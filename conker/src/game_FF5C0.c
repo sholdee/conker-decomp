@@ -30,7 +30,7 @@ void func_150D2110(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 dark
 void func_150D21CC(StrobeEffect *effect) {
     StrobeData *data = &effect->data;
 
-    data->timer += D_800BE9A4;
+    data->timer += gFrameDelta;
     while (data->timer > data->period) {
         data->timer -= data->period;
     }

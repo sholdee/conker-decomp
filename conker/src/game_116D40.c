@@ -117,7 +117,7 @@ void func_150E9E34(RandomBurstEmitter *emitter) {
     s32 pitch;
 
     spawner = &emitter->spawner;
-    spawner->spawnAccum += (spawner->rateBase + func_150ADA68() * spawner->rateRange) * D_800BE9A4;
+    spawner->spawnAccum += (spawner->rateBase + func_150ADA68() * spawner->rateRange) * gFrameDelta;
     while (spawner->spawnAccum > 1.0f) {
         scale = func_150ADA68() * spawner->scaleRange + spawner->scaleBase;
         func_1514470C(spawner->source, &pos);

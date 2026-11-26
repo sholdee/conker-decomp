@@ -275,7 +275,7 @@ s32 func_151D792C(AnchoredTrail *trail) {
         if (i < 0) {
             i = trail->head.tmpl.itemCount - 1;
         }
-        func_151D8718(&points[i].pos, &points[i].velY, D_800BE9A4);
+        func_151D8718(&points[i].pos, &points[i].velY, gFrameDelta);
     }
 // matching: an (unused) label here makes IDO start a new block for the tail update
 tail:
@@ -291,7 +291,7 @@ tail:
 
 /*
  * Attached trail update: the head follows the emitter, and points are emitted (4 per second of
- * D_800BE9A4) along the way from the last emitted point, each pre-aged by the time since it was due.
+ * gFrameDelta) along the way from the last emitted point, each pre-aged by the time since it was due.
  */
 s32 func_151D7A38(AnchoredTrail *trail) {
     AnchoredTrailData *data;
@@ -318,10 +318,10 @@ s32 func_151D7A38(AnchoredTrail *trail) {
     }
     anchorPos = emitter->anchor.pos;
     trail->head.tmpl.pos = anchorPos;
-    data->spawnAccum += 0.25f * D_800BE9A4;
+    data->spawnAccum += 0.25f * gFrameDelta;
     if (data->spawnAccum > 1.0f) {
         invCount = 1.0f / data->spawnAccum;
-        age = data->unk10 + D_800BE9A4;
+        age = data->unk10 + gFrameDelta;
         pos = data->lastPos;
         diffX = anchorPos.x - data->lastPos.x;
         diffY = anchorPos.y - data->lastPos.y;
@@ -441,7 +441,7 @@ s32 func_151D7CD0(AnchoredTrail *trail) {
         } while (i != trail->head.start);
     }
     if (trail->head.count >= 2) {
-        data->texPhase += -41.0f * D_800BE9A4;
+        data->texPhase += -41.0f * gFrameDelta;
         data->texPhase = func_15144528(data->texPhase, 16383.0f, -16384.0f);
         distance = 0;
         j = trail->head.end;

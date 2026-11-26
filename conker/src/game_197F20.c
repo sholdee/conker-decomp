@@ -35,7 +35,7 @@
 
 
 /* Per-frame update of a text box: runs the open / page / close state machine, then re-places it. */
-void func_1516AA70(TextBox *box) {
+void text_updateBox(TextBox *box) {
     s32 unused; // matching: unused local, needed for the original stack frame
     Camera *player;
     s32 width;
@@ -71,7 +71,7 @@ void func_1516AA70(TextBox *box) {
             box->fadeTimer = 10;
             box->state = TEXTBOX_STATE_BUBBLES;
             box->scale = 1.0f;
-            func_1516CC58(box);
+            text_placeBox(box);
             box->visible = TRUE;
             box->bubbleX = box->anchorX;
         } else {
@@ -82,10 +82,10 @@ void func_1516AA70(TextBox *box) {
         box->textAlpha = 0;
         break;
     case TEXTBOX_STATE_GROW:
-        func_150428D4(box->text, &width, &height, &advance);
+        text_measureString(box->text, &width, &height, &advance);
         box->halfTextWidth = width >> 1;
         box->halfTextHeight = height >> 1;
-        box->scale += box->scaleSpeed * D_800BE9A4;
+        box->scale += box->scaleSpeed * gFrameDelta;
         if (skip) {
             box->fadeTimer = 0;
         }
@@ -141,7 +141,7 @@ void func_1516AA70(TextBox *box) {
         if (box->timer == 0) {
             box->page++;
             if (box->page < box->config->numPages) {
-                box->text = func_1516C878(box->config, box->page, box->source);
+                box->text = text_getPage(box->config, box->page, box->source);
                 box->fadeTimer = 10;
                 box->state = TEXTBOX_STATE_TEXT_IN;
                 box->config->flags |= TEXTBOX_CB_PAGE_ENDED;
@@ -161,7 +161,7 @@ void func_1516AA70(TextBox *box) {
         }
         /* fallthrough */
     case TEXTBOX_STATE_TEXT_IN:
-        func_150428D4(box->text, &width, &height, &advance);
+        text_measureString(box->text, &width, &height, &advance);
         box->halfTextWidth = width >> 1;
         box->halfTextHeight = height >> 1;
         box->fadeTimer -= D_800BE9A0;
@@ -198,7 +198,7 @@ void func_1516AA70(TextBox *box) {
                     if (D_800BE710[0] & B_BUTTON) {
                         box->page = -1;
                         advancePage = TRUE;
-                        D_800D1994 = 0;
+                        gContextSoundNext = 0;
                     } else if (D_800BE710[0] & A_BUTTON) {
                         advancePage = TRUE;
                     }
@@ -230,7 +230,7 @@ void func_1516AA70(TextBox *box) {
             box->bubbleAlpha[1] = box->bubbleAlpha[0];
             box->bubbleAlpha[2] = box->bubbleAlpha[0];
         } else {
-            box->scale -= box->scaleSpeed * D_800BE9A4;
+            box->scale -= box->scaleSpeed * gFrameDelta;
         }
         if (box->scale < 0.0f || box->fadeTimer == 0) {
             box->scale = 0.0f;
@@ -248,7 +248,7 @@ void func_1516AA70(TextBox *box) {
         }
         break;
     }
-    func_1516CC58(box);
+    text_placeBox(box);
 }
 
 /* Sprite parameters passed to func_15094F70 / func_15095A48. */
@@ -264,9 +264,9 @@ extern struct {
     u32 cycle2;
 } D_800A4AC8[];
 
-/* Draws a text box: shadow, body, tail (or thought-bubble circles), then the text via func_1516C934.
+/* Draws a text box: shadow, body, tail (or thought-bubble circles), then the text via text_drawBoxText.
  * Returns gfx unchanged if the display list would overflow. */
-Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
+Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     SpriteParams sprite;
     s32 pad; // matching: unused stack slot
     f32 xoff;
@@ -327,7 +327,7 @@ Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
     } else {
         sprite.flip &= ~SPRITE_FLIP_X;
     }
-    overflow = (gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
+    overflow = (gfx - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
     if (overflow) {
         return start;
     }
@@ -365,7 +365,7 @@ Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
             }
         }
     }
-    overflow = (gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
+    overflow = (gfx - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
     if (overflow) {
         return start;
     }
@@ -440,15 +440,15 @@ Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
         gfx = func_15094F70(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
     }
     gfx = func_15095A48(gfx, &sprite, (s32)box->bodyX, (s32)box->bodyY);
-    overflow = (gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
+    overflow = (gfx - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
     if (overflow) {
         return start;
     }
-    return func_1516C934(gfx, box, 0, 0, 0, (box->textAlpha * fade) >> 8);
+    return text_drawBoxText(gfx, box, 0, 0, 0, (box->textAlpha * fade) >> 8);
 }
 
 /* Returns the start of page `index` of a config's text: pages are separated by runs of NULs. */
-u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source) {
+u8 *text_getPage(TextBoxConfig *config, s32 index, s16 source) {
     u8 *str;
     u8 *uninit;
     s32 i;
@@ -480,7 +480,7 @@ u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source) {
 
 /* Draws the current page of a text box line by line ('\n' separates lines), tinted r/g/b/a.
  * Returns gfx unchanged if the display list would overflow. */
-Gfx *func_1516C934(gfx, box, r, g, b, a)
+Gfx *text_drawBoxText(gfx, box, r, g, b, a)
     Gfx *gfx;
     TextBox *box;
     u8 r;
@@ -507,13 +507,13 @@ lbl: // matching: unused label; with the block below it sets IDO's register prio
 
         x = box->centerX - box->halfTextWidth;
         y = box->centerY - box->halfTextHeight;
-        gSPDisplayList(gfx++, D_800859A0);
+        gSPDisplayList(gfx++, gText2DSetupDL);
         first = TRUE;
         while (self->text[i] == '\n') {
             i++;
         }
         do {
-            if ((gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4 ? TRUE : FALSE) != 0) { // matching: inline flag form
+            if ((gfx - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4 ? TRUE : FALSE) != 0) { // matching: inline flag form
                 return original;
             }
             if (1) { // matching: empty block shifts IDO's temp-register assignment
@@ -527,7 +527,7 @@ lbl: // matching: unused label; with the block below it sets IDO's register prio
                 s32 height;
                 s32 advance;
 
-                func_150428D4(line, &width, &height, &advance);
+                text_measureString(line, &width, &height, &advance);
                 if (!first) {
                     y += height;
                 } else {
@@ -539,13 +539,13 @@ lbl: // matching: unused label; with the block below it sets IDO's register prio
                     offset = 0.0f;
                 }
                 if (self->config->flags & TEXTBOX_WHITE_TEXT) {
-                    gfx = func_150417AC(gfx, x + offset + 1.0f, y, line, 0xFF, 0xFF, 0xFF, a, 4096.0f, 4096.0f, n);
+                    gfx = text_drawString(gfx, x + offset + 1.0f, y, line, 0xFF, 0xFF, 0xFF, a, 4096.0f, 4096.0f, n);
                     n = 0;
                 } else if (!(self->config->flags & TEXTBOX_DARK)) {
-                    gfx = func_150417AC(gfx, x + offset + 1.0f, y, line, 0, 0, 0, a, 4096.0f, 4096.0f, n);
+                    gfx = text_drawString(gfx, x + offset + 1.0f, y, line, 0, 0, 0, a, 4096.0f, 4096.0f, n);
                     n = 0;
                 } else {
-                    gfx = func_150417AC(gfx, x + offset, y, line, r, g, b, a, 4096.0f, 4096.0f, n);
+                    gfx = text_drawString(gfx, x + offset, y, line, r, g, b, a, 4096.0f, 4096.0f, n);
                     n = 0;
                 }
                 y += advance;
@@ -559,7 +559,7 @@ lbl: // matching: unused label; with the block below it sets IDO's register prio
 
 /* Places a text box: its anchor comes from screen percentages or from its object's projected position,
  * and the body is set at an angle derived from the object's heading. */
-void func_1516CC58(TextBox *box) {
+void text_placeBox(TextBox *box) {
     f32 screenX;
     f32 screenY;
     f32 screenZ;
@@ -582,7 +582,7 @@ void func_1516CC58(TextBox *box) {
         angle *= 0.017453292f;
         box->angle = angle;
         if (config->flags & TEXTBOX_CLAMP) {
-            func_1516D0CC(box, &box->anchorX, &box->anchorY, &box->angle);
+            text_clampBoxToView(box, &box->anchorX, &box->anchorY, &box->angle);
         }
     } else {
         func_1501A764(0, config->worldX, config->worldY, config->worldZ, &screenX, &screenY, &screenZ);
@@ -610,7 +610,7 @@ void func_1516CC58(TextBox *box) {
         angle = 70.0f * angle + 55.0f;
         angle *= 0.017453292f;
         box->angle = angle;
-        func_1516D0CC(box, &box->anchorX, &box->anchorY, &box->angle);
+        text_clampBoxToView(box, &box->anchorX, &box->anchorY, &box->angle);
     }
     box->x = box->anchorX;
     box->y = box->anchorY;
@@ -621,7 +621,7 @@ void func_1516CC58(TextBox *box) {
 }
 
 /* Moves a box's anchor so the whole box stays inside the view bounds, then snaps it to whole pixels. */
-void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle) {
+void text_clampBoxToView(TextBox *box, f32 *x, f32 *y, f32 *angle) {
     f32 top;
     f32 anchorY;
     f32 left;
@@ -659,7 +659,7 @@ void func_1516D2D8(void) {
 }
 
 /* Removes a text box object immediately. */
-void func_1516D2E0(TextBox *box) {
+void text_removeBox(TextBox *box) {
     if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
         box->config->numPages = 0;
         func_1516972C(box);
@@ -668,7 +668,7 @@ void func_1516D2E0(TextBox *box) {
 }
 
 /* Asks a text box to close, skipping its remaining pages. */
-void func_1516D328(TextBox *box) {
+void text_closeBoxSkipPages(TextBox *box) {
     if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
         box->config->flags |= TEXTBOX_CLOSE;
         box->config->flags &= ~TEXTBOX_SKIP_ANIM;
@@ -677,7 +677,7 @@ void func_1516D328(TextBox *box) {
 }
 
 /* Asks a text box to close after its current page; returns it, or NULL if it isn't one. */
-TextBox *func_1516D378(TextBox *box) {
+TextBox *text_closeBoxAfterPage(TextBox *box) {
     if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
         box->config->flags |= TEXTBOX_CLOSE;
         box->config->flags &= ~TEXTBOX_SKIP_ANIM;
@@ -687,7 +687,7 @@ TextBox *func_1516D378(TextBox *box) {
 }
 
 /* Asks a text box to close at once; returns it, or NULL if it isn't one. */
-TextBox *func_1516D3C4(TextBox *box) {
+TextBox *text_closeBoxNow(TextBox *box) {
     if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
         box->config->flags |= TEXTBOX_CLOSE | TEXTBOX_SKIP_ANIM;
         return box;

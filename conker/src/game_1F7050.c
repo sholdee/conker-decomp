@@ -391,7 +391,7 @@ void func_151CAB78(Camera *player, u8 big) {
     }
 }
 
-/* Spawns the corner brackets of the zoom sight and, unless D_800BE616 is set, its centre lens. */
+/* Spawns the corner brackets of the zoom sight and, unless gIsMultiplayer is set, its centre lens. */
 void func_151CAD28(Camera *player, u8 big) {
         ScreenSpriteInfo desc;
     SightSprite *sprite;
@@ -465,7 +465,7 @@ void func_151CAD28(Camera *player, u8 big) {
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
-    if (D_800BE616 == 0) {
+    if (gIsMultiplayer == 0) {
         EffectDesc spawn;
         SightLens lens;
         SightLensObject *lensObj;
@@ -503,7 +503,7 @@ void func_151CB110(SightLensObject *obj, u16 *framebuffer) {
     s32 pad; // matching: unused stack slot
     s32 lensPos[2][2];
 
-    if (D_800BEAC0 != 0 || D_800BEAC1 != 0) {
+    if (gPaused != 0 || gPauseRequested != 0) {
         return;
     }
     if (D_800BEAC2 != 0) {
@@ -699,7 +699,7 @@ s32 func_151CB970(SightSprite *sprite) {
         baseY = 91.0f + offset;
         range = (112.0f + offset) - baseY;
         sprite->desc.y = (value * range) + baseY;
-        payload->bouncePhase += 0.5049999952f * D_800BE9A4;
+        payload->bouncePhase += 0.5049999952f * gFrameDelta;
         if (3.141592741f <= payload->bouncePhase) {
             sprite->desc.y = baseY;
             payload->flags &= ~1;
@@ -768,7 +768,7 @@ s32 func_151CBC60(SightSprite *sprite) {
         sprite->desc.halfHeight = base - (value - payload->rangeMin) * payload->rangeScale * base + 1.0f;
     }
     if (payload->flags & 2) {
-        payload->flashTimer -= D_800BE9A4;
+        payload->flashTimer -= gFrameDelta;
         value = payload->flashTimer;
         if (value <= 0.0f) {
             sprite->desc.color1.red = payload->color.r;
@@ -1105,12 +1105,12 @@ void func_151CCD1C(Camera *player, u8 red, u8 green, u8 blue) {
     }
 }
 
-/* When D_800BE616 is set, spawns the func_151A4FD0 effect for `player` (see func_151CBB6C). */
+/* When gIsMultiplayer is set, spawns the func_151A4FD0 effect for `player` (see func_151CBB6C). */
 void func_151CCE94(Camera *player) {
     SightOwnedEffect *effect;
     Camera *owner;
 
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         owner = player;
         effect = func_151A4FD0(0, 0, 0, 0xFF, 0, player->CNumber, 1, 4);
         if (effect != NULL) {

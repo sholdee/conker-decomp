@@ -57,7 +57,7 @@ void func_15164888(CamWobble *wobble) {
 /* Advances wave i (half: its CamWobbleHalves) and adds its displacement to the player's camera offset. */
 #define WOBBLE_WAVE(i, axis, half, prevHalf)                                                      \
     if (wobble->def.speed[i] != 0.0f) {                                                           \
-        wobble->phase[i] = func_15144B68(wobble->def.speed[i] * D_800BE9A4 + wobble->phase[i]);   \
+        wobble->phase[i] = func_15144B68(wobble->def.speed[i] * gFrameDelta + wobble->phase[i]);   \
         half.v[(i) % 3] = wobble->phase[i] < 3.1415927f;                                          \
         if ((wobble->def.flags & CAM_WOBBLE_STOPPING) && (prevHalf.v[(i) % 3] != half.v[(i) % 3])) { \
             wobble->def.speed[i] = 0.0f;                                                          \
@@ -380,7 +380,7 @@ s32 func_151658DC(CamWobbleEnv *wobble) {
 
     env = &wobble->envelope;
     active = 1;
-    env->time += D_800BE9A4;
+    env->time += gFrameDelta;
     if (env->time < env->riseTime) {
         wobble->shape.ampPos.x = env->riseRate.ampPos.x * env->time;
         wobble->shape.ampPos.y = env->riseRate.ampPos.y * env->time;

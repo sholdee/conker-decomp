@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Bursts three debris pieces from the object's position. */
-void func_1506A5F0(Actor *obj, s32 arg1) {
+void actor_hitBurstDebris(Actor *obj, s32 arg1) {
     DebrisEmitter emitter;
 
     emitter.count = 3;
@@ -35,7 +35,7 @@ void func_1506A5F0(Actor *obj, s32 arg1) {
 }
 
 /*
- * Per-object movement-hit handlers, dispatched through D_80086110 by func_1506AC8C. Before a call,
+ * Per-object movement-hit handlers, dispatched through D_80086110 by actor_runHitHandler. Before a call,
  * D_800D1560 holds the object's old position and D_800D1570 its position before the collision move.
  */
 static Vec3f D_800D1560;
@@ -71,7 +71,7 @@ void func_1506A83C(Actor *obj, s32 arg1) {
 }
 
 /* Spawns a flash 50 units above the object. */
-void func_1506A864(Actor *obj, s32 arg1) {
+void actor_hitSpawnFlash(Actor *obj, s32 arg1) {
     LightEffect *flash;
     LightEffectHeader header;
     f32 params[4];
@@ -166,13 +166,13 @@ void func_1506AC58(Actor *obj, s32 arg1) {
 /* The movement-hit handlers by type. Declared without a prototype: two of them take a pointer as their
    second argument. */
 static void (*D_80086110[])() = {
-    func_1506A5F0, func_1506A6FC, func_1506A724, func_1506A760, func_1506A79C,
-    func_1506A83C, func_1506A864, func_1506A968, func_1506AA08, func_1506AA48,
+    actor_hitBurstDebris, func_1506A6FC, func_1506A724, func_1506A760, func_1506A79C,
+    func_1506A83C, actor_hitSpawnFlash, func_1506A968, func_1506AA08, func_1506AA48,
     func_1506AAE0, func_1506AB7C, func_1506AC0C, func_1506AC58, func_1506ABC4,
 };
 
 /* Runs movement-hit handler `type` (0..14) for obj, passing arg on to it. */
-void func_1506AC8C(Actor *obj, s32 type, void *arg) {
+void actor_runHitHandler(Actor *obj, s32 type, void *arg) {
     if (type >= 0 && type < 15) {
         D_800D1560.x = obj->old_xpos;
         D_800D1560.y = obj->old_ypos;

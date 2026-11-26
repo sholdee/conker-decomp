@@ -591,12 +591,12 @@ s32 func_151B42A4(HoltenRopeEffect *effect) {
                     accelX = effect->accelScale * offsetX;
                     accelY = effect->accelScale * offsetY;
                     accelZ = effect->accelScale * offsetZ;
-                    point->pos.x += (point->vel.x * D_800BE9A4) + (0.5f * accelX * D_800BE9A4 * D_800BE9A4);
-                    point->pos.y += (point->vel.y * D_800BE9A4) + (0.5f * accelY * D_800BE9A4 * D_800BE9A4);
-                    point->pos.z += (point->vel.z * D_800BE9A4) + (0.5f * accelZ * D_800BE9A4 * D_800BE9A4);
-                    point->vel.x += accelX * D_800BE9A4;
-                    point->vel.y += accelY * D_800BE9A4;
-                    point->vel.z += accelZ * D_800BE9A4;
+                    point->pos.x += (point->vel.x * gFrameDelta) + (0.5f * accelX * gFrameDelta * gFrameDelta);
+                    point->pos.y += (point->vel.y * gFrameDelta) + (0.5f * accelY * gFrameDelta * gFrameDelta);
+                    point->pos.z += (point->vel.z * gFrameDelta) + (0.5f * accelZ * gFrameDelta * gFrameDelta);
+                    point->vel.x += accelX * gFrameDelta;
+                    point->vel.y += accelY * gFrameDelta;
+                    point->vel.z += accelZ * gFrameDelta;
                 }
             }
         }
@@ -681,12 +681,12 @@ s32 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,
     s32 r;
     s32 g;
     s32 b;
-    u32 a; // matching: func_1502EC34 writes an s32; as an s32 here alpha below takes another register
+    u32 a; // matching: actor_getFogColour writes an s32; as an s32 here alpha below takes another register
     u32 alpha;
 
     ret = TRUE;
     source = rope->colorSource;
-    func_1502EC34(source, &r, &g, &b, &a);
+    actor_getFogColour(source, &r, &g, &b, &a);
     if (source->fogMode & 1) {
         *mode0 = 0x200005;
         *mode1 = 0x60600;

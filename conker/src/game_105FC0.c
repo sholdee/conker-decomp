@@ -18,7 +18,7 @@ void func_150D8B3C(Actor *actor, Vec3f *out) {
     Vec3f target;
     Vec3f dir;
 
-    func_15145740(actor, &target, &dir, out, D_800BE616 ? 0.8400000334f : 1.15200007f);
+    func_15145740(actor, &target, &dir, out, gIsMultiplayer ? 0.8400000334f : 1.15200007f);
 }
 
 /* Spawns a trail object that follows the actor. */
@@ -32,7 +32,7 @@ void func_150D8B88(Actor *actor) {
 
     if (actor->mv != NULL) {
         if (level == 10) {
-            func_1000D96C(10, 55, 0);
+            music_playTune(10, 55, 0);
         }
 
         func_150D8B10(actor, &spawn.pos);
@@ -111,7 +111,7 @@ s32 func_150D8E4C(PissTrail *trail) {
             if (i < 0) {
                 i = trail->head.tmpl.itemCount - 1;
             }
-            func_150D8D84(&points[i].pos, &points[i].vel, D_800BE9A4);
+            func_150D8D84(&points[i].pos, &points[i].vel, gFrameDelta);
         }
     }
 
@@ -163,18 +163,18 @@ s32 func_150D8FAC(PissTrail *trail) {
     if (data->flags & 1) {
         flags = actor->mv->buttons;
         if (flags & 0x2000) {
-            data->speedScale += 0.001379000023f * D_800BE9A4;
+            data->speedScale += 0.001379000023f * gFrameDelta;
             if (data->speedScale > 0.04293100163f) {
                 data->speedScale = 0.04293100163f;
             }
         } else {
-            data->speedScale -= 0.001379000023f * D_800BE9A4;
+            data->speedScale -= 0.001379000023f * gFrameDelta;
             if (data->speedScale < 0.01724099927f) {
                 data->speedScale = 0.01724099927f;
             }
         }
     }
-    data->pending += 0.380000025f * D_800BE9A4;
+    data->pending += 0.380000025f * gFrameDelta;
     if (data->pending > 1.0f) {
         Vec3f cur;
         Vec3f curVel;
@@ -184,7 +184,7 @@ s32 func_150D8FAC(PissTrail *trail) {
         Vec3f dvs;
 
         inv = 1.0f / data->pending;
-        time = data->time + D_800BE9A4;
+        time = data->time + gFrameDelta;
         cur = data->lastPos;
         curVel = data->lastVel;
         step = time * inv;
@@ -345,7 +345,7 @@ s32 func_150D942C(PissTrail *trail) {
                             target->intelwalk = 10;
                             target->scriptCmd = NULL;
                         } else if (target->character_type == 0x10 && target->unk251 == 1) {
-                            func_1505A250(target->xpos - hit.pos.x, target->zpos - hit.pos.z,
+                            actor_stepVector2D(target->xpos - hit.pos.x, target->zpos - hit.pos.z,
                                           ((1.0f - (totalLen - 50.0f) * 0.001052631531f) * 0.4550000131f) + 0.2010000050f,
                                           &target->ob_slopex, &target->ob_slopey);
                             if (target->intelwalk == 15) {
@@ -358,7 +358,7 @@ s32 func_150D942C(PissTrail *trail) {
                             if (target->intelwalk == 16) {
                                 target->speed *= 0.7200000286f;
                                 excess = 1.0f / (sqrtf(dx * dx + dz * dz) * -0.07000000030f);
-                                func_1505A250(dx * excess, dz * excess, 0.7f, &target->ob_slopex, &target->ob_slopey);
+                                actor_stepVector2D(dx * excess, dz * excess, 0.7f, &target->ob_slopex, &target->ob_slopey);
                             }
                             if (target->imune == 0) {
                                 s32 pad; // matching: -g3 block scope
@@ -373,7 +373,7 @@ s32 func_150D942C(PissTrail *trail) {
                             target->scriptCmd = NULL;
                         } else {
                             ownerIndex = owner - movement_obj;
-                            func_1505D024(target, 0xE0036, ((u16)(func_150484A0(dir[0], dir[2]) * 10430.37793f) - 0x4000) | 1, ownerIndex);
+                            actor_hitScripted(target, 0xE0036, ((u16)(func_150484A0(dir[0], dir[2]) * 10430.37793f) - 0x4000) | 1, ownerIndex);
                         }
                     }
                     /* the hit ends the trail here */
@@ -398,7 +398,7 @@ s32 func_150D942C(PissTrail *trail) {
         count = trail->head.count;
     }
     if (count >= 2) {
-        data->texScroll += -395.0f * D_800BE9A4;
+        data->texScroll += -395.0f * gFrameDelta;
         data->texScroll = func_15144528(data->texScroll, 16383.0f, -16384.0f);
         texPos = 0.0f;
         j = trail->head.end;
@@ -622,7 +622,7 @@ void func_150DA484(PissTrail *trail) {
     PissTrailData *data = trail->data;
 
     if (data->sound != 0) {
-        func_100111C8(data->sound);
+        sound_stop(data->sound);
     }
 }
 
@@ -692,7 +692,7 @@ void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir) {
     target = hit->obj;
     if (hit->hitType != 0) {
         if (hit->hitType >= 2 && (target->character_type == 0x33 || target->character_type == 0x3A)) {
-            data->sparkAccum += (0.1990000159f + func_150ADA68() * 0.1540000141f) * D_800BE9A4;
+            data->sparkAccum += (0.1990000159f + func_150ADA68() * 0.1540000141f) * gFrameDelta;
             if (data->sparkAccum > 1.0f) {
                 ParticleDesc spawn;
                 WobbleData sub;
@@ -750,7 +750,7 @@ void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir) {
                 } while (data->sparkAccum > 1.0f);
             }
         } else {
-            data->impactAccum += (0.06000000238f + func_150ADA68() * 0.06000000238f) * D_800BE9A4;
+            data->impactAccum += (0.06000000238f + func_150ADA68() * 0.06000000238f) * gFrameDelta;
             if (data->impactAccum > 1.0f) {
                 SplashSpray emit;
                 CollisionHit origin;
@@ -805,7 +805,7 @@ void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir) {
             }
         }
         if (hit->hitType == 1) {
-            data->surfaceAccum += (0.200000003f + func_150ADA68() * 0.1040000021f) * D_800BE9A4;
+            data->surfaceAccum += (0.200000003f + func_150ADA68() * 0.1040000021f) * gFrameDelta;
             while (data->surfaceAccum > 1.0f) {
                 func_151D9B8C(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, &hit->tri, &hit->pos,
                               (func_150ADA20() % 81U) + 60, 1, 1, 1, trail->head.header.owner, trail->head.header.kind);

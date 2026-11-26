@@ -2905,7 +2905,7 @@ typedef struct CamWobbleDef {
     /* 0x04 */ s16 timer;      // frames left, with CAM_WOBBLE_TIMED
     /* 0x06 */ u8 playerIndex;
     /* 0x08 */ f32 amplitude[6]; // position xyz, rotation xyz
-    /* 0x20 */ f32 speed[6];     // phase step per D_800BE9A4 of time; 0 means the wave is off
+    /* 0x20 */ f32 speed[6];     // phase step per gFrameDelta of time; 0 means the wave is off
 } CamWobbleDef; // size 0x38
 
 /* Spawn parameters of a particle emitter (func_151A8B20). */
@@ -3162,7 +3162,7 @@ typedef struct {
     f32 pulseSpeed;
 } SightBeamState;
 
-/* Sound handle from func_1000FA64; `state` is the user pointer passed to it. */
+/* Sound handle from sound_addDynamicSound; `state` is the user pointer passed to it. */
 typedef struct {
     u8 pad0[0x18];
     SightBeamState *state;

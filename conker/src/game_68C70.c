@@ -152,7 +152,7 @@ void func_1503B9BC(s32 objIndex) {
     }
     if (mode == 0) {
         if (D_800BE9E4 < chain->blendTimer) {
-            if (D_800BEAC0 == 0) {
+            if (gPaused == 0) {
                 chain->blendTimer -= D_800BE9E4;
             }
             mode = 2;
@@ -197,7 +197,7 @@ void func_1503B9BC(s32 objIndex) {
         speed *= 0.5f;
     }
     bob = sinf(chain->bobPhase * 0.01745329238f) * speed;
-    if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+    if (gPaused == 0 && gFrameRateDivider == 0) {
         chain->bobPhase += speed;
         if (chain->bobPhase >= 360.0f) {
             chain->bobPhase -= 360.0f;
@@ -308,7 +308,7 @@ void func_1503B9BC(s32 objIndex) {
                 offsets[0][0] += cosYaw * bob;
                 offsets[4][2] += -sinYaw * tipBob;
                 offsets[0][2] += -sinYaw * bob;
-                if (D_800BEAC0 == 0 && D_800BEA0C == 0 && facingCamera == 0) {
+                if (gPaused == 0 && gFrameRateDivider == 0 && facingCamera == 0) {
                     chain->swayAngle += chain->swaySpeed;
                     if (chain->swayAngle > 360.0f || chain->swayAngle < -360.0f) {
                         if (fabsf(chain->swaySpeed) > 15.0f) {
@@ -325,7 +325,7 @@ void func_1503B9BC(s32 objIndex) {
                     }
                 }
             }
-        } else if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+        } else if (gPaused == 0 && gFrameRateDivider == 0) {
             chain->swayTimer = 200;
         }
     }
@@ -353,7 +353,7 @@ void func_1503B9BC(s32 objIndex) {
         goal[0] = chain->pos[prev][0] + linkLen[prev] * dirX * obj->scale_xz;
         goal[1] = chain->pos[prev][1] + linkLen[prev] * dirY * obj->scale_y;
         goal[2] = chain->pos[prev][2] + linkLen[prev] * dirZ * obj->scale_xz;
-        if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+        if (gPaused == 0 && gFrameRateDivider == 0) {
             delta = goal[0] - chain->pos[i][0];
             if (!reset) {
                 delta *= D_80098710[prev];
@@ -379,7 +379,7 @@ void func_1503B9BC(s32 objIndex) {
         link[2] *= inv;
         angle = func_15048360(dirX * link[0] + dirY * link[1] + dirZ * link[2]) * 57.29577637f;
         angle = fabsf(angle);
-        if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+        if (gPaused == 0 && gFrameRateDivider == 0) {
             if (D_80098730[prev] < angle) {
                 inv = D_80098730[prev] / angle;
                 inv = 1.0f - inv;

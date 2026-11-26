@@ -177,7 +177,7 @@ void func_150F20F0(s32 index) {
         func_100114D0(0, movement_obj[index].ypos, 0, 0x7FFF, 20000, 19000, &pan, &out2, &out3);
         pan += 0x80;
         D_800D98F0 = (func_150ADA20() & 0x7F) + 0x80;
-        func_10010F30((func_150ADA20() % 3U) + 0x6C, 24000, pan, 0, 0);
+        sound_play((func_150ADA20() % 3U) + 0x6C, 24000, pan, 0, 0);
     }
 }
 

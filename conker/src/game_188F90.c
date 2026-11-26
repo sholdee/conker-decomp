@@ -163,9 +163,9 @@ void func_1515BFA8(ActorTracker *tracker) {
         tracker->pos.x = tracker->desc.actor->xpos;
         tracker->pos.y = tracker->desc.actor->ypos;
         tracker->pos.z = tracker->desc.actor->zpos;
-        tracker->motion.x = (tracker->prevPos.x - tracker->pos.x) * D_800BE9A8;
-        tracker->motion.y = (tracker->prevPos.y - tracker->pos.y) * D_800BE9A8;
-        tracker->motion.z = (tracker->prevPos.z - tracker->pos.z) * D_800BE9A8;
+        tracker->motion.x = (tracker->prevPos.x - tracker->pos.x) * gFrameDeltaInv;
+        tracker->motion.y = (tracker->prevPos.y - tracker->pos.y) * gFrameDeltaInv;
+        tracker->motion.z = (tracker->prevPos.z - tracker->pos.z) * gFrameDeltaInv;
     }
     if (dead) {
         func_1516972C(&tracker->header);

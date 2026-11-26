@@ -79,8 +79,8 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
         if (big) {
             sfx = (func_150ADA20() % 3U) + 0x459;
             if (D_80082FA0 == 0) {
-                func_1000FA64(sfx, pos->x, pos->y, pos->z, 0x4000, 1200, 800,
-                              (SoundRecordCallback)func_1000EC24, (void *)40, 0, 0, 0);
+                sound_addDynamicSound(sfx, pos->x, pos->y, pos->z, 0x4000, 1200, 800,
+                              (SoundRecordCallback)sound_delayedPlayCallback, (void *)40, 0, 0, 0);
                 sfx = 0x106;
             }
         } else {
@@ -227,7 +227,7 @@ s32 func_151D3D50(WobbleParticle *particle) {
     BobMotion *wobble = &particle->wobble;
 
     if (wobble->timer > 0) {
-        wobble->phase += wobble->phaseSpeed * D_800BE9A4;
+        wobble->phase += wobble->phaseSpeed * gFrameDelta;
         wobble->phase = func_15144B68(wobble->phase);
         particle->unk20.y = particle->unk50.y + sinf(wobble->phase) * wobble->amplitude;
         wobble->timer -= D_800BE9E4;
@@ -249,7 +249,7 @@ void func_151D3E04(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bone, f32 y
     }
 }
 
-/* Calls func_1505D1C4 at the midpoint of a and b, with obj's movement angle relative to its mv. */
+/* Calls actor_runAttackAt at the midpoint of a and b, with obj's movement angle relative to its mv. */
 void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
     f32 x = (a->x + b->x) * 0.5f;
     f32 y = (a->y + b->y) * 0.5f;
@@ -263,7 +263,7 @@ void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
         } else {
             angle = obj->angle;
         }
-        func_1505D1C4(x, y, z, arg3, obj - movement_obj, angle, 0, 0);
+        actor_runAttackAt(x, y, z, arg3, obj - movement_obj, angle, 0, 0);
     }
 }
 
@@ -299,7 +299,7 @@ void func_151D3FF4(const Vec3f *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
 }
 
-/* Calls func_1505D1C4 twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
+/* Calls actor_runAttackAt twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
    or pos raised by half of target's height when there is no dir. */
 void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionTri *surface, s32 arg5, s32 arg6,
                    s32 arg7) {
@@ -316,13 +316,13 @@ void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionT
     } else {
         point = *pos;
         if (target != NULL) {
-            func_1507C3E0(target, &height, NULL, NULL);
+            actor_computeSize(target, &height, NULL, NULL);
             point.y += height >> 1;
         }
         angle = 0;
     }
-    func_1505D1C4(pos->x, pos->y, pos->z, arg5, obj - movement_obj, angle, arg7, (s32)&point);
-    func_1505D1C4(pos->x, pos->y, pos->z, arg6, obj - movement_obj, angle, arg7, (s32)&point);
+    actor_runAttackAt(pos->x, pos->y, pos->z, arg5, obj - movement_obj, angle, arg7, (s32)&point);
+    actor_runAttackAt(pos->x, pos->y, pos->z, arg6, obj - movement_obj, angle, arg7, (s32)&point);
 }
 
 void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 arg4) {
@@ -335,10 +335,10 @@ void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s3
     } else {
         angle = 0;
     }
-    func_1505D1C4(pos->x, pos->y, pos->z, arg4, obj - movement_obj, angle, 0, 0);
+    actor_runAttackAt(pos->x, pos->y, pos->z, arg4, obj - movement_obj, angle, 0, 0);
 }
 
-/* Unused outputs of func_1503F404's matrix decomposition. */
+/* Unused outputs of model_decomposeBoneMatrix's matrix decomposition. */
 struct S151D4408Temps {
     f32 unk00;
     f32 unk04;
@@ -355,7 +355,7 @@ void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u
     struct S151D4408Temps unused;
     f32 speed;
 
-    func_1503F404(mtx, &unused.unk0C, &unused.unk10, &unused.unk14, &p.rot.x, &p.rot.y, &p.rot.z,
+    model_decomposeBoneMatrix(mtx, &unused.unk0C, &unused.unk10, &unused.unk14, &p.rot.x, &p.rot.y, &p.rot.z,
                   &unused.unk00, &unused.unk04, &unused.unk08);
     p.rot.x += 180.0f;
 block_151D4408: // matching: an unused label ends the basic block, keeping the store above out of the jal delay slot
@@ -472,7 +472,7 @@ void func_151D4794(ObjEmitterEffect *effect) {
         if (func_15143E64(&diff) > 5.0f) {
             return;
         }
-        emitter->spawnTimer += (0.200000003f + func_150ADA68() * 0.2090000063f) * D_800BE9A4;
+        emitter->spawnTimer += (0.200000003f + func_150ADA68() * 0.2090000063f) * gFrameDelta;
         if (emitter->spawnTimer > 1.0f) {
             ParticleDesc spawn;
             WobbleData extra;
@@ -515,9 +515,9 @@ void func_151D4794(ObjEmitterEffect *effect) {
                     spawn.pos.y = diff.y * t + prev.y;
                     spawn.pos.z = diff.z * t + prev.z;
                 }
-                spawn.vel.x = diff.x * D_800BE9A8 * 0.2980000079f;
-                spawn.vel.y = diff.y * D_800BE9A8 * 0.2980000079f;
-                spawn.vel.z = diff.z * D_800BE9A8 * 0.2980000079f;
+                spawn.vel.x = diff.x * gFrameDeltaInv * 0.2980000079f;
+                spawn.vel.y = diff.y * gFrameDeltaInv * 0.2980000079f;
+                spawn.vel.z = diff.z * gFrameDeltaInv * 0.2980000079f;
                 extra.phase[0] = func_150ADA20() & 0xFF;
                 extra.phase[1] = func_150ADA20() & 0xFF;
                 extra.phaseStep[0] = func_150ADA20() % 5U + 4;
@@ -626,7 +626,7 @@ s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit
 
     if (!alreadyDead) {
         angle = func_150484A0(dir->x, dir->z) * 10430.37793f;
-        func_1505D024(victim, flags | 0x80000, (angle - 0x4000) | 1,
+        actor_hitScripted(victim, flags | 0x80000, (angle - 0x4000) | 1,
                       (attacker != NULL) ? (attacker - movement_obj) : -1);
     }
     // no return statement here: the original falls off the end (game_1EF500.c returns what is left in v0)

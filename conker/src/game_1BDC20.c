@@ -91,8 +91,8 @@ void func_15190898(DripEmitter *emitter) {
                         DripMotion *fall = &slot->drop->motion;
 
                         dropKind = &D_800A9D40[fall->dropKind];
-                        dx = (falling->head.def.pos.x - falling->head.def.rot.x) * D_800BE9A8;
-                        dz = (falling->head.def.pos.z - falling->head.def.rot.z) * D_800BE9A8;
+                        dx = (falling->head.def.pos.x - falling->head.def.rot.x) * gFrameDeltaInv;
+                        dz = (falling->head.def.pos.z - falling->head.def.rot.z) * gFrameDeltaInv;
                         fall->vel.y = 0.0f;
                         fall->vel.x = dx;
                         fall->vel.z = dz;
@@ -118,7 +118,7 @@ void func_15190898(DripEmitter *emitter) {
                 }
             }
             if (freeCount != 0) {
-                emitter->spawnAccum += kind->rate * D_800BE9A4;
+                emitter->spawnAccum += kind->rate * gFrameDelta;
                 if (emitter->spawnAccum > 1.0f) {
                     const DropKind *newKind;
 
@@ -261,7 +261,7 @@ Vtx *func_1519108C(DripParticle *drop, s16 vp) {
     viewX = &D_800DD1E8[vp];
     viewZ = &D_800DD1D8[vp];
     sign = -1.0f;
-    speed = ((*viewX * (drop->head.def.rot.x - drop->head.def.pos.x)) - (*viewZ * (drop->head.def.rot.z - drop->head.def.pos.z))) * D_800BE9A8;
+    speed = ((*viewX * (drop->head.def.rot.x - drop->head.def.pos.x)) - (*viewZ * (drop->head.def.rot.z - drop->head.def.pos.z))) * gFrameDeltaInv;
     if (speed < 0.0f) {
         sign = 1.0f;
         speed = -speed;
@@ -346,12 +346,12 @@ s8 func_15191520(DripParticle *drop) {
     alive = 1;
     oldVx = motion->vel.x;
     oldVz = motion->vel.z;
-    motion->vel.x *= motion->drag * D_800BE9A4;
-    motion->vel.z *= motion->drag * D_800BE9A4;
-    dx = (motion->vel.x + oldVx) * 0.5f * D_800BE9A4;
-    dy = motion->vel.y * D_800BE9A4 + motion->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f;
-    dz = (motion->vel.z + oldVz) * 0.5f * D_800BE9A4;
-    motion->vel.y += motion->gravity * D_800BE9A4;
+    motion->vel.x *= motion->drag * gFrameDelta;
+    motion->vel.z *= motion->drag * gFrameDelta;
+    dx = (motion->vel.x + oldVx) * 0.5f * gFrameDelta;
+    dy = motion->vel.y * gFrameDelta + motion->gravity * gFrameDelta * gFrameDelta * 0.5f;
+    dz = (motion->vel.z + oldVz) * 0.5f * gFrameDelta;
+    motion->vel.y += motion->gravity * gFrameDelta;
     drop->head.def.pos.x += dx;
     drop->head.def.pos.y += dy;
     drop->head.def.pos.z += dz;

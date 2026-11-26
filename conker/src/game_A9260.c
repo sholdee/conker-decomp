@@ -47,7 +47,7 @@ const f32 D_8009A3A8[33] = {
     40.78562f, 42.843563f, 45.0f,
 };
 
-/* The hit rules of each hit route (Actor.intelhitroute & 0x7F), read by func_1505C1E4 (game_83300.c). */
+/* The hit rules of each hit route (Actor.intelhitroute & 0x7F), read by actor_resolveHit (game_83300.c). */
 static const HitRule D_8009A42C[1] = { { 0x00, 0x0B, 0x86, 0x00 } };
 static const HitRule D_8009A430[1] = { { 0x00, 0xFF, 0x86, 0x01 } };
 static const HitRule D_8009A434[2] = { { 0x00, 0x35, 0x03, 0x00 }, { 0x00, 0xFF, 0x86, 0x01 } };
@@ -112,7 +112,7 @@ const u8 D_8009A6A0[56] = {
     1, 2, 1, 1, 5, 3, 7, 7, 6, 2, 1, 1, 2, 1,
 };
 
-/* Knockback reactions (func_1505D2B8). */
+/* Knockback reactions (actor_startKnockback). */
 const HitReaction D_8009A6D8[20] = {
     { 0x01, { 0, 0, 0 }, 0, 0x00, 0x00, 0x14, 0, 20, 0x0F, 0x00, 0x00, { 0, 0, 0 }, 0.0f, 60.0f, 8.0f, 0x01, 0, 0x04, 0, 0x0000, { 0, 0 } },
     { 0x01, { 0, 0, 0 }, 0, 0x00, 0x00, 0x14, 0, 20, 0x0F, 0x00, 0x00, { 0, 0, 0 }, 0.0f, 36.0f, 3.0f, 0x01, 0, 0x04, 0, 0x0000, { 0, 0 } },
@@ -136,7 +136,7 @@ const HitReaction D_8009A6D8[20] = {
     { 0x01, { 0, 0, 0 }, 0, 0x00, 0x00, 0x14, 0, 20, 0x0F, 0x60, 0x00, { 0, 0, 0 }, 0.0f, 0.0f, 4.0f, 0x01, 0, 0x00, 0, 0x0000, { 0, 0 } },
 };
 
-/* The default hit-reaction table (func_1505C1A4). */
+/* The default hit-reaction table (actor_getHitReactions). */
 const HitReaction D_8009A9F8[68] = {
     { 0x0A, { 0, 0, 0 }, 0, 0x04, 0x00, 0x04, 0, 0, 0x0A, 0x01, 0x00, { 0, 0, 0 }, 20.0f, 80.0f, 7.0f, 0x01, 0, 0x00, 0, 0x0000, { 0, 0 } },
     { 0x10, { 0, 0, 0 }, 163, 0x23, 0x00, 0x00, 0, 0, 0x3C, 0x41, 0x00, { 0, 0, 0 }, 7.0f, 55.0f, 2.0f, 0x01, 0, 0x00, 0, 0x0226, { 0, 0 } },
@@ -236,16 +236,16 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
 
     if (obj != NULL) {
         if (D_800C35EA[0] == 0) {
-            if (D_800BE9A4 < 2.0f) {
-                rate = D_800BE9A4 * rate;
+            if (gFrameDelta < 2.0f) {
+                rate = gFrameDelta * rate;
             } else {
                 rate += rate;
             }
         } else {
-            rate = D_800BE9A4;
+            rate = gFrameDelta;
         }
     }
-    if (D_800BEA0C != 0) {
+    if (gFrameRateDivider != 0) {
         rate = 0.0f;
     }
 
@@ -260,13 +260,13 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
         hold |= obj->mvmt_control & 0xE;
         obj->unk1FC &= ~4;
         dc_glbl_CharNum = obj - movement_obj;
-        D_800D154C = obj;
+        gCurrentActor = obj;
     }
 
     jumped = 0;
     if (obj != NULL) {
         if ((D_800C35EA[mode] != 1) || (D_800C365E[mode] != 0)) {
-            result = func_1506AD30(D_800D154C, time, 0);
+            result = func_1506AD30(gCurrentActor, time, 0);
             if (result != 0.0f) {
                 time = result;
             }
@@ -341,7 +341,7 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
     }
     if (obj != NULL) {
         if (jumped) {
-            func_1506AD30(D_800D154C, anim->frame[0], 0);
+            func_1506AD30(gCurrentActor, anim->frame[0], 0);
         }
         // structs.h declares 0xB4 as s32 padB4; it holds the object's f32 animation time
         obj->lastEventTime = anim->frame[0];

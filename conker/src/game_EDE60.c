@@ -115,7 +115,7 @@ void func_150C0C38(PoolEmitter *emitter) {
             active = FALSE;
         }
         if ((pos.x != emitter->lastX || pos.z != emitter->lastZ) && active) {
-            emitter->spawnAccum += emitter->desc.rate * D_800BE9A4;
+            emitter->spawnAccum += emitter->desc.rate * gFrameDelta;
             if (emitter->spawnAccum > 1.0f) {
                 s16 slot;
                 u8 angle;

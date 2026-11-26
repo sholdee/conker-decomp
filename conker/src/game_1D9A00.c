@@ -101,9 +101,9 @@ Vtx *func_151AC810(QuadParticle *particle, s16 view) {
     return result;
 }
 
-/* Grows the quad's width and height by unk4C per second (D_800BE9A4 = frame time). */
+/* Grows the quad's width and height by unk4C per second (gFrameDelta = frame time). */
 s32 func_151AC9EC(QuadParticle *particle) {
-    f32 growth = particle->unk4C * D_800BE9A4;
+    f32 growth = particle->unk4C * gFrameDelta;
 
     particle->width += growth;
     particle->height += growth;

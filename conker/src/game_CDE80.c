@@ -45,15 +45,15 @@ void func_150A09D0(s32 ticks) {
                 }
             }
             break;
-        case ZONE_TYPE_TUNE_CHANNEL: /* music-channel zone (func_1000E46C sets channel volumes) */
+        case ZONE_TYPE_TUNE_CHANNEL: /* music-channel zone (music_fadeChannelVolume sets channel volumes) */
             if (ZONE_AREA_TYPE(&zones[i]) == ZONE_AREA_GATE) {
                 zones[i].data3 = 0;
             } else {
                 if (zones[i].data3 == 1) {
                     zones[i].data3 = 2;
                 } else if (zones[i].data3 == 2) {
-                    if (func_1000E46C(zones[i].subTypeData, 0, zones[i].data1, 0)) {
-                        if (func_1000E46C(zones[i].subTypeData, 100, zones[i].data2, 0)) {
+                    if (music_fadeChannelVolume(zones[i].subTypeData, 0, zones[i].data1, 0)) {
+                        if (music_fadeChannelVolume(zones[i].subTypeData, 100, zones[i].data2, 0)) {
                             zones[i].data3 = 0;
                         }
                     }
@@ -115,7 +115,7 @@ void zone_cacheAngles(TriggerZone *zone) {
 
 s32 math_distance3D(s32 dx, s32 dy, s32 dz); /* game_DAE50.s */
 
-/* Starts the ZONE_TYPE_REFLECTION zone effect (func_15035808) for every active actor inside such a zone. */
+/* Starts the ZONE_TYPE_REFLECTION zone effect (model_queueReflection) for every active actor inside such a zone. */
 void func_150A0D8C(void) {
     u32 i;
     s32 j;
@@ -139,12 +139,12 @@ void func_150A0D8C(void) {
                         if (fade > 100.0f) {
                             fade = 100.0f;
                         }
-                        func_15035808(2, j, zones[i].x, zones[i].y, zones[i].z, 0.0f,
+                        model_queueReflection(2, j, zones[i].x, zones[i].y, zones[i].z, 0.0f,
                                       zones[i].yaw, zones[i].xSize - fade, zones[i].xSize,
                                       255.0f);
                     }
                 } else {
-                    func_15035808(1, j, obj->xpos, obj->floorY, obj->zpos,
+                    model_queueReflection(1, j, obj->xpos, obj->floorY, obj->zpos,
                                   0.0f, 0.0f, 100.0f, 150.0f, 255.0f);
                 }
             }
@@ -232,7 +232,7 @@ void func_150A11C4(Actor *actor) {
     prev = (u64 *)(s16)actor->ypos;
     z = actor->zpos;
     if (actor->playernumber != 0xFF) {
-        func_150806A8(actor->playernumber);
+        text_clearObjectText(actor->playernumber);
     }
     func_150829D8(actor);
     actor->unk120 = -10000;
@@ -392,8 +392,8 @@ void func_150A11C4(Actor *actor) {
                     break;
                 case ZONE_TYPE_TUNE_CHANNEL:
                     if (zones[i].data3 == 0) {
-                        if (func_1000E46C(zones[i].subTypeData, 100, zones[i].data1, 0)) {
-                            if (func_1000E46C(zones[i].subTypeData, 0, zones[i].data2, 0)) {
+                        if (music_fadeChannelVolume(zones[i].subTypeData, 100, zones[i].data1, 0)) {
+                            if (music_fadeChannelVolume(zones[i].subTypeData, 0, zones[i].data2, 0)) {
                                 zones[i].data3 = 1;
                             }
                         }
@@ -403,9 +403,9 @@ void func_150A11C4(Actor *actor) {
                     break;
                 case ZONE_TYPE_TUNE:
                     if (unk127 != 0xFF && !(prevBits & 1)) {
-                        func_1000D96C(zones[i].subTypeData, zones[i].data1, zones[i].data2 & 0xFF);
+                        music_playTune(zones[i].subTypeData, zones[i].data1, zones[i].data2 & 0xFF);
                         if (zones[i].subTypeData) {
-                            func_1000E46C(zones[i].subTypeData, 0, zones[i].data3 & 0xFFFF, 0);
+                            music_fadeChannelVolume(zones[i].subTypeData, 0, zones[i].data3 & 0xFFFF, 0);
                         }
                     }
                     break;
@@ -425,7 +425,7 @@ void func_150A11C4(Actor *actor) {
                     osPiRawReadIo(func_150A1040(0xB0000054), &raw);
                     __osPiRelAccess();
                     if (func_150A1040(raw) == 0x1090C2B && D_800C35EA[0] == 0 && actor->energy != 0) {
-                        func_15172E7C(actor, zones[i].subTypeData, zones[i].data1);
+                        player_startWarp(actor, zones[i].subTypeData, zones[i].data1);
                         if (level != zones[i].subTypeData) {
                             actor->imune = 0xFF;
                             actor->unk1CC = actor->ypos;
@@ -434,7 +434,7 @@ void func_150A11C4(Actor *actor) {
                 }
                     break;
                 case ZONE_TYPE_CONTEXT:
-                    func_15080500(actor, &zones[i], 1, zones[i].subTypeData, zones[i].data1);
+                    text_queueObjectText(actor, &zones[i], 1, zones[i].subTypeData, zones[i].data1);
                     break;
                 case ZONE_TYPE_EFFECT:
                     func_150A25D4(&zones[i], actor, unk127, prevBits);
@@ -580,7 +580,7 @@ s32 zone_isOutside(Actor *actor, TriggerZone *zone, s32 withMargin) {
     return 1;
 }
 
-/* Type-2 zone occupied: starts its looping positional sound (func_1000FA64) if it is not playing yet. */
+/* Type-2 zone occupied: starts its looping positional sound (sound_addDynamicSound) if it is not playing yet. */
 void func_150A23E4(TriggerZone *zone) {
     s32 flags;
     s32 farFlag;
@@ -594,7 +594,7 @@ void func_150A23E4(TriggerZone *zone) {
         if (zone->subTypeData >> 7) {
             flags = 0x108;
         }
-        func_1000FA64(zone->data2 >> 16, zone->x, zone->y, zone->z, (zone->subTypeData & 0x7F) * 327,
+        sound_addDynamicSound(zone->data2 >> 16, zone->x, zone->y, zone->z, (zone->subTypeData & 0x7F) * 327,
                       zone->data1 | farFlag, zone->data2 & 0xFFFF,
                       NULL, NULL, NULL, flags, 0);
         zone->data3 = 1;
@@ -688,7 +688,7 @@ void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
         u8 *timer = &D_800D3090;
         if (!(prevBits & 1)) {
             *timer = 30;
-            func_10010344(0x66F, actor, 0x5DC0, 0x190, 0x1F4);
+            sound_playActorSound1(0x66F, actor, 0x5DC0, 0x190, 0x1F4);
         }
         *timer += D_800BE9E4;
         if (*timer >= 31) {
@@ -715,7 +715,7 @@ void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
     }
 }
 
-/* Applies the ZONE_TYPE_WARP TriggerZones containing the actor (func_15172E7C), unless its unk65 is set. */
+/* Applies the ZONE_TYPE_WARP TriggerZones containing the actor (player_startWarp), unless its unk65 is set. */
 void func_150A278C(Actor *actor) {
     s32 i;
 
@@ -725,7 +725,7 @@ void func_150A278C(Actor *actor) {
     for (i = 0; i < gZoneCount; i++) {
         if (ZONE_TYPE(&zones[i]) == ZONE_TYPE_WARP) {
             if (zone_isOutside(actor, &zones[i], 0) == 0) {
-                func_15172E7C(actor, zones[i].subTypeData, zones[i].data1);
+                player_startWarp(actor, zones[i].subTypeData, zones[i].data1);
             }
         }
     }
@@ -766,7 +766,7 @@ s32 func_150A29C8(u32 actor, u32 id) {
     if (gZoneCount < id) {
         return 1;
     }
-    if (actor < 16 && (D_800D2138.playerMask & (1 << actor))) {
+    if (actor < 16 && (gMatchState.playerMask & (1 << actor))) {
         if ((D_800D30F0[actor][id >> 6] >> (id & 0x3F)) & 1) {
             return 0;
         }
@@ -784,7 +784,7 @@ s32 func_150A2AEC(actor, count, ids)
     s32 i;
     u32 id;
 
-    if (actor < 16 && (D_800D2138.playerMask & (1 << actor))) {
+    if (actor < 16 && (gMatchState.playerMask & (1 << actor))) {
         for (i = 0; i < count; i++) {
             id = ids[i];
             id &= 0xFFF;
@@ -817,7 +817,7 @@ s32 func_150A2CA4(u32 id) {
         return -1;
     }
     for (i = 0; i != 16; i++) {
-        if (D_800D2138.playerMask & (1 << i)) {
+        if (gMatchState.playerMask & (1 << i)) {
             if ((D_800D30F0[i][id >> 6] >> (id & 0x3F)) & 1) {
                 return i;
             }

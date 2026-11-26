@@ -61,7 +61,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
     ChannelParticle *created;
 
     timer = &emitter->unk28.x;
-    *timer += func_150ADA68() * 20.0f * 1e-9f * D_800BE9A4 * 36447764.0f;
+    *timer += func_150ADA68() * 20.0f * 1e-9f * gFrameDelta * 36447764.0f;
     if (*timer > 1.0f) {
         if (1) { // matching: the extra block makes IDO give emitter $s3 and pos $s2
             // matching: the camera position read as f32[3]; through Vec3f fields IDO emits other code
@@ -116,8 +116,8 @@ void func_150C2C00(Struct150C29F0 *emitter) {
 s32 func_150C2FCC(ChannelParticle *particle) {
     particle->head.def.width -= particle->head.def.width * particle->motion.shrinkRate;
     particle->head.def.height -= particle->head.def.height * particle->motion.shrinkRate;
-    particle->head.def.pos.y += (particle->head.def.scale.y * D_800BE9A4) + (0.5f * particle->head.def.scale.x * D_800BE9A4 * D_800BE9A4);
-    particle->head.def.scale.y += particle->head.def.scale.x * D_800BE9A4;
+    particle->head.def.pos.y += (particle->head.def.scale.y * gFrameDelta) + (0.5f * particle->head.def.scale.x * gFrameDelta * gFrameDelta);
+    particle->head.def.scale.y += particle->head.def.scale.x * gFrameDelta;
     if ((particle->head.def.width < 10.0f) || (particle->head.def.height < 10.0f)) {
         return 0;
     }

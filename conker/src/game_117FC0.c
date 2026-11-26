@@ -44,7 +44,7 @@ void func_150EAB10(struct_EAB10 *actor) {
     FlashSpawner *spawner;
 
     spawner = &actor->spawner;
-    spawner->accumulator += (spawner->rate + func_150ADA68() * spawner->rateRange) * D_800BE9A4;
+    spawner->accumulator += (spawner->rate + func_150ADA68() * spawner->rateRange) * gFrameDelta;
     if (spawner->accumulator > 1.0f) {
         flash.ground.material = 0;
         flash.ground.flags = 0;
@@ -105,8 +105,8 @@ s32 func_150EAE24(LightEffect *obj) {
     struct GroundFlash *flash;
     Vec3f probe;
 
-    obj->data.groundFlash.position.x += obj->data.groundFlash.velocity.x * D_800BE9A4;
-    obj->data.groundFlash.position.z += obj->data.groundFlash.velocity.z * D_800BE9A4;
+    obj->data.groundFlash.position.x += obj->data.groundFlash.velocity.x * gFrameDelta;
+    obj->data.groundFlash.position.z += obj->data.groundFlash.velocity.z * gFrameDelta;
     probe.x = obj->data.groundFlash.position.x;
     probe.y = obj->data.groundFlash.height;
     probe.z = obj->data.groundFlash.position.z;
@@ -118,7 +118,7 @@ s32 func_150EAE24(LightEffect *obj) {
     } else {
         obj->light->y = flash->height;
     }
-    flash->lifetime -= D_800BE9A4;
+    flash->lifetime -= gFrameDelta;
     if (flash->lifetime <= 0.0f) {
         return 0;
     }

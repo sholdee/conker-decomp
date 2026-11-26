@@ -234,10 +234,10 @@ s32 func_1518C0B8(MotionTrail *trail) {
         sinA = cosA = 0.0f;
     }
     while (i != trail->head.end) {
-        points[i].velocityY -= params->base.motion.gravity * D_800BE9A4;
-        offsets[i].x += params->base.motion.velocity.x * D_800BE9A4;
+        points[i].velocityY -= params->base.motion.gravity * gFrameDelta;
+        offsets[i].x += params->base.motion.velocity.x * gFrameDelta;
         offsets[i].y += points[i].velocityY;
-        offsets[i].z += params->base.motion.velocity.z * D_800BE9A4;
+        offsets[i].z += params->base.motion.velocity.z * gFrameDelta;
         points[i].pos.x = (pos.x + offsets[i].x * sinA) + offsets[i].z * cosA;
         points[i].pos.y = offsets[i].y + pos.y;
         points[i].pos.z = (pos.z + offsets[i].z * sinA) - offsets[i].x * cosA;
@@ -271,7 +271,7 @@ s32 func_1518C0B8(MotionTrail *trail) {
             }
         }
     } else {
-        invDt = 1.0f / D_800BE9A4;
+        invDt = 1.0f / gFrameDelta;
         velX = params->base.motion.velocity.x * sinA + params->base.motion.velocity.z * cosA;
         velZ = params->base.motion.velocity.z * sinA - params->base.motion.velocity.x * cosA;
         ownerVelX = (pos.x - link->emitter->prevX[link->point]) * invDt;

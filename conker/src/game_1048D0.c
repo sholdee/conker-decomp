@@ -155,7 +155,7 @@ void func_150D7790(Actor *obj, s32 action) {
         if (obj->mv != NULL) {
             obj->mv->unk12C = 120;
             obj->mv->ammo_count -= 1;
-            func_10010154(0x628, obj, 0x7FFF, 500, 1000);
+            sound_playActorSound2(0x628, obj, 0x7FFF, 500, 1000);
         }
         return;
     case 0x33:
@@ -207,7 +207,7 @@ void func_150D7928(Actor *obj) {
     f32 pad; // matching: unused stack slot keeps the frame size
     u8 id;
     u16 angle;
-    f32 scratch; /* obj's speed across func_15059140, later the rounded size stored in padC8 */
+    f32 scratch; /* obj's speed across actor_updatePhysics, later the rounded size stored in padC8 */
     s32 n; /* the rider's target angle, later the player loop index */
     f32 offset;
 
@@ -262,7 +262,7 @@ void func_150D7928(Actor *obj) {
         obj->angle = angle;
         obj->speed = player->speed;
         if (obj->doing_hit != 0) {
-            func_1505C7D8(obj, dc_glbl_CharNum);
+            actor_testAttack(obj, dc_glbl_CharNum);
         }
     } else {
         obj->unk21C = obj->langle;
@@ -277,10 +277,10 @@ void func_150D7928(Actor *obj) {
         obj->attach_char = 0;
         // matching: unk90 (u16) is read as s16 (lh); a value cast still loads with lhu
         obj->bodyRadius = obj->unk90;
-        func_1505A3A8(0.0f, obj, 0.0f, 0.5f, 1);
+        actor_accelerate(0.0f, obj, 0.0f, 0.5f, 1);
         scratch = obj->speed;
         obj->stunned = 30;
-        func_15059140(obj);
+        actor_updatePhysics(obj);
         obj->speed = scratch;
         angleOffset = (obj->lean_angle - obj->stickspeed) * 0.8f;
         if (obj->intelwalk == 4) {
@@ -344,8 +344,8 @@ void func_150D7928(Actor *obj) {
                 movement_obj[obj->owner].inwater = 0;
                 movement_obj[obj->owner].ygrav = 4.0f;
             }
-            func_100109D0(obj);
-            func_10010FFC(0, 0x51, 0x6D60, 0, 0, obj);
+            sound_stopActorSound2(obj);
+            sound_playOnActor(0, 0x51, 0x6D60, 0, 0, obj);
             obj->energy = 0;
         }
         if (obj->scale_y < 1.0f) {
@@ -377,13 +377,13 @@ void func_150D7928(Actor *obj) {
             if (volume > 18000) {
                 volume = 18000;
             }
-            if (func_100107F8(obj) == 0) {
-                func_10010154(0x678, obj, volume, 1000, 2000);
+            if (sound_isActorSound2Playing(obj) == 0) {
+                sound_playActorSound2(0x678, obj, volume, 1000, 2000);
             } else {
-                func_1001091C(obj, volume);
+                sound_setActorSound2Volume(obj, volume);
             }
         } else {
-            func_100109D0(obj);
+            sound_stopActorSound2(obj);
         }
         func_15052490(obj, obj->angle, speed, 0.55f);
     }

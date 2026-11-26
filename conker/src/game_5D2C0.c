@@ -569,7 +569,7 @@ Gfx *func_15030E08(Gfx *gdl, s32 view, s32 pass) {
                 continue;
             }
         } else {
-            alpha = func_1506196C(owner, view);
+            alpha = actor_getAlpha(owner, view);
             if (pass == 1) {
                 if (!(att->flags & 2) && (alpha == 0xFF) && (owner->drawtype != 1)) {
                     att = next;
@@ -644,7 +644,7 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
 
 
 /* Draws one attachment of `owner` in viewport `view` with the owner's lighting, fog and alpha.
- * `arg4` nonzero draws it through func_15035D6C instead of its own display lists. Returns the
+ * `arg4` nonzero draws it through model_drawAttachmentReflections instead of its own display lists. Returns the
  * original `gdl` if the display list would overflow. */
 Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg4) {
     Mtx *mtx;
@@ -676,7 +676,7 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
     }
     gDPPipeSync(gdl++);
     alpha = att->alpha;
-    v = func_1506196C(owner, view);
+    v = actor_getAlpha(owner, view);
     if (v != 0xFF) {
         alpha = (v * alpha) >> 8;
     }
@@ -690,11 +690,11 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
     }
     func_1502D54C(owner - movement_obj, light);
     if (D_800B0DF0->unk3E != 0) {
-        func_1502D630(&movement_obj[owner - movement_obj], light, view, owner - movement_obj);
+        actor_getFogAlpha(&movement_obj[owner - movement_obj], light, view, owner - movement_obj);
     } else {
         light[3] = 0xFF;
     }
-    func_1502CC34(owner, view, alpha, light, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
+    actor_getDrawColours(owner, view, alpha, light, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
                   &fogA);
     lit = TRUE;
     fogOverride = D_800B0DF0->unk3E;
@@ -763,9 +763,9 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
         }
     } else {
         gSPSetGeometryMode(gdl++, G_CULL_FRONT);
-        gdl = func_15035D6C(gdl, att, envR, envG, envB);
+        gdl = model_drawAttachmentReflections(gdl, att, envR, envG, envB);
     }
-    if (D_800BEBA4 < (gdl - D_800BE9C8[D_800BE9C0])) {
+    if (D_800BEBA4 < (gdl - gDisplayListBuffers[D_800BE9C0])) {
         v = TRUE;
     } else {
         v = FALSE;
@@ -884,7 +884,7 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
         owner->unk9C |= 0x6000;
         break;
     case 0x8D:
-        if (func_150859AC(0, 6) < 100) {
+        if (player_getStat(0, 6) < 100) {
             att->seg6Id = D_80090228;
         } else {
             att->seg6Id = D_8009022C;
@@ -923,7 +923,7 @@ void func_15031C14(ModelAttachment *att) {
         case 0x37:
         case 0x4B:
         case 0x4C:
-            func_1000FD38(func_15033BDC, att, (s32)owner);
+            sound_stopByCallback(func_15033BDC, att, (s32)owner);
             if (att->model == 0x37) {
                 func_15100180(owner);
             }
@@ -2241,7 +2241,7 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
         if (ownerAnim->unk3C != 0x3FF) {
             goto copy_frame;
         }
-        func_1505E060(anim);
+        actor_saveBlendAnim(anim);
         anim = att->anim;
     copy_frame:
         anim->frame[0] = ownerAnim->frame[0];
@@ -2468,7 +2468,7 @@ ModelAttachment *func_150335C8(Actor *obj, Actor *target, s32 setId, s32 bone, s
         objMtx[3][3] = 1.0f;
 
         func_150A7A48(objMtx, invBoneMtx, relMtx);
-        func_1503E5F8(relMtx, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
+        model_decomposeMatrix(relMtx, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
 
         if (noTranslation) {
             z = 0.0f;
@@ -2559,17 +2559,17 @@ s32 func_15033838(ModelAttachment *att, Actor *owner) {
 }
 
 /* Hook (model 0x37): scrolls the texture and keeps looping sound 0x448 playing at the owner
- * unless D_800BEA0C is set. */
+ * unless gFrameRateDivider is set. */
 s32 func_150339C8(ModelAttachment *att, Actor *owner) {
     func_150334B8(att, owner);
     if (D_800C35EA[0] != 1) {
-        if (D_800BEA0C != 0) {
+        if (gFrameRateDivider != 0) {
             if (att->unk3C != 0) {
-                func_1000FD38(func_15033BDC, att, (s32)owner);
+                sound_stopByCallback(func_15033BDC, att, (s32)owner);
             }
             att->unk3C = 0;
         } else if (att->unk3C == 0) {
-            att->unk3C = func_1000FA64(0x448, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
+            att->unk3C = sound_addDynamicSound(0x448, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
                                        500, func_15033BDC, att, (s32)owner, 0, 0) |
                          0x80000000;
         }
@@ -2579,14 +2579,14 @@ s32 func_150339C8(ModelAttachment *att, Actor *owner) {
 
 /* Hook: after a 30-tick delay, starts sound 0x513 at the owner (func_15033BDC follows it up). */
 s32 func_15033AD8(ModelAttachment *att, Actor *owner) {
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         func_1508B20C(owner->xpos, owner->ypos, owner->zpos, 900.0f);
     }
     if (att->unk38 == 0) {
         if (att->unk3C < 30) {
             att->unk3C += D_800BE9E4;
         } else {
-            att->unk3C = func_1000FA64(0x513, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
+            att->unk3C = sound_addDynamicSound(0x513, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
                                        500, func_15033BDC, att, (s32)owner, 0, 0);
             att->unk38 = 0x513;
         }
@@ -2594,7 +2594,7 @@ s32 func_15033AD8(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-/* Sound record callback of the sounds the attachment hooks start (func_1000FA64 with the attachment
+/* Sound record callback of the sounds the attachment hooks start (sound_addDynamicSound with the attachment
  * and its owner as the parameters): tracks the owner's position and plays the model's follow-up
  * sounds. Returns 1 when the sound should stop. */
 s32 func_15033BDC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound) {
@@ -2620,7 +2620,7 @@ s32 func_15033BDC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
                     }
                 }
                 if (sfxId != -1) {
-                    func_10010FFC(0, sfxId, 24000, 0, 0, owner);
+                    sound_playOnActor(0, sfxId, 24000, 0, 0, owner);
                 }
                 att->unk38 = owner->animseq.uh;
             } else {
@@ -2629,7 +2629,7 @@ s32 func_15033BDC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
                     if (unk->GrenadeTimer < 120) {
                         if (att->unk38 == 0x513) {
                             att->unk38 = 0x3A1;
-                            att->unk3C = func_1000FA64(0x3A1, owner->xpos, owner->ypos,
+                            att->unk3C = sound_addDynamicSound(0x3A1, owner->xpos, owner->ypos,
                                                        owner->zpos, 32000, 1000, 500, func_15033BDC, att,
                                                        (s32)owner, 0, 0);
                             return 1;
@@ -2642,7 +2642,7 @@ s32 func_15033BDC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
 
         if (att->model == 0x37) {
             if (record->sound_id != 0) {
-                func_100111C8(record->sound_id);
+                sound_stop(record->sound_id);
                 record->sound_id = 0;
             }
             *sound = 0;

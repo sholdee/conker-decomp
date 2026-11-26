@@ -10,7 +10,7 @@ ZDecode D_80089630[8] = {
 };
 
 /**
- * Copies one row of the z-buffer (D_800BE9C4, D_800BE620 pixels wide; row index at
+ * Copies one row of the z-buffer (gZBuffer, D_800BE620 pixels wide; row index at
  * camera+0x8BA) into the camera's one-row buffer unk8BC by drawing a 1-pixel-high
  * copy-mode texture rectangle, then restores a 1-cycle z-buffered render mode.
  */
@@ -21,7 +21,7 @@ Gfx *func_1512E5F0(Gfx *gfx, Camera *camera) {
                         G_TD_CLAMP | G_TP_NONE | G_CYC_COPY | G_PM_NPRIMITIVE | 0xF, // 0xF: blend mask bits
                     G_AC_NONE | G_ZS_PIXEL);
     gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
-                       D_800BE9C4 + (u16)camera->HitsZBufferRowIndex * D_800BE620);
+                       gZBuffer + (u16)camera->HitsZBufferRowIndex * D_800BE620);
     gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
     gDPLoadSync(gfx++);
     gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, D_800BE620 - 1, CALC_DXT(D_800BE620, G_IM_SIZ_16b_BYTES));

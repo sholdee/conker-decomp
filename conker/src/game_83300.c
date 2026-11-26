@@ -10,10 +10,10 @@ void func_151E5FF4(Actor *source, Actor *victim, u8 cause);
    compiled with a view that takes a fourth argument (one call passes the character index). */
 f32 func_1506AD30(Actor *obj, f32 time, u8 filtered, s32 arg3);
 
-/* Animation id lists (D_80099428 goes with the dive sound in func_1505F298). */
+/* Animation id lists (D_80099428 goes with the dive sound in actor_updatePlayerControls). */
 const u16 D_80099420[4] = { 0x215, 0x10E, 0x108, 0x249 };
 const u16 D_80099428[2] = { 0xE9, 0 };
-/* Eye frame for eye codes 0..2 (func_15061B4C). */
+/* Eye frame for eye codes 0..2 (actor_updateTypeAnims). */
 const s32 D_8009942C[3] = { 0x12, 0x0B, 0x13 };
 
 
@@ -23,7 +23,7 @@ struct HitReaction;
 
 
 /* Keeps the actor inside its zone set: pushed out of obstacle circles, snapped to the nearest allowed circle. */
-void func_15055E50(Actor *actor, s32 zoneSetId) {
+void actor_clampToZoneSet(Actor *actor, s32 zoneSetId) {
     s32 pad[5]; // matching: stack frame size
     f32 bestX;
     f32 bestZ;
@@ -173,7 +173,7 @@ typedef struct {
 
 /* An actor type's reaction (0x18 bytes); ANIM_HEADER(D_800D1588[id])->reactions points to the table. */
 typedef struct Game83300AnimEntry {
-    u8 kind; /* matched by func_1505E7CC */
+    u8 kind; /* matched by actor_findReaction */
     u8 pad1[3];
     s32 sound;
     u8 unk8;
@@ -183,7 +183,7 @@ typedef struct Game83300AnimEntry {
 } Game83300AnimEntry;
 
 /* Moves the actor toward its host movement_obj[unk13D - 100] and picks the carried animation. */
-void func_150562FC(Actor *actor) {
+void actor_moveToHost(Actor *actor) {
     ActorAnim *animTable;
     Game83300AnimEntry *anims;
     MtxS16 *hostBone;
@@ -231,7 +231,7 @@ void func_150562FC(Actor *actor) {
         if (movement_obj[hostIdx].animseq.uh == 0x117) {
             variant = 2;
         }
-        func_150649A0(hostIdx, dc_glbl_CharNum);
+        actor_copyAnimPosition(hostIdx, dc_glbl_CharNum);
     } else if (actor->character_type == 0x8C) {
         actor->basemtx = 4;
         if (actor->unk21C < 10) {
@@ -244,7 +244,7 @@ void func_150562FC(Actor *actor) {
         if (movement_obj[hostIdx].animseq.uh == 0x1A7) {
             variant = 2;
         }
-        func_150649A0(hostIdx, dc_glbl_CharNum);
+        actor_copyAnimPosition(hostIdx, dc_glbl_CharNum);
     } else if ((actor->character_type == 0xA8) || (actor->character_type == 0xA9)) {
         actor->basemtx = 9;
         attached = 1;
@@ -265,7 +265,7 @@ void func_150562FC(Actor *actor) {
             variant = 1;
         }
     }
-    animIdx = func_1505E7CC(animKind, actor);
+    animIdx = actor_findReaction(animKind, actor);
     animTable = D_800D1588[actor->character_type];
     anims = ANIM_HEADER(animTable)->reactions;
     if ((movement_obj[hostIdx].type == 1) && (movement_obj[hostIdx].inwater != 0)) {
@@ -284,7 +284,7 @@ void func_150562FC(Actor *actor) {
         lerp = 0.8000000119f;
     }
     offsetX = actor->unk10F;
-    func_150599C8(actor, 0x10, movement_obj[hostIdx].langle + (actor->unk13E << 8));
+    actor_turnFacing(actor, 0x10, movement_obj[hostIdx].langle + (actor->unk13E << 8));
     if (movement_obj[hostIdx].ob_matrix_ptr != NULL) {
         heightOffset = actor->unk10C / 100;
         if (movement_obj[hostIdx].type != 0x15) {
@@ -305,7 +305,7 @@ void func_150562FC(Actor *actor) {
         }
     }
     if (movement_obj[hostIdx].type == 0x15) {
-        animIdx = func_1505E7CC(0x39, actor);
+        animIdx = actor_findReaction(0x39, actor);
         actor->langle = movement_obj[hostIdx].langle;
         actor->ypos = movement_obj[hostIdx].ypos - 10.0f;
         if ((actor->shad > 100.0f) && (actor->unk21C >= 21)) {
@@ -317,7 +317,7 @@ void func_150562FC(Actor *actor) {
         actor->lean_angle += (movement_obj[hostIdx].lean_angle - actor->lean_angle) * 0.1199999973f;
         actor->speed = 0.0f;
     }
-    func_1505A184(movement_obj[hostIdx].langle, offsetX, 0.0, &offsetX, &offsetZ, &offsetY);
+    actor_splitVelocity(movement_obj[hostIdx].langle, offsetX, 0.0, &offsetX, &offsetZ, &offsetY);
     tx = movement_obj[hostIdx].xpos + offsetX;
     tz = movement_obj[hostIdx].zpos + offsetZ;
     actor->xpos += (tx - actor->xpos) * lerp;
@@ -328,7 +328,7 @@ void func_150562FC(Actor *actor) {
         rate = anims[animIdx].sub[variant].speed;
     split: // matching: block boundary moves the u32->f32 convert's register (f16 instead of f0)
         rate = rate / 100.0f;
-        func_1505E650(actor, anims[animIdx].sub[variant].anim, rate, animArg, 0.0, 0, 0);
+        actor_playAnim(actor, anims[animIdx].sub[variant].anim, rate, animArg, 0.0, 0, 0);
     }
     if (attached != 0) {
         actor->attach_char = hostIdx + 1;
@@ -397,7 +397,7 @@ void func_15056A00(Actor *actor, u8 turn, u8 row) {
  * Per-frame AI for a path/chase actor: picks the point to head for from its mode (unk223),
  * looks for targets to switch behaviour script (unk218), then turns and moves toward the point.
  */
-void func_15056B08(Actor *actor) {
+void actor_updateChaseAi(Actor *actor) {
     f32 tx;
     f32 tz;
     f32 ty;
@@ -449,7 +449,7 @@ void func_15056B08(Actor *actor) {
     faceTurnRate = actor->unk1E6;
     if (D_800D2108[actor->listpos] == 0) {
         actor->speed = 0.0f;
-        func_1505841C(actor, 0.0f);
+        actor_playMoveAnim(actor, 0.0f);
         return;
     }
     state = mode;
@@ -490,9 +490,9 @@ void func_15056B08(Actor *actor) {
             f32 leadZ;
             f32 leadY;
 
-            leadZ = func_1505A72C(target, actor);
+            leadZ = actor_distance3D(target, actor);
             leadX = target->speed * (leadZ / actor->unk231);
-            func_1505A184(target->angle, leadX, 0.0f, &leadX, &leadZ, &leadY);
+            actor_splitVelocity(target->angle, leadX, 0.0f, &leadX, &leadZ, &leadY);
             tx += leadX;
             tz += leadZ;
         }
@@ -551,7 +551,7 @@ void func_15056B08(Actor *actor) {
                     }
                 }
                 if (ok) {
-                    angle = func_1505A630(dx, -dz, 0);
+                    angle = actor_getDirectionAngle(dx, -dz, 0);
                     if (actor->unk237 &&
                         (((((actor->angle - angle) >> 8) + (actor->unk237 / 2)) & 0xFF) < actor->unk237)) {
                         actor->scriptCmd = func_1507BB28(2, actor->unk234);
@@ -598,7 +598,7 @@ void func_15056B08(Actor *actor) {
                     if (d < bestDist) {
                         cone = info->viewAngle * 3;
                         cone /= 2;
-                        angHi = (u8)(func_1505A630(ox, oz, 0) >> 8);
+                        angHi = (u8)(actor_getDirectionAngle(ox, oz, 0) >> 8);
                         if ((((((actor->langle >> 8) - angHi) + (cone / 2)) & 0xFF) < cone)) {
                             best = i + 1;
                             bestDist = d;
@@ -613,11 +613,11 @@ void func_15056B08(Actor *actor) {
                 actor->unkA8 = best + 0x7F;
                 actor->unk22E = 5;
                 if (actor->unk242 != 0) {
-                    D_800D154C = &movement_obj[best - 1];
+                    gCurrentActor = &movement_obj[best - 1];
                     movement_obj[best - 1].scriptCmd = func_1507BB28(0, actor->unk242);
                     movement_obj[best - 1].unk21C = 0;
                     movement_obj[best - 1].unk222 = dc_glbl_CharNum;
-                    D_800D154C = actor;
+                    gCurrentActor = actor;
                 }
             }
         }
@@ -654,7 +654,7 @@ void func_15056B08(Actor *actor) {
                                     f32 lookZ;
                                     f32 lookY;
 
-                                    func_1505A184(actor->langle, 9000.0f, actor->vtilt, &lookX, &lookZ, &lookY);
+                                    actor_splitVelocity(actor->langle, 9000.0f, actor->vtilt, &lookX, &lookZ, &lookY);
                                     lookX += actor->xpos;
                                     lookZ += actor->zpos;
                                     lookY += actor->ypos;
@@ -671,7 +671,7 @@ void func_15056B08(Actor *actor) {
                                     if (alertKind == 0) {
                                         fov *= 3;
                                     }
-                                    if (((((((actor->langle >> 8) + actor->unk2CA) - (u8)(func_1505A630(px, pz, 0) >> 8)) +
+                                    if (((((((actor->langle >> 8) + actor->unk2CA) - (u8)(actor_getDirectionAngle(px, pz, 0) >> 8)) +
                                            (fov / 2)) & 0xFF) < fov)) {
                                         spotted = 1;
                                     }
@@ -712,7 +712,7 @@ void func_15056B08(Actor *actor) {
                 }
                 actor->unk86 += actor->unk257;
                 orbitX = actor->unk258 * 16.0f;
-                func_1505A184(actor->unk86 << 8, orbitX, 0.0f, &orbitX, &orbitZ, &orbitY);
+                actor_splitVelocity(actor->unk86 << 8, orbitX, 0.0f, &orbitX, &orbitZ, &orbitY);
                 tx += orbitX;
                 tz += orbitZ;
             }
@@ -727,9 +727,9 @@ void func_15056B08(Actor *actor) {
             speed = 0.0f;
             tx = movement_obj[actor->unk222].xpos - actor->xpos;
             tz = actor->zpos - movement_obj[actor->unk222].zpos;
-            actor->fangle = func_1505A630(tx, tz, 0);
+            actor->fangle = actor_getDirectionAngle(tx, tz, 0);
         } else if ((actor->stickspeed >= 0.5f) && !(actor->mvmt_control & 0x40)) {
-            actor->fangle = func_1505A630(tx, tz, 0);
+            actor->fangle = actor_getDirectionAngle(tx, tz, 0);
         }
     }
     accel = actor->intel_accel / 10.0f;
@@ -761,7 +761,7 @@ void func_15056B08(Actor *actor) {
             faceTurnRate = 0;
         }
         arriveDist = actor->unk23E * 8;
-        turnDiff = func_15059B54(actor, moveTurnSpeed);
+        turnDiff = actor_turnMoving(actor, moveTurnSpeed);
         if (state != 0xD) {
             if (((u8)actor->unk24F != 0) && ((state != 0) || (arriveDist < targetDist))) {
                 k = (u8)actor->unk24F - 1;
@@ -808,10 +808,10 @@ void func_15056B08(Actor *actor) {
         }
         ang = actor->fangle;
         if (actor->mvmt_control & 0x20000) {
-            ang = func_1505A630(movement_obj[actor->unk222].xpos - actor->xpos,
+            ang = actor_getDirectionAngle(movement_obj[actor->unk222].xpos - actor->xpos,
                                 actor->zpos - movement_obj[actor->unk222].zpos, 0);
         }
-        turnDiff = func_150599C8(actor, faceTurnRate, ang);
+        turnDiff = actor_turnFacing(actor, faceTurnRate, ang);
         decel = actor->intel_decel / 10.0f;
         if ((actor->unk3A != 0) && (actor->shad == 0.0f) && !(actor->unk3A & 3 & D_800D1548)) {
             actor->animseq.uh = 0xFF;
@@ -836,7 +836,7 @@ void func_15056B08(Actor *actor) {
             if (level == 0x26) {
                 h -= 45.0f * actor->scale_y;
             }
-            ang = func_1505A630(sqrtf(distSqXZ), h, 0);
+            ang = actor_getDirectionAngle(sqrtf(distSqXZ), h, 0);
             func_1504C9E4(actor, (s16)ang / 200, 0);
         } else if (actor->unk1D1 != 0) {
             func_1504C9E4(actor, 0, 0);
@@ -848,30 +848,30 @@ void func_15056B08(Actor *actor) {
             f32 r;
 
             speed = actor->stickspeed;
-            func_1505A184(actor->fangle, speed, 0.0f, &wantVelX, &wantVelZ, &wantVelY);
+            actor_splitVelocity(actor->fangle, speed, 0.0f, &wantVelX, &wantVelZ, &wantVelY);
             if ((speed < 1.0f) || (((prevMoveAngle - actor->fangle) + 0x4000) & 0x8000)) {
                 r = decel;
             } else {
                 r = accel;
             }
-            func_1505A250(wantVelX, wantVelZ, r, &actor->unk174, &actor->unk178);
-            actor->angle = func_1505A630(actor->unk174, -actor->unk178, 0);
+            actor_stepVector2D(wantVelX, wantVelZ, r, &actor->unk174, &actor->unk178);
+            actor->angle = actor_getDirectionAngle(actor->unk174, -actor->unk178, 0);
             r = sqrtf((actor->unk174 * actor->unk174) + (actor->unk178 * actor->unk178));
             actor->speed = r + r;
         } else {
-            func_1505A3A8(speed, actor, accel, decel, turnDiff);
+            actor_accelerate(speed, actor, accel, decel, turnDiff);
         }
     } else {
-        func_150599C8(actor, actor->unk1E6, actor->fangle);
+        actor_turnFacing(actor, actor->unk1E6, actor->fangle);
         actor->angle = actor->fangle;
         actor->speed = speed;
     }
-    func_1505841C(actor, accel);
+    actor_playMoveAnim(actor, accel);
     if ((actor->unk22C & 8) && !(actor->unk1FC & 8)) {
         f32 a;
         f32 lim;
 
-        a = func_1505A630(sqrtf(distSqXZ), ty, 0) * 0.005493164f;
+        a = actor_getDirectionAngle(sqrtf(distSqXZ), ty, 0) * 0.005493164f;
         if (a > 180.0f) {
             a -= 360.0f;
         }
@@ -887,7 +887,7 @@ void func_15056B08(Actor *actor) {
     }
 }
 /* Plays the actor's movement animation (unk244) at a rate derived from its speed, or at `idleRate`. */
-void func_1505841C(Actor *actor, f32 idleRate) {
+void actor_playMoveAnim(Actor *actor, f32 idleRate) {
     AnimInstance *anim;
     f32 speed;
     f32 fade;
@@ -917,9 +917,9 @@ void func_1505841C(Actor *actor, f32 idleRate) {
     if (flags == 0xFF) {
         rate = 0.0f;
     }
-    func_1505E650(actor, actor->intel_animseq, rate, actor->unk1D0, 0.0f, 0.0f, 0);
+    actor_playAnim(actor, actor->intel_animseq, rate, actor->unk1D0, 0.0f, 0.0f, 0);
     if (actor->intel_animspd == 0xFF) {
-        fade = D_800418B0[D_800419A0][0];
+        fade = gMusicEventLevels[gLastMarkerChannel][0];
         if (fade >= 0.0f) {
             anim = actor->unk2D0;
             anim->frame[0] = (anim->numFrames[0] * (32768.0f - fade)) / 32768.0f;
@@ -928,7 +928,7 @@ void func_1505841C(Actor *actor, f32 idleRate) {
 }
 
 /* Per-frame update while the actor is stunned (stunned is the countdown; 255 = indefinitely). */
-void func_150585F0(Actor *actor, f32 decel) {
+void actor_updateStunned(Actor *actor, f32 decel) {
     ActorCtl *child;
     f32 yVel;
     s32 water;
@@ -939,7 +939,7 @@ void func_150585F0(Actor *actor, f32 decel) {
     s32 owner;
 
     decel = actor->unk109 * 0.1000000015f;
-    func_1505A3A8(0.0f, actor, 1.0f, decel, 0);
+    actor_accelerate(0.0f, actor, 1.0f, decel, 0);
     if (actor->unk1CC < 100000.0f) {
         actor->unk1CC = actor->ypos;
     }
@@ -958,7 +958,7 @@ void func_150585F0(Actor *actor, f32 decel) {
             actor->ygrav = 4.0f;
         }
     }
-    if (D_800BE616 == 0 || actor->type != 1) {
+    if (gIsMultiplayer == 0 || actor->type != 1) {
         actor->unk21C = 0;
     }
     stun = actor->stunned;
@@ -976,7 +976,7 @@ void func_150585F0(Actor *actor, f32 decel) {
                 child->matrix_physics = 0;
             }
             actor->unk10C = 0;
-            func_1505E874(dc_glbl_CharNum, actor);
+            actor_advanceReaction(dc_glbl_CharNum, actor);
         }
         if (actor->stunned == 0) {
             facing = actor->langle;
@@ -1005,14 +1005,14 @@ void func_150585F0(Actor *actor, f32 decel) {
                     angle ^= 0x8000;
                 }
                 actor->count2 = 10;
-                func_150599C8(actor, 12, angle);
+                actor_turnFacing(actor, 12, angle);
             }
         }
     }
 }
 
 /* Updates the actor's floor height (unk180) and pushes it out of walls, reacting to a wall hit. */
-void func_15058898(Actor *actor, f32 prevY) {
+void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
     f32 groundY;
     s32 hostIdx;
     s32 fastFloor;
@@ -1085,7 +1085,7 @@ void func_15058898(Actor *actor, f32 prevY) {
             }
             if (actor->noshove & 0x1000) {
                 /* bounce: reflect the moving angle about the push-out direction */
-                u16 angle = func_1505A630(actor->xpos - x, z - actor->zpos, 0);
+                u16 angle = actor_getDirectionAngle(actor->xpos - x, z - actor->zpos, 0);
 
                 actor->angle = ((angle - actor->angle) + angle) + 0x8000;
                 if (actor->type == 0x21) {
@@ -1099,7 +1099,7 @@ void func_15058898(Actor *actor, f32 prevY) {
 
                     actor->speed *= 0.8999999762f;
                     actor->langle = actor->angle;
-                    if (func_1505DADC(actor, &freeAngle, 0, actor->owner - 1, 20) != 0xFF) {
+                    if (actor_findTargetInCone(actor, &freeAngle, 0, actor->owner - 1, 20) != 0xFF) {
                         actor->angle = freeAngle;
                     }
                 }
@@ -1154,7 +1154,7 @@ void func_15058EA4(Actor *actor, f32 maxY, f32 gravityAbove, f32 minY, f32 gravi
 }
 
 /* Floats the actor on the water surface (unk118 + 9); `depth` in [0, 1) sets how low it sits. */
-void func_15058F24(Actor *actor, f32 depth, f32 arg2) {
+void actor_floatOnWater(Actor *actor, f32 depth, f32 arg2) {
     f32 tmp; // matching: one variable for the damping, offset and sink limit (IDO allocates it as one)
     f32 surfaceY;
     f32 lift;
@@ -1206,24 +1206,24 @@ void func_15058F24(Actor *actor, f32 depth, f32 arg2) {
 }
 
 /* Per-frame movement/physics step for a non-player actor. */
-void func_15059140(Actor *actor) {
+void actor_updatePhysics(Actor *actor) {
     f32 stepRate;
 
     stepRate = 0.5f;
     D_800CC268 = 0;
     if ((actor->carried == 0) || (actor->unk21C < 16)) {
         if (actor->unk223 != 8) {
-            func_15059C84(actor);
-            func_1505A770(actor);
+            actor_moveHorizontal(actor);
+            actor_applyGravity(actor);
         }
     }
-    func_1505D6F0(actor, dc_glbl_CharNum);
-    func_15055E50(actor, actor->family);
+    actor_resolveCollisions(actor, dc_glbl_CharNum);
+    actor_clampToZoneSet(actor, actor->family);
     if (actor->character_type == 8) {
         func_15056150(actor);
     }
     if (actor->carried < 100) {
-        func_15058898(actor, actor->old_ypos);
+        actor_updateFloorAndWalls(actor, actor->old_ypos);
     }
     if (actor->mvmt_control & 0x40000) {
         if (((actor->mvmt_control & 0x12000) != 0) || (D_800CC268 != 0)) {
@@ -1231,30 +1231,30 @@ void func_15059140(Actor *actor) {
         }
     }
     if (actor->unkB0 != 0) {
-        func_15058F24(actor, actor->unkB0 * 0.009999999776f, 1.0f);
+        actor_floatOnWater(actor, actor->unkB0 * 0.009999999776f, 1.0f);
     }
     if (actor->noshove & 0x20000) {
         func_15056258(actor);
     }
     if (actor->inwater != 0) {
-        func_15059444(actor);
+        actor_applyWaterCurrent(actor);
     }
     if (actor->character_type == 0xA) {
         actor->floorY = -5000.0f;
     }
     if ((actor->noshove & 0x180000) != 0) {
-        func_150511E8(actor);
+        actor_tiltToGround(actor);
     }
-    func_1505B5F8(actor, actor->floorY);
+    actor_landNonPlayer(actor, actor->floorY);
     if (((actor->mvmt_control & 0x1000) != 0) && (actor->shad < 0.200000003f)) {
-        func_15056B08(actor);
+        actor_updateChaseAi(actor);
     }
     if (actor->noshove & 0x80000) {
         stepRate = 0.150000006f;
     }
-    func_1505A250(0.0f, 0.0f, stepRate, &actor->ob_slopex, &actor->ob_slopey);
+    actor_stepVector2D(0.0f, 0.0f, stepRate, &actor->ob_slopex, &actor->ob_slopey);
     if (actor->doing_hit != 0) {
-        func_1505C7D8(actor, dc_glbl_CharNum);
+        actor_testAttack(actor, dc_glbl_CharNum);
     }
     if (actor->carried == 0) {
         if (D_800BE9A0 >= actor->unk10F) {
@@ -1276,18 +1276,18 @@ void func_15059140(Actor *actor) {
 }
 
 /* Eases the actor's push velocity (unk16C, unk170) toward `speed` along `angle`. */
-void func_150593C4(Actor *actor, u16 angle, f32 speed, f32 rate) {
+void actor_easePushVelocity(Actor *actor, u16 angle, f32 speed, f32 rate) {
     f32 x;
     f32 z;
     f32 y;
 
-    func_1505A184(angle, speed, 0.0f, &x, &z, &y);
+    actor_splitVelocity(angle, speed, 0.0f, &x, &z, &y);
     actor->ob_overslopex += (x - actor->ob_overslopex) * rate;
     actor->ob_overslopey += (z - actor->ob_overslopey) * rate;
 }
 
 /* Applies the current map's (level) water current to a swimming actor. */
-void func_15059444(Actor *actor) {
+void actor_applyWaterCurrent(Actor *actor) {
     s32 pathIdx;
     s32 id;
     s32 tmp;
@@ -1296,7 +1296,7 @@ void func_15059444(Actor *actor) {
 
     switch (level) {
         case 4:
-            func_150593C4(actor, 0x4000, 50.0f, 0.05999999865889549f);
+            actor_easePushVelocity(actor, 0x4000, 50.0f, 0.05999999865889549f);
             break;
         case 6:
             pathIdx = func_15083E0C(28);
@@ -1328,17 +1328,17 @@ void func_15059444(Actor *actor) {
     }
 
     if (pathIdx != -1) {
-        func_150611E8(actor, pathIdx);
+        actor_driftOnCurrent(actor, pathIdx);
     }
 }
 
-/* Per carry variant (see func_1505959C): the host's animation, its speed and the carried actor's reaction. */
+/* Per carry variant (see actor_attachToHost): the host's animation, its speed and the carried actor's reaction. */
 static s16 D_800860C0[] = { 0x00D5, 0x0114, 0x0017, 0x0288, 0x0034, 0x01FA };
 static f32 D_800860CC[] = { 3.0f, 1.0f, 1.0f, 1.0f, 1.5f, 1.0f };
 static u16 D_800860E4[] = { 0x000D, 0x000D, 0x0039, 0x000D, 0x000D, 0x000D };
 
 /* Attaches the actor to movement_obj[hostIdx] (grabbed/carried) and starts both actors' animations. */
-void func_1505959C(Actor *actor, s32 hostIdx) {
+void actor_attachToHost(Actor *actor, s32 hostIdx) {
     Game83300AnimEntry *anims;
     ActorAnim *animTable;
     s32 variant;
@@ -1364,17 +1364,17 @@ void func_1505959C(Actor *actor, s32 hostIdx) {
     if (actor->character_type == 0x3C) {
         variant = 4;
         movement_obj[hostIdx].lifting = 0;
-        movement_obj[hostIdx].angle = func_1505A630(actor->xpos - movement_obj[hostIdx].xpos, movement_obj[hostIdx].zpos - actor->zpos, 0);
+        movement_obj[hostIdx].angle = actor_getDirectionAngle(actor->xpos - movement_obj[hostIdx].xpos, movement_obj[hostIdx].zpos - actor->zpos, 0);
     }
     if (actor->character_type == 0x89) {
         variant = 5;
     }
-    func_1505E650(&movement_obj[hostIdx], D_800860C0[variant], D_800860CC[variant], 0.0f, 0.0f, 0.0f, 0);
+    actor_playAnim(&movement_obj[hostIdx], D_800860C0[variant], D_800860CC[variant], 0.0f, 0.0f, 0.0f, 0);
     actor->stunned = 0xFE;
     actor->stunnednum = 0;
-    actor->stunnedseq = func_1505E7CC(D_800860E4[variant], actor);
+    actor->stunnedseq = actor_findReaction(D_800860E4[variant], actor);
     actor->animseq.uh = 0xFFFF;
-    func_1505E874(dc_glbl_CharNum, actor);
+    actor_advanceReaction(dc_glbl_CharNum, actor);
     animTable = D_800D1588[actor->character_type];
     if (animTable != NULL) {
         anims = ANIM_HEADER(animTable)->reactions;
@@ -1391,8 +1391,8 @@ void func_1505959C(Actor *actor, s32 hostIdx) {
     }
 }
 
-/* Lets a free player in D_800CC268's mask grab the actor (see func_1505959C). */
-void func_150597FC(Actor *actor) {
+/* Lets a free player in D_800CC268's mask grab the actor (see actor_attachToHost). */
+void actor_checkGrab(Actor *actor) {
     s32 i;
     s32 mask;
     ActorCtl *movement;
@@ -1419,14 +1419,14 @@ void func_150597FC(Actor *actor) {
                 player->lifting = dc_glbl_CharNum + 100;
                 player->speed = 0.0f;
                 movement->unk18 = 0;
-                func_1505959C(actor, i);
+                actor_attachToHost(actor, i);
             }
         }
     }
 }
 
 /* Turns the facing angle (unk7A) toward targetAngle, limited per frame; returns the remaining gap >> 8. */
-u8 func_150599C8(Actor *actor, u8 turnRate, u16 targetAngle) {
+u8 actor_turnFacing(Actor *actor, u8 turnRate, u16 targetAngle) {
     s16 delta;
     s16 maxDelta;
     s16 minDelta;
@@ -1468,7 +1468,7 @@ u8 func_150599C8(Actor *actor, u8 turnRate, u16 targetAngle) {
 }
 
 /* Turns the moving angle (unk76) toward unk78 by at most maxStep; returns the gap before turning >> 8. */
-u8 func_15059B54(Actor *actor, u16 maxStep) {
+u8 actor_turnMoving(Actor *actor, u16 maxStep) {
     s16 delta;
     s16 maxDelta;
     s16 minDelta;
@@ -1514,7 +1514,7 @@ u8 func_15059B54(Actor *actor, u16 maxStep) {
 
 
 /* Applies one frame of horizontal movement (speed along unk76, plus push velocities), following the floor slope. */
-void func_15059C84(Actor *actor) {
+void actor_moveHorizontal(Actor *actor) {
     f32 x;
     f32 z;
     f32 y;
@@ -1572,7 +1572,7 @@ void func_15059C84(Actor *actor) {
         angle = actor->langle;
     }
     actor->unk1F4 = speed;
-    func_1505A184(angle, speed, x, &x, &z, &y);
+    actor_splitVelocity(angle, speed, x, &x, &z, &y);
     x += actor->ob_slopex + actor->ob_overslopex;
     z += actor->ob_slopey + actor->ob_overslopey;
     if (actor->inwater == 10) {
@@ -1608,7 +1608,7 @@ void func_15059C84(Actor *actor) {
     actor->ypos += y;
 }
 /* Splits `speed` (halved) along yaw `angle` and pitch `pitch` (degrees) into x/z/y components. */
-void func_1505A184(u16 angle, f32 speed, f32 pitch, f32 *outX, f32 *outZ, f32 *outY) {
+void actor_splitVelocity(u16 angle, f32 speed, f32 pitch, f32 *outX, f32 *outZ, f32 *outY) {
     f32 sinYaw;
     f32 yaw;
     f32 cosYaw;
@@ -1624,7 +1624,7 @@ void func_1505A184(u16 angle, f32 speed, f32 pitch, f32 *outX, f32 *outZ, f32 *o
     *outZ = -cosYaw * speed;
 }
 /* Steps the 2D vector (*x, *z) toward (targetX, targetZ) by rate * dt, without overshooting. */
-void func_1505A250(f32 targetX, f32 targetZ, f32 rate, f32 *x, f32 *z) {
+void actor_stepVector2D(f32 targetX, f32 targetZ, f32 rate, f32 *x, f32 *z) {
     f32 dx = targetX - *x, dz = targetZ - *z, mag, stepX, stepZ;
 
     if (dx == 0.0f) {
@@ -1661,7 +1661,7 @@ void func_1505A250(f32 targetX, f32 targetZ, f32 rate, f32 *x, f32 *z) {
 }
 
 /* Accelerates/decelerates the actor's speed toward targetSpeed; player rates are scaled in water and other states. */
-void func_1505A3A8(f32 targetSpeed, Actor *actor, f32 accel, f32 decel, u8 turnDiff) {
+void actor_accelerate(f32 targetSpeed, Actor *actor, f32 accel, f32 decel, u8 turnDiff) {
     accel *= D_800D1550;
     decel *= D_800D1550;
     if (D_800CC27C != 0 && actor->shad < 5.0f && actor->type != 0x1E) {
@@ -1722,7 +1722,7 @@ void func_1505A3A8(f32 targetSpeed, Actor *actor, f32 accel, f32 decel, u8 turnD
 }
 
 /* Analog stick deflection of a controller pad, scaled and capped at 35. */
-f32 func_1505A5CC(OSContPad *pad) {
+f32 actor_getStickDeflection(OSContPad *pad) {
     f32 x, y;
     f32 mag;
 
@@ -1741,12 +1741,12 @@ f32 func_1505A5CC(OSContPad *pad) {
 }
 
 /* Binary angle (0x10000 = full turn) of the direction (x, z); the third argument is unused. */
-u16 func_1505A630(f32 x, f32 z, s32 unused) {
+u16 actor_getDirectionAngle(f32 x, f32 z, s32 unused) {
     return (u16)(func_150484A0(-x, z) * 10430.37793f) + 16384;
 }
 
 /* Horizontal (xz) distance between two actors. */
-f32 func_1505A6F8(Actor *a, Actor *b) {
+f32 actor_distanceXZ(Actor *a, Actor *b) {
     f32 x, z;
 
     x = a->xpos - b->xpos;
@@ -1757,7 +1757,7 @@ f32 func_1505A6F8(Actor *a, Actor *b) {
 }
 
 /* 3D distance between two actors. */
-f32 func_1505A72C(Actor *a, Actor *b) {
+f32 actor_distance3D(Actor *a, Actor *b) {
     f32 x, y, z;
 
     x = a->xpos - b->xpos;
@@ -1770,7 +1770,7 @@ f32 func_1505A72C(Actor *a, Actor *b) {
 }
 
 /* Applies gravity: in the air it integrates in 0.1 steps; on the ground in a single step. Fall speed is capped at 500. */
-void func_1505A770(Actor *actor) {
+void actor_applyGravity(Actor *actor) {
     f32 velocity;
     f32 decrement;
     s32 count;
@@ -1797,7 +1797,7 @@ void func_1505A770(Actor *actor) {
 // a big one, but could be ok
 
 /* Lands the player on floorY: water entry, fall damage/death, landing animations and bounce. */
-void func_1505A9AC(Actor *actor, f32 floorY) {
+void actor_landPlayer(Actor *actor, f32 floorY) {
     f32 dist;
     f32 deathFall;
     u8 bounce;
@@ -1871,7 +1871,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
             if (((actor->floorMaterial >> 12) & 0xF) == 1) {
                 if (level == 0x14) {
                     func_1513783C(actor, 0xFF, 1);
-                    func_1507CD64(actor, 8);
+                    actor_kill(actor, 8);
                     return;
                 }
                 func_15055C88(actor);
@@ -1947,7 +1947,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                     }
                 }
                 if (killed == 0) {
-                    func_1505E650(actor, anim, speed, 2.0f, 6.0f, 0.0f, 0);
+                    actor_playAnim(actor, anim, speed, 2.0f, 6.0f, 0.0f, 0);
                 }
                 actor->stunned = 0;
                 actor->count5 = 0xFF;
@@ -1967,7 +1967,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                 if (killed == 0) {
                     func_15174690(dc_glbl_CharNum, 0, 0x1F, 0, 0x199, 4, 0xAA, 0xFF, 0);
                 } else {
-                    func_1507CD64(actor, 8);
+                    actor_kill(actor, 8);
                 }
                 return;
             }
@@ -2002,12 +2002,12 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                     actor->speed = 0.0f;
                     actor->count5 = 0xFF;
                     landState = 0xFF;
-                    func_1505E650(actor, 0x4B, 1.0f, 2.0f, 0.0f, 0.0f, 0);
+                    actor_playAnim(actor, 0x4B, 1.0f, 2.0f, 0.0f, 0.0f, 0);
                     if (dc_glbl_CharNum < 4) {
                         actor->mv->unk57 = 1;
                     }
                     if (found == 0) {
-                        func_15060A9C(0x19, actor);
+                        actor_playUntrackedSound(0x19, actor);
                     }
                 } else {
                     s32 landAnim;
@@ -2058,7 +2058,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                         }
                     }
                     if ((landAnim != 0) && !(actor->unk100 & 0x20)) {
-                        func_1505E650(actor, landAnim, 1.0f, 2.0f, 0.0f, 0.0f, 0);
+                        actor_playAnim(actor, landAnim, 1.0f, 2.0f, 0.0f, 0.0f, 0);
                     }
                     if (!(actor->unk100 & 0x80)) {
                         actor->unk100 = 1;
@@ -2125,7 +2125,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
 }
 
 /* Lands a non-player actor on floorY: fall damage, landing bounce/sound, and the fall-off reaction (unk252). */
-void func_1505B5F8(Actor *actor, f32 floorY) {
+void actor_landNonPlayer(Actor *actor, f32 floorY) {
     f32 prevHeight;
     f32 y;
     f32 factor;
@@ -2143,9 +2143,9 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
             animKind = actor->unk252;
             actor->stunned = 0xFE;
             actor->stunnednum = 0;
-            actor->stunnedseq = func_1505E7CC(animKind, actor);
+            actor->stunnedseq = actor_findReaction(animKind, actor);
             actor->animseq.uh = 0xFF;
-            func_1505E874(dc_glbl_CharNum, actor);
+            actor_advanceReaction(dc_glbl_CharNum, actor);
             actor->ypos = actor->old_ypos;
         }
         y = actor->ypos;
@@ -2209,7 +2209,7 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
  * Applies a hit to `victim`: base[index] holds the attack's defaults and hit[index] the reaction chosen
  * for this victim. Sets knockback, damage and the reaction animation, and releases anything it carried.
  */
-void func_1505B9C4(Actor *attacker, Actor *victim, const HitReaction *base, const HitReaction *hit, u8 index,
+void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, const HitReaction *hit, u8 index,
                    s32 victimSlot, u8 damageMask) {
     u8 reaction;
     s32 slot;
@@ -2233,7 +2233,7 @@ void func_1505B9C4(Actor *attacker, Actor *victim, const HitReaction *base, cons
     if (!(hit[index].unkF & 0x40)) {
         victim->angle = attacker->angle + (hit[index].unk10 << 8);
         if (base[index].unk24 & 0x10) {
-            victim->angle = func_1505A630(victim->xpos - attacker->xpos,
+            victim->angle = actor_getDirectionAngle(victim->xpos - attacker->xpos,
                                           attacker->zpos - victim->zpos, 0);
         }
         if (attacker->character_type == 0x44) {
@@ -2258,9 +2258,9 @@ void func_1505B9C4(Actor *attacker, Actor *victim, const HitReaction *base, cons
     if (victim->type == 1) {
         {
             extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
-            savedActor = D_800D154C;
+            savedActor = gCurrentActor;
             savedIdx = dc_glbl_CharNum;
-            D_800D154C = victim;
+            gCurrentActor = victim;
             dc_glbl_CharNum = (victim - movement_obj);
             movement = movement_obj[dc_glbl_CharNum].mv;
             if (movement->transport != 2) {
@@ -2268,7 +2268,7 @@ void func_1505B9C4(Actor *attacker, Actor *victim, const HitReaction *base, cons
             }
         }
         func_1506AD30(victim, 800.0f, 1, savedIdx);
-        D_800D154C = savedActor;
+        gCurrentActor = savedActor;
         dc_glbl_CharNum = savedIdx;
         victim->noshove &= 0xFEFF7FFF;
         victim->mv->ladder = 0;
@@ -2285,7 +2285,7 @@ void func_1505B9C4(Actor *attacker, Actor *victim, const HitReaction *base, cons
             other = &movement_obj[(u8)v];
 
             if (((0x8A != other->character_type) && (0x23 != other->character_type)) || (victim->energy == 0) ||
-                ((D_800BE616 != 0) && (victim->yspd > 30.0f))) {
+                ((gIsMultiplayer != 0) && (victim->yspd > 30.0f))) {
                 if (v) {} // matching: extra use of v before it is reused
                 v = 0;
                 if (0x8A == other->character_type) {
@@ -2315,7 +2315,7 @@ void func_1505B9C4(Actor *attacker, Actor *victim, const HitReaction *base, cons
     if (reaction != 0x27) {
         D_80086694[v](attacker, victim, &reaction);
     }
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         tmp = reaction;
         v = attacker->owner;
         other = v != 0 ? &movement_obj[v - 1] : attacker;
@@ -2333,18 +2333,18 @@ void func_1505B9C4(Actor *attacker, Actor *victim, const HitReaction *base, cons
     if (base[index].unk4 != 0) {
         D_800D1580 = base[index].unk4;
         if (func_1506E46C(victim, &D_800D1580, 0) != 0) {
-            func_10010630(D_800D1580, victim, 0x6D60, 0x12C, 0x708);
+            sound_playActorUntracked(D_800D1580, victim, 0x6D60, 0x12C, 0x708);
         }
     } else {
         if (hit[index].unk4 != 0) {
             D_800D1580 = hit[index].unk4;
             if (func_1506E46C(victim, &D_800D1580, 0) != 0) {
-                func_10010630(D_800D1580, victim, 0x6D60, 0x12C, 0x708);
+                sound_playActorUntracked(D_800D1580, victim, 0x6D60, 0x12C, 0x708);
             }
         }
     }
     attacker->ivehitit = 60;
-    if ((D_800BE616 == 0) || (victim->type != 1)) {
+    if ((gIsMultiplayer == 0) || (victim->type != 1)) {
         victim->unk21C = 0;
         if (base[index].unk24 & 0x100) {
             victim->scriptCmd = NULL;
@@ -2369,9 +2369,9 @@ void func_1505B9C4(Actor *attacker, Actor *victim, const HitReaction *base, cons
             }
             victim->stunned = 0xFE;
             victim->stunnednum = 0;
-            victim->stunnedseq = func_1505E7CC(reaction, victim);
+            victim->stunnedseq = actor_findReaction(reaction, victim);
             victim->animseq.uh = 0xFFFF;
-            func_1505E874(slot, victim);
+            actor_advanceReaction(slot, victim);
             if (base[index].unk24 & 0x200) {
                 victim->unk10B |= 0x20;
             }
@@ -2399,8 +2399,8 @@ void func_1505B9C4(Actor *attacker, Actor *victim, const HitReaction *base, cons
 }
 
 /* How far (binary angle, absolute) the attacker is from the victim's facing direction. */
-s16 func_1505C140(Actor *attacker, Actor *victim) {
-    s16 ret = func_1505A630(attacker->xpos - victim->xpos, victim->zpos - attacker->zpos, 0);
+s16 actor_getAttackAngle(Actor *attacker, Actor *victim) {
+    s16 ret = actor_getDirectionAngle(attacker->xpos - victim->xpos, victim->zpos - attacker->zpos, 0);
     ret -= victim->langle;
 
     if (ret < 0) {
@@ -2410,7 +2410,7 @@ s16 func_1505C140(Actor *attacker, Actor *victim) {
 }
 
 /* The actor type's hit-reaction table (stored before its animation table), or the default one. */
-const HitReaction *func_1505C1A4(Actor *actor) {
+const HitReaction *actor_getHitReactions(Actor *actor) {
     const HitReaction **slot;
     const HitReaction *ret;
 
@@ -2425,10 +2425,10 @@ const HitReaction *func_1505C1A4(Actor *actor) {
 
 /*
  * Resolves a hit on `victim` through the victim's reaction rules (unk239): may redirect to another
- * table entry, cancel the hit or handle it specially; otherwise applies it with func_1505B9C4.
+ * table entry, cancel the hit or handle it specially; otherwise applies it with actor_applyHit.
  * Returns hitMask with the victim's bit set when the hit landed.
  */
-s32 func_1505C1E4(Actor *attacker, Actor *victim, const HitReaction *table, s32 index, s32 victimSlot, s32 hitMask, s32 damageMask) {
+s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s32 index, s32 victimSlot, s32 hitMask, s32 damageMask) {
     s32 i;
     u8 done;
     u8 kind;
@@ -2451,12 +2451,12 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, const HitReaction *table, s32 
             if (((type & 0x80) == 0 && kind == rules[i].unk1) || ((type & 0x80) != 0 && kind != rules[i].unk1)) {
                 type &= 0x7F;
                 if (rules[i].unk0 == 1) {
-                    if (func_1505C140(attacker, victim) > 0x4000) {
+                    if (actor_getAttackAngle(attacker, victim) > 0x4000) {
                         type = 0xFF;
                     }
                 }
                 if (rules[i].unk0 == 2) {
-                    if (func_1505C140(attacker, victim) < 0x4000) {
+                    if (actor_getAttackAngle(attacker, victim) < 0x4000) {
                         type = 0xFF;
                     }
                 }
@@ -2467,7 +2467,7 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, const HitReaction *table, s32 
                     type = 0xFF;
                 }
                 if (type < 2) {
-                    angle = func_1505A630(attacker->xpos - victim->xpos, victim->zpos - attacker->zpos, 0) - victim->langle + 0x4000;
+                    angle = actor_getDirectionAngle(attacker->xpos - victim->xpos, victim->zpos - attacker->zpos, 0) - victim->langle + 0x4000;
                     if ((u16)(angle >> 15) == type) {
                         index = rules[i].unk3;
                     }
@@ -2572,7 +2572,7 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, const HitReaction *table, s32 
                     if (victim->unkFC != 0) {
                         sound = victim->unkFC;
                         if (func_1506E46C(attacker, &sound, 1) != 0) {
-                            func_15060B04(sound, victim, 0x5DC0);
+                            actor_playUntrackedSoundRate(sound, victim, 0x5DC0);
                         }
                     }
                     hitMask |= 1 << (victimSlot + 0x1F);
@@ -2586,13 +2586,13 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, const HitReaction *table, s32 
         return hitMask;
     }
     i = victimSlot;
-    func_1505B9C4(attacker, victim, table, entry, index, i, damageMask);
+    actor_applyHit(attacker, victim, table, entry, index, i, damageMask);
     hitMask |= 1 << (i + 0x1F);
     return hitMask;
 }
 
 /* Tests the attacker's active attack (unkD0) against every other actor and applies the hits; returns the hit mask. */
-s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
+s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
     s32 i;
     s32 slotEnd;
     s32 attackIdx;
@@ -2653,7 +2653,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
         return 0;
     }
     attackIdx = attacker->doing_hit - 1;
-    hits = func_1505C1A4(attacker);
+    hits = actor_getHitReactions(attacker);
     if (hits[attackIdx].unk24 & 0x80) {
         // matching: byte-offset form (not &hits[attackIdx]) keeps IDO's addu operand order
         hit = (const HitReaction *)((const u8 *)hits + attackIdx * sizeof(HitReaction));
@@ -2662,7 +2662,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
         hit = (const HitReaction *)((const u8 *)hits + attackIdx * sizeof(HitReaction));
         dist = hit->unkA;
         dist *= attacker->scale_xz / 0.125f;
-        func_1505A184((hit->unk9 << 8) + attacker->langle, dist, 0.0f, &x, &z, &y);
+        actor_splitVelocity((hit->unk9 << 8) + attacker->langle, dist, 0.0f, &x, &z, &y);
         x += attacker->xpos;
         y += attacker->ypos;
         z += attacker->zpos;
@@ -2696,7 +2696,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
             dx = victim->xpos - attacker->xpos;
             dz = victim->zpos - attacker->zpos;
             if (victim->unkD8 != 0 || victim->unkDA != 0) {
-                dx += func_1505D34C(victim->theta, victim->unkDA, victim->unkD8, 1.0f, &offZ);
+                dx += actor_rotateOffset(victim->theta, victim->unkDA, victim->unkD8, 1.0f, &offZ);
                 dz += offZ;
             }
             rx = (attacker->theta - 90.0f) * 0.01745329238f;
@@ -2723,7 +2723,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
             dx = x - victim->xpos;
             dz2 = z - victim->zpos;
             if (victim->unkD8 != 0 || victim->unkDA != 0) {
-                dx -= func_1505D34C(victim->theta, victim->unkDA, victim->unkD8, 1.0f, &offZ2);
+                dx -= actor_rotateOffset(victim->theta, victim->unkDA, victim->unkD8, 1.0f, &offZ2);
                 dz2 -= offZ2;
             }
             {
@@ -2746,7 +2746,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
                 if (attacker->attachments != NULL) {
                     pos = *(Vec3f *)attacker->attachments; // the first attachment's first 12 bytes
                 } else {
-                    func_1507C3E0(attacker, &halfHeightRaw, 0, 0);
+                    actor_computeSize(attacker, &halfHeightRaw, 0, 0);
                     pos.x = attacker->xpos;
                     pos.y = attacker->ypos + (halfHeightRaw >> 1);
                     pos.z = attacker->zpos;
@@ -2771,7 +2771,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
             D_800CC2C0 = x;
             D_800CC2C4 = y;
             D_800CC2C8 = z;
-            ret = func_1505C1E4(attacker, victim, hits, attackIdx, i, ret, 0xF);
+            ret = actor_resolveHit(attacker, victim, hits, attackIdx, i, ret, 0xF);
             attackIdx = attacker->doing_hit - 1;
         }
     }
@@ -2795,7 +2795,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
 }
 
 /* Hits `victim` with a scripted attack from the dummy attacker movement_obj[25]; flags & 0xFF picks the entry. */
-s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
+s32 actor_hitScripted(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
     Actor *dummy;
     s32 ret;
     s32 slot;
@@ -2823,15 +2823,15 @@ s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
     dummy->angle = angle;
     dummy->langle = angle;
     if (flags & 0x10000) {
-        table = func_1505C1A4(D_800D154C);
+        table = actor_getHitReactions(gCurrentActor);
     }
 
     slot = victim - movement_obj;
     ret = 1 << slot;
     if (flags & 0x80000) {
-        ret = func_1505C1E4(dummy, victim, table, flags & 0xFF, slot + 1, 0, 7);
+        ret = actor_resolveHit(dummy, victim, table, flags & 0xFF, slot + 1, 0, 7);
     } else {
-        func_1505B9C4(dummy, victim, table, table, flags & 0xFF, slot + 1, 7);
+        actor_applyHit(dummy, victim, table, table, flags & 0xFF, slot + 1, 7);
     }
     return ret;
 }
@@ -2840,15 +2840,15 @@ s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
  * Runs attack attackId from point (x, y, z) through the dummy attacker movement_obj[25]: sets its position,
  * owner, carried (the slot the line of sight skips), angle, attachments (the line-of-sight origin), unk114
  * (timer), doing_hit (attack + 1) and the xz/y scales.
- * Declared int but returns no value, in the pre-ANSI way: func_150E1570 uses what func_1505C7D8 leaves in v0.
+ * Declared int but returns no value, in the pre-ANSI way: func_150E1570 uses what actor_testAttack leaves in v0.
  */
-s32 func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin) {
+s32 actor_runAttackAt(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin) {
     Actor *dummy;
     s32 savedIdx;
 
     savedIdx = dc_glbl_CharNum;
     dummy = &movement_obj[25];
-    func_1505F188(dummy);
+    actor_clearSlot(dummy);
     dummy->xpos = x;
     dummy->ypos = y;
     dummy->zpos = z;
@@ -2861,12 +2861,12 @@ s32 func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, 
     dummy->doing_hit = (attackId & 0xFFFF) + 1;
     dummy->scale_xz = 0.5f;
     dummy->scale_y = 0.5f;
-    func_1505C7D8(dummy, 25);
+    actor_testAttack(dummy, 25);
     dc_glbl_CharNum = savedIdx;
 }
 
 /* Starts the knockback reaction D_8009A6D8[entryIdx] on the actor. */
-void func_1505D2B8(Actor *actor, u8 entryIdx) {
+void actor_startKnockback(Actor *actor, u8 entryIdx) {
     const HitReaction *entry;
 
     entry = &D_8009A6D8[entryIdx];
@@ -2875,13 +2875,13 @@ void func_1505D2B8(Actor *actor, u8 entryIdx) {
     actor->ygrav = entry->gravity;
     actor->stunned = 0xFE;
     actor->stunnednum = 0;
-    actor->stunnedseq = func_1505E7CC(actor->unk10E & 0x7F, actor);
+    actor->stunnedseq = actor_findReaction(actor->unk10E & 0x7F, actor);
     actor->unk10E = 0xFF;
-    func_1505E874(dc_glbl_CharNum, actor);
+    actor_advanceReaction(dc_glbl_CharNum, actor);
 }
 
 /* Rotates the offset (a, b) by angleDeg - 90 degrees (after scaling); returns x, writes z. */
-f32 func_1505D34C(f32 angleDeg, f32 a, f32 b, f32 scale, f32 *outZ) {
+f32 actor_rotateOffset(f32 angleDeg, f32 a, f32 b, f32 scale, f32 *outZ) {
     f32 sinA;
     f32 cosA;
     f32 rad;
@@ -2899,7 +2899,7 @@ f32 func_1505D34C(f32 angleDeg, f32 a, f32 b, f32 scale, f32 *outZ) {
 
 
 /* Pushes the actor out of `other` along (nx, ny, nz) unless the other one is lighter. */
-void func_1505D408(Actor *actor, Actor *other, f32 nx, f32 ny, f32 nz, f32 distSq, f32 minDist, s32 otherSlot) {
+void actor_pushOut(Actor *actor, Actor *other, f32 nx, f32 ny, f32 nz, f32 distSq, f32 minDist, s32 otherSlot) {
     f32 dist;
     f32 invDist;
     f32 pushFactor;
@@ -2957,7 +2957,7 @@ end: // matching: a jump to the shared epilogue, not an early return
 }
 
 /* Pushes the actor out of an extra collision cylinder attached to `other` (offset in other's frame). */
-void func_1505D5D0(Actor *actor, Actor *other, f32 x, f32 y, f32 z, f32 ratio, f32 radius, s32 otherSlot,
+void actor_pushOutCylinder(Actor *actor, Actor *other, f32 x, f32 y, f32 z, f32 ratio, f32 radius, s32 otherSlot,
                    f32 extraRadius, f32 extraHeight, f32 extraY, f32 offsetA, f32 offsetB) {
     f32 offsetX;
     f32 dx;
@@ -2966,7 +2966,7 @@ void func_1505D5D0(Actor *actor, Actor *other, f32 x, f32 y, f32 z, f32 ratio, f
     f32 distSq;
     f32 sumRadius;
 
-    offsetX = func_1505D34C(other->theta, offsetA, offsetB, other->scale_xz, &offsetB);
+    offsetX = actor_rotateOffset(other->theta, offsetA, offsetB, other->scale_xz, &offsetB);
     extraRadius *= other->scale_xz;
     extraHeight *= other->scale_y;
     dx = x - (other->xpos + offsetX);
@@ -2976,11 +2976,11 @@ void func_1505D5D0(Actor *actor, Actor *other, f32 x, f32 y, f32 z, f32 ratio, f
     sumRadius = radius + extraRadius;
     distSq = ((dx * dx) + (dy * dy)) + (dz * dz);
     if (distSq < (sumRadius * sumRadius)) {
-        func_1505D408(actor, other, dx, dy, dz, distSq, sumRadius, otherSlot);
+        actor_pushOut(actor, other, dx, dy, dz, distSq, sumRadius, otherSlot);
     }
 }
 /* Resolves collisions between the actor's body cylinder (bodyRadius/bodyOffsetY/unkEC) and every other actor's. */
-void func_1505D6F0(Actor *actor, s32 selfIdx) {
+void actor_resolveCollisions(Actor *actor, s32 selfIdx) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -3045,7 +3045,7 @@ void func_1505D6F0(Actor *actor, s32 selfIdx) {
             dz = z - other->zpos;
             dy = y - (other->ypos + other->bodyOffsetY);
             dy *= (height + other->unkEC) * 0.5f;
-            if ((D_800BE616 != 0) && (((dx * dx) + (dy * dy) + (dz * dz)) < 30000.0f) &&
+            if ((gIsMultiplayer != 0) && (((dx * dx) + (dy * dy) + (dz * dz)) < 30000.0f) &&
                 (actor->type == 1) && (other->type == 1) &&
                 (actor->team != other->team)) {
                 movement = actor->mv;
@@ -3055,13 +3055,13 @@ void func_1505D6F0(Actor *actor, s32 selfIdx) {
             }
             distSq = (dx * dx) + (dy * dy) + (dz * dz);
             if (distSq < (sumRadius * sumRadius)) {
-                func_1505D408(actor, other, dx, dy, dz, distSq, sumRadius, i);
+                actor_pushOut(actor, other, dx, dy, dz, distSq, sumRadius, i);
             }
             if (other->character_type == 0x34) {
                 if (other->unk251 == 2) {
-                    func_1505D5D0(actor, other, x, y, z, height, radius, i, 120.0f, 250.0f, 120.0f, -130.0f, 0.0f);
+                    actor_pushOutCylinder(actor, other, x, y, z, height, radius, i, 120.0f, 250.0f, 120.0f, -130.0f, 0.0f);
                 } else {
-                    func_1505D5D0(actor, other, x, y, z, height, radius, i, 130.0f, 140.0f, 250.0f, -50.0f, 0.0f);
+                    actor_pushOutCylinder(actor, other, x, y, z, height, radius, i, 130.0f, 140.0f, 250.0f, -50.0f, 0.0f);
                 }
             }
         }
@@ -3072,7 +3072,7 @@ void func_1505D6F0(Actor *actor, s32 selfIdx) {
  * Picks the nearest visible living actor inside a cone around the actor's facing (halfCone wide,
  * pitch +-0x10 around `pitch`), skipping skipIdx. Returns its index (0xFF if none), angle in *outAngle.
  */
-u8 func_1505DADC(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone) {
+u8 actor_findTargetInCone(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone) {
     u8 bestStunned;
     u8 i;
     u16 angle;
@@ -3102,7 +3102,7 @@ u8 func_1505DADC(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone)
             dist = func_1505DF10(actor, i, &angle, &distXZ, &dy, 0);
             if (((dist < best) || ((other->stunned == 0) && (bestStunned != 0))) &&
                 ((u8)(((angle - actor->langle) >> 8) + halfCone) < (halfCone * 2)) &&
-                ((u8)(((u8)(func_1505A630(sqrtf(distXZ), -dy, 0) >> 8) - pitch) + 0x10) < 0x20)) {
+                ((u8)(((u8)(actor_getDirectionAngle(sqrtf(distXZ), -dy, 0) >> 8) - pitch) + 0x10) < 0x20)) {
                 if ((func_150AC9C0(actor->xpos, actor->ypos + 80.0f, actor->zpos,
                                    movement_obj[i].xpos - actor->xpos,
                                    movement_obj[i].ypos - actor->ypos,
@@ -3156,7 +3156,7 @@ f32 func_1505DF10(Actor *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ, f3
     dy = actor->ypos - other->ypos;
     dz = actor->zpos - other->zpos;
     *outDy = dy;
-    *outAngle = func_1505A630(dx, dz, 0);
+    *outAngle = actor_getDirectionAngle(dx, dz, 0);
     dx = dx * dx;
     dy = dy * dy;
     dz = dz * dz;
@@ -3165,7 +3165,7 @@ f32 func_1505DF10(Actor *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ, f3
 }
 
 /* Stops the actor's animation and clears its playback state. */
-void func_1505DFDC(Actor *actor) {
+void actor_stopAnim(Actor *actor) {
     s32 id;
     AnimInstance *state;
     u16 *p;
@@ -3176,7 +3176,7 @@ void func_1505DFDC(Actor *actor) {
         id = actor->character_type;
         state->frameRom[0] = 0;
         bzero(state->header, sizeof(state->header));
-        p = &D_800C4ED0[id];
+        p = &gModelBoneCounts[id];
         state->header[0][1] = *p + 1;
         state->header[1][1] = *p + 1;
         state->frameBuf[0] = NULL;
@@ -3185,7 +3185,7 @@ void func_1505DFDC(Actor *actor) {
 }
 
 /* Saves the current animation as the previous one, to blend from. */
-void func_1505E060(AnimInstance *state) {
+void actor_saveBlendAnim(AnimInstance *state) {
     state->anim[1] = state->anim[0];
     state->frame[1] = state->frame[0];
     state->speed[1] = state->speed[0];
@@ -3201,7 +3201,7 @@ void func_1505E060(AnimInstance *state) {
  * Starts animation `anim` (entry `animEntry`) on a playback state, or only updates its speed when it is
  * already playing. `actor` may be NULL for non-actor users; blendFrames >= 1 blends from the old one.
  */
-void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, s32 restart, s32 anim,
+void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, s32 restart, s32 anim,
                    s32 bank, f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000) {
     s32 index;
     s32 changed;
@@ -3301,7 +3301,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, 
             s32 size = (dataSize + 0xF) & ~0xF;
 
             if (dataSize == 0) {
-                func_1505DFDC(actor);
+                actor_stopAnim(actor);
                 return;
             }
             if (size < 200) {
@@ -3363,8 +3363,8 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, 
         func_150627D4(actor);
     }
 }
-/* Starts animation `anim` of the actor's type (see func_1505E0C4); ignored while a cutscene holds the actor. */
-void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 arg5, s32 flag8000) {
+/* Starts animation `anim` of the actor's type (see actor_startAnimState); ignored while a cutscene holds the actor. */
+void actor_playAnim(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 arg5, s32 flag8000) {
     ActorAnim *animTable;
     s32 idx;
     u16 *entry;
@@ -3377,15 +3377,15 @@ void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 a
     if (actor->character_type == 0xFF) {
         return;
     }
-    if (D_800C5A90[actor->character_type] == 0) {
+    if (gModelAnimCounts[actor->character_type] == 0) {
         return;
     }
     data = actor->unk2D0;
     if (data == NULL) {
         return;
     }
-    if (D_800C5A90[actor->character_type] != 0) {
-        if (anim >= D_800C5A90[actor->character_type]) {
+    if (gModelAnimCounts[actor->character_type] != 0) {
+        if (anim >= gModelAnimCounts[actor->character_type]) {
             return;
         }
     } else {
@@ -3393,30 +3393,30 @@ void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 a
     }
     animTable = D_800D1588[idx];
     if (animTable == NULL) {
-        func_1505DFDC(actor);
+        actor_stopAnim(actor);
         return;
     }
-    if (anim < D_800C5A90[idx]) {
+    if (anim < gModelAnimCounts[idx]) {
         if (animTable[0].unk0 != 999) {
             entry = ((u16 (*)[4])animTable)[anim]; // matching: indexing a u16[4] row view puts the base first in the addu
             animTable = NULL; // matching: dead store and do-while(0) shape the block like the original
             do {
                 if (entry[0] != 999) {
                     if (entry[0] >= 30000) {
-                        func_1505DFDC(actor);
+                        actor_stopAnim(actor);
                         return;
                     }
                     if (actor->unk2FF == 0) {
                         blend = 0.0f;
                     }
-                    func_1505E0C4(actor, entry, data, 0, 0, anim, 0, speed, blend, arg4, arg5, flag8000);
+                    actor_startAnimState(actor, entry, data, 0, 0, anim, 0, speed, blend, arg4, arg5, flag8000);
                 }
             } while (0);
         }
     }
 }
 /* Index of the actor type's reaction entry of the given kind (0 if there is none). */
-u32 func_1505E7CC(s32 kind, Actor *actor) {
+u32 actor_findReaction(s32 kind, Actor *actor) {
     s32 id;
     ActorAnim *animTable;
     u32 count;
@@ -3460,7 +3460,7 @@ u32 func_1505E7CC(s32 kind, Actor *actor) {
  * Advances the actor's reaction sequence (entry unk106, step unk105): plays the next step's animation
  * and stun time, starts the death animation when it ends with no health left, or ends the reaction.
  */
-void func_1505E874(s32 sourceIdx, Actor *actor) {
+void actor_advanceReaction(s32 sourceIdx, Actor *actor) {
     ActorAnim *ptr;
     Game83300AnimEntry *table;
     f32 animSpeed;
@@ -3493,9 +3493,9 @@ void func_1505E874(s32 sourceIdx, Actor *actor) {
             sound = table[anim].sound;
             if (func_1506E46C(actor, &sound, 1) != 0) {
                 if (sound != 0x33) {
-                    func_15060A30(sound, actor);
+                    actor_playSound(sound, actor);
                 } else {
-                    func_15060B04(sound, actor, 0x5DC0);
+                    actor_playUntrackedSoundRate(sound, actor, 0x5DC0);
                 }
             }
         }
@@ -3573,7 +3573,7 @@ void func_1505E874(s32 sourceIdx, Actor *actor) {
                             break;
                     }
                 }
-                func_1507CD64(actor, deathKind);
+                actor_kill(actor, deathKind);
                 actor->stunnednum = 3;
                 return;
             }
@@ -3611,11 +3611,11 @@ void func_1505E874(s32 sourceIdx, Actor *actor) {
             actor->noshove &= 0xFEFFFDFF;
         }
     } else {
-        func_1505E650(actor, anim, animSpeed, blend, 0.0f, 0.0f, 0);
+        actor_playAnim(actor, anim, animSpeed, blend, 0.0f, 0.0f, 0);
     }
 }
 /* Allocates an actor slot: a free one, else one in state 0x27 is released and reused. Returns it cleared. */
-Actor *func_1505ED34(void) {
+Actor *actor_alloc(void) {
     s32 i;
     Actor *ptr;
 
@@ -3628,7 +3628,7 @@ Actor *func_1505ED34(void) {
 
         if (i != 25) {
             if (ptr->type != 0) {
-                func_15060F28(ptr, 0);
+                actor_remove(ptr, 0);
             }
         }
     }
@@ -3639,23 +3639,23 @@ Actor *func_1505ED34(void) {
 
         if (i != 25) {
             if (ptr->type != 0) {
-                func_15060F28(ptr, 0);
+                actor_remove(ptr, 0);
             }
         }
     }
 
     if (i == 25) {
         if (ptr->type != 0) {
-            func_15060F28(ptr, 0);
+            actor_remove(ptr, 0);
         }
     }
 
-    func_1505F188(ptr);
+    actor_clearSlot(ptr);
     return ptr;
 }
 
 /* The first actor in `state` (or past the end); its index goes to *outIdx. */
-Actor *func_1505EEB0(s32 state, s32 *outIdx) {
+Actor *actor_findByState(s32 state, s32 *outIdx) {
     Actor *ptr;
     s32 i;
 
@@ -3667,7 +3667,7 @@ Actor *func_1505EEB0(s32 state, s32 *outIdx) {
 }
 
 /* The first live actor following path `pathIdx` (unk13F), or NULL. */
-Actor *func_1505EEF4(s32 pathIdx) {
+Actor *actor_findOnPath(s32 pathIdx) {
     Actor *actor = movement_obj;
     s32 i;
 
@@ -3681,7 +3681,7 @@ Actor *func_1505EEF4(s32 pathIdx) {
 }
 
 /* The live actor whose playernumber is `key`, or NULL. */
-Actor *func_1505EFD0(s32 key) {
+Actor *actor_findByPlayerNumber(s32 key) {
     Actor *actor = movement_obj;
     s32 i;
 
@@ -3695,7 +3695,7 @@ Actor *func_1505EFD0(s32 key) {
 }
 
 /* The first live actor of type `id`, or NULL. */
-Actor *func_1505F0AC(s32 id) {
+Actor *actor_findByType(s32 id) {
     Actor *actor = movement_obj;
     s32 i;
 
@@ -3708,7 +3708,7 @@ Actor *func_1505F0AC(s32 id) {
     return NULL;
 }
 /* Clears an actor slot and sets its default fields. */
-void func_1505F188(Actor *actor) {
+void actor_clearSlot(Actor *actor) {
     s32 *p;
     f32 one;
     f32 initial;
@@ -3736,7 +3736,7 @@ void func_1505F188(Actor *actor) {
     actor->unk2CB = 50;
     actor->speedup = one;
     actor->blinkTimer = (func_150ADA20() % 50U) + 50;
-    func_150615DC(actor);
+    actor_resetFade(actor);
     actor->unk1DD[0] = 0xFF;
     actor->unk1DD[1] = 0xFF;
     actor->unk1DD[2] = 0xFF;
@@ -3751,7 +3751,7 @@ void func_1505F188(Actor *actor) {
     actor->floorTri.v[2].z = 0;
 }
 /* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */
-void func_1505F298(Actor *actor, OSContPad *pad) {
+void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
     s32 anim;
     s32 sound;
     f32 speed;
@@ -3859,10 +3859,10 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
             anim = 0xCB;
         }
         if ((actor->mv->weapon_status != 0) || ((actor->mv->rt_context_b != 0) && (actor->mv->rt_context_b != 0x27))) {
-            func_1506045C(actor, 0, 0, height, 1);
+            actor_runPlayerAction(actor, 0, 0, height, 1);
         }
         if (anim != 0) {
-            func_1505E650(actor, anim, speed, rate, 0.0f, 0.0f, 0);
+            actor_playAnim(actor, anim, speed, rate, 0.0f, 0.0f, 0);
         }
         return;
     }
@@ -3890,7 +3890,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
             speed = 3.0f;
         }
         if (anim != 0) {
-            func_1505E650(actor, anim, speed, 4.0f, 0.0f, 0.0f, 0);
+            actor_playAnim(actor, anim, speed, 4.0f, 0.0f, 0.0f, 0);
             return;
         }
     }
@@ -3916,7 +3916,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                 animArg4 = 15.0f;
                 actor->unk100 &= 0xFE;
                 if (flag != 0) {
-                    func_1506160C(actor, 1, 0xFF, 0, 0);
+                    actor_fadeCommand(actor, 1, 0xFF, 0, 0);
                 }
                 if (actor->mv->env_suit != 0) {
                     animArg4 = 0.0f;
@@ -3930,7 +3930,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                     actor->count5 = 0xFF;
                     actor->norun = 0xFF;
                     jumped = 0;
-                    func_1505E650(actor, 0x43, 1.299999952f, 2.0f, 0.0f, 0.0f, 0);
+                    actor_playAnim(actor, 0x43, 1.299999952f, 2.0f, 0.0f, 0.0f, 0);
                 } else {
                     if (actor->mv->injured != 0) {
                         anim = 0x32;
@@ -4010,7 +4010,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
         if (jumped != 0) {
             if (sound != 0) {
                 if (func_1506E46C(actor, &sound, 1) != 0) {
-                    func_15060A30(sound, actor);
+                    actor_playSound(sound, actor);
                 }
             }
             prevJumpState = 0;
@@ -4021,7 +4021,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                 } else if (jumpType == 0x8B) {
                     func_15052F58(actor->attach_char - 1, 5);
                     actor->speed = 30.0f;
-                    if (D_800BE616 != 0) {
+                    if (gIsMultiplayer != 0) {
                         actor->langle = 0x3000;
                         if (actor->zpos > 0.0f) {
                             actor->langle = 0xB000;
@@ -4049,7 +4049,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                 actor->shad = 80.0f;
             }
             if (actor->mv->transport != 2) {
-                func_1505E650(actor, anim, speed, 2.0f, animArg4, 0.0f, 0);
+                actor_playAnim(actor, anim, speed, 2.0f, animArg4, 0.0f, 0);
             }
             height = 25.0f;
             actor->vtilt = 0.0f;
@@ -4058,7 +4058,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
         }
         anim = 0;
     }
-    func_1506045C(actor, buttons, D_800CC288, height, 0);
+    actor_runPlayerAction(actor, buttons, D_800CC288, height, 0);
     {
     s32 pad;
     rate = 2.0f;
@@ -4100,7 +4100,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
         }
     }
     }
-    if ((D_800BE616 == 0) && (prevJumpState != 0) && (actor->inwater == 0) && (actor->lifting < 0x65) && (actor->character_type != 0x96)) {
+    if ((gIsMultiplayer == 0) && (prevJumpState != 0) && (actor->inwater == 0) && (actor->lifting < 0x65) && (actor->character_type != 0x96)) {
         jumpState = actor->mv->prop;
         if ((jumpState != 0) && (actor->mv->transport == 0)) {
             if (actor->mv->prop < 3) {
@@ -4114,8 +4114,8 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                     actor->unk1CC = actor->ypos;
                     actor->ygrav = 1.0f;
                     if (actor->animseq.uh != 0xE9) {
-                        func_100109D0(actor);
-                        func_1000FA64(0x61E, actor->xpos, actor->ypos, actor->zpos,
+                        sound_stopActorSound2(actor);
+                        sound_addDynamicSound(0x61E, actor->xpos, actor->ypos, actor->zpos,
                                       0x7FFF, 0x1F4, 0xC8, func_1000EFB4, actor, (s32)D_80099428, 0, 0);
                         func_151C6EA0(actor, 0xFF, 1);
                     }
@@ -4152,10 +4152,10 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
         }
     }
     if (anim != 0) {
-        func_1505E650(actor, anim, speed, rate, 0.0f, 0.0f, 0);
+        actor_playAnim(actor, anim, speed, rate, 0.0f, 0.0f, 0);
     }
     if (sound != 0) {
-        func_15060A30(sound, actor);
+        actor_playSound(sound, actor);
     }
     id = actor->count3;
     if (((id & 7) == 2) && !(pad->button & 0x8000)) {
@@ -4164,7 +4164,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
     }
 }
 /* Runs the player's current action/item (mv->context_b, overridden by context) for this frame's input. */
-void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 nested) {
+void actor_runPlayerAction(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 nested) {
     s32 stunned;
     s32 state;
     s32 expired;
@@ -4196,7 +4196,7 @@ void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 neste
     }
 
     if ((level != 0x29) && (level != 0x2E) && (actor->mv->rt_context_b == 0) &&
-        (D_800CC284->button & 0x20) && (func_15080738(state) != 0)) {
+        (gCurrentPad->button & 0x20) && (text_isAvailable(state) != 0)) {
         state = 0x1A;
     }
 
@@ -4241,7 +4241,7 @@ void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 neste
     if ((nested == 0) && actor->mv->rt_context_b && (state != (actor->mv->rt_context_b & ~0x80))) {
         savedUnk75 = actor->mv->context_b;
         actor->mv->context_b = actor->mv->rt_context_b;
-        func_1506045C(actor, buttons, pressed, height, 1);
+        actor_runPlayerAction(actor, buttons, pressed, height, 1);
         actor->mv->context_b = savedUnk75;
         actor->mv->rt_context_b = 0;
     }
@@ -4265,7 +4265,7 @@ void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 neste
  * reuses (1: soundHandle1, 2/3: soundHandle2; 3 only retunes it if the same sound is still playing), flags & 4 makes
  * it positional, flags & 8 forces channel 0.
  */
-void func_15060778(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s32 maxDist, s32 flags) {
+void actor_playPlayerSound(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s32 maxDist, s32 flags) {
     s32 channel;
     u32 handle;
     u16 *slot;
@@ -4289,13 +4289,13 @@ void func_15060778(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s
         if ((flags & 3) == 2) {
             break;
         }
-        if ((func_1001147C(handle) == sound) & 0x7FFF) {
+        if ((sound_getPlayingSound(handle) == sound) & 0x7FFF) {
             if (flags & 4) {
                 func_1000F91C(handle, rate + channel * 50, actor->listpos * 10 + volume, channel, 0,
                               actor->xpos, actor->ypos, actor->zpos, minDist, maxDist);
             } else {
-                func_1000F85C(handle, 0x10, volume);
-                func_1000F85C(handle, 8, rate + channel * 50);
+                sound_setVoiceParam(handle, 0x10, volume);
+                sound_setVoiceParam(handle, 8, rate + channel * 50);
             }
             return;
         }
@@ -4306,45 +4306,45 @@ void func_15060778(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s
         handle = func_10010E78(handle, sound, rate + channel * 50, volume, channel, 0, actor->xpos,
                                actor->ypos, actor->zpos, minDist, maxDist);
     } else {
-        handle = func_10010BE8(handle, sound, (rate + channel * 50), 0x40, volume, channel, 1);
+        handle = sound_startVoice(handle, sound, (rate + channel * 50), 0x40, volume, channel, 1);
     }
     if (slot != NULL) {
         *slot = handle;
     }
 }
 /* Plays an actor sound (players use handle slot 1). */
-void func_15060A30(s32 sound, Actor *actor) {
+void actor_playSound(s32 sound, Actor *actor) {
     if (actor->CameraPtr == NULL) {
-        func_10010344(sound, actor, 28000, 500, 2500);
+        sound_playActorSound1(sound, actor, 28000, 500, 2500);
     } else {
-        func_15060778(sound, actor, 24000, 0, 500, 2500, 1);
+        actor_playPlayerSound(sound, actor, 24000, 0, 500, 2500, 1);
     }
 }
 /* Plays an actor sound without a handle slot. */
-void func_15060A9C(s32 sound, Actor *actor) {
+void actor_playUntrackedSound(s32 sound, Actor *actor) {
     if (actor->CameraPtr == NULL) {
-        func_10010630(sound, actor, 24000, 500, 2500);
+        sound_playActorUntracked(sound, actor, 24000, 500, 2500);
     } else {
-        func_15060778(sound, actor, 24000, 0, 500, 2500, 0);
+        actor_playPlayerSound(sound, actor, 24000, 0, 500, 2500, 0);
     }
 }
 
-/* func_15060A9C with an explicit rate. */
-void func_15060B04(s32 sound, Actor *actor, s32 rate) {
+/* actor_playUntrackedSound with an explicit rate. */
+void actor_playUntrackedSoundRate(s32 sound, Actor *actor, s32 rate) {
     if (actor->CameraPtr == NULL) {
-        func_10010630(sound, actor, rate, 500, 2500);
+        sound_playActorUntracked(sound, actor, rate, 500, 2500);
     } else {
-        func_15060778(sound, actor, rate, 0, 500, 2500, 0);
+        actor_playPlayerSound(sound, actor, rate, 0, 500, 2500, 0);
     }
 }
 
 /* Plays a sound at the actor. */
 void func_15060B70(s32 sound, void *actor) {
-    func_10010154(sound, actor, 28000, 500, 2500);
+    sound_playActorSound2(sound, actor, 28000, 500, 2500);
 }
 
 /* Adds health up to the maximum of 6; returns FALSE when already full. */
-s32 func_15060BA4(Actor *actor, s32 amount) {
+s32 actor_addHealth(Actor *actor, s32 amount) {
     if (actor->energy == 6) {
         return FALSE;
     }
@@ -4356,7 +4356,7 @@ s32 func_15060BA4(Actor *actor, s32 amount) {
 }
 
 /* Stores the actor's head position (s16 at 0x1BC): headHeight along its head bone's up axis, or its origin. */
-void func_15060BE0(Actor *actor) {
+void actor_updateHeadPos(Actor *actor) {
     f32 pad0; // matching: pad0..pad3 reproduce the stack layout
     f32 pad1;
     f32 pad2;
@@ -4409,7 +4409,7 @@ void func_15060BE0(Actor *actor) {
     }
 }
 /* Detaches every actor carried by (unk65 pointing at) this one. */
-void func_15060D54(Actor *actor) {
+void actor_releaseCarried(Actor *actor) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
@@ -4420,16 +4420,16 @@ void func_15060D54(Actor *actor) {
 }
 
 /* Removes the actor: releases its resources and attachments, then clears its slot. */
-void func_15060F28(Actor *actor, s32 mode) {
+void actor_remove(Actor *actor, s32 mode) {
     func_1514D310(actor);
     func_151695F0(actor, 0);
     if ((actor->drawtype != 2) && (actor->drawtype != 3)) {
         func_15084558(actor);
-        func_150626EC(actor, mode);
+        actor_releaseCarriedNonPlayers(actor, mode);
     }
     if (mode == 1) {
         func_1504AF10(actor, 1, 0);
-        func_1503E260(actor - movement_obj);
+        model_stopParts(actor - movement_obj);
     }
     if (actor->listpos != 0xFF) {
         if (mode != 2) {
@@ -4490,18 +4490,18 @@ void func_15060F28(Actor *actor, s32 mode) {
     if ((actor->mv != NULL) && (actor->mv->boneChain != NULL)) {
         func_10004074(actor->mv->boneChain);
     }
-    func_10010AA8(actor);
+    sound_stopActorSounds(actor);
     func_150303E4(actor);
-    func_15060D54(actor);
+    actor_releaseCarried(actor);
     func_15188AD0(actor);
     if (actor->mv != NULL) {
         func_10004074((void *)(s32)actor->mv); // matching: passing actor->mv directly mismatches
     }
-    func_1505F188(actor);
+    actor_clearSlot(actor);
 }
 
 /* Drifts the actor along water-current path pathIdx, from the nearest of its points. */
-void func_150611E8(Actor *actor, s32 pathIdx) {
+void actor_driftOnCurrent(Actor *actor, s32 pathIdx) {
     s32 count;
     s32 closest;
     s32 i;
@@ -4552,17 +4552,17 @@ void func_150611E8(Actor *actor, s32 pathIdx) {
         if (scale > 1.0f) {
             scale = 1.0f;
         }
-        angle = func_1505A630(pts[closest + 1].x - pts[closest].x, pts[closest].z - pts[closest + 1].z, 0);
+        angle = actor_getDirectionAngle(pts[closest + 1].x - pts[closest].x, pts[closest].z - pts[closest + 1].z, 0);
         if (actor->mv != NULL && speed > 20.0f) {
             actor->mv->unk68 = angle | 1;
         }
-        func_150593C4(actor, angle, speed, scale);
+        actor_easePushVelocity(actor, angle, speed, scale);
     }
 }
 
 // TODO: is this really Actor?
 /* Resets the actor's bytes 0x7..0xF. */
-void func_150615DC(Actor *actor) {
+void actor_resetFade(Actor *actor) {
     actor->unk7 = 0xFF;
     actor->unk8 = 0xFF;
     actor->unk9 = 0;
@@ -4576,7 +4576,7 @@ void func_150615DC(Actor *actor) {
  * then removed). Bytes unkB..unkE.ub[0] are per-player alphas, unkE.ub[1] holds per-player hide bits
  * (low nibble) and pending bits (high nibble). Commands 8 and up act on player `player` only.
  */
-void func_1506160C(Actor *actor, u8 cmd, u8 value, u8 step, s32 player) {
+void actor_fadeCommand(Actor *actor, u8 cmd, u8 value, u8 step, s32 player) {
     s32 bit;
     s32 hi;
 
@@ -4632,8 +4632,8 @@ void func_1506160C(Actor *actor, u8 cmd, u8 value, u8 step, s32 player) {
     }
 }
 
-/* Per-frame fade step (see func_1506160C); removes the actor when a fade-out finishes. */
-void func_150617BC(Actor *actor) {
+/* Per-frame fade step (see actor_fadeCommand); removes the actor when a fade-out finishes. */
+void actor_updateFade(Actor *actor) {
     s32 i;
     s32 mask;
     s32 value;
@@ -4686,9 +4686,9 @@ void func_150617BC(Actor *actor) {
             }
             if (((u8 *)actor)[8] == ((u8 *)actor)[7]) {
                 if (((u8 *)actor)[0xA] == 6) {
-                    func_15060F28(actor, 1);
+                    actor_remove(actor, 1);
                 } else if (((u8 *)actor)[0xA] == 5) {
-                    func_15060F28(actor, 2);
+                    actor_remove(actor, 2);
                 } else {
                     ((u8 *)actor)[0xA] = 0;
                 }
@@ -4698,7 +4698,7 @@ void func_150617BC(Actor *actor) {
 }
 
 /* The actor's alpha as seen by `player` (0..255). */
-s32 func_1506196C(Actor *actor, s32 player) {
+s32 actor_getAlpha(Actor *actor, s32 player) {
     s32 alpha = actor->unk7 * actor->unkB[player];
 
     if (alpha == 255 * 255) {
@@ -4710,10 +4710,10 @@ s32 func_1506196C(Actor *actor, s32 player) {
 }
 
 /*
- * Per-frame fade and visibility update of all actors: unk2FA bit 0 is set when func_150623F4 says the
+ * Per-frame fade and visibility update of all actors: unk2FA bit 0 is set when actor_isVisible says the
  * actor is visible, or when one of its linked actors (keys in unk20B) is.
  */
-void func_150619A8(void) {
+void actor_updateVisibility(void) {
     s32 i;
     s32 count;
     u8 list[25];
@@ -4729,8 +4729,8 @@ void func_150619A8(void) {
             if (actor->unk2FD != 0) {
                 actor->unk2FD--;
             }
-            func_150617BC(actor);
-            if (func_150623F4(actor) != 0) {
+            actor_updateFade(actor);
+            if (actor_isVisible(actor) != 0) {
                 actor->unk2FA |= 1;
             } else {
                 actor->unk2FA &= ~1;
@@ -4760,7 +4760,7 @@ void func_150619A8(void) {
 
 
 /* Per-frame texture/morph animations of actor types that have them (once per type for most). */
-void func_15061B4C(void) {
+void actor_updateTypeAnims(void) {
     Actor *unused; // matching: stack slot
     s32 id;
     s32 i;
@@ -4773,22 +4773,22 @@ void func_15061B4C(void) {
         }
         id = movement_obj[i].character_type;
         if ((id == 0x13) && (done[0] == 0)) {
-            func_15062D10(id, 0x5E, 0, -1, 0, 0);
-            func_15062D10(id, 0x60, 0, -1, 0, 0);
-            func_15062D10(id, 0x62, 0, -1, 0, 0);
-            func_15062D10(id, 0x64, 0, -1, 0, 0);
+            actor_scrollTypeTexture(id, 0x5E, 0, -1, 0, 0);
+            actor_scrollTypeTexture(id, 0x60, 0, -1, 0, 0);
+            actor_scrollTypeTexture(id, 0x62, 0, -1, 0, 0);
+            actor_scrollTypeTexture(id, 0x64, 0, -1, 0, 0);
             done[0] = 1;
         } else if ((id == 0x23) && (done[1] == 0)) {
-            func_15062D10(id, 0x1E9, 0, -1, 0, 0);
-            func_15062D10(id, 0x1EB, 0, -1, 0, 0);
-            func_15062D10(id, 0x1ED, 0, -1, 0, 0);
-            func_15062D10(id, 0x1EF, 0, -1, 0, 0);
+            actor_scrollTypeTexture(id, 0x1E9, 0, -1, 0, 0);
+            actor_scrollTypeTexture(id, 0x1EB, 0, -1, 0, 0);
+            actor_scrollTypeTexture(id, 0x1ED, 0, -1, 0, 0);
+            actor_scrollTypeTexture(id, 0x1EF, 0, -1, 0, 0);
             done[1] = 1;
         } else if ((id == 0x24) && (done[2] == 0)) {
             if ((func_150ADA20() % 1000U) < 300) {
                 D_800CC298.unk8 = (func_150ADA20() % 5U) - 2;
             }
-            func_15062D10(id, 4, -4, D_800CC298.unk8, 0, 0);
+            actor_scrollTypeTexture(id, 4, -4, D_800CC298.unk8, 0, 0);
             if (D_800C4020[id] != NULL) {
                 func_15062E24(id, D_800C4020[id][0], 0x37, 0, D_800CC298.unk4, 2, 1);
                 func_15062E24(id, D_800C4020[id][1], 0x27, 0x37, D_800CC298.unk0, 1, 0);
@@ -4809,7 +4809,7 @@ void func_15061B4C(void) {
                 D_800CC298.unkA = 1;
             }
             D_800CC298.unk9 += D_800CC298.unkA;
-            func_15062D10(id, 0xAA, D_800CC298.unk9, 0, 0, 1);
+            actor_scrollTypeTexture(id, 0xAA, D_800CC298.unk9, 0, 0, 1);
             done[3] = 1;
         } else if ((id == 0x3A) && (done[4] == 0)) {
             f32 weights[4];
@@ -4825,14 +4825,14 @@ void func_15061B4C(void) {
                 done[4] = 1;
             }
         } else if ((id == 0x3F) && (done[5] == 0)) {
-            func_15062D10(id, 4, 0, -4, 0, 0);
+            actor_scrollTypeTexture(id, 4, 0, -4, 0, 0);
             done[5] = 1;
         } else if (id == 0x4B) {
             if (done[6] == 0) {
                 done[6] = 1;
-                func_15062D10(id, 0x173, -4, 0, 0, 0);
-                func_15062D10(id, 0x175, -2, 0, 0, 0);
-                func_15062D10(id, 0x177, -1, 0, 0, 0);
+                actor_scrollTypeTexture(id, 0x173, -4, 0, 0, 0);
+                actor_scrollTypeTexture(id, 0x175, -2, 0, 0, 0);
+                actor_scrollTypeTexture(id, 0x177, -1, 0, 0, 0);
             }
             if (D_800CC298.unkF >= 4) {
                 D_800CC298.unkF = 0;
@@ -4895,9 +4895,9 @@ void func_15061B4C(void) {
 
             if (level != 0x30) {
                 if (movement_obj[i].animseq.uh == 1) {
-                    func_15062D10(id, 0x253, 0, 0x10, 0, 0);
-                    func_15062D10(id, 0x255, 0, 8, 0, 0);
-                    func_15062D10(id, 0x257, 0, 4, 0, 0);
+                    actor_scrollTypeTexture(id, 0x253, 0, 0x10, 0, 0);
+                    actor_scrollTypeTexture(id, 0x255, 0, 8, 0, 0);
+                    actor_scrollTypeTexture(id, 0x257, 0, 4, 0, 0);
                 }
             } else {
                 if (movement_obj[i].animseq.uh == 1) {
@@ -4905,7 +4905,7 @@ void func_15061B4C(void) {
                 } else {
                     delta = 0;
                 }
-                func_15062FC0(&movement_obj[i], 0, 0, 0x1000, 0x1000, 0xC, 0, delta);
+                actor_scrollVertexTexCoords(&movement_obj[i], 0, 0, 0x1000, 0x1000, 0xC, 0, delta);
             }
         } else if (id == 0x42) {
             if ((movement_obj[i].animseq.uh == 2) || (movement_obj[i].animseq.uh == 1)) {
@@ -4925,12 +4925,12 @@ void func_15061B4C(void) {
         } else if (id == 0x7B) {
             func_150F1CB0(&movement_obj[i]);
         } else if ((id == 0x92) && (done[9] == 0)) {
-            func_15062D10(id, 4, 0, -2, 0, 0);
-            func_15062D10(id, 0x13B, 0, -2, 0, 0);
-            func_15062D10(id, 0x20D, 0, -2, 0, 0);
+            actor_scrollTypeTexture(id, 4, 0, -2, 0, 0);
+            actor_scrollTypeTexture(id, 0x13B, 0, -2, 0, 0);
+            actor_scrollTypeTexture(id, 0x20D, 0, -2, 0, 0);
             done[9] = 1;
         } else if (id == 0x43) {
-            func_15062D10(id, 4, 0x14, 8, 0, 0);
+            actor_scrollTypeTexture(id, 4, 0x14, 8, 0, 0);
         }
     }
 }
@@ -4939,7 +4939,7 @@ void func_15061B4C(void) {
  * Whether the actor should be drawn: TRUE when it has no cull radius (spawn->unk2A) or is a player, when
  * a player is inside its path area, or when it is inside some player's view; FALSE if fully faded.
  */
-s32 func_150623F4(Actor *actor) {
+s32 actor_isVisible(Actor *actor) {
     f32 scale;
     s32 sum;
     s32 hidden;
@@ -5006,14 +5006,14 @@ s32 func_150623F4(Actor *actor) {
     return 0;
 }
 /* Removes the non-player actors carried by this one. */
-void func_150626EC(Actor *actor, s32 mode) {
+void actor_releaseCarriedNonPlayers(Actor *actor, s32 mode) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
         if ((movement_obj[i].type != 0) &&
             (((actor - movement_obj) + 1) == movement_obj[i].attach_char) &&
             (movement_obj[i].playernumber == 0xFF)) {
-            func_15060F28(&movement_obj[i], mode);
+            actor_remove(&movement_obj[i], mode);
         }
     }
 }
@@ -5029,7 +5029,7 @@ void func_150627D4(Actor *actor) {
 #define OBJ_INDEX(obj) ((u32)((obj) - movement_obj))
 
 /* Swaps two actor slots (b becomes the player with a camera), fixing up indices and carry links. */
-void func_15062800(Actor *a, Actor *b) {
+void actor_swapSlots(Actor *a, Actor *b) {
     s32 idx0; // matching: idx0, cam and pad are dead, but keep the frame layout
     Camera *cam;
     Actor swap;
@@ -5065,7 +5065,7 @@ void func_15062800(Actor *a, Actor *b) {
         func_1516972C(a->unk2D4);
         a->unk2D4 = NULL;
     }
-    func_150615DC(b);
+    actor_resetFade(b);
     for (i = 0; i < 25; i++) {
         if (i == OBJ_INDEX(b) || i == OBJ_INDEX(a)) {
             continue;
@@ -5091,7 +5091,7 @@ void func_15062800(Actor *a, Actor *b) {
 }
 
 /* Recomputes the body cylinder ratios: unkEC = radius / height, unkF0 = height / radius (radius bodyRadius, height bodyHeight). */
-void func_15062AC4(Actor *actor) {
+void actor_updateBodyRatios(Actor *actor) {
     if (actor->bodyHeight && actor->bodyRadius) {
         f32 radius = actor->bodyRadius;
         actor->unkEC = radius / actor->bodyHeight;
@@ -5102,19 +5102,19 @@ void func_15062AC4(Actor *actor) {
 }
 
 /* Sets the body radius to scale_xz * radius. */
-void func_15062B1C(Actor *actor, f32 radius) {
+void actor_setBodyRadius(Actor *actor, f32 radius) {
     actor->bodyRadius = actor->scale_xz * radius;
-    func_15062AC4(actor);
+    actor_updateBodyRatios(actor);
 }
 
 /* Sets the body height to scale_y * height. */
-void func_15062B50(Actor *actor, f32 height) {
+void actor_setBodyHeight(Actor *actor, f32 height) {
     actor->bodyHeight = actor->scale_y * height;
-    func_15062AC4(actor);
+    actor_updateBodyRatios(actor);
 }
 
-/* func_15062AC4 for the hit cylinder (radius unkD2, height unkD4). */
-void func_15062B84(Actor *actor) {
+/* actor_updateBodyRatios for the hit cylinder (radius unkD2, height unkD4). */
+void actor_updateHitRatios(Actor *actor) {
     if (actor->unkD4 && actor->unkD2) {
         f32 radius = actor->unkD2;
         actor->unkDC = radius / actor->unkD4;
@@ -5126,7 +5126,7 @@ void func_15062B84(Actor *actor) {
 }
 
 /* Sets the actor's scale and rescales its hit and body cylinders from the type info. */
-void func_15062BDC(Actor *actor, f32 xzScale, f32 yScale) {
+void actor_setScale(Actor *actor, f32 xzScale, f32 yScale) {
     ModelDef *info;
 
     actor->scale_xz = xzScale;
@@ -5139,8 +5139,8 @@ void func_15062BDC(Actor *actor, f32 xzScale, f32 yScale) {
         actor->bodyRadius =  (info->unk1A * actor->scale_xz);
         actor->bodyHeight =  (info->unk1C * actor->scale_y);
         actor->bodyOffsetY =  (info->unk1E * actor->scale_y);
-        func_15062AC4(actor);
-        func_15062B84(actor);
+        actor_updateBodyRatios(actor);
+        actor_updateHitRatios(actor);
     }
 }
 
@@ -5148,7 +5148,7 @@ void func_15062BDC(Actor *actor, f32 xzScale, f32 yScale) {
  * Scrolls texture tile `tile` of actor type `type` (set `set`) by (ds, dt), wrapping at the tile size;
  * with `absolute` set the coordinates are set instead. Coordinates are packed 12:12 in unk0.
  */
-void func_15062D10(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute) {
+void actor_scrollTypeTexture(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute) {
     Gfx *base, *entry; /* G_SETTILESIZE-style words: w0 = flags in the top byte, s:t packed 12:12; w1 = tile size - 2 */
     s32 packed, wrapS, wrapT, newS, newT, tmp, flag;
 
@@ -5158,7 +5158,7 @@ void func_15062D10(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute) {
     if (D_800D19A0[type] == NULL) {
         return;
     }
-    base = D_800C4488[type][set];
+    base = gModelDlParts[type][set];
     packed = ((Gfx *)((u8 *)base + tile * 8))->words.w1; // matching: byte offsets, not base[tile]
     wrapS = ((packed >> 12) & 0xFFF) + 2;
     wrapT = (packed & 0xFFF) + 2;
@@ -5198,13 +5198,13 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
     s32 h;
     Vtx *vtx;
 
-    if (D_800C6360[type] != 0) {
+    if (gModelSavedTexCoords[type] != 0) {
         for (i = 0; i < 25; i++) {
             if (movement_obj[i].type == 0) continue;
             if (type != movement_obj[i].character_type) continue;
             if (movement_obj[i].unk2FA == 0) continue;
-            w = D_800C5338[type][set].width;
-            h = D_800C5338[type][set].height;
+            w = gModelTextures[type][set].width;
+            h = gModelTextures[type][set].height;
             if (doubleSize != 0) {
                 w *= 2;
                 h *= 2;
@@ -5212,7 +5212,7 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
             vtx = ((Vtx **)movement_obj[i].modelData)[D_800BE9C0];
             if (vtx != NULL) {
                 vtx += firstVtx;
-                func_15094AB8(vtx, (s16 (*)[2])D_800C6360[type] + arg3, arg2, arg4, h, w);
+                func_15094AB8(vtx, (s16 (*)[2])gModelSavedTexCoords[type] + arg3, arg2, arg4, h, w);
             }
         }
     }
@@ -5222,7 +5222,7 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
  * Scrolls the texture coordinates of `count` vertices (vertex group `group`, or from the start) in the
  * actor's current vertex buffer, copying from the other buffer and wrapping at (wrapS, wrapT).
  */
-void func_15062FC0(Actor *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt) {
+void actor_scrollVertexTexCoords(Actor *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt) {
     u8 *channelBase;
     Vtx *source;
     Vtx *target;
@@ -5287,7 +5287,7 @@ void func_15063168(Actor *actor) {
 }
 
 /* Respawns the actor in place: rebuilds its slot from its spawn entry (spawn), keeping position, angles and camera. */
-void func_15063254(Actor *actor, s32 type, s32 interaction_state, f32 scale) {
+void actor_respawnInPlace(Actor *actor, s32 type, s32 interaction_state, f32 scale) {
     SpawnRecord *spawn;
     s32 pathIdx;
     s32 index;
@@ -5316,7 +5316,7 @@ void func_15063254(Actor *actor, s32 type, s32 interaction_state, f32 scale) {
     unkC4 = actor->lean_angle;
     angle = actor->angle;
     index = actor - movement_obj;
-    func_15060F28(actor, 0);
+    actor_remove(actor, 0);
     func_15082A44(spawn, pathIdx, 0, 0, index + 1);
     actor->CameraPtr = camera;
     actor->xpos = x;

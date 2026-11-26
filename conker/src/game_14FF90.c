@@ -36,9 +36,9 @@ void func_15122AE0(void) {
 
     for (i = 0; i <= D_80082FA0; i++) {
         camera = &camera_global_Cameras[i];
-        if (func_150859AC(i, 0) || (i == 0)) {
+        if (player_getStat(i, 0) || (i == 0)) {
             camera->SpringTime = dt;
-            if ((D_800BEAC0 == 0) || (D_800C35EA[0] != 0) || (D_800D2DB4 != 0)) {
+            if ((gPaused == 0) || (D_800C35EA[0] != 0) || (D_800D2DB4 != 0)) {
                 func_151239CC(camera, CAMERA_MODE_PAUSE);
                 func_15122C5C(camera);
             } else {
@@ -448,7 +448,7 @@ void func_15123A54(Camera *camera) {
             camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
         }
         angle = camera->CameraAngleRad;
-        if (D_800BEA0C != 0) {
+        if (gFrameRateDivider != 0) {
             // matching: only the (f32)1 factor matches (dropping it or writing 1.0f changes the code)
             camera->CameraAngle += (f32)1 * camera->MatrixEffectDirection * D_800BEA08;
             camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
@@ -573,7 +573,7 @@ void func_15123A54(Camera *camera) {
                     ((camera->Mode & 0x80) && (camera->PadPtr->button & R_TRIG))) {
                     camera->AccelA = 6.0f;
                     camera->AccelB = 10.0f;
-                } else if ((D_800BE616 != 0) || (camera->AvailableModes & 0x200000)) {
+                } else if ((gIsMultiplayer != 0) || (camera->AvailableModes & 0x200000)) {
                     if (camera->Mode & 0x40) {
                         camera->unk974 = 1.0f;
                         camera->unk978 = 2.0f;
@@ -596,9 +596,9 @@ void func_15123A54(Camera *camera) {
                     camera->AccelA = 2.0f;
                     camera->AccelB = 3.0f;
                 }
-                if (D_800BEA0C == 0) {
+                if (gFrameRateDivider == 0) {
                     if (camera->blocked != 0) {
-                        if ((camera->DoingAim != 0) || (D_800BE616 != 0)) {
+                        if ((camera->DoingAim != 0) || (gIsMultiplayer != 0)) {
                             func_150495B0(&camera->TripodMagnitude, camera->IdealTripodMagnitude, &camera->XZVel, 8.0f, 10.0f, camera->SpringTime);
                         } else {
                             func_150495B0(&camera->TripodMagnitude, camera->IdealTripodMagnitude, &camera->XZVel, 6.0f, 8.0f, camera->SpringTime);
@@ -618,7 +618,7 @@ void func_15123A54(Camera *camera) {
             camera->TripodMagnitude = sqrtf((camera->eye.x - camera->target.x) * (camera->eye.x - camera->target.x) +
                                   (camera->eye.z - camera->target.z) * (camera->eye.z - camera->target.z));
             if (camera->IdealTripodMagnitude + camera->IdealTripodMagnitude < camera->TripodMagnitude) {
-                if ((camera->PadPtr->button & (L_CBUTTONS | R_CBUTTONS)) && (D_800BE616 == 0)) {
+                if ((camera->PadPtr->button & (L_CBUTTONS | R_CBUTTONS)) && (gIsMultiplayer == 0)) {
                     camera->PadPtr->button &= ~(L_CBUTTONS | R_CBUTTONS);
                     camera->CameraButtons &= ~(L_CBUTTONS | R_CBUTTONS);
                 }
@@ -790,7 +790,7 @@ void func_15124C38(Camera *camera, f32 *outY) {
             s16 discard1;
             s16 discard2;
 
-            func_1507C3E0(camera->CharPtr, &top, &discard1, &discard2);
+            actor_computeSize(camera->CharPtr, &top, &discard1, &discard2);
             height = top;
         }
         if (camera->mv->death_State != 0) {
@@ -798,7 +798,7 @@ void func_15124C38(Camera *camera, f32 *outY) {
             f32 y;
             f32 x;
 
-            func_1507E1D0(camera->CharPtr, &x, &y, &z);
+            actor_getTrackPoint(camera->CharPtr, &x, &y, &z);
             func_150495B0(&camera->target.y, y, &camera->LOSYVel, 4.0f, 8.0f, camera->SpringTime);
             return;
         }
@@ -1037,7 +1037,7 @@ void func_151256BC(Camera *camera) {
     if ((camera->Mode & 0x80000) || ((camera->SpecialFlags & 8) && !(camera->Mode & 0x40000))) {
         amount = func_150ADA20() % 3;
         twoPi = 6.2831854820251465f;
-        camera->DrunkRoll += ((amount + amount) * DEG2RAD) * D_800BE9A4;
+        camera->DrunkRoll += ((amount + amount) * DEG2RAD) * gFrameDelta;
         while (twoPi < camera->DrunkRoll) {
             camera->DrunkRoll -= twoPi;
         }
@@ -1148,7 +1148,7 @@ void func_15125C40(Camera *camera) {
     s32 zone;
 
     zone = camera->CharContext;
-    level42 = (D_800D1940 == 0x42) && (zone == 0x1A);
+    level42 = (gContextTextId == 0x42) && (zone == 0x1A);
     active = (zone == 3) || (zone == 0x1A) || level42;
     camera->DelayOneFrame--;
     if (active) {
@@ -1431,13 +1431,13 @@ s32 func_15126378(Camera *camera) {
         func_150627D4(camera->CharPtr);
         D_800DBFF4[camera->CNumber] = 2;
         if ((zone == 0x24) || (zone == 0x23)) {
-            func_1000FA64(0x605, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)func_15127520, camera,
+            sound_addDynamicSound(0x605, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)func_15127520, camera,
                           (u32)(-camera->TgetFOVX * 10000.0f), 0, 0);
         } else if ((zone == 0x1B) || (zone == 0x1F) || (zone == 0x29)) {
             aimKey = ext->aimYawTarget * ext->aimPitchTarget;
-            func_1000FA64(0x622, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)func_15127520, camera,
+            sound_addDynamicSound(0x622, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)func_15127520, camera,
                           (u32)(-camera->TgetFOVX * 10000.0f) | 0x80000000, 0x100, 0);
-            func_1000FA64(0x622, 0, 0, 0, 0x3E80, 300, 299, (SoundRecordCallback)func_151277B0, camera, *(s32 *)&aimKey, 0x100, 0);
+            sound_addDynamicSound(0x622, 0, 0, 0, 0x3E80, 300, 299, (SoundRecordCallback)func_151277B0, camera, *(s32 *)&aimKey, 0x100, 0);
         }
         viewer->unk2FC |= 1 << camera->CNumber;
         viewer->unk74 |= 1 << camera->CNumber;
@@ -1503,7 +1503,7 @@ s32 func_15126378(Camera *camera) {
         }
         func_15049688(&ext->aimYaw, ext->aimYawTarget, &ext->aimYawVel, 6.0f, 8.0f, camera->SpringTime);
         func_15049688(&ext->aimPitch, ext->aimPitchTarget, &ext->aimPitchVel, 6.0f, 8.0f, camera->SpringTime);
-        if ((zone != 0x16) && (zone != 0xC) && ((zone != 0x29) || (zone != 0x1F) || (D_800BE616 != 0)) &&
+        if ((zone != 0x16) && (zone != 0xC) && ((zone != 0x29) || (zone != 0x1F) || (gIsMultiplayer != 0)) &&
             ((buttons & (U_CBUTTONS | D_CBUTTONS)) != (U_CBUTTONS | D_CBUTTONS))) {
             if ((buttons & U_CBUTTONS) && (maxZoom < camera->TgetFOVX) && (zone != 0xC)) {
                 camera->TgetFOVX -= zoomStep;
@@ -1589,7 +1589,7 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
         if (changed) {
             if (*soundId != D_800894E0[index][0]) {
                 if (sound->voice != 0) {
-                    func_100111C8(sound->voice);
+                    sound_stop(sound->voice);
                 }
                 sound->voice = 0;
                 sound->flags &= ~0x80;
@@ -1597,15 +1597,15 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
             }
         } else if (*soundId == D_800894E0[index][0]) {
             if (sound->voice != 0) {
-                func_100111C8(sound->voice);
+                sound_stop(sound->voice);
             }
             sound->voice = 0;
             *soundId = D_800894E0[index][1];
-            func_10010F30(D_800894E0[index][1], 20000, 0x40, 0, 0);
+            sound_play(D_800894E0[index][1], 20000, 0x40, 0, 0);
             sound->flags &= ~0x80;
         } else if (sound->flags & 0x80) {
             func_151CC290(camera);
-            func_10010F30(D_800894E0[index][2], 20000, 0x40, 0, 0);
+            sound_play(D_800894E0[index][2], 20000, 0x40, 0, 0);
         }
     } else {
         return 1;
@@ -1656,7 +1656,7 @@ s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
         if (changed) {
             if (*soundId != 0x61C) {
                 if (sound->voice != 0) {
-                    func_100111C8(sound->voice);
+                    sound_stop(sound->voice);
                 }
                 sound->voice = 0;
                 sound->flags &= ~0x80;
@@ -1664,7 +1664,7 @@ s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
             }
         } else if (*soundId == 0x61C) {
             if (sound->voice != 0) {
-                func_100111C8(sound->voice);
+                sound_stop(sound->voice);
             }
             sound->voice = 0;
             *soundId = 0x61D;

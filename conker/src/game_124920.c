@@ -185,7 +185,7 @@ s8 func_150F78B4(ProjectileParticle *obj) {
     alive = TRUE;
     state = &obj->state.projectile;
     owner = obj->owner;
-    dt = (state->timeLeft < D_800BE9A4) ? state->timeLeft : D_800BE9A4;
+    dt = (state->timeLeft < gFrameDelta) ? state->timeLeft : gFrameDelta;
     if (obj->sound != 0) {
         func_1000F9D4(obj->sound, obj->pos.x, obj->pos.y, obj->pos.z);
     }
@@ -205,7 +205,7 @@ s8 func_150F78B4(ProjectileParticle *obj) {
     obj->pos.y += obj->vel.y * dt;
     obj->pos.z += obj->vel.z * dt;
     if (alive == TRUE) {
-        state->timeLeft -= D_800BE9A4;
+        state->timeLeft -= gFrameDelta;
         if (state->timeLeft <= 0.0f) {
             alive = FALSE;
             if (state->flags & 1) {
@@ -283,8 +283,8 @@ s32 func_150F7E20(TrailPuff *obj) {
     size = (sinf(state->phase) * state->sizeAmplitude) + state->sizeBase;
     obj->head.def.height = size;
     obj->head.def.width = size;
-    state->phase = func_15144B68(state->phase + (state->phaseSpeed * D_800BE9A4));
-    state->timeLeft -= D_800BE9A4;
+    state->phase = func_15144B68(state->phase + (state->phaseSpeed * gFrameDelta));
+    state->timeLeft -= gFrameDelta;
     if (state->timeLeft < 0.0f) {
         return 0;
     }
@@ -385,7 +385,7 @@ s32 func_150F81BC(ProjectileParticle *obj) {
         delta.x = obj->pos.x - follow->trailPos.x;
         delta.y = obj->pos.y - follow->trailPos.y;
         delta.z = obj->pos.z - follow->trailPos.z;
-        follow->trailAge += D_800BE9A4;
+        follow->trailAge += gFrameDelta;
         if (func_15145128(&delta, &dir, &dist, &unused) != 0) {
             Vec3f step;
             TrailPuff *puff;

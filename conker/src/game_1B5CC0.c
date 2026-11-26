@@ -41,7 +41,7 @@ void func_15188810(Actor *object, s32 duration, s32 maxDist) {
 
     trail = allocate_memory(sizeof(BoneTrail), 1, 0, 0);
     if (trail != NULL) {
-        numBones = func_1502DB20(object->character_type);
+        numBones = actor_getBoneMatrixCount(object->character_type);
         if (numBones == 0) {
             func_10004074(trail);
             return;
@@ -244,7 +244,7 @@ void func_15188E48(BoneTrail *trail) {
     s32 size;
 
     numFrames = trail->numFrames;
-    numBones = func_1502DB20(trail->owner.object->character_type);
+    numBones = actor_getBoneMatrixCount(trail->owner.object->character_type);
     curBase = D_800BE9C0 * (numBones * numFrames);
     prevBase = (D_800BE9C0 ^ 1) * (numBones * numFrames);
     for (i = 0; i < numFrames; i++) {
@@ -345,7 +345,7 @@ void func_15189118(s32 listIndex) {
     for (trail = D_800DF7C8[listIndex]; trail != NULL; trail = trail->next) {
         if (trail->maxDist != 0) {
             numFrames = trail->numFrames;
-            numBones = func_1502DB20(trail->owner.object->character_type);
+            numBones = actor_getBoneMatrixCount(trail->owner.object->character_type);
             base = D_800BE9C0 * numBones * numFrames;
             maxDist = trail->maxDist;
             for (i = trail->numFilled - 1; i >= 0; i--) {
@@ -425,10 +425,10 @@ Gfx *func_151895F4(Gfx *gfx, BoneTrail *trail, s16 player) {
     if (!hasFrames) {
         return gfx;
     }
-    func_1503DA9C(trail->owner.object, func_150849CC(trail->owner.object, &lod), lod, 1);
+    model_loadForActor(trail->owner.object, func_150849CC(trail->owner.object, &lod), lod, 1);
     numFrames = trail->numFrames;
     alpha = trail->alpha;
-    numBones = func_1502DB20(trail->owner.object->character_type);
+    numBones = actor_getBoneMatrixCount(trail->owner.object->character_type);
     numFilled = trail->numFilled;
     base = D_800BE9C0 * numBones * numFrames;
     index = trail->owner.object - movement_obj;
@@ -442,7 +442,7 @@ Gfx *func_151895F4(Gfx *gfx, BoneTrail *trail, s16 player) {
         alphaScale = ((i + 3) * 32 * alpha) >> 8;
         *bonesOverride = &trail->frames[base + i * numBones];
         D_800DF7C4 = alphaScale;
-        gfx = func_1502C974(gfx, index, player, 4, 1);
+        gfx = actor_drawModel(gfx, index, player, 4, 1);
     }
     trail->owner.object->unk94 = saved;
     return gfx;

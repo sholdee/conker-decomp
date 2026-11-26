@@ -90,7 +90,7 @@ void func_151A8CEC(Emitter *emitter) {
         return;
     }
 
-    state->pending += (state->def.rate + func_150ADA68() * state->def.rateRange) * D_800BE9A4 * state->area;
+    state->pending += (state->def.rate + func_150ADA68() * state->def.rateRange) * gFrameDelta * state->area;
 
     if (state->pending > 1.0f) {
         if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {

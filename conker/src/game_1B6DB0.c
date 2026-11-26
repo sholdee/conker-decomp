@@ -71,7 +71,7 @@ void func_15189A00(SprayEmitter *emitter) {
             return;
         }
     }
-    emitter->pending += (emitter->desc.rate + (func_150ADA68() * emitter->desc.rateRange)) * D_800BE9A4;
+    emitter->pending += (emitter->desc.rate + (func_150ADA68() * emitter->desc.rateRange)) * gFrameDelta;
     if (emitter->pending > 1.0f) {
         floorY = emitter->floorY;
         spawn.kind = 1;

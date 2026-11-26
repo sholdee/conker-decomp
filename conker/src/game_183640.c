@@ -95,12 +95,12 @@ void func_151563B8(StreakParticle *arg0) {
         }
     }
     if (!expired) {
-        particle->headPos.x += particle->headVel.x * D_800BE9A4;
-        particle->headPos.y += particle->headVel.y * D_800BE9A4;
-        particle->headPos.z += particle->headVel.z * D_800BE9A4;
-        particle->tailPos.x += particle->tailVel.x * D_800BE9A4;
-        particle->tailPos.y += particle->tailVel.y * D_800BE9A4;
-        particle->tailPos.z += particle->tailVel.z * D_800BE9A4;
+        particle->headPos.x += particle->headVel.x * gFrameDelta;
+        particle->headPos.y += particle->headVel.y * gFrameDelta;
+        particle->headPos.z += particle->headVel.z * gFrameDelta;
+        particle->tailPos.x += particle->tailVel.x * gFrameDelta;
+        particle->tailPos.y += particle->tailVel.y * gFrameDelta;
+        particle->tailPos.z += particle->tailVel.z * gFrameDelta;
         if (particle->flags & 8) {
             if (particle->lifetime < particle->fadeStart) {
                 fadedAlpha = particle->lifetime * particle->fadeRate;

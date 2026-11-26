@@ -18,8 +18,8 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
         return;
     }
     if (D_800C35EA[0] != 1) {
-        func_10010630(0x2BB, obj, 0x7FFF, 1000, 2000);
-        func_10010630(0x2BA, obj, 0x7FFF, 1000, 2000);
+        sound_playActorUntracked(0x2BB, obj, 0x7FFF, 1000, 2000);
+        sound_playActorUntracked(0x2BA, obj, 0x7FFF, 1000, 2000);
     }
     origin.x = obj->xpos;
     origin.y = obj->ypos + 20.0f;
@@ -81,9 +81,9 @@ void func_150E0BE0(Actor *obj) {
     } else {
         if (obj->count5 > 60) {
             D_800D1580 = 0xFF020133;
-            D_800D154C = movement_obj;
+            gCurrentActor = movement_obj;
             func_1506E8D8();
-            D_800D154C = obj;
+            gCurrentActor = obj;
         }
         obj->count5 = 0;
     }
@@ -92,19 +92,19 @@ void func_150E0BE0(Actor *obj) {
         if (obj->count5 == 0) {
             obj->fangle = obj->angle;
         }
-        func_150599C8(obj, 3, obj->fangle);
+        actor_turnFacing(obj, 3, obj->fangle);
     }
 
     obj->unk87 = 0;
     if (!obj->stunned) {
-        func_15056B08(obj);
+        actor_updateChaseAi(obj);
     } else {
-        func_150585F0(obj, 0.05f);
+        actor_updateStunned(obj, 0.05f);
     }
 
     /* facing angle (0x10000 units per turn) rotated a quarter turn, in degrees */
     obj->theta = (s16)(obj->langle + 0x4000) * (360.0f / 0x10000);
-    func_15059140(obj);
+    actor_updatePhysics(obj);
     obj->unkBC = obj->xpos - obj->old_xpos; // 0xBC is an f32 that structs.h still calls padBC
     obj->unk148 = obj->zpos - obj->old_zpos;
     if (func_150535F4(obj) == 0) {

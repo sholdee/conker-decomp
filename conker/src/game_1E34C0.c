@@ -81,7 +81,7 @@ PulseParticle *func_151B6010(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f
 void func_151B6254(PulseParticle *particle) {
     Pulse *pulse = &particle->pulse;
 
-    pulse->phase += 0.5560000539f * D_800BE9A4;
+    pulse->phase += 0.5560000539f * gFrameDelta;
     while (pulse->phase > 6.283185482f) {
         pulse->phase -= 6.283185482f;
     }

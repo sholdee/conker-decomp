@@ -3,7 +3,7 @@
 #include "variables.h"
 
 void func_15103690(s32 arg0) {
-    func_15103828();
+    sound_updateCooldowns();
 }
 
 /* Throws a burst of debris (one variant, id 226) from origin. */

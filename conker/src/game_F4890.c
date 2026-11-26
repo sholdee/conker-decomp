@@ -54,7 +54,7 @@ s32 func_150C73E0(ModelAttachment *light, Actor *owner) {
 
     if (brightness != 0.0f) {
         if (light->hiddenDLists != 2) {
-            func_10010F30((func_150ADA20() & 7) + 0x44B, 0x7D00, 0x40, 0, 0);
+            sound_play((func_150ADA20() & 7) + 0x44B, 0x7D00, 0x40, 0, 0);
         }
         light->hiddenDLists = 2;
         if (owner->taskint[0] != 1) {

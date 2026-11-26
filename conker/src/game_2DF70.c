@@ -28,7 +28,7 @@ void func_15000AD0(s32 arg0) {
     D_800DBEA8[0] = D_800B0DF0->unk5;
     D_800DBEA8[1] = D_800B0DF0->unk6;
     D_800DBEA8[2] = D_800B0DF0->unk7;
-    if (D_800BE616 != 0 && D_800B0DF0->unk8 == 4) {
+    if (gIsMultiplayer != 0 && D_800B0DF0->unk8 == 4) {
         D_800B0DF0->unk8 = 2;
     }
     if (D_800B0DF0->unk8 == 4) {

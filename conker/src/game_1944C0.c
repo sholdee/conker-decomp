@@ -168,7 +168,7 @@ static ObjType D_8008B4A8[OBJ_TYPE_COUNT] = {
     /*  78 */ { NULL, func_151AD174, func_151AD92C, NULL, NULL, NULL, NULL, func_151AE640, NULL, NULL, NULL, NULL, 1 },
     /*  79 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  80 */ { func_1515589C, NULL, func_15155CFC, NULL, NULL, NULL, NULL, func_15156028, NULL, D_8008AD30, func_15155EF8, func_15155EF8, 0 },
-    /*  81 */ { func_1516AA70, NULL, func_1516B6BC, NULL, D_800873D0, NULL, NULL, NULL, NULL, D_80087408, NULL, NULL, -1 },
+    /*  81 */ { text_updateBox, NULL, text_drawBox, NULL, D_800873D0, NULL, NULL, NULL, NULL, D_80087408, NULL, NULL, -1 },
     /*  82 */ { func_151303EC, NULL, func_15130A9C, NULL, D_80089700, NULL, NULL, func_15131C2C, NULL, D_80089730, func_1513177C, func_151317C8, 1 },
     /*  83 */ { func_151563B8, NULL, func_151564F8, NULL, D_8008AD40, NULL, NULL, NULL, NULL, NULL, func_15156FB8, func_15156FE4, 1 },
     /*  84 */ { func_1513B798, NULL, func_1513B83C, NULL, D_80089BC0, NULL, NULL, func_1513BA78, NULL, D_80089C08, func_1513BA10, func_1513BA44, 1 },
@@ -422,7 +422,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                         prev = gfx;
                         D_800DD198[D_800DD190] = node->next;
                         gfx = D_8008B4A8[type].draw(gfx, node, arg2);
-                        full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                        full = ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
                         if (full) {
                             overflowed = TRUE;
                             gfx = prev;
@@ -446,14 +446,14 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     gfx = D_8008B4A8[type].drawEnd(gfx, type, arg2);
                 }
                 if (overflowed) {
-                    full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                    full = ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
                     if (full) {
                         gSPSetGeometryMode(gfx, G_ZBUFFER);
                         return mode1Start;
                     }
                 }
                 if (D_8008B4A8[type].drawMode == 0) {
-                    full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                    full = ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
                     if (full) {
                         gSPSetGeometryMode(gfx, G_ZBUFFER);
                         return mode0Start;

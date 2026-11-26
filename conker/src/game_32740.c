@@ -102,7 +102,7 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
     func_1512D6F0(view);
     func_15125924(view);
     view->CharTrackingSpeedTarget = 1.0f;
-    func_15085430(view->CharPtr, mode, 0);
+    player_moveToSpawn(view->CharPtr, mode, 0);
     func_15005A60(view, resource);
     view->zoneWaterY = -10000.0f;
     // matching: word-wise 12-byte struct copies; the header splits these vectors into scalars

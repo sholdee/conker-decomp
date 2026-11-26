@@ -6,7 +6,7 @@
 void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 
-/* Action (intelwalk) started by a jump (1) or run (2) press; +2 when D_800BE616 is set, +4 for id 0x21. */
+/* Action (intelwalk) started by a jump (1) or run (2) press; +2 when gIsMultiplayer is set, +4 for id 0x21. */
 static const u8 D_800A0810[8] = { 0x06, 0x01, 0x21, 0x22, 0x11, 0x11, 0x00, 0x00 };
 /* Three 2-entry tables indexed by isType21 (at 0, 2 and 4); the last two bytes are not read here. */
 static const u8 D_800A0818[8] = { 0x10, 0x0C, 0x0A, 0x0D, 0x01, 0x19, 0x9C, 0xBE };
@@ -31,13 +31,13 @@ void func_150CE740(Actor *obj) {
         isType21 = 1;
     }
     v = obj->lifting;
-    if ((v == 0) && (D_800BE616 == 0)) {
-        goto control_done; // matching: a goto (not an if block) lets IDO keep D_800BE616 in a register
+    if ((v == 0) && (gIsMultiplayer == 0)) {
+        goto control_done; // matching: a goto (not an if block) lets IDO keep gIsMultiplayer in a register
     }
     action = 0;
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         if (obj->mv->bot != 0) {
-            func_1504C854(obj);
+            actor_updateButtonTimers(obj);
         } else {
             D_800CC288 = D_800BE710[dc_glbl_CharNum];
         }
@@ -55,7 +55,7 @@ void func_150CE740(Actor *obj) {
         if (isType21) {
             action += 4;
         }
-        if (D_800BE616 != 0) {
+        if (gIsMultiplayer != 0) {
             action += 2;
         }
         obj->norun = 180;
@@ -66,12 +66,12 @@ void func_150CE740(Actor *obj) {
         }
     }
     obj->owner = 0;
-    if ((obj->norun == 0) && ((D_800BE616 == 0) || (obj->mv->bot == 0))) {
-        if (D_800BE616 != 0) {
+    if ((obj->norun == 0) && ((gIsMultiplayer == 0) || (obj->mv->bot == 0))) {
+        if (gIsMultiplayer != 0) {
             /* camera yaw in degrees -> 16-bit binary angle (65536 / 360) */
             D_800CC280 = camera_global_Cameras[dc_glbl_CharNum].CameraAngle * 182.0444488525390625f;
-            heading = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0) + D_800CC280;
-            obj->stickspeed = func_1505A5CC(D_800CC284);
+            heading = actor_getDirectionAngle(gCurrentPad->stick_x, gCurrentPad->stick_y, 0) + D_800CC280;
+            obj->stickspeed = actor_getStickDeflection(gCurrentPad);
         } else {
             obj->stickspeed = movement_obj[obj->owner].stickspeed * 1.75f;
             heading = movement_obj[obj->owner].mv->press_angle;
@@ -118,7 +118,7 @@ void func_150CE740(Actor *obj) {
         }
     }
 control_done:
-    if ((D_800BE616 == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->mv->death_State == 0)) {
+    if ((gIsMultiplayer == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->mv->death_State == 0)) {
         func_15052590(obj);
     }
     if ((movement_obj[0].mv->jump_on_char != 0) && ((obj->intelwalk != D_800A0818[isType21]) || (obj->stunned != 0))) {
@@ -128,7 +128,7 @@ control_done:
         movement_obj[0].imune = 0;
         obj->intelwalk = 0x11;
     }
-    if (D_800BE616 == 0) {
+    if (gIsMultiplayer == 0) {
         /* D_800A0818 holds three 2-entry tables indexed by isType21 */
         // matching: (&table[i])[n] adds n after i; table[i + n] folds n into the address
         if (obj->intelwalk == D_800A0818[isType21]) {
@@ -156,7 +156,7 @@ control_done:
         obj->taskint[0] += ((s16)((prevFacing - obj->langle) * 4) - (s16)obj->taskint[0]) / 8;
         obj->taskint[1] += (-turn - obj->taskint[1]) / 8;
     }
-    if ((D_800BE616 != 0) && (D_800CC268 != 0)) {
+    if ((gIsMultiplayer != 0) && (D_800CC268 != 0)) {
         owner = obj->mv;
         if ((owner != NULL) && (owner->on_fire != 0)) {
             func_15063168(obj);

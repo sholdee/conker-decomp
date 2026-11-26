@@ -179,7 +179,7 @@ void func_150345E4(s32 index) {
 
         switch (movement_obj[index].character_type) {
         case 4:
-            if (D_800BE616 == 0) {
+            if (gIsMultiplayer == 0) {
                 func_15036310(0, index, 9, 0);
                 func_15036310(0, index, 4, 0);
             }
@@ -206,7 +206,7 @@ void func_15034728(Actor *obj) {
     MtxF *bones;
 
     if (obj->ob_matrix_ptr != NULL && obj->unk9C != 0) {
-        lastBone = func_1502DB20(obj->character_type) - 1;
+        lastBone = actor_getBoneMatrixCount(obj->character_type) - 1;
         bones = obj->ob_matrix_ptr;
         bone = 31;
         if (lastBone < 31) {
@@ -230,7 +230,7 @@ void func_15034728(Actor *obj) {
 void func_150347E8(void) {
     s32 i;
 
-    if (D_800BEAC0 != 0) {
+    if (gPaused != 0) {
         return;
     }
 

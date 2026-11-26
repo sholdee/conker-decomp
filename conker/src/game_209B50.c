@@ -66,12 +66,12 @@ void func_151DC8BC(pos, duration, burst, randomColors, owner, kind)
 }
 
 /* Update function of the func_151DC8BC emitter: emits particles at its position at a random rate
- * of (0.136 to 0.257) * D_800BE9A4 per frame, in a fixed colour or one of three random colour pairs. */
+ * of (0.136 to 0.257) * gFrameDelta per frame, in a fixed colour or one of three random colour pairs. */
 void func_151DC97C(ColorEmitter *emitter) {
     ColorEmitterData *data;
 
     data = &emitter->data;
-    data->accum += (0.136f + func_150ADA68() * 0.12100001f) * D_800BE9A4;
+    data->accum += (0.136f + func_150ADA68() * 0.12100001f) * gFrameDelta;
     if (data->accum > 1.0f) {
         ParticleDesc desc;
         WobbleData extra;

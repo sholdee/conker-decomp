@@ -5,37 +5,37 @@
  * This file's .bss, in the original order. IDO lays out .bss in an order that depends on the declarations
  * before it, so it is defined before functions.h and variables.h.
  */
-u8 D_800C68B0[95][0xE0]; // font 0: glyph bitmaps (I4, unpacked by func_15015A38), one per charset entry
-FontGlyph D_800CBBD0[95]; // font 0: glyph metrics
+u8 gFont0Bitmaps[95][0xE0]; // font 0: glyph bitmaps (I4, unpacked by text_unpackGlyph), one per charset entry
+FontGlyph gFont0Glyphs[95]; // font 0: glyph metrics
 u8 D_800CBD4C;            // cleared by func_15015910
-u16 D_800CBD4E;           // animation clock (high bits pick icon frames)
+u16 gTextAnimClock;           // animation clock (high bits pick icon frames)
 
 /* Text state. */
-static u8 D_800CBD50; // control/icon code of the current character, 0xFF if none
+static u8 gTextControlCode; // control/icon code of the current character, 0xFF if none
 static u8 D_800CBD51, D_800CBD52, D_800CBD53, D_800CBD54, D_800CBD55, D_800CBD56; // not referenced by any code
-static u8 D_800CBD57; // current primitive colour r, g, b, a (D_800CBD57-5A)
-static u8 D_800CBD58;
-static u8 D_800CBD59;
-static u8 D_800CBD5A;
-static u8 D_800CBD5B; // flashing text on
-static u8 D_800CBD5C; // flash phase
-static u8 D_800CBD5D; // waving text on
-static u8 D_800CBD5E; // wave phase
+static u8 gTextRed; // current primitive colour r, g, b, a (gTextRed-5A)
+static u8 gTextGreen;
+static u8 gTextBlue;
+static u8 gTextAlpha;
+static u8 gTextFlashOn; // flashing text on
+static u8 gTextFlashPhase; // flash phase
+static u8 gTextWaveOn; // waving text on
+static u8 gTextWavePhase; // wave phase
 
 #include "functions.h"
 #include "variables.h"
 
-/* The font charset: glyph i shows character D_80085930[i] (uppercase only; func_15042C40 folds case). */
-static u8 D_80085930[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ&\\^:,$\"=!.>#{([<-%+?})];/~'\304\344\326\366\334\374\337\300\340\302\342\307\347\311\351\310\353\312\352\313\352\316\356\317\357\324\364\333\364\331\372@";
-u8 (*D_80085990[])[0xE0] = { D_800C68B0 }; // per font: glyph bitmaps
-FontGlyph *D_80085994[] = { D_800CBBD0 };   // per font: glyph metrics
+/* The font charset: glyph i shows character gFontCharset[i] (uppercase only; text_findGlyph folds case). */
+static u8 gFontCharset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ&\\^:,$\"=!.>#{([<-%+?})];/~'\304\344\326\366\334\374\337\300\340\302\342\307\347\311\351\310\353\312\352\313\352\316\356\317\357\324\364\333\364\331\372@";
+u8 (*gFontBitmaps[])[0xE0] = { gFont0Bitmaps }; // per font: glyph bitmaps
+FontGlyph *gFontGlyphs[] = { gFont0Glyphs };   // per font: glyph metrics
 
 /*
  * Size and layout of a special (icon) glyph, codes 0xA8-0xFF: its width and height in texels, how far
  * it is raised above the baseline, whether it keeps the current combiner (noCombine) and its scale.
  * Other codes get a zero size.
  */
-void func_150415E0(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noCombine, f32 *scale) {
+void text_getIconSize(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noCombine, f32 *scale) {
     if (glyph >= 0xA8 && glyph < 0x100) {
         *scale = 1.0f;
         switch (glyph) {
@@ -113,7 +113,7 @@ extern s32 D_800A4AC8[][2];
  * draw icon sprites. If the display list buffer fills up, returns the list as it was before the
  * current character.
  */
-Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 scaleX, f32 scaleY, s32 len) {
+Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 scaleX, f32 scaleY, s32 len) {
     u8 c;
     TextureDesc *tex;
     SpriteParams sprite;
@@ -172,58 +172,58 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     origG = g;
     origB = b;
     phase = 0;
-    D_800CBD57 = r;
-    D_800CBD58 = g;
-    D_800CBD59 = b;
-    D_800CBD5A = a;
-    D_800CBD5B = 0;
-    D_800CBD5D = 0;
-    D_800CBD5E += D_800BE9E4 * 6;
+    gTextRed = r;
+    gTextGreen = g;
+    gTextBlue = b;
+    gTextAlpha = a;
+    gTextFlashOn = 0;
+    gTextWaveOn = 0;
+    gTextWavePhase += D_800BE9E4 * 6;
     c = 0;
     flash = 0.0f;
     while (i < len) {
         start = gfx;
-        if (curR != D_800CBD57 || curG != D_800CBD58 || curB != D_800CBD59 || curA != D_800CBD5A) {
-            D_800CBD57 = curR;
-            D_800CBD58 = curG;
-            D_800CBD59 = curB;
-            D_800CBD5A = curA;
-            a = D_800CBD5A;
-            gDPSetPrimColor(gfx++, 1, 0, D_800CBD57, D_800CBD58, D_800CBD59, D_800CBD5A);
+        if (curR != gTextRed || curG != gTextGreen || curB != gTextBlue || curA != gTextAlpha) {
+            gTextRed = curR;
+            gTextGreen = curG;
+            gTextBlue = curB;
+            gTextAlpha = curA;
+            a = gTextAlpha;
+            gDPSetPrimColor(gfx++, 1, 0, gTextRed, gTextGreen, gTextBlue, gTextAlpha);
         }
-        if (D_800CBD5B != 0) {
-            r = D_800CBD57;
-            g = D_800CBD58;
-            b = D_800CBD59;
-            a = (D_800CBD5A - 127) * flash + 127.0f;
-            if (D_800CBD5A < a) {
-                a = D_800CBD5A;
+        if (gTextFlashOn != 0) {
+            r = gTextRed;
+            g = gTextGreen;
+            b = gTextBlue;
+            a = (gTextAlpha - 127) * flash + 127.0f;
+            if (gTextAlpha < a) {
+                a = gTextAlpha;
             }
             gDPSetPrimColor(gfx++, 1, 0, r, g, b, a);
         }
-        if (D_800CBD5D != 0) {
-            ang = D_800CBD5E + phase;
+        if (gTextWaveOn != 0) {
+            ang = gTextWavePhase + phase;
             wave = (cosf((ang & 0xFF) * 0.02454369329f) + 1.0f) * 1.5f; // 2*pi/256 per step
             phase += 0x4E;
         }
         if (str[i] == 0xBC) {
-            D_800CBD50 = 0xFF;
+            gTextControlCode = 0xFF;
         } else {
             font = 0;
-            c = func_15042C40(str[i]);
+            c = text_findGlyph(str[i]);
             if (c > 0xA0) {
-                D_800CBD50 = c;
+                gTextControlCode = c;
             } else {
-                D_800CBD50 = 0xFF;
+                gTextControlCode = 0xFF;
             }
         }
-        switch (D_800CBD50) {
+        switch (gTextControlCode) {
             case 0xA1:
-                D_800CBD5B = 0;
+                gTextFlashOn = 0;
                 curR = origR;
                 curG = origG;
                 curB = origB;
-                D_800CBD5D = 0;
+                gTextWaveOn = 0;
                 break;
             case 0xA2:
                 curR = 0xFF;
@@ -246,12 +246,12 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 curB = 0;
                 break;
             case 0xA6:
-                D_800CBD5B = 1;
-                D_800CBD5C += D_800BE9E4 * 8;
-                flash = (cosf(D_800CBD5C * 0.02454369329f) + 1.0f) * 0.5f;
+                gTextFlashOn = 1;
+                gTextFlashPhase += D_800BE9E4 * 8;
+                flash = (cosf(gTextFlashPhase * 0.02454369329f) + 1.0f) * 0.5f;
                 break;
             case 0xA7:
-                D_800CBD5D = 1;
+                gTextWaveOn = 1;
                 break;
             case 0xA8:
                 tex = &D_800915DC;
@@ -291,19 +291,19 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 break;
             case 0xB2:
                 tex = &D_800916AC;
-                frame = (D_800CBD4E >> 8) & 3;
+                frame = (gTextAnimClock >> 8) & 3;
                 break;
             case 0xB4:
                 tex = &D_800916C8;
-                frame = (D_800CBD4E >> 8) & 3;
+                frame = (gTextAnimClock >> 8) & 3;
                 break;
             case 0xB3:
                 tex = &D_800916E4;
-                frame = (D_800CBD4E >> 8) & 3;
+                frame = (gTextAnimClock >> 8) & 3;
                 break;
             case 0xB5:
                 tex = &D_80091700;
-                frame = (D_800CBD4E >> 8) & 3;
+                frame = (gTextAnimClock >> 8) & 3;
                 break;
             case 0xB6:
                 tex = &D_80091710;
@@ -327,10 +327,10 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 break;
             case 0xBB:
                 tex = &D_80091764;
-                frame = (D_800CBD4E >> 10) & 1;
+                frame = (gTextAnimClock >> 10) & 1;
                 break;
             case 0xB1:
-                frame = (D_800CBD4E >> 8) % 10;
+                frame = (gTextAnimClock >> 8) % 10;
                 tex = &D_80091690;
                 break;
         }
@@ -348,8 +348,8 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 f32 dx;
                 f32 dy;
 
-                func_150415E0(c, &w, &h, &yOff, &noCombine, &scale);
-                if (D_800CBD5D != 0) {
+                text_getIconSize(c, &w, &h, &yOff, &noCombine, &scale);
+                if (gTextWaveOn != 0) {
                     yOff += wave;
                 }
                 dx = D_800BE628[D_80082FA4].scaleX * ((w >> 1) * scale) * D_800380A0;
@@ -373,7 +373,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                     gfx = func_15095A48(gfx, &sprite, x, y - yOff);
                 }
                 gSPDisplayList(gfx++, D_80087408);
-                gSPDisplayList(gfx++, D_800859A0);
+                gSPDisplayList(gfx++, gText2DSetupDL);
                 D_800D2DAB = 0;
                 y -= dy;
                 x += dx * 0.5f;
@@ -391,15 +391,15 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                     extern f32 D_800380A4;
 
                 gy = 0.0f;
-                w = D_80085994[font][c].w;
-                h = D_80085994[font][c].h;
+                w = gFontGlyphs[font][c].w;
+                h = gFontGlyphs[font][c].h;
                 sx = scaleX * 0.000244140625f;
                 sy = scaleY * 0.000244140625f;
-                if (D_800CBD5D != 0) {
+                if (gTextWaveOn != 0) {
                     gy += wave;
                 }
-                x += D_80085994[font][c].x * D_800380A0 * sx;
-                y += (D_80085994[font][c].y - gy) * D_800380A4 * sy;
+                x += gFontGlyphs[font][c].x * D_800380A0 * sx;
+                y += (gFontGlyphs[font][c].y - gy) * D_800380A4 * sy;
                 ix = scaleX;
                 iy = scaleY;
                 if (D_800BE628[D_80082FA4].left <= x + w * D_800380A0 && x < D_800BE628[D_80082FA4].right &&
@@ -410,7 +410,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                         gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, ((w + 7) >> 3), 0, 3, 0, G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
                         gDPSetTileSize(gfx++, 3, 0, 0, (((w + 7) & 0xFFF8) - 1) << 2, h << 2);
                     }
-                    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, D_80085990[font][0] + c * 0xE0); // matching: a byte offset; D_80085990[font][c] changes the frame
+                    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, gFontBitmaps[font][0] + c * 0xE0); // matching: a byte offset; gFontBitmaps[font][c] changes the frame
                     gDPLoadBlock(gfx++, 1, 0, 0, ((((w + 7) & 0xFFF8) * (h + 1) + 1) >> 1) - 1, 0);
                     yi = y;
                     gSPScisTextureRectangle(gfx++,
@@ -419,15 +419,15 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                         ((s32)(f32)((h * iy) / 4096) + yi) * 4,
                         3, 0, ((-(s32)((y - yi) * 32.0f) * 4096) + 0x20000) / iy, dsdx, dtdy);
                 }
-                y -= (D_80085994[font][c].y - gy) * D_800380A4 * sx;
-                x += (D_80085994[font][c].w - 1) * D_800380A0 * sy;
+                y -= (gFontGlyphs[font][c].y - gy) * D_800380A4 * sx;
+                x += (gFontGlyphs[font][c].w - 1) * D_800380A0 * sy;
                 }
             }
             i++;
             prevW = w;
             prevH = h;
             if (gfx != NULL) {
-                if ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) {
+                if ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) {
                     full = 1;
                 } else {
                     full = 0;
@@ -443,10 +443,10 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
 }
 
 /*
- * Measures str as drawn by func_150417AC at scale 1.0: the widest line, the total height (lines of at
+ * Measures str as drawn by text_drawString at scale 1.0: the widest line, the total height (lines of at
  * least 12) and how far icons are raised above the baseline (depth), all in screen units.
  */
-void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
+void text_measureString(u8 *str, s32 *width, s32 *height, s32 *depth) {
     s32 maxWidth;
     s32 lineHeight;
     s32 i;
@@ -471,7 +471,7 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
                 i += 2;
                 continue;
             }
-            c = func_15042C40(str[i]);
+            c = text_findGlyph(str[i]);
             if (font != 1) {
                 isGlyph = 0;
                 if (c == 0x60) {
@@ -488,7 +488,7 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
                     s32 noCombine;
                     f32 scale;
                     s32 iconHeight;
-                    func_150415E0(c, &w, &h, &yOffset, &noCombine, &scale);
+                    text_getIconSize(c, &w, &h, &yOffset, &noCombine, &scale);
                     *width += w * scale;
                     iconHeight = (s32)((s32)(h * scale) - yOffset) + 1;
                     if (lineHeight < iconHeight) {
@@ -516,8 +516,8 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
                 isGlyph = 1;
             }
             if (isGlyph) {
-                *width += D_80085994[font][c].w + D_80085994[font][c].x - 1;
-                glyphHeight = D_80085994[font][c].h + D_80085994[font][c].y;
+                *width += gFontGlyphs[font][c].w + gFontGlyphs[font][c].x - 1;
+                glyphHeight = gFontGlyphs[font][c].h + gFontGlyphs[font][c].y;
                 if (lineHeight <= glyphHeight) {
                     lineHeight = glyphHeight;
                 }
@@ -535,7 +535,7 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
 }
 
 /* Maps a character to its glyph index in the font charset; lowercase folds to uppercase, space is 0x60. */
-s32 func_15042C40(u8 ch) {
+s32 text_findGlyph(u8 ch) {
     s32 i;
     u8 c;
     s32 original;
@@ -552,7 +552,7 @@ s32 func_15042C40(u8 ch) {
     }
 
     for (i = 0; i < 95; i++) {
-        if (c == D_80085930[i]) {
+        if (c == gFontCharset[i]) {
             return i;
         }
     }

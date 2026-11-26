@@ -236,7 +236,7 @@ s32 func_151607A4(LightEffect *effect) {
 
     if (flicker->count != 0) {
         if (flicker->delay < 0.0f) {
-            flicker->level += flicker->rate * D_800BE9A4;
+            flicker->level += flicker->rate * gFrameDelta;
             if (flicker->peak < flicker->level) {
                 flicker->level = flicker->peak;
                 flicker->count--;
@@ -245,7 +245,7 @@ s32 func_151607A4(LightEffect *effect) {
                 }
             }
         } else {
-            flicker->delay -= D_800BE9A4;
+            flicker->delay -= gFrameDelta;
         }
     } else if (func_150ADA68() < 0.005000000354f) {
         flicker->count = (func_150ADA20() % 5U) + 1;
@@ -927,7 +927,7 @@ void func_151621B8(ColourPulseEffect *object) {
         (u8)(pulse->base.y + (sine * pulse->amplitude.y)),
         (u8)(pulse->base.z + (sine * pulse->amplitude.z)),
         0);
-    pulse->phase += pulse->speed * D_800BE9A4;
+    pulse->phase += pulse->speed * gFrameDelta;
     pulse->phase = func_15144B68(pulse->phase);
 }
 
@@ -970,7 +970,7 @@ s32 func_15162510(LightEffect *effect) {
     effect->light->color[1] = pulse->base.y + (sine * pulse->amplitude.y);
     effect->light->color[2] = pulse->base.z + (sine * pulse->amplitude.z);
 
-    pulse->phase += pulse->speed * D_800BE9A4;
+    pulse->phase += pulse->speed * gFrameDelta;
     pulse->phase = func_15144B68(pulse->phase);
     return 1;
 }
@@ -1131,7 +1131,7 @@ s32 func_15162B28(LightEffect *effect) {
             D_8008B364[callback](effect, state);
         }
     }
-    cycle->time += D_800BE9A4;
+    cycle->time += gFrameDelta;
     while (cycle->period < cycle->time) {
         cycle->time -= cycle->period;
     }
@@ -1219,7 +1219,7 @@ s32 func_151630F4(LightEffect *effect) {
         }
     }
     if (storm->flashes > 0) {
-        storm->flashTimer -= D_800BE9A4;
+        storm->flashTimer -= gFrameDelta;
         if (storm->flashTimer < 0.0f) {
             storm->level = func_150ADA68() * storm->flashRange + storm->flashMin;
             storm->flashTimer = func_150ADA68() * storm->flashGapRange + storm->flashGapMin;
@@ -1233,7 +1233,7 @@ s32 func_151630F4(LightEffect *effect) {
             storm->flashes--;
         }
     } else {
-        storm->waitTimer -= D_800BE9A4;
+        storm->waitTimer -= gFrameDelta;
         if (storm->waitTimer < 0.0f) {
             storm->flashes = func_150ADA20() % (storm->flashesRange + 1) + storm->flashesMin;
             storm->flashTimer = 0.0f;
@@ -1331,7 +1331,7 @@ s32 func_15163704(LightEffect *effect) {
     sine = sinf(pulse->phase);
     effect->light->radius = pulse->base + (pulse->amplitude * sine);
 
-    pulse->phase += pulse->speed * D_800BE9A4;
+    pulse->phase += pulse->speed * gFrameDelta;
     pulse->phase = func_15144B68(pulse->phase);
 
     if (pulse->phase > 3.141592741f) {
@@ -1470,13 +1470,13 @@ void func_15163CF8(LightPulse *pulse, LightEffect *effect) {
     f32 sine = sinf(pulse->phase);
 
     effect->light->radius = pulse->base + (pulse->amplitude * sine);
-    pulse->phase = pulse->phase + (pulse->speed * D_800BE9A4);
+    pulse->phase = pulse->phase + (pulse->speed * gFrameDelta);
     pulse->phase = func_15144B68(pulse->phase);
 }
 
 /* Sets the intensity from the jitter state, picking a new random target when its timer runs out. */
 void func_15163DEC(LightEffect *effect, LightJitter *jitter) {
-    jitter->timer = jitter->timer - D_800BE9A4;
+    jitter->timer = jitter->timer - gFrameDelta;
     if (jitter->timer < 0.0f) {
         jitter->timer = func_150ADA68() * jitter->interval;
         if ((func_150ADA20() & 3) != 0) {

@@ -10,7 +10,7 @@ void func_150D13A0(Actor *arg0) {
     arg0->speed *= 0.97f;
     arg0->lean_angle += arg0->unk148;
     arg0->unk148 *= 0.95f;
-    func_15059C84(arg0);
+    actor_moveHorizontal(arg0);
 }
 
 void func_150D1410(Actor *arg0) {

@@ -41,7 +41,7 @@ s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
 
 /* Answers query `query` about record `slot`; `msg` carries the query's parameters.
  * Queries 6 and 13 take an id whose bits 12-15 select its kind: 0x2000 is an object in
- * movement_obj (looked up by func_1505EEF4), 0x9000 a zones record. */
+ * movement_obj (looked up by actor_findOnPath), 0x9000 a zones record. */
 s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
     switch (query) {
     case 6:
@@ -55,7 +55,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             id = msg->params[0] & 0xFFFF0FFF;
             switch (msg->params[0] & 0xF000) {
             case 0x2000:
-                obj = func_1505EEF4(id);
+                obj = actor_findOnPath(id);
                 if (obj == NULL) {
                     return 0;
                 }
@@ -139,7 +139,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             id = msg->params[0] & 0xFFFF0FFF;
             switch (msg->params[0] & 0xF000) {
             case 0x2000:
-                obj = func_1505EEF4(id);
+                obj = actor_findOnPath(id);
                 result = func_150A2EE4(obj - movement_obj, slot);
                 break;
             case 0x9000:

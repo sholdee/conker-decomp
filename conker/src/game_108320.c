@@ -80,10 +80,10 @@ s32 func_150DB114(BeamQuad *effect) {
     beam->vel.x *= beam->damping;
     beam->vel.y *= beam->damping;
     beam->vel.z *= beam->damping;
-    effect->pos.x += beam->vel.x * D_800BE9A4;
-    effect->pos.y += beam->vel.y * D_800BE9A4;
-    effect->pos.z += beam->vel.z * D_800BE9A4;
-    beam->scaleX += beam->scaleXRate * D_800BE9A4;
+    effect->pos.x += beam->vel.x * gFrameDelta;
+    effect->pos.y += beam->vel.y * gFrameDelta;
+    effect->pos.z += beam->vel.z * gFrameDelta;
+    beam->scaleX += beam->scaleXRate * gFrameDelta;
     if (beam->scaleX > 1.2f) {
         beam->scaleX = 1.2f;
         beam->scaleXRate = -beam->scaleXRate;
@@ -91,7 +91,7 @@ s32 func_150DB114(BeamQuad *effect) {
         beam->scaleX = 0.8f;
         beam->scaleXRate = -beam->scaleXRate;
     }
-    beam->scaleY += beam->scaleYRate * D_800BE9A4;
+    beam->scaleY += beam->scaleYRate * gFrameDelta;
     if (beam->scaleY > 1.2f) {
         beam->scaleY = 1.2f;
         beam->scaleYRate = -beam->scaleYRate;
@@ -99,7 +99,7 @@ s32 func_150DB114(BeamQuad *effect) {
         beam->scaleY = 0.8f;
         beam->scaleYRate = -beam->scaleYRate;
     }
-    beam->size += beam->sizeRate * D_800BE9A4;
+    beam->size += beam->sizeRate * gFrameDelta;
     effect->halfWidth = beam->size * beam->scaleX;
     effect->halfHeight = beam->size * beam->scaleY;
     alpha -= beam->fadeRate;

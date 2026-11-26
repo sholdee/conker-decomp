@@ -45,7 +45,7 @@ typedef struct {
 
 
 /*
- * Per-frame update of a particle emitter effect: accumulates rate * scale * D_800BE9A4 and spawns one
+ * Per-frame update of a particle emitter effect: accumulates rate * scale * gFrameDelta and spawns one
  * particle per whole unit at a random point of the emitter's region, optionally snapped to the ground.
  */
 void func_151A5660(u8 *effect) {
@@ -67,7 +67,7 @@ void func_151A5660(u8 *effect) {
     if (emitter->zone != NULL && func_151464B8(emitter->zone) != 0) {
         return;
     }
-    emitter->pending += emitter->scale * emitter->rate * D_800BE9A4;
+    emitter->pending += emitter->scale * emitter->rate * gFrameDelta;
     if (emitter->pending > 1.0f) {
         particle.maxC = 0x6231;
         particle.minC = 0x1A4D;
@@ -200,7 +200,7 @@ void func_151A5CEC(TimedEffect *arg0) {
 
 /* Releases a sound handle. */
 void func_151A5D2C(u16 soundHandle) {
-    func_100111C8(soundHandle);
+    sound_stop(soundHandle);
 }
 
 /*
@@ -394,7 +394,7 @@ void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 
         }
     }
     if (playSound) {
-        func_1000FA64(0x1AA, emitter->x, emitter->y, emitter->z, 0x4000, 1000, 750, func_1000EF40, emitter,
+        sound_addDynamicSound(0x1AA, emitter->x, emitter->y, emitter->z, 0x4000, 1000, 750, func_1000EF40, emitter,
                       0, 8, func_150ADA20() & 0x300);
     }
 }

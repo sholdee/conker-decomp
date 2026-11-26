@@ -98,7 +98,7 @@ EffectParticle *func_15100600(Actor *owner, const Vec3f *vec1, const Vec3f *vec2
     data.unk88 = 20.0f;
     data.unk8C = 0.400000006f;
     if (owner->CameraPtr != NULL) {
-        data.sound = func_10010F30(0x4D0, 2000, 0x40, 0, 0);
+        data.sound = sound_play(0x4D0, 2000, 0x40, 0, 0);
     } else {
         data.sound = 0;
     }
@@ -361,7 +361,7 @@ void func_15101090(RayBeam *beam) {
 
     // matching: tested as u16 but passed as s16, so IDO reuses the lhu without an andi
     if (*(u16 *)&data->unk90) {
-        func_100111C8(data->unk90);
+        sound_stop(data->unk90);
     }
     if (data->hitFx != NULL) {
         func_1516972C(&data->hitFx->head.header);
@@ -916,16 +916,16 @@ s32 func_151022AC(Owner151022AC *obj) {
     Sub151022AC_34 *child;
 
     state = &obj->flicker;
-    state->angle += state->rate * D_800BE9A4;
+    state->angle += state->rate * gFrameDelta;
     state->angle = func_15144B68(state->angle);
-    state->rotation += state->velocity * D_800BE9A4;
+    state->rotation += state->velocity * gFrameDelta;
     while (state->rotation > 32767.0f) {
         state->rotation -= 65536.0f;
     }
     while (state->rotation < -32768.0f) {
         state->rotation += 65536.0f;
     }
-    state->timer -= D_800BE9A4;
+    state->timer -= gFrameDelta;
     if (state->timer < 0.0f) {
         state->timer = func_150ADA68() * state->timerRange;
         state->targetVelocity = func_150ADA68() * (state->velocityRange + state->velocityRange) - state->velocityRange;
@@ -936,7 +936,7 @@ s32 func_151022AC(Owner151022AC *obj) {
         quad = state->linked28;
         quad->width = quad->height = (func_150ADA68() * 0.2f + 0.4f) * state->scale;
     }
-    state->alphaTimer -= D_800BE9A4;
+    state->alphaTimer -= gFrameDelta;
     if (state->alphaTimer < 0.0f) {
         state->alphaTimer = func_150ADA68() * state->alphaTimerRange;
         state->targetAlpha = func_150ADA68() * state->alphaRange + state->alphaBase;
@@ -985,8 +985,8 @@ s32 func_151025F4(Owner151025F4 *obj, s32 arg1) {
     sinY = sinf(wobble->phase[1]);
     wobble->offset[0] = wobble->amplitude[0] * sinX + wobble->base[0];
     wobble->offset[1] = wobble->amplitude[1] * sinY + wobble->base[1];
-    wobble->phase[0] += wobble->speed[0] * D_800BE9A4;
-    wobble->phase[1] += wobble->speed[1] * D_800BE9A4;
+    wobble->phase[0] += wobble->speed[0] * gFrameDelta;
+    wobble->phase[1] += wobble->speed[1] * gFrameDelta;
     wobble->phase[0] = func_15144B68(wobble->phase[0]);
     wobble->phase[1] = func_15144B68(wobble->phase[1]);
     return 1;

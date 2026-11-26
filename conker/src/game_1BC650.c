@@ -197,7 +197,7 @@ AnchorEmitter *func_1518F5D0(Actor *owner, const AnchorEmitterTemplate *tmpl, s1
             dest->child = NULL;
         }
         func_151D2AB0(dest->tmpl.anchorSet);
-        func_1000FA64(0x4D, owner->xpos, owner->ypos, owner->zpos, 15000, 2000, 800,
+        sound_addDynamicSound(0x4D, owner->xpos, owner->ypos, owner->zpos, 15000, 2000, 800,
                       func_1518E298, emitter, (s32)owner, 0, 0);
     }
     return emitter;
@@ -208,7 +208,7 @@ s32 func_1518F7C4(AnchorEmitter *emitter) {
     AnchorEmitterParams *params;
 
     params = &emitter->params;
-    params->accum += (params->tmpl.rate + func_150ADA68() * params->tmpl.rateRange) * D_800BE9A4;
+    params->accum += (params->tmpl.rate + func_150ADA68() * params->tmpl.rateRange) * gFrameDelta;
     func_1518F8E0(emitter);
     if (params->updateFunc != -1) {
         return D_8008D67C[params->updateFunc](emitter);

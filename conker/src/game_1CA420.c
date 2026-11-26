@@ -8,7 +8,7 @@
  * fixed rate, ages them and draws them as a textured strip. Trails are started either
  * directly (func_1519D030) or by a task that waits until the owner has its matrices.
  *
- * Frame timing globals: D_800BE9A4 is the frame time step, D_800BE9A8 its reciprocal and
+ * Frame timing globals: gFrameDelta is the frame time step, gFrameDeltaInv its reciprocal and
  * D_800BE9E4 the number of frames elapsed.
  */
 
@@ -170,17 +170,17 @@ s32 func_1519D240(MatrixTrail *trail) {
         same = (MatrixTrailPoint *)((u8 *)points + offset);
         delay = point->delay;
         point->vel.x *= data->drag;
-        point->vel.y += data->gravity * D_800BE9A4;
+        point->vel.y += data->gravity * gFrameDelta;
         point->vel.z *= data->drag;
-        point->pos.x += same->vel.x * D_800BE9A4;
-        point->pos.y += same->vel.y * D_800BE9A4;
-        point->pos.z += same->vel.z * D_800BE9A4;
+        point->pos.x += same->vel.x * gFrameDelta;
+        point->pos.y += same->vel.y * gFrameDelta;
+        point->pos.z += same->vel.z * gFrameDelta;
         if (delay > 0) {
             point->delay = delay - D_800BE9E4;
         } else {
             point->life -= D_800BE9E4 * data->lifeDecay;
         }
-        point->width += D_800BE9A4 * data->widthGrowth;
+        point->width += gFrameDelta * data->widthGrowth;
         if (point->life < 0) {
             /* Everything from the head up to this point is dead too. */
             data->flags &= ~2;
@@ -269,10 +269,10 @@ s32 func_1519D454(MatrixTrail *trail) {
         }
         return 1;
     }
-    data->spawnCount += data->spawnRate * D_800BE9A4;
+    data->spawnCount += data->spawnRate * gFrameDelta;
     if (data->spawnCount > 1.0f) {
         /* Emit the owed points evenly between the last point and the emitter, oldest first. */
-        time = data->time + D_800BE9A4;
+        time = data->time + gFrameDelta;
         invCount = 1.0f / data->spawnCount;
         pos = data->lastPos;
         timeStep = time * invCount;
@@ -282,9 +282,9 @@ s32 func_1519D454(MatrixTrail *trail) {
         dz = trail->head.tmpl.pos.z - data->lastPos.z;
         dw = data->width - width;
         if (0) {} // matching: splits uopt basic blocks for the original register allocation
-        vel.x = (trail->head.tmpl.pos.x - prevX) * D_800BE9A8;
+        vel.x = (trail->head.tmpl.pos.x - prevX) * gFrameDeltaInv;
         vel.y = 0.0f;
-        vel.z = (trail->head.tmpl.pos.z - prevZ) * D_800BE9A8;
+        vel.z = (trail->head.tmpl.pos.z - prevZ) * gFrameDeltaInv;
         moveX = dx * invCount;
         stepY = dy * invCount;
         stepZ = dz * invCount;

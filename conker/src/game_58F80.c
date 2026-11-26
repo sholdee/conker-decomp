@@ -4,21 +4,21 @@
  * .bss, linked at 0x800C3E70..0x800C3EE0 in this order. Defined before conker/actor.h declares them:
  * IDO lays out .bss in first-declaration order, and an extern there would count.
  */
-static u8 D_800C3E70;  // cleared at the end of func_1502BEE4
+static u8 D_800C3E70;  // cleared at the end of actor_updateObjects
 static s32 D_800C3E74; // a bit for each character that some object stands on
 u8 dc_glbl_CharNum;
-u16 D_800C3E7A;
-u16 D_800C3E7C;
-u8 *D_800C3E80[2];
-u8 *D_800C3E88;
-u8 *D_800C3E8C;
+u16 gBoneMatricesUsed;
+u16 gBonePoolSize;
+u8 *gBonePools[2];
+u8 *gBonePoolCursor;
+u8 *gBonePoolStart;
 u8 D_800C3E90;
-static Mtx D_800C3E98; // the modelview matrix of the object being drawn
+static Mtx gObjectIdentityMtx; // the modelview matrix of the object being drawn
 
 #include "functions.h"
 #include "variables.h"
 
-Gfx D_80084160[] = {
+Gfx gObjectPassBeginDL[] = {
     gsDPPipeSync(),
     gsSPMatrix(OS_K0_TO_PHYSICAL(&D_80089470), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
     gsSPSetGeometryMode(G_SHADE | G_LIGHTING | G_SHADING_SMOOTH | 0x400000),
@@ -26,7 +26,7 @@ Gfx D_80084160[] = {
     gsDPSetConvert(0, 0, 0, 0, 0, 255),
     gsSPEndDisplayList(),
 };
-Gfx D_80084190[] = {
+Gfx gObjectPassEndDL[] = {
     gsDPPipeSync(),
     gsSPClearGeometryMode(G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_LOD | 0x400000),
     gsDPSetEnvColor(0, 0, 0, 0),
@@ -43,12 +43,12 @@ extern s32 D_8008857C;
 /* Other files */
 
 /* Emits the display list of every object drawn in one render pass (mode) for one player. */
-Gfx *func_1502BAD0(Gfx *gdl, s32 mode, s16 player) {
+Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player) {
     Actor *obj;
     s32 i;
     s32 state;
 
-    gSPDisplayList(gdl++, D_80084160);
+    gSPDisplayList(gdl++, gObjectPassBeginDL);
     obj = movement_obj;
     for (i = 0; i != 25; i++, obj++) {
         D_8003C8E0 = (i & 0xFFFFFF) | 0x01000000;
@@ -75,21 +75,21 @@ Gfx *func_1502BAD0(Gfx *gdl, s32 mode, s16 player) {
             if (obj->drawtype == 7 || obj->drawtype == 1) {
                 continue;
             }
-            if (obj->drawtype == 0 && func_1506196C(obj, player) < 0xFF) {
+            if (obj->drawtype == 0 && actor_getAlpha(obj, player) < 0xFF) {
                 continue;
             }
         } else if (mode == 2 && obj->drawtype != 2) {
             if (obj->drawtype == 7 || (obj->drawtype != 0 && obj->drawtype != 1)) {
                 continue;
             }
-            if (obj->drawtype == 0 && func_1506196C(obj, player) == 0xFF) {
+            if (obj->drawtype == 0 && actor_getAlpha(obj, player) == 0xFF) {
                 continue;
             }
         }
         if (obj->drawtype == 2) {
-            gdl = func_1502C408(gdl, i);
+            gdl = actor_drawSprite(gdl, i);
         } else {
-            gdl = func_1502C974(gdl, i, player, mode, 0);
+            gdl = actor_drawModel(gdl, i, player, mode, 0);
             if (i == 0) {
                 gdl = func_150368C4(gdl, i, player);
             }
@@ -103,16 +103,16 @@ Gfx *func_1502BAD0(Gfx *gdl, s32 mode, s16 player) {
     } else if (mode == 6) {
         gdl = func_15030E08(gdl, player, 2);
     }
-    gSPDisplayList(gdl++, D_80084190);
+    gSPDisplayList(gdl++, gObjectPassEndDL);
     D_8003C8E0 = 0;
     return gdl;
 }
 
 /* Per-frame update of one object: LOD, culling, bone matrices, fog effect and attachments. */
-void func_1502BD84(Actor *obj, s32 index) {
+void actor_updateObject(Actor *obj, s32 index) {
     obj->ob_matrix_ptr = NULL;
     if (obj->drawtype == 5) {
-        func_1502DF38(index, TRUE);
+        actor_buildRootMatrix(index, TRUE);
         return;
     }
     if (obj->character_type == 0xFF) {
@@ -122,14 +122,14 @@ void func_1502BD84(Actor *obj, s32 index) {
         return;
     }
     if (obj->drawtype == 2) {
-        func_1502C608(index);
+        actor_scrollSpriteTexture(index);
         return;
     }
     if (obj->forced_lod != 0) {
-        func_1502FBE8(obj);
+        actor_applyForcedLod(obj);
     }
-    func_1502E4C4(index);
-    func_1502DF38(index, FALSE);
+    actor_updateCulling(index);
+    actor_buildRootMatrix(index, FALSE);
     func_1503A08C(obj);
     if (obj->ob_matrix_ptr == NULL) {
         obj->unk1FC = 2;
@@ -137,14 +137,14 @@ void func_1502BD84(Actor *obj, s32 index) {
         func_150345E4(index);
         func_1503A830(obj);
     }
-    if (D_800C6660[index].state != 0) {
-        func_1503DF48(index);
+    if (gObjPartsStates[index].state != 0) {
+        model_updateParts(index);
     }
     if (obj->type != 0) {
         func_1502EEF4(index);
-        func_1502F264(index);
+        actor_followParent(index);
         if (obj->fogMode != 0) {
-            func_1502EAFC(obj);
+            actor_updateFog(obj);
         }
         if (obj->noshove & 0x4000) {
             func_150A4B04(obj);
@@ -156,7 +156,7 @@ void func_1502BD84(Actor *obj, s32 index) {
 }
 
 /* Updates every object, parents before the objects attached to them (by attachment depth). */
-void func_1502BEE4(void) {
+void actor_updateObjects(void) {
     Actor *obj;
     Actor *parent;
     s32 i;
@@ -192,7 +192,7 @@ void func_1502BEE4(void) {
                     maxDepth = depth[i];
                 }
             } else {
-                func_1502BD84(obj, i);
+                actor_updateObject(obj, i);
             }
         }
     }
@@ -206,17 +206,17 @@ void func_1502BEE4(void) {
             }
         }
         for (i = 0; i < count; i++) {
-            func_1502BD84(&movement_obj[order[i]], order[i]);
+            actor_updateObject(&movement_obj[order[i]], order[i]);
         }
     }
-    func_1502F3C8();
+    actor_carryStandingObjects();
     for (i = 0; i < 25; i++) {
         if (movement_obj[i].type != 0) {
-            func_1502F948(&movement_obj[i]);
+            actor_savePrevBones(&movement_obj[i]);
         }
     }
     func_15030468();
-    if (D_800BEAC0 == 0) {
+    if (gPaused == 0) {
         func_1507C22C(0);
     }
     D_800C3E70 = 0;
@@ -245,7 +245,7 @@ void func_1502C1A4(void) {
                 (D_800C3638 == 0 || D_800C3656[0] != 0 || func_150229E4(obj) != 0) &&
                 (obj->unk88 == 0 || obj->unkCC >= -150)) {
                 for (i = 0; i <= D_80082FA0; i++) {
-                    if (func_1506196C(obj, i) != 0) {
+                    if (actor_getAlpha(obj, i) != 0) {
                         visible = TRUE;
                     }
                 }
@@ -275,13 +275,13 @@ void func_1502C1A4(void) {
 }
 
 /* Resets this frame buffer's bone-matrix pool. */
-void func_1502C380(void) {
-    D_800C3E8C = D_800C3E88 = D_800C3E80[D_800BE9C0];
-    D_800C3E7A = 0;
+void actor_resetBonePool(void) {
+    gBonePoolStart = gBonePoolCursor = gBonePools[D_800BE9C0];
+    gBoneMatricesUsed = 0;
 }
 
 /* Texture index of a sprite object (out-of-range values fall back to 11). */
-s32 func_1502C3BC(s32 index) {
+s32 actor_getSpriteTexture(s32 index) {
     s32 tex = movement_obj[index].unk136;
 
     if (tex >= 70) {
@@ -291,7 +291,7 @@ s32 func_1502C3BC(s32 index) {
 }
 
 /* Draws a kind-2 object as a textured sprite. */
-Gfx *func_1502C408(Gfx *gdl, s32 index) {
+Gfx *actor_drawSprite(Gfx *gdl, s32 index) {
     SpriteParams sprite;
     s32 w;
     s32 h;
@@ -301,7 +301,7 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
     s32 alpha;
     u8 size;
 
-    if (D_800BEAC0 != 0) {
+    if (gPaused != 0) {
         return gdl;
     }
     alpha = movement_obj[index].unk7;
@@ -314,7 +314,7 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
     if (movement_obj[index].type == 3) {
         h = w = size * 15;
     }
-    tex = func_1502C3BC(index);
+    tex = actor_getSpriteTexture(index);
     gSPDisplayList(gdl++, D_800873D0);
     gDPPipeSync(gdl++);
     if (gdl != NULL) { // matching: the empty test changes the register choice of the spilled temps
@@ -333,16 +333,16 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
 }
 
 /* Advances a sprite object's texture scroll, wrapping at the texture's period. */
-void func_1502C608(s32 index) {
+void actor_scrollSpriteTexture(s32 index) {
     s32 period;
     s16 scroll;
     s16 speed;
 
-    if (D_800BEAC0 == 0) {
+    if (gPaused == 0) {
         scroll = movement_obj[index].texScroll;
         speed = movement_obj[index].texScrollSpeed;
         if (movement_obj[index].unk7 != 0) {
-            period = D_8008CA4C[func_1502C3BC(index)]->frameCount << 8;
+            period = D_8008CA4C[actor_getSpriteTexture(index)]->frameCount << 8;
             scroll += speed;
             if (scroll >= period) {
                 scroll -= period;
@@ -355,7 +355,7 @@ void func_1502C608(s32 index) {
 }
 
 /* Switches the object to the LOD model for its distance from the player's camera. */
-void func_1502C6E8(s32 index, s16 player, s32 mode) {
+void actor_selectLod(s32 index, s16 player, s32 mode) {
     Camera *cam;
     Actor *obj;
     s32 special;
@@ -411,7 +411,7 @@ void func_1502C6E8(s32 index, s16 player, s32 mode) {
                 lod = 1;
             }
         }
-    } else if (D_800BE616 != 0) {
+    } else if (gIsMultiplayer != 0) {
         lod = 1;
     }
     if (D_800C35EA[0] == 1) {
@@ -435,7 +435,7 @@ void func_1502C6E8(s32 index, s16 player, s32 mode) {
 }
 
 /* Draws one object's model for one player; drops the output if the display list would overflow. */
-Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
+Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     s32 lod;
     s32 alpha;
     s32 colour[4];
@@ -452,25 +452,25 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     if ((obj->unk74 & (1 << player)) == (1 << player)) {
         return gdl;
     }
-    if (func_1506196C(obj, player) == 0) {
+    if (actor_getAlpha(obj, player) == 0) {
         return gdl;
     }
     if (obj->ob_matrix_ptr == NULL) {
         return gdl;
     }
     if (mode != 4 && mode != 5 && mode != 3) {
-        func_1502C6E8(index, player, mode);
+        actor_selectLod(index, player, mode);
         lod = obj->current_lod;
     } else {
         func_150849CC(obj, &lod);
     }
     func_1502D54C(index, colour);
     if (D_800B0DF0->unk3E != 0) {
-        func_1502D630(obj, colour, player);
+        actor_getFogAlpha(obj, colour, player);
     } else {
         colour[3] = 0xFF;
     }
-    alpha = func_1506196C(obj, player);
+    alpha = actor_getAlpha(obj, player);
     if (alpha < 0xFF) {
         if (obj->CameraPtr != NULL && obj->CameraPtr->Mode == 0x100 && player != obj->playernumber) {
             alpha = 0xFF;
@@ -482,9 +482,9 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     } else {
         model = obj->ob_matrix_ptr;
     }
-    gdl = func_1502CCFC(gdl, index, player, model, alpha, colour, mode, wrap);
+    gdl = actor_emitModel(gdl, index, player, model, alpha, colour, mode, wrap);
     // matching: IDO materialises the comparison as a 0/1 value only through this flag
-    if (gdl - D_800BE9C8[D_800BE9C0] > D_800BEBA4) {
+    if (gdl - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4) {
         overflow = TRUE;
     } else {
         overflow = FALSE;
@@ -496,7 +496,7 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
 }
 
 /* Gathers the colours an object is drawn with: the player's prim/env colours and the object's fog. */
-void func_1502CC34(Actor *obj, s32 player, s32 alpha, s32 *colour, s32 *primR, s32 *primG, s32 *primB,
+void actor_getDrawColours(Actor *obj, s32 player, s32 alpha, s32 *colour, s32 *primR, s32 *primG, s32 *primB,
                    s32 *envR, s32 *envG, s32 *envB, s32 *fogR, s32 *fogG, s32 *fogB, s32 *fogA) {
     u8 *prim;
     u8 *env;
@@ -514,12 +514,12 @@ void func_1502CC34(Actor *obj, s32 player, s32 alpha, s32 *colour, s32 *primR, s
     *fogB = 0;
     *fogA = colour[3];
     if (obj->fogMode != 0) {
-        func_1502EC34(obj, fogR, fogG, fogB, fogA);
+        actor_getFogColour(obj, fogR, fogG, fogB, fogA);
     }
 }
 
 /* Emits an object's model: segments, geometry mode, lighting, colours and each part's display list. */
-Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap) {
+Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap) {
     Actor *obj;
     s32 i;
     s32 lod;
@@ -548,7 +548,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
     } else {
         lod = obj->current_lod;
     }
-    if (func_1503DA9C(obj, id, lod, (mode == 3) ? 0 : 1) != 0) {
+    if (model_loadForActor(obj, id, lod, (mode == 3) ? 0 : 1) != 0) {
         return gdl;
     }
     fb = D_800BE9C0;
@@ -556,15 +556,15 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
         return gdl;
     }
     if (wrap) {
-        gSPDisplayList(gdl++, D_80084160);
+        gSPDisplayList(gdl++, gObjectPassBeginDL);
     } else {
         gDPPipeSync(gdl++);
     }
-    gdl = func_1502F01C(gdl, index);
-    gdl = func_1502F9FC(gdl, index);
+    gdl = actor_bindSwapTextures(gdl, index);
+    gdl = actor_setTextureScroll(gdl, index);
     gSPSegment(gdl++, 3, model);
     gSPSegment(gdl++, 1, obj->modelData[lod][fb] - 0x38);
-    func_1502CC34(obj, player, alpha, colour, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
+    actor_getDrawColours(obj, player, alpha, colour, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
                   &fogA);
     if (mode == 5) {
         gSPSegment(gdl++, 8, D_800832C0);
@@ -609,7 +609,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
                             &obj->unk302, 2, obj->unk1DD, lightFlags, D_800D9E28);
     }
     colourSet = -1;
-    for (i = 0; i < D_800C4778[id]; i++) {
+    for (i = 0; i < gModelDlPartCounts[id]; i++) {
         if (!(obj->unk94 & (1 << i))) {
             if (!(obj->unk98 & (1 << i))) {
                 if (colourSet != 0) {
@@ -636,9 +636,9 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
                     continue;
                 }
             } else {
-                func_151EFE88(&D_800C3E98);
-                gSPMatrix(gdl++, OS_K0_TO_PHYSICAL(&D_800C3E98), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-                gSPDisplayList(gdl++, D_800C4488[id][i]);
+                func_151EFE88(&gObjectIdentityMtx);
+                gSPMatrix(gdl++, OS_K0_TO_PHYSICAL(&gObjectIdentityMtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                gSPDisplayList(gdl++, gModelDlParts[id][i]);
             }
         }
     }
@@ -648,7 +648,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
         gdl = func_15030F94(gdl, obj, player, 1);
     }
     if (wrap) {
-        gSPDisplayList(gdl++, D_80084190);
+        gSPDisplayList(gdl++, gObjectPassEndDL);
     }
     if (mode == 0) {
         gSPGeometryMode(gdl++, G_CULL_FRONT, G_CULL_BACK);
@@ -676,7 +676,7 @@ void func_1502D54C(s32 index, s32 *colour) {
 }
 
 /* Sets colour[3] to the object's distance-fog alpha as seen from the player's view. */
-void func_1502D630(obj, colour, player)
+void actor_getFogAlpha(obj, colour, player)
     Actor *obj;
     s32 *colour;
     s32 player;
@@ -720,7 +720,7 @@ void func_1502D630(obj, colour, player)
 }
 
 /* DMAs the current frame of each animation channel into buf (anim, or obj->unk2D0 when obj is given). */
-void func_1502D824(AnimInstance *anim, Actor *obj, u8 *buf) {
+void actor_loadAnimFrames(AnimInstance *anim, Actor *obj, u8 *buf) {
     s32 frameSize;
     u32 size;
     u32 src;
@@ -738,7 +738,7 @@ void func_1502D824(AnimInstance *anim, Actor *obj, u8 *buf) {
     align = 0;
     if (obj != NULL) {
         if (obj->animseq.uh == 0xFFFF) {
-            func_1505DFDC(obj);
+            actor_stopAnim(obj);
         }
         anim = obj->unk2D0;
     }
@@ -810,7 +810,7 @@ void func_1502D824(AnimInstance *anim, Actor *obj, u8 *buf) {
 }
 
 /* Number of bone matrices computed for a model id (four fewer than its bone count for some ids). */
-s32 func_1502DB20(s32 id) {
+s32 actor_getBoneMatrixCount(s32 id) {
     switch (id) {
     case 0x3B:
     case 0x75:
@@ -826,13 +826,13 @@ s32 func_1502DB20(s32 id) {
     case 0xB1:
     case 0xB2:
     case 0xB4:
-        return D_800C4ED0[id] - 4;
+        return gModelBoneCounts[id] - 4;
     }
-    return D_800C4ED0[id];
+    return gModelBoneCounts[id];
 }
 
 /* Computes the object's bone matrices for this frame into the matrix pool (root transform mtx). */
-void func_1502DB84(MtxF mtx, s32 index) {
+void actor_computeBones(MtxF mtx, s32 index) {
     s16 cmd[42];
     s32 id;
     u8 *remap;
@@ -848,7 +848,7 @@ void func_1502DB84(MtxF mtx, s32 index) {
     remap = NULL;
     if (D_800D19A0[id] == NULL) {
         unk144 = obj->listpos_ptr;
-        if (func_1503CF20(id, 0, unk144, 1, obj->unkAC) != 0) {
+        if (model_load(id, 0, unk144, 1, obj->unkAC) != 0) {
             obj->ob_matrix_ptr = NULL;
             return;
         }
@@ -864,14 +864,14 @@ void func_1502DB84(MtxF mtx, s32 index) {
 load:
     if (func_150838EC(obj, 0, 0, 1.0f) == 0) {
     animated:
-        if (D_800C4ED0[id] < 2 || obj->unk2D0 != NULL) {
-            count = func_1502DB20(id);
-            if (D_800C3E7C * sizeof(Mtx) < D_800C3E88 + count * sizeof(Mtx) - D_800C3E8C) {
+        if (gModelBoneCounts[id] < 2 || obj->unk2D0 != NULL) {
+            count = actor_getBoneMatrixCount(id);
+            if (gBonePoolSize * sizeof(Mtx) < gBonePoolCursor + count * sizeof(Mtx) - gBonePoolStart) {
                 obj->ob_matrix_ptr = NULL;
                 return;
             }
             func_1502FD70(obj);
-            obj->ob_matrix_ptr = (void *)D_800C3E88;
+            obj->ob_matrix_ptr = (void *)gBonePoolCursor;
             {
                 s32 k;
 
@@ -879,7 +879,7 @@ load:
                     const u8 *p;
 
                     D_800C3FFA = 0;
-                    bzero(remapBuf, D_800C4ED0[id]);
+                    bzero(remapBuf, gModelBoneCounts[id]);
                     p = D_80084230[D_800D1C90[id]->unk29 - 1];
                     while (*p != 0xFF) {
                         k = p[0];
@@ -890,7 +890,7 @@ load:
                 }
             }
             func_15033FE0((GameCommand *)cmd, index);
-            func_1502D824(NULL, obj, frameBuf);
+            actor_loadAnimFrames(NULL, obj, frameBuf);
             {
                 s16 scale;
 
@@ -899,7 +899,7 @@ load:
                 } else {
                     scale = 0;
                 }
-                func_150A81D0(&D_800C3E88, mtx, obj->unk2D0, (s32)D_800C4BE0[id], count, cmd, remap, scale);
+                func_150A81D0(&gBonePoolCursor, mtx, obj->unk2D0, (s32)gModelBones[id], count, cmd, remap, scale);
             }
             obj->mod_angle = D_8008857C;
             moved = D_80088558;
@@ -927,14 +927,14 @@ load:
                     obj->unk2D0->speed[0] = f0 * 0.5f;
                 }
             }
-            D_800C3E7A += count;
+            gBoneMatricesUsed += count;
         }
     }
 }
 
 /* Builds the object's root matrix (from its parent's bone or its own transform); with
    rootOnly it is stored as the object's only bone, otherwise the full skeleton is computed. */
-void func_1502DF38(s32 index, s32 rootOnly) {
+void actor_buildRootMatrix(s32 index, s32 rootOnly) {
     MtxF mtx;
     Actor *obj;
     Actor *other;
@@ -980,7 +980,7 @@ void func_1502DF38(s32 index, s32 rootOnly) {
         }
         maxAlpha = 0;
         for (i = 0; i <= D_80082FA4; i++) {
-            alpha = func_1506196C(obj, i);
+            alpha = actor_getAlpha(obj, i);
             if (maxAlpha < alpha) {
                 maxAlpha = alpha;
             }
@@ -1056,27 +1056,27 @@ void func_1502DF38(s32 index, s32 rootOnly) {
         }
     }
     if (rootOnly) {
-        dst = D_800C3E88;
+        dst = gBonePoolCursor;
         obj->ob_matrix_ptr = dst;
         bcopy(mtx, dst, sizeof(mtx));
-        D_800C3E88 += sizeof(mtx);
-        D_800C3E7A++;
+        gBonePoolCursor += sizeof(mtx);
+        gBoneMatricesUsed++;
         return;
     }
-    func_1502DB84(mtx, index);
+    actor_computeBones(mtx, index);
 }
 
-/* Flushes this frame's bone matrices (D_800C3E7A of them) from the pool. */
-void func_1502E474(void) {
-    if (D_800C3E7A != 0) {
-        func_150A9984(D_800C3E80[D_800BE9C0], D_800C3E7A);
+/* Flushes this frame's bone matrices (gBoneMatricesUsed of them) from the pool. */
+void actor_flushBoneMatrices(void) {
+    if (gBoneMatricesUsed != 0) {
+        func_150A9984(gBonePools[D_800BE9C0], gBoneMatricesUsed);
     }
     D_800C3E90 = 1;
 }
 
 /* Visibility test of the object against each player's view; updates the per-player culled mask
-   (unk74) and reports the result per player through func_1506160C. */
-void func_1502E4C4(s32 index) {
+   (unk74) and reports the result per player through actor_fadeCommand. */
+void actor_updateCulling(s32 index) {
     Actor *obj;
     u8 id;
     MtxF *tbl;
@@ -1106,7 +1106,7 @@ void func_1502E4C4(s32 index) {
     if (D_800C3638 != 0 && D_800C3656[0] == 0 && func_150229E4(obj) == 0) {
         return;
     }
-    if (obj->playernumber != 0xFF && !(D_800D2138.playerMask & (1 << obj->playernumber))) {
+    if (obj->playernumber != 0xFF && !(gMatchState.playerMask & (1 << obj->playernumber))) {
         return;
     }
     if ((obj->unk101 & 1) == 1) {
@@ -1172,10 +1172,10 @@ void func_1502E4C4(s32 index) {
                 } else {
                     event = 9;
                 }
-                func_1506160C(obj, event, 0, 0, i);
+                actor_fadeCommand(obj, event, 0, 0, i);
             } else {
                 obj->unkF |= (1 << i) << 4;
-                func_1506160C(obj, 9, 0, 0, i);
+                actor_fadeCommand(obj, 9, 0, 0, i);
                 event = -1;
             }
             if ((obj->noshove & 0x800000) && event != 8 && D_800C35EA[0] != 1 && func_1503F904(obj, i, oldMask) != 0) {
@@ -1185,12 +1185,12 @@ void func_1502E4C4(s32 index) {
             event = 10;
         }
         if (event != -1) {
-            func_1506160C(obj, event, 1, 0, i);
+            actor_fadeCommand(obj, event, 1, 0, i);
         }
         if (!inside) {
             obj->unk74 &= ~mask;
         }
-        if (func_1506196C(obj, i) == 0) {
+        if (actor_getAlpha(obj, i) == 0) {
             obj->unk74 |= mask;
         }
         mask <<= 1;
@@ -1210,14 +1210,14 @@ void func_1502E4C4(s32 index) {
 void func_1502E9FC(Actor *obj, s32 dist) {
 }
 
-/* Fog effect modes (obj->fogMode), advanced by func_1502EAFC and turned into a fog colour by
-   func_1502EC34:
+/* Fog effect modes (obj->fogMode), advanced by actor_updateFog and turned into a fog colour by
+   actor_getFogColour:
      1    fixed colour fogLevel/fogRate/fogFade, alpha fogColor (or *(f32 *)fogColor percent)
      2/3  black fog fading out / in at fogRate
      4    fogColor pulsing (fogLevel is the phase), 5 the same while fading out
      6/7  fogColor flash: one step up (6), then fading out at fogRate (7) */
 /* Starts a pulsing fog of colour (r, g, b, a). */
-void func_1502EA0C(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 rate) {
+void actor_startFogPulse(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 rate) {
     obj->fogMode = 4;
     obj->fogLevel = 0;
     obj->fogRate = rate;
@@ -1226,26 +1226,26 @@ void func_1502EA0C(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 rate) {
 }
 
 /* Fades out the pulsing fog. */
-void func_1502EA50(Actor *obj) {
+void actor_fadeFogPulse(Actor *obj) {
     obj->fogMode = 5;
 }
 
 /* Starts black fog fading out. */
-void func_1502EA60(Actor *obj, s32 rate) {
+void actor_startFogFadeOut(Actor *obj, s32 rate) {
     obj->fogMode = 2;
     obj->fogLevel = 0xFF;
     obj->fogRate = rate;
 }
 
 /* Starts black fog fading in. */
-void func_1502EA7C(Actor *obj, s32 rate) {
+void actor_startFogFadeIn(Actor *obj, s32 rate) {
     obj->fogMode = 3;
     obj->fogLevel = 0xFF;
     obj->fogRate = rate;
 }
 
 /* Flashes fog of colour (r, g, b, a), from full strength when instant, then fades it out. */
-void func_1502EA98(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rate) {
+void actor_flashFog(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rate) {
     if (obj->fogMode != 6 && obj->fogMode != 7) {
         if (instant) {
             obj->fogLevel = 0xFF;
@@ -1259,7 +1259,7 @@ void func_1502EA98(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rate
 }
 
 /* Advances the object's fog effect by one frame. */
-void func_1502EAFC(Actor *obj) {
+void actor_updateFog(Actor *obj) {
     // matching: per-case blocks with the break after them keep the last store out of the delay slot
     switch (obj->fogMode) {
     case 2:
@@ -1314,8 +1314,8 @@ void func_1502EAFC(Actor *obj) {
     }
 }
 
-/* Fog colour (r, g, b, a) of the object's current fog effect (see func_1502EAFC for the modes). */
-void func_1502EC34(arg0, r, g, b, a)
+/* Fog colour (r, g, b, a) of the object's current fog effect (see actor_updateFog for the modes). */
+void actor_getFogColour(arg0, r, g, b, a)
 Actor *arg0;
 s32 *r;
 s32 *g;
@@ -1420,7 +1420,7 @@ void func_1502EEF4(s32 index) {
 }
 
 /* Binds the object's swappable textures to segments 6, 7 (unk6C slots), 10 and 11. */
-Gfx *func_1502F01C(Gfx *gdl, s32 index) {
+Gfx *actor_bindSwapTextures(Gfx *gdl, s32 index) {
     Actor *obj;
     u8 texIndex[2];
     s32 id;
@@ -1456,7 +1456,7 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
             }
         }
     }
-    tex = D_800C5338[obj->character_type];
+    tex = gModelTextures[obj->character_type];
     if (tex != NULL) {
         gSPSegment(gdl++, 6, tex[texIndex[0]].addr);
         gSPSegment(gdl++, 7, tex[texIndex[1]].addr);
@@ -1467,7 +1467,7 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
 }
 
 /* Moves an attached object onto its parent (or the parent's bone) and copies the parent's state. */
-void func_1502F264(s32 index) {
+void actor_followParent(s32 index) {
     Actor *obj;
     Actor *parent;
     MtxF *bone;
@@ -1515,7 +1515,7 @@ void func_1502F264(s32 index) {
 }
 
 /* Carries every object standing on another object (unk274) along with that object's surface. */
-void func_1502F3C8(void) {
+void actor_carryStandingObjects(void) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
@@ -1526,7 +1526,7 @@ void func_1502F3C8(void) {
             continue;
         }
         movement_obj[i].ypos = movement_obj[i].floorY;
-        func_1502F490(&movement_obj[movement_obj[i].stand_on_char - 1], &movement_obj[i].xpos, &movement_obj[i].ypos,
+        actor_movePointWithPlatform(&movement_obj[movement_obj[i].stand_on_char - 1], &movement_obj[i].xpos, &movement_obj[i].ypos,
                       &movement_obj[i].zpos, movement_obj[i].floorTriIndex);
         if (movement_obj[i].ypos < movement_obj[i].floorY) {
             movement_obj[i].ypos = movement_obj[i].floorY;
@@ -1538,7 +1538,7 @@ void func_1502F3C8(void) {
 
 /* Moves the point (x, y, z) with triangle tri of the platform's skinned model: finds the point's
    barycentric position in last frame's triangle and returns it from this frame's. */
-void func_1502F490(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tri) {
+void actor_movePointWithPlatform(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tri) {
     f32 diff[3];
     f32 moved[3];
     s32 bone[3];
@@ -1556,24 +1556,24 @@ void func_1502F490(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tri) {
     f32 t;
 
     id = platform->character_type;
-    if (D_800C6070[id] == NULL) {
+    if (gModelTris[id] == NULL) {
         return;
     }
     for (i = 0; i < 3; i++) {
-        vtx[i] = (Vtx *)(D_800C6070[id][tri].v[i] + D_800D19A0[id]);
+        vtx[i] = (Vtx *)(gModelTris[id][tri].v[i] + D_800D19A0[id]);
     }
     range = 0;
     found = 0;
     do {
-        if (range == D_800C5EF8[id]) {
+        if (range == gModelVtxRunCounts[id]) {
             return;
         }
         for (i = 0; i < 3; i++) {
             if (!(found & (1 << i))) {
-                if (vtx[i] >= D_800C5C08[id][range].start &&
-                    vtx[i] < D_800C5C08[id][range].start + D_800C5C08[id][range].count) {
+                if (vtx[i] >= gModelVtxRuns[id][range].start &&
+                    vtx[i] < gModelVtxRuns[id][range].start + gModelVtxRuns[id][range].count) {
                     found = (1 << i) | found;
-                    bone[i] = D_800C5C08[id][range].mtxIndex;
+                    bone[i] = gModelVtxRuns[id][range].mtxIndex;
                 }
             }
         }
@@ -1630,25 +1630,25 @@ void func_1502F490(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tri) {
 }
 
 /* Keeps a copy of the object's bone matrices in prevBones (allocated on first use). */
-void func_1502F948(Actor *obj) {
+void actor_savePrevBones(Actor *obj) {
     s32 id;
     void *copy;
 
     if ((obj->noshove & 0x4000) && obj->hit_vtx_array != 0 && obj->ob_matrix_ptr != NULL) {
         id = obj->character_type;
         if (obj->prevBones == NULL) {
-            copy = allocate_memory(D_800C4ED0[id] * sizeof(*obj->ob_matrix_ptr), 1, 1, 2);
+            copy = allocate_memory(gModelBoneCounts[id] * sizeof(*obj->ob_matrix_ptr), 1, 1, 2);
             obj->prevBones = copy;
             if (copy == NULL) {
                 return;
             }
         }
-        bcopy(obj->ob_matrix_ptr, obj->prevBones, D_800C4ED0[id] * sizeof(*obj->ob_matrix_ptr));
+        bcopy(obj->ob_matrix_ptr, obj->prevBones, gModelBoneCounts[id] * sizeof(*obj->ob_matrix_ptr));
     }
 }
 
 /* Sets the scroll of the object's two scrolling textures (tiles 5 and 4) from unk27A/unk27E. */
-Gfx *func_1502F9FC(Gfx *gdl, s32 index) {
+Gfx *actor_setTextureScroll(Gfx *gdl, s32 index) {
     s32 id;
     s32 texIndex;
     s32 i;
@@ -1674,9 +1674,9 @@ Gfx *func_1502F9FC(Gfx *gdl, s32 index) {
     } else {
         texIndex = 0;
     }
-    if (D_800C5338[id] != NULL) {
+    if (gModelTextures[id] != NULL) {
         for (i = 0; i < 2; i++) {
-            tex = &D_800C5338[id][texIndex];
+            tex = &gModelTextures[id][texIndex];
             uls = (u16)(movement_obj[index].headYaw[i] + 2);
             ult = (u16)(movement_obj[index].headPitch[i] + 2);
             lrs = (u16)(tex->width * 4 - 2);
@@ -1690,7 +1690,7 @@ Gfx *func_1502F9FC(Gfx *gdl, s32 index) {
 
 /* Applies a requested LOD model change (forced_lod), restarting the animation if the new model
    uses a different animation set. */
-void func_1502FBE8(Actor *obj) {
+void actor_applyForcedLod(Actor *obj) {
     s32 lod;
     ActorAnim *oldAnims;
     s32 model;
@@ -1715,14 +1715,14 @@ void func_1502FBE8(Actor *obj) {
         D_800C3638 = 0;
     }
     if (oldAnims != D_800D1588[model]) {
-        if (obj->animseq.uh >= D_800C5A90[model]) {
+        if (obj->animseq.uh >= gModelAnimCounts[model]) {
             obj->animseq.uh = 0xFFFF;
-            func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+            actor_playAnim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         } else {
             s32 anim = obj->animseq.uh;
 
             obj->animseq.uh = 0xFFFF;
-            func_1505E650(obj, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+            actor_playAnim(obj, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         }
     }
     if (D_800C35EA[0] == 1) {

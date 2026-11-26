@@ -23,7 +23,7 @@ void func_150D5440(Actor *obj, u8 arg1, s32 arg2) {
 
 /*
  * FollowEffect update: while the owner is low (unk28 < 8) on a type-0xE surface, emits
- * particles on both sides of it at a rate of 3-4 per second (scaled by D_800BE9A4).
+ * particles on both sides of it at a rate of 3-4 per second (scaled by gFrameDelta).
  */
 void func_150D54C8(FollowEffect *effect) {
     Actor *owner;
@@ -48,7 +48,7 @@ void func_150D54C8(FollowEffect *effect) {
     }
     if (owner->shad < 8.0f && (owner->floorMaterial & 0x1F) == 0xE) {
         // matching: (f32)1 keeps the multiply by 1.0 that a 1.0f literal would fold away
-        data->spawnAccum += (3.000000238f + func_150ADA68() * (f32)1) * D_800BE9A4;
+        data->spawnAccum += (3.000000238f + func_150ADA68() * (f32)1) * gFrameDelta;
         if (data->spawnAccum > 1.0f) {
             if (func_1515C0F8(owner, &refVel) == 0) {
                 refVel = &D_800A5480;
@@ -185,12 +185,12 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
         return;
     }
     if ((obj->floorMaterial & 0x1F) == 0xE) {
-        func_10010630(0x434, obj, 32000, 700, 2000);
+        sound_playActorUntracked(0x434, obj, 32000, 700, 2000);
     } else {
-        func_10010630(0x4C8, obj, -32000, 700, 2000);
+        sound_playActorUntracked(0x4C8, obj, -32000, 700, 2000);
     }
-    func_10010630((func_150ADA20() & 1) + 0x2B6, obj, 32000, 1000, 3000);
-    func_10010630((func_150ADA20() & 3) + 0x2B1, obj, 32000, 700, 2000);
+    sound_playActorUntracked((func_150ADA20() & 1) + 0x2B6, obj, 32000, 1000, 3000);
+    sound_playActorUntracked((func_150ADA20() & 3) + 0x2B1, obj, 32000, 700, 2000);
     func_151C05A4(&pos, arg1, arg2);
     func_151C05F0(&pos, arg1, arg2);
     func_15145A50(obj);
@@ -564,17 +564,17 @@ s32 func_150D6CC4(FollowParticle *particle, s32 arg1) {
         f32 accelY;
         f32 accelZ;
 
-        particle->head.desc.vel.y += particle->head.desc.gravity * D_800BE9A4;
+        particle->head.desc.vel.y += particle->head.desc.gravity * gFrameDelta;
         func_15131958(&particle->head.desc.vel, data->drag);
-        accelX = (particle->head.desc.vel.x - prevVel.x) * D_800BE9A8;
-        accelY = (particle->head.desc.vel.y - prevVel.y) * D_800BE9A8;
-        accelZ = (particle->head.desc.vel.z - prevVel.z) * D_800BE9A8;
-        particle->head.desc.offset.x += prevVel.x * D_800BE9A4 +
-            accelX * D_800BE9A4 * D_800BE9A4 * 0.5f;
-        particle->head.desc.offset.y += prevVel.y * D_800BE9A4 +
-            accelY * D_800BE9A4 * D_800BE9A4 * 0.5f;
-        particle->head.desc.offset.z += prevVel.z * D_800BE9A4 +
-            accelZ * D_800BE9A4 * D_800BE9A4 * 0.5f;
+        accelX = (particle->head.desc.vel.x - prevVel.x) * gFrameDeltaInv;
+        accelY = (particle->head.desc.vel.y - prevVel.y) * gFrameDeltaInv;
+        accelZ = (particle->head.desc.vel.z - prevVel.z) * gFrameDeltaInv;
+        particle->head.desc.offset.x += prevVel.x * gFrameDelta +
+            accelX * gFrameDelta * gFrameDelta * 0.5f;
+        particle->head.desc.offset.y += prevVel.y * gFrameDelta +
+            accelY * gFrameDelta * gFrameDelta * 0.5f;
+        particle->head.desc.offset.z += prevVel.z * gFrameDelta +
+            accelZ * gFrameDelta * gFrameDelta * 0.5f;
     }
     return 1;
 }
@@ -624,7 +624,7 @@ s32 func_150D6F0C(FollowParticle *particle, s32 arg1) {
     particle->head.desc.width = size;
 
     particle->head.desc.alpha = data->fadeStart - data->fadeRate * data->time * data->time;
-    data->time += D_800BE9A4;
+    data->time += gFrameDelta;
 
     if (data->lifetime < data->time) {
         return 0;

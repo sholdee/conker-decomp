@@ -8,38 +8,38 @@
  */
 s32 *D_800C4020[187];                 // per model: first vertex of each part
 u16 D_800C4310[187];                  // per model: part count
-Gfx **D_800C4488[187];                // per model: display-list parts (ModelHeader dlists)
-u16 D_800C4778[187];                  // per model: display-list part count
+Gfx **gModelDlParts[187];                // per model: display-list parts (ModelHeader dlists)
+u16 gModelDlPartCounts[187];                  // per model: display-list part count
 Gfx **D_800C48F0[187];                // per model: display list table (ModelHeader dlists2)
-void *D_800C4BE0[187];                // per model: bone table (16-byte entries)
-u16 D_800C4ED0[187];                  // per model: bone count
+void *gModelBones[187];                // per model: bone table (16-byte entries)
+u16 gModelBoneCounts[187];                  // per model: bone count
 void *D_800C5048[187];                // per model: ModelHeader unk20
-ObjTexture *D_800C5338[187];          // per model: texture table
-u16 D_800C5628[187];                  // per model: texture count
-u16 D_800C57A0[187];                  // per model: vertex count
+ObjTexture *gModelTextures[187];          // per model: texture table
+u16 gModelTextureCounts[187];                  // per model: texture count
+u16 gModelVertexCounts[187];                  // per model: vertex count
 u16 D_800C5918[187];                  // per model: triangle weight, see func_1503D984
-u16 D_800C5A90[187];                  // per model: animation count
-VtxRun *D_800C5C08[187];              // per model: vertex runs (D_800C5EF8[id] of them)
-u16 D_800C5EF8[187];                  // per model: vertex run count
-VtxTri *D_800C6070[187];              // per model: triangles
-TexCoord *D_800C6360[187];            // per model: saved texture coordinates (func_1503D804)
+u16 gModelAnimCounts[187];                  // per model: animation count
+VtxRun *gModelVtxRuns[187];              // per model: vertex runs (gModelVtxRunCounts[id] of them)
+u16 gModelVtxRunCounts[187];                  // per model: vertex run count
+VtxTri *gModelTris[187];              // per model: triangles
+TexCoord *gModelSavedTexCoords[187];            // per model: saved texture coordinates (model_saveTexCoords)
 
 #include "functions.h"
 #include "variables.h"
 
 /*
- * A model file, as loaded by func_1503CF20: seven (data, byte size) sections whose offsets
+ * A model file, as loaded by model_load: seven (data, byte size) sections whose offsets
  * func_1502B6BC has already relocated, followed by the model data proper (its vertices first),
  * which D_800D19A0[id] points at. Offsets inside the sections are relative to the header.
  */
 typedef struct ModelHeader {
     /* 0x00 */ s32 *vtxIndices; // indices into the model's vertices (D_800C4020)
     /* 0x04 */ u32 vtxIndicesSize;
-    /* 0x08 */ Gfx **dlists; // display-list parts (D_800C4488)
+    /* 0x08 */ Gfx **dlists; // display-list parts (gModelDlParts)
     /* 0x0C */ u32 dlistsSize;
-    /* 0x10 */ void *bones; // 16-byte entries (D_800C4BE0)
+    /* 0x10 */ void *bones; // 16-byte entries (gModelBones)
     /* 0x14 */ u32 bonesSize;
-    /* 0x18 */ ObjTexture *textures; // D_800C5338
+    /* 0x18 */ ObjTexture *textures; // gModelTextures
     /* 0x1C */ u32 texturesSize;
     /* 0x20 */ void *unk20; // D_800C5048
     /* 0x24 */ u32 unk24;
@@ -64,7 +64,7 @@ typedef struct GfxBytes {
  * OR of error bits (1 out of memory, 2/4 a missing data block, 8 no memory for the vertex runs,
  * 0x10 a missing texture), in which case everything loaded so far is freed again.
  */
-s32 func_1503CF20(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags) {
+s32 model_load(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags) {
     s32 ret;
     ModelHeader *hdr;
     u32 size;
@@ -87,42 +87,42 @@ s32 func_1503CF20(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flag
     }
     D_800D19A0[id] = (u8 *)(hdr + 1);
     D_800C4020[id] = hdr->vtxIndices;
-    D_800C4488[id] = hdr->dlists;
+    gModelDlParts[id] = hdr->dlists;
     D_800C48F0[id] = hdr->dlists2;
-    D_800C4BE0[id] = hdr->bones;
-    D_800C5338[id] = hdr->textures;
+    gModelBones[id] = hdr->bones;
+    gModelTextures[id] = hdr->textures;
     D_800C5048[id] = hdr->unk20;
     D_800C4310[id] = hdr->vtxIndicesSize / sizeof(s32);
     // the vertices run up to the next section present
     if (D_800C4020[id] != NULL) {
         n = (u32)D_800C4020[id];
     } else {
-        n = (u32)D_800C4488[id];
+        n = (u32)gModelDlParts[id];
     }
-    D_800C57A0[id] = (n - (u32)hdr - sizeof(ModelHeader)) / sizeof(Vtx);
-    D_800C4778[id] = hdr->dlistsSize / sizeof(Gfx *);
-    for (i = 0; i < D_800C4778[id]; i++) {
-        func_1503D438((s32 *)&D_800C4488[id][i], (s32)hdr);
-        func_1503D368((s8 *)D_800C4488[id][i], (s32)hdr);
+    gModelVertexCounts[id] = (n - (u32)hdr - sizeof(ModelHeader)) / sizeof(Vtx);
+    gModelDlPartCounts[id] = hdr->dlistsSize / sizeof(Gfx *);
+    for (i = 0; i < gModelDlPartCounts[id]; i++) {
+        model_relocateOffset((s32 *)&gModelDlParts[id][i], (s32)hdr);
+        model_relocateDisplayList((s8 *)gModelDlParts[id][i], (s32)hdr);
     }
     n = hdr->dlists2Size / sizeof(Gfx *);
     for (i = 0; i < n; i++) {
-        func_1503D438((s32 *)&D_800C48F0[id][i], (s32)hdr);
-        func_1503D368((s8 *)D_800C48F0[id][i], (s32)hdr);
+        model_relocateOffset((s32 *)&D_800C48F0[id][i], (s32)hdr);
+        model_relocateDisplayList((s8 *)D_800C48F0[id][i], (s32)hdr);
     }
-    D_800C5628[id] = hdr->texturesSize / sizeof(ObjTexture);
-    D_800C4ED0[id] = hdr->bonesSize / 16;
+    gModelTextureCounts[id] = hdr->texturesSize / sizeof(ObjTexture);
+    gModelBoneCounts[id] = hdr->bonesSize / 16;
     if (loadTextures) {
-        ret |= func_1503DC3C(id);
+        ret |= model_loadTextures(id);
         if (ret == 0) {
-            for (i = 0; i < D_800C4778[id]; i++) {
-                func_1510CE60(D_800C4488[id][i], 0, 0, 0x3E, NULL);
+            for (i = 0; i < gModelDlPartCounts[id]; i++) {
+                func_1510CE60(gModelDlParts[id][i], 0, 0, 0x3E, NULL);
             }
         }
     }
     if (ret == 0) {
         func_1503D984(id);
-        ret |= func_1503D804(id);
+        ret |= model_saveTexCoords(id);
     }
     if (ret == 0 && ((def != NULL && (def->objFlags & 0x4000)) || (flags & 1))) {
         if (func_150028BC(id) != 0) {
@@ -132,21 +132,21 @@ s32 func_1503CF20(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flag
     if (ret == 0) {
         ret |= func_1503D774(id, 0);
         if (ret == 0) {
-            ret |= func_1503D660(id, 0);
+            ret |= model_loadAnimTable(id, 0);
         }
     }
     if (ret != 0) {
-        if (D_800C6360[id] != NULL) {
-            func_10004074(D_800C6360[id]);
+        if (gModelSavedTexCoords[id] != NULL) {
+            func_10004074(gModelSavedTexCoords[id]);
         }
-        func_1503DD1C(id);
-        if (D_800C5C08[id] != NULL) {
-            func_10004074((void *)(s32)D_800C5C08[id]); // matching: the int round trip keeps the load in v0
-            D_800C5C08[id] = NULL;
+        model_freeTextures(id);
+        if (gModelVtxRuns[id] != NULL) {
+            func_10004074((void *)(s32)gModelVtxRuns[id]); // matching: the int round trip keeps the load in v0
+            gModelVtxRuns[id] = NULL;
         }
-        if (D_800C6070[id] != NULL) {
-            func_10004074((void *)(s32)D_800C6070[id]); // matching: as above
-            D_800C6070[id] = NULL;
+        if (gModelTris[id] != NULL) {
+            func_10004074((void *)(s32)gModelTris[id]); // matching: as above
+            gModelTris[id] = NULL;
         }
         if (D_800D19A0[id] != NULL) {
             func_10004074(D_800D19A0[id] - sizeof(ModelHeader));
@@ -157,7 +157,7 @@ s32 func_1503CF20(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flag
 }
 
 /* Relocates the vertex and matrix addresses (G_VTX, G_MOVEMEM G_MV_MATRIX) in display list dl. */
-void func_1503D368(s8 *dl, s32 base) {
+void model_relocateDisplayList(s8 *dl, s32 base) {
     GfxBytes *cmd;
     s32 i;
 
@@ -167,11 +167,11 @@ void func_1503D368(s8 *dl, s32 base) {
             cmd = (GfxBytes *)&dl[i << 3];
             switch (cmd->opcode) {
             case G_VTX:
-                func_1503D438(&cmd->addr, base);
+                model_relocateOffset(&cmd->addr, base);
                 break;
             case (s8)G_MOVEMEM:
                 if (cmd->index == G_MV_MATRIX) {
-                    func_1503D438(&cmd->addr, base);
+                    model_relocateOffset(&cmd->addr, base);
                 }
                 break;
             }
@@ -180,7 +180,7 @@ void func_1503D368(s8 *dl, s32 base) {
 }
 
 /* Adds base to the offset in *offsetSlot, unless it is 0 or already a segmented address. */
-void func_1503D438(s32 *offsetSlot, s32 base) {
+void model_relocateOffset(s32 *offsetSlot, s32 base) {
     s32 offset = *offsetSlot;
 
     if (offset != 0 && (offset & 0x0F000000) == 0) {
@@ -189,7 +189,7 @@ void func_1503D438(s32 *offsetSlot, s32 base) {
 }
 
 /* Adds base to every offset of a 0-terminated list. */
-void func_1503D45C(OffsetEntry *entry, s32 base) {
+void model_relocateOffsetList(OffsetEntry *entry, s32 base) {
     s32 offset = entry->offset;
 
     while (offset != 0) {
@@ -199,7 +199,7 @@ void func_1503D45C(OffsetEntry *entry, s32 base) {
     }
 }
 
-/* AnimHeader as loaded: its pointers are still offsets from the header, made absolute by func_1503D660. */
+/* AnimHeader as loaded: its pointers are still offsets from the header, made absolute by model_loadAnimTable. */
 typedef struct AnimHeaderRaw {
     /* 0x0 */ s32 scripts; // OffsetEntry list
     /* 0x4 */ s32 hits;
@@ -207,18 +207,18 @@ typedef struct AnimHeaderRaw {
     /* 0xC */ u32 reactionsSize;
 } AnimHeaderRaw;
 
-/* Relocates the offsets of the animation table starting at anim and stores its length in D_800C5A90[id]. */
-void func_1503D484(ActorAnim *anim, s32 id) {
+/* Relocates the offsets of the animation table starting at anim and stores its length in gModelAnimCounts[id]. */
+void model_relocateAnimTable(ActorAnim *anim, s32 id) {
     ActorAnim *anims = anim;
 
     while (anim->unk0 != 999) {
         if (anim->offset != 0) {
-            func_1503D438(&anim->offset, (s32)anims);
+            model_relocateOffset(&anim->offset, (s32)anims);
         }
         anim++;
     }
 
-    D_800C5A90[id] = anim - anims;
+    gModelAnimCounts[id] = anim - anims;
 }
 
 /* Groups of model ids that share one animation table: D_80098888[i] ids in row D_80084410[i]. */
@@ -233,7 +233,7 @@ static const u8 D_80098888[] = { 20, 3, 2, 5, 4 };
 static const u8 *D_80084410[] = { D_80098860, D_80098874, D_80098878, D_8009887C, D_80098884 };
 
 /* Copies model id's animation table and count to the other models of its group. */
-void func_1503D510(s32 id) {
+void model_shareAnimTable(s32 id) {
     s32 i;
     s32 j;
     s32 k;
@@ -243,7 +243,7 @@ void func_1503D510(s32 id) {
             if (D_80084410[i][j] == id) {
                 for (k = 0; k < D_80098888[i]; k++) {
                     D_800D1588[D_80084410[i][k]] = D_800D1588[id];
-                    D_800C5A90[D_80084410[i][k]] = D_800C5A90[id];
+                    gModelAnimCounts[D_80084410[i][k]] = gModelAnimCounts[id];
                 }
                 return;
             }
@@ -272,10 +272,10 @@ s32 func_1503D5F0(s32 id) {
 #define HEADER (((AnimHeaderRaw **)D_800D1588)[id])
 
 /*
- * Loads the animation table of model id (shared by its group, see func_1503D510) into
+ * Loads the animation table of model id (shared by its group, see model_shareAnimTable) into
  * D_800D1588[id], unless it is already loaded. Returns 0, or 4 if it is missing.
  */
-s32 func_1503D660(s32 id, s32 arg1) {
+s32 model_loadAnimTable(s32 id, s32 arg1) {
     u32 size;
     AnimHeaderRaw *data;
 
@@ -285,14 +285,14 @@ s32 func_1503D660(s32 id, s32 arg1) {
     data = func_1502B5C8(&size, 2, 15, func_1503D5F0(id));
     if (data == NULL) {
         HEADER = NULL;
-        D_800C5A90[id] = 0;
-        func_1503D510(id);
+        gModelAnimCounts[id] = 0;
+        model_shareAnimTable(id);
         return 4;
     }
     HEADER = data;
     if (HEADER->scripts != 0) {
         HEADER->scripts += (s32)HEADER;
-        func_1503D45C((OffsetEntry *)HEADER->scripts, (s32)(HEADER + 1));
+        model_relocateOffsetList((OffsetEntry *)HEADER->scripts, (s32)(HEADER + 1));
     }
     if (HEADER->hits != 0) {
         HEADER->hits += (s32)HEADER;
@@ -301,8 +301,8 @@ s32 func_1503D660(s32 id, s32 arg1) {
         HEADER->reactions += (s32)HEADER;
     }
     HEADER++; // now the animation table proper
-    func_1503D484((ActorAnim *)HEADER, id);
-    func_1503D510(id);
+    model_relocateAnimTable((ActorAnim *)HEADER, id);
+    model_shareAnimTable(id);
     return 0;
 }
 
@@ -331,9 +331,9 @@ s32 func_1503D774(s32 id, s32 arg1) {
 
 /*
  * Saves the texture coordinates of the vertices that model 0x24 animates (94 of them, from its
- * first vertex index on) into D_800C6360[id]. Returns 1 when out of memory.
+ * first vertex index on) into gModelSavedTexCoords[id]. Returns 1 when out of memory.
  */
-s32 func_1503D804(s32 id) {
+s32 model_saveTexCoords(s32 id) {
     s32 count;
     s32 first;
     Vtx *src;
@@ -351,7 +351,7 @@ s32 func_1503D804(s32 id) {
     if (count == 0) {
         return 0;
     }
-    if (D_800C6360[id] != NULL) {
+    if (gModelSavedTexCoords[id] != NULL) {
         return 0;
     }
 
@@ -359,11 +359,11 @@ s32 func_1503D804(s32 id) {
     if (first != -1) {
         src += D_800C4020[id][first];
     }
-    D_800C6360[id] = allocate_memory(count * sizeof(TexCoord), 1, 0, 2);
-    if (D_800C6360[id] == NULL) {
+    gModelSavedTexCoords[id] = allocate_memory(count * sizeof(TexCoord), 1, 0, 2);
+    if (gModelSavedTexCoords[id] == NULL) {
         return 1;
     }
-    dst = D_800C6360[id];
+    dst = gModelSavedTexCoords[id];
     for (i = 0; i < count; i++) {
         dst[i].s = src[i].v.tc[0];
         dst[i].t = src[i].v.tc[1];
@@ -381,7 +381,7 @@ void func_1503D984(s32 id) {
 
     // only the first display-list part is counted; the binary keeps the one-pass loop
     for (i = 0; i < 1; i++) {
-        dl = D_800C4488[id][i];
+        dl = gModelDlParts[id][i];
         for (j = 0; (op = dl[j].words.w0 >> 24) != (s8)G_ENDDL; j++) {
             if (op == G_TRI1) {
                 count += 1;
@@ -417,7 +417,7 @@ s32 func_1503DA3C(s32 id, s32 index) {
  * Makes sure model id is loaded for obj (and, with loadTextures, its textures), then sets up obj's
  * model'th model with func_15084044. Returns 0, or the error bits of the step that failed.
  */
-s32 func_1503DA9C(Actor *obj, s32 id, s32 model, s32 loadTextures) {
+s32 model_loadForActor(Actor *obj, s32 id, s32 model, s32 loadTextures) {
     SpawnRecord *def;
     Gfx *dl;
     s32 ret;
@@ -425,19 +425,19 @@ s32 func_1503DA9C(Actor *obj, s32 id, s32 model, s32 loadTextures) {
 
     def = obj->listpos_ptr;
     if (D_800D19A0[id] == NULL) {
-        ret = func_1503CF20(id, 0, def, loadTextures, obj->unkAC);
+        ret = model_load(id, 0, def, loadTextures, obj->unkAC);
     } else {
         ret = 0;
         if ((def != NULL && (def->objFlags & 0x4000)) || (obj->unkAC & 1)) {
-            if (D_800C5C08[id] == NULL) {
+            if (gModelVtxRuns[id] == NULL) {
                 func_150028BC(id);
             }
         }
         // textures not loaded yet: the first entry's addr is still an offset
-        if (loadTextures && D_800C5628[id] != 0 && D_800C5338[id]->addr < 0x10000000) {
-            ret = func_1503DC3C(id);
-            for (i = 0; i < D_800C4778[id]; i++) {
-                dl = D_800C4488[id][i];
+        if (loadTextures && gModelTextureCounts[id] != 0 && gModelTextures[id]->addr < 0x10000000) {
+            ret = model_loadTextures(id);
+            for (i = 0; i < gModelDlPartCounts[id]; i++) {
+                dl = gModelDlParts[id][i];
                 func_1510CE60(dl, 0, 0, 0x3E, NULL);
             }
         }
@@ -448,14 +448,14 @@ s32 func_1503DA9C(Actor *obj, s32 id, s32 model, s32 loadTextures) {
     return ret;
 }
 
-/* Loads model id's textures into its D_800C5338 table. Returns 0x10 if any is missing, else 0. */
-s32 func_1503DC3C(s32 id) {
+/* Loads model id's textures into its gModelTextures table. Returns 0x10 if any is missing, else 0. */
+s32 model_loadTextures(s32 id) {
     s32 ret = 0;
     s32 i;
 
-    for (i = 0; i < D_800C5628[id]; i++) {
-        D_800C5338[id][i].addr = func_1510D0EC(D_800C5338[id][i].id, NULL, 0x3E, 1);
-        if (D_800C5338[id][i].addr == 0x80000000) {
+    for (i = 0; i < gModelTextureCounts[id]; i++) {
+        gModelTextures[id][i].addr = func_1510D0EC(gModelTextures[id][i].id, NULL, 0x3E, 1);
+        if (gModelTextures[id][i].addr == 0x80000000) {
             ret |= 0x10;
         }
     }
@@ -463,11 +463,11 @@ s32 func_1503DC3C(s32 id) {
 }
 
 /* Releases model id's loaded textures. */
-void func_1503DD1C(s32 id) {
+void model_freeTextures(s32 id) {
     s32 i;
 
-    for (i = 0; i < D_800C5628[id]; i++) {
-        ObjTexture *tex = &D_800C5338[id][i];
+    for (i = 0; i < gModelTextureCounts[id]; i++) {
+        ObjTexture *tex = &gModelTextures[id][i];
 
         if (tex->addr != 0x80000000 && tex->id != (s32)tex->addr) { // matching: the cast keeps the original operand order
             func_1510D7AC(tex->id);

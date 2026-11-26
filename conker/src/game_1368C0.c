@@ -119,7 +119,7 @@ void func_151094FC(Effect1368C0 *effect) {
         effect->base.header.state = -1;
         return;
     }
-    data->spawnAccum += data->spawnRate * D_800A2504[6] * D_800BE9A4;
+    data->spawnAccum += data->spawnRate * D_800A2504[6] * gFrameDelta;
     if (data->emitFunc != -1 && object->ob_matrix_ptr != NULL) {
         while (data->spawnAccum > 1.0f) {
             r = func_150ADA68() * D_800A2504[6];
@@ -363,7 +363,7 @@ void func_15109FB8(Effect1368C0 *effect) {
     MatrixEmitterData *data;
 
     data = &effect->data.matrix;
-    data->spawnAccum += data->spawnRate * D_800A2504[6] * D_800BE9A4;
+    data->spawnAccum += data->spawnRate * D_800A2504[6] * gFrameDelta;
     if (data->emitFunc != -1) {
         while (data->spawnAccum > 1.0f) {
             MtxF mtx;
@@ -456,7 +456,7 @@ void func_1510A40C(Effect1368C0 *effect) {
         effect->base.header.state = -1;
         return;
     }
-    data->spawnAccum += (data->spawnRate + func_150ADA68() * data->spawnRateRandom) * D_800BE9A4;
+    data->spawnAccum += (data->spawnRate + func_150ADA68() * data->spawnRateRandom) * gFrameDelta;
     if (data->spawnAccum > 1.0f && object->ob_matrix_ptr != NULL) {
         matrix = &object->ob_matrix_ptr[9];
         func_15143134(&D_800A2604, &points[0], matrix);

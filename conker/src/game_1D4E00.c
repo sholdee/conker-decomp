@@ -78,7 +78,7 @@ void func_151A7A90(Bolt *bolt) {
     }
 
     if (!done) {
-        bolt->jitterTimer -= D_800BE9A4;
+        bolt->jitterTimer -= gFrameDelta;
         if (bolt->jitterTimer < 0.0f) {
             func_151A8340(bolt, 0, bolt->def.numPoints - 1, bolt->def.jitter, 100);
             bolt->jitterTimer = func_150ADA68() * bolt->def.jitterDelayRange + bolt->def.jitterDelay;

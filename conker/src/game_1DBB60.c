@@ -22,7 +22,7 @@ void func_151AE6B0(CharacterWatcher *task) {
         if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->hit.height;
             func_151ABE40(&pos, hit, 5, task->header.owner, task->header.kind);
-            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+            sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
 }

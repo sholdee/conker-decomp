@@ -41,7 +41,7 @@ void func_150B1F90(PointEmitter *effect) {
     PointEmitterData *data;
 
     data = &effect->data;
-    data->accum += (0.07859999686f + func_150ADA68() * 0.03460000083f) * D_800BE9A4;
+    data->accum += (0.07859999686f + func_150ADA68() * 0.03460000083f) * gFrameDelta;
     if (data->accum > 1.0f) {
         ParticleDesc spawn;
         WobbleData extra;

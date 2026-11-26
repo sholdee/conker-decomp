@@ -6,7 +6,7 @@
 void func_150FDD10(s32 arg0) {
     s32 i;
 
-    func_15103828();
+    sound_updateCooldowns();
     if (D_800C35EA[0] == 1) {
         for (i = 0; i < 25; i++) {
             if (movement_obj[i].character_type == 0x28) {

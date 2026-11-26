@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15016370(void) {
+void actor_setDefaultSizes(void) {
     Actor *tmp;
     s32 i;
 

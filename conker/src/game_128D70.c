@@ -147,7 +147,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
     }
     func_151C229C(&origin, useTarget ? NULL : &dir, useTarget ? &hitPoint : NULL, useTarget ? &lineDir : NULL, useTarget ? 1 : 0, 0,
                   252.0f, 0.003968254197f, (func_150ADA68() * 20.0f) + 75.0f, (func_150ADA68() * 250.0f) + 502.0f, 50.0f,
-                  (func_150ADA20() % 31U) + 225, target != NULL ? target : obj, 1, 1, D_800BE616 != 0 ? 0 : 1, 50, 0, 1, variant, 44, timeOffset,
+                  (func_150ADA20() % 31U) + 225, target != NULL ? target : obj, 1, 1, gIsMultiplayer != 0 ? 0 : 1, 50, 0, 1, variant, 44, timeOffset,
                   cameraMask, 0, 0, arg4, arg5);
     if ((obj->unk74 & 0xF) != 0xF) {
         if (!(func_150ADA20() & 7)) {
@@ -308,7 +308,7 @@ void func_150FC614(TwoSidedEmitter *obj) {
         return;
     }
 
-    state->spawnTimer -= D_800BE9A4;
+    state->spawnTimer -= gFrameDelta;
     while (state->spawnTimer < 0.0f) {
         func_150FB8C0(owner, state->side, -state->spawnTimer, state->unkD, obj->base.header.owner, obj->base.header.kind);
         state->side ^= 1;

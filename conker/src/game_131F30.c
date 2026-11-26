@@ -68,10 +68,10 @@ void func_15104C44(BoltRainObj *obj) {
     if (state->timer >= 0) {
         state->timer -= D_800BE9E4;
         if (state->timer < 0) {
-            func_1000FD38(func_1000EF40, state->region, 0);
+            sound_stopByCallback(func_1000EF40, state->region, 0);
         }
         if (func_151464B8(state->zone) == 0) {
-            state->pending += (0.1970000118f + func_150ADA68() * 0.3f) * D_800BE9A4;
+            state->pending += (0.1970000118f + func_150ADA68() * 0.3f) * gFrameDelta;
             if (state->pending > 1.0f) {
                 BoltDesc desc;
                 f32 ground[3];
@@ -130,8 +130,8 @@ void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
     if (msg == 0x38 && state->region->inactive == 1) {
         state->timer = 300;
         // matching: the (s32) copy keeps IDO from sharing one register for region across the call
-        func_1000FD38(func_1000EF40, (void *)(s32)state->region, 0);
-        func_1000FA64(0x236, state->region->x, state->region->y, state->region->z, 0x4000, 1500, 1000,
+        sound_stopByCallback(func_1000EF40, (void *)(s32)state->region, 0);
+        sound_addDynamicSound(0x236, state->region->x, state->region->y, state->region->z, 0x4000, 1500, 1000,
                       func_1000EF40, state->region, 0, 8, 0);
     }
 }
@@ -161,7 +161,7 @@ void func_151050B0(BoltArcObj *obj) {
         return;
     }
     t = func_150ADA68();
-    state->pending += (0.04000000283f + t * 0.0700000003f) * D_800BE9A4;
+    state->pending += (0.04000000283f + t * 0.0700000003f) * gFrameDelta;
     if (state->pending > 1.0f) {
         config.widthBase = 10.0f;
         config.widthRange = 15.0f;

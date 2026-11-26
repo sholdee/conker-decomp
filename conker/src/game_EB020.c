@@ -10,7 +10,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
  * Per-frame update: copy the owning object's angles (unk13C is the owner's index + 100), then either
  * start the runState action or, in searchState, target the first eligible object in the active mask.
  */
-void func_150BDB70(Actor *self) {
+void actor_updateFollower(Actor *self) {
     s32 searchState;
     s32 runState;
     s32 runArg;
@@ -37,7 +37,7 @@ void func_150BDB70(Actor *self) {
     self->taskint[0] -= self->taskint[0] >> 3;
     if (1) {} // matching: splits the block here; without it IDO swaps the owner/state registers
     owner = movement_obj;
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         self->unk66 &= ~0x20;
     }
     mask = self->lifting;

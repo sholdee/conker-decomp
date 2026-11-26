@@ -32,7 +32,7 @@ void func_15119FC0(WorldObject *obj) {
         obj->t = sinf(WORK(obj)->phase) * 15.0f;
         obj->u = WORK(obj)->phase * 19.098593f; // 60 / pi
         obj->v = cosf(WORK(obj)->phase) * 15.0f;
-        WORK(obj)->phase += 0.08726647f * D_800BE9A4; // 5 degrees per frame
+        WORK(obj)->phase += 0.08726647f * gFrameDelta; // 5 degrees per frame
         if (18.849556f <= WORK(obj)->phase) {
             WORK(obj)->phase -= 18.849556f;
         }
@@ -46,12 +46,12 @@ void func_15119FC0(WorldObject *obj) {
                 distSq = (obj->x - movement_obj[i].xpos) * (obj->x - movement_obj[i].xpos) +
                          (obj->z - movement_obj[i].zpos) * (obj->z - movement_obj[i].zpos);
                 if (distSq < 80.0f * 80.0f) {
-                    func_1507C3E0(&movement_obj[i], &height, &width, &depth);
+                    actor_computeSize(&movement_obj[i], &height, &width, &depth);
                     obj->object_status = 0x31;
                     playerY = movement_obj[i].ypos;
                     if (playerY < obj->y + 80.0f && obj->y - 80.0f < playerY + height &&
                         movement_obj[i].energy > 0) {
-                        if (func_15060BA4(&movement_obj[i], 1)) {
+                        if (actor_addHealth(&movement_obj[i], 1)) {
                             if (obj->moveData.word != 0) {
                                 WORK(obj)->respawnTimer = (u16)(obj->moveData.word >> 16) * 60;
                                 obj->state |= 4;
@@ -60,7 +60,7 @@ void func_15119FC0(WorldObject *obj) {
                                 func_1508EE0C(2, obj - db_Object_array);
                             }
                             obj->object_status = 0x20;
-                            func_10010344(0x1CF, &movement_obj[i], 0x7D00, 200, 2500);
+                            sound_playActorSound1(0x1CF, &movement_obj[i], 0x7D00, 200, 2500);
                             func_151D69B4(obj, &movement_obj[i]);
                         } else {
                             // fade from 25% (at the centre) to 100% (at the edge) of full opacity

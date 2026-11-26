@@ -49,7 +49,7 @@ void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
         return;
     }
     previous = -1;
-    for (i = 0; i < D_800C57A0[arg0->character_type]; i++) {
+    for (i = 0; i < gModelVertexCounts[arg0->character_type]; i++) {
         if (vertices[i].flags & 0x7F00) {
             group = (vertices[i].flags & 0x7F00) >> 8;
             if (group != previous) {

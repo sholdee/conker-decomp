@@ -255,7 +255,7 @@ void func_1511B07C(WorldObject *obj) {
         // matching: the embedded &= makes IDO store the cleared flags before merging
         obj->task_flag = ((mode == TASK_FLAG_GOING_ON) ? TASK_FLAG_ON : TASK_FLAG_OFF) | (obj->task_flag &= ~TASK_FLAG_STATE);
         if (obj->sound_id != 0) {
-            func_100111C8(obj->sound_id);
+            sound_stop(obj->sound_id);
             obj->sound_id = 0;
             func_15114D24(obj, 0x4C8, 0x7D00, 100, 2500, 1);
         }
@@ -554,7 +554,7 @@ void func_1511BEBC(WorldObject *obj) {
         }
         if (target != NULL || mode == TASK_FLAG_GOING_ON) {
             if (target != NULL && triggered == 0) {
-                func_15060A30(0x16B, target);
+                actor_playSound(0x16B, target);
             }
             if (flag4 == 0) {
                 mode = TASK_FLAG_GOING_ON;
@@ -664,8 +664,8 @@ void func_1511C548(WorldObject *obj) {
     swayZ = sinf(WORK(obj)->w1511C548.phaseZ);
     obj->t = swayX * 16.0f;
     obj->v = swayZ * 16.0f;
-    WORK(obj)->w1511C548.phaseX += 0.07299999893f * D_800BE9A4;
-    WORK(obj)->w1511C548.phaseZ += 0.06499999762f * D_800BE9A4;
+    WORK(obj)->w1511C548.phaseX += 0.07299999893f * gFrameDelta;
+    WORK(obj)->w1511C548.phaseZ += 0.06499999762f * gFrameDelta;
     WORK(obj)->w1511C548.phaseX = func_15144B68(WORK(obj)->w1511C548.phaseX);
     {
         f32 wrapped = func_15144B68(WORK(obj)->w1511C548.phaseZ);
@@ -729,7 +729,7 @@ void func_1511C638(WorldObject *obj) {
                 switch (next->moveData.word & 0xFF) {
                 case 1:
                     func_15170F4C(next, 0xFF, 0);
-                    func_10010F30(0x2BE, 0x7FFF, 64, 0, 0);
+                    sound_play(0x2BE, 0x7FFF, 64, 0, 0);
                     break;
                 case 0: {
                     u16 first = func_150ADA20() % 3U;
@@ -739,17 +739,17 @@ void func_1511C638(WorldObject *obj) {
                     second = ((func_150ADA20() & 1) + first + 1) % 3U;
                     first = sounds.ids[first];
                     second = sounds.ids[second];
-                    func_10010F30(0x2B7, 0x7FFF, 64, 0, 0);
-                    func_10010F30(first, 0x7FFF, 10, 0, 0);
-                    func_10010F30(second, 0x7FFF, 54, 0, 0);
+                    sound_play(0x2B7, 0x7FFF, 64, 0, 0);
+                    sound_play(first, 0x7FFF, 10, 0, 0);
+                    sound_play(second, 0x7FFF, 54, 0, 0);
                     first = func_150ADA20() % 5U;
                     second = ((func_150ADA20() & 3) + first + 1) % 5U;
-                    func_1000FA64(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, func_1000EC24, (void *)0x1001E, 0, 0x200, 0);
-                    func_1000FA64(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, func_1000EC24, (void *)0x1001E, 0, 0, 0);
+                    sound_addDynamicSound(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, sound_delayedPlayCallback, (void *)0x1001E, 0, 0x200, 0);
+                    sound_addDynamicSound(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, sound_delayedPlayCallback, (void *)0x1001E, 0, 0, 0);
                     first = func_150ADA20() % 5U;
                     second = ((func_150ADA20() & 3) + first + 1) % 5U;
-                    func_1000FA64(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, func_1000EC24, (void *)60, 0, 0x300, 0);
-                    func_1000FA64(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, func_1000EC24, (void *)60, 0, 0x100, 0);
+                    sound_addDynamicSound(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, sound_delayedPlayCallback, (void *)60, 0, 0x300, 0);
+                    sound_addDynamicSound(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, sound_delayedPlayCallback, (void *)60, 0, 0x100, 0);
                 }
                 break;
                 case 2:
@@ -1231,9 +1231,9 @@ void func_1511DD98(WorldObject *obj, Actor *character) {
     case 0x5D:
     case 0x5E:
         if (isChar3B) {
-            func_10010630(0x542, character, 26000, 100, 1000);
+            sound_playActorUntracked(0x542, character, 26000, 100, 1000);
         } else if (isChar80) {
-            func_10010630(0x567, character, 26000, 100, 1000);
+            sound_playActorUntracked(0x567, character, 26000, 100, 1000);
         }
         sound = 0x2B0;
         break;
@@ -1278,12 +1278,12 @@ void func_1511DD98(WorldObject *obj, Actor *character) {
     case 0x53:
         sound = 0x2AF;
         if (isChar80) {
-            func_10010558(0x567, character, 32000, 100, 1000, 30);
+            sound_playActorSound1Delayed(0x567, character, 32000, 100, 1000, 30);
         }
         break;
     case 0x56:
         if (isChar80) {
-            func_10010630(0x567, character, 26000, 100, 1000);
+            sound_playActorUntracked(0x567, character, 26000, 100, 1000);
         }
         sound = 0x5AE;
         break;
@@ -1300,7 +1300,7 @@ void func_1511DD98(WorldObject *obj, Actor *character) {
         break;
     }
     if (sound != 0) {
-        func_10010630(sound, character, volume, 100, 1000);
+        sound_playActorUntracked(sound, character, volume, 100, 1000);
     }
 }
 
@@ -1384,7 +1384,7 @@ void func_1511DF6C(WorldObject *obj) {
             }
             radius *= scale;
             if (dist < radius * radius) {
-                func_1507C3E0(character, &height, &unused1, &unused2);
+                actor_computeSize(character, &height, &unused1, &unused2);
                 y = obj->y;
                 if (y < character->ceilingY && character->ypos < y + radius && y - radius < character->ypos + height) {
                     WORK(obj)->w1511DF6C.lastCharacter = character->unique_id;

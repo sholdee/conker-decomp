@@ -16,7 +16,7 @@
 
 
 /* Splits a caller-supplied string into pages: each 0xBD separator becomes a NUL. Returns the page count. */
-s32 func_1516A770(u8 *text) {
+s32 text_splitPages(u8 *text) {
     s32 numPages = 1;
 
     while (*text != 0) {
@@ -33,7 +33,7 @@ s32 func_1516A770(u8 *text) {
  * Creates a text box object for message `msgIndex` (>= 0x100 selects the D_800DD258 table), or for
  * `suppliedConfig` when it is non-NULL, and sizes it to fit the widest and tallest page.
  */
-TextBox *func_1516A7B0(u32 msgIndex, s32 objIndex, s32 arg2,
+TextBox *text_createBox(u32 msgIndex, s32 objIndex, s32 arg2,
                        void (*callback)(TextBoxConfig *config, s32 page, s32 state),
                        TextBoxConfig *suppliedConfig, s32 owner) {
     TextBox *box;
@@ -85,11 +85,11 @@ TextBox *func_1516A7B0(u32 msgIndex, s32 objIndex, s32 arg2,
         box->width = 0.0f;
         box->height = 0.0f;
         if (box->source == 2) {
-            config->numPages = func_1516A770((u8 *)config->text);
+            config->numPages = text_splitPages((u8 *)config->text);
         }
         for (i = 0; i < config->numPages; i++) {
-            page = func_1516C878(config, i, box->source);
-            func_150428D4(page, &width, &height, &advance);
+            page = text_getPage(config, i, box->source);
+            text_measureString(page, &width, &height, &advance);
             if (box->width < width) {
                 box->width = width;
             }
@@ -104,7 +104,7 @@ TextBox *func_1516A7B0(u32 msgIndex, s32 objIndex, s32 arg2,
         }
         box->width = (box->width + margin * 0.5f) * 1.149999976f;
         box->height = (box->height + margin) * 1.039999962f;
-        box->text = func_1516C878(config, 0, box->source);
+        box->text = text_getPage(config, 0, box->source);
         box->page = 0;
         config->flags &= ~(TEXTBOX_CB_CLOSED | TEXTBOX_CB_PAGE_ENDED | TEXTBOX_CB_PAGE_SHOWN);
         movement_obj[config->objIndex].unk1E3 = 1;

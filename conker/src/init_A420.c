@@ -11,7 +11,7 @@ s32 math_distance3D(s32, s32, s32);
  * full at nearDistance down to silent at farDistance (bit 0x8000 of farDistance: horizontal distance only).
  * The pan is skipped when pan is NULL. Returns the distance.
  */
-s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 distY, s32 distZ, s32 farDistance,
+s32 sound_computePanVolume(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 distY, s32 distZ, s32 farDistance,
                   s32 nearDistance, s32 *pan, s32 *volume, s32 *distanceOut) {
     f32 ratio;
     s32 distance;
@@ -83,11 +83,11 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 distY, s32 d
 
 
 /*
- * func_1000A420 for a sound spread along a path: the sound is placed at the point of path that is nearest to
+ * sound_computePanVolume for a sound spread along a path: the sound is placed at the point of path that is nearest to
  * the listener (x, y, z), interpolated along the nearest segment. (panX, panY, panZ) is the position the pan
  * is measured from.
  */
-s32 func_1000A750(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 y, s32 z, s32 farDistance,
+s32 sound_computePathPanVolume(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 y, s32 z, s32 farDistance,
                   s32 nearDistance, s32 *pan, s32 *volume, s32 *distanceOut) {
     s32 dx;
     s32 dy;
@@ -183,13 +183,13 @@ s32 func_1000A750(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 
             soundZ = D_800D2104[path][best].z + segment.z;
         }
     }
-    return func_1000A420(soundX - panX, soundY - panY, soundZ - panZ, angle, soundX - x, soundY - y, soundZ - z,
+    return sound_computePanVolume(soundX - panX, soundY - panY, soundZ - panZ, angle, soundX - x, soundY - y, soundZ - z,
                          farDistance, nearDistance, pan, volume, distanceOut);
 }
 /*
- * The pan of func_1000A420 for a direction (dx, dz) on the floor plane, turned by angle (256ths of a turn).
+ * The pan of sound_computePanVolume for a direction (dx, dz) on the floor plane, turned by angle (256ths of a turn).
  */
-s32 func_1000B060(f32 dx, f32 dz, s32 angle) {
+s32 sound_computePan(f32 dx, f32 dz, s32 angle) {
     s16 value;
     s16 rearBit;
     f32 ratio;

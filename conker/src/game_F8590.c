@@ -237,7 +237,7 @@ s32 func_150CB800(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 s32 func_150CBA30(DustPuff *dust) {
     dust->growth.growTime -= D_800BE9E4;
     if (dust->growth.growTime > 0) {
-        f32 grow = dust->growth.growRate * D_800BE9A4;
+        f32 grow = dust->growth.growRate * gFrameDelta;
 
         dust->size0 = dust->size0 + grow;
         dust->size1 = dust->size1 + grow;
@@ -334,13 +334,13 @@ s32 func_150CBCE0(SparkParticle *particle, s32 arg1) {
 
 /* Advances the particle one frame step under constant vertical acceleration. */
 s32 func_150CBE88(BallisticParticle *particle) {
-    particle->pos[0] += particle->vel[0] * D_800BE9A4;
-    particle->pos[1] += (particle->vel[1] * D_800BE9A4) + (((particle->gravity * D_800BE9A4) * D_800BE9A4) * 0.5f);
-    particle->pos[2] += particle->vel[2] * D_800BE9A4;
-    particle->vel[1] += particle->gravity * D_800BE9A4;
-    particle->unk20[0] += particle->unk50[0] * D_800BE9A4;
-    particle->unk20[1] += particle->unk50[1] * D_800BE9A4;
-    particle->unk20[2] += particle->unk50[2] * D_800BE9A4;
+    particle->pos[0] += particle->vel[0] * gFrameDelta;
+    particle->pos[1] += (particle->vel[1] * gFrameDelta) + (((particle->gravity * gFrameDelta) * gFrameDelta) * 0.5f);
+    particle->pos[2] += particle->vel[2] * gFrameDelta;
+    particle->vel[1] += particle->gravity * gFrameDelta;
+    particle->unk20[0] += particle->unk50[0] * gFrameDelta;
+    particle->unk20[1] += particle->unk50[1] * gFrameDelta;
+    particle->unk20[2] += particle->unk50[2] * gFrameDelta;
     return 1;
 }
 

@@ -43,7 +43,7 @@ void func_150CF140(ActorEmitter *emitter) {
         return;
     }
     if (actor->ob_matrix_ptr != NULL) {
-        state->spawnCredit += (0.06f + (func_150ADA68() * 0.0704f)) * D_800BE9A4;
+        state->spawnCredit += (0.06f + (func_150ADA68() * 0.0704f)) * gFrameDelta;
         func_1515C244(actor, &center, &extentA, &extentB);
         radius = (extentA + extentB) * 0.5f;
         func_1504715C(&ground, actor);

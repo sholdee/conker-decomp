@@ -86,7 +86,7 @@ void func_1515AF90(s16 player) {
     }
 }
 
-/* Effect update: accumulates rate * D_800BE9A4 and spawns one func_151303BC particle per whole unit. */
+/* Effect update: accumulates rate * gFrameDelta and spawns one func_151303BC particle per whole unit. */
 void func_1515B21C(EmitterObject *obj) {
     RiseEmitterState *emitter;
     void *particle;
@@ -94,7 +94,7 @@ void func_1515B21C(EmitterObject *obj) {
     RiseMotion extra;
 
     emitter = &obj->emitter;
-    emitter->accumulator += emitter->rate * D_800BE9A4;
+    emitter->accumulator += emitter->rate * gFrameDelta;
     if (emitter->accumulator > 1.0f) {
         f32 size;
 
@@ -258,8 +258,8 @@ s32 func_1515B994(SlidingSprite *sprite) {
     f32 previous;
 
     previous = sprite->data.velocity;
-    sprite->info.y += previous * D_800BE9A4 + 0.5f * sprite->data.acceleration * D_800BE9A4;
-    sprite->data.velocity = sprite->data.velocity + sprite->data.acceleration * D_800BE9A4;
+    sprite->info.y += previous * gFrameDelta + 0.5f * sprite->data.acceleration * gFrameDelta;
+    sprite->data.velocity = sprite->data.velocity + sprite->data.acceleration * gFrameDelta;
     sprite->info.halfHeight =
         sprite->data.baseHalfHeight + sprite->data.stretch * (sprite->data.velocity + previous) * 0.5f;
     return 1;

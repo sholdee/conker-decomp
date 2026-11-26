@@ -52,8 +52,8 @@ void func_150B54A8(OwnerSparkEffect *effect) {
         effect->base.header.state = -1;
         return;
     }
-    func_1502EA98(owner, 0xFF, 0xFF, 0xFF, 30, 0, 10);
-    data->sparkAccum += (0.2560000122f + (func_150ADA68() * 0.2960000038f)) * D_800BE9A4;
+    actor_flashFog(owner, 0xFF, 0xFF, 0xFF, 30, 0, 10);
+    data->sparkAccum += (0.2560000122f + (func_150ADA68() * 0.2960000038f)) * gFrameDelta;
     while (data->sparkAccum > 1.0f) {
         u8 colour[4];
 
@@ -66,7 +66,7 @@ void func_150B54A8(OwnerSparkEffect *effect) {
                       colour, effect->base.header.owner, effect->base.header.kind);
         data->sparkAccum -= 1.0f;
     }
-    data->unkCAccum += (0.2090000063f + (func_150ADA68() * 0.1840000153f)) * D_800BE9A4;
+    data->unkCAccum += (0.2090000063f + (func_150ADA68() * 0.1840000153f)) * gFrameDelta;
     while (data->unkCAccum > 1.0f) {
         func_15107B78(owner, func_150ADA20() & 0xFF, (func_150ADA20() % 101U) - 63, effect->base.header.owner,
                       effect->base.header.kind);

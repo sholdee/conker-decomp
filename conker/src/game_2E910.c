@@ -662,12 +662,12 @@ s32 func_15002878(void) {
 #define CMD (dl + (j << 3)) // command j of the display list, as bytes
 #define W0 (*(s32 *)CMD)
 #define W1 (*(s32 *)(CMD + 4))
-#define RUNS (&D_800C5C08[map])
-#define TRIS (&D_800C6070[map])
+#define RUNS (&gModelVtxRuns[map])
+#define TRIS (&gModelTris[map])
 
 /**
- * Builds map `map`'s vertex runs (D_800C5C08[map], D_800C5EF8[map] of them, sorted by address)
- * and triangle list (D_800C6070[map]) by walking its display list. Returns 1 when out of memory.
+ * Builds map `map`'s vertex runs (gModelVtxRuns[map], gModelVtxRunCounts[map] of them, sorted by address)
+ * and triangle list (gModelTris[map]) by walking its display list. Returns 1 when out of memory.
  */
 s32 func_150028BC(s32 map) {
     VtxRun *run;
@@ -698,7 +698,7 @@ s32 func_150028BC(s32 map) {
     numLists = 1;
     count = 0;
     for (i = 0; i < numLists; i++) {
-        list = (s8 *)D_800C4488[map][i]; // the display list read as bytes
+        list = (s8 *)gModelDlParts[map][i]; // the display list read as bytes
         j = 0;
         while (list[j << 3] != (s8)G_ENDDL) {
             if (list[j << 3] == G_VTX) {
@@ -721,7 +721,7 @@ s32 func_150028BC(s32 map) {
     numTris = 0;
     base = (s32)D_800D19A0[map];
     for (i = 0; i < numLists; i++) {
-        dl = (s8 *)D_800C4488[map][i];
+        dl = (s8 *)gModelDlParts[map][i];
         j = 0;
         while (*CMD != (s8)G_ENDDL) {
             opcode = *(u8 *)CMD;
@@ -793,12 +793,12 @@ s32 func_150028BC(s32 map) {
             j++;
         }
     }
-    D_800C5EF8[map] = numRuns;
+    gModelVtxRunCounts[map] = numRuns;
     // gnome sort of the runs by address
     // matching: for (;;) + break keeps the test at the loop top; IDO rotates a plain while
     j = 1;
     for (;;) {
-        if (j >= D_800C5EF8[map]) {
+        if (j >= gModelVtxRunCounts[map]) {
             break;
         }
         run = &(*RUNS)[j];
@@ -821,11 +821,11 @@ s32 func_150028BC(s32 map) {
 #undef W0
 #undef CMD
 
-/** Sets D_800DBE64 for map `map`: 150 on maps 50 and 51, otherwise 85 when D_800BE616 is set, else 50. */
+/** Sets D_800DBE64 for map `map`: 150 on maps 50 and 51, otherwise 85 when gIsMultiplayer is set, else 50. */
 void func_15002F40(s32 map) {
     if (map == 50 || map == 51) {
         D_800DBE64 = 150.0f;
-    } else if (D_800BE616) {
+    } else if (gIsMultiplayer) {
         D_800DBE64 = 85.0f;
     } else {
         D_800DBE64 = 50.0f;

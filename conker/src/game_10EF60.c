@@ -169,7 +169,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                         effect->target_x = D_800D9960[aim].x;
                         effect->target_y = D_800D9960[aim].y;
                         effect->target_z = D_800D9960[aim].z;
-                        if (D_800BE616 == 0) {
+                        if (gIsMultiplayer == 0) {
                             if (func_151EF610() % 100 < D_800D9960[aim].ricochetChance) {
                                 incoming[0] = effect->target_x - effect->x;
                                 incoming[1] = effect->target_y - effect->y;
@@ -186,7 +186,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                         stopDist = 1.0f;
                     } else {
                         angle = effect->owner->unk1D1 * 200;
-                        func_1505A184(effect->owner->angle - effect->owner->mv->pssd_waist_tilt, 2000.0f, angle * 0.005493164f, &effect->target_x, &effect->target_z, &effect->target_y);
+                        actor_splitVelocity(effect->owner->angle - effect->owner->mv->pssd_waist_tilt, 2000.0f, angle * 0.005493164f, &effect->target_x, &effect->target_z, &effect->target_y);
                         effect->target_x += effect->x;
                         effect->target_y += effect->y;
                         effect->target_z += effect->z;

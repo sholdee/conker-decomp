@@ -79,7 +79,7 @@ typedef struct ActorEffectDef {
 } ActorEffectDef;
 
 /* A sound player voice record: the SndState of src/libultra/audio/init_15550.c (the audio library's sound state), as seen by game code
- * that cannot include n_libaudio.h; the sound slots of init_EB00.c (D_800425E0) point at one. */
+ * that cannot include n_libaudio.h; the sound slots of init_EB00.c (gVoiceSlots) point at one. */
 struct SndState {
     /* 0x00 */ struct SndState *next;
     /* 0x04 */ struct SndState *prev;
@@ -216,12 +216,12 @@ typedef struct ObjectEmitter {
     /* 0x28 */ EmitterPos pos;
 } ObjectEmitter;
 
-/* Music settings of a level (LevelHeader.music), applied by func_150000B0: up to two songs, each with
- * two parameters (func_1000E40C / func_1000E46C). */
+/* Music settings of a level (LevelHeader.music), applied by music_startLevelMusic: up to two songs, each with
+ * two parameters (music_setVolume / music_fadeChannelVolume). */
 typedef struct LevelMusic {
     /* 0x0 */ s16 song;     // -1 = none
-    /* 0x2 */ u16 volume;         // base volume of song (func_1000E40C)
-    /* 0x4 */ u16 mutedChannels;  // channels of song set to 0%, the others to 100% (func_1000E46C)
+    /* 0x2 */ u16 volume;         // base volume of song (music_setVolume)
+    /* 0x4 */ u16 mutedChannels;  // channels of song set to 0%, the others to 100% (music_fadeChannelVolume)
     /* 0x6 */ s16 song2;    // -1 = none
     /* 0x8 */ u16 volume2;        // base volume of song2
     /* 0xA */ u16 mutedChannels2; // muted channels of song2
@@ -240,7 +240,7 @@ typedef struct LevelHeader {
     /* 0x07 */ u8  unk7;
     /* 0x08 */ u8  unk8;            // sky mode (D_800891D8); 4 = textured sky
     /* 0x09 */ u8  unk9;            // sky texture set (D_800891BC)
-    /* 0x0A */ u8  unkA;            // callback, D_80082D90
+    /* 0x0A */ u8  unkA;            // callback, gLevelSetupFuncs
     /* 0x0B */ u8  updateCallback;  // D_8008CD04
     /* 0x0C */ u8  drawCallback1;   // D_8008CD74
     /* 0x0D */ u8  drawCallback2;   // D_8008CD7C
@@ -254,7 +254,7 @@ typedef struct LevelHeader {
     /* 0x15 */ u8  pad15;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ u16 maxParticles;    // level-triangle particles (game_36680)
-    /* 0x1A */ u16 unk1A;           // D_800C3E7C, a count of 0x40-byte entries
+    /* 0x1A */ u16 unk1A;           // gBonePoolSize, a count of 0x40-byte entries
     /* 0x1C */ u16 gfxCount;        // display list length in Gfx (func_15015E80 adds 400)
     /* 0x1E */ u16 unk1E;           // game_1B1600
     /* 0x20 */ u8  pad20;
@@ -271,8 +271,8 @@ typedef struct LevelHeader {
     /* 0x42 */ u8  fogColour[4];
     /* 0x46 */ s8  fogPreset;       // fog preset (func_151733E4), -1 = none
     /* 0x47 */ u8  pad47[2];
-    /* 0x49 */ u8  unk49;           // callback, D_80086004
-    /* 0x4A */ u8  unk4A;           // callback, D_8008600C
+    /* 0x49 */ u8  unk49;           // callback, gLevelPreUpdateFuncs
+    /* 0x4A */ u8  unk4A;           // callback, gLevelPostUpdateFuncs
     /* 0x4B */ u8  assetList;       // index into D_80082B20, 0 = none
 } LevelHeader; // size 0x4C
 
@@ -284,7 +284,7 @@ typedef struct LevelSettingsAsset {
     /* 0x08 */ u16 *idList;  // D_800D2F40, LevelHeader.unk12 entries
 } LevelSettingsAsset;
 
-/* A ring buffer of length-prefixed messages (game_70200.c: func_15043A00 / func_15043BB8 / func_15043CA4). */
+/* A ring buffer of length-prefixed messages (game_70200.c: text_ringInit / text_ringPush / text_ringPop). */
 typedef struct MsgRing {
     /* 0x0 */ u8 *buffer;
     /* 0x4 */ s32 capacity;
@@ -307,13 +307,13 @@ typedef struct ObjPart {
     /* 0x65 */ u8 pad65[3];
 } ObjPart;
 
-/* Per-object parts state (D_800C6660[objIndex]; game_6B320). */
+/* Per-object parts state (gObjPartsStates[objIndex]; game_6B320). */
 typedef struct ObjPartsState {
     /* 0x00 */ ObjPart *parts;
     /* 0x04 */ s32 partMaskLo;   /* bit i selects part i, parts 0..31 */
     /* 0x08 */ s32 partMaskHi;   /* parts 32..63 (shift count taken mod 32) */
     /* 0x0C */ s16 timer;
-    /* 0x0E */ u8 kind;          /* index into the D_80084430.. per-kind tables */
+    /* 0x0E */ u8 kind;          /* index into the gPartInitFuncs.. per-kind tables */
     /* 0x0F */ u8 state;         /* PARTS_STATE_* */
 } ObjPartsState;
 
@@ -343,7 +343,7 @@ typedef struct ObjType {
     /* 0x31 */ u8 pad31[3];
 } ObjType; // size 0x34
 
-/* A positional sound slot of init_EB00.c (D_800425E0); a handle's low 4 bits are its slot. */
+/* A positional sound slot of init_EB00.c (gVoiceSlots); a handle's low 4 bits are its slot. */
 typedef struct {
     /* 0x0 */ u16 handle;
     /* 0x2 */ u16 nextHandle;  /* handed out next, then advanced by 16 */
@@ -358,7 +358,7 @@ typedef struct SoundRecord SoundRecord;
 typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix,
                                    u16 *sound);
 
-/* A positional sound being tracked by func_10011624 (dynamicSounds, up to 32).
+/* A positional sound being tracked by sound_updateRecords (dynamicSounds, up to 32).
  * original: struct AlSSound (rom_debug_struct.c); field names are Rare's labels with spaces as underscores,
  * except mix and the members of the two callback parameter unions. */
 struct SoundRecord {
@@ -373,13 +373,13 @@ struct SoundRecord {
     /* 0x14 */ SoundRecordCallback callback_ptr;
     /* 0x18 */ union {
         void *ptr;
-        Actor *owner;   /* the object the sound follows (func_1000EE70, func_1000EFB4) */
-        s32 timer;      /* countdown (func_1000EB00, func_1000EBC4) */
+        Actor *owner;   /* the object the sound follows (sound_followOwnerCallback, func_1000EFB4) */
+        s32 timer;      /* countdown (sound_chirpCallback, sound_fadeOutCallback) */
         s32 delay;      /* low half: countdown; high half: the sound held back meanwhile */
         u16 half[2];
     } callback_param1;
     /* 0x1C */ union {
-        s32 val;        /* func_1000EE70: the owner's unique_id in the low byte */
+        s32 val;        /* sound_followOwnerCallback: the owner's unique_id in the low byte */
         Actor *obj;     /* the object the delayed sound plays on (func_1000ECCC, game_130CB0.c) */
         u16 *ids;       /* func_1000EFB4: 0-terminated list of the owner's animation ids (Actor.unk84) */
     } callback_param2;
@@ -591,7 +591,7 @@ typedef struct {
     /* 0x0AE */ u8  ropeNode;
     /* 0x0AF */ u8  unkAF;
     /* 0x0B0 */ RayHit rayHit;    // last aim or shot ray cast (func_15081690)
-    /* 0x114 */ s16 height;      // cached size from func_1507C3E0
+    /* 0x114 */ s16 height;      // cached size from actor_computeSize
     /* 0x116 */ s16 width;
     /* 0x118 */ s16 depth;
     /* 0x11A */ u8  weapon_status;
@@ -683,7 +683,7 @@ typedef struct SpawnRecord {
     /* 0x24 */ f32 y_scale;
     /* 0x28 */ u8  unique_id;
     /* 0x29 */ u8  partSet;      // 1-based index into D_80086CC4, 0 for none
-    /* 0x2A */ u16 unk2A;        // cull radius, 0 = always drawn (func_150623F4)
+    /* 0x2A */ u16 unk2A;        // cull radius, 0 = always drawn (actor_isVisible)
     /* 0x2C */ u16 unk2C;
     /* 0x2E */ u8  keepTime;     // seconds (x30 frames) to keep the model's D_800D2040 counter; 0xFF = never set
     /* 0x2F */ u8  unk2F;
@@ -698,7 +698,7 @@ typedef struct PathPoint {
     /* 0x6 */ u16 param; /* point 0: radius / 8 of the path's area; later points: speed */
 } PathPoint;
 
-/* Per-player stats, read and written through func_150859AC / func_15085710 (game_B2BC0). */
+/* Per-player stats, read and written through player_getStat / player_setStat (game_B2BC0). */
 typedef struct PlayerStats {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
@@ -710,9 +710,9 @@ typedef struct PlayerStats {
     /* 0x10 */ u8 pad10[0xC];
 } PlayerStats; // size 0x1C
 
-/* D_800D2138 (0x20C bytes, defined in game_B2BC0, cleared by func_15017300): match state. */
+/* gMatchState (0x20C bytes, defined in game_B2BC0, cleared by player_initMatch): match state. */
 typedef struct MatchState {
-    /* 0x000 */ s32 mode;      /* indexes D_80087280 (player count); 1 = two views */
+    /* 0x000 */ s32 mode;      /* indexes gModePlayerCounts (player count); 1 = two views */
     /* 0x004 */ PlayerStats players[18]; /* indexed by player number; 18 fit before playerMask */
     /* 0x1FC */ u8  pad1FC[0xC];
     /* 0x208 */ u16 playerMask; /* bit per player */
@@ -727,7 +727,7 @@ typedef struct TextResource {
     /* 0xC */ u32 soundsSize; /* in bytes */
 } TextResource;
 
-/* Text box setup: a message-table entry, or one supplied by the caller (see func_1516A7B0). */
+/* Text box setup: a message-table entry, or one supplied by the caller (see text_createBox). */
 typedef struct TextBoxConfig {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s32 text;            /* message table index, or the string itself when supplied */
@@ -791,7 +791,7 @@ typedef struct {
 } TextBox;
 
 /* Animation playback state (Actor.unk2D0, ModelAttachment.anim). Every field pair is indexed by
- * channel: [0] is the current animation, [1] the previous one, kept for blending (func_1502D824 loads
+ * channel: [0] is the current animation, [1] the previous one, kept for blending (actor_loadAnimFrames loads
  * the frames of both channels in one loop). Actors allocate only the first 0x3E0 bytes (game_AEB40);
  * animated models (game_6C960, used by ModelAttachment) also use the fields past that (size 0x3F8). */
 typedef struct AnimInstance {
@@ -802,7 +802,7 @@ typedef struct AnimInstance {
     /* 0x018 */ f32 numFrames[2];   // playback end
     /* 0x020 */ f32 start[2];       // playback start (loop point)
     /* 0x028 */ s32 frameRom[2];    // ROM address of the frame data; 0: no animation loaded
-    /* 0x030 */ u8 *frameBuf[2];    // this frame's data, DMAed by func_1502D824
+    /* 0x030 */ u8 *frameBuf[2];    // this frame's data, DMAed by actor_loadAnimFrames
     /* 0x038 */ s8  nextFrameOffset[2]; // offset of the next frame in frameBuf (0: none)
     /* 0x03A */ s16 unk3A;          // blend step
     /* 0x03C */ s16 unk3C;          // blend countdown
@@ -812,20 +812,20 @@ typedef struct AnimInstance {
     /* 0x3E8 */ Mtx *partMtx[2];    // numParts matrices, one array per frame buffer
     /* 0x3F0 */ s32 unk3F0;
     /* 0x3F4 */ u8  numParts;
-    /* 0x3F5 */ u8  bank;           // animation bank passed to func_1505E0C4
+    /* 0x3F5 */ u8  bank;           // animation bank passed to actor_startAnimState
     /* 0x3F6 */ u8  unk3F6;         // set once the part matrices have been built
 } AnimInstance; // size 0x3F8
 
 /* One animation of a model's animation table (D_800D1588[id]); unk0 == 999 ends the table. */
 typedef struct ActorAnim {
     /* 0x0 */ u16 unk0;
-    /* 0x4 */ s32 offset; // relative to the table until func_1503D484 relocates it
+    /* 0x4 */ s32 offset; // relative to the table until model_relocateAnimTable relocates it
 } ActorAnim; // size 0x8
 
-/* The 16 bytes before a model's animation table (loaded as offsets, made absolute by func_1503D660). */
+/* The 16 bytes before a model's animation table (loaded as offsets, made absolute by model_loadAnimTable). */
 typedef struct AnimHeader {
     /* 0x0 */ struct ScriptEntry *scripts;            // A28B0: script id -> script
-    /* 0x4 */ const struct HitReaction *hits;           // 83300: hit-reaction table (func_1505C1A4)
+    /* 0x4 */ const struct HitReaction *hits;           // 83300: hit-reaction table (actor_getHitReactions)
     /* 0x8 */ struct Game83300AnimEntry *reactions;   // 83300: reaction entries
     /* 0xC */ u32 reactionsSize;                      // byte size of reactions
 } AnimHeader; // size 0x10
@@ -1025,8 +1025,8 @@ struct Actor {
     /* 0x089 */ u8  norun;
     /* 0x08A */ u8  nojump;
     /* 0x08B */ u8  pad8B;
-    /* 0x08C */ u16 soundHandle1; /* sound handle of slot 1 (func_10010344) */
-    /* 0x08E */ u16 soundHandle2; /* sound handle of slot 2 (func_10010154) */
+    /* 0x08C */ u16 soundHandle1; /* sound handle of slot 1 (sound_playActorSound1) */
+    /* 0x08E */ u16 soundHandle2; /* sound handle of slot 2 (sound_playActorSound2) */
     /* 0x090 */ s16 unk90;    // saved unkE4
     /* 0x092 */ u16 unk92;
     /* 0x094 */ s32 unk94;
@@ -1065,7 +1065,7 @@ struct Actor {
     /* 0x0DA */ s16 unkDA;
     /* 0x0DC */ f32 unkDC;
     /* 0x0E0 */ f32 unkE0;
-    /* 0x0E4 */ s16 bodyRadius;  // body cylinder (func_15062AC4, collisions in game_83300)
+    /* 0x0E4 */ s16 bodyRadius;  // body cylinder (actor_updateBodyRatios, collisions in game_83300)
     /* 0x0E6 */ s16 bodyHeight;
     /* 0x0E8 */ s16 bodyOffsetY; // its centre's height above the position (scaled by scale_y)
     /* 0x0EA */ u16 unkEA;
@@ -1159,8 +1159,8 @@ struct Actor {
     /* 0x1D0 */ s8  unk1D0;
     /* 0x1D1 */ s8  unk1D1;
     /* 0x1D2 */ u16 pad1D2;
-    /* 0x1D4 */ MtxF *ob_matrix_ptr;   // this frame's bone matrices, in the pool D_800C3E80: MtxF while they are
-                                       // built, then Mtx (fixed point) once func_1502E474 converts them and sets
+    /* 0x1D4 */ MtxF *ob_matrix_ptr;   // this frame's bone matrices, in the pool gBonePools: MtxF while they are
+                                       // built, then Mtx (fixed point) once actor_flushBoneMatrices converts them and sets
                                        // D_800C3E90. func_15143134 and func_15145EA4 read either form.
     /* 0x1D8 */ MtxF *prevBones; // last frame's copy (platforms)
     /* 0x1DC */ u8  unk1DC;
@@ -1260,7 +1260,7 @@ struct Actor {
     /* 0x259 */ u8  unk259[3];
     /* 0x25C */ s32 task_attrib;
     /* 0x260 */ VtxMorphState *morph; // vertex morph (game_1A8060), NULL when the model has none
-    /* 0x264 */ s32 hit_vtx_array;      // allocations freed with the actor (func_15060F28)
+    /* 0x264 */ s32 hit_vtx_array;      // allocations freed with the actor (actor_remove)
     /* 0x268 */ s32 hit_box_array;
     /* 0x26C */ s32 hit_ylimit_array;
     /* 0x270 */ f32 cull_radius_xz;
@@ -1881,7 +1881,7 @@ typedef struct AimPointDef {
     /* 0x14 */ f32 unk14;
 } AimPointDef; // size 0x18
 
-/* A cutscene subtitle slot, D_800C3CA0[3] (see func_150234A4). 0x04..0x33 is the TextBoxConfig passed to func_1516A7B0. */
+/* A cutscene subtitle slot, D_800C3CA0[3] (see func_150234A4). 0x04..0x33 is the TextBoxConfig passed to text_createBox. */
 typedef struct {
     /* 0x00 */ s16 active; /* owning track + 1, 0 = free */
     /* 0x02 */ u8 pad2[2];
@@ -1899,7 +1899,7 @@ typedef struct {
     /* 0x2E */ u8 b;
     /* 0x2F */ u8 unk2F;
     /* 0x30 */ u8 pad30[4];
-    /* 0x34 */ TextBox *handle; /* func_1516A7B0 */
+    /* 0x34 */ TextBox *handle; /* text_createBox */
 } SeqSubtitle; // size 0x38
 
 /* Summary of one of the three save files the player can pick. */
@@ -1952,7 +1952,7 @@ typedef struct TextureDesc {
     /* 0xB */ u8 siz;      // G_IM_SIZ_*
 } TextureDesc; /* size 0xC */
 
-/* The texture coordinates of one vertex (Vtx.v.tc); D_800C6360[id] saves a model's originals. */
+/* The texture coordinates of one vertex (Vtx.v.tc); gModelSavedTexCoords[id] saves a model's originals. */
 typedef struct TexCoord {
     /* 0x0 */ s16 s;
     /* 0x2 */ s16 t;
@@ -2176,7 +2176,7 @@ typedef struct {
     /* 0x8 */ s32 count;
 } VtxColorGroup; // size 0xC
 
-/* D_800CC298 (0x18 bytes): state of the per-type texture animations (func_15061B4C, game_11C2B0.c). */
+/* D_800CC298 (0x18 bytes): state of the per-type texture animations (actor_updateTypeAnims, game_11C2B0.c). */
 typedef struct TexAnimState {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;
@@ -2325,7 +2325,7 @@ typedef struct StreamVoice {
     /* 0x9B */ u8   pad9B[0x5];
 } StreamVoice; // size 0xA0
 
-/* A multiplayer spawn point (0x18 bytes) in the D_800D212C table, D_800D2128 entries long. */
+/* A multiplayer spawn point (0x18 bytes) in the gSpawnPoints table, gSpawnPointCount entries long. */
 typedef struct SpawnPoint {
     /* 0x00 */ s16 pos[3];
     /* 0x06 */ u8  tilt;   /* vertical tilt (Actor.vtilt), 256 units per turn */
@@ -2790,8 +2790,8 @@ typedef struct CamMsgQueue {
     /* 0xAC */ s32 tail;   // next free slot
 } CamMsgQueue; // size 0xB0
 
-/* A run of consecutive model vertices loaded under one matrix (bone); D_800C5C08[id] holds
- * D_800C5EF8[id] of them, sorted by address (built by func_150028BC in game_2E910). */
+/* A run of consecutive model vertices loaded under one matrix (bone); gModelVtxRuns[id] holds
+ * gModelVtxRunCounts[id] of them, sorted by address (built by func_150028BC in game_2E910). */
 typedef struct VtxRun {
     /* 0x0 */ Vtx *start;
     /* 0x4 */ s32 count;
@@ -2799,7 +2799,7 @@ typedef struct VtxRun {
 } VtxRun;
 
 /* A model triangle as the offsets of its three vertices in the model's vertex data
- * (D_800C6070[id], built by func_150028BC; the vertex base is D_800D19A0[id]). */
+ * (gModelTris[id], built by func_150028BC; the vertex base is D_800D19A0[id]). */
 typedef struct VtxTri {
     /* 0x0 */ s32 v[3];
 } VtxTri;
@@ -2944,7 +2944,7 @@ typedef struct RenderView {
     /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index D_800BE9C0
 } RenderView; // size 0x180
 
-/* A vertical cylinder that confines actors (func_15055E50): x/z centre, base y, height h; r is the radius,
+/* A vertical cylinder that confines actors (actor_clampToZoneSet): x/z centre, base y, height h; r is the radius,
    bit 15 set = keep-out cylinder, clear = the actor must stay inside one of the set's cylinders. */
 typedef struct {
     /* 0x0 */ s16 x;
@@ -3201,7 +3201,7 @@ typedef struct PathNode {
     /* 0xF */ u8 param;
 } PathNode; /* size 0x10 */
 
-/* Entries of the per-model texture tables D_800C5338[id] (D_800C5628[id] entries each). */
+/* Entries of the per-model texture tables gModelTextures[id] (gModelTextureCounts[id] entries each). */
 typedef struct ObjTexture {
     /* 0x0 */ u32 addr;   // loaded address (>= 0x10000000 once loaded), or 0x80000000 if the load failed
     /* 0x4 */ s32 id;     // texture id passed to func_1510D0EC
@@ -3314,9 +3314,9 @@ typedef struct HitReaction {
     /* 0x26 */ u8 pad26[2];
 } HitReaction; /* size 0x28 */
 
-/* One rule of a hit route (D_80086AA0, game_A9260.c), checked by func_1505C1E4 (game_83300.c). */
+/* One rule of a hit route (D_80086AA0, game_A9260.c), checked by actor_resolveHit (game_83300.c). */
 typedef struct HitRule {
-    /* 0x0 */ u8 unk0; /* condition: 1, 2 by the attack angle (func_1505C140); 3 only a stunned victim, 4 only one not stunned */
+    /* 0x0 */ u8 unk0; /* condition: 1, 2 by the attack angle (actor_getAttackAngle); 3 only a stunned victim, 4 only one not stunned */
     /* 0x1 */ u8 unk1; /* the reaction kind it matches */
     /* 0x2 */ u8 unk2; /* bit 0x80: matches every other kind; & 0x7F: action */
     /* 0x3 */ u8 unk3; /* the table entry to use */

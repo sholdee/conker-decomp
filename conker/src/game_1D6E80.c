@@ -101,7 +101,7 @@ void func_151A9AA4(ActorTask *task) {
         if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
-            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+            sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
     func_151ABE00(actor);
@@ -126,7 +126,7 @@ void func_151A9BA0(ActorTask *task) {
         if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 1, task->watcher.header.owner, task->watcher.header.kind);
-            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+            sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
 }
@@ -151,7 +151,7 @@ void func_151A9CA0(ActorTask *task) {
     if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
         pos.y = task->watcher.hit.height;
         func_151ABE40(&pos, &task->watcher.hit, 1, task->watcher.header.owner, task->watcher.header.kind);
-        func_10010FFC(0, 8, 0x6978, 0, 0, actor);
+        sound_playOnActor(0, 8, 0x6978, 0, 0, actor);
     }
     func_151AA264(actor, &task->watcher.hit);
     func_151ABE00(actor);
@@ -176,7 +176,7 @@ void func_151A9DC0(ActorTask *task) {
         if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
-            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+            sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
 }
@@ -200,7 +200,7 @@ void func_151A9EC0(ActorTask *task) {
         if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
-            func_10010FFC(0, 8, 0x6978, 0, 0, actor);
+            sound_playOnActor(0, 8, 0x6978, 0, 0, actor);
         }
     }
     func_151AA264(actor, &task->watcher.hit);
@@ -731,7 +731,7 @@ void func_151AB1C4(ActorTask *task) {
         if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
-            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+            sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
     func_151AA264(actor, &task->watcher.hit);
@@ -852,10 +852,10 @@ s32 func_151AB6B8(LoopSoundFx *fx) {
     alive = TRUE;
     sound = &fx->payload;
     if ((fx->payload.soundHandle != 0) && !(camera_global_Cameras->SpecialFlags & 1)) {
-        func_100111C8(sound->soundHandle);
+        sound_stop(sound->soundHandle);
         sound->soundHandle = 0;
     } else if ((sound->soundHandle == 0) && (camera_global_Cameras->SpecialFlags & 1)) {
-        sound->soundHandle = func_10010F30(0x355, 32000, 64, 0, 0);
+        sound->soundHandle = sound_play(0x355, 32000, 64, 0, 0);
     }
     if (sound->keepAlive == 0) {
         alive = FALSE;
@@ -870,7 +870,7 @@ void func_151AB788(LoopSoundFx *fx) {
     ActorTaskFx *ownerFx = &sound->owner->fx;
 
     if (fx->payload.soundHandle != 0) {
-        func_100111C8(sound->soundHandle);
+        sound_stop(sound->soundHandle);
     }
     ownerFx->sound = NULL;
     func_151346EC(&fx->header);
@@ -882,7 +882,7 @@ void func_151AB7D8(LoopSoundFx *fx) {
     ActorTaskFx *ownerFx = &sound->owner->fx;
 
     if (fx->payload.soundHandle != 0) {
-        func_100111C8(sound->soundHandle);
+        sound_stop(sound->soundHandle);
     }
     ownerFx->sound = NULL;
     func_1513470C(&fx->header);
@@ -984,7 +984,7 @@ void func_151AB9C8(EmitterTask *task) {
         dead = TRUE;
     }
     if (!dead) {
-        emitter->accum += (emitter->rate + func_150ADA68() * emitter->rateRandom) * D_800BE9A4;
+        emitter->accum += (emitter->rate + func_150ADA68() * emitter->rateRandom) * gFrameDelta;
         if (emitter->accum > 1.0f) {
             func_1504715C(&floor, emitter->actor);
             do {

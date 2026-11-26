@@ -17,7 +17,7 @@ f32 D_800D1898[2];
  * is five bytes: an opcode (< 247, an index into D_80086730) and four argument bytes, which the
  * interpreter copies to D_800D1890..D_800D1893 before calling the handler. Bytes >= 247 are
  * one-byte jump labels.
- * The handlers below act on the current object, D_800D154C (index dc_glbl_CharNum in movement_obj);
+ * The handlers below act on the current object, gCurrentActor (index dc_glbl_CharNum in movement_obj);
  * their comments call the four argument bytes arg0..arg3. An object's "target" is the object
  * movement_obj[unk222], its current waypoint is unk21E of its path D_800D2104[unk13F].
  */
@@ -30,19 +30,19 @@ void func_15075400(s32 target) {
     u8 i;
 
     if (target < 247) {
-        D_800D154C->scriptCmd += target;
+        gCurrentActor->scriptCmd += target;
         return;
     }
 
     for (i = 0; i < 100; i++) {
-        if (D_800D154C->scriptCmd->op < 247) {
-            D_800D154C->scriptCmd++;
+        if (gCurrentActor->scriptCmd->op < 247) {
+            gCurrentActor->scriptCmd++;
         } else {
-            label = D_800D154C->scriptCmd->op;
-            D_800D154C->scriptCmd = (const ObjScriptCmd *)((const u8 *)D_800D154C->scriptCmd + 1);
+            label = gCurrentActor->scriptCmd->op;
+            gCurrentActor->scriptCmd = (const ObjScriptCmd *)((const u8 *)gCurrentActor->scriptCmd + 1);
             if (target == label) {
                 // the interpreter steps past the current command after this returns
-                D_800D154C->scriptCmd--;
+                gCurrentActor->scriptCmd--;
                 return;
             }
         }
@@ -54,16 +54,16 @@ void func_15075498(void) {
     s32 value = D_800D1893 & 0x7F;
 
     if (value != 0x7F) {
-        D_800D154C->intel_animseq = value;
+        gCurrentActor->intel_animseq = value;
     }
-    D_800D154C->mvmt_control &= ~0x143E;
+    gCurrentActor->mvmt_control &= ~0x143E;
     if (D_800D1890 == 0xFA) {
-        D_800D154C->mvmt_control |= 0x22;
+        gCurrentActor->mvmt_control |= 0x22;
     } else if (D_800D1890 == 0xFB) {
-        D_800D154C->mvmt_control |= 4;
+        gCurrentActor->mvmt_control |= 4;
     }
     if (D_800D1893 & 0x80) {
-        D_800D154C->mvmt_control |= 0x10;
+        gCurrentActor->mvmt_control |= 0x10;
     }
 }
 
@@ -72,18 +72,18 @@ void func_15075548(void) {
     f32 speed;
     u8 speedArg;
 
-    D_800D154C->unk223 = 0;
-    D_800D154C->unk21C = D_800D1890 * 100;
+    gCurrentActor->unk223 = 0;
+    gCurrentActor->unk21C = D_800D1890 * 100;
     speedArg = D_800D1892;
     if (speedArg != 0xFF) {
         speed = speedArg;
-        D_800D154C->stickspeed = speed;
-        if (D_800D154C->stickspeed == 1.0f) {
-            D_800D154C->stickspeed = 0.5f;
+        gCurrentActor->stickspeed = speed;
+        if (gCurrentActor->stickspeed == 1.0f) {
+            gCurrentActor->stickspeed = 0.5f;
         }
-        if (D_800BE616 != 0) {
-            if ((D_800D154C->character_type == 40) && (D_800D154C->mv->unk128 & 1)) {
-                D_800D154C->stickspeed *= 1.4f;
+        if (gIsMultiplayer != 0) {
+            if ((gCurrentActor->character_type == 40) && (gCurrentActor->mv->unk128 & 1)) {
+                gCurrentActor->stickspeed *= 1.4f;
             }
         }
     }
@@ -97,47 +97,47 @@ void func_15075650(void) {
     u8 previous;
     Actor *obj;
 
-    index = D_800D2108[D_800D154C->listpos] - 1;
-    if (D_800D154C->unk21F != 0) {
-        index = D_800D154C->unk21F;
+    index = D_800D2108[gCurrentActor->listpos] - 1;
+    if (gCurrentActor->unk21F != 0) {
+        index = gCurrentActor->unk21F;
     }
-    range = index - D_800D154C->unk220;
+    range = index - gCurrentActor->unk220;
     if (D_800D1891 == 0xFF) {
-        if (D_800D154C->unk223 != 13) {
-            D_800D154C->unk21E = (func_150ADA20_u8() % (u32)range) + D_800D154C->unk220;
+        if (gCurrentActor->unk223 != 13) {
+            gCurrentActor->unk21E = (func_150ADA20_u8() % (u32)range) + gCurrentActor->unk220;
         }
     } else if (D_800D1891 == 0xFE) {
-        if (D_800D154C->unk223 != 13) {
-            previous = D_800D154C->unk21E - 1;
-            if (D_800D154C->unk21E <= D_800D154C->unk220) {
+        if (gCurrentActor->unk223 != 13) {
+            previous = gCurrentActor->unk21E - 1;
+            if (gCurrentActor->unk21E <= gCurrentActor->unk220) {
                 previous = index - 1;
             }
-            index = (func_150ADA20_u8() % (u32)range) + D_800D154C->unk220;
+            index = (func_150ADA20_u8() % (u32)range) + gCurrentActor->unk220;
             if (index != previous) {
-                D_800D154C->unk21E = index;
+                gCurrentActor->unk21E = index;
                 // matching: the copy, the `* 0` and the jump steer IDO to duplicate this store into v1
-                obj = D_800D154C;
-                obj->unk223 = D_800D154C->unk220 * 0;
+                obj = gCurrentActor;
+                obj->unk223 = gCurrentActor->unk220 * 0;
                 goto set_timer;
             }
         }
     } else if (D_800D1891 == 0xFF) {
-        D_800D154C->unk21E = index - 1;
+        gCurrentActor->unk21E = index - 1;
     } else {
-        D_800D154C->unk21E = D_800D1891;
+        gCurrentActor->unk21E = D_800D1891;
     }
-    D_800D154C->unk223 = 0;
+    gCurrentActor->unk223 = 0;
 set_timer:
-    D_800D154C->unk21C = D_800D1890 * 100;
+    gCurrentActor->unk21C = D_800D1890 * 100;
 
     if (D_800D1892 != 0xFF) {
-        D_800D154C->stickspeed = D_800D1892;
-        if (D_800D154C->stickspeed == 1.0f) {
-            D_800D154C->stickspeed = 0.5f;
+        gCurrentActor->stickspeed = D_800D1892;
+        if (gCurrentActor->stickspeed == 1.0f) {
+            gCurrentActor->stickspeed = 0.5f;
         }
     }
-    if (D_800D154C->unk21E < D_800D154C->unk220) {
-        D_800D154C->unk21E = D_800D154C->unk220;
+    if (gCurrentActor->unk21E < gCurrentActor->unk220) {
+        gCurrentActor->unk21E = gCurrentActor->unk220;
     }
     func_15075498();
 }
@@ -151,7 +151,7 @@ void func_15075884(void) {
     f32 speed;
 
     func_15075548();
-    obj = D_800D154C;
+    obj = gCurrentActor;
     dx = D_800D2104[obj->listpos][obj->unk21E + 1].x - obj->xpos;
     dz = D_800D2104[obj->listpos][obj->unk21E + 1].z - obj->zpos;
     dist = sqrtf((dx * dx) + (dz * dz));
@@ -167,13 +167,13 @@ void func_15075938(void) {
     s32 matched;
 
     matched = 0;
-    position = D_800D154C->unk21E - (s8)D_800D154C->unk221;
+    position = gCurrentActor->unk21E - (s8)gCurrentActor->unk221;
     if (position < 0) {
-        position += D_800D2108[D_800D154C->listpos] - 1;
-    } else if (position >= D_800D2108[D_800D154C->listpos] - 1) {
-        position -= D_800D2108[D_800D154C->listpos] - 1;
+        position += D_800D2108[gCurrentActor->listpos] - 1;
+    } else if (position >= D_800D2108[gCurrentActor->listpos] - 1) {
+        position -= D_800D2108[gCurrentActor->listpos] - 1;
     }
-    desired = D_800D1891 == 0xFF ? D_800D2108[D_800D154C->listpos] - 2 : D_800D1891;
+    desired = D_800D1891 == 0xFF ? D_800D2108[gCurrentActor->listpos] - 2 : D_800D1891;
     if (D_800D1892 == 0) {
         if (desired == position) {
             matched = 1;
@@ -196,7 +196,7 @@ void func_15075938(void) {
 
 /* Jumps to arg0 when the current waypoint is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_15075A50(void) {
-    u8 index = D_800D154C->unk21E;
+    u8 index = gCurrentActor->unk21E;
 
     if (((D_800D1892 == 0) && (D_800D1891 == index)) ||
         ((D_800D1892 == 1) && (D_800D1891 != index))) {
@@ -211,77 +211,77 @@ void func_15075AAC(void) {
     f32 dz;
 
     func_15075548();
-    point = D_800D2104[D_800D154C->listpos] + D_800D1891;
-    dx = point->x - D_800D154C->xpos;
-    dz = point->z - D_800D154C->zpos;
+    point = D_800D2104[gCurrentActor->listpos] + D_800D1891;
+    dx = point->x - gCurrentActor->xpos;
+    dz = point->z - gCurrentActor->zpos;
     if (fabsf(dx) + fabsf(dz) < 40.0f) {
-        D_800D154C->unk21C = 0;
-        D_800D154C->speed = 0.0f;
+        gCurrentActor->unk21C = 0;
+        gCurrentActor->speed = 0.0f;
     }
 }
 
 void func_15075B60(void) {
     func_15075548();
-    D_800D154C->unk223 = 10;
+    gCurrentActor->unk223 = 10;
 }
 
 void func_15075B8C(void) {
     func_15075650();
-    D_800D154C->unk223 = 10;
+    gCurrentActor->unk223 = 10;
 }
 
 void func_15075BB8(void) {
     func_15075548();
-    D_800D154C->unk22C |= 2;
+    gCurrentActor->unk22C |= 2;
 }
 
 void func_15075BE8(void) {
     if (D_800D1893 != 0) {
-        D_800D154C->unk22C |= 0x80;
+        gCurrentActor->unk22C |= 0x80;
     }
-    D_800D154C->unk233 = D_800D1890;
+    gCurrentActor->unk233 = D_800D1890;
 }
 
 /* Sets the vertical velocity to the s16 (arg2:arg0) unless arg3 == 1, and gravity to (s8)arg1 unless arg3 == 2. */
 void func_15075C24(void) {
     if (D_800D1893 != 1) {
-        D_800D154C->yspd = (s16)((D_800D1892 << 8) | D_800D1890);
+        gCurrentActor->yspd = (s16)((D_800D1892 << 8) | D_800D1890);
     }
     if (D_800D1893 != 2) {
-        D_800D154C->ygrav = (s8)D_800D1891;
+        gCurrentActor->ygrav = (s8)D_800D1891;
     }
 }
 
 void func_15075CA0(void) {
     func_15075548();
-    D_800D154C->unk223 = 1;
+    gCurrentActor->unk223 = 1;
 }
 
 void func_15075CCC(void) {
     func_15075548();
-    D_800D154C->unk223 = 16;
-    D_800D154C->unk231 = D_800D1891;
+    gCurrentActor->unk223 = 16;
+    gCurrentActor->unk231 = D_800D1891;
 }
 
 void func_15075D0C(void) {
     func_15075548();
-    D_800D154C->unk223 = 15;
+    gCurrentActor->unk223 = 15;
 }
 
 void func_15075D38(void) {
     func_15075CA0();
-    D_800D154C->unk223 = 14;
+    gCurrentActor->unk223 = 14;
 }
 
 void func_15075D64(void) {
     func_15075548();
-    D_800D154C->unk223 = 12;
-    D_800D154C->unk222 = 0;
+    gCurrentActor->unk223 = 12;
+    gCurrentActor->unk222 = 0;
 }
 
 void func_15075D9C(void) {
     func_15075548();
-    D_800D154C->unk223 = 9;
+    gCurrentActor->unk223 = 9;
 }
 
 void func_15075DC8(void) {
@@ -291,23 +291,23 @@ void func_15075DC8(void) {
 /* Switches to script arg1 (0: the object's current script id); a nonzero arg3 becomes the new id. */
 void func_15075DE8(void) {
     if (D_800D1891 == 0) {
-        D_800D1891 = D_800D154C->intelwalk;
+        D_800D1891 = gCurrentActor->intelwalk;
     }
     if (D_800D1893 != 0) {
-        D_800D154C->intelwalk = D_800D1893;
+        gCurrentActor->intelwalk = D_800D1893;
     }
-    D_800D154C->scriptCmd = func_1507BB28(0, D_800D1891);
+    gCurrentActor->scriptCmd = func_1507BB28(0, D_800D1891);
     // the interpreter steps past the current command after this returns
-    D_800D154C->scriptCmd--;
+    gCurrentActor->scriptCmd--;
 }
 
 void func_15075E6C(void) {
     func_15075548();
-    D_800D154C->unk223 = 2;
+    gCurrentActor->unk223 = 2;
 }
 
 void func_15075E98(void) {
-    D_800D154C->unk235 = D_800D1890;
+    gCurrentActor->unk235 = D_800D1890;
 }
 
 /* Jumps to arg0 with a chance of arg2 percent. */
@@ -318,29 +318,29 @@ void func_15075EB4(void) {
 }
 
 void func_15075F00(void) {
-    D_800D154C->unk234 = D_800D1890;
-    D_800D154C->unk236 = D_800D1891;
-    D_800D154C->unk237 = D_800D1892;
+    gCurrentActor->unk234 = D_800D1890;
+    gCurrentActor->unk236 = D_800D1891;
+    gCurrentActor->unk237 = D_800D1892;
 }
 
 void func_15075F40(void) {
     func_15075548();
-    D_800D154C->unk223 = 3;
+    gCurrentActor->unk223 = 3;
 }
 
 /* Sets the vertical velocity (arg0, downwards if arg2), the gravity (arg1) and unk3A (arg3). */
 void func_15075F6C(void) {
     if (D_800D1890 != 0) {
         if (D_800D1892 == 0) {
-            D_800D154C->yspd = D_800D1890;
+            gCurrentActor->yspd = D_800D1890;
         } else {
-            D_800D154C->yspd = -D_800D1890;
+            gCurrentActor->yspd = -D_800D1890;
         }
     }
     if (D_800D1891 != 0) {
-        D_800D154C->ygrav = D_800D1891;
+        gCurrentActor->ygrav = D_800D1891;
     }
-    D_800D154C->unk3A = D_800D1893;
+    gCurrentActor->unk3A = D_800D1893;
 }
 
 /* Starts a jump towards waypoint arg1, timing the flight so that it lands there. */
@@ -350,38 +350,38 @@ void func_1507602C(void) {
     f32 time;
 
     func_15075548();
-    D_800D154C->unk21E = D_800D1891;
-    dx = D_800D2104[D_800D154C->listpos][D_800D1891 + 1].x - D_800D154C->xpos;
-    dz = D_800D2104[D_800D154C->listpos][D_800D1891 + 1].z - D_800D154C->zpos;
-    time = 2.0f * (sqrtf((dx * dx) + (dz * dz)) / D_800D154C->stickspeed);
+    gCurrentActor->unk21E = D_800D1891;
+    dx = D_800D2104[gCurrentActor->listpos][D_800D1891 + 1].x - gCurrentActor->xpos;
+    dz = D_800D2104[gCurrentActor->listpos][D_800D1891 + 1].z - gCurrentActor->zpos;
+    time = 2.0f * (sqrtf((dx * dx) + (dz * dz)) / gCurrentActor->stickspeed);
     if (time < 12.0f) {
-        D_800D154C->stickspeed *= time * 0.08333300054f;
+        gCurrentActor->stickspeed *= time * 0.08333300054f;
         time = 12.0f;
     }
-    D_800D154C->unk21C = (u32)(time * 100.0f);
-    D_800D154C->yspd = D_800D154C->ygrav * time * 0.5f;
-    D_800D154C->unk223 = 4;
+    gCurrentActor->unk21C = (u32)(time * 100.0f);
+    gCurrentActor->yspd = gCurrentActor->ygrav * time * 0.5f;
+    gCurrentActor->unk223 = 4;
 }
 
 void func_150761C8(void) {
     func_15075650();
-    D_800D154C->unk223 = 5;
+    gCurrentActor->unk223 = 5;
 }
 
 void func_150761F4(void) {
-    D_800D154C->unk223 = 6;
-    D_800D154C->unk22C &= ~1;
+    gCurrentActor->unk223 = 6;
+    gCurrentActor->unk22C &= ~1;
 }
 
 void func_15076220(void) {
     func_150761F4();
-    D_800D154C->unk22C |= 1;
+    gCurrentActor->unk22C |= 1;
 }
 
 void func_15076250(void) {
     s32 id = (D_800D1890 << 8) | D_800D1891;
 
-    func_15060778(id, D_800D154C, 32000, -100, 500, 2500, D_800D1892);
+    actor_playPlayerSound(id, gCurrentActor, 32000, -100, 500, 2500, D_800D1892);
 }
 
 void func_150762B0(void) {
@@ -389,75 +389,75 @@ void func_150762B0(void) {
 }
 
 void func_150762D4(void) {
-    func_151669A0(D_800D154C->xpos, D_800D154C->ypos + 100.0f,
-                  D_800D154C->zpos, 0.45f, 0xFF, 0);
+    func_151669A0(gCurrentActor->xpos, gCurrentActor->ypos + 100.0f,
+                  gCurrentActor->zpos, 0.45f, 0xFF, 0);
 }
 
 void func_15076340(void) {
-    if (D_800D154C->ivehitit == 0) {
+    if (gCurrentActor->ivehitit == 0) {
         func_15075400(D_800D1890);
     }
     if (D_800D1891 != 0) {
-        D_800D154C->ivehitit = 0;
+        gCurrentActor->ivehitit = 0;
     }
 }
 
 void func_15076394(void) {
-    D_800D154C->unk236 = D_800D1890;
+    gCurrentActor->unk236 = D_800D1890;
 }
 
 void func_150763B0(void) {
     if (D_800D1890 == 128) {
-        D_800D154C->unk1E5 = D_800D154C->listpos_ptr->unkF;
+        gCurrentActor->unk1E5 = gCurrentActor->listpos_ptr->unkF;
     } else {
-        D_800D154C->unk1E5 = D_800D1890;
+        gCurrentActor->unk1E5 = D_800D1890;
     }
-    D_800D154C->unk1E7 = 0;
+    gCurrentActor->unk1E7 = 0;
 
     if (D_800D1892 != 0) {
-        D_800D154C->unk1E5 += func_150ADA20_u8() % (u32)D_800D1892;
+        gCurrentActor->unk1E5 += func_150ADA20_u8() % (u32)D_800D1892;
     }
     if (D_800D1893 == 1) {
-        D_800D154C->unk1E6 = 0;
-        D_800D154C->unk1E8 = 0;
+        gCurrentActor->unk1E6 = 0;
+        gCurrentActor->unk1E8 = 0;
         return;
     }
     if (D_800D1893 == 2) {
-        D_800D154C->unk1E6 = D_800D1891;
-        D_800D154C->unk1E8 = 0;
+        gCurrentActor->unk1E6 = D_800D1891;
+        gCurrentActor->unk1E8 = 0;
         return;
     }
     if (D_800D1891 == 0) {
-        D_800D154C->unk1E6 = D_800D154C->unk1E5;
-        D_800D154C->unk1E8 = 0;
+        gCurrentActor->unk1E6 = gCurrentActor->unk1E5;
+        gCurrentActor->unk1E8 = 0;
     }
 }
 
 void func_150764C8(void) {
-    D_800D154C->unk238 = D_800D1890;
+    gCurrentActor->unk238 = D_800D1890;
 }
 
 void func_150764E4(void) {
-    D_800D154C->intelhitroute = D_800D1890;
+    gCurrentActor->intelhitroute = D_800D1890;
 }
 
 void func_15076500(void) {
-    D_800D154C->unk22E = (D_800D1890 << 8) | D_800D1891;
+    gCurrentActor->unk22E = (D_800D1890 << 8) | D_800D1891;
 }
 
 /* Sets `immune` to arg0 on the object's target (arg1 != 0) or on the object itself. */
 void func_1507652C(void) {
     if (D_800D1891 != 0) {
-        movement_obj[D_800D154C->owner].imune = D_800D1890;
+        movement_obj[gCurrentActor->owner].imune = D_800D1890;
     } else {
-        D_800D154C->imune = D_800D1890;
+        gCurrentActor->imune = D_800D1890;
     }
 }
 
 void func_1507659C(void) {
-    D_800D154C->ypos = D_800D154C->ypos + D_800D1890 * 100;
+    gCurrentActor->ypos = gCurrentActor->ypos + D_800D1890 * 100;
     if (D_800D1893 != 0) {
-        D_800D154C->ypos = 1800.0f;
+        gCurrentActor->ypos = 1800.0f;
     }
 }
 
@@ -465,28 +465,28 @@ void func_15076600(void) {
 }
 
 void func_15076608(void) {
-    D_800D154C->unk24A = D_800D1890;
+    gCurrentActor->unk24A = D_800D1890;
 }
 
 /* Sets the flags given by the four argument bytes in unkF8. */
 void func_15076624(void) {
     s32 flags = (D_800D1890 << 24) | (D_800D1891 << 16) | (D_800D1892 << 8) | D_800D1893;
 
-    D_800D154C->noshove |= flags;
+    gCurrentActor->noshove |= flags;
 }
 
 /* Clears the flags given by the four argument bytes in unkF8. */
 void func_15076678(void) {
     s32 flags = (D_800D1890 << 24) | (D_800D1891 << 16) | (D_800D1892 << 8) | D_800D1893;
 
-    D_800D154C->noshove &= ~flags;
+    gCurrentActor->noshove &= ~flags;
 }
 
 void func_150766D0(void) {
-    if (((D_800D154C->shad > 0.0f) && (D_800D1890 == 0)) ||
-        ((D_800D1890 * 50 < D_800D154C->shad) && (D_800D1890 != 0))) {
-        D_800D154C->unk21C = 99;
-        D_800D154C->scriptCmd--;
+    if (((gCurrentActor->shad > 0.0f) && (D_800D1890 == 0)) ||
+        ((D_800D1890 * 50 < gCurrentActor->shad) && (D_800D1890 != 0))) {
+        gCurrentActor->unk21C = 99;
+        gCurrentActor->scriptCmd--;
     }
 }
 
@@ -499,16 +499,16 @@ void func_15076768(void) {
 
     switch (D_800D1890) {
     case 0:
-        func_15197A7C(D_800D154C);
+        func_15197A7C(gCurrentActor);
         break;
     case 1:
-        position.x = D_800D154C->xpos;
+        position.x = gCurrentActor->xpos;
         position.y = -390.0f;
-        position.z = D_800D154C->zpos;
+        position.z = gCurrentActor->zpos;
         // matching: the jump ends the basic block, so as1 keeps the stores before the call
         goto setup_done;
     setup_done:
-        func_1504715C(&floor, D_800D154C);
+        func_1504715C(&floor, gCurrentActor);
         func_1514B364(&position, &floor, 0xFF, 0);
         break;
     }
@@ -519,11 +519,11 @@ void func_150767F4(void) {
     Actor *target;
     u16 angle;
 
-    target = &movement_obj[D_800D154C->unk222];
+    target = &movement_obj[gCurrentActor->unk222];
     // matching: the (s32) cast before narrowing to u16 is needed
-    angle = (s32)func_1505A630(target->xpos - D_800D154C->xpos,
-                               D_800D154C->zpos - target->zpos, 0);
-    if ((((angle >> 8) - (movement_obj[D_800D154C->unk222].langle >> 8) + D_800D1891) & 0xFF) < D_800D1891 * 2) {
+    angle = (s32)actor_getDirectionAngle(target->xpos - gCurrentActor->xpos,
+                               gCurrentActor->zpos - target->zpos, 0);
+    if ((((angle >> 8) - (movement_obj[gCurrentActor->unk222].langle >> 8) + D_800D1891) & 0xFF) < D_800D1891 * 2) {
         func_15075400(D_800D1890);
     }
 }
@@ -547,24 +547,24 @@ void func_150768DC(void) {
     u8 foundIndex;
 
     nearest = D_800D1890 * 8;
-    D_800D154C->unkA8 = 0;
-    self = D_800D154C - movement_obj;
+    gCurrentActor->unkA8 = 0;
+    self = gCurrentActor - movement_obj;
 
     for (i = 0; i < 25; i++) {
         obj = &movement_obj[i];
         if ((obj->type != 0) && (obj->energy != 0) && (obj->noshove & 0x20) && (i != self)) {
-            if ((D_800D1891 != 0) || (obj->character_type != D_800D154C->character_type)) {
-                if (fabsf(D_800D154C->ypos - obj->ypos) > 50.0f) {
+            if ((D_800D1891 != 0) || (obj->character_type != gCurrentActor->character_type)) {
+                if (fabsf(gCurrentActor->ypos - obj->ypos) > 50.0f) {
                     continue;
                 }
-                dist = func_1505A72C(D_800D154C, obj);
+                dist = actor_distance3D(gCurrentActor, obj);
                 if (dist < nearest) {
-                    type = D_800D1C90[D_800D154C->character_type];
+                    type = D_800D1C90[gCurrentActor->character_type];
                     viewAngle = type->viewAngle;
-                    angle = func_1505A630(obj->xpos - D_800D154C->xpos,
-                                          D_800D154C->zpos - obj->zpos, 0) >> 8;
-                    if (((((D_800D154C->angle >> 8) + D_800D154C->unk2CA) - angle + (viewAngle / 2)) & 0xFF) < viewAngle) {
-                        D_800D154C->unkA8 = i + 0x80;
+                    angle = actor_getDirectionAngle(obj->xpos - gCurrentActor->xpos,
+                                          gCurrentActor->zpos - obj->zpos, 0) >> 8;
+                    if (((((gCurrentActor->angle >> 8) + gCurrentActor->unk2CA) - angle + (viewAngle / 2)) & 0xFF) < viewAngle) {
+                        gCurrentActor->unkA8 = i + 0x80;
                         nearest = dist;
                     }
                 }
@@ -572,12 +572,12 @@ void func_150768DC(void) {
         }
     }
 
-    if (D_800D154C->unkA8 != 0) {
-        D_800D154C->scriptCmd = func_1507BB28(0, D_800D1893);
-        D_800D154C->scriptCmd--;
+    if (gCurrentActor->unkA8 != 0) {
+        gCurrentActor->scriptCmd = func_1507BB28(0, D_800D1893);
+        gCurrentActor->scriptCmd--;
         script = D_800D1892;
         if (script != 0) {
-            foundIndex = D_800D154C->unkA8;
+            foundIndex = gCurrentActor->unkA8;
             found = &movement_obj[foundIndex & 0x7F];
             found->scriptCmd = NULL;
             found->intelwalk = script;
@@ -587,16 +587,16 @@ void func_150768DC(void) {
 }
 
 void func_15076B5C(void) {
-    D_800D154C->unk222 = D_800D154C->unkA8 & 0x7F;
+    gCurrentActor->unk222 = gCurrentActor->unkA8 & 0x7F;
 }
 
 void func_15076B78(void) {
-    D_800D154C->drawtype = D_800D1890;
+    gCurrentActor->drawtype = D_800D1890;
 }
 
 /* Targets the last object below this one (all 25 if arg1) of type arg0 that is alive, and starts mode 9. */
 void func_15076B94(void) {
-    s32 i = D_800D154C - movement_obj;
+    s32 i = gCurrentActor - movement_obj;
 
     if (D_800D1891) {
         i = 25;
@@ -604,9 +604,9 @@ void func_15076B94(void) {
     while (i != 0) {
         if ((D_800D1890 == movement_obj[i - 1].character_type) && (movement_obj[i - 1].energy != 0)) {
             func_15075548();
-            D_800D154C->unk223 = 9;
-            D_800D154C->unk222 = i - 1;
-            D_800D154C->unk21C = 1000;
+            gCurrentActor->unk223 = 9;
+            gCurrentActor->unk222 = i - 1;
+            gCurrentActor->unk21C = 1000;
             return;
         }
         i--;
@@ -614,20 +614,20 @@ void func_15076B94(void) {
 }
 
 void func_15076C7C(void) {
-    func_1506160C(D_800D154C, 1, D_800D1890, 0, 0);
+    actor_fadeCommand(gCurrentActor, 1, D_800D1890, 0, 0);
 }
 
 void func_15076CB4(void) {
-    D_800D154C->angle = D_800D154C->fangle;
+    gCurrentActor->angle = gCurrentActor->fangle;
 }
 
 void func_15076CCC(void) {
-    D_800D154C->unk21C = 10000;
-    func_15060F28(D_800D154C, 1);
+    gCurrentActor->unk21C = 10000;
+    actor_remove(gCurrentActor, 1);
 }
 
 void func_15076D04(void) {
-    D_800D154C->speed = D_800D1890;
+    gCurrentActor->speed = D_800D1890;
 }
 
 /* Sets the object's scale from two s16 percentages, (arg1:arg0) horizontal and (arg3:arg2) vertical. */
@@ -636,20 +636,20 @@ void func_15076D3C(void) {
     s16 xz = D_800D1890 | (D_800D1891 << 8);
     s16 y = D_800D1892 | (D_800D1893 << 8);
 
-    D_800D154C->scale_xz = xz * scale;
-    D_800D154C->scale_y = y * scale;
-    D_800D154C->unk154 = D_800D154C->scale_xz;
-    D_800D154C->unk158 = D_800D154C->scale_y;
-    func_15062BDC(D_800D154C, D_800D154C->scale_xz, D_800D154C->scale_y);
+    gCurrentActor->scale_xz = xz * scale;
+    gCurrentActor->scale_y = y * scale;
+    gCurrentActor->unk154 = gCurrentActor->scale_xz;
+    gCurrentActor->unk158 = gCurrentActor->scale_y;
+    actor_setScale(gCurrentActor, gCurrentActor->scale_xz, gCurrentActor->scale_y);
 }
 
 void func_15076DF4(void) {
-    D_800D154C->type = D_800D1890;
+    gCurrentActor->type = D_800D1890;
 }
 
 void func_15076E10(void) {
-    D_800D154C->unk1D0 = D_800D1890;
-    D_800D154C->unk22C |= D_800D1891;
+    gCurrentActor->unk1D0 = D_800D1890;
+    gCurrentActor->unk22C |= D_800D1891;
 }
 
 void func_15076E48(void) {
@@ -658,26 +658,26 @@ void func_15076E48(void) {
 /* Starts mode 7: a jump in a random direction with random speeds. */
 void func_15076E50(void) {
     func_15075548();
-    D_800D154C->yspd = (func_150ADA20_u8() % 20U) + 55.0f;
-    D_800D154C->ygrav = 2.0f;
-    D_800D154C->fangle = func_150ADA20_u8() % 0xFFFFU;
-    D_800D154C->speed = (func_150ADA20_u8() % 20U) + 15;
-    D_800D154C->stickspeed = D_800D154C->speed;
-    D_800D154C->unk223 = 7;
+    gCurrentActor->yspd = (func_150ADA20_u8() % 20U) + 55.0f;
+    gCurrentActor->ygrav = 2.0f;
+    gCurrentActor->fangle = func_150ADA20_u8() % 0xFFFFU;
+    gCurrentActor->speed = (func_150ADA20_u8() % 20U) + 15;
+    gCurrentActor->stickspeed = gCurrentActor->speed;
+    gCurrentActor->unk223 = 7;
 }
 
 void func_15076F40(void) {
-    D_800D154C->unk21C = 1000;
-    func_15060F28(D_800D154C, 1);
+    gCurrentActor->unk21C = 1000;
+    actor_remove(gCurrentActor, 1);
 }
 
 void func_15076F78(void) {
     s8 value;
 
     value = D_800D1890;
-    D_800D154C->unkCC = value;
+    gCurrentActor->unkCC = value;
     value = D_800D1891;
-    D_800D154C->unkCE = value;
+    gCurrentActor->unkCE = value;
 }
 
 /* arg3 == 0: moves the object by a random offset of up to +-arg0/2 (x) and +-arg1/2 (z), times 3;
@@ -687,23 +687,23 @@ void func_15076FA8(void) {
         s16 offset;
 
         offset = (func_150ADA20_u8() % (u32)D_800D1890) - (D_800D1890 / 2);
-        D_800D154C->xpos += offset * 3.0f;
+        gCurrentActor->xpos += offset * 3.0f;
         offset = (func_150ADA20_u8() % (u32)D_800D1891) - (D_800D1891 / 2);
-        D_800D154C->zpos += offset * 3.0f;
-    } else if (D_800D154C->speed < D_800D1893) {
-        D_800D154C->speed = D_800D1893;
+        gCurrentActor->zpos += offset * 3.0f;
+    } else if (gCurrentActor->speed < D_800D1893) {
+        gCurrentActor->speed = D_800D1893;
     }
 }
 
 /* Jumps to arg3 when the target's speed is below arg2. */
 void func_150770E4(void) {
-    if (movement_obj[D_800D154C->unk222].speed < D_800D1892) {
+    if (movement_obj[gCurrentActor->unk222].speed < D_800D1892) {
         func_15075400(D_800D1893);
     }
 }
 
 void func_15077174(void) {
-    D_800D154C->unk10E = D_800D1890;
+    gCurrentActor->unk10E = D_800D1890;
 }
 
 void func_15077190(void) {
@@ -712,7 +712,7 @@ void func_15077190(void) {
     if (id != 0) {
         s32 param = D_800D1892 << 7;
 
-        func_10010630(id, D_800D154C, param, 500, 2500);
+        sound_playActorUntracked(id, gCurrentActor, param, 500, 2500);
     }
 }
 
@@ -729,11 +729,11 @@ void func_150771F0(void) {
         } else {
             mode = 2;
         }
-        func_1506160C(D_800D154C, mode, param0, param1, 0);
+        actor_fadeCommand(gCurrentActor, mode, param0, param1, 0);
     } else if (D_800D1892 == 0) {
-        func_1502EA60(D_800D154C, D_800D1890);
+        actor_startFogFadeOut(gCurrentActor, D_800D1890);
     } else {
-        func_1502EA7C(D_800D154C, D_800D1890);
+        actor_startFogFadeIn(gCurrentActor, D_800D1890);
     }
 }
 
@@ -741,23 +741,23 @@ void func_150771F0(void) {
 void func_15077294(void) {
     switch (D_800D1891) {
     case 0:
-        D_800D154C->energy = D_800D1890;
+        gCurrentActor->energy = D_800D1890;
         break;
     case 1:
-        D_800D154C->energy--;
+        gCurrentActor->energy--;
         break;
     }
 }
 
 void func_150772E8(void) {
-    func_1503DE70(D_800D154C, D_800D1890, -1);
+    model_breakIntoParts(gCurrentActor, D_800D1890, -1);
 }
 
 void func_15077318(void) {
     if (D_800D1890 != 0) {
-        D_800D154C->unk101 |= 1;
+        gCurrentActor->unk101 |= 1;
     } else {
-        D_800D154C->unk101 &= ~1;
+        gCurrentActor->unk101 &= ~1;
     }
 }
 
@@ -768,10 +768,10 @@ void func_15077364(void) {
     if (D_800D1893 != 0) {
         D_800D1890 += func_150ADA20_u8() % (u32)D_800D1893;
     }
-    D_800D154C->intel_animspd = D_800D1890;
-    D_800D154C->unk249 = 0;
-    D_800D154C->intel_accel = D_800D1891;
-    D_800D154C->intel_decel = D_800D1892;
+    gCurrentActor->intel_animspd = D_800D1890;
+    gCurrentActor->unk249 = 0;
+    gCurrentActor->intel_accel = D_800D1891;
+    gCurrentActor->intel_decel = D_800D1892;
 }
 
 /*
@@ -783,23 +783,23 @@ void func_15077404(void) {
         s16 value;
         s16 delta;
 
-        value = ((D_800D154C->intel_animspd & 0x1F) << 8) + D_800D154C->unk249;
+        value = ((gCurrentActor->intel_animspd & 0x1F) << 8) + gCurrentActor->unk249;
         delta = (D_800D1891 << 8) + D_800D1892;
         value += delta * D_800BE9E4;
         if (value < 0) {
             value = 0;
         }
-        D_800D154C->intel_animspd = (value >> 8) | 0x80;
-        D_800D154C->unk249 = value;
+        gCurrentActor->intel_animspd = (value >> 8) | 0x80;
+        gCurrentActor->unk249 = value;
     } else {
-        D_800D154C->intel_animspd = D_800D1890;
+        gCurrentActor->intel_animspd = D_800D1890;
     }
 }
 
 /* Jumps to arg0 when the object has reached its destination node (or has none). */
 void func_150774B4(void) {
-    if ((D_800D154C->unk20F == D_800D154C->unk211) || (D_800D154C->unk211 == 0xFF)) {
-        D_800D154C->task_attrib |= 0x800;
+    if ((gCurrentActor->unk20F == gCurrentActor->unk211) || (gCurrentActor->unk211 == 0xFF)) {
+        gCurrentActor->task_attrib |= 0x800;
         func_15075400(D_800D1890);
     }
 }
@@ -832,48 +832,48 @@ void func_15077508(void) {
 
     next = 0xFF;
     if (D_800D1890 != 1) {
-        if (D_800D154C->unk20F == D_800D154C->unk211) {
-            UNK216(D_800D154C) = 0;
-            D_800D154C->task_attrib |= 0x800;
+        if (gCurrentActor->unk20F == gCurrentActor->unk211) {
+            UNK216(gCurrentActor) = 0;
+            gCurrentActor->task_attrib |= 0x800;
             return;
         }
-        if (D_800D154C->unk211 == 0xFF) {
-            UNK216(D_800D154C) = 0;
+        if (gCurrentActor->unk211 == 0xFF) {
+            UNK216(gCurrentActor) = 0;
         }
     }
-    D_800D154C->task_attrib &= ~0x800;
-    if (D_800D2108[D_800D154C->listpos] - 1 > 0) {
+    gCurrentActor->task_attrib &= ~0x800;
+    if (D_800D2108[gCurrentActor->listpos] - 1 > 0) {
         hasGoal2 = 0;
         hasGoal = 0;
-        if (D_800D154C->unk211 != 0xFF) {
+        if (gCurrentActor->unk211 != 0xFF) {
             hasGoal = 1;
         }
-        if (D_800D154C->unk212[0] != 0xFF) {
+        if (gCurrentActor->unk212[0] != 0xFF) {
             hasGoal2 = 1;
         }
-        current = D_800D154C->unk20F;
+        current = gCurrentActor->unk20F;
         if (current == 0xFF) {
             if (D_800D1890 == 1) {
                 hasGoal2 = 0;
                 hasGoal = 0;
-                next = D_800D154C->unk210;
+                next = gCurrentActor->unk210;
             }
             if (next == 0xFF) {
-                next = func_15086098(D_800D154C->xpos, D_800D154C->ypos, D_800D154C->zpos,
-                                     hasGoal, hasGoal2, &D_800D154C->unk211, D_800D154C->unk212);
+                next = func_15086098(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
+                                     hasGoal, hasGoal2, &gCurrentActor->unk211, gCurrentActor->unk212);
             }
         } else if (current != 0xFF) {
             if (D_800D1890 == 1) {
                 best = 0xFF;
                 node = &D_800D2350[current];
-                if (D_800D154C->unk210 != 0xFF) {
+                if (gCurrentActor->unk210 != 0xFF) {
                     // matching: dead code standing in for something the original compiled away; it
                     // keeps IDO's branch on pad210 and its register assignment
-                    tmp = 0; for (i = 0, q = (u8 *)D_800D2350; i < 4; i++, q++) { tmp += q[9] == D_800D154C->unk210; } tmp += (s32)node; tmp ^= (s32)node; tmp -= (s32)node; tmp |= (s32)node;
+                    tmp = 0; for (i = 0, q = (u8 *)D_800D2350; i < 4; i++, q++) { tmp += q[9] == gCurrentActor->unk210; } tmp += (s32)node; tmp ^= (s32)node; tmp -= (s32)node; tmp |= (s32)node;
                 }
                 bestRoll = 10.0f;
                 for (i = 0; i < 5; i++) {
-                    if (node->links[i] != 0xFF && D_800D154C->unk210 != node->links[i]) {
+                    if (node->links[i] != 0xFF && gCurrentActor->unk210 != node->links[i]) {
                         roll = func_150ADA68();
                         if (roll < bestRoll) {
                             bestRoll = roll;
@@ -883,19 +883,19 @@ void func_15077508(void) {
                 }
                 next = best;
                 if (next == 0xFF) {
-                    D_800D154C->task_attrib |= 0x800;
-                    next = D_800D154C->unk210;
+                    gCurrentActor->task_attrib |= 0x800;
+                    next = gCurrentActor->unk210;
                 }
             } else {
-                next = func_15086364(current, hasGoal, hasGoal2, &D_800D154C->unk211, D_800D154C->unk212);
+                next = func_15086364(current, hasGoal, hasGoal2, &gCurrentActor->unk211, gCurrentActor->unk212);
             }
         }
         if (next != 0xFF) {
-            D_800D154C->unk21E = 0;
+            gCurrentActor->unk21E = 0;
             if (func_15086CBC(next, &x, &y, &z)) {
-                UNK216(D_800D154C) = D_800D2354;
-                D_800D154C->unk210 = D_800D154C->unk20F;
-                D_800D154C->unk20F = next;
+                UNK216(gCurrentActor) = D_800D2354;
+                gCurrentActor->unk210 = gCurrentActor->unk20F;
+                gCurrentActor->unk20F = next;
                 {
                     f32 width;
                     f32 dx;
@@ -903,8 +903,8 @@ void func_15077508(void) {
                     f32 dist;
 
                     width = (f32)(u32)D_800D2350[next].unk8 + (f32)(u32)D_800D2350[next].unk8;
-                    dx = x - D_800D154C->xpos;
-                    dz = z - D_800D154C->zpos;
+                    dx = x - gCurrentActor->xpos;
+                    dz = z - gCurrentActor->zpos;
                     dist = sqrtf(dx * dx + dz * dz);
                     if (dist > 1.0f) {
                         dist = func_150ADA68() * width / dist;
@@ -912,9 +912,9 @@ void func_15077508(void) {
                         z += dx * dist;
                     }
                 }
-                D_800D2104[D_800D154C->listpos][1].x = x;
-                D_800D2104[D_800D154C->listpos][1].y = y;
-                D_800D2104[D_800D154C->listpos][1].z = z;
+                D_800D2104[gCurrentActor->listpos][1].x = x;
+                D_800D2104[gCurrentActor->listpos][1].y = y;
+                D_800D2104[gCurrentActor->listpos][1].z = z;
             }
         }
     }
@@ -924,21 +924,21 @@ void func_15077508(void) {
 void func_150778F0(void) {
     u8 count;
 
-    count = D_800D2108[D_800D154C->listpos] - 1;
-    if (D_800D154C->unk21F != 0) {
-        count = D_800D154C->unk21F;
+    count = D_800D2108[gCurrentActor->listpos] - 1;
+    if (gCurrentActor->unk21F != 0) {
+        count = gCurrentActor->unk21F;
     }
-    D_800D154C->unk21E += D_800D154C->unk221;
-    D_800D154C->unk21E += count;
-    D_800D154C->unk21E %= count;
-    if (D_800D154C->unk21E < D_800D154C->unk220) {
-        D_800D154C->unk21E = D_800D154C->unk220;
+    gCurrentActor->unk21E += gCurrentActor->unk221;
+    gCurrentActor->unk21E += count;
+    gCurrentActor->unk21E %= count;
+    if (gCurrentActor->unk21E < gCurrentActor->unk220) {
+        gCurrentActor->unk21E = gCurrentActor->unk220;
     }
 }
 
 void func_150779A8(void) {
     func_15075650();
-    D_800D154C->unk223 = 11;
+    gCurrentActor->unk223 = 11;
 }
 
 /* Jumps to arg0 when object 0 (or, with arg2, the target) is within arg3 * 8 units. */
@@ -949,13 +949,13 @@ void func_150779D4(void) {
 
     index = 0;
     if (D_800D1892 != 0) {
-        index = D_800D154C->unk222;
+        index = gCurrentActor->unk222;
     }
     if (dc_glbl_CharNum != index) {
         obj = &movement_obj[index];
         if ((obj->type != 1) || (obj->attach_char == 0)) {
             // matching: the assignment inside the test makes IDO keep the bound in $f2
-            if (func_1505A6F8(D_800D154C, obj) < (range = D_800D1893 << 3)) {
+            if (actor_distanceXZ(gCurrentActor, obj) < (range = D_800D1893 << 3)) {
                 func_15075400(D_800D1890);
             }
         }
@@ -963,33 +963,33 @@ void func_150779D4(void) {
 }
 
 void func_15077AA0(void) {
-    D_800D154C->intelhitroute = D_800D1890;
+    gCurrentActor->intelhitroute = D_800D1890;
 }
 
 void func_15077ABC(void) {
-    D_800D154C->unk258 = D_800D1890;
-    D_800D154C->unk257 = D_800D1891;
-    D_800D154C->unk86 = func_150ADA20_u8() % 255U;
+    gCurrentActor->unk258 = D_800D1890;
+    gCurrentActor->unk257 = D_800D1891;
+    gCurrentActor->unk86 = func_150ADA20_u8() % 255U;
 }
 
 void func_15077B14(void) {
-    D_800D154C->unk24C = D_800D1890;
-    D_800D154C->unk24D = D_800D1891;
+    gCurrentActor->unk24C = D_800D1890;
+    gCurrentActor->unk24D = D_800D1891;
 }
 
 void func_15077B44(void) {
-    func_15060A30((D_800D1890 << 8) + D_800D1891, D_800D154C);
+    actor_playSound((D_800D1890 << 8) + D_800D1891, gCurrentActor);
 }
 
 void func_15077B80(void) {
     s32 flags = (D_800D1890 << 8) + D_800D1891;
 
-    D_800D154C->task_attrib |= flags;
+    gCurrentActor->task_attrib |= flags;
 }
 
-/* Restarts the object returned by func_1505F0AC(arg1) on script arg0. */
+/* Restarts the object returned by actor_findByType(arg1) on script arg0. */
 void func_15077BB4(void) {
-    Actor *obj = func_1505F0AC(D_800D1891);
+    Actor *obj = actor_findByType(D_800D1891);
 
     obj->scriptCmd = NULL;
     obj->intelwalk = D_800D1890;
@@ -998,11 +998,11 @@ void func_15077BB4(void) {
 void func_15077BE4(void) {
     s32 mask = ~((D_800D1890 << 8) + D_800D1891);
 
-    D_800D154C->task_attrib &= mask;
+    gCurrentActor->task_attrib &= mask;
 }
 
 void func_15077C1C(void) {
-    D_800D154C->unk23D = D_800D1890;
+    gCurrentActor->unk23D = D_800D1890;
 }
 
 /*
@@ -1016,7 +1016,7 @@ void func_15077C38(void) {
     s32 i;
 
     nearest = 9999999.0f;
-    D_800D154C->unk222 = 0;
+    gCurrentActor->unk222 = 0;
 
     for (i = 0; i < 25; i++) {
         obj = &movement_obj[i];
@@ -1025,12 +1025,12 @@ void func_15077C38(void) {
             ((obj->attach_char == 0) || (D_800D1892 != 0)) &&
             ((obj->character_type == D_800D1890) || ((obj->type == D_800D1891) && (obj->stunned == 0)))) {
             if (D_800D1893 == 0) {
-                D_800D154C->unk222 = i;
+                gCurrentActor->unk222 = i;
                 return;
             }
-            dist = func_1505A72C(D_800D154C, obj);
+            dist = actor_distance3D(gCurrentActor, obj);
             if (nearest > dist) {
-                D_800D154C->unk222 = i;
+                gCurrentActor->unk222 = i;
                 nearest = dist;
             }
         }
@@ -1038,36 +1038,36 @@ void func_15077C38(void) {
 }
 
 void func_15077DA0(void) {
-    D_800D154C->unk21E = D_800D1890;
+    gCurrentActor->unk21E = D_800D1890;
 }
 
 /* Moves the object onto waypoint arg0 (0xFA: the current waypoint). */
 void func_15077DBC(void) {
     if (D_800D1890 != 0xFA) {
-        D_800D154C->unk21E = D_800D1890;
+        gCurrentActor->unk21E = D_800D1890;
     }
-    D_800D154C->xpos = D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].x;
-    D_800D154C->ypos = D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].y;
-    D_800D154C->zpos = D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].z;
+    gCurrentActor->xpos = D_800D2104[gCurrentActor->listpos][gCurrentActor->unk21E + 1].x;
+    gCurrentActor->ypos = D_800D2104[gCurrentActor->listpos][gCurrentActor->unk21E + 1].y;
+    gCurrentActor->zpos = D_800D2104[gCurrentActor->listpos][gCurrentActor->unk21E + 1].z;
 }
 
 void func_15077E9C(void) {
     s32 id = (D_800D1890 << 8) + D_800D1891;
 
-    func_10012718(id, D_800D154C, 24000, 500, 2500);
+    func_10012718(id, gCurrentActor, 24000, 500, 2500);
 }
 
 void func_15077EEC(void) {
-    D_800D154C->unk254 = D_800D1890;
+    gCurrentActor->unk254 = D_800D1890;
 }
 
 void func_15077F08(void) {
-    D_800D154C->unk1EA = (D_800D1890 << 8) | D_800D1891;
+    gCurrentActor->unk1EA = (D_800D1890 << 8) | D_800D1891;
 }
 
 void func_15077F34(void) {
-    D_800D154C->unk24F = D_800D1890;
-    D_800D154C->unk250 = D_800D1891;
+    gCurrentActor->unk24F = D_800D1890;
+    gCurrentActor->unk250 = D_800D1891;
 }
 
 /* Turns the object towards the current waypoint, starting turn animation arg0 - 1 for large turns. */
@@ -1078,16 +1078,16 @@ void func_15077F64(void) {
     u8 index;
 
     index = D_800D1890 - 1;
-    dx = D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].x - D_800D154C->xpos;
-    dz = D_800D154C->zpos - D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].z;
-    D_800D154C->fangle = func_1505A630(dx, dz, 0);
-    turn = (D_800D154C->fangle - D_800D154C->angle) >> 8;
+    dx = D_800D2104[gCurrentActor->listpos][gCurrentActor->unk21E + 1].x - gCurrentActor->xpos;
+    dz = gCurrentActor->zpos - D_800D2104[gCurrentActor->listpos][gCurrentActor->unk21E + 1].z;
+    gCurrentActor->fangle = actor_getDirectionAngle(dx, dz, 0);
+    turn = (gCurrentActor->fangle - gCurrentActor->angle) >> 8;
     if (turn & 0x80) {
         turn = -turn;
     }
     if (D_80099A3C[index][0] < turn) {
-        D_800D154C->unk250 = D_800D1891;
-        func_15056A00(D_800D154C, turn, index);
+        gCurrentActor->unk250 = D_800D1891;
+        func_15056A00(gCurrentActor, turn, index);
     }
 }
 
@@ -1102,7 +1102,7 @@ void func_15078074(void) {
     for (i = 0; i < 25; i++) {
         obj = &movement_obj[i];
         if ((obj->type != 0) && (dc_glbl_CharNum != i)) {
-            if (func_1505A6F8(D_800D154C, obj) < range) {
+            if (actor_distanceXZ(gCurrentActor, obj) < range) {
                 func_15075400(D_800D1890);
                 return;
             }
@@ -1112,7 +1112,7 @@ void func_15078074(void) {
 
 /* Jumps to arg0 when the target is inactive. */
 void func_1507813C(void) {
-    s32 index = D_800D154C->unk222;
+    s32 index = gCurrentActor->unk222;
 
     if (movement_obj[index].type == 0) {
         func_15075400(D_800D1890);
@@ -1120,10 +1120,10 @@ void func_1507813C(void) {
 }
 
 void func_150781A4(void) {
-    D_800D154C->unk23F = D_800D1891;
-    D_800D154C->unk240 = D_800D1892;
-    D_800D154C->unk241 = D_800D1890;
-    D_800D154C->unk242 = D_800D1893;
+    gCurrentActor->unk23F = D_800D1891;
+    gCurrentActor->unk240 = D_800D1892;
+    gCurrentActor->unk241 = D_800D1890;
+    gCurrentActor->unk242 = D_800D1893;
 }
 
 /* Jumps to arg0 when the object is closer (arg2 == 0) or farther (arg2 != 0) than arg3 * 8 from waypoint arg1. */
@@ -1135,9 +1135,9 @@ void func_150781F4(void) {
     s32 index;
 
     index = D_800D1891 + 1;
-    point = &D_800D2104[D_800D154C->listpos][index];
-    dx = point->x - D_800D154C->xpos;
-    dz = point->z - D_800D154C->zpos;
+    point = &D_800D2104[gCurrentActor->listpos][index];
+    dx = point->x - gCurrentActor->xpos;
+    dz = point->z - gCurrentActor->zpos;
     dist = sqrtf((dx * dx) + (dz * dz));
     dx = D_800D1893 << 3;
     if (((D_800D1892 == 0) && (dist < dx)) ||
@@ -1147,13 +1147,13 @@ void func_150781F4(void) {
 }
 
 void func_150782CC(void) {
-    D_800D154C->unk23E = D_800D1890;
+    gCurrentActor->unk23E = D_800D1890;
 }
 
 /* Jumps to arg0 when the object's unique id is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_150782E8(void) {
-    if (((D_800D1892 == 0) && (D_800D154C->unique_id == D_800D1891)) ||
-        ((D_800D1892 == 1) && (D_800D154C->unique_id != D_800D1891))) {
+    if (((D_800D1892 == 0) && (gCurrentActor->unique_id == D_800D1891)) ||
+        ((D_800D1892 == 1) && (gCurrentActor->unique_id != D_800D1891))) {
         func_15075400(D_800D1890);
     }
 }
@@ -1162,14 +1162,14 @@ void func_150782E8(void) {
 void func_15078358(void) {
     s32 index = func_15083FB0(D_800D1890);
 
-    D_800D154C->unk222 = index;
+    gCurrentActor->unk222 = index;
     if (index == -1) {
-        D_800D154C->unk222 = 0;
+        gCurrentActor->unk222 = 0;
     }
 }
 
 /*
- * Jumps to arg0 when the distance to the target (arg2: 0 func_1505A6F8, 1 func_1505A72C, else the
+ * Jumps to arg0 when the distance to the target (arg2: 0 actor_distanceXZ, 1 actor_distance3D, else the
  * height difference) is below (arg1 == 0) or above (arg1 == 1) arg3 * 8 (0xFF: unk23D * 8).
  */
 void func_1507839C(void) {
@@ -1178,18 +1178,18 @@ void func_1507839C(void) {
     f32 threshold;
 
     if (D_800D1892 == 0) {
-        target = &movement_obj[D_800D154C->unk222];
-        dist = func_1505A6F8(D_800D154C, target);
+        target = &movement_obj[gCurrentActor->unk222];
+        dist = actor_distanceXZ(gCurrentActor, target);
     } else if (D_800D1892 == 1) {
-        target = &movement_obj[D_800D154C->unk222];
-        dist = func_1505A72C(D_800D154C, target);
+        target = &movement_obj[gCurrentActor->unk222];
+        dist = actor_distance3D(gCurrentActor, target);
     } else {
-        dist = fabsf(D_800D154C->ypos - movement_obj[D_800D154C->unk222].ypos);
+        dist = fabsf(gCurrentActor->ypos - movement_obj[gCurrentActor->unk222].ypos);
     }
 
     threshold = D_800D1893 * 8;
     if (D_800D1893 == 0xFF) {
-        threshold = D_800D154C->unk23D * 8;
+        threshold = gCurrentActor->unk23D * 8;
     }
     if (((D_800D1891 == 0) && (dist < threshold)) ||
         ((D_800D1891 == 1) && (threshold < dist))) {
@@ -1222,28 +1222,28 @@ void func_15078544(void) {
 
     mode = D_800D1890 >> 6;
     D_800D1890 &= 0x3F;
-    x = movement_obj[D_800D154C->unk222].xpos;
-    z = movement_obj[D_800D154C->unk222].zpos;
-    y = movement_obj[D_800D154C->unk222].ypos;
+    x = movement_obj[gCurrentActor->unk222].xpos;
+    z = movement_obj[gCurrentActor->unk222].zpos;
+    y = movement_obj[gCurrentActor->unk222].ypos;
     offsetX = ((((s8)D_800D1891 << 4) | (D_800D1893 >> 4)) * 8);
     offsetZ = ((((s8)D_800D1892 << 4) | (D_800D1893 & 0xF)) * 8);
     if (mode == 0) {
-        facing = ((movement_obj[D_800D154C->unk222].langle >> 8) & 0xFF) - 0x40;
+        facing = ((movement_obj[gCurrentActor->unk222].langle >> 8) & 0xFF) - 0x40;
         sine = func_15048A40(facing);
         cosine = func_150489B0(facing);
     } else if (mode == 1) {
         sine = 0.0f;
         cosine = 1.0f;
     } else {
-        angle = func_150484A0(D_800D154C->xpos - x, D_800D154C->zpos - z);
+        angle = func_150484A0(gCurrentActor->xpos - x, gCurrentActor->zpos - z);
         sine = sinf(angle);
         cosine = cosf(angle);
     }
     x += offsetX * cosine + offsetZ * sine;
     z += offsetZ * cosine - offsetX * sine;
-    D_800D2104[D_800D154C->listpos][D_800D1890 + 1].x = x;
-    D_800D2104[D_800D154C->listpos][D_800D1890 + 1].y = y;
-    D_800D2104[D_800D154C->listpos][D_800D1890 + 1].z = z;
+    D_800D2104[gCurrentActor->listpos][D_800D1890 + 1].x = x;
+    D_800D2104[gCurrentActor->listpos][D_800D1890 + 1].y = y;
+    D_800D2104[gCurrentActor->listpos][D_800D1890 + 1].z = z;
 }
 
 /* Jumps to arg0 when the target's unk2D0->unk8 is below (arg2 == 0) or above (arg2 == 1) arg1. */
@@ -1252,7 +1252,7 @@ void func_1507879C(void) {
     f32 value;
     s32 compare;
 
-    data = movement_obj[D_800D154C->unk222].unk2D0;
+    data = movement_obj[gCurrentActor->unk222].unk2D0;
     value = data->frame[0];
     compare = D_800D1892;
     if (((compare == 0) && (value < (f32)(u32)D_800D1891)) ||
@@ -1262,13 +1262,13 @@ void func_1507879C(void) {
 }
 
 void func_15078874(void) {
-    D_800D154C->unk251 = D_800D1890;
+    gCurrentActor->unk251 = D_800D1890;
 }
 
 /* Jumps to arg0 when unk251 is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_15078890(void) {
-    if (((D_800D1892 == 0) && (D_800D154C->unk251 == D_800D1891)) ||
-        ((D_800D1892 == 1) && (D_800D154C->unk251 != D_800D1891))) {
+    if (((D_800D1892 == 0) && (gCurrentActor->unk251 == D_800D1891)) ||
+        ((D_800D1892 == 1) && (gCurrentActor->unk251 != D_800D1891))) {
         func_15075400(D_800D1890);
     }
 }
@@ -1276,11 +1276,11 @@ void func_15078890(void) {
 /* arg3: jumps to arg0 when the target is object 0; else when the target's unk251 is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_15078900(void) {
     if (D_800D1893 != 0) {
-        if (D_800D154C->unk222 == 0) {
+        if (gCurrentActor->unk222 == 0) {
             func_15075400(D_800D1890);
         }
-    } else if (((D_800D1892 == 0) && (D_800D1891 == movement_obj[D_800D154C->unk222].unk251)) ||
-               ((D_800D1892 == 1) && (D_800D1891 != movement_obj[D_800D154C->unk222].unk251))) {
+    } else if (((D_800D1892 == 0) && (D_800D1891 == movement_obj[gCurrentActor->unk222].unk251)) ||
+               ((D_800D1892 == 1) && (D_800D1891 != movement_obj[gCurrentActor->unk222].unk251))) {
         func_15075400(D_800D1890);
     }
 }
@@ -1290,8 +1290,8 @@ void func_15078A08(void) {
     AnimInstance *dst;
     AnimInstance *src;
 
-    dst = D_800D154C->unk2D0;
-    src = movement_obj[D_800D154C->unk222].unk2D0;
+    dst = gCurrentActor->unk2D0;
+    src = movement_obj[gCurrentActor->unk222].unk2D0;
     dst->frame[0] = src->frame[0];
     dst->frame[1] = src->frame[1];
 }
@@ -1329,8 +1329,8 @@ s32 func_15078A60(s32 index) {
         // angle between the object's facing and the direction to it from the current object
         facing = movement_obj[index].langle >> 8;
         facing -= 0x40;
-        diff = (u8)(func_150484A0(movement_obj[index].xpos - D_800D154C->xpos,
-                                  movement_obj[index].zpos - D_800D154C->zpos) * 40.74366379f) - facing;
+        diff = (u8)(func_150484A0(movement_obj[index].xpos - gCurrentActor->xpos,
+                                  movement_obj[index].zpos - gCurrentActor->zpos) * 40.74366379f) - facing;
         value = (u8)diff;
         if (value > 0x80) {
             value = 0x100 - value;
@@ -1364,13 +1364,13 @@ s32 func_15078A60(s32 index) {
         value = D_800BE9EC;
         break;
     case 15:
-        value = movement_obj[D_800D154C->unk222].character_type;
+        value = movement_obj[gCurrentActor->unk222].character_type;
         break;
     case 16:
         value = movement_obj[index].energy;
         break;
     case 17:
-        value = movement_obj[D_800D154C->unk222].intelwalk;
+        value = movement_obj[gCurrentActor->unk222].intelwalk;
         break;
     case 18:
         value = movement_obj[index].norun;
@@ -1388,8 +1388,8 @@ void func_1507900C(void) {
 
 void func_1507903C(void) {
     if (func_15078A60(0) != 0) {
-        D_800D154C->scriptCmd = func_1507BB28(0, D_800D1890);
-        D_800D154C->scriptCmd--;
+        gCurrentActor->scriptCmd = func_1507BB28(0, D_800D1890);
+        gCurrentActor->scriptCmd--;
     }
 }
 
@@ -1401,8 +1401,8 @@ void func_15079090(void) {
 
 void func_150790C4(void) {
     if (func_15078A60(dc_glbl_CharNum) != 0) {
-        D_800D154C->scriptCmd = func_1507BB28(0, D_800D1890);
-        D_800D154C->scriptCmd--;
+        gCurrentActor->scriptCmd = func_1507BB28(0, D_800D1890);
+        gCurrentActor->scriptCmd--;
     }
 }
 
@@ -1427,14 +1427,14 @@ void func_1507911C(void) {
 }
 
 void func_150791F0(void) {
-    if (D_800D154C->modelCount < D_800D1890) {
-        D_800D154C->forced_lod = 0xFF;
+    if (gCurrentActor->modelCount < D_800D1890) {
+        gCurrentActor->forced_lod = 0xFF;
     } else {
-        D_800D154C->forced_lod = D_800D1890;
+        gCurrentActor->forced_lod = D_800D1890;
     }
 }
 
-/* Calls func_1505D024 with the direction from gate unk251 to the object (never 0) and holds for a tick. */
+/* Calls actor_hitScripted with the direction from gate unk251 to the object (never 0) and holds for a tick. */
 void func_15079228(void) {
     Actor *obj;
     TriggerZone *gate;
@@ -1443,34 +1443,34 @@ void func_15079228(void) {
     u16 angle;
 
     // matching: the (no-op) load through the variable's address orders the address computation as the original
-    gate = &(*(TriggerZone **)&zones)[D_800D154C->unk251];
-    obj = D_800D154C;
+    gate = &(*(TriggerZone **)&zones)[gCurrentActor->unk251];
+    obj = gCurrentActor;
     x = gate->x;
     z = gate->z;
-    angle = func_1505A630(obj->xpos - x, z - obj->zpos, 0);
+    angle = actor_getDirectionAngle(obj->xpos - x, z - obj->zpos, 0);
     if (angle == 0) {
         angle = 1;
     }
-    func_1505D024(D_800D154C, D_800D1890, angle, -1);
-    D_800D154C->scriptCmd--;
-    D_800D154C->unk21C = 1;
+    actor_hitScripted(gCurrentActor, D_800D1890, angle, -1);
+    gCurrentActor->scriptCmd--;
+    gCurrentActor->unk21C = 1;
 }
 
 void func_150792E0(void) {
-    D_800D154C->intelwalk = D_800D1890;
+    gCurrentActor->intelwalk = D_800D1890;
 }
 
 void func_150792FC(void) {
-    D_800D154C->unk2F8 &= ~7;
-    D_800D154C->unk2F8 |= D_800D1890;
+    gCurrentActor->unk2F8 &= ~7;
+    gCurrentActor->unk2F8 |= D_800D1890;
 }
 
 /* Restarts the object found by func_150768DC on script arg0. */
 void func_15079334(void) {
     Actor *found;
 
-    if (D_800D154C->unkA8 != 0) {
-        found = &movement_obj[D_800D154C->unkA8 & 0x7F];
+    if (gCurrentActor->unkA8 != 0) {
+        found = &movement_obj[gCurrentActor->unkA8 & 0x7F];
         found->scriptCmd = NULL;
         found->intelwalk = D_800D1890;
     }
@@ -1481,7 +1481,7 @@ void func_15079390(void) {
     s32 param1 = D_800D1891;
     s32 param2 = D_800D1892;
 
-    func_1514D3B0(D_800D154C, param0, param1, param2);
+    func_1514D3B0(gCurrentActor, param0, param1, param2);
 }
 
 /* Places waypoint arg0 at a random point up to 550 units from object 0, clamped to +-1200. */
@@ -1502,7 +1502,7 @@ void func_150793D8(void) {
         z = 0;
     }
 
-    func_1505A184(func_150ADA20_u8(), 550.0f, 0.0f, &offsetX, &offsetZ, &third);
+    actor_splitVelocity(func_150ADA20_u8(), 550.0f, 0.0f, &offsetX, &offsetZ, &third);
 
     x = x + offsetX;
     z = z + offsetZ;
@@ -1519,8 +1519,8 @@ void func_150793D8(void) {
         z = 1200;
     }
 
-    D_800D2104[D_800D154C->listpos][D_800D1890 + 1].x = x;
-    D_800D2104[D_800D154C->listpos][D_800D1890 + 1].z = z;
+    D_800D2104[gCurrentActor->listpos][D_800D1890 + 1].x = x;
+    D_800D2104[gCurrentActor->listpos][D_800D1890 + 1].z = z;
 }
 
 /* Sets the speeds for a jump that lands on the target. */
@@ -1528,11 +1528,11 @@ void func_15079570(void) {
     f32 dist;
     f32 time;
 
-    dist = func_1505A6F8(D_800D154C, &movement_obj[D_800D154C->unk222]);
-    D_800D154C->stickspeed = D_800D154C->speed;
-    time = 2.0f * (dist / D_800D154C->stickspeed);
-    D_800D154C->yspd = (D_800D154C->ygrav * time) * 0.5f;
-    D_800D154C->yspd += 2.0f * ((movement_obj[D_800D154C->unk222].ypos - D_800D154C->ypos) / time);
+    dist = actor_distanceXZ(gCurrentActor, &movement_obj[gCurrentActor->unk222]);
+    gCurrentActor->stickspeed = gCurrentActor->speed;
+    time = 2.0f * (dist / gCurrentActor->stickspeed);
+    gCurrentActor->yspd = (gCurrentActor->ygrav * time) * 0.5f;
+    gCurrentActor->yspd += 2.0f * ((movement_obj[gCurrentActor->unk222].ypos - gCurrentActor->ypos) / time);
 }
 
 /* Restarts the object with unique id arg0 on script arg1. */
@@ -1568,13 +1568,13 @@ void func_15079790(void) {
     s16 offsetZ;
 
     if (D_800D1892 != 0) {
-        D_800D154C->character_type = 0xFF;
+        gCurrentActor->character_type = 0xFF;
     } else {
-        D_800D154C->character_type = 0x3A;
+        gCurrentActor->character_type = 0x3A;
         offsetX = (func_150ADA20_u8() % 500U) - 250;
         offsetZ = (func_150ADA20_u8() % 500U) - 250;
-        D_800D154C->xpos = D_800D2104[D_800D154C->listpos][0].x + offsetX;
-        D_800D154C->zpos = D_800D2104[D_800D154C->listpos][0].z + offsetZ;
+        gCurrentActor->xpos = D_800D2104[gCurrentActor->listpos][0].x + offsetX;
+        gCurrentActor->zpos = D_800D2104[gCurrentActor->listpos][0].z + offsetZ;
     }
 }
 
@@ -1593,7 +1593,7 @@ void func_15079880(void) {
 
 /* Jumps to arg0 when the object is near its current waypoint (see func_150781F4). */
 void func_150798F8(void) {
-    D_800D1891 = D_800D154C->unk21E;
+    D_800D1891 = gCurrentActor->unk21E;
     func_150781F4();
 }
 
@@ -1604,11 +1604,11 @@ void func_15079928(void) {
     if (timer == 0) {
         timer = 0xFFFF;
     }
-    func_1507E7E4(D_800D154C, D_800D1890, D_800D1893, timer, 0);
+    func_1507E7E4(gCurrentActor, D_800D1890, D_800D1893, timer, 0);
 }
 
 void func_15079988(void) {
-    func_1507EB4C(D_800D154C, D_800D1890);
+    func_1507EB4C(gCurrentActor, D_800D1890);
 }
 
 void func_150799B4(void) {
@@ -1617,16 +1617,16 @@ void func_150799B4(void) {
     if (D_800D1892 != 0) {
         id += func_150ADA20_u8() % (u32)D_800D1892;
     }
-    func_15060A30(id, D_800D154C);
+    actor_playSound(id, gCurrentActor);
 }
 
 void func_15079A28(void) {
-    D_800D154C->unk252 = D_800D1890;
-    D_800D154C->unk253 = D_800D1891;
+    gCurrentActor->unk252 = D_800D1890;
+    gCurrentActor->unk253 = D_800D1891;
 }
 
 void func_15079A58(void) {
-    D_800D2110[D_800D154C->listpos] = (D_800D1890 << 8) + D_800D1891;
+    D_800D2110[gCurrentActor->listpos] = (D_800D1890 << 8) + D_800D1891;
 }
 
 /* Returns the direction from object `arg0` to the centre of the current object's path. */
@@ -1634,9 +1634,9 @@ u16 func_15079A98(s32 arg0) {
     PathPoint *path;
     Actor *obj;
 
-    path = D_800D2104[D_800D154C->listpos];
+    path = D_800D2104[gCurrentActor->listpos];
     obj = &movement_obj[arg0];
-    return func_1505A630(path[0].x - obj->xpos, obj->zpos - path[0].z, 0);
+    return actor_getDirectionAngle(path[0].x - obj->xpos, obj->zpos - path[0].z, 0);
 }
 
 /*
@@ -1681,21 +1681,21 @@ select_object: // matching: unused label, splits the block for the scheduler
         break;
     case 4:
     case 5: {
-        // matching: the block-scope redeclaration changes how IDO schedules the address of D_800D154C
-        extern Actor *D_800D154C;
+        // matching: the block-scope redeclaration changes how IDO schedules the address of gCurrentActor
+        extern Actor *gCurrentActor;
 
         // restart the object on script arg0, running as the current object meanwhile
-        savedObj = D_800D154C;
+        savedObj = gCurrentActor;
         savedIndex = dc_glbl_CharNum;
-        D_800D154C = &movement_obj[index];
+        gCurrentActor = &movement_obj[index];
         dc_glbl_CharNum = index;
-        if (D_800D154C->intelwalk != D_800D1890) {
-            D_800D154C->intelwalk = D_800D1890;
-            D_800D154C->scriptCmd = func_1507BB28(0, D_800D154C->intelwalk);
-            D_800D154C->unk21C = 0;
+        if (gCurrentActor->intelwalk != D_800D1890) {
+            gCurrentActor->intelwalk = D_800D1890;
+            gCurrentActor->scriptCmd = func_1507BB28(0, gCurrentActor->intelwalk);
+            gCurrentActor->unk21C = 0;
         }
         dc_glbl_CharNum = savedIndex;
-        D_800D154C = savedObj;
+        gCurrentActor = savedObj;
         return;
     }
     case 6:
@@ -1705,22 +1705,22 @@ select_object: // matching: unused label, splits the block for the scheduler
         movement_obj[index].vtilt = 0.0f;
         return;
     case 8:
-        angle = func_15079A98(D_800D154C->unk222);
+        angle = func_15079A98(gCurrentActor->unk222);
         if ((func_15079A98(dc_glbl_CharNum) - angle) & 0x8000) {
-            D_800D154C->unk221 = D_800D1890;
+            gCurrentActor->unk221 = D_800D1890;
         }
         return;
     case 9: {
         u16 value = (D_800D1893 << 8) | D_800D1890;
 
-        D_800D154C->intel_animseq = value;
+        gCurrentActor->intel_animseq = value;
         return;
     }
     case 10:
-        D_800D154C->unk236 = D_800D154C->unk23D + (s8)D_800D1890;
+        gCurrentActor->unk236 = gCurrentActor->unk23D + (s8)D_800D1890;
         return;
     case 11:
-        D_800D154C->unk22A = D_800D1890;
+        gCurrentActor->unk22A = D_800D1890;
         return;
     }
     switch (D_800D1893) {
@@ -1749,11 +1749,11 @@ select_object: // matching: unused label, splits the block for the scheduler
 }
 
 void func_15079F24(void) {
-    D_800D154C->speedup = D_800D1898[D_800D1890];
+    gCurrentActor->speedup = D_800D1898[D_800D1890];
 }
 
 void func_15079F50(void) {
-    D_800D154C->unk23B = D_800D1890;
+    gCurrentActor->unk23B = D_800D1890;
 }
 
 void func_15079F6C(void) {
@@ -1763,9 +1763,9 @@ void func_15079F6C(void) {
     high = D_800D1890 << 8;
     low = D_800D1891;
     // matching: the stacked no-op masks raise the expression weight so IDO keeps `low` out of v1
-    D_800D154C->unk224 = (high | (((((((((low & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF)) & 0xFFFFu;
-    D_800D154C->unk22B = D_800D1892;
-    D_800D154C->unk226 = D_800D1893;
+    gCurrentActor->unk224 = (high | (((((((((low & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF)) & 0xFFFFu;
+    gCurrentActor->unk22B = D_800D1892;
+    gCurrentActor->unk226 = D_800D1893;
 }
 
 /*
@@ -1776,13 +1776,13 @@ void func_15079FBC(void) {
     s16 speed;
 
     if ((movement_obj[0].attach_char == 0) || (movement_obj[0].stickspeed < 5.0f)) {
-        D_800D154C->intelwalk = D_800D1891;
-        D_800D154C->scriptCmd = func_1507BB28(0, D_800D154C->intelwalk);
-        D_800D154C->scriptCmd--;
+        gCurrentActor->intelwalk = D_800D1891;
+        gCurrentActor->scriptCmd = func_1507BB28(0, gCurrentActor->intelwalk);
+        gCurrentActor->scriptCmd--;
         return;
     }
 
-    D_800D154C->fangle = movement_obj[0].mv->press_angle;
+    gCurrentActor->fangle = movement_obj[0].mv->press_angle;
 
     if (movement_obj[0].mv->chased) {
         speed = movement_obj[0].stickspeed;
@@ -1795,14 +1795,14 @@ void func_15079FBC(void) {
     }
     D_800D1892 = speed;
     func_15075F40();
-    D_800D154C->mvmt_control |= 0x40;
+    gCurrentActor->mvmt_control |= 0x40;
 }
 
 /* Sets coordinate arg1 (0 x, 1 y, 2 z) of waypoint arg0 to (s16)(arg2:arg3). */
 void func_1507A100(void) {
     s32 value = ((s8)D_800D1892 << 8) | D_800D1893;
 
-    ((s16 *)&(D_800D2104[D_800D154C->listpos] + 1)[D_800D1890])[D_800D1891] = value; // matching: waypoints start one point past the centre
+    ((s16 *)&(D_800D2104[gCurrentActor->listpos] + 1)[D_800D1890])[D_800D1891] = value; // matching: waypoints start one point past the centre
 }
 
 /* Sets the speed to object 0's speed plus (s8)arg2, clamped to [arg1, arg0]. */
@@ -1814,21 +1814,21 @@ void func_1507A164(void) {
     } else if (speed > D_800D1890) {
         speed = D_800D1890;
     }
-    D_800D154C->stickspeed = speed;
-    if (D_800D154C->stickspeed == 1.0f) {
-        D_800D154C->stickspeed = 0.5f;
+    gCurrentActor->stickspeed = speed;
+    if (gCurrentActor->stickspeed == 1.0f) {
+        gCurrentActor->stickspeed = 0.5f;
     }
 }
 
 void func_1507A210(void) {
-    D_800D154C->unk223 = 0;
-    D_800D154C->unk21C = D_800D1890 * 100;
-    D_800D154C->unk22C &= 0xFD;
+    gCurrentActor->unk223 = 0;
+    gCurrentActor->unk21C = D_800D1890 * 100;
+    gCurrentActor->unk22C &= 0xFD;
     func_15075498();
 }
 
 void func_1507A270(void) {
-    func_1503DE70(D_800D154C, D_800D1890, (s8)D_800D1891);
+    model_breakIntoParts(gCurrentActor, D_800D1890, (s8)D_800D1891);
 }
 
 void func_1507A2A4(void) {
@@ -1851,17 +1851,17 @@ void func_1507A2F8(void) {
     }
     if (count != 0) {
         i = func_150ADA20_u8();
-        D_800D154C->unkA8 = D_800D154C->unk222;
-        D_800D154C->unk222 = candidates[i % count];
+        gCurrentActor->unkA8 = gCurrentActor->unk222;
+        gCurrentActor->unk222 = candidates[i % count];
     }
 }
 
 void func_1507A3B4(void) {
-    D_800D154C->unk222 = D_800D154C->unkA8;
+    gCurrentActor->unk222 = gCurrentActor->unkA8;
 }
 
 void func_1507A3CC(void) {
-    D_800D154C->unk229 = D_800D1890;
+    gCurrentActor->unk229 = D_800D1890;
 }
 
 /* Returns the four argument bytes as one big-endian word. */
@@ -1875,7 +1875,7 @@ void func_1507A428(void) {
 
     // matching: the `& 0xFF` masks (no-ops on u8) steer IDO's register allocation
     flags = ((D_800D1890 & 0xFF) << 24) | ((D_800D1891 & 0xFF) << 16) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
-    D_800D154C->unk94 = ~(flags | 1);
+    gCurrentActor->unk94 = ~(flags | 1);
 }
 
 void func_1507A47C(void) {
@@ -1883,7 +1883,7 @@ void func_1507A47C(void) {
 
     // matching: the `& 0xFF` masks (no-ops on u8) steer IDO's register allocation
     flags = ((D_800D1890 & 0xFF) << 24) | ((D_800D1891 & 0xFF) << 16) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
-    D_800D154C->unk94 &= ~flags;
+    gCurrentActor->unk94 &= ~flags;
 }
 
 void func_1507A4D4(void) {
@@ -1891,7 +1891,7 @@ void func_1507A4D4(void) {
 
     // matching: the `& 0xFF` masks (no-ops on u8) steer IDO's register allocation
     flags = ((D_800D1890 & 0xFF) << 24) | ((D_800D1891 & 0xFF) << 16) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
-    D_800D154C->unk94 |= flags;
+    gCurrentActor->unk94 |= flags;
 }
 
 /*
@@ -1903,18 +1903,18 @@ void func_1507A528(void) {
     s32 index;
 
     if (D_800D1890 == 0) {
-        D_800D154C->unk221 = D_800D1891;
+        gCurrentActor->unk221 = D_800D1891;
     } else if (D_800D1890 == 1) {
-        D_800D154C->unk221 = -D_800D154C->unk221;
+        gCurrentActor->unk221 = -gCurrentActor->unk221;
     } else if (D_800D1890 == 2) {
         if (D_800D1892 != 0) {
             count = D_800D1892;
         } else {
-            count = D_800D2108[D_800D154C->listpos] - 1;
+            count = D_800D2108[gCurrentActor->listpos] - 1;
         }
-        D_800D154C->unk221 = -D_800D154C->unk221;
-        index = D_800D154C->unk21E + D_800D154C->unk221;
-        if (D_800D154C->unk221 > 0) {
+        gCurrentActor->unk221 = -gCurrentActor->unk221;
+        index = gCurrentActor->unk21E + gCurrentActor->unk221;
+        if (gCurrentActor->unk221 > 0) {
             index += D_800D1893;
         } else {
             index -= D_800D1893;
@@ -1924,7 +1924,7 @@ void func_1507A528(void) {
         } else if (index < 0) {
             index += count;
         }
-        D_800D154C->unk21E = index;
+        gCurrentActor->unk21E = index;
     }
 }
 
@@ -1936,12 +1936,12 @@ void func_1507A620(void) {
     u8 index;
     u16 angle;
 
-    index = D_800D154C->unk222;
+    index = gCurrentActor->unk222;
     if (D_800D1891 != 0) {
-        angle = D_800D154C->fangle >> 8;
+        angle = gCurrentActor->fangle >> 8;
     } else {
-        angle = (D_800D154C->langle - func_1505A630(movement_obj[index].xpos - D_800D154C->xpos,
-                                                   D_800D154C->zpos - movement_obj[index].zpos, 0)) >> 8;
+        angle = (gCurrentActor->langle - actor_getDirectionAngle(movement_obj[index].xpos - gCurrentActor->xpos,
+                                                   gCurrentActor->zpos - movement_obj[index].zpos, 0)) >> 8;
     }
     if ((u8)(angle - D_800D1892) < (u8)(D_800D1893 - D_800D1892)) {
         func_15075400(D_800D1890);
@@ -1971,19 +1971,19 @@ void func_1507A774(void) {
 }
 
 void func_1507A7C0(void) {
-    D_800D154C->norun = D_800D1890;
+    gCurrentActor->norun = D_800D1890;
 }
 
 void func_1507A7DC(void) {
-    func_150836CC(D_800D154C, D_800D1890);
+    func_150836CC(gCurrentActor, D_800D1890);
 }
 
 void func_1507A808(void) {
-    D_800D154C->unk22C = (D_800D154C->unk22C & D_800D1890) | D_800D1891;
+    gCurrentActor->unk22C = (gCurrentActor->unk22C & D_800D1890) | D_800D1891;
 }
 
 void func_1507A838(void) {
-    if (D_800D154C->energy == D_800D1891) {
+    if (gCurrentActor->energy == D_800D1891) {
         func_15075400(D_800D1890);
     }
 }
@@ -1993,14 +1993,14 @@ void func_1507A878(void) {
 }
 
 void func_1507A8A8(void) {
-    if ((movement_obj[0].attach_char != 0) || (D_800BE616 != 0)) {
+    if ((movement_obj[0].attach_char != 0) || (gIsMultiplayer != 0)) {
         func_15075400(D_800D1890);
     }
 }
 
 /* Jumps to arg0 when the target is (arg2 == 0) or is not (arg2 == 1) of type arg1. */
 void func_1507A8EC(void) {
-    if (D_800D1891 == movement_obj[D_800D154C->unk222].character_type) {
+    if (D_800D1891 == movement_obj[gCurrentActor->unk222].character_type) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
@@ -2016,16 +2016,16 @@ void func_1507A984(void) {
         linked = func_15083E90(D_800D1890);
         if (linked != NULL) {
             if (D_800D1892 == 0) {
-                D_800D154C->unk101 |= 4;
+                gCurrentActor->unk101 |= 4;
             }
             if (D_800D1893 != 0) {
-                D_800D154C->unk101 |= 0x40;
+                gCurrentActor->unk101 |= 0x40;
             }
-            D_800D154C->attach_char = (linked - movement_obj) + 1;
-            D_800D154C->basemtx = D_800D1891;
+            gCurrentActor->attach_char = (linked - movement_obj) + 1;
+            gCurrentActor->basemtx = D_800D1891;
         }
     } else {
-        D_800D154C->attach_char = 0;
+        gCurrentActor->attach_char = 0;
     }
 }
 
@@ -2038,77 +2038,77 @@ void func_1507AA48(void) {
     value = (D_800D1890 << 8) | D_800D1891;
     switch (D_800D1892) {
     case 0:
-        D_800D154C->fangle = D_800D154C->angle + value;
+        gCurrentActor->fangle = gCurrentActor->angle + value;
         break;
     case 1:
-        D_800D154C->fangle = D_800D154C->angle - value;
+        gCurrentActor->fangle = gCurrentActor->angle - value;
         break;
     case 2:
-        D_800D154C->fangle = value;
+        gCurrentActor->fangle = value;
         break;
     case 3:
         // matching: the do-while wrapper changes how IDO schedules case 4 below
         do {
-            D_800D154C->angle = D_800D154C->fangle;
-            D_800D154C->langle = D_800D154C->fangle;
+            gCurrentActor->angle = gCurrentActor->fangle;
+            gCurrentActor->langle = gCurrentActor->fangle;
         } while (0);
         break;
     case 4:
         // direction from waypoint arg0 to waypoint arg1, plus arg3 / 256 turns
-        path = D_800D2104[D_800D154C->listpos];
+        path = D_800D2104[gCurrentActor->listpos];
         angle = (u16)(func_150484A0(path[D_800D1891 + 1].x - path[D_800D1890 + 1].x, path[D_800D1891 + 1].z - path[D_800D1890 + 1].z) * 10430.37793f) + (D_800D1893 << 8);
-        D_800D154C->fangle = angle + 0x4000;
+        gCurrentActor->fangle = angle + 0x4000;
         break;
     case 5:
-        D_800D154C->fangle = func_150ADA20_u8();
+        gCurrentActor->fangle = func_150ADA20_u8();
         break;
     case 6:
-        D_800D154C->fangle = D_800D154C->angle;
+        gCurrentActor->fangle = gCurrentActor->angle;
         break;
     case 7:
-        D_800D154C->angle = movement_obj[D_800D154C->unk222].langle + value;
+        gCurrentActor->angle = movement_obj[gCurrentActor->unk222].langle + value;
         break;
     case 8:
-        D_800D154C->angle = D_800D154C->langle;
+        gCurrentActor->angle = gCurrentActor->langle;
         break;
     }
 }
 
 void func_1507ACB0(void) {
-    D_800D154C->unk220 = D_800D1890;
-    D_800D154C->unk21F = D_800D1891;
+    gCurrentActor->unk220 = D_800D1890;
+    gCurrentActor->unk21F = D_800D1891;
 }
 
 void func_1507ACE0(void) {
-    D_800D154C->unk1E5 = D_800D1890;
-    D_800D154C->unk1E6 = D_800D1890;
-    D_800D154C->unk1E7 = D_800D1891;
-    D_800D154C->unk1E8 = D_800D1891;
+    gCurrentActor->unk1E5 = D_800D1890;
+    gCurrentActor->unk1E6 = D_800D1890;
+    gCurrentActor->unk1E7 = D_800D1891;
+    gCurrentActor->unk1E8 = D_800D1891;
 }
 
 void func_1507AD30(void) {
-    D_800D154C->unk255 = D_800D1890;
-    D_800D154C->unk256 = D_800D1891;
+    gCurrentActor->unk255 = D_800D1890;
+    gCurrentActor->unk256 = D_800D1891;
 }
 
 void func_1507AD60(void) {
-    D_800D154C->family = D_800D1890;
+    gCurrentActor->family = D_800D1890;
 }
 
 void func_1507AD7C(void) {
-    D_800D154C->mvmt_control |= func_1507A3E8();
+    gCurrentActor->mvmt_control |= func_1507A3E8();
 }
 
 void func_1507ADAC(void) {
-    D_800D154C->mvmt_control &= ~func_1507A3E8();
+    gCurrentActor->mvmt_control &= ~func_1507A3E8();
 }
 
 /* Splits (angle between unk78 and the facing unk7A) / arg0 into unk1E6 (high byte) and unk1E8 (low byte). */
 void func_1507ADE0(void) {
     s32 diff;
     s32 step;
-    s32 facing = D_800D154C->langle;
-    s32 target = D_800D154C->fangle;
+    s32 facing = gCurrentActor->langle;
+    s32 target = gCurrentActor->fangle;
 
     diff = target - facing;
     if (diff < 0) {
@@ -2121,163 +2121,163 @@ void func_1507ADE0(void) {
         diff = -diff;
     }
     step = diff / D_800D1890;
-    D_800D154C->unk1E6 = step >> 8;
-    D_800D154C->unk1E8 = step & 0xFF;
+    gCurrentActor->unk1E6 = step >> 8;
+    gCurrentActor->unk1E8 = step & 0xFF;
 }
 
 void func_1507AE78(void) {
-    D_800D154C->unk229 = D_800D1890;
+    gCurrentActor->unk229 = D_800D1890;
 }
 
 void func_1507AE94(void) {
-    D_800D154C->unkD2 = (D_800D1890 << 8) | D_800D1891;
-    D_800D154C->unkD4 = (D_800D1892 << 8) | D_800D1893;
-    D_800D154C->unkD2 *= D_800D154C->scale_xz;
-    D_800D154C->unkD4 *= D_800D154C->scale_y;
+    gCurrentActor->unkD2 = (D_800D1890 << 8) | D_800D1891;
+    gCurrentActor->unkD4 = (D_800D1892 << 8) | D_800D1893;
+    gCurrentActor->unkD2 *= gCurrentActor->scale_xz;
+    gCurrentActor->unkD4 *= gCurrentActor->scale_y;
 }
 
 void func_1507AF3C(void) {
-    D_800D154C->unkD6 = (D_800D1890 << 8) | D_800D1891;
-    D_800D154C->unkD6 *= D_800D154C->scale_y;
+    gCurrentActor->unkD6 = (D_800D1890 << 8) | D_800D1891;
+    gCurrentActor->unkD6 *= gCurrentActor->scale_y;
 }
 
 void func_1507AF98(void) {
-    D_800D154C->unkD8 = (D_800D1890 << 8) | D_800D1891;
-    D_800D154C->unkDA = (D_800D1892 << 8) | D_800D1893;
-    D_800D154C->unkD8 *= D_800D154C->scale_xz;
-    D_800D154C->unkDA *= D_800D154C->scale_xz;
+    gCurrentActor->unkD8 = (D_800D1890 << 8) | D_800D1891;
+    gCurrentActor->unkDA = (D_800D1892 << 8) | D_800D1893;
+    gCurrentActor->unkD8 *= gCurrentActor->scale_xz;
+    gCurrentActor->unkDA *= gCurrentActor->scale_xz;
 }
 
 void func_1507B040(void) {
-    D_800D154C->angle = D_800D154C->langle;
+    gCurrentActor->angle = gCurrentActor->langle;
 }
 
-/* Acts on the object returned by func_15072208: arg0 0 calls func_1506160C, 1 sets and 2 restarts script arg1. */
+/* Acts on the object returned by func_15072208: arg0 0 calls actor_fadeCommand, 1 sets and 2 restarts script arg1. */
 void func_1507B058(void) {
-    Actor *savedObj = D_800D154C;
+    Actor *savedObj = gCurrentActor;
     s32 savedIndex = dc_glbl_CharNum;
 
-    D_800D154C = func_15072208(D_800D154C, 0);
-    dc_glbl_CharNum = D_800D154C - movement_obj;
+    gCurrentActor = func_15072208(gCurrentActor, 0);
+    dc_glbl_CharNum = gCurrentActor - movement_obj;
 
-    if (D_800D154C != NULL) {
+    if (gCurrentActor != NULL) {
         switch (D_800D1890) {
         case 0:
-            func_1506160C(D_800D154C, 1, D_800D1891, 0, 0);
+            actor_fadeCommand(gCurrentActor, 1, D_800D1891, 0, 0);
             break;
         case 1:
-            D_800D154C->intelwalk = D_800D1891;
+            gCurrentActor->intelwalk = D_800D1891;
             /* fallthrough */
         case 2:
-            D_800D154C->scriptCmd = func_1507BB28(0, D_800D1891);
-            D_800D154C->unk21C = 0;
+            gCurrentActor->scriptCmd = func_1507BB28(0, D_800D1891);
+            gCurrentActor->unk21C = 0;
         }
     }
     dc_glbl_CharNum = savedIndex;
-    D_800D154C = savedObj;
+    gCurrentActor = savedObj;
 }
 
 void func_1507B15C(void) {
-    D_800D154C->nojump = D_800D1890;
+    gCurrentActor->nojump = D_800D1890;
 }
 
 void func_1507B178(void) {
     s16 value = (D_800D1891 << 8) | D_800D1890;
 
     if (D_800D1893 == 2) {
-        D_800D154C->bodyOffsetY = value * D_800D154C->scale_y;
+        gCurrentActor->bodyOffsetY = value * gCurrentActor->scale_y;
     } else if (D_800D1893 == 1) {
-        func_15062B50(D_800D154C, value);
+        actor_setBodyHeight(gCurrentActor, value);
     } else {
-        func_15062B1C(D_800D154C, value);
+        actor_setBodyRadius(gCurrentActor, value);
     }
 }
 
 void func_1507B234(void) {
     D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
+    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
         func_1506BAD8(300, 1800);
     }
 }
 
 void func_1507B280(void) {
     D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
+    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
         func_1506BAD8(300, 3000);
     }
 }
 
 void func_1507B2CC(void) {
     D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
+    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
         func_1506BA4C(300, 1800);
     }
 }
 
 void func_1507B318(void) {
     D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
+    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
         func_1506BA4C(300, 3000);
     }
 }
 
 void func_1507B364(void) {
     D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
+    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
         func_1506BAD8(700, 4000);
     }
 }
 
 void func_1507B3B0(void) {
     D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
+    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
         func_1506BA4C(700, 4000);
     }
 }
 
 void func_1507B3FC(void) {
     D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
+    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
         func_1506BAD8(3000, 8000);
     }
 }
 
 void func_1507B448(void) {
     D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
+    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
         func_1506BAD8(190, 1300);
     }
 }
 
 void func_1507B494(void) {
     D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
+    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
         func_1506BA4C(190, 1300);
     }
 }
 
 void func_1507B4E0(void) {
     D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
+    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
         func_1506BAD8(100, 800);
     }
 }
 
 void func_1507B52C(void) {
     D_800D1580 = func_1507A3E8();
-    if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
+    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
         func_1506BA4C(100, 800);
     }
 }
 
 void func_1507B578(void) {
-    D_800D154C->doing_hit = D_800D1890;
-    D_800D154C->unk114 = D_800D1891;
+    gCurrentActor->doing_hit = D_800D1890;
+    gCurrentActor->unk114 = D_800D1891;
 }
 
 /* Jumps to arg0 when mv->context_b is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_1507B5C4(void) {
-    if (D_800D154C->mv->context_b == D_800D1891) {
+    if (gCurrentActor->mv->context_b == D_800D1891) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
@@ -2286,26 +2286,26 @@ void func_1507B5C4(void) {
 }
 
 void func_1507B630(void) {
-    if ((D_800D154C->norun == 0) && (D_800D154C->shad == 0.0f)) {
-        if (D_800D154C->mv->rt_context_b != 0) {
+    if ((gCurrentActor->norun == 0) && (gCurrentActor->shad == 0.0f)) {
+        if (gCurrentActor->mv->rt_context_b != 0) {
             D_800D1890 ^= 1;
         }
         if (D_800D1890 != 0) {
-            D_800D154C->mv->pressedButtons |= 0x4000;
-            D_800D154C->mv->pressedButtonsTimer = 0;
+            gCurrentActor->mv->pressedButtons |= 0x4000;
+            gCurrentActor->mv->pressedButtonsTimer = 0;
         }
     } else {
         // repeat this command
-        D_800D154C->scriptCmd--;
+        gCurrentActor->scriptCmd--;
     }
-    D_800D154C->unk21C = 100;
+    gCurrentActor->unk21C = 100;
 }
 
 void func_1507B6E0(void) {
-    if ((D_800D154C->norun != 0) || (D_800D154C->shad > 5.0f)) {
+    if ((gCurrentActor->norun != 0) || (gCurrentActor->shad > 5.0f)) {
         // repeat this command
-        D_800D154C->scriptCmd--;
-        D_800D154C->unk21C = 100;
+        gCurrentActor->scriptCmd--;
+        gCurrentActor->unk21C = 100;
     }
 }
 
@@ -2313,22 +2313,22 @@ void func_1507B734(void) {
     u16 value = (D_800D1890 << 8) | D_800D1891;
 
     if (D_800D1893 != 0) {
-        D_800D154C->mv->pressedButtons = value;
-        D_800D154C->mv->pressedButtonsTimer = D_800D1892;
+        gCurrentActor->mv->pressedButtons = value;
+        gCurrentActor->mv->pressedButtonsTimer = D_800D1892;
     } else {
-        D_800D154C->mv->buttons = value;
-        D_800D154C->mv->buttonsTimer = D_800D1892;
+        gCurrentActor->mv->buttons = value;
+        gCurrentActor->mv->buttonsTimer = D_800D1892;
     }
 }
 
 void func_1507B7BC(void) {
     func_15075548();
-    D_800D154C->unk223 = 17;
+    gCurrentActor->unk223 = 17;
 }
 
 /* Jumps to arg0 when the target is (arg1 == 0) or is not (arg1 == 1) stunned or dead. */
 void func_1507B7E8(void) {
-    Actor *target = &movement_obj[D_800D154C->unk222];
+    Actor *target = &movement_obj[gCurrentActor->unk222];
 
     if ((target->stunned != 0) || (target->energy == 0)) {
         D_800D1891 ^= 1;
@@ -2348,24 +2348,24 @@ void func_1507B884(void) {
     index = D_800D1890;
     handler = D_80086150[index];
     if (handler != NULL) {
-        savedObj = D_800D154C;
+        savedObj = gCurrentActor;
         savedIndex = dc_glbl_CharNum;
         handler(index);
-        D_800D154C = savedObj;
+        gCurrentActor = savedObj;
         dc_glbl_CharNum = savedIndex;
     }
 }
 
 void func_1507B8F4(void) {
-    if (D_800BE616 != 0) {
-        if ((D_800D1891 != 0) || ((D_800D154C->mv != NULL) && (D_800D154C->mv->bot != 0))) {
+    if (gIsMultiplayer != 0) {
+        if ((D_800D1891 != 0) || ((gCurrentActor->mv != NULL) && (gCurrentActor->mv->bot != 0))) {
             func_15075400(D_800D1890);
         }
     }
 }
 
 void func_1507B958(void) {
-    D_800D154C->unkB0 = D_800D1890;
+    gCurrentActor->unkB0 = D_800D1890;
 }
 
 /*
@@ -2375,9 +2375,9 @@ void func_1507B958(void) {
 void func_1507B974(void) {
     Actor *obj;
 
-    obj = D_800D154C;
-    if (D_800D154C->attach_char != 0) {
-        obj = &movement_obj[D_800D154C->attach_char - 1];
+    obj = gCurrentActor;
+    if (gCurrentActor->attach_char != 0) {
+        obj = &movement_obj[gCurrentActor->attach_char - 1];
     }
     if (D_800D1891 == D_800D2104[obj->listpos][obj->unk21E + D_800D1893].param) {
         D_800D1892 ^= 1;
@@ -2393,15 +2393,15 @@ void func_1507BA48(void) {
     if (D_800D1890 != 0) {
         id += func_150ADA20_u8() % (u32)D_800D1890;
     }
-    func_15060A9C(id, D_800D154C);
+    actor_playUntrackedSound(id, gCurrentActor);
 }
 
 void func_1507BAD0(void) {
-    D_800D154C->unkFC = func_1507A3E8();
+    gCurrentActor->unkFC = func_1507A3E8();
 }
 
 void func_1507BAF8(void) {
-    D_800D154C->unk2CC = func_1507A3E8();
+    gCurrentActor->unk2CC = func_1507A3E8();
 }
 
 void func_1507BB20(void) {
@@ -2492,7 +2492,7 @@ const ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId) {
     ScriptEntry *table;
     s32 i;
 
-    typeData = D_800D1588[D_800D154C->character_type];
+    typeData = D_800D1588[gCurrentActor->character_type];
     if (typeData == NULL) {
         return D_8009A120;
     }

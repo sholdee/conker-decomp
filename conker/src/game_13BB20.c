@@ -327,7 +327,7 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
                             object->floorTriIndex = WORLD_TRI_INDEX(triAddr);
                         }
                     } else if (object != NULL) {
-                        object->floorTriIndex = (triAddr - (s32)D_800C6070[movement_obj[hit->unkC].character_type]) / 12;
+                        object->floorTriIndex = (triAddr - (s32)gModelTris[movement_obj[hit->unkC].character_type]) / 12;
                     }
                     if (vtxBase == 0 && outTri != NULL) {
                         *outTri = hit->tri;

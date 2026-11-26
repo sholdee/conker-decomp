@@ -429,7 +429,7 @@ static const HitSphere *D_80086C60[12] = {
 
 /* Point vs. hit-sphere test: takes the point `dist` ahead of `self` (rotated by its pitch unkB8
  * and yaw unk40), rejects it against obj's whole-body sphere, then tests it against each of obj's
- * hit spheres (table `type`) grown by `radius`.  On a hit, calls func_1505D1C4 at obj's position
+ * hit spheres (table `type`) grown by `radius`.  On a hit, calls actor_runAttackAt at obj's position
  * (unless obj is immune) and returns bone + 1; returns 0 for a miss. */
 s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 arg5) {
     f32 scale;
@@ -502,7 +502,7 @@ s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 a
             r = p->radius * obj->scale_xz + radius;
             if (!(r * r < dx * dx + dy * dy + dz * dz)) {
                 if (obj->imune == 0) {
-                    func_1505D1C4(obj->xpos, obj->ypos, obj->zpos, arg5, self - movement_obj, 0, 0, 0);
+                    actor_runAttackAt(obj->xpos, obj->ypos, obj->zpos, arg5, self - movement_obj, 0, 0, 0);
                 }
                 return p->bone + 1;
             }

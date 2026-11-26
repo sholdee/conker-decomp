@@ -421,7 +421,7 @@ s32 func_1514D15C(Actor *obj) {
         }
     } while (queued != NULL);
 
-    if (slot == 0 && D_800BE616 == 0) {
+    if (slot == 0 && gIsMultiplayer == 0) {
         func_15155780(slot, 0xFF);
     }
 
@@ -1473,7 +1473,7 @@ void func_1514F194(Actor *obj) {
     func_151D0F60(obj, 1, 0xFF, 1);
     func_151D0F60(obj, 2, 0xFF, 1);
     func_151BB044(obj);
-    if (D_800BE616 == 0) {
+    if (gIsMultiplayer == 0) {
         func_151BC074(obj);
     }
     func_151BD2F8(obj, 0xFF, 1);

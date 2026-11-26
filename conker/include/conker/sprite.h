@@ -82,7 +82,7 @@ typedef struct ActorTracker {
     /* 0x18 */ ActorTrackerDesc desc;
     /* 0x20 */ Vec3f pos;
     /* 0x2C */ Vec3f prevPos;
-    /* 0x38 */ Vec3f motion;        // (prevPos - pos) * D_800BE9A8
+    /* 0x38 */ Vec3f motion;        // (prevPos - pos) * gFrameDeltaInv
     /* 0x44 */ s32 unk44;
     /* 0x48 */ s32 unk48;
 } ActorTracker;

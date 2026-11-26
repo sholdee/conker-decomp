@@ -279,21 +279,21 @@ s32 func_15157AA8(ModelEffect *fx) {
             }
         }
         if (motion->flags & 4) {
-            motion->vel.y += motion->gravity * D_800BE9A4;
+            motion->vel.y += motion->gravity * gFrameDelta;
             accelY = motion->gravity;
         } else {
             accelY = 0.0f;
         }
-        accelX = (motion->vel.x - oldVel.x) * D_800BE9A8;
-        accelZ = (motion->vel.z - oldVel.z) * D_800BE9A8;
-        fx->params.pos.x += (oldVel.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
-        fx->params.pos.y += (oldVel.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
-        fx->params.pos.z += (oldVel.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
+        accelX = (motion->vel.x - oldVel.x) * gFrameDeltaInv;
+        accelZ = (motion->vel.z - oldVel.z) * gFrameDeltaInv;
+        fx->params.pos.x += (oldVel.x + 0.5f * accelX * gFrameDelta) * gFrameDelta;
+        fx->params.pos.y += (oldVel.y + 0.5f * accelY * gFrameDelta) * gFrameDelta;
+        fx->params.pos.z += (oldVel.z + 0.5f * accelZ * gFrameDelta) * gFrameDelta;
     }
     if (motion->flags & 2) {
-        motion->rot.x += motion->rotVel.x * D_800BE9A4;
-        motion->rot.y += motion->rotVel.y * D_800BE9A4;
-        motion->rot.z += motion->rotVel.z * D_800BE9A4;
+        motion->rot.x += motion->rotVel.x * gFrameDelta;
+        motion->rot.y += motion->rotVel.y * gFrameDelta;
+        motion->rot.z += motion->rotVel.z * gFrameDelta;
     }
     return TRUE;
 }

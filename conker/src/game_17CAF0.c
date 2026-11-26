@@ -1320,13 +1320,13 @@ s32 func_1515452C(Object15132A4C *object) {
     {
         f32 elapsed = extra->elapsed;
         object->alpha = (s8)(u32)(extra->alpha - (extra->fade * elapsed * elapsed));
-        extra->elapsed += D_800BE9A4;
+        extra->elapsed += gFrameDelta;
         if (extra->duration < extra->elapsed) {
             return 0;
         }
-        object->position.x += object->velocity.x * D_800BE9A4;
-        object->position.y += object->velocity.y * D_800BE9A4;
-        object->position.z += object->velocity.z * D_800BE9A4;
+        object->position.x += object->velocity.x * gFrameDelta;
+        object->position.y += object->velocity.y * gFrameDelta;
+        object->position.z += object->velocity.z * gFrameDelta;
         return 1;
     }
 }
@@ -1429,14 +1429,14 @@ s32 func_15154A88(Object15132A4C *object) {
     object->unk1C = size;
     object->unk18 = size;
     object->alpha = (f32)(u8)(u32)extra->alpha * wave;
-    extra->remaining -= D_800BE9A4;
+    extra->remaining -= gFrameDelta;
     if (extra->remaining <= 0.0f) {
         return 0;
     }
 
-    extra->phase += extra->phaseRate * D_800BE9A4;
-    object->position.x += object->velocity.x * D_800BE9A4;
-    object->position.y += object->velocity.y * D_800BE9A4;
-    object->position.z += object->velocity.z * D_800BE9A4;
+    extra->phase += extra->phaseRate * gFrameDelta;
+    object->position.x += object->velocity.x * gFrameDelta;
+    object->position.y += object->velocity.y * gFrameDelta;
+    object->position.z += object->velocity.z * gFrameDelta;
     return 1;
 }

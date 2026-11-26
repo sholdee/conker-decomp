@@ -88,9 +88,9 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
 
 /*
  * Spawns model effect 0xA5 on `owner` (updated by func_151D6E60, drawn with func_151D710C) and a text box
- * showing a random amount as "$ %d" (style 3: func_151D7000 / func_151D70CC).
+ * showing a random amount as "$ %d" (style 3: text_updateAmount / text_handleAmountMessage).
  */
-void func_151D6BFC(Actor *owner, u8 arg1, s32 arg2) {
+void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
     EffectParams params;
     Struct1509B570 *entry;
 
@@ -137,7 +137,7 @@ void func_151D6BFC(Actor *owner, u8 arg1, s32 arg2) {
         style.ownerId = owner->unique_id;
         style.fadeStart = 8;
         style.fadeRate = 0x1F;
-        style.amount = func_150859AC(0, 6);
+        style.amount = player_getStat(0, 6);
         entry = func_1509B570(0x83);
         if (entry != NULL) {
             scale = entry->unk64 + 1;
@@ -191,7 +191,7 @@ s32 func_151D6E60(ModelEffect *fx) {
  * Text box update for style 3 (D_800888A0[3]): removes the box (returns 0) once its owner is gone or
  * replaced, otherwise prints the amount, fading out over the last fadeStart frames.
  */
-s32 func_151D7000(TextObj *obj) {
+s32 text_updateAmount(TextObj *obj) {
     Actor *owner;
     AmountTextStyle *style;
     s16 timeLeft;
@@ -214,15 +214,15 @@ s32 func_151D7000(TextObj *obj) {
         alpha = 0xFF;
     }
 
-    func_150432CC(owner, 0x109);
-    func_1504332C(0x32, 0x7D, 0x1C, alpha);
-    func_15042D78(0x81);
-    func_15042E3C("$ %d", style->amount);
-    // matching: no return value here, so the caller gets what the void func_15042E3C left in v0
+    text_setAnchor(owner, 0x109);
+    text_setColor(0x32, 0x7D, 0x1C, alpha);
+    text_setFlags(0x81);
+    text_print("$ %d", style->amount);
+    // matching: no return value here, so the caller gets what the void text_print left in v0
 }
 
 /* Text box message handler for style 3 (D_800888B0[1]): keeps the owner reference up to date. */
-void func_151D70CC(TextObj *obj, u8 *payload, u8 type) {
+void text_handleAmountMessage(TextObj *obj, u8 *payload, u8 type) {
     AmountTextStyle *style = obj->text.style;
 
     func_15169850((s32)payload, type, &style->owner, &style->ownerId, obj);

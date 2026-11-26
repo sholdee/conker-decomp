@@ -187,7 +187,7 @@ s32 func_151AFC08(SprayParticle *spray) {
             }
         }
         if (growth->growEndTimer < spray->head.def.lifetime) {
-            f32 grow = growth->growRate * D_800BE9A4;
+            f32 grow = growth->growRate * gFrameDelta;
 
             spray->head.def.width = spray->head.def.width + grow;
             spray->head.def.height = spray->head.def.height + grow;

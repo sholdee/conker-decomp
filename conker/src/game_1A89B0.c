@@ -458,7 +458,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
     }
     D_800DDD58 = j;
     /* step each type's 4 phases: ping-pong (types in D_800DDC04, D_800DDC08 adds random flips) or loop */
-    if (D_800BEAC0 == 0) {
+    if (gPaused == 0) {
         for (i = 0; i != 15; i++) {
             hi = (D_800DDBD0[i] << 8) - 1;
             if (hi > 0x100) {

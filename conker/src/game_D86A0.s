@@ -62,7 +62,7 @@ glabel func_150AB1F0
     /* D8760 150AB2B0 27A501CC */  addiu      $a1, $sp, 0x1CC
     /* D8764 150AB2B4 27A60158 */  addiu      $a2, $sp, 0x158
     /* D8768 150AB2B8 27A7015C */  addiu      $a3, $sp, 0x15C
-    /* D876C 150AB2BC 0D41F0F8 */  jal        func_1507C3E0
+    /* D876C 150AB2BC 0D41F0F8 */  jal        actor_computeSize
     /* D8770 150AB2C0 00000000 */   nop
     /* D8774 150AB2C4 24110000 */  addiu      $s1, $zero, 0x0
     /* D8778 150AB2C8 3C08800E */  lui        $t0, %hi(D_800DBE50)
@@ -373,8 +373,8 @@ glabel func_150AB1F0
     /* D8BF8 150AB748 AFAA0148 */  sw         $t2, 0x148($sp)
     /* D8BFC 150AB74C AFAD0144 */  sw         $t5, 0x144($sp)
     /* D8C00 150AB750 AFA80150 */  sw         $t0, 0x150($sp)
-    /* D8C04 150AB754 3C08800C */  lui        $t0, %hi(D_800C6070)
-    /* D8C08 150AB758 25086070 */  addiu      $t0, $t0, %lo(D_800C6070)
+    /* D8C04 150AB754 3C08800C */  lui        $t0, %hi(gModelTris)
+    /* D8C08 150AB758 25086070 */  addiu      $t0, $t0, %lo(gModelTris)
     /* D8C0C 150AB75C 91490004 */  lbu        $t1, 0x4($t2)
     /* D8C10 150AB760 00094880 */  sll        $t1, $t1, 2
     /* D8C14 150AB764 01094021 */  addu       $t0, $t0, $t1

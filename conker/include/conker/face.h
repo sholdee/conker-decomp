@@ -39,7 +39,7 @@ void func_1507EA44(Actor *actor, s32 action, s32 param);
 void func_1507EABC(Actor *actor);
 void func_1507EB2C(Actor *actor);
 void func_1507EB4C(Actor *actor, s32 expression);
-extern BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (func_150163D0 loads, func_15055E50 uses)
+extern BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (func_150163D0 loads, actor_clampToZoneSet uses)
 
 /* game_AD6B0.c */
 void func_15080200(void);

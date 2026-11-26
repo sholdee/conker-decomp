@@ -207,7 +207,7 @@ void func_1519F48C(SurfaceTrail *trail) {
     config->flags |= 1;
 }
 
-/* D_800BE9A4: frame time, D_800BE9E4: frames elapsed (both used as per-update scale factors). */
+/* gFrameDelta: frame time, D_800BE9E4: frames elapsed (both used as per-update scale factors). */
 
 /* Ages, drifts and re-grounds every point; returns 0 once a detached trail is used up. */
 s32 func_1519F4F0(SurfaceTrail *trail) {
@@ -239,9 +239,9 @@ s32 func_1519F4F0(SurfaceTrail *trail) {
         } else {
             point->alpha -= config->alphaDecay * D_800BE9E4;
         }
-        point->width += config->widthGrowth * D_800BE9A4;
-        point->x += point->vel.x * D_800BE9A4;
-        point->z += point->vel.z * D_800BE9A4;
+        point->width += config->widthGrowth * gFrameDelta;
+        point->x += point->vel.x * gFrameDelta;
+        point->z += point->vel.z * gFrameDelta;
         {
             Vec3f probe;
 
@@ -366,7 +366,7 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
     }
     if (config->pendingPoints > 1.0f) {
         inv = 1.0f / config->pendingPoints;
-        age = config->emitTime + D_800BE9A4;
+        age = config->emitTime + gFrameDelta;
         ageStep = age * inv;
         cur = config->emitPos;
         width = config->startWidth + config->widthGrowth * age;

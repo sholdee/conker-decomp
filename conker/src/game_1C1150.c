@@ -368,9 +368,9 @@ void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
     case 0xB4:
         func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
-        func_1507CD64(other, 6);
+        actor_kill(other, 6);
         if (other->mv != NULL && other->mv->GrenadeThrowState != 0) {
-            func_15063B64(other);
+            actor_throwGrenade(other);
         }
         break;
     }
@@ -387,7 +387,7 @@ void func_15194DA4(Actor *self, Actor *other, u8 *arg2) {
 void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     CollisionHit ground;
 
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         func_15194DA4(self, other, arg2);
     } else {
         func_1518D1C0(other, 11, 0, 1, 0xFF, 1, "effects_impact_lava");
@@ -426,7 +426,7 @@ void func_15194F48(Actor *self, Actor *other, u8 *arg2) {
     func_151C0098(&pos, other, 1, 0xFF, 1);
     func_15136C3C(other, 0, 0, 1, 0, 0, 0xFF, 1);
     func_15145A50(other);
-    func_1507CD64(other, 6);
+    actor_kill(other, 6);
 }
 
 void func_15194FF4(self, other, arg2)
@@ -444,7 +444,7 @@ u8 arg2;
     case 0x75: case 0x7A: case 0x80: case 0x87: case 0x88: case 0x90: case 0x96: case 0x98:
     case 0x99: case 0x9C: case 0x9D: case 0x9F: case 0xA0: case 0xB0: case 0xB1: case 0xB2:
     case 0xB4:
-        if (D_800BE616 != 0) {
+        if (gIsMultiplayer != 0) {
             trigger.interval = 0x7D;
             trigger.elapsed = 5;
             if (self->character_type == 0xFF && self->owner != 0) { // an id-0xFF object names its owner by slot + 1
@@ -476,7 +476,7 @@ void func_151951E0(Actor *obj) {
     Actor *copy;
 
     obj->energy = 0;
-    func_1507CD64(obj, 5);
+    actor_kill(obj, 5);
     func_15194AB4(obj);
     obj->type = 0x28;
     obj->speed = -3.0f;
@@ -484,7 +484,7 @@ void func_151951E0(Actor *obj) {
     obj->unk148 = (func_150ADA20() % 10U) - 5.0f;
     obj->yspd = 0.0f;
     obj->ygrav = 0.0f;
-    copy = func_1505ED34();
+    copy = actor_alloc();
     copy->type = 0x28;
     copy->character_type = obj->character_type;
     copy->imune = 0xFF;
@@ -554,7 +554,7 @@ void func_15195698(Actor *self, Actor *other, u8 *arg2) {
     if (other->energy == 0 && other->playernumber != 0xFF) {
         func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
-        func_1507CD64(other, 6);
+        actor_kill(other, 6);
     }
     if (self->character_type == 0x47) {
         self->energy = 0;

@@ -263,7 +263,7 @@ void func_1509BBA0(s32 mode) {
 
     node = gTaskWorkingSet.head;
     func_15096D08();
-    if (!D_800BE616 && level != 50 && !func_1509BE40(0, 0x2000, 0x93) && mode == TASK_ENTRY_RUN) {
+    if (!gIsMultiplayer && level != 50 && !func_1509BE40(0, 0x2000, 0x93) && mode == TASK_ENTRY_RUN) {
         return;
     }
     func_1509C228();
@@ -456,7 +456,7 @@ s32 func_1509C2A4(void) {
 
 void func_1509C3A0(void) {
     if (D_800D2E43 && !D_800D2E44 && func_1509C2A4()) {
-        D_800BE3DF = D_800BE9F4;
+        D_800BE3DF = gNextLevel;
         if (D_800C35C4 == 0) {
             func_15007718(D_8008FDA8);
         }

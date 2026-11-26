@@ -37,7 +37,7 @@ void func_15048B10(MtxF mtx, MtxF out) {
     MtxF tmp1;
     MtxF tmp2;
 
-    func_1503E5F8(mtx, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
+    model_decomposeMatrix(mtx, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
     guMtxIdentF(translate);
     translate[3][0] = -x;
     translate[3][1] = -y;

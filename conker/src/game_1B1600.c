@@ -94,7 +94,7 @@ s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     if (obj->ob_matrix_ptr == NULL || D_800C3E90 != 0) {
         return 0;
     }
-    count = func_1502DB20(id);
+    count = actor_getBoneMatrixCount(id);
     for (i = 0; i < count; i++) {
         bones = obj->ob_matrix_ptr;
         dx = bones[i][3][0];
@@ -408,7 +408,7 @@ Gfx *func_15184FA4(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
     gSPMatrix(gfx++, &D_800DF2F8[slot][D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &D_89470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     col[0] = col[1] = col[2] = 0;
-    gfx = func_1502CCFC(gfx, objIndex, view, movement_obj[objIndex].ob_matrix_ptr, func_1506196C(&movement_obj[objIndex], view), col, 3, 1);
+    gfx = actor_emitModel(gfx, objIndex, view, movement_obj[objIndex].ob_matrix_ptr, actor_getAlpha(&movement_obj[objIndex], view), col, 3, 1);
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     if (lod < 2) {
@@ -866,7 +866,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
         }
         if (movement_obj[i].lodCount != 0) {
             modelId = func_150849CC(&movement_obj[i], &modelSub);
-            func_1503DA9C(&movement_obj[i], modelId, modelSub, 0);
+            model_loadForActor(&movement_obj[i], modelId, modelSub, 0);
         } else {
             modelId = movement_obj[i].character_type;
             modelSub = 0;
@@ -958,7 +958,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
     D_800DF0E1 = 0;
     func_10004074(recv);
     // matching: the ?: materialises a 0/1 flag before the branch
-    if ((D_800BEBA4 < gfx - D_800BE9C8[D_800BE9C0]) ? 1 : 0) {
+    if ((D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0]) ? 1 : 0) {
         return gfxStart;
     }
     return gfx;

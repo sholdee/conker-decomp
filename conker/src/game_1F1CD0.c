@@ -17,13 +17,13 @@ void func_151C4820(Game1F1CD0Actor *actor) {
     Vec3f direction;
 
     emission = &actor->emission;
-    emission->stream.remaining += emission->stream.rate * D_800BE9A4;
+    emission->stream.remaining += emission->stream.rate * gFrameDelta;
     if (emission->stream.remaining > 1.0f) {
         inverse = 1.0f / emission->stream.remaining;
-        time = emission->stream.time + D_800BE9A4;
+        time = emission->stream.time + gFrameDelta;
         timeStep = time * inverse;
-        speedX = emission->stream.speedX * D_800BE9A4;
-        speedY = emission->stream.speedY * D_800BE9A4;
+        speedX = emission->stream.speedX * gFrameDelta;
+        speedY = emission->stream.speedY * gFrameDelta;
         phaseX = emission->stream.phaseX;
         phaseY = emission->stream.phaseY;
         phaseStepX = speedX * inverse;

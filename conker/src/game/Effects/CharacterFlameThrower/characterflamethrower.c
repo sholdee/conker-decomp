@@ -302,7 +302,7 @@ TexScroll *func_15195DD4(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
     if (dl == NULL) {
         return NULL;
     }
-    if (D_800BEAC0 != 0) {
+    if (gPaused != 0) {
         return NULL;
     }
     if (occurrence == -1) {
@@ -394,7 +394,7 @@ void func_15195FF0(Gfx *dl0, Gfx *dl1) {
         }
         w *= 8;
         h *= 8;
-        if (D_800BEAC0 == 0) {
+        if (gPaused == 0) {
             x += scroll->speedS * D_800BE9E4;
             y += scroll->speedT * D_800BE9E4;
         }
@@ -757,10 +757,10 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
         if (i < 0) {
             i = actor->head.tmpl.itemCount - 1;
         }
-        points[i].vel.y += jet->gravity * D_800BE9A4;
-        points[i].pos.x += points[i].vel.x * D_800BE9A4;
-        points[i].pos.y += points[i].vel.y * D_800BE9A4;
-        points[i].pos.z += points[i].vel.z * D_800BE9A4;
+        points[i].vel.y += jet->gravity * gFrameDelta;
+        points[i].pos.x += points[i].vel.x * gFrameDelta;
+        points[i].pos.y += points[i].vel.y * gFrameDelta;
+        points[i].pos.z += points[i].vel.z * gFrameDelta;
         points[i].alpha = 255;
         hold = points[i].holdTimer;
         if (hold > 0) {
@@ -773,7 +773,7 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
                 func_15198110(actor, i);
             }
         }
-        points[i].size += jet->sizeRate * D_800BE9A4;
+        points[i].size += jet->sizeRate * gFrameDelta;
         if (points[i].life < 0) {
             /* retire this point and every older one */
             jet->flags &= ~2;
@@ -879,11 +879,11 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     matrix = &jet->owner->ob_matrix_ptr[jet->bone];
     func_15143134(&jet->startOffset, &actor->head.tmpl.pos, matrix);
     func_15143134(&jet->endOffset, &end, matrix);
-    jet->emitAccum += jet->emitRate * D_800BE9A4;
+    jet->emitAccum += jet->emitRate * gFrameDelta;
     if (jet->emitAccum > 1.0f) {
         do { // matching: a plain block here reorders the float rodata
             inv = 1.0f / jet->emitAccum;
-            t = jet->timeCarry + D_800BE9A4;
+            t = jet->timeCarry + gFrameDelta;
             fq = t;
             cur = jet->start;
             cur2 = jet->end;
@@ -1231,17 +1231,17 @@ struct SceneParticle {
 /* Particle callback: applies drag and gravity to both end points' velocities, then moves them. */
 s32 func_15197AB4(SceneParticle *p) {
     p->data.jet.velA.x *= p->data.jet.dragA;
-    p->data.jet.velA.y += p->data.jet.gravity * D_800BE9A4;
+    p->data.jet.velA.y += p->data.jet.gravity * gFrameDelta;
     p->data.jet.velA.z *= p->data.jet.dragA;
     p->data.jet.velB.x *= p->data.jet.dragB;
-    p->data.jet.velB.y += p->data.jet.gravity * D_800BE9A4;
+    p->data.jet.velB.y += p->data.jet.gravity * gFrameDelta;
     p->data.jet.velB.z *= p->data.jet.dragB;
-    p->head.def.pos.x += p->data.jet.velA.x * D_800BE9A4;
-    p->head.def.pos.y += p->data.jet.velA.y * D_800BE9A4;
-    p->head.def.pos.z += p->data.jet.velA.z * D_800BE9A4;
-    p->head.def.rot.x += p->data.jet.velB.x * D_800BE9A4;
-    p->head.def.rot.y += p->data.jet.velB.y * D_800BE9A4;
-    p->head.def.rot.z += p->data.jet.velB.z * D_800BE9A4;
+    p->head.def.pos.x += p->data.jet.velA.x * gFrameDelta;
+    p->head.def.pos.y += p->data.jet.velA.y * gFrameDelta;
+    p->head.def.pos.z += p->data.jet.velA.z * gFrameDelta;
+    p->head.def.rot.x += p->data.jet.velB.x * gFrameDelta;
+    p->head.def.rot.y += p->data.jet.velB.y * gFrameDelta;
+    p->head.def.rot.z += p->data.jet.velB.z * gFrameDelta;
     return 1;
 }
 
@@ -1522,7 +1522,7 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
         dy *= (1.0f + r / h) * 0.5f;
         d = dx * dx + dy * dy + dz * dz;
         if (d < r * r) {
-            func_1505D024(obj, 0x60006, obj->langle, jet->owner - movement_obj);
+            actor_hitScripted(obj, 0x60006, obj->langle, jet->owner - movement_obj);
             func_1518D1C0(obj, 0xB, 0, 1, actor->head.header.owner, actor->head.header.kind, "Characterflamethrower");
             while (i != actor->head.start) {
                 actor->head.start = actor->head.start + 1;
@@ -1667,7 +1667,7 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
 
 /* Jet sound-start callback (D_8008F890): starts the looping flame sound; its handle is left in v0. */
 void func_15198C60(void) {
-    func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
+    sound_play(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
 
 /* Jet callback (D_8008F894): moves the jet's sound to its oldest point. */
@@ -1696,7 +1696,7 @@ void func_15198D40(CharacterFlamethrowerActor *actor) {
     if (actor->head.count != 0) {
         sound = jet->sound;
         if (sound != 0) {
-            func_100111C8(sound);
+            sound_stop(sound);
         }
     }
 }
@@ -2107,8 +2107,8 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
             i = actor->head.tmpl.itemCount - 1;
         }
         pt = &points[i];
-        func_1519BE1C(&pt->pos, &pt->vel, flame->seed.gravity, D_800BE9A4);
-        pt->size += flame->seed.sizeRate * D_800BE9A4;
+        func_1519BE1C(&pt->pos, &pt->vel, flame->seed.gravity, gFrameDelta);
+        pt->size += flame->seed.sizeRate * gFrameDelta;
     }
     {
         FlamePoint *oldest;
@@ -2189,7 +2189,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         flame->flags |= 1;
     }
     actor->head.tmpl.pos = pos0;
-    flame->emitAccum += flame->seed.emitRate * D_800BE9A4;
+    flame->emitAccum += flame->seed.emitRate * gFrameDelta;
     if (flame->emitAccum > 1.0f) {
         f32 inv;
         f32 t;
@@ -2206,7 +2206,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         f32 iz1;
 
         inv = 1.0f / flame->emitAccum;
-        t = flame->timeCarry + D_800BE9A4;
+        t = flame->timeCarry + gFrameDelta;
         step = t * inv;
         cur0 = flame->start;
         cur1 = flame->end;
@@ -2262,7 +2262,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         flame->timeCarry = t;
     }
     if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
-        flame->scatterAccum += (flame->scatter.rate + func_150ADA68() * flame->scatter.rateRange) * D_800BE9A4;
+        flame->scatterAccum += (flame->scatter.rate + func_150ADA68() * flame->scatter.rateRange) * gFrameDelta;
         if (flame->scatterAccum > 1.0f) {
             EffectTemplate spawn;
             TrailMotion motion;
@@ -2320,7 +2320,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         }
     }
     if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
-        flame->particleAccum += (flame->emit.rate + func_150ADA68() * flame->emit.rateRange) * D_800BE9A4;
+        flame->particleAccum += (flame->emit.rate + func_150ADA68() * flame->emit.rateRange) * gFrameDelta;
         if (flame->particleAccum > 1.0f) {
             ParticleDesc part;
             Vec3f delta;
@@ -2541,7 +2541,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
         s32 i;
         f32 sum;
 
-        flame->texOffset += flame->seed.texSpeed * D_800BE9A4;
+        flame->texOffset += flame->seed.texSpeed * gFrameDelta;
         flame->texOffset = func_15144528(flame->texOffset, 16383.0f, -16384.0f);
         i = actor->head.end;
         sum = 0.0f;
@@ -2558,7 +2558,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
         } while (i != actor->head.start);
     }
     if (actor->head.count >= 3 && (!(flame->flags & 0x20) || !(flame->flags & 0x10)) && maxLen <= flame->length) {
-        flame->lineAccum += (flame->line.rate + func_150ADA68() * flame->line.rateRange) * points[actor->head.start].size * D_800BE9A4;
+        flame->lineAccum += (flame->line.rate + func_150ADA68() * flame->line.rateRange) * points[actor->head.start].size * gFrameDelta;
         if (flame->lineAccum > 1.0f) {
             s32 head;
             s32 next;
@@ -2739,7 +2739,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     }
     state = actor->state;
     points = actor->points;
-    if ((state->flags & 0x20) && (D_800BE616 == 0) && (state->flags & 0x10)) {
+    if ((state->flags & 0x20) && (gIsMultiplayer == 0) && (state->flags & 0x10)) {
         return gfx;
     }
     if (state->flags & 1) {
@@ -2982,7 +2982,7 @@ void func_1519BF20(CharacterFlamethrowerActor *actor) {
 
 /* Flame sound-start callback (D_8008F8B8): starts the looping flame sound; its handle is left in v0. */
 void func_1519BF8C(void) {
-    func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
+    sound_play(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
 
 /* Flame callback (D_8008F8BC): moves the flame's sound to its oldest point. */
@@ -3007,7 +3007,7 @@ void func_1519C06C(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame = actor->state;
     u16 sound = flame->sound;
     if (sound != 0) {
-        func_100111C8(sound);
+        sound_stop(sound);
     }
 }
 
@@ -3079,11 +3079,11 @@ s32 func_1519C26C(SceneParticle *beam) {
     Vec3f accB;
     FlameLineData *p = &beam->data.line;
 
-    dtSq = D_800BE9A4 * D_800BE9A4;
+    dtSq = gFrameDelta * gFrameDelta;
     velA = p->velA;
     velB = p->velB;
-    p->velA.y += p->gravity * D_800BE9A4;
-    p->velB.y += p->gravity * D_800BE9A4;
+    p->velA.y += p->gravity * gFrameDelta;
+    p->velB.y += p->gravity * gFrameDelta;
     {
         s32 i;
 
@@ -3096,18 +3096,18 @@ s32 func_1519C26C(SceneParticle *beam) {
             p->velB.z *= p->dragB;
         }
     }
-    accA.x = (p->velA.x - velA.x) * D_800BE9A8;
-    accA.y = (p->velA.y - velA.y) * D_800BE9A8;
-    accA.z = (p->velA.z - velA.z) * D_800BE9A8;
-    accB.x = (p->velB.x - velB.x) * D_800BE9A8;
-    accB.y = (p->velB.y - velB.y) * D_800BE9A8;
-    accB.z = (p->velB.z - velB.z) * D_800BE9A8;
-    beam->head.def.pos.x += velA.x * D_800BE9A4 + 0.5f * accA.x * dtSq;
-    beam->head.def.pos.y += velA.y * D_800BE9A4 + 0.5f * accA.y * dtSq;
-    beam->head.def.pos.z += velA.z * D_800BE9A4 + 0.5f * accA.z * dtSq;
-    beam->head.def.rot.x += velB.x * D_800BE9A4 + 0.5f * accB.x * dtSq;
-    beam->head.def.rot.y += velB.y * D_800BE9A4 + 0.5f * accB.y * dtSq;
-    beam->head.def.rot.z += velB.z * D_800BE9A4 + 0.5f * accB.z * dtSq;
+    accA.x = (p->velA.x - velA.x) * gFrameDeltaInv;
+    accA.y = (p->velA.y - velA.y) * gFrameDeltaInv;
+    accA.z = (p->velA.z - velA.z) * gFrameDeltaInv;
+    accB.x = (p->velB.x - velB.x) * gFrameDeltaInv;
+    accB.y = (p->velB.y - velB.y) * gFrameDeltaInv;
+    accB.z = (p->velB.z - velB.z) * gFrameDeltaInv;
+    beam->head.def.pos.x += velA.x * gFrameDelta + 0.5f * accA.x * dtSq;
+    beam->head.def.pos.y += velA.y * gFrameDelta + 0.5f * accA.y * dtSq;
+    beam->head.def.pos.z += velA.z * gFrameDelta + 0.5f * accA.z * dtSq;
+    beam->head.def.rot.x += velB.x * gFrameDelta + 0.5f * accB.x * dtSq;
+    beam->head.def.rot.y += velB.y * gFrameDelta + 0.5f * accB.y * dtSq;
+    beam->head.def.rot.z += velB.z * gFrameDelta + 0.5f * accB.z * dtSq;
     return 1;
 }
 
@@ -3367,7 +3367,7 @@ void func_1519CD64(FlamethrowerController *ctrl) {
     ctrl->base.header.flags |= 1;
 }
 
-/* Calls func_1505D1C4(kind) at points spaced flame->length * fraction along the flame, oldest first. */
+/* Calls actor_runAttackAt(kind) at points spaced flame->length * fraction along the flame, oldest first. */
 void func_1519CDB0(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {
     f32 spacing;
     f32 factor;
@@ -3403,7 +3403,7 @@ void func_1519CDB0(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {
             if (next <= total) {
                 owner = state->seed.owner;
                 factor = (total - next) / distance;
-                func_1505D1C4(point->pos.x + ((previous->x - point->pos.x) * factor),
+                actor_runAttackAt(point->pos.x + ((previous->x - point->pos.x) * factor),
                     point->pos.y + ((previous->y - point->pos.y) * factor),
                     (interpolated_z = point->pos.z + ((previous->z - point->pos.z) * factor)), kind,
                     owner - movement_obj,

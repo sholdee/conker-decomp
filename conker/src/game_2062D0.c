@@ -530,7 +530,7 @@ s32 func_151DA368(SteamEffect *effect) {
     effect->head.def.width = func_151423D8(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
     effect->head.def.height = func_151423D8(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
 lbl: // matching: ends the basic block so the scaleY store is not moved into the next call's delay slot
-    steam->spawnCredit += (0.15f + func_150ADA68() * 0.1f) * D_800BE9A4;
+    steam->spawnCredit += (0.15f + func_150ADA68() * 0.1f) * gFrameDelta;
     avgScale = (effect->head.def.width + effect->head.def.height) * 0.5f;
     if (steam->spawnCredit > 1.0f) {
         radius = avgScale * 500.0f;

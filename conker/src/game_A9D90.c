@@ -20,14 +20,14 @@ void func_1507C8E0(Actor *obj, s32 timer) {
 }
 
 /* Per-frame update of every active player's state machine. */
-void func_1507C8FC(void) {
+void actor_updatePlayerStates(void) {
     s32 i;
     f32 x;
     f32 y;
     f32 z;
     Actor *player;
 
-    if (D_800BEAC0 == 0) {
+    if (gPaused == 0) {
         player = movement_obj;
         for (i = 0; i < D_8008FD8C; i++, player++) {
             if (player->mv == NULL) {
@@ -41,7 +41,7 @@ void func_1507C8FC(void) {
                 continue;
             }
             if (i <= D_80082FA0) {
-                if (D_800BE616 != 0 && (D_800D18A2 & (1 << i))) {
+                if (gIsMultiplayer != 0 && (D_800D18A2 & (1 << i))) {
                     player->mv->death_State = 2;
                     player->mv->deathTimer = 60;
                 }
@@ -67,18 +67,18 @@ void func_1507C8FC(void) {
                         player->mv->deathTimer -= D_800BE9E4;
                     } else {
                         player->mv->death_State = 8;
-                        func_1506160C(player, 2, 0, 60, 0);
+                        actor_fadeCommand(player, 2, 0, 60, 0);
                     }
                 }
                 player->mv->deathTime += D_800BE9E4;
-                if ((D_800BE710[i] & 0x8000) || (D_800BE616 != 0 && player->mv->bot == 0) ||
-                    func_150859AC(i, 3) < 2 || (player->mv->bot == 1 && player->mv->deathTime >= 181)) {
+                if ((D_800BE710[i] & 0x8000) || (gIsMultiplayer != 0 && player->mv->bot == 0) ||
+                    player_getStat(i, 3) < 2 || (player->mv->bot == 1 && player->mv->deathTime >= 181)) {
                     player->mv->respawnReady = TRUE;
                 }
                 if (D_8008FDBC & 0x80) {
                     player->mv->respawnReady = FALSE;
                 }
-                func_1507E1D0(player, &x, &y, &z);
+                actor_getTrackPoint(player, &x, &y, &z);
                 func_1517F814(0, x, y, z, i);
                 if (player->mv->respawnReady && player->mv->death_State == 5) {
                     player->mv->death_State = 6;
@@ -98,7 +98,7 @@ void func_1507C8FC(void) {
             } else {
                 player->mv->deathTime += D_800BE9E4;
                 if (player->unk7 == 0xFF && player->mv->deathTime >= 161) {
-                    func_1506160C(player, 2, 0, 60, 0);
+                    actor_fadeCommand(player, 2, 0, 60, 0);
                 }
                 if (player->mv->deathTime >= 181 && player->mv->death_State != 10) {
                     func_1507D4F8(i);
@@ -121,7 +121,7 @@ void func_1507CD0C(Actor *obj) {
 }
 
 /* Kills obj with the given cause: plays its sound, resets movement and moves it to a dead state. */
-void func_1507CD64(Actor *obj, s32 cause) {
+void actor_kill(Actor *obj, s32 cause) {
     f32 f;
     s32 sound;
     u32 r;
@@ -148,12 +148,12 @@ void func_1507CD64(Actor *obj, s32 cause) {
         again = FALSE;
     }
     obj->mv->unk121 = cause;
-    if (D_800BE616 != 0 && !again) {
+    if (gIsMultiplayer != 0 && !again) {
         if (slot < 16) {
             D_800E0AD0[slot]++;
         }
         if ((D_8008FDBC & 0x20) && obj->team == 0) { // byte at 0x128 (Actor has a u32 pad there)
-            func_15085710(1, 10, 1);
+            player_setStat(1, 10, 1);
         }
     }
     msg.actor = obj;
@@ -240,7 +240,7 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
         break;
     }
     if (sound != -1) {
-        func_1505E650(obj, sound, 1.0f, 3.0f, 0.0f, 0.0f, flag);
+        actor_playAnim(obj, sound, 1.0f, 3.0f, 0.0f, 0.0f, flag);
     }
     obj->energy = 0;
     obj->imune = 0xFF;
@@ -252,10 +252,10 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     obj->speed = 0.0f;
     obj->mv->bitten = 0;
     if (obj->lifting != 0) {
-        saved = D_800D154C;
-        D_800D154C = obj;
+        saved = gCurrentActor;
+        gCurrentActor = obj;
         func_1504BAF0(obj);
-        D_800D154C = saved;
+        gCurrentActor = saved;
     }
     if (mode == 0 || mode == 3) {
         obj->mv->death_State = 1;
@@ -281,7 +281,7 @@ void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_1509BFB0(3, value | 0x2000, arg1, arg2, arg3, arg4);
 }
 
-/* Re-initialises obj through func_15060F28/func_15082A44 (health back to D_8008726C), keeping a few state bytes. */
+/* Re-initialises obj through actor_remove/func_15082A44 (health back to D_8008726C), keeping a few state bytes. */
 void func_1507D1D8(Actor *obj) {
     s32 value;
     s32 saved1AA;
@@ -296,17 +296,17 @@ void func_1507D1D8(Actor *obj) {
     saved1B0 = obj->mv->lastSpawnIndex;
     saved328 = obj->unk328; // signed byte at 0x328 (Actor types it u8)
     saved1AF = obj->mv->unk1AF;
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         player = obj->mv->spawnIndex;
     } else {
         player = -1;
     }
     if (level == 0x2B) {
         slot = obj - movement_obj;
-        value = func_150859AC(slot, 1);
+        value = player_getStat(slot, 1);
         if (value >= 0x11 && value < 0x21) {
             choice = (func_150ADA20() & 0xF) + 0x11;
-            func_15085710(slot, 0, choice);
+            player_setStat(slot, 0, choice);
             if (choice < 0x1D) {
                 D_800D20FC[slot].type = 0x9C;
             } else {
@@ -315,7 +315,7 @@ void func_1507D1D8(Actor *obj) {
         }
     }
     slot = obj - movement_obj;
-    func_15060F28(obj, 0);
+    actor_remove(obj, 0);
     D_800D18A8 = 1;
     func_15082A44(&D_800D20FC[slot], slot, 0, 0, 0);
     obj->mv->lastSpawnIndex = saved1B0;
@@ -327,7 +327,7 @@ void func_1507D1D8(Actor *obj) {
         func_1517EE40(0, 0, 0, 0, 1, slot);
         func_1517EE40(0, 0, 0, 30, 0, slot);
     } else {
-        func_15085430(obj, player, 0);
+        player_moveToSpawn(obj, player, 0);
     }
     D_800D18A8 = 0;
     obj->mv->death_State = 0;
@@ -343,7 +343,7 @@ void func_1507D1D8(Actor *obj) {
     obj->intelwalk = 1;
     obj->scriptCmd = NULL;
     obj->mv->spawnIndex = player;
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         obj->imune = 150;
         obj->mv->unk1B1 = obj->imune;
         if (level == 0x33) {
@@ -353,21 +353,21 @@ void func_1507D1D8(Actor *obj) {
     }
 }
 
-/* Ends slot's current run: re-initialises it if func_150859AC(slot, 3) allows, else retires it (state 10). */
+/* Ends slot's current run: re-initialises it if player_getStat(slot, 3) allows, else retires it (state 10). */
 void func_1507D4F8(s32 slot) {
     Actor *obj;
     ActorCtl *state;
 
     if (!(D_8008FDBC & 1)) {
-        func_15085710(slot, 4, 1);
+        player_setStat(slot, 4, 1);
     }
 
-    if (func_150859AC(slot, 3) != 0) {
-        func_15085710(slot, 5, D_8008726C);
+    if (player_getStat(slot, 3) != 0) {
+        player_setStat(slot, 5, D_8008726C);
         obj = &movement_obj[slot];
         obj->unkB2 = 0;
 
-        if (D_800BE616 != 0) {
+        if (gIsMultiplayer != 0) {
             if (D_800E0C20 == 0) {
                 func_1507D1D8(obj);
                 return;
@@ -378,20 +378,20 @@ void func_1507D4F8(s32 slot) {
 
         D_800D18A8 = 1;
         if (!(D_800D2E4C[0x19] & 4) && D_8008FDA8 >= 0) {
-            func_1501C730(1, 0x22, 0, 0, 0);
+            game_requestLevelChange(1, 0x22, 0, 0, 0);
             return;
         }
-        func_1501C730(2, D_800BE3DF, D_800BE3E0, 0, 0);
+        game_requestLevelChange(2, D_800BE3DF, D_800BE3E0, 0, 0);
         return;
     }
 
-    if (D_800BE616 == 0) {
+    if (gIsMultiplayer == 0) {
         D_800D2E43 = 1;
         func_1509C3A0();
         D_800D18A8 = 1;
-        func_15085710(slot, 5, D_8008726C);
-        func_15085710(slot, 2, D_80087260);
-        func_1501C730(1, 0x18, 0, 0, 0);
+        player_setStat(slot, 5, D_8008726C);
+        player_setStat(slot, 2, D_80087260);
+        game_requestLevelChange(1, 0x18, 0, 0, 0);
     } else {
         D_800D18A0 |= 1 << slot;
     }
@@ -450,14 +450,14 @@ s32 func_1507D754(Actor *obj) {
         func_150AEB9C(obj);
         return 1;
     case 0x53:
-        if (D_800BE616 != 0) {
-            func_1507CD64(obj, 10);
+        if (gIsMultiplayer != 0) {
+            actor_kill(obj, 10);
             return 2;
         }
         break;
     case 0x90:
-        if (D_800BE616 != 0 && level == 0x33) {
-            func_1507CD64(obj, 8);
+        if (gIsMultiplayer != 0 && level == 0x33) {
+            actor_kill(obj, 8);
             return 2;
         }
         break;
@@ -466,8 +466,8 @@ s32 func_1507D754(Actor *obj) {
         spawned = NULL;
         func_151BA518(obj, 0xFF, 1);
         func_15145A50(obj);
-        if (D_800BE616 != 0) {
-            func_1507CD64(obj, 6);
+        if (gIsMultiplayer != 0) {
+            actor_kill(obj, 6);
             spawned = func_151149AC((obj->playernumber + 11));
         } else {
             if (level == 0x23) {
@@ -491,7 +491,7 @@ s32 func_1507D754(Actor *obj) {
             spawned->touch.i.b = 0;
             spawned->touch.i.c = 0;
         }
-        if (D_800BE616 != 0) {
+        if (gIsMultiplayer != 0) {
             return 2;
         }
         break;
@@ -526,7 +526,7 @@ void func_1507DB3C(void) {
 }
 
 void func_1507DB44(Actor *obj, s32 arg1) {
-    func_1503DE70(obj, arg1, -1);
+    model_breakIntoParts(obj, arg1, -1);
 }
 
 void func_1507DB64(void) {
@@ -650,7 +650,7 @@ void func_1507DF10(Actor *obj, s32 part) {
     }
 }
 
-/* Looks up resource's position and facing via func_15084D70 and calls func_1501D348(0x25, ...) from there. */
+/* Looks up resource's position and facing via player_getSpawnPoint and calls func_1501D348(0x25, ...) from there. */
 void func_1507DFE4(s32 resource, s32 arg1) {
     s32 savedMode;
     s16 pos[3];
@@ -664,7 +664,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
     s32 type;
 
     if (D_800C35EA[0] != 1) {
-        func_15084D70(0, resource, 1, pos, &vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
+        player_getSpawnPoint(0, resource, 1, pos, &vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
         yaw = (angle - 64) * (360.0f / 256.0f) + 180.0f;
         if (type == 0) {
             kind = 1;
@@ -683,7 +683,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
     }
 }
 
-/* Returns 0, or 1 + the type func_15084D70 reports for D_800BE3E0 (after setting D_800BE9F4 from D_800BE3DF). */
+/* Returns 0, or 1 + the type player_getSpawnPoint reports for D_800BE3E0 (after setting gNextLevel from D_800BE3DF). */
 s32 func_1507E114(s32 *arg0) {
     s32 type;
     s16 pos[3];
@@ -697,17 +697,17 @@ s32 func_1507E114(s32 *arg0) {
     if (D_800D18A8 == 0) {
         return 0;
     }
-    mode = D_800BE9F4;
+    mode = gNextLevel;
     if (mode == 0x22 || mode == 0x18) {
         return 0;
     }
-    D_800BE9F4 = D_800BE3DF;
-    func_15084D70(0, D_800BE3E0, 1, pos, &vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
+    gNextLevel = D_800BE3DF;
+    player_getSpawnPoint(0, D_800BE3E0, 1, pos, &vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
     return type + 1;
 }
 
 /* Gets obj's tracking point: 30 * scale_y up through bone 0 (12 or 3 in some states), or its position. */
-void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z) {
+void actor_getTrackPoint(Actor *obj, f32 *x, f32 *y, f32 *z) {
     if (obj->ob_matrix_ptr != NULL) {
         MtxF *bone;
         Vec3f in;

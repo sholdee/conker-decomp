@@ -281,7 +281,7 @@ s32 func_150B9560(FallGrowParticle *particle) {
     f32 scale;
 
     if (particle->head.def.lifetime < 80) {
-        *speed += 0.3f * D_800BE9A4;
+        *speed += 0.3f * gFrameDelta;
         particle->head.def.pos.y -= *speed;
     }
 

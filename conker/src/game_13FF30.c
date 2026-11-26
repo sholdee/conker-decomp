@@ -55,7 +55,7 @@ void func_15112A80(s32 player) {
 
         count = &D_800DBEE8[view];
         recp = &D_800BE628[view];
-        if (func_150859AC(view, 0) != 0) {
+        if (player_getStat(view, 0) != 0) {
             D_800DBEE8[view] = 0;
             for (i = 0; i < gWorldObjectCount;) {
                 groupSize = db_Object_array[i].state >> 4;
@@ -167,7 +167,7 @@ void func_15113218(void) {
     s32 pad2[3];
 
     for (view = 0; view <= D_80082FA0; view++) {
-        if (func_150859AC(view, 0) == 0) {
+        if (player_getStat(view, 0) == 0) {
             continue;
         }
         for (j = 0; j < D_800DBEE8[view]; j++) {
@@ -308,7 +308,7 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
         Gfx *cmd = gfx++; cmd->words.w0 = 0xD9EEFFFF; cmd->words.w1 = 0; // gSPClearGeometryMode(G_FOG | G_LOD)
         cmd = gfx++; cmd->words.w0 = 0xE7000000; cmd->words.w1 = 0;      // gDPPipeSync
     }
-    overflow = (D_800BEBA4 < gfx - D_800BE9C8[D_800BE9C0]) ? 1 : 0;
+    overflow = (D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0]) ? 1 : 0;
     if (overflow != 0) {
         return start;
     }
@@ -327,7 +327,7 @@ void func_15113C88(void) {
         hidden = FALSE;
         obj = i + db_Object_array; // matching: &db_Object_array[i] swaps the addu operands
         for (j = 0; j < D_80082FA0; j++) {
-            if (func_150859AC(j, 0) != 0 && obj->dst_fade_alpha[j] == 0) {
+            if (player_getStat(j, 0) != 0 && obj->dst_fade_alpha[j] == 0) {
                 hidden = TRUE;
                 break;
             }
@@ -647,7 +647,7 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
 
     if (flags & 1) {
         if (obj->sound_id != 0) {
-            if (func_1001147C(obj->sound_id) == sfx) {
+            if (sound_getPlayingSound(obj->sound_id) == sfx) {
                 return;
             }
         }
@@ -655,7 +655,7 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
 
     if (sfx == -1) {
         if (obj->sound_id != 0) {
-            func_100111C8(obj->sound_id);
+            sound_stop(obj->sound_id);
             obj->sound_id = 0;
         }
         return;
@@ -674,15 +674,15 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
         }
     } else if (flags & 2) {
         if (handle != 0) {
-            func_1001123C(handle);
+            sound_stopNextUpdate(handle);
             handle = 0;
         }
         obj->sound_id = func_10010E78(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
     } else {
         if (handle != 0) {
-            func_1001123C(handle);
+            sound_stopNextUpdate(handle);
         }
-        obj->sound_id = func_1000FA64(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (SoundRecordCallback)func_15114CC4, obj, 0, 0, 0);
+        obj->sound_id = sound_addDynamicSound(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (SoundRecordCallback)func_15114CC4, obj, 0, 0, 0);
     }
 }
 

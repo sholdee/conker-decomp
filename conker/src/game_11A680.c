@@ -25,7 +25,7 @@ f32 func_150ED1D0(f32 from, f32 to) {
 f32 func_150ED234(Actor *self, Actor *target) {
     s32 angle;
 
-    angle = func_1505A630(target->xpos - self->xpos, self->zpos - target->zpos, 0) + 0x4000;
+    angle = actor_getDirectionAngle(target->xpos - self->xpos, self->zpos - target->zpos, 0) + 0x4000;
     return func_150ED1D0(angle * (360.0f / 65536.0f), self->theta);
 }
 
@@ -116,7 +116,7 @@ void func_150ED578(Actor *obj) {
 
     state = obj->mv;
     if ((state != NULL) && (state->bot == 0)) {
-        player = D_800BE616 ? obj->playernumber : obj->owner;
+        player = gIsMultiplayer ? obj->playernumber : obj->owner;
         if (D_800BE728[player]->button & R_TRIG) {
             owner = &movement_obj[player];
             if (owner->mv->SniperState != 0) {
@@ -146,15 +146,15 @@ void func_150ED638(Actor *obj, s32 left, s32 right) {
         right = temp;
     }
 
-    func_15062FC0(obj, 0, 0, 0x800, 0x800, size, -right * 7, 0);
-    func_15062FC0(obj, 1, size, 0x800, 0x800, size, -left * 7, 0);
+    actor_scrollVertexTexCoords(obj, 0, 0, 0x800, 0x800, size, -right * 7, 0);
+    actor_scrollVertexTexCoords(obj, 1, size, 0x800, 0x800, size, -left * 7, 0);
 }
 
 /* Ray (origin, normalized dir) vs sphere (center, radius); 0 on a miss or when the near hit is behind. */
 
 /*
  * Per-frame update of a player-driven tracked vehicle with an aimable gun.
- * - The controlling player (movement_obj[unk127] when D_800BE616 is set, else object 0) drives it: stick X steers,
+ * - The controlling player (movement_obj[unk127] when gIsMultiplayer is set, else object 0) drives it: stick X steers,
  *   stick Y sets the throttle, A boosts while the player's state allows it, R stops it.
  * - The two treads are scrolled from the forward speed and the turn rate (func_150ED638).
  * - The gun angles (mv->gunYaw/gunPitch) either lead STATE->target, or turn with C-left/C-right while
@@ -222,7 +222,7 @@ void func_150ED748(Actor *obj) {
     ActorCtl *subject;
 
     health = 1;
-    if (D_800BE616) {
+    if (gIsMultiplayer) {
         viewer[0] = obj->playernumber;
     } else {
         viewer[0] = 0;
@@ -234,7 +234,7 @@ void func_150ED748(Actor *obj) {
     prevFacing = obj->langle;
     obj->intel_accel = 16;
     obj->intel_decel = 8;
-    if (D_800BE616 == 0) {
+    if (gIsMultiplayer == 0) {
         if (obj->lifting != 0) {
             controlled = 1;
             velocity = obj->speed;
@@ -296,11 +296,11 @@ void func_150ED748(Actor *obj) {
                 }
             }
             turnRate = 18.0f - obj->speed * (0.3199999928f / throttleScale);
-            turnRate = (turnRate * 0.5f + 9.0f) * D_800BE9A4;
+            turnRate = (turnRate * 0.5f + 9.0f) * gFrameDelta;
             if (turnRate < 10) {
                 turnRate = 10;
             }
-            if ((D_800BE728[player]->button & R_TRIG) && ((movement_obj[player].mv->unk128 & 2) || (D_800BE616 == 0))) {
+            if ((D_800BE728[player]->button & R_TRIG) && ((movement_obj[player].mv->unk128 & 2) || (gIsMultiplayer == 0))) {
                 throttleScale = 0.0f;
                 lockFlags = 0x1F;
                 steer = 0;
@@ -308,7 +308,7 @@ void func_150ED748(Actor *obj) {
                 obj->speed = 0.0f;
             }
             obj->unk22B = (s8)obj->unk22B + (steer - (s8)obj->unk22B) / 4;
-            if (D_800BE616 != 0) {
+            if (gIsMultiplayer != 0) {
                 obj->unk22B = steer;
             }
             if (steer == 0) {
@@ -319,7 +319,7 @@ void func_150ED748(Actor *obj) {
             obj->fangle = obj->langle - (s8)obj->unk22B * turnRate;
             obj->mvmt_control |= 0x40;
             buttonPad = player;
-            if ((D_800BE616 != 0) && (player < 2)) {
+            if ((gIsMultiplayer != 0) && (player < 2)) {
                 if (D_800E0BCE[player] != 0) {
                     buttonPad = D_800E0BCE[player];
                 }
@@ -337,7 +337,7 @@ void func_150ED748(Actor *obj) {
         movement_obj[player].mv->context_b = lockFlags;
         movement_obj[player].mv->rt_context_b = lockFlags;
     } else if (dc_glbl_CharNum < D_8008FD8C) {
-        func_1504C854(obj);
+        actor_updateButtonTimers(obj);
         if ((player < 4) && (D_800BE728[player]->button & Z_TRIG)) {
             D_800CC288 = Z_TRIG;
         }
@@ -347,18 +347,18 @@ void func_150ED748(Actor *obj) {
     }
     obj->intel_accel = 50;
     obj->intel_decel = 50;
-    if ((D_800BE616 == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->mv->death_State == 0)) {
+    if ((gIsMultiplayer == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->mv->death_State == 0)) {
         func_15052590(obj);
     }
     if (obj->type != 0) {
         if (obj->intelwalk == 13) {
             func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
-        } else if ((D_800BE616 == 0) && (D_800CC268 & 1)) {
+        } else if ((gIsMultiplayer == 0) && (D_800CC268 & 1)) {
             driver = &movement_obj[obj->owner];
             if ((driver->attach_char == 0) && (driver->mv->rt_context_b == 0) && (obj->task_attrib & 0x400)) {
                 if ((driver->stickspeed > 15.0f) && (driver->yspd > 10.0f)) {
                     func_1505327C(obj, 68.0f, 4.0f, 13, 5);
-                } else if ((driver->norun == 0) && (driver->shad > 70.0f) && (driver->stunned == 0) && (func_1505A6F8(driver, obj) < 100.0f)) {
+                } else if ((driver->norun == 0) && (driver->shad > 70.0f) && (driver->stunned == 0) && (actor_distanceXZ(driver, obj) < 100.0f)) {
                     func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 1, 0);
                 }
             }
@@ -431,11 +431,11 @@ void func_150ED748(Actor *obj) {
         } else if (controlled && health) {
             typedef s32 scope; // matching: as above
             bestScore = 0.0f;
-            yawStep = 3.0f * D_800BE9A4;
+            yawStep = 3.0f * gFrameDelta;
             bestIdx = -1;
             camSlot = 0;
             objCount = D_8008FD8C;
-            if ((D_800BE616 != 0) && (viewer[0] < 2) && (D_800E0BCE[viewer[0]] != 0)) {
+            if ((gIsMultiplayer != 0) && (viewer[0] < 2) && (D_800E0BCE[viewer[0]] != 0)) {
                 camSlot = D_800E0BCE[viewer[0]] + 1;
             } else {
                 pad = &D_800BE748[viewer[0]];
@@ -449,7 +449,7 @@ void func_150ED748(Actor *obj) {
             if (movement_obj[player].mv->SniperState != 0) {
                 camSlot = viewer[0] + 1;
             }
-            if (D_800BE616 == 0) {
+            if (gIsMultiplayer == 0) {
                 objCount = 25;
             }
             if (camSlot == 0) {
@@ -457,7 +457,7 @@ void func_150ED748(Actor *obj) {
                 for (i = 0; i < objCount; i++) {
                     if (i != viewer[0]) {
                         other = &movement_obj[i];
-                        if ((D_800BE616 == 0) && !(other->noshove & 0x40)) {
+                        if ((gIsMultiplayer == 0) && !(other->noshove & 0x40)) {
                             continue;
                         }
                         offset = func_150ED1D0(func_150ED234(obj, other), obj->mv->gunYaw);
@@ -489,13 +489,13 @@ void func_150ED748(Actor *obj) {
                 if (bestIdx != -1) {
                     typedef s32 scope; // matching: as above
                     driver = &movement_obj[bestIdx];
-                    if (D_800BE616 != 0) {
+                    if (gIsMultiplayer != 0) {
                         limit = driver->ypos + 40.0f;
                     } else {
                         limit = driver->aim.topY;
                     }
                     deltaZ = func_150ED298(obj, 0.0f, driver->xpos, limit, driver->zpos, 0.0f) * 0.001000000047f;
-                    limit = 4.0f * D_800BE9A4;
+                    limit = 4.0f * gFrameDelta;
                     if (limit < deltaZ) {
                         deltaZ = limit;
                     }

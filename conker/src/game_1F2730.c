@@ -71,7 +71,7 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
         } else {
             arg16 = 128;
         }
-        if (D_800BE616 != 0) {
+        if (gIsMultiplayer != 0) {
             arg23 = -1;
         } else {
             arg23 = 2;

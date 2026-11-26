@@ -220,10 +220,10 @@ void func_150DE7C0(ZonePairEffect *emitter) {
 
 /* Moves the particle along its travel velocity; returns 0 once its travel time has run out. */
 s32 func_150DEACC(TravelParticle *particle) {
-    particle->head.def.pos.x += particle->travel.velocity.x * D_800BE9A4;
-    particle->head.def.pos.y += particle->travel.velocity.y * D_800BE9A4;
-    particle->head.def.pos.z += particle->travel.velocity.z * D_800BE9A4;
-    particle->travel.timeLeft -= D_800BE9A4;
+    particle->head.def.pos.x += particle->travel.velocity.x * gFrameDelta;
+    particle->head.def.pos.y += particle->travel.velocity.y * gFrameDelta;
+    particle->head.def.pos.z += particle->travel.velocity.z * gFrameDelta;
+    particle->travel.timeLeft -= gFrameDelta;
     if (particle->travel.timeLeft < 0.0f) {
         return 0;
     }

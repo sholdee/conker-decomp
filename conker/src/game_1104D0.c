@@ -129,7 +129,7 @@ s32 func_150E3414(s32 originX, s32 originY, s32 originZ, s32 x, s32 y, s32 z, Ac
 
     effect = func_150E3020(x, y, z, 0, 0, 0, arg7, speed, targetObj, originX, originY, originZ, NULL, -99);
     if (effect != NULL) {
-        effect->sound = func_1000FA64(0x2D0, originX, originY, originZ, 0x5DC0, 0x1770, 0x3E8, (SoundRecordCallback)func_150E33CC,
+        effect->sound = sound_addDynamicSound(0x2D0, originX, originY, originZ, 0x5DC0, 0x1770, 0x3E8, (SoundRecordCallback)func_150E33CC,
                                       0, 0, 0, 0);
         return effect->slot + 1;
     }
@@ -152,7 +152,7 @@ void func_150E3514(HomingEffect *effect) {
 
     sound = effect->sound;
     if (sound != 0) {
-        func_100111C8(sound);
+        sound_stop(sound);
         effect->sound = 0;
         func_10010F88(0x2D7, 0x5DC0, 0, 0, 0, effect->origin.x, effect->origin.y, effect->origin.z, 0x3E8, 0x1770);
     }
@@ -279,7 +279,7 @@ void func_150E3738(HomingEffect *arg0) {
         }
     }
     if (dist != 0.0f) {
-        extern f32 D_800BE9A4; // matching: a declaration opens a -g3 block marker without a stack slot
+        extern f32 gFrameDelta; // matching: a declaration opens a -g3 block marker without a stack slot
 
         scale = move / dist;
         step.x = scale * delta.x;
@@ -293,7 +293,7 @@ void func_150E3738(HomingEffect *arg0) {
         step = delta;
     }
     effect->pos = nextPos;
-    effect->particleAccum += (526.0f + func_150ADA68() * 1228.0f) * 0.001f * D_800BE9A4;
+    effect->particleAccum += (526.0f + func_150ADA68() * 1228.0f) * 0.001f * gFrameDelta;
     while (effect->particleAccum > 1.0f) {
         from = effect->origin;
         {
@@ -318,7 +318,7 @@ void func_150E3738(HomingEffect *arg0) {
             dir.z = end.z - from.z;
         }
         if (func_15145128(&dir, &dir, &length, &unusedOut) != 0) {
-            move = func_150ADA68() * D_800BE9A4;
+            move = func_150ADA68() * gFrameDelta;
             scale = 190.0f * move;
             from.x += dir.x * scale;
             from.y += dir.y * scale;
@@ -359,7 +359,7 @@ void func_150E3738(HomingEffect *arg0) {
         effect->particleAccum -= 1.0f;
     }
     if (effect->follow == NULL) {
-        effect->sparkAccum += (56.0f + func_150ADA68() * 235.0f) * 0.001f * D_800BE9A4;
+        effect->sparkAccum += (56.0f + func_150ADA68() * 235.0f) * 0.001f * gFrameDelta;
         while (effect->sparkAccum > 1.0f) {
             randByte = func_150ADA20();
             randAngle = func_150ADA20();
@@ -388,13 +388,13 @@ struct Obj4010 {
     /* 0x110 */ Obj4010State state;
 };
 
-/* If unkA4 is set, calls func_1505D1C4 at the state position with the heading of (unk60, unk64) as a binary angle. */
+/* If unkA4 is set, calls actor_runAttackAt at the state position with the heading of (unk60, unk64) as a binary angle. */
 void func_150E4010(Obj4010 *obj) {
     Obj4010State *state;
 
     state = &obj->state;
     if (state->unkA4 != 0) {
-        func_1505D1C4(state->x, state->y, state->z, state->unkA4 | 0x60000, -1,
+        actor_runAttackAt(state->x, state->y, state->z, state->unkA4 | 0x60000, -1,
                       ((u16)(func_150484A0(state->unk60, state->unk64) * 10430.378f /* 0x10000 / 2pi */) - 0x4000) | 1, 0, 0);
     }
 }
@@ -415,7 +415,7 @@ struct Obj4174 {
 
 /* Advances unk2C and unk30 by their per-frame rates unk4C and unk54. */
 s32 func_150E4174(Obj4174 *obj) {
-    obj->unk2C += obj->unk4C * D_800BE9A4;
-    obj->unk30 += obj->unk54 * D_800BE9A4;
+    obj->unk2C += obj->unk4C * gFrameDelta;
+    obj->unk30 += obj->unk54 * gFrameDelta;
     return 1;
 }

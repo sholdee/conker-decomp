@@ -273,13 +273,13 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
                         ActorEmitterParticleData *data;
 
                         data = &slot->particle->data;
-                        data->vel.x = (slot->particle->head.def.pos.x - slot->particle->head.def.rot.x) * D_800BE9A8;
+                        data->vel.x = (slot->particle->head.def.pos.x - slot->particle->head.def.rot.x) * gFrameDeltaInv;
                         if (data->vel.x > 10.0f) {
                             data->vel.x = 10.0f;
                         } else if (data->vel.x < -10.0f) {
                             data->vel.x = -10.0f;
                         }
-                        data->vel.z = (slot->particle->head.def.pos.z - slot->particle->head.def.rot.z) * D_800BE9A8;
+                        data->vel.z = (slot->particle->head.def.pos.z - slot->particle->head.def.rot.z) * gFrameDeltaInv;
                         if (data->vel.z > 10.0f) {
                             data->vel.z = 10.0f;
                         } else if (data->vel.z < -10.0f) {

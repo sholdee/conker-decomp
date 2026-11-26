@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Level hooks, installed by the per-level setup (game_3DB60.c, game_3DC30.c) and cleared by func_1500E470. */
+/* Level hooks, installed by the per-level setup (game_3DB60.c, game_3DC30.c) and cleared by game_initLevelSubsystems. */
 s32 (*D_800E0930)(Vec3f *start, Vec3f *delta, Vec3f *hit);
 void (*D_800E0934)(s32 x, s32 y, s32 z);
 
@@ -266,7 +266,7 @@ void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactTy
     Vec3i header2;
 
     passDist = 0.0f;
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         if (shooter->ob_matrix_ptr != NULL) {
             func_151C1798(shooter, &pos);
         } else {
@@ -284,7 +284,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 pos.y = src->y + -13.0f;
                 pos.z = src->z;
             } else if (shooter->mv->SniperState != 0) {
-                extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
+                extern u8 gIsMultiplayer; // matching: a declaration makes this an IDO scope block (register choice)
 
                 angle = func_15144AA8(((Camera *)obj)->CNumber, obj) * 0.01745329238f;
                 pos.x = cosf(angle) * 25.0f + src->x;
@@ -307,7 +307,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
     }
 
     if ((shooter->mv != NULL && shooter->mv->SniperState != 0) || aimer != NULL) {
-        extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
+        extern u8 gIsMultiplayer; // matching: a declaration makes this an IDO scope block (register choice)
 
         who = (aimer != NULL) ? aimer : shooter;
 
@@ -334,7 +334,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
     if (func_151C196C(&ray, &pos, useAim ? NULL : &dir, useAim ? &aimPos : NULL,
                       useAim ? &aimDir : NULL, shooter, ignore, &passPos, &passDist, &pass,
                       mode) != 0) {
-        extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
+        extern u8 gIsMultiplayer; // matching: a declaration makes this an IDO scope block (register choice)
 
         state.mode = mode;
         state.trail = NULL;
@@ -401,13 +401,13 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             header2.z = pos.z;
             bulletState->trail = func_151602C0(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
             bulletState->follow = (struct FollowFx *)func_151B8908(obj);
-            bulletState->sound = func_1000FA64(func_150ADA20() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
+            bulletState->sound = sound_addDynamicSound(func_150ADA20() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
                                                (SoundRecordCallback)func_151C110C, obj, 0, 4, 0);
             bulletState->unk88 = (struct Bullet88 *)func_151B8400(obj);
             if (D_80082FA0 < 2 && D_8008FD8C < 4) {
                 bulletState->unk8C = func_151B8668(obj, fxOwner, fxList);
             } else {
-                extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
+                extern u8 gIsMultiplayer; // matching: a declaration makes this an IDO scope block (register choice)
 
                 bulletState->unk8C = NULL;
             }
@@ -474,10 +474,10 @@ s32 func_151C1180(Bullet *bullet) {
     LightEffect *trail;
 
     state = &bullet->state;
-    if (state->lifetime < D_800BE9A4) {
+    if (state->lifetime < gFrameDelta) {
         step = state->speed * state->lifetime;
     } else {
-        step = state->speed * D_800BE9A4;
+        step = state->speed * gFrameDelta;
     }
     delta.x = state->ray.dir.x * step;
     delta.y = state->ray.dir.y * step;
@@ -502,18 +502,18 @@ s32 func_151C1180(Bullet *bullet) {
             return FALSE;
         }
     }
-    bullet->head.pos.x += bullet->head.vel.x * D_800BE9A4;
-    bullet->head.pos.y += bullet->head.vel.y * D_800BE9A4;
-    bullet->head.pos.z += bullet->head.vel.z * D_800BE9A4;
+    bullet->head.pos.x += bullet->head.vel.x * gFrameDelta;
+    bullet->head.pos.y += bullet->head.vel.y * gFrameDelta;
+    bullet->head.pos.z += bullet->head.vel.z * gFrameDelta;
     if (state->flags & 1) {
         if (state->passTimer > 0.0f) {
-            state->passTimer -= D_800BE9A4;
+            state->passTimer -= gFrameDelta;
             if (state->passTimer <= 0.0f) {
                 func_151ABE40(&state->passPos, &state->pass, 2, bullet->head.header.owner, bullet->head.header.kind);
             }
         }
     }
-    state->lifetime -= D_800BE9A4;
+    state->lifetime -= gFrameDelta;
     if (state->lifetime <= 0.0f) {
         if (state->ray.hitType == 1) {
             func_15055A2C(0, state->ray.pos.x, state->ray.pos.y, state->ray.pos.z, 0);
@@ -557,7 +557,7 @@ void func_151C1570(Bullet *bullet) {
     if (state->unk8C != NULL) {
         func_1516972C(state->unk8C);
     }
-    func_1000FD38((SoundRecordCallback)func_151C110C, bullet, 0);
+    sound_stopByCallback((SoundRecordCallback)func_151C110C, bullet, 0);
 }
 
 void func_151C15FC(Bullet *bullet) {

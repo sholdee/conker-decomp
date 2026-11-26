@@ -20,7 +20,7 @@ void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
 
 /* Advances unk14 by unk80 per frame; returns 0 once it passes 120. */
 s32 func_150BE1C4(EB340Rising *arg0) {
-    arg0->unk14 += arg0->unk80 * D_800BE9A4;
+    arg0->unk14 += arg0->unk80 * gFrameDelta;
     if (arg0->unk14 > 120.0f) {
         return 0;
     }
@@ -44,7 +44,7 @@ void func_150BE210(WorldObject *obj) {
         obj->task_flag &= ~TASK_FLAG_STATE;
         obj->task_flag |= TASK_FLAG_ON;
         obj->spinY = 0.0f;
-        func_100111C8(obj->sound_id);
+        sound_stop(obj->sound_id);
         obj->sound_id = 0;
     }
 }

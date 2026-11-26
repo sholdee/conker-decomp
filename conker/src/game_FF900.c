@@ -18,7 +18,7 @@ void func_150D2450(ColourWaveEffect *object) {
         (u8)((sinf(wave->phaseB) * wave->amplitudeB) + wave->baseB),
         0);
 
-    wave->phaseR = func_15144B68(wave->phaseR + (wave->speedR * D_800BE9A4));
-    wave->phaseG = func_15144B68(wave->phaseG + (wave->speedG * D_800BE9A4));
-    wave->phaseB = func_15144B68(wave->phaseB + (wave->speedB * D_800BE9A4));
+    wave->phaseR = func_15144B68(wave->phaseR + (wave->speedR * gFrameDelta));
+    wave->phaseG = func_15144B68(wave->phaseG + (wave->speedG * gFrameDelta));
+    wave->phaseB = func_15144B68(wave->phaseB + (wave->speedB * gFrameDelta));
 }

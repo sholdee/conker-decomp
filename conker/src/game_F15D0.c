@@ -155,7 +155,7 @@ void func_150C44A4(PulseEffect *effect) {
     }
     func_1504715C(&ground, owner);
     if (data->unk18 == 0) {
-        data->unk18 = func_10010154(150, owner, 0x36B0, 400, 0x4268);
+        data->unk18 = sound_playActorSound2(150, owner, 0x36B0, 400, 0x4268);
     }
     if (data->flags & 1) {
         attachment = func_1503195C(owner, data->unk14, 0);
@@ -207,13 +207,13 @@ void func_150C44A4(PulseEffect *effect) {
         emit = FALSE;
     }
     if (emit) {
-        data->unk8 += (0.1290000081f + func_150ADA68() * 0.1170000061f) * D_800BE9A4;
+        data->unk8 += (0.1290000081f + func_150ADA68() * 0.1170000061f) * gFrameDelta;
         while (data->unk8 > 1.0f) {
             func_151C36D8(&pos, effect->base.header.owner, effect->base.header.kind);
             data->unk8 -= 1.0f;
         }
     }
-    data->unk10 += (0.1300000101f + func_150ADA68() * 0.2f) * D_800BE9A4;
+    data->unk10 += (0.1300000101f + func_150ADA68() * 0.2f) * gFrameDelta;
     if (data->unk10 > 1.0f) {
         if (func_1515C0F8(owner, &wind) == 0) {
             wind = &D_800A5480;

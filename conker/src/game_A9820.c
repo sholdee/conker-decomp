@@ -3,30 +3,30 @@
 #include "variables.h"
 
 /* Refreshes the cached height/width/depth (ActorCtl height, width, depth) of every object that has one. */
-void func_1507C370(void) {
+void actor_updateSizes(void) {
     s32 i;
     Actor *obj = movement_obj;
 
     for (i = 0; i < D_8008FD8C; i++, obj++) {
         ActorCtl *ext = obj->mv;
         if (ext != NULL) {
-            func_1507C3E0(obj, &ext->height, &ext->width, &ext->depth);
+            actor_computeSize(obj, &ext->height, &ext->width, &ext->depth);
         }
     }
 }
 
-/* func_1507C3E0: the original has compiled-out debug code after the size selection (ra and
+/* actor_computeSize: the original has compiled-out debug code after the size selection (ra and
  * $f20 are saved and a1-a3 homed although no call survives). The dbg* names below are
  * stand-ins that are never referenced by the emitted code; the dead blocks only steer
  * uopt's live-range splitting (height: split, in $f18 across the selection; depth: $f20;
- * width: stack). See ~/conker-ws/func_1507C3E0/notes.md for the full ledger. */
+ * width: stack). See ~/conker-ws/actor_computeSize/notes.md for the full ledger. */
 void dbg3(f32, f32, f32);
 void dbgp(f32 *);
 void dbgu();
 extern f32 dbgx[];
 /* Computes an object's height, width and depth (each output may be NULL): fixed sizes for
  * special states and object ids, otherwise its unkE6/unkE4, scaled by scale_y/scale_xz. */
-void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
+void actor_computeSize(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
     f32 height;
     f32 width;
     f32 depth;
@@ -118,7 +118,7 @@ void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
             applyScale = 0;
             break;
         case 83:
-            if (D_800BE616 != 0) {
+            if (gIsMultiplayer != 0) {
                 width = depth = 150.0f;
                 height = 300.0f;
             } else {

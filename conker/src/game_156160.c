@@ -264,7 +264,7 @@ void func_15128CB0(Camera *cam) {
             if (D_800DBFF4[0]) {
                 func_1501B320(0);
             }
-            if (!D_800BEAC0) {
+            if (!gPaused) {
                 func_1510E7A4(&cam->TrianglePtr, cam->floorTri.v, &surface, &cam->waterY, &cam->Attributes, 0,
                               cam->eye.x, cam->eye.y, cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
                 func_151236D0(cam);

@@ -129,7 +129,7 @@ void func_15006590(s32 eepromSlot) {
         D_800BE3E0 = *p++;
         D_800BE3E4 = *p++ << 8;
         D_800BE3E4 |= *p++;
-        func_15085710(0, 9, D_800BE3E4);
+        player_setStat(0, 9, D_800BE3E4);
         value = *p++ << 24;
         value |= *p++ << 16;
         value |= *p++ << 8;
@@ -244,7 +244,7 @@ void func_15006BEC(s32 saveSlot) {
     for (i = 0; i < 9; i++) { *p++ = D_800D2E60[i]; }
     *p++ = D_800BE3DF; // matching: original loads it signed (lb)
     *p++ = D_800BE3E0;
-    D_800BE3E4 = func_150859AC(0, 6);
+    D_800BE3E4 = player_getStat(0, 6);
     *p++ = (D_800BE3E4 >> 8) & 0xFF;
     *p++ = D_800BE3E4 & 0xFF;
     *p++ = ((u32)D_800BE3E8 >> 24) & 0xFF;
@@ -430,7 +430,7 @@ void func_150076BC(s32 eepromSlot) {
     if (eepromSlot < 0) {
         func_150064E0();
     }
-    if (eepromSlot >= 0 && eepromSlot < 4 && D_800BE616 == 0) {
+    if (eepromSlot >= 0 && eepromSlot < 4 && gIsMultiplayer == 0) {
         D_80082BB4 = EEPROM_REQ_LOAD_FILE;
         D_800BE3EC = eepromSlot;
     }
@@ -438,7 +438,7 @@ void func_150076BC(s32 eepromSlot) {
 
 /* Requests a save to save slot `saveSlot` (func_15006BEC). */
 void func_15007718(s32 saveSlot) {
-    if (saveSlot >= 0 && saveSlot < 3 && D_800BE616 == 0) {
+    if (saveSlot >= 0 && saveSlot < 3 && gIsMultiplayer == 0) {
         D_80082BB4 = EEPROM_REQ_SAVE_SLOT;
         D_800BE3EC = saveSlot;
     }

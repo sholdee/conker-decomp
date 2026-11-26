@@ -110,11 +110,11 @@ s32 func_1518EF54(Game1BBFC0Beam *beam) {
     f32 dz;
 
     motion->velocity.x *= motion->drag;
-    motion->velocity.y += motion->gravity * D_800BE9A4;
+    motion->velocity.y += motion->gravity * gFrameDelta;
     motion->velocity.z *= motion->drag;
-    dx = motion->velocity.x * D_800BE9A4;
-    dy = motion->velocity.y * D_800BE9A4;
-    dz = motion->velocity.z * D_800BE9A4;
+    dx = motion->velocity.x * gFrameDelta;
+    dy = motion->velocity.y * gFrameDelta;
+    dz = motion->velocity.z * gFrameDelta;
     beam->start.x += dx;
     beam->start.y += dy;
     beam->start.z += dz;
@@ -135,11 +135,11 @@ s32 func_1518F058(Game1BBFC0Beam *beam) {
     f32 dz;
 
     motion->velocity.x *= motion->drag;
-    motion->velocity.y += motion->gravity * D_800BE9A4;
+    motion->velocity.y += motion->gravity * gFrameDelta;
     motion->velocity.z *= motion->drag;
-    dx = motion->velocity.x * D_800BE9A4;
-    dy = motion->velocity.y * D_800BE9A4;
-    dz = motion->velocity.z * D_800BE9A4;
+    dx = motion->velocity.x * gFrameDelta;
+    dy = motion->velocity.y * gFrameDelta;
+    dz = motion->velocity.z * gFrameDelta;
     beam->start.x += dx;
     beam->start.y += dy;
     beam->start.z += dz;

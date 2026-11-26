@@ -74,7 +74,7 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
         id = kind;
         if (movement_obj[actorIndex].modelData[set][D_800BE9C0] == NULL || D_800D19A0[id] == NULL) {
             if (frame == morph->cur) {
-                if (D_800BEAC0 == 0) {
+                if (gPaused == 0) {
                     morph->blend += morph->rate * D_800BE9E4;
                 }
                 if (morph->blend > 1.0f) {
@@ -143,7 +143,7 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
             return -1;
         }
     }
-    if (D_800BEAC0 == 0) {
+    if (gPaused == 0) {
         morph->blend += morph->rate * D_800BE9E4;
     }
     if (morph->blend > 1.0f) {

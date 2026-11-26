@@ -29,7 +29,7 @@ void func_151A6B68(Actor *target, TriggerZone *zone) {
     } else {
         actorIndex = -1;
     }
-    func_1505D024(target, 0x60034, target->langle, actorIndex);
+    actor_hitScripted(target, 0x60034, target->langle, actorIndex);
 }
 
 /* Returns the ZoneEffect (callbackSet 0x2C) of `zone` in either object list, among the object types listed

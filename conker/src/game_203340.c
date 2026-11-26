@@ -134,7 +134,7 @@ Gfx *func_151D6778(Gfx *gfx) {
     s32 alpha;
     u16 *img;
 
-    if ((D_800BE574 == 0 && level != 0x32 && level != 0x33) || D_800BEAC0 != 0) {
+    if ((D_800BE574 == 0 && level != 0x32 && level != 0x33) || gPaused != 0) {
         return gfx;
     }
     alpha = D_800BE574;

@@ -286,8 +286,8 @@ s32 func_150DC558(StreamActor *actor) {
         }
         // matching: the u32 byte offset gives IDO's multu (&records[index] uses a signed multiply)
         rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
-        rec->velocityY += state->gravity * D_800BE9A4;
-        rec->pos.y += rec->velocityY * D_800BE9A4;
+        rec->velocityY += state->gravity * gFrameDelta;
+        rec->pos.y += rec->velocityY * gFrameDelta;
         if (rec->pos.y < state->floor) {
             {
                 f32 speed;
@@ -459,7 +459,7 @@ s32 func_150DC558(StreamActor *actor) {
         timer = state->soundTimer;
         timer -= D_800BE9E4; // matching: a separate statement (one expression reorders the loads)
         if (timer <= 0) {
-            func_10010F30(func_150ADA20() % 10U + state->sound, 0x7FFF, 0x40, 0, 0);
+            sound_play(func_150ADA20() % 10U + state->sound, 0x7FFF, 0x40, 0, 0);
             timer = func_150ADA20() & 0xC;
         }
         state->soundTimer = timer;
@@ -497,7 +497,7 @@ s32 func_150DCEA0(StreamActor *actor) {
     records = actor->records;
     state->angleX += (func_150ADA20() % (state->angleXRange + 1)) * D_800BE9E4;
     state->angleZ += (func_150ADA20() % (state->angleZRange + 1)) * D_800BE9E4;
-    state->count += state->rate * D_800BE9A4;
+    state->count += state->rate * gFrameDelta;
     if (state->count > 0.99999f) {
         inverse = 1.0f / state->count;
         {
@@ -511,8 +511,8 @@ s32 func_150DCEA0(StreamActor *actor) {
             u8 yaw;
             s32 spawned;
 
-            scale = D_800BE9A4;
-            stepScale = D_800BE9A4 * inverse;
+            scale = gFrameDelta;
+            stepScale = gFrameDelta * inverse;
             x = state->x;
             z = state->z;
             dx = func_151423D8(state->angleX - 0x40) * state->swayX + actor->head.tmpl.pos.x - state->x;

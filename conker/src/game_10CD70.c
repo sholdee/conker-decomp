@@ -214,7 +214,7 @@ s32 func_150DFDD0(ModelAttachment *att, Actor *owner) {
 
     if (owner->taskint[2] != 0) {
         att->hiddenDLists = 2;
-        owner->unk2D8[0] -= D_800BE9A4;
+        owner->unk2D8[0] -= gFrameDelta;
         if (owner->unk2D8[0] < 0.0f) {
             owner->taskint[2] = 0;
             return 1;
@@ -360,9 +360,9 @@ void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     acceleration.x = 0.0f;
     acceleration.y = 0.0f;
     acceleration.z = 0.0f;
-    velocity.x += -dx * D_800BE9A8 * scale;
-    velocity.y += -dy * D_800BE9A8 * scale;
-    velocity.z += -dz * D_800BE9A8 * scale;
+    velocity.x += -dx * gFrameDeltaInv * scale;
+    velocity.y += -dy * gFrameDeltaInv * scale;
+    velocity.z += -dz * gFrameDeltaInv * scale;
     alpha_random = func_150ADA68();
     size_random = func_150ADA68();
     random_a = func_150ADA20();

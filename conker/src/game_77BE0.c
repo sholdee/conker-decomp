@@ -20,7 +20,7 @@ f32 D_800CC278;
 u8 D_800CC27C; // floor material class of the object being updated
 u16 D_800CC27E;
 s32 D_800CC280;
-OSContPad *D_800CC284; // the current player's controller input
+OSContPad *gCurrentPad; // the current player's controller input
 s32 D_800CC288;
 s32 D_800CC28C;
 s32 D_800CC290;
@@ -38,7 +38,7 @@ f32 D_800CC2C4;
 f32 D_800CC2C8;
 Actor movement_obj[26]; // the actors (original: movement_obj, an array of movement_move)
 s32 D_800D1548;
-Actor *D_800D154C; // the actor being updated
+Actor *gCurrentActor; // the actor being updated
 f32 D_800D1550; // frame time step
 
 #include "functions.h"
@@ -58,7 +58,7 @@ static const Struct80099140 D_80099140[20] = {
     { 44, -4, 80 },  { 0, 0, 0 },     { 0, 0, 0 },     { 44, -4, 80 },  { -100, 0, 30 },
 };
 
-/* Angle for each 4-bit direction mask (read by func_1504CB98). */
+/* Angle for each 4-bit direction mask (read by actor_updatePlayer). */
 static const u16 D_8009917C[16] = {
     0x0000, 0xC000, 0x4000, 0xFFFF, 0x8000, 0xA000, 0x6000, 0x8000,
     0x0000, 0xE000, 0x2000, 0x0000, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
@@ -70,26 +70,26 @@ static const u16 D_8009919C[6] = { 0x2B1, 0x2B5, 0x2B6, 0x2B7, 0x2BD, 0x2BE };
 s32 D_80086000 = 0; /* cleared by game_43760.c */
 
 /* Level callbacks run for each object, before and after its update (indexed by the level header's unk49, unk4A). */
-static void (*D_80086004[])(Actor *) = { NULL, func_150D1410 };
-static void (*D_8008600C[])(Actor *) = { NULL, func_150D146C };
+static void (*gLevelPreUpdateFuncs[])(Actor *) = { NULL, func_150D1410 };
+static void (*gLevelPostUpdateFuncs[])(Actor *) = { NULL, func_150D146C };
 
 /* Per-type update handlers, indexed by the object's type (also run by game_49D30.c). */
-void (*D_80086014[])(Actor *) = {
-    NULL, func_1504CB98, func_15052590, func_15053894,
+void (*gActorUpdateHandlers[])(Actor *) = {
+    NULL, actor_updatePlayer, func_15052590, func_15053894,
     func_150538CC, func_150548D8, func_15052458, func_150B12FC,
     func_1505371C, func_150B1484, func_150B19E0, func_150B17DC,
-    func_150528C8, func_150536E8, NULL, func_15052EF0,
+    actor_updatePathFollower, func_150536E8, NULL, func_15052EF0,
     func_150B10F0, func_15052590, func_150548E4, func_150C3994,
     func_150C3994, func_150F34F4, NULL, NULL,
     func_150C3574, func_15052464, func_150E0BE0, func_15054A0C,
     func_15054A94, NULL, func_150ED748, func_150CE740,
     func_150D7928, func_1505528C, NULL, func_150EEDA8,
-    func_150BDB70, func_150EEC84, func_150C3230, func_15055B64,
+    actor_updateFollower, func_150EEC84, func_150C3230, func_15055B64,
     func_150D13A0, func_15055D48, func_15055BF8,
 };
 
 
-void func_1504A730(void) {
+void actor_updateAll(void) {
     Actor *obj;
     s32 i;
     s32 tickResult;
@@ -117,10 +117,10 @@ void func_1504A730(void) {
         dc_glbl_CharNum = i;
         if (obj->ypos <= obj->unk38) {
             if (obj->playernumber == 0xFF) {
-                func_15060F28(obj, 0);
+                actor_remove(obj, 0);
                 continue;
             }
-            if (D_800BE616 == 0) {
+            if (gIsMultiplayer == 0) {
                 func_1507D4F8(i);
                 continue;
             }
@@ -128,12 +128,12 @@ void func_1504A730(void) {
         if (obj->unk2FA == 0) {
             continue;
         }
-        D_800D154C = obj;
+        gCurrentActor = obj;
         obj->unk12++;
         D_800D35DC = i + 1;
         D_800CC2BA = 0;
         tickResult = 0;
-        if (D_800BE616 == 0 || (tickResult = func_1504C8BC(obj)) != 0) {
+        if (gIsMultiplayer == 0 || (tickResult = func_1504C8BC(obj)) != 0) {
             maxStep = 2.0f;
             if (i < D_8008FD8C) {
                 obj->mv->being_sniped -= D_800BE9E4;
@@ -142,10 +142,10 @@ void func_1504A730(void) {
                 }
                 obj->mv->unk57 = 0;
                 if (i < 4) {
-                    D_800CC284 = D_800BE728[i];
+                    gCurrentPad = D_800BE728[i];
                 } else {
                     bzero(&noPad, sizeof(noPad));
-                    D_800CC284 = &noPad;
+                    gCurrentPad = &noPad;
                 }
             }
             if (obj->CameraPtr != NULL) {
@@ -166,8 +166,8 @@ void func_1504A730(void) {
             obj->old_ypos = obj->ypos;
             obj->old_zpos = obj->zpos;
             D_800CC27C = (obj->floorMaterial >> 28) & 7;
-            step = D_800BE9A4;
-            if (D_800BE616 != 0 && (D_8008FDBC & 0x100)) {
+            step = gFrameDelta;
+            if (gIsMultiplayer != 0 && (D_8008FDBC & 0x100)) {
                 maxStep = 5.0f;
             }
             if (maxStep < step) {
@@ -183,28 +183,28 @@ void func_1504A730(void) {
                 }
             }
             if (D_800B0DF0->unk49 != 0) {
-                D_80086004[D_800B0DF0->unk49](obj);
+                gLevelPreUpdateFuncs[D_800B0DF0->unk49](obj);
             }
             if (!(obj->task_attrib & 0x200)) {
-                if (D_80086014[obj->type] != NULL) {
-                    D_80086014[obj->type](obj);
+                if (gActorUpdateHandlers[obj->type] != NULL) {
+                    gActorUpdateHandlers[obj->type](obj);
                 }
             }
             if (obj->type != 0) {
                 func_1507E73C(obj);
                 func_1504AF10(obj, 0, 0);
                 if (i < D_8008FD8C && D_800D18A8 == 0) {
-                    func_15085710(obj->playernumber, 5, obj->energy);
+                    player_setStat(obj->playernumber, 5, obj->energy);
                 }
             }
             obj->unk2FF = 1;
             if (tickResult == 2) {
                 D_800BE9E4 = D_800CC2BA;
-                D_800BE9A4 = D_800BE9E4 * 0.5f;
-                if (D_800BE9A4 != 0.0f) {
-                    D_800BE9A8 = 1.0f / D_800BE9A4;
+                gFrameDelta = D_800BE9E4 * 0.5f;
+                if (gFrameDelta != 0.0f) {
+                    gFrameDeltaInv = 1.0f / gFrameDelta;
                 } else {
-                    D_800BE9A8 = 0.0f;
+                    gFrameDeltaInv = 0.0f;
                 }
             }
             if (obj->old_xpos != obj->xpos || obj->old_ypos != obj->ypos ||
@@ -212,7 +212,7 @@ void func_1504A730(void) {
                 obj->unk300 = 1;
             }
             if (D_800B0DF0->unk4A != 0) {
-                D_8008600C[D_800B0DF0->unk4A](obj);
+                gLevelPostUpdateFuncs[D_800B0DF0->unk4A](obj);
             }
         }
     }
@@ -230,9 +230,9 @@ void func_1504A730(void) {
             }
         }
     }
-    func_15061B4C();
-    func_15080C64();
-    D_800D154C = movement_obj;
+    actor_updateTypeAnims();
+    text_updateContextText();
+    gCurrentActor = movement_obj;
     dc_glbl_CharNum = 0;
     D_800D35DC = 0;
 }
@@ -249,13 +249,13 @@ void func_1504ADD0(void) {
                 continue;
             }
             dc_glbl_CharNum = i;
-            D_800D154C = obj;
+            gCurrentActor = obj;
             if (i < D_8008FD8C) {
                 if (i < 4) {
-                    D_800CC284 = D_800BE728[i];
+                    gCurrentPad = D_800BE728[i];
                 } else {
                     bzero(&noPad, sizeof(noPad));
-                    D_800CC284 = &noPad;
+                    gCurrentPad = &noPad;
                 }
             }
             switch (obj->character_type) {
@@ -330,8 +330,8 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
     obj->mv->unk68 = 0;
     obj->unk110 = 0;
     if (obj->stunned == 0 && obj->energy != 0 && obj->mv->AimState == 0) {
-        stickX = D_800CC284->stick_x;
-        stickY = D_800CC284->stick_y;
+        stickX = gCurrentPad->stick_x;
+        stickY = gCurrentPad->stick_y;
     } else {
         stickX = 0;
         stickY = 0;
@@ -369,7 +369,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
         if (obj->mv->unk21 != 0) {
             targetPitch = 0.0f;
         }
-        func_15059444(obj);
+        actor_applyWaterCurrent(obj);
         if ((obj->stunned != 0 && (obj->energy != 0 || obj->yspd >= 60.0f)) || obj->animseq.uh == 0x262) {
             return 0.0f;
         }
@@ -388,9 +388,9 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
             if ((obj->unk118 - 50.0f < obj->aim.y || (obj->mv->water_attribs & 1)) && obj->energy != 0) {
                 if (obj->unkB2 > 30) {
                     if (obj->unkB2 > 1500) {
-                        func_15060A30(0x1A7, obj);
+                        actor_playSound(0x1A7, obj);
                     } else if (obj->unkB2 > 720) {
-                        func_15060A30(0x168, obj);
+                        actor_playSound(0x168, obj);
                     }
                 }
                 obj->unkB2 = 0;
@@ -400,22 +400,22 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
                     obj->unkB2 -= 60;
                     if (obj->energy >= 2) {
                         if (obj->energy == 4) {
-                            func_15060A30(0x499, obj);
+                            actor_playSound(0x499, obj);
                         }
                         obj->energy--;
                     } else {
                         obj->energy = 0;
                         if (obj->stunned != 0) {
                             obj->ygrav = 0.0f;
-                            func_1507CD64(obj, 4);
+                            actor_kill(obj, 4);
                         } else {
-                            func_1507CD64(obj, 3);
+                            actor_kill(obj, 3);
                         }
                     }
                 } else if (obj->unkB2 > 1440 && obj->unkB2 < 1500) {
                     obj->unkB2 += 120;
                     if (obj->energy < 4) {
-                        func_15060A30(0x499, obj);
+                        actor_playSound(0x499, obj);
                     }
                 }
             }
@@ -446,7 +446,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
         }
         if (obj->shad < 40.0f) {
             func_1510F820(obj->floorTriVerts, obj->floorTri.v, &out0, &out1, &out2, &out3, &out4);
-            out3 = func_1505210C(obj, out3, out4, &out4, 180.0f);
+            out3 = actor_slopeToAngles(obj, out3, out4, &out4, 180.0f);
             if (out4 < obj->vtilt) {
                 obj->vtilt += (out4 - obj->vtilt) * 0.2f;
             }
@@ -539,7 +539,7 @@ void func_1504BB88(Actor *obj) {
         obj->count5 = 0xFF;
         obj->norun = 0xFF;
         if (obj->type == 1) {
-            func_1505E650(obj, 0xD6, 1.15f, 3.0f, 0.0f, 0.0f, 0);
+            actor_playAnim(obj, 0xD6, 1.15f, 3.0f, 0.0f, 0.0f, 0);
         }
         obj->task_attrib &= ~0x10;
     }
@@ -657,7 +657,7 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     }
     obj->unk54 *= 0.5f;
     if (obj->animseq.uh == 0x2C || obj->animseq.uh == 0xE0) {
-        *arg3 = D_800CC284->stick_y >> 1;
+        *arg3 = gCurrentPad->stick_y >> 1;
     } else {
         if (!(func_150ADA20() & 0x3F)) {
             obj->mv->pssd_waist_wobble = (func_150ADA20() % 25000U) - 12500;
@@ -674,8 +674,8 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
 }
 
 s32 func_1504C078(void) {
-    if (D_800D154C->mv->idle.active != 1) {
-        D_800D154C->mv->idle.holdFrames = 0;
+    if (gCurrentActor->mv->idle.active != 1) {
+        gCurrentActor->mv->idle.holdFrames = 0;
         func_1507F640();
     }
     return 999;
@@ -713,7 +713,7 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
     }
     anim = 999;
     if (obj->attach_char != 0 && obj->stunned == 0) {
-        func_15064A14(obj);
+        actor_syncAnimToLinked(obj);
         return;
     }
     if (obj->count3 == 0 && obj->stunned == 0 && obj->inwater == 0) {
@@ -729,12 +729,12 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
             if (ext->bitten > 0 || ext->transport != 0 || obj->lifting >= 100 || arg1 != 0 ||
                 (ext->walk_attrib & 3) || ext->rt_context_b != 0 || ext->injured != 0 ||
                 ext->pissed_up > 0 || ext->env_suit != 0) {
-                if (func_15064B94(obj, vel, vel, arg1, arg2) != 0) {
+                if (actor_updateMoveAnim(obj, vel, vel, arg1, arg2) != 0) {
                     return;
                 }
                 ext = obj->mv;
             }
-            pressed = D_800CC284->button & Z_TRIG;
+            pressed = gCurrentPad->button & Z_TRIG;
             if (pressed == 0 || D_800CC2B1 != 0 || ext->rt_context_b != 0 || (ext->transport & 0xF) == 1) {
                 if (obj->speed > 4.0f) {
                     ext->dwalk = 0;
@@ -804,15 +804,15 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
             }
         }
         if (anim != 999) {
-            func_1505E650(obj, anim, speed, blend, start, 0.0f, 0);
+            actor_playAnim(obj, anim, speed, blend, start, 0.0f, 0);
         }
     } else if (obj->animseq.uh == 0x21 && D_800CC2B1 == 0 && obj->stickspeed == 0.0f &&
-               (D_800CC284->button & Z_TRIG)) {
-        func_1505E650(obj, 0x16, 1.5f, 6.0f, 0.0f, 0.0f, 0);
+               (gCurrentPad->button & Z_TRIG)) {
+        actor_playAnim(obj, 0x16, 1.5f, 6.0f, 0.0f, 0.0f, 0);
     }
 }
 
-void func_1504C854(Actor *obj) {
+void actor_updateButtonTimers(Actor *obj) {
     D_800CC288 = obj->mv->pressedButtons;
     if (obj->mv->buttonsTimer > 0) {
         obj->mv->buttonsTimer -= D_800BE9A0;
@@ -841,11 +841,11 @@ s32 func_1504C8BC(Actor *obj) {
         if (ext->unk1A8 != 0) {
             D_800CC2BA = D_800BE9E4;
             D_800BE9E4 += obj->mv->unk1A8;
-            D_800BE9A4 = D_800BE9E4 * 0.5f;
-            if (D_800BE9A4 != 0.0f) {
-                D_800BE9A8 = 1.0f / D_800BE9A4;
+            gFrameDelta = D_800BE9E4 * 0.5f;
+            if (gFrameDelta != 0.0f) {
+                gFrameDeltaInv = 1.0f / gFrameDelta;
             } else {
-                D_800BE9A8 = 0.0f;
+                gFrameDeltaInv = 0.0f;
             }
             obj->mv->unk1A8 = 0;
             return 2;
@@ -921,7 +921,7 @@ extern s32 D_800cc2bc;
  * Per-frame update of a player-controlled actor: reads (or overrides) the controller, turns stick input
  * into a move angle/speed, then runs turning, swimming, climbing, pushing, floor collision and water entry.
  */
-void func_1504CB98(Actor *actor) {
+void actor_updatePlayer(Actor *actor) {
     u16 prevFacing;
     u16 moveAngle;
     u8 pad1; // matching: unused; keeps the original stack layout
@@ -1022,57 +1022,57 @@ void func_1504CB98(Actor *actor) {
     pushAnim = 0;
     lean = 0;
     D_800CC28C = D_800BE710[dc_glbl_CharNum];
-    D_800CC290 = D_800CC284->button;
+    D_800CC290 = gCurrentPad->button;
     D_800CC2B1 = 0;
     D_800CC2B2 = 0;
     D_800CC2B4 = 4.0f;
     prevFacing = actor->angle;
     padOverridden = 0;
-    savedPad = *D_800CC284;
+    savedPad = *gCurrentPad;
     D_800CC2BC = 1;
     actor->mv->unk1B3 = 0;
     if (actor->mv->bot != 0) {
         if (actor->stunned == 0) {
-            func_15056B08(actor);
+            actor_updateChaseAi(actor);
         }
-        savedPad = *D_800CC284;
-        D_800CC284->stick_x = actor->mv->stick_x;
-        D_800CC284->stick_y = actor->mv->stick_y;
-        D_800CC284->button = actor->mv->buttons;
+        savedPad = *gCurrentPad;
+        gCurrentPad->stick_x = actor->mv->stick_x;
+        gCurrentPad->stick_y = actor->mv->stick_y;
+        gCurrentPad->button = actor->mv->buttons;
         D_800CC288 = actor->mv->pressedButtons;
         buttons = actor->mv->buttons;
         if (actor->CameraPtr == NULL) {
-            func_151279A0(actor, D_800CC284);
-            func_15121490(actor, D_800CC284);
+            func_151279A0(actor, gCurrentPad);
+            func_15121490(actor, gCurrentPad);
         }
-        func_1504C854(actor);
+        actor_updateButtonTimers(actor);
     } else {
-        actor->mv->buttons = D_800CC284->button;
+        actor->mv->buttons = gCurrentPad->button;
         D_800CC288 = D_800BE710[dc_glbl_CharNum];
         buttons = actor->mv->buttons;
     }
     if ((D_80082FA0 >= dc_glbl_CharNum) && (D_800DDE3C[dc_glbl_CharNum] != 0) && (D_800DDDC8[dc_glbl_CharNum] > 0.75f) && (D_800E0B94 != 2)) {
-        D_800CC284->stick_x = 0;
-        D_800CC284->stick_y = 0;
-        D_800CC284->button = 0;
+        gCurrentPad->stick_x = 0;
+        gCurrentPad->stick_y = 0;
+        gCurrentPad->button = 0;
         D_800CC288 = 0;
         padOverridden = 1;
         D_800CC2BC |= 2;
     }
-    if ((actor->stunned != 0) && (actor->energy != 0) && ((((actor->mv->break_stun & 1) != 0) && (D_800CC288 & 0x8000)) || ((actor->mv->break_stun & 2) && (func_1505A5CC(D_800CC284) > 15.0f)))) {
+    if ((actor->stunned != 0) && (actor->energy != 0) && ((((actor->mv->break_stun & 1) != 0) && (D_800CC288 & 0x8000)) || ((actor->mv->break_stun & 2) && (actor_getStickDeflection(gCurrentPad) > 15.0f)))) {
         actor->unk10C = 0;
         actor->stunnednum = 3;
-        func_150585F0(actor, 0.05f);
+        actor_updateStunned(actor, 0.05f);
     }
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         if (D_800BE9A0 < actor->mv->unk1B1) {
             actor->mv->unk1B1 -= D_800BE9A0;
             if (actor->fogMode != 4) {
-                func_1502EA0C(actor, 0xFF, 0xFF, 0xFF, 0xBF, 4);
+                actor_startFogPulse(actor, 0xFF, 0xFF, 0xFF, 0xBF, 4);
             }
         } else if (actor->fogMode == 4) {
             actor->mv->unk1B1 = 0;
-            func_1502EA50(actor);
+            actor_fadeFogPulse(actor);
         }
         if (((level == 0x2D) || (level == 0x30) || (level == 0x34) || (level == 0x1A) || (level == 0x3F)) && (D_800CC288 & 4) && !(D_800CC288 & 0xC000) && ((s32) actor->shad == 0) && (actor->yspd < 0.0f) && (actor->norun == 0) && (actor->lifting == 0) && (actor->mv->GrenadeThrowState == 0) && (actor->mv->rt_context_b == 0) && ((actor->mv->context_b & ~0x80) != 3) && (actor->mv->numGrenades != 0)) {
             if ((actor->character_type == 0x3B) || (level == 0x1A) || (level == 0x3F)) {
@@ -1082,11 +1082,11 @@ void func_1504CB98(Actor *actor) {
             }
         }
     }
-    actor->mv->old_keys = D_800CC284->button;
+    actor->mv->old_keys = gCurrentPad->button;
     if (D_800C3638 != 0) {
-        D_800CC284->stick_x = 0;
-        D_800CC284->stick_y = 0;
-        D_800CC284->button = 0;
+        gCurrentPad->stick_x = 0;
+        gCurrentPad->stick_y = 0;
+        gCurrentPad->button = 0;
         D_800CC288 = 0;
         D_800CC2BC |= 4;
     }
@@ -1094,9 +1094,9 @@ void func_1504CB98(Actor *actor) {
     func_1504BB88(actor);
     func_1504BA38(actor);
     if ((actor->unk228 != 0) || (actor->unk2F8 & 0x10)) {
-        D_800CC284->stick_x = 0;
-        D_800CC284->stick_y = 0;
-        D_800CC284->button = 0;
+        gCurrentPad->stick_x = 0;
+        gCurrentPad->stick_y = 0;
+        gCurrentPad->button = 0;
         D_800CC288 = 0;
         padOverridden = 1;
         D_800cc2bc |= 8;
@@ -1106,11 +1106,11 @@ void func_1504CB98(Actor *actor) {
         actor->norun = 0x14;
         if ((actor->stunned == 0) && (actor->mv->death_State == 0)) {
             if ((actor->floorMaterial & 0x1F) == 0xE) {
-                func_1507CD64(actor, 0xD);
+                actor_kill(actor, 0xD);
             } else if ((actor->floorMaterial & 0x1F) == 0x13) {
-                func_1507CD64(actor, 0xD);
+                actor_kill(actor, 0xD);
             } else {
-                func_1507CD64(actor, 0);
+                actor_kill(actor, 0);
             }
 
         }
@@ -1119,12 +1119,12 @@ void func_1504CB98(Actor *actor) {
         if (((actor->mv->AimState == 0) || (actor->mv->rt_context_b == 3)) && (actor->mv->rt_context_b != 0x12) && (actor->mv->rt_context_b != 2) && (actor->mv->rt_context_b != 0x13) && (actor->mv->rt_context_b != 0xA) && (actor->mv->rt_context_b != 0x34)) {
             mode = actor->mv->rt_context_b;
             D_800CC2BC |= 0x10;
-            moveAngle = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0);
-            moveSpeed = func_1505A5CC(D_800CC284);
+            moveAngle = actor_getDirectionAngle(gCurrentPad->stick_x, gCurrentPad->stick_y, 0);
+            moveSpeed = actor_getStickDeflection(gCurrentPad);
             physics = actor->mv->transport;
             if (physics == 2) {
-                angleDelta = D_800CC284->stick_x * D_800CC264;
-                pitchInput = D_800CC284->stick_y;
+                angleDelta = gCurrentPad->stick_x * D_800CC264;
+                pitchInput = gCurrentPad->stick_y;
                 pitchInput *= 0.6f;
                 if (pitchInput > 45.0f) {
                     pitchInput = 45.0f;
@@ -1155,11 +1155,11 @@ void func_1504CB98(Actor *actor) {
             }
             if (physics == 0x81) {
                 centerAngle = 0x6000;
-                angleDelta = D_800CC284->stick_x * D_800CC264;
+                angleDelta = gCurrentPad->stick_x * D_800CC264;
                 actor->angle -= angleDelta / 8;
                 if (level == 6) {
                     moveSpeed = 42.0f;
-                    centerAngle = func_1505A630(2540.0f - actor->xpos, actor->zpos - -160.0f, 0);
+                    centerAngle = actor_getDirectionAngle(2540.0f - actor->xpos, actor->zpos - -160.0f, 0);
                     maxOffset = 0xF000;
                     minOffset = 0x8000;
                 } else {
@@ -1191,27 +1191,27 @@ void func_1504CB98(Actor *actor) {
                 }
                 scratch *= 0.91022223f;
                 lean = scratch;
-                if ((D_800BE616 != 0) && ((actor->character_type == 0x3B) || (actor->character_type == 0x80)) && ((mode == 0x18) || (mode == 0x41) || (mode == 0x23) || (mode == 0x24)) && (D_800CC284->button & 0x2000) && ((actor->mv->rayHit.hitType == 3) || (actor->mv->rayHit.hitType == 2))) {
+                if ((gIsMultiplayer != 0) && ((actor->character_type == 0x3B) || (actor->character_type == 0x80)) && ((mode == 0x18) || (mode == 0x41) || (mode == 0x23) || (mode == 0x24)) && (gCurrentPad->button & 0x2000) && ((actor->mv->rayHit.hitType == 3) || (actor->mv->rayHit.hitType == 2))) {
                     chance = 0;
                     if (actor->mv->unkAF < 0x3C) {
                         chance = 0x30;
                     }
-                    if (func_10010894(actor) == 0) {
+                    if (sound_isActorSound1Playing(actor) == 0) {
                             if (chance >= (func_150ADA20_u8() & 0x5F)) {
                             if (actor->character_type == 0x80) {
                                 if ((mode == 0x23) && !(func_150ADA20_u8() & 7)) {
-                                    func_15060A30(0x586, actor);
+                                    actor_playSound(0x586, actor);
                                 } else {
                                     variant = (mode == 0x23) ? 4 : 5;
-                                    func_15060A30(func_1000F568(0x574, variant), actor);
+                                    actor_playSound(sound_pickVariant(0x574, variant), actor);
                                 }
-                            } else if ((D_800CC284->button & 8) && !(func_150ADA20_u8() & 1)) {
-                                func_15060A30(0x532, actor);
+                            } else if ((gCurrentPad->button & 8) && !(func_150ADA20_u8() & 1)) {
+                                actor_playSound(0x532, actor);
                             } else {
                                 if ((actor->mv->rayHit.hitType == 3) && (actor->mv->rayHit.part == 0xA) && !(func_150ADA20_u8() & 3)) {
-                                    func_15060A30(0x533, actor);
+                                    actor_playSound(0x533, actor);
                                 } else {
-                                    func_15060A30((func_150ADA20_u8() & 3) + 0x534, actor);
+                                    actor_playSound((func_150ADA20_u8() & 3) + 0x534, actor);
                                 }
                             }
                         }
@@ -1257,7 +1257,7 @@ void func_1504CB98(Actor *actor) {
                 }
             } else {} // matching: the empty else changes block layout
             if ((actor->animseq.uh == 0xBF) || (actor->animseq.uh == 0xC1)) {
-                lean = (D_800CC284->stick_y / 2);
+                lean = (gCurrentPad->stick_y / 2);
             }
             if (actor->mv->rt_context_b == 0x38) {
                 lean -= actor->mv->gunRecoil >> 8;
@@ -1267,9 +1267,9 @@ void func_1504CB98(Actor *actor) {
             moveAngle = 0;
             moveSpeed = 0.0f;
             D_800cc2bc |= 0x20;
-            if ((actor->mv->rt_context_b == 2) || (actor->mv->rt_context_b == 0x12) || (actor->mv->rt_context_b == 0x13) || (actor->mv->rt_context_b == 0x10) || (actor->mv->rt_context_b == 0xA) || (actor->mv->rt_context_b == 0x34) || ((D_800CC284->button & 0x10) && (actor->mv->rt_context_b == 0x16)) || (actor->mv->rt_context_b == 9) || (actor->mv->rt_context_b == 0x38) || (actor->mv->rt_context_b == 0x39) || (actor->mv->rt_context_b == 0x37) || (actor->mv->rt_context_b == 0x3B) || (actor->mv->rt_context_b == 0x15) || (actor->mv->rt_context_b == 0x26) || (actor->mv->rt_context_b == 0x3A)) {
+            if ((actor->mv->rt_context_b == 2) || (actor->mv->rt_context_b == 0x12) || (actor->mv->rt_context_b == 0x13) || (actor->mv->rt_context_b == 0x10) || (actor->mv->rt_context_b == 0xA) || (actor->mv->rt_context_b == 0x34) || ((gCurrentPad->button & 0x10) && (actor->mv->rt_context_b == 0x16)) || (actor->mv->rt_context_b == 9) || (actor->mv->rt_context_b == 0x38) || (actor->mv->rt_context_b == 0x39) || (actor->mv->rt_context_b == 0x37) || (actor->mv->rt_context_b == 0x3B) || (actor->mv->rt_context_b == 0x15) || (actor->mv->rt_context_b == 0x26) || (actor->mv->rt_context_b == 0x3A)) {
                 if ((actor->mv->rt_context_b == 0x10) || (actor->mv->rt_context_b == 0x14) || (actor->mv->rt_context_b == 0x3F)) {
-                    lean = (D_800CC284->stick_y / 2);
+                    lean = (gCurrentPad->stick_y / 2);
                 }
                 if ((actor->mv->rt_context_b == 0xC) || (actor->mv->rt_context_b == 0x16) || (actor->mv->rt_context_b == 0x15) || (actor->mv->rt_context_b == 0x38) || (actor->mv->rt_context_b == 0x39) || (actor->mv->rt_context_b == 0x37) || (actor->mv->rt_context_b == 0x3B) || (actor->mv->rt_context_b == 0x12) || (actor->mv->rt_context_b == 9)) {
                     tilt = actor->mv->aimPitch;
@@ -1288,24 +1288,24 @@ void func_1504CB98(Actor *actor) {
                 }
             } else if ((actor->mv->rt_context_b != 0x14) && (actor->mv->rt_context_b != 0x3F)) {
                 D_800CC2BC |= 0x100;
-                D_800CC284->button &= ~0x2000;
+                gCurrentPad->button &= ~0x2000;
                 D_800CC288 &= ~0x2000;
             }
             if (actor->mv->rt_context_b != 9) {
                 D_800CC2BC |= 0x200;
-                D_800CC284->button &= ~0x8000;
+                gCurrentPad->button &= ~0x8000;
                 D_800CC288 &= ~0x8000;
             }
         }
     }
-    if (!(actor->mv->transport & 0xF) && (actor->energy != 0) && (actor->stunned == 0) && (actor->shad == 0.0f) && ((D_800BE616 != 0) || ((actor->mv->rt_context_b == 9) && (actor->mv->matrix_physics == 0)) || (actor->mv->rt_context_b == 0x16) || (actor->mv->rt_context_b == 0x3B)) && ((actor->mv->weapon_status == 2) || (actor->mv->weapon_status == 0))) { BLK;
+    if (!(actor->mv->transport & 0xF) && (actor->energy != 0) && (actor->stunned == 0) && (actor->shad == 0.0f) && ((gIsMultiplayer != 0) || ((actor->mv->rt_context_b == 9) && (actor->mv->matrix_physics == 0)) || (actor->mv->rt_context_b == 0x16) || (actor->mv->rt_context_b == 0x3B)) && ((actor->mv->weapon_status == 2) || (actor->mv->weapon_status == 0))) { BLK;
         dirMask = ((actor->mv->rt_context_b) && ((actor->mv->SniperState == 0) || (actor->mv->rt_context_b == 0x16)) && (actor->mv->GrenadeThrowState == 0)) ? 0xF : 3;
-        if ((D_800CC284->button & dirMask) != 0) {
-            dirMask = (D_800CC284->button & dirMask);
+        if ((gCurrentPad->button & dirMask) != 0) {
+            dirMask = (gCurrentPad->button & dirMask);
             if ((actor->mv->SniperState == 0) && (actor->mv->AimState == 0)) {
-                if (D_800CC284->stick_y >= 6) {
+                if (gCurrentPad->stick_y >= 6) {
                     dirMask |= 8;
-                } else if (D_800CC284->stick_y < -5) {
+                } else if (gCurrentPad->stick_y < -5) {
                     dirMask |= 4;
                 }
             }
@@ -1321,7 +1321,7 @@ void func_1504CB98(Actor *actor) {
                 if (actor->angle != actor->langle) {
                     actor->mv->turn = 0;
                 }
-                actor->langle -= ((D_800CC284->stick_x * D_800CC264) >> 4);
+                actor->langle -= ((gCurrentPad->stick_x * D_800CC264) >> 4);
                 moveAngle = ((actor->langle + dirAngle) - actor->mv->pssd_waist_tilt) - D_800CC280;
                 moveSpeed = 34.0f;
                 if (actor->mv->SniperState != 0) {
@@ -1344,9 +1344,9 @@ void func_1504CB98(Actor *actor) {
         actor->count5 = 0;
         moveSpeed = 18.0f;
         moveAngle = actor->angle - D_800CC280;
-        D_800CC284->stick_x = 0;
-        D_800CC284->stick_y = 0;
-        D_800CC284->button = 0;
+        gCurrentPad->stick_x = 0;
+        gCurrentPad->stick_y = 0;
+        gCurrentPad->button = 0;
         D_800CC288 = 0;
         padOverridden = 1;
         actor->mv->door_walkf_time -= D_800BE9A0;
@@ -1361,13 +1361,13 @@ void func_1504CB98(Actor *actor) {
     }
     actor->unk11C = actor->unk118;
     if (actor->mv->bot == 0) {
-        actor->mv->buttons = D_800CC284->button;
+        actor->mv->buttons = gCurrentPad->button;
         actor->mv->pressedButtons = D_800CC288;
     }
     if ((actor->animseq.uh == 0) && (actor->animsp == 0.0f)) {
-        func_1505E650(actor, 0x24, 1.0f, 1.0f, 0.0f, 0.0f, 0);
+        actor_playAnim(actor, 0x24, 1.0f, 1.0f, 0.0f, 0.0f, 0);
     }
-    if (D_800CC284->stick_y == 0) {
+    if (gCurrentPad->stick_y == 0) {
         actor->mv->hang_ledge = 0;
     }
     if (actor->unk137 == 0xFF) {
@@ -1419,21 +1419,21 @@ void func_1504CB98(Actor *actor) {
             if (actor->mv->unk21 == 0) {
                 moveSpeed = swimSpeed;
                 moveAngle = actor->angle;
-                if (!(D_800CC284->button & 0x4000)) {
+                if (!(gCurrentPad->button & 0x4000)) {
                     if ((actor->mv->unk22 <= 0) && (((actor->unk118 - 60.0f) - 30.0f) < actor->ypos)) {
                         actor->mv->unk21 = 1;
                         actor->norun = 0xC;
                     }
                 }
             } else {
-                if ((D_800CC288 & 0x4000) && (D_800BE616 == 0) && (level != 0x29)) {
+                if ((D_800CC288 & 0x4000) && (gIsMultiplayer == 0) && (level != 0x29)) {
                     if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100) && !(actor->mv->water_attribs & 1)) {
                         actor->mv->unk21 = 0;
                         actor->mv->unk22 = 0x76;
                         if (((actor->unk118 - 60.0f) - 30.0f) < actor->ypos) {
                             actor->vtilt = 20.0f;
                         }
-                        func_15060A30(0x66F, actor);
+                        actor_playSound(0x66F, actor);
                     }
                 }
                 actor->mv->turn = 4;
@@ -1461,7 +1461,7 @@ void func_1504CB98(Actor *actor) {
         steer = 0.0f;
         if ((actor->inwater != 0) && (actor->mv->unk21 == 0)) {
             if ((actor->stunned == 0) && (actor->animseq.uh != 0x262)) {
-                steer = (D_800CC284->stick_x / 2);
+                steer = (gCurrentPad->stick_x / 2);
             }
         } else {
             if ((actor->mv->rt_context_b == 2) || (actor->mv->rt_context_b == 0x13) || (actor->mv->rt_context_b == 0xA) || (actor->mv->rt_context_b == 0x34)) {
@@ -1474,7 +1474,7 @@ void func_1504CB98(Actor *actor) {
                     }
                     { BLK; steer = (s8) tiltDeg; }
                 } else {
-                    steer = (D_800CC284->stick_y / 2);
+                    steer = (gCurrentPad->stick_y / 2);
                 }
             } else {
                 if (actor->norun != 0xFF) {
@@ -1498,7 +1498,7 @@ void func_1504CB98(Actor *actor) {
                         }
                     }
                 }
-                if (((actor->lifting != 0) && (movement_obj[D_800D154C->lifting - 100].character_type != 0x57)) || (actor->mv->AimState != 0) || (D_800CC284->button & 0x2000)) {
+                if (((actor->lifting != 0) && (movement_obj[gCurrentActor->lifting - 100].character_type != 0x57)) || (actor->mv->AimState != 0) || (gCurrentPad->button & 0x2000)) {
                     steer = 0.0f;
                 }
             }
@@ -1506,7 +1506,7 @@ void func_1504CB98(Actor *actor) {
         if (actor->mv->env_suit != 0) {
             if (actor->animseq.uh == 0x279) {
                 if (actor->norun == 0) {
-                    if (D_800CC284->button & 0x8000) {
+                    if (gCurrentPad->button & 0x8000) {
                         actor->ygrav = 1.1f;
                     } else {
                         if (actor->yspd > 0.0f) {
@@ -1542,7 +1542,7 @@ void func_1504CB98(Actor *actor) {
             }
         }
         actor->mv->lean_last = steer;
-        if ((D_800BEAC0 == 0) && (D_800BEA0C == 0)) {
+        if ((gPaused == 0) && (gFrameRateDivider == 0)) {
             actor->unk54 += steer;
         }
         if (moveSpeed != 0.0f) {
@@ -1637,15 +1637,15 @@ void func_1504CB98(Actor *actor) {
         } else if ((actor->mv->env_suit != 0) && (actor->lifting == 0)) {
             target = func_15083E90(6);
             if (target != NULL) {
-                if (func_1505A6F8(target, actor) < 600.0f) {
-                    moveAngle = func_1505A630(target->xpos - actor->xpos, actor->zpos - target->zpos, 0);
+                if (actor_distanceXZ(target, actor) < 600.0f) {
+                    moveAngle = actor_getDirectionAngle(target->xpos - actor->xpos, actor->zpos - target->zpos, 0);
                 } else {
                     actor->mv->turn = 5;
                 }
             }
         } else { } // matching: the empty else changes block layout
         if (actor->mv->use_cam_butt == 0) {
-            turn = func_150599C8(actor, turnRate, moveAngle);
+            turn = actor_turnFacing(actor, turnRate, moveAngle);
         }
         if ((turn >= 0x5B) && (actor->speed > 12.0f) && (actor->inwater == 0) && (actor->count3 == 0)) {
             moveSpeed = 0.0f;
@@ -1669,7 +1669,7 @@ void func_1504CB98(Actor *actor) {
             steer = 2.5f;
             if (actor->animseq.uh == 0x16) {
                 steer = 3.2f;
-                if (D_800CC284->button & 0x2000) {
+                if (gCurrentPad->button & 0x2000) {
                     moveSpeed = 0.0f;
                 }
             } else if (actor->lifting != 0) {
@@ -1695,14 +1695,14 @@ void func_1504CB98(Actor *actor) {
         if (actor->mv->matrix_physics != 0) {
             steer = 0.0f;
         }
-        func_1505A3A8(moveSpeed, actor, friction, steer, turn);
-        func_1505F298(actor, D_800CC284);
+        actor_accelerate(moveSpeed, actor, friction, steer, turn);
+        actor_updatePlayerControls(actor, gCurrentPad);
     } else {
         if (actor->inwater != 0) {
             func_1504B0FC(actor, surfaceDelta);
         }
         if (actor->stunned != 0xFF) {
-            func_1506045C(actor, D_800CC284->button, D_800CC288, actor->shad, 0);
+            actor_runPlayerAction(actor, gCurrentPad->button, D_800CC288, actor->shad, 0);
             actor->unk54 = 0.0f;
             actor->norun = 0;
             actor->count5 = 0;
@@ -1716,7 +1716,7 @@ void func_1504CB98(Actor *actor) {
                 actor->unk10C = 1;
                 actor->stunnednum = 3;
             }
-            func_150585F0(actor, 0.1f);
+            actor_updateStunned(actor, 0.1f);
             if (actor->unk10B & 0x40) {
                 height = actor->ypos - D_800CC278;
                 if (height < 400.0f) {
@@ -1726,7 +1726,7 @@ void func_1504CB98(Actor *actor) {
                     actor->angle += (D_800CC264 * 0x1400) / 100;
                     actor->yspd = (height * 0.06f) + 6.0f;
                     actor->speed = 3.0f;
-                    func_1505A184(actor->angle, height, 0.0f, &offsetX, &offsetZ, &offsetY);
+                    actor_splitVelocity(actor->angle, height, 0.0f, &offsetX, &offsetZ, &offsetY);
                     actor->mv->swing_xvel = offsetX + D_800CC270;
                     actor->mv->swing_zvel = offsetZ + D_800CC274;
                     actor->mv->gpoint = 2;
@@ -1749,8 +1749,8 @@ void func_1504CB98(Actor *actor) {
                 if (moveSpeed > 5.0f) {
                     moveAngle += D_800CC280;
                     actor->count2 = 1;
-                    func_150599C8(actor, 6, moveAngle);
-                    func_1505A184(moveAngle, moveSpeed, 0.0f, &pushX, &pushZ, &pushY);
+                    actor_turnFacing(actor, 6, moveAngle);
+                    actor_splitVelocity(moveAngle, moveSpeed, 0.0f, &pushX, &pushZ, &pushY);
                     actor->ob_overslopex += ((pushX - actor->ob_overslopex) * 0.1000000015f);
                     actor->ob_overslopey += ((pushZ - actor->ob_overslopey) * 0.1000000015f);
                     actor->angle = actor->langle;
@@ -1759,8 +1759,8 @@ void func_1504CB98(Actor *actor) {
         }
     }
     if ((actor->mv->rope != 0) && (actor->stunned == 0)) {
-        stickX = D_800CC284->stick_x;
-        stickY = D_800CC284->stick_y;
+        stickX = gCurrentPad->stick_x;
+        stickY = gCurrentPad->stick_y;
         actor->mv->prop = 0;
         actor->unk54 = 0.0f;
         actor->norun = 0xFF;
@@ -1803,12 +1803,12 @@ void func_1504CB98(Actor *actor) {
         actor->fangle = heading;
         actor->langle = heading;
         actor->angle = heading;
-        func_1505E650(actor, climbAnim, climbAnimSpeed * 0.025f, 6.0f, 0.0f, 0.0f, 0);
+        actor_playAnim(actor, climbAnim, climbAnimSpeed * 0.025f, 6.0f, 0.0f, 0.0f, 0);
     }
     if ((actor->mv->ladder != 0) && (actor->stunned == 0)) {
         if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100)) {
             climbIndex = (actor->mv->ladder & ~0x80) - 1;
-            climbSpeed = D_800CC284->stick_y;
+            climbSpeed = gCurrentPad->stick_y;
             climbSpot = &zones[climbIndex];
             if ((actor->inwater != 0) && (actor->ypos < actor->unk118)) {
                 actor->mv->unk96 = 8;
@@ -1837,17 +1837,17 @@ void func_1504CB98(Actor *actor) {
         }
     }
     if (actor->mv->unk6B == 0) {
-        func_15059C84(actor);
+        actor_moveHorizontal(actor);
         if (actor->mv->gpoint > 0) {
             actor->mv->gpoint -= D_800BE9A0;
             actor->xpos += ((actor->mv->swing_xvel - actor->xpos) * 0.2f);
             actor->zpos += ((actor->mv->swing_zvel - actor->zpos) * 0.2f);
         }
         func_1502178C(actor, 0, -1);
-        func_1505A770(actor);
-        func_1505D6F0(actor, dc_glbl_CharNum);
+        actor_applyGravity(actor);
+        actor_resolveCollisions(actor, dc_glbl_CharNum);
         if ((D_800CC26C != 0) && (actor->mv->pissed_up <= 0) && (actor->lifting == 0)) {
-            heading = func_1505A630(movement_obj[D_800CC26C].xpos - actor->xpos, actor->zpos - movement_obj[D_800CC26C].zpos, 0);
+            heading = actor_getDirectionAngle(movement_obj[D_800CC26C].xpos - actor->xpos, actor->zpos - movement_obj[D_800CC26C].zpos, 0);
             
             if ((actor->shad == 0.0f) && (moveSpeed > 15.0f) && (((D_800CC27E - heading) - 0x4000) & 0x8000)) { BLK;
                 follow = 0.1f;
@@ -1906,7 +1906,7 @@ void func_1504CB98(Actor *actor) {
                     }
                     if (carry != 0) {
                         pushAccel = 0.5f;
-                        func_1505A184(actor->angle, nudgeX, 0.0f, &nudgeX, &nudgeZ, &nudgeY);
+                        actor_splitVelocity(actor->angle, nudgeX, 0.0f, &nudgeX, &nudgeZ, &nudgeY);
                         actor->xpos += ((((movement_obj[D_800CC26C].xpos - nudgeX) + movement_obj[D_800CC26C].unkBC) - actor->xpos) * follow);
                         actor->zpos += ((((movement_obj[D_800CC26C].zpos - nudgeZ) + movement_obj[D_800CC26C].unk148) - actor->zpos) * follow);
                         movement_obj[D_800CC26C].angle = actor->angle;
@@ -1921,7 +1921,7 @@ void func_1504CB98(Actor *actor) {
                     }
                     if (movement_obj[D_800CC26C].character_type != 0x34) {
                         if (movement_obj[D_800CC26C].speed < nudgeX) {
-                            movement_obj[D_800CC26C].speed += (pushAccel * D_800BE9A4);
+                            movement_obj[D_800CC26C].speed += (pushAccel * gFrameDelta);
                         }
                     } else {
                         actor->speed = movement_obj[D_800CC26C].speed;
@@ -1930,7 +1930,7 @@ void func_1504CB98(Actor *actor) {
             }
         }
     }
-    if ((D_800BE616 != 0) && (D_800CC268 != 0) && (actor->mv->on_fire != 0)) {
+    if ((gIsMultiplayer != 0) && (D_800CC268 != 0) && (actor->mv->on_fire != 0)) {
         func_15063168(actor);
     }
     actor->theta = (actor->langle + 0x4000) * 0.005493164f;
@@ -1938,7 +1938,7 @@ void func_1504CB98(Actor *actor) {
     startX = actor->xpos;
     startZ = actor->zpos;
     if (!(actor->noshove & 0x8000)) {
-        func_15055E50(actor, actor->family);
+        actor_clampToZoneSet(actor, actor->family);
         if (actor->mvmt_control & 0x100000) {
             probeTop = 30000.0f;
         } else {
@@ -1977,7 +1977,7 @@ void func_1504CB98(Actor *actor) {
                     actor->unk118 = actor->unk120;
                 }
             }
-            heading = func_1505A630(actor->xpos - startX, startZ - actor->zpos, 0);
+            heading = actor_getDirectionAngle(actor->xpos - startX, startZ - actor->zpos, 0);
             moveDelta = actor->angle - heading;
             if (actor->mv->transport == 2) {
                 if ((moveDelta >= 0x1E01) && (moveDelta < 0xE200)) {
@@ -1992,9 +1992,9 @@ void func_1504CB98(Actor *actor) {
                         if ((actor->energy == 1) || ((moveDelta >= 0x5E01) && (moveDelta < 0xA200))) {
                             actor->energy = 0;
                             func_150D5A6C(actor, 0xFF, 1);
-                            func_1507CD64(actor, 8);
+                            actor_kill(actor, 8);
                         } else if (actor->energy != 0) {
-                            if (D_800BE616 == 0) {
+                            if (gIsMultiplayer == 0) {
                                 D_800D1580 = 0xFF0201D6;
                                 func_1506E9D8();
                             }
@@ -2008,7 +2008,7 @@ void func_1504CB98(Actor *actor) {
                     actor->speed *= 0.7f;
                     actor->norun = 0xC;
                 }
-                if ((actor->energy != 0) && (func_100107F8(actor) == 0)) {
+                if ((actor->energy != 0) && (sound_isActorSound2Playing(actor) == 0)) {
                     D_800D1580 = 0xFF08030A;
                     func_1506E5FC();
                 }
@@ -2052,7 +2052,7 @@ void func_1504CB98(Actor *actor) {
             if (floorY == -10000.0f) {
                 actor->energy = 0;
                 func_150D5A6C(actor, 0xFF, 1);
-                func_1507CD64(actor, 8);
+                actor_kill(actor, 8);
             }
             if (actor->mv->unk50 <= 0) {
                 func_1504CA60(actor);
@@ -2073,15 +2073,15 @@ void func_1504CB98(Actor *actor) {
             actor->ypos = floorY - 1.0f;
         }
         if ((actor->mv->transport == 2) || (actor->mv->matrix_physics != 0)) {
-            func_1505B5F8(actor, actor->floorY);
+            actor_landNonPlayer(actor, actor->floorY);
         } else {
-            func_1505A9AC(actor, actor->floorY);
+            actor_landPlayer(actor, actor->floorY);
         }
         if (actor->mv->ladder != 0) {
             actor->vtilt = 0.0f;
             if (actor->stunned == 0) {
                 if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100)) {
-                    climbInput = D_800CC284->stick_y;
+                    climbInput = gCurrentPad->stick_y;
                     climbIndex = (actor->mv->ladder & ~0x80) - 1;
                     climb = &zones[climbIndex];
                     if (actor->mv->unk96 != 0) {
@@ -2136,7 +2136,7 @@ void func_1504CB98(Actor *actor) {
                         }
                     }
                     if (anim != -1) {
-                        func_1505E650(actor, anim, animSpeed, 6.0f, 0.0f, 0.0f, 0);
+                        actor_playAnim(actor, anim, animSpeed, 6.0f, 0.0f, 0.0f, 0);
                     }
                 }
             }
@@ -2150,7 +2150,7 @@ void func_1504CB98(Actor *actor) {
         }
     }
     if ((actor->shad == 0.0f) && (actor->mv->transport != 2) && (actor->energy != 0) && ((actor->floorMaterial & 0x1F) == 0xE)) {
-        func_1505D024(actor, 1, actor->langle, -1);
+        actor_hitScripted(actor, 1, actor->langle, -1);
         actor->unk10B |= 0x80;
     }
     if ((actor->floorY < -9000.0f) && (actor->yspd < -120.0f)) {
@@ -2189,7 +2189,7 @@ void func_1504CB98(Actor *actor) {
                 actor->yspd = 0.0f;
                 actor->ygrav = 0.0f;
                 actor->unk1CC = actor->ypos;
-                func_1505E650(actor, 0x42, 1.0f, 1.0f, 0.0f, 0.0f, 0);
+                actor_playAnim(actor, 0x42, 1.0f, 1.0f, 0.0f, 0.0f, 0);
                 actor->mv->camjolt = 0xC;
             }
         }
@@ -2210,7 +2210,7 @@ void func_1504CB98(Actor *actor) {
                     actor->mv->unk21 = 1;
                     actor->unkB2 = 0;
                 }
-                if ((actor->mv->water_attribs & 1) && (D_800BE616 == 0)) {
+                if ((actor->mv->water_attribs & 1) && (gIsMultiplayer == 0)) {
                     func_15083568(actor, 0x38, 0.0f, 0);
                     splashSpeed = 4.0f;
                 }
@@ -2240,7 +2240,7 @@ void func_1504CB98(Actor *actor) {
                 }
                 if (actor->energy == 0) {
                     actor->norun = 0xFF;
-                    func_1507CD64(actor, 4);
+                    actor_kill(actor, 4);
                     actor->stunned = 0xFF;
                 }
             }
@@ -2249,10 +2249,10 @@ void func_1504CB98(Actor *actor) {
     func_1505250C(actor, 1);
     if (actor->unkCC < -0x5D) {
         actor->energy = 0;
-        func_1507CD64(actor, 3);
+        actor_kill(actor, 3);
     }
     if (actor->doing_hit != 0) {
-        func_1505C7D8(actor, dc_glbl_CharNum);
+        actor_testAttack(actor, dc_glbl_CharNum);
     }
     if (actor->count1 >= 9) {
         actor->count2 = 1;
@@ -2286,7 +2286,7 @@ void func_1504CB98(Actor *actor) {
     }
     if (actor->unk100 & 1) {
         if (actor->mv->rt_context_b == 0) {
-            if ((actor->mv->weapon_status != 1) && (actor->mv->weapon_status != 3) && (actor->inwater == 0) && (actor->stunned == 0) && (D_800CC2B1 == 0) && ((actor->norun == 0) || (actor->animseq.uh == 0x279)) && (actor->mv->pissed_up <= 0) && (actor->shad == 0.0f) && (D_800CC284->button & 0x2000)) {
+            if ((actor->mv->weapon_status != 1) && (actor->mv->weapon_status != 3) && (actor->inwater == 0) && (actor->stunned == 0) && (D_800CC2B1 == 0) && ((actor->norun == 0) || (actor->animseq.uh == 0x279)) && (actor->mv->pissed_up <= 0) && (actor->shad == 0.0f) && (gCurrentPad->button & 0x2000)) {
                 actor->count3 = 0;
                 actor->count5 = 0;
                 actor->unk100 &= 0xFE;
@@ -2300,12 +2300,12 @@ void func_1504CB98(Actor *actor) {
                 if (actor->animseq.uh != 0xCF) {
                     sound = 0x2007E5;
                     if (func_1506E46C(actor, &sound, 1) != 0) {
-                        func_15060A30(sound, actor);
+                        actor_playSound(sound, actor);
                     }
                     { BLK; }
                 }
                 actor->mv->prop = 0;
-                func_1505E650(actor, 0xCF, 1.0f, 2.0f, 0.0f, 0.0f, 0);
+                actor_playAnim(actor, 0xCF, 1.0f, 2.0f, 0.0f, 0.0f, 0);
                 actor->count5 = 0xC8;
             }
         }
@@ -2315,13 +2315,13 @@ void func_1504CB98(Actor *actor) {
     actor->mv->actual_speed = 2.0f * sqrtf(((actor->xpos - actor->old_xpos) * (actor->xpos - actor->old_xpos)) + ((actor->zpos - actor->old_zpos) * (actor->zpos - actor->old_zpos)));
     actor->mv->walk_attrib = 0;
     if ((actor->mv->bot != 0) || (padOverridden != 0)) {
-        *D_800CC284 = savedPad;
+        *gCurrentPad = savedPad;
     }
     actor->mv->prevButtons = buttons;
 }
 
 /* Tilts the actor toward the slope of the ground under it (pitch/roll and the unk164/unk168 lean). */
-void func_150511E8(Actor *actor) {
+void actor_tiltToGround(Actor *actor) {
     f32 slopeX;
     f32 slopeZ;
     f32 normalX;
@@ -2352,7 +2352,7 @@ void func_150511E8(Actor *actor) {
             f32 pitch;
 
             func_1510F820(actor->floorTriVerts, actor->floorTri.v, &normalX, &normalZ, &leanRate, &slopeX, &slopeZ);
-            roll = func_1505210C(actor, slopeX, slopeZ, &pitch, 50.0f);
+            roll = actor_slopeToAngles(actor, slopeX, slopeZ, &pitch, 50.0f);
             pitch *= gain;
             actor->vtilt += (pitch - actor->vtilt) * damping;
             actor->lean_angle += (roll * gain - actor->lean_angle) * damping;
@@ -2406,7 +2406,7 @@ void func_150511E8(Actor *actor) {
         slopeX = 0.0f;
         leanRate = 0.1000000015f;
     }
-    func_1505A250(-slopeX, -slopeZ, leanRate, &actor->ob_slopex, &actor->ob_slopey);
+    actor_stepVector2D(-slopeX, -slopeZ, leanRate, &actor->ob_slopex, &actor->ob_slopey);
 }
 
 
@@ -2494,11 +2494,11 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
         dx = x - actor->old_xpos;
         dy = actor->ypos - actor->old_ypos;
         dz = z - actor->old_zpos;
-        moved = 2.0f * sqrtf((dx * dx) + (dy * dy) + (dz * dz)) * D_800BE9A8;
+        moved = 2.0f * sqrtf((dx * dx) + (dy * dy) + (dz * dz)) * gFrameDeltaInv;
         if (actor->unk162 - wasSliding) { // matching: the original tests the difference (subu + bnez), not !=
             if (actor->unk162 != 0) {
-                actor->ob_slopex = dx * D_800BE9A8;
-                actor->ob_slopey = dz * D_800BE9A8;
+                actor->ob_slopex = dx * gFrameDeltaInv;
+                actor->ob_slopey = dz * gFrameDeltaInv;
                 actor->speed = 0.0f;
             } else {
                 actor->speed = moved;
@@ -2512,7 +2512,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
                     }
                     actor->speed = 17.8999996f;
                 }
-                actor->angle = func_1505A630(x - actor->old_xpos, actor->old_zpos - z, 0);
+                actor->angle = actor_getDirectionAngle(x - actor->old_xpos, actor->old_zpos - z, 0);
                 actor->ob_slopex = 0.0f;
                 actor->ob_slopey = 0.0f;
                 actor->ob_overslopex = 0.0f;
@@ -2522,8 +2522,8 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
         if ((D_800CC27C != 0) && (actor->shad < 5.0f)) {
             animSpeed = 1.0f;
             actor->nojump = D_800BE9A0 + 8;
-            actor->unk112 = func_1505A630(-normalX, normalZ, 0);
-            moveAngle = func_1505A630(actor->xpos - actor->old_xpos, actor->old_zpos - actor->zpos, 0);
+            actor->unk112 = actor_getDirectionAngle(-normalX, normalZ, 0);
+            moveAngle = actor_getDirectionAngle(actor->xpos - actor->old_xpos, actor->old_zpos - actor->zpos, 0);
             D_800CC27C = 1;
             if (actor->unk110 == 0) {
                 leanRate = D_800990C0[D_800CC27C];
@@ -2544,7 +2544,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
                     }
                     if ((actor->stunned == 0) && (actor->lifting == 0) && (actor->norun != 0xFF) && (actor->count5 < 0xFA)) {
                         if ((actor->mv->weapon_status != 1) && (actor->mv->weapon_status != 3) && (actor->mv->death_State == 0) && (actor->mv->GrenadeThrowState == 0)) {
-                            func_1505E650(actor, anim, animSpeed, 6.0f, 0.0f, 0.0f, 0);
+                            actor_playAnim(actor, anim, animSpeed, 6.0f, 0.0f, 0.0f, 0);
                         }
                     }
                 }
@@ -2552,11 +2552,11 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
                 leanRate = D_800990E0[D_800CC27C];
             }
         }
-        func_1505A250(-normalX, -normalZ, leanRate, &actor->ob_slopex, &actor->ob_slopey);
+        actor_stepVector2D(-normalX, -normalZ, leanRate, &actor->ob_slopex, &actor->ob_slopey);
         actor->ob_overslopex += (0.0f - actor->ob_overslopex) * 0.150000006f;
         actor->ob_overslopey += (0.0f - actor->ob_overslopey) * 0.150000006f;
         if (actor->unk110 != 0) {
-            actor->mv->xslopeangle = func_1505A630(actor->xpos - actor->old_xpos, actor->old_zpos - actor->zpos, 0);
+            actor->mv->xslopeangle = actor_getDirectionAngle(actor->xpos - actor->old_xpos, actor->old_zpos - actor->zpos, 0);
             if ((actor->animseq.uh == 0x28E) || (actor->animseq.uh == 0x101) || (actor->animseq.uh == 0xD0)) {
                 if ((actor->mv->weapon_status != 1) && (actor->mv->weapon_status != 3)) {
                     actor->count5 = D_800BE9A0 + 1;
@@ -2567,7 +2567,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
                     actor->mv->xslopeangle = actor->angle = actor->unk112;
                     if ((actor->speed < 2.0f) && (actor->shad == 0.0f)) {
                         if (actor->stunned == 0) {
-                            func_1505E650(actor, 0xA5, 1.39999998f, 5.0f, 0.0f, 0.0f, 0);
+                            actor_playAnim(actor, 0xA5, 1.39999998f, 5.0f, 0.0f, 0.0f, 0);
                             actor->count5 = 0x3C;
                             actor->norun = 0x3C;
                             actor->nojump = 0x1E;
@@ -2583,7 +2583,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
             }
         }
         if (height <= 0.0f) {
-            roll = func_1505210C(actor, roll, pitch, &pitch, 50.0f);
+            roll = actor_slopeToAngles(actor, roll, pitch, &pitch, 50.0f);
             if (actor->mv->transport != 2) {
                 if ((actor->mv->duck_tilt == 0) && (actor->unk110 == 0) && ((actor->mv->transport & 0xF) != 1)) {
                     roll *= (actor->mv->actual_speed * 0.00899999961f) + 0.200000003f;
@@ -2616,7 +2616,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
                 sway += shake;
                 blend = 0.25f;
             }
-            if ((fabsf(actor->lean_angle) > 70.0f) && (D_800BE616 == 0) && (actor->energy != 0) && (actor->mv->gun_before_reload == 0)) {
+            if ((fabsf(actor->lean_angle) > 70.0f) && (gIsMultiplayer == 0) && (actor->energy != 0) && (actor->mv->gun_before_reload == 0)) {
                 D_800D1580 = 0xFF020146;
                 func_1506E8D8();
                 actor->mv->gun_before_reload = 1;
@@ -2640,12 +2640,12 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
         if ((fabsf(actor->vtilt) < 35.0f) && (depth > 0.0f)) {
             roll += actor->unk54 * depth;
         }
-        func_1505A250(0.0f, 0.0f, 0.300000012f, &actor->ob_slopex, &actor->ob_slopey);
+        actor_stepVector2D(0.0f, 0.0f, 0.300000012f, &actor->ob_slopex, &actor->ob_slopey);
     }
     actor->lean_angle += (roll - actor->lean_angle) * blend;
 }
 /* Turns a surface slope into roll/pitch angles (degrees) in the actor's frame, clamped to +-limit. */
-f32 func_1505210C(Actor *actor, f32 slopeX, f32 slopeZ, f32 *pitch, f32 limit) {
+f32 actor_slopeToAngles(Actor *actor, f32 slopeX, f32 slopeZ, f32 *pitch, f32 limit) {
     f32 cosYaw;
     s32 pad; // matching: keeps the stack frame at the original size
     f32 yaw;
@@ -2704,15 +2704,15 @@ void func_15052260(Actor *actor) {
         actor->xpos += (ctrl->holdX - actor->xpos) * blend;
         actor->ypos += ((ctrl->holdY - 80) - actor->ypos) * blend;
         actor->zpos += (ctrl->holdZ - actor->zpos) * blend;
-        func_1505E650(actor, 20, 1.0f, 6.0f, 0.0f, 0.0f, 0);
+        actor_playAnim(actor, 20, 1.0f, 6.0f, 0.0f, 0.0f, 0);
         actor->yspd = -10.0f;
     } else {
         if ((s32)actor->shad == 0) {
             ctrl->unk6B = 0;
         } else {
-            func_1505E650(actor, 56, 1.0f, 6.0f, 0.0f, 0.0f, 0);
+            actor_playAnim(actor, 56, 1.0f, 6.0f, 0.0f, 0.0f, 0);
         }
-        func_1505A770(actor);
+        actor_applyGravity(actor);
     }
     actor->ygrav = 6.199999809f;
     if (actor->ypos < actor->unk118) {
@@ -2742,10 +2742,10 @@ void func_15052408(Actor *actor) {
 void func_15052458(Actor *unused) {
 }
 
-/* Calls func_15060F28(actor, 1) once the actor's health reaches zero. */
+/* Calls actor_remove(actor, 1) once the actor's health reaches zero. */
 void func_15052464(Actor *actor) {
     if (actor->energy == 0) {
-        func_15060F28(actor, 1);
+        actor_remove(actor, 1);
     }
 }
 
@@ -2797,28 +2797,28 @@ void func_15052590(Actor *obj) {
     }
 
     if ((D_800C35EA[0] != 1) || ((D_800C3654[0] != 0) && (func_150229E4(obj) == 0))) {
-        func_15053750(obj);
+        actor_stepScale(obj);
         func_1504BB88(obj);
         obj->count2 = 10;
 
         if (!obj->stunned) {
-            func_15056B08(obj);
+            actor_updateChaseAi(obj);
         } else if (obj->carried == 0) {
-            func_150585F0(obj, 0.05f);
+            actor_updateStunned(obj, 0.05f);
         }
 
         // facing angle (0x10000 units per turn) rotated a quarter turn, in degrees
         obj->theta = (s16)(obj->langle + 0x4000) * (360.0f / 65536.0f);
-        func_15059140(obj);
+        actor_updatePhysics(obj);
 
         if ((obj->shad == 0.0f) && ((obj->floorMaterial & 0x1F) == 14)) {
             obj->energy = 0;
         }
 
-        func_150597FC(obj);
+        actor_checkGrab(obj);
 
         if (obj->carried != 0) {
-            func_150562FC(obj);
+            actor_moveToHost(obj);
         } else {
             obj->lean_angle += (0.0f - obj->lean_angle) * 0.2f;
         }
@@ -2873,7 +2873,7 @@ void func_15052760(Actor *obj, s16 prevAngle) {
  * Per-frame movement for a path-following object: picks a target height (the next path point, or the
  * object in unk222), eases ypos toward it, updates the pitch-like unkB8, then moves the object.
  */
-void func_150528C8(Actor *obj) {
+void actor_updatePathFollower(Actor *obj) {
     f32 targetY;
     f32 climbSpeed;
     u32 pitch;
@@ -2910,7 +2910,7 @@ void func_150528C8(Actor *obj) {
     if ((obj->character_type == 0x4F) || (obj->character_type == 0x83)) {
         if (obj->unk251 == 1) {
             autoTilt = 0;
-            pitch = func_1505A630(obj->speed, obj->yspd, 0);
+            pitch = actor_getDirectionAngle(obj->speed, obj->yspd, 0);
             obj->vtilt = pitch * -0.005493164f;
         } else {
             heightMode = 1;
@@ -2935,7 +2935,7 @@ void func_150528C8(Actor *obj) {
         targetY = floorY;
     }
     if (heightMode != 0) {
-        maxStep = climbSpeed * D_800BE9A4;
+        maxStep = climbSpeed * gFrameDelta;
         dy = targetY - obj->ypos;
         if ((dy < maxStep) && (-maxStep < dy)) {
             heightMode = 2;
@@ -2976,19 +2976,19 @@ void func_150528C8(Actor *obj) {
         }
     }
     if (obj->stunned != 0) {
-        func_150585F0(obj, 0.0500000007f);
+        actor_updateStunned(obj, 0.0500000007f);
     } else {
-        func_15056B08(obj);
+        actor_updateChaseAi(obj);
     }
     obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
-    func_15059140(obj);
+    actor_updatePhysics(obj);
     if (autoTilt != 0) {
         func_15052760(obj, prevAngle);
     }
     if (obj->character_type == 0x9E) {
         obj->taskint[0] = 0;
     }
-    if (((D_800BE616 != 0) && (dc_glbl_CharNum < D_8008FD90)) || (func_150535F4(obj) == 0)) {
+    if (((gIsMultiplayer != 0) && (dc_glbl_CharNum < D_8008FD90)) || (func_150535F4(obj) == 0)) {
         func_1502178C(obj, 0, -1);
     }
 }
@@ -2999,7 +2999,7 @@ void func_15052EF0(Actor *obj) {
     obj->imune = 100;
     // binary angle (0x10000 per turn) to degrees, a quarter turn ahead of the facing angle
     obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
-    func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    actor_playAnim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
 /* Resets object `index` (unk13C, unk218) and sets its unk232; returns the object. */
@@ -3054,7 +3054,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
                     arg0->attach_char = arg0->owner + 1;
                     arg0->basemtx = arg2;
                     arg0->unk101 |= arg3;
-                    func_1505E650(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+                    actor_playAnim(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
                     func_15083568(obj, 0x79, 1.0f, 0);
                     callF28 = TRUE;
                 }
@@ -3087,12 +3087,12 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
         arg0->intelwalk = arg5;
         arg0->scriptCmd = NULL;
         if (arg4 != 0) {
-            func_1506160C(obj, 1, 0, 0, 0);
+            actor_fadeCommand(obj, 1, 0, 0, 0);
             obj->unk101 |= 0x40;
         }
     }
     if (callF28) {
-        func_15060F28(arg0, 0);
+        actor_remove(arg0, 0);
     }
 }
 
@@ -3118,7 +3118,7 @@ void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxInd
         obj->angle = arg0->langle;
         arg0->intelwalk = arg3;
         arg0->scriptCmd = NULL;
-        func_1505E650(obj, 50, 1.3f, 4.0f, 0.0f, 0.0f, 0);
+        actor_playAnim(obj, 50, 1.3f, 4.0f, 0.0f, 0.0f, 0);
         movement_obj[arg0->owner].mv->gpoint = 70;
         movement_obj[arg0->owner].mv->swing_xvel = arg0->xpos;
         movement_obj[arg0->owner].mv->swing_zvel = arg0->zpos;
@@ -3137,17 +3137,17 @@ void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxInd
  * Death handling for obj (called once its health is 0): picks the outcome from the
  * flag byte of its D_800D1C90 entry. Returns 0 only when unk10E is in 1..0xEF.
  */
-s32 func_15053430(Actor *obj) {
+s32 actor_handleDeath(Actor *obj) {
     u8 flags;
 
     if (obj->character_type == 0xFF) {
-        func_15060F28(obj, 1);
+        actor_remove(obj, 1);
         return 1;
     }
 
     flags = D_800D1C90[obj->character_type]->flags;
     if ((obj->unk10E != 0) && (obj->unk10E < 0xF0)) {
-        func_1505D2B8(obj, 9);
+        actor_startKnockback(obj, 9);
     } else {
         s32 result = 0;
 
@@ -3165,11 +3165,11 @@ s32 func_15053430(Actor *obj) {
             func_15053694(obj);
         } else if (flags & 0x40) {
             D_800D2110[obj->listpos] = 1250;
-            func_15060F28(obj, 1);
+            actor_remove(obj, 1);
         } else if (result == 1) {
             func_150536D0(obj);
         } else if (result == 0) {
-            func_15060F28(obj, 1);
+            actor_remove(obj, 1);
         }
         return 1;
     }
@@ -3177,7 +3177,7 @@ s32 func_15053430(Actor *obj) {
 }
 
 /**
- * Runs func_15053430 for obj once its health is 0 and its D_800D1C90 flags (or
+ * Runs actor_handleDeath for obj once its health is 0 and its D_800D1C90 flags (or
  * unk10F == 0) allow it. Returns 0 when nothing was done.
  */
 s32 func_150535F4(Actor *obj) {
@@ -3185,25 +3185,25 @@ s32 func_150535F4(Actor *obj) {
 
     if (obj->energy == 0) {
         if (obj->character_type == 0xFF) {
-            func_15060F28(obj, 1);
+            actor_remove(obj, 1);
             return 1;
         }
         flags = D_800D1C90[obj->character_type]->flags;
         if ((flags & 0x10) ||
             ((flags & 8) && (obj->shad == 0.0f)) ||
             (obj->unk10F == 0)) {
-            return func_15053430(obj);
+            return actor_handleDeath(obj);
         }
     }
     return 0;
 }
 
-/** Sets obj's interaction state to 8 and starts func_1506160C mode 6. */
+/** Sets obj's interaction state to 8 and starts actor_fadeCommand mode 6. */
 void func_15053694(Actor *obj) {
     obj->type = 8;
     obj->bodyRadius = 0;
     obj->bodyHeight = 0;
-    func_1506160C(obj, 6, 0, 0, 0);
+    actor_fadeCommand(obj, 6, 0, 0, 0);
 }
 
 void func_150536D0(Actor *obj) {
@@ -3221,7 +3221,7 @@ void func_1505371C(Actor *obj) {
 }
 
 // Moves the object's scale towards (unk154, unk158) by at most unk15C per call.
-void func_15053750(Actor *obj) {
+void actor_stepScale(Actor *obj) {
     f32 diff;
     f32 step;
 
@@ -3229,9 +3229,9 @@ void func_15053750(Actor *obj) {
     if (diff != 0.0f) {
         step = obj->unk15C;
         if (fabsf(diff) < step) {
-            func_15062BDC(obj, obj->unk154, obj->scale_y);
+            actor_setScale(obj, obj->unk154, obj->scale_y);
         } else {
-            func_15062BDC(obj, (diff < 0.0f ? -1 : 1) * step + obj->scale_xz, obj->scale_y);
+            actor_setScale(obj, (diff < 0.0f ? -1 : 1) * step + obj->scale_xz, obj->scale_y);
         }
     }
 
@@ -3239,9 +3239,9 @@ void func_15053750(Actor *obj) {
     if (diff != 0.0f) {
         step = obj->unk15C;
         if (fabsf(diff) < step) {
-            func_15062BDC(obj, obj->scale_xz, obj->unk158);
+            actor_setScale(obj, obj->scale_xz, obj->unk158);
         } else {
-            func_15062BDC(obj, obj->scale_xz, (diff < 0.0f ? -1 : 1) * step + obj->scale_y);
+            actor_setScale(obj, obj->scale_xz, (diff < 0.0f ? -1 : 1) * step + obj->scale_y);
         }
     }
 }
@@ -3249,7 +3249,7 @@ void func_15053750(Actor *obj) {
 void func_15053894(Actor *obj) {
     obj->count1++;
     if (obj->count1 >= 31) {
-        func_15060F28(obj, 1);
+        actor_remove(obj, 1);
     }
 }
 
@@ -3343,7 +3343,7 @@ void func_150538CC(Actor *obj) {
                 dx *= dist;
                 dy *= dist;
                 dz *= dist;
-                obj->angle = func_1505A630(-dx, dz, 0);
+                obj->angle = actor_getDirectionAngle(-dx, dz, 0);
             }
             obj->xpos += dx;
             obj->ypos += dy;
@@ -3382,11 +3382,11 @@ void func_150538CC(Actor *obj) {
         if (obj->unk102 != 0) {
             obj->count4 = 40;
         }
-        obj->fangle = func_1505A630(movement_obj[obj->unk126].xpos - obj->xpos, obj->zpos - movement_obj[obj->unk126].zpos, 0);
+        obj->fangle = actor_getDirectionAngle(movement_obj[obj->unk126].xpos - obj->xpos, obj->zpos - movement_obj[obj->unk126].zpos, 0);
         if ((u8)(((obj->fangle - obj->angle) >> 8) + obj->count4) < (obj->count4 * 2)) {
             climb = ((movement_obj[obj->unk126].ypos + obj->unk224) - obj->ypos) * 0.1800000072f;
-            ownerDist = func_1505A72C(&movement_obj[obj->unk126], obj);
-            func_15059B54(obj, 0x300);
+            ownerDist = actor_distance3D(&movement_obj[obj->unk126], obj);
+            actor_turnMoving(obj, 0x300);
             if ((obj->unk102 != 0) && (ownerDist < (obj->speed * 16.0f))) {
                 if (climb > 90.0f) {
                     climb = 90.0f;
@@ -3401,7 +3401,7 @@ void func_150538CC(Actor *obj) {
         obj->count4--;
     }
     if (obj->unk103 != 0) {
-        func_15059C84(obj);
+        actor_moveHorizontal(obj);
     }
     switch (kind) {
     case 2:
@@ -3409,8 +3409,8 @@ void func_150538CC(Actor *obj) {
     case 18:
         if (obj->speed != 0.0f) {
             obj->vtilt += 15.0f * D_800BE9E4;
-            if (func_100107F8(obj) == 0) {
-                func_10010154((func_151EF610() % 2) + 0x22F, obj, 30000, 500, 1000);
+            if (sound_isActorSound2Playing(obj) == 0) {
+                sound_playActorSound2((func_151EF610() % 2) + 0x22F, obj, 30000, 500, 1000);
             }
         }
         break;
@@ -3433,8 +3433,8 @@ void func_150538CC(Actor *obj) {
         case 13:
             if (obj->unkA8 < 30) {
                 obj->unkA8 += D_800BE9E4;
-            } else if (func_100107F8(obj) == 0) {
-                func_10010154((func_150ADA20() % 3U) + 0x2EE, obj, 30000, 500, 1000);
+            } else if (sound_isActorSound2Playing(obj) == 0) {
+                sound_playActorSound2((func_150ADA20() % 3U) + 0x2EE, obj, 30000, 500, 1000);
             }
             break;
         case 3:
@@ -3442,7 +3442,7 @@ void func_150538CC(Actor *obj) {
         case 11:
         case 17:
             if ((func_1505DDA8(obj, obj->owner, 0x200, 15.0f) != -1) && (obj->unkA9 == 0)) {
-                func_10010154((func_150ADA20() & 3) + 0x43E, obj, 30000, 2000, 2100);
+                sound_playActorSound2((func_150ADA20() & 3) + 0x43E, obj, 30000, 2000, 2100);
                 obj->unkA9 = 1;
             }
             break;
@@ -3451,14 +3451,14 @@ void func_150538CC(Actor *obj) {
     }
     obj->stunned = 1;
     if (obj->unk103 != 0) {
-        func_1505A770(obj);
+        actor_applyGravity(obj);
     }
     D_800CC254 = obj->xpos;
     D_800CC258 = obj->ypos;
     D_800CC25C = obj->zpos;
     prevY = obj->ypos;
-    func_15058898(obj, obj->old_ypos);
-    func_1505B5F8(obj, obj->floorY);
+    actor_updateFloorAndWalls(obj, obj->old_ypos);
+    actor_landNonPlayer(obj, obj->floorY);
     if (sweep != 0) {
         f32 dir[3];
         f32 len;
@@ -3486,8 +3486,8 @@ void func_150538CC(Actor *obj) {
             if ((hit == 1) && (obj->owner > 0)) {
                 owner = &movement_obj[obj->owner - 1];
                 if ((owner->mv != NULL) && (owner->mv->unkAF != 0)) {
-                    if (func_10010894(owner) == 0) {
-                        func_15060A30((func_150ADA20() % 3U) + 0x53B, owner);
+                    if (sound_isActorSound1Playing(owner) == 0) {
+                        actor_playSound((func_150ADA20() % 3U) + 0x53B, owner);
                     }
                 }
             }
@@ -3501,7 +3501,7 @@ void func_150538CC(Actor *obj) {
                     s32 sfx;
 
                     sfx = func_150ADA20() % 9U;
-                    func_15060778((sfx < 2) ? sfx + 0x18 : sfx + 0x29, obj, 30000, 0, 500, 1500, 5);
+                    actor_playPlayerSound((sfx < 2) ? sfx + 0x18 : sfx + 0x29, obj, 30000, 0, 500, 1500, 5);
                     func_15174690(dc_glbl_CharNum, 0, 0x14, 0, 0x199, 4, 0xAA, 0xFF, 0);
                 }
             }
@@ -3509,7 +3509,7 @@ void func_150538CC(Actor *obj) {
         if (obj->doing_hit != 0) {
             s32 hit;
 
-            hit = func_1505C7D8(obj, dc_glbl_CharNum);
+            hit = actor_testAttack(obj, dc_glbl_CharNum);
             if (hit != 0) {
                 D_800CC260 = hit;
                 obj->norun = 1;
@@ -3524,7 +3524,7 @@ void func_150538CC(Actor *obj) {
                             obj->noshove |= 0x01000000;
                             obj->count5 = 6;
                         }
-                        obj->angle = func_1505A630(other->xpos - obj->xpos, obj->zpos - other->zpos, 0);
+                        obj->angle = actor_getDirectionAngle(other->xpos - obj->xpos, obj->zpos - other->zpos, 0);
                         obj->yspd *= 0.400000006f;
                     }
                 } else {
@@ -3532,7 +3532,7 @@ void func_150538CC(Actor *obj) {
 
                     attacker = obj->unk108 & 0x7F;
                     if (attacker < 25) {
-                        obj->angle = func_1505A630(obj->old_xpos - movement_obj[attacker].xpos, movement_obj[attacker].zpos - obj->old_zpos, 0);
+                        obj->angle = actor_getDirectionAngle(obj->old_xpos - movement_obj[attacker].xpos, movement_obj[attacker].zpos - obj->old_zpos, 0);
                     }
                     obj->yspd = 35.0f;
                     obj->ygrav = 6.0f;
@@ -3540,8 +3540,8 @@ void func_150538CC(Actor *obj) {
             }
         }
         if (kind == 15) {
-            func_1505A3A8(0.0f, obj, 1.0f, 1.0f, 0);
-            func_1505D6F0(obj, dc_glbl_CharNum);
+            actor_accelerate(0.0f, obj, 1.0f, 1.0f, 0);
+            actor_resolveCollisions(obj, dc_glbl_CharNum);
             if ((D_800CC268 >> 1) != 0) {
                 Actor *other;
 
@@ -3550,7 +3550,7 @@ void func_150538CC(Actor *obj) {
                     D_800D1580 = 0xFF0100A7;
                     func_1506E6FC();
                     if (other != NULL) {
-                        obj->angle = func_1505A630(obj->xpos - other->xpos, other->zpos - obj->zpos, 0);
+                        obj->angle = actor_getDirectionAngle(obj->xpos - other->xpos, other->zpos - obj->zpos, 0);
                     }
                     obj->yspd = 38.0f;
                     obj->ygrav = 5.0f;
@@ -3565,7 +3565,7 @@ void func_150538CC(Actor *obj) {
             if (kind == 17) {
                 obj->energy = 0;
             }
-            if (D_800BE616 != 0) {
+            if (gIsMultiplayer != 0) {
                 obj->energy = 0;
             }
         }
@@ -3608,7 +3608,7 @@ void func_150538CC(Actor *obj) {
             func_15088780(obj);
             break;
         }
-        func_15060F28(obj, 1);
+        actor_remove(obj, 1);
         return;
     }
     obj->unk103 = 1;
@@ -3634,7 +3634,7 @@ void func_150548E4(Actor *obj) {
                 owner->intelwalk = 3;
                 sfx = 0x1DC;
             }
-            func_10010344(sfx, owner, 0x7D00, 500, 2500);
+            sound_playActorSound1(sfx, owner, 0x7D00, 500, 2500);
         }
     }
 }
@@ -3642,7 +3642,7 @@ void func_150548E4(Actor *obj) {
 void func_15054A0C(Actor *obj) {
     if (obj->unk2D0 != NULL) {
         if ((obj->unk2D0->numFrames[0] - 1.0f) <= obj->unk2D0->frame[0]) {
-            func_15060F28(obj, 0);
+            actor_remove(obj, 0);
         }
     }
 }
@@ -3650,7 +3650,7 @@ void func_15054A0C(Actor *obj) {
 void func_15054A5C(Actor *obj, Actor *other) {
     other->mv->weapon_status = 0;
     func_151027E8(other);
-    func_15060F28(obj, 0);
+    actor_remove(obj, 0);
 }
 
 void func_15054A94(Actor *obj) {
@@ -3677,17 +3677,17 @@ void func_15054A94(Actor *obj) {
     }
     if (obj->character_type == 0x41) {
         if (other->animseq.uh != 0x48 && other->animseq.uh != 0x4B) {
-            func_15060F28(obj, 0);
+            actor_remove(obj, 0);
             return;
         }
         if (obj->animseq.uh == 0 && anim->frame[0] == 0.0f) {
             func_15188810(obj, 100, 0);
         }
         if (obj->animseq.uh == 0 && other->animseq.uh == 0x4B) {
-            func_1505E650(obj, 1, 1.0f, 3.0f, 0.0f, 0.0f, 0);
+            actor_playAnim(obj, 1, 1.0f, 3.0f, 0.0f, 0.0f, 0);
         }
         if (obj->animseq.uh == 1 && anim->numFrames[0] - 1.0f <= anim->frame[0]) {
-            func_15060F28(obj, 0);
+            actor_remove(obj, 0);
         }
         return;
     }
@@ -3750,7 +3750,7 @@ void func_15054A94(Actor *obj) {
             attach = 0;
         }
     }
-    func_1505E650(obj, motion, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    actor_playAnim(obj, motion, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     if (attach) {
         func_1507C324(obj, other);
     }
@@ -3799,12 +3799,12 @@ void func_15054F74(Actor *obj) {
             }
         }
     } else if (obj->character_type == 0x4B) {
-        func_1505A184(obj->langle ^ 0x8000, 500.0f, 0.0f, &offsetX, &offsetZ, &offsetY);
+        actor_splitVelocity(obj->langle ^ 0x8000, 500.0f, 0.0f, &offsetX, &offsetZ, &offsetY);
         x = (s16)obj->xpos + offsetX;
         z = (s16)obj->zpos + offsetZ;
         obj->taskint[2] = (x << 16) | (z & 0xFFFF);
         if (obj->animseq.uh != 15) {
-            angle = func_1505A630(movement_obj[0].xpos - obj->xpos, obj->zpos - movement_obj[0].zpos, 0);
+            angle = actor_getDirectionAngle(movement_obj[0].xpos - obj->xpos, obj->zpos - movement_obj[0].zpos, 0);
         } else {
             angle = obj->langle - 0x800;
         }
@@ -3818,12 +3818,12 @@ void func_15054F74(Actor *obj) {
     label:
         ;
     } else if (((obj->character_type == 0x1B) || (obj->character_type == 0x7E)) && (obj->taskint[0] != 0)) {
-        if (D_800BE616 != 0) {
+        if (gIsMultiplayer != 0) {
             func_1508B20C(obj->xpos, obj->ypos, obj->zpos, 900.0f);
         }
         if (D_800BE9E4 < obj->taskint[0]) {
             if ((obj->taskint[0] >= 120) && (obj->taskint[0] < (D_800BE9E4 + 120))) {
-                func_10010154(0x3A1, obj, 0x7D00, 500, 1000);
+                sound_playActorSound2(0x3A1, obj, 0x7D00, 500, 1000);
             }
             obj->taskint[0] -= D_800BE9E4;
         } else {
@@ -3856,7 +3856,7 @@ void func_1505528C(Actor *obj) {
     case 0x1F:
         obj->vtilt += obj->speed * D_800BE9E4;
         if (obj->taskint[0] == 1) {
-            func_10010344(0x230, obj, 0x7D00, 500, 2500);
+            sound_playActorSound1(0x230, obj, 0x7D00, 500, 2500);
             obj->taskint[0] = 0;
         }
         break;
@@ -3870,7 +3870,7 @@ void func_1505528C(Actor *obj) {
         hit = func_15081574(obj, 40.0f, 10.0f, &target, 0xF, 0x53);
         if (hit != 0) {
             func_15055260(obj, target, hit - 1);
-            func_15060F28(obj, 1);
+            actor_remove(obj, 1);
             return;
         }
         break;
@@ -3887,19 +3887,19 @@ void func_1505528C(Actor *obj) {
     case 0x88:
         obj->vtilt = -func_150484A0(obj->yspd, obj->speed) * 57.29577637f;
         obj->doing_hit = 16;
-        if (func_1505C7D8(obj, dc_glbl_CharNum) != 0) {
-            func_15060F28(obj, 1);
+        if (actor_testAttack(obj, dc_glbl_CharNum) != 0) {
+            actor_remove(obj, 1);
             return;
         }
         break;
     }
-    func_15059C84(obj);
+    actor_moveHorizontal(obj);
     obj->stunned = 1;
-    func_1505A770(obj);
+    actor_applyGravity(obj);
     prevX = obj->xpos;
     prevY = obj->ypos;
     prevZ = obj->zpos;
-    func_15058898(obj, obj->old_ypos);
+    actor_updateFloorAndWalls(obj, obj->old_ypos);
     if ((obj->unk118 != -10000.0f) && (obj->ypos <= obj->unk118) && (obj->unk118 <= obj->old_ypos)) {
         obj->speed *= 0.1000000015f;
         obj->taskint[0] = 2;
@@ -3908,16 +3908,16 @@ void func_1505528C(Actor *obj) {
     } else if ((prevX != obj->xpos) || (prevY != obj->ypos) || (prevZ != obj->zpos)) {
         hitFlags = 1;
         if ((kind == 0x1F) && (obj->taskint[0] != 2)) {
-            func_10010344((func_150ADA20() % 5U) + 0x3A4, obj, 0x7D00, 500, 2500);
+            sound_playActorSound1((func_150ADA20() % 5U) + 0x3A4, obj, 0x7D00, 500, 2500);
         }
     }
-    func_1505B5F8(obj, obj->floorY);
+    actor_landNonPlayer(obj, obj->floorY);
     if (obj->shad <= hoverHeight) {
         obj->count1++;
         hitFlags |= 2;
         if ((obj->floorMaterial & 0x1F) == 0xE) {
             func_1514AD9C((Vec3f *)&obj->xpos, 0xFF, 0); // xpos, ypos, zpos as one Vec3f
-            func_15060F28(obj, 1);
+            actor_remove(obj, 1);
             return;
         }
         if (kind == 0x42) {
@@ -3947,13 +3947,13 @@ void func_1505528C(Actor *obj) {
             obj->yspd = 0.0f;
             obj->speed = 0.0f;
         } else if ((obj->yspd > 5.0f) && (kind == 0x1F) && (obj->taskint[0] != 2)) {
-            func_10010344(0x39E, obj, 0x7D00, 500, 2500);
+            sound_playActorSound1(0x39E, obj, 0x7D00, 500, 2500);
             obj->taskint[0] = 2;
         }
     }
     obj->theta = (obj->angle + 0x4000) * 0.005493164f;
     if ((hitFlags != 0) && (kind == 0x35)) {
-        func_10010630(0x360, obj, 0x4E20, 500, 2500);
+        sound_playActorUntracked(0x360, obj, 0x4E20, 500, 2500);
         if (obj->unk118 < obj->ypos) {
             Vec3f pos;
 
@@ -3962,12 +3962,12 @@ void func_1505528C(Actor *obj) {
             pos.z = obj->zpos;
             func_151DCDE0(&pos, 0xFF, 1);
         }
-        func_15060F28(obj, 1);
+        actor_remove(obj, 1);
         return;
     }
     timer = --obj->count5;
     if ((timer == 0) || (obj->count1 >= 31)) {
-        func_15060F28(obj, 1);
+        actor_remove(obj, 1);
         return;
     }
     if (timer < 10) {
@@ -3989,8 +3989,8 @@ void func_1505528C(Actor *obj) {
         if (distSq < 900.0f) {
             func_1512D748(player, 8, 0);
             func_10010F88(0x2E1, 0x6D60, 0, 0, 0, obj->xpos, obj->ypos, obj->zpos, 500, 1000);
-            func_10010A3C(obj);
-            func_15060F28(obj, 1);
+            sound_stopActorSound1(obj);
+            actor_remove(obj, 1);
         }
     }
 }
@@ -4011,7 +4011,7 @@ void func_15055A2C(s32 arg0, f32 x, f32 y, f32 z, s32 arg4) {
 
 void func_15055B0C(Actor *obj, s32 duration) {
     obj->type = 39;
-    func_1505E650(obj, obj->animseq.uh, 0, 0.0f, 0.0f, 0.0f, 0);
+    actor_playAnim(obj, obj->animseq.uh, 0, 0.0f, 0.0f, 0.0f, 0);
     obj->bodyRadius = 0;
     obj->bodyHeight = 0;
     obj->unk21C = duration;
@@ -4026,7 +4026,7 @@ void func_15055B64(Actor *obj) {
     } else {
         obj->unk21C = 0;
         if (obj->ob_matrix_ptr == NULL) {
-            func_15060F28(obj, 1);
+            actor_remove(obj, 1);
         }
     }
 }
@@ -4034,10 +4034,10 @@ void func_15055B64(Actor *obj) {
 void func_15055BF8(Actor *obj) {
     obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
     obj->noshove |= 0x1000000;
-    obj->ypos -= D_800BE9A4;
+    obj->ypos -= gFrameDelta;
 
     if (obj->ypos < (obj->floorY - 100.0f)) {
-        func_15060F28(obj, 0);
+        actor_remove(obj, 0);
     }
 }
 
@@ -4045,10 +4045,10 @@ void func_15055C88(Actor *obj) {
     s32 sfx = 0x2007E4;
 
     if (!(obj->unk9C & 0x1000) && func_1506E46C(obj, &sfx, 1)) {
-        func_15060A30(sfx, obj);
+        actor_playSound(sfx, obj);
     }
     obj->mv->over_edge = 100;
-    func_1506160C(obj, 2, 0, 6, 0);
+    actor_fadeCommand(obj, 2, 0, 6, 0);
     obj->norun = 200;
     obj->count5 = 200;
     obj->unk1CC = 70000.0f;
@@ -4056,7 +4056,7 @@ void func_15055C88(Actor *obj) {
     obj->ygrav = 0.0f;
     obj->yspd = 0.0f;
     obj->speed = 0.0f;
-    func_1507CD64(obj, 9);
+    actor_kill(obj, 9);
 }
 
 void func_15055D48(Actor *obj) {

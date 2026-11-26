@@ -73,8 +73,8 @@ extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 
 /* 80080000 */
 
-extern u8 (*D_80085990[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
-extern FontGlyph *D_80085994[];
+extern u8 (*gFontBitmaps[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
+extern FontGlyph *gFontGlyphs[];
 
 
 

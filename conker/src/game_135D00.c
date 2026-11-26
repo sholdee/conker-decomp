@@ -121,8 +121,8 @@ void func_15108850(PointLight *light) {
 s32 func_15108AB4(DynModel *model) {
     LampData *lamp = LAMP_DATA(model);
 
-    lamp->phaseX += 0.0857f * D_800BE9A4;
-    lamp->phaseZ += 0.0783f * D_800BE9A4;
+    lamp->phaseX += 0.0857f * gFrameDelta;
+    lamp->phaseZ += 0.0783f * gFrameDelta;
     lamp->phaseX = func_15144B68(lamp->phaseX);
     lamp->phaseZ = func_15144B68(lamp->phaseZ);
     lamp->swingX = sinf(lamp->phaseX) * 7.1050005f;
@@ -163,8 +163,8 @@ void func_15108BC0(DynModel *model) {
 s32 func_15108C38(DynModel *model) {
     LampData *lamp = LAMP_DATA(model);
 
-    lamp->phaseX += 0.0857f * D_800BE9A4;
-    lamp->phaseZ += 0.0783f * D_800BE9A4;
+    lamp->phaseX += 0.0857f * gFrameDelta;
+    lamp->phaseZ += 0.0783f * gFrameDelta;
     lamp->phaseX = func_15144B68(lamp->phaseX);
     lamp->phaseZ = func_15144B68(lamp->phaseZ);
     lamp->swingX = sinf(lamp->phaseX) * 7.1050005f;

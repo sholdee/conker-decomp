@@ -59,7 +59,7 @@ ScatterTrail *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity) 
 
     trail = func_15147A80(&spawn, sizeof(ScatterTrailState), sizeof(ScatterTrailPoint), 7, 7, 7, 0, 0, 0, 0xFF, 1);
     if (trail != NULL) {
-        func_1000FA64(0x221, pos->x, pos->y, pos->z, 25000, 4000, 600, func_1000EF40, 0, 0, 8,
+        sound_addDynamicSound(0x221, pos->x, pos->y, pos->z, 25000, 4000, 600, func_1000EF40, 0, 0, 8,
                       func_150ADA20() & 0x40);
         memcpy(trail->state, &state, sizeof(ScatterTrailState));
     }
@@ -95,11 +95,11 @@ s32 func_150B40E8(ScatterTrail *trail) {
                 expired = TRUE;
             }
 
-            points[i].vel.y += state->gravity * D_800BE9A4;
-            points[i].pos.x += points[i].vel.x * D_800BE9A4;
-            points[i].pos.y += points[i].vel.y * D_800BE9A4;
-            points[i].pos.z += points[i].vel.z * D_800BE9A4;
-            points[i].width += state->widthGrowth * D_800BE9A4;
+            points[i].vel.y += state->gravity * gFrameDelta;
+            points[i].pos.x += points[i].vel.x * gFrameDelta;
+            points[i].pos.y += points[i].vel.y * gFrameDelta;
+            points[i].pos.z += points[i].vel.z * gFrameDelta;
+            points[i].width += state->widthGrowth * gFrameDelta;
 
             if (expired && i != trail->head.start) {
                 do {
@@ -140,12 +140,12 @@ s32 func_150B4294(ScatterTrail *trail) {
     points = trail->points;
     state->phase += (func_150ADA20() % (state->phaseJitter + 1)) * D_800BE9E4;
     state->speedTarget = func_151423D8(state->phase - 0x40) * state->speedSwing + state->speedBase;
-    state->emitAccum += state->emitRate * D_800BE9A4;
+    state->emitAccum += state->emitRate * gFrameDelta;
     if (state->emitAccum > 1.0f) {
-        dt = D_800BE9A4;
+        dt = gFrameDelta;
         inv = 1.0f / state->emitAccum;
         baseVel = state->baseVel;
-        dtStep = D_800BE9A4 * inv;
+        dtStep = gFrameDelta * inv;
         speed = state->speed;
         diff = state->speedTarget - state->speed;
         speedStep = diff * inv;

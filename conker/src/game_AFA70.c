@@ -68,7 +68,7 @@ s32 func_150825C0(s32 spawnIdx, s32 arg1) {
                 if (movement_obj[j].playernumber == 0xFF) {
                     continue;
                 }
-                if (D_800D2138.playerMask & (1 << movement_obj[j].playernumber)) {
+                if (gMatchState.playerMask & (1 << movement_obj[j].playernumber)) {
                     // matching: squaring in place (d = d * d) reuses the operand's register
                     dx = movement_obj[j].xpos - D_800D20FC[spawnIdx].x;
                     dx = dx * dx;
@@ -170,12 +170,12 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     type = spawn->type;
     if (slot != 0) {
         obj = &movement_obj[slot - 1];
-        func_1505F188(obj);
+        actor_clearSlot(obj);
     } else if ((spawnIdx != -1) && (spawnIdx < D_8008FD8C)) {
         obj = &movement_obj[spawnIdx];
-        func_1505F188(obj);
+        actor_clearSlot(obj);
     } else {
-        obj = func_1505ED34();
+        obj = actor_alloc();
     }
     idx = obj - movement_obj;
     if (idx == 25) {
@@ -222,7 +222,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     obj->unk1CC = obj->ypos;
     obj->old_zpos = obj->zpos;
     if ((spawn->flags & 6) || (spawn->flags & 4) || (spawn->flags & 2)) {
-        func_1506160C(obj, 4, 0, 0, 0);
+        actor_fadeCommand(obj, 4, 0, 0, 0);
     }
     obj->intelwalk = spawn->unkD;
     if ((spawnIdx < D_8008FD8C) && (D_8008FE44[spawnIdx] == -2)) {
@@ -287,16 +287,16 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
         obj->drawtype = 3;
     }
     if (obj->noshove & 0x4000) {
-        func_1503DA9C(obj, obj->character_type, 0, 0);
+        model_loadForActor(obj, obj->character_type, 0, 0);
     }
     if (spawn->partSet) {
         func_15083568(obj, spawn->partSet, 1.0f, 0);
     }
     if (obj->playernumber != 0xFF) {
-        obj->energy = func_150859AC(obj->playernumber, 4);
+        obj->energy = player_getStat(obj->playernumber, 4);
         obj->unkB2 = D_800D2132;
         func_150829D8(obj);
-        func_15083384(obj, func_150859AC(idx, 1));
+        func_15083384(obj, player_getStat(idx, 1));
     }
     if (((obj->unk66 & 0xC) == 8) || ((obj->unk66 & 0xC) == 0xC)) {
         func_150832AC(obj);
@@ -304,7 +304,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
         obj->unk314 = NULL;
     }
     obj->unk288 = func_15084CB0(type);
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         t = func_151E5F64(obj->playernumber);
         if (t >= 4) {
             t = 3;
@@ -492,10 +492,10 @@ void func_150836CC(Actor *parent, s32 setId) {
         Actor *child;
 
         if (parts[i].type == 0) {
-            child = func_1505F0AC(parts[i].model);
+            child = actor_findByType(parts[i].model);
             if (child != NULL) {
                 if (child->attach_char == ((parent - movement_obj) + 1)) {
-                    func_15060F28(child, 0);
+                    actor_remove(child, 0);
                 }
             }
         }
@@ -519,12 +519,12 @@ void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
         obj->unkC8 = 0.0f;
     } else {
         obj->unkC8 = D_800D1C90[modelId]->unk6;
-        func_15062BDC(obj, obj->scale_xz, obj->scale_y);
+        actor_setScale(obj, obj->scale_xz, obj->scale_y);
         def = D_800D1C90[modelId];
         obj->drawtype = def->unk12;
     }
     obj->unk6 = func_15084D00(obj);
-    if (D_800C5A90[obj->unk6] != 0) {
+    if (gModelAnimCounts[obj->unk6] != 0) {
         obj->unk58 = (s32)func_1502B020(0, 2, 2, obj->unk6);
     }
 }
@@ -537,7 +537,7 @@ s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3) {
     if (D_800D1588[modelId] == NULL) {
         return 0;
     }
-    if (D_800C5A90[modelId] == 0) {
+    if (gModelAnimCounts[modelId] == 0) {
         return 0;
     }
     obj->unk2D0 = allocate_memory(0x3E0, 1, 2, 0);
@@ -545,7 +545,7 @@ s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3) {
         return 1;
     }
     bzero(obj->unk2D0, 0x40);
-    func_1505E650(obj, arg1, arg3, 0.0f, 0.0f, 0.0f, arg2);
+    actor_playAnim(obj, arg1, arg3, 0.0f, 0.0f, 0.0f, arg2);
     return 0;
 }
 
@@ -601,12 +601,12 @@ Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, 
     s32 i;
 
     func_1503D774(modelId, 0);
-    func_1503D660(modelId, 0);
-    obj = func_1505ED34();
+    model_loadAnimTable(modelId, 0);
+    obj = actor_alloc();
     obj->unique_id = 0xFF - (obj - movement_obj);
     obj->unkAB = arg3;
     obj->type = state;
-    func_150615DC(obj);
+    actor_resetFade(obj);
     obj->intelwalk = 1;
     obj->energy = 1;
     obj->imune = 0xFF;
@@ -734,7 +734,7 @@ s32 func_15083FB0(u8 id) {
 }
 
 s32 func_15084000(s32 id) {
-    Actor *obj = func_1505EEF4(id);
+    Actor *obj = actor_findOnPath(id);
 
     if (obj != NULL) {
         return obj - movement_obj;
@@ -783,7 +783,7 @@ s32 func_15084044(Actor *obj, s32 model) {
     } else if (mode == 1) {
         if (*(s32 *)(slot + 0x28C) == 0 || *(s32 *)(slot + 0x28C) == (s32)D_800D19A0[id]) {
             if (D_800D1F80[id] != 0) {
-                size = D_800C57A0[id] * 16;
+                size = gModelVertexCounts[id] * 16;
                 *(s32 *)(slot + 0x28C) = (s32)allocate_memory(size, 1, 2, 2);
                 if (*(s32 *)(slot + 0x28C) == 0) {
                     ret = 1;
@@ -804,7 +804,7 @@ s32 func_15084044(Actor *obj, s32 model) {
         for (i = 0; i < 2; i++) {
             if (((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == 0 || ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == (s32)D_800D19A0[id] || (i == 1 && *(s32 *)(slot + 0x28C) == *(s32 *)(slot + 0x290))) {
                 if (D_800D1F80[id] != 0) {
-                    size = D_800C57A0[id] * 16;
+                    size = gModelVertexCounts[id] * 16;
                     ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] = (s32)allocate_memory(size, 1, 2, 2);
                     if (((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == 0) {
                         ret = 1;
@@ -895,7 +895,7 @@ void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2) {
         count += def->extraModelCount;
         for (i = 0; i < count; i++) {
             func_1503D774(list[i], arg2);
-            func_1503D660(list[i], arg2);
+            model_loadAnimTable(list[i], arg2);
         }
     }
 }
@@ -976,16 +976,16 @@ void func_15084558(Actor *self) {
             }
             if (unique) {
                 if (D_800D19A0[list[i]] != NULL) {
-                    if (D_800C5C08[id] != NULL) {
-                        func_10004074((void *)(s32)D_800C5C08[id]); // matching: the int round trip keeps the load in v0
-                        D_800C5C08[id] = NULL;
-                        func_10004074(D_800C6070[id]);
-                        D_800C6070[id] = NULL;
+                    if (gModelVtxRuns[id] != NULL) {
+                        func_10004074((void *)(s32)gModelVtxRuns[id]); // matching: the int round trip keeps the load in v0
+                        gModelVtxRuns[id] = NULL;
+                        func_10004074(gModelTris[id]);
+                        gModelTris[id] = NULL;
                     }
-                    table = D_800C6360[id];
+                    table = gModelSavedTexCoords[id];
                     if (table != NULL) {
                         func_10004074(table);
-                        D_800C6360[id] = NULL;
+                        gModelSavedTexCoords[id] = NULL;
                     }
                 }
             }
@@ -1025,7 +1025,7 @@ s32 func_150849CC(Actor *obj, s32 *outIndex) {
     return obj->modelIds[index];
 }
 
-/* Ticks the D_800D2040 countdowns; a model whose countdown expires while it has no D_800C5C08
+/* Ticks the D_800D2040 countdowns; a model whose countdown expires while it has no gModelVtxRuns
    table is unloaded and every object's references to it are dropped. */
 void func_15084A18(void) {
     s32 i;
@@ -1042,7 +1042,7 @@ void func_15084A18(void) {
             continue;
         }
         if (*timer == 1) {
-            if (D_800D19A0[i] != NULL && D_800C5C08[i] == NULL) {
+            if (D_800D19A0[i] != NULL && gModelVtxRuns[i] == NULL) {
                 for (m = 0; m < 25; m++) {
                     obj = &movement_obj[m];
                     if (obj->type != 0) {
@@ -1058,8 +1058,8 @@ void func_15084A18(void) {
                         }
                     }
                 }
-                textures = D_800C5338[i];
-                for (k = 0; k < D_800C5628[i]; k++) {
+                textures = gModelTextures[i];
+                for (k = 0; k < gModelTextureCounts[i]; k++) {
                     if (textures[k].addr >= 0x10000000U) {
                         func_1510D720(textures[k].id);
                     }

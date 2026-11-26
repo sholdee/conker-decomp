@@ -309,7 +309,7 @@ void func_151AD174(Rope *rope) {
     }
 
     /* Creak when swinging hard, unless the last creak is still playing. */
-    if (motion > 250.0f && (rope->soundHandle == 0 || func_1000F3D0(rope->soundHandle) == 0)) {
+    if (motion > 250.0f && (rope->soundHandle == 0 || sound_isPlaying(rope->soundHandle) == 0)) {
         rope->soundHandle = func_10010E78(0, (func_150ADA20() % 9) + 0x507, 30000, 0, 0, 0, pos[0], pos[1], pos[2], 250, -0x7E0C);
     }
 }

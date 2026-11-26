@@ -239,7 +239,7 @@ s32 func_1508A1BC(void) {
                     if (i >= D_8008FD90) {
                         dist *= 2;
                     }
-                    dist = dist / (func_150859AC(i, 6) + 2);
+                    dist = dist / (player_getStat(i, 6) + 2);
                 }
             }
             if (i < D_8008FD90 && dist != -1) {
@@ -367,7 +367,7 @@ s32 func_1508A6FC(void) {
             if (D_800D23B0->grenades != NULL) {
                 D_800D23B0->grenades[i] = obj->mv->numGrenades;
             }
-            arr39C[i] = func_150859AC(i, 4);
+            arr39C[i] = player_getStat(i, 4);
             layers[i] = func_15085DA8(obj->ypos);
             if (arr39C[i] == 0 || isNew || obj->unk2FD != 0) {
                 if (arr35C[i] == 0) {
@@ -487,11 +487,11 @@ s32 func_1508A6FC(void) {
     }
     if (D_800D23B0->gameType == 0xB9) {
         half = (s32)(VIEWS[0].right - VIEWS[0].left) >> 1;
-        func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+        text_setColor(0xFF, 0xFF, 0xFF, 0xFF);
         for (j = 0; j <= D_80082FA0; j++) {
             if (movement_obj[j].team == 0) {
                 vp = &VIEWS[j];
-                func_15042D94(vp->left + half, vp->top + 6.0f, 1, "%d", countdowns[j] / 60);
+                text_printAt(vp->left + half, vp->top + 6.0f, 1, "%d", countdowns[j] / 60);
             }
         }
 
@@ -908,8 +908,8 @@ void func_1508C1A4(s32 a, s32 b) {
 
     seen = 0;
     blocked = 0;
-    from = func_1505EEF4(a & 0xFFFF0FFF);
-    to = func_1505EEF4(b & 0xFFFF0FFF);
+    from = actor_findOnPath(a & 0xFFFF0FFF);
+    to = actor_findOnPath(b & 0xFFFF0FFF);
     if (from != NULL && to != NULL) {
         x0 = from->xpos;
         z0 = from->zpos;
@@ -1164,7 +1164,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         if (type == 9 || type == 0x38 || type == 0x15) {
             hasCam = 0;
         }
-        victim = func_1505EEF4(target & 0xFFFF0FFF);
+        victim = actor_findOnPath(target & 0xFFFF0FFF);
         if (victim == NULL) {
             return 1;
         }
@@ -1264,7 +1264,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             dx -= dz * mag;
             dz += tx * mag;
         }
-        ang = func_1505A630(dx, -dz, 0) * 0.005493164f;
+        ang = actor_getDirectionAngle(dx, -dz, 0) * 0.005493164f;
         if (type != 3) {
             curYaw = obj->mv->aimYaw;
         } else {
@@ -1286,7 +1286,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         }
         D_800D23B0->aimY[player] += cur * scale;
         cur = obj->mv->aimEye.y - D_800D23B0->aimY[player];
-        ang = func_1505A630(dist, cur, 0) * 0.005493164f;
+        ang = actor_getDirectionAngle(dist, cur, 0) * 0.005493164f;
         curYaw = obj->mv->aimPitch;
         while (ang > 180.0f) {
             ang -= 360.0f;
@@ -1353,7 +1353,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
                 if (f < 0.0f) {
                     f = 0.0f;
                 }
-                f = (sinf((D_800BE9AC & 0x3F) * 0.09815625101f) * 0.174999997f) + f;
+                f = (sinf((gTotalTicks & 0x3F) * 0.09815625101f) * 0.174999997f) + f;
                 if (f > 1.0f) {
                     f = 1.0f;
                 }
@@ -1627,7 +1627,7 @@ s32 func_1508DC24(void) {
 
             if (D_800D23B0->gameType == 0xB8) {
                 if (prev == 0x80) {
-                    func_1502EA50(&movement_obj[i]);
+                    actor_fadeFogPulse(&movement_obj[i]);
                     movement_obj[i].imune = 0;
                 }
                 movement_obj[i].mv->unk128 = cur;
@@ -1635,12 +1635,12 @@ s32 func_1508DC24(void) {
                     movement_obj[i].mv->unk12C = 600;
                 } else if (cur == 0x80) {
                     movement_obj[i].mv->unk12C = 1800;
-                    func_1502EA0C(&movement_obj[i], 0, 0, 0xFF, 0xBF, 4);
+                    actor_startFogPulse(&movement_obj[i], 0, 0, 0xFF, 0xBF, 4);
                 } else if (cur == 0x10) {
                     movement_obj[i].mv->unk12C = 3;
                 }
             } else {
-                func_15080620(i, 1, cur, 0);
+                text_lockObjectText(i, 1, cur, 0);
                 if (cur == 0 && prev != 3) {
                     movement_obj[i].mv->rt_context_b = 0;
                 }
@@ -1711,7 +1711,7 @@ s32 func_1508DC24(void) {
                         continue;
                     }
                     func_151027E8(other);
-                    func_15060F28(other, 0);
+                    actor_remove(other, 0);
                     break;
                 }
                 // matching: empty tests of the original source; without them IDO allocates registers differently
@@ -1933,9 +1933,9 @@ s32 func_1508E89C(s32 player, s32 source) {
             D_800D18A2 |= bit0;
             D_800D18A0 &= ~bit0;
             D_800D18A0 |= (1 << source);
-            tmp = func_150859AC(source, 3);
-            func_15085710(player, 2, tmp);
-            func_15085710(source, 2, 0);
+            tmp = player_getStat(source, 3);
+            player_setStat(player, 2, tmp);
+            player_setStat(source, 2, 0);
             if (D_800D23B0->seenMask != 0) {
                 D_800D23B0->seenMask &= ~bit0;
                 D_800D23B0->seenMask |= (1 << source);
@@ -1957,7 +1957,7 @@ s32 func_1508E89C(s32 player, s32 source) {
             }
             D_800D23B0->unk16C0[player] = D_800D23B0->unk16C0[source];
             savedRot = obj->mv->shotsfired;
-            func_15062800(&movement_obj[source], obj);
+            actor_swapSlots(&movement_obj[source], obj);
             if (level == 0x3F) {
                 if (obj->lifting >= 100) {
                     slot = obj->lifting - 100;

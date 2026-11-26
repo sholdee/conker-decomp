@@ -253,7 +253,7 @@ s32 func_1500B714(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri
         clamped = 62;
     }
 
-    func_1000FA64(0x4D, x, y, z, 0x8000, clamped, clamped >> 3, 0, 0, 0, 0, 0);
+    sound_addDynamicSound(0x4D, x, y, z, 0x8000, clamped, clamped >> 3, 0, 0, 0, 0, 0);
     return index;
 }
 /**

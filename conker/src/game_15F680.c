@@ -240,7 +240,7 @@ void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floo
             node->prev = NULL;
             node->model = spawn->model;
             if (spawn->flags & 0x100000) {
-                if (level == 0x3B || level == 6 || level == 0x13 || D_800BE616 != 0 ||
+                if (level == 0x3B || level == 6 || level == 0x13 || gIsMultiplayer != 0 ||
                     level == 2) {
                     node->keepLoaded = FALSE;
                 } else {
@@ -408,19 +408,19 @@ s32 func_15132DDC(ModelParticle *particle) {
     }
 
     if (particle->flags & 8) {
-        particle->vel.y += particle->gravity * D_800BE9A4;
+        particle->vel.y += particle->gravity * gFrameDelta;
     }
 
     if (particle->flags & 0x20) {
-        particle->pos.x += particle->vel.x * D_800BE9A4;
-        particle->pos.y += particle->vel.y * D_800BE9A4;
-        particle->pos.z += particle->vel.z * D_800BE9A4;
+        particle->pos.x += particle->vel.x * gFrameDelta;
+        particle->pos.y += particle->vel.y * gFrameDelta;
+        particle->pos.z += particle->vel.z * gFrameDelta;
     }
 
     if (particle->flags & 0x40) {
-        particle->rot.x += particle->rotVel.x * D_800BE9A4;
-        particle->rot.y += particle->rotVel.y * D_800BE9A4;
-        particle->rot.z += particle->rotVel.z * D_800BE9A4;
+        particle->rot.x += particle->rotVel.x * gFrameDelta;
+        particle->rot.y += particle->rotVel.y * gFrameDelta;
+        particle->rot.z += particle->rotVel.z * gFrameDelta;
     }
 
     if (particle->flags & 7) {
@@ -526,9 +526,9 @@ s32 func_151332DC(ModelParticle *particle) {
     particle->scale.y = 1.0f;
     particle->scale.z = 1.0f;
     if (particle->flags & 0x40) {
-        particle->rot.x += particle->rotVel.x * D_800BE9A4;
-        particle->rot.y += particle->rotVel.y * D_800BE9A4;
-        particle->rot.z += particle->rotVel.z * D_800BE9A4;
+        particle->rot.x += particle->rotVel.x * gFrameDelta;
+        particle->rot.y += particle->rotVel.y * gFrameDelta;
+        particle->rot.z += particle->rotVel.z * gFrameDelta;
     }
     particle->squashPhase += (s32)(576.0f * particle->invSpeed) * D_800BE9E4;
     if (particle->squashPhase < 0x80) {
@@ -628,13 +628,13 @@ s32 func_15133760(Mtx *mtx, ModelParticle *particle) {
 
 /* Ballistic step: integrate position under gravity (y gains vel.y*dt + gravity*dt*dt/2), then velocity and spin. */
 s32 func_151337C0(ModelParticle *particle) {
-    particle->pos.x += particle->vel.x * D_800BE9A4;
-    particle->pos.y += (particle->vel.y * D_800BE9A4) + (((particle->gravity * D_800BE9A4) * D_800BE9A4) * 0.5f);
-    particle->pos.z += particle->vel.z * D_800BE9A4;
-    particle->vel.y += particle->gravity * D_800BE9A4;
-    particle->rot.x += particle->rotVel.x * D_800BE9A4;
-    particle->rot.y += particle->rotVel.y * D_800BE9A4;
-    particle->rot.z += particle->rotVel.z * D_800BE9A4;
+    particle->pos.x += particle->vel.x * gFrameDelta;
+    particle->pos.y += (particle->vel.y * gFrameDelta) + (((particle->gravity * gFrameDelta) * gFrameDelta) * 0.5f);
+    particle->pos.z += particle->vel.z * gFrameDelta;
+    particle->vel.y += particle->gravity * gFrameDelta;
+    particle->rot.x += particle->rotVel.x * gFrameDelta;
+    particle->rot.y += particle->rotVel.y * gFrameDelta;
+    particle->rot.z += particle->rotVel.z * gFrameDelta;
     return 1;
 }
 

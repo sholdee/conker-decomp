@@ -116,7 +116,7 @@ void func_150B0D20(DDB60Effect *effect) {
         }
     }
     if (emit) {
-        data->timer += (D_8009F860[emit] + func_150ADA68() * D_8009F868[emit]) * D_800BE9A4;
+        data->timer += (D_8009F860[emit] + func_150ADA68() * D_8009F868[emit]) * gFrameDelta;
         if (data->timer > 1.0f) {
             if (func_1515C0F8(owner, &refVel) == 0) {
                 refVel = &D_800A5480;

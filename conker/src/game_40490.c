@@ -344,7 +344,7 @@ s32 func_15013778(TriggerZone *obj) {
             memcpy((u8 *)effect + 0x28, &packet, sizeof(packet));
         }
         height = obj->ySize;
-        func_1000FA64(0x67C, obj->x, obj->y + height, obj->z,
+        sound_addDynamicSound(0x67C, obj->x, obj->y + height, obj->z,
                       12000, height * 2, height / 2, func_1000EF40, 0, 0, 8, 0);
     }
     return 1;
@@ -450,7 +450,7 @@ s32 func_150139AC(TriggerZone *obj, s32 index) {
     }
 
     if (entry->unk33 != 0) {
-        data.unk44 = func_1000FA64(0x4D, obj->x, obj->y, obj->z, 24000, 1000, 300, 0, NULL, 0, 0, 0);
+        data.unk44 = sound_addDynamicSound(0x4D, obj->x, obj->y, obj->z, 24000, 1000, 300, 0, NULL, 0, 0, 0);
     } else {
         data.unk44 = 0;
     }

@@ -317,7 +317,7 @@ void func_151412BC(void) {
                         params = &cur->params;
                         for (j = 0; j <= D_80082FA0; j++) {
                             if (params->shape.screenX[j] >= 0 && params->shape.screenX[j] < D_800BE620 && params->shape.screenY[j] >= 0 && params->shape.screenY[j] < D_800BE624) {
-                                params->shape.zbufSample[j] = D_800BE9C4[params->shape.screenX[j] + params->shape.screenY[j] * D_800BE620];
+                                params->shape.zbufSample[j] = gZBuffer[params->shape.screenX[j] + params->shape.screenY[j] * D_800BE620];
                             } else {
                                 params->shape.zbufSample[j] = 0x7FFF;
                             }
@@ -352,7 +352,7 @@ s32 func_15141478(GlowObj *obj) {
 
     params = &obj->params;
     flicker = &obj->params.anim.flicker;
-    flicker->timer -= D_800BE9A4;
+    flicker->timer -= gFrameDelta;
     if (flicker->timer < 0.0f) {
         flicker->timer = func_150ADA68() * flicker->period;
         if (func_150ADA20() & 3) {
@@ -373,7 +373,7 @@ s32 func_15141564(GlowObj *obj) {
     // matching: (*pulse).base rather than pulse->base changes IDO's FP load order
     obj->params.shape.scale = pulse->amplitude * sinf(pulse->phase) + (*pulse).base;
     phase = &pulse->phase;
-    *phase = pulse->speed * D_800BE9A4 + *phase;
+    *phase = pulse->speed * gFrameDelta + *phase;
     *phase = func_15144B68(*phase);
     return 1;
 }
@@ -395,7 +395,7 @@ s32 func_151415D4(GlowObj *obj) {
         t = 1.0f - (env->time - env->fallStart) * env->rampRate;
         obj->params.shape.scale = env->base + env->range * t;
     }
-    env->time = env->time + D_800BE9A4;
+    env->time = env->time + gFrameDelta;
     while (env->period < env->time) {
         env->time = env->time - env->period;
     }

@@ -54,8 +54,8 @@ void func_150D2924(SparkEffect *obj) {
     s16 *record;
 
     emitter = &obj->data.emitter;
-    emitter->spawnAccum += emitter->rate * D_800BE9A4;
-    emitter->elapsed += D_800BE9A4;
+    emitter->spawnAccum += emitter->rate * gFrameDelta;
+    emitter->elapsed += gFrameDelta;
     if (emitter->spawnAccum > 1.0f) {
         ParticleDef54 spawn;
         void *spark;
@@ -203,13 +203,13 @@ Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index) {
 s32 func_150D317C(RingSparkParticle *particle) {
     SparkMotion *motion = &particle->motion;
 
-    motion->phaseX += motion->phaseSpeedX * D_800BE9A4;
-    motion->phaseY += motion->phaseSpeedY * D_800BE9A4;
+    motion->phaseX += motion->phaseSpeedX * gFrameDelta;
+    motion->phaseY += motion->phaseSpeedY * gFrameDelta;
     motion->phaseX = func_15144B68(motion->phaseX);
     motion->phaseY = func_15144B68(motion->phaseY);
     motion->posX = sinf(motion->phaseX) * motion->amplitudeX + motion->baseX;
     motion->posY = sinf(motion->phaseY) * motion->amplitudeY + motion->baseY;
-    motion->life -= D_800BE9A4;
+    motion->life -= gFrameDelta;
     particle->unk5C = motion->fadeScale * motion->life;
     if (motion->life > 0.0f) {
         return 1;

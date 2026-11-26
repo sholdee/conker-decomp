@@ -52,7 +52,7 @@ void func_1512A390(Camera *arg0) {
         targetHeight = arg0->mv->height;
     } else {
         flag4E = 0;
-        func_1507C3E0(arg0->CharPtr, &height, &width, &depth);
+        actor_computeSize(arg0->CharPtr, &height, &width, &depth);
         targetHeight = height;
     }
     if (!arg0->AvailableModes & 0x40) { // sic: (!unk84) & 0x40 is always 0, but the original computes it
@@ -78,7 +78,7 @@ void func_1512A390(Camera *arg0) {
         func_15128774(arg0, arg0->CharPtr);
     }
     if (-10000.0f == arg0->unk35C) {
-        if (D_800BE616 != 0) {
+        if (gIsMultiplayer != 0) {
             arg0->unk35C = arg0->CharPtr->floorY;
         } else {
             arg0->unk35C = 10000.0f;
@@ -279,7 +279,7 @@ void func_1512AD54(Camera *arg0) {
 /* Runs the z-buffer occlusion check (func_1512AD54) when the camera mode allows it; otherwise marks the
  * check as off and arms the unk5FC/unk5FE countdowns. */
 void func_1512B100(Camera *arg0) {
-    if ((arg0->Mode & ~0x100) && (D_800BEAC0 == 0) && (D_800C3671 == 0)) {
+    if ((arg0->Mode & ~0x100) && (gPaused == 0) && (D_800C3671 == 0)) {
         if (arg0->Mode != 0x40) {
             if ((arg0->AvailableModes & 8) && !(arg0->AvailableModes & 0x200) && (arg0->Snap == 0)) {
                 if (!(arg0->SpecialFlags & 0x80) && !(arg0->SpecialFlags & 0x40)) {

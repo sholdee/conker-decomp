@@ -83,7 +83,7 @@ void func_1517E134(LensFlare *flare) {
     func_10004074(flare);
 }
 
-/* Samples the z-buffer (D_800BE9C4) under each on-screen flare. */
+/* Samples the z-buffer (gZBuffer) under each on-screen flare. */
 void func_1517E1AC(void) {
     LensFlare *cur;
     f32 x;
@@ -94,7 +94,7 @@ void func_1517E1AC(void) {
         if (x >= 0.0f && x < D_800BE620) {
             y = cur->screenY;
             if (y >= 0.0f && y < D_800BE624) {
-                cur->zbufSample = D_800BE9C4[(s32)x + (s32)y * D_800BE620];
+                cur->zbufSample = gZBuffer[(s32)x + (s32)y * D_800BE620];
             }
         }
     }

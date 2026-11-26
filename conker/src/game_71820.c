@@ -125,7 +125,7 @@ void func_15044660(Actor *obj, f32 x, f32 y, f32 z) {
     s32 half;
     s32 index;
 
-    func_1507C3E0(obj, &height, &unk2C, &unk2A);
+    actor_computeSize(obj, &height, &unk2C, &unk2A);
     if (obj->type == 0x2D || obj->type == 0x2E || obj->type == 0x2C) {
         D_800CBDDC = 0.0f;
         D_800CBDD8 = height;
@@ -309,19 +309,19 @@ s32 func_15044CE4(TriggerVolume *volume) {
     return func_15044B78(volume);
 }
 
-/* Check 2: calls func_1505D1C4 at the node's position with its depth; never fires. */
+/* Check 2: calls actor_runAttackAt at the node's position with its depth; never fires. */
 s32 func_15044D40(TriggerVolume *volume) {
-    func_1505D1C4(volume->node.x, volume->node.y, volume->node.z, volume->depth, 0xFF, 0, 0, 0);
+    actor_runAttackAt(volume->node.x, volume->node.y, volume->node.z, volume->depth, 0xFF, 0, 0, 0);
     return FALSE;
 }
 
-/* Trigger actions 1-4: hit the player with a func_1505D024 type unless stunned or immune. */
+/* Trigger actions 1-4: hit the player with a actor_hitScripted type unless stunned or immune. */
 
 void func_15044DA0(void) {
     if (movement_obj[0].stunned || movement_obj[0].imune) {
         return;
     }
-    func_1505D024(&movement_obj[0], 5, movement_obj[0].langle, -1);
+    actor_hitScripted(&movement_obj[0], 5, movement_obj[0].langle, -1);
 }
 
 void func_15044DE8(void) {
@@ -329,7 +329,7 @@ void func_15044DE8(void) {
         return;
     }
     if (D_800C35EA[0] != 1) {
-        func_1505D024(&movement_obj[0], 4, movement_obj[0].langle, -1);
+        actor_hitScripted(&movement_obj[0], 4, movement_obj[0].langle, -1);
     }
 }
 
@@ -337,14 +337,14 @@ void func_15044E40(void) {
     if (movement_obj[0].stunned || movement_obj[0].imune) {
         return;
     }
-    func_1505D024(&movement_obj[0], 0x40, movement_obj[0].langle, -1);
+    actor_hitScripted(&movement_obj[0], 0x40, movement_obj[0].langle, -1);
 }
 
 void func_15044E88(void) {
     if (movement_obj[0].stunned || movement_obj[0].imune) {
         return;
     }
-    func_1505D024(&movement_obj[0], 1, movement_obj[0].langle, -1);
+    actor_hitScripted(&movement_obj[0], 1, movement_obj[0].langle, -1);
 }
 
 /* One candidate triangle returned by the func_150A3A70/func_150A4FA0/func_150A43E0 grid queries. */

@@ -259,11 +259,11 @@ void func_1501A39C(void) {
     Gfx *gfx;
 
     for (i = 0; i < 2; i++) {
-        gfx = D_800BE9C8[i];
+        gfx = gDisplayListBuffers[i];
         gSPSegment(gfx++, 0, 0);
         gSPSegment(gfx++, 0, 0);
         gSPDisplayList(gfx++, D_8002C930);
-        gDPSetDepthImage(gfx++, D_800BE9C4);
+        gDPSetDepthImage(gfx++, gZBuffer);
         gSPViewport(gfx++, &RENDER_VIEWS[0].viewports[i]);
         D_800BE9D8[i] = gfx;
     }

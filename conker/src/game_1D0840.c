@@ -36,7 +36,7 @@ void func_151A3390(Actor *owner, u8 arg1) {
     func_151A3504(&params, arg1);
     func_151A4590(owner, arg1);
     func_151A499C(owner, arg1);
-    func_10010154(0x1AA, owner, 0x55F0, 1000, 4000);
+    sound_playActorSound2(0x1AA, owner, 0x55F0, 1000, 4000);
     origin.x = 0.0f;
     origin.y = 0.0f;
     origin.z = 0.0f;
@@ -103,7 +103,7 @@ s32 func_151A361C(BoneTrailEffect *effect) {
             point->intensity -= D_800BE9E4 * state->params.fadeRate;
         }
         point->alpha = 0xFF;
-        point->width += D_800BE9A4 * state->params.widthGrowth;
+        point->width += gFrameDelta * state->params.widthGrowth;
         if (point->intensity < 0) {
             state->flags &= ~TRAIL_FADE_TAIL;
             while (i != effect->head.start) {
@@ -186,7 +186,7 @@ s32 func_151A37C0(BoneTrailEffect *effect) {
         f32 widthStep;
 
         invPending = 1.0f / state->pending;
-        age = state->age + D_800BE9A4;
+        age = state->age + gFrameDelta;
         pos = state->lastPos;
         ageStep = age * invPending;
         width = state->params.width + state->params.widthGrowth * age;
@@ -505,7 +505,7 @@ void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHead
     spawn.pos.x = x;
     spawn.pos.y = y;
     spawn.pos.z = z;
-    scale = 0.0869999975f * D_800BE9A8;
+    scale = 0.0869999975f * gFrameDeltaInv;
     spawn.vel.x = -dirX * scale;
     spawn.vel.y = -dirY * scale;
     spawn.vel.z = -dirZ * scale;
@@ -635,7 +635,7 @@ void func_151A4A38(BoneEmitterTask *task) {
         return;
     }
 
-    emitter->pending += emitter->rate * D_800BE9A4;
+    emitter->pending += emitter->rate * gFrameDelta;
     if (emitter->pending > 1.0f) {
         angle = (emitter->owner->angle >> 8) - 0x40;
         func_15143134(&emitter->offset, &pos, &emitter->owner->ob_matrix_ptr[emitter->bone]);

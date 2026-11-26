@@ -7,7 +7,7 @@
  * (0x228CF0) each start on a 16-byte unit boundary, and the 12 zero bytes after the last list are the
  * unit's own padding (front-end data and the jump table of game_61490 would be adjacent in one unit).
  *
- * Per-model bone remap lists: (bone, value) byte pairs terminated by 0xFF. func_1502DB84 (game_58F80)
+ * Per-model bone remap lists: (bone, value) byte pairs terminated by 0xFF. actor_computeBones (game_58F80)
  * copies the list of a model's remap set (1-based: 0 is none) into its per-bone remap buffer.
  */
 static const u8 D_80097B70[] = { 5, 2, 0xFF };

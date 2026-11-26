@@ -12,7 +12,7 @@ void func_150EC520(EmitterEffect *effect) {
 
     if (func_151464B8(effect->data.emitter.zone) == 0) {
         emitter = &effect->data.emitter;
-        emitter->accumulator += (9.04e-08f + func_150ADA68() * 9.87e-08f) * emitter->rate * D_800BE9A4;
+        emitter->accumulator += (9.04e-08f + func_150ADA68() * 9.87e-08f) * emitter->rate * gFrameDelta;
         if (emitter->accumulator > 1.0f) {
             point.w = 0.0f;
             do {
@@ -35,7 +35,7 @@ void func_150EC6B0(EmitterEffect *effect) {
     ParticleSourceData *source;
 
     source = &effect->data.source;
-    source->accumulator += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
+    source->accumulator += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * gFrameDelta;
     if (source->accumulator > 1.0f) {
         ParticleDesc spawn;
         WobbleData data;
@@ -130,7 +130,7 @@ void func_150ECB8C(EmitterEffect *effect) {
     if ((owner->type == 0) || (owner->unique_id != fog->ownerId)) {
         effect->base.header.state = -1;
     } else {
-        func_1502EA98(owner, fog->r, fog->g, fog->b, fog->a, FALSE, fog->rate);
+        actor_flashFog(owner, fog->r, fog->g, fog->b, fog->a, FALSE, fog->rate);
     }
 }
 

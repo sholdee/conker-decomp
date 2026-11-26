@@ -2,7 +2,7 @@
 #include "controller.h"
 #include "siint.h"
 
-/* One recorded frame of controller input, replayed by func_151DD8C0. */
+/* One recorded frame of controller input, replayed by os_playDemoInput. */
 struct DemoInput {
     s8 x;
     s8 y;
@@ -12,8 +12,8 @@ struct DemoInput {
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c). */
 OSPifRam D_800E0A30; /* __osEepPifRam */
-void *D_800E0A70; /* the recorded input: 500 struct DemoInput frames */
-s32 D_800E0A74;
+void *gDemoInput; /* the recorded input: 500 struct DemoInput frames */
+s32 gDemoInputIndex;
 
 #include "functions.h"
 #include "variables.h"
@@ -22,7 +22,7 @@ s32 D_800E0A74;
  * func_151DD4E0 = osEepromWrite: the osEepromRead shape (game_20A5F0) with `ptr += 4`
  * and no `i` local (the frame has no slot for one).
  * func_151DD65C = __osPackEepWriteData, func_151DD710 = __osEepStatus.
- * func_151DD8C0 is Rare's demo playback: it replaces the input of the first controller with the next recorded frame.
+ * os_playDemoInput is Rare's demo playback: it replaces the input of the first controller with the next recorded frame.
  */
 
 s32 func_151DD4E0(OSMesgQueue *mq, u8 address, u8 *buffer) {
@@ -142,7 +142,7 @@ s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data) {
     return data->errno;
 }
 
-void func_151DD8C0(void) {
+void os_playDemoInput(void) {
     OSContPad *input = D_800BE748;
     struct DemoInput *e;
     s32 idx;
@@ -150,8 +150,8 @@ void func_151DD8C0(void) {
     s32 time;
     u16 held;
     held = input->button & START_BUTTON;
-    idx = D_800E0A74;
-    e = (struct DemoInput *)D_800E0A70 + idx;
+    idx = gDemoInputIndex;
+    e = (struct DemoInput *)gDemoInput + idx;
     input->stick_x = e->x;
     input->stick_y = e->y;
     input->button = e->buttons | held;
@@ -164,8 +164,8 @@ void func_151DD8C0(void) {
     }
     time = e->time;
     D_800BE9E4 = time;
-    D_800E0A74 = idx + 1;
-    if (D_800E0A74 >= 0x1F3) {
-        D_800E0A74 = 0x1F3;
+    gDemoInputIndex = idx + 1;
+    if (gDemoInputIndex >= 0x1F3) {
+        gDemoInputIndex = 0x1F3;
     }
 }

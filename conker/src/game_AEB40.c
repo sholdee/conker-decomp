@@ -184,7 +184,7 @@ s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *
 }
 
 void func_15081E0C(Actor *obj, u16 part, u8 skip) {
-    if (D_800BE616 == 0) {
+    if (gIsMultiplayer == 0) {
         if (obj->energy != 0) {
             obj->energy = 7;
         }
@@ -262,7 +262,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
         case 10:
             effect = -1;
             func_15104608(hit->pos.x, hit->pos.y, hit->pos.z, self->owner);
-            func_1506AC8C(self, 2, NULL);
+            actor_runHitHandler(self, 2, NULL);
             break;
         default:
             effect = 5;
@@ -275,7 +275,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
     }
     obj = hit->obj;
     if (kind == 5 || kind == 9 || kind == 10) {
-        func_1506AC8C(self, 3, NULL);
+        actor_runHitHandler(self, 3, NULL);
     }
     if (obj->energy == 0) {
     // matching: an (unused) label here stops IDO hoisting the store out of the then-block
@@ -302,7 +302,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
             func_150B6754(0xFF, 1);
         }
     } else if (hit->hitType == 3) {
-        if (D_800BE616 == 0) {
+        if (gIsMultiplayer == 0) {
             if (obj->character_type == 0x9F || obj->character_type == 0xA0) {
                 if (1000.0f < hit->dist) {
                     longShot = 1;
@@ -317,7 +317,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
                     obj->mv->unk1AD = 1;
                 }
                 if (obj->character_type == 0x80 && hit->index == 0 && hit->pos.y - 5.5f > hit->centre.y) {
-                    func_15060A9C((func_150ADA20() & 7) + 0x2E3, obj);
+                    actor_playUntrackedSound((func_150ADA20() & 7) + 0x2E3, obj);
                 }
                 func_15138C80(obj, 0xFF, 1);
                 sound = 0x20;
@@ -326,9 +326,9 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
                         sound = 0x3D;
                     }
                 }
-                func_15060A30(0xAA, obj);
+                actor_playSound(0xAA, obj);
             } else {
-                func_15060A30(0x107, obj);
+                actor_playSound(0x107, obj);
             }
             if (kind != 11 && kind != 12 && obj->energy != 0) {
                 obj->energy = 1;
@@ -377,7 +377,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
         func_150D7120(&hit->pos, 0xFF, 1);
     }
     if (noHealth == 0) {
-        func_1505D024(obj, sound | 0x80000, (yaw - 90.0f) * 182.04444885f, self - movement_obj);
+        actor_hitScripted(obj, sound | 0x80000, (yaw - 90.0f) * 182.04444885f, self - movement_obj);
     }
     return 2;
 }

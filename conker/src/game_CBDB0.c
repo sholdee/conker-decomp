@@ -298,7 +298,7 @@ s32 func_1509EFF0(s32 sound, u32 *cmd) {
             ret = func_1509F6E8(sound, cmd[3] & 0xFFF, cmd[2], cmd[4], cmd[5]);
             break;
         case 4:
-            func_15103C14(sound, cmd[3] & 0xFFF, cmd[2], cmd[4], cmd[5]);
+            sound_playWithCooldown(sound, cmd[3] & 0xFFF, cmd[2], cmd[4], cmd[5]);
             return 0x7000;
         default:
             return 0;
@@ -313,7 +313,7 @@ s32 func_1509EFF0(s32 sound, u32 *cmd) {
 /* Script "stop sound" handler: stops the voice whose handle is in the command's top halfword. */
 s32 func_1509F248(s32 arg0, u32 *cmd) {
     if (arg0 != 0) {
-        func_100111C8((cmd[0] & 0xFFFF0000) >> 16);
+        sound_stop((cmd[0] & 0xFFFF0000) >> 16);
     }
     return 1;
 }
@@ -347,14 +347,14 @@ s32 func_1509F354(first, last, unplayed, volume, path, nearDistance, farDistance
     s32 count;
     u8 pick;
 
-    actor = func_1505EEF4(path);
+    actor = actor_findOnPath(path);
     if (volume >= 0x8000) {
         volume = 0x7FFF;
     }
     if (actor == NULL) {
         return unplayed;
     }
-    if (!func_10010894(actor)) {
+    if (!sound_isActorSound1Playing(actor)) {
         if (unplayed == 0) {
             unplayed = 0xFFFFFFFF >> (32 - (u8)(last - first + 1));
         }
@@ -363,7 +363,7 @@ s32 func_1509F354(first, last, unplayed, volume, path, nearDistance, farDistance
             pick = func_150ADA20() % (u32)count;
         } while (!((1 << pick) & unplayed));
 
-        if (func_10010344(pick + first, actor, volume, nearDistance, farDistance)) {
+        if (sound_playActorSound1(pick + first, actor, volume, nearDistance, farDistance)) {
             unplayed ^= 1 << pick;
         }
     }
@@ -377,7 +377,7 @@ void func_1509F47C(first, last, volume, objId, nearDistance, farDistance)
     WorldObject *obj;
 
     obj = func_151149AC(objId);
-    func_15114D24(obj, func_1000F568(first, (u8)(last - first + 1)), volume, nearDistance, farDistance, 0);
+    func_15114D24(obj, sound_pickVariant(first, (u8)(last - first + 1)), volume, nearDistance, farDistance, 0);
 }
 
 /* Plays a random sound from first..last at point `index` of the zones table, whose halfword at
@@ -391,13 +391,13 @@ s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance) 
     if (nearDistance >= farDistance) {
         nearDistance = farDistance - 1;
     }
-    return func_10010F88(func_1000F568(first, (u8)(last - first + 1)), volume, 0, 0, 0, point->x, point->y,
+    return func_10010F88(sound_pickVariant(first, (u8)(last - first + 1)), volume, 0, 0, 0, point->x, point->y,
                          point->z, nearDistance, farDistance);
 }
 
 /* Plays a random sound from first..last, unpositioned. */
 s32 func_1509F5A8(s32 first, s32 last, s32 volume) {
-    return func_10010F30(func_1000F568(first, (u8)(last - first + 1)), volume, 0x40, 0, 0);
+    return sound_play(sound_pickVariant(first, (u8)(last - first + 1)), volume, 0x40, 0, 0);
 }
 
 /* Plays `sound` on the actor following `path`, unless the actor is already playing one and `force` is clear. */
@@ -406,10 +406,10 @@ void func_1509F5F4(sound, volume, path, nearDistance, farDistance, force)
 {
     Actor *actor;
 
-    actor = func_1505EEF4(path);
+    actor = actor_findOnPath(path);
     if (actor != NULL) {
-        if (force || !func_10010894(actor)) {
-            func_10010344(sound, actor, volume, nearDistance, farDistance);
+        if (force || !sound_isActorSound1Playing(actor)) {
+            sound_playActorSound1(sound, actor, volume, nearDistance, farDistance);
         }
     }
 }
@@ -418,19 +418,19 @@ void func_1509F5F4(sound, volume, path, nearDistance, farDistance, force)
 void func_1509F660(s32 path, s32 secondVoice) {
     Actor *actor;
 
-    actor = func_1505EEF4(path);
+    actor = actor_findOnPath(path);
     if (actor != NULL) {
         if (secondVoice) {
-            func_10010A3C(actor);
+            sound_stopActorSound1(actor);
         } else {
-            func_100109D0(actor);
+            sound_stopActorSound2(actor);
         }
     }
 }
 
 /* Plays `sound` unpositioned. */
 s32 func_1509F6B0(s32 sound, s32 volume, s32 cents, s32 pan) {
-    return func_10010F30(sound, volume, pan, cents, 0);
+    return sound_play(sound, volume, pan, cents, 0);
 }
 
 /* Plays `sound` at the position of the actor following `path`. */
@@ -440,7 +440,7 @@ s32 func_1509F6E8(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDist
     s32 y;
     s32 z;
 
-    actor = func_1505EEF4(path);
+    actor = actor_findOnPath(path);
     if (actor == NULL) {
         return 0;
     }
@@ -457,7 +457,7 @@ void func_1509F77C(s32 handle, s32 path, s32 cents, s32 nearDistance, s32 farDis
     s32 y;
     s32 z;
 
-    actor = func_1505EEF4(path);
+    actor = actor_findOnPath(path);
     x = actor->xpos;
     y = actor->ypos;
     z = actor->zpos;

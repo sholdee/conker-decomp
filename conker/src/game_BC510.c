@@ -120,7 +120,7 @@ void func_1508F0D4(void) {
                 func_1508F7BC();
             }
         }
-        func_10010F30(0x1A6, 0x7FFF, 0x40, 0, 0);
+        sound_play(0x1A6, 0x7FFF, 0x40, 0, 0);
     } else if (D_800D2457 < movement_obj[0].energy) {
         D_800D2444 = 240;
         while (movement_obj[0].energy != D_800D2457) {
@@ -153,7 +153,7 @@ void func_1508F0D4(void) {
                 for (i = 0; i < count; i++) {
                     func_1508F7BC();
                 }
-                func_10010F30(0x1A6, 0x7FFF, 0x40, 0, 0);
+                sound_play(0x1A6, 0x7FFF, 0x40, 0, 0);
             }
         } else {
             count = D_800D2457 - D_800D2456;
@@ -203,7 +203,7 @@ void func_1508F7BC(void) {
     node->next = D_800D245C;
     D_800D245C = node;
     guMtxL2F(mtx, &D_800D2590[D_800D2456][D_800BE9C0 ^ 1]);
-    func_1503E5F8(mtx, &node->pos.x, &node->pos.y, &node->pos.z, &node->rot.x, &node->rot.y, &node->rot.z,
+    model_decomposeMatrix(mtx, &node->pos.x, &node->pos.y, &node->pos.z, &node->rot.x, &node->rot.y, &node->rot.z,
                   &unused, &unused, &unused);
     node->vel.x = (func_150ADA20() & 0xFU) + 10;
     node->vel.y = (func_150ADA20() & 0x1FU) + 20;
@@ -351,10 +351,10 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     }
     gSPPerspNormalize(gfx++, D_800D2454);
     gSPMatrix(gfx++, &D_800D23D0, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         gfx = func_150918EC(gfx);
         // matching: the 0/1 flag variable; testing the comparison directly changes the code
-        overflow = D_800BEBA4 < gfx - D_800BE9C8[D_800BE9C0] ? 1 : 0;
+        overflow = D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0] ? 1 : 0;
         if (overflow != 0) {
             return start;
         }
@@ -389,7 +389,7 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     gfx = func_15094F40(gfx);
     gfx = func_15090630(gfx);
     gfx = func_15096934(gfx);
-    overflow = D_800BEBA4 < gfx - D_800BE9C8[D_800BE9C0] ? 1 : 0;
+    overflow = D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0] ? 1 : 0;
     if (overflow != 0) {
         return start;
     }
@@ -785,7 +785,7 @@ Gfx *func_150911F4(Gfx *gfx) {
     if (D_800D24C8.alpha == 0) {
         return gfx;
     }
-    gSPDisplayList(gfx++, D_80084160);
+    gSPDisplayList(gfx++, gObjectPassBeginDL);
     gSPSetGeometryMode(gfx++, G_CULL_BACK);
     gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     gSPClearGeometryMode(gfx++, G_LIGHTING | 0x400000);
@@ -821,7 +821,7 @@ Gfx *func_150911F4(Gfx *gfx) {
         gSPSegment(gfx++, 11, tex);
     }
     gSPDisplayList(gfx++, D_800D24C8.dl);
-    gSPDisplayList(gfx++, D_80084190);
+    gSPDisplayList(gfx++, gObjectPassEndDL);
     return gfx;
 }
 
@@ -871,15 +871,15 @@ void func_150916B4(s32 x, s32 y, s32 frames, s32 style) {
     x -= 8;
     if (frames >= 0) {
         seconds = frames / 60;
-        func_15042D94((x - (((seconds / 60) >= 10) ? 5 : 0)) - 8, y, style, "%d", seconds / 60);
-        func_15042D94(x, y, style, ":%02d", seconds % 60);
-        func_15042D94(x + 16, y, style, ":%02d", hundredths);
+        text_printAt((x - (((seconds / 60) >= 10) ? 5 : 0)) - 8, y, style, "%d", seconds / 60);
+        text_printAt(x, y, style, ":%02d", seconds % 60);
+        text_printAt(x + 16, y, style, ":%02d", hundredths);
         return;
     }
 
-    func_15042D94(x - 8, y, style, "--");
-    func_15042D94(x, y, style, ": --");
-    func_15042D94(x + 16, y, style, ": --");
+    text_printAt(x - 8, y, style, "--");
+    text_printAt(x, y, style, ": --");
+    text_printAt(x + 16, y, style, ": --");
 }
 
 extern u8 D_CF1[];
@@ -888,9 +888,9 @@ extern u8 D_D13[];
 extern u8 D_D14[];
 
 /* Draws the multiplayer HUD in each player's viewport, as enabled by the D_8008FDC0 flags:
- * 0x002 an icon picked by func_150859AC(i, 3), 0x400 score, 0x800 name, 0x004 held-item icons
+ * 0x002 an icon picked by player_getStat(i, 3), 0x400 score, 0x800 name, 0x004 held-item icons
  * (repeated per count) and bars from ActorCtl field 0x12C, 0x010 two rows of bars from
- * func_150859AC(i, 4), grenade icons, 0x080 race time and lap, 0x1000 a map with player dots,
+ * player_getStat(i, 4), grenade icons, 0x080 race time and lap, 0x1000 a map with player dots,
  * 0x020 the radar (func_15093B58). */
 Gfx *func_150918EC(Gfx *gfx) {
     s32 i;
@@ -929,7 +929,7 @@ Gfx *func_150918EC(Gfx *gfx) {
     barLen = D_800873B0;
     vpWidth = D_800BE628->right - D_800BE628->left;
     gSPDisplayList(gfx++, D_80087390);
-    func_1504332C(255, 255, 255, 255);
+    text_setColor(255, 255, 255, 255);
     step = 0x400;
     if (D_8008FE1C != 1.0f) {
         step = step / D_8008FE1C;
@@ -967,7 +967,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                         gDPSetEnvColor(gfx++, 255, 255, 255, 128);
                     }
                     x = scaled[5] + vpLeft;
-                    n = func_150859AC(i, 3);
+                    n = player_getStat(i, 3);
                     // matching: both on one line (as1 orders the two loads by line number)
                     texS = D_800873C4[n & 3] << 5; texT = D_800873C8[n >> 2] << 5;
                     if (texOk) {
@@ -979,14 +979,14 @@ Gfx *func_150918EC(Gfx *gfx) {
                     if (D_8008FE1C != 1.0f) {
                         x -= 8;
                     }
-                    func_15042D94(x, y, 0x41, "%d", D_8008FDD4->score[i]);
+                    text_printAt(x, y, 0x41, "%d", D_8008FDD4->score[i]);
                 }
                 if (D_8008FDC0 & 0x800) {
                     x = (vpWidth >> 1) + vpLeft + 16;
                     if (D_8008FE1C != 1.0f) {
                         x += 16;
                     }
-                    func_15042D94(x, y, 0x41, "(%s)", D_800E0BD8[8 + D_800E0AC0[i]]);
+                    text_printAt(x, y, 0x41, "(%s)", D_800E0BD8[8 + D_800E0AC0[i]]);
                 }
             }
         }
@@ -1104,7 +1104,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                     if (!texLoaded) {
                         gfx = func_15091534(gfx, 0, &texOk);
                     }
-                    s = func_150859AC(i, 4);
+                    s = player_getStat(i, 4);
                     x = scaled[22] + vpLeft;
                     h = ((s + 1) >> 1) * 5;
                     if (h != 0 && texOk) {
@@ -1278,7 +1278,7 @@ Gfx *func_150918EC(Gfx *gfx) {
         lapCount = D_800E0BE0[7];
         for (i = 0; i <= D_80082FA0; i++) {
             rowY = (s32)D_800BE628[i].top + 5;
-            func_1504332C(255, 255, 255, 255);
+            text_setColor(255, 255, 255, 255);
             if (D_800872A0[i].lastLapTime > 0) {
                 x = D_800BE628[i].left;
                 func_150916B4(x + 23, rowY + 25, D_800872A0[i].lastLapTime, 0xC0);
@@ -1286,14 +1286,14 @@ Gfx *func_150918EC(Gfx *gfx) {
             x = (s32)D_800BE628[i].left + (vpWidth >> 1);
             icon = (s8)(D_800872A0[i].lap + 1); /* the current lap */
             if (icon <= lapCount) {
-                func_15042D94(x, rowY, 0xC1, "%s", D_800E0BD8[8 + D_800E0AC0[i]]);
-                func_15042D94((s32)D_800BE628[i].left + 29, rowY + 14, 0xC1, "lap %d/%d", icon, lapCount);
+                text_printAt(x, rowY, 0xC1, "%s", D_800E0BD8[8 + D_800E0AC0[i]]);
+                text_printAt((s32)D_800BE628[i].left + 29, rowY + 14, 0xC1, "lap %d/%d", icon, lapCount);
                 func_150916B4(x, (s32)D_800BE628[i].bottom - 12, D_800872A0[i].raceTime, 0xC0);
             }
         }
     }
 
-    if (D_800BEAC1 == 0 && (D_8008FDC0 & 0x1000)) {
+    if (gPauseRequested == 0 && (D_8008FDC0 & 0x1000)) {
         s32 shift;
         s32 size;
         f32 scale;
@@ -1322,7 +1322,7 @@ Gfx *func_150918EC(Gfx *gfx) {
         gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 63 << G_TEXTURE_IMAGE_FRAC, 63 << G_TEXTURE_IMAGE_FRAC);
         gDPSetOtherMode(gfx++, 0x002C3F, 0x00504244);
         for (i = 0; i < D_8008FD90; i++) {
-            if (func_150859AC(i, 3) > 0) {
+            if (player_getStat(i, 3) > 0) {
                 rowY = scaled[21] + ((s32)D_800BE628[i].top + scaled[24]);
                 rowY *= 4;
                 gDPPipeSync(gfx++);
@@ -1334,7 +1334,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                 gDPPipeSync(gfx++);
                 gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
                 for (k = 0, player = movement_obj; k != 25; k++, player++) {
-                    if (k == i || (k < D_8008FD8C && func_150859AC(k, 3) > 0) || player->unk328 != 0) {
+                    if (k == i || (k < D_8008FD8C && player_getStat(k, 3) > 0) || player->unk328 != 0) {
                         gDPPipeSync(gfx++);
                         if (k == i) {
                             gDPSetEnvColor(gfx++, 0, 255, 0, 255);
@@ -1353,7 +1353,7 @@ Gfx *func_150918EC(Gfx *gfx) {
             }
         }
     }
-    if (D_800BEAC1 == 0 && (D_8008FDC0 & 0x20)) {
+    if (gPauseRequested == 0 && (D_8008FDC0 & 0x20)) {
         gfx = func_15093B58(gfx, step, scaled, 0x2C30, 0);
     }
     return gfx;
@@ -1467,7 +1467,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
     gDPSetOtherMode(gfx++, renderMode | 0xF, 0x00504244);
 
     for (i = 0; i < D_8008FD90; i++) {
-        if (func_150859AC(i, 3) > 0) {
+        if (player_getStat(i, 3) > 0) {
             s32 halfSize;
             s32 dsdx;
             s32 x;
@@ -1544,9 +1544,9 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                     if (other->unk328 != 0) {
                         color = other->unk328 - 1;
                         if (j < D_8008FD8C) {
-                            if (func_150859AC(j, 3) <= 0) {
+                            if (player_getStat(j, 3) <= 0) {
                                 color = -1;
-                            } else if (func_150859AC(j, 4) <= 0) {
+                            } else if (player_getStat(j, 4) <= 0) {
                                 color = -1;
                             } else if (D_800E0BCC & (1 << j)) {
                                 color = -1;

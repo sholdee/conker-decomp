@@ -208,7 +208,7 @@ Gfx *func_151106A8(Gfx *gfx) {
         gDPPipeSync(gfx++);
         gDPSetOtherMode(gfx++, 0x302C0F, 4);
         gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
-        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_800BE9C4);
+        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, gZBuffer);
         gDPSetFillColor(gfx++, (GPACK_ZDZ(G_MAXFBZ, 0) << 16) | GPACK_ZDZ(G_MAXFBZ, 0));
         gfx = func_1501A490(gfx, 0xFF, 0, 0, 0, 0);
         gDPFillRectangle(gfx++, 2, 0, D_800BE620 - 2, D_800BE624);

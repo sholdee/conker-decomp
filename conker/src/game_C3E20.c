@@ -351,7 +351,7 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
         return sqrtf(dx * dx + dz * dz);
     case 33:
         // Which side of the actor's facing direction a path object is on: -1 or 1 (-1 if not found).
-        target = func_1505EEF4(args[2] & 0xFFF);
+        target = actor_findOnPath(args[2] & 0xFFF);
         if (target == NULL) {
             return -1;
         }

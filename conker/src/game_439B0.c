@@ -8,20 +8,20 @@ u8 D_800BE580[9]; // bit set over the 0x43 text ids (func_15016588 clears only t
 #include "functions.h"
 #include "variables.h"
 
-void func_15016500(void) {
-    D_800D1940 = 0;
-    D_800D1941 = 0;
-    D_800D1944 = 0;
-    D_800D1948 = 0;
-    D_800D194C = 0;
-    D_800D1950 = 0;
-    bzero(&D_800D1958, sizeof(TextBoxConfig));
-    D_800D1988 = 0.0f;
-    D_800D198C = 0.0f;
-    D_800D1990 = 0.0f;
-    D_800D1994 = 0;
-    D_800D1995 = 0;
-    D_800D1998 = 0;
+void text_resetContextText(void) {
+    gContextTextId = 0;
+    gContextTextOpen = 0;
+    gContextText = 0;
+    gContextHeaderText = 0;
+    gContextCombinedText = 0;
+    gContextTextBox = 0;
+    bzero(&gContextTextBoxConfig, sizeof(TextBoxConfig));
+    gContextTextScreenX = 0.0f;
+    gContextTextScreenY = 0.0f;
+    gContextTextAngle = 0.0f;
+    gContextSoundNext = 0;
+    gContextSoundCount = 0;
+    gContextSounds = 0;
 }
 
 /* Builds D_800BE580: bit i is set when the data block (0x1A, D_800BEAAB, i) has a non-zero size. */

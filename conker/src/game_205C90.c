@@ -33,7 +33,7 @@ s32 func_151D87E0(u8 playerMask) {
 }
 
 /* Spawns a rumble object (kind 0x3F) with `dataSize` bytes of extra data and starts the rumble.
- * Returns NULL while D_800E0B94 or any of D_800BEAC0..3 is set, when no player in the mask has
+ * Returns NULL while D_800E0B94 or any of gPaused..3 is set, when no player in the mask has
  * a rumble pak, or when any of those players' views is irised or fading. */
 RumbleObj *func_151D8868(RumbleParams *params, s32 dataSize, u8 arg2, s32 arg3) {
     RumbleObj *obj;
@@ -45,7 +45,7 @@ RumbleObj *func_151D8868(RumbleParams *params, s32 dataSize, u8 arg2, s32 arg3) 
     if (!func_151D87E0(params->playerMask)) {
         return NULL;
     }
-    if (D_800BEAC0 != 0 || D_800BEAC1 != 0 || D_800BEAC2 != 0 || D_800BEAC3 != 0) {
+    if (gPaused != 0 || gPauseRequested != 0 || D_800BEAC2 != 0 || D_800BEAC3 != 0) {
         return NULL;
     }
     {

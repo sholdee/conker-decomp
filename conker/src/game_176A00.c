@@ -181,8 +181,8 @@ s32 func_15149BF4(ChannelParticle *particle) {
 s32 func_15149C58(ChannelParticle *particle) {
     particle->head.def.width -= particle->head.def.width * particle->motion.shrinkRate;
     particle->head.def.height -= particle->head.def.height * particle->motion.shrinkRate;
-    particle->head.def.scale.y += particle->head.def.scale.x * D_800BE9A4;
-    particle->head.def.pos.y += particle->head.def.scale.y * D_800BE9A4;
+    particle->head.def.scale.y += particle->head.def.scale.x * gFrameDelta;
+    particle->head.def.pos.y += particle->head.def.scale.y * gFrameDelta;
     if (particle->motion.maxHeight < particle->head.def.pos.y) {
         return 0;
     }

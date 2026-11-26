@@ -16,7 +16,7 @@ static const TextureChoices D_800A2160 = { { 0x60, 0x61, 0x62, 0x63 } };
 u8 D_80088BB0 = 9; // bone of the muzzle points above (game_981E0 uses it too)
 
 /*
- * Shot effects for `obj`: a muzzle effect and particles when it has bones, three func_1505D1C4
+ * Shot effects for `obj`: a muzzle effect and particles when it has bones, three actor_runAttackAt
  * spawns along `direction` if `arg1`, a func_15081690 call if `arg2`, then a camera event.
  */
 void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
@@ -76,7 +76,7 @@ void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     func_150FFC3C(obj);
 }
 
-/* Spawns func_1505D1C4 effect `type` at `position`, owned by `obj`. */
+/* Spawns actor_runAttackAt effect `type` at `position`, owned by `obj`. */
 void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) {
     s32 flags;
     s32 index;
@@ -85,7 +85,7 @@ void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) {
     flags = type | 0x60000;
     index = obj - movement_obj;
     angle = obj->langle;
-    func_1505D1C4(position->x, position->y, position->z, flags, index, angle, 0, (s32)origin);
+    actor_runAttackAt(position->x, position->y, position->z, flags, index, angle, 0, (s32)origin);
 }
 
 /* Writes the world position of the muzzle point D_800A2130 on bone D_80088BB0 of `obj` to `out`. */

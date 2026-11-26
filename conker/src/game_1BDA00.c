@@ -23,7 +23,7 @@ void func_15190550(AnchorEmitter *obj, ActorMsg *msg, u8 event) {
 }
 
 /*
- * Advances the trigger timer by D_800BE9E4 and calls func_1505D024 (with the target's index in
+ * Advances the trigger timer by D_800BE9E4 and calls actor_hitScripted (with the target's index in
  * movement_obj) once per elapsed interval; then sets the linked state's unk46 to 1000 if unk84 is clear.
  */
 s32 func_151905BC(PeriodicObject *obj) {
@@ -33,7 +33,7 @@ s32 func_151905BC(PeriodicObject *obj) {
     obj->trigger.elapsed += D_800BE9E4;
     trigger = &obj->trigger;
     while (trigger->elapsed >= trigger->interval) {
-        func_1505D024(obj->emitter.group.actor, 0x60021, 0, trigger->target - movement_obj);
+        actor_hitScripted(obj->emitter.group.actor, 0x60021, 0, trigger->target - movement_obj);
         trigger->elapsed -= trigger->interval;
     }
     state = obj->emitter.group.actor->mv;

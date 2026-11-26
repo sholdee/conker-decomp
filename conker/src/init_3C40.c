@@ -331,7 +331,7 @@ void func_10004308(void) {
 
     mask = osSetIntMask(1);
     block = D_800380B4;
-    func_15042D50();
+    text_clearQueue();
     for (; block != NULL; block = block->next) {
         tag = block->taggedSize >> 24;
         if (tag == 1 || tag == 2 || tag == 3 || tag == 4) {

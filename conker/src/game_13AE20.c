@@ -253,7 +253,7 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
         alpha = shadow->alpha;
         switch (shadow->ownerType) {
             case 0:
-                ownerAlpha = func_1506196C(shadow->owner, view);
+                ownerAlpha = actor_getAlpha(shadow->owner, view);
                 break;
             case 1: {
                 WorldObject *prop = shadow->owner;

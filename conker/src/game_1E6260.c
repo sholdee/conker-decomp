@@ -169,13 +169,13 @@ void func_151B8DB0(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
 s32 func_151B9214(LampParticle *particle) {
     LampSwing *swing = &particle->swing;
 
-    swing->phase += swing->speed * D_800BE9A4;
+    swing->phase += swing->speed * gFrameDelta;
     swing->phase = func_15144B68(swing->phase);
     swing->out = sinf(swing->phase) * swing->amp;
     if (swing->timer > 0.0f) {
-        swing->timer -= D_800BE9A4;
-        swing->speed += swing->speedRate * D_800BE9A4;
-        swing->amp += swing->ampRate * D_800BE9A4;
+        swing->timer -= gFrameDelta;
+        swing->speed += swing->speedRate * gFrameDelta;
+        swing->amp += swing->ampRate * gFrameDelta;
     } else {
         swing->speed += (swing->targetSpeed - swing->speed) * 0.0234f;
         swing->amp += (swing->targetAmp - swing->amp) * 0.0234f;

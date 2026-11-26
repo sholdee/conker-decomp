@@ -38,8 +38,8 @@ typedef struct OffsetEntry {
 void func_15004D50(void);
 
 /* game_322B0.c */
-void func_15004E00(void);
-void func_15004E80(void);
+void model_resetParts(void);
+void model_allocBonePools(void);
 
 /* game_323B0.c */
 void func_15004F00(void);
@@ -49,13 +49,13 @@ void func_15004F10(void);
 void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2);
 
 /* game_623D0.c */
-void func_15034F20(void);
-void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx, MtxF *dstMtx, s32 count, f32 planeX, f32 planeY, f32 planeZ, f32 unused, f32 angle, f32 objX, f32 objY, f32 objZ, f32 fadeStart, f32 fadeEnd, f32 maxAlpha, s32 srcIsFixed, s32 dstToFixed);
-ReflectionEntry *func_150356C8(void);
-s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY);
-void func_15035808(s32 mode, s32 objIndex, f32 planeX, f32 planeY, f32 planeZ, f32 unused, f32 angle, f32 fadeStart, f32 fadeEnd, f32 maxAlpha);
-Gfx *func_15035D6C(Gfx *gfx, ModelAttachment *att, s32 red, s32 green, s32 blue);
-Gfx *func_15035FE8(Gfx *gfx, s32 player);
+void model_clearReflections(void);
+void model_mirrorMatrices(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx, MtxF *dstMtx, s32 count, f32 planeX, f32 planeY, f32 planeZ, f32 unused, f32 angle, f32 objX, f32 objY, f32 objZ, f32 fadeStart, f32 fadeEnd, f32 maxAlpha, s32 srcIsFixed, s32 dstToFixed);
+ReflectionEntry *model_allocReflection(void);
+s32 model_isReflectionCulled(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY);
+void model_queueReflection(s32 mode, s32 objIndex, f32 planeX, f32 planeY, f32 planeZ, f32 unused, f32 angle, f32 fadeStart, f32 fadeEnd, f32 maxAlpha);
+Gfx *model_drawAttachmentReflections(Gfx *gfx, ModelAttachment *att, s32 red, s32 green, s32 blue);
+Gfx *model_drawReflections(Gfx *gfx, s32 player);
 void func_15036148(void);
 
 /* game_63A20.c */
@@ -67,49 +67,49 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view);
 /* game_6A3D0.c */
 extern s32 *D_800C4020[187];           // per model: first vertex of each part
 extern u16 D_800C4310[187];            // per model: part count (indexed by VtxMorphGroup.kind)
-extern Gfx **D_800C4488[187];          // per model: display-list parts
-extern u16 D_800C4778[187];            // per model: display-list part count
+extern Gfx **gModelDlParts[187];          // per model: display-list parts
+extern u16 gModelDlPartCounts[187];            // per model: display-list part count
 extern Gfx **D_800C48F0[187];          // per model: display list table (ModelHeader dlists2)
-extern void *D_800C4BE0[187];          // per model: bone table (16-byte entries)
-extern u16 D_800C4ED0[187];            // per model: bone count
-extern ObjTexture *D_800C5338[187];    // per model: texture table
-extern u16 D_800C5628[187];            // per model: texture count
-extern u16 D_800C57A0[187];            // per model: vertex count
+extern void *gModelBones[187];          // per model: bone table (16-byte entries)
+extern u16 gModelBoneCounts[187];            // per model: bone count
+extern ObjTexture *gModelTextures[187];    // per model: texture table
+extern u16 gModelTextureCounts[187];            // per model: texture count
+extern u16 gModelVertexCounts[187];            // per model: vertex count
 extern u16 D_800C5918[187];            // per model: triangle weight, see func_1503D984
-extern u16 D_800C5A90[187];            // per model: animation count
-extern VtxRun *D_800C5C08[187];        // per model: vertex runs (D_800C5EF8[id] of them)
-extern u16 D_800C5EF8[187];            // per model: vertex run count
-extern VtxTri *D_800C6070[187];        // per model: triangles
-extern TexCoord *D_800C6360[187];      // per model: saved texture coordinates (func_1503D804)
-s32 func_1503CF20(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags);
-void func_1503D368(s8 *dl, s32 base);
-void func_1503D438(s32 *offsetSlot, s32 base);
-void func_1503D45C(OffsetEntry *entry, s32 base);
-void func_1503D484(ActorAnim *anim, s32 id);
-void func_1503D510(s32 id);
+extern u16 gModelAnimCounts[187];            // per model: animation count
+extern VtxRun *gModelVtxRuns[187];        // per model: vertex runs (gModelVtxRunCounts[id] of them)
+extern u16 gModelVtxRunCounts[187];            // per model: vertex run count
+extern VtxTri *gModelTris[187];        // per model: triangles
+extern TexCoord *gModelSavedTexCoords[187];      // per model: saved texture coordinates (model_saveTexCoords)
+s32 model_load(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags);
+void model_relocateDisplayList(s8 *dl, s32 base);
+void model_relocateOffset(s32 *offsetSlot, s32 base);
+void model_relocateOffsetList(OffsetEntry *entry, s32 base);
+void model_relocateAnimTable(ActorAnim *anim, s32 id);
+void model_shareAnimTable(s32 id);
 s32 func_1503D5F0(s32 id);
-s32 func_1503D660(s32 id, s32 arg1);
+s32 model_loadAnimTable(s32 id, s32 arg1);
 s32 func_1503D774(s32 id, s32 arg1);
-s32 func_1503D804(s32 id);
+s32 model_saveTexCoords(s32 id);
 void func_1503D984(s32 id);
 s32 func_1503DA3C(s32 id, s32 index);
-s32 func_1503DA9C(Actor *obj, s32 id, s32 model, s32 loadTextures);
-s32 func_1503DC3C(s32 id);
-void func_1503DD1C(s32 id);
+s32 model_loadForActor(Actor *obj, s32 id, s32 model, s32 loadTextures);
+s32 model_loadTextures(s32 id);
+void model_freeTextures(s32 id);
 
 /* game_6B320.c */
-extern ObjPartsState D_800C6660[25]; // per object: its parts effect state
-void func_1503DE70(Actor *obj, s32 kind, s32 variant);
+extern ObjPartsState gObjPartsStates[25]; // per object: its parts effect state
+void model_breakIntoParts(Actor *obj, s32 kind, s32 variant);
 void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi);
-void func_1503DF48(s32 objIndex);
-s32 func_1503E1F4(s32 partIndex, s32 objIndex);
-void func_1503E260(s32 objIndex);
-void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s32 noParent);
-void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ, f32 *scaleX, f32 *scaleY, f32 *scaleZ);
-void func_1503E82C(s32 objIndex);
-void func_1503EA54(s32 objIndex);
-void func_1503EB78(ObjPart *part, f32 spreadXZ, f32 spreadY, s32 strong);
-void func_1503ECA0(s32 objIndex);
+void model_updateParts(s32 objIndex);
+s32 model_isPartSelected(s32 partIndex, s32 objIndex);
+void model_stopParts(s32 objIndex);
+void model_initPart(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s32 noParent);
+void model_decomposeMatrix(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ, f32 *scaleX, f32 *scaleY, f32 *scaleZ);
+void model_rebuildBonesFromParts(s32 objIndex);
+void model_moveFreeParts(s32 objIndex);
+void model_randomizePart(ObjPart *part, f32 spreadXZ, f32 spreadY, s32 strong);
+void model_bounceParts(s32 objIndex);
 void func_1503EEB8(void);
 void func_1503EEC0(s32 objIndex);
 s32 func_1503EF4C(s32 kind, s32 variant, s32 objIndex);
@@ -120,6 +120,6 @@ void func_1503F0D8(ObjPart *part, s32 objIndex);
 void func_1503F108(s32 objIndex);
 void func_1503F16C(s32 objIndex);
 void func_1503F2B0(s32 objIndex);
-void func_1503F404(void *mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ, f32 *scaleX, f32 *scaleY, f32 *scaleZ);
+void model_decomposeBoneMatrix(void *mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ, f32 *scaleX, f32 *scaleY, f32 *scaleZ);
 
 #endif

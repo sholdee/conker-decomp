@@ -233,11 +233,11 @@ s32 func_150EF38C(AimedBeam *beam) {
             link->flags |= 1;
         }
     }
-    link->widthPhase += 0.1600000113f * D_800BE9A4;
+    link->widthPhase += 0.1600000113f * gFrameDelta;
     angle = func_15144B68(link->widthPhase);
     link->widthPhase = angle;
     beam->head.def.width = sinf(angle) * 5.0f + 16.0f;
-    link->alphaPhase += 0.1600000113f * D_800BE9A4;
+    link->alphaPhase += 0.1600000113f * gFrameDelta;
     angle = func_15144B68(link->alphaPhase);
     link->alphaPhase = angle;
     beam->head.def.unk44 = sinf(angle) * 25.0f + 230.0f;
@@ -254,8 +254,8 @@ s32 func_150EF38C(AimedBeam *beam) {
                       &hit, link->distance, 1, 0, 1, 4, 0, 0);
         if (hit.hitType >= 2) {
             object = hit.obj;
-            func_1502EA98(object, 0xFF, 0, 0, 0x90, 0, 1);
-            func_1505D024(object, 0xA0038, 0, actor - movement_obj);
+            actor_flashFog(object, 0xFF, 0, 0, 0x90, 0, 1);
+            actor_hitScripted(object, 0xA0038, 0, actor - movement_obj);
         }
     } else if (link->flash != NULL) {
         link->flash->light->disabled = TRUE;
@@ -913,9 +913,9 @@ s32 func_150F0E48(AttachedSpriteParticle *particle, s32 arg1) {
     particle->head.desc.pos.x = actor->xpos;
     particle->head.desc.pos.y = actor->ypos;
     particle->head.desc.pos.z = actor->zpos;
-    link->phase[0] += 0.2630000114f * D_800BE9A4;
-    link->phase[1] += 0.3030000031f * D_800BE9A4;
-    link->phase[2] += 0.25f * D_800BE9A4;
+    link->phase[0] += 0.2630000114f * gFrameDelta;
+    link->phase[1] += 0.3030000031f * gFrameDelta;
+    link->phase[2] += 0.25f * gFrameDelta;
     link->phase[0] = func_15144B68(link->phase[0]);
     link->phase[1] = func_15144B68(link->phase[1]);
     link->phase[2] = func_15144B68(link->phase[2]);
@@ -998,7 +998,7 @@ void func_150F1170(ActorTrailEmitter *emitter) {
     dx = link->lastPos.x - last.x;
     dy = link->lastPos.y - last.y;
     dz = link->lastPos.z - last.z;
-    link->accum += (0.1090000048f + func_150ADA68() * 0.2840000093f) * D_800BE9A4;
+    link->accum += (0.1090000048f + func_150ADA68() * 0.2840000093f) * gFrameDelta;
     if (link->accum > 1.0f) {
         s32 pad; // matching: unused stack slot
 
@@ -1039,9 +1039,9 @@ void func_150F1170(ActorTrailEmitter *emitter) {
             spawn.pos.y = dy * r + last.y;
             spawn.pos.z = dz * r + last.z;
             }
-            spawn.vel.x = dx * D_800BE9A8 * 0.3330000043f;
-            spawn.vel.y = dy * D_800BE9A8 * 0.3330000043f;
-            spawn.vel.z = dz * D_800BE9A8 * 0.3330000043f;
+            spawn.vel.x = dx * gFrameDeltaInv * 0.3330000043f;
+            spawn.vel.y = dy * gFrameDeltaInv * 0.3330000043f;
+            spawn.vel.z = dz * gFrameDeltaInv * 0.3330000043f;
             ext.unk0 = func_150ADA20();
             ext.unk1 = (s16)func_150ADA20(); // matching: the s16 cast keeps the value in its own temp
             ext.unk2 = (func_150ADA20() % 5U) + 4;

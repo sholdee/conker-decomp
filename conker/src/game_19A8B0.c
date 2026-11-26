@@ -770,8 +770,8 @@ void func_1516F548(
         (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
         (s16)velocityY, 0xC8, 1, 6, 0, 1, 0, 0,
         0, 0, 0, arg15, arg16);
-    func_1000FA64(7, x, y, z, 0x36B0, 0x3E8, 0x64,
-        (SoundRecordCallback)func_1000EBC4, (void *)arg3, 0, 0, 0);
+    sound_addDynamicSound(7, x, y, z, 0x36B0, 0x3E8, 0x64,
+        (SoundRecordCallback)sound_fadeOutCallback, (void *)arg3, 0, 0, 0);
 }
 
 /* x and z are 8.8 fixed point with their fractions in u.drift; the velocities are 8.8 too. */

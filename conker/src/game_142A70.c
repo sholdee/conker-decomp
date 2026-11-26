@@ -161,7 +161,7 @@ void func_1511575C(WorldObject *obj) {
                 progress = 0;
                 state = -100;
                 if (handle) {
-                    func_100111C8(handle);
+                    sound_stop(handle);
                     handle = 0;
                     func_10010F88(0x83, 0x5000, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000);
                 }
@@ -187,7 +187,7 @@ void func_1511575C(WorldObject *obj) {
             state--;
             progress = 255;
             if (handle) {
-                func_100111C8(handle);
+                sound_stop(handle);
                 handle = 0;
                 func_10010F88(0x83, 0x5000, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000);
             }

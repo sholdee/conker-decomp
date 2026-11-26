@@ -50,12 +50,12 @@ void func_151041E4(FadeEffect *effect) {
             source = effect->source;
             owner = effect->owner;
             effect->state = 1;
-            D_800BEA0C = 1;
+            gFrameRateDivider = 1;
             func_100176C4();
-            func_10010F30(0x5B2, 0x7FFF, 0, 0, 0);
-            func_10010F30(0x5B2, 0x7FFF, 127, -100, 0);
-            func_10010F30(0x5B2, 0x7FFF, 0, 0, 0);
-            func_10010F30(0x5B2, 0x7FFF, 127, -100, 0);
+            sound_play(0x5B2, 0x7FFF, 0, 0, 0);
+            sound_play(0x5B2, 0x7FFF, 127, -100, 0);
+            sound_play(0x5B2, 0x7FFF, 0, 0, 0);
+            sound_play(0x5B2, 0x7FFF, 127, -100, 0);
             func_151D66F0(210, 2);
             func_151254F4(owner->CameraPtr, source->listpos);
             owner->CameraPtr->CharTrackingSpeedTarget = 0.0f;
@@ -82,8 +82,8 @@ void func_151041E4(FadeEffect *effect) {
             effect->timer -= D_800BEA08;
         } else {
             owner = effect->owner;
-            D_800BEA0C = 0;
-            func_1000E2F4(0);
+            gFrameRateDivider = 0;
+            music_pauseAll(0);
             func_151254F4(owner->CameraPtr, owner->listpos);
             owner->CameraPtr->CharTrackingSpeedTarget = 0.0f;
             effect->state = 3;

@@ -90,7 +90,7 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
     if ((owner->unk74 & 0xF) == 0xF) {
         return 0;
     }
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         if (owner->CameraPtr != NULL && owner->mv != NULL &&
             owner->mv->SniperState != 0 && viewport == owner->CameraPtr->CNumber) {
             return 0;
@@ -259,7 +259,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
         mtx = &obj->ob_matrix_ptr[1];
         {
             typedef s32 T151; // matching: a declaration makes -g3 open a scope here, which steers the scheduler
-            func_1503F404(mtx, &outA0, &outA1, &outA2, &objPos.x, &objPos.y, &objPos.z, &outB0, &outB1, &outB2);
+            model_decomposeBoneMatrix(mtx, &outA0, &outA1, &outA2, &objPos.x, &objPos.y, &objPos.z, &outB0, &outB1, &outB2);
         }
         {
             typedef s32 T152; // matching: as above
@@ -411,7 +411,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
 
 /* Starts sound 0x4A7 at `obj`; func_151BB0E0 keeps it updated. */
 void func_151BB044(Actor *obj) {
-    func_1000FA64(0x4A7, obj->xpos, obj->ypos, obj->zpos, 0x2000, 0x320, 0xC8,
+    sound_addDynamicSound(0x4A7, obj->xpos, obj->ypos, obj->zpos, 0x2000, 0x320, 0xC8,
                   (SoundRecordCallback)func_151BB0E0, obj, 0, 8, 0);
 }
 
@@ -470,10 +470,10 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
             if ((((state ^ prevState) & 0x7F) & 2) && (state & 2)) {
                 sound = 0x4A5;
             } else {
-                sound = func_1000F568(0x4A3, 4);
+                sound = sound_pickVariant(0x4A3, 4);
             }
-            if (!func_10010894(obj)) {
-                func_10010154(sound, obj, 0x6D60, 300, 1800);
+            if (!sound_isActorSound1Playing(obj)) {
+                sound_playActorSound2(sound, obj, 0x6D60, 300, 1800);
             }
             sound = 0;
         }
@@ -488,7 +488,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
             param = 0x2000;
         }
         if (sound != 0) {
-            func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, param, 0x320, 0xC8,
+            sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, param, 0x320, 0xC8,
                           (SoundRecordCallback)func_151BB0E0, obj, state | 0x12CFF00, 8, 0);
             goto end; // matching: a plain return 1 here is scheduled differently
         }
@@ -513,7 +513,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
                 if (timer <= 0) {
                     timer = 0;
                     if (*soundId == 0x4A8) {
-                        func_1000FA64(0x4A9, obj->xpos, obj->ypos, obj->zpos, 0x2EE0, 0x320,
+                        sound_addDynamicSound(0x4A9, obj->xpos, obj->ypos, obj->zpos, 0x2EE0, 0x320,
                                       0xC8, (SoundRecordCallback)func_151BB0E0, obj, state | 0x880, 8, 0);
                         timer = (func_150ADA20() & 0x200) + 900;
                     }
@@ -524,7 +524,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
         chan->userData = (fadingIn << 7) | state | (fade << 8) | (timer << 16);
         if ((*volume == 0) || (chan->flags & 0x80)) {
             if (chan->unk24 != 0) {
-                func_100111C8(chan->unk24);
+                sound_stop(chan->unk24);
                 chan->unk24 = 0;
             }
             *soundId = 0;
@@ -878,9 +878,9 @@ void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     offset.x = 0.0f;
     offset.y = 0.0f;
     offset.z = 0.0f;
-    velocity.x += -dx * D_800BE9A8 * scale;
-    velocity.y += -dy * D_800BE9A8 * scale;
-    velocity.z += -dz * D_800BE9A8 * scale;
+    velocity.x += -dx * gFrameDeltaInv * scale;
+    velocity.y += -dy * gFrameDeltaInv * scale;
+    velocity.z += -dz * gFrameDeltaInv * scale;
     fraction_a = func_150ADA68();
     fraction_b = func_150ADA68();
     random_a = func_150ADA20();
@@ -992,7 +992,7 @@ s32 func_151BC794(RibbonTrail *trail) {
     delta.y = trail->head.tmpl.pos.y - data->lastPos.y;
     delta.z = trail->head.tmpl.pos.z - data->lastPos.z;
     dist = func_15143E64(&delta);
-    data->pending += dist * 0.04870799929f * D_800BE9A4;
+    data->pending += dist * 0.04870799929f * gFrameDelta;
     data->texU += dist * 9.708835602f;
     if (data->pending > 1.0f) {
         Vec3f pos;
@@ -1005,7 +1005,7 @@ s32 func_151BC794(RibbonTrail *trail) {
         f32 uSpan;
 
         inv = 1.0f / data->pending;
-        y = data->unk18 + D_800BE9A4;
+        y = data->unk18 + gFrameDelta;
         pos = data->lastPos;
         startU = data->lastTexU;
         u = startU;
@@ -1715,13 +1715,13 @@ void func_151BE1E4(BurstEffect *effect) {
 s32 func_151BE210(BurstSpark *spark) {
     BurstSparkData *data = &spark->data;
 
-    data->widthTimer -= D_800BE9A4;
+    data->widthTimer -= gFrameDelta;
     if (data->widthTimer < 0.0f) {
         data->widthTimer = func_150ADA68() * 4.0f;
         data->widthTarget = func_150ADA68() * data->widthRange + data->widthBase;
     }
     spark->head.def.width += (data->widthTarget - spark->head.def.width) * 0.35f;
-    data->heightTimer -= D_800BE9A4;
+    data->heightTimer -= gFrameDelta;
     if (data->heightTimer < 0.0f) {
         data->heightTimer = func_150ADA68() * 9.0f;
         if (func_150ADA20() & 1) {
@@ -1731,7 +1731,7 @@ s32 func_151BE210(BurstSpark *spark) {
         }
     }
     spark->head.def.height += (data->heightTarget - spark->head.def.height) * 0.4f;
-    data->alphaTimer -= D_800BE9A4;
+    data->alphaTimer -= gFrameDelta;
     if (data->alphaTimer < 0.0f) {
         data->alphaTimer = func_150ADA68() * 10.0f;
         data->alphaTarget = func_150ADA68() * data->alphaRange + data->alphaBase;

@@ -107,7 +107,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
     width = 0;
     height = 0;
     taskCount = func_1509CB68();
-    gSPDisplayList((*gfxp)++, D_800859A0);
+    gSPDisplayList((*gfxp)++, gText2DSetupDL);
     if (taskCount < MENU_MAX_ROWS) {
         rowCount = taskCount;
     } else {
@@ -185,9 +185,9 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         taskIndex = func_1509CA98(entry + 1);
         if (D_8008448C != 0) {
             text = D_80098930;
-            func_150428D4((u8 *)text, &width, &height, &depth);
+            text_measureString((u8 *)text, &width, &height, &depth);
         } else {
-            func_150428D4((u8 *)func_1509CA10(taskIndex), &width, &height, &depth);
+            text_measureString((u8 *)func_1509CA10(taskIndex), &width, &height, &depth);
             // matching: index + base operand order (TASK_BIT_SET's base + index allocates differently)
             if (*((taskIndex >> 3) + D_800D2E4C) & (1 << (taskIndex & 7))) {
                 if (entry == D_80084498) {
@@ -196,7 +196,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
                     } else {
                         text = func_1509CA10(taskIndex);
                     }
-                    func_150428D4((u8 *)text, &width, &unusedHeight, &depth);
+                    text_measureString((u8 *)text, &width, &unusedHeight, &depth);
                 } else {
                     text = func_1509CA10(taskIndex);
                 }
@@ -209,10 +209,10 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         textY = rowY + D_800C6850;
         if (func_1509CA78(taskIndex) & 0x80000000) {
             /* Flagged tasks get a "." line above them. */
-            func_150428D4((u8 *)D_80098944, &dotWidth, &dotHeight, &depth);
+            text_measureString((u8 *)D_80098944, &dotWidth, &dotHeight, &depth);
             dotX = D_800BE620 * 0.5f - (dotWidth >> 1);
             dotY = rowY + D_800C6850;
-            *gfxp = func_150417AC(*gfxp, dotX, dotY, (u8 *)D_80098944, 255, 255, 255, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(D_80098944));
+            *gfxp = text_drawString(*gfxp, dotX, dotY, (u8 *)D_80098944, 255, 255, 255, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(D_80098944));
             lineY += dotHeight;
             textY += dotHeight;
         }
@@ -227,10 +227,10 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
             text = D_8008449C;
         }
         if (D_8008448C == 0 && (entry != D_80084498 || D_80084488 != 0)) {
-            *gfxp = func_150417AC(*gfxp, textX, textY, (u8 *)text, 255, 255, 255, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(text));
+            *gfxp = text_drawString(*gfxp, textX, textY, (u8 *)text, 255, 255, 255, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(text));
         } else {
             /* the selected task, and every row while resetting, is drawn in red */
-            *gfxp = func_150417AC(*gfxp, textX, textY, (u8 *)text, 255, 0, 0, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(text));
+            *gfxp = text_drawString(*gfxp, textX, textY, (u8 *)text, 255, 0, 0, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(text));
         }
         lineY += height;
         row++;

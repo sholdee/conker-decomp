@@ -284,13 +284,13 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             func_150FAA40(0xFF, 1);
             break;
         case 47:
-            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->arg));
+            obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
             if (obj != NULL) {
                 func_15108120(obj, 0xFF, 1);
             }
             break;
         case 46:
-            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->arg));
+            obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
             if (obj != NULL) {
                 func_150ECC00(obj, 0xFF, 1);
             }
@@ -299,7 +299,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             func_150FAD78();
             break;
         case 42:
-            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->arg));
+            obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
             if (obj != NULL) {
                 func_150FCFD4(obj, 0xFF, 1);
             }
@@ -314,7 +314,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             {
                 Actor *target;
 
-                target = func_1505EEF4(CMD_OBJECT_ID(cmd->arg));
+                target = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
                 if (target != NULL) {
                     func_1514EC1C(func_150F6DE4(target), target, 27);
                 }
@@ -348,7 +348,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             }
             break;
         case 35:
-            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->arg));
+            obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
             func_15136C3C(obj, 1, 1, 1, 1, 0, 0xFF, 1);
             break;
         case 33:
@@ -356,7 +356,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
                 s32 pad[2]; // matching: frame size
                 Vec3f pos;
 
-                obj = func_1505EEF4(CMD_OBJECT_ID(cmd->arg));
+                obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
                 if (obj != NULL) {
                     pos.x = obj->xpos;
                     pos.y = obj->ypos + 50.0f;
@@ -389,7 +389,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             light_sendEvent(22, 31, 0);
             break;
         case 0:
-            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->arg));
+            obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
             func_150B53D0(obj, cmd->a[0].h.lo, 0xFF, 1);
             break;
         case 1:
@@ -409,7 +409,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             }
             break;
         case 5:
-            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->a[2]));
+            obj = actor_findOnPath(CMD_OBJECT_ID(cmd->a[2]));
             if (obj != NULL) {
                 ret = func_150E32D0(cmd->arg.w, cmd->a[0].w, cmd->a[1].w, obj, cmd->a[3].w, cmd->a[5].w);
                 if (ret != 0) {
@@ -454,7 +454,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             func_15163A60(cmd->arg.b.lo, 0xFF, 1);
             break;
         case 32:
-            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->arg));
+            obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
             func_150D5A6C(obj, 0xFF, 1);
             break;
     }
@@ -478,7 +478,7 @@ s32 func_1509D780(s32 cmdId, ScriptCmd *cmd) {
             light_sendEvent(41, 24, 0);
             break;
         case 36:
-            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->arg));
+            obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
             if (obj != NULL) {
                 func_150F6DB0(obj);
             }
@@ -501,7 +501,7 @@ s32 func_1509D780(s32 cmdId, ScriptCmd *cmd) {
             func_150B3DD0();
             break;
         case 9:
-            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->arg));
+            obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
             if (obj == NULL) {
                 return 0;
             }
@@ -537,7 +537,7 @@ s32 func_1509D8FC(s32 cmdId, s32 phase, ScriptCmd *cmd) {
     switch (cmdId) {
         case 52:
             if (phase == 3) {
-                func_15197A7C(func_1505EEF4(CMD_OBJECT_ID(cmd->arg)));
+                func_15197A7C(actor_findOnPath(CMD_OBJECT_ID(cmd->arg)));
             }
             break;
 

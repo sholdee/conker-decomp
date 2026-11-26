@@ -8,14 +8,14 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
 
     D_800BE9B4 = 2;
     func_1503FB08();
-    level = D_800BE9F4 = arg2;
+    level = gNextLevel = arg2;
 
-    func_15172C50(D_800DD2C0[0]);
+    player_resetWarps(gPlayerSpawnPoints[0]);
     func_15008230();
     func_15005270();
-    func_15017300(arg0, arg1);
+    player_initMatch(arg0, arg1);
 
-    func_15015F40(D_80087280[D_800D2138.mode], arg2);
+    func_15015F40(gModePlayerCounts[gMatchState.mode], arg2);
     func_150175E0();
     func_150177F8();
     func_15089BB0();
@@ -28,7 +28,7 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
 
 
 
-void func_15007B3C(void) {
+void game_loadLevel(void) {
     s32 i;
     s32 resource;
     s32 slot;
@@ -40,8 +40,8 @@ void func_15007B3C(void) {
         D_800BE9B4 = 1;
     }
     func_10004308();
-    func_15002FB4(D_800BE9F4);
-    switch (D_800BE9F4) {
+    func_15002FB4(gNextLevel);
+    switch (gNextLevel) {
     case 0x1A:
     case 0x24:
     case 0x2B:
@@ -51,16 +51,16 @@ void func_15007B3C(void) {
     case 0x34:
     case 0x3F:
         value = 0x103;
-        if (D_800BE9F4 == 0x24) {
+        if (gNextLevel == 0x24) {
             value = 0xF3;
         }
-        if (D_800BE9F4 == 0x33) {
+        if (gNextLevel == 0x33) {
             value -= 8;
         }
-        if (D_800BE9F4 == 0x3F) {
+        if (gNextLevel == 0x3F) {
             value -= 8;
         }
-        if (D_800BE9F4 == 0x34) {
+        if (gNextLevel == 0x34) {
             value += 8;
         }
         break;
@@ -82,18 +82,18 @@ void func_15007B3C(void) {
     D_800E0920 = NULL;
     func_15008840();
     D_8003E384 = 1;
-    resource = D_800DD2C0[0];
+    resource = gPlayerSpawnPoints[0];
     slot = func_1507E114(&resource);
     if (D_800E0B94 == 2) {
         resource = D_800E0BD1;
     }
-    D_800BE9F8 = level;
-    level = D_800BE9F4;
+    gPrevLevel = level;
+    level = gNextLevel;
     func_150091D0();
     func_15187F90();
-    D_800BE619 = 0;
-    D_800BE61A = 0;
-    D_800BEA0C = 0;
+    gFrameDeltaHistoryNext = 0;
+    gFrameDeltaHistoryCount = 0;
+    gFrameRateDivider = 0;
     func_150081E4();
     if (D_800BE9ED != 0) {
         func_10003ACC(0xFF, 0xFF, 0xFF);
@@ -101,16 +101,16 @@ void func_15007B3C(void) {
     } else {
         func_10003ACC(0, 0, 0);
     }
-    if ((D_800BE616 == 0) && !(D_800D2E4C[0x18] & 1)) {
+    if ((gIsMultiplayer == 0) && !(D_800D2E4C[0x18] & 1)) {
         D_800D2457 = D_800D2456 = 3;
-        func_15085710(0, 5, 3);
+        player_setStat(0, 5, 3);
     }
     func_15002F40(level);
     func_1501C53C();
     func_15015E80();
-    func_150162B0();
+    actor_clearAll();
     func_15017930(level);
-    func_15016500();
+    text_resetContextText();
     func_1501A220(D_800BE9E8, 1);
     func_15012F90();
     func_15008A60();
@@ -120,7 +120,7 @@ void func_15007B3C(void) {
     func_15044370();
     func_15016670();
     func_15004F00();
-    func_15004E80();
+    model_allocBonePools();
     func_15017868();
     func_151732E0(level);
     func_1502AAF0();
@@ -135,17 +135,17 @@ void func_15007B3C(void) {
     func_15017578(level);
     func_150045C4(level);
     func_15008248(level);
-    func_150000B0();
-    func_1000F248(level);
+    music_startLevelMusic();
+    sound_initLevel(level);
     func_100125CC(level);
     func_10011FEC();
     func_1501BB20();
     func_15008870(1);
     func_15008930(1);
-    func_15016690(level);
+    player_loadSpawnPoints(level);
     func_150169A0(level);
     func_15005290(level, resource);
-    func_15016370();
+    actor_setDefaultSizes();
     func_150006E0(level);
     func_1510B070(0);
     for (i = 0; i <= D_80082FA0; i++) {
@@ -158,7 +158,7 @@ void func_15007B3C(void) {
     if (level == 0x1D) {
         func_151E81EC();
     }
-    func_1500E470(level);
+    game_initLevelSubsystems(level);
     func_15009150(level);
     func_15085B70(level);
     func_15008DD0();
@@ -167,13 +167,13 @@ void func_15007B3C(void) {
     D_800BE9E4 = 2;
     func_15015910();
     func_15004F10();
-    func_1501748C(D_800D2138.playerMask);
+    func_1501748C(gMatchState.playerMask);
     func_1500C1E0();
-    func_15004E00();
+    model_resetParts();
     func_15004D50();
     func_150082CC();
-    if (D_800BE616 == 0) {
-        func_15085710(0, 9, D_800BE3E4);
+    if (gIsMultiplayer == 0) {
+        player_setStat(0, 9, D_800BE3E4);
     }
     if (func_1509C2A4() != 0) {
         D_800BE3E0 = resource & 0xFF;
@@ -212,7 +212,7 @@ void func_15007B3C(void) {
         func_151BF340(0xFF, 1);
     }
     func_1509C3A0();
-    D_800BE9F4 = level;
+    gNextLevel = level;
     func_151D8DE8();
 }
 

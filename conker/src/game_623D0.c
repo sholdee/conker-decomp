@@ -2,12 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 
-static u8 D_800C3F00;                 // number of queued reflections
-static ReflectionEntry D_800C3F08[15]; // reflection queue
+static u8 gReflectionCount;                 // number of queued reflections
+static ReflectionEntry gReflections[15]; // reflection queue
 
 /* Clears the reflection queue. */
-void func_15034F20(void) {
-    D_800C3F00 = 0;
+void model_clearReflections(void) {
+    gReflectionCount = 0;
 }
 
 /*
@@ -16,7 +16,7 @@ void func_15034F20(void) {
  * vertical plane through (planeX, planeZ) at `angle`. `srcIsFixed`: the sources are fixed point
  * (Mtx); `dstToFixed`: convert the results to fixed point.
  */
-void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx,
+void model_mirrorMatrices(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx,
                    MtxF *dstMtx, s32 count, f32 planeX, f32 planeY, f32 planeZ, f32 unused,
                    f32 angle, f32 objX, f32 objY, f32 objZ, f32 fadeStart, f32 fadeEnd, f32 maxAlpha,
                    s32 srcIsFixed, s32 dstToFixed) {
@@ -123,19 +123,19 @@ void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx,
 }
 
 /* Reserves the next reflection queue slot, or returns NULL when the queue is full. */
-ReflectionEntry *func_150356C8(void) {
-    if (D_800C3F00 == 15) {
+ReflectionEntry *model_allocReflection(void) {
+    if (gReflectionCount == 15) {
         return NULL;
     }
-    D_800C3F00++;
-    return &D_800C3F08[D_800C3F00 - 1];
+    gReflectionCount++;
+    return &gReflections[gReflectionCount - 1];
 }
 
 /*
  * Returns 1 when the reflection of `obj`, whose mirrored root matrix is `mtx`, is outside the view.
  * In modes 0 and 1 the bounds centre is mirrored in the plane y = planeY.
  */
-s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
+s32 model_isReflectionCulled(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     f32 height;
     f32 radiusXZ;
     f32 radiusY;
@@ -171,9 +171,9 @@ s32 math_distance3D(s32, s32, s32);
 
 /*
  * Queues reflections of object `objIndex` and of its attachments, mirrored as described at
- * func_15034F30. Objects beyond the view range, or whose reflection is off screen, are skipped.
+ * model_mirrorMatrices. Objects beyond the view range, or whose reflection is off screen, are skipped.
  */
-void func_15035808(s32 mode, s32 objIndex, f32 planeX, f32 planeY, f32 planeZ, f32 unused, f32 angle,
+void model_queueReflection(s32 mode, s32 objIndex, f32 planeX, f32 planeY, f32 planeZ, f32 unused, f32 angle,
                    f32 fadeStart, f32 fadeEnd, f32 maxAlpha) {
     ReflectionEntry *entry;
     void *mtx;
@@ -192,7 +192,7 @@ void func_15035808(s32 mode, s32 objIndex, f32 planeX, f32 planeY, f32 planeZ, f
     s32 attAlpha;
 
     range = 1400;
-    if (D_800C3F00 == 15) {
+    if (gReflectionCount == 15) {
         return;
     }
     if (mode == 0 && movement_obj[objIndex].type != 1) {
@@ -210,8 +210,8 @@ visible:;
     if (alpha == 0) {
         return;
     }
-    numBones = func_1502DB20(movement_obj[objIndex].character_type);
-    if (D_800C3E7C * sizeof(Mtx) < D_800C3E88 + numBones * sizeof(Mtx) - D_800C3E8C) {
+    numBones = actor_getBoneMatrixCount(movement_obj[objIndex].character_type);
+    if (gBonePoolSize * sizeof(Mtx) < gBonePoolCursor + numBones * sizeof(Mtx) - gBonePoolStart) {
         return;
     }
     if (D_800C35EA[0] == 1) {
@@ -232,11 +232,11 @@ visible:;
         fade *= alpha;
         fade >>= 8;
     }
-    entry = func_150356C8();
+    entry = model_allocReflection();
     if (entry == NULL) {
         return;
     }
-    entry->mtx = D_800C3E88;
+    entry->mtx = gBonePoolCursor;
     func_1502D54C(objIndex, color);
     entry->color[0] = color[0];
     entry->color[1] = color[1];
@@ -246,16 +246,16 @@ visible:;
     entry->ownerId = movement_obj[objIndex].unique_id;
     srcMtx = movement_obj[objIndex].ob_matrix_ptr;
     mtx = entry->mtx;
-    func_15034F30(&movement_obj[objIndex], entry, mode, srcMtx, mtx, numBones, planeX, planeY, planeZ, unused,
+    model_mirrorMatrices(&movement_obj[objIndex], entry, mode, srcMtx, mtx, numBones, planeX, planeY, planeZ, unused,
                   angle, movement_obj[objIndex].xpos, movement_obj[objIndex].ypos,
                   movement_obj[objIndex].zpos, fadeStart, fadeEnd, maxAlpha, 0, 0);
     entry->alpha = (entry->alpha * fade) >> 8;
-    if (func_15035714(mode, &movement_obj[objIndex], *srcMtx, planeY) != 0) {
-        D_800C3F00--;
+    if (model_isReflectionCulled(mode, &movement_obj[objIndex], *srcMtx, planeY) != 0) {
+        gReflectionCount--;
         return;
     }
-    D_800C3E88 += (numBones << 3) << 3; // matching: numBones * sizeof(Mtx) schedules differently
-    D_800C3E7A += numBones;
+    gBonePoolCursor += (numBones << 3) << 3; // matching: numBones * sizeof(Mtx) schedules differently
+    gBoneMatricesUsed += numBones;
 
     att = D_800C3EE0;
     while (att != NULL) {
@@ -264,7 +264,7 @@ visible:;
             att = next;
             continue;
         }
-        entry = func_150356C8();
+        entry = model_allocReflection();
         if (entry == NULL) {
             return;
         }
@@ -294,7 +294,7 @@ visible:;
         } else {
             srcIsFixed = TRUE;
         }
-        func_15034F30(NULL, entry, mode, srcMtx, mtx, numMtx, planeX, planeY, planeZ, unused, angle,
+        model_mirrorMatrices(NULL, entry, mode, srcMtx, mtx, numMtx, planeX, planeY, planeZ, unused, angle,
                       movement_obj[objIndex].xpos, movement_obj[objIndex].ypos,
                       movement_obj[objIndex].zpos, fadeStart, fadeEnd, attAlpha, srcIsFixed, TRUE);
         att = next;
@@ -306,20 +306,20 @@ visible:;
  * Draws the queued reflections of attachment `att`: its display lists once per reflection, with
  * the reflection's matrices in segment 3 and its alpha in the env colour.
  */
-Gfx *func_15035D6C(Gfx *gfx, ModelAttachment *att, s32 red, s32 green, s32 blue) {
+Gfx *model_drawAttachmentReflections(Gfx *gfx, ModelAttachment *att, s32 red, s32 green, s32 blue) {
     ReflectionEntry *entry;
     s32 alpha;
     s32 i;
     s32 j;
 
-    if (D_800C3F00 == 0) {
+    if (gReflectionCount == 0) {
         return gfx;
     }
 
     gSPSetGeometryMode(gfx++, G_CULL_FRONT);
 
-    for (i = 0; i < D_800C3F00; i++) {
-        entry = &D_800C3F08[i];
+    for (i = 0; i < gReflectionCount; i++) {
+        entry = &gReflections[i];
         if (entry->isAttachment != TRUE) {
             continue;
         }
@@ -355,19 +355,19 @@ Gfx *func_15035D6C(Gfx *gfx, ModelAttachment *att, s32 red, s32 green, s32 blue)
 }
 
 /* Draws the queued object reflections (not the attachment ones) for `player`. */
-Gfx *func_15035FE8(Gfx *gfx, s32 player) {
+Gfx *model_drawReflections(Gfx *gfx, s32 player) {
     ReflectionEntry *entry;
     s32 color[4];
     s32 i;
 
-    if (D_800C3F00 == 0) {
+    if (gReflectionCount == 0) {
         return gfx;
     }
     gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
     gSPClearGeometryMode(gfx++, G_FOG | G_LOD);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    for (i = 0; i < D_800C3F00; i++) {
-        entry = &D_800C3F08[i];
+    for (i = 0; i < gReflectionCount; i++) {
+        entry = &gReflections[i];
         if (entry->isAttachment) {
             continue;
         }
@@ -375,7 +375,7 @@ Gfx *func_15035FE8(Gfx *gfx, s32 player) {
         color[1] = entry->color[1];
         color[2] = entry->color[2];
         color[3] = 255;
-        gfx = func_1502CCFC(gfx, entry->objIndex, player, entry->mtx, entry->alpha, color, 0, 1);
+        gfx = actor_emitModel(gfx, entry->objIndex, player, entry->mtx, entry->alpha, color, 0, 1);
     }
     return gfx;
 }
@@ -383,7 +383,7 @@ Gfx *func_15035FE8(Gfx *gfx, s32 player) {
 /*
  * Queues a reflection in the horizontal plane y = unk118 for every moving object of kind 0 or 1
  * that is above that plane while unk180 lies below it, when the gap is larger than the height from
- * func_1507C3E0.
+ * actor_computeSize.
  */
 void func_15036148(void) {
     s32 pad; // matching: stack slot
@@ -397,9 +397,9 @@ void func_15036148(void) {
             if (movement_obj[i].type != 0 && (movement_obj[i].drawtype == 0 || movement_obj[i].drawtype == 1)) {
                 if (movement_obj[i].unk118 != -10000.0f && movement_obj[i].unk118 < movement_obj[i].ypos &&
                     movement_obj[i].floorY < movement_obj[i].unk118 && movement_obj[i].shad > 5.0f) {
-                    func_1507C3E0(&movement_obj[i], &height, &unusedA, &unusedB);
+                    actor_computeSize(&movement_obj[i], &height, &unusedA, &unusedB);
                     if (height < movement_obj[i].unk118 - movement_obj[i].floorY) {
-                        func_15035808(1, i, movement_obj[i].xpos, movement_obj[i].unk118,
+                        model_queueReflection(1, i, movement_obj[i].xpos, movement_obj[i].unk118,
                                       movement_obj[i].zpos, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
                     }
                 }

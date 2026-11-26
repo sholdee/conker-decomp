@@ -122,14 +122,14 @@ void func_150E6B84(Game113D60Effect *effect) {
     u32 randomColor;
 
     emission = &effect->emission;
-    effect->emission.stream.remaining += effect->emission.stream.rate * D_800BE9A4;
+    effect->emission.stream.remaining += effect->emission.stream.rate * gFrameDelta;
     if (effect->emission.stream.remaining > 1.0f) {
         inverse = 1.0f / emission->stream.remaining;
         factor = 0.1f;
-        time = emission->stream.time + D_800BE9A4;
+        time = emission->stream.time + gFrameDelta;
         timeStep = time * inverse;
-        speedX = emission->stream.speedX * D_800BE9A4;
-        speedY = emission->stream.speedY * D_800BE9A4;
+        speedX = emission->stream.speedX * gFrameDelta;
+        speedY = emission->stream.speedY * gFrameDelta;
         phaseX = emission->stream.phaseX;
         phaseY = emission->stream.phaseY;
         phaseStepX = speedX * inverse;
@@ -318,7 +318,7 @@ void func_150E7290(arg0, owner, kind)
             func_150E76D0(((randomSize * 100.0f) + 150.0f) * 0.1f, (flip4 % 201) + 500, 9,
                           (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, ids, 2, owner, kind);
         }
-        func_10010F30(0x360, 0x7FFF, 0, 0, 0);
+        sound_play(0x360, 0x7FFF, 0, 0, 0);
         func_15164F0C(1, arg0, NULL, owner, kind);
         event.flags = 1;
         event.duration = (func_150ADA20() % 26) + 25;
@@ -512,7 +512,7 @@ void func_150E7C9C(Game113D60BurstEffect *effect) {
     Game113D60Burst *burst;
 
     burst = &effect->burst;
-    burst->head.accum += burst->head.rate * D_800BE9A4;
+    burst->head.accum += burst->head.rate * gFrameDelta;
     while ((burst->head.accum > 1.0f) && (burst->head.next != burst->head.count)) {
         position.x = burst->points[burst->head.next * 2];
         position.y = burst->points[burst->head.next * 2 + 1];
@@ -522,7 +522,7 @@ void func_150E7C9C(Game113D60BurstEffect *effect) {
         func_150E75A0(&position, (randomSize * 12.0f) + 30.0f, 300, flip2 | flip4,
                       (func_150ADA68() * 25.0f) + 100.0f, 0xFF, 1, 0xFF, NULL, 0, effect->base.header.owner,
                       effect->base.header.kind);
-        func_10010F30(0x360, 0x7FFF, (position.x * 0.4315068424f) + 64.0f, 0, 0);
+        sound_play(0x360, 0x7FFF, (position.x * 0.4315068424f) + 64.0f, 0, 0);
         burst->head.next++;
         burst->head.accum -= 1.0f;
     }
@@ -659,7 +659,7 @@ void func_150E8470(Game113D60EmitterEffect *effect) {
     Game113D60Emitter *emitter;
 
     emitter = &effect->emitter;
-    emitter->accum += (0.09999999404f + func_150ADA68() * 0.08789999783f) * D_800BE9A4;
+    emitter->accum += (0.09999999404f + func_150ADA68() * 0.08789999783f) * gFrameDelta;
     if (emitter->accum > 1.0f) {
         ParticleDesc arg;
         Game113D60ParticleExtra extra;
@@ -740,7 +740,7 @@ void func_150E8854(void) {
 
 /* Counts the timer down and fires func_150E8930 each time it runs out (rearmed to 201-538). */
 void func_150E88C0(Game113D60TimerEffect *effect) {
-    effect->timer -= D_800BE9A4;
+    effect->timer -= gFrameDelta;
     if (effect->timer < 0.0f) {
         effect->timer = (func_150ADA68() * 337.0f) + 201.0f;
         func_150E8930(effect);
@@ -767,8 +767,8 @@ void func_150E8930() {
     if (D_800DCDC4 != NULL) {
         func_150E90DC();
     }
-    func_10010F30(0x4C8, 0x7FFF, 0x40, 0x200 - (func_150ADA20() & 0x400), 0);
-    func_10010F30(0x4CD, 0x5DC0, 0x40, 0x200 - (func_150ADA20() & 0x400), 0);
+    sound_play(0x4C8, 0x7FFF, 0x40, 0x200 - (func_150ADA20() & 0x400), 0);
+    sound_play(0x4CD, 0x5DC0, 0x40, 0x200 - (func_150ADA20() & 0x400), 0);
 }
 
 typedef struct {
@@ -815,7 +815,7 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
     dataPtr = &data; // matching: using &data directly at each use does not match
     center = func_15144B34(D_800BE9E8);
     spawner = &effect->spawner;
-    spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * D_800BE9A4 * D_800DCD90;
+    spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * gFrameDelta * D_800DCD90;
     if (spawner->accum > 1.0f) {
         do {
             pick = func_150ADA68() * D_800DCD90;
@@ -857,7 +857,7 @@ void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
     f32 zero; // matching: writing 0.0f literals instead does not match
 
     spawner = &effect->spawner;
-    spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * D_800BE9A4;
+    spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * gFrameDelta;
     if (spawner->accum > 1.0f) {
         zero = 0.0f;
         {
@@ -972,7 +972,7 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
 
     center = func_15144B34(D_800BE9E8);
     spawner = &effect->spawner;
-    spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * D_800BE9A4 * D_800DCD90;
+    spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * gFrameDelta * D_800DCD90;
     if (spawner->accum > 1.0f) {
         do {
             pick = func_150ADA68() * D_800DCD90;
@@ -1021,7 +1021,7 @@ void func_150E93DC(Game113D60PointSpawnerEffect *effect) {
     Game113D60DebrisExtra extra; // copied into the particle uninitialized
 
     spawner = &effect->spawner;
-    spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * D_800BE9A4;
+    spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * gFrameDelta;
     if (spawner->accum > 1.0f) {
         {
             f32 pad; // matching: unused stack slot

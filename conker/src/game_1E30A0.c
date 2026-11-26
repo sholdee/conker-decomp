@@ -102,7 +102,7 @@ void func_151B5E94(PulseParticle *particle) {
     Pulse *pulse;
 
     pulse = &particle->pulse;
-    pulse->phase += 1.002000093f * D_800BE9A4;
+    pulse->phase += 1.002000093f * gFrameDelta;
     if (pulse->phase > 29.89999962f) {
         pulse->phase = 0.0f;
         func_10010F88(0x502, 0x5DC0, 0, 0, -1, particle->head.pos.x, particle->head.pos.y, particle->head.pos.z, 100, 500);
@@ -124,7 +124,7 @@ void func_151B5E94(PulseParticle *particle) {
 /* Stops the object's sound, if one is playing. */
 void func_151B5FCC(SoundOwner *obj) {
     if (obj->sound != 0) {
-        func_100111C8(obj->sound);
+        sound_stop(obj->sound);
         obj->sound = 0;
     }
 }

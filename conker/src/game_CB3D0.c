@@ -36,8 +36,8 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, ScriptCmd *args) {
         func_15181E18(0);
         return 0;
     case 1:
-        func_1504332C(255, 255, 255, 255);
-        func_15042D94(150, 86, 1, "%d", (args->a[0].w + 59) / 60);
+        text_setColor(255, 255, 255, 255);
+        text_printAt(150, 86, 1, "%d", (args->a[0].w + 59) / 60);
         D_8008FDBC |= 0x80;
         break;
     case 2:
@@ -119,7 +119,7 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, ScriptCmd *args) {
     case 24:
         obj = func_15083E90(args->a[0].w);
         if (obj != NULL) {
-            func_15060F28(obj, 0);
+            actor_remove(obj, 0);
         }
         break;
     }

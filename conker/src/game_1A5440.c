@@ -477,7 +477,7 @@ void func_15178DA4(Swarm *swarm) {
     SwarmMember *member;
 
     member = (SwarmMember *)D_800DCE50[0][59];
-    func_100111C8(swarm->sfxHandle);
+    sound_stop(swarm->sfxHandle);
     while (member != NULL) {
         next = (SwarmMember *)member->header.next;
         if (swarm == member->s.swarm) {

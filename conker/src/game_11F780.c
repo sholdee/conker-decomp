@@ -85,8 +85,8 @@ s32 func_150F23E0(SwayObject *obj) {
 
     obj->rotX = sway->amplitudeX * sinf(sway->phaseX);
     obj->rotZ = sway->amplitudeZ * sinf(sway->phaseZ);
-    sway->phaseX = func_15144B68(sway->phaseX + sway->speedX * D_800BE9A4);
-    sway->phaseZ = func_15144B68(sway->phaseZ + sway->speedZ * D_800BE9A4);
+    sway->phaseX = func_15144B68(sway->phaseX + sway->speedX * gFrameDelta);
+    sway->phaseZ = func_15144B68(sway->phaseZ + sway->speedZ * gFrameDelta);
     return 1;
 }
 
@@ -96,8 +96,8 @@ s32 func_150F2480(DynModel *model) {
 
     block->rotX = block->sway.amplitudeX * sinf(block->sway.phaseX);
     block->rotZ = block->sway.amplitudeZ * sinf(block->sway.phaseZ);
-    block->sway.phaseX = func_15144B68(block->sway.phaseX + block->sway.speedX * D_800BE9A4);
-    block->sway.phaseZ = func_15144B68(block->sway.phaseZ + block->sway.speedZ * D_800BE9A4);
+    block->sway.phaseX = func_15144B68(block->sway.phaseX + block->sway.speedX * gFrameDelta);
+    block->sway.phaseZ = func_15144B68(block->sway.phaseZ + block->sway.speedZ * gFrameDelta);
     return 1;
 }
 

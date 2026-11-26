@@ -4,13 +4,13 @@
 
 #define EMITTER_ENABLED 1
 
-/* Emitter update: accumulates 0.03..0.04 particles per unit of D_800BE9A4 and, while enabled,
+/* Emitter update: accumulates 0.03..0.04 particles per unit of gFrameDelta and, while enabled,
  * spawns one at a random point of the emitter's area for each whole one. */
 void func_151082D0(AreaEmitter *emitter) {
     AreaEmitterData *data;
 
     data = &emitter->data;
-    data->spawnAccum += (0.030000001f + func_150ADA68() * 0.010000001f) * D_800BE9A4;
+    data->spawnAccum += (0.030000001f + func_150ADA68() * 0.010000001f) * gFrameDelta;
     if (data->spawnAccum > 1.0f) {
         if (data->flags & EMITTER_ENABLED) {
             ParticleDesc desc;
@@ -100,13 +100,13 @@ s32 func_15108658(AreaFlashParticle *particle, s32 arg1) {
         } else {
             particle->head.desc.drawFunc = 3;
         }
-        data->flashTimer -= D_800BE9A4;
+        data->flashTimer -= gFrameDelta;
         if (data->flashTimer < 0.0f) {
             data->flashTimer = 0.0f;
             particle->head.desc.drawFunc = -1;
         }
     } else {
-        data->life -= D_800BE9A4;
+        data->life -= gFrameDelta;
         if (data->life < 0.0f) {
             return 0;
         }

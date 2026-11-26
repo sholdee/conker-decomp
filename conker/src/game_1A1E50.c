@@ -75,11 +75,11 @@ void func_151749F8(s32 arg0, s32 arg1) {
     if (temp != 0) {
         D_8008CD04[temp](arg1);
     }
-    if (D_800BE616 == 0) {
+    if (gIsMultiplayer == 0) {
         func_1517DE5C();
         func_151880C0();
     }
-    D_800CBD4E += D_800BE9E4 << 6;
+    gTextAnimClock += D_800BE9E4 << 6;
 }
 
 Gfx *func_15174AA4(Gfx *gfx, s32 arg1, s32 arg2) {

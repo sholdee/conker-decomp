@@ -174,7 +174,7 @@ void func_151711C4(Actor *obj) {
     if (obj->character_type == 0x33) {
         func_150C3D5C(obj);
     }
-    func_15060F28(obj, 1);
+    actor_remove(obj, 1);
 }
 
 /*
@@ -350,7 +350,7 @@ void func_15171BF4(Actor *obj, u8 owner) {
     case 0x13:
     case 0x23:
         func_150AEEB0(obj, owner);
-        func_10010154(0x69, obj, 32000, 200, 2000);
+        sound_playActorSound2(0x69, obj, 32000, 200, 2000);
         break;
     case 0x1E:
         func_150BD740(obj, owner, 1);

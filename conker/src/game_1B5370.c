@@ -102,7 +102,7 @@ void func_151880C0(void) {
             break;
         case COLOR_ANIM_PULSE:
             D_800DF700[i].blend = (sinf(D_800DF700[i].state.f) + 1.0f) * 0.5f;
-            D_800DF700[i].state.f = D_800DF700[i].rate * D_800BE9A4 + D_800DF700[i].state.f;
+            D_800DF700[i].state.f = D_800DF700[i].rate * gFrameDelta + D_800DF700[i].state.f;
             if (D_800DF700[i].state.f >= 6.283185482f) {
                 D_800DF700[i].state.f = D_800DF700[i].state.f - 6.283185482f;
             }

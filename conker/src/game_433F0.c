@@ -4,7 +4,7 @@
 
 
 /*
- * Sets D_800BE616 for the listed maps, which take their player count from func_151E5FAC();
+ * Sets gIsMultiplayer for the listed maps, which take their player count from func_151E5FAC();
  * every other map uses `count`. D_800BE9E8 gets that count minus one.
  */
 void func_15015F40(s16 count, s32 map) {
@@ -17,11 +17,11 @@ void func_15015F40(s16 count, s32 map) {
         case 0x33:
         case 0x34:
         case 0x3F:
-            D_800BE616 = 1;
+            gIsMultiplayer = 1;
             D_800BE9E8 = func_151E5FAC() - 1;
             break;
         default:
-            D_800BE616 = 0;
+            gIsMultiplayer = 0;
             D_800BE9E8 = count - 1;
             break;
     }

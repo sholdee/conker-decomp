@@ -124,7 +124,7 @@ s32 func_150CF800(HopSprite *hopper) {
 
     hop = &hopper->motion.hop;
     if (hop->flags & 1) {
-        hop->phase += 0.19000001f * D_800BE9A4;
+        hop->phase += 0.19000001f * gFrameDelta;
         phase = hop->phase;
         if (phase >= 1.0f) {
             hop->phase = 1.0f;
@@ -214,9 +214,9 @@ void func_150CFC38(f32 targetX) {
 s32 func_150CFC60(HopSprite *particle) {
     BounceMotion *m = &particle->motion.bounce;
 
-    particle->pos.x += m->vel.x * D_800BE9A4;
-    particle->pos.y += (m->vel.y * D_800BE9A4) + (((0.5f * m->gravity) * D_800BE9A4) * D_800BE9A4);
-    m->vel.y += m->gravity * D_800BE9A4;
+    particle->pos.x += m->vel.x * gFrameDelta;
+    particle->pos.y += (m->vel.y * gFrameDelta) + (((0.5f * m->gravity) * gFrameDelta) * gFrameDelta);
+    m->vel.y += m->gravity * gFrameDelta;
     if (m->floorY < particle->pos.y) {
         particle->pos.y = m->floorY;
         m->vel.x *= 0.3f;

@@ -37,10 +37,10 @@ s32 func_1515C388(FallingTrail *trail) {
         oldest = points[trail->head.start].pos;
         i = trail->head.start;
         while (i != trail->head.end) {
-            points[i].pos.x += data->vel.x * D_800BE9A4;
-            points[i].pos.y += points[i].velY * D_800BE9A4 + data->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f;
-            points[i].pos.z += data->vel.z * D_800BE9A4;
-            points[i].velY += data->gravity * D_800BE9A4;
+            points[i].pos.x += data->vel.x * gFrameDelta;
+            points[i].pos.y += points[i].velY * gFrameDelta + data->gravity * gFrameDelta * gFrameDelta * 0.5f;
+            points[i].pos.z += data->vel.z * gFrameDelta;
+            points[i].velY += data->gravity * gFrameDelta;
             i++;
             if (i == trail->head.tmpl.itemCount) {
                 i = 0;

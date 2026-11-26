@@ -25,22 +25,22 @@ u16 D_800427F4;           /* the track last started */
  * Pushes the message onto the ring.
  */
 void func_10012560(s32 unused, void *message, s32 size) {
-    func_15043BB8(&D_800427A0, message, size);
+    text_ringPush(&D_800427A0, message, size);
 }
 
 /* Initialise the stream player from `heap` and hook its messages into the ring. */
 void func_10012588(ALHeap *heap) {
     func_15016170(heap);
-    func_15043A00(&D_800427A0, D_800427B0, sizeof(D_800427B0));
+    text_ringInit(&D_800427A0, D_800427B0, sizeof(D_800427B0));
     func_151F3C1C(func_10012560);
 }
 
 /* When entering `levelId`, fade a running stream to silence and stop any other active one,
- * except when entering level 30 with D_800BE9F8 == 27. */
+ * except when entering level 30 with gPrevLevel == 27. */
 void func_100125CC(s32 levelId) {
     s32 state = func_151F2CDC();
 
-    if (levelId != 30 || D_800BE9F8 != 27) {
+    if (levelId != 30 || gPrevLevel != 27) {
         if (state == 1) {
             func_151F2D6C(0, 11010);
             return;
@@ -73,7 +73,7 @@ void func_1001263C(s32 id, s32 volume, s32 pan) {
 
 /* Pop the next logged message into `dst` (at most `dstSize` bytes). */
 s32 func_100126E8(u8 *dst, s32 dstSize) {
-    return func_15043CA4(&D_800427A0, dst, dstSize);
+    return text_ringPop(&D_800427A0, dst, dstSize);
 }
 
 /*

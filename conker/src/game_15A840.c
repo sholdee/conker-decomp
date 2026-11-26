@@ -32,7 +32,7 @@ void func_1512D390(Camera *camera) {
             camera->orbitDir = -1;
         }
         orbit->counter++;
-        orbit->orbitSpeed += camera->orbitDir * 0.5f * D_800BE9A4;
+        orbit->orbitSpeed += camera->orbitDir * 0.5f * gFrameDelta;
         speed = orbit->orbitSpeed;
         if (speed < -10.0f) {
             orbit->orbitSpeed = -10.0f;
@@ -49,10 +49,10 @@ void func_1512D390(Camera *camera) {
             return;
         }
         func_1508EF80(&camera->eye, &camera->focus,
-                      (orbit->orbitSpeed * D_800BE9A4) / 2.5f, &camera->eye);
+                      (orbit->orbitSpeed * gFrameDelta) / 2.5f, &camera->eye);
     } else if (orbit->orbitSpeed != 0.0f) {
-        orbit->orbitSpeed -= orbit->orbitSpeed * 0.2f * D_800BE9A4;
+        orbit->orbitSpeed -= orbit->orbitSpeed * 0.2f * gFrameDelta;
         func_1508EF80(&camera->eye, &camera->focus,
-                      (orbit->orbitSpeed * D_800BE9A4) / 2.5f, &camera->eye);
+                      (orbit->orbitSpeed * gFrameDelta) / 2.5f, &camera->eye);
     }
 }

@@ -39,7 +39,7 @@ void func_151A0A10(Actor *actor, s16 duration, u8 owner, s32 arg3) {
 void func_151A0AF8(SparkEmitterEffect *effect) {
     PointSparkEmitter *emitter;
 
-    effect->emitter.accum += 0.1750000119f * D_800BE9A4;
+    effect->emitter.accum += 0.1750000119f * gFrameDelta;
     emitter = &effect->emitter;
     while (emitter->accum > 1.0f) {
         func_1514C678(emitter->x, emitter->y, emitter->z, func_150ADA68() * 25.0f + 15.0f,

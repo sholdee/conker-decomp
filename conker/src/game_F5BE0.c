@@ -42,7 +42,7 @@ s32 func_150C8730(ModelAttachment *att, Actor *actor) {
         mf[1][3] = 0.0f;
         mf[2][3] = 0.0f;
         mf[3][3] = 1.0f;
-        func_1503E5F8(mf, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
+        model_decomposeMatrix(mf, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
 
         obj = func_15073118(actor, -1, 0x4E, 0.0f, 0.0f, 0.0f, 0.0f, 42.79999924f, 49.90000153f, 2.900000095f, 200);
         obj->xpos = x;

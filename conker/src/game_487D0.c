@@ -20,7 +20,7 @@ void func_1501B320(s32 player) {
     f32 diff;
     f32 yaw;
 
-    if (D_800BEAC0 == 0) {
+    if (gPaused == 0) {
         if (camera_global_Cameras[player].unk698 != 0) {
             rate = 0.1000000015f;
         } else if (*(s32 *)D_800DBFF4 != 0) { // any of the four per-player bytes set

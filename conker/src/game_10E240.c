@@ -133,7 +133,7 @@ void func_150E114C(PropEmitterEffect *effect) {
     TimedEffect *particle;
 
     emitter = &effect->emitter;
-    emitter->accum += (204.0f + (func_150ADA68() * 159.0f)) * 0.001f * D_800BE9A4;
+    emitter->accum += (204.0f + (func_150ADA68() * 159.0f)) * 0.001f * gFrameDelta;
     if (emitter->accum > 1.0f) {
         for (i = 0, mask = 0; i <= D_80082FA0; i++) {
             mask |= 1 << i;

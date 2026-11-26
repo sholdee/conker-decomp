@@ -119,7 +119,7 @@ void func_10012020(void) {
             }
             break;
     }
-    D_80042798 += D_800BE9A4;
+    D_80042798 += gFrameDelta;
     if (volume != D_80042790 || D_80042794 != 1.0f) {
         scale = volume / 127.0f;
         for (i = 0; i < 3; i++) {

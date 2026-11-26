@@ -10,12 +10,12 @@ s32 func_151A6600(ZoneEmitter *obj) {
     if (state->hasZone) {
         func_1508B20C(obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 500.0f);
     }
-    state->angle += state->angleSpeed * D_800BE9A4;
+    state->angle += state->angleSpeed * gFrameDelta;
     state->angle = func_15144528(state->angle, 2048.0f, 0.0f);
     state->phase += state->phaseSpeed * D_800BE9E4;
     state->alpha = func_151423D8(state->phase - 0x40) * 63.0f + 192.0f;
     if (func_151464B8(obj->head.def.unk48) == 0) {
-        state->pending += (0.3930000067f + func_150ADA68() * 0.4370000064f) * D_800BE9A4;
+        state->pending += (0.3930000067f + func_150ADA68() * 0.4370000064f) * gFrameDelta;
         if (state->pending > 1.0f) {
             ParticleDesc spawn;
 
@@ -67,10 +67,10 @@ s32 func_151A6600(ZoneEmitter *obj) {
     return 1;
 }
 
-/* Shuts the emitter down: marks its region off, calls func_1000FD38 with func_1000EF40 on it, and frees unk10. */
+/* Shuts the emitter down: marks its region off, calls sound_stopByCallback with func_1000EF40 on it, and frees unk10. */
 void func_151A6AB8(ZoneEmitter *obj) {
     obj->state.region->inactive = 1;
-    func_1000FD38(func_1000EF40, obj->state.region, 0);
+    sound_stopByCallback(func_1000EF40, obj->state.region, 0);
     if (obj->state.unk10 != NULL) {
         func_1516972C(obj->state.unk10);
     }

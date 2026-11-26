@@ -272,7 +272,7 @@ void func_150F5C98(BoneSparkEffect *effect) {
         return;
     }
     if (owner->ob_matrix_ptr != NULL) {
-        data->accum += (0.2600000203f + func_150ADA68() * 0.1950000077f) * D_800BE9A4;
+        data->accum += (0.2600000203f + func_150ADA68() * 0.1950000077f) * gFrameDelta;
         if (data->accum > 1.0f) {
             spawn.r = 0xFF;
             spawn.g = 0xFF;
@@ -328,7 +328,7 @@ void func_150F5C98(BoneSparkEffect *effect) {
                 spawn.vel.y = dy * speed;
                 spawn.vel.z = dz * speed;
                 /* Start a random part of a frame along the path. */
-                t = func_150ADA68() * D_800BE9A4;
+                t = func_150ADA68() * gFrameDelta;
                 spawn.flags &= ~0xC0;
                 spawn.pos.x = spawn.vel.x * t + start.x;
                 spawn.pos.y = spawn.vel.y * t + start.y;

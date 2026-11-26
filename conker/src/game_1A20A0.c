@@ -364,7 +364,7 @@ void func_15175958(SwarmActor *actor) {
     D_800DDF68[actor->modelIndex] = 1;
     sound = actor->sound;
     if (sound != 0) {
-        if (func_1000F3D0(sound) != 0) {
+        if (sound_isPlaying(sound) != 0) {
             func_1000F91C(actor->sound, 0x7D00, 0, 0, 0, actor->x, actor->y, actor->z, 1000, 4000);
         } else {
             actor->sound = 0;
@@ -552,7 +552,7 @@ void func_15175958(SwarmActor *actor) {
     }
     if ((actor->flags & 2) &&
         func_1510AEE0(D_800D9C10[0], actor->x, actor->y, actor->z, D_800D9B20, D_800D9B1C, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
-        (D_800D2138.mode != 1 ||
+        (gMatchState.mode != 1 ||
          func_1510AEE0(D_800D9C10[1], actor->x, actor->y, actor->z, D_800D9B20, D_800D9B1C, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
         func_1516972C(&actor->header);
     }

@@ -173,7 +173,7 @@ typedef struct {
     /* 0x0 */ f32 base;
     /* 0x4 */ f32 amplitude;
     /* 0x8 */ f32 phase;
-    /* 0xC */ f32 rate; /* per unit of D_800BE9A4 */
+    /* 0xC */ f32 rate; /* per unit of gFrameDelta */
 } TimeOscillator;
 
 typedef struct {
@@ -923,7 +923,7 @@ extern TriggerZone *D_800D9A20[2]; /* end points of source 1; func_15014040 regi
 /* Spawner state at +0x28 of a burst emitter. */
 typedef struct {
     /* 0x00 */ TriggerZone *source; // where func_1514470C places each burst
-    /* 0x04 */ f32 rateBase;    // bursts per unit of D_800BE9A4
+    /* 0x04 */ f32 rateBase;    // bursts per unit of gFrameDelta
     /* 0x08 */ f32 rateRange;
     /* 0x0C */ f32 scaleBase;   // size scale passed to func_150E9890
     /* 0x10 */ f32 scaleRange;
@@ -1168,7 +1168,7 @@ typedef struct {
     /* 0x84 */ f32 unk84;
     /* 0x88 */ f32 unk88;
     /* 0x8C */ f32 unk8C;
-    /* 0x90 */ s16 sound;           /* func_10010F30 handle */
+    /* 0x90 */ s16 sound;           /* sound_play handle */
     /* 0x92 */ u8 pad92[2];
 } EffectParticleState; /* size 0x94 */
 
@@ -1764,7 +1764,7 @@ void func_15156FE4(StreakParticle *particle);
 /* Emitter state stored in an effect object at +0x28. */
 typedef struct {
     /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 rate;        // particles per unit of D_800BE9A4
+    /* 0x0C */ f32 rate;        // particles per unit of gFrameDelta
     /* 0x10 */ f32 accumulator; // pending particles; one is spawned per whole unit
     /* 0x14 */ f32 unk14;
 } RiseEmitterState;
@@ -2445,7 +2445,7 @@ typedef struct {
     /* 0x00 */ u8 dropKind;         /* D_800A9D40 index */
     /* 0x04 */ s32 numMounts;
     /* 0x08 */ const BoneMount *mounts;
-    /* 0x0C */ f32 rate;            /* new drops per unit of D_800BE9A4 */
+    /* 0x0C */ f32 rate;            /* new drops per unit of gFrameDelta */
     /* 0x10 */ s32 maxDrops;
     /* 0x14 */ s16 holdMin;         /* D_800BE9E4 ticks a drop hangs before it falls */
     /* 0x16 */ s16 holdRange;

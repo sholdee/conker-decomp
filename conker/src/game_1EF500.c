@@ -14,11 +14,11 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
     Camera *camera;
     s32 direction;
     s16 song;
-    f32 volumeLevel; // matching: separate spill slot for the value kept across func_1000B060
+    f32 volumeLevel; // matching: separate spill slot for the value kept across sound_computePan
     f32 intensity;
 
     if (obj != NULL) {
-        if (D_800BE616 || (camera = obj->CameraPtr) == NULL) {
+        if (gIsMultiplayer || (camera = obj->CameraPtr) == NULL) {
             song = D_800B0DF0->music.song;
             if (song == 0x24 || song == 0x13 || song == 0x4D || song == 0x85 || song == 0x93) {
                 func_100114D0(pos->x, pos->y, pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
@@ -34,7 +34,7 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
                 if (intensity > 16.0f) {
                     volumeLevel = intensity;
                     /* 40.74 = 256 / 2pi: radians to a 256-step angle */
-                    direction = func_1000B060(dir->x, dir->z, (u32)(camera->TrueCameraAngleRad * 40.74366379f));
+                    direction = sound_computePan(dir->x, dir->z, (u32)(camera->TrueCameraAngleRad * 40.74366379f));
                     func_1000E7A0(8, (func_1510F8CC(soundId) + 1) | ((s32)volumeLevel << 8) | (direction << 16));
                 }
             }
@@ -206,11 +206,11 @@ s8 func_151C2734(Game1EF500Trail *trail) {
     ext = &trail->trail;
     alive = TRUE;
     func_151C436C(trail, ext, D_800BE9E4);
-    if (func_151C43E0(trail, ext, D_800BE9A4) == 0) {
+    if (func_151C43E0(trail, ext, gFrameDelta) == 0) {
         alive = FALSE;
     }
-    func_151C4510(trail, ext, D_800BE9A4);
-    if (func_151C455C(trail, ext, D_800BE9A4) == 0) {
+    func_151C4510(trail, ext, gFrameDelta);
+    if (func_151C455C(trail, ext, gFrameDelta) == 0) {
         alive = FALSE;
     }
     if (ext->soundEnabled && alive == TRUE) {
@@ -239,22 +239,22 @@ s8 func_151C2734(Game1EF500Trail *trail) {
                 }
                 player = NULL;
             }
-        } else if (func_1000F3D0(ext->sound)) {
+        } else if (sound_isPlaying(ext->sound)) {
             player = &camera_global_Cameras[ext->listener];
         } else {
             ext->soundEnabled = FALSE;
         }
         if (player != NULL) {
             volume = 0x40;
-            func_1000A420(trail->head.def.pos.x - player->eye.x, trail->head.def.pos.y - player->eye.y,
+            sound_computePanVolume(trail->head.def.pos.x - player->eye.x, trail->head.def.pos.y - player->eye.y,
                           trail->head.def.pos.z - player->eye.z, player->TrueCameraAngle,
                           trail->head.def.pos.x - player->eye.x, trail->head.def.pos.y - player->eye.y,
                           trail->head.def.pos.z - player->eye.z, 10000, 9999, &volume, &pan, 0);
             if (sound != 0) {
-                ext->sound = func_10010F30(sound, 0x6590, volume & 0x7F, 0, volume & 0x80);
+                ext->sound = sound_play(sound, 0x6590, volume & 0x7F, 0, volume & 0x80);
             } else {
-                func_1000F85C(ext->sound, 4, volume & 0x7F);
-                func_1000F85C(ext->sound, 0x100, volume & 0x80);
+                sound_setVoiceParam(ext->sound, 4, volume & 0x7F);
+                sound_setVoiceParam(ext->sound, 0x100, volume & 0x80);
             }
         }
     }
@@ -724,7 +724,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         scale = (func_150ADA68() * 15.0f) + 15.0f;
         debris.texture = shade[type];
         debris.unk7 = 0;
-        debris.flags = (D_800BE616 ? 0x20000 : 0) | 0xBF01;
+        debris.flags = (gIsMultiplayer ? 0x20000 : 0) | 0xBF01;
         debris.lifetime = (func_150ADA20() % 61U) + 0x3C;
         debris.frame = 0;
         debris.frameSpeed = 0;
@@ -769,7 +769,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         spark.scale.x = 1.269999981f;
         spark.scale.y = 1.0f;
         spark.scale.z = 56.81999969f;
-        spark.flags = (D_800BE616 ? 0x40000000 : 0) | 0x08DC0009;
+        spark.flags = (gIsMultiplayer ? 0x40000000 : 0) | 0x08DC0009;
         spark.unk44 = (func_150ADA20() % 76U) + 0xB4;
         spark.unk45 = 0xFF;
         spark.unk46 = 0;
@@ -822,7 +822,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         smoke.speedRange = 17.0f;
         smoke.gravityBase = 0.00800000038f;
         smoke.gravityRange = 0.2610000074f;
-        smoke.flags = (D_800BE616 ? 0x800000 : 0) | 0x40E07;
+        smoke.flags = (gIsMultiplayer ? 0x800000 : 0) | 0x40E07;
         smoke.updateFunc = 0x10;
         smoke.deathFunc = -1;
         smoke.primColorMode = 8;

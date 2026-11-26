@@ -411,7 +411,7 @@ s32 func_15159370(Actor *chr, u8 *mode) {
     s32 ret;
 
     ret = 0;
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         *mode = 0;
         ret = 1;
     }
@@ -730,7 +730,7 @@ void func_15159C08(DiskEmitterObject *obj) {
 
     emitter = &obj->emitter;
     if (func_151454BC(D_800BE9E8, 3000.0f, &emitter->position)) {
-        emitter->pending += (emitter->rate + (func_150ADA68() * emitter->rateRandom)) * D_800BE9A4;
+        emitter->pending += (emitter->rate + (func_150ADA68() * emitter->rateRandom)) * gFrameDelta;
         if (emitter->pending > 1.0f) {
             ParticleDesc6C spawn;
             OscillateMotion oscillate;
@@ -843,7 +843,7 @@ s32 func_1515A11C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     particle->head.desc.height = osc->baseSize + (osc->heightWobble * sin1);
     if ((osc && osc) && osc) { // matching: these dead tests of osc steer IDO's schedule of the angle update
     }
-    osc->angle += osc->angleSpeed * D_800BE9A4;
+    osc->angle += osc->angleSpeed * gFrameDelta;
     osc->angle = func_15144B68(osc->angle);
     sin0 = sinf(osc->angle);
     particle->head.desc.offset.x = osc->direction.x * sin0;
@@ -1137,7 +1137,7 @@ void func_1515AB88(RiseEmitterObject *obj) {
     RiseEmitter *emitter;
 
     emitter = &obj->emitter;
-    emitter->pending += (emitter->settings.rate + (func_150ADA68() * emitter->settings.rateRandom)) * D_800BE9A4;
+    emitter->pending += (emitter->settings.rate + (func_150ADA68() * emitter->settings.rateRandom)) * gFrameDelta;
     if (emitter->pending > 1.0f) {
         ParticleDesc spawn;
         RiseMotion rise;

@@ -3,26 +3,26 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15000000(void) {
+void music_init(void) {
     OSMesgQueue *msgQueue;
     s32 i;
 
     for (i = 0; i < 3; i++)
     {
-        msgQueue = &D_80041E58[i];
-        osCreateMesgQueue(msgQueue, D_80041EA0[i], 8);
+        msgQueue = &gMarkerQueues[i];
+        osCreateMesgQueue(msgQueue, gMarkerQueueBufs[i], 8);
         func_10008570(i, msgQueue);
     }
 
     func_100085A4(0, 6, 1); // stub function
-    func_1000E934();
+    music_reset();
 }
 
 void func_15000090(void) {
-    func_1000DEC4();
+    music_freeStoppedTunes();
 }
 
-void func_150000B0(void) {
+void music_startLevelMusic(void) {
     LevelMusic q;
     s32 i;
     s32 j;
@@ -56,21 +56,21 @@ void func_150000B0(void) {
         a2 = 1;
     case 4:
     case 0:
-        func_1000DEC4();
+        music_freeStoppedTunes();
         break;
     case 3:
         a2 = 1;
     case 1:
         if (D_800BE9B4 == 2) {
-            func_1000DEC4();
-        } else if (D_800BE9F8 != 0x22) {
+            music_freeStoppedTunes();
+        } else if (gPrevLevel != 0x22) {
             a2 = 0;
             q.song = -1;
             q.song2 = -1;
         }
         break;
     }
-    i = func_1000B548(arr);
+    i = music_getPlayingIds(arr);
     n = i;
     for (; i < 3; i++) {
         arr[i] = -1;
@@ -96,23 +96,23 @@ void func_150000B0(void) {
             q.song2 = 0;
         }
     }
-    func_1000E2F4(0);
+    music_pauseAll(0);
     if (a2 == 0) {
         for (i = 0; i < 3; i++) {
             if (arr[i] != -1) {
                 if (q.song == arr[i]) {
-                    func_1000E46C(q.song, 0, q.mutedChannels, 0);
-                    func_1000E46C(q.song, 0x64, (q.mutedChannels ^ 0xFFFF), 0);
-                    func_1000E40C(q.song, q.volume);
-                    func_1000DF68(q.song, 0x7FFF, 0);
+                    music_fadeChannelVolume(q.song, 0, q.mutedChannels, 0);
+                    music_fadeChannelVolume(q.song, 0x64, (q.mutedChannels ^ 0xFFFF), 0);
+                    music_setVolume(q.song, q.volume);
+                    music_setFade(q.song, 0x7FFF, 0);
                     arr[i] = -1;
                     q.song = -1;
                     n--;
                 } else if (q.song2 == arr[i]) {
-                    func_1000E46C(q.song2, 0, q.mutedChannels2, 0);
-                    func_1000E46C(q.song2, 0x64, (q.mutedChannels2 ^ 0xFFFF), 0);
-                    func_1000E40C(q.song2, q.volume2);
-                    func_1000DF68(q.song2, 0x7FFF, 0);
+                    music_fadeChannelVolume(q.song2, 0, q.mutedChannels2, 0);
+                    music_fadeChannelVolume(q.song2, 0x64, (q.mutedChannels2 ^ 0xFFFF), 0);
+                    music_setVolume(q.song2, q.volume2);
+                    music_setFade(q.song2, 0x7FFF, 0);
                     arr[i] = -1;
                     q.song2 = -1;
                     n--;
@@ -130,7 +130,7 @@ void func_150000B0(void) {
         j = n - cnt;
         for (i = 2; i >= 0 && j != 0; i--) {
             if (arr[i] != -1) {
-                func_1000DE1C(arr[i], 4);
+                music_stopTune(arr[i], 4);
                 arr[i] = -1;
                 j--;
             }
@@ -145,19 +145,19 @@ void func_150000B0(void) {
         }
         if (j == -1) {
             if (q.song > 0) {
-                func_1000D96C(q.song, 0, 0);
+                music_playTune(q.song, 0, 0);
             }
         } else {
             if (q.song > 0) {
-                func_1000D96C(q.song, arr[j], 5);
+                music_playTune(q.song, arr[j], 5);
             } else {
-                func_1000DE1C(arr[j], 4);
+                music_stopTune(arr[j], 4);
             }
             arr[j] = -1;
         }
         if (q.song > 0) {
-            func_1000E46C(q.song, 0, q.mutedChannels, 0);
-            func_1000E40C(q.song, q.volume);
+            music_fadeChannelVolume(q.song, 0, q.mutedChannels, 0);
+            music_setVolume(q.song, q.volume);
         }
     }
     if (q.song2 >= 0) {
@@ -169,19 +169,19 @@ void func_150000B0(void) {
         }
         if (j == -1) {
             if (q.song2 > 0) {
-                func_1000D96C(q.song2, 0, 0);
+                music_playTune(q.song2, 0, 0);
             }
         } else {
             if (q.song2 > 0) {
-                func_1000D96C(q.song2, arr[j], 5);
+                music_playTune(q.song2, arr[j], 5);
             } else {
-                func_1000DE1C(arr[j], 4);
+                music_stopTune(arr[j], 4);
             }
             arr[j] = -1;
         }
         if (q.song2 > 0) {
-            func_1000E46C(q.song2, 0, q.mutedChannels2, 0);
-            func_1000E40C(q.song2, q.volume2);
+            music_fadeChannelVolume(q.song2, 0, q.mutedChannels2, 0);
+            music_setVolume(q.song2, q.volume2);
         }
     }
     func_10017944(1, q.unkD);

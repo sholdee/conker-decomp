@@ -54,7 +54,7 @@ void func_100010F8(void *arg) {
     }
 }
 
-extern u8 D_151FA130; // end of the chunk0 code segment (starts at func_15000000)
+extern u8 D_151FA130; // end of the chunk0 code segment (starts at music_init)
 /**
  * Main thread: clear the heap, set up framebuffers and the VI manager, load and decompress the
  * boot data from ROM, load the chunk0 offset table, then hand over to the game.
@@ -97,7 +97,7 @@ void func_10001194(void *arg) {
     func_10004074(compressed);
 
     D_800354F8 = (u8 *)ALIGN16(&D_80033330);
-    blockCount = ((u32)&D_151FA130 - (u32)&func_15000000 + 0xFFF) >> 12;
+    blockCount = ((u32)&D_151FA130 - (u32)&music_init + 0xFFF) >> 12;
     D_800354FC = (s32 *)ALIGN16(&D_80032B30);
     size = blockCount + 1;
     // matching: 16-byte round-up written as (x + 0xF | 0xF) ^ 0xF; `& ~0xF` or `* 4` change the code

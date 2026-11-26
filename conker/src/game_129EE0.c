@@ -31,10 +31,10 @@ void func_150FCA30(void) {
     func_150FCBC0(1);
     func_150FCBC0(2);
 
-    // func_1000FA64(sound, x, y, z, volume, farDistance, nearDistance, callback, owner, key, flags, cents)
-    func_1000FA64(0x2B8, -2038, 1560, -2631, 28000, 9000, 7000, func_1000EC24, (void *)45, 0, 0, 0);
-    func_1000FA64(0x2B7, -319, -273, -3419, 28000, 9000, 7000, func_1000EC24, NULL, 0, 0, 0);
-    func_1000FA64(0x2B6, 1519, 947, -2633, 28000, 9000, 7000, func_1000EC24, (void *)90, 0, 0, 0);
+    // sound_addDynamicSound(sound, x, y, z, volume, farDistance, nearDistance, callback, owner, key, flags, cents)
+    sound_addDynamicSound(0x2B8, -2038, 1560, -2631, 28000, 9000, 7000, sound_delayedPlayCallback, (void *)45, 0, 0, 0);
+    sound_addDynamicSound(0x2B7, -319, -273, -3419, 28000, 9000, 7000, sound_delayedPlayCallback, NULL, 0, 0, 0);
+    sound_addDynamicSound(0x2B6, 1519, 947, -2633, 28000, 9000, 7000, sound_delayedPlayCallback, (void *)90, 0, 0, 0);
 
     for (i = 0; i < D_80082FA0 + 1; i++) {
         func_15164F0C(4, i, 0, 0xFF, 1);
@@ -129,7 +129,7 @@ f32 func_150FCF1C(void *arg0) {
 }
 
 void func_150FCFB0(s32 arg0) {
-    func_15103828();
+    sound_updateCooldowns();
 }
 
 
@@ -138,7 +138,7 @@ typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;      /* owner->unique_id when the link was made */
     /* 0x08 */ f32 maxWidth;
-    /* 0x0C */ f32 timer;       /* counts down by D_800BE9A4; the particle dies below 0 */
+    /* 0x0C */ f32 timer;       /* counts down by gFrameDelta; the particle dies below 0 */
     /* 0x10 */ f32 pulsePhase;
     /* 0x14 */ f32 texS0;       /* S texture coordinate of corners 0 and 3 */
     /* 0x18 */ f32 texS1;       /* S texture coordinate of corners 1 and 2 */
@@ -194,7 +194,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
         pos.y = obj->ypos;
         onGround = 0;
     }
-    func_1505D024(obj, 0x39, obj->langle, -1);
+    actor_hitScripted(obj, 0x39, obj->langle, -1);
     ext.owner = obj;
     ext.ownerId = obj->unique_id;
     ext.maxWidth = 60.0f;
@@ -209,7 +209,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     ext.groundParticle = NULL;
     ext.emitCounter = 0.0f;
     ext.ground = ground;
-    ext.soundHandle = func_1000FA64(0x69E, pos.x, pos.y, pos.z, 32000, 3000, 500, 0, 0, 0, 0, 0);
+    ext.soundHandle = sound_addDynamicSound(0x69E, pos.x, pos.y, pos.z, 32000, 3000, 500, 0, 0, 0, 0, 0);
     flag = onGround ? 1 : 0; // matching: the s32 temp keeps IDO's branchy 0/1 select
     ext.onGround = flag;
     def.texture = 0x59;
@@ -321,8 +321,8 @@ s32 func_150FD514(Actor150FD514 *particle) {
         z = particle->head.def.pos.z;
     }
     if (owner != NULL) {
-        func_1502EA98(owner, 0xFF, 0, 0, 0xFF, 0, 4);
-        ext->emitCounter += (0.091000006f + func_150ADA68() * 0.07f) * D_800BE9A4;
+        actor_flashFog(owner, 0xFF, 0, 0, 0xFF, 0, 4);
+        ext->emitCounter += (0.091000006f + func_150ADA68() * 0.07f) * gFrameDelta;
         while (ext->emitCounter > 1.0f) {
             func_15107B78(owner, func_150ADA20() & 0xFF, (func_150ADA20() % 101) - 63, particle->head.header.owner, particle->head.header.kind);
             ext->emitCounter -= 1.0f;
@@ -336,7 +336,7 @@ s32 func_150FD514(Actor150FD514 *particle) {
         particle->head.def.width = ext->timer * 0.1f * ext->maxWidth;
         if (ext->burstDone == 0) {
             if (owner != NULL) {
-                func_1505D024(owner, 0x16, owner->langle, -1);
+                actor_hitScripted(owner, 0x16, owner->langle, -1);
                 func_10010F88(0x69D, 32000, 0, 0, 0, particle->head.def.pos.x, particle->head.def.pos.y, particle->head.def.pos.z, 500, 3000);
             }
             ext->burstDone = 1;
@@ -353,10 +353,10 @@ s32 func_150FD514(Actor150FD514 *particle) {
         }
     }
     particle->head.def.unk44 = sinf(ext->pulsePhase) * 57.0f + 198.0f;
-    ext->pulsePhase += 0.28500003f * D_800BE9A4;
+    ext->pulsePhase += 0.28500003f * gFrameDelta;
     ext->pulsePhase = func_15144B68(ext->pulsePhase);
-    ext->texPhase0 += 0.10700001f * D_800BE9A4;
-    ext->texPhase1 += -0.086f * D_800BE9A4;
+    ext->texPhase0 += 0.10700001f * gFrameDelta;
+    ext->texPhase1 += -0.086f * gFrameDelta;
     ext->texPhase0 = func_15144B68(ext->texPhase0);
     ext->texPhase1 = func_15144B68(ext->texPhase1);
     ext->texS0 = func_150AD78C(ext->texPhase0) * 1666.0f + -4633.0f;
@@ -369,7 +369,7 @@ s32 func_150FD514(Actor150FD514 *particle) {
     }
     particle->head.def.pos.x = x;
     particle->head.def.pos.z = z;
-    ext->timer -= D_800BE9A4;
+    ext->timer -= gFrameDelta;
     if (ext->timer < 0.0f) {
         return 0;
     }
@@ -425,10 +425,10 @@ void func_150FDC2C(Actor150FD514 *actor) {
         func_1516972C(&ext->groundParticle->head.header);
     }
     if (ext->soundHandle != 0) {
-        func_100111C8(ext->soundHandle);
+        sound_stop(ext->soundHandle);
     }
     if (ext->soundHandle2 != 0) {
-        func_100111C8(ext->soundHandle2);
+        sound_stop(ext->soundHandle2);
     }
 }
 

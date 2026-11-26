@@ -20,100 +20,100 @@
 
 /* game_42DC0.c */
 void func_15015910(void);
-void func_15015920(s16 font);
-void func_15015A38(u8 *record, s32 glyph, s32 font);
+void text_loadFont(s16 font);
+void text_unpackGlyph(u8 *record, s32 glyph, s32 font);
 
 /* game_439B0.c */
-void func_15016500(void);
+void text_resetContextText(void);
 void func_15016588(void);
 extern u8 D_800BE580[9]; // bit set over the 0x43 text ids
 
 /* game_6E770.c */
-Gfx *func_150412C0(Gfx *gfx);
-Gfx *func_150413FC(Gfx *gfx, s32 x, s32 y, u8 *str);
-s32 func_15041480(u8 ch);
-Gfx *func_15041508(Gfx *gfx, s32 x, s32 y, s32 glyph);
+Gfx *text_setupFixedFont(Gfx *gfx);
+Gfx *text_drawFixedString(Gfx *gfx, s32 x, s32 y, u8 *str);
+s32 text_findFixedGlyph(u8 ch);
+Gfx *text_drawFixedGlyph(Gfx *gfx, s32 x, s32 y, s32 glyph);
 
 /* game_6EA90.c */
-void func_150415E0(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noCombine, f32 *scale);
-Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 scaleX, f32 scaleY, s32 len);
-void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth);
-s32 func_15042C40(u8 ch);
+void text_getIconSize(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noCombine, f32 *scale);
+Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 scaleX, f32 scaleY, s32 len);
+void text_measureString(u8 *str, s32 *width, s32 *height, s32 *depth);
+s32 text_findGlyph(u8 ch);
 extern u8 D_800CBD4C;  // cleared by func_15015910
-extern u16 D_800CBD4E; // animation clock (high bits pick icon frames)
+extern u16 gTextAnimClock; // animation clock (high bits pick icon frames)
 
 /* game_70200.c */
-void func_15042D50(void);
-void func_15042D78(u8 flags);
-void func_15042D94(s32 x, s32 y, u8 flags, char *format, ...);
-void func_15042E3C(char *format, ...);
-void func_15042ECC(u8 *format, s32 *argumentWords);
-void func_150432BC(f32 scale);
-void func_150432CC(Actor *object, s32 yOffset);
-void func_150432FC(s16 x, s16 y);
-void func_1504332C(u8 red, u8 green, u8 blue, u8 alpha);
-Gfx *func_15043384(Gfx *gfx);
-extern Gfx D_800859A0[]; // render setup for 2D text and sprites
-void func_15043A00(MsgRing *ring, u8 *buffer, s32 capacity);
-s32 func_15043A20(u8 *buffer, s32 capacity, s32 offset, u8 *src, s32 size);
-s32 func_15043AC8(u8 *buffer, s32 capacity, s32 offset, u8 *dst, s32 size);
-s32 func_15043B70(u8 *buffer, s32 capacity, s32 offset, s32 size);
-s32 func_15043BB8(MsgRing *ring, u8 *message, s32 size);
-s32 func_15043CA4(MsgRing *ring, u8 *dst, s32 dstSize);
+void text_clearQueue(void);
+void text_setFlags(u8 flags);
+void text_printAt(s32 x, s32 y, u8 flags, char *format, ...);
+void text_print(char *format, ...);
+void text_parseFormat(u8 *format, s32 *argumentWords);
+void text_setScale(f32 scale);
+void text_setAnchor(Actor *object, s32 yOffset);
+void text_setPosition(s16 x, s16 y);
+void text_setColor(u8 red, u8 green, u8 blue, u8 alpha);
+Gfx *text_drawQueue(Gfx *gfx);
+extern Gfx gText2DSetupDL[]; // render setup for 2D text and sprites
+void text_ringInit(MsgRing *ring, u8 *buffer, s32 capacity);
+s32 text_ringWrite(u8 *buffer, s32 capacity, s32 offset, u8 *src, s32 size);
+s32 text_ringRead(u8 *buffer, s32 capacity, s32 offset, u8 *dst, s32 size);
+s32 text_ringSkip(u8 *buffer, s32 capacity, s32 offset, s32 size);
+s32 text_ringPush(MsgRing *ring, u8 *message, s32 size);
+s32 text_ringPop(MsgRing *ring, u8 *dst, s32 dstSize);
 
 /* game_AD9B0.c */
 /* (Actor *obj, TriggerZone *zone, s32 slot, s32 textId); declared without a prototype: game_CDE80.c passes 5 arguments */
-void func_15080500();
-void func_15080620(s32 objIndex, s32 slot, s32 textId, s32 arg3);
-void func_150806A8(s32 objIndex);
-void func_15080718(s32 n, s32 *byteIndex, s32 *bitMask);
-s32 func_15080738(s32 textId);
-void func_15080784(void);
-void func_150807F4(TextBoxConfig *config, s32 page, s32 event);
-void func_15080828(s32 arg0);
-void func_15080BE8(void);
-void func_15080C64(void);
-s32 func_15080CF4(void);
-extern u8 D_800D1940;
-extern u8 D_800D1941;
-extern TextResource *D_800D1944; // current text
-extern TextResource *D_800D1948; // header text prepended to it, or NULL
-extern u8 *D_800D194C; // header + page break + current text
-extern TextBox *D_800D1950; // open text box
-extern TextBoxConfig D_800D1958;
-extern f32 D_800D1988;
-extern f32 D_800D198C;
-extern f32 D_800D1990;
-extern u8 D_800D1994;
-extern u8 D_800D1995;
-extern u16 *D_800D1998; // sound effects voiced while the text types out
+void text_queueObjectText();
+void text_lockObjectText(s32 objIndex, s32 slot, s32 textId, s32 arg3);
+void text_clearObjectText(s32 objIndex);
+void text_getBitPos(s32 n, s32 *byteIndex, s32 *bitMask);
+s32 text_isAvailable(s32 textId);
+void text_playNextSound(void);
+void text_soundCallback(TextBoxConfig *config, s32 page, s32 event);
+void text_openContextText(s32 arg0);
+void text_closeContextText(void);
+void text_updateContextText(void);
+s32 text_isContextTextClosed(void);
+extern u8 gContextTextId;
+extern u8 gContextTextOpen;
+extern TextResource *gContextText; // current text
+extern TextResource *gContextHeaderText; // header text prepended to it, or NULL
+extern u8 *gContextCombinedText; // header + page break + current text
+extern TextBox *gContextTextBox; // open text box
+extern TextBoxConfig gContextTextBoxConfig;
+extern f32 gContextTextScreenX;
+extern f32 gContextTextScreenY;
+extern f32 gContextTextAngle;
+extern u8 gContextSoundNext;
+extern u8 gContextSoundCount;
+extern u16 *gContextSounds; // sound effects voiced while the text types out
 
 /* game_197C20.c */
-s32 func_1516A770(u8 *text);
-TextBox *func_1516A7B0(u32 msgIndex, s32 objIndex, s32 arg2,
+s32 text_splitPages(u8 *text);
+TextBox *text_createBox(u32 msgIndex, s32 objIndex, s32 arg2,
                        void (*callback)(TextBoxConfig *config, s32 page, s32 state),
                        TextBoxConfig *suppliedConfig, s32 owner);
 
 /* game_197F20.c */
-void func_1516AA70(TextBox *box);
-Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2);
-u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source);
-Gfx *func_1516C934(Gfx *gfx, TextBox *box, u8 r, u8 g, u8 b, u8 a);
-void func_1516CC58(TextBox *box);
-void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle);
+void text_updateBox(TextBox *box);
+Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2);
+u8 *text_getPage(TextBoxConfig *config, s32 index, s16 source);
+Gfx *text_drawBoxText(Gfx *gfx, TextBox *box, u8 r, u8 g, u8 b, u8 a);
+void text_placeBox(TextBox *box);
+void text_clampBoxToView(TextBox *box, f32 *x, f32 *y, f32 *angle);
 void func_1516D2D8(void);
-void func_1516D2E0(TextBox *box);
-void func_1516D328(TextBox *box);
-TextBox *func_1516D378(TextBox *box);
-TextBox *func_1516D3C4(TextBox *box);
+void text_removeBox(TextBox *box);
+void text_closeBoxSkipPages(TextBox *box);
+TextBox *text_closeBoxAfterPage(TextBox *box);
+TextBox *text_closeBoxNow(TextBox *box);
 
 /* game_203E20.c */
 void func_151D6970(Actor *character, void *obj);
 void func_151D69B4(WorldObject *pickup, Actor *player);
-void func_151D6BFC(Actor *owner, u8 arg1, s32 arg2);
+void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2);
 s32 func_151D6E60(ModelEffect *fx);
-s32 func_151D7000(TextObj *obj);
-void func_151D70CC(TextObj *obj, u8 *payload, u8 type);
+s32 text_updateAmount(TextObj *obj);
+void text_handleAmountMessage(TextObj *obj, u8 *payload, u8 type);
 Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 
 #endif

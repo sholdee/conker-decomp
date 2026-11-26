@@ -293,12 +293,12 @@ s32 func_1513BEB0(DynModel *obj) {
     TexWarpState *state;
 
     state = (TexWarpState *)(obj->buffers + obj->buffersSize);
-    state->scrollTPhase += 0.03700000048f * D_800BE9A4;
+    state->scrollTPhase += 0.03700000048f * gFrameDelta;
     state->scrollTPhase = func_15144B68(state->scrollTPhase);
-    state->scrollS += 1.899999976f * D_800BE9A4;
+    state->scrollS += 1.899999976f * gFrameDelta;
     state->scrollT = sinf(state->scrollTPhase) * 77.30000305f;
-    state->scalePhaseS += 0.01900000125f * D_800BE9A4;
-    state->scalePhaseT += 0.01000000071f * D_800BE9A4;
+    state->scalePhaseS += 0.01900000125f * gFrameDelta;
+    state->scalePhaseT += 0.01000000071f * gFrameDelta;
     state->scalePhaseS = func_15144B68(state->scalePhaseS);
     state->scalePhaseT = func_15144B68(state->scalePhaseT);
 

@@ -296,10 +296,10 @@ s32 func_151488C4(MotionTrail *trail) {
     params = trail->params;
     index = trail->head.start;
     while (index != trail->head.end) {
-        points[index].velocityY -= params->motion.gravity * D_800BE9A4;
-        points[index].pos.x += params->motion.velocity.x * D_800BE9A4;
-        points[index].pos.y += points[index].velocityY * D_800BE9A4;
-        points[index].pos.z += params->motion.velocity.z * D_800BE9A4;
+        points[index].velocityY -= params->motion.gravity * gFrameDelta;
+        points[index].pos.x += params->motion.velocity.x * gFrameDelta;
+        points[index].pos.y += points[index].velocityY * gFrameDelta;
+        points[index].pos.z += params->motion.velocity.z * gFrameDelta;
         index++;
         if (index == trail->head.tmpl.itemCount) {
             index = 0;
@@ -354,10 +354,10 @@ s32 func_15148AF4(MotionTrail *trail) {
         if (idx < 0) {
             idx = trail->head.tmpl.itemCount - 1;
         }
-        points[idx].velocityY -= params->motion.gravity * D_800BE9A4;
-        points[idx].pos.x += params->motion.velocity.x * D_800BE9A4;
-        points[idx].pos.y += points[idx].velocityY * D_800BE9A4;
-        points[idx].pos.z += params->motion.velocity.z * D_800BE9A4;
+        points[idx].velocityY -= params->motion.gravity * gFrameDelta;
+        points[idx].pos.x += params->motion.velocity.x * gFrameDelta;
+        points[idx].pos.y += points[idx].velocityY * gFrameDelta;
+        points[idx].pos.z += params->motion.velocity.z * gFrameDelta;
     } while (idx != trail->head.start);
     return 1;
 }
@@ -382,10 +382,10 @@ s32 func_15148BA4(MotionTrail *trail) {
         if (index < 0) {
             index = trail->head.tmpl.itemCount - 1;
         }
-        points[index].velocityY -= params->motion.gravity * D_800BE9A4;
-        points[index].pos.x += params->motion.velocity.x * D_800BE9A4;
-        points[index].pos.y += points[index].velocityY * D_800BE9A4;
-        points[index].pos.z += params->motion.velocity.z * D_800BE9A4;
+        points[index].velocityY -= params->motion.gravity * gFrameDelta;
+        points[index].pos.x += params->motion.velocity.x * gFrameDelta;
+        points[index].pos.y += points[index].velocityY * gFrameDelta;
+        points[index].pos.z += params->motion.velocity.z * gFrameDelta;
     } while (index != trail->head.start);
     if (params->motion.flags & 0x17) {
         if (points[trail->head.start].pos.y < oldPosition.y) {

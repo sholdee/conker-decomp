@@ -6,7 +6,7 @@
 /*
  * Casts a ray from (fromX, fromY, fromZ) to (toX, toY, toZ) against the first 25 objects and picks the
  * one func_15049440 scores lowest, skipping slot `skipIndex` and `source`'s own slot. If one is found,
- * spawns func_1505D1C4 effect `effect` at it and copies `source`'s unk76 to it.
+ * spawns actor_runAttackAt effect `effect` at it and copies `source`'s unk76 to it.
  */
 s32 func_150E1570(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex,
                   s32 effect) {
@@ -53,7 +53,7 @@ s32 func_150E1570(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 t
 
     if (best != -1) {
         obj = &movement_obj[best];
-        result = func_1505D1C4(obj->xpos, obj->unkD6 + obj->ypos, obj->zpos, effect,
+        result = actor_runAttackAt(obj->xpos, obj->unkD6 + obj->ypos, obj->zpos, effect,
                                dc_glbl_CharNum, 0, 0, 0);
         obj->angle = source->angle;
     }

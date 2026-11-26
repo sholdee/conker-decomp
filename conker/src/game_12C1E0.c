@@ -68,7 +68,7 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
         random1 = func_150ADA68();
         randomWord = func_150ADA20();
 
-        if (D_800BE616 != 0) {
+        if (gIsMultiplayer != 0) {
             kind = 0x35;
         } else {
             kind = 0x1A;

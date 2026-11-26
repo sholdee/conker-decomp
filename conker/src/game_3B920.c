@@ -4,7 +4,7 @@
 #include "variables.h"
 
 /* Per-level setup routines, indexed by LevelHeader.unkA (0: none). */
-static void (*D_80082D90[])(void) = {
+static void (*gLevelSetupFuncs[])(void) = {
     NULL,
     func_1500E8C0, func_15010600, func_1500EB20,
     func_1500EBC4, func_1500EF20, func_15010680,
@@ -22,7 +22,7 @@ static void (*D_80082D90[])(void) = {
 };
 
 /* Resets game globals, then runs the subsystem init routines for the given level. */
-void func_1500E470(s32 levelId) {
+void game_initLevelSubsystems(s32 levelId) {
     D_800DD190 = -1;
     bzero(D_800DD198, 24);
     D_800DD404 = 0xFF;
@@ -53,7 +53,7 @@ void func_1500E470(s32 levelId) {
     func_1500E5C0();
 
     if (D_800B0DF0->unkA) {
-        D_80082D90[D_800B0DF0->unkA]();
+        gLevelSetupFuncs[D_800B0DF0->unkA]();
     }
     func_1500ABA0(levelId);
     func_1500BEC0();

@@ -2,19 +2,19 @@
 #include "structs.h"
 
 // SoundRecordCallback (functions.h) is called each update for a record with flag 0x10, with the values
-// func_10011624 is about to apply. Each callback gives callback_param1/2 its own meaning.
+// sound_updateRecords is about to apply. Each callback gives callback_param1/2 its own meaning.
 
-// SoundRecord.flags, as func_10011624 reads them:
+// SoundRecord.flags, as sound_updateRecords reads them:
 //   0x0001 a voice is playing (handle valid)    0x0002 re-evaluate even while playing
 //   0x0004 doppler pitch shift                  0x0008 keep the record while silent
-//   0x0010 run the callback                     0x0040 position from y only (func_1000A750)
-//   0x0080 finished, removed by func_10011BB8   0x0100 centered (no pan)
+//   0x0010 run the callback                     0x0040 position from y only (sound_computePathPanVolume)
+//   0x0080 finished, removed by sound_update   0x0100 centered (no pan)
 //   0x0200 mirror the pan                       0x0C00 bus override (0x400: bus 0, else 1)
 //   0x1000 skip the next update (set when the record was just started)
 
-// Per-player listener (D_80041F68), refreshed from the cameras by func_10011BB8.
+// Per-player listener (gSoundListeners), refreshed from the cameras by sound_update.
 typedef struct {
-    s32 x0;      // Camera.focus (one listener, flag 0x80000 clear) or Camera.eye; deltas to func_1000A420
+    s32 x0;      // Camera.focus (one listener, flag 0x80000 clear) or Camera.eye; deltas to sound_computePanVolume
     s32 y4;
     s32 z8;
     s32 xC;      // Camera.eye; the nearest listener is chosen by distance to this
@@ -23,7 +23,7 @@ typedef struct {
     f32 field18; // Camera.TrueCameraAngle
 } SoundSpatialRecord;
 
-// Deferred voice stop, queued by func_100112BC.
+// Deferred voice stop, queued by sound_queueStop.
 typedef struct {
     u16 handle;
     u8 delay; // updates to wait
@@ -40,26 +40,26 @@ typedef struct {
  * This file's .bss. It is defined before functions.h and variables.h: IDO places a variable that an
  * extern declared earlier (conker/sound.h) after the others.
  */
-static SoundQueueEntry D_80041F10[16];
+static SoundQueueEntry gSoundStopQueue[16];
 static s32 D_80041F50;
 static s32 D_80041F54;            /* music volume; its low half is what func_10017780 takes */
 static f32 D_80041F58;
-static u8 *D_80041F5C;            /* per-sound variant history */
+static u8 *gSoundVariantHistory;            /* per-sound variant history */
 static u8 D_80041F60;
 static u8 D_80041F61;
-static SoundSpatialRecord D_80041F68[4];
+static SoundSpatialRecord gSoundListeners[4];
 s8 D_80041FD8;
 u8 D_80041FD9;
 s32 D_80041FDC;
 static SoundRecord dynamicSounds[32];
-static SoundSlot D_800425E0[32];  /* func_1000F1A8 clears all 32; a handle's low 4 bits pick one of the first 16 */
-static s32 D_80042760;            /* records in use in dynamicSounds */
+static SoundSlot gVoiceSlots[32];  /* func_1000F1A8 clears all 32; a handle's low 4 bits pick one of the first 16 */
+static s32 gDynamicSoundCount;            /* records in use in dynamicSounds */
 
 #include "functions.h"
 #include "variables.h"
 
-// The variants of each effect (func_10011EB8), indexed [effect][variant].
-static const SoundVariant D_8002C240[20][5] = {
+// The variants of each effect (sound_pickEffectVariant), indexed [effect][variant].
+static const SoundVariant gEffectSoundVariants[20][5] = {
     { { 0x000, 0 }, { 0x000, 0 }, { 0x000, 0 }, { 0x000, 0 }, { 0x000, 0 } },
     { { 0x25A, 4 }, { 0x254, 4 }, { 0x258, 2 }, { 0x253, 1 }, { 0x2AB, 4 } },
     { { 0x248, 4 }, { 0x24C, 4 }, { 0x250, 2 }, { 0x252, 1 }, { 0x2AB, 4 } },
@@ -92,7 +92,7 @@ void func_10017780(u8 arg0, u16 arg1);
 SndState *func_10017438(ALBank *, s16, u16, u8, f32, u8, u8, SndState **);
 
 // Random ambient chirp: every 128-255 ticks, play one of sounds 0x6C-0x6E.
-s32 func_1000EB00(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
+s32 sound_chirpCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
     if (record->sound_id != 0) {
         record->sound_id = 0;
@@ -115,7 +115,7 @@ s32 func_1000EB00(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
 }
 
 // Fade out: once the timer runs out, lower the volume each tick; stop at zero.
-s32 func_1000EBC4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan) {
+s32 sound_fadeOutCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan) {
     s32 newVolume = record->max_volume;
     s32 timer = record->callback_param1.timer;
 
@@ -133,7 +133,7 @@ s32 func_1000EBC4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan) {
 
 // Delayed non-positional sound: the record's sound moves to callback_param2, and plays when the
 // countdown in the low half of callback_param1 runs out.
-s32 func_1000EC24(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
+s32 sound_delayedPlayCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
     s16 remaining = record->callback_param1.half[1];
 
@@ -147,7 +147,7 @@ s32 func_1000EC24(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
 
     if (remaining <= 0) {
         if (*volume != 0) {
-            func_10010F30(record->callback_param2.val, *volume, *pan, *cents, *mix);
+            sound_play(record->callback_param2.val, *volume, *pan, *cents, *mix);
         }
         return 1;
     }
@@ -175,8 +175,8 @@ s32 func_1000ECCC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
     if (remaining <= 0) {
         *sound = delayedSound;
         record->sample = delayedSound;
-        if (func_10010894(record->callback_param2.obj) == 0) {
-            func_10010344(*sound, record->callback_param2.obj, record->max_volume, record->distance_loudest,
+        if (sound_isActorSound1Playing(record->callback_param2.obj) == 0) {
+            sound_playActorSound1(*sound, record->callback_param2.obj, record->max_volume, record->distance_loudest,
                           record->distance_max);
         }
         return 1;
@@ -203,7 +203,7 @@ s32 func_1000EDA0(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
     if (remaining <= 0) {
         *sound = delay >> 16;
         record->sample = *sound;
-        func_10010630(*sound, record->callback_param2.obj, record->max_volume, record->distance_loudest,
+        sound_playActorUntracked(*sound, record->callback_param2.obj, record->max_volume, record->distance_loudest,
                       record->distance_max);
         return 1;
     }
@@ -212,7 +212,7 @@ s32 func_1000EDA0(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
 }
 
 // Follow the owning object: copy its position into the record while it lives.
-s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
+s32 sound_followOwnerCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
     Actor *obj;
     u8 uid;
@@ -242,7 +242,7 @@ s32 func_1000EF40(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
     }
     if (*volume == 0) {
         if (record->sound_id != 0) {
-            func_100111C8(record->sound_id);
+            sound_stop(record->sound_id);
             record->sound_id = 0;
         }
         *sound = 0;
@@ -273,13 +273,13 @@ s32 func_1000EFB4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
             }
             soundId = *sound;
             if (soundId == 0xCA) {
-                func_10010F30(0xCB, gain, *pan, 0, *mix);
+                sound_play(0xCB, gain, *pan, 0, *mix);
             } else if (soundId == 0x2CF) {
-                func_10010F30(0x2D7, gain, *pan, 0, *mix);
-                func_10010F30((func_150ADA20() % 3U) + 0x2EB, 16000, *pan, 0, *mix);
+                sound_play(0x2D7, gain, *pan, 0, *mix);
+                sound_play((func_150ADA20() % 3U) + 0x2EB, 16000, *pan, 0, *mix);
             } else if (soundId == 0x2D2) {
-                func_10010F30(0x2DA, gain, *pan, 0, *mix);
-                func_10010F30((func_150ADA20() % 3U) + 0x2EB, 16000, *pan, 0, *mix);
+                sound_play(0x2DA, gain, *pan, 0, *mix);
+                sound_play((func_150ADA20() % 3U) + 0x2EB, 16000, *pan, 0, *mix);
             }
         }
     }
@@ -288,13 +288,13 @@ s32 func_1000EFB4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
 void func_1000F1A8(void) {
     s32 i;
 
-    D_80042760 = 0;
+    gDynamicSoundCount = 0;
     D_80041FD9 = 1;
     D_80041FD8 = 0;
-    bzero(D_800425E0, sizeof(D_800425E0));
+    bzero(gVoiceSlots, sizeof(gVoiceSlots));
 
     for (i = 0; i < 16; i++) {
-        D_800425E0[i].nextHandle = i + 16;
+        gVoiceSlots[i].nextHandle = i + 16;
     }
 
     D_80041F50 = 0;
@@ -302,7 +302,7 @@ void func_1000F1A8(void) {
     D_80041F60 = D_80041F61 = 0;
 }
 
-void func_1000F248(s32 mode) {
+void sound_initLevel(s32 mode) {
     func_1000F1A8();
     if (mode == 4) {
         D_80041F54 = 0;
@@ -327,9 +327,9 @@ void func_1000F248(s32 mode) {
         D_80041FD8 = 60;
     }
 
-    D_80041F5C = allocate_memory(1762, 1, 0, 0);
+    gSoundVariantHistory = allocate_memory(1762, 1, 0, 0);
 
-    bzero(D_80041F5C, 1762);
+    bzero(gSoundVariantHistory, 1762);
 
     if (mode == 0x31) {
         D_80041FDC = 14000;
@@ -345,10 +345,10 @@ void func_1000F248(s32 mode) {
 
 // Is the voice behind this handle still playing? A bare slot number (< 16) matches any
 // handle in that slot.
-s32 func_1000F3D0(u16 handle) {
+s32 sound_isPlaying(u16 handle) {
     SoundSlot *slot;
 
-    slot = &D_800425E0[handle & 0xF];
+    slot = &gVoiceSlots[handle & 0xF];
     if (slot->voice != NULL) {
         if ((slot->handle == handle) || (handle == (handle & 0xF))) {
             if (func_100173C4(&slot->voice) != 0) {
@@ -365,7 +365,7 @@ s32 func_1000F44C(u16 handle) {
     SndState *voice;
 
     mask = __osDisableInt();
-    slot = &D_800425E0[handle & 0xF];
+    slot = &gVoiceSlots[handle & 0xF];
     voice = slot->voice;
     if ((voice != NULL) && (slot->handle == handle) && (voice->flags & 2)) {
         __osRestoreInt(mask);
@@ -376,14 +376,14 @@ s32 func_1000F44C(u16 handle) {
 }
 
 // Is any voice playing this sound id?
-s32 func_1000F4D8(u16 sound) {
+s32 sound_isSoundPlaying(u16 sound) {
     s32 i;
 
     sound &= 0x7FFF;
     for (i = 0; i < 16; i++) {
-        if (D_800425E0[i].voice != NULL) {
-            if ((D_800425E0[i].sound & 0x7FFF) == sound) {
-                if (func_100173C4(&D_800425E0[i].voice) != 0) {
+        if (gVoiceSlots[i].voice != NULL) {
+            if ((gVoiceSlots[i].sound & 0x7FFF) == sound) {
+                if (func_100173C4(&gVoiceSlots[i].voice) != 0) {
                     return 1;
                 }
             }
@@ -393,7 +393,7 @@ s32 func_1000F4D8(u16 sound) {
 }
 
 // Picks one of the `count` consecutive sound ids starting at `base` at random. For fewer
-s32 func_1000F568(s32 base, s32 count) {
+s32 sound_pickVariant(s32 base, s32 count) {
     s32 roll;
     s32 pick;
     u8 unplayed;
@@ -408,8 +408,8 @@ s32 func_1000F568(s32 base, s32 count) {
     if (count < 2) {
         return base;
     }
-    if (D_80041F5C != NULL) {
-        unplayed = D_80041F5C[base];
+    if (gSoundVariantHistory != NULL) {
+        unplayed = gSoundVariantHistory[base];
         if (count < 8) {
             mask = (1 << count) - 1;
             if (!(unplayed & 0x80) || !(unplayed & mask)) {
@@ -419,13 +419,13 @@ s32 func_1000F568(s32 base, s32 count) {
                 pick = (pick + 1) % count;
             }
             left = unplayed ^ (1 << pick);
-            D_80041F5C[base] = left;
+            gSoundVariantHistory[base] = left;
             if (!(left & mask)) {
                 // all played: start over, but not with the one just picked
-                D_80041F5C[base] = unplayed ^ mask;
+                gSoundVariantHistory[base] = unplayed ^ mask;
             }
         } else {
-            D_80041F5C[base] = roll + 1;
+            gSoundVariantHistory[base] = roll + 1;
         }
     }
     return base + pick;
@@ -449,35 +449,35 @@ s32 func_1000F6B8(s32 arg0, s16 x, s16 y, s16 z, s32 *pan, s32 nearDistance, s32
 
         closest = 0xFFFFFFFF;
         for (i = 0; i <= D_80082FA0; i++) {
-            dx = x - D_80041F68[i].xC;
-            dy = y - D_80041F68[i].y10;
-            dz = z - D_80041F68[i].z14;
+            dx = x - gSoundListeners[i].xC;
+            dy = y - gSoundListeners[i].y10;
+            dz = z - gSoundListeners[i].z14;
             distance = dx * dx + dy * dy + dz * dz;
             if (distance < closest) {
                 closest = distance;
-                listener = &D_80041F68[i];
+                listener = &gSoundListeners[i];
                 bestX = dx;
                 bestY = dy;
                 bestZ = dz;
             }
         }
     } else {
-        listener = D_80041F68;
+        listener = gSoundListeners;
         bestX = x - listener->xC;
         bestY = y - listener->y10;
         bestZ = z - listener->z14;
     }
-    func_1000A420(bestX, bestY, bestZ, listener->field18,
+    sound_computePanVolume(bestX, bestY, bestZ, listener->field18,
                   x - listener->x0, y - listener->y4, z - listener->z8,
                   (s16)farDistance, (s16)nearDistance, pan, &volume, NULL);
     return volume;
 }
 
-void func_1000F85C(u16 handle, s16 param, s32 value) {
+void sound_setVoiceParam(u16 handle, s16 param, s32 value) {
     if (handle < 16) {
         return;
     }
-    if (func_1000F3D0(handle) != 0) {
+    if (sound_isPlaying(handle) != 0) {
         if (param == 0x10) {
             // value is in cents; pass the voice its pitch ratio as raw f32 bits
             f32 ratio = alCents2Ratio(value);
@@ -486,7 +486,7 @@ void func_1000F85C(u16 handle, s16 param, s32 value) {
             // value already holds a ratio's f32 bits
             param = 0x10;
         }
-        func_10017714(D_800425E0[handle & 0xF].voice, param, value);
+        func_10017714(gVoiceSlots[handle & 0xF].voice, param, value);
     }
 }
 
@@ -495,29 +495,29 @@ void func_1000F91C(u16 handle, u16 volume, s16 cents, u8 mix, s32 arg4,
     s32 pan;
     s32 scale = func_1000F6B8(arg4, x, y, z, &pan, nearDistance, farDistance);
 
-    func_1000F85C(handle, 8, (u32)(scale * volume) >> 15);
-    func_1000F85C(handle, 4, pan & 0x7F);
-    func_1000F85C(handle, 0x100, (pan & 0x80) | mix);
-    func_1000F85C(handle, 0x10, cents);
+    sound_setVoiceParam(handle, 8, (u32)(scale * volume) >> 15);
+    sound_setVoiceParam(handle, 4, pan & 0x7F);
+    sound_setVoiceParam(handle, 0x100, (pan & 0x80) | mix);
+    sound_setVoiceParam(handle, 0x10, cents);
 }
 
 void func_1000F9D4(u16 handle, s16 x, s16 y, s16 z) {
     s32 pan;
 
     func_1000F6B8(-1, x, y, z, &pan, 32760, 32765);
-    func_1000F85C(handle, 4, pan & 0x7F);
-    func_1000F85C(handle, 0x100, pan & 0x80);
+    sound_setVoiceParam(handle, 4, pan & 0x7F);
+    sound_setVoiceParam(handle, 0x100, pan & 0x80);
 }
 
-u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance,
+u16 sound_addDynamicSound(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance,
                   s16 nearDistance, SoundRecordCallback callback, void *owner, s32 key,
                   s32 flags, s32 cents) {
     s32 count;
     s32 index;
 
-    if (D_80042760 < 32) {
-        index = D_80042760;
-        D_80042760++;
+    if (gDynamicSoundCount < 32) {
+        index = gDynamicSoundCount;
+        gDynamicSoundCount++;
     } else {
         return 0;
     }
@@ -552,9 +552,9 @@ u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance,
     dynamicSounds[index].current_volume = 0;
     dynamicSounds[index].distance_current = 0;
     dynamicSounds[index].pitch_shift_cent = cents;
-    count = D_80042760;
-    func_10011624(dynamicSounds, &D_80042760, index, index + 1);
-    if (count == D_80042760) {
+    count = gDynamicSoundCount;
+    sound_updateRecords(dynamicSounds, &gDynamicSoundCount, index, index + 1);
+    if (count == gDynamicSoundCount) {
         dynamicSounds[index].flags |= 0x1000;
         return dynamicSounds[index].sound_id;
     }
@@ -574,49 +574,49 @@ void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, u16 farDistance) {
     posX = x;
     posY = y;
     posZ = z;
-    for (i = 0; i < D_80042760; i++) {
+    for (i = 0; i < gDynamicSoundCount; i++) {
         record = &dynamicSounds[i];
         if ((soundId == record->sample) && (posX == record->x) && (posY == record->y) &&
             (posZ == record->z) && ((record->distance_max & 0x7FFF) == farDistance)) {
             handle = record->sound_id;
             if (handle != 0) {
-                func_100111C8(handle);
+                sound_stop(handle);
             }
             dynamicSounds[i].flags |= 0x80; // matching: indexed again, not through record
         }
     }
 }
 
-void func_1000FD38(SoundRecordCallback callback, void *owner, s32 key) {
+void sound_stopByCallback(SoundRecordCallback callback, void *owner, s32 key) {
     s32 i;
 
-    for (i = 0; i < D_80042760; i++) {
+    for (i = 0; i < gDynamicSoundCount; i++) {
         if ((callback == dynamicSounds[i].callback_ptr) && (owner == dynamicSounds[i].callback_param1.ptr) &&
             (key == dynamicSounds[i].callback_param2.val)) {
             if (dynamicSounds[i].sound_id != 0) {
-                func_100111C8(dynamicSounds[i].sound_id);
+                sound_stop(dynamicSounds[i].sound_id);
             }
             dynamicSounds[i].flags |= 0x80;
         }
     }
 }
-void func_1000FDF4(u16 handle) {
+void sound_stopByHandle(u16 handle) {
     s32 i;
     s32 handleId = handle;
 
-    for (i = 0; i < D_80042760; i++) {
+    for (i = 0; i < gDynamicSoundCount; i++) {
         if ((u32)dynamicSounds[i].sound_id == (u32)handleId) { // matching: unsigned compare of the widened handle
             if (dynamicSounds[i].sound_id != 0) {
-                func_100111C8(dynamicSounds[i].sound_id);
+                sound_stop(dynamicSounds[i].sound_id);
             }
             dynamicSounds[i].flags |= 0x80;
         }
     }
 }
-s32 func_1000FE88(SoundRecord *records, s32 index, s32 *count) {
+s32 sound_stopRecord(SoundRecord *records, s32 index, s32 *count) {
     if (index < *count) {
         if (records[index].sound_id != 0) {
-            func_100111C8(records[index].sound_id);
+            sound_stop(records[index].sound_id);
         }
         records[index].flags |= 0x80;
         return 0;
@@ -624,13 +624,13 @@ s32 func_1000FE88(SoundRecord *records, s32 index, s32 *count) {
     return 1;
 }
 
-s32 func_1000FEF0(u16 handle, void *owner, s32 key) {
+s32 sound_findByHandle(u16 handle, void *owner, s32 key) {
     s32 i;
 
     if (!handle) {
         return -1;
     }
-    for (i = 0; i < D_80042760; i++) {
+    for (i = 0; i < gDynamicSoundCount; i++) {
         if ((handle == dynamicSounds[i].sound_id) && (owner == dynamicSounds[i].callback_param1.ptr) &&
             (key == dynamicSounds[i].callback_param2.val) && !(dynamicSounds[i].flags & 0x80)) {
             return i;
@@ -639,10 +639,10 @@ s32 func_1000FEF0(u16 handle, void *owner, s32 key) {
     return -1;
 }
 
-s32 func_1000FF90(SoundRecordCallback callback, void *owner, s32 key) {
+s32 sound_findByCallback(SoundRecordCallback callback, void *owner, s32 key) {
     s32 i;
 
-    for (i = 0; i < D_80042760; i++) {
+    for (i = 0; i < gDynamicSoundCount; i++) {
         if ((callback == dynamicSounds[i].callback_ptr) &&
             ((owner == dynamicSounds[i].callback_param1.ptr) || (owner == (void *)-1)) &&
             ((key == dynamicSounds[i].callback_param2.val) || (key == -1)) &&
@@ -656,18 +656,18 @@ void func_1001001C(SoundRecordCallback callback, void *owner, s32 key, s32 volum
     SoundRecord *record = dynamicSounds;
     s32 i;
 
-    for (i = 0; i < D_80042760; i++, record++) {
+    for (i = 0; i < gDynamicSoundCount; i++, record++) {
         if ((callback == record->callback_ptr) && (owner == record->callback_param1.ptr) && (key == record->callback_param2.val)) {
             record->pitch = alCents2Ratio(cents);
             record->max_volume = volume;
         }
     }
 }
-void func_100100E0(SoundRecordCallback callback, void *owner, s32 key,
+void sound_replaceCallback(SoundRecordCallback callback, void *owner, s32 key,
                    SoundRecordCallback newCallback, void *newOwner, s32 newKey) {
     s32 i;
 
-    for (i = 0; i < D_80042760; i++) {
+    for (i = 0; i < gDynamicSoundCount; i++) {
         if ((callback == dynamicSounds[i].callback_ptr) && (owner == dynamicSounds[i].callback_param1.ptr) &&
             (key == dynamicSounds[i].callback_param2.val)) {
             dynamicSounds[i].callback_ptr = newCallback;
@@ -677,7 +677,7 @@ void func_100100E0(SoundRecordCallback callback, void *owner, s32 key,
     }
 }
 
-s32 func_10010154(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDistance) {
+s32 sound_playActorSound2(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDistance) {
     s32 handle = 0;
     s32 flags = 0;
 
@@ -687,7 +687,7 @@ s32 func_10010154(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDi
     if (obj->CameraPtr != NULL) {
         u32 mixFlags = obj->floorMaterial;
 
-        handle = func_10010BE8(obj->soundHandle2, sound, volume, 64, 0, ((mixFlags >> 3) & 0x30) * 2,
+        handle = sound_startVoice(obj->soundHandle2, sound, volume, 64, 0, ((mixFlags >> 3) & 0x30) * 2,
                                D_80041FD9);
     } else {
         if (obj->character_type == 0x16) {
@@ -700,11 +700,11 @@ s32 func_10010154(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDi
         } else if ((obj->lifting != 0) && ((obj->character_type == 0x8A) || (obj->character_type == 0x23))) {
             flags = 0x100;
         }
-        func_1000FD38((SoundRecordCallback)func_1000EE70, obj, obj->unique_id | 0x10000);
+        sound_stopByCallback((SoundRecordCallback)sound_followOwnerCallback, obj, obj->unique_id | 0x10000);
         if (obj->type != 0) {
-            handle = func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos,
+            handle = sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos,
                                    volume, farDistance, nearDistance,
-                                   (SoundRecordCallback)func_1000EE70, obj,
+                                   (SoundRecordCallback)sound_followOwnerCallback, obj,
                                    obj->unique_id | 0x10000, flags, 0);
         }
     }
@@ -712,7 +712,7 @@ s32 func_10010154(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDi
     // no return statement here: the original falls off the end
 }
 
-s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farDistance) {
+s32 sound_playActorSound1(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farDistance) {
     Actor *obj = owner;
     s32 flags = 0;
 
@@ -733,7 +733,7 @@ s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farD
             bus = 1;
             volume = 0x7FFF;
         }
-        flags = func_10010BE8(obj->soundHandle1, sound, volume, 64, 0, mix, bus);
+        flags = sound_startVoice(obj->soundHandle1, sound, volume, 64, 0, mix, bus);
     } else {
         if (obj->character_type == 0x16) {
             nearDistance *= 2;
@@ -745,28 +745,28 @@ s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farD
         } else if ((obj->character_type == 0x4F) || (obj->character_type == 0x83)) {
             flags |= 4;
         }
-        func_1000FD38((SoundRecordCallback)func_1000EE70, obj, obj->unique_id | 0x20000);
-        flags = func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, volume,
-                              farDistance, nearDistance, (SoundRecordCallback)func_1000EE70,
+        sound_stopByCallback((SoundRecordCallback)sound_followOwnerCallback, obj, obj->unique_id | 0x20000);
+        flags = sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, volume,
+                              farDistance, nearDistance, (SoundRecordCallback)sound_followOwnerCallback,
                               obj, obj->unique_id | 0x20000, flags, 0);
     }
     obj->soundHandle1 = flags;
     return flags;
 }
 
-void func_10010558(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance,
+void sound_playActorSound1Delayed(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance,
                    s32 delay) {
     if (delay <= 0) {
-        func_10010344(sound, obj, volume, nearDistance, farDistance);
+        sound_playActorSound1(sound, obj, volume, nearDistance, farDistance);
     } else {
-        func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, volume,
+        sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, volume,
                       farDistance, nearDistance, (SoundRecordCallback)func_1000ECCC,
                       (void *)delay, (s32)obj, 0, 0);
     }
 }
 
 // matching: the empty ifs add uses of volume so that IDO keeps it in s1 like the target
-void func_10010630(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDistance) {
+void sound_playActorUntracked(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDistance) {
     if (volume) {}
     if (volume) {}
     if (volume) {}
@@ -774,38 +774,38 @@ void func_10010630(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farD
         if (obj->CameraPtr != NULL) {
             u32 mixFlags = obj->floorMaterial;
 
-            func_10010F30(sound, volume, 64, 0, ((mixFlags >> 3) & 0x30) * 2);
+            sound_play(sound, volume, 64, 0, ((mixFlags >> 3) & 0x30) * 2);
         } else {
-            func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, volume,
-                          farDistance, nearDistance, (SoundRecordCallback)func_1000EE70, obj,
+            sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, volume,
+                          farDistance, nearDistance, (SoundRecordCallback)sound_followOwnerCallback, obj,
                           obj->unique_id, 0, 0);
         }
     }
 }
 
-void func_10010720(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance,
+void sound_playActorUntrackedDelayed(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance,
                    s32 delay) {
     if (delay <= 0) {
-        func_10010630(sound, obj, volume, nearDistance, farDistance);
+        sound_playActorUntracked(sound, obj, volume, nearDistance, farDistance);
     } else {
-        func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, volume,
+        sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, volume,
                       farDistance, nearDistance, (SoundRecordCallback)func_1000EDA0,
                       (void *)delay, (s32)obj, 0, 0);
     }
 }
 
-s32 func_100107F8(Actor *obj) {
+s32 sound_isActorSound2Playing(Actor *obj) {
     if (obj->type == 0) {
         return 0;
     } else {
         if (obj->CameraPtr != NULL) {
             if (obj->soundHandle2 != 0) {
-                if (func_1000F3D0(obj->soundHandle2) != 0) {
+                if (sound_isPlaying(obj->soundHandle2) != 0) {
                     return 1;
                 }
             }
         } else {
-            if (func_1000FF90((SoundRecordCallback)func_1000EE70, obj,
+            if (sound_findByCallback((SoundRecordCallback)sound_followOwnerCallback, obj,
                               obj->unique_id | 0x10000) != -1) {
                 return 1;
             }
@@ -815,15 +815,15 @@ s32 func_100107F8(Actor *obj) {
     return 0;
 }
 
-s32 func_10010894(Actor *obj) {
+s32 sound_isActorSound1Playing(Actor *obj) {
     if (obj->CameraPtr != NULL) {
         if (obj->soundHandle1 != 0) {
-            if (func_1000F3D0(obj->soundHandle1) != 0) {
+            if (sound_isPlaying(obj->soundHandle1) != 0) {
                 return 1;
             }
         }
     } else {
-        if (func_1000FF90((SoundRecordCallback)func_1000EE70, obj,
+        if (sound_findByCallback((SoundRecordCallback)sound_followOwnerCallback, obj,
                           obj->unique_id | 0x20000) != -1) {
             return 1;
         }
@@ -832,16 +832,16 @@ s32 func_10010894(Actor *obj) {
     return 0;
 }
 
-void func_1001091C(Actor *obj, u32 volume) {
+void sound_setActorSound2Volume(Actor *obj, u32 volume) {
     s32 index;
 
     if ((volume != 0) && (obj->type != 0)) {
         if (obj->CameraPtr != NULL) {
             if (obj->soundHandle2 != 0) {
-                func_1000F85C(obj->soundHandle2, 8, *(s32 *)&volume); // matching: the pun makes IDO reload volume from its stack home
+                sound_setVoiceParam(obj->soundHandle2, 8, *(s32 *)&volume); // matching: the pun makes IDO reload volume from its stack home
             }
         } else {
-            index = func_1000FF90((SoundRecordCallback)func_1000EE70, obj,
+            index = sound_findByCallback((SoundRecordCallback)sound_followOwnerCallback, obj,
                                   obj->unique_id | 0x10000);
             if (index != -1) {
                 dynamicSounds[index].max_volume = volume;
@@ -854,52 +854,52 @@ void func_1001091C(Actor *obj, u32 volume) {
 
 // Declared int but returns no value, in the pre-ANSI way: game_90840.c's calls only match with an
 // int-returning view (the other callers match either way).
-s32 func_100109D0(Actor *obj) {
+s32 sound_stopActorSound2(Actor *obj) {
     if (obj->CameraPtr != NULL) {
         if (obj->soundHandle2 != 0) {
-            func_100111C8(obj->soundHandle2);
+            sound_stop(obj->soundHandle2);
         }
     } else {
-        func_1000FD38((SoundRecordCallback)func_1000EE70, obj, obj->unique_id | 0x10000);
+        sound_stopByCallback((SoundRecordCallback)sound_followOwnerCallback, obj, obj->unique_id | 0x10000);
     }
     obj->soundHandle2 = 0;
 }
 
-void func_10010A3C(Actor *obj) {
+void sound_stopActorSound1(Actor *obj) {
     if (obj->CameraPtr != NULL) {
         if (obj->soundHandle1 != 0) {
-            func_100111C8(obj->soundHandle1);
+            sound_stop(obj->soundHandle1);
         }
     } else {
-        func_1000FD38((SoundRecordCallback)func_1000EE70, obj, obj->unique_id | 0x20000);
+        sound_stopByCallback((SoundRecordCallback)sound_followOwnerCallback, obj, obj->unique_id | 0x20000);
     }
     obj->soundHandle1 = 0;
 }
 
-void func_10010AA8(Actor *obj) {
+void sound_stopActorSounds(Actor *obj) {
     s32 index;
     SoundRecord *record;
 
     if (obj->CameraPtr != NULL) {
         if (obj->soundHandle1 && func_1000F44C(obj->soundHandle1)) {
-            func_100111C8(obj->soundHandle1);
+            sound_stop(obj->soundHandle1);
         }
         if (obj->soundHandle2 && func_1000F44C(obj->soundHandle2)) {
-            func_100111C8(obj->soundHandle2);
+            sound_stop(obj->soundHandle2);
         }
     } else {
-        index = func_1000FEF0(obj->soundHandle1, obj, obj->unique_id);
+        index = sound_findByHandle(obj->soundHandle1, obj, obj->unique_id);
         if (index != -1) {
             if (func_1000F44C(obj->soundHandle1)) {
-                func_100111C8(obj->soundHandle1);
+                sound_stop(obj->soundHandle1);
             }
             record = &dynamicSounds[index];
             record->flags |= 0x80;
         }
-        index = func_1000FEF0(obj->soundHandle2, obj, obj->unique_id);
+        index = sound_findByHandle(obj->soundHandle2, obj, obj->unique_id);
         if (index != -1) {
             if (func_1000F44C(obj->soundHandle2)) {
-                func_100111C8(obj->soundHandle2);
+                sound_stop(obj->soundHandle2);
             }
             record = &dynamicSounds[index];
             record->flags |= 0x80;
@@ -911,23 +911,23 @@ void func_10010AA8(Actor *obj) {
 
 // Starts `sound` on a free voice slot (reusing `handle`'s slot if it is still ours) and
 // returns the new handle, or 0. Handles are slot + 16 * n, so the low nibble is the slot.
-u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, u8 bus) {
+u16 sound_startVoice(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, u8 bus) {
     u16 newHandle;
     u16 next;
     u32 slot;
 
     slot = handle & 0xF;
-    if ((handle == D_800425E0[slot].handle) && (handle != 0)) {
-        if ((D_800425E0[slot].voice != NULL) && (func_100173C4(&D_800425E0[slot].voice) != 0)) {
-            func_10017594(D_800425E0[slot].voice);
-            D_800425E0[slot].voice = NULL;
+    if ((handle == gVoiceSlots[slot].handle) && (handle != 0)) {
+        if ((gVoiceSlots[slot].voice != NULL) && (func_100173C4(&gVoiceSlots[slot].voice) != 0)) {
+            func_10017594(gVoiceSlots[slot].voice);
+            gVoiceSlots[slot].voice = NULL;
         }
-    } else if (((D_800425E0[slot].voice != NULL) && (func_100173C4(&D_800425E0[slot].voice) != 0)) ||
-               (D_800425E0[slot].sound & 0x8000)) {
+    } else if (((gVoiceSlots[slot].voice != NULL) && (func_100173C4(&gVoiceSlots[slot].voice) != 0)) ||
+               (gVoiceSlots[slot].sound & 0x8000)) {
         slot = 0;
         while ((slot < 16) &&
-               (((D_800425E0[slot].voice != NULL) && (func_100173C4(&D_800425E0[slot].voice) != 0)) ||
-                (D_800425E0[slot].sound & 0x8000))) {
+               (((gVoiceSlots[slot].voice != NULL) && (func_100173C4(&gVoiceSlots[slot].voice) != 0)) ||
+                (gVoiceSlots[slot].sound & 0x8000))) {
             slot++;
         }
     }
@@ -943,16 +943,16 @@ u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, 
         if ((sound & 0x7FFF) >= 1763) {
             return 0;
         }
-        newHandle = D_800425E0[slot].nextHandle;
+        newHandle = gVoiceSlots[slot].nextHandle;
         next = newHandle + 16;
-        D_800425E0[slot].handle = newHandle;
+        gVoiceSlots[slot].handle = newHandle;
         if (next < 16) { // wrapped around: never hand out a bare slot number
             next += 16;
         }
-        D_800425E0[slot].nextHandle = next;
-        D_800425E0[slot].sound = sound;
-        if (D_800425E0[slot].voice != NULL) {
-            D_800425E0[slot].voice->state = 5;
+        gVoiceSlots[slot].nextHandle = next;
+        gVoiceSlots[slot].sound = sound;
+        if (gVoiceSlots[slot].voice != NULL) {
+            gVoiceSlots[slot].voice->state = 5;
         }
         if ((mix & 0x7F) + (u8)D_80041FD8 < 0x80) {
             mix += (u8)D_80041FD8;
@@ -960,7 +960,7 @@ u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, 
             mix |= 0x7F;
         }
         func_10017438(D_8003E368, sound & 0x7FFF, volume, pan, alCents2Ratio(cents), mix, bus,
-                      &D_800425E0[slot].voice);
+                      &gVoiceSlots[slot].voice);
     }
     return newHandle;
 }
@@ -973,15 +973,15 @@ u16 func_10010E78(u16 handle, s32 sound, u16 volume, s16 cents, s32 mix, s32 arg
     scaled = func_1000F6B8(arg5, x, y, z, &pan, (s16)nearDistance, (s16)farDistance);
     scaled = ((u32)volume * scaled) >> 15;
     if (scaled != 0) {
-        return func_10010BE8(handle, sound, scaled, pan & 0x7F, cents,
+        return sound_startVoice(handle, sound, scaled, pan & 0x7F, cents,
                              (pan & 0x80) | (u8)mix, D_80041FD9);
     }
     return 0;
 }
 
 // Plays an unpositioned sound.
-u16 func_10010F30(s32 sound, u16 volume, u8 pan, s16 cents, u8 mix) {
-    return func_10010BE8(0, sound, volume, pan, cents, mix, D_80041FD9);
+u16 sound_play(s32 sound, u16 volume, u8 pan, s16 cents, u8 mix) {
+    return sound_startVoice(0, sound, volume, pan, cents, mix, D_80041FD9);
 }
 
 u16 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4,
@@ -991,14 +991,14 @@ u16 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4,
 
 // Plays a sound positioned on obj; a player-camera object (obj->camera set) plays it
 // unpositioned instead.
-s32 func_10010FFC(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, Actor *obj) {
+s32 sound_playOnActor(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, Actor *obj) {
     f32 scale;
 
     if ((obj == NULL) || (obj->type == 0)) {
         return 0;
     }
     if (obj->CameraPtr != NULL) {
-        handle = func_10010BE8(handle, sound, volume, 64, cents, mix, D_80041FD9);
+        handle = sound_startVoice(handle, sound, volume, 64, cents, mix, D_80041FD9);
     } else {
         volume = (volume + volume + volume) >> 2;
         if (obj->character_type != 0xFF) {
@@ -1021,8 +1021,8 @@ s32 func_10010FFC(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, Actor *o
 }
 
 // Stops the voice behind `handle` now.
-void func_100111C8(u16 handle) {
-    SoundSlot *slot = &D_800425E0[handle & 0xF];
+void sound_stop(u16 handle) {
+    SoundSlot *slot = &gVoiceSlots[handle & 0xF];
 
     if ((slot->voice != NULL) && (slot->handle == handle)) {
         slot->handle = 0;
@@ -1033,23 +1033,23 @@ void func_100111C8(u16 handle) {
 }
 
 // Stops the voice behind `handle` on the next update (now if the queue is full).
-void func_1001123C(u16 handle) {
-    SoundSlot *slot = &D_800425E0[handle & 0xF];
+void sound_stopNextUpdate(u16 handle) {
+    SoundSlot *slot = &gVoiceSlots[handle & 0xF];
 
     if ((slot->voice != NULL) && (slot->handle == handle)) {
-        if (func_100112BC(handle, 1) == 0) {
+        if (sound_queueStop(handle, 1) == 0) {
             func_10017594(slot->voice);
             slot->voice = NULL;
         }
     }
 }
 
-s32 func_100112BC(s32 handle, s32 delay) {
+s32 sound_queueStop(s32 handle, s32 delay) {
     SoundQueueEntry *entry;
     s32 count = D_80041F50;
 
     if (count < 16) {
-        entry = &D_80041F10[count];
+        entry = &gSoundStopQueue[count];
         entry->handle = handle;
         entry->delay = delay;
         entry->slot = handle & 0xF;
@@ -1061,7 +1061,7 @@ s32 func_100112BC(s32 handle, s32 delay) {
 }
 
 // Runs the stop queue: counts down each entry's delay and stops its voice when it expires.
-void func_10011310(void) {
+void sound_runStopQueue(void) {
     s32 i;
     s32 j;
     s32 stopped;
@@ -1073,24 +1073,24 @@ void func_10011310(void) {
     j = 0;
     remaining = D_80041F50;
     for (i = 0; i < D_80041F50; i++) {
-        if (D_80041F10[i].delay > 0) {
-            D_80041F10[i].delay--;
+        if (gSoundStopQueue[i].delay > 0) {
+            gSoundStopQueue[i].delay--;
         } else {
-            slot = D_80041F10[i].slot;
-            if (D_800425E0[slot].handle == D_80041F10[i].handle) {
-                voice = D_800425E0[slot].voice;
-                D_800425E0[slot].handle = 0;
-                D_800425E0[slot].sound = 0;
+            slot = gSoundStopQueue[i].slot;
+            if (gVoiceSlots[slot].handle == gSoundStopQueue[i].handle) {
+                voice = gVoiceSlots[slot].voice;
+                gVoiceSlots[slot].handle = 0;
+                gVoiceSlots[slot].sound = 0;
                 if (voice != NULL) {
                     func_10017594(voice);
                 }
-                D_800425E0[slot].voice = NULL;
+                gVoiceSlots[slot].voice = NULL;
             }
             remaining--;
             stopped = 1;
         }
         if (j != i) {
-            D_80041F10[j] = D_80041F10[i];
+            gSoundStopQueue[j] = gSoundStopQueue[i];
         }
         if (stopped) {
             j++;
@@ -1102,11 +1102,11 @@ void func_10011310(void) {
 }
 
 // Returns the sound id playing behind `handle`, or -1.
-s32 func_1001147C(u16 handle) {
+s32 sound_getPlayingSound(u16 handle) {
     SoundSlot *slot;
 
     if (handle != 0) {
-        slot = &D_800425E0[handle & 0xF];
+        slot = &gVoiceSlots[handle & 0xF];
         if (slot->handle == handle) {
             return slot->sound & 0x7FFF;
         }
@@ -1126,21 +1126,21 @@ s32 func_100114D0(s32 x, s32 y, s32 z, s32 volume, s32 farDistance, s32 nearDist
     u32 d;
     s32 active;
 
-    best = D_80041F68;
+    best = gSoundListeners;
     if (D_80082FA0 != 0) {
         bestDist = 0xFFFFFFFF;
         for (i = 0; i <= D_80082FA0; i++) {
-            dx = x - D_80041F68[i].xC;
-            dy = y - D_80041F68[i].y10;
-            dz = z - D_80041F68[i].z14;
+            dx = x - gSoundListeners[i].xC;
+            dy = y - gSoundListeners[i].y10;
+            dz = z - gSoundListeners[i].z14;
             d = dx * dx + dy * dy + dz * dz;
             if (d < bestDist) {
                 bestDist = d;
-                best = &D_80041F68[i];
+                best = &gSoundListeners[i];
             }
         }
     }
-    active = func_1000A420(x - best->xC, y - best->y10, z - best->z14, best->field18,
+    active = sound_computePanVolume(x - best->xC, y - best->y10, z - best->z14, best->field18,
                            x - best->x0, y - best->y4, z - best->z8, farDistance, nearDistance,
                            pan, &scale, distance);
     *volumeOut = ((u32)scale * volume) >> 15;
@@ -1148,7 +1148,7 @@ s32 func_100114D0(s32 x, s32 y, s32 z, s32 volume, s32 farDistance, s32 nearDist
 }
 
 // Updates records[start..end) (and below *count): re-evaluates each sound's volume, pan and
-void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
+void sound_updateRecords(SoundRecord *records, s32 *count, s32 start, s32 end) {
     SoundRecord *record;
     u32 flags;
     s32 pan;
@@ -1187,7 +1187,7 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
             goto next_record;
         }
         handle = record->sound_id;
-        if ((flags & 1) && (handle != 0) && (func_1000F3D0(handle) == 0)) {
+        if ((flags & 1) && (handle != 0) && (sound_isPlaying(handle) == 0)) {
             // the voice ended on its own
             handle = 0;
             flags &= ~1;
@@ -1209,10 +1209,10 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                 panOut = &pan;
             }
             if (flags & 0x40) {
-                active = func_1000A750(record->y,
-                         D_80041F68->xC, D_80041F68->y10, D_80041F68->z14,
-                         D_80041F68->field18, D_80041F68->x0,
-                         D_80041F68->y4, D_80041F68->z8,
+                active = sound_computePathPanVolume(record->y,
+                         gSoundListeners->xC, gSoundListeners->y10, gSoundListeners->z14,
+                         gSoundListeners->field18, gSoundListeners->x0,
+                         gSoundListeners->y4, gSoundListeners->z8,
                          record->distance_max, record->distance_loudest, &pan,
                          (s32 *)&volume, &distance);
                 volume = (u32)(record->max_volume * volume) >> 15;
@@ -1232,7 +1232,7 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                 // matching: the record address recomputed as integer offset + records
                 if (record->callback_ptr((SoundRecord *)(offset + (u32)records),
                         &active, &volume, &pan, &cents, &mix, &sound) != 0) {
-                    func_1000FE88(records, index, count);
+                    sound_stopRecord(records, index, count);
                     goto next_record;
                 }
                 handle = record->sound_id;
@@ -1262,7 +1262,7 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                         } else {
                             rate = D_80041FD9;
                         }
-                        handle = func_10010BE8(0, sound, volume,
+                        handle = sound_startVoice(0, sound, volume,
                                              pan, cents, fxmix, rate);
                         if (handle != 0) {
                             flags |= 1;
@@ -1270,13 +1270,13 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                         }
                     } else {
                         if (volume != (u16)record->current_volume) {
-                            func_1000F85C(handle, 8, volume);
+                            sound_setVoiceParam(handle, 8, volume);
                         }
                         if (pan != (record->pan & 0x7F)) {
-                            func_1000F85C(handle, 4, pan);
+                            sound_setVoiceParam(handle, 4, pan);
                         }
                         if (fxmix != (record->mix | (record->pan & 0x80))) {
-                            func_1000F85C(handle, 0x100, fxmix);
+                            sound_setVoiceParam(handle, 0x100, fxmix);
                         }
                         if (flags & 4) {
                             // doppler: shift the pitch by how fast the distance changes
@@ -1298,7 +1298,7 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                         }
                         start = pitch.bits; // matching: the f32 bits go through the dead param
                         if (pitch.value != record->pitch) {
-                            func_1000F85C(handle, 0x11, start);
+                            sound_setVoiceParam(handle, 0x11, start);
                         }
                     }
                     record->distance_current = distance;
@@ -1309,12 +1309,12 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                 } else if (flags & 8) {
                     // silent but persistent: drop the voice, keep the record
                     if (handle != 0) {
-                        func_100111C8(handle);
+                        sound_stop(handle);
                     }
                     handle = 0;
                     flags &= ~1;
                 } else {
-                    func_1000FE88(records, index, count);
+                    sound_stopRecord(records, index, count);
                     goto next_record;
                 }
             }
@@ -1328,7 +1328,7 @@ next_record:
     }
 }
 
-void func_10011BB8(void) {
+void sound_update(void) {
     s32 i;
     s32 kept;
     s32 delta;
@@ -1338,28 +1338,28 @@ void func_10011BB8(void) {
             Camera *camera = &camera_global_Cameras[i];
 
             if ((D_80082FA0 != 0) || (camera->Mode & 0x80000)) {
-                D_80041F68[i].x0 = camera->eye.x;
-                D_80041F68[i].y4 = camera->eye.y;
-                D_80041F68[i].z8 = camera->eye.z;
+                gSoundListeners[i].x0 = camera->eye.x;
+                gSoundListeners[i].y4 = camera->eye.y;
+                gSoundListeners[i].z8 = camera->eye.z;
             } else {
-                D_80041F68[i].x0 = camera->focus.x;
-                D_80041F68[i].y4 = camera->focus.y;
-                D_80041F68[i].z8 = camera->focus.z;
+                gSoundListeners[i].x0 = camera->focus.x;
+                gSoundListeners[i].y4 = camera->focus.y;
+                gSoundListeners[i].z8 = camera->focus.z;
             }
-            D_80041F68[i].xC = camera->eye.x;
-            D_80041F68[i].y10 = camera->eye.y;
-            D_80041F68[i].z14 = camera->eye.z;
-            D_80041F68[i].field18 = camera->TrueCameraAngle;
+            gSoundListeners[i].xC = camera->eye.x;
+            gSoundListeners[i].y10 = camera->eye.y;
+            gSoundListeners[i].z14 = camera->eye.z;
+            gSoundListeners[i].field18 = camera->TrueCameraAngle;
         }
-        func_10011310();
-        func_10011624(dynamicSounds, &D_80042760, 0, D_80042760);
-        for (i = 0, kept = 0; i < D_80042760; i++) {
+        sound_runStopQueue();
+        sound_updateRecords(dynamicSounds, &gDynamicSoundCount, 0, gDynamicSoundCount);
+        for (i = 0, kept = 0; i < gDynamicSoundCount; i++) {
             dynamicSounds[kept] = dynamicSounds[i];
             if (!(dynamicSounds[kept].flags & 0x80)) {
                 kept++;
             }
         }
-        D_80042760 = kept;
+        gDynamicSoundCount = kept;
     }
     if ((D_80041F54 != D_80041FDC) || (D_80041F60 != D_80041F61)) {
         if (D_80041F61 == 1) {
@@ -1382,7 +1382,7 @@ void func_10011BB8(void) {
 void func_10011E88(s32 mode) {
 }
 
-void func_10011E94(s32 mute) {
+void sound_setMuted(s32 mute) {
     if (mute) {
         D_80041F61 = 1;
     } else {
@@ -1391,7 +1391,7 @@ void func_10011E94(s32 mute) {
 }
 
 // Picks the sound id for variant `variant` of effect `effect`, rotating through the
-u16 func_10011EB8(s32 effect, s16 *volume, s32 variant) {
+u16 sound_pickEffectVariant(s32 effect, s16 *volume, s32 variant) {
     s32 sound;
 
     effect = func_1510F8CC(effect);
@@ -1404,9 +1404,9 @@ u16 func_10011EB8(s32 effect, s16 *volume, s32 variant) {
         }
     }
 
-    sound = D_8002C240[effect][variant].base;
-    if (D_8002C240[effect][variant].count >= 2) {
-        sound = func_1000F568(sound, D_8002C240[effect][variant].count);
+    sound = gEffectSoundVariants[effect][variant].base;
+    if (gEffectSoundVariants[effect][variant].count >= 2) {
+        sound = sound_pickVariant(sound, gEffectSoundVariants[effect][variant].count);
     }
     return sound;
 }

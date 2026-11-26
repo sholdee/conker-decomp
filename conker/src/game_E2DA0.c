@@ -274,7 +274,7 @@ void func_150B6110(BoltRingEffect *effect) {
         return;
     }
     data = &effect->data;
-    data->spawnAccum += (0.15f + func_150ADA68() * 0.155f) * D_800BE9A4;
+    data->spawnAccum += (0.15f + func_150ADA68() * 0.155f) * gFrameDelta;
     if (data->spawnAccum > 1.0f) {
         BoltChainConfig config;
         Vec3f start;

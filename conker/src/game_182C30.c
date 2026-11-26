@@ -70,7 +70,7 @@ void func_1515589C(PlayerMarker *marker) {
             (kind != 0x2C) && (info->SniperState == 0) && (kind != 0) && (kind != 0x1F) && !player->inwater) {
             marker->state = 1;
             marker->header.state = 120;
-            func_10010F30(0x1EB, 0x7FFF, 0x40, 0, 0);
+            sound_play(0x1EB, 0x7FFF, 0x40, 0, 0);
         } else if (marker->light != NULL) {
             func_1515F10C(marker->light);
             marker->light = NULL;

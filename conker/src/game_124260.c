@@ -130,11 +130,11 @@ void func_150F706C(BeamObj *obj) {
             if (beam->ray.hitType == 1) {
                 beam->ends[0]->mode = -1;
                 beam->ends[1]->mode = 3;
-            } else if (func_1506196C(beam->ray.obj, 0) < 0xFF) {
+            } else if (actor_getAlpha(beam->ray.obj, 0) < 0xFF) {
                 beam->ends[0]->mode = -1;
                 beam->ends[1]->mode = 3;
             } else {
-                func_1502EA98(beam->ray.obj, 0xFF, 0, 0, 0x7F, 0, 0x10);
+                actor_flashFog(beam->ray.obj, 0xFF, 0, 0, 0x7F, 0, 0x10);
                 beam->ends[0]->mode = 3;
                 beam->ends[1]->mode = -1;
             }

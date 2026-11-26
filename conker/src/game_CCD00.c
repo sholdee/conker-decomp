@@ -90,13 +90,13 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         return 0;
     case 7:
         if (D_800D3840 == 4) {
-            func_1501C730(2, args->unk8, args->unkC, 0, 0);
+            game_requestLevelChange(2, args->unk8, args->unkC, 0, 0);
             return 0;
         }
         break;
     case 8:
         if (D_800D3840 == 4) {
-            func_15172E7C(movement_obj, args->unk8 & 0xFFF, args->unkC & 0xFFF);
+            player_startWarp(movement_obj, args->unk8 & 0xFFF, args->unkC & 0xFFF);
             return 0;
         }
         break;
@@ -142,16 +142,16 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         break;
     case 15:
         if (args->unkC == 0) {
-            D_800D2120 &= ~(1 << args->unk8);
+            gTeam0SpawnMask &= ~(1 << args->unk8);
         } else {
-            D_800D2124 &= ~(1 << args->unk8);
+            gTeam1SpawnMask &= ~(1 << args->unk8);
         }
         break;
     case 16:
         if (args->unkC == 0) {
-            D_800D2120 |= 1 << args->unk8;
+            gTeam0SpawnMask |= 1 << args->unk8;
         } else {
-            D_800D2124 |= 1 << args->unk8;
+            gTeam1SpawnMask |= 1 << args->unk8;
         }
         break;
     case 17:
@@ -166,7 +166,7 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         D_800BE3DF = args->unk8;
         // matching: the redundant '& 0xFF' uses up a temp register that the case 19/23 allocation needs
         D_800BE3E0 = args->unkC & 0xFF;
-        D_800BE9F4 = D_800BE3DF;
+        gNextLevel = D_800BE3DF;
         break;
     case 20:
         func_151E8214();
@@ -175,7 +175,7 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         func_151E4DC4();
         return 0;
     case 22:
-        func_15042E3C("%d", args->unk8);
+        text_print("%d", args->unk8);
         return 0;
     case 23:
         if (args->unk8) {
@@ -228,7 +228,7 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
     case 30:
         return func_151E5F64(args->unk8);
     case 31:
-        return D_800BE9F8;
+        return gPrevLevel;
     case 32:
         return D_800BE3DF;
     case 33:

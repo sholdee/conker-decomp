@@ -65,7 +65,7 @@ void func_15191D54(DustEmitter *effect) {
         effect->base.header.state = -1;
         return;
     }
-    data->accum += (data->rateBase + func_150ADA68() * data->rateRandom) * D_800BE9A4;
+    data->accum += (data->rateBase + func_150ADA68() * data->rateRandom) * gFrameDelta;
     if (data->accum > 1.0f) {
         if (owner->ob_matrix_ptr != NULL) {
             func_15143134(&data->offset, &position, (u8 *)owner->ob_matrix_ptr + data->matrixOffset);

@@ -105,7 +105,7 @@ void func_15112520(WorldObject *turret) {
         volume = 32000.0f - D_800DBEC0 * 0.1000000015f;
         D_80089234 = cfg->sfxCooldown;
         if (volume > 0) {
-            func_10010F30(cfg->sfx, 32000, 64, 0, 0);
+            sound_play(cfg->sfx, 32000, 64, 0, 0);
         }
     } else if (D_80089234 > 0) {
         D_80089234--;

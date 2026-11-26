@@ -350,7 +350,7 @@ Gfx *func_15142E24(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s32 s, s32 t,
             *needSync = 0;
         }
         if ((level == 0x18) || (level == 0x13) || (level == 6) || (level == 0x3B) ||
-            (level == 2) || (D_800BE616 != 0)) {
+            (level == 2) || (gIsMultiplayer != 0)) {
             assetArg = 3;
         }
         gfx = func_15094FE8(gfx, desc, frame >> 8, sprite, 0, 0, 0, cm, s, t, assetArg);
@@ -1545,7 +1545,7 @@ void func_15145740(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f3
     pitchDeg = temp;
     temp = temp * 0.01745329238f; /* degrees to radians */
     pitchRad[0] = temp;
-    func_1505A184(yaw, 2000.0f, pitchDeg, &target->x, &target->z, &target->y);
+    actor_splitVelocity(yaw, 2000.0f, pitchDeg, &target->x, &target->z, &target->y);
     if (dir != NULL) {
         dir->y = cosf(pitchRad[0]) * 1000.0f;
         horizontal[0] = sinf(pitchRad[0]) * 1000.0f;
@@ -1577,7 +1577,7 @@ f32 func_15145A0C(f32 arg0, f32 scale, f32 arg2) {
 void func_15145A50(Actor *actor) {
     actor->drawtype = 3;
     if (level != 51) {
-        if ((D_800BE616 != 0) || (actor->type == 5) || (actor->type == 1) ||
+        if ((gIsMultiplayer != 0) || (actor->type == 5) || (actor->type == 1) ||
             (actor->type == 21)) {
             actor->type = 5;
             if (actor->mv != NULL) {
@@ -1975,7 +1975,7 @@ s32 func_1514672C(Vec3f *pos) {
  * target in [lo, mid) (3 in 4) or [mid, hi); value then eases towards the target by rate.
  */
 void func_151467A4(f32 *timer, f32 maxTime, f32 *target, f32 lo, f32 mid, f32 hi, f32 rate, f32 *value) {
-    *timer = *timer - D_800BE9A4;
+    *timer = *timer - gFrameDelta;
     if (*timer < 0.0f) {
         *timer = func_150ADA68() * maxTime;
         if ((func_150ADA20() & 3) != 0) {

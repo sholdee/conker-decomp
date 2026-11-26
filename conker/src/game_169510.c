@@ -1167,22 +1167,22 @@ s32 func_1513E6E8(DefParticleHead *particle) {
 
     motion = PARTICLE_MOTION(particle);
     if (particle->def.flags & 0x20) {
-        motion->drift.vel.y += motion->drift.gravity * D_800BE9A4;
+        motion->drift.vel.y += motion->drift.gravity * gFrameDelta;
     }
     if (particle->def.flags & 0x40) {
-        particle->def.pos.x += motion->drift.vel.x * D_800BE9A4;
-        particle->def.pos.y += motion->drift.vel.y * D_800BE9A4;
-        particle->def.pos.z += motion->drift.vel.z * D_800BE9A4;
+        particle->def.pos.x += motion->drift.vel.x * gFrameDelta;
+        particle->def.pos.y += motion->drift.vel.y * gFrameDelta;
+        particle->def.pos.z += motion->drift.vel.z * gFrameDelta;
     }
     if (particle->def.flags & 0x80) {
-        particle->def.rot.x += motion->drift.rotVel.x * D_800BE9A4;
-        particle->def.rot.y += motion->drift.rotVel.y * D_800BE9A4;
-        particle->def.rot.z += motion->drift.rotVel.z * D_800BE9A4;
+        particle->def.rot.x += motion->drift.rotVel.x * gFrameDelta;
+        particle->def.rot.y += motion->drift.rotVel.y * gFrameDelta;
+        particle->def.rot.z += motion->drift.rotVel.z * gFrameDelta;
     }
     if (particle->def.flags & 0x100) {
-        particle->def.scale.x += motion->drift.scaleVel.x * D_800BE9A4;
-        particle->def.scale.y += motion->drift.scaleVel.y * D_800BE9A4;
-        particle->def.scale.z += motion->drift.scaleVel.z * D_800BE9A4;
+        particle->def.scale.x += motion->drift.scaleVel.x * gFrameDelta;
+        particle->def.scale.y += motion->drift.scaleVel.y * gFrameDelta;
+        particle->def.scale.z += motion->drift.scaleVel.z * gFrameDelta;
     }
     particle->def.unk45 = 0xFF;
     return 1;
@@ -1425,7 +1425,7 @@ Vtx *func_1513F114(DefParticleHead *particle, s16 viewport) {
         bottom = -(particle->def.scale.y * particle->def.height);
         top = particle->def.height + bottom;
         dist = (((particle->def.rot.x - particle->def.pos.x) * cosDir) -
-                (sinDir * (particle->def.rot.z - particle->def.pos.z))) * D_800BE9A8;
+                (sinDir * (particle->def.rot.z - particle->def.pos.z))) * gFrameDeltaInv;
         sign = -1.0f;
         if (dist < 0.0f) {
             sign = 1.0f;
@@ -1611,8 +1611,8 @@ void func_1513F6C0(QuadSprite *sprite, u8 updateFn, u8 expireFn) {
 s32 func_1513F6E8(DefParticleHead *particle) {
     f32 rate = PARTICLE_MOTION(particle)->grow.rate;
 
-    particle->def.width += rate * D_800BE9A4;
-    particle->def.height += rate * D_800BE9A4;
+    particle->def.width += rate * gFrameDelta;
+    particle->def.height += rate * gFrameDelta;
     return 1;
 }
 
@@ -1637,17 +1637,17 @@ s32 func_1513F728(DefParticleHead *particle) {
         f32 ay;
         f32 az;
 
-        motion->ballistic.vel.y += motion->ballistic.gravity * D_800BE9A4;
-        ax = (motion->ballistic.vel.x - oldVel.x) * D_800BE9A8;
-        ay = (motion->ballistic.vel.y - oldVel.y) * D_800BE9A8;
-        az = (motion->ballistic.vel.z - oldVel.z) * D_800BE9A8;
-        particle->def.pos.x += (oldVel.x + 0.5f * ax * D_800BE9A4) * D_800BE9A4;
-        particle->def.pos.y += (oldVel.y + 0.5f * ay * D_800BE9A4) * D_800BE9A4;
-        particle->def.pos.z += (oldVel.z + 0.5f * az * D_800BE9A4) * D_800BE9A4;
+        motion->ballistic.vel.y += motion->ballistic.gravity * gFrameDelta;
+        ax = (motion->ballistic.vel.x - oldVel.x) * gFrameDeltaInv;
+        ay = (motion->ballistic.vel.y - oldVel.y) * gFrameDeltaInv;
+        az = (motion->ballistic.vel.z - oldVel.z) * gFrameDeltaInv;
+        particle->def.pos.x += (oldVel.x + 0.5f * ax * gFrameDelta) * gFrameDelta;
+        particle->def.pos.y += (oldVel.y + 0.5f * ay * gFrameDelta) * gFrameDelta;
+        particle->def.pos.z += (oldVel.z + 0.5f * az * gFrameDelta) * gFrameDelta;
     }
-    particle->def.rot.x += motion->ballistic.rotVel.x * D_800BE9A4;
-    particle->def.rot.y += motion->ballistic.rotVel.y * D_800BE9A4;
-    particle->def.rot.z += motion->ballistic.rotVel.z * D_800BE9A4;
+    particle->def.rot.x += motion->ballistic.rotVel.x * gFrameDelta;
+    particle->def.rot.y += motion->ballistic.rotVel.y * gFrameDelta;
+    particle->def.rot.z += motion->ballistic.rotVel.z * gFrameDelta;
     return 1;
 }
 

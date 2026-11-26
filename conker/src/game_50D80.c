@@ -362,7 +362,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         if (sub != NULL) {
             if (event->unk4 == 0) {
                 if (sub->isOpen != 0) {
-                    func_1516D2E0(sub->handle);
+                    text_removeBox(sub->handle);
                 }
                 text = D_800C35E0[scene][event->value];
                 if (*text == 0xBE) {
@@ -388,14 +388,14 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 if (event->unk5 == 2) {
                     sub->flags |= 0x40000;
                 }
-                sub->handle = func_1516A7B0(0, 0, 0, 0, (TextBoxConfig *)&sub->flags, sceneTag);
+                sub->handle = text_createBox(0, 0, 0, 0, (TextBoxConfig *)&sub->flags, sceneTag);
             } else if (event->unk4 == 1) {
                 func_15023440(sub, event->unk5);
             } else {
                 if (event->unk5 == 0) {
-                    sub->handle = func_1516D378(sub->handle);
+                    sub->handle = text_closeBoxAfterPage(sub->handle);
                 } else {
-                    sub->handle = func_1516D3C4(sub->handle);
+                    sub->handle = text_closeBoxNow(sub->handle);
                 }
                 if (event->unk6 != 0) {
                     s32 color = event->unk6 - 1;
@@ -513,9 +513,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 return 1;
             }
             if (event->unk4 == 0) {
-                func_15053430(obj);
+                actor_handleDeath(obj);
             } else {
-                func_15060F28(obj, 0);
+                actor_remove(obj, 0);
             }
         } else if (event->value == 0x41) {
             u8 colors[2][3] = { { 0xFF, 0, 0 }, { 0, 0, 0 } };
@@ -544,7 +544,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 c = 0;
                 a = 1;
             }
-            func_1501C730(a, event->unk4, c, 0, 0);
+            game_requestLevelChange(a, event->unk4, c, 0, 0);
         } else if (event->value == 0x17) {
             if (obj == NULL) {
                 return 1;
@@ -979,14 +979,14 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     movement_obj->lifting = dc_glbl_CharNum + 100;
                     movement_obj->speed = 0.0f;
                     FS16(movement_obj->mv, 0x18) = 0;
-                    func_1505959C(obj, 0);
+                    actor_attachToHost(obj, 0);
                     *(u32 *) &obj->basemtx = 9; // matching: an unsigned store
                     obj->attach_char = 1;
                     obj->unk101 |= 4;
                 } else if (event->unk4 == 4) {
                     FU8(movement_obj->mv, 0x17) = 1;
                 } else if (event->unk4 == 5) {
-                    D_800D154C = obj;
+                    gCurrentActor = obj;
                     func_15073F1C();
                 } else if (event->unk4 == 6) {
                     obj->mv->transport = 0;
@@ -1001,7 +1001,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->value == 0x6D) {
             D_800C3662 = !event->unk4;
         } else if (event->value == 0x74) {
-            D_800BEA0C = event->unk5;
+            gFrameRateDivider = event->unk5;
         } else if (event->value == 0x6F) {
             if (obj != NULL) {
                 obj->unk68[event->unk4] = event->unk5;
@@ -2239,7 +2239,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 snd->fadeOut = fadeOut;
                 snd->volume = (vol * 0x7FFF) >> 8;
                 snd->stopAtEnd = event->type == 10;
-                func_1000FA64(event->value, pos[0], pos[1], pos[2], snd->volume, 0x7D00, 0x7918,
+                sound_addDynamicSound(event->value, pos[0], pos[1], pos[2], snd->volume, 0x7D00, 0x7918,
                               (SoundRecordCallback)func_150238D8, snd, 0, sflags, fade);
             }
         }
@@ -2251,31 +2251,31 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if ((skipping != 0) && (func_1000E134(event->value) != 0)) {
                 return 1;
             }
-            func_1000D96C(event->value, 0, 0);
+            music_playTune(event->value, 0, 0);
             if (event->unk6 != 0) { // matching: empty under -g3 but it still shapes the code
             }
         } else if (event->unk4 == 1) {
-            func_1000E588(event->value, event->unk6 * 100, 1 << (event->unk5 + 31));
+            music_setChannelVolume(event->value, event->unk6 * 100, 1 << (event->unk5 + 31));
         } else if (event->unk4 == 2) {
-            func_1000DF68(event->value, event->unk6 * 328, 1);
+            music_setFade(event->value, event->unk6 * 328, 1);
         } else if (event->unk4 == 3) {
         } else if (event->unk4 == 4) {
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 5, 1, event->unk5, scene) - eventTime;
             if (skipping != 0) {
-                func_1000E588(event->value, event->unk6, 1 << (event->unk5 + 31));
+                music_setChannelVolume(event->value, event->unk6, 1 << (event->unk5 + 31));
             } else {
-                func_1000E46C(event->value, event->unk6, 1 << (event->unk5 + 31), duration);
+                music_fadeChannelVolume(event->value, event->unk6, 1 << (event->unk5 + 31), duration);
             }
         } else if (event->unk4 == 6) {
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 7, 0, 0, scene) - eventTime;
             if (duration < 2) {
                 duration = 1;
             }
-            func_1000DF68(event->value, event->unk6 * 328, duration);
+            music_setFade(event->value, event->unk6 * 328, duration);
         } else if (event->unk4 == 8) {
-            func_1000E654(event->value, event->unk6 + 1, 0, -1);
+            music_jumpToMarker(event->value, event->unk6 + 1, 0, -1);
         } else if (event->unk4 == 9) {
-            func_1000DE1C(event->value, 0);
+            music_stopTune(event->value, 0);
         }
     } else if (event->type == 2) {
         f32 speed;
@@ -2313,7 +2313,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 loop = 1;
             }
             if (id != obj->animseq.uh) {
-                func_1505E650(obj, id, 1.0f, rate, 0.0f, 0.0f, loop);
+                actor_playAnim(obj, id, 1.0f, rate, 0.0f, 0.0f, loop);
             }
             if (duration > 0.0f) {
                 speed = obj->unk2D0->numFrames[0] / duration * 2.0f;
@@ -2323,7 +2323,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (event->unk5 != 0) {
                 speed = 0.0f;
             }
-            func_1505E650(obj, id, speed, rate, 0.0f, 0.0f, loop);
+            actor_playAnim(obj, id, speed, rate, 0.0f, 0.0f, loop);
         }
     } else if (event->type == 5) {
         if (event->value == 1) {
@@ -2355,10 +2355,10 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     if (kind != -1) {
                         // matching: the original reuses the (otherwise unused) index parameter as the temp
                         index = (event->unk4 == 0) ? -1 : event->unk4 - 1;
-                        func_1503DE70(obj, kind, index);
+                        model_breakIntoParts(obj, kind, index);
                     }
                 } else {
-                    func_15060F28(obj, 1);
+                    actor_remove(obj, 1);
                 }
             }
         } else if (event->value == 0x5C) {

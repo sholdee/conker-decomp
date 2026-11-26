@@ -6,7 +6,7 @@
  * game_43880.c loads the table and game_83300.c reads it. It lies between the .bss of game_A9D90 and
  * of game_AC030 on its own 16-byte line, so this unit is the one that defines it.
  */
-BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (func_150163D0 loads, func_15055E50 uses)
+BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (func_150163D0 loads, actor_clampToZoneSet uses)
 
 #include "functions.h"
 #include "variables.h"

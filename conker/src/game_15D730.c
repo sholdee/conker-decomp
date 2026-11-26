@@ -106,13 +106,13 @@ void func_151303EC(SpriteParticle *p) {
         }
     }
     if (p->head.desc.flags & PARTICLE_GRAVITY) {
-        p->head.desc.vel.y += p->head.desc.gravity * D_800BE9A4;
+        p->head.desc.vel.y += p->head.desc.gravity * gFrameDelta;
     }
     prevPos = p->head.desc.pos;
     if (p->head.desc.flags & PARTICLE_MOVE) {
-        p->head.desc.pos.x += p->head.desc.vel.x * D_800BE9A4;
-        p->head.desc.pos.y += p->head.desc.vel.y * D_800BE9A4;
-        p->head.desc.pos.z += p->head.desc.vel.z * D_800BE9A4;
+        p->head.desc.pos.x += p->head.desc.vel.x * gFrameDelta;
+        p->head.desc.pos.y += p->head.desc.vel.y * gFrameDelta;
+        p->head.desc.pos.z += p->head.desc.vel.z * gFrameDelta;
     }
     if (p->head.desc.flags & PARTICLE_FADE) {
         if (p->head.desc.timer < p->head.desc.fadeStart) {
@@ -681,7 +681,7 @@ s32 func_15131DEC(SpriteParticle *p, Vec3f *prevPos) {
     p->head.desc.width = size;
 
     p->head.desc.alpha = (u32)(p->data.flash.startAlpha - p->data.flash.alphaDecay * elapsed * elapsed);
-    p->data.flash.elapsed = elapsed + D_800BE9A4;
+    p->data.flash.elapsed = elapsed + gFrameDelta;
 
     if (p->data.flash.duration < p->data.flash.elapsed) {
         return FALSE;

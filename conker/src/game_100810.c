@@ -53,11 +53,11 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
     state = ((CharacterTrail *)state)->state;
     memcpy(state, &init, sizeof(CharacterTrailState));
     if (D_8008FD8C < 5) {
-        func_1000FA64(0x5B3, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B3, 12, 0);
+        sound_addDynamicSound(0x5B3, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B3, 12, 0);
     }
-    func_1000FA64(0x5B4, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B4, 12, 0);
+    sound_addDynamicSound(0x5B4, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B4, 12, 0);
     if (D_8008FD8C < 7 || owner->CameraPtr != NULL) {
-        func_1000FA64(0x5BC, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5BC, 12, 0);
+        sound_addDynamicSound(0x5BC, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5BC, 12, 0);
     }
     {
         GlowShape params;
@@ -714,10 +714,10 @@ void func_150D4C2C(CharacterTrail *actor) {
 
     state = actor->state;
     if (D_8008FD8C < 5) {
-        func_1000FD38((SoundRecordCallback)func_150D5124, state, 0x5B3);
+        sound_stopByCallback((SoundRecordCallback)func_150D5124, state, 0x5B3);
     }
-    func_1000FD38((SoundRecordCallback)func_150D5124, state, 0x5B4);
-    func_1000FD38((SoundRecordCallback)func_150D5124, state, 0x5BC);
+    sound_stopByCallback((SoundRecordCallback)func_150D5124, state, 0x5B4);
+    sound_stopByCallback((SoundRecordCallback)func_150D5124, state, 0x5BC);
     if (state->effects[0] != NULL) {
         func_1516972C(&state->effects[0]->head.header);
     }
@@ -912,7 +912,7 @@ s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
 
     if (*arg2 == 0) {
         if (snd->voiceHandle != 0) {
-            func_100111C8(snd->voiceHandle);
+            sound_stop(snd->voiceHandle);
             snd->voiceHandle = 0;
         }
         *playing = 0;

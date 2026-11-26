@@ -73,7 +73,7 @@ s32 func_151B6420(EffectObj *obj) {
         if (i < 0) {
             i = obj->head.tmpl.itemCount - 1;
         }
-        (i + points)->life -= D_800BE9A4; // matching: IDO orders the addu operands as written
+        (i + points)->life -= gFrameDelta; // matching: IDO orders the addu operands as written
         if ((i + points)->life < 0.0f) {
             while (i != obj->head.start) {
                 obj->head.start++;
@@ -136,7 +136,7 @@ s32 func_151B65D4(EffectObj *obj) {
     delta.y = obj->head.tmpl.pos.y - state->lastPos.y;
     delta.z = obj->head.tmpl.pos.z - state->lastPos.z;
     dist = func_15143E64(&delta);
-    state->pending += dist * 0.003721999936f * D_800BE9A4;
+    state->pending += dist * 0.003721999936f * gFrameDelta;
     state->targetTexS += dist * 4.409547806f;
     if (state->pending > 1.0f) {
         TargetTrailPoint *point;
@@ -153,7 +153,7 @@ s32 func_151B65D4(EffectObj *obj) {
         f32 texStep;
 
         inv = 1.0f / state->pending;
-        elapsed = state->elapsed + D_800BE9A4;
+        elapsed = state->elapsed + gFrameDelta;
         cur = state->lastPos;
         texS = state->texS;
         distance = state->distance;

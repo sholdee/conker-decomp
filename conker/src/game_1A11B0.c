@@ -13,7 +13,7 @@ Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, void *zDest, void *colorD
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPSetColorDither(gfx++, G_CD_DISABLE);
     gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-    gDPLoadTextureBlock(gfx++, D_800BE9C4 + y * D_800BE620, G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)D_800BE628[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadTextureBlock(gfx++, gZBuffer + y * D_800BE620, G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)D_800BE628[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, zDest);
     gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, (s32)D_800BE628[view].width, 1);
     gSPTextureRectangle(gfx++, 0, 0, 3 << 2, 1 << 2, G_TX_RENDERTILE, x << 5, 0, 4 << 10, 1 << 10);

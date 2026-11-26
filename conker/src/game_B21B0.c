@@ -3,10 +3,10 @@
 
 /* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
  * it first sees each name (see init_50A0.c). The multiplayer spawn points of the level: */
-s32 D_800D2120;          // team 0 spawn mask (bit per spawn point)
-s32 D_800D2124;          // team 1 spawn mask
-s32 D_800D2128;          // number of entries in D_800D212C
-SpawnPoint *D_800D212C;  // the level's spawn point table
+s32 gTeam0SpawnMask;          // team 0 spawn mask (bit per spawn point)
+s32 gTeam1SpawnMask;          // team 1 spawn mask
+s32 gSpawnPointCount;          // number of entries in gSpawnPoints
+SpawnPoint *gSpawnPoints;  // the level's spawn point table
 
 #include "functions.h"
 #include "variables.h"
@@ -53,11 +53,11 @@ s32 func_15084D00(Actor *obj) {
 }
 
 /* Copies spawn point `spawnIndex` (or, when it is -1, the player's stored one) into the out
- * parameters. In multiplayer (D_800BE616) with D_800D18A8 set, it instead picks the team's spawn
+ * parameters. In multiplayer (gIsMultiplayer) with D_800D18A8 set, it instead picks the team's spawn
  * point farthest from the other team's players, plus a random term. When `useLink` is set, the
  * point's link is followed. Remembers the chosen index in the player's state; returns 1 when
  * there is no spawn table, else 0. */
-s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec3f *outCameraEye, u8 *outTilt,
+s32 player_getSpawnPoint(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec3f *outCameraEye, u8 *outTilt,
                   u8 *outFacing, s32 *outUnk14, s32 *outDoorWalkTime, s32 unused, s32 *outLinkFlag) {
     s32 remember;
     ActorCtl *state;
@@ -78,7 +78,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec
         remember = FALSE;
         D_800D18A8 = 0;
     }
-    if (D_800BE616 && D_8008FDD4->selection == 0 && D_800E0BE0[3] != 0) {
+    if (gIsMultiplayer && D_8008FDD4->selection == 0 && D_800E0BE0[3] != 0) {
         remember = FALSE;
     }
     if (playerIndex != 0xFF) {
@@ -90,11 +90,11 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec
         }
     }
     spawnIndex &= 0xFFF;
-    if (spawnIndex >= D_800D2128 || spawnIndex < 0) {
+    if (spawnIndex >= gSpawnPointCount || spawnIndex < 0) {
         spawnIndex = 0;
     }
-    if (D_800D212C != NULL) {
-        if (D_800BE616 && D_800D18A8) {
+    if (gSpawnPoints != NULL) {
+        if (gIsMultiplayer && D_800D18A8) {
             u8 candidates[32];
 
             team = movement_obj[playerIndex].team;
@@ -102,11 +102,11 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec
             count = 0;
             best = 0;
             if (team == 0) {
-                mask = D_800D2120;
+                mask = gTeam0SpawnMask;
             } else {
-                mask = D_800D2124;
+                mask = gTeam1SpawnMask;
             }
-            for (j = 0; j < D_800D2128; j++) {
+            for (j = 0; j < gSpawnPointCount; j++) {
                 if ((1 << j) & mask) {
                     candidates[count] = j;
                     count++;
@@ -119,8 +119,8 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec
                     nearestDistSq = 100000000.0f;
                     for (mask = 0; mask < D_8008FD8C; mask++) {
                         if (team != movement_obj[mask].team) {
-                            dx = movement_obj[mask].xpos - D_800D212C[candidates[i]].pos[0];
-                            dz = movement_obj[mask].zpos - D_800D212C[candidates[i]].pos[2];
+                            dx = movement_obj[mask].xpos - gSpawnPoints[candidates[i]].pos[0];
+                            dz = movement_obj[mask].zpos - gSpawnPoints[candidates[i]].pos[2];
                             dx = dx * dx + dz * dz;
                             if (dx < nearestDistSq) {
                                 nearestDistSq = dx;
@@ -143,13 +143,13 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec
             useLink = FALSE;
         }
         j = spawnIndex;
-        if (useLink && (mask = D_800D212C[spawnIndex].link) != 0) {
+        if (useLink && (mask = gSpawnPoints[spawnIndex].link) != 0) {
             j = mask;
-            if (mask == -1 || mask >= D_800D2128) {
+            if (mask == -1 || mask >= gSpawnPointCount) {
                 j = spawnIndex;
             }
             if (outLinkFlag != NULL) {
-                mask = D_800D212C[j].doorWalkTime;
+                mask = gSpawnPoints[j].doorWalkTime;
                 if (mask >= 0) {
                     *outLinkFlag = 0;
                 } else if (mask == -1) {
@@ -158,20 +158,20 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec
                     *outLinkFlag = 1;
                 }
             }
-        } else if (useLink && D_800D212C[spawnIndex].link == 0) {
+        } else if (useLink && gSpawnPoints[spawnIndex].link == 0) {
             D_800DDE38 = 2;
         }
-        outCameraEye->x = D_800D212C[j].cameraEye.x;
-        outCameraEye->y = D_800D212C[j].cameraEye.y;
-        outCameraEye->z = D_800D212C[j].cameraEye.z;
-        outPos[0] = D_800D212C[j].pos[0];
-        outPos[1] = D_800D212C[j].pos[1];
-        outPos[2] = D_800D212C[j].pos[2];
-        *outTilt = D_800D212C[j].tilt;
-        *outFacing = D_800D212C[j].facing;
-        *outUnk14 = D_800D212C[j].unk14;
-        *outDoorWalkTime = D_800D212C[j].doorWalkTime;
-        if (D_800BE616 && D_800D18A8 == 0) {
+        outCameraEye->x = gSpawnPoints[j].cameraEye.x;
+        outCameraEye->y = gSpawnPoints[j].cameraEye.y;
+        outCameraEye->z = gSpawnPoints[j].cameraEye.z;
+        outPos[0] = gSpawnPoints[j].pos[0];
+        outPos[1] = gSpawnPoints[j].pos[1];
+        outPos[2] = gSpawnPoints[j].pos[2];
+        *outTilt = gSpawnPoints[j].tilt;
+        *outFacing = gSpawnPoints[j].facing;
+        *outUnk14 = gSpawnPoints[j].unk14;
+        *outDoorWalkTime = gSpawnPoints[j].doorWalkTime;
+        if (gIsMultiplayer && D_800D18A8 == 0) {
             f32 angle = *outFacing * 3.1415927410f * (1.0f / 128);
             f32 offset = func_150ADA68() * 80.0f - 40.0f;
             outPos[0] += sinf(angle) * offset;
@@ -185,19 +185,19 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec
     return 1;
 }
 
-/* Sets the spawn index func_15084D70 falls back to for this player object. */
-void func_15085410(Actor *obj, s32 spawnIndex) {
+/* Sets the spawn index player_getSpawnPoint falls back to for this player object. */
+void player_setSpawnIndex(Actor *obj, s32 spawnIndex) {
     obj->mv->spawnIndex = spawnIndex;
 }
 
 /* Returns the player object's stored spawn index. */
-u8 func_15085420(Actor *obj) {
+u8 player_getSpawnIndex(Actor *obj) {
     return obj->mv->spawnIndex;
 }
 
-/* Moves obj to spawn point `spawnIndex` (see func_15084D70): sets its position and angles,
+/* Moves obj to spawn point `spawnIndex` (see player_getSpawnPoint): sets its position and angles,
  * clears its motion, places its camera and passes {obj, unique_id} to func_15169040. */
-void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
+void player_moveToSpawn(Actor *obj, s32 spawnIndex, s32 unused) {
     s16 pos[3];
     Vec3f cameraEye;
     u8 tilt;
@@ -208,13 +208,13 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     s32 savedIndex;
     ActorRef event;
 
-    func_15084D70(obj->playernumber, spawnIndex, D_800D18A8, pos, &cameraEye, &tilt, &facing, &unk14, &doorWalkTime, unused, NULL);
-    savedObject = D_800D154C;
+    player_getSpawnPoint(obj->playernumber, spawnIndex, D_800D18A8, pos, &cameraEye, &tilt, &facing, &unk14, &doorWalkTime, unused, NULL);
+    savedObject = gCurrentActor;
     savedIndex = dc_glbl_CharNum;
-    D_800D154C = obj;
+    gCurrentActor = obj;
     dc_glbl_CharNum = obj - movement_obj;
     func_1506AD30(obj, 800.0f, 1);
-    D_800D154C = savedObject;
+    gCurrentActor = savedObject;
     dc_glbl_CharNum = savedIndex;
     obj->xpos = pos[0];
     obj->ypos = pos[1];
@@ -231,7 +231,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     obj->shad = 0.0f;
     obj->floorY = obj->ypos;
     if (obj->mv != NULL) {
-        func_1507C3E0(obj, &obj->mv->height, &obj->mv->width, &obj->mv->depth);
+        actor_computeSize(obj, &obj->mv->height, &obj->mv->width, &obj->mv->depth);
     }
     obj->unk1CC = obj->ypos;
     obj->unk2F8 &= ~0x10;
@@ -242,8 +242,8 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     obj->ob_overslopey = 0.0f;
     if (obj->playernumber != 0xFF) {
         obj->mv->door_walkf_time = doorWalkTime;
-        if (D_800BE616 && D_800D18A8) {
-            func_1505D6F0(obj, obj - movement_obj);
+        if (gIsMultiplayer && D_800D18A8) {
+            actor_resolveCollisions(obj, obj - movement_obj);
         }
         if (obj->mv->rt_context_b == 0 && obj->mv->GrenadeThrowState != 4 && obj->mv->GrenadeThrowState != 7) {
             obj->count5 = 0;

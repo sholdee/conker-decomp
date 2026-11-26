@@ -145,10 +145,10 @@ void func_15169040(s32 event, u8 eventType);
 
 extern u64 D_800CBE10[];
 
-/* Append a parameterless GBI command (gDPNoParam) at the display-list write head D_800BE9D0. */
+/* Append a parameterless GBI command (gDPNoParam) at the display-list write head gDisplayListHead. */
 #define GFX_APPEND_NOPARAM(cmd)                 \
 {                                               \
-    Gfx *gfx = D_800BE9D0++;                    \
+    Gfx *gfx = gDisplayListHead++;                    \
     gfx->words.w0 = _SHIFTL(cmd, 24, 8);        \
     gfx->words.w1 = 0;                          \
 }
@@ -159,27 +159,27 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
     Gfx **dlBase;
     s32 used;
 
-    dlBase = D_800BE9C8;
+    dlBase = gDisplayListBuffers;
     capacity = dlBase[1] - dlBase[0];
     D_800BEAD4 = &D_800BEAD8[D_800BE9C0];
     D_800BEAD4->next = 0;
-    used = D_800BE9D0 - dlBase[D_800BE9C0];
+    used = gDisplayListHead - dlBase[D_800BE9C0];
     if ((used < 0) || (used > capacity)) {
         func_1501A39C();
-        D_800BE9D0 = D_800BE9D8[D_800BE9C0];
+        gDisplayListHead = D_800BE9D8[D_800BE9C0];
         GFX_APPEND_NOPARAM(G_RDPFULLSYNC);
         GFX_APPEND_NOPARAM(G_ENDDL);
-        used = D_800BE9D0 - dlBase[D_800BE9C0];
+        used = gDisplayListHead - dlBase[D_800BE9C0];
     }
 
     if ((used < 0) || (used > (capacity - 400))) {
-        D_800BE9D0 = dlBase[D_800BE9C0] + (capacity - 400);
+        gDisplayListHead = dlBase[D_800BE9C0] + (capacity - 400);
         GFX_APPEND_NOPARAM(G_RDPFULLSYNC);
         GFX_APPEND_NOPARAM(G_ENDDL);
     }
 
     D_800BEAD4->list.t.data_ptr = (u64 *)dlBase[D_800BE9C0];
-    D_800BEAD4->list.t.data_size = (D_800BE9D0 - dlBase[D_800BE9C0]) * sizeof(Gfx);
+    D_800BEAD4->list.t.data_size = (gDisplayListHead - dlBase[D_800BE9C0]) * sizeof(Gfx);
     func_1501CC3C();
 
     D_800BEAD4->list.t.type = M_GFXTASK;
@@ -208,8 +208,8 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
         D_800BEAD4->flags |= (D_80082FA0 + 1) << 16;
         D_800BE617 = 0;
     }
-    D_800BEAD4->msgQ = &D_800BEA10;
-    D_800BEAD4->msg = &D_800BEA68[D_800BE9C0];
+    D_800BEAD4->msgQ = &gGameMesgQueue;
+    D_800BEAD4->msg = &gTaskDoneMsgs[D_800BE9C0];
     D_800BEAD4->framebuffer = D_8002AAE8[D_800BE9C0];
     osWritebackDCacheAll();
     osSendMesg(&D_8003B1E8, D_800BEAD4, 1);
@@ -435,7 +435,7 @@ s32 func_1501D2C4(s32 map, s32 cutscene) {
 static void (*D_800840FC[])(s32, s32, s32, s32) = { NULL, func_15023870 };
 
 /* Start cutscene `cutscene` of map `map` in scene slot `scene`. If another map is loaded, switch
-   maps first (func_1501C730) and leave the request pending in D_800C35C4. Otherwise load the
+   maps first (game_requestLevelChange) and leave the request pending in D_800C35C4. Otherwise load the
    cutscene file, allocate and fill the per-track tables, and run the first frame. */
 void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackArg) {
     SeqFileHeader *hdr;
@@ -451,7 +451,7 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
         D_800C3C94 = callbackArg;
         if (map != level) {
             D_800C35C4 = cutscene + 1;
-            func_1501C730(1, map, 0, 0, 0);
+            game_requestLevelChange(1, map, 0, 0, 0);
             if (D_800C35EA[scene] != 0) {
                 D_800C35C5 = 0;
                 return;
@@ -666,7 +666,7 @@ void func_1501DF04(s32 scene) {
     }
     obj = func_15072208(movement_obj, 0);
     if (obj != NULL) {
-        func_15060F28(obj, 0);
+        actor_remove(obj, 0);
     }
     chained = D_800C3C99;
     func_1501DE18(scene);
@@ -799,7 +799,7 @@ void func_1501E400(s32 scene) {
     D_800C35B8[scene] = D_800C35B0[scene];
     if (D_800C35EA[scene] == 1) {
         func_1501E1B4(scene);
-        if ((scene != 0) || (D_800BEAC0 == 0)) {
+        if ((scene != 0) || (gPaused == 0)) {
             D_800C35B0[scene] += D_800BEA08;
         }
         if ((D_800C35C0[scene] == 0) &&
@@ -1826,7 +1826,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                         obj->unk158 = D_800C3958[scene][track].unk1C * 0.009999999776f;
                     }
                     if (rescaled) {
-                        func_15062BDC(obj, obj->scale_xz, obj->scale_y);
+                        actor_setScale(obj, obj->scale_xz, obj->scale_y);
                     }
                     obj->vtilt = D_800C3958[scene][track].unkC;
                     angle = D_800C3958[scene][track].unk10 + 180.0f;
@@ -1840,7 +1840,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                     obj->theta = angle;
                     obj->lean_angle = D_800C3958[scene][track].unk14;
                     D_800C3958[scene][track].unk34 = (D_800C3958[scene][track].unk34 < 0.0f) ? 0.0f : (D_800C3958[scene][track].unk34 > 255.0f) ? 255.0f : D_800C3958[scene][track].unk34;
-                    func_1506160C(obj, 1, D_800C3958[scene][track].unk34, 0, 0);
+                    actor_fadeCommand(obj, 1, D_800C3958[scene][track].unk34, 0, 0);
                     obj->old_xpos = obj->xpos;
                     obj->old_ypos = obj->ypos;
                     obj->old_zpos = obj->zpos;
@@ -2027,7 +2027,7 @@ void func_15022398(s32 track, s32 scene) {
             id = D_800C35F0[scene][track].targetId;
             slot = func_15083E0C(id);
             if (slot != -1) {
-                obj = func_1505EEF4(slot);
+                obj = actor_findOnPath(slot);
                 if (obj != NULL) {
                     if (obj->drawtype == 3) {
                         if (D_800C35F0 != &D_800C35F0[scene]) {
@@ -2042,9 +2042,9 @@ void func_15022398(s32 track, s32 scene) {
                 } else {
                     if (slot < D_800D2100) {
                         func_15082A44((void *)((slot * 0x30) + (s32)D_800D20FC), slot, 0, scene, 0); // matching: integer address math
-                        obj = func_1505EEF4(slot);
+                        obj = actor_findOnPath(slot);
                         if (obj != NULL) {
-                            func_1505E650(obj, 0, 0.0f, 0.0f, 0.0f, 0.0f, 1);
+                            actor_playAnim(obj, 0, 0.0f, 0.0f, 0.0f, 0.0f, 1);
                             func_1502225C(obj - movement_obj, scene);
                         }
                     }
@@ -2152,7 +2152,7 @@ void func_15022848(s32 scene) {
     }
 }
 
-/* Call func_15060F28 on every live object in the scene's D_800C3518 list. */
+/* Call actor_remove on every live object in the scene's D_800C3518 list. */
 void func_150228E4(s32 scene) {
     s32 i;
     s32 count;
@@ -2164,17 +2164,17 @@ void func_150228E4(s32 scene) {
     for (i = 0; i < count; i++) {
         obj = &movement_obj[D_800C3518[scene][i]];
         if (obj->type != 0) {
-            func_15060F28(obj, 0);
+            actor_remove(obj, 0);
             count = *countPtr;
         }
     }
 }
 
-/* Run the D_80086014 handler of an object whose state (its first word) is 0x1B or 4. */
+/* Run the gActorUpdateHandlers handler of an object whose state (its first word) is 0x1B or 4. */
 void func_15022998(Actor *obj) {
     if ((obj->type == 0x1B) || (obj->type == 4)) {
-        if (D_80086014[obj->type] != NULL) {
-            D_80086014[obj->type](obj);
+        if (gActorUpdateHandlers[obj->type] != NULL) {
+            gActorUpdateHandlers[obj->type](obj);
         }
     }
 }
@@ -2410,7 +2410,7 @@ void func_150233E4(void) {
     do {
         entry = &D_800C3CA0[i];
         if (entry->active != 0) {
-            func_1516D2E0(entry->handle);
+            text_removeBox(entry->handle);
             entry->handle = 0;
             // matching: the cleared value goes through a local
             zero = 0;
@@ -2420,16 +2420,16 @@ void func_150233E4(void) {
     } while ((SeqSubtitle *)D_800C3D48 != &D_800C3CA0[i]);
 }
 
-/* Release subtitle slot `sub`: close it now if `force`, else let an open one finish (func_1516D328). */
+/* Release subtitle slot `sub`: close it now if `force`, else let an open one finish (text_closeBoxSkipPages). */
 void func_15023440(SeqSubtitle *sub, s32 force) {
     SeqSubtitle *entry;
 
     entry = sub;
     if (force != 0) {
-        func_1516D2E0(entry->handle);
+        text_removeBox(entry->handle);
         entry->handle = 0;
     } else if (entry->isOpen != 0) {
-        func_1516D328(entry->handle);
+        text_closeBoxSkipPages(entry->handle);
     } else {
         entry->handle = 0;
     }
@@ -2520,7 +2520,7 @@ s32 func_150235DC(s32 scene) {
             obj->nojump = 0;
             obj->stunned = 0;
             obj->shad = obj->ypos - obj->floorY;
-            D_800D154C = obj;
+            gCurrentActor = obj;
             func_1507F640();
             obj->mv->door_walkf_time = 0;
             obj->unk287 = 0;
@@ -2537,7 +2537,7 @@ s32 func_150235DC(s32 scene) {
     }
 }
 
-/* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to func_1504A730): run
+/* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to actor_updateAll): run
    each live object's handler and apply the track of objects bound to one. */
 void func_1502378C(void) {
     s32 bound;
@@ -2549,7 +2549,7 @@ void func_1502378C(void) {
     obj = movement_obj;
     i = 0;
     if (D_800C3654[0] != 0) {
-        func_1504A730();
+        actor_updateAll();
         return;
     }
     // matching: 1 and 25 live in registers; the no-op `^ 0` and `& 0xFFFFFFFF` and the empty
@@ -2571,5 +2571,5 @@ void func_1502378C(void) {
         i++;
     }
 
-    func_15061B4C();
+    actor_updateTypeAnims();
 }

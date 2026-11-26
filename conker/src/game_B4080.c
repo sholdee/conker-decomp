@@ -320,7 +320,7 @@ void func_15087350(s32 index, s32 started, f32 lookahead) {
                 again = 0;
             }
         } while (again);
-        func_15042D78(0x80);
+        text_setFlags(0x80);
         racer->prevTicks = racer->ticks;
         racer->ticks = D_800BE9E4;
         adist = (obj->old_xpos * dx + dz * obj->old_zpos + d) - dist;
@@ -465,7 +465,7 @@ void func_15087E54(s32 index, Actor *obj) {
         return;
     }
     racer = &D_800872A0[index];
-    r = func_1505A630(racer->dirZ, racer->dirX, 0) + 0x4000;
+    r = actor_getDirectionAngle(racer->dirZ, racer->dirX, 0) + 0x4000;
     d = r - obj->angle;
     if (d & 0x8000) {
         if (d < 0xDBFF) {
@@ -486,7 +486,7 @@ void func_15087EF0(s32 index, Actor *obj) {
         return;
     }
     racer = &D_800872A0[index];
-    r = func_1505A630(racer->dirZ, racer->dirX, 0);
+    r = actor_getDirectionAngle(racer->dirZ, racer->dirX, 0);
     if (D_800D23A8 == 0) {
         if (racer->lateral < 0.5f) {
             r += 0x4A00;
@@ -539,7 +539,7 @@ s32 func_1508802C(Racer *racer, Actor *obj, s32 mode) {
     state->bot = 1;
     obj->type = 12;
     obj->intelwalk = mode;
-    D_800D154C = obj;
+    gCurrentActor = obj;
     dc_glbl_CharNum = racer->actorIndex;
     obj->scriptCmd = func_1507BB28(0, mode);
     obj->unk21C = 0;
@@ -930,7 +930,7 @@ s32 func_15088A08(Racer *racer, f32 step) {
         idx = racer->actorIndex;
         racer->nodesPassed += dir;
         racer->lap = racer->nodesPassed / racer->lapLength;
-        if (D_800BE616 != 0) {
+        if (gIsMultiplayer != 0) {
             if (lim < racer->lap) {
                 racer->lap = lim + 1;
             }
@@ -1018,7 +1018,7 @@ void func_15088D58(Actor *obj) {
         obj->xpos = func_150498A4(xs, 0, racer->segmentT, &x_derivative);
         obj->ypos = func_150497E0(ys, 0, racer->segmentT);
         obj->zpos = func_150498A4(zs, 0, racer->segmentT, &z_derivative);
-        angle = func_15144BC8((func_1505A630(racer->dirZ, racer->dirX, 0) + 0x8000) * 0.005493164f);
+        angle = func_15144BC8((actor_getDirectionAngle(racer->dirZ, racer->dirX, 0) + 0x8000) * 0.005493164f);
         obj->theta = angle;
         rotation = (s16)(angle * 182.0444489f) - 0x4000;
         obj->langle = rotation;

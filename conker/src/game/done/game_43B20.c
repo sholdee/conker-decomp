@@ -8,39 +8,39 @@ void func_15016670(void) {
     D_800D18C0 = 0;
 }
 
-void func_15016680(void) {
-    D_800D212C = 0;
+void player_clearSpawnPoints(void) {
+    gSpawnPoints = 0;
 }
 
-void func_15016690(s32 arg0) {
+void player_loadSpawnPoints(s32 arg0) {
     s32 tmp;
 
-    D_800D2120 = -1;
-    D_800D2124 = -1;
-    tmp = func_1502B7F0(&D_800D212C, 3, 12, arg0, 6) / 24U;
-    D_800D2128 = tmp;
+    gTeam0SpawnMask = -1;
+    gTeam1SpawnMask = -1;
+    tmp = func_1502B7F0(&gSpawnPoints, 3, 12, arg0, 6) / 24U;
+    gSpawnPointCount = tmp;
     if (tmp == 0) {
-        D_800D212C = allocate_memory(24, 1, 0, 0);
-        D_800D2128 = 1U;
+        gSpawnPoints = allocate_memory(24, 1, 0, 0);
+        gSpawnPointCount = 1U;
         if (D_800D20FC) {
-            D_800D212C->pos[0] = D_800D20FC->x;
-            D_800D212C->pos[1] = D_800D20FC->y;
-            D_800D212C->pos[2] = D_800D20FC->z;
-            D_800D212C->cameraEye.x = D_800D20FC->x + 100;
-            D_800D212C->cameraEye.y = D_800D20FC->y + 100;
-            D_800D212C->cameraEye.z = D_800D20FC->z;
-            D_800D212C->tilt = 0;
-            D_800D212C->facing = D_800D20FC->angle;
-            D_800D212C->doorWalkTime = 0;
+            gSpawnPoints->pos[0] = D_800D20FC->x;
+            gSpawnPoints->pos[1] = D_800D20FC->y;
+            gSpawnPoints->pos[2] = D_800D20FC->z;
+            gSpawnPoints->cameraEye.x = D_800D20FC->x + 100;
+            gSpawnPoints->cameraEye.y = D_800D20FC->y + 100;
+            gSpawnPoints->cameraEye.z = D_800D20FC->z;
+            gSpawnPoints->tilt = 0;
+            gSpawnPoints->facing = D_800D20FC->angle;
+            gSpawnPoints->doorWalkTime = 0;
         } else {
-            D_800D212C->pos[0] = 0xE10;
-            D_800D212C->pos[1] = -0xC80;
-            D_800D212C->pos[2] = -0x898;
-            D_800D212C->cameraEye.z = 1000.0f;
-            D_800D212C->cameraEye.x = D_800D212C->cameraEye.y = D_800D212C->cameraEye.z;
-            D_800D212C->tilt = 0;
-            D_800D212C->facing = 0;
-            D_800D212C->doorWalkTime = 0;
+            gSpawnPoints->pos[0] = 0xE10;
+            gSpawnPoints->pos[1] = -0xC80;
+            gSpawnPoints->pos[2] = -0x898;
+            gSpawnPoints->cameraEye.z = 1000.0f;
+            gSpawnPoints->cameraEye.x = gSpawnPoints->cameraEye.y = gSpawnPoints->cameraEye.z;
+            gSpawnPoints->tilt = 0;
+            gSpawnPoints->facing = 0;
+            gSpawnPoints->doorWalkTime = 0;
         }
     }
 }

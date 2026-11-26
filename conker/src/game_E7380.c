@@ -113,12 +113,12 @@ s32 func_150BA35C(QuadSprite *sprite) {
 
 /* Moves the particle by its velocity and spins it, under gravity of -0.6 per frame. */
 s32 func_150BA37C(TumblingParticle *particle) {
-    particle->motion.vel.y += -0.6f * D_800BE9A4;
-    particle->head.def.pos.x += particle->motion.vel.x * D_800BE9A4;
-    particle->head.def.pos.y += particle->motion.vel.y * D_800BE9A4;
-    particle->head.def.pos.z += particle->motion.vel.z * D_800BE9A4;
-    particle->head.def.rot.x += particle->motion.rotVelX * D_800BE9A4;
-    particle->head.def.rot.y += particle->motion.rotVelY * D_800BE9A4;
+    particle->motion.vel.y += -0.6f * gFrameDelta;
+    particle->head.def.pos.x += particle->motion.vel.x * gFrameDelta;
+    particle->head.def.pos.y += particle->motion.vel.y * gFrameDelta;
+    particle->head.def.pos.z += particle->motion.vel.z * gFrameDelta;
+    particle->head.def.rot.x += particle->motion.rotVelX * gFrameDelta;
+    particle->head.def.rot.y += particle->motion.rotVelY * gFrameDelta;
     return 1;
 }
 

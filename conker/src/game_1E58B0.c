@@ -62,9 +62,9 @@ s32 func_151B85AC(BulletParticle *particle) {
 
     if (bullet != NULL) {
         particle->head.def.pos = bullet->head.pos;
-        particle->head.def.rot.x += particle->head.def.scale.x * D_800BE9A4;
-        particle->head.def.rot.y += particle->head.def.scale.y * D_800BE9A4;
-        particle->head.def.rot.z += particle->head.def.scale.z * D_800BE9A4;
+        particle->head.def.rot.x += particle->head.def.scale.x * gFrameDelta;
+        particle->head.def.rot.y += particle->head.def.scale.y * gFrameDelta;
+        particle->head.def.rot.z += particle->head.def.scale.z * gFrameDelta;
     } else {
         particle->head.def.flags |= 1;
     }
@@ -116,9 +116,9 @@ void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     acceleration.x = 0.0f;
     acceleration.y = 0.0f;
     acceleration.z = 0.0f;
-    velocity.x += -dx * D_800BE9A8 * push;
-    velocity.y += -dy * D_800BE9A8 * push;
-    velocity.z += -dz * D_800BE9A8 * push;
+    velocity.x += -dx * gFrameDeltaInv * push;
+    velocity.y += -dy * gFrameDeltaInv * push;
+    velocity.z += -dz * gFrameDeltaInv * push;
     random_f = func_150ADA68();
     random_c = func_150ADA68();
     random_a = func_150ADA20();

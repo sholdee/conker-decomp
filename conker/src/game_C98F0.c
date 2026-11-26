@@ -138,7 +138,7 @@ void func_1509C8FC(s32 ref, s32 alt) {
     Camera *player;
     f32 angle;
 
-    obj = func_1505EEF4(ref & 0xFFF);
+    obj = actor_findOnPath(ref & 0xFFF);
     if (obj != NULL) {
         player = camera_global_Cameras;
         if (player->Mode & 0x100) {

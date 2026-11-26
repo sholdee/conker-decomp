@@ -134,7 +134,7 @@ void func_150BF21C(WorldObject *obj) {
         if (diff == 0.0f) {
             BOB_WORK(obj)->speed = 0.0f;
             BOB_WORK(obj)->bobPhase += 0.05f;
-            bob = ((height / 1500.0f) + 1.0f) * D_800BE9A4;
+            bob = ((height / 1500.0f) + 1.0f) * gFrameDelta;
             if (bob < 0.0f) {
                 bob = 0.0f;
             }
@@ -155,7 +155,7 @@ void func_150BF21C(WorldObject *obj) {
             }
             BOB_WORK(obj)->speed = speed;
             if (fabsf(speed) < fabsf(diff)) {
-                height += speed * D_800BE9A4;
+                height += speed * gFrameDelta;
                 if (speed < -25.0f) {
                     BOB_WORK(&obj[1])->speed = -10.0f;
                 } else {
@@ -250,14 +250,14 @@ void func_150BF760(WorldObject *obj) {
             }
         } else if (mode == TASK_FLAG_ON) {
             if (actor != NULL && progress >= 1.0f) {
-                func_15060F28(actor, 0);
+                actor_remove(actor, 0);
             }
         } else if (mode == TASK_FLAG_OFF) {
             if (progress >= 0.25f) {
                 obj[1].v = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
             }
             if (actor != NULL && progress >= 1.0f) {
-                func_15060F28(actor, 0);
+                actor_remove(actor, 0);
             }
         } else if (mode == TASK_FLAG_GOING_OFF) {
             if (progress >= 0.25f) {

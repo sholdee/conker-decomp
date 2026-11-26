@@ -48,7 +48,7 @@ extern u8 D_1A34E0[];
 extern u8 compressed_ROM_START[];
 
 /* Loads the spawn table for `levelId` (base entries from ROM plus the level's own), then fills in one
- * entry per player slot (the first D_8008FD8C) from the type func_150859AC reports and the slot's object. */
+ * entry per player slot (the first D_8008FD8C) from the type player_getStat reports and the slot's object. */
 void func_150169A0(s32 levelId) {
     s32 j;
     u8 *romEnd;
@@ -58,7 +58,7 @@ void func_150169A0(s32 levelId) {
     s32 count;
     s32 i;
 
-    func_15004F30();
+    actor_clearModelTables();
     switch (levelId) {
     case 26:
     case 36:
@@ -92,8 +92,8 @@ void func_150169A0(s32 levelId) {
     D_800D1548 = 0;
 players: // matching: unused label splits the basic block; IDO schedules the loop setup differently without it
     for (i = 0; i < D_8008FD8C; i++) {
-        if ((1 << i) & D_800D2138.playerMask) {
-            s32 type = func_150859AC(i, 1);
+        if ((1 << i) & gMatchState.playerMask) {
+            s32 type = player_getStat(i, 1);
 
             D_800D20FC[i].unk2 = 0;
             switch (type) {
@@ -232,7 +232,7 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
         }
     }
     func_1508295C(levelId, 1, 1);
-    func_15172CA8(0);
+    player_cancelWarp(0);
     func_1508295C(levelId, 1, 0);
 }
 

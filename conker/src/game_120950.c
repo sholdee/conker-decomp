@@ -25,7 +25,7 @@ void func_150F34F4(Actor *actor) {
     f32 accel;
     f32 temp; // matching: one local for stick_x and the climb limit (split locals move FP registers)
     f32 pitch;
-    f32 speed; // capped xz speed, then the func_1505A3A8 rate, then the old yspd (IDO's allocation)
+    f32 speed; // capped xz speed, then the actor_accelerate rate, then the old yspd (IDO's allocation)
     f32 animSpeed;
     s32 anim;
     s32 count;
@@ -42,11 +42,11 @@ void func_150F34F4(Actor *actor) {
     actor->count2 = 1;
     actor->unk222 = 0;
     D_800CC288 = D_800BE710[0];
-    D_800CC284 = D_800BE728[0];
+    gCurrentPad = D_800BE728[0];
     if ((dc_glbl_CharNum <= D_80082FA0) && (D_800DDE3C[dc_glbl_CharNum] != 0) && (D_800DDDC8[dc_glbl_CharNum] > 0.75f) && (D_800E0B94 != 2)) {
-        D_800CC284->stick_x = 0;
-        D_800CC284->stick_y = 0;
-        D_800CC284->button = 0;
+        gCurrentPad->stick_x = 0;
+        gCurrentPad->stick_y = 0;
+        gCurrentPad->button = 0;
         D_800CC288 = 0;
     }
     actor->noshove |= 0x40;
@@ -55,8 +55,8 @@ void func_150F34F4(Actor *actor) {
         actor->unk103--;
     }
     if (actor->stunned != 0) {
-        func_150585F0(actor, 0.25f);
-        func_15059140(actor);
+        actor_updateStunned(actor, 0.25f);
+        actor_updatePhysics(actor);
         actor->theta = ((s16)actor->langle + 0x4000) * (360.0f / 65536.0f);
         if (actor->lifting != 0) {
             Actor *rider;
@@ -75,9 +75,9 @@ void func_150F34F4(Actor *actor) {
     }
     if (actor->unk102 == 0) {
         actor->inwater = 0;
-        angle = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0);
-        mag = func_1505A5CC(D_800CC284);
-        if (D_800CC284->button & R_TRIG) {
+        angle = actor_getDirectionAngle(gCurrentPad->stick_x, gCurrentPad->stick_y, 0);
+        mag = actor_getStickDeflection(gCurrentPad);
+        if (gCurrentPad->button & R_TRIG) {
             mag = 0.0f;
         }
         angle += D_800CC280;
@@ -97,7 +97,7 @@ void func_150F34F4(Actor *actor) {
             if (actor->shad > 30.0f) {
                 D_800D1580 = 0xFF010074;
                 func_1506E8D8();
-                func_1505959C(&movement_obj[D_800CC26D - 100], dc_glbl_CharNum);
+                actor_attachToHost(&movement_obj[D_800CC26D - 100], dc_glbl_CharNum);
                 actor->lifting = D_800CC26D;
                 actor->unk102 = 1;
             }
@@ -114,8 +114,8 @@ void func_150F34F4(Actor *actor) {
     if (speed > 60.0f) {
         speed = 60.0f;
     }
-    pitch = D_800CC284->stick_y * 1.25f;
-    rHeld = D_800CC284->button & R_TRIG;
+    pitch = gCurrentPad->stick_y * 1.25f;
+    rHeld = gCurrentPad->button & R_TRIG;
     if (rHeld) {
         pitch = 0.0f;
     }
@@ -129,7 +129,7 @@ void func_150F34F4(Actor *actor) {
             if ((movement_obj[i].type != 0) && (movement_obj[i].energy != 0) &&
                 (movement_obj[i].shad == 0.0f) && (movement_obj[i].intelwalk != 0x21) &&
                 ((movement_obj[i].character_type == 0x9C) || (movement_obj[i].character_type == 0x9D))) {
-                dist = func_1505A6F8(D_800D154C, &movement_obj[i]);
+                dist = actor_distanceXZ(gCurrentActor, &movement_obj[i]);
                 if (dist < minDist) {
                     actor->unk222 = i;
                     minDist = dist;
@@ -149,11 +149,11 @@ void func_150F34F4(Actor *actor) {
         }
         pitch = 40.0f;
     }
-    temp = D_800CC284->stick_x;
+    temp = gCurrentPad->stick_x;
     actor->lean_angle += (temp - actor->lean_angle) * (0.2f * D_800D1550);
     actor->angle -= (s16)(actor->lean_angle * D_800D1550 * 0.04f * ((100.0f - speed) * 0.015f) * 220.0f);
     actor->unk7E = 0x19;
-    func_150599C8(actor, 8, actor->angle);
+    actor_turnFacing(actor, 8, actor->angle);
     actor->wantspeed = 0.0f;
     speed = 0.0f;
     accel = 1.3f;
@@ -167,13 +167,13 @@ void func_150F34F4(Actor *actor) {
         actor->unk86 = 0;
         actor->yspd = 9.0f;
     }
-    if (!(D_800CC284->button & R_TRIG)) {
-        if (D_800CC284->button & A_BUTTON) {
+    if (!(gCurrentPad->button & R_TRIG)) {
+        if (gCurrentPad->button & A_BUTTON) {
             actor->wantspeed = -22.0f;
             speed = 1.0f;
             accel = 1.8f;
         }
-        if (D_800CC284->button & B_BUTTON) {
+        if (gCurrentPad->button & B_BUTTON) {
             actor->wantspeed = 30.0f;
             if (actor->yspd < 0.0f) {
                 actor->wantspeed -= actor->yspd * 0.6f;
@@ -182,7 +182,7 @@ void func_150F34F4(Actor *actor) {
             accel = 0.3f;
         }
     }
-    func_1505A3A8(actor->wantspeed, actor, speed, accel, 1);
+    actor_accelerate(actor->wantspeed, actor, speed, accel, 1);
     actor->theta = ((s16)actor->langle + 0x4000) * (360.0f / 65536.0f);
     actor->ygrav = pitch * 0.000125f * (200.0f - actor->speed);
     if (actor->lifting == 0) {
@@ -212,8 +212,8 @@ void func_150F34F4(Actor *actor) {
         actor->ygrav = 0.0f;
     }
     actor->inwater = 10;
-    if (D_800CC284->button & R_TRIG) {
-        actor->vtilt += (D_800CC284->stick_y - actor->vtilt) * 0.2f;
+    if (gCurrentPad->button & R_TRIG) {
+        actor->vtilt += (gCurrentPad->stick_y - actor->vtilt) * 0.2f;
         actor->yspd = 0.0f;
         actor->ygrav = 0.0f;
     } else {
@@ -226,16 +226,16 @@ void func_150F34F4(Actor *actor) {
     }
     speed = actor->yspd;
     D_800CBDD3 = 1;
-    func_15059140(actor);
+    actor_updatePhysics(actor);
     D_800CBDD3 = 0;
     if ((actor->lifting != 0) && (actor->shad < 50.0f)) {
         floorLevel = 50.0f;
     }
-    if (!(D_800CC284->button & R_TRIG)) {
+    if (!(gCurrentPad->button & R_TRIG)) {
         if ((D_800CC26D != 0) && (actor->lifting == 0) && (movement_obj[D_800CC26D - 100].shad == 0.0f)) {
             actor->ypos = movement_obj[D_800CC26D - 100].ypos + 70.0f;
             actor->yspd = 20.0f;
-            func_1505959C(&movement_obj[D_800CC26D - 100], dc_glbl_CharNum);
+            actor_attachToHost(&movement_obj[D_800CC26D - 100], dc_glbl_CharNum);
             actor->lifting = D_800CC26D;
             D_800D1580 = 0xFF010074;
             func_1506E8D8();
@@ -276,7 +276,7 @@ void func_150F34F4(Actor *actor) {
     }
     if (actor->shad <= floorLevel) {
         actor->speed *= 0.6f;
-        if ((D_800CC284->button & B_BUTTON) || (actor->unk86 != 0) || (actor->lifting != 0)) {
+        if ((gCurrentPad->button & B_BUTTON) || (actor->unk86 != 0) || (actor->lifting != 0)) {
             if (actor->lifting != 0) {
                 if (actor->yspd < -10.0f) {
                     D_800D1580 = 0xFF0100A7;
@@ -301,7 +301,7 @@ void func_150F34F4(Actor *actor) {
             actor->vtilt = 0.0f;
         }
     }
-    if (!(D_800CC284->button & R_TRIG)) {
+    if (!(gCurrentPad->button & R_TRIG)) {
         actor->vtilt += 20.0f;
     } else {
         actor->yspd = actor->vtilt * -0.35f;
@@ -330,7 +330,7 @@ void func_150F34F4(Actor *actor) {
         anim = 0x17;
         animSpeed += 0.2f;
     }
-    func_1505E650(actor, anim, animSpeed, 9.0f, 0.0f, 0.0f, 0);
+    actor_playAnim(actor, anim, animSpeed, 9.0f, 0.0f, 0.0f, 0);
 }
 
 void func_150F43F0(Camera *actor) {

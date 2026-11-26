@@ -202,7 +202,7 @@ void func_150F892C(StageObj *obj) {
         state->eventTimer = func_150ADA20() % 151U + 150;
     }
 
-    state->unk38 += (0.02000000142f + func_150ADA68() * 0.025f) * (D_800BE9A4 * count);
+    state->unk38 += (0.02000000142f + func_150ADA68() * 0.025f) * (gFrameDelta * count);
     if (state->unk38 > 1.0f) {
         s16 side;
         Vec3f pos;
@@ -217,7 +217,7 @@ void func_150F892C(StageObj *obj) {
         } while (state->unk38 > 1.0f);
     }
 
-    state->unk34 += (0.02000000142f + func_150ADA68() * 0.06000000238f) * (D_800BE9A4 * count);
+    state->unk34 += (0.02000000142f + func_150ADA68() * 0.06000000238f) * (gFrameDelta * count);
     if (state->unk34 > 1.0f) {
         s16 pieces;
         s16 side;
@@ -275,7 +275,7 @@ void func_150F892C(StageObj *obj) {
         } while (state->unk34 > 1.0f);
     }
 
-    state->unk30 += (0.05500000343f + func_150ADA68() * 0.05f) * (D_800BE9A4 * count);
+    state->unk30 += (0.05500000343f + func_150ADA68() * 0.05f) * (gFrameDelta * count);
     if (state->unk30 > 1.0f) {
         s16 side;
         s32 flares;
@@ -338,7 +338,7 @@ void func_150F892C(StageObj *obj) {
         } while (state->unk30 > 1.0f);
     }
 
-    state->unk2C += (0.3360000253f + func_150ADA68() * 0.126f) * (D_800BE9A4 * count);
+    state->unk2C += (0.3360000253f + func_150ADA68() * 0.126f) * (gFrameDelta * count);
     if (state->unk2C > 1.0f) {
         s16 side;
         Vec3f pos;

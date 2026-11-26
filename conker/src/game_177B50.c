@@ -205,8 +205,8 @@ void func_1514AD9C(Vec3f *pos, u8 arg1, s32 arg2) {
 s32 func_1514AF74(Particle177B50 *p) {
     p->head.def.width -= p->head.def.width * p->unk150;
     p->head.def.height -= p->head.def.height * p->unk150;
-    p->head.def.pos.y += p->head.def.scale.y * D_800BE9A4 + 0.5f * p->head.def.scale.x * D_800BE9A4 * D_800BE9A4;
-    p->head.def.scale.y += p->head.def.scale.x * D_800BE9A4;
+    p->head.def.pos.y += p->head.def.scale.y * gFrameDelta + 0.5f * p->head.def.scale.x * gFrameDelta * gFrameDelta;
+    p->head.def.scale.y += p->head.def.scale.x * gFrameDelta;
     if (p->head.def.width < 10.0f || p->head.def.height < 10.0f) {
         return 0;
     }
@@ -418,9 +418,9 @@ s32 func_1514B844(MotionTrail *trail) {
     return 1;
 }
 
-/* Grows unk2C and unk30 by unk4C, scaled by the frame delta D_800BE9A4. */
+/* Grows unk2C and unk30 by unk4C, scaled by the frame delta gFrameDelta. */
 s32 func_1514B87C(Particle177B50 *p) {
-    f32 growth = p->head.def.scale.x * D_800BE9A4;
+    f32 growth = p->head.def.scale.x * gFrameDelta;
 
     p->head.def.width += growth;
     p->head.def.height += growth;
@@ -519,13 +519,13 @@ void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, co
  * countdown timer (decremented by the frame delta) runs out.
  */
 s32 func_1514BC08(JitterParticle *p, ParticleJitter *w) {
-    w->widthTimer -= D_800BE9A4;
+    w->widthTimer -= gFrameDelta;
     if (w->widthTimer < 0.0f) {
         w->widthTimer = func_150ADA68() * 4.0f;
         w->widthTarget = func_150ADA68() * w->widthRange + w->widthBase;
     }
     p->head.def.width += (w->widthTarget - p->head.def.width) * 0.35f;
-    w->heightTimer -= D_800BE9A4;
+    w->heightTimer -= gFrameDelta;
     if (w->heightTimer < 0.0f) {
         w->heightTimer = func_150ADA68() * 9.0f;
         if (func_150ADA20() & 1) {
@@ -535,7 +535,7 @@ s32 func_1514BC08(JitterParticle *p, ParticleJitter *w) {
         }
     }
     p->head.def.height += (w->heightTarget - p->head.def.height) * 0.4f;
-    w->speedTimer -= D_800BE9A4;
+    w->speedTimer -= gFrameDelta;
     if (w->speedTimer < 0.0f) {
         w->speedTimer = func_150ADA68() * 7.0f;
         w->speedTarget = func_150ADA68() * w->speedRange + w->speedBase;

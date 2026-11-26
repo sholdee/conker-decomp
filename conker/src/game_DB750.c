@@ -49,8 +49,8 @@ struct Foo150AE36C {
 s32 func_150AE2A0(struct Foo150AE280 *arg0) {
     struct Foo150AE280Inner *temp_v0;
 
-    arg0->unk170.unk8 += 0.065f * D_800BE9A4;
-    arg0->unk170.unkC += 0.0484f * D_800BE9A4;
+    arg0->unk170.unk8 += 0.065f * gFrameDelta;
+    arg0->unk170.unkC += 0.0484f * gFrameDelta;
     temp_v0 = &arg0->unk170;
     temp_v0->unk8 = func_15144B68(arg0->unk170.unk8);
     temp_v0->unkC = func_15144B68(temp_v0->unkC);

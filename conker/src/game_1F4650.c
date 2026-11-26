@@ -233,7 +233,7 @@ SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end,
             objState->endEffect1 = NULL;
         }
         if (objState->midEffect != NULL) {
-            func_1000FA64(0x4D0, pos.x, pos.y, pos.z, 0x1F40, 0xFA, 0x64, (SoundRecordCallback)func_151C87AC, objState, 0, 8, (u8)func_150ADA20());
+            sound_addDynamicSound(0x4D0, pos.x, pos.y, pos.z, 0x1F40, 0xFA, 0x64, (SoundRecordCallback)func_151C87AC, objState, 0, 8, (u8)func_150ADA20());
         }
     }
     return obj;
@@ -344,8 +344,8 @@ s32 func_151C82D0(SightBeamObject *obj) {
         }
     }
     if (state->flags & 2) {
-        state->angleS += state->speedS * D_800BE9A4;
-        state->angleT += state->speedT * D_800BE9A4;
+        state->angleS += state->speedS * gFrameDelta;
+        state->angleT += state->speedT * gFrameDelta;
         state->angleS = func_15144B68(state->angleS);
         state->angleT = func_15144B68(state->angleT);
         state->texS = func_150AD78C(state->angleS) * state->radiusS + state->centerS;
@@ -368,7 +368,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
             beam->inactive = 1;
         }
     }
-    state->phase += 0.08000000566f * D_800BE9A4;
+    state->phase += 0.08000000566f * gFrameDelta;
     while (state->phase > 1.0f) {
         if (state->flags & 2) {
             state->alternate ^= 1;
@@ -396,7 +396,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
     }
     if (state->flags & 8) {
         obj->head.def.unk44 = func_150AD78C(state->pulseAngle) * 112.5f + 142.5f;
-        state->pulseAngle = func_15144B68(state->pulseAngle + state->pulseSpeed * D_800BE9A4);
+        state->pulseAngle = func_15144B68(state->pulseAngle + state->pulseSpeed * gFrameDelta);
     }
     return 1;
 }
@@ -484,7 +484,7 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
     } else {
         radius = 50.0f;
     }
-    func_1507C3E0(actor, &height, &width, &depth);
+    actor_computeSize(actor, &height, &width, &depth);
     if (height == 0.0f) {
         return 0;
     }
@@ -585,10 +585,10 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
         func_151D8868(&params8868, 0, 0xFF, 0);
     }
     if (actor != NULL) {
-        func_1505D024(actor, D_800AAC30[state->unk94], 0, -1);
+        actor_hitScripted(actor, D_800AAC30[state->unk94], 0, -1);
     }
     func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 2000, 2200);
-    func_1000FA64(0x2F6, obj->head.def.rot.x, obj->head.def.rot.y, obj->head.def.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
+    sound_addDynamicSound(0x2F6, obj->head.def.rot.x, obj->head.def.rot.y, obj->head.def.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)sound_delayedPlayCallback, (void *)5, 0, 0, func_150ADA20() % 500U);
     func_1516972C(&obj->head.header);
 }
 
@@ -747,7 +747,7 @@ void func_151C94D4(SightBeamObject *obj) {
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
         func_1516972C(state->midEffect);
-        func_1000FD38((SoundRecordCallback)func_151C87AC, state, 0);
+        sound_stopByCallback((SoundRecordCallback)func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
     part = ((SightBeamObject *)state)->state.endEffect0;
@@ -795,7 +795,7 @@ void func_151C95D8(SightBeamObject *obj) {
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
         func_1516972C(state->midEffect);
-        func_1000FD38((SoundRecordCallback)func_151C87AC, state, 0);
+        sound_stopByCallback((SoundRecordCallback)func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
     part = ((SightBeamObject *)state)->state.endEffect0;

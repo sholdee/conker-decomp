@@ -810,12 +810,12 @@ void func_15181DC8(s32 view) {
     D_800DDE20[view] = 0;
 }
 
-/* Starts the opening effect of `view`: a fade from black when D_800BE616 is set, otherwise an
+/* Starts the opening effect of `view`: a fade from black when gIsMultiplayer is set, otherwise an
  * iris that tracks the player while it opens. */
 void func_15181E18(s32 view) {
     FadeColor *color;
 
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         color = &D_800DDDA0[view];
         color->r = 0;
         color->g = 0;

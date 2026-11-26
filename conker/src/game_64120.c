@@ -189,7 +189,7 @@ void func_15036CE8(void) {
         bone = 7;
         argB = 0;
         limitIdx = 1;
-        if (D_800D154C->unk2F8 & 0x100) {
+        if (gCurrentActor->unk2F8 & 0x100) {
             data->offYaw[0] = 45;
             data->offPitch[0] = 64;
         } else if (data->yaw[0] == -99999.0f) {
@@ -200,7 +200,7 @@ void func_15036CE8(void) {
         bone = 12;
         ; // matching: the empty statement steers IDO's scheduling of the -99999.0f load below
     }
-    if (D_800C3FFA == 0 && !(D_800D154C->unk2F8 & 0x100)) {
+    if (D_800C3FFA == 0 && !(gCurrentActor->unk2F8 & 0x100)) {
         D_800C3FE8[0] = -99999.0f;
         D_800C3FE8[1] = -99999.0f;
         D_800C3FE8[2] = -99999.0f;
@@ -389,7 +389,7 @@ void func_15036F34(void) {
         refBone = 3;
         break;
     case 138:
-        if (D_800BE616 != 0) {
+        if (gIsMultiplayer != 0) {
             return;
         }
         bone = 4;
@@ -1118,7 +1118,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
     data->flag[slot] = locked;
     if (data->blend[slot] < 2) {
         if (data->timer[slot] > 0) {
-            if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+            if (gPaused == 0 && gFrameRateDivider == 0) {
                 --data->timer[slot];
             }
             if (data->timer[slot] == 0) {
@@ -1232,7 +1232,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
         yaw = origYaw;
         pitch = origPitch;
     }
-    if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+    if (gPaused == 0 && gFrameRateDivider == 0) {
         rateYaw = D_800981A0[rateIdx][0];
         ratePitch = D_800981A0[rateIdx][1];
         maxYaw = D_800981A0[rateIdx][2];
@@ -1388,7 +1388,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
     }
     data->yaw[slot] = yaw;
     data->pitch[slot] = pitch;
-    if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+    if (gPaused == 0 && gFrameRateDivider == 0) {
         if (data->blend[slot] > 0) {
             data->blend[slot]--;
         }
@@ -1535,7 +1535,7 @@ void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPi
 /*
  * Recomputes an object's aim points (OBJ_AIM) from its type's aim bone: the bone origin pushed out by
  * unk30 along z, a top point unk0 up along y, two side points unk3A out along +-x, and a z direction in
- * dir. Objects without that bone data get points from their position and func_1507C3E0's height.
+ * dir. Objects without that bone data get points from their position and actor_computeSize's height.
  */
 void func_1503A08C(Actor *obj) {
     ModelDef *def;
@@ -1646,7 +1646,7 @@ void func_1503A08C(Actor *obj) {
             } else {
                 topHeight = 0;
             }
-            func_1507C3E0(obj, &height, &size2, &size3);
+            actor_computeSize(obj, &height, &size2, &size3);
             obj->aim.x = obj->xpos;
             obj->aim.y = obj->ypos + (height * 7) / 8;
             obj->aim.z = obj->zpos;

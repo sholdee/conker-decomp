@@ -108,7 +108,7 @@ void func_1500E890(void) {
     func_15008E10(1);
 }
 
-/* Starts two func_15195AA8 entries, spawns one func_15189900 emitter and calls func_1000FA64. */
+/* Starts two func_15195AA8 entries, spawns one func_15189900 emitter and calls sound_addDynamicSound. */
 void func_1500E8C0(void) {
     func_15195AA8(D_800B0E00[0], D_800902E8, 0, -1, 0, 0, 0, -6);
     func_15195AA8(D_800B0E00[1], D_800902E8, 0, -1, 0, 1, 0, -6);
@@ -141,7 +141,7 @@ void func_1500E8C0(void) {
         descriptor.extent.z = 900.0f - descriptor.origin.z;
         func_15189900(&descriptor, 1);
     }
-    func_1000FA64(1567, (level == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);
+    sound_addDynamicSound(1567, (level == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);
 }
 
 void func_1500EAA0(void) {

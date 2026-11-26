@@ -162,11 +162,11 @@ s32 func_151CD674(LevelStream *emitter) {
         }
         particle = &particles[i];
         velocity = particle->velocity;
-        dt = D_800BE9A4;
+        dt = gFrameDelta;
         travel = velocity * dt;
         dtSquared = dt * dt;
         particle->pos.y += travel + halfGravity * dtSquared;
-        particle->velocity = (f32)velocity + gravity * D_800BE9A4; // matching: the no-op cast keeps velocity as the first add operand
+        particle->velocity = (f32)velocity + gravity * gFrameDelta; // matching: the no-op cast keeps velocity as the first add operand
         if (particle->pos.y < data->floorY) {
             while (i != emitter->head.start) {
                 emitter->head.start++;
@@ -204,20 +204,20 @@ s32 func_151CD7BC(LevelStream *emitter) {
 
     data = emitter->data;
     particles = emitter->particles;
-    data->swayPhaseX += data->swayRateX * D_800BE9A4;
-    data->swayPhaseZ += data->swayRateZ * D_800BE9A4;
+    data->swayPhaseX += data->swayRateX * gFrameDelta;
+    data->swayPhaseZ += data->swayRateZ * gFrameDelta;
     data->swayPhaseX = func_15144B68(data->swayPhaseX);
     data->swayPhaseZ = func_15144B68(data->swayPhaseZ);
-    data->widthPhase += data->widthRate * D_800BE9A4;
+    data->widthPhase += data->widthRate * gFrameDelta;
     data->widthPhase = func_15144B68(data->widthPhase);
-    data->spawnCount += 0.2730129957f * D_800BE9A4;
-    data->tc += (10220.0f + func_150ADA68() * 9434.0f) * 0.01f * D_800BE9A4;
+    data->spawnCount += 0.2730129957f * gFrameDelta;
+    data->tc += (10220.0f + func_150ADA68() * 9434.0f) * 0.01f * gFrameDelta;
     while (data->tc >= 16384.0f) {
         data->tc -= 16384.0f;
     }
     if (data->spawnCount > 1.0f) {
         step = 1.0f / data->spawnCount;
-        unk20 = data->unk20 + D_800BE9A4;
+        unk20 = data->unk20 + gFrameDelta;
         unk20Step = -(unk20 * step);
         pos = data->spawnPos;
         dx = (emitter->head.tmpl.pos.x + sinf(data->swayPhaseX) * data->swayAmpX) - data->spawnPos.x;
@@ -238,8 +238,8 @@ s32 func_151CD7BC(LevelStream *emitter) {
             particle->width = width;
             particle->alpha = 0xFF;
             particle->tc = tc;
-            particle->pos.y += velocity * D_800BE9A4 + halfGravity * (D_800BE9A4 * D_800BE9A4);
-            particle->velocity = (f32)velocity + gravity * D_800BE9A4; // matching: see func_151CD674
+            particle->pos.y += velocity * gFrameDelta + halfGravity * (gFrameDelta * gFrameDelta);
+            particle->velocity = (f32)velocity + gravity * gFrameDelta; // matching: see func_151CD674
             emitter->head.end++;
             if (emitter->head.end == emitter->head.tmpl.itemCount) {
                 emitter->head.end = 0;
@@ -499,7 +499,7 @@ void func_151CE51C(Actor *actor, TriggerZone *source) {
                 columnTop = particles[newest].pos.y;
             }
             if (bottom <= columnTop) {
-                func_1505D024(actor, 0x60019, 0, -1);
+                actor_hitScripted(actor, 0x60019, 0, -1);
             }
         } else {
             /* Still attached to the emitter: its bottom is the oldest particle. */
@@ -517,7 +517,7 @@ void func_151CE51C(Actor *actor, TriggerZone *source) {
                 columnBottom = particles[emitter->head.start].pos.y;
             }
             if (columnBottom <= top) {
-                func_1505D024(actor, 0x60019, 0, -1);
+                actor_hitScripted(actor, 0x60019, 0, -1);
             }
         }
     }
@@ -557,7 +557,7 @@ void func_151CE6D0(Game1FBB80Object *object) {
     s16 mask;
 
     effect = &object->effect;
-    effect->accumulator += (5624.0f + func_150ADA68() * 3973.0f) * 1.0e-10f * D_800BE9A4 * effect->rate;
+    effect->accumulator += (5624.0f + func_150ADA68() * 3973.0f) * 1.0e-10f * gFrameDelta * effect->rate;
     if (effect->accumulator > 1.0f) {
         for (index = 0, mask = 0; index <= D_80082FA0; index++) {
             mask |= 1 << index;
@@ -614,10 +614,10 @@ s32 func_151CEA20(TrailScalarMotion *motion) {
     {
         f32 prevVelocity = motion->velocity;
 
-        motion->velocity += motion->acceleration * D_800BE9A4;
-        motion->position += (prevVelocity + 0.5f * motion->acceleration * D_800BE9A4) * D_800BE9A4;
+        motion->velocity += motion->acceleration * gFrameDelta;
+        motion->position += (prevVelocity + 0.5f * motion->acceleration * gFrameDelta) * gFrameDelta;
     }
-    motion->fade += motion->fadeRate * D_800BE9A4;
+    motion->fade += motion->fadeRate * gFrameDelta;
     if (motion->fade > 1.0f) {
         motion->fade = 1.0f;
     }
@@ -919,7 +919,7 @@ s32 func_151CF120(WaveTrail *actor) {
             phase += distance * 0.0122f;
         } while (index != actor->head.start);
     }
-    config->phase += -0.70900005f * D_800BE9A4;
+    config->phase += -0.70900005f * gFrameDelta;
     return 1;
 }
 
@@ -1099,7 +1099,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
     pos.z = obj->zpos;
     if (obj->ob_matrix_ptr) {
         // matching: the matrix goes through s32; passing the pointer directly changes the temp registers
-        func_1503F404((Mtx *)(s32)obj->ob_matrix_ptr, &vecA.x, &vecA.y, &vecA.z, &vecB.x, &vecB.y, &vecB.z,
+        model_decomposeBoneMatrix((Mtx *)(s32)obj->ob_matrix_ptr, &vecA.x, &vecA.y, &vecA.z, &vecB.x, &vecB.y, &vecB.z,
                       &vecC.x, &vecC.y, &vecC.z);
         {
             ParticleSpawn78 piece;

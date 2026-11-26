@@ -72,7 +72,7 @@ void func_1515F270(Actor *obj, TriggerZone *zone) {
 }
 
 void func_1515F2B8(Actor *obj, TriggerZone *zone) {
-    func_1505D024(obj, 0x6001D, obj->langle, -1);
+    actor_hitScripted(obj, 0x6001D, obj->langle, -1);
 }
 
 /* Ambient effects per zone->data2 */
@@ -153,7 +153,7 @@ void func_1515F850(Actor *obj, TriggerZone *zone) {
     targetR = (s * 29.5f) + 127.5f;
     targetG = (s * 71.0f) + 109.0f;
     targetB = (s * 26.0f) + 26.0f;
-    D_800DCDA0 += 0.07100000232f * D_800BE9A4;
+    D_800DCDA0 += 0.07100000232f * gFrameDelta;
     D_800DCDA0 = func_15144B68(D_800DCDA0);
     if (targetR != D_800DCD94) {
         D_800DCD94 += (targetR - D_800DCD94) * 0.5f;
@@ -182,7 +182,7 @@ void func_1515FB70(Actor *obj, TriggerZone *zone) {
 }
 
 void func_1515FB94(Actor *obj, TriggerZone *zone) {
-    func_1505D024(obj, 0x6002D, obj->langle, -1);
+    actor_hitScripted(obj, 0x6002D, obj->langle, -1);
 }
 
 /* TriggerZone handler: like func_1515FB94, also passing the index of the object linked to this zone (or -1). */
@@ -201,11 +201,11 @@ void func_1515FBC4(Actor *obj, TriggerZone *zone) {
     } else {
         targetIndex = -1;
     }
-    func_1505D024(obj, 0x6002E, obj->langle, targetIndex);
+    actor_hitScripted(obj, 0x6002E, obj->langle, targetIndex);
 }
 
 void func_1515FC34(Actor *obj, TriggerZone *zone) {
-    func_1505D024(obj, 0x33, 0xC000, -1);
+    actor_hitScripted(obj, 0x33, 0xC000, -1);
 }
 
 /*
@@ -228,9 +228,9 @@ void func_1515FC60(Actor *obj, TriggerZone *zone) {
                 return;
             }
         }
-        func_1505D024(obj, 0x2F, 0, -1);
+        actor_hitScripted(obj, 0x2F, 0, -1);
         func_15136C3C(obj, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(obj);
-        func_1507CD64(obj, 6);
+        actor_kill(obj, 6);
     }
 }

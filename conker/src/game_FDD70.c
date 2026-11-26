@@ -61,7 +61,7 @@ void func_150D08C0(Camera *camera) {
 
 /* Steps four scroll counters by D_800BE9E4; then, unless movement_obj[0]'s mv->death_State is set, kills
  * movement_obj[0] once per prop 0xFA-0xF8 it stands on, and if it stands on prop 0xFB plays sound 0x627 and
- * runs it through func_15136C3C .. func_1507CD64(6). */
+ * runs it through func_15136C3C .. actor_kill(6). */
 void func_150D0E90(s32 arg0) {
     WorldObject *prop;
     s32 propIndex;
@@ -78,17 +78,17 @@ void func_150D0E90(s32 arg0) {
             propIndex = prop - db_Object_array;
             if (gWorldObjectContacts[propIndex] & 1) {
                 func_151951E0(movement_obj);
-                func_10010154(0x627, movement_obj, 0x7FFF, 200, 700);
+                sound_playActorSound2(0x627, movement_obj, 0x7FFF, 200, 700);
             }
         }
 
         prop = func_151149AC(0xFB);
         propIndex = prop - db_Object_array;
         if (gWorldObjectContacts[propIndex] & 1) {
-            func_10010154(0x627, movement_obj, 0x7FFF, 200, 700);
+            sound_playActorSound2(0x627, movement_obj, 0x7FFF, 200, 700);
             func_15136C3C(movement_obj, 1, 1, 1, 1, 0, 0xFF, 1);
             func_15145A50(movement_obj);
-            func_1507CD64(movement_obj, 6);
+            actor_kill(movement_obj, 6);
         }
     }
 }

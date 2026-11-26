@@ -6,7 +6,7 @@
    argument. */
 void func_15131958(Vec3f *vel, f32 drag);
 
-/* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls func_1505D024 on
+/* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls actor_hitScripted on
  * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while movement_obj[0].stunned is set. */
 void func_150AF200(s32 idA, s32 idB) {
     WorldObject *obj;
@@ -19,14 +19,14 @@ void func_150AF200(s32 idA, s32 idB) {
     obj = func_151149AC(idA);
     index = obj - db_Object_array;
     if (gWorldObjectContacts[index] & 1) {
-        func_1505D024(&movement_obj[0], 0x3F, 0x6E00, -1);
+        actor_hitScripted(&movement_obj[0], 0x3F, 0x6E00, -1);
         return;
     }
 
     obj = func_151149AC(idB);
     index = obj - db_Object_array;
     if (gWorldObjectContacts[index] & 1) {
-        func_1505D024(&movement_obj[0], 0x3F, 0xEE00, -1);
+        actor_hitScripted(&movement_obj[0], 0x3F, 0xEE00, -1);
     }
 }
 
@@ -35,13 +35,13 @@ void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
     func_151CF898(arg0, range->unk2 + range->unk8, range->unk2);
 }
 
-/* Emitter update: accumulates 0.1352..0.305 particles per unit of D_800BE9A4 and spawns one
+/* Emitter update: accumulates 0.1352..0.305 particles per unit of gFrameDelta and spawns one
  * randomly sized particle at the emitter's position for each whole one. */
 void func_150AF328(SmokeEmitter *emitter) {
     SmokeEmitterData *data;
 
     data = &emitter->data;
-    data->spawnAccum += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
+    data->spawnAccum += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * gFrameDelta;
     if (data->spawnAccum > 1.0f) {
         ParticleDesc spawn;
         WobbleData wobble;
@@ -238,7 +238,7 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
 s32 func_150AFBF4(Obj150AFBF4 *obj) {
     TimeOscillator *osc = &obj->osc;
 
-    osc->phase = osc->phase + osc->rate * D_800BE9A4;
+    osc->phase = osc->phase + osc->rate * gFrameDelta;
     osc->phase = func_15144B68(osc->phase);
     obj->unk10 = sinf(osc->phase) * osc->amplitude + osc->base;
     return 1;
@@ -276,7 +276,7 @@ void func_150AFDB0(void) {
     D_800DD190--;
 }
 
-/* Fires a tracer along the -z axis of bone 3 (bone 2 if `altBone`) of D_800D154C, from 20 to
+/* Fires a tracer along the -z axis of bone 3 (bone 2 if `altBone`) of gCurrentActor, from 20 to
  * 150 units out, plus a tracer (func_150E2DB4) attached to the same bone. */
 void func_150AFE64(s32 altBone) {
     f32 startX;
@@ -288,14 +288,14 @@ void func_150AFE64(s32 altBone) {
     s32 bone;
     f32 (*mtx)[4];
 
-    if (D_800D154C->ob_matrix_ptr != NULL) {
+    if (gCurrentActor->ob_matrix_ptr != NULL) {
         if (altBone == 0) {
             bone = 3;
         } else {
             bone = 2;
         }
 
-        mtx = D_800D154C->ob_matrix_ptr[bone];
+        mtx = gCurrentActor->ob_matrix_ptr[bone];
         startX = 0.0f;
         startY = 0.0f;
         startZ = -20.0f;
@@ -308,7 +308,7 @@ void func_150AFE64(s32 altBone) {
         func_150E1AB0(0, startX, startY, startZ, endX, endY, endZ, 40.0f, 0.0f, 2.0f, 120.0f, 60, 35,
                       0, 0, 0, NULL, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         /* from (0, 0, -39) to (0, 0, -150) in bone space; on 3 frames, off 255, lifetime 4 */
-        func_150E2DB4(D_800D154C, D_800D154C->unique_id, bone, -1, 0.0f, 0.0f, -39.0f, 0.0f, 0.0f, -150.0f,
+        func_150E2DB4(gCurrentActor, gCurrentActor->unique_id, bone, -1, 0.0f, 0.0f, -39.0f, 0.0f, 0.0f, -150.0f,
                       3, 0xFF, 4, 0);
     }
 }

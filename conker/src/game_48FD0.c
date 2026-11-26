@@ -114,7 +114,7 @@ OSContPad **func_1501BBB8(void) {
     }
     if (D_800E0B94 == 2 || D_800E0B95 == 2) {
         replaying = 1;
-        func_151DD8C0();
+        os_playDemoInput();
     } else {
         replaying = 0;
     }
@@ -218,7 +218,7 @@ void func_1501C1B0(void) {
                 D_800BE948[channel] = 0;
                 D_800BE93C[channel] = 0;
             }
-            if (!D_800BEAC1 && !D_800BEAC0 && !D_800BEAC2 && !D_800BEAC3 && !D_800E0A00) {
+            if (!gPauseRequested && !gPaused && !D_800BEAC2 && !D_800BEAC3 && !D_800E0A00) {
                 switch (D_800BE93C[channel]) {
                 case 0:
                     if (D_800BE940[channel] == 1) {
@@ -228,7 +228,7 @@ void func_1501C1B0(void) {
                     }
                     break;
                 case 1:
-                    D_800BE950[channel] += D_800BE9A4;
+                    D_800BE950[channel] += gFrameDelta;
                     while (D_800BE950[channel] > D_800BE980[channel]) {
                         D_800BE950[channel] -= D_800BE980[channel];
                     }

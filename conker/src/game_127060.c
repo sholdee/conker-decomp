@@ -435,7 +435,7 @@ void func_150FAA40(u8 owner, s32 kind) {
     }
 }
 
-/* Emitter update: spawns func_150F4570 effects between the two endpoints, 0.08-0.26 per frame (times D_800BE9A4). */
+/* Emitter update: spawns func_150F4570 effects between the two endpoints, 0.08-0.26 per frame (times gFrameDelta). */
 void func_150FAAEC(LineEmitter *effect) {
     LineEmitterData *data;
     Vec3f from;
@@ -445,7 +445,7 @@ void func_150FAAEC(LineEmitter *effect) {
     VariantList *variants;
 
     data = &effect->data;
-    data->pending += (0.08000000566f + func_150ADA68() * 0.18f) * D_800BE9A4;
+    data->pending += (0.08000000566f + func_150ADA68() * 0.18f) * gFrameDelta;
     while (data->pending > 1.0f) {
         func_1514470C(data->from, &from);
         func_1514470C(data->to, &to);
