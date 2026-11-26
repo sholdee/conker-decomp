@@ -1,12 +1,7 @@
 #include <ultra64.h>
-#define func_151DC260 func_151DC260_header // matching: this file keeps its own declaration of func_151DC260
 #include "functions.h"
-#undef func_151DC260
 #include "variables.h"
 extern u8 D_800A8244[];
-
-// matching: a pointer where the definition has s32 (arg 2); s32 where the definition has u8 (arg 3)
-extern void func_151DC260(f32 *pos, CollisionHit *ground, s32 type, u8 arg3, s32 arg4);
 
 // Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
 void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {

@@ -3213,7 +3213,9 @@ void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s3
 void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, CollisionTri *tri, u8 arg6, u8 arg7,
                    u8 arg8, s32 arg9);
 void func_151DC034(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5, s32 arg6);
-void func_151DC260(Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4);
+/* (Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4); declared without a prototype: game_1C1150.c
+   passes the kind unnarrowed */
+void func_151DC260();
 /* (Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4); declared without a prototype: game_1C1150.c
    passes the kind unnarrowed */
 void func_151DC484();
