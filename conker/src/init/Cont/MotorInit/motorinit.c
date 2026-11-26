@@ -9,12 +9,10 @@ static u8 _motorstartbuf[32]; // the motor data block that starts the motor (all
 
 #include "functions.h"
 #include "variables.h"
+#include "controller.h"
 #undef osMotorInit
 
-
 void osMotorInit(s32 channel, u16 address, u8 *data, u8 *command);
-extern s32 __osContRamRead(OSMesgQueue *, s32, u16, u8 *);
-extern s32 __osContRamWrite(OSMesgQueue *, s32, u16, u8 *, s32);
 
 s32 _MakeMotorData(OSMesgQueue *queue, OSPfs *device, s32 channel) {
     s32 i;
@@ -50,8 +48,6 @@ s32 _MakeMotorData(OSMesgQueue *queue, OSPfs *device, s32 channel) {
     osMotorInit(channel, 0x600, _motorstopbuf, _MotorStopData[channel]);
     return 0;
 }
-
-u8 __osContAddressCrc(u16);
 
 void osMotorInit(s32 channel, u16 address, u8 *data, u8 *command) {
     u8 *ptr = command;
