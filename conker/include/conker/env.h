@@ -33,6 +33,13 @@ extern u16 *D_800BE524;       // first D_800BE510[0] entry of each prop
 Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 tScroll, s32 arg5, f32 roll);
 
 /* game_13D350.c */
+extern void *D_800DBE80;
+extern Vtx *D_800DBE88[4][2];
+extern u8 D_800DBEA8[3];
+extern u8 D_800DBEAB;
+extern u8 D_800DBEAC;
+extern Mtx *D_800DBEB0;
+extern s32 *D_800891BC[];
 Gfx *func_1510FEA0(Gfx *gfx, s32 arg1);
 void func_151102CC(MtxF mtx, f32 pitch, f32 yaw, f32 roll);
 void func_15110360(s32 viewIndex, MtxF mtx, f32 pitch, f32 yaw, f32 roll);

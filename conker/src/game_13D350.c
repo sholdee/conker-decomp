@@ -1,4 +1,13 @@
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+void *D_800DBE80;      // the current sky data (star field, tile formats or gradient texture)
+Vtx *D_800DBE88[4][2]; // per view, per framebuffer
+u8 D_800DBEA8[3];      // background colour
+u8 D_800DBEAB;
+u8 D_800DBEAC;
+Mtx *D_800DBEB0;       // sky projection matrices, 2 per view
+
 #include "functions.h"
 #include "variables.h"
 
@@ -33,7 +42,56 @@ extern u8 D_800D9B80;
 extern u8 D_800D9B81;
 extern u8 D_800D9B82;
 extern u8 D_800D9B83;
-extern SkyDrawFunc D_800891D8[];
+/* The textures of each textured sky set (D_800B0DF0->unk9), five per set. */
+static s32 D_80089130[5] = { 0x17E1, 0x1829, 0x1799, 0x1871, 0x18B9 };
+static s32 D_80089144[5] = { 0x1679, 0x16C1, 0x162B, 0x1709, 0x1751 };
+static s32 D_80089158[5] = { 0x1CCB, 0x1D13, 0x1C83, 0x1D5B, 0x1DA3 };
+static s32 D_8008916C[5] = { 0x1949, 0x1991, 0x1901, 0x19D9, 0x1A21 };
+static s32 D_80089180[5] = { 0x147B, 0x150B, 0x12CB, 0x159B, 0x15E3 };
+static s32 D_80089194[5] = { 0x135B, 0x13A3, 0x1313, 0x13EB, 0x1433 };
+static s32 D_800891A8[5] = { 0x1AB1, 0x1AF9, 0x1A69, 0x1B41, 0x1B89 };
+s32 *D_800891BC[] = { D_80089130, D_80089144, D_80089158, D_8008916C, D_80089180, D_800891A8, D_80089194 };
+
+/*
+ * The draw routine of each sky mode (D_800B0DF0->unk8). The routines' own prototypes differ (they ignore or
+ * reinterpret the camera arguments, which O32 passes in the same registers), so each is stored as a SkyDrawFunc.
+ * The table comes before func_15111AF4: the address the last entry takes makes as1 treat that function's
+ * entry label as address-taken, which its scheduling needs.
+ */
+static SkyDrawFunc D_800891D8[] = {
+    (SkyDrawFunc)func_151103C8, (SkyDrawFunc)func_150F9AB0, (SkyDrawFunc)func_150D1810,
+    (SkyDrawFunc)func_15110600, func_15111AF4,
+};
+
+/* Per-format texture load tables (two formats), wrapped so they can be copied to the stack. */
+struct Game13D350U8x2 { u8 v[2]; };
+struct Game13D350S16x2 { s16 v[2]; };
+static struct Game13D350U8x2 D_800891EC = { { 1, 4 } };          // texel sizes (G_IM_SIZ_*)
+static struct Game13D350U8x2 D_800891F0 = { { 1, 2 } };          // load shifts
+static struct Game13D350S16x2 D_800891F4 = { { 0x800, 0x400 } }; // palette offsets
+static struct Game13D350U8x2 D_800891F8 = { { 255, 15 } };       // TLUT counts - 1
+static struct Game13D350U8x2 D_800891FC = { { 0, 1 } };          // render tiles
+
+/* One skybox face: its size and two opposite corners (the axis whose coordinates match is the face's plane). */
+typedef struct SkyFace {
+    u16 width;
+    u16 height;
+    s16 x0;
+    s16 y0;
+    s16 z0;
+    s16 x1;
+    s16 y1;
+    s16 z1;
+} SkyFace;
+
+static const SkyFace D_800A2DA0[6] = {
+    { 360, 360, -180, 180, -180, 180, -180, -180 },
+    { 360, 360, -180, 180, -180, -180, -180, 180 },
+    { 360, 360, -180, 180, 180, 180, -180, 180 },
+    { 360, 360, 180, 180, -180, 180, -180, 180 },
+    { 360, 360, -180, 180, 180, 180, 180, -180 },
+    { 360, 360, -180, -180, 180, 180, -180, -180 },
+};
 
 /* Draws the sky for the current view: clears the depth buffer, then (unless the view is covered) wraps the
  * camera angles into range and calls the current sky's draw routine if func_151108C4 says the sky shows. */
@@ -584,8 +642,8 @@ void func_15111858(void) {
         s32 height;
         f32 bits; // matching: read back through a u16 pointer (a union keeps it out of memory)
 
-        longitude = (f32)(func_150ADA20() % 36000U) * 0.0001745329209f; // hundredths of a degree to radians
-        v = (f32)(s32)((func_150ADA20() % 1584400U) - 792100) * 0.01f;
+        longitude = (func_150ADA20() % 36000U) * 0.0001745329209f; // hundredths of a degree to radians
+        v = (s32)((func_150ADA20() % 1584400U) - 792100) * 0.01f;
         if (v >= 0.0f) {
             latitude = 89.0f - sqrtf(v);
         } else {
@@ -605,36 +663,7 @@ void func_15111858(void) {
     }
 }
 
-/* One skybox face: its size and two opposite corners (the axis whose coordinates match is the face's plane). */
-typedef struct SkyFace {
-    u16 width;
-    u16 height;
-    s16 x0;
-    s16 y0;
-    s16 z0;
-    s16 x1;
-    s16 y1;
-    s16 z1;
-} SkyFace;
 
-/* Per-format texture load tables (two formats), wrapped so they can be copied to the stack. */
-struct Game13D350U8x2 { u8 v[2]; };
-struct Game13D350S16x2 { s16 v[2]; };
-extern struct Game13D350U8x2 D_800891EC;
-extern struct Game13D350U8x2 D_800891F0;
-extern struct Game13D350S16x2 D_800891F4;
-extern struct Game13D350U8x2 D_800891F8;
-extern struct Game13D350U8x2 D_800891FC;
-extern SkyFace D_800A2DA0[];
-
-
-/* Last entry of the D_800891D8 draw table (still asm data). The original file defined that table
- * before this function; the `.word func_15111AF4` it emits makes as1 treat the function's entry
- * label as address-taken, so the switch's `jr` gets an edge back to it. That turns everything up
- * to the switch into a "loop" for as1's cross-block scheduler (candidate limit 100 instead of
- * 10), which is what hoists `lwc1 yaw` above the 0x41 test and the else-arm `move v0,s0` into the
- * colour branch's delay slot. Without this word the function cannot match. */
-static void *D_800891E8[] = { func_15111AF4 };
 
 /* Draws the textured skybox (sky mode 4): sets up a tinted CI texture pipeline and the rotation-only view
  * matrix, then draws each face the camera can see (faces 0-3 by yaw, 4 and 5 by pitch) as a grid of 60x30

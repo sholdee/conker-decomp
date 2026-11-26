@@ -79,7 +79,6 @@ extern FontGlyph *D_80085994[];
 
 
 extern u64 D_800885B0;
-extern s32 * D_800891BC[];
 
 extern EffectHeader *D_800DCE50[2][OBJ_TYPE_COUNT]; /* object lists: [list][type] heads a doubly linked list (game_1944C0.c) */
 
@@ -384,12 +383,6 @@ extern f32 D_800DBE64;
 extern f32 D_800DBE68;
 extern f32 D_800DBE6C;
 extern f32 D_800DBE70;
-extern void *D_800DBE80; // the current sky data (star field, tile formats or gradient texture)
-extern Vtx * D_800DBE88[][2]; // per view, per framebuffer
-extern u8 D_800DBEA8[];
-extern u8 D_800DBEAB;
-extern u8 D_800DBEAC;
-extern Mtx *D_800DBEB0; // sky projection matrices, 2 per view
 
 extern u8 D_800DCA20;
 extern f32 D_800DCA24;
