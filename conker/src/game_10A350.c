@@ -23,8 +23,8 @@ s32 func_150DCEA0(StreamActor *actor) {
 
     state = actor->state;
     records = actor->records;
-    state->angleX += (func_150ADA20() % (u32)(state->angleXRange + 1)) * D_800BE9E4;
-    state->angleZ += (func_150ADA20() % (u32)(state->angleZRange + 1)) * D_800BE9E4;
+    state->angleX += (func_150ADA20() % (state->angleXRange + 1)) * D_800BE9E4;
+    state->angleZ += (func_150ADA20() % (state->angleZRange + 1)) * D_800BE9E4;
     state->count += state->rate * D_800BE9A4;
     if (state->count > 0.99999f) {
         inverse = 1.0f / state->count;
@@ -43,8 +43,8 @@ s32 func_150DCEA0(StreamActor *actor) {
             stepScale = D_800BE9A4 * inverse;
             x = state->x;
             z = state->z;
-            dx = func_151423D8((u8)(state->angleX - 0x40)) * state->swayX + actor->head.tmpl.pos.x - state->x;
-            dz = func_151423D8((u8)(state->angleZ - 0x40)) * state->swayZ + actor->head.tmpl.pos.z - state->z;
+            dx = func_151423D8(state->angleX - 0x40) * state->swayX + actor->head.tmpl.pos.x - state->x;
+            dz = func_151423D8(state->angleZ - 0x40) * state->swayZ + actor->head.tmpl.pos.z - state->z;
             if (state->count > 1.0f) {
                 stepX = dx * inverse;
                 stepZ = dz * inverse;
@@ -73,17 +73,17 @@ s32 func_150DCEA0(StreamActor *actor) {
                             speed = func_150ADA68() * state->speedRange + state->speedBase;
                             yaw = func_150ADA20();
                             sinYaw = func_151423D8(yaw);
-                            cosYaw = func_151423D8((u8)(yaw - 0x40));
-                            pitch = (func_150ADA20() % (u32)(state->pitchRange + 1)) + state->pitchBase;
+                            cosYaw = func_151423D8(yaw - 0x40);
+                            pitch = (func_150ADA20() % (state->pitchRange + 1)) + state->pitchBase;
                             sinPitch = func_151423D8(pitch);
-                            cosPitch = func_151423D8((u8)(pitch - 0x40));
+                            cosPitch = func_151423D8(pitch - 0x40);
                             packet.x = actor->head.tmpl.pos.x + state->radius * cosYaw;
                             packet.z = actor->head.tmpl.pos.z + state->radius * sinYaw;
                             packet.velX = speed * sinPitch * cosYaw;
                             packet.velY = -speed * cosPitch;
                             packet.velZ = speed * sinPitch * sinYaw;
                             packet.accelY = func_150ADA68() * state->accelRange + state->accelBase;
-                            packet.fadeStep = (func_150ADA20() % (u32)(state->fadeRange + 1)) + state->fadeBase;
+                            packet.fadeStep = (func_150ADA20() % (state->fadeRange + 1)) + state->fadeBase;
                             packet.width = packet.height = func_150ADA68() * state->sizeRange + state->sizeBase;
                             if (func_15167D84(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind) == NULL) {
                                 spawned = FALSE;
@@ -98,11 +98,11 @@ s32 func_150DCEA0(StreamActor *actor) {
                     records[actor->head.end].pos.y = actor->head.tmpl.pos.y;
                     records[actor->head.end].pos.z = z;
                     records[actor->head.end].velocityY = state->velocityY;
-                    state->widthAngle += func_150ADA20() % (u32)(state->widthAngleRange + 1);
-                    records[actor->head.end].width = func_151423D8((u8)(state->widthAngle - 0x40)) * state->widthRange + state->widthBase;
+                    state->widthAngle += func_150ADA20() % (state->widthAngleRange + 1);
+                    records[actor->head.end].width = func_151423D8(state->widthAngle - 0x40) * state->widthRange + state->widthBase;
                     records[actor->head.end].alpha = state->alpha;
                     records[actor->head.end].texCoord = state->texCoord;
-                    state->texCoord += state->texCoordStep + (func_150ADA20() % (u32)(state->texCoordStepRange + 1));
+                    state->texCoord += state->texCoordStep + (func_150ADA20() % (state->texCoordStepRange + 1));
                     records[actor->head.end].velocityY += state->gravity * scale;
                     records[actor->head.end].pos.y += records[actor->head.end].velocityY * scale;
                     actor->head.end++;
