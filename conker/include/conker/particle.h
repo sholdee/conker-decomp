@@ -255,8 +255,19 @@ typedef struct {
     /* 0x14 */ Vec3f pos;
 } CollisionProbe;
 
+/* A particle spawned by func_1513D594: the 0x110-byte particle, its 0x18-byte quad axes, then the
+ * caller's motion block. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x128];
+    /* 0x128 */ f32 motion[2];
+} AxisParticle;
+
 s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, void *surface);
 s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, f32 z);
+extern Actor *D_80088720;
+extern Vec3f D_80088724;
+extern Actor *D_80088730;
+extern s32 D_80088740;
 
 /* game_E6A10.c */
 /* A live particle of game_169510.c whose motion block is a fall speed (func_150B9560); the update callbacks

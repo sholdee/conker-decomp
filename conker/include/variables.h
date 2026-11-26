@@ -79,10 +79,7 @@ extern FontGlyph *D_80085994[];
 
 
 extern u64 D_800885B0;
-extern Actor *D_80088720;
-extern Actor *D_80088730;
 extern struct Queue *D_80088750;
-extern Vec3f D_80088724;
 extern s32 D_80088890;
 extern s32 D_80088894;
 extern s32 D_80088898;
