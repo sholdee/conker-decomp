@@ -1097,7 +1097,9 @@ struct Actor {
     /* 0x1D0 */ s8  unk1D0;
     /* 0x1D1 */ s8  unk1D1;
     /* 0x1D2 */ u16 pad1D2;
-    /* 0x1D4 */ MtxF *ob_matrix_ptr;   // this frame's bone matrices
+    /* 0x1D4 */ MtxF *ob_matrix_ptr;   // this frame's bone matrices, in the pool D_800C3E80: MtxF while they are
+                                       // built, then Mtx (fixed point) once func_1502E474 converts them and sets
+                                       // D_800C3E90. func_15143134 and func_15145EA4 read either form.
     /* 0x1D8 */ MtxF *prevBones; // last frame's copy (platforms)
     /* 0x1DC */ u8  unk1DC;
     /* 0x1DD */ u8  unk1DD[3];
