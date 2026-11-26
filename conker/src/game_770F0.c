@@ -98,7 +98,7 @@ void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out) {
     }
 }
 
-void func_1504A140(f32 *q, f32 *m) {
+void func_1504A140(f32 *q, MtxF m) {
     f32 s;
     f32 a, b, c;
     f32 wx, wy, wz;
@@ -121,17 +121,17 @@ void func_1504A140(f32 *q, f32 *m) {
     yz = q[2] * c;
     zz = q[3] * c;
 
-    m[0] = 1.0f - (yy + zz);
-    m[1] = xy + wz;
-    m[2] = xz - wy;
-    m[4] = xy - wz;
-    m[5] = 1.0f - (xx + zz);
-    m[6] = yz + wx;
-    m[8] = xz + wy;
-    m[9] = yz - wx;
-    m[10] = 1.0f - (xx + yy);
-    m[3] = 0.0f;
-    m[7] = 0.0f;
-    m[11] = 0.0f;
-    m[15] = 1.0f;
+    m[0][0] = 1.0f - (yy + zz);
+    m[0][1] = xy + wz;
+    m[0][2] = xz - wy;
+    m[1][0] = xy - wz;
+    m[1][1] = 1.0f - (xx + zz);
+    m[1][2] = yz + wx;
+    m[2][0] = xz + wy;
+    m[2][1] = yz - wx;
+    m[2][2] = 1.0f - (xx + yy);
+    m[0][3] = 0.0f;
+    m[1][3] = 0.0f;
+    m[2][3] = 0.0f;
+    m[3][3] = 1.0f;
 }

@@ -36,7 +36,7 @@ void func_150407FC(Gfx *gfx);
 void func_15040808(Gfx *gfx);
 void func_15040814(Gfx *gfx);
 void func_15040820(Gfx *gfx);
-s32 func_1504082C(u32 *w0);
+s32 func_1504082C(Gfx *tri);
 void func_1504086C(Gfx *gfx);
 void func_15040878(Gfx *gfx);
 void func_15040884(Gfx *gfx);
