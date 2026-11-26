@@ -328,7 +328,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
                         slot->particle->head.def.pos.y = self->pos.y + slot->offset.y;
                         slot->particle->head.def.pos.z = self->pos.z + slot->offset.z;
                     } else {
-                        func_15143134(&info->points[k], &slot->particle->head.def.pos,
+                        func_15143134(&info->points[k].pos, &slot->particle->head.def.pos,
                                       self->params.owner->ob_matrix_ptr + info->points[k].bone);
                     }
                     slot->timer -= D_800BE9E4;
@@ -466,7 +466,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
                                 s32 idx;
 
                                 idx = freeSlot - self->slots;
-                                func_15143134(&info->points[idx], &freeSlot->particle->head.def.pos,
+                                func_15143134(&info->points[idx].pos, &freeSlot->particle->head.def.pos,
                                               self->params.owner->ob_matrix_ptr + info->points[idx].bone);
                             }
                             freeSlot->particle->head.def.rot = freeSlot->particle->head.def.pos;

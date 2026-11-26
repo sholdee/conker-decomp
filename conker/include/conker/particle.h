@@ -581,7 +581,7 @@ typedef struct EmitterTrigger {
     s32 minDelay;
     s32 delayRange;
     s32 countdown;
-    f32 matrix[16];
+    MtxF matrix;
     u8 params[2]; // [0] bit 0: spawn periodically; [1]: id matched by event 0x34
                   // matching: one array; two u8 fields swap the compare's registers in func_150D32FC
 } EmitterTrigger;
@@ -595,7 +595,7 @@ typedef struct RingSparkEmitter {
     f32 angleStep;
     f32 spawnAccum;
     f32 elapsed;
-    f32 matrix[16];
+    MtxF matrix;
     u8 color[3];
 } RingSparkEmitter; // size 0x60
 
@@ -637,7 +637,7 @@ typedef struct GameFFBA0Beam {
 } GameFFBA0Beam;
 
 void func_150D26F0(SparkEffect *obj);
-void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1);
+void func_150D278C(s16 *record, MtxF matrix, u8 unkC, s32 unk1);
 void func_150D2924(SparkEffect *obj);
 Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index);
 s32 func_150D317C(RingSparkParticle *particle);
