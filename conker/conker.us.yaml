@@ -1170,7 +1170,7 @@ segments:
       - {start: 0x22EB40, type: .data, name: game_16EE20, linker_section_order: .rodata}
       - {start: 0x22EC20, type: .data, name: game_16F770, linker_section_order: .rodata}
       - {start: 0x22EC90, type: .data, name: game_174BF0, linker_section_order: .rodata}
-      - [0x22EEA0, rodata]
+      - {start: 0x22EEA0, type: .data, name: game_175250, linker_section_order: .rodata}
       - [0x22EF30, rodata]
       - [0x22EF80, rodata]
       - {start: 0x22F530, type: .data, name: game_179F30, linker_section_order: .rodata}
