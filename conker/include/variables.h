@@ -83,8 +83,6 @@ extern u64 D_800885B0;
 
 
 
-extern u8 (*D_8008FCD0[])(void); // texture id pickers by effect kind (game_2062D0)
-extern u8 (*D_8008FD04[])(void); // a second picker table by effect kind (game_2062D0)
 
 /* 8009 */
 extern s32 D_80090298[]; // texture ids
@@ -457,7 +455,6 @@ extern s8   D_800E0C20;
 extern void (*D_800E0E00)(s32, void *, s32); // stream tag callback (set by func_151F3C1C; gets each MP3 frame's copyright tag)
 extern s32  D_800E0E04;
 extern TriggerZone *D_800E0900[6]; // per flamethrower character
-extern u8   D_800E0A10;
 extern StreamVoice D_800E0D80; // the streaming music player's voice
 
 // end of zero'd out section

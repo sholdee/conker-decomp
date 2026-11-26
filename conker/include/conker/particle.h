@@ -3141,6 +3141,8 @@ void func_151D5D60(void *slots, s16 index, s32 size, void *out, u8 *allocated);
 void func_151D5E30(void *slots);
 
 /* game_2062D0.c */
+extern u8 D_800E0A10;              /* the effect kind of the current context (func_151D8E20) */
+extern u8 (*D_8008FD04[13])(void); /* a second picker table by effect kind */
 /* Data of a func_151DA08C effect: wobbles its scale and keeps spawning func_151DB5D0 particles. */
 typedef struct {
     u8 phaseX;

@@ -41,7 +41,9 @@ static const Vec3f D_800A174C[2][4][2] = {
 };
 static const u8 D_800A180C[2][2] = { { 0x16, 0x1A }, { 0x09, 0x06 } };
 
-extern s32 (*D_8008FD00)(s32, u8);
+/* The texture id pickers by effect kind (game_2062D0.c, where each takes no argument). This file was
+ * compiled with a view that passes the actor and the slot (as a u8, by prototype) to the kind 12 picker. */
+extern u8 (*D_8008FCD0[])(Actor *actor, u8 slot);
 
 /* Fires beam slot `slot` (0 or 1) of `actor`: spawns its beam, a spark burst and an effect
  * at the muzzle. */
@@ -476,7 +478,7 @@ Glow *func_150EFEC8(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u8
     link.slot = slot;
     link.beam = beam;
 
-    spawn.texture = D_8008FD00((s32)actor, slot);
+    spawn.texture = D_8008FCD0[12](actor, slot);
     spawn.type = 3;
     spawn.renderModes = 0x2203;
     spawn.lifetime = 300;

@@ -1,5 +1,8 @@
 #include <ultra64.h>
 
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/particle.h describes it. */
+u8 D_800E0A10; /* the effect kind of the current context (func_151D8E20); game_3B920 sets it */
+
 // functions.h declares these three with other return types; this file uses the s32 versions below.
 #include "functions.h"
 #include "variables.h"
@@ -15,6 +18,25 @@ const u8 D_800AB310[13] = { 176, 164, 172, 169, 168, 170, 174, 175, 164, 177, 17
 static const u8 D_800AB320[13] = { 119, 118, 29, 147, 91, 45, 103, 149, 119, 159, 179, 118, 97 };
 /* Per effect kind flag. */
 static const u8 D_800AB330[13] = { 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 };
+
+/*
+ * Per effect kind (0..12): texture id pickers. No header declares D_8008FCD0: game_11C2B0 was compiled
+ * with a view that passes the kind 12 picker two arguments (u8 slot by prototype), so each file that
+ * reads it declares its own view.
+ */
+u8 (*D_8008FCD0[13])(void) = {
+    func_151D8E6C, func_151D8EB0, func_151D8EBC, func_151D8EC8, func_151D8EFC, func_151D8F30, func_151D8F7C,
+    func_151D8FB0, func_151D8FB0, func_151D8FBC, func_151D8FC8, func_151D8FD4, func_151D8FE0,
+};
+u8 (*D_8008FD04[13])(void) = {
+    func_151D97A8, func_151D9878, func_151D98D0, func_151D9820, func_151D9918, func_151D9960, func_151D99C8,
+    func_151D9A20, func_151D9A20, func_151D9A68, func_151D9AC0, func_151D9ADC, func_151D9B34,
+};
+/* Per effect kind: the colour setters of func_151DB5D0's particles. */
+static void (*D_8008FD38[13])(ParticleDesc *) = {
+    func_151DB004, func_151DB068, func_151DB0CC, func_151DB15C, func_151DB1EC, func_151DB27C, func_151DB2A8,
+    func_151DB2CC, func_151DB330, func_151DB3D8, func_151DB43C, func_151DB068, func_151DB4CC,
+};
 
 
 
@@ -194,8 +216,8 @@ s32 func_151D9450(SteamParticle *particle, Vec3f *arg1) {
     }
     wobble->phaseX = wobble->phaseX + wobble->stepX * D_800BE9E4;
     wobble->phaseY = wobble->phaseY + wobble->stepY * D_800BE9E4;
-    particle->head.desc.width = wobble->amplitudeX * func_151423D8((u8)(wobble->phaseX - 0x40)) + wobble->size;
-    particle->head.desc.height = wobble->amplitudeY * func_151423D8((u8)(wobble->phaseY - 0x40)) + wobble->size;
+    particle->head.desc.width = wobble->amplitudeX * func_151423D8(wobble->phaseX - 0x40) + wobble->size;
+    particle->head.desc.height = wobble->amplitudeY * func_151423D8(wobble->phaseY - 0x40) + wobble->size;
     return 1;
 }
 
@@ -741,7 +763,7 @@ s32 func_151DADA0(SquashEffect *effect) {
 
     squash = &effect->squash;
     squash->phase = squash->phase + squash->step * D_800BE9E4;
-    wave = func_151423D8((u8)(squash->phase - 0x40));
+    wave = func_151423D8(squash->phase - 0x40);
     effect->head.def.scale.x = squash->amplitudeX * wave + 1.0f;
     effect->head.def.scale.y = 1.3f - squash->amplitudeY * wave;
     return 1;
@@ -904,8 +926,6 @@ void func_151DB4CC(ParticleDesc *desc) {
     desc->b2 = (func_150ADA20() % 56U) + 200;
 }
 
-extern void (*D_8008FD38[])(ParticleDesc *);
-
 /*
  * Spawns a sprite particle of effect kind `kind` at `pos` (lifetime -1: never times out). With `spin` set
  * its desc.unk3C oscillates (func_151DB97C); a `drag` other than 1.0f scales its velocity each frame.
@@ -991,12 +1011,12 @@ s32 func_151DB97C(SteamParticle *particle, s32 arg1) {
         spin->angleY = spin->angleY + (spin->stepY * D_800BE9E4);
         spin->angleZ = spin->angleZ + (spin->stepZ * D_800BE9E4);
 
-        waveX = func_151423D8((u8)(spin->angleX - 0x40));
-        waveY = func_151423D8((u8)(spin->angleY - 0x40));
+        waveX = func_151423D8(spin->angleX - 0x40);
+        waveY = func_151423D8(spin->angleY - 0x40);
         {
             f32 waveZ;
 
-            waveZ = func_151423D8((u8)(spin->angleZ - 0x40));
+            waveZ = func_151423D8(spin->angleZ - 0x40);
             particle->head.desc.offset.x = spin->amplitude.x * waveX;
             particle->head.desc.offset.y = spin->amplitude.y * waveY;
             particle->head.desc.offset.z = spin->amplitude.z * waveZ;
@@ -1137,7 +1157,7 @@ void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, Collis
     desc.rot.z = 0.0f;
 
     func_1513D668(&desc, 0, 11, 17, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1),
-                  (s16)(func_150ADA20() & 0xFF), size, size, NULL, tri, 0, 0, arg8, arg9);
+                  func_150ADA20() & 0xFF, size, size, NULL, tri, 0, 0, arg8, arg9);
 }
 
 /* Spawns a plain sprite particle of effect kind `kind` (id from D_800AB320) at `pos`. */
