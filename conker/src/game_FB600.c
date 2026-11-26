@@ -31,7 +31,7 @@ MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
 }
 
 /* Offset that func_150CE200 transforms by the owner's bone matrix to centre the mosaic rectangle. */
-const f32 D_800A07F0[3] = { 0.0f, -49.0f, -2.0f };
+const Vec3f D_800A07F0 = { 0.0f, -49.0f, -2.0f };
 
 /*
  * Update handler: projects the owner's bone 52 to the screen and sets the mosaic rectangle,
@@ -39,7 +39,7 @@ const f32 D_800A07F0[3] = { 0.0f, -49.0f, -2.0f };
  */
 s32 func_150CE200(MosaicEffect *effect) {
     MosaicData *mosaic = &effect->data;
-    f32 pos[3];
+    Vec3f pos;
     f32 projectedZ;
     f32 projectedW;
     f32 scale;
@@ -53,8 +53,8 @@ s32 func_150CE200(MosaicEffect *effect) {
     if (mosaic->owner->ob_matrix_ptr == NULL) {
         mosaic->flags &= ~1;
     } else {
-        func_15143134(D_800A07F0, pos, (Mtx *)mosaic->owner->ob_matrix_ptr + 52);
-        if (func_15144CEC(pos, mosaic->center, &projectedZ, &projectedW, &scale, D_80082FA4)) {
+        func_15143134(&D_800A07F0, &pos, &mosaic->owner->ob_matrix_ptr[52]);
+        if (func_15144CEC(&pos, mosaic->center, &projectedZ, &projectedW, &scale, D_80082FA4)) {
             f32 dx;
             f32 dy;
 

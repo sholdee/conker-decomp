@@ -476,7 +476,7 @@ void func_150F64B0(DefParticleHead *obj) {
     func_151411C4(obj);
 }
 
-extern f32 D_800A1B30[3];
+extern Vec3f D_800A1B30;
 
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
  * frames calls func_10010F88(0x679) at the owner, makes a flash at a point of the model and emits
@@ -507,7 +507,7 @@ void func_150F64DC(FlashBurstEffect *effect) {
                 s32 rand2;
                 s32 rand3;
 
-                func_15143134(D_800A1B30, &pos, (Mtx *)owner->ob_matrix_ptr);
+                func_15143134(&D_800A1B30, &pos, owner->ob_matrix_ptr);
                 header.flags = 3;
                 header.update = -1;
                 header.lifetime = (func_150ADA20() % 9U) + 10;
@@ -526,7 +526,7 @@ void func_150F64DC(FlashBurstEffect *effect) {
                     rand1 = func_150ADA20();
                     rand2 = func_150ADA20();
                     rand3 = func_150ADA20();
-                    func_15107C1C(owner, 0, D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
+                    func_15107C1C(owner, 0, &D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
                                   27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, effect->base.header.owner,
                                   effect->base.header.kind);
                     count--;

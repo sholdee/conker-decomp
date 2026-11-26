@@ -199,7 +199,7 @@ void func_150F2230(Actor *actor, s32 arg1, s32 arg2) {
         offset.y = 0.0f;
         offset.z = 0.0f;
         func_15143874((s16)(func_150ADA20() & 0xFF), 100.0f, &offset.x, &offset.z);
-        func_15143134(&offset, &pos, (Mtx *)actor->ob_matrix_ptr + 19);
-        func_151C329C(&pos.x, (u8)arg1, arg2);
+        func_15143134(&offset, &pos, &actor->ob_matrix_ptr[19]);
+        func_151C329C(&pos, (u8)arg1, arg2);
     }
 }

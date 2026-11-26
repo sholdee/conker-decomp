@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-static const f32 D_800A15F0[4][3] = { { -78.0f, 0.0f, 0.0f }, { 78.0f, 0.0f, 0.0f }, { -150.0f, 0.0f, 0.0f }, { 150.0f, 0.0f, 0.0f } };
-static const f32 D_800A1620[2][3] = { { -78.0f, 20.0f, 0.0f }, { 78.0f, 20.0f, 0.0f } };
+static const Vec3f D_800A15F0[4] = { { -78.0f, 0.0f, 0.0f }, { 78.0f, 0.0f, 0.0f }, { -150.0f, 0.0f, 0.0f }, { 150.0f, 0.0f, 0.0f } };
+static const Vec3f D_800A1620[2] = { { -78.0f, 20.0f, 0.0f }, { 78.0f, 20.0f, 0.0f } };
 static const u8 D_800A1638[4] = { 0x16, 0x1A, 0x00, 0x00 };
 static const u8 D_800A163C[4] = { 0x40, 0x20, 0x00, 0x00 };
 static const f32 D_800A1640[2][3] = { { -175.0f, 42.0f, 0.0f }, { 175.0f, 42.0f, 0.0f } };
@@ -61,7 +61,7 @@ void func_150EEE00(actor, slot)
     func_150EEF80(actor, slot, 0xFF, 1);
     bones = actor->ob_matrix_ptr;
     if (bones != NULL) {
-        func_15143134(D_800A15F0[slot], &muzzle, (Mtx *)bones + D_800A1638[slot]);
+        func_15143134(&D_800A15F0[slot], &muzzle, &bones[D_800A1638[slot]]);
         header.flags = 3;
         header.update = -1;
         header.lifetime = (func_150ADA20() % 3U) + 4;
@@ -238,7 +238,7 @@ s32 func_150EF38C(AimedBeam *beam) {
     }
     link->flags &= ~1;
     if (actor->ob_matrix_ptr != NULL) {
-        func_15143134(D_800A15F0[link->slot], &beam->head.def.pos, (Mtx *)actor->ob_matrix_ptr + D_800A1638[link->slot]);
+        func_15143134(&D_800A15F0[link->slot], &beam->head.def.pos, &actor->ob_matrix_ptr[D_800A1638[link->slot]]);
         beam->head.def.rot.x = target->xpos;
         beam->head.def.rot.y = target->ypos;
         beam->head.def.rot.z = target->zpos;
@@ -408,7 +408,7 @@ s32 func_150EFA4C(BeamSpark *spark) {
             spark->end = beam->head.def.rot;
             spark->distance = link->distance;
             spark->inverse = link->inverse;
-            func_15143134(D_800A1620[slot], &spark->offset, (Mtx *)actor->ob_matrix_ptr + D_800A1638[slot]);
+            func_15143134(&D_800A1620[slot], &spark->offset, &actor->ob_matrix_ptr[D_800A1638[slot]]);
             spark->offset.x = spark->offset.x - spark->start.x;
             spark->offset.y = spark->offset.y - spark->start.y;
             spark->offset.z = spark->offset.z - spark->start.z;

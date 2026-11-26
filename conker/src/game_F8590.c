@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A05E0[];
-extern f32 D_800A05EC[];
+extern Vec3f D_800A05E0;
+extern Vec3f D_800A05EC;
 
 
 /*
@@ -11,25 +11,25 @@ extern f32 D_800A05EC[];
  * (bone 40 or 47) into `pos`.
  * If `ground` is non-NULL, also probes the ground below that point into it.
  */
-s32 func_150CB0E0(f32 *pos, Actor *actor, CollisionHit *ground, u8 side) {
-    f32 probe[3];
-    f32 *offset;
-    Mtx *bone;
+s32 func_150CB0E0(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 side) {
+    Vec3f probe;
+    Vec3f *offset;
+    MtxF *bone;
 
     if ((side != 1) && (side != 2)) {
         return 0;
     }
 
     if (side == 1) {
-        offset = D_800A05EC;
+        offset = &D_800A05EC;
     } else {
-        offset = D_800A05E0;
+        offset = &D_800A05E0;
     }
 
     if (side == 1) {
-        bone = (Mtx *)actor->ob_matrix_ptr + 40;
+        bone = &actor->ob_matrix_ptr[40];
     } else {
-        bone = (Mtx *)actor->ob_matrix_ptr + 47;
+        bone = &actor->ob_matrix_ptr[47];
     }
 
     func_15143134(offset, pos, bone);
@@ -37,11 +37,11 @@ s32 func_150CB0E0(f32 *pos, Actor *actor, CollisionHit *ground, u8 side) {
         return 1;
     }
 
-    probe[0] = pos[0];
-    probe[1] = pos[1] + 100.0f;
-    probe[2] = pos[2];
+    probe.x = pos->x;
+    probe.y = pos->y + 100.0f;
+    probe.z = pos->z;
     func_1504715C(ground, actor);
-    return func_15046C80(probe, 0, pos[1] - 500.0f, ground);
+    return func_15046C80(&probe, 0, pos->y - 500.0f, ground);
 }
 
 s32 func_150CB1E0(s32 arg0, s32 arg1) {
@@ -59,7 +59,7 @@ typedef struct {
 
 /* Spawns a dust puff (tinted by func_150CCD90) on the ground below the actor's bone on `side`. */
 void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
-    f32 pos[3];
+    Vec3f pos;
     CollisionHit ground;
     f32 fr;
     f32 fg;
@@ -75,12 +75,12 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
     if (actor->ob_matrix_ptr == NULL) {
         return;
     }
-    if (func_150CB0E0(pos, actor, &ground, side) == 0) {
+    if (func_150CB0E0(&pos, actor, &ground, side) == 0) {
         return;
     }
     func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
-    func_151D5404((Vec3f *)pos, 1502.0f, 3000.0f, 1.0f / 3000.0f, 12, 15, 0xFF, 0);
-    func_150CCD90(pos[2], &fr, &fg, &fb);
+    func_151D5404(&pos, 1502.0f, 3000.0f, 1.0f / 3000.0f, 12, 15, 0xFF, 0);
+    func_150CCD90(pos.z, &fr, &fg, &fb);
     r = fr;
     g = fg;
     b = fb;
@@ -124,9 +124,9 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
         desc.rgba[2] = 0xFF;
         desc.rgba[3] = 0xFF;
         desc.width = desc.height = ((func_150ADA68() * 50.0f) + 325.0f) * 0.001f;
-        desc.pos.x = pos[0];
+        desc.pos.x = pos.x;
         desc.pos.y = ground.height + 10.0f;
-        desc.pos.z = pos[2];
+        desc.pos.z = pos.z;
         desc.rot.x = 0.0f;
         desc.rot.y = 0.0f;
         desc.rot.z = 0.0f;
@@ -150,13 +150,13 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
             }
         }
         roll = (func_150ADA20() & 0xF) + 10;
-        func_1514C678(pos[0], pos[1], pos[2], (func_150ADA68() * 59.0f) + 80.0f,
+        func_1514C678(pos.x, pos.y, pos.z, (func_150ADA68() * 59.0f) + 80.0f,
                       0, 0xFF, roll, 14, 0, 0.0f, NULL, 0xFF);
         roll2 = (func_150ADA20() & 0xF) + 5;
         rgb.r = r;
         rgb.g = g;
         rgb.b = b;
-        func_1514C678(pos[0], pos[1], pos[2], (func_150ADA68() * 59.0f) + 70.0f,
+        func_1514C678(pos.x, pos.y, pos.z, (func_150ADA68() * 59.0f) + 70.0f,
                       0, 0xFF, roll2, 15, 0, 0.0f, &rgb, 0xFF);
     }
 }

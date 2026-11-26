@@ -459,7 +459,7 @@ typedef struct {
     /* 0x58 */ s32 flags;
 } FadeoutParticle;
 
-s32 func_150CB0E0(f32 *pos, Actor *actor, CollisionHit *ground, u8 side);
+s32 func_150CB0E0(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 side);
 s32 func_150CB1E0(s32 arg0, s32 arg1);
 void func_150CB1F4(Actor *actor, s32 side, s32 arg2);
 s32 func_150CB7CC(QuadSprite *sprite);
@@ -2667,7 +2667,7 @@ typedef struct {
     /* 0x128 */ SprayGrowth growth;
 } SprayParticle;
 
-s32 func_151AF5C0(f32 *pos, Actor *actor, CollisionHit *ground, u8 side);
+s32 func_151AF5C0(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 side);
 s32 func_151AF6C0(s32 arg0, s32 arg1);
 void func_151AF6D4(Actor *actor, s32 side, s32 arg2);
 s32 func_151AFBD4(QuadSprite *sprite);

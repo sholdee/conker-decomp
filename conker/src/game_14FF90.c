@@ -1286,7 +1286,7 @@ void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f3
     Vec3f localPos;
     Vec3f worldPos;
     s32 bone;
-    Mtx *boneMtx;
+    MtxF *boneMtx;
     f32 offsetY;
 
     useObjectPos = 1;
@@ -1309,7 +1309,7 @@ void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f3
         }
 
         if (useObjectPos == 0) {
-            boneMtx = (Mtx *)obj->ob_matrix_ptr;
+            boneMtx = obj->ob_matrix_ptr;
             boneMtx += bone;
             func_15143134(&localPos, &worldPos, boneMtx);
             *outX = worldPos.x;

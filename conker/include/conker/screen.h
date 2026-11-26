@@ -148,7 +148,7 @@ MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
 s32 func_150CE200(MosaicEffect *effect);
 void func_150CE450(MosaicEffect *effect, u16 *fb);
 void func_150CE694(MosaicEffect *effect, ActorMsg *msg, u8 type);
-extern const f32 D_800A07F0[3];
+extern const Vec3f D_800A07F0;
 
 /* game_FBBF0.c */
 void func_150CE740(Actor *obj);
