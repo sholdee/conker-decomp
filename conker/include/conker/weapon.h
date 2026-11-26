@@ -10,6 +10,7 @@
  * that these files define, grouped by file in address order:
  *   game_119370.c
  *   game_11A680.c
+ *   game_22D5D0.c (data-only unit between game_120950 and game_121A20)
  *   game_12B250.c
  *   game_12BD10.c
  *   game_12C1E0.c
@@ -118,16 +119,20 @@ void func_150ED748(Actor *obj);
 void func_150EEC84(Actor *obj);
 void func_150EEDA8(Actor *obj);
 
+/* game_22D5D0.c (data-only unit between game_120950 and game_121A20) */
+extern const Vec3f D_800A19E0; /* the second gun's muzzle point */
+extern u8 D_80088B10;          /* the bone it is on */
+
 /* game_12B250.c */
 Game1EF500Trail *func_150FDDA0(Actor *obj, s32 arg1, s32 arg2);
 void func_150FDF38(Actor *obj, u8 arg1, s32 arg2, Vec3f *muzzleOut, Vec3f *launchOut);
 void func_150FE0B8(Actor *obj, Vec3f *muzzle, u8 arg2, s32 arg3);
-void func_150FE248(Actor *obj, s32 arg1, Vec3f *out);
+void func_150FE248(Actor *obj, s16 arg1, Vec3f *out);
 void func_150FE288(Actor *obj);
 
 /* game_12BD10.c */
 void func_150FE860(Actor *actor, u8 arg1, s32 arg2);
-void func_150FEBC8(Actor *actor, s32 arg1, Vec3f *out);
+void func_150FEBC8(Actor *actor, s16 arg1, Vec3f *out);
 void func_150FEC28(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, Vec3f *position, u8 arg5, s32 arg6);
 
 /* game_12C1E0.c */
@@ -152,7 +157,7 @@ extern const Vec3f D_800A2080[2][6];
 /* game_12CCF0.c */
 void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type);
-void func_150FFBDC(Actor *obj, s32 arg1, Vec3f *out);
+void func_150FFBDC(Actor *obj, s16 arg1, Vec3f *out);
 void func_150FFC3C(Actor *obj);
 void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
 void func_150FFD2C(Actor *obj, Actor *other, s32 arg2);
@@ -200,10 +205,15 @@ void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 ar
                    s32 arg5, s32 arg6, s32 arg7, s8 arg8, IgnoreList *ignore, Vec3f *passPos,
                    f32 *passDist, CollisionHit *pass, s32 mode);
 void func_151C1FB8(Actor *obj);
+extern s32 (*D_800E0930)(Vec3f *start, Vec3f *delta, Vec3f *hit); /* per-level test of a bullet's step; TRUE stops it */
+extern void (*D_800E0934)(s32 x, s32 y, s32 z); /* per-level bullet impact hook (func_151C1654) */
 extern const u8 D_800AA954[3];
 extern const Vec3f D_800AA958[3];
 
 /* game_1EF500.c */
+/* The level hook D_800E0940: (hit position, index of the WorldObject that was hit). */
+typedef void (*TrailHitCallback)(Vec3f *pos, s32 index);
+extern TrailHitCallback D_800E0940;
 void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance);
 Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
                                u8 altNormalized, RayHit *knownHit, f32 speed, f32 arg7, f32 arg8,
@@ -251,8 +261,8 @@ extern const Vec3f D_800AAAA8;
 /* game_1F3780.c */
 Game1EF500Trail *func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
                                s32 arg6);
-void func_151C6974(Actor *arg0, s32 arg1, Vec3f *out);
-void func_151C69A0(Actor *arg0, s32 arg1, Vec3f *out);
+void func_151C6974(Actor *arg0, s16 arg1, Vec3f *out);
+void func_151C69A0(Actor *arg0, s16 arg1, Vec3f *out);
 void func_151C69CC(Actor *arg0, Vec3f *out, u8 side);
 void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3);
 void func_151C6D70(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5);

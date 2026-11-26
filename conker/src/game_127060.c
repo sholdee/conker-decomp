@@ -622,8 +622,8 @@ s32 func_150FB188(ModelEffect *fx) {
 }
 
 /* Passes func_151D710C's result, with the same remaining arguments, to func_15157F80. */
-void func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
-    func_15157F80(func_151D710C(gfx, fx, view, needSync, proceed), fx, view, needSync, proceed);
+Gfx *func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
+    return func_15157F80(func_151D710C(gfx, fx, view, needSync, proceed), fx, view, needSync, proceed);
 }
 
 /* Layout of Effect (game_1844C0.c), as far as func_150FB29C uses it. */

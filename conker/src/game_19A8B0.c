@@ -2,18 +2,48 @@
 #include "functions.h"
 #include "variables.h"
 
+u8 D_800DD2A0[4];
+
+/* not referenced */
+static const u8 D_800A6DF0[16] = {
+    0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0xFF, 0x00,
+};
+
+/* The intensity ramps of func_1516E8CC: descending thresholds and the colour at each. */
+static const u8 D_800A6E00[12] = { 255, 40, 35, 30, 25, 20, 15, 0, 255, 40, 0, 0 };
+static const u8 D_800A6E0C[12][3] = {
+    { 0xFF, 0xFF, 0x00 }, { 0xFF, 0xFF, 0x00 }, { 0xFF, 0x80, 0x00 }, { 0xFF, 0x80, 0x00 },
+    { 0xFF, 0x00, 0x00 }, { 0xFF, 0x00, 0x00 }, { 0xC0, 0x00, 0x00 }, { 0x80, 0x00, 0x00 },
+    { 0x5A, 0x5A, 0x5A }, { 0x5A, 0x5A, 0x5A }, { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x00 },
+};
+
+/* Emission segments of func_1516DB90 by emitter->x: from (x, y, z), to (x, y, z), random z mask. */
+static const s16 D_800A6E30[6][7] = {
+    { 0, 0, 34, 0, 0, 96, 0 },
+    { 0, 0, 190, 0, 0, 0, 0 },
+    { 0, 10, 20, 0, 10, 120, 0 },
+    { 0, 0, -20, 0, 0, -128, 0 },
+    { 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 50, -30, 0, -260, 390, 127 },
+};
+
+/* Render setup and teardown of the style particles (object types 18 and 103 of D_8008B4A8). */
+Gfx D_8008CB70[] = {
+    gsSPDisplayList(D_800873D0),
+    gsDPSetCombineLERP(PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0,
+                       PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0),
+    gsDPSetRenderMode(G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2),
+    gsSPEndDisplayList(),
+};
+Gfx D_8008CB90[] = {
+    gsSPDisplayList(D_80087408),
+    gsSPEndDisplayList(),
+};
 
 /* u8 tables indexed by a particle style */
 struct StyleTable {
     u8 v[11];
 };
-
-extern struct StyleTable D_8008CBC4;
-extern struct StyleTable D_8008CBD0;
-extern struct StyleTable D_8008CBDC;
-extern struct StyleTable D_8008CBE8;
-
-
 
 void func_1516D400(void) {
     s32 i;
@@ -79,11 +109,16 @@ void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
     }
 }
 
-extern s32 (*D_8008CBA0[])(StyleParticle *);
+/* Update handlers by StyleParticle.kind (1 frees the particle), declared without a prototype: two of them
+ * take other particle types. */
+static s32 (*D_8008CBA0[])() = {
+    func_1516E8CC, func_1516ECAC, func_1516F024, func_1516F9C4, func_1516FBCC,
+    func_1516FD50, func_151707E0, func_1516A648, func_150BF0F4,
+};
 
 void func_1516D678(StyleParticle *particle) {
     s32 value;
-    ParticleLink *link;
+    TriggerVolume *link;
 
     value = particle->lifetime;
     if (value != 0) {
@@ -96,7 +131,7 @@ void func_1516D678(StyleParticle *particle) {
     if (D_8008CBA0[particle->kind](particle) == 1) {
         link = particle->link;
         if (link != NULL) {
-            link->status = 0;
+            link->node.lifetime = 0;
         }
         func_1516972C(particle);
     } else {
@@ -252,7 +287,6 @@ void func_1516D99C(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
 }
 
 
-extern s16 D_800A6E30[][7];
 
 
 void func_1516DB90(SpriteEmitter *arg0) {
@@ -351,7 +385,7 @@ void func_1516DB90(SpriteEmitter *arg0) {
                     toY = D_800A6E30[emitter->x][4];
                     toZ = D_800A6E30[emitter->x][5];
                     if (D_800A6E30[emitter->x][6] != 0) {
-                        toZ += (u32)(func_150ADA20() & D_800A6E30[emitter->x][6]);
+                        toZ += func_150ADA20() & D_800A6E30[emitter->x][6];
                     }
                     func_150A7960(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
                     func_150A7960(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
@@ -395,19 +429,19 @@ void func_1516DB90(SpriteEmitter *arg0) {
                     angle = func_150ADA20();
                     s = func_15048A40(angle);
                     c = func_150489B0(angle);
-                    speed = (u32)((func_150ADA20() & 0xFFFF) * emitter->radiusXZ) * (1.0f / 65536.0f);
+                    speed = (func_150ADA20() & 0xFFFF) * emitter->radiusXZ * (1.0f / 65536.0f);
                     x += speed * s;
                     z += speed * c;
                 }
                 if (emitter->radiusY != 0) {
                     s = func_15048A40(func_150ADA20() & 0xFF);
-                    speed = (u32)((func_150ADA20() & 0xFFFF) * emitter->radiusY) * (1.0f / 65536.0f);
+                    speed = (func_150ADA20() & 0xFFFF) * emitter->radiusY * (1.0f / 65536.0f);
                     y += (s32)(speed * s);
                 }
                 scaleX = emitter->scaleX;
                 scaleY = emitter->scaleY;
                 if (emitter->scaleXRandom != 0) {
-                    scaleRandom = func_150ADA20() % (u32)emitter->scaleXRandom;
+                    scaleRandom = func_150ADA20() % emitter->scaleXRandom;
                 } else {
                     scaleRandom = 0;
                 }
@@ -417,7 +451,7 @@ void func_1516DB90(SpriteEmitter *arg0) {
                 } else {
                     scaleX += scaleRandom;
                     if (emitter->scaleYRandom != 0) {
-                        scaleY += func_150ADA20() % (u32)emitter->scaleYRandom;
+                        scaleY += func_150ADA20() % emitter->scaleYRandom;
                     }
                 }
                 if (!(emitter->flags & 8) && !(emitter->flags & 0x80)) {
@@ -485,15 +519,12 @@ void func_1516DB90(SpriteEmitter *arg0) {
 
 /* Emitter that follows the f32 position vector at `position` (flags 0x20). */
 void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4) {
-    func_1516D99C((s16)((u32)position >> 16), (s16)((u32)position & 0xFFFF), 0, texture,
+    func_1516D99C((u32)position >> 16, (u32)position & 0xFFFF, 0, texture,
         0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,
         8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, duration,
         0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1,
         0, 0, 0, 0, 0, arg3, arg4);
 }
-
-extern u8 D_800A6E00[];
-extern u8 D_800A6E0C[][3];
 
 s32 func_1516E8CC(StyleParticle *particle) {
     s32 alpha;
@@ -633,18 +664,13 @@ void func_1516EED4(s32 object, s32 threshold, u8 arg2, s32 arg3) {
 s32 func_1516F024(StyleParticle *particle) {
     u8 pad[16]; // matching: the original frame has 16 unused bytes here
     s32 style;
-    struct StyleTable damping;
-    struct StyleTable growth;
-    struct StyleTable maxAlpha;
-    struct StyleTable fadeRate;
+    struct StyleTable damping = { { 250, 250, 235, 235, 250, 250, 220, 210, 210, 220, 210 } };
+    struct StyleTable growth = { { 16, 7, 7, 7, 20, 8, 40, 40, 40, 20, 20 } };
+    struct StyleTable maxAlpha = { { 255, 255, 255, 255, 190, 170, 120, 200, 60, 120, 200 } };
+    struct StyleTable fadeRate = { { 8, 2, 10, 1, 8, 10, 255, 10, 2, 255, 10 } };
     s32 alpha;
     s32 limit;
     s32 lifetime;
-
-    damping = D_8008CBC4;
-    growth = D_8008CBD0;
-    maxAlpha = D_8008CBDC;
-    fadeRate = D_8008CBE8;
 
     lifetime = particle->lifetime;
     style = particle->u.drift.unk2C;
@@ -730,21 +756,21 @@ void func_1516F548(
     s32 scaleRandom, s32 radius, s32 style0, s32 style1,
     s32 arg12, s32 arg13, s32 arg14, u8 arg15,
     s32 arg16) {
-    func_1516D99C((s16)x, (s16)y, (s16)z, 0xD,
+    func_1516D99C(x, y, z, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
         2, (u8)velocityXHigh, 0, (u8)velocityZHigh, 0, 0, 0, style0,
         0, 0, 0, 0, 0, 0, 0, (s16)((scale << 12) / 4096),
         (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
         (s16)velocityY, 0xC8, 1, 0, 0, 1, 0, 0,
         0, 0, 0, arg15, arg16);
-    func_1516D99C((s16)x, (s16)y, (s16)z, 0xD,
+    func_1516D99C(x, y, z, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
         2, (u8)velocityXHigh, 0, (u8)velocityZHigh, 0, 0, 0, style1,
         0, 0, 0, 0, 0, 0, 0, (s16)((scale << 12) / 4096),
         (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
         (s16)velocityY, 0xC8, 1, 6, 0, 1, 0, 0,
         0, 0, 0, arg15, arg16);
-    func_1000FA64(7, (s16)x, (s16)y, (s16)z, 0x36B0, 0x3E8, 0x64,
+    func_1000FA64(7, x, y, z, 0x36B0, 0x3E8, 0x64,
         (SoundRecordCallback)func_1000EBC4, (void *)arg3, 0, 0, 0);
 }
 
@@ -1002,20 +1028,17 @@ void func_15170034(s32 flags, f32 *outX, f32 *outY, f32 *outZ) {
 
     mask = (flags & 0x40) ? 0x3F : 0x7F;
     angle = func_150ADA20() & mask;
-    *outY = func_150489B0((u8)angle);
-    horizontal = func_15048A40((u8)angle);
+    *outY = func_150489B0(angle);
+    horizontal = func_15048A40(angle);
     angle = func_150ADA20() & 0xFF;
-    yawB = func_150489B0((u8)angle);
-    yawA = func_15048A40((u8)angle);
+    yawB = func_150489B0(angle);
+    yawA = func_15048A40(angle);
     *outX = horizontal * yawA;
     *outZ = horizontal * yawB;
 }
 
 struct Vec3fTable { f32 v[3]; };
 struct RGBTable { u8 c[3][3]; };
-extern struct Vec3fTable D_8008CBF4;
-extern struct Vec3fTable D_8008CC00;
-extern struct RGBTable D_8008CC0C;
 
 void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8, s32 arg9) {
     s32 i;
@@ -1040,13 +1063,10 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type,
     s32 particleStyle;
     s32 pad; // matching: unused stack slot in the original frame
     s32 count;
-    struct Vec3fTable unused;
-    struct Vec3fTable velocityYRandoms;
-    struct RGBTable colors;
+    struct Vec3fTable unused = { { 143.0f, 30.0f, 30.0f } }; /* copied but never read, as in the original */
+    struct Vec3fTable velocityYRandoms = { { 571.0f, 130.0f, 130.0f } };
+    struct RGBTable colors = { { { 0x86, 0x6A, 0x3C }, { 0xC8, 0xBE, 0xB4 }, { 0xFF, 0xD2, 0x80 } } };
 
-    unused = D_8008CBF4; /* copied but never read, as in the original */
-    velocityYRandoms = D_8008CC00;
-    colors = D_8008CC0C;
     velocityYRandom = velocityYRandoms.v[type] * scale;
     sizeMin = 731.0f * scale;
     sizeRandom = 836.0f * scale;
@@ -1077,9 +1097,9 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type,
             if (i) { // matching: the empty branch on i steers IDO's register allocation
             }
             lifetime = (func_150ADA20() & 0x1F) + 0xF;
-            size = (func_150ADA20() % (u32)sizeRandom) + sizeMin;
-            velocityY = (func_150ADA20() % (u32)velocityYRandom) + velocityYMin;
-            func_1516D4E8((s16)(s32)px, (s16)(s32)py, (s16)(s32)pz, 0xD, 0,
+            size = (func_150ADA20() % sizeRandom) + sizeMin;
+            velocityY = (func_150ADA20() % velocityYRandom) + velocityYMin;
+            func_1516D4E8(px, py, pz, 0xD, 0,
                 color[0], color[1], color[2], 0, 0, 0, 0, 2,
                 (u8)((velocityX >> 8) & 0xFF), (u8)(velocityX & 0xFF), (u8)((velocityZ >> 8) & 0xFF), (u8)(velocityZ & 0xFF),
                 0, 0, particleStyle, 0, 0, 0,
@@ -1118,9 +1138,9 @@ void func_15170500(x, y, z, angle, isParticle, arg5, arg6)
         angle = movement_obj[0].langle;
     }
     tilt = func_151EF610() % 50;
-    dirX = func_150489B0((u8)angle);
-    dirZ = -func_15048A40((u8)angle);
-    spread = func_150489B0((u8)tilt);
+    dirX = func_150489B0(angle);
+    dirZ = -func_15048A40(angle);
+    spread = func_150489B0(tilt);
     dirX *= spread;
     dirZ *= spread;
     dirY = rise * spread;

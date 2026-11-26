@@ -15,7 +15,29 @@ typedef struct VertexAnim {
     u8 frameCount;
 } VertexAnim;
 
-extern VertexAnim D_80089320[];
+/* .data, linked at 0x80089260..0x80089324 (the unit continues in game_1478C0.c). */
+
+/* Sounds of the props, indexed by the sound row of the object's param (row 0: none). */
+PropSounds D_80089260[16] = {
+    { 0, 0, 0, 0, 0, 0 },
+    { 0x4B5, 0x4B6, 0, 0x4B7, 0, 0 },
+    { 0x4B8, 0x4B8, 0x4B9, 0x4B9, 0, 0 },
+    { 0x4C1, 0x4C2, -1, 0x4C3, 0, 0 },
+    { 0x361, 0x361, 0x4C1, 0x4C1, 0, 0 },
+    { 0x4BC, 0x4BC, 0, 0, 0x4BD, 30 },
+    { 0, 0, 0x82, 0x82, 0, 0 },
+    { 0x4BE, 0x4BF, 0x4C0, 0, 0, 0 },
+    { 0x4BF, 0x4BF, -1, 0, 0, 0 },
+    { 0x4C2, 0x4C2, -1, -1, 0, 0 },
+    { 0x4C4, 0x4C5, -1, -1, 0, 0 },
+    { 0x1A, 0x4C5, -1, -1, 0, 0 },
+    { 0x4BA, 0, 0x4BB, 0, 0, 0 },
+    { 0x4B, 0x4B, 0x4C8, 0x4C8, 0, 0 },
+    { 0x67B, 0x67B, 0x4C8, 0x4C8, 0, 0 },
+    { 0x62C, 0x62C, 0x4C2, 0x4C2, 0, 0 },
+};
+
+static VertexAnim D_80089320[2] = { { 0, 0 }, { 0, 0 } };
 
 
 /*

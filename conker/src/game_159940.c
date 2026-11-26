@@ -1,9 +1,13 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss. */
+CamOffset *D_800DC280[4]; // camera shake tables: one CamOffset delta per frame
+s32 D_800DC290[4];        // their lengths in frames
+Mtx *D_800DC2A0[2];       // per framebuffer: one view matrix per view
+
 #include "functions.h"
 #include "variables.h"
-
-extern CamOffset *D_800DC280[4]; // camera shake tables: one CamOffset delta per frame
-extern s32 D_800DC290[4];        // their lengths in frames
 
 #define VIEW_MTX(player) (&D_800DC2A0[D_800BE9C0][player])
 
@@ -220,7 +224,7 @@ void func_1512D070(Camera *camera) {
     }
 
     if ((camera->Mode & 0x80000) || (camera->SpecialFlags & 1) || (camera->Mode != 0x40000 && (camera->SpecialFlags & 8))) {
-        camera->WaterDx += 0.04363323003f * (f32)D_800BE9E4; // 2.5 degrees per frame
+        camera->WaterDx += 0.04363323003f * D_800BE9E4; // 2.5 degrees per frame
         if (camera->WaterDx > 3.141592741f) {
             camera->WaterDx -= 6.283185482f;
         }

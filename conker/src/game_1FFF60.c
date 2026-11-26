@@ -1,8 +1,19 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/effect.h describes it. */
+u8 D_800E0950[20];                 /* reference count per shared anchor resource (D_800AB140) */
+u16 D_800E0968[20];                /* anchor count of each loaded set */
+struct BoneAnchor *D_800E0990[20]; /* the loaded anchor set of each resource (type in game_1BC650) */
 
 #include "functions.h"
 #include "variables.h"
 
+/* The ROM table ids of the shared anchor resources. */
+static const u16 D_800AB140[20] = {
+    0x1B0, 0x1B2, 0x1B3, 0x1B4, 0x1B5, 0x1B6, 0x1B7, 0x1B8, 0x1B9, 0x1BA,
+    0x1BB, 0x1BC, 0x1BE, 0x1BD, 0x1C0, 0x1C1, 0x1C2, 0x1C3, 0x1C4, 0x1B1,
+};
 
 /* Object type 0x3D: a point on one bone of an actor, re-transformed every frame. */
 struct BoneFollower {
@@ -25,35 +36,20 @@ struct BoneFollower {
     /* 0x44 */ BoneFollower *prev;
 }; // size 0x48
 
-/* Object type 0x3E: watches an actor and owns a list of BoneFollowers. */
-struct ActorFollowerGroup {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ Actor *actor;
-    /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
-    /* 0x15 */ u8 pad15;
-    /* 0x16 */ s16 timer;
-    /* 0x18 */ u8 flags;            // bit 0: timer counts down; bit 1: actor is trackable (has bone matrices, (unk74 & 0xF) != 0xF)
-    /* 0x19 */ s8 updateFn;         // index into D_8008FC4C, -1 for none
-    /* 0x1A */ s8 trackFn;          // index into D_8008FC50, called when bit 1 of flags sets
-    /* 0x1B */ s8 untrackFn;        // index into D_8008FC54, called when bit 1 of flags clears
-    /* 0x1C */ s8 expireFn;         // index into D_8008FC58, -1 for none
-    /* 0x1D */ u8 kind;             // index into D_8008FC5C and D_8008FC64
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s16 count;
-    /* 0x22 */ u8 pad22[2];
-    /* 0x24 */ BoneFollower *head;
-    /* 0x28 */ BoneFollower *tail;
-    /* 0x2C */ u8 pad2C[4];
-}; // size 0x30
-
-extern s32 (*D_8008FC40[])(BoneFollower *, Vec3f *);
-extern void (*D_8008FC48[])(BoneFollower *, Vec3f *);
-extern s32 (*D_8008FC4C[])(ActorFollowerGroup *);
-extern void (*D_8008FC50[])(ActorFollowerGroup *);
-extern void (*D_8008FC54[])(ActorFollowerGroup *);
-extern void (*D_8008FC58[])(ActorFollowerGroup *);
-extern void (*D_8008FC5C[])(ActorFollowerGroup *);
-extern void (*D_8008FC64[])(ActorFollowerGroup *, ActorMsg *, u8);
+/*
+ * The follower and group callbacks, indexed by the fields named above. They are declared without a
+ * prototype: each entry takes the follower or group as its own, longer view (EmitterParticle,
+ * AnchorEmitter in game_1BC650.c). The message table keeps the prototype of its call, which passes the
+ * type as a u8; its entry still takes the AnchorEmitter view (warning 709).
+ */
+static s32 (*D_8008FC40[])() = { func_1518FC04, func_1518FC44 }; /* BoneFollower.updateFn */
+static void (*D_8008FC48[])() = { func_1518FC84 };               /* BoneFollower.expireFn */
+static s32 (*D_8008FC4C[])() = { func_1518F7C4 };                /* ActorFollowerGroup.updateFn */
+static void (*D_8008FC50[])() = { func_1518F89C };               /* ActorFollowerGroup.trackFn */
+static void (*D_8008FC54[])() = { func_151D33B8 };               /* ActorFollowerGroup.untrackFn */
+static void (*D_8008FC58[])() = { func_1518F858 };               /* ActorFollowerGroup.expireFn */
+static void (*D_8008FC5C[])() = { NULL, func_151904BC };         /* per kind, before the followers go */
+static void (*D_8008FC64[])(ActorFollowerGroup *, ActorMsg *, u8) = { NULL, func_15190550 }; /* per kind, after a message */
 
 
 /* Takes a reference on shared resource `index`, loading it on the first reference. */
@@ -62,7 +58,7 @@ void func_151D2AB0(s32 index) {
 
     D_800E0950[index]++;
     if (D_800E0950[index] < 2) {
-        D_800E0990[index] = (struct BoneAnchor *)func_1502B5C8(&loadInfo, 2, 9, D_800AB140[index]);
+        D_800E0990[index] = func_1502B5C8(&loadInfo, 2, 9, D_800AB140[index]);
         D_800E0968[index] = loadInfo >> 4;
     }
 }
@@ -72,7 +68,7 @@ void func_151D2B4C(s32 index) {
     if (D_800E0950[index] != 0) {
         D_800E0950[index]--;
         if (D_800E0950[index] == 0) {
-            func_100043B4((s32 *)D_800E0990[index], 4);
+            func_100043B4(D_800E0990[index], 4);
         }
     }
 }
@@ -175,8 +171,9 @@ void func_151D2E5C(BoneFollower *follower, ActorMsg *msg, u8 type) {
     }
 }
 
-/* Spawns an ActorFollowerGroup from `params` (0x10 bytes from +0x10) with an empty list. */
-ActorFollowerGroup *func_151D2F00(void *params, s32 extraSize, u8 arg2, s32 arg3) {
+/* Spawns an ActorFollowerGroup from `params` (0x10 bytes from +0x10) with an empty list, followed by extraSize
+ * bytes of the caller's data; the caller keeps the object in its own view (AnchorEmitter). */
+void *func_151D2F00(void *params, s32 extraSize, u8 arg2, s32 arg3) {
     ActorFollowerGroup *group = func_15167A68(0x3E, arg3, extraSize + sizeof(ActorFollowerGroup), 1, arg2, 1);
 
     if (group == NULL) {
@@ -357,6 +354,8 @@ void func_151D33FC(ActorFollowerGroup *group, ActorMsg *msg) {
     }
 }
 
+/* The effect-object kinds that func_151D343C sends its event to. */
+static const IdList1 D_800AB168 = { { 0x3E } };
 
 void func_151D343C(s32 arg0, u8 arg1) {
     IdList1 args;

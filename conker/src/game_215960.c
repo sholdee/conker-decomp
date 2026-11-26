@@ -1,4 +1,19 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* .bss, linked at 0x800E0C30..0x800E0C90 in this order. */
+static s16 D_800E0C30; /* alpha of the single-player HUD (fades in) */
+static Mtx D_800E0C38; /* the HUD's orthographic projection */
+static s16 D_800E0C78;
+static u8 *D_800E0C7C; /* text entry buffer (0x1A8 bytes) */
+static s8 D_800E0C80;  /* text entry cursor column */
+static s8 D_800E0C81;  /* text entry cursor row */
+static s8 D_800E0C82;
+static s8 D_800E0C83;
+static s8 D_800E0C84;
+static u8 D_800E0C85; /* not referenced */
+static u8 D_800E0C88[4]; /* alpha of each player slot */
+
 #include "functions.h"
 #include "variables.h"
 
@@ -27,11 +42,8 @@ Gfx D_80090028[] = {
 HudModel *D_80090058 = NULL;
 HudModel *D_8009005C = NULL;
 HudSprite D_80090060 = { (void *)0x7BC, 0x100, 32, 32, G_IM_FMT_RGBA, G_IM_SIZ_32b };
-extern HudSprite D_80091804;
-extern HudSprite D_80091810;
 extern u8 D_7FB;
 extern u8 D_887;
-extern u8 D_800E0C85;
 /* func_1510D0EC returns this instead of a texture address when it fails. */
 #define TEXTURE_NOT_LOADED ((s32)0x80000000)
 
@@ -75,7 +87,6 @@ Gfx *func_151E84B0(Gfx *gfx) {
     return gfx;
 }
 
-extern s16 D_800E0C78;
 
 /* Draws the per-mode overlay; if it overran the display list buffer, discards what it wrote. */
 Gfx *func_151E8620(Gfx *gfx) {
@@ -820,8 +831,6 @@ extern u8 D_82F;
 extern u8 D_830;
 extern u8 D_891;
 
-extern s16 D_800E0C30;
-extern Mtx D_800E0C38;
 
 /* Draws the single-player HUD (counters and models) after preloading its textures; fades it in. */
 Gfx *func_151EB06C(Gfx *gfx) {
@@ -1286,7 +1295,6 @@ Gfx *func_151EC3E8(Gfx *gfx) {
     return gfx;
 }
 
-extern u8 D_800E0C88[];
 extern u8 D_87B;
 extern u8 D_88C;
 
@@ -1521,8 +1529,6 @@ Gfx *func_151EC648(Gfx *gfx) {
     return gfx;
 }
 
-extern HudSprite D_8009181C;
-extern HudSprite D_80091828;
 
 /* Draws a fading-in image with a tinted overlay (strength D_800E0B97). */
 Gfx *func_151ED09C(Gfx *gfx) {
@@ -1812,12 +1818,6 @@ Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
 
 Struct151EDF4C *D_80090138 = NULL;
 HudSprite D_8009013C = { NULL, 0x100, 64, 22, G_IM_FMT_RGBA, G_IM_SIZ_16b };
-extern u8 *D_800E0C7C;
-extern s8 D_800E0C80;
-extern s8 D_800E0C81;
-extern s8 D_800E0C82;
-extern s8 D_800E0C83;
-extern s8 D_800E0C84;
 
 /*
  * Loads the 30 display lists 0x1C5..0x1E2 and patches them: vertex addresses relocated with the

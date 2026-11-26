@@ -2,6 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
+/* The z-buffer decompression table: depth = (mantissa << shift) + base, by the 3-bit exponent. The camera's
+ * z-buffer scans (game_157840.c) decode the rows that func_1512E5F0 copies with it. */
+ZDecode D_80089630[8] = {
+    { 6, 0x00000 }, { 5, 0x20000 }, { 4, 0x30000 }, { 3, 0x38000 },
+    { 2, 0x3C000 }, { 1, 0x3E000 }, { 0, 0x3F000 }, { 0, 0x3F800 },
+};
+
 /**
  * Copies one row of the z-buffer (D_800BE9C4, D_800BE620 pixels wide; row index at
  * camera+0x8BA) into the camera's one-row buffer unk8BC by drawing a 1-pixel-high

@@ -1,21 +1,24 @@
 #include <ultra64.h>
-/* The shared headers declare these with the wrong types; hide those declarations and redeclare below. */
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/effect.h describes it. */
+u16 D_800DD430;      /* sound handle */
+u8 D_800DD432;       /* wind gust timer */
+u8 D_800DD433;       /* wind strength */
+u8 D_800DD434;       /* requested rain state */
+s16 D_800DD436;      /* number of live drops */
+Vec3s D_800DD438;    /* centre of the rain volume */
+/* RAIN_MAX_DROPS drop slots (QuadFx *), allocated while it rains.
+ * matching: int-typed; a pointer-typed global changes func_15178EFC's register allocation. */
+s32 D_800DD440;
+s16 D_800DD444;      /* state timer */
+s8 D_800DD446;       /* rain state */
+
 #include "functions.h"
 #include "variables.h"
 
 #define RAIN_MAX_DROPS 300
-
-extern u16 D_800DD430;      /* sound handle */
-extern u8 D_800DD432;       /* wind gust timer */
-extern u8 D_800DD433;       /* wind strength */
-extern u8 D_800DD434;       /* requested rain state */
-extern s16 D_800DD436;      /* number of live drops */
-extern Vec3s D_800DD438;    /* centre of the rain volume */
-/* RAIN_MAX_DROPS drop slots (QuadFx *), allocated while it rains.
- * matching: int-typed; a pointer-typed global changes func_15178EFC's register allocation. */
-extern s32 D_800DD440;
 #define RAIN_DROP(i) (*(QuadFx **)(D_800DD440 + (i) * sizeof(QuadFx *)))
-extern s8 D_800DD446;       /* rain state */
 
 /* Resets the rain state. */
 void func_15178EB0(void) {
@@ -173,9 +176,9 @@ void func_151794C8(void) {
     f32 s;
     f32 vx;
 
-    x = (s32)camera_global_Cameras->eye.x;
-    y = (s32)camera_global_Cameras->eye.y;
-    z = (s32)camera_global_Cameras->eye.z;
+    x = camera_global_Cameras->eye.x;
+    y = camera_global_Cameras->eye.y;
+    z = camera_global_Cameras->eye.z;
 
     /* offset (0, 500, 0) rotated by unk398, then by unk3A0 */
     angle = camera_global_Cameras->CameraPitchRad;
@@ -215,9 +218,9 @@ void func_15179600(s32 scatterY, s32 dropFlags) {
     packet.flags = 0;
     func_1516865C(&packet, 0xFF, 0xFF, 0xFF, 0x50);
 
-    baseX = (s32)camera_global_Cameras->eye.x;
-    baseY = (s32)camera_global_Cameras->eye.y;
-    baseZ = (s32)camera_global_Cameras->eye.z;
+    baseX = camera_global_Cameras->eye.x;
+    baseY = camera_global_Cameras->eye.y;
+    baseZ = camera_global_Cameras->eye.z;
 
     x = (func_150ADA20_u8() % 500) + baseX;
     z = (func_150ADA20_u8() % 500) + baseZ;
@@ -264,8 +267,8 @@ void func_151797B0(QuadFx *drop) {
     s16 cy;
     s16 cz;
 
-    dx = (f32)drop->data.z - camera_global_Cameras->eye.z;
-    dz = (f32)drop->data.x - camera_global_Cameras->eye.x;
+    dx = drop->data.z - camera_global_Cameras->eye.z;
+    dz = drop->data.x - camera_global_Cameras->eye.x;
     dist = sqrtf(dx * dx + dz * dz);
     alpha = 80.0f - (80.0f * dist) / 1000.0f;
     if (alpha < 0) {
@@ -392,8 +395,8 @@ void func_15179CB0(QuadFx *splash) {
     f32 dz;
     f32 dist;
 
-    dx = (f32)splash->data.z - camera_global_Cameras->eye.z;
-    dz = (f32)splash->data.x - camera_global_Cameras->eye.x;
+    dx = splash->data.z - camera_global_Cameras->eye.z;
+    dz = splash->data.x - camera_global_Cameras->eye.x;
     dist = sqrtf((dx * dx) + (dz * dz));
     splash->data.unkA4 = 255.0f - (160.0f * dist) / 1000.0f;
 }

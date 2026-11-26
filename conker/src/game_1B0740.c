@@ -1,4 +1,13 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/swarm.h describes it. */
+EffectModelSlot D_800DDE80[11];
+u8 D_800DDF5C[4];
+u8 D_800DDF60[4];
+s8 D_800DDF68[11];
+Gfx *D_800DDF78[11];
+
 #include "functions.h"
 #include "variables.h"
 
@@ -22,26 +31,41 @@ typedef struct ModelResource {
     /* 0x18 */ Gfx *unk18;
 } ModelResource;
 
-/* Per-slot wobble parameters for func_15165C80. */
-typedef struct Game1B0740Wave {
-    u8 pad0[0x18];
-    f32 angle;
-    u8 pad1C[8];
-    f32 velocity;
-    f32 amplitude;
-    f32 frequency;
-    f32 radius;
-    u8 pad34[4];
-} Game1B0740Wave;
+/* The model id of each slot (func_15183BA4 looks a model up here). */
+static const u8 D_800A72D0[11] = { 10, 10, 21, 22, 23, 24, 20, 19, 68, 69, 19 };
+/* The wing vertex indices that func_15165C80 moves, per slot: left half, then right half. */
+static const u8 D_800A72DC[2] = { 13, 16 };
+static const u8 D_800A72E0[2] = { 1, 3 };
+static const u8 D_800A72E4[4] = { 9, 10, 13, 16 };
+/* The number of wing vertex indices per slot. */
+static const u8 D_800A72E8[7] = { 2, 2, 2, 2, 2, 2, 4 };
 
+/* Per-slot motion parameters: this file wobbles the wings of slots 0..6 between minAngle and maxAngle. */
+SwarmFlight D_8008D0B0[11] = {
+    { 10, 8, 60, 60, 40.0f, 40.0f, 10.0f, 4.0f, 2.0f, { { 0.0f, 0.0f, 0.0f, 17.0f, 45.0f, -45.0f, 35.0f, 0.0f } } },
+    { 12, 8, 60, 60, 40.0f, 40.0f, 10.0f, 4.0f, 2.0f, { { 0.0f, 0.0f, 0.0f, 15.0f, 45.0f, -45.0f, 35.0f, 0.0f } } },
+    { 2, 1, 10, 10, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 0.0f, 0.0f, 0.0f, 10.0f, 75.0f, 10.0f, 49.0f, 0.0f } } },
+    { 2, 1, 10, 10, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 0.0f, 0.0f, 0.0f, 9.0f, 75.0f, 10.0f, 49.0f, 0.0f } } },
+    { 2, 1, 10, 10, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 0.0f, 0.0f, 0.0f, 8.0f, 75.0f, 10.0f, 49.0f, 0.0f } } },
+    { 2, 1, 10, 10, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 0.0f, 0.0f, 0.0f, 10.0f, 75.0f, 10.0f, 49.0f, 0.0f } } },
+    { 4, 1, 20, 20, 40.0f, 40.0f, 10.0f, 4.0f, 2.0f, { { 0.0f, 0.0f, 0.0f, 10.0f, 20.0f, -20.0f, 471.0f, 0.0f } } },
+    { 10, 4, 60, 60, 40.0f, 40.0f, 10.0f, 4.0f, 2.0f, { { 0.0f, 35.0f, 17.5f, 12.5f, 45.0f, -45.0f, 29.0f, 72.0f } } },
+    { 2, 1, 120, 120, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 10.0f, 40.0f, 0.0f, 0.0f, 21.0f, 5.0f, 25.0f, 0.0f } } },
+    { 2, 1, 120, 120, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 10.0f, 40.0f, 0.0f, 0.0f, 21.0f, 5.0f, 25.0f, 0.0f } } },
+    { 6, 2, 60, 60, 40.0f, 40.0f, 10.0f, 4.0f, 2.0f, { { 0.0f, 35.0f, 17.5f, 12.5f, 45.0f, -45.0f, 29.0f, 72.0f } } },
+};
 
-extern u8 D_800A72D0[];
-extern s32 D_800DDF20;
-extern s32 D_800DDF98;
-extern Game1B0740Wave D_8008D0B0[];
-extern Game1B0740Wave D_8008D318[];
-extern u8 *D_8008D3C0[];
-extern u8 D_800A72E8[];
+/* The wobble of the second vertex set of slots 2..4. */
+static SwarmFlight D_8008D318[3] = {
+    { 2, 1, 10, 10, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 0.0f, 0.0f, 0.0f, 0.5f, 75.0f, 40.0f, 49.0f, 0.0f } } },
+    { 2, 1, 10, 10, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 0.0f, 0.0f, 0.0f, 0.400000006f, 75.0f, 40.0f, 49.0f, 0.0f } } },
+    { 2, 1, 10, 10, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 0.0f, 0.0f, 0.0f, 0.3000000119f, 75.0f, 40.0f, 49.0f, 0.0f } } },
+};
+
+/* The wing vertex indices of each wobbling slot. */
+static const u8 *D_8008D3C0[7] = {
+    D_800A72DC, D_800A72DC, D_800A72E0, D_800A72E0, D_800A72E0, D_800A72E0, D_800A72E4,
+};
 
 /*
  * Spawns effect `type` at (x, y, z) for `player`, loading the models it needs.
@@ -217,7 +241,7 @@ Gfx *func_15183BA4(Gfx *gdl, s32 modelId, s32 arg2, s32 arg3) {
 }
 
 /* Frees model `slot`. Slots 8 and 9 are a pair: slot 8's model is kept until slot 9 is unused too, and freeing
- * slot 9 after slot 8 also frees D_800DDF20. */
+ * slot 9 after slot 8 also frees slot 8's model. */
 void func_15183C28(s32 slot) {
     if (D_800DDE80[slot].unk10 != NULL) {
         func_1510D630(D_800DDE80[slot].unk10);
@@ -227,10 +251,11 @@ void func_15183C28(s32 slot) {
         if (D_800DDF68[9] != -2) {
             return;
         }
-    } else if (slot == 9 && D_800DDF68[8] == -2 && D_800DDF20 != 0) {
-        func_10004074((void *)D_800DDF20);
-        D_800DDF20 = 0;
-        D_800DDF98 = 0;
+    } else if (slot == 9 && D_800DDF68[8] == -2 && D_800DDE80[8].resource != NULL) {
+        // matching: as below, the int-to-pointer cast keeps the argument in v0 before the move to a0
+        func_10004074((void *)(s32)D_800DDE80[8].resource);
+        D_800DDE80[8].resource = NULL;
+        D_800DDF78[8] = NULL;
     }
     if (D_800DDE80[slot].resource != NULL) {
         // matching: IDO reloads the argument into a0 directly unless it goes through an int-to-pointer cast
@@ -244,7 +269,7 @@ void func_15183C28(s32 slot) {
 void func_15183D28(void) {
     s32 i;
     s32 value;
-    Game1B0740Wave *wave;
+    SwarmFlight *wave;
 
     for (i = 0; i < 11; i++) {
         if (D_800DDF68[i] >= -1 && (D_800DDE80[i].resource == NULL || D_800DDF78[i] == NULL)) {
@@ -263,15 +288,15 @@ void func_15183D28(void) {
     for (i = 0; i < 7; i++) {
         if (D_800DDF68[i] == 1) {
             wave = &D_8008D0B0[i];
-            func_15165C80(&wave->angle, D_800DDE80[i].unk8, wave->radius, &wave->velocity, wave->amplitude,
-                          wave->frequency, D_8008D3C0[i], D_800A72E8[i]);
+            func_15165C80(&wave->u.wobble.angle, D_800DDE80[i].unk8, wave->u.wobble.radius, &wave->u.wobble.velocity, wave->u.wobble.maxAngle,
+                          wave->u.wobble.minAngle, D_8008D3C0[i], D_800A72E8[i]);
         }
     }
     for (i = 2; i < 5; i++) {
         if (D_800DDF68[i] == 1) {
             wave = &D_8008D318[i - 2];
-            func_15165C80(&wave->angle, D_800DDE80[i].unk4, wave->radius, &wave->velocity, wave->amplitude,
-                          wave->frequency, D_8008D3C0[i], D_800A72E8[i]);
+            func_15165C80(&wave->u.wobble.angle, D_800DDE80[i].unk4, wave->u.wobble.radius, &wave->u.wobble.velocity, wave->u.wobble.maxAngle,
+                          wave->u.wobble.minAngle, D_8008D3C0[i], D_800A72E8[i]);
         }
     }
     if (D_800DDF68[7] == 1) {

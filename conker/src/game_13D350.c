@@ -1,4 +1,13 @@
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+void *D_800DBE80;      // the current sky data (star field, tile formats or gradient texture)
+Vtx *D_800DBE88[4][2]; // per view, per framebuffer
+u8 D_800DBEA8[3];      // background colour
+u8 D_800DBEAB;
+u8 D_800DBEAC;
+Mtx *D_800DBEB0;       // sky projection matrices, 2 per view
+
 #include "functions.h"
 #include "variables.h"
 
@@ -11,29 +20,54 @@
  * extent from func_151108C4. */
 typedef Gfx *(*SkyDrawFunc)(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
-extern u8 D_800D9B69;
-extern u8 D_800D9B6A;
-extern u8 D_800D9B6B;
-extern u8 D_800D9B6C;
-extern u8 D_800D9B6D;
-extern u8 D_800D9B6E;
-extern u8 D_800D9B6F;
-extern u8 D_800D9B70;
-extern u8 D_800D9B71;
-extern u8 D_800D9B72;
-extern u8 D_800D9B73;
-extern u8 D_800D9B79;
-extern u8 D_800D9B7A;
-extern u8 D_800D9B7B;
-extern u8 D_800D9B7C;
-extern u8 D_800D9B7D;
-extern u8 D_800D9B7E;
-extern u8 D_800D9B7F;
-extern u8 D_800D9B80;
-extern u8 D_800D9B81;
-extern u8 D_800D9B82;
-extern u8 D_800D9B83;
-extern SkyDrawFunc D_800891D8[];
+/* The textures of each textured sky set (D_800B0DF0->unk9), five per set. */
+static s32 D_80089130[5] = { 0x17E1, 0x1829, 0x1799, 0x1871, 0x18B9 };
+static s32 D_80089144[5] = { 0x1679, 0x16C1, 0x162B, 0x1709, 0x1751 };
+static s32 D_80089158[5] = { 0x1CCB, 0x1D13, 0x1C83, 0x1D5B, 0x1DA3 };
+static s32 D_8008916C[5] = { 0x1949, 0x1991, 0x1901, 0x19D9, 0x1A21 };
+static s32 D_80089180[5] = { 0x147B, 0x150B, 0x12CB, 0x159B, 0x15E3 };
+static s32 D_80089194[5] = { 0x135B, 0x13A3, 0x1313, 0x13EB, 0x1433 };
+static s32 D_800891A8[5] = { 0x1AB1, 0x1AF9, 0x1A69, 0x1B41, 0x1B89 };
+s32 *D_800891BC[] = { D_80089130, D_80089144, D_80089158, D_8008916C, D_80089180, D_800891A8, D_80089194 };
+
+/*
+ * The draw routine of each sky mode (D_800B0DF0->unk8); most ignore some of the camera arguments.
+ * The table comes before func_15111AF4: the address the last entry takes makes as1 treat that function's
+ * entry label as address-taken, which its scheduling needs.
+ */
+static SkyDrawFunc D_800891D8[] = {
+    func_151103C8, func_150F9AB0, func_150D1810, func_15110600, func_15111AF4,
+};
+
+/* Per-format texture load tables (two formats), wrapped so they can be copied to the stack. */
+struct Game13D350U8x2 { u8 v[2]; };
+struct Game13D350S16x2 { s16 v[2]; };
+static struct Game13D350U8x2 D_800891EC = { { 1, 4 } };          // texel sizes (G_IM_SIZ_*)
+static struct Game13D350U8x2 D_800891F0 = { { 1, 2 } };          // load shifts
+static struct Game13D350S16x2 D_800891F4 = { { 0x800, 0x400 } }; // palette offsets
+static struct Game13D350U8x2 D_800891F8 = { { 255, 15 } };       // TLUT counts - 1
+static struct Game13D350U8x2 D_800891FC = { { 0, 1 } };          // render tiles
+
+/* One skybox face: its size and two opposite corners (the axis whose coordinates match is the face's plane). */
+typedef struct SkyFace {
+    u16 width;
+    u16 height;
+    s16 x0;
+    s16 y0;
+    s16 z0;
+    s16 x1;
+    s16 y1;
+    s16 z1;
+} SkyFace;
+
+static const SkyFace D_800A2DA0[6] = {
+    { 360, 360, -180, 180, -180, 180, -180, -180 },
+    { 360, 360, -180, 180, -180, -180, -180, 180 },
+    { 360, 360, -180, 180, 180, 180, -180, 180 },
+    { 360, 360, 180, 180, -180, 180, -180, 180 },
+    { 360, 360, -180, 180, 180, 180, 180, -180 },
+    { 360, 360, -180, -180, 180, 180, -180, -180 },
+};
 
 /* Draws the sky for the current view: clears the depth buffer, then (unless the view is covered) wraps the
  * camera angles into range and calls the current sky's draw routine if func_151108C4 says the sky shows. */
@@ -46,32 +80,16 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     f32 x;
     f32 y;
     f32 z;
+    s32 i;
 
-    // matching: each byte is its own symbol (a lui per store), not an index into D_800D9B68/D_800D9B78
-    D_800D9B68[0][0] = 0;
-    D_800D9B69 = 0;
-    D_800D9B6A = 0;
-    D_800D9B78[0][0] = 0;
-    D_800D9B79 = 0;
-    D_800D9B7A = 0;
-    D_800D9B6B = 0;
-    D_800D9B6C = 0;
-    D_800D9B6D = 0;
-    D_800D9B7B = 0;
-    D_800D9B7C = 0;
-    D_800D9B7D = 0;
-    D_800D9B6E = 0;
-    D_800D9B6F = 0;
-    D_800D9B70 = 0;
-    D_800D9B7E = 0;
-    D_800D9B7F = 0;
-    D_800D9B80 = 0;
-    D_800D9B71 = 0;
-    D_800D9B72 = 0;
-    D_800D9B73 = 0;
-    D_800D9B81 = 0;
-    D_800D9B82 = 0;
-    D_800D9B83 = 0;
+    for (i = 0; i < 4; i++) {
+        D_800D9B68[i][0] = 0;
+        D_800D9B68[i][1] = 0;
+        D_800D9B68[i][2] = 0;
+        D_800D9B78[i][0] = 0;
+        D_800D9B78[i][1] = 0;
+        D_800D9B78[i][2] = 0;
+    }
     gSPClearGeometryMode(gfx++, G_CULL_BOTH);
     gfx = func_151106A8(gfx);
     gDPPipeSync(gfx++);
@@ -138,7 +156,7 @@ void func_15110360(s32 viewIndex, MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
 
 /* Fills the current view with the background colour D_800DBEA8 and, on view 0 in split screen, draws the
  * black divider bars (only the horizontal one when D_80082FA0 is 1). */
-Gfx *func_151103C8(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
+Gfx *func_151103C8(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
     RenderView *view;
 
     view = &RENDER_VIEWS[D_80082FA4];
@@ -172,7 +190,7 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
 
 /* On maps 0x1B and 0x1E (and 0x31 while camera 0's unk3D4 has state 3) fills the whole drawable area with the
  * background colour D_800DBEA8. */
-Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
+Gfx *func_15110600(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
     // unk78 is the high byte of Actor's u16 unk78
     if (level == 0x1B || level == 0x1E ||
         (level == 0x31 && camera_global_Cameras->mv->rt_context_b == 3)) {
@@ -584,8 +602,8 @@ void func_15111858(void) {
         s32 height;
         f32 bits; // matching: read back through a u16 pointer (a union keeps it out of memory)
 
-        longitude = (f32)(func_150ADA20() % 36000U) * 0.0001745329209f; // hundredths of a degree to radians
-        v = (f32)(s32)((func_150ADA20() % 1584400U) - 792100) * 0.01f;
+        longitude = (func_150ADA20() % 36000U) * 0.0001745329209f; // hundredths of a degree to radians
+        v = (s32)((func_150ADA20() % 1584400U) - 792100) * 0.01f;
         if (v >= 0.0f) {
             latitude = 89.0f - sqrtf(v);
         } else {
@@ -605,36 +623,7 @@ void func_15111858(void) {
     }
 }
 
-/* One skybox face: its size and two opposite corners (the axis whose coordinates match is the face's plane). */
-typedef struct SkyFace {
-    u16 width;
-    u16 height;
-    s16 x0;
-    s16 y0;
-    s16 z0;
-    s16 x1;
-    s16 y1;
-    s16 z1;
-} SkyFace;
 
-/* Per-format texture load tables (two formats), wrapped so they can be copied to the stack. */
-struct Game13D350U8x2 { u8 v[2]; };
-struct Game13D350S16x2 { s16 v[2]; };
-extern struct Game13D350U8x2 D_800891EC;
-extern struct Game13D350U8x2 D_800891F0;
-extern struct Game13D350S16x2 D_800891F4;
-extern struct Game13D350U8x2 D_800891F8;
-extern struct Game13D350U8x2 D_800891FC;
-extern SkyFace D_800A2DA0[];
-
-
-/* Last entry of the D_800891D8 draw table (still asm data). The original file defined that table
- * before this function; the `.word func_15111AF4` it emits makes as1 treat the function's entry
- * label as address-taken, so the switch's `jr` gets an edge back to it. That turns everything up
- * to the switch into a "loop" for as1's cross-block scheduler (candidate limit 100 instead of
- * 10), which is what hoists `lwc1 yaw` above the 0x41 test and the else-arm `move v0,s0` into the
- * colour branch's delay slot. Without this word the function cannot match. */
-static void *D_800891E8[] = { func_15111AF4 };
 
 /* Draws the textured skybox (sky mode 4): sets up a tinted CI texture pipeline and the rotation-only view
  * matrix, then draws each face the camera can see (faces 0-3 by yaw, 4 and 5 by pitch) as a grid of 60x30

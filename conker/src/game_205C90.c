@@ -1,10 +1,16 @@
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/cont.h describes it. */
+u8 D_800E0A00; /* set by func_151D8DE8; game_48FD0 keeps the motors off while it is set */
+
 #include "functions.h"
 #include "variables.h"
 
 /* Rumble effect objects: a timed rumble on the controllers of the players in a mask. */
 
-extern void (*D_8008FCC0[])(RumbleObj *);
+/* The update handlers (RumbleParams.updateKind). Declared without a prototype: the entry takes the
+ * object as its own, longer view (RumbleFalloffObj). */
+static void (*D_8008FCC0[])() = { func_151D8BE0 };
 
 /* Returns whether any player in `playerMask` has a rumble pak; false at the first player without a
  * controller. */
@@ -165,7 +171,7 @@ void func_151D8D5C(RumbleObj *obj, s32 data, u8 message) {
     }
 }
 
-extern s32 D_800AB300[]; /* object kinds to message: { 0x3F } (rumble objects) */
+static const s32 D_800AB300[1] = { 0x3F }; /* object kinds to message: rumble objects */
 
 /* Sends `message` with `data` to every rumble object. */
 void func_151D8DB4(s32 data, u8 message) {

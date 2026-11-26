@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern TextureDesc *D_8008CA64; /* entry 6 of D_8008CA4C */
 
 /* Object type 0x3A: a swarm centre that steers towards a target and owns a group of members. */
 struct Swarm {
@@ -113,7 +112,7 @@ void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, 
     swarm->playSfx = playSfx;
     swarm->sfxHandle = 0;
     if (0) {} // matching: the extra basic block steers IDO's register allocation
-    template.anim = D_8008CA64;
+    template.anim = D_8008CA4C[6];
     template.swarm = swarm;
     template.velX = 0;
     template.velZ = 0;
@@ -251,7 +250,7 @@ void func_15178268(SwarmMember *member) {
     member->s.velZ = c * radius;
     member->s.angle = angle;
     rnd = (func_150ADA20() & 0x7F) + 100;
-    if ((f32)(func_150ADA20() & 0x3F) + (y + 50.0f) < member->s.y) {
+    if ((func_150ADA20() & 0x3F) + (y + 50.0f) < member->s.y) {
         member->s.unk22 = -rnd;
     } else {
         member->s.unk22 = rnd;
@@ -289,14 +288,14 @@ void func_15178268(SwarmMember *member) {
 }
 
 /* Member hook: defers to func_15168118 only when the swarm's viewMask has bit `view` set. */
-s32 func_15178750(s32 arg0, SwarmMember *member, s16 view) {
+Gfx *func_15178750(Gfx *gfx, SwarmMember *member, s16 view) {
     Swarm *swarm;
 
     swarm = member->s.swarm;
     if (swarm->viewMask & (1 << view)) {
-        return func_15168118((Gfx *)arg0, (BillboardParticle *)member, view);
+        return func_15168118(gfx, (BillboardParticle *)member, view);
     }
-    return arg0;
+    return gfx;
 }
 
 /* The empty function at 0x151787A4. */
@@ -414,14 +413,11 @@ void func_151787AC(Swarm *swarm, s32 x, s32 y, s32 z) {
     }
 }
 
-extern Swarm *D_800DCF38;       /* list of live swarms */
-extern SwarmMember *D_800DCF3C; /* list of live swarm members */
-
 /* Returns the live swarm with the given tag, or NULL. */
 Swarm *func_15178B98(u8 tag) {
     Swarm *swarm;
 
-    for (swarm = D_800DCF38; swarm != NULL; swarm = (Swarm *)swarm->header.next) {
+    for (swarm = (Swarm *)D_800DCE50[0][58]; swarm != NULL; swarm = (Swarm *)swarm->header.next) {
         if (swarm->tag == tag) {
             return swarm;
         }
@@ -480,7 +476,7 @@ void func_15178DA4(Swarm *swarm) {
     SwarmMember *next;
     SwarmMember *member;
 
-    member = D_800DCF3C;
+    member = (SwarmMember *)D_800DCE50[0][59];
     func_100111C8(swarm->sfxHandle);
     while (member != NULL) {
         next = (SwarmMember *)member->header.next;

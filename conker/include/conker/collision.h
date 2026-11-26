@@ -15,7 +15,6 @@
  *   game_AEB40.c
  *   game_AFA70.c
  *   game_22B750.c (data only, linked after game_AFA70)
- *   game_D0960.c
  *   game_D0F20.s .. game_DB730.s (hand-written asm)
  *   game_DB750.c
  *   game_10EA20.c
@@ -29,6 +28,18 @@ typedef struct TriggerVolume TriggerVolume;
 struct Foo150AE280;
 struct ShadowVtx;
 struct Foo150AE36C;
+
+/* A TriggerNode with a box volume (func_150448D0). */
+struct TriggerVolume {
+    /* 0x00 */ TriggerNode node;
+    /* 0x10 */ s16 depth;
+    /* 0x12 */ s16 width;
+    /* 0x14 */ s16 height;
+    /* 0x16 */ u8 angle;
+    /* 0x17 */ u8 pad17;
+    /* 0x18 */ s16 *position;
+    /* 0x1C */ s16 *size;
+};
 
 // One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
 typedef struct PartDef {
@@ -132,7 +143,7 @@ void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f3
                    f32 zUp);
 void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp);
-extern f32 D_800CBD90; // ledge probe results (written by game_D9894.s)
+extern f32 D_800CBD90; // ledge probe results (written by func_150AC3E4, game_D86A0.s)
 extern f32 D_800CBD94;
 extern f32 D_800CBD98;
 extern u16 D_800CBDA0[25]; // per movement_obj: 1 + the world object it touches, 0 if none
@@ -207,10 +218,6 @@ extern s32 (*D_80086C90[7])();
 extern const u8 *D_80086CAC[6]; // per ModelDef.subModelList: the sub-model list
 extern PartSet D_80086CC4[175]; // per ModelDef.partSet (1-based)
 extern const u8 D_8009D910[5];  // the expression actions of model 0
-
-/* game_D0960.c */
-s32 func_150A34B0(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);
-s32 func_150A3504(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);
 
 /* game_D0F20.s: the ground probe. func_150A3A70 gathers the candidate hits under (x, z) into
  * D_800D3300 and returns their count; func_150A3FC4 gives the height of a triangle at (x, z), from
@@ -303,8 +310,6 @@ s32 func_150AAD98(Tri3f tri);
 
 /* game_D86A0.s */
 s32 func_150AB1F0(f32 x, f32 y, f32 z, Actor *actor, s32 arg4);
-
-/* game_D9894.s */
 void func_150AC3E4(f32 x, f32 y, f32 z, Actor *actor, s32 arg4);
 
 /* game_D9E70.s: casts the ray from (x, y, z) along (dx, dy, dz), up to maxDist when it is not 0. Each
@@ -317,8 +322,6 @@ void func_150AD770(void);
 
 /* game_DAC30.s */
 f32 func_150AD780(f32 x);
-
-/* game_DAC3C.s */
 f32 func_150AD78C(f32 x);
 
 /* game_DAD60.s: out = a x b */
@@ -361,6 +364,11 @@ s32 func_15104620(s32 arg0, s32 arg1);
 s32 func_15104634(f32 x, f32 z, f32 y, f32 *out);
 
 /* game_13BB20.c */
+extern void *D_800DBDD8[4];
+extern void *D_800DBDE8[4];
+extern void *D_800DBDF8[4];
+extern struct QuadNode *D_800DBE08[4];
+extern u8 D_80089120[4];
 s32 func_1510E670(s32 index);
 void func_1510E7A4(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
                    f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj, f32 minY, f32 maxY);

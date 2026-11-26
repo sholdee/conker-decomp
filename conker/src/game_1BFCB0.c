@@ -4,7 +4,13 @@
 
 typedef void (*ObjectHandler)(Actor *obj);
 
-extern ObjectHandler *D_8008F860[];
+/*
+ * This file's .data: the handlers by id group (func_151928B0), then surface slot. Slot 2 (surface type 5 in level
+ * 20) runs func_15192920 (game_1BFDD0.c) for group 0 and func_151B1AB0 (game_1DEF60.c) for group 1.
+ */
+static ObjectHandler D_8008F840[] = { NULL, NULL, func_15192920, NULL };
+static ObjectHandler D_8008F850[] = { NULL, NULL, func_151B1AB0, NULL };
+static ObjectHandler *D_8008F860[] = { D_8008F840, D_8008F850 };
 
 /* Runs the handler for obj's id group, picked by the surface type in obj->unk184 (and the level). */
 void func_15192800(Actor *obj, s32 arg1) {

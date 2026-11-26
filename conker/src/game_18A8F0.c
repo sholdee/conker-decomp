@@ -1,4 +1,23 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
+s32 D_800DCD10[4]; // light-space scale matrix of the current player (func_1515EF74)
+u8 D_800DCD20[3];
+u8 D_800DCD23; /* not referenced */
+u8 D_800DCD24[3];
+u8 D_800DCD27;
+u8 D_800DCD28[3];
+s8 D_800DCD30[4][3];
+u8 D_800DCD3C;
+u8 D_800DCD3D;
+PointLightGfx D_800DCD40;
+u8 D_800DCD70[8]; /* not referenced */
+PointLight *D_800DCD78;
+s32 D_800DCD7C;
+ZoneLink *D_800DCD80;
+ZoneLink *D_800DCD84;
+
 #include "functions.h"
 #include "variables.h"
 
@@ -98,8 +117,6 @@ void func_1515D69C(void) {
 void func_1515D6C8(void) {
 }
 
-extern s32 D_800DCD10[];
-
 /* G_MOVEWORD index this microcode uses for the light-space scale matrix. */
 #define G_MW_LIGHTSCALE 0x10
 
@@ -192,9 +209,9 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
         scale = sqrtf(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
         if (scale != 0.0f) {
             scale = 1000.0f / scale;
-            pos[0] = dir[0] * scale + (f32)x;
-            pos[1] = dir[1] * scale + (f32)y;
-            pos[2] = dir[2] * scale + (f32)z;
+            pos[0] = dir[0] * scale + x;
+            pos[1] = dir[1] * scale + y;
+            pos[2] = dir[2] * scale + z;
         } else {
             pos[0] = x;
             pos[1] = y;
@@ -299,8 +316,8 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
         if (padLight) {
             gSPPointLight(gfx++, &D_800DCD40, (i + 2) * 0x30U);
         }
-        gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (u32)((i + padLight + 1) * 0x30U + 0x30));
-        gSPPointLight(gfx++, ambient, (u32)((i + padLight + 2) * 0x30U + 0x30));
+        gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (i + padLight + 1) * 0x30U + 0x30);
+        gSPPointLight(gfx++, ambient, (i + padLight + 2) * 0x30U + 0x30);
     }
     return gfx;
 }
@@ -401,8 +418,8 @@ Gfx *func_1515E544(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte
     if (padLight) {
         gSPPointLight(gfx++, &D_800DCD40, (i + 2) * 0x30U);
     }
-    gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (u32)((i + padLight + 1) * 0x30U + 0x30));
-    gSPPointLight(gfx++, ambient, (u32)((i + padLight + 2) * 0x30U + 0x30));
+    gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (i + padLight + 1) * 0x30U + 0x30);
+    gSPPointLight(gfx++, ambient, (i + padLight + 2) * 0x30U + 0x30);
     return gfx;
 }
 
@@ -584,7 +601,7 @@ void func_1515EF74(s16 *mtx) {
 f32 func_1515F008(s16 *mtx, s32 i) {
     s32 value = mtx[i];
     value = (value << 16) | (u16)mtx[i + 16];
-    return (f32)value * (1.0f / 65536.0f);
+    return value * (1.0f / 65536.0f);
 }
 
 /* Clamps `value` to the s16 range and stores it in D_800DCD10[i] as 16.16 fixed point. */
@@ -595,7 +612,7 @@ void func_1515F040(f32 value, s32 i) {
         value = -32768.0f;
     }
     value *= 65536.0f;
-    D_800DCD10[i] = (s32)value;
+    D_800DCD10[i] = value;
 }
 
 /* Clamps `value` to the s16 range and stores it in D_800DCD10[i] as an integer. */
@@ -605,7 +622,7 @@ void func_1515F0AC(f32 value, s32 i) {
     } else if (value < -32768.0f) {
         value = -32768.0f;
     }
-    D_800DCD10[i] = (s32)value;
+    D_800DCD10[i] = value;
 }
 
 /* Unlinks `light` from the light list and frees it. */

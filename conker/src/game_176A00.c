@@ -100,14 +100,14 @@ s32 func_15149838(ChannelParticle *particle) {
 
     motion->timerA -= D_800BE9E4;
     if (motion->timerA < 0) {
-        motion->timerA = func_150ADA20() % (u32)motion->periodA;
+        motion->timerA = func_150ADA20() % motion->periodA;
         motion->targetA = func_150ADA68() * (motion->maxA - motion->minA) + motion->minA;
     }
     particle->head.def.width += (motion->targetA - particle->head.def.width) * motion->rateA;
 
     motion->timerB -= D_800BE9E4;
     if (motion->timerB < 0) {
-        motion->timerB = func_150ADA20() % (u32)motion->periodB;
+        motion->timerB = func_150ADA20() % motion->periodB;
         if (func_150ADA20() & 3) {
             motion->targetB = func_150ADA68() * (motion->maxB - motion->minB) + motion->minB;
         } else {
@@ -118,8 +118,8 @@ s32 func_15149838(ChannelParticle *particle) {
 
     motion->timerC -= D_800BE9E4;
     if (motion->timerC < 0) {
-        motion->timerC = func_150ADA20() % (u32)motion->periodC;
-        motion->targetC = func_150ADA20() % (u32)(motion->maxC - motion->minC + 1) + motion->minC;
+        motion->timerC = func_150ADA20() % motion->periodC;
+        motion->targetC = func_150ADA20() % (motion->maxC - motion->minC + 1) + motion->minC;
     }
     particle->head.def.frameSpeed += (s32)(((f32)motion->targetC - (f32)particle->head.def.frameSpeed) * motion->rateC);
 

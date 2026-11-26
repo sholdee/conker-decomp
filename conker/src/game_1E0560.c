@@ -7,9 +7,41 @@
 #define ROPE_FLAG_NO_START 4 // start position not known
 #define ROPE_FLAG_NO_END   8 // end position not known
 
-extern s32 (*D_8008FAF0[])(HoltenRopeEffect *, Vec3f *, s32);
-extern s32 (*D_8008FAF8[])(HoltenRopeEffect *);
-extern void (*D_8008FB70[])(HoltenRopeEffect *);
+/* Endpoint callbacks (HoltenRopeEffect.startCallback / endCallback): s32 (rope, Vec3f *pos, u8 isStart),
+ * each taking the rope as its own type's view; 0 ends the rope. */
+static s32 (*D_8008FAF0[])() = { func_151B3F28, func_151B2FA0 };
+
+/* Update callbacks (HoltenRopeEffect.updateCallback); 0 ends the rope. */
+static s32 (*D_8008FAF8[])(HoltenRopeEffect *) = {
+    func_151B3A7C, func_151B3CF0, func_151B3FDC, func_151B42A4, func_151B48DC, func_151B4B78,
+};
+
+/* Draw styles (HoltenRopeEffect.drawStyle): s32 (rope, s32 *mode0, s32 *mode1, s32 *primR, s32 *primG, s32 *primB,
+ * s32 *primA, s32 *envR, s32 *envG, s32 *envB, s32 *envA, s32 *cycleType, u8 *renderMode, u8 *unk13) returns the
+ * draw settings of the rope's display list, nonzero if the rope should be drawn. */
+static s32 (*D_8008FB10[])() = { func_151B498C, func_151B4A14 };
+
+/* Render setup and reset display lists of the ropes; the rope type's entry in the object type table
+ * D_8008B4A8 points to them. */
+Gfx D_8008FB18[] = {
+    gsDPPipeSync(),
+    gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsDPSetConvert(0, 0, 0, 0, 0, 255),
+    gsSPEndDisplayList(),
+};
+Gfx D_8008FB40[] = {
+    gsDPPipeSync(),
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsDPPipeSync(),
+    gsDPSetConvert(G_CV_K0, G_CV_K1, G_CV_K2, G_CV_K3, G_CV_K4, G_CV_K5),
+    gsSPEndDisplayList(),
+};
+
+/* Message and cleanup handlers per rope type (HoltenRopeEffect.type); the cleanup handlers take the rope as
+ * their type's view. */
+static void (*D_8008FB68[])(HoltenRopeEffect *, s32, u8) = { NULL, NULL };
+static void (*D_8008FB70[])() = { func_151B2950, NULL };
 
 /* Allocates a rope effect with `extraSize` bytes of type data and initializes it from `desc`. */
 HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4) {
@@ -73,13 +105,6 @@ void func_151B3184(HoltenRopeEffect *effect) {
     }
 }
 
-/* Returns the draw settings for a rope's display list; nonzero if the rope should be drawn. */
-typedef s32 (*HoltenRopeDrawStyle)(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1,
-                                   s32 *primR, s32 *primG, s32 *primB, s32 *primA,
-                                   s32 *envR, s32 *envG, s32 *envB, s32 *envA,
-                                   s32 *cycleType, u8 *renderMode, u8 *unk13);
-
-extern HoltenRopeDrawStyle D_8008FB10[];
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -147,7 +172,7 @@ Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
             gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
             gfx = func_1513F4E4(gfx, unk13, &needSync);
-            gfx = func_15142E24(gfx, &D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &needSync, 3);
+            gfx = func_15142E24(gfx, &D_80090B60[54], 0, 0, 0, 0, 0x36, 0, 0, &needSync, 3);
             gfx = func_15142FBC(gfx, cycleType | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4, &needSync);
             {
                 f32 pad3; // matching: a local here opens a -g3 scope that IDO will not schedule across
@@ -250,8 +275,6 @@ Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
     }
     return gfx;
 }
-
-extern void (*D_8008FB68[])(HoltenRopeEffect *, s32, u8);
 
 /* Calls the rope type's handler from D_8008FB68, if it has one. */
 void func_151B3A34(HoltenRopeEffect *effect, s32 arg1, u8 arg2) {
@@ -459,7 +482,7 @@ s32 func_151B3FDC(HoltenRopeEffect *effect) {
  * from last frame (most in the middle of the rope) and is integrated with a velocity, so the
  * rope swings. Points snap to the curve on a reset (flag 2) or while D_800DBFF4 is set.
  */
-u8 func_151B42A4(HoltenRopeEffect *effect) {
+s32 func_151B42A4(HoltenRopeEffect *effect) {
     u8 ret;
     f32 dx;
     f32 dy;
@@ -586,7 +609,7 @@ u8 func_151B42A4(HoltenRopeEffect *effect) {
  * Places one end of a rope tied between two bones (called through func_151B2FA0). Returns 0 once
  * either actor is gone; while either has no bone matrices yet, both ends are marked lost.
  */
-s32 func_151B47D8(HoltenRopeEffect *effect, HoltenRopeBoneAnchors *anchors, Vec3f *pos, u8 isStart) {
+s32 func_151B47D8(HoltenRopeEffect *effect, RopeTieLink *anchors, Vec3f *pos, u8 isStart) {
     Actor *startTarget = anchors->start.target;
     Actor *endTarget = anchors->end.target;
 
@@ -648,17 +671,17 @@ s32 func_151B498C(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1,
 }
 
 /* Draw style 1: two-cycle, tinted with the color source's color while bit 0 of its unkA4 is set; style 0 otherwise. */
-u8 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,
+s32 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,
                  s32 *primR, s32 *primG, s32 *primB, s32 *primA,
                  s32 *envR, s32 *envG, s32 *envB, s32 *envA,
                  s32 *cycleType, u8 *renderMode, u8 *unk13) {
     u8 ret;
     s32 pad[2]; // matching: stack slots
     Actor *source;
-    u32 r;
-    u32 g;
-    u32 b;
-    u32 a;
+    s32 r;
+    s32 g;
+    s32 b;
+    u32 a; // matching: func_1502EC34 writes an s32; as an s32 here alpha below takes another register
     u32 alpha;
 
     ret = TRUE;

@@ -30,11 +30,10 @@ typedef struct {
     Camera *player;
 } SightPanelMsg;
 
-/* Effect spawned by func_151CCE94; +0x20 holds the owning player. */
+/* Effect spawned by func_151CCE94: a func_151A4FD0 screen tint with the owning player as its extra data. */
 typedef struct {
-    EffectHeader header;
-    u8 pad10[0x10];
-    Camera *player;
+    /* 0x00 */ struct ScreenTint tint;
+    /* 0x20 */ Camera *player;
 } SightOwnedEffect;
 
 /* State of the lens effect (func_151CB110), stored at +0x18 of its object. */
@@ -55,9 +54,9 @@ typedef struct {
 } SightLensObject;
 
 /* game_1F4650.c */
-s32 func_151C71A0(SightBeamParams *beam);
+s32 func_151C71A0(TriggerZone *beam);
 SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri,
-                               SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue,
+                               TriggerZone *beam, TriggerZone *source, u8 red, u8 green, u8 blue,
                                u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks,
                                u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle,
                                f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
@@ -93,23 +92,23 @@ void func_151CAB78(Camera *player, u8 big);
 void func_151CAD28(Camera *player, u8 big);
 void func_151CB110(SightLensObject *obj, u16 *framebuffer);
 void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId);
-void func_151CB510(SightSprite *sprite);
+s32 func_151CB510(SightSprite *sprite);
 void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4);
-void func_151CB918(SightSprite *sprite, SightPanelMsg *msg, u8 msgId);
+void func_151CB918(SightSprite *sprite, void *msg, u8 msgId);
 s32 func_151CB970(SightSprite *sprite);
 void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId);
 s32 func_151CBBE0(SightSprite *sprite);
 s32 func_151CBC60(SightSprite *sprite);
 f32 func_151CC1D4(SightSprite *sprite);
 void func_151CC290(Camera *player);
-void func_151CC2BC(SightSprite *sprite, s32 *msg, u8 msgId);
+void func_151CC2BC(SightSprite *sprite, void *msg, u8 msgId);
 void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5);
 s32 func_151CC77C(SightSprite *sprite);
 void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5);
 void func_151CCD1C(Camera *player, u8 red, u8 green, u8 blue);
 void func_151CCE94(Camera *player);
 void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3);
-void func_151CD224(SightSprite *sprite);
+s32 func_151CD224(SightSprite *sprite);
 extern const SightColor D_800AAC80;
 extern const SightColor D_800AAC90[];
 extern const SightColor D_800AACE0[];

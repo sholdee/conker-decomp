@@ -105,26 +105,6 @@ void func_150415E0(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noComb
     }
 }
 
-extern TextureDesc D_800915DC;
-extern TextureDesc D_800915EC;
-extern TextureDesc D_800915FC;
-extern TextureDesc D_8009160C;
-extern TextureDesc D_8009161C;
-extern TextureDesc D_8009162C;
-extern TextureDesc D_8009163C;
-extern TextureDesc D_8009164C;
-extern TextureDesc D_8009165C;
-extern TextureDesc D_80091690;
-extern TextureDesc D_800916AC;
-extern TextureDesc D_800916C8;
-extern TextureDesc D_800916E4;
-extern TextureDesc D_80091700;
-extern TextureDesc D_80091710;
-extern TextureDesc D_80091720;
-extern TextureDesc D_80091730;
-extern TextureDesc D_80091740;
-extern TextureDesc D_80091750;
-extern TextureDesc D_80091764;
 extern s32 D_800A4AC8[][2];
 
 /*

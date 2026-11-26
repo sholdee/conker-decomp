@@ -5,9 +5,13 @@
 /* Object type 0x34: screen effects from ../Effects/ColourFrameBuffer/colourframebuffer.c */
 #define OBJ_TYPE_SCREEN_EFFECT 0x34
 
-extern s32 (*D_8008B0D0[])(ScreenEffect *);
-extern void (*D_8008B0D8[])(ScreenEffect *, s32);
-extern void (*D_8008B0E4[])(ScreenEffect *, s32, u8);
+/* Update and draw handlers per screen effect kind (EffectDesc.updateIndex, drawIndex). Declared without
+ * a prototype: each handler takes the effect as its own type. */
+static s32 (*D_8008B0D0[])() = { func_151600D8, func_150CE200 };
+static void (*D_8008B0D8[])() = { func_150CE450, func_151CB110, func_150AF790 };
+/* Message handlers per kind (EffectDesc.messageIndex), as func_15160090 calls them; the handlers take
+ * the effect and the message as their own types. */
+static void (*D_8008B0E4[])(ScreenEffect *, s32, u8) = { NULL, func_151CB49C, func_150CE694 };
 
 /* Draws every screen effect in both object lists through its draw handler. */
 void func_1515FDA0(s32 arg0) {
@@ -101,14 +105,14 @@ s32 func_151600D8(ColourFrameBufferEffect *effect) {
 
     data = &effect->data;
     tunable = 0;
-    data->pos[0] = (f32)func_151422DC(tunable++, "pos s", -2000, 2000, 0,
-                                      "../Effects/ColourFrameBuffer/colourframebuffer.c", 452) * 0.001000000047f;
-    data->pos[1] = (f32)func_151422DC(tunable++, "pos t", -2000, 2000, 0,
-                                      "../Effects/ColourFrameBuffer/colourframebuffer.c", 457) * 0.001000000047f;
-    data->size[0] = (f32)func_151422DC(tunable++, "size s", 0, 2000, 500,
-                                       "../Effects/ColourFrameBuffer/colourframebuffer.c", 462) * 0.001000000047f;
-    data->size[1] = (f32)func_151422DC(tunable++, "size t", 0, 2000, 500,
-                                       "../Effects/ColourFrameBuffer/colourframebuffer.c", 467) * 0.001000000047f;
+    data->pos[0] = func_151422DC(tunable++, "pos s", -2000, 2000, 0,
+                                "../Effects/ColourFrameBuffer/colourframebuffer.c", 452) * 0.001000000047f;
+    data->pos[1] = func_151422DC(tunable++, "pos t", -2000, 2000, 0,
+                                "../Effects/ColourFrameBuffer/colourframebuffer.c", 457) * 0.001000000047f;
+    data->size[0] = func_151422DC(tunable++, "size s", 0, 2000, 500,
+                                 "../Effects/ColourFrameBuffer/colourframebuffer.c", 462) * 0.001000000047f;
+    data->size[1] = func_151422DC(tunable++, "size t", 0, 2000, 500,
+                                 "../Effects/ColourFrameBuffer/colourframebuffer.c", 467) * 0.001000000047f;
     data->pixelation = func_151422DC(tunable, "pixelation", 0, 0x10000, 0x10000,
                                      "../Effects/ColourFrameBuffer/colourframebuffer.c", 473);
     return 1;

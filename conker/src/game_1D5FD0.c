@@ -51,8 +51,13 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
     return emitter;
 }
 
-extern s32 (*D_8008F980[])(Emitter *);
-extern void (*D_8008F970[])(Emitter *, Vec3f *, f32, u8);
+/* Spawn hooks (EmitterDef.spawn), called once per particle at a point of the area; the last two take their
+   own views of the emitter. */
+static void (*D_8008F970[])(Emitter *, Vec3f *, f32, u8) = {
+    func_151A91AC, func_151A9634, func_1515AA84, func_150B1EE0,
+};
+/* Update hooks (EmitterDef.update); a hook that returns 0 ends the emitter. */
+static s32 (*D_8008F980[])(Emitter *) = { NULL };
 
 /*
  * Per-frame update: runs the update hook (0 kills the object), then while switched on (and its zone
@@ -123,7 +128,7 @@ void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
     EmitterDef *def;
 
     def = &emitter->state.def;
-    func_15143874((s16)(func_150ADA20() & 0xFF), def->radius * func_150ADA68(), &pos->x, &pos->z);
+    func_15143874(func_150ADA20() & 0xFF, def->radius * func_150ADA68(), &pos->x, &pos->z);
     pos->x += def->pos.x;
     pos->z += def->pos.z;
     pos->y = def->pos.y;
@@ -138,7 +143,12 @@ void func_151A9024(Emitter *emitter, u8 *msg, u8 msgType) {
     }
 }
 
-extern void (*D_8008F984[])(TriggerZone *, s32);
+/* Zone handlers by kind (TriggerZone.data1); declared without a prototype as two take their own view of
+   the zone. */
+static void (*D_8008F984[])() = {
+    func_151A90C0, func_151A90C0, func_151A90C0, func_151A90C0, func_151A90C0, func_151A90C0, func_1515A974,
+    func_15012020,
+};
 
 /* Zone handler (D_80082ECC): marks the zone and runs the handler for its kind (data1, 0 to 7). */
 s32 func_151A9060(TriggerZone *obj) {
@@ -202,7 +212,6 @@ typedef struct {
     s16 ids[3];
 } SpriteChoices;
 
-extern SpriteChoices D_8008F9A4;
 
 /* Spawn descriptor passed to func_1513C650. */
 typedef struct {
@@ -227,16 +236,15 @@ typedef struct {
     /* 0x28 */ s32 unk28;
 } SpriteSpawn;
 
-/* Spawn hook 0: a sprite of random size (50 to 100) using one of three D_8008F9A4 images, at pos. */
+/* Spawn hook 0: a sprite of random size (50 to 100) using one of three images, at pos. */
 void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     SpriteSpawn spawn;
     f32 size;
-    SpriteChoices choices;
+    SpriteChoices choices = { 15, 16, 17 };
     u32 pick;
     s32 rand2;
     s32 rand1;
 
-    choices = D_8008F9A4;
     size = func_150ADA68() * 50.0f + 50.0f;
     pick = func_150ADA20() % 3;
 
@@ -294,20 +302,30 @@ typedef struct {
     /* 0x0A */ u8 unkA;
     /* 0x0B */ u8 unkB;
     /* 0x0C */ u8 unkC;
-    /* 0x10 */ ParticleSettings *settings;
+    /* 0x10 */ const ParticleSettings *settings;
 } EmitterPreset;
 
-extern EmitterPreset D_8008F9AC[];
-
 /* The settings of the emitter presets (referenced only through D_8008F9AC). */
-const ParticleSettings D_800A8DF0 = { 1.0f, 1.0f, 0.0f, 0.0f, { 50, 0 }, { 50, 0 }, { 255, 0 }, 1, 255, 1.0f, 0.0f, 0 };
-const ParticleSettings D_800A8E1C = { 0.80100006f, 0.901f, 0.906f, 0.702f, { 16, 50 }, { 50, 50 }, { 80, 120 }, 20, 12, 0.1f, 0.29900002f, 0 };
-const ParticleSettings D_800A8E48 = { 0.499f, 0.79700005f, 0.80600005f, 0.508f, { 10, 50 }, { 50, 25 }, { 80, 150 }, 16, 15, 0.10700001f, 0.252f, 0 };
-const ParticleSettings D_800A8E74 = { 0.814f, 0.69500005f, 0.32200003f, 0.54200006f, { 10, 69 }, { 60, 25 }, { 80, 120 }, 16, 15, 0.08400001f, 0.29500002f, 0 };
-const ParticleSettings D_800A8EA0 = { 1.003f, 1.291f, 1.3050001f, 1.1680001f, { 10, 50 }, { 34, 20 }, { 80, 120 }, 20, 12, 0.279f, 0.30100003f, 0 };
-const ParticleSettings D_800A8ECC = { 1.322f, 1.7500001f, 1.238f, 1.108f, { 4, 91 }, { 60, 40 }, { 100, 100 }, 30, 8, 0.106000006f, 0.305f, 0 };
-const ParticleSettings D_800A8EF8 = { 1.141f, 1.087f, 1.5400001f, 0.688f, { 46, 74 }, { 35, 25 }, { 100, 100 }, 30, 8, 0.037f, 0.09900001f, 0 };
-const ParticleSettings D_800A8F24 = { 0.41700003f, 0.48900002f, 0.38000003f, 0.344f, { 30, 120 }, { 49, 25 }, { 100, 100 }, 15, 17, 0.09f, 0.05f, 0 };
+static const ParticleSettings D_800A8DF0 = { 1.0f, 1.0f, 0.0f, 0.0f, { 50, 0 }, { 50, 0 }, { 255, 0 }, 1, 255, 1.0f, 0.0f, 0 };
+static const ParticleSettings D_800A8E1C = { 0.80100006f, 0.901f, 0.906f, 0.702f, { 16, 50 }, { 50, 50 }, { 80, 120 }, 20, 12, 0.1f, 0.29900002f, 0 };
+static const ParticleSettings D_800A8E48 = { 0.499f, 0.79700005f, 0.80600005f, 0.508f, { 10, 50 }, { 50, 25 }, { 80, 150 }, 16, 15, 0.10700001f, 0.252f, 0 };
+static const ParticleSettings D_800A8E74 = { 0.814f, 0.69500005f, 0.32200003f, 0.54200006f, { 10, 69 }, { 60, 25 }, { 80, 120 }, 16, 15, 0.08400001f, 0.29500002f, 0 };
+static const ParticleSettings D_800A8EA0 = { 1.003f, 1.291f, 1.3050001f, 1.1680001f, { 10, 50 }, { 34, 20 }, { 80, 120 }, 20, 12, 0.279f, 0.30100003f, 0 };
+static const ParticleSettings D_800A8ECC = { 1.322f, 1.7500001f, 1.238f, 1.108f, { 4, 91 }, { 60, 40 }, { 100, 100 }, 30, 8, 0.106000006f, 0.305f, 0 };
+static const ParticleSettings D_800A8EF8 = { 1.141f, 1.087f, 1.5400001f, 0.688f, { 46, 74 }, { 35, 25 }, { 100, 100 }, 30, 8, 0.037f, 0.09900001f, 0 };
+static const ParticleSettings D_800A8F24 = { 0.41700003f, 0.48900002f, 0.38000003f, 0.344f, { 30, 120 }, { 49, 25 }, { 100, 100 }, 15, 17, 0.09f, 0.05f, 0 };
+
+static EmitterPreset D_8008F9AC[] = {
+    { 0.31f, 0.33900002f, 255, 200, 100, 6, 12, &D_800A8DF0 },
+    { 9.867606e-06f, 1.0790705e-05f, 255, 200, 100, 6, 12, &D_800A8E1C },
+    { 9.867606e-06f, 1.0790705e-05f, 255, 200, 100, 6, 12, &D_800A8E1C },
+    { 3.573e-05f, 2.592e-05f, 255, 200, 100, 6, 12, &D_800A8E48 },
+    { 2.492e-05f, 2.0e-05f, 255, 194, 94, 6, 13, &D_800A8E74 },
+    { 1.456e-05f, 1.044e-05f, 255, 194, 94, 6, 13, &D_800A8EA0 },
+    { 3.7e-07f, 7.4e-07f, 255, 194, 94, 6, 13, &D_800A8ECC },
+    { 1.27e-06f, 9.1e-07f, 255, 194, 94, 6, 13, &D_800A8EF8 },
+    { 7.143e-05f, 5.639e-05f, 255, 194, 94, 6, 13, &D_800A8F24 },
+};
 
 /*
  * Spawns particle emitter preset `preset` (0-8) on obj, or at pos when given. options:
@@ -403,7 +421,7 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     vec[0] = func_150ADA68() * settings->vec0Range + settings->vec0Base;
     vec[1] = func_150ADA68() * settings->vec1Range + settings->vec1Base;
     extra.gravity = func_150ADA68() * settings->unk20Range + settings->unk20Base;
-    extra.lifetime = func_150ADA20() % (u32)(settings->unk14.range + 1) + settings->unk14.base;
+    extra.lifetime = func_150ADA20() % (settings->unk14.range + 1) + settings->unk14.base;
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
     if (settings->flags & 1) {
@@ -418,8 +436,8 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     }
     flags = (settings->flags & 2) ? 0 : 2;
     particle = func_1514B8E4(pos, vec,
-        (s16)(rand1 % (u32)(settings->unk10.range + 1) + settings->unk10.base),
-        (rand2 % (u32)(settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
+        (s16)(rand1 % (settings->unk10.range + 1) + settings->unk10.base),
+        (rand2 % (settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
         0, 0.0f, 1.0f, 1.0f, 0x21, 0x23, 2, kind, flags,
         settings->unk1C, settings->unk1E, 8, emitter->base.header.owner, emitter->base.header.kind);
     if (particle != NULL) {
@@ -428,7 +446,7 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
 }
 
 /* The spawn functions; `data` is passed through from func_151A9834 (func_151DBBD4 reads a u8 kind there). */
-extern void (*D_8008FA60[])(Vec3f *, CollisionHit *, void *, u8, s32);
+static void (*D_8008FA60[])(Vec3f *, CollisionHit *, void *, u8, s32) = { func_151DBBD4, func_150DF4B8 };
 
 /*
  * Calls spawn function D_8008FA60[spawnFunc] at `count` random points within radius of center

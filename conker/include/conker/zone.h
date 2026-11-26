@@ -67,6 +67,8 @@ s32 func_150A32B4(TriggerZone *zone, s32 x, s32 y, s32 z);
 void func_150A3330(s32 id, s32 *subTypeData, s32 *data1, s32 *data2, s32 *data3);
 void func_150A3398(s32 id, u16 mask, s32 subTypeData, s32 data1, s32 data2, s32 data3);
 void func_150A3444(s32 id, s16 x, s16 y, s16 z);
+s32 func_150A34B0(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);
+s32 func_150A3504(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);
 extern u32 gZoneCount;
 extern TriggerZone *zones;
 extern ZoneBounds *D_800D309C;

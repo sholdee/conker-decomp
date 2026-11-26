@@ -4,7 +4,7 @@
  * This file's .bss, in the original order. IDO lays out .bss in an order that depends on the declarations
  * before it, so it is defined before functions.h and variables.h.
  */
-f32 D_800CBD90; // ledge probe results (func_150AB1F0 family in game_D9894.s)
+f32 D_800CBD90; // ledge probe results (func_150AB1F0 family in game_D86A0.s)
 f32 D_800CBD94;
 f32 D_800CBD98;
 s32 D_800CBD9C; // cleared by func_15044370
@@ -44,18 +44,6 @@ static AccentedLetter D_80085CE0[52] = { /* not referenced */
     { "\326", 0xD6, 20 }, { "\371", 0xF9, 21 }, { "\331", 0xD9, 21 }, { "\372", 0xFA, 22 },
     { "\332", 0xDA, 22 }, { "\373", 0xFB, 23 }, { "\333", 0xDB, 23 }, { "\374", 0xFC, 24 },
     { "\334", 0xDC, 24 }, { "\375", 0xFD, 25 }, { "\335", 0xDD, 25 }, { "\377", 0xFF, 26 }
-};
-
-/* A TriggerNode with a box volume (func_150448D0). */
-struct TriggerVolume {
-    /* 0x00 */ TriggerNode node;
-    /* 0x10 */ s16 depth;
-    /* 0x12 */ s16 width;
-    /* 0x14 */ s16 height;
-    /* 0x16 */ u8 angle;
-    /* 0x17 */ u8 pad17;
-    /* 0x18 */ s16 *position;
-    /* 0x1C */ s16 *size;
 };
 
 /* Trigger checks (TriggerNode.check) and actions (TriggerNode.action). */
@@ -361,7 +349,6 @@ void func_15044E88(void) {
 
 /* One candidate triangle returned by the func_150A3A70/func_150A4FA0/func_150A43E0 grid queries. */
 
-extern f32 D_800DBE74;
 
 /* Ceiling probe against collision set 0: lowest triangle between pos.y and top. */
 s32 func_15044ED0(Vec3f *pos, f32 top, CollisionHit *hit) {

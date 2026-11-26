@@ -9,6 +9,7 @@
  * that these files define, grouped by file in address order:
  *   game_43330.c
  *   game_13F9D0.c
+ *   game_13FF30.c
  */
 
 /* Turret settings (WorldObject.moveData.data); angles in degrees. */
@@ -45,6 +46,9 @@ void func_15015E80(void);
 
 /* game_13F9D0.c */
 void func_15112520(WorldObject *turret);
+extern Turret15112520Cfg D_80089200;
+
+/* game_13FF30.c */
 void func_15112A80(s32 player);
 void func_15113180(void);
 void func_15113218(void);
@@ -66,6 +70,22 @@ s32 func_15114CC4(ObjSound *sound, s32 arg1, s32 *follow, s32 arg3);
 void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 flags);
 void func_15114F04(WorldObject *obj, s32 arg1, s32 arg2);
 void func_15114F44(s32 arg0, s32 arg1, s32 arg2);
-extern Turret15112520Cfg D_80089200;
+extern DrawEntry **D_80089240[4]; // per-view draw lists
+extern Mtx **D_80089250[2]; // per frame buffer: one Mtx per object
+extern DrawEntry *D_800DBED0[4];
+extern Mtx *D_800DBEE0;
+extern Mtx *D_800DBEE4;
+extern u16 D_800DBEE8[4]; // per view: entries in D_80089240
+extern s32 gWorldObjectCount; // number of db_Object_array entries
+extern WorldObject *db_Object_array; // original name (Oct 2000 debugger); gWorldObjectCount entries
+extern void **D_800DBEF8; // per object: handle released with func_10004074
+extern u8 *D_800DBEFC; // per object: frames to keep the handle once hidden
+extern u8 D_800DBF00;
+extern MtxF D_800DBF08[2]; // per frame buffer
+extern u8 D_800DBF88;
+extern Gfx *D_800DBF8C; // display list of object D_800DBF88 (func_15004574)
+extern Vtx *D_800DBF90; // its source vertices
+extern s32 *gWorldObjectContacts; // per object: bit N set when actor movement_obj[N] touches it
+extern s32 D_800DBF98; // grouped objects, kept at the end of db_Object_array
 
 #endif

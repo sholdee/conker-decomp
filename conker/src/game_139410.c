@@ -1,6 +1,12 @@
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+struct UvWobble *D_800D9E60[1]; // the registered UV wobbles; only one fits
+u8 D_800D9E64;                  // number of registered UV wobbles
+
 #include "functions.h"
 #include "variables.h"
+
 
 /* The opcode byte of a display-list command, read signed (G_ENDDL is -0x21). */
 #define GFX_OP(g) (*(s8 *)(g))
@@ -146,8 +152,6 @@ s32 func_1510BF60(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip) {
     count = ((maxIdx + 1) + base) - *outVtx; // matching: ugen evaluates the index first
     return count;
 }
-
-extern UvWobble *D_800D9E60[];
 
 /* Registers a UV wobble for mesh 0 vertices drawn with texture `tex` and mesh 1 ones drawn with D_800917B8. */
 UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude) {

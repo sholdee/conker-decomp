@@ -8,14 +8,6 @@ static const Vec3f D_800A195C = { 0.0f, 71.0f, 9.0f };
 ZoneNode *D_800D9A40;
 
 
-// matching: D_800CC5EC is movement_obj[0].mv; func_150F2A60 tests it through the array and reads through
-// this alias so IDO reloads it (as the original does) instead of reusing the first load
-extern struct {
-    u8 pad0[0x120];
-    u8 unk120;
-} *D_800CC5EC;
-extern u8 D_800CC40C;
-
 /* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs
  * movement_obj[0] through func_15136C3C .. func_1507CD64(6) once; then offsets the four D_800BE4F0 entries
  * by object 0xE's taskint[0]. */
@@ -25,18 +17,22 @@ void func_150F2A60(s32 arg0) {
     Actor *obj;
     WorldObject *entry;
     s32 entryIndex;
+    Actor *player;
 
-    if (movement_obj->mv != NULL) {
-        if (D_800CC5EC->unk120 == 0) {
+    player = movement_obj;
+    // matching: the ROM loads player->mv twice, with no store between (the Oct 2000 debug build too). IDO
+    // merges two reads of one field with the same type into one load, so the test reads the pointer as a word.
+    if (*(s32 *)&player->mv != 0) {
+        if (player->mv->death_State == 0) {
             // matching: `| 0` hides the induction variable, so IDO keeps `slti` instead of testing i != 2
             for (i = 0; i < 2; i = (i + 1) | 0) {
                 entry = func_151149AC(0xFA - i);
                 entryIndex = entry - db_Object_array;
                 if (gWorldObjectContacts[entryIndex] & 1) {
-                    if (D_800CC40C != 0) {
-                        func_15060F28(&movement_obj[D_800CC40C - 100], 0);
+                    if (player->lifting) {
+                        func_15060F28(&movement_obj[player->lifting - 100], 0);
                     }
-                    D_800CC49A = 0;
+                    player->energy = 0;
                     func_15136C3C(movement_obj, 0, 0, 1, 1, 0, 0xFF, 1);
                     func_10010630(0x627, movement_obj, 0x6D60, 500, 1000);
                     func_15145A50(movement_obj);

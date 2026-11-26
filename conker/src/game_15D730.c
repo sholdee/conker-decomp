@@ -8,8 +8,25 @@ void func_15131958(Vec3f *vel, f32 drag);
 
 #include "libc/string.h"
 
-extern IdList3 D_800A37F0;
-
+/* This file's .data: the particle render setup and reset display lists (the particle object types point to
+ * them), then the handler tables. The handlers of a table take different particle types, so the tables are
+ * declared without a prototype. */
+Gfx D_80089700[] = {
+    gsDPPipeSync(),
+    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsDPSetAlphaCompare(G_AC_NONE),
+    gsDPSetBlendColor(0, 0, 0, 0x20),
+    gsSPEndDisplayList(),
+};
+Gfx D_80089730[] = {
+    gsDPPipeSync(),
+    gsDPSetAlphaCompare(G_AC_NONE),
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPClearGeometryMode(G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR),
+    gsSPSetGeometryMode(G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH),
+    gsSPEndDisplayList(),
+};
 
 /* Allocates a particle of the given kind with dataSize bytes of per-particle data and copies desc into it. */
 void *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5) {
@@ -55,8 +72,21 @@ void *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
     return func_15130374(desc, kind, dataSize, 0xFF, 0);
 }
 
-extern s32 (*D_80089760[])(SpriteParticle *, Vec3f *);
-extern void (*D_80089800[])(SpriteParticle *);
+/* Update functions, indexed by ParticleDesc.updateFunc (0 kills the particle). */
+static s32 (*D_80089760[])() = {
+    func_151A483C, func_151A4900, func_150BB260, func_15159594,
+    func_151596BC, func_151DB97C, func_151AFEA4, func_150CBCE0,
+    func_150CC8D4, func_150CAC28, func_151316DC, func_151025F4,
+    func_1515A11C, func_15192308, func_15192358, func_1519257C,
+    func_1513170C, func_151A2960, func_151045F4, func_151BD79C,
+    func_1515A60C, func_1515A78C, func_150AF6E4, func_151B8BE0,
+    func_15108658, func_150E8824, func_151316AC, func_151319A4,
+    func_15131AFC, func_15131B3C, func_150D6CC4, func_150D6F0C,
+    func_151D4D04, func_151D93F4, func_151D9450, func_151D9534,
+    func_150DA628, func_150F0E48, func_15131D9C, func_15131DEC,
+};
+/* Death functions, indexed by ParticleDesc.deathFunc. */
+static void (*D_80089800[])() = { func_150C1198 };
 
 /* Per-frame particle update: lifetime, motion, fade, scaling, animation and the update/death callbacks. */
 void func_151303EC(SpriteParticle *p) {
@@ -167,7 +197,10 @@ typedef struct ParticleRenderMode {
     s32 unk4;
 } ParticleRenderMode;
 
-extern s32 (*D_80089804[])(SpriteParticle *, s16);
+/* Draw functions, indexed by ParticleDesc.drawFunc. */
+static s32 (*D_80089804[])() = {
+    func_1510281C, func_15102884, func_15104620, func_15131814,
+};
 extern ParticleRenderMode D_800A4AC8[];
 
 /* Draws a particle as a screen-space textured rectangle in the given view. */
@@ -293,7 +326,7 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
                 u8 color[4];
 
                 func_1513137C(&primR, &primG, &primB, &primA, p);
-                func_1515E888(viewIdx, (s32)pos.x, (s32)pos.y, (s32)pos.z, 0xFF, color, NULL, NULL);
+                func_1515E888(viewIdx, pos.x, pos.y, pos.z, 0xFF, color, NULL, NULL);
                 envR = color[0];
                 envG = color[1];
                 envB = color[2];
@@ -451,7 +484,11 @@ void func_1513175C(DescParticleHead *p) {
     func_15169824(&p->header);
 }
 
-extern void (*D_80089814[])(SpriteParticle *);
+static void (*D_80089814[])() = {
+    func_1513173C, func_15101288, func_1513173C, func_1513173C,
+    func_1513173C, func_15101328, func_1513173C, func_1513173C,
+    func_1513173C, func_1513173C, func_1513173C, func_151D0F08,
+};
 
 /* Calls the particle's D_80089814 handler (set 0 without PARTICLE_HANDLERS). */
 void func_1513177C(SpriteParticle *p) {
@@ -465,7 +502,11 @@ void func_1513177C(SpriteParticle *p) {
     D_80089814[set](p);
 }
 
-extern s32 (*D_80089844[])(SpriteParticle *);
+static s32 (*D_80089844[])() = {
+    func_1513175C, func_151012B0, func_1513175C, func_1513175C,
+    func_1513175C, func_15101350, func_1513175C, func_1513175C,
+    func_1513175C, func_1513175C, func_1513175C, func_151D0F34,
+};
 
 /* Calls the particle's D_80089844 handler (set 0 without PARTICLE_HANDLERS). */
 s32 func_151317C8(SpriteParticle *p) {
@@ -485,8 +526,8 @@ s32 func_15131814(s32 arg0, s32 arg1) {
 
 /* Moves the particle's x/z offset around an ellipse with radii amplitude[0..1] as phase advances. */
 void func_15131828(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseStep) {
-    head->desc.offset.x = amplitude[0] * func_151423D8((u8)(phase[0] - 0x40));
-    head->desc.offset.z = amplitude[1] * func_151423D8((u8)(phase[1] - 0x40));
+    head->desc.offset.x = amplitude[0] * func_151423D8(phase[0] - 0x40);
+    head->desc.offset.z = amplitude[1] * func_151423D8(phase[1] - 0x40);
     phase[0] += phaseStep[0] * D_800BE9E4;
     phase[1] += phaseStep[1] * D_800BE9E4;
 }
@@ -526,7 +567,7 @@ s32 func_151319A4(SpriteParticle *p, Vec3f *prevPos) {
     return func_151319C4(p, prevPos, &p->data.bounce);
 }
 
-extern s32 (*D_80089874[])(SpriteParticle *, Vec3f *, f32 *, ParticleBounce *);
+static s32 (*D_80089874[])(SpriteParticle *, Vec3f *, f32 *, ParticleBounce *) = { func_15131B7C };
 
 /*
  * When a falling particle reaches the floor below it, calls its hit func with the floor point.
@@ -587,7 +628,10 @@ s32 func_15131B7C(SpriteParticle *p, Vec3f *prevPos, f32 *hit, ParticleBounce *b
     return TRUE;
 }
 
-extern void (*D_80089878[])(SpriteParticle *, s32, u8);
+static void (*D_80089878[])() = {
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    func_151BE558, func_150D6E60, func_150D7068, func_150F1020, NULL, NULL, NULL,
+};
 
 /* Calls the particle's D_80089878 handler, if it has one. */
 void func_15131C2C(SpriteParticle *p, s32 arg1, u8 arg2) {
@@ -605,11 +649,14 @@ void func_15131C2C(SpriteParticle *p, s32 arg1, u8 arg2) {
 void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX, f32 *outY) {
     phase[0] += phaseStep[0] * D_800BE9E4;
     phase[1] += phaseStep[1] * D_800BE9E4;
-    *outX = amplitude[0] * func_151423D8((u8)(phase[0] - 0x40)) + base;
-    *outY = amplitude[1] * func_151423D8((u8)(phase[1] - 0x40)) + base;
+    *outX = amplitude[0] * func_151423D8(phase[0] - 0x40) + base;
+    *outY = amplitude[1] * func_151423D8(phase[1] - 0x40) + base;
 }
 
-/* Calls func_15169260 with the three particle object types (see func_15130280). */
+/* The three particle object types (see func_15130280). */
+static const IdList3 D_800A37F0 = { { 0x2B, 0x47, 0x52 } };
+
+/* Calls func_15169260 with the three particle object types. */
 void func_15131D4C(s32 arg0, u8 arg1) {
     IdList3 types;
 

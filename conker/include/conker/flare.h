@@ -41,6 +41,7 @@ typedef struct ProbeData {
 void func_15009150(s32 arg0);
 
 /* game_16DC80.c */
+extern s32 D_800DC9F0; /* live glow count */
 /* Spawns a glow and copies paramSize bytes of params (a GlowParams, or a caller struct that starts with a
  * GlowShape) into it. Callers keep their own view of the glow object. */
 void *func_151407D0(void *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 handler, u8 arg8, s32 arg9);
@@ -61,14 +62,18 @@ void func_1514182C(GlowObj *obj, f32 *pivot, f32 distance, f32 spread, f32 angle
 s32 func_15141928(GlowObj *obj);
 
 /* game_1A0420.c */
+extern u8 D_800DD2D0; /* screen flash level (0 for none), which the lens flares raise */
 Gfx *func_15172F70(Gfx *arg0);
 
 /* game_1A11B0.c */
-Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, s32 zDest, s32 colorDest, s16 view);
+Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, void *zDest, void *colorDest, s16 view);
 Gfx *func_151742EC(Gfx *gfx, s32 view);
 s32 func_151745F0(f32 x, f32 y, f32 z, ProbeData *data, s8 callback, s32 arg5);
 
 /* game_1AB530.c */
+extern u8 D_800DDD61;
+extern LensFlare *D_800DDD64; /* head of the lens flare list */
+extern f32 *D_8008CFFC[2]; /* per LevelHeader.unk10: sun position (FLARE_SUN) */
 LensFlare *func_1517E080(s32 type, s32 alpha);
 void func_1517E134(LensFlare *flare);
 void func_1517E1AC(void);

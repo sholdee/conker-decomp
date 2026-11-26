@@ -432,7 +432,7 @@ typedef struct ParticleDef {
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
     /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x28 */ Vec3f rot;      /* or a point: func_1513F114 bend target, beam end, game_1DD500 previous position */
     /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
@@ -460,7 +460,7 @@ typedef struct ParticleDef48 {
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
     /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x28 */ Vec3f rot;      /* or a point: func_1513F114 bend target, beam end, game_1DD500 previous position */
     /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
@@ -482,7 +482,7 @@ typedef struct ParticleDef4C {
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
     /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x28 */ Vec3f rot;      /* or a point: func_1513F114 bend target, beam end, game_1DD500 previous position */
     /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
@@ -505,7 +505,7 @@ typedef struct ParticleDef54 {
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
     /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x28 */ Vec3f rot;      /* or a point: func_1513F114 bend target, beam end, game_1DD500 previous position */
     /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
@@ -1646,7 +1646,7 @@ typedef struct SpriteDef {
     /* 0x26 */ u8 pad26[2];
 } SpriteDef; /* size 0x28 */
 
-/* matching: a 0x2C stack copy of SpriteDef (game_E6A10.c); the extra word keeps func_150B9D8C's frame layout. */
+/* matching: a 0x2C stack copy of SpriteDef (game_E5E90.c); the extra word keeps func_150B9D8C's frame layout. */
 typedef struct SpriteDef2C {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s16 lifetime;
@@ -1770,17 +1770,32 @@ typedef struct AnchorEmitterParams {
     /* 0x5B */ u8 pad5B;
 } AnchorEmitterParams; /* size 0x5C */
 
-/* Emitter object created by func_1518F5D0 (game_1BC650.c; an object of func_151D2F00). */
-typedef struct AnchorEmitter {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ struct Actor *owner;
-    /* 0x14 */ u8 pad14[0xC];
+/* Object type 0x3E (game_1FFF60.c): watches an actor and owns a list of BoneFollowers. Users that need more
+ * data ask func_151D2F00 for extra bytes after it (AnchorEmitter). */
+typedef struct ActorFollowerGroup {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ struct Actor *actor;
+    /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
+    /* 0x15 */ u8 pad15;
+    /* 0x16 */ s16 timer;
+    /* 0x18 */ u8 flags;            // bit 0: timer counts down; bit 1: actor is trackable (has bone matrices, (unk74 & 0xF) != 0xF)
+    /* 0x19 */ s8 updateFn;         // index into D_8008FC4C, -1 for none
+    /* 0x1A */ s8 trackFn;          // index into D_8008FC50, called when bit 1 of flags sets
+    /* 0x1B */ s8 untrackFn;        // index into D_8008FC54, called when bit 1 of flags clears
+    /* 0x1C */ s8 expireFn;         // index into D_8008FC58, -1 for none
+    /* 0x1D */ u8 kind;             // index into D_8008FC5C and D_8008FC64
+    /* 0x1E */ u8 pad1E[2];
     /* 0x20 */ s16 count;
-    /* 0x22 */ u8 pad22[0xE];
+    /* 0x22 */ u8 pad22[2];
+    /* 0x24 */ struct BoneFollower *head;
+    /* 0x28 */ struct BoneFollower *tail;
+    /* 0x2C */ u8 pad2C[4];
+} ActorFollowerGroup; /* size 0x30 */
+
+/* Emitter object created by func_1518F5D0 (game_1BC650.c): an ActorFollowerGroup (kind 1) with the emitter's data
+ * after it. */
+typedef struct AnchorEmitter {
+    /* 0x00 */ ActorFollowerGroup group;
     /* 0x30 */ AnchorEmitterParams params;
 } AnchorEmitter; /* size 0x8C */
 
@@ -2074,20 +2089,14 @@ typedef struct DefParticleHead {
     /* 0x073 */ u8 vertexFn;             /* D_80089E1C index */
     /* 0x074 */ u8 unk74;
     /* 0x075 */ u8 pad75[3];
-    /* 0x078 */ f32 unk78;
-    /* 0x07C */ u8 pad7C[0x14];
-    /* 0x090 */ s32 unk90;
-    /* 0x094 */ u8 unk94;
-    /* 0x095 */ u8 unk95;
-    /* 0x096 */ u8 pad96[2];
-    /* 0x098 */ void *unk98;
+    /* 0x078 */ CollisionHit ground;      /* cleared at spawn (height -10000); filled by a ground probe */
     /* 0x09C */ ModelLink link;
     /* 0x0BC */ u8 padBC[4];
     /* 0x0C0 */ Vtx vtxTemplate[4];
     /* 0x100 */ Vtx *vtxBuffers[4];  /* per viewport, refreshed from vtxTemplate */
 } DefParticleHead; /* size 0x110 */
 
-/* Burst effect (func_150F9BB0 in game_127060.c, func_151BD828 in game_1E9A30.c): an effect object that
+/* Burst effect (func_150F9BB0 in game_127060.c, func_151BD828 in game_1E73B0.c): an effect object that
  * keeps two sparks (func_1513D2F0 beams) and two glows (func_151407D0) on its owner actor. */
 struct BurstSpark;
 struct BurstGlow;
@@ -2192,13 +2201,6 @@ typedef struct FadeEvent {
     /* 0x6 */ s8 eventFunc;      /* D_8008F8E0 index, -1 for none */
 } FadeEvent;
 
-/* The particle func_151A26EC spawns with func_15130374. */
-typedef struct FadeEventParticle {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 drag;         /* read by func_1513170C */
-    /* 0xAC */ u8 padAC[4];
-    /* 0xB0 */ FadeEvent fade;
-} FadeEventParticle; /* size 0xB8 */
 
 /* Description of a growing billboard particle (callback 9) spawned by func_1518CA80 (game_1B9F30.c). */
 typedef struct BillboardSpawn {
@@ -2272,7 +2274,7 @@ typedef struct EffectObj {
     /* 0x9C */ u8 pad9C[4];
 } EffectObj; /* size 0xA0 */
 
-/* Data of the tracker effect (game_1FC830.c): follows one point of its owner and leaves a TrackerTrail behind it. */
+/* Data of the tracker effect (game_1FA770.c): follows one point of its owner and leaves a TrackerTrail behind it. */
 typedef struct TrackerData {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;        /* owner->unique_id at spawn; a mismatch means the owner died */
@@ -2290,7 +2292,7 @@ typedef struct TrackerEffect {
     /* 0x28 */ TrackerData data;
 } TrackerEffect;
 
-/* User data of a TrackerTrail (copied in at spawn by func_151D1448, game_1FC830.c; run by game_1FEA80.c). */
+/* User data of a TrackerTrail (copied in at spawn by func_151D1448, game_1FA770.c; run by game_1FEA80.c). */
 typedef struct TrackerTrailData {
     /* 0x00 */ TrackerEffect *owner; /* NULL once the tracker lets go of the trail */
     /* 0x04 */ f32 texture;       /* running texture coordinate of the newest sample */
@@ -2318,8 +2320,8 @@ typedef struct TrailVec2 {
     f32 z;
 } TrailVec2;
 
-/* Kind 17 trail (func_151CEAAC, game_1FBED0.c): follows an actor or a sprite particle (func_151CEC54,
- * game_1FC0C0.c) and wobbles as a sine wave that grows along its length (func_151CF120, game_1FC5D0.c). */
+/* Kind 17 trail (func_151CEAAC, game_1FA770.c): follows an actor or a sprite particle (func_151CEC54,
+ * same file) and wobbles as a sine wave that grows along its length (func_151CF120). */
 
 /* WaveTrailData.flags */
 #define WAVE_TRAIL_HAS_NORMAL 1 /* scaled/normal have been initialised */
@@ -2665,12 +2667,17 @@ typedef struct SpriteParticle {
         struct {
             f32 drag;
             u8 pad4[4];
-            ActorRef owner;     /* the particle moves with it (func_151BD79C, game_1E9A30.c) */
+            ActorRef owner;     /* the particle moves with it (func_151BD79C, game_1E73B0.c) */
         } dragOwner;
         ParticlePulse pulse;
         ParticleFlash flash;
         WobbleData wobble;      /* update func 22 (func_150AF6E4, game_DC6B0.c) and the like */
         AgeFadeParams ageFade;  /* update funcs 0 and 1 (func_151A483C / func_151A4900, game_1D0840.c) */
+        struct {
+            f32 drag;
+            u8 pad4[4];
+            FadeEvent fade;
+        } dragFade;             /* update func 17 (func_151A2960, game_1CE2F0.c) */
     } data;
 } SpriteParticle;
 
@@ -3101,23 +3108,6 @@ typedef struct Struct150C29F0 {
 /* Sight beams (laser tripwires) and sight sprites, game_1F4650.c and game_1F7050.c. They are here and
  * not in conker/sight.h because they embed DefParticleHead and ScreenSpriteInfo. */
 
-/* Placement parameters for a sight beam (laser tripwire) between two surfaces. */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad6[2];
-    s16 length;
-    u8 padA[2];
-    f32 rotationX;
-    f32 rotationY;
-    u8 disabled;
-    u8 pad15[3];
-    u32 flags;
-    u32 colors;
-    u32 widths;
-} SightBeamParams;
-
 /* Animation parameters copied into an emitter part by func_151C9198. */
 typedef struct {
     /* 0x00 */ u8  unk0;
@@ -3148,7 +3138,7 @@ typedef struct {
     f32 angleT;
     f32 speedS;
     f32 speedT;
-    SightBeamParams *source;
+    TriggerZone *source;
     LightEffect *midEffect;
     s32 unk30;
     struct SightExtension *endEffect0;
@@ -3164,7 +3154,7 @@ typedef struct {
     s16 timer;
     s16 period;
     u8 flags;
-    SightBeamParams *beam;
+    TriggerZone *beam;
     ZoneNode *zone0;
     ZoneNode *zone1;
     u8 unk94;

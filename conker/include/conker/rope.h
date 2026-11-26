@@ -116,11 +116,6 @@ typedef struct {
     /* 0x2C */ u8 slot; // index in owner->tie.ropes
 } RopeTieLink;
 
-struct TiedRope {
-    /* 0x000 */ u8 pad0[0x150]; // HoltenRopeEffect
-    /* 0x150 */ RopeTieLink link;
-};
-
 /* Data at 0x28 of the straight line effect a RopeTie owns. */
 typedef struct {
     /* 0x00 */ RopeAnchor anchor; // anchor.offset is the start point
@@ -178,19 +173,11 @@ typedef struct {
     HoltenRopeAnchor anchor;
 } HoltenRopeAttached;
 
-/* Endpoint data at 0x150 for ropes tied between two actors' bones. */
-typedef struct {
-    /* 0x00 */ Actor *target;
-    /* 0x04 */ u8 targetId; // target->unique_id when the rope was attached
-    /* 0x05 */ u8 bone;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ Vec3f offset; // in the bone's space
-} HoltenRopeBoneAnchor;
-
-typedef struct {
-    HoltenRopeBoneAnchor start;
-    HoltenRopeBoneAnchor end;
-} HoltenRopeBoneAnchors;
+/* A rope a RopeTie owns: tied between two actors' bones (func_151B47D8 places its ends). */
+struct TiedRope {
+    /* 0x000 */ HoltenRopeEffect effect;
+    /* 0x150 */ RopeTieLink link;
+};
 
 /* A rope whose type data at 0x150 points to the object it takes its color from. */
 typedef struct {
@@ -228,13 +215,15 @@ void func_151B2950(TiedRope *self);
 Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view);
 void func_151B2EC4(RopeLine *self, s32 arg1, u8 event);
 void func_151B2F04(RopeTie *self, ActorSwapMsg *swap, u8 event);
-void func_151B2FA0(TiedRope *self, Vec3f *pos, u8 isStart);
+s32 func_151B2FA0(TiedRope *self, Vec3f *pos, u8 isStart);
 void func_151B2FD0(RopeLine *self);
 void func_151B2FE8(RopeLine *self);
 void func_151B3014(RopeLine *self);
 void func_151B3040(TiedRope *self, s32 arg1, u8 event);
 
 /* game_1E0560.c */
+extern Gfx D_8008FB18[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008FB40[]; /* render teardown (object type table D_8008B4A8) */
 HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4);
 void func_151B3184(HoltenRopeEffect *effect);
 Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view);
@@ -243,11 +232,11 @@ s32 func_151B3A7C(HoltenRopeEffect *effect);
 s32 func_151B3CF0(HoltenRopeEffect *effect);
 s32 func_151B3F28(HoltenRopeAttached *rope, Vec3f *pos, u8 isStart);
 s32 func_151B3FDC(HoltenRopeEffect *effect);
-u8 func_151B42A4(HoltenRopeEffect *effect);
-s32 func_151B47D8(HoltenRopeEffect *effect, HoltenRopeBoneAnchors *anchors, Vec3f *pos, u8 isStart);
+s32 func_151B42A4(HoltenRopeEffect *effect);
+s32 func_151B47D8(HoltenRopeEffect *effect, RopeTieLink *anchors, Vec3f *pos, u8 isStart);
 s32 func_151B48DC(HoltenRopeEffect *effect);
 s32 func_151B498C(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1, s32 *primR, s32 *primG, s32 *primB, s32 *primA, s32 *envR, s32 *envG, s32 *envB, s32 *envA, s32 *cycleType, u8 *renderMode, u8 *unk13);
-u8 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1, s32 *primR, s32 *primG, s32 *primB, s32 *primA, s32 *envR, s32 *envG, s32 *envB, s32 *envA, s32 *cycleType, u8 *renderMode, u8 *unk13);
+s32 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1, s32 *primR, s32 *primG, s32 *primB, s32 *primA, s32 *envR, s32 *envG, s32 *envB, s32 *envA, s32 *cycleType, u8 *renderMode, u8 *unk13);
 s32 func_151B4B78(HoltenRopeEffect *effect);
 void func_151B4C1C(HoltenRopeEffect *effect);
 void func_151B4C6C(HoltenRopeEffect *effect);

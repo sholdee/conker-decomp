@@ -12,12 +12,6 @@
  *   game/done/game_43820.c
  *   game_58F80.c
  *   game_77BE0.c
- *   game_7F710.c
- *   game_7FA40.c
- *   game_7FC10.c
- *   game_803A0.c
- *   game_808E0.c
- *   game_80B80.c
  *   game_83300.c
  *   game_90840.c
  *   game_97AA0.c
@@ -86,7 +80,8 @@ void func_1502EA60(Actor *obj, s32 rate);
 void func_1502EA7C(Actor *obj, s32 rate);
 void func_1502EA98(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rate);
 void func_1502EAFC(Actor *obj);
-void func_1502EC34(Actor *arg0, s32 *r, s32 *g, s32 *b, s32 *a);
+/* (Actor *obj, s32 *r, s32 *g, s32 *b, s32 *a); declared without a prototype: game_1E0560.c passes a u32 *a */
+void func_1502EC34();
 s32 func_1502EE8C(s32 index, s32 slot);
 void func_1502EEF4(s32 index);
 Gfx *func_1502F01C(Gfx *gdl, s32 index);
@@ -126,56 +121,28 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2);
 void func_1504C854(Actor *obj);
 s32 func_1504C8BC(Actor *obj);
 void func_1504C9E4(Actor *obj, s8 target, u8 mode);
-extern s32 D_80086000;
-extern void (*D_80086014[])(Actor *); // per-type update handlers
-extern s32 D_800CC250;
-extern f32 D_800CC254; // object position saved at the hit test (x, y, z)
-extern f32 D_800CC258;
-extern f32 D_800CC25C;
-extern s32 D_800CC260;
-extern s16 D_800CC264; // frame speed in percent
-extern s32 D_800CC268;
-extern u8 D_800CC26C;
-extern u8 D_800CC26D;
-extern u8 D_800CC26E;
-extern f32 D_800CC270; // attacker position saved at the hit (x, z, y)
-extern f32 D_800CC274;
-extern f32 D_800CC278;
-extern u8 D_800CC27C; // floor material class of the object being updated
-extern u16 D_800CC27E;
-extern const f32 D_800990C0[8];
-extern const f32 D_800990E0[8];
-extern const u16 D_8009917C[16];
-extern const u16 D_8009919C[6];
-
-/* game_7F710.c */
+void func_1504CA60(Actor *actor);
+void func_1504CB98(Actor *actor);
+void func_150511E8(Actor *actor);
+void func_15051558(Actor *actor, f32 x, f32 z, u16 facing);
+f32 func_1505210C(Actor *actor, f32 slopeX, f32 slopeZ, f32 *pitch, f32 limit);
 void func_15052260(Actor *actor);
 void func_15052408(Actor *actor);
 void func_15052458(Actor *unused);
 void func_15052464(Actor *actor);
 void func_15052490(Actor *actor, u16 angle, f32 amount, f32 scale);
 void func_1505250C(Actor *actor, s32 unused);
-
-/* game_7FA40.c */
 void func_15052590(Actor *obj);
-
-/* game_7FC10.c */
 void func_15052760(Actor *obj, s16 prevAngle);
 void func_150528C8(Actor *obj);
-
-/* game_803A0.c */
 void func_15052EF0(Actor *obj);
 Actor *func_15052F58(s32 index, s32 arg1);
 /* void func_15052F9C(Actor *, f32 height, ...) is declared in the files that call it:
    game_1048D0.c was compiled with an s32 return. */
 void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
-
-/* game_808E0.c */
 s32 func_15053430(Actor *obj);
 s32 func_150535F4(Actor *obj);
 void func_15053694(Actor *obj);
-
-/* game_80B80.c */
 void func_150536D0(Actor *obj);
 void func_150536E8(Actor *obj);
 void func_1505371C(Actor *obj);
@@ -196,6 +163,44 @@ void func_15055B64(Actor *obj);
 void func_15055BF8(Actor *obj);
 void func_15055C88(Actor *obj);
 void func_15055D48(Actor *obj);
+extern s32 D_80086000;
+extern void (*D_80086014[])(Actor *); // per-type update handlers
+extern s32 D_800CC250;
+extern f32 D_800CC254; // object position saved at the hit test (x, y, z)
+extern f32 D_800CC258;
+extern f32 D_800CC25C;
+extern s32 D_800CC260;
+extern s16 D_800CC264; // frame speed in percent
+extern s32 D_800CC268;
+extern u8 D_800CC26C;
+extern u8 D_800CC26D;
+extern u8 D_800CC26E;
+extern f32 D_800CC270; // attacker position saved at the hit (x, z, y)
+extern f32 D_800CC274;
+extern f32 D_800CC278;
+extern u8 D_800CC27C; // floor material class of the object being updated
+extern u16 D_800CC27E;
+extern s32 D_800CC280;
+extern OSContPad *D_800CC284; // the current player's controller input
+extern s32 D_800CC288;
+extern s32 D_800CC28C;
+extern s32 D_800CC290;
+extern s32 D_800CC294; // not referenced by any code
+extern TexAnimState D_800CC298;
+extern u8 D_800CC2B0;
+extern u8 D_800CC2B1;
+extern s16 D_800CC2B2;
+extern f32 D_800CC2B4;
+extern u8 D_800CC2B8;
+extern u16 D_800CC2BA; // frame step of the actor being updated
+extern s32 D_800CC2BC;
+extern f32 D_800CC2C0;
+extern f32 D_800CC2C4;
+extern f32 D_800CC2C8;
+extern Actor movement_obj[26]; // the actors
+extern s32 D_800D1548;
+extern Actor *D_800D154C; // the actor being updated
+extern f32 D_800D1550; // frame time step
 
 /* game_83300.c */
 void func_15055E50(Actor *actor, s32 zoneSetId);

@@ -2,8 +2,19 @@
 #include "functions.h"
 #include "variables.h"
 
-
-
+/* Render setup and teardown of the sprite particles (object types 15 and 67 of D_8008B4A8). */
+Gfx D_8008CC30[] = {
+    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPClearGeometryMode(G_CULL_BOTH | G_FOG | G_LOD),
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsSPEndDisplayList(),
+};
+Gfx D_8008CC58[] = {
+    gsSPSetGeometryMode(G_CULL_BACK),
+    gsDPPipeSync(),
+    gsSPEndDisplayList(),
+};
 
 /* Allocates a particle and initialises its animation state. */
 Particle19F150 *func_15171CA0(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 arg6,
@@ -41,11 +52,11 @@ void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f
                 func_1516972C(&particle->header);
             }
         } else {
-            particle->vtx[0].v.ob[0] = particle->vtx[3].v.ob[0] = x - (f32)size;
-            particle->vtx[1].v.ob[0] = particle->vtx[2].v.ob[0] = (f32)size + x;
+            particle->vtx[0].v.ob[0] = particle->vtx[3].v.ob[0] = x - size;
+            particle->vtx[1].v.ob[0] = particle->vtx[2].v.ob[0] = size + x;
             particle->vtx[0].v.ob[1] = particle->vtx[1].v.ob[1] = particle->vtx[2].v.ob[1] = particle->vtx[3].v.ob[1] = y;
-            particle->vtx[0].v.ob[2] = particle->vtx[1].v.ob[2] = z - (f32)size;
-            particle->vtx[2].v.ob[2] = particle->vtx[3].v.ob[2] = (f32)size + z;
+            particle->vtx[0].v.ob[2] = particle->vtx[1].v.ob[2] = z - size;
+            particle->vtx[2].v.ob[2] = particle->vtx[3].v.ob[2] = size + z;
             particle->vtx[0].v.tc[0] = particle->vtx[3].v.tc[0] = 0x2000;
             particle->vtx[1].v.tc[0] = particle->vtx[2].v.tc[0] = (D_8008CA4C[animIndex]->width + 0x100) << 5;
             particle->vtx[0].v.tc[1] = particle->vtx[1].v.tc[1] = 0x2000;
@@ -293,7 +304,7 @@ s32 func_151725FC(Vtx *vtx, void *tri, f32 x, f32 y, f32 z, f32 angle, s32 size,
     f32 centerT;
     f32 cosT;
     f32 sinT;
-    s16 (*cornerUV)[2];
+    const s16 (*cornerUV)[2];
     Vtx *quad; // matching: the texture-coordinate loop must index the parameter, the others this copy
     s32 n;
     s32 i;
@@ -388,8 +399,8 @@ s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, 
 
     cosT = cosf((angle - 90.0f) * 0.01745329238f);
     sinT = sinf((angle - 90.0f) * 0.01745329238f);
-    x += (f32)dist * sinT;
-    z += (f32)dist * cosT;
+    x += dist * sinT;
+    z += dist * cosT;
     func_1510E82C(&floor.tri, 0, &floor.floorY, 0, &floor.unk8, 0, x, y, z, y, 0, 0);
     if (floor.tri == NULL) {
         return 0;

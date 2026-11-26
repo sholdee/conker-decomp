@@ -27,9 +27,9 @@ s32 func_1509DD50(s32 arg0, SwarmSpawnCmd *cmd) {
 }
 
 /* Script handler: destroys the swarm with the given tag. */
-s32 func_1509DDC4(s32 tag, u16 arg1) {
-    arg1 = tag; // matching: IDO copies tag through the arg1 register only via this reassignment
-    func_15178E14(arg1);
+s32 func_1509DDC4(s32 tag, ScriptCmd *cmd) {
+    u16 swarmTag = tag; // matching: the u16 local takes the register of cmd (unused)
+    func_15178E14(swarmTag);
     return 0;
 }
 

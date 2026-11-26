@@ -4,9 +4,9 @@
 
 
 /* Per-camera accumulated speeds for the free camera, indexed by Camera.CNumber. */
-extern f32 D_80089560[]; /* vertical (C-up / C-down) */
-extern f32 D_80089570[]; /* strafe or roll (C-left / C-right) */
-extern f32 D_80089580[]; /* pitch (A / B) */
+static f32 D_80089560[4] = { 0.0f }; /* vertical (C-up / C-down) */
+static f32 D_80089570[4] = { 0.0f }; /* strafe or roll (C-left / C-right) */
+static f32 D_80089580[4] = { 0.0f }; /* pitch (A / B) */
 
 /*
  * Free-fly camera. D-pad down toggles it (flag 0x80000000 in flags means paused). While active, the

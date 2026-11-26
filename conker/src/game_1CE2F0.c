@@ -144,8 +144,8 @@ void func_151A11E4(SphereEmitter *emitter) {
             if (func_150ADA20() & 1) {
                 packet.flags |= BILLBOARD_FLIP_T;
             }
-            packet.frameStep = func_150ADA20() % (u32)(params->frameStepRange + 1) + params->frameStep;
-            size = func_150ADA20() % (u32)(params->sizeRange + 1) + params->size;
+            packet.frameStep = func_150ADA20() % (params->frameStepRange + 1) + params->frameStep;
+            size = func_150ADA20() % (params->sizeRange + 1) + params->size;
             packet.life = D_80090B60[39].frameCount * (256 / packet.frameStep);
             life = packet.life;
             data.growStart = data.fadeInStart = life;
@@ -171,9 +171,9 @@ void func_151A11E4(SphereEmitter *emitter) {
             do { } while (0);
             horiz = (ty - params->y) * inv;
             dist = (tz - params->z) * inv;
-            data.velX = (s32)vx;
-            data.velY = (s32)horiz;
-            data.velZ = (s32)dist;
+            data.velX = vx;
+            data.velY = horiz;
+            data.velZ = dist;
             data.velSubX = (u8)(s32)(vx * 256.0f);
             data.velSubY = (u8)(s32)(horiz * 256.0f);
             data.velSubZ = (u8)(s32)(dist * 256.0f);
@@ -335,8 +335,8 @@ void func_151A1998(SphereEmitter *emitter) {
             if (func_150ADA20() & 1) {
                 packet.flags |= BILLBOARD_FLIP_T;
             }
-            packet.frameStep = func_150ADA20() % (u32)(params->frameStepRange + 1) + params->frameStep;
-            size = func_150ADA20() % (u32)(params->sizeRange + 1) + params->size;
+            packet.frameStep = func_150ADA20() % (params->frameStepRange + 1) + params->frameStep;
+            size = func_150ADA20() % (params->sizeRange + 1) + params->size;
             life = packet.life = D_80090B60[39].frameCount * (256 / packet.frameStep);
             data.fadeInStart = life;
             data.fadeInEnd = life - (life >> 2);
@@ -499,8 +499,8 @@ void func_151A1FB4(SphereEmitter *emitter) {
             if (func_150ADA20() & 1) {
                 packet.flags |= BILLBOARD_FLIP_T;
             }
-            packet.frameStep = func_150ADA20() % (u32)(params->frameStepRange + 1) + params->frameStep;
-            size = func_150ADA20() % (u32)(params->sizeRange + 1) + params->size;
+            packet.frameStep = func_150ADA20() % (params->frameStepRange + 1) + params->frameStep;
+            size = func_150ADA20() % (params->sizeRange + 1) + params->size;
             packet.life = D_80090B60[39].frameCount * (256 / packet.frameStep);
             data.fadeInStart = packet.life;
             data.growStart = packet.life;
@@ -514,7 +514,7 @@ void func_151A1FB4(SphereEmitter *emitter) {
             data.fadeOutStart = packet.life >> 2;
             data.fadeOutStep = 255 / (packet.life >> 2);
             data.swellStart = packet.life >> 1;
-            data.swellRate = func_150ADA20() % (u32)(params->growRateRange + 1) + params->growRate;
+            data.swellRate = func_150ADA20() % (params->growRateRange + 1) + params->growRate;
             data.accelStart = packet.life >> 1;
             data.accel = func_150ADA20() % 81U + 80;
             packet.x = x;
@@ -595,14 +595,16 @@ typedef struct {
     /* 0x4 */ FadeEvent fade;
 } ParticleData151A26EC;
 
-extern void (*D_8008F8E0[])(FadeEventParticle *, s32);
+/* Fade event handlers (FadeEvent.eventFunc), called with the particle and its event time; declared
+   without a prototype as the handlers take only the particle. */
+static void (*D_8008F8E0[])() = { func_151A2F0C, func_151A3150 };
 
 /* Spawns one func_15130374 particle (texture 39, update func 0x11) at pos/offset with velocity vel. */
 s32 func_151A26EC(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, f32 size,
                   s16 timer, u8 alpha, s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc,
                   u8 r, u8 g, u8 b, u8 argF, s32 arg10) {
     ParticleData151A26EC data;
-    FadeEventParticle *particle;
+    SpriteParticle *particle;
     ParticleDesc desc;
 
     if (fadeStart <= 0) {
@@ -654,17 +656,17 @@ s32 func_151A26EC(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, 
     particle = func_15130374(&desc, 1, 0x10, argF, arg10);
     if (particle != NULL) {
         // matching: the target copies 8 bytes from data.drag, overlapping the second copy
-        memcpy(&particle->drag, &data.drag, 8);
-        memcpy(&particle->fade, &data.fade, sizeof(data.fade));
+        memcpy(&particle->data.dragFade.drag, &data.drag, 8);
+        memcpy(&particle->data.dragFade.fade, &data.fade, sizeof(data.fade));
     }
     return 0;
 }
 
 /* Update func 0x11 (func_151A26EC's particles): dim out, run the one-shot event, then apply drag. */
-s32 func_151A2960(FadeEventParticle *particle, Vec3f *prevPos) {
+s32 func_151A2960(SpriteParticle *particle, Vec3f *prevPos) {
     FadeEvent *fade;
 
-    fade = &particle->fade;
+    fade = &particle->data.dragFade.fade;
     if (particle->head.desc.timer < fade->fadeOutStart) {
         particle->head.desc.brightness = particle->head.desc.timer * fade->fadeOutStep;
     }
@@ -709,14 +711,15 @@ void func_151A2B84(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out) {
 
 /* BurstVelocityFunc: the yaw/pitch direction at speed * (1 - t). */
 void func_151A2BD0(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out) {
-    func_15143794((s16)yaw, (s16)pitch, (1.0f - t) * speed, out);
+    func_15143794(yaw, pitch, (1.0f - t) * speed, out);
 }
 
-/* BillboardParticle colours picked at random by func_151A2C24 (a local initializer's rodata). */
+/* BillboardParticle colours picked at random by func_151A2C24. */
 typedef struct {
     u8 rgb[4][3];
 } BurstColors;
-extern BurstColors D_8008F8E8;
+
+static BurstColors D_8008F8E8 = { { { 0, 0, 0 }, { 89, 0, 0 }, { 255, 255, 255 }, { 128, 128, 128 } } };
 
 /* Spawns `count` func_151A26EC particles around pos; size and speed change linearly over the burst. */
 void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
@@ -744,16 +747,16 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
         minFade = fadeOutStart;
     }
     t = 0.0f;
-    step = 1.0f / (f32)count;
+    step = 1.0f / count;
     while (count != 0) {
         f32 rand;
         s32 a;  // matching: a and b are reused for the alpha roll and the event time
         s32 b;
 
-        delay = func_150ADA20() % (u32)(delayRange + 1) + delayBase;
+        delay = func_150ADA20() % (delayRange + 1) + delayBase;
         a = func_150ADA20();
         b = func_150ADA20();
-        func_15143794((s16)(a & 0xFF), (s16)(b & 0xFF), func_150ADA68() * spread, &offset);
+        func_15143794(a & 0xFF, b & 0xFF, func_150ADA68() * spread, &offset);
         velocityFunc(dir, yaw, pitch, speed, t, &vel);
         colors = D_8008F8E8;
         color = func_150ADA20() & 3;
@@ -774,7 +777,7 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
 }
 
 /* D_8008F8E0[0]: a func_15152B38 burst at the particle's position, sized by the particle. */
-void func_151A2F0C(FadeEventParticle *particle) {
+void func_151A2F0C(SpriteParticle *particle) {
     TrailBurst config;
 
     config.countBase = 8;
@@ -827,6 +830,71 @@ void func_151A2F0C(FadeEventParticle *particle) {
     config.clearGeometryMode = 0x60600;
     config.fadeStart = 7;
     config.fadeRate = 0x24;
+    config.shrinkStart = 1;
+    config.shrinkPaused = 0;
+    config.shrinkFactor = 1.0f;
+    config.unk38 = -1;
+    config.unk39 = 0;
+    config.unk72 = -1;
+    config.unk73 = -1;
+
+    func_15152B38(&config, particle->head.header.owner, particle->head.header.kind);
+}
+
+/* D_8008F8E0[1]: a func_15152B38 burst at the particle's position, sized by the particle. */
+void func_151A3150(SpriteParticle *particle) {
+    TrailBurst config;
+
+    config.countBase = 10;
+    config.countRange = 15;
+    config.pos = particle->head.desc.pos;
+    if (particle->head.desc.flags & 0x1000) {
+        config.pos.x += particle->head.desc.offset.x;
+        config.pos.y += particle->head.desc.offset.y;
+        config.pos.z += particle->head.desc.offset.z;
+    }
+    config.sizeBase = (particle->head.desc.width + particle->head.desc.height) * 0.5f * 0.02119999938f;
+    config.sizeRange = (particle->head.desc.width + particle->head.desc.height) * 0.5f * 0.05319999903f;
+    config.gravityBase = -1.031000018f;
+    config.gravityRange = 0.0f;
+    config.speedBase = 8.0f;
+    config.speedRange = 8.0f;
+    config.angles.yawBase = 0;
+    config.angles.yawRange = 255;
+    config.angles.pitchBase = -64;
+    config.angles.pitchRange = 86;
+    config.capacityBase = 3;
+    config.capacityRange = 2;
+    config.lifeBase = 15;
+    config.lifeRange = 30;
+    config.headerFlags = 1;
+    config.flags = 4;
+    config.primMode = 2;
+    config.envMode = 3;
+    config.colorBase.red = 255;
+    config.colorBase.green = 200;
+    config.colorBase.blue = 200;
+    config.colorBase.alpha = 255;
+    config.colorRange.red = 0;
+    config.colorRange.green = 55;
+    config.colorRange.blue = 55;
+    config.colorRange.alpha = 0;
+    config.color2Base.red = 255;
+    config.color2Base.green = 255;
+    config.color2Base.blue = 255;
+    config.color2Base.alpha = 255;
+    config.color2Range.red = 0;
+    config.color2Range.green = 0;
+    config.color2Range.blue = 0;
+    config.color2Range.alpha = 0;
+    config.colorLevelBase = 255;
+    config.colorLevelRange = 0;
+    config.renderMode = 1;
+    config.unk21 = 0x24;
+    config.setGeometryMode = 0x200005;
+    config.clearGeometryMode = 0x60600;
+    config.fadeStart = 15;
+    config.fadeRate = 17;
     config.shrinkStart = 1;
     config.shrinkPaused = 0;
     config.shrinkFactor = 1.0f;

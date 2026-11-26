@@ -9,7 +9,8 @@ typedef struct Game1DD500Profile {
     /* 0x0F */ u8 padF;
 } Game1DD500Profile; // size 0x10
 
-extern Vec3f D_800AA120;
+/* Impact point in the space of joint 6 (func_151B01B8). */
+static const Vec3f D_800AA120 = { 0.0f, -12.0f, 96.0f };
 
 /* Joint matrix of an actor, as an Mtx. */
 #define JOINT_MTX(actor, joint) (&(actor)->ob_matrix_ptr[joint])
@@ -147,10 +148,10 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
                 spot[1] += 10.0f;
                 // matching: (f32)100 is not CSE'd with the 100.0f above, which would tie up an FP register
                 if (func_150ADA20() & 1) {
-                    func_151D9B8C(0, func_150ADA68() * 4.5f + 15.0f, (u32)(func_150ADA68() * (f32)100 + 155.0f),
+                    func_151D9B8C(0, func_150ADA68() * 4.5f + 15.0f, func_150ADA68() * (f32)100 + 155.0f,
                                   &scatterGround.tri, (Vec3f *)spot, 100, 0, 1, 0, arg1, arg2);
                 } else {
-                    func_151DAB58(0, func_150ADA68() * 5.9f + 6.1f, (u32)(func_150ADA68() * (f32)100 + 155.0f),
+                    func_151DAB58(0, func_150ADA68() * 5.9f + 6.1f, func_150ADA68() * (f32)100 + 155.0f,
                                   (Vec3f *)spot, 1, arg1, arg2);
                 }
                 if (--count == 0) {
@@ -202,24 +203,9 @@ typedef struct Game1DD500Motion {
     /* 0x26 */ u8 pad26[2];
 } Game1DD500Motion; // size 0x28
 
-/* Particle object created by func_1513D524. */
+/* Particle object created by func_1513D524: head.def.rot holds the previous position, head.def.unk44 the alpha. */
 struct Game1DD500Particle {
-    /* 0x000 */ EffectHeader header;
-    /* 0x010 */ u8 pad10[0xC];
-    /* 0x01C */ s16 life;
-    /* 0x01E */ u8 pad1E[0xE];
-    /* 0x02C */ f32 width;
-    /* 0x030 */ f32 height;
-    /* 0x034 */ Vec3f position;
-    /* 0x040 */ Vec3f previous;
-    /* 0x04C */ u8 pad4C[0xC];
-    /* 0x058 */ s32 flags;
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ u8 pad5D[0x1B];
-    /* 0x078 */ CollisionHit ground;
-    /* 0x09C */ u8 pad9C[0x24];
-    /* 0x0C0 */ Vtx quadTemplate[4];
-    /* 0x100 */ Vtx *quads[4];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Game1DD500Motion motion;
 };
 
@@ -309,8 +295,35 @@ typedef struct Game1DD500Mount {
     /* 0x4 */ Vec3f offset;
 } Game1DD500Mount;
 
-extern Game1DD500Mount D_800AA12C[11];
-extern Game1DD500Mount D_800AA1DC[11]; /* actor type 0x36 */
+/* Where the emitter keeps its particles: one mount per slot. */
+static const Game1DD500Mount D_800AA12C[11] = {
+    { 5, { 0 }, { 0.0f, -10.0f, 159.0f } },
+    { 5, { 0 }, { 34.0f, -8.0f, 145.0f } },
+    { 5, { 0 }, { -34.0f, -8.0f, 145.0f } },
+    { 5, { 0 }, { -52.0f, 10.0f, 104.0f } },
+    { 5, { 0 }, { 52.0f, 10.0f, 104.0f } },
+    { 5, { 0 }, { 52.0f, 34.0f, 38.0f } },
+    { 5, { 0 }, { -52.0f, 34.0f, 38.0f } },
+    { 6, { 0 }, { 20.0f, -46.0f, 131.0f } },
+    { 6, { 0 }, { -20.0f, -46.0f, 131.0f } },
+    { 6, { 0 }, { -46.0f, -26.0f, 84.0f } },
+    { 6, { 0 }, { 46.0f, -26.0f, 84.0f } },
+};
+
+/* actor type 0x36 */
+static const Game1DD500Mount D_800AA1DC[11] = {
+    { 4, { 0 }, { 0.0f, -32.0f, 195.0f } },
+    { 4, { 0 }, { 40.0f, -25.0f, 154.0f } },
+    { 4, { 0 }, { 69.0f, 8.0f, 86.0f } },
+    { 4, { 0 }, { 79.0f, 29.0f, 62.0f } },
+    { 4, { 0 }, { -79.0f, 29.0f, 62.0f } },
+    { 4, { 0 }, { -69.0f, 8.0f, 86.0f } },
+    { 4, { 0 }, { -40.0f, -25.0f, 154.0f } },
+    { 5, { 0 }, { 0.0f, -47.0f, 101.0f } },
+    { 5, { 0 }, { -40.0f, -42.0f, 69.0f } },
+    { 5, { 0 }, { 40.0f, -42.0f, 69.0f } },
+    { 5, { 0 }, { -72.0f, 10.0f, 3.0f } },
+};
 
 /* Emitter task update: carries attached particles with the owner's joints, releases expired ones and spawns new ones. */
 void func_151B0B88(Game1DD500Task *task) {
@@ -336,20 +349,20 @@ void func_151B0B88(Game1DD500Task *task) {
                 s32 isFree;
 
                 if (slot->particle != NULL) {
-                    slot->particle->previous = slot->particle->position;
+                    slot->particle->head.def.rot = slot->particle->head.def.pos;
                     func_15143134(emitter->owner->character_type == 0x36 ? &D_800AA1DC[i].offset : &D_800AA12C[i].offset,
-                                  &slot->particle->position,
+                                  &slot->particle->head.def.pos,
                                   emitter->owner->character_type == 0x36 ? JOINT_MTX(emitter->owner, D_800AA1DC[i].joint)
                                                              : JOINT_MTX(emitter->owner, D_800AA12C[i].joint));
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
                         Vec3f *velocity = &slot->particle->motion.velocity;
 
-                        velocity->x = (slot->particle->position.x - slot->particle->previous.x) * D_800BE9A8;
+                        velocity->x = (slot->particle->head.def.pos.x - slot->particle->head.def.rot.x) * D_800BE9A8;
                         velocity->y = 0.0f;
-                        velocity->z = (slot->particle->position.z - slot->particle->previous.z) * D_800BE9A8;
-                        func_1513F680(slot->particle, 0x10, 0x1B, 0, 0x10);
-                        slot->particle->flags |= 1;
+                        velocity->z = (slot->particle->head.def.pos.z - slot->particle->head.def.rot.z) * D_800BE9A8;
+                        func_1513F680(&slot->particle->head, 0x10, 0x1B, 0, 0x10);
+                        slot->particle->head.def.flags |= 1;
                         slot->particle = NULL;
                         emitter->count--;
                         isFree = TRUE;
@@ -461,7 +474,7 @@ s32 func_151B118C(Game1DD500Particle *particle) {
     f32 size;
 
     motion = &particle->motion;
-    oldY = particle->position.y;
+    oldY = particle->head.def.pos.y;
     oldVx = motion->velocity.x;
     oldVz = motion->velocity.z;
     alive = TRUE;
@@ -471,29 +484,29 @@ s32 func_151B118C(Game1DD500Particle *particle) {
     dy = motion->velocity.y * D_800BE9A4 + motion->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f;
     dz = (motion->velocity.z + oldVz) * 0.5f * D_800BE9A4;
     motion->velocity.y += motion->gravity * D_800BE9A4;
-    particle->position.x += dx;
-    particle->position.y += dy;
-    particle->position.z += dz;
-    particle->previous.x += dx;
-    particle->previous.y += dy;
-    particle->previous.z += dz;
-    particle->previous.x = particle->position.x + (particle->previous.x - particle->position.x) * 0.706000030f;
-    particle->previous.y = particle->position.y + (particle->previous.y - particle->position.y) * 0.706000030f;
-    particle->previous.z = particle->position.z + (particle->previous.z - particle->position.z) * 0.706000030f;
+    particle->head.def.pos.x += dx;
+    particle->head.def.pos.y += dy;
+    particle->head.def.pos.z += dz;
+    particle->head.def.rot.x += dx;
+    particle->head.def.rot.y += dy;
+    particle->head.def.rot.z += dz;
+    particle->head.def.rot.x = particle->head.def.pos.x + (particle->head.def.rot.x - particle->head.def.pos.x) * 0.706000030f;
+    particle->head.def.rot.y = particle->head.def.pos.y + (particle->head.def.rot.y - particle->head.def.pos.y) * 0.706000030f;
+    particle->head.def.rot.z = particle->head.def.pos.z + (particle->head.def.rot.z - particle->head.def.pos.z) * 0.706000030f;
     if (motion->checkGround) {
-        probe.x = particle->position.x;
-        probe.y = oldY - particle->height;
-        probe.z = particle->position.z;
-        if (func_15046C80(&probe, 0, particle->position.y - particle->height, &particle->ground)) {
+        probe.x = particle->head.def.pos.x;
+        probe.y = oldY - particle->head.def.height;
+        probe.z = particle->head.def.pos.z;
+        if (func_15046C80(&probe, 0, particle->head.def.pos.y - particle->head.def.height, &particle->head.ground)) {
             splat.x = probe.x;
-            splat.y = particle->ground.height + 5.0f;
+            splat.y = particle->head.ground.height + 5.0f;
             splat.z = probe.z;
             size = ((motion->baseWidth + motion->swingWidth * 0.5f) + (motion->baseHeight + motion->swingHeight * 0.5f)) * 0.5f;
             if (func_150ADA20() & 1) {
-                func_151D9B8C(motion->unk25, size * 1.7f, particle->alpha, &particle->ground.tri, &splat, 100, 0, 1, 0,
-                              particle->header.owner, particle->header.kind);
+                func_151D9B8C(motion->unk25, size * 1.7f, particle->head.def.unk44, &particle->head.ground.tri, &splat, 100, 0, 1, 0,
+                              particle->head.header.owner, particle->head.header.kind);
             } else {
-                func_151DAB58(motion->unk25, size * 0.68f, particle->alpha, &splat, 1, particle->header.owner, particle->header.kind);
+                func_151DAB58(motion->unk25, size * 0.68f, particle->head.def.unk44, &splat, 1, particle->head.header.owner, particle->head.header.kind);
             }
             alive = FALSE;
         }
@@ -505,10 +518,10 @@ s32 func_151B118C(Game1DD500Particle *particle) {
 s32 func_151B1478(Game1DD500Particle *particle) {
     s32 fade;
 
-    if (particle->life < 32) {
-        fade = particle->life * 8;
-        if (fade < particle->alpha) {
-            particle->alpha = fade;
+    if (particle->head.def.lifetime < 32) {
+        fade = particle->head.def.lifetime * 8;
+        if (fade < particle->head.def.unk44) {
+            particle->head.def.unk44 = fade;
         }
     }
     return 1;
@@ -530,12 +543,12 @@ Vtx *func_151B14AC(Game1DD500Particle *particle, s16 view) {
     f32 t;
     u8 fresh;
 
-    func_151D5D60(particle->quads, view, 0x40, &quad, &fresh);
+    func_151D5D60(particle->head.vtxBuffers, view, 0x40, &quad, &fresh);
     ret = quad; // matching: quad is address-taken; returning it directly reloads it
     if (quad != NULL) {
         if (fresh) {
-            memcpy(particle->quads[view], particle->quadTemplate, sizeof(particle->quadTemplate));
-            memcpy(&particle->quads[view][4], particle->quadTemplate, sizeof(particle->quadTemplate));
+            memcpy(particle->head.vtxBuffers[view], particle->head.vtxTemplate, sizeof(particle->head.vtxTemplate));
+            memcpy(&particle->head.vtxBuffers[view][4], particle->head.vtxTemplate, sizeof(particle->head.vtxTemplate));
         }
     } else {
         return NULL;
@@ -543,8 +556,8 @@ Vtx *func_151B14AC(Game1DD500Particle *particle, s16 view) {
 
     camX = &D_800DD1E8[view];
     sign = -1.0f;
-    lateral = ((*camX * (particle->previous.x - particle->position.x)) -
-               (D_800DD1D8[view] * (particle->previous.z - particle->position.z))) * D_800BE9A8;
+    lateral = ((*camX * (particle->head.def.rot.x - particle->head.def.pos.x)) -
+               (D_800DD1D8[view] * (particle->head.def.rot.z - particle->head.def.pos.z))) * D_800BE9A8;
     if (lateral < 0.0f) {
         sign = 1.0f;
         lateral = -lateral;
@@ -558,31 +571,31 @@ Vtx *func_151B14AC(Game1DD500Particle *particle, s16 view) {
     t *= sign;
     sine = sinf(t);
     t = cosf(t);
-    widthCos = particle->width * t;
-    widthSin = particle->width * sine;
-    heightCos = particle->height * t;
-    heightSin = particle->height * sine;
+    widthCos = particle->head.def.width * t;
+    widthSin = particle->head.def.width * sine;
+    heightCos = particle->head.def.height * t;
+    heightSin = particle->head.def.height * sine;
 
-    quad[0].v.ob[0] = (*camX * -widthCos) + particle->position.x;
-    quad[0].v.ob[1] = particle->position.y + widthSin;
-    quad[0].v.ob[2] = particle->position.z - (D_800DD1D8[view] * -widthCos);
+    quad[0].v.ob[0] = (*camX * -widthCos) + particle->head.def.pos.x;
+    quad[0].v.ob[1] = particle->head.def.pos.y + widthSin;
+    quad[0].v.ob[2] = particle->head.def.pos.z - (D_800DD1D8[view] * -widthCos);
     quad[0].v.flag = 0;
 
-    quad[1].v.ob[0] = (*camX * widthCos) + particle->position.x;
-    quad[1].v.ob[1] = particle->position.y - widthSin;
-    quad[1].v.ob[2] = particle->position.z - (D_800DD1D8[view] * widthCos);
+    quad[1].v.ob[0] = (*camX * widthCos) + particle->head.def.pos.x;
+    quad[1].v.ob[1] = particle->head.def.pos.y - widthSin;
+    quad[1].v.ob[2] = particle->head.def.pos.z - (D_800DD1D8[view] * widthCos);
     quad[1].v.flag = 0;
 
     t = widthCos - heightSin;
-    quad[2].v.ob[0] = (*camX * t) + particle->position.x;
-    quad[2].v.ob[1] = (particle->position.y - widthSin) - heightCos;
-    quad[2].v.ob[2] = particle->position.z - (D_800DD1D8[view] * t);
+    quad[2].v.ob[0] = (*camX * t) + particle->head.def.pos.x;
+    quad[2].v.ob[1] = (particle->head.def.pos.y - widthSin) - heightCos;
+    quad[2].v.ob[2] = particle->head.def.pos.z - (D_800DD1D8[view] * t);
     quad[2].v.flag = 0;
 
     t = -(widthCos + heightSin);
-    quad[3].v.ob[0] = (*camX * t) + particle->position.x;
-    quad[3].v.ob[1] = (particle->position.y + widthSin) - heightCos;
-    quad[3].v.ob[2] = particle->position.z - (D_800DD1D8[view] * t);
+    quad[3].v.ob[0] = (*camX * t) + particle->head.def.pos.x;
+    quad[3].v.ob[1] = (particle->head.def.pos.y + widthSin) - heightCos;
+    quad[3].v.ob[2] = particle->head.def.pos.z - (D_800DD1D8[view] * t);
     quad[3].v.flag = 0;
 
     return ret;
@@ -599,8 +612,8 @@ s32 func_151B1828(Game1DD500Particle *arg0) {
     motion->phaseHeight += motion->phaseSpeedHeight * D_800BE9E4;
     swingW = func_151423D8(motion->phaseWidth - 0x40);
     swingH = func_151423D8(motion->phaseHeight - 0x40);
-    particle->width += (motion->baseWidth + motion->swingWidth * swingW - particle->width) * 0.5f;
-    particle->height += (motion->baseHeight + motion->swingHeight * swingH - particle->height) * 0.5f;
+    particle->head.def.width += (motion->baseWidth + motion->swingWidth * swingW - particle->head.def.width) * 0.5f;
+    particle->head.def.height += (motion->baseHeight + motion->swingHeight * swingH - particle->head.def.height) * 0.5f;
     return 1;
 }
 
@@ -616,7 +629,7 @@ void func_151B1918(Game1DD500Task *task) {
         Game1DD500Slot *slot = &emitter->slots[i];
 
         if (slot->particle != NULL) {
-            func_1516972C(&slot->particle->header);
+            func_1516972C(&slot->particle->head.header);
         }
         slot->particle = NULL;
         slot->timer = 0;

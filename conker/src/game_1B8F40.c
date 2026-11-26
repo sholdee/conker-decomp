@@ -138,7 +138,7 @@ void func_1518BD60(TrailEmitter *emitter) {
             if (emitter->timers[i] < 0) {
                 point = i;
                 if (point) {} // matching: a second use keeps the copy of i in its own register
-                angle = func_150ADA20() % (u32)(emitter->params.angleRange + 1);
+                angle = func_150ADA20() % (emitter->params.angleRange + 1);
                 sinA = func_151423D8(angle);
                 cosA = func_151423D8(angle - 0x40);
                 speed = func_150ADA68() * emitter->params.speedRange + emitter->params.speedMin;
@@ -152,7 +152,7 @@ void func_1518BD60(TrailEmitter *emitter) {
                 render.unk18 = 0x20;
                 render.primMode = 0;
                 render.envMode = 9;
-                spawn.itemCount = func_150ADA20() % (u32)(emitter->params.pointRange + 1) + 3;
+                spawn.itemCount = func_150ADA20() % (emitter->params.pointRange + 1) + 3;
                 spawn.kind = 1;
                 spawn.flags = 1;
                 spawn.life = func_150ADA20() % 21U + 80;
@@ -163,7 +163,7 @@ void func_1518BD60(TrailEmitter *emitter) {
                 motion.velocity.x = speed * cosA;
                 motion.velocity.z = speed * sinA;
                 motion.flags = emitter->params.flags | 8;
-                motion.shade = 0xFF - ((u8)((u32)emitter->params.owner->floorMaterial >> 5) << 6);
+                motion.shade = 0xFF - ((u8)(emitter->params.owner->floorMaterial >> 5) << 6);
                 motion.alpha = 0xFF;
                 trail = func_15147DA0(&spawn, &motion, spawn.itemCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
                                       0, &render, 0, emitter->link.owner, emitter->link.kind);

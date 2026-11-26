@@ -2,7 +2,32 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A6C94; // pi / 180
+/* Render setup display list of the quad effects; the effect type's entry in the object type table
+ * D_8008B4D4 points to it. */
+Gfx D_8008B3A0[] = {
+    gsSPClearGeometryMode(G_CULL_BOTH),
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM),
+    gsDPSetAlphaCompare(G_AC_THRESHOLD),
+    gsDPSetBlendColor(0, 0, 0, 1),
+    gsSPEndDisplayList(),
+};
+
+/* not referenced */
+const u8 D_800A6C80[20] = {
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x65, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00,
+};
+
+// matching: a 0.01745329238f literal swaps the spill slots of effect and angle; the factor is a const
+// struct in .rodata
+static const struct {
+    f32 degToRad;
+} D_800A6C94 = { 0.01745329238f };
+
+static s16 D_800DCE40; // frame offset of the next texture frame (func_151668B8)
+
 
 /* Spawns a quad effect at (x, y, z); direction is in degrees, or -1 for a quad lying flat at height y. */
 void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, u8 arg7, s32 arg8) {
@@ -25,8 +50,7 @@ void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life,
             }
             effect->mode = 0;
         } else {
-            // matching: the 0.01745329238f literal swaps the spill slots of effect and angle
-            angle = (f32)direction * D_800A6C94;
+            angle = direction * D_800A6C94.degToRad;
             effect->dirZ = sinf(angle) * 127.0f;
             effect->dirX = -cosf(angle) * 127.0f;
             effect->mode = 1;
@@ -210,9 +234,7 @@ Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
     return gdl;
 }
 
-extern TextureDesc D_800903F4;
 extern s32 D_800A4AC8[][2];
-extern s16 D_800DCE40;
 
 /* Loads the next frame of texture D_800903F4 (advancing 0x80 per call, wrapping at 0x500) and sets a render mode. */
 Gfx *func_151668B8(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {

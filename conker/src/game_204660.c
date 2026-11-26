@@ -10,11 +10,18 @@
 
 struct AnchoredTrail;
 
-extern s32 (*D_8008FCA0[])(AnchoredTrailEmitter *);
-extern void (*D_8008FCA4[])(AnchoredTrailEmitter *, TrailBoneLink *, u8);
-extern s32 (*D_8008FCA8[])(AnchoredTrailEmitter *);
-extern Vec3f D_800AB280[];
-extern u8 D_800AB2D4[];
+/* Per anchor type: the update that places the anchor, and the message handler. */
+static s32 (*D_8008FCA0[])(AnchoredTrailEmitter *) = { func_151D75C4 };
+static void (*D_8008FCA4[])(AnchoredTrailEmitter *, TrailBoneLink *, u8) = { func_151D7538 };
+/* The extra checks of a bone link (TrailBoneLink.condition). */
+static s32 (*D_8008FCA8[])(AnchoredTrailEmitter *) = { func_151D7724, func_151D7770, func_151D779C };
+
+/* Per TrailBoneLink.bone: the anchor point in the bone's space, and the bone matrix it is on. */
+static const Vec3f D_800AB280[7] = {
+    { -21.0f, -12.0f, 32.0f }, { -22.0f, -4.0f, 16.0f }, { -8.0f, 24.0f, 2.0f }, { -24.0f, 16.0f, 18.0f },
+    { 6.0f, 14.0f, 35.0f },    { 35.0f, 27.0f, 59.0f },  { -79.0f, 18.0f, 36.0f },
+};
+static const u8 D_800AB2D4[7] = { 15, 17, 15, 2, 6, 6, 14 };
 
 /* Creates an emitter of the given anchor type with `extraSize` more bytes of data after the TrailAnchor. */
 TimedEffect *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extraSize, u8 arg5, s32 arg6) {
@@ -518,7 +525,7 @@ Gfx *func_151D80C4(AnchoredTrail *trail, Gfx *gfx, s16 view) {
         return gfx;
     }
     needSync = 1;
-    gfx = func_15142E24(gfx, &D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &needSync, 0x3E);
+    gfx = func_15142E24(gfx, &D_80090B60[31], 0, 0, 0, 0, 0x1F, 0, 0, &needSync, 0x3E);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x4C, &needSync);
     gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].unk0 | D_800A4AC8[1].unk4, &needSync);

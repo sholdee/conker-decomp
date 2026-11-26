@@ -32,35 +32,14 @@ dummy_label_927029:
     }
 }
 
+/* Clears the flag that script command 2 sets and the two 14-byte tables after it (as func_1500E5C0 does). */
 void func_15010600(void) {
     s32 i;
 
     D_800D9921 = 0;
     D_800D9920 = 0;
-    D_800D9928[0] = 0;
-    D_800D9938[0] = 0;
-    D_800D9929 = 0;
-    for (D_800D9939 = 0, i = 0;;) {
-        D_800D992A[i + 1] = 0;
-        D_800D993A[i + 1] = 0;
-        D_800D992A[i + 2] = 0;
-        D_800D993A[i + 2] = 0;
-        D_800D992A[i + 3] = 0;
-        D_800D993A[i + 3] = 0;
-        i += 4;
-        D_800D992A[i - 4] = 0;
-        D_800D993A[i - 4] = 0;
-        if (&D_800D9946[0] != &D_800D993A[i]) {
-            continue;
-        }
-        break;
+    for (i = 0; i < 14; i++) {
+        D_800D9928[i] = 0;
+        D_800D9938[i] = 0;
     }
 }
-// NON-MATCHING: addresses are wrong :(
-// void func_15010600(void) {
-//     s32 i;
-//
-//     for (i = 0; i < 11; i++) {
-//         D_800D9930[i] = D_800D9920[i] = 0;
-//     }
-// }

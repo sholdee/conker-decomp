@@ -58,16 +58,12 @@ typedef struct YRange {
     s16 max;
 } YRange;
 
-extern YRange *D_800DBE44;
-
 typedef struct XZRange {
     s16 minx;
     s16 minz;
     s16 maxx;
     s16 maxz;
 } XZRange;
-
-extern XZRange *D_800DBE40;
 
 /**
  * Appends every triangle drawn by display list `dl` to the triangle table D_800DBE3C
@@ -183,16 +179,15 @@ void func_15001460(Gfx *dl) {
 
 /** Resets the triangle counters and allocates this map's triangle-data arena (D_800B0DC0..D_800B0DC8). */
 void func_15001970(void) {
-    s32 pad; // matching: unused stack slot keeps the original frame size
+    s32 i;
     s32 size;
 
     D_800B0DE4 = 0;
     D_800DBE63 = 0;
-    D_800DBE18[0] = 0;
-    D_800DBE1C[0] = 0;
-    D_800DBE20 = 0;
+    for (i = 0; i < 4; i++) {
+        D_800DBE18[i] = 0;
+    }
     size = D_80091C04[level];
-    D_800DBE24 = 0;
     D_800B0DC0 = allocate_memory(size, 1, 0, 0);
     D_800B0DC8 = size + D_800B0DC0;
     D_800B0DC4 = D_800B0DC0;
@@ -209,6 +204,7 @@ void func_15001A08(void) {
     s32 size;
     u32 stat;
     s32 romWord;
+    s32 i;
 
     size = D_80091AF0[level];
 
@@ -228,10 +224,9 @@ void func_15001A08(void) {
     D_800B0DE0 = D_800B0DDC;
     D_800B0DCC = 0;
     D_800B0DD0 = 0;
-    D_800DBE30[0] = 0;
-    D_800DBE32 = 0;
-    D_800DBE34 = 0;
-    D_800DBE36 = 0;
+    for (i = 0; i < 4; i++) {
+        D_800DBE30[i] = 0;
+    }
 }
 
 void func_15001B08(void) {
@@ -652,8 +647,8 @@ s32 func_15002878(void) {
 
     highest = D_800DBE18[0];
 
-    for (i = 0; i < 3; i++) {
-        count = D_800DBE1C[i];
+    for (i = 1; i < 4; i++) {
+        count = D_800DBE18[i];
         if (highest < count) {
             highest = count;
         }

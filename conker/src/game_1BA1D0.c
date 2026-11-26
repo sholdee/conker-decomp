@@ -15,8 +15,8 @@ void func_1518CD20(WorldObject *placement, u8 arg1, s32 arg2) {
 
     count = remaining = func_150ADA20() % 11U + 25;
     if (count > 0) {
-        ring = (Vec3f *)func_10003C6C((count + 1) * sizeof(Vec3f), 3, 1, 0, 1);
-        points = (Vec3f *)func_10003C6C((count + 1) * sizeof(Vec3f), 3, 1, 0, 1);
+        ring = func_10003C6C((count + 1) * sizeof(Vec3f), 3, 1, 0, 1);
+        points = func_10003C6C((count + 1) * sizeof(Vec3f), 3, 1, 0, 1);
         if (ring == NULL || points == NULL) {
             return;
         }

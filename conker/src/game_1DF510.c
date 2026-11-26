@@ -2,14 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 
-extern Vec3f D_800AA320;
-extern Vec3f D_800AA32C;
-extern Vec3f D_800AA338;
-extern Vec3f D_800AA344;
-extern Vec3f D_800AA350;
-extern Vec3f D_800AA35C;
-extern Vec3f D_800AA368;
-extern Vec3f D_800AA374;
+/* Rope end offsets in bone space. */
+static const Vec3f D_800AA320 = { 77.0f, 20.0f, 67.0f };
+static const Vec3f D_800AA32C = { -77.0f, 20.0f, 67.0f };
+static const Vec3f D_800AA338 = { -6.0f, 0.0f, 0.0f };
+static const Vec3f D_800AA344 = { 6.0f, 0.0f, 0.0f };
+static const Vec3f D_800AA350 = { -12.0f, 0.0f, 0.0f };
+static const Vec3f D_800AA35C = { 12.0f, 0.0f, 0.0f };
+static const Vec3f D_800AA368 = { 27.0f, 42.0f, 0.0f };
+static const Vec3f D_800AA374 = { -27.0f, 42.0f, 0.0f };
 
 /* Spawns a RopeTie between `obj` and the object from func_15083E90(1). */
 void func_151B2060(Actor *obj) {
@@ -313,7 +314,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         update = 1;
         camera = &camera_global_Cameras[view].eye.x;
         gfx = func_15142B7C(gfx, 0x200005, 0x60600);
-        gfx = func_15142E24(gfx, &D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
+        gfx = func_15142E24(gfx, &D_80090B60[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = func_1513F4E4(gfx, 0x2B, &update);
@@ -401,8 +402,8 @@ void func_151B2F04(RopeTie *self, ActorSwapMsg *swap, u8 event) {
 }
 
 /* Rope event handler: passes the link to func_151B47D8. */
-void func_151B2FA0(TiedRope *self, Vec3f *pos, u8 isStart) {
-    func_151B47D8((HoltenRopeEffect *)self, (HoltenRopeBoneAnchors *)&self->link, pos, isStart);
+s32 func_151B2FA0(TiedRope *self, Vec3f *pos, u8 isStart) {
+    return func_151B47D8(&self->effect, &self->link, pos, isStart);
 }
 
 /* Line teardown: clears the owner's reference to this line. */

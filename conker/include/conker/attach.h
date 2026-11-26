@@ -84,6 +84,9 @@ s32 func_150D8A20(s32 arg0, s32 arg1);
 void func_150D8A34(Actor *actor, s32 point, s32 arg2);
 
 /* game_1B9DB0.c */
+extern u8 D_800DF7D0[0x1E4];                 /* per-model load reference counts */
+extern s16 *D_800DF9B8[0x1E4];               /* per model: written by func_1510CE60 */
+extern AttachModelHeader *D_800E0148[0x1E4]; /* per model: loaded attachment model header */
 Gfx *func_1518C900(s32 arg0);
 void func_1518CA04(s32 arg0);
 

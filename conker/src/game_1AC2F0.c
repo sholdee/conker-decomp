@@ -1,9 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
-
-// matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
-#define gRenderViews ((RenderView *)D_800BE628) // matching: the no-op cast changes the code; plain D_800BE628 mismatches
+#include "structs.h"
 
 /* Per-view screen effects: a colour fade, a colour flash, a global tint, an iris wipe and the
  * cutscene letterbox. Per-view arrays are indexed by view (0..D_80082FA0). */
@@ -14,33 +10,62 @@ typedef struct {
     u8 b;
 } FadeColor;
 
+/* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
+u8 D_800DDD70[4];         // iris: wobble frames left
+u8 D_800DDD74[4];         // iris: wobble angle
+u8 D_800DDD78[4];         // iris: overlay animation frame
+u16 D_800DDD80[4];        // iris: hold frames left
+u8 D_800DDD88;            // tint: pulse speed (angle step per frame)
+u8 D_800DDD89;            // tint: pulse angle
+u8 D_800DDD8A;            // tint: colour pair index into D_8008D010
+u8 D_800DDD8B;            // tint: alpha
+u8 D_800DDD8C;            // tint: nonzero: alpha pulses
+FadeColor D_800DDD90[4];  // flash: colour
+u8 D_800DDD9C[4];         // flash: alpha
+FadeColor D_800DDDA0[4];  // fade: colour
+s8 D_800DDDAC[4];         // fade: direction (nonzero: fading to the colour)
+s32 D_800DDDB0[4];        // fade: elapsed frames
+u8 D_800DDDC0[4];         // fade: fixed alpha that overrides the timer when nonzero
+f32 D_800DDDC8[4];        // iris: closure (0 open .. 1 closed)
+f32 D_800DDDD8[4];        // iris: closure change per frame
+f32 D_800DDDE8[4][2];     // iris: hole centre, relative to the view centre
+u16 D_800DDE08;           // tint: frames left
+u16 D_800DDE10[4];        // flash: frames left
+f32 *D_800DDE18;          // letterbox amount in percent, or NULL when off
+u8 D_800DDE1C[4];         // iris: style
+u8 D_800DDE20[4];         // iris: scripted
+s32 D_800DDE28[4];        // fade: duration
+u8 D_800DDE38;
+u8 D_800DDE3C[4];         // iris: tracking the player
+u8 D_800DDE40;            // nonzero: iris driven by the cutscene tracks
+f32 *D_800DDE44;          // cutscene iris: closure, percent
+f32 *D_800DDE48;          // cutscene iris: hole x, percent of the view width
+f32 *D_800DDE4C;          // cutscene iris: hole y, percent of the view height
 
+#include "functions.h"
+#include "variables.h"
 
-/* Colour fade (func_1517EE40) */
-extern FadeColor D_800DDDA0[]; // colour
-extern u8 D_800DDDC0[];        // fixed alpha that overrides the timer when nonzero
+// matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
+#define gRenderViews ((RenderView *)D_800BE628) // matching: the no-op cast changes the code; plain D_800BE628 mismatches
 
-/* Colour flash (func_1517F488) */
-extern FadeColor D_800DDD90[];
-extern u8 D_800DDD9C[];  // alpha
+/* The colour pairs of the tint: red to yellow. */
+static u8 D_8008D010[1][6] = { { 255, 0, 0, 255, 255, 0 } };
 
-/* Pulsing full-screen tint (func_1517F720), view 0 only */
-extern u8 D_800DDD88;  // pulse speed (angle step per frame)
-extern u8 D_800DDD89;  // pulse angle
-extern u8 D_800DDD8A;  // colour pair index into D_8008D010
-extern u8 D_800DDD8B;  // alpha
-extern u8 D_800DDD8C;  // nonzero: alpha pulses
-extern u8 D_8008D010[][6]; // two RGB colours per entry
+/* Render setup of the iris wipe (func_15180580). */
+static Gfx D_8008D018[] = {
+    gsSPClearGeometryMode(G_ZBUFFER | G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN |
+                          G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH),
+    gsSPSetGeometryMode(G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH),
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_SHADE, G_CC_SHADE),
+    gsDPSetConvert(G_CV_K0, G_CV_K1, G_CV_K2, G_CV_K3, G_CV_K4, G_CV_K5),
+    gsSPEndDisplayList(),
+};
 
-/* Iris wipe */
-extern f32 D_800DDDE8[][2];  // hole centre, relative to the view centre
-extern u8 D_800DDD70[];      // wobble frames left
-extern u8 D_800DDD74[];      // wobble angle
-extern u8 D_800DDD78[];      // overlay animation frame
-extern u16 D_800DDD80[];     // hold frames left
-
-/* Letterbox */
-
+/* Scripted iris closures, by D_80082FA0: the hold closure, then the final closure. */
+static const f32 D_800A7260[4] = { 0.8f, 0.9f, 0.9f, 0.9f };
+static const f32 D_800A7270[4] = { 0.9649999738f, 0.9649999738f, 0.9649999738f, 0.9649999738f };
 
 /* Starts a fade of `view` to (toColor) or from the colour r,g,b over `duration` frames,
  * unless that same fade has already run to completion. */
@@ -385,8 +410,6 @@ Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
     return gfx;
 }
 
-extern Gfx D_8008D018[];
-
 /* Draws the iris wipe of `view`: black around a round hole, with optional sight marks and overlay. */
 Gfx *func_15180580(Gfx *gfx, s32 view) {
     f32 closure;
@@ -572,8 +595,6 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
     return gfx;
 }
 
-extern f32 D_800A7260[]; // scripted iris hold closure, by D_80082FA0
-extern f32 D_800A7270[]; // scripted iris final closure, by D_80082FA0
 
 /* Updates the iris of every view: scripted irises step through the player's mode states,
  * tracking irises follow the player, and free irises run at their speed until open or closed. */
@@ -812,8 +833,6 @@ void func_15181E18(s32 view) {
     }
 }
 
-extern s32 D_800902C8; // texture id: top bar edge
-extern s32 D_800902CC; // texture id: bottom bar edge
 // matching: 0.7f read from rodata; a literal would let IDO fold 1.0f - 0.7f
 extern f32 D_800A72C0;
 

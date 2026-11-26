@@ -1,4 +1,9 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* .bss, defined before variables.h and conker/camera.h declare it (an earlier extern changes the order). */
+f32 D_800DC000; // camera transition distance (see func_15128030)
+f32 D_800DC004; // camera transition height
 
 #include "functions.h"
 #include "variables.h"
@@ -8,7 +13,6 @@
 
 #define DEG2RAD 0.01745329238474369f
 
-extern f32 D_800DC000;
 /* Camera distance presets, indexed by Camera.DistIndex: { tripod magnitude, height }. */
 const f32 D_800A34B0[4][2] = {
     { 267.0f, 100.0f },
@@ -16,7 +20,11 @@ const f32 D_800A34B0[4][2] = {
     { 370.0f, 185.0f },
     { 530.0f, 400.0f },
 };
-extern u16 D_800894E0[2][3];
+/* Aim (zoom) sound ids of func_15127520, per kind: [0] while the zoom moves, [1] when it stops. */
+static u16 D_800894E0[2][3] = {
+    { 0x603, 0x604, 0x605 },
+    { 0x620, 0x621, 0x622 },
+};
 
 /* Per-frame update of every active player camera. */
 void func_15122AE0(void) {
@@ -1027,7 +1035,7 @@ void func_151256BC(Camera *camera) {
     f32 targetScale;
 
     if ((camera->Mode & 0x80000) || ((camera->SpecialFlags & 8) && !(camera->Mode & 0x40000))) {
-        amount = (f32)(func_150ADA20() % 3);
+        amount = func_150ADA20() % 3;
         twoPi = 6.2831854820251465f;
         camera->DrunkRoll += ((amount + amount) * DEG2RAD) * D_800BE9A4;
         while (twoPi < camera->DrunkRoll) {
@@ -1572,7 +1580,7 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
     sound->z = camera->CharPtr->zpos;
 
     if (camera->mv->SniperState == 2) {
-        newZoom = (u32)zoom;
+        newZoom = zoom;
         if (oldZoom != newZoom) {
             changed = 1;
             sound->data = (index << 31) | newZoom;

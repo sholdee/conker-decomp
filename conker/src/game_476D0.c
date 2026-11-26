@@ -1,9 +1,7 @@
 #include <ultra64.h>
+#include "structs.h"
 
-#include "functions.h"
-#include "variables.h"
-
-/* This file's .bss, in address order. */
+/* This file's .bss, in address order, defined before the headers declare it (see init_50A0.c). */
 s32 D_800BE620;              // the screen width
 s32 D_800BE624;              // the screen height
 RenderView *D_800BE628;      // the views
@@ -14,6 +12,10 @@ s32 D_800BE638[6];           // the view width of each screen layout
 s32 D_800BE650[6];           // the view height of each screen layout
 s16 D_800BE668[4][5][2];     // the centre (x, y) of each view, by screen layout
 f32 D_800BE6B8;              // the width scale of the two-player layout
+
+#include "functions.h"
+#include "variables.h"
+
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)

@@ -35,6 +35,9 @@ extern u16 D_800427F4; /* the track last started */
 void func_15016170(ALHeap *arg0);
 
 /* libultra/audio/game_21FC90.c: the streaming music player (StreamVoice D_800E0D80) */
+extern StreamVoice D_800E0D80; /* the streaming music player's voice */
+extern s32 *D_800E0E20;        /* Huffman table pointers, relocated by D_800E0E28 */
+extern void *D_800E0E28;       /* the Huffman table data */
 void func_151F2960(s32 data, s32 size);
 void func_151F2BA8(void);
 void func_151F2BE8(void);
@@ -66,6 +69,7 @@ s32 func_151F7F60(Mp3Decoder *dec);
 s32 func_151F8088(Mp3Decoder *dec, s32 seekPos);
 Mp3Decoder *func_151F85C4(s32 handle, Mp3ReadFn read, s32 arg2);
 s32 func_151F86B0(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels);
+extern f32 *D_800E0E30; /* pow43 table storage (0x8000 bytes) */
 
 /* game_225D20.s: the bit reader (func_151F8960(buf, &bitPos, n) reads n bits from buf at bitPos) and the
  * Huffman decoders */

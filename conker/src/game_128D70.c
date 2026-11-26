@@ -217,21 +217,21 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
 }
 
 
-/* Calls func_151C3B0C for a particle. The last argument is a mask of every camera except the owner's,
+/* Calls func_151C3B0C for a projectile. The last argument is a mask of every camera except the owner's,
  * or 0xFF when the owner is gone, has no camera or fails one of the other checks. */
-void func_150FC368(Particle_150FC368 *particle) {
+void func_150FC368(Game1EF500Trail *trail) {
     u8 cameraMask;
     Actor *owner;
 
-    owner = particle->owner;
+    owner = trail->trail.owner;
     if ((owner == NULL) || (owner->type == 0) || (owner->character_type == 0xFF) ||
-        (owner->unique_id != particle->ownerUniqueId) || (owner->mv == NULL) ||
+        (owner->unique_id != trail->trail.ownerId) || (owner->mv == NULL) ||
         (owner->mv->bot != 0) || (owner->playernumber == 0xFF) || (owner->CameraPtr == NULL)) {
         cameraMask = 0xFF;
     } else {
         cameraMask = ~(1U << owner->CameraPtr->CNumber) & 0xFF;
     }
-    func_151C3B0C(particle, 1.0f, 1.0f, 0.6f, 0.0f, 0xFF, 0xFF, cameraMask);
+    func_151C3B0C(trail, 1.0f, 1.0f, 0.6f, 0.0f, 0xFF, 0xFF, cameraMask);
 }
 
 /* Spawns an emitter object that follows `owner` (see func_150FC614); when `other` has a camera, also

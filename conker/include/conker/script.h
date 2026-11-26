@@ -356,6 +356,13 @@ typedef struct ResourceDescriptor {
 
 extern ResourceDescriptor D_80087430[RESOURCE_COUNT];
 
+/* game_22CEE0.c: the script command handlers by class (bits 12-15 of the command word, minus one): start,
+ * end, query and command. Declared without a prototype: the handlers take different parameter types. */
+extern s32 (*D_80088420[15])();
+extern s32 (*D_8008845C[15])();
+extern s32 (*D_80088498[15])();
+extern s32 (*D_800884D4[15])();
+
 /* game_C9EC0.c */
 const char *func_1509CA10(s32 index);
 u16 func_1509CA30(s32 index);
@@ -383,13 +390,13 @@ s32 func_1509DD20(s32 arg0);
 s32 func_1509DD30(s32 arg0);
 s32 func_1509DD40(s32 arg0);
 s32 func_1509DD50(s32 arg0, SwarmSpawnCmd *cmd);
-s32 func_1509DDC4(s32 tag, u16 arg1);
+s32 func_1509DDC4(s32 tag, ScriptCmd *cmd);
 s32 func_1509DDFC(s32 tag, s32 op, SwarmTargetCmd *cmd);
 s32 func_1509DEC4(s32 tag, s32 op, SwarmTargetCmd *cmd);
 
 /* game_CB3D0.c */
-void func_1509DF20(s32 arg0, ScriptCmd *record);
-void func_1509DFB4(s32 arg0, s32 arg1);
+s32 func_1509DF20(s32 arg0, ScriptCmd *record);
+s32 func_1509DFB4(s32 arg0, ScriptCmd *record);
 s32 func_1509DFC4(s32 arg0, s32 cmd, ScriptCmd *args);
 s32 func_1509E3DC(s32 arg0, s32 cmd, ScriptCmd *args);
 

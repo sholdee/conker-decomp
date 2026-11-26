@@ -2,7 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800A7170[];
+/* Brightness of a grounded swarm actor, by bits 5-6 of its surface flags. */
+static const u8 D_800A7170[4] = { 0x00, 0x2A, 0x54, 0x7F };
 
 /* Spawns `count` swarm actors of type 10 around (x, y, z), heading roughly away from player `player`. */
 void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
@@ -21,7 +22,7 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
     u32 surfaceFlags;
     s32 surface;
 
-    height = (f32)y;
+    height = y;
     diff.x = x - camera_global_Cameras[player].eye.x;
     diff.y = height - camera_global_Cameras[player].eye.y;
     diff.z = z - camera_global_Cameras[player].eye.z;
@@ -105,8 +106,8 @@ void func_15174FA4(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 ar
         if (actor == NULL) return;
         radius = spread >> 1;
         height = spawnY;
-        actorX = (func_150ADA20() % (u32)spread) + spawnX - radius;
-        actorZ = (func_150ADA20() % (u32)spread) + z - radius;
+        actorX = (func_150ADA20() % spread) + spawnX - radius;
+        actorZ = (func_150ADA20() % spread) + z - radius;
         actor->group = group;
         actor->x = actorX;
         actor->y = height;
@@ -209,7 +210,7 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
         if (state == 0) {
             actorY = actor->groundHeight;
         } else if (heightRange != 0) {
-            actorY += func_150ADA20() % (u32)heightRange;
+            actorY += func_150ADA20() % heightRange;
         }
         actor->group = group;
         actor->flags = flags;
@@ -287,28 +288,6 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
     }
 }
 
-/* Per-model flight parameters, indexed like D_800DDE80. */
-typedef struct SwarmFlight {
-    /* 0x00 */ u8 maxSpeed;
-    /* 0x01 */ u8 minSpeed;
-    /* 0x02 */ u8 wanderTime;
-    /* 0x03 */ u8 turnTime;
-    /* 0x04 */ f32 maxRoll;
-    /* 0x08 */ f32 maxPitch;
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ f32 maxYawStep;
-    /* 0x14 */ u8 pad14[4];
-    /* 0x18 */ f32 flapAngle;        /* flapAmplitude * sin(flapPhase) */
-    /* 0x1C */ f32 flapRate;
-    /* 0x20 */ f32 flapThreshold;
-    /* 0x24 */ f32 flapPhase;
-    /* 0x28 */ f32 flapAmplitude;
-    /* 0x2C */ u8 pad2C[4];
-    /* 0x30 */ f32 innerWingLength;
-    /* 0x34 */ f32 outerWingLength;
-} SwarmFlight;
-
-extern SwarmFlight D_8008D0B0[];
 #define D_800D35E4 ((&D_800D35E8)[-1])
 
 /* Common per-frame flight update for a swarm actor: fading, wandering inside its home ring,
@@ -394,7 +373,7 @@ void func_15175958(SwarmActor *actor) {
     if (actor->flags & 4) {
         s32 tooClose;
 
-        dist = func_150AD960((s32)actor->x, (s32)actor->z, actor->originX, actor->originZ);
+        dist = func_150AD960(actor->x, actor->z, actor->originX, actor->originZ);
         tooClose = ((actor->flags & 0x10) && dist < actor->minRadius) ? TRUE : FALSE;
         if (actor->maxRadius < dist || tooClose) {
             vec.x = actor->originX - actor->x;
@@ -516,13 +495,13 @@ void func_15175958(SwarmActor *actor) {
     }
     if (!(actor->flags & 1)) {
         if (actor->pitch >= 0) {
-            threshold = flight->flapThreshold;
-            if (actor->vertices == model->unk4 && flight->flapAngle < threshold && -threshold < flight->flapAngle) {
+            threshold = flight->u.flap.threshold;
+            if (actor->vertices == model->unk4 && flight->u.flap.angle < threshold && -threshold < flight->u.flap.angle) {
                 actor->vertices = model->unk8;
             }
         } else {
-            threshold = flight->flapThreshold;
-            if (actor->vertices == model->unk8 && flight->flapAngle < threshold && -threshold < flight->flapAngle) {
+            threshold = flight->u.flap.threshold;
+            if (actor->vertices == model->unk8 && flight->u.flap.angle < threshold && -threshold < flight->u.flap.angle) {
                 actor->vertices = model->unk4;
             }
         }
@@ -589,7 +568,7 @@ void func_1517685C(SwarmActor *actor) {
         D_800DDF68[actor->modelIndex] = 1;
         switch (actor->state) {
         case 0:
-            if (func_150AD960((s32)movement_obj->xpos, (s32)movement_obj->zpos, (s32)actor->x, (s32)actor->z) < 400) {
+            if (func_150AD960(movement_obj->xpos, movement_obj->zpos, actor->x, actor->z) < 400) {
                 actor->state = 1;
                 actor->pitchStep = -1 - (s32)(func_150ADA20() & 3);
                 actor->pitch = -8.0f;
@@ -695,8 +674,7 @@ void func_15176B84(SwarmActor *actor) {
 
     switch (actor->state) {
         case 0:
-            if (func_150AD960((s32)movement_obj[0].xpos, (s32)movement_obj[0].zpos, (s32)actor->x,
-                              (s32)actor->z) < 200) {
+            if (func_150AD960(movement_obj[0].xpos, movement_obj[0].zpos, actor->x, actor->z) < 200) {
                 actor->state = 2;
                 actor->targetY = (f32)(func_150ADA20() % actor->heightRange) + actor->originY;
                 actor->vertices = D_800DDE80[actor->modelIndex].unk8;
@@ -808,7 +786,7 @@ Gfx *func_151770C8(Gfx *gdl, SwarmActor *actor, s16 camera) {
     return gdl;
 }
 
-/* Flaps model `index`'s wings: updates flapAngle from the flap phase and rotates the inner
+/* Flaps model `index`'s wings: updates the flap angle from the flap phase and rotates the inner
  * wing vertices by it and the outer ones by the angle 30 degrees of phase earlier. */
 void func_1517725C(u8 index) {
     f32 angle;
@@ -821,13 +799,13 @@ void func_1517725C(u8 index) {
 
     flight = &D_8008D0B0[index];
     vtx = D_800DDE80[index].unk8;
-    angle = flight->flapPhase * 0.01745329238f;
-    flight->flapAngle = func_150AD78C(angle) * flight->flapAmplitude;
-    angle = flight->flapAngle * 0.01745329238f;
+    angle = flight->u.flap.phase * 0.01745329238f;
+    flight->u.flap.angle = func_150AD78C(angle) * flight->u.flap.amplitude;
+    angle = flight->u.flap.angle * 0.01745329238f;
     sinAngle = func_150AD78C(angle);
     cosAngle = func_150AD780(angle);
-    x = flight->innerWingLength * cosAngle;
-    y = flight->innerWingLength * sinAngle;
+    x = flight->u.flap.innerWingLength * cosAngle;
+    y = flight->u.flap.innerWingLength * sinAngle;
     vtx[10].v.ob[0] = -x;
     vtx[11].v.ob[0] = -x;
     vtx[17].v.ob[0] = x;
@@ -836,19 +814,19 @@ void func_1517725C(u8 index) {
     vtx[18].v.ob[1] = y;
     vtx[10].v.ob[1] = y;
     vtx[11].v.ob[1] = y;
-    angle = (flight->flapPhase - 30.0f) * 0.01745329238f;
-    flight->flapAngle = func_150AD78C(angle) * flight->flapAmplitude;
-    angle = flight->flapAngle * 0.01745329238f;
+    angle = (flight->u.flap.phase - 30.0f) * 0.01745329238f;
+    flight->u.flap.angle = func_150AD78C(angle) * flight->u.flap.amplitude;
+    angle = flight->u.flap.angle * 0.01745329238f;
     sinAngle = func_150AD78C(angle);
     cosAngle = func_150AD780(angle);
-    x = flight->outerWingLength * cosAngle;
-    y = flight->outerWingLength * sinAngle;
+    x = flight->u.flap.outerWingLength * cosAngle;
+    y = flight->u.flap.outerWingLength * sinAngle;
     vtx[14].v.ob[0] = -x;
     vtx[19].v.ob[0] = x;
     vtx[14].v.ob[1] = y;
     vtx[19].v.ob[1] = y;
-    flight->flapPhase += flight->flapRate;
-    if (flight->flapPhase >= 360.0f) {
-        flight->flapPhase -= 360.0f;
+    flight->u.flap.phase += flight->u.flap.rate;
+    if (flight->u.flap.phase >= 360.0f) {
+        flight->u.flap.phase -= 360.0f;
     }
 }

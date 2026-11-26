@@ -1,11 +1,24 @@
 #include <ultra64.h>
 
-/* This file's constants (file-statics in the SDK source), not defined here. */
-extern f32 D_80085EA0; /* 1 / (pi/2) */
-extern f32 D_80085EA4; /* pi/2, high part */
-extern f32 D_80085EA8; /* pi/2, low part */
-extern f32 D_80085EAC;
-extern f32 D_80098D70[]; /* [1]..[4]: odd-power polynomial coefficients */
+typedef union {
+    unsigned int i;
+    float f;
+} fu;
+
+/* coefficients for polynomial approximation of sin on +/- pi/2 */
+static const fu P[] = {
+    { 0x3F800000 },
+    { 0xBE2AAAA6 },
+    { 0x3C088769 },
+    { 0xB94FB7FD },
+    { 0x362EDEFA },
+};
+
+/* Scalar constants: IDO places these in .data (the P table above is .rodata). */
+static const f32 rpi = 0.3183099031f;    /* 1 / pi */
+static const f32 pihi = 3.141592979f;    /* pi, high part */
+static const f32 pilo = 3.178650942e-08f; /* pi, low part */
+static const f32 zero = 0.0f;
 
 /* cosf: cos(x) = sin(|x| + pi/2), so the range reduction rounds to the nearest
    HALF integer (the +0.5f / -0.5f pair around the rounding step) and the same
@@ -19,7 +32,6 @@ f32 cosf(f32 x)
     f32 y;
     f32 ysq;
     f32 result;
-    f32 *c;
     s32 n;
 
     n = *((s32 *) &x);
@@ -30,7 +42,7 @@ f32 cosf(f32 x)
             xa = -x;
         }
         y = xa;
-        t = (xa * D_80085EA0) + 0.5f;
+        t = (xa * rpi) + 0.5f;
         /* NOTE: this zero is spelled `0.f` while the one above is `0.0f`.
            IDO pools identical float literals within a function into a single
            value, which would keep one register tied up across the whole block
@@ -42,11 +54,10 @@ f32 cosf(f32 x)
             n = (s32) (t - 0.5f);
         }
         t = ((f32) n) - 0.5f;
-        y = y - (t * D_80085EA4);
-        y = y - (t * D_80085EA8);
+        y = y - (t * pihi);
+        y = y - (t * pilo);
         ysq = y * y;
-        c = D_80098D70;
-        result = (((((c[4] * ysq) + c[3]) * ysq) + c[2]) * ysq) + c[1];
+        result = (((((P[4].f * ysq) + P[3].f) * ysq) + P[2].f) * ysq) + P[1].f;
         if ((n & 1) == 0) {
             return ((y * ysq) * result) + y;
         }
@@ -55,5 +66,5 @@ f32 cosf(f32 x)
     if (x != x) {
         return __libm_qnan_f;
     }
-    return D_80085EAC;
+    return zero;
 }

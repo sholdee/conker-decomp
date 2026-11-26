@@ -1,13 +1,94 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
+u8 D_800DCDD0;
+
 #include "functions.h"
 #include "variables.h"
 
 extern u8 D_800886F0[];
 extern u8 D_800886F4[];
 extern u8 D_800886F8[];
-extern void (*D_8008B37C[])(LightEffect *);
 
-extern void (*D_8008B358[])(LightEffect *, ActorEvent *, u8);
+/* Update callbacks per LightEffect.update; 0 ends the effect. Declared without a prototype: the
+ * caller passes no argument, the callbacks take the effect and some return u8 or nothing. */
+static s32 (*D_8008B0F0[])() = {
+    func_15160600, func_1516065C, func_15160684, func_151606A8,
+    func_151607A4, func_15160B74, func_15160E30, func_151B9408,
+    func_15108E10, func_15161A68, func_15161F2C, func_15162510,
+    func_15162B28, func_151630F4, func_15163504, func_15163704,
+    func_151638E0, func_15163B98, func_151903D0, func_150EAE24,
+    func_1516429C, func_151643F8, func_150F25A0, func_151644A8,
+};
+
+/* Event handlers per LightEffect.lightType (func_151604A0). Declared without a prototype: the caller
+ * passes the effect only, the handlers take the event too. */
+static void (*D_8008B150[])() = {
+    NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL,
+    func_15163FEC, func_15164134, NULL, NULL,
+    NULL, func_15161F4C, NULL, NULL,
+    NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, func_151635A8,
+    NULL, NULL, NULL, func_151639D0,
+    func_15163A18, func_15190400, NULL, func_1516434C,
+    NULL, NULL,
+};
+
+/* Callbacks of bone-attached lights (LightAttach.callback). Declared without a prototype: the
+ * callbacks take the effect under their own types. */
+static s32 (*D_8008B1F8[])() = { func_15163CD0, func_150B66DC, func_150D88AC, func_151C9B30 };
+
+/* Destroy and free handlers per LightEffect.lightType (func_15161804, func_15161860) */
+static void (*D_8008B208[])(LightEffect *) = {
+    func_151617C4, func_151617C4, func_151617C4, func_151617C4,
+    func_151617C4, func_151617C4, func_151617C4, func_15101238,
+    func_151617C4, func_151617C4, func_151617C4, func_151617C4,
+    func_151617C4, func_151617C4, func_151617C4, func_151617C4,
+    func_15161714, func_1516176C, func_151617C4, func_151617C4,
+    func_151617C4, func_151617C4, func_151617C4, func_151617C4,
+    func_151617C4, func_151617C4, func_151617C4, func_151617C4,
+    func_151617C4, func_151617C4, func_151617C4, func_151617C4,
+    func_151617C4, func_150F0390, func_1519C200, func_151617C4,
+    func_151617C4, func_15190464, func_151617C4, func_151617C4,
+    func_151617C4, func_151617C4,
+};
+static void (*D_8008B2B0[])(LightEffect *) = {
+    func_151617E4, func_151617E4, func_151617E4, func_151617E4,
+    func_151617E4, func_151617E4, func_151617E4, func_15101260,
+    func_151617E4, func_151617E4, func_151617E4, func_151617E4,
+    func_151617E4, func_151617E4, func_151617E4, func_151617E4,
+    func_15161740, func_15161798, func_151617E4, func_151617E4,
+    func_151617E4, func_151617E4, func_151617E4, func_151617E4,
+    func_151617E4, func_151617E4, func_151617E4, func_151617E4,
+    func_151617E4, func_151617E4, func_151617E4, func_151617E4,
+    func_151617E4, func_150F03BC, func_1519C22C, func_151617E4,
+    func_151617E4, func_15190490, func_151617E4, func_151617E4,
+    func_151617E4, func_151617E4,
+};
+
+/* Payload event handlers of actor-following lights (LightActorRef.eventHandler); func_150F1684 takes
+ * the effect and the event as its own types. */
+static void (*D_8008B358[])(LightEffect *, ActorEvent *, u8) = { NULL, func_150F1684, NULL };
+
+/* State change callbacks of cycling lights (LightCycle). Declared without a prototype: the caller
+ * passes the state too. */
+static void (*D_8008B364[])() = { func_15162EF8, func_15162F50 };
+
+/* Update callbacks of tracking lights (LightTrack.callback). Declared without a prototype: the caller
+ * passes no argument. */
+static s32 (*D_8008B36C[])() = { func_151BD2BC };
+
+/* Event handlers of tracking lights (LightTrack.handler) */
+static void (*D_8008B370[])(LightEffect *effect, s32 arg1, u8 eventId) = { NULL };
+
+/* Event handlers of bone-attached and beam lights (LightAttach.eventHandler, LightBeam.eventHandler).
+ * Declared without a prototype: the callers pass the effect only. */
+static void (*D_8008B374[])() = { NULL, func_151640C0 };
+static void (*D_8008B37C[])() = { NULL, func_151643A8 };
 
 /* Creates a light at `position` and an effect instance (with `size` bytes of payload) that owns it. */
 LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA) {
@@ -58,12 +139,10 @@ void func_151603FC(LightEffect *effect) {
     }
 }
 
-extern void (*D_8008B150[])(void *);
-
 /* Event handler: events 0x17-0x22 addressed to this effect's type toggle or remove it; others go to the type's handler. */
 void func_151604A0(void *arg0, u8 *message, u8 event) {
     LightEffect *effect = arg0;
-    void (*handler)(void *);
+    void (*handler)();
     Vec3f position;
 
     switch (event) {
@@ -1001,8 +1080,6 @@ LightEffect *func_1516295C(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lif
     return effect;
 }
 
-extern void (*D_8008B364[])(LightEffect *, s32);
-
 /* Sets the intensity for the current point of the cycle, runs the state's callback on a state change, and advances time. */
 s32 func_15162B28(LightEffect *effect) {
     LightCycle *cycle;
@@ -1158,7 +1235,7 @@ s32 func_151630F4(LightEffect *effect) {
     } else {
         storm->waitTimer -= D_800BE9A4;
         if (storm->waitTimer < 0.0f) {
-            storm->flashes = func_150ADA20() % (u32)(storm->flashesRange + 1) + storm->flashesMin;
+            storm->flashes = func_150ADA20() % (storm->flashesRange + 1) + storm->flashesMin;
             storm->flashTimer = 0.0f;
             storm->waitTimer = func_150ADA68() * storm->waitRange + storm->waitMin;
         }

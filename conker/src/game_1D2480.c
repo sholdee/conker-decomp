@@ -3,10 +3,10 @@
 #include "variables.h"
 
 
-/* Spawns a tint effect with extraSize bytes after it; returns NULL if the allocation fails. */
-struct Obj151A4FD0 *func_151A4FD0(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19,
-                                  s32 extraSize) {
-    struct Obj151A4FD0 *effect = func_15167A68(0x5A, 0, extraSize + sizeof(struct Obj151A4FD0), 0, 0xFF, 1);
+/* Spawns a tint effect with extraSize bytes of the caller's data after it (SightOwnedEffect); returns NULL if the
+ * allocation fails. */
+void *func_151A4FD0(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19, s32 extraSize) {
+    struct ScreenTint *effect = func_15167A68(0x5A, 0, extraSize + sizeof(struct ScreenTint), 0, 0xFF, 1);
 
     if (effect == NULL) {
         return NULL;
@@ -23,7 +23,7 @@ struct Obj151A4FD0 *func_151A4FD0(s32 type, s32 timer, s32 red, s32 green, s32 b
 }
 
 /* Per-frame update: counts the timer down (freeing the effect when it runs out) and pulses red between 0x90 and 0xFF. */
-void func_151A5070(struct Obj151A4FD0 *effect) {
+void func_151A5070(struct ScreenTint *effect) {
     s32 timer;
     s32 step;
     s32 red;
@@ -60,10 +60,11 @@ void func_151A5070(struct Obj151A4FD0 *effect) {
     effect->red = red;
 }
 
-extern void (*D_8008F900[])(void *, struct Obj151A4FD0 *, s16);
+/* Draw handlers by effect type. */
+static Gfx *(*D_8008F900[])(Gfx *, struct ScreenTint *, s32) = { func_151A5170 };
 
 /* Calls the effect's type handler from D_8008F900. */
-void func_151A5130(void *arg0, struct Obj151A4FD0 *effect, s16 arg2) {
+void func_151A5130(void *arg0, struct ScreenTint *effect, s16 arg2) {
     D_8008F900[effect->type](arg0, effect, arg2);
 }
 
@@ -71,7 +72,7 @@ void func_151A5130(void *arg0, struct Obj151A4FD0 *effect, s16 arg2) {
  * Redraws the effect's viewport from the current framebuffer, tinted by the effect's colour.
  * The copy goes through TMEM in strips: 8 rows of up to 256 columns, then 54 rows of any columns past 256.
  */
-Gfx *func_151A5170(Gfx *gfx, struct Obj151A4FD0 *effect, s32 arg2) {
+Gfx *func_151A5170(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
     s32 left;
     s32 pass;
     s32 y;
@@ -133,24 +134,22 @@ Gfx *func_151A5170(Gfx *gfx, struct Obj151A4FD0 *effect, s32 arg2) {
     return func_15142FBC(gfx, 0x2C00, 0x0F0A4004, &state);
 }
 
-extern void (*D_8008F904[])(struct Obj151A4FD0 *, void *, u8);
+/* Message handlers by ScreenTint.unk19 (none for 0); func_151CBB6C (game_1F7050) takes the effect as
+   the longer SightOwnedEffect, which has the owning player in the extra data. */
+static void (*D_8008F904[])(struct ScreenTint *, void *, u8) = { NULL, func_151CBB6C };
 
 /* Calls the effect's optional D_8008F904 handler, if it has one. */
-void func_151A55D4(struct Obj151A4FD0 *effect, void *arg1, u8 arg2) {
-    void (*handler)(struct Obj151A4FD0 *, void *, u8) = D_8008F904[effect->unk19];
+void func_151A55D4(struct ScreenTint *effect, void *arg1, u8 arg2) {
+    void (*handler)(struct ScreenTint *, void *, u8) = D_8008F904[effect->unk19];
 
     if (handler != NULL) {
         handler(effect, arg1, arg2);
     }
 }
 
-
-extern IdList1 D_800A8D70;
-
-/* Forwards a message to func_15169260 with a local copy of the D_800A8D70 descriptor. */
+/* Forwards a message to the effect objects of kind 90 (func_15169260). */
 void func_151A561C(s32 arg0, u8 arg1) {
-    IdList1 descriptor;
+    const s32 ids[1] = { 90 };
 
-    descriptor = D_800A8D70;
-    func_15169260(descriptor.ids, 1, arg0, arg1);
+    func_15169260(ids, 1, arg0, arg1);
 }

@@ -156,7 +156,7 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
             particle.maxB = 57.969f * height;
             particle.minB = 42.714f * height;
             particle.altB = 118.763f * height;
-            particle.life = func_150ADA20() % (u32)(lifeRange + 1) + lifeBase;
+            particle.life = func_150ADA20() % (lifeRange + 1) + lifeBase;
             func_15149550(&particle, 10, 0, 0, 0xFF, 1);
             count--;
         } while (count != 0);
@@ -408,12 +408,12 @@ void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
     }
 }
 
-/* Fades out over the last 16 frames of life: caps the alpha byte at unk98[0x1B] to life * 16. */
-s32 func_1514B844(Particle177B50 *p) {
-    u8 *unk98 = p->head.unk98;
+/* Trail update handler (D_8008A3F8): fades out over the last 16 frames of life, capping the alpha at life * 16. */
+s32 func_1514B844(MotionTrail *trail) {
+    TrailParams *params = trail->params;
 
-    if (p->head.def.lifetime < 16 && p->head.def.lifetime * 16 < unk98[0x1B]) {
-        unk98[0x1B] = p->head.def.lifetime * 16;
+    if (trail->head.tmpl.life < 16 && trail->head.tmpl.life * 16 < params->motion.alpha) {
+        params->motion.alpha = trail->head.tmpl.life * 16;
     }
     return 1;
 }
@@ -439,7 +439,7 @@ s32 func_1514B8B0(Particle177B50 *p) {
  * Spawns a particle at `pos` through func_1513D2F0 and stores its initial func_1514BC08 state.
  * A `life` of -1 means 300 frames without the timed-life flag.
  */
-void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Vec3f *velocity,
+void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, const Vec3f *velocity,
                     f32 gravity, f32 drag, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags,
                     s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11) {
     void *particle;
@@ -518,7 +518,7 @@ void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Ve
  * Eases def.width, def.height and def.frameSpeed toward random targets, picking a new target for each when its
  * countdown timer (decremented by the frame delta) runs out.
  */
-s32 func_1514BC08(Particle177B50 *p, ParticleJitter *w) {
+s32 func_1514BC08(JitterParticle *p, ParticleJitter *w) {
     w->widthTimer -= D_800BE9A4;
     if (w->widthTimer < 0.0f) {
         w->widthTimer = func_150ADA68() * 4.0f;

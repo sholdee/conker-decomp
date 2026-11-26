@@ -4,16 +4,6 @@
 
 void *memcpy(void *, const void *, u32);
 
-/* D_800A9D40: lifetime and wobble of each kind of falling drop. */
-typedef struct {
-    /* 0x00 */ s16 lifeMin;
-    /* 0x02 */ s16 lifeRange;
-    /* 0x04 */ Size2f baseSize;
-    /* 0x0C */ Size2f wobble;
-} DropKind; /* size 0x14 */
-
-extern DropKind D_800A9D40[];
-
 /* Destroys the emitter already on link->actor, then creates one with extraSize bytes of extra data. */
 DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
     DripEmitter *emitter;
@@ -48,25 +38,6 @@ void func_1519086C(DripEmitter *emitter) {
     func_15169824(&emitter->header);
 }
 
-/* A point on an actor's bone where a drop hangs. */
-typedef struct {
-    /* 0x0 */ Vec3f offset;
-    /* 0xC */ u8 bone;
-} BoneMount; /* size 0x10 */
-
-/* D_8008FA70: one entry per emitter kind (ActorLink.kind). */
-typedef struct {
-    /* 0x00 */ u8 dropKind;         /* D_800A9D40 index */
-    /* 0x04 */ s32 numMounts;
-    /* 0x08 */ BoneMount *mounts;
-    /* 0x0C */ f32 rate;            /* new drops per unit of D_800BE9A4 */
-    /* 0x10 */ s32 maxDrops;
-    /* 0x14 */ s16 holdMin;         /* D_800BE9E4 ticks a drop hangs before it falls */
-    /* 0x16 */ s16 holdRange;
-} EmitterKind; /* size 0x18 */
-
-extern EmitterKind D_8008FA70[];
-
 /*
  * Update of the emitter: keeps its hanging drops on their bones and lets them fall when their time is up,
  * then hangs new drops on random free mounts at the kind's rate. Destroys itself when its actor is gone or
@@ -82,7 +53,7 @@ void func_15190898(DripEmitter *emitter) {
     s32 freeCount;
     s32 i;
     s32 isFree;
-    DropKind *dropKind;
+    const DropKind *dropKind;
     f32 dx;
     f32 dz;
     s32 skip;
@@ -127,7 +98,7 @@ void func_15190898(DripEmitter *emitter) {
                         fall->vel.z = dz;
                         func_1513F680(&slot->drop->head, 13, 18, 0, 13);
                         isFree = 1;
-                        slot->drop->head.def.lifetime = func_150ADA20() % (u32)(dropKind->lifeRange + 1) + dropKind->lifeMin;
+                        slot->drop->head.def.lifetime = func_150ADA20() % (dropKind->lifeRange + 1) + dropKind->lifeMin;
                         slot->drop->head.def.flags |= 1;
                         slot->drop = NULL;
                         emitter->dropCount--;
@@ -149,7 +120,7 @@ void func_15190898(DripEmitter *emitter) {
             if (freeCount != 0) {
                 emitter->spawnAccum += kind->rate * D_800BE9A4;
                 if (emitter->spawnAccum > 1.0f) {
-                    DropKind *newKind;
+                    const DropKind *newKind;
 
                     newKind = &D_800A9D40[kind->dropKind];
                     tail->next = head;
@@ -185,7 +156,7 @@ void func_15190898(DripEmitter *emitter) {
                     motion.phase[0] = 0;
                     motion.phase[1] = 0;
                     do {
-                        skip = func_150ADA20() % (u32)freeCount;
+                        skip = func_150ADA20() % freeCount;
                         while (skip--) {
                             tail = head;
                             head = head->next;
@@ -208,7 +179,7 @@ void func_15190898(DripEmitter *emitter) {
                             head->drop = drop;
                             if (drop != NULL) {
                                 memcpy(&drop->motion, &motion, sizeof(motion));
-                                head->timer = func_150ADA20() % (u32)(kind->holdRange + 1) + kind->holdMin;
+                                head->timer = func_150ADA20() % (kind->holdRange + 1) + kind->holdMin;
                                 freeCount--;
                                 head = head->next;
                                 tail->next = head;
@@ -250,8 +221,8 @@ s32 func_15190F9C(DripParticle *drop) {
 
     motion->phase[0] += motion->phaseSpeed[0] * D_800BE9E4;
     motion->phase[1] += motion->phaseSpeed[1] * D_800BE9E4;
-    widthWave = func_151423D8((u8)(motion->phase[0] - 0x40));
-    heightWave = func_151423D8((u8)(motion->phase[1] - 0x40));
+    widthWave = func_151423D8(motion->phase[0] - 0x40);
+    heightWave = func_151423D8(motion->phase[1] - 0x40);
     p->head.def.width += (motion->baseSize.width + motion->wobble.width * widthWave - p->head.def.width) * 0.5f;
     p->head.def.height += (motion->baseSize.height + motion->wobble.height * heightWave - p->head.def.height) * 0.5f;
     return 1;
@@ -339,7 +310,7 @@ void func_15191400(DripEmitter *emitter) {
     s32 i;
     DripSlot *slot;
     DripMotion *motion;
-    DropKind *dropKind;
+    const DropKind *dropKind;
 
     emitter->spawnAccum = 0.0f;
     emitter->dropCount = 0;
@@ -352,7 +323,7 @@ void func_15191400(DripEmitter *emitter) {
             motion->vel.y = 0.0f;
             motion->vel.z = 0.0f;
             func_1513F680(&slot->drop->head, 13, 18, 0, 13);
-            slot->drop->head.def.lifetime = func_150ADA20() % (u32)(dropKind->lifeRange + 1) + dropKind->lifeMin;
+            slot->drop->head.def.lifetime = func_150ADA20() % (dropKind->lifeRange + 1) + dropKind->lifeMin;
             slot->drop->head.def.flags |= 1;
         }
     }

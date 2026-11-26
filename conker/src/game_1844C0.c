@@ -2,8 +2,35 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 (*D_8008AD90[])(ModelEffect *);
-extern s32 (*D_8008ADA0[])(ModelEffect *);
+/* Each view's orthographic projection (func_15012370 of game_3F820 builds them). */
+Mtx D_800DCC10[4];
+
+/* The model effect types, for func_15158078's event. */
+const s32 D_800A6060[3] = { 0x36, 0x4C, 0x5B };
+
+/* The model effect type's render setup and teardown display lists (object type table). */
+Gfx D_8008AD60[] = {
+    gsDPPipeSync(),
+    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsSPEndDisplayList(),
+};
+Gfx D_8008AD80[] = {
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPEndDisplayList(),
+};
+
+/* Update callbacks (EffectParams.updateFunc, .updateFunc2, the third set): each returns 0 when the effect
+   is done. Declared without a prototype where the entries take their own effect views. */
+s32 (*D_8008AD90[])() = { func_15157AA8, func_151BECB8, func_151B8C54, func_150FB29C };
+s32 (*D_8008ADA0[])(ModelEffect *) = { func_15157860, func_15157918 };
+s32 (*D_8008ADA8[])() = { func_151BEB20, func_151D6E60, func_150FB188, func_15157DC8, func_150C52CC };
+
+/* Pre-draw and post-draw callbacks (EffectParams.preDrawFunc, .postDrawFunc). */
+Gfx *(*D_8008ADBC[])(Gfx *, ModelEffect *, s32, u8 *, u8 *) = {
+    func_151BEC94, func_151D710C, func_150FB1E8, func_15157F80,
+};
+Gfx *(*D_8008ADCC[])(Gfx *, ModelEffect *, s32, u8 *) = { func_15157FE8 };
 
 /*
  * Spawns a model effect from `params`, with `extraSize` bytes of extension at 0x120. The object type
@@ -129,8 +156,6 @@ void func_151572D0(ModelEffect *fx) {
     }
 }
 
-extern Gfx *(*D_8008ADBC[])(Gfx *, ModelEffect *, s16, u8 *, u8 *);
-extern Gfx *(*D_8008ADCC[])(Gfx *, ModelEffect *, s16, u8 *);
 extern RenderModePair D_800A4AC8[];
 
 /*

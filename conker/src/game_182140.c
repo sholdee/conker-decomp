@@ -12,11 +12,45 @@ typedef struct {
     s32 id[2];
 } SpriteListIds;
 
-extern s32 (*D_8008ACC8[])(ScreenSprite *);
-extern void (*D_8008AD04[])(ScreenSprite *, s32, u8);
 extern CombineMode D_800A4AC8[];
-extern SpriteListIds D_800A6030;
-extern IdList2 D_800A6038;
+
+/* The render setup and reset display lists of the sprite object type (the object type table
+   D_8008B4D4 points to them). */
+Gfx D_8008AC70[] = {
+    gsDPPipeSync(),
+    gsDPSetAlphaCompare(G_AC_NONE),
+    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsSPEndDisplayList(),
+};
+Gfx D_8008AC98[] = {
+    gsDPPipeSync(),
+    gsDPSetTexturePersp(G_TP_PERSP),
+    gsDPSetDepthSource(G_ZS_PIXEL),
+    gsDPSetAlphaCompare(G_AC_NONE),
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPEndDisplayList(),
+};
+
+/* The update callback of each sprite kind (ScreenSprite.unk68 & 0xF; nonzero: keep the sprite) and the
+   message handler of each kind (ScreenSprite.info.kind). The callbacks take their own sprite types, so
+   their table is declared without a prototype. The handler table keeps the prototype of its call
+   (func_15155564 narrows the u8 message id for it), and its entries take their own sprite and payload
+   types (warning 709). */
+s32 (*D_8008ACC8[15])() = {
+    NULL,          func_15134CEC, func_1515B994, func_15135BF8, func_151CB510,
+    func_151CB970, func_150AFBF4, func_151CBBE0, func_151CBC60, func_151CC77C,
+    func_150BE1C4, func_151CD224, func_150CF800, func_150CFC60, func_150FB2E0,
+};
+void (*D_8008AD04[11])(ScreenSprite *, s32, u8) = {
+    NULL, func_1515B62C, NULL, NULL, NULL, NULL, NULL, func_151CAACC, func_150CFBEC, NULL, NULL,
+};
+
+/* The two sprite lists func_151555AC searches. */
+static const SpriteListIds D_800A6030 = { 93, 87 };
+
+/* The same two lists, for func_1515572C. */
+static const IdList2 D_800A6038 = { 93, 87 };
 
 /* Per-frame update of a sprite: runs its timer, its update callback and its fade-out; frees it when done. */
 void func_15154C90(ScreenSprite *sprite) {

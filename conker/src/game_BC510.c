@@ -503,8 +503,6 @@ typedef struct TexSprite {
 #define SPRITE_FLIP_X 1
 #define SPRITE_FLIP_Y 2
 
-extern TextureDesc D_800903D4;
-extern TextureDesc D_80091840;
 
 /* Draws the bubbles: rising ones (states 1 and 2) wobble, popping ones (state 3) flip randomly. */
 Gfx *func_15090630(Gfx *gfx) {
@@ -571,11 +569,6 @@ Gfx *func_15090630(Gfx *gfx) {
     }
     return gfx;
 }
-extern u16 D_8009025A;
-extern u16 D_80090262;
-extern u16 D_80090266;
-extern u16 D_8009026E;
-extern u16 D_80090272;
 
 /* Animates the water surface mesh while player 1 is in water: blends its vertex positions,
  * tints its vertex colours and picks its textures by player 1's unkB2 counter. */
@@ -683,31 +676,31 @@ void func_1509093C(void) {
         dst[i].ob[2] = base[i].ob[2] + ((f32)target[i].ob[2] - (f32)base[i].ob[2]) * blend;
     }
     if (intensity < 480) {
-        tex = D_8009026E;
+        tex = D_8009026C;
         D_800D24C8.tex[3] = tex;
         D_800D24C8.tex[2] = tex;
-        tex = D_8009025A;
+        tex = D_80090258;
         D_800D24C8.tex[1] = tex;
         D_800D24C8.tex[0] = tex;
     } else if (intensity < 960) {
-        tex = D_80090272;
+        tex = D_80090270;
         D_800D24C8.tex[3] = tex;
         D_800D24C8.tex[2] = tex;
-        tex = D_8009025A;
+        tex = D_80090258;
         D_800D24C8.tex[1] = tex;
         D_800D24C8.tex[0] = tex;
     } else if (intensity < 1200) {
-        tex = D_80090272;
+        tex = D_80090270;
         D_800D24C8.tex[3] = tex;
         D_800D24C8.tex[2] = tex;
-        tex = D_80090266;
+        tex = D_80090264;
         D_800D24C8.tex[1] = tex;
         D_800D24C8.tex[0] = tex;
     } else {
-        tex = D_80090272;
+        tex = D_80090270;
         D_800D24C8.tex[3] = tex;
         D_800D24C8.tex[2] = tex;
-        tex = D_80090262;
+        tex = D_80090260;
         D_800D24C8.tex[1] = tex;
         D_800D24C8.tex[0] = tex;
     }
@@ -1541,7 +1534,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 s32 xh;
                 s32 yh;
                 Actor *other;
-                u8 *rgb;
+                const u8 *rgb;
 
                 if (j == i || j == skip) {
                     continue;

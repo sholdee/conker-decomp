@@ -1,22 +1,79 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/shadow.h describes it. */
+Vec3f D_800DDFB0[8]; /* light position per shadow slot */
+Vec3f D_800DE010;    /* default light offset from the object */
+/* Shadow settings, set per level by func_151872B0. */
+s32 D_800DE01C; /* vertex budget cap */
+s32 D_800DE020; /* below this budget D_800DE028 eases back up */
+s32 D_800DE024; /* vertex budget floor */
+f32 D_800DE028;
+f32 D_800DE02C; /* shadow alpha */
+s32 D_800DE030; /* shadow viewport depth scale, in 1/1024 */
+s32 D_800DE034; /* nonzero: skip the light nodes and always use the default light offset */
+s32 D_800DE038; /* max lights (shadows) per object */
+f32 D_800DE03C; /* light distance scale */
+u8 D_800DE040;  /* nonzero: keep the light at least 30 degrees above the object */
+u8 D_800DE041;  /* nonzero: only faces flagged in the D_800D3668 table receive shadows */
+u8 D_800DE048[0x1040]; /* the 64x64 shadow texture, at the first 64-byte boundary (D_800DF088) */
+s32 D_800DF088;
+Vp D_800DF090[4];
+u16 D_800DF0D0[8]; /* perspective normalisation per shadow slot */
+u8 D_800DF0E0;
+u8 D_800DF0E1;
+s32 D_800DF0E4;
+s32 D_800DF0E8;
+s32 D_800DF0EC;
+s32 D_800DF0F0;
+s32 D_800DF0F4;
+MtxF D_800DF0F8[8];
+Mtx D_800DF2F8[8][2];
+f32 D_800DF6F8; /* light-to-object distance */
+
 #include "functions.h"
 #include "variables.h"
 
-/* Per clip plane: edge intersection, and the inside test. */
-extern ClipVtx *(*D_8008D498[])(ClipVtx *, ClipVtx *, ClipVtx *);
-extern s32 (*D_8008D4C0[])(ClipVtx *);
-
 extern f32 D_800D3688;  /* shadow near plane (light-space z) */
-/* Shadow settings, set per level by func_151872B0. */
-extern s32 D_800DE01C;  /* vertex budget cap */
-extern s32 D_800DE020;  /* below this budget D_800DE028 eases back up */
-extern s32 D_800DE024;  /* vertex budget floor */
-extern s32 D_800DE030;  /* shadow viewport depth scale, in 1/1024 */
-extern s32 D_800DE034;  /* nonzero: skip the light nodes and always use the default light offset */
-extern s32 D_800DE038;  /* max lights (shadows) per object */
-extern f32 D_800DE03C;  /* light distance scale */
-extern u8 D_800DE040;   /* nonzero: keep the light at least 30 degrees above the object */
-extern u8 D_800DE041;   /* nonzero: only faces flagged in the D_800D3668 table receive shadows */
+
+static s32 D_8008D3E0 = 0; /* shadow vertex budget for this frame */
+/* The viewport of the 64x64 shadow texture. */
+static Vp D_8008D3E8 = { { { 128, 128, 511, 0 }, { 128, 128, 511, 0 } } };
+/* The corners of an object's bounding box, as signs of its half-extents. */
+static s8 D_8008D3F8[8][3] = {
+    { 1, 1, 1 }, { 1, 1, -1 }, { 1, -1, -1 }, { 1, -1, 1 }, { -1, 1, 1 }, { -1, 1, -1 }, { -1, -1, -1 }, { -1, -1, 1 },
+};
+/* Render setup of the shadow receivers: shade times the inverted texture. The last entry stays zero. */
+static Gfx D_8008D410[7] = {
+    gsDPPipeSync(),
+    gsDPSetCombineLERP(0, 0, 0, SHADE, 1, TEXEL0, SHADE, 0, 0, 0, 0, SHADE, 1, TEXEL0, SHADE, 0),
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsSPClearGeometryMode(G_CULL_FRONT | G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD),
+    gsSPSetGeometryMode(G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH),
+    gsSPEndDisplayList(),
+};
+/* Clears the shadow texture to white before the silhouette is drawn into it. */
+static Gfx D_8008D448[] = {
+    gsDPSetFillColor(0xFFFFFFFF),
+    gsDPSetOtherMode(0x302C3F, 0x00000000),
+    gsSPClearGeometryMode(G_ZBUFFER | G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_SHADING_SMOOTH),
+    gsDPSetScissor(G_SC_NON_INTERLACE, 0, 0, 65, 65),
+    gsDPFillRectangle(0, 0, 63, 63),
+    gsDPPipeSync(),
+    gsDPSetScissor(G_SC_NON_INTERLACE, 1, 1, 63, 63),
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF),
+    gsDPSetOtherMode(0x082C3F, 0x00000000),
+    gsSPEndDisplayList(),
+};
+/* Per clip plane: edge intersection, and the inside test. */
+static ClipVtx *(*D_8008D498[])(ClipVtx *, ClipVtx *, ClipVtx *) = {
+    func_15185454, func_1518557C, func_151856A8, func_151857DC, func_151858FC,
+    func_15185A28, func_15185B54, func_15185B54, func_15185C6C, func_15185C6C,
+};
+static s32 (*D_8008D4C0[])(ClipVtx *) = {
+    func_15185554, func_1518567C, func_151857B0, func_151858D4, func_151859FC,
+    func_15185B28, func_15185C44, func_15185D84, func_15185DAC, func_15185D5C,
+};
 
 /* Half-extents of an object's bounding box, from its bone matrices or, failing that, its model size. */
 s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
@@ -76,20 +133,9 @@ s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     }
 }
 
-extern Vec3f D_800DE010; /* default light offset from the object */
-extern Vec3f D_800DDFB0[]; /* light position per shadow slot */
-extern f32 D_800DF6F8; /* light-to-object distance */
-extern f32 D_800DE028;
-extern f32 D_800DE02C;
-extern MtxF D_800DF0F8[];
-extern u16 D_800DF0D0[];
-extern Mtx D_800DF2F8[][2];
-extern s32 D_800DF088;
-extern u8 D_800DE048[];
 extern f32 D_800D3680;
 extern f32 D_800D3684;
 extern f32 D_800D368C;
-extern s8 D_8008D3F8[8][3];
 extern s32 math_distance3D(s32, s32, s32);
 
 /*
@@ -339,8 +385,6 @@ s32 func_15184DF0(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *halfZ) {
     return dist;
 }
 
-extern Gfx D_8008D448[];
-extern Vp D_8008D3E8;
 extern Mtx D_89470;
 
 /*
@@ -651,10 +695,6 @@ s32 func_15185F24(ShadowVtx *in, s32 count, s32 maxVerts, Vtx *out, s32 *quadEnd
 
 extern u32 *D_800D3694;
 extern MeshTri *D_800D3690;
-extern s32 D_800DF0E8;
-extern s32 D_800DF0EC;
-extern s32 D_800DF0F0;
-extern s32 D_800DF0F4;
 
 /*
  * Gathers the shadow-receiving faces within `radius` of (x, z): decodes each nearby cell's delta-encoded
@@ -730,9 +770,6 @@ s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx 
     return 0;
 }
 
-extern s32 D_8008D3E0; /* shadow vertex budget for this frame */
-extern Gfx D_8008D410[];
-extern Vp D_800DF090[];
 
 /*
  * Rare microcode command 0x10: four triangles sharing vertex c, (c, v-3, v-2) (c, v-2, v-1) (c, v, v+1)
@@ -846,7 +883,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
             if (lightDist == 0.0f) {
                 break;
             }
-            mtx = (f32 *)D_800DF0F8[slot];
+            mtx = &D_800DF0F8[slot][0][0];
             recvCount = func_151873E4(movement_obj[i].xpos, movement_obj[i].zpos, 230, recv, mtx, &recv[D_8008D3E0 - 2],
                                   func_1518652C(movement_obj[i].xpos, movement_obj[i].zpos, 230, recv, mtx, &recv[D_8008D3E0 - 2]));
             if (recvCount != 0) {
@@ -966,9 +1003,6 @@ void func_151872B0(s32 levelId) {
         break;
     }
 }
-
-
-extern s32 D_800DF0E4;
 
 /*
  * Appends to out[count..] the shadow-receiving geometry of every db_Object_array entry whose bounds overlap

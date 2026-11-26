@@ -251,7 +251,7 @@ s8 func_150F78B4(ProjectileParticle *obj) {
             spawn.viewportMask = 0xFF;
             spawn.unk50 = 0;
             do {
-                s32 *colors = &D_800A4AA0;
+                const VtxColor *colors = D_800A4AA0;
 
                 puffState.phase = 4.712388992f;
                 puffState.timeLeft = 27.0f - state->trailAge;
@@ -428,7 +428,7 @@ s32 func_150F81BC(ProjectileParticle *obj) {
                 spawn.viewportMask = 0xFF;
                 spawn.unk50 = 0;
                 do {
-                    s32 *colors = &D_800A4AA0;
+                    const VtxColor *colors = D_800A4AA0;
 
                     puffState.phase = 4.712388992f;
                     puffState.timeLeft = 27.0f - follow->trailAge;

@@ -25,6 +25,16 @@
 
 extern s32 __osContinitialized;
 
+/* .bss, linked at 0x800E0C90..0x800E0D20: the globals of this copy of the SDK's controller.c, in the
+ * SDK's layout (__osContPifRam, __osContLastCmd, __osMaxControllers, __osEepromTimer, __osEepromTimerQ,
+ * __osEepromTimerMsg). Not referenced: the code below uses the BOOT-segment globals of those names. */
+OSPifRam D_800E0C90;
+u8 D_800E0CD0;
+u8 D_800E0CD1;
+OSTimer D_800E0CD8;
+OSMesgQueue D_800E0CF8;
+OSMesg D_800E0D10;
+
 void __osSiCreateAccessQueue(void);
 
 /* This ROM predates the OS_CPU_COUNTER form in include/2.0L/PR/os_convert.h: golden loads the

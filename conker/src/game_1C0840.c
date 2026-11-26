@@ -19,7 +19,7 @@ void func_15193390(ObjectEmitter *volatile emitter) {
     if (floorY != -10000.0f) {
         spawn.floorY = floorY;
     } else {
-        spawn.floorY = (f32)pos->y - 200.0f;
+        spawn.floorY = pos->y - 200.0f;
         pos->unk8 = 0;
     }
 

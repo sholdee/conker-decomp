@@ -14,7 +14,7 @@ void func_151904BC(AnchorEmitter *emitter) {
     if (params->child != NULL) {
         func_1516972C(params->child);
     }
-    func_1000FD38(func_1518E298, emitter, (s32)emitter->owner);
+    func_1000FD38(func_1518E298, emitter, (s32)emitter->group.actor);
     func_151D2B4C(params->tmpl.anchorSet);
 }
 

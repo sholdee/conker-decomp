@@ -14,11 +14,6 @@ static u8 D_800BE564;     // count of D_800BE530 entries
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800DF7D1;
-extern u8 D_800DF7D2;
-extern u8 D_800DF7D3[];
-extern u8 D_800DF9B3[];
-
 void func_150127B0(void) {
     s32 total;
     s32 i;
@@ -123,20 +118,12 @@ void func_15012ED8(Gfx *dl) {
     }
 }
 
+/* Clears the attachment model reference counts (game_1B9DB0), all but the last of the 0x1E4. */
 void func_15012F90(void) {
     s32 i;
 
-    D_800DF7D0[0] = 0;
-    D_800DF7D1 = 0;
-    for (D_800DF7D2 = 0, i = 0;;) {
-        i += 4;
-        D_800DF7D3[i - 3] = 0;
-        D_800DF7D3[i - 2] = 0;
-        D_800DF7D3[i - 1] = 0;
-        D_800DF7D3[i - 4] = 0;
-        if (&D_800DF9B3[0] != &D_800DF7D3[i]) {
-            continue;
-        }
-        break;
+    // matching: IDO peels the 3 left over from 0x1E3 / 4 before the unrolled loop
+    for (i = 0; i < 0x1E3; i++) {
+        D_800DF7D0[i] = 0;
     }
 }

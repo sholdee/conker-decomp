@@ -193,7 +193,7 @@ void func_150C7D7C(WorldObject *obj);
 void func_150CF0A0(WorldObject *arg0);
 
 /* game_1188E0.c */
-void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit);
+s32 func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit);
 s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit);
 void func_150EB614(WorldObject *obj);
 void func_150EB8C4(void);
@@ -207,6 +207,16 @@ s32 func_1510AEE0(MtxF mtx, f32 x, f32 y, f32 z, f32 nearZ, f32 farZ, f32 slopeX
                   f32 *marginY);
 
 /* game_142560.c */
+/* (vertex, pivot) index pairs: vertices that follow the rotation of a preceding object (func_1511B7D4). */
+typedef struct VertexPivots {
+    /* 0x0 */ u8 count;
+    /* 0x1 */ u8 pairs[8][2];
+} VertexPivots;
+typedef struct SoundTriple {
+    /* 0x0 */ u16 ids[3];
+} SoundTriple;
+extern const VertexPivots D_800A2F70;
+extern const SoundTriple D_800A2F84;
 void func_151150B0(WorldObject *obj);
 void func_151150BC(WorldObject *obj);
 void func_1511515C(WorldObject *obj);
@@ -242,6 +252,7 @@ void func_15116BAC(WorldObject *obj);
 void func_15116D7C(WorldObject *obj);
 void func_15116EA4(WorldObject *obj);
 f32 func_151172D8(WorldObject *obj, f32 angle);
+extern PropSounds D_80089260[16]; // prop sound rows (doors, movers, sliders)
 
 /* game_144950.c */
 void func_151174A0(WorldObject *obj);
@@ -295,7 +306,7 @@ void func_1511BEBC(WorldObject *obj);
 void func_1511C540(void);
 void func_1511C548(WorldObject *obj);
 void func_1511C638(WorldObject *obj);
-void func_1511CB2C(s32 obj, f32 *originZ);
+void func_1511CB2C(WorldObject *obj, f32 *originZ);
 void func_1511CB44(WorldObject *obj);
 void func_1511D394(WorldObject *obj);
 void func_1511D7BC(Game1483E0WaveMesh *mesh);
@@ -326,11 +337,17 @@ Gfx *func_1511FC2C(Gfx *gfx, f32 x, f32 y, f32 z, f32 rot, s32 view);
 Gfx *func_1511FC44(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
 
 /* game_1A48C0.c */
+extern WaveDeformer *D_800DD410[2]; /* the wave deformers, D_800DD418 of them in use */
+extern u8 D_800DD418;
 void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 radius, f32 amplitude, s8 speed,
                    s8 phaseStep, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF);
 void func_15177A94(void);
 
 /* game_1AFC80.c */
+extern u8 D_800DDE50;                /* active wave chains */
+extern u8 D_800DDE54[4];             /* per chain: its D_8008D050 preset */
+extern WaveSample *D_800DDE60[8];    /* samples of each active wave chain (40 each) */
+extern WavePreset D_8008D050[4];     /* static parameters of each wave spring chain */
 void func_151827D0(void);
 void func_15182C5C(WorldObject *prop);
 f32 func_15182F58(s32 dist, s32 chain);

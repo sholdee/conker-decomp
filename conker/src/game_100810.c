@@ -516,7 +516,7 @@ Gfx *func_150D4300(CharacterTrail *actor, Gfx *gfx, s16 view) {
     }
     eye = func_15144B34(view);
     update = 1;
-    gfx = func_15142E24(gfx, &D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &update, 0x3E);
+    gfx = func_15142E24(gfx, &D_80090B60[120], 0, 0, 0, 0, 0x78, 0, 0, &update, 0x3E);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x55, &update);

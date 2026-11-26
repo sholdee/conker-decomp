@@ -89,7 +89,7 @@ void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) {
 }
 
 /* Writes the world position of the muzzle point D_800A2130 on bone D_80088BB0 of `obj` to `out`. */
-void func_150FFBDC(Actor *obj, s32 arg1, Vec3f *out) {
+void func_150FFBDC(Actor *obj, s16 arg1, Vec3f *out) {
     const Vec3f *src;
     Vec3f *dst;
 

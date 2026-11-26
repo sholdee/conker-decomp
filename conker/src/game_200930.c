@@ -6,7 +6,14 @@
    view that takes a third argument. */
 void func_15131958(void *vel, f32 drag, void *arg2);
 
-extern void (*D_8008FC70[])(Actor *, s16, Vec3f *);
+/* The point functions of func_151D469C's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is
+ * their second argument). */
+static void (*D_8008FC70[])(Actor *obj, s16 arg1, Vec3f *out) = {
+    func_151C6974, func_151C69A0, func_150FE794, func_150FE248, func_150FFBDC, func_150FEBC8, func_150FEFD0,
+};
+/* The guns' muzzle points and the bones they are on, for func_151D5A18 (by gun). */
+const Vec3f *D_8008FC8C[] = { &D_800A2130, &D_800A19E0 };
+u8 *D_8008FC94[] = { &D_80088BB0, &D_80088B10 };
 
 void *memcpy(void *, const void *, u32);
 
@@ -19,8 +26,8 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
     u8 solid;
     s32 particleType;
     s32 big;
+    s32 hitVerts;
     f32 hitDist;
-    s32 hitUnk;
     s32 sfx;
 
     if (kind >= 6) {
@@ -49,7 +56,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
     }
     if (surface == NULL) {
         if (func_150AC9C0(pos->x - dir->x, pos->y - dir->y, pos->z - dir->z, dir->x, dir->y, dir->z,
-                          &hitDist, &hitSurface, &hitPos.x, &hitPos.y, &hitPos.z, &hitUnk, &surfaceId, 0, 0.0f)) {
+                          &hitVerts, &hitSurface, &hitPos.x, &hitPos.y, &hitPos.z, &hitDist, &surfaceId, 0, 0.0f)) {
             hit = 1;
         } else {
             typedef s32 BlockScope; // matching: a declaration in this block changes IDO's branch layout
@@ -301,7 +308,7 @@ void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionT
     s16 height;
 
     if (dir != NULL) {
-        angle = (u16)(func_150484A0(dir->x, dir->z) * 10430.37793f);
+        angle = func_150484A0(dir->x, dir->z) * 10430.37793f;
         angle = (angle - 0x4000) | 1;
         point.x = pos->x + (dir->x * -90.0f);
         point.y = pos->y + (dir->y * -90.0f);
@@ -724,7 +731,7 @@ void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range
     params.unk10 = arg2;
     params.unk14 = arg3;
     header.flags = 1;
-    header.duration = (func_150ADA20() % (u32)((s16)range + 1)) + (s16)base;
+    header.duration = (func_150ADA20() % ((s16)range + 1)) + (s16)base;
     header.strength = 0;
     header.updateKind = 0;
 
@@ -851,7 +858,7 @@ void func_151D57F8(Actor *obj, u8 slot) {
 
 /* Computes obj's axes (forward, axis1, axis2) and the world position of localPos on bone `bone`;
    objects without bone matrices use a point 34 units out and 49 up from their origin. */
-void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, Vec3f *localPos, u8 bone) {
+void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, const Vec3f *localPos, u8 bone) {
     const Vec3f *src;
     Vec3f *dst;
 

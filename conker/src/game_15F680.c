@@ -1,11 +1,19 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss. */
+ParticleNode *D_800DC460; // loaded particle models: list head
+ParticleNode *D_800DC464; // list tail
+s16 D_800DC468[233];      // per model: live particles that use it
+s32 D_800DC63C;           // live particles (at most 300)
+s16 *D_800DC640[233];     // per model: the textures its display list uses (func_1510CE60)
+
 #include "functions.h"
 #include "variables.h"
 
 #define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
 
 extern s32 D_800A3880[];
-extern s32 D_800DC640[];
 
 
 /* Collision handlers; each gets the particle's position from before the move. Returning 0 stops the update. */
@@ -14,18 +22,57 @@ typedef s32 (*ParticleFloorHitFn)(ModelParticle *particle, f32 x, f32 y, f32 z, 
 typedef s32 (*ParticleFloorType3Fn)(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight);
 typedef s32 (*ParticleWallHitFn)(ModelParticle *particle, Actor *probe, f32 x, f32 y, f32 z);
 
-extern ParticleFloorHitFn D_80089934[];
-extern ParticleFloorType3Fn D_80089970[];
-extern ParticleWallHitFn D_80089974[];
 
 
 typedef s32 (*ParticleUpdateFn)(ModelParticle *);
 typedef void (*ParticleDestroyFn)(ModelParticle *);
+typedef s32 (*ParticleMatrixFn)(Mtx *mtx, ModelParticle *particle);
+typedef void (*ParticleEventFn)(ModelParticle *particle, void *data, u8 event);
 
-extern ParticleUpdateFn D_800898B0[];
-extern ParticleUpdateFn D_80089914[];
-extern ParticleDestroyFn D_8008997C[];
-extern ParticleUpdateFn D_80089988[];
+/* This file's .data: the particle handler tables. */
+static s32 (*D_800898B0[])() = {
+    NULL, func_15132DDC, func_150CBE88, func_150CCCB4,
+    func_150CB008, func_151B5E94, func_151B6254, func_150CA07C,
+    func_151337C0, func_151B9214, func_151C1180, func_150AE2A0,
+    func_151D3D50, func_15133894, func_151B8B40, func_1515452C,
+    func_150F23E0, func_150E971C, func_15154A88, func_150F78B4,
+    func_150F81BC, func_1519ED24, func_150F48D0, func_151C7038,
+    func_150C5310,
+};
+static s32 (*D_80089914[])() = {
+    NULL, func_150B963C, func_1518AD20, func_1518B1AC,
+    func_1518B1D8, func_151A73EC, func_150C7670, func_150F4A38,
+};
+static ParticleFloorHitFn D_80089934[] = {
+    NULL, func_150B89E0, func_150BCFB8, func_150E5810,
+    func_151A743C, func_150B36AC, func_151339D4, func_15133A50,
+    func_151389A8, func_15139578, func_15133B98, func_15133D20,
+    func_15133C58, func_150C01DC, func_150C0648,
+};
+static ParticleFloorType3Fn D_80089970[] = { NULL };
+static ParticleWallHitFn D_80089974[] = { NULL, func_150B8F44 };
+static void (*D_8008997C[])() = { NULL, func_151A7908, func_151B5FCC };
+static s32 (*D_80089988[])() = { func_151332DC };
+static s32 (*D_8008998C[])() = {
+    func_15133510, func_150B9D14, func_15133760, func_150C773C,
+    func_151B9310, func_15133A94,
+};
+static Gfx *(*D_800899A4[])(Gfx *gfx, ModelParticle *particle, s16 arg2) = { func_15133E84, func_15133EB8, func_15133FD8 };
+static void (*D_800899B0[])() = {
+    func_15132570, func_151C15FC, func_15132570, func_15132570,
+    func_15132570, func_15132570, func_15132570, func_150B02F0,
+    func_15132570,
+};
+static void (*D_800899D4[])() = {
+    func_1513259C, func_151C1628, func_1513259C, func_1513259C,
+    func_1513259C, func_1513259C, func_1513259C, func_150B031C,
+    func_1513259C,
+};
+static ParticleEventFn D_800899F8[] = {
+    NULL, func_151C1814, NULL, NULL,
+    NULL, func_15133DE8, func_1513B0B8, NULL,
+    func_150F4CFC, NULL,
+};
 
 /* Per-frame update: run the particle's update callbacks, age and fade it, and destroy it when any step says so. */
 void func_151321D0(ModelParticle *particle) {
@@ -70,7 +117,7 @@ void func_151321D0(ModelParticle *particle) {
     }
 
     if (!dead && !(particle->flags & 0x80000)) {
-        dead = func_1514672C(&particle->pos.x) == 0;
+        dead = func_1514672C(&particle->pos) == 0;
     }
 
     if (dead) {
@@ -81,8 +128,6 @@ void func_151321D0(ModelParticle *particle) {
     }
 }
 
-extern ParticleDestroyFn D_800899B0[];
-
 /* Dispatch to the variant's handler in D_800899B0 (variant 0 unless flag 0x100 is set). */
 void func_151323AC(ModelParticle *particle) {
     s32 variant;
@@ -90,8 +135,6 @@ void func_151323AC(ModelParticle *particle) {
     variant = (particle->flags & 0x100) ? particle->variant : 0;
     D_800899B0[variant](particle);
 }
-
-extern ParticleDestroyFn D_800899D4[];
 
 /* Dispatch to the variant's handler in D_800899D4 (variant 0 unless flag 0x100 is set). */
 void func_151323F8(ModelParticle *particle) {
@@ -272,9 +315,6 @@ void *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 
     return func_1513264C(spawn, arg1, arg2, NULL, extraSize, arg4, arg5);
 }
 
-typedef s32 (*ParticleMatrixFn)(Mtx *mtx, ModelParticle *particle);
-extern ParticleMatrixFn D_8008998C[];
-
 /* Rebuild this frame's matrix through the matrixFn handler; flag 0x40000 says the particle is drawable.
  * A handler result of -1 destroys the particle. */
 void func_15132A88(ModelParticle *particle) {
@@ -310,8 +350,6 @@ void func_15132A88(ModelParticle *particle) {
         particle->flags |= 0x240000;
     }
 }
-
-extern Gfx *(*D_800899A4[])(Gfx *gfx, ModelParticle *particle, s16 arg2);
 
 /* Draw a particle whose matrix func_15132A88 built this frame: segment 8, render and geometry mode (lit when
  * flag 0x800), optional extra commands from drawFn, then the matrix and the model's display list. */
@@ -349,7 +387,7 @@ Gfx *func_15132B80(Gfx *gfx, ModelParticle *arg1, s16 arg2) {
                             G_CULL_BOTH | G_FOG | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     if (particle->flags & 0x800) {
         gfx = func_151462C8(gfx, &particle->link, particle->unk7A, particle->owner, particle->ownerId, arg2,
-                            &particle->pos.x, (particle->flags & 0x1000) ? 1 : 0, particle->floor.material);
+                            &particle->pos, (particle->flags & 0x1000) ? 1 : 0, particle->floor.material);
     }
     gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPDisplayList(gfx++, *particle->node->resource);
@@ -390,7 +428,7 @@ s32 func_15132DDC(ModelParticle *particle) {
         test.y = prev.y;
         test.z = particle->pos.z;
 
-        if (func_15046C80(&test.x, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
+        if (func_15046C80(&test, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
             if (particle->floor.source == 1 || (particle->floor.source == 2 && (particle->floor.flags & 1))) {
                 particle->hitFlags |= 1;
                 if (particle->flags & 0x10) {
@@ -530,9 +568,6 @@ s32 func_15133510(Mtx *mtx, ModelParticle *particle) {
     return 1;
 }
 
-typedef void (*ParticleEventFn)(ModelParticle *particle, void *data, u8 event);
-extern ParticleEventFn D_800899F8[];
-
 /* Event handler: follow an owner swap (0x2D), forget a removed owner (0), then pass the event on to the
  * variant's handler in D_800899F8. */
 void func_15133588(ModelParticle *particle, void *data, u8 event) {
@@ -572,7 +607,7 @@ void func_15133588(ModelParticle *particle, void *data, u8 event) {
 
 /* Load model `model` (D_800A3880 table, bank 9) into the node and prepare it; returns FALSE if the load fails. */
 s32 func_151336A8(s32 model, ParticleNode *node, ModelParticle *particle) {
-    s32 out1;
+    u32 out1;
     s32 out2;
 
     node->resource = func_1502B6BC(&out1, 0, &out2, 2, 9, D_800A3880[model]);
@@ -619,7 +654,7 @@ s32 func_15133894(ModelParticle *particle) {
         test.x = particle->pos.x;
         test.y = particle->radius + prev.y;
         test.z = particle->pos.z;
-        if (func_15046C80(&test.x, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
+        if (func_15046C80(&test, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
             skip = FALSE;
             if (particle->floor.surface != NULL) {
                 surface = particle->floor.surface;

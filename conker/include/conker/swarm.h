@@ -50,6 +50,55 @@ struct SwarmActor {
     /* 0xF1 */ u8 fadingOut;
 };
 
+/*
+ * Per-model motion parameters of the effect model slots, indexed like D_800DDE80 (D_8008D0B0). Every slot
+ * uses the flight limits (func_15175958); the words from 0x18 on mean different things per slot.
+ */
+typedef struct SwarmFlight {
+    /* 0x00 */ u8 maxSpeed;
+    /* 0x01 */ u8 minSpeed;
+    /* 0x02 */ u8 wanderTime;
+    /* 0x03 */ u8 turnTime;
+    /* 0x04 */ f32 maxRoll;
+    /* 0x08 */ f32 maxPitch;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 maxYawStep;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ union {
+        /* slots 0..6 (and D_8008D318): wings wobbled between minAngle and maxAngle by func_15165C80 */
+        struct {
+            /* 0x18 */ f32 angle;
+            /* 0x1C */ f32 unk1C;
+            /* 0x20 */ f32 unk20;
+            /* 0x24 */ f32 velocity;
+            /* 0x28 */ f32 maxAngle;
+            /* 0x2C */ f32 minAngle;
+            /* 0x30 */ f32 radius;
+            /* 0x34 */ f32 unk34;
+        } wobble;
+        /* slots 7 and 10: wings flapped by func_1517725C */
+        struct {
+            /* 0x18 */ f32 angle;     /* amplitude * sin(phase) */
+            /* 0x1C */ f32 rate;
+            /* 0x20 */ f32 threshold;
+            /* 0x24 */ f32 phase;
+            /* 0x28 */ f32 amplitude;
+            /* 0x2C */ f32 unk2C;
+            /* 0x30 */ f32 innerWingLength;
+            /* 0x34 */ f32 outerWingLength;
+        } flap;
+        /* slots 8 and 9: both vertex sets bobbed by func_15179DB0 */
+        struct {
+            /* 0x18 */ f32 rate[2];
+            /* 0x20 */ f32 angle[2];
+            /* 0x28 */ f32 amplitude;
+            /* 0x2C */ f32 unk2C;
+            /* 0x30 */ f32 unk30;
+            /* 0x34 */ f32 unk34;
+        } bob;
+    } u;
+} SwarmFlight; /* size 0x38 */
+
 /* game/done/game_39690.c */
 extern const ParticleTexInfo D_80095CE0[69];
 void func_1500C1E0(void);
@@ -72,7 +121,7 @@ void func_1517725C(u8 index);
 void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, s32 arg6, s32 arg7, u8 arg8, s32 playSfx,
                    s32 argA);
 void func_15178268(SwarmMember *member);
-s32 func_15178750(s32 arg0, SwarmMember *member, s16 view);
+Gfx *func_15178750(Gfx *gfx, SwarmMember *member, s16 view);
 void func_151787A4(void);
 void func_151787AC(Swarm *swarm, s32 x, s32 y, s32 z);
 Swarm *func_15178B98(u8 tag);
@@ -83,6 +132,12 @@ void func_15178DA4(Swarm *swarm);
 void func_15178E14(u8 tag);
 
 /* game_1B0740.c */
+extern EffectModelSlot D_800DDE80[11]; /* one loaded model per effect model slot */
+extern u8 D_800DDF5C[4];               /* per swarm group: in use */
+extern u8 D_800DDF60[4];               /* per swarm group: countdown */
+extern s8 D_800DDF68[11];              /* per slot: use state (1 = used this frame, -2 = unused) */
+extern Gfx *D_800DDF78[11];            /* per slot: the model's second display list */
+extern SwarmFlight D_8008D0B0[11];
 s32 func_15183290(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 player, s32 maxRadius, s32 heightRange,
                   s32 minRadius, s32 spawnFlags);
 void func_151838B0(s32 slot);

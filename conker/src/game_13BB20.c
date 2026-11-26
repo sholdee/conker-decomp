@@ -1,12 +1,49 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/*
+ * This unit's .bss, defined before the headers declare it (see init_50A0.c). The externs of D_800DBE18 and
+ * later stay in variables.h: 20 new names in conker/collision.h, which comes before conker/cont.h, rotate the
+ * .bss of game_48FD0.c (its variables are first declared in cont.h).
+ */
+s32 D_800DBDC0;                 // the camera that func_1510FC34 last placed
+s32 D_800DBDC4;                 // its zone
+ZoneNode *D_800DBDC8;           // its zone tree leaf
+f32 D_800DBDCC;                 // its x
+f32 D_800DBDD0;                 // its z
+void *D_800DBDD8[4];            // per map: triangle table (carved from D_800B0DC0)
+void *D_800DBDE8[4];            // per map: x/z bounds
+void *D_800DBDF8[4];            // per map: y bounds
+struct QuadNode *D_800DBE08[4]; // per map: quadtree root
+s32 D_800DBE18[4];              // per map: triangle count
+s16 D_800DBE28;                 // quadtree node bitmap: row stride in bytes
+s16 D_800DBE2A;                 // map 0 quadtree: node count
+s16 D_800DBE2C;                 // map 0 quadtree: leaf count
+s16 D_800DBE30[4];              // per view: camera zone
+s32 D_800DBE38;                 // triangles collected for the current map
+MeshTri *D_800DBE3C;            // world mesh: triangles
+struct XZRange *D_800DBE40;     // world mesh: x/z bounds per triangle
+struct YRange *D_800DBE44;      // world mesh: y bounds per triangle
+ZoneNode *D_800DBE48;           // zone tree root
+s32 D_800DBE4C;                 // world mesh: triangle count
+s32 D_800DBE50;                 // map whose triangle table is carved next
+f32 D_800DBE54;                 // last floor query: highest floor
+f32 D_800DBE58;                 // last floor query: ceiling
+u32 *D_800DBE5C;                // per world-mesh triangle: material / surface flags
+u16 D_800DBE60;                 // last floor query: prop hit (index + 1, 0: none)
+u8 D_800DBE62;                  // set once the world mesh is built
+u8 D_800DBE63;
+f32 D_800DBE64;                 // floor query reach
+f32 D_800DBE68;                 // last floor query: x
+f32 D_800DBE6C;                 // last floor query: y
+f32 D_800DBE70;                 // last floor query: z
+f32 D_800DBE74;                 // last ray probe: bottom
+
 #include "functions.h"
 #include "variables.h"
 
-extern s32 D_800DBDC0;
-extern s32 D_800DBDC4;
-extern ZoneNode *D_800DBDC8;
-extern f32 D_800DBDCC;
-extern f32 D_800DBDD0;
+/* Per collision set: 1 = enabled. */
+u8 D_80089120[4] = { 1, 1, 1, 1 };
 
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
@@ -69,9 +106,6 @@ void func_1510E8BC(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropF
                   -10000.0f, 20000.0f, noFallback);
 }
 
-extern f32 D_800DBE54;
-extern f32 D_800DBE58;
-extern u16 D_800DBE60;
 
 // D_800DBE5C points at the world mesh's per-triangle materials, or is NULL.
 // World-mesh triangles are 12 bytes (three vertex offsets) from D_800DBE3C on.
@@ -168,8 +202,8 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
             if (type == PROBE_OBJECT && object != NULL && (object->noshove & 0x200)) {
                 continue;
             }
-            ix = (s32)x;
-            iz = (s32)z;
+            ix = x;
+            iz = z;
             i = 0; // matching: dead store, but IDO schedules the loop differently without it
             func_1510F800(type);
             found = FALSE;
@@ -181,7 +215,7 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
                 s32 propVtxBase;
                 s16 *propVtx;
 
-                floorProps = func_150A6568((s16)ix, (s16)iz, &allProps, group, ix, iz, (s32)minY, (s32)maxY);
+                floorProps = func_150A6568(ix, iz, &allProps, group, ix, iz, minY, maxY);
                 func_150A44F0(floorProps, D_800D37E0, 0);
                 if (outPropFloorY != NULL) {
                     func_150A44F0(allProps, D_800D3830, 0);
@@ -417,10 +451,10 @@ f32 func_1510F648(f32 x, f32 y, f32 z) {
     s32 iy;
 
     func_1510F800(2);
-    iy = (s32)y; // matching: converting y before the call keeps the original order
-    func_150A64C8((s32)x, (s32)z, &groups, iy);
+    iy = y; // matching: converting y before the call keeps the original order
+    func_150A64C8(x, z, &groups, iy);
     func_150A44F0(groups, D_800D3830, 0);
-    if (func_150A43E0((s32)x, (s32)z, groups, D_800D3830)) {
+    if (func_150A43E0(x, z, groups, D_800D3830)) {
         height = D_800D3300[0].height * 0.00390625f;
     } else {
         height = -10000.0f;
@@ -465,8 +499,6 @@ void func_1510F800() { // matching: a declared s32 parameter changes the code
     func_150A49F4();
 }
 
-extern f32 D_800A2D9C; // matching: 0.02f as a literal grows the frame by 8 bytes
-
 /*
  * Gets the slope of the given triangle: outSlopeX/Z receive it raw, outDirX/Z its direction
  * normalised to length 50 (or (1, 0) on flat ground). The fifth argument is unused.
@@ -476,17 +508,15 @@ void func_1510F820(void *tri, void *verts, f32 *outDirX, f32 *outDirZ, f32 *unus
     f32 slopeX;
     f32 slopeZ;
     f32 length;
-    f32 zero;
 
-    zero = 0.0f; // matching: IDO keeps 0.0f in $f12 for both the compare and the store
     func_1510E388(tri, verts, &slopeX, &slopeZ);
     length = sqrtf((slopeX * slopeX) + (slopeZ * slopeZ));
     *outSlopeX = slopeX;
     *outSlopeZ = slopeZ;
-    length = length * D_800A2D9C;
-    if (zero == length) {
+    length = length * 0.02f;
+    if (length == 0.0f) {
         *outDirX = 1.0f;
-        *outDirZ = zero;
+        *outDirZ = 0.0f;
         return;
     }
     *outDirX = slopeX / length;

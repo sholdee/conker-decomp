@@ -14,7 +14,6 @@
  *   game_11EEB0.c
  *   game_1228D0.c
  *   game_124260.c
- *   game_12E540.c
  *   game_131F30.c
  *   game_133190.c
  *   game_1BBFC0.c
@@ -803,22 +802,6 @@ void func_150F740C(BeamObj *obj);
 void func_150F7438(BeamObj *obj);
 extern Vec3f D_800D9A50; // the last beam direction (func_150F706C); game_123FB0 aims a camera by it
 
-/* game_12E540.c */
-void func_15101090(RayBeam *beam);
-void func_15101148(RayBeam *beam);
-void func_151011E8(BeamHitFx *fx);
-void func_15101210(BeamHitFx *fx);
-void func_15101238(LightEffect *endPoint);
-void func_15101260(LightEffect *endPoint);
-void func_15101288(BeamStartFx *fx);
-void func_151012B0(BeamStartFx *fx);
-void func_151012D8(BeamLine *line);
-void func_15101300(BeamLine *line);
-void func_15101328(BeamEndFx *fx);
-void func_15101350(BeamEndFx *fx);
-s8 func_15101378(RayBeam *beam);
-Vtx *func_151019C4(RayBeam *beam, s16 viewport);
-
 /* game_131F30.c */
 void func_15104A80(WorldObject *prop);
 void func_15104C44(BoltRainObj *obj);
@@ -884,6 +867,8 @@ s32 func_1518F108(Game1BBFC0Beam *beam);
 s32 func_1518F15C(Game1BBFC0Beam *beam);
 
 /* game_1D4E00.c */
+extern Gfx D_8008F910[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008F930[]; /* render teardown (object type table D_8008B4A8) */
 Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3);
 void func_151A7A90(Bolt *bolt);
 Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view);
@@ -895,8 +880,8 @@ Bolt *func_151A8624(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime, f32 
                     BoltColor *color, f32 width, Vec3f *targetOffset, u8 arg9, u8 argA, s8 update2, s32 extraSize,
                     u8 argD, s32 argE);
 s32 func_151A87F8(Bolt *bolt);
-void func_151A8A20(Bolt *bolt, void *msg, u8 msgType);
-void func_151A8A78(Bolt *bolt, void *arg, u8 msgType);
+void func_151A8A20(Bolt *bolt, s32 msg, u8 msgType);
+void func_151A8A78(Bolt *bolt, s32 arg, u8 msgType);
 
 /* game_1D5FD0.c */
 Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s32 arg4);
@@ -913,14 +898,6 @@ void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos, f32 bott
 void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround);
 void func_151A9834(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit, s32 count, u8 spawnFunc, void *arg6,
                    u8 arg7, s32 arg8);
-extern const ParticleSettings D_800A8DF0;
-extern const ParticleSettings D_800A8E1C;
-extern const ParticleSettings D_800A8E48;
-extern const ParticleSettings D_800A8E74;
-extern const ParticleSettings D_800A8EA0;
-extern const ParticleSettings D_800A8ECC;
-extern const ParticleSettings D_800A8EF8;
-extern const ParticleSettings D_800A8F24;
 
 /* game_1E26F0.c */
 WavyBeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2);

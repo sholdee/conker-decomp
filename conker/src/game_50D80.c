@@ -5,7 +5,7 @@
 /* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
 void func_15169040(s32 event, u8 eventType);
 
-/* Defined in game_803A0.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
+/* Defined in game_77BE0.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
 void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 
@@ -338,7 +338,6 @@ void func_150242F8(s32 mode, s32 scene) {
 #define FF32(p, o) (*(f32 *) ((u8 *) (p) + (o)))
 #define FPTR(p, o) (*(void **) ((u8 *) (p) + (o)))
 
-extern s32 D_80090214[];
 
 
 /*
@@ -1056,7 +1055,6 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
     return 1;
 }
 
-extern TextureDesc *D_8008CA50;
 
 /* Defined in game_19A8B0.c as void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4).
    Not in particle.h: this file was compiled with an s8 texture (the call passes event->unk5 without narrowing). */
@@ -1167,7 +1165,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->value == 0xC) {
             SpriteFxTemplate sp;
 
-            sp.anim = D_8008CA50;
+            sp.anim = D_8008CA4C[1];
             sp.frame = 0;
             sp.frameStep = 0x100;
             sp.x = pos[0];

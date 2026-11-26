@@ -28,10 +28,34 @@ void *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s
     return trail;
 }
 
+/*
+ * This file's .data: the handler tables of the trails, by the indices in TrailParams. The update and finish
+ * handlers are declared without a prototype: each trail kind keeps its own view of the object.
+ */
 typedef s32 (*TrailFunc)();
-extern TrailFunc D_8008A3E0[];
-extern TrailFunc D_8008A3F8[];
-extern TrailFunc D_8008A42C[];
+/* Update handlers (TrailParams.state, then .unk21); 0 ends the trail. */
+static TrailFunc D_8008A3E0[6] = {
+    NULL, func_151488C4, func_15148AF4, func_15148BA4, func_15148DE0, func_1518C0B8,
+};
+static TrailFunc D_8008A3F8[13] = {
+    NULL,          func_1518C540, func_150AED9C, func_150AF1C0, func_150C251C, func_150C1978, func_151490C8,
+    func_150B378C, func_151AC3CC, func_151AADBC, func_15189EBC, func_150BDB3C, func_1514B844,
+};
+/* Finish handlers (TrailParams.finishFn); there are none. */
+static TrailFunc D_8008A42C[1] = { NULL };
+/*
+ * Ground hit handlers (TrailParams.hitFn, and .hitKind3Fn for a hit of source 3), given the trail, the oldest
+ * point's last position, the ground height and the surface: 0 ends the trail. They take floats, so they keep a
+ * prototype.
+ */
+typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, CollisionTri *);
+static TrailHitFunc D_8008A430[8] = {
+    NULL,          func_15148EF8, func_1518C57C, func_150DDFAC, func_150DE12C, func_150B37C8, func_151AC408,
+    func_151DA938,
+};
+static TrailHitFunc D_8008A450[5] = {
+    NULL, func_1518C69C, func_151AC550, func_15189FD0, func_151DAA88,
+};
 
 /* Runs the trail's update handlers and fades; returns whether it is still alive. */
 s8 func_15147EB8(MotionTrail *trail) {
@@ -81,7 +105,6 @@ s8 func_15147EB8(MotionTrail *trail) {
     return ret;
 }
 
-extern Texture D_800915A4; /* addr is set to the trail texture before each draw */
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -339,10 +362,6 @@ s32 func_15148AF4(MotionTrail *trail) {
     return 1;
 }
 
-typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, void *);
-extern TrailHitFunc D_8008A430[];
-extern TrailHitFunc D_8008A450[];
-
 /* Like func_15148AF4, then tests the oldest point's fall against the ground and runs a hit handler. */
 s32 func_15148BA4(MotionTrail *trail) {
     s32 index;
@@ -456,10 +475,10 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
     TrailRender render;
 
     /* func_151423D8 is a 256-step periodic lookup; "Q" values are a quarter turn (0x40) back. */
-    pitchWave = func_151423D8((u8)pitch);
-    pitchWaveQ = func_151423D8((u8)(pitch - 0x40));
-    yawWave = func_151423D8((u8)yaw);
-    yawWaveQ = func_151423D8((u8)(yaw - 0x40));
+    pitchWave = func_151423D8(pitch);
+    pitchWaveQ = func_151423D8(pitch - 0x40);
+    yawWave = func_151423D8(yaw);
+    yawWaveQ = func_151423D8(yaw - 0x40);
 
     spawn.kind = 1;
     spawn.flags = 1;

@@ -1,21 +1,28 @@
 #include <ultra64.h>
+#include "controller.h"
+#include "siint.h"
+
+/* One recorded frame of controller input, replayed by func_151DD8C0. */
+struct DemoInput {
+    s8 x;
+    s8 y;
+    u16 time;
+    u16 buttons;
+};
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+OSPifRam D_800E0A30; /* __osEepPifRam */
+void *D_800E0A70; /* the recorded input: 500 struct DemoInput frames */
+s32 D_800E0A74;
+
 #include "functions.h"
 #include "variables.h"
-#include "controller.h"
 
-extern OSPifRam D_800E0A30;
-
-/* func_151DD65C = __osPackEepWriteData.  Byte-perfect at the tree default.
- *
+/*
  * func_151DD4E0 = osEepromWrite: the osEepromRead shape (game_20A5F0) with `ptr += 4`
  * and no `i` local (the frame has no slot for one).
- *
- * The others are parked near-misses, all with golden's instruction sequence already:
- *   func_151DD710 (__osEepStatus)  mism=89,  n=109/108 -- one instruction too MANY.
- *   func_151DD8C0 (demo playback)  mism=35,  n=44/44   -- every instruction is golden's;
- *       the residue is register allocation (golden keeps &D_800BE748 in $a1 and the frame
- *       pointer in $a0 and starts short-lived temps at $t8; we use $a0/$v0/$t7).  Six
- *       spellings of the frame-pointer expression all land within 45-50.
+ * func_151DD65C = __osPackEepWriteData, func_151DD710 = __osEepStatus.
+ * func_151DD8C0 is Rare's demo playback: it replaces the input of the first controller with the next recorded frame.
  */
 
 s32 func_151DD4E0(OSMesgQueue *mq, u8 address, u8 *buffer) {
@@ -135,19 +142,16 @@ s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data) {
     return data->errno;
 }
 
-extern u8 *D_800E0A70;
-
 void func_151DD8C0(void) {
-    typedef struct { s8 x; s8 y; u16 time; u16 buttons; } Entry;
     OSContPad *input = D_800BE748;
-    Entry *e;
+    struct DemoInput *e;
     s32 idx;
     s32 next;
     s32 time;
     u16 held;
     held = input->button & START_BUTTON;
     idx = D_800E0A74;
-    e = (Entry *)D_800E0A70 + idx;
+    e = (struct DemoInput *)D_800E0A70 + idx;
     input->stick_x = e->x;
     input->stick_y = e->y;
     input->button = e->buttons | held;

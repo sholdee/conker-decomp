@@ -17,15 +17,12 @@ typedef struct TrailSpec {
     /* 0x00 */ f32 gravity;
     /* 0x04 */ f32 spawnRate;
     /* 0x08 */ u8 brightness;
-    /* 0x09 */ u8 pad9[3];
     /* 0x0C */ s32 unkC;
     /* 0x10 */ u8 matrixIndex;
-    /* 0x11 */ u8 pad11[3];
     /* 0x14 */ Vec3f offset;
     /* 0x20 */ s16 life;
     /* 0x22 */ s16 delay;
     /* 0x24 */ s16 lifeDecay;
-    /* 0x26 */ u8 pad26[2];
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 widthGrowth;
     /* 0x30 */ f32 drag;
@@ -38,7 +35,16 @@ typedef struct TrailSpec {
     /* 0x3F */ u8 tailFadeStep;
 } TrailSpec;
 
-extern TrailSpec D_800A8B80[];
+/* The ribbon trail object currently started by func_1519E6BC's task, or NULL (game_34F20 clears it). */
+TrailTask *D_800E0920;
+
+static const TrailSpec D_800A8B80[5] = {
+    { 0.6f, 0.37f, 255, 11, 22, { 0.0f, 45.0f, 0.0f }, 255, 6, 18, 4.0f, 0.4f, 0.3f, 1.0f, 0, 7, 2, 127, 2, 127 },
+    { 0.6f, 0.37f, 255, 11, 6, { 35.0f, 27.0f, 59.0f }, 100, 6, 4, 7.0f, 0.6f, 0.3f, 0.4f, 0, 32, 2, 127, 2, 127 },
+    { 0.14999999f, 0.38f, 255, 10, 15, { -21.0f, -12.0f, 32.0f }, 150, 16, 6, 2.8f, 0.099999994f, 0.3f, 1.0f, 0, 5, 2, 127, 2, 127 },
+    { 0.14999999f, 0.38f, 127, 15, 4, { -5.3f, -93.0f, 39.0f }, 150, 45, 7, 6.2000003f, 0.17f, 0.3f, 0.5f, 0, 7, 2, 127, 2, 127 },
+    { 0.14999999f, 0.38f, 127, 15, 9, { 5.3f, -93.0f, 39.0f }, 150, 45, 7, 6.2000003f, 0.17f, 0.3f, 0.5f, 0, 7, 2, 127, 2, 127 },
+};
 
 /* Stops every trail of kind specIndex (event 6). */
 void func_1519CF70(u8 specIndex) {
@@ -81,7 +87,7 @@ MatrixTrail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u
     EffectTemplate spawn;
     MatrixTrailData data;
     MatrixTrail *trail;
-    TrailSpec *spec;
+    const TrailSpec *spec;
 
     spec = &D_800A8B80[specIndex];
 
@@ -418,7 +424,7 @@ Gfx *func_1519D9F4(MatrixTrail *trail, Gfx *gfx, s16 view) {
                     }
                 } while (count != 0 && k != trail->head.end);
             }
-            gfx = func_15142E24(gfx, &D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
+            gfx = func_15142E24(gfx, &D_80090B60[31], 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
             gfx = func_15142C10(gfx, data->brightness, data->brightness, data->brightness, 0xFF, &update);
             gfx = func_1513F4E4(gfx, 6, &update);
             gfx = func_15142B7C(gfx, 1, 0x160600);

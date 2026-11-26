@@ -17,8 +17,9 @@ FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstPar
 }
 
 typedef s32 (*TrailHandler)(FallingTrail *, TrailBurstParams *);
-extern TrailHandler D_8008B080[];
-extern TrailHandler D_8008B084[];
+/* Handlers per TrailBurstParams.unk38 and unk39; each returns 0 when the trail fails. */
+static TrailHandler D_8008B080[] = { NULL };
+static TrailHandler D_8008B084[] = { func_1515CF9C, func_1515D030 };
 
 /* Moves every point by the trail's velocity under gravity, runs the unk38 handler and tracks the tail position. */
 s32 func_1515C388(FallingTrail *trail) {
@@ -93,7 +94,6 @@ s32 func_1515C534(FallingTrail *trail) {
     return 1;
 }
 
-extern TextureDesc D_80090E78; /* an entry of the effect texture table D_80090B60 */
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -147,7 +147,7 @@ Gfx *func_1515C6F4(FallingTrail *trail, Gfx *gfx, s16 view) {
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->primMode);
             func_151442FC(&envR, &envG, &envB, &envA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->envMode);
-            gfx = func_15142E24(gfx, &D_80090E78, 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
+            gfx = func_15142E24(gfx, &D_80090B60[66], 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
             gfx = func_1513F4E4(gfx, data->unk21, &update);
             gfx = func_15142B7C(gfx, data->setGeometryMode, data->clearGeometryMode);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
@@ -356,11 +356,16 @@ typedef struct {
 
 /* Burst description for func_15152B38, which spawns a randomised batch of trails with func_1515C2F0. */
 
-extern TrailBurstPreset D_800A64A0[];
+/* The emission presets (TrailBurstEmitter.emitter.preset); preset 0 emits nothing. */
+static const TrailBurstPreset D_800A64A0[] = {
+    { 0 },
+    { 0.0f, 0.03299999982f, 5, 15, 6.0f, 9.0f, -2.205000162f, 0.753000021f, 20.10000038f, 10.10000038f, 3, 4, 16, 9,
+      6, 42, 6, { 0 }, 0.9900000691f },
+};
 
 /* Emits trail bursts at random points on a sphere around the origin, at the preset's random rate. */
 void func_1515D130(TrailBurstEmitter *owner) {
-    TrailBurstPreset *preset;
+    const TrailBurstPreset *preset;
     TrailBurstState *emitter;
     TrailBurst burst;
     s32 yaw;

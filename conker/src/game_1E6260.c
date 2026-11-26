@@ -9,8 +9,19 @@ typedef struct {
     /* 0x8 */ f32 invScale;    // 1 / D_800AA528[kind]
 } SwingingLight;
 
-extern Vec3f D_800AA4E0[];     // lamp position, by kind
-extern f32 D_800AA528[];        // lamp size, by kind
+/* Lamp position, by kind. */
+static const Vec3f D_800AA4E0[6] = {
+    { 1993.0f, 367.0f, 7294.0f },
+    { 1993.0f, 367.0f, 6183.0f },
+    { 695.0f, 737.0f, -2.0f },
+    { -453.0f, 737.0f, -2.0f },
+    { -1860.0f, 737.0f, 1650.0f },
+    { -1830.0f, 737.0f, 3017.0f },
+};
+
+/* Lamp size, by kind. */
+static const f32 D_800AA528[6] = { 1.0f, 1.0f, 2.0f, 2.0f, 2.0f, 2.0f };
+
 /* matching: GlowParams without the animation; it is passed as paramSize, and the frame needs 0x60 bytes. */
 typedef struct {
     /* 0x00 */ GlowShape shape;

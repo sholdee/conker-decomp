@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern TextureDesc *D_8008CAE0; /* entry 37 of the D_8008CA4C texture table */
 
 
 /* Remembers the object's x/z, and drags a swimming player who comes within range down and sideways around it. */
@@ -247,7 +246,7 @@ void func_150B19E0(Actor *obj) {
         cosine = func_15048A40(angle);
         particle.frame = 0;
         particle.frameStep = 0;
-        particle.anim = D_8008CAE0;
+        particle.anim = D_8008CA4C[37];
         particle.x = obj->xpos + sine * radius;
         particle.y = obj->ypos;
         particle.z = obj->zpos + cosine * radius;

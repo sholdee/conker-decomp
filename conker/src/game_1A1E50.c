@@ -1,9 +1,51 @@
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/effect.h describes it. */
+s32 D_800DD400; /* not referenced */
+u8 D_800DD404;
+u8 D_800DD405;
+u8 D_800DD406;
+
 #include "functions.h"
 #include "variables.h"
 
-extern Gfx *(*D_8008CD74[])(Gfx *, s32);
-extern Gfx *(*D_8008CD7C[])(Gfx *, s32);
+u8 D_8008CD00 = 0;
+
+/* Per-level update hooks, indexed by the level header's updateCallback (0: none). */
+static void (*D_8008CD04[])(s32) = {
+    NULL,
+    func_150D82B0,
+    func_150BEF70,
+    func_150EA8E0,
+    func_150DEC90,
+    func_150B6BC0,
+    func_150CEF60,
+    func_150DF920,
+    func_150C79BC,
+    func_150C84F4,
+    func_15100340,
+    func_150DE320,
+    NULL,
+    func_1510AA20,
+    func_150D0730,
+    func_15103690,
+    func_150FCFB0,
+    func_150FDD10,
+    func_150F568C,
+    func_150D0E90,
+    func_150CF578,
+    func_150F5310,
+    func_150F2A60,
+    func_150B003C,
+    func_150D7630,
+    func_150F20F0,
+    func_150F51E8,
+    NULL,
+};
+
+/* Per-level draw hooks, indexed by the level header's drawCallback1 and drawCallback2 (0: none). */
+static Gfx *(*D_8008CD74[2])(Gfx *, s32) = { NULL, NULL };
+static Gfx *(*D_8008CD7C[5])(Gfx *, s32) = { NULL, NULL, NULL, NULL, NULL };
 
 #define WGFX15174AA4(pkt, a, b)     \
 {                                   \
@@ -14,16 +56,14 @@ extern Gfx *(*D_8008CD7C[])(Gfx *, s32);
 
 void func_151749A0(s32 arg0, s32 arg1) {
     D_800DD406 += D_800BE9E4;
-    if (arg0 < (u8)D_800DD406) {
+    if (arg0 < D_800DD406) {
         D_800DD405++;
-        if ((u8)D_800DD405 >= arg1) {
+        if (D_800DD405 >= arg1) {
             D_800DD405 = 0;
         }
         D_800DD406 = 0;
     }
 }
-
-extern void (*D_8008CD04[])(s32);
 
 void func_151749F8(s32 arg0, s32 arg1) {
     u8 temp;

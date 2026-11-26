@@ -33,8 +33,6 @@ static const u8 D_80095CC4[15] = { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 }
 /* The patterns of func_1500B3B0. */
 static const f32 *D_80082D80[] = { D_80095BE0, D_80095BFC, D_80095C28 };
 
-extern s16 D_800DDB80[15][2];
-
 /** Clears the particle slot tables and picks this level's resources. */
 void func_1500ABA0(s32 arg0) {
     bzero(D_800BE4A0, sizeof(D_800BE4A0));
@@ -64,13 +62,11 @@ void func_1500AC14(void) {
                 length = 0;
                 D_800DDA90[i].devAddr = 0;
             }
-            D_800DDB80[i][0] = (D_80095CE0[id].width << 5) - 1;
-            D_800DDB80[i][1] = (((length / D_80095CE0[id].width) << 6) / 5) - 1;
+            D_800DDB80[i].s = (D_80095CE0[id].width << 5) - 1;
+            D_800DDB80[i].t = (((length / D_80095CE0[id].width) << 6) / 5) - 1;
         }
     }
 }
-
-extern u8 D_800DDC20[][2];
 
 /** Sets up particle slot `slot` for resource `id` (0xFF: unused). */
 void func_1500AD84(s32 slot, s32 id, s32 flags) {
@@ -115,22 +111,6 @@ void func_1500AD84(s32 slot, s32 id, s32 flags) {
     D_800DDC20[slot][1] = D_80095CC4[slot];
 }
 
-/** One particle placed on a level triangle; D_800DDD18 holds D_800B0DF0->maxParticles of them. */
-typedef struct Game36680Particle {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 unk6; // (subtype << 5) | slot
-    u8 animIndex; // slot * 4 + phase into D_800DDC90, 60: not animated
-    u8 resource;
-    u8 unk9;
-    u8 kind;
-    u8 unkB;
-    u8 scaleX;
-    u8 scaleY;
-} Game36680Particle; // size 0xE
-
-extern Game36680Particle *D_800DDD18;
 
 /** Fills particle `index` for particle slot `slot`; returns the next free index. */
 s32 func_1500AF08(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jitter, u8 kind, s32 parity) {
@@ -146,29 +126,29 @@ s32 func_1500AF08(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jit
 
     if (D_800DDBD0[slot] >= 2) {
         if ((1 << slot) & D_800DDC00) {
-            D_800DDD18[index].animIndex = (slot << 2) + (parity & 1);
+            D_800DDD18[index].phaseIdx = (slot << 2) + (parity & 1);
         } else {
-            D_800DDD18[index].animIndex = (index & 3) + (slot << 2);
+            D_800DDD18[index].phaseIdx = (index & 3) + (slot << 2);
         }
     } else {
-        D_800DDD18[index].animIndex = 60;
+        D_800DDD18[index].phaseIdx = 60;
     }
 
     D_800DDD18[index].unk6 = (subtype << 5) | slot;
     D_800DDD18[index].kind = kind;
-    D_800DDD18[index].resource = D_800DDBC0[slot];
+    D_800DDD18[index].texInfo = D_800DDBC0[slot];
 
     if (jitter != 0) {
         // matching: the "+ jitter - jitter" pair is needed for the original instruction sequence
         scale = (func_151EF610() % jitter + jitter) - jitter + 0x100;
-        D_800DDD18[index].scaleX = (D_800BE438[slot][0] * scale) >> 10;
+        D_800DDD18[index].halfWidth = (D_800BE438[slot][0] * scale) >> 10;
         if (D_80095CE0[D_800DDBC0[slot]].flags & 4) {
             scale = func_151EF610() % jitter * 4 + scale;
         }
-        D_800DDD18[index].scaleY = (D_800BE438[slot][1] * scale) >> 10;
+        D_800DDD18[index].height = (D_800BE438[slot][1] * scale) >> 10;
     } else {
-        D_800DDD18[index].scaleX = D_800BE438[slot][0] >> 2;
-        D_800DDD18[index].scaleY = D_800BE438[slot][1] >> 2;
+        D_800DDD18[index].halfWidth = D_800BE438[slot][0] >> 2;
+        D_800DDD18[index].height = D_800BE438[slot][1] >> 2;
     }
     return index + 1;
 }
@@ -276,8 +256,12 @@ s32 func_1500B714(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri
     func_1000FA64(0x4D, x, y, z, 0x8000, clamped, clamped >> 3, 0, 0, 0, 0, 0);
     return index;
 }
-/** Like func_1500B1F4 without scale jitter, then sets the slot's frame count to 87. */
-void func_1500B8F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
+/**
+ * Like func_1500B1F4 without scale jitter, then sets the slot's frame count to 87. It has no return
+ * statement: its caller func_1500BEC0 (through D_8008CEB8) keeps the next index that the last
+ * func_1500AF08 call left in v0.
+ */
+s32 func_1500B8F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
     s32 i;
     s32 n;
     s32 next;
@@ -305,8 +289,12 @@ void func_1500B8F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri
     }
     D_800DDBD0[slot] = 87;
 }
-/** Like func_1500B1F4 without scale jitter, then sets the slot's frame count to 8. */
-void func_1500BAB8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
+/**
+ * Like func_1500B1F4 without scale jitter, then sets the slot's frame count to 8. It has no return
+ * statement: its caller func_1500BEC0 (through D_8008CEB8) keeps the next index that the last
+ * func_1500AF08 call left in v0.
+ */
+s32 func_1500BAB8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
     s32 i;
     s32 n;
     s32 next;
@@ -334,8 +322,12 @@ void func_1500BAB8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri
     }
     D_800DDBD0[slot] = 8;
 }
-/** Like func_1500B1F4 without scale jitter, then sets the slot's frame count to 33. */
-void func_1500BC7C(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
+/**
+ * Like func_1500B1F4 without scale jitter, then sets the slot's frame count to 33. It has no return
+ * statement: its caller func_1500BEC0 (through D_8008CEB8) keeps the next index that the last
+ * func_1500AF08 call left in v0.
+ */
+s32 func_1500BC7C(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
     s32 i;
     s32 n;
     s32 next;
@@ -379,21 +371,6 @@ void func_1500BE68(void) {
     func_1500BE40(0);
 }
 
-typedef s32 (*ParticleEmitFunc)(s16, u8, s32, s32, s32, MeshTri *);
-
-typedef struct Game36680Emitter {
-    ParticleEmitFunc emit;
-    s32 unk4;
-    s32 unk8;
-} Game36680Emitter;
-
-typedef struct Game36680EmitterChoice {
-    s16 emitter; // index into D_8008CEB8
-    s16 count;   // first argument of the emit function
-} Game36680EmitterChoice;
-
-extern Game36680EmitterChoice D_8008CF00[][8];
-extern Game36680Emitter D_8008CEB8[];
 
 /**
  * Builds the level's particles: sets up the 15 particle slots, then for every level triangle whose
@@ -420,7 +397,7 @@ void func_1500BEC0(void) {
         func_1500AD84(i, D_800BE4A0[i].id, D_800BE4A0[i].flags);
     }
 
-    D_800DDD18 = allocate_memory(D_800B0DF0->maxParticles * sizeof(Game36680Particle), 1, 2, 0);
+    D_800DDD18 = allocate_memory(D_800B0DF0->maxParticles * sizeof(Game1A89B0Position), 1, 2, 0);
     func_1510F800(0);
 
     if (D_800DBE5C != NULL) {

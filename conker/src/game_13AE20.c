@@ -2,13 +2,33 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Render setup of the blob shadows (an I 8-bit 64x64 texture times the primitive alpha, decal blending); the
+ * shadow type's entry in the object type table D_8008B4D4 points to it. */
+Gfx D_800890C0[] = {
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsSPClearGeometryMode(G_FOG | G_LIGHTING | G_LOD | G_CULL_FRONT),
+    gsSPSetGeometryMode(G_CULL_BACK),
+    gsDPPipeSync(),
+    gsDPSetCombineLERP(0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0),
+    gsDPSetPrimColor(0, 0, 0, 0, 0, 0),
+    gsDPSetEnvColor(0, 0, 0, 0),
+    gsDPSetTile(G_IM_FMT_I, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
+                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD),
+    gsDPSetTile(G_IM_FMT_I, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
+                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD),
+    gsDPSetTileSize(G_TX_RENDERTILE, 0, 0, (64 - 1) << G_TEXTURE_IMAGE_FRAC, (64 - 1) << G_TEXTURE_IMAGE_FRAC),
+    gsDPSetOtherMode(G_AD_DISABLE | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE | G_TL_TILE |
+                         G_TD_CLAMP | G_TP_PERSP | G_CYC_1CYCLE | G_PM_NPRIMITIVE | 0xF, // 0xF: blend mask bits
+                     G_AC_NONE | G_ZS_PIXEL | G_RM_AA_ZB_XLU_DECAL | G_RM_AA_ZB_XLU_DECAL2),
+    gsSPEndDisplayList(),
+};
 
 /* A blob shadow: a textured quad laid on the floor under its owner, tilted to the floor slope. */
 struct Shadow {
     /* 0x00 */ EffectHeader header;
     /* 0x010 */ Mtx mtx[2];        /* translation, double-buffered by D_800BE9C0 */
     /* 0x090 */ Vtx vtx[2][4];     /* quad corners, double-buffered by D_800BE9C0 */
-    /* 0x110 */ u8 *owner;
+    /* 0x110 */ void *owner;       /* an Actor (ownerType 0) or a WorldObject (ownerType 1) */
     /* 0x114 */ f32 x;
     /* 0x118 */ f32 z;
     /* 0x11C */ f32 floorY;
@@ -96,7 +116,7 @@ void func_1510DA84(Shadow *shadow) {
     shadow->visible = FALSE;
     switch (shadow->ownerType) {
         case 0:
-            obj = (Actor *)shadow->owner;
+            obj = shadow->owner;
             x = obj->xpos;
             ownerY = obj->ypos;
             z = obj->zpos;
@@ -110,7 +130,7 @@ void func_1510DA84(Shadow *shadow) {
             angle = (obj->langle >> 8) + 0x20;
             break;
         case 1:
-            prop = (WorldObject *)shadow->owner;
+            prop = shadow->owner;
             if (prop->inactive == 1) {
                 return;
             }
@@ -123,7 +143,7 @@ void func_1510DA84(Shadow *shadow) {
             x = prop->x;
             ownerY = prop->y;
             z = prop->z;
-            scale = (f32)(prop->shadowSize * 4) * prop->xScale;
+            scale = (prop->shadowSize * 4) * prop->xScale;
             angle = 0;
             break;
     }
@@ -211,7 +231,6 @@ onFloor: // matching: an unused label splits the block, so the call setup stays 
     }
 }
 
-extern s32 D_80091770[];
 
 /* Draws the shadow quad, loading its texture and alpha only when they differ from the last shadow drawn. */
 Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
@@ -234,10 +253,10 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
         alpha = shadow->alpha;
         switch (shadow->ownerType) {
             case 0:
-                ownerAlpha = func_1506196C((Actor *)shadow->owner, view);
+                ownerAlpha = func_1506196C(shadow->owner, view);
                 break;
             case 1: {
-                WorldObject *prop = (WorldObject *)shadow->owner;
+                WorldObject *prop = shadow->owner;
 
                 ownerAlpha = (prop->alpha * prop->dst_fade_alpha[view] + 0xFF) >> 8;
                 break;

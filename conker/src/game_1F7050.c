@@ -86,7 +86,11 @@ void func_151C9ED4(Camera *player) {
     D_8008CD00 = 0;
 }
 
-extern void (*D_8008FC10[])(SightSprite *, void **, u8);
+/* Message handlers per sight sprite kind (SightSpritePayload.kind); msg points to the message of msgId. */
+static void (*D_8008FC10[6])(SightSprite *sprite, void *msg, u8 msgId) = {
+    NULL, func_151CB918, func_151CB918, func_151CC2BC, NULL, NULL,
+};
+
 const SightColor D_800AAC80 = { 255.0f, 0.0f, 0.0f, 255.0f };
 const SightColor D_800AAC90[] = {
     { 0.0f, 255.0f, 0.0f, 130.0f },
@@ -302,7 +306,7 @@ void func_151CA6A0(Camera *player, u8 big) {
  * reset (0x21) or when message 0 names an actor controlled by that player, then runs the
  * handler for the sprite's kind. */
 void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
-    void (*handler)(SightSprite *, void **, u8);
+    void (*handler)(SightSprite *, void *, u8);
     Actor *actor;
 
     if (msgId == 0x21) {
@@ -532,12 +536,12 @@ void func_151CB110(SightLensObject *obj, u16 *framebuffer) {
                     while (x < 0.0f) {
                         f32 scale;
                         scale = func_15145A0C(fabsf(x), radius, invRadius);
-                        screenPos[0][0] = (s32)(view->centerX + x * 12.0f);
-                        screenPos[1][0] = (s32)(view->centerX - x * 12.0f);
+                        screenPos[0][0] = view->centerX + x * 12.0f;
+                        screenPos[1][0] = view->centerX - x * 12.0f;
                         scale = 1.0f - scale * strength;
-                        lensPos[0][0] = (s32)(x * scale * 12.0f + 12.0f);
+                        lensPos[0][0] = x * scale * 12.0f + 12.0f;
                         lensPos[0][1] = (s32)(y * scale * 12.0f + 12.0f) * 24;
-                        lensPos[1][0] = (s32)(12.0f - x * scale * 12.0f);
+                        lensPos[1][0] = 12.0f - x * scale * 12.0f;
                         lensPos[1][1] = (s32)(12.0f - y * scale * 12.0f) * 24;
                         *(framebuffer + screenPos[0][1] + screenPos[0][0]) = *(lens->pixels + lensPos[0][0] + lensPos[0][1]);
                         *(framebuffer + screenPos[0][1] + screenPos[1][0]) = *(lens->pixels + lensPos[1][0] + lensPos[0][1]);
@@ -568,8 +572,9 @@ void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
 }
 
 /* Fades the sprite towards payload.unk8 while the player's 0x2000 input flag is held
- * (and unk3D4->unk19E is clear), and towards 0 otherwise. */
-void func_151CB510(SightSprite *sprite) {
+ * (and unk3D4->unk19E is clear), and towards 0 otherwise. An update callback of D_8008ACC8: it has the
+ * table's s32 type but no return statement. */
+s32 func_151CB510(SightSprite *sprite) {
     Camera *player;
     SightSpritePayload *payload;
     f32 target;
@@ -661,12 +666,13 @@ void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
 }
 
 /* Message 0x37 for a side panel: restart its bounce when `side` and `player` match. */
-void func_151CB918(SightSprite *sprite, SightPanelMsg *msg, u8 msgId) {
+void func_151CB918(SightSprite *sprite, void *msg, u8 msgId) {
     SightSpritePayload *payload = &sprite->payload;
+    SightPanelMsg *panel = msg;
 
     if (msgId == 0x37) {
-        if (payload->side == msg->side) {
-            if (payload->player == msg->player) {
+        if (payload->side == panel->side) {
+            if (payload->player == panel->player) {
                 payload->bouncePhase = 0.0f;
                 payload->flags |= 1;
                 payload->fade = 0.0f;
@@ -723,12 +729,12 @@ void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (effect->player == *msg) {
-            func_1516972C(&effect->header);
+            func_1516972C(&effect->tint.header);
         }
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->CameraPtr == effect->player) {
-            func_1516972C(&effect->header);
+            func_1516972C(&effect->tint.header);
         }
     }
 }
@@ -811,12 +817,13 @@ void func_151CC290(Camera *player) {
 }
 
 /* Message 0x46 handler: starts the 35-frame colour flash. */
-void func_151CC2BC(SightSprite *sprite, s32 *msg, u8 msgId) {
+void func_151CC2BC(SightSprite *sprite, void *msg, u8 msgId) {
     SightSpritePayload *payload;
+    s32 *player = msg; /* the message is the player (Camera *) */
 
     payload = &sprite->payload;
     // matching: reading payload->player as *(s32 *)payload keeps IDO's load order
-    if ((msgId == 0x46) && (*msg == *(s32 *)payload)) {
+    if ((msgId == 0x46) && (*player == *(s32 *)payload)) {
         payload->flags |= 2;
         payload->flashTimer = 35.0f;
         sprite->desc.color1.red = (u32)payload->flashColor.r;
@@ -1105,16 +1112,12 @@ void func_151CCE94(Camera *player) {
 
     if (D_800BE616 != 0) {
         owner = player;
-        effect = (SightOwnedEffect *)func_151A4FD0(0, 0, 0, 0xFF, 0, player->CNumber, 1, 4);
+        effect = func_151A4FD0(0, 0, 0, 0xFF, 0, player->CNumber, 1, 4);
         if (effect != NULL) {
             memcpy(&effect->player, &owner, sizeof(owner));
         }
     }
 }
-
-/* Texture ids of the four strips in a scope frame row. */
-typedef struct { u8 b[4]; } SightTextureRow;
-extern SightTextureRow D_8008FC28;
 
 /* Spawns the two rows of four texture strips (top and bottom) of the scope frame for `player`. */
 void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
@@ -1122,7 +1125,6 @@ void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
     SightSprite *sprite;
     SightSpritePayload payload;
     u8 i;
-    SightTextureRow textures;
     u8 j;
 
     payload.rangeMax = 0.0f;
@@ -1166,13 +1168,14 @@ void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
     desc.halfHeight = 16.0f;
 
     for (j = 0; j < 2; j++) {
-        textures = D_8008FC28;
+        u8 textures[4] = { 0xB5, 0xB6, 0xB7, 0xB8 }; /* texture ids of the row's four strips */
+
         desc.y = j ? 92.0f : -90.0f;
         desc.flags |= j ? 4 : 0;
         payload.kind = j ? 5 : 4;
         for (i = 0; i < 4; i++) {
             desc.x = ((i * 71.5f) + 35.75f) - 143.0f;
-            desc.texture = textures.b[i];
+            desc.texture = textures[i];
             sprite = func_1515548C(&desc, 0xB, 0, 0, sizeof(SightSpritePayload), arg3, 1);
             if (sprite != NULL) {
                 memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
@@ -1181,8 +1184,9 @@ void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
     }
 }
 
-/* Scope frame strip update: the top (kind 5) and bottom (kind 4) rows slide with the sight value. */
-void func_151CD224(SightSprite *sprite) {
+/* Scope frame strip update: the top (kind 5) and bottom (kind 4) rows slide with the sight value. An update
+ * callback of D_8008ACC8: it has the table's s32 type but no return statement. */
+s32 func_151CD224(SightSprite *sprite) {
     SightSpritePayload *payload = &sprite->payload;
     f32 value = func_151CC1D4(sprite);
     f32 offset = (1.0f - (value - payload->rangeMin) * payload->rangeScale) * 75.0f;

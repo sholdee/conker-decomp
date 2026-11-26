@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-extern u8 D_800A8244[];
 
 // Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
 void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
@@ -67,8 +66,6 @@ void func_151942E8(self, other, arg2)
     func_15193CA0(other, TRUE, 0xFF, 1);
 }
 
-extern u8 D_800A8210;
-
 void func_15194320(Actor *self, Actor *other, u8 *arg2) {
     switch (other->character_type) {
     case 0:
@@ -76,12 +73,10 @@ void func_15194320(Actor *self, Actor *other, u8 *arg2) {
     case 2:
     case 3:
     case 4:
-        func_1518D1C0(other, 10, 0, 1, 0xFF, 1, &D_800A8210);
+        func_1518D1C0(other, 10, 0, 1, 0xFF, 1, "effects_impact_lavaboulder");
         break;
     }
 }
-
-extern u8 D_800A822C;
 
 void func_15194394(Actor *self, Actor *other, u8 *arg2) {
     switch (other->character_type) {
@@ -90,7 +85,7 @@ void func_15194394(Actor *self, Actor *other, u8 *arg2) {
     case 2:
     case 3:
     case 4:
-        func_1518D1C0(other, 12, 0, 1, 0xFF, 1, &D_800A822C);
+        func_1518D1C0(other, 12, 0, 1, 0xFF, 1, "effects_impact_fireimp");
         break;
     }
 }
@@ -395,7 +390,7 @@ void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     if (D_800BE616 != 0) {
         func_15194DA4(self, other, arg2);
     } else {
-        func_1518D1C0(other, 11, 0, 1, 0xFF, 1, D_800A8244);
+        func_1518D1C0(other, 11, 0, 1, 0xFF, 1, "effects_impact_lava");
     }
     func_1504715C(&ground, other);
     func_1514B364((Vec3f *)&other->xpos, &ground, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
@@ -434,19 +429,13 @@ void func_15194F48(Actor *self, Actor *other, u8 *arg2) {
     func_1507CD64(other, 6);
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    Actor *source;
-} Struct15194FF4;
-
 void func_15194FF4(self, other, arg2)
 Actor *self;
 Actor *other;
 u8 arg2;
 {
-    u8 *spawned;
-    Struct15194FF4 info;
+    PeriodicObject *spawned;
+    PeriodicTrigger trigger;
 
     func_15190518(other);
     switch (other->character_type) {
@@ -456,16 +445,16 @@ u8 arg2;
     case 0x99: case 0x9C: case 0x9D: case 0x9F: case 0xA0: case 0xB0: case 0xB1: case 0xB2:
     case 0xB4:
         if (D_800BE616 != 0) {
-            info.unk0 = 0x7D;
-            info.unk4 = 5;
+            trigger.interval = 0x7D;
+            trigger.elapsed = 5;
             if (self->character_type == 0xFF && self->owner != 0) { // an id-0xFF object names its owner by slot + 1
-                info.source = &movement_obj[self->owner - 1];
+                trigger.target = &movement_obj[self->owner - 1];
             } else {
-                info.source = self;
+                trigger.target = self;
             }
             spawned = func_1518F51C(other, 0, 250, arg2 ? 0 : -1, arg2 ? 0 : -1, 8, arg2 ? 1 : 0, arg2 ? 12 : 0, 0xFF, 1);
             if (spawned != NULL && arg2 != 0) {
-                memcpy(spawned + 0x90, &info, sizeof(info));
+                memcpy(&spawned->trigger, &trigger, sizeof(trigger));
                 {
                     ActorCtl *ext = other->mv;
 

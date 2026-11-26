@@ -30,15 +30,22 @@ extern u8 (***D_800BE520)[3]; // [set][group][i]: base RGB of each color-group v
 extern u16 *D_800BE524;       // first D_800BE510[0] entry of each prop
 
 /* game_FECC0.c */
-Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 tScroll, s32 arg5, f32 roll);
+Gfx *func_150D1810(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
 /* game_13D350.c */
+extern void *D_800DBE80;
+extern Vtx *D_800DBE88[4][2];
+extern u8 D_800DBEA8[3];
+extern u8 D_800DBEAB;
+extern u8 D_800DBEAC;
+extern Mtx *D_800DBEB0;
+extern s32 *D_800891BC[];
 Gfx *func_1510FEA0(Gfx *gfx, s32 arg1);
 void func_151102CC(MtxF mtx, f32 pitch, f32 yaw, f32 roll);
 void func_15110360(s32 viewIndex, MtxF mtx, f32 pitch, f32 yaw, f32 roll);
-Gfx *func_151103C8(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3);
+Gfx *func_151103C8(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 b);
-Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3);
+Gfx *func_15110600(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 Gfx *func_151106A8(Gfx *gfx);
 s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw);
 Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4, u32 width, u32 height, u32 tileW,
@@ -50,6 +57,15 @@ void func_15111858(void);
 Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
 /* game_1A0790.c */
+extern s8 D_800DD2E0;     /* 1 when the level has its own fog preset */
+extern u8 D_800DD2E4[4];  /* the active fog: colour */
+extern u16 D_800DD2E8;
+extern u16 D_800DD2EA;
+extern u16 D_800DD2EC;
+extern u16 D_800DD2EE;
+extern s16 D_800DD2F0;    /* blend of the last func_151733E4 call */
+extern s16 D_800DD2F2;    /* near plane */
+extern s16 D_800DD2F4;    /* far plane */
 void func_151732E0(s32 arg0);
 Gfx *func_151733D8(Gfx *gfx, s32 arg1);
 void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest);

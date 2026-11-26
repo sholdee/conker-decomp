@@ -2,6 +2,55 @@
 #include "functions.h"
 #include "variables.h"
 
+s16 D_800DD450; /* primitive alpha last set in the display list; -1 = unknown */
+
+/* The debris quad: a hexagon of six vertices fanned into four triangles. */
+static Vtx D_8008CD90[6] = {
+    { { { 7, 4, 0 }, 0, { 0x2412, 0x209F }, { 0xFE, 0xFE, 0xFE, 0xFF } } },
+    { { { -7, 4, 0 }, 0, { 0x2008, 0x208E }, { 0xFE, 0xFE, 0xFE, 0xFF } } },
+    { { { 0, 1, 3 }, 0, { 0x2210, 0x1FAB }, { 0xFE, 0xFE, 0xFE, 0xFF } } },
+    { { { 7, 14, 0 }, 0, { 0x23F2, 0x2350 }, { 0xFE, 0xFE, 0xFE, 0xFF } } },
+    { { { -7, 14, 0 }, 0, { 0x2015, 0x2340 }, { 0xFE, 0xFE, 0xFE, 0xFF } } },
+    { { { 0, 21, 4 }, 0, { 0x21FA, 0x25DE }, { 0xFE, 0xFE, 0xFE, 0xFF } } },
+};
+
+/* The particle drawn by func_1517A3A0. */
+static Gfx D_8008CDF0[] = {
+    gsSPVertex(D_8008CD90, 6, 0),
+    gsSP1Triangle(0, 1, 2, 0),
+    gsSP1Triangle(0, 3, 1, 0),
+    gsSP1Triangle(4, 1, 3, 0),
+    gsSP1Triangle(5, 4, 3, 0),
+    gsSPEndDisplayList(),
+};
+
+static Gfx D_8008CE60[9];
+
+/* Render setups of the object types (drawBeginDL in D_8008B4A8): types 8 and 9 draw in the z-buffered
+ * translucent mode, types 12 and 89 without the z-buffer. */
+Gfx D_8008CE20[] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2),
+    gsSPDisplayList(D_8008CE60),
+    gsSPEndDisplayList(),
+};
+Gfx D_8008CE40[] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_XLU_SURF, G_RM_XLU_SURF2),
+    gsSPDisplayList(D_8008CE60),
+    gsSPEndDisplayList(),
+};
+static Gfx D_8008CE60[9] = {
+    gsDPSetCycleType(G_CYC_1CYCLE),
+    gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0),
+    gsDPSetTextureLOD(G_TL_TILE),
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsSPClearGeometryMode(G_CULL_BOTH | G_FOG | G_LOD),
+    gsDPSetTextureDetail(G_TD_CLAMP),
+    gsDPSetTextureFilter(G_TF_BILERP),
+    gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0),
+    gsSPEndDisplayList(),
+};
 
 /* Spawns one particle of object type `type` at (x, y, z) with random horizontal speed and spin. */
 void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkAC, u8 speedRange,
@@ -89,8 +138,6 @@ Gfx *func_1517A394(Gfx *gfx) {
 }
 
 #define D_800D35E4 ((&D_800D35E8)[-1])
-extern s16 D_800DD450; /* primitive alpha last set in the display list; -1 = unknown */
-extern u8 D_8008CDF0[];
 
 /* Draw callback: culls the particle against view `view` (types 0xC and 0x59 are never culled), then emits its
  * texture, matrix, primitive alpha and render mode, and the shared particle display list D_8008CDF0. */
@@ -155,11 +202,11 @@ void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
             rnd = (func_150ADA20() % 80) + 100;
             particle->scale = rnd * 0.01f;
             particle->velY = size * 0.4f;
-            rnd = func_150ADA20() % (u32)range;
+            rnd = func_150ADA20() % range;
             half = size * 0.5f;
             particle->spinX = rnd - half;
-            particle->spinY = (func_150ADA20() % (u32)range) - half;
-            particle->spinZ = (func_150ADA20() % (u32)range) - half;
+            particle->spinY = (func_150ADA20() % range) - half;
+            particle->spinZ = (func_150ADA20() % range) - half;
             particle->timer = 0;
             particle->alpha = 0xFF;
         }
@@ -218,13 +265,13 @@ Gfx *func_1517A958(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
     return gfx;
 }
 
-extern TextureDesc D_80090614; /* an entry of the texture tables */
 
 /* Loads particle texture `texture` unless it is already the current one. */
 Gfx *func_1517A9A8(Gfx *gfx, s32 texture) {
     SpriteParams texState; // filled in by func_15094F70; unused here
 
     if (texture != D_800DD1B0) {
+        // matching: the unsigned shift changes IDO's code
         gfx = func_15094F70(gfx, &D_80090614, (u32)texture << 8, &texState, 0, 0, 0, 2, 3);
         D_800DD1B0 = texture;
     }
@@ -247,7 +294,7 @@ void func_1517AA20(f32 size, s32 x, s32 y, s32 z, s32 count) {
             offsetZ = func_150ADA20() & 0x3F;
             offsetX -= 32;
             offsetZ -= 32;
-            chunkSize = (f32)((func_150ADA20() % (u32)range) >> 4) + size;
+            chunkSize = ((func_150ADA20() % range) >> 4) + size;
             func_1517A644(chunkSize, func_150ADA20() & 1, x + offsetX, y, z + offsetZ);
         }
     }

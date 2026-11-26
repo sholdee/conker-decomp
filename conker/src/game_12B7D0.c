@@ -112,7 +112,7 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
 }
 
 /* Handler: writes the world position of `obj`'s bone point D_800A1FC8 to `out`. */
-void func_150FE794(Actor *obj, s32 arg1, Vec3f *out) {
+void func_150FE794(Actor *obj, s16 arg1, Vec3f *out) {
     func_151D3E04(obj, out, &D_800A1FC8, D_80088B94, 0.0f);
 }
 

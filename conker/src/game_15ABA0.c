@@ -1,4 +1,9 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss. */
+ViewEnvelope D_800DC2C0[4]; // per-view camera wobble envelope
+
 #include "functions.h"
 #include "variables.h"
 
@@ -16,7 +21,18 @@ void func_1512D6F0(Camera *view) {
     env->elapsed = -1.0f;
 }
 
-extern u8 D_800895D0[][10];
+/* Envelope presets: four oscillator frequencies, attack, decay, sustain and release times, peak, sustain level. */
+static u8 D_800895D0[9][10] = {
+    { 5, 5, 5, 5, 30, 20, 30, 30, 7, 3 },
+    { 3, 4, 0, 0, 13, 5, 7, 14, 3, 5 },
+    { 9, 4, 7, 0, 13, 5, 7, 14, 3, 5 },
+    { 9, 4, 7, 0, 13, 5, 7, 14, 3, 5 },
+    { 0, 12, 13, 3, 1, 1, 1, 1, 4, 1 },
+    { 3, 4, 0, 0, 13, 5, 7, 14, 3, 5 },
+    { 9, 4, 7, 0, 13, 5, 7, 14, 3, 5 },
+    { 9, 4, 7, 0, 13, 5, 7, 14, 3, 5 },
+    { 0, 12, 13, 3, 1, 1, 1, 1, 4, 1 },
+};
 
 /* Loads envelope preset presetIndex into the view's envelope and restarts it from the attack stage. */
 /* Loads envelope preset presetIndex into the view's envelope and restarts it from the attack stage. */

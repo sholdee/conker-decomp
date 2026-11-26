@@ -30,8 +30,76 @@ typedef union {
 #define PARTICLE_MOTION(particle) ((DefParticleMotion *)((particle) + 1))
 
 
-extern s32 (*D_80089C70[])(QuadSprite *);
-extern s32 (*D_80089CA8[])(QuadSprite *);
+/* Sprite update (QuadSprite.updateFn; 0 = none) and expire (QuadSprite.expireFn) callbacks; an update returning 0
+ * expires the sprite, an expire callback returning nonzero keeps it. */
+static s32 (*D_80089C70[])() = {
+    NULL, func_1513416C, func_150B961C, func_150BA35C, func_150AEDD8, func_150DE2A4, func_150BB450, func_151AB090,
+    func_150C5E0C, func_150C673C, func_150CB7CC, func_151AFBD4, func_150CA9D0, func_15136A1C,
+};
+static s32 (*D_80089CA8[])() = { NULL, func_151AB180, func_150C5EFC, func_150C682C };
+
+/* Particle update (DefParticleHead.updateFn1, updateFn2; 0 = none) and expire callbacks, as for sprites. */
+static s32 (*D_80089CB8[])() = {
+    NULL, func_1513E6E8, func_1518A094, func_150B9560, func_150BA37C, func_1514A4EC, func_1514A594, func_1518EF54,
+    func_1518F058, func_150DB114, func_15197AB4, func_151AC9EC, func_15190F9C, func_15191520, func_151DA368,
+    func_150E6230, func_151B118C, func_151B1828, func_1514B87C, func_150CD17C, func_150C308C, func_15101378,
+    func_151C2734, func_150AE35C, func_1513F6E8, func_1513F728, func_151C82D0, func_151B85AC, func_151CEA20,
+    func_150EF38C, func_150F00EC, func_1519C26C, func_1514C258, func_1514C288, func_150E4174, func_151B8CFC,
+    func_150F7E20, func_15141928, func_150F3214, func_1519EF04, func_150DEACC, func_15102D90,
+};
+static s32 (*D_80089D60[])() = {
+    NULL, func_150B95FC, func_150BA424, func_1514143C, func_1514A19C, func_1514A380, func_1514A498, func_1518F108,
+    func_1518F15C, func_1518F1A0, func_150DB630, func_15197BBC, func_1518F384, func_15149838, func_15149A94,
+    func_15149BF4, func_15149C58, func_151ACA20, func_1519187C, func_151DA6A8, func_151DADA0, func_150E679C,
+    func_151AFC08, func_150CBA30, func_150CC638, func_150C2FCC, func_151368A8, func_151B1478, func_1514AF74,
+    func_1514B8B0, func_150CD17C, func_151022AC, func_15141478, func_151415D4, func_1519C4E4, func_1514BE00,
+    func_1514BF7C, func_151BE210, func_150D317C, func_150D4CC4, func_151A6600, func_15141564, func_151BE6CC,
+    func_150FD514,
+};
+static s32 (*D_80089E10[])() = { NULL, func_15149EC4, func_1514C2B8 };
+
+/* Vertex functions of a particle (DefParticleHead.vertexFn), see func_1513E83C. The prototype keeps the viewport an
+ * s16; most entries take their own view of the particle. */
+static Vtx *(*D_80089E1C[])(DefParticleHead *, s16) = {
+    func_1513E83C, func_151408A4, func_15149FD0, func_1513F114, func_1514A6A0, func_1518E73C, func_1518EB10,
+    func_150DB2D8, func_150DB714, func_15197C10, func_15149D18, func_151AC810, func_1513F4B0, func_1519108C,
+    func_151DAE28, func_150E63A0, func_151B14AC, func_150CD59C, func_151019C4, func_15101F50, func_151C2AD0,
+    func_150AE36C, func_15102EB8, func_1513EE14, func_151C7E98, func_151B863C, func_1519C56C, func_1513FA2C,
+    func_1513FA70, func_151BE4B8, func_15140190, func_150D2D6C, func_151A6350, func_150F7F58, func_1513EDB4,
+    func_1513EDE4, func_150FDBA0, func_150F337C, func_150DEB58,
+};
+
+/* Render setup and reset display lists of the particles; their entry in the object type table points to them. */
+Gfx D_80089EB8[] = {
+    gsDPPipeSync(),
+    gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsSPEndDisplayList(),
+};
+Gfx D_80089ED8[] = {
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPEndDisplayList(),
+};
+
+/* Destroy and free handlers of a sprite (SpriteDef.unk7) and of a particle (ParticleDef.type). */
+static void (*D_80089EE8[])(QuadSprite *) = { func_1513C8D4, func_1513C8D4 };
+static void (*D_80089EF0[])(QuadSprite *) = { func_1513C900, func_1513C900 };
+static void (*D_80089EF8[])() = {
+    func_1513CA6C, func_15101090, func_151011E8, func_151411E4, func_1513CA6C, func_1513CA6C, func_151C94D4,
+    func_150EF7B0, func_151BE674, func_150F6420, func_151A6B10, func_150FDCAC, func_1513CA6C,
+};
+static void (*D_80089F2C[])() = {
+    func_1513CAA0, func_15101148, func_15101210, func_15141250, func_1513CAA0, func_1513CAA0, func_151C95D8,
+    func_150EF860, func_151BE6A0, func_150F644C, func_151A6B3C, func_150FDCD8, func_1513CAA0,
+};
+/* Event handler of a sprite (func_1513CF9C). */
+static void (*D_80089F60[])(s32, s32, u8) = { func_1513CFD0 };
+/* Event handlers of a particle (ParticleDef.type, func_1513DF9C); several take their own view of the particle and
+ * of the event data. */
+static void (*D_80089F64[])(DefParticleHead *, s32, u8) = {
+    func_1513E070, func_1513E084, func_15102D50, func_151C86AC, func_151416E8, func_150EF910, func_151BE604,
+    func_151BE604, func_151C4AB0, func_150FDB0C, func_150F31D4,
+};
 
 /* Per-frame update of a sprite: lifetime, fading and texture animation. */
 void func_1513C060(QuadSprite *sprite) {
@@ -125,6 +193,14 @@ void func_1513C060(QuadSprite *sprite) {
         }
     }
 }
+
+/* The default vertex colours of a sprite or particle: opaque white. */
+const VtxColor D_800A4AA0[4] = {
+    { 0xFF, 0xFF, 0xFF, 0xFF, 0 },
+    { 0xFF, 0xFF, 0xFF, 0xFF, 0 },
+    { 0xFF, 0xFF, 0xFF, 0xFF, 0 },
+    { 0xFF, 0xFF, 0xFF, 0xFF, 0 },
+};
 
 /* Allocates a sprite from a template; extraSize bytes follow it. */
 QuadSprite *func_1513C350(void *def, const void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6,
@@ -286,7 +362,7 @@ void func_1513C9B0(QuadSprite *sprite) {
     } else {
         index = 0;
     }
-    D_80089EE8[index]();
+    D_80089EE8[index](sprite);
 }
 
 void func_1513C9FC(QuadSprite *sprite) {
@@ -297,7 +373,7 @@ void func_1513C9FC(QuadSprite *sprite) {
     } else {
         index = 0;
     }
-    D_80089EF0[index]();
+    D_80089EF0[index](sprite);
 }
 
 /* Frees a particle's per-viewport vertex buffers. */
@@ -340,7 +416,7 @@ void func_1513CB58(DefParticleHead *particle) {
     } else {
         index = 0;
     }
-    D_80089EF8[index]();
+    D_80089EF8[index](particle);
 }
 
 void func_1513CBA4(DefParticleHead *particle) {
@@ -351,10 +427,41 @@ void func_1513CBA4(DefParticleHead *particle) {
     } else {
         index = 0;
     }
-    D_80089F2C[index]();
+    D_80089F2C[index](particle);
 }
 
-extern RenderModePair D_800A4AC8[];
+/* The render modes of the effects (the blender words of the two cycles), indexed by the low byte of a render mode
+ * field; most effect files read it with their own view. */
+const RenderModePair D_800A4AC8[28] = {
+{ 0x004049D8, 0x001049D8 },
+{ 0x004049D8, 0x001049D8 },
+{ 0x00404DD8, 0x00404DD8 },
+{ 0x00404350, 0x00104350 },
+{ 0x00404358, 0x00104358 },
+{ 0x004049F8, 0x001049F8 },
+{ 0x00404DF8, 0x00104DF8 },
+{ 0x004041C8, 0x001041C8 },
+{ 0x00404240, 0x00104240 },
+{ 0x00443078, 0x00113078 },
+{ 0xC8000000, 0x00112230 },
+{ 0xC8000000, 0x00104A50 },
+{ 0xC8000000, 0x001049F8 },
+{ 0x0C080000, 0x001041C8 },
+{ 0x0C080000, 0x001049F8 },
+{ 0x0C080000, 0x001049D8 },
+{ 0x00442078, 0x00112078 },
+{ 0x0C080000, 0x00104A50 },
+{ 0x0C083238, 0x03023238 },
+{ 0x00442048, 0x00112048 },
+{ 0x00442230, 0x00112230 },
+{ 0x004049F8, 0x001049F8 },
+{ 0x00442078, 0x00112078 },
+{ 0x00404340, 0x00104340 },
+{ 0x00404870, 0x00104870 },
+{ 0x00404840, 0x00104840 },
+{ 0x0C080000, 0x00104350 },
+{ 0x00404340, 0x00104340 },
+};
 
 /* Draws a sprite's quad (and attached model) for one viewport. */
 Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
@@ -421,12 +528,9 @@ void func_1513CF9C(s32 arg0, s32 arg1, u8 arg2) {
     D_80089F60[0](arg0, arg1, arg2);
 }
 
-void func_1513CFD0(s32 arg0, s32 arg1, s32 arg2) {
+void func_1513CFD0(s32 arg0, s32 arg1, u8 arg2) {
 }
 
-extern s32 (*D_80089CB8[])(DefParticleHead *);
-extern s32 (*D_80089D60[])(DefParticleHead *);
-extern s32 (*D_80089E10[])(DefParticleHead *);
 
 /* Per-frame update of a particle: lifetime, fading and texture animation. */
 void func_1513CFE4(DefParticleHead *particle) {
@@ -553,11 +657,11 @@ void *func_1513D2F0(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u
     func_151400D0(particle->vtxTemplate, colors);
     particle->active = 1;
     particle->unk14 = 0;
-    particle->unk78 = -10000.0f;
-    particle->unk98 = NULL;
-    particle->unk95 = 0;
-    particle->unk94 = 0;
-    particle->unk90 = 0;
+    particle->ground.height = -10000.0f;
+    particle->ground.surface = NULL;
+    particle->ground.source = 0;
+    particle->ground.flags = 0;
+    particle->ground.material = 0;
     particle->link.model = model;
     particle->link.unk1C = arg8;
     particle->link.unk4 = 0;
@@ -730,7 +834,6 @@ end: // matching: an unused label keeps the final return 1 in its own basic bloc
     return 1;
 }
 
-extern Vtx *(*D_80089E1C[])(DefParticleHead *, s16);
 
 /* Draws a particle's quad (and attached model) for one viewport. */
 Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
@@ -755,7 +858,7 @@ Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
         needSync = TRUE;
         if ((particle->def.flags & 8) && !(particle->def.viewportMask & (1 << viewport))) {
             if (particle->vtxBuffers[viewport]) {
-                func_100043B4((s32 *)(s32)particle->vtxBuffers[viewport], 2);
+                func_100043B4((void *)(s32)particle->vtxBuffers[viewport], 2);
                 particle->vtxBuffers[viewport] = NULL;
             }
             return gfx;
@@ -766,7 +869,7 @@ Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
         if ((particle->def.flags & 0x1000000) && particle->def.unk48 != NULL &&
             !(particle->def.unk48->views & (1 << viewport))) {
             if (particle->vtxBuffers[viewport]) {
-                func_100043B4((s32 *)(s32)particle->vtxBuffers[viewport], 2);
+                func_100043B4((void *)(s32)particle->vtxBuffers[viewport], 2);
                 particle->vtxBuffers[viewport] = NULL;
             }
             return gfx;
@@ -774,7 +877,7 @@ Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
         vtx = D_80089E1C[particle->vertexFn](particle, viewport);
         if (vtx == NULL) {
             if (particle->vtxBuffers[viewport]) {
-                func_100043B4((s32 *)(s32)particle->vtxBuffers[viewport], 2);
+                func_100043B4((void *)(s32)particle->vtxBuffers[viewport], 2);
                 particle->vtxBuffers[viewport] = NULL;
             }
             return gfx;
@@ -821,7 +924,6 @@ Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
     return gfx;
 }
 
-extern void (*D_80089F64[])(DefParticleHead *, s32, u8);
 
 /* Dispatches to the D_80089F64 handler for the particle's type. */
 void func_1513DF9C(DefParticleHead *particle, s32 arg1, u8 arg2) {
@@ -873,7 +975,7 @@ void func_1513DF9C(DefParticleHead *particle, s32 arg1, u8 arg2) {
     D_80089F64[index](particle, arg1, arg2);
 }
 
-void func_1513E070(s32 arg0, s32 arg1, s32 arg2) {
+void func_1513E070(DefParticleHead *particle, s32 arg1, u8 arg2) {
 }
 
 /* Message handler: frees the particle when its owner goes away (0x1A), or retargets it on an actor swap (0x2D). */
@@ -1375,12 +1477,105 @@ void func_1513F4B0(DefParticleHead *head, s16 viewport) {
  * Combiner modes: each 16-byte entry holds the a, b, c, d inputs of cycle 0 colour, cycle 0 alpha,
  * cycle 1 colour and cycle 1 alpha, in that order.
  */
-extern u8 D_800A4BA8[][16];
+static const u8 D_800A4BA8[92][16] = {
+    { 1, 31, 5, 3, 1, 7, 5, 3, 1, 31, 5, 3, 1, 7, 5, 3 },
+    { 1, 3, 5, 31, 1, 3, 5, 7, 1, 3, 5, 31, 1, 3, 5, 7 },
+    { 1, 31, 5, 3, 1, 7, 5, 3, 1, 31, 5, 3, 1, 7, 5, 3 },
+    { 1, 31, 5, 3, 1, 7, 5, 7, 1, 31, 5, 3, 1, 7, 5, 7 },
+    { 31, 31, 5, 3, 1, 7, 5, 7, 31, 31, 5, 3, 1, 7, 5, 7 },
+    { 1, 31, 5, 31, 1, 7, 4, 7, 1, 31, 5, 31, 1, 7, 4, 7 },
+    { 1, 31, 5, 31, 1, 7, 4, 7, 1, 31, 5, 31, 1, 7, 4, 7 },
+    { 1, 31, 5, 31, 1, 7, 4, 7, 1, 31, 5, 31, 1, 7, 4, 7 },
+    { 1, 31, 5, 3, 1, 7, 5, 7, 1, 31, 5, 3, 1, 7, 5, 7 },
+    { 1, 31, 5, 3, 1, 7, 5, 7, 31, 31, 31, 0, 7, 7, 7, 0 },
+    { 1, 3, 5, 31, 1, 7, 5, 7, 31, 31, 31, 0, 7, 7, 7, 0 },
+    { 1, 31, 5, 31, 1, 7, 4, 7, 1, 31, 5, 31, 1, 7, 4, 7 },
+    { 31, 31, 31, 1, 1, 7, 3, 7, 31, 31, 31, 1, 1, 7, 3, 7 },
+    { 3, 5, 1, 5, 3, 7, 1, 7, 3, 5, 1, 5, 3, 7, 1, 7 },
+    { 3, 5, 8, 5, 3, 7, 1, 7, 3, 5, 8, 5, 3, 7, 1, 7 },
+    { 3, 5, 1, 5, 3, 7, 2, 7, 31, 31, 31, 0, 7, 7, 7, 0 },
+    { 1, 31, 5, 31, 1, 7, 5, 7, 1, 31, 5, 31, 1, 7, 5, 7 },
+    { 1, 31, 3, 31, 1, 7, 3, 7, 1, 31, 3, 31, 1, 7, 3, 7 },
+    { 1, 31, 2, 31, 1, 7, 2, 7, 0, 31, 3, 31, 0, 7, 3, 7 },
+    { 31, 31, 31, 1, 7, 7, 7, 1, 31, 31, 31, 1, 7, 7, 7, 1 },
+    { 31, 31, 31, 1, 1, 7, 3, 7, 31, 31, 31, 1, 1, 7, 3, 7 },
+    { 7, 31, 3, 31, 7, 7, 7, 3, 7, 31, 3, 31, 7, 7, 7, 3 },
+    { 31, 31, 31, 4, 4, 7, 5, 7, 31, 31, 31, 4, 4, 7, 5, 7 },
+    { 1, 31, 5, 31, 7, 7, 7, 1, 1, 31, 5, 31, 7, 7, 7, 1 },
+    { 31, 31, 31, 4, 7, 7, 7, 5, 31, 31, 31, 4, 7, 7, 7, 5 },
+    { 31, 31, 31, 5, 1, 7, 5, 7, 31, 31, 31, 5, 1, 7, 5, 7 },
+    { 31, 31, 31, 5, 1, 7, 5, 7, 31, 31, 31, 5, 1, 7, 5, 7 },
+    { 1, 31, 4, 31, 1, 7, 4, 7, 1, 31, 4, 31, 1, 7, 4, 7 },
+    { 1, 31, 4, 31, 1, 7, 5, 7, 1, 31, 4, 31, 1, 7, 5, 7 },
+    { 1, 31, 3, 31, 1, 7, 5, 7, 1, 31, 3, 31, 1, 7, 5, 7 },
+    { 1, 5, 15, 3, 3, 7, 1, 7, 1, 5, 15, 3, 3, 7, 1, 7 },
+    { 1, 31, 5, 31, 1, 7, 3, 7, 1, 31, 5, 31, 1, 7, 3, 7 },
+    { 3, 5, 8, 5, 3, 7, 1, 7, 3, 5, 8, 5, 3, 7, 1, 7 },
+    { 2, 1, 13, 1, 2, 1, 0, 1, 4, 31, 0, 31, 0, 7, 4, 7 },
+    { 31, 31, 31, 1, 1, 7, 5, 7, 31, 31, 31, 1, 1, 7, 5, 7 },
+    { 31, 31, 31, 1, 1, 7, 4, 7, 31, 31, 31, 1, 1, 7, 4, 7 },
+    { 31, 31, 31, 3, 1, 7, 4, 7, 31, 31, 31, 3, 1, 7, 4, 7 },
+    { 1, 31, 4, 31, 1, 7, 5, 7, 1, 31, 4, 31, 1, 7, 5, 7 },
+    { 1, 31, 4, 31, 1, 7, 5, 7, 1, 31, 4, 31, 1, 7, 5, 7 },
+    { 1, 31, 5, 31, 1, 7, 5, 7, 1, 31, 5, 31, 1, 7, 5, 7 },
+    { 1, 31, 5, 31, 1, 7, 3, 7, 1, 31, 5, 31, 1, 7, 3, 7 },
+    { 1, 31, 5, 31, 1, 7, 3, 7, 1, 31, 5, 31, 1, 7, 3, 7 },
+    { 1, 31, 5, 31, 1, 7, 3, 7, 1, 31, 5, 31, 1, 7, 3, 7 },
+    { 31, 31, 31, 1, 7, 7, 7, 1, 31, 31, 31, 1, 7, 7, 7, 1 },
+    { 1, 31, 5, 31, 1, 7, 5, 7, 1, 31, 5, 31, 1, 7, 5, 7 },
+    { 1, 31, 5, 31, 1, 7, 5, 7, 1, 31, 5, 31, 1, 7, 5, 7 },
+    { 31, 31, 31, 1, 7, 7, 7, 1, 31, 31, 31, 1, 7, 7, 7, 1 },
+    { 1, 31, 5, 31, 7, 7, 7, 1, 6, 5, 3, 0, 7, 7, 7, 0 },
+    { 1, 31, 5, 31, 1, 7, 5, 7, 0, 31, 4, 31, 7, 7, 7, 0 },
+    { 31, 31, 31, 5, 1, 7, 5, 7, 31, 31, 31, 5, 1, 7, 5, 7 },
+    { 31, 31, 31, 5, 1, 7, 5, 7, 31, 31, 31, 5, 1, 7, 5, 7 },
+    { 1, 31, 5, 31, 1, 7, 5, 7, 1, 31, 5, 31, 1, 7, 5, 7 },
+    { 31, 31, 31, 5, 1, 7, 5, 7, 31, 31, 31, 5, 1, 7, 5, 7 },
+    { 31, 31, 31, 6, 7, 7, 7, 6, 31, 31, 31, 6, 7, 7, 7, 6 },
+    { 31, 31, 31, 4, 7, 7, 7, 4, 31, 31, 31, 4, 7, 7, 7, 4 },
+    { 1, 31, 4, 31, 1, 7, 4, 7, 1, 31, 4, 31, 1, 7, 4, 7 },
+    { 1, 31, 4, 31, 1, 7, 5, 7, 1, 31, 4, 31, 1, 7, 5, 7 },
+    { 1, 31, 5, 31, 4, 7, 5, 7, 1, 31, 5, 31, 4, 7, 5, 7 },
+    { 31, 31, 31, 4, 7, 7, 7, 4, 31, 31, 31, 4, 7, 7, 7, 4 },
+    { 1, 31, 4, 31, 1, 7, 5, 7, 1, 31, 4, 31, 1, 7, 5, 7 },
+    { 1, 31, 5, 31, 1, 7, 5, 7, 1, 31, 5, 31, 1, 7, 5, 7 },
+    { 31, 31, 31, 1, 1, 7, 5, 7, 31, 31, 31, 1, 1, 7, 5, 7 },
+    { 1, 31, 5, 31, 1, 7, 5, 7, 1, 31, 5, 31, 1, 7, 5, 7 },
+    { 1, 31, 4, 31, 1, 7, 5, 7, 1, 31, 4, 31, 1, 7, 5, 7 },
+    { 1, 31, 4, 31, 1, 7, 5, 7, 1, 31, 4, 31, 1, 7, 5, 7 },
+    { 1, 31, 4, 31, 1, 7, 5, 7, 1, 31, 4, 31, 1, 7, 5, 7 },
+    { 31, 31, 31, 1, 1, 7, 5, 7, 31, 31, 31, 1, 1, 7, 5, 7 },
+    { 31, 31, 31, 1, 7, 7, 7, 1, 31, 31, 31, 1, 7, 7, 7, 1 },
+    { 1, 31, 5, 31, 1, 7, 5, 7, 1, 31, 5, 31, 1, 7, 5, 7 },
+    { 31, 31, 31, 1, 1, 7, 4, 7, 31, 31, 31, 1, 1, 7, 4, 7 },
+    { 1, 31, 4, 31, 1, 7, 5, 7, 1, 31, 4, 31, 1, 7, 5, 7 },
+    { 1, 31, 4, 31, 7, 7, 7, 6, 1, 31, 4, 31, 7, 7, 7, 6 },
+    { 5, 31, 4, 31, 1, 7, 5, 7, 5, 31, 4, 31, 1, 7, 5, 7 },
+    { 1, 31, 4, 31, 7, 7, 7, 1, 1, 31, 4, 31, 7, 7, 7, 1 },
+    { 31, 31, 31, 4, 4, 7, 5, 7, 31, 31, 31, 4, 4, 7, 5, 7 },
+    { 31, 31, 31, 1, 1, 7, 3, 7, 31, 31, 31, 1, 1, 7, 3, 7 },
+    { 31, 31, 31, 1, 1, 7, 4, 7, 31, 31, 31, 1, 1, 7, 4, 7 },
+    { 1, 31, 5, 31, 1, 7, 4, 7, 1, 31, 5, 31, 1, 7, 4, 7 },
+    { 1, 31, 4, 31, 1, 7, 4, 7, 1, 31, 4, 31, 1, 7, 4, 7 },
+    { 31, 31, 31, 6, 7, 7, 7, 4, 31, 31, 31, 6, 7, 7, 7, 4 },
+    { 1, 31, 3, 31, 1, 7, 3, 7, 6, 1, 5, 0, 7, 7, 7, 0 },
+    { 3, 5, 1, 5, 1, 7, 5, 7, 3, 5, 1, 5, 1, 7, 5, 7 },
+    { 1, 3, 5, 3, 1, 7, 3, 7, 1, 3, 5, 3, 1, 7, 3, 7 },
+    { 31, 31, 31, 1, 7, 7, 7, 5, 31, 31, 31, 1, 7, 7, 7, 5 },
+    { 31, 31, 31, 5, 7, 7, 7, 5, 31, 31, 31, 5, 7, 7, 7, 5 },
+    { 31, 31, 31, 6, 1, 7, 5, 7, 31, 31, 31, 6, 1, 7, 5, 7 },
+    { 31, 31, 31, 6, 1, 7, 4, 7, 31, 31, 31, 6, 1, 7, 4, 7 },
+    { 31, 31, 31, 5, 1, 7, 4, 7, 31, 31, 31, 5, 1, 7, 4, 7 },
+    { 1, 31, 5, 31, 5, 7, 4, 7, 1, 31, 5, 31, 5, 7, 4, 7 },
+    { 31, 31, 31, 5, 5, 7, 4, 7, 31, 31, 31, 5, 5, 7, 4, 7 },
+    { 31, 31, 31, 5, 1, 7, 5, 7, 31, 31, 31, 5, 1, 7, 5, 7 },
+    { 31, 31, 31, 5, 1, 7, 5, 7, 31, 31, 31, 0, 0, 7, 4, 7 },
+};
 
 /* Sets the colour combiner to mode combiner unless it is already current. */
 Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync) {
     s32 key;
-    u8 *mode;
+    const u8 *mode;
 
     key = func_15143044(combiner, 0);
     if (key != D_800DD1BE) {
@@ -1692,6 +1887,10 @@ Vtx *func_15140190(DefParticleHead *particle, s16 viewport) {
     }
     return result;
 }
+
+/* The object list types of the glow sprites (game_16DC80) and of the effect objects, for func_15169260. */
+const s32 D_800A5168[4] = { 0x1C, 0x49, 0x56, 0x62 };
+static const s32 D_800A5178[3] = { 0x1B, 0x61, 0x4A };
 
 void func_151403A8(s32 arg0, u8 arg1) {
     func_15169260(D_800A5168, 4, arg0, arg1);

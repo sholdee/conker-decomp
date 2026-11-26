@@ -32,7 +32,7 @@ void func_1512D390(Camera *camera) {
             camera->orbitDir = -1;
         }
         orbit->counter++;
-        orbit->orbitSpeed += (f32)camera->orbitDir * 0.5f * D_800BE9A4;
+        orbit->orbitSpeed += camera->orbitDir * 0.5f * D_800BE9A4;
         speed = orbit->orbitSpeed;
         if (speed < -10.0f) {
             orbit->orbitSpeed = -10.0f;

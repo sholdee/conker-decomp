@@ -3,7 +3,7 @@
 #include "structs.h"
 
 /* This file's .bss (0x800D1580-0x800D188F), defined in address order before the headers declare it
-   (see game_79F10.c). */
+   (see game_77BE0.c). */
 s32 D_800D1580; // parameter of the animation event being run (D_800D1874: the same bits as an f32)
 ActorAnim *D_800D1588[187]; // per model id: animation table, after its AnimHeader (see func_1503D660)
 static f32 D_800D1874;

@@ -114,7 +114,7 @@ typedef struct {
 } FlashEffect;
 
 /* Full-screen tint effect: redraws a viewport's framebuffer modulated by a pulsing prim colour. */
-struct Obj151A4FD0 {
+struct ScreenTint {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 timer;       /* frames left; 0 = unlimited */
     /* 0x14 */ u8 type;         /* index into D_8008F900 */
@@ -163,7 +163,7 @@ extern u8 D_800D9900;
 void func_150D2374(StrobeSpawner *spawner);
 
 /* game_126F60.c */
-void func_150F9AB0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f32 roll);
+Gfx *func_150F9AB0(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
 /* game_131620.c */
 void func_15104170(s32 mode, Actor *owner, Actor *source);
@@ -172,6 +172,22 @@ Gfx *func_1510448C(Gfx *gfx, FadeEffect *effect, s16 view);
 u8 func_151044F4(void);
 
 /* game_1AC2F0.c */
+extern s8 D_800DDDAC[4];
+extern s32 D_800DDDB0[4];
+extern f32 D_800DDDC8[4];
+extern f32 D_800DDDD8[4];
+extern u16 D_800DDE08;
+extern u16 D_800DDE10[4];
+extern f32 *D_800DDE18;
+extern u8 D_800DDE1C[4];
+extern u8 D_800DDE20[4];
+extern s32 D_800DDE28[4];
+extern u8 D_800DDE38;
+extern u8 D_800DDE3C[4];
+extern u8 D_800DDE40;
+extern f32 *D_800DDE44;
+extern f32 *D_800DDE48;
+extern f32 *D_800DDE4C;
 void func_1517EE40(s32 r, s32 g, s32 b, s32 duration, s8 toColor, s32 view);
 s32 func_1517EF00(s32 view);
 s32 func_1517EFAC(s32 view);
@@ -202,12 +218,12 @@ void func_15182748(FlashEffect *effect);
 Gfx *func_15182768(Gfx *gfx, FlashEffect *effect, s16 view);
 
 /* game_1D2480.c */
-struct Obj151A4FD0 *func_151A4FD0(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19,
-                                  s32 extraSize);
-void func_151A5070(struct Obj151A4FD0 *effect);
-void func_151A5130(void *arg0, struct Obj151A4FD0 *effect, s16 arg2);
-Gfx *func_151A5170(Gfx *gfx, struct Obj151A4FD0 *effect, s32 arg2);
-void func_151A55D4(struct Obj151A4FD0 *effect, void *arg1, u8 arg2);
+/* returns the struct ScreenTint, followed by extraSize bytes of the caller's data */
+void *func_151A4FD0(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19, s32 extraSize);
+void func_151A5070(struct ScreenTint *effect);
+void func_151A5130(void *arg0, struct ScreenTint *effect, s16 arg2);
+Gfx *func_151A5170(Gfx *gfx, struct ScreenTint *effect, s32 arg2);
+void func_151A55D4(struct ScreenTint *effect, void *arg1, u8 arg2);
 void func_151A561C(s32 arg0, u8 arg1);
 
 /* game_1FFB70.c */

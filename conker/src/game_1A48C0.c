@@ -1,4 +1,10 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/prop.h describes it. */
+WaveDeformer *D_800DD410[2];
+u8 D_800DD418;
+
 #include "functions.h"
 #include "variables.h"
 

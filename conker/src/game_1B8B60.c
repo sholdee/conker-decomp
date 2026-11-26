@@ -49,9 +49,9 @@ void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
         yaw = func_150ADA20() & 0xFF;
         pitch = -0x10 - (func_150ADA20() % 32U);
         speed = (func_150ADA68() * 10.0f) + 5.0f;
-        sinYaw = func_151423D8((u8)(yaw - 0x40));
+        sinYaw = func_151423D8(yaw - 0x40);
         cosYaw = func_151423D8(yaw);
-        sinPitch = func_151423D8((u8)(pitch - 0x40));
+        sinPitch = func_151423D8(pitch - 0x40);
         cosPitch = func_151423D8(pitch);
         spread = func_150ADA68() * 20.0f;
         sp.pos.x = (spread * sinYaw) + arg0;

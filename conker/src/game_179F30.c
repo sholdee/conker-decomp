@@ -1,29 +1,38 @@
 #include <ultra64.h>
-// functions.h declares these two with other signatures; this file uses its own prototypes
 #include "functions.h"
 #include "variables.h"
 
-/* Spawn-callback tables (see func_1514D15C). */
-extern void (*D_8008AA70[])(Actor *);
-extern void (*D_8008AACC[])(Actor *);
-extern u8 *D_8008AB90[];
-extern u8 D_800A5EC0[];
-extern u8 D_800A5ED8[];
+/* Spawn callbacks by slot (see func_1514D15C); slot 0 is empty. */
+static void (*D_8008AA70[])(Actor *) = {
+    NULL,           func_1514E00C, func_1514E194, func_1514E31C, func_1514E5B8, func_1514E668,
+    func_1514E508,  func_1514E718, func_1514E7C8, func_1514E824, func_1514D9F4, func_1514D96C,
+    func_1514D64C,  func_1514DB58, func_1514DE50, func_1514DFD0, func_1514D564, func_1514DA38,
+    func_1514DAA4,  func_1514DB18, func_1514DB64, func_1514DE88, func_1514DB98,
+};
 
-/* Attachment type tables. */
-extern void (*D_8008AB58[])(s32);
-extern s32 (*D_8008AB64[])(s32, s32, s32);
+/* Spawn callbacks by object id; entry 0 runs for every object first. */
+static void (*D_8008AACC[])(Actor *) = {
+    func_1514EE70, func_1514DD2C, func_1514DD4C, func_1514DD6C, func_1514DD8C, func_1514EECC,
+    func_1514F110, func_150F0938, func_1514DDAC, func_1514DDCC, func_1514DDEC, func_1514DE38,
+    func_1514DE44, func_1514F308, func_1514DE0C, func_1514DC84, func_1514F3CC, func_1514DE2C,
+    func_1514DC98, func_1514DC38, func_1514DBB8, func_1514F44C, func_15010538, func_1514F4A8,
+    func_1514F4D8, func_1514F508, func_1514F568, func_1514F590, func_150B0C34, func_1514F5CC,
+    func_150F2C8C, func_1501214C, func_1514DC5C, func_1514F538, func_1514D978,
+};
+
+/* Attachment type handlers (AttachmentType.destroyHandler, .messageHandler). Declared without a
+   prototype: the handlers take the attachment's handle as what it is. */
+static void (*D_8008AB58[])() = { func_1514E830, func_1514E850, func_1514E87C };
+static s32 (*D_8008AB64[])() = {
+    func_1514E89C, func_1514E920, func_1514E9DC, func_1514E9FC,
+    func_1514EA1C, func_1514EB6C, func_1514F130, func_1514EB8C,
+};
 
 /* Emitter offsets. */
-const Vec3f D_800A58A0 = { 0.0f, 75.0f, 96.0f };
-const Vec3f D_800A58AC = { 0.0f, 66.0f, 50.0f };
-const Vec3f D_800A58B8 = { 0.0f, 66.0f, 274.0f };
-const Vec3f D_800A58C4 = { 0.0f, 31.0f, 73.0f };
-
-/* Elsewhere. */
-
-
-
+static const Vec3f D_800A58A0 = { 0.0f, 75.0f, 96.0f };
+static const Vec3f D_800A58AC = { 0.0f, 66.0f, 50.0f };
+static const Vec3f D_800A58B8 = { 0.0f, 66.0f, 274.0f };
+static const Vec3f D_800A58C4 = { 0.0f, 31.0f, 73.0f };
 
 /**
  * Finds which spawn-callback slots apply to `obj`: one chosen by its object id (*idSlot, flag 4),
@@ -455,7 +464,7 @@ s32 func_1514D310(Actor *owner) {
     while (node != NULL) {
         next = node->next;
         if (D_8008ABE8[node->type]->destroyHandler != -1) {
-            D_8008AB58[D_8008ABE8[node->type]->destroyHandler]((s32)node->handle);
+            D_8008AB58[D_8008ABE8[node->type]->destroyHandler](node->handle);
         }
         func_1516972C(&node->header);
         node = next;
@@ -475,7 +484,7 @@ s32 func_1514D3B0(Actor *owner, s16 type, s32 msg, s32 arg) {
     for (node = owner->attachments; node != NULL; node = node->next) {
         if (type == node->type || func_1514D4B8(D_8008ABE8[type]->firstChild, node->type)) {
             if (D_8008ABE8[node->type]->messageHandler != -1) {
-                if (D_8008AB64[D_8008ABE8[node->type]->messageHandler]((s32)node->handle, msg, arg)) {
+                if (D_8008AB64[D_8008ABE8[node->type]->messageHandler](node->handle, msg, arg)) {
                     result = 1;
                 } else {
                     result = 0;
@@ -1066,18 +1075,17 @@ void func_1514E7C8(Actor *obj) {
     func_1514EC1C(handle, obj, 0xF);
 }
 
-/* Attachment destroy handlers (D_8008AB58 entries): release an attachment's handle. */
-
 /* Emitter offsets of func_1514EECC and func_1514F194. */
-const Vec3f D_800A5934 = { 0.0f, 90.0f, 0.0f };
-const Vec3f D_800A5940 = { 0.0f, 70.0f, 0.0f };
-const Vec3f D_800A594C = { 0.0f, 120.0f, 0.0f };
-const Vec3f D_800A5958 = { 0.0f, 112.0f, 151.0f };
-const Vec3f D_800A5964 = { 0.0f, 74.0f, -161.0f };
+static const Vec3f D_800A5934 = { 0.0f, 90.0f, 0.0f };
+static const Vec3f D_800A5940 = { 0.0f, 70.0f, 0.0f };
+static const Vec3f D_800A594C = { 0.0f, 120.0f, 0.0f };
+static const Vec3f D_800A5958 = { 0.0f, 112.0f, 151.0f };
+static const Vec3f D_800A5964 = { 0.0f, 74.0f, -161.0f };
 
-void func_1514E824(s32 handle) {
+void func_1514E824(Actor *obj) {
 }
 
+/* Attachment destroy handlers (D_8008AB58 entries): release an attachment's handle. */
 void func_1514E830(EffectHeader *handle) {
     func_1516972C(handle);
 }
@@ -1163,12 +1171,12 @@ s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
     return 1;
 }
 
-void func_1514E9DC(s32 handle, s32 msg, s32 arg) {
-    func_1514E920(handle, msg, arg);
+s32 func_1514E9DC(s32 handle, s32 msg, s32 arg) {
+    return func_1514E920(handle, msg, arg);
 }
 
-void func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg) {
-    func_1514E89C(target, msg, arg);
+s32 func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg) {
+    return func_1514E89C(target, msg, arg);
 }
 
 /** Messages 3..12 switch the emitter between table 2 and tables 3, 5 and 6. */
@@ -1222,8 +1230,8 @@ s32 func_1514EA1C(ActorEmitterProcess *target, s32 msg, s32 arg) {
     return 1;
 }
 
-void func_1514EB6C(ToggleTarget *target, s32 msg, s32 arg) {
-    func_1514E89C(target, msg, arg);
+s32 func_1514EB6C(ToggleTarget *target, s32 msg, s32 arg) {
+    return func_1514E89C(target, msg, arg);
 }
 
 s32 func_1514EB8C(s32 handle, s32 msg, s32 arg) {
@@ -1265,7 +1273,7 @@ Attachment *func_1514EC1C(void *handle, Actor *owner, s16 type) {
                 node->next->prev = node;
             }
         } else if (D_8008ABE8[type]->destroyHandler != -1) {
-            D_8008AB58[D_8008ABE8[type]->destroyHandler]((s32)handle);
+            D_8008AB58[D_8008ABE8[type]->destroyHandler](handle);
         } else {
             func_1516972C(handle);
         }

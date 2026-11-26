@@ -2,6 +2,27 @@
 #include "functions.h"
 #include "variables.h"
 
+/* The three quads of a puff, drawn on each quad's matrix (func_15166D68). */
+static Vtx D_8008B3E0[] = {
+    {{{ -400, -34, -40 }, 0, { 0, 0 }, { 0, 0, 0, 0 }}},
+    {{{ -400, -34,  40 }, 0, { 0, 0 }, { 0, 0, 0, 0 }}},
+    {{{ -400,  34,   0 }, 0, { 0, 0 }, { 0, 0, 0, 0 }}},
+    {{{    0, -34, -40 }, 0, { 0, 0 }, { 0, 0, 0, 0 }}},
+    {{{    0, -34,  40 }, 0, { 0, 0 }, { 0, 0, 0, 0 }}},
+    {{{    0,  34,   0 }, 0, { 0, 0 }, { 0, 0, 0, 0 }}},
+};
+
+/* Render setup of object type 0xD (its entry in the object type table D_8008B4A8). */
+Gfx D_8008B440[] = {
+    gsSPSetGeometryMode(G_CULL_BACK),
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
+    gsDPSetBlendColor(0, 0, 0, 1),
+    gsDPSetOtherMode(0x082CAF, 0x00504B50),
+    gsSPEndDisplayList(),
+};
+
 /* Spawns a puff at (x, y, z); its quads are yawed 90-153 degrees apart from a random start. */
 void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
     PuffQuadEffect *obj;
@@ -84,8 +105,6 @@ void func_15166B50(void *self) {
     }
 }
 
-extern Vtx D_8008B3E0[];
-
 /* Draws the three quads; their texture scrolls in S as the timer runs down. */
 Gfx *func_15166D68(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
     s32 texS;
@@ -109,7 +128,6 @@ Gfx *func_15166D68(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
     return gfx;
 }
 
-extern TextureDesc D_8009054C;
 
 /* Loads texture D_8009054C, using the frame and mode already in D_800DD220/D_800DD224. */
 Gfx *func_15166F6C(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {

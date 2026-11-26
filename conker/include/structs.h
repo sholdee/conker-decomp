@@ -73,7 +73,8 @@ typedef struct Vec3i {
 /* Actor effect D_8008A0B4[handler] (game_16EE20.c): its handler runs once, or every frame while it is
  * attached to the actor as a timed effect of `duration` frames. */
 typedef struct ActorEffectDef {
-    /* 0x0 */ void (*handler)(struct Actor *actor, s32 arg1, s32 timer);
+    /* 0x0 */ void (*handler)(); /* (actor, side, timer); declared without a prototype: the game_173D40.c
+                                   handlers take the actor as an s32 */
     /* 0x4 */ s32 duration;  // > 0: attached as a timed effect
 } ActorEffectDef;
 
@@ -316,20 +317,28 @@ typedef struct ObjPartsState {
     /* 0x0F */ u8 state;         /* PARTS_STATE_* */
 } ObjPartsState;
 
-/* Object type descriptor, D_8008B4A8[type] (game_1944C0). */
+/*
+ * Object type descriptor, D_8008B4A8[type] (game_1944C0). Each type's handlers take that type's own object
+ * struct, so the one-argument handlers (unk0, unk4, unkC, destroy, free: the object) are declared without a
+ * prototype. draw, drawBegin, drawEnd and handleEvent keep theirs: their calls pass an s16 view or a u8
+ * event type, and the calls only match with those parameter types in scope.
+ * So IDO warns (709) at the entries of those four fields whose handler takes a more specific object type
+ * than EffectHeader *. This is expected: it is the original form (IDO accepts it, and the ROM matches), and
+ * a cast in each handler only hides it. tools/warncheck.py keeps the total number of warnings from rising.
+ */
 typedef struct ObjType {
-    /* 0x00 */ void (*unk0)(EffectHeader *);
-    /* 0x04 */ void (*unk4)(EffectHeader *);
-    /* 0x08 */ Gfx *(*draw)(Gfx *gfx, EffectHeader *obj, s16 arg2);
-    /* 0x0C */ void (*unkC)(EffectHeader *);
+    /* 0x00 */ void (*unk0)();
+    /* 0x04 */ void (*unk4)();
+    /* 0x08 */ Gfx *(*draw)(Gfx *gfx, EffectHeader *obj, s16 view);
+    /* 0x0C */ void (*unkC)();
     /* 0x10 */ Gfx *drawBeginDL;
-    /* 0x14 */ Gfx *(*drawBegin)(Gfx *gfx, s32 type, s32 list, s16 arg3);
+    /* 0x14 */ Gfx *(*drawBegin)(Gfx *gfx, s32 type, s32 list, s16 view);
     /* 0x18 */ void (*unk18)(void);
     /* 0x1C */ void (*handleEvent)(EffectHeader *obj, s32 event, u8 eventType);
-    /* 0x20 */ Gfx *(*drawEnd)(Gfx *gfx, s32 type, s16 arg2);
+    /* 0x20 */ Gfx *(*drawEnd)(Gfx *gfx, s32 type, s16 view);
     /* 0x24 */ Gfx *drawEndDL;
-    /* 0x28 */ void (*destroy)(EffectHeader *);
-    /* 0x2C */ void (*free)(EffectHeader *);
+    /* 0x28 */ void (*destroy)();
+    /* 0x2C */ void (*free)();
     /* 0x30 */ s8 drawMode;
     /* 0x31 */ u8 pad31[3];
 } ObjType; // size 0x34
@@ -483,7 +492,7 @@ typedef struct RayHit {
  * layout equals US. Field names in Rare's spelling come from that viewer. */
 typedef struct {
     /* 0x000 */ f32 actual_speed;
-    /* 0x004 */ s32 duck_tilt;       // nonzero suppresses the walk lean (game_79F10.c)
+    /* 0x004 */ s32 duck_tilt;       // nonzero suppresses the walk lean (game_77BE0.c)
     /* 0x008 */ s16 pissed_up;
     /* 0x00A */ u8  pissed_amount;   // not accessed by US code
     /* 0x00B */ u8  pissed_cycle;
@@ -1411,11 +1420,6 @@ struct WorldObject {
     /* 0x9C */ s32 unk9C;
 }; // size 0xA0
 
-typedef struct {
-    u8 pad[0x1b];
-    u8 unk1B;
-} struct133;
-
 /* Camera command playback state (Camera.cmdState, at 0x6CC). */
 typedef struct CamCmdState {
     /* 0x00 */ s16 unk0;
@@ -2236,7 +2240,7 @@ typedef struct WaterStage {
 
 /* One loaded particle model, shared by every live particle that uses it (D_800DC468 counts them). */
 typedef struct ParticleNode {
-    /* 0x0 */ s32 *resource;
+    /* 0x0 */ Gfx **resource; // the model resource; its first word points to the display list
     /* 0x4 */ struct ParticleNode *next;
     /* 0x8 */ struct ParticleNode *prev;
     /* 0xC */ u16 model;
@@ -2269,43 +2273,54 @@ typedef struct RopeSpawn {
 /* The streaming music player's voice (D_800E0D80; set up by game_43620, run by
  * libultra/audio/game_21FC90). It carries its own copy of the libaudio envmixer parameter block
  * at the offsets N_PVoice uses for em_state onwards (pan at 0x0C, volume at 0x0E, cvolL/cvolR,
- * the two rate pairs, the two targets). The fields outside that block are Rare's. Several fields
- * are also addressed through their own symbols (D_800E0D84..D_800E0DFC) in game_21FC90. */
+ * the two rate pairs, the two targets), and from 0x30 a low-pass filter laid out as LowPass is up
+ * to its first state pointer (fc, fgain, the coefficient vector, first, fstate[0]). The fields
+ * outside those blocks are Rare's: the decoder, the stream's ROM window and read callback, the
+ * decoded buffers and the player state. */
 typedef struct StreamVoice {
-    /* 0x00 */ s32  romAddr;        // ROM address of the stream (read at romAddr + D_800E0DE4)
-    /* 0x04 */ u8   pad4[0x4];
+    /* 0x00 */ s32  romAddr;        // ROM address of the stream (read at romAddr + streamPos)
+    /* 0x04 */ struct Mp3Decoder *decoder;
     /* 0x08 */ void *unk8;          // 0x50-byte heap block
     /* 0x0C */ s16  em_pan;
     /* 0x0E */ s16  em_volume;
     /* 0x10 */ s16  em_cvolL;
     /* 0x12 */ s16  em_cvolR;
     /* 0x14 */ s16  unk14;
-    /* 0x16 */ u16  unk16;
+    /* 0x16 */ s16  unk16;
     /* 0x18 */ u16  em_lratl;
     /* 0x1A */ s16  em_lratm;
     /* 0x1C */ s16  em_ltgt;
     /* 0x1E */ u16  em_rratl;
     /* 0x20 */ s16  em_rratm;
     /* 0x22 */ s16  em_rtgt;
-    /* 0x24 */ u16  unk24;
+    /* 0x24 */ s16  unk24;          // nonzero: program the envmixer on the next frame
     /* 0x26 */ u8   pad26[0x2];
     /* 0x28 */ s32  em_delta;
     /* 0x2C */ s32  em_segEnd;
-    /* 0x30 */ u16  unk30;          // start of the lowpass state passed to func_1001CF38
-    /* 0x32 */ u16  unk32;
+    /* 0x30 */ s16  unk30;          // the low-pass filter (passed to func_1001CF38 as a LowPass): fc
+    /* 0x32 */ s16  unk32;          // fgain; the filter runs while it is > 0
     /* 0x34 */ u8   pad34[0x4];
-    /* 0x38 */ u8   unk38[0x24];    // DMEM-bound state block (its physical address goes in an acmd)
-    /* 0x5C */ void *unk5C;         // 8-byte heap block
-    /* 0x60 */ u8   pad60[0x14];
-    /* 0x74 */ void *unk74;         // 0x440-byte heap block, cleared on restart
-    /* 0x78 */ u8   pad78[0xC];
-    /* 0x84 */ s32  unk84;
+    /* 0x38 */ s16  unk38[16];      // the coefficient vector (its physical address goes in an acmd)
+    /* 0x58 */ s32  unk58;          // first: 2 after fc/fgain change, cleared once loaded
+    /* 0x5C */ void *unk5C;         // fstate: 8-byte heap block
+    /* 0x60 */ s32  streamSize;     // the stream's length in bytes
+    /* 0x64 */ s32  streamPos;      // the next byte to read
+    /* 0x68 */ u8  *pcm;            // the decoded buffers of the current block
+    /* 0x6C */ s32  pcmCount;       // samples in the current block
+    /* 0x70 */ s32  pcmPos;         // samples of the current block already queued
+    /* 0x74 */ void *unk74[1];      // 0x440-byte heap block, cleared on restart; the DMA source of
+                                    // channel i is unk74[i] (for a second channel: the word unk78)
+    /* 0x78 */ s32  unk78;          // the DMEM state slot, stepped by 0x24 per block
+    /* 0x7C */ s32 (*read)(s32 handle, void *dst, s32 size, s32 seekPos); // Mp3ReadFn
+    /* 0x80 */ void (*tagCallback)(s32, void *, s32); // gets each MP3 frame's copyright tag
+    /* 0x84 */ s32  unk84;          // player state: 1 running, 2/6 paused, 3 stopping, 4/5 opening, 7 resuming
     /* 0x88 */ s32  unk88;          // target volume
     /* 0x8C */ u8   pad8C[0x4];
-    /* 0x90 */ u32  unk90;
-    /* 0x94 */ s16  unk94;          // target pan
-    /* 0x96 */ s16  unk96;
-    /* 0x98 */ u8   pad98[0x2];
+    /* 0x90 */ u32  unk90;          // ramp length in samples
+    /* 0x94 */ s16  unk94;          // pan, slewed towards unk96
+    /* 0x96 */ s16  unk96;          // target pan
+    /* 0x98 */ u8   unk98;          // frames to wait before opening or resuming
+    /* 0x99 */ u8   unk99;          // nonzero: the stream is stereo
     /* 0x9A */ u8   unk9A;
     /* 0x9B */ u8   pad9B[0x5];
 } StreamVoice; // size 0xA0
@@ -3040,7 +3055,11 @@ typedef struct ModeSettings {
     /* 0x9 */ u8 unk9; /* -> D_800E0BE0[6] */
 } ModeSettings; /* size 0xA */
 
-/* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format. */
+/* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format.
+ * The record of a TextureDesc (pad4 is frameCount 1 and pad5), declared for the HUD code: that code stores the
+ * addresses of link-time symbols here (&D_891 compiles to a lui/addiu pair with relocations, not to a constant),
+ * while the texture code reads TextureDesc.addr as an integer (s32 id tables, compares with 0x10000000). One
+ * type would need casts on one side, so both declarations stay. */
 typedef struct {
     /* 0x00 */ void *texId;
     /* 0x04 */ u16 pad4;
@@ -3246,7 +3265,7 @@ typedef struct {
 
 /* Message table entry (D_800DD254 / D_800DD258). */
 typedef struct {
-    /* 0x0 */ u8 *data;
+    /* 0x0 */ void *data; /* a TextBoxConfig (indexed by message) or the text of a page (indexed by config->text) */
     /* 0x4 */ s32 unk4;
 } MessageEntry;
 

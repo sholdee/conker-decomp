@@ -9,7 +9,6 @@
  * that these files define, grouped by file in address order:
  *   game_228CF0.c (data only; linked between game_5D2C0 and game_61490)
  *   game_61490.c
- *   game_61950.c
  *   game_61D10.c
  *   game_637C0.c
  *   game_68C70.c
@@ -35,8 +34,6 @@ GameCommand *func_150341BC(GameCommand *cmd, s32 index);
 GameCommand *func_15034340(GameCommand *cmd, s32 index);
 GameCommand *func_150343B0(GameCommand *cmd, s32 index);
 GameCommand *func_15034420(GameCommand *cmd, s32 index);
-
-/* game_61950.c */
 GameCommand *func_150344A0(GameCommand *cmd, s32 index);
 void func_1503453C(s32 index);
 void func_150345E4(s32 index);

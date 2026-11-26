@@ -53,6 +53,7 @@
  *   game_1308E0.c
  *   game_1319D0.c
  *   game_135490.c
+ *   game_22DF30.c (data only, linked after game_14CE30)
  *   game_14D110.c
  *   game_14EE80.c
  *   game_14F0B0.c
@@ -306,6 +307,12 @@ void func_15104520(Camera *camera);
 /* game_135490.c */
 void func_15107FE0(Camera *arg0);
 
+/* game_22DF30.c (data only, linked after game_14CE30) */
+extern Camera *camera_global_Cameras; // original name (Oct 2000 debugger); one Camera per player
+extern u8 D_800DBFF4[4]; // per-player camera hold timers; *(s32 *)D_800DBFF4 tests all four at once
+extern Mtx D_80089470; // the identity, loaded as a fixed modelview matrix
+extern s32 D_800894B0; // camera frames
+
 /* game_14D110.c */
 void func_1511FC60(Camera *camera);
 void func_15120158(Camera *camera);
@@ -382,17 +389,25 @@ void func_15128680(Camera *camera);
 void func_1512868C(Camera *camera);
 void func_15128774(Camera *camera, Actor *obj);
 extern const f32 D_800A34B0[4][2];
+extern f32 D_800DC004; // camera transition height (see func_15128030)
 
 /* game_155C90.c */
 void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8);
 
 /* game_156160.c */
 void func_15128CB0(Camera *cam);
+extern s32 D_80089520;
+extern s32 D_80089524[4];
+extern s32 D_80089534[4];
+extern Camera *D_800DC010;
 
 /* game_156D70.c */
 /* (Camera *cam, s32 arg1); declared without a prototype: game_32740.c also passes the actor */
 void func_151298C0();
 void func_15129934(Camera *cam);
+extern s16 D_80089550;
+extern CamPose *D_800DC020;
+extern CamPose *D_800DC024;
 
 /* game_1570E0.c */
 void func_15129C30(Camera *cam);
@@ -414,6 +429,7 @@ void func_1512C150(Camera *arg0);
 void func_1512C200(Camera *camera);
 void func_1512C20C(Camera *arg0);
 s32 func_1512C47C(s32 arg0);
+extern f32 D_800895B0;
 
 /* game_159940.c */
 void func_1512C490(Camera *camera);
@@ -422,6 +438,7 @@ void func_1512D238(void);
 void func_1512D2E4(Camera *camera, s32 index);
 void func_1512D2F8(Camera *camera);
 void func_1512D368(Camera *camera);
+extern Mtx *D_800DC2A0[2];
 
 /* game/done/game_15A830.c */
 void func_1512D380(Camera *camera);
@@ -434,11 +451,13 @@ void func_1512D560(Camera *camera, s32 type, void *arg);
 CamMsg *func_1512D604(); /* (Camera *camera): the definition has a second, scratch parameter */
 void func_1512D66C(Camera *camera);
 s32 func_1512D6B0(Camera *camera);
+extern CamMsgQueue *D_800DC2B0;
 
 /* game_15ABA0.c */
 void func_1512D6F0(Camera *view);
 void func_1512D748(Camera *view, s32 presetIndex, s32 mode);
 void func_1512D980(Camera *view);
+extern ViewEnvelope D_800DC2C0[4];
 
 /* game_15B200.c */
 void func_1512DD50(Camera *camera);
@@ -452,12 +471,14 @@ void func_1512E4B0(Camera *camera);
 
 /* game_15BAA0.c */
 Gfx *func_1512E5F0(Gfx *gfx, Camera *camera);
+extern ZDecode D_80089630[8];
 
 /* game_15BD90.c */
 void func_1512E8E0(Camera *camera);
 void func_1512FE00(Camera *camera, s32 action);
 
 /* game_191C30.c */
+extern CamOffset D_800DCDE0[4]; // per-player camera offset (position, rotation), summed from the wobbles
 CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3);
 void func_15164888(CamWobble *wobble);
 void func_1516489C(CamWobble *wobble);

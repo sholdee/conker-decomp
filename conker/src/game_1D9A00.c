@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
-// game_1DC720.c were compiled with a different view of it.
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c and game_161520.c
+// were compiled with a different view of it.
 SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
@@ -24,28 +24,6 @@ s32 func_151AC550(SampleTrail *state, f32 x, f32 y, f32 z, f32 height, Collision
     return 1;
 }
 
-/* Randomized particle parameters: each value is base + random * range. */
-typedef struct {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ s16 pitch;
-    /* 0x06 */ u16 pitchRange;
-    /* 0x08 */ f32 speed;
-    /* 0x0C */ f32 speedRange;
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ u16 unk10Range;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk14Range;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk18Range;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk20Range;
-    /* 0x28 */ f32 unk28Chance;
-} EmitterConfig; // size 0x2C
-
-extern s8 D_800A9023[]; // byte 3 of 5-byte entries
-extern EmitterConfig D_800A9180[];
-
 /*
  * Emitter callback (see D_8008AA00): spawns one func_151D9014 particle at (x, y, z) moving
  * along `yaw` with a random pitch and speed, using the randomized parameters of `kind`.
@@ -55,26 +33,26 @@ s32 func_151AC61C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
                   EmitterOwner *owner, u8 arg14) {
     EmitterOwner *emitter; // matching: the owner copy, scale and entry each reserve the frame slots IDO used
     f32 scale;
-    s8 *entry;
+    const s8 *entry;
     Vec3f position;
     Vec3f velocity;
-    EmitterConfig *config;
+    const EmitterConfig *config;
 
     emitter = owner;
     scale = 1.0f;
-    entry = &D_800A9023[kind * 5];
+    entry = &D_800A9020[kind].emitter;
     config = &D_800A9180[*entry];
     position.x = x;
     position.y = y;
     position.z = z;
-    func_15143794((s16)yaw, (s16)((func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitch),
+    func_15143794(yaw, (func_150ADA20() % (config->pitchRange + 1)) + config->pitch,
                   func_150ADA68() * config->speedRange + config->speed, &velocity);
     func_151D9014(&position, &velocity, emitter->unk8,
                   func_150ADA68() * config->unk20Range + config->unk20,
-                  (func_150ADA20() % (u32)(config->unk10Range + 1)) + config->unk10,
-                  (func_150ADA20() % (u32)(config->unk14Range + 1)) + config->unk14,
+                  (func_150ADA20() % (config->unk10Range + 1)) + config->unk10,
+                  (func_150ADA20() % (config->unk14Range + 1)) + config->unk14,
                   func_150ADA68() * config->unk18Range + config->unk18,
-                  func_150ADA68() < config->unk28Chance, scale, scale, 1, emitter->unk0, 1, 0, arg14,
+                  func_150ADA68() < config->unk28Chance, scale, scale, 1, emitter->ground, 1, 0, arg14,
                   emitter->unk4);
     return 1;
 }

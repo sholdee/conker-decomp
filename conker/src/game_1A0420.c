@@ -1,4 +1,8 @@
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/flare.h describes it. */
+u8 D_800DD2D0;
+
 #include "functions.h"
 #include "variables.h"
 

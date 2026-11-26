@@ -2,8 +2,28 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 (*D_8008B078[])(TexturedQuad *);
-extern s32 (*D_8008B07C[])(TexturedQuad *);
+/* not referenced: four s16 channel masks per row (all on, each channel off in turn, all off) */
+const s16 D_800A6470[6][4] = {
+    { 255, 255, 255, 255 }, { 0, 255, 255, 255 }, { 255, 0, 255, 255 },
+    { 255, 255, 0, 255 },   { 255, 255, 255, 0 }, { 0, 0, 0, 0 },
+};
+
+/* Render setup and reset display lists of the textured quads; the quad type's entry in the object
+ * type table D_8008B4D4 points to them. */
+Gfx D_8008B050[] = {
+    gsDPPipeSync(),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsSPEndDisplayList(),
+};
+Gfx D_8008B068[] = {
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPEndDisplayList(),
+};
+
+/* Update and destroy callbacks of a quad (TexturedQuad.updateFunc, destroyFunc); none is defined. */
+static s32 (*D_8008B078[])(TexturedQuad *) = { NULL };
+static s32 (*D_8008B07C[])(TexturedQuad *) = { NULL };
+
 extern RenderModePair D_800A4AC8[];
 
 void *memcpy(void *, const void *, u32);

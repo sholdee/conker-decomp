@@ -7,8 +7,8 @@ typedef struct PropLink {
     /* 0x04 */ s32 group;
 } PropLink;
 
-extern s32 D_800DBFC0;          /* number of used D_800DBFC8 entries */
-extern PropLink D_800DBFC8[4];
+static s32 D_800DBFC0; /* number of used D_800DBFC8 entries */
+static PropLink D_800DBFC8[4];
 
 /* Clears the linked-prop table. */
 void func_1511F980(void) {

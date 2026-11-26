@@ -31,6 +31,7 @@ typedef struct ShadowVtx {
 } ShadowVtx; /* size 0x14 */
 
 /* game_13AE20.c */
+extern Gfx D_800890C0[]; /* render setup (object type table D_8008B4A8) */
 Shadow *func_1510D970(s32 ownerType, void *owner, s32 texture, s32 createFlags, s32 flags);
 void func_1510DA84(Shadow *shadow);
 Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view);
@@ -38,6 +39,8 @@ s32 func_1510E388(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ);
 Gfx *func_1510E634(Gfx *gfx, s32 arg1, s32 arg2);
 
 /* game_1B1600.c */
+extern u8 D_800DF0E0;
+extern u8 D_800DF0E1; /* nonzero: halve the light distance term of the shadow near plane */
 s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ);
 f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 minDist);
 s32 func_15184DF0(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *halfZ);

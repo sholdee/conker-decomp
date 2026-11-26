@@ -32,7 +32,30 @@ struct FadeBurstEffect {
     s16 duration;        /* 0xAA */
 }; /* size 0xB0 */
 
-extern Vtx D_8008D538[];
+/* The burst effect type's render setup display list (object type table D_8008B4A8). */
+Gfx D_8008D4F0[] = {
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsDPPipeSync(),
+    gsDPSetCombineLERP(PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0),
+    gsSPClearGeometryMode(G_LIGHTING | G_CULL_BOTH),
+    gsDPSetOtherMode(0x082CAF, 0x00504A50),
+    gsSPEndDisplayList(),
+};
+
+/* Its render teardown display list. */
+Gfx D_8008D520[] = {
+    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsDPPipeSync(),
+    gsSPEndDisplayList(),
+};
+
+/* One burst piece: a thin pyramid along the x axis, its tip faded. */
+static Vtx D_8008D538[] = {
+    { { { -625, 0, 0 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0x10 } } },
+    { { { 625, 31, 0 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 625, -31, 31 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 625, -31, -31 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+};
 
 /* Spawns a burst effect at (x, y, z) with 12 pieces in three rings of four. */
 void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJitter, f32 scaleYZ, f32 scaleX) {
@@ -71,7 +94,7 @@ void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJit
                 burst->pieces[i].rotMode = 1;
             }
             if (speed >= 4) {
-                burst->pieces[i].speed = (func_150ADA20() % (u32)(speed >> 2)) + speed;
+                burst->pieces[i].speed = (func_150ADA20() % (speed >> 2)) + speed;
             } else {
                 burst->pieces[i].speed = speed;
             }

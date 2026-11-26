@@ -1,7 +1,9 @@
+#include <ultra64.h>
 #include <n_libaudio.h>
 #include "n_abi.h"
+#include "structs.h"
+#include "conker/mp3.h"
 
-extern s32 D_800E0E04;
 extern u8 D_800428C4[];
 extern u8 D_800428C6[];
 
@@ -29,7 +31,7 @@ Acmd *func_1001FB40(s32 sampleOffset, Acmd *cmdList) {
     s32      bus;
 
     p = cmdList;
-    if ((D_800E0E04 == 0) || (func_151F2E88(0xB8, &p) == 0)) {
+    if ((D_800E0D80.unk84 == 0) || (func_151F2E88(0xB8, &p) == 0)) {
         aClearBuffer(p++, 0x4E0, 0x2E0);
         aClearBuffer(p++, 0x7C0, 0x2E0);
     }

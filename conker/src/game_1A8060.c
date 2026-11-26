@@ -2,7 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
+/* The models whose vertices morph between keyframes: model kind, keyframe count and the vertex count
+ * of each part. */
+const VtxMorphGroup D_800A7230[2] = {
+    { 0x00, 16, { 337, 12, 12 } },
+    { 0x3A, 7, { 109, 25, 24 } },
+};
 
+VtxMorphFrame **D_800DD460[2];
 
 /* Ages the cached morph keyframes and frees the ones that have not been used for a while. */
 void func_1517ABB0(void) {
@@ -34,7 +41,7 @@ void func_1517ABB0(void) {
  */
 s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     VtxMorphState *morph;
-    VtxMorphGroup *config;
+    const VtxMorphGroup *config;
     s32 id;
     u32 size;
     s32 kind;

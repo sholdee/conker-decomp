@@ -2,15 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Per-impact-type effect selection: indices into the tables below, -1 for none. */
-typedef struct {
-    /* 0x00 */ s8 first;      /* D_800A9040 index */
-    /* 0x01 */ s8 firstStyle; /* D_800A9068 index (read by func_151AC078) */
-    /* 0x02 */ s8 second;     /* D_800A9158 index */
-    /* 0x03 */ s8 unk3;
-    /* 0x04 */ s8 impact;     /* D_800A925C index */
-} FxImpactSet; // size 0x5
-
 typedef struct {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ s16 base;
@@ -22,64 +13,6 @@ typedef struct {
     /* 0x04 */ s16 unk4;
     /* 0x08 */ f32 unk8;
 } FxImpactEntry; // size 0xC
-
-/* Passed through func_1514C678 to the spawn callbacks (e.g. func_151AC078). */
-struct FxSpawnPayload {
-    /* 0x00 */ CollisionHit *hit;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u8 kind;
-};
-
-extern FxImpactSet D_800A9020[];
-extern FxSpawnRange D_800A9040[];
-extern FxSpawnRange D_800A9158[];
-extern FxImpactEntry D_800A925C[];
-
-
-/* Spawns the effects listed for impact type `type` at `pos` on surface `hit`. */
-void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 arg4) {
-    FxImpactSet *set;
-    u8 kind;
-
-    kind = func_151D8E20();
-    if (hit == NULL) {
-        return;
-    }
-    set = &D_800A9020[type];
-    if (set->first != -1) {
-        FxSpawnPayload payload;
-
-        payload.hit = hit;
-        payload.unk4 = arg4;
-        payload.kind = kind;
-        {
-            FxSpawnRange *spawn = &D_800A9040[set->first];
-
-            func_1514C678(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
-                          func_150ADA20() % (spawn->range + 1) + spawn->base, 11, type, 0.0f,
-                          &payload, arg3);
-        }
-    }
-    if (set->second != -1) {
-        FxSpawnPayload payload;
-
-        payload.hit = hit;
-        payload.unk4 = arg4;
-        payload.kind = kind;
-        {
-            FxSpawnRange *spawn = &D_800A9158[set->second];
-
-            func_1514C678(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
-                          func_150ADA20() % (spawn->range + 1) + spawn->base, 12, type, 0.0f,
-                          &payload, arg3);
-        }
-    }
-    if (set->impact != -1 && (hit->flags & 1)) {
-        FxImpactEntry *impact = &D_800A925C[set->impact];
-
-        func_151DBE80(kind, impact->unk0, impact->unk8, impact->unk4, pos, &hit->tri, 150, 0, arg3, arg4);
-    }
-}
 
 /* Random ranges for one spray particle: each value is base + rand() % (range + 1) or
  * base + randf() * range. */
@@ -101,13 +34,116 @@ typedef struct {
     /* 0x2C */ f32 chance;
 } FxSprayParams; // size 0x30
 
-extern FxSprayParams D_800A9068[];
+/* Passed through func_1514C678 to the spawn callbacks (e.g. func_151AC078). */
+struct FxSpawnPayload {
+    /* 0x00 */ CollisionHit *hit;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u8 kind;
+};
+
+/* The impact types' effect selections (func_151ABE40, func_151AC078, func_151AC61C). */
+const FxImpactSet D_800A9020[] = {
+    { 0, 0, 0, 0, 0 },
+    { 1, 1, 1, 1, 0 },
+    { 2, 2, 2, 2, 0 },
+    { 3, 3, 3, 3, 0 },
+    { -1, -1, -1, -1, 0 },
+    { 4, 4, 4, 4, 0 },
+};
+
+/* The first effect of an impact (FxImpactSet.first). */
+static const FxSpawnRange D_800A9040[] = {
+    { 10.0f, 10, 0 },
+    { 6.0f, 8, 4 },
+    { 8.0f, 10, 5 },
+    { 6.0f, 7, 2 },
+    { 3.0f, 3, 2 },
+};
+
+/* The spray particles of an impact (FxImpactSet.firstStyle). */
+static const FxSprayParams D_800A9068[] = {
+    { 120, 0, -45, 30, 10.0f, 0.0f, 6, 0, 300, 0, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f },
+    { 100, 40, -50, 13, 13.99f, 3.04f, 3, 2, 45, 25, 5.0499997f, 1.1999999f, 0.9f, 0.2f, 0.5f },
+    { 100, 40, -63, 8, 17.23f, 7.3599997f, 4, 2, 80, 50, 6.0f, 1.0f, 0.765f, 0.15f, 0.4f },
+    { 100, 40, -46, 11, 9.48f, 1.55f, 3, 2, 60, 30, 3.82f, 2.3799999f, 0.583f, 0.12f, 0.5f },
+    { 120, 120, -63, 20, 9.0f, 3.0f, 4, 1, 60, 30, 4.49f, 1.4499999f, 0.583f, 0.12f, 0.5f },
+};
+
+/* The second effect of an impact (FxImpactSet.second). */
+static const FxSpawnRange D_800A9158[] = {
+    { 10.0f, 10, 0 },
+    { 10.0f, 15, 10 },
+    { 10.0f, 15, 5 },
+    { 10.0f, 15, 5 },
+    { 5.0f, 15, 10 },
+};
+
+/* The particle parameters of the impact emitters (FxImpactSet.emitter, func_151AC61C in game_1D9A00.c). */
+const EmitterConfig D_800A9180[] = {
+    { 10, 25, -63, 50, 5.19f, 9.849999f, 40, 30, 100, 155, 49.0f, 105.5f, -1.0780001f, 0.49400002f, 1.0f },
+    { 10, 25, -48, 4, 7.0699997f, 3.9099998f, 50, 20, 100, 100, 39.5f, 65.0f, -0.57000005f, 0.07f, 0.4f },
+    { 10, 25, -61, 8, 6.99f, 3.76f, 50, 20, 100, 100, 40.0f, 70.0f, -0.61f, 0.07f, 0.4f },
+    { 10, 25, -53, 6, 7.0699997f, 3.9099998f, 50, 20, 100, 100, 40.0f, 60.0f, -0.57000005f, 0.07f, 0.4f },
+    { 10, 25, -63, 20, 7.0699997f, 3.9099998f, 50, 20, 100, 155, 45.0f, 70.0f, -0.57000005f, 0.07f, 0.4f },
+};
+
+/* The ground impact of an impact (FxImpactSet.impact). */
+static const FxImpactEntry D_800A925C[] = {
+    { 60.0f, 75, 0.1f },
+};
+
+
+/* Spawns the effects listed for impact type `type` at `pos` on surface `hit`. */
+void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 arg4) {
+    const FxImpactSet *set;
+    u8 kind;
+
+    kind = func_151D8E20();
+    if (hit == NULL) {
+        return;
+    }
+    set = &D_800A9020[type];
+    if (set->first != -1) {
+        FxSpawnPayload payload;
+
+        payload.hit = hit;
+        payload.unk4 = arg4;
+        payload.kind = kind;
+        {
+            const FxSpawnRange *spawn = &D_800A9040[set->first];
+
+            func_1514C678(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
+                          func_150ADA20() % (spawn->range + 1) + spawn->base, 11, type, 0.0f,
+                          &payload, arg3);
+        }
+    }
+    if (set->second != -1) {
+        FxSpawnPayload payload;
+
+        payload.hit = hit;
+        payload.unk4 = arg4;
+        payload.kind = kind;
+        {
+            const FxSpawnRange *spawn = &D_800A9158[set->second];
+
+            func_1514C678(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
+                          func_150ADA20() % (spawn->range + 1) + spawn->base, 12, type, 0.0f,
+                          &payload, arg3);
+        }
+    }
+    if (set->impact != -1 && (hit->flags & 1)) {
+        const FxImpactEntry *impact = &D_800A925C[set->impact];
+
+        func_151DBE80(kind, impact->unk0, impact->unk8, impact->unk4, pos, &hit->tri, 150, 0, arg3, arg4);
+    }
+}
+
 
 /* Spawn callback: launches one spray particle at (x, y, z) heading along `yaw`, with random
  * pitch and speed from the impact type's spray parameters. */
 s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9,
                   s32 argA, s32 type, s32 argC, FxSpawnPayload *payload, u8 argE) {
-    FxSprayParams *params;
+    const FxSprayParams *params;
     EffectTemplate18 spawn;
     TrailMotion part;
     f32 roll;

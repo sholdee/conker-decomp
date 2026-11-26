@@ -2,14 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/*
- * Not referenced. It lies between the padded .rodata of game_120950 and the spawn-variant tables,
- * and the unreferenced .data word D_80088B10 lies at the same place in .data (after game_11EEB0's
- * padded .data, before D_80088B20). Both are taken as this unit's front-end data: 16 bytes each,
- * because the next object of the unit starts right after them.
- */
-const f32 D_800A19E0[4] = { 6.0f, 0.0f, 59.0f, 0.0f };
-
 /* Spawn-variant tables, reached through D_80088B20 (VariantList: count, ids, scales). */
 const s16 D_800A19F0[3] = { 9, 10, 11 };
 const f32 D_800A19F8[3] = { 1.0f, 1.0f, 1.0f };
@@ -20,8 +12,6 @@ const f32 D_800A1A24[16] = {
     0.2f, 0.1f, 0.1f, 0.025f, 0.025f, 0.08f, 0.2f, 0.2f,
     0.1f, 0.25f, 0.25f, 0.25f, 0.25f, 0.25f, 0.35f, 0.2f,
 };
-
-u8 D_80088B10[16] = { 9 }; /* not referenced */
 
 /* Spawn variants of the camera emitters (CameraEmitterData.variants); game_127060 uses entry 1. */
 VariantList D_80088B20[2] = {

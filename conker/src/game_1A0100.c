@@ -1,4 +1,9 @@
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/player.h describes it. */
+s8 D_800DD2B0[16];
+u8 D_800DD2C0[16];
+
 #include "functions.h"
 #include "variables.h"
 
@@ -7,10 +12,6 @@
  * the player is respawned at the zone's spawn point (or the zone's level is requested, when it is not the
  * current level level).
  */
-
-extern s8 D_800DD2B0[]; // per player: level of the pending warp, -1 when none
-
-
 
 /* Clears every pending warp and spawn point, then sets player 0's spawn point to `spawn0`. */
 void func_15172C50(s32 spawn0) {

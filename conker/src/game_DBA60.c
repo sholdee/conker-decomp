@@ -51,7 +51,6 @@ struct AttachedEffect {
     /* 0x28 */ OwnerLink link;
 };
 
-extern TextureDesc *D_8008CB14; /* entry 50 of D_8008CA4C */
 
 /* Bursts 12-20 particles plus one emission from the owner's bone, when the owner is still the same actor. */
 void func_150AE790(AttachedEffect *effect) {
@@ -146,7 +145,7 @@ void func_150AE790(AttachedEffect *effect) {
         emission.velZ = 0;
         emission.accelY = 0;
         emission.velY = 0;
-        emission.anim = D_8008CB14;
+        emission.anim = D_8008CA4C[50];
         emission.x = spawn.pos.x;
         emission.y = spawn.pos.y;
         emission.z = spawn.pos.z;

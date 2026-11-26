@@ -1,4 +1,21 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/*
+ * This file's .bss, defined before the headers declare it (see init_50A0.c). Head/tail of the texture-scroll
+ * reference list (TexScrollRef) and the texture-scroll list (TexScroll).
+ */
+static struct ListNode *D_800E08E0;
+static struct ListNode *D_800E08E4;
+static struct ListNode *D_800E08E8;
+static struct ListNode *D_800E08EC;
+/* Next automatic (negative) texture-scroll id. */
+static s32 D_800E08F0;
+static s32 D_800E08F4;    /* not referenced */
+static s32 D_800E08F8[2]; /* not referenced */
+/* The trigger zones of the flamethrower characters, by slot (game_40490.c registers them). */
+TriggerZone *D_800E0900[6];
+
 #include "functions.h"
 #include "variables.h"
 
@@ -12,13 +29,6 @@ struct ListNode {
     struct ListNode *next;
 };
 
-/* Head/tail of the texture-scroll reference list (TexScrollRef) and the texture-scroll list (TexScroll). */
-extern ListNode *D_800E08E0;
-extern ListNode *D_800E08E4;
-extern ListNode *D_800E08E8;
-extern ListNode *D_800E08EC;
-/* Next automatic (negative) texture-scroll id. */
-extern s32 D_800E08F0;
 
 /* The opcode byte of a display-list command. */
 #define DL_OPCODE(cmd) (*(s8 *)&(cmd))
@@ -157,7 +167,7 @@ TexScroll *func_15195984(s32 id, s32 size, s32 pos, s32 doubled) {
 }
 
 /* Returns `cmdIndex` unchanged. */
-s16 func_15195A84(s16 cmdIndex, s32 arg1, s32 arg2, s32 arg3) {
+s16 func_15195A84(s16 cmdIndex, TexScroll *scroll, s32 size, s32 doubled) {
     return cmdIndex;
 }
 
@@ -211,7 +221,7 @@ TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
                     return NULL;
                 }
             } else {
-                idx = func_15195A84(idx, (s32)scroll, size, doubled);
+                idx = func_15195A84(idx, scroll, size, doubled);
                 isNew = FALSE;
             }
             if (scroll->levelCount < levels) {
@@ -327,7 +337,7 @@ TexScroll *func_15195DD4(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
                     return NULL;
                 }
             } else {
-                idx = func_15195A84(idx, (s32)scroll, size, doubled);
+                idx = func_15195A84(idx, scroll, size, doubled);
                 isNew = FALSE;
             }
             if (scroll->levelCount < levels) {
@@ -1448,12 +1458,12 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
         do {
             a = func_150ADA20() & 0xFF;
             b = func_150ADA20() & 0xFF;
-            sinA = func_151423D8((u8)(a - 0x40));
+            sinA = func_151423D8(a - 0x40);
             cosA = func_151423D8(a);
-            sinB = func_151423D8((u8)(b - 0x40));
+            sinB = func_151423D8(b - 0x40);
             cosB = func_151423D8(b);
             rad = next->size * 0.8000000119f;
-            spawn.lifetime = (func_150ADA20() % (u32)(preset->lifeRange + 1)) + preset->lifeMin;
+            spawn.lifetime = (func_150ADA20() % (preset->lifeRange + 1)) + preset->lifeMin;
             rc = rad * cosB;
             dx = rc * sinA;
             dy = -rad * sinB;
@@ -1469,7 +1479,7 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
             } else {
                 flag = 0;
             }
-            ret = func_1513D524(&spawn, 0xA, 0xB, 0, 9, (u8)(flag | 2), 0x5C, 0xFF, 0);
+            ret = func_1513D524(&spawn, 0xA, 0xB, 0, 9, flag | 2, 0x5C, 0xFF, 0);
             if (ret != NULL) {
                 memcpy(&ret->data, &data, sizeof(data));
             }
@@ -1735,16 +1745,16 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
         speed = (func_150ADA68() * preset->speedRange) + preset->speed;
         a = func_150ADA20() & 0xFF;
         b = func_150ADA20() & 0xFF;
-        sinA = func_151423D8((u8)(a - 0x40));
+        sinA = func_151423D8(a - 0x40);
         cosA = func_151423D8(a);
-        sinB = func_151423D8((u8)(b - 0x40));
+        sinB = func_151423D8(b - 0x40);
         cosB = func_151423D8(b);
         rad = preset->radius;
         px = end->x + (rad * cosB * sinA);
         py = end->y - (rad * sinB);
         pz = end->z + (rad * cosB * cosA);
-        spawn.itemCount = (func_150ADA20() % (u32)(preset->itemCountRange + 1)) + preset->itemCount;
-        spawn.life = (func_150ADA20() % (u32)(preset->lifeRange + 1)) + preset->life;
+        spawn.itemCount = (func_150ADA20() % (preset->itemCountRange + 1)) + preset->itemCount;
+        spawn.life = (func_150ADA20() % (preset->lifeRange + 1)) + preset->life;
         motion.halfWidth = (func_150ADA68() * preset->halfWidthRange) + preset->halfWidth;
         motion.gravity = (func_150ADA68() * preset->gravityRange) + preset->gravity;
         motion.velocity.x = (px - actor->head.tmpl.pos.x) * speed;
@@ -1810,9 +1820,9 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
         packet.velX = (x - actor->head.tmpl.pos.x) * speed;
         packet.velY = (y - actor->head.tmpl.pos.y) * speed;
         packet.velZ = (z - actor->head.tmpl.pos.z) * speed;
-        packet.accelY = func_150ADA20() % (u32)(preset->acceleration_range + 1) + preset->acceleration;
-        packet.fadeStep = func_150ADA20() % (u32)(preset->fade_range + 1) + preset->fade;
-        packet.width = packet.height = func_150ADA20() % (u32)(preset->size_range + 1) + preset->size;
+        packet.accelY = func_150ADA20() % (preset->acceleration_range + 1) + preset->acceleration;
+        packet.fadeStep = func_150ADA20() % (preset->fade_range + 1) + preset->fade;
+        packet.width = packet.height = func_150ADA20() % (preset->size_range + 1) + preset->size;
         func_15167D84(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind);
         jet->spriteAccum -= 1.0f;
     } while (jet->spriteAccum > 1.0f);
@@ -1963,7 +1973,7 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
         spawn.pos = initial.start;
         initial.timeCarry = 0.0f;
         initial.emitAccum = 0.0f;
-        initial.alpha = (f32)(u32)initial.seed.alpha;
+        initial.alpha = initial.seed.alpha;
         initial.texOffset = -16384.0f;
         initial.line = setup->line;
         initial.lineAccum = 0.0f;
@@ -2286,8 +2296,8 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
                 { // matching: a block with a declaration in it steers IDO's scheduling here
                     typedef s32 T15199C34a;
 
-                    spawn.itemCount = (func_150ADA20() % (u32)(flame->scatter.unk18 + 1)) + flame->scatter.unk14;
-                    spawn.life = (func_150ADA20() % (u32)(flame->scatter.unk1E + 1)) + flame->scatter.unk1C;
+                    spawn.itemCount = (func_150ADA20() % (flame->scatter.unk18 + 1)) + flame->scatter.unk14;
+                    spawn.life = (func_150ADA20() % (flame->scatter.unk1E + 1)) + flame->scatter.unk1C;
                     motion.halfWidth = func_150ADA68() * flame->scatter.unk24 + flame->scatter.unk20;
                 }
                 spawn.pos = pos0;
@@ -2352,8 +2362,8 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
                 { // matching: a block with a declaration in it steers IDO's scheduling here
                     typedef s32 T15199C34b;
 
-                    part.timer = (func_150ADA20() % (u32)(flame->emit.unk16 + 1)) + flame->emit.unk14;
-                    part.alpha = (func_150ADA20() % (u32)(flame->emit.unk1A + 1)) + flame->emit.unk18;
+                    part.timer = (func_150ADA20() % (flame->emit.unk16 + 1)) + flame->emit.unk14;
+                    part.alpha = (func_150ADA20() % (flame->emit.unk1A + 1)) + flame->emit.unk18;
                     part.width = part.height = func_150ADA68() * flame->emit.unk20 + flame->emit.unk1C;
                 }
                 delta = pos3;
@@ -2657,7 +2667,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
                     spawn.texture = 0x14;
                 }
                 spawn.lifetime = func_150ADA20() % (flame->line.lifeRange + 1) + flame->line.lifeMin;
-                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 0x3F), alpha, &vel);
+                func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, alpha, &vel);
                 spawn.pos.x = pos.x + vel.x;
                 spawn.pos.y = pos.y + vel.y;
                 spawn.pos.z = pos.z + vel.z;
@@ -2700,7 +2710,6 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
 }
 
 
-extern TextureDesc D_80091064; /* an entry of the effect texture table D_80090B60 */
 extern s32 D_800A4AC8[][2];
 
 /* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */
@@ -2766,7 +2775,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     }
     camera = func_15144B34(view);
     flag = 1;
-    gfx = func_15142E24(gfx, &D_80091064, 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
+    gfx = func_15142E24(gfx, &D_80090B60[107], 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x4C, &flag);
     gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);

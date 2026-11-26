@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 (*D_8008FD1C)(void);
-extern u8 (*D_8008FD30)(void);
 
 /* Get the position of one of the actor's bones (0x13 for side 1, 0x17 for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return
@@ -113,13 +111,13 @@ void func_15146BD8(s32 actor, s32 side, s32 strength) {
 
 /* Effect 0xB (or 0xC when `alt`) at the ground below the actor's bone on `side`, plus effect 2
    there when strength is at least 115. */
-void func_15146BF8(s32 actor, s32 side, s32 strength, s32 alt) {
+void func_15146BF8(s32 actor, s32 side, s32 strength, u8 alt) {
     Vec3f pos;
     CollisionHit hit;
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
-            func_15141F78((u8)alt != 0 ? 0xC : 0xB, &hit, strength * (1.0f / 130.0f),
+            func_15141F78(alt != 0 ? 0xC : 0xB, &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
                 func_15142180(2, &pos, hit.material, 1.0f, 1.0f);
@@ -268,7 +266,7 @@ void func_15147318(s32 actor, s32 side, s32 strength) {
     }
 }
 
-/* Effect D_8008FD1C() at the ground below the actor's bone on `side`, plus effect 6 there when
+/* Effect D_8008FD04[6]() at the ground below the actor's bone on `side`, plus effect 6 there when
    strength is at least 115. */
 void func_15147478(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
@@ -276,7 +274,7 @@ void func_15147478(s32 actor, s32 side, s32 strength) {
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
-            func_15141F78(D_8008FD1C(), &hit, strength * (1.0f / 130.0f),
+            func_15141F78(D_8008FD04[6](), &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
                 func_15142180(6, &pos, hit.material, 1.0f, 1.0f);
@@ -285,7 +283,7 @@ void func_15147478(s32 actor, s32 side, s32 strength) {
     }
 }
 
-/* Effect D_8008FD30() at the ground below the actor's bone on `side`, plus effect 0xB there when
+/* Effect D_8008FD04[11]() at the ground below the actor's bone on `side`, plus effect 0xB there when
    strength is at least 115. */
 void func_151475D8(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
@@ -293,7 +291,7 @@ void func_151475D8(s32 actor, s32 side, s32 strength) {
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
-            func_15141F78(D_8008FD30(), &hit, strength * (1.0f / 130.0f),
+            func_15141F78(D_8008FD04[11](), &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
                 func_15142180(0xB, &pos, hit.material, 1.0f, 1.0f);
