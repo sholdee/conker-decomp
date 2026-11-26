@@ -15,7 +15,7 @@ glabel func_150AD780
 
 .section .rodata
 
-/* Constants of game_DAC30.s to game_DAE50.s (one unit in the ROM): cosf/sinf and the random scale. */
+/* Constants of game_DAC30.s and game_DAC3C.s (one unit in the ROM): cosf and sinf. */
 glabel D_8009F710
     .word 0x3FC90FDB /* 1.5707964f (pi/2): cosf(x) = sinf(x + pi/2) */
 glabel D_8009F714
@@ -40,6 +40,4 @@ glabel D_8009F738
     .word 0x3C08876A
 glabel D_8009F73C
     .word 0xBE2AAAA6
-glabel D_8009F740
-    .word 0x37800080 /* 1.5259022e-05f (1/65535): scale of the random value (game_DAE50.s) */
     .balign 16

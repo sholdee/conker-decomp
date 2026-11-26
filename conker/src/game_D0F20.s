@@ -662,7 +662,7 @@ glabel func_150A3FC4
 
 .section .bss
 
-/* Data of game_D0F20.s to game_D2450.s (one unit in the ROM) */
+/* Data of game_D0F20.s to game_D2450.s */
 glabel D_800D3300
     /* 800D3300 */ .space 0xC
 glabel D_800D330C

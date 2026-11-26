@@ -51,7 +51,7 @@ glabel func_150A50C0
 
 .section .bss
 
-/* Data of game_D2570.s and game_D260C.s (one unit in the ROM) */
+/* Data of game_D2570.s and game_D260C.s */
 glabel D_800D35E0
     /* 800D35E0 */ .space 0x8
 glabel D_800D35E8

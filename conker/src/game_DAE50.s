@@ -107,6 +107,12 @@ glabel func_150ADACC
     /* DAF98 150ADAE8 00000000 */  nop
     /* DAF9C 150ADAEC 00000000 */  nop
 
+.section .rodata
+
+glabel D_8009F740
+    .word 0x37800080 /* 1.5259022e-05f (1/65535): scale of func_150ADA68's random value */
+    .balign 16
+
 .section .data
 
 /* The 64-bit random state: func_150ADACC seeds it, func_150ADA20 and func_150ADA68 advance it */
