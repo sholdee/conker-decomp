@@ -355,13 +355,7 @@ extern u8  D_800D992A[];
 extern u8  D_800D993A[];
 extern u8  D_800D9946[]; // just past the end of D_800D993A (func_15010600 stops there)
 
-extern Vec3f D_800D9AC0[];
-extern u8 D_800D9AF0;
-extern ViewClip gViewClips[];
 
-extern u8  D_800D9B18;
-extern f32 D_800D9B1C;
-extern f32 D_800D9B20;
 extern u8  D_800D9B68[4][3];
 extern u8  D_800D9B78[4][3];
 extern u8  D_800D9B84[];
