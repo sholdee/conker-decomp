@@ -181,7 +181,8 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     JetSpraySpec burst;
     CollisionHit floor;
     Vec3f objPos;
-    ParticleSpawn80 part;
+    s32 pad; // matching: unused stack slot
+    ParticleSpawn part;
     f32 outA2, outA1, outA0, outB2, outB1, outB0;
     Mtx *mtx;
     s32 i, j, k;

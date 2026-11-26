@@ -177,7 +177,8 @@ s32 func_150CB7CC(QuadSprite *sprite) {
 /* Spawns one func_15132A4C particle at (x, y, z), its velocity built by func_15143794 from `angle`. */
 s32 func_150CB800(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
                   s32 arg9, s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
-    ParticleSpawn80 desc;
+    s32 pad; // matching: unused stack slot
+    ParticleSpawn desc;
     f32 fraction;
     u32 random;
 

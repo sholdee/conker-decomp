@@ -275,7 +275,8 @@ s32 func_150CC8D4(DecayParticle *p, s32 arg1) {
 s32 func_150CCA7C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
-    ParticleSpawn80 spawn;
+    s32 pad; // matching: unused stack slot
+    ParticleSpawn spawn;
     f32 speed;
     u32 random;
 
