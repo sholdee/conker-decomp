@@ -37,6 +37,16 @@ void func_1501B0A0(s32 view, s32 layout);
 void func_1501B22C(s32 viewIndex);
 extern s32 D_80082FA0; // the screen layout: the number of players
 extern s32 D_80082FA4; // the view being drawn
+extern s32 D_800BE620; // the screen width
+extern s32 D_800BE624; // the screen height
+extern RenderView *D_800BE628; // the views
+extern Vp *D_800BE62C; // one viewport per view
+extern u8 D_800BE630[5]; // the player of each view
+extern u8 D_800BE635;
+extern s32 D_800BE638[6]; // the view width of each screen layout
+extern s32 D_800BE650[6]; // the view height of each screen layout
+extern s16 D_800BE668[4][5][2]; // the centre (x, y) of each view, by screen layout
+extern f32 D_800BE6B8; // the width scale of the two-player layout
 extern Gfx D_80082FC0[24][2]; // render mode tables for segment 8
 extern Gfx D_80083140[24][2];
 extern Gfx D_800832C0[24][2];

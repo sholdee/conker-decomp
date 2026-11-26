@@ -365,8 +365,6 @@ extern u8 D_800BE590;
 extern u16 D_800BE598[];
 extern s32 *D_800BE5A8[]; // per spawn model type: data loaded by func_1502B7F0
 extern s32 D_800BE5D0;
-extern u8 D_800BE630[];
-extern s16 D_800BE668[4][5][2];
 extern f32 D_800BE6C0[]; // per-player smoothed light pitch (degrees, -180..180)
 extern f32 D_800BE6D0[]; // per-player smoothed light yaw (degrees, 0..360)
 extern u8 D_800BE740;
@@ -388,14 +386,6 @@ extern s32  D_800BE3E8;
 extern s8   D_800BE3EC; // its save-slot argument
 extern SaveSlotInfo D_800BE3F8[3]; // the three save slots
 
-extern s32  D_800BE620;
-extern s32  D_800BE624;
-extern RenderView *D_800BE628; // one per player view
-extern Vp  *D_800BE62C; // one viewport per view
-extern u8   D_800BE635;
-extern s32  D_800BE638[6]; // per-layout view widths
-extern s32  D_800BE650[6]; // per-layout view heights
-extern f32  D_800BE6B8;
 extern OSPfs D_800BE760[MAXCONTROLLERS]; // rumble pak per controller channel
 extern OSMesgQueue D_800BE900;
 extern OSContPad D_800BE918[4]; // controller pads (read in game_48FD0.c)

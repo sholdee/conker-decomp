@@ -6,8 +6,6 @@
 void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 
-extern u16 D_800BE648[];
-
 /* Action (intelwalk) started by a jump (1) or run (2) press; +2 when D_800BE616 is set, +4 for id 0x21. */
 const u8 D_800A0810[8] = { 0x06, 0x01, 0x21, 0x22, 0x11, 0x11, 0x00, 0x00 };
 /* Three 2-entry tables indexed by isType21 (at 0, 2 and 4); the last two bytes are not read here. */
@@ -44,7 +42,7 @@ void func_150CE740(Actor *obj) {
             D_800CC288 = D_800BE710[dc_glbl_CharNum];
         }
     } else {
-        D_800CC288 = D_800BE648[v];
+        D_800CC288 = D_800BE710[v - 100];
     }
     if ((D_800CC288 & 0x8000) && (obj->nojump == 0) && (obj->shad == 0.0f)) {
         action = 1;

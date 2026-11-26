@@ -3,6 +3,18 @@
 #include "functions.h"
 #include "variables.h"
 
+/* This file's .bss, in address order. */
+s32 D_800BE620;              // the screen width
+s32 D_800BE624;              // the screen height
+RenderView *D_800BE628;      // the views
+Vp *D_800BE62C;              // one viewport per view
+u8 D_800BE630[5];            // the player of each view
+u8 D_800BE635;
+s32 D_800BE638[6];           // the view width of each screen layout
+s32 D_800BE650[6];           // the view height of each screen layout
+s16 D_800BE668[4][5][2];     // the centre (x, y) of each view, by screen layout
+f32 D_800BE6B8;              // the width scale of the two-player layout
+
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
 
