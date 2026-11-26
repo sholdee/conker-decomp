@@ -5,8 +5,8 @@
 /* Data copied into a effect_newTimedEffectNoDraw particle at offset 0x28 by func_1515AF90. */
 typedef struct {
     /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
+    /* 0x0C */ f32 rate;
+    /* 0x10 */ f32 accumulator;
     /* 0x14 */ f32 upperFloorY; // highest floor between the camera's eye and y = 19500
 } GroundParticle;
 
@@ -75,8 +75,8 @@ void func_1515AF90(s16 player) {
                 effect.position.y = bottom;
             }
         }
-        effect.unkC = (func_150ADA68() * 0.0f + 195.0f) * 0.001000000047f;
-        effect.unk10 = 0.0f;
+        effect.rate = (func_150ADA68() * 0.0f + 195.0f) * 0.001000000047f;
+        effect.accumulator = 0.0f;
         if (valid) {
             particle = effect_newTimedEffectNoDraw((func_150ADA20() % 61U) + 5, -1, 12, 1, 7, 0x18, 0xFF, 0);
             if (particle != NULL) {
@@ -133,7 +133,7 @@ void func_1515B21C(EmitterObject *obj) {
         desc.vel.z = 0.0f;
         extra.maxRiseSpeed = 1.200000048f;
         extra.swayPerSpeed = 0.8333333135f;
-        extra.ceiling = emitter->unk14;
+        extra.ceiling = emitter->ceiling;
 
         if (func_150ADA20() & 1) {
             desc.flags |= 0x40;

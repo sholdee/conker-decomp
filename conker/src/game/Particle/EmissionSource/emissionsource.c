@@ -636,7 +636,7 @@ void func_150E81A8(index, owner, kind)
 
 typedef struct {
     /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 unkC;
+    /* 0x0C */ f32 accum;
 } Game113D60PointData;
 
 /* Creates effect 0x28 at `position`, lasting `duration` frames (-1: 300). */
@@ -645,7 +645,7 @@ void func_150E83AC(const Vec3f *position, s16 duration, u8 owner, s32 kind) {
     TimedEffect *effect;
 
     data.position = *position;
-    data.unkC = 0.0f;
+    data.accum = 0.0f;
 
     effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x28, -1, (duration == -1) ? 0 : 1, 0, sizeof(data),
                            owner, kind);
@@ -772,9 +772,9 @@ void func_150E8930() {
 }
 
 typedef struct {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ f32 unk8;
+    /* 0x0 */ f32 rate;
+    /* 0x4 */ f32 rateRange;
+    /* 0x8 */ f32 accum;
 } Game113D60Data8A80;
 
 /* Creates effect 0x33 for 30-70 frames. */
@@ -782,9 +782,9 @@ void func_150E8A80(void) {
     TimedEffect *effect;
     Game113D60Data8A80 data;
 
-    data.unk0 = 1.199999957e-07f;
-    data.unk4 = 3.199999981e-07f;
-    data.unk8 = 0.0f;
+    data.rate = 1.199999957e-07f;
+    data.rateRange = 3.199999981e-07f;
+    data.accum = 0.0f;
 
     effect = effect_newTimedEffect((func_150ADA20() % 41) + 30, -1, 0x33, -1, 1, 0, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
@@ -794,9 +794,9 @@ void func_150E8A80(void) {
 
 typedef struct {
     /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
+    /* 0x0C */ f32 rate;
+    /* 0x10 */ f32 rateRange;
+    /* 0x14 */ f32 accum;
 } Game113D60Data8B1C;
 
 /* Spawns effect 0x34 at random points of the weighted regions within 1800 units of the
@@ -831,9 +831,9 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
             if (dx * dx + dy * dy + dz * dz < 3240000.0f) {
                 TimedEffect *child;
 
-                data.unk0C = 0.3171199858f;
-                data.unk10 = 1.046509981f;
-                data.unk14 = 0.0f;
+                data.rate = 0.3171199858f;
+                data.rateRange = 1.046509981f;
+                data.accum = 0.0f;
                 child = effect_newTimedEffect((func_150ADA20() % 13) + 5, -1, 0x34, -1, 1, 0, sizeof(data),
                                       effect->base.header.owner, effect->base.header.kind);
                 if (child != NULL) {
@@ -926,9 +926,9 @@ void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
 }
 
 typedef struct {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ f32 unk8;
+    /* 0x0 */ f32 rate;
+    /* 0x4 */ f32 rateRange;
+    /* 0x8 */ f32 accum;
 } Game113D60Data90DC;
 
 /* Creates effect 0x36 for 5-30 frames. */
@@ -936,9 +936,9 @@ void func_150E90DC(void) {
     TimedEffect *effect;
     Game113D60Data90DC data;
 
-    data.unk0 = 2.000000023e-07f;
-    data.unk4 = 1.500000053e-07f;
-    data.unk8 = 0.0f;
+    data.rate = 2.000000023e-07f;
+    data.rateRange = 1.500000053e-07f;
+    data.accum = 0.0f;
 
     effect = effect_newTimedEffect((func_150ADA20() % 26) + 5, -1, 0x36, -1, 1, 0, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
@@ -948,9 +948,9 @@ void func_150E90DC(void) {
 
 typedef struct {
     /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
+    /* 0x0C */ f32 rate;
+    /* 0x10 */ f32 rateRange;
+    /* 0x14 */ f32 accum;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ u8 pad1C[0x14];
     /* 0x30 */ s32 unk30;
@@ -988,9 +988,9 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
             if (dx * dx + dy * dy + dz * dz < 1960000.0f) {
                 TimedEffect *child;
 
-                data.unk0C = 0.1932400018f;
-                data.unk10 = 0.3140099943f;
-                data.unk14 = 0.0f;
+                data.rate = 0.1932400018f;
+                data.rateRange = 0.3140099943f;
+                data.accum = 0.0f;
                 data.unk18 = 99999.89844f;
                 data.unk30 = 0;
                 data.unk34 = 0;

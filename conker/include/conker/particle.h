@@ -1766,7 +1766,7 @@ typedef struct {
     /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 rate;        // particles per unit of gFrameDelta
     /* 0x10 */ f32 accumulator; // pending particles; one is spawned per whole unit
-    /* 0x14 */ f32 unk14;
+    /* 0x14 */ f32 ceiling; // highest floor above the camera eye (GroundParticle.upperFloorY); copied to RiseMotion.ceiling
 } RiseEmitterState;
 
 typedef struct {
