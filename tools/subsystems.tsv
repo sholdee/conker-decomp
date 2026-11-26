@@ -660,6 +660,8 @@ src/game_22B750.c	collision	data-only unit: model part sets, sub-model lists, ob
 src/game_22D750.c	level	data-only unit: level-object behaviour handlers and grouped-object defaults
 src/game_22DF30.c	camera	data-only unit: identity matrix, camera frame count, camera table, hold timers
 src/game_22F650.c	effect	data-only unit (effect tables)
+src/game_232150.c	particle	data-only unit (wave 5)
+src/game_234530.c	particle	data-only unit: drip bone points, drop kinds and emitter kinds of game_1BDC20
 src/debugger_256F80.c	debugger	debugger copy of controller read
 src/debugger_257330.c	debugger	debugger stub
 src/debugger_257350.c	debugger	debugger printf
