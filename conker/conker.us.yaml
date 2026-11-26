@@ -230,6 +230,8 @@ segments:
       - [0x2AC30, .data, init_3C40]
       - [0x2AC50, .data, init_49E0]
       - [0x2AC70, data]
+      - [0x2ADEC, .data, init_7DAC]
+      - [0x2AE40, data]
       - [0x2BD10, .data, libultra/os/initialize]
       - [0x2BD30, .data, libultra/libc/xlitob]
       - [0x2BD60, .data, libultra/os/piacs]
