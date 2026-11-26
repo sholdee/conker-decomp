@@ -315,24 +315,10 @@ extern f32 D_800CC2C8;
 
 extern Actor movement_obj[26]; // objects
 extern u8  D_800CC2D4[];
-extern f32 D_800CC2E4;
-extern f32 D_800CC2E8[];
-extern f32 D_800CC2EC;
-extern f32 D_800CC30C[];
-extern u8  D_800CC335;
-extern u16 D_800CC34A[];
-extern u8  D_800CC37D;
 extern u16 D_800CC382;
-extern u8  D_800CC3D4[];
-extern s8  D_800CC3D7;
-extern u8  D_800CC3F5[] ; // ??
 
 extern u8 D_800CC49A;
-extern u8 D_800CC4B3[][0x32C]; /* byte 0x1E3 of each movement_obj object */
-extern Actor  D_800CC5A0[];
-extern u8  D_800CC521[]; // ??
 
-extern Actor *D_800CE370;
 
 /* 800D0000 */
 

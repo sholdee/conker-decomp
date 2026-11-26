@@ -107,7 +107,7 @@ TextBox *func_1516A7B0(u32 msgIndex, s32 objIndex, s32 arg2,
         box->text = func_1516C878(config, 0, box->source);
         box->page = 0;
         config->flags &= ~(TEXTBOX_CB_CLOSED | TEXTBOX_CB_PAGE_ENDED | TEXTBOX_CB_PAGE_SHOWN);
-        D_800CC4B3[config->objIndex][0] = 1;
+        movement_obj[config->objIndex].unk1E3 = 1;
         box->visible = FALSE;
     }
     return box;

@@ -73,7 +73,7 @@ void func_1508F0A4(void) {
     func_1509093C();
 }
 
-/* Moves the debris particles, adds/removes blocks to follow D_800CC49A and moves the stack. */
+/* Moves the debris particles, adds/removes blocks to follow movement_obj[0].energy and moves the stack. */
 void func_1508F0D4(void) {
     s32 timer;
     s32 i;
@@ -109,21 +109,21 @@ void func_1508F0D4(void) {
         node = node->next;
     }
 
-    if (D_800CC49A < D_800D2457) {
+    if (movement_obj[0].energy < D_800D2457) {
         // matching: an empty if here splits the block; IDO's layout of the branch below depends on it
         if (node != NULL) {
         }
         D_800D2444 = 240;
-        while (D_800CC49A != D_800D2457) {
+        while (movement_obj[0].energy != D_800D2457) {
             D_800D2457--;
             if (D_800D2428[0] == D_8009DCB4[3]) {
                 func_1508F7BC();
             }
         }
         func_10010F30(0x1A6, 0x7FFF, 0x40, 0, 0);
-    } else if (D_800D2457 < D_800CC49A) {
+    } else if (D_800D2457 < movement_obj[0].energy) {
         D_800D2444 = 240;
-        while (D_800CC49A != D_800D2457) {
+        while (movement_obj[0].energy != D_800D2457) {
             D_800D2457++;
             if (D_800D2428[0] == D_8009DCB4[3]) {
                 func_1508F9C4();
@@ -396,7 +396,7 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     return gfx;
 }
 
-/* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws D_800CC49A
+/* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws movement_obj[0].energy
  * blocks at full scale at a fixed spot near D_8009DCB4[3..5], after patching the block display
  * list's combiner and other-mode commands. */
 Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
@@ -436,7 +436,7 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
         x = D_8009DCB4[3] - 54.0f;
         y = D_8009DCB4[4] - 52.0f;
         z = D_8009DCB4[5] - 344.7000122f;
-        count = D_800CC49A;
+        count = movement_obj[0].energy;
         func_150A8050(base, 50.0f, -20.0f, -20.0f);
         scale = 1.0f;
         {

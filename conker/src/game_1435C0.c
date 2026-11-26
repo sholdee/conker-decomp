@@ -4,7 +4,6 @@
 
 /* Registers a TexScroll on res's display list (game_1C2C60.c). */
 /* Height of the prop surface below (x, y, z), or -10000 (game_13BB20.c). */
-extern u16 D_800CC354;
 
 /*
  * Behaviour scratch state (WorldObject.touch) of the objects in this file:
@@ -50,7 +49,7 @@ void func_1511617C(WorldObject *obj) {
         obj->moveData.word += delta * 0.2f;
     } else {
         target = -20;
-        if (D_800CC354 == 75) {
+        if (movement_obj[0].animseq.uh == 75) {
             target = -40;
         }
         delta = target - obj->moveData.word;

@@ -10,7 +10,7 @@ void func_150AE5B0(Camera *arg0) {
         if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
             if (func_15123934(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
                 arg0->AvailableModes |= 0x1000000;
-                func_151254F4(arg0, D_800CC335 - 1);
+                func_151254F4(arg0, movement_obj[0].attach_char - 1);
             }
         } else if (func_151239CC(arg0, CAMERA_MODE_PICKED_UP) != 0) {
             func_151254F4(arg0, 0);

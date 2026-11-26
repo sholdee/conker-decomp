@@ -26,7 +26,7 @@ void func_150C7E00(Camera *camera)
       if (func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0)
       {
         camera->AvailableModes |= 0x01000000;
-        func_151254F4(camera, D_800CC335 - 1);
+        func_151254F4(camera, movement_obj[0].attach_char - 1);
         camera->CharTrackingSpeedTarget = 0.0f;
       }
     }
@@ -40,7 +40,7 @@ void func_150C7E00(Camera *camera)
         func_151239CC(camera, CAMERA_MODE_ZONES);
         if (func_15123934(camera, 8, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0)
         {
-          func_151254F4(camera, D_800CC335 - 1);
+          func_151254F4(camera, movement_obj[0].attach_char - 1);
           camera->AvailableModes &= ~4;
           camera->CharTrackingSpeedTarget = 0.0f;
           func_15123070(camera);

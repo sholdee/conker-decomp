@@ -241,7 +241,7 @@ void func_1516AA70(TextBox *box) {
                 box->config->callback(box->config, box->page, box->state);
             }
             box->config->flags &= ~TEXTBOX_CB_CLOSED;
-            D_800CC4B3[box->config->objIndex][0] = 0;
+            movement_obj[box->config->objIndex].unk1E3 = 0;
             player->cmdState.unk0 = 0;
             box->config->numPages = 0;
             func_1516972C(box);

@@ -67,13 +67,13 @@ void func_1501C730(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     case 1:
         D_800BE615 = 3;
         D_800BE9F4 = arg1;
-        D_800D2132 = D_800CC382;
+        D_800D2132 = movement_obj[0].unkB2;
         break;
     case 2:
         D_800BE615 = 3;
         D_800BE9F4 = arg1;
         D_800DD2C0[0] = arg2;
-        D_800D2132 = D_800CC382;
+        D_800D2132 = movement_obj[0].unkB2;
         break;
     case 3:
         if (D_800BE616 == 0) {

@@ -53,7 +53,6 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
     func_151D40D4(&origin, 0, obj, obj, 0, 0x16, 0x15, 0);
 }
 
-extern u16 D_800CC346;
 
 /* Per-frame update for obj: steps its unk83 counter while unk87 is set, moves it, then stores its x/z displacement since last frame. */
 void func_150E0BE0(Actor *obj) {
@@ -71,7 +70,7 @@ void func_150E0BE0(Actor *obj) {
         if (counter >= 5) {
             counter = obj->unk251; // matching: reusing counter keeps both in v0
             if (counter != 3) {
-                obj->fangle = D_800CC346;
+                obj->fangle = movement_obj[0].angle;
                 obj->scriptCmd = NULL;
                 obj->intelwalk = 4;
                 if (counter == 2) {

@@ -224,8 +224,8 @@ void func_150B19E0(Actor *obj) {
     obj->count2 = 1;
     if (obj->task_attrib & 0x40) {
         obj->task_attrib &= ~0x40;
-        obj->old_xpos = D_800CC2E4;
-        obj->old_zpos = D_800CC2EC;
+        obj->old_xpos = movement_obj[0].xpos;
+        obj->old_zpos = movement_obj[0].zpos;
     }
     if (obj->carried != 0) {
         func_150562FC(obj);

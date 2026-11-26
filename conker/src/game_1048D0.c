@@ -185,7 +185,6 @@ void func_150D7790(Actor *obj, s32 action) {
     }
 }
 
-extern s8 D_800CC4B4;
 
 /*
  * Per-frame update for an object that can be carried by a player (unk13C set, unk124 = player index).
@@ -286,7 +285,7 @@ void func_150D7928(Actor *obj) {
         angleOffset = (obj->lean_angle - obj->stickspeed) * 0.8f;
         if (obj->intelwalk == 4) {
             if (id == 0x48) {
-                D_800CC4B4 = 1;
+                movement_obj[0].family = 1;
             }
             if (func_15052F9C(obj, 50.0f, 0x17, 4, 0, 5, 0, 0, 0, 0) != 0) {
                 return;

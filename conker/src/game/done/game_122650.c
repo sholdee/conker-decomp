@@ -5,7 +5,6 @@
 u8 D_80088B40 = 0;
 static u8 D_80088B44 = 0;
 
-extern s32 D_800CC454;
 
 void func_150F51A0(s32 arg0, s32 arg1) {
     D_80088B40 = 1;
@@ -21,7 +20,7 @@ s32 func_150F51BC(void) {
 }
 
 void func_150F51E8(s32 arg0) {
-    if (((D_800CC454 & 0X1F) == 3) || ((D_800CC454 & 0x1F) == 4)) {
+    if (((movement_obj[0].floorMaterial & 0X1F) == 3) || ((movement_obj[0].floorMaterial & 0x1F) == 4)) {
         if (D_800BE9E4 < D_80088B44){
             if(D_800C35EA[0] != 1) {
                 D_80088B44 = (D_80088B44 - D_800BE9E4);

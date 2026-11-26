@@ -7,12 +7,12 @@
 void func_15131958(Vec3f *vel, f32 drag);
 
 /* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls func_1505D024 on
- * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while D_800CC3D4[0] is set. */
+ * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while movement_obj[0].stunned is set. */
 void func_150AF200(s32 idA, s32 idB) {
     WorldObject *obj;
     s32 index;
 
-    if (D_800CC3D4[0] != 0) {
+    if (movement_obj[0].stunned != 0) {
         return;
     }
 
