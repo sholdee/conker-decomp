@@ -14,6 +14,17 @@
  *   game_68C70.c
  */
 
+/* Simulation state of the 5-joint bone chain driven from bones 24-28 (0x50 bytes). */
+typedef struct BoneChain {
+    /* 0x00 */ f32 pos[5][3];   /* joint world positions, root first */
+    /* 0x3C */ f32 bobPhase;    /* degrees, advanced by the walking speed */
+    /* 0x40 */ f32 swayAngle;   /* degrees */
+    /* 0x44 */ f32 swaySpeed;   /* degrees per frame */
+    /* 0x48 */ f32 swayAmp;
+    /* 0x4C */ s16 swayTimer;   /* frames until the next idle sway */
+    /* 0x4E */ u8 blendTimer;   /* frames left blending back from the animated pose */
+} BoneChain;
+
 /* game_61490.c */
 void func_15033FE0(GameCommand *commands, s32 index);
 GameCommand *func_150341BC(GameCommand *cmd, s32 index);
@@ -38,8 +49,8 @@ void func_15036310(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn);
 /* game_68C70.c */
 void func_1503B7C0(Actor *obj);
 void func_1503B840(Actor *obj);
-s32 func_1503B95C(s32 objIndex, struct BoneChain *chain);
+s32 func_1503B95C(s32 objIndex, BoneChain *chain);
 void func_1503B9BC(s32 objIndex);
-void func_1503CB98(s32 objIndex, s32 mode, f32 blend, struct BoneChain *chain);
+void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain);
 
 #endif

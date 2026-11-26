@@ -2,18 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Simulation state of the 5-joint bone chain driven from bones 24-28 (0x50 bytes). */
-typedef struct BoneChain {
-    /* 0x00 */ f32 pos[5][3];   /* joint world positions, root first */
-    /* 0x3C */ f32 bobPhase;    /* degrees, advanced by the walking speed */
-    /* 0x40 */ f32 swayAngle;   /* degrees */
-    /* 0x44 */ f32 swaySpeed;   /* degrees per frame */
-    /* 0x48 */ f32 swayAmp;
-    /* 0x4C */ s16 swayTimer;   /* frames until the next idle sway */
-    /* 0x4E */ u8 blendTimer;   /* frames left blending back from the animated pose */
-} BoneChain;
-
-
 /* Allocates and initialises the bone chain state of an object. */
 void func_1503B7C0(Actor *obj) {
     obj->mv->boneChain = allocate_memory(sizeof(BoneChain), 1, 0, 0);
