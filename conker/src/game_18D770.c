@@ -1,10 +1,6 @@
 #include <ultra64.h>
-// matching: func_1000E770 is defined with two parameters but called here with four, so this file
-// uses an unprototyped declaration (below) instead of the one in functions.h.
-#define func_1000E770 func_1000E770_2args
 #define func_1515F10C func_1515F10C_header
 #include "functions.h"
-#undef func_1000E770
 #undef func_1515F10C
 // matching: two calls here pass func_1515F10C a second argument, which it ignores
 void func_1515F10C();

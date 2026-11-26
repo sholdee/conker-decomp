@@ -16,10 +16,7 @@
 // matching: a pointer where the definition has s32 (arg 4)
 void func_151D9B8C(u8, f32, u8, void *, Vec3f *, s16, u8, u8, u8, u8, s32);
 #undef func_151DB5D0
-// variables.h declares D_800A3F14 without const; this file defines it as const data (.rodata)
-#define D_800A3F14 D_800A3F14_hdr
 #include "variables.h"
-#undef D_800A3F14
 
 /* Scale factors passed to func_1513A24C (all 1.0f). */
 const f32 D_800A3C30[15] = {

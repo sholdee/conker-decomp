@@ -1616,7 +1616,10 @@ void func_1000E75C(s32 arg0) {
 }
 
 /* Reads the pending music mode request and its value (see func_1000E7A0); returns the flags. */
-s32 func_1000E770(s32 *mode, s32 *value) {
+s32 func_1000E770(mode, value)
+    s32 *mode;
+    s32 *value;
+{
     if (mode != NULL) {
         *mode = D_80041F08;
     }
