@@ -10,7 +10,7 @@
  */
 void func_15007830(void) {
     game_clearBss();
-    D_800D2C28[0] = 0;
+    gSegmentBases[0] = 0;
     osCreateMesgQueue(&gGameMesgQueue, gGameMesgBuf, 16);
     gTaskDoneMsgs[0].type = OS_SC_DONE_MSG;
     gTaskDoneMsgs[1].type = OS_SC_DONE_MSG;

@@ -128,7 +128,7 @@ Gfx *func_150D765C(Gfx *gdl) {
             table = 1;
         }
         frameIndex = (frame + i * 13) % 5;
-        addr = func_1510D0EC(tables.frames[table][frameIndex], &size, 3, 0);
+        addr = texture_getAddress(tables.frames[table][frameIndex], &size, 3, 0);
         segment = i + 2;
         gSPSegment(gdl++, segment, addr);
     }
@@ -216,7 +216,7 @@ void func_150D7928(Actor *obj) {
     id = obj->character_type;
     linkType = -1;
     if (id == 0x48) {
-        player = (Actor *)func_15033E84(obj);
+        player = (Actor *)attach_getFirst(obj);
         if (player != NULL) {
             linkType = player->unk6;
         }

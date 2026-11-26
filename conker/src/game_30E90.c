@@ -34,10 +34,10 @@ void func_150039E0(s32 levelId, s32 arg1) {
     groupedSpawns = NULL;
     setStateBit2 = FALSE;
     D_800BE2A0 = D_800BE2A2 = D_800BE2A4 = 0;
-    i = func_1502B7F0(&spawns, 2, 0xB, levelId);
+    i = rom_loadPathTo(&spawns, 2, 0xB, levelId);
     gUngroupedObjectCount = i / sizeof(ObjectSpawn);
     gWorldObjectCount = gUngroupedObjectCount;
-    gGroupedObjectCount = func_1502B7F0(&groupedSpawns, 3, 0xC, levelId, 2) / sizeof(ObjectSpawn);
+    gGroupedObjectCount = rom_loadPathTo(&groupedSpawns, 3, 0xC, levelId, 2) / sizeof(ObjectSpawn);
     gWorldObjectCount += gGroupedObjectCount;
     db_Object_array = allocate_memory(gWorldObjectCount * sizeof(WorldObject), 1, 2, 0);
     if (db_Object_array == NULL) {
@@ -112,7 +112,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
                 }
             }
             if (!found) {
-                model = func_1502B6BC(&loaded, 0, 0, 2, 3, id);
+                model = rom_loadPathTable(&loaded, 0, 0, 2, 3, id);
                 obj->model = model;
             }
             if (found) {
@@ -220,7 +220,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
             obj->viewFlags |= 0x20;
         }
         if (!found) {
-            func_1510CE60(obj->displayList, 0, 1, 0x3F, 0);
+            texture_resolveDl(obj->displayList, 0, 1, 0x3F, 0);
             func_15004CE0((DlCommand *)obj->displayList, (u32)model);
         }
     }
@@ -320,7 +320,7 @@ void func_150045C4(s32 arg0) {
             }
             bcopy(obj->vertices[0], obj->vertices[1], obj->numVertices * sizeof(Vtx));
         }
-        func_1510F800(2);
+        collision_selectMap(2);
         if ((obj->viewFlags & 0x80) == 0x80 && (obj->object_status & 0x60) != 0x20) {
             D_800D37E0[0] = i;
             func_150A44F0(1, D_800D37E0, 1);
@@ -332,7 +332,7 @@ void func_150045C4(s32 arg0) {
             continue;
         }
         if ((obj->viewFlags & 0x20) == 0x20) {
-            func_1510E7A4(&floorTri, NULL, &floorY, NULL, &floorFlags, NULL, obj->x, obj->y, obj->z, obj->y,
+            collision_findFloorInRange(&floorTri, NULL, &floorY, NULL, &floorFlags, NULL, obj->x, obj->y, obj->z, obj->y,
                           i + 1, NULL, -10000.0f, 20000.0f);
             obj->touch.floor.tri = floorTri;
             obj->touch.floor.y = floorY;

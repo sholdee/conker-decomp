@@ -4,7 +4,7 @@
 
 /* Shows a sprite that fades in over `fadeIn` frames, holds for `hold` frames and
  * fades out over `fadeOut` frames. */
-void func_1510A930(s32 fadeIn, s32 hold, s32 fadeOut) {
+void sprite_showFadeSprite(s32 fadeIn, s32 hold, s32 fadeOut) {
     Sprite2DParams desc;
     s32 total;
 
@@ -33,5 +33,5 @@ void func_1510A930(s32 fadeIn, s32 hold, s32 fadeOut) {
     desc.frame = 0;
     desc.x = 228.0f;
     desc.y = 252.59259033203125f;
-    func_15169968(&desc);
+    sprite_newSprite2DDefault(&desc);
 }

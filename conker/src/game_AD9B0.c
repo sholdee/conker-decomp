@@ -137,7 +137,7 @@ void text_openContextText(s32 arg0) {
     } else {
         withHeader = FALSE;
     }
-    gContextText = func_1502B6BC(0, 0, 0, 3, 0x1A, D_800BEAAB, gContextTextId);
+    gContextText = rom_loadPathTable(0, 0, 0, 3, 0x1A, D_800BEAAB, gContextTextId);
     if (gContextText != NULL) {
         gContextSoundNext = 0;
         gContextSounds = gContextText->sounds;
@@ -149,7 +149,7 @@ void text_openContextText(s32 arg0) {
             s32 soundCount;
             u32 headerSoundCount;
 
-            gContextHeaderText = func_1502B6BC(0, 0, 0, 3, 0x1A, D_800BEAAB, 0x43);
+            gContextHeaderText = rom_loadPathTable(0, 0, 0, 3, 0x1A, D_800BEAAB, 0x43);
             if (gContextText == NULL) { /* sic: tests the text, not the header just loaded */
                 return;
             }

@@ -366,7 +366,7 @@ void func_1507EFD0(void) {
             category = 9;
         } else if (gCurrentActor->mv->rt_context_b == 0x16) {
             category = 10;
-        } else if (func_1503195C(gCurrentActor, 0x17, 0) != NULL) {
+        } else if (attach_find(gCurrentActor, 0x17, 0) != NULL) {
             category = 6;
         } else if (level == 0x31) {
             if (D_800D18C0 & 4) {

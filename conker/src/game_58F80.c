@@ -97,11 +97,11 @@ Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player) {
     }
     D_8003C8E0 = 0x01FFFFFF;
     if (mode == 1) {
-        gdl = func_15030E08(gdl, player, 0);
+        gdl = attach_drawView(gdl, player, 0);
     } else if (mode == 2) {
-        gdl = func_15030E08(gdl, player, 1);
+        gdl = attach_drawView(gdl, player, 1);
     } else if (mode == 6) {
-        gdl = func_15030E08(gdl, player, 2);
+        gdl = attach_drawView(gdl, player, 2);
     }
     gSPDisplayList(gdl++, gObjectPassEndDL);
     D_8003C8E0 = 0;
@@ -167,7 +167,7 @@ void actor_updateObjects(void) {
     s32 count;
     s32 maxDepth;
 
-    func_1503F964();
+    zone_advanceObjectCursor();
     maxDepth = 0;
     D_800C3E90 = 0;
     D_800C3E74 = 0;
@@ -215,7 +215,7 @@ void actor_updateObjects(void) {
             actor_savePrevBones(&movement_obj[i]);
         }
     }
-    func_15030468();
+    attach_updateAll();
     if (gPaused == 0) {
         func_1507C22C(0);
     }
@@ -315,11 +315,11 @@ Gfx *actor_drawSprite(Gfx *gdl, s32 index) {
         h = w = size * 15;
     }
     tex = actor_getSpriteTexture(index);
-    gSPDisplayList(gdl++, D_800873D0);
+    gSPDisplayList(gdl++, gSpriteRenderDl);
     gDPPipeSync(gdl++);
     if (gdl != NULL) { // matching: the empty test changes the register choice of the spilled temps
     }
-    gdl = func_15094F70(gdl, D_8008CA4C[tex], scroll, &sprite, 0, 0, 0, 2, 3);
+    gdl = sprite_loadDescFrame(gdl, D_8008CA4C[tex], scroll, &sprite, 0, 0, 0, 2, 3);
     sprite.flip = 0;
     sprite.alpha = alpha;
     sprite.scaleX = w;
@@ -327,8 +327,8 @@ Gfx *actor_drawSprite(Gfx *gdl, s32 index) {
     sprite.x = movement_obj[index].xpos;
     sprite.y = movement_obj[index].ypos + (size / 2);
     sprite.z = movement_obj[index].zpos;
-    gdl = func_15095760(gdl, &sprite);
-    gSPDisplayList(gdl++, D_80087408);
+    gdl = sprite_drawWorld(gdl, &sprite);
+    gSPDisplayList(gdl++, gSpriteEndDl);
     return gdl;
 }
 
@@ -382,7 +382,7 @@ void actor_selectLod(s32 index, s16 player, s32 mode) {
     if (maxLod == -1) {
         return;
     }
-    special = func_150849A0(obj);
+    special = collision_getModelId(obj);
     diff = cam->eye.x - obj->xpos;
     distSq = diff * diff;
     diff = cam->eye.y - obj->ypos;
@@ -430,7 +430,7 @@ void actor_selectLod(s32 index, s16 player, s32 mode) {
         return;
     }
     model = obj->modelIds[lod];
-    func_150837D4(index, model, 0);
+    collision_setObjectModel(index, model, 0);
     obj->current_lod = lod;
 }
 
@@ -462,7 +462,7 @@ Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
         actor_selectLod(index, player, mode);
         lod = obj->current_lod;
     } else {
-        func_150849CC(obj, &lod);
+        collision_getLodModelId(obj, &lod);
     }
     func_1502D54C(index, colour);
     if (D_800B0DF0->unk3E != 0) {
@@ -544,7 +544,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     obj = &movement_obj[index];
     id = obj->character_type;
     if (mode == 3 || mode == 4 || mode == 5) {
-        id = func_150849CC(obj, &lod);
+        id = collision_getLodModelId(obj, &lod);
     } else {
         lod = obj->current_lod;
     }
@@ -645,7 +645,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     func_1502FD70(obj);
     obj->unk2FE = 1;
     if (mode == 0) {
-        gdl = func_15030F94(gdl, obj, player, 1);
+        gdl = attach_drawOwner(gdl, obj, player, 1);
     }
     if (wrap) {
         gSPDisplayList(gdl++, gObjectPassEndDL);
@@ -705,7 +705,7 @@ void actor_getFogAlpha(obj, colour, player)
     step = (first - last) * 0.001000000047f;
     near = D_800DD2E8 * step + last;
     far = D_800DD2EC * step + last;
-    func_150A7A00(D_800D2CA8[player], obj->xpos, obj->ypos, obj->zpos, &x, &y, &z, &w);
+    func_150A7A00(gSpriteViewMtx[player], obj->xpos, obj->ypos, obj->zpos, &x, &y, &z, &w);
     w = (w != 0.0f) ? 1.0f / w : 0.001000000047f;
     if (w < 0) { // matching: integer zeros here; 0.0f literals share the 1.0f register differently
         amount = 0;
@@ -787,9 +787,9 @@ void actor_loadAnimFrames(AnimInstance *anim, Actor *obj, u8 *buf) {
         anim->frameBuf[i] = (u8 *)(align + (u32)buf);
         off = (u8)(s32)align; // matching: this dead use of off (see `off * 0` below) steers register allocation
         if (size < 200) {
-            func_1000480C(src, buf, size);
+            rom_copyUncached(src, buf, size);
         } else {
-            func_10004514(src, buf, (size + 0xF) & ~0xF, 1);
+            rom_read(src, buf, (size + 0xF) & ~0xF, 1);
         }
         buf += size + (off * 0);
         if (wrap) {
@@ -799,9 +799,9 @@ void actor_loadAnimFrames(AnimInstance *anim, Actor *obj, u8 *buf) {
             src -= off;
             size = off + frameSize;
             if (size < 200) {
-                func_1000480C(src, buf, size);
+                rom_copyUncached(src, buf, size);
             } else {
-                func_10004514(src, buf, (size + 0xF) & ~0xF, 1);
+                rom_read(src, buf, (size + 0xF) & ~0xF, 1);
             }
             anim->nextFrameOffset[i] = (buf + off) - anim->frameBuf[i];
             buf += size;
@@ -846,13 +846,13 @@ void actor_computeBones(MtxF mtx, s32 index) {
     obj = &movement_obj[index];
     id = obj->character_type;
     remap = NULL;
-    if (D_800D19A0[id] == NULL) {
+    if (gModelData[id] == NULL) {
         unk144 = obj->listpos_ptr;
         if (model_load(id, 0, unk144, 1, obj->unkAC) != 0) {
             obj->ob_matrix_ptr = NULL;
             return;
         }
-        if (D_800D19A0[id] == NULL) {
+        if (gModelData[id] == NULL) {
             obj->ob_matrix_ptr = NULL;
             return;
         }
@@ -862,7 +862,7 @@ void actor_computeBones(MtxF mtx, s32 index) {
     }
     // matching: the unused label splits the block so as1 keeps the call's argument setup after the test
 load:
-    if (func_150838EC(obj, 0, 0, 1.0f) == 0) {
+    if (collision_allocAnimState(obj, 0, 0, 1.0f) == 0) {
     animated:
         if (gModelBoneCounts[id] < 2 || obj->unk2D0 != NULL) {
             count = actor_getBoneMatrixCount(id);
@@ -875,12 +875,12 @@ load:
             {
                 s32 k;
 
-                if (D_800D1C90[id]->unk29 != 0) {
+                if (gModelDefs[id]->unk29 != 0) {
                     const u8 *p;
 
                     D_800C3FFA = 0;
                     bzero(remapBuf, gModelBoneCounts[id]);
-                    p = gBoneRemapLists[D_800D1C90[id]->unk29 - 1];
+                    p = gBoneRemapLists[gModelDefs[id]->unk29 - 1];
                     while (*p != 0xFF) {
                         k = p[0];
                         remapBuf[k] = p[1];
@@ -1119,9 +1119,9 @@ void actor_updateCulling(s32 index) {
         obj->unk74 = movement_obj[obj->attach_char - 1].unk74;
         return;
     }
-    width = D_800D1C90[id]->bodyRadius * obj->scale_xz;
-    height = D_800D1C90[id]->bodyRadius * obj->scale_y;
-    yOffset = (D_800D1C90[id]->bodyHeight + obj->unkCC) * obj->scale_y;
+    width = gModelDefs[id]->bodyRadius * obj->scale_xz;
+    height = gModelDefs[id]->bodyRadius * obj->scale_y;
+    yOffset = (gModelDefs[id]->bodyHeight + obj->unkCC) * obj->scale_y;
     obj->cull_radius_xz = width;
     range = obj->cullDistance;
     if (D_800C35EA[0] == 1 && D_800C3660[0] == 0) {
@@ -1131,12 +1131,12 @@ void actor_updateCulling(s32 index) {
     if (obj->unk101 & 0x80) {
         cullDist = 0.0f;
     } else {
-        if (D_800D1C90[id]->cullDistance == 0) {
+        if (gModelDefs[id]->cullDistance == 0) {
             cullDist = obj->bodyRadius;
-        } else if (D_800D1C90[id]->cullDistance == 1) {
+        } else if (gModelDefs[id]->cullDistance == 1) {
             cullDist = 0.0f;
         } else {
-            cullDist = D_800D1C90[id]->cullDistance * obj->scale_xz;
+            cullDist = gModelDefs[id]->cullDistance * obj->scale_xz;
         }
     }
     for (i = 0; i <= gScreenLayout; i++) {
@@ -1435,7 +1435,7 @@ Gfx *actor_bindSwapTextures(Gfx *gdl, s32 index) {
         if (obj->eyeCode[i] >= 10) {
             texIndex[i] = obj->eyeCode[i] - 10;
         } else {
-            texIndex[i] = D_800D1C90[id]->texture[i][obj->eyeCode[i]];
+            texIndex[i] = gModelDefs[id]->texture[i][obj->eyeCode[i]];
             if (obj->expression && !override) {
                 override = func_1507E908(obj, obj->expression);
             }
@@ -1445,7 +1445,7 @@ Gfx *actor_bindSwapTextures(Gfx *gdl, s32 index) {
                 overrideTex[0] = override->eyeCode[0];
                 overrideTex[1] = override->eyeCode[1];
                 if (override != NULL) { // matching: dropping this redundant re-test changes the code
-                    if (overrideTex[i] != D_800D1C90[id]->texture[i][2]) {
+                    if (overrideTex[i] != gModelDefs[id]->texture[i][2]) {
                         if (obj->eyeCode[i] == 0) {
                             texIndex[i] = overrideTex[i];
                         }
@@ -1560,7 +1560,7 @@ void actor_movePointWithPlatform(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tr
         return;
     }
     for (i = 0; i < 3; i++) {
-        vtx[i] = (Vtx *)(gModelTris[id][tri].v[i] + D_800D19A0[id]);
+        vtx[i] = (Vtx *)(gModelTris[id][tri].v[i] + gModelData[id]);
     }
     range = 0;
     found = 0;
@@ -1709,7 +1709,7 @@ void actor_applyForcedLod(Actor *obj) {
         }
     }
     model = obj->modelIds[lod];
-    func_150837D4(obj - movement_obj, model, 0);
+    collision_setObjectModel(obj - movement_obj, model, 0);
     obj->current_lod = lod;
     if (D_800C35EA[0] == 1) {
         D_800C3638 = 0;
@@ -1731,7 +1731,7 @@ void actor_applyForcedLod(Actor *obj) {
     func_1507EABC(obj);
 }
 
-/* Refreshes the D_800D2040 counter of the object's model id (2 in one special case, 3 by default,
+/* Refreshes the gModelUnloadTimers counter of the object's model id (2 in one special case, 3 by default,
    or keepTime seconds). */
 void func_1502FD70(Actor *arg0) {
     Actor *obj = arg0; // matching: the parameter copy changes register allocation
@@ -1739,10 +1739,10 @@ void func_1502FD70(Actor *arg0) {
     u8 *counter;
 
     if (D_80038080 == 0 && level == 0x1D) {
-        D_800D2040[id] = 2;
+        gModelUnloadTimers[id] = 2;
         return;
     }
-    counter = &D_800D2040[id];
+    counter = &gModelUnloadTimers[id];
     if (*counter != 0xFF) {
         // matching: the shared default store needs the goto (an || condition reorders the tests)
         if (obj->listpos_ptr != NULL) {

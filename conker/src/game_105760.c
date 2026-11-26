@@ -16,9 +16,9 @@ void func_150D82B0(s32 arg0) {
 #define GFX_OPCODE(gfx) (*(s8 *)(gfx))
 
 
-/* Model attachment hook 1 (D_800841C0[1]). While the actor runs action 13 with anim->unk8 in 23..40,
+/* Model attachment hook 1 (gAttachHooks[1]). While the actor runs action 13 with anim->unk8 in 23..40,
  * scrolls the texture of the first G_SETTILESIZE command in the display list horizontally. */
-s32 func_150D82BC(ModelAttachment *att, Actor *actor) {
+s32 attach_hookScrollTexH(ModelAttachment *att, Actor *actor) {
     AnimInstance *anim = actor->unk2D0;
     Gfx *list;
     s32 i;
@@ -50,10 +50,10 @@ s32 func_150D82BC(ModelAttachment *att, Actor *actor) {
     return 0;
 }
 
-/* Model attachment hook 19 (D_800841C0[19]). Scrolls the first G_SETTILESIZE command's texture
+/* Model attachment hook 19 (gAttachHooks[19]). Scrolls the first G_SETTILESIZE command's texture
  * vertically by a progress value (unk3C, percent; unk38 is the phase) that rises to 100% once action
  * 0x18D reaches anim->unk8 46, then falls to 0 once action 0x18E reaches 34. */
-s32 func_150D83D8(ModelAttachment *att, Actor *actor) {
+s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor) {
     Gfx *list;
     s32 i;
     f32 t;
@@ -105,7 +105,7 @@ GameCommand *func_150D8590(GameCommand *cmd, s32 arg1) {
 
 /* Spawns impact effects at the actor's feet: a ground effect if the ground below is flagged,
  * then func_150E83AC's effect and a particle burst. */
-void func_150D85AC(Actor *actor) {
+void attach_spawnFootImpact(Actor *actor) {
     Vec3f pos;
 
     pos.x = actor->xpos;
@@ -118,7 +118,7 @@ void func_150D85AC(Actor *actor) {
         probe.x = pos.x;
         probe.y = pos.y + 100.0f;
         probe.z = pos.z;
-        func_1504715C(&ground, actor);
+        collision_initHitFromObject(&ground, actor);
         {
             SpriteBurst burst;
 
@@ -126,7 +126,7 @@ void func_150D85AC(Actor *actor) {
                 union { u32 value; f64 align; } random; // matching: keeps the value in a stack slot, not a temp
                 f32 randomScale;
 
-                if (func_15046C80(&probe, 0, pos.y - 200.0f, &ground) != 0 && (ground.flags & 1)) {
+                if (collision_probeFloorSurfABSet0Cached(&probe, 0, pos.y - 200.0f, &ground) != 0 && (ground.flags & 1)) {
                     pos.x = probe.x;
                     pos.y = ground.height;
                     pos.z = probe.z;

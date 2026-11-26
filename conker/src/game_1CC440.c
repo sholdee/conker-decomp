@@ -250,7 +250,7 @@ s32 trail_ageSurfaceTrail(SurfaceTrail *trail) {
             probe.z = point->z;
             if (20000.0f < fabsf(probe.x) || 20000.0f < fabsf(probe.z)) {
                 expired = 1;
-            } else if (func_15045800(&probe, 0, point->y - 30.0f, &trail->collision) != 0) {
+            } else if (collision_probeFloorSurfBCached(&probe, 0, point->y - 30.0f, &trail->collision) != 0) {
                 point->y = trail->collision.height;
             } else {
                 expired = 1;
@@ -427,7 +427,7 @@ s32 trail_followSurfaceTrail(SurfaceTrail *trail) {
                 probe.z = point->z;
                 if (fabsf(probe.x) > 20000.0f || fabsf(probe.z) > 20000.0f) {
                     ok = 0;
-                } else if (func_15045800(&probe, 0, probe.y - 200.0f, &trail->collision) != 0) {
+                } else if (collision_probeFloorSurfBCached(&probe, 0, probe.y - 200.0f, &trail->collision) != 0) {
                     point->y = trail->collision.height;
                 } else {
                     ok = 0;
@@ -535,12 +535,12 @@ Gfx *trail_drawSurfaceTrail(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
                     }
                 } while (headFadeLeft != 0 && j != trail->head.end);
             }
-            gfx = func_15142E24(gfx, &D_80090B60[57], 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
+            gfx = func_15142E24(gfx, &gEffectTextures[57], 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
             gfx = func_15142B7C(gfx, 1, 0x160600);
             gfx = func_15142C10(gfx, config->color[0], config->color[1], config->color[2], 0xFF, &update);
             gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &update);
             gfx = func_1513F4E4(gfx, 7, &update);
-            gfx = func_15142FBC(gfx, G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
+            gfx = func_15142FBC(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
             if (trail->head.tmpl.flags & 2) {
                 /* still attached: start the strip at the live attach point */
                 i = trail->head.end - 1;

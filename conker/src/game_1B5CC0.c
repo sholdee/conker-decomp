@@ -425,7 +425,7 @@ Gfx *trail_drawActorAfterimage(Gfx *gfx, BoneTrail *trail, s16 player) {
     if (!hasFrames) {
         return gfx;
     }
-    model_loadForActor(trail->owner.object, func_150849CC(trail->owner.object, &lod), lod, 1);
+    model_loadForActor(trail->owner.object, collision_getLodModelId(trail->owner.object, &lod), lod, 1);
     numFrames = trail->numFrames;
     alpha = trail->alpha;
     numBones = actor_getBoneMatrixCount(trail->owner.object->character_type);

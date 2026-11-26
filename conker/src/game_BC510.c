@@ -382,13 +382,13 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     if (D_800D2428[0] != D_8009DCB4[0]) {
         gfx = func_150900F0(gfx, 0);
     } else if (D_800D2588 != NULL) {
-        func_1518CA04(0xB8);
+        attach_releaseModel(0xB8);
         D_800D2588 = NULL;
     }
     gfx = func_150911F4(gfx);
-    gfx = func_15094F40(gfx);
+    gfx = sprite_beginDraw(gfx);
     gfx = func_15090630(gfx);
-    gfx = func_15096934(gfx);
+    gfx = sprite_endDraw(gfx);
     overflow = D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0] ? 1 : 0;
     if (overflow != 0) {
         return start;
@@ -412,7 +412,7 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
     Gfx *dl;
 
     if (D_800D2588 == NULL) {
-        D_800D2588 = func_1518C900(0xB8);
+        D_800D2588 = attach_loadModelDl(0xB8);
     }
     gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
@@ -486,8 +486,8 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
     return gfx;
 }
 /* matching: SpriteParams before tex (0x10 bytes), as an older revision with other field names; a full
- * SpriteParams on the stack changes the frame. func_15094F70 still writes tex past its end, and
- * func_15095A48 reads it back (see ParticleDesc64 in effects.h). */
+ * SpriteParams on the stack changes the frame. sprite_loadDescFrame still writes tex past its end, and
+ * sprite_drawScreen reads it back (see ParticleDesc64 in effects.h). */
 typedef struct TexSprite {
     s32 unk0;
     s16 unk4;
@@ -526,16 +526,16 @@ Gfx *func_15090630(Gfx *gfx) {
     for (i = 0; i < 6; i++) {
         if (D_800D2460[i].state == 1 || D_800D2460[i].state == 2) {
             if (first) {
-                func_1510D0EC(D_80091840.addr, &tex, 3, 0);
+                texture_getAddress(D_80091840.addr, &tex, 3, 0);
                 first = FALSE;
-                gfx = func_15094F70(gfx, &D_800903D4, 0, &sprite, 0, 0, 0, 2, 3);
+                gfx = sprite_loadDescFrame(gfx, &D_800903D4, 0, &sprite, 0, 0, 0, 2, 3);
             }
             wobble = func_15048A40(D_800D2460[i].phase);
             x = D_800D2460[i].x;
             y = D_800D2460[i].y;
             sprite.w = D_800D2460[i].size * (0.2f * wobble + 1.0f);
             sprite.h = D_800D2460[i].size * (-0.2f * wobble + 1.0f);
-            gfx = func_15095A48(gfx, &sprite, x, y);
+            gfx = sprite_drawScreen(gfx, &sprite, x, y);
         }
     }
     first = TRUE;
@@ -556,9 +556,9 @@ Gfx *func_15090630(Gfx *gfx) {
             sprite.flags = flags;
             if (first) {
                 first = FALSE;
-                gfx = func_15094F70(gfx, &D_80091840, 0, &sprite, 0, 0, 0, 2, 3);
+                gfx = sprite_loadDescFrame(gfx, &D_80091840, 0, &sprite, 0, 0, 0, 2, 3);
             }
-            gfx = func_15095A48(gfx, &sprite, x, y);
+            gfx = sprite_drawScreen(gfx, &sprite, x, y);
             timer = D_800D2460[i].timer;
             timer -= D_800BE9E4;
             if (timer < 0) {
@@ -644,7 +644,7 @@ void func_1509093C(void) {
         }
     }
     if (D_800D24C8.dl == 0) {
-        func_1502FE10(0xB9, &dlists, &numDLists, &vtxStart, &unkOut1, &unkOut2, &unkOut3);
+        attach_loadModel(0xB9, &dlists, &numDLists, &vtxStart, &unkOut1, &unkOut2, &unkOut3);
         D_800D24C8.dl = *dlists;
         D_800D24C8.count = ((u32)dlists - (u32)vtxStart) >> 4;
         D_800D24C8.vtx[0] = vtxStart;
@@ -663,7 +663,7 @@ void func_1509093C(void) {
         }
         /* shapes[0] is the rest shape copied above; the others are loaded */
         for (i = 1; i < 2; i++) {
-            func_1502B7F0(&D_800D24C8.shapes[i], 2, 0x18, i - 1);
+            rom_loadPathTo(&D_800D24C8.shapes[i], 2, 0x18, i - 1);
         }
     }
     base = D_800D24C8.shapes[0];
@@ -805,19 +805,19 @@ Gfx *func_150911F4(Gfx *gfx) {
     gSPSegment(gfx++, 3, &D_800D24C8.mtx[D_800BE9C0]);
     gSPSegment(gfx++, 1, D_800D24C8.vtx[D_800BE9C0]);
     if (D_800D24C8.tex[0]) {
-        tex = func_1510D0EC(D_800D24C8.tex[0], texBuf, 3, 0);
+        tex = texture_getAddress(D_800D24C8.tex[0], texBuf, 3, 0);
         gSPSegment(gfx++, 6, tex);
     }
     if (D_800D24C8.tex[1]) {
-        tex = func_1510D0EC(D_800D24C8.tex[1], texBuf, 3, 0);
+        tex = texture_getAddress(D_800D24C8.tex[1], texBuf, 3, 0);
         gSPSegment(gfx++, 7, tex);
     }
     if (D_800D24C8.tex[2]) {
-        tex = func_1510D0EC(D_800D24C8.tex[2], texBuf, 3, 0);
+        tex = texture_getAddress(D_800D24C8.tex[2], texBuf, 3, 0);
         gSPSegment(gfx++, 10, tex);
     }
     if (D_800D24C8.tex[3]) {
-        tex = func_1510D0EC(D_800D24C8.tex[3], texBuf, 3, 0);
+        tex = texture_getAddress(D_800D24C8.tex[3], texBuf, 3, 0);
         gSPSegment(gfx++, 11, tex);
     }
     gSPDisplayList(gfx++, D_800D24C8.dl);
@@ -831,7 +831,7 @@ Gfx *func_15091534(Gfx *gfx, s32 sheet, u8 *loaded) {
     s32 tex;
 
     *loaded = FALSE;
-    tex = func_1510D0EC(sheet + (s32)D_D16, 0, 3, 0);
+    tex = texture_getAddress(sheet + (s32)D_D16, 0, 3, 0);
 
     if (tex != 0x80000000) {
         gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, tex);
@@ -950,7 +950,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                 y = gViews[i].top + scaled[6];
                 if (D_8008FDC0 & 2) {
                     if (!texLoaded) {
-                        n = func_1510D0EC((s32)D_D14, 0, 3, 0);
+                        n = texture_getAddress((s32)D_D14, 0, 3, 0);
                         texLoaded = 1;
                         if (n != 0x80000000) {
                             gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, n);
@@ -1227,7 +1227,7 @@ Gfx *func_150918EC(Gfx *gfx) {
         s32 cellW;
         // matching: the original keeps the pipe-sync command word in a variable (cellW, reused below)
         cellW = G_RDPPIPESYNC << 24;
-        j = func_1510D0EC((s32)D_D13, 0, 3, 0);
+        j = texture_getAddress((s32)D_D13, 0, 3, 0);
         gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, j);
         gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
         gDPLoadSync(gfx++);
@@ -1312,7 +1312,7 @@ Gfx *func_150918EC(Gfx *gfx) {
             size = 64;
         }
         k = (D_8008FDBC & 0x40) ? (s32)D_CF2 : (s32)D_CF1;
-        vpRight = func_1510D0EC(k, 0, 3, 0);
+        vpRight = texture_getAddress(k, 0, 3, 0);
         gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, vpRight);
         gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
         gDPLoadSync(gfx++);
@@ -1373,7 +1373,7 @@ void func_15093818(s32 enable) {
 
 /* Loads the clock model and allocates its two (double-buffered) matrices. */
 void func_15093878(void) {
-    D_800D2448 = func_1518C900(0xBA);
+    D_800D2448 = attach_loadModelDl(0xBA);
     D_800D244C = allocate_memory(2 * sizeof(Mtx), 1, 1, 0);
 }
 
@@ -1392,7 +1392,7 @@ Gfx *func_150938BC(Gfx *gfx) {
     value = (D_800D2450 / 30) % 60;
     segment = 4;
     do {
-        tex = func_1510D0EC((s32)D_11AD + (value % 10), 0, 3, 0);
+        tex = texture_getAddress((s32)D_11AD + (value % 10), 0, 3, 0);
         if (tex == 0x80000000) {
             return gfx;
         }
@@ -1453,7 +1453,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
     scale *= D_8008FE1C;
     dotSize = (D_8008FE1C == 1.0f) ? 4 : 6;
     radiusSq *= D_8008FE1C;
-    tex = func_1510D0EC((s32)(D_CF2 + 1), 0, 3, 0);
+    tex = texture_getAddress((s32)(D_CF2 + 1), 0, 3, 0);
     if (tex == 0x80000000) {
         return gfx;
     }

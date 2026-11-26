@@ -30,7 +30,7 @@ void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2) {
     init.effects[1] = NULL;
     init.owner = owner;
     init.ownerId = owner->unique_id;
-    attachment = func_1503195C(owner, (owner->character_type == 0x48) ? 0x7A : 0x79, 0);
+    attachment = attach_find(owner, (owner->character_type == 0x48) ? 0x7A : 0x79, 0);
     if (attachment == NULL) {
         return;
     }
@@ -306,7 +306,7 @@ s32 trail_updateCharacterTrail(CharacterTrail *actor) {
                 if (prevMode != state->mode) {
                     const Vec3f *vel;
 
-                    if (func_1515C0F8(owner, &vel) == 0) {
+                    if (sprite_findActorMotion(owner, &vel) == 0) {
                         vel = &D_800A5480;
                     }
                     trail_throwSparks(&actor->head.tmpl.pos, vel, owner->theta, actor->head.header.owner, actor->head.header.kind);
@@ -356,7 +356,7 @@ s32 trail_trimCharacterTrail(CharacterTrail *actor) {
     state = actor->state;
     points = actor->points;
     if (D_800C35EA[0] != 1) {
-        if (func_1515C0F8(state->owner, &vel) != 0) {
+        if (sprite_findActorMotion(state->owner, &vel) != 0) {
             speed = func_15143E64(vel);
         } else {
             speed = 0.0f;
@@ -516,11 +516,11 @@ Gfx *trail_drawCharacterTrail(CharacterTrail *actor, Gfx *gfx, s16 view) {
     }
     eye = func_15144B34(view);
     update = 1;
-    gfx = func_15142E24(gfx, &D_80090B60[120], 0, 0, 0, 0, 0x78, 0, 0, &update, 0x3E);
+    gfx = func_15142E24(gfx, &gEffectTextures[120], 0, 0, 0, 0, 0x78, 0, 0, &update, 0x3E);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x55, &update);
-    gfx = func_15142FBC(gfx, G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
+    gfx = func_15142FBC(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
     cur = actor->head.end - 1;
     if (cur < 0) {
         cur = actor->head.tmpl.itemCount - 1;
@@ -654,11 +654,11 @@ void trail_onCharacterTrailMessage(CharacterTrail *actor, ActorMsg *msg, u8 id) 
         if (state->owner == msg->swap.actorA) {
             state->owner = msg->swap.actorB;
             state->ownerId = msg->swap.idB;
-            state->attachment = func_1503195C(state->owner, (state->owner->character_type == 0x48) ? 0x7A : 0x79, 0);
+            state->attachment = attach_find(state->owner, (state->owner->character_type == 0x48) ? 0x7A : 0x79, 0);
         } else if (state->owner == msg->swap.actorB) {
             state->owner = msg->swap.actorA;
             state->ownerId = msg->swap.idA;
-            state->attachment = func_1503195C(state->owner, (state->owner->character_type == 0x48) ? 0x7A : 0x79, 0);
+            state->attachment = attach_find(state->owner, (state->owner->character_type == 0x48) ? 0x7A : 0x79, 0);
         }
     }
 }

@@ -44,7 +44,7 @@ void func_10001050(void) {
 
 /** Idle thread: start the main thread (func_10001194), then drop to priority 0 and spin. */
 void func_100010F8(void *arg) {
-    func_10004470(); // create message queues
+    rom_init(); // create message queues
     osCreateThread(&D_80031AE0, 3, func_10001194, arg, &D_800314B0[0x80], 10);
     if ((D_8002AC5C == 0) && (D_80000310 == 6105)) { // osCicId: CIC-NUS-6105
         osStartThread(&D_80031AE0);
@@ -88,11 +88,11 @@ void func_10001194(void *arg) {
     osCreateViManager(OS_PRIORITY_VIMGR);
 
     romBase = (s32)&game_us_rzip_ROM_START;
-    func_10004514(romBase, D_80082B20, 16, 1);
+    rom_read(romBase, D_80082B20, 16, 1);
     compressedRomAddr = (s32)D_80082B20[0] + romBase; // the segment header, not yet a list pointer
     size = (u32)&debugger_us_ROM_START - compressedRomAddr;
     compressed = allocate_memory(size, 1, 2, 0);
-    func_10004514(compressedRomAddr, compressed, size, 1);
+    rom_read(compressedRomAddr, compressed, size, 1);
     func_10006240(compressed, D_80082B20, D_8003809C);
     func_10004074(compressed);
 
@@ -101,7 +101,7 @@ void func_10001194(void *arg) {
     D_800354FC = (s32 *)ALIGN16(&D_80032B30);
     size = blockCount + 1;
     // matching: 16-byte round-up written as (x + 0xF | 0xF) ^ 0xF; `& ~0xF` or `* 4` change the code
-    func_10004514(romBase + 4, D_800354FC, ((((blockCount + 2) << 2) + 0xF) | 0xF) ^ 0xF, 1);
+    rom_read(romBase + 4, D_800354FC, ((((blockCount + 2) << 2) + 0xF) | 0xF) ^ 0xF, 1);
     for (i = 0; i < size; i++) {
         D_800354FC[i] = (D_800354FC[i] ^ 0x8039CCCA) + romBase;
     }

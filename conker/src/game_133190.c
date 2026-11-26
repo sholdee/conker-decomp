@@ -4,29 +4,29 @@
 
 /* This file's .data: the bolt effect type's render setup and teardown display lists (its entry in D_8008C1A8
  * points to them), then the bolt handler tables. */
-Gfx D_80088BE0[] = {
+Gfx gBoltRenderSetupDl[] = {
     gsDPPipeSync(),
     gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
-Gfx D_80088C00[] = {
+Gfx gBoltRenderTeardownDl[] = {
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
     gsSPEndDisplayList(),
 };
 /* Per BoltDesc.updateKind. */
-static s32 (*D_80088C10[])(BoltObj *bolt, u8 *moved) = { func_15107924, func_15107E48 };
+static s32 (*gBoltUpdateHandlers[])(BoltObj *bolt, u8 *moved) = { beam_followBoundsBolt, beam_followBoneBolt };
 /* Per BoltDesc.kind: cleanup, then message handlers. */
-static void (*D_80088C18[])(BoltObj *bolt) = { NULL, func_15107604, NULL, NULL };
-static void (*D_80088C28[])(BoltObj *bolt, s32 arg1, u8 arg2) = { NULL, NULL, func_151078E4, func_15107F98 };
+static void (*gBoltCleanupHandlers[])(BoltObj *bolt) = { NULL, beam_unlinkChainBolt, NULL, NULL };
+static void (*gBoltMsgHandlers[])(BoltObj *bolt, s32 arg1, u8 arg2) = { NULL, NULL, beam_boundsBoltMessage, beam_boneBoltMessage };
 /* Per BoltChain.kind: message handlers. */
-static void (*D_80088C38[])(EffectHeader *obj, s32 arg1, u8 arg2) = { NULL, func_150B6450, func_1510550C };
+static void (*gBoltChainMsgHandlers[])(EffectHeader *obj, s32 arg1, u8 arg2) = { NULL, func_150B6450, func_1510550C };
 
 /*
  * Allocates a bolt for desc with extraSize bytes of user data, samples and jitters it, and spawns its
  * end flares. arg2 and arg3 go through to the allocators; callers pass their own header bytes 0xC and 0x1.
  */
-BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
+BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
     BoltObj *bolt;
     s32 segments;
     u8 i;
@@ -42,8 +42,8 @@ BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
     bolt->userData = (u8 *)bolt + segments * sizeof(BoltSample) + points * sizeof(Vec3f) + sizeof(BoltObj);
     bolt->step = 1.0f / (desc->segments + 1);
     bolt->rejitterTimer = func_150ADA20() % (desc->rejitterRange + 1) + desc->rejitterBase;
-    func_15106214(bolt);
-    func_15106610(bolt);
+    beam_sampleBolt(bolt);
+    beam_jitterBolt(bolt);
     bolt->flares[0] = NULL;
     bolt->flares[1] = NULL;
     bzero(bolt->vtxBuf, sizeof(bolt->vtxBuf));
@@ -97,14 +97,14 @@ BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
 }
 
 /* Per-frame update: follow the owner, count down life, re-jitter on a timer, keep the flares on the end points. */
-void func_1510608C(BoltObj *bolt) {
+void beam_updateBolt(BoltObj *bolt) {
     s32 (*update)(BoltObj *, u8 *);
     u8 moved;
     BoltFlare *flare;
 
     moved = FALSE;
     if (bolt->desc.updateKind != -1) {
-        update = D_80088C10[bolt->desc.updateKind];
+        update = gBoltUpdateHandlers[bolt->desc.updateKind];
         if (update != NULL && !update(bolt, &moved)) {
             func_1516972C(&bolt->header);
         }
@@ -118,12 +118,12 @@ void func_1510608C(BoltObj *bolt) {
     }
 
     if (moved) {
-        func_15106214(bolt);
+        beam_sampleBolt(bolt);
     }
 
     bolt->rejitterTimer -= D_800BE9E4;
     if (bolt->rejitterTimer < 0) {
-        func_15106610(bolt);
+        beam_jitterBolt(bolt);
         bolt->rejitterTimer = (func_150ADA20() % (bolt->desc.rejitterRange + 1)) + bolt->desc.rejitterBase;
     }
 
@@ -139,18 +139,18 @@ void func_1510608C(BoltObj *bolt) {
 }
 
 /* The Bezier samples that follow the bolt object. */
-BoltSample *func_151061E0(BoltObj *bolt) {
+BoltSample *beam_getBoltSamples(BoltObj *bolt) {
     return (BoltSample *)(bolt + 1);
 }
 
 /* The jittered joint points that follow the samples. */
-Vec3f *func_151061EC(BoltObj *bolt) {
+Vec3f *beam_getBoltJoints(BoltObj *bolt) {
     s32 segments = bolt->desc.segments;
     return (Vec3f *)((BoltSample *)(bolt + 1) + segments);
 }
 
 /* Samples the Bezier at t = step, 2 * step, ...: position, tangent and a frame around the tangent. */
-void func_15106214(BoltObj *bolt) {
+void beam_sampleBolt(BoltObj *bolt) {
     BoltSample *samples;
     f32 step;
     BoltSample *out;
@@ -165,20 +165,20 @@ void func_15106214(BoltObj *bolt) {
     f32 d2;
     f32 d3;
 
-    samples = func_151061E0(bolt);
+    samples = beam_getBoltSamples(bolt);
     step = bolt->step;
     t = step;
     for (i = 0; i < bolt->desc.segments; i++) {
         out = &samples[i];
         out->t = t;
-        b0 = func_151064B4(t);
-        b1 = func_151064DC(t);
-        b2 = func_15106510(t);
-        b3 = func_15106540(t);
-        d0 = func_15106558(t);
-        d1 = func_15106584(t);
-        d2 = func_151065BC(t);
-        d3 = func_151065EC(t);
+        b0 = beam_bezierB0(t);
+        b1 = beam_bezierB1(t);
+        b2 = beam_bezierB2(t);
+        b3 = beam_bezierB3(t);
+        d0 = beam_bezierB0Deriv(t);
+        d1 = beam_bezierB1Deriv(t);
+        d2 = beam_bezierB2Deriv(t);
+        d3 = beam_bezierB3Deriv(t);
         out->pos.x = bolt->desc.ctrl[0].x * b0 + bolt->desc.ctrl[1].x * b1 + bolt->desc.ctrl[2].x * b2 + bolt->desc.ctrl[3].x * b3;
         out->pos.y = bolt->desc.ctrl[0].y * b0 + bolt->desc.ctrl[1].y * b1 + bolt->desc.ctrl[2].y * b2 + bolt->desc.ctrl[3].y * b3;
         out->pos.z = bolt->desc.ctrl[0].z * b0 + bolt->desc.ctrl[1].z * b1 + bolt->desc.ctrl[2].z * b2 + bolt->desc.ctrl[3].z * b3;
@@ -198,57 +198,57 @@ void func_15106214(BoltObj *bolt) {
 }
 
 /* Cubic Bernstein basis B0(t) = (1 - t)^3. */
-f32 func_151064B4(f32 t) {
+f32 beam_bezierB0(f32 t) {
     f32 u = 1.0f - t;
     return u * u * u;
 }
 
 /* B1(t) = 3t(1 - t)^2. */
-f32 func_151064DC(f32 t) {
+f32 beam_bezierB1(f32 t) {
     f32 u = 1.0f - t;
     return 3.0f * t * u * u;
 }
 
 /* B2(t) = 3t^2(1 - t). */
-f32 func_15106510(f32 t) {
+f32 beam_bezierB2(f32 t) {
     return 3.0f * t * t * (1.0f - t);
 }
 
 /* B3(t) = t^3. */
-f32 func_15106540(f32 t) {
+f32 beam_bezierB3(f32 t) {
     return t * t * t;
 }
 
 /* B0'(t) = -3(1 - t)^2. */
-f32 func_15106558(f32 t) {
+f32 beam_bezierB0Deriv(f32 t) {
     f32 u = 1.0f - t;
     return -3.0f * u * u;
 }
 
 /* B1'(t) = 9t^2 - 12t + 3. */
-f32 func_15106584(f32 t) {
+f32 beam_bezierB1Deriv(f32 t) {
     return 9.0f * t * t - 12.0f * t + 3.0f;
 }
 
 /* B2'(t) = -9t^2 + 6t. */
-f32 func_151065BC(f32 t) {
+f32 beam_bezierB2Deriv(f32 t) {
     return -9.0f * t * t + 6.0f * t;
 }
 
 /* B3'(t) = 3t^2. */
-f32 func_151065EC(f32 t) {
+f32 beam_bezierB3Deriv(f32 t) {
     return 3.0f * t * t;
 }
 
 /* Rebuilds the joint points: the fixed end points plus each sample pushed a random distance sideways. */
-void func_15106610(BoltObj *bolt) {
+void beam_jitterBolt(BoltObj *bolt) {
     BoltSample *samples;
     Vec3f *points;
     s32 i;
     s32 j;
 
-    samples = func_151061E0(bolt);
-    points = func_151061EC(bolt);
+    samples = beam_getBoltSamples(bolt);
+    points = beam_getBoltJoints(bolt);
     points[0] = bolt->desc.ctrl[0];
     points[bolt->desc.segments + 1] = bolt->desc.ctrl[3];
     for (i = 1, j = 0; i < bolt->desc.segments + 1; i++, j++) {
@@ -266,7 +266,7 @@ void func_15106610(BoltObj *bolt) {
 extern s32 D_800A4AC8[][2];
 
 /* Draws the bolt as a camera-facing strip: three vertices (one side, centre, other side) per joint point. */
-Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
+Gfx *beam_drawBolt(Gfx *gdl, BoltObj *bolt, s16 view) {
     Vec3f *camera;
     BoltObj *curve = bolt; // matching: a second copy of the bolt pointer steers IDO's register choice
     Vtx_t *vtx;
@@ -286,12 +286,12 @@ Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
     }
     camera = func_15144B34(view);
     flag = 1;
-    points = func_151061EC(bolt);
-    gdl = func_15142E24(gdl, &D_80090B60[44], 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
+    points = beam_getBoltJoints(bolt);
+    gdl = func_15142E24(gdl, &gEffectTextures[44], 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
     gdl = func_15142C10(gdl, bolt->desc.color.red, bolt->desc.color.green, bolt->desc.color.blue, bolt->desc.color.alpha, &flag);
     gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
     gdl = func_1513F4E4(gdl, 0x44, &flag);
-    gdl = func_15142FBC(gdl, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[1][0] | D_800A4AC8[1][1], &flag);
+    gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[1][0] | D_800A4AC8[1][1], &flag);
     delta.x = points[1].x - points[0].x;
     delta.y = points[1].y - points[0].y;
     delta.z = points[1].z - points[0].z;
@@ -385,11 +385,11 @@ Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
 }
 
 /* Destroys the bolt's resources: the kind's cleanup callback, both end flares and the vertex buffer. */
-void func_15106E78(BoltObj *bolt) {
+void beam_releaseBolt(BoltObj *bolt) {
     void (*cleanup)(BoltObj *);
     BoltFlare *flare;
 
-    cleanup = D_80088C18[bolt->desc.kind];
+    cleanup = gBoltCleanupHandlers[bolt->desc.kind];
     if (cleanup != NULL) {
         cleanup(bolt);
     }
@@ -405,27 +405,27 @@ void func_15106E78(BoltObj *bolt) {
 }
 
 /* Destroys the bolt's resources, then hands it to func_15169804. */
-void func_15106EF8(BoltObj *bolt) {
-    func_15106E78(bolt);
+void beam_destroyBolt(BoltObj *bolt) {
+    beam_releaseBolt(bolt);
     func_15169804(&bolt->header);
 }
 
 /* Destroys the bolt's resources, then hands it to func_15169824. */
-void func_15106F24(BoltObj *bolt) {
-    func_15106E78(bolt);
+void beam_freeBolt(BoltObj *bolt) {
+    beam_releaseBolt(bolt);
     func_15169824(&bolt->header);
 }
 
-/* Dispatches to the bolt kind's handler in D_80088C28. */
-void func_15106F50(BoltObj *bolt, s32 arg1, u8 arg2) {
-    void (*fn)(BoltObj *, s32, u8) = D_80088C28[bolt->desc.kind];
+/* Dispatches to the bolt kind's handler in gBoltMsgHandlers. */
+void beam_boltMessage(BoltObj *bolt, s32 arg1, u8 arg2) {
+    void (*fn)(BoltObj *, s32, u8) = gBoltMsgHandlers[bolt->desc.kind];
     if (fn != NULL) {
         fn(bolt, arg1, arg2);
     }
 }
 
 /* Creates a bolt chain from start to end with (1 << depth) + 1 randomly spaced points. */
-BoltChainObj *func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, u8 kind, u8 arg6, s32 arg7) {
+BoltChainObj *beam_newBoltChain(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, u8 kind, u8 arg6, s32 arg7) {
     BoltChainObj *obj;
     BoltChain chain;
     BoltChain *data;
@@ -443,13 +443,13 @@ BoltChainObj *func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig
         data->points = (Vec3f *)((u8 *)data + 0x48); // matching: = obj->points, but computed from data
         data->points[0] = *start;
         data->points[chain.count - 1] = *end;
-        func_151070F8(obj, 0, chain.count - 1, spread);
+        beam_placeChainPoints(obj, 0, chain.count - 1, spread);
     }
     return obj;
 }
 
 /* Recursively places the points between lo and hi on the line, each midpoint randomly within +-spread of halfway. */
-void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread) {
+void beam_placeChainPoints(BoltChainObj *obj, s16 lo, s16 hi, f32 spread) {
     BoltChain *chain = &obj->chain;
     Vec3f *a;
     f32 dx;
@@ -470,12 +470,12 @@ void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread) {
     chain->points[mid].x = a->x + dx * t;
     chain->points[mid].y = a->y + dy * t;
     chain->points[mid].z = a->z + dz * t;
-    func_151070F8(obj, lo, mid, spread);
-    func_151070F8(obj, mid, hi, spread);
+    beam_placeChainPoints(obj, lo, mid, spread);
+    beam_placeChainPoints(obj, mid, hi, spread);
 }
 
 /* Chain update: once the current link is gone, spawns a bolt from points[index] to points[index + 1]; ends the chain after the last. */
-void func_151072BC(BoltChainObj *obj) {
+void beam_updateBoltChain(BoltChainObj *obj) {
     BoltChain *chain;
     BoltDesc desc;
     BoltChainObj *owner;
@@ -518,7 +518,7 @@ void func_151072BC(BoltChainObj *obj) {
         desc.color.alpha = func_150ADA20() % (config->alphaRange + 1) + config->alphaBase;
         desc.kind = 1;
         desc.segments = func_150ADA20() % (config->segmentsRange + 1) + config->segmentsBase;
-        chain->link = func_15105CE0(&desc, sizeof(owner), obj->base.header.owner, obj->base.header.kind);
+        chain->link = beam_newBolt(&desc, sizeof(owner), obj->base.header.owner, obj->base.header.kind);
         if (chain->link != NULL) {
             memcpy(chain->link->userData, &owner, sizeof(owner));
         }
@@ -527,34 +527,34 @@ void func_151072BC(BoltChainObj *obj) {
 }
 
 /* Kind-1 (chain link) cleanup: tells the owning chain that its link is gone. */
-void func_15107604(BoltObj *bolt) {
+void beam_unlinkChainBolt(BoltObj *bolt) {
     BoltChainObj **owner = bolt->userData;
     BoltChain *chain = &(*owner)->chain;
     chain->link = NULL;
 }
 
 /* Kills the chain's live link, if any. */
-void func_1510761C(BoltChainObj *obj) {
+void beam_killChainLink(BoltChainObj *obj) {
     // matching: volatile makes IDO load the link twice, as the original does
     if (*(BoltObj *volatile *)&obj->chain.link != NULL) {
         func_1516972C(*(EffectHeader *volatile *)&obj->chain.link);
     }
 }
 
-void func_1510764C(BoltChainObj *obj) {
-    func_1510761C(obj);
+void beam_destroyBoltChain(BoltChainObj *obj) {
+    beam_killChainLink(obj);
     func_1514933C(&obj->base);
 }
 
-void func_15107678(BoltChainObj *obj) {
-    func_1510761C(obj);
+void beam_freeBoltChain(BoltChainObj *obj) {
+    beam_killChainLink(obj);
     func_15149368(&obj->base);
 }
 
-/* Dispatches to the chain kind's handler in D_80088C38. */
-void func_151076A4(BoltChainObj *obj, s32 arg1, u8 arg2) {
-    if (D_80088C38[obj->chain.kind] != NULL) {
-        D_80088C38[*(volatile u8 *)&obj->chain.kind](&obj->base.header, arg1, arg2); // matching: the original reloads the kind
+/* Dispatches to the chain kind's handler in gBoltChainMsgHandlers. */
+void beam_boltChainMessage(BoltChainObj *obj, s32 arg1, u8 arg2) {
+    if (gBoltChainMsgHandlers[obj->chain.kind] != NULL) {
+        gBoltChainMsgHandlers[*(volatile u8 *)&obj->chain.kind](&obj->base.header, arg1, arg2); // matching: the original reloads the kind
     }
 }
 
@@ -582,7 +582,7 @@ typedef struct BoltBoneAnchor {
  * Spawns a kind-2 bolt from a point on the actor's bounds (direction yaw/pitch) to where the ray
  * from that point away from the actor hits. life -1 means it never runs out.
  */
-BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argA, s32 argB) {
+BoltObj *beam_spawnBoundsBolt(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argA, s32 argB) {
     BoltAnchor anchor;
     BoltObj *bolt;
     BoltDesc desc;
@@ -620,31 +620,31 @@ BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments,
 
     // matching: a block holding a declaration emits a scope marker that keeps IDO from hoisting &desc.color
     {
-        void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
+        void beam_getBoundsPoint(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
 
-        func_15107A20(actor, yaw, pitch, &desc.ctrl[0], &center);
-        func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, desc.ctrl[0].x - center.x, desc.ctrl[0].y - center.y, desc.ctrl[0].z - center.z, &hit, 0.0f, 0, 1, 1, -1, 0, 0);
+        beam_getBoundsPoint(actor, yaw, pitch, &desc.ctrl[0], &center);
+        collision_castRay(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, desc.ctrl[0].x - center.x, desc.ctrl[0].y - center.y, desc.ctrl[0].z - center.z, &hit, 0.0f, 0, 1, 1, -1, 0, 0);
     }
     if (hit.hitType == 0) {
         return NULL;
     }
     desc.ctrl[3] = hit.pos;
 
-    func_15107AE0(&desc.ctrl[0], &desc.ctrl[3], &desc.ctrl[1], &desc.ctrl[2]);
-    bolt = func_15105CE0(&desc, sizeof(BoltAnchor), argA, argB);
+    beam_getStraightCtrlPoints(&desc.ctrl[0], &desc.ctrl[3], &desc.ctrl[1], &desc.ctrl[2]);
+    bolt = beam_newBolt(&desc, sizeof(BoltAnchor), argA, argB);
     if (bolt != NULL) {
         memcpy(bolt->userData, &anchor, sizeof(BoltAnchor));
     }
     return bolt;
 }
 
-/* D_80088C28 handler for kind 2. */
-void func_151078E4(BoltObj *bolt, s32 arg1, u8 arg2) {
+/* gBoltMsgHandlers handler for kind 2. */
+void beam_boundsBoltMessage(BoltObj *bolt, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, bolt->userData, (u8 *)bolt->userData + 4, bolt);
 }
 
 /* updateKind 0: keeps a kind-2 bolt's start on its owner; returns 0 once the owner is gone. */
-s32 func_15107924(BoltObj *bolt, u8 *moved) {
+s32 beam_followBoundsBolt(BoltObj *bolt, u8 *moved) {
     BoltAnchor *anchor;
     Actor *owner;
     Vec3f oldStart;
@@ -656,21 +656,21 @@ s32 func_15107924(BoltObj *bolt, u8 *moved) {
     }
     *moved = FALSE;
     oldStart = bolt->desc.ctrl[0];
-    func_15107A20(owner, anchor->yaw, anchor->pitch, &bolt->desc.ctrl[0], NULL);
+    beam_getBoundsPoint(owner, anchor->yaw, anchor->pitch, &bolt->desc.ctrl[0], NULL);
     if (oldStart.x != bolt->desc.ctrl[0].x || oldStart.y != bolt->desc.ctrl[0].y || oldStart.z != bolt->desc.ctrl[0].z) {
         *moved = TRUE;
-        func_15107AE0(&bolt->desc.ctrl[0], &bolt->desc.ctrl[3], &bolt->desc.ctrl[1], &bolt->desc.ctrl[2]);
+        beam_getStraightCtrlPoints(&bolt->desc.ctrl[0], &bolt->desc.ctrl[3], &bolt->desc.ctrl[1], &bolt->desc.ctrl[2]);
     }
     return 1;
 }
 
 /* The point on the actor's bounds in direction yaw/pitch (vertically scaled by unkF0); optionally the bounds centre. */
-void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut) {
+void beam_getBoundsPoint(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut) {
     Vec3f center;
     f32 radius;
     f32 unused;
 
-    func_1515C244(actor, &center, &radius, &unused);
+    sprite_getActorBodyBounds(actor, &center, &radius, &unused);
     func_15143794(yaw, pitch, radius, out);
     out->y *= actor->unkF0;
     out->x += center.x;
@@ -682,7 +682,7 @@ void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOu
 }
 
 /* Inner control points of a straight bolt: one third and two thirds of the way from start to end. */
-void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2) {
+void beam_getStraightCtrlPoints(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -706,7 +706,7 @@ void func_15107B78(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4) {
     f32 unused;
 
     if (actor->ob_matrix_ptr != NULL) {
-        func_1515C244(actor, &center, &radius, &unused);
+        sprite_getActorBodyBounds(actor, &center, &radius, &unused);
         func_15143794(yaw, pitch, radius, &pos);
         pos.y *= actor->unkF0;
         pos.x += center.x;
@@ -720,7 +720,7 @@ void func_15107B78(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4) {
  * Spawns a kind-3 bolt from localPos in the actor's bone matrix along direction yaw/pitch, up to 300
  * units or to what the ray hits. life -1 means it never runs out.
  */
-BoltObj *func_15107C1C(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
+BoltObj *beam_spawnBoneBolt(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
     BoltBoneAnchor anchor;
     BoltObj *bolt;
     BoltDesc desc;
@@ -756,9 +756,9 @@ BoltObj *func_15107C1C(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s1
     desc.color = *(Color8 *)color;
     desc.kind = 3;
 
-    func_15107F54(actor, bone, localPos, &desc.ctrl[0]);
+    beam_transformBoneLocal(actor, bone, localPos, &desc.ctrl[0]);
     func_15143794(yaw, pitch, 1.0f, &dir);
-    func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, dir.x, dir.y, dir.z, &hit, 300.0f, 0, 1, 1, -1, 0, 0);
+    collision_castRay(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, dir.x, dir.y, dir.z, &hit, 300.0f, 0, 1, 1, -1, 0, 0);
 
     if (hit.hitType == 0) {
         desc.ctrl[3].x = desc.ctrl[0].x + dir.x * 300.0f;
@@ -768,8 +768,8 @@ BoltObj *func_15107C1C(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s1
         desc.ctrl[3] = hit.pos;
     }
 
-    func_15107AE0(&desc.ctrl[0], &desc.ctrl[3], &desc.ctrl[1], &desc.ctrl[2]);
-    bolt = func_15105CE0(&desc, sizeof(BoltBoneAnchor), argC, argD);
+    beam_getStraightCtrlPoints(&desc.ctrl[0], &desc.ctrl[3], &desc.ctrl[1], &desc.ctrl[2]);
+    bolt = beam_newBolt(&desc, sizeof(BoltBoneAnchor), argC, argD);
     if (bolt != NULL) {
         memcpy(bolt->userData, &anchor, sizeof(BoltBoneAnchor));
     }
@@ -777,7 +777,7 @@ BoltObj *func_15107C1C(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s1
 }
 
 /* updateKind 1: keeps a kind-3 bolt's start on its owner's bone; returns 0 once the owner is gone. */
-s32 func_15107E48(BoltObj *bolt, u8 *moved) {
+s32 beam_followBoneBolt(BoltObj *bolt, u8 *moved) {
     BoltBoneAnchor *anchor;
     Actor *owner;
     Vec3f oldStart;
@@ -792,20 +792,20 @@ s32 func_15107E48(BoltObj *bolt, u8 *moved) {
     }
     *moved = FALSE;
     oldStart = bolt->desc.ctrl[0];
-    func_15107F54(owner, anchor->bone, &anchor->localPos, &bolt->desc.ctrl[0]);
+    beam_transformBoneLocal(owner, anchor->bone, &anchor->localPos, &bolt->desc.ctrl[0]);
     if (oldStart.x != bolt->desc.ctrl[0].x || oldStart.y != bolt->desc.ctrl[0].y || oldStart.z != bolt->desc.ctrl[0].z) {
         *moved = TRUE;
-        func_15107AE0(&bolt->desc.ctrl[0], &bolt->desc.ctrl[3], &bolt->desc.ctrl[1], &bolt->desc.ctrl[2]);
+        beam_getStraightCtrlPoints(&bolt->desc.ctrl[0], &bolt->desc.ctrl[3], &bolt->desc.ctrl[1], &bolt->desc.ctrl[2]);
     }
     return 1;
 }
 
 /* Transforms localPos by the actor's bone matrix (64 bytes each, at ob_matrix_ptr). */
-void func_15107F54(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f *out) {
+void beam_transformBoneLocal(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f *out) {
     func_15143134(localPos, out, &actor->ob_matrix_ptr[bone]);
 }
 
-/* D_80088C28 handler for kind 3. */
-void func_15107F98(BoltObj *bolt, s32 arg1, u8 arg2) {
+/* gBoltMsgHandlers handler for kind 3. */
+void beam_boneBoltMessage(BoltObj *bolt, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, bolt->userData, (u8 *)bolt->userData + 4, bolt);
 }

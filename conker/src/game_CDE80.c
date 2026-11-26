@@ -2,17 +2,17 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c). */
-u8 D_800D3090;                // timer of the ZONE_TYPE_EFFECT subtype-6 zone
+u8 gEffectZoneTimer;                // timer of the ZONE_TYPE_EFFECT subtype-6 zone
 u32 gZoneCount;               // number of TriggerZones in zones
 TriggerZone *zones;           // level placement / marker table (0x34-byte records)
-ZoneBounds *D_800D309C;       // bounds of each trigger zone (zones)
-u64 D_800D30A0[3];            // TriggerZones that are always tested
-u64 D_800D30B8[3];            // default candidate TriggerZones
-u16 D_800D30D0[16];           // per actor: 1 + index of the last zone box it was found in, 0 for none
-u64 D_800D30F0[16][3];        // per actor: TriggerZones it was inside last time
-TriggerZone **D_800D3270;     // the ZONE_TYPE_CHAR_FLAGS zones with subTypeData 0, 2 or 6
-s32 D_800D3274;               // number of entries in D_800D3270
-static s32 D_800D3278;        // cleared by func_150A11C4, otherwise unused
+ZoneBounds *gZoneBounds;       // bounds of each trigger zone (zones)
+u64 gZonesAlwaysTested[3];            // TriggerZones that are always tested
+u64 gZonesCandidates[3];            // default candidate TriggerZones
+u16 gActorLastZoneBox[16];           // per actor: 1 + index of the last zone box it was found in, 0 for none
+u64 gActorZoneBits[16][3];        // per actor: TriggerZones it was inside last time
+TriggerZone **gCharFlagZones;     // the ZONE_TYPE_CHAR_FLAGS zones with subTypeData 0, 2 or 6
+s32 gCharFlagZoneCount;               // number of entries in gCharFlagZones
+static s32 D_800D3278;        // cleared by zone_updateActor, otherwise unused
 static u8 D_800D3280[0x80];   /* not referenced; neither this build nor the October 2000 debug build reads it */
 
 #include "functions.h"
@@ -21,13 +21,13 @@ static u8 D_800D3280[0x80];   /* not referenced; neither this build nor the Octo
 
 
 /* Per-frame update of the zone state that does not depend on an actor (ticks is unused). */
-void func_150A09D0(s32 ticks) {
+void zone_updateGlobal(s32 ticks) {
     u32 countdown;
     s32 i;
 
     for (i = 0; i < gZoneCount; i++) {
         switch (ZONE_TYPE(&zones[i])) {
-        case ZONE_TYPE_SOUND: /* sound zone: data3 is 1 while occupied (func_150A23E4 sets it each time); a zone left
+        case ZONE_TYPE_SOUND: /* sound zone: data3 is 1 while occupied (zone_startSound sets it each time); a zone left
                    unoccupied for a whole update gets its looping sound stopped */
             if (zones[i].data3 == 1) {
                 zones[i].data3 ^= 3;
@@ -41,7 +41,7 @@ void func_150A09D0(s32 ticks) {
             }
             if (D_800C35EA[0] == 1) {
                 if (zone_isOutside(movement_obj, &zones[i], 0) == 0) {
-                    func_150A23E4(&zones[i]);
+                    zone_startSound(&zones[i]);
                 }
             }
             break;
@@ -62,7 +62,7 @@ void func_150A09D0(s32 ticks) {
             break;
         case ZONE_TYPE_MINI_SHAPE:
             if (zones[i].subTypeData != 9) {
-                /* count down the respawn delay of the object func_150A24C0 spawned */
+                /* count down the respawn delay of the object zone_updateMiniShape spawned */
                 countdown = zones[i].data2 & 0xFF;
                 if (countdown != 0) {
                     if (!zones[i].inactive) {
@@ -116,7 +116,7 @@ void zone_cacheAngles(TriggerZone *zone) {
 s32 math_distance3D(s32 dx, s32 dy, s32 dz); /* game_DAE50.s */
 
 /* Starts the ZONE_TYPE_REFLECTION zone effect (model_queueReflection) for every active actor inside such a zone. */
-void func_150A0D8C(void) {
+void zone_updateReflections(void) {
     u32 i;
     s32 j;
     Actor *obj;
@@ -152,13 +152,13 @@ void func_150A0D8C(void) {
     }
 }
 
-/* Offsets a value by 0x400; used to hide the cartridge-check address and value in func_150A11C4. */
+/* Offsets a value by 0x400; used to hide the cartridge-check address and value in zone_updateActor. */
 s32 func_150A1040(s32 value) {
     return value + 0x400;
 }
 
 /* Tests the camera position against the given TriggerZones and applies the ZONE_TYPE_CHAR_FLAGS ones (camera floor height and flag 0x40000). */
-void func_150A104C(Camera *cam, TriggerZone **zoneList, s32 count) {
+void zone_applyCameraZones(Camera *cam, TriggerZone **zoneList, s32 count) {
     Actor probe;
 
     probe.xpos = cam->eye.x;
@@ -201,7 +201,7 @@ void __osPiRelAccess(void);
 s32 osPiRawReadIo(u32, u32 *);
 
 /* Finds the TriggerZones that contain the actor (narrowed through the zone bounding boxes) and applies them. */
-void func_150A11C4(Actor *actor) {
+void zone_updateActor(Actor *actor) {
     u32 i;
     u32 base;
     u64 *word;
@@ -225,8 +225,8 @@ void func_150A11C4(Actor *actor) {
     cam = actor->CameraPtr;
     if (cam == NULL) {
         unk127 = 0xFF;
-    } else if (D_800D3274 != 0) {
-        func_150A104C(cam, D_800D3270, D_800D3274);
+    } else if (gCharFlagZoneCount != 0) {
+        zone_applyCameraZones(cam, gCharFlagZones, gCharFlagZoneCount);
     }
     x = (s16)actor->xpos;
     prev = (u64 *)(s16)actor->ypos;
@@ -240,8 +240,8 @@ void func_150A11C4(Actor *actor) {
     idx = actor - movement_obj;
     found = 0;
     if (idx < 16) {
-        if (D_800D30D0[idx] > 0) {
-            box = &D_800D309C[D_800D30D0[idx] - 1];
+        if (gActorLastZoneBox[idx] > 0) {
+            box = &gZoneBounds[gActorLastZoneBox[idx] - 1];
             if (BOX_CONTAINS(box, x, (s32)prev, z)) {
                 for (i = 0; i < 3; i++) {
                     mask[i] = box->overlaps[i];
@@ -249,11 +249,11 @@ void func_150A11C4(Actor *actor) {
                 found = 1;
             }
         }
-        D_800D30D0[idx] = 0;
+        gActorLastZoneBox[idx] = 0;
     }
     if (!found) {
         for (i = 0; i < 3; i++) {
-            mask[i] = D_800D30B8[i];
+            mask[i] = gZonesCandidates[i];
         }
     }
 
@@ -270,13 +270,13 @@ void func_150A11C4(Actor *actor) {
             }
         }
         if (bits & 1) {
-            box = &D_800D309C[i];
+            box = &gZoneBounds[i];
             if (BOX_CONTAINS(box, x, (s32)prev, z)) {
                 for (k = 0; k < 3; k++) {
                     mask[k] &= box->overlaps[k];
                 }
                 if (idx < 16 && box->numOverlaps < bestUnk18) {
-                    D_800D30D0[idx] = i + 1;
+                    gActorLastZoneBox[idx] = i + 1;
                     bestUnk18 = box->numOverlaps;
                 }
             } else {
@@ -290,10 +290,10 @@ void func_150A11C4(Actor *actor) {
     word = mask;
     base = 0;
     for (i = 0; i < 3; i++) {
-        mask[i] |= D_800D30A0[i];
+        mask[i] |= gZonesAlwaysTested[i];
     }
     if (idx < 16) {
-        prev = D_800D30F0[idx];
+        prev = gActorZoneBits[idx];
         prevBits = *prev;
         *prev = 0;
     } else {
@@ -388,7 +388,7 @@ void func_150A11C4(Actor *actor) {
                     }
                     break;
                 case ZONE_TYPE_SOUND:
-                    func_150A23E4(&zones[i]);
+                    zone_startSound(&zones[i]);
                     break;
                 case ZONE_TYPE_TUNE_CHANNEL:
                     if (zones[i].data3 == 0) {
@@ -415,7 +415,7 @@ void func_150A11C4(Actor *actor) {
                     }
                     break;
                 case ZONE_TYPE_MINI_SHAPE:
-                    func_150A24C0(&zones[i], unk127);
+                    zone_updateMiniShape(&zones[i], unk127);
                     break;
                 case ZONE_TYPE_WARP: {
                     u32 raw;
@@ -437,7 +437,7 @@ void func_150A11C4(Actor *actor) {
                     text_queueObjectText(actor, &zones[i], 1, zones[i].subTypeData, zones[i].data1);
                     break;
                 case ZONE_TYPE_EFFECT:
-                    func_150A25D4(&zones[i], actor, unk127, prevBits);
+                    zone_applyEffect(&zones[i], actor, unk127, prevBits);
                     break;
                 case ZONE_TYPE_NEUTRAL:
                     if (zones[i].subTypeData == 5) {
@@ -581,7 +581,7 @@ s32 zone_isOutside(Actor *actor, TriggerZone *zone, s32 withMargin) {
 }
 
 /* Type-2 zone occupied: starts its looping positional sound (sound_addDynamicSound) if it is not playing yet. */
-void func_150A23E4(TriggerZone *zone) {
+void zone_startSound(TriggerZone *zone) {
     s32 flags;
     s32 farFlag;
 
@@ -625,7 +625,7 @@ typedef struct {
 
 /* ZONE_TYPE_MINI_SHAPE zone: spawns its object (swarm_spawnEffect) once the countdown in the low byte of data2 is 0;
    while the zone stays occupied the countdown is held at 2 or more. */
-void func_150A24C0(TriggerZone *zone, s32 unk127) {
+void zone_updateMiniShape(TriggerZone *zone, s32 unk127) {
     s32 handle;
     s32 countdown;
     s32 subtype;
@@ -662,7 +662,7 @@ void func_150A24C0(TriggerZone *zone, s32 unk127) {
 }
 
 /* ZONE_TYPE_EFFECT zone: subTypeData-specific effect on the actor inside it; prevBits bit 0 is "was inside last time". */
-void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
+void zone_applyEffect(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
     switch (zone->subTypeData) {
     case 0:
         break;
@@ -674,9 +674,9 @@ void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
     case 2:
         if (unk127 != 0xFF) {
             /* colour: one byte each from data1, data2, data3 */
-            D_800D9EB8[unk127][0] = zone->data1;
-            D_800D9EB8[unk127][1] = zone->data2;
-            D_800D9EB8[unk127][2] = zone->data3;
+            gTintTargetOverrides[unk127][0] = zone->data1;
+            gTintTargetOverrides[unk127][1] = zone->data2;
+            gTintTargetOverrides[unk127][2] = zone->data3;
         }
         break;
     case 3:
@@ -685,7 +685,7 @@ void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
         }
         break;
     case 6: {
-        u8 *timer = &D_800D3090;
+        u8 *timer = &gEffectZoneTimer;
         if (!(prevBits & 1)) {
             *timer = 30;
             sound_playActorSound1(0x66F, actor, 0x5DC0, 0x190, 0x1F4);
@@ -716,7 +716,7 @@ void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
 }
 
 /* Applies the ZONE_TYPE_WARP TriggerZones containing the actor (player_startWarp), unless its unk65 is set. */
-void func_150A278C(Actor *actor) {
+void zone_applyWarps(Actor *actor) {
     s32 i;
 
     if (actor->attach_char != 0) {
@@ -732,7 +732,7 @@ void func_150A278C(Actor *actor) {
 }
 
 /* Enables (0) or disables (1) zone id; disabling also clears it from every actor's occupancy bits. */
-void func_150A2864(u32 id, s32 disabled) {
+void zone_setDisabled(u32 id, s32 disabled) {
     s32 i;
 
     id &= 0xFFF;
@@ -741,13 +741,13 @@ void func_150A2864(u32 id, s32 disabled) {
     }
     if (disabled == 1) {
         for (i = 0; i < 16; i++) {
-            D_800D30F0[i][id >> 6] &= ~(1ULL << (id & 0x3F));
+            gActorZoneBits[i][id >> 6] &= ~(1ULL << (id & 0x3F));
         }
     }
 }
 
 /* Sets zone id's data1 and subTypeData (-1 leaves one unchanged) and clears its data2. */
-void func_150A2940(s32 id, s32 data1, s32 subTypeData) {
+void zone_setData1(s32 id, s32 data1, s32 subTypeData) {
     id &= 0xFFF;
     if (id < gZoneCount) {
         if (data1 != -1) {
@@ -761,13 +761,13 @@ void func_150A2940(s32 id, s32 data1, s32 subTypeData) {
 }
 
 /* Returns 0 if actor `actor` is inside zone id, else 1 (cached occupancy bits when they are current). */
-s32 func_150A29C8(u32 actor, u32 id) {
+s32 zone_isActorOutsideId(u32 actor, u32 id) {
     id &= 0xFFF;
     if (gZoneCount < id) {
         return 1;
     }
     if (actor < 16 && (gMatchState.playerMask & (1 << actor))) {
-        if ((D_800D30F0[actor][id >> 6] >> (id & 0x3F)) & 1) {
+        if ((gActorZoneBits[actor][id >> 6] >> (id & 0x3F)) & 1) {
             return 0;
         }
         return 1;
@@ -776,7 +776,7 @@ s32 func_150A29C8(u32 actor, u32 id) {
 }
 
 /* Returns the first of the count zone ids in ids[] that contains actor `actor`, or -1. */
-s32 func_150A2AEC(actor, count, ids)
+s32 zone_findActorZone(actor, count, ids)
     u32 actor;
     s32 count;
     s32 *ids;
@@ -789,7 +789,7 @@ s32 func_150A2AEC(actor, count, ids)
             id = ids[i];
             id &= 0xFFF;
             if (id < gZoneCount) {
-                if ((D_800D30F0[actor][id >> 6] >> (id & 0x3F)) & 1) {
+                if ((gActorZoneBits[actor][id >> 6] >> (id & 0x3F)) & 1) {
                     return id;
                 }
             }
@@ -809,7 +809,7 @@ s32 func_150A2AEC(actor, count, ids)
 }
 
 /* Returns the first actor whose cached occupancy bits say it is inside zone id, or -1. */
-s32 func_150A2CA4(u32 id) {
+s32 zone_findActorInZone(u32 id) {
     s32 i;
 
     id &= 0xFFF;
@@ -818,7 +818,7 @@ s32 func_150A2CA4(u32 id) {
     }
     for (i = 0; i != 16; i++) {
         if (gMatchState.playerMask & (1 << i)) {
-            if ((D_800D30F0[i][id >> 6] >> (id & 0x3F)) & 1) {
+            if ((gActorZoneBits[i][id >> 6] >> (id & 0x3F)) & 1) {
                 return i;
             }
         }
@@ -827,7 +827,7 @@ s32 func_150A2CA4(u32 id) {
 }
 
 /* Returns 0 if camera `camIndex`'s position is inside zone id, else 1. */
-s32 func_150A2D84(s32 camIndex, s32 id) {
+s32 zone_isCameraOutsideId(s32 camIndex, s32 id) {
     Camera *cam;
     Actor probe;
 
@@ -849,7 +849,7 @@ s32 func_150A2D84(s32 camIndex, s32 id) {
 /* Returns 1 if the point is behind (or on) the zone's rotated plane, else 0.
  * matching: the dead u/z computations reproduce the original's register allocation
  * (u reserves $f16 so t lands in $f18) and block IDO's (a - b <= 0) -> (a <= b) fold. */
-s32 func_150A2E4C(TriggerZone *zone, f32 x, f32 y, f32 z) {
+s32 zone_isBehindPlane(TriggerZone *zone, f32 x, f32 y, f32 z) {
     f32 s;
     f32 c;
     f32 t;
@@ -876,20 +876,20 @@ s32 func_150A2E4C(TriggerZone *zone, f32 x, f32 y, f32 z) {
 }
 
 /* Returns whether actor `actor` is behind gate zone id (0 for a zone that is not a gate, 1 for bad ids). */
-s32 func_150A2EE4(s32 actor, s32 id) {
+s32 zone_isActorBehindGate(s32 actor, s32 id) {
     id &= 0xFFF;
     if (gZoneCount < id) {
         return 1;
     }
     if (ZONE_AREA_TYPE(&zones[id]) == ZONE_AREA_GATE) {
-        return func_150A2E4C(&zones[id], movement_obj[actor].xpos, movement_obj[actor].ypos,
+        return zone_isBehindPlane(&zones[id], movement_obj[actor].xpos, movement_obj[actor].ypos,
                              movement_obj[actor].zpos);
     }
     return 0;
 }
 
-/* As func_150A2EE4, for camera `camIndex`'s position. */
-s32 func_150A2FA4(s32 camIndex, s32 id) {
+/* As zone_isActorBehindGate, for camera `camIndex`'s position. */
+s32 zone_isCameraBehindGate(s32 camIndex, s32 id) {
     Camera *cam;
 
     cam = &camera_global_Cameras[camIndex];
@@ -898,13 +898,13 @@ s32 func_150A2FA4(s32 camIndex, s32 id) {
         return 1;
     }
     if (ZONE_AREA_TYPE(&zones[id]) == ZONE_AREA_GATE) {
-        return func_150A2E4C(&zones[id], cam->eye.x, cam->eye.y, cam->eye.z);
+        return zone_isBehindPlane(&zones[id], cam->eye.x, cam->eye.y, cam->eye.z);
     }
     return 0;
 }
 
 /* Returns 1 if the point is inside an enabled ZONE_TYPE_NEUTRAL zone of the given subTypeData. */
-s32 func_150A3058(s32 subtype, s16 x, s16 y, s16 z) {
+s32 zone_isInNeutralZone(s32 subtype, s16 x, s16 y, s16 z) {
     u8 pad[4]; // matching: unused local of the original (frame layout)
     Actor probe;
     s32 i;
@@ -959,7 +959,7 @@ TriggerZone *zone_findAt(s32 type, s32 subtype, s32 x, s32 y, s32 z) {
 }
 
 /* Returns 1 if the point is inside the zone. */
-s32 func_150A32B4(TriggerZone *zone, s32 x, s32 y, s32 z) {
+s32 zone_containsPoint(TriggerZone *zone, s32 x, s32 y, s32 z) {
     Actor probe;
     u8 pad[8]; // matching: unused local of the original (frame layout)
 
@@ -977,7 +977,7 @@ s32 func_150A32B4(TriggerZone *zone, s32 x, s32 y, s32 z) {
 }
 
 /* Reads zone id's subTypeData and parameters. */
-void func_150A3330(s32 id, s32 *subTypeData, s32 *data1, s32 *data2, s32 *data3) {
+void zone_getParams(s32 id, s32 *subTypeData, s32 *data1, s32 *data2, s32 *data3) {
     *subTypeData = zones[id].subTypeData;
     *data1 = zones[id].data1;
     *data2 = zones[id].data2;
@@ -985,7 +985,7 @@ void func_150A3330(s32 id, s32 *subTypeData, s32 *data1, s32 *data2, s32 *data3)
 }
 
 /* Writes the zone id fields selected by mask (1: subTypeData, 2: data1, 4: data2, 8: data3). */
-void func_150A3398(s32 id, u16 mask, s32 subTypeData, s32 data1, s32 data2, s32 data3) {
+void zone_setParams(s32 id, u16 mask, s32 subTypeData, s32 data1, s32 data2, s32 data3) {
     if (mask & 1) {
         zones[id].subTypeData = subTypeData;
     }
@@ -1001,7 +1001,7 @@ void func_150A3398(s32 id, u16 mask, s32 subTypeData, s32 data1, s32 data2, s32 
 }
 
 /* Moves zone id to (x, y, z). */
-void func_150A3444(s32 id, s16 x, s16 y, s16 z) {
+void zone_setPosition(s32 id, s16 x, s16 y, s16 z) {
     zones[id].x = x;
     zones[id].y = y;
     zones[id].z = z;
@@ -1009,12 +1009,12 @@ void func_150A3444(s32 id, s16 x, s16 y, s16 z) {
 
 /* Tests the segment p0-p1 against cyl (only an active ZONE_AREA_CYLINDER zone);
    on a hit writes the entry point to hit and returns TRUE. */
-s32 func_150A34B0(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit) {
+s32 zone_segmentHitsCylinder(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit) {
     if (cyl->inactive == 1) {
         return FALSE;
     }
     if (ZONE_AREA_TYPE(cyl) == ZONE_AREA_CYLINDER) {
-        return func_150A3504(cyl, p0, p1, hit);
+        return zone_segmentCylinder(cyl, p0, p1, hit);
     }
     return FALSE;
 }
@@ -1023,7 +1023,7 @@ s32 func_150A34B0(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit) {
    segment to the height slab [0, height] and to the radius, and on overlap writes the first
    contact point (back in world space) to hit and returns TRUE.
    func_150AD78C / func_150AD780 are sin / cos of an angle in radians. */
-s32 func_150A3504(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit) {
+s32 zone_segmentCylinder(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit) {
     s32 i;
     f32 scale;
     f32 tSlabMin;

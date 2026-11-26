@@ -54,7 +54,7 @@ void func_150B12FC(Actor *obj) {
     {
         f32 height;
 
-        height = D_800D2104[obj->listpos][0].y;
+        height = gSpawnPaths[obj->listpos][0].y;
         func_15058EA4(obj, height, 1.0f, height, -0.7f, 12.0f, -16.0f);
     }
     actor_updateChaseAi(obj);
@@ -92,7 +92,7 @@ void func_150B1484(Actor *obj) {
     if (obj->stunned == 0) {
         f32 targetY;
 
-        targetY = D_800D20FC[obj->listpos].y + 210.0f;
+        targetY = gSpawnRecords[obj->listpos].y + 210.0f;
         if (!(obj->unk22C & 8)) {
             if (obj->unk223 != 3) {
                 obj->vtilt = obj->yspd * -0.5f;
@@ -115,7 +115,7 @@ void func_150B1484(Actor *obj) {
             heightCode = obj->unk224;
             if (heightCode != 0) {
                 if (heightCode == 10000) {
-                    targetY = D_800D2104[obj->listpos][obj->unk21E + 1].y;
+                    targetY = gSpawnPaths[obj->listpos][obj->unk21E + 1].y;
                 } else if ((obj->character_type == 0x50) || (obj->character_type == 5) || (obj->character_type == 0xAD) || (obj->character_type == 0xAE) || (obj->character_type == 0xAF)) {
                     targetY = heightCode * 8;
                 } else {
@@ -127,7 +127,7 @@ void func_150B1484(Actor *obj) {
                 f32 maxSpeed;
 
                 if (obj->character_type == 0x44) {
-                    targetY = D_800D2104[obj->listpos][obj->unk21E + 1].y;
+                    targetY = gSpawnPaths[obj->listpos][obj->unk21E + 1].y;
                     gravity = 3.0f;
                     maxSpeed = 12.0f;
                 } else {
@@ -250,8 +250,8 @@ void func_150B19E0(Actor *obj) {
         particle.x = obj->xpos + sine * radius;
         particle.y = obj->ypos;
         particle.z = obj->zpos + cosine * radius;
-        func_1510F800(0);
-        particle.unk4 = func_1510F8D8(particle.x, particle.y, particle.z, 0);
+        collision_selectMap(0);
+        particle.unk4 = collision_findMeshFloorNear(particle.x, particle.y, particle.z, 0);
         angle = movement_obj[0].angle >> 8;
         speed = movement_obj[0].speed * 64.0f;
         particle.velX = func_150489B0(angle) * speed;

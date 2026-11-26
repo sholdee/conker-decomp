@@ -218,15 +218,15 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
     }
     if (dist < 200000 && flare->brightness > 0 && fabsf(flare->screenX) < 2000.0f &&
         fabsf(flare->screenY) < 2000.0f) {
-        D_800D2DA8 = 0xFF;
-        D_800D2DA9 = 0xFF;
-        D_800D2DAA = 0xFF;
-        sprite.tex = &D_800903AC;
+        gSpritePrimR = 0xFF;
+        gSpritePrimG = 0xFF;
+        gSpritePrimB = 0xFF;
+        sprite.tex = &gFlareTexture;
         sprite.animSpeed = 0;
         sprite.animTimer = 0;
         sprite.flip = 0;
         if (!D_800DDD60) {
-            gfx = func_150950D4(func_1517EA4C(gfx), &D_800903AC, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
+            gfx = sprite_loadTexture(func_1517EA4C(gfx), &gFlareTexture, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
             D_800DDD60 = TRUE;
         }
         intensity = flare->alpha;
@@ -240,7 +240,7 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
             sprite.scaleX = (size << 12) * D_800380A0 / 255.0f;
             sprite.scaleY = (size << 12) * D_800380A4 / 255.0f;
             D_800D2DAB = 0;
-            gfx = func_15095A48(gfx, &sprite, x, y);
+            gfx = sprite_drawScreen(gfx, &sprite, x, y);
             gDPPipeSync(gfx++);
         }
     }
@@ -322,7 +322,7 @@ typedef union {
 
 /*
  * Projects a flare and computes its z-buffer depth. Stores the decoded z-buffer sample in *outZbufDepth.
- * Returns 0 when func_1509563C rejects the flare (max distance 4000), and 1 otherwise; a FLARE_DIRECTED
+ * Returns 0 when sprite_project rejects the flare (max distance 4000), and 1 otherwise; a FLARE_DIRECTED
  * flare whose cone the viewer is outside of returns 1 early without updating anything.
  */
 s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
@@ -333,7 +333,7 @@ s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
     s32 exponent;
     ClipZW clip;
 
-    if (func_1509563C(flare->pos[0], flare->pos[1], flare->pos[2], &flare->screenX, &flare->screenY, &clip.f.z,
+    if (sprite_project(flare->pos[0], flare->pos[1], flare->pos[2], &flare->screenX, &flare->screenY, &clip.f.z,
                       &clip.f.w, 4000.0f) == 1) {
         if (flare->flags & FLARE_DIRECTED) {
             dx = flare->pos[0] - camera_global_Cameras->eye.x;

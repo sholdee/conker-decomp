@@ -44,7 +44,7 @@ HudModel *D_8009005C = NULL;
 HudSprite D_80090060 = { (void *)0x7BC, 0x100, 32, 32, G_IM_FMT_RGBA, G_IM_SIZ_32b };
 extern u8 D_7FB;
 extern u8 D_887;
-/* func_1510D0EC returns this instead of a texture address when it fails. */
+/* texture_getAddress returns this instead of a texture address when it fails. */
 #define TEXTURE_NOT_LOADED ((s32)0x80000000)
 
 /* Draws the HUD overlay: shared HUD, the per-mode overlay, and a blinking warning message. */
@@ -230,7 +230,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     }
     image = 0;
     if (D_8008FDC0 & 9) {
-        image = func_1510D0EC((s32)&D_D14, 0, 3, 0);
+        image = texture_getAddress((s32)&D_D14, 0, 3, 0);
         if (image != TEXTURE_NOT_LOADED) {
             gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, image);
             gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 5, 0, G_TX_CLAMP, 5, 0);
@@ -285,7 +285,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
         } else {
             i = (s32)&D_D16;
         }
-        image = func_1510D0EC(i, 0, 3, 0);
+        image = texture_getAddress(i, 0, 3, 0);
         if (image != TEXTURE_NOT_LOADED) {
             gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, image);
             gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 6, 0, G_TX_CLAMP, 6, 0);
@@ -326,7 +326,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
         } else {
             i = (s32)&D_D10;
         }
-        image = func_1510D0EC(i, 0, 3, 0);
+        image = texture_getAddress(i, 0, 3, 0);
         if (image != TEXTURE_NOT_LOADED) {
             gDPPipeSync(gfx++);
             gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, image);
@@ -373,7 +373,7 @@ Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh
 
     inactiveTeams = 0;
     if (loadTexture != 0) {
-        image = func_1510D0EC((s32)&D_D14, 0, 3, 0);
+        image = texture_getAddress((s32)&D_D14, 0, 3, 0);
         if (image == TEXTURE_NOT_LOADED) {
             return gfx;
         }
@@ -430,7 +430,7 @@ Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh
         x += spacing;
     }
     if (inactiveTeams) {
-        image = func_1510D0EC((s32)&D_D16 + 1, 0, 3, 0);
+        image = texture_getAddress((s32)&D_D16 + 1, 0, 3, 0);
         if (image == TEXTURE_NOT_LOADED) {
             return gfx;
         }
@@ -496,7 +496,7 @@ Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
         rightIconT = 0;
     }
 
-    image = func_1510D0EC(tex, 0, 3, 0);
+    image = texture_getAddress(tex, 0, 3, 0);
     if (image == TEXTURE_NOT_LOADED) {
         return gfx;
     }
@@ -586,7 +586,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
         gDPPipeSync(gfx++);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
         gDPSetCombine(gfx++, 0x12D225, 0xFFA7FFFF);
-        image = func_1510D0EC((s32)&D_843, 0, 3, 0);
+        image = texture_getAddress((s32)&D_843, 0, 3, 0);
         if (image == TEXTURE_NOT_LOADED) {
             return gfx;
         }
@@ -648,7 +648,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
         team = gRosterTeams[i];
         if (team != 0 || (team == 0 && showTeam0)) { // matching: redundant team == 0 test is in the original
             if (texturesLoaded == 0) {
-                image = func_1510D0EC((s32)&D_887, 0, 3, 0);
+                image = texture_getAddress((s32)&D_887, 0, 3, 0);
                 if (image == TEXTURE_NOT_LOADED) {
                     return gfx;
                 }
@@ -676,7 +676,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                     x += 0x78;
                 }
                 gDPPipeSync(gfx++);
-                image = func_1510D0EC((s32)&D_888, 0, 3, 0);
+                image = texture_getAddress((s32)&D_888, 0, 3, 0);
                 if (image == TEXTURE_NOT_LOADED) {
                     return gfx;
                 }
@@ -696,7 +696,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                     gfx = func_151E86E4(gfx, x, iconY, x + 0x80, iconBottom, 0, 0, 0x200, 0x400, 0x400);
                 }
                 gDPPipeSync(gfx++);
-                image = func_1510D0EC((s32)&D_843, 0, 3, 0);
+                image = texture_getAddress((s32)&D_843, 0, 3, 0);
                 if (image == TEXTURE_NOT_LOADED) {
                     return gfx;
                 }
@@ -798,7 +798,7 @@ Gfx *func_151EADFC(Gfx *gfx, s32 x, s32 y, s32 value) {
         digit = value / places.v[i];
         value = value % places.v[i];
         if ((digit > 0) || started || (i == 0)) {
-            image = func_1510D0EC(D_80090074[digit], 0, 3, 0);
+            image = texture_getAddress(D_80090074[digit], 0, 3, 0);
             started = 1;
             if (image != TEXTURE_NOT_LOADED) {
                 gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, image);
@@ -867,7 +867,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
             for (i = 0; i < 0x48; i++, id++) {
                 if (id != (s32)&D_1647 && id != (s32)&D_1648 && id != (s32)(&D_1648 + 1) &&
                     id != (s32)&D_1653 && id != (s32)&D_1654 && id != (s32)(&D_1654 + 1)) {
-                    func_1510D694(id);
+                    texture_releaseId(id);
                 }
             }
             start = 0x4E;
@@ -875,7 +875,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
             start = 0;
         }
         for (i = start; i < 0x168; i++) {
-            func_1510D694(D_800891BC[D_800B0DF0->unk9][2] + i);
+            texture_releaseId(D_800891BC[D_800B0DF0->unk9][2] + i);
         }
     }
     if (D_800900B8 < 5) {
@@ -892,17 +892,17 @@ Gfx *func_151EB06C(Gfx *gfx) {
     {
         s32 remaining;
         s32 pad; // matching: stack slot
-        func_1510D0EC((s32)&D_7D3, &remaining, 3, 0);
-        func_1510D0EC((s32)&D_7D4, &remaining, 3, 0);
-        func_1510D0EC((s32)&D_7FC, &remaining, 3, 0);
-        func_1510D0EC((s32)(&D_7FC + 1), &remaining, 3, 0);
-        func_1510D0EC((s32)&D_7F1, &remaining, 3, 0);
-        func_1510D0EC((s32)&D_7F2, &remaining, 3, 0);
-        func_1510D0EC((s32)&D_82F, &remaining, 3, 0);
-        func_1510D0EC((s32)&D_830, &remaining, 3, 0);
+        texture_getAddress((s32)&D_7D3, &remaining, 3, 0);
+        texture_getAddress((s32)&D_7D4, &remaining, 3, 0);
+        texture_getAddress((s32)&D_7FC, &remaining, 3, 0);
+        texture_getAddress((s32)(&D_7FC + 1), &remaining, 3, 0);
+        texture_getAddress((s32)&D_7F1, &remaining, 3, 0);
+        texture_getAddress((s32)&D_7F2, &remaining, 3, 0);
+        texture_getAddress((s32)&D_82F, &remaining, 3, 0);
+        texture_getAddress((s32)&D_830, &remaining, 3, 0);
         if (gIsMultiplayer) {
-            func_1510D0EC((s32)&D_80E, &remaining, 3, 0);
-            func_1510D0EC((s32)(&D_80E + 1), &remaining, 3, 0);
+            texture_getAddress((s32)&D_80E, &remaining, 3, 0);
+            texture_getAddress((s32)(&D_80E + 1), &remaining, 3, 0);
         }
         if (!gIsMultiplayer) {
             f32 halfWidth;
@@ -1223,7 +1223,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
     gDPSetCombine(gfx++, 0xFFD3FF, 0xFFA6FF7F);
     gDPSetEnvColor(gfx++, 0x20, 0xFF, 0x20, D_800E0B97);
     gfx = func_151ED430(gfx, &D_80091810, 0x92, 0xCB, 5, 2, 1.0f, 0);
-    gfx = func_15096934(gfx);
+    gfx = sprite_endDraw(gfx);
 
     alpha = 0x1EA - gDemoInputIndex;
     if (alpha < 0) {
@@ -1545,7 +1545,7 @@ Gfx *func_151ED09C(Gfx *gfx) {
     gDPSetCombine(gfx++, 0xFFD3FF, 0xFFA6FF7F);
     gDPSetEnvColor(gfx++, 0xFF, 0x80, 0x20, (D_800E0B97 * (alpha + 1)) >> 8);
     gfx = func_151ED430(gfx, &D_80091828, 0x92, 0x6C, 8, 3, 1.0f, 0);
-    return func_15096934(gfx);
+    return sprite_endDraw(gfx);
 }
 
 /* Darkens the whole screen with a black rectangle of alpha D_800E0B96. */
@@ -1570,8 +1570,8 @@ Gfx *func_151ED29C(Gfx *gfx, HudSprite *sprite, s32 *blockSizeOut) {
     s32 fmt;
     s32 blockSize;
 
-    blockSize = D_8009DEB0[sprite->siz] + sprite->width * sprite->height;
-    blockSize >>= D_8009DEB4[sprite->siz];
+    blockSize = gImSizIncr[sprite->siz] + sprite->width * sprite->height;
+    blockSize >>= gImSizShift[sprite->siz];
     *blockSizeOut = blockSize;
     masks = 1;
     for (i = 2; i < sprite->width; i <<= 1) {
@@ -1583,7 +1583,7 @@ Gfx *func_151ED29C(Gfx *gfx, HudSprite *sprite, s32 *blockSizeOut) {
     }
     fmt = sprite->fmt;
     gDPPipeSync(gfx++);
-    gDPSetTile(gfx++, fmt, D_8009DEBC[sprite->siz], 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPSetTile(gfx++, fmt, gImSizLoadBlock[sprite->siz], 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
     gDPSetTile(gfx++, fmt, sprite->siz, (D_8009DEB8[sprite->siz] * sprite->width + 7) >> 3, 0, 0, 0, G_TX_CLAMP, maskt, 0, G_TX_CLAMP, masks, 0);
     gDPSetTileSize(gfx++, 0, 0, 0, (sprite->width - 1) << 2, (sprite->height - 1) << 2);
     return gfx;
@@ -1629,11 +1629,11 @@ Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 r
         y = top;
         for (row = 0; row < rows; row++) {
             if (!midTexture) {
-                image = func_1510D0EC(texId, &remaining, 3, 0);
+                image = texture_getAddress(texId, &remaining, 3, 0);
             }
             if (image != TEXTURE_NOT_LOADED) {
                 gDPPipeSync(gfx++);
-                gDPSetTextureImage(gfx++, sprite->fmt, D_8009DEBC[sprite->siz], 1, image);
+                gDPSetTextureImage(gfx++, sprite->fmt, gImSizLoadBlock[sprite->siz], 1, image);
                 gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, blockSize - 1, 0);
                 gSPScisTextureRectangle(gfx++, x << 2, y << 2, (x + width) << 2, (y + height) << 2, 0, 0, 0, dsdx, dtdy);
             }
@@ -1801,7 +1801,7 @@ Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
         } else {
             tex = (s32)&D_508;
         }
-        image = func_1510D0EC(tex, 0, 3, 0);
+        image = texture_getAddress(tex, 0, 3, 0);
         if (image == TEXTURE_NOT_LOADED) {
             return start;
         }
@@ -1838,10 +1838,10 @@ void func_151EDF4C(void) {
     if (D_800E0C7C != NULL) {
         D_80090138 = (Struct151EDF4C *)(D_800E0C7C + 0x40);
         for (i = 0x1C5, j = 0; i < 0x1E3; i++, j++) {
-            data = func_1502B6BC(0, 1, 0, 2, 9, i);
+            data = rom_loadPathTable(0, 1, 0, 2, 9, i);
             D_80090138[j].data = data;
             D_80090138[j].dl = (Gfx *)*data;
-            func_1510CE60(D_80090138[j].dl, 0, 1, 0x3E, &D_80090138[j].unk8);
+            texture_resolveDl(D_80090138[j].dl, 0, 1, 0x3E, &D_80090138[j].unk8);
             dl = D_80090138[j].dl;
             do {
                 cmd = (dl->words.w0 >> 24) & 0xFF;
@@ -2067,7 +2067,7 @@ Gfx *func_151EE184(Gfx *gfx) {
                 if (sfx != 0) {
                     mp3_startTrack(sfx, 0x7D00, 0x40);
                 }
-                obj = func_15083E90(9);
+                obj = collision_findObjectById(9);
                 if (obj != NULL) {
                     obj->intelwalk = cheatType;
                     gCurrentActor = obj;
@@ -2131,7 +2131,7 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
 
     gDPPipeSync(gfx++);
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, gMenuBrightness);
-    image = func_1510D0EC((s32)&D_7FB, 0, 3, 0);
+    image = texture_getAddress((s32)&D_7FB, 0, 3, 0);
     if (image != TEXTURE_NOT_LOADED) {
         gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, image);
         gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_MIRROR, 5, 0, G_TX_CLAMP, 6, 0);
@@ -2146,7 +2146,7 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
     }
 
     gDPPipeSync(gfx++);
-    image = func_1510D0EC((s32)&D_887, 0, 3, 0);
+    image = texture_getAddress((s32)&D_887, 0, 3, 0);
     if (image != TEXTURE_NOT_LOADED) {
         gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, image);
         gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 5, 0, G_TX_CLAMP, 5, 0);
@@ -2164,7 +2164,7 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
         u32 size;
 
         table = NULL;
-        size = func_1502B7F0(&table, 1, 0x1D);
+        size = rom_loadPathTo(&table, 1, 0x1D);
         if ((u32)index < size >> 1) {
             D_8009013C.texId = (void *)table[index];
         } else {

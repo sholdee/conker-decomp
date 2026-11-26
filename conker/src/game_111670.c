@@ -59,11 +59,11 @@ void func_150E42F8(s32 count) {
         y = 10000;
         x = func_150ADA20_u8() % 500 + centerX;
         z = func_150ADA20_u8() % 500 + centerZ;
-        y = func_1510F8D8(x, y, z, &surface);
+        y = collision_findMeshFloorNear(x, y, z, &surface);
         if (noHit != y && surface != 0) {
-            idx = (surface - (s32)D_800DBE3C) / 12;
-            if (idx >= 0 && idx < D_800DBE4C) {
-                material = func_1510F8CC(D_800DBE5C[idx]);
+            idx = (surface - (s32)gCurMapTris) / 12;
+            if (idx >= 0 && idx < gCurMapTriCount) {
+                material = collision_getSurfaceType(gMeshTriMaterials[idx]);
                 if (material != 0) {
                     func_150E4550(x, y, z, 0, material, (s16 **)surface, 0xFF);
                 }

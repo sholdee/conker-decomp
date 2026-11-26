@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The render setup of the tracer effect type (the effect type table entry of func_150E1D14 points to it). */
-Gfx D_800889E0[] = {
+/* The render setup of the tracer effect type (the effect type table entry of beam_updateTracer points to it). */
+Gfx gTracerRenderSetupDl[] = {
     gsDPPipeSync(),
     gsSPClearGeometryMode(G_LIGHTING | G_CULL_BOTH),
     gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
@@ -11,10 +11,10 @@ Gfx D_800889E0[] = {
 };
 
 /* Aim-impact slots: where a shot from an owner at a given angle lands (func_150E4550 fills them). */
-AimImpact D_800D9960[4];
+AimImpact gAimImpacts[4];
 
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
-void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
+void beam_spawnTracer(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
                    f32 halfWidth, f32 length, s16 lifetime, u16 texture, s8 mode, s16 onTime, s16 offTime,
                    Actor *owner, u8 ownerId, u8 bone, s32 ownerTag, u8 impactEffect, u8 unkFE,
                    f32 startX, f32 startY, f32 startZ, f32 endX, f32 endY, f32 endZ) {
@@ -90,7 +90,7 @@ void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32
 }
 
 /* Per-frame update of a tracer: re-fires attached ones from the owner's bone, then moves it. */
-void func_150E1D14(Game10EF60Effect *effect) {
+void beam_updateTracer(Game10EF60Effect *effect) {
     f32 vx;
     f32 vy;
     f32 vz;
@@ -121,7 +121,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
     s32 i;
 
     // matching: dead stores; first mentions order uopt'len CSE temp slots
-    impact = (s32)D_800D9960[aim].normal;
+    impact = (s32)gAimImpacts[aim].normal;
     fire = effect->owner->angle - effect->owner->mv->pssd_waist_tilt;
     i = (s32)&effect->target_x;
     bone = (void *)&effect->target_z;
@@ -165,21 +165,21 @@ void func_150E1D14(Game10EF60Effect *effect) {
                 }
                 impact = 0;
                 if (aim != 0xFF) {
-                    if (effect->owner->angle - effect->owner->mv->pssd_waist_tilt == D_800D9960[aim].unk0 && effect->owner->unk1D1 == D_800D9960[aim].unk2) {
-                        effect->target_x = D_800D9960[aim].x;
-                        effect->target_y = D_800D9960[aim].y;
-                        effect->target_z = D_800D9960[aim].z;
+                    if (effect->owner->angle - effect->owner->mv->pssd_waist_tilt == gAimImpacts[aim].unk0 && effect->owner->unk1D1 == gAimImpacts[aim].unk2) {
+                        effect->target_x = gAimImpacts[aim].x;
+                        effect->target_y = gAimImpacts[aim].y;
+                        effect->target_z = gAimImpacts[aim].z;
                         if (gIsMultiplayer == 0) {
-                            if (func_151EF610() % 100 < D_800D9960[aim].ricochetChance) {
+                            if (func_151EF610() % 100 < gAimImpacts[aim].ricochetChance) {
                                 incoming[0] = effect->target_x - effect->x;
                                 incoming[1] = effect->target_y - effect->y;
                                 incoming[2] = effect->target_z - effect->z;
-                                func_15049148((Vec3f *)D_800D9960[aim].normal, 2.0f * func_150AD900(D_800D9960[aim].normal, incoming), &reflected);
+                                func_15049148((Vec3f *)gAimImpacts[aim].normal, 2.0f * func_150AD900(gAimImpacts[aim].normal, incoming), &reflected);
                                 func_15048F58((Vec3f *)incoming, &reflected, &reflected);
                                 reflected.x += effect->target_x;
                                 reflected.y += effect->target_y;
                                 reflected.z += effect->target_z;
-                                func_150E1AB0(0, effect->target_x, effect->target_y, effect->target_z, reflected.x, reflected.y, reflected.z, func_151EF610() % 35 + 20.0f, 0.0f, 8.0f, 320.0f, 30, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                                beam_spawnTracer(0, effect->target_x, effect->target_y, effect->target_z, reflected.x, reflected.y, reflected.z, func_151EF610() % 35 + 20.0f, 0.0f, 8.0f, 320.0f, 30, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                                 func_10010F88(func_151EF610() % 6 + 0x2B, 10000, 0, 0, aim, effect->target_x, effect->target_y, effect->target_z, 500, 2000);
                             }
                         }
@@ -203,9 +203,9 @@ void func_150E1D14(Game10EF60Effect *effect) {
                             effect->target_y = rayY;
                             effect->target_z = rayZ;
                             stopDist = 1.0f;
-                            i = (hitTri - (u32)D_800DBE3C) / 12;
-                            if (i >= 0 && i < D_800DBE4C && D_800DBE5C != NULL) {
-                                impact = func_1510F8CC(D_800DBE5C[i]);
+                            i = (hitTri - (u32)gCurMapTris) / 12;
+                            if (i >= 0 && i < gCurMapTriCount && gMeshTriMaterials != NULL) {
+                                impact = collision_getSurfaceType(gMeshTriMaterials[i]);
                             }
                         }
                     }
@@ -217,7 +217,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                 effect->dy = 0.0f;
                 effect->dz = 0.0f;
                 if (fire) {
-                    func_150E1AB0(0, effect->x, effect->y, effect->z, effect->target_x, effect->target_y, effect->target_z, speed, stopDist, 15.0f, 820.0f, 75, texture, 0, 0, 0, effect->owner, 0, 0, 0, impact, effect->unkFE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                    beam_spawnTracer(0, effect->x, effect->y, effect->z, effect->target_x, effect->target_y, effect->target_z, speed, stopDist, 15.0f, 820.0f, 75, texture, 0, 0, 0, effect->owner, 0, 0, 0, impact, effect->unkFE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                 }
             } else {
                 func_1516972C(&effect->header);
@@ -263,7 +263,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
         }
         if (effect->unkFE == 1) {
             i = effect->owner != NULL ? effect->owner - movement_obj : 0;
-            func_150E1570(effect->owner, effect->x, effect->y, effect->z, effect->x + vx, effect->y + vy, effect->z + vz, i, 0);
+            collision_castRayAtObjects(effect->owner, effect->x, effect->y, effect->z, effect->x + vx, effect->y + vy, effect->z + vz, i, 0);
         }
         effect->x += vx;
         effect->y += vy;
@@ -286,7 +286,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
 
 
 /* Draws a tracer as a camera-facing quad from its position along its direction. */
-Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
+Gfx *beam_drawTracer(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
     Vec3f points[2];
     f32 camera[3];
     f32 normal[3];
@@ -358,9 +358,9 @@ Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
                 effect->quads[D_800BE9C0][i].ob[j] = corners[i][j];
             }
         }
-        gfx = func_15094F70(gfx, D_8008CA4C[effect->texture], 0, &texState, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, D_8008CA4C[effect->texture], 0, &texState, 0, 0, 0, 2, 3);
         flag = 0;
-        gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x504A50, &flag);
+        gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x504A50, &flag);
         gSPVertex(gfx++, effect->quads[D_800BE9C0], 4, 0);
         gSP1Triangle(gfx++, 0, 1, 3, 0);
         gSP1Triangle(gfx++, 0, 3, 2, 0);
@@ -374,18 +374,18 @@ s32 func_150E2DA4(s32 arg0, s32 arg1) {
 }
 
 /* Spawns a tracer attached to a bone of owner, refiring every onTime + offTime frames. */
-void func_150E2DB4(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
+void beam_spawnBoneTracer(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
                    f32 endX, f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8 unkFE) {
-    func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 40.0f, 400.0f, lifetime, 39, 1, onTime, offTime,
+    beam_spawnTracer(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 40.0f, 400.0f, lifetime, 39, 1, onTime, offTime,
                   owner, ownerId, bone, ownerTag, 0, unkFE, startX, startY, startZ, endX, endY, endZ);
 }
 
-/* Like func_150E2DB4 with a caller-chosen width, length and speed. */
+/* Like beam_spawnBoneTracer with a caller-chosen width, length and speed. */
 // matching: functions.h declares the narrow params as s32, but the original took u8/s16 (lbu/lh of the arg slot)
-void func_150E2EA4(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
+void beam_spawnBoneTracerEx(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
                    f32 endX, f32 endY, f32 endZ, s32 onTime, s32 offTime, s32 lifetime, f32 halfWidth, f32 length,
                    s32 unkFE, f32 speed) {
-    func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, speed, 0.0f, halfWidth, length, *(u16 *)((u8 *)&lifetime + 2),
+    beam_spawnTracer(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, speed, 0.0f, halfWidth, length, *(u16 *)((u8 *)&lifetime + 2),
                   39, 1, *(s16 *)((u8 *)&onTime + 2), *(s16 *)((u8 *)&offTime + 2), owner, *((u8 *)&ownerId + 3),
                   *(s16 *)((u8 *)&bone + 2), ownerTag, 0, *((u8 *)&unkFE + 3), startX, startY, startZ, endX, endY, endZ);
 }
@@ -395,7 +395,7 @@ s32 func_150E2F90(s32 a0, s32 a1, s16 a2) {
 }
 
 /* Message 0x2D: if the effect's owner is one object of the pair, retarget it to the other. */
-void func_150E2FC0(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg) {
+void beam_tracerSwapMessage(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg) {
     if (msg == 0x2D) {
         if (effect->owner == swap->actorA) {
             effect->owner = swap->actorB;

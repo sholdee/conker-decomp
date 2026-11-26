@@ -12,19 +12,19 @@ s16 D_80084480 = 0; // the first word of this file's .data; read by game_14FF90.
  * `controller` points along each axis, ignoring deflections within STICK_DEADZONE, and clears the
  * stick reading. On the other calls both outputs are 0.
  */
-void func_1503F9F0(s16 controller, s16 *dirX, s16 *dirY) {
-    static s16 D_80084484 = 5; // frames until the next repeat
+void debug_getStickRepeat(s16 controller, s16 *dirX, s16 *dirY) {
+    static s16 gStickRepeatTimer = 5; // frames until the next repeat
     OSContPad *pad;
     s16 stickX;
 
     pad = D_800BE728[controller];
-    if (--D_80084484 != 0) {
+    if (--gStickRepeatTimer != 0) {
         *dirX = 0;
         *dirY = 0;
         return;
     }
     stickX = pad->stick_x;
-    D_80084484 = 5;
+    gStickRepeatTimer = 5;
     if (stickX < -STICK_DEADZONE || stickX > STICK_DEADZONE) {
         *dirX = stickX;
     } else {
@@ -41,23 +41,23 @@ void func_1503F9F0(s16 controller, s16 *dirX, s16 *dirY) {
     *dirY = (*dirY < -1) ? -1 : (*dirY > 1) ? 1 : *dirY;
 }
 
-/* State of the task list menu drawn by func_1503FB40. */
-static s32 D_80084488 = 0; // scroll in progress: 1 = up, -1 = down, 0 = idle
-static f32 D_800C6850;     // scroll animation offset, +-11 at the end of a step
-static s32 D_8008448C = 0; // frames left showing "RESETTING ALL TASKS"
-static s8 D_80084490 = 0;  // frames until the selection blink toggles
-static u8 D_80084494 = 0;  // blink phase
+/* State of the task list menu drawn by debug_drawTaskMenu. */
+static s32 gTaskMenuScrollDir = 0; // scroll in progress: 1 = up, -1 = down, 0 = idle
+static f32 gTaskMenuScrollOffset;     // scroll animation offset, +-11 at the end of a step
+static s32 gTaskMenuResetTimer = 0; // frames left showing "RESETTING ALL TASKS"
+static s8 gTaskMenuBlinkTimer = 0;  // frames until the selection blink toggles
+static u8 gTaskMenuBlinkPhase = 0;  // blink phase
 
 /* Resets the task list menu's scroll and blink state. */
-void func_1503FB08(void) {
-    D_80084488 = 0;
-    D_800C6850 = 0.0f;
-    D_8008448C = 0;
-    D_80084490 = 30;
-    D_80084494 = 0;
+void debug_resetTaskMenu(void) {
+    gTaskMenuScrollDir = 0;
+    gTaskMenuScrollOffset = 0.0f;
+    gTaskMenuResetTimer = 0;
+    gTaskMenuBlinkTimer = 30;
+    gTaskMenuBlinkPhase = 0;
 }
 
-static u8 D_80084498 = 0;     // selected task (index into the list of tasks in use)
+static u8 gTaskMenuSelection = 0;     // selected task (index into the list of tasks in use)
 static char D_8008449C[] = "ERROR";
 static const char D_80098930[] = "RESETTING ALL TASKS";
 static const char D_80098944[] = "."; // drawn above flagged tasks
@@ -78,7 +78,7 @@ s32 strlen(const char *);
  * `selectButtons` is pressed and the task's bit is clear, -1 when a button in `backButtons` or B is
  * pressed, otherwise -2.
  */
-s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
+s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
     s32 taskIndex;
     s16 stickDirX;
     s16 stickDirY;
@@ -114,66 +114,66 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         rowCount = MENU_MAX_ROWS;
     }
     lineY = 1;
-    if (D_8008448C == 0 && (buttons & L_TRIG) && (buttons & R_TRIG)) {
-        D_8008448C = 60;
+    if (gTaskMenuResetTimer == 0 && (buttons & L_TRIG) && (buttons & R_TRIG)) {
+        gTaskMenuResetTimer = 60;
         func_15017790();
         func_150177F8();
     }
-    if (D_8008448C != 0) {
+    if (gTaskMenuResetTimer != 0) {
         buttons = 0;
-        D_8008448C -= D_800BE9E4;
-        if (D_8008448C <= 0) {
-            D_8008448C = 0;
+        gTaskMenuResetTimer -= D_800BE9E4;
+        if (gTaskMenuResetTimer <= 0) {
+            gTaskMenuResetTimer = 0;
         }
     }
     if (buttons & selectButtons) {
-        if (!TASK_BIT_SET(script_findTaskIndex(D_80084498 + 1))) {
-            return script_findTaskIndex(D_80084498 + 1);
+        if (!TASK_BIT_SET(script_findTaskIndex(gTaskMenuSelection + 1))) {
+            return script_findTaskIndex(gTaskMenuSelection + 1);
         }
     }
     if ((buttons & backButtons) || (buttons & B_BUTTON)) {
         return -1;
     }
-    func_1503F9F0(0, &stickDirX, &stickDirY);
-    if (D_80084488 != 0) {
-        D_800C6850 += 1.25f * (D_80084488 * D_800BE9E4);
+    debug_getStickRepeat(0, &stickDirX, &stickDirY);
+    if (gTaskMenuScrollDir != 0) {
+        gTaskMenuScrollOffset += 1.25f * (gTaskMenuScrollDir * D_800BE9E4);
         // matching: clamp through rowY (shares its FP register); a ternary or separate temp mismatches
         rowY = -SCROLL_LIMIT;
-        if (D_800C6850 < -SCROLL_LIMIT) {
-        } else if (D_800C6850 > SCROLL_LIMIT) {
+        if (gTaskMenuScrollOffset < -SCROLL_LIMIT) {
+        } else if (gTaskMenuScrollOffset > SCROLL_LIMIT) {
             rowY = SCROLL_LIMIT;
         } else {
-            rowY = D_800C6850;
+            rowY = gTaskMenuScrollOffset;
         }
-        D_800C6850 = rowY;
-        if (fabsf(D_800C6850) >= SCROLL_LIMIT) {
+        gTaskMenuScrollOffset = rowY;
+        if (fabsf(gTaskMenuScrollOffset) >= SCROLL_LIMIT) {
             step = (D_800BE728[0]->button & Z_TRIG) ? 3 : 1;
-            if (D_80084488 == 1) {
-                D_80084498 -= step;
-                if (D_80084498 > taskCount) {
-                    D_80084498 += taskCount;
+            if (gTaskMenuScrollDir == 1) {
+                gTaskMenuSelection -= step;
+                if (gTaskMenuSelection > taskCount) {
+                    gTaskMenuSelection += taskCount;
                 }
-            } else if (D_80084488 == -1) {
-                D_80084498 = (D_80084498 + step) % taskCount;
+            } else if (gTaskMenuScrollDir == -1) {
+                gTaskMenuSelection = (gTaskMenuSelection + step) % taskCount;
             }
-            D_80084488 = 0;
-            D_800C6850 = 0.0f;
+            gTaskMenuScrollDir = 0;
+            gTaskMenuScrollOffset = 0.0f;
         }
     } else if ((buttons & D_CBUTTONS) || (stickDirY == -1)) {
-        D_80084488 = -1;
-        D_800C6850 = 0.0f;
+        gTaskMenuScrollDir = -1;
+        gTaskMenuScrollOffset = 0.0f;
     } else if ((buttons & U_CBUTTONS) || (stickDirY == 1)) {
-        D_80084488 = 1;
-        D_800C6850 = 0.0f;
+        gTaskMenuScrollDir = 1;
+        gTaskMenuScrollOffset = 0.0f;
     }
-    entry = D_80084498 - (u8)((rowCount - 1) >> 1);
+    entry = gTaskMenuSelection - (u8)((rowCount - 1) >> 1);
     if (entry > taskCount) {
         entry += taskCount;
     }
-    D_80084490 -= D_800BE9E4;
-    if (D_80084490 <= 0) {
-        D_80084490 = 30;
-        D_80084494 ^= 1;
+    gTaskMenuBlinkTimer -= D_800BE9E4;
+    if (gTaskMenuBlinkTimer <= 0) {
+        gTaskMenuBlinkTimer = 30;
+        gTaskMenuBlinkPhase ^= 1;
     }
     do {
         {
@@ -183,15 +183,15 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         f32 dotY;
 
         taskIndex = script_findTaskIndex(entry + 1);
-        if (D_8008448C != 0) {
+        if (gTaskMenuResetTimer != 0) {
             text = D_80098930;
             text_measureString((u8 *)text, &width, &height, &depth);
         } else {
             text_measureString((u8 *)script_getTaskName(taskIndex), &width, &height, &depth);
             // matching: index + base operand order (TASK_BIT_SET's base + index allocates differently)
             if (*((taskIndex >> 3) + gTaskDoneBits) & (1 << (taskIndex & 7))) {
-                if (entry == D_80084498) {
-                    if (D_80084494 != 0) {
+                if (entry == gTaskMenuSelection) {
+                    if (gTaskMenuBlinkPhase != 0) {
                         text = D_80098948;
                     } else {
                         text = script_getTaskName(taskIndex);
@@ -206,12 +206,12 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         }
         rowY = lineY + 1.0f;
         textX = gScreenWidth * 0.5f - (width >> 1);
-        textY = rowY + D_800C6850;
+        textY = rowY + gTaskMenuScrollOffset;
         if (func_1509CA78(taskIndex) & 0x80000000) {
             /* Flagged tasks get a "." line above them. */
             text_measureString((u8 *)D_80098944, &dotWidth, &dotHeight, &depth);
             dotX = gScreenWidth * 0.5f - (dotWidth >> 1);
-            dotY = rowY + D_800C6850;
+            dotY = rowY + gTaskMenuScrollOffset;
             *gfxp = text_drawString(*gfxp, dotX, dotY, (u8 *)D_80098944, 255, 255, 255, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(D_80098944));
             lineY += dotHeight;
             textY += dotHeight;
@@ -226,7 +226,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         if (text == NULL) {
             text = D_8008449C;
         }
-        if (D_8008448C == 0 && (entry != D_80084498 || D_80084488 != 0)) {
+        if (gTaskMenuResetTimer == 0 && (entry != gTaskMenuSelection || gTaskMenuScrollDir != 0)) {
             *gfxp = text_drawString(*gfxp, textX, textY, (u8 *)text, 255, 255, 255, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(text));
         } else {
             /* the selected task, and every row while resetting, is drawn in red */

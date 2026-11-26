@@ -186,8 +186,8 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     probe.y = obj->ypos + 100.0f;
     pos.z = obj->zpos;
     probe.z = pos.z;
-    func_1504715C(&ground, obj);
-    if (func_15046C80(&probe, 0, -10000.0f, &ground)) {
+    collision_initHitFromObject(&ground, obj);
+    if (collision_probeFloorSurfABSet0Cached(&probe, 0, -10000.0f, &ground)) {
         pos.y = ground.height;
         onGround = 1;
     } else {

@@ -179,12 +179,12 @@ void script_insertTask(IdRecord *node) {
 }
 
 
-/* Loads task `id` (via func_1502B5C8) and sets its LoadSection to the current level level. */
+/* Loads task `id` (via rom_loadPath) and sets its LoadSection to the current level level. */
 IdRecord *script_loadTask(s16 id) {
     IdRecord *node;
     u32 size;
 
-    node = func_1502B5C8(&size, 2, 20, id);
+    node = rom_loadPath(&size, 2, 20, id);
     node->TaskID |= id;
     node->LoadSection = level;
     return script_allocTaskBss(node);

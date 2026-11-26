@@ -15,7 +15,7 @@ void func_151A0A10(Actor *actor, s16 duration, u8 owner, s32 arg3) {
         if (D_800C35EA[0] != 1) {
             emitter.y = actor->floorY;
             emitter.accum = 0.0f;
-            switch (func_1510F8CC(actor->floorMaterial)) {
+            switch (collision_getSurfaceType(actor->floorMaterial)) {
             case 10:
                 emitter.variant = 0;
                 break;

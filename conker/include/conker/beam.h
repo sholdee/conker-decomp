@@ -27,7 +27,7 @@ typedef struct {
     u8 r, g, b, a;
 } BoltColor;
 
-/* Spawn parameters of a lightning bolt; func_151A7950 copies them into Bolt.def. */
+/* Spawn parameters of a lightning bolt; beam_newLightning copies them into Bolt.def. */
 typedef struct {
     /* 0x00 */ s16 lifetime;         /* frames, counted down while BOLT_TIMED */
     /* 0x02 */ s16 numPoints;
@@ -37,14 +37,14 @@ typedef struct {
     /* 0x10 */ f32 jitter;           /* largest sideways displacement of a midpoint */
     /* 0x14 */ BoltColor color;
     /* 0x18 */ f32 width;
-    /* 0x1C */ s8 update1;           /* index into D_8008F940, -1 for none */
+    /* 0x1C */ s8 update1;           /* index into gLightningUpdateHooks, -1 for none */
     /* 0x1D */ s8 update2;           /* index into D_8008F948, -1 for none */
     /* 0x20 */ Vec3f start;
     /* 0x2C */ Vec3f end;
     /* 0x38 */ Vec3f up;
     /* 0x44 */ f32 length;
     /* 0x48 */ f32 invLength;
-    /* 0x4C */ u8 type;              /* index into the D_8008F94C/D_8008F958/D_8008F964 handlers */
+    /* 0x4C */ u8 type;              /* index into the gLightningDestroyHooks/gLightningFreeHooks/gLightningMsgHandlers handlers */
 } BoltDef; /* size 0x50 */
 
 #define BOLT_TIMED  1
@@ -55,7 +55,7 @@ typedef struct {
     Vec3f world;
 } BoltPoint;
 
-/* User data of a bolt that runs from an actor bone to a point near the actor (func_151A8624). */
+/* User data of a bolt that runs from an actor bone to a point near the actor (beam_spawnBoneLightning). */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;           /* owner->unique_id at spawn; the bolt stops when it changes */
@@ -78,7 +78,7 @@ typedef struct {
     /* 0x80 */ BoltPoint pointData[1];
 } Bolt;
 
-/* Spawn parameters; func_150C5370 copies them into the object at +0x18. */
+/* Spawn parameters; beam_newStrip copies them into the object at +0x18. */
 typedef struct StripDesc {
     /* 0x00 */ Vec3f p0;
     /* 0x0C */ Vec3f p1;
@@ -105,10 +105,10 @@ typedef struct StripObj {
     /* 0x14 */ s32 unk14;
     /* 0x18 */ Vec3f p0;
     /* 0x24 */ Vec3f p1;
-    /* 0x30 */ s8 updateIdx;    // index into D_80088760, -1 for none
+    /* 0x30 */ s8 updateIdx;    // index into gStripUpdateHandlers, -1 for none
     /* 0x31 */ u8 pad31[3];
     /* 0x34 */ f32 texScale;    // v texcoord = length * texScale * 64
-    /* 0x38 */ u8 kind;         // index into D_800887B8 / D_800887C0 / D_800887C8
+    /* 0x38 */ u8 kind;         // index into gStripDestroyHandlers / gStripFreeHandlers / gStripMsgHandlers
     /* 0x39 */ u8 pad39[7];
     /* 0x40 */ Vtx quad[2][4];  // double-buffered by D_800BE9C0
     /* 0xC0 */ f32 length;      // |p0 - p1|
@@ -116,7 +116,7 @@ typedef struct StripObj {
     /* 0xC8 */ StripTarget target;
 } StripObj;
 
-/* Self-propelled beam quad (func_150DAE70 / func_150DB114). */
+/* Self-propelled beam quad (beam_spawnBoneQuad / beam_updateQuad). */
 typedef struct {
     Vec3f vel;
     f32 size;
@@ -129,7 +129,7 @@ typedef struct {
     u8  fadeRate;
 } BeamMotion;
 
-/* Quad that follows externally owned values (func_150DB518 / func_150DB630 / func_150DB714). */
+/* Quad that follows externally owned values (beam_spawnLinkedQuad / beam_updateLinkedQuad / beam_drawLinkedQuad). */
 typedef struct {
     f32 *pos;
     f32 *angle;     /* degrees */
@@ -270,7 +270,7 @@ typedef struct {
     /* 0x08 */ f32 phase[3];
 } ActorParticleLink;
 
-/* State a trail particle (see func_150F1170) carries at +0xA8. */
+/* State a trail particle (see beam_updateTrailEmitter) carries at +0xA8. */
 typedef struct {
     u8 unk0;
     u8 unk1;
@@ -308,7 +308,7 @@ typedef struct {
     /* 0x18 */ ActorRef ref;
 } ActorBound;
 
-/* Data of the spark effect spawned by func_150F5C08 and run by func_150F5C98 (sparks along a
+/* Data of the spark effect spawned by beam_spawnBoneSparks and run by beam_updateBoneSparks (sparks along a
  * segment of the owner's bone 5). */
 typedef struct {
     Actor *owner;
@@ -359,10 +359,10 @@ typedef struct {
     /* 0x10 */ u8 pad10[0x30];
     /* 0x40 */ Vec3f pos;
     /* 0x4C */ u8 pad4C[0x74 - 0x4C];
-    /* 0x74 */ s8 mode; /* 3 or -1 (see func_150F706C) */
+    /* 0x74 */ s8 mode; /* 3 or -1 (see beam_updateCastBeam) */
 } BeamEnd;
 
-/* Per-object state of a beam (0x78 bytes, copied in by func_150F6DE4). */
+/* Per-object state of a beam (0x78 bytes, copied in by beam_spawnCastBeam). */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id */
@@ -482,7 +482,7 @@ struct RayBeam {
     /* 0x110 */ RayBeamData data;
 };
 
-/* Rain of lightning bolts falling around a point onto the ground (func_15104C44, func_15104FF8). */
+/* Rain of lightning bolts falling around a point onto the ground (beam_updateBoltRain, beam_boltRainMessage). */
 typedef struct BoltRainState {
     /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 pending;      /* bolts owed, accumulated per frame */
@@ -533,8 +533,8 @@ typedef struct BoltFlare {
 } BoltFlare;
 
 /*
- * A bolt object. It is followed in memory by desc.segments BoltSamples (func_151061E0),
- * desc.segments + 2 jittered joint points (func_151061EC) and the per-kind user data.
+ * A bolt object. It is followed in memory by desc.segments BoltSamples (beam_getBoltSamples),
+ * desc.segments + 2 jittered joint points (beam_getBoltJoints) and the per-kind user data.
  */
 typedef struct BoltObj {
     /* 0x00 */ EffectHeader header;
@@ -555,7 +555,7 @@ typedef struct BoltChain {
     /* 0x08 */ BoltObj *link;      /* the live link, NULL once it is gone */
     /* 0x0C */ Vec3f *points;
     /* 0x10 */ BoltChainConfig config;
-    /* 0x40 */ u8 kind;            /* index into D_80088C38 */
+    /* 0x40 */ u8 kind;            /* index into gBoltChainMsgHandlers */
     /* 0x41 */ u8 pad41[3];
 } BoltChain; /* size 0x44 */
 
@@ -615,7 +615,7 @@ typedef struct {
     /* 0x28 */ u8 flags;             /* 1: particle kind 0x71 (else 0x13 or 0x14); 2: clear the 2 flag */
 } ParticleSettings; /* size 0x2C */
 
-/* Effect data of the wavy beam drawn between two actors' bones (func_151B5328). */
+/* Effect data of the wavy beam drawn between two actors' bones (beam_drawWavyBeam). */
 typedef struct {
     /* 0x000 */ Vtx vertices[2][44];  // double-buffered, indexed by D_800BE9C0
     /* 0x580 */ Actor *first;
@@ -632,7 +632,7 @@ typedef struct {
     /* 0x5A4 */ u8 unk5A4[4];
 } WavyBeamData; // size 0x5A8
 
-/* The wavy beam effect (func_151B5240). */
+/* The wavy beam effect (beam_spawnWavyBeam). */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ WavyBeamData data;
@@ -641,7 +641,7 @@ typedef struct {
 typedef struct BoltArcObj BoltArcObj;
 typedef struct SparkObj SparkObj;
 
-/* Lightning arcing between the four edges of a quad (func_151050B0, func_15105548). */
+/* Lightning arcing between the four edges of a quad (beam_updateBoltArc, beam_boltArcMessage). */
 typedef struct BoltArcState {
     /* 0x00 */ TriggerZone *region;
     /* 0x04 */ s16 timer;          /* frames left; negative when off */
@@ -658,7 +658,7 @@ struct BoltArcObj {
     /* 0x28 */ BoltArcState state;
 };
 
-/* Sparks thrown up from random points of a spawn region (func_151058B4, func_15105848, func_15105BC8). */
+/* Sparks thrown up from random points of a spawn region (beam_updateSparkRegion, beam_sparkRegionMessage, func_15105BC8). */
 typedef struct SparkState {
     /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 rate;
@@ -672,91 +672,91 @@ struct SparkObj {
 };
 
 /* game_F2820.c */
-extern Gfx D_80088768[]; /* strip render setup (object type table D_8008B4D4) */
-extern Gfx D_80088790[]; /* strip render reset */
-StripObj *func_150C5370(StripDesc *desc, s32 payloadSize);
-void func_150C5430(StripObj *strip);
-void func_150C5450(StripObj *strip);
-void func_150C5470(StripObj *strip);
-void func_150C54C0(StripObj *strip);
-void func_150C5510(StripObj *strip);
-void func_150C553C(StripObj *strip);
-void func_150C5568(StripObj *strip);
-Gfx *func_150C56A4(Gfx *gfx, StripObj *strip, s16 view);
-s32 func_150C5B88(StripObj *strip);
-s32 func_150C5BD4(StripObj *strip);
+extern Gfx gStripRenderSetupDl[]; /* strip render setup (object type table D_8008B4D4) */
+extern Gfx gStripRenderResetDl[]; /* strip render reset */
+StripObj *beam_newStrip(StripDesc *desc, s32 payloadSize);
+void beam_destroyStripDefault(StripObj *strip);
+void beam_freeStripDefault(StripObj *strip);
+void beam_destroyStrip(StripObj *strip);
+void beam_freeStrip(StripObj *strip);
+void beam_destroyStripDetach(StripObj *strip);
+void beam_freeStripDetach(StripObj *strip);
+void beam_updateStrip(StripObj *strip);
+Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view);
+s32 beam_stripFollowTarget(StripObj *strip);
+s32 beam_stripFollowTargetBone(StripObj *strip);
 void func_150C5C74(Actor *obj);
 void func_150C5C9C(Actor *obj);
-void func_150C5CC4(StripObj *strip, ActorMsg *data, u8 msg);
-void func_150C5D0C(StripObj *strip, ActorMsg *data, u8 msg);
+void beam_stripMessage(StripObj *strip, ActorMsg *data, u8 msg);
+void beam_stripTargetMessage(StripObj *strip, ActorMsg *data, u8 msg);
 
 /* game_108320.c */
-void func_150DAE70(Actor *owner, s32 type, u8 arg2, s32 arg3);
-s32 func_150DB114(BeamQuad *effect);
-Vtx_t *func_150DB2D8(BeamQuad *effect, s16 bufferIndex);
-void func_150DB518(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHeight, s16 arg5, u8 arg6, s32 arg7);
-s32 func_150DB630(BeamQuad *effect);
-Vtx_t *func_150DB714(BeamQuad *effect, s16 bufferIndex);
+void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3);
+s32 beam_updateQuad(BeamQuad *effect);
+Vtx_t *beam_drawQuad(BeamQuad *effect, s16 bufferIndex);
+void beam_spawnLinkedQuad(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHeight, s16 arg5, u8 arg6, s32 arg7);
+s32 beam_updateLinkedQuad(BeamQuad *effect);
+Vtx_t *beam_drawLinkedQuad(BeamQuad *effect, s16 bufferIndex);
 
 /* game_10EF60.c */
-void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist, f32 halfWidth,
+void beam_spawnTracer(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist, f32 halfWidth,
                    f32 length, s16 lifetime, u16 texture, s8 mode, s16 onTime, s16 offTime, Actor *owner, u8 ownerId,
                    u8 bone, s32 ownerTag, u8 impactEffect, u8 unkFE, f32 startX, f32 startY, f32 startZ, f32 endX,
                    f32 endY, f32 endZ);
-void func_150E1D14(Game10EF60Effect *effect);
-Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view);
+void beam_updateTracer(Game10EF60Effect *effect);
+Gfx *beam_drawTracer(Gfx *gfx, Game10EF60Effect *effect, s16 view);
 s32 func_150E2DA4(s32 arg0, s32 arg1);
-void func_150E2DB4(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ, f32 endX,
+void beam_spawnBoneTracer(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ, f32 endX,
                    f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8 unkFE);
-void func_150E2EA4(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ, f32 endX,
+void beam_spawnBoneTracerEx(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ, f32 endX,
                    f32 endY, f32 endZ, s32 onTime, s32 offTime, s32 lifetime, f32 halfWidth, f32 length, s32 unkFE,
                    f32 speed);
 s32 func_150E2F90(s32 a0, s32 a1, s16 a2);
-void func_150E2FC0(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg);
-extern Gfx D_800889E0[];         /* tracer render setup display list */
-extern AimImpact D_800D9960[4];  /* aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none) */
+void beam_tracerSwapMessage(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg);
+extern Gfx gTracerRenderSetupDl[];         /* tracer render setup display list */
+extern AimImpact gAimImpacts[4];  /* aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none) */
 
 /* game_11C2B0.c */
 /* (Actor *actor, u8 slot); declared without a prototype: game_981E0.c passes a third argument */
-void func_150EEE00();
+void beam_fireSlot();
 /* (Actor *actor, u8 slot); declared without a prototype: game_981E0.c passes a third argument */
-void func_150EEF40();
-AimedBeam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3);
-s32 func_150EF38C(AimedBeam *beam);
+void beam_releaseSlot();
+AimedBeam *beam_spawnAimed(Actor *actor, u8 slot, u8 arg2, s32 arg3);
+s32 beam_updateAimed(AimedBeam *beam);
 s32 func_150EF784(Actor *actor, s32 arg1, s32 arg2);
-void func_150EF7B0(AimedBeam *beam);
-void func_150EF860(AimedBeam *beam);
-void func_150EF910(AimedBeam *beam, BeamMsg *msg, u8 type);
-s32 func_150EFA4C(Bolt *spark);
-void func_150EFB80(BeamEmitter *emitter);
-Glow *func_150EFEC8(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u8 arg6, s32 arg7);
-s32 func_150F00EC(Glow *glow);
-LightEffect *func_150F0198(u8 r, u8 g, u8 b, u8 a, AimedBeam *beam, u8 arg5, s32 arg6);
-void func_150F0260(Bolt *spark);
-void func_150F0280(Bolt *spark);
-void func_150F02A0(Bolt *spark);
-void func_150F02C0(BeamEmitter *emitter);
-void func_150F02EC(BeamEmitter *emitter);
-void func_150F0318(BeamEmitter *emitter);
-void func_150F0328(Glow *glow);
-void func_150F0354(Glow *glow);
-void func_150F0380(Glow *glow);
-void func_150F0390(LightEffect *flash);
-void func_150F03BC(LightEffect *flash);
-void func_150F03E8(LightEffect *flash);
-struct Game1EF500Trail *func_150F03F8(Actor *actor, s32 slot, s32 arg2, s32 arg3); /* K&R definition (u8 slot, arg2): no caller declares it */
-void func_150F07E4(Bolt *spark, s32 data, u8 type);
-void func_150F088C(Glow *glow, ActorMsg *msg, u8 type);
+void beam_destroyAimed(AimedBeam *beam);
+void beam_freeAimed(AimedBeam *beam);
+void beam_aimedMessage(AimedBeam *beam, BeamMsg *msg, u8 type);
+s32 beam_updateSpark(Bolt *spark);
+void beam_updateEmitter(BeamEmitter *emitter);
+Glow *beam_spawnGlow(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u8 arg6, s32 arg7);
+s32 beam_updateGlow(Glow *glow);
+LightEffect *beam_spawnFlash(u8 r, u8 g, u8 b, u8 a, AimedBeam *beam, u8 arg5, s32 arg6);
+void beam_destroySpark(Bolt *spark);
+void beam_freeSpark(Bolt *spark);
+void beam_unlinkSpark(Bolt *spark);
+void beam_destroyEmitter(BeamEmitter *emitter);
+void beam_freeEmitter(BeamEmitter *emitter);
+void beam_unlinkEmitter(BeamEmitter *emitter);
+void beam_destroyGlow(Glow *glow);
+void beam_freeGlow(Glow *glow);
+void beam_unlinkGlow(Glow *glow);
+void beam_destroyFlash(LightEffect *flash);
+void beam_freeFlash(LightEffect *flash);
+void beam_unlinkFlash(LightEffect *flash);
+struct Game1EF500Trail *beam_fireSlotProjectile(Actor *actor, s32 slot, s32 arg2, s32 arg3); /* K&R definition (u8 slot, arg2): no caller declares it */
+void beam_sparkMessage(Bolt *spark, s32 data, u8 type);
+void beam_glowMessage(Glow *glow, ActorMsg *msg, u8 type);
 void func_150F0938(Actor *actor);
-void func_150F0A24(Vec3f *pos);
-void func_150F0BEC(Actor *actor);
-s32 func_150F0E48(AttachedSpriteParticle *particle, s32 arg1);
-void func_150F1020(AttachedSpriteParticle *particle, s32 data, u8 type);
-void func_150F10D4(Actor *actor);
-void func_150F1170(ActorTrailEmitter *emitter);
-void func_150F15F8(ActorTrailEmitter *emitter, s32 data, u8 type);
-void func_150F1684(ActorBound *self, ActorMsg *msg, u8 type);
-void func_150F16DC(Actor *actor, u8 slot, u8 variant, u8 arg3, s32 arg4); /* K&R definition: the callers' view */
+void beam_spawnMuzzleParticles(Vec3f *pos);
+void beam_spawnFollowParticle(Actor *actor);
+s32 beam_updateFollowParticle(AttachedSpriteParticle *particle, s32 arg1);
+void beam_followParticleMessage(AttachedSpriteParticle *particle, s32 data, u8 type);
+void beam_attachTrailEmitter(Actor *actor);
+void beam_updateTrailEmitter(ActorTrailEmitter *emitter);
+void beam_trailEmitterMessage(ActorTrailEmitter *emitter, s32 data, u8 type);
+void beam_actorBoundMessage(ActorBound *self, ActorMsg *msg, u8 type);
+void beam_spawnMuzzleBurst(Actor *actor, u8 slot, u8 variant, u8 arg3, s32 arg4); /* K&R definition: the callers' view */
 
 /* game_11EEB0.c */
 void func_150F1A00(Actor *actor);
@@ -767,141 +767,141 @@ void func_150F20F0(s32 index);
 void func_150F2230(Actor *actor, s32 arg1, s32 arg2);
 
 /* game_1228D0.c */
-void func_150F5420(s32 fadeIn, s32 hold, s32 fadeOut, s32 style);
-void func_150F5590(Sprite2D *sprite);
-void func_150F55C8(Sprite2D *sprite);
+void beam_showFadeSprite(s32 fadeIn, s32 hold, s32 fadeOut, s32 style);
+void beam_updateGrowSprite(Sprite2D *sprite);
+void beam_updateSpriteFade(Sprite2D *sprite);
 void func_150F568C(s32 arg0);
-s32 func_150F56B0(ModelAttachment *att, Actor *actor);
-s32 func_150F5A54(ModelAttachment *att, Actor *actor);
-void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3);
-void func_150F5C98(BoneSparkEffect *effect);
-void func_150F6138(BoneSparkEffect *effect, s32 arg1, u8 arg2);
-void func_150F6178(ModelBeamEffect *effect);
-void func_150F631C(ModelBeamEffect *effect);
-void func_150F6368(ModelBeamEffect *effect);
-void func_150F6394(ModelBeamEffect *effect);
-void func_150F63C0(ModelBeamEffect *effect, s32 arg1, u8 arg2);
-void func_150F6400(ModelBeam *beam);
-void func_150F6420(ModelBeam *beam);
-void func_150F644C(ModelBeam *beam);
+s32 beam_hookFrameTexture(ModelAttachment *att, Actor *actor);
+s32 beam_hookSlideTexture(ModelAttachment *att, Actor *actor);
+void beam_spawnBoneSparks(Actor *owner, s16 arg1, u8 arg2, s32 arg3);
+void beam_updateBoneSparks(BoneSparkEffect *effect);
+void beam_boneSparksMessage(BoneSparkEffect *effect, s32 arg1, u8 arg2);
+void beam_updateModelBeam(ModelBeamEffect *effect);
+void beam_releaseModelBeamParts(ModelBeamEffect *effect);
+void beam_destroyModelBeamEffect(ModelBeamEffect *effect);
+void beam_freeModelBeamEffect(ModelBeamEffect *effect);
+void beam_modelBeamMessage(ModelBeamEffect *effect, s32 arg1, u8 arg2);
+void beam_unlinkModelBeam(ModelBeam *beam);
+void beam_destroyModelBeam(ModelBeam *beam);
+void beam_freeModelBeam(ModelBeam *beam);
 void func_150F6478(DefParticleHead *obj);
 void func_150F6484(DefParticleHead *obj);
 void func_150F64B0(DefParticleHead *obj);
-void func_150F64DC(FlashBurstEffect *effect);
-void func_150F6850(FlashBurstEffect *effect, s32 arg1, u8 arg2);
+void beam_updateFlashBurst(FlashBurstEffect *effect);
+void beam_flashBurstMessage(FlashBurstEffect *effect, s32 arg1, u8 arg2);
 void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3);
-void func_150F695C(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
+void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
 
 /* game_124260.c */
-void func_150F6DB0(Actor *owner);
-BeamObj *func_150F6DE4(Actor *owner);
-void func_150F706C(BeamObj *obj);
-void func_150F7310(BeamObj *obj, ActorRef *msg, u8 msgId);
-void func_150F739C(BeamObj *obj);
-void func_150F740C(BeamObj *obj);
-void func_150F7438(BeamObj *obj);
-extern Vec3f D_800D9A50; // the last beam direction (func_150F706C); game_123FB0 aims a camera by it
+void beam_sendOwnerGone(Actor *owner);
+BeamObj *beam_spawnCastBeam(Actor *owner);
+void beam_updateCastBeam(BeamObj *obj);
+void beam_castBeamMessage(BeamObj *obj, ActorRef *msg, u8 msgId);
+void beam_teardownCastBeam(BeamObj *obj);
+void beam_destroyCastBeam(BeamObj *obj);
+void beam_freeCastBeam(BeamObj *obj);
+extern Vec3f gLastBeamDir; // the last beam direction (beam_updateCastBeam); game_123FB0 aims a camera by it
 
 /* game_131F30.c */
-void func_15104A80(WorldObject *prop);
-void func_15104C44(BoltRainObj *obj);
-void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg);
-void func_151050B0(BoltArcObj *obj);
+void beam_onPropArrival(WorldObject *prop);
+void beam_updateBoltRain(BoltRainObj *obj);
+void beam_boltRainMessage(BoltRainObj *obj, s32 arg1, u8 msg);
+void beam_updateBoltArc(BoltArcObj *obj);
 void func_1510550C(EffectHeader *obj, s32 arg1, u8 msg);
-void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg);
-void func_1510558C(ImpactObj *obj);
-void func_15105848(SparkObj *obj, s32 arg1, u8 msg);
-void func_151058B4(SparkObj *obj);
+void beam_boltArcMessage(BoltArcObj *obj, s32 *arg1, u8 msg);
+void beam_spawnImpactEffects(ImpactObj *obj);
+void beam_sparkRegionMessage(SparkObj *obj, s32 arg1, u8 msg);
+void beam_updateSparkRegion(SparkObj *obj);
 void func_15105BC8(SparkObj *obj);
-ZoneRectEffect *func_15105C24(TriggerZone *zone);
+ZoneRectEffect *beam_findZoneRectEffect(TriggerZone *zone);
 
 /* game_133190.c */
-extern Gfx D_80088BE0[]; /* the bolt effect type's render setup and teardown (D_8008C1A8) */
-extern Gfx D_80088C00[];
-BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
-void func_1510608C(BoltObj *bolt);
-BoltSample *func_151061E0(BoltObj *bolt);
-Vec3f *func_151061EC(BoltObj *bolt);
-void func_15106214(BoltObj *bolt);
-f32 func_151064B4(f32 t);
-f32 func_151064DC(f32 t);
-f32 func_15106510(f32 t);
-f32 func_15106540(f32 t);
-f32 func_15106558(f32 t);
-f32 func_15106584(f32 t);
-f32 func_151065BC(f32 t);
-f32 func_151065EC(f32 t);
-void func_15106610(BoltObj *bolt);
-Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view);
-void func_15106E78(BoltObj *bolt);
-void func_15106EF8(BoltObj *bolt);
-void func_15106F24(BoltObj *bolt);
-void func_15106F50(BoltObj *bolt, s32 arg1, u8 arg2);
-BoltChainObj *func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, u8 kind,
+extern Gfx gBoltRenderSetupDl[]; /* the bolt effect type's render setup and teardown (D_8008C1A8) */
+extern Gfx gBoltRenderTeardownDl[];
+BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
+void beam_updateBolt(BoltObj *bolt);
+BoltSample *beam_getBoltSamples(BoltObj *bolt);
+Vec3f *beam_getBoltJoints(BoltObj *bolt);
+void beam_sampleBolt(BoltObj *bolt);
+f32 beam_bezierB0(f32 t);
+f32 beam_bezierB1(f32 t);
+f32 beam_bezierB2(f32 t);
+f32 beam_bezierB3(f32 t);
+f32 beam_bezierB0Deriv(f32 t);
+f32 beam_bezierB1Deriv(f32 t);
+f32 beam_bezierB2Deriv(f32 t);
+f32 beam_bezierB3Deriv(f32 t);
+void beam_jitterBolt(BoltObj *bolt);
+Gfx *beam_drawBolt(Gfx *gdl, BoltObj *bolt, s16 view);
+void beam_releaseBolt(BoltObj *bolt);
+void beam_destroyBolt(BoltObj *bolt);
+void beam_freeBolt(BoltObj *bolt);
+void beam_boltMessage(BoltObj *bolt, s32 arg1, u8 arg2);
+BoltChainObj *beam_newBoltChain(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, u8 kind,
                             u8 arg6, s32 arg7);
-void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread);
-void func_151072BC(BoltChainObj *obj);
-void func_15107604(BoltObj *bolt);
-void func_1510761C(BoltChainObj *obj);
-void func_1510764C(BoltChainObj *obj);
-void func_15107678(BoltChainObj *obj);
-void func_151076A4(BoltChainObj *obj, s32 arg1, u8 arg2);
-BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width,
+void beam_placeChainPoints(BoltChainObj *obj, s16 lo, s16 hi, f32 spread);
+void beam_updateBoltChain(BoltChainObj *obj);
+void beam_unlinkChainBolt(BoltObj *bolt);
+void beam_killChainLink(BoltChainObj *obj);
+void beam_destroyBoltChain(BoltChainObj *obj);
+void beam_freeBoltChain(BoltChainObj *obj);
+void beam_boltChainMessage(BoltChainObj *obj, s32 arg1, u8 arg2);
+BoltObj *beam_spawnBoundsBolt(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width,
                        s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argA, s32 argB);
-void func_151078E4(BoltObj *bolt, s32 arg1, u8 arg2);
-s32 func_15107924(BoltObj *bolt, u8 *moved);
-void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
-void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
+void beam_boundsBoltMessage(BoltObj *bolt, s32 arg1, u8 arg2);
+s32 beam_followBoundsBolt(BoltObj *bolt, u8 *moved);
+void beam_getBoundsPoint(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
+void beam_getStraightCtrlPoints(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
 void func_15107B78(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4);
-BoltObj *func_15107C1C(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments,
+BoltObj *beam_spawnBoneBolt(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments,
                        f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD);
-s32 func_15107E48(BoltObj *bolt, u8 *moved);
-void func_15107F54(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f *out);
-void func_15107F98(BoltObj *bolt, s32 arg1, u8 arg2);
+s32 beam_followBoneBolt(BoltObj *bolt, u8 *moved);
+void beam_transformBoneLocal(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f *out);
+void beam_boneBoltMessage(BoltObj *bolt, s32 arg1, u8 arg2);
 
 /* game_1BBFC0.c */
-Vtx *func_1518EB10(Game1BBFC0Beam *beam, s16 cam);
-s32 func_1518EF54(Game1BBFC0Beam *beam);
-s32 func_1518F058(Game1BBFC0Beam *beam);
-s32 func_1518F108(Game1BBFC0Beam *beam);
-s32 func_1518F15C(Game1BBFC0Beam *beam);
+Vtx *beam_fillMotionVerts(Game1BBFC0Beam *beam, s16 cam);
+s32 beam_updateMotionPull(Game1BBFC0Beam *beam);
+s32 beam_updateMotion(Game1BBFC0Beam *beam);
+s32 beam_shrinkMotion(Game1BBFC0Beam *beam);
+s32 beam_shrinkMotionProgress(Game1BBFC0Beam *beam);
 
 /* game_1D4E00.c */
-extern Gfx D_8008F910[]; /* render setup (object type table D_8008B4A8) */
-extern Gfx D_8008F930[]; /* render teardown (object type table D_8008B4A8) */
-Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3);
-void func_151A7A90(Bolt *bolt);
-Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view);
-void func_151A8340(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth);
-void func_151A8560(Bolt *bolt);
-void func_151A8584(Bolt *bolt);
-void func_151A85D4(Bolt *bolt);
-Bolt *func_151A8624(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime, f32 jitterDelay, f32 jitterDelayRange,
+extern Gfx gLightningRenderSetupDl[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx gLightningRenderTeardownDl[]; /* render teardown (object type table D_8008B4A8) */
+Bolt *beam_newLightning(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3);
+void beam_updateLightning(Bolt *bolt);
+Gfx *beam_drawLightning(Gfx *gdl, Bolt *bolt, s16 view);
+void beam_displaceLightning(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth);
+void beam_freeLightningVtx(Bolt *bolt);
+void beam_destroyLightning(Bolt *bolt);
+void beam_freeLightning(Bolt *bolt);
+Bolt *beam_spawnBoneLightning(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime, f32 jitterDelay, f32 jitterDelayRange,
                     BoltColor *color, f32 width, Vec3f *targetOffset, u8 arg9, u8 argA, s8 update2, s32 extraSize,
                     u8 argD, s32 argE);
-s32 func_151A87F8(Bolt *bolt);
-void func_151A8A20(Bolt *bolt, s32 msg, u8 msgType);
-void func_151A8A78(Bolt *bolt, s32 arg, u8 msgType);
+s32 beam_followBoneLightning(Bolt *bolt);
+void beam_lightningMessage(Bolt *bolt, s32 msg, u8 msgType);
+void beam_boneLightningMessage(Bolt *bolt, s32 arg, u8 msgType);
 
 /* game_1D5FD0.c */
-Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s32 arg4);
-void func_151A8CEC(Emitter *emitter);
-void func_151A8F1C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
-void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
-void func_151A9024(Emitter *emitter, u8 *msg, u8 msgType);
-s32 func_151A9060(TriggerZone *obj);
-void func_151A90C0(TriggerZone *obj, s32 kind);
-void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround);
-void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType);
-void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos, f32 bottom, f32 radius, s16 lifetime,
+Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s32 arg4);
+void beam_updateAreaEmitter(Emitter *emitter);
+void beam_pickAnchorPoint(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
+void beam_pickRadiusPoint(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
+void beam_areaEmitterMessage(Emitter *emitter, u8 *msg, u8 msgType);
+s32 beam_runZoneHandler(TriggerZone *obj);
+void beam_spawnZoneEmitter(TriggerZone *obj, s32 kind);
+void beam_spawnSpriteParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround);
+void beam_switchEmitterMessage(Emitter *emitter, u8 *msg, u8 msgType);
+void beam_spawnEmitterPreset(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos, f32 bottom, f32 radius, s16 lifetime,
                    u8 arg7, s32 arg8);
 void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround);
-void func_151A9834(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit, s32 count, u8 spawnFunc, void *arg6,
+void beam_spawnAtGroundPoints(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit, s32 count, u8 spawnFunc, void *arg6,
                    u8 arg7, s32 arg8);
 
 /* game_1E26F0.c */
-WavyBeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2);
-Gfx *func_151B5328(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx);
-void func_151B5A9C(WavyBeamEffect *effect, void *msg, u8 type);
+WavyBeamEffect *beam_spawnWavyBeam(s16 duration, u8 arg1, s32 arg2);
+Gfx *beam_drawWavyBeam(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx);
+void beam_wavyBeamMessage(WavyBeamEffect *effect, void *msg, u8 type);
 
 #endif

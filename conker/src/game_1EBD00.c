@@ -21,8 +21,8 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
     EffectParams params;
     Extra151BE850 extra;
 
-    func_1510F800(0);
-    zone = func_1510FD20(pos->x, pos->z);
+    collision_selectMap(0);
+    zone = collision_findZoneLeaf(pos->x, pos->z);
     if (variant >= 3) {
         return NULL;
     }
@@ -145,7 +145,7 @@ struct S151BECB8 {
     /* 0x048 */ u8 unk48;
     /* 0x049 */ u8 pad49[0xB];
     /* 0x054 */ Vec3f unk54;
-    /* 0x060 */ ZoneNode *zone; /* EffectParams.mask: func_1510FD20 at the spawn position */
+    /* 0x060 */ ZoneNode *zone; /* EffectParams.mask: collision_findZoneLeaf at the spawn position */
     /* 0x064 */ u8 pad64[0x98];
     /* 0x0FC */ s32 unkFC;
     /* 0x100 */ u8 pad100[0x1B];
@@ -178,7 +178,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                 f32 dist;
 
                 params = &arg0->params;
-                func_1515C1A0(obj, &objPos, &radius, &height);
+                sprite_getActorBounds(obj, &objPos, &radius, &height);
                 diff.x = objPos.x - params->pos.x;
                 diff.y = objPos.y - params->pos.y;
                 diff.z = objPos.z - params->pos.z;
@@ -484,12 +484,12 @@ void func_151BF340(u8 owner, s32 kind) {
                 digitArg.scaleY = 1.f;
                 if (digits[0] == 0) {
                     digitArg.texture = digitSprites[digits[1]];
-                    display->digits[0] = func_1515548C(&digitArg, 0, NULL, 0, 0, owner, kind);
+                    display->digits[0] = sprite_newScreenSprite(&digitArg, 0, NULL, 0, 0, owner, kind);
                     display->digits[1] = NULL;
                 } else {
                     for (i = 0; i < 2; i++) {
                         digitArg.texture = digitSprites[digits[i]];
-                        display->digits[i] = func_1515548C(&digitArg, 0, NULL, 0, 0, owner, kind);
+                        display->digits[i] = sprite_newScreenSprite(&digitArg, 0, NULL, 0, 0, owner, kind);
                     }
                 }
             }

@@ -83,7 +83,7 @@ static s32 (*D_80089760[])() = {
     func_15108658, func_150E8824, func_151316AC, func_151319A4,
     func_15131AFC, func_15131B3C, func_150D6CC4, func_150D6F0C,
     func_151D4D04, func_151D93F4, func_151D9450, func_151D9534,
-    func_150DA628, func_150F0E48, func_15131D9C, func_15131DEC,
+    func_150DA628, beam_updateFollowParticle, func_15131D9C, func_15131DEC,
 };
 /* Death functions, indexed by ParticleDesc.deathFunc. */
 static void (*D_80089800[])() = { func_150C1198 };
@@ -151,7 +151,7 @@ void func_151303EC(SpriteParticle *p) {
     if (!dead) {
         rate = p->head.desc.frameRate;
         if (rate != 0) {
-            frameCount = D_80090B60[p->head.desc.texture].frameCount;
+            frameCount = gEffectTextures[p->head.desc.texture].frameCount;
             maxFrame = (frameCount << 16) - 1;
             p->head.desc.frame += rate * D_800BE9E4;
             if (maxFrame < p->head.desc.frame) {
@@ -298,7 +298,7 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
                 needSync = FALSE;
             }
             gDPSetPrimDepth(gfx++, (s32)((depth * scale * gViews[viewIdx].viewports[D_800BE9C0].vp.vscale[2] + gViews[viewIdx].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
-            tex = &D_80090B60[p->head.desc.texture];
+            tex = &gEffectTextures[p->head.desc.texture];
             texW = tex->width;
             texH = tex->height;
             height = lry - uly;
@@ -338,8 +338,8 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
             gfx = func_15142B7C(gfx, p->head.desc.unk0, p->head.desc.unk4 | 0x10000 | 0x100000);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
             gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
-            gfx = func_15142E24(gfx, &D_80090B60[p->head.desc.texture], p->head.desc.frame, 2, 0, 0, p->head.desc.texture, 0, 0, &needSync, (p->head.desc.flags & 0x800000) ? 0x3E : 3);
-            gfx = func_15142FBC(gfx, ((p->head.desc.flags & 0x100) ? 0x100000 : 0) | D_800D2C9C | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4 | 4, &needSync);
+            gfx = func_15142E24(gfx, &gEffectTextures[p->head.desc.texture], p->head.desc.frame, 2, 0, 0, p->head.desc.texture, 0, 0, &needSync, (p->head.desc.flags & 0x800000) ? 0x3E : 3);
+            gfx = func_15142FBC(gfx, ((p->head.desc.flags & 0x100) ? 0x100000 : 0) | gSpriteTlutMode | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4 | 4, &needSync);
             gSPScisTextureRectangle(gfx++, (s32)ulx, (s32)uly, (s32)lrx, (s32)lry, 0, s, t, dsdx, dtdy);
         }
     }
@@ -585,7 +585,7 @@ s32 func_151319C4(SpriteParticle *p, Vec3f *prevPos, ParticleBounce *bounce) {
         if (func_1514672C(&probe) == 0) {
             return FALSE;
         }
-        if (func_15046C80(&probe, 0, p->head.desc.pos.y - p->head.desc.height * 0.06000000238f, &p->head.floor) != 0) {
+        if (collision_probeFloorSurfABSet0Cached(&probe, 0, p->head.desc.pos.y - p->head.desc.height * 0.06000000238f, &p->head.floor) != 0) {
             f32 hit[3];
 
             hit[0] = probe.x;
@@ -630,7 +630,7 @@ s32 func_15131B7C(SpriteParticle *p, Vec3f *prevPos, f32 *hit, ParticleBounce *b
 
 static void (*D_80089878[])() = {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    func_151BE558, func_150D6E60, func_150D7068, func_150F1020, NULL, NULL, NULL,
+    func_151BE558, func_150D6E60, func_150D7068, beam_followParticleMessage, NULL, NULL, NULL,
 };
 
 /* Calls the particle's D_80089878 handler, if it has one. */

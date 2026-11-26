@@ -70,7 +70,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
                 dz = side.z - bottom.z;
                 radius = sqrtf(dx * dx + dz * dz);
             } else {
-                func_1515C244(obj, &center, &radius, &height);
+                sprite_getActorBodyBounds(obj, &center, &radius, &height);
             }
         }
         if (radius != 0.0f) {
@@ -87,8 +87,8 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             probe.x = center.x;
             probe.y = center.y + 100.0f;
             probe.z = center.z;
-            func_1504715C(&ground, obj);
-            if (func_15046C80(&probe, 0, center.y - 2000.0f, &ground) != 0) {
+            collision_initHitFromObject(&ground, obj);
+            if (collision_probeFloorSurfABSet0Cached(&probe, 0, center.y - 2000.0f, &ground) != 0) {
                 probe.y = ground.height;
                 func_1514C678(probe.x, probe.y + 31.0f, probe.z, radius, 0, 0xFF,
                               (func_150ADA20() % 11U) + 30, 25, 0, 0, 0, arg1);

@@ -174,7 +174,7 @@ void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     desc.color1.green = D_800AAC90[type].g;
     desc.color1.blue = D_800AAC90[type].b;
     desc.color1.alpha = D_800AAC90[type].a;
-    sprite = func_1515548C(&desc, 8, 0, 0, sizeof(SightSpritePayload), arg4, 1);
+    sprite = sprite_newScreenSprite(&desc, 8, 0, 0, sizeof(SightSpritePayload), arg4, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -186,7 +186,7 @@ void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     desc.color1.green = D_800AACE0[type].g;
     desc.color1.blue = D_800AACE0[type].b;
     desc.color1.alpha = D_800AACE0[type].a;
-    sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg4, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -239,7 +239,7 @@ void sight_spawnBasicSight(Camera *player, u8 big) {
     desc.flags |= 6;
     desc.x = 25.0f;
     desc.y = 25.0f;
-    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    sprite = sprite_newScreenSprite(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -247,7 +247,7 @@ void sight_spawnBasicSight(Camera *player, u8 big) {
     desc.flags |= 4;
     desc.x = -25.0f;
     desc.y = 25.0f;
-    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    sprite = sprite_newScreenSprite(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -255,7 +255,7 @@ void sight_spawnBasicSight(Camera *player, u8 big) {
     desc.flags |= 0;
     desc.x = -25.0f;
     desc.y = -25.0f;
-    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    sprite = sprite_newScreenSprite(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -263,7 +263,7 @@ void sight_spawnBasicSight(Camera *player, u8 big) {
     desc.flags |= 2;
     desc.x = 25.0f;
     desc.y = -25.0f;
-    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    sprite = sprite_newScreenSprite(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -293,7 +293,7 @@ void sight_spawnBasicSight(Camera *player, u8 big) {
         i = 0; // matching: the counter is initialised before the angle
         payload.angle = 0.0f;
         for (; i < 12; i++) {
-            sprite = func_1515548C(&desc, 7, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+            sprite = sprite_newScreenSprite(&desc, 7, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
             if (sprite != NULL) {
                 memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
             }
@@ -385,7 +385,7 @@ void sight_spawnDotSight(Camera *player, u8 big) {
         kind = 0;
     }
 
-    sprite = func_1515548C(&desc, kind, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    sprite = sprite_newScreenSprite(&desc, kind, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -437,7 +437,7 @@ void sight_spawnZoomSight(Camera *player, u8 big) {
     desc.flags |= 6;
     desc.x = 25.0f;
     desc.y = 25.0f;
-    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    sprite = sprite_newScreenSprite(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -445,7 +445,7 @@ void sight_spawnZoomSight(Camera *player, u8 big) {
     desc.flags |= 4;
     desc.x = -25.0f;
     desc.y = 25.0f;
-    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    sprite = sprite_newScreenSprite(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -453,7 +453,7 @@ void sight_spawnZoomSight(Camera *player, u8 big) {
     desc.flags |= 0;
     desc.x = -25.0f;
     desc.y = -25.0f;
-    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    sprite = sprite_newScreenSprite(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -461,7 +461,7 @@ void sight_spawnZoomSight(Camera *player, u8 big) {
     desc.flags |= 2;
     desc.x = 25.0f;
     desc.y = -25.0f;
-    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    sprite = sprite_newScreenSprite(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -572,7 +572,7 @@ void sight_handleLensMessage(SightLensObject *obj, void **msg, u8 msgId) {
 }
 
 /* Fades the sprite towards payload.unk8 while the player's 0x2000 input flag is held
- * (and unk3D4->unk19E is clear), and towards 0 otherwise. An update callback of D_8008ACC8: it has the
+ * (and unk3D4->unk19E is clear), and towards 0 otherwise. An update callback of gScreenSpriteUpdates: it has the
  * table's s32 type but no return statement. */
 s32 func_151CB510(SightSprite *sprite) {
     Camera *player;
@@ -637,13 +637,13 @@ void sight_spawnSidePanel(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     desc.y = 91.0f;
     payload.rangeMin = D_800AAD6C[3][gScreenLayout == 1];
     payload.rangeScale = D_800AAD94[3][gScreenLayout == 1];
-    sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
     desc.color1.alpha = 0;
     desc.texture = 0x7C;
-    sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -653,13 +653,13 @@ void sight_spawnSidePanel(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     payload.side = 1;
     desc.x = -88.0f;
     desc.y = 91.0f;
-    sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
     desc.color1.alpha = 0;
     desc.texture = 0x7C;
-    sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -878,7 +878,7 @@ void sight_spawnCrossBars(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8
     desc.y = -37.0f;
     desc.texture = 0x9A;
     desc.x = 0.0f;
-    sprite = func_1515548C(&desc, 9, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 9, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -890,7 +890,7 @@ void sight_spawnCrossBars(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8
     desc.halfWidth = 4.199999809f;
     desc.halfHeight = 28.0f;
     desc.x = -37.0f;
-    sprite = func_1515548C(&desc, 9, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 9, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -971,7 +971,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.texture = 0x64;
     desc.halfHeight = 12.0f;
     desc.halfWidth = 12.0f;
-    sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -983,7 +983,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.halfWidth = 7.0f;
     desc.x = 55.0f;
     desc.y = 0.0f;
-    sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -992,7 +992,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.flags |= 2;
     desc.x = -55.0f;
     desc.y = 0.0f;
-    sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1002,7 +1002,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.flags |= 4;
     desc.x = 0.0f;
     desc.y = 55.0f;
-    sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1011,7 +1011,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.flags |= 0;
     desc.x = 0.0f;
     desc.y = -55.0f;
-    sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1023,7 +1023,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.halfWidth = 6.0f;
     desc.x = 44.0f;
     desc.y = 44.0f;
-    sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1032,7 +1032,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.flags |= 4;
     desc.x = -44.0f;
     desc.y = 44.0f;
-    sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1041,7 +1041,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.flags |= 0;
     desc.x = -44.0f;
     desc.y = -44.0f;
-    sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1050,7 +1050,7 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     desc.flags |= 2;
     desc.x = 44.0f;
     desc.y = -44.0f;
-    sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1099,7 +1099,7 @@ void sight_spawnLargeRing(Camera *player, u8 red, u8 green, u8 blue) {
     desc.halfWidth = 65.0f;
     desc.halfHeight = 65.0f;
 
-    sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
@@ -1176,7 +1176,7 @@ void sight_spawnScopeFrame(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
         for (i = 0; i < 4; i++) {
             desc.x = ((i * 71.5f) + 35.75f) - 143.0f;
             desc.texture = textures[i];
-            sprite = func_1515548C(&desc, 0xB, 0, 0, sizeof(SightSpritePayload), arg3, 1);
+            sprite = sprite_newScreenSprite(&desc, 0xB, 0, 0, sizeof(SightSpritePayload), arg3, 1);
             if (sprite != NULL) {
                 memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
             }
@@ -1185,7 +1185,7 @@ void sight_spawnScopeFrame(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
 }
 
 /* Scope frame strip update: the top (kind 5) and bottom (kind 4) rows slide with the sight value. An update
- * callback of D_8008ACC8: it has the table's s32 type but no return statement. */
+ * callback of gScreenSpriteUpdates: it has the table's s32 type but no return statement. */
 s32 sight_updateScopeStrip(SightSprite *sprite) {
     SightSpritePayload *payload = &sprite->payload;
     f32 value = sight_getSpriteValue(sprite);

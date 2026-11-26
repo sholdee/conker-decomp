@@ -26,7 +26,7 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
     CollisionHit ground;
     SplashSpraySpec first;
 
-    func_1504715C(&ground, player);
+    collision_initHitFromObject(&ground, player);
     first.spray.pos.x = pickup->x;
     first.spray.pos.y = pickup->y;
     first.spray.pos.z = pickup->z;

@@ -17,7 +17,7 @@ static f32 D_80088944[] = { 0.007f };
 static f32 D_80088948[] = { 0.012f };
 
 /* Spawns a beam effect between two bone-relative points of the owner's skeleton. */
-void func_150DAE70(Actor *owner, s32 type, u8 arg2, s32 arg3) {
+void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3) {
     MtxF *mtx;
     Vec3f from;
     Vec3f to;
@@ -71,7 +71,7 @@ void func_150DAE70(Actor *owner, s32 type, u8 arg2, s32 arg3) {
 }
 
 /* Beam update: moves, pulses the quad's scale and fades out. Returns 0 once fully faded. */
-s32 func_150DB114(BeamQuad *effect) {
+s32 beam_updateQuad(BeamQuad *effect) {
     BeamMotion *beam;
     s16 alpha;
 
@@ -112,7 +112,7 @@ s32 func_150DB114(BeamQuad *effect) {
 }
 
 /* Beam draw: fills this frame's vertex buffer with a quad facing along dir. */
-Vtx_t *func_150DB2D8(BeamQuad *effect, s16 bufferIndex) {
+Vtx_t *beam_drawQuad(BeamQuad *effect, s16 bufferIndex) {
     Vtx_t *vertices;
     Vtx_t *result;
     f32 offsetX;
@@ -155,7 +155,7 @@ Vtx_t *func_150DB2D8(BeamQuad *effect, s16 bufferIndex) {
 }
 
 /* Spawns a quad whose position, angle, size and alpha follow the given values. */
-void func_150DB518(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHeight, s16 arg5, u8 arg6, s32 arg7) {
+void beam_spawnLinkedQuad(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHeight, s16 arg5, u8 arg6, s32 arg7) {
     ParticleDef spawn;
     BeamQuad *effect;
 
@@ -184,7 +184,7 @@ void func_150DB518(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHe
 }
 
 /* Linked quad update: copies the followed alpha, clamped to 0..255. */
-s32 func_150DB630(BeamQuad *effect) {
+s32 beam_updateLinkedQuad(BeamQuad *effect) {
     f32 **source;
     f32 alpha;
 
@@ -204,7 +204,7 @@ s32 func_150DB630(BeamQuad *effect) {
 }
 
 /* Linked quad draw: fills this frame's vertex buffer with a quad rotated by the followed angle. */
-Vtx_t *func_150DB714(BeamQuad *effect, s16 bufferIndex) {
+Vtx_t *beam_drawLinkedQuad(BeamQuad *effect, s16 bufferIndex) {
     Vtx_t *vertices;
     Vtx_t *result;
     f32 cosine;

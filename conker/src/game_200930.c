@@ -818,7 +818,7 @@ void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u
 }
 
 /* Computes obj's emission point and direction for slot `slot`, stores a far target point along it in
-   unk31C->unkB8..unkC0, and calls func_15081690 from the point towards that target. */
+   unk31C->unkB8..unkC0, and calls collision_castRay from the point towards that target. */
 void func_151D57F8(Actor *obj, u8 slot) {
     Vec3f pos;
     Vec3f forward;
@@ -849,7 +849,7 @@ void func_151D57F8(Actor *obj, u8 slot) {
         delta.y = obj->mv->rayHit.pos.y - pos.y;
         delta.z = obj->mv->rayHit.pos.z - pos.z;
         if (func_15145128(&delta, &delta, &len, NULL) != 0) {
-            func_15081690(obj, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z,
+            collision_castRay(obj, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z,
                           &obj->mv->rayHit, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
         }
     }
@@ -891,7 +891,7 @@ void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *
 
 
 /* Runs func_151452C4(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter
-   is not -1, only for those D_80086C90[filter] accepts). Returns a mask with bit i cleared for each
+   is not -1, only for those gObjectFilters[filter] accepts). Returns a mask with bit i cleared for each
    object i it reports. */
 s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg) {
     f32 radius;
@@ -912,7 +912,7 @@ s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg)
         if (level != 0x23 && obj->character_type == 0xFF) continue;
         if (obj == self) continue;
         if (!(obj->noshove & 0x40)) continue;
-        if (filter != -1 && D_80086C90[filter](obj, self, filterArg) == 0) continue;
+        if (filter != -1 && gObjectFilters[filter](obj, self, filterArg) == 0) continue;
         if (obj->unkD2 < obj->unkD4) {
             radius = obj->unkD4;
         } else {

@@ -205,8 +205,8 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
     gfx = view_emitRspSetup(gfx, view);
     gSPLookAtX(gfx++, &gLookAts[D_800BE9C0].l[0]);
     gSPLight(gfx++, &gLookAts[D_800BE9C0].l[1], 1);
-    func_1510CB10(view);
-    gfx = func_1510CDB8(gfx, 0xFF, 0xFF, view);
+    texture_updateTint(view);
+    gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);
     gfx = func_151733D8(gfx, 1);
     gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     if (!skipWorld) {
@@ -228,7 +228,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
             break;
         }
     }
-    func_1510F800(0);
+    collision_selectMap(0);
     if (D_800DCD7C == 0) {
         gDma2p(gfx++, G_MOVEMEM, &gViewAmbients[view][D_800BE9C0], 48, G_MV_LIGHT, G_MVO_L2);
     }
@@ -239,7 +239,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
         if (level != 5) {
             if (D_800BEAAA) {
                 gDPPipeSync(gfx++);
-                if (D_800DBE62) {
+                if (gMeshBuilt) {
                     if (level != 0x14 && level != 0x33 && level != 0x32) {
                         gfx = func_150A5378(D_800B0E00[0], gfx, gViewMatrices[view], 0, 0, 1 << view);
                     } else {
@@ -247,7 +247,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                     }
                     if (D_800B0E00[1] != NULL) {
                         gDPPipeSync(gfx++);
-                        gfx = func_1510CDB8(gfx, 0xFF, 0xFF, view);
+                        gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);
                         gfx = func_151733D8(gfx, 1);
                         if (level == 0x35) {
                             gfx = func_150CF5E8(gfx);
@@ -271,7 +271,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
         gfx = light_reemitLights(gfx, D_800D9E10[view], D_800D9E20, D_800D9E21, &gViewAmbients[view][D_800BE9C0]);
         if (D_800B0E00[2] != NULL) {
             gDPPipeSync(gfx++);
-            gfx = func_1510CDB8(gfx, 0xFF, 0xFF, view);
+            gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);
             gSPDisplayList(gfx++, D_800B0E00[2]);
         }
     }

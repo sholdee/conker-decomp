@@ -5,7 +5,7 @@
 
 
 void func_15004F00(void) {
-    D_800C3EE0 = NULL;
+    gAttachments = NULL;
 }
 
 void func_15004F10(void) {

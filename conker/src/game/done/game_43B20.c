@@ -17,20 +17,20 @@ void player_loadSpawnPoints(s32 arg0) {
 
     gTeam0SpawnMask = -1;
     gTeam1SpawnMask = -1;
-    tmp = func_1502B7F0(&gSpawnPoints, 3, 12, arg0, 6) / 24U;
+    tmp = rom_loadPathTo(&gSpawnPoints, 3, 12, arg0, 6) / 24U;
     gSpawnPointCount = tmp;
     if (tmp == 0) {
         gSpawnPoints = allocate_memory(24, 1, 0, 0);
         gSpawnPointCount = 1U;
-        if (D_800D20FC) {
-            gSpawnPoints->pos[0] = D_800D20FC->x;
-            gSpawnPoints->pos[1] = D_800D20FC->y;
-            gSpawnPoints->pos[2] = D_800D20FC->z;
-            gSpawnPoints->cameraEye.x = D_800D20FC->x + 100;
-            gSpawnPoints->cameraEye.y = D_800D20FC->y + 100;
-            gSpawnPoints->cameraEye.z = D_800D20FC->z;
+        if (gSpawnRecords) {
+            gSpawnPoints->pos[0] = gSpawnRecords->x;
+            gSpawnPoints->pos[1] = gSpawnRecords->y;
+            gSpawnPoints->pos[2] = gSpawnRecords->z;
+            gSpawnPoints->cameraEye.x = gSpawnRecords->x + 100;
+            gSpawnPoints->cameraEye.y = gSpawnRecords->y + 100;
+            gSpawnPoints->cameraEye.z = gSpawnRecords->z;
             gSpawnPoints->tilt = 0;
-            gSpawnPoints->facing = D_800D20FC->angle;
+            gSpawnPoints->facing = gSpawnRecords->angle;
             gSpawnPoints->doorWalkTime = 0;
         } else {
             gSpawnPoints->pos[0] = 0xE10;

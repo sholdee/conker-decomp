@@ -310,7 +310,7 @@ void func_150B6110(BoltRingEffect *effect) {
             func_1514373C((u32)angle, emitter->xSize, &end.x, &end.z);
             end.x += emitter->x;
             end.z += emitter->z;
-            func_15106F98(&start, &end, 4, &config, spread, 1, effect->owner, effect->kind);
+            beam_newBoltChain(&start, &end, 4, &config, spread, 1, effect->owner, effect->kind);
             data->spawnAccum -= 1.0f;
         } while (data->spawnAccum > 1.0f);
     }

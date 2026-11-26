@@ -4,18 +4,18 @@
 // This file's .bss (0x800D9890-0x800D98BF), in the original order. IDO places the variables that
 // a header declares after the ones the .c file declares first, so these are declared only here, before
 // functions.h: the order also depends on how many types and variables come before them (see init_50A0.c).
-u8 D_800D9890; // queued command for func_150B6BC0
+u8 gSpriteQueuedCmd; // queued command for sprite_runQueuedCommand
 EffectHeader *D_800D9894;
 // matching: defined in-file so as1 shares one lui across the unrolled stores in func_150B6C90
-static struct Sprite2D *D_800D9898[10];
+static struct Sprite2D *gSpriteSlots[10];
 
 #include "functions.h"
 #include "variables.h"
 
 
-/* Runs the command queued in D_800D9890 (each handler resets it to 3). */
-void func_150B6BC0(s32 unused) {
-    switch (D_800D9890) {
+/* Runs the command queued in gSpriteQueuedCmd (each handler resets it to 3). */
+void sprite_runQueuedCommand(s32 unused) {
+    switch (gSpriteQueuedCmd) {
     case 1:
         func_150B6C90();
         return;
@@ -23,7 +23,7 @@ void func_150B6BC0(s32 unused) {
         func_150B6D34();
         return;
     case 4:
-        func_150B6D78();
+        sprite_freeAll();
         return;
     case 5:
         func_150B7484();
@@ -55,9 +55,9 @@ void func_150B6C90(void) {
         func_1516972C(D_800D9894);
     }
     D_800D9894 = screen_spawnTintEffect(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
-    D_800D9890 = 3;
+    gSpriteQueuedCmd = 3;
     for (i = 0; i < 10; i++) {
-        D_800D9898[i] = NULL;
+        gSpriteSlots[i] = NULL;
     }
 }
 
@@ -67,16 +67,16 @@ void func_150B6D34(void) {
     Sprite2D *sprite;
 
     for (i = 0; i < 3; i++) {
-        sprite = D_800D9898[i + 5];
+        sprite = gSpriteSlots[i + 5];
         if (sprite != NULL) {
             sprite->params.data.scroll.stage = 1;
         }
     }
-    D_800D9890 = 3;
+    gSpriteQueuedCmd = 3;
 }
 
 /* Frees the screen_spawnTintEffect effect and every sprite. */
-void func_150B6D78(void) {
+void sprite_freeAll(void) {
     s32 i;
 
     if (D_800D9894 != NULL) {
@@ -84,12 +84,12 @@ void func_150B6D78(void) {
         D_800D9894 = NULL;
     }
     for (i = 0; i < 10; i++) {
-        if (D_800D9898[i] != NULL) {
-            func_1516972C(&D_800D9898[i]->header);
-            D_800D9898[i] = NULL;
+        if (gSpriteSlots[i] != NULL) {
+            func_1516972C(&gSpriteSlots[i]->header);
+            gSpriteSlots[i] = NULL;
         }
     }
-    D_800D9890 = 3;
+    gSpriteQueuedCmd = 3;
 }
 
 /* Update routine 4: advances unk34 by 0x30 per frame, wrapping from above 0x800 back to -0xC00. */
@@ -185,7 +185,7 @@ void func_150B709C(Sprite2D *sprite) {
 }
 
 /* Update routine 6: grows scaleX up to 1.0, then scaleY. */
-void func_150B71A8(Sprite2D *sprite) {
+void sprite_updateGrowIn(Sprite2D *sprite) {
     if (sprite->params.scaleX != 0x1000) {
         sprite->params.scaleX += D_800BE9E4 * 0x100;
         if (sprite->params.scaleX > 0x1000) {
@@ -202,7 +202,7 @@ void func_150B71A8(Sprite2D *sprite) {
 
 /* Spawns four D_80091924 sprites (update routine 7) that converge on (arg0, arg1) from above, below,
  * left and right over `duration` frames. */
-void func_150B7220(s32 arg0, s32 arg1, s32 duration, s32 arg3) {
+void sprite_spawnConverging(s32 arg0, s32 arg1, s32 duration, s32 arg3) {
     Sprite2DParams desc;
     s32 r;
     s32 x;
@@ -244,29 +244,29 @@ void func_150B7220(s32 arg0, s32 arg1, s32 duration, s32 arg3) {
     desc.frame = 0;
     desc.x = x;
     desc.y = y - r;
-    func_15169900(&desc, arg3);
+    sprite_newSprite2D(&desc, arg3);
 
     desc.data.words[2] = (x << 16) | ((y + r) & 0xFFFF);
     desc.flags = 8;
     desc.y = y + r;
-    func_15169900(&desc, arg3);
+    sprite_newSprite2D(&desc, arg3);
 
     desc.x = x - r;
     desc.data.words[2] = ((x - r) << 16) | (y & 0xFFFF);
     desc.flags = 4;
     desc.frame = 0x100;
     desc.y = y;
-    func_15169900(&desc, arg3);
+    sprite_newSprite2D(&desc, arg3);
 
     desc.data.words[2] = ((x + r) << 16) | (y & 0xFFFF);
     desc.flags = 0;
     desc.x = x + r;
-    func_15169900(&desc, arg3);
+    sprite_newSprite2D(&desc, arg3);
 }
 
 /* Update routine 7: moves the sprite in a straight line from its start point to its end point as its
  * timer runs down from the duration to 0. */
-void func_150B73F0(Sprite2D *sprite) {
+void sprite_updateLinearMove(Sprite2D *sprite) {
     s32 endX = sprite->params.data.move.endX;
     s32 endY = sprite->params.data.move.endY;
     s32 startX = sprite->params.data.move.startX;
@@ -307,20 +307,20 @@ void func_150B7484(void) {
     desc.cycleType = 1;
     desc.scaleX = 0x51;
     desc.scaleY = 0x51;
-    if (D_800D9898[0] != NULL) {
-        func_1516972C(&D_800D9898[0]->header);
+    if (gSpriteSlots[0] != NULL) {
+        func_1516972C(&gSpriteSlots[0]->header);
     }
-    D_800D9898[0] = func_15169968(&desc);
-    D_800D9890 = 3;
+    gSpriteSlots[0] = sprite_newSprite2DDefault(&desc);
+    gSpriteQueuedCmd = 3;
 }
 
 /* Frees sprite slot 0 and puts a static 15-frame D_800918DC sprite at (60, 60) in slot 3. */
 void func_150B7560(void) {
     Sprite2DParams desc;
 
-    if (D_800D9898[0] != NULL) {
-        func_1516972C(&D_800D9898[0]->header);
-        D_800D9898[0] = NULL;
+    if (gSpriteSlots[0] != NULL) {
+        func_1516972C(&gSpriteSlots[0]->header);
+        gSpriteSlots[0] = NULL;
     }
     desc.frameSpeed = 0x4D;
     desc.frameCount = 15;
@@ -344,27 +344,27 @@ void func_150B7560(void) {
     desc.scaleY = 0x1000;
     desc.x = 60.0f;
     desc.y = 60.0f;
-    if (D_800D9898[3] != NULL) {
-        func_1516972C(&D_800D9898[3]->header);
+    if (gSpriteSlots[3] != NULL) {
+        func_1516972C(&gSpriteSlots[3]->header);
     }
-    D_800D9898[3] = func_15169968(&desc);
-    D_800D9890 = 3;
+    gSpriteSlots[3] = sprite_newSprite2DDefault(&desc);
+    gSpriteQueuedCmd = 3;
 }
 
 /* Spawns the growing D_800918E8 sprite at x = 60 in slot 1. */
 void func_150B765C(void) {
-    func_150B76BC(0x3C, 1);
-    D_800D9890 = 3;
+    sprite_spawnGrowing(0x3C, 1);
+    gSpriteQueuedCmd = 3;
 }
 
 /* Spawns the growing D_800918E8 sprite at x = 230 in slot 2. */
 void func_150B768C(void) {
-    func_150B76BC(0xE6, 2);
-    D_800D9890 = 3;
+    sprite_spawnGrowing(0xE6, 2);
+    gSpriteQueuedCmd = 3;
 }
 
 /* Replaces sprite `slot` with a D_800918E8 sprite at (x, 170) that grows in (update routine 6). */
-void func_150B76BC(s32 x, s32 slot) {
+void sprite_spawnGrowing(s32 x, s32 slot) {
     Sprite2DParams desc;
 
     desc.x = x;
@@ -389,10 +389,10 @@ void func_150B76BC(s32 x, s32 slot) {
     desc.cycleType = 1;
     desc.scaleX = 0x51;
     desc.scaleY = 0x51;
-    if (D_800D9898[slot] != NULL) {
-        func_1516972C(&D_800D9898[slot]->header);
+    if (gSpriteSlots[slot] != NULL) {
+        func_1516972C(&gSpriteSlots[slot]->header);
     }
-    D_800D9898[slot] = func_15169968(&desc);
+    gSpriteSlots[slot] = sprite_newSprite2DDefault(&desc);
 }
 
 /* Frees sprite slot 1, then puts the D_800918F4/D_80091900 sprite (update routine 4) in slot 4
@@ -400,9 +400,9 @@ void func_150B76BC(s32 x, s32 slot) {
 void func_150B77A8(void) {
     Sprite2DParams desc;
 
-    if (D_800D9898[1] != NULL) {
-        func_1516972C(&D_800D9898[1]->header);
-        D_800D9898[1] = NULL;
+    if (gSpriteSlots[1] != NULL) {
+        func_1516972C(&gSpriteSlots[1]->header);
+        gSpriteSlots[1] = NULL;
     }
 
     desc.x = 60.0f;
@@ -428,10 +428,10 @@ void func_150B77A8(void) {
     desc.flags = 3;
     desc.scaleX = 0x1000;
     desc.scaleY = 0x1000;
-    if (D_800D9898[4] != NULL) {
-        func_1516972C(&D_800D9898[4]->header);
+    if (gSpriteSlots[4] != NULL) {
+        func_1516972C(&gSpriteSlots[4]->header);
     }
-    D_800D9898[4] = func_15169968(&desc);
+    gSpriteSlots[4] = sprite_newSprite2DDefault(&desc);
 
     desc.sOffset = 0;
     desc.extraWidth = 0;
@@ -442,11 +442,11 @@ void func_150B77A8(void) {
     desc.unk37 = 0x11;
     desc.texture = &D_800918E8;
     desc.cycleType = 1;
-    if (D_800D9898[8] != NULL) {
-        func_1516972C(&D_800D9898[8]->header);
+    if (gSpriteSlots[8] != NULL) {
+        func_1516972C(&gSpriteSlots[8]->header);
     }
-    D_800D9898[8] = func_15169968(&desc);
-    D_800D9890 = 3;
+    gSpriteSlots[8] = sprite_newSprite2DDefault(&desc);
+    gSpriteQueuedCmd = 3;
 }
 
 
@@ -455,9 +455,9 @@ void func_150B77A8(void) {
 void func_150B791C(void) {
     Sprite2DParams desc;
 
-    if (D_800D9898[2] != NULL) {
-        func_1516972C(&D_800D9898[2]->header);
-        D_800D9898[2] = NULL;
+    if (gSpriteSlots[2] != NULL) {
+        func_1516972C(&gSpriteSlots[2]->header);
+        gSpriteSlots[2] = NULL;
     }
     desc.x = 230.0f;
     desc.frameCount = 3;
@@ -485,28 +485,28 @@ void func_150B791C(void) {
     desc.flags = 0;
     desc.scaleX = 0x1000;
     desc.scaleY = 0x1000;
-    if (D_800D9898[5] != NULL) {
-        func_1516972C(&D_800D9898[5]->header);
+    if (gSpriteSlots[5] != NULL) {
+        func_1516972C(&gSpriteSlots[5]->header);
     }
-    D_800D9898[5] = func_15169968(&desc);
+    gSpriteSlots[5] = sprite_newSprite2DDefault(&desc);
     desc.frame = 0x100;
     desc.data.scroll.frame = 0x100;
     desc.y = 170.0f;
     desc.data.scroll.y = desc.y;
     desc.alpha = 0xFF;
-    if (D_800D9898[6] != NULL) {
-        func_1516972C(&D_800D9898[5]->header); /* sic: frees slot 5, not 6 */
+    if (gSpriteSlots[6] != NULL) {
+        func_1516972C(&gSpriteSlots[5]->header); /* sic: frees slot 5, not 6 */
     }
-    D_800D9898[6] = func_15169968(&desc);
+    gSpriteSlots[6] = sprite_newSprite2DDefault(&desc);
     desc.frame = 0x200;
     desc.data.scroll.frame = 0x200;
     desc.y = 190.0f;
     desc.data.scroll.y = desc.y;
     desc.alpha = 0x80;
-    if (D_800D9898[7] != NULL) {
-        func_1516972C(&D_800D9898[5]->header); /* sic */
+    if (gSpriteSlots[7] != NULL) {
+        func_1516972C(&gSpriteSlots[5]->header); /* sic */
     }
-    D_800D9898[7] = func_15169968(&desc);
+    gSpriteSlots[7] = sprite_newSprite2DDefault(&desc);
     desc.timer = 0;
     desc.frame = 0;
     desc.frameSpeed = 0;
@@ -518,9 +518,9 @@ void func_150B791C(void) {
     desc.texture = &D_800918E8;
     desc.x = 230.0f;
     desc.y = 170.0f;
-    if (D_800D9898[9] != NULL) {
-        func_1516972C(&D_800D9898[9]->header);
+    if (gSpriteSlots[9] != NULL) {
+        func_1516972C(&gSpriteSlots[9]->header);
     }
-    D_800D9898[9] = func_15169968(&desc);
-    D_800D9890 = 3;
+    gSpriteSlots[9] = sprite_newSprite2DDefault(&desc);
+    gSpriteQueuedCmd = 3;
 }

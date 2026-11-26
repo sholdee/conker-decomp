@@ -423,7 +423,7 @@ Gfx *text_drawQueue(Gfx *gfx) {
                 if (node->anchor != NULL) {
                     anchor = node->anchor;
                     gCurrentView = 0;
-                    visible = func_1509563C(anchor->xpos, anchor->ypos + node->y, anchor->zpos,
+                    visible = sprite_project(anchor->xpos, anchor->ypos + node->y, anchor->zpos,
                                             &screenX, &screenY, &screenZ, &screenW, 30000.0f);
                     if (visible) {
                         node->x = screenX;

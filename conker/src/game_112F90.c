@@ -72,7 +72,7 @@ void func_150E5AE0(void) {
                 x2 += camera_global_Cameras->eye.x;
                 h2 += camera_global_Cameras->eye.y;
                 z2 += camera_global_Cameras->eye.z;
-                func_150E1AB0(0, x1, h1, z1, x2, h2, z2,
+                beam_spawnTracer(0, x1, h1, z1, x2, h2, z2,
                               160.0f, 10.0f, 4.0f, 360.0f, 0xF, 0x43, 0, 0, 0, 0, 0, 0, -1, 0, 0,
                               0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
             }

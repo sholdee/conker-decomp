@@ -335,7 +335,7 @@ s32 trail_tracePissTrail(PissTrail *trail) {
                     dir[1] = delta.y * invLen;
                     dir[2] = delta.z * invLen;
                 }
-                func_15081690(owner, prev->pos.x, prev->pos.y, prev->pos.z, dir[0], dir[1], dir[2], &hit, cur->len, 0, 0, 1, -1, 0, 0);
+                collision_castRay(owner, prev->pos.x, prev->pos.y, prev->pos.z, dir[0], dir[1], dir[2], &hit, cur->len, 0, 0, 1, -1, 0, 0);
                 if (hit.hitType != 0) {
                     trail_spawnPissImpact(trail, &hit, dir);
                     if (hit.hitType >= 2) {
@@ -479,10 +479,10 @@ Gfx *trail_drawPissTrail(PissTrail *trail, Gfx *gfx, s16 view) {
     }
     camera = func_15144B34(view);
     flag = 1;
-    gfx = func_15142E24(gfx, &D_80090B60[146], 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
+    gfx = func_15142E24(gfx, &gEffectTextures[146], 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x220005, 0x1D0600);
     gfx = func_1513F4E4(gfx, 0x4E, &flag);
-    gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
+    gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
     if (trail->head.tmpl.flags & 2) {
         index = trail->head.end - 1;
         if (index < 0) {
@@ -683,7 +683,7 @@ s32 func_150DA628(SpriteParticle *particle, s32 arg1) {
     return 1;
 }
 
-/* Spawns the impact effects of a trail segment hitting something (hit from func_15081690). */
+/* Spawns the impact effects of a trail segment hitting something (hit from collision_castRay). */
 void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
     PissTrailData *data;
     Actor *target;
@@ -755,7 +755,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                 SplashSpray emit;
                 CollisionHit origin;
 
-                func_150472C0(&origin, hit);
+                collision_initHitFromRay(&origin, hit);
                 emit.pos = hit->pos;
                 emit.scaleBase = 3.480000019f;
                 emit.countBase = 1;

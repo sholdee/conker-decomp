@@ -144,7 +144,7 @@ void func_151A5660(u8 *effect) {
                 probe.x = particle.pos.x;
                 probe.y = high;
                 probe.z = particle.pos.z;
-                if (func_15046C80(&probe, 0, low, &emitter->ground) != 0) {
+                if (collision_probeFloorSurfABSet0Cached(&probe, 0, low, &emitter->ground) != 0) {
                     particle.pos.y = emitter->ground.height;
                 } else {
                     particle.pos.y = low;

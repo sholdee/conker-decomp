@@ -40,7 +40,7 @@ s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3
             }
         }
         if (recast && (hit->hitType == 2 || hit->hitType == 3)) {
-            func_15081690(owner, hit->origin.x, hit->origin.y, hit->origin.z, hit->dir.x, hit->dir.y, hit->dir.z,
+            collision_castRay(owner, hit->origin.x, hit->origin.y, hit->origin.z, hit->dir.x, hit->dir.y, hit->dir.z,
                           &recastHit, 0.0f, 0, 1, 1, -1, 0, arg16);
             if (recastHit.hitType != 0) {
                 *hit = recastHit;
@@ -59,7 +59,7 @@ s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3
             hit->origin = *origin;
             hit->dir = *dir;
         }
-        func_15081690(owner, hit->origin.x, hit->origin.y, hit->origin.z, hit->dir.x, hit->dir.y, hit->dir.z, hit,
+        collision_castRay(owner, hit->origin.x, hit->origin.y, hit->origin.z, hit->dir.x, hit->dir.y, hit->dir.z, hit,
                       0.0f, 0, collide ? 0 : 1, (arg15 && collide) ? 0 : 1, arg13, 0, arg16);
         if (hit->surface == NULL) {
             index = -1;

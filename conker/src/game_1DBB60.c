@@ -19,7 +19,7 @@ void func_151AE6B0(CharacterWatcher *task) {
         }
         pos.z = actor->zpos;
         hit = &task->hit;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->hit.height;
             func_151ABE40(&pos, hit, 5, task->header.owner, task->header.kind);
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);

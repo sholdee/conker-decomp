@@ -94,9 +94,9 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
     Vec3i pos;
     Vec3f ndir;
 
-    func_1510F800(0);
-    state.zone0 = func_1510FD20(start->x, start->z);
-    state.zone1 = func_1510FD20(end->x, end->z);
+    collision_selectMap(0);
+    state.zone0 = collision_findZoneLeaf(start->x, start->z);
+    state.zone1 = collision_findZoneLeaf(end->x, end->z);
     if (state.zone0 == NULL || state.zone1 == NULL) {
         return NULL;
     }
@@ -480,7 +480,7 @@ s32 sight_doesBeamHitActor(Actor *actor, SightBeamObject *obj) {
 
     kind = actor->character_type;
     if (kind < 187 && kind != 0xFF) {
-        radius = actor->scale_xz * D_800D1C90[kind]->unk1A;
+        radius = actor->scale_xz * gModelDefs[kind]->unk1A;
     } else {
         radius = 50.0f;
     }
@@ -877,8 +877,8 @@ void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
         query.x = origin.x;
         query.y = origin.y;
         query.z = origin.z;
-        func_1504715C(&collision, actor);
-        if (func_15046C80(&query, 0, origin.y - 200.0f, &collision) != 0 && (collision.flags & 1)) {
+        collision_initHitFromObject(&collision, actor);
+        if (collision_probeFloorSurfABSet0Cached(&query, 0, origin.y - 200.0f, &collision) != 0 && (collision.flags & 1)) {
             impact.x = query.x;
             hit = 1;
             impact.y = collision.height;
@@ -912,7 +912,7 @@ void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
     pos.x = actor->xpos;
     pos.y = actor->floorY + 2.0f;
     pos.z = actor->zpos;
-    func_1504715C(&collision, actor);
+    collision_initHitFromObject(&collision, actor);
     func_151ABE40(&pos, &collision, 2, arg1, arg2);
 }
 

@@ -92,8 +92,8 @@ void func_15010A60(void) {
         part.pos = pos;
         tail.unk18 = pos;
 
-        func_1510F800(0);
-        part.unk5C = func_1510FD20(part.pos.x, part.pos.z);
+        collision_selectMap(0);
+        part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
 
         rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
         rnd *= 1.525902189e-05f;

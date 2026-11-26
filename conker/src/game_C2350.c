@@ -2,34 +2,34 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c). */
-// Sprite placement computed by func_15095B08 for func_15095D34.
-f32 D_800D2C70; // x scale
-f32 D_800D2C74; // y scale
-f32 D_800D2C78; // left
-f32 D_800D2C7C; // top
-f32 D_800D2C80; // depth
-f32 D_800D2C84; // width
-f32 D_800D2C88; // height
-Texture D_800D2C90; // the shared texture of func_15095060
-s32 D_800D2C9C;
-u8 *D_800D2CA0;
-MtxF D_800D2CA8[4];
-u8 D_800D2DA8;
-u8 D_800D2DA9;
-u8 D_800D2DAA;
+// Sprite placement computed by sprite_place for sprite_drawPlacedEx.
+f32 gSpriteScaleX; // x scale
+f32 gSpriteScaleY; // y scale
+f32 gSpriteLeft; // left
+f32 gSpriteTop; // top
+f32 gSpriteDepth; // depth
+f32 gSpriteWidth; // width
+f32 gSpriteHeight; // height
+Texture gSpriteSharedTexture; // the shared texture of sprite_setSharedTexture
+s32 gSpriteTlutMode;
+u8 *gSpriteLastTexFrame;
+MtxF gSpriteViewMtx[4];
+u8 gSpritePrimR;
+u8 gSpritePrimG;
+u8 gSpritePrimB;
 u8 D_800D2DAB;
 
 #include "functions.h"
 #include "variables.h"
 
 /* Per G_IM_SIZ (4b, 8b, 16b, 32b): as libultra's G_IM_SIZ_*_INCR, _SHIFT, line-bits factor and _LOAD_BLOCK. */
-const u8 D_8009DEB0[4] = { 3, 1, 0, 0 };
-const u8 D_8009DEB4[4] = { 2, 1, 0, 0 };
+const u8 gImSizIncr[4] = { 3, 1, 0, 0 };
+const u8 gImSizShift[4] = { 2, 1, 0, 0 };
 const u8 D_8009DEB8[4] = { 1, 1, 2, 2 };
-const u8 D_8009DEBC[4] = { G_IM_SIZ_16b, G_IM_SIZ_16b, G_IM_SIZ_16b, G_IM_SIZ_32b };
+const u8 gImSizLoadBlock[4] = { G_IM_SIZ_16b, G_IM_SIZ_16b, G_IM_SIZ_16b, G_IM_SIZ_32b };
 
-/* Sprite render state (func_15094F40). */
-Gfx D_800873D0[] = {
+/* Sprite render state (sprite_beginDraw). */
+Gfx gSpriteRenderDl[] = {
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsDPPipeSync(),
     gsDPSetCombineLERP(0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0),
@@ -39,7 +39,7 @@ Gfx D_800873D0[] = {
     gsSPEndDisplayList(),
 };
 
-Gfx D_80087408[] = {
+Gfx gSpriteEndDl[] = {
     gsSPEndDisplayList(),
 };
 
@@ -47,60 +47,60 @@ Gfx D_80087408[] = {
 #define VIEWS ((RenderView *)gViews)
 
 
-/* Combines view `view`'s current projection and view matrices into D_800D2CA8[view]. */
-void func_15094EA0(s32 view) {
+/* Combines view `view`'s current projection and view matrices into gSpriteViewMtx[view]. */
+void sprite_setViewMtx(s32 view) {
     MtxF projection;
     MtxF viewMtx;
 
     guMtxL2F(projection, &D_800DC2A0[D_800BE9C0][view]);
     guMtxL2F(viewMtx, &VIEWS[view].projectionMtx[D_800BE9C0]);
-    func_150A7A48(projection, viewMtx, D_800D2CA8[view]);
+    func_150A7A48(projection, viewMtx, gSpriteViewMtx[view]);
 }
 
 
-/* Emits display list D_800873D0 and forgets the last loaded texture address. */
-Gfx *func_15094F40(Gfx *gfx) {
-    gSPDisplayList(gfx++, D_800873D0);
-    D_800D2CA0 = NULL;
+/* Emits display list gSpriteRenderDl and forgets the last loaded texture address. */
+Gfx *sprite_beginDraw(Gfx *gfx) {
+    gSPDisplayList(gfx++, gSpriteRenderDl);
+    gSpriteLastTexFrame = NULL;
     return gfx;
 }
 
 /* Loads frame `frame >> 8` of `desc` as tile `tile` at tmem `tmem`, with the tile origin at (256, 256). */
-Gfx *func_15094F70(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 assetArg) {
-    func_15095060(desc, frame, sprite);
-    return func_150950D4(gfx, &D_800D2C90, tmem, tile, 0, sfrac, cm, 0x100, 0x100, assetArg);
+Gfx *sprite_loadDescFrame(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 assetArg) {
+    sprite_setSharedTexture(desc, frame, sprite);
+    return sprite_loadTexture(gfx, &gSpriteSharedTexture, tmem, tile, 0, sfrac, cm, 0x100, 0x100, assetArg);
 }
 
-/* As func_15094F70, with the tile origin (s, t) given. */
-Gfx *func_15094FE8(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg) {
-    func_15095060(desc, frame, sprite);
-    return func_150950D4(gfx, &D_800D2C90, tmem, tile, 0, sfrac, cm, s, t, assetArg);
+/* As sprite_loadDescFrame, with the tile origin (s, t) given. */
+Gfx *sprite_loadDescFrameAt(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg) {
+    sprite_setSharedTexture(desc, frame, sprite);
+    return sprite_loadTexture(gfx, &gSpriteSharedTexture, tmem, tile, 0, sfrac, cm, s, t, assetArg);
 }
 
-/* Fills the shared texture D_800D2C90 from `desc`, and points `sprite` (if any) at it. */
-void func_15095060(TextureDesc *desc, s32 frame, SpriteParams *sprite) {
+/* Fills the shared texture gSpriteSharedTexture from `desc`, and points `sprite` (if any) at it. */
+void sprite_setSharedTexture(TextureDesc *desc, s32 frame, SpriteParams *sprite) {
     u32 addr;
 
     if (sprite != NULL) {
-        sprite->tex = &D_800D2C90;
+        sprite->tex = &gSpriteSharedTexture;
     }
 
     addr = desc->addr;
     if (addr < 0x10000000U) {
-        D_800D2C90.addr = addr;
+        gSpriteSharedTexture.addr = addr;
     } else {
-        D_800D2C90.addr = ((u32 *)addr)[frame >> 8];
+        gSpriteSharedTexture.addr = ((u32 *)addr)[frame >> 8];
     }
 
-    D_800D2C90.width = desc->width;
-    D_800D2C90.height = desc->height;
-    D_800D2C90.fmt = desc->fmt;
-    D_800D2C90.siz = desc->siz;
-    D_800D2C90.frames = desc->frameCount;
+    gSpriteSharedTexture.width = desc->width;
+    gSpriteSharedTexture.height = desc->height;
+    gSpriteSharedTexture.fmt = desc->fmt;
+    gSpriteSharedTexture.siz = desc->siz;
+    gSpriteSharedTexture.frames = desc->frameCount;
 }
 
 /* Loads frame `frame` of `tex` (and its palette) into tmem, as tile `tile` placed at (s, t). */
-Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg) {
+Gfx *sprite_loadTexture(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg) {
     s32 width;
     s32 size;
     s32 masks;
@@ -111,17 +111,17 @@ Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sf
     if (tex->frames == 0) {
         frame = 0;
     }
-    size = D_8009DEB0[tex->siz] + tex->width * tex->height;
+    size = gImSizIncr[tex->siz] + tex->width * tex->height;
     if (tex->fmt == 5) {
         size += (tex->width * tex->height) / 4;
     }
-    size >>= D_8009DEB4[tex->siz];
-    D_800D2CA0 = (u8 *)tex->addr;
-    if ((u32)D_800D2CA0 < 0x10000000) {
-        D_800D2CA0 = (u8 *)func_1510D0EC((s32)D_800D2CA0, 0, assetArg, 0);
+    size >>= gImSizShift[tex->siz];
+    gSpriteLastTexFrame = (u8 *)tex->addr;
+    if ((u32)gSpriteLastTexFrame < 0x10000000) {
+        gSpriteLastTexFrame = (u8 *)texture_getAddress((s32)gSpriteLastTexFrame, 0, assetArg, 0);
     }
-    if (D_800D2CA0 != (u8 *)0x80000000) { // the loader's "no asset" value
-        D_800D2CA0 += (size + size) * frame;
+    if (gSpriteLastTexFrame != (u8 *)0x80000000) { // the loader's "no asset" value
+        gSpriteLastTexFrame += (size + size) * frame;
     }
     if (tex->siz == G_IM_SIZ_4b) {
         width = tex->width >> 1;
@@ -142,8 +142,8 @@ Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sf
         fmt = G_IM_FMT_RGBA;
     }
     gDPPipeSync(gfx++);
-    gDPSetTextureImage(gfx++, fmt, D_8009DEBC[tex->siz], 1, D_800D2CA0);
-    gDPSetTile(gfx++, fmt, D_8009DEBC[tex->siz], 0, tmem, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPSetTextureImage(gfx++, fmt, gImSizLoadBlock[tex->siz], 1, gSpriteLastTexFrame);
+    gDPSetTile(gfx++, fmt, gImSizLoadBlock[tex->siz], 0, tmem, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
     gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, size - 1, 0);
     gDPSetTile(gfx++, fmt, tex->siz, (D_8009DEB8[tex->siz] * width + 7) >> 3, tmem, tile, 0, cm, maskt, 0, cm, masks, 0);
     gDPSetTileSize(gfx++, tile, (s << 2) + sfrac, t << 2, ((tex->width + s - 1) << 2) + sfrac, (tex->height + t - 1) << 2);
@@ -163,26 +163,26 @@ Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sf
             colors = 255;
         }
         // the palette follows the texels
-        gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, D_800D2CA0 + (tex->width * tex->height * bits) / 8);
+        gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, gSpriteLastTexFrame + (tex->width * tex->height * bits) / 8);
         gDPLoadSync(gfx++);
         gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE - 1, colors);
-        D_800D2C9C = G_TT_RGBA16;
+        gSpriteTlutMode = G_TT_RGBA16;
     } else {
-        D_800D2C9C = G_TT_NONE;
+        gSpriteTlutMode = G_TT_NONE;
     }
     return gfx;
 }
 
 /* Projects (x, y, z) through view gCurrentView. Writes screen x/y to *outX/*outY and the clip z/w;
  * returns 0 when w is outside (gDefaultNear, maxW). */
-s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW, f32 maxW) {
+s32 sprite_project(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW, f32 maxW) {
     f32 w;
     f32 invW;
     f32 screenX;
     f32 screenY;
     RenderView *view;
 
-    func_150A7A00(D_800D2CA8[gCurrentView], x, y, z, outX, outY, outZ, outW);
+    func_150A7A00(gSpriteViewMtx[gCurrentView], x, y, z, outX, outY, outZ, outW);
     w = *outW;
     if ((maxW <= w) || (w <= gDefaultNear)) {
         return FALSE;
@@ -201,34 +201,34 @@ s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *out
 }
 
 /* Draws `sprite` at its world position, depth-tested at its projected depth. */
-Gfx *func_15095760(Gfx *gfx, SpriteParams *sprite) {
+Gfx *sprite_drawWorld(Gfx *gfx, SpriteParams *sprite) {
     f32 screenX;
     f32 screenY;
     f32 clipZ;
     f32 clipW;
 
-    if (!func_1509563C(sprite->x, sprite->y, sprite->z, &screenX, &screenY, &clipZ, &clipW, 4000.0f)) {
+    if (!sprite_project(sprite->x, sprite->y, sprite->z, &screenX, &screenY, &clipZ, &clipW, 4000.0f)) {
         return gfx;
     }
     gDPPipeSync(gfx++);
     gDPSetPrimDepth(gfx++,
         (s32)(((clipZ / clipW) * VIEWS[gCurrentView].viewports[D_800BE9C0].vp.vscale[2]
             + VIEWS[gCurrentView].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
-    return func_15095A90(gfx, sprite, screenX, screenY, clipW, TRUE, 0, 0, 0);
+    return sprite_drawScreenAt(gfx, sprite, screenX, screenY, clipW, TRUE, 0, 0, 0);
 }
 
 /* Places `sprite` at its world position; if it is on screen, emits its depth and sets *visible. */
-Gfx *func_150958B0(Gfx *gfx, SpriteParams *sprite, s32 *visible) {
+Gfx *sprite_placeWorld(Gfx *gfx, SpriteParams *sprite, s32 *visible) {
     f32 screenX;
     f32 screenY;
     f32 clipZ;
     f32 clipW;
 
-    if (!func_1509563C(sprite->x, sprite->y, sprite->z, &screenX, &screenY, &clipZ, &clipW, 4000.0f)) {
+    if (!sprite_project(sprite->x, sprite->y, sprite->z, &screenX, &screenY, &clipZ, &clipW, 4000.0f)) {
         *visible = FALSE;
         return gfx;
     }
-    func_15095B08(sprite, screenX, screenY, clipW, TRUE, visible);
+    sprite_place(sprite, screenX, screenY, clipW, TRUE, visible);
     if (*visible) {
         gDPPipeSync(gfx++);
         gDPSetPrimDepth(gfx++, clipZ / clipW * 16352.0f + 16352.0f, 0);
@@ -237,23 +237,23 @@ Gfx *func_150958B0(Gfx *gfx, SpriteParams *sprite, s32 *visible) {
 }
 
 /* Draws `sprite` centred on screen position (x, y). */
-Gfx *func_15095A48(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y) {
-    return func_15095A90(gfx, sprite, x, y, 4096.0f, FALSE, 0, 0, 0);
+Gfx *sprite_drawScreen(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y) {
+    return sprite_drawScreenAt(gfx, sprite, x, y, 4096.0f, FALSE, 0, 0, 0);
 }
 
 /* Places `sprite` centred on screen position (x, y) at depth z and draws it if it is on screen. */
-Gfx *func_15095A90(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 sOffset, s32 tOffset, s32 extraWidth) {
+Gfx *sprite_drawScreenAt(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 sOffset, s32 tOffset, s32 extraWidth) {
     s32 visible;
 
-    func_15095B08(sprite, x, y, z, projected, &visible);
+    sprite_place(sprite, x, y, z, projected, &visible);
     if (visible) {
-        gfx = func_15095D34(gfx, sprite, sOffset, tOffset, extraWidth);
+        gfx = sprite_drawPlacedEx(gfx, sprite, sOffset, tOffset, extraWidth);
     }
     return gfx;
 }
 
 /* Computes `sprite`'s screen rectangle centred on (x, y) at depth z, and whether it is on screen. */
-void func_15095B08(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 *visible) {
+void sprite_place(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 *visible) {
     RenderView *view;
     Texture *tex;
     f32 scaleX;
@@ -288,23 +288,23 @@ void func_15095B08(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32
     if (view->left <= x + width && x < view->right && view->top <= y + height && y < view->bottom) {
         *visible = TRUE;
     }
-    D_800D2C70 = scaleX;
-    D_800D2C74 = scaleY;
-    D_800D2C78 = x;
-    D_800D2C7C = y;
-    D_800D2C80 = z;
-    D_800D2C84 = width;
-    D_800D2C88 = height;
+    gSpriteScaleX = scaleX;
+    gSpriteScaleY = scaleY;
+    gSpriteLeft = x;
+    gSpriteTop = y;
+    gSpriteDepth = z;
+    gSpriteWidth = width;
+    gSpriteHeight = height;
 }
 
-/* Draws `sprite` at the placement from func_15095B08, without offsets. */
-Gfx *func_15095D0C(Gfx *gfx, SpriteParams *sprite) {
-    return func_15095D34(gfx, sprite, 0, 0, 0);
+/* Draws `sprite` at the placement from sprite_place, without offsets. */
+Gfx *sprite_drawPlaced(Gfx *gfx, SpriteParams *sprite) {
+    return sprite_drawPlacedEx(gfx, sprite, 0, 0, 0);
 }
 
 
-/* Draws `sprite` at the placement func_15095B08 computed, then advances its animation. */
-Gfx *func_15095D34(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32 extraWidth) {
+/* Draws `sprite` at the placement sprite_place computed, then advances its animation. */
+Gfx *sprite_drawPlacedEx(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32 extraWidth) {
     f32 x;
     f32 y;
     f32 z;
@@ -323,19 +323,19 @@ Gfx *func_15095D34(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32
     s32 iz;
     s32 unused; // matching: see the dead division below
 
-    scaleX = D_800D2C70;
-    scaleY = D_800D2C74;
-    x = D_800D2C78;
-    y = D_800D2C7C;
-    z = D_800D2C80;
+    scaleX = gSpriteScaleX;
+    scaleY = gSpriteScaleY;
+    x = gSpriteLeft;
+    y = gSpriteTop;
+    z = gSpriteDepth;
     if (tOffset != 0) {
-        D_800D2C84 -= (D_800D2C70 + D_800D2C70) / D_800D2C80;
-        D_800D2C88 -= (D_800D2C74 + D_800D2C74) / D_800D2C80;
-        x += D_800D2C70 / D_800D2C80;
-        y += D_800D2C74 / D_800D2C80;
+        gSpriteWidth -= (gSpriteScaleX + gSpriteScaleX) / gSpriteDepth;
+        gSpriteHeight -= (gSpriteScaleY + gSpriteScaleY) / gSpriteDepth;
+        x += gSpriteScaleX / gSpriteDepth;
+        y += gSpriteScaleY / gSpriteDepth;
     }
-    width = D_800D2C84;
-    height = D_800D2C88;
+    width = gSpriteWidth;
+    height = gSpriteHeight;
     iy = y;
     iz = z;
     if (width < 2.0f) {
@@ -345,7 +345,7 @@ Gfx *func_15095D34(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32
     dtdy = (iz << 10) / scaleY;
     unused = ((s32)z << 10) / scaleX; // matching: dead early division sets uopt's spill-slot colouring
     if (D_800D2DAB == 0) {
-        gDPSetPrimColor(gfx++, 1, 0, D_800D2DA8, D_800D2DA9, D_800D2DAA, sprite->alpha);
+        gDPSetPrimColor(gfx++, 1, 0, gSpritePrimR, gSpritePrimG, gSpritePrimB, sprite->alpha);
     }
     tfrac = ((32.0f - (y - (s32)y) * 32) * z) / scaleY;
     s = (s32)(((32.0f - (x - (s32)x) * 32) * z) / scaleX) + sOffset + 0x2000;
@@ -391,7 +391,7 @@ Gfx *func_15095D34(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32
 /* Draws `desc` as a width x height image at (x, y) scaled by (scaleX, scaleY) / 4096, split into
  * tiles of the texture's size (one asset per tile, frame `frame` starting at frame * tile count).
  * flags: bit 0 = tiles carry a 1-texel border, bit 1 = flip s, bit 2 = flip t. */
-Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f32 y, s32 width, s32 height,
+Gfx *sprite_drawImage(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f32 y, s32 width, s32 height,
                    s32 flags, s32 sOffset, s32 extraWidth, s32 frame) {
     s32 tileW;
     s32 tileH;
@@ -487,7 +487,7 @@ Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f
                 t += (s32)(32 - (top - (s32)top) * 32.0f * (4096 / scaleY));
             }
             iy = top;
-            gfx = func_15094F70(gfx, &tile, 0, NULL, 0, 0, 0, G_TX_CLAMP, 3);
+            gfx = sprite_loadDescFrame(gfx, &tile, 0, NULL, 0, 0, 0, G_TX_CLAMP, 3);
             tile.addr++;
             dx = (s32)right - (s32)left;
             dy = (s32)bottom - iy;
@@ -507,9 +507,9 @@ Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f
 }
 
 
-/* Emits display list D_80087408 and clears D_800D2DAB (back to the sprite prim colour). */
-Gfx *func_15096934(Gfx *gfx) {
-    gSPDisplayList(gfx++, D_80087408);
+/* Emits display list gSpriteEndDl and clears D_800D2DAB (back to the sprite prim colour). */
+Gfx *sprite_endDraw(Gfx *gfx) {
+    gSPDisplayList(gfx++, gSpriteEndDl);
     D_800D2DAB = 0;
     return gfx;
 }

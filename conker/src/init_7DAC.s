@@ -154,8 +154,8 @@ glabel func_10007DAC
     /* 7FCC 10007FCC 2404000F */  addiu      $a0, $zero, 0xF
     /* 7FD0 10007FD0 3C050001 */  lui        $a1, (0x1E000 >> 16)
     /* 7FD4 10007FD4 34A5E000 */  ori        $a1, $a1, (0x1E000 & 0xFFFF)
-    /* 7FD8 10007FD8 3C061600 */  lui        $a2, %hi(func_16000000)
-    /* 7FDC 10007FDC 24C60000 */  addiu      $a2, $a2, %lo(func_16000000)
+    /* 7FD8 10007FD8 3C061600 */  lui        $a2, %hi(debugger_drawPrompt)
+    /* 7FDC 10007FDC 24C60000 */  addiu      $a2, $a2, %lo(debugger_drawPrompt)
     /* 7FE0 10007FE0 3C010FFF */  lui        $at, (0xFFFFFFF >> 16)
     /* 7FE4 10007FE4 3421FFFF */  ori        $at, $at, (0xFFFFFFF & 0xFFFF)
     /* 7FE8 10007FE8 02213824 */  and        $a3, $s1, $at
@@ -167,18 +167,18 @@ glabel func_10007DAC
     /* 8000 10008000 0C0098C4 */  jal        osMapTLB
     /* 8004 10008004 00000000 */   nop
     /* 8008 10008008 27BD0018 */  addiu      $sp, $sp, 0x18
-    /* 800C 1000800C 3C041600 */  lui        $a0, %hi(func_16000000)
-    /* 8010 10008010 24840000 */  addiu      $a0, $a0, %lo(func_16000000)
+    /* 800C 1000800C 3C041600 */  lui        $a0, %hi(debugger_drawPrompt)
+    /* 8010 10008010 24840000 */  addiu      $a0, $a0, %lo(debugger_drawPrompt)
     /* 8014 10008014 3C050004 */  lui        $a1, (0x40000 >> 16)
     /* 8018 10008018 0C008B44 */  jal        osInvalDCache
     /* 801C 1000801C 00000000 */   nop
-    /* 8020 10008020 3C041600 */  lui        $a0, %hi(func_16000000)
-    /* 8024 10008024 24840000 */  addiu      $a0, $a0, %lo(func_16000000)
+    /* 8020 10008020 3C041600 */  lui        $a0, %hi(debugger_drawPrompt)
+    /* 8024 10008024 24840000 */  addiu      $a0, $a0, %lo(debugger_drawPrompt)
     /* 8028 10008028 3C050004 */  lui        $a1, (0x40000 >> 16)
     /* 802C 1000802C 0C008B24 */  jal        osInvalICache
     /* 8030 10008030 00000000 */   nop
-    /* 8034 10008034 3C081600 */  lui        $t0, %hi(func_16000B14)
-    /* 8038 10008038 25080B14 */  addiu      $t0, $t0, %lo(func_16000B14)
+    /* 8034 10008034 3C081600 */  lui        $t0, %hi(debugger_run)
+    /* 8038 10008038 25080B14 */  addiu      $t0, $t0, %lo(debugger_run)
     /* 803C 1000803C 8D080000 */  lw         $t0, 0x0($t0)
     /* 8040 10008040 01002825 */  or         $a1, $t0, $zero
     /* 8044 10008044 240400B6 */  addiu      $a0, $zero, 0xB6
@@ -192,7 +192,7 @@ glabel func_10007DAC
     /* 8064 10008064 0C0093C4 */  jal        osWritebackDCacheAll
     /* 8068 10008068 00000000 */   nop
     /* 806C 1000806C 03402025 */  or         $a0, $k0, $zero
-    /* 8070 10008070 0D8002C5 */  jal        func_16000B14
+    /* 8070 10008070 0D8002C5 */  jal        debugger_run
     /* 8074 10008074 00000000 */   nop
     /* 8078 10008078 00609025 */  or         $s2, $v1, $zero
     /* 807C 1000807C 10400005 */  beqz       $v0, .L10008094

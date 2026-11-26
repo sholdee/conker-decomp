@@ -3,8 +3,8 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15000AC0(void) {
-    D_800D9E64 = 0;
+void collision_clearUvWobbles(void) {
+    gUvWobbleCount = 0;
 }
 
 /**
@@ -12,7 +12,7 @@ void func_15000AC0(void) {
  * mode 4 allocates two vertex buffers per view (gScreenLayout + 1 views), mode 2 builds a
  * 256-entry, four-band colour gradient (chosen by map) plus a quad per view and buffer.
  */
-void func_15000AD0(s32 arg0) {
+void collision_initMapBackground(s32 arg0) {
     s32 i;
     s32 j;
     s32 end; // one past the last gradient entry of the current band
@@ -38,10 +38,10 @@ void func_15000AD0(s32 arg0) {
             D_800DBE88[i][0] = vtx;
             D_800DBE88[i][1] = D_800DBE88[i][0] + size;
         }
-        func_1502B7F0(&D_800DBE80, 2, 0xD, D_800B0DF0->unk9);
+        rom_loadPathTo(&D_800DBE80, 2, 0xD, D_800B0DF0->unk9);
         if (D_80038080 != 0) {
             for (i = 0; i < 360; i++) {
-                func_1510D0EC(D_800891BC[D_800B0DF0->unk9][0] + i, 0, 0x3F, 0);
+                texture_getAddress(D_800891BC[D_800B0DF0->unk9][0] + i, 0, 0x3F, 0);
             }
         }
         D_800DBEB0 = allocate_memory((gScreenLayout + 1) * 0x80, 1, 2, 0);

@@ -54,7 +54,7 @@ void func_1515AF90(s16 player) {
         probe.y = 19500.0f;
         probe.z = effect.position.z;
         hit.height = -10000.0f;
-        if (func_1504697C(&probe, 0, eye->y, &hit)) {
+        if (collision_probeFloorSurfABSet0(&probe, 0, eye->y, &hit)) {
             effect.upperFloorY = hit.height;
         } else {
             valid = FALSE;
@@ -69,7 +69,7 @@ void func_1515AF90(s16 player) {
             lowerProbe.x = effect.position.x;
             lowerProbe.y = eye->y;
             lowerProbe.z = effect.position.z;
-            if (func_1504697C(&lowerProbe, 0, bottom, &lowerHit)) {
+            if (collision_probeFloorSurfABSet0(&lowerProbe, 0, bottom, &lowerHit)) {
                 effect.position.y = lowerHit.height;
             } else {
                 effect.position.y = bottom;
@@ -243,7 +243,7 @@ void func_1515B674(s16 player) {
         if (func_150ADA20() & 1) {
             info.flags |= 4;
         }
-        sprite = func_1515548C(&info, 2, 0, 0, sizeof(SlidingSpriteData), 255, 1);
+        sprite = sprite_newScreenSprite(&info, 2, 0, 0, sizeof(SlidingSpriteData), 255, 1);
         if (sprite != NULL) {
             memcpy(&sprite->data, &data, sizeof(SlidingSpriteData));
         }

@@ -40,7 +40,7 @@ void func_1511617C(WorldObject *obj) {
     s16 oldY;
 
     oldY = obj->y;
-    WORK(obj)->groundY = func_1510F648(obj->x, obj->y, obj->z);
+    WORK(obj)->groundY = collision_getPropSurfaceHeight(obj->x, obj->y, obj->z);
     if (fabsf(WORK(obj)->groundY - obj->y) > 200.0f) {
         obj->moveData.word = 0;
     }

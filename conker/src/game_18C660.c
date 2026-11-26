@@ -192,7 +192,7 @@ void func_1515FBC4(Actor *obj, TriggerZone *zone) {
     s32 targetIndex;
 
     target = NULL;
-    link = func_15105C24(zone);
+    link = beam_findZoneRectEffect(zone);
     if (link != NULL) {
         target = link->data.actor;
     }

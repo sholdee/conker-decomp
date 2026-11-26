@@ -131,7 +131,7 @@ void func_15120158(Camera *camera) {
     aim = &camera->aim;
     zone = camera->CharContext;
     inMap42Zone1A = (gContextTextId == 0x42) && (zone == 0x1A);
-    func_1510E7A4(0, 0, &probeY, &camera->waterY, 0, 0,
+    collision_findFloorInRange(0, 0, &probeY, &camera->waterY, 0, 0,
                  camera->eye.x, camera->eye.y, camera->eye.z, camera->eye.y, 0, 0, -10000.0f, camera->eye.y);
     camera->mv->AimState = camera->DoingAim;
     camera->TripodMagnitude = sqrtf((camera->eye.x - camera->target.x) * (camera->eye.x - camera->target.x) +

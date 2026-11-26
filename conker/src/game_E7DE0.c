@@ -20,8 +20,8 @@ s32 func_150BA930(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3) {
     probe.x = pos->x;
     probe.y = pos->y + 100.0f;
     probe.z = pos->z;
-    func_1504715C(hit, obj);
-    return func_15046C80(&probe, 0, pos->y - 100.0f, hit);
+    collision_initHitFromObject(hit, obj);
+    return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 100.0f, hit);
 }
 
 /* Constant handler; always returns 9. */

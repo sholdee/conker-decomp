@@ -239,11 +239,11 @@ Gfx *trail_drawFollowTrail(EffectObj *obj, Gfx *gfx, s16 view) {
             points = obj->items;
             camera = func_15144B34(view);
             flag = 1;
-            gfx = func_15142E24(gfx, &D_80090B60[31], 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
+            gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
             gfx = func_1513F4E4(gfx, 0x4E, &flag);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
+            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
             if (obj->head.tmpl.flags & 2) {
                 index = obj->head.end - 1;
                 if (index < 0) {
@@ -786,10 +786,10 @@ Gfx *trail_drawRibbon(EffectObj *obj, Gfx *gfx, s16 view) {
     }
     camera = func_15144B34(view);
     flag = 1;
-    gfx = func_15142E24(gfx, &D_80090B60[120], 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
+    gfx = func_15142E24(gfx, &gEffectTextures[120], 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x56, &flag);
-    gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
+    gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
     previous = obj->head.end - 1;
     if (previous < 0) {
         previous = obj->head.tmpl.itemCount - 1;

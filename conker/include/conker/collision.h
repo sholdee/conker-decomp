@@ -29,7 +29,7 @@ struct Foo150AE280;
 struct ShadowVtx;
 struct Foo150AE36C;
 
-/* A TriggerNode with a box volume (func_150448D0). */
+/* A TriggerNode with a box volume (collision_addTriggerVolume). */
 struct TriggerVolume {
     /* 0x00 */ TriggerNode node;
     /* 0x10 */ s16 depth;
@@ -41,12 +41,12 @@ struct TriggerVolume {
     /* 0x1C */ s16 *size;
 };
 
-// One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
+// One 0x10-byte part of a part set (gPartSets): a child object or an attachment.
 typedef struct PartDef {
     /* 0x00 */ u8 model;    // model id of the child object or the attachment
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 unk2;
-    /* 0x03 */ u8 type;     // 0: child object (func_15083AC8), otherwise func_15030AF4
+    /* 0x03 */ u8 type;     // 0: child object (collision_createChildObject), otherwise attach_add
     /* 0x04 */ u8 unk4;
     /* 0x05 */ u8 unk5;
     /* 0x06 */ u8 unk6;
@@ -62,81 +62,81 @@ typedef struct PartSet {
 } PartSet;
 
 /* game_2DF70.c */
-void func_15000AC0(void);
-void func_15000AD0(s32 arg0);
+void collision_clearUvWobbles(void);
+void collision_initMapBackground(s32 arg0);
 
 /* game_2E910.c */
-void func_15001460(Gfx *dl);
-void func_15001970(void);
-void func_15001A08(void);
+void collision_addDlTris(Gfx *dl);
+void collision_initTriArena(void);
+void collision_allocQuadTree(void);
 void func_15001B08(void);
-QuadNode *func_15001B10(void);
-void func_15001B5C(u8 value);
-void func_15001B8C(u16 value);
-void func_15001BC8(s32 map, s16 *nodeCount, s16 *leafCount);
-void func_15001CEC(s32 map);
-QuadNode *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, u16 *triList);
-void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList);
-int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, u16 *triList, u16 **subList);
-void func_15002560(QuadNode *node, QuadNode *parentNext);
+QuadNode *collision_newQuadNode(void);
+void collision_quadPutByte(u8 value);
+void collision_quadPutHalf(u16 value);
+void collision_buildQuadTree(s32 map, s16 *nodeCount, s16 *leafCount);
+void collision_buildLeafQuadTree(s32 map);
+QuadNode *collision_buildQuadNode(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, u16 *triList);
+void collision_writeLeafTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList);
+int collision_collectBoxTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, u16 *triList, u16 **subList);
+void collision_threadQuadTree(QuadNode *node, QuadNode *parentNext);
 void func_150025FC(void);
-void func_150026C4(s32 map);
-void func_150026E8(s32 map);
-void func_15002724(Gfx *dl);
-void func_15002754(void);
-s32 func_150027F8(Gfx *dl);
-s32 func_15002878(void);
-s32 func_150028BC(s32 map);
-void func_15002F40(s32 map);
-s32 func_15002FA0(s32 value);
-void func_15002FB4(s32 map);
+void collision_beginMapTris(s32 map);
+void collision_endMapTris(s32 map);
+void collision_addDlTriCount(Gfx *dl);
+void collision_allocMapTriTables(void);
+s32 collision_countDlTris(Gfx *dl);
+s32 collision_getMaxMapTriCount(void);
+s32 collision_buildVertexRuns(s32 map);
+void collision_setFloorReach(s32 map);
+s32 collision_xorScramble(s32 value);
+void collision_loadMapSettings(s32 map);
 void func_1500310C(void);
-extern u8 *D_800B0DC0; /* triangle-data arena cursor; game_34ED0 clears the game .bss from here */
+extern u8 *gTriArenaCursor; /* triangle-data arena cursor; game_34ED0 clears the game .bss from here */
 
 /* game_43880.c */
-void func_150163D0(s32 arg0);
+void collision_loadCylinderSets(s32 arg0);
 
 /* game_71820.c */
 void func_15044370(void);
 s32 func_15044380(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass);
-void func_1504452C(s16 **vertices, Vec3f *out, f32 sinY, f32 cosY, f32 ox, f32 oy, f32 oz, s32 offset);
+void collision_rotateTriVerts(s16 **vertices, Vec3f *out, f32 sinY, f32 cosY, f32 ox, f32 oy, f32 oz, s32 offset);
 void func_15044658(void);
-void func_15044660(Actor *obj, f32 x, f32 y, f32 z);
-TriggerVolume *func_150448D0(s32 lifetime, s32 delay, s32 action, s32 depth, s32 width, s32 height, s32 angle,
+void collision_setProbeHeights(Actor *obj, f32 x, f32 y, f32 z);
+TriggerVolume *collision_addTriggerVolume(s32 lifetime, s32 delay, s32 action, s32 depth, s32 width, s32 height, s32 angle,
                              s16 *position, s16 *size);
-TriggerNode *func_15044964(s32 size, s32 check, s32 lifetime, s32 delay, s32 action, s32 x, s32 y, s32 z);
-void func_15044A28(void);
-s32 func_15044B78(TriggerVolume *volume);
-s32 func_15044CE4(TriggerVolume *volume);
+TriggerNode *collision_addTriggerNode(s32 size, s32 check, s32 lifetime, s32 delay, s32 action, s32 x, s32 y, s32 z);
+void collision_updateTriggers(void);
+s32 collision_checkPlayerInVolume(TriggerVolume *volume);
+s32 collision_checkTrackedVolume(TriggerVolume *volume);
 s32 func_15044D40(TriggerVolume *volume);
 void func_15044DA0(void);
 void func_15044DE8(void);
 void func_15044E40(void);
 void func_15044E88(void);
-s32 func_15044ED0(Vec3f *pos, f32 top, CollisionHit *hit);
-s32 func_150450CC(Vec3f *pos, f32 bottom, CollisionHit *hit);
-s32 func_1504530C(Vec3f *pos, f32 top, CollisionHit *hit);
-s32 func_15045384(Vec3f *pos, f32 top, CollisionHit *hit);
-s32 func_1504554C(Vec3f *pos, f32 bottom, CollisionHit *hit);
-void func_15045714(Vec3f *pos, u16 mask, s32 *setA, s32 *setB);
-s32 func_15045780(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
-s32 func_15045800(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
-s32 func_15045880(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit);
-s32 func_15045AE4(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit);
-s32 func_15045D48(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit);
-s32 func_15045F8C(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit);
-s32 func_150461D0(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit);
-s32 func_15046460(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
-s32 func_150466F8(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit);
-s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
-s32 func_15046C00(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit);
-s32 func_15046C80(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
-s32 func_15046D00(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
-s32 func_15046F84(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
-s32 func_15047004(Vec3f *pos, f32 bottom, CollisionHit *hit);
-s32 func_150470B0(Vec3f *pos, f32 top, CollisionHit *hit);
-void func_1504715C(CollisionHit *hit, Actor *obj);
-void func_150472C0(CollisionHit *hit, RayHit *src);
+s32 collision_probeCeilingSet0(Vec3f *pos, f32 top, CollisionHit *hit);
+s32 collision_probeFloorSet0(Vec3f *pos, f32 bottom, CollisionHit *hit);
+s32 collision_probeCeilingSet0Cached(Vec3f *pos, f32 top, CollisionHit *hit);
+s32 collision_probeCeilingSet3(Vec3f *pos, f32 top, CollisionHit *hit);
+s32 collision_probeFloorSet3(Vec3f *pos, f32 bottom, CollisionHit *hit);
+void collision_selectSurfaceSets(Vec3f *pos, u16 mask, s32 *setA, s32 *setB);
+s32 collision_probeFloorSurfB(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
+s32 collision_probeFloorSurfBCached(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
+s32 collision_probeCeilingInSurfA(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit);
+s32 collision_probeFloorInSurfA(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit);
+s32 collision_probeCeilingInSurfB(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit);
+s32 collision_probeFloorInSurfB(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit);
+s32 collision_probeCeilingSurfAB(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit);
+s32 collision_probeFloorSurfAB(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
+s32 collision_probeCeilingSurfABSet0(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit);
+s32 collision_probeFloorSurfABSet0(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
+s32 collision_probeCeilingSurfABSet0Cached(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit);
+s32 collision_probeFloorSurfABSet0Cached(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
+s32 collision_probeFloorWithSet3(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
+s32 collision_probeFloorWithSet3Cached(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
+s32 collision_retestCachedFloor(Vec3f *pos, f32 bottom, CollisionHit *hit);
+s32 collision_retestCachedCeiling(Vec3f *pos, f32 top, CollisionHit *hit);
+void collision_initHitFromObject(CollisionHit *hit, Actor *obj);
+void collision_initHitFromRay(CollisionHit *hit, RayHit *src);
 void func_15047390(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp);
 void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp);
 void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
@@ -146,78 +146,78 @@ void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32
 extern f32 D_800CBD90; // ledge probe results (written by func_150AC3E4, game_D86A0.s)
 extern f32 D_800CBD94;
 extern f32 D_800CBD98;
-extern u16 D_800CBDA0[25]; // per movement_obj: 1 + the world object it touches, 0 if none
+extern u16 gActorTouchedObject[25]; // per movement_obj: 1 + the world object it touches, 0 if none
 extern u8 D_800CBDD2;
 extern u8 D_800CBDD3;
 extern u8 D_800CBDD4;
 extern f32 D_800CBDF4; // ledge heights, -32768.0f if none
 extern f32 D_800CBDF8;
 extern f32 D_800CBDFC;
-extern TriggerNode *D_800CBE00; // timed trigger nodes (func_15044964)
+extern TriggerNode *gTriggerNodes; // timed trigger nodes (collision_addTriggerNode)
 
 /* game_AE1D0.c */
-s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 arg5);
-s32 func_1508108C(Actor *obj);
-s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre,
+s32 collision_testPointHitSpheres(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 arg5);
+s32 collision_getHitTableIndex(Actor *obj);
+s32 collision_rayHitSpheres(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre,
                   f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
-s32 func_15081574(Actor *self, f32 dist, f32 radius, Actor **outTarget, s32 arg4, s32 model);
+s32 collision_findHitSphereTarget(Actor *self, f32 dist, f32 radius, Actor **outTarget, s32 arg4, s32 model);
 
 /* game_AEB40.c */
-void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out,
+void collision_castRay(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out,
                    f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, void *filterArg, s32 ignoreMask);
-s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist,
+s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist,
                   f32 *outFarDist);
 void func_15081E0C(Actor *obj, u16 part, u8 skip);
-s32 func_15081E78(Actor *self, RayHit *hit, s32 kind);
+s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind);
 
 /* game_AFA70.c */
-s32 func_150825C0(s32 spawnIdx, s32 arg1);
-void func_1508295C(s32 arg0, s32 arg1, s32 firstRange);
+s32 collision_trySpawnRecord(s32 spawnIdx, s32 arg1);
+void collision_trySpawnRecords(s32 arg0, s32 arg1, s32 firstRange);
 void func_150829D8(Actor *obj);
-s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
+s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
 void func_150832AC(Actor *obj);
 void func_15083384(Actor *obj, s32 arg1);
-void *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3);
-void func_150836CC(Actor *parent, s32 setId);
-void func_150837D4(s32 objIdx, s32 modelId, s32 arg2);
-s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3);
-void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn);
-Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7,
+void *collision_createPartSet(Actor *parent, s32 setId, f32 arg2, s32 arg3);
+void collision_removePartSet(Actor *parent, s32 setId);
+void collision_setObjectModel(s32 objIdx, s32 modelId, s32 arg2);
+s32 collision_allocAnimState(Actor *obj, s32 arg1, s32 arg2, f32 arg3);
+void collision_applyModelDefaults(Actor *obj, s32 modelId, SpawnRecord *spawn);
+Actor *collision_createChildObject(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7,
                      f32 arg8);
-s32 func_15083DA0(void);
-s32 func_15083E0C(u8 id);
-Actor *func_15083E90(u8 id);
-s32 func_15083FB0(u8 id);
+s32 collision_getFreeUniqueId(void);
+s32 collision_findSpawnById(u8 id);
+Actor *collision_findObjectById(u8 id);
+s32 collision_findObjectSlotById(u8 id);
 s32 func_15084000(s32 id);
-s32 func_15084044(Actor *obj, s32 model);
-void func_1508434C(Actor *obj);
-void func_150843AC(Actor *obj, s32 model);
-void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2);
-void func_15084558(Actor *self);
-s32 func_150849A0(Actor *obj);
-s32 func_150849CC(Actor *obj, s32 *outIndex);
-void func_15084A18(void);
+s32 collision_initModelData(Actor *obj, s32 model);
+void collision_releaseAllModelData(Actor *obj);
+void collision_releaseModelData(Actor *obj, s32 model);
+void collision_loadSpawnModel(SpawnRecord *spawn, s32 arg1, s32 arg2);
+void collision_freeObjectModels(Actor *self);
+s32 collision_getModelId(Actor *obj);
+s32 collision_getLodModelId(Actor *obj, s32 *outIndex);
+void collision_updateModelUnload(void);
 void func_15084C30(Actor *obj);
 s32 func_15084CB0(s32 modelId);
-extern u8 *D_800D19A0[187]; // per model id: model data (just past its header)
-extern ModelDef *D_800D1C90[187];
+extern u8 *gModelData[187]; // per model id: model data (just past its header)
+extern ModelDef *gModelDefs[187];
 extern u8 D_800D1F80[187];
-extern u8 D_800D2040[187]; // per model id counter
-extern SpawnRecord *D_800D20FC;
-extern u8 D_800D2100;
-extern u8 D_800D2101;
-extern PathPoint **D_800D2104;
-extern u8 *D_800D2108;
-extern u8 *D_800D210C;
-extern u16 *D_800D2110;
+extern u8 gModelUnloadTimers[187]; // per model id counter
+extern SpawnRecord *gSpawnRecords;
+extern u8 gSpawnRecordCount;
+extern u8 gSpawnFirstCount;
+extern PathPoint **gSpawnPaths;
+extern u8 *gSpawnPathCounts;
+extern u8 *gSpawnInUse;
+extern u16 *gSpawnDelays;
 
 /* game_22B750.c */
 /* The object filters: s32 (Actor *obj, Actor *self, arg); declared without a prototype, as their
    second and third parameters differ. */
-extern s32 (*D_80086C90[7])();
-extern const u8 *D_80086CAC[6]; // per ModelDef.subModelList: the sub-model list
-extern PartSet D_80086CC4[175]; // per ModelDef.partSet (1-based)
-extern const u8 D_8009D910[5];  // the expression actions of model 0
+extern s32 (*gObjectFilters[7])();
+extern const u8 *gSubModelLists[6]; // per ModelDef.subModelList: the sub-model list
+extern PartSet gPartSets[175]; // per ModelDef.partSet (1-based)
+extern const u8 gModel0ExpressionActions[5];  // the expression actions of model 0
 
 /* game_D0F20.s: the ground probe. func_150A3A70 gathers the candidate hits under (x, z) into
  * D_800D3300 and returns their count; func_150A3FC4 gives the height of a triangle at (x, z), from
@@ -230,7 +230,7 @@ s32 func_150A43E0(s32 x, s32 z, s32 count, u16 *props);
 
 /* game_D19A0.s */
 void func_150A44F0(s32 count, u16 *props, s32 arg2);
-/* (s32 map); declared without a prototype: func_1510F800 (game_13BB20.c) passes its own argument on */
+/* (s32 map); declared without a prototype: collision_selectMap (game_13BB20.c) passes its own argument on */
 void func_150A49F4();
 
 /* game_D1FB4.s */
@@ -354,39 +354,39 @@ s32 func_150AE35C(s32 arg0);
 s16 *func_150AE36C(struct Foo150AE36C *arg0, s16 arg1);
 
 /* game_10EA20.c */
-s32 func_150E1570(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex, s32 effect);
+s32 collision_castRayAtObjects(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex, s32 effect);
 
 /* game_131A90.c */
 void func_151045E0(void *arg0, s32 arg1, f32 arg2);
 s32 func_151045F4(s32 arg0, s32 arg1);
 void func_15104608(f32 x, f32 y, f32 z, s32 arg3);
 s32 func_15104620(s32 arg0, s32 arg1);
-s32 func_15104634(f32 x, f32 z, f32 y, f32 *out);
+s32 collision_getFloorNearY(f32 x, f32 z, f32 y, f32 *out);
 
 /* game_13BB20.c */
-extern void *D_800DBDD8[4];
-extern void *D_800DBDE8[4];
-extern void *D_800DBDF8[4];
-extern struct QuadNode *D_800DBE08[4];
-extern u8 D_80089120[4];
-s32 func_1510E670(s32 index);
-void func_1510E7A4(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
+extern void *gMapTriTables[4];
+extern void *gMapTriXZBounds[4];
+extern void *gMapTriYBounds[4];
+extern struct QuadNode *gMapQuadTrees[4];
+extern u8 gFloorProbeTypeEnabled[4];
+s32 collision_isHitFacingUp(s32 index);
+void collision_findFloorInRange(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
                    f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj, f32 minY, f32 maxY);
-void func_1510E82C(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
+void collision_findFloor(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
                    f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj);
-void func_1510E8BC(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
+void collision_findFloorEx(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
                    f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj, f32 unused12, f32 unused13, s32 noFallback);
-void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *outFloorY, f32 *outPropFloorY,
+void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *outFloorY, f32 *outPropFloorY,
                    u32 *outFlags, s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *object, f32 minY,
                    f32 maxY, s32 noFallback);
-f32 func_1510F648(f32 x, f32 y, f32 z);
-s32 func_1510F720(s32 x, s32 z, s32 radius, ZoneNode **outLeaves);
-void func_1510F800();
-void func_1510F820(void *tri, void *verts, f32 *outDirX, f32 *outDirZ, f32 *unused, f32 *outSlopeX, f32 *outSlopeZ);
-s32 func_1510F8CC(s32 flags);
-s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 *outTri);
-void func_1510FC34(s32 index);
-ZoneNode *func_1510FD20(s32 x, s32 z);
-s32 func_1510FE30(ZoneNode *zone);
+f32 collision_getPropSurfaceHeight(f32 x, f32 y, f32 z);
+s32 collision_findZoneLeavesNear(s32 x, s32 z, s32 radius, ZoneNode **outLeaves);
+void collision_selectMap();
+void collision_getTriSlope(void *tri, void *verts, f32 *outDirX, f32 *outDirZ, f32 *unused, f32 *outSlopeX, f32 *outSlopeZ);
+s32 collision_getSurfaceType(s32 flags);
+s32 collision_findMeshFloorNear(s32 x, s32 y, s32 z, s32 *outTri);
+void collision_updateCameraZone(s32 index);
+ZoneNode *collision_findZoneLeaf(s32 x, s32 z);
+s32 collision_getZoneLeafIndex(ZoneNode *zone);
 
 #endif

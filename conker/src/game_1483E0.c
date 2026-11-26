@@ -464,7 +464,7 @@ void func_1511BDF4(Game1483E0State *obj) {
     if (obj->reference != NULL) {
         reference = obj->reference;
     } else {
-        reference = func_15083E90(obj->reference_id);
+        reference = collision_findObjectById(obj->reference_id);
     }
     if (reference != NULL) {
         func_1511BB04(obj, reference->xpos, reference->zpos, 1.0f, 1.0f);
@@ -944,7 +944,7 @@ void func_1511CB44(WorldObject *obj) {
         obj->alpha = (func_150489B0(wave->alphaPhase + wave->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
     }
     if (uvRate != 0.0f) {
-        func_15094AB8(obj->vertices[D_800BE9C0], wave->uv, obj->numVertices, wave->uvAngle, uvArg4, uvArg5);
+        sprite_rotateTexcoords(obj->vertices[D_800BE9C0], wave->uv, obj->numVertices, wave->uvAngle, uvArg4, uvArg5);
         wave->uvAngle += uvRate;
         if (wave->uvAngle >= 360.0f) {
             wave->uvAngle -= 360.0f;
@@ -1134,7 +1134,7 @@ void func_1511D9E4(WorldObject *obj) {
     uvArg5 = (obj->moveData.word >> 16) & 0xFF;
     speed = (f32)(s16)(obj->moveData.word & 0xFFFF) * 0.01;
     WORK(obj)->w1511D9E4.uvAngle += speed * D_800BE9E4;
-    func_15094AB8(obj->vertices[D_800BE9C0], uv, obj->numVertices, WORK(obj)->w1511D9E4.uvAngle, uvArg4, uvArg5);
+    sprite_rotateTexcoords(obj->vertices[D_800BE9C0], uv, obj->numVertices, WORK(obj)->w1511D9E4.uvAngle, uvArg4, uvArg5);
 }
 
 struct Swing1511DBC4 {
@@ -1372,7 +1372,7 @@ void func_1511DF6C(WorldObject *obj) {
             if ((WORK(obj)->w1511DF6C.filter == 1 && character->team != 0) || (WORK(obj)->w1511DF6C.filter == 2 && character->team == 0) || (WORK(obj)->w1511DF6C.filter == 3 && (character->team & 1))) {
                 continue;
             }
-            if (anim != -1 && func_1503195C(character, anim, 0) != NULL) {
+            if (anim != -1 && attach_find(character, anim, 0) != NULL) {
                 continue;
             }
             dist = (obj->x - character->xpos) * (obj->x - character->xpos) + (obj->z - character->zpos) * (obj->z - character->zpos);

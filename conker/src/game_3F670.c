@@ -38,8 +38,8 @@ void func_150121C0(LightEffect *effect) {
     stack.saved = effect;
     stack.payload.variant = 0;
 
-    func_1510F800(0);
-    stack.payload.unk5C = func_1510FD20(D_80096550.x, D_80096550.z);
+    collision_selectMap(0);
+    stack.payload.unk5C = collision_findZoneLeaf(D_80096550.x, D_80096550.z);
     stack.payload.alpha = 0xFF;
     stack.payload.updateFn = 0;
     stack.payload.update2Fn = 6;

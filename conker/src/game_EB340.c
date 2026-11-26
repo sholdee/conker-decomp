@@ -64,7 +64,7 @@ void func_150BDF0C(EB340Obj *obj) {
         payload.unkD = 0;
         payload.unkC = 0;
         payload.unk10 = (func_150ADA68() * 4.06400013f) + 2.513000011f;
-        effect = func_1515548C(&emitter, 10, 0, 0, sizeof(emitter), obj->base.header.owner, 0);
+        effect = sprite_newScreenSprite(&emitter, 10, 0, 0, sizeof(emitter), obj->base.header.owner, 0);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x70, &payload, sizeof(payload));
         }

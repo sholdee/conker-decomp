@@ -153,12 +153,12 @@ void func_150C44A4(PulseEffect *effect) {
         }
         return;
     }
-    func_1504715C(&ground, owner);
+    collision_initHitFromObject(&ground, owner);
     if (data->unk18 == 0) {
         data->unk18 = sound_playActorSound2(150, owner, 0x36B0, 400, 0x4268);
     }
     if (data->flags & 1) {
-        attachment = func_1503195C(owner, data->unk14, 0);
+        attachment = attach_find(owner, data->unk14, 0);
         if (attachment == NULL) {
             return;
         }
@@ -203,7 +203,7 @@ void func_150C44A4(PulseEffect *effect) {
         data->particle->head.desc.pos = pos;
     }
     emit = TRUE;
-    if ((level == 2) && (func_150A29C8(owner - movement_obj, 0x4065) == 0)) {
+    if ((level == 2) && (zone_isActorOutsideId(owner - movement_obj, 0x4065) == 0)) {
         emit = FALSE;
     }
     if (emit) {
@@ -215,7 +215,7 @@ void func_150C44A4(PulseEffect *effect) {
     }
     data->unk10 += (0.1300000101f + func_150ADA68() * 0.2f) * gFrameDelta;
     if (data->unk10 > 1.0f) {
-        if (func_1515C0F8(owner, &wind) == 0) {
+        if (sprite_findActorMotion(owner, &wind) == 0) {
             wind = &D_800A5480;
         }
         do {

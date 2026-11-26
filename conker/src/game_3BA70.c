@@ -24,7 +24,7 @@ void func_1500E5C0(void) {
         // matching: IDO materializes &D_800D98D0 before the two scalar stores only via a local
         EffectHeader **entries = D_800D98D0;
 
-        D_800D9890 = 0;
+        gSpriteQueuedCmd = 0;
         D_800D9894 = NULL;
         entries[0] = NULL;
         entries[1] = NULL;

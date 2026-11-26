@@ -656,8 +656,8 @@ void event_playSoundCommand(void) {
     sound = gEventParam & 0x7FF;
     id = gCurrentActor->character_type;
     ownerFilter = (u32)gEventParam >> 24;
-    if (D_800D1C90[id]->subModelCount != 0) {
-        owner = *D_80086CAC[D_800D1C90[id]->subModelList];
+    if (gModelDefs[id]->subModelCount != 0) {
+        owner = *gSubModelLists[gModelDefs[id]->subModelList];
     } else {
         owner = id;
     }
@@ -684,7 +684,7 @@ void event_playSoundCommand(void) {
         if (gScreenLayout >= 2) {
             break;
         }
-        type = func_1510F8CC(gCurrentActor->floorMaterial);
+        type = collision_getSurfaceType(gCurrentActor->floorMaterial);
         if (type == 0xC && gCurrentActor->unkCC > -17.0f) {
             sound = sound_pickVariant(0x9C, 2);
         } else if (gCurrentActor->unk118 != -10000.0f && gCurrentActor->ypos <= gCurrentActor->unk118) {
@@ -901,7 +901,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
             anim = 0x50;
             break;
         }
-        func_15083568(obj, anim, 1.0f, 0);
+        collision_createPartSet(obj, anim, 1.0f, 0);
     }
     angle = (s16)(yaw * 182.04445f) - 0x4000;
     if (gIsMultiplayer && !(flags & 1) && kind != 5 && kind != 9 && kind != 10 && kind != 4) {
@@ -1163,7 +1163,7 @@ void event_spawnObjectAhead(void) {
     f32 height;
 
     type = gEventParam & 0xFF;
-    obj = actor_findOnPath(func_15083E0C(type));
+    obj = actor_findOnPath(collision_findSpawnById(type));
     if (obj == NULL) {
         return;
     }
@@ -1180,9 +1180,9 @@ void event_spawnObjectAhead(void) {
     obj->angle = angle;
     actor_splitVelocity(angle, 5000.0f, height, &xOff, &zOff, &yOff);
 
-    D_800D2104[obj->listpos][1].x = gCurrentActor->xpos + xOff;
-    D_800D2104[obj->listpos][1].z = gCurrentActor->zpos + zOff;
-    D_800D2104[obj->listpos][1].y = gCurrentActor->ypos + yOff;
+    gSpawnPaths[obj->listpos][1].x = gCurrentActor->xpos + xOff;
+    gSpawnPaths[obj->listpos][1].z = gCurrentActor->zpos + zOff;
+    gSpawnPaths[obj->listpos][1].y = gCurrentActor->ypos + yOff;
     obj->attach_char = 0;
     obj->scriptCmd = NULL;
 
@@ -2141,15 +2141,15 @@ void func_1506F8C0(s32 cmd) {
 }
 
 void func_1506F8F0(s32 cmd) {
-    func_150E2EA4(gCurrentActor, gCurrentActor->unique_id, 0x14, -1, 482.0f, -127.0f, -45.0f, 659.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
+    beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 0x14, -1, 482.0f, -127.0f, -45.0f, 659.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
 void func_1506F9C0(s32 cmd) {
-    func_150E2EA4(gCurrentActor, gCurrentActor->unique_id, 0x14, -1, 241.0f, -127.0f, -45.0f, 418.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
+    beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 0x14, -1, 241.0f, -127.0f, -45.0f, 418.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
 void func_1506FA90(s32 cmd) {
-    func_150E2EA4(gCurrentActor, gCurrentActor->unique_id, 0x1A, -1, -181.0f, -218.0f, -1.0f, -681.0f, -584.0f, -2.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
+    beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 0x1A, -1, -181.0f, -218.0f, -1.0f, -681.0f, -584.0f, -2.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
 void func_1506FB60(s32 cmd) {
@@ -2189,7 +2189,7 @@ void func_1506FCFC(s32 cmd) {
 }
 
 void func_1506FD30(s32 cmd) {
-    func_150E2EA4(gCurrentActor, gCurrentActor->unique_id, 1, -1, 0.0f, 0, 345.0f, 0.0f, 0, 414.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 1, 50.0f);
+    beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 1, -1, 0.0f, 0, 345.0f, 0.0f, 0, 414.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 1, 50.0f);
 }
 
 void func_1506FDF0(s32 cmd) {
@@ -2397,19 +2397,19 @@ void func_15070300(s32 cmd) {
 }
 
 void func_15070690(s32 cmd) {
-    func_150EEE00(gCurrentActor, (cmd - 0x3E) & 0xFF, cmd);
+    beam_fireSlot(gCurrentActor, (cmd - 0x3E) & 0xFF, cmd);
 }
 
 void func_150706C4(s32 cmd) {
-    func_150EEF40(gCurrentActor, (cmd - 0x3E) & 0xFF, cmd);
+    beam_releaseSlot(gCurrentActor, (cmd - 0x3E) & 0xFF, cmd);
 }
 
 void func_150706F8(s32 cmd) {
     if ((gCurrentActor->unk94 & 0x10) == 0) {
-        func_150F03F8(gCurrentActor, 0, 0xFF, 1);
+        beam_fireSlotProjectile(gCurrentActor, 0, 0xFF, 1);
     }
     if ((gCurrentActor->unk94 & 8) == 0) {
-        func_150F03F8(gCurrentActor, 1, 0xFF, 1);
+        beam_fireSlotProjectile(gCurrentActor, 1, 0xFF, 1);
     }
 }
 
@@ -2743,10 +2743,10 @@ void func_150716EC(s32 cmd) {
 }
 
 void func_15071764(s32 cmd) {
-    Actor *obj = func_15083E90(18);
+    Actor *obj = collision_findObjectById(18);
     if (obj != NULL) {
-        func_150F0BEC(obj);
-        func_150F10D4(obj);
+        beam_spawnFollowParticle(obj);
+        beam_attachTrailEmitter(obj);
         light_createAtActor(obj, 1, 2, 300, 70, 255, 130, 0, 255, 1);
     }
 }
@@ -2755,7 +2755,7 @@ void func_150717E0(s32 cmd) {
     ActorRef ref;
     Actor *obj;
 
-    obj = func_15083E90(18);
+    obj = collision_findObjectById(18);
     if (obj != NULL) {
         ref.actor = obj;
         ref.uniqueId = obj->unique_id;
@@ -2820,7 +2820,7 @@ void func_15071A64(s32 cmd) {
 
     if (!(func_150ADA20() & 1) && gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->unk74 & 0xF) != 0xF &&
         movement_obj[0].stunned != 0 && movement_obj[0].energy > 0) {
-        func_1504715C(&hit.ground, gCurrentActor);
+        collision_initHitFromObject(&hit.ground, gCurrentActor);
         func_15143134(&D_80099BBC, &hit.pos, &gCurrentActor->ob_matrix_ptr[15]);
         func_151DC484(&hit.pos.x, &hit.ground, 0, 0xFF, 1);
     }
@@ -2832,7 +2832,7 @@ void func_15071B18(s32 cmd) {
 
     if (gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->unk74 & 0xF) != 0xF) {
         func_15143134(&D_80099BC8[func_150ADA20() % 3U], &point, &gCurrentActor->ob_matrix_ptr[7]);
-        func_1504715C(&collision, gCurrentActor);
+        collision_initHitFromObject(&collision, gCurrentActor);
         if (func_150ADA20() & 1) {
             if (func_150ADA20() & 1) {
                 func_151DC260(&point.x, &collision, 0, 0xFF, 1);
@@ -3050,7 +3050,7 @@ void func_15072388(void) {
 }
 
 void func_150723AC(void) {
-    Actor *obj = func_15083E90(gEventParam);
+    Actor *obj = collision_findObjectById(gEventParam);
 
     if (obj != NULL) {
         actor_remove(obj, 0);
@@ -3058,14 +3058,14 @@ void func_150723AC(void) {
 }
 
 void func_150723E0(void) {
-    Actor *obj = func_15083E90(gEventParam);
+    Actor *obj = collision_findObjectById(gEventParam);
 
     if (obj != NULL && obj->attach_char != 0) {
         actor_remove(obj, 0);
     }
 }
 
-/* Respawns the object whose spawn record (D_800D20FC, 0x30-byte SpawnRecord entries) gEventParam names. */
+/* Respawns the object whose spawn record (gSpawnRecords, 0x30-byte SpawnRecord entries) gEventParam names. */
 void event_respawnObject(void) {
     Actor *obj;
     s32 spawnFlags;
@@ -3077,11 +3077,11 @@ void event_respawnObject(void) {
     angle = (gEventParam >> 8) & 0x7F;
     noKill = (gEventParam >> 15) & 1;
     spawnFlags = (gEventParam >> 16) & 0xFF;
-    id = func_15083E0C(gEventParam);
+    id = collision_findSpawnById(gEventParam);
     if (id == -1) {
         return;
     }
-    D_800D210C[id] = 0;
+    gSpawnInUse[id] = 0;
     if (!(spawnFlags & 0x80)) {
         obj = actor_findOnPath(id);
         if (obj != NULL) {
@@ -3089,8 +3089,8 @@ void event_respawnObject(void) {
             actor_clearSlot(obj);
         }
     }
-    D_800D20FC[id].unk2 = 0;
-    slot = func_15082A44((SpawnRecord *)(id * 0x30 + (s32)D_800D20FC), id, 0, 0, 0); // matching: integer address math
+    gSpawnRecords[id].unk2 = 0;
+    slot = collision_spawnObject((SpawnRecord *)(id * 0x30 + (s32)gSpawnRecords), id, 0, 0, 0); // matching: integer address math
     if (slot == 0) {
         return;
     }
@@ -3317,7 +3317,7 @@ void func_15072DA0(void) {
 }
 
 void func_15072DD8(void) {
-    func_15083568(gCurrentActor, gEventParam, 1.0f, 0);
+    collision_createPartSet(gCurrentActor, gEventParam, 1.0f, 0);
 
     if (gCurrentActor->mv != NULL && gCurrentActor->mv->weapon_status == 1) {
         gCurrentActor->mv->weapon_status = 2;
@@ -3325,7 +3325,7 @@ void func_15072DD8(void) {
 }
 
 void func_15072E38(void) {
-    func_150836CC(gCurrentActor, gEventParam);
+    collision_removePartSet(gCurrentActor, gEventParam);
 
     if (gCurrentActor->mv != NULL) {
         gCurrentActor->mv->weapon_status = 0;
@@ -3366,7 +3366,7 @@ void func_15072F10(void) {
     targetX = targetX * 5000.0f + gCurrentActor->xpos;
     targetZ = targetZ * 5000.0f + gCurrentActor->zpos;
     targetY = targetY * 5000.0f + gCurrentActor->ypos;
-    func_150E1570(gCurrentActor, gCurrentActor->xpos, gCurrentActor->ypos + gCurrentActor->unkD6,
+    collision_castRayAtObjects(gCurrentActor, gCurrentActor->xpos, gCurrentActor->ypos + gCurrentActor->unkD6,
                   gCurrentActor->zpos, targetX, targetY, targetZ, dc_glbl_CharNum, 18);
 }
 
@@ -3454,7 +3454,7 @@ Actor *event_spawnAnimProjectile(Actor *parent, s32 bone, s32 anim, f32 offX, f3
     obj->headEffectState = anim;
     obj->drawtype = 5;
     obj->unique_id = 255U - (obj - movement_obj);
-    func_15083568(obj, anim, 1.0f, 0);
+    collision_createPartSet(obj, anim, 1.0f, 0);
     for (i = 0; i <= gScreenLayout; i++) {
         obj->unk304[i] = light_allocGfxLights(1);
     }
@@ -3642,7 +3642,7 @@ void func_15073D34(void) {
 void func_15073D74(void) {
     Actor *obj;
 
-    obj = func_15083E90(gEventParam);
+    obj = collision_findObjectById(gEventParam);
     if (obj != NULL) {
         obj->attach_char = 0;
     }
@@ -3668,7 +3668,7 @@ void func_15073EA4(void) {
 }
 
 void func_15073F1C(void) {
-    ModelAttachment *att = func_1503195C(gCurrentActor, 60, 0);
+    ModelAttachment *att = attach_find(gCurrentActor, 60, 0);
 
     if (att != NULL) {
         att->unk38 = 2400;
@@ -3711,11 +3711,11 @@ void event_spawnThrownItem(void) {
     Actor *player;
 
     arg = gEventParam & 0xFFFF;
-    slot = func_15083E0C(arg);
+    slot = collision_findSpawnById(arg);
     if (slot != -1) {
         state = 1;
-        D_800D210C[slot] = 0;
-        idx = func_15082A44((SpawnRecord *)(slot * 0x30 + (s32)D_800D20FC), slot, 0, 0, 0); // matching: integer address math
+        gSpawnInUse[slot] = 0;
+        idx = collision_spawnObject((SpawnRecord *)(slot * 0x30 + (s32)gSpawnRecords), slot, 0, 0, 0); // matching: integer address math
         if (idx != 0) {
             idx--;
             obj = &movement_obj[idx];
@@ -3783,13 +3783,13 @@ void event_spawnThrownItem(void) {
                     obj->yspd = 50.0f;
                 }
                 if (player->character_type == 0x75) {
-                    slot = (s32)func_1503195C(player, 0x64, 0); // matching: slot is reused for the attachment
+                    slot = (s32)attach_find(player, 0x64, 0); // matching: slot is reused for the attachment
                 } else {
-                    slot = (s32)func_1503195C(player, 0x2C, 0);
+                    slot = (s32)attach_find(player, 0x2C, 0);
                 }
                 if (slot != 0) {
                     obj->soundHandle2 = ((ModelAttachment *)slot)->unk3C;
-                    sound_replaceCallback((SoundRecordCallback)func_15033BDC, (void *)slot, (s32)gCurrentActor, sound_followOwnerCallback, obj, obj->unique_id);
+                    sound_replaceCallback((SoundRecordCallback)attach_soundCallback, (void *)slot, (s32)gCurrentActor, sound_followOwnerCallback, obj, obj->unique_id);
                 }
                 player = gCurrentActor;
             }
@@ -3805,17 +3805,17 @@ void event_spawnThrownItem(void) {
                 state = 5;
                 obj->speed = 0.0f;
                 trail_spawnActorBoneTrail(obj, 0xFF);
-                D_800D2104[obj->listpos][1].x = movement_obj[0].xpos;
-                D_800D2104[obj->listpos][1].z = movement_obj[0].zpos;
+                gSpawnPaths[obj->listpos][1].x = movement_obj[0].xpos;
+                gSpawnPaths[obj->listpos][1].z = movement_obj[0].zpos;
             } else if (player->character_type == 0x7B) {
                 if (arg == 0x10) {
                     state = 7;
-                    D_800D2104[obj->listpos][1].x = movement_obj[0].xpos;
-                    D_800D2104[obj->listpos][1].y = 980;
-                    D_800D2104[obj->listpos][1].z = movement_obj[0].zpos;
+                    gSpawnPaths[obj->listpos][1].x = movement_obj[0].xpos;
+                    gSpawnPaths[obj->listpos][1].y = 980;
+                    gSpawnPaths[obj->listpos][1].z = movement_obj[0].zpos;
                     obj->unique_id = 0xFF - idx;
                     actor_runHitHandler(obj, 0xC, NULL);
-                    func_150F16DC(gCurrentActor, func_150ADA20() & 1, func_150ADA20() & 3, 0xFF, 1);
+                    beam_spawnMuzzleBurst(gCurrentActor, func_150ADA20() & 1, func_150ADA20() & 3, 0xFF, 1);
                 } else if (arg == 0xA) {
                     state = 0xE;
                     obj->ypos = player->ypos;
@@ -4032,7 +4032,7 @@ void func_15074C00(Actor *self, Actor *other, u8 *result) {
     GroundPoint hit;
 
     if (((u8)other->intelhitroute & 0x7F) == 5) {
-        func_1504715C(&hit.ground, other);
+        collision_initHitFromObject(&hit.ground, other);
         hit.pos.x = D_800CC2C0;
         hit.pos.y = D_800CC2C4;
         hit.pos.z = D_800CC2C8;
@@ -4060,7 +4060,7 @@ void func_15074C80(Actor *self, Actor *other) {
                     anim = 0x51;
                 }
             }
-            func_150335C8(self, other, anim, 12, 1, 0);
+            attach_attachInPlace(self, other, anim, 12, 1, 0);
         }
         self->energy = 0;
     }

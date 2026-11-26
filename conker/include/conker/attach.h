@@ -20,74 +20,74 @@ struct SoundRecord;
 struct S150D88AC;
 
 /* game_5D2C0.c */
-extern ModelAttachment *D_800C3EE0; // head of the model attachment list
-s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6);
-s32 func_1502FFD8(ModelAttachment *att, Actor *owner);
-void func_15030158(ModelAttachment *att, s32 immediate);
-void func_150302F0(Actor *owner, s32 setId);
-s32 func_15030310(Actor *owner, s32 setId, s32 index);
-s32 func_150303E4(Actor *owner);
-void func_15030468(void);
-ModelAttachment *func_15030AF4(Actor *owner, s32 model, s32 bone, s32 flags, s32 unk15, s32 unk16, s32 lifetime,
+extern ModelAttachment *gAttachments; // head of the model attachment list
+s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6);
+s32 attach_initModel(ModelAttachment *att, Actor *owner);
+void attach_free(ModelAttachment *att, s32 immediate);
+void attach_removeSet(Actor *owner, s32 setId);
+s32 attach_removeFromSet(Actor *owner, s32 setId, s32 index);
+s32 attach_removeAll(Actor *owner);
+void attach_updateAll(void);
+ModelAttachment *attach_add(Actor *owner, s32 model, s32 bone, s32 flags, s32 unk15, s32 unk16, s32 lifetime,
                                s32 setId, s32 handler, const u16 *ownerStates, s32 unk17, s32 parentSet, s32 parentMtx);
-void func_15030D54(ModelAttachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY, f32 rotZ);
-Gfx *func_15030E08(Gfx *gdl, s32 view, s32 pass);
-Gfx *func_15030F94(Gfx *gdl, Actor *owner, s32 view, s32 arg3);
-s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx);
-Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg4);
-void func_1503192C(Actor *owner, s32 setId, s32 alpha, s32 index);
-ModelAttachment *func_1503195C(Actor *owner, s32 setId, s32 index);
-ModelAttachment *func_150319CC(s32 setId, Actor *owner);
-void func_15031A50(ModelAttachment *att, Actor *owner);
-void func_15031C14(ModelAttachment *att);
-s32 func_15031E2C(ModelAttachment *att, Actor *owner);
-s32 func_15031E7C(ModelAttachment *att, Actor *owner);
-s32 func_15031FC8(ModelAttachment *att, Actor *owner);
-s32 func_150331B8(ModelAttachment *att, Actor *owner);
-s32 func_1503327C(ModelAttachment *att, Actor *owner);
+void attach_setOffset(ModelAttachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY, f32 rotZ);
+Gfx *attach_drawView(Gfx *gdl, s32 view, s32 pass);
+Gfx *attach_drawOwner(Gfx *gdl, Actor *owner, s32 view, s32 arg3);
+s32 attach_getMatrices(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx);
+Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg4);
+void attach_setAlpha(Actor *owner, s32 setId, s32 alpha, s32 index);
+ModelAttachment *attach_find(Actor *owner, s32 setId, s32 index);
+ModelAttachment *attach_findInSet(s32 setId, Actor *owner);
+void attach_applyOwnerEffects(ModelAttachment *att, Actor *owner);
+void attach_undoOwnerEffects(ModelAttachment *att);
+s32 attach_hookCycleTexture(ModelAttachment *att, Actor *owner);
+s32 attach_hookFrameTile(ModelAttachment *att, Actor *owner);
+s32 attach_hookHeldProp(ModelAttachment *att, Actor *owner);
+s32 attach_hookFollowAnim(ModelAttachment *att, Actor *owner);
+s32 attach_hookPlayOnce(ModelAttachment *att, Actor *owner);
 s32 func_15033328(ModelAttachment *att, Actor *owner);
 s32 func_150333A8(ModelAttachment *att, Actor *owner);
 s32 func_15033440(ModelAttachment *att, Actor *owner);
-s32 func_150334B8(ModelAttachment *att, Actor *owner);
-ModelAttachment *func_150335C8(Actor *obj, Actor *target, s32 setId, s32 bone, s32 arg4, s32 noTranslation);
+s32 attach_scrollTile(ModelAttachment *att, Actor *owner);
+ModelAttachment *attach_attachInPlace(Actor *obj, Actor *target, s32 setId, s32 bone, s32 arg4, s32 noTranslation);
 s32 func_1503378C(ModelAttachment *att, Actor *owner);
-s32 func_150337E4(ModelAttachment *att, Actor *owner);
-s32 func_15033838(ModelAttachment *att, Actor *owner);
+s32 attach_hookToggleTexture(ModelAttachment *att, Actor *owner);
+s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner);
 s32 func_150339C8(ModelAttachment *att, Actor *owner);
-s32 func_15033AD8(ModelAttachment *att, Actor *owner);
+s32 attach_hookDelayedSound(ModelAttachment *att, Actor *owner);
 /* A sound record callback (SoundRecordCallback, conker/sound.h). */
-s32 func_15033BDC(struct SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
+s32 attach_soundCallback(struct SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 s32 func_15033E00(ModelAttachment *att, Actor *owner);
-s32 func_15033E28(Actor *owner, ModelAttachment **out);
-ModelAttachment *func_15033E84(Actor *owner);
-void func_15033EC4(s32 a, s32 b);
+s32 attach_getAll(Actor *owner, ModelAttachment **out);
+ModelAttachment *attach_getFirst(Actor *owner);
+void attach_swapOwners(s32 a, s32 b);
 s32 func_15033F0C(ModelAttachment *att, Actor *owner);
 s32 func_15033F70(ModelAttachment *att, Actor *owner);
 
 /* game_F4890.c */
-s32 func_150C73E0(ModelAttachment *light, Actor *owner);
+s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner);
 
 /* game_F5BE0.c */
-s32 func_150C8730(ModelAttachment *att, Actor *actor);
+s32 attach_hookSpawnProjectile(ModelAttachment *att, Actor *actor);
 
 /* game_105760.c */
 void func_150D82B0(s32 arg0);
-s32 func_150D82BC(ModelAttachment *att, Actor *actor);
-s32 func_150D83D8(ModelAttachment *att, Actor *actor);
+s32 attach_hookScrollTexH(ModelAttachment *att, Actor *actor);
+s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor);
 GameCommand *func_150D8590(GameCommand *cmd, s32 arg1);
-void func_150D85AC(Actor *actor);
+void attach_spawnFootImpact(Actor *actor);
 s32 func_150D88AC(struct S150D88AC *arg0);
 
 /* game_105D90.c */
-s32 func_150D88E0(Vec3f *out, Actor *actor, u8 point);
+s32 attach_getBonePoint(Vec3f *out, Actor *actor, u8 point);
 s32 func_150D8A20(s32 arg0, s32 arg1);
-void func_150D8A34(Actor *actor, s32 point, s32 arg2);
+void attach_spawnBonePointEffects(Actor *actor, s32 point, s32 arg2);
 
 /* game_1B9DB0.c */
-extern u8 D_800DF7D0[0x1E4];                 /* per-model load reference counts */
-extern s16 *D_800DF9B8[0x1E4];               /* per model: written by func_1510CE60 */
-extern AttachModelHeader *D_800E0148[0x1E4]; /* per model: loaded attachment model header */
-Gfx *func_1518C900(s32 arg0);
-void func_1518CA04(s32 arg0);
+extern u8 gAttachModelRefCounts[0x1E4];                 /* per-model load reference counts */
+extern s16 *gAttachModelTexIds[0x1E4];               /* per model: written by texture_resolveDl */
+extern AttachModelHeader *gAttachModelHeaders[0x1E4]; /* per model: loaded attachment model header */
+Gfx *attach_loadModelDl(s32 arg0);
+void attach_releaseModel(s32 arg0);
 
 #endif

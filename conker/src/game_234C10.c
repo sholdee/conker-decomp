@@ -8,7 +8,7 @@
  * The values are asset ids of textures (and of the frames of animated ones). A TextureDesc whose
  * frame count is above 1, or whose frames are listed, points at a list of such ids in this file.
  * Most of these words are their own objects: the code reads them by their own names (game_BC510.c
- * loads several of the single ids with separate lui), so only D_80090B60 is a table.
+ * loads several of the single ids with separate lui), so only gEffectTextures is a table.
  */
 
 /* Frame id lists that the tables point at before the lists are defined */
@@ -49,8 +49,8 @@ s32 D_80090274[9] = { 0xCB2, 0xCB3, 0xCB4, 0xCB5, 0xCB6, 0xCB7, 0xCB8, 0xCB9, 0x
 s32 D_80090298[8] = { 0xF59, 0x7B0, 0x1141, 0x113E, 0x113F, 0x1140, 0x548, 0x547 };
 s32 D_800902B8 = 0x102D;
 s32 D_800902BC[3] = { 0xA54, 0xA55, 0xA56 };
-s32 D_800902C8 = 0x7A4;
-s32 D_800902CC = 0x7A5;
+s32 gBarTopEdgeTexId = 0x7A4;
+s32 gBarBottomEdgeTexId = 0x7A5;
 s32 D_800902D0 = 0xECF;
 s32 D_800902D4 = 0xED0;
 s32 D_800902D8 = 0x730;
@@ -72,7 +72,7 @@ static s32 D_80090358[12] = { 0xCFD, 0xCFE, 0xCFF, 0xD00, 0xD01, 0xD02, 0xCF7, 0
 TextureDesc D_80090388 = { (u32)D_80090358, 12, 0, 44, 44, 0, 2 };
 static TextureDesc D_80090394 = { 0x4B2, 1, 0, 32, 32, 5, 2 };
 static TextureDesc D_800903A0 = { 0x619, 1, 0, 32, 32, 0, 2 };
-Texture D_800903AC = { 0xBB5, 64, 64, 4, 1, 0 };
+Texture gFlareTexture = { 0xBB5, 64, 64, 4, 1, 0 };
 static s32 D_800903B8[1] = { 0x50D };
 TextureDesc D_800903BC = { (u32)D_800903B8, 1, 0, 32, 16, 0, 2 };
 TextureDesc D_800903C8 = { 0x714, 1, 0, 16, 16, 3, 1 };
@@ -350,7 +350,7 @@ static s32 D_80090B54[1] = { 0x880 };
 static s32 D_80090B58[1] = { 0x88F };
 static s32 D_80090B5C[1] = { 0x7F6 };
 /* The effect texture table: the `texture` index of the effect descriptors */
-TextureDesc D_80090B60[207] = {
+TextureDesc gEffectTextures[207] = {
     { (u32)D_80090744, 1, 0, 32, 32, 0, 3 }, /* 0 */
     { (u32)D_80090748, 1, 0, 32, 32, 0, 3 }, /* 1 */
     { (u32)D_8009074C, 1, 0, 32, 32, 0, 3 }, /* 2 */
@@ -570,7 +570,7 @@ s32 D_80091538[1] = { 0x1C5E };
 s32 D_8009153C[5] = { 0x8FF, 0x900, 0x901, 0x902, 0x903 };
 s32 D_80091550[5] = { 0x904, 0x905, 0x906, 0x907, 0x908 };
 s32 D_80091564[16] = { 0x1C02, 0x7A3, 0x401, 0x105D, 0xE40, 0x186, 0x1C5F, 0xD3B, 0xB0A, 0xFD8, 0xBA7, 0x102E, 0x4AA, 0x403, 0x53C, 0xE34 };
-Texture D_800915A4 = { 0x0, 16, 64, 0, 3, 1 };
+Texture gTrailTexture = { 0x0, 16, 64, 0, 3, 1 };
 Texture D_800915B0 = { 0x916, 32, 32, 0, 3, 1 };
 s32 D_800915BC[5] = { 0x101E, 0x101F, 0x1020, 0x1021, 0x1022 };
 s32 D_800915D0[1] = { 0x364 };

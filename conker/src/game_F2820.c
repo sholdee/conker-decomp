@@ -3,18 +3,18 @@
 #include "variables.h"
 
 /* Update handlers of a strip (StripObj.updateIdx); 0 removes the strip. */
-static s32 (*D_80088760[])(StripObj *) = { func_150C5B88, func_150C5BD4 };
+static s32 (*gStripUpdateHandlers[])(StripObj *) = { beam_stripFollowTarget, beam_stripFollowTargetBone };
 
 /* Render setup and reset display lists of the strips; the strip type's entry in the object type table
  * D_8008B4D4 points to them. */
-Gfx D_80088768[] = {
+Gfx gStripRenderSetupDl[] = {
     gsDPPipeSync(),
     gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsDPSetConvert(0, 0, 0, 0, 0, 255),
     gsSPEndDisplayList(),
 };
-Gfx D_80088790[] = {
+Gfx gStripRenderResetDl[] = {
     gsDPPipeSync(),
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
     gsDPPipeSync(),
@@ -23,13 +23,13 @@ Gfx D_80088790[] = {
 };
 
 /* Destroy and free handlers per strip kind (StripObj.kind) */
-static void (*D_800887B8[])(StripObj *) = { func_150C5430, func_150C5510 };
-static void (*D_800887C0[])(StripObj *) = { func_150C5450, func_150C553C };
+static void (*gStripDestroyHandlers[])(StripObj *) = { beam_destroyStripDefault, beam_destroyStripDetach };
+static void (*gStripFreeHandlers[])(StripObj *) = { beam_freeStripDefault, beam_freeStripDetach };
 /* Message handlers per strip kind */
-static void (*D_800887C8[])(StripObj *, ActorMsg *, u8) = { NULL, func_150C5D0C };
+static void (*gStripMsgHandlers[])(StripObj *, ActorMsg *, u8) = { NULL, beam_stripTargetMessage };
 
 /** Allocates a strip (0xC8-byte header plus `payloadSize` bytes of payload, its target) and caches its length. */
-StripObj *func_150C5370(StripDesc *desc, s32 payloadSize) {
+StripObj *beam_newStrip(StripDesc *desc, s32 payloadSize) {
     StripObj *strip;
 
     strip = func_15167A68(0x46, 0, payloadSize + 0xC8, 1, 0xFF, 1);
@@ -51,17 +51,17 @@ StripObj *func_150C5370(StripDesc *desc, s32 payloadSize) {
 }
 
 /** Destroy handler: hands the strip to func_15169804. */
-void func_150C5430(StripObj *strip) {
+void beam_destroyStripDefault(StripObj *strip) {
     func_15169804(&strip->header);
 }
 
 /** Free handler: hands the strip to func_15169824. */
-void func_150C5450(StripObj *strip) {
+void beam_freeStripDefault(StripObj *strip) {
     func_15169824(&strip->header);
 }
 
-/** Calls the D_800887B8 handler for the strip kind, or the first one when it is out of range. */
-void func_150C5470(StripObj *strip) {
+/** Calls the gStripDestroyHandlers handler for the strip kind, or the first one when it is out of range. */
+void beam_destroyStrip(StripObj *strip) {
     s32 idx = strip->kind;
 
     if (idx < 0) {
@@ -69,11 +69,11 @@ void func_150C5470(StripObj *strip) {
     } else if (idx >= 2) {
         idx = 0;
     }
-    D_800887B8[idx](strip);
+    gStripDestroyHandlers[idx](strip);
 }
 
-/** Calls the D_800887C0 handler for the strip kind, or the first one when it is out of range. */
-void func_150C54C0(StripObj *strip) {
+/** Calls the gStripFreeHandlers handler for the strip kind, or the first one when it is out of range. */
+void beam_freeStrip(StripObj *strip) {
     s32 idx = strip->kind;
 
     if (idx < 0) {
@@ -81,23 +81,23 @@ void func_150C54C0(StripObj *strip) {
     } else if (idx >= 2) {
         idx = 0;
     }
-    D_800887C0[idx](strip);
+    gStripFreeHandlers[idx](strip);
 }
 
-/** Detaches the strip from its target character, then destroys it (func_150C5430). */
-void func_150C5510(StripObj *strip) {
+/** Detaches the strip from its target character, then destroys it (beam_destroyStripDefault). */
+void beam_destroyStripDetach(StripObj *strip) {
     func_1514EDF0(strip, strip->target.obj);
-    func_150C5430(strip);
+    beam_destroyStripDefault(strip);
 }
 
-/** Detaches the strip from its target character, then frees it (func_150C5450). */
-void func_150C553C(StripObj *strip) {
+/** Detaches the strip from its target character, then frees it (beam_freeStripDefault). */
+void beam_freeStripDetach(StripObj *strip) {
     func_1514EDF0(strip, strip->target.obj);
-    func_150C5450(strip);
+    beam_freeStripDefault(strip);
 }
 
 /** Runs the strip's update handler; removes the strip when it returns 0, else refreshes the length if it moved. */
-void func_150C5568(StripObj *strip) {
+void beam_updateStrip(StripObj *strip) {
     s32 idx;
     u8 remove;
     Vec3f prev;
@@ -110,7 +110,7 @@ void func_150C5568(StripObj *strip) {
         prev.z = strip->p0.z - strip->p1.z;
 
         if (idx != -1) {
-            if (D_80088760[idx](strip) == 0) {
+            if (gStripUpdateHandlers[idx](strip) == 0) {
                 remove = TRUE;
             }
         }
@@ -134,7 +134,7 @@ void func_150C5568(StripObj *strip) {
 extern s32 D_800A4AC8[][2];
 
 /** Draws the strip for viewport `view` as a quad from p0 to p1 widened sideways to face the camera. */
-Gfx *func_150C56A4(Gfx *gfx, StripObj *strip, s16 view) {
+Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view) {
     s32 pad; // matching: unused stack word in the target frame
     u8 update;
     Vtx *vtx;
@@ -157,7 +157,7 @@ Gfx *func_150C56A4(Gfx *gfx, StripObj *strip, s16 view) {
         vtx = strip->quad[D_800BE9C0];
         eye = &camera_global_Cameras[view].eye;
         gfx = func_15142B7C(gfx, 1, 0x600);
-        gfx = func_15142E24(gfx, &D_80090B60[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
+        gfx = func_15142E24(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         if (camera_global_Cameras[view].SpecialFlags & 1) {
             gfx = func_15142C10(gfx, D_800D9B78[view][0], D_800D9B78[view][1], D_800D9B78[view][2], 0xFF, &update);
             gfx = func_15142CF0(gfx, 0xF2, 0, D_800D9B68[view][0], D_800D9B68[view][1], D_800D9B68[view][2], 0xFF, &update);
@@ -167,7 +167,7 @@ Gfx *func_150C56A4(Gfx *gfx, StripObj *strip, s16 view) {
             gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &update);
             gfx = func_1513F4E4(gfx, 19, &update);
         }
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1][0] | D_800A4AC8[1][1], &update);
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1][0] | D_800A4AC8[1][1], &update);
 
         scale = strip->p1.z;
         dir.x = strip->p1.x - strip->p0.x;
@@ -223,7 +223,7 @@ Gfx *func_150C56A4(Gfx *gfx, StripObj *strip, s16 view) {
 }
 
 /** Moves p1 to the target character's position; returns 0 once the character is gone. */
-s32 func_150C5B88(StripObj *strip) {
+s32 beam_stripFollowTarget(StripObj *strip) {
     StripTarget *target = &strip->target;
 
     if (target->obj->type == 0) {
@@ -239,7 +239,7 @@ s32 func_150C5B88(StripObj *strip) {
  * Moves p1 to the target's bone-local offset transformed by its bone matrix, or to its position when it has
  * no matrices. Returns 0 once the character is gone or its slot was reused.
  */
-s32 func_150C5BD4(StripObj *strip) {
+s32 beam_stripFollowTargetBone(StripObj *strip) {
     StripTarget *target = &strip->target;
     MtxF *bones;
 
@@ -271,9 +271,9 @@ void func_150C5C9C(Actor *obj) {
     func_1514D3B0(obj, 0x15, 2, 0);
 }
 
-/** Forwards a message to the D_800887C8 handler for the strip kind, if there is one. */
-void func_150C5CC4(StripObj *strip, ActorMsg *data, u8 msg) {
-    void (*handler)(StripObj *, ActorMsg *, u8) = D_800887C8[strip->kind];
+/** Forwards a message to the gStripMsgHandlers handler for the strip kind, if there is one. */
+void beam_stripMessage(StripObj *strip, ActorMsg *data, u8 msg) {
+    void (*handler)(StripObj *, ActorMsg *, u8) = gStripMsgHandlers[strip->kind];
 
     if (handler != NULL) {
         handler(strip, data, msg);
@@ -284,7 +284,7 @@ void func_150C5CC4(StripObj *strip, ActorMsg *data, u8 msg) {
  * Message 0: removes the strip if it targets data's character (same pointer or same unique id).
  * Message 0x2D: retargets the strip from either of data's two characters (A, B) to the other.
  */
-void func_150C5D0C(StripObj *strip, ActorMsg *data, u8 msg) {
+void beam_stripTargetMessage(StripObj *strip, ActorMsg *data, u8 msg) {
     StripTarget *target = &strip->target;
 
     if (msg == 0) {

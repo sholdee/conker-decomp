@@ -57,7 +57,7 @@ void mp3_startTrack(s32 id, s32 volume, s32 pan) {
     s32 size;
 
     size = 0;
-    data = (s32)func_1502B020(&size, 2, 22, id);
+    data = (s32)rom_findPath(&size, 2, 22, id);
     gMp3LastTrack = id;
     if (data != 0 && size != 0) {
         func_151F2D6C(volume, 0);

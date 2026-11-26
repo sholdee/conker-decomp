@@ -13,12 +13,12 @@ void func_15000940(arg0)
     idx = D_800B0DF0->unk29;
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
-            D_800D9E70[i][j] = 0;
-            D_800D9E88[i][j] = D_800A2CE8[D_800A2CD0[idx][0]][j];
-            D_800D9E98[i][j] = D_800A2CEC[D_800A2CD0[idx][1]][j];
-            D_800D9EB4[j] = D_800A2D04[D_800A2CD0[idx][2]][j];
-            D_800D9EA8[i][j] = D_800D9EB4[j];
-            D_800D9EB8[i][j] = 0;
+            gTintWavePhases[i][j] = 0;
+            gTintWaveSteps[i][j] = gTintPresetSteps[gTintPresets[idx][0]][j];
+            gTintWaveAmps[i][j] = gTintPresetAmps[gTintPresets[idx][1]][j];
+            gTintDefaultTargets[j] = gTintPresetTargets[gTintPresets[idx][2]][j];
+            gTintLevels[i][j] = gTintDefaultTargets[j];
+            gTintTargetOverrides[i][j] = 0;
         }
     }
 }

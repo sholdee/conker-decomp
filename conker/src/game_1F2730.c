@@ -41,7 +41,7 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
             modelPoints[1] = &D_800AAAA8;
             worldPoints[0] = &start;
             worldPoints[1] = &end;
-            part = func_1503195C(obj, 0x46, 0);
+            part = attach_find(obj, 0x46, 0);
             if (part == NULL) {
                 return;
             }
@@ -353,7 +353,7 @@ void func_151C61A0(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3) {
     func_15154684(&desc, arg2, arg3);
 }
 
-/* D_80086C90 object filter: rejects objects with id 0x5A, 0x74 or 0x7A. */
+/* gObjectFilters object filter: rejects objects with id 0x5A, 0x74 or 0x7A. */
 s32 func_151C6290(Actor *obj, Actor *self, s32 arg2) {
     if (obj->character_type == 0x5A || obj->character_type == 0x74 || obj->character_type == 0x7A) {
         return FALSE;

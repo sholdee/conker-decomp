@@ -291,7 +291,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
 
     if (actor->ob_matrix_ptr) {
         func_15143134(&D_800A1CFC[point], &pos, &actor->ob_matrix_ptr[5]);
-        func_1504715C(&ground, actor);
+        collision_initHitFromObject(&ground, actor);
         {
             SplashSpraySpec first;
 
@@ -497,7 +497,7 @@ void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event) {
     }
 }
 
-/* Objects created by func_15157010 / func_1515548C; this caller stores a tag in each. */
+/* Objects created by func_15157010 / sprite_newScreenSprite; this caller stores a tag in each. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x120];
     /* 0x120 */ s16 tag;
@@ -509,7 +509,7 @@ typedef struct {
 } TaggedSprite;
 
 /*
- * Spawns a func_15157010 object and a row of 8 func_1515548C sprites (the first with kind 0xCE,
+ * Spawns a func_15157010 object and a row of 8 sprite_newScreenSprite sprites (the first with kind 0xCE,
  * the rest 0xC5/0xC4), each tagged with duration in its data.
  */
 void func_150FAE18(s16 duration, u8 owner, s32 kind) {
@@ -596,7 +596,7 @@ void func_150FAE18(s16 duration, u8 owner, s32 kind) {
             for (i = 0; i < 8; i++) {
                 sprite.x = -65.0f + i * 24.75f;
                 sprite.texture = kinds[i];
-                spawned = func_1515548C(&sprite, 14, 0, 0, 2, owner, kind);
+                spawned = sprite_newScreenSprite(&sprite, 14, 0, 0, 2, owner, kind);
                 if (spawned != NULL) {
                     memcpy(&((TaggedSprite *)spawned)->tag, &tag, sizeof(tag));
                 }
@@ -670,7 +670,7 @@ struct FadeInSprite {
     /* 0x70 */ s16 duration;  /* the timer's starting value */
 };
 
-/* D_8008ACC8 sprite callback: fades the sprite's alpha in over its first fadeStart ticks. */
+/* gScreenSpriteUpdates sprite callback: fades the sprite's alpha in over its first fadeStart ticks. */
 s32 func_150FB2E0(FadeInSprite *sprite) {
     func_150FB240(&sprite->alpha, sprite->timer, sprite->duration, sprite->fadeStart, sprite->fadeRate);
     return 1;

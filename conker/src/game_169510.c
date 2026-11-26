@@ -40,16 +40,16 @@ static s32 (*D_80089CA8[])() = { NULL, func_151AB180, func_150C5EFC, func_150C68
 
 /* Particle update (DefParticleHead.updateFn1, updateFn2; 0 = none) and expire callbacks, as for sprites. */
 static s32 (*D_80089CB8[])() = {
-    NULL, func_1513E6E8, func_1518A094, func_150B9560, func_150BA37C, func_1514A4EC, func_1514A594, func_1518EF54,
-    func_1518F058, func_150DB114, flamethrower_moveJetLine, func_151AC9EC, func_15190F9C, func_15191520, func_151DA368,
+    NULL, func_1513E6E8, func_1518A094, func_150B9560, func_150BA37C, func_1514A4EC, func_1514A594, beam_updateMotionPull,
+    beam_updateMotion, beam_updateQuad, flamethrower_moveJetLine, func_151AC9EC, func_15190F9C, func_15191520, func_151DA368,
     func_150E6230, func_151B118C, func_151B1828, func_1514B87C, func_150CD17C, func_150C308C, func_15101378,
     weapon_updateProjectile, func_150AE35C, func_1513F6E8, func_1513F728, sight_updateBeam, weapon_updateBulletParticle, trail_integrateScalarMotion,
-    func_150EF38C, func_150F00EC, flamethrower_moveFlameLine, func_1514C258, func_1514C288, func_150E4174, func_151B8CFC,
+    beam_updateAimed, beam_updateGlow, flamethrower_moveFlameLine, func_1514C258, func_1514C288, func_150E4174, func_151B8CFC,
     func_150F7E20, func_15141928, func_150F3214, func_1519EF04, func_150DEACC, func_15102D90,
 };
 static s32 (*D_80089D60[])() = {
-    NULL, func_150B95FC, func_150BA424, func_1514143C, func_1514A19C, func_1514A380, func_1514A498, func_1518F108,
-    func_1518F15C, func_1518F1A0, func_150DB630, flamethrower_fadeJetLine, func_1518F384, func_15149838, func_15149A94,
+    NULL, func_150B95FC, func_150BA424, func_1514143C, func_1514A19C, func_1514A380, func_1514A498, beam_shrinkMotion,
+    beam_shrinkMotionProgress, func_1518F1A0, beam_updateLinkedQuad, flamethrower_fadeJetLine, func_1518F384, func_15149838, func_15149A94,
     func_15149BF4, func_15149C58, func_151ACA20, func_1519187C, func_151DA6A8, func_151DADA0, func_150E679C,
     func_151AFC08, func_150CBA30, func_150CC638, func_150C2FCC, func_151368A8, func_151B1478, func_1514AF74,
     func_1514B8B0, func_150CD17C, func_151022AC, func_15141478, func_151415D4, flamethrower_fadeFlameLine, func_1514BE00,
@@ -61,8 +61,8 @@ static s32 (*D_80089E10[])() = { NULL, func_15149EC4, func_1514C2B8 };
 /* Vertex functions of a particle (DefParticleHead.vertexFn), see func_1513E83C. The prototype keeps the viewport an
  * s16; most entries take their own view of the particle. */
 static Vtx *(*D_80089E1C[])(DefParticleHead *, s16) = {
-    func_1513E83C, func_151408A4, func_15149FD0, func_1513F114, func_1514A6A0, func_1518E73C, func_1518EB10,
-    func_150DB2D8, func_150DB714, flamethrower_buildJetLineQuad, func_15149D18, func_151AC810, func_1513F4B0, func_1519108C,
+    func_1513E83C, func_151408A4, func_15149FD0, func_1513F114, func_1514A6A0, func_1518E73C, beam_fillMotionVerts,
+    beam_drawQuad, beam_drawLinkedQuad, flamethrower_buildJetLineQuad, func_15149D18, func_151AC810, func_1513F4B0, func_1519108C,
     func_151DAE28, func_150E63A0, func_151B14AC, func_150CD59C, func_151019C4, func_15101F50, weapon_buildProjectileTail,
     func_150AE36C, func_15102EB8, func_1513EE14, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, func_1513FA2C,
     func_1513FA70, func_151BE4B8, func_15140190, func_150D2D6C, func_151A6350, func_150F7F58, func_1513EDB4,
@@ -86,18 +86,18 @@ static void (*D_80089EE8[])(QuadSprite *) = { func_1513C8D4, func_1513C8D4 };
 static void (*D_80089EF0[])(QuadSprite *) = { func_1513C900, func_1513C900 };
 static void (*D_80089EF8[])() = {
     func_1513CA6C, func_15101090, func_151011E8, func_151411E4, func_1513CA6C, func_1513CA6C, sight_freeBeam,
-    func_150EF7B0, func_151BE674, func_150F6420, func_151A6B10, func_150FDCAC, func_1513CA6C,
+    beam_destroyAimed, func_151BE674, beam_destroyModelBeam, func_151A6B10, func_150FDCAC, func_1513CA6C,
 };
 static void (*D_80089F2C[])() = {
     func_1513CAA0, func_15101148, func_15101210, func_15141250, func_1513CAA0, func_1513CAA0, func_151C95D8,
-    func_150EF860, func_151BE6A0, func_150F644C, func_151A6B3C, func_150FDCD8, func_1513CAA0,
+    beam_freeAimed, func_151BE6A0, beam_freeModelBeam, func_151A6B3C, func_150FDCD8, func_1513CAA0,
 };
 /* Event handler of a sprite (func_1513CF9C). */
 static void (*D_80089F60[])(s32, s32, u8) = { func_1513CFD0 };
 /* Event handlers of a particle (ParticleDef.type, func_1513DF9C); several take their own view of the particle and
  * of the event data. */
 static void (*D_80089F64[])(DefParticleHead *, s32, u8) = {
-    func_1513E070, func_1513E084, func_15102D50, sight_handleBeamMessage, func_151416E8, func_150EF910, func_151BE604,
+    func_1513E070, func_1513E084, func_15102D50, sight_handleBeamMessage, func_151416E8, beam_aimedMessage, func_151BE604,
     func_151BE604, func_151C4AB0, func_150FDB0C, func_150F31D4,
 };
 
@@ -148,7 +148,7 @@ void func_1513C060(QuadSprite *sprite) {
     if (!expired) {
         speed = sprite->def.frameSpeed;
         if (speed != 0) {
-            numFrames = D_80090B60[sprite->def.texture].frameCount;
+            numFrames = gEffectTextures[sprite->def.texture].frameCount;
             lastFrame = (numFrames << 16) - 1;
             sprite->def.frame += speed * D_800BE9E4;
             if (lastFrame < sprite->def.frame) {
@@ -505,7 +505,7 @@ Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
         }
         gfx = func_15142B7C(gfx, ((sprite->def.flags & 0x400) ? G_LIGHTING : 0) | geometry | G_ZBUFFER, G_CULL_BOTH);
         if (sprite->def.texture != 0xFF) {
-            gfx = func_15142E24(gfx, &D_80090B60[sprite->def.texture], sprite->def.frame, 2, 0, 0, sprite->def.texture,
+            gfx = func_15142E24(gfx, &gEffectTextures[sprite->def.texture], sprite->def.frame, 2, 0, 0, sprite->def.texture,
                                 0, 0, &needSync, (sprite->def.flags & 0x20000) ? 0x3E : 3);
         }
         gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
@@ -513,7 +513,7 @@ Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
         gfx = func_1513F4E4(gfx, combiner, &needSync);
         gfx = func_15142FBC(gfx,
                             G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
-                                ((sprite->def.texture == 0xFF) ? 0 : (u32)D_800D2C9C /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
+                                ((sprite->def.texture == 0xFF) ? 0 : (u32)gSpriteTlutMode /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
                                 G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[blendMode].cycle1 | D_800A4AC8[blendMode].cycle2, &needSync);
 
@@ -584,7 +584,7 @@ void func_1513CFE4(DefParticleHead *particle) {
     if (!expired) {
         speed = particle->def.frameSpeed;
         if (speed != 0) {
-            numFrames = D_80090B60[particle->def.texture].frameCount;
+            numFrames = gEffectTextures[particle->def.texture].frameCount;
             lastFrame = (numFrames << 16) - 1;
             particle->def.frame += speed * D_800BE9E4;
             if (lastFrame < particle->def.frame) {
@@ -905,7 +905,7 @@ Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
             s32 clamp;
 
             clamp = (particle->def.flags & 0x200000) ? 0 : 2;
-            gfx = func_15142E24(gfx, &D_80090B60[particle->def.texture], particle->def.frame, clamp, 0, 0,
+            gfx = func_15142E24(gfx, &gEffectTextures[particle->def.texture], particle->def.frame, clamp, 0, 0,
                                 particle->def.texture, 0, 0, &needSync,
                                 (particle->def.flags & 0x40000000) ? 0x3E : 3);
         }
@@ -915,7 +915,7 @@ Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
         gfx = func_15142FBC(gfx,
                             G_PM_NPRIMITIVE | ((particle->def.flags & 0x20000000) ? G_CYC_2CYCLE : G_CYC_1CYCLE) |
                                 G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
-                                ((particle->def.texture == 0xFF) ? 0 : (u32)D_800D2C9C /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
+                                ((particle->def.texture == 0xFF) ? 0 : (u32)gSpriteTlutMode /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
                                 G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[blendMode].cycle1 | D_800A4AC8[blendMode].cycle2, &needSync);
         gSPVertex(gfx++, vtx, 4, 0);
@@ -1782,7 +1782,7 @@ void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip) {
     s32 coord;
 
     if (texture != 0xFF) {
-        tex = &D_80090B60[texture];
+        tex = &gEffectTextures[texture];
         maxS = tex->width - 1;
         maxT = tex->height - 1;
 

@@ -8,17 +8,17 @@ f32 D_800CBD90; // ledge probe results (func_150AB1F0 family in game_D86A0.s)
 f32 D_800CBD94;
 f32 D_800CBD98;
 s32 D_800CBD9C; // cleared by func_15044370
-u16 D_800CBDA0[25]; // per movement_obj: 1 + the world object it touches, 0 if none
+u16 gActorTouchedObject[25]; // per movement_obj: 1 + the world object it touches, 0 if none
 u8 D_800CBDD2;
 u8 D_800CBDD3;
 u8 D_800CBDD4;
-f32 D_800CBDD8; // collision probe height (func_15044660)
-f32 D_800CBDDC; // collision probe mid-height
+f32 gProbeHeight; // collision probe height (collision_setProbeHeights)
+f32 gProbeMidHeight; // collision probe mid-height
 f32 D_800CBDE0[5]; /* not referenced */
 f32 D_800CBDF4; // ledge heights, -32768.0f if none
 f32 D_800CBDF8;
 f32 D_800CBDFC;
-struct TriggerNode *D_800CBE00; // timed trigger nodes (func_15044964)
+struct TriggerNode *gTriggerNodes; // timed trigger nodes (collision_addTriggerNode)
 
 #include "functions.h"
 #include "variables.h"
@@ -30,7 +30,7 @@ typedef struct {
     u8 index;
 } AccentedLetter;
 
-static AccentedLetter D_80085CE0[52] = { /* not referenced */
+static AccentedLetter gAccentedLetters[52] = { /* not referenced */
     { "\337", 0xDF, 0 }, { "\340", 0xE0, 1 }, { "\300", 0xC0, 1 }, { "\341", 0xE1, 2 },
     { "\301", 0xC1, 2 }, { "\342", 0xE2, 3 }, { "\302", 0xC2, 3 }, { "\343", 0xE3, 4 },
     { "\303", 0xC3, 4 }, { "\344", 0xE4, 5 }, { "\304", 0xC4, 5 }, { "\347", 0xE7, 6 },
@@ -47,8 +47,8 @@ static AccentedLetter D_80085CE0[52] = { /* not referenced */
 };
 
 /* Trigger checks (TriggerNode.check) and actions (TriggerNode.action). */
-static s32 (*D_80085E80[])() = { func_15044B78, func_15044CE4, func_15044D40 };
-static void (*D_80085E8C[])(void) = { NULL, func_15044DA0, func_15044DE8, func_15044E40, func_15044E88 };
+static s32 (*gTriggerChecks[])() = { collision_checkPlayerInVolume, collision_checkTrackedVolume, func_15044D40 };
+static void (*gTriggerActions[])(void) = { NULL, func_15044DA0, func_15044DE8, func_15044E40, func_15044E88 };
 
 /* Up to func_15047390, sqrtf is a real call (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
 #pragma function sqrtf
@@ -71,32 +71,32 @@ s32 func_15044380(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass) {
     D_800CBDF8 = -32768.0f;
     total = 0;
     obj->touching_char = 0;
-    func_15044660(obj, x, y, z);
+    collision_setProbeHeights(obj, x, y, z);
     saved_mode = D_800CBDD3;
     for (i = 3; i >= 0; i--) {
-        if (D_80089120[i] == 1 && (i != 3 || !(obj->noshove & 0x200))) {
-            func_1510F800(i);
-            if (D_800DBE62 == 0) continue;
+        if (gFloorProbeTypeEnabled[i] == 1 && (i != 3 || !(obj->noshove & 0x200))) {
+            collision_selectMap(i);
+            if (gMeshBuilt == 0) continue;
             total += func_150AB1F0(x, y, z, obj, arg4);
         }
     }
     if (secondPass) {
         for (i = 0; i < 3; i++) {
-            if (D_80089120[i] == 1) {
-                func_1510F800(i);
-                if (D_800DBE62 != 0) {
+            if (gFloorProbeTypeEnabled[i] == 1) {
+                collision_selectMap(i);
+                if (gMeshBuilt != 0) {
                     func_150AC3E4(x, y, z, obj, 0);
                 }
             }
         }
     }
-    func_1510F800(0);
+    collision_selectMap(0);
     D_800CBDD3 = saved_mode;
     return total;
 }
 
 /* Copies a triangle's three s16 vertices into out, relative to (ox, oy, oz) and rotated about Y. */
-void func_1504452C(s16 **vertices, Vec3f *out, f32 sinY, f32 cosY, f32 ox, f32 oy, f32 oz, s32 offset) {
+void collision_rotateTriVerts(s16 **vertices, Vec3f *out, f32 sinY, f32 cosY, f32 ox, f32 oy, f32 oz, s32 offset) {
     s16 *vtx;
     f32 x;
     f32 y;
@@ -117,8 +117,8 @@ void func_1504452C(s16 **vertices, Vec3f *out, f32 sinY, f32 cosY, f32 ox, f32 o
 void func_15044658(void) {
 }
 
-/* Sets D_800CBDD8/D_800CBDDC (a height and a mid-height) for obj's collision probe. */
-void func_15044660(Actor *obj, f32 x, f32 y, f32 z) {
+/* Sets gProbeHeight/gProbeMidHeight (a height and a mid-height) for obj's collision probe. */
+void collision_setProbeHeights(Actor *obj, f32 x, f32 y, f32 z) {
     s16 height;
     s16 unk2C;
     s16 unk2A;
@@ -127,54 +127,54 @@ void func_15044660(Actor *obj, f32 x, f32 y, f32 z) {
 
     actor_computeSize(obj, &height, &unk2C, &unk2A);
     if (obj->type == 0x2D || obj->type == 0x2E || obj->type == 0x2C) {
-        D_800CBDDC = 0.0f;
-        D_800CBDD8 = height;
+        gProbeMidHeight = 0.0f;
+        gProbeHeight = height;
     } else {
         height += fabsf(y - obj->ypos);
         index = obj - movement_obj;
     }
     if (obj->drawtype == 5) {
-        D_800CBDDC = 0.0f;
-        D_800CBDD8 = height;
+        gProbeMidHeight = 0.0f;
+        gProbeHeight = height;
         return;
     }
     if (obj->inwater != 0) {
-        D_800CBDD8 = height;
-        D_800CBDDC = height >> 1;
+        gProbeHeight = height;
+        gProbeMidHeight = height >> 1;
         return;
     }
     if (obj->character_type == 0x53) {
-        D_800CBDD8 = height;
-        D_800CBDDC = height >> 1;
+        gProbeHeight = height;
+        gProbeMidHeight = height >> 1;
         return;
     }
     if (obj->character_type == 0x28) {
         half = 20;
-        D_800CBDD8 = height - half;
-        D_800CBDDC = half + D_800CBDD8 * 0.5f;
+        gProbeHeight = height - half;
+        gProbeMidHeight = half + gProbeHeight * 0.5f;
         return;
     }
     if (index >= 0 && index < D_8008FD8C && obj->shad != 0.0f) {
-        D_800CBDD8 = height;
-        D_800CBDDC = height >> 1;
+        gProbeHeight = height;
+        gProbeMidHeight = height >> 1;
         return;
     }
     if (obj->character_type == 0x25) {
         half = height / 2;
-        D_800CBDD8 = height - half;
-        D_800CBDDC = half + D_800CBDD8 * 0.5f;
+        gProbeHeight = height - half;
+        gProbeMidHeight = half + gProbeHeight * 0.5f;
         return;
     }
-    D_800CBDD8 = height;
-    D_800CBDDC = height >> 1;
+    gProbeHeight = height;
+    gProbeMidHeight = height >> 1;
 }
 
 /* Adds a box trigger volume whose position and size are read from the given s16 pointers. */
-TriggerVolume *func_150448D0(s32 lifetime, s32 delay, s32 action, s32 depth, s32 width, s32 height, s32 angle,
+TriggerVolume *collision_addTriggerVolume(s32 lifetime, s32 delay, s32 action, s32 depth, s32 width, s32 height, s32 angle,
                              s16 *position, s16 *size) {
     TriggerVolume *volume;
 
-    volume = (TriggerVolume *)func_15044964(sizeof(TriggerVolume), 1, lifetime, delay, action, 0, 0, 0);
+    volume = (TriggerVolume *)collision_addTriggerNode(sizeof(TriggerVolume), 1, lifetime, delay, action, 0, 0, 0);
     if (volume == NULL) {
         return NULL;
     }
@@ -187,8 +187,8 @@ TriggerVolume *func_150448D0(s32 lifetime, s32 delay, s32 action, s32 depth, s32
     return volume;
 }
 
-/* Allocates a trigger node and appends it to the D_800CBE00 list. */
-TriggerNode *func_15044964(s32 size, s32 check, s32 lifetime, s32 delay, s32 action, s32 x, s32 y, s32 z) {
+/* Allocates a trigger node and appends it to the gTriggerNodes list. */
+TriggerNode *collision_addTriggerNode(s32 size, s32 check, s32 lifetime, s32 delay, s32 action, s32 x, s32 y, s32 z) {
     TriggerNode *node;
     TriggerNode *tail;
 
@@ -206,10 +206,10 @@ TriggerNode *func_15044964(s32 size, s32 check, s32 lifetime, s32 delay, s32 act
     node->y = y;
     node->z = z;
 
-    if (D_800CBE00 == NULL) {
-        D_800CBE00 = node;
+    if (gTriggerNodes == NULL) {
+        gTriggerNodes = node;
     } else {
-        for (tail = D_800CBE00; tail->next != NULL; tail = tail->next) {
+        for (tail = gTriggerNodes; tail->next != NULL; tail = tail->next) {
         }
         tail->next = node;
     }
@@ -218,7 +218,7 @@ TriggerNode *func_15044964(s32 size, s32 check, s32 lifetime, s32 delay, s32 act
 }
 
 /* Per frame: runs each node's check (and its action when the check passes), then ages and frees expired nodes. */
-void func_15044A28(void) {
+void collision_updateTriggers(void) {
     TriggerNode *node;
     TriggerNode *prev;
     TriggerNode *next;
@@ -228,13 +228,13 @@ void func_15044A28(void) {
     s32 delay;
 
     prev = NULL;
-    for (node = D_800CBE00; node != NULL; node = next) {
+    for (node = gTriggerNodes; node != NULL; node = next) {
         countdown = node->delay;
         check = node->check;
         next = node->next;
         if (countdown == 0) {
-            if (D_80085E80[check](node) != 0) {
-                D_80085E8C[node->action]();
+            if (gTriggerChecks[check](node) != 0) {
+                gTriggerActions[node->action]();
             }
         } else {
             delay = countdown - D_800BE9E4;
@@ -248,7 +248,7 @@ void func_15044A28(void) {
             lifetime -= D_800BE9E4;
             if (lifetime <= 0) {
                 if (prev == NULL) {
-                    D_800CBE00 = node->next;
+                    gTriggerNodes = node->next;
                 } else {
                     prev->next = node->next;
                 }
@@ -265,7 +265,7 @@ void func_15044A28(void) {
 
 
 /* Check 0: whether the player's bounds overlap the volume's box, rotated about Y by its angle. */
-s32 func_15044B78(TriggerVolume *volume) {
+s32 collision_checkPlayerInVolume(TriggerVolume *volume) {
     f32 cosA;
     f32 sinA;
     f32 dzRot;
@@ -295,7 +295,7 @@ s32 func_15044B78(TriggerVolume *volume) {
 }
 
 /* Check 1: refreshes the volume's position and size from its source pointers, then runs check 0. */
-s32 func_15044CE4(TriggerVolume *volume) {
+s32 collision_checkTrackedVolume(TriggerVolume *volume) {
     s16 *position = volume->position;
     s32 extent;
 
@@ -306,7 +306,7 @@ s32 func_15044CE4(TriggerVolume *volume) {
     volume->depth = extent;
     volume->width = extent;
     volume->height = extent;
-    return func_15044B78(volume);
+    return collision_checkPlayerInVolume(volume);
 }
 
 /* Check 2: calls actor_runAttackAt at the node's position with its depth; never fires. */
@@ -351,7 +351,7 @@ void func_15044E88(void) {
 
 
 /* Ceiling probe against collision set 0: lowest triangle between pos.y and top. */
-s32 func_15044ED0(Vec3f *pos, f32 top, CollisionHit *hit) {
+s32 collision_probeCeilingSet0(Vec3f *pos, f32 top, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
@@ -363,7 +363,7 @@ s32 func_15044ED0(Vec3f *pos, f32 top, CollisionHit *hit) {
     }
     hit->height = 99999.8984375f;
     best = -1;
-    func_1510F800(0);
+    collision_selectMap(0);
     count = func_150A3A70(pos->x, pos->z);
     for (i = 0; i < count; i++) {
         height = D_800D3300[i].height * 0.00390625f;
@@ -388,8 +388,8 @@ s32 func_15044ED0(Vec3f *pos, f32 top, CollisionHit *hit) {
             hit->tri.v[j].z = vtx->v.ob[2];
         }
         {
-            s32 triangle = (MeshTri *)candidate->tri - D_800DBE3C;
-            hit->material = D_800DBE5C[triangle];
+            s32 triangle = (MeshTri *)candidate->tri - gCurMapTris;
+            hit->material = gMeshTriMaterials[triangle];
         }
         hit->flags |= 5;
         hit->source = 1;
@@ -405,7 +405,7 @@ s32 func_15044ED0(Vec3f *pos, f32 top, CollisionHit *hit) {
 }
 
 /* Floor probe against collision set 0: highest triangle between bottom and pos.y. */
-s32 func_150450CC(Vec3f *pos, f32 bottom, CollisionHit *hit) {
+s32 collision_probeFloorSet0(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
@@ -417,11 +417,11 @@ s32 func_150450CC(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     }
     hit->height = -10000.0f;
     best = -1;
-    func_1510F800(0);
-    D_800DBE68 = pos->x;
-    D_800DBE6C = pos->y;
-    D_800DBE70 = pos->z;
-    D_800DBE74 = bottom;
+    collision_selectMap(0);
+    gFloorQueryX = pos->x;
+    gFloorQueryY = pos->y;
+    gFloorQueryZ = pos->z;
+    gRayProbeBottom = bottom;
     count = func_150A3A70(pos->x, pos->z);
     for (i = 0; i < count; i++) {
         height = D_800D3300[i].height * 0.00390625f;
@@ -445,9 +445,9 @@ s32 func_150450CC(Vec3f *pos, f32 bottom, CollisionHit *hit) {
             hit->tri.v[j].y = vtx->v.ob[1];
             hit->tri.v[j].z = vtx->v.ob[2];
         }
-        if (D_800DBE5C != NULL) {
-            s32 triangle = (MeshTri *)candidate->tri - D_800DBE3C;
-            hit->material = D_800DBE5C[triangle];
+        if (gMeshTriMaterials != NULL) {
+            s32 triangle = (MeshTri *)candidate->tri - gCurMapTris;
+            hit->material = gMeshTriMaterials[triangle];
         } else {
             hit->material = 0;
         }
@@ -466,10 +466,10 @@ s32 func_150450CC(Vec3f *pos, f32 bottom, CollisionHit *hit) {
 
 
 /* Ceiling probe: re-tests the cached triangle first, then searches collision set 0. */
-s32 func_1504530C(Vec3f *pos, f32 top, CollisionHit *hit) {
-    switch (func_150470B0(pos, top, hit)) {
+s32 collision_probeCeilingSet0Cached(Vec3f *pos, f32 top, CollisionHit *hit) {
+    switch (collision_retestCachedCeiling(pos, top, hit)) {
     case 0:
-        return func_15044ED0(pos, top, hit);
+        return collision_probeCeilingSet0(pos, top, hit);
     case 1:
         return FALSE;
     case 2:
@@ -478,7 +478,7 @@ s32 func_1504530C(Vec3f *pos, f32 top, CollisionHit *hit) {
 }
 
 /* Ceiling probe against collision set 3. */
-s32 func_15045384(Vec3f *pos, f32 top, CollisionHit *hit) {
+s32 collision_probeCeilingSet3(Vec3f *pos, f32 top, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
@@ -490,7 +490,7 @@ s32 func_15045384(Vec3f *pos, f32 top, CollisionHit *hit) {
     }
     hit->height = 99999.8984375f;
     best = -1;
-    func_1510F800(3);
+    collision_selectMap(3);
     count = func_150A4FA0(pos->x, pos->z);
     for (i = 0; i < count; i++) {
         height = D_800D3300[i].height * 0.00390625f;
@@ -529,7 +529,7 @@ s32 func_15045384(Vec3f *pos, f32 top, CollisionHit *hit) {
 }
 
 /* Floor probe against collision set 3. */
-s32 func_1504554C(Vec3f *pos, f32 bottom, CollisionHit *hit) {
+s32 collision_probeFloorSet3(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
@@ -541,7 +541,7 @@ s32 func_1504554C(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     }
     hit->height = -10000.0f;
     best = -1;
-    func_1510F800(3);
+    collision_selectMap(3);
     count = func_150A4FA0(pos->x, pos->z);
     for (i = 0; i < count; i++) {
         height = D_800D3300[i].height * 0.00390625f;
@@ -579,15 +579,15 @@ s32 func_1504554C(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     return FALSE;
 }
 
-/* Selects the two surface sets (collision set 2) under pos for the func_15045880-style probes. */
-void func_15045714(Vec3f *pos, u16 mask, s32 *setA, s32 *setB) {
-    func_1510F800(2);
+/* Selects the two surface sets (collision set 2) under pos for the collision_probeCeilingInSurfA-style probes. */
+void collision_selectSurfaceSets(Vec3f *pos, u16 mask, s32 *setA, s32 *setB) {
+    collision_selectMap(2);
     *setA = func_150A6500(pos->x, pos->z, setB, mask);
 }
 
 
 /* Floor probe against surface set B only. */
-s32 func_15045780(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+s32 collision_probeFloorSurfB(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     s32 setA;
     s32 setB;
 
@@ -595,16 +595,16 @@ s32 func_15045780(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
         hit->flags &= ~2;
         return FALSE;
     }
-    func_15045714(pos, mask, &setA, &setB);
-    return func_15045F8C(pos, bottom, &setB, hit);
+    collision_selectSurfaceSets(pos, mask, &setA, &setB);
+    return collision_probeFloorInSurfB(pos, bottom, &setB, hit);
 }
 
 
-/* Floor probe: re-tests the cached triangle first, then func_15045780. */
-s32 func_15045800(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
-    switch (func_15047004(pos, bottom, hit)) {
+/* Floor probe: re-tests the cached triangle first, then collision_probeFloorSurfB. */
+s32 collision_probeFloorSurfBCached(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+    switch (collision_retestCachedFloor(pos, bottom, hit)) {
     case 0:
-        return func_15045780(pos, mask, bottom, hit);
+        return collision_probeFloorSurfB(pos, mask, bottom, hit);
     case 1:
         return FALSE;
     case 2:
@@ -613,7 +613,7 @@ s32 func_15045800(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
 }
 
 /* Ceiling probe against surface set A. */
-s32 func_15045880(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
+s32 collision_probeCeilingInSurfA(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
@@ -651,7 +651,7 @@ s32 func_15045880(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
         hit->surface = &db_Object_array[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
+            s32 triangle = ((MeshTri *)vertices - gCurMapTris) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
             hit->material = hit->surface->floorHitAttrib;
@@ -677,7 +677,7 @@ s32 func_15045880(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
 }
 
 /* Floor probe against surface set A. */
-s32 func_15045AE4(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
+s32 collision_probeFloorInSurfA(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
@@ -715,7 +715,7 @@ s32 func_15045AE4(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         hit->surface = &db_Object_array[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
+            s32 triangle = ((MeshTri *)vertices - gCurMapTris) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
             hit->material = hit->surface->floorHitAttrib;
@@ -741,7 +741,7 @@ s32 func_15045AE4(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
 }
 
 /* Ceiling probe against surface set B. */
-s32 func_15045D48(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
+s32 collision_probeCeilingInSurfB(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
@@ -779,7 +779,7 @@ s32 func_15045D48(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
         hit->surface = &db_Object_array[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
+            s32 triangle = ((MeshTri *)vertices - gCurMapTris) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
             hit->material = hit->surface->floorHitAttrib;
@@ -800,7 +800,7 @@ s32 func_15045D48(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
 }
 
 /* Floor probe against surface set B. */
-s32 func_15045F8C(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
+s32 collision_probeFloorInSurfB(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
@@ -838,7 +838,7 @@ s32 func_15045F8C(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         hit->surface = &db_Object_array[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
+            s32 triangle = ((MeshTri *)vertices - gCurMapTris) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
             hit->material = hit->surface->floorHitAttrib;
@@ -859,7 +859,7 @@ s32 func_15045F8C(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
 }
 
 /* Ceiling probe: the nearer of surface sets A and B. */
-s32 func_150461D0(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
+s32 collision_probeCeilingSurfAB(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
     s32 setA;
     s32 setB;
     CollisionHit hitA;
@@ -873,9 +873,9 @@ s32 func_150461D0(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
     }
     hitA = *hit;
     hitB = *hit;
-    func_15045714(pos, mask, &setA, &setB);
-    foundA = func_15045880(pos, top, &setA, &hitA);
-    foundB = func_15045D48(pos, top, &setB, &hitB);
+    collision_selectSurfaceSets(pos, mask, &setA, &setB);
+    foundA = collision_probeCeilingInSurfA(pos, top, &setA, &hitA);
+    foundB = collision_probeCeilingInSurfB(pos, top, &setB, &hitB);
     if (foundA && foundB) {
         if (hitA.height < hitB.height) {
             *hit = hitA;
@@ -902,7 +902,7 @@ s32 func_150461D0(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
 }
 
 /* Floor probe: the nearer of surface sets A and B. */
-s32 func_15046460(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+s32 collision_probeFloorSurfAB(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     s32 setA;
     s32 setB;
     CollisionHit hitA;
@@ -918,9 +918,9 @@ s32 func_15046460(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     }
     hitA = *hit;
     hitB = *hit;
-    func_15045714(pos, mask, &setA, &setB);
-    foundA = func_15045AE4(pos, bottom, &setA, &hitA);
-    foundB = func_15045F8C(pos, bottom, &setB, &hitB);
+    collision_selectSurfaceSets(pos, mask, &setA, &setB);
+    foundA = collision_probeFloorInSurfA(pos, bottom, &setA, &hitA);
+    foundB = collision_probeFloorInSurfB(pos, bottom, &setB, &hitB);
     if (foundA && foundB) {
         if (hitB.height < hitA.height) {
             *hit = hitA;
@@ -947,7 +947,7 @@ s32 func_15046460(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
 }
 
 /* Ceiling probe: the nearer of surface sets A/B and collision set 0. */
-s32 func_150466F8(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
+s32 collision_probeCeilingSurfABSet0(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
     CollisionHit hitA;
     CollisionHit hitB;
     u8 foundA;
@@ -960,8 +960,8 @@ s32 func_150466F8(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
 
     hitA = *hit;
     hitB = *hit;
-    foundA = func_150461D0(pos, mask, top, &hitA);
-    foundB = func_15044ED0(pos, top, &hitB);
+    foundA = collision_probeCeilingSurfAB(pos, mask, top, &hitA);
+    foundB = collision_probeCeilingSet0(pos, top, &hitB);
 
     if (foundA && foundB) {
         if (hitA.height < hitB.height) {
@@ -992,7 +992,7 @@ s32 func_150466F8(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
 }
 
 /* Floor probe: the nearer of surface sets A/B and collision set 0. */
-s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+s32 collision_probeFloorSurfABSet0(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     CollisionHit hitA;
     CollisionHit hitB;
     u8 foundA;
@@ -1005,8 +1005,8 @@ s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
 
     hitA = *hit;
     hitB = *hit;
-    foundA = func_15046460(pos, mask, bottom, &hitA);
-    foundB = func_150450CC(pos, bottom, &hitB);
+    foundA = collision_probeFloorSurfAB(pos, mask, bottom, &hitA);
+    foundB = collision_probeFloorSet0(pos, bottom, &hitB);
 
     if (foundA && foundB) {
         if (hitB.height < hitA.height) {
@@ -1036,11 +1036,11 @@ s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     return FALSE;
 }
 
-/* Ceiling probe with the cached-triangle fast path (func_150466F8). */
-s32 func_15046C00(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
-    switch (func_150470B0(pos, top, hit)) {
+/* Ceiling probe with the cached-triangle fast path (collision_probeCeilingSurfABSet0). */
+s32 collision_probeCeilingSurfABSet0Cached(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
+    switch (collision_retestCachedCeiling(pos, top, hit)) {
     case 0:
-        return func_150466F8(pos, mask, top, hit);
+        return collision_probeCeilingSurfABSet0(pos, mask, top, hit);
     case 1:
         return FALSE;
     case 2:
@@ -1048,11 +1048,11 @@ s32 func_15046C00(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
     }
 }
 
-/* Floor probe with the cached-triangle fast path (func_1504697C). */
-s32 func_15046C80(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
-    switch (func_15047004(pos, bottom, hit)) {
+/* Floor probe with the cached-triangle fast path (collision_probeFloorSurfABSet0). */
+s32 collision_probeFloorSurfABSet0Cached(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+    switch (collision_retestCachedFloor(pos, bottom, hit)) {
     case 0:
-        return func_1504697C(pos, mask, bottom, hit);
+        return collision_probeFloorSurfABSet0(pos, mask, bottom, hit);
     case 1:
         return FALSE;
     case 2:
@@ -1060,8 +1060,8 @@ s32 func_15046C80(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     }
 }
 
-/* Floor probe: func_1504697C or collision set 3, whichever is nearer. */
-s32 func_15046D00(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+/* Floor probe: collision_probeFloorSurfABSet0 or collision set 3, whichever is nearer. */
+s32 collision_probeFloorWithSet3(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     CollisionHit hitA;
     CollisionHit hitB;
     u8 foundA;
@@ -1074,8 +1074,8 @@ s32 func_15046D00(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
 
     hitA = *hit;
     hitB = *hit;
-    foundA = func_1504697C(pos, mask, bottom, &hitA);
-    foundB = func_1504554C(pos, bottom, &hitB);
+    foundA = collision_probeFloorSurfABSet0(pos, mask, bottom, &hitA);
+    foundB = collision_probeFloorSet3(pos, bottom, &hitB);
 
     if (foundA && foundB) {
         if (hitB.height < hitA.height) {
@@ -1105,11 +1105,11 @@ s32 func_15046D00(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     return FALSE;
 }
 
-/* Floor probe with the cached-triangle fast path (func_15046D00). */
-s32 func_15046F84(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
-    switch (func_15047004(pos, bottom, hit)) {
+/* Floor probe with the cached-triangle fast path (collision_probeFloorWithSet3). */
+s32 collision_probeFloorWithSet3Cached(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+    switch (collision_retestCachedFloor(pos, bottom, hit)) {
     case 0:
-        return func_15046D00(pos, mask, bottom, hit);
+        return collision_probeFloorWithSet3(pos, mask, bottom, hit);
     case 1:
         return FALSE;
     case 2:
@@ -1121,7 +1121,7 @@ s32 func_15046F84(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
  * Fast path for floor probes: if hit->tri is still valid and pos lies over it, re-measure its height.
  * Returns 0 when not over the cached triangle, 1 when over it but outside [bottom, pos.y], 2 on a hit.
  */
-s32 func_15047004(Vec3f *pos, f32 bottom, CollisionHit *hit) {
+s32 collision_retestCachedFloor(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     f32 height;
 
     if (hit->flags & 4) {
@@ -1139,8 +1139,8 @@ s32 func_15047004(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     return 0;
 }
 
-/* Ceiling counterpart of func_15047004: a hit lies in [pos.y, top]. */
-s32 func_150470B0(Vec3f *pos, f32 top, CollisionHit *hit) {
+/* Ceiling counterpart of collision_retestCachedFloor: a hit lies in [pos.y, top]. */
+s32 collision_retestCachedCeiling(Vec3f *pos, f32 top, CollisionHit *hit) {
     f32 height;
 
     if (hit->flags & 4) {
@@ -1160,7 +1160,7 @@ s32 func_150470B0(Vec3f *pos, f32 top, CollisionHit *hit) {
 
 /* Floor state an object keeps (overlays Actor, whose header copy lacks these fields). */
 /* Seeds a CollisionHit from the floor an object last stood on (a flat triangle if flag 0x200000 is set). */
-void func_1504715C(CollisionHit *hit, Actor *obj) {
+void collision_initHitFromObject(CollisionHit *hit, Actor *obj) {
     s32 surface;
     s32 flag;
 
@@ -1206,7 +1206,7 @@ void func_1504715C(CollisionHit *hit, Actor *obj) {
 }
 
 /* Fills a CollisionHit from a ray hit; a level-mesh hit (hitType 1) is valid (flags 7, source 1). */
-void func_150472C0(CollisionHit *hit, RayHit *src) {
+void collision_initHitFromRay(CollisionHit *hit, RayHit *src) {
     s32 one;
     s32 inRange;
     s32 flag1;

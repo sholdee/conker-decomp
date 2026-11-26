@@ -137,7 +137,7 @@ typedef struct {
     /* 0x28 */ EB340Spawn spawn;
 } EB340Obj;
 
-/* Copied to +0x70 of the emitter object func_1515548C returns. */
+/* Copied to +0x70 of the emitter object sprite_newScreenSprite returns. */
 typedef struct {
     /* 0x00 */ Camera *owner;
     /* 0x04 */ u8   pad4[0x8];
@@ -1063,7 +1063,7 @@ extern const AttachmentType *D_8008ABE8[];
 extern Gfx D_8008AD30[]; /* render teardown (object type table D_8008B4A8) */
 /*
  * Type 0x50 object: a marker over player movement_obj[playerId], made of a white point light and a sprite
- * (attachment model 166, D_800E0148[166]) that bob 160 units above the player.
+ * (attachment model 166, gAttachModelHeaders[166]) that bob 160 units above the player.
  */
 typedef struct PlayerMarker {
     /* 0x00 */ EffectHeader header;
@@ -1239,7 +1239,7 @@ struct ModelFxData {
     /* 0x57 */ u8 phase;
     /* 0x58 */ u8 flags;
     /* 0x59 */ u8 floorOffset;
-    /* 0x5A */ u8 modelId;      /* the func_1518C900 resource displayList came from */
+    /* 0x5A */ u8 modelId;      /* the attach_loadModelDl resource displayList came from */
     /* 0x5B */ u8 kind;
     /* 0x5C */ u8 renderMode;
     /* 0x5D */ u8 combineMode;
@@ -1649,7 +1649,7 @@ typedef struct {
     /* 0x10 */ f32 unk10;
 } PanelExtra;
 
-/* The object func_1515548C returns: one digit of the counter. */
+/* The object sprite_newScreenSprite returns: one digit of the counter. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ f32 x;

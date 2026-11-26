@@ -29,8 +29,8 @@ TexCoord *gModelSavedTexCoords[187];            // per model: saved texture coor
 
 /*
  * A model file, as loaded by model_load: seven (data, byte size) sections whose offsets
- * func_1502B6BC has already relocated, followed by the model data proper (its vertices first),
- * which D_800D19A0[id] points at. Offsets inside the sections are relative to the header.
+ * rom_loadPathTable has already relocated, followed by the model data proper (its vertices first),
+ * which gModelData[id] points at. Offsets inside the sections are relative to the header.
  */
 typedef struct ModelHeader {
     /* 0x00 */ s32 *vtxIndices; // indices into the model's vertices (D_800C4020)
@@ -78,14 +78,14 @@ s32 model_load(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags) 
         return 0;
     }
     ret = 0;
-    if (D_800D19A0[id] != NULL) {
+    if (gModelData[id] != NULL) {
         return 0;
     }
-    hdr = func_1502B6BC(&size, 7, NULL, 2, 1, id);
+    hdr = rom_loadPathTable(&size, 7, NULL, 2, 1, id);
     if (hdr == NULL) {
         return 1;
     }
-    D_800D19A0[id] = (u8 *)(hdr + 1);
+    gModelData[id] = (u8 *)(hdr + 1);
     D_800C4020[id] = hdr->vtxIndices;
     gModelDlParts[id] = hdr->dlists;
     D_800C48F0[id] = hdr->dlists2;
@@ -116,7 +116,7 @@ s32 model_load(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags) 
         ret |= model_loadTextures(id);
         if (ret == 0) {
             for (i = 0; i < gModelDlPartCounts[id]; i++) {
-                func_1510CE60(gModelDlParts[id][i], 0, 0, 0x3E, NULL);
+                texture_resolveDl(gModelDlParts[id][i], 0, 0, 0x3E, NULL);
             }
         }
     }
@@ -125,7 +125,7 @@ s32 model_load(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags) 
         ret |= model_saveTexCoords(id);
     }
     if (ret == 0 && ((def != NULL && (def->objFlags & 0x4000)) || (flags & 1))) {
-        if (func_150028BC(id) != 0) {
+        if (collision_buildVertexRuns(id) != 0) {
             ret |= 8;
         }
     }
@@ -148,9 +148,9 @@ s32 model_load(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags) 
             func_10004074((void *)(s32)gModelTris[id]); // matching: as above
             gModelTris[id] = NULL;
         }
-        if (D_800D19A0[id] != NULL) {
-            func_10004074(D_800D19A0[id] - sizeof(ModelHeader));
-            D_800D19A0[id] = NULL;
+        if (gModelData[id] != NULL) {
+            func_10004074(gModelData[id] - sizeof(ModelHeader));
+            gModelData[id] = NULL;
         }
     }
     return ret;
@@ -282,7 +282,7 @@ s32 model_loadAnimTable(s32 id, s32 arg1) {
     if (HEADER != NULL) {
         return 0;
     }
-    data = func_1502B5C8(&size, 2, 15, func_1503D5F0(id));
+    data = rom_loadPath(&size, 2, 15, func_1503D5F0(id));
     if (data == NULL) {
         HEADER = NULL;
         gModelAnimCounts[id] = 0;
@@ -308,23 +308,23 @@ s32 model_loadAnimTable(s32 id, s32 arg1) {
 
 #undef HEADER
 
-/* Loads model id's D_800D1C90 entry, unless it is already loaded. Returns 0, or 2 if it is missing. */
+/* Loads model id's gModelDefs entry, unless it is already loaded. Returns 0, or 2 if it is missing. */
 s32 func_1503D774(s32 id, s32 arg1) {
     u32 size;
     ModelDef **table;
 
-    if (D_800D1C90[id] != NULL) {
+    if (gModelDefs[id] != NULL) {
         return 0;
     }
-    table = func_1502B6BC(&size, 2, NULL, 2, 17, id);
+    table = rom_loadPathTable(&size, 2, NULL, 2, 17, id);
     // matching: if/else (an early return without the else schedules the stores differently)
     if (table == NULL) {
-        D_800D1C90[id] = NULL;
+        gModelDefs[id] = NULL;
         return 2;
     } else {
         // the original stores the table, then replaces it with its first entry
-        D_800D1C90[id] = (ModelDef *)table;
-        D_800D1C90[id] = *table;
+        gModelDefs[id] = (ModelDef *)table;
+        gModelDefs[id] = *table;
     }
     return 0;
 }
@@ -355,7 +355,7 @@ s32 model_saveTexCoords(s32 id) {
         return 0;
     }
 
-    src = (Vtx *)D_800D19A0[id];
+    src = (Vtx *)gModelData[id];
     if (first != -1) {
         src += D_800C4020[id][first];
     }
@@ -397,7 +397,7 @@ void func_1503D984(s32 id) {
 
 /* Returns entry `index` of model id's unk30 byte table, or 0xFF if there is none. */
 s32 func_1503DA3C(s32 id, s32 index) {
-    u8 *data = D_800D19A0[id];
+    u8 *data = gModelData[id];
     ModelHeader *hdr = (ModelHeader *)data - 1;
     u8 *table;
     s32 ret;
@@ -415,7 +415,7 @@ s32 func_1503DA3C(s32 id, s32 index) {
 
 /*
  * Makes sure model id is loaded for obj (and, with loadTextures, its textures), then sets up obj's
- * model'th model with func_15084044. Returns 0, or the error bits of the step that failed.
+ * model'th model with collision_initModelData. Returns 0, or the error bits of the step that failed.
  */
 s32 model_loadForActor(Actor *obj, s32 id, s32 model, s32 loadTextures) {
     SpawnRecord *def;
@@ -424,13 +424,13 @@ s32 model_loadForActor(Actor *obj, s32 id, s32 model, s32 loadTextures) {
     s32 i;
 
     def = obj->listpos_ptr;
-    if (D_800D19A0[id] == NULL) {
+    if (gModelData[id] == NULL) {
         ret = model_load(id, 0, def, loadTextures, obj->unkAC);
     } else {
         ret = 0;
         if ((def != NULL && (def->objFlags & 0x4000)) || (obj->unkAC & 1)) {
             if (gModelVtxRuns[id] == NULL) {
-                func_150028BC(id);
+                collision_buildVertexRuns(id);
             }
         }
         // textures not loaded yet: the first entry's addr is still an offset
@@ -438,12 +438,12 @@ s32 model_loadForActor(Actor *obj, s32 id, s32 model, s32 loadTextures) {
             ret = model_loadTextures(id);
             for (i = 0; i < gModelDlPartCounts[id]; i++) {
                 dl = gModelDlParts[id][i];
-                func_1510CE60(dl, 0, 0, 0x3E, NULL);
+                texture_resolveDl(dl, 0, 0, 0x3E, NULL);
             }
         }
     }
     if (ret == 0) {
-        ret = func_15084044(obj, model);
+        ret = collision_initModelData(obj, model);
     }
     return ret;
 }
@@ -454,7 +454,7 @@ s32 model_loadTextures(s32 id) {
     s32 i;
 
     for (i = 0; i < gModelTextureCounts[id]; i++) {
-        gModelTextures[id][i].addr = func_1510D0EC(gModelTextures[id][i].id, NULL, 0x3E, 1);
+        gModelTextures[id][i].addr = texture_getAddress(gModelTextures[id][i].id, NULL, 0x3E, 1);
         if (gModelTextures[id][i].addr == 0x80000000) {
             ret |= 0x10;
         }
@@ -470,7 +470,7 @@ void model_freeTextures(s32 id) {
         ObjTexture *tex = &gModelTextures[id][i];
 
         if (tex->addr != 0x80000000 && tex->id != (s32)tex->addr) { // matching: the cast keeps the original operand order
-            func_1510D7AC(tex->id);
+            texture_dropUseAndFree(tex->id);
         }
     }
 }

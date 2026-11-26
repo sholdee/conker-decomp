@@ -101,7 +101,7 @@ void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, SegmentEmi
     f32 y;
     f32 z;
 
-    if (!func_1515C0F8(emitter->owner, &ownerMotion)) {
+    if (!sprite_findActorMotion(emitter->owner, &ownerMotion)) {
         return;
     }
     if (emitter->owner->inwater) {

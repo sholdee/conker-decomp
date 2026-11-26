@@ -231,7 +231,7 @@ void func_15116EA4(WorldObject *obj) {
     speed = obj->moveData.word >> 16;
     if (WORK(obj)->anim.frames == NULL) {
         WORK(obj)->anim.frames = allocate_memory(size, 1, 2, 0);
-        func_10004514(D_8002AAD0[file].start, WORK(obj)->anim.frames, size, 1);
+        rom_read(D_8002AAD0[file].start, WORK(obj)->anim.frames, size, 1);
     }
     t = frameCount * (pos * (1.0f / 65535));
     frame = t;

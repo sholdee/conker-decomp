@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Maps a model id to the hit-sphere table (D_80086C60 / D_8009CBCC index) it uses. */
+/* Maps a model id to the hit-sphere table (gHitSphereTables / gHitSphereCounts index) it uses. */
 typedef struct {
     /* 0x0 */ u16 model;
     /* 0x2 */ u8  sphereTable;
@@ -10,7 +10,7 @@ typedef struct {
 } ModelHitEntry; /* size 0x4 */
 
 /* The models that have hit spheres. */
-static const ModelHitEntry D_8009BD30[23] = {
+static const ModelHitEntry gModelHitTables[23] = {
     { 0x53, 0, 0 }, { 0x00, 1, 0 }, { 0x01, 1, 0 }, { 0x02, 1, 0 },
     { 0x03, 1, 0 }, { 0x04, 1, 0 }, { 0x3B, 2, 0 }, { 0x5A, 3, 0 },
     { 0x74, 3, 0 }, { 0x7A, 3, 0 }, { 0x75, 4, 0 }, { 0x80, 5, 0 },
@@ -419,10 +419,10 @@ static const HitSphere D_8009CA58[37] = {
 };
 
 /* The number of spheres of each table. */
-static const u8 D_8009CBCC[12] = { 7, 42, 43, 21, 35, 42, 31, 27, 37, 4, 37, 37 };
+static const u8 gHitSphereCounts[12] = { 7, 42, 43, 21, 35, 42, 31, 27, 37, 4, 37, 37 };
 
 /* This file's .data: the sphere tables. */
-static const HitSphere *D_80086C60[12] = {
+static const HitSphere *gHitSphereTables[12] = {
     D_8009BD8C, D_8009BDFC, D_8009C3E8, D_8009C598, D_8009C288, D_8009C66C,
     D_8009C810, D_8009C948, D_8009BFA0, D_8009BDD4, D_8009CA58, D_8009C114,
 };
@@ -431,7 +431,7 @@ static const HitSphere *D_80086C60[12] = {
  * and yaw unk40), rejects it against obj's whole-body sphere, then tests it against each of obj's
  * hit spheres (table `type`) grown by `radius`.  On a hit, calls actor_runAttackAt at obj's position
  * (unless obj is immune) and returns bone + 1; returns 0 for a miss. */
-s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 arg5) {
+s32 collision_testPointHitSpheres(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 arg5) {
     f32 scale;
     f32 angle;
     f32 s;
@@ -472,7 +472,7 @@ s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 a
     pos[1] += self->ypos;
     pos[2] += self->zpos;
     id = obj->character_type;
-    bounds = D_800D1C90[id];
+    bounds = gModelDefs[id];
     // matching: the body radius reuses `angle`; a separate local shifts IDO's register allocation
     angle = bounds->bodyRadius * obj->scale_xz;
     height = bounds->bodyHeight * obj->scale_y;
@@ -482,8 +482,8 @@ s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 a
     if (angle * angle < dx * dx + dy * dy + dz * dz) {
         return 0;
     }
-    spheres = D_80086C60[type];
-    count = D_8009CBCC[type];
+    spheres = gHitSphereTables[type];
+    count = gHitSphereCounts[type];
     i = 0;
     bones = obj->ob_matrix_ptr;
     if (count > 0) {
@@ -512,12 +512,12 @@ s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 a
     return 0;
 }
 
-/* Returns the index of obj's model in the D_8009BD30 hit table, or -1 if it has none. */
-s32 func_1508108C(Actor *obj) {
+/* Returns the index of obj's model in the gModelHitTables hit table, or -1 if it has none. */
+s32 collision_getHitTableIndex(Actor *obj) {
     s32 i;
 
     for (i = 0; i < 23; i++) {
-        if (obj->character_type == D_8009BD30[i].model) {
+        if (obj->character_type == gModelHitTables[i].model) {
             return i;
         }
     }
@@ -525,7 +525,7 @@ s32 func_1508108C(Actor *obj) {
 }
 
 /* Ray vs. per-bone hit-sphere test for one actor.  Broad phase: build the whole-object
- * bounding sphere from D_800D1C90[obj->id] and ray-test it; if that hits, walk the model's
+ * bounding sphere from gModelDefs[obj->id] and ray-test it; if that hits, walk the model's
  * hit-sphere table, skipping bones masked off in obj->unk9C, transform each sphere's local
  * offset by its bone matrix and keep the nearest / highest-priority hit.
  *
@@ -533,7 +533,7 @@ s32 func_1508108C(Actor *obj) {
  * loop, overwriting the tracked best distance with the LAST call's near-t rather than the
  * best one.  Golden does exactly this (0x15081460..0x15081484); it is not to be "fixed".
  */
-s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset) {
+s32 collision_rayHitSpheres(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset) {
     s32 idx;
     const HitSphere *spheres;
     s32 count;
@@ -557,18 +557,18 @@ s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, V
     if (obj->ob_matrix_ptr == NULL) {
         return -1;
     }
-    idx = func_1508108C(obj);
+    idx = collision_getHitTableIndex(obj);
     if (idx == -1) {
         return -1;
     }
-    type = D_8009BD30[idx].sphereTable;
-    spheres = D_80086C60[type];
-    count = D_8009CBCC[type];
+    type = gModelHitTables[idx].sphereTable;
+    spheres = gHitSphereTables[type];
+    count = gHitSphereCounts[type];
     *outDist = -1.0f;
     centre.x = obj->xpos;
-    centre.y = D_800D1C90[obj->character_type]->bodyHeight * obj->scale_y + obj->ypos;
+    centre.y = gModelDefs[obj->character_type]->bodyHeight * obj->scale_y + obj->ypos;
     centre.z = obj->zpos;
-    radius = D_800D1C90[obj->character_type]->bodyRadius * obj->scale_y;
+    radius = gModelDefs[obj->character_type]->bodyRadius * obj->scale_y;
     if (func_151452C4(rayOrigin, rayDir, &centre, radius, &near, &far, &tNear, &tFar) == 0) {
         return 0;
     }
@@ -623,7 +623,7 @@ s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, V
 
 /* Finds the first live object of the given model whose hit spheres the point `dist` ahead of
  * `self` (with reach `radius`) touches.  Stores it in *outTarget and returns bone + 1, or 0. */
-s32 func_15081574(Actor *self, f32 dist, f32 radius, Actor **outTarget, s32 arg4, s32 model) {
+s32 collision_findHitSphereTarget(Actor *self, f32 dist, f32 radius, Actor **outTarget, s32 arg4, s32 model) {
     s32 i;
     Actor *obj;
     s32 idx;
@@ -635,11 +635,11 @@ s32 func_15081574(Actor *self, f32 dist, f32 radius, Actor **outTarget, s32 arg4
         if (obj->type == 0 || obj->ob_matrix_ptr == NULL || model != obj->character_type) {
             continue;
         }
-        idx = func_1508108C(obj);
+        idx = collision_getHitTableIndex(obj);
         if (idx == -1) {
             continue;
         }
-        bone = func_15080D20(self, obj, D_8009BD30[idx].sphereTable, dist, radius, arg4);
+        bone = collision_testPointHitSpheres(self, obj, gModelHitTables[idx].sphereTable, dist, radius, arg4);
         if (bone != 0) {
             *outTarget = obj;
             return bone;

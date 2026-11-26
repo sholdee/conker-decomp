@@ -95,7 +95,7 @@ void func_151571C4(ModelEffect *fx) {
 /* Destroy handler: frees the attachments and model instance, then the object (func_15169804). */
 void func_15157248(ModelEffect *fx) {
     func_151571C4(fx);
-    func_1518CA04(fx->params.model);
+    attach_releaseModel(fx->params.model);
     func_1503F7B8(fx->model);
     func_15169804(&fx->header);
 }
@@ -103,7 +103,7 @@ void func_15157248(ModelEffect *fx) {
 /* As func_15157248, but releases the object through func_15169824. */
 void func_1515728C(ModelEffect *fx) {
     func_151571C4(fx);
-    func_1518CA04(fx->params.model);
+    attach_releaseModel(fx->params.model);
     func_1503F7B8(fx->model);
     func_15169824(&fx->header);
 }

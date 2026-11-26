@@ -156,8 +156,8 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
             points = trail->points;
             tex = func_1514306C(0, params->motion.texture, 0, 2);
             if (tex != D_800DD1B0) {
-                D_800915A4.addr = D_80091564[params->motion.texture];
-                gfx = func_150950D4(gfx, &D_800915A4, 0, 0, 0, 0, 2, 0x100, 0x100, (params->motion.flags & 0x80) ? 0x3E : 3);
+                gTrailTexture.addr = D_80091564[params->motion.texture];
+                gfx = sprite_loadTexture(gfx, &gTrailTexture, 0, 0, 0, 0, 2, 0x100, 0x100, (params->motion.flags & 0x80) ? 0x3E : 3);
                 D_800DD1B0 = tex;
             }
             func_151441A4(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.primMode);
@@ -166,7 +166,7 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
             gfx = func_15142C10(gfx, primR, primG, primB, primA, &update);
             gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &update);
             gfx = func_1513F4E4(gfx, ((u8 *)&params->render.unk10)[3] /* matching: reads the low byte */, &update);
-            gfx = func_15142FBC(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, D_800A4AC8[params->render.renderMode].unk0 | D_800A4AC8[params->render.renderMode].unk4, &update);
+            gfx = func_15142FBC(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, D_800A4AC8[params->render.renderMode].unk0 | D_800A4AC8[params->render.renderMode].unk4, &update);
             i = trail->head.end - 1;
             if (i < 0) {
                 i = trail->head.tmpl.itemCount - 1;
@@ -392,7 +392,7 @@ s32 trail_movePointsGroundTest(MotionTrail *trail) {
             position.x = points[trail->head.start].pos.x;
             position.y = oldPosition.y;
             position.z = points[trail->head.start].pos.z;
-            if (func_15046C80(&position, 0, points[trail->head.start].pos.y,
+            if (collision_probeFloorSurfABSet0Cached(&position, 0, points[trail->head.start].pos.y,
                               &trail->collision) != 0) {
                 if (trail->collision.source == 3) {
                     callback = params->hitKind3Fn;

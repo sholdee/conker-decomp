@@ -316,7 +316,7 @@ s32 trail_fadeStreamEnds(LevelStream *emitter) {
     return 1;
 }
 
-/* The stream textures (D_80090B60 indices) by textureIndex. */
+/* The stream textures (gEffectTextures indices) by textureIndex. */
 // matching: defined after trail_drawStream; with the values in view IDO keeps fewer values in registers there
 static const s32 gStreamTextures[3];
 
@@ -339,12 +339,12 @@ Gfx *trail_drawStream(LevelStream *emitter, Gfx *gfx, s16 view) {
             data = emitter->data;
             particles = emitter->particles;
             update = 1;
-            gfx = func_15142E24(gfx, &D_80090B60[gStreamTextures[data->textureIndex]], 0, 0, 0, 0, gStreamTextures[data->textureIndex], 0,
+            gfx = func_15142E24(gfx, &gEffectTextures[gStreamTextures[data->textureIndex]], 0, 0, 0, 0, gStreamTextures[data->textureIndex], 0,
                                 0, &update, 3);
             gfx = func_1513F4E4(gfx, 0x4E, &update);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
             gfx = func_15142FBC(gfx,
-                                D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+                                gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                                 D_800A4AC8[3].cycle1 | D_800A4AC8[3].cycle2, &update);
             /* While emitting, the ribbon starts at the emitter itself. */
             if (emitter->head.tmpl.flags & EMITTER_FLAG_EMITTING) {
@@ -477,7 +477,7 @@ void trail_testStreamContact(Actor *actor, TriggerZone *source) {
 
     emitter = trail_findStream(source->data1);
     if (emitter != NULL) {
-        func_1515C1A0(actor, &pos, &radius, &height);
+        sprite_getActorBounds(actor, &pos, &radius, &height);
         if (emitter->head.tmpl.flags & EMITTER_FLAG_STOPPED) {
             /* The column has left the emitter: its top is the newest particle. */
             f32 bottom;
@@ -598,7 +598,7 @@ void trail_updateRandomPointEmitter(Game1FBB80Object *object) {
                 packet.width = func_150ADA68() * 25.0f + 10.0f;
                 packet.height = func_150ADA68() * 60.0f + 60.0f;
                 func_151432BC(effect->shape, &packet.pos.x, &packet.pos.z, &upperHeight, &packet.pos.y);
-                if (func_1504530C(&packet.pos, upperHeight, &effect->floor) != 0) {
+                if (collision_probeCeilingSet0Cached(&packet.pos, upperHeight, &effect->floor) != 0) {
                     packet.pos.y = effect->floor.height;
                     packet.unk44 = func_150ADA20() % 101U + 155;
                     func_1513D2F0(&packet, &D_800A4AA0, 0x1C, 0, 0, 0x22, 0, 0, 0, 0, object->base.header.owner, object->base.header.kind);
@@ -953,7 +953,7 @@ Gfx *trail_drawWaveRibbon(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     func_151D5D60(ribbon->vtxBuffer, cameraIdx, (ribbon->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
     update = 1;
     gfx = func_15142B7C(func_15142C10(gfx, 0xED, 0xD2, 0x85, 0xC8, &update), 0x200005, 0x1F0600);
-    gfx = func_15142FBC(func_1513F4E4(gfx, 0x54, &update), D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].cycle1 | D_800A4AC8[1].cycle2, &update);
+    gfx = func_15142FBC(func_1513F4E4(gfx, 0x54, &update), gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].cycle1 | D_800A4AC8[1].cycle2, &update);
     cur = ribbon->head.end - 1;
     if (cur < 0) {
         cur = ribbon->head.tmpl.itemCount - 1;
@@ -1062,7 +1062,7 @@ void trail_spawnNearCamera(Actor *obj, f32 probeY, f32 arg2) {
             spawnPos.y = probeY;
             spawnPos.z = camPos->z - (cosf(angle) * distance);
 
-            if (func_15046C80(&spawnPos, 0, arg2, &D_800D9860) != 0) {
+            if (collision_probeFloorSurfABSet0Cached(&spawnPos, 0, arg2, &D_800D9860) != 0) {
                 spawnPos.y = D_800D9860.height;
                 data.pos = spawnPos;
                 data.unkC = 0.0f;
@@ -1216,9 +1216,9 @@ void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
             s8 flag;
             s32 pad; // matching: unused stack slot in the original frame
 
-            func_1504715C(&floor, obj);
+            collision_initHitFromObject(&floor, obj);
             flag = 2;
-            func_151A9834(&pos, pos.y - 2000.0f, 200.0f, &floor, (func_150ADA20() & 3) + 7, 0, &flag, arg1, arg2);
+            beam_spawnAtGroundPoints(&pos, pos.y - 2000.0f, 200.0f, &floor, (func_150ADA20() & 3) + 7, 0, &flag, arg1, arg2);
         }
     }
 }
@@ -1318,10 +1318,10 @@ Gfx *trail_drawStripEffect(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     func_15143134(&gStripEndPoint, &to, &owner->ob_matrix_ptr[gStripEndJoints[data->variant]]);
     camPos = func_15144B34(cameraIdx);
     gfx = func_15142B7C(gfx, 0x200005, 0x60600);
-    gfx = func_15142E24(gfx, &D_80090B60[127], 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
+    gfx = func_15142E24(gfx, &gEffectTextures[127], 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
     gfx = func_1513F4E4(gfx, 0x3B, &update);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, data->alpha, &update);
-    gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].cycle1 | D_800A4AC8[3].cycle2, &update);
+    gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].cycle1 | D_800A4AC8[3].cycle2, &update);
     diff.x = to.x - from.x;
     diff.y = to.y - from.y;
     diff.z = to.z - from.z;
@@ -1469,7 +1469,7 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             dir.y -= pos.y;
             dir.z -= pos.z;
         }
-        func_1504715C(&floor, obj);
+        collision_initHitFromObject(&floor, obj);
         shape.flags = 0;
         shape.direction = dir;
         /* Start from the zero vector D_800A5480. */
@@ -1686,7 +1686,7 @@ void trail_updateTrackerEffect(TrackerEffect *effect) {
     data->delta.z = data->pos.z - data->prevPos.z;
     data->dist = func_15143E64(&data->delta);
 
-    state = func_1510F8CC(owner->floorMaterial);
+    state = collision_getSurfaceType(owner->floorMaterial);
     if (data->dist > 300.0f || data->dist <= 0.0f || owner->shad != 0.0f || owner->inwater != 0 ||
         state == 5 || state == 6 || state == 9 || state == 13 || state == 14) {
         finished = TRUE;

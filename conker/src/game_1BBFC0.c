@@ -8,7 +8,7 @@ void *memcpy(void *, const void *, u32);
  * Fills this camera's four beam vertices: a quad from start toward end (scaled by progress),
  * widened by width perpendicular to the view direction from the camera eye.
  */
-Vtx *func_1518EB10(Game1BBFC0Beam *beam, s16 cam) {
+Vtx *beam_fillMotionVerts(Game1BBFC0Beam *beam, s16 cam) {
     Vtx *vtx;
     Vtx *result;
     f32 progress;
@@ -103,7 +103,7 @@ Vtx *func_1518EB10(Game1BBFC0Beam *beam, s16 cam) {
 }
 
 /* Moves the beam by its velocity (with drag and gravity), then pulls its end toward its start. */
-s32 func_1518EF54(Game1BBFC0Beam *beam) {
+s32 beam_updateMotionPull(Game1BBFC0Beam *beam) {
     Game1BBFC0Motion *motion = &beam->motion;
     f32 dx;
     f32 dy;
@@ -128,7 +128,7 @@ s32 func_1518EF54(Game1BBFC0Beam *beam) {
 }
 
 /* Moves the beam by its velocity, with drag and gravity. */
-s32 func_1518F058(Game1BBFC0Beam *beam) {
+s32 beam_updateMotion(Game1BBFC0Beam *beam) {
     Game1BBFC0Motion *motion = &beam->motion;
     f32 dx;
     f32 dy;
@@ -150,7 +150,7 @@ s32 func_1518F058(Game1BBFC0Beam *beam) {
 }
 
 /* Shrinks the beam's width and progress; sets unk5C from unk1C while unk1C < unk48. */
-s32 func_1518F108(Game1BBFC0Beam *beam) {
+s32 beam_shrinkMotion(Game1BBFC0Beam *beam) {
     beam->progress -= beam->progress * beam->motion.shrinkRate;
     beam->width -= beam->width * beam->motion.shrinkRate;
     if (beam->unk1C < beam->motion.unk48) {
@@ -159,8 +159,8 @@ s32 func_1518F108(Game1BBFC0Beam *beam) {
     return 1;
 }
 
-/* Like func_1518F108, but shrinks only the beam's progress. */
-s32 func_1518F15C(Game1BBFC0Beam *beam) {
+/* Like beam_shrinkMotion, but shrinks only the beam's progress. */
+s32 beam_shrinkMotionProgress(Game1BBFC0Beam *beam) {
     beam->progress -= beam->progress * beam->motion.shrinkRate;
     if (beam->unk1C < beam->motion.unk48) {
         beam->unk5C = beam->unk1C * beam->motion.unk4A;

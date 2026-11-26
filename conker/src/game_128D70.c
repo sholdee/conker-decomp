@@ -209,7 +209,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         effect.unk40 = 0;
         effect.unk41 = 7;
         effect.viewport = target->CameraPtr->CNumber;
-        func_1515548C(&effect, 0, 0, 0, 0, 0, arg5);
+        sprite_newScreenSprite(&effect, 0, 0, 0, 0, 0, arg5);
         cameraArg.side = side;
         cameraArg.camera = target->CameraPtr;
         func_1515572C((s32)&cameraArg, 0x37);

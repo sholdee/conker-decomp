@@ -191,7 +191,7 @@ s8 func_150F78B4(ProjectileParticle *obj) {
     }
     dist = state->speed * dt;
     if (state->flags & 2) {
-        func_15081690(owner, obj->pos.x, obj->pos.y, obj->pos.z, state->hit.dir.x, state->hit.dir.y,
+        collision_castRay(owner, obj->pos.x, obj->pos.y, obj->pos.z, state->hit.dir.x, state->hit.dir.y,
                       state->hit.dir.z, &hit, dist, 1, 0, !(state->flags & 4), state->unkB0, 0, 0);
         if (hit.hitType >= 2) {
             func_151D4DAC(hit.obj, owner, &hit.pos, &hit.far, &hit, 0x1A, &state->hit.dir, obj->unkC, obj->unk1);

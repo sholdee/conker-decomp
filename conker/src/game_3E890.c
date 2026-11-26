@@ -246,7 +246,7 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
     }
 }
 
-/* Spawns timed effect 85 (func_150F64DC): light bursts on the owner while it lives. */
+/* Spawns timed effect 85 (beam_updateFlashBurst): light bursts on the owner while it lives. */
 void func_15011A78(Actor *owner, u8 arg1, s32 arg2) {
     FlashBurstData data;
     FlashBurstEffect *effect;

@@ -124,6 +124,6 @@ void func_15012F90(void) {
 
     // matching: IDO peels the 3 left over from 0x1E3 / 4 before the unrolled loop
     for (i = 0; i < 0x1E3; i++) {
-        D_800DF7D0[i] = 0;
+        gAttachModelRefCounts[i] = 0;
     }
 }

@@ -26,7 +26,7 @@ DustEmitter *func_15191BE0(Actor *owner, const Vec3f *offset, u8 bone, f32 rateB
     data.rateBase = rateBase;
     data.accum = 0.0f;
     data.rateRandom = rateRandom;
-    func_1504715C(&data.floor, owner);
+    collision_initHitFromObject(&data.floor, owner);
 
     data.gravityBase = gravityBase;
     data.gravityRandom = gravityRandom;
@@ -74,7 +74,7 @@ void func_15191D54(DustEmitter *effect) {
                     floorY = -9500.0f;
                 } else {
                     minY = -9500.0f;
-                    if (func_15046F84(&position, 0, minY, &data->floor) != 0) {
+                    if (collision_probeFloorWithSet3Cached(&position, 0, minY, &data->floor) != 0) {
                         floorY = data->floor.height;
                     } else {
                         floorY = minY;

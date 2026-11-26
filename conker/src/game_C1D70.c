@@ -2,28 +2,28 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c). */
-f32 (*D_800D2C20)[4]; // the current float matrix
-s32 D_800D2C28[16];   // segment base addresses
+f32 (*gPointGroupMtx)[4]; // the current float matrix
+s32 gSegmentBases[16];   // segment base addresses
 u8 D_800D2C68;
 
 #include "functions.h"
 #include "variables.h"
 
-/* Transforms the group's points by the matrix D_800D2C20 into out[slot] (16 slots; empty slots are skipped). */
-void func_150948C0(PointGroup *group, f32 (*out)[3]) {
+/* Transforms the group's points by the matrix gPointGroupMtx into out[slot] (16 slots; empty slots are skipped). */
+void sprite_transformPointGroup(PointGroup *group, f32 (*out)[3]) {
     GroupPoint *slots[16];
     s32 i;
 
-    func_1509499C(group, slots);
+    sprite_spreadGroupSlots(group, slots);
     for (i = 0; i < 16; i++) {
         if (slots[i] != NULL) {
-            func_150A7960(D_800D2C20, slots[i]->x, slots[i]->y, slots[i]->z, &out[i][0], &out[i][1], &out[i][2]);
+            func_150A7960(gPointGroupMtx, slots[i]->x, slots[i]->y, slots[i]->z, &out[i][0], &out[i][1], &out[i][2]);
         }
     }
 }
 
 /* Spreads a group's points over 16 slots: slots first..last (inclusive) get consecutive points, the rest NULL. */
-void func_1509499C(PointGroup *group, GroupPoint **slots) {
+void sprite_spreadGroupSlots(PointGroup *group, GroupPoint **slots) {
     GroupPoint *point = group->points;
     s16 end = group->slots; // matching: the packed byte and `end` share one register
     s16 first = end & 0xF;
@@ -47,7 +47,7 @@ void func_1509499C(PointGroup *group, GroupPoint **slots) {
  * Writes texcoords[i] rotated by `angle` degrees about the centre of a width x height texture
  * into verts[i].v.tc (S10.5 fixed point).
  */
-void func_15094AB8(Vtx *verts, s16 (*texcoords)[2], s32 count, f32 angle, s32 width, s32 height) {
+void sprite_rotateTexcoords(Vtx *verts, s16 (*texcoords)[2], s32 count, f32 angle, s32 width, s32 height) {
     f32 centerS;
     f32 centerT;
     f32 sine;

@@ -13,9 +13,9 @@ s32 func_150106D0(TriggerZone *zone) {
     tmp.rate = func_15144598(zone);
     tmp.accumulator = 0.0f;
 
-    func_1510F800(0);
+    collision_selectMap(0);
 
-    tmp.zone = func_1510FD20(zone->x, zone->z);
+    tmp.zone = collision_findZoneLeaf(zone->x, zone->z);
     if (tmp.zone == NULL) {
         return 1;
     } else {

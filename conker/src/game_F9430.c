@@ -51,7 +51,7 @@ void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     if (owner == NULL || owner->ob_matrix_ptr == NULL) {
         return;
     }
-    func_1504715C(&ground, owner);
+    collision_initHitFromObject(&ground, owner);
     def = &D_800A0640[index];
     func_15143134(&def->offset, &pos, &owner->ob_matrix_ptr[def->bone]);
     {
@@ -60,7 +60,7 @@ void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
         ray.x = pos.x;
         ray.y = pos.y + 200.0f;
         ray.z = pos.z;
-        if (func_15046C80(&ray, 0, pos.y - 2000.0f, &ground) == 0) {
+        if (collision_probeFloorSurfABSet0Cached(&ray, 0, pos.y - 2000.0f, &ground) == 0) {
             return;
         }
     }

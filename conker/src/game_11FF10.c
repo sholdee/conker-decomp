@@ -40,7 +40,7 @@ void func_150F2A60(s32 arg0) {
                     break;
                 }
             }
-            obj = func_15083E90(0xE);
+            obj = collision_findObjectById(0xE);
             if (obj != NULL) {
                 scroll = obj->taskint[0];
             } else {

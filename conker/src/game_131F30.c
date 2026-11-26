@@ -11,7 +11,7 @@ typedef struct {
 /* Arrival callback of a level prop (db_Object_array entry): finds the first active player in the prop's
  * player mask and sends message 0x35 with a 9-entry list chosen by the prop's id (0xF7-0xF9),
  * or message 0x38 for 0xF6. */
-void func_15104A80(WorldObject *prop) {
+void beam_onPropArrival(WorldObject *prop) {
     Actor *player;
 
     player = NULL;
@@ -61,7 +61,7 @@ void func_15104A80(WorldObject *prop) {
 }
 
 /* While the timer runs, drops lightning bolts from above pos to random ground points within radius. */
-void func_15104C44(BoltRainObj *obj) {
+void beam_updateBoltRain(BoltRainObj *obj) {
     BoltRainState *state;
 
     state = &obj->state;
@@ -100,7 +100,7 @@ void func_15104C44(BoltRainObj *obj) {
                                   &ground[0], &ground[2]);
                     ground[0] += state->pos.x;
                     ground[2] += state->pos.z;
-                    if (func_15046C80(ground, 0, state->pos.y, &state->ground) != 0) {
+                    if (collision_probeFloorSurfABSet0Cached(ground, 0, state->pos.y, &state->ground) != 0) {
                         func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX1, &offZ1);
                         func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX2, &offZ2);
                         desc.ctrl[1].x = state->pos.x + offX1;
@@ -114,7 +114,7 @@ void func_15104C44(BoltRainObj *obj) {
                         desc.life = func_150ADA20() % 13U + 8;
                         desc.color.alpha = func_150ADA20() % 156U + 100;
                         desc.segments = func_150ADA20() % 3U + 5;
-                        func_15105CE0(&desc, 0, obj->base.header.owner, obj->base.header.kind);
+                        beam_newBolt(&desc, 0, obj->base.header.owner, obj->base.header.kind);
                     }
                     state->pending -= 1.0f;
                 } while (state->pending > 1.0f);
@@ -124,7 +124,7 @@ void func_15104C44(BoltRainObj *obj) {
 }
 
 /* Message handler: on 0x38 while the region is idle, restarts the rain for 300 frames with its sound. */
-void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
+void beam_boltRainMessage(BoltRainObj *obj, s32 arg1, u8 msg) {
     BoltRainState *state = &obj->state;
 
     if (msg == 0x38 && state->region->inactive == 1) {
@@ -137,7 +137,7 @@ void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
 }
 
 /* While the timer runs, chains lightning between random points on two different edges of the quad. */
-void func_151050B0(BoltArcObj *obj) {
+void beam_updateBoltArc(BoltArcObj *obj) {
     BoltArcState *state;
     BoltChainConfig config;
     Vec3f start;
@@ -194,7 +194,7 @@ void func_151050B0(BoltArcObj *obj) {
             end.x = state->edgeStart[edgeB].x + state->edgeDelta[edgeB].x * t;
             end.y = state->edgeStart[edgeB].y + state->edgeDelta[edgeB].y * t;
             end.z = state->edgeStart[edgeB].z + state->edgeDelta[edgeB].z * t;
-            func_15106F98(&start, &end, 3, &config, 0.3250000179f, 2, obj->base.header.owner, obj->base.header.kind);
+            beam_newBoltChain(&start, &end, 3, &config, 0.3250000179f, 2, obj->base.header.owner, obj->base.header.kind);
             state->pending -= 1.0f;
         } while (state->pending > 1.0f);
     }
@@ -208,7 +208,7 @@ void func_1510550C(EffectHeader *obj, s32 arg1, u8 msg) {
 }
 
 /* Message handler: on 0x38 while the region is idle, restarts the arcs for 300 frames. */
-void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg) {
+void beam_boltArcMessage(BoltArcObj *obj, s32 *arg1, u8 msg) {
     BoltArcState *state = &obj->state;
 
     if (msg == 0x38 && state->region->inactive == 1) {
@@ -225,7 +225,7 @@ static const F32x1 D_800A23A8 = { { 0.1f } };
 
 /* Spawns the effects of an impact: a func_15102920 effect, weapon_spawnImpactBurst by chance and, except on
  * surface type 9, sometimes debris flying back along the impact direction. */
-void func_1510558C(ImpactObj *obj) {
+void beam_spawnImpactEffects(ImpactObj *obj) {
     ImpactHit *hit;
     u32 surfaceFlags;
     // matching: one struct keeps IDO's stack order (scales, ids, desc) above the spilled locals
@@ -281,11 +281,11 @@ void func_1510558C(ImpactObj *obj) {
 
 
 /* Message handler: 0x38 bursts sparks and switches the effect on, 0x39 switches it off. */
-void func_15105848(SparkObj *obj, s32 arg1, u8 msg) {
+void beam_sparkRegionMessage(SparkObj *obj, s32 arg1, u8 msg) {
     SparkState *state = &obj->state;
 
     if (msg == 0x38) {
-        func_151058B4(obj);
+        beam_updateSparkRegion(obj);
         state->flags |= 1;
     } else if (msg == 0x39) {
         state->flags &= ~1;
@@ -293,7 +293,7 @@ void func_15105848(SparkObj *obj, s32 arg1, u8 msg) {
 }
 
 /* Throws a rate-scaled random number of sparks from random points of the region. */
-void func_151058B4(SparkObj *obj) {
+void beam_updateSparkRegion(SparkObj *obj) {
     SparkState *state;
     f32 count;
     u32 angle;
@@ -357,7 +357,7 @@ void func_15105BC8(SparkObj *obj) {
 
 /* Returns the ZoneRectEffect (callbackSet 0x2E) of `zone` in either object list, searching the two
  * object types listed in D_800A5770, or NULL. */
-ZoneRectEffect *func_15105C24(TriggerZone *zone) {
+ZoneRectEffect *beam_findZoneRectEffect(TriggerZone *zone) {
     u8 i;
     u8 list;
     ZoneRectEffect *obj;

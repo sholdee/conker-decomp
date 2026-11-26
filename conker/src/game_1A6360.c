@@ -369,7 +369,7 @@ void func_15179B14(s32 count) {
     for (i = 0; i < count; i++) {
         x = (func_150ADA20_u8() % 500) + centerX;
         z = (func_150ADA20_u8() % 500) + centerZ;
-        groundY = func_1510F8D8(x, 10000, z, 0);
+        groundY = collision_findMeshFloorNear(x, 10000, z, 0);
         if (groundY != -10000.0f) {
             packet.dropFlags = 0;
             packet.frameStep = 0x80;

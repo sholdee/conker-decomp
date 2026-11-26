@@ -7,7 +7,7 @@
 
 /* Casts a ray from origin along dir against the world and every active object (except self and those in
    ignoreMask or rejected by filter), recording the nearest hit closer than maxDist in out. */
-void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out, f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, void *filterArg, s32 ignoreMask) {
+void collision_castRay(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out, f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, void *filterArg, s32 ignoreMask) {
     s32 surf;
     f32 hitX;
     f32 hitY;
@@ -99,11 +99,11 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
             if (!(obj->noshove & 0x40)) {
                 continue;
             }
-            if (filter != -1 && D_80086C90[filter](obj, self, filterArg) == 0) {
+            if (filter != -1 && gObjectFilters[filter](obj, self, filterArg) == 0) {
                 continue;
             }
             if (skipModels == 0) {
-                ret = func_1508114C(obj, &origin, &dir, &near, &far, &centre, &dist, &index, &bone, &part, offset);
+                ret = collision_rayHitSpheres(obj, &origin, &dir, &near, &far, &centre, &dist, &index, &bone, &part, offset);
                 if (ret > 0 && dist < maxDist && (out->dist == -1.0f || dist < out->dist) && best != childSlot[i]) {
                     out->dist = dist;
                     out->obj = obj;
@@ -120,7 +120,7 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
                     continue;
                 }
             }
-            if (func_15081C20(&origin, &dir, obj, &near, &far, &dist, &farDist) != 0 &&
+            if (collision_rayCylinder(&origin, &dir, obj, &near, &far, &dist, &farDist) != 0 &&
                 dist < maxDist && (out->dist == -1.0f || dist < out->dist) && best != childSlot[i]) {
                 out->dist = dist;
                 out->obj = obj;
@@ -135,7 +135,7 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
 
 /* Intersects a ray with obj's collision cylinder (radius unkD2, centre raised by unkD6, y squashed by
    unkDC). Returns 1 with the entry/exit points and their distances from origin on a hit. */
-s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist) {
+s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist) {
     Vec3f pos;
 
     pos.x = obj->xpos;
@@ -197,7 +197,7 @@ void func_15081E0C(Actor *obj, u16 part, u8 skip) {
 /* Applies the effects of a ray hit of the given kind fired by self: world impact effects for a world
    hit, otherwise hit reactions, sounds and effects on the object that was hit. Returns 0 for no hit,
    1 for a world hit and 2 for an object hit. */
-s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
+s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
     s32 sound;
     f32 yaw;
     f32 pitch;
@@ -364,7 +364,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
             source.lean_angle = 0.0f;
             source.scale_xz = obj->scale_xz;
             source.scale_y = obj->scale_y;
-            func_150335C8(&source, obj, spawnEffect, hit->bone, 1, 0);
+            attach_attachInPlace(&source, obj, spawnEffect, hit->bone, 1, 0);
             if (hit->part == 10) {
                 sound = 0x20;
             }

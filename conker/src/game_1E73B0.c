@@ -255,7 +255,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     }
     func_1514FCE8(&burst, arg1, arg2);
     if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
-        func_1504715C(&floor, obj);
+        collision_initHitFromObject(&floor, obj);
         mtx = &obj->ob_matrix_ptr[1];
         {
             typedef s32 T151; // matching: a declaration makes -g3 open a scope here, which steers the scheduler
@@ -680,11 +680,11 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
             burst.spray.eventFunc = 0;
         }
         func_1514FCE8(&burst, arg3, arg4);
-        func_1504715C(&floor, obj);
+        collision_initHitFromObject(&floor, obj);
         probe.x = center.x;
         probe.y = center.y + 100.0f;
         probe.z = center.z;
-        if (func_15046C80(&probe, 0, center.y - 1000.0f, &floor) != 0) {
+        if (collision_probeFloorSurfABSet0Cached(&probe, 0, center.y - 1000.0f, &floor) != 0) {
             hit.x = probe.x;
             hit.y = floor.height;
             hit.z = probe.z;
@@ -1087,11 +1087,11 @@ Gfx *func_151BCA90(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
             points = trail->points;
             camPos = func_15144B34(viewport);
             dirty = 1;
-            gfx = func_15142E24(gfx, &D_80090B60[31], 0, 0, 0, 0, 0x1F, 0, 0, &dirty, 3);
+            gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &dirty, 3);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &dirty);
             gfx = func_1513F4E4(gfx, 0x4E, &dirty);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &dirty);
+            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &dirty);
             if (trail->head.tmpl.flags & 2) {
                 /* ribbon starts at the live position */
                 i = trail->head.end - 1;

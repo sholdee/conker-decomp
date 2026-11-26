@@ -15,7 +15,7 @@
  *   shape 2: box of half-extents radiusX x radiusZ rotated by yaw, y from y to y + height
  *   shape 3: the centre point, y within +-height
  */
-void func_15008340(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
+void zone_getRandomPoint(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
     // matching: each case's `break` sits after its block (with -g3 its line steers the dispatch scheduling)
     switch (ZONE_AREA_TYPE(region)) {
     default:

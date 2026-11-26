@@ -113,7 +113,7 @@ s32 func_150EAE24(LightEffect *obj) {
     obj->light->x = obj->data.groundFlash.position.x;
     obj->light->z = obj->data.groundFlash.position.z;
     flash = &obj->data.groundFlash;
-    if (func_15046C80(&probe, 0, obj->data.groundFlash.probeHeight, &flash->ground) != 0) {
+    if (collision_probeFloorSurfABSet0Cached(&probe, 0, obj->data.groundFlash.probeHeight, &flash->ground) != 0) {
         obj->light->y = flash->ground.height;
     } else {
         obj->light->y = flash->height;

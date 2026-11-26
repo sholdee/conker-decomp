@@ -168,7 +168,7 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
 
 /*
  * Effect update: drops the effect's position onto the ground below it (if any), spawns a
- * point effect (func_150E83AC) there and scatters 3-5 func_151A9834 spawns around it.
+ * point effect (func_150E83AC) there and scatters 3-5 beam_spawnAtGroundPoints spawns around it.
  */
 void func_150DF334(PointEffect *effect) {
     Vec3f *pos;
@@ -183,7 +183,7 @@ void func_150DF334(PointEffect *effect) {
     probe.x = effect->pos.x;
     probe.y = effect->pos.y + 500.0f;
     probe.z = effect->pos.z;
-    if (func_1504697C(&probe, 0, probe.y - 1000.0f, &hit) != 0) {
+    if (collision_probeFloorSurfABSet0(&probe, 0, probe.y - 1000.0f, &hit) != 0) {
         groundPos.x = pos->x;
         groundPos.y = hit.height;
         groundPos.z = pos->z;
@@ -193,7 +193,7 @@ void func_150DF334(PointEffect *effect) {
     pos = onGround ? &groundPos : &effect->pos;
     center = *pos;
     center.y += 500.0f;
-    func_151A9834(&center, center.y - 1000.0f, 250.0f, &hit, func_150ADA20() % 3U + 3, 1, 0, effect->base.header.owner,
+    beam_spawnAtGroundPoints(&center, center.y - 1000.0f, 250.0f, &hit, func_150ADA20() % 3U + 3, 1, 0, effect->base.header.owner,
                   effect->base.header.kind);
 }
 

@@ -262,15 +262,15 @@ void func_1501CC3C(void) {
         ucode += 2;
     }
     if ((ucode != D_80084070) || (altOffset != D_80084074)) {
-        func_10004514(D_80084078[ucode].textStart + (s32)ucode_ROM_START, D_800C1060, D_80084078[ucode].textEnd - D_80084078[ucode].textStart, 1);
+        rom_read(D_80084078[ucode].textStart + (s32)ucode_ROM_START, D_800C1060, D_80084078[ucode].textEnd - D_80084078[ucode].textStart, 1);
         D_800BEB9C = (u64 *)((D_80084078[ucode].textEnd - D_80084078[ucode].textStart) + (u8 *)D_800C1060);
-        func_10004514(D_80084078[ucode].dataStart + (s32)ucode_ROM_START, D_800BEB9C, D_80084078[ucode].dataEnd - D_80084078[ucode].dataStart, 1);
+        rom_read(D_80084078[ucode].dataStart + (s32)ucode_ROM_START, D_800BEB9C, D_80084078[ucode].dataEnd - D_80084078[ucode].dataStart, 1);
         D_80084070 = ucode;
         D_80084074 = altOffset;
         alt = D_80084078 + (ucode + altOffset);
-        func_10004514(alt->textStart + (s32)ucode_ROM_START, D_800BEBB0, alt->textEnd - alt->textStart, 1);
+        rom_read(alt->textStart + (s32)ucode_ROM_START, D_800BEBB0, alt->textEnd - alt->textStart, 1);
         D_800BEAD0 = (u64 *)((alt->textEnd - alt->textStart) + (u8 *)D_800BEBB0);
-        func_10004514(alt->dataStart + (s32)ucode_ROM_START, D_800BEAD0, alt->dataEnd - alt->dataStart, 1);
+        rom_read(alt->dataStart + (s32)ucode_ROM_START, D_800BEAD0, alt->dataEnd - alt->dataStart, 1);
     }
 }
 
@@ -403,7 +403,7 @@ SeqFileEntry *func_1501D1D4(s32 map, s32 cutscene, s32 scene) {
     u32 unused;
     SeqFileEntry *file;
 
-    file = func_1502B6BC(&unused, 0, &size, 3, 6, map, cutscene);
+    file = rom_loadPathTable(&unused, 0, &size, 3, 6, map, cutscene);
     if (file != NULL) {
         D_800C3668[scene] = file;
     } else {
@@ -862,7 +862,7 @@ void func_1501E73C(s32 scene) {
 
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35F0[scene][i].type == 2) {
-            obj = func_15083E90(D_800C35F0[scene][i].targetId);
+            obj = collision_findObjectById(D_800C35F0[scene][i].targetId);
             if (obj == NULL) {
                 continue;
             }
@@ -1573,7 +1573,7 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
 
 /* Apply the scene's evaluated tracks: the camera track (type 1, the one chosen by func_15023264)
    drives the player camera through func_1512D560 message 7, type 3 tracks drive actors, type 2
-   tracks objects (func_1502178C) and type 5 tracks func_1517D5FC. Non-camera tracks go first. */
+   tracks objects (func_1502178C) and type 5 tracks sprite_queuePlayerBillboard. Non-camera tracks go first. */
 void func_15020EC4(s32 scene) {
     s32 track;
     s32 pass;
@@ -1655,7 +1655,7 @@ void func_15020EC4(s32 scene) {
                     } else if (ENT(scene, track)->targetId == 2) {
                         Actor *obj;
 
-                        obj = func_15083E90(ENT(scene, track)->unk3);
+                        obj = collision_findObjectById(ENT(scene, track)->unk3);
                         if (obj == NULL) {
                             continue;
                         }
@@ -1725,7 +1725,7 @@ void func_15020EC4(s32 scene) {
                 } else if (ENT(scene, track)->type == 2) {
                     Actor *obj2;
 
-                    obj2 = func_15083E90(ENT(scene, track)->targetId);
+                    obj2 = collision_findObjectById(ENT(scene, track)->targetId);
                     func_1502178C(obj2, scene, track);
                 } else if (ENT(scene, track)->type == 4) {
                     s32 arr[3];
@@ -1736,7 +1736,7 @@ void func_15020EC4(s32 scene) {
                 } else if (ENT(scene, track)->type == 5) {
                     state = ELEM(scene, track);
                     if (state->unk34 >= 1.0f) {
-                        func_1517D5FC(state->x, state->y, state->z, 0, state->unk18, state->unk1C);
+                        sprite_queuePlayerBillboard(state->x, state->y, state->z, 0, state->unk18, state->unk1C);
                     }
                 }
             }
@@ -1776,7 +1776,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
             }
             info = &D_800C35F0[scene][track];
             if (info->type == 2) {
-                obj = func_15083E90(info->targetId);
+                obj = collision_findObjectById(info->targetId);
                 if (obj != NULL && obj == target) {
                     oldPos[0] = obj->xpos;
                     oldPos[1] = obj->ypos;
@@ -1800,7 +1800,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                     obj->unkCC = 0;
                     rescaled = 0;
                     D_800D35DC = (target - movement_obj) + 1;
-                    func_1510E7A4(&obj->floorTriVerts, obj->floorTri.v, &floorY, &obj->unk118, &obj->floorMaterial, &obj->floorType,
+                    collision_findFloorInRange(&obj->floorTriVerts, obj->floorTri.v, &floorY, &obj->unk118, &obj->floorMaterial, &obj->floorType,
                                   obj->xpos, obj->ypos, obj->zpos, obj->ypos, 0, obj,
                                   -10000.0f, target->ypos);
                     ((u8 *)&D_800D35E0)[-4] = 0;
@@ -1997,7 +1997,7 @@ void func_150222E0(s32 track, s32 scene) {
     if (D_800C35C8[scene][track] != 0) {
         info = &D_800C35F0[scene][track];
         if (info->type == 2) {
-            obj = func_15083E90(info->targetId);
+            obj = collision_findObjectById(info->targetId);
             if (obj != NULL) {
                 obj->eyeCode[0] = 0;
                 obj->eyeCode[1] = 0;
@@ -2015,7 +2015,7 @@ void func_150222E0(s32 track, s32 scene) {
     }
 }
 
-/* Make sure the object bound to the scene's track `track` exists: spawn it from its D_800D20FC
+/* Make sure the object bound to the scene's track `track` exists: spawn it from its gSpawnRecords
    slot if needed and add it to the scene's D_800C3518 list. */
 void func_15022398(s32 track, s32 scene) {
     Actor *obj;
@@ -2025,7 +2025,7 @@ void func_15022398(s32 track, s32 scene) {
     if (D_800C35C8[scene][track] != 0) {
         if (D_800C35F0[scene][track].type == 2) {
             id = D_800C35F0[scene][track].targetId;
-            slot = func_15083E0C(id);
+            slot = collision_findSpawnById(id);
             if (slot != -1) {
                 obj = actor_findOnPath(slot);
                 if (obj != NULL) {
@@ -2040,8 +2040,8 @@ void func_15022398(s32 track, s32 scene) {
                         obj->mvmt_control &= -0x2B;
                     }
                 } else {
-                    if (slot < D_800D2100) {
-                        func_15082A44((void *)((slot * 0x30) + (s32)D_800D20FC), slot, 0, scene, 0); // matching: integer address math
+                    if (slot < gSpawnRecordCount) {
+                        collision_spawnObject((void *)((slot * 0x30) + (s32)gSpawnRecords), slot, 0, scene, 0); // matching: integer address math
                         obj = actor_findOnPath(slot);
                         if (obj != NULL) {
                             actor_playAnim(obj, 0, 0.0f, 0.0f, 0.0f, 0.0f, 1);
@@ -2067,7 +2067,7 @@ void func_15022528(s32 scene) {
             continue;
         }
         if (D_800C35F0[scene][track].type == 2) {
-            obj = func_15083E90(D_800C35F0[scene][track].targetId);
+            obj = collision_findObjectById(D_800C35F0[scene][track].targetId);
             if (obj != NULL) {
                 func_1502178C(obj, scene, track);
             }
@@ -2262,7 +2262,7 @@ void func_15022BA4(s32 scene) {
             }
             if (D_800C35F0[scene][track].targetId == 0) {
                 Actor *obj;
-                obj = func_15083E90(D_800C35F0[scene][track].unk3);
+                obj = collision_findObjectById(D_800C35F0[scene][track].unk3);
                 if (obj == NULL) {
                     return;
                 }
@@ -2485,7 +2485,7 @@ s32 func_150235DC(s32 scene) {
 
     movement_obj[0].task_attrib &= ~0x200;
     if (D_800C35AA == 0) {
-        obj = func_15083E90(1);
+        obj = collision_findObjectById(1);
         if (obj != NULL) {
             dc_glbl_CharNum = obj - movement_obj;
             ctl = obj->mv;

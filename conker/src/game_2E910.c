@@ -4,24 +4,24 @@
  * Collision state, linked at 0x800B0DC0..0x800B0DF0 in this order. It is defined before functions.h
  * and variables.h: an earlier declaration changes IDO's .bss order.
  */
-u8 *D_800B0DC0;         /* triangle-data arena: cursor */
-static u8 *D_800B0DC4;  /* triangle-data arena: start */
-static u8 *D_800B0DC8;  /* triangle-data arena: end */
-static s32 D_800B0DCC;  /* quadtree node count */
-static s32 D_800B0DD0;  /* quadtree leaf count */
-static s32 D_800B0DD4;  /* quadtree: smallest node size that is split */
-static u16 D_800B0DD8;  /* quadtree: fewest triangles in a node that is split */
-static u8 *D_800B0DDC;  /* quadtree buffer */
-static u8 *D_800B0DE0;  /* quadtree buffer cursor */
-static s32 D_800B0DE4;  /* triangles added for all maps */
+u8 *gTriArenaCursor;         /* triangle-data arena: cursor */
+static u8 *gTriArenaStart;  /* triangle-data arena: start */
+static u8 *gTriArenaEnd;  /* triangle-data arena: end */
+static s32 gQuadNodeCount;  /* quadtree node count */
+static s32 gQuadLeafCount;  /* quadtree leaf count */
+static s32 gQuadMinSplitSize;  /* quadtree: smallest node size that is split */
+static u16 gQuadMinSplitTris;  /* quadtree: fewest triangles in a node that is split */
+static u8 *gQuadBuffer;  /* quadtree buffer */
+static u8 *gQuadCursor;  /* quadtree buffer cursor */
+static s32 gAllMapsTriCount;  /* triangles added for all maps */
 
 #include "functions.h"
 #include "variables.h"
 
 #include "macros.h"
 
-/* Size of the quadtree buffer of each level (func_15001A08). */
-static const s32 D_80091AF0[69] = {
+/* Size of the quadtree buffer of each level (collision_allocQuadTree). */
+static const s32 gQuadBufferSizes[69] = {
     15000, 10000, 20000, 30000, 30000, 30000, 30000, 10000, 30000, 30000,
     15000, 10000, 20000, 30000, 20000, 30000, 20000, 30000, 10000, 30000,
     40000, 30000, 30000, 30000, 30000, 30000, 20000, 10000, 20000, 10000,
@@ -31,8 +31,8 @@ static const s32 D_80091AF0[69] = {
     50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000,
 };
 
-/* Size of the triangle-data arena of each level (func_15001970). */
-static const s32 D_80091C04[69] = {
+/* Size of the triangle-data arena of each level (collision_initTriArena). */
+static const s32 gTriArenaSizes[69] = {
     45000, 60000, 100000, 100000, 70000, 100000, 125000, 50000, 100000, 100000,
     61000, 60000, 100000, 100000, 70000, 100000, 60000, 100000, 24000, 110000,
     50000, 100000, 100000, 110000, 30000, 100000, 70000, 70000, 110000, 40000,
@@ -42,7 +42,7 @@ static const s32 D_80091C04[69] = {
     150000, 130000, 130000, 130000, 100000, 100000, 8000, 54000, 18000,
 };
 
-// Quadtree node, built into the D_800B0DDC buffer. Links are byte offsets from the node itself.
+// Quadtree node, built into the gQuadBuffer buffer. Links are byte offsets from the node itself.
 struct QuadNode {
     /* 0x0 */ s16 minY;
     /* 0x2 */ s16 maxY;
@@ -66,10 +66,10 @@ typedef struct XZRange {
 } XZRange;
 
 /**
- * Appends every triangle drawn by display list `dl` to the triangle table D_800DBE3C
- * and records its bounding box: x/z in D_800DBE40, y in D_800DBE44.
+ * Appends every triangle drawn by display list `dl` to the triangle table gCurMapTris
+ * and records its bounding box: x/z in gCurMapTriXZBounds, y in gCurMapTriYBounds.
  */
-void func_15001460(Gfx *dl) {
+void collision_addDlTris(Gfx *dl) {
     s32 i;
     Gfx *gfx;
     s32 opcode;
@@ -90,7 +90,7 @@ void func_15001460(Gfx *dl) {
     if (dl == NULL) {
         return;
     }
-    count = D_800DBE38;
+    count = gMapTriCollected;
     for (i = 0; *(s8 *)&dl[i] != (s8)G_ENDDL; i++) {
         gfx = &dl[i];
         numTris = 0;
@@ -122,7 +122,7 @@ void func_15001460(Gfx *dl) {
             addr = gfx->words.w1;
             if ((addr >> 24) & 0xF) {
                 // segmented address: rebase through the segment table
-                addr = D_800D2C28[(addr >> 24) & 0xF] + addr - (D_800D2C68 << 24);
+                addr = gSegmentBases[(addr >> 24) & 0xF] + addr - (D_800D2C68 << 24);
             }
             numVerts = ((s32)gfx->words.w0 >> 12) & 0xFF;
             first = ((s32)gfx->words.w0 >> 1) & 0x7F;
@@ -163,50 +163,50 @@ void func_15001460(Gfx *dl) {
                 }
             }
             for (j = 0; j < 3; j++) {
-                D_800DBE3C[count].verts[j] = verts[tris[t][j]];
+                gCurMapTris[count].verts[j] = verts[tris[t][j]];
             }
-            D_800DBE40[count].minx = min[0];
-            D_800DBE40[count].maxx = max[0];
-            D_800DBE40[count].minz = min[2];
-            D_800DBE40[count].maxz = max[2];
-            D_800DBE44[count].min = min[1];
-            D_800DBE44[count].max = max[1];
+            gCurMapTriXZBounds[count].minx = min[0];
+            gCurMapTriXZBounds[count].maxx = max[0];
+            gCurMapTriXZBounds[count].minz = min[2];
+            gCurMapTriXZBounds[count].maxz = max[2];
+            gCurMapTriYBounds[count].min = min[1];
+            gCurMapTriYBounds[count].max = max[1];
             count++;
         }
     }
-    D_800DBE38 = count;
+    gMapTriCollected = count;
 }
 
-/** Resets the triangle counters and allocates this map's triangle-data arena (D_800B0DC0..D_800B0DC8). */
-void func_15001970(void) {
+/** Resets the triangle counters and allocates this map's triangle-data arena (gTriArenaCursor..gTriArenaEnd). */
+void collision_initTriArena(void) {
     s32 i;
     s32 size;
 
-    D_800B0DE4 = 0;
+    gAllMapsTriCount = 0;
     D_800DBE63 = 0;
     for (i = 0; i < 4; i++) {
-        D_800DBE18[i] = 0;
+        gMapTriCounts[i] = 0;
     }
-    size = D_80091C04[level];
-    D_800B0DC0 = allocate_memory(size, 1, 0, 0);
-    D_800B0DC8 = size + D_800B0DC0;
-    D_800B0DC4 = D_800B0DC0;
+    size = gTriArenaSizes[level];
+    gTriArenaCursor = allocate_memory(size, 1, 0, 0);
+    gTriArenaEnd = size + gTriArenaCursor;
+    gTriArenaStart = gTriArenaCursor;
 }
 
 void __osPiGetAccess(void);
 void __osPiRelAccess(void);
 
 /**
- * Allocates the quadtree buffer for the current map (D_800B0DDC) and resets the node counters.
+ * Allocates the quadtree buffer for the current map (gQuadBuffer) and resets the node counters.
  * The buffer is doubled when the cartridge word at ROM offset 0xD24 is not the expected one.
  */
-void func_15001A08(void) {
+void collision_allocQuadTree(void) {
     s32 size;
     u32 stat;
     s32 romWord;
     s32 i;
 
-    size = D_80091AF0[level];
+    size = gQuadBufferSizes[level];
 
     __osPiGetAccess();
     stat = IO_READ(PI_STATUS_REG);
@@ -220,12 +220,12 @@ void func_15001A08(void) {
         size <<= 1;
     }
 
-    D_800B0DDC = allocate_memory(size, 1, 0, 0);
-    D_800B0DE0 = D_800B0DDC;
-    D_800B0DCC = 0;
-    D_800B0DD0 = 0;
+    gQuadBuffer = allocate_memory(size, 1, 0, 0);
+    gQuadCursor = gQuadBuffer;
+    gQuadNodeCount = 0;
+    gQuadLeafCount = 0;
     for (i = 0; i < 4; i++) {
-        D_800DBE30[i] = 0;
+        gViewCameraZones[i] = 0;
     }
 }
 
@@ -233,76 +233,76 @@ void func_15001B08(void) {
 }
 
 /** Appends a new quadtree node (with no child or sibling) to the 4-byte-aligned end of the buffer. */
-QuadNode *func_15001B10(void) {
+QuadNode *collision_newQuadNode(void) {
     QuadNode *node;
 
-    D_800B0DE0 = (u8 *)ALIGN4(D_800B0DE0);
-    D_800B0DCC++;
+    gQuadCursor = (u8 *)ALIGN4(gQuadCursor);
+    gQuadNodeCount++;
 
-    node = (QuadNode *)D_800B0DE0;
+    node = (QuadNode *)gQuadCursor;
     node->child = 0;
     node->next = 0;
 
-    D_800B0DE0 += sizeof(QuadNode);
+    gQuadCursor += sizeof(QuadNode);
     return node;
 }
 
 /** Appends one byte to the quadtree buffer. */
-void func_15001B5C(u8 value) {
-    *D_800B0DE0++ = value;
+void collision_quadPutByte(u8 value) {
+    *gQuadCursor++ = value;
 }
 
 /** Appends a big-endian halfword to the quadtree buffer. */
-void func_15001B8C(u16 value) {
-    D_800B0DE0[0] = value >> 8;
-    D_800B0DE0[1] = value & 0xFF;
-    D_800B0DE0 += 2;
+void collision_quadPutHalf(u16 value) {
+    gQuadCursor[0] = value >> 8;
+    gQuadCursor[1] = value & 0xFF;
+    gQuadCursor += 2;
 }
 
 /**
- * Builds the quadtree of map `map` over its D_800DBE4C triangles and stores the root in
- * D_800DBE08[map]. Optionally returns the total node count and the leaf count.
+ * Builds the quadtree of map `map` over its gCurMapTriCount triangles and stores the root in
+ * gMapQuadTrees[map]. Optionally returns the total node count and the leaf count.
  */
-void func_15001BC8(s32 map, s16 *nodeCount, s16 *leafCount) {
+void collision_buildQuadTree(s32 map, s16 *nodeCount, s16 *leafCount) {
     QuadNode *root;
     u16 *triList;
     s32 i;
 
-    func_1510F800(map);
-    D_800B0DD8 = 10;
-    D_800B0DD4 = 512;
-    triList = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
+    collision_selectMap(map);
+    gQuadMinSplitTris = 10;
+    gQuadMinSplitSize = 512;
+    triList = allocate_memory((gCurMapTriCount + 1) << 1, 1, 0, 0);
 
-    triList[0] = D_800DBE4C;
-    for (i = 0; i < D_800DBE4C; i++) {
+    triList[0] = gCurMapTriCount;
+    for (i = 0; i < gCurMapTriCount; i++) {
         triList[i + 1] = i;
     }
 
-    root = func_15001DE0(0, 0, 0x8000, 0x8000, 0, triList);
-    D_800DBE08[map] = root;
-    func_15002560(root, NULL);
+    root = collision_buildQuadNode(0, 0, 0x8000, 0x8000, 0, triList);
+    gMapQuadTrees[map] = root;
+    collision_threadQuadTree(root, NULL);
     func_10004074(triList);
 
     if (1) { } // matching: IDO's register allocation for the out-params needs this empty block
 
     if (nodeCount != NULL) {
-        *nodeCount = D_800B0DCC;
+        *nodeCount = gQuadNodeCount;
     }
     if (leafCount != NULL) {
-        *leafCount = D_800B0DD0;
+        *leafCount = gQuadLeafCount;
     }
 }
 
 /** Gives map `map` a single-leaf quadtree that covers the whole map and holds all its triangles. */
-void func_15001CEC(s32 map) {
+void collision_buildLeafQuadTree(s32 map) {
     QuadNode *root;
     u16 *triList;
     s32 i;
 
-    func_1510F800(map);
-    root = func_15001B10();
+    collision_selectMap(map);
+    root = collision_newQuadNode();
 
-    D_800DBE08[map] = root;
+    gMapQuadTrees[map] = root;
 
     root->minY = -0x8000;
     root->maxY = 0x7FFF;
@@ -312,24 +312,24 @@ void func_15001CEC(s32 map) {
     root->z = 0;
     root->child = 0;
 
-    triList = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
+    triList = allocate_memory((gCurMapTriCount + 1) << 1, 1, 0, 0);
 
-    triList[0] = D_800DBE4C;
-    for (i = 0; i < D_800DBE4C; i++) {
+    triList[0] = gCurMapTriCount;
+    for (i = 0; i < gCurMapTriCount; i++) {
         triList[i + 1] = i;
     }
 
-    func_15002008(-0x8000, 0x8000, -0x8000, 0x8000, triList);
+    collision_writeLeafTris(-0x8000, 0x8000, -0x8000, 0x8000, triList);
     func_10004074(triList);
 }
 
 /**
  * Recursively builds the quadtree node centred on (x, z) with half-extents (halfX, halfZ) from the
  * triangles in `triList` (a count followed by triangle indices). A node becomes a leaf, followed in
- * the buffer by its triangle stream, when it overlaps fewer than D_800B0DD8 triangles or is narrower
- * than D_800B0DD4; otherwise it gets four children, chained through their `next` offsets.
+ * the buffer by its triangle stream, when it overlaps fewer than gQuadMinSplitTris triangles or is narrower
+ * than gQuadMinSplitSize; otherwise it gets four children, chained through their `next` offsets.
  */
-QuadNode *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, u16 *triList) {
+QuadNode *collision_buildQuadNode(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, u16 *triList) {
     QuadNode *node;
     QuadNode *child0;
     QuadNode *child1;
@@ -348,17 +348,17 @@ QuadNode *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, u16 *triLi
     s32 minX;
     u16 *subList;
 
-    minTris = D_800B0DD8;
-    minSize = D_800B0DD4;
+    minTris = gQuadMinSplitTris;
+    minSize = gQuadMinSplitSize;
 
     minX = x - halfX;
     maxX = x + halfX;
     minZ = z - halfZ;
     maxZ = z + halfZ;
 
-    if ((func_15002248(minX, maxX, minZ, maxZ, &minY, &maxY, triList, &subList) < minTris) || (halfX < minSize)) {
-        node = func_15001B10();
-        D_800B0DD0++;
+    if ((collision_collectBoxTris(minX, maxX, minZ, maxZ, &minY, &maxY, triList, &subList) < minTris) || (halfX < minSize)) {
+        node = collision_newQuadNode();
+        gQuadLeafCount++;
         node->minY = minY;
         node->maxY = maxY;
         node->halfSize = halfX;
@@ -366,9 +366,9 @@ QuadNode *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, u16 *triLi
         node->z = z;
         node->next = 0;
         node->child = 0;
-        func_15002008(minX, maxX, minZ, maxZ, subList);
+        collision_writeLeafTris(minX, maxX, minZ, maxZ, subList);
     } else {
-        node = func_15001B10();
+        node = collision_newQuadNode();
         node->minY = minY;
         node->maxY = maxY;
         node->halfSize = halfX;
@@ -376,13 +376,13 @@ QuadNode *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, u16 *triLi
         node->z = z;
         node->next = 0;
 
-        child0 = func_15001DE0(x - (halfX >> 1), z - (halfZ >> 1), halfX >> 1, halfZ >> 1, 0, subList);
+        child0 = collision_buildQuadNode(x - (halfX >> 1), z - (halfZ >> 1), halfX >> 1, halfZ >> 1, 0, subList);
         node->child = (u8 *)child0 - (u8 *)node;
-        child1 = func_15001DE0(x - (halfX >> 1), (halfZ >> 1) + z, halfX >> 1, halfZ >> 1, 0, subList);
+        child1 = collision_buildQuadNode(x - (halfX >> 1), (halfZ >> 1) + z, halfX >> 1, halfZ >> 1, 0, subList);
         child0->next = (u8 *)child1 - (u8 *)child0;
-        child2 = func_15001DE0((halfX >> 1) + x, z - (halfZ >> 1), halfX >> 1, halfZ >> 1, 0, subList);
+        child2 = collision_buildQuadNode((halfX >> 1) + x, z - (halfZ >> 1), halfX >> 1, halfZ >> 1, 0, subList);
         child1->next = (u8 *)child2 - (u8 *)child1;
-        child2->next = (u8 *)func_15001DE0((halfX >> 1) + x, (halfZ >> 1) + z, halfX >> 1, halfZ >> 1, 0, subList) - (u8 *)child2;
+        child2->next = (u8 *)collision_buildQuadNode((halfX >> 1) + x, (halfZ >> 1) + z, halfX >> 1, halfZ >> 1, 0, subList) - (u8 *)child2;
     }
     func_10004074(subList);
     return node;
@@ -393,7 +393,7 @@ QuadNode *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, u16 *triLi
  * [minX, maxX] x [minZ, maxZ], as a stream of index deltas: a byte for a delta below 0x80,
  * otherwise a big-endian halfword index with bit 15 set. The stream ends with a 0 byte.
  */
-void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList) {
+void collision_writeLeafTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList) {
     MeshTri *tri;
     s32 count;
     s32 index;
@@ -410,7 +410,7 @@ void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList) {
 
     for (i = 1; i <= count; i++) {
         index = triList[i];
-        tri = &((MeshTri *)D_800DBE3C)[index]; // matching: the no-op cast keeps IDO's addu operand order
+        tri = &((MeshTri *)gCurMapTris)[index]; // matching: the no-op cast keeps IDO's addu operand order
 
         for (j = 0; j < 3; j++) {
             if ((u32)tri->verts[j] > 0x80000000) {
@@ -427,17 +427,17 @@ void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList) {
         if (func_15049260(pos) == 0) {
             delta = index - prev;
             if (prev == -1) {
-                func_15001B8C(index | 0x8000);
+                collision_quadPutHalf(index | 0x8000);
             } else if (delta < 0x80) {
-                func_15001B5C(delta);
+                collision_quadPutByte(delta);
             } else {
-                func_15001B8C(index | 0x8000);
+                collision_quadPutHalf(index | 0x8000);
             }
             prev = index;
         }
     }
 
-    func_15001B5C(0);
+    collision_quadPutByte(0);
 }
 
 /**
@@ -445,7 +445,7 @@ void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList) {
  * overlap the box [minX, maxX] x [minZ, maxZ], and returns their combined y range in
  * *minY / *maxY, widened to a multiple of 2 << gScreenLayout. Returns the count.
  */
-int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, u16 *triList, u16 **subList) {
+int collision_collectBoxTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, u16 *triList, u16 **subList) {
     s32 i;
     s32 j;
     s32 count;
@@ -475,7 +475,7 @@ int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, 
 
     for (i = 1; i < total; i++) {
         index = triList[i];
-        tri = &((MeshTri *)D_800DBE3C)[index]; // matching: the no-op cast keeps IDO's addu operand order
+        tri = &((MeshTri *)gCurMapTris)[index]; // matching: the no-op cast keeps IDO's addu operand order
 
         for (j = 0; j < 3; j++) {
             if ((u32)tri->verts[j] > 0x80000000) {
@@ -495,18 +495,18 @@ int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, 
             out[count] = index;
 
             if (haveRange) {
-                bound = (D_800DBE44[index].min - lowBits) & highBits;
+                bound = (gCurMapTriYBounds[index].min - lowBits) & highBits;
                 if (bound < *minY) {
                     *minY = bound;
                 }
-                bound = ((D_800DBE44[index].max + lowBits) & highBits) + lowBits;
+                bound = ((gCurMapTriYBounds[index].max + lowBits) & highBits) + lowBits;
                 if (*maxY < bound) {
                     *maxY = bound;
                 }
             } else {
                 haveRange = TRUE;
-                *minY = (D_800DBE44[index].min - lowBits) & highBits;
-                *maxY = ((D_800DBE44[index].max + lowBits) & highBits) + lowBits;
+                *minY = (gCurMapTriYBounds[index].min - lowBits) & highBits;
+                *maxY = ((gCurMapTriYBounds[index].max + lowBits) & highBits) + lowBits;
             }
         }
     }
@@ -519,7 +519,7 @@ int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, 
  * Threads the quadtree for traversal: every node without a sibling gets its `next` link pointed
  * at `parentNext`, the node that follows its parent (none at the root).
  */
-void func_15002560(QuadNode *node, QuadNode *parentNext) {
+void collision_threadQuadTree(QuadNode *node, QuadNode *parentNext) {
     s32 offset;
     QuadNode *next;
     QuadNode *child;
@@ -544,7 +544,7 @@ void func_15002560(QuadNode *node, QuadNode *parentNext) {
         child = (QuadNode *)((u8 *)node + offset);
         while (child->next != 0) {
             next = (QuadNode *)((u8 *)child + child->next);
-            func_15002560(child, next);
+            collision_threadQuadTree(child, next);
             child = next;
         }
         // the last child inherits this node's parentNext
@@ -567,8 +567,8 @@ void func_150025FC(void) {
     height = D_800DBE2C;
 
     D_800DBE28 = (((width + 7) / 8) + 15) & 0xFFF0;
-    res0 = func_1502B5C8(NULL, 2, 5, level * 2);
-    res1 = func_1502B5C8(NULL, 2, 5, level * 2 + 1);
+    res0 = rom_loadPath(NULL, 2, 5, level * 2);
+    res1 = rom_loadPath(NULL, 2, 5, level * 2 + 1);
     if (res0 == NULL) {
         D_800BE5D0 = 0;
     } else {
@@ -578,45 +578,45 @@ void func_150025FC(void) {
 }
 
 /** Starts collecting the triangles of map `map`. */
-void func_150026C4(s32 map) {
-    D_800DBE38 = 0;
-    func_1510F800(map);
+void collision_beginMapTris(s32 map) {
+    gMapTriCollected = 0;
+    collision_selectMap(map);
 }
 
 /** Records the number of triangles collected for map `map`. */
-void func_150026E8(s32 map) {
-    D_800DBE18[map] = D_800DBE38;
-    D_800DBE4C = D_800DBE38;
-    D_800B0DE4 += D_800DBE38;
+void collision_endMapTris(s32 map) {
+    gMapTriCounts[map] = gMapTriCollected;
+    gCurMapTriCount = gMapTriCollected;
+    gAllMapsTriCount += gMapTriCollected;
 }
 
 /** Adds the triangle count of display list `dl` to the running count. */
-void func_15002724(Gfx *dl) {
-    D_800DBE38 += func_150027F8(dl);
+void collision_addDlTriCount(Gfx *dl) {
+    gMapTriCollected += collision_countDlTris(dl);
 }
 
 /**
- * Carves the current map's triangle table (D_800DBDD8), x/z bounds (D_800DBDE8) and
- * y bounds (D_800DBDF8) out of the triangle-data arena, sized for the counted triangles.
+ * Carves the current map's triangle table (gMapTriTables), x/z bounds (gMapTriXZBounds) and
+ * y bounds (gMapTriYBounds) out of the triangle-data arena, sized for the counted triangles.
  */
-void func_15002754(void) {
+void collision_allocMapTriTables(void) {
     s32 count;
     s32 map;
 
-    D_800DBDD8[D_800DBE50] = D_800B0DC0 = (u8 *)ALIGN4(D_800B0DC0);
-    count = D_800DBE38;
-    map = D_800DBE50;
-    D_800B0DC0 += count * sizeof(MeshTri);
-    D_800DBDE8[map] = D_800B0DC0;
-    D_800B0DC0 += count * sizeof(XZRange);
-    D_800DBDF8[map] = D_800B0DC0;
-    D_800B0DC0 += count * sizeof(YRange);
-    func_1510F800(map);
-    D_800DBE38 = 0;
+    gMapTriTables[gCurMap] = gTriArenaCursor = (u8 *)ALIGN4(gTriArenaCursor);
+    count = gMapTriCollected;
+    map = gCurMap;
+    gTriArenaCursor += count * sizeof(MeshTri);
+    gMapTriXZBounds[map] = gTriArenaCursor;
+    gTriArenaCursor += count * sizeof(XZRange);
+    gMapTriYBounds[map] = gTriArenaCursor;
+    gTriArenaCursor += count * sizeof(YRange);
+    collision_selectMap(map);
+    gMapTriCollected = 0;
 }
 
 /** Returns the number of triangles drawn by display list `dl` (G_TRI1, G_TRI2 and Conker's G_TRI4). */
-s32 func_150027F8(Gfx *dl) {
+s32 collision_countDlTris(Gfx *dl) {
     s32 i;
     s32 numTris;
     s32 opcode;
@@ -639,16 +639,16 @@ s32 func_150027F8(Gfx *dl) {
     return numTris;
 }
 
-/** Returns the largest per-map triangle count (D_800DBE18[0..3]). */
-s32 func_15002878(void) {
+/** Returns the largest per-map triangle count (gMapTriCounts[0..3]). */
+s32 collision_getMaxMapTriCount(void) {
     s32 i;
     s32 count;
     s32 highest;
 
-    highest = D_800DBE18[0];
+    highest = gMapTriCounts[0];
 
     for (i = 1; i < 4; i++) {
-        count = D_800DBE18[i];
+        count = gMapTriCounts[i];
         if (highest < count) {
             highest = count;
         }
@@ -669,7 +669,7 @@ s32 func_15002878(void) {
  * Builds map `map`'s vertex runs (gModelVtxRuns[map], gModelVtxRunCounts[map] of them, sorted by address)
  * and triangle list (gModelTris[map]) by walking its display list. Returns 1 when out of memory.
  */
-s32 func_150028BC(s32 map) {
+s32 collision_buildVertexRuns(s32 map) {
     VtxRun *run;
     s32 vaddr;
     s32 numLists;
@@ -719,7 +719,7 @@ s32 func_150028BC(s32 map) {
     }
     numRuns = 0;
     numTris = 0;
-    base = (s32)D_800D19A0[map];
+    base = (s32)gModelData[map];
     for (i = 0; i < numLists; i++) {
         dl = (s8 *)gModelDlParts[map][i];
         j = 0;
@@ -821,19 +821,19 @@ s32 func_150028BC(s32 map) {
 #undef W0
 #undef CMD
 
-/** Sets D_800DBE64 for map `map`: 150 on maps 50 and 51, otherwise 85 when gIsMultiplayer is set, else 50. */
-void func_15002F40(s32 map) {
+/** Sets gFloorQueryReach for map `map`: 150 on maps 50 and 51, otherwise 85 when gIsMultiplayer is set, else 50. */
+void collision_setFloorReach(s32 map) {
     if (map == 50 || map == 51) {
-        D_800DBE64 = 150.0f;
+        gFloorQueryReach = 150.0f;
     } else if (gIsMultiplayer) {
-        D_800DBE64 = 85.0f;
+        gFloorQueryReach = 85.0f;
     } else {
-        D_800DBE64 = 50.0f;
+        gFloorQueryReach = 50.0f;
     }
 }
 
 /** XOR (un)scrambling for the constants of the ROM check below. */
-s32 func_15002FA0(s32 value) {
+s32 collision_xorScramble(s32 value) {
     return value ^ 0xF0F0F0F0;
 }
 
@@ -842,14 +842,14 @@ s32 func_15002FA0(s32 value) {
  * publishes its gLevelTaskCount/gLevelTaskIds table. If the cartridge word at 0xB0000A5C is not the
  * expected one, the table length unk12 is halved.
  */
-void func_15002FB4(s32 map) {
+void collision_loadMapSettings(s32 map) {
     LevelSettingsAsset *res;
     s32 count;
     u32 loaded;
     LevelHeader *info;
     u32 romWord;
 
-    res = func_1502B6BC(&loaded, 0, &count, 2, 21, map);
+    res = rom_loadPathTable(&loaded, 0, &count, 2, 21, map);
     if (count != 0 && (res->unk4 << 8) != 0) {
         D_800B0DF0 = res->header;
         if (loaded == 0) {
@@ -861,9 +861,9 @@ void func_15002FB4(s32 map) {
             func_150AD770();
         }
     }
-    // func_15002FA0(0x40F0FAAC) == 0xB0000A5C, func_15002FA0(0xE7B00F09) == 0x1740FFF9
-    func_151EF040(func_15002FA0(0x40F0FAAC), &romWord);
-    romWord = func_15002FA0(romWord);
+    // collision_xorScramble(0x40F0FAAC) == 0xB0000A5C, collision_xorScramble(0xE7B00F09) == 0x1740FFF9
+    func_151EF040(collision_xorScramble(0x40F0FAAC), &romWord);
+    romWord = collision_xorScramble(romWord);
     if (romWord != 0xE7B00F09) {
         info = D_800B0DF0;
         info->unk12 >>= 1;

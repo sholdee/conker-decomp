@@ -1,8 +1,8 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c). */
-struct UvWobble *D_800D9E60[1]; // the registered UV wobbles; only one fits
-u8 D_800D9E64;                  // number of registered UV wobbles
+struct UvWobble *gUvWobbles[1]; // the registered UV wobbles; only one fits
+u8 gUvWobbleCount;                  // number of registered UV wobbles
 
 #include "functions.h"
 #include "variables.h"
@@ -16,7 +16,7 @@ u8 D_800D9E64;                  // number of registered UV wobbles
  * stores the first one in *outVtx and returns how many there are (0 if the texture is never loaded).
  * Opcodes 0x10-0x1F are Conker's four-triangle command (12 five-bit indices).
  */
-s32 func_1510BF60(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip) {
+s32 texture_findTexVerts(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip) {
     s32 count;
     s32 unused;
     s32 state;
@@ -31,7 +31,7 @@ s32 func_1510BF60(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip) {
     s32 n;
     s32 minIdx;
 
-    func_1510D0EC(tex, &unused, 3, 0);
+    texture_getAddress(tex, &unused, 3, 0);
     *outVtx = NULL;
     state = 0;
     maxIdx = 0;
@@ -154,13 +154,13 @@ s32 func_1510BF60(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip) {
 }
 
 /* Registers a UV wobble for mesh 0 vertices drawn with texture `tex` and mesh 1 ones drawn with D_800917B8. */
-UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude) {
+UvWobble *texture_addUvWobble(s32 tex, s32 disabled, s32 rate, s32 amplitude) {
     Vtx *vtx;
     s32 count;
     s32 i;
     UvWobble *wob;
 
-    if (D_800D9E64 > 0) { /* only one wobble fits */
+    if (gUvWobbleCount > 0) { /* only one wobble fits */
         return NULL;
     }
 
@@ -169,7 +169,7 @@ UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude) {
         return NULL;
     }
 
-    D_800D9E60[D_800D9E64++] = wob;
+    gUvWobbles[gUvWobbleCount++] = wob;
     wob->disabled = disabled;
     wob->primary = NULL;
     wob->secondary = NULL;
@@ -177,7 +177,7 @@ UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude) {
     wob->rate = rate;
     wob->amplitude = amplitude;
 
-    count = func_1510BF60(D_800B0E00[0], tex, &vtx, 0);
+    count = texture_findTexVerts(D_800B0E00[0], tex, &vtx, 0);
     if (count != 0) {
         wob->primaryCount = count;
         wob->primaryIndex = vtx - D_800B0E10[0];
@@ -188,7 +188,7 @@ UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude) {
         }
     }
 
-    count = func_1510BF60(D_800B0E00[1], D_800917B8, &vtx, 0);
+    count = texture_findTexVerts(D_800B0E00[1], D_800917B8, &vtx, 0);
     if (count != 0) {
         wob->secondaryCount = count;
         wob->secondaryIndex = vtx - D_800B0E10[1];
@@ -203,7 +203,7 @@ UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude) {
 }
 
 /* Advances every enabled UV wobble and rewrites its vertices' texture coordinates. */
-void func_1510C8A8(void) {
+void texture_updateUvWobbles(void) {
     s32 i;
     s32 j;
     UvWobble *wob;
@@ -212,8 +212,8 @@ void func_1510C8A8(void) {
     s16 offS;
     s16 offT;
 
-    for (i = 0; i < D_800D9E64; i++) {
-        wob = D_800D9E60[i];
+    for (i = 0; i < gUvWobbleCount; i++) {
+        wob = gUvWobbles[i];
         if (wob->disabled == 0) {
             if (wob->primary != NULL) {
                 f32 sn;

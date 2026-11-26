@@ -34,7 +34,7 @@ void func_1503F5B8(AnimInstance *model, s32 restart, s32 anim, f32 speed, f32 bl
 }
 
 /*
- * Loads model `model` (see func_1502FE10) and creates its AnimInstance in *out, playing animation 0.
+ * Loads model `model` (see attach_loadModel) and creates its AnimInstance in *out, playing animation 0.
  * Returns 1 on failure.
  */
 s32 func_1503F62C(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg5, AnimInstance **out) {
@@ -49,7 +49,7 @@ s32 func_1503F62C(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, 
     bzero(*out, 0x40);
     (*out)->header[1][5] = 1;
     (*out)->header[0][5] = 1;
-    func_1502FE10(model, dlists, numDLists, data, arg5, &(*out)->unk3F0, &numParts);
+    attach_loadModel(model, dlists, numDLists, data, arg5, &(*out)->unk3F0, &numParts);
     (*out)->numParts = numParts;
     (*out)->bank = bank;
     (*out)->unk3F6 = FALSE;

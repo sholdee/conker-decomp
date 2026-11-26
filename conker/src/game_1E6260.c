@@ -62,8 +62,8 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
     spawn.gravity = 0.0f;
     spawn.lifetime = 300;
     spawn.model = 0x22;
-    func_1510F800(0);
-    spawn.unk5C = func_1510FD20(spawn.pos.x, spawn.pos.z);
+    collision_selectMap(0);
+    spawn.unk5C = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
     spawn.flags = (spawn.unk5C ? 0x400 : 0) | 0x100 | 0x800;
     spawn.variant = 0;
     spawn.alpha = 255;

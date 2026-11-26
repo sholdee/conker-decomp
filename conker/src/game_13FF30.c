@@ -289,7 +289,7 @@ Gfx *gfx_drawObject(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance
         gSPClearGeometryMode(gfx++, 0x400000);
     }
     gSPSetGeometryMode(gfx++, G_LIGHTING);
-    gfx = func_1510D8C0(func_1510CDB8(gfx, 255, alpha, view), obj);
+    gfx = texture_emitBindings(texture_setTintColors(gfx, 255, alpha, view), obj);
     if (pass == 0) {
         gSPSetGeometryMode(gfx++, G_FOG | G_LOD);
     }
@@ -521,7 +521,7 @@ void gfx_carryActorOnObject(Actor *actor, s32 objIndex) {
     }
     gfx_carryPointWithObject(objIndex, &actor->xpos, &actor->ypos, &actor->zpos);
     actor->angle += db_Object_array[objIndex].spinY * 182.04444885f;
-    if (actor->unk137 != 0 && objIndex + 1 == D_800CBDA0[actor - movement_obj]) {
+    if (actor->unk137 != 0 && objIndex + 1 == gActorTouchedObject[actor - movement_obj]) {
         actor->langle = actor->angle;
     }
 }
@@ -692,7 +692,7 @@ void gfx_startObjectSound(WorldObject *obj, s32 arg1, s32 arg2) {
 }
 
 /*
- * On level 0x12, 0x13 and 0x36 only: checks both D_800DBDD8 lists (stops with error 0xC00005A on a bad
+ * On level 0x12, 0x13 and 0x36 only: checks both gMapTriTables lists (stops with error 0xC00005A on a bad
  * entry), then stores the three arguments in D_800DBF9C..D_800DBFA4.
  */
 void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
@@ -702,8 +702,8 @@ void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
 
     if ((level == 0x12) || (level == 0x36) || (level == 0x13)) {
         for (j = 0; j < 2; j++) {
-            list = (u32 (*)[3])D_800DBDD8[j];
-            for (i = 0; i < D_800DBE18[j]; i++) {
+            list = (u32 (*)[3])gMapTriTables[j];
+            for (i = 0; i < gMapTriCounts[j]; i++) {
                 /* each entry holds three KSEG0 addresses, 4-byte aligned */
                 if (((list[i][0] & 0xF0000000) != 0x80000000) || ((list[i][1] & 0xF0000000) != 0x80000000) ||
                     ((list[i][2] & 0xF0000000) != 0x80000000) ||

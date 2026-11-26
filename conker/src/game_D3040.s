@@ -60,8 +60,8 @@ glabel func_150A5B90
     /* D30FC 150A5C4C 8E733694 */  lw         $s3, %lo(D_800D3694)($s3)
     /* D3100 150A5C50 C4DE0034 */  lwc1       $f30, 0x34($a2)
     /* D3104 150A5C54 C4DF0038 */  lwc1       $f31, 0x38($a2)
-    /* D3108 150A5C58 3C19800E */  lui        $t9, %hi(D_800DBE40)
-    /* D310C 150A5C5C 8F39BE40 */  lw         $t9, %lo(D_800DBE40)($t9)
+    /* D3108 150A5C58 3C19800E */  lui        $t9, %hi(gCurMapTriXZBounds)
+    /* D310C 150A5C5C 8F39BE40 */  lw         $t9, %lo(gCurMapTriXZBounds)($t9)
     /* D3110 150A5C60 3C18800E */  lui        $t8, %hi(D_800DF0E8)
     /* D3114 150A5C64 8F18F0E8 */  lw         $t8, %lo(D_800DF0E8)($t8)
     /* D3118 150A5C68 3C1E800E */  lui        $fp, %hi(D_800DF0F0)
@@ -246,8 +246,8 @@ glabel func_150A5E44
     /* D33C4 150A5F14 8DEFBEF8 */  lw         $t7, %lo(gObjectBlocks)($t7)
     /* D33C8 150A5F18 0018C040 */  sll        $t8, $t8, 1
     /* D33CC 150A5F1C 0304C021 */  addu       $t8, $t8, $a0
-    /* D33D0 150A5F20 3C10800E */  lui        $s0, %hi(D_800DBE40)
-    /* D33D4 150A5F24 8E10BE40 */  lw         $s0, %lo(D_800DBE40)($s0)
+    /* D33D0 150A5F20 3C10800E */  lui        $s0, %hi(gCurMapTriXZBounds)
+    /* D33D4 150A5F24 8E10BE40 */  lw         $s0, %lo(gCurMapTriXZBounds)($s0)
     /* D33D8 150A5F28 3C13800E */  lui        $s3, %hi(D_800DF0E8)
     /* D33DC 150A5F2C 8E73F0E8 */  lw         $s3, %lo(D_800DF0E8)($s3)
     /* D33E0 150A5F30 3C1E800E */  lui        $fp, %hi(D_800DF0F0)

@@ -6,7 +6,7 @@
 typedef struct {
     /* 0x00 */ u8 index; // 0 or 1: row of D_800A0FE0, D_800A0FE4 and D_800A0FFC
     /* 0x04 */ WorldObject *prop;
-    /* 0x08 */ ZoneNode *zone; // func_1510FD20 at the prop's x/z
+    /* 0x08 */ ZoneNode *zone; // collision_findZoneLeaf at the prop's x/z
     /* 0x0C */ f32 accum; // particles owed; one is emitted per whole unit
 } PropEmitter;
 
@@ -101,8 +101,8 @@ TimedEffect *func_150E1060(u8 index, u8 owner, s32 kind) {
         return NULL;
     }
 
-    func_1510F800(0);
-    emitter.zone = func_1510FD20(emitter.prop->x, emitter.prop->z);
+    collision_selectMap(0);
+    emitter.zone = collision_findZoneLeaf(emitter.prop->x, emitter.prop->z);
     emitter.accum = 0.0f;
 
     effect = func_15149130(300, -1, 0x1F, -1, 0, 0x1F, sizeof(emitter), owner, kind);

@@ -512,7 +512,7 @@ s32 func_1514D4B8(s16 root, s16 type) {
     return 0;
 }
 
-/** Spawns a func_150C5370 object running from a fixed point to `obj` and attaches it (type 0x15). */
+/** Spawns a beam_newStrip object running from a fixed point to `obj` and attaches it (type 0x15). */
 void func_1514D564(Actor *obj) {
     StripDesc desc;
     StripObj *spawned;
@@ -533,7 +533,7 @@ void func_1514D564(Actor *obj) {
     desc.p1.z = obj->zpos;
     desc.kind = 1;
     desc.texScale = 0.3199999928f;
-    spawned = func_150C5370(&desc, sizeof(payload));
+    spawned = beam_newStrip(&desc, sizeof(payload));
     if (spawned != NULL) {
         memcpy(&spawned->target, &payload, sizeof(payload));
         func_1514EC1C(spawned, obj, 0x15);
@@ -774,15 +774,15 @@ void func_1514DC98(Actor *obj) {
 /** Sets obj->unk9C to 0x6000 and spawns part sets 0x23 and 0x44 on `obj`. */
 void func_1514DCAC(Actor *obj) {
     obj->unk9C = 0x6000;
-    func_15083568(obj, 0x23, 1.0f, 0);
-    func_15083568(obj, 0x44, 1.0f, 0);
+    collision_createPartSet(obj, 0x23, 1.0f, 0);
+    collision_createPartSet(obj, 0x44, 1.0f, 0);
 }
 
 void func_1514DCF4(Actor *obj) {
     if (obj->mv != NULL) {
         obj->mv->unk94 = 1;
     }
-    func_15083568(obj, 0x17, 1.0f, 0);
+    collision_createPartSet(obj, 0x17, 1.0f, 0);
 }
 
 void func_1514DD2C(Actor *obj) {
@@ -840,7 +840,7 @@ void func_1514DE94(Actor *obj) {
 
     light_createBeam(obj, 12, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
-    part = func_15083568(obj, 0x3C, 1.0f, 0);
+    part = collision_createPartSet(obj, 0x3C, 1.0f, 0);
     if (D_800BE9B4 == 0) {
         part->unk38 = 2400;
     }
@@ -849,7 +849,7 @@ void func_1514DE94(Actor *obj) {
 
 /** Links `obj` to the object whose unique_id is 9 (unk65 holds that object's slot + 1). */
 void func_1514DFD0(Actor *obj) {
-    obj->attach_char = func_15083FB0(9) + 1;
+    obj->attach_char = collision_findObjectSlotById(9) + 1;
     obj->unk101 |= 0x34;
 }
 
@@ -1366,7 +1366,7 @@ void func_1514EDF0(void *handle, Actor *owner) {
     } while (found);
 }
 
-/** Attaches a func_1515BE50 object for `obj` (type 0x16). */
+/** Attaches a sprite_newActorTracker object for `obj` (type 0x16). */
 void func_1514EE70(Actor *obj) {
     ActorTrackerDesc desc;
     ActorTracker *handle;
@@ -1375,7 +1375,7 @@ void func_1514EE70(Actor *obj) {
     desc.actorId = obj->unique_id;
     desc.flags = 0;
     desc.lifetime = 300;
-    handle = func_1515BE50(&desc, 0, 0xFF, 1);
+    handle = sprite_newActorTracker(&desc, 0, 0xFF, 1);
     func_1514EC1C(handle, obj, 0x16);
 }
 

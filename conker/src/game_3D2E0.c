@@ -23,7 +23,7 @@ void func_1500FE30(void) {
 }
 
 void func_1500FF9C(void) {
-    func_1510C4AC(D_800917B8, 0, 0xAD, 0x75);
+    texture_addUvWobble(D_800917B8, 0, 0xAD, 0x75);
 }
 
 void func_1500FFCC(void) {

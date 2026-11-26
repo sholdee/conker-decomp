@@ -52,7 +52,7 @@ static void (*gLightEffectDestroyHandlers[])(LightEffect *) = {
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
-    func_151617C4, func_150F0390, flamethrower_destroyFlameLight, func_151617C4,
+    func_151617C4, beam_destroyFlash, flamethrower_destroyFlameLight, func_151617C4,
     func_151617C4, func_15190464, func_151617C4, func_151617C4,
     func_151617C4, func_151617C4,
 };
@@ -65,14 +65,14 @@ static void (*gLightEffectFreeHandlers[])(LightEffect *) = {
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
-    func_151617E4, func_150F03BC, flamethrower_freeFlameLight, func_151617E4,
+    func_151617E4, beam_freeFlash, flamethrower_freeFlameLight, func_151617E4,
     func_151617E4, func_15190490, func_151617E4, func_151617E4,
     func_151617E4, func_151617E4,
 };
 
-/* Payload event handlers of actor-following lights (LightActorRef.eventHandler); func_150F1684 takes
+/* Payload event handlers of actor-following lights (LightActorRef.eventHandler); beam_actorBoundMessage takes
  * the effect and the event as its own types. */
-static void (*gLightActorEventHandlers[])(LightEffect *, ActorEvent *, u8) = { NULL, func_150F1684, NULL };
+static void (*gLightActorEventHandlers[])(LightEffect *, ActorEvent *, u8) = { NULL, beam_actorBoundMessage, NULL };
 
 /* State change callbacks of cycling lights (LightCycle). Declared without a prototype: the caller
  * passes the state too. */
@@ -430,7 +430,7 @@ s32 light_updateBeam(LightEffect *effect) {
                 }
             }
         }
-        func_15081690(actor, start.x, start.y, start.z, dir.x, dir.y, dir.z, &ray, 0.0f, 0, 0, 1, -1, 0, 0);
+        collision_castRay(actor, start.x, start.y, start.z, dir.x, dir.y, dir.z, &ray, 0.0f, 0, 0, 1, -1, 0, 0);
         hitType = ray.hitType;
         if (hitType == 0) {
             effect->light->x = actor->xpos;

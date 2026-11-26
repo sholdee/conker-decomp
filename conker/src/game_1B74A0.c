@@ -30,7 +30,7 @@ s32 func_1518A094(BoneGlow *emitter) {
 
     attach = &emitter->attach;
     if (attach->target == NULL) {
-        attach->target = func_15083E90(attach->targetId);
+        attach->target = collision_findObjectById(attach->targetId);
         if (attach->target == NULL) {
             return 0;
         }

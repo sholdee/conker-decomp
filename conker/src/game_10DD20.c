@@ -32,8 +32,8 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
         top.x = origin.x;
         top.y = origin.y + 100.0f;
         top.z = origin.z;
-        func_1504715C(&hit, obj);
-        if (func_15046C80(&top, 0, origin.y - 200.0f, &hit) && (hit.flags & 1)) {
+        collision_initHitFromObject(&hit, obj);
+        if (collision_probeFloorSurfABSet0Cached(&top, 0, origin.y - 200.0f, &hit) && (hit.flags & 1)) {
             impact.x = top.x;
             hitGround = TRUE;
             impact.y = hit.height;

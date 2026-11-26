@@ -307,7 +307,7 @@ void func_150E3738(HomingEffect *arg0) {
             point.z = rnd * step.z + prevPos.z + offsetZ;
         }
         end = point;
-        if (func_15046C80(&point, 0, point.y - 1000.0f, &effect->ground) != 0) {
+        if (collision_probeFloorSurfABSet0Cached(&point, 0, point.y - 1000.0f, &effect->ground) != 0) {
             end.y = effect->ground.height;
         }
         {

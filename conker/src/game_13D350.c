@@ -276,8 +276,8 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
         break;
     case 0xB:
         byHeight = FALSE;
-        if (func_150A29C8(0, 0x18) == 1) {
-            if (func_150A29C8(0, 0x2E) == 0) {
+        if (zone_isActorOutsideId(0, 0x18) == 1) {
+            if (zone_isActorOutsideId(0, 0x2E) == 0) {
                 if (pitch > 0.0f) {
                     ret = 0;
                 } else {
@@ -465,7 +465,7 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4,
                     colIdx >= 2 && colIdx < 4) {
                     texIndex = (s32)&D_1673[colIdx * 3 + rowIdx - 10];
                 }
-                texAddr = func_1510D0EC(texIndex, 0, 3, 0);
+                texAddr = texture_getAddress(texIndex, 0, 3, 0);
                 if (!D_800DBEAB || rowIdx < limit) {
                     maxT = (u16)(s32)((tileH + 0.5f) * 32.0f);
                     maxS = (u16)(s32)((tileW + 0.5f) * 32.0f);
@@ -565,12 +565,12 @@ void func_1511172C(s32 sky) {
     if (sky != D_800B0DF0->unk9 && D_800B0DF0->unk8 == 4) {
         if (D_80038080 != 0) {
             for (i = 0; i != 360; i++) {
-                func_1510D694(D_800891BC[D_800B0DF0->unk9][0] + i);
+                texture_releaseId(D_800891BC[D_800B0DF0->unk9][0] + i);
             }
         }
         func_10004074(D_800DBE80);
         D_800B0DF0->unk9 = sky;
-        func_1502B7F0(&D_800DBE80, 2, 13, D_800B0DF0->unk9);
+        rom_loadPathTo(&D_800DBE80, 2, 13, D_800B0DF0->unk9);
     }
 }
 

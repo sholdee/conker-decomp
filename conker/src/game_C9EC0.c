@@ -170,7 +170,7 @@ s32 script_loadResourceTable(s32 arg0, s32 *countOut) {
     s32 pad[2]; // matching: frame size
 
     count = 0;
-    gResourceTable = func_1502B6BC(0, 0, &count, 3, 8, 0, arg0);
+    gResourceTable = rom_loadPathTable(0, 0, &count, 3, 8, 0, arg0);
     if (gResourceTable == NULL) {
         *countOut = 0;
         return 0;
@@ -316,7 +316,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
 
                 target = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
                 if (target != NULL) {
-                    func_1514EC1C(func_150F6DE4(target), target, 27);
+                    func_1514EC1C(beam_spawnCastBeam(target), target, 27);
                 }
             }
             break;
@@ -334,7 +334,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
                 pos.x = cmd->arg.w;
                 pos.y = 20000.0f;
                 pos.z = cmd->a[0].w;
-                if (func_15046C80(&pos, 0, floor.height, &floor) != 0) {
+                if (collision_probeFloorSurfABSet0Cached(&pos, 0, floor.height, &floor) != 0) {
                     { // matching: -g3 block keeps the float stores out of the branch delay slot
                         Vec3f dir;
 
@@ -373,7 +373,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
                 u8 values[8];
 
                 values[0] = D_8009F0D0[0];
-                obj = func_15083E90(cmd->arg.b.lo);
+                obj = collision_findObjectById(cmd->arg.b.lo);
                 // matching: the no-op ternary orders the argument moves
                 func_1518F51C(obj ? obj : obj, values[cmd->a[0].w], cmd->a[1].h.lo, -1, -1, -1, 0, 0, 0xFF, 1);
             }
@@ -480,7 +480,7 @@ s32 script_endEffect(s32 cmdId, ScriptCmd *cmd) {
         case 36:
             obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
             if (obj != NULL) {
-                func_150F6DB0(obj);
+                beam_sendOwnerGone(obj);
             }
             break;
         case 26:

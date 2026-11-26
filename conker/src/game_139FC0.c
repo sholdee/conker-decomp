@@ -1,29 +1,29 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c): per camera slot, the tint
- * channels func_1510CB10 steps and waves (set up by func_15000940 from the tables below). */
-u16 D_800D9E70[4][3]; // wave phase (12 bits after >> 4)
-u8 D_800D9E88[4][3];  // wave phase step
-u8 D_800D9E98[4][3];  // wave amplitude
-u8 D_800D9EA8[4][3];  // current level
-u8 D_800D9EB4[3];     // default target level
-u8 D_800D9EB8[4][3];  // override target level ([0] != 0: use it for this frame)
+ * channels texture_updateTint steps and waves (set up by func_15000940 from the tables below). */
+u16 gTintWavePhases[4][3]; // wave phase (12 bits after >> 4)
+u8 gTintWaveSteps[4][3];  // wave phase step
+u8 gTintWaveAmps[4][3];  // wave amplitude
+u8 gTintLevels[4][3];  // current level
+u8 gTintDefaultTargets[3];     // default target level
+u8 gTintTargetOverrides[4][3];  // override target level ([0] != 0: use it for this frame)
 
 #include "functions.h"
 #include "variables.h"
 
 /* Tint presets, chosen per level by func_15000940: an entry's three indices pick the phase step,
  * amplitude and target level rows. */
-const u8 D_800A2CD0[7][3] = {
+const u8 gTintPresets[7][3] = {
     { 0, 0, 0 }, { 0, 1, 1 }, { 0, 2, 2 }, { 0, 3, 3 }, { 0, 4, 4 }, { 0, 5, 5 }, { 0, 6, 6 },
 };
-const u8 D_800A2CE8[1][3] = {
+const u8 gTintPresetSteps[1][3] = {
     { 11, 23, 34 },
 };
-const u8 D_800A2CEC[7][3] = {
+const u8 gTintPresetAmps[7][3] = {
     { 20, 40, 20 }, { 20, 20, 40 }, { 0, 16, 40 }, { 20, 20, 20 }, { 10, 10, 10 }, { 0, 0, 0 }, { 20, 20, 10 },
 };
-const u8 D_800A2D04[7][3] = {
+const u8 gTintPresetTargets[7][3] = {
     { 80, 127, 235 }, { 80, 235, 127 }, { 0, 71, 70 }, { 59, 102, 12 }, { 70, 85, 45 }, { 128, 128, 128 }, { 90, 67, 31 },
 };
 
@@ -32,7 +32,7 @@ extern u8 compressed_ROM_START[];
 
 
 /* Steps slot's tint channels toward their targets and applies a func_150489B0 wave to the prim/env colors. */
-void func_1510CB10(s32 slot) {
+void texture_updateTint(s32 slot) {
     f32 wave;
     s32 step;
     s32 target;
@@ -43,15 +43,15 @@ void func_1510CB10(s32 slot) {
     s32 i;
 
     if (camera_global_Cameras[slot].SpecialFlags & 1) {
-        override = D_800D9EB8[slot][0];
+        override = gTintTargetOverrides[slot][0];
         step = D_800BE9E4 * 2;
 
         for (i = 0; i < 3; i++) {
-            cur = D_800D9EA8[slot][i];
+            cur = gTintLevels[slot][i];
             if (override) {
-                target = D_800D9EB8[slot][i];
+                target = gTintTargetOverrides[slot][i];
             } else {
-                target = D_800D9EB4[i];
+                target = gTintDefaultTargets[i];
             }
 
             diff = target - cur;
@@ -64,10 +64,10 @@ void func_1510CB10(s32 slot) {
                 } else {
                     cur += step;
                 }
-                D_800D9EA8[slot][i] = cur;
+                gTintLevels[slot][i] = cur;
             }
 
-            wave = D_800D9E98[slot][i] * func_150489B0(D_800D9E70[slot][i] >> 4);
+            wave = gTintWaveAmps[slot][i] * func_150489B0(gTintWavePhases[slot][i] >> 4);
             amount = (s32)wave + cur - 127;
             if (amount >= 0) {
                 D_800D9B68[slot][i] += amount;
@@ -82,16 +82,16 @@ void func_1510CB10(s32 slot) {
                 D_800D9B78[slot][i] = 127;
             }
 
-            D_800D9E70[slot][i] += D_800D9E88[slot][i];
-            D_800D9E70[slot][i] &= 0xFFF;
+            gTintWavePhases[slot][i] += gTintWaveSteps[slot][i];
+            gTintWavePhases[slot][i] &= 0xFFF;
         }
 
-        D_800D9EB8[slot][0] = 0;
+        gTintTargetOverrides[slot][0] = 0;
     }
 }
 
 /* Emits the prim and env colors for slot's current tint. */
-Gfx *func_1510CDB8(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot) {
+Gfx *texture_setTintColors(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot) {
     gDPSetPrimColor(gfx++, 0xF2, 0, D_800D9B68[slot][0], D_800D9B68[slot][1], D_800D9B68[slot][2], primAlpha);
     gDPSetEnvColor(gfx++, D_800D9B78[slot][0], D_800D9B78[slot][1], D_800D9B78[slot][2], envAlpha);
     return gfx;
@@ -102,13 +102,13 @@ Gfx *func_1510CDB8(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot) {
 
 /*
  * Resolves the texture references in a display list: each G_SETTIMG whose image address is a texture
- * index (segment 0) is replaced with the loaded texture's address via func_1510D0EC, offset to its
+ * index (segment 0) is replaced with the loaded texture's address via texture_getAddress, offset to its
  * palette and given a segment when the flag bits in the address ask for it. With strict set, only
  * commands whose address has no flag bits are touched. When usedOut is non-NULL it receives a newly
  * allocated list (count, then the indices) of the distinct textures referenced.
  * Returns whether every texture loaded.
  */
-s32 func_1510CE60(Gfx *dl, s32 strict, u32 countUse, s32 lifetime, s16 **usedOut) {
+s32 texture_resolveDl(Gfx *dl, s32 strict, u32 countUse, s32 lifetime, s16 **usedOut) {
     s32 seg;
     s32 i;
     s32 texSize;
@@ -144,7 +144,7 @@ s32 func_1510CE60(Gfx *dl, s32 strict, u32 countUse, s32 lifetime, s16 **usedOut
                 seg = dram & 0x0F000000;
                 dram &= 0xF03FFFFF;
                 if (seg == 0) {
-                    texAddr = func_1510D0EC(dram, &texSize, lifetime, countUse);
+                    texAddr = texture_getAddress(dram, &texSize, lifetime, countUse);
                     gfx->words.w1 = texAddr;
                     if (usedOut != NULL) {
                         value = 1 << (dram & 7);
@@ -204,13 +204,13 @@ typedef struct {
 
 /*
  * Returns the address of texture `index`, loading it on first use: its compressed bytes (size from
- * D_80091D20, located by func_1510D374) are read from ROM and decompressed into a new buffer of the
+ * D_80091D20, located by texture_getRomAddress) are read from ROM and decompressed into a new buffer of the
  * size given by D_800B87A0. Returns 0x80000000 for an invalid index or a failed load. Also widens the
- * D_800D9F58..D_800D9F5C range of indices to scan, raises the texture's lifetime (see func_1510D404)
+ * gTexAgeFirst..gTexAgeLast range of indices to scan, raises the texture's lifetime (see texture_updateAging)
  * to at least `lifetime` and, when countUse is set, bumps its use count. sizeOut (optional) receives
  * the decompressed size.
  */
-s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
+s32 texture_getAddress(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
     s32 packedSize;
     s32 romAddr;
     s32 texture;
@@ -218,11 +218,11 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
     u8 *packed;
     s32 len;
 
-    if (index < D_800D9F58) {
-        D_800D9F58 = index;
+    if (index < gTexAgeFirst) {
+        gTexAgeFirst = index;
     }
-    if (D_800D9F5C < index) {
-        D_800D9F5C = index;
+    if (gTexAgeLast < index) {
+        gTexAgeLast = index;
     }
     if (index >= 0x1E52 || index < 0) {
         return 0x80000000;
@@ -231,11 +231,11 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
     if (packedSize == 0) {
         D_800B0E58[index] = 0x80000000;
     } else if (D_800B0E58[index] == -1) {
-        D_800DBDBA = 5;
+        gTexLoadCooldown = 5;
         if (lifetime == 0x3F) {
             lifetime = 0x3E;
         }
-        romAddr = func_1510D374(index);
+        romAddr = texture_getRomAddress(index);
         len = packedSize;
         if (romAddr & 1) {
             romAddr--;
@@ -251,7 +251,7 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
         if (packed == NULL) {
             return 0x80000000;
         }
-        func_10004514(romAddr, packed, (len + odd + 0xF) & ~0xF, 1);
+        rom_read(romAddr, packed, (len + odd + 0xF) & ~0xF, 1);
         len = D_800B87A0[index];
         texture = (s32)func_10003C6C(len, 1, 1, 0, 2); // the texture cache D_800B0E58 holds addresses as s32
         if (texture == 0) {
@@ -261,7 +261,7 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
         func_10006240(packed + odd, texture, D_8003809C);
         func_10004074(packed);
         D_800B0E58[index] = texture;
-        D_800D9F68[index] = 0;
+        gTexUseCounts[index] = 0;
     }
     if (sizeOut != NULL) {
         len = D_800B87A0[index];
@@ -272,8 +272,8 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
         D_800BC448[index] = lifetime;
     }
     if (countUse != 0) {
-        if (D_800D9F68[index] < 255) {
-            D_800D9F68[index]++;
+        if (gTexUseCounts[index] < 255) {
+            gTexUseCounts[index]++;
         }
     }
     // matching: taking texture's address keeps it in memory, as in the original
@@ -282,7 +282,7 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
 }
 
 /* Returns the ROM address of texture `index`'s compressed data: the textures are packed back to back. */
-s32 func_1510D374(s32 index) {
+s32 texture_getRomAddress(s32 index) {
     s32 romAddr;
     s32 i;
 
@@ -295,40 +295,40 @@ s32 func_1510D374(s32 index) {
 }
 
 /*
- * Ages the textures in the D_800D9F58..D_800D9F5C range, freeing those whose lifetime
+ * Ages the textures in the gTexAgeFirst..gTexAgeLast range, freeing those whose lifetime
  * runs out and re-decompressing those flagged 0x40, and narrows the range to the ones still pending.
  */
-void func_1510D404(void) {
+void texture_updateAging(void) {
     s32 start;
     s32 end;
     s32 i;
     u8 *data;
     s32 size;
 
-    if (D_800D9F5C == -1) {
+    if (gTexAgeLast == -1) {
         return;
     }
-    if (D_800DBDBA == 0 && D_800D9F60 != 0) {
+    if (gTexLoadCooldown == 0 && gTexAgeThrottle != 0) {
         return;
     }
-    if (D_800DBDBA != 0) {
-        D_800DBDBA -= 1;
+    if (gTexLoadCooldown != 0) {
+        gTexLoadCooldown -= 1;
     }
-    start = D_800D9F58;
-    end = D_800D9F5C;
-    D_800D9F58 = 0xFFFF;
-    D_800D9F5C = -1;
+    start = gTexAgeFirst;
+    end = gTexAgeLast;
+    gTexAgeFirst = 0xFFFF;
+    gTexAgeLast = -1;
     if (start < 0 || end >= 0x1E53) {
         D_8003C8E0 = 0x0C000046;
         func_150AD770();
     }
-    D_800DBDBC = -1;
+    gTexLastFreed = -1;
     for (i = start; i <= end; i++) {
         if (D_800BC448[i] != 0) {
             if (D_800BC448[i] < 4) {
                 D_800BC448[i]--;
                 if (D_800BC448[i] == 0) {
-                    D_800DBDBC = i;
+                    gTexLastFreed = i;
                     // matching: the empty compare counts as a loop use of -1, so IDO keeps -1 in a register
                     func_10004074((s16 *)D_800B0E58[i]);
                     if (i == -1) {
@@ -336,11 +336,11 @@ void func_1510D404(void) {
                     D_800B0E58[i] = -1;
                     continue; // matching: the extra loop block lowers the loop-limit temp's register priority
                 } else {
-                    if (i < D_800D9F58) {
-                        D_800D9F58 = i;
+                    if (i < gTexAgeFirst) {
+                        gTexAgeFirst = i;
                     }
-                    if (D_800D9F5C < i) {
-                        D_800D9F5C = i;
+                    if (gTexAgeLast < i) {
+                        gTexAgeLast = i;
                     }
                 }
             } else if (D_800BC448[i] & 0x40) {
@@ -349,20 +349,20 @@ void func_1510D404(void) {
                 func_10006240(data + size, (Entry1510D404 *)D_800B0E58[i], D_8003809C);
                 func_10004074(data);
                 D_800BC448[i] &= ~0x40;
-                if (i < D_800D9F58) {
-                    D_800D9F58 = i;
+                if (i < gTexAgeFirst) {
+                    gTexAgeFirst = i;
                 }
-                if (D_800D9F5C < i) {
-                    D_800D9F5C = i;
+                if (gTexAgeLast < i) {
+                    gTexAgeLast = i;
                 }
             }
         }
     }
-    D_800DBDBC = -2;
+    gTexLastFreed = -2;
 }
 
 /* Sets a loaded texture's lifetime, keeping its 0x40 flag; unloaded textures (lifetime 0) are left alone. */
-void func_1510D608(s32 index, s32 lifetime) {
+void texture_setLifetime(s32 index, s32 lifetime) {
     s8 *state = &D_800BC448[index];
     s8 prev = *state;
 

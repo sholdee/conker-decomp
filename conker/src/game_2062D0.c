@@ -40,9 +40,9 @@ static void (*D_8008FD38[13])(ParticleDesc *) = {
 
 
 
-/* Effect kind for the current context: D_800E0A10, or kind 10 when level is clear and func_150A29C8(0, 0x1C) fails. */
+/* Effect kind for the current context: D_800E0A10, or kind 10 when level is clear and zone_isActorOutsideId(0, 0x1C) fails. */
 s32 func_151D8E20(void) {
-    if ((level == 0) && (func_150A29C8(0, 0x1C) == 0)) {
+    if ((level == 0) && (zone_isActorOutsideId(0, 0x1C) == 0)) {
         return 10;
     }
     return D_800E0A10;
@@ -239,7 +239,7 @@ u8 func_151D9534(SteamParticle *particle, Vec3f *arg1) {
         if (func_1514672C(&point) == 0) {
             return 0;
         }
-        if (func_15046C80(&point, 0,
+        if (collision_probeFloorSurfABSet0Cached(&point, 0,
  particle->head.desc.pos.y, &particle->head.floor) != 0) {
             point.y = particle->head.floor.height + 2.0f;
             if (particle->data.wobble.flags & WOBBLE_FLAG_BOUNCE) {

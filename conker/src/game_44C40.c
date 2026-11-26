@@ -43,32 +43,32 @@ void func_15017868(void) {
     script_loadLevelTasks((s16)level, 1);
 }
 
-/* Loads the level's object table and builds the list D_800D3270 of the ZONE_TYPE_CHAR_FLAGS TriggerZones with subTypeData 0, 2 or 6. */
-void func_15017930(s32 arg0) {
+/* Loads the level's object table and builds the list gCharFlagZones of the ZONE_TYPE_CHAR_FLAGS TriggerZones with subTypeData 0, 2 or 6. */
+void zone_loadObjects(s32 arg0) {
     u32 i;
     u32 count;
     s32 type;
 
-    gZoneCount = func_1502B7F0(&zones, 3, 0xC, arg0, 5);
+    gZoneCount = rom_loadPathTo(&zones, 3, 0xC, arg0, 5);
     count = gZoneCount / sizeof(TriggerZone);
     gZoneCount = count;
-    func_15017B20(zones, count);
-    D_800D3274 = 0;
-    D_800D3270 = NULL;
+    zone_computeAllBounds(zones, count);
+    gCharFlagZoneCount = 0;
+    gCharFlagZones = NULL;
     for (i = 0; i < gZoneCount; i++) {
         if (ZONE_TYPE(&zones[i]) == ZONE_TYPE_CHAR_FLAGS &&
             (zones[i].subTypeData == 2 || zones[i].subTypeData == 0 || zones[i].subTypeData == 6)) {
-            D_800D3274++;
+            gCharFlagZoneCount++;
         }
         type = ZONE_TYPE(&zones[i]);
         if (type == ZONE_TYPE_SOUND || type == ZONE_TYPE_TUNE_CHANNEL) {
             zones[i].data3 = 0;
         }
     }
-    if (D_800D3274 != 0) {
-        D_800D3270 = allocate_memory(D_800D3274 * sizeof(TriggerZone *), 1, 0, 0);
-        if (D_800D3270 != NULL) {
-            TriggerZone **out = D_800D3270;
+    if (gCharFlagZoneCount != 0) {
+        gCharFlagZones = allocate_memory(gCharFlagZoneCount * sizeof(TriggerZone *), 1, 0, 0);
+        if (gCharFlagZones != NULL) {
+            TriggerZone **out = gCharFlagZones;
 
             for (i = 0; i < gZoneCount; i++) {
                 if (ZONE_TYPE(&zones[i]) == ZONE_TYPE_CHAR_FLAGS &&
@@ -78,19 +78,19 @@ void func_15017930(s32 arg0) {
             }
         }
     }
-    bzero(D_800D30F0, sizeof(D_800D30F0));
-    bzero(D_800D30D0, sizeof(D_800D30D0));
+    bzero(gActorZoneBits, sizeof(gActorZoneBits));
+    bzero(gActorLastZoneBox, sizeof(gActorLastZoneBox));
 }
 
 /* Whether the ranges [a0, a1) and [b0, b1) overlap. */
 #define OVERLAP(a0, a1, b0, b1) (((a0 <= b0) && (b0 < a1)) || ((b0 < a0) && (a0 < b1)) || ((a0 < b1) && (b1 < a1)))
 
 /*
- * Computes the bounds of every level object and the object bitsets D_800D30A0 (shape 3 or flag 8,
- * without flag 4) and D_800D30B8 (all others without flag 4). For each object in D_800D30B8 it
- * records which other D_800D30B8 objects its bounds overlap.
+ * Computes the bounds of every level object and the object bitsets gZonesAlwaysTested (shape 3 or flag 8,
+ * without flag 4) and gZonesCandidates (all others without flag 4). For each object in gZonesCandidates it
+ * records which other gZonesCandidates objects its bounds overlap.
  */
-void func_15017B20(TriggerZone *objects, s32 count) {
+void zone_computeAllBounds(TriggerZone *objects, s32 count) {
     s32 pad[6]; // matching: stack frame size
     u64 bitI;
     u64 bitJ;
@@ -100,43 +100,43 @@ void func_15017B20(TriggerZone *objects, s32 count) {
     s32 i;
     s32 j;
 
-    D_800D309C = allocate_memory(count * sizeof(ZoneBounds), 1, 1, 0);
+    gZoneBounds = allocate_memory(count * sizeof(ZoneBounds), 1, 1, 0);
     for (i = 0; i < count; i++) {
         zone_cacheAngles(&objects[i]);
-        func_15017FA4(&objects[i], &D_800D309C[i]);
+        zone_computeBounds(&objects[i], &gZoneBounds[i]);
     }
-    bzero(D_800D30A0, sizeof(D_800D30A0));
+    bzero(gZonesAlwaysTested, sizeof(gZonesAlwaysTested));
     for (i = 0; i < count; i++) {
         if ((ZONE_AREA_TYPE(&objects[i]) == ZONE_AREA_GATE) || (objects[i].flags & 8)) {
             if (!(objects[i].flags & 4)) {
-                D_800D30A0[i >> 6] |= (u64)1 << (i & 63);
+                gZonesAlwaysTested[i >> 6] |= (u64)1 << (i & 63);
             }
         }
     }
-    bzero(D_800D30B8, sizeof(D_800D30B8));
+    bzero(gZonesCandidates, sizeof(gZonesCandidates));
     for (i = 0; i < count; i++) {
         if (ZONE_AREA_TYPE(&objects[i]) != ZONE_AREA_GATE) {
             if (!(objects[i].flags & 8) && !(objects[i].flags & 4)) {
-                D_800D30B8[i >> 6] |= (u64)1 << (i & 63);
+                gZonesCandidates[i >> 6] |= (u64)1 << (i & 63);
             }
         }
     }
-    wordI = D_800D30B8;
+    wordI = gZonesCandidates;
     bitI = 1;
     for (i = 0; i < count; i++) {
-        wordJ = D_800D30B8;
-        D_800D309C[i].numOverlaps = 0;
+        wordJ = gZonesCandidates;
+        gZoneBounds[i].numOverlaps = 0;
         if (*wordI & bitI) {
             bitJ = 1;
-            overlapWord = (u64 *)&D_800D309C[i]; // matching: same as .overlaps, but that form schedules differently
-            bzero(D_800D309C[i].overlaps, sizeof(D_800D309C[i].overlaps));
+            overlapWord = (u64 *)&gZoneBounds[i]; // matching: same as .overlaps, but that form schedules differently
+            bzero(gZoneBounds[i].overlaps, sizeof(gZoneBounds[i].overlaps));
             for (j = 0; j < count; j++) {
                 if (*wordJ & bitJ) {
-                    if (OVERLAP(D_800D309C[i].minX, D_800D309C[i].maxX, D_800D309C[j].minX, D_800D309C[j].maxX) &&
-                        OVERLAP(D_800D309C[i].minY, D_800D309C[i].maxY, D_800D309C[j].minY, D_800D309C[j].maxY) &&
-                        OVERLAP(D_800D309C[i].minZ, D_800D309C[i].maxZ, D_800D309C[j].minZ, D_800D309C[j].maxZ)) {
+                    if (OVERLAP(gZoneBounds[i].minX, gZoneBounds[i].maxX, gZoneBounds[j].minX, gZoneBounds[j].maxX) &&
+                        OVERLAP(gZoneBounds[i].minY, gZoneBounds[i].maxY, gZoneBounds[j].minY, gZoneBounds[j].maxY) &&
+                        OVERLAP(gZoneBounds[i].minZ, gZoneBounds[i].maxZ, gZoneBounds[j].minZ, gZoneBounds[j].maxZ)) {
                         *overlapWord |= bitJ;
-                        D_800D309C[i].numOverlaps++;
+                        gZoneBounds[i].numOverlaps++;
                     }
                 }
                 bitJ <<= 1;
@@ -160,7 +160,7 @@ void func_15017B20(TriggerZone *objects, s32 count) {
  * object's scale (from its size and shape) and rotation, offset by its position. Unknown shapes
  * get zero-size bounds at the position.
  */
-void func_15017FA4(TriggerZone *obj, ZoneBounds *bounds) {
+void zone_computeBounds(TriggerZone *obj, ZoneBounds *bounds) {
     s32 i;
     s32 shape;
     s32 invalid;

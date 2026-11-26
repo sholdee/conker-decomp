@@ -80,7 +80,7 @@ void func_151177C0(WorldObject *prop) {
         travel = 10;
         autoReturn = TRUE;
         step = 6;
-        onArrive = func_15104A80;
+        onArrive = beam_onPropArrival;
     } else if (kind == 4) {
         travel = 15;
     }

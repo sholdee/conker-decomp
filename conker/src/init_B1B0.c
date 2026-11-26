@@ -562,7 +562,7 @@ s32 func_1000BCBC(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         if (state != volume) {
             func_1000886C(channel, 3, volume);
         }
-        if (func_150A29C8(0, 0x4041) == 0) {
+        if (zone_isActorOutsideId(0, 0x4041) == 0) {
             distance = 1290.0f - y;
             if (1290.0f < y) {
                 volume = 32;

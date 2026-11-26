@@ -3,12 +3,12 @@
 #include "variables.h"
 
 /*
- * Model attachment hook 10 (D_800841C0[10]). While the actor is in state 0x14 past animation frame 10,
+ * Model attachment hook 10 (gAttachHooks[10]). While the actor is in state 0x14 past animation frame 10,
  * or in state 0x23, spawns a projectile (animation 0x4E) placed and rotated by the attachment's matrix
  * from the other frame buffer.
  * Returns 1 when it spawned one.
  */
-s32 func_150C8730(ModelAttachment *att, Actor *actor) {
+s32 attach_hookSpawnProjectile(ModelAttachment *att, Actor *actor) {
     AnimInstance *anim;
     s32 state;
     Actor *obj;

@@ -345,7 +345,7 @@ void func_150169A0(s32 levelId);
 void func_15017114(s32 levelId);
 extern u8 D_800BE590;      // number of distinct spawn model types in D_800BE598
 extern u16 D_800BE598[8];  // the distinct spawn model types (< 0xBB) of the level
-extern s32 *D_800BE5A8[8]; // per spawn model type: data loaded by func_1502B7F0
+extern s32 *D_800BE5A8[8]; // per spawn model type: data loaded by rom_loadPathTo
 
 /* game_FDD70.c */
 void func_150D08C0(Camera *camera);

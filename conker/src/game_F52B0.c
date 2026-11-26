@@ -103,7 +103,7 @@ void func_150C7E00(Camera *camera)
       D_80088800 = 0;
       if (camera->SpecialFlags & 4)
       {
-        target = func_15083E90(0x10);
+        target = collision_findObjectById(0x10);
         if (target != NULL)
         {
           actor = camera->CharPtr;

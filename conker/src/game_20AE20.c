@@ -499,13 +499,13 @@ void save_updatePauseMenu(void) {
                     }
                     romAddr = func_151DDB94(-0xF81);
                     osWritebackDCache(aligned, 0x10);
-                    osPiStartDma(&D_800388E0, 0, 0, romAddr, aligned, 0x10, gMessageQueue);
+                    osPiStartDma(&gRomIoMesg, 0, 0, romAddr, aligned, 0x10, gMessageQueue);
                     osRecvMesg(gMessageQueue, NULL, OS_MESG_BLOCK);
                     osInvalDCache(aligned, 0x10);
                     aligned[0] -= 0x3E0EF0F0;
                     aligned[1] -= 0x3E0EF0F0;
                     if ((aligned[0] != 0x3050A14A) || (aligned[1] != 0xBCFCF506)) {
-                        osPiStartDma(&D_800388E0, 0, 0, func_150ADA20() & 0xFFFF, (void *)((func_150ADA20() & 0xFFFFE) + 0x80300000), 0x100, gMessageQueue);
+                        osPiStartDma(&gRomIoMesg, 0, 0, func_150ADA20() & 0xFFFF, (void *)((func_150ADA20() & 0xFFFFE) + 0x80300000), 0x100, gMessageQueue);
                         osRecvMesg(gMessageQueue, NULL, OS_MESG_BLOCK);
                     }
                     gPauseCursor -= 2;
@@ -841,7 +841,7 @@ void func_151DF1BC(void) {
     s32 anim;
     Actor *obj;
 
-    obj = func_15083E90(9);
+    obj = collision_findObjectById(9);
     if (gMenuPendingPage != -1) {
         alpha = gMenuPageFade - (D_800BE9E4 << 5);
         if (alpha <= 0) {
@@ -3759,7 +3759,7 @@ void save_loadTextBank(s32 bank) {
         return;
     }
 
-    gTextBank = (s32)func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, bank - 1);
+    gTextBank = (s32)rom_loadPath(&size, 3, 0x1C, D_800BEAAB, bank - 1);
     cursor = (u8 *)gTextBank;
     end = cursor + size;
     count = 0;
@@ -3792,7 +3792,7 @@ void save_loadTextBank(s32 bank) {
         return;
     }
 
-    gTextBank2 = (s32)func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, 2);
+    gTextBank2 = (s32)rom_loadPath(&size, 3, 0x1C, D_800BEAAB, 2);
     D_800E0B88 = allocate_memory(80 * sizeof(u8 *), 1, 0, 0);
     cursor = (u8 *)gTextBank2;
     count = 0;
@@ -4297,8 +4297,8 @@ void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx) {
     if (gMenuCharacters[slotIdx] != NULL) {
         actor_remove(gMenuCharacters[slotIdx], 1);
     }
-    spawnId = func_15083E0C(slotIdx + 0x10);
-    spawn = (SpawnRecord *)((spawnId * 0x30) + (s32)D_800D20FC); // matching: offset + base operand order
+    spawnId = collision_findSpawnById(slotIdx + 0x10);
+    spawn = (SpawnRecord *)((spawnId * 0x30) + (s32)gSpawnRecords); // matching: offset + base operand order
     kind = gMenuCharacterTypes[charIdx].unk5;
     posIdx = slotIdx;
     if (gMenuState->unk2C == 7) {
@@ -4315,7 +4315,7 @@ void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx) {
     } else {
         spawn->unkD = 0xE;
     }
-    objSlot = func_15082A44(spawn, spawnId, 0, 0, 0);
+    objSlot = collision_spawnObject(spawn, spawnId, 0, 0, 0);
     if (objSlot != 0) {
         obj = &movement_obj[objSlot - 1];
         gMenuCharacters[slotIdx] = obj;

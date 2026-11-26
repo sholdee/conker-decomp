@@ -38,7 +38,7 @@ glabel func_150AC9C0
     /* D9ED4 150ACA24 4487A000 */  mtc1       $a3, $f20
     /* D9ED8 150ACA28 460065C6 */  mov.s      $f23, $f12
     /* D9EDC 150ACA2C 46007606 */  mov.s      $f24, $f14
-    /* D9EE0 150ACA30 0D443E00 */  jal        func_1510F800
+    /* D9EE0 150ACA30 0D443E00 */  jal        collision_selectMap
     /* D9EE4 150ACA34 24040000 */   addiu     $a0, $zero, 0x0
     /* D9EE8 150ACA38 44800000 */  mtc1       $zero, $f0
     /* D9EEC 150ACA3C C7B50080 */  lwc1       $f21, 0x80($sp)
@@ -116,8 +116,8 @@ glabel func_150AC9C0
     /* D9FF0 150ACB40 00000000 */  nop
     /* D9FF4 150ACB44 4601E702 */  mul.s      $f28, $f28, $f1
   .L150ACB48:
-    /* D9FF8 150ACB48 3C14800E */  lui        $s4, %hi(D_800DBE08)
-    /* D9FFC 150ACB4C 8E94BE08 */  lw         $s4, %lo(D_800DBE08)($s4)
+    /* D9FF8 150ACB48 3C14800E */  lui        $s4, %hi(gMapQuadTrees)
+    /* D9FFC 150ACB4C 8E94BE08 */  lw         $s4, %lo(gMapQuadTrees)($s4)
   glabel func_150ACB50
     /* DA000 150ACB50 86880008 */  lh         $t0, 0x8($s4)
     /* DA004 150ACB54 8689000A */  lh         $t1, 0xA($s4)
@@ -159,8 +159,8 @@ glabel func_150AC9C0
   glabel func_150ACBD8
     /* DA088 150ACBD8 128000BC */  beqz       $s4, .L150ACECC
     /* DA08C 150ACBDC 2689000E */   addiu     $t1, $s4, 0xE
-    /* DA090 150ACBE0 3C06800E */  lui        $a2, %hi(D_800DBE40)
-    /* DA094 150ACBE4 8CC6BE40 */  lw         $a2, %lo(D_800DBE40)($a2)
+    /* DA090 150ACBE0 3C06800E */  lui        $a2, %hi(gCurMapTriXZBounds)
+    /* DA094 150ACBE4 8CC6BE40 */  lw         $a2, %lo(gCurMapTriXZBounds)($a2)
     /* DA098 150ACBE8 00C03825 */  or         $a3, $a2, $zero
     /* DA09C 150ACBEC 56600002 */  bnel       $s3, $zero, func_150ACBF8
     /* DA0A0 150ACBF0 24E70002 */   addiu     $a3, $a3, 0x2
@@ -317,8 +317,8 @@ glabel func_150AC9C0
     /* DA2B4 150ACE04 46082100 */  add.s      $f4, $f4, $f8
   glabel func_150ACE08
     /* DA2B8 150ACE08 C7A100A8 */  lwc1       $f1, 0xA8($sp)
-    /* DA2BC 150ACE0C 3C0C800E */  lui        $t4, %hi(D_800DBE08)
-    /* DA2C0 150ACE10 8D8CBE08 */  lw         $t4, %lo(D_800DBE08)($t4)
+    /* DA2BC 150ACE0C 3C0C800E */  lui        $t4, %hi(gMapQuadTrees)
+    /* DA2C0 150ACE10 8D8CBE08 */  lw         $t4, %lo(gMapQuadTrees)($t4)
     /* DA2C4 150ACE14 46000832 */  c.eq.s     $f1, $f0
     /* DA2C8 150ACE18 4501000C */  bc1t       .L150ACE4C
     /* DA2CC 150ACE1C 00000000 */   nop
@@ -370,7 +370,7 @@ glabel func_150AC9C0
     /* DA374 150ACEC4 0942B2F6 */  j          func_150ACBD8
     /* DA378 150ACEC8 0180A025 */   or        $s4, $t4, $zero
   .L150ACECC:
-    /* DA37C 150ACECC 0D443E00 */  jal        func_1510F800
+    /* DA37C 150ACECC 0D443E00 */  jal        collision_selectMap
     /* DA380 150ACED0 24040002 */   addiu     $a0, $zero, 0x2
     /* DA384 150ACED4 3C0B800E */  lui        $t3, %hi(gWorldObjectCount)
     /* DA388 150ACED8 8D6BBEF0 */  lw         $t3, %lo(gWorldObjectCount)($t3)
@@ -482,8 +482,8 @@ glabel func_150AC9C0
     /* DA520 150AD070 023E8821 */  addu       $s1, $s1, $fp
     /* DA524 150AD074 3C09800E */  lui        $t1, %hi(gObjectBlocks)
     /* DA528 150AD078 8D29BEF8 */  lw         $t1, %lo(gObjectBlocks)($t1)
-    /* DA52C 150AD07C 3C06800E */  lui        $a2, %hi(D_800DBE40)
-    /* DA530 150AD080 8CC6BE40 */  lw         $a2, %lo(D_800DBE40)($a2)
+    /* DA52C 150AD07C 3C06800E */  lui        $a2, %hi(gCurMapTriXZBounds)
+    /* DA530 150AD080 8CC6BE40 */  lw         $a2, %lo(gCurMapTriXZBounds)($a2)
     /* DA534 150AD084 00C03825 */  or         $a3, $a2, $zero
     /* DA538 150AD088 56600002 */  bnel       $s3, $zero, .L150AD094
     /* DA53C 150AD08C 24E70002 */   addiu     $a3, $a3, 0x2
@@ -645,8 +645,8 @@ glabel func_150AC9C0
     /* DA75C 150AD2AC 24090001 */   addiu     $t1, $zero, 0x1
     /* DA760 150AD2B0 16090006 */  bne        $s0, $t1, .L150AD2CC
     /* DA764 150AD2B4 00174880 */   sll       $t1, $s7, 2
-    /* DA768 150AD2B8 3C08800E */  lui        $t0, %hi(D_800DBE5C)
-    /* DA76C 150AD2BC 8D08BE5C */  lw         $t0, %lo(D_800DBE5C)($t0)
+    /* DA768 150AD2B8 3C08800E */  lui        $t0, %hi(gMeshTriMaterials)
+    /* DA76C 150AD2BC 8D08BE5C */  lw         $t0, %lo(gMeshTriMaterials)($t0)
     /* DA770 150AD2C0 01284821 */  addu       $t1, $t1, $t0
     /* DA774 150AD2C4 0942B4BD */  j          func_150AD2F4
     /* DA778 150AD2C8 8D290000 */   lw        $t1, 0x0($t1)
@@ -696,8 +696,8 @@ glabel func_150AC9C0
 
 glabel func_150AD364
     /* DA814 150AD364 440CD000 */  mfc1       $t4, $f26
-    /* DA818 150AD368 3C08800E */  lui        $t0, %hi(D_800DBE3C)
-    /* DA81C 150AD36C 8D08BE3C */  lw         $t0, %lo(D_800DBE3C)($t0)
+    /* DA818 150AD368 3C08800E */  lui        $t0, %hi(gCurMapTris)
+    /* DA81C 150AD36C 8D08BE3C */  lw         $t0, %lo(gCurMapTris)($t0)
     /* DA820 150AD370 000AE080 */  sll        $gp, $t2, 2
     /* DA824 150AD374 011C4021 */  addu       $t0, $t0, $gp
     /* DA828 150AD378 000AE0C0 */  sll        $gp, $t2, 3
@@ -773,8 +773,8 @@ glabel func_150AD364
     /* DA940 150AD490 46001081 */  sub.s      $f2, $f2, $f0
     /* DA944 150AD494 4619D002 */  mul.s      $f0, $f26, $f25
     /* DA948 150AD498 46001081 */  sub.s      $f2, $f2, $f0
-    /* DA94C 150AD49C 3C0E800E */  lui        $t6, %hi(D_800DBE40)
-    /* DA950 150AD4A0 8DCEBE40 */  lw         $t6, %lo(D_800DBE40)($t6)
+    /* DA94C 150AD49C 3C0E800E */  lui        $t6, %hi(gCurMapTriXZBounds)
+    /* DA950 150AD4A0 8DCEBE40 */  lw         $t6, %lo(gCurMapTriXZBounds)($t6)
     /* DA954 150AD4A4 461B1081 */  sub.s      $f2, $f2, $f27
     /* DA958 150AD4A8 44800000 */  mtc1       $zero, $f0
     /* DA95C 150AD4AC 46011043 */  div.s      $f1, $f2, $f1
@@ -811,8 +811,8 @@ glabel func_150AD364
     /* DA9D8 150AD528 461A0837 */  c.ule.s    $f1, $f26
     /* DA9DC 150AD52C 4500008B */  bc1f       .L150AD75C
     /* DA9E0 150AD530 461A1034 */   c.olt.s   $f2, $f26
-    /* DA9E4 150AD534 3C0E800E */  lui        $t6, %hi(D_800DBE44)
-    /* DA9E8 150AD538 8DCEBE44 */  lw         $t6, %lo(D_800DBE44)($t6)
+    /* DA9E4 150AD534 3C0E800E */  lui        $t6, %hi(gCurMapTriYBounds)
+    /* DA9E8 150AD538 8DCEBE44 */  lw         $t6, %lo(gCurMapTriYBounds)($t6)
     /* DA9EC 150AD53C 45010087 */  bc1t       .L150AD75C
     /* DA9F0 150AD540 000A7880 */   sll       $t7, $t2, 2
     /* DA9F4 150AD544 01CF7021 */  addu       $t6, $t6, $t7

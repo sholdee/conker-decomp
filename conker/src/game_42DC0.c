@@ -30,7 +30,7 @@ void text_loadFont(s16 font) {
     s32 glyph;
 
     buffer = func_10003C6C(0x2800, 1, 2, 1, 0);
-    func_10004514(gFontRomRanges[font].romStart, buffer, gFontRomRanges[font].romEnd - gFontRomRanges[font].romStart, 1);
+    rom_read(gFontRomRanges[font].romStart, buffer, gFontRomRanges[font].romEnd - gFontRomRanges[font].romStart, 1);
     record = buffer;
     glyph = 0;
     while (record + 15 < buffer + gFontRomRanges[font].romEnd - gFontRomRanges[font].romStart) {

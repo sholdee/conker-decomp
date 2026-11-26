@@ -64,10 +64,10 @@ void swarm_spawnAwayFromPlayer(s32 count, s32 group, s32 x, s32 y, s32 z, s32 pl
         actor->surfaceFlags = 0;
         if (onGround) {
             actor->flags |= 0x80;
-            actor->groundHeight = func_1510F8D8(actorX, y, actorZ, &surface);
+            actor->groundHeight = collision_findMeshFloorNear(actorX, y, actorZ, &surface);
             if (surface != 0) {
-                surfaceIndex = (surface - (s32)D_800DBE3C) / 12;
-                surfaceFlags = D_800DBE5C[surfaceIndex];
+                surfaceIndex = (surface - (s32)gCurMapTris) / 12;
+                surfaceFlags = gMeshTriMaterials[surfaceIndex];
             } else {
                 surfaceFlags = 0;
             }
@@ -100,7 +100,7 @@ void swarm_spawnScattered(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread,
     // matching: IDO assigns x and y their callee-saved registers in copy order
     spawnX = x;
     spawnY = y;
-    if (airborne == 0) func_1510F800(0);
+    if (airborne == 0) collision_selectMap(0);
     for (i = 0; i < count; i++) {
         actor = func_15167A68(0x13, 0, 0xF8, 1, 0xFF, 1);
         if (actor == NULL) return;
@@ -205,7 +205,7 @@ void swarm_spawnRing(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
         actorZ = (actorZ < 0) ? actorZ - minRadius : actorZ + minRadius;
         actorZ += z;
         if (state == 0 || onGround) {
-            actor->groundHeight = func_1510F8D8(actorX, y, actorZ, &surface);
+            actor->groundHeight = collision_findMeshFloorNear(actorX, y, actorZ, &surface);
         }
         if (state == 0) {
             actorY = actor->groundHeight;
@@ -273,8 +273,8 @@ void swarm_spawnRing(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
             actor->flags |= 0x80;
             // matching: reusing ringWidth/onGround here keeps the original stack frame size
             if (surface != 0) {
-                ringWidth = (surface - (s32)D_800DBE3C) / 12;
-                onGround = D_800DBE5C[ringWidth];
+                ringWidth = (surface - (s32)gCurMapTris) / 12;
+                onGround = gMeshTriMaterials[ringWidth];
             } else {
                 onGround = 0;
             }
@@ -433,10 +433,10 @@ void swarm_updateFlight(SwarmActor *actor) {
         }
     }
     if (actor->flags & 0x80) {
-        actor->groundHeight = func_1510F8D8(actor->x, actor->y, actor->z, &surface);
+        actor->groundHeight = collision_findMeshFloorNear(actor->x, actor->y, actor->z, &surface);
         if (surface != 0) {
-            surfaceIndex = (surface - (s32)D_800DBE3C) / 12;
-            surfaceFlags = D_800DBE5C[surfaceIndex];
+            surfaceIndex = (surface - (s32)gCurMapTris) / 12;
+            surfaceFlags = gMeshTriMaterials[surfaceIndex];
         } else {
             surfaceFlags = 0;
         }

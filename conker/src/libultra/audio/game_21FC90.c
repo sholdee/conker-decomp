@@ -40,15 +40,15 @@ void func_151F2960(s32 arg0, s32 arg1) {
             D_800E0E2C = 0;
             return;
         }
-        D_800E0E20 = func_1502B5C8(0, 2, 0x17, 4);
+        D_800E0E20 = rom_loadPath(0, 2, 0x17, 4);
         if (D_800E0E20 != 0) {
             func_100043B4(D_800E0E20, 0xFF);
         }
-        D_800E0E24 = func_1502B5C8(0, 2, 0x17, 5);
+        D_800E0E24 = rom_loadPath(0, 2, 0x17, 5);
         if (D_800E0E24 != 0) {
             func_100043B4(D_800E0E24, 0xFF);
         }
-        D_800E0E28 = func_1502B5C8(0, 2, 0x17, 6);
+        D_800E0E28 = rom_loadPath(0, 2, 0x17, 6);
         if (D_800E0E28 != 0) {
             func_100043B4(D_800E0E28, 0xFF);
         }

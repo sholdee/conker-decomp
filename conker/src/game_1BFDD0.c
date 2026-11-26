@@ -33,7 +33,7 @@ void func_15192920(Actor *object) {
 }
 
 /* Effect 0x23 update: emits 0.31-0.91 particles per gFrameDelta tick, 20 units to either side of the object,
- * moving against the direction func_1515C0F8 returns. */
+ * moving against the direction sprite_findActorMotion returns. */
 void func_151929A4(Effect1BFDD0 *effect) {
     FixedEmitterData *data;
     ParticleDesc desc;
@@ -45,7 +45,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
 
     data = &effect->data;
     data->spawnAccum += (312.0f + (func_150ADA68() * 599.0f)) * 0.001f * gFrameDelta;
-    if (data->spawnAccum > 1.0f && func_1515C0F8(data->object, &dir) != 0) {
+    if (data->spawnAccum > 1.0f && sprite_findActorMotion(data->object, &dir) != 0) {
         desc.texture = 0x29;
         desc.renderMode = 0xE03;
         desc.unk0 = 0x200005;

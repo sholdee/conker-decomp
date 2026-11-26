@@ -4,17 +4,17 @@
 #include "variables.h"
 
 /* Display-list checker state. */
-static s32 D_800C6860[16]; // segment base table, mirrored from G_MW_SEGMENT moveword commands (-1 = unset)
-static u8 D_800C68A0;      // set once something is drawn, cleared by G_RDPPIPESYNC
-static u8 D_800C68A1;      // current G_DL nesting depth
+static s32 gDlCheckSegments[16]; // segment base table, mirrored from G_MW_SEGMENT moveword commands (-1 = unset)
+static u8 gDlCheckDrawn;      // set once something is drawn, cleared by G_RDPPIPESYNC
+static u8 gDlCheckDepth;      // current G_DL nesting depth
 
-#define DL_NONE func_15040748  /* opcodes without their own handler */
-#define DL_RSP1X func_15040820 /* opcodes 0x10-0x1F */
+#define DL_NONE debug_cmdDefault  /* opcodes without their own handler */
+#define DL_RSP1X debug_cmdTri4 /* opcodes 0x10-0x1F */
 
-/* Per-opcode handlers used when dumping commands (func_15040A78, func_15040CC8), indexed by the command byte. */
-static void (*D_800844B0[256])() = {
-    /* 0x00 */ func_1504092C, func_150407A0, func_150407A8, func_150407B4, func_150407C0, func_1504086C, func_15040814, func_15040808,
-    /* 0x08 */ func_150407CC, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+/* Per-opcode handlers used when dumping commands (debug_dumpDlRange, debug_dumpDlAround), indexed by the command byte. */
+static void (*gDlCmdHandlers[256])() = {
+    /* 0x00 */ debug_cmdNoop, debug_cmdVtx, debug_cmdModifyVtx, debug_cmdCullDl, debug_cmdBranchZ, debug_cmdTri1, debug_cmdTri2, debug_cmdQuad,
+    /* 0x08 */ debug_cmdLine3D, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
     /* 0x10 */ DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X,
     /* 0x18 */ DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X,
     /* 0x20 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
@@ -39,28 +39,28 @@ static void (*D_800844B0[256])() = {
     /* 0xB8 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
     /* 0xC0 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
     /* 0xC8 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
-    /* 0xD0 */ DL_NONE, DL_NONE, DL_NONE, func_15040998, func_150409A4, func_150409B0, func_150409BC, func_15040D6C,
-    /* 0xD8 */ func_15040A28, func_15040A40, func_15040A34, func_15040A6C, func_15040A60, func_15040A54, func_150408F0, func_15040A1C,
-    /* 0xE0 */ func_15040938, func_150407D8, func_15040908, func_150408FC, func_150409E0, func_150409EC, func_150408B4, func_150408A8,
-    /* 0xE8 */ func_15040890, func_1504089C, func_150407F0, func_150407FC, func_15040914, func_15040920, func_15040D60, func_15040D78,
-    /* 0xF0 */ func_15040878, func_150407E4, func_15040A10, func_150409F8, func_15040884, func_15040A04, func_150409D4, func_150409C8,
-    /* 0xF8 */ func_1504098C, func_15040980, func_15040974, func_15040968, func_150408C0, func_1504095C, func_15040950, func_15040944
+    /* 0xD0 */ DL_NONE, DL_NONE, DL_NONE, debug_cmdSpecial3, debug_cmdSpecial2, debug_cmdSpecial1, debug_cmdDmaIo, debug_cmdTexture,
+    /* 0xD8 */ debug_cmdPopMtx, debug_cmdGeometryMode, debug_cmdMtx, debug_cmdMoveWord, debug_cmdMoveMem, debug_cmdLoadUcode, debug_cmdDl, debug_cmdEndDl,
+    /* 0xE0 */ debug_cmdSpNoop, debug_cmdRdpHalf1, debug_cmdSetOtherModeL, debug_cmdSetOtherModeH, debug_cmdTexRect, debug_cmdTexRectFlip, debug_cmdRdpLoadSync, debug_cmdRdpPipeSync,
+    /* 0xE8 */ debug_cmdRdpTileSync, debug_cmdRdpFullSync, debug_cmdSetKeyGB, debug_cmdSetKeyR, debug_cmdSetConvert, debug_cmdSetScissor, debug_cmdSetPrimDepth, debug_cmdRdpSetOtherMode,
+    /* 0xF0 */ debug_cmdLoadTlut, debug_cmdRdpHalf2, debug_cmdSetTileSize, debug_cmdLoadBlock, debug_cmdLoadTile, debug_cmdSetTile, debug_cmdFillRect, debug_cmdSetFillColor,
+    /* 0xF8 */ debug_cmdSetFogColor, debug_cmdSetBlendColor, debug_cmdSetPrimColor, debug_cmdSetEnvColor, debug_cmdSetCombine, debug_cmdSetTImg, debug_cmdSetZImg, debug_cmdSetCImg
 };
-static s32 D_800848B0 = 0; // last G_SETTIMG address
+static s32 gDlCheckLastTImg = 0; // last G_SETTIMG address
 
 
 /** Checks the display list at dl (up to end, or up to its G_ENDDL when end is 0). */
-void func_15040350(void *dl, u32 end) {
+void debug_checkDl(void *dl, u32 end) {
     s32 i;
 
-    D_800C68A0 = D_800848B0 = 0;
-    D_800C68A1 = 0;
+    gDlCheckDrawn = gDlCheckLastTImg = 0;
+    gDlCheckDepth = 0;
 
     for (i = 0; i < 16; i++) {
-        D_800C6860[i] = -1;
+        gDlCheckSegments[i] = -1;
     }
-    D_800C6860[0] = 0;
-    func_150403C8(dl, end, NULL);
+    gDlCheckSegments[0] = 0;
+    debug_walkCheckDl(dl, end, NULL);
 }
 
 /** Posts error code 0xC00005B to D_8003C8E0 and calls func_150AD770. */
@@ -80,9 +80,9 @@ void func_15040350(void *dl, u32 end) {
  * G_DL branches, and reports malformed commands: bad branch targets, nesting
  * deeper than 20, corrupt G_VTX/G_TRI1 commands, and RDP state changes made after
  * drawing without a G_RDPPIPESYNC. Each report dumps the commands around the
- * culprit with func_15040CC8. parent (the calling G_DL command) is unused.
+ * culprit with debug_dumpDlAround. parent (the calling G_DL command) is unused.
  */
-void func_150403C8(void *dl, u32 end, Gfx *parent) {
+void debug_walkCheckDl(void *dl, u32 end, Gfx *parent) {
     Gfx *gfx;
     s32 pad[2]; // matching: reserves the stack slots the original frame has
     s32 isBad = 0;
@@ -96,46 +96,46 @@ void func_150403C8(void *dl, u32 end, Gfx *parent) {
         switch (gfx->dma.cmd) {
             case (s8)G_DL:
                 addr = gfx->words.w1;
-                isBad = func_150408CC(gfx);
+                isBad = debug_isBadDlCmd(gfx);
                 segment = (addr >> 24) & 0xF;
                 addr &= 0xFFFFFF;
-                addr += D_800C6860[segment];
+                addr += gDlCheckSegments[segment];
                 addr |= 0x80000000;
-                D_800C68A1++;
-                if (D_800C68A1 == 20) {
-                    func_15040CC8(gfx);
+                gDlCheckDepth++;
+                if (gDlCheckDepth == 20) {
+                    debug_dumpDlAround(gfx);
                     DL_ERROR();
                 }
                 if (addr > 0x80000000 && addr < 0xA0000000 && !(addr & 7)) {
-                    func_150403C8((void *)addr, 0, gfx);
+                    debug_walkCheckDl((void *)addr, 0, gfx);
                 } else {
-                    func_15040CC8(gfx);
+                    debug_dumpDlAround(gfx);
                     DL_ERROR_FLIP();
                 }
-                if (D_800C68A1 > 0) {
-                    D_800C68A1--;
+                if (gDlCheckDepth > 0) {
+                    gDlCheckDepth--;
                 } else {
                     DL_ERROR_FLIP();
                 }
                 break;
             case (s8)G_RDPPIPESYNC:
-                D_800C68A0 = 0;
+                gDlCheckDrawn = 0;
                 break;
             case (s8)G_TEXRECT: case (s8)G_TEXRECTFLIP: case (s8)G_FILLRECT: case G_TRI2: case G_QUAD:
             // raw RDP triangle commands
             case 0x10: case 0x11: case 0x12: case 0x13: case 0x14: case 0x15: case 0x16: case 0x17:
             case 0x18: case 0x19: case 0x1A: case 0x1B: case 0x1C: case 0x1D: case 0x1E: case 0x1F:
-                D_800C68A0 = 1;
+                gDlCheckDrawn = 1;
                 break;
             case G_TRI1:
-                isBad = func_1504082C(gfx);
-                D_800C68A0 = 1;
+                isBad = debug_isBadTri1Cmd(gfx);
+                gDlCheckDrawn = 1;
                 break;
             case G_VTX:
-                isBad = func_15040754(gfx);
+                isBad = debug_isBadVtxCmd(gfx);
                 break;
             case (s8)G_SETTIMG:
-                D_800848B0 = gfx->words.w1;
+                gDlCheckLastTImg = gfx->words.w1;
                 break;
             // matching: these three groups are separate case bodies in the original;
             // merging them changes the jump table and code size
@@ -161,7 +161,7 @@ void func_150403C8(void *dl, u32 end, Gfx *parent) {
                     offset = gfx->words.w0 & 0xFFFF;
                     data = gfx->words.w1;
                     if ((index & 0xFF) == G_MW_SEGMENT) {
-                        D_800C6860[offset / 4] = data;
+                        gDlCheckSegments[offset / 4] = data;
                     }
                 }
                 break;
@@ -177,14 +177,14 @@ void func_150403C8(void *dl, u32 end, Gfx *parent) {
                 DL_ERROR();
                 break;
         }
-        if (needsPipeSync && D_800C68A0) {
-            func_15040CC8(gfx);
-            D_800C68A0 = 0;
+        if (needsPipeSync && gDlCheckDrawn) {
+            debug_dumpDlAround(gfx);
+            gDlCheckDrawn = 0;
             DL_ERROR_FLIP();
         }
         if (isBad) {
             isBad = 0;
-            func_15040CC8(gfx);
+            debug_dumpDlAround(gfx);
             DL_ERROR_FLIP();
         }
         gfx++;
@@ -192,7 +192,7 @@ void func_150403C8(void *dl, u32 end, Gfx *parent) {
 }
 
 /** Returns whether a display list address is not 8-byte aligned. */
-s32 func_1504072C(s32 addr) {
+s32 debug_isMisalignedDl(s32 addr) {
     if (addr & 7) {
         return 1;
     }
@@ -200,14 +200,14 @@ s32 func_1504072C(s32 addr) {
 }
 
 /** Command handler for every opcode without its own entry (empty). */
-void func_15040748(Gfx *gfx) {
+void debug_cmdDefault(Gfx *gfx) {
 }
 
 /**
  * G_VTX check: returns nonzero when the first vertex index (v0 + n minus n)
  * is negative or the vertex source address is misaligned.
  */
-s32 func_15040754(Gfx *gfx) {
+s32 debug_isBadVtxCmd(Gfx *gfx) {
     s32 first = (gfx->words.w0 >> 1) & 0x7F; // v0 + n
     s32 count = (gfx->words.w0 >> 12) & 0xFF;
 
@@ -215,62 +215,62 @@ s32 func_15040754(Gfx *gfx) {
     if (first < 0) {
         return 1;
     }
-    return func_1504072C(gfx->words.w1);
+    return debug_isMisalignedDl(gfx->words.w1);
 }
 
 /** G_VTX command handler (empty). */
-void func_150407A0(void) {
+void debug_cmdVtx(void) {
 }
 
 /** G_MODIFYVTX command handler (empty). */
-void func_150407A8(Gfx *gfx) {
+void debug_cmdModifyVtx(Gfx *gfx) {
 }
 
 /** G_CULLDL command handler (empty). */
-void func_150407B4(Gfx *gfx) {
+void debug_cmdCullDl(Gfx *gfx) {
 }
 
 /** G_BRANCH_Z command handler (empty). */
-void func_150407C0(Gfx *gfx) {
+void debug_cmdBranchZ(Gfx *gfx) {
 }
 
 /** G_LINE3D command handler (empty). */
-void func_150407CC(Gfx *gfx) {
+void debug_cmdLine3D(Gfx *gfx) {
 }
 
 /** G_RDPHALF_1 command handler (empty). */
-void func_150407D8(Gfx *gfx) {
+void debug_cmdRdpHalf1(Gfx *gfx) {
 }
 
 /** G_RDPHALF_2 command handler (empty). */
-void func_150407E4(Gfx *gfx) {
+void debug_cmdRdpHalf2(Gfx *gfx) {
 }
 
 /** G_SETKEYGB command handler (empty). */
-void func_150407F0(Gfx *gfx) {
+void debug_cmdSetKeyGB(Gfx *gfx) {
 }
 
 /** G_SETKEYR command handler (empty). */
-void func_150407FC(Gfx *gfx) {
+void debug_cmdSetKeyR(Gfx *gfx) {
 }
 
 /** G_QUAD command handler (empty). */
-void func_15040808(Gfx *gfx) {
+void debug_cmdQuad(Gfx *gfx) {
 }
 
 /** G_TRI2 command handler (empty). */
-void func_15040814(Gfx *gfx) {
+void debug_cmdTri2(Gfx *gfx) {
 }
 
 /** Command handler for opcodes 0x10-0x1F (empty). */
-void func_15040820(Gfx *gfx) {
+void debug_cmdTri4(Gfx *gfx) {
 }
 
 /**
  * G_TRI1 check: the three vertex indices are stored doubled, so an odd byte
  * means a corrupt command. Returns nonzero in that case.
  */
-s32 func_1504082C(Gfx *tri) {
+s32 debug_isBadTri1Cmd(Gfx *tri) {
     s32 v0 = (tri->words.w0 >> 16) & 0xFF;
     s32 v1 = (tri->words.w0 >> 8) & 0xFF;
     s32 v2 = tri->words.w0 & 0xFF;
@@ -282,179 +282,179 @@ s32 func_1504082C(Gfx *tri) {
 }
 
 /** G_TRI1 command handler (empty). */
-void func_1504086C(Gfx *gfx) {
+void debug_cmdTri1(Gfx *gfx) {
 }
 
 /** G_LOADTLUT command handler (empty). */
-void func_15040878(Gfx *gfx) {
+void debug_cmdLoadTlut(Gfx *gfx) {
 }
 
 /** G_LOADTILE command handler (empty). */
-void func_15040884(Gfx *gfx) {
+void debug_cmdLoadTile(Gfx *gfx) {
 }
 
 /** G_RDPTILESYNC command handler (empty). */
-void func_15040890(Gfx *gfx) {
+void debug_cmdRdpTileSync(Gfx *gfx) {
 }
 
 /** G_RDPFULLSYNC command handler (empty). */
-void func_1504089C(Gfx *gfx) {
+void debug_cmdRdpFullSync(Gfx *gfx) {
 }
 
 /** G_RDPPIPESYNC command handler (empty). */
-void func_150408A8(Gfx *gfx) {
+void debug_cmdRdpPipeSync(Gfx *gfx) {
 }
 
 /** G_RDPLOADSYNC command handler (empty). */
-void func_150408B4(Gfx *gfx) {
+void debug_cmdRdpLoadSync(Gfx *gfx) {
 }
 
 /** G_SETCOMBINE command handler (empty). */
-void func_150408C0(Gfx *gfx) {
+void debug_cmdSetCombine(Gfx *gfx) {
 }
 
 /** G_DL check: returns nonzero when the branch target is misaligned. */
-s32 func_150408CC(Gfx *gfx) {
-    return func_1504072C(gfx->words.w1);
+s32 debug_isBadDlCmd(Gfx *gfx) {
+    return debug_isMisalignedDl(gfx->words.w1);
 }
 
 /** G_DL command handler (empty). */
-void func_150408F0(Gfx *gfx) {
+void debug_cmdDl(Gfx *gfx) {
 }
 
 /** G_SETOTHERMODE_H command handler (empty). */
-void func_150408FC(Gfx *gfx) {
+void debug_cmdSetOtherModeH(Gfx *gfx) {
 }
 
 /** G_SETOTHERMODE_L command handler (empty). */
-void func_15040908(Gfx *gfx) {
+void debug_cmdSetOtherModeL(Gfx *gfx) {
 }
 
 /** G_SETCONVERT command handler (empty). */
-void func_15040914(Gfx *gfx) {
+void debug_cmdSetConvert(Gfx *gfx) {
 }
 
 /** G_SETSCISSOR command handler (empty). */
-void func_15040920(Gfx *gfx) {
+void debug_cmdSetScissor(Gfx *gfx) {
 }
 
 /** G_NOOP command handler (empty). */
-void func_1504092C(Gfx *gfx) {
+void debug_cmdNoop(Gfx *gfx) {
 }
 
 /** G_SPNOOP command handler (empty). */
-void func_15040938(Gfx *gfx) {
+void debug_cmdSpNoop(Gfx *gfx) {
 }
 
 /** G_SETCIMG command handler (empty). */
-void func_15040944(Gfx *gfx) {
+void debug_cmdSetCImg(Gfx *gfx) {
 }
 
 /** G_SETZIMG command handler (empty). */
-void func_15040950(Gfx *gfx) {
+void debug_cmdSetZImg(Gfx *gfx) {
 }
 
 /** G_SETTIMG command handler (empty). */
-void func_1504095C(Gfx *gfx) {
+void debug_cmdSetTImg(Gfx *gfx) {
 }
 
 /** G_SETENVCOLOR command handler (empty). */
-void func_15040968(Gfx *gfx) {
+void debug_cmdSetEnvColor(Gfx *gfx) {
 }
 
 /** G_SETPRIMCOLOR command handler (empty). */
-void func_15040974(Gfx *gfx) {
+void debug_cmdSetPrimColor(Gfx *gfx) {
 }
 
 /** G_SETBLENDCOLOR command handler (empty). */
-void func_15040980(Gfx *gfx) {
+void debug_cmdSetBlendColor(Gfx *gfx) {
 }
 
 /** G_SETFOGCOLOR command handler (empty). */
-void func_1504098C(Gfx *gfx) {
+void debug_cmdSetFogColor(Gfx *gfx) {
 }
 
 /** G_SPECIAL_3 command handler (empty). */
-void func_15040998(Gfx *gfx) {
+void debug_cmdSpecial3(Gfx *gfx) {
 }
 
 /** G_SPECIAL_2 command handler (empty). */
-void func_150409A4(Gfx *gfx) {
+void debug_cmdSpecial2(Gfx *gfx) {
 }
 
 /** G_SPECIAL_1 command handler (empty). */
-void func_150409B0(Gfx *gfx) {
+void debug_cmdSpecial1(Gfx *gfx) {
 }
 
 /** G_DMA_IO command handler (empty). */
-void func_150409BC(Gfx *gfx) {
+void debug_cmdDmaIo(Gfx *gfx) {
 }
 
 /** G_SETFILLCOLOR command handler (empty). */
-void func_150409C8(Gfx *gfx) {
+void debug_cmdSetFillColor(Gfx *gfx) {
 }
 
 /** G_FILLRECT command handler (empty). */
-void func_150409D4(Gfx *gfx) {
+void debug_cmdFillRect(Gfx *gfx) {
 }
 
 /** G_TEXRECT command handler (empty). */
-void func_150409E0(Gfx *gfx) {
+void debug_cmdTexRect(Gfx *gfx) {
 }
 
 /** G_TEXRECTFLIP command handler (empty). */
-void func_150409EC(Gfx *gfx) {
+void debug_cmdTexRectFlip(Gfx *gfx) {
 }
 
 /** G_LOADBLOCK command handler (empty). */
-void func_150409F8(Gfx *gfx) {
+void debug_cmdLoadBlock(Gfx *gfx) {
 }
 
 /** G_SETTILE command handler (empty). */
-void func_15040A04(Gfx *gfx) {
+void debug_cmdSetTile(Gfx *gfx) {
 }
 
 /** G_SETTILESIZE command handler (empty). */
-void func_15040A10(Gfx *gfx) {
+void debug_cmdSetTileSize(Gfx *gfx) {
 }
 
 /** G_ENDDL command handler (empty). */
-void func_15040A1C(Gfx *gfx) {
+void debug_cmdEndDl(Gfx *gfx) {
 }
 
 /** G_POPMTX command handler (empty). */
-void func_15040A28(Gfx *gfx) {
+void debug_cmdPopMtx(Gfx *gfx) {
 }
 
 /** G_MTX command handler (empty). */
-void func_15040A34(Gfx *gfx) {
+void debug_cmdMtx(Gfx *gfx) {
 }
 
 /** G_GEOMETRYMODE command handler (empty). */
-void func_15040A40(Gfx *gfx) {
+void debug_cmdGeometryMode(Gfx *gfx) {
 }
 
 void func_15040A4C(void) {
 }
 
 /** G_LOAD_UCODE command handler (empty). */
-void func_15040A54(Gfx *gfx) {
+void debug_cmdLoadUcode(Gfx *gfx) {
 }
 
 /** G_MOVEMEM command handler (empty). */
-void func_15040A60(Gfx *gfx) {
+void debug_cmdMoveMem(Gfx *gfx) {
 }
 
 /** G_MOVEWORD command handler (empty). */
-void func_15040A6C(Gfx *gfx) {
+void debug_cmdMoveWord(Gfx *gfx) {
 }
 
 /**
  * Walks the display list at start, following G_DL branches, and runs the
- * D_800844B0 handler of every command from `from` through `to` (inclusive).
- * Also tracks G_MW_SEGMENT movewords in D_800C6860 to resolve branch targets.
+ * gDlCmdHandlers handler of every command from `from` through `to` (inclusive).
+ * Also tracks G_MW_SEGMENT movewords in gDlCheckSegments to resolve branch targets.
  */
-void func_15040A78(Gfx *start, Gfx *from, Gfx *to) {
+void debug_dumpDlRange(Gfx *start, Gfx *from, Gfx *to) {
     s32 i;
     Gfx *gfx;
     u32 w0;
@@ -473,10 +473,10 @@ void func_15040A78(Gfx *start, Gfx *from, Gfx *to) {
     depth = 0;
     i = 0;
     do { // matching: a for loop here is scheduled differently
-        D_800C6860[i] = -1;
+        gDlCheckSegments[i] = -1;
         i++;
     } while (i < 16);
-    D_800C6860[0] = 0;
+    gDlCheckSegments[0] = 0;
     inRange = 0;
     gfx = start;
     while (gfx <= to || depth > 0) {
@@ -485,7 +485,7 @@ void func_15040A78(Gfx *start, Gfx *from, Gfx *to) {
         }
         cmd = gfx->dma.cmd;
         if (inRange) {
-            D_800844B0[cmd](gfx);
+            gDlCmdHandlers[cmd](gfx);
         }
         if (gfx == to) {
             inRange = 0;
@@ -506,9 +506,9 @@ void func_15040A78(Gfx *start, Gfx *from, Gfx *to) {
                 if (inRange) {
                 }
                 segment = (w1 >> 24) & 0xF;
-                if (D_800C6860[segment] != -1) {
+                if (gDlCheckSegments[segment] != -1) {
                     w1 &= 0xFFFFFF;
-                    w1 += D_800C6860[segment];
+                    w1 += gDlCheckSegments[segment];
                     gfx = (Gfx *)(w1 | 0x80000000);
                 } else {
                     gfx++;
@@ -521,7 +521,7 @@ void func_15040A78(Gfx *start, Gfx *from, Gfx *to) {
                 if ((w0 & 0xFFFF) == (w0 >> 16)) {
                 }
                 if (((w0 >> 16) & 0xFF) == G_MW_SEGMENT) {
-                    D_800C6860[(s32)(w0 & 0xFFFF) >> 2] = data;
+                    gDlCheckSegments[(s32)(w0 & 0xFFFF) >> 2] = data;
                 }
                 gfx++;
                 break;
@@ -535,7 +535,7 @@ void func_15040A78(Gfx *start, Gfx *from, Gfx *to) {
                 gfx++;
                 break;
             case G_MTX:
-                mtx = (D_800C6860[(gfx->words.w1 >> 24) & 0xF] + (gfx->words.w1 & 0xFFFFFF)) | 0x80000000;
+                mtx = (gDlCheckSegments[(gfx->words.w1 >> 24) & 0xF] + (gfx->words.w1 & 0xFFFFFF)) | 0x80000000;
                 if (mtx == 0) {
                 }
                 gfx++;
@@ -551,10 +551,10 @@ void func_15040A78(Gfx *start, Gfx *from, Gfx *to) {
 }
 
 /**
- * Dumps the commands from 20 before gfx to 9 after it through the D_800844B0
+ * Dumps the commands from 20 before gfx to 9 after it through the gDlCmdHandlers
  * handlers, then passes the last G_SETTIMG address to func_1500390C.
  */
-void func_15040CC8(Gfx *gfx) {
+void debug_dumpDlAround(Gfx *gfx) {
     s32 i;
     s32 addr; // matching: a Gfx * local here changes the generated code
     s32 lastTexture;
@@ -564,27 +564,27 @@ void func_15040CC8(Gfx *gfx) {
         // empty: the loop itself is emitted
     }
 
-    handlers = D_800844B0;
+    handlers = gDlCmdHandlers;
     // matching: "| 0" keeps IDO from rewriting the exit test as a bne against 10 held in a register
     for (i = -20; i < 10; i = (i + 1) | 0) {
         addr = (s32)&gfx[i];
         handlers[*(u8 *)addr](addr);
     }
 
-    lastTexture = D_800848B0;
+    lastTexture = gDlCheckLastTImg;
     if (lastTexture != 0) {
         func_1500390C(lastTexture);
     }
 }
 
 /** G_SETPRIMDEPTH command handler (empty). */
-void func_15040D60(Gfx *gfx) {
+void debug_cmdSetPrimDepth(Gfx *gfx) {
 }
 
 /** G_TEXTURE command handler (empty). */
-void func_15040D6C(Gfx *gfx) {
+void debug_cmdTexture(Gfx *gfx) {
 }
 
 /** G_RDPSETOTHERMODE command handler (empty). */
-void func_15040D78(Gfx *gfx) {
+void debug_cmdRdpSetOtherMode(Gfx *gfx) {
 }

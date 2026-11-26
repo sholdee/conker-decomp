@@ -2,17 +2,17 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c). */
-u8 *D_800D19A0[187]; // per model id: model data (just past its header)
-ModelDef *D_800D1C90[187];
+u8 *gModelData[187]; // per model id: model data (just past its header)
+ModelDef *gModelDefs[187];
 u8 D_800D1F80[187];
-u8 D_800D2040[187]; // per model id counter
-SpawnRecord *D_800D20FC;
-u8 D_800D2100;
-u8 D_800D2101;
-PathPoint **D_800D2104;
-u8 *D_800D2108;
-u8 *D_800D210C;
-u16 *D_800D2110;
+u8 gModelUnloadTimers[187]; // per model id counter
+SpawnRecord *gSpawnRecords;
+u8 gSpawnRecordCount;
+u8 gSpawnFirstCount;
+PathPoint **gSpawnPaths;
+u8 *gSpawnPathCounts;
+u8 *gSpawnInUse;
+u16 *gSpawnDelays;
 
 #include "functions.h"
 #include "variables.h"
@@ -20,9 +20,9 @@ u16 *D_800D2110;
 
 
 /* Spawns the object for spawn record spawnIdx once it is due: skips records that are in use,
-   disabled (x == 0x7FFF) or still counting down their D_800D2110 delay, and records whose flags
+   disabled (x == 0x7FFF) or still counting down their gSpawnDelays delay, and records whose flags
    ask for no player nearby (radius by flags & 6) or for being off-screen (flags & 8). */
-s32 func_150825C0(s32 spawnIdx, s32 arg1) {
+s32 collision_trySpawnRecord(s32 spawnIdx, s32 arg1) {
     f32 radiusSq;
     s32 i;
     u16 range;
@@ -32,24 +32,24 @@ s32 func_150825C0(s32 spawnIdx, s32 arg1) {
     f32 dx;
     f32 dz;
 
-    if (D_800D210C[spawnIdx] != 0) {
+    if (gSpawnInUse[spawnIdx] != 0) {
         return 0;
     }
-    if (D_800D20FC[spawnIdx].unk2 == 1) {
+    if (gSpawnRecords[spawnIdx].unk2 == 1) {
         return 0;
     }
-    if (D_800D20FC[spawnIdx].x == 0x7FFF) {
+    if (gSpawnRecords[spawnIdx].x == 0x7FFF) {
         return 0;
     }
-    if (D_800D2110[spawnIdx]) {
-        if (D_800D2110[spawnIdx] <= D_800BE9A0) {
-            D_800D2110[spawnIdx] = 0;
+    if (gSpawnDelays[spawnIdx]) {
+        if (gSpawnDelays[spawnIdx] <= D_800BE9A0) {
+            gSpawnDelays[spawnIdx] = 0;
         } else {
-            D_800D2110[spawnIdx] -= D_800BE9A0;
+            gSpawnDelays[spawnIdx] -= D_800BE9A0;
         }
         return 0;
     }
-    flags = D_800D20FC[spawnIdx].flags;
+    flags = gSpawnRecords[spawnIdx].flags;
     if (spawnIdx >= 5) {
         range = flags & 6;
         if (range != 0) {
@@ -70,9 +70,9 @@ s32 func_150825C0(s32 spawnIdx, s32 arg1) {
                 }
                 if (gMatchState.playerMask & (1 << movement_obj[j].playernumber)) {
                     // matching: squaring in place (d = d * d) reuses the operand's register
-                    dx = movement_obj[j].xpos - D_800D20FC[spawnIdx].x;
+                    dx = movement_obj[j].xpos - gSpawnRecords[spawnIdx].x;
                     dx = dx * dx;
-                    dz = movement_obj[j].zpos - D_800D20FC[spawnIdx].z;
+                    dz = movement_obj[j].zpos - gSpawnRecords[spawnIdx].z;
                     dz = dz * dz;
                     if (dx + dz <= radiusSq) {
                         clear = 0;
@@ -90,9 +90,9 @@ s32 func_150825C0(s32 spawnIdx, s32 arg1) {
         for (i = 0; i <= gScreenLayout; i++) {
             // matching: offset + base operand order
             if (func_150A6360(i + gViews, gViewMatrices[i],
-                              D_800D20FC[spawnIdx].x,
-                              D_800D20FC[spawnIdx].y + 150,
-                              D_800D20FC[spawnIdx].z,
+                              gSpawnRecords[spawnIdx].x,
+                              gSpawnRecords[spawnIdx].y + 150,
+                              gSpawnRecords[spawnIdx].z,
                               150.0f, 150.0f, 20000.0f) != 0) {
                 clear = 0;
             }
@@ -101,26 +101,26 @@ s32 func_150825C0(s32 spawnIdx, s32 arg1) {
             return 0;
         }
     }
-    return func_15082A44(&D_800D20FC[spawnIdx], spawnIdx, 0, 0, 0);
+    return collision_spawnObject(&gSpawnRecords[spawnIdx], spawnIdx, 0, 0, 0);
 }
 
-/* Runs func_150825C0 over the spawn records: [0, D_800D2101) when firstRange is set, else
-   [D_800D2101, D_800D2100). */
-void func_1508295C(s32 arg0, s32 arg1, s32 firstRange) {
+/* Runs collision_trySpawnRecord over the spawn records: [0, gSpawnFirstCount) when firstRange is set, else
+   [gSpawnFirstCount, gSpawnRecordCount). */
+void collision_trySpawnRecords(s32 arg0, s32 arg1, s32 firstRange) {
     s32 start;
     s32 end;
     s32 i;
 
     if (firstRange != 0) {
         start = 0;
-        end = D_800D2101;
+        end = gSpawnFirstCount;
     } else {
-        start = D_800D2101;
-        end = D_800D2100;
+        start = gSpawnFirstCount;
+        end = gSpawnRecordCount;
     }
 
     for (i = start; i < end; i++) {
-        func_150825C0(i, arg1);
+        collision_trySpawnRecord(i, arg1);
     }
 }
 
@@ -152,7 +152,7 @@ void func_150829D8(Actor *obj) {
 
 /* Creates and initialises a game object from spawn record spawnIdx (slot: 1-based object slot to
    reuse, 0 for the default). Returns the 1-based slot, or 0 on failure. */
-s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot) {
+s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot) {
     s32 type;
     Actor *obj;
     s32 idx;
@@ -164,7 +164,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     VtxMorphState *mem;
     u16 angle;
 
-    if (D_800D210C[spawnIdx] & ~0x80) {
+    if (gSpawnInUse[spawnIdx] & ~0x80) {
         return 0;
     }
     type = spawn->type;
@@ -183,9 +183,9 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     }
     if (spawnIdx != -1) {
         if (spawn->flags & 0x21) {
-            D_800D210C[spawnIdx] = idx + 1;
+            gSpawnInUse[spawnIdx] = idx + 1;
         } else {
-            D_800D210C[spawnIdx] = idx + 0x81;
+            gSpawnInUse[spawnIdx] = idx + 0x81;
         }
         obj->listpos = spawnIdx;
         if (spawnIdx < D_8008FD8C) {
@@ -196,7 +196,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     }
     obj->listpos_ptr = spawn;
     ret = idx + 1;
-    func_15084488(spawn, obj->listpos, arg3);
+    collision_loadSpawnModel(spawn, obj->listpos, arg3);
     if ((idx < D_8008FD8C) || (type == 0x98) || (type == 0x28)) {
         obj->mv = allocate_memory(sizeof(ActorCtl), 1, 0, 0);
         bzero(obj->mv, sizeof(ActorCtl));
@@ -261,7 +261,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
         obj->unk38 = obj->ypos - 500.0f;
     }
     if (obj->noshove & 0x800000) {
-        D_800C67F0 = 1;
+        gZoneCursorEnabled = 1;
     }
     obj->family = spawn->unk11;
     obj->unk66 = spawn->unk10;
@@ -276,13 +276,13 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     obj->intel_accel = 100;
     obj->intel_decel = 100;
     obj->unk1FC |= 2;
-    func_150839B8(obj, type, spawn);
+    collision_applyModelDefaults(obj, type, spawn);
     t = spawn->unk13 & 0x7F;
     obj->unk92 = ((spawn->unk13 & 0x80) << 8) | t;
     obj->unk90 = spawn->unk14;
-    func_150837D4(idx, type, 1);
+    collision_setObjectModel(idx, type, 1);
     if (type != 0xFF) {
-        func_150838EC(obj, 0, 0, 1.0f);
+        collision_allocAnimState(obj, 0, 0, 1.0f);
     } else {
         obj->drawtype = 3;
     }
@@ -290,7 +290,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
         model_loadForActor(obj, obj->character_type, 0, 0);
     }
     if (spawn->partSet) {
-        func_15083568(obj, spawn->partSet, 1.0f, 0);
+        collision_createPartSet(obj, spawn->partSet, 1.0f, 0);
     }
     if (obj->playernumber != 0xFF) {
         obj->energy = player_getStat(obj->playernumber, 4);
@@ -321,14 +321,14 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
             found = 1;
         }
         for (i = 0; i < found; i++) {
-            D_800D2040[obj->modelIds[i]] = 0xFF;
+            gModelUnloadTimers[obj->modelIds[i]] = 0xFF;
         }
     }
     if (level == 29) {
         obj->unk66 &= ~0x20;
     }
     func_1514D15C(obj);
-    model = func_150849A0(obj);
+    model = collision_getModelId(obj);
     found = 0;
     for (i = 0; i < 2; i++) {
         if (model == D_800A7230[i].kind) {
@@ -453,25 +453,25 @@ void func_15083384(Actor *obj, s32 arg1) {
         break;
     }
     if (partSet != -1) {
-        func_15083568(obj, partSet, 0.0f, 0);
+        collision_createPartSet(obj, partSet, 0.0f, 0);
     }
 }
 
 /* Creates every part of part set setId (1-based) on parent; returns the last part created (a child
  * Actor or a ModelAttachment, depending on its type). */
-void *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3) {
+void *collision_createPartSet(Actor *parent, s32 setId, f32 arg2, s32 arg3) {
     const PartDef *parts;
     void *ret;
     s32 i;
 
     setId--;
     ret = NULL;
-    parts = D_80086CC4[setId].parts;
-    for (i = 0; i < D_80086CC4[setId].count; i++) {
+    parts = gPartSets[setId].parts;
+    for (i = 0; i < gPartSets[setId].count; i++) {
         if (parts[i].type == 0) {
-            ret = func_15083AC8(parent, parts[i].unk1, parts[i].model, 0, parts[i].unk2, parts[i].unk4, parts[i].unk5, parts[i].unk6, arg2);
+            ret = collision_createChildObject(parent, parts[i].unk1, parts[i].model, 0, parts[i].unk2, parts[i].unk4, parts[i].unk5, parts[i].unk6, arg2);
         } else {
-            ret = func_15030AF4(parent, parts[i].model, parts[i].unk1, parts[i].flags, parts[i].unk4, parts[i].unk5, arg3, setId + 1, parts[i].unk2,
+            ret = attach_add(parent, parts[i].model, parts[i].unk1, parts[i].flags, parts[i].unk4, parts[i].unk5, arg3, setId + 1, parts[i].unk2,
                                 parts[i].data, (parts[i].type == 2) ? parts[i].unk6 : -1, parts[i].parentSet, parts[i].parentMtx);
         }
     }
@@ -479,14 +479,14 @@ void *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3) {
 }
 
 /* Removes the child objects of part set setId (1-based) that belong to parent. */
-void func_150836CC(Actor *parent, s32 setId) {
+void collision_removePartSet(Actor *parent, s32 setId) {
     const PartSet *set;
     s32 i;
     const PartDef *parts;
 
-    func_150302F0(parent, setId);
+    attach_removeSet(parent, setId);
     setId--;
-    set = &D_80086CC4[setId];
+    set = &gPartSets[setId];
     parts = set->parts;
     for (i = 0; i < set->count; i++) {
         Actor *child;
@@ -503,7 +503,7 @@ void func_150836CC(Actor *parent, s32 setId) {
 }
 
 /* Sets object objIdx's model to modelId (0xFF for none) and loads its per-model state. */
-void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
+void collision_setObjectModel(s32 objIdx, s32 modelId, s32 arg2) {
     Actor *obj = &movement_obj[objIdx];
     ModelDef *def;
 
@@ -518,19 +518,19 @@ void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
         obj->shadow_size = 0;
         obj->unkC8 = 0.0f;
     } else {
-        obj->unkC8 = D_800D1C90[modelId]->unk6;
+        obj->unkC8 = gModelDefs[modelId]->unk6;
         actor_setScale(obj, obj->scale_xz, obj->scale_y);
-        def = D_800D1C90[modelId];
+        def = gModelDefs[modelId];
         obj->drawtype = def->unk12;
     }
     obj->unk6 = func_15084D00(obj);
     if (gModelAnimCounts[obj->unk6] != 0) {
-        obj->unk58 = (s32)func_1502B020(0, 2, 2, obj->unk6);
+        obj->unk58 = (s32)rom_findPath(0, 2, 2, obj->unk6);
     }
 }
 
 /* Allocates the animation state block of obj's model. Returns 1 only if the allocation fails. */
-s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3) {
+s32 collision_allocAnimState(Actor *obj, s32 arg1, s32 arg2, f32 arg3) {
     s32 modelId;
 
     modelId = obj->character_type;
@@ -550,12 +550,12 @@ s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3) {
 }
 
 /* Copies model modelId's defaults from its ModelDef into obj; spawn (may be NULL) overrides unk10. */
-void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn) {
+void collision_applyModelDefaults(Actor *obj, s32 modelId, SpawnRecord *spawn) {
     ModelDef *def;
     u16 override;
 
     if (modelId != 0xFF) {
-        def = D_800D1C90[modelId];
+        def = gModelDefs[modelId];
         if (spawn != NULL) {
             override = spawn->unk2C;
             if (override == 0) {
@@ -581,7 +581,7 @@ void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn) {
         obj->unk68[1] = def->eyeDefault[1];
         obj->shadow_size = def->unk2;
         if (def->subModelCount != 0) {
-            obj->modelIds = D_80086CAC[def->subModelList];
+            obj->modelIds = gSubModelLists[def->subModelList];
             obj->lodCount = def->subModelCount;
         }
         obj->modelCount = obj->lodCount + def->extraModelCount;
@@ -591,8 +591,8 @@ void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn) {
     }
 }
 
-/* Creates a child object of parent with model modelId (a part from func_15083568). */
-Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8) {
+/* Creates a child object of parent with model modelId (a part from collision_createPartSet). */
+Actor *collision_createChildObject(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8) {
     Actor *obj;
     // matching: unused stack slot
     s32 pad;
@@ -640,7 +640,7 @@ Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, 
     func_1503D774(modelId, 0);
     if (arg5 & 1) {
         obj->noshove |= 0x4000;
-        obj->cull_radius_xz = D_800D1C90[modelId]->bodyRadius * obj->scale_xz;
+        obj->cull_radius_xz = gModelDefs[modelId]->bodyRadius * obj->scale_xz;
     }
     animFlag = 0;
     if (arg5 & 2) {
@@ -661,9 +661,9 @@ Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, 
     if (blocked) {
         D_800C3638 = 0;
     }
-    func_150839B8(obj, modelId, NULL);
-    func_150837D4(obj - movement_obj, modelId, 1);
-    func_150838EC(obj, arg7, animFlag, arg8);
+    collision_applyModelDefaults(obj, modelId, NULL);
+    collision_setObjectModel(obj - movement_obj, modelId, 1);
+    collision_allocAnimState(obj, arg7, animFlag, arg8);
     if (blocked) {
         D_800C3638 = 1;
     }
@@ -671,13 +671,13 @@ Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, 
 }
 
 /* Returns the lowest unique id (1..255) that no spawn record uses. */
-s32 func_15083DA0(void) {
+s32 collision_getFreeUniqueId(void) {
     s32 id;
     s32 i;
 
     id = 1;
-    for (i = 0; i < D_800D2100; i++) {
-        if (id == D_800D20FC[i].unique_id) {
+    for (i = 0; i < gSpawnRecordCount; i++) {
+        if (id == gSpawnRecords[i].unique_id) {
             id++;
             i = 0;
         }
@@ -689,22 +689,22 @@ s32 func_15083DA0(void) {
 }
 
 /* Returns the index of the spawn record with unique id id, or -1. */
-s32 func_15083E0C(u8 id) {
+s32 collision_findSpawnById(u8 id) {
     s32 i;
 
     if (id == 0) {
         return -1;
     }
-    for (i = 0; i < D_800D2100; i++) {
-        if (D_800D20FC[i].unique_id == id) {
-            return &D_800D20FC[i] - D_800D20FC;
+    for (i = 0; i < gSpawnRecordCount; i++) {
+        if (gSpawnRecords[i].unique_id == id) {
+            return &gSpawnRecords[i] - gSpawnRecords;
         }
     }
     return -1;
 }
 
 /* Returns the active object with unique id id, or NULL. */
-Actor *func_15083E90(u8 id) {
+Actor *collision_findObjectById(u8 id) {
     Actor *obj;
     s32 i;
 
@@ -723,10 +723,10 @@ Actor *func_15083E90(u8 id) {
 }
 
 /* Returns the slot of the active object with unique id id, or -1. */
-s32 func_15083FB0(u8 id) {
+s32 collision_findObjectSlotById(u8 id) {
     Actor *obj;
 
-    obj = func_15083E90(id);
+    obj = collision_findObjectById(id);
     if (obj != NULL) {
         return obj - movement_obj;
     }
@@ -742,9 +742,9 @@ s32 func_15084000(s32 id) {
     return -1;
 }
 
-/* Sets up obj's two data pointers for its model'th model: shared with D_800D19A0[id] or private
+/* Sets up obj's two data pointers for its model'th model: shared with gModelData[id] or private
    copies, depending on the owning spawn record's mode (unk10 & 3). Returns 1 if an allocation failed. */
-s32 func_15084044(Actor *obj, s32 model) {
+s32 collision_initModelData(Actor *obj, s32 model) {
     u8 *slot;
     SpawnRecord *spawn;
     s32 mode;
@@ -755,7 +755,7 @@ s32 func_15084044(Actor *obj, s32 model) {
     s32 size;
 
     // matching: every access to modelData[model] goes through this byte pointer (slot + 0x28C/0x290) or
-    // an s32 row view, as s32 lvalues; typed field access reallocates registers (see the func_15084044 ledger)
+    // an s32 row view, as s32 lvalues; typed field access reallocates registers (see the collision_initModelData ledger)
     slot = (u8 *)((s32)obj + model * 8);
     if (obj->attach_char != 0) {
         spawn = movement_obj[obj->attach_char - 1].listpos_ptr;
@@ -770,30 +770,30 @@ s32 func_15084044(Actor *obj, s32 model) {
     if (*(s32 *)(slot + 0x28C) != 0 && *(s32 *)(slot + 0x290) != 0) {
         return 0;
     }
-    val = (s32)D_800D19A0[id];
-    if ((s32)D_800D19A0[id] == 0) {
+    val = (s32)gModelData[id];
+    if ((s32)gModelData[id] == 0) {
         return 0;
     }
     ret = 0;
     if (mode == 0) {
-        val = (s32)D_800D19A0[id];
+        val = (s32)gModelData[id];
         *(s32 *)(slot + 0x290) = val;
         *(s32 *)(slot + 0x28C) = val;
         D_800D1F80[id] += 2;
     } else if (mode == 1) {
-        if (*(s32 *)(slot + 0x28C) == 0 || *(s32 *)(slot + 0x28C) == (s32)D_800D19A0[id]) {
+        if (*(s32 *)(slot + 0x28C) == 0 || *(s32 *)(slot + 0x28C) == (s32)gModelData[id]) {
             if (D_800D1F80[id] != 0) {
                 size = gModelVertexCounts[id] * 16;
                 *(s32 *)(slot + 0x28C) = (s32)allocate_memory(size, 1, 2, 2);
                 if (*(s32 *)(slot + 0x28C) == 0) {
                     ret = 1;
                 } else if (*(s32 *)(slot + 0x28C) != 0) {
-                    bcopy((void *)(s32)D_800D19A0[id], (void *)*(s32 *)(slot + 0x28C), size);
+                    bcopy((void *)(s32)gModelData[id], (void *)*(s32 *)(slot + 0x28C), size);
                 } else {
-                    *(s32 *)(slot + 0x28C) = (s32)D_800D19A0[id];
+                    *(s32 *)(slot + 0x28C) = (s32)gModelData[id];
                 }
             } else {
-                val = (s32)D_800D19A0[id];
+                val = (s32)gModelData[id];
                 *(s32 *)(slot + 0x290) = val;
                 *(s32 *)(slot + 0x28C) = val;
                 D_800D1F80[id] += 2;
@@ -802,14 +802,14 @@ s32 func_15084044(Actor *obj, s32 model) {
         *(s32 *)(slot + 0x290) = *(s32 *)(slot + 0x28C);
     } else if (mode == 2) {
         for (i = 0; i < 2; i++) {
-            if (((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == 0 || ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == (s32)D_800D19A0[id] || (i == 1 && *(s32 *)(slot + 0x28C) == *(s32 *)(slot + 0x290))) {
+            if (((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == 0 || ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == (s32)gModelData[id] || (i == 1 && *(s32 *)(slot + 0x28C) == *(s32 *)(slot + 0x290))) {
                 if (D_800D1F80[id] != 0) {
                     size = gModelVertexCounts[id] * 16;
                     ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] = (s32)allocate_memory(size, 1, 2, 2);
                     if (((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == 0) {
                         ret = 1;
                         if (i == 1) {
-                            if (*(s32 *)(slot + 0x28C) != (s32)D_800D19A0[id]) {
+                            if (*(s32 *)(slot + 0x28C) != (s32)gModelData[id]) {
                                 func_10004074((void *)*(s32 *)(slot + 0x28C));
                             } else {
                                 D_800D1F80[id] -= 1;
@@ -818,12 +818,12 @@ s32 func_15084044(Actor *obj, s32 model) {
                         }
                         break;
                     } else if (((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] != 0) {
-                        bcopy((void *)(s32)D_800D19A0[id], (void *)((s32 (*)[2])((u8 *)obj + 0x28C))[model][i], size);
+                        bcopy((void *)(s32)gModelData[id], (void *)((s32 (*)[2])((u8 *)obj + 0x28C))[model][i], size);
                     } else {
-                        ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] = (s32)D_800D19A0[id];
+                        ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] = (s32)gModelData[id];
                     }
                 } else {
-                    ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] = (s32)D_800D19A0[id];
+                    ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] = (s32)gModelData[id];
                     D_800D1F80[id] += 1;
                 }
             }
@@ -833,7 +833,7 @@ s32 func_15084044(Actor *obj, s32 model) {
 }
 
 /* Releases the data pointers of all of obj's models. */
-void func_1508434C(Actor *obj) {
+void collision_releaseAllModelData(Actor *obj) {
     s32 count;
     s32 i;
 
@@ -842,14 +842,14 @@ void func_1508434C(Actor *obj) {
         count = 1;
     }
     for (i = 0; i < count; i++) {
-        func_150843AC(obj, i);
+        collision_releaseModelData(obj, i);
     }
 }
 
 /* Releases the data pointers of obj's model'th model: frees private copies, drops the
    reference count of shared ones. */
-void func_150843AC(Actor *obj, s32 model) {
-    // matching: a named trip count takes its saved register before the D_800D19A0 base
+void collision_releaseModelData(Actor *obj, s32 model) {
+    // matching: a named trip count takes its saved register before the gModelData base
     u8 limit;
     u8 *data;
     s32 i;
@@ -863,7 +863,7 @@ void func_150843AC(Actor *obj, s32 model) {
     for (i = 0; i != limit; i++) {
         data = obj->modelData[model][i];
         if (data != NULL) {
-            if (data != D_800D19A0[id]) {
+            if (data != gModelData[id]) {
                 func_100043B4((s32 *)data, 3);
             } else {
                 D_800D1F80[id] -= 1;
@@ -874,7 +874,7 @@ void func_150843AC(Actor *obj, s32 model) {
 }
 
 /* Loads model spawn->type and all of its sub-models. */
-void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2) {
+void collision_loadSpawnModel(SpawnRecord *spawn, s32 arg1, s32 arg2) {
     s32 count;
     s32 i;
     ModelDef *def;
@@ -884,13 +884,13 @@ void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2) {
     modelId = spawn->type;
     if (modelId != 0xFF) {
         func_1503D774(modelId, arg2);
-        def = D_800D1C90[modelId];
+        def = gModelDefs[modelId];
         list = &spawn->type;
         count = def->subModelCount;
         if (count == 0) {
             count = 1;
         } else {
-            list = D_80086CAC[def->subModelList];
+            list = gSubModelLists[def->subModelList];
         }
         count += def->extraModelCount;
         for (i = 0; i < count; i++) {
@@ -902,7 +902,7 @@ void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2) {
 
 /* Releases obj's model data, and frees each of its models (and their tables) that no other
    active object still uses. */
-void func_15084558(Actor *self) {
+void collision_freeObjectModels(Actor *self) {
     s32 id;
     const u8 *list;
     s32 i;
@@ -922,10 +922,10 @@ void func_15084558(Actor *self) {
     TexCoord *table;
 
     id = self->character_type;
-    if (id != 0xFF && D_800D19A0[id] != NULL) {
+    if (id != 0xFF && gModelData[id] != NULL) {
         count = self->modelCount;
         list = self->modelIds;
-        func_1508434C(self);
+        collision_releaseAllModelData(self);
         for (i = 0; i < count; i++) {
             unique = 1;
             freeData = 1;
@@ -948,7 +948,7 @@ void func_15084558(Actor *self) {
                             if (gModelAnimTables[otherList[k]] == gModelAnimTables[list[i]] && gModelAnimTables[otherList[k]] != NULL) {
                                 freeData = 0;
                             }
-                            if (D_800D1C90[otherList[k]] == D_800D1C90[list[i]] && D_800D1C90[otherList[k]] != NULL) {
+                            if (gModelDefs[otherList[k]] == gModelDefs[list[i]] && gModelDefs[otherList[k]] != NULL) {
                                 freeDef = 0;
                             }
                         }
@@ -967,15 +967,15 @@ void func_15084558(Actor *self) {
                 }
             }
             if (freeDef) {
-                block = (u8 *)D_800D1C90[list[i]];
+                block = (u8 *)gModelDefs[list[i]];
                 if (block != NULL) {
                     block -= 0x10;  // the allocation starts 0x10 bytes before the data
                     func_100043B4((s32 *)block, 3);
-                    D_800D1C90[list[i]] = NULL;
+                    gModelDefs[list[i]] = NULL;
                 }
             }
             if (unique) {
-                if (D_800D19A0[list[i]] != NULL) {
+                if (gModelData[list[i]] != NULL) {
                     if (gModelVtxRuns[id] != NULL) {
                         func_10004074((void *)(s32)gModelVtxRuns[id]); // matching: the int round trip keeps the load in v0
                         gModelVtxRuns[id] = NULL;
@@ -994,7 +994,7 @@ void func_15084558(Actor *self) {
 }
 
 /* Returns obj's current model id (modelIds[forced_lod - 1], or the first). */
-s32 func_150849A0(Actor *obj) {
+s32 collision_getModelId(Actor *obj) {
     s32 current = obj->forced_lod;
 
     if (current != 0) {
@@ -1003,8 +1003,8 @@ s32 func_150849A0(Actor *obj) {
     return obj->modelIds[0];
 }
 
-/* Like func_150849A0, falling back to modelIds[lodCount - 1]; stores the index in *outIndex. */
-s32 func_150849CC(Actor *obj, s32 *outIndex) {
+/* Like collision_getModelId, falling back to modelIds[lodCount - 1]; stores the index in *outIndex. */
+s32 collision_getLodModelId(Actor *obj, s32 *outIndex) {
     s32 index;
     s32 n;
 
@@ -1025,9 +1025,9 @@ s32 func_150849CC(Actor *obj, s32 *outIndex) {
     return obj->modelIds[index];
 }
 
-/* Ticks the D_800D2040 countdowns; a model whose countdown expires while it has no gModelVtxRuns
+/* Ticks the gModelUnloadTimers countdowns; a model whose countdown expires while it has no gModelVtxRuns
    table is unloaded and every object's references to it are dropped. */
-void func_15084A18(void) {
+void collision_updateModelUnload(void) {
     s32 i;
     s32 m;
     Actor *obj;
@@ -1036,24 +1036,24 @@ void func_15084A18(void) {
     ObjTexture *textures;
     u8 *timer;
 
-    timer = D_800D2040;
+    timer = gModelUnloadTimers;
     for (i = 0; i < 187; i++, timer++) {
         if (*timer == 0xFF || *timer == 0) {
             continue;
         }
         if (*timer == 1) {
-            if (D_800D19A0[i] != NULL && gModelVtxRuns[i] == NULL) {
+            if (gModelData[i] != NULL && gModelVtxRuns[i] == NULL) {
                 for (m = 0; m < 25; m++) {
                     obj = &movement_obj[m];
                     if (obj->type != 0) {
                         for (j = 0; j < obj->modelCount; j++) {
                             for (k = 0; k < 2; k++) {
-                                if (obj->modelData[j][k] == D_800D19A0[i]) {
+                                if (obj->modelData[j][k] == gModelData[i]) {
                                     obj->modelData[j][k] = NULL;
                                 }
                             }
                             if (i == obj->modelIds[j]) {
-                                func_150843AC(obj, j);
+                                collision_releaseModelData(obj, j);
                             }
                         }
                     }
@@ -1061,12 +1061,12 @@ void func_15084A18(void) {
                 textures = gModelTextures[i];
                 for (k = 0; k < gModelTextureCounts[i]; k++) {
                     if (textures[k].addr >= 0x10000000U) {
-                        func_1510D720(textures[k].id);
+                        texture_dropUse(textures[k].id);
                     }
                 }
-                func_10004074(D_800D19A0[i] - 0x38);
+                func_10004074(gModelData[i] - 0x38);
                 D_800D1F80[i] = 0;
-                D_800D19A0[i] = NULL;
+                gModelData[i] = NULL;
             }
         }
         (*timer)--;

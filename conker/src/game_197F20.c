@@ -251,7 +251,7 @@ void text_updateBox(TextBox *box) {
     text_placeBox(box);
 }
 
-/* Sprite parameters passed to func_15094F70 / func_15095A48. */
+/* Sprite parameters passed to sprite_loadDescFrame / sprite_drawScreen. */
 
 #define SPRITE_FLIP_X 1 /* set while the body is left of the anchor */
 #define SPRITE_FLIP_Y 2 /* set while the body is below the anchor */
@@ -290,7 +290,7 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     if (D_800E0BDC == 0) {
         return gfx;
     }
-    D_800D2DA8 = D_800D2DA9 = D_800D2DAA = 0;
+    gSpritePrimR = gSpritePrimG = gSpritePrimB = 0;
     fade = D_800E0BDC + 1;
     sprite.flip = 0;
     sprite.alpha = (64 * fade) >> 8;
@@ -310,12 +310,12 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     if (box->config->flags & TEXTBOX_BUBBLES) {
         sprite.alpha = box->bubbleAlpha[0] * 64.0f / 255.0f;
         sprite.alpha = (sprite.alpha * fade) >> 8;
-        gfx = func_15094F70(gfx, &D_8009056C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &D_8009056C, 0, &sprite, 0, 0, 0, 2, 3);
     } else {
-        gfx = func_15094F70(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
     }
     if (!dark) {
-        gfx = func_15095A48(gfx, &sprite, box->bodyX + 5.0f, box->bodyY + -5.0f);
+        gfx = sprite_drawScreen(gfx, &sprite, box->bodyX + 5.0f, box->bodyY + -5.0f);
     }
     if (box->angle > 0.0f && box->angle < 3.1415927f) {
         sprite.flip &= ~SPRITE_FLIP_Y;
@@ -335,33 +335,33 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
         if (box->state == TEXTBOX_STATE_INIT) {
             box->bubbleX = box->anchorX;
         }
-        gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
         sprite.alpha = box->bubbleAlpha[1] * 64.0f / 255.0f;
         sprite.alpha = (sprite.alpha * fade) >> 8;
         if (box->angle > 1.5707964f) {
             box->bubbleX += (box->x + xoff - box->bubbleX) * 0.3f;
-            gfx = func_15095A48(gfx, &sprite, box->bubbleX, box->y - yoff);
+            gfx = sprite_drawScreen(gfx, &sprite, box->bubbleX, box->y - yoff);
         } else {
             box->bubbleX += (box->x - xoff - box->bubbleX) * 0.3f;
-            gfx = func_15095A48(gfx, &sprite, box->bubbleX, box->y - yoff);
+            gfx = sprite_drawScreen(gfx, &sprite, box->bubbleX, box->y - yoff);
         }
         sprite.scaleX /= 2;
         sprite.scaleY /= 2;
         sprite.alpha = box->bubbleAlpha[2] * 64.0f / 255.0f;
         sprite.alpha = (sprite.alpha * fade) >> 8;
-        gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
         if (box->angle > 1.5707964f) {
-            gfx = func_15095A48(gfx, &sprite, box->x - 2.5f, box->y + -2.5f);
+            gfx = sprite_drawScreen(gfx, &sprite, box->x - 2.5f, box->y + -2.5f);
         } else {
-            gfx = func_15095A48(gfx, &sprite, box->x + 2.5f, box->y + -2.5f);
+            gfx = sprite_drawScreen(gfx, &sprite, box->x + 2.5f, box->y + -2.5f);
         }
     } else {
-        gfx = func_15094F70(gfx, &D_8009057C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &D_8009057C, 0, &sprite, 0, 0, 0, 2, 3);
         if (!dark) {
             if (box->angle > 1.5707964f) {
-                gfx = func_15095A48(gfx, &sprite, box->x + xoff - 2.5f, box->y - yoff + -2.5f);
+                gfx = sprite_drawScreen(gfx, &sprite, box->x + xoff - 2.5f, box->y - yoff + -2.5f);
             } else {
-                gfx = func_15095A48(gfx, &sprite, box->x - xoff + 2.5f, box->y - yoff + -2.5f);
+                gfx = sprite_drawScreen(gfx, &sprite, box->x - xoff + 2.5f, box->y - yoff + -2.5f);
             }
         }
     }
@@ -371,11 +371,11 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     }
     /* the box itself, tinted with the config's colour */
     if (dark) {
-        D_800D2DA8 = D_800D2DA9 = D_800D2DAA = 0;
+        gSpritePrimR = gSpritePrimG = gSpritePrimB = 0;
     } else {
-        D_800D2DA8 = box->config->r;
-        D_800D2DA9 = box->config->g;
-        D_800D2DAA = box->config->b;
+        gSpritePrimR = box->config->r;
+        gSpritePrimG = box->config->g;
+        gSpritePrimB = box->config->b;
     }
     sprite.flip = 0;
     if (dark) {
@@ -401,33 +401,33 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     sprite.scaleX = box->width / D_8009055C.width * 2355.2f * box->scale;
     sprite.scaleY = box->height / D_8009055C.height * 4259.84f * box->scale;
     if (box->config->flags & TEXTBOX_BUBBLES) {
-        gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
         sprite.alpha = box->bubbleAlpha[1];
         sprite.alpha = (sprite.alpha * fade) >> 8;
-        gfx = func_15095A48(gfx, &sprite, box->bubbleX, box->y - yoff);
+        gfx = sprite_drawScreen(gfx, &sprite, box->bubbleX, box->y - yoff);
         sprite.scaleX /= 2;
         sprite.scaleY /= 2;
-        gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
         sprite.alpha = box->bubbleAlpha[2];
         sprite.alpha = (sprite.alpha * fade) >> 8;
         if (box->angle > 1.5707964f) {
-            gfx = func_15095A48(gfx, &sprite, box->x, box->y);
+            gfx = sprite_drawScreen(gfx, &sprite, box->x, box->y);
         } else {
-            gfx = func_15095A48(gfx, &sprite, box->x, box->y);
+            gfx = sprite_drawScreen(gfx, &sprite, box->x, box->y);
         }
     } else if (box->config->flags & TEXTBOX_ALT_TAIL) {
-        gfx = func_15094F70(gfx, &D_8009059C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &D_8009059C, 0, &sprite, 0, 0, 0, 2, 3);
         if (box->angle > 1.5707964f) {
-            gfx = func_15095A48(gfx, &sprite, box->x + xoff, box->y - yoff);
+            gfx = sprite_drawScreen(gfx, &sprite, box->x + xoff, box->y - yoff);
         } else {
-            gfx = func_15095A48(gfx, &sprite, box->x - xoff, box->y - yoff);
+            gfx = sprite_drawScreen(gfx, &sprite, box->x - xoff, box->y - yoff);
         }
     } else {
-        gfx = func_15094F70(gfx, &D_8009057C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &D_8009057C, 0, &sprite, 0, 0, 0, 2, 3);
         if (box->angle > 1.5707964f) {
-            gfx = func_15095A48(gfx, &sprite, box->x + xoff, box->y - yoff);
+            gfx = sprite_drawScreen(gfx, &sprite, box->x + xoff, box->y - yoff);
         } else {
-            gfx = func_15095A48(gfx, &sprite, box->x - xoff, box->y - yoff);
+            gfx = sprite_drawScreen(gfx, &sprite, box->x - xoff, box->y - yoff);
         }
     }
     sprite.scaleX = 2.0f * box->width / D_8009055C.width * 2355.2f * box->scale;
@@ -435,11 +435,11 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     if (box->config->flags & TEXTBOX_BUBBLES) {
         sprite.alpha = box->bubbleAlpha[0];
         sprite.alpha = (sprite.alpha * fade) >> 8;
-        gfx = func_15094F70(gfx, &D_8009056C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &D_8009056C, 0, &sprite, 0, 0, 0, 2, 3);
     } else {
-        gfx = func_15094F70(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
     }
-    gfx = func_15095A48(gfx, &sprite, (s32)box->bodyX, (s32)box->bodyY);
+    gfx = sprite_drawScreen(gfx, &sprite, (s32)box->bodyX, (s32)box->bodyY);
     overflow = (gfx - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
     if (overflow) {
         return start;

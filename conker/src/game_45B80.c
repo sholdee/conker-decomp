@@ -161,14 +161,14 @@ s32 game_processMessage(void) {
                     bone_collapseAllMaskedBones();
                     actor_flushBoneMatrices();
                     trail_limitHistorySpacing(0);
-                    func_15084A18();
+                    collision_updateModelUnload();
                     func_15125628();
                     DL_APPEND(_SHIFTL(G_RDPFULLSYNC, 24, 8), 0); // gDPFullSync
                     DL_APPEND(_SHIFTL(G_ENDDL, 24, 8), 0); // gSPEndDisplayList
-                    func_10004674();
-                    func_1510D404();
+                    rom_waitReads();
+                    texture_updateAging();
                     gfx_freeHiddenObjectBlocks();
-                    func_1517CFC4();
+                    sprite_freeTypeTextures();
                     func_1501C880(0, 1);
                     D_800BE9B4 = 0;
                     if (gPaused != 0) {
@@ -207,7 +207,7 @@ s32 game_processMessage(void) {
 
 /* Per-frame updates called from game_updateFrame, most of them only outside gPaused mode. */
 void func_15018DFC(void) {
-    func_150A09D0(D_800BE9E4);
+    zone_updateGlobal(D_800BE9E4);
     actor_updateVisibility();
     func_1501C870();
     if (gPaused == 0) {
@@ -225,7 +225,7 @@ void func_15018DFC(void) {
 /* Draws group 0 of player's display lists (func_151674F8), then func_15174AA4 for the level. */
 Gfx *func_15018E88(Gfx *gfx, s16 player) {
     if (gIsMultiplayer == 0) {
-        func_1517D7B0(&gfx, 1);
+        sprite_drawLevelSprites(&gfx, 1);
     }
     gfx = func_151674F8(gfx, 0, player, 0);
     gfx = func_151674F8(gfx, 0, player, 1);
@@ -238,7 +238,7 @@ Gfx *func_15018F08(Gfx *gfx, s16 player) {
     gfx = func_151674F8(gfx, 1, player, 0);
     gfx = func_151674F8(gfx, 1, player, 1);
 
-    func_1517D7B0(&gfx, 2);
+    sprite_drawLevelSprites(&gfx, 2);
 
     return gfx;
 }
@@ -291,7 +291,7 @@ s32 game_updateFrame(void) {
     s32 i;
     u8 player;
 
-    func_1510D864();
+    texture_clearBindings();
     script_purgeTasks(0);
     script_runTasks(2);
     gAmbientPriority = 0;
@@ -299,7 +299,7 @@ s32 game_updateFrame(void) {
     func_1501E400(0);
     model_clearReflections();
     view_updateMatrices();
-    func_1510F800(0);
+    collision_selectMap(0);
     gfx_flagObjectUpdates();
     if (gPaused == 0) {
         gfx_runObjectUpdates(1);
@@ -307,7 +307,7 @@ s32 game_updateFrame(void) {
     if (gPaused == 0) {
         gfx_dispatchObjectContacts();
     }
-    func_15044A28();
+    collision_updateTriggers();
     func_15018DFC();
     func_150242F8(1, 0);
     func_1501EC38(0);
@@ -319,13 +319,13 @@ s32 game_updateFrame(void) {
     }
     func_15122AE0();
     func_1504ADD0();
-    func_1510F800(0);
+    collision_selectMap(0);
     for (i = 0; i <= gScreenLayout; i++) {
-        func_1510FC34(i);
+        collision_updateCameraZone(i);
     }
     view_updateMatrices();
     for (player = 0; player <= gScreenLayout; player++) {
-        func_15094EA0(player);
+        sprite_setViewMtx(player);
     }
     gfx_buildDrawLists(0);
     func_151749F8(level, 0);
@@ -338,7 +338,7 @@ s32 game_updateFrame(void) {
     }
     actor_updateObjects();
     if (gIsMultiplayer == 0) {
-        func_150A0D8C();
+        zone_updateReflections();
     }
     gfx_updateObjectMatrices();
     trail_updateBoneTrails(1);
@@ -481,7 +481,7 @@ Gfx *func_150198FC(Gfx *gfx) {
     }
     gfx = func_151674F8(gfx, 3, 0, 0);
     gfx = func_151674F8(gfx, 3, 0, 1);
-    return func_15096934(gfx);
+    return sprite_endDraw(gfx);
 }
 
 /* Draws player's late pass (group 4 display lists) into their viewport. */

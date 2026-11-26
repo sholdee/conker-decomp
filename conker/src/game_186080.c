@@ -527,7 +527,7 @@ typedef struct {
     /* 0x14 */ f32 swayX;
     /* 0x18 */ f32 swayZ;
     /* 0x1C */ f32 damping;
-    /* 0x20 */ f32 groundHeight; /* GROUND_UNKNOWN: query func_15046C00 each frame */
+    /* 0x20 */ f32 groundHeight; /* GROUND_UNKNOWN: query collision_probeCeilingSurfABSet0Cached each frame */
 } ParticleDriftMotion;
 
 #define GROUND_UNKNOWN -99999.8984375f
@@ -564,7 +564,7 @@ u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
             if (func_1514672C(&pos) == 0) {
                 return 0;
             }
-            found = func_15046C00(&pos, 0, particle->head.desc.pos.y, &particle->head.floor);
+            found = collision_probeCeilingSurfABSet0Cached(&pos, 0, particle->head.desc.pos.y, &particle->head.floor);
             if (found != 0) {
                 pos.y = particle->head.floor.height;
                 if (particle->head.floor.source == 3) {
@@ -926,7 +926,7 @@ EffectMotionParticle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 d
             hit.flags = 0;
         }
         if (func_1514672C(pos)) {
-            if (func_15046C00(pos, 0, 19500.0f, &hit)) {
+            if (collision_probeCeilingSurfABSet0Cached(pos, 0, 19500.0f, &hit)) {
                 ground = &hit;
                 drift.groundHeight = hit.height;
             } else {
@@ -986,7 +986,7 @@ u8 func_1515A78C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
         if (func_1514672C(&pos) == 0) {
             return 0;
         }
-        if (func_15046C00(&pos, 0, particle->head.desc.pos.y, &particle->head.floor) != 0) {
+        if (collision_probeCeilingSurfABSet0Cached(&pos, 0, particle->head.desc.pos.y, &particle->head.floor) != 0) {
             pos.y = particle->head.floor.height;
             alive = 0;
         }
@@ -1045,7 +1045,7 @@ typedef struct {
     /* 0x04 */ EmitterSettings settings;
 } SpawnerData;
 
-/* Spawner object created by func_151A8B20 (func_1515A974). */
+/* Spawner object created by beam_newAreaEmitter (func_1515A974). */
 struct Spawner {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterState state;
@@ -1093,7 +1093,7 @@ void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
         info.spawn = 2;
         data.types = D_800A636C[variant].data.types;
         data.settings = D_800A636C[variant].data.settings;
-        spawner = (Spawner *)func_151A8B20(&info, -1, sizeof(SpawnerData), 0xFF, 0); /* an Emitter with SpawnerData */
+        spawner = (Spawner *)beam_newAreaEmitter(&info, -1, sizeof(SpawnerData), 0xFF, 0); /* an Emitter with SpawnerData */
         if (spawner != NULL) {
             memcpy(&spawner->data, &data, sizeof(SpawnerData));
         }

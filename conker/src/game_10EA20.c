@@ -8,7 +8,7 @@
  * one func_15049440 scores lowest, skipping slot `skipIndex` and `source`'s own slot. If one is found,
  * spawns actor_runAttackAt effect `effect` at it and copies `source`'s unk76 to it.
  */
-s32 func_150E1570(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex,
+s32 collision_castRayAtObjects(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex,
                   s32 effect) {
     MtxF view;
     f32 dx;

@@ -118,7 +118,7 @@ void func_150B0D20(DDB60Effect *effect) {
     if (emit) {
         data->timer += (D_8009F860[emit] + func_150ADA68() * D_8009F868[emit]) * gFrameDelta;
         if (data->timer > 1.0f) {
-            if (func_1515C0F8(owner, &refVel) == 0) {
+            if (sprite_findActorMotion(owner, &refVel) == 0) {
                 refVel = &D_800A5480;
             }
             func_1514373C(owner->theta * 0.01745329238f, 1.0f, &forward[0], &forward[1]);

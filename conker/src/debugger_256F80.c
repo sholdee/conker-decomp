@@ -4,7 +4,7 @@
 #include "variables.h"
 #include "controller.h"
 
-s32 func_16001700(void)
+s32 debugger_contStartReadData(void)
 {
   s32 ret;
   s32 count;
@@ -13,8 +13,8 @@ s32 func_16001700(void)
   s32 *ptr;
   if (__osContLastCmd != 1)
   {
-    func_160018BC();
-    func_160019A8(1, &__osContPifRam);
+    debugger_packReadData();
+    debugger_siRawStartDma(1, &__osContPifRam);
     count = 0;
     end = osGetCount() + 0x30D40;
     if (osGetCount() < end)
@@ -36,7 +36,7 @@ s32 func_16001700(void)
   /* __osContPifRam.pifstatus, spelled through the next symbol of controller.c's .bss (__osContLastCmd
    * follows it): with __osContPifRam itself IDO keeps its address in a register across the call */
   ((u32 *)&__osContLastCmd)[-1] = 0;
-  ret = func_160019A8(0, &__osContPifRam);
+  ret = debugger_siRawStartDma(0, &__osContPifRam);
   __osContLastCmd = 1;
   count2 = 0;
   end = osGetCount() + 0xC3500;
@@ -52,7 +52,7 @@ s32 func_16001700(void)
   return ret;
 }
 
-void func_16001830(OSContPad *data)
+void debugger_contGetReadData(OSContPad *data)
 {
   u8 *ptr;
   __OSContReadFormat readformat;
@@ -80,7 +80,7 @@ void func_16001830(OSContPad *data)
   }
 }
 // __osPackReadData
-void func_160018BC(void)
+void debugger_packReadData(void)
 {
   u8 *ptr;
   __OSContReadFormat readformat;
@@ -121,7 +121,7 @@ void func_160018BC(void)
 }
 
 // another __osSiDeviceBusy function
-s32 func_16001984()
+s32 debugger_siDeviceBusy()
 {
     register u32 stat = IO_READ(SI_STATUS_REG);
     if (stat & (SI_STATUS_DMA_BUSY | SI_STATUS_RD_BUSY))
@@ -130,11 +130,11 @@ s32 func_16001984()
 }
 
 // very similar to __osSiRawStartDma
-s32 func_160019A8(s32 direction, void *dramAddr) {
+s32 debugger_siRawStartDma(s32 direction, void *dramAddr) {
     if ((s32)dramAddr & 3) { // what is this checking?
         return -1;
     }
-    if (func_16001984()) {
+    if (debugger_siDeviceBusy()) {
         return -1;
     }
 
@@ -159,7 +159,7 @@ s32 func_160019A8(s32 direction, void *dramAddr) {
 void func_16001A64(void) {
 }
 
-s32 func_16001A6C(f32 arg0) {
+s32 debugger_isBadFloat(f32 arg0) {
     s32 tmp = *(s32*) &arg0;
 
     if ((tmp * 2) == 0) {

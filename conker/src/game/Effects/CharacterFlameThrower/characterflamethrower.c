@@ -1009,7 +1009,7 @@ Gfx *flamethrower_drawJet(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view)
                 gfx = func_15142C10(gfx, jet->shade, jet->shade, jet->shade, 0xFF, &flag);
                 gfx = func_15142B7C(gfx, 1, 0x160600);
                 gfx = func_1513F4E4(gfx, 0xB, &flag);
-                gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x5049D8, &flag);
+                gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x5049D8, &flag);
                 if (actor->head.tmpl.flags & 2) {
                     j = actor->head.end - 1;
                     if (j < 0) {
@@ -1653,7 +1653,7 @@ s32 flamethrower_burnSwarm(CharacterFlamethrowerActor *actor) {
                         node->yawStep = 40.0f;
                         node->pitch = 40.0f;
                         node->pitchStep = 0.0f;
-                        node->groundHeight = func_1510F8D8(node->x, node->y, node->z, 0);
+                        node->groundHeight = collision_findMeshFloorNear(node->x, node->y, node->z, 0);
                         node->state = 4;
                     }
                 }
@@ -2775,10 +2775,10 @@ Gfx *flamethrower_drawFlame(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 vie
     }
     camera = func_15144B34(view);
     flag = 1;
-    gfx = func_15142E24(gfx, &D_80090B60[107], 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
+    gfx = func_15142E24(gfx, &gEffectTextures[107], 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x4C, &flag);
-    gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
+    gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
     if (actor->head.tmpl.flags & 2) {
         index = actor->head.end;
         index--;

@@ -4,14 +4,14 @@
 
 
 /*
- * Model attachment hook 8 (D_800841C0[8]): per-frame update for a flashing light. Flickers
+ * Model attachment hook 8 (gAttachHooks[8]): per-frame update for a flashing light. Flickers
  * randomly for the last 60 frames, ramps brightness over frames 60..300, pulses until 330 and
  * eases toward full above that. While lit it hides display list 1, plays a random sound
  * (0x44B..0x452) on first lighting and toggles light_sendEvent(0x11, 0x40/0x41), keeping the
  * owner's taskint[0] at 1 while that is in effect; when dark it hides display lists 2 and 3.
  * light->unk38: frames left in the flash sequence; light->unk3C: brightness 0..255.
  */
-s32 func_150C73E0(ModelAttachment *light, Actor *owner) {
+s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner) {
     f32 brightness;
     f32 fullBrightness;
     f32 progress;

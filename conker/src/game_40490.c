@@ -173,8 +173,8 @@ start:
     emit.fadeRate = 9.999999975e-07f;
     if (onGround) {
 ground:
-        func_1510F800(0);
-        spawn.unk48 = func_1510FD20(spawn.pos.x, spawn.pos.z);
+        collision_selectMap(0);
+        spawn.unk48 = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
     } else {
         spawn.unk48 = 0;
         onGround = FALSE; // matching: redundant store, but IDO's allocation needs it
@@ -357,7 +357,7 @@ static s32 (*D_80082ECC[23])() = {
     NULL,
     NULL,
     func_150139AC,
-    func_151A9060,
+    beam_runZoneHandler,
     func_150156F4,
     func_150151D4,
     NULL,
@@ -443,8 +443,8 @@ s32 func_150139AC(TriggerZone *obj, s32 index) {
     data.unk48 = -10000.0f;
 
     if (entry->unk34 != 0) {
-        func_1510F800(0);
-        data.zone = func_1510FD20(obj->x, obj->z);
+        collision_selectMap(0);
+        data.zone = collision_findZoneLeaf(obj->x, obj->z);
     } else {
         data.zone = NULL;
     }
@@ -640,8 +640,8 @@ s32 func_15014094(TriggerZone *obj) {
     data.unk4 = func_15144598(obj);
     data.unk8 = 0.0f;
 
-    func_1510F800(0);
-    data.zone = func_1510FD20(obj->x, obj->z);
+    collision_selectMap(0);
+    data.zone = collision_findZoneLeaf(obj->x, obj->z);
     data.unk2C = 0;
 
     effect = func_15149130(300, -1, 0x21, -1, 0, 0, sizeof(data), 0xFF, 1);
@@ -650,7 +650,7 @@ s32 func_15014094(TriggerZone *obj) {
     }
 }
 
-/** Calls func_151A9390 for the object with option bits taken from data1 (bit 1 inverted). */
+/** Calls beam_spawnEmitterPreset for the object with option bits taken from data1 (bit 1 inverted). */
 s32 func_15014144(TriggerZone *obj) {
     s32 flags;
     s32 bit8;
@@ -666,7 +666,7 @@ s32 func_15014144(TriggerZone *obj) {
     bit1 = (flags & 1) ? 1 : 0;
     bit16 = (flags & 0x10) ? 0x10 : 0;
 
-    func_151A9390(bit16 | bit1 | bit2 | bit4 | bit8, obj->data2, obj, 0, -10000.0f, 100.0f, -1, 0xFF, 1);
+    beam_spawnEmitterPreset(bit16 | bit1 | bit2 | bit4 | bit8, obj->data2, obj, 0, -10000.0f, 100.0f, -1, 0xFF, 1);
     return 1;
 }
 
@@ -981,8 +981,8 @@ s32 func_15015104(TriggerZone *obj) {
     data.zone = obj;
     data.unk4 = obj->data2;
 
-    func_1510F800(0);
-    data.node = func_1510FD20(obj->x, obj->z);
+    collision_selectMap(0);
+    data.node = collision_findZoneLeaf(obj->x, obj->z);
 
     value = obj->data3;
     bit1 = (value != 0) ? 1 : 0;
@@ -1033,8 +1033,8 @@ s32 func_150151D4(TriggerZone *obj) {
     data.unk3C = 0;
     data.unk38 = 0;
 
-    func_1510F800(0);
-    data.zone = func_1510FD20(obj->x, obj->z);
+    collision_selectMap(0);
+    data.zone = collision_findZoneLeaf(obj->x, obj->z);
 
     effect = func_15149130(300, -1, 0x3C, -1, 0, 0x2D, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
@@ -1122,8 +1122,8 @@ void func_15015354(TriggerZone *obj) {
     data.edges[3][1] = data.points[0][1] - data.points[3][1];
     data.edges[3][2] = data.points[0][2] - data.points[3][2];
 
-    func_1510F800(0);
-    data.node = func_1510FD20(obj->x, obj->z);
+    collision_selectMap(0);
+    data.node = collision_findZoneLeaf(obj->x, obj->z);
     data.actor = NULL;
 
     effect = func_15149130(300, -1, 0x3D, -1, 0, 0x2E, sizeof(data), 0xFF, 0);
@@ -1146,8 +1146,8 @@ s32 func_15015644(TriggerZone *obj) {
 
     data.unk0 = obj;
     data.unk4 = func_15144598(obj);
-    func_1510F800(0);
-    data.zone = func_1510FD20(obj->x, obj->z);
+    collision_selectMap(0);
+    data.zone = collision_findZoneLeaf(obj->x, obj->z);
     data.unkC = 0;
 
     effect = func_15149130(300, -1, 0x44, -1, 0, 0x2F, sizeof(data), 0xFF, 0);

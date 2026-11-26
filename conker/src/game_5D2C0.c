@@ -2,17 +2,17 @@
 #include "functions.h"
 #include "variables.h"
 
-ModelAttachment *D_800C3EE0; // head of the model attachment list
+ModelAttachment *gAttachments; // head of the model attachment list
 
 
 
 /* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */
-s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6) {
+s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6) {
     AttachModelHeader *header;
     s32 i;
 
-    if (D_800DF7D0[model] == 0) {
-        header = func_1502B6BC(0, 0, 0, 2, 9, model);
+    if (gAttachModelRefCounts[model] == 0) {
+        header = rom_loadPathTable(0, 0, 0, 2, 9, model);
         if (header == NULL) {
             return 1;
         }
@@ -20,16 +20,16 @@ s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4,
         *numDLists = header->dlistsSize >> 2;
         for (i = 0; i < *numDLists; i++) {
             (*dlists)[i] = (Gfx *)((u8 *)(*dlists)[i] + (s32)header);
-            func_1510CE60((*dlists)[i], 0, 1, 0x3E, &D_800DF9B8[model]);
+            texture_resolveDl((*dlists)[i], 0, 1, 0x3E, &gAttachModelTexIds[model]);
             func_15168E54((*dlists)[i], (s32)header);
         }
-        D_800E0148[model] = header;
+        gAttachModelHeaders[model] = header;
     } else {
-        header = D_800E0148[model];
+        header = gAttachModelHeaders[model];
         *dlists = header->dlists;
         *numDLists = header->dlistsSize >> 2;
     }
-    D_800DF7D0[model]++;
+    gAttachModelRefCounts[model]++;
     *data = header->data;
     if (arg4 != NULL) {
         *arg4 = header->unk10;
@@ -48,14 +48,14 @@ s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4,
 
 
 /* Loads the attachment's model, making private per-frame vertex copies when the owner needs them. */
-s32 func_1502FFD8(ModelAttachment *att, Actor *owner) {
+s32 attach_initModel(ModelAttachment *att, Actor *owner) {
     u8 *data;
     s32 mode;
     s32 size;
 
     if (att->dlists == NULL) {
         if (att->unk17 == -1) {
-            if (func_1502FE10(att->model, &att->dlists, &att->numDLists, &data, &att->unk30, NULL, NULL) != 0) {
+            if (attach_loadModel(att->model, &att->dlists, &att->numDLists, &data, &att->unk30, NULL, NULL) != 0) {
                 return 1;
             }
         } else {
@@ -92,9 +92,9 @@ s32 func_1502FFD8(ModelAttachment *att, Actor *owner) {
 }
 
 /* Unlinks and frees an attachment; `immediate` frees its buffers now instead of deferring it. */
-void func_15030158(ModelAttachment *att, s32 immediate) {
+void attach_free(ModelAttachment *att, s32 immediate) {
     if (!immediate) {
-        func_15031C14(att);
+        attach_undoOwnerEffects(att);
     }
     if (att->loaded) {
         if (att->ownsVtx) {
@@ -109,7 +109,7 @@ void func_15030158(ModelAttachment *att, s32 immediate) {
         if (att->anim != NULL) {
             func_1503F7B8(att->anim);
         }
-        func_1518CA04(att->model);
+        attach_releaseModel(att->model);
     }
     if (att->mtx != NULL) {
         if (immediate) {
@@ -138,8 +138,8 @@ void func_15030158(ModelAttachment *att, s32 immediate) {
         }
     }
 
-    if (att == D_800C3EE0) {
-        D_800C3EE0 = att->next;
+    if (att == gAttachments) {
+        gAttachments = att->next;
     }
     if (att->prev != NULL) {
         att->prev->next = att->next;
@@ -152,12 +152,12 @@ void func_15030158(ModelAttachment *att, s32 immediate) {
 
 
 /* Removes every attachment of set `setId` from `owner`. */
-void func_150302F0(Actor *owner, s32 setId) {
-    func_15030310(owner, setId, 0xFF);
+void attach_removeSet(Actor *owner, s32 setId) {
+    attach_removeFromSet(owner, setId, 0xFF);
 }
 
 /* Removes attachment number `index` of set `setId` from `owner` (all of them when index is 0xFF). */
-s32 func_15030310(Actor *owner, s32 setId, s32 index) {
+s32 attach_removeFromSet(Actor *owner, s32 setId, s32 index) {
     ModelAttachment *att;
     s32 removed;
 
@@ -165,7 +165,7 @@ s32 func_15030310(Actor *owner, s32 setId, s32 index) {
         return 0;
     }
     removed = 0;
-    att = D_800C3EE0;
+    att = gAttachments;
     while (att != NULL) {
         ModelAttachment *next = att->next;
 
@@ -176,7 +176,7 @@ s32 func_15030310(Actor *owner, s32 setId, s32 index) {
                 continue;
             } else {
                 removed = 1;
-                func_15030158(att, 0);
+                attach_free(att, 0);
                 if (index == 0) {
                     break;
                 }
@@ -188,7 +188,7 @@ s32 func_15030310(Actor *owner, s32 setId, s32 index) {
 }
 
 /* Removes every attachment of `owner`. */
-s32 func_150303E4(Actor *owner) {
+s32 attach_removeAll(Actor *owner) {
     ModelAttachment *att;
     ModelAttachment *next;
     s32 removed;
@@ -197,13 +197,13 @@ s32 func_150303E4(Actor *owner) {
         return 0;
     }
 
-    att = D_800C3EE0;
+    att = gAttachments;
     removed = 0;
     while (att != NULL) {
         next = att->next;
         if (att->ownerId == owner->unique_id) {
             removed = 1;
-            func_15030158(att, 0);
+            attach_free(att, 0);
         }
         att = next;
     }
@@ -212,29 +212,29 @@ s32 func_150303E4(Actor *owner) {
 
 /* Per-model hooks, indexed by ModelAttachment.handler; a nonzero return removes the attachment. */
 typedef s32 (*AttachmentHook)(ModelAttachment *att, Actor *owner);
-static AttachmentHook D_800841C0[] = {
+static AttachmentHook gAttachHooks[] = {
     NULL,
-    func_150D82BC,
-    func_15031E2C,
-    func_15031E7C,
-    func_150F56B0,
-    func_15031FC8,
-    func_1503327C,
+    attach_hookScrollTexH,
+    attach_hookCycleTexture,
+    attach_hookFrameTile,
+    beam_hookFrameTexture,
+    attach_hookHeldProp,
+    attach_hookPlayOnce,
     func_15033328,
-    func_150C73E0,
-    func_150331B8,
-    func_150C8730,
+    attach_hookFlashingLight,
+    attach_hookFollowAnim,
+    attach_hookSpawnProjectile,
     func_15033440,
     func_150DFDD0,
-    func_150334B8,
+    attach_scrollTile,
     func_1503378C,
-    func_150337E4,
-    func_15033838,
+    attach_hookToggleTexture,
+    attach_hookStateEffect,
     func_150339C8,
-    func_15033AD8,
-    func_150D83D8,
+    attach_hookDelayedSound,
+    attach_hookScrollTexV,
     func_15033E00,
-    func_150F5A54,
+    beam_hookSlideTexture,
     func_150333A8,
     func_15033F0C,
     func_15033F70,
@@ -243,7 +243,7 @@ static AttachmentHook D_800841C0[] = {
 /* Per-frame update of every attachment: runs its hook, builds its matrix for this frame and removes
  * it when its owner is gone or it has expired. Attachments that follow another attachment's
  * matrix are updated in a second pass, after the ones they follow. */
-void func_15030468(void) {
+void attach_updateAll(void) {
     ModelAttachment *att;
     ModelAttachment *next;
     Actor *owner;
@@ -273,7 +273,7 @@ void func_15030468(void) {
         if (pass == 1 && !hasFollowers) {
             break;
         }
-        att = D_800C3EE0;
+        att = gAttachments;
         while (att != NULL) {
             next = att->next;
             ret = 0;
@@ -287,18 +287,18 @@ void func_15030468(void) {
                 att = next;
                 continue;
             }
-            owner = func_15083E90(att->ownerId);
+            owner = collision_findObjectById(att->ownerId);
             att->updated = TRUE;
             if (owner == NULL) {
-                func_15030158(att, 0);
+                attach_free(att, 0);
                 att = next;
                 continue;
             }
             if (att->handler != 0) {
-                ret = D_800841C0[att->handler](att, owner);
+                ret = gAttachHooks[att->handler](att, owner);
             }
             if (ret != 0) {
-                func_15030158(att, 0);
+                attach_free(att, 0);
                 att = next;
                 continue;
             }
@@ -306,14 +306,14 @@ void func_15030468(void) {
                 if (owner->ob_matrix_ptr != NULL) {
                     i = att->parentSet;
                     if (att->parentSet != 0) {
-                        ret = (s32)func_1503195C(owner, i, 0); // matching: the parent pointer reuses ret
+                        ret = (s32)attach_find(owner, i, 0); // matching: the parent pointer reuses ret
                         if (ret == 0) {
-                            func_15030158(att, 0);
+                            attach_free(att, 0);
                             att = next;
                             continue;
                         }
-                        if (func_15031070((ModelAttachment *)ret, owner, &parentMtx, &parentBoneMtx) == 0) {
-                            func_15030158(att, 0);
+                        if (attach_getMatrices((ModelAttachment *)ret, owner, &parentMtx, &parentBoneMtx) == 0) {
+                            attach_free(att, 0);
                             att = next;
                             continue;
                         }
@@ -414,7 +414,7 @@ void func_15030468(void) {
                     }
                 }
                 if (remove) {
-                    func_15030158(att, 0);
+                    attach_free(att, 0);
                     att = next;
                     continue;
                 }
@@ -427,7 +427,7 @@ void func_15030468(void) {
                         att->timer = 0;
                     }
                 } else {
-                    func_15030158(att, 0);
+                    attach_free(att, 0);
                 }
             }
             att = next;
@@ -438,7 +438,7 @@ void func_15030468(void) {
 
 /* Attaches `model` to bone `bone` of `owner` as part of set `setId`. Returns NULL on failure, or
  * (unless flags & 8) when that model of that set is already attached. */
-ModelAttachment *func_15030AF4(Actor *owner, s32 model, s32 bone, s32 flags, s32 unk15, s32 unk16, s32 lifetime,
+ModelAttachment *attach_add(Actor *owner, s32 model, s32 bone, s32 flags, s32 unk15, s32 unk16, s32 lifetime,
                           s32 setId, s32 handler, const u16 *ownerStates, s32 unk17, s32 parentSet, s32 parentMtx) {
     ModelAttachment *att;
     ModelAttachment *next;
@@ -448,7 +448,7 @@ ModelAttachment *func_15030AF4(Actor *owner, s32 model, s32 bone, s32 flags, s32
         return NULL;
     }
     if (!(flags & 8)) {
-        att = D_800C3EE0;
+        att = gAttachments;
         if (att != NULL) {
             do {
                 next = att->next;
@@ -464,12 +464,12 @@ ModelAttachment *func_15030AF4(Actor *owner, s32 model, s32 bone, s32 flags, s32
         return NULL;
     }
     err = 0;
-    if (D_800C3EE0 != NULL) {
-        D_800C3EE0->prev = att;
+    if (gAttachments != NULL) {
+        gAttachments->prev = att;
     }
-    att->next = D_800C3EE0;
+    att->next = gAttachments;
     att->prev = NULL;
-    D_800C3EE0 = att;
+    gAttachments = att;
     att->ownerId = owner->unique_id;
     att->model = model;
     att->bone = bone;
@@ -517,18 +517,18 @@ ModelAttachment *func_15030AF4(Actor *owner, s32 model, s32 bone, s32 flags, s32
         att->timer = lifetime;
     }
     if (!err) {
-        err |= func_1502FFD8(att, owner);
+        err |= attach_initModel(att, owner);
     }
     if (err) {
-        func_15030158(att, 1);
+        attach_free(att, 1);
         return NULL;
     }
-    func_15031A50(att, owner);
+    attach_applyOwnerEffects(att, owner);
     return att;
 }
 
 /* Gives the attachment a fixed offset from its bone, and a matrix buffer to draw it with. */
-void func_15030D54(ModelAttachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY, f32 rotZ) {
+void attach_setOffset(ModelAttachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY, f32 rotZ) {
     att->offset = allocate_memory(sizeof(AttachmentOffset), 1, 0, 2);
     if (att->offset != NULL) {
         att->offset->x = x;
@@ -545,20 +545,20 @@ void func_15030D54(ModelAttachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY
 
 /* Draws the attachments of every object visible in viewport `view`. `pass` 0 draws the opaque
  * ones, 1 the translucent ones, 2 those of objects whose unk5 is 7. */
-Gfx *func_15030E08(Gfx *gdl, s32 view, s32 pass) {
+Gfx *attach_drawView(Gfx *gdl, s32 view, s32 pass) {
     ModelAttachment *att;
     ModelAttachment *next;
     Actor *owner;
     s32 alpha;
 
-    att = D_800C3EE0;
+    att = gAttachments;
     while (att != NULL) {
         next = att->next;
         if (att->alpha == 0) {
             att = next;
             continue;
         }
-        owner = func_15083E90(att->ownerId);
+        owner = collision_findObjectById(att->ownerId);
         if ((owner == NULL) || (owner->ob_matrix_ptr == NULL) || ((owner->unk74 & (1 << view)) == (1 << view))) {
             att = next;
             continue;
@@ -580,28 +580,28 @@ Gfx *func_15030E08(Gfx *gdl, s32 view, s32 pass) {
                 continue;
             }
         }
-        gdl = func_150311C4(gdl, att, owner, view, 0);
+        gdl = attach_draw(gdl, att, owner, view, 0);
         att = next;
     }
     return gdl;
 }
 
 /* Draws the visible attachments of `owner` in viewport `view`. */
-Gfx *func_15030F94(Gfx *gdl, Actor *owner, s32 view, s32 arg3) {
+Gfx *attach_drawOwner(Gfx *gdl, Actor *owner, s32 view, s32 arg3) {
     ModelAttachment *att;
     ModelAttachment *next;
 
     if ((owner == NULL) || (owner->ob_matrix_ptr == NULL) || (owner->unique_id == 0)) {
         return gdl;
     }
-    att = D_800C3EE0;
+    att = gAttachments;
     while (att != NULL) {
         next = att->next;
         if ((att->ownerId != owner->unique_id) || (att->alpha == 0)) {
             att = next;
             continue;
         }
-        gdl = func_150311C4(gdl, att, owner, view, arg3);
+        gdl = attach_draw(gdl, att, owner, view, arg3);
         att = next;
     }
     return gdl;
@@ -609,7 +609,7 @@ Gfx *func_15030F94(Gfx *gdl, Actor *owner, s32 view, s32 arg3) {
 
 /* Finds the matrix to draw `att` with this frame (*mtx) and the bone matrix it follows (*boneMtx).
  * Returns 0 when none is available yet. */
-s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) {
+s32 attach_getMatrices(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) {
     ModelAttachment *parent;
 
     if (att->anim != NULL) {
@@ -622,11 +622,11 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
         *mtx = &att->mtx[D_800BE9C0];
         *boneMtx = (Mtx *)owner->ob_matrix_ptr + att->bone;
     } else if (att->parentSet) {
-        parent = func_1503195C(owner, att->parentSet, 0);
+        parent = attach_find(owner, att->parentSet, 0);
         if (parent == NULL) {
             return 0;
         }
-        if (func_15031070(parent, owner, mtx, boneMtx) == 0) {
+        if (attach_getMatrices(parent, owner, mtx, boneMtx) == 0) {
             return 0;
         }
         {
@@ -646,7 +646,7 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
 /* Draws one attachment of `owner` in viewport `view` with the owner's lighting, fog and alpha.
  * `arg4` nonzero draws it through model_drawAttachmentReflections instead of its own display lists. Returns the
  * original `gdl` if the display list would overflow. */
-Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg4) {
+Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg4) {
     Mtx *mtx;
     Mtx *boneMtx;
     s32 segScratch[3];
@@ -685,7 +685,7 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
     } else {
         gSPSegment(gdl++, 8, D_80083140);
     }
-    if (func_15031070(att, owner, &mtx, &boneMtx) == 0) {
+    if (attach_getMatrices(att, owner, &mtx, &boneMtx) == 0) {
         return gdl;
     }
     func_1502D54C(owner - movement_obj, light);
@@ -747,11 +747,11 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
     segId = att->seg6Id;
     if (segId != 0) {
         // matching: the ids go through a pointer conversion; a plain int argument numbers IDO's temps differently
-        v = func_1510D0EC((s32)(void *)segId, segScratch, 0x3E, 0);
+        v = texture_getAddress((s32)(void *)segId, segScratch, 0x3E, 0);
         gSPSegment(gdl++, 6, v);
     }
     if (att->seg7Id != 0) {
-        v = func_1510D0EC((s32)(void *)att->seg7Id, segScratch, 0x3E, 0);
+        v = texture_getAddress((s32)(void *)att->seg7Id, segScratch, 0x3E, 0);
         gSPSegment(gdl++, 7, v);
     }
     if (arg4 == 0) {
@@ -777,17 +777,17 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
 }
 
 /* Sets the alpha of attachment number `index` of set `setId` on `owner`. */
-void func_1503192C(Actor *owner, s32 setId, s32 alpha, s32 index) {
+void attach_setAlpha(Actor *owner, s32 setId, s32 alpha, s32 index) {
     ModelAttachment *att;
 
-    att = func_1503195C(owner, setId, index);
+    att = attach_find(owner, setId, index);
     if (att != NULL) {
         att->alpha = alpha;
     }
 }
 
 /* Returns attachment number `index` of set `setId` on `owner`, or NULL. */
-ModelAttachment *func_1503195C(Actor *owner, s32 setId, s32 index) {
+ModelAttachment *attach_find(Actor *owner, s32 setId, s32 index) {
     s32 ownerId;
     ModelAttachment *att;
     ModelAttachment *next;
@@ -797,7 +797,7 @@ ModelAttachment *func_1503195C(Actor *owner, s32 setId, s32 index) {
         return NULL;
     }
 
-    att = D_800C3EE0;
+    att = gAttachments;
     while (att != NULL) {
         next = att->next;
         if ((ownerId == att->ownerId) && (setId == att->setId)) {
@@ -815,13 +815,13 @@ ModelAttachment *func_1503195C(Actor *owner, s32 setId, s32 index) {
 }
 
 /* Returns the first attachment of set `setId`, preferring one owned by `owner`. */
-ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
+ModelAttachment *attach_findInSet(s32 setId, Actor *owner) {
     ModelAttachment *att;
     ModelAttachment *next;
     u8 ownerId;
 
     if (owner != NULL) {
-        att = D_800C3EE0;
+        att = gAttachments;
         if (att != NULL) {
             ownerId = owner->unique_id;
             do {
@@ -833,7 +833,7 @@ ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
             } while (att != NULL);
         }
     }
-    att = D_800C3EE0;
+    att = gAttachments;
     while (att != NULL) {
         next = att->next;
         if (att->setId == setId) {
@@ -845,8 +845,8 @@ ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
 }
 
 
-/* Applies a model's side effects to its owner when it is attached (undone by func_15031C14). */
-void func_15031A50(ModelAttachment *att, Actor *owner) {
+/* Applies a model's side effects to its owner when it is attached (undone by attach_undoOwnerEffects). */
+void attach_applyOwnerEffects(ModelAttachment *att, Actor *owner) {
     s32 model = att->model;
     ActorCtl *unk;
 
@@ -897,15 +897,15 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
 }
 
 
-/* Undoes func_15031A50's side effects on the owner when an attachment is removed. */
-void func_15031C14(ModelAttachment *att) {
+/* Undoes attach_applyOwnerEffects's side effects on the owner when an attachment is removed. */
+void attach_undoOwnerEffects(ModelAttachment *att) {
     Actor *owner;
     ActorRef ref49;
     ActorRef ref5D;
     ActorCtl *unk;
     ActorRef *volatile ref; // matching: IDO spills the pointer across the call only when volatile
 
-    owner = func_15083E90(att->ownerId);
+    owner = collision_findObjectById(att->ownerId);
     if (owner != NULL) {
         switch (att->model) {
         case 0x5A:
@@ -923,7 +923,7 @@ void func_15031C14(ModelAttachment *att) {
         case 0x37:
         case 0x4B:
         case 0x4C:
-            sound_stopByCallback(func_15033BDC, att, (s32)owner);
+            sound_stopByCallback(attach_soundCallback, att, (s32)owner);
             if (att->model == 0x37) {
                 func_15100180(owner);
             }
@@ -970,7 +970,7 @@ void func_15031C14(ModelAttachment *att) {
 }
 
 /* Hook: cycles seg6Id back and forth through the three D_800902BC entries, one step per call. */
-s32 func_15031E2C(ModelAttachment *att, Actor *owner) {
+s32 attach_hookCycleTexture(ModelAttachment *att, Actor *owner) {
     s32 step;
 
     step = att->unk38;
@@ -990,7 +990,7 @@ s32 func_15031E2C(ModelAttachment *att, Actor *owner) {
 
 /* Hook: sets the tile t of the first display list's 4th G_SETTILESIZE from the owner's
  * animation frame (0..120 maps to 27..2). */
-s32 func_15031E7C(ModelAttachment *att, Actor *owner) {
+s32 attach_hookFrameTile(ModelAttachment *att, Actor *owner) {
     AnimInstance *anim;
     Gfx *gfx;
     s32 count;
@@ -1037,7 +1037,7 @@ s32 func_15031E7C(ModelAttachment *att, Actor *owner) {
 
 /* Hook for held/worn props: picks the prop's animation (and for some models its bone and parent)
  * from the owner's id and state, then keeps its frame in step with the owner's animation. */
-s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
+s32 attach_hookHeldProp(ModelAttachment *att, Actor *owner) {
     AnimInstance *ownerAnim;
     s32 animId;
     u8 pad1; // matching: stack padding
@@ -2260,7 +2260,7 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
 }
 
 /* Hook: plays the owner's taskint[0] animation on the attachment and keeps it in step with the owner's frame. */
-s32 func_150331B8(ModelAttachment *att, Actor *owner) {
+s32 attach_hookFollowAnim(ModelAttachment *att, Actor *owner) {
     AnimInstance *ownerAnim;
     AnimInstance *anim;
 
@@ -2283,7 +2283,7 @@ s32 func_150331B8(ModelAttachment *att, Actor *owner) {
 }
 
 /* Hook: plays animation 0 on the attachment once; removes the attachment when it has finished. */
-s32 func_1503327C(ModelAttachment *att, Actor *owner) {
+s32 attach_hookPlayOnce(ModelAttachment *att, Actor *owner) {
     AnimInstance *anim;
 
     anim = att->anim;
@@ -2364,7 +2364,7 @@ s32 func_15033440(ModelAttachment *att, Actor *owner) {
 }
 
 /* Scrolls the tile of model 0x37's 4th G_SETTILESIZE, wrapping s and t within the tile size. */
-s32 func_150334B8(ModelAttachment *att, Actor *owner) {
+s32 attach_scrollTile(ModelAttachment *att, Actor *owner) {
     Gfx *gfx;
     s32 count;
     s32 i;
@@ -2421,7 +2421,7 @@ s32 func_150334B8(ModelAttachment *att, Actor *owner) {
 
 /* Attaches set `setId` to bone `bone` of `target`, with the offset that keeps it where `obj` is now
  * (only rotation when `noTranslation`). */
-ModelAttachment *func_150335C8(Actor *obj, Actor *target, s32 setId, s32 bone, s32 arg4, s32 noTranslation) {
+ModelAttachment *attach_attachInPlace(Actor *obj, Actor *target, s32 setId, s32 bone, s32 arg4, s32 noTranslation) {
     ModelAttachment *att;
     MtxF boneMtx;
     MtxF invBoneMtx;
@@ -2442,7 +2442,7 @@ ModelAttachment *func_150335C8(Actor *obj, Actor *target, s32 setId, s32 bone, s
         return NULL;
     }
 
-    att = func_15083568(target, setId, 1.0f, 0);
+    att = collision_createPartSet(target, setId, 1.0f, 0);
     if (att != NULL) {
         att->bone = bone;
         att->scale = obj->scale_xz;
@@ -2476,7 +2476,7 @@ ModelAttachment *func_150335C8(Actor *obj, Actor *target, s32 setId, s32 bone, s
             x = 0.0f;
         }
 
-        func_15030D54(att, x, y, z, rotX, rotY, rotZ);
+        attach_setOffset(att, x, y, z, rotX, rotY, rotZ);
         return att;
     }
 
@@ -2498,7 +2498,7 @@ s32 func_1503378C(ModelAttachment *att, Actor *owner) {
 
 
 /* Hook: toggles seg6Id between the two D_800902FC entries every 16 ticks. */
-s32 func_150337E4(ModelAttachment *att, Actor *owner) {
+s32 attach_hookToggleTexture(ModelAttachment *att, Actor *owner) {
     att->unk38 += D_800BE9E4;
     if (att->unk38 >= 16) {
         att->unk38 = 0;
@@ -2510,7 +2510,7 @@ s32 func_150337E4(ModelAttachment *att, Actor *owner) {
 
 /* Hook: starts func_151026BC effect `kind` while the owner is in the set's trigger state (and
  * mv allows it), and stops it with func_151027E8 when that no longer holds. */
-s32 func_15033838(ModelAttachment *att, Actor *owner) {
+s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
     u8 kind;
     s32 triggered;
     ActorCtl *unk;
@@ -2561,24 +2561,24 @@ s32 func_15033838(ModelAttachment *att, Actor *owner) {
 /* Hook (model 0x37): scrolls the texture and keeps looping sound 0x448 playing at the owner
  * unless gFrameRateDivider is set. */
 s32 func_150339C8(ModelAttachment *att, Actor *owner) {
-    func_150334B8(att, owner);
+    attach_scrollTile(att, owner);
     if (D_800C35EA[0] != 1) {
         if (gFrameRateDivider != 0) {
             if (att->unk3C != 0) {
-                sound_stopByCallback(func_15033BDC, att, (s32)owner);
+                sound_stopByCallback(attach_soundCallback, att, (s32)owner);
             }
             att->unk3C = 0;
         } else if (att->unk3C == 0) {
             att->unk3C = sound_addDynamicSound(0x448, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
-                                       500, func_15033BDC, att, (s32)owner, 0, 0) |
+                                       500, attach_soundCallback, att, (s32)owner, 0, 0) |
                          0x80000000;
         }
     }
     return 0;
 }
 
-/* Hook: after a 30-tick delay, starts sound 0x513 at the owner (func_15033BDC follows it up). */
-s32 func_15033AD8(ModelAttachment *att, Actor *owner) {
+/* Hook: after a 30-tick delay, starts sound 0x513 at the owner (attach_soundCallback follows it up). */
+s32 attach_hookDelayedSound(ModelAttachment *att, Actor *owner) {
     if (gIsMultiplayer != 0) {
         func_1508B20C(owner->xpos, owner->ypos, owner->zpos, 900.0f);
     }
@@ -2587,7 +2587,7 @@ s32 func_15033AD8(ModelAttachment *att, Actor *owner) {
             att->unk3C += D_800BE9E4;
         } else {
             att->unk3C = sound_addDynamicSound(0x513, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
-                                       500, func_15033BDC, att, (s32)owner, 0, 0);
+                                       500, attach_soundCallback, att, (s32)owner, 0, 0);
             att->unk38 = 0x513;
         }
     }
@@ -2597,7 +2597,7 @@ s32 func_15033AD8(ModelAttachment *att, Actor *owner) {
 /* Sound record callback of the sounds the attachment hooks start (sound_addDynamicSound with the attachment
  * and its owner as the parameters): tracks the owner's position and plays the model's follow-up
  * sounds. Returns 1 when the sound should stop. */
-s32 func_15033BDC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound) {
+s32 attach_soundCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound) {
     ModelAttachment *att;
     Actor *owner;
     ActorCtl *unk;
@@ -2630,7 +2630,7 @@ s32 func_15033BDC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
                         if (att->unk38 == 0x513) {
                             att->unk38 = 0x3A1;
                             att->unk3C = sound_addDynamicSound(0x3A1, owner->xpos, owner->ypos,
-                                                       owner->zpos, 32000, 1000, 500, func_15033BDC, att,
+                                                       owner->zpos, 32000, 1000, 500, attach_soundCallback, att,
                                                        (s32)owner, 0, 0);
                             return 1;
                         }
@@ -2661,13 +2661,13 @@ s32 func_15033E00(ModelAttachment *att, Actor *owner) {
 }
 
 /* Stores every attachment of `owner` into `out` and returns how many there are. */
-s32 func_15033E28(Actor *owner, ModelAttachment **out) {
+s32 attach_getAll(Actor *owner, ModelAttachment **out) {
     ModelAttachment *head;
     ModelAttachment *att;
     ModelAttachment *next;
     s32 count;
 
-    head = D_800C3EE0;
+    head = gAttachments;
     count = 0;
     if (head == NULL) {
         return 0;
@@ -2685,12 +2685,12 @@ s32 func_15033E28(Actor *owner, ModelAttachment **out) {
 }
 
 /* Returns the first attachment of `owner`, or NULL. */
-ModelAttachment *func_15033E84(Actor *owner) {
+ModelAttachment *attach_getFirst(Actor *owner) {
     ModelAttachment *att;
     ModelAttachment *next;
     u8 ownerId;
 
-    att = D_800C3EE0;
+    att = gAttachments;
     if (att != NULL) {
         ownerId = owner->unique_id;
         do {
@@ -2705,14 +2705,14 @@ ModelAttachment *func_15033E84(Actor *owner) {
 }
 
 /* Swaps the owners of all attachments of owner ids `a` and `b`. */
-void func_15033EC4(s32 a, s32 b) {
+void attach_swapOwners(s32 a, s32 b) {
     ModelAttachment *att;
     ModelAttachment *next;
     s32 idA;
     s32 ownerId;
 
     idA = a; // matching: IDO keeps the copy in a2
-    att = D_800C3EE0;
+    att = gAttachments;
     while (att != NULL) {
         next = att->next;
         ownerId = att->ownerId;

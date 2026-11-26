@@ -124,11 +124,11 @@ s32 shadow_getObjectHalfExtents(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ
     }
 
     if (*halfX == 0.0f || *halfY == 0.0f || *halfZ == 0.0f) {
-        dx = D_800D1C90[obj->character_type]->unk1A;
+        dx = gModelDefs[obj->character_type]->unk1A;
         dy = obj->scale_xz * dx;
         *halfZ = dy;
         *halfX = dy;
-        dx = D_800D1C90[obj->character_type]->unk1C + D_800D1C90[obj->character_type]->unk1E;
+        dx = gModelDefs[obj->character_type]->unk1C + gModelDefs[obj->character_type]->unk1E;
         *halfY = obj->scale_y * dx;
     }
 }
@@ -711,8 +711,8 @@ s32 shadow_gatherLevelFaces(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, 
     s32 c;
 
     maxFace = 0;
-    func_1510F800(0);
-    count = func_1510F720(x, z, radius, cells);
+    collision_selectMap(0);
+    count = collision_findZoneLeavesNear(x, z, radius, cells);
     if (count != 0) {
         bzero(bits, sizeof(bits));
         while (count != 0) {
@@ -759,7 +759,7 @@ s32 shadow_gatherLevelFaces(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, 
                 }
             }
         }
-        D_800D3690 = D_800DBE3C;
+        D_800D3690 = gCurMapTris;
         D_800D3694 = &bits[(maxFace >> 5) + 1];
         D_800DF0E8 = x - radius;
         D_800DF0EC = x + radius;
@@ -865,7 +865,7 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
             continue;
         }
         if (movement_obj[i].lodCount != 0) {
-            modelId = func_150849CC(&movement_obj[i], &modelSub);
+            modelId = collision_getLodModelId(&movement_obj[i], &modelSub);
             model_loadForActor(&movement_obj[i], modelId, modelSub, 0);
         } else {
             modelId = movement_obj[i].character_type;
@@ -1018,7 +1018,7 @@ s32 shadow_gatherObjectFaces(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, 
         return count;
     }
 
-    func_1510F800(2);
+    collision_selectMap(2);
 
     out += count;
     D_800DF0E8 = x - range;
@@ -1054,7 +1054,7 @@ s32 shadow_gatherObjectFaces(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, 
 
     if (found != 0) {
         func_150A44F0(found, D_800D37E0, 0);
-        D_800D3690 = D_800DBE3C;
+        D_800D3690 = gCurMapTris;
         D_800DF0E4 = found;
         count += func_150A5E44(D_800D37E0, out, mtx, end) - out;
     }

@@ -134,7 +134,7 @@ typedef struct GameDC6B0SmokeMotion {
     f32 unkC;
 } GameDC6B0SmokeMotion;
 
-/* A sprite created by func_1515548C; the puffs carry their motion at 0x70. */
+/* A sprite created by sprite_newScreenSprite; the puffs carry their motion at 0x70. */
 typedef struct {
     u8 pad0[0x70];
     GameDC6B0SmokeMotion motion;
@@ -190,7 +190,7 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         puff.unk40 = 0;
         puff.unk41 = 0xA;
         puff.viewport = 0;
-        sprite = func_1515548C(&puff, 6, 0, 0, 0x10, source->base.header.owner, source->base.header.kind);
+        sprite = sprite_newScreenSprite(&puff, 6, 0, 0, 0x10, source->base.header.owner, source->base.header.kind);
         if (sprite != NULL) {
             memcpy(&sprite->motion, &motion, sizeof(motion));
         }
@@ -229,7 +229,7 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         spark.unk40 = 0;
         spark.unk41 = 7;
         spark.viewport = 0;
-        func_1515548C(&spark, 0, 0, 0, 0, source->base.header.owner, source->base.header.kind);
+        sprite_newScreenSprite(&spark, 0, 0, 0, 0, source->base.header.owner, source->base.header.kind);
         timers->spark = func_150ADA20() % 11U + 3;
     }
 }
@@ -277,7 +277,7 @@ void func_150AFDB0(void) {
 }
 
 /* Fires a tracer along the -z axis of bone 3 (bone 2 if `altBone`) of gCurrentActor, from 20 to
- * 150 units out, plus a tracer (func_150E2DB4) attached to the same bone. */
+ * 150 units out, plus a tracer (beam_spawnBoneTracer) attached to the same bone. */
 void func_150AFE64(s32 altBone) {
     f32 startX;
     f32 startY;
@@ -305,10 +305,10 @@ void func_150AFE64(s32 altBone) {
         endZ = -150.0f;
         func_150A7960(mtx, endX, endY, endZ, &endX, &endY, &endZ);
         /* speed 40, stopDist 0, halfWidth 2, length 120, lifetime 60, texture 35 */
-        func_150E1AB0(0, startX, startY, startZ, endX, endY, endZ, 40.0f, 0.0f, 2.0f, 120.0f, 60, 35,
+        beam_spawnTracer(0, startX, startY, startZ, endX, endY, endZ, 40.0f, 0.0f, 2.0f, 120.0f, 60, 35,
                       0, 0, 0, NULL, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         /* from (0, 0, -39) to (0, 0, -150) in bone space; on 3 frames, off 255, lifetime 4 */
-        func_150E2DB4(gCurrentActor, gCurrentActor->unique_id, bone, -1, 0.0f, 0.0f, -39.0f, 0.0f, 0.0f, -150.0f,
+        beam_spawnBoneTracer(gCurrentActor, gCurrentActor->unique_id, bone, -1, 0.0f, 0.0f, -39.0f, 0.0f, 0.0f, -150.0f,
                       3, 0xFF, 4, 0);
     }
 }

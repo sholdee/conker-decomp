@@ -50,7 +50,7 @@ void func_150D54C8(FollowEffect *effect) {
         // matching: (f32)1 keeps the multiply by 1.0 that a 1.0f literal would fold away
         data->spawnAccum += (3.000000238f + func_150ADA68() * (f32)1) * gFrameDelta;
         if (data->spawnAccum > 1.0f) {
-            if (func_1515C0F8(owner, &refVel) == 0) {
+            if (sprite_findActorMotion(owner, &refVel) == 0) {
                 refVel = &D_800A5480;
             }
             func_1514373C(owner->theta * 0.01745329238f, 1.0f, &sinYaw, &cosYaw);

@@ -46,7 +46,7 @@ void func_151B01B8(Actor *actor, Actor *other) {
     s32 profile;
 
     if (actor != NULL && actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
-        func_1504715C(&ground, actor);
+        collision_initHitFromObject(&ground, actor);
         profile = EFFECT_PROFILE(other);
         if (profile != 99) {
             if (D_800A3FD8[profile].unkE != 2) {
@@ -97,7 +97,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
     CollisionHit centerGround;
 
     if (actor != NULL) {
-        func_1504715C(&ground, actor);
+        collision_initHitFromObject(&ground, actor);
         impact.spray.pos.x = actor->xpos;
         impact.spray.pos.y = actor->ypos;
         impact.spray.pos.z = actor->zpos;
@@ -141,7 +141,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
                 spot[2] += actor->zpos;
                 probe.x = spot[0];
                 probe.z = spot[2];
-                if (!func_15046C80(&probe, 0, actor->ypos - 500.0f, &scatterGround) || scatterGround.source == 3) {
+                if (!collision_probeFloorSurfABSet0Cached(&probe, 0, actor->ypos - 500.0f, &scatterGround) || scatterGround.source == 3) {
                     return;
                 }
                 spot[1] = scatterGround.height;
@@ -174,7 +174,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
             above.x = center[0];
             above.y = center[1] + 100.0f;
             above.z = center[2];
-            if (!func_1504697C(&above, 0, center[1] - 500.0f, &centerGround) || centerGround.source == 3) {
+            if (!collision_probeFloorSurfABSet0(&above, 0, center[1] - 500.0f, &centerGround) || centerGround.source == 3) {
                 return;
             }
         }
@@ -497,7 +497,7 @@ s32 func_151B118C(Game1DD500Particle *particle) {
         probe.x = particle->head.def.pos.x;
         probe.y = oldY - particle->head.def.height;
         probe.z = particle->head.def.pos.z;
-        if (func_15046C80(&probe, 0, particle->head.def.pos.y - particle->head.def.height, &particle->head.ground)) {
+        if (collision_probeFloorSurfABSet0Cached(&probe, 0, particle->head.def.pos.y - particle->head.def.height, &particle->head.ground)) {
             splat.x = probe.x;
             splat.y = particle->head.ground.height + 5.0f;
             splat.z = probe.z;

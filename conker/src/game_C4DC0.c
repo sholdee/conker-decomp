@@ -17,15 +17,15 @@ s32 script_spawnActor(s32 scriptId, s32 unused) {
     s32 ret;
     Actor *obj;
 
-    ret = func_15083E0C(scriptId);
+    ret = collision_findSpawnById(scriptId);
     if (ret != -1) {
-        obj = func_15083E90(scriptId);
+        obj = collision_findObjectById(scriptId);
         if (obj == NULL) {
-            D_800D20FC[ret].unk2 = 0;
-            if (func_15082A44(ret + D_800D20FC, ret, 0, 0, 0) == 0) { // matching: index + base operand order
+            gSpawnRecords[ret].unk2 = 0;
+            if (collision_spawnObject(ret + gSpawnRecords, ret, 0, 0, 0) == 0) { // matching: index + base operand order
                 return -1;
             }
-            ret = func_15083E0C(scriptId);
+            ret = collision_findSpawnById(scriptId);
         } else {
             ret = obj->listpos;
         }
@@ -44,8 +44,8 @@ s32 script_removeActor(s32 objId, C4DC0_arg1 *arg1) {
     if (obj == NULL) {
         return 0;
     }
-    if (objId < D_800D2100) {
-        D_800D20FC[objId].unk2 = 1;
+    if (objId < gSpawnRecordCount) {
+        gSpawnRecords[objId].unk2 = 1;
     }
     if (D_800D3840 == 2) {
         if (arg1->unk4 == 0) {
@@ -493,7 +493,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
             z = cmd->a[3].w + (cmd->a[3].w - z);
         }
         y = camera_global_Cameras->eye.y;
-        func_1510E7A4(0, 0, &y, 0, 0, 0, x, y, z, y, 0, 0, -10000.0f, 20000.0f);
+        collision_findFloorInRange(0, 0, &y, 0, 0, 0, x, y, z, y, 0, 0, -10000.0f, 20000.0f);
         obj->xpos = x;
         obj->ypos = cmd->a[4].w + y;
         obj->zpos = z;
@@ -571,9 +571,9 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk249 = cmd->a[0].w & 0xFF;
         break;
     case 0x43:
-        D_800D2104[obj->listpos][cmd->a[0].w + 1].x = cmd->a[1].w;
-        D_800D2104[obj->listpos][cmd->a[0].w + 1].y = cmd->a[2].w;
-        D_800D2104[obj->listpos][cmd->a[0].w + 1].z = cmd->a[3].w;
+        gSpawnPaths[obj->listpos][cmd->a[0].w + 1].x = cmd->a[1].w;
+        gSpawnPaths[obj->listpos][cmd->a[0].w + 1].y = cmd->a[2].w;
+        gSpawnPaths[obj->listpos][cmd->a[0].w + 1].z = cmd->a[3].w;
         break;
     case 0x44: {
         f32 px;
@@ -583,9 +583,9 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         node = func_15086D48(cmd->a[1].w);
         if (node != -1) {
             func_15086CBC(node, &px, &py, &pz);
-            D_800D2104[obj->listpos][cmd->a[0].w + 1].x = px;
-            D_800D2104[obj->listpos][cmd->a[0].w + 1].y = py;
-            D_800D2104[obj->listpos][cmd->a[0].w + 1].z = pz;
+            gSpawnPaths[obj->listpos][cmd->a[0].w + 1].x = px;
+            gSpawnPaths[obj->listpos][cmd->a[0].w + 1].y = py;
+            gSpawnPaths[obj->listpos][cmd->a[0].w + 1].z = pz;
         }
         break;
     }
@@ -614,7 +614,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 v;
 
         v = cmd->a[0].w;
-        func_15083568(obj, v, 0.0f, 0);
+        collision_createPartSet(obj, v, 0.0f, 0);
         break;
     }
     case 0x4C:
@@ -622,7 +622,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 v;
 
         v = cmd->a[0].w;
-        func_150836CC(obj, v);
+        collision_removePartSet(obj, v);
         break;
     }
     case 0x4D: {
@@ -632,7 +632,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         v1 = cmd->a[0].w;
         v2 = cmd->a[1].w;
-        p = func_1503195C(obj, v1, v2);
+        p = attach_find(obj, v1, v2);
         if (p != NULL) {
             p->unk38 = cmd->a[2].w;
         }
@@ -642,7 +642,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         Actor *other;
         s32 pad;
 
-        other = func_15083E90(cmd->a[0].w & 0xFF);
+        other = collision_findObjectById(cmd->a[0].w & 0xFF);
         if (other != NULL) {
             if (cmd->a[2].w == 0) {
                 obj->unk101 |= 4;
@@ -802,7 +802,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
             s32 v;
 
             v = 0x79;
-            func_15083568(obj, v, 0.0f, 0);
+            collision_createPartSet(obj, v, 0.0f, 0);
             if (OBJ_INDEX(obj) < D_8008FD90) {
                 obj->mv->transport = 2;
                 actor_playAnim(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
@@ -847,7 +847,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         Actor *other;
         s32 pad;
 
-        other = func_15083E90(cmd->a[0].w & 0xFF);
+        other = collision_findObjectById(cmd->a[0].w & 0xFF);
         if (other != NULL) {
             obj->lifting = OBJ_INDEX(other) + 100;
             obj->speed = 0.0f;
@@ -958,7 +958,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     f32 dz;
 
     if (opcode == 0xB7) {
-        return func_15083E0C(objId);
+        return collision_findSpawnById(objId);
     }
     obj = actor_findOnPath(objId);
     if (opcode == 0xB0) {
@@ -1086,7 +1086,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xAB:
         return obj->mv->rt_context_z;
     case 0xAC:
-        ret = func_150A2AEC(OBJ_INDEX(obj), D_800D3840 - 2, &cmd->a[0].w);
+        ret = zone_findActorZone(OBJ_INDEX(obj), D_800D3840 - 2, &cmd->a[0].w);
         if (ret != -1) {
             return ret | 0x4000;
         }
@@ -1128,12 +1128,12 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xB9: {
         s32 x;
         s32 z;
-        x = D_800D2104[obj->listpos][cmd->a[0].w].x;
-        z = D_800D2104[obj->listpos][cmd->a[0].w].z;
+        x = gSpawnPaths[obj->listpos][cmd->a[0].w].x;
+        z = gSpawnPaths[obj->listpos][cmd->a[0].w].z;
         return (x << 16) | (z & 0xFFFF);
     }
     case 0xBA:
-        return D_800D2104[obj->listpos][cmd->a[0].w].y;
+        return gSpawnPaths[obj->listpos][cmd->a[0].w].y;
     case 0xBB:
         if (obj->attach_char != 0) {
             return movement_obj[obj->attach_char - 1].listpos;
@@ -1479,8 +1479,8 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 dx;
         s32 dz;
         idx = obj->listpos;
-        pts = D_800D2104[idx];
-        n = D_800D2108[idx];
+        pts = gSpawnPaths[idx];
+        n = gSpawnPathCounts[idx];
         best = -1;
         if (pts != NULL && n != 0) {
             other = actor_findOnPath(cmd->a[0].w & 0xFFFF0FFF);
@@ -1518,7 +1518,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 b;
         a = cmd->a[0].w;
         b = cmd->a[1].w;
-        p = func_1503195C(obj, a, b);
+        p = attach_find(obj, a, b);
         if (p != NULL) {
             return p->unk38;
         }

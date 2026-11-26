@@ -1,12 +1,12 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* A billboard queued by func_1517D578 and drawn by func_1517D690. */
+/* A billboard queued by sprite_queueBillboard and drawn by sprite_drawQueuedBillboards. */
 struct Entry1517D578 {
     s16 x;
     s16 y;
     s16 z;
-    u8  frame; /* texture frame (from the D_800DDD1C animation counter) */
+    u8  frame; /* texture frame (from the gBillboardAnimCounter animation counter) */
     u16 halfWidth;
     u16 height;
     f32 angle;
@@ -17,48 +17,48 @@ struct Entry1517D578 {
  * lays out .bss in first-declaration order, and an extern there would count. The struct tags of
  * SpriteTexSize and Game1A89B0Position are completed by conker/sprite.h.
  */
-struct { s16 x; s16 y; s16 z; } D_800DD470; /* set by func_1517E05C; x == 0 means unset */
-s32 D_800DD478[15 * 26]; // matching: an int that holds an address; a pointer type changes IDO's registers
-ParticleTexFile D_800DDA90[15];
-struct SpriteTexSize D_800DDB80[15];
+struct { s16 x; s16 y; s16 z; } gSpriteDisturbPoint; /* set by sprite_setDisturbPoint; x == 0 means unset */
+s32 gSpriteTypeFrames[15 * 26]; // matching: an int that holds an address; a pointer type changes IDO's registers
+ParticleTexFile gSpriteTypeTexFiles[15];
+struct SpriteTexSize gSpriteTypeTexSizes[15];
 u8 D_800DDBC0[15];
-u8 D_800DDBD0[15];
-u8 D_800DDBE0[15];
-u8 D_800DDBF0[15];
+u8 gSpriteTypeFrameCounts[15];
+u8 gSpriteTypeDisturbFrames[15];
+u8 gSpriteTypePasses[15];
 s32 D_800DDC00;
-s32 D_800DDC04;
-s32 D_800DDC08;
-u8 D_800DDC10[15];
+s32 gSpritePingPongTypes;
+s32 gSpriteRandomFlipTypes;
+u8 gSpritePingPongDirs[15];
 u8 D_800DDC20[15][2];
-u32 D_800DDC40[15]; /* per sprite type: distance to the nearest sprite this frame */
-u8 D_800DDC80[15];
-s16 D_800DDC90[60];
+u32 gSpriteTypeNearest[15]; /* per sprite type: distance to the nearest sprite this frame */
+u8 gSpriteTypeKindRows[15];
+s16 gSpriteTypePhases[60];
 s32 D_800DDD08; /* not referenced */
-s32 D_800DDD0C;
-Vtx *D_800DDD10[2];
-struct Game1A89B0Position *D_800DDD18;
-u8 D_800DDD1C;
-s32 D_800DDD20;
-s32 D_800DDD24; /* texture strip of the billboards */
-struct Entry1517D578 D_800DDD28[3];
-s32 D_800DDD58; /* sprites in this frame's vertex buffer */
+s32 gSpriteMaxPerFrame;
+Vtx *gSpriteVtxBuffers[2];
+struct Game1A89B0Position *gLevelSprites;
+u8 gBillboardAnimCounter;
+s32 gLevelSpriteCount;
+s32 gBillboardTexture; /* texture strip of the billboards */
+struct Entry1517D578 gBillboardQueue[3];
+s32 gSpriteVtxCount; /* sprites in this frame's vertex buffer */
 
 #include "functions.h"
 #include "variables.h"
 
-u8 D_8008CEB0 = 0;
-s32 D_8008CEB4 = 0;
+u8 gBillboardQueueCount = 0;
+s32 gLevelSpriteSortAxis = 0;
 
-SpriteKind D_8008CEB8[6] = {
+SpriteKind gSpriteKinds[6] = {
     { light_scatterParticles, NULL, 0 },
     { func_1500B714, func_1517B500, 0 },
-    { func_1500B8F4, func_1517B6E8, 0 },
+    { func_1500B8F4, sprite_animFadeOffset, 0 },
     { func_1500BAB8, func_1517B7A8, 0 },
     { light_placeParticlePattern, NULL, 0 },
-    { func_1500BC7C, func_1517B7F8, 0 },
+    { func_1500BC7C, sprite_animHop, 0 },
 };
 
-SpriteKindChoice D_8008CF00[5][8] = {
+SpriteKindChoice gSpriteKindChoices[5][8] = {
     { { 0, 1 }, { 0, 2 }, { 4, 0 }, { 0, 4 }, { 4, 1 }, { 0, 6 }, { 4, 2 }, { 0, 8 } },
     { { 1, 500 }, { 1, 250 }, { 1, 125 }, { 1, 62 }, { 1, 46 }, { 1, 31 }, { 1, 15 }, { 0, 1 } },
     { { 2, 1 }, { 2, 2 }, { 2, 3 }, { 2, 4 }, { 2, 5 }, { 2, 6 }, { 2, 7 }, { 0, 1 } },
@@ -69,7 +69,7 @@ SpriteKindChoice D_8008CF00[5][8] = {
 extern Mtx D_89470; /* the physical address of the fixed matrix D_80089470 */
 
 /* Render setup of the sprites and billboards. */
-static Gfx D_8008CFA0[] = {
+static Gfx gLevelSpriteRenderDl[] = {
     gsSPMatrix(&D_89470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
     gsDPPipeSync(),
     gsSPClearGeometryMode(0xFFFF),
@@ -82,7 +82,7 @@ static Gfx D_8008CFA0[] = {
 };
 
 /*
- * Sprite animation callbacks (the anim functions of D_8008CEB8): each copies the sprite's position into its first
+ * Sprite animation callbacks (the anim functions of gSpriteKinds): each copies the sprite's position into its first
  * vertex, possibly offset, and may advance the animation phase or lower the alpha. Nonzero hides the sprite.
  */
 
@@ -120,7 +120,7 @@ s32 func_1517B500(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
 }
 
 /* Once the phase reaches 0x600, offsets the vertex by it, fades the alpha and holds the phase at 0x600. */
-s32 func_1517B6E8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
+s32 sprite_animFadeOffset(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     s32 fade;
 
     if (*phase >= 0x600) {
@@ -159,7 +159,7 @@ s32 func_1517B7A8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
 }
 
 /* Hops along a parabola peaking at phase 0x600; hidden once the phase reaches 0xD00. */
-s32 func_1517B7F8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
+s32 sprite_animHop(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     s32 t;
     s32 cur;
 
@@ -187,8 +187,8 @@ s32 func_1517B7F8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     return 0;
 }
 
-/* Quicksorts D_800DDD18[first..last] by x, or by z when D_8008CEB4 is set (pivot = last element). */
-void func_1517B89C(s32 first, s32 last) {
+/* Quicksorts gLevelSprites[first..last] by x, or by z when gLevelSpriteSortAxis is set (pivot = last element). */
+void sprite_sortLevelSprites(s32 first, s32 last) {
     s32 left;
     s32 right;
     s32 pivot;
@@ -197,20 +197,20 @@ void func_1517B89C(s32 first, s32 last) {
     if (first < last) {
         right = last;
         while (1) {
-            if (D_8008CEB4 == 0) {
-                pivot = D_800DDD18[last].x;
-                while (D_800DDD18[left].x < pivot && left < last) left++;
-                while (pivot < D_800DDD18[right].x && first < right) right--;
+            if (gLevelSpriteSortAxis == 0) {
+                pivot = gLevelSprites[last].x;
+                while (gLevelSprites[left].x < pivot && left < last) left++;
+                while (pivot < gLevelSprites[right].x && first < right) right--;
             } else {
-                pivot = D_800DDD18[last].z;
-                while (D_800DDD18[left].z < pivot && left < last) left++;
-                while (pivot < D_800DDD18[right].z && first < right) right--;
+                pivot = gLevelSprites[last].z;
+                while (gLevelSprites[left].z < pivot && left < last) left++;
+                while (pivot < gLevelSprites[right].z && first < right) right--;
             }
             if (left < right) {
                 {
-                    Game1A89B0Position swap = D_800DDD18[left];
-                    D_800DDD18[left] = D_800DDD18[right];
-                    D_800DDD18[right] = swap;
+                    Game1A89B0Position swap = gLevelSprites[left];
+                    gLevelSprites[left] = gLevelSprites[right];
+                    gLevelSprites[right] = swap;
                 }
                 left++;
                 right--;
@@ -219,29 +219,29 @@ void func_1517B89C(s32 first, s32 last) {
             }
         }
         {
-            Game1A89B0Position pivotSwap = D_800DDD18[left];
-            D_800DDD18[left] = D_800DDD18[last];
-            D_800DDD18[last] = pivotSwap;
-            func_1517B89C(first, left - 1);
-            func_1517B89C(left + 1, last);
+            Game1A89B0Position pivotSwap = gLevelSprites[left];
+            gLevelSprites[left] = gLevelSprites[last];
+            gLevelSprites[last] = pivotSwap;
+            sprite_sortLevelSprites(first, left - 1);
+            sprite_sortLevelSprites(left + 1, last);
         }
     }
 }
 
 extern s32 math_distance3D(s32, s32, s32);
 
-/* Per sprite type: the texture file (D_800DDA90) and the 26 frame pointers into its decoded buffer. */
+/* Per sprite type: the texture file (gSpriteTypeTexFiles) and the 26 frame pointers into its decoded buffer. */
 #define FRAMES_PER_TYPE 26
 
 /* This frame's sprite vertex buffer, four vertices per sprite. */
-#define VTX(n) (((Vtx *)(s32)D_800DDD10[D_800BE9C0])[n]) // matching: the int round trip keeps the original addressing
+#define VTX(n) (((Vtx *)(s32)gSpriteVtxBuffers[D_800BE9C0])[n]) // matching: the int round trip keeps the original addressing
 
 /* Whether sorted sprite k is still inside the box, walking from its near edge in direction dir along the axis. */
 #define IN_WINDOW(k)                                                                \
-    ((axis == 0 && ((dir == 1 && (k) < D_800DDD20 && D_800DDD18[k].x < maxX) ||   \
-                    (dir == -1 && (k) >= 0 && minX < D_800DDD18[k].x))) ||         \
-     (axis != 0 && ((dir == 1 && (k) < D_800DDD20 && D_800DDD18[k].z < maxZ) ||   \
-                    (dir == -1 && (k) >= 0 && minZ < D_800DDD18[k].z))))
+    ((axis == 0 && ((dir == 1 && (k) < gLevelSpriteCount && gLevelSprites[k].x < maxX) ||   \
+                    (dir == -1 && (k) >= 0 && minX < gLevelSprites[k].x))) ||         \
+     (axis != 0 && ((dir == 1 && (k) < gLevelSpriteCount && gLevelSprites[k].z < maxZ) ||   \
+                    (dir == -1 && (k) >= 0 && minZ < gLevelSprites[k].z))))
 
 /*
  * Builds this frame's sprite vertex buffer: walks the sprites sorted along the axis facing `angle`
@@ -252,7 +252,7 @@ extern s32 math_distance3D(s32, s32, s32);
  * `angle`.
  */
 // matching: hi, fadeDist, j and y are reused for unrelated values; separate locals change IDO's allocation
-void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fadeY, s32 fadeZ) {
+void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fadeY, s32 fadeZ) {
     s32 i;
     s32 lo;
     s32 hi;
@@ -281,10 +281,10 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
     f32 sinA;
     s16 cosA;
 
-    D_800DDD58 = 0;
+    gSpriteVtxCount = 0;
     maxX = x + radius; minX = x - radius;
     maxZ = z + radius; minZ = z - radius;
-    dist = D_800DDD20 - 1; hi = dist; // matching: routing through dist (and below) steers IDO's allocation
+    dist = gLevelSpriteCount - 1; hi = dist; // matching: routing through dist (and below) steers IDO's allocation
     lo = 0;
     mid = 0;
     if ((angle > 45.0f && angle < 135.0f) || (angle > 225.0f && angle < 315.0f)) {
@@ -295,181 +295,181 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
     } else if (angle > 90.0f && angle < 270.0f) {
         dir = -1;
     }
-    if (axis != D_8008CEB4) {
-        D_8008CEB4 = axis;
-        dist = D_800DDD20 - 1;
-        func_1517B89C(0, dist);
+    if (axis != gLevelSpriteSortAxis) {
+        gLevelSpriteSortAxis = axis;
+        dist = gLevelSpriteCount - 1;
+        sprite_sortLevelSprites(0, dist);
     }
     while (lo <= hi) {
         mid = (lo + hi) / 2;
         if (axis == 0) {
             if (dir == 1) {
-                if (minX < D_800DDD18[mid].x) {
+                if (minX < gLevelSprites[mid].x) {
                     hi = mid - 1;
-                } else if (D_800DDD18[mid].x < minX) {
+                } else if (gLevelSprites[mid].x < minX) {
                     lo = mid + 1;
-                } else if (minX == D_800DDD18[mid].x) {
+                } else if (minX == gLevelSprites[mid].x) {
                     break;
                 }
             } else {
-                if (maxX < D_800DDD18[mid].x) {
+                if (maxX < gLevelSprites[mid].x) {
                     hi = mid - 1;
-                } else if (D_800DDD18[mid].x < maxX) {
+                } else if (gLevelSprites[mid].x < maxX) {
                     lo = mid + 1;
-                } else if (maxX == D_800DDD18[mid].x) {
+                } else if (maxX == gLevelSprites[mid].x) {
                     break;
                 }
             }
         } else {
             if (dir == 1) {
-                if (minZ < D_800DDD18[mid].z) {
+                if (minZ < gLevelSprites[mid].z) {
                     hi = mid - 1;
-                } else if (D_800DDD18[mid].z < minZ) {
+                } else if (gLevelSprites[mid].z < minZ) {
                     lo = mid + 1;
-                } else if (minZ == D_800DDD18[mid].z) {
+                } else if (minZ == gLevelSprites[mid].z) {
                     break;
                 }
             } else {
-                if (maxZ < D_800DDD18[mid].z) {
+                if (maxZ < gLevelSprites[mid].z) {
                     hi = mid - 1;
-                } else if (D_800DDD18[mid].z < maxZ) {
+                } else if (gLevelSprites[mid].z < maxZ) {
                     lo = mid + 1;
-                } else if (maxZ == D_800DDD18[mid].z) {
+                } else if (maxZ == gLevelSprites[mid].z) {
                     break;
                 }
             }
         }
     }
     /* nearest distance per sprite type */
-    for (nearest = D_800DDC40; nearest < &D_800DDC40[15]; nearest++) {
+    for (nearest = gSpriteTypeNearest; nearest < &gSpriteTypeNearest[15]; nearest++) {
         *nearest = 0x7FFF;
     }
     i = mid;
     if (IN_WINDOW(mid)) {
-        j = ((u32) D_800DDD20 < D_800DDD0C) ? D_800DDD20 : D_800DDD0C;
-        D_800DDD10[D_800BE9C0] = allocate_memory(j << 6, 4, 2, 0);
-        if (D_800DDD10[D_800BE9C0] == NULL) {
+        j = ((u32) gLevelSpriteCount < gSpriteMaxPerFrame) ? gLevelSpriteCount : gSpriteMaxPerFrame;
+        gSpriteVtxBuffers[D_800BE9C0] = allocate_memory(j << 6, 4, 2, 0);
+        if (gSpriteVtxBuffers[D_800BE9C0] == NULL) {
             return;
         }
     } else {
-        D_800DDD10[D_800BE9C0] = NULL;
+        gSpriteVtxBuffers[D_800BE9C0] = NULL;
         return;
     }
-    for (j = 0; (u32) j < D_800DDD0C && IN_WINDOW(i); i += dir) {
-        dist = math_distance3D(D_800DDD18[i].x - x, D_800DDD18[i].y - y, D_800DDD18[i].z - z);
+    for (j = 0; (u32) j < gSpriteMaxPerFrame && IN_WINDOW(i); i += dir) {
+        dist = math_distance3D(gLevelSprites[i].x - x, gLevelSprites[i].y - y, gLevelSprites[i].z - z);
         if (dist < radius) {
-            type = D_800DDD18[i].unk6 & 0xF;
-            if (dist < D_800DDC40[type]) {
-                D_800DDC40[type] = dist;
+            type = gLevelSprites[i].unk6 & 0xF;
+            if (dist < gSpriteTypeNearest[type]) {
+                gSpriteTypeNearest[type] = dist;
             }
-            fadeDist = math_distance3D(D_800DDD18[i].x - fadeX, D_800DDD18[i].y - fadeY, D_800DDD18[i].z - fadeZ);
+            fadeDist = math_distance3D(gLevelSprites[i].x - fadeX, gLevelSprites[i].y - fadeY, gLevelSprites[i].z - fadeZ);
             if (fadeDist > 140) {
                 if (fadeDist < 240) {
                     dist = radius - ((radius - dist) * (fadeDist - 140)) / 100;
                 }
-                if (D_800DD478[type * FRAMES_PER_TYPE] == 0) {
-                    if (D_800DDA90[type].devAddr != 0) {
+                if (gSpriteTypeFrames[type * FRAMES_PER_TYPE] == 0) {
+                    if (gSpriteTypeTexFiles[type].devAddr != 0) {
                         hi = gParticleTexInfos[D_800DDBC0[type]].frameSize * gParticleTexInfos[D_800DDBC0[type]].frameCount;
-                        D_800DDA90[type].buf = func_10003C6C(D_800DDA90[type].size, 1, 2, 1, 0);
-                        if (D_800DDA90[type].buf != 0) {
-                            D_800DD478[type * FRAMES_PER_TYPE] = func_10003C6C(hi, 4, 1, 0, 0);
-                            if (D_800DD478[type * FRAMES_PER_TYPE] != 0) {
-                                func_10004514(D_800DDA90[type].devAddr, D_800DDA90[type].buf, D_800DDA90[type].size, 1);
-                                D_800DDA90[type].used = 1;
+                        gSpriteTypeTexFiles[type].buf = func_10003C6C(gSpriteTypeTexFiles[type].size, 1, 2, 1, 0);
+                        if (gSpriteTypeTexFiles[type].buf != 0) {
+                            gSpriteTypeFrames[type * FRAMES_PER_TYPE] = func_10003C6C(hi, 4, 1, 0, 0);
+                            if (gSpriteTypeFrames[type * FRAMES_PER_TYPE] != 0) {
+                                rom_read(gSpriteTypeTexFiles[type].devAddr, gSpriteTypeTexFiles[type].buf, gSpriteTypeTexFiles[type].size, 1);
+                                gSpriteTypeTexFiles[type].used = 1;
                                 hi = gParticleTexInfos[D_800DDBC0[type]].frameSize;
                                 for (frame = 1; frame < FRAMES_PER_TYPE; frame++) {
-                                    D_800DD478[type * FRAMES_PER_TYPE + frame] = D_800DD478[type * FRAMES_PER_TYPE + frame - 1] + hi;
+                                    gSpriteTypeFrames[type * FRAMES_PER_TYPE + frame] = gSpriteTypeFrames[type * FRAMES_PER_TYPE + frame - 1] + hi;
                                 }
                             } else {
-                                func_10004074(D_800DDA90[type].buf);
+                                func_10004074(gSpriteTypeTexFiles[type].buf);
                             }
                         }
                     }
                 texdone:; // matching: IDO needs this empty labelled statement (a block join) here
                 } else {
-                    if (D_800DDA90[type].used == 0) {
-                        D_800DDA90[type].used = 1;
-                        func_100043B4((s32 *) D_800DD478[type * FRAMES_PER_TYPE], 4);
+                    if (gSpriteTypeTexFiles[type].used == 0) {
+                        gSpriteTypeTexFiles[type].used = 1;
+                        func_100043B4((s32 *) gSpriteTypeFrames[type * FRAMES_PER_TYPE], 4);
                     }
                 }
                 vtx = &VTX(j << 2);
-                phase = D_800DDC90[D_800DDD18[i].phaseIdx];
+                phase = gSpriteTypePhases[gLevelSprites[i].phaseIdx];
                 if (phase < 0) {
                     phase = 0;
                 }
-                if (D_800DD470.x != 0) {
-                    if (math_distance3D(D_800DDD18[i].x - D_800DD470.x, D_800DDD18[i].y - D_800DD470.y,
-                                      D_800DDD18[i].z - D_800DD470.z) < 80 &&
+                if (gSpriteDisturbPoint.x != 0) {
+                    if (math_distance3D(gLevelSprites[i].x - gSpriteDisturbPoint.x, gLevelSprites[i].y - gSpriteDisturbPoint.y,
+                                      gLevelSprites[i].z - gSpriteDisturbPoint.z) < 80 &&
                         D_800DDBC0[type] == 0) {
-                        if (D_800DDD18[i].disturbState != 0x21) {
-                            D_800DDD18[i].disturbState = 0x21;
-                            func_15170500(D_800DDD18[i].x, D_800DDD18[i].y + 68, D_800DDD18[i].z, 0, 0, 255, 0);
+                        if (gLevelSprites[i].disturbState != 0x21) {
+                            gLevelSprites[i].disturbState = 0x21;
+                            func_15170500(gLevelSprites[i].x, gLevelSprites[i].y + 68, gLevelSprites[i].z, 0, 0, 255, 0);
                         }
                     }
                 }
-                if (D_800DDD18[i].disturbState >= 0x21) {
-                    if (D_800DDD18[i].disturbState >= 0x22) {
-                        D_800DDD18[i].disturbState--;
+                if (gLevelSprites[i].disturbState >= 0x21) {
+                    if (gLevelSprites[i].disturbState >= 0x22) {
+                        gLevelSprites[i].disturbState--;
                     }
-                    vtx[3].v.flag = D_800DDD18[i].height;
+                    vtx[3].v.flag = gLevelSprites[i].height;
                 } else {
                     if (dist < 48 && D_800DDBC0[type] == 0) {
-                        D_800DDD18[i].disturbState = 0x22;
-                        func_15170500(D_800DDD18[i].x, D_800DDD18[i].y + 68, D_800DDD18[i].z, 0, 0, 255, 0);
+                        gLevelSprites[i].disturbState = 0x22;
+                        func_15170500(gLevelSprites[i].x, gLevelSprites[i].y + 68, gLevelSprites[i].z, 0, 0, 255, 0);
                     }
-                    vtx[3].v.flag = D_800DDD18[i].height;
+                    vtx[3].v.flag = gLevelSprites[i].height;
                 }
-                vtx[2].v.flag = D_800DDD18[i].halfWidth;
+                vtx[2].v.flag = gLevelSprites[i].halfWidth;
                 dist = (u32) (radius - dist) >> 1;
                 if (dist >= 256) {
                     dist = 255;
                 }
                 vtx[0].v.cn[3] = dist;
-                if (D_8008CEB8[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].kind].emitter].anim != NULL) {
-                    if (D_8008CEB8[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].kind].emitter].anim(&D_800DDD18[i], vtx, &phase, &vtx[0].v.cn[3]) != 0) {
+                if (gSpriteKinds[gSpriteKindChoices[gSpriteTypeKindRows[type]][gLevelSprites[i].kind].emitter].anim != NULL) {
+                    if (gSpriteKinds[gSpriteKindChoices[gSpriteTypeKindRows[type]][gLevelSprites[i].kind].emitter].anim(&gLevelSprites[i], vtx, &phase, &vtx[0].v.cn[3]) != 0) {
                         continue;
                     }
                 } else {
-                    vtx[0].v.ob[0] = D_800DDD18[i].x;
-                    vtx[0].v.ob[1] = D_800DDD18[i].y;
-                    vtx[0].v.ob[2] = D_800DDD18[i].z;
+                    vtx[0].v.ob[0] = gLevelSprites[i].x;
+                    vtx[0].v.ob[1] = gLevelSprites[i].y;
+                    vtx[0].v.ob[2] = gLevelSprites[i].z;
                 }
-                shade = D_800DDD18[i].unk6 | 0x9F;
+                shade = gLevelSprites[i].unk6 | 0x9F;
                 fadeDist = vtx[0].v.cn[3] & 0xFF;
                 vtx[0].v.cn[0] = vtx[0].v.cn[1] = vtx[0].v.cn[2] = shade;
                 vtx[1].v.cn[0] = vtx[1].v.cn[1] = vtx[1].v.cn[2] = shade;
                 vtx[2].v.cn[0] = vtx[2].v.cn[1] = vtx[2].v.cn[2] = shade;
                 vtx[3].v.cn[0] = vtx[3].v.cn[1] = vtx[3].v.cn[2] = shade;
                 vtx[1].v.cn[3] = vtx[2].v.cn[3] = vtx[3].v.cn[3] = fadeDist;
-                if (D_800DDD18[i].disturbState >= 0x21) {
-                    vtx[0].v.flag = D_800DDBE0[type] + type * FRAMES_PER_TYPE;
+                if (gLevelSprites[i].disturbState >= 0x21) {
+                    vtx[0].v.flag = gSpriteTypeDisturbFrames[type] + type * FRAMES_PER_TYPE;
                 } else {
                     vtx[0].v.flag = type * FRAMES_PER_TYPE + (phase >> 8);
                 }
                 vtx++;
-                vtx->v.flag = D_800DDBF0[type];
+                vtx->v.flag = gSpriteTypePasses[type];
                 VTX((j << 2) + 1).v.tc[0] =
-                    VTX((j << 2) + 2).v.tc[0] = D_800DDB80[type].s;
+                    VTX((j << 2) + 2).v.tc[0] = gSpriteTypeTexSizes[type].s;
                 VTX((j << 2) + 2).v.tc[1] =
-                    VTX((j << 2) + 3).v.tc[1] = D_800DDB80[type].t;
+                    VTX((j << 2) + 3).v.tc[1] = gSpriteTypeTexSizes[type].t;
                 j++;
             }
         }
     }
-    D_800DDD58 = j;
-    /* step each type's 4 phases: ping-pong (types in D_800DDC04, D_800DDC08 adds random flips) or loop */
+    gSpriteVtxCount = j;
+    /* step each type's 4 phases: ping-pong (types in gSpritePingPongTypes, gSpriteRandomFlipTypes adds random flips) or loop */
     if (gPaused == 0) {
         for (i = 0; i != 15; i++) {
-            hi = (D_800DDBD0[i] << 8) - 1;
+            hi = (gSpriteTypeFrameCounts[i] << 8) - 1;
             if (hi > 0x100) {
                 y = 1 << i;
-                if (y & D_800DDC04) {
-                    if (y & D_800DDC08) {
+                if (y & gSpritePingPongTypes) {
+                    if (y & gSpriteRandomFlipTypes) {
                         step = func_151EF610() % 10;
                         if (step == 0) {
-                            D_800DDC10[i] |= func_151EF610() % 16;
+                            gSpritePingPongDirs[i] |= func_151EF610() % 16;
                         } else if (step == 1) {
-                            D_800DDC10[i] &= func_151EF610() % 16;
+                            gSpritePingPongDirs[i] &= func_151EF610() % 16;
                         } else {
                             step = D_800BE9E4 << 5;
                         }
@@ -478,19 +478,19 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                     }
                     fadeDist = i << 2;
                     for (j = 0; j != 4; j++, fadeDist++) {
-                        bits = D_800DDC10[i];
+                        bits = gSpritePingPongDirs[i];
                         y = 1 << j;
                         if (bits & y) {
-                            D_800DDC90[fadeDist] -= step;
-                            if (D_800DDC90[fadeDist] <= 0) {
-                                D_800DDC90[fadeDist] = -D_800DDC90[fadeDist];
-                                D_800DDC10[i] = bits ^ y;
+                            gSpriteTypePhases[fadeDist] -= step;
+                            if (gSpriteTypePhases[fadeDist] <= 0) {
+                                gSpriteTypePhases[fadeDist] = -gSpriteTypePhases[fadeDist];
+                                gSpritePingPongDirs[i] = bits ^ y;
                             }
                         } else {
-                            D_800DDC90[fadeDist] += step;
-                            if (D_800DDC90[fadeDist] >= hi) {
-                                D_800DDC90[fadeDist] = hi * 2 - D_800DDC90[fadeDist];
-                                D_800DDC10[i] = bits ^ y;
+                            gSpriteTypePhases[fadeDist] += step;
+                            if (gSpriteTypePhases[fadeDist] >= hi) {
+                                gSpriteTypePhases[fadeDist] = hi * 2 - gSpriteTypePhases[fadeDist];
+                                gSpritePingPongDirs[i] = bits ^ y;
                             }
                         }
                     }
@@ -498,9 +498,9 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                     bits = D_800BE9E4 * 48;
                     fadeDist = i << 2;
                     for (j = 0; j != 4; j++, fadeDist++) {
-                        D_800DDC90[fadeDist] += bits;
-                        if (D_800DDC90[fadeDist] >= hi) {
-                            D_800DDC90[fadeDist] -= hi;
+                        gSpriteTypePhases[fadeDist] += bits;
+                        if (gSpriteTypePhases[fadeDist] >= hi) {
+                            gSpriteTypePhases[fadeDist] -= hi;
                         }
                     }
                 }
@@ -508,8 +508,8 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
         }
     }
     /* occasionally spawn a particle at a random sprite showing frame 0 */
-    i = (u32) func_151EF610() % D_800DDD0C;
-    if ((u32) i < D_800DDD58) {
+    i = (u32) func_151EF610() % gSpriteMaxPerFrame;
+    if ((u32) i < gSpriteVtxCount) {
         i *= 4;
         j = VTX(i).v.flag;
         if (j % 26 == 0 && D_800DDBC0[j / 26] == 0) {
@@ -520,7 +520,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
     angle *= 0.01745329238f;
     cosA = cosf(angle) * 128.0f;
     sinA = sinf(angle);
-    for (i = 0; (u32) i < D_800DDD58; i++) {
+    for (i = 0; (u32) i < gSpriteVtxCount; i++) {
         halfWidth = VTX((i << 2) + 2).v.flag;
         x = VTX((i << 2)).v.ob[0];
         height = VTX((i << 2) + 3).v.flag * 4;
@@ -537,39 +537,39 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
         VTX((i << 2)).v.tc[0] = VTX((i << 2)).v.tc[1] = 0;
         VTX((i << 2) + 1).v.tc[1] = VTX((i << 2) + 3).v.tc[0] = 0;
     }
-    D_800DD470.x = 0;
+    gSpriteDisturbPoint.x = 0;
 }
 
 /* Releases every sprite type's texture file buffer, first passing it with the frames to func_10006240. */
-void func_1517CFC4(void) {
+void sprite_freeTypeTextures(void) {
     s32 i;
 
     for (i = 0; i < 15; i++) {
-        if (D_800DDA90[i].buf != 0) {
-            if (D_800DD478[i * FRAMES_PER_TYPE] != 0) {
-                func_10006240(D_800DDA90[i].buf, D_800DD478[i * FRAMES_PER_TYPE], D_8003809C);
-                func_10004074(D_800DDA90[i].buf);
+        if (gSpriteTypeTexFiles[i].buf != 0) {
+            if (gSpriteTypeFrames[i * FRAMES_PER_TYPE] != 0) {
+                func_10006240(gSpriteTypeTexFiles[i].buf, gSpriteTypeFrames[i * FRAMES_PER_TYPE], D_8003809C);
+                func_10004074(gSpriteTypeTexFiles[i].buf);
             }
-            D_800DDA90[i].buf = 0;
+            gSpriteTypeTexFiles[i].buf = 0;
         }
     }
 }
 
 
 /* Draws one textured billboard quad at (x, y, z) facing `angle` into the sprite vertex buffer's next slot. */
-Gfx *func_1517D074(Gfx *gfx, s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 height, u8 texWidth, u8 texHeight, s32 texture) {
+Gfx *sprite_drawBillboard(Gfx *gfx, s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 height, u8 texWidth, u8 texHeight, s32 texture) {
     u32 count;
     s16 dx;
     s16 dz;
     Vtx *v;
 
-    count = D_800DDD58;
+    count = gSpriteVtxCount;
     v = &VTX(count * 4);
-    if ((u32)D_800DDD58 >= D_800DDD0C) {
+    if ((u32)gSpriteVtxCount >= gSpriteMaxPerFrame) {
         return gfx;
     }
 
-    gSPDisplayList(gfx++, D_8008CFA0);
+    gSPDisplayList(gfx++, gLevelSpriteRenderDl);
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, TEXEL1, 0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
     gSPClearGeometryMode(gfx++, G_CULL_BACK);
     gDPSetOtherMode(gfx++, 0x182C3F, 0x0C184B50);
@@ -602,17 +602,17 @@ Gfx *func_1517D074(Gfx *gfx, s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 
     gSP1Triangle(gfx++, 0, 2, 1, 0);
     gSP1Triangle(gfx++, 0, 3, 2, 0);
     gSPSetGeometryMode(gfx++, G_SHADING_SMOOTH);
-    D_800DDD58++;
+    gSpriteVtxCount++;
     return gfx;
 }
 
-/* Queues a billboard (at most 3 per frame; D_8008CEB0 counts them). */
-void func_1517D578(s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 height, u8 frame) {
+/* Queues a billboard (at most 3 per frame; gBillboardQueueCount counts them). */
+void sprite_queueBillboard(s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 height, u8 frame) {
     struct Entry1517D578 *e;
-    u8 idx = D_8008CEB0;
+    u8 idx = gBillboardQueueCount;
 
-    if (D_8008CEB0 < 3) {
-        e = &D_800DDD28[idx];
+    if (gBillboardQueueCount < 3) {
+        e = &gBillboardQueue[idx];
         e->x = x;
         e->y = y;
         e->z = z;
@@ -620,47 +620,47 @@ void func_1517D578(s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 height, u8
         e->halfWidth = halfWidth;
         e->height = height;
         e->frame = frame;
-        D_8008CEB0 = idx + 1;
+        gBillboardQueueCount = idx + 1;
     }
 }
 
 /* Queues a billboard facing player `player`'s view angle, showing the current animation frame. */
-void func_1517D5FC(s16 x, s16 y, s16 z, s32 player, s32 halfWidth, s32 height) {
-    func_1517D578(x, y, z, camera_global_Cameras[player].TrueCameraAngle, halfWidth, height, D_800DDD1C >> 3);
+void sprite_queuePlayerBillboard(s16 x, s16 y, s16 z, s32 player, s32 halfWidth, s32 height) {
+    sprite_queueBillboard(x, y, z, camera_global_Cameras[player].TrueCameraAngle, halfWidth, height, gBillboardAnimCounter >> 3);
 }
 
 /*
  * Advances the billboard animation counter and drains the queue, drawing each billboard with its frame of
  * the 16x32 texture strip at `texture` (nothing is drawn when it is 0). Leaves the sprite count unchanged.
  */
-Gfx *func_1517D690(Gfx *gfx, s32 texture) {
+Gfx *sprite_drawQueuedBillboards(Gfx *gfx, s32 texture) {
     s32 saved;
 
-    saved = D_800DDD58;
-    if ((D_800DDD1C += 5) >= 200) {
-        D_800DDD1C -= 200;
+    saved = gSpriteVtxCount;
+    if ((gBillboardAnimCounter += 5) >= 200) {
+        gBillboardAnimCounter -= 200;
     }
 
-    while (D_8008CEB0 != 0) {
-        D_8008CEB0--;
+    while (gBillboardQueueCount != 0) {
+        gBillboardQueueCount--;
         if (texture != 0) {
             /* frames are 0x500 bytes apart */
-            gfx = func_1517D074(gfx, D_800DDD28[D_8008CEB0].x, D_800DDD28[D_8008CEB0].y, D_800DDD28[D_8008CEB0].z,
-                                D_800DDD28[D_8008CEB0].angle, D_800DDD28[D_8008CEB0].halfWidth,
-                                D_800DDD28[D_8008CEB0].height, 16, 32,
-                                ((D_800DDD28[D_8008CEB0].frame * 0x280) << 1) + texture); // matching: `* 0x500` codegens differently
+            gfx = sprite_drawBillboard(gfx, gBillboardQueue[gBillboardQueueCount].x, gBillboardQueue[gBillboardQueueCount].y, gBillboardQueue[gBillboardQueueCount].z,
+                                gBillboardQueue[gBillboardQueueCount].angle, gBillboardQueue[gBillboardQueueCount].halfWidth,
+                                gBillboardQueue[gBillboardQueueCount].height, 16, 32,
+                                ((gBillboardQueue[gBillboardQueueCount].frame * 0x280) << 1) + texture); // matching: `* 0x500` codegens differently
         }
     }
 
-    D_800DDD58 = saved;
+    gSpriteVtxCount = saved;
     return gfx;
 }
 
 /*
- * Draws the queued billboards (func_1517D690), then every sprite built by func_1517BBAC whose second
+ * Draws the queued billboards (sprite_drawQueuedBillboards), then every sprite built by sprite_buildLevelSprites whose second
  * vertex's flag equals `pass`, loading each texture frame once per batch.
  */
-void func_1517D7B0(Gfx **gfx, s32 pass) {
+void sprite_drawLevelSprites(Gfx **gfx, s32 pass) {
     Vtx *v;
     u32 sprite;
     u32 quad;
@@ -672,21 +672,21 @@ void func_1517D7B0(Gfx **gfx, s32 pass) {
     s16 height;
 
     tex = 0xFFFF; /* no texture loaded yet */
-    if (D_800DDD10[D_800BE9C0] == NULL) {
+    if (gSpriteVtxBuffers[D_800BE9C0] == NULL) {
         return;
     }
-    *gfx = func_1517D690(*gfx, D_800DDD24);
-    if (D_800DDD20 == 0 || D_800DDD58 == 0) {
+    *gfx = sprite_drawQueuedBillboards(*gfx, gBillboardTexture);
+    if (gLevelSpriteCount == 0 || gSpriteVtxCount == 0) {
         return;
     }
     quad = 0;
-    gSPDisplayList((*gfx)++, D_8008CFA0);
-    *gfx = func_1510CDB8(*gfx, 0xFF, 0xFF, 0);
+    gSPDisplayList((*gfx)++, gLevelSpriteRenderDl);
+    *gfx = texture_setTintColors(*gfx, 0xFF, 0xFF, 0);
     sprite = 0;
     /* Batches of up to 4 sprites (16 vertices); within a batch draw the quads grouped by texture. */
-    while (sprite < D_800DDD58) {
+    while (sprite < gSpriteVtxCount) {
         done = 0;
-        vtxCount = (D_800DDD58 - sprite >= 5) ? 16 : (D_800DDD58 - sprite) * 4;
+        vtxCount = (gSpriteVtxCount - sprite >= 5) ? 16 : (gSpriteVtxCount - sprite) * 4;
         for (slot = 0; slot < vtxCount; slot += 4) {
             if (pass != VTX(sprite * 4 + slot + 1).v.flag) {
                 done |= 1 << slot;
@@ -707,7 +707,7 @@ void func_1517D7B0(Gfx **gfx, s32 pass) {
                         tex = v[quad].v.flag;
                         width = (v[quad + 2].v.tc[0] + 1) >> 5;
                         height = (v[quad + 2].v.tc[1] + 1) >> 5;
-                        gDPLoadTextureBlock((*gfx)++, D_800DD478[tex], G_IM_FMT_RGBA, G_IM_SIZ_16b, width,
+                        gDPLoadTextureBlock((*gfx)++, gSpriteTypeFrames[tex], G_IM_FMT_RGBA, G_IM_SIZ_16b, width,
                                             (height * 5 + 3) >> 2, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK,
                                             G_TX_NOLOD, G_TX_NOLOD);
                         gDPSetTile((*gfx)++, G_IM_FMT_I, G_IM_SIZ_4b, ((width >> 1) + 7) >> 3, (width * height) >> 2, 1, 0,
@@ -735,19 +735,19 @@ void func_1517D7B0(Gfx **gfx, s32 pass) {
 
 
 /* Rebuilds the sprites around player 0's view, then forgets the textures of types no sprite used. */
-void func_1517DE5C(void) {
+void sprite_updateLevelSprites(void) {
     s32 i;
 
-    if (D_800DDD20 != 0) {
+    if (gLevelSpriteCount != 0) {
         for (i = 0; i < 15; i++) {
-            D_800DDA90[i].used = 0;
+            gSpriteTypeTexFiles[i].used = 0;
         }
-        func_1517BBAC(movement_obj->xpos, movement_obj->ypos, movement_obj->zpos, 1500,
+        sprite_buildLevelSprites(movement_obj->xpos, movement_obj->ypos, movement_obj->zpos, 1500,
                       camera_global_Cameras->TrueCameraAngle, camera_global_Cameras->eye.x, camera_global_Cameras->eye.y, camera_global_Cameras->eye.z);
         for (i = 0; i < 15; i++) {
-            if (D_800DD478[i * FRAMES_PER_TYPE] != 0 && D_800DDA90[i].used == 0) {
-                D_800DD478[i * FRAMES_PER_TYPE] = 0;
-                D_800DDA90[i].buf = 0;
+            if (gSpriteTypeFrames[i * FRAMES_PER_TYPE] != 0 && gSpriteTypeTexFiles[i].used == 0) {
+                gSpriteTypeFrames[i * FRAMES_PER_TYPE] = 0;
+                gSpriteTypeTexFiles[i].buf = 0;
             }
         }
     }
@@ -755,8 +755,8 @@ void func_1517DE5C(void) {
 
 
 /* Sets this frame's disturbance point: sprites within 80 of it react as if the player were close. */
-void func_1517E05C(s32 x, s32 y, s32 z) {
-    D_800DD470.x = x;
-    D_800DD470.y = y;
-    D_800DD470.z = z;
+void sprite_setDisturbPoint(s32 x, s32 y, s32 z) {
+    gSpriteDisturbPoint.x = x;
+    gSpriteDisturbPoint.y = y;
+    gSpriteDisturbPoint.z = z;
 }

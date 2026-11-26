@@ -560,7 +560,7 @@ static s32 (*D_80089B1C[])() = {
 };
 static void (*D_80089B38[])(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32, BloodStrip *) = {
     func_151AA6D8, func_150C71C0, func_150EA11C, func_151938FC, func_151BD43C,
-    func_15137E60, weapon_emitBloodStripParticle, func_150D1204, func_150F695C,
+    func_15137E60, weapon_emitBloodStripParticle, func_150D1204, beam_emitBloodParticle,
 };
 static f32 (*D_80089B5C[])() = { func_15135670, func_151AAA4C, func_150EA490, func_151BD750 };
 static s32 (*D_80089B6C[])() = { func_151AABA0 };
@@ -908,7 +908,7 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
     particle.unk3C = 32;
     particle.color1.alpha = alpha;
     particle.unk23 = endAlpha;
-    result = func_1515548C(&particle, 3, spriteKinds, 1, sizeof(motion), arg10, arg11);
+    result = sprite_newScreenSprite(&particle, 3, spriteKinds, 1, sizeof(motion), arg10, arg11);
     if (result != NULL) {
         memcpy(&result->motion, &motion, sizeof(motion));
         scale = (particle.halfWidth + particle.halfHeight) * 0.5f;
@@ -961,7 +961,7 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
             if (func_150ADA20() & 1) {
                 spark.flags |= 4;
             }
-            func_1515548C(&spark, 0, 0, 0, 0, arg10, arg11);
+            sprite_newScreenSprite(&spark, 0, 0, 0, 0, arg10, arg11);
             count -= 1.0f;
         }
     }
@@ -1045,7 +1045,7 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     probe.x = fromX;
     probe.y = 10000.0f;
     probe.z = from->z;
-    if (func_15046460(&probe, 0, from->y, &hit) != 0 && hit.source == 3) {
+    if (collision_probeFloorSurfAB(&probe, 0, from->y, &hit) != 0 && hit.source == 3) {
         for (drops = func_150ADA20() % 11U + 10; drops > 0; drops--) {
             speed = (func_150ADA68() * 67.0f + 86.0f) * 0.001000000047f;
             velocity.x = direction.x * speed;
@@ -1105,13 +1105,13 @@ void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
     if (actor != NULL) {
         area = 3.141592741f * radius * radius;
         count = (func_150ADA68() * 305.0f + 108.0f) * 9.999999975e-07f * area;
-        func_1504715C(&hit, actor);
+        collision_initHitFromObject(&hit, actor);
         while (count > 1.0f) {
             func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * radius, &probe.x, &probe.z);
             probe.x += actor->xpos;
             probe.z += actor->zpos;
             probe.y = actor->ypos + 500.0f;
-            if (func_15046C80(&probe, 0, actor->ypos - 5000.0f, &hit) != 0 && hit.source != 3) {
+            if (collision_probeFloorSurfABSet0Cached(&probe, 0, actor->ypos - 5000.0f, &hit) != 0 && hit.source != 3) {
                 pos.x = probe.x;
                 pos.y = hit.height;
                 pos.z = probe.z;
@@ -1323,12 +1323,12 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
         return;
     }
     scale = (actor->scale_xz + actor->scale_y) * 0.5f;
-    func_1515C244(actor, &position, &unused0, &unused1);
+    sprite_getActorBodyBounds(actor, &position, &unused0, &unused1);
     kind = func_15134070(actor);
     if (kind == BLOOD_PROFILE_NONE) {
         return;
     }
-    func_1504715C(&hit, actor);
+    collision_initHitFromObject(&hit, actor);
     if (arg3 != 0) {
         func_1513A24C(&position, D_80089A20[kind], D_800A3C30,
                       ((arg5 != 0) || ((kind == 4) && (actor->character_type != MODEL_UGA_BUGA_BLUE_HEADGEAR)))
@@ -1368,7 +1368,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
         } else {
             heavy = 0;
         }
-        func_151A9834(&position, position.y - 300.0f, 300.0f, &hit,
+        beam_spawnAtGroundPoints(&position, position.y - 300.0f, 300.0f, &hit,
                       (func_150ADA20() % 6U) + 18, 0, &heavy, arg6, arg7);
     }
     if (arg4 != 0) {
@@ -1596,15 +1596,15 @@ void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
         return;
     }
     scale = (actor->scale_xz + actor->scale_y) * 0.5f;
-    func_1515C244(actor, &position, &unused0, &unused1);
-    func_1504715C(&hit, actor);
+    sprite_getActorBodyBounds(actor, &position, &unused0, &unused1);
+    collision_initHitFromObject(&hit, actor);
     probe.x = position.x;
     probe.y = position.y + 100.0f;
     probe.z = position.z;
     if (func_1514672C(&probe) == 0) {
         return;
     }
-    if (func_15046C80(&probe, 0, probe.y - 500.0f, &hit) != 0) {
+    if (collision_probeFloorSurfABSet0Cached(&probe, 0, probe.y - 500.0f, &hit) != 0) {
         if (hit.flags & 1) {
             pool = 1;
         } else {
@@ -1897,7 +1897,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
         i = 0;
         found = 0;
         do {
-            if (func_1503195C(actor, ids[i], 0) != NULL) {
+            if (attach_find(actor, ids[i], 0) != NULL) {
                 found = 1;
             } else {
                 i++;
@@ -1991,7 +1991,7 @@ void func_15138BC0(Actor *actor, u8 arg1, s32 arg2) {
         valid = func_151380B4(actor, kind, &position);
         func_15138120(actor, kind, 1);
         if (valid != 0) {
-            func_1504715C(&hit, actor);
+            collision_initHitFromObject(&hit, actor);
             func_151382E0(&position, kind, &hit, arg1, arg2);
             func_15138424(actor, &position, kind, &hit, arg1, arg2);
         }
@@ -2010,7 +2010,7 @@ void func_15138C80(Actor *actor, u8 arg1, s32 arg2) {
         valid = func_151380B4(actor, kind, &position);
         func_15138120(actor, kind, 1);
         if (valid != 0) {
-            func_1504715C(&hit, actor);
+            collision_initHitFromObject(&hit, actor);
             func_151382E0(&position, kind, &hit, arg1, arg2);
             switch (kind) {
             case 16:

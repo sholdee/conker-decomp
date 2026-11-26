@@ -19,7 +19,7 @@ s32 func_15104620(s32 arg0, s32 arg1) {
 
 #define ABS(x) (((x) < 0.0f) ? -(x) : (x))
 
-s32 func_15104634(f32 x, f32 z, f32 y, f32 *out) {
+s32 collision_getFloorNearY(f32 x, f32 z, f32 y, f32 *out) {
     s32 count;
     s32 i;
     s32 j;
@@ -37,7 +37,7 @@ s32 func_15104634(f32 x, f32 z, f32 y, f32 *out) {
     s32 *t;
     s32 best;
 
-    func_1510F800(0);
+    collision_selectMap(0);
     count = func_150A3A70(x, z);
     if (count == 0) {
         return 0;

@@ -145,7 +145,7 @@ s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, 
     f32 impactSpeed = particle->speed - fabsf(particle->vel.y); /* speed less the vertical part */
 
     if (impactSpeed > 6.0f) {
-        if (func_150A3058(1, probe->pos.x, probe->pos.y, probe->pos.z) == 0) {
+        if (zone_isInNeutralZone(1, probe->pos.x, probe->pos.y, probe->pos.z) == 0) {
             Vec3f move;
             Vec3f hit;
             CollisionTri triangle;
@@ -330,7 +330,7 @@ s32 func_150B963C(ModelParticle *particle) {
     Vec3f pos;
 
     if ((D_80088730 == NULL) || (D_80088730->type == 0) || (D_80088730->unique_id != 1)) {
-        D_80088730 = func_15083E90(1);
+        D_80088730 = collision_findObjectById(1);
     }
     if (D_80088730 != NULL) {
         playerPos.x = D_80088730->xpos;
@@ -361,7 +361,7 @@ s32 func_150B963C(ModelParticle *particle) {
             pos.x = particle->pos.x;
             pos.y = particle->pos.y + 100.0f;
             pos.z = particle->pos.z;
-            if (func_15046C80(&pos, 0, particle->pos.y - 2000.0f, &particle->floor) != 0) {
+            if (collision_probeFloorSurfABSet0Cached(&pos, 0, particle->pos.y - 2000.0f, &particle->floor) != 0) {
             // matching: an unused label here makes as1 emit the following branch as beqzl
             lbl_spawn:
                 pos.y = particle->floor.height;
@@ -458,7 +458,7 @@ s32 func_150B963C(ModelParticle *particle) {
         }
     }
     if ((D_80088720 == NULL) || (D_80088720->type == 0) || (D_80088720->unique_id != 1)) {
-        D_80088720 = func_15083E90(1);
+        D_80088720 = collision_findObjectById(1);
     }
     if (D_80088720 != NULL) {
         D_80088724.x = D_80088720->xpos;

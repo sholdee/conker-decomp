@@ -434,11 +434,11 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             return 1;
         }
         if (event->unk4 == 0) {
-            func_15083568(obj, event->value + 1, 1.0f, 0);
+            collision_createPartSet(obj, event->value + 1, 1.0f, 0);
         } else if (event->unk4 == 1) {
-            func_150836CC(obj, event->value + 1);
+            collision_removePartSet(obj, event->value + 1);
         } else {
-            att = func_1503195C(obj, event->value + 1, 0);
+            att = attach_find(obj, event->value + 1, 0);
             if (att != NULL) {
                 if (event->unk4 == 2) {
                     att->seg6Id = D_80090214[event->unk5];
@@ -606,7 +606,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     point2.x = D_800C3958[scene][track].x;
                     point2.y = D_800C3958[scene][track].y;
                     point2.z = D_800C3958[scene][track].z;
-                    func_151A9390(5, 1, 0, &point2, -10000.0f, 100.0f, -1, sceneTag, 1);
+                    beam_spawnEmitterPreset(5, 1, 0, &point2, -10000.0f, 100.0f, -1, sceneTag, 1);
                     break;
                 case 2:
                     func_151494E0(0, event->unk5 ? 0x2B : 0x2C);
@@ -803,7 +803,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             if (obj != NULL) {
                 if (event->unk4 == 0) {
-                    r = func_15083FB0(event->unk6);
+                    r = collision_findObjectSlotById(event->unk6);
                     if (r != -1) {
                         obj->unk101 |= 4;
                         obj->attach_char = r + 1;
@@ -815,23 +815,23 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x42) {
             if (event->unk4 == 0) {
-                D_800D9890 = 1;
+                gSpriteQueuedCmd = 1;
             } else if (event->unk4 == 1) {
-                D_800D9890 = 4;
+                gSpriteQueuedCmd = 4;
             } else if (event->unk4 == 3) {
-                D_800D9890 = 2;
+                gSpriteQueuedCmd = 2;
             } else if (event->unk4 == 4) {
-                D_800D9890 = 5;
+                gSpriteQueuedCmd = 5;
             } else if (event->unk4 == 5) {
-                D_800D9890 = 6;
+                gSpriteQueuedCmd = 6;
             } else if (event->unk4 == 6) {
-                D_800D9890 = 7;
+                gSpriteQueuedCmd = 7;
             } else if (event->unk4 == 7) {
-                D_800D9890 = 8;
+                gSpriteQueuedCmd = 8;
             } else if (event->unk4 == 8) {
-                D_800D9890 = 9;
+                gSpriteQueuedCmd = 9;
             } else if (event->unk4 == 9) {
-                D_800D9890 = 10;
+                gSpriteQueuedCmd = 10;
             }
         } else if (event->value == 0x43) {
             s32 duration;
@@ -839,7 +839,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             if (event->unk4 == 0) {
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_150B7220(D_800C3958[scene][track].unk24, D_800C3958[scene][track].unk28, duration, sceneTag);
+                sprite_spawnConverging(D_800C3958[scene][track].unk24, D_800C3958[scene][track].unk28, duration, sceneTag);
             }
         } else if (event->value == 0x45) {
             s32 duration;
@@ -932,9 +932,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     end = 0;
                 }
                 if (level == 0x18) {
-                    func_150F5420(start, total - eventTime - end - start, end, event->unk5);
+                    beam_showFadeSprite(start, total - eventTime - end - start, end, event->unk5);
                 } else if (level == 0x21) {
-                    func_1510A930(start, total - eventTime - end - start, end);
+                    sprite_showFadeSprite(start, total - eventTime - end - start, end);
                 }
             }
         } else if (event->value == 0x62) {
@@ -972,7 +972,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     obj->ygrav = 0.0f;
                     obj->yspd = 0.0f;
                 } else if (event->unk4 == 2) {
-                    func_150836CC(obj, 0x11);
+                    collision_removePartSet(obj, 0x11);
                     obj->unkA9 = 0;
                 } else if (event->unk4 == 3) {
                     dc_glbl_CharNum = obj - movement_obj;
@@ -1010,7 +1010,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             D_800C3C8C = 1;
         } else if (event->value == 0x72) {
             if (obj != NULL) {
-                obj->unkC8 = D_800D1C90[obj->character_type]->unk6;
+                obj->unkC8 = gModelDefs[obj->character_type]->unk6;
             }
         } else if (event->value == 0x78) {
             D_800C3C8D = 1;
@@ -1202,7 +1202,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 to.z = D_800C3958[scene][track].z;
                 func_150B0094(&from, &to, sceneTag, 1);
             } else {
-                func_150E1AB0(0, D_800C3868[scene][track]->x, D_800C3868[scene][track]->y, D_800C3868[scene][track]->z,
+                beam_spawnTracer(0, D_800C3868[scene][track]->x, D_800C3868[scene][track]->y, D_800C3868[scene][track]->z,
                               D_800C3958[scene][track].x, D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset,
                               D_800C3958[scene][track].z, 40.0f, 0.0f, 8.0f, 60.0f, 0x258, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                               0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -1223,7 +1223,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 default:
                     return 1;
             }
-            func_150E2DB4(obj, obj->unique_id, anim, -1, 0.0f, 0.0f, 156.0f, 0.0f, 0.0f, 636.0f, 3, 0xA, 0xF0, 0);
+            beam_spawnBoneTracer(obj, obj->unique_id, anim, -1, 0.0f, 0.0f, 156.0f, 0.0f, 0.0f, 636.0f, 3, 0xA, 0xF0, 0);
         } else if (event->value == 0x1B) {
             s32 duration;
             SeqEvent *found;
@@ -1347,7 +1347,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         p.x = D_800C3958[scene][track].x;
                         p.y = D_800C3958[scene][track].y;
                         p.z = D_800C3958[scene][track].z;
-                        func_151A9390(5, 1, 0, &p, -10000.0f, 100.0f, duration, sceneTag, 1);
+                        beam_spawnEmitterPreset(5, 1, 0, &p, -10000.0f, 100.0f, duration, sceneTag, 1);
                         break;
                     }
                     case 9: {
@@ -1390,7 +1390,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         break;
                     }
                     case 12:
-                        func_150F5C08(obj, duration, sceneTag, 1);
+                        beam_spawnBoneSparks(obj, duration, sceneTag, 1);
                         break;
                     case 13: {
                         u16 id;
@@ -1458,7 +1458,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         probe.x = point.x;
                         probe.y = point.y + 100.0f;
                         probe.z = point.z;
-                        if (func_15046C80(&probe, 0, point.y - 1000.0f, &floor) != 0) {
+                        if (collision_probeFloorSurfABSet0Cached(&probe, 0, point.y - 1000.0f, &floor) != 0) {
                             if (floor.source != 3) {
                                 hit = 1;
                                 point.y = floor.height;
@@ -1508,7 +1508,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             if (event->unk4 == 0) {
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_151B5240((event->unk4 != 0) ? 5000 : duration, sceneTag, 0);
+                beam_spawnWavyBeam((event->unk4 != 0) ? 5000 : duration, sceneTag, 0);
             }
         } else if (event->value == 0x5D) {
             s32 duration;
@@ -1612,7 +1612,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_150DB518(pos, &D_800C3958[scene][track].unk10, &D_800C3958[scene][track].unk18,
+                beam_spawnLinkedQuad(pos, &D_800C3958[scene][track].unk10, &D_800C3958[scene][track].unk18,
                               &D_800C3958[scene][track].unk1C, &D_800C3958[scene][track].unk20, duration,
                               sceneTag, 0);
             }
@@ -1674,11 +1674,11 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         CollisionHit floor;
                         Vec3f out;
 
-                        func_1504715C(&floor, obj);
+                        collision_initHitFromObject(&floor, obj);
                         pos.x = obj->xpos;
                         pos.y = obj->ypos + 100.0f;
                         pos.z = obj->zpos;
-                        if (func_15046C80(&pos, 0, obj->ypos - 300.0f, &floor) != 0) {
+                        if (collision_probeFloorSurfABSet0Cached(&pos, 0, obj->ypos - 300.0f, &floor) != 0) {
                             out.x = pos.x;
                             out.y = floor.height;
                             out.z = pos.z;
@@ -1699,7 +1699,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                             case 0x74:
                             case 0x75:
                             case 0x7A:
-                                attachment = func_1503195C(obj, 0x46, 0);
+                                attachment = attach_find(obj, 0x46, 0);
                                 if (attachment != NULL) {
                                     const Vec3f *p1;
                                     Vec3f *p2;
@@ -1746,7 +1746,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
                         attachment = NULL;
                         if (event->unk6 != 0) {
-                            attachment = func_1503195C(obj, event->unk5 ? 0xA4 : 0xA5, 0);
+                            attachment = attach_find(obj, event->unk5 ? 0xA4 : 0xA5, 0);
                         }
                         weapon_fireJointShot(obj, event->unk5, 1, attachment, event->unk5 ? 0xA4 : 0xA5, sceneTag, 1);
                     }
@@ -1841,12 +1841,12 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     if (event->unk5 != 0) {
                         size *= 0.349999994f;
                     }
-                    func_15107700(obj, func_150ADA20() & 0xFF, (func_150ADA20() % 129) - 0x3F,
+                    beam_spawnBoundsBolt(obj, func_150ADA20() & 0xFF, (func_150ADA20() % 129) - 0x3F,
                                   (func_150ADA20() % 21) + 0xA, 4, 40.0f, size, 0, 2, colour, sceneTag, 1);
                     break;
                 }
                 case 16:
-                    func_150F16DC(obj, event->unk5, event->unk6, sceneTag, 1);
+                    beam_spawnMuzzleBurst(obj, event->unk5, event->unk6, sceneTag, 1);
                     break;
                 case 17: {
                     s32 unused; // matching: stack padding
@@ -2029,7 +2029,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             func_150C2290(sceneTag);
             func_150C2424(sceneTag);
         } else if (event->value == 0x31) {
-            func_150DAE70(obj, 0, sceneTag, 0);
+            beam_spawnBoneQuad(obj, 0, sceneTag, 0);
         } else if (event->value == 0x33) {
             u8 type;
             SeqTrackState *state;
@@ -2378,7 +2378,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     if (found == NULL) {
                         fadeOut = 0;
                     }
-                    func_150F5420(fadeIn, start - eventTime - fadeOut - fadeIn, fadeOut, event->unk5);
+                    beam_showFadeSprite(fadeIn, start - eventTime - fadeOut - fadeIn, fadeOut, event->unk5);
                 }
             }
         } else if (event->value == 0x56) {
@@ -2455,7 +2455,7 @@ void func_1502A8A0(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 sce
     sceneTag = D_800C35E8[scene];
     info = &D_800C35F0[scene][track];
     if (info->type == 2) {
-        obj = func_15083E90(info->targetId);
+        obj = collision_findObjectById(info->targetId);
         if (obj == NULL) {
             return;
         }

@@ -56,16 +56,16 @@ extern u8            D_80044B20[];                 // audio heap memory
 
 void *allocate_memory(s32, s32, s32, s32);
 void func_10004074(void *);
-void func_10004514(u32, void *, u32, s32);
-void func_100046E4(u32, void *, u32);
+void rom_read(u32, void *, u32, s32);
+void rom_readLarge(u32, void *, u32);
 void audio_createAudioMgr(AudioDriverConfig_8180 *, s32, AudioDeviceConfig_8180 *);
 void func_10015550(N_ALCSPlayer *, ALBank *);
 void func_100155A0(AudioSoundConfig_8180 *);
 void func_10017870(u8);
 void func_10017944(s32, s32);
-void *func_1502B020(s32 *, s32, ...);
-s32 func_1502B8E0(void *, s32, s32, ...);
-s32 func_1502B9B4(s32, ...);
+void *rom_findPath(s32 *, s32, ...);
+s32 rom_loadPathInto(void *, s32, s32, ...);
+s32 rom_getPathSize(s32, ...);
 
 
 /* Initialise the audio heap, synthesis driver, sound bank, sequence table, sequence players and sound player. */
@@ -96,26 +96,26 @@ void audio_init(void) {
     deviceConfig.frequency = 22020;
     deviceConfig.frames = 1;
     deviceConfig.maxCommands = 0xC00;
-    driverConfig.waveBase = func_1502B020(0, 2, 0x17, 2);
+    driverConfig.waveBase = rom_findPath(0, 2, 0x17, 2);
     audio_createAudioMgr(&driverConfig, 12, &deviceConfig);
 
     // load the sound bank file
-    bankSize = func_1502B9B4(2, 0x17, 0);
+    bankSize = rom_getPathSize(2, 0x17, 0);
     bankFile = allocate_memory(bankSize, 0xFF, 2, 0);
-    func_1502B8E0(bankFile, bankSize, 2, 0x17, 0);
-    bankAddress = (u32)func_1502B020(0, 2, 0x17, 1);
-    waveBase = func_1502B020(0, 2, 0x17, 2);
+    rom_loadPathInto(bankFile, bankSize, 2, 0x17, 0);
+    bankAddress = (u32)rom_findPath(0, 2, 0x17, 1);
+    waveBase = rom_findPath(0, 2, 0x17, 2);
     func_10012934(bankFile, waveBase, bankAddress);
     gSoundBank = bankFile->bankArray[0];
 
     // read the sequence table header for its count, then the whole table
-    sequenceAddress = (u32)func_1502B020(0, 2, 0x17, 3);
+    sequenceAddress = (u32)rom_findPath(0, 2, 0x17, 3);
     seqHeader = allocate_memory(0x10, 1, 2, 0);
-    func_100046E4(sequenceAddress, seqHeader, 0x10);
+    rom_readLarge(sequenceAddress, seqHeader, 0x10);
     sequenceSize = seqHeader->seqCount * sizeof(ALSeqData) + 4;
     func_10004074(seqHeader);
     gSeqFile = allocate_memory(sequenceSize, 0xFF, 2, 0);
-    func_100046E4(sequenceAddress, gSeqFile, ALIGN16(sequenceSize));
+    rom_readLarge(sequenceAddress, gSeqFile, ALIGN16(sequenceSize));
     alSeqFileNew(gSeqFile, (u8 *)sequenceAddress);
     for (i = 0; i < NUM_SEQUENCES; i++) {
         gSeqLengths[i] = gSeqFile->seqArray[i].len;
@@ -326,7 +326,7 @@ s32 audio_playSequence(u8 player, s32 sequence) {
         if (gSeqPlayerBuffers[player] == NULL) {
             return -1;
         }
-        func_10004514((u32)romAddress, gSeqPlayerBuffers[player], ALIGN16(gSeqLengths[sequence]), 1);
+        rom_read((u32)romAddress, gSeqPlayerBuffers[player], ALIGN16(gSeqLengths[sequence]), 1);
         gSeqPlayerSeqIds[player] = sequence;
     }
     n_alCSeqNew(&gSeqPlayerSeqs[player], gSeqPlayerBuffers[player]);

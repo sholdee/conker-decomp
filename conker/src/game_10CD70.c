@@ -35,7 +35,7 @@ s32 func_150DF8C0(s32 index) {
     return 0;
 }
 
-/* Points slots 3 and 4 (func_150A2864/func_150A3444) 200 units above actors 6 and 7, or
+/* Points slots 3 and 4 (zone_setDisabled/zone_setPosition) 200 units above actors 6 and 7, or
  * disables them when the actor is missing, then scrolls the texture of each of the three
  * materials in the D_800B0E00 display list that loads its image from segment 2 + i. */
 void func_150DF920(s32 arg0) {
@@ -62,16 +62,16 @@ void func_150DF920(s32 arg0) {
     id = 6;
     slot = 3;
     for (i = 0; i < 2; i++) {
-        obj = func_15083E90(id);
+        obj = collision_findObjectById(id);
         id = 7;
         if (obj != NULL) {
-            func_150A2864(slot, 0);
+            zone_setDisabled(slot, 0);
             x = obj->xpos;
             y = obj->ypos + 200.0f;
             z = obj->zpos;
-            func_150A3444(slot, x, y, z);
+            zone_setPosition(slot, x, y, z);
         } else {
-            func_150A2864(slot, 1);
+            zone_setDisabled(slot, 1);
         }
         slot = 4;
     }
@@ -145,7 +145,7 @@ Gfx *func_150DFBD0(Gfx *gdl) {
         } else {
             asset = D_80090324[8];
         }
-        addr = func_1510D0EC(asset, &unused, 3, 0);
+        addr = texture_getAddress(asset, &unused, 3, 0);
         segment = i + 2;
         gSPSegment(gdl++, segment, addr);
     }
@@ -202,7 +202,7 @@ void func_150DFDA4(Actor *actor) {
     bone[3][2] = actor->zpos;
 }
 
-/* Model attachment hook 12 (D_800841C0[12]). While the owner's fade is active (taskint[2]), counts
+/* Model attachment hook 12 (gAttachHooks[12]). While the owner's fade is active (taskint[2]), counts
  * its timer (unk2D8[0]) down, returning 1 once it expires, and rewrites the G_SETTILESIZE of the
  * attachment's display list: uls follows the fade, ult steps back by a third of the old uls. */
 s32 func_150DFDD0(ModelAttachment *att, Actor *owner) {
@@ -248,7 +248,7 @@ struct BoltEmitter {
     /* 0x28 */ BoltSource src;
 };
 
-/* Spawns flashes (light_createWithEffect), light-blue bolts (func_15107700) and func_15107B78 effects
+/* Spawns flashes (light_createWithEffect), light-blue bolts (beam_spawnBoundsBolt) and func_15107B78 effects
  * around the emitter's source actor, each on its own random timer,
  * and ends the emitter (unkE = -1) once that actor is gone or its slot was reused. */
 void func_150DFEFC(BoltEmitter *emitter) {
@@ -288,7 +288,7 @@ void func_150DFEFC(BoltEmitter *emitter) {
             colour[1] = 210;
             colour[2] = 255;
             colour[3] = func_150ADA20() % 61U + 150;
-            func_15107700(obj, func_150ADA20() & 0xFF, func_150ADA20() % 129U - 63,
+            beam_spawnBoundsBolt(obj, func_150ADA20() & 0xFF, func_150ADA20() % 129U - 63,
                           func_150ADA20() % 21U + 10, 4, 40.0f, func_150ADA68() * 20.0f + 25.0f, 0, 2,
                           colour, emitter->base.header.owner, emitter->base.header.kind);
             count--;

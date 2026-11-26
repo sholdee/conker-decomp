@@ -104,7 +104,7 @@ typedef struct {
     u8 ownerId;         // owner->unique_id, to notice the owner slot being reused
     u8 mode;            // 0, 1 or 2 (from owner speed or stick tilt); selects sounds and sizes
     u8 pad6[2];
-    ModelAttachment *attachment; // func_1503195C(owner, 0x79 / 0x7A): the trail runs between two of its points
+    ModelAttachment *attachment; // attach_find(owner, 0x79 / 0x7A): the trail runs between two of its points
     TrailGlow *effects[2];
     f32 width;          // trail width at the head, eased toward targetWidth each frame
     f32 targetWidth;
@@ -238,7 +238,7 @@ typedef struct StreamState {
     /* 0x3D */ u8 pad3D;
     /* 0x3E */ s16 texCoordStepRange;
     /* 0x40 */ u8 texCoord;
-    /* 0x41 */ u8 trailTexture; /* D_80090B60 index */
+    /* 0x41 */ u8 trailTexture; /* gEffectTextures index */
     /* 0x42 */ u8 unk42;
     /* 0x43 */ u8 pad43;
     /* 0x44 */ s32 unk44;
@@ -394,7 +394,7 @@ typedef struct SprayEmitter {
     /* 0x62 */ u8 pad62[2];
     /* 0x64 */ f32 pending; /* particles owed, accumulated by rate */
     /* 0x68 */ f32 floorY;  /* lowest point of the spawn segment */
-    /* 0x6C */ ZoneNode *zone;  /* from func_1510FD20 at the segment's midpoint */
+    /* 0x6C */ ZoneNode *zone;  /* from collision_findZoneLeaf at the segment's midpoint */
     /* 0x70 */ u8 flags;
     /* 0x71 */ u8 pad71[7];
 } SprayEmitter; /* size 0x78 */
@@ -1048,7 +1048,7 @@ typedef struct Game1FBB80Effect {
     /* 0x04 */ f32 rate;
     /* 0x08 */ f32 accumulator;
     /* 0x0C */ ZoneNode *zone;     /* the emitter's zone: it emits only while a view can see it */
-    /* 0x10 */ CollisionHit floor; /* the last floor probe (func_1504530C) under a packet */
+    /* 0x10 */ CollisionHit floor; /* the last floor probe (collision_probeCeilingSet0Cached) under a packet */
 } Game1FBB80Effect;
 
 typedef struct Game1FBB80Object {

@@ -134,7 +134,7 @@ void func_15190898(DripEmitter *emitter) {
                     motion.stretch = 0.2f;
                     motion.gravity = -1.0f;
                     motion.dropKind = kind->dropKind;
-                    func_1504715C(&motion.ground, emitter->link.actor);
+                    collision_initHitFromObject(&motion.ground, emitter->link.actor);
                     motion.kind = emitter->kind;
                     def.texture = D_800AB310[emitter->kind];
                     def.renderModes = 0x1001;
@@ -370,7 +370,7 @@ s8 func_15191520(DripParticle *drop) {
         if (func_1514672C(&probe) == 0) {
             return 0;
         }
-        if (func_15046C80(&probe, 0, drop->head.def.pos.y - drop->head.def.height, &motion->ground) != 0) {
+        if (collision_probeFloorSurfABSet0Cached(&probe, 0, drop->head.def.pos.y - drop->head.def.height, &motion->ground) != 0) {
             probe.y = motion->ground.height;
             if (motion->ground.source == 3) {
                 func_151DBCBC(motion->kind, drop->head.def.width * drop->head.def.height * 0.25f, drop->head.def.unk44,

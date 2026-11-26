@@ -17,7 +17,7 @@ u8 gGunMuzzleBone = 9; // bone of the muzzle points above (game_981E0 uses it to
 
 /*
  * Shot effects for `obj`: a muzzle effect and particles when it has bones, three actor_runAttackAt
- * spawns along `direction` if `arg1`, a func_15081690 call if `arg2`, then a camera event.
+ * spawns along `direction` if `arg1`, a collision_castRay call if `arg2`, then a camera event.
  */
 void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     Vec3f position;
@@ -68,10 +68,10 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
         } else {
             buffer = scratch;
         }
-        func_15081690(obj, position.x, position.y, position.z,
+        collision_castRay(obj, position.x, position.y, position.z,
                       direction.x * 0.001000000047f, direction.y * 0.001000000047f,
                       direction.z * 0.001000000047f, buffer, 2000.0f, 0, 0, 0, -1, 0, 0);
-        func_15081E78(obj, buffer, 0x10);
+        collision_applyRayHit(obj, buffer, 0x10);
     }
     weapon_rumbleGun(obj);
 }

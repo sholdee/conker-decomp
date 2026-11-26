@@ -7,7 +7,7 @@ typedef struct {
     s32 unk4;
 } CombineMode;
 
-/* The two sprite lists func_151555AC searches. */
+/* The two sprite lists sprite_overlapsScreenSprite searches. */
 typedef struct {
     s32 id[2];
 } SpriteListIds;
@@ -16,14 +16,14 @@ extern CombineMode D_800A4AC8[];
 
 /* The render setup and reset display lists of the sprite object type (the object type table
    D_8008B4D4 points to them). */
-Gfx D_8008AC70[] = {
+Gfx gScreenSpriteSetupDl[] = {
     gsDPPipeSync(),
     gsDPSetAlphaCompare(G_AC_NONE),
     gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
-Gfx D_8008AC98[] = {
+Gfx gScreenSpriteTeardownDl[] = {
     gsDPPipeSync(),
     gsDPSetTexturePersp(G_TP_PERSP),
     gsDPSetDepthSource(G_ZS_PIXEL),
@@ -35,25 +35,25 @@ Gfx D_8008AC98[] = {
 /* The update callback of each sprite kind (ScreenSprite.unk68 & 0xF; nonzero: keep the sprite) and the
    message handler of each kind (ScreenSprite.info.kind). The callbacks take their own sprite types, so
    their table is declared without a prototype. The handler table keeps the prototype of its call
-   (func_15155564 narrows the u8 message id for it), and its entries take their own sprite and payload
+   (sprite_screenSpriteMessage narrows the u8 message id for it), and its entries take their own sprite and payload
    types (warning 709). */
-s32 (*D_8008ACC8[15])() = {
+s32 (*gScreenSpriteUpdates[15])() = {
     NULL,          func_15134CEC, func_1515B994, func_15135BF8, func_151CB510,
     sight_updateSidePanel, func_150AFBF4, func_151CBBE0, func_151CBC60, sight_updateCrossBar,
     func_150BE1C4, sight_updateScopeStrip, func_150CF800, func_150CFC60, func_150FB2E0,
 };
-void (*D_8008AD04[11])(ScreenSprite *, s32, u8) = {
+void (*gScreenSpriteMsgHandlers[11])(ScreenSprite *, s32, u8) = {
     NULL, func_1515B62C, NULL, NULL, NULL, NULL, NULL, sight_handleSpriteMessage, func_150CFBEC, NULL, NULL,
 };
 
-/* The two sprite lists func_151555AC searches. */
-static const SpriteListIds D_800A6030 = { 93, 87 };
+/* The two sprite lists sprite_overlapsScreenSprite searches. */
+static const SpriteListIds gScreenSpriteLists = { 93, 87 };
 
 /* The same two lists, for func_1515572C. */
 static const IdList2 D_800A6038 = { 93, 87 };
 
 /* Per-frame update of a sprite: runs its timer, its update callback and its fade-out; frees it when done. */
-void func_15154C90(ScreenSprite *sprite) {
+void sprite_updateScreenSprite(ScreenSprite *sprite) {
     s32 index;
     s8 finished;
 
@@ -66,7 +66,7 @@ void func_15154C90(ScreenSprite *sprite) {
     }
     index = sprite->unk68 & 0xF;
     if (index != 0 && !finished) {
-        if (D_8008ACC8[index](sprite) == 0) {
+        if (gScreenSpriteUpdates[index](sprite) == 0) {
             finished = 1;
         }
     }
@@ -87,7 +87,7 @@ void func_15154C90(ScreenSprite *sprite) {
 /*
  * Draws a sprite as a scissored texture rectangle in the given viewport, unless its flags hide it there.
  */
-Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
+Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     s32 s;
     u8 update;
     u16 texWidth;
@@ -127,7 +127,7 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     }
     if (sprite->info.texture != 0xFF) {
         // matching: the pointer goes through an integer (IDO keeps the converted value in a temporary)
-        gfx = func_15142E24(gfx, (TextureDesc *)(s32)&D_80090B60[sprite->info.texture], 0, (sprite->info.flags & 0x200) ? 0 : 2,
+        gfx = func_15142E24(gfx, (TextureDesc *)(s32)&gEffectTextures[sprite->info.texture], 0, (sprite->info.flags & 0x200) ? 0 : 2,
                             0, 0, sprite->info.texture, 0, 0, &update, (sprite->info.flags & 0x400) ? 0x3E : 3);
     }
     gfx = func_15142B7C(gfx, sprite->info.unk28, sprite->info.unk2C);
@@ -143,7 +143,7 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
     // matching: the draw reads only the low byte of unk34 (lbu at 0x37)
     gfx = func_1513F4E4(gfx, ((u8 *)&sprite->info.unk34)[3], &update);
-    gfx = func_15142FBC(gfx, sprite->info.otherModeH | D_800D2C9C | G_TF_BILERP | G_TC_FILT |
+    gfx = func_15142FBC(gfx, sprite->info.otherModeH | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT |
                             sprite->info.unk38 | sprite->info.unk3C,
                         D_800A4AC8[sprite->info.combineMode].unk0 | D_800A4AC8[sprite->info.combineMode].unk4, &update);
     x = vp->centerX + sprite->info.x * vp->scaleX;
@@ -155,10 +155,10 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     yl = (y - halfHeight) * 4.0f;
     xh = (x + halfWidth) * 4.0f;
     yh = (y + halfHeight) * 4.0f;
-    texWidth = D_80090B60[sprite->info.texture].width;
-    texWidthF = D_80090B60[sprite->info.texture].width;
+    texWidth = gEffectTextures[sprite->info.texture].width;
+    texWidthF = gEffectTextures[sprite->info.texture].width;
     while (0) {}  // matching: block boundary steers the scheduling of the texture size loads
-    texHeightF = D_80090B60[sprite->info.texture].height;
+    texHeightF = gEffectTextures[sprite->info.texture].height;
     width = (xh - xl) + 1.0f;
     height = (yh - yl) + 1.0f;
     if (sprite->info.flags & 0x80) {
@@ -182,7 +182,7 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
         dsdx = -dsdx & 0xFFFF;
     }
     if (sprite->info.flags & 4) { /* mirror vertically */
-        t = (D_80090B60[sprite->info.texture].height - 1) << 5;
+        t = (gEffectTextures[sprite->info.texture].height - 1) << 5;
         dtdy = -dtdy & 0xFFFF;
     }
     if (sprite->info.flags & 0x100) {
@@ -197,14 +197,14 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
  * Creates a sprite from info, flagged with flags. With kinds given, it is not created (NULL) when its
  * rectangle overlaps a live sprite of one of those kinds. Callers keep their own view of the sprite.
  */
-void *func_1515548C(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6) {
+void *sprite_newScreenSprite(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6) {
     ScreenSprite *sprite;
     f32 halfSize[2];
 
     if ((kinds != NULL) && (kindCount > 0)) {
         halfSize[0] = info->halfWidth;
         halfSize[1] = info->halfHeight;
-        if (func_151555AC(&info->x, halfSize, kinds, kindCount) != 0) {
+        if (sprite_overlapsScreenSprite(&info->x, halfSize, kinds, kindCount) != 0) {
             return NULL;
         }
     }
@@ -219,17 +219,17 @@ void *func_1515548C(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount,
 }
 
 /* Calls the handler for the sprite's kind, if it has one. */
-void func_15155564(ScreenSprite *sprite, s32 arg1, u8 arg2) {
-    if (D_8008AD04[sprite->info.kind] != NULL) {
-        D_8008AD04[sprite->info.kind](sprite, arg1, arg2);
+void sprite_screenSpriteMessage(ScreenSprite *sprite, s32 arg1, u8 arg2) {
+    if (gScreenSpriteMsgHandlers[sprite->info.kind] != NULL) {
+        gScreenSpriteMsgHandlers[sprite->info.kind](sprite, arg1, arg2);
     }
 }
 
 /*
  * Returns 1 when a live sprite of one of the given kinds overlaps the rectangle center +- halfSize
- * (its own half size added), searching both sprite lists D_800A6030 names in both tables.
+ * (its own half size added), searching both sprite lists gScreenSpriteLists names in both tables.
  */
-s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount) {
+s32 sprite_overlapsScreenSprite(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount) {
     s32 table;
     SpriteListIds lists;
     u8 i;
@@ -242,7 +242,7 @@ s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount) {
 
     i = 0;
     for (table = 0; table < 2; table++) {
-        lists = D_800A6030;
+        lists = gScreenSpriteLists;
         i &= 0; // matching: `i = 0` here (or a for loop) changes the loop's branch shape
         do {
             sprite = (ScreenSprite *)D_800DCE50[table][lists.id[i]];

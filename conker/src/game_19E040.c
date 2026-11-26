@@ -76,7 +76,7 @@ void func_15170B90(WorldObject *actor, s32 modelId, s32 kind, s32 mode, u8 owner
         } else {
             id = modelId;
         }
-        displayList = func_1518C900(id);
+        displayList = attach_loadModelDl(id);
         fx.position[0] = D_800A6E90[i][0] + x;
         fx.position[1] = D_800A6E90[i][1] + y;
         fx.position[2] = D_800A6E90[i][2] + z;
@@ -148,7 +148,7 @@ void func_15170F4C(WorldObject *actor, u8 owner, s32 list) {
     fx.bounce = -0.7f;
     fx.spinDamp = -0.2f;
     for (i = 0; i < count; i++) {
-        displayList = func_1518C900(piece->modelId);
+        displayList = attach_loadModelDl(piece->modelId);
         fx.modelId = piece->modelId;
         fx.position[0] = piece->offset[0] + x;
         fx.position[1] = piece->offset[1] + y;
@@ -218,7 +218,7 @@ void func_15171200(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed, f32 m
         fx.position[0] = ((s32)func_150ADA20() >> 16) * radius + x;
         fx.position[1] = ((s32)func_150ADA20() >> 16) * radius + y;
         fx.position[2] = ((s32)func_150ADA20() >> 16) * radius + z;
-        displayList = func_1518C900(modelId);
+        displayList = attach_loadModelDl(modelId);
         fx.displayList = displayList;
         driftX = ((s32)func_150ADA20() >> 16) * (15.0f / 65536);
         fx.velocity[0] = driftX;

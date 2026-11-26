@@ -117,7 +117,7 @@ void func_151A11E4(SphereEmitter *emitter) {
         packet.flags = 0x120;
         packet.unk4 = 0xC0001;
         packet.frame = 0;
-        packet.anim = &D_80090B60[39];
+        packet.anim = &gEffectTextures[39];
         packet.velX = 0;
         packet.velY = 0;
         packet.velZ = 0;
@@ -146,7 +146,7 @@ void func_151A11E4(SphereEmitter *emitter) {
             }
             packet.frameStep = func_150ADA20() % (params->frameStepRange + 1) + params->frameStep;
             size = func_150ADA20() % (params->sizeRange + 1) + params->size;
-            packet.life = D_80090B60[39].frameCount * (256 / packet.frameStep);
+            packet.life = gEffectTextures[39].frameCount * (256 / packet.frameStep);
             life = packet.life;
             data.growStart = data.fadeInStart = life;
             data.fadeInEnd = life - (life >> 2);
@@ -310,7 +310,7 @@ void func_151A1998(SphereEmitter *emitter) {
         packet.flags = 0x120;
         packet.unk4 = 0xC0001;
         packet.frame = 0;
-        packet.anim = &D_80090B60[39];
+        packet.anim = &gEffectTextures[39];
         packet.velX = 0;
         packet.velY = 0;
         packet.velZ = 0;
@@ -337,7 +337,7 @@ void func_151A1998(SphereEmitter *emitter) {
             }
             packet.frameStep = func_150ADA20() % (params->frameStepRange + 1) + params->frameStep;
             size = func_150ADA20() % (params->sizeRange + 1) + params->size;
-            life = packet.life = D_80090B60[39].frameCount * (256 / packet.frameStep);
+            life = packet.life = gEffectTextures[39].frameCount * (256 / packet.frameStep);
             data.fadeInStart = life;
             data.fadeInEnd = life - (life >> 2);
             data.fadeInStep = 255 / (data.fadeInStart - data.fadeInEnd);
@@ -473,7 +473,7 @@ void func_151A1FB4(SphereEmitter *emitter) {
         packet.flags = 0x120;
         packet.unk4 = 0xC0001;
         packet.frame = 0;
-        packet.anim = &D_80090B60[39];
+        packet.anim = &gEffectTextures[39];
         packet.velX = 0;
         packet.velY = 0;
         packet.velZ = 0;
@@ -501,7 +501,7 @@ void func_151A1FB4(SphereEmitter *emitter) {
             }
             packet.frameStep = func_150ADA20() % (params->frameStepRange + 1) + params->frameStep;
             size = func_150ADA20() % (params->sizeRange + 1) + params->size;
-            packet.life = D_80090B60[39].frameCount * (256 / packet.frameStep);
+            packet.life = gEffectTextures[39].frameCount * (256 / packet.frameStep);
             data.fadeInStart = packet.life;
             data.growStart = packet.life;
             data.fadeInEnd = packet.life - (packet.life >> 2);

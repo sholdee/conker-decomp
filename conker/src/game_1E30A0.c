@@ -4,7 +4,7 @@
 
 
 /* Spawns a pulsing particle of the given size at pos (fading out over 0x100 >> fadeShift frames at the end
- * of its lifetime). Also checksums func_15002FB4's code as an anti-tamper check. */
+ * of its lifetime). Also checksums collision_loadMapSettings's code as an anti-tamper check. */
 PulseParticle *func_151B5BF0(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rotVel, f32 gravity,
                         s16 lifetime, u8 alpha, s32 unused, f32 elasticity, u8 fadeShift, u8 arg11, u8 arg12,
                         s32 arg13) {
@@ -47,7 +47,7 @@ PulseParticle *func_151B5BF0(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f
         s32 sum;
 
         sum = 0;
-        p = (u32 *)func_15002FB4;
+        p = (u32 *)collision_loadMapSettings;
         end = (u32 *)func_1500310C;
         for (; p < end; p++) {
             sum += *p;

@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15005270(void) {
-    D_800C67F1 = 0;
-    D_800C67F0 = 0;
+void zone_resetObjectCursor(void) {
+    gZoneObjectCursor = 0;
+    gZoneCursorEnabled = 0;
 }

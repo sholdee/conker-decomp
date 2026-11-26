@@ -179,7 +179,7 @@ Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
     gdl = func_1513F4E4(gdl, 0x21, &flag);
     gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4AC8[14].unk0 | D_800A4AC8[14].unk4, &flag);
     {
-    s32 texAddr = func_1510D0EC(*(s32 *)D_80090B60[67].addr, &palOffset, 3, 0);
+    s32 texAddr = texture_getAddress(*(s32 *)gEffectTextures[67].addr, &palOffset, 3, 0);
 
 
     gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
@@ -530,12 +530,12 @@ void func_150CA150(Actor *actor) {
 
     onGround = 0;
     if (actor != NULL) {
-        func_1504715C(&floorInfo, actor);
+        collision_initHitFromObject(&floorInfo, actor);
         func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
         pos.x = actor->xpos;
         pos.y = actor->ypos + 100.0f;
         pos.z = actor->zpos;
-        if (func_15046C80(&pos, 0, actor->ypos - 300.0f, &floorInfo) != 0) {
+        if (collision_probeFloorSurfABSet0Cached(&pos, 0, actor->ypos - 300.0f, &floorInfo) != 0) {
             onGround = 1;
             pos.y = floorInfo.height;
         } else {

@@ -92,7 +92,7 @@ void save_readFile(s32 eepromSlot) {
         backup[i] = gTaskDoneBits[i];
     }
     if (gSaveEntryBits == NULL) {
-        gSaveEntryBits = (u8 *)func_1502B5C8(NULL, 1, 7) + 8;
+        gSaveEntryBits = (u8 *)rom_loadPath(NULL, 1, 7) + 8;
     }
     osWritebackDCache(gEepromBuffer, 0x80);
     osInvalDCache(gEepromBuffer, 0x80);
@@ -232,7 +232,7 @@ void save_writeSlot(s32 saveSlot) {
         func_151DD4E0(&D_800BE900, (eepromSlot << 4) + 0x13, gEepromBuffer);
     }
     if (gSaveEntryBits == NULL) {
-        gSaveEntryBits = (u8 *)func_1502B5C8(NULL, 1, 7) + 8;
+        gSaveEntryBits = (u8 *)rom_loadPath(NULL, 1, 7) + 8;
     }
     p = (u8 *)(u32)&gEepromBuffer[2]; // matching: without the (u32) round trip the code changes
     *p++ = saveSlot;

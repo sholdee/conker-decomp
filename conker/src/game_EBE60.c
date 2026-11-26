@@ -4,7 +4,7 @@
 
 
 /* Get the position of one of the actor's bones (picked by `side`, 0x10 by default).  With a `hit`
-   buffer, also look for the ground below that point and return func_15046C80's result. */
+   buffer, also look for the ground below that point and return collision_probeFloorSurfABSet0Cached's result. */
 s32 func_150BE9B0(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     Vec3f probe;
     s32 bone;
@@ -32,8 +32,8 @@ s32 func_150BE9B0(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     probe.x = pos->x;
     probe.y = pos->y + 10.0f;
     probe.z = pos->z;
-    func_1504715C(hit, actor);
-    return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
+    collision_initHitFromObject(hit, actor);
+    return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 50.0f, hit);
 }
 
 /* Returns 0x11 for `arg0` 0 or 1, -1 otherwise. */
@@ -90,8 +90,8 @@ s32 func_150BEC30(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     probe.x = pos->x;
     probe.y = pos->y + 10.0f;
     probe.z = pos->z;
-    func_1504715C(hit, actor);
-    return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
+    collision_initHitFromObject(hit, actor);
+    return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 50.0f, hit);
 }
 
 /* Returns 0x12 for `arg0` 0 or 1, -1 otherwise. */

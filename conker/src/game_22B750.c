@@ -10,14 +10,14 @@
  * expression actions of model 0 (game_AB760).
  */
 
-/* Sub-model lists (D_80086CAC): model ids, ModelDef.subModelCount LODs then the extra models. */
+/* Sub-model lists (gSubModelLists): model ids, ModelDef.subModelCount LODs then the extra models. */
 const u8 D_8009CDD0[7] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x82, 0x96 };
 const u8 D_8009CDD8[6] = { 0x96, 0x96, 0x96, 0x96, 0x96, 0x82 };
 const u8 D_8009CDE0[6] = { 0x3A, 0x3A, 0x3A, 0x3A, 0x3A, 0x3D };
 const u8 D_8009CDE8[2] = { 0x54, 0x68 };
 const u8 D_8009CDEC[3] = { 0x5A, 0x5A, 0x5A };
 
-/* The parts of each part set (D_80086CC4). */
+/* The parts of each part set (gPartSets). */
 static const PartDef D_8009CDF0[1] = {
     { 0x0C, 15, 0, 1, 0, 0, 0, 0, { 0x0000, 0x0000, 0x0000 }, 0, 0 },
 };
@@ -548,23 +548,23 @@ static const PartDef D_8009D900[1] = {
 };
 
 /* The expression actions of model 0 (func_1507E9F8). */
-const u8 D_8009D910[5] = { 5, 6, 7, 10, 11 };
+const u8 gModel0ExpressionActions[5] = { 5, 6, 7, 10, 11 };
 
 /*
  * This file's .data. The object filters of the ray and range searches (game_AEB40.c, game_200930.c):
  * declared without a prototype, as the filters differ in their second and third parameters.
  */
-s32 (*D_80086C90[7])() = {
+s32 (*gObjectFilters[7])() = {
     func_150FC930, func_150FF6B4, func_151C6290, weapon_filterBulletTarget, func_150EF784, NULL, NULL,
 };
 
 /* Per ModelDef.subModelList: the model's sub-model list. */
-const u8 *D_80086CAC[6] = {
+const u8 *gSubModelLists[6] = {
     NULL, D_8009CDD0, D_8009CDE0, D_8009CDD8, D_8009CDE8, D_8009CDEC,
 };
 
 /* The part sets of ModelDef.partSet (1-based). */
-PartSet D_80086CC4[175] = {
+PartSet gPartSets[175] = {
     { D_8009CDF0, 1 },
     { D_8009CE20, 1 },
     { D_8009CE30, 1 },

@@ -75,7 +75,7 @@ void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life,
         effect->z = z;
         effect->growthRate = growthRate;
         effect->unk94 = arg6;
-        func_1517E05C(x, y, z);
+        sprite_setDisturbPoint(x, y, z);
     }
 }
 
@@ -109,7 +109,7 @@ void func_15166118(s32 angleA, s32 angleB, s32 x, s32 y, s32 z, s32 growthRate, 
         effect->unk94 = arg7;
         effect->angleA = angleA;
         effect->angleB = angleB;
-        func_1517E05C(x, y, z);
+        sprite_setDisturbPoint(x, y, z);
     }
 }
 
@@ -250,7 +250,7 @@ Gfx *func_151668B8(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
         D_800DCE40 = 0;
     }
     D_800DD224 = 1;
-    return func_15142FBC(func_15094F70(gdl, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3),
-                         D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1],
+    return func_15142FBC(sprite_loadDescFrame(gdl, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3),
+                         gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1],
                          &needSync);
 }

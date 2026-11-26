@@ -38,19 +38,19 @@ static s32 (*D_80089F90[])() = { func_151028AC, sight_isExtensionOn, func_151418
 /* Destroy handlers, indexed by GlowShape.type. */
 static void (*D_80089F9C[])() = {
     func_151411A4, func_151012D8, func_151411A4, func_151411A4, func_151411A4, func_151411A4, func_151411A4,
-    func_151411A4, func_151411A4, func_151411A4, func_150F0328, func_151411A4, func_151411A4, func_151411A4,
+    func_151411A4, func_151411A4, func_151411A4, beam_destroyGlow, func_151411A4, func_151411A4, func_151411A4,
     func_151411A4, func_151BE7F8, func_150F6484, func_151411A4,
 };
 /* Free handlers, indexed by GlowShape.type. */
 static void (*D_80089FE4[])() = {
     func_151411C4, func_15101300, func_151411C4, func_151411C4, func_151411C4, func_151411C4, func_151411C4,
-    func_151411C4, func_151411C4, func_151411C4, func_150F0354, func_151411C4, func_151411C4, func_151411C4,
+    func_151411C4, func_151411C4, func_151411C4, beam_freeGlow, func_151411C4, func_151411C4, func_151411C4,
     func_151411C4, func_151BE824, func_150F64B0, func_151411C4,
 };
 /* Message handlers, indexed by GlowShape.type. */
 typedef void (*GlowMsgFn)();
 static GlowMsgFn D_8008A02C[] = {
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, func_150F088C, func_1518A360, func_150D7420,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, beam_glowMessage, func_1518A360, func_150D7420,
     func_150D74DC, func_150D758C, func_151BE788, func_151BE788, func_150FADC8,
 };
 static IdList2 D_8008A074 = { { 0x1C, 0x56 } }; /* effect-object kinds */

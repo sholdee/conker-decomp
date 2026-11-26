@@ -108,7 +108,7 @@ void weapon_getAttachmentPos(Actor *obj, s16 setId, Vec3f *out) {
         out->y = obj->ypos;
         out->z = obj->zpos;
     } else {
-        attachment = func_1503195C(obj, setId, 0);
+        attachment = attach_find(obj, setId, 0);
         if (attachment == NULL) {
             out->x = obj->xpos;
             out->y = obj->ypos;
@@ -175,7 +175,7 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
 
 /* Returns `obj`'s gun attachment (set 0x82), or NULL. */
 ModelAttachment *weapon_getGunAttachment(Actor *obj) {
-    return func_1503195C(obj, 0x82, 0);
+    return attach_find(obj, 0x82, 0);
 }
 
 /* Fills `direction`, `axis0` and `axis1` for `obj` through func_15145740. */

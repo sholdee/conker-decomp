@@ -281,7 +281,7 @@ void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     script_command(3, value | 0x2000, arg1, arg2, arg3, arg4);
 }
 
-/* Re-initialises obj through actor_remove/func_15082A44 (health back to D_8008726C), keeping a few state bytes. */
+/* Re-initialises obj through actor_remove/collision_spawnObject (health back to D_8008726C), keeping a few state bytes. */
 void func_1507D1D8(Actor *obj) {
     s32 value;
     s32 saved1AA;
@@ -308,16 +308,16 @@ void func_1507D1D8(Actor *obj) {
             choice = (func_150ADA20() & 0xF) + 0x11;
             player_setStat(slot, 0, choice);
             if (choice < 0x1D) {
-                D_800D20FC[slot].type = 0x9C;
+                gSpawnRecords[slot].type = 0x9C;
             } else {
-                D_800D20FC[slot].type = 0x9D;
+                gSpawnRecords[slot].type = 0x9D;
             }
         }
     }
     slot = obj - movement_obj;
     actor_remove(obj, 0);
     D_800D18A8 = 1;
-    func_15082A44(&D_800D20FC[slot], slot, 0, 0, 0);
+    collision_spawnObject(&gSpawnRecords[slot], slot, 0, 0, 0);
     obj->mv->lastSpawnIndex = saved1B0;
     obj->mv->unk1AF = saved1AF;
     obj->unk328 = saved328;
@@ -425,7 +425,7 @@ s32 func_1507D754(Actor *obj) {
         break;
     case 0x3A:
     case 0x3D:
-        func_150D85AC(obj);
+        attach_spawnFootImpact(obj);
         break;
     case 0x4A:
         func_150F1D10(obj, 0xFF, 1);
@@ -554,7 +554,7 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
     s32 scale;
 
     gSPDisplayList(gfx++, D_80086B80);
-    texture = func_1510D0EC((s32)&D_D0F, NULL, 3, 0);
+    texture = texture_getAddress((s32)&D_D0F, NULL, 3, 0);
     gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, texture);
     gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
     gDPLoadSync(gfx++);
@@ -596,14 +596,14 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
 }
 
 
-/* Sets bits in obj->unk9C (after re-running func_150836CC 0x44/0x23 when type is 1). */
+/* Sets bits in obj->unk9C (after re-running collision_removePartSet 0x44/0x23 when type is 1). */
 void func_1507DE4C(Actor *obj) {
     if (obj->type == 1) {
-        func_150836CC(obj, 0x44);
-        func_150836CC(obj, 0x23);
+        collision_removePartSet(obj, 0x44);
+        collision_removePartSet(obj, 0x23);
         obj->unk9C |= 0xF000;
-        func_150836CC(obj, 0x44);
-        func_150836CC(obj, 0x23);
+        collision_removePartSet(obj, 0x44);
+        collision_removePartSet(obj, 0x23);
         return;
     }
 

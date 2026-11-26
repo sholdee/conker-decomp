@@ -407,14 +407,14 @@ void model_bounceParts(s32 objIndex) {
     s32 i;
     s32 count;
 
-    func_1510F800(0);
+    collision_selectMap(0);
     ps = &gObjPartsStates[objIndex];
     count = gPartCounts[ps->kind];
     for (i = 0; i < count; i++) {
         if (ps->parts[i].active) {
             part = &ps->parts[i];
             if (gPartParents[ps->kind][i] == PART_PARENT_NONE && part->gravity != 0.0f) {
-                floorY = func_1510F8D8(part->pos[0], part->pos[1], part->pos[2], 0) + 5;
+                floorY = collision_findMeshFloorNear(part->pos[0], part->pos[1], part->pos[2], 0) + 5;
                 if (part->pos[1] < floorY) {
                     velY = part->vel[1];
                     part->pos[1] = floorY;

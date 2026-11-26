@@ -4,7 +4,7 @@
 
 
 /* Allocates a sprite effect and initialises it from `params`. */
-Sprite2D *func_15169900(Sprite2DParams *params, s32 arg1) {
+Sprite2D *sprite_newSprite2D(Sprite2DParams *params, s32 arg1) {
     Sprite2D *sprite;
 
     sprite = func_15167A68(0x5E, 0, sizeof(Sprite2D), 0, arg1, 1);
@@ -14,12 +14,12 @@ Sprite2D *func_15169900(Sprite2DParams *params, s32 arg1) {
     return sprite;
 }
 
-Sprite2D *func_15169968(Sprite2DParams *params) {
-    return func_15169900(params, 0xFF);
+Sprite2D *sprite_newSprite2DDefault(Sprite2DParams *params) {
+    return sprite_newSprite2D(params, 0xFF);
 }
 
 /* Per-tick update: runs the sprite's behaviour, advances its animation and counts down its lifetime. */
-void func_15169988(Sprite2D *sprite) {
+void sprite_updateSprite2D(Sprite2D *sprite) {
     s32 behavior;
     s32 frame;
     s32 lifetime;
@@ -58,7 +58,7 @@ typedef struct {
 extern Game196DB0RenderMode D_800A4AC8[];
 
 /* Draws the sprite as a scaled textured rectangle. */
-Gfx *func_15169A48(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
+Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
     s32 pad; // matching: unused stack slots keep the original frame size
     s32 drawFlags;
     u8 update;
@@ -75,7 +75,7 @@ Gfx *func_15169A48(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
                     sprite->params.alpha);
     if (sprite->params.flags & 1) {
         sfrac = (sprite->params.flags & 2) ? (sprite->params.sOffset * 4) >> 5 : 0;
-        gfx = func_15094F70(gfx, sprite->params.tile1Texture, 0, NULL, 0x100, 1, sfrac, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, sprite->params.tile1Texture, 0, NULL, 0x100, 1, sfrac, 2, 3);
     }
     drawFlags = (sprite->params.flags & 0x10) ? 1 : 0;
     if (sprite->params.flags & 4) {
@@ -89,11 +89,11 @@ Gfx *func_15169A48(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
     }
     cycleType = (sprite->params.cycleType == 2) ? G_CYC_2CYCLE : G_CYC_1CYCLE;
     gfx = func_15142FBC(gfx,
-                        cycleType | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+                        cycleType | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                         D_800A4AC8[sprite->params.renderMode].cycle1 | D_800A4AC8[sprite->params.renderMode].cycle2 |
                             G_ZS_PRIM,
                         &update);
-    return func_1509629C(gfx, sprite->params.texture, sprite->params.scaleX, sprite->params.scaleY, sprite->params.x,
+    return sprite_drawImage(gfx, sprite->params.texture, sprite->params.scaleX, sprite->params.scaleY, sprite->params.x,
                          sprite->params.y, sprite->params.width, sprite->params.height, drawFlags,
                          sprite->params.sOffset, sprite->params.extraWidth, sprite->params.frame >> 8);
 }

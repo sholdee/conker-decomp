@@ -12,8 +12,8 @@ void trail_createSprayEmitter(SprayDesc *desc, u8 arg1) {
     emitter = func_15167A68(0x1A, 1, sizeof(SprayEmitter), 1, 0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->desc, desc, sizeof(SprayDesc));
-        func_1510F800(0);
-        emitter->zone = func_1510FD20(emitter->desc.origin.x + (emitter->desc.extent.x * 0.5f),
+        collision_selectMap(0);
+        emitter->zone = collision_findZoneLeaf(emitter->desc.origin.x + (emitter->desc.extent.x * 0.5f),
                                       emitter->desc.origin.z + (emitter->desc.extent.z * 0.5f));
         if (arg1 != 0) {
             flag = 1;

@@ -2,54 +2,54 @@
 #include "structs.h"
 
 /*
- * This unit's .bss, defined before the headers declare it (see init_50A0.c). The externs of D_800DBE18 and
+ * This unit's .bss, defined before the headers declare it (see init_50A0.c). The externs of gMapTriCounts and
  * later stay in variables.h: 20 new names in conker/collision.h, which comes before conker/cont.h, rotate the
  * .bss of game_48FD0.c (its variables are first declared in cont.h).
  */
-s32 D_800DBDC0;                 // the camera that func_1510FC34 last placed
-s32 D_800DBDC4;                 // its zone
-ZoneNode *D_800DBDC8;           // its zone tree leaf
-f32 D_800DBDCC;                 // its x
-f32 D_800DBDD0;                 // its z
-void *D_800DBDD8[4];            // per map: triangle table (carved from D_800B0DC0)
-void *D_800DBDE8[4];            // per map: x/z bounds
-void *D_800DBDF8[4];            // per map: y bounds
-struct QuadNode *D_800DBE08[4]; // per map: quadtree root
-s32 D_800DBE18[4];              // per map: triangle count
+s32 gZoneLastCamera;                 // the camera that collision_updateCameraZone last placed
+s32 gZoneLastCameraZone;                 // its zone
+ZoneNode *gZoneLastCameraLeaf;           // its zone tree leaf
+f32 gZoneLastCameraX;                 // its x
+f32 gZoneLastCameraZ;                 // its z
+void *gMapTriTables[4];            // per map: triangle table (carved from gTriArenaCursor)
+void *gMapTriXZBounds[4];            // per map: x/z bounds
+void *gMapTriYBounds[4];            // per map: y bounds
+struct QuadNode *gMapQuadTrees[4]; // per map: quadtree root
+s32 gMapTriCounts[4];              // per map: triangle count
 s16 D_800DBE28;                 // quadtree node bitmap: row stride in bytes
 s16 D_800DBE2A;                 // map 0 quadtree: node count
 s16 D_800DBE2C;                 // map 0 quadtree: leaf count
-s16 D_800DBE30[4];              // per view: camera zone
-s32 D_800DBE38;                 // triangles collected for the current map
-MeshTri *D_800DBE3C;            // world mesh: triangles
-struct XZRange *D_800DBE40;     // world mesh: x/z bounds per triangle
-struct YRange *D_800DBE44;      // world mesh: y bounds per triangle
-ZoneNode *D_800DBE48;           // zone tree root
-s32 D_800DBE4C;                 // world mesh: triangle count
-s32 D_800DBE50;                 // map whose triangle table is carved next
-f32 D_800DBE54;                 // last floor query: highest floor
-f32 D_800DBE58;                 // last floor query: ceiling
-u32 *D_800DBE5C;                // per world-mesh triangle: material / surface flags
-u16 D_800DBE60;                 // last floor query: prop hit (index + 1, 0: none)
-u8 D_800DBE62;                  // set once the world mesh is built
+s16 gViewCameraZones[4];              // per view: camera zone
+s32 gMapTriCollected;                 // triangles collected for the current map
+MeshTri *gCurMapTris;            // world mesh: triangles
+struct XZRange *gCurMapTriXZBounds;     // world mesh: x/z bounds per triangle
+struct YRange *gCurMapTriYBounds;      // world mesh: y bounds per triangle
+ZoneNode *gCurMapQuadTree;           // zone tree root
+s32 gCurMapTriCount;                 // world mesh: triangle count
+s32 gCurMap;                 // map whose triangle table is carved next
+f32 gFloorQueryFloorY;                 // last floor query: highest floor
+f32 gFloorQueryCeilingY;                 // last floor query: ceiling
+u32 *gMeshTriMaterials;                // per world-mesh triangle: material / surface flags
+u16 gFloorQueryProp;                 // last floor query: prop hit (index + 1, 0: none)
+u8 gMeshBuilt;                  // set once the world mesh is built
 u8 D_800DBE63;
-f32 D_800DBE64;                 // floor query reach
-f32 D_800DBE68;                 // last floor query: x
-f32 D_800DBE6C;                 // last floor query: y
-f32 D_800DBE70;                 // last floor query: z
-f32 D_800DBE74;                 // last ray probe: bottom
+f32 gFloorQueryReach;                 // floor query reach
+f32 gFloorQueryX;                 // last floor query: x
+f32 gFloorQueryY;                 // last floor query: y
+f32 gFloorQueryZ;                 // last floor query: z
+f32 gRayProbeBottom;                 // last ray probe: bottom
 
 #include "functions.h"
 #include "variables.h"
 
 /* Per collision set: 1 = enabled. */
-u8 D_80089120[4] = { 1, 1, 1, 1 };
+u8 gFloorProbeTypeEnabled[4] = { 1, 1, 1, 1 };
 
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
 /* Returns whether ground hit `index`'s triangle faces up (its normal has y >= 0). */
-s32 func_1510E670(s32 index) {
+s32 collision_isHitFacingUp(s32 index) {
     s32 *tri;
     s32 vtxBase;
     s16 *v0;
@@ -84,32 +84,32 @@ s32 func_1510E670(s32 index) {
 }
 
 
-/* Floor query (see func_1510E950) with an explicit height window for the prop probe. */
-void func_1510E7A4(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags,
+/* Floor query (see collision_findFloorCore) with an explicit height window for the prop probe. */
+void collision_findFloorInRange(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags,
                    s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj, f32 minY, f32 maxY) {
-    func_1510E950(outTri, outVerts, NULL, outFloorY, outPropFloorY, outFlags, outType, x, y, z, refY, group, obj,
+    collision_findFloorCore(outTri, outVerts, NULL, outFloorY, outPropFloorY, outFlags, outType, x, y, z, refY, group, obj,
                   minY, maxY, 0);
 }
 
-/* Floor query (see func_1510E950) with the default height window. */
-void func_1510E82C(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags,
+/* Floor query (see collision_findFloorCore) with the default height window. */
+void collision_findFloor(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags,
                    s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj) {
-    func_1510E950(outTri, outVerts, NULL, outFloorY, outPropFloorY, outFlags, outType, x, y, z, refY, group, obj,
+    collision_findFloorCore(outTri, outVerts, NULL, outFloorY, outPropFloorY, outFlags, outType, x, y, z, refY, group, obj,
                   -10000.0f, 20000.0f, 0);
 }
 
-/* Floor query (see func_1510E950) with the default height window and a noFallback choice. */
-void func_1510E8BC(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags,
+/* Floor query (see collision_findFloorCore) with the default height window and a noFallback choice. */
+void collision_findFloorEx(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags,
                    s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj, f32 unused12,
                    f32 unused13, s32 noFallback) {
-    func_1510E950(outTri, outVerts, NULL, outFloorY, outPropFloorY, outFlags, outType, x, y, z, refY, group, obj,
+    collision_findFloorCore(outTri, outVerts, NULL, outFloorY, outPropFloorY, outFlags, outType, x, y, z, refY, group, obj,
                   -10000.0f, 20000.0f, noFallback);
 }
 
 
-// D_800DBE5C points at the world mesh's per-triangle materials, or is NULL.
-// World-mesh triangles are 12 bytes (three vertex offsets) from D_800DBE3C on.
-#define WORLD_TRI_INDEX(tri) (((s32)(tri) - (s32)D_800DBE3C) / 12)
+// gMeshTriMaterials points at the world mesh's per-triangle materials, or is NULL.
+// World-mesh triangles are 12 bytes (three vertex offsets) from gCurMapTris on.
+#define WORLD_TRI_INDEX(tri) (((s32)(tri) - (s32)gCurMapTris) / 12)
 
 #define PROBE_WORLD 0
 #define PROBE_PROP 2
@@ -124,7 +124,7 @@ void func_1510E8BC(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropF
  * ceiling above the floor. With an object, also records what it stands on and the ceiling height.
  * Unless noFallback is set, the first upward-facing hit is used when none is within reach.
  */
-void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *outFloorY, f32 *outPropFloorY,
+void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *outFloorY, f32 *outPropFloorY,
                    u32 *outFlags, s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *object,
                    f32 minY, f32 maxY, s32 noFallback) {
     s32 i;
@@ -171,23 +171,23 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
         *outTri = 0;
     }
     if (object != NULL) {
-        reach = D_800DBE64;
+        reach = gFloorQueryReach;
     } else {
         reach = 50.0f;
     }
-    D_800DBE68 = x;
-    D_800DBE6C = y;
+    gFloorQueryX = x;
+    gFloorQueryY = y;
     haveFallback = FALSE;
-    D_800DBE70 = z;
+    gFloorQueryZ = z;
     *outFloorY = noFloor;
     if (outFlags == NULL) {
         dummyFlags = 0;
         outFlags = &dummyFlags;
     }
     ceilingY = 20000.0f;
-    D_800DBE54 = noFloor;
+    gFloorQueryFloorY = noFloor;
     objectNum = 0;
-    D_800DBE60 = 0;
+    gFloorQueryProp = 0;
     if (object != NULL) {
         object->floorTriIndex = 0;
     }
@@ -198,14 +198,14 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
         *outPropFloorY = noFloor;
     }
     for (type = 0; type < numProbes; type++) {
-        if (D_80089120[type] == 1) {
+        if (gFloorProbeTypeEnabled[type] == 1) {
             if (type == PROBE_OBJECT && object != NULL && (object->noshove & 0x200)) {
                 continue;
             }
             ix = x;
             iz = z;
             i = 0; // matching: dead store, but IDO schedules the loop differently without it
-            func_1510F800(type);
+            collision_selectMap(type);
             found = FALSE;
             if (type == PROBE_PROP) {
                 s32 floorProps;
@@ -263,7 +263,7 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
                 if (noFallback == 0 && allowFallback != 0 && *outFloorY == noFloor
                     && (noFloor == noFloor || height < noFloor)) { // matching: tautology IDO still compiles
                     s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
-                    if (func_1510E670(i)) {
+                    if (collision_isHitFacingUp(i)) {
                         haveFallback = TRUE;
                         fallbackHit = i;
                         fallbackType = type;
@@ -275,8 +275,8 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
                         continue;
                     }
                 }
-                if (D_800DBE54 < height) {
-                    D_800DBE54 = height;
+                if (gFloorQueryFloorY < height) {
+                    gFloorQueryFloorY = height;
                 }
                 if (y < refY) {
                     if (height < refY + curReach && bestY < height) {
@@ -295,7 +295,7 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
                 }
                 if (inReach) {
                     inReach = FALSE;
-                    if (func_1510E670(i)) {
+                    if (collision_isHitFacingUp(i)) {
                         bestType = type;
                         found = TRUE;
                         bestY = height;
@@ -337,23 +337,23 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
                     *outFloorY = noFloor;
                     floorVtxBase = 0;
                     if (outTri != NULL) {
-                        *outTri = D_800DBE3C;
+                        *outTri = gCurMapTris;
                     }
-                    floorTri = (s32)D_800DBE3C;
+                    floorTri = (s32)gCurMapTris;
                 }
                 triIndex = WORLD_TRI_INDEX(floorTri);
                 if (type == PROBE_WORLD && outFlags != NULL) {
-                    if (D_800DBE5C != NULL) {
-                        *outFlags = D_800DBE5C[triIndex];
+                    if (gMeshTriMaterials != NULL) {
+                        *outFlags = gMeshTriMaterials[triIndex];
                     } else {
                         *outFlags = 0;
                     }
                 } else if (type == PROBE_PROP && outFlags != NULL) {
-                    D_800DBE60 = D_800D3300[bestHit].unkC + 1;
-                    if (db_Object_array[D_800DBE60 - 1].materials != NULL) {
-                        *outFlags = db_Object_array[D_800DBE60 - 1].materials[triIndex - db_Object_array[D_800DBE60 - 1].firstTri];
+                    gFloorQueryProp = D_800D3300[bestHit].unkC + 1;
+                    if (db_Object_array[gFloorQueryProp - 1].materials != NULL) {
+                        *outFlags = db_Object_array[gFloorQueryProp - 1].materials[triIndex - db_Object_array[gFloorQueryProp - 1].firstTri];
                     } else {
-                        *outFlags = db_Object_array[D_800DBE60 - 1].floorHitAttrib;
+                        *outFlags = db_Object_array[gFloorQueryProp - 1].floorHitAttrib;
                     }
                 } else if (outFlags != NULL) {
                     *outFlags = 0;
@@ -371,15 +371,15 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
                 for (i = 0; i < count; i++) {
                     height = D_800D3300[i].height / 256.0f;
                     if (ceilingFrom < height && height < ceilingY) {
-                        if (!func_1510E670(i)) {
+                        if (!collision_isHitFacingUp(i)) {
                             s32 ceilingTri;
 
                             ceilingY = height;
                             ceilingTri = (s32)D_800D3300[i].tri;
                             triIndex = WORLD_TRI_INDEX(ceilingTri);
                             if (type == PROBE_WORLD) {
-                                if (D_800DBE5C != NULL) {
-                                    ceilingFlags = D_800DBE5C[triIndex];
+                                if (gMeshTriMaterials != NULL) {
+                                    ceilingFlags = gMeshTriMaterials[triIndex];
                                 } else {
                                     ceilingFlags = 0;
                                 }
@@ -409,7 +409,7 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
         }
     }
     if (floorTri != 0 && outVerts != NULL) {
-        extern MeshTri *D_800DBE3C; // matching: a declaration here keeps IDO from using beqzl on this test
+        extern MeshTri *gCurMapTris; // matching: a declaration here keeps IDO from using beqzl on this test
         for (i = 0; i < 3; i++) {
             vtx = (s16 *)(((s32 *)floorTri)[i] + floorVtxBase);
             outVerts[i].x = vtx[0];
@@ -421,10 +421,10 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
         }
     }
     if (object != NULL) {
-        object->propNum = D_800DBE60;
-        if (D_800DBE60 != 0 && (y - *outFloorY) < 10.0f) {
-            db_Object_array[D_800DBE60 - 1].object_status |= 0x84;
-            gWorldObjectContacts[D_800DBE60 - 1] |= 1 << (object - movement_obj);
+        object->propNum = gFloorQueryProp;
+        if (gFloorQueryProp != 0 && (y - *outFloorY) < 10.0f) {
+            db_Object_array[gFloorQueryProp - 1].object_status |= 0x84;
+            gWorldObjectContacts[gFloorQueryProp - 1] |= 1 << (object - movement_obj);
         }
         if (objectNum != 0 && (y - *outFloorY) < 10.0f) {
             object->stand_on_char = objectNum;
@@ -441,16 +441,16 @@ void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *
     if (object != NULL) {
         object->ceilingY = ceilingY;
     }
-    D_800DBE58 = ceilingY;
+    gFloorQueryCeilingY = ceilingY;
 }
 
 /* Returns the height of the first prop surface found at (x, z) from height y, or -10000. */
-f32 func_1510F648(f32 x, f32 y, f32 z) {
+f32 collision_getPropSurfaceHeight(f32 x, f32 y, f32 z) {
     f32 height;
     s32 groups;
     s32 iy;
 
-    func_1510F800(2);
+    collision_selectMap(2);
     iy = y; // matching: converting y before the call keeps the original order
     func_150A64C8(x, z, &groups, iy);
     func_150A44F0(groups, D_800D3830, 0);
@@ -466,12 +466,12 @@ f32 func_1510F648(f32 x, f32 y, f32 z) {
  * Collects into outLeaves every leaf zone whose square, grown by `radius`, contains (x, z).
  * Returns the number of leaves written.
  */
-s32 func_1510F720(s32 x, s32 z, s32 radius, ZoneNode **outLeaves) {
+s32 collision_findZoneLeavesNear(s32 x, s32 z, s32 radius, ZoneNode **outLeaves) {
     ZoneNode *node;
     s32 count;
     s32 offset;
 
-    node = D_800DBE48;
+    node = gCurMapQuadTree;
     count = 0;
     while (node != NULL) {
         if (ABS(node->x - x) < radius + node->halfSize && ABS(node->z - z) < radius + node->halfSize) {
@@ -495,7 +495,7 @@ s32 func_1510F720(s32 x, s32 z, s32 radius, ZoneNode **outLeaves) {
 }
 
 /* Prepares the collision probe; callers pass the probe type, which is unused. */
-void func_1510F800() { // matching: a declared s32 parameter changes the code
+void collision_selectMap() { // matching: a declared s32 parameter changes the code
     func_150A49F4();
 }
 
@@ -503,7 +503,7 @@ void func_1510F800() { // matching: a declared s32 parameter changes the code
  * Gets the slope of the given triangle: outSlopeX/Z receive it raw, outDirX/Z its direction
  * normalised to length 50 (or (1, 0) on flat ground). The fifth argument is unused.
  */
-void func_1510F820(void *tri, void *verts, f32 *outDirX, f32 *outDirZ, f32 *unused, f32 *outSlopeX,
+void collision_getTriSlope(void *tri, void *verts, f32 *outDirX, f32 *outDirZ, f32 *unused, f32 *outSlopeX,
                    f32 *outSlopeZ) {
     f32 slopeX;
     f32 slopeZ;
@@ -524,7 +524,7 @@ void func_1510F820(void *tri, void *verts, f32 *outDirX, f32 *outDirZ, f32 *unus
 }
 
 /* Returns a surface's type: the low 5 bits of its flags. */
-s32 func_1510F8CC(s32 flags) {
+s32 collision_getSurfaceType(s32 flags) {
     return flags & 0x1F;
 }
 
@@ -532,7 +532,7 @@ s32 func_1510F8CC(s32 flags) {
  * Finds the world-mesh floor at (x, z) closest to height y, preferring hits at or below y.
  * Returns its height (or -10000 when there is none) and stores its triangle in *outTri.
  */
-s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 *outTri) {
+s32 collision_findMeshFloorNear(s32 x, s32 y, s32 z, s32 *outTri) {
     s32 count;
     s32 bestIndex;
     s32 i;
@@ -541,7 +541,7 @@ s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 *outTri) {
     f32 bestDist;
     f32 dist;
 
-    func_1510F800(0);
+    collision_selectMap(0);
     count = func_150A3A70(x, z);
     if (count == 0) {
         return -10000;
@@ -571,7 +571,7 @@ s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 *outTri) {
  * Updates the current zone for camera `index` from its position, calling func_150A6760 when it
  * entered a different zone.
  */
-void func_1510FC34(s32 index) {
+void collision_updateCameraZone(s32 index) {
     Camera *camera;
     s32 x;
     s32 z;
@@ -579,18 +579,18 @@ void func_1510FC34(s32 index) {
     s32 zone;
     s16 *cameraZone;
 
-    D_800DBDC0 = index;
+    gZoneLastCamera = index;
     // matching: &camera_global_Cameras[index] computes the multiply after the base load
     camera = (Camera *)((u8 *)camera_global_Cameras + index * sizeof(Camera));
     x = camera->eye.x;
     z = camera->eye.z;
-    D_800DBDCC = x;
-    D_800DBDD0 = z;
-    node = func_1510FD20(x, z);
-    D_800DBDC8 = node;
-    zone = func_1510FE30(node);
-    D_800DBDC4 = zone;
-    cameraZone = &D_800DBE30[index];
+    gZoneLastCameraX = x;
+    gZoneLastCameraZ = z;
+    node = collision_findZoneLeaf(x, z);
+    gZoneLastCameraLeaf = node;
+    zone = collision_getZoneLeafIndex(node);
+    gZoneLastCameraZone = zone;
+    cameraZone = &gViewCameraZones[index];
     if (zone != *cameraZone) {
         *cameraZone = zone;
         func_150A6760(index);
@@ -601,10 +601,10 @@ void func_1510FC34(s32 index) {
 }
 
 /* Returns the leaf zone whose square contains (x, z), or NULL. */
-ZoneNode *func_1510FD20(s32 x, s32 z) {
+ZoneNode *collision_findZoneLeaf(s32 x, s32 z) {
     ZoneNode *node;
 
-    node = D_800DBE48;
+    node = gCurMapQuadTree;
     while (node != NULL) {
         if (node->child != 0) {
             if (ABS(x - node->x) <= node->halfSize && ABS(z - node->z) <= node->halfSize) {
@@ -629,12 +629,12 @@ ZoneNode *func_1510FD20(s32 x, s32 z) {
 }
 
 /* Returns the index of leaf zone `zone` (counted in tree order), or 0 if it is not in the tree. */
-s32 func_1510FE30(ZoneNode *zone) {
+s32 collision_getZoneLeafIndex(ZoneNode *zone) {
     ZoneNode *node;
     s32 index;
     s16 offset;
 
-    node = D_800DBE48;
+    node = gCurMapQuadTree;
     index = 0;
 
     while (node != NULL) {

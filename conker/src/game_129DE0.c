@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* D_80086C90 object filter: rejects objects with id 0x12, 0x23, 0x73 or 0x8A. */
+/* gObjectFilters object filter: rejects objects with id 0x12, 0x23, 0x73 or 0x8A. */
 s32 func_150FC930(Actor *obj, s32 arg1, s32 arg2) {
     u8 id = obj->character_type;
 

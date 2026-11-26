@@ -737,9 +737,9 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         Vec3f target;
         Actor *held;
 
-        if ((holder = func_150319CC(0x1F, obj)) != NULL && (holderData = holder->anim) != NULL &&
+        if ((holder = attach_findInSet(0x1F, obj)) != NULL && (holderData = holder->anim) != NULL &&
             holderData->unk3F6 != 0 && (model = holderData->partMtx[D_800BE9C0]) != NULL &&
-            (held = func_15083E90(holder->ownerId)) != NULL) {
+            (held = collision_findObjectById(holder->ownerId)) != NULL) {
             if (held->drawtype == 5) {
                 target.x = held->xpos;
                 target.y = held->ypos;
@@ -1559,9 +1559,9 @@ void func_1503A08C(Actor *obj) {
     f32 scale;
 
     if (obj->character_type != 0xFF) {
-        if ((obj->ob_matrix_ptr != NULL) && (D_800D1C90[obj->character_type] != NULL)) {
+        if ((obj->ob_matrix_ptr != NULL) && (gModelDefs[obj->character_type] != NULL)) {
             if (func_1503D774(obj->character_type, 0) == 0) {
-                def = D_800D1C90[obj->character_type];
+                def = gModelDefs[obj->character_type];
                 bone = obj->ob_matrix_ptr[0];
                 bone = ((MtxF *)bone)[def->aimBone]; // matching: two steps; one OBJ_BONES() index mismatches
                 scale = obj->scale_y;
@@ -1640,7 +1640,7 @@ void func_1503A08C(Actor *obj) {
                 obj->aim.side[1][2] = obj->aim.z - sideZ + upZ;
             }
         } else {
-            def = D_800D1C90[obj->character_type];
+            def = gModelDefs[obj->character_type];
             if (def != NULL) {
                 topHeight = def->aimHeight;
             } else {
@@ -1903,7 +1903,7 @@ void func_1503A830(Actor *obj) {
             Mtx *model;
 
             aim = 1;
-            holder = func_1503195C(obj, 0x2B, 0);
+            holder = attach_find(obj, 0x2B, 0);
             if (holder != NULL) {
                 holderData = holder->anim;
                 if (holderData != NULL) {
@@ -2032,14 +2032,14 @@ void func_1503A830(Actor *obj) {
         yaw[1] = yaw[0];
         pitch[1] = pitch[0];
     }
-    if (D_800D1C90[id] == NULL) {
+    if (gModelDefs[id] == NULL) {
         return;
     }
-    yaw0 = (yaw[0] >= 0.0f) ? D_800D1C90[id]->headYaw[1] * yaw[0] / 45.0f : D_800D1C90[id]->headYaw[0] * yaw[0] / -45.0f;
-    yaw1 = (yaw[1] >= 0.0f) ? D_800D1C90[id]->headYaw[0] * yaw[1] / 45.0f : D_800D1C90[id]->headYaw[1] * yaw[1] / -45.0f;
+    yaw0 = (yaw[0] >= 0.0f) ? gModelDefs[id]->headYaw[1] * yaw[0] / 45.0f : gModelDefs[id]->headYaw[0] * yaw[0] / -45.0f;
+    yaw1 = (yaw[1] >= 0.0f) ? gModelDefs[id]->headYaw[0] * yaw[1] / 45.0f : gModelDefs[id]->headYaw[1] * yaw[1] / -45.0f;
     yaw1 = -yaw1;
-    pitch0 = (pitch[0] >= 0.0f) ? D_800D1C90[id]->headPitch[0] * pitch[0] / 30.0f : D_800D1C90[id]->headPitch[1] * pitch[0] / -15.0f;
-    pitch1 = (pitch[1] >= 0.0f) ? D_800D1C90[id]->headPitch[0] * pitch[1] / 30.0f : D_800D1C90[id]->headPitch[1] * pitch[1] / -15.0f;
+    pitch0 = (pitch[0] >= 0.0f) ? gModelDefs[id]->headPitch[0] * pitch[0] / 30.0f : gModelDefs[id]->headPitch[1] * pitch[0] / -15.0f;
+    pitch1 = (pitch[1] >= 0.0f) ? gModelDefs[id]->headPitch[0] * pitch[1] / 30.0f : gModelDefs[id]->headPitch[1] * pitch[1] / -15.0f;
     APPROACH(obj->headYaw[0], (s32)yaw1);
     APPROACH(obj->headYaw[1], (s32)yaw0);
     APPROACH(obj->headPitch[0], (s32)pitch1);

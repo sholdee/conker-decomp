@@ -25,9 +25,9 @@ void func_15103E40(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u
     top.x = pos->x;
     top.y = pos->y + 100.0f;
     top.z = pos->z;
-    func_1504715C(&hit, obj);
+    collision_initHitFromObject(&hit, obj);
 
-    if (func_15046C80(&top, 0, pos->y - 100.0f, &hit) && (hit.flags & 1)) {
+    if (collision_probeFloorSurfABSet0Cached(&top, 0, pos->y - 100.0f, &hit) && (hit.flags & 1)) {
         impact.x = top.x;
         hitGround = TRUE;
         impact.y = hit.height;

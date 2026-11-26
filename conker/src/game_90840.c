@@ -22,8 +22,8 @@ void func_15063404(Actor *arg0) {
     Actor *self = &movement_obj[arg0 - movement_obj];
 
     self->mv->rt_context_b = 9;
-    func_15083568(arg0, 0x1D, 1.0f, 0);
-    func_15083568(arg0, 0x1E, 1.0f, 0);
+    collision_createPartSet(arg0, 0x1D, 1.0f, 0);
+    collision_createPartSet(arg0, 0x1E, 1.0f, 0);
     arg0->nojump = 20;
     arg0->norun = 0;
     arg0->count5 = 0;
@@ -36,8 +36,8 @@ void func_15063404(Actor *arg0) {
 void func_150634E4(Actor *arg0) {
     movement_obj[arg0 - movement_obj].mv->rt_context_b = 0;
     movement_obj[arg0 - movement_obj].mv->weapon_status = 0;
-    func_150836CC(arg0, 0x1D);
-    func_150836CC(arg0, 0x1E);
+    collision_removePartSet(arg0, 0x1D);
+    collision_removePartSet(arg0, 0x1E);
     arg0->nojump = 0;
     arg0->norun = 0;
     arg0->count5 = 0;
@@ -46,7 +46,7 @@ void func_150634E4(Actor *arg0) {
 void func_15063570(Actor *arg0) {
     movement_obj[arg0 - movement_obj].mv->rt_context_b = 0x3B;
     movement_obj[arg0 - movement_obj].mv->weapon_status = 2;
-    func_15083568(arg0, 0x89, 1.0f, 0);
+    collision_createPartSet(arg0, 0x89, 1.0f, 0);
     arg0->nojump = 20;
     arg0->norun = 0;
     arg0->count5 = 0;
@@ -57,7 +57,7 @@ void func_15063570(Actor *arg0) {
 void func_15063628(Actor *arg0, f32 arg1) {
     ActorCtl *ctl = arg0->mv;
 
-    func_15081690(arg0, ctl->aimEye.x, ctl->aimEye.y, ctl->aimEye.z,
+    collision_castRay(arg0, ctl->aimEye.x, ctl->aimEye.y, ctl->aimEye.z,
                   ctl->aimDir.x, ctl->aimDir.y, ctl->aimDir.z, &ctl->rayHit,
                   arg1, 0, 0, 0, -1, 0, 0);
     func_150636A4(arg0);
@@ -137,7 +137,7 @@ void actor_runPending(void) {
                     }
                     break;
                 case 0x24:
-                    if (func_15081E78(actor, &ctl->rayHit, 7) != 2) {
+                    if (collision_applyRayHit(actor, &ctl->rayHit, 7) != 2) {
                         ctl = actor->mv;
                         if (ctl->unkAF != 0) {
                             ctl->unkAF = 0;
@@ -152,12 +152,12 @@ void actor_runPending(void) {
                     }
                     break;
                 case 0x3B:
-                    func_15081E78(actor, &ctl->rayHit, 0x10);
+                    collision_applyRayHit(actor, &ctl->rayHit, 0x10);
                     weapon_getShotFrame(actor, &position, &direction, &side, &up);
                     weapon_spawnFannedParticles(&position, &direction, 0xFF, 1);
                     break;
                 case 0x23:
-                    func_15081E78(actor, &ctl->rayHit, 8);
+                    collision_applyRayHit(actor, &ctl->rayHit, 8);
                     camera = actor->CameraPtr;
                     if (camera != NULL) {
                         func_1512D2E4(camera, 0);
@@ -222,7 +222,7 @@ void actor_throwGrenade(Actor *arg0) {
         packet.anim = 0x2C;
     }
 
-    if (func_1503195C(arg0, packet.anim, 0) != NULL) {
+    if (attach_find(arg0, packet.anim, 0) != NULL) {
         if (arg0->ob_matrix_ptr != NULL) {
             func_15143134(NULL, &packet.position, &arg0->ob_matrix_ptr[4]);
         } else {
@@ -234,7 +234,7 @@ void actor_throwGrenade(Actor *arg0) {
         packet.throwerId = (arg0 - movement_obj) + 1;
         packet.thrower = arg0;
         actor_runHitHandler(arg0, 0xB, &packet);
-        func_150836CC(arg0, packet.anim);
+        collision_removePartSet(arg0, packet.anim);
 
         if (arg0->mv->numGrenades != 0) {
             arg0->mv->numGrenades--;
@@ -425,7 +425,7 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
             gEventParam = 1;
             func_15074664();
             if (arg0->inwater != 0 || (s32)arg0->shad != 0) {
-                func_15083568(arg0, 0x17, 1.0f, 0);
+                collision_createPartSet(arg0, 0x17, 1.0f, 0);
                 arg0->mv->weapon_status = 2;
             } else {
                 arg0->norun = 0xFF;
@@ -440,7 +440,7 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
             gEventParam = 0;
             func_15074664();
             if (arg0->inwater != 0 || (s32)arg0->shad != 0) {
-                func_150836CC(arg0, 0x17);
+                collision_removePartSet(arg0, 0x17);
                 arg0->mv->weapon_status = 0;
             } else {
                 arg0->norun = 0xFF;
@@ -1059,12 +1059,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             if (arg6 != 0) {
                 switch (act) {
                 case 0x34:
-                    func_150836CC(arg0, 0x3D);
+                    collision_removePartSet(arg0, 0x3D);
                     arg0->mv->weapon_status = 0;
                     break;
                 case 0xA:
-                    func_150836CC(arg0, 0x28);
-                    func_150836CC(arg0, 0x29);
+                    collision_removePartSet(arg0, 0x28);
+                    collision_removePartSet(arg0, 0x29);
                     arg0->mv->weapon_status = 0;
                     break;
                 }
@@ -1077,8 +1077,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->norun = 0;
                 arg0->count5 = 0;
                 if (act == 0xA) {
-                    func_150836CC(arg0, 0x28);
-                    func_150836CC(arg0, 0x29);
+                    collision_removePartSet(arg0, 0x28);
+                    collision_removePartSet(arg0, 0x29);
                     arg0->mv->weapon_status = 0;
                 }
             } else if (((arg3 <= 0.0f) && (pressedButtons & B_BUTTON)) || (arg4 != 0)) {
@@ -1124,12 +1124,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     arg0->mv->weapon_status = 2;
                     switch (act) {
                     case 0xA:
-                        func_15083568(arg0, 0x28, 1.0f, 0);
-                        func_15083568(arg0, 0x29, 1.0f, 0);
+                        collision_createPartSet(arg0, 0x28, 1.0f, 0);
+                        collision_createPartSet(arg0, 0x29, 1.0f, 0);
                         break;
                     case 0x2:
                     case 0x13:
-                        func_15083568(arg0, 8, 1.0f, 0);
+                        collision_createPartSet(arg0, 8, 1.0f, 0);
                         break;
                     }
                 } else {
@@ -1137,15 +1137,15 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     arg0->mv->rt_context_b = 0;
                     switch (act) {
                     case 0x34:
-                        func_150836CC(arg0, 0x3D);
+                        collision_removePartSet(arg0, 0x3D);
                         break;
                     case 0xA:
-                        func_150836CC(arg0, 0x28);
-                        func_150836CC(arg0, 0x29);
+                        collision_removePartSet(arg0, 0x28);
+                        collision_removePartSet(arg0, 0x29);
                         break;
                     case 0x2:
                     case 0x13:
-                        func_150836CC(arg0, 8);
+                        collision_removePartSet(arg0, 8);
                         break;
                     }
                 }
@@ -1179,7 +1179,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             }
             anim = 999;
             if ((arg7 != 0) && (arg0->mv->rt_context_b != 0)) {
-                func_15083568(arg0, sfx, 1.0f, 0);
+                collision_createPartSet(arg0, sfx, 1.0f, 0);
             }
             if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f)) {
                 if (arg0->mv->rt_context_b != 0) {
@@ -1203,7 +1203,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             if (anim != 999) {
                 speed = 2.0f;
             } else if ((arg4 != 0) && (arg0->attach_char != 0)) {
-                func_150836CC(arg0, sfx);
+                collision_removePartSet(arg0, sfx);
                 arg0->mv->weapon_status = 0;
             } else if (act == arg0->mv->rt_context_b) {
                 arg0->unkAA = 0x4B;
@@ -1382,7 +1382,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f)) {
             ModelAttachment *found;
 
-            found = func_1503195C(arg0, 0x3C, 0);
+            found = attach_find(arg0, 0x3C, 0);
             if ((found != NULL) && (found->unk38 < 0x12C)) {
                 anim = 0x240;
                 arg0->norun = 0xFF;
@@ -1592,7 +1592,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x38:
         if (act == arg0->mv->rt_context_b) {
             if ((arg4 != 0) && (arg0->attach_char != 0)) {
-                func_150836CC(arg0, 0x7B);
+                collision_removePartSet(arg0, 0x7B);
                 arg0->mv->weapon_status = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
@@ -1665,7 +1665,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x39:
         if (act == arg0->mv->rt_context_b) {
             if ((arg4 != 0) && (arg0->attach_char != 0)) {
-                func_150836CC(arg0, 0x82);
+                collision_removePartSet(arg0, 0x82);
                 arg0->mv->weapon_status = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
@@ -1713,7 +1713,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x37:
         if (act == arg0->mv->rt_context_b) {
             if ((arg4 != 0) && (arg0->attach_char != 0)) {
-                func_150836CC(arg0, 0x85);
+                collision_removePartSet(arg0, 0x85);
                 arg0->mv->weapon_status = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
@@ -1771,7 +1771,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     }
                 }
                 if (cancel != 0) {
-                    func_150836CC(arg0, 0x24);
+                    collision_removePartSet(arg0, 0x24);
                     arg0->mv->weapon_status = 0;
                     arg0->count5 = 0;
                     arg0->norun = 0;
@@ -1780,20 +1780,20 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         } else if (act == arg0->mv->rt_context_b) {
             arg0->nojump = 0xA;
             if ((arg4 != 0) && ((arg0->attach_char != 0) || ((s32)arg0->shad != 0))) {
-                func_150836CC(arg0, 0x24);
+                collision_removePartSet(arg0, 0x24);
                 arg0->mv->weapon_status = 0;
             } else if (arg6 != 0) {
                 if ((act == 0x16) || ((act == 0xC) && (arg0->shad == 0.0f) && (arg0->energy != 0))) {
                     clearAction = 0;
                 } else {
-                    func_150836CC(arg0, 0x24);
+                    collision_removePartSet(arg0, 0x24);
                     arg0->mv->weapon_status = 0;
                 }
             } else if ((pressedButtons & B_BUTTON) || (arg4 != 0)) {
                 pressedButtons |= B_BUTTON;
                 anim = func_15063E84(arg0, 0x78, 1, 0, pressedButtons);
                 if ((anim == 999) && (arg4 != 0)) {
-                    func_150836CC(arg0, 0x24);
+                    collision_removePartSet(arg0, 0x24);
                     arg0->mv->weapon_status = 0;
                     arg0->count5 = 0;
                 }
@@ -1823,7 +1823,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         if ((act == 0xC) && ((act == arg0->mv->rt_context_b) || (arg0->mv->weapon_status != 0))) {
             arg0->speed = 0.0f;
             if ((s32)arg0->shad != 0) {
-                func_150836CC(arg0, 0x24);
+                collision_removePartSet(arg0, 0x24);
                 arg0->mv->weapon_status = 0;
                 arg0->mv->rt_context_b = 0;
             }
@@ -1865,7 +1865,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0xF:
         anim = 999;
         if ((act == arg0->mv->rt_context_b) && ((arg6 != 0) || (arg0->attach_char != 0) || (arg4 != 0))) {
-            func_150836CC(arg0, 0x3A);
+            collision_removePartSet(arg0, 0x3A);
             arg0->mv->weapon_status = 0;
             arg0->norun = 0;
             arg0->count5 = 0;
@@ -1900,7 +1900,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x15:
         if (act == arg0->mv->rt_context_b) {
             if ((arg4 != 0) && (arg0->attach_char != 0)) {
-                func_150836CC(arg0, 0x4B);
+                collision_removePartSet(arg0, 0x4B);
                 arg0->mv->weapon_status = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
@@ -1996,7 +1996,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         if (pressedButtons & B_BUTTON) {
             u8 pad;  // matching: unused stack slot
 
-            func_15083E90(7)->taskint[0] = 1;
+            collision_findObjectById(7)->taskint[0] = 1;
         }
         break;
     case 0x25:
@@ -2079,7 +2079,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     blend = 0.0f;
                 }
                 if (pressedButtons & B_BUTTON) {
-                    obj = func_15083E90(6);
+                    obj = collision_findObjectById(6);
                     obj->speed = 80.0f;
                     if (mag > 2000.0f) {
                         obj->speed = (mag + 1000.0f) / 36.0f;
@@ -2112,7 +2112,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         break;
     case 0x21:
         if ((arg4 != 0) && (arg0->attach_char != 0)) {
-            func_150836CC(arg0, 0x58);
+            collision_removePartSet(arg0, 0x58);
             arg0->mv->weapon_status = 0;
         } else if (arg6 != 0) {
             clearAction = 0;
@@ -2137,7 +2137,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x22:
         speed = 1.399999976f;
         if ((arg4 != 0) && (arg0->attach_char != 0)) {
-            func_150836CC(arg0, 0x56);
+            collision_removePartSet(arg0, 0x56);
             arg0->mv->weapon_status = 0;
         } else if (arg6 != 0) {
             clearAction = 0;
@@ -2169,7 +2169,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     }
                 }
                 if (cancel != 0) {
-                    func_150836CC(arg0, 0x63);
+                    collision_removePartSet(arg0, 0x63);
                     arg0->mv->weapon_status = 0;
                     arg0->count5 = 0;
                     arg0->norun = 0;
@@ -2177,7 +2177,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             }
         } else if (act == arg0->mv->rt_context_b) {
             if ((arg4 != 0) && (arg0->attach_char != 0)) {
-                func_150836CC(arg0, 0x63);
+                collision_removePartSet(arg0, 0x63);
                 arg0->mv->weapon_status = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
@@ -2213,7 +2213,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     arg0->count5 = 0xFF;
                     anim = 0x155;
                     if ((s32)arg0->shad != 0) {
-                        func_150836CC(arg0, 0x63);
+                        collision_removePartSet(arg0, 0x63);
                         arg0->mv->weapon_status = 0;
                     }
                 } else if ((pressedButtons & Z_TRIG) && (arg0->animseq.uh != 0x152) && (arg0->mv->ReloadTimer == 0)) {
@@ -2236,10 +2236,10 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
 
             if (D_800C3A58 != 0) {
                 if (act == arg0->mv->rt_context_b) {
-                    func_15083568(arg0, 0x89, 1.0f, 0);
+                    collision_createPartSet(arg0, 0x89, 1.0f, 0);
                     arg0->mv->weapon_status = 2;
                 } else {
-                    func_150836CC(arg0, 0x89);
+                    collision_removePartSet(arg0, 0x89);
                     arg0->mv->weapon_status = 0;
                 }
             }
@@ -2247,18 +2247,18 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->mv->rt_context_b = 0;
                 arg0->norun = 0;
                 arg0->count5 = 0;
-                func_150836CC(arg0, 0x89);
+                collision_removePartSet(arg0, 0x89);
                 arg0->mv->weapon_status = 0;
             } else if (act == arg0->mv->rt_context_b) {
                 if ((arg4 != 0) && ((arg0->attach_char != 0) || (arg0->stunned != 0) || (arg0->lifting != 0))) {
-                    func_150836CC(arg0, 0x89);
+                    collision_removePartSet(arg0, 0x89);
                     arg0->mv->weapon_status = 0;
                     arg0->mv->rt_context_b = 0;
                 } else if (arg4 != 0) {
                     pressedButtons |= B_BUTTON;
                     anim = func_15063E84(arg0, 0x226, 1, 0, pressedButtons);
                     if (anim == 999) {
-                        func_150836CC(arg0, 0x89);
+                        collision_removePartSet(arg0, 0x89);
                         arg0->mv->weapon_status = 0;
                         arg0->mv->rt_context_b = 0;
                         arg0->count5 = 0;
@@ -2282,7 +2282,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         arg0->count5 = 0xFF;
                         anim = 0x226;
                         if ((s32)arg0->shad != 0) {
-                            func_150836CC(arg0, 0x89);
+                            collision_removePartSet(arg0, 0x89);
                             arg0->mv->weapon_status = 0;
                         }
                     } else {
@@ -2390,7 +2390,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x23:
         if (act == arg0->mv->rt_context_b) {
             if ((arg4 != 0) && (arg0->attach_char != 0)) {
-                func_150836CC(arg0, 0x16);
+                collision_removePartSet(arg0, 0x16);
                 arg0->mv->weapon_status = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
@@ -2645,8 +2645,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             }
             if (arg6 != 0) {
                 if ((act == arg0->mv->rt_context_b) || (arg0->mv->GrenadeThrowState == 4)) {
-                    if ((func_1503195C(arg0, item, 0) != NULL) || (arg0->mv->GrenadeThrowState == 4)) {
-                        func_150836CC(arg0, item);
+                    if ((attach_find(arg0, item, 0) != NULL) || (arg0->mv->GrenadeThrowState == 4)) {
+                        collision_removePartSet(arg0, item);
                         gEventParam = (u16)sfx | 0x10000;
                         event_spawnThrownItem();
                         if (arg0->mv->numGrenades != 0) {
@@ -2724,9 +2724,9 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 if (arg0->mv->GrenadeThrowState == 5) {
                     if (act != arg0->mv->rt_context_b) {
                         if (item == 0x89) {
-                            obj = func_15083568(arg0, 0x86, 1.0f, 0);
+                            obj = collision_createPartSet(arg0, 0x86, 1.0f, 0);
                         } else {
-                            obj = func_15083568(arg0, 0x9F, 1.0f, 0);
+                            obj = collision_createPartSet(arg0, 0x9F, 1.0f, 0);
                         }
                         if (obj != NULL) {
                             arg0->mv->rt_context_b = act;

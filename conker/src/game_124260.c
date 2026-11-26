@@ -2,10 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-Vec3f D_800D9A50;
+Vec3f gLastBeamDir;
 
 /* Sends message 0x3E (func_151494E0) for `owner`; beams it owns destroy themselves on it. */
-void func_150F6DB0(Actor *owner) {
+void beam_sendOwnerGone(Actor *owner) {
     ActorRef msg;
 
     msg.actor = owner;
@@ -14,7 +14,7 @@ void func_150F6DB0(Actor *owner) {
 }
 
 /* Spawns a beam object for `owner`, with two end sprites (blue-tinted, then red-tinted). */
-BeamObj *func_150F6DE4(Actor *owner) {
+BeamObj *beam_spawnCastBeam(Actor *owner) {
     BeamState state;
     u8 i;
     BeamObj *obj;
@@ -82,7 +82,7 @@ BeamObj *func_150F6DE4(Actor *owner) {
 }
 
 /* Per-frame update: re-casts the beam from the owner and moves the end sprites to where it hits. */
-void func_150F706C(BeamObj *obj) {
+void beam_updateCastBeam(BeamObj *obj) {
     BeamState *beam;
     Actor *owner;
     Vec3f origin;
@@ -107,14 +107,14 @@ void func_150F706C(BeamObj *obj) {
     origin.x = owner->xpos;
     origin.y = owner->ypos + 46.0f;
     origin.z = owner->zpos;
-    func_15145740(owner, &D_800D9A50, NULL, NULL, 0.0f);
+    func_15145740(owner, &gLastBeamDir, NULL, NULL, 0.0f);
 
-    D_800D9A50.x *= 0.001f;
-    D_800D9A50.y *= 0.001f;
-    D_800D9A50.z *= 0.001f;
+    gLastBeamDir.x *= 0.001f;
+    gLastBeamDir.y *= 0.001f;
+    gLastBeamDir.z *= 0.001f;
 
-    func_15081690(owner, origin.x, origin.y, origin.z,
-                  D_800D9A50.x, D_800D9A50.y, D_800D9A50.z,
+    collision_castRay(owner, origin.x, origin.y, origin.z,
+                  gLastBeamDir.x, gLastBeamDir.y, gLastBeamDir.z,
                   &beam->ray, 5000.0f, 0, 0, 1, -1, 0, 0);
 
     beam->flags |= 1;
@@ -143,7 +143,7 @@ void func_150F706C(BeamObj *obj) {
 }
 
 /* Message handler: destroys the beam when its owner is reported gone (0x3E); other messages go to the default handler. */
-void func_150F7310(BeamObj *obj, ActorRef *msg, u8 msgId) {
+void beam_castBeamMessage(BeamObj *obj, ActorRef *msg, u8 msgId) {
     // matching: taking &obj keeps it in its arg slot (IDO reloads it instead of saving it in s0)
     BeamObj **objp = &obj;
     BeamState *beam;
@@ -161,7 +161,7 @@ void func_150F7310(BeamObj *obj, ActorRef *msg, u8 msgId) {
 }
 
 /* Destroys the beam's end sprites and detaches the beam from its owner. */
-void func_150F739C(BeamObj *obj) {
+void beam_teardownCastBeam(BeamObj *obj) {
     BeamState *beam;
     u8 i;
 
@@ -174,14 +174,14 @@ void func_150F739C(BeamObj *obj) {
     func_1514EDF0(obj, beam->owner);
 }
 
-/* Beam callback: tears the beam down (func_150F739C), then hands it to func_1514933C. */
-void func_150F740C(BeamObj *obj) {
-    func_150F739C(obj);
+/* Beam callback: tears the beam down (beam_teardownCastBeam), then hands it to func_1514933C. */
+void beam_destroyCastBeam(BeamObj *obj) {
+    beam_teardownCastBeam(obj);
     func_1514933C(&obj->base);
 }
 
-/* Beam callback: tears the beam down (func_150F739C), then hands it to func_15149368. */
-void func_150F7438(BeamObj *obj) {
-    func_150F739C(obj);
+/* Beam callback: tears the beam down (beam_teardownCastBeam), then hands it to func_15149368. */
+void beam_freeCastBeam(BeamObj *obj) {
+    beam_teardownCastBeam(obj);
     func_15149368(&obj->base);
 }

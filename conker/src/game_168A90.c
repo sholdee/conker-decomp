@@ -74,7 +74,7 @@ DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, 
     s32 count;
     s32 i;
 
-    asset = func_1502B6BC(&loaded, 0, &count, 2, desc->unk30, desc->unk34);
+    asset = rom_loadPathTable(&loaded, 0, &count, 2, desc->unk30, desc->unk34);
     {
         s32 type;
 
@@ -102,7 +102,7 @@ DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, 
     }
     obj->displayList = asset->displayList;
     obj->buffersSize = buffersSize;
-    func_1510CE60(obj->displayList, 0, 1, 0x3E, 0);
+    texture_resolveDl(obj->displayList, 0, 1, 0x3E, 0);
     return obj;
 }
 

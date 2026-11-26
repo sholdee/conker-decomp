@@ -36,7 +36,7 @@ Gfx *func_150D1810(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gfx = view_setScissor(gfx, gCurrentView, 0, 0, 0, 0); // takes the view index as s16
     gfx = view_setColorImage(gfx);
-    gfx = func_150950D4(gfx, &tex, 0, 0, 0, 0, G_TX_CLAMP, 256, 256, 3);
+    gfx = sprite_loadTexture(gfx, &tex, 0, 0, 0, 0, G_TX_CLAMP, 256, 256, 3);
     func_151102CC(rotation, 0.0f, 0.0f, roll);
     func_150A7A48(rotation, gViews[gCurrentView].projection, viewProj);
     guMtxF2L(viewProj, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0]);

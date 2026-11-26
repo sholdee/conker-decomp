@@ -117,7 +117,7 @@ s32 script_miscCommand(s32 arg0, s32 cmd, ScriptCmd *args) {
         return D_800D2FD8[args->a[0].w] * 65536.0f;
         }
     case 24:
-        obj = func_15083E90(args->a[0].w);
+        obj = collision_findObjectById(args->a[0].w);
         if (obj != NULL) {
             actor_remove(obj, 0);
         }
@@ -177,7 +177,7 @@ s32 script_miscQuery(s32 arg0, s32 cmd, ScriptCmd *args) {
     case 21:
         return D_800D2FD8[args->a[0].w] * 65536.0f;
     case 18:
-        obj = func_15083E90(args->a[0].w);
+        obj = collision_findObjectById(args->a[0].w);
         if (obj != NULL) {
             x = obj->xpos;
             z = obj->zpos;
@@ -185,7 +185,7 @@ s32 script_miscQuery(s32 arg0, s32 cmd, ScriptCmd *args) {
         }
         return 0;
     case 19:
-        obj = func_15083E90(args->a[0].w);
+        obj = collision_findObjectById(args->a[0].w);
         if (obj != NULL) {
             return (s16)obj->ypos;
         }

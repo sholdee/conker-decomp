@@ -154,7 +154,7 @@ void func_151AECA0(Actor *obj, u8 arg1, s32 arg2) {
     if (obj == NULL) {
         return;
     }
-    func_1504715C(&ground, obj);
+    collision_initHitFromObject(&ground, obj);
 // matching: the unused labels lbD/lbA/lbC/lbB/lbl split basic blocks; without them uopt
 // register-allocates far more (callee-saved $f22-$f30, s5/s6) and the frame grows
 lbD:
@@ -196,7 +196,7 @@ lbC:
         pos[2] += obj->zpos;
         probe.x = pos[0];
         probe.z = pos[2];
-        if (func_15046C80(&probe, 0, obj->ypos - 500.0f, &ground) == 0 || ground.source == 3) {
+        if (collision_probeFloorSurfABSet0Cached(&probe, 0, obj->ypos - 500.0f, &ground) == 0 || ground.source == 3) {
             return;
         }
         pos[1] = ground.height;
@@ -217,7 +217,7 @@ lbB:
     centerProbe.x = center[0];
     centerProbe.y = center[1] + 100.0f;
     centerProbe.z = center[2];
-    if (func_15046C80(&centerProbe, 0, center[1] - 500.0f, &ground) == 0 || ground.source == 3) {
+    if (collision_probeFloorSurfABSet0Cached(&centerProbe, 0, center[1] - 500.0f, &ground) == 0 || ground.source == 3) {
         return;
     }
     center[1] = ground.height;

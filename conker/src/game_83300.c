@@ -128,7 +128,7 @@ void func_15056150(Actor *actor) {
     PathPoint *path;
 
     if (actor->taskint[1] != 0) {
-        path = D_800D2104[actor->listpos];
+        path = gSpawnPaths[actor->listpos];
         centerX = path[1].x;
         centerZ = path[1].z;
         centerY = path[1].y;
@@ -343,7 +343,7 @@ s32 func_1505693C(Actor *actor, s32 targetIdx) {
     f32 radiusSq;
     f32 dz;
     f32 dx;
-    PathPoint *path = D_800D2104[actor->listpos];
+    PathPoint *path = gSpawnPaths[actor->listpos];
 
     if (path[0].param == 0) {
         return TRUE;
@@ -447,22 +447,22 @@ void actor_updateChaseAi(Actor *actor) {
     }
     moveTurnSpeed = (((actor->unk1E5 << 8) + actor->unk1E7) * D_800CC264) / 100;
     faceTurnRate = actor->unk1E6;
-    if (D_800D2108[actor->listpos] == 0) {
+    if (gSpawnPathCounts[actor->listpos] == 0) {
         actor->speed = 0.0f;
         actor_playMoveAnim(actor, 0.0f);
         return;
     }
     state = mode;
-    info = D_800D1C90[actor->character_type];
+    info = gModelDefs[actor->character_type];
     if (actor->unk23D == 0xFF) {
         rangeSq = 1000000000.0f;
     } else {
         rangeSq = actor->unk23D * 8;
         rangeSq *= rangeSq;
     }
-    if (D_800D2104[actor->listpos]->param != 0) {
-        tx = D_800D2104[actor->listpos]->x - actor->xpos;
-        tz = D_800D2104[actor->listpos]->z - actor->zpos;
+    if (gSpawnPaths[actor->listpos]->param != 0) {
+        tx = gSpawnPaths[actor->listpos]->x - actor->xpos;
+        tz = gSpawnPaths[actor->listpos]->z - actor->zpos;
     }
     if ((actor->task_attrib & 4) && !(actor->task_attrib & 1) && ((state == 1) || (state == 3))) {
         actor->unk21C = 0;
@@ -698,9 +698,9 @@ void actor_updateChaseAi(Actor *actor) {
                 tz = movement_obj[actor->unk222].zpos;
                 ty = movement_obj[actor->unk222].ypos;
             } else {
-                tx = D_800D2104[actor->listpos][actor->unk21E + 1].x;
-                tz = D_800D2104[actor->listpos][actor->unk21E + 1].z;
-                ty = D_800D2104[actor->listpos][actor->unk21E + 1].y;
+                tx = gSpawnPaths[actor->listpos][actor->unk21E + 1].x;
+                tz = gSpawnPaths[actor->listpos][actor->unk21E + 1].z;
+                ty = gSpawnPaths[actor->listpos][actor->unk21E + 1].y;
             }
             if ((state == 5) || (state == 6)) {
                 f32 orbitX;
@@ -784,16 +784,16 @@ void actor_updateChaseAi(Actor *actor) {
             }
         }
         if (((state == 0) || (state == 0xA)) && (targetDist < arriveDist)) {
-            n = D_800D2108[actor->listpos] - 1;
+            n = gSpawnPathCounts[actor->listpos] - 1;
             if (actor->unk21F != 0) {
                 n = actor->unk21F;
             }
             if (actor->unk22C & 4) {
-                actor->xpos = D_800D2104[actor->listpos][actor->unk21E + 1].x;
-                actor->zpos = D_800D2104[actor->listpos][actor->unk21E + 1].z;
+                actor->xpos = gSpawnPaths[actor->listpos][actor->unk21E + 1].x;
+                actor->zpos = gSpawnPaths[actor->listpos][actor->unk21E + 1].z;
                 actor->unk1FC |= 8;
                 if (actor->unk22C & 8) {
-                    actor->ypos = D_800D2104[actor->listpos][actor->unk21E + 1].y;
+                    actor->ypos = gSpawnPaths[actor->listpos][actor->unk21E + 1].y;
                 }
             }
             if (!(actor->mvmt_control & 0x10)) {
@@ -1046,11 +1046,11 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
         } else {
             floorOut = NULL;
         }
-        func_1510E8BC(&actor->floorTriVerts, actor->floorTri.v, &groundY, floorOut, &actor->floorMaterial, &actor->floorType,
+        collision_findFloorEx(&actor->floorTriVerts, actor->floorTri.v, &groundY, floorOut, &actor->floorMaterial, &actor->floorType,
                       actor->xpos, actor->ypos, actor->zpos, prevY, 0, actor, -10000.0f,
                       actor->ypos, actor->noshove & 0x04000000);
     } else if (actor->noshove & 8) {
-        actor->unk118 = func_1510F648(actor->xpos, actor->ypos, actor->zpos);
+        actor->unk118 = collision_getPropSurfaceHeight(actor->xpos, actor->ypos, actor->zpos);
     }
     flags = actor->noshove;
     if ((actor->lifting != 0) && (actor->character_type != 0x9A)) {
@@ -1114,7 +1114,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
             }
             if (!(actor->noshove & 2) ||
                 !func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &groundY)) {
-                func_1510E8BC(&actor->floorTriVerts, actor->floorTri.v, &groundY, &actor->unk118, &actor->floorMaterial,
+                collision_findFloorEx(&actor->floorTriVerts, actor->floorTri.v, &groundY, &actor->unk118, &actor->floorMaterial,
                               &actor->floorType, actor->xpos, actor->ypos, actor->zpos, prevY, 0,
                               actor, -10000.0f, actor->ypos, actor->noshove & 0x04000000);
             }
@@ -1299,31 +1299,31 @@ void actor_applyWaterCurrent(Actor *actor) {
             actor_easePushVelocity(actor, 0x4000, 50.0f, 0.05999999865889549f);
             break;
         case 6:
-            pathIdx = func_15083E0C(28);
+            pathIdx = collision_findSpawnById(28);
             break;
         case 41:
-            if (func_150A29C8(dc_glbl_CharNum, 0x4028) == 0) {
+            if (zone_isActorOutsideId(dc_glbl_CharNum, 0x4028) == 0) {
                 id = 12;
-            } else if (func_150A29C8(dc_glbl_CharNum, 0x400E) == 0) {
+            } else if (zone_isActorOutsideId(dc_glbl_CharNum, 0x400E) == 0) {
                 id = 10;
-            } else if (func_150A29C8(dc_glbl_CharNum, 0x400D) == 0) {
+            } else if (zone_isActorOutsideId(dc_glbl_CharNum, 0x400D) == 0) {
                 id = 9;
             } else {
                 id = 6;
             }
-            pathIdx = func_15083E0C(id);
+            pathIdx = collision_findSpawnById(id);
         split: // matching: label steers IDO register allocation for id
             break;
         case 43:
-            pathIdx = func_15083E0C(18);
+            pathIdx = collision_findSpawnById(18);
             break;
         case 65:
-            if (func_150A29C8(dc_glbl_CharNum, 0x401F) == 0) {
+            if (zone_isActorOutsideId(dc_glbl_CharNum, 0x401F) == 0) {
                 id = 27;
             } else {
                 id = 26;
             }
-            pathIdx = func_15083E0C(id);
+            pathIdx = collision_findSpawnById(id);
             break;
     }
 
@@ -2840,7 +2840,7 @@ s32 actor_hitScripted(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
  * Runs attack attackId from point (x, y, z) through the dummy attacker movement_obj[25]: sets its position,
  * owner, carried (the slot the line of sight skips), angle, attachments (the line-of-sight origin), unk114
  * (timer), doing_hit (attack + 1) and the xz/y scales.
- * Declared int but returns no value, in the pre-ANSI way: func_150E1570 uses what actor_testAttack leaves in v0.
+ * Declared int but returns no value, in the pre-ANSI way: collision_castRayAtObjects uses what actor_testAttack leaves in v0.
  */
 s32 actor_runAttackAt(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin) {
     Actor *dummy;
@@ -3288,9 +3288,9 @@ void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32
             state->callback = 0;
         }
         if (actor != NULL && (u8 *)actor->unk58 != NULL) {
-            info = (s32 *)func_1502AF04((u8 *)actor->unk58, buf, assetId, 2);
+            info = (s32 *)rom_loadTableEntries((u8 *)actor->unk58, buf, assetId, 2);
         } else {
-            info = (s32 *)func_1502B110(NULL, 2, buf, 3, kind, bank, assetId);
+            info = (s32 *)rom_loadSubTable(NULL, 2, buf, 3, kind, bank, assetId);
         }
         if (info != NULL) {
             dataSize = info[1];
@@ -3305,9 +3305,9 @@ void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32
                 return;
             }
             if (size < 200) {
-                func_1000480C(romAddr, state->header[0], size);
+                rom_copyUncached(romAddr, state->header[0], size);
             } else {
-                func_10004514(romAddr, state->header[0], size, 1);
+                rom_read(romAddr, state->header[0], size, 1);
             }
         }
         state->numFrames[0] = state->header[0][3];
@@ -4377,7 +4377,7 @@ void actor_updateHeadPos(Actor *actor) {
     done = FALSE;
     if (actor->character_type != 0xFF) {
         if ((actor->ob_matrix_ptr != 0) && (D_800C3E90 == 0)) {
-            info = D_800D1C90[actor->character_type];
+            info = gModelDefs[actor->character_type];
             bone = actor->ob_matrix_ptr[info->headBone];
             height = info->headHeight * actor->scale_y;
             if (height) {
@@ -4424,7 +4424,7 @@ void actor_remove(Actor *actor, s32 mode) {
     func_1514D310(actor);
     func_151695F0(actor, 0);
     if ((actor->drawtype != 2) && (actor->drawtype != 3)) {
-        func_15084558(actor);
+        collision_freeObjectModels(actor);
         actor_releaseCarriedNonPlayers(actor, mode);
     }
     if (mode == 1) {
@@ -4437,19 +4437,19 @@ void actor_remove(Actor *actor, s32 mode) {
             if ((*(s32 *)&actor->listpos_ptr) != 0) {
                 if (((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->flags & 0x20) {
                     ((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->unk2 = 1;
-                    D_800D210C[actor->listpos] = 0;
+                    gSpawnInUse[actor->listpos] = 0;
                 } else if (((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->flags & 1) {
-                    D_800D210C[actor->listpos] = 0;
+                    gSpawnInUse[actor->listpos] = 0;
                 } else {
                     s32 pad;
                     ((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->unk2 = 1;
-                    D_800D210C[actor->listpos] &= 0x80;
+                    gSpawnInUse[actor->listpos] &= 0x80;
                 }
             } else {
-                D_800D210C[actor->listpos] &= 0x80;
+                gSpawnInUse[actor->listpos] &= 0x80;
             }
         } else {
-            D_800D210C[actor->listpos] = 0;
+            gSpawnInUse[actor->listpos] = 0;
         }
     }
     /* free the actor's allocations */
@@ -4491,7 +4491,7 @@ void actor_remove(Actor *actor, s32 mode) {
         func_10004074(actor->mv->boneChain);
     }
     sound_stopActorSounds(actor);
-    func_150303E4(actor);
+    attach_removeAll(actor);
     actor_releaseCarried(actor);
     trail_removeActorAfterimages(actor);
     if (actor->mv != NULL) {
@@ -4516,7 +4516,7 @@ void actor_driftOnCurrent(Actor *actor, s32 pathIdx) {
     u16 angle;
     s32 dist;
 
-    count = D_800D2108[pathIdx];
+    count = gSpawnPathCounts[pathIdx];
     if (count < 3) {
         return;
     }
@@ -4524,15 +4524,15 @@ void actor_driftOnCurrent(Actor *actor, s32 pathIdx) {
     z = actor->zpos;
     best = 0x7FFFFFFF;
     for (i = 0; i < count; i++) {
-        dx = x - D_800D2104[pathIdx][i].x;
-        dz = z - D_800D2104[pathIdx][i].z;
+        dx = x - gSpawnPaths[pathIdx][i].x;
+        dz = z - gSpawnPaths[pathIdx][i].z;
         if (dx * dx + dz * dz < best) {
             closest = i;
             best = dx * dx + dz * dz;
         }
     }
     if (closest != 0 && closest != count - 1) {
-        pts = D_800D2104[pathIdx];
+        pts = gSpawnPaths[pathIdx];
         if (best > 28000) {
             dx = x - pts[closest + 1].x;
             dz = z - pts[closest + 1].z;
@@ -4747,7 +4747,7 @@ void actor_updateVisibility(void) {
             actor = &movement_obj[idx];
             for (j = 0; j < 4; j++) {
                 if (actor->unk20B[j] != 0) {
-                    other = func_15083E90(actor->unk20B[j]);
+                    other = collision_findObjectById(actor->unk20B[j]);
                     if (other != NULL && (other->unk2FA & 1)) {
                         actor->unk2FA |= 1;
                         break;
@@ -4976,12 +4976,12 @@ s32 actor_isVisible(Actor *actor) {
         return 1;
     }
     idx = actor->listpos;
-    if (D_800D2108[idx] != 0) {
+    if (gSpawnPathCounts[idx] != 0) {
         hidden = 1;
         for (i = 0; i < D_8008FD8C; i++) {
-            dx = D_800D2104[idx]->x - movement_obj[i].xpos;
-            dz = D_800D2104[idx]->z - movement_obj[i].zpos;
-            if ((dx * dx) + (dz * dz) < D_800D2104[idx]->param * D_800D2104[idx]->param) {
+            dx = gSpawnPaths[idx]->x - movement_obj[i].xpos;
+            dz = gSpawnPaths[idx]->z - movement_obj[i].zpos;
+            if ((dx * dx) + (dz * dz) < gSpawnPaths[idx]->param * gSpawnPaths[idx]->param) {
                 hidden = 0;
                 break;
             }
@@ -4991,7 +4991,7 @@ s32 actor_isVisible(Actor *actor) {
         }
     }
     id = actor->character_type;
-    height = D_800D1C90[id]->bodyHeight * actor->scale_y;
+    height = gModelDefs[id]->bodyHeight * actor->scale_y;
     for (i = 0; i <= gScreenLayout; i++) {
         hidden = 1;
         if (func_150A6360(&gViews[i], gViewMatrices[i], actor->xpos,
@@ -5056,7 +5056,7 @@ void actor_swapSlots(Actor *a, Actor *b) {
     b->listpos_ptr = (SpawnRecord *)u;
     camera_global_Cameras[OBJ_INDEX(b)].mv = b->mv;
     b->mv->SniperState = 0;
-    func_15033EC4(b->unique_id, a->unique_id);
+    attach_swapOwners(b->unique_id, a->unique_id);
     if (b->unk2D4 != NULL) {
         func_1516972C(b->unk2D4);
         b->unk2D4 = NULL;
@@ -5132,7 +5132,7 @@ void actor_setScale(Actor *actor, f32 xzScale, f32 yScale) {
     actor->scale_xz = xzScale;
     actor->scale_y = yScale;
     if (actor->character_type != 255) {
-        info = D_800D1C90[actor->character_type];
+        info = gModelDefs[actor->character_type];
         actor->unkD2 =  (info->unk20 * actor->scale_xz);
         actor->unkD4 =  (info->unk22 * actor->scale_y);
         actor->unkD6 =  (info->unk24 * actor->scale_y);
@@ -5155,7 +5155,7 @@ void actor_scrollTypeTexture(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 ab
     newS = 0;
     wrapS = 0;
     wrapT = 0;
-    if (D_800D19A0[type] == NULL) {
+    if (gModelData[type] == NULL) {
         return;
     }
     base = gModelDlParts[type][set];
@@ -5212,7 +5212,7 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
             vtx = ((Vtx **)movement_obj[i].modelData)[D_800BE9C0];
             if (vtx != NULL) {
                 vtx += firstVtx;
-                func_15094AB8(vtx, (s16 (*)[2])gModelSavedTexCoords[type] + arg3, arg2, arg4, h, w);
+                sprite_rotateTexcoords(vtx, (s16 (*)[2])gModelSavedTexCoords[type] + arg3, arg2, arg4, h, w);
             }
         }
     }
@@ -5317,7 +5317,7 @@ void actor_respawnInPlace(Actor *actor, s32 type, s32 interaction_state, f32 sca
     angle = actor->angle;
     index = actor - movement_obj;
     actor_remove(actor, 0);
-    func_15082A44(spawn, pathIdx, 0, 0, index + 1);
+    collision_spawnObject(spawn, pathIdx, 0, 0, index + 1);
     actor->CameraPtr = camera;
     actor->xpos = x;
     actor->ypos = y;

@@ -148,7 +148,7 @@ s32 model_isReflectionCulled(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
 
     recp = gViews;
     id = obj->character_type;
-    bounds = D_800D1C90[id];
+    bounds = gModelDefs[id];
     radius = bounds->bodyRadius;
     radiusXZ = radius;
     radiusY = radius;
@@ -257,7 +257,7 @@ visible:;
     gBonePoolCursor += (numBones << 3) << 3; // matching: numBones * sizeof(Mtx) schedules differently
     gBoneMatricesUsed += numBones;
 
-    att = D_800C3EE0;
+    att = gAttachments;
     while (att != NULL) {
         next = att->next;
         if (movement_obj[objIndex].unique_id != att->ownerId || att->alpha == 0) {
@@ -275,7 +275,7 @@ visible:;
         entry->isAttachment = TRUE;
         entry->ownerId = movement_obj[objIndex].unique_id;
         entry->setId = att->setId;
-        if (func_15031070(att, &movement_obj[objIndex], &srcMtx, boneMtx) == 0) {
+        if (attach_getMatrices(att, &movement_obj[objIndex], &srcMtx, boneMtx) == 0) {
             att = next;
             continue;
         }

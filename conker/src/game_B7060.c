@@ -1656,11 +1656,11 @@ s32 func_1508DC24(void) {
         if (D_80087340 == i && base->gameType != 0xB8) {
             setId = func_1508E780(cur);
             found = 0;
-            numAttached = func_15033E28(&movement_obj[i], attached);
+            numAttached = attach_getAll(&movement_obj[i], attached);
             if (numAttached == 0 && movement_obj[i].mv->weapon_status == 2 && setId != 0x55 && setId != 0x2E) {
-                func_15083568(&movement_obj[i], setId, 1.0f, 0);
+                collision_createPartSet(&movement_obj[i], setId, 1.0f, 0);
                 if (setId == 0x1D) {
-                    func_15083568(&movement_obj[i], 0x1E, 1.0f, 0);
+                    collision_createPartSet(&movement_obj[i], 0x1E, 1.0f, 0);
                 }
             }
             if (numAttached != 0 && cur != 0x20) {
@@ -1672,16 +1672,16 @@ s32 func_1508DC24(void) {
                             attached[j]->setId != 0x2D && attached[j]->setId != 0x72 &&
                             attached[j]->setId != 0x73 && attached[j]->setId != 0x76 &&
                             attached[j]->setId != 0x77 && attached[j]->setId != 0x78 && attached[j]->setId != 7) {
-                            func_15030158(attached[j], 0);
+                            attach_free(attached[j], 0);
                             movement_obj[i].mv->weapon_status = 0;
                         } else if (setId == attached[j]->setId) {
                             found = 1;
                         }
                     }
                     if (found == 0 && movement_obj[i].mv->weapon_status == 2 && setId != 0x55 && setId != 0x2E) {
-                        func_15083568(&movement_obj[i], setId, 1.0f, 0);
+                        collision_createPartSet(&movement_obj[i], setId, 1.0f, 0);
                         if (setId == 0x1D) {
-                            func_15083568(&movement_obj[i], 0x1E, 1.0f, 0);
+                            collision_createPartSet(&movement_obj[i], 0x1E, 1.0f, 0);
                         }
                     }
                 } else {
@@ -1691,7 +1691,7 @@ s32 func_1508DC24(void) {
                             attached[j]->setId != 0x2D && attached[j]->setId != 0x72 &&
                             attached[j]->setId != 0x73 && attached[j]->setId != 0x76 &&
                             attached[j]->setId != 0x77 && attached[j]->setId != 0x78 && attached[j]->setId != 7) {
-                            func_15030158(attached[j], 0);
+                            attach_free(attached[j], 0);
                             movement_obj[i].mv->weapon_status = 0;
                         }
                     }

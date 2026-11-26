@@ -44,9 +44,9 @@ void func_150CF140(ActorEmitter *emitter) {
     }
     if (actor->ob_matrix_ptr != NULL) {
         state->spawnCredit += (0.06f + (func_150ADA68() * 0.0704f)) * gFrameDelta;
-        func_1515C244(actor, &center, &extentA, &extentB);
+        sprite_getActorBodyBounds(actor, &center, &extentA, &extentB);
         radius = (extentA + extentB) * 0.5f;
-        func_1504715C(&ground, actor);
+        collision_initHitFromObject(&ground, actor);
         while (state->spawnCredit > 1.0f) {
             yaw = func_150ADA20() & 0xFF;
             func_15143794(yaw, (func_150ADA20() % 76U) - 64, radius, &pos);

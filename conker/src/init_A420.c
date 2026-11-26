@@ -111,14 +111,14 @@ s32 sound_computePathPanVolume(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle
     f32 dot;
 
     outside = FALSE;
-    count = D_800D2108[path];
+    count = gSpawnPathCounts[path];
     best = -2;
     if (count == 0) {
         return 0;
     }
     bestDist = 0x7FFFFFFF;
     prevDist = bestDist;
-    for (i = 0, point = D_800D2104[path]; i < count; i++, point++) {
+    for (i = 0, point = gSpawnPaths[path]; i < count; i++, point++) {
         dx = x - point->x;
         dy = y - point->y;
         dz = z - point->z;
@@ -132,20 +132,20 @@ s32 sound_computePathPanVolume(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle
         }
         prevDist = dist;
     }
-    soundX = D_800D2104[path][best].x;
-    soundY = D_800D2104[path][best].y;
-    soundZ = D_800D2104[path][best].z;
+    soundX = gSpawnPaths[path][best].x;
+    soundY = gSpawnPaths[path][best].y;
+    soundZ = gSpawnPaths[path][best].z;
     if (count >= 2 && bestDist > 28000) {
         // use the segment from best toward its nearer neighbour
         if (best >= count - 1 || beforeBestDist < afterBestDist) {
             best--;
         }
-        segment.x = D_800D2104[path][best + 1].x - D_800D2104[path][best].x;
-        segment.y = D_800D2104[path][best + 1].y - D_800D2104[path][best].y;
-        segment.z = D_800D2104[path][best + 1].z - D_800D2104[path][best].z;
-        offset.x = x - D_800D2104[path][best].x;
-        offset.y = y - D_800D2104[path][best].y;
-        offset.z = z - D_800D2104[path][best].z;
+        segment.x = gSpawnPaths[path][best + 1].x - gSpawnPaths[path][best].x;
+        segment.y = gSpawnPaths[path][best + 1].y - gSpawnPaths[path][best].y;
+        segment.z = gSpawnPaths[path][best + 1].z - gSpawnPaths[path][best].z;
+        offset.x = x - gSpawnPaths[path][best].x;
+        offset.y = y - gSpawnPaths[path][best].y;
+        offset.z = z - gSpawnPaths[path][best].z;
         dot = func_150AD900(&segment.x, &offset.x);
         if (dot < 0.0f) {
             outside = TRUE;
@@ -164,12 +164,12 @@ s32 sound_computePathPanVolume(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle
             } else {
                 best--;
             }
-            segment.x = D_800D2104[path][best + 1].x - D_800D2104[path][best].x;
-            segment.y = D_800D2104[path][best + 1].y - D_800D2104[path][best].y;
-            segment.z = D_800D2104[path][best + 1].z - D_800D2104[path][best].z;
-            offset.x = x - D_800D2104[path][best].x;
-            offset.y = y - D_800D2104[path][best].y;
-            offset.z = z - D_800D2104[path][best].z;
+            segment.x = gSpawnPaths[path][best + 1].x - gSpawnPaths[path][best].x;
+            segment.y = gSpawnPaths[path][best + 1].y - gSpawnPaths[path][best].y;
+            segment.z = gSpawnPaths[path][best + 1].z - gSpawnPaths[path][best].z;
+            offset.x = x - gSpawnPaths[path][best].x;
+            offset.y = y - gSpawnPaths[path][best].y;
+            offset.z = z - gSpawnPaths[path][best].z;
             dot = func_150AD900(&segment.x, &offset.x);
             lengthSq = func_150AD930(&segment.x);
             lengthSq = lengthSq * lengthSq;
@@ -178,9 +178,9 @@ s32 sound_computePathPanVolume(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle
             if (dot < lengthSq) {
                 func_15049148(&segment, dot / lengthSq, &segment);
             }
-            soundX = D_800D2104[path][best].x + segment.x;
-            soundY = D_800D2104[path][best].y + segment.y;
-            soundZ = D_800D2104[path][best].z + segment.z;
+            soundX = gSpawnPaths[path][best].x + segment.x;
+            soundY = gSpawnPaths[path][best].y + segment.y;
+            soundZ = gSpawnPaths[path][best].z + segment.z;
         }
     }
     return sound_computePanVolume(soundX - panX, soundY - panY, soundZ - panZ, angle, soundX - x, soundY - y, soundZ - z,

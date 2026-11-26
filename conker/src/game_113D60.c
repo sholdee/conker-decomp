@@ -286,7 +286,7 @@ void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *e
     emission->stream.speedY = func_150ADA68() * 0.150000006f;
 }
 
-/* Occasionally spawns one of the two func_1515548C effects, plus a sound and an event. */
+/* Occasionally spawns one of the two sprite_newScreenSprite effects, plus a sound and an event. */
 void func_150E7290(arg0, owner, kind)
     u8 arg0;
     u8 owner;
@@ -329,7 +329,7 @@ void func_150E7290(arg0, owner, kind)
     }
 }
 
-/* Spawns a func_1515548C effect of the given size at `position`. */
+/* Spawns a sprite_newScreenSprite effect of the given size at `position`. */
 void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
                    s32 idCount, u8 owner, s32 kind) {
     s32 pad; // matching: unused stack slot
@@ -364,7 +364,7 @@ void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 
     arg.unk34 = 60;
     arg.unk38 = 0x80;
     arg.unk3C = 0x20;
-    func_1515548C(&arg, 0, ids, idCount, 0, owner, kind);
+    sprite_newScreenSprite(&arg, 0, ids, idCount, 0, owner, kind);
 }
 
 /* Like func_150E75A0, but placed at a random screen edge. */
@@ -441,7 +441,7 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
         break;
     }
 
-    func_1515548C(&arg, 0, ids, idCount, 0, owner, kind);
+    sprite_newScreenSprite(&arg, 0, ids, idCount, 0, owner, kind);
 }
 
 /* Creates a burst effect (updated by func_150E7C9C) whose `count` points lie on a random

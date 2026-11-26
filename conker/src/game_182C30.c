@@ -22,7 +22,7 @@ PlayerMarker *func_15155780(s32 playerId, s32 owner) {
     marker->heightOffset = 0.0f;
     marker->state = 0;
     marker->light = NULL;
-    func_1518C900(0xA6);
+    attach_loadModelDl(0xA6);
     return marker;
 }
 
@@ -149,14 +149,14 @@ Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
             extraHeight = 0.0f;
         }
         yaw = camera_global_Cameras[view].TrueCameraAngle;
-        gfx = func_15096934(gfx);
+        gfx = sprite_endDraw(gfx);
         func_15043D90(&marker->mtx[D_800BE9C0], 0.0f, yaw, 0.0f, 2.25f, 2.25f, 2.25f, player->xpos,
                       func_15048A40(marker->bobPhase) * 15.0f +
                           (player->ypos + 160.0f + extraHeight + marker->heightOffset),
                       player->zpos);
         gSPMatrix(gfx++, &marker->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPClearGeometryMode(gfx++, G_ZBUFFER);
-        gSPDisplayList(gfx++, D_800E0148[166]->dlists); /* attachment model 166, loaded by func_1518C900 */
+        gSPDisplayList(gfx++, gAttachModelHeaders[166]->dlists); /* attachment model 166, loaded by attach_loadModelDl */
         gSPSetGeometryMode(gfx++, G_ZBUFFER);
     }
     return gfx;
@@ -171,7 +171,7 @@ void func_15155EF8(PlayerMarker *arg0) {
         light_freePointLight(marker->light);
     }
     func_15169804(&marker->header);
-    func_1518CA04(0xA6);
+    attach_releaseModel(0xA6);
 }
 
 /* For the current player: re-arms a finished marker (state 2 -> 0) or ends a timed one (state 3 -> 2). */

@@ -8,7 +8,7 @@ void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
     CollisionHit ground;
     s32 type;
 
-    func_1504715C(&ground, obj);
+    collision_initHitFromObject(&ground, obj);
     pos.x = D_800CC2C0;
     pos.y = D_800CC2C4;
     pos.z = D_800CC2C8;
@@ -19,7 +19,7 @@ void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
         u32 end;
         s32 pad; // matching: IDO needs the extra stack slot
 
-        addr = (u32)&func_150A11C4;
+        addr = (u32)&zone_updateActor;
         end = (u32)&zone_isOutside;
         sum = 0;
         for (; addr < end; addr += 4) {
@@ -108,7 +108,7 @@ void func_15194408(Actor *self, Actor *other) {
     }
 
     func_151AE7B0(other, 0.6f, 90, 0xFF, 1);
-    func_1504715C(&ground, other);
+    collision_initHitFromObject(&ground, other);
     burst.spray.pos.x = other->xpos;
     burst.spray.pos.y = other->ypos + 50.0f;
     burst.spray.pos.z = other->zpos;
@@ -158,7 +158,7 @@ void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
         s32 kind;
         s32 profile;
 
-        func_1504715C(&ground, other);
+        collision_initHitFromObject(&ground, other);
         kind = func_15134070(other);
         if (kind != 0x63) {
             profile = D_800A3FD8[kind].unkE;
@@ -230,7 +230,7 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
         pos.y = other->ypos + 95.0f;
         pos.z = other->zpos;
     fence: // matching: this basic-block boundary keeps as1 from scheduling across it
-        func_1504715C(&ground, other);
+        collision_initHitFromObject(&ground, other);
         burst.spray.pos = pos;
         burst.spray.scaleBase = 10.0f;
         burst.spray.countBase = 15;
@@ -298,7 +298,7 @@ void func_15194AB4(Actor *obj) {
         break;
     }
     if (anim != -1) {
-        func_15083568(obj, anim, 1.0f, 0);
+        collision_createPartSet(obj, anim, 1.0f, 0);
     }
 }
 
@@ -392,7 +392,7 @@ void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     } else {
         func_1518D1C0(other, 11, 0, 1, 0xFF, 1, "effects_impact_lava");
     }
-    func_1504715C(&ground, other);
+    collision_initHitFromObject(&ground, other);
     func_1514B364((Vec3f *)&other->xpos, &ground, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
 }
 
@@ -511,7 +511,7 @@ void func_151951E0(Actor *obj) {
     copy->theta = (obj->angle + 0x4000) * (360.0f / 65536);
     copy->noshove = obj->noshove;
     copy->unk9C |= 0x0FFF0000;
-    func_150838EC(copy, obj->animseq.uh, 0, obj->animsp);
+    collision_allocAnimState(copy, obj->animseq.uh, 0, obj->animsp);
     func_150D10E4(obj, 0);
     func_150D10E4(copy, 1);
 }

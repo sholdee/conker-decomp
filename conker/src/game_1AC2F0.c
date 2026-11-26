@@ -553,7 +553,7 @@ Gfx *screen_drawIris(Gfx *gfx, s32 view) {
         gDPPipeSync(gfx++);
         gDPSetCombineLERP(gfx++, 0, 0, 0, 0, 0, 0, 0, TEXEL0, 0, 0, 0, 0, 0, 0, 0, TEXEL0);
         gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
-        gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, func_1510D0EC(D_80090298[1], NULL, 3, 0));
+        gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, texture_getAddress(D_80090298[1], NULL, 3, 0));
         gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
         gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
         gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_CLAMP, 6,
@@ -564,7 +564,7 @@ Gfx *screen_drawIris(Gfx *gfx, s32 view) {
         gfx = func_1517FB9C(gfx, size, 64, 0, 0, view);
         if (gIrisStyles[view] != 0) {
             gDPPipeSync(gfx++);
-            gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, func_1510D0EC(D_80090298[2], NULL, 3, 0));
+            gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, texture_getAddress(D_80090298[2], NULL, 3, 0));
             gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
             gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
             gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_CLAMP,
@@ -573,7 +573,7 @@ Gfx *screen_drawIris(Gfx *gfx, s32 view) {
             if (gIrisStyles[view] == 2) {
                 gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
                 gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
-                                   func_1510D0EC(D_80090298[gIrisOverlayFrames[view] + 3], NULL, 3, 0));
+                                   texture_getAddress(D_80090298[gIrisOverlayFrames[view] + 3], NULL, 3, 0));
                 gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
                 gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x3FF, 0);
                 gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 5, G_TX_NOLOD,
@@ -889,7 +889,7 @@ Gfx *screen_drawLetterbox(Gfx *gfx) {
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gDPSetOtherMode(gfx++, 0x002CFF, 0x5011C4);
     gDPSetCombineLERP(gfx++, 0, 0, 0, 0, 0, 0, 0, TEXEL0, 0, 0, 0, 0, 0, 0, 0, TEXEL0);
-    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, func_1510D0EC(D_800902C8, NULL, 3, 0));
+    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, texture_getAddress(gBarTopEdgeTexId, NULL, 3, 0));
     gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
     gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
     gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 7, G_TX_NOLOD, G_TX_CLAMP, 7,
@@ -903,7 +903,7 @@ Gfx *screen_drawLetterbox(Gfx *gfx) {
     xh = right;
     gSPScisTextureRectangle(gfx++, xl << 2, yl << 2, xh << 2, yh << 2, G_TX_RENDERTILE, 0, 0, dsdx, dtdy);
 
-    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, func_1510D0EC(D_800902CC, NULL, 3, 0));
+    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, texture_getAddress(gBarBottomEdgeTexId, NULL, 3, 0));
     gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
     gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
     gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 7, G_TX_NOLOD, G_TX_CLAMP, 7,

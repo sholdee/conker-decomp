@@ -47,11 +47,11 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
     func_15165F80(-1, pos.x, pos.y + 6.0f, pos.z, 25, 18, 0, *(u8 *)&arg2, 1);
     func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 50.0f + 40.0f, yaw + 60, yaw - 60,
                   func_150ADA20() % 11U + 30, 5, 0, 0.0f, 0, *(u8 *)&arg2);
-    func_1504715C(&ground, obj);
+    collision_initHitFromObject(&ground, obj);
     probe.x = pos.x;
     probe.y = pos.y + 100.0f;
     probe.z = pos.z;
-    if (func_15046C80(&probe, 0, pos.y - 100.0f, &ground) != 0) {
+    if (collision_probeFloorSurfABSet0Cached(&probe, 0, pos.y - 100.0f, &ground) != 0) {
         size = func_150ADA68() * 200.0f + 200.0f;
         desc.texture = 0x2A;
         desc.unk7 = 0;

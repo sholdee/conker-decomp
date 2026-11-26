@@ -43,7 +43,7 @@ void func_15016588(void) {
             mask = mask << 1;
         }
 
-        func_1502B020(&value, 3, 0x1A, D_800BEAAB, i);
+        rom_findPath(&value, 3, 0x1A, D_800BEAAB, i);
         i++;
         if (value != 0) {
             D_800BE580[idx] |= mask;

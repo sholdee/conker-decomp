@@ -150,11 +150,11 @@ void func_150C7C90(WorldObject *obj) {
     last->head.word |= angle;
 }
 
-/* Places the object at (-30, +50, +30) from the Actor that func_15083E90(0xC) returns. */
+/* Places the object at (-30, +50, +30) from the Actor that collision_findObjectById(0xC) returns. */
 void func_150C7D7C(WorldObject *obj) {
     Actor *target;
 
-    target = func_15083E90(0xC);
+    target = collision_findObjectById(0xC);
     obj->x = target->xpos - 30.0f;
     obj->y = target->ypos + 50.0f;
     obj->z = target->zpos + 30.0f;

@@ -20,7 +20,7 @@ Gfx *gEffectModelSecondDls[11];
  * gSwarmGroupsInUse[4] marks the swarm groups handed out by swarm_spawnEffect.
  */
 
-/* Model resource returned by the loader func_1502B6BC. */
+/* Model resource returned by the loader rom_loadPathTable. */
 typedef struct ModelResource {
     /* 0x00 */ Vtx *unk0;
     /* 0x04 */ s32 unk4;
@@ -160,7 +160,7 @@ void swarm_loadModelWithAltVerts(s32 slot) {
         swarm_loadModel(slot);
     }
     if (gEffectModelSlots[slot + 1].resource == NULL) {
-        res = func_1502B6BC(0, 0, 0, 2, 9, slot + 0xAE);
+        res = rom_loadPathTable(0, 0, 0, 2, 9, slot + 0xAE);
         if (res != NULL) {
             gEffectModelSlots[slot + 1].resource = res;
             gEffectModelSlots[slot + 1].unk4 = res->unk0;
@@ -191,7 +191,7 @@ void swarm_loadModelWithExtra(s32 slot, s32 extraSlot) {
         swarm_loadModel(slot);
     }
     if (gEffectModelSlots[slot].resource != NULL && gEffectModelSlots[extraSlot].resource == NULL) {
-        res = func_1502B6BC(0, 0, 0, 2, 9, extraSlot + 0xAD);
+        res = rom_loadPathTable(0, 0, 0, 2, 9, extraSlot + 0xAD);
         if (res != NULL) {
             gEffectModelSlots[extraSlot].resource = res;
             gEffectModelSlots[extraSlot].unk4 = res->unk0;
@@ -208,14 +208,14 @@ void swarm_loadModel(s32 slot) {
     ModelResource *res;
 
     if (gEffectModelSlots[slot].resource == NULL) {
-        res = func_1502B6BC(0, 0, 0, 2, 9, slot + 0xAD);
+        res = rom_loadPathTable(0, 0, 0, 2, 9, slot + 0xAD);
         if (res != NULL) {
             gEffectModelSlots[slot].resource = res;
             gEffectModelSlots[slot].unk4 = res->unk0;
             gEffectModelSlots[slot].unk8 = res->unk8;
             gEffectModelSlots[slot].displayList = res->unk18;
             gEffectModelSecondDls[slot] = res->unk10;
-            func_1510CE60(gEffectModelSecondDls[slot], 0, 1, 0x3E, &gEffectModelSlots[slot].unk10);
+            texture_resolveDl(gEffectModelSecondDls[slot], 0, 1, 0x3E, &gEffectModelSlots[slot].unk10);
             gEffectModelSlotStates[slot] = 1;
         }
     }
@@ -244,7 +244,7 @@ Gfx *swarm_callModelSecondDl(Gfx *gdl, s32 modelId, s32 arg2, s32 arg3) {
  * slot 9 after slot 8 also frees slot 8's model. */
 void swarm_freeModel(s32 slot) {
     if (gEffectModelSlots[slot].unk10 != NULL) {
-        func_1510D630(gEffectModelSlots[slot].unk10);
+        texture_releaseList(gEffectModelSlots[slot].unk10);
         gEffectModelSlots[slot].unk10 = NULL;
     }
     if (slot == 8) {

@@ -339,9 +339,9 @@ void func_15087350(s32 index, s32 started, f32 lookahead) {
                     D_800D23A0 = obj->ypos;
                     D_800D23A4 = cosf(f) * 300.0f + obj->zpos;
                 }
-                D_800D2104[obj->listpos][1].x = D_800D239C;
-                D_800D2104[obj->listpos][1].y = D_800D23A0;
-                D_800D2104[obj->listpos][1].z = D_800D23A4;
+                gSpawnPaths[obj->listpos][1].x = D_800D239C;
+                gSpawnPaths[obj->listpos][1].y = D_800D23A0;
+                gSpawnPaths[obj->listpos][1].z = D_800D23A4;
                 obj->stickspeed = started;
                 if (D_800D2390 == 1) {
                     obj->yspd = 75.0f;

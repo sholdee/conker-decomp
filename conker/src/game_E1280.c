@@ -262,11 +262,11 @@ lbl1:
                     }
                 } while (count != 0 && k != trail->head.end);
             }
-            gfx = func_15142E24(gfx, &D_80090B60[146], 0, 0, 0, 0, 0x92, 0, 0, &update, 3);
+            gfx = func_15142E24(gfx, &gEffectTextures[146], 0, 0, 0, 0, 0x92, 0, 0, &update, 3);
             gfx = func_15142B7C(gfx, 1, 0x160600);
             gfx = func_1513F4E4(gfx, 0x4D, &update);
             gfx = func_15142C10(gfx, state->shade, state->shade, state->shade, 0xFF, &update);
-            gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
+            gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
             if (trail->head.tmpl.flags & TRAIL_ATTACHED) {
                 j = trail->head.end - 1;
                 if (j < 0) {

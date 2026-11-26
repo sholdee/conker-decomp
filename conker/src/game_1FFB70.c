@@ -75,7 +75,7 @@ Gfx *screen_drawOverlay(Gfx *gfx, ScreenOverlay *overlay, s16 id) {
                       TEXEL0, 0, ENVIRONMENT, 0, ENVIRONMENT, 0, TEXEL0, 0);
     gDPSetOtherMode(gfx++, 0x002C3F, G_RM_XLU_SURF | G_RM_XLU_SURF2 | G_ZS_PRIM);
 
-    texture = func_1510D0EC((s32)D_A48, NULL, 3, 0);
+    texture = texture_getAddress((s32)D_A48, NULL, 3, 0);
 
     gDPLoadTextureBlockS(gfx++, texture, G_IM_FMT_IA, G_IM_SIZ_8b, 64, 64, 0, G_TX_WRAP | G_TX_NOMIRROR,
                          G_TX_WRAP | G_TX_NOMIRROR, 6, 6, G_TX_NOLOD, G_TX_NOLOD);

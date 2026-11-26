@@ -7,12 +7,12 @@
 void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
 
     D_800BE9B4 = 2;
-    func_1503FB08();
+    debug_resetTaskMenu();
     level = gNextLevel = arg2;
 
     player_resetWarps(gPlayerSpawnPoints[0]);
     func_15008230();
-    func_15005270();
+    zone_resetObjectCursor();
     player_initMatch(arg0, arg1);
 
     view_setPlayerCount(gModePlayerCounts[gMatchState.mode], arg2);
@@ -40,7 +40,7 @@ void game_loadLevel(void) {
         D_800BE9B4 = 1;
     }
     func_10004308();
-    func_15002FB4(gNextLevel);
+    collision_loadMapSettings(gNextLevel);
     switch (gNextLevel) {
     case 0x1A:
     case 0x24:
@@ -105,16 +105,16 @@ void game_loadLevel(void) {
         D_800D2457 = D_800D2456 = 3;
         player_setStat(0, 5, 3);
     }
-    func_15002F40(level);
+    collision_setFloorReach(level);
     func_1501C53C();
     gfx_allocDisplayLists();
     actor_clearAll();
-    func_15017930(level);
+    zone_loadObjects(level);
     text_resetContextText();
     view_allocViews(D_800BE9E8, 1);
     func_15012F90();
     screen_resetEffects();
-    func_15000AC0();
+    collision_clearUvWobbles();
     func_15012780();
     light_resetParticles();
     func_15044370();
@@ -152,9 +152,9 @@ void game_loadLevel(void) {
         func_15125690(&camera_global_Cameras[i], 1);
     }
     func_1500E70C(level);
-    func_150163D0(level);
+    collision_loadCylinderSets(level);
     light_applyZones();
-    func_15000AD0(level);
+    collision_initMapBackground(level);
     if (level == 0x1D) {
         save_clearMenuCharacters();
     }
@@ -204,7 +204,7 @@ void game_loadLevel(void) {
     func_1501CC3C();
     for (i = 0; i < 25; i++) {
         if ((movement_obj[i].type != 0) && (movement_obj[i].playernumber != 0xFF)) {
-            func_150A11C4(&movement_obj[i]);
+            zone_updateActor(&movement_obj[i]);
         }
     }
     if ((D_800D18A8 != 0) && (level != 0x22)) {
@@ -220,7 +220,7 @@ void func_150081E4(void) {
     s32 i;
 
     D_800D3668 = NULL;
-    D_800CBE00 = NULL;
+    gTriggerNodes = NULL;
     D_800DDD64 = NULL;
 
     for (i = 0; i < 2; i++)

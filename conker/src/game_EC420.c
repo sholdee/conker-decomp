@@ -227,7 +227,7 @@ void func_150BF760(WorldObject *obj) {
         if (SCROLL_WORK(&obj[1])->texScroll == NULL) {
             SCROLL_WORK(&obj[1])->texScroll = flamethrower_addObjectTexScroll(obj, D_800902B8, 1, -1, 0, 0, -8);
         }
-        actor = func_15083E90(0x14);
+        actor = collision_findObjectById(0x14);
         mode = obj->task_flag & TASK_FLAG_STATE;
         if (actor != NULL) {
             anim = actor->unk2D0;
@@ -239,10 +239,10 @@ void func_150BF760(WorldObject *obj) {
                 obj[1].v = -sinf(progress * 3.141592741f * 1.333333254f) * 10.0f;
             }
             if (actor == NULL) {
-                slot = func_15083E0C(0x14);
-                D_800D20FC[slot].unk2 = 0;
-                func_150825C0(slot, 0);
-                actor = func_15083E90(0x14);
+                slot = collision_findSpawnById(0x14);
+                gSpawnRecords[slot].unk2 = 0;
+                collision_trySpawnRecord(slot, 0);
+                actor = collision_findObjectById(0x14);
             }
             if (actor->intelwalk != 2) {
                 actor->intelwalk = 2;
@@ -264,10 +264,10 @@ void func_150BF760(WorldObject *obj) {
                 obj[1].v = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
             }
             if (actor == NULL) {
-                slot = func_15083E0C(0x14);
-                D_800D20FC[slot].unk2 = 0;
-                func_150825C0(slot, 0);
-                actor = func_15083E90(0x14);
+                slot = collision_findSpawnById(0x14);
+                gSpawnRecords[slot].unk2 = 0;
+                collision_trySpawnRecord(slot, 0);
+                actor = collision_findObjectById(0x14);
             }
             if (actor == NULL && actor->intelwalk != 3) { /* sic: the original tests actor == NULL */
                 actor->intelwalk = 3;

@@ -13,8 +13,8 @@ ChannelParticle *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u
     spawn.pos = emitter->pos;
     if (arg2) {
         spawn.flags |= 0x01000000;
-        func_1510F800(0);
-        spawn.unk48 = func_1510FD20(spawn.pos.x, spawn.pos.z);
+        collision_selectMap(0);
+        spawn.unk48 = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
     } else {
         spawn.flags &= ~0x01000000;
         spawn.unk48 = 0;

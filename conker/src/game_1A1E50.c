@@ -18,7 +18,7 @@ static void (*D_8008CD04[])(s32) = {
     func_150BEF70,
     func_150EA8E0,
     func_150DEC90,
-    func_150B6BC0,
+    sprite_runQueuedCommand,
     func_150CEF60,
     func_150DF920,
     func_150C79BC,
@@ -70,13 +70,13 @@ void func_151749F8(s32 arg0, s32 arg1) {
 
     func_15165F70();
     flamethrower_updateTexScrolls(D_800B0E00[0], D_800B0E00[1]);
-    func_1510C8A8();
+    texture_updateUvWobbles();
     temp = D_800B0DF0->updateCallback;
     if (temp != 0) {
         D_8008CD04[temp](arg1);
     }
     if (gIsMultiplayer == 0) {
-        func_1517DE5C();
+        sprite_updateLevelSprites();
         func_151880C0();
     }
     gTextAnimClock += D_800BE9E4 << 6;

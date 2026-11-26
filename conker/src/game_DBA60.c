@@ -181,7 +181,7 @@ static EffectDefList D_800886E0[] = {
 };
 
 /* Spawns the effects in D_800886E0[0] and attaches each to `actor`. Also checksums the code from
-   func_15001A08 up to func_15001B08 and, if it was modified, empties object list 35. */
+   collision_allocQuadTree up to func_15001B08 and, if it was modified, empties object list 35. */
 void func_150AEB9C(Actor *actor) {
     u32 *p;
     u32 sum;
@@ -193,7 +193,7 @@ void func_150AEB9C(Actor *actor) {
     if (actor != NULL) {
         sum = 0;
         end = (u32)func_15001B08;
-        for (p = (u32 *)func_15001A08; (u32)p < end; p++) {
+        for (p = (u32 *)collision_allocQuadTree; (u32)p < end; p++) {
             sum ^= *p;
             sum <<= 1;
         }

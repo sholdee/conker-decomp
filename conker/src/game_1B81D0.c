@@ -175,7 +175,7 @@ void func_1518B264(f32 *pos, f32 radius, f32 size, s32 count, u8 arg4) {
 
 /*
  * Spawns up to count droplets of the given model at random points within radius of pos. A droplet
- * is spawned only where func_15046C80 finds a floor below the point, together with 1-4 smaller ones
+ * is spawned only where collision_probeFloorSurfABSet0Cached finds a floor below the point, together with 1-4 smaller ones
  * above it; every droplet remembers that floor height (see func_1518AD20). arg5 is unused.
  */
 void func_1518B2A8(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
@@ -235,7 +235,7 @@ void func_1518B2A8(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg
             spawn.pos.z = pos[2] - func_151423D8(angle - 0x40) * dist;
             spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
             spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
-            if (func_15046C80(&spawn.pos, 0, -10000.0f, &floor) != 0) {
+            if (collision_probeFloorSurfABSet0Cached(&spawn.pos, 0, -10000.0f, &floor) != 0) {
                 spawn.update2Fn = 2;
                 droplet = func_15132A4C(&spawn, 3, 0xFF, sizeof(f32), arg6, 0);
                 if (droplet != NULL) {

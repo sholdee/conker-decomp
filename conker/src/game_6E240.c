@@ -9,7 +9,7 @@ void func_15040D90(s32 arg0) {
 
 }
 
-void func_15040D9C(s32 arg0) {
+void debug_drawFilledMarker(s32 arg0) {
     u16 *ptr;
     s32 i;
     s32 j;
@@ -45,7 +45,7 @@ void func_15040D9C(s32 arg0) {
     }
 }
 
-void func_15040FCC(s32 arg0) {
+void debug_drawHollowMarker(s32 arg0) {
     u16 *fb1;
     u16 *fb2;
     u16 *zb;
@@ -95,7 +95,7 @@ void func_15040FCC(s32 arg0) {
     }
 }
 
-void func_1504129C(void) {
+void debug_busyWait(void) {
     s32 i = 0;
     do {} while (++i < 0x18000000);
 }

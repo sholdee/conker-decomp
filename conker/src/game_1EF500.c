@@ -24,7 +24,7 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
                 func_100114D0(pos->x, pos->y, pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
                 if ((u32)volume > 0x1000) {
                     volume = (u32)volume >> 7;
-                    func_1000E7A0(8, (func_1510F8CC(soundId) + 1) | (volume << 8) | (pan << 16));
+                    func_1000E7A0(8, (collision_getSurfaceType(soundId) + 1) | (volume << 8) | (pan << 16));
                 }
             }
         } else {
@@ -35,7 +35,7 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
                     volumeLevel = intensity;
                     /* 40.74 = 256 / 2pi: radians to a 256-step angle */
                     direction = sound_computePan(dir->x, dir->z, (u32)(camera->TrueCameraAngleRad * 40.74366379f));
-                    func_1000E7A0(8, (func_1510F8CC(soundId) + 1) | ((s32)volumeLevel << 8) | (direction << 16));
+                    func_1000E7A0(8, (collision_getSurfaceType(soundId) + 1) | ((s32)volumeLevel << 8) | (direction << 16));
                 }
             }
         }
@@ -885,7 +885,7 @@ u8 weapon_traceProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 d
             Vec3f *from = &trail->head.def.pos;
 
             solid = !(ext->flags & TRAIL_FLAG_8);
-            func_15081690(owner, from->x, from->y, from->z, ext->path.dir.x, ext->path.dir.y, ext->path.dir.z,
+            collision_castRay(owner, from->x, from->y, from->z, ext->path.dir.x, ext->path.dir.y, ext->path.dir.z,
                           &ray, length, 1, 0, solid, ext->fieldA8, 0, ext->handle);
             if (ray.hitType >= 2) {
                 weapon_onProjectileImpact(ray.obj, owner, trail, &ray.pos, &ray.far, &ray);

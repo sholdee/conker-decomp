@@ -16,19 +16,19 @@ s32 script_zoneCommand(s32 slot, u32 command, Msg_CD860 *msg) {
 
     switch (command) {
     case 0:
-        func_150A2864(slot, 0);
+        zone_setDisabled(slot, 0);
         return 1;
     case 1:
-        func_150A2864(slot, 1);
+        zone_setDisabled(slot, 1);
         return 1;
     case 2:
-        func_150A2940(slot, msg->params[0], msg->params[1]);
+        zone_setData1(slot, msg->params[0], msg->params[1]);
         return 1;
     case 3:
-        func_150A3444(slot, msg->params[0], msg->params[1], msg->params[2]);
+        zone_setPosition(slot, msg->params[0], msg->params[1], msg->params[2]);
         break;
     case 4:
-        func_150A3398(slot, msg->params[0], msg->params[1], msg->params[2], msg->params[3], msg->params[4]);
+        zone_setParams(slot, msg->params[0], msg->params[1], msg->params[2], msg->params[3], msg->params[4]);
         break;
     case 5:
         // matching: `== 0` would compile to sltiu; the inverted test keeps the branchy form
@@ -59,11 +59,11 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
                 if (obj == NULL) {
                     return 0;
                 }
-                result = func_150A29C8(obj - movement_obj, slot);
+                result = zone_isActorOutsideId(obj - movement_obj, slot);
             lbl1: // matching: block boundary stops IDO moving the store into the branch delay slot
                 break;
             case 0x9000:
-                result = func_150A2D84(id, slot);
+                result = zone_isCameraOutsideId(id, slot);
                 break;
             }
             return (result == 0) ? 1 : ret;
@@ -75,7 +75,7 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
             s32 c;
             s32 d;
 
-            func_150A3330(slot, &a, &b, &c, &d);
+            zone_getParams(slot, &a, &b, &c, &d);
             if (c == 0) {
                 break;
             }
@@ -91,7 +91,7 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
             s32 c;
             s32 d;
 
-            func_150A3330(slot, &a, &b, &c, &d);
+            zone_getParams(slot, &a, &b, &c, &d);
             if (c == 0) {
                 break;
             }
@@ -118,7 +118,7 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
             s32 i;
 
             for (i = 0; i < 25; i++) {
-                if (movement_obj[i].type == msg->params[0] && func_150A29C8(i, slot) == 0) {
+                if (movement_obj[i].type == msg->params[0] && zone_isActorOutsideId(i, slot) == 0) {
                     if (query == 11) {
                         return movement_obj[i].listpos | 0x2000;
                     }
@@ -140,10 +140,10 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
             switch (msg->params[0] & 0xF000) {
             case 0x2000:
                 obj = actor_findOnPath(id);
-                result = func_150A2EE4(obj - movement_obj, slot);
+                result = zone_isActorBehindGate(obj - movement_obj, slot);
                 break;
             case 0x9000:
-                result = func_150A2FA4(id, slot);
+                result = zone_isCameraBehindGate(id, slot);
                 break;
             }
             return result;
@@ -151,21 +151,21 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
     case 14:
         return zones[slot].y;
     case 15:
-        if (func_150A2CA4(slot) == -1) {
+        if (zone_findActorInZone(slot) == -1) {
             return 0;
         }
         return 1;
     case 16:
-        if (func_150A2CA4(slot) == -1) {
+        if (zone_findActorInZone(slot) == -1) {
             s32 i;
 
             for (i = 0; i < D_8008FD90; i++) {
-                if (func_150A2D84(i, slot) == 0) {
+                if (zone_isCameraOutsideId(i, slot) == 0) {
                     if (D_800D3840 == 2) {
                         return 1;
                     }
                     if (msg->params[1] != 0) {
-                        if (movement_obj[i].mv->rt_context_b != 3 && func_150A2D84(i, msg->params[0] & 0xFFFF0FFF) == 0) {
+                        if (movement_obj[i].mv->rt_context_b != 3 && zone_isCameraOutsideId(i, msg->params[0] & 0xFFFF0FFF) == 0) {
                             return 1;
                         }
                     } else {

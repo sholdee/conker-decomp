@@ -111,7 +111,7 @@ Actor *func_15142444(u8 uniqueId, Actor *self) {
         return NULL;
     }
 
-    actor = func_15083E90(uniqueId);
+    actor = collision_findObjectById(uniqueId);
     if ((actor != NULL) && (actor->ob_matrix_ptr != NULL)) {
         return actor;
     }
@@ -337,7 +337,7 @@ Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32
     return gfx;
 }
 
-/* Loads frame `frame >> 16` of `desc` through func_15094FE8 unless the same texture (func_1514306C of
+/* Loads frame `frame >> 16` of `desc` through sprite_loadDescFrameAt unless the same texture (func_1514306C of
  * `texture` and `mode`) is already loaded with the same clamp mode and origin (cached state). */
 Gfx *func_15142E24(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s32 s, s32 t, s32 texture, u8 mode,
                    SpriteParams *sprite, u8 *needSync, s32 assetArg) {
@@ -353,7 +353,7 @@ Gfx *func_15142E24(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s32 s, s32 t,
             (level == 2) || (gIsMultiplayer != 0)) {
             assetArg = 3;
         }
-        gfx = func_15094FE8(gfx, desc, frame >> 8, sprite, 0, 0, 0, cm, s, t, assetArg);
+        gfx = sprite_loadDescFrameAt(gfx, desc, frame >> 8, sprite, 0, 0, 0, cm, s, t, assetArg);
         D_800DD1B0 = id;
         D_800DD208 = cm;
         D_800DD20C = s;
@@ -386,7 +386,7 @@ s16 func_15143044(u8 arg0, s32 arg1) {
 
 
 /* The asset id of frame `frame` that func_15142E24 compares with the cached one: by `mode`, a fixed texture, the
- * id `texture` itself or from D_80091564, frame of `desc`, or (the default) frame of D_80090B60[texture]. */
+ * id `texture` itself or from D_80091564, frame of `desc`, or (the default) frame of gEffectTextures[texture]. */
 s32 func_1514306C(TextureDesc *desc, s32 texture, s32 frame, u8 mode) {
     s32 ret;
 
@@ -415,7 +415,7 @@ s32 func_1514306C(TextureDesc *desc, s32 texture, s32 frame, u8 mode) {
             }
             break;
         default:
-            ret = ((s32 *)D_80090B60[texture].addr)[frame];
+            ret = ((s32 *)gEffectTextures[texture].addr)[frame];
             break;
     }
     return ret;
@@ -780,7 +780,7 @@ f32 func_15143E64(const Vec3f *v) {
 }
 
 /*
- * If any actor is alive and some i passes func_150A29C8(i, arg1) == 0, plays arg0 through func_1512D748
+ * If any actor is alive and some i passes zone_isActorOutsideId(i, arg1) == 0, plays arg0 through func_1512D748
  * and spawns a short random func_151D8868 effect. Returns whether it did.
  */
 u8 func_15143E94(s32 arg0, s32 arg1) {
@@ -808,7 +808,7 @@ start:
     if (found) {
         found2 = 0;
         while (!found2 && i < count) {
-            if (func_150A29C8(i, arg1) == 0) {
+            if (zone_isActorOutsideId(i, arg1) == 0) {
                 found2 = 1;
             } else {
                 i++;
@@ -829,7 +829,7 @@ start:
 }
 
 /*
- * Advances a 16.16 position through sequence `id` (D_80090B60[id].frameCount steps long) by speed * D_800BE9E4.
+ * Advances a 16.16 position through sequence `id` (gEffectTextures[id].frameCount steps long) by speed * D_800BE9E4.
  * Past either end it stops (1), clamps (2/0x10), bounces (4) or wraps; returns 1 when it stopped.
  */
 s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags) {
@@ -838,7 +838,7 @@ s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags) {
     s32 n;
 
     ret = 0;
-    n = D_80090B60[id].frameCount;
+    n = gEffectTextures[id].frameCount;
     max = (n << 16) - 1;
     *pos += *speed * D_800BE9E4;
     if (max < *pos) {
@@ -1590,7 +1590,7 @@ void func_15145A50(Actor *actor) {
 }
 
 /*
- * Ray (start, dir) against the actor's collision ellipsoid (centre/radius from func_1515C1A0, y squashed
+ * Ray (start, dir) against the actor's collision ellipsoid (centre/radius from sprite_getActorBounds, y squashed
  * by unkDC); writes the near and far hits, unsquashed by unkE0. Returns 0 on a miss.
  */
 s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f *hitFar,
@@ -1612,7 +1612,7 @@ s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f 
     if (center != NULL) {
         center = &centerBuf;
     }
-    func_1515C1A0(actor, center, radius, arg6);
+    sprite_getActorBounds(actor, center, radius, arg6);
     if (*arg6 == 0.0f) {
         return 0;
     }
@@ -1926,11 +1926,11 @@ s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, const Vec3f *
         }
         mtx = point->anim->partMtx[D_800BE9C0] + index;
     } else if (point->parentSet) {
-        part = func_1503195C(actor, point->parentSet, 0);
+        part = attach_find(actor, point->parentSet, 0);
         if (part == NULL) {
             return 0;
         }
-        if (func_15031070(part, actor, &partMtx, &partBoneMtx) == 0) {
+        if (attach_getMatrices(part, actor, &partMtx, &partBoneMtx) == 0) {
             return 0;
         }
         if (part->anim != NULL) {

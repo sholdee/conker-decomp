@@ -261,7 +261,7 @@ void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
 }
 
 
-/* If func_15046C80 finds ground within 200 units of `position`, spawns a cluster of effects there. */
+/* If collision_probeFloorSurfABSet0Cached finds ground within 200 units of `position`, spawns a cluster of effects there. */
 void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
     Vec3f pos;
 
@@ -272,7 +272,7 @@ void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
         probe.x = position->x;
         probe.y = position->y + 200.0f;
         probe.z = position->z;
-        if (func_15046C80(&probe, 0, position->y - 200.0f, ground) == 0) {
+        if (collision_probeFloorSurfABSet0Cached(&probe, 0, position->y - 200.0f, ground) == 0) {
             return;
         }
     }

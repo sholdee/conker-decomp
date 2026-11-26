@@ -276,7 +276,7 @@ typedef struct LevelHeader {
     /* 0x4B */ u8  assetList;       // index into D_80082B20, 0 = none
 } LevelHeader; // size 0x4C
 
-/* The level settings resource as returned by func_1502B6BC (table 21, func_15002FB4): the
+/* The level settings resource as returned by rom_loadPathTable (table 21, collision_loadMapSettings): the
  * LevelHeader and the id list published as gLevelTaskIds. */
 typedef struct LevelSettingsAsset {
     /* 0x00 */ LevelHeader *header;
@@ -402,14 +402,14 @@ struct WORD {
     s32 unk0;
 };
 
-/* Per model-type definition, D_800D1C90[id] (loaded by func_1503D774; freed by func_15084558 with its
+/* Per model-type definition, gModelDefs[id] (loaded by func_1503D774; freed by collision_freeObjectModels with its
  * allocation starting 0x10 bytes earlier). An ExpressionTableHeader (game_AB760) sits 8 bytes before it.
  * Only the fields the code reads are typed; the full size is unknown (at least 0x40). */
 typedef struct ModelDef {
     /* 0x00 */ s16 aimHeight;       // aim top point, above the aim bone (func_1503A08C)
     /* 0x02 */ s16 unk2;
     /* 0x04 */ u8  subModelCount;
-    /* 0x05 */ u8  subModelList;    // index into D_80086CAC
+    /* 0x05 */ u8  subModelList;    // index into gSubModelLists
     /* 0x06 */ s16 unk6;
     /* 0x08 */ u8  texture[2][3];   // texture per eye slot (Actor.unk6C) and state
     /* 0x0E */ u16 bodyRadius;
@@ -466,7 +466,7 @@ typedef struct CollisionTri {
     /* 0x00 */ Vec3s v[3];
 } CollisionTri; // size 0x12
 
-/* Result of a ray cast: func_15081690 (level mesh, then the actors' collision cylinders or models). */
+/* Result of a ray cast: collision_castRay (level mesh, then the actors' collision cylinders or models). */
 typedef struct RayHit {
     /* 0x00 */ Actor *obj;                  // actor hit (hitType 2/3), else NULL
     /* 0x04 */ f32 dist;                    // distance from origin to pos; -1.0f: no hit
@@ -479,7 +479,7 @@ typedef struct RayHit {
     /* 0x56 */ u16 bone;                    // model hit: bone of the part hit
     /* 0x58 */ u8 part;                     // model hit: part hit
     /* 0x59 */ u8 hitType;                  // 0 none, 1 level mesh, 2 actor cylinder, 3 actor model
-    /* 0x5A */ u8 index;                    // model hit: index from func_1508114C
+    /* 0x5A */ u8 index;                    // model hit: index from collision_rayHitSpheres
     /* 0x5B */ u8 pad5B;
     /* 0x5C */ struct WorldObject *surface; // level-mesh hit on an object surface, else NULL
     /* 0x60 */ s32 material;                // level-mesh hit: surface material
@@ -590,7 +590,7 @@ typedef struct {
     /* 0x0AD */ u8  ropeSwingTimer;
     /* 0x0AE */ u8  ropeNode;
     /* 0x0AF */ u8  unkAF;
-    /* 0x0B0 */ RayHit rayHit;    // last aim or shot ray cast (func_15081690)
+    /* 0x0B0 */ RayHit rayHit;    // last aim or shot ray cast (collision_castRay)
     /* 0x114 */ s16 height;      // cached size from actor_computeSize
     /* 0x116 */ s16 width;
     /* 0x118 */ s16 depth;
@@ -655,7 +655,7 @@ typedef struct {
     /* 0x1BC */ f32 gunYaw;          // tracked vehicle gun heading, degrees in [0, 360)
 } ActorCtl; // size 0x1C0
 
-/* One 0x30-byte entry of the level's spawn table D_800D20FC; Actor.spawn points at the one it came from. */
+/* One 0x30-byte entry of the level's spawn table gSpawnRecords; Actor.spawn points at the one it came from. */
 typedef struct SpawnRecord {
     /* 0x00 */ u16 flags;
     /* 0x02 */ u8  unk2;
@@ -682,15 +682,15 @@ typedef struct SpawnRecord {
     /* 0x20 */ f32 xz_scale;
     /* 0x24 */ f32 y_scale;
     /* 0x28 */ u8  unique_id;
-    /* 0x29 */ u8  partSet;      // 1-based index into D_80086CC4, 0 for none
+    /* 0x29 */ u8  partSet;      // 1-based index into gPartSets, 0 for none
     /* 0x2A */ u16 unk2A;        // cull radius, 0 = always drawn (actor_isVisible)
     /* 0x2C */ u16 unk2C;
-    /* 0x2E */ u8  keepTime;     // seconds (x30 frames) to keep the model's D_800D2040 counter; 0xFF = never set
+    /* 0x2E */ u8  keepTime;     // seconds (x30 frames) to keep the model's gModelUnloadTimers counter; 0xFF = never set
     /* 0x2F */ u8  unk2F;
 } SpawnRecord; // size 0x30
 
-/* One point of a level path (8 bytes). D_800D2104[n] points at path n: a centre point followed by
- * D_800D2108[n] - 1 waypoints. */
+/* One point of a level path (8 bytes). gSpawnPaths[n] points at path n: a centre point followed by
+ * gSpawnPathCounts[n] - 1 waypoints. */
 typedef struct PathPoint {
     /* 0x0 */ s16 x;
     /* 0x2 */ s16 y;
@@ -719,7 +719,7 @@ typedef struct MatchState {
     /* 0x20A */ u8  pad20A[2];
 } MatchState; // size 0x20C
 
-/* Text resource loaded by func_1502B6BC: the text, then the sound effects voiced one per word. */
+/* Text resource loaded by rom_loadPathTable: the text, then the sound effects voiced one per word. */
 typedef struct TextResource {
     /* 0x0 */ char *text;
     /* 0x4 */ s32 unk4;
@@ -840,7 +840,7 @@ typedef struct {
 
 /* What a scene track drives (D_800C35F0[scene][track]). */
 typedef struct SeqTrackInfo {
-    /* 0x0 */ u16 type;     // 1 = camera, 2 = an object (func_15083E90), 3 = an actor (gfx_findObjectById)
+    /* 0x0 */ u16 type;     // 1 = camera, 2 = an object (collision_findObjectById), 3 = an actor (gfx_findObjectById)
     /* 0x2 */ u8 targetId;  // object / actor id for types 2 and 3
     /* 0x3 */ u8 unk3;
     /* 0x4 */ s16 yOffset;
@@ -860,7 +860,7 @@ typedef struct AttachmentOffset {
     /* 0x14 */ f32 rotZ;
 } AttachmentOffset;
 
-/* A model attached to a game object; doubly linked list headed by D_800C3EE0 (game_5D2C0). */
+/* A model attached to a game object; doubly linked list headed by gAttachments (game_5D2C0). */
 typedef struct ModelAttachment {
     /* 0x00 */ u8 ownerId;            // unique_id of the owning Actor
     /* 0x01 */ u8 model;              // model id; also selects the per-model hooks
@@ -868,8 +868,8 @@ typedef struct ModelAttachment {
     /* 0x03 */ u8 alpha;
     /* 0x04 */ u8 flags;
     /* 0x05 */ u8 updated;            // set by the update pass; not drawn before that
-    /* 0x06 */ u8 setId;              // attachment set id (see func_15083568)
-    /* 0x07 */ u8 handler;            // index into the D_800841C0 per-frame callbacks
+    /* 0x06 */ u8 setId;              // attachment set id (see collision_createPartSet)
+    /* 0x07 */ u8 handler;            // index into the gAttachHooks per-frame callbacks
     /* 0x08 */ u8 ownsVtx;            // vtx[] are private copies that must be freed
     /* 0x09 */ u8 loaded;
     /* 0x0A */ u16 ownerStates[3];    // if set, kept only while owner->unk84 is one of these
@@ -879,8 +879,8 @@ typedef struct ModelAttachment {
     /* 0x15 */ u8 unk15;
     /* 0x16 */ u8 unk16;
     /* 0x17 */ s8 unk17;              // -1, or the animation set passed to func_1503F62C
-    /* 0x18 */ u16 seg6Id;            // resolved by func_1510D0EC into segment 6
-    /* 0x1A */ u16 seg7Id;            // resolved by func_1510D0EC into segment 7
+    /* 0x18 */ u16 seg6Id;            // resolved by texture_getAddress into segment 6
+    /* 0x1A */ u16 seg7Id;            // resolved by texture_getAddress into segment 7
     /* 0x1C */ u16 timer;             // frames left to live; 0xFFFF = forever
     /* 0x1E */ u16 parentSet;         // nonzero: follows a matrix of another attachment set
     /* 0x20 */ u16 parentMtx;
@@ -932,7 +932,7 @@ typedef struct ActorAimPoints {
     /* 0x14 */ s8  dir[3];     // facing direction in 1/256 units
 } ActorAimPoints; // size 0x18
 
-/* Result of a floor/ceiling probe: func_15046C80 (probe down from a point) / func_1504715C (an actor's floor). */
+/* Result of a floor/ceiling probe: collision_probeFloorSurfABSet0Cached (probe down from a point) / collision_initHitFromObject (an actor's floor). */
 typedef struct CollisionHit {
     /* 0x00 */ f32 height;            // y of the surface hit
     /* 0x04 */ CollisionTri tri;      // the triangle hit
@@ -1058,7 +1058,7 @@ struct Actor {
     /* 0x0CE */ s16 unkCE;
     /* 0x0D0 */ u8  doing_hit;
     /* 0x0D1 */ s8  padD1;
-    /* 0x0D2 */ s16 unkD2;    // first set of bounds (func_1515C1A0): radius,
+    /* 0x0D2 */ s16 unkD2;    // first set of bounds (sprite_getActorBounds): radius,
     /* 0x0D4 */ s16 unkD4;    // ...
     /* 0x0D6 */ s16 unkD6;    // ... and centre height above the position
     /* 0x0D8 */ s16 unkD8;
@@ -1120,7 +1120,7 @@ struct Actor {
     /* 0x13C */ u8  lifting;
     /* 0x13D */ u8  carried;
     /* 0x13E */ u8  unk13E;
-    /* 0x13F */ u8  listpos; // index of its spawn record in D_800D20FC, 0xFF = none
+    /* 0x13F */ u8  listpos; // index of its spawn record in gSpawnRecords, 0xFF = none
     /* 0x140 */ u8  unk140;
     /* 0x141 */ u8  pad141[0x3];
     /* 0x144 */ SpawnRecord *listpos_ptr; // the spawn record this actor came from
@@ -1913,7 +1913,7 @@ typedef struct SaveSlotInfo {
     /* 0x0F */ s8 padF;
 } SaveSlotInfo; /* size = 0x10 */
 
-/* A texture as the sprite and tile loaders take it (D_800D2C90 in game_C2350.c is the shared one). */
+/* A texture as the sprite and tile loaders take it (gSpriteSharedTexture in game_C2350.c is the shared one). */
 typedef struct Texture {
     /* 0x0 */ u32 addr;  // RAM address, or an asset id below 0x10000000
     /* 0x4 */ u16 width;
@@ -1923,8 +1923,8 @@ typedef struct Texture {
     /* 0xA */ u8 frames; // animation frames (0 = still)
 } Texture; /* size 0xC */
 
-/* A sprite to draw (see func_15095D34, game_C2350.c). func_15095060 points tex at the shared texture;
- * func_15095B08 scales the texture's size by scaleX and scaleY. */
+/* A sprite to draw (see sprite_drawPlacedEx, game_C2350.c). sprite_setSharedTexture points tex at the shared texture;
+ * sprite_place scales the texture's size by scaleX and scaleY. */
 typedef struct SpriteParams {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
@@ -1939,10 +1939,10 @@ typedef struct SpriteParams {
     /* 0x10 */ Texture *tex;
 } SpriteParams; /* size 0x14 */
 
-/* An entry of the texture tables: the effect texture table D_80090B60, the entries that D_8008CA4C points
- * at, and single entries such as D_800903D4. func_15095060 (game_C2350.c) converts one into a Texture. */
+/* An entry of the texture tables: the effect texture table gEffectTextures, the entries that D_8008CA4C points
+ * at, and single entries such as D_800903D4. sprite_setSharedTexture (game_C2350.c) converts one into a Texture. */
 typedef struct TextureDesc {
-    /* 0x0 */ u32 addr;     // below 0x10000000: the asset id (func_1509629C steps it through the tiles of a big
+    /* 0x0 */ u32 addr;     // below 0x10000000: the asset id (sprite_drawImage steps it through the tiles of a big
                             // image); else the address of a table of frameCount per-frame asset ids
     /* 0x4 */ u8 frameCount;
     /* 0x5 */ u8 pad5;
@@ -1960,8 +1960,8 @@ typedef struct TexCoord {
 
 /* The texture of one particle resource (gParticleTexInfos[id]; game_38050.c and game_1A89B0.c read it). */
 typedef struct ParticleTexInfo {
-    /* 0x0 */ u8  flags;      // 0x01, 0x08: the slot's bit in D_800DDC04, D_800DDC08; 0x04: more y jitter
-                              // 0x10: one frame fewer; 0x80: D_800DDBF0 = 2 (light_setupParticleSlot)
+    /* 0x0 */ u8  flags;      // 0x01, 0x08: the slot's bit in gSpritePingPongTypes, gSpriteRandomFlipTypes; 0x04: more y jitter
+                              // 0x10: one frame fewer; 0x80: gSpriteTypePasses = 2 (light_setupParticleSlot)
     /* 0x1 */ u8  frameCount;
     /* 0x2 */ u16 frameSize;  // bytes of one frame
     /* 0x4 */ s16 scaleX;     // base x scale of the sprite
@@ -1976,7 +1976,7 @@ typedef struct ParticleResource {
     /* 0x2 */ u16 flags;
 } ParticleResource;
 
-/* The texture file of one particle sprite type (D_800DDA90[15]; loaded by game_1A89B0.c). */
+/* The texture file of one particle sprite type (gSpriteTypeTexFiles[15]; loaded by game_1A89B0.c). */
 typedef struct ParticleTexFile {
     /* 0x0 */ s32 devAddr;
     /* 0x4 */ s32 size;
@@ -2152,15 +2152,15 @@ typedef struct ZoneLink {
     /* 0x4 */ TriggerZone *zone;
 } ZoneLink;
 
-/* A timed node in the D_800CBE00 list, allocated by func_15044964. */
+/* A timed node in the gTriggerNodes list, allocated by collision_addTriggerNode. */
 typedef struct TriggerNode {
     /* 0x00 */ struct TriggerNode *next;
     /* 0x04 */ s16 lifetime; // frames left; -1 = never expires
     /* 0x06 */ s16 x;
     /* 0x08 */ s16 y;
     /* 0x0A */ s16 z;
-    /* 0x0C */ u8 check;     // index into D_80085E80
-    /* 0x0D */ u8 action;    // index into D_80085E8C, run when check passes
+    /* 0x0C */ u8 check;     // index into gTriggerChecks
+    /* 0x0D */ u8 action;    // index into gTriggerActions, run when check passes
     /* 0x0E */ u8 delay;     // frames before check starts running
     /* 0x0F */ u8 padF;
 } TriggerNode;
@@ -2768,7 +2768,7 @@ typedef struct EffectModelSlot {
     /* 0x04 */ Vtx *unk4;          // two vertex buffers (swarm flap frames, wave deformation)
     /* 0x08 */ Vtx *unk8;
     /* 0x0C */ Gfx *displayList;
-    /* 0x10 */ s16 *unk10;         // texture ids used by the display list (func_1510CE60's usedOut)
+    /* 0x10 */ s16 *unk10;         // texture ids used by the display list (texture_resolveDl's usedOut)
 } EffectModelSlot; // size 0x14
 
 /* A camera's message ring buffer, D_800DC2B0[camera index] (game_15AA10; allocated in game_32740).
@@ -2791,7 +2791,7 @@ typedef struct CamMsgQueue {
 } CamMsgQueue; // size 0xB0
 
 /* A run of consecutive model vertices loaded under one matrix (bone); gModelVtxRuns[id] holds
- * gModelVtxRunCounts[id] of them, sorted by address (built by func_150028BC in game_2E910). */
+ * gModelVtxRunCounts[id] of them, sorted by address (built by collision_buildVertexRuns in game_2E910). */
 typedef struct VtxRun {
     /* 0x0 */ Vtx *start;
     /* 0x4 */ s32 count;
@@ -2799,7 +2799,7 @@ typedef struct VtxRun {
 } VtxRun;
 
 /* A model triangle as the offsets of its three vertices in the model's vertex data
- * (gModelTris[id], built by func_150028BC; the vertex base is D_800D19A0[id]). */
+ * (gModelTris[id], built by collision_buildVertexRuns; the vertex base is gModelData[id]). */
 typedef struct VtxTri {
     /* 0x0 */ s32 v[3];
 } VtxTri;
@@ -2889,7 +2889,7 @@ typedef struct BoneTrail {
     /* 0x14 */ s32 unk14;    /* type 0 only: swapped into owner.object->unk94 while drawing */
 } BoneTrail; // size 0x18 (type 1 trails are allocated without unk14)
 
-/* One 12-byte entry of the world-mesh triangle table D_800DBE3C (built by func_15000F04 in game_2DF70):
+/* One 12-byte entry of the world-mesh triangle table gCurMapTris (built by func_15000F04 in game_2DF70):
  * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,
  * which is 0 for the static world mesh. */
 typedef struct MeshTri {
@@ -2899,7 +2899,7 @@ typedef struct MeshTri {
 /* A ground-probe candidate hit (func_150A3A70 / func_150A43E0 fill the D_800D3300 array with these). */
 typedef struct GroundCandidate {
     /* 0x0 */ s32 height;  // 24.8 fixed point
-    /* 0x4 */ s32 *tri;    // collision triangle (a D_800DBE3C entry): three vertex offsets from vtxBase
+    /* 0x4 */ s32 *tri;    // collision triangle (a gCurMapTris entry): three vertex offsets from vtxBase
     /* 0x8 */ s32 vtxBase; // 0 for the static world mesh
     /* 0xC */ s32 unkC;    // group or object index (db_Object_array), depending on the probe type
 } GroundCandidate;
@@ -2956,12 +2956,12 @@ typedef struct {
 
 /* One entry of the per-level cylinder-set table D_800D18B0 (terminated by cylinders == NULL). */
 typedef struct {
-    /* 0x0 */ BoundCylinder *cylinders; /* file offset until func_150163D0 relocates it */
+    /* 0x0 */ BoundCylinder *cylinders; /* file offset until collision_loadCylinderSets relocates it */
     /* 0x4 */ u16 count;
     /* 0x6 */ u16 id;
 } BoundCylinderSet; /* size 0x8 */
 
-/* An aim-impact slot (D_800D9960): where a shot from an owner at a given angle lands; tracers snap to it. */
+/* An aim-impact slot (gAimImpacts): where a shot from an owner at a given angle lands; tracers snap to it. */
 typedef struct {
     /* 0x00 */ s16 unk0;           // compared with the owner's angle
     /* 0x02 */ s8 unk2;            // compared with owner->unk1D1
@@ -3069,7 +3069,7 @@ typedef struct {
     /* 0x0B */ u8 siz;
 } HudSprite; /* size 0xC */
 
-/* Axis-aligned bounds of trigger zone i (D_800D309C[i], built by func_15017FA4) plus the set of TriggerZones it overlaps. */
+/* Axis-aligned bounds of trigger zone i (gZoneBounds[i], built by zone_computeBounds) plus the set of TriggerZones it overlaps. */
 typedef struct {
     /* 0x00 */ u64 overlaps[3]; // bit j: overlaps zone j
     /* 0x18 */ u8 numOverlaps;
@@ -3204,7 +3204,7 @@ typedef struct PathNode {
 /* Entries of the per-model texture tables gModelTextures[id] (gModelTextureCounts[id] entries each). */
 typedef struct ObjTexture {
     /* 0x0 */ u32 addr;   // loaded address (>= 0x10000000 once loaded), or 0x80000000 if the load failed
-    /* 0x4 */ s32 id;     // texture id passed to func_1510D0EC
+    /* 0x4 */ s32 id;     // texture id passed to texture_getAddress
     /* 0x8 */ u16 width;
     /* 0xA */ u16 height;
 } ObjTexture; /* size 0xC */
@@ -3276,7 +3276,7 @@ typedef struct DrawEntry {
 } DrawEntry;
 
 /*
- * Node of the zone tree at D_800DBE48: square regions linked by byte offsets. func_1510FD20 returns the
+ * Node of the zone tree at gCurMapQuadTree: square regions linked by byte offsets. collision_findZoneLeaf returns the
  * leaf that contains a point; effects keep it to skip work in zones that no view can see.
  */
 typedef struct ZoneNode {
@@ -3322,8 +3322,8 @@ typedef struct HitRule {
     /* 0x3 */ u8 unk3; /* the table entry to use */
 } HitRule;
 
-/* File header of an attachment model (func_1502B6BC table 9), cached per model in D_800E0148 with the load
- * reference counts in D_800DF7D0. game_5D2C0 relocates the display-list table; game_1B9DB0 passes the
+/* File header of an attachment model (rom_loadPathTable table 9), cached per model in gAttachModelHeaders with the load
+ * reference counts in gAttachModelRefCounts. game_5D2C0 relocates the display-list table; game_1B9DB0 passes the
  * dlists pointer itself on as one display list. */
 typedef struct AttachModelHeader {
     /* 0x00 */ Gfx **dlists;    // display list table (entries are relocated on first load)
@@ -3335,7 +3335,7 @@ typedef struct AttachModelHeader {
     /* 0x18 */ u8 data[1];      // vertex data, up to the display list table
 } AttachModelHeader;
 
-/* A model asset as returned by func_1502B6BC (level models: table 4, D_800B0E50; object models: table 3; dynamic
+/* A model asset as returned by rom_loadPathTable (level models: table 4, D_800B0E50; object models: table 3; dynamic
  * models in game_168A90): a header, the vertices, then the display list. A level model's pointer fields hold
  * offsets from the asset's start until func_150031EC rebases them. */
 typedef struct ModelAsset {

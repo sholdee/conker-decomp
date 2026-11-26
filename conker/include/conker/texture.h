@@ -30,48 +30,48 @@ typedef struct UvWobble {
     /* 0x12 */ u16 amplitude;
 } UvWobble;
 
-extern u8 D_800D9E64;
+extern u8 gUvWobbleCount;
 
-s32 func_1510BF60(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip);
-UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude);
-void func_1510C8A8(void);
+s32 texture_findTexVerts(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip);
+UvWobble *texture_addUvWobble(s32 tex, s32 disabled, s32 rate, s32 amplitude);
+void texture_updateUvWobbles(void);
 
 /* game_139FC0.c */
-extern u16 D_800D9E70[4][3];
-extern u8 D_800D9E88[4][3];
-extern u8 D_800D9E98[4][3];
-extern u8 D_800D9EA8[4][3];
-extern u8 D_800D9EB4[3];
-extern u8 D_800D9EB8[4][3];
-extern const u8 D_800A2CD0[7][3];
-extern const u8 D_800A2CE8[1][3];
-extern const u8 D_800A2CEC[7][3];
-extern const u8 D_800A2D04[7][3];
-void func_1510CB10(s32 slot);
-Gfx *func_1510CDB8(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot);
-s32 func_1510CE60(Gfx *dl, s32 strict, u32 countUse, s32 lifetime, s16 **usedOut);
-s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse); /* texture address of a texture id */
-s32 func_1510D374(s32 index);
-void func_1510D404(void);
-void func_1510D608(s32 index, s32 lifetime);
+extern u16 gTintWavePhases[4][3];
+extern u8 gTintWaveSteps[4][3];
+extern u8 gTintWaveAmps[4][3];
+extern u8 gTintLevels[4][3];
+extern u8 gTintDefaultTargets[3];
+extern u8 gTintTargetOverrides[4][3];
+extern const u8 gTintPresets[7][3];
+extern const u8 gTintPresetSteps[1][3];
+extern const u8 gTintPresetAmps[7][3];
+extern const u8 gTintPresetTargets[7][3];
+void texture_updateTint(s32 slot);
+Gfx *texture_setTintColors(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot);
+s32 texture_resolveDl(Gfx *dl, s32 strict, u32 countUse, s32 lifetime, s16 **usedOut);
+s32 texture_getAddress(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse); /* texture address of a texture id */
+s32 texture_getRomAddress(s32 index);
+void texture_updateAging(void);
+void texture_setLifetime(s32 index, s32 lifetime);
 
 /* game_13AAE0.c */
-/* list: a count-prefixed array of s16 texture ids (built by func_1510CE60), freed after it is released. */
-void func_1510D630(s16 *list);
-void func_1510D694(s32 id);
+/* list: a count-prefixed array of s16 texture ids (built by texture_resolveDl), freed after it is released. */
+void texture_releaseList(s16 *list);
+void texture_releaseId(s32 id);
 
 /* game_13ABD0.c */
-extern s32 D_800D9F58;
-extern s32 D_800D9F5C;
-extern u8 D_800D9F60;
-extern u8 D_800D9F68[7762];
-extern u8 D_800DBDBA;
-extern s32 D_800DBDBC;
-void func_1510D720(s32 index);
-void func_1510D7AC(u32 index);
-void func_1510D864(void);
-void func_1510D874(void *object, s32 texture, s32 palette, s32 textureSegment, s32 paletteSegment);
-Gfx *func_1510D8C0(Gfx *gfx, void *object);
+extern s32 gTexAgeFirst;
+extern s32 gTexAgeLast;
+extern u8 gTexAgeThrottle;
+extern u8 gTexUseCounts[7762];
+extern u8 gTexLoadCooldown;
+extern s32 gTexLastFreed;
+void texture_dropUse(s32 index);
+void texture_dropUseAndFree(u32 index);
+void texture_clearBindings(void);
+void texture_addBinding(void *object, s32 texture, s32 palette, s32 textureSegment, s32 paletteSegment);
+Gfx *texture_emitBindings(Gfx *gfx, void *object);
 
 /* game_234C10.c: the shared texture tables (a data-only unit). The TextureDesc entries are the ones the
  * texture table D_8008CA4C (game_1944C0.c) and the code use by name; D_80090150, D_8009016C, D_80090184
@@ -96,8 +96,8 @@ extern s32 D_80090274[9];
 extern s32 D_80090298[8]; /* texture ids */
 extern s32 D_800902B8;
 extern s32 D_800902BC[3];
-extern s32 D_800902C8; /* texture id: top bar edge */
-extern s32 D_800902CC; /* texture id: bottom bar edge */
+extern s32 gBarTopEdgeTexId; /* texture id: top bar edge */
+extern s32 gBarBottomEdgeTexId; /* texture id: bottom bar edge */
 extern s32 D_800902D0;
 extern s32 D_800902D4;
 extern s32 D_800902D8;
@@ -114,7 +114,7 @@ extern s32 D_80090320;
 extern s32 D_80090324[5];
 extern s32 D_80090338[8];
 extern TextureDesc D_80090388;
-extern Texture D_800903AC; /* flare sprite texture */
+extern Texture gFlareTexture; /* flare sprite texture */
 extern TextureDesc D_800903BC;
 extern TextureDesc D_800903C8;
 extern TextureDesc D_800903D4;
@@ -174,10 +174,10 @@ extern TextureDesc D_80090798;
 extern TextureDesc D_800907EC;
 extern TextureDesc D_800907FC;
 extern TextureDesc D_8009080C;
-extern TextureDesc D_80090B60[207]; /* the effect texture table (the `texture` index of the effect descriptors) */
+extern TextureDesc gEffectTextures[207]; /* the effect texture table (the `texture` index of the effect descriptors) */
 extern Texture D_80091514;
 extern s32 D_80091564[16];
-extern Texture D_800915A4; /* addr is set to the trail texture before each draw */
+extern Texture gTrailTexture; /* addr is set to the trail texture before each draw */
 extern Texture D_800915B0;
 extern TextureDesc D_800915DC;
 extern TextureDesc D_800915EC;

@@ -424,11 +424,11 @@ Gfx *trail_drawMatrixTrail(MatrixTrail *trail, Gfx *gfx, s16 view) {
                     }
                 } while (count != 0 && k != trail->head.end);
             }
-            gfx = func_15142E24(gfx, &D_80090B60[31], 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
+            gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
             gfx = func_15142C10(gfx, data->brightness, data->brightness, data->brightness, 0xFF, &update);
             gfx = func_1513F4E4(gfx, 6, &update);
             gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, G_RM_AA_ZB_XLU_SURF | G_RM_AA_ZB_XLU_SURF2, &update);
+            gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, G_RM_AA_ZB_XLU_SURF | G_RM_AA_ZB_XLU_SURF2, &update);
             if (trail->head.tmpl.flags & 2) {
                 /* Attached: the strip starts at the emitter. */
                 j = trail->head.end - 1;

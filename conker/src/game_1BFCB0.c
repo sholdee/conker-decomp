@@ -20,7 +20,7 @@ void func_15192800(Actor *obj, s32 arg1) {
 
     groupPtr = &group;
     if (obj != NULL && func_151928B0(obj, groupPtr)) {
-        switch (func_1510F8CC(obj->floorMaterial)) {
+        switch (collision_getSurfaceType(obj->floorMaterial)) {
         case 5:
             if (level == 20) {
                 slot = 2;

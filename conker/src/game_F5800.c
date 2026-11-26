@@ -105,7 +105,7 @@ Gfx *func_150C8600(Gfx *gdl) {
         if (D_800BE4E0[i].table >= 2) {
             D_800BE4E0[i].table = 0;
         }
-        addr = func_1510D0EC(tables.frames[D_800BE4E0[i].table][frame], &size, 3, 0);
+        addr = texture_getAddress(tables.frames[D_800BE4E0[i].table][frame], &size, 3, 0);
         segment = i + 1;
         gSPSegment(gdl++, segment, addr);
     }

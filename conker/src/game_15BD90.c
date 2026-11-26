@@ -219,7 +219,7 @@ void func_1512E8E0(Camera *camera) {
             Actor *obj;
 
             // matching: reusing obj for the id (instead of nesting the calls) drops a cfe temp
-            obj = (Actor *)func_15083E0C(cmd->unk1C);
+            obj = (Actor *)collision_findSpawnById(cmd->unk1C);
             obj = actor_findOnPath((s32)obj);
             if (obj != NULL) {
                 f32 dist;

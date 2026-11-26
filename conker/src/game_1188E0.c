@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* The zones TriggerZones used here are collision cylinders (ZONE_AREA_CYLINDER, tested by
-   func_150A34B0 in game_CDE80.c). */
+   zone_segmentHitsCylinder in game_CDE80.c). */
 
 /* The gate cylinders that a hit disables, and the ones that are only tested. */
 static s32 D_80088AA0[4] = { 1, 2, 4, 3 };
@@ -21,7 +21,7 @@ s32 func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {
 
 /*
  * Tests the segment from start to end against the zones cylinders. While object 9 exists,
- * a hit on one of the four D_80088AA0 cylinders disables it (func_150A2864(id, 1)), stores
+ * a hit on one of the four D_80088AA0 cylinders disables it (zone_setDisabled(id, 1)), stores
  * which one (1-4) in the object's taskint[1] and plays func_150EBC80's effect at it; the eight
  * D_80088AB0 cylinders are only tested. Otherwise only cylinder 76 is tested, and a hit sets
  * its data1. Returns TRUE when object 9 exists and the segment hit one of the twelve.
@@ -31,25 +31,25 @@ s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
     s32 id;
     Actor *obj;
 
-    obj = func_15083E90(9);
+    obj = collision_findObjectById(9);
     if (obj != NULL) {
         for (i = 0; i < 4; i++) {
             id = D_80088AA0[i];
-            if (func_150A34B0(&zones[id], start, end, hit)) {
-                func_150A2864(id, 1);
+            if (zone_segmentHitsCylinder(&zones[id], start, end, hit)) {
+                zone_setDisabled(id, 1);
                 obj->taskint[1] = i + 1;
                 func_150EBC80(&zones[id], 0xFF, 1);
                 return TRUE;
             }
         }
         for (i = 0; i < 8; i++) {
-            if (func_150A34B0(&zones[D_80088AB0[i]], start, end, hit)) {
+            if (zone_segmentHitsCylinder(&zones[D_80088AB0[i]], start, end, hit)) {
                 return TRUE;
             }
         }
         return FALSE;
     }
-    if (func_150A34B0(&zones[76], start, end, hit)) {
+    if (zone_segmentHitsCylinder(&zones[76], start, end, hit)) {
         zones[76].data1 = 1;
     }
     return FALSE;

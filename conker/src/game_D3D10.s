@@ -76,7 +76,7 @@ glabel func_150A6860
     /* D3E04 150A6954 AFA00018 */  sw         $zero, 0x18($sp)
     /* D3E08 150A6958 24070002 */  addiu      $a3, $zero, 0x2
     /* D3E0C 150A695C AFA7001C */  sw         $a3, 0x1C($sp)
-    /* D3E10 150A6960 0D4253DC */  jal        func_15094F70
+    /* D3E10 150A6960 0D4253DC */  jal        sprite_loadDescFrame
     /* D3E14 150A6964 00003825 */   or        $a3, $zero, $zero
     /* D3E18 150A6968 00408025 */  or         $s0, $v0, $zero
   .L150A696C:
@@ -419,8 +419,8 @@ glabel func_150A6860
     /* D4320 150A6E70 26100008 */  addiu      $s0, $s0, 0x8
     /* D4324 150A6E74 AE0BFFFC */  sw         $t3, -0x4($s0)
   .L150A6E78:
-    /* D4328 150A6E78 3C0B800D */  lui        $t3, %hi(D_800D2C9C)
-    /* D432C 150A6E7C 8D6B2C9C */  lw         $t3, %lo(D_800D2C9C)($t3)
+    /* D4328 150A6E78 3C0B800D */  lui        $t3, %hi(gSpriteTlutMode)
+    /* D432C 150A6E7C 8D6B2C9C */  lw         $t3, %lo(gSpriteTlutMode)($t3)
     /* D4330 150A6E80 31E90020 */  andi       $t1, $t7, 0x20
     /* D4334 150A6E84 55200005 */  bnel       $t1, $zero, .L150A6E9C
     /* D4338 150A6E88 240A0001 */   addiu     $t2, $zero, 0x1

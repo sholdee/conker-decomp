@@ -6,7 +6,7 @@ ParticleNode *D_800DC460; // loaded particle models: list head
 ParticleNode *D_800DC464; // list tail
 s16 D_800DC468[233];      // per model: live particles that use it
 s32 D_800DC63C;           // live particles (at most 300)
-s16 *D_800DC640[233];     // per model: the textures its display list uses (func_1510CE60)
+s16 *D_800DC640[233];     // per model: the textures its display list uses (texture_resolveDl)
 
 #include "functions.h"
 #include "variables.h"
@@ -155,7 +155,7 @@ void func_15132444(ModelParticle *particle) {
         if (particle->node->keepLoaded) {
             D_800DC468[particle->model] = 1;
         } else {
-            func_1510D630(D_800DC640[particle->model]);
+            texture_releaseList(D_800DC640[particle->model]);
             node = particle->node;
             if (node->prev == NULL) {
                 D_800DC460 = node->next;
@@ -428,7 +428,7 @@ s32 func_15132DDC(ModelParticle *particle) {
         test.y = prev.y;
         test.z = particle->pos.z;
 
-        if (func_15046C80(&test, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
+        if (collision_probeFloorSurfABSet0Cached(&test, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
             if (particle->floor.source == 1 || (particle->floor.source == 2 && (particle->floor.flags & 1))) {
                 particle->hitFlags |= 1;
                 if (particle->flags & 0x10) {
@@ -610,11 +610,11 @@ s32 func_151336A8(s32 model, ParticleNode *node, ModelParticle *particle) {
     u32 out1;
     s32 out2;
 
-    node->resource = func_1502B6BC(&out1, 0, &out2, 2, 9, D_800A3880[model]);
+    node->resource = rom_loadPathTable(&out1, 0, &out2, 2, 9, D_800A3880[model]);
     if (node->resource == NULL) {
         return FALSE;
     }
-    func_1510CE60(*node->resource, 0, 1, 0x3E, &D_800DC640[model]);
+    texture_resolveDl(*node->resource, 0, 1, 0x3E, &D_800DC640[model]);
     func_15168E54(*node->resource, (s32)node->resource);
     return TRUE;
 }
@@ -654,7 +654,7 @@ s32 func_15133894(ModelParticle *particle) {
         test.x = particle->pos.x;
         test.y = particle->radius + prev.y;
         test.z = particle->pos.z;
-        if (func_15046C80(&test, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
+        if (collision_probeFloorSurfABSet0Cached(&test, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
             skip = FALSE;
             if (particle->floor.surface != NULL) {
                 surface = particle->floor.surface;
@@ -795,7 +795,7 @@ void func_15133E3C(s32 arg0, u8 arg1) {
     func_15169260(kinds, ARRAY_COUNT(kinds), arg0, arg1);
 }
 
-/* A texture to bind to a segment: D_80090B60 index, segment number, and func_1510D0EC's third argument. */
+/* A texture to bind to a segment: gEffectTextures index, segment number, and texture_getAddress's third argument. */
 typedef struct {
     /* 0x0 */ u16 index;
     /* 0x2 */ u8 segment;
@@ -825,7 +825,7 @@ Gfx *func_15133EB8(Gfx *gfx, ModelParticle *particle, s16 arg2) {
 }
 
 
-/* Bind texture D_80090B60[index] to `segment` (and its palette, at the end of the data, to segment + 1). */
+/* Bind texture gEffectTextures[index] to `segment` (and its palette, at the end of the data, to segment + 1). */
 Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3) {
     s32 data;
     u8 format;
@@ -833,11 +833,11 @@ Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3) {
     TextureDesc *entry;
     s32 size;
 
-    entry = &D_80090B60[index];
+    entry = &gEffectTextures[index];
     data = *(s32 *)entry->addr;
     format = entry->fmt;
     unkB = entry->siz;
-    data = func_1510D0EC(data, &size, arg3, 0);
+    data = texture_getAddress(data, &size, arg3, 0);
     gSPSegment(gfx++, segment, data);
     if (format == 2) {
         gSPSegment(gfx++, segment + 1, data + size - ((unkB == 1) ? 0x200 : 0x20));

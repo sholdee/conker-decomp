@@ -3,14 +3,14 @@
 #include "variables.h"
 
 /* Spawns a beam effect between actors 0x17 and 0x16. */
-WavyBeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
+WavyBeamEffect *beam_spawnWavyBeam(s16 duration, u8 arg1, s32 arg2) {
     WavyBeamEffect *effect;
     WavyBeamData data;
 
     data.firstId = 0x17;
     data.secondId = 0x16;
-    data.first = func_15083E90(0x17);
-    data.second = func_15083E90(data.secondId);
+    data.first = collision_findObjectById(0x17);
+    data.second = collision_findObjectById(data.secondId);
     data.fadeEnd = 250.0f;
     data.width = 18.0f;
     data.fadeStart = 0.0f;
@@ -24,18 +24,18 @@ WavyBeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
     return effect;
 }
 
-static const u8 D_8008FB80 = 1; // first's bone
-static const u8 D_8008FB84 = 1; // second's bone
+static const u8 gWavyBeamFirstBone = 1; // first's bone
+static const u8 gWavyBeamSecondBone = 1; // second's bone
 extern s32 D_800A4AC8[][2];
-static const Vec3f D_800AA400 = { -3.0f, 11.0f, -4.0f };  // beam start, in first's bone space
-static const Vec3f D_800AA40C = { 0.0f, -5.0f, -7.0f };   // beam end, in second's bone space
+static const Vec3f gWavyBeamStart = { -3.0f, 11.0f, -4.0f };  // beam start, in first's bone space
+static const Vec3f gWavyBeamEnd = { 0.0f, -5.0f, -7.0f };   // beam end, in second's bone space
 
 /*
- * Beam effect draw: a red textured strip of 10 quads from a point on first's bone D_8008FB80 to a
- * point on second's bone D_8008FB84, facing the eye of view viewIdx. Once the beam is longer than
+ * Beam effect draw: a red textured strip of 10 quads from a point on first's bone gWavyBeamFirstBone to a
+ * point on second's bone gWavyBeamSecondBone, facing the eye of view viewIdx. Once the beam is longer than
  * fadeStart, its width ripples along a sine wave. Kills the effect when either actor is gone.
  */
-Gfx *func_151B5328(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx) {
+Gfx *beam_drawWavyBeam(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx) {
     WavyBeamData *data;
     u8 failed;
     u8 flag;
@@ -69,17 +69,17 @@ Gfx *func_151B5328(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx) {
         failed = 1;
     }
     if (!failed && data->first->ob_matrix_ptr != NULL && data->second->ob_matrix_ptr != NULL) {
-        func_15143134(&D_800AA400, &start, &data->first->ob_matrix_ptr[D_8008FB80]);
-        func_15143134(&D_800AA40C, &end, &data->second->ob_matrix_ptr[D_8008FB84]);
+        func_15143134(&gWavyBeamStart, &start, &data->first->ob_matrix_ptr[gWavyBeamFirstBone]);
+        func_15143134(&gWavyBeamEnd, &end, &data->second->ob_matrix_ptr[gWavyBeamSecondBone]);
         flag = 1;
         vtx = data->vertices[D_800BE9C0];
         eye = &camera_global_Cameras[viewIdx].eye;
         gdl = func_15142B7C(gdl, 0x200005, 0x60600);
-        gdl = func_15142E24(gdl, &D_80090B60[86], 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
+        gdl = func_15142E24(gdl, &gEffectTextures[86], 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
         gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
         gdl = func_15142CF0(gdl, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
         gdl = func_1513F4E4(gdl, 0x2E, &flag);
-        gdl = func_15142FBC(gdl, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[5][0] | D_800A4AC8[5][1], &flag);
+        gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[5][0] | D_800A4AC8[5][1], &flag);
         dir.x = end.x - start.x;
         dir.y = end.y - start.y;
         dir.z = end.z - start.z;
@@ -173,7 +173,7 @@ Gfx *func_151B5328(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx) {
 }
 
 /* Effect message handler: follows actor slot swaps (message 0x2D) and dies with either actor (message 0). */
-void func_151B5A9C(WavyBeamEffect *effect, void *msg, u8 type) {
+void beam_wavyBeamMessage(WavyBeamEffect *effect, void *msg, u8 type) {
     WavyBeamData *data = &effect->data;
 
     if (type == 0x2D) {

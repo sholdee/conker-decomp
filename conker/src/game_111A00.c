@@ -4,7 +4,7 @@
 
 
 
-/* Per-material impact effects, indexed by the material id from func_1510F8CC. */
+/* Per-material impact effects, indexed by the material id from collision_getSurfaceType. */
 typedef struct Struct800A1070 {
     /* 0x00 */ u16 objectType;   // object spawned through func_15168800 (0 = none)
     /* 0x02 */ u16 particleType; // particle burst type (0 = none)
@@ -46,7 +46,7 @@ static const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
 /*
  * Spawns the impact effects of `material` at (x, y, z): a particle burst, debris (func_150E4E04),
  * a random weapon_spawnImpactBurst effect and an object. `size` indexes D_800A111C/D_800A1110, `tri` is the
- * hit triangle (three vertex pointers) or NULL, and `slot` indexes D_800D9960 (0xFF = none).
+ * hit triangle (three vertex pointers) or NULL, and `slot` indexes gAimImpacts (0xFF = none).
  * Bit 0x8000 of `material` is forwarded to func_150E4E04.
  */
 void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 slot) {
@@ -91,10 +91,10 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
             weapon_spawnImpactBurst(&pos, 0xFF, 1);
         }
         if (slot != 0xFF) {
-            D_800D9960[slot].ricochetChance = 100;
+            gAimImpacts[slot].ricochetChance = 100;
         }
     } else if (slot != 0xFF) {
-        D_800D9960[slot].ricochetChance = 0;
+        gAimImpacts[slot].ricochetChance = 0;
     }
     if (entry->objectType != 0) {
         bzero(&obj, sizeof(obj));
@@ -142,7 +142,7 @@ void func_150E4928(WorldObject *obj) {
     if (i < gWorldObjectCount && i >= 0) {
         idx = i;
         found = 0;
-        func_1510F800(2);
+        collision_selectMap(2);
         func_150A44F0(1, &idx, 0);
         while (tries != 0) {
             x = obj->x;
@@ -169,7 +169,7 @@ void func_150E4928(WorldObject *obj) {
         }
         if (found) {
             if (obj->materials != NULL) {
-                i = ((s32)tri - (s32)D_800DBE3C) / 12;
+                i = ((s32)tri - (s32)gCurMapTris) / 12;
                 material = obj->materials[i - obj->firstTri];
             } else {
                 material = obj->floorHitAttrib;
@@ -195,7 +195,7 @@ void func_150E4928(WorldObject *obj) {
                 }
                 tri = (s32 *)verts;
             }
-            func_150E4550(x, height, z, 1, func_1510F8CC(material), (s16 **)tri, 0);
+            func_150E4550(x, height, z, 1, collision_getSurfaceType(material), (s16 **)tri, 0);
         }
     }
 }
@@ -239,7 +239,7 @@ void func_150E4CBC(Struct150E4CBC *fx) {
 
 /*
  * Sprays debris particles of `kind` from (x, y, z). With a hit triangle `tri` the spray follows the
- * surface normal (also stored in D_800D9960[slot]); otherwise it goes straight up. Bit 0x8000 of
+ * surface normal (also stored in gAimImpacts[slot]); otherwise it goes straight up. Bit 0x8000 of
  * `kind` suppresses the particles. Kinds 4, 5 and 9 sometimes add a func_150E5558 chunk.
  */
 void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot) {
@@ -296,7 +296,7 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
         dirZ /= len;
         if (slot != 0xFF && fabsf(dirY) < 0.8999999762f) {
             func_150440A0(mtx, 0.0f, 0.0f, 0.0f, dirX, dirY, dirZ, 0.0f, 1.0f, 0.0f);
-            func_150A7960(mtx, 0.0f, 0.0f, 1.0f, &D_800D9960[slot].normal[0], &D_800D9960[slot].normal[1], &D_800D9960[slot].normal[2]);
+            func_150A7960(mtx, 0.0f, 0.0f, 1.0f, &gAimImpacts[slot].normal[0], &gAimImpacts[slot].normal[1], &gAimImpacts[slot].normal[2]);
         } else {
             noSurface = 1;
         }
@@ -304,7 +304,7 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
         noSurface = 1;
     }
     if (slot != 0xFF && noSurface) {
-        D_800D9960[slot].ricochetChance = 0;
+        gAimImpacts[slot].ricochetChance = 0;
     }
     if (!noFx) {
         spawn.x = x;

@@ -145,8 +145,8 @@ void func_15128CB0(Camera *cam) {
                     cam->savedEye = cam->eye;
                     cam->prevTarget = cam->target;
                     cam->prevEye = cam->eye;
-                    func_150A09D0(D_800BE9E4);
-                    func_150A11C4(&movement_obj[cam->CNumber]);
+                    zone_updateGlobal(D_800BE9E4);
+                    zone_updateActor(&movement_obj[cam->CNumber]);
                     func_1512E8E0(cam);
                     func_151287E0(cam, 0, 0);
                     func_151283B8(cam);
@@ -265,7 +265,7 @@ void func_15128CB0(Camera *cam) {
                 light_easePlayerLight(0);
             }
             if (!gPaused) {
-                func_1510E7A4(&cam->TrianglePtr, cam->floorTri.v, &surface, &cam->waterY, &cam->Attributes, 0,
+                collision_findFloorInRange(&cam->TrianglePtr, cam->floorTri.v, &surface, &cam->waterY, &cam->Attributes, 0,
                               cam->eye.x, cam->eye.y, cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
                 func_151236D0(cam);
             }

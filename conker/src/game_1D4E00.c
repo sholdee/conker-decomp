@@ -3,23 +3,23 @@
 #include "variables.h"
 
 /* The bolt object type's render setup and teardown display lists (object type table D_8008B4A8). */
-Gfx D_8008F910[] = {
+Gfx gLightningRenderSetupDl[] = {
     gsDPPipeSync(),
     gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
 
-Gfx D_8008F930[] = {
+Gfx gLightningRenderTeardownDl[] = {
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
     gsSPEndDisplayList(),
 };
 
 /*
  * Allocates a bolt for def with extraSize bytes of user data after its points. The local points run
- * from (0, 0, 0) to (0, 0, 1); func_151A8340 fills in the ones between.
+ * from (0, 0, 0) to (0, 0, 1); beam_displaceLightning fills in the ones between.
  */
-Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
+Bolt *beam_newLightning(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     Bolt *bolt;
 
     bolt = func_15167A68(0x2D, arg3, def->numPoints * sizeof(BoltPoint) + extraSize + sizeof(Bolt) - sizeof(BoltPoint), 1, arg2, 1);
@@ -43,7 +43,7 @@ Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
 }
 
 /* Update hooks (BoltDef.update1, BoltDef.update2); a hook that returns 0 ends the bolt. */
-static s32 (*D_8008F940[])(Bolt *) = { func_150EFA4C, func_151A87F8 };
+static s32 (*gLightningUpdateHooks[])(Bolt *) = { beam_updateSpark, beam_followBoneLightning };
 static s32 (*D_8008F948[])(Bolt *) = { NULL };
 
 /*
@@ -51,7 +51,7 @@ static s32 (*D_8008F948[])(Bolt *) = { NULL };
  * timer runs out and places them in the world along start->end. The bolt is destroyed once a hook
  * returns 0 or its lifetime runs out.
  */
-void func_151A7A90(Bolt *bolt) {
+void beam_updateLightning(Bolt *bolt) {
     Bolt *self; // matching: the loop bound is read through a second copy of bolt
     u8 done;
     Vec3f side;
@@ -70,7 +70,7 @@ void func_151A7A90(Bolt *bolt) {
     }
     update1 = bolt->def.update1;
     if (update1 != -1 && !done) {
-        done = (D_8008F940[update1](bolt) == 0);
+        done = (gLightningUpdateHooks[update1](bolt) == 0);
     }
     update2 = bolt->def.update2;
     if (update2 != -1 && !done) {
@@ -80,7 +80,7 @@ void func_151A7A90(Bolt *bolt) {
     if (!done) {
         bolt->jitterTimer -= gFrameDelta;
         if (bolt->jitterTimer < 0.0f) {
-            func_151A8340(bolt, 0, bolt->def.numPoints - 1, bolt->def.jitter, 100);
+            beam_displaceLightning(bolt, 0, bolt->def.numPoints - 1, bolt->def.jitter, 100);
             bolt->jitterTimer = func_150ADA68() * bolt->def.jitterDelayRange + bolt->def.jitterDelay;
         }
         if (bolt->def.flags & BOLT_ACTIVE) {
@@ -123,7 +123,7 @@ extern s32 D_800A4AC8[][2];
  * Draws the bolt as one camera-facing quad (two triangles) per segment, def.width wide, with
  * vertices from the bolt's vertex buffer for this view.
  */
-Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
+Gfx *beam_drawLightning(Gfx *gdl, Bolt *bolt, s16 view) {
     Bolt *self = bolt; // matching: the loop bound is read through a second copy of bolt
     Vtx_t *vtx;
     Vec3f dir;
@@ -153,11 +153,11 @@ Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
             last = bolt->def.numPoints - 1;
             j = 0;
             i = 1;
-            gdl = func_15142E24(gdl, &D_80090B60[44], 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
+            gdl = func_15142E24(gdl, &gEffectTextures[44], 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
             gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
             gdl = func_15142C10(gdl, bolt->def.color.r, bolt->def.color.g, bolt->def.color.b, bolt->def.color.a, &changed);
             gdl = func_1513F4E4(gdl, 0x19, &changed);
-            gdl = func_15142FBC(gdl, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &changed);
+            gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &changed);
             dir.x = bolt->points[0].world.x - bolt->points[last].world.x;
             dir.y = bolt->points[0].world.y - bolt->points[last].world.y;
             dir.z = bolt->points[0].world.z - bolt->points[last].world.z;
@@ -239,7 +239,7 @@ Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
  * Midpoint displacement: sets the point halfway between first and last to their average, moved up
  * to amp sideways and along up, then recurses into both halves until depth runs out.
  */
-void func_151A8340(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth) {
+void beam_displaceLightning(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth) {
     s16 middle;
 
     if (last - first < 2) {
@@ -268,47 +268,47 @@ void func_151A8340(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth) {
         bolt->points[middle].local.y = (a->y + dy * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
         bolt->points[middle].local.z = a->z + dz * 0.5f;
     }
-    func_151A8340(bolt, first, middle, amp, depth - 1);
-    func_151A8340(bolt, middle, last, amp, depth - 1);
+    beam_displaceLightning(bolt, first, middle, amp, depth - 1);
+    beam_displaceLightning(bolt, middle, last, amp, depth - 1);
 }
 
 /* Frees the bolt's vertex buffers. */
-void func_151A8560(Bolt *bolt) {
+void beam_freeLightningVtx(Bolt *bolt) {
     func_151D5E30(bolt->vtxBuf);
 }
 
 /* Destroy and free hooks, by bolt type. */
-static void (*D_8008F94C[])(Bolt *) = { NULL, func_150F0260, NULL };
+static void (*gLightningDestroyHooks[])(Bolt *) = { NULL, beam_destroySpark, NULL };
 
 /* Destroy handler: runs the type's hook, then frees the vertex buffers and the object. */
-void func_151A8584(Bolt *bolt) {
+void beam_destroyLightning(Bolt *bolt) {
     Bolt *self = bolt; // matching: the copy lets IDO read type from a0 before homing bolt
 
-    if (D_8008F94C[self->def.type] != NULL) {
-        D_8008F94C[self->def.type](bolt);
+    if (gLightningDestroyHooks[self->def.type] != NULL) {
+        gLightningDestroyHooks[self->def.type](bolt);
     }
-    func_151A8560(bolt);
+    beam_freeLightningVtx(bolt);
     func_15169804(&bolt->header);
 }
 
-static void (*D_8008F958[])(Bolt *) = { NULL, func_150F0280, NULL };
+static void (*gLightningFreeHooks[])(Bolt *) = { NULL, beam_freeSpark, NULL };
 
-/* Like func_151A8584, through the D_8008F958 hooks and func_15169824. */
-void func_151A85D4(Bolt *bolt) {
+/* Like beam_destroyLightning, through the gLightningFreeHooks hooks and func_15169824. */
+void beam_freeLightning(Bolt *bolt) {
     Bolt *self = bolt; // matching: the copy lets IDO read type from a0 before homing bolt
 
-    if (D_8008F958[self->def.type] != NULL) {
-        D_8008F958[self->def.type](bolt);
+    if (gLightningFreeHooks[self->def.type] != NULL) {
+        gLightningFreeHooks[self->def.type](bolt);
     }
-    func_151A8560(bolt);
+    beam_freeLightningVtx(bolt);
     func_15169824(&bolt->header);
 }
 
 /*
  * Spawns a bolt from bone `bone` of owner (at boneOffset in bone space) to targetOffset from the
- * owner's position; func_151A87F8 (update1) keeps both ends attached. lifetime -1 means untimed.
+ * owner's position; beam_followBoneLightning (update1) keeps both ends attached. lifetime -1 means untimed.
  */
-Bolt *func_151A8624(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
+Bolt *beam_spawnBoneLightning(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
                     f32 jitterDelay, f32 jitterDelayRange, BoltColor *color,
                     f32 width, Vec3f *targetOffset, u8 arg9, u8 argA,
                     s8 update2, s32 extraSize, u8 argD, s32 argE) {
@@ -356,7 +356,7 @@ Bolt *func_151A8624(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
     def.jitter = 79.75f;
     def.color = *color;
     def.width = width;
-    // matching: both arms pick update1 1 (func_151A87F8), but IDO must see the arg9 test
+    // matching: both arms pick update1 1 (beam_followBoneLightning), but IDO must see the arg9 test
     if ((arg9 != 0) && (arg9 == 1)) {
         def.update1 = 1;
     } else {
@@ -376,7 +376,7 @@ Bolt *func_151A8624(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
     def.type = 2;
     def.invLength = 1.0f;
 
-    bolt = func_151A7950(&def, extraSize + sizeof(BoltLink), argD, argE);
+    bolt = beam_newLightning(&def, extraSize + sizeof(BoltLink), argD, argE);
     if (bolt != NULL) {
         memcpy(bolt->link, &link, sizeof(link));
     }
@@ -384,11 +384,11 @@ Bolt *func_151A8624(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
 }
 
 /*
- * Update hook 1 of a bolt spawned by func_151A8624: puts the start on the owner's bone and, until
+ * Update hook 1 of a bolt spawned by beam_spawnBoneLightning: puts the start on the owner's bone and, until
  * a ray cast succeeds, casts from there towards the target point to place the end. Deactivates
  * the bolt when it has no length or the cast fails; returns 0 (destroy) once the owner is gone.
  */
-s32 func_151A87F8(Bolt *bolt) {
+s32 beam_followBoneLightning(Bolt *bolt) {
     BoltLink *link;
     Actor *owner;
     Vec3f dir;
@@ -447,26 +447,26 @@ lbl3:
 }
 
 /* Message handlers, by bolt type. */
-static void (*D_8008F964[])(Bolt *, s32, u8) = { NULL, func_150F07E4, func_151A8A78 };
+static void (*gLightningMsgHandlers[])(Bolt *, s32, u8) = { NULL, beam_sparkMessage, beam_boneLightningMessage };
 
-/* Message handler: forwards to the type's handler in D_8008F964 (types 3 and up use type 0). */
-void func_151A8A20(Bolt *bolt, s32 msg, u8 msgType) {
+/* Message handler: forwards to the type's handler in gLightningMsgHandlers (types 3 and up use type 0). */
+void beam_lightningMessage(Bolt *bolt, s32 msg, u8 msgType) {
     s32 type;
 
     type = bolt->def.type;
     if (type >= 3) {
         type = 0;
     }
-    if (D_8008F964[type] != NULL) {
-        D_8008F964[type](bolt, msg, msgType);
+    if (gLightningMsgHandlers[type] != NULL) {
+        gLightningMsgHandlers[type](bolt, msg, msgType);
     }
 }
 
 /*
- * Type 2 message handler (bolts from func_151A8624): message 0 destroys the bolt when its owner goes
+ * Type 2 message handler (bolts from beam_spawnBoneLightning): message 0 destroys the bolt when its owner goes
  * away; message 0x2D re-attaches it when its owner is swapped for another actor.
  */
-void func_151A8A78(Bolt *bolt, s32 arg, u8 msgType) {
+void beam_boneLightningMessage(Bolt *bolt, s32 arg, u8 msgType) {
     BoltLink *link = bolt->link;
     ActorMsg *msg = (ActorMsg *)arg;
     Actor *actor;

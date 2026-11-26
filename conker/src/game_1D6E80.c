@@ -75,7 +75,7 @@ void func_151A99D0(ActorTask *task) {
             pos.y = actor->ypos + 150.0f;
         }
         pos.z = actor->zpos;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, &task->watcher.hit, 3, task->watcher.header.owner, task->watcher.header.kind);
         }
@@ -98,7 +98,7 @@ void func_151A9AA4(ActorTask *task) {
         }
         pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
@@ -123,7 +123,7 @@ void func_151A9BA0(ActorTask *task) {
         }
         pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 1, task->watcher.header.owner, task->watcher.header.kind);
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
@@ -148,7 +148,7 @@ void func_151A9CA0(ActorTask *task) {
         pos.y = actor->ypos + 150.0f;
     }
     pos.z = actor->zpos;
-    if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+    if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
         pos.y = task->watcher.hit.height;
         func_151ABE40(&pos, &task->watcher.hit, 1, task->watcher.header.owner, task->watcher.header.kind);
         sound_playOnActor(0, 8, 0x6978, 0, 0, actor);
@@ -173,7 +173,7 @@ void func_151A9DC0(ActorTask *task) {
         }
         pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
@@ -197,7 +197,7 @@ void func_151A9EC0(ActorTask *task) {
         }
         pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
             sound_playOnActor(0, 8, 0x6978, 0, 0, actor);
@@ -221,7 +221,7 @@ void func_151A9FC8(ActorTask *task) {
             pos.y = actor->ypos + 150.0f;
         }
         pos.z = actor->zpos;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
         }
@@ -242,7 +242,7 @@ void func_151AA09C(ActorTask *task) {
             pos.y = actor->ypos + 150.0f;
         }
         pos.z = actor->zpos;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
         }
@@ -559,12 +559,12 @@ void func_151AABC4(Actor *actor, u8 index) {
     if ((actor != NULL) && (actor->ob_matrix_ptr != NULL)) {
         color = func_151D8E20();
         func_15142314(actor->ob_matrix_ptr, D_800A8F70[index], &pos, actor);
-        func_1504715C(&floor, actor);
+        collision_initHitFromObject(&floor, actor);
         y = pos.y + 50.0f;
         probe.x = pos.x;
         probe.y = y;
         probe.z = pos.z;
-        if (func_1504697C(&probe, 0, y - 100.0f, &floor) != 0) {
+        if (collision_probeFloorSurfABSet0(&probe, 0, y - 100.0f, &floor) != 0) {
             hit.x = pos.x;
             hit.y = floor.height;
             hit.z = pos.z;
@@ -646,7 +646,7 @@ void func_151AADF8(ActorTask *task) {
         pos.y = actor->ypos + 150.0f;
     }
     pos.z = actor->zpos;
-    if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+    if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
         color = func_151D8E20();
         pos.y = task->watcher.hit.height;
         size = (func_150ADA68() * 30.0f) + 50.0f;
@@ -728,7 +728,7 @@ void func_151AB1C4(ActorTask *task) {
         }
         pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
@@ -986,7 +986,7 @@ void func_151AB9C8(EmitterTask *task) {
     if (!dead) {
         emitter->accum += (emitter->rate + func_150ADA68() * emitter->rateRandom) * gFrameDelta;
         if (emitter->accum > 1.0f) {
-            func_1504715C(&floor, emitter->actor);
+            collision_initHitFromObject(&floor, emitter->actor);
             do {
                 yaw = func_150ADA20() & 0xFF;
                 pitch = (func_150ADA20() % 46U) - 0x3F;

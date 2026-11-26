@@ -529,7 +529,7 @@ u16 sound_addDynamicSound(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDis
     }
 
     if (flags & 0x40) {
-        y = func_15083E0C(x);
+        y = collision_findSpawnById(x);
         if (y == -1) {
             return 0;
         }
@@ -1002,7 +1002,7 @@ s32 sound_playOnActor(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, Acto
     } else {
         volume = (volume + volume + volume) >> 2;
         if (obj->character_type != 0xFF) {
-            scale = D_800D1C90[obj->character_type]->bodyRadius * obj->scale_xz;
+            scale = gModelDefs[obj->character_type]->bodyRadius * obj->scale_xz;
         } else {
             scale = 0.0f;
         }
@@ -1394,7 +1394,7 @@ void sound_setMuted(s32 mute) {
 u16 sound_pickEffectVariant(s32 effect, s16 *volume, s32 variant) {
     s32 sound;
 
-    effect = func_1510F8CC(effect);
+    effect = collision_getSurfaceType(effect);
 
     if (volume != NULL) {
         if (gScreenLayout != 0) {

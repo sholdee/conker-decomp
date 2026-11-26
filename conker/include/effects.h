@@ -69,7 +69,7 @@ typedef struct ParticleDesc {
     /* 0x1A */ u8 b2;
     /* 0x1B */ u8 alpha;
     /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;     /* D_80090B60 index */
+    /* 0x1D */ u8 texture;     /* gEffectTextures index */
     /* 0x1E */ s16 fadeStart;
     /* 0x20 */ s16 fadeRate;
     /* 0x22 */ s16 scaleStart;
@@ -81,7 +81,7 @@ typedef struct ParticleDesc {
     /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
-    /* 0x5C */ ZoneNode *viewMask; /* func_1510FD20 zone of the spawn point, or NULL */
+    /* 0x5C */ ZoneNode *viewMask; /* collision_findZoneLeaf zone of the spawn point, or NULL */
     /* 0x60 */ u8 primColorMode;
     /* 0x61 */ u8 envColorMode;
     /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
@@ -125,7 +125,7 @@ typedef struct ParticleDesc64 {
     /* 0x1A */ u8 b2;
     /* 0x1B */ u8 alpha;
     /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;     /* D_80090B60 index */
+    /* 0x1D */ u8 texture;     /* gEffectTextures index */
     /* 0x1E */ s16 fadeStart;
     /* 0x20 */ s16 fadeRate;
     /* 0x22 */ s16 scaleStart;
@@ -137,7 +137,7 @@ typedef struct ParticleDesc64 {
     /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
-    /* 0x5C */ ZoneNode *viewMask; /* func_1510FD20 zone of the spawn point, or NULL */
+    /* 0x5C */ ZoneNode *viewMask; /* collision_findZoneLeaf zone of the spawn point, or NULL */
     /* 0x60 */ u8 primColorMode;
     /* 0x61 */ u8 envColorMode;
     /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
@@ -161,7 +161,7 @@ typedef struct ParticleDesc68 {
     /* 0x1A */ u8 b2;
     /* 0x1B */ u8 alpha;
     /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;     /* D_80090B60 index */
+    /* 0x1D */ u8 texture;     /* gEffectTextures index */
     /* 0x1E */ s16 fadeStart;
     /* 0x20 */ s16 fadeRate;
     /* 0x22 */ s16 scaleStart;
@@ -173,7 +173,7 @@ typedef struct ParticleDesc68 {
     /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
-    /* 0x5C */ ZoneNode *viewMask; /* func_1510FD20 zone of the spawn point, or NULL */
+    /* 0x5C */ ZoneNode *viewMask; /* collision_findZoneLeaf zone of the spawn point, or NULL */
     /* 0x60 */ u8 primColorMode;
     /* 0x61 */ u8 envColorMode;
     /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
@@ -201,7 +201,7 @@ typedef struct ParticleDesc6C {
     /* 0x1A */ u8 b2;
     /* 0x1B */ u8 alpha;
     /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;     /* D_80090B60 index */
+    /* 0x1D */ u8 texture;     /* gEffectTextures index */
     /* 0x1E */ s16 fadeStart;
     /* 0x20 */ s16 fadeRate;
     /* 0x22 */ s16 scaleStart;
@@ -213,7 +213,7 @@ typedef struct ParticleDesc6C {
     /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
-    /* 0x5C */ ZoneNode *viewMask; /* func_1510FD20 zone of the spawn point, or NULL */
+    /* 0x5C */ ZoneNode *viewMask; /* collision_findZoneLeaf zone of the spawn point, or NULL */
     /* 0x60 */ u8 primColorMode;
     /* 0x61 */ u8 envColorMode;
     /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
@@ -244,7 +244,7 @@ typedef struct ParticleSpawn {
     /* 0x56 */ u16 model;
     /* 0x58 */ u8 variant;
     /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ ZoneNode *unk5C; /* func_1510FD20 zone of the spawn point, or NULL */
+    /* 0x5C */ ZoneNode *unk5C; /* collision_findZoneLeaf zone of the spawn point, or NULL */
     /* 0x60 */ u8 alpha;
     /* 0x61 */ u8 updateFn;
     /* 0x62 */ u8 update2Fn;
@@ -283,7 +283,7 @@ typedef struct ParticleSpawn78 {
     /* 0x56 */ u16 model;
     /* 0x58 */ u8 variant;
     /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ ZoneNode *unk5C; /* func_1510FD20 zone of the spawn point, or NULL */
+    /* 0x5C */ ZoneNode *unk5C; /* collision_findZoneLeaf zone of the spawn point, or NULL */
     /* 0x60 */ u8 alpha;
     /* 0x61 */ u8 updateFn;
     /* 0x62 */ u8 update2Fn;
@@ -421,7 +421,7 @@ typedef struct ParticleSize {
 /* Spawn template of a particle, func_1513D2F0 / func_1513D4B8 / func_1513D524 / func_1513D594
  * (game_169510.c) copy it to DefParticleHead.def. */
 typedef struct ParticleDef {
-    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
+    /* 0x00 */ u8 texture;      /* gEffectTextures index, 0xFF = untextured */
     /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
     /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
     /* 0x04 */ s16 lifetime;
@@ -439,7 +439,7 @@ typedef struct ParticleDef {
     /* 0x45 */ u8 unk45;
     /* 0x46 */ u8 unk46;
     /* 0x47 */ u8 unk47;
-    /* 0x48 */ ZoneNode *unk48; /* func_1510FD20 zone of the spawn point, or NULL */
+    /* 0x48 */ ZoneNode *unk48; /* collision_findZoneLeaf zone of the spawn point, or NULL */
     /* 0x4C */ u8 viewportMask;
     /* 0x4D */ u8 pad4D[3];
     /* 0x50 */ s32 unk50;
@@ -449,7 +449,7 @@ typedef struct ParticleDef {
 
 /* matching: ParticleDef before unk48 (0x48 bytes); see ParticleDesc64. */
 typedef struct ParticleDef48 {
-    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
+    /* 0x00 */ u8 texture;      /* gEffectTextures index, 0xFF = untextured */
     /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
     /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
     /* 0x04 */ s16 lifetime;
@@ -471,7 +471,7 @@ typedef struct ParticleDef48 {
 
 /* matching: ParticleDef before viewportMask (0x4C bytes); see ParticleDesc64. */
 typedef struct ParticleDef4C {
-    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
+    /* 0x00 */ u8 texture;      /* gEffectTextures index, 0xFF = untextured */
     /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
     /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
     /* 0x04 */ s16 lifetime;
@@ -489,12 +489,12 @@ typedef struct ParticleDef4C {
     /* 0x45 */ u8 unk45;
     /* 0x46 */ u8 unk46;
     /* 0x47 */ u8 unk47;
-    /* 0x48 */ ZoneNode *unk48; /* func_1510FD20 zone of the spawn point, or NULL */
+    /* 0x48 */ ZoneNode *unk48; /* collision_findZoneLeaf zone of the spawn point, or NULL */
 } ParticleDef4C;
 
 /* matching: ParticleDef before fadeStart (0x54 bytes); see ParticleDesc64. */
 typedef struct ParticleDef54 {
-    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
+    /* 0x00 */ u8 texture;      /* gEffectTextures index, 0xFF = untextured */
     /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
     /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
     /* 0x04 */ s16 lifetime;
@@ -512,7 +512,7 @@ typedef struct ParticleDef54 {
     /* 0x45 */ u8 unk45;
     /* 0x46 */ u8 unk46;
     /* 0x47 */ u8 unk47;
-    /* 0x48 */ ZoneNode *unk48; /* func_1510FD20 zone of the spawn point, or NULL */
+    /* 0x48 */ ZoneNode *unk48; /* collision_findZoneLeaf zone of the spawn point, or NULL */
     /* 0x4C */ u8 viewportMask;
     /* 0x4D */ u8 pad4D[3];
     /* 0x50 */ s32 unk50;
@@ -708,19 +708,19 @@ typedef struct Color8 {
     /* 0x3 */ u8 alpha;
 } Color8;
 
-/* Spawn parameters of a screen sprite, copied to ScreenSprite.info by func_1515548C (game_182140.c). */
+/* Spawn parameters of a screen sprite, copied to ScreenSprite.info by sprite_newScreenSprite (game_182140.c). */
 typedef struct ScreenSpriteInfo {
     /* 0x00 */ f32 x;           /* centre, in viewport units */
     /* 0x04 */ f32 y;
     /* 0x08 */ f32 halfWidth;
     /* 0x0C */ f32 halfHeight;
-    /* 0x10 */ u8 texture;    /* index into D_80090B60, 0xFF = none */
+    /* 0x10 */ u8 texture;    /* index into gEffectTextures, 0xFF = none */
     /* 0x11 */ u8 pad11;
     /* 0x12 */ s16 timer;     /* counts down by D_800BE9E4 when (flags & 1) */
     /* 0x14 */ u16 flags;
     /* 0x16 */ s16 fadeStart; /* (flags & 8): below this timer, alpha = timer * fadeRate */
     /* 0x18 */ s16 fadeRate;
-    /* 0x1A */ u8 kind;       /* index into D_8008AD04 */
+    /* 0x1A */ u8 kind;       /* index into gScreenSpriteMsgHandlers */
     /* 0x1B */ Color8 color1;
     /* 0x1F */ Color8 color2;
     /* 0x23 */ u8 unk23;
@@ -1628,7 +1628,7 @@ typedef struct DebrisScatter {
 typedef struct SpriteDef {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 texture;          /* D_80090B60 index, 0xFF = untextured */
+    /* 0x06 */ u8 texture;          /* gEffectTextures index, 0xFF = untextured */
     /* 0x07 */ u8 unk7;
     /* 0x08 */ s32 frame;           /* 16.16 animation frame */
     /* 0x0C */ s32 frameSpeed;
@@ -1718,7 +1718,7 @@ typedef struct BoltDesc {
     /* 0x02 */ u8 flags;          /* bit 0: life counts down */
     /* 0x03 */ u8 pad3;
     /* 0x04 */ Vec3f ctrl[4];     /* Bezier control points; ctrl[0] and ctrl[3] are the end points */
-    /* 0x34 */ s8 updateKind;     /* index into D_80088C10, -1: none */
+    /* 0x34 */ s8 updateKind;     /* index into gBoltUpdateHandlers, -1: none */
     /* 0x35 */ u8 pad35[3];
     /* 0x38 */ s32 segments;
     /* 0x3C */ f32 jitter;        /* max sideways offset of each joint */
@@ -1726,7 +1726,7 @@ typedef struct BoltDesc {
     /* 0x44 */ s16 rejitterBase;  /* frames between re-jitters: base + rand % (range + 1) */
     /* 0x46 */ s16 rejitterRange;
     /* 0x48 */ Color8 color;
-    /* 0x4C */ u8 kind;           /* index into D_80088C18 / D_80088C28 */
+    /* 0x4C */ u8 kind;           /* index into gBoltCleanupHandlers / gBoltMsgHandlers */
     /* 0x4D */ u8 pad4D[3];
 } BoltDesc; /* size 0x50 */
 
@@ -2444,7 +2444,7 @@ typedef union Sprite2DData {
         s32 duration;
         s16 startX;
         s16 startY;
-    } move;                       /* func_150B73F0: from start to end as the timer runs down */
+    } move;                       /* sprite_updateLinearMove: from start to end as the timer runs down */
     struct {
         s32 fadeInHold;           /* fade-in frames << 16 | hold frames */
         s32 fadeOutTotal;         /* fade-out frames << 16 | total frames */
@@ -2453,10 +2453,10 @@ typedef union Sprite2DData {
     s32 words[3];                 /* move's points packed as x << 16 | y */
 } Sprite2DData; /* size 0xC */
 
-/* Spawn parameters of a 2D screen sprite (object type 0x5E, func_15169900 / func_15169968, game_196DB0.c),
+/* Spawn parameters of a 2D screen sprite (object type 0x5E, sprite_newSprite2D / sprite_newSprite2DDefault, game_196DB0.c),
  * copied to Sprite2D.params. */
 typedef struct Sprite2DParams {
-    /* 0x00 */ void *texture;     /* drawn with func_1509629C: a TextureDesc, or a HudSprite (same layout) */
+    /* 0x00 */ void *texture;     /* drawn with sprite_drawImage: a TextureDesc, or a HudSprite (same layout) */
     /* 0x04 */ TextureDesc *tile1Texture; /* loaded into tile 1 when flags & 1 */
     /* 0x08 */ Sprite2DData data;
     /* 0x14 */ s16 timer;         /* frames left; 0 = lives forever */
@@ -2847,7 +2847,7 @@ typedef struct DynModelDesc {
     /* 0x24 */ u8 unk24;
     /* 0x25 */ u8 unk25;
     /* 0x26 */ u8 pad26[0xA];
-    /* 0x30 */ s32 unk30;      // model asset, passed to func_1502B6BC
+    /* 0x30 */ s32 unk30;      // model asset, passed to rom_loadPathTable
     /* 0x34 */ s32 unk34;
     /* 0x38 */ u8 kind;        // selects the D_80089C44 / D_80089C54 handlers
     /* 0x39 */ u8 viewportMask; // viewports drawn in when DYNMODEL_FLAG_VIEWPORT_MASK is set
@@ -2908,7 +2908,7 @@ typedef struct CamWobbleDef {
     /* 0x20 */ f32 speed[6];     // phase step per gFrameDelta of time; 0 means the wave is off
 } CamWobbleDef; // size 0x38
 
-/* Spawn parameters of a particle emitter (func_151A8B20). */
+/* Spawn parameters of a particle emitter (beam_newAreaEmitter). */
 typedef struct EmitterDef {
     /* 0x00 */ u8 flags;             /* EMITTER_* */
     /* 0x04 */ struct TriggerZone *anchor; /* zone giving the centre (and area) with EMITTER_ANCHORED */
@@ -2917,9 +2917,9 @@ typedef struct EmitterDef {
     /* 0x10 */ Vec3f pos;            /* centre without EMITTER_ANCHORED */
     /* 0x1C */ f32 bottom;           /* lowest height the ground probe searches */
     /* 0x20 */ f32 radius;
-    /* 0x24 */ u8 type;              /* 1: switched on and off by messages (func_151A931C) */
-    /* 0x25 */ s8 update;            /* index into D_8008F980, -1 for none */
-    /* 0x26 */ s8 spawn;             /* index into D_8008F970, -1 for none */
+    /* 0x24 */ u8 type;              /* 1: switched on and off by messages (beam_switchEmitterMessage) */
+    /* 0x25 */ s8 update;            /* index into gEmitterUpdateHooks, -1 for none */
+    /* 0x26 */ s8 spawn;             /* index into gEmitterSpawnHooks, -1 for none */
 } EmitterDef; /* size 0x28 */
 
 /* EmitterDef.flags */
@@ -2933,11 +2933,11 @@ typedef struct EmitterState {
     /* 0x00 */ EmitterDef def;
     /* 0x28 */ f32 pending;          /* particles owed; one spawns per whole unit */
     /* 0x2C */ CollisionHit ground;
-    /* 0x50 */ ZoneNode *zone;       /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
+    /* 0x50 */ ZoneNode *zone;       /* collision_findZoneLeaf zone of the centre, with EMITTER_ZONED */
     /* 0x54 */ f32 area;
 } EmitterState; /* size 0x58 */
 
-/* Particle emitter: the timed effect that func_151A8B20 (game_1D5FD0.c) spawns from an EmitterDef. */
+/* Particle emitter: the timed effect that beam_newAreaEmitter (game_1D5FD0.c) spawns from an EmitterDef. */
 typedef struct Emitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterState state;
@@ -2974,7 +2974,7 @@ typedef struct BoltSource {
     /* 0x0A */ s16 timer2;
 } BoltSource; /* size 0xC */
 
-/* Data of the effect run by func_150F64DC. */
+/* Data of the effect run by beam_updateFlashBurst. */
 typedef struct FlashBurstData {
     /* 0x00 */ struct Actor *owner;
     /* 0x04 */ u8 ownerId;
@@ -2982,7 +2982,7 @@ typedef struct FlashBurstData {
     /* 0x06 */ s16 timer; /* frames until the next burst */
 } FlashBurstData;
 
-/* Timed effect 0x55 (func_15149130, spawned by func_15011A78), updated by func_150F64DC. */
+/* Timed effect 0x55 (func_15149130, spawned by func_15011A78), updated by beam_updateFlashBurst. */
 typedef struct FlashBurstEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ FlashBurstData data;
@@ -3006,17 +3006,17 @@ typedef struct OwnerEffect {
 typedef struct ShapeEmitter {
     /* 0x00 */ void *shape;
     /* 0x04 */ f32 rate;
-    /* 0x08 */ ZoneNode *zone;   /* func_1510FD20 at the shape's x/z */
+    /* 0x08 */ ZoneNode *zone;   /* collision_findZoneLeaf at the shape's x/z */
     /* 0x0C */ f32 accumulator;
 } ShapeEmitter;
 
 /* Zone effects: timed effects (object type 35 or 95, D_800A5770) that game_40490.c makes for a TriggerZone,
  * with the zone first in their data. func_151A6BD8 (game_1D3FC0.c) finds the ZoneEffect of a zone (callbackSet
- * 0x2C) and func_15105C24 (game_131F30.c) its ZoneRectEffect (callbackSet 0x2E). */
+ * 0x2C) and beam_findZoneRectEffect (game_131F30.c) its ZoneRectEffect (callbackSet 0x2E). */
 typedef struct ZoneEffectData {     /* filled by func_15015104 */
     /* 0x00 */ TriggerZone *zone;
     /* 0x04 */ u8 unk4;             /* the zone's data2 */
-    /* 0x08 */ ZoneNode *node;      /* func_1510FD20 at the zone's x/z */
+    /* 0x08 */ ZoneNode *node;      /* collision_findZoneLeaf at the zone's x/z */
     /* 0x0C */ u8 flags;            /* 3 when the zone's data3 is set, else 0 */
     /* 0x10 */ struct Actor *actor; /* NULL at the start; read by func_151A6B68 */
 } ZoneEffectData;
@@ -3032,7 +3032,7 @@ typedef struct ZoneRectData {       /* filled by func_15015354 */
     /* 0x08 */ f32 unk8;
     /* 0x0C */ f32 points[4][3];    /* the zone's rotated rectangle */
     /* 0x3C */ f32 edges[4][3];     /* points[i + 1] - points[i] */
-    /* 0x6C */ ZoneNode *node;      /* func_1510FD20 at the zone's x/z */
+    /* 0x6C */ ZoneNode *node;      /* collision_findZoneLeaf at the zone's x/z */
     /* 0x70 */ struct Actor *actor; /* NULL at the start; read by func_1515FBC4 */
 } ZoneRectData;
 

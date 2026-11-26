@@ -34,7 +34,7 @@ void func_151298C0(cam, arg1)
 
 /*
  * Eases the camera point unk2F8 toward the point unk278 short of unk2BC on the line from
- * unk288 (snapping when unk23C is set), then re-queries func_1510E7A4 for it when needed.
+ * unk288 (snapping when unk23C is set), then re-queries collision_findFloorInRange for it when needed.
  */
 void func_15129934(Camera *cam) {
     f32 x;
@@ -92,7 +92,7 @@ void func_15129934(Camera *cam) {
         func_1512C150(cam);
         if (cam->Snap || (cam->AvailableModes & 0x400000) ||
             !func_150A3FC4(cam->eye.x, cam->eye.z, cam->TrianglePtr, cam->floorTri.v, &cam->unk35C)) {
-            func_1510E7A4(NULL, NULL, &surface, &cam->waterY, &cam->Attributes, 0, cam->eye.x, cam->eye.y,
+            collision_findFloorInRange(NULL, NULL, &surface, &cam->waterY, &cam->Attributes, 0, cam->eye.x, cam->eye.y,
                           cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
             if (cam->zoneWaterY != -10000.0f) {
                 cam->waterY = cam->zoneWaterY;

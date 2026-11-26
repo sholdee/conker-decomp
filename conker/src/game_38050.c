@@ -36,9 +36,9 @@ static const f32 *gParticlePatterns[] = { D_80095BE0, D_80095BFC, D_80095C28 };
 /** Clears the particle slot tables and picks this level's resources. */
 void light_initParticleSlots(s32 arg0) {
     bzero(gParticleSlotResources, sizeof(gParticleSlotResources));
-    func_1502B8E0(gParticleSlotResources, sizeof(gParticleSlotResources), 3, 12, arg0, 10);
-    bzero(D_800DDA90, sizeof(D_800DDA90));
-    bzero(D_800DD478, sizeof(D_800DD478));
+    rom_loadPathInto(gParticleSlotResources, sizeof(gParticleSlotResources), 3, 12, arg0, 10);
+    bzero(gSpriteTypeTexFiles, sizeof(gSpriteTypeTexFiles));
+    bzero(gSpriteTypeFrames, sizeof(gSpriteTypeFrames));
 }
 
 /** Looks up the texture file of every used particle slot and computes its texture extents. */
@@ -49,21 +49,21 @@ void light_loadParticleTextures(void) {
     u32 length;
 
     for (i = 0; i < 15; i++) {
-        D_800DDA90[i].devAddr = 0;
-        D_800DDA90[i].buf = 0;
-        D_800DDA90[i].size = 0;
-        D_800DDA90[i].used = 0;
+        gSpriteTypeTexFiles[i].devAddr = 0;
+        gSpriteTypeTexFiles[i].buf = 0;
+        gSpriteTypeTexFiles[i].size = 0;
+        gSpriteTypeTexFiles[i].used = 0;
         id = gParticleSlotResources[i].id;
         if (id != 0xFF && (gParticleSlotTriCounts[i] != 0 || gParticleSlotResources[i].id == 0x3B)) {
-            D_800DDA90[i].devAddr = (s32)func_1502B020(&size, 2, 0, id);
-            D_800DDA90[i].size = (size + 15) & ~15;
+            gSpriteTypeTexFiles[i].devAddr = (s32)rom_findPath(&size, 2, 0, id);
+            gSpriteTypeTexFiles[i].size = (size + 15) & ~15;
             length = gParticleTexInfos[id].frameSize;
             if (size == 0 || length == 0) {
                 length = 0;
-                D_800DDA90[i].devAddr = 0;
+                gSpriteTypeTexFiles[i].devAddr = 0;
             }
-            D_800DDB80[i].s = (gParticleTexInfos[id].width << 5) - 1;
-            D_800DDB80[i].t = (((length / gParticleTexInfos[id].width) << 6) / 5) - 1;
+            gSpriteTypeTexSizes[i].s = (gParticleTexInfos[id].width << 5) - 1;
+            gSpriteTypeTexSizes[i].t = (((length / gParticleTexInfos[id].width) << 6) / 5) - 1;
         }
     }
 }
@@ -75,36 +75,36 @@ void light_setupParticleSlot(s32 slot, s32 id, s32 flags) {
     s32 infoFlags;
 
     if (id != 255) {
-        frames = &D_800DDBD0[slot];
+        frames = &gSpriteTypeFrameCounts[slot];
         info = &gParticleTexInfos[id];
         *frames = info->frameCount;
         infoFlags = info->flags;
         if (infoFlags & 0x10) {
             *frames -= 1;
-            D_800DDBE0[slot] = *frames;
+            gSpriteTypeDisturbFrames[slot] = *frames;
         } else {
-            D_800DDBE0[slot] = 0;
+            gSpriteTypeDisturbFrames[slot] = 0;
         }
         if (infoFlags & 0x80) {
-            D_800DDBF0[slot] = 2;
+            gSpriteTypePasses[slot] = 2;
         } else {
-            D_800DDBF0[slot] = 1;
+            gSpriteTypePasses[slot] = 1;
         }
         gParticleSlotScales[slot][0] = info->scaleX;
         gParticleSlotScales[slot][1] = info->scaleY;
         D_800DDBC0[slot] = id;
-        D_800DDC80[slot] = flags & 0xFF7F;
+        gSpriteTypeKindRows[slot] = flags & 0xFF7F;
         if (flags & 0x80) {
             D_800DDC00 |= 1 << slot;
         }
         if (infoFlags & 1) {
-            D_800DDC04 |= 1 << slot;
+            gSpritePingPongTypes |= 1 << slot;
         }
         if (infoFlags & 8) {
-            D_800DDC08 |= 1 << slot;
+            gSpriteRandomFlipTypes |= 1 << slot;
         }
     } else {
-        D_800DDBD0[slot] = 0;
+        gSpriteTypeFrameCounts[slot] = 0;
     }
     gParticleSlotTriCounts[slot] = 0;
     D_800DDC20[slot][0] = D_80095CC4[slot];
@@ -120,35 +120,35 @@ s32 func_1500AF08(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jit
         return D_800B0DF0->maxParticles - 1;
     }
 
-    D_800DDD18[index].x = x;
-    D_800DDD18[index].y = y;
-    D_800DDD18[index].z = z;
+    gLevelSprites[index].x = x;
+    gLevelSprites[index].y = y;
+    gLevelSprites[index].z = z;
 
-    if (D_800DDBD0[slot] >= 2) {
+    if (gSpriteTypeFrameCounts[slot] >= 2) {
         if ((1 << slot) & D_800DDC00) {
-            D_800DDD18[index].phaseIdx = (slot << 2) + (parity & 1);
+            gLevelSprites[index].phaseIdx = (slot << 2) + (parity & 1);
         } else {
-            D_800DDD18[index].phaseIdx = (index & 3) + (slot << 2);
+            gLevelSprites[index].phaseIdx = (index & 3) + (slot << 2);
         }
     } else {
-        D_800DDD18[index].phaseIdx = 60;
+        gLevelSprites[index].phaseIdx = 60;
     }
 
-    D_800DDD18[index].unk6 = (subtype << 5) | slot;
-    D_800DDD18[index].kind = kind;
-    D_800DDD18[index].texInfo = D_800DDBC0[slot];
+    gLevelSprites[index].unk6 = (subtype << 5) | slot;
+    gLevelSprites[index].kind = kind;
+    gLevelSprites[index].texInfo = D_800DDBC0[slot];
 
     if (jitter != 0) {
         // matching: the "+ jitter - jitter" pair is needed for the original instruction sequence
         scale = (func_151EF610() % jitter + jitter) - jitter + 0x100;
-        D_800DDD18[index].halfWidth = (gParticleSlotScales[slot][0] * scale) >> 10;
+        gLevelSprites[index].halfWidth = (gParticleSlotScales[slot][0] * scale) >> 10;
         if (gParticleTexInfos[D_800DDBC0[slot]].flags & 4) {
             scale = func_151EF610() % jitter * 4 + scale;
         }
-        D_800DDD18[index].height = (gParticleSlotScales[slot][1] * scale) >> 10;
+        gLevelSprites[index].height = (gParticleSlotScales[slot][1] * scale) >> 10;
     } else {
-        D_800DDD18[index].halfWidth = gParticleSlotScales[slot][0] >> 2;
-        D_800DDD18[index].height = gParticleSlotScales[slot][1] >> 2;
+        gLevelSprites[index].halfWidth = gParticleSlotScales[slot][0] >> 2;
+        gLevelSprites[index].height = gParticleSlotScales[slot][1] >> 2;
     }
     return index + 1;
 }
@@ -258,7 +258,7 @@ s32 func_1500B714(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri
 }
 /**
  * Like light_scatterParticles without scale jitter, then sets the slot's frame count to 87. It has no return
- * statement: its caller light_buildLevelParticles (through D_8008CEB8) keeps the next index that the last
+ * statement: its caller light_buildLevelParticles (through gSpriteKinds) keeps the next index that the last
  * func_1500AF08 call left in v0.
  */
 s32 func_1500B8F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
@@ -287,11 +287,11 @@ s32 func_1500B8F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri 
             index = next;
         } while (i != n);
     }
-    D_800DDBD0[slot] = 87;
+    gSpriteTypeFrameCounts[slot] = 87;
 }
 /**
  * Like light_scatterParticles without scale jitter, then sets the slot's frame count to 8. It has no return
- * statement: its caller light_buildLevelParticles (through D_8008CEB8) keeps the next index that the last
+ * statement: its caller light_buildLevelParticles (through gSpriteKinds) keeps the next index that the last
  * func_1500AF08 call left in v0.
  */
 s32 func_1500BAB8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
@@ -320,11 +320,11 @@ s32 func_1500BAB8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri 
             index = next;
         } while (i != n);
     }
-    D_800DDBD0[slot] = 8;
+    gSpriteTypeFrameCounts[slot] = 8;
 }
 /**
  * Like light_scatterParticles without scale jitter, then sets the slot's frame count to 33. It has no return
- * statement: its caller light_buildLevelParticles (through D_8008CEB8) keeps the next index that the last
+ * statement: its caller light_buildLevelParticles (through gSpriteKinds) keeps the next index that the last
  * func_1500AF08 call left in v0.
  */
 s32 func_1500BC7C(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
@@ -353,21 +353,21 @@ s32 func_1500BC7C(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri 
             index = next;
         } while (i != n);
     }
-    D_800DDBD0[slot] = 33;
+    gSpriteTypeFrameCounts[slot] = 33;
 }
 
 void func_1500BE40(s32 unused) {
-    D_800DDD10[0] = NULL;
-    D_800DDD10[1] = NULL;
-    D_800DDD0C = 110;
+    gSpriteVtxBuffers[0] = NULL;
+    gSpriteVtxBuffers[1] = NULL;
+    gSpriteMaxPerFrame = 110;
 }
 
 /** Resets the particle counters and slot bitmasks. */
 void light_resetParticles(void) {
-    D_800DDD1C = 0;
-    D_8008CEB0 = 0;
-    D_800DDC04 = D_800DDC00 = D_800DDC08 = 0;
-    D_800DDD20 = 0;
+    gBillboardAnimCounter = 0;
+    gBillboardQueueCount = 0;
+    gSpritePingPongTypes = D_800DDC00 = gSpriteRandomFlipTypes = 0;
+    gLevelSpriteCount = 0;
     func_1500BE40(0);
 }
 
@@ -397,37 +397,37 @@ void light_buildLevelParticles(void) {
         light_setupParticleSlot(i, gParticleSlotResources[i].id, gParticleSlotResources[i].flags);
     }
 
-    D_800DDD18 = allocate_memory(D_800B0DF0->maxParticles * sizeof(Game1A89B0Position), 1, 2, 0);
-    func_1510F800(0);
+    gLevelSprites = allocate_memory(D_800B0DF0->maxParticles * sizeof(Game1A89B0Position), 1, 2, 0);
+    collision_selectMap(0);
 
-    if (D_800DBE5C != NULL) {
-        for (i = 0; i < D_800DBE4C; i++) {
-            packed = D_800DBE5C[i];
+    if (gMeshTriMaterials != NULL) {
+        for (i = 0; i < gCurMapTriCount; i++) {
+            packed = gMeshTriMaterials[i];
             if (packed & 0xF0000) {
                 slot = ((packed >> 16) & 0xF) - 1;
                 kind = (packed >> 20) & 7;
-                D_800DDD20 = D_8008CEB8[D_8008CF00[D_800DDC80[slot]][kind].emitter].emit(
-                    D_8008CF00[D_800DDC80[slot]][kind].count, kind, slot,
-                    ((packed >> 5) & 3) ^ 3, D_800DDD20, &D_800DBE3C[i]);
+                gLevelSpriteCount = gSpriteKinds[gSpriteKindChoices[gSpriteTypeKindRows[slot]][kind].emitter].emit(
+                    gSpriteKindChoices[gSpriteTypeKindRows[slot]][kind].count, kind, slot,
+                    ((packed >> 5) & 3) ^ 3, gLevelSpriteCount, &gCurMapTris[i]);
                 gParticleSlotTriCounts[slot]++;
             }
         }
     }
 
-    for (i = 0; i < D_800DDD20; i++) {
-        D_800DDD18[i].disturbState = 0;
+    for (i = 0; i < gLevelSpriteCount; i++) {
+        gLevelSprites[i].disturbState = 0;
     }
 
-    D_8008CEB4 = 0;
-    func_1517B89C(0, D_800DDD20 - 1);
+    gLevelSpriteSortAxis = 0;
+    sprite_sortLevelSprites(0, gLevelSpriteCount - 1);
 
     for (i = 0; i < 60; i++) {
         slot = i >> 2;
-        if (D_800DDBD0[slot] != 0) {
-            D_800DDC90[i] = (func_151EF610() % D_800DDBD0[slot]) << 8;
+        if (gSpriteTypeFrameCounts[slot] != 0) {
+            gSpriteTypePhases[i] = (func_151EF610() % gSpriteTypeFrameCounts[slot]) << 8;
         } else {
-            D_800DDC90[i] = 0;
+            gSpriteTypePhases[i] = 0;
         }
-        D_800DDC10[slot] = func_151EF610();
+        gSpritePingPongDirs[slot] = func_151EF610();
     }
 }

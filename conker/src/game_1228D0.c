@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Points in bone space: the ends of the func_150F5C98 spark segment (bone 5), of the func_150F6178 beam,
- * and the origin of the func_150F64DC bolts. */
+/* Points in bone space: the ends of the beam_updateBoneSparks spark segment (bone 5), of the beam_updateModelBeam beam,
+ * and the origin of the beam_updateFlashBurst bolts. */
 static const Vec3f D_800A1B00 = { 0.0f, 0.0f, 14.0f };
 static const Vec3f D_800A1B0C = { 0.0f, 0.0f, 78.0f };
 static const Vec3f D_800A1B18 = { 0.0f, -55.0f, 0.0f };
@@ -13,7 +13,7 @@ static const Vec3f D_800A1B30 = { 0.0f, 465.0f, -102.0f };
 
 /* Shows a sprite (picked by `style`) that fades in over `fadeIn` frames, holds for
  * `hold` frames and fades out over `fadeOut` frames. */
-void func_150F5420(s32 fadeIn, s32 hold, s32 fadeOut, s32 style) {
+void beam_showFadeSprite(s32 fadeIn, s32 hold, s32 fadeOut, s32 style) {
     Sprite2DParams desc;
     s32 total;
 
@@ -64,20 +64,20 @@ void func_150F5420(s32 fadeIn, s32 hold, s32 fadeOut, s32 style) {
     desc.unk37 = 0x11;
     desc.alpha = 0;
     desc.frame = 0;
-    func_15169968(&desc);
+    sprite_newSprite2DDefault(&desc);
 }
 
 /* Grows the sprite as its timer runs down, then updates its fade. */
-void func_150F5590(Sprite2D *sprite) {
+void beam_updateGrowSprite(Sprite2D *sprite) {
     s32 scale = 0x1000 - (sprite->params.timer << 2);
 
     sprite->params.scaleX = scale;
     sprite->params.scaleY = sprite->params.scaleX;
-    func_150F55C8(sprite);
+    beam_updateSpriteFade(sprite);
 }
 
 /* Sets the sprite's alpha from its timer: fade in, hold at 0xFF, then fade out. */
-void func_150F55C8(Sprite2D *sprite) {
+void beam_updateSpriteFade(Sprite2D *sprite) {
     s32 timer;
     s32 total;
     s32 fadeIn;
@@ -106,9 +106,9 @@ void func_150F568C(s32 arg0) {
 }
 
 
-/* Model attachment hook 4 (D_800841C0[4]). Picks the attachment's segment-6 texture (an entry of
+/* Model attachment hook 4 (gAttachHooks[4]). Picks the attachment's segment-6 texture (an entry of
  * D_80090274) from the actor's animation frame while the actor is in state 0xAE. */
-s32 func_150F56B0(ModelAttachment *att, Actor *actor) {
+s32 beam_hookFrameTexture(ModelAttachment *att, Actor *actor) {
     AnimInstance *anim;
     s32 frame;
     f32 two; // matching: IDO materializes 2.0f once only when it is a variable
@@ -165,10 +165,10 @@ s32 func_150F56B0(ModelAttachment *att, Actor *actor) {
     return 0;
 }
 
-/* Model attachment hook 21 (D_800841C0[21]). While the actor is in state 5, slides the attachment's
+/* Model attachment hook 21 (gAttachHooks[21]). While the actor is in state 5, slides the attachment's
  * texture over animation frames 69-84 by patching the upper-left t of the first G_SETTILESIZE in its
  * display list. unk38 is the fade state: 0 = start, 1 = shown, 2 = faded out. */
-s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
+s32 beam_hookSlideTexture(ModelAttachment *att, Actor *actor) {
     AnimInstance *anim;
     Gfx *gfx;
     s32 count;
@@ -235,8 +235,8 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     return 0;
 }
 
-/* Spawns a spark effect (func_150F5C98) on `owner`. */
-void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
+/* Spawns a spark effect (beam_updateBoneSparks) on `owner`. */
+void beam_spawnBoneSparks(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     SparkData data;
     BoneSparkEffect *effect;
 
@@ -252,7 +252,7 @@ void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 
 /* Spark effect: while the owner lives, emits sparks along the segment between two points of
  * its bone 5, at a random rate. */
-void func_150F5C98(BoneSparkEffect *effect) {
+void beam_updateBoneSparks(BoneSparkEffect *effect) {
     Actor *owner;
     SparkData *data;
     ParticleDesc spawn;
@@ -347,13 +347,13 @@ void func_150F5C98(BoneSparkEffect *effect) {
 
 /* Effect callback for the spark effect: hands func_15149514 the effect's owner reference
  * (pointer and id). */
-void func_150F6138(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
+void beam_boneSparksMessage(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Beam effect: while the owner lives and has a model (and unk94 bit 1 is clear), stretches the
  * beam between two points of the model and puts the flash at the first; otherwise hides both. */
-void func_150F6178(ModelBeamEffect *effect) {
+void beam_updateModelBeam(ModelBeamEffect *effect) {
     ModelBeamData *data;
     Actor *owner;
     Vec3f start;
@@ -412,7 +412,7 @@ void func_150F6178(ModelBeamEffect *effect) {
 }
 
 /* Frees the beam effect's beam and flash. */
-void func_150F631C(ModelBeamEffect *effect) {
+void beam_releaseModelBeamParts(ModelBeamEffect *effect) {
     ModelBeamData *data = &effect->data;
 
     if (data->beam != NULL) {
@@ -424,23 +424,23 @@ void func_150F631C(ModelBeamEffect *effect) {
 }
 
 /* Beam effect destructors: free the beam and flash, then the effect. */
-void func_150F6368(ModelBeamEffect *effect) {
-    func_150F631C(effect);
+void beam_destroyModelBeamEffect(ModelBeamEffect *effect) {
+    beam_releaseModelBeamParts(effect);
     func_1514933C(&effect->base);
 }
 
-void func_150F6394(ModelBeamEffect *effect) {
-    func_150F631C(effect);
+void beam_freeModelBeamEffect(ModelBeamEffect *effect) {
+    beam_releaseModelBeamParts(effect);
     func_15149368(&effect->base);
 }
 
 /* Effect callback for the beam effect: hands func_15169850 the owner reference. */
-void func_150F63C0(ModelBeamEffect *effect, s32 arg1, u8 arg2) {
+void beam_modelBeamMessage(ModelBeamEffect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Clears the beam effect's reference to this beam. */
-void func_150F6400(ModelBeam *beam) {
+void beam_unlinkModelBeam(ModelBeam *beam) {
     BeamPart *part = &beam->part;
 
     if (part->effect != NULL) {
@@ -451,13 +451,13 @@ void func_150F6400(ModelBeam *beam) {
 }
 
 /* Beam destructors: unlink the beam from its effect, then free it. */
-void func_150F6420(ModelBeam *beam) {
-    func_150F6400(beam);
+void beam_destroyModelBeam(ModelBeam *beam) {
+    beam_unlinkModelBeam(beam);
     func_1513CA6C(&beam->head);
 }
 
-void func_150F644C(ModelBeam *beam) {
-    func_150F6400(beam);
+void beam_freeModelBeam(ModelBeam *beam) {
+    beam_unlinkModelBeam(beam);
     func_1513CAA0(&beam->head);
 }
 
@@ -477,7 +477,7 @@ void func_150F64B0(DefParticleHead *obj) {
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
  * frames calls func_10010F88(0x679) at the owner, makes a flash at a point of the model and emits
  * 2 or 3 blue-white particles from it. */
-void func_150F64DC(FlashBurstEffect *effect) {
+void beam_updateFlashBurst(FlashBurstEffect *effect) {
     FlashBurstData *data;
     Actor *owner;
     s8 count;
@@ -522,7 +522,7 @@ void func_150F64DC(FlashBurstEffect *effect) {
                     rand1 = func_150ADA20();
                     rand2 = func_150ADA20();
                     rand3 = func_150ADA20();
-                    func_15107C1C(owner, 0, &D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
+                    beam_spawnBoneBolt(owner, 0, &D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
                                   27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, effect->base.header.owner,
                                   effect->base.header.kind);
                     count--;
@@ -534,7 +534,7 @@ void func_150F64DC(FlashBurstEffect *effect) {
 }
 
 /* Effect callback for the burst effect: hands func_15169850 the owner reference. */
-void func_150F6850(FlashBurstEffect *effect, s32 arg1, u8 arg2) {
+void beam_flashBurstMessage(FlashBurstEffect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
@@ -573,7 +573,7 @@ void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, s32, s32);
 /* BloodStrip emit callback: one func_151D9014 blood particle, larger than func_15137E60's. 60% of
  * them get a ground probe under the strip's owner; the rest get none (height -10000). */
-void func_150F695C(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
+void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
     Vec3f start;
     Vec3f end;
     Vec3f velocity;
@@ -592,7 +592,7 @@ void func_150F695C(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *veloci
     arg6 *= 1.0f + (random + random);
     probeGround = func_150ADA68() < 0.6f;
     if (probeGround) {
-        func_1504715C(&ground, strip->owner);
+        collision_initHitFromObject(&ground, strip->owner);
     } else {
         ground.material = 0;
         ground.flags = 0;

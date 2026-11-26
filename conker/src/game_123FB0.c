@@ -51,7 +51,7 @@ void func_150F6B00(Camera *actor) {
         }
         vertical = -20.0f;
         script_command(3, 0x4003, 3, (s32)lateral, (s32)vertical, (s32)LERP(-5530.0f, 1198.0f, blend)); // z of the segment ends
-        func_15049688(&actor->CameraAngle, func_15048FC8(&D_800D9A50) - 180.0f, &actor->AutoBehindAngleVel, 8.0f, 10.0f, actor->SpringTime);
+        func_15049688(&actor->CameraAngle, func_15048FC8(&gLastBeamDir) - 180.0f, &actor->AutoBehindAngleVel, 8.0f, 10.0f, actor->SpringTime);
         actor->CameraAngleRad = actor->CameraAngle * 0.01745329238f; // degrees to radians
     } else {
         actor->AvailableModes &= 0x3FFFEFFF;

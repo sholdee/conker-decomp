@@ -65,8 +65,8 @@ glabel func_150AB1F0
     /* D876C 150AB2BC 0D41F0F8 */  jal        actor_computeSize
     /* D8770 150AB2C0 00000000 */   nop
     /* D8774 150AB2C4 24110000 */  addiu      $s1, $zero, 0x0
-    /* D8778 150AB2C8 3C08800E */  lui        $t0, %hi(D_800DBE50)
-    /* D877C 150AB2CC 8D08BE50 */  lw         $t0, %lo(D_800DBE50)($t0)
+    /* D8778 150AB2C8 3C08800E */  lui        $t0, %hi(gCurMap)
+    /* D877C 150AB2CC 8D08BE50 */  lw         $t0, %lo(gCurMap)($t0)
     /* D8780 150AB2D0 8FA601C8 */  lw         $a2, 0x1C8($sp)
     /* D8784 150AB2D4 24010002 */  addiu      $at, $zero, 0x2
     /* D8788 150AB2D8 15010037 */  bne        $t0, $at, .L150AB3B8
@@ -166,8 +166,8 @@ glabel func_150AB1F0
     /* D88F0 150AB440 AFAA0158 */  sw         $t2, 0x158($sp)
     /* D88F4 150AB444 E7A101E0 */  swc1       $f1, 0x1E0($sp)
     /* D88F8 150AB448 E7A201E4 */  swc1       $f2, 0x1E4($sp)
-    /* D88FC 150AB44C 3C01800D */  lui        $at, %hi(D_800CBDDC)
-    /* D8900 150AB450 C420BDDC */  lwc1       $f0, %lo(D_800CBDDC)($at)
+    /* D88FC 150AB44C 3C01800D */  lui        $at, %hi(gProbeMidHeight)
+    /* D8900 150AB450 C420BDDC */  lwc1       $f0, %lo(gProbeMidHeight)($at)
     /* D8904 150AB454 E7A00054 */  swc1       $f0, 0x54($sp)
     /* D8908 150AB458 3C014000 */  lui        $at, (0x40000000 >> 16)
     /* D890C 150AB45C 44811000 */  mtc1       $at, $f2
@@ -182,8 +182,8 @@ glabel func_150AB1F0
     /* D8930 150AB480 46806320 */  cvt.s.w    $f12, $f12
     /* D8934 150AB484 46026302 */  mul.s      $f12, $f12, $f2
     /* D8938 150AB488 00000000 */  nop
-    /* D893C 150AB48C 3C01800D */  lui        $at, %hi(D_800CBDD8)
-    /* D8940 150AB490 C42EBDD8 */  lwc1       $f14, %lo(D_800CBDD8)($at)
+    /* D893C 150AB48C 3C01800D */  lui        $at, %hi(gProbeHeight)
+    /* D8940 150AB490 C42EBDD8 */  lwc1       $f14, %lo(gProbeHeight)($at)
     /* D8944 150AB494 46037380 */  add.s      $f14, $f14, $f3
     /* D8948 150AB498 0D4124B3 */  jal        func_150492CC
     /* D894C 150AB49C 00000000 */   nop
@@ -194,8 +194,8 @@ glabel func_150AB1F0
     /* D895C 150AB4AC E7A10160 */  swc1       $f1, 0x160($sp)
     /* D8960 150AB4B0 AFA8015C */  sw         $t0, 0x15C($sp)
     /* D8964 150AB4B4 AFAA0158 */  sw         $t2, 0x158($sp)
-    /* D8968 150AB4B8 3C01800D */  lui        $at, %hi(D_800CBDDC)
-    /* D896C 150AB4BC C420BDDC */  lwc1       $f0, %lo(D_800CBDDC)($at)
+    /* D8968 150AB4B8 3C01800D */  lui        $at, %hi(gProbeMidHeight)
+    /* D896C 150AB4BC C420BDDC */  lwc1       $f0, %lo(gProbeMidHeight)($at)
     /* D8970 150AB4C0 E7A00054 */  swc1       $f0, 0x54($sp)
     /* D8974 150AB4C4 3C014000 */  lui        $at, (0x40000000 >> 16)
     /* D8978 150AB4C8 44811000 */  mtc1       $at, $f2
@@ -224,8 +224,8 @@ glabel func_150AB1F0
     /* D89D4 150AB524 46806320 */  cvt.s.w    $f12, $f12
     /* D89D8 150AB528 46026302 */  mul.s      $f12, $f12, $f2
     /* D89DC 150AB52C 00000000 */  nop
-    /* D89E0 150AB530 3C01800D */  lui        $at, %hi(D_800CBDD8)
-    /* D89E4 150AB534 C42EBDD8 */  lwc1       $f14, %lo(D_800CBDD8)($at)
+    /* D89E0 150AB530 3C01800D */  lui        $at, %hi(gProbeHeight)
+    /* D89E4 150AB534 C42EBDD8 */  lwc1       $f14, %lo(gProbeHeight)($at)
     /* D89E8 150AB538 0D4124B3 */  jal        func_150492CC
     /* D89EC 150AB53C 00000000 */   nop
   glabel func_150AB540
@@ -277,8 +277,8 @@ glabel func_150AB1F0
     /* D8A9C 150AB5EC AFA80058 */  sw         $t0, 0x58($sp)
     /* D8AA0 150AB5F0 AFA9005C */  sw         $t1, 0x5C($sp)
     /* D8AA4 150AB5F4 AFAA0060 */  sw         $t2, 0x60($sp)
-    /* D8AA8 150AB5F8 3C10800E */  lui        $s0, %hi(D_800DBE48)
-    /* D8AAC 150AB5FC 8E10BE48 */  lw         $s0, %lo(D_800DBE48)($s0)
+    /* D8AA8 150AB5F8 3C10800E */  lui        $s0, %hi(gCurMapQuadTree)
+    /* D8AAC 150AB5FC 8E10BE48 */  lw         $s0, %lo(gCurMapQuadTree)($s0)
     /* D8AB0 150AB600 8FA901D4 */  lw         $t1, 0x1D4($sp)
     /* D8AB4 150AB604 01200008 */  jr         $t1
     /* D8AB8 150AB608 00000000 */   nop
@@ -379,8 +379,8 @@ glabel func_150AB1F0
     /* D8C10 150AB760 00094880 */  sll        $t1, $t1, 2
     /* D8C14 150AB764 01094021 */  addu       $t0, $t0, $t1
     /* D8C18 150AB768 8D080000 */  lw         $t0, 0x0($t0)
-    /* D8C1C 150AB76C 3C01800E */  lui        $at, %hi(D_800DBE3C)
-    /* D8C20 150AB770 AC28BE3C */  sw         $t0, %lo(D_800DBE3C)($at)
+    /* D8C1C 150AB76C 3C01800E */  lui        $at, %hi(gCurMapTris)
+    /* D8C20 150AB770 AC28BE3C */  sw         $t0, %lo(gCurMapTris)($at)
     /* D8C24 150AB774 3C08800C */  lui        $t0, %hi(D_800C5918)
     /* D8C28 150AB778 25085918 */  addiu      $t0, $t0, %lo(D_800C5918)
     /* D8C2C 150AB77C 00094842 */  srl        $t1, $t1, 1
@@ -399,10 +399,10 @@ glabel func_150AB1F0
     /* D8C5C 150AB7AC 0942AE37 */  j          func_150AB8DC
     /* D8C60 150AB7B0 8D47026C */   lw        $a3, 0x26C($t2)
   .L150AB7B4:
-    /* D8C64 150AB7B4 3C06800E */  lui        $a2, %hi(D_800DBE40)
-    /* D8C68 150AB7B8 8CC6BE40 */  lw         $a2, %lo(D_800DBE40)($a2)
-    /* D8C6C 150AB7BC 3C07800E */  lui        $a3, %hi(D_800DBE44)
-    /* D8C70 150AB7C0 8CE7BE44 */  lw         $a3, %lo(D_800DBE44)($a3)
+    /* D8C64 150AB7B4 3C06800E */  lui        $a2, %hi(gCurMapTriXZBounds)
+    /* D8C68 150AB7B8 8CC6BE40 */  lw         $a2, %lo(gCurMapTriXZBounds)($a2)
+    /* D8C6C 150AB7BC 3C07800E */  lui        $a3, %hi(gCurMapTriYBounds)
+    /* D8C70 150AB7C0 8CE7BE44 */  lw         $a3, %lo(gCurMapTriYBounds)($a3)
     /* D8C74 150AB7C4 8FB80064 */  lw         $t8, 0x64($sp)
     /* D8C78 150AB7C8 92EC0000 */  lbu        $t4, 0x0($s7)
     /* D8C7C 150AB7CC 26F70001 */  addiu      $s7, $s7, 0x1
@@ -459,8 +459,8 @@ glabel func_150AB1F0
     /* D8D44 150AB894 0942AE2E */  j          func_150AB8B8
     /* D8D48 150AB898 8DEF0040 */   lw        $t7, 0x40($t7)
   .L150AB89C:
-    /* D8D4C 150AB89C 3C18800E */  lui        $t8, %hi(D_800DBE5C)
-    /* D8D50 150AB8A0 8F18BE5C */  lw         $t8, %lo(D_800DBE5C)($t8)
+    /* D8D4C 150AB89C 3C18800E */  lui        $t8, %hi(gMeshTriMaterials)
+    /* D8D50 150AB8A0 8F18BE5C */  lw         $t8, %lo(gMeshTriMaterials)($t8)
     /* D8D54 150AB8A4 13000004 */  beqz       $t8, func_150AB8B8
     /* D8D58 150AB8A8 00007825 */   or        $t7, $zero, $zero
     /* D8D5C 150AB8AC 00167880 */  sll        $t7, $s6, 2
@@ -524,8 +524,8 @@ glabel func_150AB1F0
     /* D8E30 150AB980 8FA801D8 */  lw         $t0, 0x1D8($sp)
     /* D8E34 150AB984 01000008 */  jr         $t0
   glabel D_150AB988
-    /* D8E38 150AB988 3C08800E */   lui       $t0, %hi(D_800DBE3C)
-    /* D8E3C 150AB98C 8D08BE3C */  lw         $t0, %lo(D_800DBE3C)($t0)
+    /* D8E38 150AB988 3C08800E */   lui       $t0, %hi(gCurMapTris)
+    /* D8E3C 150AB98C 8D08BE3C */  lw         $t0, %lo(gCurMapTris)($t0)
     /* D8E40 150AB990 001650C0 */  sll        $t2, $s6, 3
     /* D8E44 150AB994 010A4021 */  addu       $t0, $t0, $t2
     /* D8E48 150AB998 00165080 */  sll        $t2, $s6, 2
@@ -1267,8 +1267,8 @@ glabel func_150AC3E4
     /* D9904 150AC454 00000000 */  nop
     /* D9908 150AC458 00000000 */  nop
     /* D990C 150AC45C 00084040 */  sll        $t0, $t0, 1
-    /* D9910 150AC460 3C09800D */  lui        $t1, %hi(D_800CBDA0)
-    /* D9914 150AC464 2529BDA0 */  addiu      $t1, $t1, %lo(D_800CBDA0)
+    /* D9910 150AC460 3C09800D */  lui        $t1, %hi(gActorTouchedObject)
+    /* D9914 150AC464 2529BDA0 */  addiu      $t1, $t1, %lo(gActorTouchedObject)
     /* D9918 150AC468 01094021 */  addu       $t0, $t0, $t1
     /* D991C 150AC46C A5000000 */  sh         $zero, 0x0($t0)
     /* D9920 150AC470 3C080E00 */  lui        $t0, (0xE000000 >> 16)
@@ -1277,8 +1277,8 @@ glabel func_150AC3E4
     /* D992C 150AC47C 00000000 */   nop
 
 glabel func_150AC480
-    /* D9930 150AC480 3C08800E */  lui        $t0, %hi(D_800DBE3C)
-    /* D9934 150AC484 8D08BE3C */  lw         $t0, %lo(D_800DBE3C)($t0)
+    /* D9930 150AC480 3C08800E */  lui        $t0, %hi(gCurMapTris)
+    /* D9934 150AC484 8D08BE3C */  lw         $t0, %lo(gCurMapTris)($t0)
     /* D9938 150AC488 001650C0 */  sll        $t2, $s6, 3
     /* D993C 150AC48C 010A4021 */  addu       $t0, $t0, $t2
     /* D9940 150AC490 00165080 */  sll        $t2, $s6, 2
@@ -1625,8 +1625,8 @@ glabel func_150AC480
     /* D9E38 150AC988 0109001A */  div        $zero, $t0, $t1
     /* D9E3C 150AC98C 00004012 */  mflo       $t0
     /* D9E40 150AC990 00084040 */  sll        $t0, $t0, 1
-    /* D9E44 150AC994 3C09800D */  lui        $t1, %hi(D_800CBDA0)
-    /* D9E48 150AC998 2529BDA0 */  addiu      $t1, $t1, %lo(D_800CBDA0)
+    /* D9E44 150AC994 3C09800D */  lui        $t1, %hi(gActorTouchedObject)
+    /* D9E48 150AC998 2529BDA0 */  addiu      $t1, $t1, %lo(gActorTouchedObject)
     /* D9E4C 150AC99C 01094021 */  addu       $t0, $t0, $t1
     /* D9E50 150AC9A0 240A0001 */  addiu      $t2, $zero, 0x1
     /* D9E54 150AC9A4 A50A0000 */  sh         $t2, 0x0($t0)

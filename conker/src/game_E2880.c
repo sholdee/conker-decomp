@@ -7,7 +7,7 @@ typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
     /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 sparkAccum; /* fractional count of func_15107700 particles still to spawn */
+    /* 0x08 */ f32 sparkAccum; /* fractional count of beam_spawnBoundsBolt particles still to spawn */
     /* 0x0C */ f32 unkCAccum;  /* fractional count of func_15107B78 particles still to spawn */
 } OwnerSparkData; /* size 0x10 */
 
@@ -61,7 +61,7 @@ void func_150B54A8(OwnerSparkEffect *effect) {
         colour[1] = 0xD2;
         colour[2] = 0xFF;
         colour[3] = (func_150ADA20() % 126U) + 130;
-        func_15107700(owner, func_150ADA20() & 0xFF, (func_150ADA20() % 101U) - 63,
+        beam_spawnBoundsBolt(owner, func_150ADA20() & 0xFF, (func_150ADA20() % 101U) - 63,
                       (func_150ADA20() & 0xF) + 15, 4, 129.0f, (func_150ADA68() * 75.0f) + 35.0f, 0, 1,
                       colour, effect->base.header.owner, effect->base.header.kind);
         data->sparkAccum -= 1.0f;

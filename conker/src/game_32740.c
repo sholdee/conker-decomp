@@ -14,7 +14,7 @@ void func_15005290(s32 resource, s32 mode) {
     s32 count;
     u32 i;
 
-    D_800DC020 = (CamPose *)func_1502B5C8(&size, 3, 12, resource, 8);
+    D_800DC020 = (CamPose *)rom_loadPath(&size, 3, 12, resource, 8);
     D_80089550 = size / 24;
     count = gScreenLayout + 1;
     camera_global_Cameras = allocate_memory(count * sizeof(Camera), 1, 1, 0);
@@ -134,7 +134,7 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
     view->prevEye = view->eye;
 
     viewEye = &view->eye; // matching: kept live across the call in a stack slot
-    func_1510E7A4(&view->TrianglePtr, view->floorTri.v, &view->unk354, &view->waterY, &view->Attributes, 0,
+    collision_findFloorInRange(&view->TrianglePtr, view->floorTri.v, &view->unk354, &view->waterY, &view->Attributes, 0,
                   view->eye.x, view->eye.y, view->eye.z, view->eye.y, 0, 0, -10000.0f, view->eye.y);
 
     view->unk358 = view->unk354;

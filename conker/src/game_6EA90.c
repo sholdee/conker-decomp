@@ -360,7 +360,7 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
                 y += dy;
                 sprite.scaleX = scaleX * scale;
                 sprite.scaleY = scaleY * scale;
-                gSPDisplayList(gfx++, D_800873D0);
+                gSPDisplayList(gfx++, gSpriteRenderDl);
                 D_800D2DAB = 1;
                 gDPSetOtherMode(gfx++, 0x002C3F, D_800A4AC8[25][0] | D_800A4AC8[25][1] | 4);
                 if (noCombine == 0) {
@@ -368,11 +368,11 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
                                       0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
                 }
                 // matching: IDO allocates differently without the dead store in "frame <<= 8"
-                gfx = func_15094F70(gfx, tex, frame <<= 8, &sprite, 0, 0, 0, 2, 3);
-                if (D_800D2CA0 != (u8 *)0x80000000) {
-                    gfx = func_15095A48(gfx, &sprite, x, y - yOff);
+                gfx = sprite_loadDescFrame(gfx, tex, frame <<= 8, &sprite, 0, 0, 0, 2, 3);
+                if (gSpriteLastTexFrame != (u8 *)0x80000000) {
+                    gfx = sprite_drawScreen(gfx, &sprite, x, y - yOff);
                 }
-                gSPDisplayList(gfx++, D_80087408);
+                gSPDisplayList(gfx++, gSpriteEndDl);
                 gSPDisplayList(gfx++, gText2DSetupDL);
                 D_800D2DAB = 0;
                 y -= dy;

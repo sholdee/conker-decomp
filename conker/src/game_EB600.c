@@ -117,8 +117,8 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
 
     if (obj != NULL) {
         halfSize = (obj->scale_xz + obj->scale_y) * 0.5f;
-        func_1515C244(obj, &pos, &radius, &unk2);
-        func_1504715C(&ground, obj);
+        sprite_getActorBodyBounds(obj, &pos, &radius, &unk2);
+        collision_initHitFromObject(&ground, obj);
         primary.countBase = 10;
         primary.countRange = 0;
         primary.pos = pos;

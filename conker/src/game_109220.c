@@ -132,7 +132,7 @@ s32 func_150DBD70(u8 kind) {
     case 2:
     case 3:
     case 4: {
-        Actor *character = func_15083E90(6);
+        Actor *character = collision_findObjectById(6);
 
         if (character == NULL) {
             return 0;
@@ -683,11 +683,11 @@ Gfx *func_150DD640(StreamActor *actor, Gfx *gfx, s16 view) {
                 tcAxis[0] = 0;
                 tcAxis[1] = 1;
             }
-            gfx = func_15142E24(gfx, D_80090B60 + state->trailTexture, 0, 0, 0, 0, state->trailTexture, 0, 0, &update, 3);
+            gfx = func_15142E24(gfx, gEffectTextures + state->trailTexture, 0, 0, 0, 0, state->trailTexture, 0, 0, &update, 3);
             gfx = func_15142C10(gfx, state->unk28, state->unk28, state->unk28, 0xFF, &update);
             gfx = func_1513F4E4(gfx, unk42High, &update);
             gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &update);
+            gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &update);
             if (actor->head.tmpl.flags & 2) {
                 /* still emitting: the ribbon starts at the actor itself (i is left unset, as in the original) */
                 j = actor->head.end - 1;
@@ -726,7 +726,7 @@ Gfx *func_150DD640(StreamActor *actor, Gfx *gfx, s16 view) {
             vtx->v.ob[1] = newer.y;
             vtx->v.ob[2] = records[j].width * sinYaw + newer.z;
             SET_TEXCOORD(vtx, tcAxis[0], prevTexCoord << 6);
-            SET_TEXCOORD(vtx, tcAxis[1], (D_80090B60[state->trailTexture].width - 1) << 6);
+            SET_TEXCOORD(vtx, tcAxis[1], (gEffectTextures[state->trailTexture].width - 1) << 6);
             vtx->v.cn[0] = 0xFF;
             vtx->v.cn[1] = 0xFF;
             vtx->v.cn[2] = 0xFF;
@@ -752,7 +752,7 @@ Gfx *func_150DD640(StreamActor *actor, Gfx *gfx, s16 view) {
                 vtx->v.ob[1] = older.y;
                 vtx->v.ob[2] = records[j].width * sinYaw + older.z;
                 SET_TEXCOORD(vtx, tcAxis[0], texCoord << 6);
-                SET_TEXCOORD(vtx, tcAxis[1], (D_80090B60[state->trailTexture].width - 1) << 6);
+                SET_TEXCOORD(vtx, tcAxis[1], (gEffectTextures[state->trailTexture].width - 1) << 6);
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
                 vtx->v.cn[2] = 0xFF;

@@ -136,7 +136,7 @@ void shadow_updateBlob(Shadow *shadow) {
             }
             tri = prop->shadow->floorTri;
             if (func_150A3FC4(prop->x, prop->z, 0, tri, &floorY) == 0) {
-                func_1510E7A4(0, tri, &floorY, 0, 0, 0, prop->x, prop->y, prop->z, prop->y,
+                collision_findFloorInRange(0, tri, &floorY, 0, 0, 0, prop->x, prop->y, prop->z, prop->y,
                               prop->object_num + 1, 0, -10000.0f, prop->y);
             }
             triPtrs = NULL;
@@ -243,7 +243,7 @@ Gfx *shadow_drawBlob(Gfx *gfx, Shadow *shadow, s16 view) {
         gSPMatrix(gfx++, &shadow->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         if (D_800DD1B4 != shadow->texture) {
             (&D_800DD1B0)[1] = shadow->texture; // matching: D_800DD1B4 through another symbol keeps the split %hi/%lo
-            tex = func_1510D0EC(D_80091770[shadow->texture], 0, 0x3E, 0);
+            tex = texture_getAddress(D_80091770[shadow->texture], 0, 0x3E, 0);
             gDPPipeSync(gfx++);
             gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, tex);
             gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);

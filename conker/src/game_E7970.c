@@ -44,7 +44,7 @@ void func_150BA55C(EffectE7970 *effect) {
         if (data->spawnAccum > 1.0f) {
             size = (owner->scale_xz + owner->scale_y) * 0.5f;
             heading = (owner->angle >> 8) - 64;
-            func_1515C244(owner, &ownerPos, &radius, &unused);
+            sprite_getActorBodyBounds(owner, &ownerPos, &radius, &unused);
             growth.y = 0.0f;
             do {
                 randomYaw = func_150ADA20();

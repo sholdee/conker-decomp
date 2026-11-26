@@ -61,7 +61,7 @@ void func_1512A390(Camera *arg0) {
     }
     if ((arg0->Snap != 0) || (arg0->AvailableModes & 0x400000) || (arg0->SpecialFlags & 0x40) ||
         (func_150A3FC4(arg0->eye.x, arg0->eye.z, arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C) == 0)) {
-        func_1510E8BC(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
+        collision_findFloorEx(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
                       arg0->eye.x, arg0->unk35C, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
     }
     if (unused28) {} // matching: keeps the otherwise dead unk28 load
@@ -83,7 +83,7 @@ void func_1512A390(Camera *arg0) {
         } else {
             arg0->unk35C = 10000.0f;
             arg0->AvailableModes |= 0x800000;
-            func_1510E8BC(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
+            collision_findFloorEx(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
                           arg0->eye.x, arg0->eye.y, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
         }
     } else {
@@ -526,8 +526,8 @@ void func_1512BB10(Camera *arg0) {
     // matching: sub is loaded inside the condition, after the first flag test
     if (!(arg0->AvailableModes & 0x40000) && (sub = arg0->mv, sub->ladder == 0) && (arg0->Mode != 0x40) &&
         !(arg0->AvailableModes & 0x80) && !(arg0->AvailableModes & 0x200)) {
-        saved2 = D_80089120[2];
-        saved1 = D_80089120[1];
+        saved2 = gFloorProbeTypeEnabled[2];
+        saved1 = gFloorProbeTypeEnabled[1];
         if (arg0->SpecialFlags & 0x800) {
             arg0->unk94C = 20.0f;
             arg0->unk950 = 40.0f;
@@ -581,10 +581,10 @@ void func_1512BB10(Camera *arg0) {
         probe.yspd = 0.0f;
         probe.theta = arg0->CameraAngle;
         if ((arg0->AvailableModes & 0x80000000) || (level == 0x37)) {
-            D_80089120[2] = 0;
+            gFloorProbeTypeEnabled[2] = 0;
         }
         if (arg0->AvailableModes & 0x10000) {
-            D_80089120[1] = 0;
+            gFloorProbeTypeEnabled[1] = 0;
         }
         D_800CBDD2 = 1;
         savedDD3 = D_800CBDD3;
@@ -603,8 +603,8 @@ void func_1512BB10(Camera *arg0) {
         D_800CBDD4 = savedDD4;
         D_800CBDD2 = 0;
         D_800CBDD3 = savedDD3;
-        D_80089120[2] = saved2;
-        D_80089120[1] = saved1;
+        gFloorProbeTypeEnabled[2] = saved2;
+        gFloorProbeTypeEnabled[1] = saved1;
         if (hit != 0) {
             arg0->TonyHitsClear = 0;
             arg0->SlackenK = 0.004999999888f;
@@ -622,7 +622,7 @@ void func_1512BB10(Camera *arg0) {
         }
         arg0->eye.z = probe.zpos;
         if ((level != 0x1B) && (hit != 0) && (arg0->Mode != 0x100)) {
-            func_1510E8BC(NULL, NULL, &floorY, NULL, NULL, 0, arg0->eye.x, arg0->eye.y, arg0->eye.z,
+            collision_findFloorEx(NULL, NULL, &floorY, NULL, NULL, 0, arg0->eye.x, arg0->eye.y, arg0->eye.z,
                           arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
             if (arg0->eye.y < floorY + 40.0f) {
                 s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local

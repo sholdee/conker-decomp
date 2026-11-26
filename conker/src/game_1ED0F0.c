@@ -146,8 +146,8 @@ void weapon_spawnObjectHit(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwn
         probe.x = pos->x;
         probe.y = pos->y + 100.0f;
         probe.z = pos->z;
-        func_1504715C(&floor, hitObj);
-        if (func_15046C80(&probe, 0, pos->y - 1000.0f, &floor) != 0) {
+        collision_initHitFromObject(&floor, hitObj);
+        if (collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 1000.0f, &floor) != 0) {
             markPos.x = probe.x;
             markPos.y = floor.height;
             markPos.z = probe.z;
@@ -492,7 +492,7 @@ s32 weapon_updateBullet(Bullet *bullet) {
     }
     if (step) {
     fence: // matching: an unused label splits IDO's basic block here
-        func_15081690(state->owner, bullet->head.pos.x, bullet->head.pos.y, bullet->head.pos.z, delta.x, delta.y, delta.z,
+        collision_castRay(state->owner, bullet->head.pos.x, bullet->head.pos.y, bullet->head.pos.z, delta.x, delta.y, delta.z,
                       &hit, step, 1, 0, 1, 3, &state->ignore, state->mode);
 
         if (hit.hitType >= 2) {
@@ -751,7 +751,7 @@ void weapon_castPiercingRay(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ra
     pos = *start;
 
     do {
-        func_15081690(shooter, pos.x, pos.y, pos.z, dir->x, dir->y, dir->z, ray, arg4, arg5,
+        collision_castRay(shooter, pos.x, pos.y, pos.z, dir->x, dir->y, dir->z, ray, arg4, arg5,
                       arg6, arg7, arg8, ignore, mode);
         dist += ray->dist;
         if (ray->surface != NULL) {

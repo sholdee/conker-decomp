@@ -5,7 +5,7 @@
 
 /* Get the position of one of the actor's bones (0x13 for side 1, 0x17 for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return
-   func_15046C80's result. */
+   collision_probeFloorSurfABSet0Cached's result. */
 s32 func_15146890(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     Vec3f probe;
     s32 bone;
@@ -28,8 +28,8 @@ s32 func_15146890(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     probe.x = pos->x;
     probe.y = pos->y + 10.0f;
     probe.z = pos->z;
-    func_1504715C(hit, actor);
-    return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
+    collision_initHitFromObject(hit, actor);
+    return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 50.0f, hit);
 }
 
 /* Map an actor's damage/effect kind onto the particle-effect id used for it.  Most kinds are a
@@ -57,7 +57,7 @@ s32 func_15146970(s32 kind, Actor *actor) {
         {
             const s32 list[5] = { 0x401D, 0x401E, 0x401F, 0x4020, 0x4021 };
 
-            if (func_150A2AEC(actor - movement_obj, 5, list, actor) == -1) {
+            if (zone_findActorZone(actor - movement_obj, 5, list, actor) == -1) {
                 return -1;
             }
         }

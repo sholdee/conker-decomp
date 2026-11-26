@@ -44,7 +44,7 @@ typedef struct {
     /* 0x0C */ f32 floorY;
 } BounceMotion;
 
-/* A screen sprite made by func_1515548C (ScreenSprite in game_182140.c, 0x70 bytes) with its motion data. */
+/* A screen sprite made by sprite_newScreenSprite (ScreenSprite in game_182140.c, 0x70 bytes) with its motion data. */
 struct HopSprite {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
@@ -104,7 +104,7 @@ void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
     spawn.offsetS = 0.0f;
     spawn.viewport = gScreenLayout;
 
-    particle = func_1515548C(&spawn, 12, 0, 0, 0x10, unkC, unk1);
+    particle = sprite_newScreenSprite(&spawn, 12, 0, 0, 0x10, unkC, unk1);
     if (particle != NULL) {
         memcpy(&particle->motion.hop, &hop, sizeof(hop));
     }
@@ -178,7 +178,7 @@ s32 func_150CF800(HopSprite *hopper) {
                     rand = 0;
                 }
                 spawn.flags = rand | 1 | bit2 | 8 | 0x10 | 0x20; // matching: folding the constants into 0x39 changes the code
-                particle = func_1515548C(&spawn, 13, 0, 0, 0x10, hopper->unkC, hopper->unk1);
+                particle = sprite_newScreenSprite(&spawn, 13, 0, 0, 0x10, hopper->unkC, hopper->unk1);
                 if (particle != NULL) {
                     memcpy(&particle->motion.bounce, &dust, sizeof(dust));
                 }
