@@ -787,13 +787,13 @@ void func_151D5648(Vec3f *pos, u8 arg1, s32 arg2) {
 void func_151D5714(Actor *obj, const Vec3f *from, const Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
     Vec3f start;
     Vec3f dir;
-    s32 mtx;
+    MtxF *mtx;
     const Vec3f *srcs[2];
     Vec3f *dsts[2];
 
     if (obj->ob_matrix_ptr != NULL) {
         if ((obj->unk74 & 0xF) != 0xF) {
-            mtx = (s32)obj->ob_matrix_ptr + (bone << 6);
+            mtx = obj->ob_matrix_ptr + bone;
             srcs[0] = from;
             srcs[1] = to;
             dsts[0] = &start;
@@ -804,7 +804,7 @@ void func_151D5714(Actor *obj, const Vec3f *from, const Vec3f *to, u8 bone, f32 
             dir.z -= start.z;
             { // matching: a block holding a declaration changes how as1 schedules the call setup
 void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
-                func_151D4408(&start, &dir, (void *)mtx, obj, scale, arg5, arg6);
+                func_151D4408(&start, &dir, mtx, obj, scale, arg5, arg6);
             }
         }
     }
@@ -859,7 +859,7 @@ void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *
     if (obj->ob_matrix_ptr != NULL) {
         dst = out;
         src = localPos;
-        func_15145EA4(&src, &dst, (s32)obj->ob_matrix_ptr + (bone << 6), 1);
+        func_15145EA4(&src, &dst, obj->ob_matrix_ptr + bone, 1);
     } else {
         f32 dz;
         f32 dx;
