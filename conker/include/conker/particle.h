@@ -910,7 +910,7 @@ TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind);
 void func_150E7C9C(Game113D60BurstEffect *effect);
 /* (u8 index, u8 owner, s32 kind); declared without a prototype: the K&R definition changes with one */
 void func_150E81A8();
-void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind);
+void func_150E83AC(const Vec3f *position, s16 duration, u8 owner, s32 kind);
 void func_150E8470(Game113D60EmitterEffect *effect);
 s32 func_150E8824(Game113D60Particle *particle, s32 arg1);
 void func_150E8854(void);
@@ -1632,7 +1632,7 @@ void func_151539B4(StreakBurst *config, u8 arg1);
 void func_15153C84(TriangleSource *source, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
 void func_15153CCC(ConeBasis *cone, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
 void func_15153F18(AngleRange *angles, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
-void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 arg5, s32 arg6);
+void *func_151541B8(const Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 arg5, s32 arg6);
 s32 func_1515452C(Object15132A4C *object);
 void func_15154684(ParticleBurst *config, u8 arg1, s32 arg2);
 void *func_15154884(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 arg4, s32 arg5);
@@ -3026,7 +3026,7 @@ s32 func_151D3D50(WobbleParticle *particle);
 void func_151D3E04(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bone, f32 yOffset);
 void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3);
 void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2);
-void func_151D3FF4(Vec3f *pos, u8 arg1, s32 arg2);
+void func_151D3FF4(const Vec3f *pos, u8 arg1, s32 arg2);
 void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionTri *surface, s32 arg5, s32 arg6,
                    s32 arg7);
 void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 arg4);
@@ -3044,7 +3044,7 @@ void func_151D5174(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg
                    Vec3f **outPoint, Vec3f **outDir, Vec3f *arg9);
 void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6);
 void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7);
-void func_151D5514(Vec3f *pos, u8 arg1, s32 arg2);
+void func_151D5514(const Vec3f *pos, u8 arg1, s32 arg2);
 void func_151D5648(Vec3f *pos, u8 arg1, s32 arg2);
 void func_151D5714(Actor *obj, const Vec3f *from, const Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6);
 void func_151D57F8(Actor *obj, u8 slot);

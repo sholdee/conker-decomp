@@ -141,15 +141,15 @@ void func_150ECC00(Actor *obj, u8 owner, s32 kind) {
 }
 
 /* Current colour (r, g, b), its target and its easing velocity. */
-extern f32 D_80088AD0;
-extern f32 D_80088AD4;
-extern f32 D_80088AD8;
-extern f32 D_80088ADC;
-extern f32 D_80088AE0;
-extern f32 D_80088AE4;
-extern f32 D_80088AE8;
-extern f32 D_80088AEC;
-extern f32 D_80088AF0;
+static f32 D_80088AD0 = 255.0f;
+static f32 D_80088AD4 = 255.0f;
+static f32 D_80088AD8 = 255.0f;
+static f32 D_80088ADC = 255.0f;
+static f32 D_80088AE0 = 255.0f;
+static f32 D_80088AE4 = 255.0f;
+static f32 D_80088AE8 = 0.0f;
+static f32 D_80088AEC = 0.0f;
+static f32 D_80088AF0 = 0.0f;
 
 /* Per-frame handler driven by setting 0x403B: while it is on, picks a target colour (one channel
  * at 128 per settings 0x4038-0x403A) and applies settings 0x9C/0x9A of mode 0x2007; otherwise

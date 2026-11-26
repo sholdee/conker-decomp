@@ -640,7 +640,7 @@ typedef struct {
 } Game113D60PointData;
 
 /* Creates effect 0x28 at `position`, lasting `duration` frames (-1: 300). */
-void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
+void func_150E83AC(const Vec3f *position, s16 duration, u8 owner, s32 kind) {
     Game113D60PointData data;
     TimedEffect *effect;
 
