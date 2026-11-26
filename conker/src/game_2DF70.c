@@ -460,10 +460,10 @@ void func_15001B08(void) {
 }
 
 /** Appends a new quadtree node (with no child or sibling) to the 4-byte-aligned end of the buffer. */
-u16 *func_15001B10(void) {
+QuadNode *func_15001B10(void) {
     QuadNode *node;
 
-    D_800B0DE0 = ALIGN4(D_800B0DE0);
+    D_800B0DE0 = (u8 *)ALIGN4(D_800B0DE0);
     D_800B0DCC++;
 
     node = (QuadNode *)D_800B0DE0;
@@ -471,7 +471,7 @@ u16 *func_15001B10(void) {
     node->next = 0;
 
     D_800B0DE0 += sizeof(QuadNode);
-    return (u16 *)node;
+    return node;
 }
 
 /** Appends one byte to the quadtree buffer. */
@@ -491,8 +491,8 @@ void func_15001B8C(u16 value) {
  * D_800DBE08[map]. Optionally returns the total node count and the leaf count.
  */
 void func_15001BC8(s32 map, s16 *nodeCount, s16 *leafCount) {
-    u16 *root;
-    s16 *triList;
+    QuadNode *root;
+    u16 *triList;
     s32 i;
 
     func_1510F800(map);
@@ -507,7 +507,7 @@ void func_15001BC8(s32 map, s16 *nodeCount, s16 *leafCount) {
 
     root = func_15001DE0(0, 0, 0x8000, 0x8000, 0, triList);
     D_800DBE08[map] = root;
-    func_15002560((QuadNode *)root, NULL);
+    func_15002560(root, NULL);
     func_10004074(triList);
 
     if (1) { } // matching: IDO's register allocation for the out-params needs this empty block
@@ -523,13 +523,13 @@ void func_15001BC8(s32 map, s16 *nodeCount, s16 *leafCount) {
 /** Gives map `map` a single-leaf quadtree that covers the whole map and holds all its triangles. */
 void func_15001CEC(s32 map) {
     QuadNode *root;
-    s16 *triList;
+    u16 *triList;
     s32 i;
 
     func_1510F800(map);
-    root = (QuadNode *)func_15001B10();
+    root = func_15001B10();
 
-    D_800DBE08[map] = (u16 *)root;
+    D_800DBE08[map] = root;
 
     root->minY = -0x8000;
     root->maxY = 0x7FFF;
@@ -556,7 +556,7 @@ void func_15001CEC(s32 map) {
  * the buffer by its triangle stream, when it overlaps fewer than D_800B0DD8 triangles or is narrower
  * than D_800B0DD4; otherwise it gets four children, chained through their `next` offsets.
  */
-u16 *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, s32 triList) {
+QuadNode *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, u16 *triList) {
     QuadNode *node;
     QuadNode *child0;
     QuadNode *child1;
@@ -584,7 +584,7 @@ u16 *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, s32 triList) {
     maxZ = z + halfZ;
 
     if ((func_15002248(minX, maxX, minZ, maxZ, &minY, &maxY, triList, &subList) < minTris) || (halfX < minSize)) {
-        node = (QuadNode *)func_15001B10();
+        node = func_15001B10();
         D_800B0DD0++;
         node->minY = minY;
         node->maxY = maxY;
@@ -595,7 +595,7 @@ u16 *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, s32 triList) {
         node->child = 0;
         func_15002008(minX, maxX, minZ, maxZ, subList);
     } else {
-        node = (QuadNode *)func_15001B10();
+        node = func_15001B10();
         node->minY = minY;
         node->maxY = maxY;
         node->halfSize = halfX;
@@ -603,16 +603,16 @@ u16 *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, s32 triList) {
         node->z = z;
         node->next = 0;
 
-        child0 = (QuadNode *)func_15001DE0(x - (halfX >> 1), z - (halfZ >> 1), halfX >> 1, halfZ >> 1, 0, subList);
+        child0 = func_15001DE0(x - (halfX >> 1), z - (halfZ >> 1), halfX >> 1, halfZ >> 1, 0, subList);
         node->child = (u8 *)child0 - (u8 *)node;
-        child1 = (QuadNode *)func_15001DE0(x - (halfX >> 1), (halfZ >> 1) + z, halfX >> 1, halfZ >> 1, 0, subList);
+        child1 = func_15001DE0(x - (halfX >> 1), (halfZ >> 1) + z, halfX >> 1, halfZ >> 1, 0, subList);
         child0->next = (u8 *)child1 - (u8 *)child0;
-        child2 = (QuadNode *)func_15001DE0((halfX >> 1) + x, z - (halfZ >> 1), halfX >> 1, halfZ >> 1, 0, subList);
+        child2 = func_15001DE0((halfX >> 1) + x, z - (halfZ >> 1), halfX >> 1, halfZ >> 1, 0, subList);
         child1->next = (u8 *)child2 - (u8 *)child1;
         child2->next = (u8 *)func_15001DE0((halfX >> 1) + x, (halfZ >> 1) + z, halfX >> 1, halfZ >> 1, 0, subList) - (u8 *)child2;
     }
     func_10004074(subList);
-    return (u16 *)node;
+    return node;
 }
 
 /**
@@ -830,7 +830,7 @@ void func_15002754(void) {
     s32 count;
     s32 map;
 
-    D_800DBDD8[D_800DBE50] = D_800B0DC0 = ALIGN4(D_800B0DC0);
+    D_800DBDD8[D_800DBE50] = D_800B0DC0 = (u8 *)ALIGN4(D_800B0DC0);
     count = D_800DBE38;
     map = D_800DBE50;
     D_800B0DC0 += count * sizeof(MeshTri);
@@ -1072,7 +1072,7 @@ s32 func_15002FA0(s32 value) {
 void func_15002FB4(s32 map) {
     LevelSettingsAsset *res;
     s32 count;
-    s32 loaded;
+    u32 loaded;
     LevelHeader *info;
     u32 romWord;
 

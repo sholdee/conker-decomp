@@ -501,14 +501,14 @@ extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
 extern u8 D_800AB62C[][3]; // team colours (RGB)
 extern ModeEntry D_800AB68C[]; // multiplayer game-mode table
 extern s32 D_800AB754[];
-extern s32  D_800B0DC0;
-extern s32  D_800B0DC4;
-extern s32  D_800B0DC8;
+extern u8  *D_800B0DC0; // triangle-data arena: cursor, start, end
+extern u8  *D_800B0DC4;
+extern u8  *D_800B0DC8;
 extern s32  D_800B0DCC;
 extern s32  D_800B0DD0;
 extern s32  D_800B0DD4;
 extern u16  D_800B0DD8;
-extern s32  D_800B0DDC;
+extern u8  *D_800B0DDC;
 extern u8  *D_800B0DE0;
 extern s32  D_800B0DE4;
 extern LevelHeader *D_800B0DF0;
@@ -1043,11 +1043,11 @@ extern s32 D_800D9F5C;
 extern u8  D_800D9F60;
 
 extern u8 D_800D9F68[]; /* per-id reference count */
-extern s32 D_800DBDD8[];
-extern s32 D_800DBDE8[];
-extern s32 D_800DBDF8[];
+extern void *D_800DBDD8[]; // per map: triangle table, x/z bounds, y bounds (carved from D_800B0DC0)
+extern void *D_800DBDE8[];
+extern void *D_800DBDF8[];
 
-extern u16* D_800DBE08[];
+extern struct QuadNode *D_800DBE08[];
 extern s32 D_800DBE18[];
 extern s32 D_800DBE1C[];
 extern s32 D_800DBE20;
