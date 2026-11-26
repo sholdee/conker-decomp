@@ -2523,10 +2523,10 @@ collision_findPropsInBox	0x150A6568	404	game	hasm	d	build/src/game_D3A18.s.o
 func_150A66FC	0x150A66FC	100	game	hasm	d	build/src/game_D3A18.s.o
 func_150A6760	0x150A6760	112	game	hasm	d,g	build/src/game_D3A18.s.o
 func_150A67D0	0x150A67D0	144	game	hasm	d	build/src/game_D3A18.s.o
-effect_drawQuadFx	0x150A6860	508	game	hasm	d,h	build/src/game_D3D10.s.o
-effect_drawQuadFxVertices	0x150A6A5C	992	game	hasm	b,d,e,h	build/src/game_D3D10.s.o
-effect_drawQuadFxRenderMode	0x150A6E3C	240	game	hasm	d	build/src/game_D3D10.s.o
-effect_drawQuadFxTriangles	0x150A6F2C	116	game	hasm	k	build/src/game_D3D10.s.o
+effect_drawQuadFx	0x150A6860	508	game	hasm	d,h	build/src/game/Effects/ObjectList/quadfxdraw.s.o
+effect_drawQuadFxVertices	0x150A6A5C	992	game	hasm	b,d,e,h	build/src/game/Effects/ObjectList/quadfxdraw.s.o
+effect_drawQuadFxRenderMode	0x150A6E3C	240	game	hasm	d	build/src/game/Effects/ObjectList/quadfxdraw.s.o
+effect_drawQuadFxTriangles	0x150A6F2C	116	game	hasm	k	build/src/game/Effects/ObjectList/quadfxdraw.s.o
 prop_waveVerticesWeighted	0x150A6FA0	200	game	hasm	b,d	build/src/game_D4450.s.o
 func_150A7068	0x150A7068	24	game	hasm	d,e	build/src/game_D4450.s.o
 func_150A7080	0x150A7080	64	game	hasm	b,d	build/src/game_D4450.s.o
@@ -3132,7 +3132,7 @@ effect_spawnTrailSpriteLarge	0x150DDFAC	384	game	c		build/src/game/Effects/TrapE
 effect_spawnTrailSpriteSmall	0x150DE12C	376	game	c		build/src/game/Effects/TrapEffect/trapeffect.c.o
 effect_fadeTrailSpriteByLife	0x150DE2A4	32	game	c		build/src/game/Effects/TrapEffect/trapeffect.c.o
 effect_shrinkBillboard	0x150DE2C4	76	game	c		build/src/game/Effects/TrapEffect/trapeffect.c.o
-effect_emptyLevelHook14	0x150DE310	16	game	c		build/src/game/done/game_10B7C0.c.o
+effect_emptyLevelHook14	0x150DE310	16	game	c		build/src/game_10B7C0.c.o
 func_150DE320	0x150DE320	12	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
 func_150DE32C	0x150DE32C	300	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
 func_150DE458	0x150DE458	640	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
@@ -3419,7 +3419,7 @@ effect_fadeInAlpha	0x150FB240	92	game	c		build/src/game_127060.c.o
 effect_updateFadeInEffect	0x150FB29C	68	game	c		build/src/game_127060.c.o
 effect_updateFadeInSprite	0x150FB2E0	68	game	c		build/src/game_127060.c.o
 func_150FB324	0x150FB324	412	game	c		build/src/game_127060.c.o
-effect_drawStarField	0x150FB4C0	1024	game	hasm	b,e,h	build/src/game_128970.s.o
+effect_drawStarField	0x150FB4C0	1024	game	hasm	b,e,h	build/src/game/Effects/StarField/starfield.s.o
 particle_spawnSideEffect	0x150FB8C0	2728	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
 func_150FC368	0x150FC368	208	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
 particle_spawnTwoSidedEmitter	0x150FC438	476	game	c		build/src/game/Particle/TwoSidedEmitter/twosidedemitter.c.o
@@ -3475,7 +3475,7 @@ effect_sendOwnerGone	0x15100180	52	game	c		build/src/game/Effects/OwnerEffect/ow
 effect_spawnOwnerEffect	0x151001B4	124	game	c		build/src/game/Effects/OwnerEffect/ownereffect.c.o
 effect_ownerEffectMessage	0x15100230	140	game	c		build/src/game/Effects/OwnerEffect/ownereffect.c.o
 effect_updateOwnerEffect	0x151002BC	116	game	c		build/src/game/Effects/OwnerEffect/ownereffect.c.o
-effect_emptyLevelHook8	0x15100330	16	game	c		build/src/game/done/game_12D7E0.c.o
+effect_emptyLevelHook8	0x15100330	16	game	c		build/src/game_12D7E0.c.o
 effect_levelUpdateFlagLights	0x15100340	292	game	c		build/src/game/Effects/FlagLights/flaglights.c.o
 effect_bindFlagLightTextures	0x15100464	412	game	c		build/src/game/Effects/FlagLights/flaglights.c.o
 particle_spawnRayBeam	0x15100600	2704	game	c		build/src/game/Particle/RayBeam/raybeam.c.o
@@ -4617,7 +4617,7 @@ camera_updateWobbleEnvelope	0x151658DC	676	game	c		build/src/game/Camera/CameraW
 camera_getWobbleFalloff	0x15165B80	48	game	c		build/src/game/Camera/CameraWobble/camerawobble.c.o
 camera_getFalloffScale	0x15165BB0	208	game	c		build/src/game/Camera/CameraWobble/camerawobble.c.o
 effect_swingVertices	0x15165C80	752	game	c		build/src/game/Effects/VertexSwing/vertexswing.c.o
-effect_emptyLevelUpdateHook	0x15165F70	16	game	c		build/src/game/done/game_193420.c.o
+effect_emptyLevelUpdateHook	0x15165F70	16	game	c		build/src/game_193420.c.o
 effect_spawnQuadEffect	0x15165F80	408	game	c		build/src/game/Effects/QuadEffect/quadeffect.c.o
 effect_spawnRotatedQuadEffect	0x15166118	236	game	c		build/src/game/Effects/QuadEffect/quadeffect.c.o
 effect_updateQuadEffect	0x15166204	100	game	c		build/src/game/Effects/QuadEffect/quadeffect.c.o
@@ -5169,7 +5169,7 @@ cutscene_spawnTrackEffect	0x1519EB8C	408	game	c		build/src/game/Cutscene/EventEf
 cutscene_updateTrackEffect	0x1519ED24	96	game	c		build/src/game/Cutscene/EventEffects/eventeffects.c.o
 cutscene_spawnTrackParticle	0x1519ED84	384	game	c		build/src/game/Cutscene/EventEffects/eventeffects.c.o
 cutscene_updateTrackParticle	0x1519EF04	108	game	c		build/src/game/Cutscene/EventEffects/eventeffects.c.o
-effect_emptyActorEventHook	0x1519EF70	32	game	c		build/src/game/done/game_1CC420.c.o
+effect_emptyActorEventHook	0x1519EF70	32	game	c		build/src/game_1CC420.c.o
 func_1519EF90	0x1519EF90	376	game	c		build/src/game/Trail/SurfaceTrail/surfacetrail.c.o
 trail_destroySurfaceTrail	0x1519F108	96	game	c		build/src/game/Trail/SurfaceTrail/surfacetrail.c.o
 trail_freeSurfaceTrail	0x1519F168	96	game	c		build/src/game/Trail/SurfaceTrail/surfacetrail.c.o

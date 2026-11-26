@@ -53,7 +53,7 @@ src/game_D36C0.s	collision	hand-written asm (subsystem from its header group)
 src/game_D3810.s	collision	hand-written asm (subsystem from its header group)
 src/game_D39B0.s	collision	hand-written asm (subsystem from its header group)
 src/game_D3A18.s	collision	hand-written asm (subsystem from its header group)
-src/game_D3D10.s	effect	hand-written asm (subsystem from its header group)
+src/game/Effects/ObjectList/quadfxdraw.s	effect	hand-written asm (subsystem from its header group)
 src/game_D4450.s	collision	hand-written asm (subsystem from its header group)
 src/game_D4C20.s	collision	hand-written asm (subsystem from nearest preceding file)
 src/game_D4E10.s	collision	hand-written asm (subsystem from its header group)
@@ -102,7 +102,7 @@ src/game_FBBF0.c	actor	mount control
 src/game/done/game_FC3C0.c	camera	per-level camera preset hook
 src/game_FDB00.c	camera	per-level camera hook
 src/game_FE850.c	effect	spin-decay object with colour pulse
-src/game/done/game_10B7C0.c	effect	effect stub (empty)
+src/game_10B7C0.c	effect	effect stub (empty)
 src/game_10CCD0.c	camera	per-level camera hook (water)
 src/game_10CD70.c	effect	swing objects, bolt emitters, scrolling material textures
 src/game/done/game_10ECB0.c	camera	per-level camera flag hook
@@ -115,14 +115,14 @@ src/game_122760.c	camera	per-level camera flag hook
 src/game_126ED0.c	camera	per-level camera hook
 src/game_126F60.c	screen	black view fill with view-projection matrix
 src/game_127060.c	effect	impact bursts with sparks and glows
-src/game_128970.s	effect	hand-written asm (subsystem from its header group)
+src/game/Effects/StarField/starfield.s	effect	hand-written asm (subsystem from its header group)
 src/game/done/game_129EB0.c	camera	per-level camera preset hook
-src/game/done/game_12D7E0.c	effect	effect stub (empty)
+src/game_12D7E0.c	effect	effect stub (empty)
 src/game_1308E0.c	camera	per-level camera/actor flag hook
 src/game_135490.c	camera	per-level camera hook
-src/game/done/game_193420.c	effect	effect stub (empty)
+src/game_193420.c	effect	effect stub (empty)
 src/game_1A7260.c	swarm	swarm model-slot vertex animation (only caller is the swarm model slots)
-src/game/done/game_1CC420.c	effect	effect stub (empty)
+src/game_1CC420.c	effect	effect stub (empty)
 src/libultra/audio/game_21FC90.c	mp3	streaming music player (StreamVoice), set up by game_43620.c
 src/game_225D20.s	mp3	hand-written asm (subsystem from its header group)
 src/game_2261A0.s	mp3	hand-written asm (subsystem from its header group)

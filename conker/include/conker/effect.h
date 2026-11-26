@@ -41,7 +41,7 @@
  *   game/Effects/PuffTimer/pufftimer.c
  *   game/Effects/FallingStream/fallingstream.c
  *   game/Effects/TrapEffect/trapeffect.c
- *   game/done/game_10B7C0.c
+ *   game_10B7C0.c
  *   game/Effects/ZonePairEmitter/zonepairemitter.c
  *   game/Effects/RainHook/rainhook.c
  *   game/Effects/Explosion/explosion.c
@@ -61,14 +61,14 @@
  *   game/Effects/ProjectilePuffs/projectilepuffs.c
  *   game/Effects/StageEffect/stageeffect.c
  *   game_127060.c
- *   game_128970.s
+ *   game/Effects/StarField/starfield.s
  *   game/Effects/ChildEffect/childeffect.c
  *   game/Effects/ChildEffectFree/childeffectfree.c
  *   game/Effects/AreaSpray/areaspray.c
  *   game/Effects/TreadScroll/treadscroll.c
  *   game/Effects/BonePointFx/bonepointfx.c
  *   game/Effects/OwnerEffect/ownereffect.c
- *   game/done/game_12D7E0.c
+ *   game_12D7E0.c
  *   game/Effects/FlagLights/flaglights.c
  *   game/Effects/BoneBeamParticle/bonebeamparticle.c
  *   game/Effects/DebrisThrow/debristhrow.c
@@ -86,7 +86,7 @@
  *   game/Effects/EffectActor/effectactor.c
  *   game/Effects/CharacterWatcher/characterwatcher.c
  *   game/Effects/VertexSwing/vertexswing.c
- *   game/done/game_193420.c
+ *   game_193420.c
  *   game/Effects/QuadEffect/quadeffect.c
  *   game/Effects/ObjectList/objectlist.c
  *   game/Effects/ModelBurst/modelburst.c
@@ -102,7 +102,7 @@
  *   game/Effects/SurfaceHandlers/surfacehandlers.c
  *   game/Effects/FallingObject/fallingobject.c
  *   game/Effects/ContactEffects/contacteffects.c
- *   game/done/game_1CC420.c
+ *   game_1CC420.c
  *   game/Effects/ZoneEffect/zoneeffect.c
  *   game/Effects/DebrisBurst/debrisburst.c
  *   game/Effects/ActorTasks/actortasks.c
@@ -205,7 +205,7 @@ void effect_initQueue(void);
 void effect_allocQueue(void);
 void func_15008BE0(void);
 
-/* game_D3D10.s */
+/* game/Effects/ObjectList/quadfxdraw.s */
 Gfx *effect_drawQuadFx(Gfx *gfx, QuadFx *fx, s16 viewIndex); /* draw handler of object type 14 */
 
 /* game/Effects/AttachedBurst/attachedburst.c */
@@ -510,7 +510,7 @@ s32 effect_spawnTrailSpriteSmall(EffectSpawnSource *source, f32 x, f32 y, f32 z,
 s32 effect_fadeTrailSpriteByLife(QuadSprite *sprite);
 void effect_shrinkBillboard(BillboardParticle *particle);
 
-/* game/done/game_10B7C0.c */
+/* game_10B7C0.c */
 void effect_emptyLevelHook14(s32 arg0);
 
 /* game/Effects/ZonePairEmitter/zonepairemitter.c */
@@ -700,7 +700,7 @@ s32 effect_updateFadeInEffect(FadeInEffect *effect);
 s32 effect_updateFadeInSprite(FadeInSprite *sprite);
 void func_150FB324(Actor *actor, u8 arg1, s32 arg2);
 
-/* game_128970.s */
+/* game/Effects/StarField/starfield.s */
 Gfx *effect_drawStarField(Gfx *gfx, MtxF viewMtx);
 
 /* game/Effects/ChildEffect/childeffect.c */
@@ -752,7 +752,7 @@ void effect_spawnOwnerEffect(Actor *owner);
 void effect_ownerEffectMessage(OwnerEffect *effect, ActorRef *msg, u8 msgId);
 void effect_updateOwnerEffect(OwnerEffect *effect);
 
-/* game/done/game_12D7E0.c */
+/* game_12D7E0.c */
 void effect_emptyLevelHook8(s32 arg0);
 
 /* game/Effects/FlagLights/flaglights.c */
@@ -1171,7 +1171,7 @@ void effect_updateRiseEmitter(RiseEmitterObject *obj);
 void effect_swingVertices(f32 *angle, Vtx *verts, f32 radius, f32 *velocity, f32 maxAngle, f32 minAngle, const u8 *vtxIndices,
                    u8 count);
 
-/* game/done/game_193420.c */
+/* game_193420.c */
 void effect_emptyLevelUpdateHook(void);
 
 /* game/Effects/QuadEffect/quadeffect.c */
@@ -1458,7 +1458,7 @@ void effect_hitReactJointImpact(Actor *self, Actor *other, u8 *arg2);
 void func_15195698(Actor *self, Actor *other, u8 *arg2);
 void effect_hitReactRumble(Actor *self, Actor *other, u8 *arg2);
 
-/* game/done/game_1CC420.c */
+/* game_1CC420.c */
 void effect_emptyActorEventHook(Actor *arg0, s32 arg1, s32 arg2);
 
 /* game/Effects/ZoneEffect/zoneeffect.c */
