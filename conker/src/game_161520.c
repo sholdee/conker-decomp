@@ -1341,7 +1341,6 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     }
 }
 
-
 /* Blood for an impact from `from` to `to`: a burst, a spray along the decalPos and wall decals. */
 void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s32 arg5) {
     Vec3f start;

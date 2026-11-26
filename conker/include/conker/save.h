@@ -96,7 +96,8 @@ s8 func_151E564C(void);
 s32 func_151E565C(void);
 s32 func_151E5F64(s32 player);
 s8 func_151E5FAC(void);
-void func_151E5FF4(Actor *source, Actor *victim, s32 cause);
+/* void func_151E5FF4(Actor *source, Actor *victim, s32 cause) is declared in the files that call it:
+   game_83300.c was compiled with a u8 cause. */
 void func_151E6964(s32 bank);
 void func_151E6BFC(void);
 void func_151E6C1C(s32 index);

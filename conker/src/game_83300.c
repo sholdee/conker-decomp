@@ -1,11 +1,10 @@
 #include <ultra64.h>
-
-// matching: the shared headers declare these with parameter types that would change the code here
-// (extra narrowing in callers) or the variable type; hide those declarations and declare them below.
-#define func_151E5FF4 func_151E5FF4_hdr
 #include "functions.h"
-#undef func_151E5FF4
 #include "variables.h"
+
+/* Defined in game_20AE20.c as void func_151E5FF4(Actor *source, Actor *victim, s32 cause). This file was
+   compiled with a view that takes a u8 cause. */
+void func_151E5FF4(Actor *source, Actor *victim, u8 cause);
 
 /* Defined in game_981E0.c as f32 func_1506AD30(Actor *obj, f32 time, u8 filtered). This file was
    compiled with a view that takes a fourth argument (one call passes the character index). */
@@ -2227,9 +2226,6 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
         }
     }
 }
-
-// matching: the cause is passed as a u8 (the definition takes an s32)
-void func_151E5FF4(void *, Actor *, u8);
 
 /*
  * Applies a hit to `victim`: base[index] holds the attack's defaults and hit[index] the reaction chosen
