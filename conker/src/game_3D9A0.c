@@ -3,8 +3,6 @@
 #include "variables.h"
 
 
-extern u8 D_800D9946[];
-
 // ???
 void func_150104F0(void) {
     WorldObject *temp_v0;

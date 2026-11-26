@@ -300,9 +300,6 @@ extern TextureDesc D_800918A0;
 // this chunk0 data
 // D_800959E0 is 0x80082B20 + 0x00012ec0
 
-extern RopeEnds D_800963A0[6];
-extern RopeEnds D_80096430;
-
 extern f32 D_80096530;
 extern f32 D_80096534;
 
@@ -816,6 +813,7 @@ extern u8  D_800D9938[14];
 extern u8  D_800D9939;
 extern u8  D_800D992A[];
 extern u8  D_800D993A[];
+extern u8  D_800D9946[]; // just past the end of D_800D993A (func_15010600 stops there)
 
 extern u8 D_800D9950[];
 extern AimImpact D_800D9960[]; // aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none)
@@ -1142,7 +1140,7 @@ extern void (*D_800E0E00)(s32, void *, s32); // stream tag callback (set by func
 extern s32  D_800E0E04;
 extern TriggerZone *D_800E0900[6]; // per flamethrower character
 extern void *D_800E0930;
-extern s32  D_800E0934;
+extern void (*D_800E0934)(s32 x, s32 y, s32 z); // bullet impact hook (func_151C1654), set per level
 extern void *D_800E0940;
 extern u8   D_800E0950[20]; // reference counts (game_1FFF60)
 extern s32  D_800E0964;
