@@ -1,8 +1,6 @@
 #include <ultra64.h>
-#define func_1514C678 func_1514C678_header // matching: this file keeps its own declarations of these
-#define func_151DBE80 func_151DBE80_header
+#define func_151DBE80 func_151DBE80_header // matching: this file keeps its own declaration of func_151DBE80
 #include "functions.h"
-#undef func_1514C678
 #undef func_151DBE80
 #include "variables.h"
 
@@ -39,13 +37,11 @@ extern FxSpawnRange D_800A9040[];
 extern FxSpawnRange D_800A9158[];
 extern FxImpactEntry D_800A925C[];
 
-// matching: s32 parameters where the definition has s16 and u8 (no truncation at the call)
-void func_1514C678(f32 x, f32 y, f32 z, f32, s32, s32, s32, s32, s32, f32, FxSpawnPayload *, s32);
 // matching: a pointer where the definition has s32 (arg 6); s32 where the definition has u8 (args 7-9)
 void func_151DBE80(u8, f32, f32, s16, Vec3f *, void *, s32, s32, s32, s32);
 
 /* Spawns the effects listed for impact type `type` at `pos` on surface `hit`. */
-void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, s32 arg3, s32 arg4) {
+void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 arg4) {
     FxImpactSet *set;
     u8 kind;
 
@@ -65,7 +61,7 @@ void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, s32 arg3, s32 arg4) 
 
             func_1514C678(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
                           func_150ADA20() % (spawn->range + 1) + spawn->base, 11, type, 0.0f,
-                          &payload, (u8)arg3);
+                          &payload, arg3);
         }
     }
     if (set->second != -1) {
@@ -77,10 +73,9 @@ void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, s32 arg3, s32 arg4) 
         {
             FxSpawnRange *spawn = &D_800A9158[set->second];
 
-            // matching: a plain (u8)arg3 is CSE'd with the first call's and spilled
             func_1514C678(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
                           func_150ADA20() % (spawn->range + 1) + spawn->base, 12, type, 0.0f,
-                          &payload, (u8)(u16)arg3);
+                          &payload, arg3);
         }
     }
     if (set->impact != -1 && (hit->flags & 1)) {

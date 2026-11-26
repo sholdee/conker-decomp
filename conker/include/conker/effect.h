@@ -1390,7 +1390,7 @@ void func_151ABE00(Actor *actor);
 /* game_1D92F0.c */
 typedef struct FxSpawnPayload FxSpawnPayload;
 typedef struct FxEmitter FxEmitter;
-void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, s32 arg3, s32 arg4);
+void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 arg4);
 s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 argA,
                   s32 type, s32 argC, FxSpawnPayload *payload, u8 argE);
 s32 func_151AC3CC(FxEmitter *emitter);
