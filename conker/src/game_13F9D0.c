@@ -130,10 +130,10 @@ void func_15112A80(s32 player) {
     s32 *dp;
 
     for (view = 0; view <= D_80082FA0; view++) {
-        s32 recp;
+        RenderView *recp;
 
         count = &D_800DBEE8[view];
-        recp = (s32)&D_800BE628[view];
+        recp = &D_800BE628[view];
         if (func_150859AC(view, 0) != 0) {
             D_800DBEE8[view] = 0;
             for (i = 0; i < gWorldObjectCount;) {
