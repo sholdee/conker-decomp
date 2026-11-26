@@ -39,12 +39,18 @@ const s32 D_800A3F64[20] = {
     12, 11, 11, 13, 11, 11, 11, 11, 10, 11,
 };
 
+/* Blood model list of each profile (the counts are in D_800A3F14). */
+const s32 *D_80089A20[20] = {
+    D_800A3C6C, D_800A3C94, D_800A3CB4, D_800A3CD4, D_800A3CF4, D_800A3D14, D_800A3D34,
+    D_800A3D54, D_800A3D7C, D_800A3D9C, D_800A3DBC, D_800A3DEC, D_800A3E0C, D_800A3E2C,
+    D_800A3E48, D_800A3E70, D_800A3E90, D_800A3EB4, D_800A3ED4, D_800A3EF0,
+};
+
 
 typedef struct {
     s32 unk0[4];
 } Struct15136698Table;
 
-extern Struct15136698Table D_80089BAC;
 
 /* Actor model ids (Actor::id) that have a blood profile. */
 enum {
@@ -203,8 +209,23 @@ void *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
 }
 
 
-extern void (*D_80089A70[])(f32, f32, f32, f32, f32, f32, void *);
-extern s32 (*D_80089AA0[])(void *);
+/* Drop emitters of a drip (BloodDripDesc.emitter): called with the drop position, the path moved and the drip.
+ * The prototype keeps the f32 arguments unpromoted; several emitters take their own view of the emitter object. */
+static void (*D_80089A70[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
+    func_151348F0, func_151A4638, func_151AA30C, func_151AB3A4, func_150C60D8, func_150C6A08,
+    func_151AE890, func_150EA5CC, func_151B4E4C, func_151B50A4, func_151AF338, func_150E03F8,
+};
+/* Drip callbacks (BloodDripDesc.callback): 0 kills the drip. */
+static s32 (*D_80089AA0[])() = { func_151AB6B8, func_150C63EC, func_150C6D1C };
+/* Teardown handlers of a drip (BloodDripDesc.unk2D). */
+static void (*D_80089AAC[10])() = {
+    func_151346EC, func_151AB788, func_150C6410, func_150C6D40, func_151346EC,
+    func_151346EC, func_151346EC, func_151346EC, func_151346EC, func_151346EC,
+};
+static void (*D_80089AD4[10])() = {
+    func_1513470C, func_151AB7D8, func_150C6438, func_150C6D68, func_1513470C,
+    func_1513470C, func_1513470C, func_1513470C, func_1513470C, func_1513470C,
+};
 
 /* Per-frame update: follows the drip source and emits drops along the path it moved. */
 void func_151342BC(BloodDrip *drip) {
@@ -285,7 +306,7 @@ void func_151342BC(BloodDrip *drip) {
                     (position[0] + deltaX * fraction + drip->desc.radius) - randomX * diameter,
                     (position[1] + deltaY * fraction + drip->desc.radius) - randomY * diameter,
                     (position[2] + deltaZ * fraction + drip->desc.radius) - func_150ADA68() * diameter,
-                    deltaX, deltaY, deltaZ, drip);
+                    deltaX, deltaY, deltaZ, &drip->header);
             }
             drip->accumulator -= 1.0f;
         }
@@ -384,7 +405,7 @@ void func_151347CC(void *arg0, ActorMsg *msg, u8 message) {
 }
 
 /* Empty callback. */
-void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
+void func_151348F0(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter) {
 }
 
 #define BLOOD_TRAIL_LIFETIME   0x01
@@ -410,8 +431,12 @@ void *func_15134908(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
     return trail;
 }
 
-extern s32 (*D_80089B18[])(void *);
-extern void (*D_80089AFC[])(f32, f32, f32, f32, f32, f32, void *);
+/* Drop emitters of a trail (BloodTrail.emitter), as D_80089A70 (with a prototype for the same reason). */
+static void (*D_80089AFC[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
+    func_15134CD4, func_151A7610, func_15159BB0, func_151B86F4, func_151BC370, func_15136AE4, func_150C2898,
+};
+/* Trail callbacks (BloodTrail.callback): 0 kills the trail. */
+static s32 (*D_80089B18[])() = { func_151BC580 };
 
 /* Per-frame update: emits drops along the path the trail point moved since last frame. */
 void func_151349D0(BloodTrail *trail) {
@@ -461,7 +486,7 @@ void func_151349D0(BloodTrail *trail) {
                     (position[0] + deltaX * fraction + trail->radius) - randomX * diameter,
                     (position[1] + deltaY * fraction + trail->radius) - randomY * diameter,
                     (position[2] + deltaZ * fraction + trail->radius) - func_150ADA68() * diameter,
-                    deltaX, deltaY, deltaZ, trail);
+                    deltaX, deltaY, deltaZ, &trail->header);
             }
             trail->accumulator -= 1.0f;
         }
@@ -483,7 +508,7 @@ void func_15134C98(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
 }
 
 /* Empty callback. */
-void func_15134CD4(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
+void func_15134CD4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter) {
 }
 
 /* Particle callback: accelerates and moves the particle and fades unk2E; returns 0 to kill it. */
@@ -528,10 +553,17 @@ void *func_15134DAC(BloodStripDesc *desc, s32 extraSize) {
     return strip;
 }
 
-extern s32 (*D_80089B1C[])(BloodStrip *);
-extern void (*D_80089B38[])(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32, BloodStrip *);
-extern f32 (*D_80089B5C[])(BloodStrip *);
-extern s32 (*D_80089B6C[])(BloodStrip *);
+/* Callbacks of a strip: sample (0 kills it), emit, rate and update (0 kills it). The emit table has a prototype
+ * for its f32 argument. */
+static s32 (*D_80089B1C[])() = {
+    func_15135658, func_151AA5A4, func_150EA10C, func_151938E4, func_151BD42C, func_15137E10, func_150D11B4,
+};
+static void (*D_80089B38[])(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32, BloodStrip *) = {
+    func_151AA6D8, func_150C71C0, func_150EA11C, func_151938FC, func_151BD43C,
+    func_15137E60, func_151C5E74, func_150D1204, func_150F695C,
+};
+static f32 (*D_80089B5C[])() = { func_15135670, func_151AAA4C, func_150EA490, func_151BD750 };
+static s32 (*D_80089B6C[])() = { func_151AABA0 };
 
 /* Per-frame update of a BloodStrip. */
 void func_15134E48(BloodStrip *arg0) {
@@ -646,7 +678,10 @@ void func_1513530C(EffectHeader *effect) {
     func_15169824(effect);
 }
 
-extern void (*D_80089B70[])(BloodStrip *);
+/* Destroy and free handlers per strip mode. */
+static void (*D_80089B70[])() = {
+    func_151352EC, func_151AAB50, func_151352EC, func_151352EC, func_151352EC, func_151352EC,
+};
 
 /* Stops the strip's sound, then calls the D_80089B70 handler for its mode. */
 void func_1513532C(BloodStrip *arg0) {
@@ -666,7 +701,9 @@ void func_1513532C(BloodStrip *arg0) {
     D_80089B70[mode](strip);
 }
 
-extern void (*D_80089B88[])(BloodStrip *);
+static void (*D_80089B88[])() = {
+    func_1513530C, func_151AAB78, func_1513530C, func_1513530C, func_1513530C, func_1513530C,
+};
 
 /* Stops the strip's sound, then calls the D_80089B88 handler for its mode. */
 void func_151353A8(BloodStrip *arg0) {
@@ -820,25 +857,22 @@ typedef struct {
     u8 value[2];
 } Blood356D4Kinds;
 
-extern Blood356D4Kinds D_80089BA0;
-extern s32 D_80089BA4;
-extern Blood356D4Kinds D_80089BA8;
-
 /* Spawns a blood splat particle at *position plus a ring of smaller spark particles around it. */
 void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha, u8 endAlpha, s16 delay, s16 lifetime, s16 duration, s16 period, u8 arg10, s32 arg11) {
-    void *result;
+    BloodSplat *result;
     ScreenSpriteInfo particle;
     Blood356D4Motion motion;
-    Blood356D4Kinds kinds;
-    s32 data;
+    Blood356D4Kinds kinds = { { 0x3A, 0x3B } };
+    s32 spriteKinds[1] = { 2 };
     f32 scale;
     f32 count;
     ScreenSpriteInfo spark;
     Blood356D4Kinds sparkKinds;
     s32 flip;
+    // matching: the spark textures are copied from a static each iteration (an initializer in the loop moves
+    // the stack slot)
+    static Blood356D4Kinds sparkTextures = { { 0x3C, 0x3D } };
 
-    kinds = D_80089BA0;
-    data = D_80089BA4;
     motion.timer = delay;
     motion.growth = (func_150ADA68() * 100.0f + 100.0f) * size * 0.001f;
     motion.velocity.x = func_150ADA68() * 6.0f * position->x * 0.001f;
@@ -874,9 +908,9 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
     particle.unk3C = 32;
     particle.color1.alpha = alpha;
     particle.unk23 = endAlpha;
-    result = func_1515548C(&particle, 3, (s32 *)&data, 1, sizeof(motion), arg10, arg11);
+    result = func_1515548C(&particle, 3, spriteKinds, 1, sizeof(motion), arg10, arg11);
     if (result != NULL) {
-        memcpy(&((BloodSplat *)result)->motion, &motion, sizeof(motion));
+        memcpy(&result->motion, &motion, sizeof(motion));
         scale = (particle.halfWidth + particle.halfHeight) * 0.5f;
         count = (func_150ADA68() * 300.0f + 100.0f) * size * 0.001f;
         spark.timer = 50;
@@ -905,7 +939,7 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
         spark.halfWidth = (func_150ADA68() * 120.0f + 80.0f) * (size * scale) * 0.0001f;
         spark.halfHeight = (func_150ADA68() * 120.0f + 80.0f) * (size * scale) * 0.0001f;
         while (count > 1.0f) {
-            sparkKinds = D_80089BA8;
+            sparkKinds = sparkTextures;
             {
                 s16 angle;
                 f32 cosine;
@@ -1036,7 +1070,7 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
                 randA = func_150ADA20();
                 life = func_150ADA20();
                 scale = func_150ADA68();
-                func_151DA6F8(from, &offset, speed * 1.013000011f, randA % 21U + 20, (u32)life % 101U + 100, scale * 4.200000286f + 1.899999976f, func_150ADA20() % 3U + 3, 0, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, arg3, arg4);
+                func_151DA6F8(from, &offset, speed * 1.013000011f, randA % 21U + 20, life % 101U + 100, scale * 4.200000286f + 1.899999976f, func_150ADA20() % 3U + 3, 0, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, arg3, arg4);
             }
         }
         {
@@ -1095,14 +1129,13 @@ GrowingBloodParticle *func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 l
     GrowingBloodParticle *particle;
     ParticleDef desc;
     f32 extra;
-    Struct15136698Table textures;
+    Struct15136698Table textures = { { 0x3A, 0x3B, 0x3C, 0x3D } };
     s32 argB;
     s32 argC;
     s32 value;
     s32 random1;
     s32 random0;
 
-    textures = D_80089BAC;
     extra = arg1;
     desc.texture = textures.unk0[func_150ADA20() & 3];
     if (arg7 != 0) {
@@ -1252,7 +1285,7 @@ void func_15136A50(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 arg4, s32 arg5) {
 }
 
 /* Sprays blood from (x, y, z) against the direction (dirX, dirY, dirZ). */
-void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) {
+void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *emitter) {
     f32 position[3];
     f32 velocity[3];
     f32 speed;
@@ -1267,7 +1300,7 @@ void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) 
     func_151D9014(position, velocity, 0, func_150ADA68() * 0.2700000107f + -0.3100000024f,
                     (func_150ADA20() & 0xF) + 25, (func_150ADA20() % 101) + 155,
                     func_150ADA68() * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,
-                    arg6[0xC], arg6[1]);
+                    emitter->owner, emitter->kind);
 }
 
 
@@ -1301,7 +1334,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
                       ((arg5 != 0) || ((kind == 4) && (actor->character_type != MODEL_UGA_BUGA_BLUE_HEADGEAR)))
                           ? D_800A3F14[kind] - 2
                           : D_800A3F14[kind],
-                      scale, kind, D_800A3F64[kind], (u8 *)actor, &hit, arg6,
+                      scale, kind, D_800A3F64[kind], actor, &hit, arg6,
                       arg7);
     }
     if (D_800A3FD8[kind].unkE == 2) {
@@ -1455,7 +1488,7 @@ void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
 
     if (actor != 0) {
         if (actor->ob_matrix_ptr == 0 || (actor->unk74 & 0xF) == 0xF ||
-            (s32)actor->energy <= 0) {
+            actor->energy <= 0) {
             return;
         }
         mode = actor->character_type;
@@ -1584,7 +1617,7 @@ void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
     }
     func_1513A24C(&position, D_80089A20[kind] + 2, D_800A3C30,
                   D_800A3F14[kind] - 2, scale, kind, D_800A3F64[kind],
-                  (u8 *)actor, &hit, arg1, arg2);
+                  actor, &hit, arg1, arg2);
     if (D_800A3FD8[kind].unkE != 2) {
         func_1513A48C(&position, arg1, arg2);
         if (pool != 0) {
@@ -1756,9 +1789,9 @@ void func_15138120(Actor *actor, s32 kind, u8 arg2) {
         desc.mode = 0;
         desc.updateCallback = -1;
         desc.rate = 1.0f;
-        desc.sound = func_1000FA64(0x4FE, (s16)(s32)actor->xpos,
-                                   (s16)(s32)actor->ypos,
-                                   (s16)(s32)actor->zpos, 0x5DC0,
+        desc.sound = func_1000FA64(0x4FE, (s32)actor->xpos,
+                                   (s32)actor->ypos,
+                                   (s32)actor->zpos, 0x5DC0,
                                    600, 300, (SoundRecordCallback)func_1000EBC4,
                                    (void *)120, 0, 0, 0);
         func_15134DAC(&desc, 0);
@@ -1835,7 +1868,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
     spawn.sizeXZ = spawn.sizeY;
     spawn.gravity = (func_150ADA68() * 292.0f + -1099.0f) * 0.001000000047f;
     spawn.pos = *position;
-    func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 21U - 83), func_150ADA68() * 8.0f + 9.0f, &spawn.vel);
+    func_15143794(func_150ADA20() & 0xFF, func_150ADA20() % 21U - 83, func_150ADA68() * 8.0f + 9.0f, &spawn.vel);
     spawn.rot = v;
     spawn.rotVel.x = (func_150ADA68() * 24496.0f + -12248.0f) * 0.001000000047f;
     spawn.rotVel.z = (func_150ADA68() * 24496.0f + -12248.0f) * 0.001000000047f;
@@ -2151,7 +2184,7 @@ void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit
                 func_15143134(&D_800A4188[j], &packet.pos, BONE_MATRIX(actor, 12));
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
-                func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
+                func_15143794((u8)yaw, pitch % 35U - 84, func_150ADA68() * 6.12f + 3.0f,
                               &packet.vel);
                 packet.rotVel.x = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.rotVel.z = func_150ADA68() * 30.746002f + -15.373001f;
@@ -2192,7 +2225,7 @@ void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit
         func_15143134(&D_800A41B8, &spray.pos, BONE_MATRIX(actor, 12));
         yaw = func_150ADA20();
         pitch = func_150ADA20();
-        func_15143794((u8)yaw, (s16)(pitch % 16U - 60), func_150ADA68() * 7.1499996f + 10.889999f,
+        func_15143794((u8)yaw, pitch % 16U - 60, func_150ADA68() * 7.1499996f + 10.889999f,
                       &spray.vel);
         spray.rotVel.x = func_150ADA68() * 48.158f + -24.079f;
         spray.rotVel.z = func_150ADA68() * 48.158f + -24.079f;
@@ -2325,7 +2358,7 @@ void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8
         Vec3f b;
         ParticleSpawn spawn2;
         for (count = (func_150ADA20() & 3) + 5; count > 0; count--) {
-            func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 71U - 60), func_150ADA68() * 6.0f + 6.0f, &dir);
+            func_15143794(func_150ADA20() & 0xFF, func_150ADA20() % 71U - 60, func_150ADA68() * 6.0f + 6.0f, &dir);
             func_151C5F44(origin, &dir, func_150ADA68() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
                           func_150ADA20() % 66U + 190, func_150ADA20() % 45U + 44, func_150ADA68() * 20.0f + 50.0f,
                           0, hit, arg4, arg5);
@@ -2363,7 +2396,7 @@ void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8
             if (!(D_800A41C4[idx] & mask2)) {
                 spawn2.model = D_800A41D8[j];
                 func_15143134(&D_800A41E8[j], &spawn2.pos, BONE_MATRIX(actor, 12));
-                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 35U - 84), func_150ADA68() * 6.119999886f + 3.0f, &spawn2.vel);
+                func_15143794(func_150ADA20() & 0xFF, func_150ADA20() % 35U - 84, func_150ADA68() * 6.119999886f + 3.0f, &spawn2.vel);
                 spawn2.rotVel.x = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.rotVel.z = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.gravity = func_150ADA68() * 0.2080000043f + -0.7080000043f;
@@ -2495,7 +2528,7 @@ void func_15139D74(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
                 func_15143134(&D_800A4234[j], &packet.pos, BONE_MATRIX(actor, 12));
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
-                func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
+                func_15143794((u8)yaw, pitch % 35U - 84, func_150ADA68() * 6.12f + 3.0f,
                               &packet.vel);
                 packet.rotVel.x = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.rotVel.z = func_150ADA68() * 30.746002f + -15.373001f;
@@ -2515,7 +2548,7 @@ typedef struct {
 } Extra080C_1513A24C;
 
 /* Blood burst (func_1515080C) for an actor of blood profile `kind`; actor is a Actor. */
-void func_1513A24C(Vec3f *position, const s32 *table, const f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor, CollisionHit *hit, u8 arg9, s32 argA) {
+void func_1513A24C(Vec3f *position, const s32 *table, const f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, Actor *actor, CollisionHit *hit, u8 arg9, s32 argA) {
     DebrisSpray config;
     Extra080C_1513A24C extra;
     s32 flag;
@@ -2558,7 +2591,7 @@ void func_1513A24C(Vec3f *position, const s32 *table, const f32 *arg2, s32 count
     case 1: {
         const u16 models[4] = { 0x83, 0x81, 0x82, 0x84 };
         s32 index;
-        index = actor[0x128]; /* Actor byte 0x128, not in the shared struct yet */
+        index = actor->team;
         if (index >= 4) {
             index = 3;
         }
@@ -2879,7 +2912,7 @@ void func_1513ABB8(Actor *actor, Vec3f *origin, u8 variant, CollisionHit *hit, u
                 func_15143134(&D_800A42F4[variant][j], &packet.pos, BONE_MATRIX(actor, 12));
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
-                func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
+                func_15143794((u8)yaw, pitch % 35U - 84, func_150ADA68() * 6.12f + 3.0f,
                               &packet.vel);
                 packet.rotVel.x = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.rotVel.z = func_150ADA68() * 30.746002f + -15.373001f;

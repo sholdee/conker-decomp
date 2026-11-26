@@ -166,11 +166,11 @@ void func_1513470C(EffectHeader *effect);
 void func_1513472C(BloodDrip *drip);
 void func_1513477C(BloodDrip *drip);
 void func_151347CC(void *arg0, ActorMsg *msg, u8 message);
-void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3);
+void func_151348F0(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter);
 void *func_15134908(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3); /* a BloodTrail, then extraSize bytes */
 void func_151349D0(BloodTrail *trail);
 void func_15134C98(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId);
-void func_15134CD4(f32 arg0, f32 arg1, s32 arg2, s32 arg3);
+void func_15134CD4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter);
 s32 func_15134CEC(Struct15134CEC *particle);
 void *func_15134DAC(BloodStripDesc *desc, s32 extraSize); /* a BloodStrip, then extraSize bytes */
 void func_15134E48(BloodStrip *arg0);
@@ -196,7 +196,7 @@ void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, Collision
                    s32 arg8);
 s32 func_15136A1C(DefParticleHead *particle);
 void func_15136A50(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 arg4, s32 arg5);
-void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6);
+void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *emitter);
 void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7);
 void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s32 arg5);
 void func_15137610(Actor *actor, Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg4, s32 arg5);
@@ -218,7 +218,7 @@ void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit
 s32 func_15139578(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, CollisionTri *surface);
 void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8 arg4, s32 arg5);
 void func_15139D74(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4);
-void func_1513A24C(Vec3f *position, const s32 *table, const f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor,
+void func_1513A24C(Vec3f *position, const s32 *table, const f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, Actor *actor,
                    CollisionHit *hit, u8 arg9, s32 argA);
 void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2);
 void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4);
@@ -228,6 +228,7 @@ void func_1513ABB8(Actor *actor, Vec3f *origin, u8 variant, CollisionHit *hit, u
 void func_1513B0B8(BloodChunk *chunk, s32 arg1, u8 message);
 void func_1513B0F8(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4);
 extern const f32 D_800A3C30[15];
+extern const s32 *D_80089A20[20];
 extern const s32 D_800A3C6C[10];
 extern const s32 D_800A3C94[8];
 extern const s32 D_800A3CB4[8];

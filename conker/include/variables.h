@@ -83,8 +83,6 @@ extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern s32 * D_800891BC[];
 extern Mtx D_80089470; // fixed modelview matrix
 extern s32 D_800894B0;
-extern void (*D_80089AAC[10])(void);
-extern void (*D_80089AD4[10])(void);
 extern void (*D_80089C44[])(void);
 extern void (*D_80089C54[])(void);
 extern void (*D_80089EE8[])(void);
@@ -93,7 +91,6 @@ extern void (*D_80089EF8[])(void);
 extern void (*D_80089F2C[])(void);
 extern void (*D_80089F60[])(s32, s32, u8);
 extern ZDecode D_80089630[8]; // z-buffer decompression table
-extern const s32 *D_80089A20[];
 extern void (*D_8008A4E8[])(TimedEffect*);
 extern void (*D_8008A4C0[])(TimedEffect*);
 extern void (*D_8008A688[])(TimedEffect*);
