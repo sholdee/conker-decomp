@@ -74,6 +74,19 @@ void func_15080828(s32 arg0);
 void func_15080BE8(void);
 void func_15080C64(void);
 s32 func_15080CF4(void);
+extern u8 D_800D1940;
+extern u8 D_800D1941;
+extern TextResource *D_800D1944; // current text
+extern TextResource *D_800D1948; // header text prepended to it, or NULL
+extern u8 *D_800D194C; // header + page break + current text
+extern TextBox *D_800D1950; // open text box
+extern TextBoxConfig D_800D1958;
+extern f32 D_800D1988;
+extern f32 D_800D198C;
+extern f32 D_800D1990;
+extern u8 D_800D1994;
+extern u8 D_800D1995;
+extern u16 *D_800D1998; // sound effects voiced while the text types out
 
 /* game_197C20.c */
 s32 func_1516A770(u8 *text);

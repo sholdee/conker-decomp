@@ -46,5 +46,6 @@ void func_15080200(void);
 void func_15080228(void);
 void func_15080348(Actor *actor);
 void func_15080430(Actor *actor, s32 expression, s32 morphDuration);
+extern u8 D_800D18D0; // the object whose expression the messages set (index into movement_obj)
 
 #endif

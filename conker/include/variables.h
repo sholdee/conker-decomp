@@ -393,21 +393,7 @@ extern f32 D_800D1550; // frame time step
 extern s32 D_800D1548;
 extern Actor *D_800D154C;
 
-extern u8  D_800D18D0;
 
-extern u8  D_800D1940;
-extern u8  D_800D1941;
-extern TextResource *D_800D1944; // current text
-extern TextResource *D_800D1948; // header text prepended to it, or NULL
-extern u8 *D_800D194C; // header + page break + current text
-extern TextBox *D_800D1950; // open text box
-extern TextBoxConfig D_800D1958;
-extern f32 D_800D1988;
-extern f32 D_800D198C;
-extern f32 D_800D1990;
-extern u8  D_800D1994;
-extern u8  D_800D1995;
-extern u16 *D_800D1998; // sound effects voiced while the text types out
 
 extern u8 *D_800D19A0[187]; // per model id: model data (just past its header)
 extern ModelDef *D_800D1C90[187];

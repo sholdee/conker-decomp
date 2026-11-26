@@ -1,4 +1,12 @@
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+u8 D_800D18D0;       // the object whose expression the messages set (index into movement_obj)
+u8 D_800D18D8[0x50]; /* not referenced */
+static s32 D_800D1928;
+static s32 D_800D192C;
+static s32 D_800D1930;
+
 #include "functions.h"
 #include "variables.h"
 
@@ -6,10 +14,8 @@
  * Scripted expression control for the current object.
  */
 
-extern s32 D_8009BD10[];
-extern s32 D_800D1928;
-extern s32 D_800D192C;
-extern s32 D_800D1930;
+/* The expressions that mode 2 cycles through. */
+static const s32 D_8009BD10[5] = { 0, 1, 2, 3, 4 };
 
 /* Resets the expression mode, cycle index and D_800D1930. */
 void func_15080200(void) {
