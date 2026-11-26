@@ -127,7 +127,7 @@ src/libultra/audio/game_21FC90.c	mp3	streaming music player (StreamVoice), set u
 src/game_225D20.s	mp3	hand-written asm (subsystem from its header group)
 src/game_2261A0.s	mp3	hand-written asm (subsystem from its header group)
 src/game_2270A0.s	mp3	hand-written asm (subsystem from its header group)
-src/debugger_258ED0.s	debugger	hand-written asm (subsystem from its header group)
+src/debugger/Debugger/TlbSnapshot/tlbsnapshot.s	debugger	hand-written asm (subsystem from its header group)
 src/debugger/Debugger/CrashScreen/crashscreen.c	debugger	crash debugger screens
 src/debugger/Debugger/DebuggerCont/debuggercont.c	debugger	debugger copy of controller read
 src/debugger/Debugger/DebuggerPrintf/debuggerprintf.c	debugger	debugger printf

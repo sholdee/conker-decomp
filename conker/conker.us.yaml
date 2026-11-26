@@ -1799,7 +1799,7 @@ segments:
       - [0x256F80, c, debugger/Debugger/DebuggerCont/debuggercont]
       - [0x257330, c, debugger/Debugger/DebuggerStub/debuggerstub]
       - [0x257350, c, debugger/Debugger/DebuggerPrintf/debuggerprintf]
-      - [0x258ED0, hasm, debugger_258ED0]
+      - [0x258ED0, hasm, debugger/Debugger/TlbSnapshot/tlbsnapshot]
       - {start: 0x258F70, type: .data, name: debugger/Debugger/CrashScreen/crashscreen, linker_section_order: .rodata}
       - {start: 0x2594F0, type: .data, name: debugger/Debugger/DebuggerPrintf/debuggerprintf, linker_section_order: .rodata}
       - [0x259560, rodata] # font of debugger/debugger (an asset)

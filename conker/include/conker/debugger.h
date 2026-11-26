@@ -12,7 +12,7 @@
  *   debugger/Debugger/DebuggerStub/debuggerstub.c
  *   debugger/Debugger/DebuggerPrintf/debuggerprintf.c
  *   debugger/Debugger/CrashScreen/crashscreen.c
- *   debugger_258ED0.s
+ *   debugger/Debugger/TlbSnapshot/tlbsnapshot.s
  */
 
 /* Conversion state for one printf field (libultra _Pft): n0/n1/n2 are the lengths of the
@@ -89,7 +89,7 @@ extern u32 gTlbEntryLo1[32];
 extern u32 gTlbEntryHi[32];
 extern u32 gTlbPageMask[32];
 
-/* debugger_258ED0.s: takes the TLB snapshot */
+/* debugger/Debugger/TlbSnapshot/tlbsnapshot.s: takes the TLB snapshot */
 void debugger_readTlb(void);
 
 #endif

@@ -6050,4 +6050,4 @@ debugger_ldtob	0x1600288C	1184	debugger	c		build/src/debugger/Debugger/DebuggerP
 debugger_ldunscale	0x16002D2C	184	debugger	c		build/src/debugger/Debugger/DebuggerPrintf/debuggerprintf.c.o
 debugger_genld	0x16002DE4	1476	debugger	c		build/src/debugger/Debugger/DebuggerPrintf/debuggerprintf.c.o
 debugger_litob	0x160033A8	680	debugger	c		build/src/debugger/Debugger/DebuggerPrintf/debuggerprintf.c.o
-debugger_readTlb	0x16003650	160	debugger	hasm	b	build/src/debugger_258ED0.s.o
+debugger_readTlb	0x16003650	160	debugger	hasm	b	build/src/debugger/Debugger/TlbSnapshot/tlbsnapshot.s.o
