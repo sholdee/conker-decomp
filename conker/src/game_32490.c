@@ -15,7 +15,7 @@ s32 aim_loadPoints(s32 assetId) {
 
     src = NULL;
     i = 0;
-    remaining = func_1502B7F0((void **)&src, 3, 12, assetId, 3) / sizeof(AimPointDef);
+    remaining = func_1502B7F0(&src, 3, 12, assetId, 3) / sizeof(AimPointDef);
     gAimPoints = allocate_memory(remaining * sizeof(AimPoint), 1, 1, 0);
     gAimPointCount = remaining;
     while (remaining > 0) {

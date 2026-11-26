@@ -2164,7 +2164,7 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
         u32 size;
 
         table = NULL;
-        size = func_1502B7F0((void **)&table, 1, 0x1D);
+        size = func_1502B7F0(&table, 1, 0x1D);
         if ((u32)index < size >> 1) {
             D_8009013C.texId = (void *)table[index];
         } else {

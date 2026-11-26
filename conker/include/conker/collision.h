@@ -47,7 +47,7 @@ void func_15002560(QuadNode *node, QuadNode *parentNext);
 void func_150025FC(void);
 void func_150026C4(s32 map);
 void func_150026E8(s32 map);
-void func_15002724(s32 dl);
+void func_15002724(Gfx *dl);
 void func_15002754(void);
 s32 func_150027F8(Gfx *dl);
 s32 func_15002878(void);

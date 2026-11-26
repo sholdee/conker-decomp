@@ -49,7 +49,7 @@ void func_15017930(s32 arg0) {
     u32 count;
     s32 type;
 
-    gZoneCount = func_1502B7F0((void **)&zones, 3, 0xC, arg0, 5);
+    gZoneCount = func_1502B7F0(&zones, 3, 0xC, arg0, 5);
     count = gZoneCount / sizeof(TriggerZone);
     gZoneCount = count;
     func_15017B20(zones, count);

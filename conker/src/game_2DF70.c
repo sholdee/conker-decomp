@@ -818,8 +818,8 @@ void func_150026E8(s32 map) {
 }
 
 /** Adds the triangle count of display list `dl` to the running count. */
-void func_15002724(s32 dl) {
-    D_800DBE38 += func_150027F8((Gfx *)dl);
+void func_15002724(Gfx *dl) {
+    D_800DBE38 += func_150027F8(dl);
 }
 
 /**

@@ -32,7 +32,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
     s32 i;
     s32 found;
     s32 id;
-    s32 loaded;
+    u32 loaded;
     s32 j;
     ObjectSpawn *spawns;
     ObjectSpawn *groupedSpawns;
