@@ -51,9 +51,9 @@ TextBox *func_1516A7B0(u32 msgIndex, s32 objIndex, s32 arg2,
         // matching: unused label adds a block so IDO doesn't hoist &width/&height/&advance into s-regs
         unused:
             if (msgIndex >= 0x100) {
-                config = (TextBoxConfig *)D_800DD258[msgIndex - 0x100].data;
+                config = D_800DD258[msgIndex - 0x100].data;
             } else {
-                config = (TextBoxConfig *)D_800DD254[msgIndex].data;
+                config = D_800DD254[msgIndex].data;
             }
         } else {
             config = suppliedConfig;

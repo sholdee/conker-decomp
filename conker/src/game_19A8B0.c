@@ -385,7 +385,7 @@ void func_1516DB90(SpriteEmitter *arg0) {
                     toY = D_800A6E30[emitter->x][4];
                     toZ = D_800A6E30[emitter->x][5];
                     if (D_800A6E30[emitter->x][6] != 0) {
-                        toZ += (u32)(func_150ADA20() & D_800A6E30[emitter->x][6]);
+                        toZ += func_150ADA20() & D_800A6E30[emitter->x][6];
                     }
                     func_150A7960(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
                     func_150A7960(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
@@ -429,19 +429,19 @@ void func_1516DB90(SpriteEmitter *arg0) {
                     angle = func_150ADA20();
                     s = func_15048A40(angle);
                     c = func_150489B0(angle);
-                    speed = (u32)((func_150ADA20() & 0xFFFF) * emitter->radiusXZ) * (1.0f / 65536.0f);
+                    speed = (func_150ADA20() & 0xFFFF) * emitter->radiusXZ * (1.0f / 65536.0f);
                     x += speed * s;
                     z += speed * c;
                 }
                 if (emitter->radiusY != 0) {
                     s = func_15048A40(func_150ADA20() & 0xFF);
-                    speed = (u32)((func_150ADA20() & 0xFFFF) * emitter->radiusY) * (1.0f / 65536.0f);
+                    speed = (func_150ADA20() & 0xFFFF) * emitter->radiusY * (1.0f / 65536.0f);
                     y += (s32)(speed * s);
                 }
                 scaleX = emitter->scaleX;
                 scaleY = emitter->scaleY;
                 if (emitter->scaleXRandom != 0) {
-                    scaleRandom = func_150ADA20() % (u32)emitter->scaleXRandom;
+                    scaleRandom = func_150ADA20() % emitter->scaleXRandom;
                 } else {
                     scaleRandom = 0;
                 }
@@ -451,7 +451,7 @@ void func_1516DB90(SpriteEmitter *arg0) {
                 } else {
                     scaleX += scaleRandom;
                     if (emitter->scaleYRandom != 0) {
-                        scaleY += func_150ADA20() % (u32)emitter->scaleYRandom;
+                        scaleY += func_150ADA20() % emitter->scaleYRandom;
                     }
                 }
                 if (!(emitter->flags & 8) && !(emitter->flags & 0x80)) {
@@ -519,7 +519,7 @@ void func_1516DB90(SpriteEmitter *arg0) {
 
 /* Emitter that follows the f32 position vector at `position` (flags 0x20). */
 void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4) {
-    func_1516D99C((s16)((u32)position >> 16), (s16)((u32)position & 0xFFFF), 0, texture,
+    func_1516D99C((u32)position >> 16, (u32)position & 0xFFFF, 0, texture,
         0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,
         8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, duration,
         0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1,
@@ -756,21 +756,21 @@ void func_1516F548(
     s32 scaleRandom, s32 radius, s32 style0, s32 style1,
     s32 arg12, s32 arg13, s32 arg14, u8 arg15,
     s32 arg16) {
-    func_1516D99C((s16)x, (s16)y, (s16)z, 0xD,
+    func_1516D99C(x, y, z, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
         2, (u8)velocityXHigh, 0, (u8)velocityZHigh, 0, 0, 0, style0,
         0, 0, 0, 0, 0, 0, 0, (s16)((scale << 12) / 4096),
         (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
         (s16)velocityY, 0xC8, 1, 0, 0, 1, 0, 0,
         0, 0, 0, arg15, arg16);
-    func_1516D99C((s16)x, (s16)y, (s16)z, 0xD,
+    func_1516D99C(x, y, z, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
         2, (u8)velocityXHigh, 0, (u8)velocityZHigh, 0, 0, 0, style1,
         0, 0, 0, 0, 0, 0, 0, (s16)((scale << 12) / 4096),
         (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
         (s16)velocityY, 0xC8, 1, 6, 0, 1, 0, 0,
         0, 0, 0, arg15, arg16);
-    func_1000FA64(7, (s16)x, (s16)y, (s16)z, 0x36B0, 0x3E8, 0x64,
+    func_1000FA64(7, x, y, z, 0x36B0, 0x3E8, 0x64,
         (SoundRecordCallback)func_1000EBC4, (void *)arg3, 0, 0, 0);
 }
 
@@ -1028,11 +1028,11 @@ void func_15170034(s32 flags, f32 *outX, f32 *outY, f32 *outZ) {
 
     mask = (flags & 0x40) ? 0x3F : 0x7F;
     angle = func_150ADA20() & mask;
-    *outY = func_150489B0((u8)angle);
-    horizontal = func_15048A40((u8)angle);
+    *outY = func_150489B0(angle);
+    horizontal = func_15048A40(angle);
     angle = func_150ADA20() & 0xFF;
-    yawB = func_150489B0((u8)angle);
-    yawA = func_15048A40((u8)angle);
+    yawB = func_150489B0(angle);
+    yawA = func_15048A40(angle);
     *outX = horizontal * yawA;
     *outZ = horizontal * yawB;
 }
@@ -1097,9 +1097,9 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type,
             if (i) { // matching: the empty branch on i steers IDO's register allocation
             }
             lifetime = (func_150ADA20() & 0x1F) + 0xF;
-            size = (func_150ADA20() % (u32)sizeRandom) + sizeMin;
-            velocityY = (func_150ADA20() % (u32)velocityYRandom) + velocityYMin;
-            func_1516D4E8((s16)(s32)px, (s16)(s32)py, (s16)(s32)pz, 0xD, 0,
+            size = (func_150ADA20() % sizeRandom) + sizeMin;
+            velocityY = (func_150ADA20() % velocityYRandom) + velocityYMin;
+            func_1516D4E8(px, py, pz, 0xD, 0,
                 color[0], color[1], color[2], 0, 0, 0, 0, 2,
                 (u8)((velocityX >> 8) & 0xFF), (u8)(velocityX & 0xFF), (u8)((velocityZ >> 8) & 0xFF), (u8)(velocityZ & 0xFF),
                 0, 0, particleStyle, 0, 0, 0,
@@ -1138,9 +1138,9 @@ void func_15170500(x, y, z, angle, isParticle, arg5, arg6)
         angle = movement_obj[0].langle;
     }
     tilt = func_151EF610() % 50;
-    dirX = func_150489B0((u8)angle);
-    dirZ = -func_15048A40((u8)angle);
-    spread = func_150489B0((u8)tilt);
+    dirX = func_150489B0(angle);
+    dirZ = -func_15048A40(angle);
+    spread = func_150489B0(tilt);
     dirX *= spread;
     dirZ *= spread;
     dirY = rise * spread;

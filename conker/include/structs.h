@@ -3252,7 +3252,7 @@ typedef struct {
 
 /* Message table entry (D_800DD254 / D_800DD258). */
 typedef struct {
-    /* 0x0 */ u8 *data;
+    /* 0x0 */ void *data; /* a TextBoxConfig (indexed by message) or the text of a page (indexed by config->text) */
     /* 0x4 */ s32 unk4;
 } MessageEntry;
 
