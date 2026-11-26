@@ -14,6 +14,12 @@
  *   game_1A0E60.c
  */
 
+/* A queued sky tile (game_13D350.c): its loaded texture and its format (the index into the per-format load tables). */
+typedef struct SkyTile {
+    s32 texture;
+    s32 format;
+} SkyTile;
+
 /* game_3FC60.c */
 void func_150127B0(void);
 void func_15012C84(Vtx *arg0, u32 arg1);
@@ -32,6 +38,10 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
 Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3);
 Gfx *func_151106A8(Gfx *gfx);
 s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw);
+Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4, u32 width, u32 height, u32 tileW,
+                   u32 tileH, f32 x, f32 y, f32 z, u8 axis, MtxF mtx, s32 limit, s32 *vtxCountPtr, s32 *vtxIdxPtr,
+                   SkyTile *queue, s32 *lastFormatPtr, u8 *sizes, u8 *shifts, s16 *palOffsets, u8 *tlutCounts,
+                   u8 *tiles, s32 texSet);
 void func_1511172C(s32 sky);
 void func_15111858(void);
 Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);

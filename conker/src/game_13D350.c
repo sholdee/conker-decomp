@@ -318,12 +318,6 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
     return ret;
 }
 
-/* A queued sky tile: its loaded texture and its format (the index into the per-format load tables). */
-typedef struct SkyTile {
-    s32 texture;
-    s32 format;
-} SkyTile;
-
 s32 func_150A6210(MtxF mtx, f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
 extern u8 D_1673[];
 
