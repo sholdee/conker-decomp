@@ -225,11 +225,11 @@ void func_1501A220(s32 numPlayers, s32 arg1) {
     D_800BE62C = allocate_memory(numViews * sizeof(Vp), 1, 1, 0);
 
     if (D_80082FA0 == 1) {
-        width = (f32)D_800BE638[1] - 2.0f;
+        width = D_800BE638[1] - 2.0f;
         scaled = width;
         scaled *= D_800968E0[0];
         scaledWidth = scaled;
-        D_800BE6B8 = (f32)(scaledWidth - (scaledWidth % 4)) / width;
+        D_800BE6B8 = (scaledWidth - (scaledWidth % 4)) / width;
     }
 
     func_150006E0(level);
@@ -285,8 +285,8 @@ Gfx *func_1501A490(Gfx *gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s
         right = view->right;
         top = view->top;
         if (maxBottom != 0) {
-            if ((f32)maxBottom < view->bottom) {
-                bottom = (f32)maxBottom;
+            if (maxBottom < view->bottom) {
+                bottom = maxBottom;
             } else {
                 bottom = view->bottom;
             }
@@ -384,10 +384,10 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
         func_1501B0A0(view, layout);
     } else {
         fullWidth = D_800BE638[0];
-        fullAspect = fullWidth / (f32)D_800BE650[0];
+        fullAspect = fullWidth / D_800BE650[0];
         aspect = RENDER_VIEWS[view].width / RENDER_VIEWS[view].height;
         RENDER_VIEWS[view].scaleX = (RENDER_VIEWS[view].width / fullWidth) * (fullAspect / aspect);
-        RENDER_VIEWS[view].scaleY = RENDER_VIEWS[view].height / (f32)D_800BE650[0];
+        RENDER_VIEWS[view].scaleY = RENDER_VIEWS[view].height / D_800BE650[0];
     }
     halfFov = RENDER_VIEWS[view].fovX * 0.5f * 0.01745329238f;
     sine = sinf(halfFov);
@@ -420,8 +420,8 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
 
 /* Returns whether view's rectangle lies entirely inside the drawable framebuffer area. */
 s32 func_1501AE94(s32 viewIndex) {
-    f32 maxX = (f32)D_800BE620 - 2.0f;
-    f32 maxY = (f32)D_800BE624;
+    f32 maxX = D_800BE620 - 2.0f;
+    f32 maxY = D_800BE624;
     RenderView *view = &RENDER_VIEWS[viewIndex];
 
     if (view->left < 2.0f || maxX < view->right) {
@@ -440,8 +440,8 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     if (*left < 2.0f) {
         *left = 2.0f;
     } else {
-        if ((f32)D_800BE620 - 2.0f < *left) {
-            clamped = (f32)D_800BE620 - 2.0f;
+        if (D_800BE620 - 2.0f < *left) {
+            clamped = D_800BE620 - 2.0f;
         } else {
             clamped = *left;
         }
@@ -451,8 +451,8 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     if (*right < 2.0f) {
         *right = 2.0f;
     } else {
-        if ((f32)D_800BE620 - 2.0f < *right) {
-            clamped = (f32)D_800BE620 - 2.0f;
+        if (D_800BE620 - 2.0f < *right) {
+            clamped = D_800BE620 - 2.0f;
         } else {
             clamped = *right;
         }
@@ -462,8 +462,8 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     if (*top < 0.0f) {
         *top = 0.0f;
     } else {
-        if ((f32)D_800BE624 < *top) {
-            clamped = (f32)D_800BE624;
+        if (D_800BE624 < *top) {
+            clamped = D_800BE624;
         } else {
             clamped = *top;
         }
@@ -473,8 +473,8 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     if (*bottom < 0.0f) {
         *bottom = 0.0f;
     } else {
-        if ((f32)D_800BE624 < *bottom) {
-            clamped = (f32)D_800BE624;
+        if (D_800BE624 < *bottom) {
+            clamped = D_800BE624;
         } else {
             clamped = *bottom;
         }
@@ -498,8 +498,8 @@ void func_1501B0A0(s32 view, s32 layout) {
     halfFovY = RENDER_VIEWS[view].fovY * 0.008726646f;
     tanX = sinf(halfFovX) / cosf(halfFovX);
     tanY = sinf(halfFovY) / cosf(halfFovY);
-    distX = (f32)D_800BE638[layout] / (2.0f * tanX);
-    distY = (f32)D_800BE650[layout] / (2.0f * tanY);
+    distX = D_800BE638[layout] / (2.0f * tanX);
+    distY = D_800BE650[layout] / (2.0f * tanY);
     x = func_150484A0(RENDER_VIEWS[view].halfWidth, distX) * 114.59155f - RENDER_VIEWS[layout].fovX;
     y = func_150484A0(RENDER_VIEWS[view].halfHeight, distY) * 114.59155f - RENDER_VIEWS[layout].fovY;
     func_1510B128(view, x, y, 1.0f, 0.0f);

@@ -216,7 +216,7 @@ void func_15018DFC(void) {
         } else {
             func_1504A730();
         }
-        func_15085ABC((s16)D_800D2340);
+        func_15085ABC(D_800D2340);
     }
     func_1507C370();
     func_1507C8FC();
@@ -556,7 +556,7 @@ void func_15019F20(void) {
         } else {
             i = ((u32 *)D_800BE5E8)[10]; // matching: reads D_800BE610 (the word after the array) through D_800BE5E8, keeping its address out of CSE
             i += ticks;
-            D_800BE9A4 = (f32)ticks / (f32)(u32)rate;
+            D_800BE9A4 = (f32)ticks / (u32)rate;
             D_800BE9E4 = D_800BE9A4;
             D_800BE9A4 *= 0.5f;
             if (i >= rate) {
@@ -571,7 +571,7 @@ void func_15019F20(void) {
             }
         }
     } else {
-        D_800BE9A4 = (f32)ticks * 0.5f;
+        D_800BE9A4 = ticks * 0.5f;
     }
     D_800BE5E0 &= 1;
     D_800BE5E0 += ticks;

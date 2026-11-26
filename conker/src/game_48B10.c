@@ -59,7 +59,7 @@ void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
                 previous = group;
                 group--;
                 steps = D_80096920[group];
-                interval = 1.0f / (f32) (steps - 1);
+                interval = 1.0f / (steps - 1);
                 if (arg2 != 0) {
                     value = arg1[group];
                 } else {
@@ -68,13 +68,13 @@ void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
                 sample = value / interval;
                 first = &D_80084040[group][sample];
                 second = &D_80084040[group][sample + 1];
-                fraction = (value - (f32) (u32) sample * interval) / interval;
+                fraction = (value - (u32)sample * interval) / interval;
                 r = first->r;
-                outR = (f32) (s32) (second->r - r) * fraction + (f32) r;
+                outR = (s32)(second->r - r) * fraction + r;
                 g = first->g;
-                outG = (f32) (s32) (second->g - g) * fraction + (f32) g;
+                outG = (s32)(second->g - g) * fraction + g;
                 b = first->b;
-                outB = (f32) (s32) (second->b - b) * fraction + (f32) b;
+                outB = (s32)(second->b - b) * fraction + b;
             }
             vertices[i].r = outR;
             vertices[i].g = outG;
