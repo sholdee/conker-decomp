@@ -3052,7 +3052,11 @@ typedef struct ModeSettings {
     /* 0x9 */ u8 unk9; /* -> D_800E0BE0[6] */
 } ModeSettings; /* size 0xA */
 
-/* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format. */
+/* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format.
+ * The record of a TextureDesc (pad4 is frameCount 1 and pad5), declared for the HUD code: that code stores the
+ * addresses of link-time symbols here (&D_891 compiles to a lui/addiu pair with relocations, not to a constant),
+ * while the texture code reads TextureDesc.addr as an integer (s32 id tables, compares with 0x10000000). One
+ * type would need casts on one side, so both declarations stay. */
 typedef struct {
     /* 0x00 */ void *texId;
     /* 0x04 */ u16 pad4;

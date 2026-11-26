@@ -6,8 +6,8 @@
 #define RENDER_VIEWS ((RenderView *)D_800BE628) // matching: the no-op cast changes the code; plain D_800BE628 mismatches
 
 /* Fills the current view with black, sets a primitive-colour combiner, and passes the view-projection
- * matrix built from (pitch, yaw, roll) on to func_150FB4C0. */
-void func_150F9AB0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f32 roll) {
+ * matrix built from (pitch, yaw, roll) on to func_150FB4C0. A sky draw routine (D_800891D8). */
+Gfx *func_150F9AB0(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
     MtxF viewMtx;
     RenderView *view;
 
@@ -17,5 +17,5 @@ void func_150F9AB0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f
     gDPPipeSync(gfx++);
     gDPSetOtherMode(gfx++, 0x2C0F, 0x0F0A4004);
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, PRIMITIVE_ALPHA, 0, 0, 0, 0, 0, PRIMITIVE, 0, PRIMITIVE_ALPHA, 0, 0, 0, 0, 0);
-    func_150FB4C0(gfx, viewMtx);
+    return func_150FB4C0(gfx, viewMtx);
 }

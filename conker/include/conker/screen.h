@@ -163,7 +163,7 @@ extern u8 D_800D9900;
 void func_150D2374(StrobeSpawner *spawner);
 
 /* game_126F60.c */
-void func_150F9AB0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f32 roll);
+Gfx *func_150F9AB0(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
 /* game_131620.c */
 void func_15104170(s32 mode, Actor *owner, Actor *source);

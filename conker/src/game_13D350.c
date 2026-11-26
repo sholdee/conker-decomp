@@ -31,14 +31,12 @@ static s32 D_800891A8[5] = { 0x1AB1, 0x1AF9, 0x1A69, 0x1B41, 0x1B89 };
 s32 *D_800891BC[] = { D_80089130, D_80089144, D_80089158, D_8008916C, D_80089180, D_800891A8, D_80089194 };
 
 /*
- * The draw routine of each sky mode (D_800B0DF0->unk8). The routines' own prototypes differ (they ignore or
- * reinterpret the camera arguments, which O32 passes in the same registers), so each is stored as a SkyDrawFunc.
+ * The draw routine of each sky mode (D_800B0DF0->unk8); most ignore some of the camera arguments.
  * The table comes before func_15111AF4: the address the last entry takes makes as1 treat that function's
  * entry label as address-taken, which its scheduling needs.
  */
 static SkyDrawFunc D_800891D8[] = {
-    (SkyDrawFunc)func_151103C8, (SkyDrawFunc)func_150F9AB0, (SkyDrawFunc)func_150D1810,
-    (SkyDrawFunc)func_15110600, func_15111AF4,
+    func_151103C8, func_150F9AB0, func_150D1810, func_15110600, func_15111AF4,
 };
 
 /* Per-format texture load tables (two formats), wrapped so they can be copied to the stack. */
@@ -158,7 +156,7 @@ void func_15110360(s32 viewIndex, MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
 
 /* Fills the current view with the background colour D_800DBEA8 and, on view 0 in split screen, draws the
  * black divider bars (only the horizontal one when D_80082FA0 is 1). */
-Gfx *func_151103C8(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
+Gfx *func_151103C8(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
     RenderView *view;
 
     view = &RENDER_VIEWS[D_80082FA4];
@@ -192,7 +190,7 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
 
 /* On maps 0x1B and 0x1E (and 0x31 while camera 0's unk3D4 has state 3) fills the whole drawable area with the
  * background colour D_800DBEA8. */
-Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
+Gfx *func_15110600(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
     // unk78 is the high byte of Actor's u16 unk78
     if (level == 0x1B || level == 0x1E ||
         (level == 0x31 && camera_global_Cameras->mv->rt_context_b == 3)) {
