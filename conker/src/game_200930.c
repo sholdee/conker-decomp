@@ -1,12 +1,12 @@
 #include <ultra64.h>
-#define func_15131958 func_15131958_header // matching: this file keeps its own declaration of func_15131958
 #include "functions.h"
-#undef func_15131958
 #include "variables.h"
 
-extern void (*D_8008FC70[])(Actor *, s16, Vec3f *);
+/* Defined in game_15D730.c as void func_15131958(Vec3f *vel, f32 drag). This file was compiled with a
+   view that takes a third argument. */
+void func_15131958(void *vel, f32 drag, void *arg2);
 
-void func_15131958(void *, f32, void *); // matching: called with a third argument (the definition takes two)
+extern void (*D_8008FC70[])(Actor *, s16, Vec3f *);
 
 void *memcpy(void *, const void *, u32);
 

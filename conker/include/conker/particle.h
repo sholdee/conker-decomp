@@ -1271,7 +1271,8 @@ s32 func_15131814(s32 arg0, s32 arg1);
 void func_15131828(SpriteParticle *p, f32 *amplitude, u8 *phase, u8 *phaseStep);
 void func_151318E8(Vec3f *vel, f32 drag);
 void func_15131918(Vec3f *vel, f32 drag);
-void func_15131958(Vec3f *vel, f32 drag);
+/* void func_15131958(Vec3f *vel, f32 drag) is declared in the files that call it: game_105FC0.c and
+   game_200930.c pass a third argument. */
 s32 func_151319A4(SpriteParticle *p, Vec3f *prevPos);
 s32 func_151319C4(SpriteParticle *p, Vec3f *prevPos, ParticleBounce *bounce);
 s32 func_15131AFC(SpriteParticle *p, Vec3f *prevPos);

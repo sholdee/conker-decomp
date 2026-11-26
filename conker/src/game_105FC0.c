@@ -1,14 +1,14 @@
 #include <ultra64.h>
-#define func_15131958 func_15131958_header // matching: this file keeps its own declarations of these
-#define func_15153C84 func_15153C84_header
+#define func_15153C84 func_15153C84_header // matching: this file keeps its own declarations of these
 #define func_15153CCC func_15153CCC_header
 #include "functions.h"
-#undef func_15131958
 #undef func_15153C84
 #undef func_15153CCC
 #include "variables.h"
 
-extern void func_15131958(void *, f32, void *); // matching: called with a third argument (the definition takes two)
+/* Defined in game_15D730.c as void func_15131958(Vec3f *vel, f32 drag). This file was compiled with a
+   view that takes a third argument. */
+void func_15131958(void *vel, f32 drag, void *arg2);
 
 /* Trail anchor point: 20 units above the actor. */
 void func_150D8B10(Actor *actor, Vec3f *out) {

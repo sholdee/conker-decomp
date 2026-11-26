@@ -2,6 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Defined in game_15D730.c. Not in particle.h: game_105FC0.c and game_200930.c call it with a third
+   argument. */
+void func_15131958(Vec3f *vel, f32 drag);
+
 /* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls func_1505D024 on
  * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while D_800CC3D4[0] is set. */
 void func_150AF200(s32 idA, s32 idB) {

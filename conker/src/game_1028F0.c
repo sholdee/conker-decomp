@@ -2,6 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Defined in game_15D730.c. Not in particle.h: game_105FC0.c and game_200930.c call it with a third
+   argument. */
+void func_15131958(Vec3f *vel, f32 drag);
+
 /* Attaches a FollowEffect (func_150D54C8) to obj. */
 void func_150D5440(Actor *obj, u8 arg1, s32 arg2) {
     FollowEffectData data;
