@@ -161,3 +161,9 @@ glabel func_150A7DF0
     /* D54F4 150A8044 A488001E */   sh        $t0, 0x1E($a0)
     /* D54F8 150A8048 00000000 */  nop
     /* D54FC 150A804C 00000000 */  nop
+
+.section .rodata
+
+glabel D_8009F6B0
+    .word 0x3C8EFA35 /* 0.017453292f (pi/180) */
+    .balign 16

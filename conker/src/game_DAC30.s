@@ -12,3 +12,34 @@ glabel func_150AD780
     /* DAC30 150AD780 3C01800A */  lui        $at, %hi(D_8009F710)
     /* DAC34 150AD784 C42AF710 */  lwc1       $f10, %lo(D_8009F710)($at)
     /* DAC38 150AD788 460A6300 */  add.s      $f12, $f12, $f10
+
+.section .rodata
+
+/* Constants of game_DAC30.s to game_DAE50.s (one unit in the ROM): cosf/sinf and the random scale. */
+glabel D_8009F710
+    .word 0x3FC90FDB /* 1.5707964f (pi/2): cosf(x) = sinf(x + pi/2) */
+glabel D_8009F714
+    .word 0x362EDEF8 /* sine polynomial coefficients (game_DAC3C.s) */
+glabel D_8009F718
+    .word 0xB94FB7FF
+glabel D_8009F71C
+    .word 0x3C08876A
+glabel D_8009F720
+    .word 0xBE2AAAA6
+glabel D_8009F724
+    .word 0x3EA2F983 /* 0.31830987f (1/pi) */
+glabel D_8009F728
+    .word 0x40490FDB /* 3.1415927f (pi) */
+glabel D_8009F72C
+    .word 0x330885A3 /* 3.1786509e-08f */
+glabel D_8009F730
+    .word 0x362EDEF8
+glabel D_8009F734
+    .word 0xB94FB7FF
+glabel D_8009F738
+    .word 0x3C08876A
+glabel D_8009F73C
+    .word 0xBE2AAAA6
+glabel D_8009F740
+    .word 0x37800080 /* 1.5259022e-05f (1/65535): scale of the random value (game_DAE50.s) */
+    .balign 16

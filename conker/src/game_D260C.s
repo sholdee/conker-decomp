@@ -738,3 +738,9 @@ glabel func_150A5AB8
     /* D3034 150A5B84 00000000 */  nop
     /* D3038 150A5B88 00000000 */  nop
     /* D303C 150A5B8C 00000000 */  nop
+
+.section .rodata
+
+glabel D_8009F690
+    .word 0x3DCCCCCD /* 0.1f */
+    .balign 16

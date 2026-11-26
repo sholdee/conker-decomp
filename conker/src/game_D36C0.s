@@ -96,3 +96,9 @@ glabel func_150A6354
     /* D3804 150A6354 4489A000 */  mtc1       $t1, $f20
     /* D3808 150A6358 03E00008 */  jr         $ra
     /* D380C 150A635C 448AA800 */   mtc1      $t2, $f21
+
+.section .rodata
+
+glabel D_8009F6A0
+    .word 0x3F3504F3 /* 0.70710677f (sqrt(1/2)) */
+    .balign 16
