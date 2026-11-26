@@ -2,6 +2,19 @@
 #include "functions.h"
 #include "variables.h"
 
+/* The bolt object type's render setup and teardown display lists (object type table D_8008B4A8). */
+Gfx D_8008F910[] = {
+    gsDPPipeSync(),
+    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsSPEndDisplayList(),
+};
+
+Gfx D_8008F930[] = {
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPEndDisplayList(),
+};
+
 /*
  * Allocates a bolt for def with extraSize bytes of user data after its points. The local points run
  * from (0, 0, 0) to (0, 0, 1); func_151A8340 fills in the ones between.
@@ -29,8 +42,9 @@ Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     return bolt;
 }
 
-extern s32 (*D_8008F940[])(Bolt *);
-extern s32 (*D_8008F948[])(Bolt *);
+/* Update hooks (BoltDef.update1, BoltDef.update2); a hook that returns 0 ends the bolt. */
+static s32 (*D_8008F940[])(Bolt *) = { func_150EFA4C, func_151A87F8 };
+static s32 (*D_8008F948[])(Bolt *) = { NULL };
 
 /*
  * Per-frame update: counts down the lifetime, runs the update hooks, re-jitters the points when the
@@ -263,7 +277,8 @@ void func_151A8560(Bolt *bolt) {
     func_151D5E30(bolt->vtxBuf);
 }
 
-extern void (*D_8008F94C[])(Bolt *);
+/* Destroy and free hooks, by bolt type. */
+static void (*D_8008F94C[])(Bolt *) = { NULL, func_150F0260, NULL };
 
 /* Destroy handler: runs the type's hook, then frees the vertex buffers and the object. */
 void func_151A8584(Bolt *bolt) {
@@ -276,7 +291,7 @@ void func_151A8584(Bolt *bolt) {
     func_15169804(&bolt->header);
 }
 
-extern void (*D_8008F958[])(Bolt *);
+static void (*D_8008F958[])(Bolt *) = { NULL, func_150F0280, NULL };
 
 /* Like func_151A8584, through the D_8008F958 hooks and func_15169824. */
 void func_151A85D4(Bolt *bolt) {
@@ -431,10 +446,11 @@ lbl3:
     return 1;
 }
 
-extern void (*D_8008F964[])(Bolt *, void *, u8);
+/* Message handlers, by bolt type. */
+static void (*D_8008F964[])(Bolt *, s32, u8) = { NULL, func_150F07E4, func_151A8A78 };
 
 /* Message handler: forwards to the type's handler in D_8008F964 (types 3 and up use type 0). */
-void func_151A8A20(Bolt *bolt, void *msg, u8 msgType) {
+void func_151A8A20(Bolt *bolt, s32 msg, u8 msgType) {
     s32 type;
 
     type = bolt->def.type;
@@ -450,9 +466,9 @@ void func_151A8A20(Bolt *bolt, void *msg, u8 msgType) {
  * Type 2 message handler (bolts from func_151A8624): message 0 destroys the bolt when its owner goes
  * away; message 0x2D re-attaches it when its owner is swapped for another actor.
  */
-void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
+void func_151A8A78(Bolt *bolt, s32 arg, u8 msgType) {
     BoltLink *link = bolt->link;
-    ActorMsg *msg = arg;
+    ActorMsg *msg = (ActorMsg *)arg;
     Actor *actor;
 
     if (msgType == 0) {
