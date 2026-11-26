@@ -66,6 +66,7 @@ s32 func_151F7F60(Mp3Decoder *dec);
 s32 func_151F8088(Mp3Decoder *dec, s32 seekPos);
 Mp3Decoder *func_151F85C4(s32 handle, Mp3ReadFn read, s32 arg2);
 s32 func_151F86B0(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels);
+extern f32 *D_800E0E30; /* pow43 table storage (0x8000 bytes) */
 
 /* game_225D20.s: the bit reader (func_151F8960(buf, &bitPos, n) reads n bits from buf at bitPos) and the
  * Huffman decoders */

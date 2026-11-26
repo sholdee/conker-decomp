@@ -101,12 +101,14 @@ struct Mp3Decoder {
     /* 0x847C */ Mp3DecodeFn readSideInfo;
 }; /* size 0x8480 */
 
-/* The tables func_151F3DE0 builds */
+/* .bss, linked at 0x800E0E30..0x800E9D00 in this order (with the decoder D_800E1880 last).
+ * The tables func_151F3DE0 builds: */
+f32 *D_800E0E30; // pow43 table storage (0x8000 bytes), allocated by func_151F2960
 /* IMDCT window per block type (0 normal, 1 start, 2 short, 3 stop) */
-extern f32 D_800E0E38[4][36];
-extern f32 *D_800E1078;          /* pow43: i^(4/3) */
-extern f32 D_800E1080[256];      /* scalefactor gain powers */
-extern f32 D_800E1480[256];      /* 0.25^i: subblock gain powers */
+static f32 D_800E0E38[4][36];
+static f32 *D_800E1078;          /* pow43: i^(4/3) */
+static f32 D_800E1080[256];      /* scalefactor gain powers */
+static f32 D_800E1480[256];      /* 0.25^i: subblock gain powers */
 
 /* The pretab (preemphasis) table; a struct so it can be copied by value. */
 typedef struct {
@@ -132,7 +134,7 @@ typedef struct {
     /* 0x4 */ u32 code;
 } Mp3HuffCode; /* size 0x8 */
 
-extern Mp3Decoder D_800E1880;
+static Mp3Decoder D_800E1880; /* the decoder */
 
 /* .rodata front-end data, in this order (then the float literals of func_151F3DE0) */
 /* The Huffman code tables, by table number (not referenced: the decoder loads its tables at run time,
