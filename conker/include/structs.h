@@ -3017,10 +3017,12 @@ typedef struct PropSounds {
     /* 0xA */ s16 arriveLead; /* movers: how early (in units of the move rate) to play `arrive` */
 } PropSounds; /* size 0xC */
 
-/* Per-behaviour handlers of level objects (D_80088C90, indexed by the placement's behaviour index). */
+/* Per-behaviour handlers of level objects (D_80088C90, indexed by the placement's behaviour index).
+ * The handlers are declared without a prototype: (WorldObject *obj) and (WorldObject *obj, Actor *actor),
+ * but some handlers take their own view of the object or other parameters. */
 typedef struct ObjectBehavior {
-    /* 0x0 */ void (*moveProc)(WorldObject *obj);
-    /* 0x4 */ void (*onContact)(WorldObject *obj, Actor *actor);
+    /* 0x0 */ void (*moveProc)();
+    /* 0x4 */ void (*onContact)();
     /* 0x8 */ s32 contactNonPlayers; /* copied to WorldObject.contactNonPlayers */
 } ObjectBehavior; /* size 0xC */
 
