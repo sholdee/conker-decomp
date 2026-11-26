@@ -451,14 +451,27 @@ void func_150D0730(s32 arg0);
 extern u8 D_800D98F0;
 
 /* game_FE850.c */
-typedef struct Obj150D149C Obj150D149C;
+/* A timed effect that pulses the ambient colour (func_150D149C, and func_150D1B40 of game_FEFF0.c). */
+typedef struct {
+    TimedEffect base;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+} AmbientPulse;
 void func_150D13A0(Actor *arg0);
 void func_150D1410(Actor *arg0);
 void func_150D146C(Actor *arg0);
-void func_150D149C(Obj150D149C *arg0);
+void func_150D149C(AmbientPulse *arg0);
 
 /* game_FF0E0.c */
 typedef struct FF0E0Object FF0E0Object;
+/* Payload of message 0x32 (passed as the s32 argument). */
+typedef struct {
+    Vec3f angularVelocity;
+    f32 intensity;
+} FF0E0SpinMsg;
+extern const u8 D_800A0938[13][3];
+extern const FF0E0SpinMsg D_800A0960[3];
 void func_150D1C30(FF0E0Object *obj);
 void func_150D1F6C(FF0E0Object *obj, s32 arg, u8 msg);
 void func_150D2054(FF0E0Object *obj);

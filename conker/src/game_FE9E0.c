@@ -2,9 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
-// matching: rodata loads; the literals 1/170 and 24.6f allocate FP registers differently
-extern f32 D_800A08D0; // 1.0f / 170.0f
-extern f32 D_800A08D4; // 24.6f
+/* This file's .rodata front-end data (as literals, IDO allocates the FP registers of func_150D1530 differently). */
+static const struct {
+    f32 speedScale; /* 1 / 170: the speed as a 0..1 fraction */
+    f32 fovRange;   /* field of view gained at full speed */
+} D_800A08D0 = { 1.0f / 170.0f, 24.599998f };
 
 
 /* Unless camera->Mode is 0x40: with unk5F0 bit 0x80 set, scales distances (unk348/unk34C/unk374/unk1A4/unk1A8)
@@ -23,7 +25,7 @@ void func_150D1530(Camera *camera) {
         speedFrac = (camera->CharPtr->speed < 0.0f)
                     ? 0.0f
                     : ((170.0f < camera->CharPtr->speed) ? 170.0f : camera->CharPtr->speed);
-        speedFrac = speedFrac * D_800A08D0;
+        speedFrac = speedFrac * D_800A08D0.speedScale;
         if (func_15123934(camera, 8, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0) {
             camera->AvailableModes |= 0x1300080;
             camera->AvailableModes &= ~6;
@@ -47,7 +49,7 @@ void func_150D1530(Camera *camera) {
             }
             camera->AvailableModes &= ~0x10000000;
         }
-        camera->TgetFOVX = camera->TgetFOVY = D_800A08D4 * speedFrac + 10.0f;
+        camera->TgetFOVX = camera->TgetFOVY = D_800A08D0.fovRange * speedFrac + 10.0f;
         if (camera->Snap != 0) {
             // matching: the ROM has a real load/store pair per field; the original self-assigned them
             camera->TgetFOVX = camera->TgetFOVX;

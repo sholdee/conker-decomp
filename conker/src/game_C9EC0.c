@@ -531,7 +531,6 @@ typedef struct Msg1509D8FC {
     /* 0x7 */ u8 unk7;
 } Msg1509D8FC;
 
-extern u8 D_800A0960[][16];
 
 /* Advances script command `cmdId` to `phase`. */
 s32 func_1509D8FC(s32 cmdId, s32 phase, ScriptCmd *cmd) {
@@ -592,7 +591,7 @@ s32 func_1509D8FC(s32 cmdId, s32 phase, ScriptCmd *cmd) {
                 if (idx < 0 || idx >= 3) {
                     return 1;
                 }
-                func_151494E0((s32)D_800A0960[idx], 50);
+                func_151494E0((s32)&D_800A0960[idx], 50);
             }
             break;
         case 11:

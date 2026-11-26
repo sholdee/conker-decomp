@@ -35,13 +35,26 @@ struct FF0E0Object {
     FF0E0State state;
 };
 
-/* Payload of message 0x32 (passed as the s32 argument). */
-typedef struct {
-    Vec3f angularVelocity;
-    f32 intensity;
-} FF0E0SpinMsg;
-
-extern Vec3f D_800A08F0[6];
+/*
+ * This file's .rodata front-end data: the six ray directions, the colours of the six children
+ * (func_15014B60 of game_40490.c reads the first six), and the spin presets that game_C9EC0.c sends
+ * with message 0x32.
+ */
+static const Vec3f D_800A08F0[6] = {
+    { 0.0f, 10.0f, 0.0f }, { 0.0f, -10.0f, 0.0f }, { 10.0f, 0.0f, 0.0f },
+    { -10.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 10.0f }, { 0.0f, 0.0f, -10.0f },
+};
+const u8 D_800A0938[13][3] = {
+    { 0xFF, 0x00, 0x00 }, { 0xFF, 0x00, 0x00 }, { 0x00, 0xFF, 0x00 }, { 0x00, 0xFF, 0x00 },
+    { 0x00, 0x00, 0xFF }, { 0x00, 0x00, 0xFF }, { 0x00, 0x00, 0xFF }, { 0x00, 0x00, 0xFF },
+    { 0x00, 0x00, 0xFF }, { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF }, { 0xFF, 0x00, 0xFF },
+    { 0xFF, 0x00, 0x00 },
+};
+const FF0E0SpinMsg D_800A0960[3] = {
+    { { 0.91200006f, 2.4320002f, -1.064f }, 0.00129f },
+    { { 1.2160001f, 5.6250005f, -0.76000005f }, 0.012363f },
+    { { 3.3450003f, 9.882001f, -2.4320002f }, 0.03f },
+};
 
 /* Spins the object and casts a ray from its position along each of the six rotated directions,
  * moving each child to the hit point (unk9 = 0) or flagging it unk9 = 1 on a miss or while disabled. */

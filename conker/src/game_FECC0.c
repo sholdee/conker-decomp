@@ -13,7 +13,7 @@ Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 tScroll, s32 arg5
     Vtx *vtx;
     Texture tex;
 
-    tOffset = (s32)(tScroll * 81.0f);
+    tOffset = tScroll * 81.0f;
     if ((level == 0x33) || (level == 0x32) || (level == 0x3F)) {
         top = -98;
         bottom = 39;

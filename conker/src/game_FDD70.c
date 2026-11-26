@@ -7,19 +7,17 @@
 SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
                              u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
-
-/* Eases *value toward target, tracking its rate of change in *velocity. */
-
-/* Current values, targets and easing velocities of three channels. */
-extern f32 D_800888C0;
-extern f32 D_800888C4;
-extern f32 D_800888C8;
-extern f32 D_800888CC;
-extern f32 D_800888D0;
-extern f32 D_800888D4;
-extern f32 D_800888D8;
-extern f32 D_800888DC;
-extern f32 D_800888E0;
+/* This file's .data: the current values, targets and easing velocities of three channels. */
+static f32 D_800888C0 = 255.0f;
+static f32 D_800888C4 = 255.0f;
+static f32 D_800888C8 = 255.0f;
+static f32 D_800888CC = 255.0f;
+static f32 D_800888D0 = 255.0f;
+static f32 D_800888D4 = 255.0f;
+static f32 D_800888D8 = 0.0f;
+static f32 D_800888DC = 0.0f;
+static f32 D_800888E0 = 0.0f;
+static s32 D_800888E4[7] = { 0 }; /* not referenced */
 
 /* Picks targets for three channels (255, or one of them 64 per flags 0x4043-0x4045 while 0x403D is
  * set), eases the channels toward them, and writes them to ids 0x30F3-0x30F5 and 0x30F8-0x30FA. */
