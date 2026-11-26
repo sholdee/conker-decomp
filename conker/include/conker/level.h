@@ -324,10 +324,12 @@ s32 func_15015300(TriggerZone *obj);
 void func_15015354(TriggerZone *obj);
 s32 func_15015644(TriggerZone *obj);
 s32 func_150156F4(TriggerZone *obj);
-extern s32 (*gZoneSpawnHandlers[26])(TriggerZone *);
-extern const s32 D_8009658C[5];
+extern const s32 D_8009658C[5]; // defined after func_150130B4, which reads them: their .rodata follows its const local
 extern const s32 D_800965A0[5];
 extern const s32 D_800965B4[8];
+extern u16 *D_800BE570; // RGBA16 screen copy, D_800BE620 x D_800BE624 (game_203340)
+extern u8 D_800BE574;
+extern u8 D_800BE575;
 
 /* game_43D00.c */
 void func_15016850(void);

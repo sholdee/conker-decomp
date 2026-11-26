@@ -136,10 +136,6 @@ extern void (*D_80082B40[])(Camera *);
 extern s8   D_80082BB4; // pending EEPROM request (game_33990)
 extern ModeSettings *D_80082BBC; // saved settings, one record per multiplayer mode
 extern u8   D_80082BC0;
-extern void (*D_80082EA0[])(void);
-extern void (*D_80082ECC[])(void);
-extern void (*D_80082F40[])(void);
-extern void (*D_80082F70[])(void);
 extern u8 D_80084160[];
 extern u8 D_80084190[];
 extern Vtx  D_80084300[5];
@@ -364,9 +360,6 @@ extern LevelHeader *D_800B0DF0;
 
 extern u8 * D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
 extern ParticleResource D_800BE4A0[15];
-extern u16 *D_800BE570; // RGBA16 screen copy, D_800BE620 x D_800BE624 (game_203340)
-extern u8  D_800BE574;
-extern u8  D_800BE575;
 extern u8 D_800BE580[]; /* bit set over text ids */
 extern u8 D_800BE590;
 extern u16 D_800BE598[];
