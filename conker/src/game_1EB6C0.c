@@ -118,6 +118,7 @@ void func_151BE6A0(BurstSpark *spark) {
 /* Per-frame update of a burst glow: switches it to a random texture every 3-10 frames and eases its scale. */
 s32 func_151BE6CC(BurstGlow *glow) {
     s32 pad; // matching: unused stack slot above textures
+    // not const: the original unit (game_1E73B0..game_1EB6C0) keeps its aggregate initializers ahead of the literals (ROM 0x24F268)
     s32 textures[4] = { 0x60, 0x61, 0x62, 0x63 };
     GlowShape *shape = &glow->shape;
 
