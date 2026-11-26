@@ -14,7 +14,6 @@
  *   game_11EEB0.c
  *   game_1228D0.c
  *   game_124260.c
- *   game_12E540.c
  *   game_131F30.c
  *   game_133190.c
  *   game_1BBFC0.c
@@ -802,22 +801,6 @@ void func_150F739C(BeamObj *obj);
 void func_150F740C(BeamObj *obj);
 void func_150F7438(BeamObj *obj);
 extern Vec3f D_800D9A50; // the last beam direction (func_150F706C); game_123FB0 aims a camera by it
-
-/* game_12E540.c */
-void func_15101090(RayBeam *beam);
-void func_15101148(RayBeam *beam);
-void func_151011E8(BeamHitFx *fx);
-void func_15101210(BeamHitFx *fx);
-void func_15101238(LightEffect *endPoint);
-void func_15101260(LightEffect *endPoint);
-void func_15101288(BeamStartFx *fx);
-void func_151012B0(BeamStartFx *fx);
-void func_151012D8(BeamLine *line);
-void func_15101300(BeamLine *line);
-void func_15101328(BeamEndFx *fx);
-void func_15101350(BeamEndFx *fx);
-s8 func_15101378(RayBeam *beam);
-Vtx *func_151019C4(RayBeam *beam, s16 viewport);
 
 /* game_131F30.c */
 void func_15104A80(WorldObject *prop);

@@ -1184,11 +1184,35 @@ typedef struct EffectParticle {
     EffectParticleState state;
 } EffectParticle;
 
-extern const Vec3f D_800A21A0[7];
-extern const Vec3f D_800A21F4[7];
-extern const u8 D_800A2248[7];
+typedef struct Struct15101F50 Struct15101F50;
+typedef struct Owner1510281C Owner1510281C;
+typedef struct Owner151025F4 Owner151025F4;
+typedef struct Owner151022AC Owner151022AC;
+typedef struct Obj15102884 Obj15102884;
 EffectParticle *func_15100600(Actor *owner, const Vec3f *vec1, const Vec3f *vec2, u8 arg3, s16 lifetime, u8 r, u8 g, u8 b, f32 arg8,
                               f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE);
+void func_15101090(RayBeam *beam);
+void func_15101148(RayBeam *beam);
+void func_151011E8(BeamHitFx *fx);
+void func_15101210(BeamHitFx *fx);
+void func_15101238(LightEffect *endPoint);
+void func_15101260(LightEffect *endPoint);
+void func_15101288(BeamStartFx *fx);
+void func_151012B0(BeamStartFx *fx);
+void func_151012D8(BeamLine *line);
+void func_15101300(BeamLine *line);
+void func_15101328(BeamEndFx *fx);
+void func_15101350(BeamEndFx *fx);
+s8 func_15101378(RayBeam *beam);
+Vtx *func_151019C4(RayBeam *beam, s16 viewport);
+Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport);
+s32 func_151022AC(Owner151022AC *obj);
+s32 func_151025F4(Owner151025F4 *obj, s32 arg1);
+EffectParticle *func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5);
+void func_151027E8(Actor *actor);
+s32 func_1510281C(Owner1510281C *owner, s16 key);
+s32 func_15102884(Obj15102884 *obj, s32 arg1);
+s32 func_151028AC(Owner1510281C *owner, s16 key);
 
 /* game_135780.c */
 /*

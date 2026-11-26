@@ -70,7 +70,6 @@
  *   game_12D630.c
  *   game/done/game_12D7E0.c
  *   game_12D7F0.c
- *   game_12F400.c
  *   game_12FDD0.c
  *   game_130B40.c
  *   game_1312F0.c
@@ -762,21 +761,6 @@ void func_15100330(s32 arg0);
 /* game_12D7F0.c */
 void func_15100340(s32 arg0);
 Gfx *func_15100464(Gfx *gdl);
-
-/* game_12F400.c */
-typedef struct Struct15101F50 Struct15101F50;
-typedef struct Owner1510281C Owner1510281C;
-typedef struct Owner151025F4 Owner151025F4;
-typedef struct Owner151022AC Owner151022AC;
-typedef struct Obj15102884 Obj15102884;
-Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport);
-s32 func_151022AC(Owner151022AC *obj);
-s32 func_151025F4(Owner151025F4 *obj, s32 arg1);
-struct EffectParticle *func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5);
-void func_151027E8(Actor *actor);
-s32 func_1510281C(Owner1510281C *owner, s16 key);
-s32 func_15102884(Obj15102884 *obj, s32 arg1);
-s32 func_151028AC(Owner1510281C *owner, s16 key);
 
 /* game_12FDD0.c */
 typedef struct BoneBeamParticle BoneBeamParticle;
