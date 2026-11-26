@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-extern s32 D_80088800;
+/* This file's .data. */
+static s32 D_80088800 = 0;
 
 /* Updates camera flags and range fields (liftTarget/height/unk34C/targetDistance) from func_1509BE40 state queries 0x5071/0x5072. */
 void func_150C7E00(Camera *camera)
@@ -80,7 +81,7 @@ void func_150C7E00(Camera *camera)
         return;
       }
       func_1509BFB0(1, 0x9000, 0x17, func_1509BE40(1, func_1509BE40(0, 0x2011, 0xB7) | 0x2000, 0x9C, 0x2000));
-      t = ((f32)func_1509BE40(1, func_1509BE40(0, 0x2011, 0xB7) | 0x2000, 0x9A, 0x2000) - 300.0f) / 900.0f;
+      t = (func_1509BE40(1, func_1509BE40(0, 0x2011, 0xB7) | 0x2000, 0x9A, 0x2000) - 300.0f) / 900.0f;
       blend = (t < 0.0f) ? 0.0f : (t > 1.0f) ? 1.0f : t;
       if (queryBC == 0)
       {
