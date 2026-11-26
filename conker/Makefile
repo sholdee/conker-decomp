@@ -137,6 +137,8 @@ $(BUILD_DIR)/$(SRC_DIR)/libultra/io/crc2.c.o: OPT_FLAGS := -O1
 # (uopt ~1000 blocks, as1 500) come out unoptimized otherwise (func_1504CB98, func_150265CC,
 # func_1502460C, func_15065A5C). The whole bin is unchanged with it (2026-11-16).
 $(BUILD_DIR)/$(SRC_DIR)/game_%.c.o: OLIMIT := -Olimit 3000
+# Files in Rare's layout (src/game/<Area>/<Name>/<name>.c) are not named game_*: they need the same limit.
+$(BUILD_DIR)/$(SRC_DIR)/game/%.c.o: OLIMIT := -Olimit 3000
 
 $(BUILD_DIR)/$(SRC_DIR)/init_3920.c.o: OPT_FLAGS := -O2
 
