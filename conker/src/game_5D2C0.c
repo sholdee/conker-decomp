@@ -651,7 +651,7 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
     alpha = att->alpha;
     v = func_1506196C(owner, view);
     if (v != 0xFF) {
-        alpha = (s32)(v * alpha) >> 8;
+        alpha = (v * alpha) >> 8;
     }
     if (alpha < 0xFF) {
         gSPSegment(gdl++, 8, D_80082FC0);
