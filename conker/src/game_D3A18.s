@@ -211,3 +211,11 @@ glabel func_150A6568
     /* D3D04 150A6854 00000000 */   nop
     /* D3D08 150A6858 00000000 */  nop
     /* D3D0C 150A685C 00000000 */  nop
+
+.section .bss
+
+glabel D_800D37E0
+    /* 800D37E0 */ .space 0x50
+glabel D_800D3830
+    /* 800D3830 */ .space 0x10
+    .balign 16

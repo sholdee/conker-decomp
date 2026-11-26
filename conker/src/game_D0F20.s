@@ -659,3 +659,16 @@ glabel func_150A3FC4
   .L150A43D8:
     /* D1888 150A43D8 03E00008 */  jr         $ra
     /* D188C 150A43DC 00000000 */   nop
+
+.section .bss
+
+/* Data of game_D0F20.s to game_D2450.s (one unit in the ROM) */
+glabel D_800D3300
+    /* 800D3300 */ .space 0xC
+glabel D_800D330C
+    /* 800D330C */ .space 0x278
+glabel D_800D3584
+    /* 800D3584 */ .space 0x58
+glabel D_800D35DC
+    /* 800D35DC */ .space 0x4
+    .balign 16

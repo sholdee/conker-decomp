@@ -701,3 +701,19 @@ glabel D_800886A4
     /* 22D194 800886D4 150AE1DC */ .word func_150AE1DC
     /* 22D198 800886D8 1509DD40 */ .word func_1509DD40
     /* 22D19C 800886DC 00000000 */ .word 0x00000000
+
+.section .bss
+
+glabel D_800D3840
+    /* 800D3840 */ .space 0x4
+glabel D_800D3844
+    /* 800D3844 */ .space 0x4
+glabel D_800D3848
+    /* 800D3848 */ .space 0x4
+glabel D_800D384C
+    /* 800D384C */ .space 0xC
+glabel D_800D3858
+    /* 800D3858 */ .space 0x8
+glabel D_800D3860
+    /* 800D3860 */ .space 0x6000
+    .balign 16
