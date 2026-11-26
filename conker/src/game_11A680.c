@@ -219,7 +219,7 @@ void func_150ED748(Actor *obj) {
     f32 tNear;
     f32 tFar;
     Camera *camera;
-    Actor *subject;
+    ActorCtl *subject;
 
     health = 1;
     if (D_800BE616) {
@@ -354,11 +354,11 @@ void func_150ED748(Actor *obj) {
         if (obj->intelwalk == 13) {
             func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
         } else if ((D_800BE616 == 0) && (D_800CC268 & 1)) {
-            subject = &movement_obj[obj->owner];
-            if ((subject->attach_char == 0) && (subject->mv->rt_context_b == 0) && (obj->task_attrib & 0x400)) {
-                if ((subject->stickspeed > 15.0f) && (subject->yspd > 10.0f)) {
+            driver = &movement_obj[obj->owner];
+            if ((driver->attach_char == 0) && (driver->mv->rt_context_b == 0) && (obj->task_attrib & 0x400)) {
+                if ((driver->stickspeed > 15.0f) && (driver->yspd > 10.0f)) {
                     func_1505327C(obj, 68.0f, 4.0f, 13, 5);
-                } else if ((subject->norun == 0) && (subject->shad > 70.0f) && (subject->stunned == 0) && (func_1505A6F8(subject, obj) < 100.0f)) {
+                } else if ((driver->norun == 0) && (driver->shad > 70.0f) && (driver->stunned == 0) && (func_1505A6F8(driver, obj) < 100.0f)) {
                     func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 1, 0);
                 }
             }
@@ -488,13 +488,13 @@ void func_150ED748(Actor *obj) {
                 }
                 if (bestIdx != -1) {
                     typedef s32 scope; // matching: as above
-                    subject = &movement_obj[bestIdx];
+                    driver = &movement_obj[bestIdx];
                     if (D_800BE616 != 0) {
-                        limit = subject->ypos + 40.0f;
+                        limit = driver->ypos + 40.0f;
                     } else {
-                        limit = subject->aim.topY;
+                        limit = driver->aim.topY;
                     }
-                    deltaZ = func_150ED298(obj, 0.0f, subject->xpos, limit, subject->zpos, 0.0f) * 0.001000000047f;
+                    deltaZ = func_150ED298(obj, 0.0f, driver->xpos, limit, driver->zpos, 0.0f) * 0.001000000047f;
                     limit = 4.0f * D_800BE9A4;
                     if (limit < deltaZ) {
                         deltaZ = limit;
@@ -512,9 +512,9 @@ void func_150ED748(Actor *obj) {
                 if (camera->mv->SniperState != 0) {
                     /* Copy the camera subject's angles. */
                     typedef s32 scope; // matching: as above
-                    angle = -subject->ob_overslopey;
+                    angle = -subject->aimPitch;
                     angle -= obj->vtilt;
-                    angle2 = subject->ob_overslopex;
+                    angle2 = subject->aimYaw;
                     angle2 = (obj->theta - 90.0f) - angle2;
                     while (angle > 180.0f) {
                         angle -= 360.0f;
@@ -557,10 +557,10 @@ void func_150ED748(Actor *obj) {
                             }
                         }
                     }
-                    subject->team &= ~0x40;
+                    subject->unk128 &= ~0x40;
                     if (hit != 0) {
                         if (hit == 2) {
-                            subject->team |= 0x40;
+                            subject->unk128 |= 0x40;
                         }
                         hitX = dir[0] * dist + camera->eye.x;
                         hitY = dir[1] * dist + camera->eye.y;
