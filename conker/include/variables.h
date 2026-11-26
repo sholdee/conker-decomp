@@ -138,8 +138,6 @@ extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 // 0x80044B20 + 253952 = 0x80082B20
 
 /* 80080000 */
-extern s32 *D_80082B20[]; // per level (LevelHeader.assetList): zero-terminated asset id list. The segment
-                          // starts here; init_1050 first DMAs its 16-byte header in (word 0: compressed data offset).
 extern void (*D_80082B40[])(Camera *);
 extern s8   D_80082BB4; // pending EEPROM request (game_33990)
 extern ModeSettings *D_80082BBC; // saved settings, one record per multiplayer mode
@@ -287,6 +285,11 @@ extern s32 jtbl_80091A30[];
 
 extern s32 D_80090324[];
 extern TextureDesc D_80090514;
+/* Asset id lists of D_80082B20 (game_305D0.c). */
+extern s32 D_80090150[];
+extern s32 D_8009016C[];
+extern s32 D_80090184[];
+extern s32 D_800901C4[];
 extern TextureDesc D_80090B60[]; /* the effect texture table (the `texture` index of the effect descriptors) */
 /* Entries of the effect texture table D_80090B60, referenced directly. */
 extern TextureDesc D_80090CD4;
@@ -304,7 +307,6 @@ extern TextureDesc D_8009187C;
 extern TextureDesc D_800918A0;
 extern s32 D_80091AF0[];
 extern s32 D_80091C04[];
-extern u16 D_80091D20[]; // per texture: compressed size
 
 // chunk0 data starts at rom 0x80082B20
 // this chunk0 data
@@ -384,21 +386,6 @@ extern u8  *D_800B0DDC;
 extern u8  *D_800B0DE0;
 extern s32  D_800B0DE4;
 extern LevelHeader *D_800B0DF0;
-extern Gfx *D_800B0E00[4]; // level display lists (D_800B0E04 is [1])
-extern Gfx *D_800B0E04;
-
-extern Vtx *D_800B0E10[4]; // level mesh vertices of the four level models (each display list follows its vertices)
-extern VtxColorGroup **D_800B0E30; // groups of each vertex color set
-extern u8 *D_800B0E34; // group count of each vertex color set
-
-extern u8 D_800B0E38;
-extern s32 D_800B0E40[];
-extern LevelModelEntry *D_800B0E50; // the current level's models
-extern s32 D_800B0E58[7762];
-
-extern u16 D_800B87A0[]; // per texture: size
-
-extern s8  D_800BC448[]; // per texture: frames left before it is freed (0 = not loaded)
 
 extern u8 * D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
 extern ParticleResource D_800BE4A0[15];

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 extern TextureDesc *D_8008CAE0; /* entry 37 of the D_8008CA4C texture table */
-extern u8 D_800B86A4[][0x32C];
 
 
 /* Remembers the object's x/z, and drags a swimming player who comes within range down and sideways around it. */
@@ -198,7 +197,7 @@ void func_150B17DC(Actor *obj) {
 
 /*
  * Keeps the object stunned with fixed state flags, eases unkB8 toward 0 (or -20 when unk13D is set, unk21C >= 9
- * and D_800B86A4's row clear or D_800CC250 bit 2 set), and
+ * and its host (movement_obj[carried - 100]) not stunned or D_800CC250 bit 2 set), and
  * now and then emits a particle at a random point around it that drifts with the player's motion.
  */
 void func_150B19E0(Actor *obj) {
@@ -230,7 +229,7 @@ void func_150B19E0(Actor *obj) {
     }
     if (obj->carried != 0) {
         func_150562FC(obj);
-        if ((D_800B86A4[obj->carried][0] == 0 || (D_800CC250 & 4)) && obj->unk21C >= 9) {
+        if ((movement_obj[obj->carried - 100].stunned == 0 || (D_800CC250 & 4)) && obj->unk21C >= 9) {
             target = -20.0f;
         }
     }

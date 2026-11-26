@@ -112,6 +112,19 @@ typedef struct {
 void func_15000940();
 
 /* game_305D0.c */
+extern s32 *D_80082B20[]; // per level (LevelHeader.assetList): zero-terminated asset id list. The segment
+                          // starts here; init_1050 first DMAs its 16-byte header in (word 0: compressed data offset).
+extern const u16 D_80091D20[7762]; // per texture: compressed size
+extern Gfx *D_800B0E00[4]; // level display lists
+extern Vtx *D_800B0E10[4]; // level mesh vertices of the four level models (each display list follows its vertices)
+extern VtxColorGroup **D_800B0E30; // groups of each vertex color set
+extern u8 *D_800B0E34; // group count of each vertex color set
+extern u8 D_800B0E38;
+extern s32 D_800B0E40[4];
+extern LevelModelEntry *D_800B0E50; // the current level's models
+extern s32 D_800B0E58[7762]; // per texture: its address once loaded, or -1
+extern u16 D_800B87A0[7762]; // per texture: size
+extern s8 D_800BC448[7762]; // per texture: frames left before it is freed (0 = not loaded)
 void func_15003120(s32 index, s32 base, s32 list);
 void func_150031EC(s32 levelId);
 s32 func_150034B4(void);
