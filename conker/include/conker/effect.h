@@ -786,7 +786,6 @@ s32 func_1513BBFC(DynModel *obj, s16 viewport);
 s32 func_1513BEB0(DynModel *obj);
 
 /* game_16EE20.c */
-typedef struct Source15141F78 Source15141F78;
 typedef struct Msg151419D0 Msg151419D0;
 typedef struct LinkedObject151419D0 LinkedObject151419D0;
 typedef struct Args151420F8 Args151420F8;
@@ -799,8 +798,8 @@ s32 func_15141C0C(Actor *actor);
 s32 func_15141CC0(u32 type);
 void func_15141DA4(void *actor, s32 selector, s32 handler);
 void func_15141E38(Actor *actor, s32 handler);
-void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5);
-s32 func_151420F8(s32 actor);
+void func_15141F78(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5);
+s32 func_151420F8(Actor *actor);
 void func_15142180(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB);
 extern const Args151420F8 D_800A5200;
 
