@@ -411,7 +411,7 @@ void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList) {
     prev = -1;
     count = triList[0];
 
-    func_150492CC((f32)(maxX - minX), 32000.0f, (f32)(maxZ - minZ));
+    func_150492CC(maxX - minX, 32000.0f, maxZ - minZ);
 
     for (i = 1; i <= count; i++) {
         index = triList[i];
@@ -468,7 +468,7 @@ int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, 
     lowBits = (1 << (D_80082FA0 + 1)) - 1;
     highBits = -(1 << (D_80082FA0 + 1));
 
-    func_150492CC((f32)(maxX - minX), 32000.0f, (f32)(maxZ - minZ));
+    func_150492CC(maxX - minX, 32000.0f, maxZ - minZ);
 
     total = triList[0] + 1;
     count = 0;

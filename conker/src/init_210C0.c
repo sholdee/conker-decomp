@@ -62,9 +62,9 @@ Cmd *func_100210C0(s16 *outp, Cmd *p, s32 bus, s32 *cmdCount) {
     if (count != 0) {
         maxPri -= 0x3E;
         if (maxPri >= 7) {
-            gain = (u32) (26755.0f / sqrtf((f32) maxPri));
+            gain = (u32) (26755.0f / sqrtf(maxPri));
         } else {
-            gain = (u32) (65536.0f / (f32) maxPri);
+            gain = (u32) (65536.0f / maxPri);
         }
 
         lCmd = ptr++;
