@@ -23,7 +23,7 @@ void effect_levelUpdateFlagLights(s32 arg0) {
         gLevelTexFrame++;
         for (i = 0; i < 5; i++, flag++) {
             chance = (*flag != 0) ? 70 : 35;
-            if (func_150ADA20() % 1000U < chance) {
+            if (math_random() % 1000U < chance) {
                 if ((*flag ^= 1) != 0) {
                     light_sendEvent(ids.unk0[i], 0x18, 0);
                 } else {

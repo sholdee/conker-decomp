@@ -57,6 +57,6 @@ void blood_sprayFromBone(obj, type, sceneTag, arg3)
         boneMtx = &obj->ob_matrix_ptr[entry->bone];
         math_transformOffset(&entry->from, &from, boneMtx);
         math_transformOffset(&entry->to, &to, boneMtx);
-        blood_spray(&from, &to, ((func_150ADA68() * 170.0f) + 71.0f) * 0.01f, sceneTag, arg3);
+        blood_spray(&from, &to, ((math_randomFloat() * 170.0f) + 71.0f) * 0.01f, sceneTag, arg3);
     }
 }

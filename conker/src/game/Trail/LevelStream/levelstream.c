@@ -211,7 +211,7 @@ s32 trail_spawnStreamParticles(LevelStream *emitter) {
     data->widthPhase += data->widthRate * gFrameDelta;
     data->widthPhase = math_wrapRadians(data->widthPhase);
     data->spawnCount += 0.2730129957f * gFrameDelta;
-    data->tc += (10220.0f + func_150ADA68() * 9434.0f) * 0.01f * gFrameDelta;
+    data->tc += (10220.0f + math_randomFloat() * 9434.0f) * 0.01f * gFrameDelta;
     while (data->tc >= 16384.0f) {
         data->tc -= 16384.0f;
     }
@@ -557,7 +557,7 @@ void trail_updateRandomPointEmitter(Game1FBB80Object *object) {
     s16 mask;
 
     effect = &object->effect;
-    effect->accumulator += (5624.0f + func_150ADA68() * 3973.0f) * 1.0e-10f * gFrameDelta * effect->rate;
+    effect->accumulator += (5624.0f + math_randomFloat() * 3973.0f) * 1.0e-10f * gFrameDelta * effect->rate;
     if (effect->accumulator > 1.0f) {
         for (index = 0, mask = 0; index <= gScreenLayout; index++) {
             mask |= 1 << index;
@@ -593,14 +593,14 @@ void trail_updateRandomPointEmitter(Game1FBB80Object *object) {
             packet.unk48 = effect->zone;
             do {
                 // matching: `+ -1308.0f` (add.s); `- 1308.0f` emits sub.s
-                packet.rot.x = (func_150ADA68() * 409.0f + -1308.0f) * 0.001f;
-                packet.scale.x = (func_150ADA68() * 121.0f + 23.0f) * 0.001f;
-                packet.width = func_150ADA68() * 25.0f + 10.0f;
-                packet.height = func_150ADA68() * 60.0f + 60.0f;
+                packet.rot.x = (math_randomFloat() * 409.0f + -1308.0f) * 0.001f;
+                packet.scale.x = (math_randomFloat() * 121.0f + 23.0f) * 0.001f;
+                packet.width = math_randomFloat() * 25.0f + 10.0f;
+                packet.height = math_randomFloat() * 60.0f + 60.0f;
                 math_randomZoneFootprintPoint(effect->shape, &packet.pos.x, &packet.pos.z, &upperHeight, &packet.pos.y);
                 if (collision_probeCeilingSet0Cached(&packet.pos, upperHeight, &effect->floor) != 0) {
                     packet.pos.y = effect->floor.height;
-                    packet.unk44 = func_150ADA20() % 101U + 155;
+                    packet.unk44 = math_random() % 101U + 155;
                     particle_newQuadParticle(&packet, &gWhiteVtxColors, 0x1C, 0, 0, 0x22, 0, 0, 0, 0, object->base.header.owner, object->base.header.kind);
                 }
                 effect->accumulator -= 1.0f;
@@ -657,8 +657,8 @@ WaveTrail *trail_spawnWaveTrail(Actor *owner, DescParticleHead *anchor, u8 arg2,
     }
     info.flags = flags;
 
-    info.maxLength = func_150ADA68() * 400.0f + 400.0f;
-    random = func_150ADA68();
+    info.maxLength = math_randomFloat() * 400.0f + 400.0f;
+    random = math_randomFloat();
     info.phase = (random + random) * 3.141592741f; /* random angle in [0, 2pi) */
 
     if (!trail_getWaveTrailAnchor(&spawn.pos, owner, anchor)) {
@@ -1052,11 +1052,11 @@ void trail_spawnNearCamera(Actor *obj, f32 probeY, f32 arg2) {
 
     player = obj->CameraPtr;
     if (player != NULL) {
-        if (func_150ADA68() < 0.2220000178f) {
+        if (math_randomFloat() < 0.2220000178f) {
             camPos = math_getCameraPos(player->CNumber);
             yaw = math_getCameraYaw(player->CNumber);
-            angle = ((func_150ADA68() * 80.0f) + (yaw - 40.0f)) * 0.01745329238f;
-            distance = func_150ADA68() * 2000.0f;
+            angle = ((math_randomFloat() * 80.0f) + (yaw - 40.0f)) * 0.01745329238f;
+            distance = math_randomFloat() * 2000.0f;
 
             spawnPos.x = camPos->x - (sinf(angle) * distance);
             spawnPos.y = probeY;
@@ -1067,7 +1067,7 @@ void trail_spawnNearCamera(Actor *obj, f32 probeY, f32 arg2) {
                 data.pos = spawnPos;
                 data.unkC = 0.0f;
 
-                effect = effect_newTimedEffect((func_150ADA20() % 131U) + 51, -1, 0x20, -1, 1, 0,
+                effect = effect_newTimedEffect((math_random() % 131U) + 51, -1, 0x20, -1, 1, 0,
                                                        sizeof(data), 0xFF, 1);
                 if (effect != NULL) {
                     memcpy(&effect->data, &data, sizeof(data));
@@ -1136,13 +1136,13 @@ void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
 
                 piece.model = models[i];
                 math_transformOffset(&gBreakPiecePoints[i], &piece.pos, obj->ob_matrix_ptr);
-                yaw = func_150ADA20();
-                pitch = func_150ADA20();
-                math_dirFromBinAngles(yaw & 0xFF, (pitch % 25U) - 64, (func_150ADA68() * 11.44999981f) + 16.93000031f, &piece.vel);
-                piece.rotVel.x = (func_150ADA68() * 19.75200081f) + -9.876000404f;
-                piece.rotVel.z = (func_150ADA68() * 19.75200081f) + -9.876000404f;
-                piece.gravity = (func_150ADA68() * 0.5180000067f) + -1.539000034f;
-                piece.lifetime = (func_150ADA20() % 101U) + 100;
+                yaw = math_random();
+                pitch = math_random();
+                math_dirFromBinAngles(yaw & 0xFF, (pitch % 25U) - 64, (math_randomFloat() * 11.44999981f) + 16.93000031f, &piece.vel);
+                piece.rotVel.x = (math_randomFloat() * 19.75200081f) + -9.876000404f;
+                piece.rotVel.z = (math_randomFloat() * 19.75200081f) + -9.876000404f;
+                piece.gravity = (math_randomFloat() * 0.5180000067f) + -1.539000034f;
+                piece.lifetime = (math_random() % 101U) + 100;
                 particle_newModelParticle(&piece, 3, 0xFF, 0, arg1, arg2);
             }
         }
@@ -1218,7 +1218,7 @@ void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
 
             collision_initHitFromObject(&floor, obj);
             flag = 2;
-            beam_spawnAtGroundPoints(&pos, pos.y - 2000.0f, 200.0f, &floor, (func_150ADA20() & 3) + 7, 0, &flag, arg1, arg2);
+            beam_spawnAtGroundPoints(&pos, pos.y - 2000.0f, 200.0f, &floor, (math_random() & 3) + 7, 0, &flag, arg1, arg2);
         }
     }
 }
@@ -1241,7 +1241,7 @@ void trail_spawnStripEffect(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
     data.ownerId = obj->unique_id;
     data.scale = (obj->scale_xz + obj->scale_y) * 0.5f;
     data.variant = variant;
-    data.alpha = (func_150ADA20() % 56U) + 200;
+    data.alpha = (math_random() % 56U) + 200;
     data.ownerUnk84 = obj->animseq.uh;
 
     effect = effect_newTimedEffect(300, -1, 0x61, 4, 0, 0x31, sizeof(data), arg2, arg3);
@@ -1531,7 +1531,7 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             s32 pad; // matching: unused stack slot in the original frame
 
             shape.spread = 1000.0f;
-            count = (func_150ADA20() % 6U) + 5;
+            count = (math_random() % 6U) + 5;
             spawn.texture = 0x3E;
             spawn.renderMode = 0x2203;
             spawn.unk0 = 0x200005;
@@ -1552,7 +1552,7 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             spawn.scaleStart = 1;
             spawn.flags = 0xC007;
             spawn.scaleRate = 1.0f;
-            spawn.timer = (func_150ADA20() % 11U) + 40;
+            spawn.timer = (math_random() % 11U) + 40;
             spawn.fadeStart = 1;
             spawn.fadeRate = 0xFF;
             spawn.primColorMode = 6;
@@ -1568,8 +1568,8 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             spawn.width = 0.0f;
             spawn.maxSize = 10000.0f;
             while (count != 0) {
-                particle_getRandomConeDir(&shape, (func_150ADA68() * 0.03999999911f) + 0.04999999702f, &spawn.vel);
-                spawn.gravity = (func_150ADA68() * 1.340000033f) + -2.328999996f;
+                particle_getRandomConeDir(&shape, (math_randomFloat() * 0.03999999911f) + 0.04999999702f, &spawn.vel);
+                spawn.gravity = (math_randomFloat() * 1.340000033f) + -2.328999996f;
                 particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, arg1, arg2);
                 if (particle != NULL) {
                     particle->effect = trail_spawnWaveTrail(NULL, &particle->head, 0, arg1, arg2);

@@ -16,11 +16,11 @@ void func_150B3AB0(Actor *obj, u8 arg1) {
         math_transformOffset(&D_8009FBC0, &pos, obj->ob_matrix_ptr + 25);
         // matching: *(u8 *)&arg1 re-reads arg1 from its stack slot at each use (plain or K&R arg1 stays in a register)
         particle_emitOnRandomArc(pos.x, pos.y, pos.z, 10.0f, yaw, 0, 0xFF,
-                      (func_150ADA20() % 31U) + 40, 8, 0, 0.0f, 0, *(u8 *)&arg1);
+                      (math_random() % 31U) + 40, 8, 0, 0.0f, 0, *(u8 *)&arg1);
 
         event.flags = 1;
-        event.duration = (func_150ADA20() & 0xF) + 12;
-        event.strength = (func_150ADA20() & 3) + 5;
+        event.duration = (math_random() & 0xF) + 12;
+        event.strength = (math_random() & 3) + 5;
         event.updateKind = -1;
         event.playerMask = 1;
         cont_spawnRumble(&event, 0, *(u8 *)&arg1, 0);
@@ -51,16 +51,16 @@ s32 func_150B3C0C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     desc.dir.y = -10.0f * pitchCos;
     desc.dir.z = horizSpeed * yawSin;
 
-    desc.headSpeed = (func_150ADA68() * 1.953000069f) + 3.736000061f;
-    desc.tailSpeed = (func_150ADA68() * 0.9400000572f) + 2.22300005f;
+    desc.headSpeed = (math_randomFloat() * 1.953000069f) + 3.736000061f;
+    desc.tailSpeed = (math_randomFloat() * 0.9400000572f) + 2.22300005f;
     math_pickPaletteColour(8, &desc.headColor.red, &desc.headColor.green, &desc.headColor.blue);
     math_pickPaletteColour(8, &desc.tailColor.red, &desc.tailColor.green, &desc.tailColor.blue);
     desc.headColor.alpha = 0xFF;
     desc.tailColor.alpha = 0xFF;
     desc.flags = 9;
-    desc.lifetime = (func_150ADA20() & 0xF) + 15;
+    desc.lifetime = (math_random() & 0xF) + 15;
 
-    desc.width = (func_150ADA68() * 2.659999847f) + 1.849999905f;
+    desc.width = (math_randomFloat() * 2.659999847f) + 1.849999905f;
     desc.renderMode = 0x1601;
     desc.alpha = 0xFF;
     desc.fadeStart = 10;

@@ -54,7 +54,7 @@ void sprite_setViewMtx(s32 view) {
 
     guMtxL2F(projection, &gViewMtxBuffers[D_800BE9C0][view]);
     guMtxL2F(viewMtx, &VIEWS[view].projectionMtx[D_800BE9C0]);
-    func_150A7A48(projection, viewMtx, gSpriteViewMtx[view]);
+    math_mtxMulF(projection, viewMtx, gSpriteViewMtx[view]);
 }
 
 
@@ -182,7 +182,7 @@ s32 sprite_project(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *ou
     f32 screenY;
     RenderView *view;
 
-    func_150A7A00(gSpriteViewMtx[gCurrentView], x, y, z, outX, outY, outZ, outW);
+    math_transformPointW(gSpriteViewMtx[gCurrentView], x, y, z, outX, outY, outZ, outW);
     w = *outW;
     if ((maxW <= w) || (w <= gDefaultNear)) {
         return FALSE;

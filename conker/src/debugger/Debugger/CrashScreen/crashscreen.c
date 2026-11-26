@@ -556,7 +556,7 @@ s32 debugger_run(OSThread *thread) {
     }
     gDebuggerThread = thread;
     gDebuggerIsLockup = 0;
-    if ((thread->context.cause == EXC_SYSCALL) && (thread->context.pc == (u32)func_150AD770)) {
+    if ((thread->context.cause == EXC_SYSCALL) && (thread->context.pc == (u32)debug_fatalTrap)) {
         *(s8 *)&gDebuggerIsLockup = 1; // matching: as above
     }
     do {

@@ -17,7 +17,7 @@ void sprite_transformPointGroup(PointGroup *group, f32 (*out)[3]) {
     sprite_spreadGroupSlots(group, slots);
     for (i = 0; i < 16; i++) {
         if (slots[i] != NULL) {
-            func_150A7960(gPointGroupMtx, slots[i]->x, slots[i]->y, slots[i]->z, &out[i][0], &out[i][1], &out[i][2]);
+            math_transformPoint(gPointGroupMtx, slots[i]->x, slots[i]->y, slots[i]->z, &out[i][0], &out[i][1], &out[i][2]);
         }
     }
 }

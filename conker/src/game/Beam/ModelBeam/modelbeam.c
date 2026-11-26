@@ -272,7 +272,7 @@ void beam_updateBoneSparks(BoneSparkEffect *effect) {
         return;
     }
     if (owner->ob_matrix_ptr != NULL) {
-        data->accum += (0.2600000203f + func_150ADA68() * 0.1950000077f) * gFrameDelta;
+        data->accum += (0.2600000203f + math_randomFloat() * 0.1950000077f) * gFrameDelta;
         if (data->accum > 1.0f) {
             spawn.r = 0xFF;
             spawn.g = 0xFF;
@@ -316,25 +316,25 @@ void beam_updateBoneSparks(BoneSparkEffect *effect) {
                 s32 flipX;
                 SpriteParticle *spark;
 
-                spawn.timer = func_150ADA20() % 21U + 20;
+                spawn.timer = math_random() % 21U + 20;
                 spawn.scaleStart = spawn.timer;
                 spawn.fadeStart = spawn.timer;
                 spawn.fadeRate = 0xFF / spawn.timer;
-                spawn.alpha = func_150ADA20() % 26U + 8;
-                spawn.width = spawn.height = func_150ADA68() * 70.0f + 148.0f;
-                spawn.gravity = func_150ADA68() * 0.2190000117f + 0.08600000292f;
-                speed = func_150ADA68() * 0.04100000113f + 0.07800000161f;
+                spawn.alpha = math_random() % 26U + 8;
+                spawn.width = spawn.height = math_randomFloat() * 70.0f + 148.0f;
+                spawn.gravity = math_randomFloat() * 0.2190000117f + 0.08600000292f;
+                speed = math_randomFloat() * 0.04100000113f + 0.07800000161f;
                 spawn.vel.x = dx * speed;
                 spawn.vel.y = dy * speed;
                 spawn.vel.z = dz * speed;
                 /* Start a random part of a frame along the path. */
-                t = func_150ADA68() * gFrameDelta;
+                t = math_randomFloat() * gFrameDelta;
                 spawn.flags &= ~0xC0;
                 spawn.pos.x = spawn.vel.x * t + start.x;
                 spawn.pos.y = spawn.vel.y * t + start.y;
                 spawn.pos.z = spawn.vel.z * t + start.z;
-                flipX = (func_150ADA20() & 1) ? 0x80 : 0;
-                spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
+                flipX = (math_random() & 1) ? 0x80 : 0;
+                spawn.flags |= ((math_random() & 1) ? 0x40 : 0) | flipX;
                 spark = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, effect->base.header.owner, effect->base.header.kind);
                 if (spark != NULL) {
                     memcpy(&spark->data.drag, &scale, sizeof(scale));
@@ -475,7 +475,7 @@ void func_150F64B0(DefParticleHead *obj) {
 }
 
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
- * frames calls func_10010F88(0x679) at the owner, makes a flash at a point of the model and emits
+ * frames calls sound_playAt(0x679) at the owner, makes a flash at a point of the model and emits
  * 2 or 3 blue-white particles from it. */
 void beam_updateFlashBurst(FlashBurstEffect *effect) {
     FlashBurstData *data;
@@ -491,9 +491,9 @@ void beam_updateFlashBurst(FlashBurstEffect *effect) {
     if ((owner->ob_matrix_ptr != NULL) && !(owner->unk94 & 2)) {
         data->timer -= D_800BE9E4;
         if (data->timer < 0) {
-            func_10010F88(0x679, 0x18CE, 0, 0, 0, owner->xpos, owner->ypos, owner->zpos,
+            sound_playAt(0x679, 0x18CE, 0, 0, 0, owner->xpos, owner->ypos, owner->zpos,
                           0x7918, 0x7D00);
-            count = (func_150ADA20() & 1) + 2;
+            count = (math_random() & 1) + 2;
             {
                 Vec3f pos;
                 LightEffectHeader header;
@@ -506,28 +506,28 @@ void beam_updateFlashBurst(FlashBurstEffect *effect) {
                 math_transformOffset(&D_800A1B30, &pos, owner->ob_matrix_ptr);
                 header.flags = 3;
                 header.update = -1;
-                header.lifetime = (func_150ADA20() % 9U) + 10;
+                header.lifetime = (math_random() % 9U) + 10;
                 header.lightType = 0;
                 origin.x = pos.x;
                 origin.y = pos.y;
                 origin.z = pos.z;
-                rand3 = (func_150ADA20() % 61U) + 60;
+                rand3 = (math_random() % 61U) + 60;
                 light_createWithEffect(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->base.header.owner,
                               effect->base.header.kind);
                 do {
                     color[0] = 0xA0;
                     color[1] = 0xA0;
                     color[2] = 0xFF;
-                    color[3] = (func_150ADA20() % 101U) + 155;
-                    rand1 = func_150ADA20();
-                    rand2 = func_150ADA20();
-                    rand3 = func_150ADA20();
+                    color[3] = (math_random() % 101U) + 155;
+                    rand1 = math_random();
+                    rand2 = math_random();
+                    rand3 = math_random();
                     beam_spawnBoneBolt(owner, 0, &D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
-                                  27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, effect->base.header.owner,
+                                  27.0f, (math_randomFloat() * 16.0f) + 20.0f, 0, 2, color, effect->base.header.owner,
                                   effect->base.header.kind);
                     count--;
                 } while (count > 0);
-                data->timer = (func_150ADA20() % 91U) + 90;
+                data->timer = (math_random() % 91U) + 90;
             }
         }
     }
@@ -588,9 +588,9 @@ void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3
 
     blood_getStripParticleParams(pointA, pointB, velocityA, velocityB, time, strip, &start, &end, &velocity, &arg3,
                   &arg4, &arg5, &arg6);
-    random = func_150ADA68();
+    random = math_randomFloat();
     arg6 *= 1.0f + (random + random);
-    probeGround = func_150ADA68() < 0.6f;
+    probeGround = math_randomFloat() < 0.6f;
     if (probeGround) {
         collision_initHitFromObject(&ground, strip->owner);
     } else {
@@ -601,7 +601,7 @@ void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3
         ground.height = -10000.0f;
     }
     if (probeGround) {
-        flag = func_150ADA68() < 0.5f;
+        flag = math_randomFloat() < 0.5f;
     } else {
         flag = 0;
     }

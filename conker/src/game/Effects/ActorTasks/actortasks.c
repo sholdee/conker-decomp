@@ -341,13 +341,13 @@ void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f
         ground = NULL;
     }
     vel.x = 0.0f;
-    vel.y = -((func_150ADA68() * 196.0f + 199.0f) * 0.001000000047f * scale);
+    vel.y = -((math_randomFloat() * 196.0f + 199.0f) * 0.001000000047f * scale);
     vel.z = 0.0f;
     pos.x = x;
     pos.y = y;
     pos.z = z;
-    effect_spawnDriftMotionParticle(&pos, &vel, (func_150ADA68() * 311.0f + 454.0f) * 0.001000000047f, 0.972683012f, ground,
-                  func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 50, func_150ADA20() % 101U + 100,
+    effect_spawnDriftMotionParticle(&pos, &vel, (math_randomFloat() * 311.0f + 454.0f) * 0.001000000047f, 0.972683012f, ground,
+                  math_randomFloat() * 101.0f + 101.0f, math_random() % 31U + 50, math_random() % 101U + 100,
                   1, task->header.owner, task->header.kind);
 }
 
@@ -395,11 +395,11 @@ PulseFx *effect_spawnTaskPulse(Actor *actor, ActorTask *task) {
 /* PulseFx callback: restarts the pulse and plays sound 10 or 11 (at random) at the effect. */
 s32 effect_restartTaskPulse(PulseFx *fx) {
     fx->payload.phase = 0;
-    if (func_150ADA20() & 1) {
-        func_10010F88(10, 0x55F0, (math_rand() % 1200) - 600, 0, 0, fx->strip.posA.x, fx->strip.posA.y, fx->strip.posA.z, 500, 2500);
+    if (math_random() & 1) {
+        sound_playAt(10, 0x55F0, (math_rand() % 1200) - 600, 0, 0, fx->strip.posA.x, fx->strip.posA.y, fx->strip.posA.z, 500, 2500);
         return 1;
     }
-    func_10010F88(11, 0x55F0, (math_rand() % 1200) - 600, 0, 0, fx->strip.posA.x, fx->strip.posA.y, fx->strip.posA.z, 500, 2500);
+    sound_playAt(11, 0x55F0, (math_rand() % 1200) - 600, 0, 0, fx->strip.posA.x, fx->strip.posA.y, fx->strip.posA.z, 500, 2500);
     return 1;
 }
 
@@ -455,25 +455,25 @@ void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f3
     burst.pos.y += burst.vel.y * t;
     burst.pos.z += burst.vel.z * t;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         burst.flags |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         burst.flags |= 0x80;
     }
 
-    burst.timer = (func_150ADA20() % 51U) + 50;
-    burst.alpha = (func_150ADA20() % 101U) + 100;
-    payload.baseSize = burst.width = burst.height = (func_150ADA68() * 39.0f) + 31.0f;
-    payload.widthPhaseStep = (func_150ADA20() % 5U) + 4;
-    payload.heightPhaseStep = (func_150ADA20() % 5U) + 4;
-    payload.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.baseSize;
-    payload.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.baseSize;
-    payload.swayPhaseStepX = (func_150ADA20() % 5U) + 4;
-    payload.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
-    payload.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
-    payload.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
-    burst.gravity = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001000000047f;
+    burst.timer = (math_random() % 51U) + 50;
+    burst.alpha = (math_random() % 101U) + 100;
+    payload.baseSize = burst.width = burst.height = (math_randomFloat() * 39.0f) + 31.0f;
+    payload.widthPhaseStep = (math_random() % 5U) + 4;
+    payload.heightPhaseStep = (math_random() % 5U) + 4;
+    payload.widthWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * payload.baseSize;
+    payload.heightWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * payload.baseSize;
+    payload.swayPhaseStepX = (math_random() % 5U) + 4;
+    payload.swayPhaseStepZ = (math_random() % 5U) + 4;
+    payload.swayX = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
+    payload.swayZ = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
+    burst.gravity = ((math_randomFloat() * 70.0f) + 73.0f) * 0.001000000047f;
 
     spawned = particle_newSpriteParticle(&burst, 2, sizeof(payload));
     if (spawned != NULL) {
@@ -649,7 +649,7 @@ void effect_keepTaskFlicker(ActorTask *task) {
     if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
         color = particle_getContextEffectKind();
         pos.y = task->watcher.hit.height;
-        size = (func_150ADA68() * 30.0f) + 50.0f;
+        size = (math_randomFloat() * 30.0f) + 50.0f;
         payload.owner = &task->watcher;
         payload.keepAlive = 1;
         payload.minDelay = 10;
@@ -674,8 +674,8 @@ void effect_keepTaskFlicker(ActorTask *task) {
         part.unk16 = 0;
         part.unk17 = 6;
         fx->flicker = (FlickerSprite *)particle_spawnSurfaceQuadSpriteNoModel(&part, 7, 1, &task->watcher.hit.tri, pos.x, pos.y, pos.z,
-                                                 size, size, func_150ADA20() & 0xFF,
-                                                 (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
+                                                 size, size, math_random() & 0xFF,
+                                                 (math_random() & 1) + ((math_random() & 1) * 2), 0x20, 0xFF, 1);
         if (fx->flicker != NULL) {
             memcpy(&fx->flicker->flicker, &payload, sizeof(payload));
         }
@@ -694,8 +694,8 @@ s32 effect_updateTaskFlicker(FlickerSprite *fx) {
     flicker->keepAlive = 0;
     flicker->timer -= D_800BE9E4;
     if (flicker->timer < 0) {
-        flicker->timer = (func_150ADA20() % (flicker->delayRange + 1)) + flicker->minDelay;
-        flicker->target = func_150ADA68() * flicker->targetRange + flicker->minTarget;
+        flicker->timer = (math_random() % (flicker->delayRange + 1)) + flicker->minDelay;
+        flicker->target = math_randomFloat() * flicker->targetRange + flicker->minTarget;
     }
     fx->quad.def.frameSpeed += (s32)((flicker->target - fx->quad.def.frameSpeed) * flicker->easing);
     return alive;
@@ -820,24 +820,24 @@ void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz,
     burst.vel.x = -dx * 0.2f;
     burst.vel.y = 0.0f;
     burst.vel.z = -dz * 0.2f;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         burst.flags |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         burst.flags |= 0x80;
     }
-    burst.timer = (func_150ADA20() % 51U) + 106;
-    burst.alpha = (func_150ADA20() % 101U) + 100;
-    payload.baseSize = burst.width = burst.height = (func_150ADA68() * 62.0f) + 41.0f;
-    payload.widthPhaseStep = (func_150ADA20() % 5U) + 4;
-    payload.heightPhaseStep = (func_150ADA20() % 5U) + 4;
-    payload.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.baseSize;
-    payload.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.baseSize;
-    payload.swayPhaseStepX = (func_150ADA20() % 5U) + 4;
-    payload.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
-    payload.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
-    payload.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
-    burst.gravity = ((func_150ADA68() * 60.0f) + 21.0f) * 0.001000000047f;
+    burst.timer = (math_random() % 51U) + 106;
+    burst.alpha = (math_random() % 101U) + 100;
+    payload.baseSize = burst.width = burst.height = (math_randomFloat() * 62.0f) + 41.0f;
+    payload.widthPhaseStep = (math_random() % 5U) + 4;
+    payload.heightPhaseStep = (math_random() % 5U) + 4;
+    payload.widthWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * payload.baseSize;
+    payload.heightWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * payload.baseSize;
+    payload.swayPhaseStepX = (math_random() % 5U) + 4;
+    payload.swayPhaseStepZ = (math_random() % 5U) + 4;
+    payload.swayX = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
+    payload.swayZ = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
+    burst.gravity = ((math_randomFloat() * 60.0f) + 21.0f) * 0.001000000047f;
     spawned = particle_newSpriteParticle(&burst, 2, sizeof(payload));
     if (spawned != NULL) {
         memcpy((u8 *)spawned + 0xA8, &payload, sizeof(payload));
@@ -984,17 +984,17 @@ void effect_updateSparkEmitterTask(EmitterTask *task) {
         dead = TRUE;
     }
     if (!dead) {
-        emitter->accum += (emitter->rate + func_150ADA68() * emitter->rateRandom) * gFrameDelta;
+        emitter->accum += (emitter->rate + math_randomFloat() * emitter->rateRandom) * gFrameDelta;
         if (emitter->accum > 1.0f) {
             collision_initHitFromObject(&floor, emitter->actor);
             do {
-                yaw = func_150ADA20() & 0xFF;
-                pitch = (func_150ADA20() % 46U) - 0x3F;
+                yaw = math_random() & 0xFF;
+                pitch = (math_random() % 46U) - 0x3F;
                 sinP = math_cosBinAngleMasked(pitch);
                 cosP = math_cosBinAngleMasked(pitch - 0x40);
                 sinY = math_cosBinAngleMasked(yaw);
                 cosY = math_cosBinAngleMasked(yaw - 0x40);
-                speed = (func_150ADA68() * 713.0f + 500.0f) * 0.009999999776f;
+                speed = (math_randomFloat() * 713.0f + 500.0f) * 0.009999999776f;
                 pos.x = emitter->actor->xpos + 30.0f * sinP * cosY;
                 pos.y = emitter->actor->ypos - 75.0f * cosP;
                 pos.z = emitter->actor->zpos + 30.0f * sinP * sinY;
@@ -1002,12 +1002,12 @@ void effect_updateSparkEmitterTask(EmitterTask *task) {
                 vel.y = -speed * cosP;
                 vel.z = speed * sinP * sinY;
                 {
-                    f32 randT = func_150ADA68();
+                    f32 randT = math_randomFloat();
 
-                    randA = func_150ADA20();
-                    randB = func_150ADA20();
+                    randA = math_random();
+                    randB = math_random();
                     particle_spawnSteamParticle(&pos, &vel, emitter->color, randT * 0.5f + -1.0f, (u32)randA % 26U + 32,
-                                  (u32)randB % 101U + 100, func_150ADA68() * 34.0f + 52.0f, 1, 1.0f, 1.0f, 1, &floor, 1,
+                                  (u32)randB % 101U + 100, math_randomFloat() * 34.0f + 52.0f, 1, 1.0f, 1.0f, 1, &floor, 1,
                                   0, task->base.header.owner, task->base.header.kind);
                 }
                 emitter->accum -= 1.0f;

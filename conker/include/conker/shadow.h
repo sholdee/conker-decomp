@@ -36,7 +36,7 @@ Shadow *shadow_createBlob(s32 ownerType, void *owner, s32 texture, s32 createFla
 void shadow_updateBlob(Shadow *shadow);
 Gfx *shadow_drawBlob(Gfx *gfx, Shadow *shadow, s16 view);
 s32 shadow_getTriSlopes(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ);
-Gfx *func_1510E634(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *shadow_loadIdentityMtx(Gfx *gfx, s32 arg1, s32 arg2);
 
 /* game/Shadow/RealTimeShadow/realtimeshadow.c */
 extern u8 D_800DF0E0;

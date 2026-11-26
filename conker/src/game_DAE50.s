@@ -46,12 +46,12 @@ glabel math_distance3D
     /* DAEC8 150ADA18 03E00008 */  jr         $ra
     /* DAECC 150ADA1C 00461020 */   add       $v0, $v0, $a2 /* handwritten instruction */
 
-glabel func_150ADA20
+glabel math_random
 /* The same function under a u8 return type: 14 C files were compiled with a u8 view of it. */
 .globl func_150ADA20_u8
 func_150ADA20_u8:
-    /* DAED0 150ADA20 3C048009 */  lui        $a0, %hi(D_800885B0)
-    /* DAED4 150ADA24 DC8485B0 */  ld         $a0, %lo(D_800885B0)($a0)
+    /* DAED0 150ADA20 3C048009 */  lui        $a0, %hi(gRandomState)
+    /* DAED4 150ADA24 DC8485B0 */  ld         $a0, %lo(gRandomState)($a0)
     /* DAED8 150ADA28 000437FC */  dsll32     $a2, $a0, 31
     /* DAEDC 150ADA2C 000637FA */  dsrl       $a2, $a2, 31
     /* DAEE0 150ADA30 00042FF8 */  dsll       $a1, $a0, 31
@@ -63,15 +63,15 @@ func_150ADA20_u8:
     /* DAEF8 150ADA48 0006253A */  dsrl       $a0, $a2, 20
     /* DAEFC 150ADA4C 30840FFF */  andi       $a0, $a0, 0xFFF
     /* DAF00 150ADA50 00862026 */  xor        $a0, $a0, $a2
-    /* DAF04 150ADA54 3C018009 */  lui        $at, %hi(D_800885B0)
-    /* DAF08 150ADA58 FC2485B0 */  sd         $a0, %lo(D_800885B0)($at)
+    /* DAF04 150ADA54 3C018009 */  lui        $at, %hi(gRandomState)
+    /* DAF08 150ADA58 FC2485B0 */  sd         $a0, %lo(gRandomState)($at)
     /* DAF0C 150ADA5C 0004103C */  dsll32     $v0, $a0, 0
     /* DAF10 150ADA60 03E00008 */  jr         $ra
     /* DAF14 150ADA64 0002103F */   dsra32    $v0, $v0, 0
 
-glabel func_150ADA68
-    /* DAF18 150ADA68 3C048009 */  lui        $a0, %hi(D_800885B0)
-    /* DAF1C 150ADA6C DC8485B0 */  ld         $a0, %lo(D_800885B0)($a0)
+glabel math_randomFloat
+    /* DAF18 150ADA68 3C048009 */  lui        $a0, %hi(gRandomState)
+    /* DAF1C 150ADA6C DC8485B0 */  ld         $a0, %lo(gRandomState)($a0)
     /* DAF20 150ADA70 000437FC */  dsll32     $a2, $a0, 31
     /* DAF24 150ADA74 000637FA */  dsrl       $a2, $a2, 31
     /* DAF28 150ADA78 00042FF8 */  dsll       $a1, $a0, 31
@@ -83,8 +83,8 @@ glabel func_150ADA68
     /* DAF40 150ADA90 0006253A */  dsrl       $a0, $a2, 20
     /* DAF44 150ADA94 30840FFF */  andi       $a0, $a0, 0xFFF
     /* DAF48 150ADA98 00862026 */  xor        $a0, $a0, $a2
-    /* DAF4C 150ADA9C 3C018009 */  lui        $at, %hi(D_800885B0)
-    /* DAF50 150ADAA0 FC2485B0 */  sd         $a0, %lo(D_800885B0)($at)
+    /* DAF4C 150ADA9C 3C018009 */  lui        $at, %hi(gRandomState)
+    /* DAF50 150ADAA0 FC2485B0 */  sd         $a0, %lo(gRandomState)($at)
     /* DAF54 150ADAA4 0004103C */  dsll32     $v0, $a0, 0
     /* DAF58 150ADAA8 0002103F */  dsra32     $v0, $v0, 0
     /* DAF5C 150ADAAC 3042FFFF */  andi       $v0, $v0, 0xFFFF
@@ -96,10 +96,10 @@ glabel func_150ADA68
     /* DAF74 150ADAC4 03E00008 */  jr         $ra
     /* DAF78 150ADAC8 00000000 */   nop
 
-glabel func_150ADACC
+glabel math_seedRandom
     /* DAF7C 150ADACC 64840001 */  daddiu     $a0, $a0, 0x1
-    /* DAF80 150ADAD0 3C018009 */  lui        $at, %hi(D_800885B0)
-    /* DAF84 150ADAD4 FC2485B0 */  sd         $a0, %lo(D_800885B0)($at)
+    /* DAF80 150ADAD0 3C018009 */  lui        $at, %hi(gRandomState)
+    /* DAF84 150ADAD4 FC2485B0 */  sd         $a0, %lo(gRandomState)($at)
     /* DAF88 150ADAD8 24040000 */  addiu      $a0, $zero, 0x0
     /* DAF8C 150ADADC 03E00008 */  jr         $ra
     /* DAF90 150ADAE0 00000000 */   nop
@@ -110,13 +110,13 @@ glabel func_150ADACC
 .section .rodata
 
 glabel D_8009F740
-    .word 0x37800080 /* 1.5259022e-05f (1/65535): scale of func_150ADA68's random value */
+    .word 0x37800080 /* 1.5259022e-05f (1/65535): scale of math_randomFloat's random value */
     .balign 16
 
 .section .data
 
-/* The 64-bit random state: func_150ADACC seeds it, func_150ADA20 and func_150ADA68 advance it */
-glabel D_800885B0
+/* The 64-bit random state: math_seedRandom seeds it, math_random and math_randomFloat advance it */
+glabel gRandomState
     /* 22D070 800885B0 AB8D9F77 */ .word 0xAB8D9F77
     /* 22D074 800885B4 81280783 */ .word 0x81280783
     /* 22D078 800885B8 00000000 */ .word 0x00000000

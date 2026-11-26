@@ -130,7 +130,7 @@ void actor_updateAll(void) {
         }
         gCurrentActor = obj;
         obj->unk12++;
-        D_800D35DC = i + 1;
+        gCurrentActorSlot = i + 1;
         D_800CC2BA = 0;
         tickResult = 0;
         if (gIsMultiplayer == 0 || (tickResult = func_1504C8BC(obj)) != 0) {
@@ -234,7 +234,7 @@ void actor_updateAll(void) {
     text_updateContextText();
     gCurrentActor = movement_obj;
     dc_glbl_CharNum = 0;
-    D_800D35DC = 0;
+    gCurrentActorSlot = 0;
 }
 
 void func_1504ADD0(void) {
@@ -644,7 +644,7 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
         obj->mv->turn = 1;
         obj->mv->pissed_angle = *arg1;
     }
-    func_150AD78C(angle);
+    math_sin(angle);
     if (arg1) {
     }
     obj->mv->pissed_cycle += 2;
@@ -659,8 +659,8 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     if (obj->animseq.uh == 0x2C || obj->animseq.uh == 0xE0) {
         *arg3 = gCurrentPad->stick_y >> 1;
     } else {
-        if (!(func_150ADA20() & 0x3F)) {
-            obj->mv->pssd_waist_wobble = (func_150ADA20() % 25000U) - 12500;
+        if (!(math_random() & 0x3F)) {
+            obj->mv->pssd_waist_wobble = (math_random() % 25000U) - 12500;
         }
         D_800CC2B2 = obj->mv->pssd_waist_wobble;
         if (obj->mv->pissed_hangover != 0) {
@@ -1251,7 +1251,7 @@ void actor_updatePlayer(Actor *actor) {
                     }
                     moveSpeed = 28.0f;
                     actor->mv->turn = 4;
-                    scratch = func_150AD78C(phase) * 10240.0f;
+                    scratch = math_sin(phase) * 10240.0f;
                     actor->mv->pissed_cycle += 0x10;
                     actor->mv->pissed_angle = scratch;
                 }
@@ -1944,7 +1944,7 @@ void actor_updatePlayer(Actor *actor) {
         } else {
             probeTop = actor->old_ypos;
         }
-        if ((actor->waterHeight != -10000.0f) || ((actor->noshove & 2) == 0) || ((func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &floorY) == 0))) {
+        if ((actor->waterHeight != -10000.0f) || ((actor->noshove & 2) == 0) || ((collision_getTriHeightAt(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &floorY) == 0))) {
             collision_findFloorEx(&actor->floorTriVerts, actor->floorTri.v, &floorY, &actor->waterHeight, &actor->floorMaterial, &actor->floorType, actor->xpos, actor->ypos, actor->zpos, probeTop, 0, actor, -10000.0f, actor->ypos, actor->noshove & 0x04000000);
             if (actor->waterHeight < actor->unk120) {
                 actor->waterHeight = actor->unk120;
@@ -1962,16 +1962,16 @@ void actor_updatePlayer(Actor *actor) {
             if (actor->mv->transport == 2) {
                 D_800CBDD4 = 1;
             }
-            func_15044380(actor->old_xpos, actor->old_ypos, actor->old_zpos, actor, 1, 1);
+            collision_resolveActorWalls(actor->old_xpos, actor->old_ypos, actor->old_zpos, actor, 1, 1);
             D_800CBDD4 = 0;
             D_800CBDD3 = 0;
         } else {
-            D_800CBDF4 = D_800CBDF8 = -32768.0f;
+            gLedgeHeight1 = gLedgeHeight2 = -32768.0f;
         }
         if ((startX != actor->xpos) || (startZ != actor->zpos)) {
             scratch = -10000.0f;
             actor->mvmt_control |= 0x10000;
-            if ((scratch != actor->waterHeight) || (floorY != scratch) || !(actor->noshove & 2) || (func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &floorY) == 0)) {
+            if ((scratch != actor->waterHeight) || (floorY != scratch) || !(actor->noshove & 2) || (collision_getTriHeightAt(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &floorY) == 0)) {
                 collision_findFloorEx(&actor->floorTriVerts, actor->floorTri.v, &floorY, &actor->waterHeight, &actor->floorMaterial, &actor->floorType, actor->xpos, actor->ypos, actor->zpos, probeTop, 0, actor, scratch, actor->ypos, actor->noshove & 0x04000000);
                 if (actor->waterHeight < actor->unk120) {
                     actor->waterHeight = actor->unk120;
@@ -2165,21 +2165,21 @@ void actor_updatePlayer(Actor *actor) {
     if (actor->mv->transport == 0) {
         if ((actor->shad > 5.0f) && (actor->unk137 == 0) && (actor->norun == 0) && (actor->mv->rt_context_b == 0) && (actor->mv->env_suit == 0) && (actor->stunned == 0) && (actor->mv->bitten == 0) && (actor->inwater == 0) && (actor->lifting == 0) && (actor->floorY != -10000.0f) && (actor->energy != 0) && (actor->mv->pissed_up == 0) && (actor->mv->transport == 0) && (actor->unk110 == 0) && ((actor->unk1CC - actor->ypos) < 450.0f)) {
             anim = 0;
-            if (D_800CBDF4 != -32768.0f) {
-                ledgeAngle = (((actor->theta + D_800CBD94) - 90.0f) / 1.40625f);
-                ledgeY = D_800CBDF4;
+            if (gLedgeHeight1 != -32768.0f) {
+                ledgeAngle = (((actor->theta + gLedgeAngle1) - 90.0f) / 1.40625f);
+                ledgeY = gLedgeHeight1;
                 anim = 1;
-            } else if ((D_800CBDF8 != -32768.0f) && (actor->speed < 10.0f)) {
-                ledgeAngle = ((actor->theta + D_800CBD98 + 90.0f) / 1.40625f);
-                ledgeY = D_800CBDF8;
+            } else if ((gLedgeHeight2 != -32768.0f) && (actor->speed < 10.0f)) {
+                ledgeAngle = ((actor->theta + gLedgeAngle2 + 90.0f) / 1.40625f);
+                ledgeY = gLedgeHeight2;
                 anim = 2;
             }
             if (anim != 0) {
                 actor->angle = (ledgeAngle << 8);
                 actor->langle = actor->angle;
                 actor->ypos = ledgeY - 25.0f;
-                actor->xpos = D_800CBDFC;
-                actor->zpos = D_800CBD90;
+                actor->xpos = gLedgeX;
+                actor->zpos = gLedgeZ;
                 actor->mv->hang_ledge = 1;
                 actor->mv->save_done = 0;
                 actor->norun = 0xFF;
@@ -2655,8 +2655,8 @@ f32 actor_slopeToAngles(Actor *actor, f32 slopeX, f32 slopeZ, f32 *pitch, f32 li
 
     slopeZ = -slopeZ;
     yaw = actor->theta * 0.01745329238f;
-    cosYaw = func_150AD780(yaw);
-    sinYaw = func_150AD78C(yaw);
+    cosYaw = math_cos(yaw);
+    sinYaw = math_sin(yaw);
     localX = (slopeX * cosYaw) + (slopeZ * sinYaw);
     slopeZ = (-slopeX * sinYaw) + (slopeZ * cosYaw);
     slopeX = math_atan2(localX, 1.0f) * 57.29577637f;
@@ -3434,7 +3434,7 @@ void func_150538CC(Actor *obj) {
             if (obj->unkA8 < 30) {
                 obj->unkA8 += D_800BE9E4;
             } else if (sound_isActorSound2Playing(obj) == 0) {
-                sound_playActorSound2((func_150ADA20() % 3U) + 0x2EE, obj, 30000, 500, 1000);
+                sound_playActorSound2((math_random() % 3U) + 0x2EE, obj, 30000, 500, 1000);
             }
             break;
         case 3:
@@ -3442,7 +3442,7 @@ void func_150538CC(Actor *obj) {
         case 11:
         case 17:
             if ((func_1505DDA8(obj, obj->owner, 0x200, 15.0f) != -1) && (obj->unkA9 == 0)) {
-                sound_playActorSound2((func_150ADA20() & 3) + 0x43E, obj, 30000, 2000, 2100);
+                sound_playActorSound2((math_random() & 3) + 0x43E, obj, 30000, 2000, 2100);
                 obj->unkA9 = 1;
             }
             break;
@@ -3487,7 +3487,7 @@ void func_150538CC(Actor *obj) {
                 owner = &movement_obj[obj->owner - 1];
                 if ((owner->mv != NULL) && (owner->mv->unkAF != 0)) {
                     if (sound_isActorSound1Playing(owner) == 0) {
-                        actor_playSound((func_150ADA20() % 3U) + 0x53B, owner);
+                        actor_playSound((math_random() % 3U) + 0x53B, owner);
                     }
                 }
             }
@@ -3500,7 +3500,7 @@ void func_150538CC(Actor *obj) {
                 if ((kind == 0) && (obj->speed > 20.0f) && (obj->mvmt_control & 0x10000)) {
                     s32 sfx;
 
-                    sfx = func_150ADA20() % 9U;
+                    sfx = math_random() % 9U;
                     actor_playPlayerSound((sfx < 2) ? sfx + 0x18 : sfx + 0x29, obj, 30000, 0, 500, 1500, 5);
                     particle_spawnWakePuff(dc_glbl_CharNum, 0, 0x14, 0, 0x199, 4, 0xAA, 0xFF, 0);
                 }
@@ -3627,7 +3627,7 @@ void func_150548E4(Actor *obj) {
     for (i = 0; i < D_8008FD8C; i++) {
         if ((movement_obj[i].stand_on_char == (obj - movement_obj) + 1) && (owner->intelwalk == 1)) {
             owner->scriptCmd = NULL;
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 owner->intelwalk = 2;
                 sfx = 0x1DB;
             } else {
@@ -3908,7 +3908,7 @@ void func_1505528C(Actor *obj) {
     } else if ((prevX != obj->xpos) || (prevY != obj->ypos) || (prevZ != obj->zpos)) {
         hitFlags = 1;
         if ((kind == 0x1F) && (obj->taskint[0] != 2)) {
-            sound_playActorSound1((func_150ADA20() % 5U) + 0x3A4, obj, 0x7D00, 500, 2500);
+            sound_playActorSound1((math_random() % 5U) + 0x3A4, obj, 0x7D00, 500, 2500);
         }
     }
     actor_landNonPlayer(obj, obj->floorY);
@@ -3988,7 +3988,7 @@ void func_1505528C(Actor *obj) {
                  ((player->eye.z - obj->zpos) * (player->eye.z - obj->zpos));
         if (distSq < 900.0f) {
             camera_startEnvelope(player, 8, 0);
-            func_10010F88(0x2E1, 0x6D60, 0, 0, 0, obj->xpos, obj->ypos, obj->zpos, 500, 1000);
+            sound_playAt(0x2E1, 0x6D60, 0, 0, 0, obj->xpos, obj->ypos, obj->zpos, 500, 1000);
             sound_stopActorSound1(obj);
             actor_remove(obj, 1);
         }
@@ -4004,9 +4004,9 @@ void func_15055A2C(s32 arg0, f32 x, f32 y, f32 z, s32 arg4) {
         sfx = 1549;
         range = 100;
     } else {
-        sfx = D_8009919C[func_150ADA20() % 6U];
+        sfx = D_8009919C[math_random() % 6U];
     }
-    func_10010F88(sfx, 32700, func_150ADA20() % 500U, 0, 0, x, y, z, range, 3000);
+    sound_playAt(sfx, 32700, math_random() % 500U, 0, 0, x, y, z, range, 3000);
 }
 
 void func_15055B0C(Actor *obj, s32 duration) {

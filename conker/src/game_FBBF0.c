@@ -81,10 +81,10 @@ void func_150CE740(Actor *obj) {
         }
         if (isType21) {
             if (obj->stickspeed < 5.0f) {
-                heading = func_150ADA20();
-                obj->stickspeed = (func_150ADA20() % 60U) + 20.0f;
+                heading = math_random();
+                obj->stickspeed = (math_random() % 60U) + 20.0f;
             }
-            obj->fangle = ((func_150ADA20() % 10000U) + heading) - 5000;
+            obj->fangle = ((math_random() % 10000U) + heading) - 5000;
             obj->stickspeed = (obj->stickspeed * 0.5f) + 22.0f;
             if ((u8)(((obj->angle - obj->fangle) >> 8) - 0x50) < 0x60) {
                 obj->scriptCmd = NULL;

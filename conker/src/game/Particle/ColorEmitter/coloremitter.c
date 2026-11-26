@@ -5,7 +5,7 @@
 /* Spawns a flash particle, a burst of 12-18 drops, the particle_spawnShortLightFlash effect and a white screen
  * flash at `pos`. */
 void particle_spawnFlashBurst(Vec3f *pos, u8 owner, s32 kind) {
-    effect_spawnFlashParticle(func_150ADA20() % 5U + 12, func_150ADA20() % 56U + 200, func_150ADA68() * 600.0f + 1700.0f,
+    effect_spawnFlashParticle(math_random() % 5U + 12, math_random() % 56U + 200, math_randomFloat() * 600.0f + 1700.0f,
                   pos, 0xFF, owner, kind);
     {
         DropSpraySpec drops;
@@ -35,7 +35,7 @@ void particle_spawnFlashBurst(Vec3f *pos, u8 owner, s32 kind) {
         particle_spawnDropSprayAtAngles(&drops.angles, &drops.spray, 0, owner, kind);
     }
     particle_spawnShortLightFlash(pos, owner, kind);
-    screen_spawnFlash(0xFF, 0xFF, 0xFF, func_150ADA20() % 51U + 150, func_150ADA20() % 5U + 8, 0, owner, kind);
+    screen_spawnFlash(0xFF, 0xFF, 0xFF, math_random() % 51U + 150, math_random() % 5U + 8, 0, owner, kind);
 }
 
 /* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by particle_updateColorEmitter
@@ -71,7 +71,7 @@ void particle_updateColorEmitter(ColorEmitter *emitter) {
     ColorEmitterData *data;
 
     data = &emitter->data;
-    data->accum += (0.136f + func_150ADA68() * 0.12100001f) * gFrameDelta;
+    data->accum += (0.136f + math_randomFloat() * 0.12100001f) * gFrameDelta;
     if (data->accum > 1.0f) {
         ParticleDesc desc;
         WobbleData extra;
@@ -116,20 +116,20 @@ void particle_updateColorEmitter(ColorEmitter *emitter) {
             desc.b2 = 0x30;
         }
         do {
-            extra.phaseStep[0] = func_150ADA20() % 5U + 4;
-            extra.phaseStep[1] = func_150ADA20() % 5U + 4;
-            extra.amplitude[0] = func_150ADA68() * 50.0f;
-            extra.amplitude[1] = func_150ADA68() * 50.0f;
-            desc.gravity = func_150ADA68() * 0.15100001f + 0.19100001f;
+            extra.phaseStep[0] = math_random() % 5U + 4;
+            extra.phaseStep[1] = math_random() % 5U + 4;
+            extra.amplitude[0] = math_randomFloat() * 50.0f;
+            extra.amplitude[1] = math_randomFloat() * 50.0f;
+            desc.gravity = math_randomFloat() * 0.15100001f + 0.19100001f;
             desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
-            desc.flags |= ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) | ((func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0);
-            desc.alpha = func_150ADA20() % 56U + 200;
-            desc.timer = func_150ADA20() % 36U + 110;
-            desc.width = desc.height = func_150ADA68() * 370.0f + 403.0f;
+            desc.flags |= ((math_random() & 1) ? PARTICLE_FLIP_S : 0) | ((math_random() & 1) ? PARTICLE_FLIP_T : 0);
+            desc.alpha = math_random() % 56U + 200;
+            desc.timer = math_random() % 36U + 110;
+            desc.width = desc.height = math_randomFloat() * 370.0f + 403.0f;
             if (data->randomColors != 0) {
                 const u8 colors[3][3] = { { 0xEF, 0xE0, 0xCD }, { 0x9E, 0x9C, 0xA0 }, { 0x9E, 0x9C, 0xA0 } };
                 const u8 colors2[3][3] = { { 0x30, 0x30, 0x30 }, { 0x9A, 0x69, 0xD2 }, { 0xD5, 0x83, 0x91 } };
-                colorIndex = func_150ADA20() % 3U;
+                colorIndex = math_random() % 3U;
                 desc.r = colors[colorIndex][0];
                 desc.g = colors[colorIndex][1];
                 desc.b = colors[colorIndex][2];

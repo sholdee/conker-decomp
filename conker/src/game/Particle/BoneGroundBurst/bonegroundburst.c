@@ -99,14 +99,14 @@ lbl: // matching: unused label ends the basic block so the pos.y store stays out
         colors[3].unk8 = 0;
         spawn.texture = def->type;
         spawn.renderModes = 0x2601;
-        spawn.lifetime = (func_150ADA20() % 51U) + 132;
+        spawn.lifetime = (math_random() % 51U) + 132;
         spawn.frame = 0;
         spawn.frameSpeed = 0;
         spawn.rgba[0] = 0xFF;
         spawn.rgba[1] = 0xFF;
         spawn.rgba[2] = 0xFF;
         spawn.rgba[3] = 0xFF;
-        spawn.width = spawn.height = (func_150ADA68() * def->sizeRange) + def->sizeMin;
+        spawn.width = spawn.height = (math_randomFloat() * def->sizeRange) + def->sizeMin;
         spawn.pos.x = pos.x;
         spawn.pos.y = pos.y + 10.0f;
         spawn.pos.z = pos.z;
@@ -117,12 +117,12 @@ lbl: // matching: unused label ends the basic block so the pos.y store stays out
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
         spawn.flags = 0x1C0001;
-        spawn.unk44 = (func_150ADA20() % (def->unk10Range + 1)) + def->unk10Min;
+        spawn.unk44 = (math_random() % (def->unk10Range + 1)) + def->unk10Min;
         spawn.unk45 = 0xFF;
         spawn.unk46 = 0;
         spawn.unk47 = 6;
-        extra.growDelay = (spawn.lifetime - (func_150ADA20() % (def->growDelayRange + 1))) - def->growDelayMin;
-        extra.growRate = ((func_150ADA68() * def->growRateRange) + def->growRateMin) * spawn.width;
+        extra.growDelay = (spawn.lifetime - (math_random() % (def->growDelayRange + 1))) - def->growDelayMin;
+        extra.growRate = ((math_randomFloat() * def->growRateRange) + def->growRateMin) * spawn.width;
         particle = particle_spawnAxisQuadParticleNoModel(&spawn, colors, 0, 0x18, 0, 0, (owner->langle >> 8) + def->yawOffset,
                                  500.0f, 500.0f, NULL, &ground.tri, 1, 8, arg3, arg2);
         if (particle != NULL) {
@@ -132,8 +132,8 @@ lbl: // matching: unused label ends the basic block so the pos.y store stays out
             RadialEffectDef fx;
             f32 d;
 
-            rnd = (func_150ADA20() % 1U) + 41; // matching: a degenerate random range; the call and divu are in the ROM
-            particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (func_150ADA68() * 50.0f) + 80.0f,
+            rnd = (math_random() % 1U) + 41; // matching: a degenerate random range; the call and divu are in the ROM
+            particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (math_randomFloat() * 50.0f) + 80.0f,
                           0, 0xFF, rnd, 0x11, 0, 0.0f, NULL, arg3);
             d = 13.90000057f;
 lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above the 13.9f load
@@ -160,11 +160,11 @@ lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above 
         {
             Rgb8 rgb;
 
-            rnd = (func_150ADA20() % 14U) + 15;
+            rnd = (math_random() % 14U) + 15;
             rgb.r = r;
             rgb.g = g;
             rgb.b = b;
-            particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (func_150ADA68() * 70.0f) + 70.0f,
+            particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (math_randomFloat() * 70.0f) + 70.0f,
                           0, 0xFF, rnd, 0x12, 0, 0.0f, &rgb, arg3);
         }
         particle_startPlayerRumbles(&pos, 500.0f, 5000.0f, 0.0002f, 12, 15, 0xFF, 0);
@@ -209,7 +209,7 @@ s32 particle_spawnYawDampedSprite(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 a
     spawn.renderMode = 0xE03;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
-    spawn.timer = (func_150ADA20() & 0xF) + 20;
+    spawn.timer = (math_random() & 0xF) + 20;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.r2 = 0xB0;
@@ -220,30 +220,30 @@ s32 particle_spawnYawDampedSprite(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 a
     spawn.b = 0x6A;
     spawn.a = 0xFF;
 
-    spawn.alpha = (func_150ADA20() % 156U) + 100;
+    spawn.alpha = (math_random() % 156U) + 100;
     spawn.brightness = 0xFF;
     spawn.primColorMode = 3;
     spawn.envColorMode = 3;
 
-    size = (func_150ADA68() * 401.0f) + 300.0f;
+    size = (math_randomFloat() * 401.0f) + 300.0f;
     spawn.width = size;
     spawn.height = size;
     spawn.pos.x = x;
     spawn.pos.y = y;
     spawn.pos.z = z;
 
-    random = func_150ADA20();
-    speed = (func_150ADA68() * 200.0f + 350.0f) * 0.1000000015f;
+    random = math_random();
+    speed = (math_randomFloat() * 200.0f + 350.0f) * 0.1000000015f;
     math_dirFromBinAngles(yaw, (random % 21U) - 25, speed, &spawn.vel);
 
     spawn.gravity = 0.0f;
     spawn.flags = 0xE05;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         spawn.flags |= 0x40;
     }
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         spawn.flags |= 0x80;
     }
 
@@ -300,20 +300,20 @@ s32 particle_spawnYawTumbler(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.pos.z = z;
     spawn.elasticity = 0.200000003f;
 
-    random = func_150ADA20();
-    speed = (func_150ADA68() * 200.0f + 300.0f) * 0.1000000015f;
+    random = math_random();
+    speed = (math_randomFloat() * 200.0f + 300.0f) * 0.1000000015f;
     math_dirFromBinAngles(yaw, (random % 44U) - 63, speed, &spawn.vel);
 
-    spawn.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
-    spawn.rotVel.z = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
-    spawn.lifetime = (func_150ADA20() % 51U) + 50;
-    spawn.gravity = (func_150ADA68() * 1500.0f + -3500.0f) * 0.001000000047f;
+    spawn.rotVel.x = (math_randomFloat() * 260.0f + -130.0f) * 0.1000000015f;
+    spawn.rotVel.z = (math_randomFloat() * 260.0f + -130.0f) * 0.1000000015f;
+    spawn.lifetime = (math_random() % 51U) + 50;
+    spawn.gravity = (math_randomFloat() * 1500.0f + -3500.0f) * 0.001000000047f;
 
-    spawn.sizeXZ = spawn.sizeY = (func_150ADA68() * 500.0f + 100.0f) * 0.001000000047f;
+    spawn.sizeXZ = spawn.sizeY = (math_randomFloat() * 500.0f + 100.0f) * 0.001000000047f;
     spawn.variant = 0;
     spawn.unk5C = 0;
 
-    spawn.alpha = (func_150ADA20() % 101U) + 155;
+    spawn.alpha = (math_random() % 101U) + 155;
     spawn.updateFn = 3;
     spawn.update2Fn = 0;
     spawn.floorHitFn = 0;

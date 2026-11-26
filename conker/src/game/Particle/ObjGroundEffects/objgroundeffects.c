@@ -35,7 +35,7 @@ void particle_spawnObjEffects(Actor *obj, s32 arg1, s32 arg2) {
     CollisionHit hit;
     s32 angle;
     u8 onGround;
-    s16 pad; // matching: unused slot moves IDO's spill of func_150ADA68()'s result to sp38
+    s16 pad; // matching: unused slot moves IDO's spill of math_randomFloat()'s result to sp38
 
     if (obj->ob_matrix_ptr == NULL) {
         return;
@@ -50,7 +50,7 @@ void particle_spawnObjEffects(Actor *obj, s32 arg1, s32 arg2) {
         effect_spawnQuadEffect(-1, pos.x, pos.y + 6.0f, pos.z,
                       0x19, 0x12, 0, 0xFF, 1);
         particle_emitOnRandomCircle(pos.x, pos.y, pos.z,
-                      (func_150ADA68() * 50.0f) + 40.0f, angle + 60, angle - 60,
-                      (func_150ADA20() % 11U) + 30, 5, 0, 0.0f, 0, 0xFF);
+                      (math_randomFloat() * 50.0f) + 40.0f, angle + 60, angle - 60,
+                      (math_random() % 11U) + 30, 5, 0, 0.0f, 0, 0xFF);
     }
 }

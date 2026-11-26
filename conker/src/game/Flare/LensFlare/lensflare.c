@@ -296,7 +296,7 @@ s32 flare_projectToScreen(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     env_buildViewProj(gCurrentView, mtx, pitch, yaw, roll);
     cx = gViews[gCurrentView].halfWidth;
     cy = gViews[gCurrentView].halfHeight;
-    func_150A7A00(mtx, x, y, z, &sx, &sy, &sz, &sw);
+    math_transformPointW(mtx, x, y, z, &sx, &sy, &sz, &sw);
     if (sw > 10.0f) {
         scale = 1.0f / sw;
         sx = sx * cx * scale;

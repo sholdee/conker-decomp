@@ -17,7 +17,7 @@ s32 func_15011D60(TriggerZone *zone) {
 
     bzero(&tmp, sizeof(tmp));
     tmp.stage = 0;
-    tmp.stageTimer = (func_150ADA20() % 0x79U) + 0x12C;
+    tmp.stageTimer = (math_random() % 0x79U) + 0x12C;
     tmp.zone = zone;
 
     tmp.set = zone->data2;

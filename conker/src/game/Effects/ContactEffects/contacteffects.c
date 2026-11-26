@@ -257,7 +257,7 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
         burst.spray.unk38 = 0.5f;
         particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 0xFF, 1);
         params.flags = 1;
-        params.duration = (func_150ADA20() % 11U) + 20;
+        params.duration = (math_random() % 11U) + 20;
         params.strength = 8;
         params.updateKind = -1;
         params.playerMask = 1;
@@ -409,8 +409,8 @@ void effect_hitReactFlashAndKill(Actor *self, Actor *other, u8 *arg2) {
 
     result = 0;
     if (other->CameraPtr != NULL) {
-        rand0 = func_150ADA20();
-        rand1 = func_150ADA20();
+        rand0 = math_random();
+        rand1 = math_random();
         screen_spawnFlash(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->CameraPtr->CNumber, 0xFF, 1);
         if (rand0) { } // matching: keeps the unused first random value live across the second call
     }
@@ -480,8 +480,8 @@ void effect_killAndSplitActor(Actor *obj) {
     func_15194AB4(obj);
     obj->type = 0x28;
     obj->speed = -3.0f;
-    obj->unkBC = -10.0f - (func_150ADA20() % 5U);
-    obj->unk148 = (func_150ADA20() % 10U) - 5.0f;
+    obj->unkBC = -10.0f - (math_random() % 5U);
+    obj->unk148 = (math_random() % 10U) - 5.0f;
     obj->yspd = 0.0f;
     obj->ygrav = 0.0f;
     copy = actor_alloc();
@@ -499,15 +499,15 @@ void effect_killAndSplitActor(Actor *obj) {
     copy->scale_xz = obj->scale_xz;
     copy->scale_y = obj->scale_y;
     copy->speed = 10.0f;
-    copy->unkBC = (func_150ADA20() % 5U) + 10.0f;
-    copy->unk148 = (func_150ADA20() % 10U) - 5.0f;
+    copy->unkBC = (math_random() % 5U) + 10.0f;
+    copy->unk148 = (math_random() % 10U) - 5.0f;
     copy->unk68[0] = obj->unk68[0];
     copy->unk68[1] = obj->unk68[1];
     copy->eyeClosed[0] = obj->eyeClosed[0];
     copy->eyeClosed[1] = obj->eyeClosed[1];
     copy->eyeCode[0] = obj->eyeCode[0];
     copy->eyeCode[1] = obj->eyeCode[1];
-    copy->angle += (func_150ADA20() % 10922U) - 65536.0f / 12;
+    copy->angle += (math_random() % 10922U) - 65536.0f / 12;
     copy->theta = (obj->angle + 0x4000) * (360.0f / 65536);
     copy->noshove = obj->noshove;
     copy->unk9C |= 0x0FFF0000;
@@ -530,7 +530,7 @@ void effect_hitReactActorImpact(Actor *self, Actor *other, u8 *arg2) {
     } else if (other != NULL) {
         angle = other->theta - 90.0f;
     } else {
-        angle = func_150ADA68() * 360.0f;
+        angle = math_randomFloat() * 360.0f;
     }
     math_dirFromAngleXZ(angle * 0.01745329238f, 1.0f, &dir[0], &dir[2]);
     dir[1] = 0.0f;
@@ -565,7 +565,7 @@ void effect_hitReactRumble(Actor *self, Actor *other, u8 *arg2) {
     RumbleParams params;
 
     params.flags = 1;
-    params.duration = (func_150ADA20() % 11U) + 20;
+    params.duration = (math_random() % 11U) + 20;
     params.strength = 8;
     params.updateKind = -1;
     params.playerMask = 1;

@@ -89,7 +89,7 @@ s32 collision_trySpawnRecord(s32 spawnIdx, s32 arg1) {
         clear = 1;
         for (i = 0; i <= gScreenLayout; i++) {
             // matching: offset + base operand order
-            if (func_150A6360(i + gViews, gViewMatrices[i],
+            if (view_testCylinderInView(i + gViews, gViewMatrices[i],
                               gSpawnRecords[spawnIdx].x,
                               gSpawnRecords[spawnIdx].y + 150,
                               gSpawnRecords[spawnIdx].z,
@@ -299,11 +299,11 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
         func_15083384(obj, player_getStat(idx, 1));
     }
     if (((obj->unk66 & 0xC) == 8) || ((obj->unk66 & 0xC) == 0xC)) {
-        func_150832AC(obj);
+        collision_allocActorLights(obj);
     } else {
         obj->unk314 = NULL;
     }
-    obj->unk288 = func_15084CB0(type);
+    obj->unk288 = collision_getSpawnModelTypeIndex(type);
     if (gIsMultiplayer != 0) {
         t = save_getTeam(obj->playernumber);
         if (t >= 4) {
@@ -350,7 +350,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     return ret;
 }
 
-void func_150832AC(Actor *obj) {
+void collision_allocActorLights(Actor *obj) {
     SpawnRecord *spawn;
     u8 n;
     s32 i;
@@ -733,7 +733,7 @@ s32 collision_findObjectSlotById(u8 id) {
     return -1;
 }
 
-s32 func_15084000(s32 id) {
+s32 collision_findSlotBySpawnIndex(s32 id) {
     Actor *obj = actor_findOnPath(id);
 
     if (obj != NULL) {
@@ -1079,13 +1079,13 @@ void func_15084C30(Actor *obj) {
 
     if (obj->character_type == 0x94) {
         anim = obj->unk2D0;
-        phase = func_150ADA20() % (s32)anim->numFrames[0];
+        phase = math_random() % (s32)anim->numFrames[0];
         anim->frame[0] = phase;
     }
 }
 
 /* Returns the index of modelId in gSpawnModelTypes, or 0. */
-s32 func_15084CB0(s32 modelId) {
+s32 collision_getSpawnModelTypeIndex(s32 modelId) {
     s32 ret;
     s32 i;
 

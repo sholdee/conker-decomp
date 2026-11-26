@@ -53,9 +53,9 @@ s32 particle_followBoneGlow(BoneGlow *emitter) {
 
             mtx = attach->target->ob_matrix_ptr[attach->bone];
             out = &emitter->head.def.pos;
-            func_150A7960(mtx, attach->p0.x, attach->p0.y, attach->p0.z, &out->x, &out->y, &out->z);
+            math_transformPoint(mtx, attach->p0.x, attach->p0.y, attach->p0.z, &out->x, &out->y, &out->z);
             out = &emitter->head.def.rot;
-            func_150A7960(mtx, attach->p1.x, attach->p1.y, attach->p1.z, &out->x, &out->y, &out->z);
+            math_transformPoint(mtx, attach->p1.x, attach->p1.y, attach->p1.z, &out->x, &out->y, &out->z);
             emitter->head.def.flags |= 2;
             emitter->head.def.flags &= ~4;
         } else {

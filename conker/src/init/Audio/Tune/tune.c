@@ -484,7 +484,7 @@ s32 func_1000BA18(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     volume = 0;
     innerState = state & 0xFFFFFF;
     state &= 0xFF000000;
-    func_100114D0(0, -377, 8227, 0x7FFF, 4000, 3000, &pan, &volume, NULL);
+    sound_getPanVolumeAt(0, -377, 8227, 0x7FFF, 4000, 3000, &pan, &volume, NULL);
     volume = (volume << 16) & 0xFF000000;
     if (state != volume) {
         state = volume;
@@ -504,7 +504,7 @@ s32 func_1000BAFC(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     volume = 0;
     innerState = state & 0xFFFFFF;
     state &= 0xFF000000;
-    func_100114D0(0, 0, 0, 0x7FF8, 3700, 2600, &pan, &volume, NULL);
+    sound_getPanVolumeAt(0, 0, 0, 0x7FF8, 3700, 2600, &pan, &volume, NULL);
     volume = ((0x7FFF - volume) << 16) & 0xFF000000;
     if (state != volume) {
         state = volume;
@@ -615,7 +615,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
 
     volumeChanged = 0;
     panChanged = 0;
-    func_100114D0(-351, 0, 407, 0x7FFF, 3000, 300, &pan, &volume, NULL);
+    sound_getPanVolumeAt(-351, 0, 407, 0x7FFF, 3000, 300, &pan, &volume, NULL);
 
     if (volume < 0x4000) {
         volume = 0x40;
@@ -638,7 +638,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
 
     oldMix = (pan << 8) | (volume << 16);
 
-    func_100114D0(-64, 0, 543, 0x7FFF, 3000, 300, &pan, &volume, NULL);
+    sound_getPanVolumeAt(-64, 0, 543, 0x7FFF, 3000, 300, &pan, &volume, NULL);
     if (volumeChanged) {
         if (volume < 0x4000) {
             volume = 0x4000;
@@ -651,7 +651,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
         func_100086FC(channel, 0, 0);
     }
 
-    func_100114D0(-294, 0, 656, 0x7FFF, 3000, 300, &pan, &volume, NULL);
+    sound_getPanVolumeAt(-294, 0, 656, 0x7FFF, 3000, 300, &pan, &volume, NULL);
     if (volumeChanged) {
         if (volume < 0x4000) {
             volume = 0x4000;
@@ -853,7 +853,7 @@ s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
         maxVolume = 12000;
     }
     if (level == 55 && flag == 0) {
-        func_100114D0(2200, 1066, -1600, maxVolume, 3000, 1500, NULL, &volume, NULL);
+        sound_getPanVolumeAt(2200, 1066, -1600, maxVolume, 3000, 1500, NULL, &volume, NULL);
         volume &= 0xFF00;
         volume = maxVolume - volume;
     }
@@ -872,7 +872,7 @@ s32 func_1000CA18(s32 state, s32 channel, s32 arg2, s32 arg3) {
         if (camera_global_Cameras->SpecialFlags & 1) {
             volume = 0;
         } else {
-            func_100114D0(2200, 1066, -1600, 24000, 3000, 1500, NULL, &volume, NULL);
+            sound_getPanVolumeAt(2200, 1066, -1600, 24000, 3000, 1500, NULL, &volume, NULL);
             volume &= 0xFF00;
         }
     } else {

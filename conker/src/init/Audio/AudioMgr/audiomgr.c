@@ -537,7 +537,7 @@ void audio_bankAddRef(BankRecord *record) {
 void audio_retireBank(BankRecord *record) {
     if ((u32)record & 1) {
         D_8003C8E0 = 0x0F000004;
-        func_150AD770();
+        debug_fatalTrap();
     } else {
         u32 *ownerSlot = record->ownerSlot;
 

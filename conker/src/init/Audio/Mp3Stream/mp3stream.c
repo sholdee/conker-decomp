@@ -88,7 +88,7 @@ s32 mp3_startTrackAt(u16 id, Actor *obj, s32 volume, s16 nearDistance, u16 farDi
     if (obj->CameraPtr != 0) {
         mp3_startTrack(id, volume, 64);
     } else {
-        func_100114D0(obj->xpos, obj->ypos, obj->zpos, volume, farDistance, nearDistance,
+        sound_getPanVolumeAt(obj->xpos, obj->ypos, obj->zpos, volume, farDistance, nearDistance,
                       &pan, &attenuatedVolume, &unused);
         mp3_startTrack(id, attenuatedVolume, pan);
     }

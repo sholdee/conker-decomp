@@ -63,13 +63,13 @@ void weapon_spawnForwardProjectile(Actor *actor, u8 arg1, s32 arg2) {
         position.z = actor->zpos + 34.0f * sideZ;
     }
     weapon_spawnProjectile(&position, &direction, 0, 0, 0, 0, 300.0f, 0.003333333414f,
-                  func_150ADA68() * 10.0f + 25.0f, func_150ADA68() * 200.0f + 400.0f, 50.0f,
-                  (func_150ADA20() % 156U) + 100, actor, 1, 1, 0, 0, 1, 1, 0, 0x35, 0.0f, 0xFF, -1, 0,
+                  math_randomFloat() * 10.0f + 25.0f, math_randomFloat() * 200.0f + 400.0f, 50.0f,
+                  (math_random() % 156U) + 100, actor, 1, 1, 0, 0, 1, 1, 0, 0x35, 0.0f, 0xFF, -1, 0,
                   arg1, arg2);
     if (actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
         particle_spawnShortLightFlash(&position, arg1, arg2);
         particle_spawnBoneDirParticle(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             weapon_spawnBoneBeam(actor, D_80088BA0, &D_800A2000, &D_800A200C, &position, arg1, arg2);
         }
     }
@@ -93,10 +93,10 @@ void weapon_spawnBoneBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f
     s32 pad; // matching: unused stack slot between motion and random
     s32 random[2];
 
-    motion.height = func_150ADA68() * 1.001f + 0.6040000319f;
-    motion.width = func_150ADA68() * 5.9f + 14.1f;
-    random[0] = func_150ADA20();
-    random[1] = func_150ADA20();
-    effect_spawnBoneBeamParticle(actor, bone, start, end, &motion, (random[0] & 3) + 6, 0xFF, func_150ADA68() * 270.0f + 359.0f,
+    motion.height = math_randomFloat() * 1.001f + 0.6040000319f;
+    motion.width = math_randomFloat() * 5.9f + 14.1f;
+    random[0] = math_random();
+    random[1] = math_random();
+    effect_spawnBoneBeamParticle(actor, bone, start, end, &motion, (random[0] & 3) + 6, 0xFF, math_randomFloat() * 270.0f + 359.0f,
                   position, 0xFF, 0, -1, arg5, arg6);
 }

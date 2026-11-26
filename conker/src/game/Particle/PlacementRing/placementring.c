@@ -13,7 +13,7 @@ void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2) {
     f32 drag;
     Vec3f *ring;
 
-    count = remaining = func_150ADA20() % 11U + 25;
+    count = remaining = math_random() % 11U + 25;
     if (count > 0) {
         ring = heap_alloc((count + 1) * sizeof(Vec3f), 3, 1, 0, 1);
         points = heap_alloc((count + 1) * sizeof(Vec3f), 3, 1, 0, 1);
@@ -21,7 +21,7 @@ void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2) {
             return;
         }
         for (i = 0; i < count; i++) {
-            math_dirFromAngleXZ(func_150ADA68() * 3.141592741f + 3.141592741f, 114.0f, &ring[i].x, &ring[i].z);
+            math_dirFromAngleXZ(math_randomFloat() * 3.141592741f + 3.141592741f, 114.0f, &ring[i].x, &ring[i].z);
             ring[i].x += 111.0f;
             ring[i].y = -90.0f;
         }
@@ -64,17 +64,17 @@ void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2) {
             SpriteParticle *particle;
 
             spawn.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
-            flipT = (func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0;
-            spawn.flags |= ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) | flipT;
-            speed = (func_150ADA68() * 202.0f + 250.0f) * 0.001000000047f;
-            spawn.scaleStart = spawn.timer = func_150ADA20() % 26U + 25;
-            spawn.width = spawn.height = func_150ADA68() * 105.0f + 150.0f;
+            flipT = (math_random() & 1) ? PARTICLE_FLIP_T : 0;
+            spawn.flags |= ((math_random() & 1) ? PARTICLE_FLIP_S : 0) | flipT;
+            speed = (math_randomFloat() * 202.0f + 250.0f) * 0.001000000047f;
+            spawn.scaleStart = spawn.timer = math_random() % 26U + 25;
+            spawn.width = spawn.height = math_randomFloat() * 105.0f + 150.0f;
             spawn.pos = points[i];
             spawn.vel.x = (points[i].x - points[count].x) * speed;
             spawn.vel.y = (points[i].y - points[count].y) * speed;
             spawn.vel.z = (points[i].z - points[count].z) * speed;
-            spawn.gravity = (func_150ADA68() * 880.0f + 13.0f) * 0.001000000047f;
-            spawn.alpha = func_150ADA20() % 176U + 80;
+            spawn.gravity = (math_randomFloat() * 880.0f + 13.0f) * 0.001000000047f;
+            spawn.alpha = math_random() % 176U + 80;
             particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(particle->data.drag), arg1, arg2);
             if (particle != NULL) {
                 memcpy(&particle->data.drag, &drag, sizeof(drag));

@@ -51,7 +51,7 @@ s32 particle_getContextEffectKind(void) {
 /* Id picker for effect kind 0 in the gKindParticleTexturePickers table. */
 u8 func_151D8E6C(void) {
     const u8 ids[3] = { 88, 64, 62 };
-    return ids[func_150ADA20() % 3U];
+    return ids[math_random() % 3U];
 }
 
 /* Id picker for effect kind 1 in the gKindParticleTexturePickers table. */
@@ -66,23 +66,23 @@ u8 func_151D8EBC(void) {
 
 /* Id picker for effect kind 3 in the gKindParticleTexturePickers table. */
 u8 func_151D8EC8(void) {
-    return (func_150ADA20() & 1) ? 17 : 147;
+    return (math_random() & 1) ? 17 : 147;
 }
 
 /* Id picker for effect kind 4 in the gKindParticleTexturePickers table. */
 u8 func_151D8EFC(void) {
-    return (func_150ADA20() & 1) ? 90 : 91;
+    return (math_random() & 1) ? 90 : 91;
 }
 
 /* Id picker for effect kind 5 in the gKindParticleTexturePickers table. */
 u8 func_151D8F30(void) {
     const u8 ids[5] = { 46, 48, 45, 51, 52 };
-    return ids[func_150ADA20() % 5U];
+    return ids[math_random() % 5U];
 }
 
 /* Id picker for effect kind 6 in the gKindParticleTexturePickers table. */
 u8 func_151D8F7C(void) {
-    return (func_150ADA20() & 1) ? 102 : 103;
+    return (math_random() & 1) ? 102 : 103;
 }
 
 /* Id picker for effect kinds 7 and 8 in the gKindParticleTexturePickers table. */
@@ -108,7 +108,7 @@ u8 func_151D8FD4(void) {
 /* Id picker for effect kind 12 in the gKindParticleTexturePickers table. */
 u8 func_151D8FE0(void) {
     const u8 ids[4] = { 96, 97, 98, 99 };
-    return ids[func_150ADA20() & 3];
+    return ids[math_random() & 3];
 }
 
 #define WOBBLE_FLAG_FIXED_SIZE 1 /* skip the size wobble */
@@ -146,8 +146,8 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
     desc.scaleStart = 1;
     desc.gravity = gravity;
     desc.scaleRate = 1.0f;
-    desc.flags = ((lifetime == -99) ? 0 : 1) | 2 | 4 | ((func_150ADA20() & 1) ? 0x40 : 0) |
-                 ((func_150ADA20() & 1) ? 0x80 : 0) | 0x200 | 0x4000 | 0x8000 | (argA ? 0x10000 : 0) |
+    desc.flags = ((lifetime == -99) ? 0 : 1) | 2 | 4 | ((math_random() & 1) ? 0x40 : 0) |
+                 ((math_random() & 1) ? 0x80 : 0) | 0x200 | 0x4000 | 0x8000 | (argA ? 0x10000 : 0) |
                  (D_800AB330[kind] ? 0x800000 : 0);
     if (lifetime == -99) {
         desc.timer = 300;
@@ -168,17 +168,17 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
     desc.views = 0xFF;
     desc.minSize = 0;
     desc.maxSize = 10000.0f;
-    wobble.phaseX = func_150ADA20() & 0xFF;
-    wobble.phaseY = func_150ADA20() & 0xFF;
+    wobble.phaseX = math_random() & 0xFF;
+    wobble.phaseY = math_random() & 0xFF;
     if (desc.texture == 0x40 || desc.texture == 0x67) {
         wobble.size = desc.width = desc.height = size * 0.7f;
     } else {
         wobble.size = desc.width = desc.height = size;
     }
-    wobble.stepX = (func_150ADA20() % 6U) + 5;
-    wobble.stepY = (func_150ADA20() % 6U) + 5;
-    wobble.amplitudeX = ((func_150ADA68() * 0.25f) + 0.2f) * wobble.size;
-    wobble.amplitudeY = ((func_150ADA68() * 0.25f) + 0.2f) * wobble.size;
+    wobble.stepX = (math_random() % 6U) + 5;
+    wobble.stepY = (math_random() % 6U) + 5;
+    wobble.amplitudeX = ((math_randomFloat() * 0.25f) + 0.2f) * wobble.size;
+    wobble.amplitudeY = ((math_randomFloat() * 0.25f) + 0.2f) * wobble.size;
     wobble.burstScale = burstScale;
     wobble.kind = kind;
     wobble.altBurstScale = altBurstScale;
@@ -261,7 +261,7 @@ u8 particle_steamFloorHit(SteamParticle *particle, Vec3f *arg1) {
                 if (particle->head.floor.source == 3) {
                     particle_spawnKindSplash(wobble->kind, wobble->altBurstScale * avgScale, particle->head.desc.alpha,
                                   &particle->head.floor.tri, &point, particle->head.header.owner, particle->head.header.kind);
-                } else if (func_150ADA20() & 1) {
+                } else if (math_random() & 1) {
                     particle_spawnKindEmitter(wobble->kind, (avgScale * 0.09f) * wobble->burstScale, particle->head.desc.alpha,
                                   &particle->head.floor.tri, &point, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
                 } else {
@@ -277,55 +277,55 @@ u8 particle_steamFloorHit(SteamParticle *particle, Vec3f *arg1) {
 /* Id picker for effect kind 0 in the D_8008FD04 table. */
 u8 func_151D97A8(void) {
     const s32 ids[7] = { 0, 1, 2, 58, 59, 60, 61 };
-    return ids[func_150ADA20() % 7U];
+    return ids[math_random() % 7U];
 }
 
 /* Id picker for effect kind 3 in the D_8008FD04 table. */
 u8 func_151D9820(void) {
     const s32 ids[3] = { 15, 16, 17 };
-    return ids[func_150ADA20() % 3U];
+    return ids[math_random() % 3U];
 }
 
 /* Id picker for effect kind 1 in the D_8008FD04 table. */
 u8 func_151D9878(void) {
     const s32 ids[3] = { 143, 144, 145 };
-    return ids[func_150ADA20() % 3U];
+    return ids[math_random() % 3U];
 }
 
 /* Id picker for effect kind 2 in the D_8008FD04 table. */
 u8 func_151D98D0(void) {
     const s32 ids[2] = { 29, 30 };
-    return ids[func_150ADA20() & 1];
+    return ids[math_random() & 1];
 }
 
 /* Id picker for effect kind 4 in the D_8008FD04 table. */
 u8 func_151D9918(void) {
     const s32 ids[2] = { 8, 9 };
-    return ids[func_150ADA20() & 1];
+    return ids[math_random() & 1];
 }
 
 /* Id picker for effect kind 5 in the D_8008FD04 table. */
 u8 func_151D9960(void) {
     const s32 ids[5] = { 49, 50, 51, 13, 14 };
-    return ids[func_150ADA20() % 5U];
+    return ids[math_random() % 5U];
 }
 
 /* Id picker for effect kind 6 in the D_8008FD04 table. */
 u8 func_151D99C8(void) {
     const s32 ids[3] = { 150, 151, 152 };
-    return ids[func_150ADA20() % 3U];
+    return ids[math_random() % 3U];
 }
 
 /* Id picker for effect kinds 7 and 8 in the D_8008FD04 table. */
 u8 func_151D9A20(void) {
     const s32 ids[2] = { 27, 28 };
-    return ids[func_150ADA20() & 1];
+    return ids[math_random() & 1];
 }
 
 /* Id picker for effect kind 9 in the D_8008FD04 table. */
 u8 func_151D9A68(void) {
     const s32 ids[3] = { 160, 161, 162 };
-    return ids[func_150ADA20() % 3U];
+    return ids[math_random() % 3U];
 }
 
 /* Id picker for effect kind 10 in the D_8008FD04 table. */
@@ -337,13 +337,13 @@ u8 func_151D9AC0(void) {
 /* Id picker for effect kind 11 in the D_8008FD04 table. */
 u8 func_151D9ADC(void) {
     const s32 ids[3] = { 185, 186, 187 };
-    return ids[func_150ADA20() % 3U];
+    return ids[math_random() % 3U];
 }
 
 /* Id picker for effect kind 12 in the D_8008FD04 table. */
 u8 func_151D9B34(void) {
     const s32 ids[4] = { 96, 97, 98, 99 };
-    return ids[func_150ADA20() & 3];
+    return ids[math_random() & 3];
 }
 
 
@@ -387,7 +387,7 @@ void particle_spawnKindEmitter(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos
     desc.viewportMask = 0xFF;
     desc.unk1C = 0;
     if (particle_spawnSurfaceQuadSprite(&desc, 0, 0, tri, pos->x, pos->y, pos->z, size, size,
-                      func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
+                      math_random() & 0xFF, (math_random() & 1) + ((math_random() & 1) * 2),
                       arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
         arg8 && math_getTriEdges(tri, &outA, &outB, &normal)) {
         down = gDownUnitVec;
@@ -420,11 +420,11 @@ void particle_updateDripEffect(DripEffect *effect) {
     drip = &effect->drip;
     drip->timer = drip->timer - D_800BE9E4;
     if (drip->timer < 0) {
-        rand = func_150ADA68();
-        lifeRand = func_150ADA20();
+        rand = math_randomFloat();
+        lifeRand = math_random();
         particle_spawnSteamParticle(&drip->pos, &gZeroVec3f, drip->kind, rand * 0.157f + -0.657f, (lifeRand % 41U) + 35,
                       drip->unk14, drip->size, 0, 1.0f, 1.0f, drip->unk15, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);
-        drip->timer = (func_150ADA20() % 111U) + 30;
+        drip->timer = (math_random() % 111U) + 30;
     }
 }
 
@@ -449,10 +449,10 @@ SteamEffect *particle_startSteamEffect(u8 kind, f32 size, f32 shrink, u8 arg3, s
     steam.phaseX = 0;
     steam.phaseY = 0;
     steam.size = size;
-    steam.stepX = (func_150ADA20() % 5U) + 2;
-    steam.stepY = (func_150ADA20() % 5U) + 2;
-    steam.amplitudeX = ((func_150ADA68() * 0.2f) + 0.1f) * steam.size;
-    steam.amplitudeY = ((func_150ADA68() * 0.2f) + 0.1f) * steam.size;
+    steam.stepX = (math_random() % 5U) + 2;
+    steam.stepY = (math_random() % 5U) + 2;
+    steam.amplitudeX = ((math_randomFloat() * 0.2f) + 0.1f) * steam.size;
+    steam.amplitudeY = ((math_randomFloat() * 0.2f) + 0.1f) * steam.size;
     steam.kind = kind;
     steam.spawnCredit = 0.0f;
     desc.texture = D_8008FD04[kind]();
@@ -501,9 +501,9 @@ SteamEffect *particle_startSteamEffect(u8 kind, f32 size, f32 shrink, u8 arg3, s
     desc.unk48 = 0;
     desc.viewportMask = 0xFF;
     desc.unk50 = 0;
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
-    rand3 = func_150ADA20();
+    rand1 = math_random();
+    rand2 = math_random();
+    rand3 = math_random();
     effect = particle_spawnAxisQuadParticleNoModel(&desc, 0, 14, 19, 0, (rand2 & 1) + (rand1 & 1), rand3 & 0xFF, 500.0f, 500.0f, NULL,
                            surface, 0, sizeof(steam), 0xFF, 0);
     if (effect != NULL) {
@@ -530,13 +530,13 @@ s32 particle_updateSteamEffect(SteamEffect *effect) {
     effect->head.def.width = math_cosBinAngleMasked(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
     effect->head.def.height = math_cosBinAngleMasked(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
 lbl: // matching: ends the basic block so the scaleY store is not moved into the next call's delay slot
-    steam->spawnCredit += (0.15f + func_150ADA68() * 0.1f) * gFrameDelta;
+    steam->spawnCredit += (0.15f + math_randomFloat() * 0.1f) * gFrameDelta;
     avgScale = (effect->head.def.width + effect->head.def.height) * 0.5f;
     if (steam->spawnCredit > 1.0f) {
         radius = avgScale * 500.0f;
         do {
-            angle = func_150ADA20() & 0xFF;
-            dist = func_150ADA68() * radius;
+            angle = math_random() & 0xFF;
+            dist = math_randomFloat() * radius;
             c = math_cosBinAngleMasked(angle - 0x40);
             // matching: indexing the position as an array orders the add's operands like the target
             pos[0] = math_cosBinAngleMasked(angle) * dist + ((f32 *)&effect->head.def.pos)[0];
@@ -548,10 +548,10 @@ lbl: // matching: ends the basic block so the scaleY store is not moved into the
                 vel[0] = 0.0f;
                 vel[1] = 0.0f;
                 vel[2] = 0.0f;
-                life = (func_150ADA20() % 51U) + 150;
-                dist = func_150ADA68();
+                life = (math_random() % 51U) + 150;
+                dist = math_randomFloat();
                 particle_spawnKindSprite(steam->kind, pos, vel, avgScale * 471.0f, (dist * 154.0f + 10106.0f) * 0.0001f, 1.0f,
-                              (func_150ADA68() * 25.0f + -50.0f) * 0.001f, life, 0x9B, life, 0xFF / life, 1,
+                              (math_randomFloat() * 25.0f + -50.0f) * 0.001f, life, 0x9B, life, 0xFF / life, 1,
                               effect->head.header.owner, effect->head.header.kind);
             }
             steam->spawnCredit -= 1.0f;
@@ -671,7 +671,7 @@ s32 particle_splashBurst(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, Collis
     point.x = nodes[splash->head.start].pos.x;
     point.y = floorY + 2.0f;
     point.z = nodes[splash->head.start].pos.z;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         particle_spawnKindEmitter(burst->kind, (state->motion.halfWidth * 3.0f) * burst->burstScale, state->motion.alpha, surface,
                       &point, 100, 0, 1, 0, splash->head.header.owner, splash->head.header.kind);
     } else {
@@ -735,16 +735,16 @@ void particle_spawnSquash(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 ar
     desc.unk46 = 0;
     desc.unk47 = 7;
     squash.phase = 0;
-    squash.step = (func_150ADA20() % 3U) + 6;
-    squash.amplitudeX = (func_150ADA68() * 0.2f) + 0.1f;
-    squash.amplitudeY = (func_150ADA68() * 0.2f) + 0.1f;
+    squash.step = (math_random() % 3U) + 6;
+    squash.amplitudeX = (math_randomFloat() * 0.2f) + 0.1f;
+    squash.amplitudeY = (math_randomFloat() * 0.2f) + 0.1f;
     desc.type = 0;
     desc.unk48 = 0;
     desc.viewportMask = 0xFF;
     desc.unk50 = 0;
     desc.fadeStart = 32;
     desc.fadeRate = 7;
-    coinFlip = (func_150ADA20() & 1) ? 1 : 0;
+    coinFlip = (math_random() & 1) ? 1 : 0;
     value = *(u8 *)&arg4;
     arg7 = value ? 3 : 0;
     value = value ? 0xFF : 0;
@@ -812,49 +812,49 @@ Vtx *particle_buildSquashQuad(DefParticleHead *effect, s16 view) {
 
 /* Colour setter for effect kind 0 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
 void func_151DB004(ParticleDesc *desc) {
-    desc->r = (func_150ADA20() % 56U) + 80;
+    desc->r = (math_random() % 56U) + 80;
     desc->g = 0;
     desc->b = 0;
-    desc->r2 = (func_150ADA20() % 46U) + 180;
+    desc->r2 = (math_random() % 46U) + 180;
     desc->g2 = 0;
     desc->b2 = 0;
 }
 
 /* Colour setter for effect kinds 1 and 11 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
 void func_151DB068(ParticleDesc *desc) {
-    desc->r = desc->g = (func_150ADA20() % 56U) + 100;
+    desc->r = desc->g = (math_random() % 56U) + 100;
     desc->b = 0;
-    desc->r2 = desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->r2 = desc->g2 = (math_random() % 46U) + 180;
     desc->b2 = 0;
 }
 
 /* Colour setter for effect kind 2 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
 void func_151DB0CC(ParticleDesc *desc) {
-    desc->r = (func_150ADA20() % 56U) + 80;
-    desc->g = (func_150ADA20() % 56U) + 80;
+    desc->r = (math_random() % 56U) + 80;
+    desc->g = (math_random() % 56U) + 80;
     desc->b = 0;
-    desc->r2 = (func_150ADA20() % 46U) + 180;
-    desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->r2 = (math_random() % 46U) + 180;
+    desc->g2 = (math_random() % 46U) + 180;
     desc->b2 = 0;
 }
 
 /* Colour setter for effect kind 3 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
 void func_151DB15C(ParticleDesc *desc) {
-    desc->r = (func_150ADA20() % 56U) + 80;
-    desc->g = (func_150ADA20() % 56U) + 80;
+    desc->r = (math_random() % 56U) + 80;
+    desc->g = (math_random() % 56U) + 80;
     desc->b = 0;
-    desc->r2 = (func_150ADA20() % 46U) + 180;
-    desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->r2 = (math_random() % 46U) + 180;
+    desc->g2 = (math_random() % 46U) + 180;
     desc->b2 = 0;
 }
 
 /* Colour setter for effect kind 4 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
 void func_151DB1EC(ParticleDesc *desc) {
-    desc->r = (func_150ADA20() % 56U) + 80;
-    desc->g = (func_150ADA20() % 56U) + 80;
+    desc->r = (math_random() % 56U) + 80;
+    desc->g = (math_random() % 56U) + 80;
     desc->b = 0;
-    desc->r2 = (func_150ADA20() % 46U) + 180;
-    desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->r2 = (math_random() % 46U) + 180;
+    desc->g2 = (math_random() % 46U) + 180;
     desc->b2 = 0;
 }
 
@@ -881,49 +881,49 @@ void func_151DB2A8(ParticleDesc *desc) {
 /* Colour setter for effect kind 7 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
 void func_151DB2CC(ParticleDesc *desc) {
     desc->r = 0;
-    desc->g = (func_150ADA20() % 56U) + 80;
+    desc->g = (math_random() % 56U) + 80;
     desc->b = 0;
     desc->r2 = 0;
-    desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->g2 = (math_random() % 46U) + 180;
     desc->b2 = 0;
 }
 
 /* Colour setter for effect kind 8 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
 void func_151DB330(ParticleDesc *desc) {
-    desc->r = (func_150ADA20() % 21U) + 95;
-    desc->g = (func_150ADA20() % 21U) + 95;
-    desc->b = (func_150ADA20() % 11U) + 45;
-    desc->r2 = (func_150ADA20() & 0xF) + 58;
-    desc->g2 = (func_150ADA20() & 0xF) + 60;
-    desc->b2 = (func_150ADA20() % 11U) + 25;
+    desc->r = (math_random() % 21U) + 95;
+    desc->g = (math_random() % 21U) + 95;
+    desc->b = (math_random() % 11U) + 45;
+    desc->r2 = (math_random() & 0xF) + 58;
+    desc->g2 = (math_random() & 0xF) + 60;
+    desc->b2 = (math_random() % 11U) + 25;
 }
 
 /* Colour setter for effect kind 9 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
 void func_151DB3D8(ParticleDesc *desc) {
     desc->r = 0;
-    desc->g = desc->b = (func_150ADA20() % 56U) + 80;
+    desc->g = desc->b = (math_random() % 56U) + 80;
     desc->r2 = 0;
-    desc->g2 = desc->b2 = (func_150ADA20() % 46U) + 180;
+    desc->g2 = desc->b2 = (math_random() % 46U) + 180;
 }
 
 /* Colour setter for effect kind 10 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
 void func_151DB43C(ParticleDesc *desc) {
-    desc->r = (func_150ADA20() % 56U) + 80;
+    desc->r = (math_random() % 56U) + 80;
     desc->g = 0;
-    desc->b = (func_150ADA20() % 56U) + 80;
-    desc->r2 = (func_150ADA20() % 46U) + 180;
+    desc->b = (math_random() % 56U) + 80;
+    desc->r2 = (math_random() % 46U) + 180;
     desc->g2 = 0;
-    desc->b2 = (func_150ADA20() % 46U) + 180;
+    desc->b2 = (math_random() % 46U) + 180;
 }
 
 /* Colour setter for effect kind 12 (gEffectKindColorFuncs): fills the colours rgb and rgb2. */
 void func_151DB4CC(ParticleDesc *desc) {
-    desc->r = (func_150ADA20() % 56U) + 200;
-    desc->g = (func_150ADA20() % 56U) + 200;
-    desc->b = (func_150ADA20() % 56U) + 200;
-    desc->r2 = (func_150ADA20() % 56U) + 200;
-    desc->g2 = (func_150ADA20() % 56U) + 200;
-    desc->b2 = (func_150ADA20() % 56U) + 200;
+    desc->r = (math_random() % 56U) + 200;
+    desc->g = (math_random() % 56U) + 200;
+    desc->b = (math_random() % 56U) + 200;
+    desc->r2 = (math_random() % 56U) + 200;
+    desc->g2 = (math_random() % 56U) + 200;
+    desc->b2 = (math_random() % 56U) + 200;
 }
 
 /*
@@ -942,12 +942,12 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
     data.angleY = 0;
     data.angleZ = 0;
     if (spin) {
-        data.stepX = (func_150ADA20() % 7U) - 3;
-        data.stepY = (func_150ADA20() % 7U) - 3;
-        data.stepZ = (func_150ADA20() % 7U) - 3;
-        data.amplitude.x = (func_150ADA68() * 0.05f + 0.05f) * size;
-        data.amplitude.y = (func_150ADA68() * 0.03f + 0.03f) * size;
-        data.amplitude.z = (func_150ADA68() * 0.05f + 0.05f) * size;
+        data.stepX = (math_random() % 7U) - 3;
+        data.stepY = (math_random() % 7U) - 3;
+        data.stepZ = (math_random() % 7U) - 3;
+        data.amplitude.x = (math_randomFloat() * 0.05f + 0.05f) * size;
+        data.amplitude.y = (math_randomFloat() * 0.03f + 0.03f) * size;
+        data.amplitude.z = (math_randomFloat() * 0.05f + 0.05f) * size;
     } else {
         data.stepX = 0;
         data.stepY = 0;
@@ -974,8 +974,8 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
     desc.fadeRate = fadeStep;
     desc.scaleStart = (lifetime == -1) ? 1 : lifetime;
     desc.scaleRate = arg4;
-    desc.flags = ((lifetime == -1) ? 0 : 1) | 2 | 4 | ((func_150ADA20() & 1) ? 0x40 : 0) |
-                 ((func_150ADA20() & 1) ? 0x80 : 0) | 0x200 | 0x400 | 0x800 | (spin ? 0x1000 : 0) | 0x4000 |
+    desc.flags = ((lifetime == -1) ? 0 : 1) | 2 | 4 | ((math_random() & 1) ? 0x40 : 0) |
+                 ((math_random() & 1) ? 0x80 : 0) | 0x200 | 0x400 | 0x800 | (spin ? 0x1000 : 0) | 0x4000 |
                  0x8000 | 0x40000 | 0x800000;
     desc.primColorMode = 8;
     desc.envColorMode = 6;
@@ -1077,11 +1077,11 @@ void particle_spawnKindEmitterAbove(Vec3f *pos, CollisionHit *hit, u8 *kind, u8 
     point.z = pos->z;
 
     emitterKind = *kind;
-    sizeRand = func_150ADA68();
-    rand = func_150ADA20();
+    sizeRand = math_randomFloat();
+    rand = math_random();
 
     particle_spawnKindEmitter(emitterKind, (sizeRand * 25.0f) + 10.0f, (rand % 56U) + 200, &hit->tri, &point,
-                  (func_150ADA20() % 151U) + 150, 0, 1, 0, arg3, arg4);
+                  (math_random() % 151U) + 150, 0, 1, 0, arg3, arg4);
 }
 
 
@@ -1111,8 +1111,8 @@ void particle_spawnKindMark(u8 kind, f32 size, s16 arg2, CollisionTri *surface, 
     desc.unk1C = 0;
     if (surface != NULL) {
         particle_spawnSurfaceQuadSpriteNoModel(&desc, 0, 0, surface, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y,
-                      ((Vec3f *)pos)->z, size, size, func_150ADA20() & 0xFF,
-                      (func_150ADA20() & 1) + (func_150ADA20() & 1) * 2, 0, arg5, arg6);
+                      ((Vec3f *)pos)->z, size, size, math_random() & 0xFF,
+                      (math_random() & 1) + (math_random() & 1) * 2, 0, arg5, arg6);
     } else {
         particle_spawnFlatQuadSpriteNoModel(&desc, 0, 0, 0, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y, ((Vec3f *)pos)->z,
                       size, size, 0, 0, 0, arg5, arg6);
@@ -1156,8 +1156,8 @@ void particle_startKindEffect(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *
     desc.rot.y = 0.0f;
     desc.rot.z = 0.0f;
 
-    particle_spawnAxisQuadParticleNoModel(&desc, 0, 11, 17, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1),
-                  func_150ADA20() & 0xFF, size, size, NULL, tri, 0, 0, arg8, arg9);
+    particle_spawnAxisQuadParticleNoModel(&desc, 0, 11, 17, 0, (math_random() & 1) + (math_random() & 1),
+                  math_random() & 0xFF, size, size, NULL, tri, 0, 0, arg8, arg9);
 }
 
 /* Spawns a plain sprite particle of effect kind `kind` (id from gKindPlainTextures) at `pos`. */
@@ -1193,8 +1193,8 @@ void particle_spawnKindPlainSprite(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, 
     desc.scaleStart = 1;
     desc.gravity = 0.0f;
     desc.scaleRate = 1.0f;
-    flag80 = (func_150ADA20() & 1) ? 0x80 : 0;
-    flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
+    flag80 = (math_random() & 1) ? 0x80 : 0;
+    flag40 = (math_random() & 1) ? 0x40 : 0;
     flag800000 = D_800AB330[kind] ? 0x800000 : 0;
     desc.flags
  = flag800000 | 1 | flag40 | flag80 | 0x4000 | 0x8000 | 0x200 | 0x10000;

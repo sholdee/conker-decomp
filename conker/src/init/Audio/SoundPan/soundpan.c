@@ -23,14 +23,14 @@ s32 sound_computePanVolume(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 dis
     rearBit = 0x80; // cleared when the sound is in the front quarter (|angle| < 32)
     if (farDistance & 0x8000) {
         farDistance &= 0x7FFF;
-        distance = func_150AD960(distX, distZ, 0, 0);
+        distance = math_distance2D(distX, distZ, 0, 0);
     } else {
         distance = math_distance3D(distX, distY, distZ);
     }
     gain = 0x7FFF - ((nearDistance - distance) << 15) / (nearDistance - farDistance);
     if (gain > 400) {
         if (pan != NULL) {
-            if (func_150AD960(dx, dz, 0, 0) > 30) {
+            if (math_distance2D(dx, dz, 0, 0) > 30) {
                 ratio = sqrtf(dx * dx + dz * dz);
                 if (ratio > 0.01f) {
                     ratio = dx / ratio;
@@ -146,11 +146,11 @@ s32 sound_computePathPanVolume(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle
         offset.x = x - gSpawnPaths[path][best].x;
         offset.y = y - gSpawnPaths[path][best].y;
         offset.z = z - gSpawnPaths[path][best].z;
-        dot = func_150AD900(&segment.x, &offset.x);
+        dot = math_dot3(&segment.x, &offset.x);
         if (dot < 0.0f) {
             outside = TRUE;
         } else {
-            lengthSq = func_150AD930(&segment.x);
+            lengthSq = math_length3(&segment.x);
             lengthSq = lengthSq * lengthSq;
             if (lengthSq < dot) {
                 outside = TRUE;
@@ -158,7 +158,7 @@ s32 sound_computePathPanVolume(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle
         }
         if (outside) {
             // the listener projects outside that segment: try the one on the other side
-            func_150AD900(&segment.x, &offset.x);
+            math_dot3(&segment.x, &offset.x);
             if (beforeBestDist < afterBestDist) {
                 best++;
             } else {
@@ -170,8 +170,8 @@ s32 sound_computePathPanVolume(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle
             offset.x = x - gSpawnPaths[path][best].x;
             offset.y = y - gSpawnPaths[path][best].y;
             offset.z = z - gSpawnPaths[path][best].z;
-            dot = func_150AD900(&segment.x, &offset.x);
-            lengthSq = func_150AD930(&segment.x);
+            dot = math_dot3(&segment.x, &offset.x);
+            lengthSq = math_length3(&segment.x);
             lengthSq = lengthSq * lengthSq;
         }
         if (lengthSq != 0.0f) {

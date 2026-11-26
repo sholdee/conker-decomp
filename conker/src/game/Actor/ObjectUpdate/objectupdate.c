@@ -36,7 +36,7 @@ Gfx gObjectPassEndDL[] = {
 
 extern s32 D_80088554;
 extern s32 D_80088558;
-extern s32 D_8008857C;
+extern s32 gAnimModAngle;
 
 /* This file */
 
@@ -147,7 +147,7 @@ void actor_updateObject(Actor *obj, s32 index) {
             actor_updateFog(obj);
         }
         if (obj->noshove & 0x4000) {
-            func_150A4B04(obj);
+            collision_updateActorHitMesh(obj);
         }
         if (obj->morph != NULL) {
             anim_morphVertices(obj->unk134, obj->morphDuration, index);
@@ -705,7 +705,7 @@ void actor_getFogAlpha(obj, colour, player)
     step = (first - last) * 0.001000000047f;
     near = D_800DD2E8 * step + last;
     far = D_800DD2EC * step + last;
-    func_150A7A00(gSpriteViewMtx[player], obj->xpos, obj->ypos, obj->zpos, &x, &y, &z, &w);
+    math_transformPointW(gSpriteViewMtx[player], obj->xpos, obj->ypos, obj->zpos, &x, &y, &z, &w);
     w = (w != 0.0f) ? 1.0f / w : 0.001000000047f;
     if (w < 0) { // matching: integer zeros here; 0.0f literals share the 1.0f register differently
         amount = 0;
@@ -899,9 +899,9 @@ load:
                 } else {
                     scale = 0;
                 }
-                func_150A81D0(&gBonePoolCursor, mtx, obj->unk2D0, (s32)gModelBones[id], count, cmd, remap, scale);
+                anim_buildBoneMatrices(&gBonePoolCursor, mtx, obj->unk2D0, (s32)gModelBones[id], count, cmd, remap, scale);
             }
-            obj->mod_angle = D_8008857C;
+            obj->mod_angle = gAnimModAngle;
             moved = D_80088558;
             if (moved != 0) {
                 f32 f0;
@@ -1031,7 +1031,7 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
             mtx[3][3] = 1.0f;
         }
     } else {
-        func_150A9B0C(mtx, obj->vtilt, obj->theta, obj->lean_angle, obj->scale_xz, obj->scale_y, obj->scale_xz);
+        math_mtxRotScaleF(mtx, obj->vtilt, obj->theta, obj->lean_angle, obj->scale_xz, obj->scale_y, obj->scale_xz);
         if (obj->unk101 & 0x10) {
             other = &movement_obj[obj->attach_char - 1];
             bone = movement_obj[obj->attach_char - 1].ob_matrix_ptr;
@@ -1069,7 +1069,7 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
 /* Flushes this frame's bone matrices (gBoneMatricesUsed of them) from the pool. */
 void actor_flushBoneMatrices(void) {
     if (gBoneMatricesUsed != 0) {
-        func_150A9984(gBonePools[D_800BE9C0], gBoneMatricesUsed);
+        math_mtxFToLInPlace(gBonePools[D_800BE9C0], gBoneMatricesUsed);
     }
     D_800C3E90 = 1;
 }
@@ -1150,7 +1150,7 @@ void actor_updateCulling(s32 index) {
         } else {
             playerRange = range;
         }
-        dist = func_150A6360(view, *tbl, obj->xpos, obj->ypos + yOffset, obj->zpos, width,
+        dist = view_testCylinderInView(view, *tbl, obj->xpos, obj->ypos + yOffset, obj->zpos, width,
                              height, 20000.0f);
         if (dist == 0) {
             inside = TRUE;
@@ -1590,7 +1590,7 @@ void actor_movePointWithPlatform(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tr
         }
         for (j = 0; j < 3; j++) {
             // matching: byte-offset form; bones[bone[j]] swaps the addu operands
-            func_150A7960((f32 (*)[4])((u8 *)bones + (bone[j] << 6)), vtx[j]->v.ob[0], vtx[j]->v.ob[1],
+            math_transformPoint((f32 (*)[4])((u8 *)bones + (bone[j] << 6)), vtx[j]->v.ob[0], vtx[j]->v.ob[1],
                           vtx[j]->v.ob[2], &v[i][j][0], &v[i][j][1], &v[i][j][2]);
         }
     }

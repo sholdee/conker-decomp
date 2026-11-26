@@ -49,7 +49,7 @@ void bone_buildCommands(GameCommand *commands, s32 index) {
         }
     }
     first = func_1503DA3C(actor->character_type, 0);
-    func_15034860(cursor, actor, first, func_1503DA3C(actor->character_type, 1))->opcode = 0x1000;
+    bone_addLevelCommands(cursor, actor, first, func_1503DA3C(actor->character_type, 1))->opcode = 0x1000;
 }
 
 /* Appends the commands for an actor in interaction state 1. Angles are in degrees, scaled to 65536/360 units. */

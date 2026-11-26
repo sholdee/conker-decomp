@@ -195,11 +195,11 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                 particleAData.unk14 = 2.750000238f;
                 particleAData.unk10 = 2.750000238f;
                 particleAData.parent = particle;
-                particleAData.angle[0] = func_150ADA68() * 6.283185482f;
-                particleAData.angle[1] = func_150ADA68() * 6.283185482f;
+                particleAData.angle[0] = math_randomFloat() * 6.283185482f;
+                particleAData.angle[1] = math_randomFloat() * 6.283185482f;
                 // matching: '+ -0.3f' (add.s), not '- 0.3f' (sub.s)
-                particleAData.unk20 = (func_150ADA68() * 0.5999999642f) + -0.2999999821f;
-                particleAData.unk24 = (func_150ADA68() * 0.5999999642f) + -0.2999999821f;
+                particleAData.unk20 = (math_randomFloat() * 0.5999999642f) + -0.2999999821f;
+                particleAData.unk24 = (math_randomFloat() * 0.5999999642f) + -0.2999999821f;
                 descA.texture = 0x2B;
                 descA.renderMode = 0x3303;
                 descA.unk0 = 0x200005;
@@ -232,8 +232,8 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                 descA.fadeRate = 0xFF;
                 descA.scaleStart = 1;
                 descA.scaleRate = 1.0f;
-                descA.flags = ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) |
-                             ((hasLifetime ? PARTICLE_LIFETIME : 0) | ((func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0)) |
+                descA.flags = ((math_random() & 1) ? PARTICLE_FLIP_S : 0) |
+                             ((hasLifetime ? PARTICLE_LIFETIME : 0) | ((math_random() & 1) ? PARTICLE_FLIP_T : 0)) |
                              PARTICLE_HANDLERS | PARTICLE_DRAW_FUNC;
                 descA.primColorMode = 6;
                 descA.envColorMode = 6;
@@ -334,9 +334,9 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                         descB.fadeRate = 0xFF;
                         descB.scaleStart = 1;
                         descB.scaleRate = 1.0f;
-                        descB.flags = ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) |
+                        descB.flags = ((math_random() & 1) ? PARTICLE_FLIP_S : 0) |
                                       ((hasLifetime ? PARTICLE_LIFETIME : 0) |
-                                       ((func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0)) |
+                                       ((math_random() & 1) ? PARTICLE_FLIP_T : 0)) |
                                       PARTICLE_HANDLERS | PARTICLE_DRAW_FUNC;
                         descB.primColorMode = 6;
                         descB.envColorMode = 6;
@@ -533,7 +533,7 @@ s8 particle_updateRayBeam(RayBeam *beam) {
                 target.x = target.x - beam->head.def.pos.x;
                 target.y = target.y - beam->head.def.pos.y;
                 target.z = target.z - beam->head.def.pos.z;
-                if (func_150AC9C0(beam->head.def.pos.x, beam->head.def.pos.y, beam->head.def.pos.z, target.x, target.y,
+                if (collision_castRayWorld(beam->head.def.pos.x, beam->head.def.pos.y, beam->head.def.pos.z, target.x, target.y,
                                   target.z, &unkOut, &hitInfo, &beam->head.def.rot.x, &beam->head.def.rot.y, &beam->head.def.rot.z, 0,
                                   0, 0, 0.0f) != hit * 0) { // matching: reading hit here makes IDO keep it in v1
                     dir.x = beam->head.def.rot.x - beam->head.def.pos.x;
@@ -927,19 +927,19 @@ s32 particle_flickerRayBeam(Owner151022AC *obj) {
     }
     state->timer -= gFrameDelta;
     if (state->timer < 0.0f) {
-        state->timer = func_150ADA68() * state->timerRange;
-        state->targetVelocity = func_150ADA68() * (state->velocityRange + state->velocityRange) - state->velocityRange;
+        state->timer = math_randomFloat() * state->timerRange;
+        state->targetVelocity = math_randomFloat() * (state->velocityRange + state->velocityRange) - state->velocityRange;
     }
     state->velocity += (state->targetVelocity - state->velocity) * state->velocityBlend;
     state->scale += (state->targetScale - state->scale) * state->scaleBlend;
     if (state->linked28 != NULL) {
         quad = state->linked28;
-        quad->width = quad->height = (func_150ADA68() * 0.2f + 0.4f) * state->scale;
+        quad->width = quad->height = (math_randomFloat() * 0.2f + 0.4f) * state->scale;
     }
     state->alphaTimer -= gFrameDelta;
     if (state->alphaTimer < 0.0f) {
-        state->alphaTimer = func_150ADA68() * state->alphaTimerRange;
-        state->targetAlpha = func_150ADA68() * state->alphaRange + state->alphaBase;
+        state->alphaTimer = math_randomFloat() * state->alphaTimerRange;
+        state->targetAlpha = math_randomFloat() * state->alphaRange + state->alphaBase;
     }
     state->alpha += (state->targetAlpha - state->alpha) * state->alphaBlend;
     obj->alpha = state->alpha;
@@ -951,11 +951,11 @@ s32 particle_flickerRayBeam(Owner151022AC *obj) {
     }
     if (state->linked2C != NULL) {
         particles = state->linked2C;
-        particles->unk14[0x2F] = (func_150ADA20() & 3) + 2;
+        particles->unk14[0x2F] = (math_random() & 3) + 2;
     }
     if (state->linked34 != NULL) {
         child = state->linked34;
-        child->unk38 = child->unk3C = func_150ADA68() * 10.0f + 120.0f;
+        child->unk38 = child->unk3C = math_randomFloat() * 10.0f + 120.0f;
     }
     return 1;
 }

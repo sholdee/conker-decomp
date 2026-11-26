@@ -343,7 +343,7 @@ void attach_updateAll(void) {
                                 normMtx[3][i] = boneMtx[3][i];
                             }
                             normMtx[3][3] = 1.0f;
-                            func_150A9B0C(offsetMtx, att->offset->rotX, att->offset->rotY, att->offset->rotZ,
+                            math_mtxRotScaleF(offsetMtx, att->offset->rotX, att->offset->rotY, att->offset->rotZ,
                                           att->scale, att->scale, att->scale);
                             offsetMtx[3][0] = att->offset->x;
                             offsetMtx[3][1] = att->offset->y;
@@ -352,7 +352,7 @@ void attach_updateAll(void) {
                             offsetMtx[1][3] = 0.0f;
                             offsetMtx[2][3] = 0.0f;
                             offsetMtx[3][3] = 1.0f;
-                            func_150A7A48(offsetMtx, normMtx, resultMtx);
+                            math_mtxMulF(offsetMtx, normMtx, resultMtx);
                             guMtxF2L(resultMtx, mtx);
                         } else if (att->unk16 == 4) {
                             /* bone matrix rescaled to att->scale */
@@ -372,8 +372,8 @@ void attach_updateAll(void) {
                             }
                             normMtx[3][3] = 1.0f;
                             if (att->rotZ != 0) {
-                                func_150A8050(rotMtx, 0.0f, 0.0f, att->rotZ * (360.0f / 65536.0f));
-                                func_150A7A48(rotMtx, normMtx, rotResultMtx);
+                                math_mtxRotateRPYF(rotMtx, 0.0f, 0.0f, att->rotZ * (360.0f / 65536.0f));
+                                math_mtxMulF(rotMtx, normMtx, rotResultMtx);
                                 guMtxF2L(rotResultMtx, mtx);
                             } else {
                                 guMtxF2L(normMtx, mtx);
@@ -384,8 +384,8 @@ void attach_updateAll(void) {
                             boneMtx[2][3] = 0.0f;
                             boneMtx[3][3] = 1.0f;
                             if (att->rotZ != 0) {
-                                func_150A8050(rotMtx2, 0.0f, 0.0f, att->rotZ * (360.0f / 65536.0f));
-                                func_150A7A48(rotMtx2, boneMtx, rotResultMtx2);
+                                math_mtxRotateRPYF(rotMtx2, 0.0f, 0.0f, att->rotZ * (360.0f / 65536.0f));
+                                math_mtxMulF(rotMtx2, boneMtx, rotResultMtx2);
                                 guMtxF2L(rotResultMtx2, mtx);
                             } else {
                                 guMtxF2L(boneMtx, mtx);
@@ -668,7 +668,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
     Gfx *start;
     s32 v;
     s32 lit;
-    s32 i; // matching: also the "func_150832AC just ran" flag; a separate local mismatches
+    s32 i; // matching: also the "collision_allocActorLights just ran" flag; a separate local mismatches
 
     start = gdl;
     if (!att->updated) {
@@ -712,7 +712,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
     }
     if (lit) {
         if (owner->unk304[view] == 0) {
-            func_150832AC(owner);
+            collision_allocActorLights(owner);
             i = TRUE;
         } else {
             i = FALSE;
@@ -2457,7 +2457,7 @@ ModelAttachment *attach_attachInPlace(Actor *obj, Actor *target, s32 setId, s32 
         math_mtxRigidInverse(boneMtx, invBoneMtx);
 
         scale = obj->scale_xz;
-        func_150A9B0C(objMtx, obj->vtilt, obj->theta, obj->lean_angle, scale, obj->scale_y, scale);
+        math_mtxRotScaleF(objMtx, obj->vtilt, obj->theta, obj->lean_angle, scale, obj->scale_y, scale);
 
         objMtx[3][0] = obj->xpos;
         objMtx[3][1] = obj->ypos;
@@ -2467,7 +2467,7 @@ ModelAttachment *attach_attachInPlace(Actor *obj, Actor *target, s32 setId, s32 
         objMtx[2][3] = 0.0f;
         objMtx[3][3] = 1.0f;
 
-        func_150A7A48(objMtx, invBoneMtx, relMtx);
+        math_mtxMulF(objMtx, invBoneMtx, relMtx);
         model_decomposeMatrix(relMtx, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
 
         if (noTranslation) {
@@ -2616,7 +2616,7 @@ s32 attach_soundCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan
 
                 if (owner->animseq.uh != (lastState & 0xFFFF)) {
                     if (owner->animseq.uh == 0x15F) {
-                        sfxId = (func_150ADA20() & 3) + 0x444;
+                        sfxId = (math_random() & 3) + 0x444;
                     }
                 }
                 if (sfxId != -1) {

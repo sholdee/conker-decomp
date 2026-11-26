@@ -78,7 +78,7 @@ extern FontGlyph *gFontGlyphs[];
 
 
 
-extern u64 D_800885B0;
+extern u64 gRandomState;
 
 
 
@@ -196,18 +196,18 @@ extern s64 D_800C3A60[];
 
 /* 800D0000 */
 
-extern GroundCandidate D_800D3300[]; // ground-probe hits
-extern u8  D_800D35DC; // 1-based slot of the actor being updated (0 = none)
+extern GroundCandidate gGroundCandidates[]; // ground-probe hits
+extern u8  gCurrentActorSlot; // 1-based slot of the actor being updated (0 = none)
 extern f32 D_800D35E0;
-extern f32 D_800D35E8; /* 0x800D35E4 == (&D_800D35E8)[-1]; it has no symbol of its own */
+extern f32 gCullVtxFlags; /* 0x800D35E4 == (&gCullVtxFlags)[-1]; it has no symbol of its own */
 extern u8 *D_800D3668; // per-face shadow flag table
 extern u8 *D_800D366C; // end of D_800D3668
 extern f32 D_800D3670;
 extern s16 D_800D3674;
-extern u16 D_800D37E0[40]; // grid-query result: triangle indices (u16 list for func_150A43E0 / func_150A44F0)
-extern u16 D_800D3830[]; // second grid-query triangle index buffer
-extern s32 D_800D3840;
-extern s32 D_800D3858;
+extern u16 gSurfSetA[40]; // grid-query result: triangle indices (u16 list for collision_gatherPropGroundTris / collision_transformPropTris)
+extern u16 gSurfSetB[]; // second grid-query triangle index buffer
+extern s32 gScriptCmdWordCount;
+extern s32 gScriptSavedSp;
 
 extern u8  D_800D987C;
 
@@ -223,9 +223,9 @@ extern u8  D_800D9938[14];
 
 
 extern s32 gMapTriCounts[4];
-extern s16 D_800DBE28;
-extern s16 D_800DBE2A;
-extern s16 D_800DBE2C;
+extern s16 gQuadNodeBitmapStride;
+extern s16 gMap0QuadNodeCount;
+extern s16 gMap0QuadLeafCount;
 extern s16 gViewCameraZones[4]; // per-view camera zone
 extern s32 gMapTriCollected;
 extern MeshTri *gCurMapTris;

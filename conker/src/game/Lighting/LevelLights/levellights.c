@@ -542,15 +542,15 @@ void func_1500A990(s32 unused) {
     params[4] = 30.0f;
     params[5] = 50.0f;
 
-    fraction = (osGetCount() * func_150ADA20()) & 0xFFFF;
+    fraction = (osGetCount() * math_random()) & 0xFFFF;
     fraction *= 1.5259022e-05f; // 1/65535
     params[6] = (fraction + fraction) * 3.1415927f;
 
-    fraction = (osGetCount() * func_150ADA20()) & 0xFFFF;
+    fraction = (osGetCount() * math_random()) & 0xFFFF;
     fraction *= 1.5259022e-05f;
     params[7] = (fraction + fraction) * 3.1415927f;
 
-    fraction = (osGetCount() * func_150ADA20()) & 0xFFFF;
+    fraction = (osGetCount() * math_random()) & 0xFFFF;
     fraction *= 1.5259022e-05f;
 
     params[8] = (fraction + fraction) * 3.1415927f;

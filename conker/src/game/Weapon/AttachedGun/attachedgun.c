@@ -64,9 +64,9 @@ void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2) {
         weapon_findShotStart(&valid, points, &position, &hit, &normal, &direction, &axis0, &axis1, &output0, &output1,
                       &value0, &value1, &endpoint, obj, gun);
 
-        random0 = func_150ADA68();
-        random1 = func_150ADA68();
-        randomWord = func_150ADA20();
+        random0 = math_randomFloat();
+        random1 = math_randomFloat();
+        randomWord = math_random();
 
         if (gIsMultiplayer != 0) {
             kind = 0x35;
@@ -160,7 +160,7 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
             hasValue1 = TRUE;
         }
 
-        randomWord = func_150ADA20();
+        randomWord = math_random();
         effect_spawnProjectile(&position, &direction, value0, value1, hasValue1, NULL, 54.00000381f, 0.01851851679f, 300.0f,
                       obj, 1, 1, 1, 0, 0x1A, 1, (randomWord % 5U) + 807, 0, arg1, arg2);
 
@@ -268,13 +268,13 @@ void weapon_spawnMuzzleFlashes(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3
     spawn.unk47 = 7;
     spawn.unk4C = 0xFF;
     spawn.unk48 = 0;
-    spawn.unk4 = (func_150ADA20() & 3) + 3;
+    spawn.unk4 = (math_random() & 3) + 3;
     for (i = 0; i < 6; i++) {
-        spawn.unk14 = (func_150ADA68() * 11.10000038f) + 5.0f;
-        spawn.unk18 = (func_150ADA68() * 0.9990000725f) + 2.48300004f;
+        spawn.unk14 = (math_randomFloat() * 11.10000038f) + 5.0f;
+        spawn.unk18 = (math_randomFloat() * 0.9990000725f) + 2.48300004f;
         spawn.unk28 = points[i];
-        spawn.unk44 = (func_150ADA20() % 156U) + 100;
-        variant = (func_150ADA20() & 1) ? 2 : 0;
+        spawn.unk44 = (math_random() % 156U) + 100;
+        variant = (math_random() & 1) ? 2 : 0;
         particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0, 0, 0x1B, variant + 1, 0, 0, 0, arg2, arg3);
     }
 }
@@ -298,7 +298,7 @@ u8 weapon_getGunMuzzlePoints(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *
     Vec3f *dst[10];
     u8 set;
 
-    set = func_150ADA20() & 1;
+    set = math_random() & 1;
     src[0] = &D_800A2050;
     src[1] = &D_800A2068;
     src[2] = &D_800A2074;

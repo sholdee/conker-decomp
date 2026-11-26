@@ -18,8 +18,8 @@ void anim_updateInstance(AnimInstance *anim) {
         unk8 = 0x1000;
         transform = anim->matrices[D_800BE9C0];
         mtx = anim->partMtx[D_800BE9C0];
-        func_150A81D0(&mtx, transform, anim, anim->unk3F0, anim->numParts, &unk8, NULL, 0);
-        func_150A9984(anim->partMtx[D_800BE9C0], anim->numParts);
+        anim_buildBoneMatrices(&mtx, transform, anim, anim->unk3F0, anim->numParts, &unk8, NULL, 0);
+        math_mtxFToLInPlace(anim->partMtx[D_800BE9C0], anim->numParts);
         anim->unk3F6 = TRUE;
     }
     anim_advance(anim, gFrameDelta, NULL, 0);

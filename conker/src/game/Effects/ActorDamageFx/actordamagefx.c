@@ -161,14 +161,14 @@ void effect_spawnFootSplash(s32 actor, s32 side, s32 strength) {
             spot.y = hit.height;
             spot.z = pos.z;
 
-            if (func_150ADA20() & 1) {
-                size = func_150ADA68();
-                random = func_150ADA20();
+            if (math_random() & 1) {
+                size = math_randomFloat();
+                random = math_random();
                 particle_spawnKindEmitter(kind, size * 10.0f + 10.0f, (random % 101U) + 100, &hit.tri,
-                              &spot, (func_150ADA20() % 41U) + 80, 1, 1, 0, 0xFF, 1);
+                              &spot, (math_random() % 41U) + 80, 1, 1, 0, 0xFF, 1);
             } else {
-                size = func_150ADA68();
-                particle_spawnSquash(kind, size * 8.0f + 5.0f, (func_150ADA20() % 101U) + 100, &spot, 1,
+                size = math_randomFloat();
+                particle_spawnSquash(kind, size * 8.0f + 5.0f, (math_random() % 101U) + 100, &spot, 1,
                               0xFF, 1);
             }
         }
@@ -182,8 +182,8 @@ void effect_spawnFootCircleBurst(s32 actor, s32 side, s32 strength) {
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         effect_getFootPos(&pos, (Actor *)actor, NULL, side);
-        roll = (func_150ADA20() % 11U) + 5;
-        particle_emitOnRandomCircle(pos.x, pos.y, pos.z, func_150ADA68() * 11.0f, 0, 0xFF, roll, 0x16, 0, 0.0f, 0,
+        roll = (math_random() % 11U) + 5;
+        particle_emitOnRandomCircle(pos.x, pos.y, pos.z, math_randomFloat() * 11.0f, 0, 0xFF, roll, 0x16, 0, 0.0f, 0,
                       0xFF);
     }
 }
@@ -201,7 +201,7 @@ s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.renderMode = 0xE03;
     desc.unk0 = 0x200005;
     desc.unk4 = 0;
-    desc.timer = (func_150ADA20() & 0xF) + 20;
+    desc.timer = (math_random() & 0xF) + 20;
     desc.frame = 0;
     desc.frameRate = 0;
     desc.r2 = 0xB0;
@@ -211,26 +211,26 @@ s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.g = 0xB;
     desc.b = 0x6A;
     desc.a = 0xFF;
-    desc.alpha = (func_150ADA20() % 101U) + 100;
+    desc.alpha = (math_random() % 101U) + 100;
     desc.brightness = 0xFF;
     desc.primColorMode = 3;
     desc.envColorMode = 3;
 
-    desc.width = desc.height = func_150ADA68() * 95.0f + 101.0f;
+    desc.width = desc.height = math_randomFloat() * 95.0f + 101.0f;
     desc.pos.x = x;
     desc.pos.y = y;
     desc.pos.z = z;
-    random = func_150ADA20();
-    speed = func_150ADA68();
+    random = math_random();
+    speed = math_randomFloat();
     math_dirFromBinAngles(yaw, (random % 11U) - 11, (speed * 396.0f + 202.0f) * 0.01f, &desc.vel);
     desc.gravity = 0.0f;
     desc.flags = 0xE05;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x40;
     }
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x80;
     }
 

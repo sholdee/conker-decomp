@@ -14,7 +14,7 @@ typedef struct {
     f32 offset;      /* 0x90 distance travelled along the local x axis */
     s16 elapsed;     /* 0x94 */
     s16 duration;    /* 0x96 */
-    u8 rotMode;      /* 0x98 0: func_150A8050, 1: effect_buildEulerRotation */
+    u8 rotMode;      /* 0x98 0: math_mtxRotateRPYF, 1: effect_buildEulerRotation */
     u8 pad99[7];
 } FadeBurstPiece; /* size 0xA0 */
 
@@ -78,29 +78,29 @@ void effect_spawnFadeBurst(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 dur
         burst->scaleX = scaleX;
         for (i = 0; i < BURST_NUM_PIECES; i++) {
             if (i < 4) {
-                burst->pieces[i].rotX = 7U - (func_150ADA20() & 15U);
+                burst->pieces[i].rotX = 7U - (math_random() & 15U);
                 burst->pieces[i].rotY = 0.0f;
-                burst->pieces[i].rotZ = (func_150ADA20() & 63U) + (i * 90 - 30);
+                burst->pieces[i].rotZ = (math_random() & 63U) + (i * 90 - 30);
                 burst->pieces[i].rotMode = 0;
             } else if (i < 8) {
                 burst->pieces[i].rotX = 0.0f;
-                burst->pieces[i].rotY = (func_150ADA20() & 63U) + (i * 90 - 570);
-                burst->pieces[i].rotZ = 7U - (func_150ADA20() & 15U);
+                burst->pieces[i].rotY = (math_random() & 63U) + (i * 90 - 570);
+                burst->pieces[i].rotZ = 7U - (math_random() & 15U);
                 burst->pieces[i].rotMode = 0;
             } else {
-                burst->pieces[i].rotX = (func_150ADA20() & 63U) + (i * 90 - 30);
-                burst->pieces[i].rotY = 97U - (func_150ADA20() & 15U);
+                burst->pieces[i].rotX = (math_random() & 63U) + (i * 90 - 30);
+                burst->pieces[i].rotY = 97U - (math_random() & 15U);
                 burst->pieces[i].rotZ = 0.0f;
                 burst->pieces[i].rotMode = 1;
             }
             if (speed >= 4) {
-                burst->pieces[i].speed = (func_150ADA20() % (speed >> 2)) + speed;
+                burst->pieces[i].speed = (math_random() % (speed >> 2)) + speed;
             } else {
                 burst->pieces[i].speed = speed;
             }
-            burst->pieces[i].offset = func_150ADA20() & 15U;
+            burst->pieces[i].offset = math_random() & 15U;
             burst->pieces[i].elapsed = 0;
-            burst->pieces[i].duration = duration - (func_150ADA20() & durationJitter);
+            burst->pieces[i].duration = duration - (math_random() & durationJitter);
         }
     }
 }
@@ -145,20 +145,20 @@ Gfx *effect_drawFadeBurst(Gfx *gdl, FadeBurstEffect *burst, s32 arg2) {
     primCmd = NULL;
     mtxCmd = NULL;
     if (burst->timer >= 0) {
-        func_150A7DA0(mtx, burst->x, burst->y, burst->z);
+        math_mtxTranslateF(mtx, burst->x, burst->y, burst->z);
         guMtxF2L2(mtx, &burst->mtx[D_800BE9C0]);
         for (i = 0; i < BURST_NUM_PIECES; i++) {
             gSPMatrix(gdl++, &burst->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-            func_150A7DA0(mtx, burst->pieces[i].offset, 0.0f, 0.0f);
+            math_mtxTranslateF(mtx, burst->pieces[i].offset, 0.0f, 0.0f);
             mtx[0][0] *= burst->scaleX;
             mtx[1][1] *= burst->scaleYZ;
             mtx[2][2] *= burst->scaleYZ;
             if (burst->pieces[i].rotMode == 0) {
-                func_150A8050(rot, burst->pieces[i].rotX, burst->pieces[i].rotY, burst->pieces[i].rotZ);
+                math_mtxRotateRPYF(rot, burst->pieces[i].rotX, burst->pieces[i].rotY, burst->pieces[i].rotZ);
             } else {
                 effect_buildEulerRotation(rot, burst->pieces[i].rotX, burst->pieces[i].rotY, burst->pieces[i].rotZ);
             }
-            func_150A7A48(mtx, rot, mtx);
+            math_mtxMulF(mtx, rot, mtx);
             guMtxF2L(mtx, &burst->pieces[i].mtx[D_800BE9C0]);
             alpha = (burst->pieces[i].duration - burst->pieces[i].elapsed) * 255 / burst->pieces[i].duration;
             // matching: gDPSetPrimColor/gSPMatrix written out via named pointers (see the dead stores above);
@@ -181,7 +181,7 @@ Gfx *effect_drawFadeBurst(Gfx *gdl, FadeBurstEffect *burst, s32 arg2) {
     return gdl;
 }
 
-/* Builds a rotation matrix from angles in degrees (the alternative axis order to func_150A8050). */
+/* Builds a rotation matrix from angles in degrees (the alternative axis order to math_mtxRotateRPYF). */
 void effect_buildEulerRotation(MtxF mtx, f32 rx, f32 ry, f32 rz) {
     f32 sx;
     f32 cx;

@@ -320,7 +320,7 @@ void texture_updateAging(void) {
     gTexAgeLast = -1;
     if (start < 0 || end >= 0x1E53) {
         D_8003C8E0 = 0x0C000046;
-        func_150AD770();
+        debug_fatalTrap();
     }
     gTexLastFreed = -1;
     for (i = start; i <= end; i++) {

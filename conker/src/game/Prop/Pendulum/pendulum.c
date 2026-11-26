@@ -45,7 +45,7 @@ void prop_swingPendulum(WorldObject *pendulum) {
     velocity -= angle * 0.009f;
     if (phase >= 256.0f) {
         phase -= 256.0f;
-        func_10010F88(0xF, 0x55F0, 0, 0, 0, pendulum->x, pendulum->y, pendulum->z, 500, 1000);
+        sound_playAt(0xF, 0x55F0, 0, 0, 0, pendulum->x, pendulum->y, pendulum->z, 500, 1000);
     }
     WORK(pendulum)->pendulum.phase = phase;
     push = math_sinBinAngle(phase);

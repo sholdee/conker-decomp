@@ -67,7 +67,7 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
         }
         node3->TaskID |= TASK_FINISHED;
         if (id == gCurrentTaskId) {
-            func_150AE280();
+            script_exitTask();
             return 0;
         }
         return 1;
@@ -89,13 +89,13 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
         script_getTask(id, 0);
         return 0;
     case 7:
-        if (D_800D3840 == 4) {
+        if (gScriptCmdWordCount == 4) {
             game_requestLevelChange(2, args->unk8, args->unkC, 0, 0);
             return 0;
         }
         break;
     case 8:
-        if (D_800D3840 == 4) {
+        if (gScriptCmdWordCount == 4) {
             player_startWarp(movement_obj, args->unk8 & 0xFFF, args->unkC & 0xFFF);
             return 0;
         }
@@ -122,7 +122,7 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
         }
         node11->TaskID |= TASK_FINISHED;
         save_endMatch(0);
-        func_150AE280();
+        script_exitTask();
         return 0;
     case 12:
         if (args->unk8 < 0) {
@@ -234,12 +234,12 @@ s32 script_taskQuery(s32 id, s32 query, QueryArgs *args) {
     case 33:
         return D_800BE3E0;
     case 34:
-        /* Weighted pick: index of the first nonzero weight whose running total reaches func_150ADA68() * total. */
+        /* Weighted pick: index of the first nonzero weight whose running total reaches math_randomFloat() * total. */
         sum = 0;
         for (i = 0; i < args->unk8; i++) {
             sum += args->unkC[i];
         }
-        threshold = func_150ADA68() * sum;
+        threshold = math_randomFloat() * sum;
         sum = 0;
         for (i = 0; i < args->unk8; i++) {
             sum += args->unkC[i];
@@ -271,7 +271,7 @@ s32 script_taskQuery(s32 id, s32 query, QueryArgs *args) {
         }
         return 0;
     case 44:
-        return screen_isViewFadedOut(D_800D3840 == 3 ? args->unk8 : 0);
+        return screen_isViewFadedOut(gScriptCmdWordCount == 3 ? args->unk8 : 0);
     case 45:
         return D_800D2E40;
     }

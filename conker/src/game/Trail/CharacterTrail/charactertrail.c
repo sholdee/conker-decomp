@@ -152,7 +152,7 @@ void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2) {
         params.alpha0 = 0.8000000119f;
         params.fadeRate = 9.999999975e-07f;
         // matching: indexing gCharacterTrailTextures[...] costs IDO an extra 8-byte stack slot
-        desc.texture = *(gCharacterTrailTextures + (func_150ADA20() & 3));
+        desc.texture = *(gCharacterTrailTextures + (math_random() & 3));
         desc.type = 3;
         desc.renderModes = 0x2203;
         desc.lifetime = 300;
@@ -732,8 +732,8 @@ s32 trail_updateTrailGlow(TrailGlow *particle) {
 
     particle->tail.timer -= D_800BE9E4;
     if (particle->tail.timer < 0) {
-        particle->head.def.texture = gCharacterTrailTextures[func_150ADA20() & 3];
-        particle->tail.timer = (func_150ADA20() & 7) + 3;
+        particle->head.def.texture = gCharacterTrailTextures[math_random() & 3];
+        particle->tail.timer = (math_random() & 7) + 3;
     }
 
     sub->scale += (particle->tail.targetScale - sub->scale) * 0.6500000358f;
@@ -749,7 +749,7 @@ void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg
     s32 r1;
     s32 r2;
 
-    count = func_150ADA20() % 11U + 10;
+    count = math_random() % 11U + 10;
     spawn.renderMode = 0x2203;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
@@ -782,21 +782,21 @@ void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg
     yaw += 0x40;
     spawn.scaleRate = 1.0f;
     do {
-        scale = func_150ADA68() * 0.2230000049f + 0.8050000668f;
-        spawn.texture = gCharacterTrailTextures[func_150ADA20() & 3];
-        spawn.timer = func_150ADA20() % 18U + 27;
-        spawn.alpha = func_150ADA20() % 156U + 100;
-        spawn.width = spawn.height = func_150ADA68() * 233.0f + 199.0f;
-        r1 = func_150ADA20();
-        r2 = func_150ADA20();
-        math_dirFromBinAngles(r1 % 130U + yaw, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.vel);
+        scale = math_randomFloat() * 0.2230000049f + 0.8050000668f;
+        spawn.texture = gCharacterTrailTextures[math_random() & 3];
+        spawn.timer = math_random() % 18U + 27;
+        spawn.alpha = math_random() % 156U + 100;
+        spawn.width = spawn.height = math_randomFloat() * 233.0f + 199.0f;
+        r1 = math_random();
+        r2 = math_random();
+        math_dirFromBinAngles(r1 % 130U + yaw, r2 % 81U - 64, math_randomFloat() * 10.0f + 5.0f, &spawn.vel);
         spawn.vel.x -= vel->x * scale;
         spawn.vel.z -= vel->z * scale;
         // matching: `+ -x` (a subtraction emits sub.s instead of add.s)
-        spawn.gravity = func_150ADA68() * 0.6460000277f + -0.7940000296f;
+        spawn.gravity = math_randomFloat() * 0.6460000277f + -0.7940000296f;
         spawn.flags &= ~0xC0;
-        r1 = (func_150ADA20() & 1) ? 0x80 : 0;
-        r2 = (func_150ADA20() & 1) ? 0x40 : 0;
+        r1 = (math_random() & 1) ? 0x80 : 0;
+        r2 = (math_random() & 1) ? 0x40 : 0;
         spawn.flags |= r2 | r1;
         particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, arg3, arg4);
         count--;

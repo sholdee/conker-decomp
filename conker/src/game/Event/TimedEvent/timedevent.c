@@ -424,7 +424,7 @@ void event_pickPissedWalk(s32 count) {
     u8 index;
     ActorCtl *ext;
 
-    rand = func_150ADA20();
+    rand = math_random();
     pick = rand % (u8)count;
     index = pick;
     ext = gCurrentActor->mv;
@@ -441,14 +441,14 @@ void event_pickPissedWalk(s32 count) {
 
     if (gCurrentActor->mv->pissed_walk == 0xA7) {
         gEventParam = 0xFF020144;
-        gCurrentActor->mv->pissed_stumble = (func_150ADA20() % 3U) + 2;
+        gCurrentActor->mv->pissed_stumble = (math_random() % 3U) + 2;
         func_1506E8D8();
         gCurrentActor->speed = gCurrentActor->speed * 0.2f;
     }
 }
 
 void func_1506B740(void) {
-    u8 roll = func_150ADA20() & 0xFF;
+    u8 roll = math_random() & 0xFF;
 
     if (gCurrentActor->waterHeight != -10000.0f && gCurrentActor->ypos < gCurrentActor->waterHeight) {
         gCurrentActor->mv->pissed_walk = 720;
@@ -844,7 +844,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
         } else {
             mtx = &mtx[gProjectileSpawnOffsets[kind][3]];
         }
-        func_150A7960(*mtx, gProjectileSpawnOffsets[kind][0], gProjectileSpawnOffsets[kind][1], gProjectileSpawnOffsets[kind][2], &x, &y, &z);
+        math_transformPoint(*mtx, gProjectileSpawnOffsets[kind][0], gProjectileSpawnOffsets[kind][1], gProjectileSpawnOffsets[kind][2], &x, &y, &z);
         obj->xpos = x;
         obj->ypos = y;
         obj->zpos = z;
@@ -930,7 +930,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
         yVelocity = ((movement_obj[0].ypos + 60.0f) - obj->ypos) / (actor_distanceXZ(obj, movement_obj) / speed);
     }
     if (flags & 8) {
-        angle += (u16)(func_150ADA20() % 0x1200U) - 0x900;
+        angle += (u16)(math_random() % 0x1200U) - 0x900;
     }
     if (flags & 0x10) {
         f32 pad1; // matching: three unused stack slots
@@ -1071,7 +1071,7 @@ void event_fireProjectile(void) {
     if (bone != -1) {
         if (gCurrentActor->ob_matrix_ptr != NULL) {
             mtxs = gCurrentActor->ob_matrix_ptr;
-            func_150A7960(mtxs[bone], 0.0f, 0.0f, 1.0f, &x, &y, &z);
+            math_transformPoint(mtxs[bone], 0.0f, 0.0f, 1.0f, &x, &y, &z);
             x -= mtxs[bone][3][0];
             y -= mtxs[bone][3][1];
             z -= mtxs[bone][3][2];
@@ -1361,7 +1361,7 @@ void func_1506DC10(void) {
     s32 roll;
 
     if (gCurrentActor->waterHeight - 60.0f < gCurrentActor->ypos || gCurrentActor->waterHeight == -10000.0f) {
-        roll = func_150ADA20() & 3;
+        roll = math_random() & 3;
         if (roll >= 2) {
             id = roll + 0x612;
         } else {
@@ -1436,7 +1436,7 @@ void func_1506DE84(void) {
         }
         return;
     case 1:
-        if ((func_150ADA20() & 0xFF) < 0x40U) { // 1 in 4
+        if ((math_random() & 0xFF) < 0x40U) { // 1 in 4
             effect_spawnFadeBurst(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
                           10, 20, 7, 0.03f, 0.02f);
             gEventParam = 262;
@@ -1503,7 +1503,7 @@ void func_1506E0EC(void) {
         height = gCurrentActor->floorY;
         for (i = 0; i < 4; i++) {
             y = 0.0f;
-            func_150A7960(*gCurrentActor->ob_matrix_ptr, x, 0.0f, z, &x, &y, &z);
+            math_transformPoint(*gCurrentActor->ob_matrix_ptr, x, 0.0f, z, &x, &y, &z);
             vertices[i][0] = x;
             vertices[i][1] = height;
             vertices[i][2] = z;
@@ -1546,7 +1546,7 @@ void func_1506E2CC(void) {
         z = halfX;
         for (i = 0; i < 4; i++) {
             y = 0.0f;
-            func_150A7960(*gCurrentActor->ob_matrix_ptr, x, y, z, &x, &y, &z);
+            math_transformPoint(*gCurrentActor->ob_matrix_ptr, x, y, z, &x, &y, &z);
             verts[i][0] = x;
             verts[i][1] = height;
             verts[i][2] = z;
@@ -1616,7 +1616,7 @@ s32 event_resolveSoundCommand(Actor *obj, s32 *command, s32 mode) {
     id = cmd >> 16;
     if (id != 0) {
     lab: // matching: an unused label splits the block, which steers as1
-        if ((cmd >> 24) >= (func_150ADA20() & 0xFF)) {
+        if ((cmd >> 24) >= (math_random() & 0xFF)) {
             id &= 0x1F;
             cmd &= 0x7FFF;
             if (id) {
@@ -2141,15 +2141,15 @@ void func_1506F8C0(s32 cmd) {
 }
 
 void func_1506F8F0(s32 cmd) {
-    beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 0x14, -1, 482.0f, -127.0f, -45.0f, 659.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
+    beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 0x14, -1, 482.0f, -127.0f, -45.0f, 659.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (math_randomFloat() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
 void func_1506F9C0(s32 cmd) {
-    beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 0x14, -1, 241.0f, -127.0f, -45.0f, 418.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
+    beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 0x14, -1, 241.0f, -127.0f, -45.0f, 418.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (math_randomFloat() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
 void func_1506FA90(s32 cmd) {
-    beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 0x1A, -1, -181.0f, -218.0f, -1.0f, -681.0f, -584.0f, -2.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
+    beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 0x1A, -1, -181.0f, -218.0f, -1.0f, -681.0f, -584.0f, -2.0f, 3, 3, 5, 20.0f, (math_randomFloat() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
 void func_1506FB60(s32 cmd) {
@@ -2189,7 +2189,7 @@ void func_1506FCFC(s32 cmd) {
 }
 
 void func_1506FD30(s32 cmd) {
-    beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 1, -1, 0.0f, 0, 345.0f, 0.0f, 0, 414.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 1, 50.0f);
+    beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 1, -1, 0.0f, 0, 345.0f, 0.0f, 0, 414.0f, 3, 3, 5, 20.0f, (math_randomFloat() * 10.0f) + 40.0f, 1, 50.0f);
 }
 
 void func_1506FDF0(s32 cmd) {
@@ -2297,14 +2297,14 @@ void func_15070224(s32 cmd) {
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = (func_150ADA20() % 5U) + 4;
+    header.lifetime = (math_random() % 5U) + 4;
     header.lightType = 0;
 
     header2.x = gCurrentActor->xpos;
     header2.y = gCurrentActor->ypos;
     header2.z = gCurrentActor->zpos;
 
-    light_createWithEffect(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+    light_createWithEffect(&header, &header2, (math_random() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
 
 
@@ -2384,14 +2384,14 @@ void func_15070300(s32 cmd) {
     }
     localPos = D_80099B70;
     vec74 = D_80099B7C;
-    randoms.width = (func_150ADA68() * 30.0f) + 40.0f;
-    randoms.height = (func_150ADA68() * 2.512f) + 3.5900002f;
+    randoms.width = (math_randomFloat() * 30.0f) + 40.0f;
+    randoms.height = (math_randomFloat() * 2.512f) + 3.5900002f;
     srcs[0] = &localPos;
     dsts[0] = &worldPos;
     math_transformOffsets(srcs, dsts, &gCurrentActor->ob_matrix_ptr[4], 1);
     effect_spawnBoneBeamParticle(gCurrentActor, 4, &localPos, &vec74, &randoms,
-                  (func_150ADA20() % 5U) + 5, (func_150ADA20() % 56U) + 200,
-                  (func_150ADA68() * 510.0f) + 1296.0f,
+                  (math_random() % 5U) + 5, (math_random() % 56U) + 200,
+                  (math_randomFloat() * 510.0f) + 1296.0f,
                   &worldPos, 0xFF, 0, -1, 0xFF, 1);
     func_151C1860(&worldPos, 0xFF, 1);
 }
@@ -2572,26 +2572,26 @@ void func_15070D24(s32 cmd) {
         return;
     }
 
-    fx.randoms.width = (func_150ADA68() * 101.0f) + 151.0f;
-    fx.randoms.height = (func_150ADA68() * 4.0f) + 4.0f;
+    fx.randoms.width = (math_randomFloat() * 101.0f) + 151.0f;
+    fx.randoms.height = (math_randomFloat() * 4.0f) + 4.0f;
 
     math_transformOffset(&fx.localPos, &fx.worldPos, &gCurrentActor->ob_matrix_ptr[1]);
 
     effect_spawnBoneBeamParticle(gCurrentActor, 1, &fx.localPos, &fx.vec78, &fx.randoms,
-                  (func_150ADA20() % 6U) + 5, (func_150ADA20() % 156U) + 100,
-                  (func_150ADA68() * 2496.0f) + 3496.0f,
+                  (math_random() % 6U) + 5, (math_random() % 156U) + 100,
+                  (math_randomFloat() * 2496.0f) + 3496.0f,
                   &fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
 
     fx.header.flags = 3;
     fx.header.update = -1;
-    fx.header.lifetime = (func_150ADA20() % 6U) + 0xA;
+    fx.header.lifetime = (math_random() % 6U) + 0xA;
     fx.header.lightType = 0;
 
     fx.header2.x = fx.worldPos.x;
     fx.header2.y = fx.worldPos.y;
     fx.header2.z = fx.worldPos.z;
 
-    light_createWithEffect(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
+    light_createWithEffect(&fx.header, &fx.header2, (math_random() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
 }
 void func_15070F60(cmd)
     u8 cmd;
@@ -2609,26 +2609,26 @@ void func_15070F60(cmd)
         return;
     }
 
-    fx.randoms.width = (func_150ADA68() * 180.0f) + 150.0f;
-    fx.randoms.height = func_150ADA68() * 2.0f + 2.5f;
+    fx.randoms.width = (math_randomFloat() * 180.0f) + 150.0f;
+    fx.randoms.height = math_randomFloat() * 2.0f + 2.5f;
 
     math_transformOffset(&fx.localPos, &fx.worldPos, &gCurrentActor->ob_matrix_ptr[cmd ? 1 : 2]);
 
     effect_spawnBoneBeamParticle(gCurrentActor, cmd ? 1 : 2, &fx.localPos, &fx.vec78, &fx.randoms,
-                  (func_150ADA20() % 5U) + 5, (func_150ADA20() % 156U) + 100,
-                  (func_150ADA68() * 4000.0f) + 4000.0f,
+                  (math_random() % 5U) + 5, (math_random() % 156U) + 100,
+                  (math_randomFloat() * 4000.0f) + 4000.0f,
                   &fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
 
     fx.header.flags = 3;
     fx.header.update = -1;
-    fx.header.lifetime = (func_150ADA20() % 5U) + 3;
+    fx.header.lifetime = (math_random() % 5U) + 3;
     fx.header.lightType = 0;
 
     fx.header2.x = fx.worldPos.x;
     fx.header2.y = fx.worldPos.y;
     fx.header2.z = fx.worldPos.z;
 
-    light_createWithEffect(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
+    light_createWithEffect(&fx.header, &fx.header2, (math_random() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
     particle_startPlayerRumbles(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
     particle_startPlayerCameraWobbles(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
 }
@@ -2650,9 +2650,9 @@ void func_150712AC(s32 cmd) {
     weapon_spawnForwardProjectile(gCurrentActor, 0xFF, 1);
     if (gCurrentActor->CameraPtr != NULL) {
         args.flags = 1;
-        args.duration = (func_150ADA20() % 7U) + 10;
+        args.duration = (math_random() % 7U) + 10;
         args.playerMask = 1 << gCurrentActor->CameraPtr->CNumber;
-        args.strength = (func_150ADA20() % 7U) + 2;
+        args.strength = (math_random() % 7U) + 2;
         args.updateKind = -1;
         cont_spawnRumble(&args, 0, 0xFF, 1);
     }
@@ -2668,9 +2668,9 @@ void func_15071360(s32 cmd) {
     }
     if (gCurrentActor->CameraPtr != NULL) {
         args.flags = 1;
-        args.duration = (func_150ADA20() % 5U) + 15;
+        args.duration = (math_random() % 5U) + 15;
         args.playerMask = 1 << gCurrentActor->CameraPtr->CNumber;
-        args.strength = (func_150ADA20() % 4U) + 3;
+        args.strength = (math_random() % 4U) + 3;
         args.updateKind = -1;
         cont_spawnRumble(&args, 0, 0xFF, 1);
     }
@@ -2782,7 +2782,7 @@ void func_150718E4(s32 cmd) {
     const u8 bones[4] = { 13, 16, 24, 27 };
 
     if (gCurrentActor->ob_matrix_ptr != NULL || (gCurrentActor->unk74 & 0xF) == 0xF) {
-        math_transformOffset(&gZeroVec3f, &pos, &gCurrentActor->ob_matrix_ptr[bones[func_150ADA20() & 3]]);
+        math_transformOffset(&gZeroVec3f, &pos, &gCurrentActor->ob_matrix_ptr[bones[math_random() & 3]]);
         pos.y = gCurrentActor->floorY + 20.0f;
         weapon_spawnImpactBurst(&pos, 0xFF, 1);
     }
@@ -2818,7 +2818,7 @@ void func_15071A34(s32 cmd) {
 void func_15071A64(s32 cmd) {
     GroundPoint hit;
 
-    if (!(func_150ADA20() & 1) && gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->unk74 & 0xF) != 0xF &&
+    if (!(math_random() & 1) && gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->unk74 & 0xF) != 0xF &&
         movement_obj[0].stunned != 0 && movement_obj[0].energy > 0) {
         collision_initHitFromObject(&hit.ground, gCurrentActor);
         math_transformOffset(&D_80099BBC, &hit.pos, &gCurrentActor->ob_matrix_ptr[15]);
@@ -2831,16 +2831,16 @@ void func_15071B18(s32 cmd) {
     CollisionHit collision;
 
     if (gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->unk74 & 0xF) != 0xF) {
-        math_transformOffset(&D_80099BC8[func_150ADA20() % 3U], &point, &gCurrentActor->ob_matrix_ptr[7]);
+        math_transformOffset(&D_80099BC8[math_random() % 3U], &point, &gCurrentActor->ob_matrix_ptr[7]);
         collision_initHitFromObject(&collision, gCurrentActor);
-        if (func_150ADA20() & 1) {
-            if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
+            if (math_random() & 1) {
                 particle_spawnSplashAndDrops(&point.x, &collision, 0, 0xFF, 1);
             } else {
                 particle_spawnSmallSplashAndDrops(&point.x, &collision, 0, 0xFF, 1);
             }
         }
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             DebrisBurst config;
 
             config.countBase = 8;
@@ -3213,7 +3213,7 @@ void func_15072A40(void) {
 void func_15072A7C(void) {
     if (gCurrentActor->mv != NULL) {
         gCurrentActor->mv->unk1A9++;
-        if ((func_150ADA20() & 7) < gCurrentActor->mv->unk1A9) {
+        if ((math_random() & 7) < gCurrentActor->mv->unk1A9) {
             actor_playAnim(gCurrentActor, 394, 1.0f, 4.0f, 0.0f, 0.0f, 0);
         }
     }
@@ -3423,7 +3423,7 @@ Actor *event_spawnAnimProjectile(Actor *parent, s32 bone, s32 anim, f32 offX, f3
             guMtxL2F(mf, (Mtx *)mtx);
             mtx = &mf;
         }
-        func_150A7960(*mtx, offX, offY, offZ, &x, &y, &z);
+        math_transformPoint(*mtx, offX, offY, offZ, &x, &y, &z);
     } else {
         x = parent->xpos;
         y = parent->ypos;
@@ -3488,7 +3488,7 @@ void event_fireVolley(void) {
         target = gCurrentActor->CameraPtr;
         if (aim_isPointInCone(gCurrentActor - movement_obj, 23, 23, target->eye.x, target->eye.y, target->eye.z,
                           &dist, 30.0f, 0, 0) != 0 &&
-            func_150ADA20() % 1000 < 200) {
+            math_random() % 1000 < 200) {
             hit = 1;
         }
         obj = event_spawnAnimProjectile(gCurrentActor, 23, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
@@ -3517,11 +3517,11 @@ void event_fireVolley(void) {
         f32 spread;
 
         spread = gCurrentActor->taskint[0] * 0.01f;
-        t = (s32)(func_150ADA20() % 40 - 20) * spread;
+        t = (s32)(math_random() % 40 - 20) * spread;
         y = 58.4f + t;
-        t = (s32)(func_150ADA20() % 40 - 20) * spread;
+        t = (s32)(math_random() % 40 - 20) * spread;
         x = 42.8f + t;
-        event_spawnAnimProjectile(gCurrentActor, 14, 0x42, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * spread, x, y, 2.9f, 100);
+        event_spawnAnimProjectile(gCurrentActor, 14, 0x42, 0.0f, 0.0f, 16.0f, (s32)(math_random() % 40 - 20) * spread, x, y, 2.9f, 100);
     } else if (gEventParam == 2) {
         obj = event_spawnAnimProjectile(gCurrentActor, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
         obj->vtilt = 180.0f;
@@ -3529,11 +3529,11 @@ void event_fireVolley(void) {
     } else if (gEventParam == 3) {
         f32 t;
 
-        t = (s32)(func_150ADA20() % 40 - 20) * 10.0f;
+        t = (s32)(math_random() % 40 - 20) * 10.0f;
         y = 58.4f + t;
-        t = (s32)(func_150ADA20() % 40 - 20) * 10.0f;
+        t = (s32)(math_random() % 40 - 20) * 10.0f;
         x = 42.8f + t;
-        event_spawnAnimProjectile(gCurrentActor, 14, 0x88, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * 10.0f, x, y, 2.9f, 100);
+        event_spawnAnimProjectile(gCurrentActor, 14, 0x88, 0.0f, 0.0f, 16.0f, (s32)(math_random() % 40 - 20) * 10.0f, x, y, 2.9f, 100);
     }
 }
 
@@ -3815,7 +3815,7 @@ void event_spawnThrownItem(void) {
                     gSpawnPaths[obj->listpos][1].z = movement_obj[0].zpos;
                     obj->unique_id = 0xFF - idx;
                     actor_runHitHandler(obj, 0xC, NULL);
-                    beam_spawnMuzzleBurst(gCurrentActor, func_150ADA20() & 1, func_150ADA20() & 3, 0xFF, 1);
+                    beam_spawnMuzzleBurst(gCurrentActor, math_random() & 1, math_random() & 3, 0xFF, 1);
                 } else if (arg == 0xA) {
                     state = 0xE;
                     obj->ypos = player->ypos;
@@ -3826,8 +3826,8 @@ void event_spawnThrownItem(void) {
                     obj->speed = 0.0f;
                 }
             } else if (player->character_type == 0x9A) {
-                rnd = (func_150ADA20() & 0xFFF) - 0x800;
-                speed = (s16)(func_150ADA20() % 800U) * 0.01f;
+                rnd = (math_random() & 0xFFF) - 0x800;
+                speed = (s16)(math_random() % 800U) * 0.01f;
                 state = 7;
                 actor_splitVelocity(gCurrentActor->angle + rnd, 30.0f - speed, 0.0f, &x2, &z2, &y2);
                 obj->xpos -= x2;

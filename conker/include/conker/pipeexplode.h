@@ -54,11 +54,11 @@ void pipeexplode_explode(u8 pipe, u8 arg1);
 s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB,
                   f32 argC, s32 argD, u8 argE);
-s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
+s32 pipeexplode_spawnTunableChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB,
                   f32 argC, s32 argD, u8 argE);
 s32 pipeexplode_onChunkFloorHit(PipeChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 arg4);
-s32 func_150B378C(PipeExplodeActor *actor);
-s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
+s32 pipeexplode_fadeByLife(PipeExplodeActor *actor);
+s32 pipeexplode_spawnLandParticle(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 
 #endif

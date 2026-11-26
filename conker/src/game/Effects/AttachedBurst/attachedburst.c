@@ -92,7 +92,7 @@ void effect_updateAttachedBurst(AttachedEffect *effect) {
         motion.unk14 = link->owner->floorY;
         motion.flags = 8;
         motion.alpha = 0xFF;
-        count = func_150ADA20() % 9U + 12;
+        count = math_random() % 9U + 12;
         style.unk0 = 0;
         style.setGeometryMode = 1;
         style.clearGeometryMode = 0x160600;
@@ -103,17 +103,17 @@ void effect_updateAttachedBurst(AttachedEffect *effect) {
         style.primMode = 0;
         style.envMode = 9;
         for (; count != 0; count--) {
-            yaw = func_150ADA20() & 0xFF;
-            pitch = func_150ADA20() % 51U;
+            yaw = math_random() & 0xFF;
+            pitch = math_random() % 51U;
             sinYaw = math_cosBinAngleMasked(yaw);
             cosYaw = math_cosBinAngleMasked(yaw - 0x40);
             sinPitch = math_cosBinAngleMasked(pitch);
             cosPitch = math_cosBinAngleMasked(pitch - 0x40);
-            speed = func_150ADA68() * 0.5f + 18.79999924f;
+            speed = math_randomFloat() * 0.5f + 18.79999924f;
             spawn.itemCount = 4;
-            spawn.life = (func_150ADA20() & 0xF) + 35;
-            motion.halfWidth = func_150ADA68() * 2.299999952f + 2.900000095f;
-            motion.gravity = func_150ADA68() * 0.1000000015f + 0.6999999881f;
+            spawn.life = (math_random() & 0xF) + 35;
+            motion.halfWidth = math_randomFloat() * 2.299999952f + 2.900000095f;
+            motion.gravity = math_randomFloat() * 0.1000000015f + 0.6999999881f;
             horizontal = speed * sinPitch;
             motion.velocity.x = horizontal * cosYaw;
             motion.velocity.y = -speed * cosPitch;
@@ -121,8 +121,8 @@ void effect_updateAttachedBurst(AttachedEffect *effect) {
             trail_createMotionTrail(&spawn, &motion, 0, 1, 2, 0, 0, 0, 0, 0, 0, &style, 0, effect->base.header.owner, effect->base.header.kind);
         }
 
-        duration = func_150ADA68() + 2.5f;
-        distance = func_150ADA68() * 200.0f + 600.0f;
+        duration = math_randomFloat() + 2.5f;
+        distance = math_randomFloat() * 200.0f + 600.0f;
         emission.unk1A = distance;
         emission.unk4 = distance / duration;
         emission.height = 0;

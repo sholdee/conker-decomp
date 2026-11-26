@@ -21,7 +21,7 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
         if (gIsMultiplayer || (camera = obj->CameraPtr) == NULL) {
             song = D_800B0DF0->music.song;
             if (song == 0x24 || song == 0x13 || song == 0x4D || song == 0x85 || song == 0x93) {
-                func_100114D0(pos->x, pos->y, pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
+                sound_getPanVolumeAt(pos->x, pos->y, pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
                 if ((u32)volume > 0x1000) {
                     volume = (u32)volume >> 7;
                     func_1000E7A0(8, (collision_getSurfaceType(soundId) + 1) | (volume << 8) | (pan << 16));
@@ -95,7 +95,7 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     ext.fieldA8 = arg23;
     ext.expireHandler = handlerIndex;
     ext.fieldA4 = arg20;
-    ext.soundEnabled = (func_150ADA20() & 0xFFU) < soundChance ? TRUE : FALSE;
+    ext.soundEnabled = (math_random() & 0xFFU) < soundChance ? TRUE : FALSE;
     ext.sound = 0;
     ext.listener = 0;
     if (altOrigin != NULL && altDirection != NULL) {
@@ -217,7 +217,7 @@ s8 weapon_updateProjectile(Game1EF500Trail *trail) {
         sound = 0;
         player = NULL;
         if (ext->sound == 0) {
-            sfxIndex = func_150ADA20() & 7;
+            sfxIndex = math_random() & 7;
             for (i = 0; i <= gScreenLayout; i++) {
                 player = &camera_global_Cameras[i];
                 dx = player->eye.x - trail->head.def.pos.x;
@@ -389,17 +389,17 @@ void weapon_onProjectileExpire(Game1EF500Trail *trail) {
     Vec3i header2;
 
     ext = &trail->trail;
-    effect_spawnSurfaceSprite((func_150ADA68() * 30.0f) + 8.0f, 0xFF, &ext->path.tri, &ext->path.pos,
-                  (func_150ADA20() % 46U) + 25, 1, 1, ext->path.material, trail->head.header.owner, trail->head.header.kind);
-    if (func_150ADA68() < 0.253000021f * D_800DCA24) {
+    effect_spawnSurfaceSprite((math_randomFloat() * 30.0f) + 8.0f, 0xFF, &ext->path.tri, &ext->path.pos,
+                  (math_random() % 46U) + 25, 1, 1, ext->path.material, trail->head.header.owner, trail->head.header.kind);
+    if (math_randomFloat() < 0.253000021f * D_800DCA24) {
         header.flags = 3;
         header.update = -1;
-        header.lifetime = (func_150ADA20() % 7U) + 4;
+        header.lifetime = (math_random() % 7U) + 4;
         header.lightType = 0;
         header2.x = ext->path.pos.x;
         header2.y = ext->path.pos.y;
         header2.z = ext->path.pos.z;
-        light_createWithEffect(&header, &header2, (func_150ADA20() % 9U) + 12, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, trail->head.header.owner,
+        light_createWithEffect(&header, &header2, (math_random() % 9U) + 12, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, trail->head.header.owner,
                       trail->head.header.kind);
 
         {
@@ -526,7 +526,7 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.renderMode = 0x4403;
     particle.unk0 = 0x200005;
     particle.unk4 = 0x20000;
-    particle.timer = (func_150ADA20() % 7U) + 6;
+    particle.timer = (math_random() % 7U) + 6;
     particle.frame = 0;
     particle.frameRate = 0;
     particle.r = 0xFF;
@@ -538,7 +538,7 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.b2 = 0xFF;
     particle.alpha = 0xFF;
     particle.brightness = 0xFF;
-    particle.width = particle.height = func_150ADA68() * 196.0f + 106.0f;
+    particle.width = particle.height = math_randomFloat() * 196.0f + 106.0f;
     particle.pos = *pos;
     particle.fadeStart = 3;
     particle.fadeRate = 0x55;
@@ -551,7 +551,7 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.vel.z = 0.0f;
     particle.gravity = 0.0f;
     particle.scaleRate = 1.0f;
-    particle.flags = 1 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x8000 | 0x4000 |
+    particle.flags = 1 | ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0) | 0x8000 | 0x4000 |
                      0x200;
     particle.primColorMode = 6;
     particle.envColorMode = 6;
@@ -562,12 +562,12 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, arg1, arg2);
     header.flags = 3;
     header.update = -1;
-    header.lifetime = (func_150ADA20() % 7U) + 6;
+    header.lifetime = (math_random() % 7U) + 6;
     header.lightType = 0;
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
-    light_createWithEffect(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (math_random() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
 /* Smaller variant of weapon_spawnImpactBurst. */
@@ -635,7 +635,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.renderMode = 0x4403;
     particle.unk0 = 0x200005;
     particle.unk4 = 0x20000;
-    particle.timer = (func_150ADA20() % 5U) + 4;
+    particle.timer = (math_random() % 5U) + 4;
     particle.frame = 0;
     particle.frameRate = 0;
     particle.r = 0xFF;
@@ -647,7 +647,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.b2 = 0xFF;
     particle.alpha = 0xFF;
     particle.brightness = 0xFF;
-    particle.width = particle.height = (func_150ADA68() * 60.0f) + 80.0f;
+    particle.width = particle.height = (math_randomFloat() * 60.0f) + 80.0f;
     particle.pos = *pos;
     particle.fadeStart = 2;
     particle.fadeRate = 0x7F;
@@ -660,7 +660,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.vel.z = 0.0f;
     particle.gravity = 0.0f;
     particle.scaleRate = 1.0f;
-    particle.flags = ((func_150ADA20() & 1) ? 0x40 : 0) | (((func_150ADA20() & 1) ? 0x80 : 0) | 1) | 0x8000 | 0x4000 |
+    particle.flags = ((math_random() & 1) ? 0x40 : 0) | (((math_random() & 1) ? 0x80 : 0) | 1) | 0x8000 | 0x4000 |
                      0x200;
     particle.primColorMode = 6;
     particle.envColorMode = 6;
@@ -672,12 +672,12 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = (func_150ADA20() % 7U) + 6;
+    header.lifetime = (math_random() % 7U) + 6;
     header.lightType = 0;
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
-    light_createWithEffect(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (math_random() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
 /*
@@ -714,21 +714,21 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         type = 0;
         smokeChance = sparkChance = debrisChance = 0.0f;
     }
-    if (func_150ADA68() < debrisChance) {
+    if (math_randomFloat() < debrisChance) {
         SpriteDef debris;
         f32 scale;
         // not const (here and below): the ROM has these tables before D_800AAA30, so they are .data linked ahead of the .rodata
         s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
         u8 big;
 
-        scale = (func_150ADA68() * 15.0f) + 15.0f;
+        scale = (math_randomFloat() * 15.0f) + 15.0f;
         debris.texture = shade[type];
         debris.unk7 = 0;
         debris.flags = (gIsMultiplayer ? 0x20000 : 0) | 0xBF01;
-        debris.lifetime = (func_150ADA20() % 61U) + 0x3C;
+        debris.lifetime = (math_random() % 61U) + 0x3C;
         debris.frame = 0;
         debris.frameSpeed = 0;
-        debris.unk10 = (func_150ADA20() % 56U) + 0xC8;
+        debris.unk10 = (math_random() % 56U) + 0xC8;
         debris.unk11 = 0xFF;
         debris.rgba[0] = 0;
         debris.rgba[1] = 0;
@@ -743,9 +743,9 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         debris.fadeRate = 7;
         ext = &trail->trail;
         particle_spawnSurfaceQuadSprite(&debris, 0, 0, &ext->path.tri, ext->path.pos.x, ext->path.pos.y, ext->path.pos.z,
-                      scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
+                      scale, scale, math_random() & 0xFF, 0, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
-    if (func_150ADA68() < sparkChance) {
+    if (math_randomFloat() < sparkChance) {
         ParticleDef spark;
         s32 shade[6] = { 0x6D, 0x6D, 0x6E, 0x6E, 0x6D, 0x6D };
 
@@ -753,15 +753,15 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         spark.texture = shade[type];
         spark.type = 0;
         spark.renderModes = 0x3B03;
-        spark.lifetime = (func_150ADA20() % 6U) + 0xD;
+        spark.lifetime = (math_random() % 6U) + 0xD;
         spark.frame = 0;
         spark.frameSpeed = 0;
         spark.rgba[0] = 0xFF;
         spark.rgba[1] = 0xFF;
         spark.rgba[2] = 0xFF;
         spark.rgba[3] = 0xFF;
-        spark.width = (func_150ADA68() * 5.0f) + 7.0f;
-        spark.height = (func_150ADA68() * 40.0f) + 10.0f;
+        spark.width = (math_randomFloat() * 5.0f) + 7.0f;
+        spark.height = (math_randomFloat() * 40.0f) + 10.0f;
         spark.pos = ext->path.pos;
         spark.rot.x = ext->path.pos.x - ext->path.dir.x;
         spark.rot.y = ext->path.pos.y - ext->path.dir.y;
@@ -770,7 +770,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         spark.scale.y = 1.0f;
         spark.scale.z = 56.81999969f;
         spark.flags = (gIsMultiplayer ? 0x40000000 : 0) | 0x08DC0009;
-        spark.unk44 = (func_150ADA20() % 76U) + 0xB4;
+        spark.unk44 = (math_random() % 76U) + 0xB4;
         spark.unk45 = 0xFF;
         spark.unk46 = 0;
         spark.unk47 = 7;
@@ -780,7 +780,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         spark.fadeRate = 0x1F;
         particle_newQuadParticle(&spark, &gWhiteVtxColors, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
-    if (func_150ADA68() < smokeChance) {
+    if (math_randomFloat() < smokeChance) {
         SpriteBurst smoke;
         u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
                             { 0xAA, 0x52, 0x1E }, { 0x98, 0x92, 0x79 }, { 0xFF, 0xC0, 0x00 } };
@@ -831,7 +831,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         smoke.extra = 0.8702070117f;
         particle_spawnSpriteBurst(&smoke, smokeArg, trail->head.header.owner, trail->head.header.kind);
     }
-    if (func_150ADA68() < flashChance) {
+    if (math_randomFloat() < flashChance) {
         LightEffectHeader header;
         Vec3i header2;
         u8 color[2][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xA7, 0xA7 } };
@@ -840,13 +840,13 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         header.flags = 3;
         header.update = -1;
         ext = &trail->trail;
-        header.lifetime = (func_150ADA20() % 6U) + 3;
+        header.lifetime = (math_random() % 6U) + 3;
         header.lightType = 0;
         header2.x = ext->path.pos.x;
         header2.y = ext->path.pos.y;
         header2.z = ext->path.pos.z;
-        sel = func_150ADA20() & 1;
-        light_createWithEffect(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, trail->head.header.owner, trail->head.header.kind);
+        sel = math_random() & 1;
+        light_createWithEffect(&header, &header2, (math_random() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
 }
 
@@ -942,14 +942,14 @@ void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
     if (emitter->timer < 0) {
         data.stream.angleX = emitter->angleX;
         data.stream.angleY = emitter->angleY;
-        data.stream.amplitudeX = func_150ADA68() * emitter->spread;
-        data.stream.amplitudeY = func_150ADA68() * emitter->spread;
-        data.stream.phaseX = func_150ADA68() * 6.283185482f; /* 2pi */
-        data.stream.phaseY = func_150ADA68() * 6.283185482f;
+        data.stream.amplitudeX = math_randomFloat() * emitter->spread;
+        data.stream.amplitudeY = math_randomFloat() * emitter->spread;
+        data.stream.phaseX = math_randomFloat() * 6.283185482f; /* 2pi */
+        data.stream.phaseY = math_randomFloat() * 6.283185482f;
         data.stream.speedX = emitter->wobbleSpeed;
         data.stream.speedY = emitter->wobbleSpeed;
         data.stream.time = 0.0f;
-        data.stream.rate = (func_150ADA68() * emitter->rateRange) + emitter->rateBase;
+        data.stream.rate = (math_randomFloat() * emitter->rateRange) + emitter->rateBase;
         data.stream.remaining = 0.0f;
         data.stream.position.x = emitter->position[0];
         data.stream.position.y = emitter->position[1];
@@ -958,12 +958,12 @@ void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
         data.unk3C = emitter->unk30;
         data.unk40 = emitter->unk34;
 
-        effect = effect_newTimedEffect((func_150ADA20() % (emitter->lifeRange + 1)) + emitter->minLife,
+        effect = effect_newTimedEffect((math_random() % (emitter->lifeRange + 1)) + emitter->minLife,
                                -1, 0x2B, -1, 1, 0, sizeof(data), owner->base.header.owner, owner->base.header.kind);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x28, &data, sizeof(data));
         }
 
-        emitter->timer = (func_150ADA20() % (emitter->delayRange + 1)) + emitter->minDelay;
+        emitter->timer = (math_random() % (emitter->delayRange + 1)) + emitter->minDelay;
     }
 }

@@ -566,7 +566,7 @@ void light_fillGfxLight(PointLight *light, s32 player, PointLightGfx *out, s32 x
         pos[1] = light->viewPos[player][1];
         pos[2] = light->viewPos[player][2];
     } else {
-        func_150A7960(gViewMatrices[player], pos[0], pos[1], pos[2], &viewPos[0], &viewPos[1], &viewPos[2]);
+        math_transformPoint(gViewMatrices[player], pos[0], pos[1], pos[2], &viewPos[0], &viewPos[1], &viewPos[2]);
         pos[0] = viewPos[0];
         pos[1] = viewPos[1];
         pos[2] = viewPos[2];

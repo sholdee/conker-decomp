@@ -35,8 +35,8 @@ void effect_playRandomZoneSounds(s32 arg0) {
     }
 
     if (var_s0 != 0) {
-        gRandomSoundTimer = (func_150ADA20() & 0x7F) + 0x80;
-        func_10010F88((func_150ADA20() % 3U) + 0x6C, 0x5DC0, 0, 0, 0,
+        gRandomSoundTimer = (math_random() & 0x7F) + 0x80;
+        sound_playAt((math_random() % 3U) + 0x6C, 0x5DC0, 0, 0, 0,
                       zones[var_s0].x,
                       zones[var_s0].y,
                       zones[var_s0].z,

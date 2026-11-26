@@ -120,7 +120,7 @@ s32 effect_buildEffectActorRotScaleMtx(Mtx *mtx, EffectActor *actor) {
     TumbleMotion *motion = &actor->data.motion;
     MtxF mf;
 
-    func_150A8050(mf, motion->rot.x, motion->rot.y, motion->rot.z);
+    math_mtxRotateRPYF(mf, motion->rot.x, motion->rot.y, motion->rot.z);
     mf[3][0] = actor->tmpl.position.x;
     mf[3][1] = actor->tmpl.position.y;
     mf[3][2] = actor->tmpl.position.z;

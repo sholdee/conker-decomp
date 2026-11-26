@@ -95,32 +95,32 @@ void func_15010A60(void) {
         collision_selectMap(0);
         part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
 
-        rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
+        rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
         sp[0] = (rnd + rnd) * 3.141592741f;
         tail.unk00 = sp[0];
 
-        rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
+        rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
         sp[1] = (rnd + rnd) * 3.141592741f;
         tail.unk04 = sp[1];
 
-        rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
+        rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
         sp[4] = rnd * 3.800000191f + 2.0f;
         tail.unk10 = sp[4];
 
-        rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
+        rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
         sp[5] = rnd * 3.800000191f + 2.0f;
         tail.unk14 = sp[5];
 
-        rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
+        rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
         sp[2] = rnd * 0.1100000069f + 0.05000000075f;
         tail.unk08 = sp[2];
 
-        rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
+        rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
         sp[3] = rnd * 0.1100000069f + 0.05000000075f;
         tail.unk0C = sp[3];

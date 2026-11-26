@@ -81,7 +81,7 @@ void effect_spawnStompRing(Actor *actor, s32 side, s32 arg2) {
     while (count--) {
         // matching: masking the already-u8 random byte keeps IDO's andi/move pair
         angle = func_150ADA20_u8() & 0xFF;
-        speed = (0.1f + func_150ADA68() * 0.9f) * 9.0f * scale;
+        speed = (0.1f + math_randomFloat() * 0.9f) * 9.0f * scale;
         cosine = math_cosBinAngleMasked(angle - 0x40);
         sine = math_cosBinAngleMasked(angle);
         spawn.lifetime = (func_150ADA20_u8() & 15) + 30;
@@ -91,12 +91,12 @@ void effect_spawnStompRing(Actor *actor, s32 side, s32 arg2) {
         spawn.vel.x = speed * cosine;
         spawn.vel.y = 2.0f * speed;
         spawn.vel.z = speed * sine;
-        spawn.sizeY = spawn.sizeXZ = spawn.radius = (0.1f + func_150ADA68() * 0.9f) * scale * 1.5f;
-        spawn.rot.x = func_150ADA68() * 360.0f;
-        spawn.rot.y = func_150ADA68() * 360.0f;
-        spawn.rot.z = func_150ADA68() * 360.0f;
-        spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
-        spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
+        spawn.sizeY = spawn.sizeXZ = spawn.radius = (0.1f + math_randomFloat() * 0.9f) * scale * 1.5f;
+        spawn.rot.x = math_randomFloat() * 360.0f;
+        spawn.rot.y = math_randomFloat() * 360.0f;
+        spawn.rot.z = math_randomFloat() * 360.0f;
+        spawn.rotVel.x = 25.0f - math_randomFloat() * 50.0f;
+        spawn.rotVel.y = 25.0f - math_randomFloat() * 50.0f;
         particle = particle_newModelParticle(&spawn, 3, 255, sizeof(f32), 255, 0);
         if (particle != NULL) {
             particle->floorY = actor->floorY;

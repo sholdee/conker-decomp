@@ -41,14 +41,14 @@ void bone_collapseMaskedBones(Actor *obj);
 void bone_collapseAllMaskedBones(void);
 
 /* game/Bone/BoneChannels/bonechannels.c */
-GameCommand *func_15034860(GameCommand *cmd, Actor *actor, s32 channel, s32 channel2);
+GameCommand *bone_addLevelCommands(GameCommand *cmd, Actor *actor, s32 channel, s32 channel2);
 void bone_lowerBones(Actor *actor, s32 first, s32 second);
 
 /* game/Bone/BoneLookAt/bonelookat.c */
 void bone_lookAtCamera(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn);
 
 /* game/Bone/BoneChain/bonechain.c */
-extern u8 D_800C4000; // one bit per object: reset its bone chain once it has bones again
+extern u8 gBoneChainResetMask; // one bit per object: reset its bone chain once it has bones again
 void bone_initChain(Actor *obj);
 void bone_updateChainPoseFlags(Actor *obj);
 s32 bone_isChainSimulated(s32 objIndex, BoneChain *chain);

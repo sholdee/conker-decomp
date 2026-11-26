@@ -142,7 +142,7 @@ void actor_runPending(void) {
                         if (ctl->unkAF != 0) {
                             ctl->unkAF = 0;
                             if (sound_isActorSound1Playing(actor) == 0) {
-                                sound_playActorSound1Delayed(func_150ADA20() % 3 + 0x53B, actor, 0x7D00, 800, 3000, 30);
+                                sound_playActorSound1Delayed(math_random() % 3 + 0x53B, actor, 0x7D00, 800, 3000, 30);
                             }
                         }
                     }
@@ -353,7 +353,7 @@ u16 actor_pickRandomAnim(Actor *arg0, u16 animA, u16 animB, u16 animC) {
 
     angle = 0;
     selected = animA;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         selected = animB;
     }
     if ((actor->animseq.uh == animA) || (actor->animseq.uh == animB)) {
@@ -976,8 +976,8 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
         speed = arg4 / 5.0f + 0.3f;
         blend = 8.0f;
         anim = 0x64;
-        if (func_150ADA20() % 1000U >= 988) {
-            anim = (func_150ADA20() & 1) + 0x65;
+        if (math_random() % 1000U >= 988) {
+            anim = (math_random() & 1) + 0x65;
             speed = 0.65f;
             arg0->norun = 0xFF;
             arg0->count5 = 0xFF;
@@ -1496,8 +1496,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             event_runAnimCommand();
                             gEventParam = -0xFCF920;
                             func_1506E5FC();
-                            sound_playActorUntracked((func_150ADA20() & 1) + 0x2F5, arg0, 0x7D00, 0x1F4, 0x3E8);
-                            if (!(func_150ADA20() & 7)) {
+                            sound_playActorUntracked((math_random() & 1) + 0x2F5, arg0, 0x7D00, 0x1F4, 0x3E8);
+                            if (!(math_random() & 7)) {
                                 sound_playActorUntrackedDelayed(0x5CD, arg0, 0x5DC0, 0x1F4, 0x3E8, 0x3C);
                             }
                         }
@@ -1545,7 +1545,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             if ((arg0->animseq.uh != 0x7C) && (arg0->animseq.uh != 0x20D) && (arg0->animseq.uh != 0x238)) {
                                 particle_detachObjEmitters(arg0);
                                 sound_addDynamicSound(0x2CF, arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996C0, 0, 0); // matching: the (s32) casts on these tables steer IDO; a plain pointer reschedules
-                                if (((arg0->character_type == 0x3BU) || (arg0->character_type == 0x80)) && !(func_150ADA20() & 3)) {
+                                if (((arg0->character_type == 0x3BU) || (arg0->character_type == 0x80)) && !(math_random() & 3)) {
                                     s32 sound;
 
                                     if (arg0->character_type == 0x3B) {
@@ -1627,7 +1627,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         if ((arg0->animseq.uh != 0x1E0) && (arg0->animseq.uh != 0x253) && (arg0->animseq.uh != 0x254)) {
                             particle_detachObjEmitters(arg0);
                             sound_addDynamicSound(0x2CF, arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996C8, 0, 0);
-                            if (((arg0->character_type == 0x3BU) || (arg0->character_type == 0x80)) && !(func_150ADA20() & 3)) {
+                            if (((arg0->character_type == 0x3BU) || (arg0->character_type == 0x80)) && !(math_random() & 3)) {
                                 s32 sound;
 
                                 if (arg0->character_type == 0x3B) {
@@ -1692,9 +1692,9 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             event_runAnimCommand();
                         }
                         sound_stopByCallback(effect_nullSoundCallback, arg0, arg0->unique_id);
-                        sound_addDynamicSound((func_150ADA20() & 1) + 0x2F3, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x5DC, 0x1F4, effect_nullSoundCallback, arg0, arg0->unique_id, 0, 0);
+                        sound_addDynamicSound((math_random() & 1) + 0x2F3, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x5DC, 0x1F4, effect_nullSoundCallback, arg0, arg0->unique_id, 0, 0);
                         if (arg0->CameraPtr != NULL) {
-                            sound_playActorSound1Delayed((func_150ADA20() % 3U) + 0x2EB, arg0, 0x7D00, 0x64, 0x78, 0x1E);
+                            sound_playActorSound1Delayed((math_random() % 3U) + 0x2EB, arg0, 0x7D00, 0x64, 0x78, 0x1E);
                         }
                     } else {
                         speed = 1.399999976f;
@@ -1721,7 +1721,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->nojump = 0xA;
                 func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
                 if ((pressedButtons & Z_TRIG) && (arg0->animseq.uh != 0x1F7) && (arg0->mv->ReloadTimer == 0)) {
-                    if (func_150ADA20() & 3) {
+                    if (math_random() & 3) {
                         anim = 0x1F4;
                     } else {
                         anim = 0x235;
@@ -1814,7 +1814,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     }
                 }
                 arg0->mv->ReloadTimer = 0x78;
-            } else if ((arg0->mv->SniperState != 0) && (arg0->CameraPtr != NULL) && (arg0->character_type == 0x80) && (sound_isActorSound1Playing(arg0) == 0) && !(func_150ADA20() & 0x7F)) {
+            } else if ((arg0->mv->SniperState != 0) && (arg0->CameraPtr != NULL) && (arg0->character_type == 0x80) && (sound_isActorSound1Playing(arg0) == 0) && !(math_random() & 0x7F)) {
                 actor_playSound(sound_pickVariant(0x568, 4), arg0);
             }
         } else {
@@ -2200,7 +2200,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         anim = 0x156;
                         if ((arg0->CameraPtr != NULL) && (((arg0->floorMaterial & 0x1F) == 5) || ((arg0->floorMaterial & 0x1F) == 3) ||
                                                        ((arg0->floorMaterial & 0x1F) == 6) || ((arg0->floorMaterial & 0x1F) == 9))) {
-                            sound_playActorSound1Delayed((func_150ADA20() % 3U) + 0x2EB, arg0, 0x7D00, 0x64, 0x78, 0x6E);
+                            sound_playActorSound1Delayed((math_random() % 3U) + 0x2EB, arg0, 0x7D00, 0x64, 0x78, 0x6E);
                         }
                     } else if (arg0->animseq.uh != 0x156) {
                         anim = 0x157;
@@ -2292,7 +2292,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                                    (arg0->animseq.uh != 0x225) && (arg0->animseq.uh != 0x222) && (arg0->animseq.uh != 0x236) &&
                                    (arg0->animseq.uh != 0x227) && (arg0->animseq.uh != 0x237) && (arg0->mv->ReloadTimer == 0)) {
                             if (gCurrentPad->button & R_TRIG) {
-                                if (func_150ADA20() & 3) {
+                                if (math_random() & 3) {
                                     anim = 0x227;
                                 } else {
                                     anim = 0x237;
@@ -2300,7 +2300,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                                 arg0->mv->deferredActions |= 2;
                                 D_800CC2B0 = 1;
                             } else {
-                                if (func_150ADA20() & 3) {
+                                if (math_random() & 3) {
                                     anim = 0x222;
                                 } else {
                                     anim = 0x236;
@@ -2536,8 +2536,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             arg0->headEffectTimer = 0x64;
             if ((s8)arg0->unk284 == 0) {  // matching: read signed (lb); Actor declares u8
                 arg0->headEffectState = arg0->headEffectState + D_800BE9E4;
-                if (((func_150ADA20() % 120U) + 0xB4) < arg0->headEffectState) {
-                    face_requestExpression(arg0, sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
+                if (((math_random() % 120U) + 0xB4) < arg0->headEffectState) {
+                    face_requestExpression(arg0, sounds[math_random() & 1], 1, (math_random() % 180U) + 0x1A4, 0);
                     arg0->headEffectState = 0;
                     arg0->unk284 = 1;
                 }
@@ -2591,7 +2591,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     if ((animGrab != obj->animseq.uh) || ((D_800C3A58 != 0) && (animSpecial != 0))) {
                         particle_spawnTwoSidedEmitter(obj, arg0, 0, animGrab);
                         sound_stopActorSound1(obj);
-                        if ((arg0->character_type == 0x80) && !(func_150ADA20() & 3)) {
+                        if ((arg0->character_type == 0x80) && !(math_random() & 3)) {
                             sound_addDynamicSound(sound_pickVariant(0x57C, 6), arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996D0, 0, 0);
                         }
                     }
@@ -2607,7 +2607,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 } else if (arg0->mv->shotCount == 1) {
                     arg0->mv->shotCount = 0;
                     if (sound_findByCallback(sound_delayedPlayCallback, (void *)-1, -1) == -1) {
-                        sound_addDynamicSound((func_150ADA20() % 3U) + 0x618, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x1F4, 0xC8, sound_delayedPlayCallback, (void *)0x1E, 0, 0x300, 0);
+                        sound_addDynamicSound((math_random() % 3U) + 0x618, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x1F4, 0xC8, sound_delayedPlayCallback, (void *)0x1E, 0, 0x300, 0);
                     }
                 }
                 if (pressedButtons & B_BUTTON) {
@@ -2618,7 +2618,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 if (next != 0) {
                     arg0->mv->gun_before_reload = 0x258;
                     arg0->mv->ReloadTimer = 0x96;
-                    sound_addDynamicSound((func_150ADA20() % 3U) + 0x618, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x1F4, 0xC8, sound_delayedPlayCallback, (void *)0x1E, 0, 0x300, 0);
+                    sound_addDynamicSound((math_random() % 3U) + 0x618, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x1F4, 0xC8, sound_delayedPlayCallback, (void *)0x1E, 0, 0x300, 0);
                     obj->intelwalk = next;
                     obj->scriptCmd = NULL;
                 }

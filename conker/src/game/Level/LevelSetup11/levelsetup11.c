@@ -13,7 +13,7 @@ static const RopeEnds D_80096380 = { { -2893.0f, 2648.0f, 2174.0f }, { -2893.0f,
 void func_1500F9D0(s32 x, s32 y, s32 z, s32 floorY, s32 arg4) {
     ObjectEmitter *emitter;
 
-    emitter = effect_newTimedEffectNoDraw((func_150ADA20() & 0x7F) + 0xA, 1, -1, 1, 0, 0xA, 0xFF, 0);
+    emitter = effect_newTimedEffectNoDraw((math_random() & 0x7F) + 0xA, 1, -1, 1, 0, 0xA, 0xFF, 0);
     if (emitter != NULL) {
         emitter->pos.x = x;
         emitter->pos.y = y;

@@ -14,7 +14,7 @@ void func_1500FE30(void) {
     for (i = 0; i < 10; i++) {
         D_800BE4E0[i].table = i / 5;
         D_800BE4E0[i].dir = -1;
-        D_800BE4E0[i].pos = func_150ADA20() % 5;
+        D_800BE4E0[i].pos = math_random() % 5;
     }
     effect_randomizeBounceRecordSpeeds(100);
     for (i = 0; i < 10; i++) {

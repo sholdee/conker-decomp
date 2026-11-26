@@ -206,7 +206,7 @@ void model_initPart(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, 
         local[0][3] = 0.0f;
         local[2][3] = 0.0f;
         local[3][3] = 1.0f;
-        func_150A7A48(local, parentInv, local);
+        math_mtxMulF(local, parentInv, local);
     }
     model_decomposeMatrix(local, &part->initPos[0], &part->initPos[1], &part->initPos[2],
                   &part->initRot[0], &part->initRot[1], &part->initRot[2],
@@ -251,7 +251,7 @@ void model_decomposeMatrix(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rot
     *y = m[3][1];
     *z = m[3][2];
     for (i = 0; i < 3; i++) {
-        len = func_150AD930(m[i]);
+        len = math_length3(m[i]);
         if (len == 0.0f) {
             len = 0.0001f;
         }
@@ -265,8 +265,8 @@ void model_decomposeMatrix(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rot
         math_vec3Scale((Vec3f *)m[i], 1.0f / len, (Vec3f *)m[i]);
     }
     /* A mirrored basis: flip the scale signs and axes back to a rotation. */
-    func_150AD8B0(m[1], m[2], cross);
-    dot = func_150AD900(m[0], cross);
+    math_cross3(m[1], m[2], cross);
+    dot = math_dot3(m[0], cross);
     if (dot < 0.0f) {
         *scaleX = -*scaleX;
         *scaleY = -*scaleY;
@@ -278,7 +278,7 @@ void model_decomposeMatrix(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rot
         }
     }
     ry = math_asinTable(-m[0][2]);
-    if (func_150AD780(ry) != 0.0f) {
+    if (math_cos(ry) != 0.0f) {
         rx = math_atan2(m[1][2], m[2][2]);
         rz = math_atan2(m[0][1], m[0][0]);
     } else {
@@ -315,16 +315,16 @@ void model_rebuildBonesFromParts(s32 objIndex) {
             parent = gPartParents[gObjPartsStates[objIndex].kind][i];
             if (parent != PART_PARENT_NONE) {
                 /* bone = scale * rotation * (translation * parent bone) */
-                func_150A7DA0(m, part->pos[0], part->pos[1], part->pos[2]);
-                func_150A7A48(m, OBJ_BONE(&movement_obj[objIndex], parent), m);
+                math_mtxTranslateF(m, part->pos[0], part->pos[1], part->pos[2]);
+                math_mtxMulF(m, OBJ_BONE(&movement_obj[objIndex], parent), m);
                 part = &gObjPartsStates[objIndex].parts[i];
-                func_150A8050(bone, part->rot[0], part->rot[1], part->rot[2]);
-                func_150A7A48(bone, m, bone);
+                math_mtxRotateRPYF(bone, part->rot[0], part->rot[1], part->rot[2]);
+                math_mtxMulF(bone, m, bone);
                 part = &gObjPartsStates[objIndex].parts[i];
-                func_150A7CB0(m, part->scale[0], part->scale[1], part->scale[2]);
-                func_150A7A48(m, bone, bone);
+                math_mtxScaleF(m, part->scale[0], part->scale[1], part->scale[2]);
+                math_mtxMulF(m, bone, bone);
             } else {
-                func_150A8050(bone, part->rot[0], part->rot[1], part->rot[2]);
+                math_mtxRotateRPYF(bone, part->rot[0], part->rot[1], part->rot[2]);
                 part = &gObjPartsStates[objIndex].parts[i];
                 math_mtxSetScaleTrans(bone, part->scale[0], part->scale[1], part->scale[2],
                               part->pos[0], part->pos[1], part->pos[2]);

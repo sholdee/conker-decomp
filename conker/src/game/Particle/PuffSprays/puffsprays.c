@@ -154,9 +154,9 @@ void func_150C2290(u8 arg0) {
 
 void func_150C2424(u8 arg0) {
     particle_emitOnLine(8500.0f, -490.0f, -328.0f, 8500.0f, -490.0f, 328.0f,
-                  (func_150ADA68() * 8.0f) + 8.0f, 1, 0, 0.0f, 0, arg0);
+                  (math_randomFloat() * 8.0f) + 8.0f, 1, 0, 0.0f, 0, arg0);
     particle_emitOnLine(8843.0f, -560.0f, -580.0f, 8117.0f, -560.0f, -580.0f,
-                  (func_150ADA68() * 3.0f) + 4.0f, 3, 0, 0.0f, 0, arg0);
+                  (math_randomFloat() * 3.0f) + 4.0f, 3, 0, 0.0f, 0, arg0);
 }
 
 /* Trail update handler (gMotionTrailUpdateProcs): sets the trail's alpha from its remaining life (as trail_fadeKind2Trail). */
@@ -179,7 +179,7 @@ s32 func_150C2558(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 
     params.pos.x = x;
     params.pos.y = y;
-    params.pos.z = (z + 15.0f) - (func_150ADA68() * 30.0f);
+    params.pos.z = (z + 15.0f) - (math_randomFloat() * 30.0f);
     params.countBase = 1;
     params.countRange = 0;
     params.angles.yawBase = (s32)(params.pos.z * 0.07012195f) - 0x40;
@@ -284,14 +284,14 @@ void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C
     pos.x = x;
     pos.y = y;
     pos.z = z;
-    speed = (func_150ADA68() * 112.0f + 247.0f) * 0.001f;
+    speed = (math_randomFloat() * 112.0f + 247.0f) * 0.001f;
     vel.x = -dirX * speed;
     vel.y = -dirY * speed;
     vel.z = -dirZ * speed;
-    rand0 = func_150ADA68();
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
-    rand3 = func_150ADA68();
+    rand0 = math_randomFloat();
+    rand1 = math_random();
+    rand2 = math_random();
+    rand3 = math_randomFloat();
     particle_spawnSteamParticle(&pos, &vel, 6, rand0 * 0.27f + -0.31f,
                     (rand1 & 0xF) + 25, (rand2 % 101) + 155,
                     rand3 * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,

@@ -30,9 +30,9 @@ EffectActor *effect_spawnTumblingPiece(Vec3f *position, Vec3f *angle, f32 scale,
     template.lifetime = lifetime;
 
     if (altDisplayList) {
-        template.displayList = gTumblePieceAltDls[func_150ADA20() & 1];
+        template.displayList = gTumblePieceAltDls[math_random() & 1];
     } else {
-        template.displayList = gTumblePieceDls[func_150ADA20() & 1];
+        template.displayList = gTumblePieceDls[math_random() & 1];
     }
 
     template.render.setGeometryMode = 0x220205;
@@ -114,7 +114,7 @@ s32 effect_buildTumblingPieceMtx(Mtx *mtx, EffectActor *actor) {
     TumbleMotion *motion = &actor->data.piece.motion;
     MtxF mf;
 
-    func_150A8050(mf, motion->rot.x, motion->rot.y, motion->rot.z);
+    math_mtxRotateRPYF(mf, motion->rot.x, motion->rot.y, motion->rot.z);
     mf[3][0] = actor->tmpl.position.x;
     mf[3][1] = actor->tmpl.position.y;
     mf[3][2] = actor->tmpl.position.z;

@@ -276,10 +276,10 @@ void effect_spawnFootprint(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f
     packet.texture = kind;
     packet.unk7 = 0;
     packet.flags = 0x6F701;
-    packet.lifetime = (func_150ADA20() % 61U) + 100;
+    packet.lifetime = (math_random() % 61U) + 100;
     packet.frame = 0;
     packet.frameSpeed = 0;
-    packet.unk10 = (func_150ADA20() & 0x7F) + 128;
+    packet.unk10 = (math_random() & 0x7F) + 128;
     packet.unk11 = 0xFF;
     packet.rgba[0] = 0xFF;
     packet.rgba[1] = 0xFF;
@@ -293,7 +293,7 @@ void effect_spawnFootprint(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f
     packet.fadeStart = 40;
     packet.fadeRate = 6;
 
-    size = ((func_150ADA68() * 5.0f) + 10.0f) * scale;
+    size = ((math_randomFloat() * 5.0f) + 10.0f) * scale;
     if (arg5 == 2) {
         flag = 1;
     } else {

@@ -131,10 +131,10 @@ void prop_updatePush(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
         amount = (amount * pitchScale) - 500.0f;
         if (handle == 0) {
             if (speed > 0.01f) {
-                obj->sound_id = func_10010F88(soundId, volume, amount, 0, -1, obj->x, obj->y, obj->z, 1000, 6000);
+                obj->sound_id = sound_playAt(soundId, volume, amount, 0, -1, obj->x, obj->y, obj->z, 1000, 6000);
             }
         } else if (speed > 0.01f) {
-            func_1000F91C(handle, volume, amount, 0, -1, obj->x, obj->y, obj->z, 200, 2000);
+            sound_setVoiceSpatial(handle, volume, amount, 0, -1, obj->x, obj->y, obj->z, 200, 2000);
         } else {
             sound_stop(handle);
             obj->sound_id = 0;

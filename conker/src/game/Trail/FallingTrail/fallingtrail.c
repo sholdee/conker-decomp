@@ -373,7 +373,7 @@ void trail_updateBurstEmitter(TrailBurstEmitter *owner) {
 
     preset = &gTrailBurstPresets[owner->emitter.preset];
     emitter = &owner->emitter;
-    emitter->accum += preset->rateBase + func_150ADA68() * preset->rateRange;
+    emitter->accum += preset->rateBase + math_randomFloat() * preset->rateRange;
 
     while (emitter->accum > 1.0f) {
         burst.countBase = preset->countBase;
@@ -425,8 +425,8 @@ void trail_updateBurstEmitter(TrailBurstEmitter *owner) {
         burst.shrinkFactor = preset->shrinkFactor;
         burst.unk38 = -1;
         burst.unk39 = 0;
-        yaw = func_150ADA20();
-        pitch = func_150ADA20();
+        yaw = math_random();
+        pitch = math_random();
         math_dirFromBinAngles(yaw & 0xFF, 64 - (pitch & 0x7F), emitter->origin->radius, &burst.pos);
         burst.pos.x += emitter->origin->x;
         burst.pos.y += emitter->origin->y;

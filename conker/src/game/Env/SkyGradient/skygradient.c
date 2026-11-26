@@ -38,7 +38,7 @@ Gfx *env_drawSkyGradient(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 
     gfx = view_setColorImage(gfx);
     gfx = sprite_loadTexture(gfx, &tex, 0, 0, 0, 0, G_TX_CLAMP, 256, 256, 3);
     env_buildCameraRotation(rotation, 0.0f, 0.0f, roll);
-    func_150A7A48(rotation, gViews[gCurrentView].projection, viewProj);
+    math_mtxMulF(rotation, gViews[gCurrentView].projection, viewProj);
     guMtxF2L(viewProj, &gSkyMatrices[gCurrentView * 2 + D_800BE9C0]);
     gSPMatrix(gfx++, &gSkyMatrices[gCurrentView * 2 + D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

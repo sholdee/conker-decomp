@@ -17,7 +17,7 @@ typedef struct {
  * above the eye; the particle sits on the floor at most 250 units below the eye (else at that depth).
  */
 void particle_spawnUnderwaterRiseEmitter(s16 player) {
-    if (!(func_150ADA20() & 0xF)) {
+    if (!(math_random() & 0xF)) {
         void *particle;
         GroundParticle effect;
         Vec3f *eye;
@@ -37,10 +37,10 @@ void particle_spawnUnderwaterRiseEmitter(s16 player) {
         eye = &camera_global_Cameras[player].eye;
         yaw = camera_global_Cameras[player].TrueCameraAngle * 0.7111111283f;
         {
-            u32 roll = func_150ADA20();
+            u32 roll = math_random();
 
             angle = (roll % 41U) + yaw - 20;
-            distance = func_150ADA68() * 1903.0f + 107.0f;
+            distance = math_randomFloat() * 1903.0f + 107.0f;
             cosine = math_cosBinAngleMasked(angle);
             sine = math_cosBinAngleMasked(angle - 0x40);
             effect.position.x = eye->x - distance * sine;
@@ -75,10 +75,10 @@ void particle_spawnUnderwaterRiseEmitter(s16 player) {
                 effect.position.y = bottom;
             }
         }
-        effect.rate = (func_150ADA68() * 0.0f + 195.0f) * 0.001000000047f;
+        effect.rate = (math_randomFloat() * 0.0f + 195.0f) * 0.001000000047f;
         effect.accumulator = 0.0f;
         if (valid) {
-            particle = effect_newTimedEffectNoDraw((func_150ADA20() % 61U) + 5, -1, 12, 1, 7, 0x18, 0xFF, 0);
+            particle = effect_newTimedEffectNoDraw((math_random() % 61U) + 5, -1, 12, 1, 7, 0x18, 0xFF, 0);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0x28, &effect, sizeof(effect));
             }
@@ -135,30 +135,30 @@ void particle_updateUnderwaterRiseEmitter(EmitterObject *obj) {
         extra.swayPerSpeed = 0.8333333135f;
         extra.ceiling = emitter->ceiling;
 
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             desc.flags |= 0x40;
         }
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             desc.flags |= 0x80;
         }
 
         do {
-            desc.vel.y = func_150ADA68() * 12.0f * 0.1000000015f;
-            desc.timer = (func_150ADA20() % 152U) + 150;
-            desc.alpha = (func_150ADA20() % 151U) + 55;
-            size = (func_150ADA68() * 200.0f) + 100.0f;
+            desc.vel.y = math_randomFloat() * 12.0f * 0.1000000015f;
+            desc.timer = (math_random() % 152U) + 150;
+            desc.alpha = (math_random() % 151U) + 55;
+            size = (math_randomFloat() * 200.0f) + 100.0f;
             desc.width = size;
             extra.baseSize = size;
             desc.height = size;
-            extra.widthPhaseStep = (func_150ADA20() % 5U) + 4;
-            extra.heightPhaseStep = (func_150ADA20() % 5U) + 4;
-            extra.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.baseSize;
-            extra.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.baseSize;
-            extra.swayPhaseStepX = (func_150ADA20() & 3) + 2;
-            extra.swayPhaseStepZ = (func_150ADA20() & 3) + 2;
-            extra.swayX = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.baseSize;
-            extra.swayZ = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.baseSize;
-            desc.gravity = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001000000047f;
+            extra.widthPhaseStep = (math_random() % 5U) + 4;
+            extra.heightPhaseStep = (math_random() % 5U) + 4;
+            extra.widthWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * extra.baseSize;
+            extra.heightWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * extra.baseSize;
+            extra.swayPhaseStepX = (math_random() & 3) + 2;
+            extra.swayPhaseStepZ = (math_random() & 3) + 2;
+            extra.swayX = ((math_randomFloat() * 0.0700000003f) + 0.05999999866f) * extra.baseSize;
+            extra.swayZ = ((math_randomFloat() * 0.0700000003f) + 0.05999999866f) * extra.baseSize;
+            desc.gravity = ((math_randomFloat() * 1005.0f) + 600.0f) * 0.001000000047f;
 
             particle = particle_newSpriteParticle(&desc, 2, 0x28);
             if (particle != NULL) {
@@ -202,7 +202,7 @@ void particle_spawnSlidingSprites(s16 player) {
     SlidingSprite *sprite;
     s16 count;
 
-    count = (func_150ADA20() % 1U) + 10;
+    count = (math_random() % 1U) + 10;
     info.flags = 0x19;
     info.kind = 1;
     info.fadeStart = 20;
@@ -227,20 +227,20 @@ void particle_spawnSlidingSprites(s16 player) {
     info.unk38 = 0x80;
     info.unk3C = 0x20;
     while (count--) {
-        data.acceleration = ((func_150ADA68() * 105.0f) + 105.0f) * 0.001000000047f;
-        data.velocity = func_150ADA68() * 3008.0f * 0.001000000047f;
+        data.acceleration = ((math_randomFloat() * 105.0f) + 105.0f) * 0.001000000047f;
+        data.velocity = math_randomFloat() * 3008.0f * 0.001000000047f;
         info.halfHeight = info.halfWidth = data.baseHalfHeight =
-            ((func_150ADA68() * 1579.0f) + 489.0f) * 0.009999999776f;
-        data.stretch = ((func_150ADA68() * 301.0f) + 94.0f) * 0.009999999776f;
-        info.x = (func_150ADA68() * 200.0f) + -100.0f;
-        info.y = (func_150ADA68() * 148.0f) + -100.0f;
+            ((math_randomFloat() * 1579.0f) + 489.0f) * 0.009999999776f;
+        data.stretch = ((math_randomFloat() * 301.0f) + 94.0f) * 0.009999999776f;
+        info.x = (math_randomFloat() * 200.0f) + -100.0f;
+        info.y = (math_randomFloat() * 148.0f) + -100.0f;
         info.texture = D_8008FD04[particle_getContextEffectKind()]();
-        info.timer = (func_150ADA20() % 51U) + 50;
-        info.color1.alpha = (func_150ADA20() % 101U) + 100;
-        if (func_150ADA20() & 1) {
+        info.timer = (math_random() % 51U) + 50;
+        info.color1.alpha = (math_random() % 101U) + 100;
+        if (math_random() & 1) {
             info.flags |= 2;
         }
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             info.flags |= 4;
         }
         sprite = sprite_newScreenSprite(&info, 2, 0, 0, sizeof(SlidingSpriteData), 255, 1);

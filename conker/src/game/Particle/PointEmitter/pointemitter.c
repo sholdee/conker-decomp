@@ -28,7 +28,7 @@ void particle_spawnPointEmitter(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32
     data.pos = *pos;
     data.accum = 0.0f;
 
-    effect = effect_newTimedEffect(func_150ADA20() % 133U + 69, -1, 0x49, -1, 1, 0, sizeof(data),
+    effect = effect_newTimedEffect(math_random() % 133U + 69, -1, 0x49, -1, 1, 0, sizeof(data),
                            spawner->owner, spawner->kind);
     if (effect != NULL) {
         memcpy(&((PointEmitter *)effect)->data, &data, sizeof(data));
@@ -41,7 +41,7 @@ void particle_updatePointEmitter(PointEmitter *effect) {
     PointEmitterData *data;
 
     data = &effect->data;
-    data->accum += (0.07859999686f + func_150ADA68() * 0.03460000083f) * gFrameDelta;
+    data->accum += (0.07859999686f + math_randomFloat() * 0.03460000083f) * gFrameDelta;
     if (data->accum > 1.0f) {
         ParticleDesc spawn;
         WobbleData extra;
@@ -83,16 +83,16 @@ void particle_updatePointEmitter(PointEmitter *effect) {
         spawn.vel.y = 0.0f;
         spawn.vel.z = 0.0f;
         do {
-            extra.phaseStep[0] = func_150ADA20() % 5U + 4;
-            extra.phaseStep[1] = func_150ADA20() % 5U + 4;
-            extra.amplitude[0] = func_150ADA68() * 27.0f;
-            extra.amplitude[1] = func_150ADA68() * 27.0f;
-            spawn.gravity = func_150ADA68() * 0.2090000063f + 0.1350000054f;
+            extra.phaseStep[0] = math_random() % 5U + 4;
+            extra.phaseStep[1] = math_random() % 5U + 4;
+            extra.amplitude[0] = math_randomFloat() * 27.0f;
+            extra.amplitude[1] = math_randomFloat() * 27.0f;
+            spawn.gravity = math_randomFloat() * 0.2090000063f + 0.1350000054f;
             spawn.flags &= ~0xC0;
-            spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-            spawn.alpha = func_150ADA20() % 101U + 100;
-            spawn.timer = func_150ADA20() % 78U + 126;
-            spawn.width = spawn.height = func_150ADA68() * 503.0f + 405.0f;
+            spawn.flags |= ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0);
+            spawn.alpha = math_random() % 101U + 100;
+            spawn.timer = math_random() % 78U + 126;
+            spawn.width = spawn.height = math_randomFloat() * 503.0f + 405.0f;
             particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));

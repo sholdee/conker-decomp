@@ -354,11 +354,11 @@ s32 flare_glowFlicker(GlowObj *obj) {
     flicker = &obj->params.anim.flicker;
     flicker->timer -= gFrameDelta;
     if (flicker->timer < 0.0f) {
-        flicker->timer = func_150ADA68() * flicker->period;
-        if (func_150ADA20() & 3) {
-            flicker->target = func_150ADA68() * (flicker->base - flicker->low) + flicker->low;
+        flicker->timer = math_randomFloat() * flicker->period;
+        if (math_random() & 3) {
+            flicker->target = math_randomFloat() * (flicker->base - flicker->low) + flicker->low;
         } else {
-            flicker->target = func_150ADA68() * (flicker->high - flicker->base) + flicker->base;
+            flicker->target = math_randomFloat() * (flicker->high - flicker->base) + flicker->base;
         }
     }
     params->shape.scale = params->shape.scale + (flicker->target - params->shape.scale) * flicker->rate;
@@ -456,11 +456,11 @@ void flare_placeGlowOnPivot(GlowObj *obj, f32 *pivot, f32 distance, f32 spread, 
     f32 dx, dy, dz;
     MtxF mtx;
 
-    func_150A8050(mtx, angleX, 0.0f, angleZ);
+    math_mtxRotateRPYF(mtx, angleX, 0.0f, angleZ);
     mtx[3][0] = pivot[0];
     mtx[3][1] = pivot[1];
     mtx[3][2] = pivot[2];
-    func_150A7960(mtx, 0.0f, distance, 0.0f, &obj->pos[0], &obj->pos[1], &obj->pos[2]);
+    math_transformPoint(mtx, 0.0f, distance, 0.0f, &obj->pos[0], &obj->pos[1], &obj->pos[2]);
     dx = (obj->pos[0] - pivot[0]) * spread;
     dy = (obj->pos[1] - pivot[1]) * spread;
     dz = (obj->pos[2] - pivot[2]) * spread;

@@ -176,7 +176,7 @@ void func_150B17DC(Actor *obj) {
     } else {
         phase = obj->unk7E;
         phase *= 0.2f;
-        other->vtilt = func_150AD78C(phase) * 6.0f;
+        other->vtilt = math_sin(phase) * 6.0f;
         actor_applyGravity(obj);
         other->ypos = obj->ypos - 170.0f;
         other->lifting = dc_glbl_CharNum + 100;
@@ -238,10 +238,10 @@ void func_150B19E0(Actor *obj) {
     actor_checkGrab(obj);
     actor_playAnim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     cutscene_applyObjectTrack(obj, 0, -1);
-    if (obj->carried != 0 && (u8)func_150ADA20() < 40U) {
-        random = func_150ADA20() % 40U;
+    if (obj->carried != 0 && (u8)math_random() < 40U) {
+        random = math_random() % 40U;
         radius = obj->scale_xz * random;
-        angle = func_150ADA20();
+        angle = math_random();
         sine = math_cosBinAngle(angle);
         cosine = math_sinBinAngle(angle);
         particle.frame = 0;
@@ -260,7 +260,7 @@ void func_150B19E0(Actor *obj) {
         particle.callback = 7;
         particle.velY = 0;
         particle.accelY = -80;
-        random = (u8)func_150ADA20();
+        random = (u8)math_random();
         particle.unk2B = random;
         particle.width = (s32)(random << 12) / 5100 + 204;
         particle.height = (s32)(random << 12) / 12750 + 81;

@@ -659,30 +659,30 @@ EffectMotionParticle *effect_spawnRiseParticle(Vec3f *pos, Vec3f *velocity, s32 
     rise.swayPerSpeed = 0.25f;
     spawn.vel = *velocity;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         spawn.flags |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         spawn.flags |= 0x80;
     }
 
-    spawn.timer = (func_150ADA20() % 25U) + 30;
+    spawn.timer = (math_random() % 25U) + 30;
     spawn.fadeStart = 30;
     spawn.fadeRate = 8;
-    spawn.alpha = (func_150ADA20() % 101U) + 100;
-    size = (func_150ADA68() * 20.0f) + 49.0f;
+    spawn.alpha = (math_random() % 101U) + 100;
+    size = (math_randomFloat() * 20.0f) + 49.0f;
     spawn.width = size;
     rise.baseSize = size;
     spawn.height = size;
-    rise.widthPhaseStep = (func_150ADA20() % 5U) + 4;
-    rise.heightPhaseStep = (func_150ADA20() % 5U) + 4;
-    rise.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * rise.baseSize;
-    rise.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * rise.baseSize;
-    rise.swayPhaseStepX = (func_150ADA20() % 5U) + 4;
-    rise.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
-    rise.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
-    rise.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
-    spawn.gravity = ((func_150ADA68() * 254.0f) + 108.0f) * 0.001000000047f;
+    rise.widthPhaseStep = (math_random() % 5U) + 4;
+    rise.heightPhaseStep = (math_random() % 5U) + 4;
+    rise.widthWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * rise.baseSize;
+    rise.heightWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * rise.baseSize;
+    rise.swayPhaseStepX = (math_random() % 5U) + 4;
+    rise.swayPhaseStepZ = (math_random() % 5U) + 4;
+    rise.swayX = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
+    rise.swayZ = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
+    spawn.gravity = ((math_randomFloat() * 254.0f) + 108.0f) * 0.001000000047f;
 
     particle = particle_newSpriteParticle(&spawn, 2, sizeof(RiseMotion));
     if (particle != NULL) {
@@ -730,7 +730,7 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
 
     emitter = &obj->emitter;
     if (math_isNearCamera(D_800BE9E8, 3000.0f, &emitter->position)) {
-        emitter->pending += (emitter->rate + (func_150ADA68() * emitter->rateRandom)) * gFrameDelta;
+        emitter->pending += (emitter->rate + (math_randomFloat() * emitter->rateRandom)) * gFrameDelta;
         if (emitter->pending > 1.0f) {
             ParticleDesc6C spawn;
             OscillateMotion oscillate;
@@ -774,22 +774,22 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
             oscillate.heightPhase = 0;
             spawn.gravity = 0.0f;
             do {
-                angle = func_150ADA68() * 6.283185482f;
-                radius = func_150ADA68() * emitter->radius;
+                angle = math_randomFloat() * 6.283185482f;
+                radius = math_randomFloat() * emitter->radius;
                 x = sinf(angle) * radius;
                 z = cosf(angle) * radius;
-                func_150A8050(mtx, emitter->angleX, emitter->angleY, 0.0f);
-                func_150A7960(mtx, x, 0.0f, z, &oscillate.direction.x, &oscillate.direction.y,
+                math_mtxRotateRPYF(mtx, emitter->angleX, emitter->angleY, 0.0f);
+                math_transformPoint(mtx, x, 0.0f, z, &oscillate.direction.x, &oscillate.direction.y,
                               &oscillate.direction.z);
-                oscillate.angle = func_150ADA68() * 6.283185482f;
-                oscillate.angleSpeed = ((func_150ADA68() * 320.0f) + -160.0f) * 0.001000000047f;
+                oscillate.angle = math_randomFloat() * 6.283185482f;
+                oscillate.angleSpeed = ((math_randomFloat() * 320.0f) + -160.0f) * 0.001000000047f;
                 {
                     s16 pad; // matching: IDO's frame has an unused slot here
 
-                    scale = ((func_150ADA68() * 161.0f) + 446.0f) * 0.009999999776f;
+                    scale = ((math_randomFloat() * 161.0f) + 446.0f) * 0.009999999776f;
                     invScale = 1.0f / scale;
                     dist = emitter->unk18 * invScale;
-                    fadeTime = ((func_150ADA68() * 6596.0f) + 2402.0f) * 0.1000000015f * invScale;
+                    fadeTime = ((math_randomFloat() * 6596.0f) + 2402.0f) * 0.1000000015f * invScale;
                     spawn.vel.x = emitter->velocity.x * scale;
                     spawn.vel.y = emitter->velocity.y * scale;
                     spawn.vel.z = emitter->velocity.z * scale;
@@ -801,21 +801,21 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
                     spawn.fadeStart = fadeTime;
                     spawn.fadeRate = 0xFF / spawn.fadeStart;
                     spawn.flags &= ~0xC0;
-                    if (func_150ADA20() & 1) {
+                    if (math_random() & 1) {
                         spawn.flags |= 0x40;
                     }
-                    if (func_150ADA20() & 1) {
+                    if (math_random() & 1) {
                         spawn.flags |= 0x80;
                     }
-                    spawn.alpha = (func_150ADA20() % 51U) + 124;
-                    size = (func_150ADA68() * 100.0f) + 240.0f;
+                    spawn.alpha = (math_random() % 51U) + 124;
+                    size = (math_randomFloat() * 100.0f) + 240.0f;
                     spawn.width = size;
                     oscillate.baseSize = size;
                     spawn.height = size;
-                    oscillate.widthPhaseStep = (func_150ADA20() % 5U) + 4;
-                    oscillate.heightPhaseStep = (func_150ADA20() % 5U) + 4;
-                    oscillate.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * oscillate.baseSize;
-                    oscillate.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * oscillate.baseSize;
+                    oscillate.widthPhaseStep = (math_random() % 5U) + 4;
+                    oscillate.heightPhaseStep = (math_random() % 5U) + 4;
+                    oscillate.widthWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * oscillate.baseSize;
+                    oscillate.heightWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * oscillate.baseSize;
                     particle = particle_newSpriteParticle(&spawn, 2, sizeof(OscillateMotion));
                     if (particle != NULL) {
                         memcpy(&particle->motion, &oscillate, sizeof(OscillateMotion));
@@ -878,8 +878,8 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
     spawn.brightness = 0xFF;
     spawn.scaleStart = 0;
     spawn.scaleRate = 0.0f;
-    flipX = (func_150ADA20() & 1) ? 0x40 : 0;
-    flipY = (func_150ADA20() & 1) ? 0x80 : 0;
+    flipX = (math_random() & 1) ? 0x40 : 0;
+    flipY = (math_random() & 1) ? 0x80 : 0;
     spawn.flags = flipY | 0x1007 | flipX | 0x8000 | 0x4000;
     spawn.primColorMode = 6;
     spawn.envColorMode = 8;
@@ -899,18 +899,18 @@ EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocit
     drift.baseSize = size;
     spawn.width = size;
     spawn.height = size;
-    drift.widthPhase = func_150ADA20() & 0xFF;
-    drift.heightPhase = func_150ADA20() & 0xFF;
-    drift.widthPhaseStep = (func_150ADA20() % 5U) + 4;
-    drift.heightPhaseStep = (func_150ADA20() % 5U) + 4;
-    drift.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * drift.baseSize;
-    drift.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * drift.baseSize;
+    drift.widthPhase = math_random() & 0xFF;
+    drift.heightPhase = math_random() & 0xFF;
+    drift.widthPhaseStep = (math_random() % 5U) + 4;
+    drift.heightPhaseStep = (math_random() % 5U) + 4;
+    drift.widthWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * drift.baseSize;
+    drift.heightWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * drift.baseSize;
     drift.swayPhaseX = 0;
     drift.swayPhaseZ = 0;
-    drift.swayPhaseStepX = (func_150ADA20() % 5U) + 4;
-    drift.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
-    drift.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * drift.baseSize;
-    drift.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * drift.baseSize;
+    drift.swayPhaseStepX = (math_random() % 5U) + 4;
+    drift.swayPhaseStepZ = (math_random() % 5U) + 4;
+    drift.swayX = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * drift.baseSize;
+    drift.swayZ = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * drift.baseSize;
     spawn.vel = *velocity;
     spawn.handlerSet = 0;
     spawn.timer = lifetime;
@@ -995,7 +995,7 @@ u8 effect_updateLandingDriftParticle(EffectMotionParticle *particle, ParticleUpd
         alive = 0;
     }
     if (alive == 0) {
-        if (func_150ADA68() < 0.200000003f) {
+        if (math_randomFloat() < 0.200000003f) {
             if (particle->head.floor.source == 3) {
                 particle_spawnKindMark(particle_getContextEffectKind(), drift->baseSize * 0.200000003f, particle->head.desc.alpha,
                               &particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
@@ -1124,7 +1124,7 @@ void effect_spawnRiseEmitter(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3
     emitter.position = *pos;
     emitter.ceiling = ceiling;
     emitter.settings = data->settings;
-    obj = effect_newTimedEffect(func_150ADA20() % (data->types.range + 1) + data->types.base,
+    obj = effect_newTimedEffect(math_random() % (data->types.range + 1) + data->types.base,
                                              -1, 0x3F, -1, 1, 0, sizeof(RiseEmitter), spawner->base.header.owner,
                                              spawner->base.header.kind);
     if (obj != NULL) {
@@ -1137,7 +1137,7 @@ void effect_updateRiseEmitter(RiseEmitterObject *obj) {
     RiseEmitter *emitter;
 
     emitter = &obj->emitter;
-    emitter->pending += (emitter->settings.rate + (func_150ADA68() * emitter->settings.rateRandom)) * gFrameDelta;
+    emitter->pending += (emitter->settings.rate + (math_randomFloat() * emitter->settings.rateRandom)) * gFrameDelta;
     if (emitter->pending > 1.0f) {
         ParticleDesc spawn;
         RiseMotion rise;
@@ -1185,20 +1185,20 @@ void effect_updateRiseEmitter(RiseEmitterObject *obj) {
         spawn.offset.y = 0.0f;
         spawn.offset.z = 0.0f;
         do {
-            rise.widthPhaseStep = (func_150ADA20() % 5U) + 4;
-            rise.heightPhaseStep = (func_150ADA20() % 5U) + 4;
+            rise.widthPhaseStep = (math_random() % 5U) + 4;
+            rise.heightPhaseStep = (math_random() % 5U) + 4;
             rise.baseSize = spawn.width = spawn.height =
-                (func_150ADA68() * emitter->settings.sizeRandom) + emitter->settings.sizeBase;
-            rise.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * rise.baseSize;
-            rise.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * rise.baseSize;
-            rise.swayPhaseStepX = (func_150ADA20() % 5U) + 4;
-            rise.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
-            rise.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
-            rise.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
-            spawn.gravity = (func_150ADA68() * emitter->settings.unk54Random) + emitter->settings.unk54Base;
-            spawn.alpha = (func_150ADA20() % (emitter->settings.alphaRange + 1)) + emitter->settings.alphaBase;
-            flipX = (func_150ADA20() & 1) ? 0x40 : 0;
-            flipY = (func_150ADA20() & 1) ? 0x80 : 0;
+                (math_randomFloat() * emitter->settings.sizeRandom) + emitter->settings.sizeBase;
+            rise.widthWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * rise.baseSize;
+            rise.heightWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * rise.baseSize;
+            rise.swayPhaseStepX = (math_random() % 5U) + 4;
+            rise.swayPhaseStepZ = (math_random() % 5U) + 4;
+            rise.swayX = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
+            rise.swayZ = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
+            spawn.gravity = (math_randomFloat() * emitter->settings.unk54Random) + emitter->settings.unk54Base;
+            spawn.alpha = (math_random() % (emitter->settings.alphaRange + 1)) + emitter->settings.alphaBase;
+            flipX = (math_random() & 1) ? 0x40 : 0;
+            flipY = (math_random() & 1) ? 0x80 : 0;
             spawn.flags = flipY | 6 | flipX | 0x8000 | 0x4000 | 0x2000 | 0x1000;
             particle = particle_newSpriteParticleWithFloor(&spawn, 2, NULL, sizeof(RiseMotion), obj->base.header.owner, obj->base.header.kind);
             if (particle != NULL) {

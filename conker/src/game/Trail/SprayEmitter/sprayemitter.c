@@ -71,7 +71,7 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
             return;
         }
     }
-    emitter->pending += (emitter->desc.rate + (func_150ADA68() * emitter->desc.rateRange)) * gFrameDelta;
+    emitter->pending += (emitter->desc.rate + (math_randomFloat() * emitter->desc.rateRange)) * gFrameDelta;
     if (emitter->pending > 1.0f) {
         floorY = emitter->floorY;
         spawn.kind = 1;
@@ -92,15 +92,15 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
         render.primMode = 0;
         render.envMode = 7;
         do {
-            spawn.itemCount = (func_150ADA20() % (emitter->desc.pointCountRange + 1)) + emitter->desc.pointCount;
+            spawn.itemCount = (math_random() % (emitter->desc.pointCountRange + 1)) + emitter->desc.pointCount;
             {
                 f32 t;
-                t = func_150ADA68();
+                t = math_randomFloat();
                 spawn.pos.x = emitter->desc.origin.x + (t * emitter->desc.extent.x);
                 spawn.pos.y = emitter->desc.origin.y + (t * emitter->desc.extent.y);
                 spawn.pos.z = emitter->desc.origin.z + (t * emitter->desc.extent.z);
             }
-            motion.halfWidth = (func_150ADA68() * emitter->desc.halfWidthRange) + emitter->desc.halfWidth;
+            motion.halfWidth = (math_randomFloat() * emitter->desc.halfWidthRange) + emitter->desc.halfWidth;
             {
                 f32 speed;
                 s16 yaw;
@@ -110,9 +110,9 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
                 f32 sinPitch;
                 f32 cosPitch;
                 // matching: IDO needs the double negation here; `+ yawSpread` does not match
-                yaw = emitter->desc.yaw - (func_150ADA20() % ((emitter->desc.yawSpread * 2) + 1)) - -emitter->desc.yawSpread;
-                pitch = (func_150ADA20() % (emitter->desc.pitchRange + 1)) + emitter->desc.pitch;
-                speed = (func_150ADA68() * emitter->desc.speedRange) + emitter->desc.speed;
+                yaw = emitter->desc.yaw - (math_random() % ((emitter->desc.yawSpread * 2) + 1)) - -emitter->desc.yawSpread;
+                pitch = (math_random() % (emitter->desc.pitchRange + 1)) + emitter->desc.pitch;
+                speed = (math_randomFloat() * emitter->desc.speedRange) + emitter->desc.speed;
                 sinYaw = math_cosBinAngleMasked(yaw);
                 cosYaw = math_cosBinAngleMasked(yaw - 0x40);
                 sinPitch = math_cosBinAngleMasked(pitch);
@@ -121,9 +121,9 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
                 motion.velocity.y = -speed * cosPitch;
                 motion.velocity.z = (speed * sinPitch) * sinYaw;
             }
-            motion.gravity = (func_150ADA68() * emitter->desc.gravityRange) + emitter->desc.gravity;
-            motion.alpha = (func_150ADA20() % (emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
-            spawn.life = (func_150ADA20() % (emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
+            motion.gravity = (math_randomFloat() * emitter->desc.gravityRange) + emitter->desc.gravity;
+            motion.alpha = (math_random() % (emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
+            spawn.life = (math_random() % (emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
             trail = trail_createMotionTrail(&spawn, &motion, 8, 1, (emitter->flags & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0, &render, 0,
                                   emitter->link.owner, emitter->link.kind);
             if (trail != NULL) {
@@ -143,7 +143,7 @@ s32 trail_landSprayTrail(SprayTrail *trail) {
     Vec3f splashPos;
 
     if (points[trail->head.start].pos.y < params->floorY) {
-        chance = func_150ADA68();
+        chance = math_randomFloat();
         if (chance < 0.8) {
             splashPos.x = points[trail->head.start].pos.x;
             splashPos.y = params->floorY;

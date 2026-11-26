@@ -127,7 +127,7 @@ void func_150D10E4(Actor *obj, u8 mirrored) {
 
 /* BloodStrip sample callback 6: random power in [0.35, 0.5). */
 s32 func_150D11B4(BloodStrip *strip) {
-    strip->power = (func_150ADA68() * 150.0f + 350.0f) * 0.001f;
+    strip->power = (math_randomFloat() * 150.0f + 350.0f) * 0.001f;
     return 1;
 }
 
@@ -156,11 +156,11 @@ void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *veloci
     velocity.y = (endY - start.y) * strip->power;
     velocity.z = (endZ - start.z) * strip->power;
 
-    random0 = func_150ADA68();
-    random1 = func_150ADA68();
-    randomInt = func_150ADA20();
+    random0 = math_randomFloat();
+    random1 = math_randomFloat();
+    randomInt = math_random();
 
     particle_spawnKindSprite(0, &start.x, &velocity.x, random0 * 61.0f + 60.0f, 1.03571403f, 0.9704080224f,
                   random1 * 0.1570000052f + -0.08000000566f, (randomInt & 0xF) + 35,
-                  func_150ADA20() % 156U + 100, 30, 8, 0, strip->header.owner, strip->header.kind);
+                  math_random() % 156U + 100, 30, 8, 0, strip->header.owner, strip->header.kind);
 }

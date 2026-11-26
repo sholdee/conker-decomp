@@ -47,7 +47,7 @@ void trail_spawnPissTrail(Actor *actor) {
 
         data.speedScale = 0.01724099927f;
         variant = math_rand() % 2;
-        data.sound = func_10010F88(variant + 0x1B6, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 5000);
+        data.sound = sound_playAt(variant + 0x1B6, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 5000);
         data.pending = 0.0f;
         data.time = 0.0f;
         data.surfaceAccum = 0.0f;
@@ -389,7 +389,7 @@ s32 trail_tracePissTrail(PissTrail *trail) {
                         trail->head.count--;
                     }
                     if (data->sound != 0) {
-                        func_1000F91C(data->sound, 0x7FFF, 0, 0, 0, cur->pos.x, cur->pos.y, cur->pos.z, 500, 5000);
+                        sound_setVoiceSpatial(data->sound, 0x7FFF, 0, 0, 0, cur->pos.x, cur->pos.y, cur->pos.z, 500, 5000);
                     }
                 }
             }
@@ -692,7 +692,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
     target = hit->obj;
     if (hit->hitType != 0) {
         if (hit->hitType >= 2 && (target->character_type == 0x33 || target->character_type == 0x3A)) {
-            data->sparkAccum += (0.1990000159f + func_150ADA68() * 0.1540000141f) * gFrameDelta;
+            data->sparkAccum += (0.1990000159f + math_randomFloat() * 0.1540000141f) * gFrameDelta;
             if (data->sparkAccum > 1.0f) {
                 ParticleDesc spawn;
                 WobbleData sub;
@@ -730,18 +730,18 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                 spawn.pos = hit->pos;
                 spawn.vel = gZeroVec3f;
                 do {
-                    sub.phase[0] = func_150ADA20();
-                    sub.phase[1] = (s16)func_150ADA20(); // matching: the s16 cast gives IDO's extra move
-                    sub.phaseStep[0] = (func_150ADA20() % 5U) + 4;
-                    sub.phaseStep[1] = (func_150ADA20() % 5U) + 4;
-                    sub.amplitude[0] = func_150ADA68() * 10.0f;
-                    sub.amplitude[1] = func_150ADA68() * 10.0f;
-                    spawn.gravity = func_150ADA68() * 0.0910000056f + 0.1010000035f;
+                    sub.phase[0] = math_random();
+                    sub.phase[1] = (s16)math_random(); // matching: the s16 cast gives IDO's extra move
+                    sub.phaseStep[0] = (math_random() % 5U) + 4;
+                    sub.phaseStep[1] = (math_random() % 5U) + 4;
+                    sub.amplitude[0] = math_randomFloat() * 10.0f;
+                    sub.amplitude[1] = math_randomFloat() * 10.0f;
+                    spawn.gravity = math_randomFloat() * 0.0910000056f + 0.1010000035f;
                     spawn.flags &= ~0xC0;
-                    spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-                    spawn.alpha = (func_150ADA20() % 101U) + 100;
-                    spawn.timer = (func_150ADA20() % 11U) + 70;
-                    spawn.width = spawn.height = func_150ADA68() * 116.0f + 131.0f;
+                    spawn.flags |= ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0);
+                    spawn.alpha = (math_random() % 101U) + 100;
+                    spawn.timer = (math_random() % 11U) + 70;
+                    spawn.width = spawn.height = math_randomFloat() * 116.0f + 131.0f;
                     spark = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0x10, trail->head.header.owner, trail->head.header.kind);
                     if (spark != NULL) {
                         memcpy(&spark->data.wobble, &sub, sizeof(sub));
@@ -750,7 +750,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                 } while (data->sparkAccum > 1.0f);
             }
         } else {
-            data->impactAccum += (0.06000000238f + func_150ADA68() * 0.06000000238f) * gFrameDelta;
+            data->impactAccum += (0.06000000238f + math_randomFloat() * 0.06000000238f) * gFrameDelta;
             if (data->impactAccum > 1.0f) {
                 SplashSpray emit;
                 CollisionHit origin;
@@ -805,10 +805,10 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
             }
         }
         if (hit->hitType == 1) {
-            data->surfaceAccum += (0.200000003f + func_150ADA68() * 0.1040000021f) * gFrameDelta;
+            data->surfaceAccum += (0.200000003f + math_randomFloat() * 0.1040000021f) * gFrameDelta;
             while (data->surfaceAccum > 1.0f) {
-                particle_spawnKindEmitter(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, &hit->tri, &hit->pos,
-                              (func_150ADA20() % 81U) + 60, 1, 1, 1, trail->head.header.owner, trail->head.header.kind);
+                particle_spawnKindEmitter(3, math_randomFloat() * 30.0f + 15.0f, (math_random() % 101U) + 100, &hit->tri, &hit->pos,
+                              (math_random() % 81U) + 60, 1, 1, 1, trail->head.header.owner, trail->head.header.kind);
                 data->surfaceAccum -= 1.0f;
             }
         }

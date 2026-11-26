@@ -203,29 +203,29 @@ func_1000EA94	0x1000EA94	108	init	c		build/src/init/Audio/Tune/tune.c.o
 sound_chirpCallback	0x1000EB00	196	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_fadeOutCallback	0x1000EBC4	96	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_delayedPlayCallback	0x1000EC24	168	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_1000ECCC	0x1000ECCC	212	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_1000EDA0	0x1000EDA0	208	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_actorSound1DelayCallback	0x1000ECCC	212	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_actorUntrackedDelayCallback	0x1000EDA0	208	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_followOwnerCallback	0x1000EE70	208	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_1000EF40	0x1000EF40	116	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_stopWhenSilentCallback	0x1000EF40	116	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 func_1000EFB4	0x1000EFB4	500	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_1000F1A8	0x1000F1A8	160	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_resetVoices	0x1000F1A8	160	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_initLevel	0x1000F248	392	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_isPlaying	0x1000F3D0	124	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 func_1000F44C	0x1000F44C	140	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_isSoundPlaying	0x1000F4D8	144	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_pickVariant	0x1000F568	336	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_1000F6B8	0x1000F6B8	420	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_getNearestListenerVolume	0x1000F6B8	420	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_setVoiceParam	0x1000F85C	192	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_1000F91C	0x1000F91C	184	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_1000F9D4	0x1000F9D4	144	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_setVoiceSpatial	0x1000F91C	184	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_setVoicePanAt	0x1000F9D4	144	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_addDynamicSound	0x1000FA64	436	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_1000FC18	0x1000FC18	288	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_stopDynamicSoundAt	0x1000FC18	288	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_stopByCallback	0x1000FD38	188	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_stopByHandle	0x1000FDF4	148	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_stopRecord	0x1000FE88	104	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_findByHandle	0x1000FEF0	160	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_findByCallback	0x1000FF90	140	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_1001001C	0x1001001C	196	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_setVolumeByCallback	0x1001001C	196	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_replaceCallback	0x100100E0	116	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_playActorSound2	0x10010154	496	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_playActorSound1	0x10010344	532	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
@@ -239,16 +239,16 @@ sound_stopActorSound2	0x100109D0	108	init	c		build/src/init/Audio/DynamicSound/d
 sound_stopActorSound1	0x10010A3C	108	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_stopActorSounds	0x10010AA8	320	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_startVoice	0x10010BE8	656	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_10010E78	0x10010E78	184	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_startVoiceAt	0x10010E78	184	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_play	0x10010F30	88	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_10010F88	0x10010F88	116	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_playAt	0x10010F88	116	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_playOnActor	0x10010FFC	460	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_stop	0x100111C8	116	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_stopNextUpdate	0x1001123C	128	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_queueStop	0x100112BC	84	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_runStopQueue	0x10011310	364	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_getPlayingSound	0x1001147C	84	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
-func_100114D0	0x100114D0	340	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
+sound_getPanVolumeAt	0x100114D0	340	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_updateRecords	0x10011624	1428	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 sound_update	0x10011BB8	720	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
 func_10011E88	0x10011E88	12	init	c		build/src/init/Audio/DynamicSound/dynamicsound.c.o
@@ -1125,7 +1125,7 @@ bone_updateChainByType	0x1503453C	168	game	c		build/src/game/Bone/BoneCommands/b
 bone_updateObject	0x150345E4	324	game	c		build/src/game/Bone/BoneCommands/bonecommands.c.o
 bone_collapseMaskedBones	0x15034728	192	game	c		build/src/game/Bone/BoneCommands/bonecommands.c.o
 bone_collapseAllMaskedBones	0x150347E8	120	game	c		build/src/game/Bone/BoneCommands/bonecommands.c.o
-func_15034860	0x15034860	1620	game	c		build/src/game/Bone/BoneChannels/bonechannels.c.o
+bone_addLevelCommands	0x15034860	1620	game	c		build/src/game/Bone/BoneChannels/bonechannels.c.o
 bone_lowerBones	0x15034EB4	108	game	c		build/src/game/Bone/BoneChannels/bonechannels.c.o
 model_clearReflections	0x15034F20	16	game	c		build/src/game/Model/Reflection/reflection.c.o
 model_mirrorMatrices	0x15034F30	1944	game	c		build/src/game/Model/Reflection/reflection.c.o
@@ -1311,7 +1311,7 @@ math_mtxGetTranslation	0x15043FF0	176	game	c		build/src/game/Math/MtxBuild/mtxbu
 math_mtxLookAt	0x150440A0	544	game	c		build/src/game/Math/MtxBuild/mtxbuild.c.o
 math_mtxTranslateLocal	0x150442C0	176	game	c		build/src/game/Math/MtxTranslate/mtxtranslate.c.o
 func_15044370	0x15044370	16	game	c		build/src/game/Collision/Probe/probe.c.o
-func_15044380	0x15044380	428	game	c		build/src/game/Collision/Probe/probe.c.o
+collision_resolveActorWalls	0x15044380	428	game	c		build/src/game/Collision/Probe/probe.c.o
 collision_rotateTriVerts	0x1504452C	300	game	c		build/src/game/Collision/Probe/probe.c.o
 func_15044658	0x15044658	8	game	c		build/src/game/Collision/Probe/probe.c.o
 collision_setProbeHeights	0x15044660	624	game	c		build/src/game/Collision/Probe/probe.c.o
@@ -1320,7 +1320,7 @@ collision_addTriggerNode	0x15044964	196	game	c		build/src/game/Collision/Probe/p
 collision_updateTriggers	0x15044A28	336	game	c		build/src/game/Collision/Probe/probe.c.o
 collision_checkPlayerInVolume	0x15044B78	364	game	c		build/src/game/Collision/Probe/probe.c.o
 collision_checkTrackedVolume	0x15044CE4	92	game	c		build/src/game/Collision/Probe/probe.c.o
-func_15044D40	0x15044D40	96	game	c		build/src/game/Collision/Probe/probe.c.o
+collision_runVolumeAttack	0x15044D40	96	game	c		build/src/game/Collision/Probe/probe.c.o
 func_15044DA0	0x15044DA0	72	game	c		build/src/game/Collision/Probe/probe.c.o
 func_15044DE8	0x15044DE8	88	game	c		build/src/game/Collision/Probe/probe.c.o
 func_15044E40	0x15044E40	72	game	c		build/src/game/Collision/Probe/probe.c.o
@@ -2175,7 +2175,7 @@ anim_playIdle	0x1507F54C	244	game	c		build/src/game/Anim/IdleAnim/idleanim.c.o
 anim_updateIdle	0x1507F640	1516	game	c		build/src/game/Anim/IdleAnim/idleanim.c.o
 anim_applyIdleFrameFlags	0x1507FC2C	628	game	c		build/src/game/Anim/IdleAnim/idleanim.c.o
 anim_updateIdleTimer	0x1507FEA0	244	game	c		build/src/game/Anim/IdleAnim/idleanim.c.o
-func_1507FF94	0x1507FF94	68	game	c		build/src/game/Anim/IdleAnim/idleanim.c.o
+anim_sendIdleDelayEvent	0x1507FF94	68	game	c		build/src/game/Anim/IdleAnim/idleanim.c.o
 anim_isIdleWatched	0x1507FFD8	552	game	c		build/src/game/Anim/IdleAnim/idleanim.c.o
 face_resetScripted	0x15080200	40	game	c		build/src/game/Face/ScriptedExpression/scriptedexpression.c.o
 face_processMessages	0x15080228	288	game	c		build/src/game/Face/ScriptedExpression/scriptedexpression.c.o
@@ -2204,7 +2204,7 @@ collision_trySpawnRecord	0x150825C0	924	game	c		build/src/game/Collision/Spawn/s
 collision_trySpawnRecords	0x1508295C	124	game	c		build/src/game/Collision/Spawn/spawn.c.o
 func_150829D8	0x150829D8	108	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_spawnObject	0x15082A44	2152	game	c		build/src/game/Collision/Spawn/spawn.c.o
-func_150832AC	0x150832AC	216	game	c		build/src/game/Collision/Spawn/spawn.c.o
+collision_allocActorLights	0x150832AC	216	game	c		build/src/game/Collision/Spawn/spawn.c.o
 func_15083384	0x15083384	484	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_createPartSet	0x15083568	356	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_removePartSet	0x150836CC	264	game	c		build/src/game/Collision/Spawn/spawn.c.o
@@ -2216,7 +2216,7 @@ collision_getFreeUniqueId	0x15083DA0	108	game	c		build/src/game/Collision/Spawn/
 collision_findSpawnById	0x15083E0C	132	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_findObjectById	0x15083E90	288	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_findObjectSlotById	0x15083FB0	80	game	c		build/src/game/Collision/Spawn/spawn.c.o
-func_15084000	0x15084000	68	game	c		build/src/game/Collision/Spawn/spawn.c.o
+collision_findSlotBySpawnIndex	0x15084000	68	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_initModelData	0x15084044	776	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_releaseAllModelData	0x1508434C	96	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_releaseModelData	0x150843AC	220	game	c		build/src/game/Collision/Spawn/spawn.c.o
@@ -2226,7 +2226,7 @@ collision_getModelId	0x150849A0	44	game	c		build/src/game/Collision/Spawn/spawn.
 collision_getLodModelId	0x150849CC	76	game	c		build/src/game/Collision/Spawn/spawn.c.o
 collision_updateModelUnload	0x15084A18	536	game	c		build/src/game/Collision/Spawn/spawn.c.o
 func_15084C30	0x15084C30	128	game	c		build/src/game/Collision/Spawn/spawn.c.o
-func_15084CB0	0x15084CB0	80	game	c		build/src/game/Collision/Spawn/spawn.c.o
+collision_getSpawnModelTypeIndex	0x15084CB0	80	game	c		build/src/game/Collision/Spawn/spawn.c.o
 func_15084D00	0x15084D00	112	game	c		build/src/game/Player/SpawnPoint/spawnpoint.c.o
 player_getSpawnPoint	0x15084D70	1696	game	c		build/src/game/Player/SpawnPoint/spawnpoint.c.o
 player_setSpawnIndex	0x15085410	16	game	c		build/src/game/Player/SpawnPoint/spawnpoint.c.o
@@ -2468,34 +2468,34 @@ zone_setParams	0x150A3398	172	game	c		build/src/game/Zone/ZoneState/zonestate.c.
 zone_setPosition	0x150A3444	108	game	c		build/src/game/Zone/ZoneState/zonestate.c.o
 zone_segmentHitsCylinder	0x150A34B0	84	game	c		build/src/game/Zone/ZoneState/zonestate.c.o
 zone_segmentCylinder	0x150A3504	1388	game	c		build/src/game/Zone/ZoneState/zonestate.c.o
-func_150A3A70	0x150A3A70	176	game	hasm	d,g	build/src/game_D0F20.s.o
+collision_gatherGroundTris	0x150A3A70	176	game	hasm	d,g	build/src/game_D0F20.s.o
 func_150A3B20	0x150A3B20	104	game	hasm	d	build/src/game_D0F20.s.o
 D_150A3B88	0x150A3B88	308	game	hasm	d	build/src/game_D0F20.s.o
 func_150A3CBC	0x150A3CBC	672	game	hasm	b	build/src/game_D0F20.s.o
-func_150A3F5C	0x150A3F5C	104	game	hasm	k	build/src/game_D0F20.s.o
-func_150A3FC4	0x150A3FC4	228	game	hasm	b,d,e	build/src/game_D0F20.s.o
+collision_groundQueryReturn	0x150A3F5C	104	game	hasm	k	build/src/game_D0F20.s.o
+collision_getTriHeightAt	0x150A3FC4	228	game	hasm	b,d,e	build/src/game_D0F20.s.o
 func_150A40A8	0x150A40A8	116	game	hasm	d	build/src/game_D0F20.s.o
 func_150A411C	0x150A411C	708	game	hasm	b,h	build/src/game_D0F20.s.o
-func_150A43E0	0x150A43E0	252	game	hasm	d,g	build/src/game_D1890.s.o
+collision_gatherPropGroundTris	0x150A43E0	252	game	hasm	d,g	build/src/game_D1890.s.o
 D_150A44DC	0x150A44DC	20	game	hasm	d	build/src/game_D1890.s.o
-func_150A44F0	0x150A44F0	384	game	hasm	d	build/src/game_D19A0.s.o
+collision_transformPropTris	0x150A44F0	384	game	hasm	d	build/src/game_D19A0.s.o
 func_150A4670	0x150A4670	376	game	hasm	d,h	build/src/game_D19A0.s.o
 func_150A47E8	0x150A47E8	20	game	hasm	g	build/src/game_D19A0.s.o
 func_150A47FC	0x150A47FC	156	game	hasm	e,g,h	build/src/game_D19A0.s.o
 func_150A4898	0x150A4898	348	game	hasm	b,d,h	build/src/game_D19A0.s.o
-func_150A49F4	0x150A49F4	256	game	hasm	k	build/src/game_D19A0.s.o
+collision_setCurMap	0x150A49F4	256	game	hasm	k	build/src/game_D19A0.s.o
 D_150A4AF4	0x150A4AF4	16	game	hasm	d	build/src/game_D19A0.s.o
-func_150A4B04	0x150A4B04	1008	game	hasm	d,e,h	build/src/game_D1FB4.s.o
+collision_updateActorHitMesh	0x150A4B04	1008	game	hasm	d,e,h	build/src/game_D1FB4.s.o
 func_150A4EF4	0x150A4EF4	104	game	hasm	k	build/src/game_D1FB4.s.o
 func_150A4F5C	0x150A4F5C	68	game	hasm	d,h	build/src/game_D1FB4.s.o
-func_150A4FA0	0x150A4FA0	208	game	hasm	c,d,g	build/src/game_D2450.s.o
+collision_gatherActorGroundTris	0x150A4FA0	208	game	hasm	c,d,g	build/src/game_D2450.s.o
 D_150A5070	0x150A5070	80	game	hasm	d	build/src/game_D2450.s.o
-func_150A50C0	0x150A50C0	156	game	hasm	d	build/src/game_D2570.s.o
+gfx_copyDlCulled	0x150A50C0	156	game	hasm	d	build/src/game_D2570.s.o
 func_150A515C	0x150A515C	24	game	hasm	b,c,g	build/src/game_D260C.s.o
 func_150A5174	0x150A5174	36	game	hasm	d,g	build/src/game_D260C.s.o
 func_150A5198	0x150A5198	348	game	hasm	b,d	build/src/game_D260C.s.o
 func_150A52F4	0x150A52F4	132	game	hasm	d	build/src/game_D260C.s.o
-func_150A5378	0x150A5378	260	game	hasm	b,g,h	build/src/game_D260C.s.o
+gfx_copyLevelDlCulled	0x150A5378	260	game	hasm	b,g,h	build/src/game_D260C.s.o
 func_150A547C	0x150A547C	320	game	hasm	d,h	build/src/game_D260C.s.o
 func_150A55BC	0x150A55BC	84	game	hasm	d	build/src/game_D260C.s.o
 func_150A5610	0x150A5610	248	game	hasm	b,d	build/src/game_D260C.s.o
@@ -2505,21 +2505,21 @@ func_150A5798	0x150A5798	4	game	hasm	b,g	build/src/game_D260C.s.o
 func_150A579C	0x150A579C	140	game	hasm	b,d	build/src/game_D260C.s.o
 func_150A5828	0x150A5828	656	game	hasm	b,c,d,h	build/src/game_D260C.s.o
 func_150A5AB8	0x150A5AB8	216	game	hasm	c,h	build/src/game_D260C.s.o
-func_150A5B90	0x150A5B90	248	game	hasm	b,g	build/src/game_D3040.s.o
+shadow_projectLevelFaces	0x150A5B90	248	game	hasm	b,g	build/src/game_D3040.s.o
 func_150A5C88	0x150A5C88	444	game	hasm	b,d,h	build/src/game_D3040.s.o
-func_150A5E44	0x150A5E44	324	game	hasm	b,d	build/src/game_D3040.s.o
+shadow_projectPropFaces	0x150A5E44	324	game	hasm	b,d	build/src/game_D3040.s.o
 func_150A5F88	0x150A5F88	28	game	hasm	d	build/src/game_D3040.s.o
 func_150A5FA4	0x150A5FA4	288	game	hasm	b,d,g,h	build/src/game_D3040.s.o
 func_150A60C4	0x150A60C4	120	game	hasm	k	build/src/game_D3040.s.o
 func_150A613C	0x150A613C	212	game	hasm	c,h	build/src/game_D3040.s.o
-func_150A6210	0x150A6210	324	game	hasm	c,d,e,h	build/src/game_D36C0.s.o
+view_getQuadViewDepth	0x150A6210	324	game	hasm	c,d,e,h	build/src/game_D36C0.s.o
 func_150A6354	0x150A6354	12	game	hasm	c	build/src/game_D36C0.s.o
-func_150A6360	0x150A6360	344	game	hasm	d,e,h	build/src/game_D3810.s.o
+view_testCylinderInView	0x150A6360	344	game	hasm	d,e,h	build/src/game_D3810.s.o
 func_150A64B8	0x150A64B8	16	game	hasm	k	build/src/game_D3810.s.o
-func_150A64C8	0x150A64C8	56	game	hasm	k	build/src/game_D3810.s.o
-func_150A6500	0x150A6500	56	game	hasm	k	build/src/game_D39B0.s.o
+collision_findPropsBelow	0x150A64C8	56	game	hasm	k	build/src/game_D3810.s.o
+collision_findPropsAt	0x150A6500	56	game	hasm	k	build/src/game_D39B0.s.o
 func_150A6538	0x150A6538	48	game	hasm	k	build/src/game_D39B0.s.o
-func_150A6568	0x150A6568	404	game	hasm	d	build/src/game_D3A18.s.o
+collision_findPropsInBox	0x150A6568	404	game	hasm	d	build/src/game_D3A18.s.o
 func_150A66FC	0x150A66FC	100	game	hasm	d	build/src/game_D3A18.s.o
 func_150A6760	0x150A6760	112	game	hasm	d,g	build/src/game_D3A18.s.o
 func_150A67D0	0x150A67D0	144	game	hasm	d	build/src/game_D3A18.s.o
@@ -2527,17 +2527,17 @@ effect_drawQuadFx	0x150A6860	508	game	hasm	d,h	build/src/game_D3D10.s.o
 effect_drawQuadFxVertices	0x150A6A5C	992	game	hasm	b,d,e,h	build/src/game_D3D10.s.o
 effect_drawQuadFxRenderMode	0x150A6E3C	240	game	hasm	d	build/src/game_D3D10.s.o
 effect_drawQuadFxTriangles	0x150A6F2C	116	game	hasm	k	build/src/game_D3D10.s.o
-func_150A6FA0	0x150A6FA0	200	game	hasm	b,d	build/src/game_D4450.s.o
+prop_waveVerticesWeighted	0x150A6FA0	200	game	hasm	b,d	build/src/game_D4450.s.o
 func_150A7068	0x150A7068	24	game	hasm	d,e	build/src/game_D4450.s.o
 func_150A7080	0x150A7080	64	game	hasm	b,d	build/src/game_D4450.s.o
-func_150A70C0	0x150A70C0	188	game	hasm	b,d,f	build/src/game_D4450.s.o
+prop_waveVertices	0x150A70C0	188	game	hasm	b,d,f	build/src/game_D4450.s.o
 func_150A717C	0x150A717C	76	game	hasm	b,d,e,h	build/src/game_D4450.s.o
-func_150A71C8	0x150A71C8	236	game	hasm	b,d	build/src/game_D4450.s.o
+prop_waveVerticesMode1	0x150A71C8	236	game	hasm	b,d	build/src/game_D4450.s.o
 func_150A72B4	0x150A72B4	172	game	hasm	b,d,e,h	build/src/game_D4450.s.o
-func_150A7360	0x150A7360	252	game	hasm	b,d	build/src/game_D4450.s.o
+prop_waveVerticesMode1Weighted	0x150A7360	252	game	hasm	b,d	build/src/game_D4450.s.o
 func_150A745C	0x150A745C	112	game	hasm	b,d,e	build/src/game_D4450.s.o
 func_150A74CC	0x150A74CC	80	game	hasm	b,d	build/src/game_D4450.s.o
-func_150A751C	0x150A751C	160	game	hasm	b,d	build/src/game_D4450.s.o
+prop_waveVerticesMode2Weighted	0x150A751C	160	game	hasm	b,d	build/src/game_D4450.s.o
 D_150A75BC	0x150A75BC	52	game	hasm	b,d,e	build/src/game_D4450.s.o
 D_150A75F0	0x150A75F0	28	game	hasm	d,e,h	build/src/game_D4450.s.o
 D_150A760C	0x150A760C	24	game	hasm	b,d,h	build/src/game_D4450.s.o
@@ -2546,22 +2546,22 @@ D_150A763C	0x150A763C	24	game	hasm	b,d,h	build/src/game_D4450.s.o
 D_150A7654	0x150A7654	72	game	hasm	d,e,h	build/src/game_D4450.s.o
 func_150A769C	0x150A769C	84	game	hasm	b,d	build/src/game_D4450.s.o
 func_150A76F0	0x150A76F0	128	game	hasm	b,c	build/src/game_D4450.s.o
-func_150A7770	0x150A7770	32	game	hasm	b	build/src/game_D4C20.s.o
+libc_fillBytes	0x150A7770	32	game	hasm	b	build/src/game_D4C20.s.o
 guMtxF2L	0x150A7790	464	game	hasm	e	build/src/libultra/gu/guMtxF2L.s.o
-func_150A7960	0x150A7960	160	game	hasm	s	build/src/game_D4E10.s.o
-func_150A7A00	0x150A7A00	20	game	hasm	d	build/src/game_D4EB0.s.o
-func_150A7A14	0x150A7A14	52	game	hasm	c	build/src/game_D4EC4.s.o
-func_150A7A48	0x150A7A48	312	game	hasm	f,h	build/src/game_D4EF8.s.o
-func_150A7B80	0x150A7B80	64	game	hasm	b	build/src/game_D5030.s.o
+math_transformPoint	0x150A7960	160	game	hasm	s	build/src/game_D4E10.s.o
+math_transformPointW	0x150A7A00	20	game	hasm	d	build/src/game_D4EB0.s.o
+math_storeTransformW	0x150A7A14	52	game	hasm	c	build/src/game_D4EC4.s.o
+math_mtxMulF	0x150A7A48	312	game	hasm	f,h	build/src/game_D4EF8.s.o
+math_mtxIdentity	0x150A7B80	64	game	hasm	b	build/src/game_D5030.s.o
 guMtxIdentF	0x150A7BC0	80	game	hasm	s	build/src/libultra/gu/guMtxIdentF.s.o
-func_150A7C10	0x150A7C10	160	game	hasm	b	build/src/game_D50C0.s.o
-func_150A7CB0	0x150A7CB0	80	game	hasm	s	build/src/game_D5160.s.o
+math_mtxScale	0x150A7C10	160	game	hasm	b	build/src/game_D50C0.s.o
+math_mtxScaleF	0x150A7CB0	80	game	hasm	s	build/src/game_D5160.s.o
 math_mtxTranslate	0x150A7D00	160	game	hasm	b	build/src/game_D51B0.s.o
-func_150A7DA0	0x150A7DA0	80	game	hasm	s	build/src/game_D5250.s.o
-func_150A7DF0	0x150A7DF0	608	game	hasm	f	build/src/game_D52A0.s.o
-func_150A8050	0x150A8050	336	game	hasm	f	build/src/game_D5500.s.o
-func_150A81A0	0x150A81A0	48	game	hasm	b	build/src/game_D5650.s.o
-func_150A81D0	0x150A81D0	580	game	hasm	d,f,h	build/src/game_D5680.s.o
+math_mtxTranslateF	0x150A7DA0	80	game	hasm	s	build/src/game_D5250.s.o
+math_mtxRotateRPY	0x150A7DF0	608	game	hasm	f	build/src/game_D52A0.s.o
+math_mtxRotateRPYF	0x150A8050	336	game	hasm	f	build/src/game_D5500.s.o
+anim_copyRootMtx	0x150A81A0	48	game	hasm	b	build/src/game_D5650.s.o
+anim_buildBoneMatrices	0x150A81D0	580	game	hasm	d,f,h	build/src/game_D5680.s.o
 func_150A8414	0x150A8414	264	game	hasm	d,h	build/src/game_D5680.s.o
 func_150A851C	0x150A851C	28	game	hasm	d,g	build/src/game_D5680.s.o
 func_150A8538	0x150A8538	232	game	hasm	d	build/src/game_D5680.s.o
@@ -2587,23 +2587,23 @@ func_150A9400	0x150A9400	220	game	hasm	d,h	build/src/game_D5DC8.s.o
 func_150A94DC	0x150A94DC	144	game	hasm	c,d,h	build/src/game_D5DC8.s.o
 func_150A956C	0x150A956C	368	game	hasm	d,g,h	build/src/game_D5DC8.s.o
 func_150A96DC	0x150A96DC	680	game	hasm	d	build/src/game_D5DC8.s.o
-func_150A9984	0x150A9984	392	game	hasm	e,h	build/src/game_D6E34.s.o
-func_150A9B0C	0x150A9B0C	304	game	hasm	h	build/src/game_D6FBC.s.o
+math_mtxFToLInPlace	0x150A9984	392	game	hasm	e,h	build/src/game_D6E34.s.o
+math_mtxRotScaleF	0x150A9B0C	304	game	hasm	h	build/src/game_D6FBC.s.o
 D_150A9C3C	0x150A9C3C	4	game	hasm	g	build/src/game_D6FBC.s.o
-func_150A9C40	0x150A9C40	2096	game	hasm	b,g	build/src/game_D70F0.s.o
-func_150AA470	0x150AA470	96	game	hasm	h	build/src/game_D70F0.s.o
-func_150AA4D0	0x150AA4D0	216	game	hasm	c,h	build/src/game_D7980.s.o
-func_150AA5A8	0x150AA5A8	156	game	hasm	c,h	build/src/game_D7980.s.o
-func_150AA644	0x150AA644	52	game	hasm	c,h	build/src/game_D7980.s.o
-func_150AA678	0x150AA678	256	game	hasm	c,h	build/src/game_D7980.s.o
-func_150AA778	0x150AA778	156	game	hasm	c,h	build/src/game_D7980.s.o
-func_150AA814	0x150AA814	396	game	hasm	b,h	build/src/game_D7CC4.s.o
-func_150AA9A0	0x150AA9A0	128	game	hasm	c,h	build/src/game_D7E50.s.o
-func_150AAA20	0x150AAA20	868	game	hasm	c,d,h	build/src/game_D7E50.s.o
+gQuarterSineTable	0x150A9C40	2096	game	hasm	b,g	build/src/game_D70F0.s.o
+math_triBoxFacePlane	0x150AA470	96	game	hasm	h	build/src/game_D70F0.s.o
+math_triBoxBevel2D	0x150AA4D0	216	game	hasm	c,h	build/src/game_D7980.s.o
+math_triBoxBevel3D	0x150AA5A8	156	game	hasm	c,h	build/src/game_D7980.s.o
+math_triBoxCheckPoint	0x150AA644	52	game	hasm	c,h	build/src/game_D7980.s.o
+math_triBoxCheckLine	0x150AA678	256	game	hasm	c,h	build/src/game_D7980.s.o
+math_triBoxSign3	0x150AA778	156	game	hasm	c,h	build/src/game_D7980.s.o
+math_triBoxPointInTri	0x150AA814	396	game	hasm	b,h	build/src/game_D7CC4.s.o
+math_storeTriPlane	0x150AA9A0	128	game	hasm	c,h	build/src/game_D7E50.s.o
+math_triCubeOverlap	0x150AAA20	868	game	hasm	c,d,h	build/src/game_D7E50.s.o
 func_150AAD84	0x150AAD84	20	game	hasm	k	build/src/game_D7E50.s.o
-func_150AAD98	0x150AAD98	1032	game	hasm	d,h	build/src/game_D8248.s.o
+math_triBoxOverlap	0x150AAD98	1032	game	hasm	d,h	build/src/game_D8248.s.o
 func_150AB1A0	0x150AB1A0	80	game	hasm	c	build/src/game_D8248.s.o
-func_150AB1F0	0x150AB1F0	56	game	hasm	g	build/src/game_D86A0.s.o
+collision_resolveMapWalls	0x150AB1F0	56	game	hasm	g	build/src/game_D86A0.s.o
 func_150AB228	0x150AB228	448	game	hasm	b,d,e,f,h	build/src/game_D86A0.s.o
 func_150AB3E8	0x150AB3E8	36	game	hasm	k	build/src/game_D86A0.s.o
 D_150AB40C	0x150AB40C	156	game	hasm	d,h	build/src/game_D86A0.s.o
@@ -2632,14 +2632,14 @@ D_150AC2AC	0x150AC2AC	44	game	hasm	d,g	build/src/game_D86A0.s.o
 func_150AC2D8	0x150AC2D8	108	game	hasm	k	build/src/game_D86A0.s.o
 func_150AC344	0x150AC344	12	game	hasm	c,g	build/src/game_D86A0.s.o
 func_150AC350	0x150AC350	148	game	hasm	d,h	build/src/game_D86A0.s.o
-func_150AC3E4	0x150AC3E4	156	game	hasm	d	build/src/game_D86A0.s.o
+collision_findLedge	0x150AC3E4	156	game	hasm	d	build/src/game_D86A0.s.o
 func_150AC480	0x150AC480	380	game	hasm	d,h	build/src/game_D86A0.s.o
 func_150AC5FC	0x150AC5FC	152	game	hasm	d,h	build/src/game_D86A0.s.o
 func_150AC694	0x150AC694	164	game	hasm	d,h	build/src/game_D86A0.s.o
 func_150AC738	0x150AC738	556	game	hasm	d,h	build/src/game_D86A0.s.o
 func_150AC964	0x150AC964	76	game	hasm	d	build/src/game_D86A0.s.o
 D_150AC9B0	0x150AC9B0	16	game	hasm	d	build/src/game_D86A0.s.o
-func_150AC9C0	0x150AC9C0	360	game	hasm	d,h	build/src/game_D9E70.s.o
+collision_castRayWorld	0x150AC9C0	360	game	hasm	d,h	build/src/game_D9E70.s.o
 func_150ACB28	0x150ACB28	40	game	hasm	g,h	build/src/game_D9E70.s.o
 func_150ACB50	0x150ACB50	136	game	hasm	d,h	build/src/game_D9E70.s.o
 func_150ACBD8	0x150ACBD8	32	game	hasm	d,g	build/src/game_D9E70.s.o
@@ -2651,20 +2651,20 @@ func_150AD2F4	0x150AD2F4	112	game	hasm	k	build/src/game_D9E70.s.o
 func_150AD364	0x150AD364	900	game	hasm	c,d,h	build/src/game_D9E70.s.o
 func_150AD6E8	0x150AD6E8	104	game	hasm	d,g,h	build/src/game_D9E70.s.o
 func_150AD750	0x150AD750	32	game	hasm	d	build/src/game_D9E70.s.o
-func_150AD770	0x150AD770	16	game	hasm	b,g	build/src/game_DAC20.s.o
-func_150AD780	0x150AD780	12	game	hasm	g	build/src/game_DAC30.s.o
-func_150AD78C	0x150AD78C	272	game	hasm	d,e	build/src/game_DAC30.s.o
+debug_fatalTrap	0x150AD770	16	game	hasm	b,g	build/src/game_DAC20.s.o
+math_cos	0x150AD780	12	game	hasm	g	build/src/game_DAC30.s.o
+math_sin	0x150AD78C	272	game	hasm	d,e	build/src/game_DAC30.s.o
 func_150AD89C	0x150AD89C	20	game	hasm	k	build/src/game_DAC30.s.o
-func_150AD8B0	0x150AD8B0	80	game	hasm	s	build/src/game_DAD60.s.o
-func_150AD900	0x150AD900	48	game	hasm	s	build/src/game_DADB0.s.o
-func_150AD930	0x150AD930	48	game	hasm	s	build/src/game_DADB0.s.o
-func_150AD960	0x150AD960	48	game	hasm	b,d	build/src/game_DAE10.s.o
+math_cross3	0x150AD8B0	80	game	hasm	s	build/src/game_DAD60.s.o
+math_dot3	0x150AD900	48	game	hasm	s	build/src/game_DADB0.s.o
+math_length3	0x150AD930	48	game	hasm	s	build/src/game_DADB0.s.o
+math_distance2D	0x150AD960	48	game	hasm	b,d	build/src/game_DAE10.s.o
 func_150AD990	0x150AD990	16	game	hasm	b	build/src/game_DAE10.s.o
 math_distance3D	0x150AD9A0	128	game	hasm	b	build/src/game_DAE50.s.o
-func_150ADA20	0x150ADA20	72	game	hasm	b	build/src/game_DAE50.s.o
-func_150ADA68	0x150ADA68	100	game	hasm	b	build/src/game_DAE50.s.o
-func_150ADACC	0x150ADACC	36	game	hasm	b	build/src/game_DAE50.s.o
-func_150ADAF0	0x150ADAF0	1544	game	hasm	b	build/src/game_DAFA0.s.o
+func_150ADA20_u8	0x150ADA20	72	game	hasm	b	build/src/game_DAE50.s.o
+math_randomFloat	0x150ADA68	100	game	hasm	b	build/src/game_DAE50.s.o
+math_seedRandom	0x150ADACC	36	game	hasm	b	build/src/game_DAE50.s.o
+script_runTask	0x150ADAF0	1544	game	hasm	b	build/src/game_DAFA0.s.o
 func_150AE0F8	0x150AE0F8	156	game	hasm	k	build/src/game_DAFA0.s.o
 func_150AE194	0x150AE194	28	game	hasm	h	build/src/game_DAFA0.s.o
 func_150AE1B0	0x150AE1B0	16	game	hasm	s	build/src/game_DAFA0.s.o
@@ -2672,7 +2672,7 @@ func_150AE1C0	0x150AE1C0	28	game	hasm	b	build/src/game_DAFA0.s.o
 func_150AE1DC	0x150AE1DC	24	game	hasm	b	build/src/game_DAFA0.s.o
 func_150AE1F4	0x150AE1F4	64	game	hasm	b	build/src/game_DAFA0.s.o
 func_150AE234	0x150AE234	76	game	hasm	b	build/src/game_DAFA0.s.o
-func_150AE280	0x150AE280	32	game	hasm	d,g	build/src/game_DB730.s.o
+script_exitTask	0x150AE280	32	game	hasm	d,g	build/src/game_DB730.s.o
 func_150AE2A0	0x150AE2A0	188	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
 func_150AE35C	0x150AE35C	16	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
 func_150AE36C	0x150AE36C	580	game	c		build/src/game/Collision/WobbleQuad/wobblequad.c.o
@@ -2725,10 +2725,10 @@ particle_spawnObjGroundBurst	0x150B2494	220	game	c		build/src/game/Particle/YawS
 particle_spawnYawStreak	0x150B2570	464	game	c		build/src/game/Particle/YawStreak/yawstreak.c.o
 pipeexplode_explode	0x150B2740	1908	game	c		build/src/game/Effects/PipeExplode/pipeexplode.c.o
 pipeexplode_spawnChunk	0x150B2EB4	724	game	c		build/src/game/Effects/PipeExplode/pipeexplode.c.o
-func_150B3188	0x150B3188	1316	game	c		build/src/game/Effects/PipeExplode/pipeexplode.c.o
+pipeexplode_spawnTunableChunk	0x150B3188	1316	game	c		build/src/game/Effects/PipeExplode/pipeexplode.c.o
 pipeexplode_onChunkFloorHit	0x150B36AC	224	game	c		build/src/game/Effects/PipeExplode/pipeexplode.c.o
-func_150B378C	0x150B378C	60	game	c		build/src/game/Effects/PipeExplode/pipeexplode.c.o
-func_150B37C8	0x150B37C8	744	game	c		build/src/game/Effects/PipeExplode/pipeexplode.c.o
+pipeexplode_fadeByLife	0x150B378C	60	game	c		build/src/game/Effects/PipeExplode/pipeexplode.c.o
+pipeexplode_spawnLandParticle	0x150B37C8	744	game	c		build/src/game/Effects/PipeExplode/pipeexplode.c.o
 func_150B3AB0	0x150B3AB0	348	game	c		build/src/game/Effects/BoneStreak/bonestreak.c.o
 func_150B3C0C	0x150B3C0C	452	game	c		build/src/game/Effects/BoneStreak/bonestreak.c.o
 func_150B3DD0	0x150B3DD0	164	game	c		build/src/game/Trail/ScatterTrail/scattertrail.c.o
@@ -3638,7 +3638,7 @@ shadow_createBlob	0x1510D970	276	game	c		build/src/game/Shadow/BlobShadow/blobsh
 shadow_updateBlob	0x1510DA84	1692	game	c		build/src/game/Shadow/BlobShadow/blobshadow.c.o
 shadow_drawBlob	0x1510E120	616	game	c		build/src/game/Shadow/BlobShadow/blobshadow.c.o
 shadow_getTriSlopes	0x1510E388	684	game	c		build/src/game/Shadow/BlobShadow/blobshadow.c.o
-func_1510E634	0x1510E634	60	game	c		build/src/game/Shadow/BlobShadow/blobshadow.c.o
+shadow_loadIdentityMtx	0x1510E634	60	game	c		build/src/game/Shadow/BlobShadow/blobshadow.c.o
 collision_isHitFacingUp	0x1510E670	308	game	c		build/src/game/Collision/Floor/floor.c.o
 collision_findFloorInRange	0x1510E7A4	136	game	c		build/src/game/Collision/Floor/floor.c.o
 collision_findFloor	0x1510E82C	144	game	c		build/src/game/Collision/Floor/floor.c.o

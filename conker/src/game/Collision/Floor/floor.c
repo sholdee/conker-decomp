@@ -16,9 +16,9 @@ void *gMapTriXZBounds[4];            // per map: x/z bounds
 void *gMapTriYBounds[4];            // per map: y bounds
 struct QuadNode *gMapQuadTrees[4]; // per map: quadtree root
 s32 gMapTriCounts[4];              // per map: triangle count
-s16 D_800DBE28;                 // quadtree node bitmap: row stride in bytes
-s16 D_800DBE2A;                 // map 0 quadtree: node count
-s16 D_800DBE2C;                 // map 0 quadtree: leaf count
+s16 gQuadNodeBitmapStride;                 // quadtree node bitmap: row stride in bytes
+s16 gMap0QuadNodeCount;                 // map 0 quadtree: node count
+s16 gMap0QuadLeafCount;                 // map 0 quadtree: leaf count
 s16 gViewCameraZones[4];              // per view: camera zone
 s32 gMapTriCollected;                 // triangles collected for the current map
 MeshTri *gCurMapTris;            // world mesh: triangles
@@ -60,8 +60,8 @@ s32 collision_isHitFacingUp(s32 index) {
     f32 normal[3];
     f32 normalY;
 
-    tri = D_800D3300[index].tri;
-    vtxBase = D_800D3300[index].vtxBase;
+    tri = gGroundCandidates[index].tri;
+    vtxBase = gGroundCandidates[index].vtxBase;
     if (tri != NULL) {
         v0 = (s16 *)(tri[0] + vtxBase);
         v1 = (s16 *)(tri[1] + vtxBase);
@@ -72,7 +72,7 @@ s32 collision_isHitFacingUp(s32 index) {
         edge2[0] = v2[0] - v0[0];
         edge2[1] = v2[1] - v0[1];
         edge2[2] = v2[2] - v0[2];
-        func_150AD8B0(edge1, edge2, normal);
+        math_cross3(edge1, edge2, normal);
         normalY = normal[1];
         if (normalY < 0.0f) {
             return FALSE;
@@ -215,16 +215,16 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                 s32 propVtxBase;
                 s16 *propVtx;
 
-                floorProps = func_150A6568(ix, iz, &allProps, group, ix, iz, minY, maxY);
-                func_150A44F0(floorProps, D_800D37E0, 0);
+                floorProps = collision_findPropsInBox(ix, iz, &allProps, group, ix, iz, minY, maxY);
+                collision_transformPropTris(floorProps, gSurfSetA, 0);
                 if (outPropFloorY != NULL) {
-                    func_150A44F0(allProps, D_800D3830, 0);
+                    collision_transformPropTris(allProps, gSurfSetB, 0);
                     bestPropHit = 0;
-                    count = func_150A43E0(ix, iz, allProps, D_800D3830);
+                    count = collision_gatherPropGroundTris(ix, iz, allProps, gSurfSetB);
                     if (count != 0) {
                         bestPropY = noFloor;
                         for (i = 0; i < count; i++) {
-                            height = D_800D3300[i].height * 0.00390625f;
+                            height = gGroundCandidates[i].height * 0.00390625f;
                             if (bestPropY < height && height < ceilingY) {
                                 bestPropHit = i;
                                 bestPropY = height;
@@ -233,8 +233,8 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                         *outPropFloorY = bestPropY;
                     }
                     if (*outPropFloorY != noFloor && outPropVerts != NULL) {
-                        tri = D_800D3300[bestPropHit].tri;
-                        propVtxBase = D_800D3300[bestPropHit].vtxBase;
+                        tri = gGroundCandidates[bestPropHit].tri;
+                        propVtxBase = gGroundCandidates[bestPropHit].vtxBase;
                         for (i = 0; i < 3; i++) {
                             propVtx = (s16 *)(tri[i] + propVtxBase);
                             outPropVerts[i][0] = propVtx[0];
@@ -243,11 +243,11 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                         }
                     }
                 }
-                count = func_150A43E0(ix, iz, floorProps, D_800D37E0);
+                count = collision_gatherPropGroundTris(ix, iz, floorProps, gSurfSetA);
             } else if (type == PROBE_OBJECT) {
-                count = func_150A4FA0(ix, iz);
+                count = collision_gatherActorGroundTris(ix, iz);
             } else {
-                count = func_150A3A70(ix, iz);
+                count = collision_gatherGroundTris(ix, iz);
             }
             total += count;
             if (first) {
@@ -259,7 +259,7 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
             for (i = 0; i < count; i++) {
                 f32 curReach;
 
-                height = D_800D3300[i].height / 256.0f;
+                height = gGroundCandidates[i].height / 256.0f;
                 if (noFallback == 0 && allowFallback != 0 && *outFloorY == noFloor
                     && (noFloor == noFloor || height < noFloor)) { // matching: tautology IDO still compiles
                     s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
@@ -313,7 +313,7 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                     *outType = bestType;
                 }
                 if (bestHit != -1) {
-                    hit = &D_800D3300[bestHit];
+                    hit = &gGroundCandidates[bestHit];
                     allowFallback = FALSE;
                     *outFloorY = hit->height / 256.0f;
                     if (*outFloorY < noFloor) {
@@ -349,7 +349,7 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                         *outFlags = 0;
                     }
                 } else if (type == PROBE_PROP && outFlags != NULL) {
-                    gFloorQueryProp = D_800D3300[bestHit].owner + 1;
+                    gFloorQueryProp = gGroundCandidates[bestHit].owner + 1;
                     if (db_Object_array[gFloorQueryProp - 1].materials != NULL) {
                         *outFlags = db_Object_array[gFloorQueryProp - 1].materials[triIndex - db_Object_array[gFloorQueryProp - 1].firstTri];
                     } else {
@@ -359,7 +359,7 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                     *outFlags = 0;
                 }
                 if (type == PROBE_OBJECT) {
-                    objectNum = D_800D3300[bestHit].owner + 1;
+                    objectNum = gGroundCandidates[bestHit].owner + 1;
                 }
             }
             if (count >= 2) {
@@ -369,13 +369,13 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                     ceilingFrom = *outFloorY;
                 }
                 for (i = 0; i < count; i++) {
-                    height = D_800D3300[i].height / 256.0f;
+                    height = gGroundCandidates[i].height / 256.0f;
                     if (ceilingFrom < height && height < ceilingY) {
                         if (!collision_isHitFacingUp(i)) {
                             s32 ceilingTri;
 
                             ceilingY = height;
-                            ceilingTri = (s32)D_800D3300[i].tri;
+                            ceilingTri = (s32)gGroundCandidates[i].tri;
                             triIndex = WORLD_TRI_INDEX(ceilingTri);
                             if (type == PROBE_WORLD) {
                                 if (gMeshTriMaterials != NULL) {
@@ -385,7 +385,7 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                                 }
                             } else if (type == PROBE_PROP) {
                                 s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
-                                propNum = D_800D3300[i].owner + 1;
+                                propNum = gGroundCandidates[i].owner + 1;
                                 if (db_Object_array[propNum - 1].materials != NULL) {
                                     ceilingFlags = db_Object_array[propNum - 1].materials[triIndex - db_Object_array[propNum - 1].firstTri];
                                 } else {
@@ -452,10 +452,10 @@ f32 collision_getPropSurfaceHeight(f32 x, f32 y, f32 z) {
 
     collision_selectMap(2);
     iy = y; // matching: converting y before the call keeps the original order
-    func_150A64C8(x, z, &groups, iy);
-    func_150A44F0(groups, D_800D3830, 0);
-    if (func_150A43E0(x, z, groups, D_800D3830)) {
-        height = D_800D3300[0].height * 0.00390625f;
+    collision_findPropsBelow(x, z, &groups, iy);
+    collision_transformPropTris(groups, gSurfSetB, 0);
+    if (collision_gatherPropGroundTris(x, z, groups, gSurfSetB)) {
+        height = gGroundCandidates[0].height * 0.00390625f;
     } else {
         height = -10000.0f;
     }
@@ -496,7 +496,7 @@ s32 collision_findZoneLeavesNear(s32 x, s32 z, s32 radius, ZoneNode **outLeaves)
 
 /* Prepares the collision probe; callers pass the probe type, which is unused. */
 void collision_selectMap() { // matching: a declared s32 parameter changes the code
-    func_150A49F4();
+    collision_setCurMap();
 }
 
 /*
@@ -542,12 +542,12 @@ s32 collision_findMeshFloorNear(s32 x, s32 y, s32 z, s32 *outTri) {
     f32 dist;
 
     collision_selectMap(0);
-    count = func_150A3A70(x, z);
+    count = collision_gatherGroundTris(x, z);
     if (count == 0) {
         return -10000;
     }
 
-    hits = D_800D3300;
+    hits = gGroundCandidates;
     bestIndex = 0;
     fy = y;
     bestDist = fy - hits[0].height * 0.00390625f;

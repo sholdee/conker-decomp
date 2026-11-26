@@ -45,7 +45,7 @@ void boot_runGame(void) {
             case 2:
                 player_clearMatch();
                 if (gFrontEndState == 2) {
-                    func_150ADACC(0x81280783);
+                    math_seedRandom(0x81280783);
                 }
                 func_15007A70(D_800BEA04, D_800BEA00, gNextLevel);
                 /* fallthrough */

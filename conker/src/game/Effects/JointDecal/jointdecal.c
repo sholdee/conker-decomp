@@ -45,20 +45,20 @@ void effect_spawnJointStepEffects(Actor *obj, u8 side, u8 arg2) {
     pos.y = obj->floorY;
     func_15143E94(5, 0x4022);
     effect_spawnQuadEffect(-1, pos.x, pos.y + 6.0f, pos.z, 25, 18, 0, *(u8 *)&arg2, 1);
-    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, func_150ADA68() * 50.0f + 40.0f, yaw + 60, yaw - 60,
-                  func_150ADA20() % 11U + 30, 5, 0, 0.0f, 0, *(u8 *)&arg2);
+    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, math_randomFloat() * 50.0f + 40.0f, yaw + 60, yaw - 60,
+                  math_random() % 11U + 30, 5, 0, 0.0f, 0, *(u8 *)&arg2);
     collision_initHitFromObject(&ground, obj);
     probe.x = pos.x;
     probe.y = pos.y + 100.0f;
     probe.z = pos.z;
     if (collision_probeFloorSurfABSet0Cached(&probe, 0, pos.y - 100.0f, &ground) != 0) {
-        size = func_150ADA68() * 200.0f + 200.0f;
+        size = math_randomFloat() * 200.0f + 200.0f;
         desc.texture = 0x2A;
         desc.unk7 = 0;
         desc.flags = 0x7340;
         desc.lifetime = 300;
         desc.frame = 0;
-        desc.frameSpeed = func_150ADA20() % 2001U + 2000;
+        desc.frameSpeed = math_random() % 2001U + 2000;
         desc.unk10 = 0xFF;
         desc.unk11 = 0xFF;
         desc.rgba[0] = 0;
@@ -71,13 +71,13 @@ void effect_spawnJointStepEffects(Actor *obj, u8 side, u8 arg2) {
         desc.unk1C = 0;
         desc.renderModes = 0x170002;
         decal = particle_spawnSurfaceQuadSpriteNoModel(&desc, 0, 0, &ground.tri, pos.x, ground.height, pos.z, size, size,
-                              func_150ADA20() & 0xFF, (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), 4, *(u8 *)&arg2, 0);
+                              math_random() & 0xFF, (math_random() & 1) * 2 + (math_random() & 1), 4, *(u8 *)&arg2, 0);
         if (decal != NULL && effect_pushQueue(gGroundDecalQueue, decal, 1) == 0) {
             effect_destroyObject(&decal->header);
         }
     }
-    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, func_150ADA68() * 40.0f + 60.0f, yaw + 60, yaw - 60,
-                  func_150ADA20() % 7U + 6, 6, 0, 0.0f, 0, *(u8 *)&arg2);
+    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, math_randomFloat() * 40.0f + 60.0f, yaw + 60, yaw - 60,
+                  math_random() % 7U + 6, 6, 0, 0.0f, 0, *(u8 *)&arg2);
 }
 
 /* Spawns one particle at (x, y, z) flying off along `yaw` at a random pitch; it slows down by 0.95 per frame. */
@@ -100,7 +100,7 @@ s32 effect_spawnJointSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
     desc.renderMode = 0xE03;
     desc.unk0 = 0x200005;
     desc.unk4 = 0;
-    desc.timer = func_150ADA20() % 36U + 70;
+    desc.timer = math_random() % 36U + 70;
     desc.frame = 0;
     desc.frameRate = 0;
     desc.r2 = 0xB0;
@@ -110,27 +110,27 @@ s32 effect_spawnJointSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
     desc.g = 0xB;
     desc.b = 0x6A;
     desc.a = 0xFF;
-    desc.alpha = func_150ADA20() % 52U + 90;
+    desc.alpha = math_random() % 52U + 90;
     desc.brightness = 0xFF;
     desc.primColorMode = 3;
     desc.envColorMode = 3;
-    desc.width = desc.height = func_150ADA68() * 165.0f + 800.0f;
+    desc.width = desc.height = math_randomFloat() * 165.0f + 800.0f;
     desc.pos.x = x;
     desc.pos.y = y;
     desc.pos.z = z;
-    pitch = func_150ADA20() % 11U - 12;
+    pitch = math_random() % 11U - 12;
     cosPitch = math_cosBinAngleMasked(pitch - 0x40);
     sinPitch = math_cosBinAngleMasked(pitch);
-    speed = func_150ADA68() * 11.0f + 15.0f;
+    speed = math_randomFloat() * 11.0f + 15.0f;
     desc.flags = 0xE05;
     desc.vel.x = speed * sinPitch * cosYaw;
     desc.vel.y = -speed * cosPitch;
     desc.vel.z = speed * sinPitch * sinYaw;
     desc.gravity = 0.0f;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x80;
     }
     desc.updateFunc = 2;
@@ -208,24 +208,24 @@ s32 effect_spawnJointPiece(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
     piece.pos.z = z;
     piece.elasticity = 0.2f;
 
-    pitch = func_150ADA20() % 13U - 52;
+    pitch = math_random() % 13U - 52;
     cosPitch = math_cosBinAngleMasked(pitch - 0x40);
     sinPitch = math_cosBinAngleMasked(pitch);
 
-    speed = func_150ADA68() * 9.0f + 3.0f;
+    speed = math_randomFloat() * 9.0f + 3.0f;
     piece.vel.x = speed * sinPitch * cosYaw;
     piece.vel.y = -speed * cosPitch;
     piece.vel.z = speed * sinPitch * sinYaw;
 
-    piece.rotVel.x = func_150ADA68() * 50.0f + -25.0f;
+    piece.rotVel.x = math_randomFloat() * 50.0f + -25.0f;
     piece.rotVel.y = 0.0f;
-    piece.rotVel.z = func_150ADA68() * 50.0f + -25.0f;
-    piece.lifetime = func_150ADA20() % 68U + 38;
+    piece.rotVel.z = math_randomFloat() * 50.0f + -25.0f;
+    piece.lifetime = math_random() % 68U + 38;
 
-    piece.gravity = func_150ADA68() * -0.1f + -0.3f;
+    piece.gravity = math_randomFloat() * -0.1f + -0.3f;
     piece.radius = 1.0f;
 
-    scale = func_150ADA68() * 18.80000114f + 5.6f;
+    scale = math_randomFloat() * 18.80000114f + 5.6f;
     piece.model = 31;
     piece.variant = 0;
     piece.unk5C = 0;

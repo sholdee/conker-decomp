@@ -12,14 +12,14 @@ void particle_updateShapeEmitter(EmitterEffect *effect) {
 
     if (math_isZoneHiddenFromViews(effect->data.emitter.zone) == 0) {
         emitter = &effect->data.emitter;
-        emitter->accumulator += (9.04e-08f + func_150ADA68() * 9.87e-08f) * emitter->rate * gFrameDelta;
+        emitter->accumulator += (9.04e-08f + math_randomFloat() * 9.87e-08f) * emitter->rate * gFrameDelta;
         if (emitter->accumulator > 1.0f) {
             point.w = 0.0f;
             do {
                 EmitterEffect *spawned;
 
                 math_randomZoneFootprintPoint(emitter->shape, &point.x, &point.z, &upper, &point.y);
-                spawned = effect_newTimedEffect(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
+                spawned = effect_newTimedEffect(math_random() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
                                                   sizeof(point), effect->base.header.owner, effect->base.header.kind);
                 if (spawned != NULL) {
                     memcpy(&spawned->data, &point, sizeof(point));
@@ -35,7 +35,7 @@ void particle_updateSourceEmitter(EmitterEffect *effect) {
     ParticleSourceData *source;
 
     source = &effect->data.source;
-    source->accumulator += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * gFrameDelta;
+    source->accumulator += (1352.0f + math_randomFloat() * 1698.0f) * 0.0001f * gFrameDelta;
     if (source->accumulator > 1.0f) {
         ParticleDesc spawn;
         WobbleData data;
@@ -77,16 +77,16 @@ void particle_updateSourceEmitter(EmitterEffect *effect) {
         spawn.vel.y = 0.0f;
         spawn.vel.z = 0.0f;
         do {
-            data.phaseStep[0] = func_150ADA20() % 5U + 4;
-            data.phaseStep[1] = func_150ADA20() % 5U + 4;
-            data.amplitude[0] = func_150ADA68() * 11.0f;
-            data.amplitude[1] = func_150ADA68() * 11.0f;
-            spawn.gravity = func_150ADA68() * 0.172f + 0.09800000489f;
+            data.phaseStep[0] = math_random() % 5U + 4;
+            data.phaseStep[1] = math_random() % 5U + 4;
+            data.amplitude[0] = math_randomFloat() * 11.0f;
+            data.amplitude[1] = math_randomFloat() * 11.0f;
+            spawn.gravity = math_randomFloat() * 0.172f + 0.09800000489f;
             spawn.flags &= ~0xC0;
-            spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-            spawn.alpha = func_150ADA20() % 101U + 100;
-            spawn.timer = func_150ADA20() % 51U + 80;
-            spawn.width = spawn.height = func_150ADA68() * 80.0f + 92.0f;
+            spawn.flags |= ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0);
+            spawn.alpha = math_random() % 101U + 100;
+            spawn.timer = math_random() % 51U + 80;
+            spawn.width = spawn.height = math_randomFloat() * 80.0f + 92.0f;
             particle = particle_newSpriteParticleWithFloor(&spawn, 0, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->data.wobble, &data, sizeof(data));

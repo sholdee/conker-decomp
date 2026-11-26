@@ -141,7 +141,7 @@ void func_1500E8C0(void) {
         descriptor.extent.z = 900.0f - descriptor.origin.z;
         trail_createSprayEmitter(&descriptor, 1);
     }
-    sound_addDynamicSound(1567, (level == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);
+    sound_addDynamicSound(1567, (level == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, sound_stopWhenSilentCallback, 0, 0, 72, 0);
 }
 
 void func_1500EAA0(void) {

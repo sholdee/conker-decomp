@@ -23,7 +23,7 @@ void func_150177F8(void) {
     D_800D2DB0 = 999.0f;
     D_800D2E41 = 10;
     D_800D2E42 = 6;
-    D_800D3858 = 0;
+    gScriptSavedSp = 0;
     D_800D2E44 = 0;
 }
 
@@ -177,21 +177,21 @@ void zone_computeBounds(TriggerZone *obj, ZoneBounds *bounds) {
         invalid = 1;
         break;
     case ZONE_AREA_CYLINDER:
-        func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
-        func_150A7CB0(transform, obj->xSize, obj->ySize * 0.5f, obj->xSize);
-        func_150A7A48(rotation, transform, transform);
-        func_150A8050(rotation, obj->pitch, obj->yaw, 0.0f);
-        func_150A7A48(transform, rotation, transform);
+        math_mtxTranslateF(rotation, 0.0f, 1.0f, 0.0f);
+        math_mtxScaleF(transform, obj->xSize, obj->ySize * 0.5f, obj->xSize);
+        math_mtxMulF(rotation, transform, transform);
+        math_mtxRotateRPYF(rotation, obj->pitch, obj->yaw, 0.0f);
+        math_mtxMulF(transform, rotation, transform);
         break;
     case ZONE_AREA_SPHERE:
-        func_150A7CB0(transform, obj->xSize, obj->xSize, obj->xSize);
+        math_mtxScaleF(transform, obj->xSize, obj->xSize, obj->xSize);
         break;
     case ZONE_AREA_BOX:
-        func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
-        func_150A7CB0(transform, obj->xSize, obj->ySize * 0.5f, obj->zSize);
-        func_150A7A48(rotation, transform, transform);
-        func_150A8050(rotation, obj->pitch, obj->yaw, 0.0f);
-        func_150A7A48(transform, rotation, transform);
+        math_mtxTranslateF(rotation, 0.0f, 1.0f, 0.0f);
+        math_mtxScaleF(transform, obj->xSize, obj->ySize * 0.5f, obj->zSize);
+        math_mtxMulF(rotation, transform, transform);
+        math_mtxRotateRPYF(rotation, obj->pitch, obj->yaw, 0.0f);
+        math_mtxMulF(transform, rotation, transform);
         break;
     }
     minZ = 0;
@@ -217,7 +217,7 @@ void zone_computeBounds(TriggerZone *obj, ZoneBounds *bounds) {
             } else {
                 signZ = -1.0f;
             }
-            func_150A7960(transform, signX, signY, signZ, &x, &y, &z);
+            math_transformPoint(transform, signX, signY, signZ, &x, &y, &z);
             if (x < minX) {
                 minX = x;
             } else if (maxX < x) {

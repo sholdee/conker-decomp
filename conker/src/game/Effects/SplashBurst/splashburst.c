@@ -38,16 +38,16 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
             hitGround = TRUE;
             impact.y = hit.height;
             impact.z = top.z;
-            particle_spawnImpactMark(func_150ADA68() * 125.0f + 204.0f, func_150ADA20() % 101U + 155, &hit.tri, &impact,
-                          func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
+            particle_spawnImpactMark(math_randomFloat() * 125.0f + 204.0f, math_random() % 101U + 155, &hit.tri, &impact,
+                          math_random() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
         }
     }
     particle_startPlayerRumbles(&origin, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg1, arg2);
     particle_startPlayerCameraWobbles(&origin, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
     particle_spawnBlastSpray(&origin, arg1, arg2);
     particle_spawnLightFlash(&origin, arg1, arg2);
-    particle_startRandomEmitter(hitGround ? &impact : &origin, func_150ADA20() % 62U + 120, arg1, arg2);
-    particle_spawnGrowFade(&origin, func_150ADA68() * 4.0f + 12.0f, 1.6409999f, func_150ADA20() % 56U + 200, 0.0f, arg1,
+    particle_startRandomEmitter(hitGround ? &impact : &origin, math_random() % 62U + 120, arg1, arg2);
+    particle_spawnGrowFade(&origin, math_randomFloat() * 4.0f + 12.0f, 1.6409999f, math_random() % 56U + 200, 0.0f, arg1,
                   arg2);
     blood_spawnHitEffects(obj, 1, 1, 1, 1, 0, arg1, arg2);
     particle_runAttackPairAt(&origin, 0, obj, obj, 0, 0x16, 0x15, 0);

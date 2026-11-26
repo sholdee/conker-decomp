@@ -86,7 +86,7 @@ void *heap_alloc(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
             osSetIntMask(intMask);
             if (mode == 0) {
                 D_8003C8E0 = 0x0C000042;
-                func_150AD770();
+                debug_fatalTrap();
             }
             return NULL;
         }

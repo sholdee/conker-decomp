@@ -185,7 +185,7 @@ s32 func_15108D24(DynModel *model, s32 viewport) {
     LampData *lamp;
 
     lamp = LAMP_DATA(model);
-    func_150A8050(mtx, lamp->swingX, 0.0f, lamp->swingZ);
+    math_mtxRotateRPYF(mtx, lamp->swingX, 0.0f, lamp->swingZ);
     mtx[3][1] = lamp->height;
     mtx[0][0] *= 0.157f;
     mtx[0][1] *= 0.157f;
@@ -215,7 +215,7 @@ s32 light_updateLampLight(LightEffect *effect) {
 
     model = effect->data.object;
     lamp = LAMP_DATA(model);
-    func_150A8050(mtx, lamp->swingX, 0.0f, lamp->swingZ);
+    math_mtxRotateRPYF(mtx, lamp->swingX, 0.0f, lamp->swingZ);
     mtx[3][1] = lamp->height;
     mtx[0][0] *= 0.157f;
     mtx[0][1] *= 0.157f;
@@ -226,11 +226,11 @@ s32 light_updateLampLight(LightEffect *effect) {
     mtx[2][0] *= 0.157f;
     mtx[2][1] *= 0.157f;
     mtx[2][2] *= 0.157f;
-    func_150A7960(mtx, 0.0f, -1108.0f, 0.0f, &end.x, &end.y, &end.z);
+    math_transformPoint(mtx, 0.0f, -1108.0f, 0.0f, &end.x, &end.y, &end.z);
     {
         f32 dy = end.y - lamp->height;
 
-        if (func_150AC9C0(0.0f, lamp->height, 0.0f, end.x, dy, end.z, NULL, NULL, &hit.x, &hit.y, &hit.z, NULL,
+        if (collision_castRayWorld(0.0f, lamp->height, 0.0f, end.x, dy, end.z, NULL, NULL, &hit.x, &hit.y, &hit.z, NULL,
                           NULL, NULL, 0.0f) == 0) {
             hit = end;
         }
@@ -314,7 +314,7 @@ s32 func_15109120(DynModel *model, s16 viewport) {
     s32 i;
 
     lamp = LAMP_DATA(model);
-    func_150A8050(mtx, lamp->swingX, 0.0f, lamp->swingZ);
+    math_mtxRotateRPYF(mtx, lamp->swingX, 0.0f, lamp->swingZ);
     mtx[3][1] = lamp->height;
     mtx[0][0] *= 0.157f;
     mtx[0][1] *= 0.157f;
@@ -347,7 +347,7 @@ s32 func_15109120(DynModel *model, s16 viewport) {
         x = vtx->v.ob[0];
         y = vtx->v.ob[1];
         z = vtx->v.ob[2];
-        func_150A7960(mtx, x, y, z, &outX, &outY, &outZ);
+        math_transformPoint(mtx, x, y, z, &outX, &outY, &outZ);
         t = outY * 0.358f + 81.0f;
         s = (outX * dirX + outZ * dirZ) * 0.21300001f + 26.0f;
         vtx->v.tc[0] = s * 32.0f;

@@ -79,7 +79,7 @@ void effect_randomizeBounceRecordSpeeds(s32 scale) {
         minSpeed = (scale * 300) >> 8;
         for (i = 0; i < RECORD_COUNT; i++) {
             speed = minSpeed; // matching: one combined expression shifts the code
-            speed += func_150ADA20() % range;
+            speed += math_random() % range;
             D_800BE4E0[i].targetSpeed = speed;
         }
     }

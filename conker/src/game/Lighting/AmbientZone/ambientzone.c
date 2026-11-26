@@ -222,7 +222,7 @@ void func_1515FC60(Actor *obj, TriggerZone *zone) {
         value = zone->data2;
         if (value != 0) {
             scale = (u32)value * 0.009999999776f;
-            value = func_150AD960(zone->x, zone->z, obj->xpos, obj->zpos);
+            value = math_distance2D(zone->x, zone->z, obj->xpos, obj->zpos);
             limit = (zone->xSize * scale) - obj->bodyRadius;
             if (limit > value) {
                 return;

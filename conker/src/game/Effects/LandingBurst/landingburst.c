@@ -29,12 +29,12 @@ s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     pos.x = x;
     pos.y = y;
     pos.z = z;
-    speed = func_150ADA68() * 5.3f + 4.4f;
+    speed = math_randomFloat() * 5.3f + 4.4f;
     math_dirFromBinAngles(yaw, pitch, speed, &dir);
     // matching: a literal 0.0f scale is folded away; IDO keeps the multiply for (0.68f - 0.68f)
-    particle_spawnSplash(&pos, &dir, func_150ADA68() * (0.68f - 0.68f) + 0.68f, func_150ADA20() % 20 + 31,
-                  func_150ADA20() % 101 + 155, func_150ADA68() * 2.33f + 6.7f,
-                  (func_150ADA20() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, argE, 1);
+    particle_spawnSplash(&pos, &dir, math_randomFloat() * (0.68f - 0.68f) + 0.68f, math_random() % 20 + 31,
+                  math_random() % 101 + 155, math_randomFloat() * 2.33f + 6.7f,
+                  (math_random() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, argE, 1);
     return 1;
 }
 
@@ -126,7 +126,7 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
         impact.spray.unk38 = 0.5f;
         particle_spawnSplashSprayAtAngles(&impact.angles, &impact.spray, &ground, 0xFF, 1);
 
-        count = func_150ADA20() % 6 + 12;
+        count = math_random() % 6 + 12;
         scatterGround.material = 0;
         scatterGround.flags = 0;
         scatterGround.source = 0;
@@ -136,7 +136,7 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
         if (count != 0) {
             // matching: a do/while (--count != 0) loop schedules differently from this break form
             for (;;) {
-                math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * 100.0f + 110.0f, &spot[0], &spot[2]);
+                math_dirFromBinAngleXZ(math_random() & 0xFF, math_randomFloat() * 100.0f + 110.0f, &spot[0], &spot[2]);
                 spot[0] += actor->xpos;
                 spot[2] += actor->zpos;
                 probe.x = spot[0];
@@ -147,11 +147,11 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
                 spot[1] = scatterGround.height;
                 spot[1] += 10.0f;
                 // matching: (f32)100 is not CSE'd with the 100.0f above, which would tie up an FP register
-                if (func_150ADA20() & 1) {
-                    particle_spawnKindEmitter(0, func_150ADA68() * 4.5f + 15.0f, func_150ADA68() * (f32)100 + 155.0f,
+                if (math_random() & 1) {
+                    particle_spawnKindEmitter(0, math_randomFloat() * 4.5f + 15.0f, math_randomFloat() * (f32)100 + 155.0f,
                                   &scatterGround.tri, (Vec3f *)spot, 100, 0, 1, 0, arg1, arg2);
                 } else {
-                    particle_spawnSquash(0, func_150ADA68() * 5.9f + 6.1f, func_150ADA68() * (f32)100 + 155.0f,
+                    particle_spawnSquash(0, math_randomFloat() * 5.9f + 6.1f, math_randomFloat() * (f32)100 + 155.0f,
                                   (Vec3f *)spot, 1, arg1, arg2);
                 }
                 if (--count == 0) {
@@ -180,8 +180,8 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
         }
         center[1] = centerGround.height;
         center[1] += 10.0f;
-        blood_spawnGrowingParticle((func_150ADA68() * 40.0f + 120.0f) * 0.001f, (func_150ADA68() * 123.0f + 123.0f) * 0.00001f,
-                      func_150ADA20() % 101 + 155, func_150ADA20() % 101 + 100, func_150ADA20() % 56 + 70,
+        blood_spawnGrowingParticle((math_randomFloat() * 40.0f + 120.0f) * 0.001f, (math_randomFloat() * 123.0f + 123.0f) * 0.00001f,
+                      math_random() % 101 + 155, math_random() % 101 + 100, math_random() % 56 + 70,
                       &centerGround.tri, (Vec3f *)center, 0, 1, arg1, arg2);
     }
 }
@@ -382,7 +382,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                 }
             }
             if (freeCount != 0) {
-                emitter->spawnTime += func_150ADA68() * 307.0f * 0.001f * gFrameDelta;
+                emitter->spawnTime += math_randomFloat() * 307.0f * 0.001f * gFrameDelta;
                 if (emitter->spawnTime > 1.0f) {
                     ParticleDef desc;
                     Game1DD500Motion motion;
@@ -390,7 +390,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                     last->next = head;
                     desc.texture = gKindSpriteTextures[emitter->profileFlag];
                     desc.renderModes = 0x1001;
-                    desc.lifetime = func_150ADA20() % 51 + 52;
+                    desc.lifetime = math_random() % 51 + 52;
                     desc.frame = 0;
                     desc.frameSpeed = 0;
                     desc.rgba[0] = 0;
@@ -407,7 +407,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                     desc.rot.y = 0.0f;
                     desc.rot.z = 0.0f;
                     motion.unk25 = emitter->profileFlag;
-                    motion.checkGround = func_150ADA20() & 1;
+                    motion.checkGround = math_random() & 1;
                     desc.width = 0.0f;
                     desc.height = 0.0f;
                     motion.baseWidth = 5.0f;
@@ -419,27 +419,27 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                         s32 index;
                         Game1DD500Particle *particle;
 
-                        skip = func_150ADA20() % freeCount;
+                        skip = math_random() % freeCount;
                         while (skip--) {
                             last = head;
                             head = head->next;
                         }
                         index = head - emitter->slots;
-                        desc.unk45 = func_150ADA20() % 101 + 100;
-                        desc.unk44 = func_150ADA20() % 101 + 155;
-                        motion.phaseSpeedWidth = func_150ADA20() % 5 + 4;
-                        motion.phaseSpeedHeight = func_150ADA20() % 5 + 4;
+                        desc.unk45 = math_random() % 101 + 100;
+                        desc.unk44 = math_random() % 101 + 155;
+                        motion.phaseSpeedWidth = math_random() % 5 + 4;
+                        motion.phaseSpeedHeight = math_random() % 5 + 4;
                         // matching: "- 703.0f" emits sub.s; the original adds a negative constant
-                        motion.gravity = (func_150ADA68() * 506.0f + -703.0f) * 0.001f;
+                        motion.gravity = (math_randomFloat() * 506.0f + -703.0f) * 0.001f;
                         math_transformOffset(&gJointEmitterMounts[index].offset, &desc.pos,
                                       JOINT_MTX(emitter->owner, gJointEmitterMounts[index].joint));
                         desc.rot = desc.pos;
-                        particle = particle_newQuadParticleWhite(&desc, 0x11, 0, 0, 0x10, ((func_150ADA20() % 1) ? 1 : 0) | 2, 0x28,
+                        particle = particle_newQuadParticleWhite(&desc, 0x11, 0, 0, 0x10, ((math_random() % 1) ? 1 : 0) | 2, 0x28,
                                                  task->base.header.owner, task->base.header.kind);
                         head->particle = particle;
                         if (particle != NULL) {
                             memcpy(&particle->motion, &motion, sizeof(motion));
-                            head->timer = func_150ADA20() % 31 + 20;
+                            head->timer = math_random() % 31 + 20;
                             head = head->next;
                             freeCount--;
                             last->next = head;
@@ -502,7 +502,7 @@ s32 effect_moveReleasedParticle(Game1DD500Particle *particle) {
             splat.y = particle->head.ground.height + 5.0f;
             splat.z = probe.z;
             size = ((motion->baseWidth + motion->swingWidth * 0.5f) + (motion->baseHeight + motion->swingHeight * 0.5f)) * 0.5f;
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 particle_spawnKindEmitter(motion->unk25, size * 1.7f, particle->head.def.unk44, &particle->head.ground.tri, &splat, 100, 0, 1, 0,
                               particle->head.header.owner, particle->head.header.kind);
             } else {

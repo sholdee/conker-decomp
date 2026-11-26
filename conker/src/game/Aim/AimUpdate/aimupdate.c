@@ -1313,24 +1313,24 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
     finalPitch = data->offPitch[slot] + pitch;
     switch (axisMode) {
     case 0:
-        func_150A8050(mtxA, 0.0f, 0.0f, roll);
-        func_150A8050(mtxB, -finalPitch, finalYaw, 0.0f);
+        math_mtxRotateRPYF(mtxA, 0.0f, 0.0f, roll);
+        math_mtxRotateRPYF(mtxB, -finalPitch, finalYaw, 0.0f);
         break;
     case 2:
-        func_150A8050(mtxA, 0.0f, 0.0f, -finalPitch);
-        func_150A8050(mtxB, roll, finalYaw, 0.0f);
+        math_mtxRotateRPYF(mtxA, 0.0f, 0.0f, -finalPitch);
+        math_mtxRotateRPYF(mtxB, roll, finalYaw, 0.0f);
         break;
     case 1:
-        func_150A8050(mtxA, 0.0f, 0.0f, finalPitch);
-        func_150A8050(mtxB, roll, finalYaw, 0.0f);
+        math_mtxRotateRPYF(mtxA, 0.0f, 0.0f, finalPitch);
+        math_mtxRotateRPYF(mtxB, roll, finalYaw, 0.0f);
         break;
     case 3:
-        func_150A8050(mtxA, 0.0f, 0.0f, -finalPitch);
-        func_150A8050(mtxB, -finalYaw, roll, 0.0f);
+        math_mtxRotateRPYF(mtxA, 0.0f, 0.0f, -finalPitch);
+        math_mtxRotateRPYF(mtxB, -finalYaw, roll, 0.0f);
         break;
     }
-    func_150A7A48(mtxA, mtxB, mtxC);
-    func_150A7A48(mtxC, refMtx, result);
+    math_mtxMulF(mtxA, mtxB, mtxC);
+    math_mtxMulF(mtxC, refMtx, result);
     result[3][0] = mtx[3][0];
     result[3][1] = mtx[3][1];
     result[3][2] = mtx[3][2];
@@ -1364,7 +1364,7 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
         scale[2] = 1.0f;
     }
     if (relative != 0) {
-        func_150A7A48(mtxC, mtx, mtxA);
+        math_mtxMulF(mtxC, mtx, mtxA);
         bcopy(mtxA, mtx, sizeof(mtxA));
     } else {
         bcopy(result, mtx, sizeof(result));
@@ -1711,8 +1711,8 @@ void func_1503A678(void) {
         pos[1] = bone[3][1];
         pos[2] = bone[3][2];
         guMtxIdentF(scaleMtx);
-        func_150A7CB0(scaleMtx, scale[0], scale[1], scale[2]);
-        func_150A7A48(bone, scaleMtx, tmp);
+        math_mtxScaleF(scaleMtx, scale[0], scale[1], scale[2]);
+        math_mtxMulF(bone, scaleMtx, tmp);
         bcopy(tmp, bone, sizeof(tmp));
         bone[3][0] = pos[0];
         bone[3][1] = pos[1];

@@ -70,9 +70,9 @@ void effect_sprayFromArea(u8 index) {
     pos.x = area->x;
     pos.y = area->y + area->ySize * 0.5f;
     pos.z = area->z;
-    randFrac = func_150ADA68();
-    particle_spawnGrowFade(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, func_150ADA20() % 56U + 200, 2.6090002f, 0xFF, 1);
-    count = (func_150ADA20() & 1) + 3;
+    randFrac = math_randomFloat();
+    particle_spawnGrowFade(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, math_random() % 56U + 200, 2.6090002f, 0xFF, 1);
+    count = (math_random() & 1) + 3;
     if (count > 0) {
         range = gSprayAreaAngleRanges[index];
         desc.angles.yawRange = 80;
@@ -100,13 +100,13 @@ void effect_sprayFromArea(u8 index) {
         desc.spray.fadeOutStart = 12;
         desc.spray.eventFunc = -1;
         do {
-            randInt = func_150ADA20();
+            randInt = math_random();
             angle = range[0] + randInt % (range[1] + 1);
             desc.angles.yawBase = angle - 40;
             math_dirFromBinAngleXZ(angle, area->xSize, &desc.spray.pos.x, &desc.spray.pos.z);
             desc.spray.pos.x += area->x;
             desc.spray.pos.z += area->z;
-            desc.spray.pos.y = func_150ADA68() * area->ySize + area->y;
+            desc.spray.pos.y = math_randomFloat() * area->ySize + area->y;
             particle_spawnJetSprayBursts(&desc, 0xFF, 1);
             count--;
         } while (count > 0);
@@ -199,12 +199,12 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
     ext.ownerId = obj->unique_id;
     ext.maxWidth = 60.0f;
     ext.timer = 50.0f;
-    ext.pulsePhase = func_150ADA68() * 6.2831855f;
+    ext.pulsePhase = math_randomFloat() * 6.2831855f;
     ext.burstDone = 0;
     ext.texS0 = -2048.0f;
     ext.texS1 = -2048.0f;
-    ext.texPhase0 = func_150ADA68() * 6.2831855f;
-    ext.texPhase1 = func_150ADA68() * 6.2831855f;
+    ext.texPhase0 = math_randomFloat() * 6.2831855f;
+    ext.texPhase1 = math_randomFloat() * 6.2831855f;
     ext.light = NULL;
     ext.groundParticle = NULL;
     ext.emitCounter = 0.0f;
@@ -322,9 +322,9 @@ s32 effect_updateActorBeam(Actor150FD514 *particle) {
     }
     if (owner != NULL) {
         actor_flashFog(owner, 0xFF, 0, 0, 0xFF, 0, 4);
-        ext->emitCounter += (0.091000006f + func_150ADA68() * 0.07f) * gFrameDelta;
+        ext->emitCounter += (0.091000006f + math_randomFloat() * 0.07f) * gFrameDelta;
         while (ext->emitCounter > 1.0f) {
-            func_15107B78(owner, func_150ADA20() & 0xFF, (func_150ADA20() % 101) - 63, particle->head.header.owner, particle->head.header.kind);
+            func_15107B78(owner, math_random() & 0xFF, (math_random() % 101) - 63, particle->head.header.owner, particle->head.header.kind);
             ext->emitCounter -= 1.0f;
         }
     }
@@ -337,7 +337,7 @@ s32 effect_updateActorBeam(Actor150FD514 *particle) {
         if (ext->burstDone == 0) {
             if (owner != NULL) {
                 actor_hitScripted(owner, 0x16, owner->langle, -1);
-                func_10010F88(0x69D, 32000, 0, 0, 0, particle->head.def.pos.x, particle->head.def.pos.y, particle->head.def.pos.z, 500, 3000);
+                sound_playAt(0x69D, 32000, 0, 0, 0, particle->head.def.pos.x, particle->head.def.pos.y, particle->head.def.pos.z, 500, 3000);
             }
             ext->burstDone = 1;
             particle_startPlayerRumbles(&particle->head.def.pos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, particle->head.header.owner, particle->head.header.kind);
@@ -346,9 +346,9 @@ s32 effect_updateActorBeam(Actor150FD514 *particle) {
                 groundPos.x = particle->head.def.pos.x;
                 groundPos.y = ext->ground.height;
                 groundPos.z = particle->head.def.pos.z;
-                particle_spawnImpactMark(func_150ADA68() * 78.0f + 125.0f, func_150ADA20() % 76 + 180, &ext->ground.tri, &groundPos,
-                              (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, particle->head.header.owner, 0);
-                particle_startRandomEmitter(&groundPos, (func_150ADA20() % 80) + 243, particle->head.header.owner, particle->head.header.kind);
+                particle_spawnImpactMark(math_randomFloat() * 78.0f + 125.0f, math_random() % 76 + 180, &ext->ground.tri, &groundPos,
+                              (math_random() % 207) + 302, 0, 1, 0, 0, 0, particle->head.header.owner, 0);
+                particle_startRandomEmitter(&groundPos, (math_random() % 80) + 243, particle->head.header.owner, particle->head.header.kind);
             }
         }
     }
@@ -359,8 +359,8 @@ s32 effect_updateActorBeam(Actor150FD514 *particle) {
     ext->texPhase1 += -0.086f * gFrameDelta;
     ext->texPhase0 = math_wrapRadians(ext->texPhase0);
     ext->texPhase1 = math_wrapRadians(ext->texPhase1);
-    ext->texS0 = func_150AD78C(ext->texPhase0) * 1666.0f + -4633.0f;
-    ext->texS1 = func_150AD78C(ext->texPhase1) * 1192.0f + 1242.0f;
+    ext->texS0 = math_sin(ext->texPhase0) * 1666.0f + -4633.0f;
+    ext->texS1 = math_sin(ext->texPhase1) * 1192.0f + 1242.0f;
     if (ext->groundParticle != NULL) {
         ext->groundParticle->head.def.width = ext->groundParticle->head.def.height = particle->head.def.width * 0.02f;
         ext->groundParticle->head.def.unk44 = particle->head.def.unk44;

@@ -33,7 +33,7 @@ s32 attach_getBonePoint(Vec3f *out, Actor *actor, u8 point) {
             break;
     }
     y = 0.0f;
-    func_150A7960(actor->ob_matrix_ptr[bone], x, y, z, &x, &y, &z);
+    math_transformPoint(actor->ob_matrix_ptr[bone], x, y, z, &x, &y, &z);
     out->x = x;
     out->y = y;
     out->z = z;

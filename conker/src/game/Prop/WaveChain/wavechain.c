@@ -79,13 +79,13 @@ void prop_updateWaveChains(void) {
                 gWaveChainPresets[gWaveChainPresetIds[chain]].soundTimer = 0;
             }
             if (falling && gWaveChainPresets[gWaveChainPresetIds[chain]].soundTimer == 0) {
-                gWaveChainPresets[gWaveChainPresetIds[chain]].soundTimer = (func_150ADA20() & 0x3F) + 180;
+                gWaveChainPresets[gWaveChainPresetIds[chain]].soundTimer = (math_random() & 0x3F) + 180;
                 if (gWaveChainPresetIds[chain] == 2 || gWaveChainPresetIds[chain] == 3) {
-                    func_10010F88((func_150ADA20() & 8) + 0x507, 0x5DC0, 0, 0, 0,
+                    sound_playAt((math_random() & 8) + 0x507, 0x5DC0, 0, 0, 0,
                                   movement_obj[lastActor - 1].xpos, movement_obj[lastActor - 1].ypos,
                                   movement_obj[lastActor - 1].zpos, 300, 800);
                 } else {
-                    func_10010F88(15, 0x5DC0, 0, 0, 0,
+                    sound_playAt(15, 0x5DC0, 0, 0, 0,
                                   movement_obj[lastActor - 1].xpos, movement_obj[lastActor - 1].ypos,
                                   movement_obj[lastActor - 1].zpos, 300, 800);
                 }
@@ -121,7 +121,7 @@ void prop_bendWaveChainMesh(WorldObject *prop) {
 
     chain = prop->moveData.word;
     out = prop->vertices[D_800BE9C0];
-    func_150A8050(mtx, 0.0f, -gWaveChainPresets[gWaveChainPresetIds[chain]].angle, 0.0f);
+    math_mtxRotateRPYF(mtx, 0.0f, -gWaveChainPresets[gWaveChainPresetIds[chain]].angle, 0.0f);
     for (i = 0; i < db_Object_array[gWaveChainPresets[gWaveChainPresetIds[chain]].objIndex].numVertices; i++) {
         samplePos = prop_getWaveChainSample(prop->srcVertices[i].v.ob[2], chain);
         sample = samplePos;
@@ -134,7 +134,7 @@ void prop_bendWaveChainMesh(WorldObject *prop) {
         weighted[1] = gWaveChainSamples[chain][next].pos * frac;
         lift = (weighted[0] + weighted[1]);
         lift >>= 4; // matching: folding the shift into the line above reschedules it
-        func_150A7960(mtx, prop->srcVertices[i].v.ob[0], prop->srcVertices[i].v.ob[1] + lift, prop->srcVertices[i].v.ob[2],
+        math_transformPoint(mtx, prop->srcVertices[i].v.ob[0], prop->srcVertices[i].v.ob[1] + lift, prop->srcVertices[i].v.ob[2],
                       &x, &y, &z);
         out[i].v.ob[0] = prop->x + x;
         out[i].v.ob[1] = prop->y + y;
@@ -193,8 +193,8 @@ s32 prop_getWaveChainPush(Actor *actor, s32 sample, s32 chain) {
     dx = actor->xpos - originX;
     dy = 0.0f;
     dz = actor->zpos - originZ;
-    func_150A8050(mtx, 0.0f, gWaveChainPresets[gWaveChainPresetIds[chain]].angle, 0.0f);
-    func_150A7960(mtx, dx, dy, dz, &localX, &localY, &localZ);
+    math_mtxRotateRPYF(mtx, 0.0f, gWaveChainPresets[gWaveChainPresetIds[chain]].angle, 0.0f);
+    math_transformPoint(mtx, dx, dy, dz, &localX, &localY, &localZ);
 
     if (localZ > 0.0f || localZ < gWaveChainPresets[gWaveChainPresetIds[chain]].minZ || localX < 0.0f ||
         gWaveChainPresets[gWaveChainPresetIds[chain]].width < localX) {

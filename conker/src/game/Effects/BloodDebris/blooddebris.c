@@ -56,14 +56,14 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
     spawn.fadeStart = 32;
     spawn.fadeRate = 7;
     while (count--) {
-        yaw = func_150ADA20() % (emitter->yawRange + 1) + emitter->yawBase;
-        pitch = func_150ADA20() % (emitter->pitchRange + 1) + emitter->pitchBase;
+        yaw = math_random() % (emitter->yawRange + 1) + emitter->yawBase;
+        pitch = math_random() % (emitter->pitchRange + 1) + emitter->pitchBase;
         /* math_cosBinAngleMasked is a cosine, so cos(a - 64) is sin(a) */
         sinYaw = math_cosBinAngleMasked(yaw - 64);
         cosYaw = math_cosBinAngleMasked(yaw);
         sinPitch = math_cosBinAngleMasked(pitch - 64);
         cosPitch = math_cosBinAngleMasked(pitch);
-        dist = func_150ADA68() * emitter->radius;
+        dist = math_randomFloat() * emitter->radius;
         spawn.pos.x = emitter->pos.x + dist * cosPitch * sinYaw;
         spawn.pos.y = emitter->pos.y - dist * sinPitch;
         spawn.pos.z = emitter->pos.z + dist * cosPitch * cosYaw;
@@ -71,8 +71,8 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
         case 0: {
             f32 speed;
             f32 velY;
-            speed = func_150ADA68() * emitter->speedRange + emitter->speedBase;
-            velY = func_150ADA68() * emitter->velYRange + emitter->velYBase;
+            speed = math_randomFloat() * emitter->speedRange + emitter->speedBase;
+            velY = math_randomFloat() * emitter->velYRange + emitter->velYBase;
             spawn.vel.x = speed * sinYaw;
             spawn.vel.y = velY;
             spawn.vel.z = speed * cosYaw;
@@ -80,7 +80,7 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
             break;
         case 1: {
             f32 speed;
-            speed = func_150ADA68() * emitter->speedRange + emitter->speedBase;
+            speed = math_randomFloat() * emitter->speedRange + emitter->speedBase;
             spawn.vel.x = speed * cosPitch * sinYaw;
             spawn.vel.y = -speed * sinPitch;
             spawn.vel.z = speed * cosPitch * cosYaw;
@@ -91,18 +91,18 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
             break;
         case 3: {
             f32 speed;
-            speed = func_150ADA68() * emitter->speedRange + emitter->speedBase;
+            speed = math_randomFloat() * emitter->speedRange + emitter->speedBase;
             spawn.vel.x = emitter->dir.x * speed;
             spawn.vel.y = emitter->dir.y * speed;
             spawn.vel.z = emitter->dir.z * speed;
             break;
         }
         }
-        size = spawn.sizeXZ = spawn.sizeY = func_150ADA68() * emitter->sizeRange + emitter->sizeBase;
+        size = spawn.sizeXZ = spawn.sizeY = math_randomFloat() * emitter->sizeRange + emitter->sizeBase;
         spawn.radius = size * 30.0f;
-        spawn.gravity = func_150ADA68() * emitter->gravityRange + emitter->gravityBase;
-        spawn.rotVel.x = func_150ADA68() * emitter->spinRange + emitter->spinBase;
-        spawn.rotVel.z = func_150ADA68() * emitter->spinRange + emitter->spinBase;
+        spawn.gravity = math_randomFloat() * emitter->gravityRange + emitter->gravityBase;
+        spawn.rotVel.x = math_randomFloat() * emitter->spinRange + emitter->spinBase;
+        spawn.rotVel.z = math_randomFloat() * emitter->spinRange + emitter->spinBase;
         particle = particle_newModelParticle(&spawn, 0, 0, sizeof(DebrisData), arg2, arg3);
         if (particle != NULL) {
             BloodTrailDesc18 trailDesc;
@@ -171,7 +171,7 @@ s32 blood_onDebrisFloorHit(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f
             if (data->landPuffFlag) {
                 puffFlag = TRUE;
             }
-            particle_scatterChannelParticles(x, floorY, z, particle->head.sizeXZ * 35.0f, func_150ADA20() % 3 + 2,
+            particle_scatterChannelParticles(x, floorY, z, particle->head.sizeXZ * 35.0f, math_random() % 3 + 2,
                           particle->head.sizeXZ, particle->head.sizeXZ * 0.5f,
                           particle->head.sizeXZ, particle->head.sizeXZ * 0.5f,
                           data->landPuffLifeBase, data->landPuffLifeRange, puffFlag);
@@ -215,7 +215,7 @@ void blood_emitDebrisDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBlo
     do { } while (0);
     if (dt) {
     }
-    speed = func_150ADA68();
+    speed = math_randomFloat();
     dt = gFrameDeltaInv;
     speed = speed * 166.0f + 160.0f;
     offset.x = 0.0f;
@@ -225,12 +225,12 @@ void blood_emitDebrisDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBlo
     vel.x = -dx * dt * speed;
     vel.y = -dy * dt * speed;
     vel.z = -dz * dt * speed;
-    rand.gravity = func_150ADA68();
-    rand.size = func_150ADA68();
-    rand.timer = func_150ADA20();
+    rand.gravity = math_randomFloat();
+    rand.size = math_randomFloat();
+    rand.timer = math_random();
     // matching: `+ -600.0f` (add.s); `- 600.0f` would emit sub.s
     particle_spawnDragFadeSprite(&pos, &offset, &vel, 1.0f, (rand.gravity * 591.0f + -600.0f) * 0.001000000047f,
-                  (rand.size * 500.0f + 400.0f) * size, rand.timer % 21 + 15, func_150ADA20() % 101 + 100,
+                  (rand.size * 500.0f + 400.0f) * size, rand.timer % 21 + 15, math_random() % 101 + 100,
                   15, 20, 0, -1, 86, 39, 0, trail->trail.header.owner, trail->trail.header.kind);
 }
 

@@ -127,8 +127,8 @@ start:
     spawn.pos.x = obj->x;
     spawn.pos.y = obj->y;
     spawn.pos.z = obj->z;
-    func_150A8050(mtx, obj->pitch, obj->yaw, 0.0f);
-    func_150A7960(mtx, 0.0f, 0.0f, -500.0f, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
+    math_mtxRotateRPYF(mtx, obj->pitch, obj->yaw, 0.0f);
+    math_transformPoint(mtx, 0.0f, 0.0f, -500.0f, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
     spawn.rot.x += spawn.pos.x;
     spawn.rot.y += spawn.pos.y;
     spawn.rot.z += spawn.pos.z;
@@ -333,8 +333,8 @@ s32 level_spawnZoneBeam(TriggerZone *obj) {
         packet.position[0] = obj->x;
         packet.position[1] = obj->y;
         packet.position[2] = obj->z;
-        func_150A8050(matrix, obj->pitch, obj->yaw, 0.0f);
-        func_150A7960(matrix, 0.0f, packet.height, 0.0f,
+        math_mtxRotateRPYF(matrix, obj->pitch, obj->yaw, 0.0f);
+        math_transformPoint(matrix, 0.0f, packet.height, 0.0f,
                       &packet.direction[0], &packet.direction[1], &packet.direction[2]);
         packet.direction[0] *= inverse;
         packet.direction[1] *= inverse;
@@ -345,7 +345,7 @@ s32 level_spawnZoneBeam(TriggerZone *obj) {
         }
         height = obj->ySize;
         sound_addDynamicSound(0x67C, obj->x, obj->y + height, obj->z,
-                      12000, height * 2, height / 2, func_1000EF40, 0, 0, 8, 0);
+                      12000, height * 2, height / 2, sound_stopWhenSilentCallback, 0, 0, 8, 0);
     }
     return 1;
 }
@@ -547,7 +547,7 @@ s32 func_15013DE8(TriggerZone *obj) {
     params.shrinkRate = 0.04500000179f;
     params.growRate = 0.6999999881f;
 
-    params.unk2C = (func_150ADA20() % 56U) + 200;
+    params.unk2C = (math_random() % 56U) + 200;
 
     params.maxA = 22.60000038f * scaleX;
     params.minA = 13.78600025f * scaleX;
@@ -763,14 +763,14 @@ s32 func_150144B8(TriggerZone *obj) {
     if (gScreenLayout >= 2) {
         return 1;
     }
-    func_150A8050(scratch.matrix, obj->pitch, obj->yaw, 0.0f);
-    func_150A7960(scratch.matrix, 0.0f, 100.0f, 0.0f, &scratch.direction.x, &scratch.direction.y, &scratch.direction.z);
+    math_mtxRotateRPYF(scratch.matrix, obj->pitch, obj->yaw, 0.0f);
+    math_transformPoint(scratch.matrix, 0.0f, 100.0f, 0.0f, &scratch.direction.x, &scratch.direction.y, &scratch.direction.z);
     math_getHeadingElevation(&scratch.direction, &emitter.angleX, &emitter.angleY);
     emitter.angleX *= 0.017453292f;
     emitter.angleY *= 0.017453292f;
     emitter.minDelay = obj->data1 & 0xFF;
     emitter.delayRange = (obj->data1 >> 8) & 0xFF;
-    value = func_150ADA20();
+    value = math_random();
     emitter.position = &obj->x;
     emitter.timer = value % (emitter.delayRange + 1) + emitter.minDelay;
     emitter.minLife = (obj->data1 >> 16) & 0xFF;
@@ -885,11 +885,11 @@ s32 level_spawnDiscoBallZone(TriggerZone *obj) {
     packet.pos[1] = obj->y;
     packet.pos[2] = obj->z;
     count = osGetCount();
-    packet.rot[0] = ((func_150ADA20() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
+    packet.rot[0] = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
     count = osGetCount();
-    packet.rot[1] = ((func_150ADA20() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
+    packet.rot[1] = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
     count = osGetCount();
-    packet.rot[2] = ((func_150ADA20() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
+    packet.rot[2] = ((math_random() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
     packet.unk18 = (obj->data1 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
     packet.unk1C = ((obj->data1 >> 16) & 0xFFFF) * 0.152587890625f * 0.001000000047f;
     packet.unk20 = (obj->data2 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
@@ -944,8 +944,8 @@ s32 func_15014F6C(TriggerZone *obj) {
     /* data1 holds a minimum and a range: unkC is random in [min, min + range] */
     data.unk4 = obj->data1 & 0xFFFF;
     data.unk8 = (obj->data1 >> 16) & 0xFFFF;
-    data.unkC = (func_150ADA20() % (data.unk8 + 1)) + data.unk4;
-    func_150A8050(data.mtx, obj->pitch, obj->yaw, 0.0f);
+    data.unkC = (math_random() % (data.unk8 + 1)) + data.unk4;
+    math_mtxRotateRPYF(data.mtx, obj->pitch, obj->yaw, 0.0f);
 
     data.mtx[3][0] = obj->x;
     data.mtx[3][1] = obj->y;
@@ -1098,14 +1098,14 @@ void func_15015354(TriggerZone *obj) {
     corners[3][1] = 0.0f;
     corners[3][2] = obj->zSize;
 
-    func_150A8050(mtx, obj->pitch, obj->yaw, 0.0f);
+    math_mtxRotateRPYF(mtx, obj->pitch, obj->yaw, 0.0f);
 
     mtx[3][0] = x;
     mtx[3][1] = y;
     mtx[3][2] = z;
 
     for (i = 0; i < 4; i++) {
-        func_150A7960(mtx, corners[i][0], corners[i][1], corners[i][2],
+        math_transformPoint(mtx, corners[i][0], corners[i][1], corners[i][2],
                       &data.points[i][0], &data.points[i][1], &data.points[i][2]);
     }
 
@@ -1178,12 +1178,12 @@ s32 func_150156F4(TriggerZone *obj) {
         }
     }
 
-    func_150A8050(mtx, obj->pitch, obj->yaw, 0.0f);
+    math_mtxRotateRPYF(mtx, obj->pitch, obj->yaw, 0.0f);
     mtx[3][0] = obj->x;
     mtx[3][1] = obj->y;
     mtx[3][2] = obj->z;
 
-    func_150A7960(mtx, 0.0f, obj->ySize, 0.0f, &points[1].x, &points[1].y, &points[1].z);
+    math_transformPoint(mtx, 0.0f, obj->ySize, 0.0f, &points[1].x, &points[1].y, &points[1].z);
 
     points[0].x = obj->x;
     points[0].y = obj->y;

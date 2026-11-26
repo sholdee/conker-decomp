@@ -1040,7 +1040,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
         fastFloor = movement_obj[flags].noshove & 2;
     }
     if (!fastFloor ||
-        !func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &groundY)) {
+        !collision_getTriHeightAt(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &groundY)) {
         if (actor->noshove & 8) {
             floorOut = &actor->waterHeight;
         } else {
@@ -1068,7 +1068,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
         if ((actor->character_type == 0x1B) || (actor->character_type == 0x7E)) {
             D_800CBDD3 = 1;
         }
-        func_15044380(actor->old_xpos, actor->old_ypos, actor->old_zpos, actor, 1, 0);
+        collision_resolveActorWalls(actor->old_xpos, actor->old_ypos, actor->old_zpos, actor, 1, 0);
         if ((actor->character_type == 0x1B) || (actor->character_type == 0x7E)) {
             D_800CBDD3 = 0;
         }
@@ -1113,7 +1113,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
                 }
             }
             if (!(actor->noshove & 2) ||
-                !func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &groundY)) {
+                !collision_getTriHeightAt(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &groundY)) {
                 collision_findFloorEx(&actor->floorTriVerts, actor->floorTri.v, &groundY, &actor->waterHeight, &actor->floorMaterial,
                               &actor->floorType, actor->xpos, actor->ypos, actor->zpos, prevY, 0,
                               actor, -10000.0f, actor->ypos, actor->noshove & 0x04000000);
@@ -1615,11 +1615,11 @@ void actor_splitVelocity(u16 angle, f32 speed, f32 pitch, f32 *outX, f32 *outZ, 
 
     speed = speed * 0.5f;
     pitch = pitch * 0.01745329238f;
-    *outY = func_150AD78C(pitch) * -speed;
-    speed = func_150AD780(pitch) * speed;
+    *outY = math_sin(pitch) * -speed;
+    speed = math_cos(pitch) * speed;
     yaw = angle * 9.587380191e-05f;
-    sinYaw = func_150AD780(yaw);
-    cosYaw = func_150AD78C(yaw);
+    sinYaw = math_cos(yaw);
+    cosYaw = math_sin(yaw);
     *outX = sinYaw * speed;
     *outZ = -cosYaw * speed;
 }
@@ -2700,8 +2700,8 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
                 dz += offZ;
             }
             rx = (attacker->theta - 90.0f) * 0.01745329238f;
-            s = func_150AD780(-rx);
-            c = func_150AD78C(-rx);
+            s = math_cos(-rx);
+            c = math_sin(-rx);
             rx = dx * s + dz * c;
             dz = -dx * c + dz * s;
             hx = hit->unk9 * 5;
@@ -2763,7 +2763,7 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
                 ray.x = rx - pos.x;
                 ray.y = t - pos.y;
                 ray.z = rz - pos.z;
-                if (func_150AC9C0(pos.x, pos.y, pos.z, ray.x, ray.y, ray.z, NULL, NULL, &hitX, &hitY, &hitZ, &hitDist, 0, 0, 0.0f) != 0 &&
+                if (collision_castRayWorld(pos.x, pos.y, pos.z, ray.x, ray.y, ray.z, NULL, NULL, &hitX, &hitY, &hitZ, &hitDist, 0, 0, 0.0f) != 0 &&
                     hitDist < math_vec3Length(&ray)) {
                     continue;
                 }
@@ -2891,8 +2891,8 @@ f32 actor_rotateOffset(f32 angleDeg, f32 a, f32 b, f32 scale, f32 *outZ) {
         b = b * scale;
     }
     rad = (angleDeg - 90.0f) * 0.01745329238f;
-    sinA = func_150AD780(rad);
-    cosA = func_150AD78C(rad);
+    sinA = math_cos(rad);
+    cosA = math_sin(rad);
     *outZ = (-a * cosA) + (b * sinA);
     return (a * sinA) + b * cosA;
 }
@@ -3103,7 +3103,7 @@ u8 actor_findTargetInCone(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 
             if (((dist < best) || ((other->stunned == 0) && (bestStunned != 0))) &&
                 ((u8)(((angle - actor->langle) >> 8) + halfCone) < (halfCone * 2)) &&
                 ((u8)(((u8)(actor_getDirectionAngle(sqrtf(distXZ), -dy, 0) >> 8) - pitch) + 0x10) < 0x20)) {
-                if ((func_150AC9C0(actor->xpos, actor->ypos + 80.0f, actor->zpos,
+                if ((collision_castRayWorld(actor->xpos, actor->ypos + 80.0f, actor->zpos,
                                    movement_obj[i].xpos - actor->xpos,
                                    movement_obj[i].ypos - actor->ypos,
                                    movement_obj[i].zpos - actor->zpos, hitA, &hitB, &hitX, &hitY, &hitZ,
@@ -3735,7 +3735,7 @@ void actor_clearSlot(Actor *actor) {
     actor->character_type = 0xFF;
     actor->unk2CB = 50;
     actor->speedup = one;
-    actor->blinkTimer = (func_150ADA20() % 50U) + 50;
+    actor->blinkTimer = (math_random() % 50U) + 50;
     actor_resetFade(actor);
     actor->unk1DD[0] = 0xFF;
     actor->unk1DD[1] = 0xFF;
@@ -4291,7 +4291,7 @@ void actor_playPlayerSound(s32 sound, Actor *actor, u16 rate, s32 volume, s32 mi
         }
         if ((sound_getPlayingSound(handle) == sound) & 0x7FFF) {
             if (flags & 4) {
-                func_1000F91C(handle, rate + channel * 50, actor->listpos * 10 + volume, channel, 0,
+                sound_setVoiceSpatial(handle, rate + channel * 50, actor->listpos * 10 + volume, channel, 0,
                               actor->xpos, actor->ypos, actor->zpos, minDist, maxDist);
             } else {
                 sound_setVoiceParam(handle, 0x10, volume);
@@ -4303,7 +4303,7 @@ void actor_playPlayerSound(s32 sound, Actor *actor, u16 rate, s32 volume, s32 mi
         break;
     }
     if (flags & 4) {
-        handle = func_10010E78(handle, sound, rate + channel * 50, volume, channel, 0, actor->xpos,
+        handle = sound_startVoiceAt(handle, sound, rate + channel * 50, volume, channel, 0, actor->xpos,
                                actor->ypos, actor->zpos, minDist, maxDist);
     } else {
         handle = sound_startVoice(handle, sound, (rate + channel * 50), 0x40, volume, channel, 1);
@@ -4785,8 +4785,8 @@ void actor_updateTypeAnims(void) {
             actor_scrollTypeTexture(id, 0x1EF, 0, -1, 0, 0);
             done[1] = 1;
         } else if ((id == 0x24) && (done[2] == 0)) {
-            if ((func_150ADA20() % 1000U) < 300) {
-                D_800CC298.unk8 = (func_150ADA20() % 5U) - 2;
+            if ((math_random() % 1000U) < 300) {
+                D_800CC298.unk8 = (math_random() % 5U) - 2;
             }
             actor_scrollTypeTexture(id, 4, -4, D_800CC298.unk8, 0, 0);
             if (D_800C4020[id] != NULL) {
@@ -4912,7 +4912,7 @@ void actor_updateTypeAnims(void) {
                 if (movement_obj[i].unk68[0] == 0xD) {
                     movement_obj[i].unk68[0] = 0xC;
                 }
-                if ((func_150ADA20() & 3) == 0) {
+                if ((math_random() & 3) == 0) {
                     if (movement_obj[i].unk68[0] == 0x15) {
                         movement_obj[i].unk68[0] = 0xC;
                     } else {
@@ -4994,7 +4994,7 @@ s32 actor_isVisible(Actor *actor) {
     height = gModelDefs[id]->bodyHeight * actor->scale_y;
     for (i = 0; i <= gScreenLayout; i++) {
         hidden = 1;
-        if (func_150A6360(&gViews[i], gViewMatrices[i], actor->xpos,
+        if (view_testCylinderInView(&gViews[i], gViewMatrices[i], actor->xpos,
                           actor->ypos + height, actor->zpos, scale, scale, 20000.0f) != 0) {
             hidden = 0;
             break;

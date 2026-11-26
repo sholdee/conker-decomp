@@ -117,7 +117,7 @@ void particle_spawnSideSpray(Actor *actor, s32 side, s32 arg2) {
     colors[3].unk8 = 0;
     desc.texture = 0x50;
     desc.renderModes = 0x2502;
-    lifeRoll = func_150ADA20();
+    lifeRoll = math_random();
     desc.lifetime = (lifeRoll % 61U) + 88;
     desc.frame = 0;
     desc.frameSpeed = 0;
@@ -125,7 +125,7 @@ void particle_spawnSideSpray(Actor *actor, s32 side, s32 arg2) {
     desc.rgba[1] = 0xFF;
     desc.rgba[2] = 0xFF;
     desc.rgba[3] = 0xFF;
-    desc.width = desc.height = ((func_150ADA68() * 21.0f) + 91.0f) * 0.001f;
+    desc.width = desc.height = ((math_randomFloat() * 21.0f) + 91.0f) * 0.001f;
     desc.pos.x = pos.x;
     desc.pos.y = ground.height;
     desc.pos.z = pos.z;
@@ -136,10 +136,10 @@ void particle_spawnSideSpray(Actor *actor, s32 side, s32 arg2) {
     desc.scale.y = 1.0f;
     desc.scale.z = 1.0f;
     desc.flags = 0x401C0001;
-    desc.unk44 = (func_150ADA20() % 41U) + 80;
+    desc.unk44 = (math_random() % 41U) + 80;
     desc.unk45 = 0xFF;
-    growth.growEndTimer = (desc.lifetime - (func_150ADA20() % 6U)) - 8;
-    growth.growRate = (((func_150ADA68() * 40.0f) + 51.0f) * desc.width) * 0.001f;
+    growth.growEndTimer = (desc.lifetime - (math_random() % 6U)) - 8;
+    growth.growRate = (((math_randomFloat() * 40.0f) + 51.0f) * desc.width) * 0.001f;
     desc.unk46 = 0;
     desc.unk47 = 6;
     particle = particle_spawnAxisQuadParticleNoModel(&desc, colors, 0, 0x16, 0, 0, (actor->langle >> 8) - ((side == 1) ? -10 : 10),
@@ -147,8 +147,8 @@ void particle_spawnSideSpray(Actor *actor, s32 side, s32 arg2) {
     if (particle != NULL) {
         memcpy(&particle->growth, &growth, sizeof(growth));
     }
-    roll = (func_150ADA20() % 11U) + 5;
-    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (func_150ADA68() * 17.0f) + 29.0f,
+    roll = (math_random() % 11U) + 5;
+    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (math_randomFloat() * 17.0f) + 29.0f,
                   0, 0xFF, roll, 16, 0, 0.0f, NULL, 0xFF);
 }
 
@@ -211,7 +211,7 @@ s32 particle_spawnYawSpraySpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg
     desc.renderMode = 0xE03;
     desc.unk0 = 0x200005;
     desc.unk4 = 0;
-    desc.timer = (func_150ADA20() & 0xF) + 25;
+    desc.timer = (math_random() & 0xF) + 25;
     desc.frame = 0;
     desc.frameRate = 0;
     desc.r2 = 0xB0;
@@ -221,26 +221,26 @@ s32 particle_spawnYawSpraySpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg
     desc.g = 0xB;
     desc.b = 0x6A;
     desc.a = 0xFF;
-    desc.alpha = (func_150ADA20() % 156U) + 100;
+    desc.alpha = (math_random() % 156U) + 100;
     desc.brightness = 0xFF;
     desc.primColorMode = 3;
     desc.envColorMode = 3;
-    desc.width = desc.height = (func_150ADA68() * 202.0f) + 101.0f;
+    desc.width = desc.height = (math_randomFloat() * 202.0f) + 101.0f;
     desc.pos.x = x;
     desc.pos.y = y;
     desc.pos.z = z;
 
-    roll = func_150ADA20();
-    math_dirFromBinAngles(yaw, (roll % 21U) - 20, (func_150ADA68() * 301.0f + 500.0f) * 0.01f, &desc.vel);
+    roll = math_random();
+    math_dirFromBinAngles(yaw, (roll % 21U) - 20, (math_randomFloat() * 301.0f + 500.0f) * 0.01f, &desc.vel);
 
     desc.flags = 0xE05;
     desc.gravity = 0.0f;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x40;
     }
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x80;
     }
 

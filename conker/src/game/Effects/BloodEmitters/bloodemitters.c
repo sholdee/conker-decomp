@@ -44,7 +44,7 @@ BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
     desc.radius = 15.0f;
     desc.rate = 0.448f;
     desc.flags = 0x06; /* ON_BONE | LIFETIME (BLOOD_DRIP_* in game/Effects/Blood/blood.c) */
-    desc.lifetime = func_150ADA20() % 21U + 40;
+    desc.lifetime = math_random() % 21U + 40;
     desc.emitter = 8;
     desc.callback = -1;
     desc.unk2D = 7;
@@ -87,11 +87,11 @@ void func_151B4EA4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 ar
     velocity.x = -dirX * speed;
     velocity.y = -dirY * speed;
     velocity.z = -dirZ * speed;
-    fracA = func_150ADA68();
-    randA = func_150ADA20();
-    randB = func_150ADA20();
-    fracB = func_150ADA68();
-    coin = func_150ADA20() & 1;
+    fracA = math_randomFloat();
+    randA = math_random();
+    randB = math_random();
+    fracB = math_randomFloat();
+    coin = math_random() & 1;
     particle_spawnSteamParticle(position, &velocity, arg4, fracA * 0.497f + -1.0f, randA % 31 + 20, randB % 101 + 155,
                   fracB * 152.0f + 109.0f, coin, 1.7f, 1.7f, 0, 0, 1, 0, arg5, 1);
 }
@@ -148,15 +148,15 @@ void func_151B50F4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4) {
     velocity.x = -dirX * speed;
     velocity.y = -dirY * speed;
     velocity.z = -dirZ * speed;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         coin = 1;
     } else {
         coin = 0;
     }
-    fracA = func_150ADA68();
-    randA = func_150ADA20();
-    randB = func_150ADA20();
-    scaledB = func_150ADA68() * 202.0f + 142.0f;
+    fracA = math_randomFloat();
+    randA = math_random();
+    randB = math_random();
+    scaledB = math_randomFloat() * 202.0f + 142.0f;
     particle_spawnSteamParticle(position, &velocity, 0, fracA * 0.126f + -0.702f, (randA & 0xF) + 10, randB % 45 + 137, scaledB,
                   coin, 1.7f, 1.7f, 0, 0, 1, 0, arg4, 1);
 }

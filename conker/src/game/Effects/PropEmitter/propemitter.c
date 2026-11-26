@@ -133,7 +133,7 @@ void effect_updatePropEmitter(PropEmitterEffect *effect) {
     TimedEffect *particle;
 
     emitter = &effect->emitter;
-    emitter->accum += (204.0f + (func_150ADA68() * 159.0f)) * 0.001f * gFrameDelta;
+    emitter->accum += (204.0f + (math_randomFloat() * 159.0f)) * 0.001f * gFrameDelta;
     if (emitter->accum > 1.0f) {
         for (i = 0, mask = 0; i <= gScreenLayout; i++) {
             mask |= 1 << i;
@@ -185,16 +185,16 @@ void effect_updatePropEmitter(PropEmitterEffect *effect) {
         }
         do {
             args.flags &= ~0xC0;
-            flip80 = (func_150ADA20() & 1) ? 0x80 : 0;
-            flip40 = (func_150ADA20() & 1) ? 0x40 : 0;
+            flip80 = (math_random() & 1) ? 0x80 : 0;
+            flip40 = (math_random() & 1) ? 0x40 : 0;
             args.flags |= flip40 | flip80;
             args.offset.x = 0.0f;
             args.offset.y = 0.0f;
             args.offset.z = 0.0f;
             args.alpha = 0xFF;
-            args.timer = (func_150ADA20() % 17U) + 50;
-            args.width = args.height = (func_150ADA68() * 165.0f) + 357.0f;
-            speed = ((func_150ADA68() * 195.0f) + 356.0f) * 0.001f;
+            args.timer = (math_random() % 17U) + 50;
+            args.width = args.height = (math_randomFloat() * 165.0f) + 357.0f;
+            speed = ((math_randomFloat() * 195.0f) + 356.0f) * 0.001f;
             args.vel.x = dir[0] * speed;
             args.vel.y = dir[1] * speed;
             args.vel.z = dir[2] * speed;

@@ -63,7 +63,7 @@ void particle_spawnFootDust(Actor *actor, u8 foot) {
         count = (func_150ADA20_u8() & 7) + 5;
         while (count--) {
             angle = func_150ADA20_u8() & 0xFF; // matching: the redundant mask on the u8 result is in the original
-            speed = (func_150ADA68() * 0.8999999762f + 0.1000000015f) * 18.0f * size;
+            speed = (math_randomFloat() * 0.8999999762f + 0.1000000015f) * 18.0f * size;
             cosA = math_cosBinAngleMasked(angle - 0x40);
             sinA = math_cosBinAngleMasked(angle);
             spawn.lifetime = (func_150ADA20_u8() & 0x1F) + 15;
@@ -73,15 +73,15 @@ void particle_spawnFootDust(Actor *actor, u8 foot) {
             spawn.pos.z = (radius * sinA) + footPos.z;
             spawn.vel.x = speed * cosA;
             spawn.vel.z = speed * sinA;
-            scale = (func_150ADA68() * 0.8999999762f + 0.1000000015f) * size * 2.230000019f;
+            scale = (math_randomFloat() * 0.8999999762f + 0.1000000015f) * size * 2.230000019f;
             spawn.sizeXZ = scale;
             spawn.sizeY = scale;
             spawn.radius = scale;
-            spawn.rot.x = func_150ADA68() * 360.0f;
-            spawn.rot.y = func_150ADA68() * 360.0f;
-            spawn.rot.z = func_150ADA68() * 360.0f;
-            spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
-            spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
+            spawn.rot.x = math_randomFloat() * 360.0f;
+            spawn.rot.y = math_randomFloat() * 360.0f;
+            spawn.rot.z = math_randomFloat() * 360.0f;
+            spawn.rotVel.x = 25.0f - math_randomFloat() * 50.0f;
+            spawn.rotVel.y = 25.0f - math_randomFloat() * 50.0f;
             particle = particle_newModelParticle(&spawn, 3, 0xFF, 4, 0xFF, 0);
             if (particle != NULL) {
                 particle->floorY = actor->floorY;

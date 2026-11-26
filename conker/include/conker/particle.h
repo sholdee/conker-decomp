@@ -571,7 +571,7 @@ typedef struct {
     /* 0x02C */ f32 halfWidth;
     /* 0x030 */ f32 halfHeight;
     /* 0x034 */ Vec3f pos;
-    /* 0x040 */ Vec3f dir;   /* rotation angles for func_150A8050 */
+    /* 0x040 */ Vec3f dir;   /* rotation angles for math_mtxRotateRPYF */
     /* 0x04C */ Vec3f sway;  /* offset added to pos while falling */
     /* 0x058 */ u8 pad58[0x68];
     /* 0x0C0 */ Vtx_t template[4];

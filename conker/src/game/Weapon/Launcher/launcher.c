@@ -32,9 +32,9 @@ Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 arg1, s32 arg2) {
     math_getActorAim(obj, &target, &dir, NULL, 0.0f);
     func_150FDF38(obj, ((u8 *)&arg1)[3], arg2, &muzzle, &launch);
 
-    rand0 = func_150ADA68();
-    rand1 = func_150ADA68();
-    random = func_150ADA20();
+    rand0 = math_randomFloat();
+    rand1 = math_randomFloat();
+    random = math_random();
     kind = (level == 0x2B) ? 0x27 : 0x1A;
 
     return weapon_spawnProjectile(&launch, NULL, &launch, &target, 0, 0, 300.0f, 0.003333333414f, rand0 * 10.0f + 25.0f,
@@ -97,8 +97,8 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
     s32 random0;
 
     if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
-        params.height = func_150ADA68() * 1.5f + 2.0f;
-        params.width = func_150ADA68() * 10.10000038f + 2.059999943f;
+        params.height = math_randomFloat() * 1.5f + 2.0f;
+        params.width = math_randomFloat() * 10.10000038f + 2.059999943f;
 
         if (obj->mv != NULL && obj->mv->SniperState != 0 && obj->CameraPtr != NULL) {
             cameraMask = ~(1 << obj->CameraPtr->CNumber) & 0xFF;
@@ -106,10 +106,10 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
             cameraMask = 0xFF;
         }
 
-        random0 = func_150ADA20();
-        random1 = func_150ADA20();
+        random0 = math_random();
+        random1 = math_random();
         effect_spawnBoneBeamParticle(obj, D_80088B80, &D_800A1F70, &D_800A1F7C, &params, (random0 % 5U) + 6, (random1 % 101U) + 155,
-                      func_150ADA68() * 199.0f + 501.0f, muzzle, cameraMask, 0, -1, arg2, arg3);
+                      math_randomFloat() * 199.0f + 501.0f, muzzle, cameraMask, 0, -1, arg2, arg3);
     }
 }
 
@@ -124,9 +124,9 @@ void weapon_rumbleLauncher(Actor *obj) {
 
     if (obj->CameraPtr != NULL) {
         event.flags = 1;
-        event.duration = (func_150ADA20() % 9U) + 15;
+        event.duration = (math_random() % 9U) + 15;
         event.playerMask = 1 << obj->CameraPtr->CNumber;
-        event.strength = (func_150ADA20() & 3) + 3;
+        event.strength = (math_random() & 3) + 3;
         event.updateKind = -1;
         cont_spawnRumble(&event, 0, 0xFF, 1);
     }

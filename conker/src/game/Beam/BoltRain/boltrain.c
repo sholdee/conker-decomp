@@ -68,10 +68,10 @@ void beam_updateBoltRain(BoltRainObj *obj) {
     if (state->timer >= 0) {
         state->timer -= D_800BE9E4;
         if (state->timer < 0) {
-            sound_stopByCallback(func_1000EF40, state->region, 0);
+            sound_stopByCallback(sound_stopWhenSilentCallback, state->region, 0);
         }
         if (math_isZoneHiddenFromViews(state->zone) == 0) {
-            state->pending += (0.1970000118f + func_150ADA68() * 0.3f) * gFrameDelta;
+            state->pending += (0.1970000118f + math_randomFloat() * 0.3f) * gFrameDelta;
             if (state->pending > 1.0f) {
                 BoltDesc desc;
                 f32 ground[3];
@@ -96,13 +96,13 @@ void beam_updateBoltRain(BoltRainObj *obj) {
                 desc.color.green = 0xF2;
                 desc.color.blue = 0xFF;
                 do {
-                    math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, (func_150ADA68() * 0.5f + 0.5f) * state->radius,
+                    math_dirFromBinAngleXZ(math_random() & 0xFF, (math_randomFloat() * 0.5f + 0.5f) * state->radius,
                                   &ground[0], &ground[2]);
                     ground[0] += state->pos.x;
                     ground[2] += state->pos.z;
                     if (collision_probeFloorSurfABSet0Cached(ground, 0, state->pos.y, &state->ground) != 0) {
-                        math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX1, &offZ1);
-                        math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX2, &offZ2);
+                        math_dirFromBinAngleXZ(math_random() & 0xFF, math_randomFloat() * 220.0f, &offX1, &offZ1);
+                        math_dirFromBinAngleXZ(math_random() & 0xFF, math_randomFloat() * 220.0f, &offX2, &offZ2);
                         desc.ctrl[1].x = state->pos.x + offX1;
                         desc.ctrl[1].z = state->pos.z + offZ1;
                         desc.ctrl[3].x = ground[0];
@@ -111,9 +111,9 @@ void beam_updateBoltRain(BoltRainObj *obj) {
                         desc.ctrl[2].x = offX2 + ground[0];
                         desc.ctrl[2].y = desc.ctrl[3].y + 180.0f;
                         desc.ctrl[2].z = offZ2 + ground[2];
-                        desc.life = func_150ADA20() % 13U + 8;
-                        desc.color.alpha = func_150ADA20() % 156U + 100;
-                        desc.segments = func_150ADA20() % 3U + 5;
+                        desc.life = math_random() % 13U + 8;
+                        desc.color.alpha = math_random() % 156U + 100;
+                        desc.segments = math_random() % 3U + 5;
                         beam_newBolt(&desc, 0, obj->base.header.owner, obj->base.header.kind);
                     }
                     state->pending -= 1.0f;
@@ -130,9 +130,9 @@ void beam_boltRainMessage(BoltRainObj *obj, s32 arg1, u8 msg) {
     if (msg == 0x38 && state->region->inactive == 1) {
         state->timer = 300;
         // matching: the (s32) copy keeps IDO from sharing one register for region across the call
-        sound_stopByCallback(func_1000EF40, (void *)(s32)state->region, 0);
+        sound_stopByCallback(sound_stopWhenSilentCallback, (void *)(s32)state->region, 0);
         sound_addDynamicSound(0x236, state->region->x, state->region->y, state->region->z, 0x4000, 1500, 1000,
-                      func_1000EF40, state->region, 0, 8, 0);
+                      sound_stopWhenSilentCallback, state->region, 0, 8, 0);
     }
 }
 
@@ -160,7 +160,7 @@ void beam_updateBoltArc(BoltArcObj *obj) {
     if (math_isZoneHiddenFromViews(state->zone) != 0) {
         return;
     }
-    t = func_150ADA68();
+    t = math_randomFloat();
     state->pending += (0.04000000283f + t * 0.0700000003f) * gFrameDelta;
     if (state->pending > 1.0f) {
         config.widthBase = 10.0f;
@@ -181,16 +181,16 @@ void beam_updateBoltArc(BoltArcObj *obj) {
         config.alphaBase = 0x37;
         config.alphaRange = 0xC8;
         do {
-            edgeA = (u8)(func_150ADA68() * 3.0f);
-            edgeB = func_150ADA68() * 2 + 1 + edgeA;
+            edgeA = (u8)(math_randomFloat() * 3.0f);
+            edgeB = math_randomFloat() * 2 + 1 + edgeA;
             if (edgeB >= 4) {
                 edgeB -= 4;
             }
-            t = func_150ADA68();
+            t = math_randomFloat();
             start.x = state->edgeStart[edgeA].x + state->edgeDelta[edgeA].x * t;
             start.y = state->edgeStart[edgeA].y + state->edgeDelta[edgeA].y * t;
             start.z = state->edgeStart[edgeA].z + state->edgeDelta[edgeA].z * t;
-            t = func_150ADA68();
+            t = math_randomFloat();
             end.x = state->edgeStart[edgeB].x + state->edgeDelta[edgeB].x * t;
             end.y = state->edgeStart[edgeB].y + state->edgeDelta[edgeB].y * t;
             end.z = state->edgeStart[edgeB].z + state->edgeDelta[edgeB].z * t;
@@ -239,21 +239,21 @@ void beam_spawnImpactEffects(ImpactObj *obj) {
     f32 fraction;
 
     hit = &obj->hit;
-    fraction = func_150ADA68();
-    random = func_150ADA20();
-    lifetime = func_150ADA20() % 81U + 50;
+    fraction = math_randomFloat();
+    random = math_random();
+    lifetime = math_random() % 81U + 50;
     effect_spawnSurfaceSprite(fraction * 25.0f + 15.0f, random % 56U + 200, &hit->triangle, &hit->position,
                   lifetime, 1, 1, hit->surfaceFlags, obj->base.header.owner, obj->base.header.kind);
     surfaceFlags = hit->surfaceFlags;
     if ((surfaceFlags & 0x1F) == 9) {
-        if (func_150ADA68() < 0.400000006f) {
+        if (math_randomFloat() < 0.400000006f) {
             weapon_spawnImpactBurst(&hit->position, obj->base.header.owner, obj->base.header.kind);
         }
     } else {
-        if (func_150ADA68() < 0.1000000015f) {
+        if (math_randomFloat() < 0.1000000015f) {
             weapon_spawnImpactBurst(&hit->position, obj->base.header.owner, obj->base.header.kind);
         }
-        if (func_150ADA68() < 0.400000006f) {
+        if (math_randomFloat() < 0.400000006f) {
             debris.variantIds = D_800A23A4;
             debris.variantScales = D_800A23A8;
             debris.desc.countBase = 1;
@@ -304,7 +304,7 @@ void beam_updateSparkRegion(SparkObj *obj) {
 
     state = &obj->state;
     if (math_isZoneHiddenFromViews(state->zone) == 0) {
-        count = (func_150ADA68() * 0.0013f + 0.001899999916f) * state->rate;
+        count = (math_randomFloat() * 0.0013f + 0.001899999916f) * state->rate;
         if (count > 1.0f) {
             spawn.flags = 0x15;
             spawn.kind = 10;
@@ -333,14 +333,14 @@ void beam_updateSparkRegion(SparkObj *obj) {
             part.unk39 = 0;
             spawn.pos.y = state->region->y;
             do {
-                part.color.alpha = func_150ADA20() % 101U + 155;
-                spawn.itemCount = (func_150ADA20() & 3) + 3;
+                part.color.alpha = math_random() % 101U + 155;
+                spawn.itemCount = (math_random() & 3) + 3;
                 math_randomZoneFootprintPoint(state->region, &spawn.pos.x, &spawn.pos.z, &top, &bottom);
-                spawn.life = func_150ADA20() % 31U + 30;
-                part.width = func_150ADA68() * 10.13f + 7.399999619f;
-                angle = func_150ADA20();
-                math_dirFromBinAngles(angle & 0xFF, func_150ADA20() % 22U - 54, func_150ADA68() * 20.0f + 30.0f, &part.vel);
-                part.gravity = func_150ADA68() * 1.486000061f + -3.048f;
+                spawn.life = math_random() % 31U + 30;
+                part.width = math_randomFloat() * 10.13f + 7.399999619f;
+                angle = math_random();
+                math_dirFromBinAngles(angle & 0xFF, math_random() % 22U - 54, math_randomFloat() * 20.0f + 30.0f, &part.vel);
+                part.gravity = math_randomFloat() * 1.486000061f + -3.048f;
                 trail_spawnFallingTrail(&spawn, 0, &part, 0, obj->base.header.owner, obj->base.header.kind);
                 count -= 1.0f;
             } while (count > 1.0f);

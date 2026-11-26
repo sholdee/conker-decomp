@@ -6,11 +6,11 @@
 /* The calls to sqrtf in this file are real calls (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
 #pragma function sqrtf
 
-/* Builds an Mtx from a rotation (func_150A8050), per-axis scale and translation. */
+/* Builds an Mtx from a rotation (math_mtxRotateRPYF), per-axis scale and translation. */
 void math_mtxRotScaleTrans(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY, f32 scaleZ, f32 x, f32 y, f32 z) {
     MtxF mtx;
 
-    func_150A8050(mtx, rotX, rotY, rotZ);
+    math_mtxRotateRPYF(mtx, rotX, rotY, rotZ);
     mtx[3][0] = x;
     mtx[3][1] = y;
     mtx[3][2] = z;
@@ -26,11 +26,11 @@ void math_mtxRotScaleTrans(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32
     guMtxF2L(mtx, m);
 }
 
-/* Builds an Mtx from a rotation (func_150A8050) and translation. */
+/* Builds an Mtx from a rotation (math_mtxRotateRPYF) and translation. */
 void math_mtxRotTrans(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
     MtxF mtx;
 
-    func_150A8050(mtx, rotX, rotY, rotZ);
+    math_mtxRotateRPYF(mtx, rotX, rotY, rotZ);
     mtx[3][0] = x;
     mtx[3][1] = y;
     mtx[3][2] = z;
@@ -53,9 +53,9 @@ void math_mtxSetScaleTrans(MtxF mtx, f32 x, f32 y, f32 z, f32 transX, f32 transY
     mtx[2][2] *= z;
 }
 
-/* Builds a rotate-scale matrix (func_150A9B0C) with translation x, y, z and a clean last column. */
+/* Builds a rotate-scale matrix (math_mtxRotScaleF) with translation x, y, z and a clean last column. */
 void math_mtxFRotScaleTrans(MtxF mtx, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY, f32 scaleZ, f32 x, f32 y, f32 z) {
-    func_150A9B0C(mtx, rotX, rotY, rotZ, scaleX, scaleY, scaleZ);
+    math_mtxRotScaleF(mtx, rotX, rotY, rotZ, scaleX, scaleY, scaleZ);
     mtx[3][0] = x;
     mtx[3][1] = y;
     mtx[3][2] = z;

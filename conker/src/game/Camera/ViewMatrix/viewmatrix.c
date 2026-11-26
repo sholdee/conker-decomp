@@ -106,7 +106,7 @@ void camera_buildViewMatrix(Camera *camera) {
             return;
         }
         if (camera->Mode == 0x40000) {
-            func_150A7DF0(&rotMtx, 0.0f, 0.0f, camera->Roll);
+            math_mtxRotateRPY(&rotMtx, 0.0f, 0.0f, camera->Roll);
             guMtxCatL(VIEW_MTX(camera->CNumber), &rotMtx, VIEW_MTX(camera->CNumber));
             camera_applyBreathing(camera);
             return;
@@ -141,11 +141,11 @@ void camera_buildViewMatrix(Camera *camera) {
             camera->DeltaZ -= camera->DeltaZ * 0.08f;
         }
         camera->Roll += camera->DeltaRoll * shakeScale;
-        func_150A7DF0(&rotMtx, -camera->DeltaPitch * shakeScale, camera->DeltaYaw * shakeScale, camera->DeltaRoll * shakeScale);
+        math_mtxRotateRPY(&rotMtx, -camera->DeltaPitch * shakeScale, camera->DeltaYaw * shakeScale, camera->DeltaRoll * shakeScale);
         guMtxCatL(VIEW_MTX(camera->CNumber), &rotMtx, VIEW_MTX(camera->CNumber));
         if (camera->mv != NULL) {
             yaw = math_vec3Heading(&camera->mv->aimDir) - 180.0f;
-            func_150A8050(dirMtx,
+            math_mtxRotateRPYF(dirMtx,
                           -math_atan2(camera->mv->aimDir.y,
                                          sqrtf(camera->mv->aimDir.x * camera->mv->aimDir.x +
                                                camera->mv->aimDir.z * camera->mv->aimDir.z)) *
@@ -158,7 +158,7 @@ void camera_buildViewMatrix(Camera *camera) {
             camera->mv->aimDir.z = dirZ;
         }
         if (camera->mv->SniperState != 0) {
-            func_150A7DF0(&rotMtx, gCameraOffsets[camera->CNumber].rot.x, gCameraOffsets[camera->CNumber].rot.y,
+            math_mtxRotateRPY(&rotMtx, gCameraOffsets[camera->CNumber].rot.x, gCameraOffsets[camera->CNumber].rot.y,
                           gCameraOffsets[camera->CNumber].rot.z);
             math_mtxTranslate(&transMtx, gCameraOffsets[camera->CNumber].pos.x, gCameraOffsets[camera->CNumber].pos.y,
                           gCameraOffsets[camera->CNumber].pos.z);
@@ -189,13 +189,13 @@ void camera_buildViewMatrix(Camera *camera) {
                 camera->CameraPitch -= camera->ClampYAngle;
                 camera->CameraPitchRad = camera->CameraPitch * 0.0174532924f; // pi/180
             }
-            func_150A7DF0(&rotMtx,
+            math_mtxRotateRPY(&rotMtx,
                           gCameraOffsets[camera->CNumber].rot.x + (camera->ClampYAngle + camera->APitchAngle + camera->AddOnPitch),
                           gCameraOffsets[camera->CNumber].rot.y + camera->YawAngle,
                           camera->Roll + gViewEnvelopes[camera->CNumber].output[3] * 0.5f +
                               gCameraOffsets[camera->CNumber].rot.z);
             if (camera->Mode == 0x40000) {
-                func_150A7DF0(&rotMtx, 0.0f, 0.0f, camera->Roll);
+                math_mtxRotateRPY(&rotMtx, 0.0f, 0.0f, camera->Roll);
             }
         }
         guMtxCatL(VIEW_MTX(camera->CNumber), &rotMtx, VIEW_MTX(camera->CNumber));
@@ -239,8 +239,8 @@ void camera_applyBreathing(Camera *camera) {
     }
 
     guMtxIdentF(mf);
-    mf[0][0] = func_150AD78C(camera->WaterDx) * camera->WaterEffectTargetAmp * 2.0f + (camera->WaterEffectTargetAmp + camera->WaterEffectTargetAmp) + 1.0f;
-    mf[1][1] = func_150AD780(camera->WaterDx) * camera->WaterEffectTargetAmp + camera->WaterEffectTargetAmp + 1.0f;
+    mf[0][0] = math_sin(camera->WaterDx) * camera->WaterEffectTargetAmp * 2.0f + (camera->WaterEffectTargetAmp + camera->WaterEffectTargetAmp) + 1.0f;
+    mf[1][1] = math_cos(camera->WaterDx) * camera->WaterEffectTargetAmp + camera->WaterEffectTargetAmp + 1.0f;
     guMtxF2L(mf, &mtx);
     guMtxCatL(VIEW_MTX(camera->CNumber), &mtx, VIEW_MTX(camera->CNumber));
 }

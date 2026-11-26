@@ -268,8 +268,8 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
         func_1507D4F8(slot);
     }
     if (slot == 0 && level == 4) {
-        r = func_150ADA20();
-        f = func_150ADA68();
+        r = math_random();
+        f = math_randomFloat();
         particle_startScreenBurst(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
     }
 }
@@ -305,7 +305,7 @@ void func_1507D1D8(Actor *obj) {
         slot = obj - movement_obj;
         value = player_getStat(slot, 1);
         if (value >= 0x11 && value < 0x21) {
-            choice = (func_150ADA20() & 0xF) + 0x11;
+            choice = (math_random() & 0xF) + 0x11;
             player_setStat(slot, 0, choice);
             if (choice < 0x1D) {
                 gSpawnRecords[slot].type = 0x9C;

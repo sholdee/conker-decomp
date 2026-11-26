@@ -64,7 +64,7 @@ void collision_castRay(Actor *self, f32 originX, f32 originY, f32 originZ, f32 d
         }
     }
     if (skipWorld == 0 &&
-        func_150AC9C0(originX, originY, originZ, dirX, dirY, dirZ, &surf, &out->tri, &hitX, &hitY, &hitZ, &dist, &surfIdx, &out->material, 0.0f) != 0 &&
+        collision_castRayWorld(originX, originY, originZ, dirX, dirY, dirZ, &surf, &out->tri, &hitX, &hitY, &hitZ, &dist, &surfIdx, &out->material, 0.0f) != 0 &&
         dist < maxDist) {
         out->dist = dist;
         out->hitType = 1;
@@ -317,7 +317,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
                     obj->mv->unk1AD = 1;
                 }
                 if (obj->character_type == 0x80 && hit->index == 0 && hit->pos.y - 5.5f > hit->centre.y) {
-                    actor_playUntrackedSound((func_150ADA20() & 7) + 0x2E3, obj);
+                    actor_playUntrackedSound((math_random() & 7) + 0x2E3, obj);
                 }
                 blood_spawnFatalHit(obj, 0xFF, 1);
                 sound = 0x20;

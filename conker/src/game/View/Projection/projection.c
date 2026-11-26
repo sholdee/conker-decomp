@@ -145,7 +145,7 @@ void view_buildProjection(s32 viewIndex, u16 *perspNorm, f32 fovy, f32 aspect, f
 
 // matching: 0x800D35E4 has no symbol; addressing it as D_800D35E0[1] lets IDO share one %hi, the original doesn't
 
-#define D_800D35E4 ((&D_800D35E8)[-1])
+#define D_800D35E4 ((&gCullVtxFlags)[-1])
 
 /* Rebuilds every view's float view matrix and its view * projection product for this frame. */
 void view_updateMatrices(void) {
@@ -155,7 +155,7 @@ void view_updateMatrices(void) {
     for (view = 0; view <= gScreenLayout; view++) {
         guMtxL2F(projection, &gRenderViews[view].projectionMtx[D_800BE9C0]);
         guMtxL2F(gViewMatrices[view], &gViewMtxBuffers[D_800BE9C0][view]);
-        func_150A7A48(gViewMatrices[view], projection, gViewProjMatrices[view]);
+        math_mtxMulF(gViewMatrices[view], projection, gViewProjMatrices[view]);
         view_buildFrustumPlanes(view);
     }
 }
@@ -241,7 +241,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                 gDPPipeSync(gfx++);
                 if (gMeshBuilt) {
                     if (level != 0x14 && level != 0x33 && level != 0x32) {
-                        gfx = func_150A5378(gLevelDisplayLists[0], gfx, gViewMatrices[view], 0, 0, 1 << view);
+                        gfx = gfx_copyLevelDlCulled(gLevelDisplayLists[0], gfx, gViewMatrices[view], 0, 0, 1 << view);
                     } else {
                         gSPDisplayList(gfx++, gLevelDisplayLists[0]);
                     }
@@ -263,7 +263,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                     gSPDisplayList(gfx++, gLevelDisplayLists[0]);
                 }
             } else if (D_800BEAAA) {
-                gfx = func_150A50C0(gLevelDisplayLists[0], gfx, gViewMatrices[view], 0, 0, 0);
+                gfx = gfx_copyDlCulled(gLevelDisplayLists[0], gfx, gViewMatrices[view], 0, 0, 0);
             } else {
                 gSPDisplayList(gfx++, gLevelDisplayLists[0]);
             }

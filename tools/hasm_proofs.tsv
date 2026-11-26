@@ -19,14 +19,14 @@ osWritebackDCacheAll	a	ultralib src/*/writebackdcacheall.s assembled by IDO 5.3 
 func_100061F8	c	reads ['61F8', 'mfc0', '$t0, $10 /* handwritten instruction */', '10'] before any write; not an ABI input
 func_150A8918	c	reads ['D5DC8', 'lh', '$t7, 0x0($s0)', 's0'], ['D5DD4', 'and', '$s3, $t2, $t3', 't3'], ['D5DD8', 'addu', '$t6, $s3, $s2', 's2'] before any write; not an ABI input
 func_150A8A18	c	reads ['D5ECC', 'sw', '$t0, %lo(D_80088550)($at)', 't0'], ['D5ED4', 'sw', '$t1, %lo(D_8008856C)($at)', 't1'], ['D5ED8', 'bnez', '$t4, .L150A8A38', 't4'] before any write; not an ABI input
-func_150AA778	c	reads ['D7C28', 'sub.s', '$f10, $f7, $f10', 'f7'], ['D7C28', 'sub.s', '$f10, $f7, $f10', 'f10'], ['D7C2C', 'sub.s', '$f11, $f8, $f11', 'f8'] before any write; not an ABI input
-func_150AA5A8	c	reads ['D7A58', 'add.s', '$f6, $f0, $f1', 'f0'], ['D7A58', 'add.s', '$f6, $f0, $f1', 'f1'], ['D7A60', 'add.s', '$f7, $f3, $f4', 'f3'] before any write; not an ABI input
-func_150AA9A0	c	reads ['D7E50', 'sub.s', '$f4, $f24, $f27', 'f24'], ['D7E50', 'sub.s', '$f4, $f24, $f27', 'f27'], ['D7E54', 'sub.s', '$f8, $f25, $f31', 'f31'] before any write; not an ABI input
-func_150AA644	c	reads ['D7AF4', 'sub.s', '$f3, $f6, $f9', 'f9'], ['D7AF4', 'sub.s', '$f3, $f6, $f9', 'f6'], ['D7AF8', 'sub.s', '$f4, $f7, $f10', 'f7'] before any write; not an ABI input
+math_triBoxSign3	c	reads ['D7C28', 'sub.s', '$f10, $f7, $f10', 'f7'], ['D7C28', 'sub.s', '$f10, $f7, $f10', 'f10'], ['D7C2C', 'sub.s', '$f11, $f8, $f11', 'f8'] before any write; not an ABI input
+math_triBoxBevel3D	c	reads ['D7A58', 'add.s', '$f6, $f0, $f1', 'f0'], ['D7A58', 'add.s', '$f6, $f0, $f1', 'f1'], ['D7A60', 'add.s', '$f7, $f3, $f4', 'f3'] before any write; not an ABI input
+math_storeTriPlane	c	reads ['D7E50', 'sub.s', '$f4, $f24, $f27', 'f24'], ['D7E50', 'sub.s', '$f4, $f24, $f27', 'f27'], ['D7E54', 'sub.s', '$f8, $f25, $f31', 'f31'] before any write; not an ABI input
+math_triBoxCheckPoint	c	reads ['D7AF4', 'sub.s', '$f3, $f6, $f9', 'f9'], ['D7AF4', 'sub.s', '$f3, $f6, $f9', 'f6'], ['D7AF8', 'sub.s', '$f4, $f7, $f10', 'f7'] before any write; not an ABI input
 func_150A5828	c	reads ['D2CD8', 'andi', '$t4, $t4, 0xFFFE', 't4'], ['D2CE0', 'sdc1', '$f4, 0x0($a1)', 'f4'] before any write; not an ABI input
-func_150AAA20	c	reads ['D7ED8', 'mov.s', '$f3, $f23', 'f23'], ['D7EDC', 'mov.s', '$f4, $f24', 'f24'], ['D7EE4', 'mov.s', '$f5, $f25', 'f25'] before any write; not an ABI input
-func_150AA678	c	reads ['D7B34', 'andi', '$t0, $v1, 0x3', 'v1'], ['D7B3C', 'andi', '$t0, $v1, 0x1', 'v1'] before any write; not an ABI input
-func_150AA4D0	c	reads ['D7984', 'add.s', '$f6, $f0, $f1', 'f0'], ['D7984', 'add.s', '$f6, $f0, $f1', 'f1'], ['D7988', 'add.s', '$f7, $f3, $f4', 'f3'] before any write; not an ABI input
+math_triCubeOverlap	c	reads ['D7ED8', 'mov.s', '$f3, $f23', 'f23'], ['D7EDC', 'mov.s', '$f4, $f24', 'f24'], ['D7EE4', 'mov.s', '$f5, $f25', 'f25'] before any write; not an ABI input
+math_triBoxCheckLine	c	reads ['D7B34', 'andi', '$t0, $v1, 0x3', 'v1'], ['D7B3C', 'andi', '$t0, $v1, 0x1', 'v1'] before any write; not an ABI input
+math_triBoxBevel2D	c	reads ['D7984', 'add.s', '$f6, $f0, $f1', 'f0'], ['D7984', 'add.s', '$f6, $f0, $f1', 'f1'], ['D7988', 'add.s', '$f7, $f3, $f4', 'f3'] before any write; not an ABI input
 osGetCount	c	reads ['24770', 'mfc0', '$v0, $9 /* handwritten instruction */', '9'] before any write; not an ABI input
 osSetIntMask	c	reads ['24880', 'mfc0', '$t4, $12 /* handwritten instruction */', '12'] before any write; not an ABI input
 osUnmapTLB	c	reads ['262D0', 'mfc0', '$t0, $10 /* handwritten instruction */', '10'] before any write; not an ABI input
@@ -55,19 +55,19 @@ func_150A5708	c	reads ['D2BBC', 'lb', '$t2, 0x0($t1)', 't1'], ['D2BC0', 'lb', '$
 func_150A5AB8	c	reads ['D2F68', 'mtc1', '$t0, $f18', 't0'], ['D2F6C', 'mtc1', '$t1, $f30', 't1'], ['D2F78', 'mul.s', '$f12, $f18, $f2', 'f2'] before any write; not an ABI input
 func_151F8870	c	reads ['225D20', 'andi', '$t4, $t0, 0x7', 't0'], ['225D4C', 'addi', '$t2, $s5, 0x2200 /* handwritten instruction */', 's5'] before any write; not an ABI input
 func_16003650	c	reads ['258F14', 'mfc0', '$t1, $2 /* handwritten instruction */', '2'], ['258F1C', 'mfc0', '$t2, $3 /* handwritten instruction */', '3'], ['258F24', 'mfc0', '$t3, $10 /* handwritten instruction */', '10'] before any write; not an ABI input
-func_150A4FA0	c	reads ['D2450', 'mtc1', '$s0, $f0', 's0'], ['D2454', 'mtc1', '$s1, $f1', 's1'], ['D2458', 'mtc1', '$s2, $f2', 's2'] before any write; not an ABI input
-func_150A7A14	c	reads ['D4ECC', 'mul.s', '$f6, $f6, $f0', 'f0'], ['D4ED4', 'mul.s', '$f8, $f8, $f2', 'f2'], ['D4EDC', 'mul.s', '$f10, $f10, $f4', 'f4'] before any write; not an ABI input
+collision_gatherActorGroundTris	c	reads ['D2450', 'mtc1', '$s0, $f0', 's0'], ['D2454', 'mtc1', '$s1, $f1', 's1'], ['D2458', 'mtc1', '$s2, $f2', 's2'] before any write; not an ABI input
+math_storeTransformW	c	reads ['D4ECC', 'mul.s', '$f6, $f6, $f0', 'f0'], ['D4ED4', 'mul.s', '$f8, $f8, $f2', 'f2'], ['D4EDC', 'mul.s', '$f10, $f10, $f4', 'f4'] before any write; not an ABI input
 func_150ABD20	c	reads ['D91D0', 'mul.s', '$f3, $f19, $f26', 'f19'], ['D91D0', 'mul.s', '$f3, $f19, $f26', 'f26'], ['D91D8', 'mul.s', '$f4, $f20, $f27', 'f27'] before any write; not an ABI input
 func_150AC1C4	c	reads ['D9674', 'cvt.w.s', '$f3, $f7', 'f7'], ['D967C', 'sub.s', '$f9, $f6, $f29', 'f6'], ['D967C', 'sub.s', '$f9, $f6, $f29', 'f29'] before any write; not an ABI input
 func_150AC344	c	reads ['D97F8', 'or', '$t5, $t0, $zero', 't0'], ['D982C', 'sub.s', '$f0, $f0, $f20', 'f20'], ['D9830', 'sub.s', '$f1, $f1, $f21', 'f21'] before any write; not an ABI input
-func_150A6210	c	reads ['D36C4', 'mfc1', '$t1, $f20', 'f20'], ['D36C8', 'mfc1', '$t2, $f21', 'f21'] before any write; not an ABI input
+view_getQuadViewDepth	c	reads ['D36C4', 'mfc1', '$t1, $f20', 'f20'], ['D36C8', 'mfc1', '$t2, $f21', 'f21'] before any write; not an ABI input
 func_150A6354	c	reads ['D3804', 'mtc1', '$t1, $f20', 't1'], ['D380C', 'mtc1', '$t2, $f21', 't2'] before any write; not an ABI input
 guMtxIdentF	s	second, custom copy of guMtxIdentF (the SDK C one is at 0x151EFE00); inside the hasm block D2450-D7980, one function per 16-byte unit in SDK mgu order. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
-func_150A7CB0	s	guScaleF-like; between hasm guScale/guTranslate-like neighbours that use sd $zero; inside hasm block D2450-D7980. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
-func_150A7DA0	s	guTranslateF-like; follows hasm func_150A7D00; inside hasm block D2450-D7980. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
-func_150A7960	s	guMtxXFMF-like; proven-asm func_150A7A00 calls it with a hand-set ra and func_150A7A14 then reads the $f0/$f2/$f4 it leaves; noreorder order. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
-func_150AD8B0	s	cross product; every mul.s alternates with a non-mul (IDO as in reorder mode cannot produce it); next to hasm func_150AD780. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
-func_150AD900	s	dot product accumulating in place in $f0; schedule IDO as never produces (19,200 orders tried). No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
-func_150AD930	s	vector length; a plain reorder-mode .s assembled by IDO as -r4300_mul gives exactly these bytes. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
+math_mtxScaleF	s	guScaleF-like; between hasm guScale/guTranslate-like neighbours that use sd $zero; inside hasm block D2450-D7980. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
+math_mtxTranslateF	s	guTranslateF-like; follows hasm func_150A7D00; inside hasm block D2450-D7980. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
+math_transformPoint	s	guMtxXFMF-like; proven-asm math_transformPointW calls it with a hand-set ra and math_storeTransformW then reads the $f0/$f2/$f4 it leaves; noreorder order. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
+math_cross3	s	cross product; every mul.s alternates with a non-mul (IDO as in reorder mode cannot produce it); next to hasm math_cos. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
+math_dot3	s	dot product accumulating in place in $f0; schedule IDO as never produces (19,200 orders tried). No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
+math_length3	s	vector length; a plain reorder-mode .s assembled by IDO as -r4300_mul gives exactly these bytes. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
 func_150AE1B0	s	IDO 5.3 -O1 gives the same 4 instructions but in $t6; this uses $t2 like its asm neighbours in game_DAFA0 (func_150AE1C0 uses dmult)
-func_150AB1A0	c	reads $t7 (or $ra,$t7,$zero; jr $t7) and the caller's stack frame (lwc1 $f20..$f31 from 0x4..0x30($sp), addiu $sp,0x58) without writing either: a second exit path of func_150AAD98's frame
+func_150AB1A0	c	reads $t7 (or $ra,$t7,$zero; jr $t7) and the caller's stack frame (lwc1 $f20..$f31 from 0x4..0x30($sp), addiu $sp,0x58) without writing either: a second exit path of math_triBoxOverlap's frame

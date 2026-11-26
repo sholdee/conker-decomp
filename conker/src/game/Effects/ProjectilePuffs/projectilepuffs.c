@@ -139,7 +139,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
     spawn.fadeStart = 1;
     spawn.fadeRate = 0xFF;
     if (sound != 0) {
-        spawn.sound = func_10010F88(sound, 18000, -500, 0, -1, spawn.pos.x, spawn.pos.y, spawn.pos.z, 1000,
+        spawn.sound = sound_playAt(sound, 18000, -500, 0, -1, spawn.pos.x, spawn.pos.y, spawn.pos.z, 1000,
                                     2000);
     } else {
         spawn.sound = 0;
@@ -187,7 +187,7 @@ s8 effect_updateProjectile(ProjectileParticle *obj) {
     owner = obj->owner;
     dt = (state->timeLeft < gFrameDelta) ? state->timeLeft : gFrameDelta;
     if (obj->sound != 0) {
-        func_1000F9D4(obj->sound, obj->pos.x, obj->pos.y, obj->pos.z);
+        sound_setVoicePanAt(obj->sound, obj->pos.x, obj->pos.y, obj->pos.z);
     }
     dist = state->speed * dt;
     if (state->flags & 2) {
@@ -301,8 +301,8 @@ void effect_spawnPuffFlash(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 random1;
     f32 random0;
 
-    random0 = func_150ADA68();
-    random1 = func_150ADA68();
+    random0 = math_randomFloat();
+    random1 = math_randomFloat();
     particle_spawnGrowFade(pos, random0 * 3.0f + 9.0f, 0.5119050145f, random1 * 70.0f + 70.0f, 0.0f, arg1, arg2);
     particle_spawnShortLightFlash(pos, arg1, arg2);
 }

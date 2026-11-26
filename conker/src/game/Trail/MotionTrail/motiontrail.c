@@ -39,7 +39,7 @@ static TrailFunc gMotionTrailStateProcs[6] = {
 };
 static TrailFunc gMotionTrailUpdateProcs[13] = {
     NULL,          trail_fadeEmittedTrail, func_150AED9C, trail_fadeMotionTrail, particle_fadeMotionTrailByLife, trail_fadeKind2Trail, trail_fadeIn,
-    func_150B378C, effect_fadeImpactTrailByLife, effect_fadeTrailByLife, trail_landSprayTrail, effect_fadeSegmentTrailByLife, particle_fadeTrailByLife,
+    pipeexplode_fadeByLife, effect_fadeImpactTrailByLife, effect_fadeTrailByLife, trail_landSprayTrail, effect_fadeSegmentTrailByLife, particle_fadeTrailByLife,
 };
 /* Finish handlers (TrailParams.finishFn); there are none. */
 static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
@@ -50,7 +50,7 @@ static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
  */
 typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, CollisionTri *);
 static TrailHitFunc D_8008A430[8] = {
-    NULL,          func_15148EF8, trail_spawnHitPuff, effect_spawnTrailSpriteLarge, effect_spawnTrailSpriteSmall, func_150B37C8, effect_spawnImpactTrailBurst,
+    NULL,          func_15148EF8, trail_spawnHitPuff, effect_spawnTrailSpriteLarge, effect_spawnTrailSpriteSmall, pipeexplode_spawnLandParticle, effect_spawnImpactTrailBurst,
     particle_splashBurst,
 };
 static TrailHitFunc D_8008A450[5] = {

@@ -56,7 +56,7 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
     frame = actor->unk2D0->frame[0];
     if (state == 0x3E || state == 0x41 || (state == 0x138 && frame >= 36.0f) ||
         ((state == 0x3D || state == 0xD9) && frame > 21.0f)) {
-        func_150A7960(pinMtx, -7.0f, -17.0f, -7.0f, &x, &y, &z);
+        math_transformPoint(pinMtx, -7.0f, -17.0f, -7.0f, &x, &y, &z);
         anchor = QUAD_ANCHOR(index);
         anchor[0] = x;
         anchor[1] = y;
@@ -71,7 +71,7 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
         x = (vtx[2].v.ob[0] + vtx[3].v.ob[0]) * 0.5f;
         y = (vtx[2].v.ob[1] + vtx[3].v.ob[1]) * 0.5f;
         z = (vtx[2].v.ob[2] + vtx[3].v.ob[2]) * 0.5f;
-        func_150A7960(followMtx, x, y, z, &targetX, &targetY, &targetZ);
+        math_transformPoint(followMtx, x, y, z, &targetX, &targetY, &targetZ);
         anchor = QUAD_ANCHOR(index);
         delta = targetX - anchor[0];
         anchor[0] += delta * blend;

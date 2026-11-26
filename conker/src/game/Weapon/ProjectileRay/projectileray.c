@@ -83,7 +83,7 @@ s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3
                 return 0;
             }
             dist = hit->dist;
-            found = func_150AC9C0(hit->pos.x, hit->pos.y, hit->pos.z, hit->dir.x, hit->dir.y, hit->dir.z, NULL,
+            found = collision_castRayWorld(hit->pos.x, hit->pos.y, hit->pos.z, hit->dir.x, hit->dir.y, hit->dir.z, NULL,
                                   &hit->tri, &hit->pos.x, &hit->pos.y, &hit->pos.z, &hit->dist, &index,
                                   &hit->material, 0.0f);
             if (found) {
@@ -91,7 +91,7 @@ s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3
                 hit->origin = *origin;
             }
         } else {
-            found = func_150AC9C0(origin->x, origin->y, origin->z, hit->dir.x, hit->dir.y, hit->dir.z, NULL,
+            found = collision_castRayWorld(origin->x, origin->y, origin->z, hit->dir.x, hit->dir.y, hit->dir.z, NULL,
                                   &hit->tri, &hit->pos.x, &hit->pos.y, &hit->pos.z, &hit->dist, &index,
                                   &hit->material, 0.0f);
         }

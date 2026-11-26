@@ -144,9 +144,9 @@ void sound_playWithCooldown(s32 sound, s32 objId, u32 variantCount, s32 slot, s3
 
     if (variantCount != 0) {
         if (pairVariants) {
-            sound += (func_150ADA20() % variantCount) * 2;
+            sound += (math_random() % variantCount) * 2;
         } else {
-            sound += func_150ADA20() % variantCount;
+            sound += math_random() % variantCount;
         }
     }
 

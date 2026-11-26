@@ -156,11 +156,11 @@ void func_150EB8C4(void) {
     ParticleSpawn spawn;
 
     camera_startWobblePreset(2, D_800BE9E8, NULL, 0xFF, 1);
-    particle_startRandomEmitter(&D_800A149C, func_150ADA20() % 62U + 120, 0xFF, 1);
+    particle_startRandomEmitter(&D_800A149C, math_random() % 62U + 120, 0xFF, 1);
     particle_spawnBlastSpray(&D_800A1490, 0xFF, 1);
     particle_spawnLightFlash(&D_800A1490, 0xFF, 1);
-    particle_spawnGrowFade(&D_800A1490, func_150ADA68() * 4.0f + 12.0f, 1.640999913f,
-                  func_150ADA20() % 56U + 200, 0.0f, 0xFF, 1);
+    particle_spawnGrowFade(&D_800A1490, math_randomFloat() * 4.0f + 12.0f, 1.640999913f,
+                  math_random() % 56U + 200, 0.0f, 0xFF, 1);
     {
         u8 i;
         s32 yaw;
@@ -198,13 +198,13 @@ void func_150EB8C4(void) {
         }
         for (i = 0; i < 4; i++) {
             spawn.pos = D_800A14A8[i];
-            yaw = func_150ADA20();
-            pitch = func_150ADA20();
-            math_dirFromBinAngles(yaw % 26U + 45, (pitch & 0xF) - 25, func_150ADA68() * 30.0f + 15.0f, &spawn.vel);
-            spawn.rotVel.x = func_150ADA68() * 15.10800076f + -7.554000378f;
-            spawn.rotVel.z = func_150ADA68() * 15.10800076f + -7.554000378f;
-            spawn.gravity = func_150ADA68() * 0.6170000434f + -1.621000051f;
-            spawn.lifetime = func_150ADA20() % 51U + 50;
+            yaw = math_random();
+            pitch = math_random();
+            math_dirFromBinAngles(yaw % 26U + 45, (pitch & 0xF) - 25, math_randomFloat() * 30.0f + 15.0f, &spawn.vel);
+            spawn.rotVel.x = math_randomFloat() * 15.10800076f + -7.554000378f;
+            spawn.rotVel.z = math_randomFloat() * 15.10800076f + -7.554000378f;
+            spawn.gravity = math_randomFloat() * 0.6170000434f + -1.621000051f;
+            spawn.lifetime = math_random() % 51U + 50;
             spawn.model = D_800A14D8[i];
             particle_newModelParticleWithFloor(&spawn, 3, 0xFF, 0, 0, 0xFF, 1);
         }
@@ -229,9 +229,9 @@ void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind) {
     position.y = gate->y;
     position.z = gate->z;
     step = gate->ySize * 0.5f;
-    particle_startRandomEmitter(&position, func_150ADA20() % 101U + 300, owner, kind);
+    particle_startRandomEmitter(&position, math_random() % 101U + 300, owner, kind);
     event.flags = 1;
-    event.duration = func_150ADA20() % 21U + 15;
+    event.duration = math_random() % 21U + 15;
     event.strength = 0;
     event.updateKind = -1;
     event.playerMask = 1;
@@ -241,9 +241,9 @@ void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind) {
     for (i = 0; i < 2; i++) {
         particle_spawnLightFlash(&position, owner, kind);
         particle_spawnBlastSpray(&position, owner, kind);
-        random = func_150ADA68();
+        random = math_randomFloat();
         particle_spawnGrowFade(&position, random * 4.0f + 12.0f, growth,
-                      func_150ADA20() % 56U + 200, 0.0f, owner, kind);
+                      math_random() % 56U + 200, 0.0f, owner, kind);
         position.y += step;
     }
 }

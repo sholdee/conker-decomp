@@ -172,7 +172,7 @@ s32 script_worldObjectQuery(s32 id, s32 op, s32 *cmd) {
     case 19:
         return gfx_isObjectTouchedBy(obj, -1);
     case 20:
-        return gfx_isObjectTouchedBy(obj, func_15084000(cmd[2] & 0xFFFF0FFF));
+        return gfx_isObjectTouchedBy(obj, collision_findSlotBySpawnIndex(cmd[2] & 0xFFFF0FFF));
     case 21:
         for (i = 0; i < 25; i++) {
             if (movement_obj[i].type == cmd[2] && gfx_isObjectTouchedBy(obj, i)) {
@@ -253,16 +253,16 @@ s32 script_playSound(s32 sound, u32 *cmd) {
     s32 pan;
     s32 force;
 
-    if (D_800D3840 == 1) {
+    if (gScriptCmdWordCount == 1) {
         ret = script_playPlainSound(sound, 0x7FFF, 0, 0x40);
     } else {
         ret = cmd[1]; // matching: the kind must share a register with the result
         switch (ret) {
         case 1:
             pan = 0x40;
-            if (D_800D3840 >= 4) {
+            if (gScriptCmdWordCount >= 4) {
                 cents = cmd[3];
-                if (D_800D3840 == 5) {
+                if (gScriptCmdWordCount == 5) {
                     pan = cmd[4];
                 }
             } else {
@@ -288,7 +288,7 @@ s32 script_playSound(s32 sound, u32 *cmd) {
             break;
         case 2:
             force = FALSE;
-            if (D_800D3840 >= 7 && cmd[6] != 0) {
+            if (gScriptCmdWordCount >= 7 && cmd[6] != 0) {
                 force = TRUE;
             }
             script_playActorSound(sound & 0xFFF, cmd[2], cmd[3] & 0xFFF, cmd[4], cmd[5], force);
@@ -360,7 +360,7 @@ s32 script_playRandomActorSound(first, last, unplayed, volume, path, nearDistanc
         }
         count = (u8)(last - first + 1);
         do {
-            pick = func_150ADA20() % (u32)count;
+            pick = math_random() % (u32)count;
         } while (!((1 << pick) & unplayed));
 
         if (sound_playActorSound1(pick + first, actor, volume, nearDistance, farDistance)) {
@@ -391,7 +391,7 @@ s32 script_playRandomZoneSound(s32 first, s32 last, s32 volume, s32 index, u32 n
     if (nearDistance >= farDistance) {
         nearDistance = farDistance - 1;
     }
-    return func_10010F88(sound_pickVariant(first, (u8)(last - first + 1)), volume, 0, 0, 0, point->x, point->y,
+    return sound_playAt(sound_pickVariant(first, (u8)(last - first + 1)), volume, 0, 0, 0, point->x, point->y,
                          point->z, nearDistance, farDistance);
 }
 
@@ -447,7 +447,7 @@ s32 script_playSoundAtActor(s32 sound, s32 path, s32 volume, s32 nearDistance, s
     x = actor->xpos;
     y = actor->ypos;
     z = actor->zpos;
-    return func_10010F88(sound, volume, 0, 0, 0, x, y, z, nearDistance, farDistance);
+    return sound_playAt(sound, volume, 0, 0, 0, x, y, z, nearDistance, farDistance);
 }
 
 /* Moves the voice `handle` to the position of the actor following `path`. */
@@ -461,7 +461,7 @@ void script_moveSoundToActor(s32 handle, s32 path, s32 cents, s32 nearDistance, 
     x = actor->xpos;
     y = actor->ypos;
     z = actor->zpos;
-    func_1000F91C(handle, 0x7FFF, cents, 0, 0, x, y, z, nearDistance, farDistance);
+    sound_setVoiceSpatial(handle, 0x7FFF, cents, 0, 0, x, y, z, nearDistance, farDistance);
 }
 
 s32 func_1509F800(s32 arg0, s32 arg1, s32 arg2) {
@@ -469,6 +469,6 @@ s32 func_1509F800(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 s32 func_1509F818(s32 arg0, s32 arg1, s32 arg2) {
-    func_150AD770();
+    debug_fatalTrap();
     return 0;
 }

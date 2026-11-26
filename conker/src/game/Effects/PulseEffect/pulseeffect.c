@@ -55,14 +55,14 @@ void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
         { // matching: textures must be scoped after the memcpy
             const s32 textures[4] = { 0x60, 0x61, 0x62, 0x63 };
 
-            pulse.phase[0] = func_150ADA20();
-            pulse.phase[1] = func_150ADA20();
+            pulse.phase[0] = math_random();
+            pulse.phase[1] = math_random();
             pulse.baseSize = spawn.width = spawn.height = 700.0f;
-            pulse.phaseStep[0] = (s8)(func_150ADA20() % 6U) + 5; // matching: the (s8) steers t-register allocation
-            pulse.phaseStep[1] = func_150ADA20() % 6U + 5;
-            pulse.amplitude[0] = (func_150ADA68() * 0.25f + 0.200000003f) * pulse.baseSize;
-            pulse.amplitude[1] = (func_150ADA68() * 0.25f + 0.200000003f) * pulse.baseSize;
-            spawn.texture = *(textures + (func_150ADA20() & 3)); // matching: textures[i] reserves an extra temp
+            pulse.phaseStep[0] = (s8)(math_random() % 6U) + 5; // matching: the (s8) steers t-register allocation
+            pulse.phaseStep[1] = math_random() % 6U + 5;
+            pulse.amplitude[0] = (math_randomFloat() * 0.25f + 0.200000003f) * pulse.baseSize;
+            pulse.amplitude[1] = (math_randomFloat() * 0.25f + 0.200000003f) * pulse.baseSize;
+            spawn.texture = *(textures + (math_random() & 3)); // matching: textures[i] reserves an extra temp
             spawn.renderMode = 0x2203;
             spawn.unk0 = 0x200005;
             spawn.unk4 = 0;
@@ -83,7 +83,7 @@ void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
             spawn.scaleStart = 1;
             spawn.gravity = 0.0f;
             spawn.scaleRate = 1.0f;
-            spawn.flags = ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x8000 | 0x4000;
+            spawn.flags = ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0) | 0x8000 | 0x4000;
             spawn.timer = 300;
             spawn.maxSize = 10000.0f;
             spawn.fadeStart = 1;
@@ -207,29 +207,29 @@ void effect_updatePulseEffect(PulseEffect *effect) {
         emit = FALSE;
     }
     if (emit) {
-        data->unk8 += (0.1290000081f + func_150ADA68() * 0.1170000061f) * gFrameDelta;
+        data->unk8 += (0.1290000081f + math_randomFloat() * 0.1170000061f) * gFrameDelta;
         while (data->unk8 > 1.0f) {
             weapon_spawnSmallImpactBurst(&pos, effect->base.header.owner, effect->base.header.kind);
             data->unk8 -= 1.0f;
         }
     }
-    data->unk10 += (0.1300000101f + func_150ADA68() * 0.2f) * gFrameDelta;
+    data->unk10 += (0.1300000101f + math_randomFloat() * 0.2f) * gFrameDelta;
     if (data->unk10 > 1.0f) {
         if (sprite_findActorMotion(owner, &wind) == 0) {
             wind = &gZeroVec3f;
         }
         do {
-            rand1 = func_150ADA20();
-            rand0 = func_150ADA20();
-            math_dirFromBinAngles(rand1 & 0xFF, (rand0 % 25U) - 0x40, func_150ADA68() * 2.597000122f + 4.870000362f, &vel);
+            rand1 = math_random();
+            rand0 = math_random();
+            math_dirFromBinAngles(rand1 & 0xFF, (rand0 % 25U) - 0x40, math_randomFloat() * 2.597000122f + 4.870000362f, &vel);
             vel.x -= wind->x * 0.6f;
             vel.z -= wind->z * 0.6f;
-            randF0 = func_150ADA68();
-            rand1 = func_150ADA20();
-            rand0 = func_150ADA20();
-            randF1 = func_150ADA68();
+            randF0 = math_randomFloat();
+            rand1 = math_random();
+            rand0 = math_random();
+            randF1 = math_randomFloat();
             particle_spawnSteamParticle(&pos, &vel, 0xC, randF0 * 0.2580000162f + -0.6080000401f, (rand1 % 41U) + 60, (rand0 % 56U) + 200,
-                          randF1 * 160.0f + 121.0f, func_150ADA68() < 0.7000000477f, 1.0f, 1.0f, 0, &ground, 1, 1,
+                          randF1 * 160.0f + 121.0f, math_randomFloat() < 0.7000000477f, 1.0f, 1.0f, 0, &ground, 1, 1,
                           effect->base.header.owner, effect->base.header.kind);
             data->unk10 -= 1.0f;
         } while (data->unk10 > 1.0f);

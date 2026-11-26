@@ -28,8 +28,8 @@ s8 particle_updateFlickerSprite(FlickerSprite *particle) {
     flicker->keepAlive = FALSE;
     flicker->timer -= D_800BE9E4;
     if (flicker->timer < 0) {
-        flicker->timer = func_150ADA20() % (flicker->delayRange + 1) + flicker->minDelay;
-        flicker->target = func_150ADA68() * flicker->targetRange + flicker->minTarget;
+        flicker->timer = math_random() % (flicker->delayRange + 1) + flicker->minDelay;
+        flicker->target = math_randomFloat() * flicker->targetRange + flicker->minTarget;
     }
     particle->quad.def.frameSpeed += (s32)((flicker->target - particle->quad.def.frameSpeed) * flicker->easing);
     return alive;
@@ -147,24 +147,24 @@ void particle_spawnWatcherParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, 
     burst.vel.x = -vx * 0.2f;
     burst.vel.y = 0.0f;
     burst.vel.z = -vz * 0.2f;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         burst.flags |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         burst.flags |= 0x80;
     }
-    burst.timer = func_150ADA20() % 51U + 106;
-    burst.alpha = func_150ADA20() % 101U + 100;
-    motion.baseSize = burst.width = burst.height = func_150ADA68() * 62.0f + 41.0f;
-    motion.widthPhaseStep = func_150ADA20() % 5U + 4;
-    motion.heightPhaseStep = func_150ADA20() % 5U + 4;
-    motion.widthWobble = (func_150ADA68() * 0.25f + 0.15f) * motion.baseSize;
-    motion.heightWobble = (func_150ADA68() * 0.25f + 0.15f) * motion.baseSize;
-    motion.swayPhaseStepX = func_150ADA20() % 5U + 4;
-    motion.swayPhaseStepZ = func_150ADA20() % 5U + 4;
-    motion.swayX = (func_150ADA68() * 0.1f + 0.08f) * motion.baseSize;
-    motion.swayZ = (func_150ADA68() * 0.1f + 0.08f) * motion.baseSize;
-    burst.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
+    burst.timer = math_random() % 51U + 106;
+    burst.alpha = math_random() % 101U + 100;
+    motion.baseSize = burst.width = burst.height = math_randomFloat() * 62.0f + 41.0f;
+    motion.widthPhaseStep = math_random() % 5U + 4;
+    motion.heightPhaseStep = math_random() % 5U + 4;
+    motion.widthWobble = (math_randomFloat() * 0.25f + 0.15f) * motion.baseSize;
+    motion.heightWobble = (math_randomFloat() * 0.25f + 0.15f) * motion.baseSize;
+    motion.swayPhaseStepX = math_random() % 5U + 4;
+    motion.swayPhaseStepZ = math_random() % 5U + 4;
+    motion.swayX = (math_randomFloat() * 0.1f + 0.08f) * motion.baseSize;
+    motion.swayZ = (math_randomFloat() * 0.1f + 0.08f) * motion.baseSize;
+    burst.gravity = (math_randomFloat() * 60.0f + 21.0f) * 0.001f;
     spawned = particle_newSpriteParticle(&burst, 2, 40);
     if (spawned != NULL) {
         memcpy(&spawned->motion, &motion, sizeof(motion));
@@ -235,7 +235,7 @@ FlickerSprite *particle_spawnFlickerSprite(GameF3270Emitter *emitter) {
 
             colorIndex = particle_getContextEffectKind();
             probe.y = emitter->watcher.hit.height;
-            size = func_150ADA68() * 50.0f + 100.0f;
+            size = math_randomFloat() * 50.0f + 100.0f;
             flicker.owner = &emitter->watcher;
             flicker.keepAlive = TRUE;
             flicker.minTarget = 26214.4f;
@@ -259,9 +259,9 @@ FlickerSprite *particle_spawnFlickerSprite(GameF3270Emitter *emitter) {
             desc.renderModes = 0x440001;
             desc.unk16 = 0;
             desc.unk17 = 6;
-            rand0 = func_150ADA20();
-            rand1 = func_150ADA20();
-            rand2 = func_150ADA20();
+            rand0 = math_random();
+            rand1 = math_random();
+            rand2 = math_random();
             // matching: the explicit & 0xFF on rand0 (a (u8) cast emits no andi)
             particle = (FlickerSprite *)particle_spawnSurfaceQuadSpriteNoModel(
                 &desc, 8, 2, &emitter->watcher.hit.tri, probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,

@@ -77,24 +77,24 @@ s32 particle_wobbleSpriteSize(EffectSprite *sprite) {
 
     state->timer1 -= D_800BE9E4;
     if (state->timer1 < 0) {
-        state->timer1 = func_150ADA20() % 6U;
-        if (func_150ADA20() & 3) {
-            state->target1 = func_150ADA68() * (state->hi1 - state->lo1) + state->lo1;
+        state->timer1 = math_random() % 6U;
+        if (math_random() & 3) {
+            state->target1 = math_randomFloat() * (state->hi1 - state->lo1) + state->lo1;
         } else {
-            state->target1 = func_150ADA68() * (state->peak1 - state->hi1) + state->hi1;
+            state->target1 = math_randomFloat() * (state->peak1 - state->hi1) + state->hi1;
         }
     }
     sprite->head.def.height += (state->target1 - sprite->head.def.height) * 0.359f;
     state->timer0 -= D_800BE9E4;
     if (state->timer0 < 0) {
-        state->timer0 = func_150ADA20() % 17U;
-        state->target0 = func_150ADA68() * (state->hi0 - state->lo0) + state->lo0;
+        state->timer0 = math_random() % 17U;
+        state->target0 = math_randomFloat() * (state->hi0 - state->lo0) + state->lo0;
     }
     sprite->head.def.width += (state->target0 - sprite->head.def.width) * 0.186f;
     state->timer2 -= D_800BE9E4;
     if (state->timer2 < 0) {
-        state->timer2 = func_150ADA20() % 15U;
-        state->target2 = func_150ADA68() * (state->hi2 - state->lo2) + state->lo2;
+        state->timer2 = math_random() % 15U;
+        state->target2 = math_randomFloat() * (state->hi2 - state->lo2) + state->lo2;
     }
     sprite->head.def.frameSpeed += (s32)((state->target2 - sprite->head.def.frameSpeed) * 0.231f);
     return 1;
@@ -105,11 +105,11 @@ s32 particle_easeSpriteSizeOnce(EffectSprite *sprite) {
     SpriteWobble *state = &sprite->wobble;
 
     if (sprite->wobble.timer0 == 0) {
-        state->target0 = func_150ADA68() * (state->hi0 - state->lo0) + state->lo0;
+        state->target0 = math_randomFloat() * (state->hi0 - state->lo0) + state->lo0;
         state->timer0 = 1;
     }
     if (state->timer1 == 0) {
-        state->target1 = func_150ADA68() * (state->hi1 - state->lo1) + state->lo1;
+        state->target1 = math_randomFloat() * (state->hi1 - state->lo1) + state->lo1;
         state->timer1 = 1;
     }
     sprite->head.def.height += (state->target1 - sprite->head.def.height) * 0.359f;
@@ -208,7 +208,7 @@ s32 particle_updateAnchorEmitter(AnchorEmitter *emitter) {
     AnchorEmitterParams *params;
 
     params = &emitter->params;
-    params->accum += (params->tmpl.rate + func_150ADA68() * params->tmpl.rateRange) * gFrameDelta;
+    params->accum += (params->tmpl.rate + math_randomFloat() * params->tmpl.rateRange) * gFrameDelta;
     particle_emitAtRandomAnchor(emitter);
     if (params->updateFunc != -1) {
         return gAnchorEmitterUpdateFuncs[params->updateFunc](emitter);
@@ -229,7 +229,7 @@ void particle_emitAnchorBurst(AnchorEmitter *emitter) {
     AnchorEmitterParams *params;
 
     params = &emitter->params;
-    params->accum = func_150ADA68() * params->tmpl.burstRange + params->tmpl.burstBase;
+    params->accum = math_randomFloat() * params->tmpl.burstRange + params->tmpl.burstBase;
     particle_emitAtRandomAnchor(emitter);
 }
 
@@ -253,12 +253,12 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
             do {
                 if (emitter->group.count < params->tmpl.maxCount) {
                     set = params->tmpl.anchorSet;
-                    anchor = &gAnchorSets[set][func_150ADA20() % gAnchorCounts[set]];
-                    size.unk0 = func_150ADA68() * params->tmpl.sizeXRange + params->tmpl.sizeX;
-                    size.unk4 = func_150ADA68() * params->tmpl.sizeYRange + params->tmpl.sizeY;
+                    anchor = &gAnchorSets[set][math_random() % gAnchorCounts[set]];
+                    size.unk0 = math_randomFloat() * params->tmpl.sizeXRange + params->tmpl.sizeX;
+                    size.unk4 = math_randomFloat() * params->tmpl.sizeYRange + params->tmpl.sizeY;
                     math_transformOffset(&anchor->offset, &pos, owner->ob_matrix_ptr + anchor->bone);
-                    frameRand = func_150ADA20();
-                    if (func_150ADA20() & 1) {
+                    frameRand = math_random();
+                    if (math_random() & 1) {
                         kind = 0x13;
                     } else {
                         kind = 0x14;
@@ -272,7 +272,7 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
                         desc.ownerId = owner->unique_id;
                         desc.offset = anchor->offset;
                         desc.bone = anchor->bone;
-                        desc.duration = func_150ADA20() % (params->tmpl.lifeRange + 1) + params->tmpl.lifeMin;
+                        desc.duration = math_random() % (params->tmpl.lifeRange + 1) + params->tmpl.lifeMin;
                         desc.unk18 = 1;
                         if (params->tmpl.flags & 1) {
                             desc.unk19 = 1;
@@ -331,11 +331,11 @@ void particle_launchAnchorParticle(EmitterParticle *particle, Vec3f *dest) {
     sprite->jitter.velocity.z = (dest->z - particle->pos.z) * parent->params.tmpl.velocityScale;
     params = &parent->params;
     motion = &sprite->jitter;
-    motion->gravity = func_150ADA68() * params->tmpl.unk34Range + params->tmpl.unk30;
+    motion->gravity = math_randomFloat() * params->tmpl.unk34Range + params->tmpl.unk30;
     motion->drag = params->tmpl.unk38;
     sprite->head.def.fadeStart = params->tmpl.unk3C;
     sprite->head.def.fadeRate = params->tmpl.unk3E;
-    sprite->head.def.lifetime = func_150ADA20() % (params->tmpl.unk42Range + 1) + params->tmpl.unk40;
+    sprite->head.def.lifetime = math_random() % (params->tmpl.unk42Range + 1) + params->tmpl.unk40;
     if (params->tmpl.flags & 1) {
         sprite->head.updateFn1 = 0x21;
     } else {

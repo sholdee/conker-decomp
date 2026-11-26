@@ -182,15 +182,15 @@ void effect_centreRainVolume(void) {
 
     /* offset (0, 500, 0) rotated by unk398, then by unk3A0 */
     angle = camera_global_Cameras->CameraPitchRad;
-    c = func_150AD78C(angle);
-    s = func_150AD780(angle);
+    c = math_sin(angle);
+    s = math_cos(angle);
     vy = 500.0f * c;
     vz = -500.0f * s;
     vx = 0.0f;
 
     angle = camera_global_Cameras->TrueCameraAngleRad;
-    c = func_150AD78C(angle);
-    s = func_150AD780(angle);
+    c = math_sin(angle);
+    s = math_cos(angle);
     x += vx * s + vz * c;
     z += vz * s - vx * c;
     y += vy;

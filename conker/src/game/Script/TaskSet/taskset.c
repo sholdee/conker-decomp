@@ -78,7 +78,7 @@ IdRecord *script_getTask(s32 id, s32 reload) {
         script_insertTask(node);
         if (!ID_FLAG(TASK_ID(node))) {
             D_8003C8E0 = 0x6000000;
-            func_150ADAF0(node, TASK_ENTRY_START);
+            script_runTask(node, TASK_ENTRY_START);
             D_8003C8E0 = 0;
         }
         if (!reload || (node->TaskID & RUN_INIT_ONCE_ONLY)) {
@@ -241,7 +241,7 @@ void script_purgeTasks(s32 unloadAll) {
             gTaskStates[id] = 3;
         } else if (unloadAll || (key & TASK_FINISHED) || ((key & PURGE_BETWEEN_SECTIONS) && level != node->LoadSection)) {
             D_8003C8E0 = 0x6000001;
-            func_150ADAF0(node, TASK_ENTRY_PURGE);
+            script_runTask(node, TASK_ENTRY_PURGE);
             D_8003C8E0 = 0;
             script_freeTask(node);
             if (!ID_FLAG(id)) {
@@ -278,7 +278,7 @@ void script_runTasks(s32 mode) {
         if (mode == TASK_ENTRY_DONE) {
             if (ID_FLAG(id)) {
                 D_8003C8E0 = 0x6000002;
-                func_150ADAF0(node, TASK_ENTRY_DONE);
+                script_runTask(node, TASK_ENTRY_DONE);
                 D_8003C8E0 = 0;
                 gTaskStates[id] = 3;
                 node->TaskID |= TASK_FINISHED;
@@ -288,7 +288,7 @@ void script_runTasks(s32 mode) {
         } else if (!ID_FLAG(id)) {
             if (key & TASK_INIT_PENDING) {
                 D_8003C8E0 = 0x6000003;
-                func_150ADAF0(node, TASK_ENTRY_INIT);
+                script_runTask(node, TASK_ENTRY_INIT);
                 D_8003C8E0 = 0;
                 key = node->TaskID &= ~TASK_INIT_PENDING;
             }
@@ -299,7 +299,7 @@ void script_runTasks(s32 mode) {
             if (!(key & SUSPEND_BETWEEN_SECTIONS) || level == node->LoadSection) {
                 if (mode == TASK_ENTRY_RUN || (mode == TASK_ENTRY_INIT && !(key & RUN_INIT_ONCE_ONLY))) {
                     D_8003C8E0 = 0x6000004;
-                    func_150ADAF0(node, mode);
+                    script_runTask(node, mode);
                     D_8003C8E0 = 0;
                 }
                 if (mode == TASK_ENTRY_RUN) {
@@ -317,7 +317,7 @@ void script_runTasks(s32 mode) {
         D_800D2F58 = 0;
         script_loadLevelTasks((s16)level, 0);
     }
-    D_800D3858 = 0;
+    gScriptSavedSp = 0;
 }
 
 /*
@@ -336,7 +336,7 @@ s32 script_query(s32 count, s32 cmdWord, s32 arg, ...) {
 
     va_start(ap, count);
     cmd = va_arg(ap, s32);
-    saved = D_800D3840;
+    saved = gScriptCmdWordCount;
     type = ((cmd & 0xF000) >> 12) - 1;
     cmd &= 0xFFF;
     arg = va_arg(ap, s32);
@@ -346,9 +346,9 @@ s32 script_query(s32 count, s32 cmdWord, s32 arg, ...) {
         gScriptCmdBuffer[i + 2] = va_arg(ap, s32);
     }
     va_end(ap);
-    D_800D3840 = count + 2;
+    gScriptCmdWordCount = count + 2;
     result = gScriptQueryHandlers[type](cmd, arg, gScriptCmdBuffer);
-    D_800D3840 = saved;
+    gScriptCmdWordCount = saved;
     return result;
 }
 
@@ -362,7 +362,7 @@ s32 script_command(s32 count, s32 cmdWord, s32 arg, ...) {
 
     va_start(ap, count);
     cmd = va_arg(ap, s32);
-    saved = D_800D3840;
+    saved = gScriptCmdWordCount;
     type = ((cmd & 0xF000) >> 12) - 1;
     cmd &= 0xFFF;
     arg = va_arg(ap, s32);
@@ -372,14 +372,14 @@ s32 script_command(s32 count, s32 cmdWord, s32 arg, ...) {
         gScriptCmdBuffer[i + 2] = va_arg(ap, s32);
     }
     va_end(ap);
-    D_800D3840 = count + 2;
+    gScriptCmdWordCount = count + 2;
     result = gScriptCommandHandlers[type](cmd, arg, gScriptCmdBuffer);
-    D_800D3840 = saved;
+    gScriptCmdWordCount = saved;
     return result;
 }
 
 /*
- * (Re)allocates the 0x1B-byte id bit array: allocates 1-4 buffers (count from func_150ADA20),
+ * (Re)allocates the 0x1B-byte id bit array: allocates 1-4 buffers (count from math_random),
  * keeps the last one and frees the others, then copies the old array over and frees it.
  */
 void script_reallocTaskDoneBits(void) {
@@ -388,10 +388,10 @@ void script_reallocTaskDoneBits(void) {
     u8 *bufs[4];
     u8 *old;
 
-    last = func_150ADA20() & 3;
+    last = math_random() & 3;
     old = gTaskDoneBits;
     if (old != NULL) {
-        if (!(func_150ADA20() & 4)) {
+        if (!(math_random() & 4)) {
             return;
         }
     }

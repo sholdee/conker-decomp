@@ -135,7 +135,7 @@ void shadow_updateBlob(Shadow *shadow) {
                 return;
             }
             tri = prop->shadow->floorTri;
-            if (func_150A3FC4(prop->x, prop->z, 0, tri, &floorY) == 0) {
+            if (collision_getTriHeightAt(prop->x, prop->z, 0, tri, &floorY) == 0) {
                 collision_findFloorInRange(0, tri, &floorY, 0, 0, 0, prop->x, prop->y, prop->z, prop->y,
                               prop->object_num + 1, 0, -10000.0f, prop->y);
             }
@@ -377,7 +377,7 @@ s32 shadow_getTriSlopes(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ) {
 
 
 /* Loads the fixed matrix gIdentityMtx as the modelview matrix (arg1 and arg2 are unused). */
-Gfx *func_1510E634(Gfx *gfx, s32 arg1, s32 arg2) {
+Gfx *shadow_loadIdentityMtx(Gfx *gfx, s32 arg1, s32 arg2) {
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     return gfx;
 }

@@ -130,12 +130,12 @@ void attach_spawnFootImpact(Actor *actor) {
                     pos.x = probe.x;
                     pos.y = ground.height;
                     pos.z = probe.z;
-                    randomScale = func_150ADA68();
-                    random.value = func_150ADA20();
+                    randomScale = math_randomFloat();
+                    random.value = math_random();
                     particle_spawnImpactMark(randomScale * 109.0f + 140.0f, ((random.value % 86U) + 170),
-                                  &ground.tri, &pos, (func_150ADA20() % 251U) + 500, 0, 1, 0, 0, 0, 255, 0);
+                                  &ground.tri, &pos, (math_random() % 251U) + 500, 0, 1, 0, 0, 0, 255, 0);
                 }
-                particle_startRandomEmitter(&pos, (func_150ADA20() % 62U) + 120, 255, 1);
+                particle_startRandomEmitter(&pos, (math_random() % 62U) + 120, 255, 1);
             }
             burst.countBase = 26;
             burst.countRange = 7;

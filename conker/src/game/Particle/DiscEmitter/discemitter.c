@@ -13,11 +13,11 @@ void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     f32 sine;
     f32 radius;
 
-    angle = func_150ADA20() & 0xFF;
+    angle = math_random() & 0xFF;
     cosine = math_cosBinAngleMasked(angle - 0x40);
     sine = math_cosBinAngleMasked(angle);
     pos = &emitter->unk28;
-    radius = func_150ADA68() * pos->radius;
+    radius = math_randomFloat() * pos->radius;
     particle.maxC = 0x6231; particle.minC = 0x1A4D; // matching: one source line (-g3 line numbers steer as1 scheduling)
     particle.color[0] = 0;
     particle.color[1] = 0;
@@ -29,7 +29,7 @@ void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     particle.flags = 1;
     particle.unk2E = 0;
     particle.unk2F = 1;
-    particle.life = (func_150ADA20() % 201U) + 100;
+    particle.life = (math_random() % 201U) + 100;
     particle.effect = 0xF;
     particle.scale = 0.0f;
     particle.shrinkRate = 0.045f;
@@ -38,15 +38,15 @@ void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     particle.pos.y = pos->y;
     particle.pos.z = pos->z + radius * sine;
     particle.maxHeight = 10000.0f;
-    scaleA = (func_150ADA68() * 0.5f) + 1.0f;
-    scaleB = (func_150ADA68() * 0.5f) + 1.0f;
+    scaleA = (math_randomFloat() * 0.5f) + 1.0f;
+    scaleB = (math_randomFloat() * 0.5f) + 1.0f;
     particle.maxA = 22.6f * scaleA;
     particle.minA = 13.786f * scaleA;
     particle.maxB = 57.969f * scaleB;
     particle.minB = 42.714f * scaleB;
     particle.altB = 118.763f * scaleB;
     particle_spawnChannelParticle(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
-    emitter->base.header.state = (func_150ADA20() % 51U) + 25;
+    emitter->base.header.state = (math_random() % 51U) + 25;
 }
 void *memcpy(void *, const void *, u32);
 
@@ -61,7 +61,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
     ChannelParticle *created;
 
     timer = &emitter->unk28.x;
-    *timer += func_150ADA68() * 20.0f * 1e-9f * gFrameDelta * 36447764.0f;
+    *timer += math_randomFloat() * 20.0f * 1e-9f * gFrameDelta * 36447764.0f;
     if (*timer > 1.0f) {
         if (1) { // matching: the extra block makes IDO give emitter $s3 and pos $s2
             // matching: the camera position read as f32[3]; through Vec3f fields IDO emits other code
@@ -85,19 +85,19 @@ void func_150C2C00(Struct150C29F0 *emitter) {
                 particle.shrinkRate = 0.045f;
                 particle.growRate = 0.7f;
                 do {
-                    angle = (func_150ADA68() * 5.8659425f) + 0.957204f;
+                    angle = (math_randomFloat() * 5.8659425f) + 0.957204f;
                     if (math_angleDistance(math_atan2(pos[0], pos[2]), angle) < 0.4f) {
-                        math_dirFromAngleXZ(angle, (func_150ADA68() * 1278.0f) + 3900.0f, &particle.pos.x, &particle.pos.z);
-                        scaleA = ((func_150ADA68() * 1991.0f) + 1985.0f) * 0.001f;
-                        scaleB = ((func_150ADA68() * 1493.0f) + 3000.0f) * 0.001f;
+                        math_dirFromAngleXZ(angle, (math_randomFloat() * 1278.0f) + 3900.0f, &particle.pos.x, &particle.pos.z);
+                        scaleA = ((math_randomFloat() * 1991.0f) + 1985.0f) * 0.001f;
+                        scaleB = ((math_randomFloat() * 1493.0f) + 3000.0f) * 0.001f;
                         particle.maxA = 22.6f * scaleA;
                         particle.minA = 13.786f * scaleA;
                         particle.maxB = 57.969f * scaleB;
                         particle.minB = 42.714f * scaleB;
                         particle.altB = 118.763f * scaleB;
-                        particle.life = (func_150ADA20() % 151U) + 50;
-                        particle.scale = (func_150ADA68() * 500.0f) * 0.001f;
-                        particle.unk2C = (func_150ADA20() % 156U) + 100;
+                        particle.life = (math_random() % 151U) + 50;
+                        particle.scale = (math_randomFloat() * 500.0f) * 0.001f;
+                        particle.unk2C = (math_random() % 156U) + 100;
                         created = particle_spawnChannelParticle(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
                         if (created != NULL) {
                             memcpy(&created->extra, &angle, sizeof(angle));

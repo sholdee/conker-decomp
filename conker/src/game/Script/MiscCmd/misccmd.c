@@ -7,11 +7,11 @@ static f32 D_800D2FC0[5]; // velocity
 static f32 D_800D2FD8[5]; // value
 static u8 D_800D2FEC[5];  // set by func_1509DF20
 
-// On a type-1 record (only while D_800D3840 == 3), sets both float slots of entry `index` to the
+// On a type-1 record (only while gScriptCmdWordCount == 3), sets both float slots of entry `index` to the
 // 16.16 fixed-point `value` and flags the entry. A start handler of gScriptStartHandlers: it has the table's s32
 // type but no return statement.
 s32 func_1509DF20(s32 arg0, ScriptCmd *record) {
-    if (record->arg.w == 1 && D_800D3840 == 3) {
+    if (record->arg.w == 1 && gScriptCmdWordCount == 3) {
         D_800D2FC0[record->a[0].w] = record->a[1].w * (1.0f / 65536.0f);
         D_800D2FD8[record->a[0].w] = record->a[1].w * (1.0f / 65536.0f);
         D_800D2FEC[record->a[0].w] = 1;

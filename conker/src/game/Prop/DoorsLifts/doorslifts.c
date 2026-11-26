@@ -732,7 +732,7 @@ void prop_swingFlap(WorldObject *prop) {
             if (target == 0.0f) {
                 accel += 0.1000000015f;
             } else {
-                func_10010F88(0x4BA, 0x5DC0, 0, 0, 0, prop->x, prop->y, prop->z, 200, 0x9C4);
+                sound_playAt(0x4BA, 0x5DC0, 0, 0, 0, prop->x, prop->y, prop->z, 200, 0x9C4);
                 accel += 0.1000000015f;
             }
         }
@@ -747,7 +747,7 @@ void prop_swingFlap(WorldObject *prop) {
                     motion = TASK_FLAG_OFF;
                 } else {
                     motion = TASK_FLAG_ON;
-                    func_10010F88(0x4BB, 0x5DC0, 0, 0, 0, prop->x, prop->y, prop->z, 200, 0x9C4);
+                    sound_playAt(0x4BB, 0x5DC0, 0, 0, 0, prop->x, prop->y, prop->z, 200, 0x9C4);
                 }
             } else {
                 WORK(prop)->swing.accel *= 0.5f;

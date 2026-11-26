@@ -164,23 +164,23 @@ void prop_updateWaveDeformers(void) {
             }
             if ((deformer->flags & WAVE_MODE_MASK) == 1) {
                 if ((deformer->flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {
-                    func_150A7360(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
+                    prop_waveVerticesMode1Weighted(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
                                   deformer->params.unk14, deformer->vertexPhase, deformer->vertexWeight, src);
                 } else {
-                    func_150A71C8(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
+                    prop_waveVerticesMode1(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
                                   deformer->params.unk14, deformer->vertexPhase, src);
                 }
             } else if ((deformer->flags & WAVE_MODE_MASK) == 0) {
                 if ((deformer->flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {
-                    func_150A6FA0(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
+                    prop_waveVerticesWeighted(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
                                   deformer->vertexPhase, deformer->vertexWeight, src);
                 } else {
-                    func_150A70C0(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
+                    prop_waveVertices(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
                                   deformer->vertexPhase, src);
                 }
             } else if ((deformer->flags & WAVE_MODE_MASK) == 2) {
                 if ((deformer->flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {
-                    func_150A751C(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
+                    prop_waveVerticesMode2Weighted(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
                                   deformer->vertexAngle, deformer->vertexPhase, deformer->vertexWeight, src);
                 }
             }
@@ -203,7 +203,7 @@ void prop_updateWaveDeformers(void) {
                     gfx_getObjectModelMtx(mtx, obj);
                     if (i) {} // matching: an extra use of i makes IDO keep it in a register and spill the list cursor
                     for (j = 0; j < obj->numVertices; j++) {
-                        func_150A7960(mtx, obj->srcVertices[j].v.ob[0], obj->vertices[D_800BE9C0][j].v.ob[1],
+                        math_transformPoint(mtx, obj->srcVertices[j].v.ob[0], obj->vertices[D_800BE9C0][j].v.ob[1],
                                       obj->srcVertices[j].v.ob[2], &x, &y, &z);
                         obj->vertices[D_800BE9C0][j].v.ob[0] = x;
                         obj->vertices[D_800BE9C0][j].v.ob[1] = y;

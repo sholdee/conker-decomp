@@ -424,12 +424,12 @@ void trail_spawnParticleAtTarget(Actor *target, u8 arg1, s32 arg2) {
     spawn.frameRate = 0;
     spawn.fadeStart = 18;
     spawn.fadeRate = 14;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         flag40 = 0x40;
     } else {
         flag40 = 0;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         flag80 = 0x80;
     } else {
         flag80 = 0;
@@ -458,9 +458,9 @@ void trail_spawnParticleAtTarget(Actor *target, u8 arg1, s32 arg2) {
     spawn.offset.x = 0.0f;
     spawn.offset.y = 0.0f;
     spawn.offset.z = 0.0f;
-    spawn.alpha = func_150ADA20() % 56U + 200;
-    spawn.timer = func_150ADA20() % 10U + 30;
-    spawn.width = spawn.height = func_150ADA68() * 50.0f + 89.0f;
+    spawn.alpha = math_random() % 56U + 200;
+    spawn.timer = math_random() % 10U + 30;
+    spawn.width = spawn.height = math_randomFloat() * 50.0f + 89.0f;
     spawn.vel.x = 0.0f;
     spawn.vel.y = 0.0f;
     spawn.vel.z = 0.0f;
@@ -526,7 +526,7 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32
         const s32 unk1DChoices[4] = { 0x60, 0x61, 0x62, 0x63 };
         s32 flag80;
         s32 flag40;
-        particle.texture = unk1DChoices[func_150ADA20() & 3];
+        particle.texture = unk1DChoices[math_random() & 3];
         particle.renderMode = 0x1303;
         particle.unk0 = 0x200005;
         particle.unk4 = 0;
@@ -542,7 +542,7 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32
         particle.b2 = 0xFF;
         particle.alpha = 0xFF;
         particle.brightness = 0xFF;
-        particle.width = particle.height = func_150ADA68() * 800.0f + 1700.0f;
+        particle.width = particle.height = math_randomFloat() * 800.0f + 1700.0f;
         particle.pos = spawn.pos;
         particle.offset = gZeroVec3f;
         particle.vel = gZeroVec3f;
@@ -551,12 +551,12 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32
         particle.scaleStart = 1;
         particle.gravity = 0.0f;
         particle.scaleRate = 1.0f;
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             flag40 = 0x40;
         } else {
             flag40 = 0;
         }
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             flag80 = 0x80;
         } else {
             flag80 = 0;
@@ -615,7 +615,7 @@ s32 trail_getRibbonPointBehind(EffectObj *obj, Vec3f *pos) {
     state = obj->userData;
     ref = state->args;
     target = *ref;
-    func_150A8050(mtx, target->rot.x, target->rot.y, target->rot.z);
+    math_mtxRotateRPYF(mtx, target->rot.x, target->rot.y, target->rot.z);
     mtx[3][0] = target->pos.x;
     mtx[3][1] = target->pos.y;
     mtx[3][2] = target->pos.z;
@@ -628,7 +628,7 @@ s32 trail_getRibbonPointBehind(EffectObj *obj, Vec3f *pos) {
     mtx[2][0] *= target->scaleXZ;
     mtx[2][1] *= target->scaleXZ;
     mtx[2][2] *= target->scaleXZ;
-    func_150A7960(mtx, 0.0f, 0.0f, -250.0f, &pos->x, &pos->y, &pos->z);
+    math_transformPoint(mtx, 0.0f, 0.0f, -250.0f, &pos->x, &pos->y, &pos->z);
     return 1;
 }
 

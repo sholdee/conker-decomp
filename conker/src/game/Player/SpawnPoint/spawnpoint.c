@@ -127,7 +127,7 @@ s32 player_getSpawnPoint(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outP
                             }
                         }
                     }
-                    dz = func_150ADA68() * 500.0f;
+                    dz = math_randomFloat() * 500.0f;
                     nearestDistSq += dz * dz;
                     if (bestDistSq < nearestDistSq) {
                         best = i;
@@ -173,7 +173,7 @@ s32 player_getSpawnPoint(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outP
         *outDoorWalkTime = gSpawnPoints[j].doorWalkTime;
         if (gIsMultiplayer && D_800D18A8 == 0) {
             f32 angle = *outFacing * 3.1415927410f * (1.0f / 128);
-            f32 offset = func_150ADA68() * 80.0f - 40.0f;
+            f32 offset = math_randomFloat() * 80.0f - 40.0f;
             outPos[0] += sinf(angle) * offset;
             outPos[2] += cosf(angle) * offset;
         }

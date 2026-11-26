@@ -55,7 +55,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
             break;
     }
     if (surface == NULL) {
-        if (func_150AC9C0(pos->x - dir->x, pos->y - dir->y, pos->z - dir->z, dir->x, dir->y, dir->z,
+        if (collision_castRayWorld(pos->x - dir->x, pos->y - dir->y, pos->z - dir->z, dir->x, dir->y, dir->z,
                           &hitVerts, &hitSurface, &hitPos.x, &hitPos.y, &hitPos.z, &hitDist, &surfaceId, 0, 0.0f)) {
             hit = 1;
         } else {
@@ -70,14 +70,14 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         hit = 1;
     }
     solid = math_isObjectHidden(surfaceId);
-    if ((func_150ADA20() & 1) || !solid) {
+    if ((math_random() & 1) || !solid) {
         big = 1;
     } else {
         big = 0;
     }
     if (kind == 1) {
         if (big) {
-            sfx = (func_150ADA20() % 3U) + 0x459;
+            sfx = (math_random() % 3U) + 0x459;
             if (gScreenLayout == 0) {
                 sound_addDynamicSound(sfx, pos->x, pos->y, pos->z, 0x4000, 1200, 800,
                               (SoundRecordCallback)sound_delayedPlayCallback, (void *)40, 0, 0, 0);
@@ -86,9 +86,9 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         } else {
             sfx = 0xB0;
         }
-        func_10010E78(0, sfx, 0x6590, (func_150ADA20() % 500U) - 250, 0, 0, pos->x, pos->y, pos->z, 500, 800);
+        sound_startVoiceAt(0, sfx, 0x6590, (math_random() % 500U) - 250, 0, 0, pos->x, pos->y, pos->z, 500, 800);
     }
-    if (func_150ADA68() < D_800DCA24) {
+    if (math_randomFloat() < D_800DCA24) {
         TrailBurst sparks;
 
         sparks.countBase = 5 >> D_800DCA20;
@@ -181,15 +181,15 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
             f32 speed;
 
             if (math_vec3Normalize(dir, &unitDir, &unkOut1, &unkOut2)) {
-                speed = func_150ADA68() * 12.0f + 3.0f;
-                p.lifetime = (func_150ADA20() % 11U) + 30;
+                speed = math_randomFloat() * 12.0f + 3.0f;
+                p.lifetime = (math_random() % 11U) + 30;
                 p.vel.x = -unitDir.x * speed;
                 p.vel.y = -unitDir.y * speed;
                 p.vel.z = -unitDir.z * speed;
-                p.rotVel.x = (func_150ADA68() * 203280.0f + -101640.0f) * 9.999999747e-05f;
-                p.rotVel.y = (func_150ADA68() * 203280.0f + -101640.0f) * 9.999999747e-05f;
-                p.rotVel.z = (func_150ADA68() * 203280.0f + -101640.0f) * 9.999999747e-05f;
-                p.gravity = (func_150ADA68() * 449.0f + -744.0f) * 0.001000000047f;
+                p.rotVel.x = (math_randomFloat() * 203280.0f + -101640.0f) * 9.999999747e-05f;
+                p.rotVel.y = (math_randomFloat() * 203280.0f + -101640.0f) * 9.999999747e-05f;
+                p.rotVel.z = (math_randomFloat() * 203280.0f + -101640.0f) * 9.999999747e-05f;
+                p.gravity = (math_randomFloat() * 449.0f + -744.0f) * 0.001000000047f;
                 p.flags = 0x39E8;
                 p.updateFn = 8;
                 particle_newModelParticle(&p, 3, 255, 0, arg4, arg5);
@@ -198,10 +198,10 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
             BobMotion wobble;
             void *obj;
 
-            wobble.timer = (func_150ADA20() & 0xF) + 20;
+            wobble.timer = (math_random() & 0xF) + 20;
             wobble.phase = 0.0f;
-            wobble.phaseSpeed = (func_150ADA68() * 10000.0f + 10000.0f) * 9.999999747e-05f;
-            wobble.amplitude = (func_150ADA68() * 21000.0f + 4000.0f) * 9.999999747e-05f;
+            wobble.phaseSpeed = (math_randomFloat() * 10000.0f + 10000.0f) * 9.999999747e-05f;
+            wobble.amplitude = (math_randomFloat() * 21000.0f + 4000.0f) * 9.999999747e-05f;
             p.lifetime = 300;
             // matching: integer 0 (not 0.0f) makes IDO store with sw zero instead of an FPU move
             p.vel.x = 0;
@@ -218,7 +218,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         }
     }
     if (hit && solid) {
-        effect_spawnSurfaceSprite(func_150ADA68() * 20.0f + 15.0f, 255, &hitSurface, &hitPos, 300, 1, 1, 0, arg4, arg5);
+        effect_spawnSurfaceSprite(math_randomFloat() * 20.0f + 15.0f, 255, &hitSurface, &hitPos, 300, 1, 1, 0, arg4, arg5);
     }
 }
 
@@ -273,14 +273,14 @@ void particle_spawnShortLightFlash(Vec3f *pos, u8 arg1, s32 arg2) {
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = (func_150ADA20() % 3U) + 4;
+    header.lifetime = (math_random() % 3U) + 4;
     header.lightType = 0;
 
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
 
-    light_createWithEffect(&header, &header2, (func_150ADA20() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (math_random() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
 }
 
 void particle_spawnLightFlash(const Vec3f *pos, u8 arg1, s32 arg2) {
@@ -289,14 +289,14 @@ void particle_spawnLightFlash(const Vec3f *pos, u8 arg1, s32 arg2) {
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = (func_150ADA20() % 11U) + 20;
+    header.lifetime = (math_random() % 11U) + 20;
     header.lightType = 0;
 
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
 
-    light_createWithEffect(&header, &header2, (func_150ADA20() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (math_random() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
 }
 
 /* Calls actor_runAttackAt twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
@@ -359,7 +359,7 @@ void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *own
                   &unused.unk00, &unused.unk04, &unused.unk08);
     p.rot.x += 180.0f;
 block_151D4408: // matching: an unused label ends the basic block, keeping the store above out of the jal delay slot
-    speed = func_150ADA68();
+    speed = math_randomFloat();
 
     p.radius = 1.0f;
     p.elasticity = 1.0f;
@@ -375,12 +375,12 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     p.vel.y = dir->y * speed;
     p.vel.z = dir->z * speed;
 
-    p.rotVel.x = (func_150ADA68() * 6378.0f + -3189.0f) * 0.001000000047f;
+    p.rotVel.x = (math_randomFloat() * 6378.0f + -3189.0f) * 0.001000000047f;
     p.rotVel.y = 0.0f;
-    p.rotVel.z = (func_150ADA68() * 6378.0f + -3189.0f) * 0.001000000047f;
-    p.gravity = (func_150ADA68() * 320.0f + -707.0f) * 0.001000000047f;
+    p.rotVel.z = (math_randomFloat() * 6378.0f + -3189.0f) * 0.001000000047f;
+    p.gravity = (math_randomFloat() * 320.0f + -707.0f) * 0.001000000047f;
     p.flags = 0x29E8;
-    p.lifetime = (func_150ADA20() & 7) + 28;
+    p.lifetime = (math_random() & 7) + 28;
     p.model = 37;
     p.variant = 0;
     p.unk5C = 0;
@@ -472,7 +472,7 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
         if (math_vec3Length(&diff) > 5.0f) {
             return;
         }
-        emitter->spawnTimer += (0.200000003f + func_150ADA68() * 0.2090000063f) * gFrameDelta;
+        emitter->spawnTimer += (0.200000003f + math_randomFloat() * 0.2090000063f) * gFrameDelta;
         if (emitter->spawnTimer > 1.0f) {
             ParticleDesc spawn;
             WobbleData extra;
@@ -509,7 +509,7 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
             spawn.scaleRate = 1.025550008f;
             do {
                 {
-                    f32 t = func_150ADA68();
+                    f32 t = math_randomFloat();
 
                     spawn.pos.x = diff.x * t + prev.x;
                     spawn.pos.y = diff.y * t + prev.y;
@@ -518,18 +518,18 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
                 spawn.vel.x = diff.x * gFrameDeltaInv * 0.2980000079f;
                 spawn.vel.y = diff.y * gFrameDeltaInv * 0.2980000079f;
                 spawn.vel.z = diff.z * gFrameDeltaInv * 0.2980000079f;
-                extra.phase[0] = func_150ADA20() & 0xFF;
-                extra.phase[1] = func_150ADA20() & 0xFF;
-                extra.phaseStep[0] = func_150ADA20() % 5U + 4;
-                extra.phaseStep[1] = func_150ADA20() % 5U + 4;
-                extra.amplitude[0] = func_150ADA68() * 6.0f;
-                extra.amplitude[1] = func_150ADA68() * 6.0f;
-                spawn.gravity = func_150ADA68() * 0.1800000072f + 0.1300000101f;
+                extra.phase[0] = math_random() & 0xFF;
+                extra.phase[1] = math_random() & 0xFF;
+                extra.phaseStep[0] = math_random() % 5U + 4;
+                extra.phaseStep[1] = math_random() % 5U + 4;
+                extra.amplitude[0] = math_randomFloat() * 6.0f;
+                extra.amplitude[1] = math_randomFloat() * 6.0f;
+                spawn.gravity = math_randomFloat() * 0.1800000072f + 0.1300000101f;
                 spawn.flags &= ~0xC0;
-                spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-                spawn.alpha = func_150ADA20() % 61U + 60;
-                spawn.timer = func_150ADA20() % 11U + 70;
-                spawn.width = spawn.height = func_150ADA68() * 40.0f + 40.0f;
+                spawn.flags |= ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0);
+                spawn.alpha = math_random() % 61U + 60;
+                spawn.timer = math_random() % 11U + 70;
+                spawn.width = spawn.height = math_randomFloat() * 40.0f + 40.0f;
                 ret = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
                 if (ret != NULL) {
                     memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
@@ -731,7 +731,7 @@ void particle_startPlayerRumbles(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 b
     params.unk10 = arg2;
     params.unk14 = arg3;
     header.flags = 1;
-    header.duration = (func_150ADA20() % ((s16)range + 1)) + (s16)base;
+    header.duration = (math_random() % ((s16)range + 1)) + (s16)base;
     header.strength = 0;
     header.updateKind = 0;
 
@@ -784,8 +784,8 @@ void particle_spawnBlast(Vec3f *pos, u8 arg1, s32 arg2) {
 
     particle_spawnBlastSpray(pos, arg1, arg2);
     particle_spawnLightFlash(pos, arg1, arg2);
-    randF = func_150ADA68();
-    randU = func_150ADA20();
+    randF = math_randomFloat();
+    randU = math_random();
     particle_spawnGrowFade(pos, randF * 4.0f + 12.0f, 1.640999913f,
                   (randU % 56U) + 200, 0.0f, arg1, arg2);
 }

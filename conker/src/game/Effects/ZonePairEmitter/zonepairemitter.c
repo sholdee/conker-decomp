@@ -159,14 +159,14 @@ void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
     if (link->timer < 0) {
         textures = gTravelParticleTextures;
         // matching: textures.ids[i] grows the frame by 8; the pointer-add form does not
-        def.texture = *(textures.ids + (func_150ADA20() & 1));
+        def.texture = *(textures.ids + (math_random() & 1));
         math_randomPointInZone(link->source, &def.pos);
         math_randomPointInZone(link->target, &target);
         delta.x = target.x - def.pos.x;
         delta.y = target.y - def.pos.y;
         delta.z = target.z - def.pos.z;
         math_vec3Normalize(&delta, &travel.velocity, &length, &unused);
-        speed = func_150ADA68() * 30.0f + 25.0f;
+        speed = math_randomFloat() * 30.0f + 25.0f;
         base = speed;
         if (def.texture == 0xBF) {
             speed = base * 0.1800000072f;
@@ -192,7 +192,7 @@ void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
         def.rgba[1] = 0xFF;
         def.rgba[2] = 0xFF;
         def.rgba[3] = 0xFF;
-        func_150ADA68();
+        math_randomFloat();
         def.height = 706.0f;
         def.width = 706.0f;
         def.rot = gZeroVec3f;
@@ -214,7 +214,7 @@ void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
         if (particle != NULL) {
             memcpy(&particle->travel, &travel, sizeof(travel));
         }
-        link->timer = func_150ADA20() % 201U + 200;
+        link->timer = math_random() % 201U + 200;
     }
 }
 

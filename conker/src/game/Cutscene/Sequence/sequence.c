@@ -1746,7 +1746,7 @@ void cutscene_applyTracks(s32 scene) {
 }
 
 
-// matching: ((u8 *)&D_800D35E0)[-4] is D_800D35DC; a distinct base keeps IDO from reusing the hoisted address
+// matching: ((u8 *)&D_800D35E0)[-4] is gCurrentActorSlot; a distinct base keeps IDO from reusing the hoisted address
 
 /* Move object `target` to the state of the scene's object track bound to it (all tracks, or only
    `onlyTrack` unless it is -1): position, velocity, floor probe, scale, facing and alpha. */
@@ -1799,7 +1799,7 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                     obj->unk54 = 0.0f;
                     obj->unkCC = 0;
                     rescaled = 0;
-                    D_800D35DC = (target - movement_obj) + 1;
+                    gCurrentActorSlot = (target - movement_obj) + 1;
                     collision_findFloorInRange(&obj->floorTriVerts, obj->floorTri.v, &floorY, &obj->waterHeight, &obj->floorMaterial, &obj->floorType,
                                   obj->xpos, obj->ypos, obj->zpos, obj->ypos, 0, obj,
                                   -10000.0f, target->ypos);

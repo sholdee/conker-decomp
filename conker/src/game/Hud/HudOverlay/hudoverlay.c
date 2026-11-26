@@ -1794,7 +1794,7 @@ Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     if (model == D_80090058) {
         model->blinkTimer--;
         if (model->blinkTimer == 0) {
-            model->blinkTimer = (func_150ADA20() & 0x7F) + 0xF;
+            model->blinkTimer = (math_random() & 0x7F) + 0xF;
         }
         if (model->blinkTimer < 7) {
             tex = (s32)&D_507;
@@ -2013,7 +2013,7 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
                         D_800E9D00 &= ~0x400;
                     }
                     cheatType = 0x10;
-                    sfx = (func_150ADA20() & 1) + 0xC3;
+                    sfx = (math_random() & 1) + 0xC3;
                 lbl1:; // matching: as lbl2 below
                 } else {
                     cheatType = 0x11;
@@ -2027,7 +2027,7 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
                             }
                             if (word[j] == 0 && (*str == ' ' || *str == 0)) {
                                 str = NULL;
-                                sfx = (func_150ADA20() & 1) + 0xC1;
+                                sfx = (math_random() & 1) + 0xC1;
                             } else if (*str == ' ') {
                                 str++;
                             } else {
@@ -2041,7 +2041,7 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
                         }
                     }
                     if (sfx == 0) {
-                        sfx = (func_150ADA20() & 1) + 0xC5;
+                        sfx = (math_random() & 1) + 0xC5;
                         i = 0;
                         while (gCodeEntryText[i + 0x20] && gCodeEntryText[i] && gCodeEntryText[i + 0x20] == gCodeEntryText[i]) {
                             i++;

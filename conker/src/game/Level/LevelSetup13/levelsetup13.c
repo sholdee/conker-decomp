@@ -230,7 +230,7 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
             packet.unk47 = 7;
             packet.unk48 = 0;
             controller->effect = particle_newQuadParticle(&packet, &gWhiteVtxColors, 0, 0x25, 0, 0x1D,
-                                               ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(motion), arg1, arg2);
+                                               ((math_random() & 1) ? 2 : 0) + 1, 0, 0, sizeof(motion), arg1, arg2);
             if (controller->effect != NULL) {
                 memcpy(&controller->effect->motion, &motion, sizeof(motion));
             }

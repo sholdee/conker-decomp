@@ -114,25 +114,25 @@ void effect_spawnSegmentParticle(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32
     desc.pos.y += desc.vel.y * t;
     desc.pos.z += desc.vel.z * t;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x80;
     }
 
-    desc.timer = func_150ADA20() % 51U + 50;
-    desc.alpha = func_150ADA20() % 101U + 100;
-    extra.baseSize = desc.width = desc.height = func_150ADA68() * 39.0f + 31.0f;
-    extra.widthPhaseStep = func_150ADA20() % 5U + 4;
-    extra.heightPhaseStep = func_150ADA20() % 5U + 4;
-    extra.widthWobble = (func_150ADA68() * 0.25f + 0.15f) * extra.baseSize;
-    extra.heightWobble = (func_150ADA68() * 0.25f + 0.15f) * extra.baseSize;
-    extra.swayPhaseStepX = func_150ADA20() % 5U + 4;
-    extra.swayPhaseStepZ = func_150ADA20() % 5U + 4;
-    extra.swayX = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
-    extra.swayZ = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
-    desc.gravity = (func_150ADA68() * 70.0f + 73.0f) * 0.001f;
+    desc.timer = math_random() % 51U + 50;
+    desc.alpha = math_random() % 101U + 100;
+    extra.baseSize = desc.width = desc.height = math_randomFloat() * 39.0f + 31.0f;
+    extra.widthPhaseStep = math_random() % 5U + 4;
+    extra.heightPhaseStep = math_random() % 5U + 4;
+    extra.widthWobble = (math_randomFloat() * 0.25f + 0.15f) * extra.baseSize;
+    extra.heightWobble = (math_randomFloat() * 0.25f + 0.15f) * extra.baseSize;
+    extra.swayPhaseStepX = math_random() % 5U + 4;
+    extra.swayPhaseStepZ = math_random() % 5U + 4;
+    extra.swayX = (math_randomFloat() * 0.1f + 0.08f) * extra.baseSize;
+    extra.swayZ = (math_randomFloat() * 0.1f + 0.08f) * extra.baseSize;
+    desc.gravity = (math_randomFloat() * 70.0f + 73.0f) * 0.001f;
 
     particle = particle_newSpriteParticle(&desc, 2, 0x28);
     if (particle != NULL) {
@@ -222,25 +222,25 @@ void effect_spawnDriftParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     desc.vel.y = 0.0f;
     desc.vel.z = -vz * 0.2f;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x80;
     }
 
-    desc.timer = func_150ADA20() % 51U + 106;
-    desc.alpha = func_150ADA20() % 101U + 100;
-    extra.baseSize = desc.width = desc.height = func_150ADA68() * 62.0f + 41.0f;
-    extra.widthPhaseStep = func_150ADA20() % 5U + 4;
-    extra.heightPhaseStep = func_150ADA20() % 5U + 4;
-    extra.widthWobble = (func_150ADA68() * 0.25f + 0.15f) * extra.baseSize;
-    extra.heightWobble = (func_150ADA68() * 0.25f + 0.15f) * extra.baseSize;
-    extra.swayPhaseStepX = func_150ADA20() % 5U + 4;
-    extra.swayPhaseStepZ = func_150ADA20() % 5U + 4;
-    extra.swayX = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
-    extra.swayZ = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
-    desc.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
+    desc.timer = math_random() % 51U + 106;
+    desc.alpha = math_random() % 101U + 100;
+    extra.baseSize = desc.width = desc.height = math_randomFloat() * 62.0f + 41.0f;
+    extra.widthPhaseStep = math_random() % 5U + 4;
+    extra.heightPhaseStep = math_random() % 5U + 4;
+    extra.widthWobble = (math_randomFloat() * 0.25f + 0.15f) * extra.baseSize;
+    extra.heightWobble = (math_randomFloat() * 0.25f + 0.15f) * extra.baseSize;
+    extra.swayPhaseStepX = math_random() % 5U + 4;
+    extra.swayPhaseStepZ = math_random() % 5U + 4;
+    extra.swayX = (math_randomFloat() * 0.1f + 0.08f) * extra.baseSize;
+    extra.swayZ = (math_randomFloat() * 0.1f + 0.08f) * extra.baseSize;
+    desc.gravity = (math_randomFloat() * 60.0f + 21.0f) * 0.001f;
 
     particle = particle_newSpriteParticle(&desc, 2, 0x28);
     if (particle != NULL) {

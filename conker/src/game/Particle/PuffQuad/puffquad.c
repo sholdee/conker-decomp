@@ -40,7 +40,7 @@ void particle_spawnPuffQuad(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
         obj->z = z;
         obj->scale = scale;
 
-        angle = func_150ADA20() & 0x7F;
+        angle = math_random() & 0x7F;
         fx = x;
         fy = y;
         fz = z;
@@ -50,7 +50,7 @@ void particle_spawnPuffQuad(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
             } else {
                 math_mtxRotTrans(&obj->mtx[i], 0.0f, angle, 0.0f, fx, fy, fz);
             }
-            angle += (func_150ADA20() & 0x3F) + 90;
+            angle += (math_random() & 0x3F) + 90;
         }
         sprite_setDisturbPoint(x, y, z);
     }
@@ -93,8 +93,8 @@ void particle_updatePuffQuad(void *self) {
         spawn.flags = 0;
         for (i = 0; i < 3; i++) {
             guMtxL2F(mf, &obj->mtx[i]);
-            func_150A7960(mf, -400.0f, 10.0f, 0.0f, &x, &y, &z);
-            spawn.frameStep = (func_150ADA20() & 0x7F) + 85;
+            math_transformPoint(mf, -400.0f, 10.0f, 0.0f, &x, &y, &z);
+            spawn.frameStep = (math_random() & 0x7F) + 85;
             spawn.x = x;
             spawn.y = y;
             spawn.z = z;

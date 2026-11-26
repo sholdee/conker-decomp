@@ -62,43 +62,43 @@ s32 func_150BB760(Actor *actor) {
             f32 size;
             f32 size2;
 
-            angle = func_150ADA20();
+            angle = math_random();
             spreadSine = math_cosBinAngleMasked(angle);
             spreadCosine = math_cosBinAngleMasked(angle - 0x40);
-            distance = func_150ADA68() * width;
+            distance = math_randomFloat() * width;
             spreadX = spreadSine * distance;
             spreadZ = -spreadCosine * distance;
-            heading = (actor->angle >> 8) - (func_150ADA20() & 0x3F) - 0x20;
+            heading = (actor->angle >> 8) - (math_random() & 0x3F) - 0x20;
             headingSine = math_cosBinAngleMasked(heading);
             headingCosine = math_cosBinAngleMasked(heading - 0x40);
-            speed = func_150ADA68() * 5.0f + 3.0f;
+            speed = math_randomFloat() * 5.0f + 3.0f;
             velocityX = headingCosine * speed;
             velocityZ = headingSine * speed;
-            size = func_150ADA68() * 0.05f + 0.01f;
-            size2 = func_150ADA68() * 0.05f + 0.01f;
+            size = math_randomFloat() * 0.05f + 0.01f;
+            size2 = math_randomFloat() * 0.05f + 0.01f;
             particle.sizeXZ = size;
             particle.sizeY = size2;
             particle.radius = (size + size2) * 0.5f;
-            particle.rot.x = func_150ADA68() * 360.0f;
-            particle.rot.y = func_150ADA68() * 360.0f;
-            particle.rot.z = func_150ADA68() * 360.0f;
+            particle.rot.x = math_randomFloat() * 360.0f;
+            particle.rot.y = math_randomFloat() * 360.0f;
+            particle.rot.z = math_randomFloat() * 360.0f;
             particle.pos.x = actor->xpos + spreadX;
-            particle.pos.y = actor->ypos + func_150ADA68() * height + 4.0f;
+            particle.pos.y = actor->ypos + math_randomFloat() * height + 4.0f;
             particle.pos.z = actor->zpos + spreadZ;
             particle.vel.x = velocityX + offsetX;
-            particle.vel.y = func_150ADA68() * 5.0f + 3.0f;
+            particle.vel.y = math_randomFloat() * 5.0f + 3.0f;
             particle.vel.z = velocityZ + offsetZ;
-            particle.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
-            particle.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
-            particle.lifetime = (func_150ADA20() & 0x1F) + 0x3C;
-            particle.elasticity = func_150ADA68() * 0.2f + 0.25f;
+            particle.rotVel.x = 25.0f - math_randomFloat() * 50.0f;
+            particle.rotVel.y = 25.0f - math_randomFloat() * 50.0f;
+            particle.lifetime = (math_random() & 0x1F) + 0x3C;
+            particle.elasticity = math_randomFloat() * 0.2f + 0.25f;
             particle_newModelParticle(&particle, 3, 0xFF, 0, 0xFF, 0);
         }
     }
 }
 
 /* Actor id 0x20: effect_initQuadFxTemplate/effect_spawnQuadFx request, then bursts of 0x29E9 particles,
- * particle_spawnSplash effects and two 0x39E8 particles, then func_10010F88. */
+ * particle_spawnSplash effects and two 0x39E8 particles, then sound_playAt. */
 s32 func_150BBB5C(Actor *actor) {
     ParticleSpawn particle;
     s8 i;
@@ -119,8 +119,8 @@ s32 func_150BBB5C(Actor *actor) {
     if (actor != NULL && actor->type != 0) {
         width = actor->bodyRadius;
         height = actor->bodyHeight;
-        count1 = (func_150ADA20() & 3) + 6;
-        count2 = (func_150ADA20() & 3) + 0xA;
+        count1 = (math_random() & 3) + 6;
+        count2 = (math_random() & 3) + 0xA;
         sine = math_cosBinAngleMasked(actor->angle >> 8);
         cosine = math_cosBinAngleMasked((actor->angle >> 8) + 0x40);
         offsetX = actor->speed * sine * 0.5f;
@@ -183,34 +183,34 @@ s32 func_150BBB5C(Actor *actor) {
             f32 size;
             f32 size2;
 
-            angle = func_150ADA20();
+            angle = math_random();
             spreadSine = math_cosBinAngleMasked(angle);
             spreadCosine = math_cosBinAngleMasked(angle - 0x40);
-            distance = func_150ADA68() * width;
+            distance = math_randomFloat() * width;
             spreadX = spreadSine * distance;
             spreadZ = -spreadCosine * distance;
-            heading = func_150ADA20();
+            heading = math_random();
             headingSine = math_cosBinAngleMasked(heading);
             headingCosine = math_cosBinAngleMasked(heading - 0x40);
-            speed = func_150ADA68() * 4.0f + 2.0f;
+            speed = math_randomFloat() * 4.0f + 2.0f;
             velocityX = headingCosine * speed;
             velocityZ = headingSine * speed;
-            size = func_150ADA68() * 0.03f + 0.03f;
-            size2 = func_150ADA68() * 0.03f + 0.03f;
+            size = math_randomFloat() * 0.03f + 0.03f;
+            size2 = math_randomFloat() * 0.03f + 0.03f;
             particle.sizeXZ = size;
             particle.sizeY = size2;
             particle.radius = (size + size2) * 0.5f;
-            particle.rot.x = func_150ADA68() * 360.0f;
-            particle.rot.y = func_150ADA68() * 360.0f;
-            particle.rot.z = func_150ADA68() * 360.0f;
+            particle.rot.x = math_randomFloat() * 360.0f;
+            particle.rot.y = math_randomFloat() * 360.0f;
+            particle.rot.z = math_randomFloat() * 360.0f;
             particle.pos.x = actor->xpos + spreadX;
-            particle.pos.y = actor->ypos + func_150ADA68() * height + 5.0f;
+            particle.pos.y = actor->ypos + math_randomFloat() * height + 5.0f;
             particle.pos.z = actor->zpos + spreadZ;
             particle.vel.x = offsetX + velocityX;
-            particle.vel.y = func_150ADA68() * 7.0f + 13.0f;
+            particle.vel.y = math_randomFloat() * 7.0f + 13.0f;
             particle.vel.z = offsetZ + velocityZ;
-            particle.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
-            particle.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
+            particle.rotVel.x = 25.0f - math_randomFloat() * 50.0f;
+            particle.rotVel.y = 25.0f - math_randomFloat() * 50.0f;
             particle_newModelParticle(&particle, 3, 0xFF, 0, 0xFF, 0);
             count1--;
         }
@@ -223,24 +223,24 @@ s32 func_150BBB5C(Actor *actor) {
             f32 sine2;
             f32 cosine2;
 
-            distance = func_150ADA68() * width;
-            speed = func_150ADA68() * 7.0f + 7.0f;
-            angle = func_150ADA20() & 0xFF;
+            distance = math_randomFloat() * width;
+            speed = math_randomFloat() * 7.0f + 7.0f;
+            angle = math_random() & 0xFF;
             sine2 = math_cosBinAngleMasked(angle);
             cosine2 = math_cosBinAngleMasked(angle - 0x40);
             pos.x = actor->xpos + sine2 * distance;
-            pos.y = actor->ypos + func_150ADA68() * height + 5.0f;
+            pos.y = actor->ypos + math_randomFloat() * height + 5.0f;
             pos.z = actor->zpos - cosine2 * distance;
             dir.x = cosine2 * speed + offsetX;
-            dir.y = func_150ADA68() * 9.0f + 15.0f;
+            dir.y = math_randomFloat() * 9.0f + 15.0f;
             dir.z = sine2 * speed + offsetZ;
-            particle_spawnSplash(&pos, &dir, 1.6f, (func_150ADA20() & 7) + 0x19, (func_150ADA20() & 0x7F) + 0x80,
-                          func_150ADA68() * 0.2f * width + 13.0f, (func_150ADA20() & 3) + 2, 0,
+            particle_spawnSplash(&pos, &dir, 1.6f, (math_random() & 7) + 0x19, (math_random() & 0x7F) + 0x80,
+                          math_randomFloat() * 0.2f * width + 13.0f, (math_random() & 3) + 2, 0,
                           1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
             count2--;
         }
         particle.model = 0;
-        particle.lifetime = (func_150ADA20() & 0xF) + 0x10;
+        particle.lifetime = (math_random() & 0xF) + 0x10;
         particle.elasticity = 0.6f;
         particle.rot.x = actor->vtilt;
         particle.rot.y = actor->theta;
@@ -283,9 +283,9 @@ s32 func_150BBB5C(Actor *actor) {
             f32 pitchCosine;
             f32 horizontal;
 
-            speed = actor->scale_y * (func_150ADA68() * 30.0f) + 10.0f;
-            yaw = func_150ADA20() & 0x7F;
-            pitch = -0x20 - (func_150ADA20() & 0x1F);
+            speed = actor->scale_y * (math_randomFloat() * 30.0f) + 10.0f;
+            yaw = math_random() & 0x7F;
+            pitch = -0x20 - (math_random() & 0x1F);
             yawSine = math_cosBinAngleMasked(yaw);
             yawCosine = math_cosBinAngleMasked(yaw - 0x40);
             pitchSine = math_cosBinAngleMasked(pitch);
@@ -294,11 +294,11 @@ s32 func_150BBB5C(Actor *actor) {
             particle.vel.x = horizontal * yawCosine + offsetX;
             particle.vel.y = -speed * pitchCosine;
             particle.vel.z = horizontal * yawSine + offsetZ;
-            particle.rotVel.x = 30.0f - func_150ADA68() * 60.0f;
-            particle.rotVel.y = 30.0f - func_150ADA68() * 60.0f;
+            particle.rotVel.x = 30.0f - math_randomFloat() * 60.0f;
+            particle.rotVel.y = 30.0f - math_randomFloat() * 60.0f;
             particle_newModelParticle(&particle, 3, 0xFF, 0, 0xFF, 0);
         }
-        func_10010F88(0xAA, 0x6590, 0, 0, 0, actor->xpos, actor->ypos,
+        sound_playAt(0xAA, 0x6590, 0, 0, 0, actor->xpos, actor->ypos,
                       actor->zpos, 0xC8, 0x7D0);
     }
 }
@@ -317,7 +317,7 @@ s32 func_150BC488(Actor *actor) {
     }
     if (actor != NULL && actor->type != 0) {
         width = actor->bodyRadius;
-        count = (func_150ADA20() & 3) + 6;
+        count = (math_random() & 3) + 6;
         particle.model = 1;
         particle.flags = 0x29E9;
         particle.variant = 0;
@@ -360,42 +360,42 @@ s32 func_150BC488(Actor *actor) {
             f32 sizeA;
             f32 sizeB;
 
-            angle = func_150ADA20();
+            angle = math_random();
             spreadSine = math_cosBinAngleMasked(angle);
             spreadCosine = math_cosBinAngleMasked(angle - 0x40);
-            distance = func_150ADA68() * width;
+            distance = math_randomFloat() * width;
             spreadX = spreadSine * distance;
             spreadZ = -spreadCosine * distance;
-            heading = func_150ADA20();
+            heading = math_random();
             headingSine = math_cosBinAngleMasked(heading);
             headingCosine = math_cosBinAngleMasked(heading - 0x40);
-            speed = func_150ADA68() * 4.0f + 4.0f;
+            speed = math_randomFloat() * 4.0f + 4.0f;
             velocityX = headingCosine * speed;
             velocityZ = headingSine * speed;
             velocityY = actor->yspd * 0.05f;
-            sizeA = func_150ADA68() * 0.04f + 0.02f;
-            sizeB = func_150ADA68() * 0.04f + 0.02f;
+            sizeA = math_randomFloat() * 0.04f + 0.02f;
+            sizeB = math_randomFloat() * 0.04f + 0.02f;
             particle.sizeXZ = sizeA;
             particle.sizeY = sizeB;
             particle.radius = (sizeA + sizeB) * 0.5f;
-            particle.rot.x = func_150ADA68() * 360.0f;
-            particle.rot.y = func_150ADA68() * 360.0f;
-            particle.rot.z = func_150ADA68() * 360.0f;
+            particle.rot.x = math_randomFloat() * 360.0f;
+            particle.rot.y = math_randomFloat() * 360.0f;
+            particle.rot.z = math_randomFloat() * 360.0f;
             particle.pos.x = actor->xpos + spreadX;
             particle.pos.y = actor->ypos;
             particle.pos.z = actor->zpos + spreadZ;
             particle.vel.x = velocityX;
             particle.vel.y = velocityY;
             particle.vel.z = velocityZ;
-            particle.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
-            particle.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
-            particle.lifetime = (func_150ADA20() & 0x3F) + 0x64;
+            particle.rotVel.x = 25.0f - math_randomFloat() * 50.0f;
+            particle.rotVel.y = 25.0f - math_randomFloat() * 50.0f;
+            particle.lifetime = (math_random() & 0x3F) + 0x64;
             if (particle_newModelParticle(&particle, 3, 0xFF, 0, 0xFF, 0) == NULL) {
                 ok = 0;
             }
             count--;
         }
-        for (n = (func_150ADA20() & 3) + 2; n > 0; n--) {
+        for (n = (math_random() & 3) + 2; n > 0; n--) {
             Vec3f position;
             Vec3f velocity;
             f32 speed;
@@ -403,27 +403,27 @@ s32 func_150BC488(Actor *actor) {
             f32 sine;
             f32 cosine;
 
-            speed = func_150ADA68() * 7.0f + 7.0f;
-            angle = func_150ADA20() & 0xFF;
+            speed = math_randomFloat() * 7.0f + 7.0f;
+            angle = math_random() & 0xFF;
             sine = math_cosBinAngleMasked(angle);
             cosine = math_cosBinAngleMasked(angle - 0x40);
             position.x = actor->xpos;
-            position.y = actor->ypos + func_150ADA68() * 5.0f;
+            position.y = actor->ypos + math_randomFloat() * 5.0f;
             position.z = actor->zpos;
             velocity.x = cosine * speed;
             velocity.y = 0.0f;
             velocity.z = sine * speed;
-            particle_spawnSplash(&position, &velocity, 1.6f, (func_150ADA20() & 7) + 0x19,
-                          (func_150ADA20() & 0x7F) + 0x80,
-                          func_150ADA68() * 0.2f * width + 5.0f, (func_150ADA20() & 1) + 2, 0,
+            particle_spawnSplash(&position, &velocity, 1.6f, (math_random() & 7) + 0x19,
+                          (math_random() & 0x7F) + 0x80,
+                          math_randomFloat() * 0.2f * width + 5.0f, (math_random() & 1) + 2, 0,
                           1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
         }
-        total = (func_150ADA20() & 1) + (func_150ADA20() & 1);
+        total = (math_random() & 1) + (math_random() & 1);
         if (total != 0) {
             s8 j;
 
             particle.model = 0;
-            particle.lifetime = (func_150ADA20() & 0xF) + 0x10;
+            particle.lifetime = (math_random() & 0xF) + 0x10;
             particle.elasticity = 0.6f;
             particle.rot.x = actor->vtilt;
             particle.rot.y = actor->theta;
@@ -466,9 +466,9 @@ s32 func_150BC488(Actor *actor) {
                 f32 pitchCosine;
                 f32 horizontal;
 
-                speed = func_150ADA68() * 5.0f + 8.0f;
-                heading = func_150ADA20() & 0x7F;
-                pitch = 0x20 - (func_150ADA20() & 0x3F);
+                speed = math_randomFloat() * 5.0f + 8.0f;
+                heading = math_random() & 0x7F;
+                pitch = 0x20 - (math_random() & 0x3F);
                 headingSine = math_cosBinAngleMasked(heading);
                 headingCosine = math_cosBinAngleMasked(heading - 0x40);
                 pitchSine = math_cosBinAngleMasked(pitch);
@@ -477,8 +477,8 @@ s32 func_150BC488(Actor *actor) {
                 particle.vel.x = horizontal * headingCosine;
                 particle.vel.y = -speed * pitchCosine;
                 particle.vel.z = horizontal * headingSine;
-                particle.rotVel.x = 30.0f - func_150ADA68() * 60.0f;
-                particle.rotVel.y = 30.0f - func_150ADA68() * 60.0f;
+                particle.rotVel.x = 30.0f - math_randomFloat() * 60.0f;
+                particle.rotVel.y = 30.0f - math_randomFloat() * 60.0f;
                 particle_newModelParticle(&particle, 3, 0xFF, 0, 0xFF, 0);
             }
         }
@@ -499,7 +499,7 @@ s32 func_150BCBBC(Actor *actor) {
     if (actor != NULL && actor->type != 0) {
         width = actor->bodyRadius;
         height = actor->bodyHeight;
-        count = func_150ADA20() & 1;
+        count = math_random() & 1;
         particle.model = 1;
         particle.lifetime = 0x96;
         particle.flags = 0x29E9;
@@ -541,39 +541,39 @@ s32 func_150BCBBC(Actor *actor) {
             f32 velocityX;
             f32 velocityZ;
 
-            angle = func_150ADA20();
+            angle = math_random();
             spreadSine = math_cosBinAngleMasked(angle);
             spreadCosine = math_cosBinAngleMasked(angle - 0x40);
-            distance = func_150ADA68() * width;
+            distance = math_randomFloat() * width;
             spreadX = spreadSine * distance;
             spreadZ = -spreadCosine * distance;
-            distance = func_150ADA68() * 0.03f + 0.01f;
-            sizeA = func_150ADA68() * 0.03f + 0.01f;
+            distance = math_randomFloat() * 0.03f + 0.01f;
+            sizeA = math_randomFloat() * 0.03f + 0.01f;
             // matching: the unsigned offset and the casts are needed as written
-            if (func_150ADA20() & 1) {
-                heading = (u8)((actor->angle >> 8) + (s32)(8 - (func_150ADA20() & 0xF)));
+            if (math_random() & 1) {
+                heading = (u8)((actor->angle >> 8) + (s32)(8 - (math_random() & 0xF)));
             } else {
-                heading = (u8)((actor->angle >> 8) + (s32)(8 - (func_150ADA20() & 0xF)) - 0x80);
+                heading = (u8)((actor->angle >> 8) + (s32)(8 - (math_random() & 0xF)) - 0x80);
             }
             headingSine = math_cosBinAngleMasked(heading);
             headingCosine = math_cosBinAngleMasked(heading - 0x40);
-            speed = func_150ADA68() * 5.0f + 3.0f;
+            speed = math_randomFloat() * 5.0f + 3.0f;
             velocityX = headingCosine * speed;
             velocityZ = headingSine * speed;
             particle.sizeXZ = distance;
             particle.sizeY = sizeA;
             particle.radius = (distance + sizeA) * 0.5f;
-            particle.rot.x = func_150ADA68() * 360.0f;
-            particle.rot.y = func_150ADA68() * 360.0f;
-            particle.rot.z = func_150ADA68() * 360.0f;
+            particle.rot.x = math_randomFloat() * 360.0f;
+            particle.rot.y = math_randomFloat() * 360.0f;
+            particle.rot.z = math_randomFloat() * 360.0f;
             particle.pos.x = actor->xpos + spreadX;
-            particle.pos.y = actor->ypos + func_150ADA68() * height + 4.0f;
+            particle.pos.y = actor->ypos + math_randomFloat() * height + 4.0f;
             particle.pos.z = actor->zpos + spreadZ;
             particle.vel.x = velocityX;
-            particle.vel.y = func_150ADA68() * 5.0f + 3.0f;
+            particle.vel.y = math_randomFloat() * 5.0f + 3.0f;
             particle.vel.z = velocityZ;
-            particle.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
-            particle.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
+            particle.rotVel.x = 25.0f - math_randomFloat() * 50.0f;
+            particle.rotVel.y = 25.0f - math_randomFloat() * 50.0f;
             if (particle_newModelParticle(&particle, 3, 0xFF, 0, 0xFF, 0) == NULL) {
                 ok = 0;
             }
@@ -629,7 +629,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
         ParticleSpawn particle;
         s32 rnd;
 
-        count = func_150ADA20() % 9U + 13;
+        count = math_random() % 9U + 13;
         particle.flags = 0x12DE8;
         particle.model = 1;
         particle.variant = 0;
@@ -657,18 +657,18 @@ void func_150BD070(u8 arg0, s32 arg1) {
         particle.scale.z = 1.0f;
         particle.rotVel.y = 0.0f;
         while (count > 0) {
-            particle.lifetime = func_150ADA20() % 26U + 40;
-            particle.sizeXZ = particle.sizeY = func_150ADA68() * 0.2470000088f + 0.2030000091f;
-            particle.rot.x = func_150ADA68() * 360.0f;
-            particle.rot.y = func_150ADA68() * 360.0f;
-            particle.rot.z = func_150ADA68() * 360.0f;
+            particle.lifetime = math_random() % 26U + 40;
+            particle.sizeXZ = particle.sizeY = math_randomFloat() * 0.2470000088f + 0.2030000091f;
+            particle.rot.x = math_randomFloat() * 360.0f;
+            particle.rot.y = math_randomFloat() * 360.0f;
+            particle.rot.z = math_randomFloat() * 360.0f;
             // matching: the "+ -c" addends here must stay; writing "- c" changes the emitted code
-            particle.rotVel.x = func_150ADA68() * 45.46600342f + -22.73300171f;
-            particle.rotVel.z = func_150ADA68() * 45.46600342f + -22.73300171f;
-            math_randomPointInZone(anchors[func_150ADA20() & 1], &particle.pos);
-            rnd = func_150ADA20();
-            math_dirFromBinAngles(rnd % 31U - 84, func_150ADA20() % 26U - 45, func_150ADA68() * 21.80000114f + 30.2f, &particle.vel);
-            particle.gravity = func_150ADA68() * 1.129000068f + -1.909f;
+            particle.rotVel.x = math_randomFloat() * 45.46600342f + -22.73300171f;
+            particle.rotVel.z = math_randomFloat() * 45.46600342f + -22.73300171f;
+            math_randomPointInZone(anchors[math_random() & 1], &particle.pos);
+            rnd = math_random();
+            math_dirFromBinAngles(rnd % 31U - 84, math_random() % 26U - 45, math_randomFloat() * 21.80000114f + 30.2f, &particle.vel);
+            particle.gravity = math_randomFloat() * 1.129000068f + -1.909f;
             particle_newModelParticleWithFloor(&particle, 3, 0xFF, 0, 0, arg0, arg1);
             count--;
         }
@@ -680,7 +680,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
         Vec3f pos;
         Vec3f pos2;
 
-        count = func_150ADA20() % 9U + 17;
+        count = math_random() % 9U + 17;
         spawn.unk0 = 0x200005;
         spawn.renderMode = 0x5103;
         spawn.unk4 = 0;
@@ -699,8 +699,8 @@ void func_150BD070(u8 arg0, s32 arg1) {
         spawn.fadeRate = 7;
         spawn.scaleRate = 1.012537f;
         spawn.offset = gZeroVec3f;
-        rnd = (func_150ADA20() & 1) ? 0x40 : 0;
-        spawn.flags = ((func_150ADA20() & 1) ? 0x80 : 0) | 7 | rnd | 0x8000 | 0x4000 | 0x800 | 0x400 | 0x200 | 0x20000 | 0x800000;
+        rnd = (math_random() & 1) ? 0x40 : 0;
+        spawn.flags = ((math_random() & 1) ? 0x80 : 0) | 7 | rnd | 0x8000 | 0x4000 | 0x800 | 0x400 | 0x200 | 0x20000 | 0x800000;
         spawn.viewMask = 0;
         spawn.primColorMode = 8;
         spawn.envColorMode = 6;
@@ -715,13 +715,13 @@ void func_150BD070(u8 arg0, s32 arg1) {
         while (count > 0) {
             SpriteParticle *spawned;
 
-            spawn.scaleStart = spawn.timer = func_150ADA20() % 31U + 30;
-            spawn.alpha = func_150ADA20() % 101U + 155;
-            spawn.width = spawn.height = func_150ADA68() * 755.0f + 1262.0f;
-            math_randomPointInZone(anchors[func_150ADA20() & 1], &spawn.pos);
-            rnd = func_150ADA20();
-            math_dirFromBinAngles(rnd % 41U - 89, func_150ADA20() % 51U - 64, func_150ADA68() * 45.60000229f + 18.80000114f, &spawn.vel);
-            spawn.gravity = func_150ADA68() * 0.559f + -0.777f;
+            spawn.scaleStart = spawn.timer = math_random() % 31U + 30;
+            spawn.alpha = math_random() % 101U + 155;
+            spawn.width = spawn.height = math_randomFloat() * 755.0f + 1262.0f;
+            math_randomPointInZone(anchors[math_random() & 1], &spawn.pos);
+            rnd = math_random();
+            math_dirFromBinAngles(rnd % 41U - 89, math_random() % 51U - 64, math_randomFloat() * 45.60000229f + 18.80000114f, &spawn.vel);
+            spawn.gravity = math_randomFloat() * 0.559f + -0.777f;
             spawned = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, arg0, arg1);
             if (spawned != NULL) {
                 memcpy(&spawned->data.drag, &scale, sizeof(scale));

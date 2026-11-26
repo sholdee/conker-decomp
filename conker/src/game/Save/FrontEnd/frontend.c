@@ -298,7 +298,7 @@ void func_151DDBA0(void) {
     D_8008FDA4 = 0;
     gPauseRequested = 0;
     save_resetControllerMap();
-    func_1000F1A8();
+    sound_resetVoices();
     music_reset();
     D_8008FD8C = 1;
     D_8008FD90 = 1;
@@ -505,7 +505,7 @@ void save_updatePauseMenu(void) {
                     aligned[0] -= 0x3E0EF0F0;
                     aligned[1] -= 0x3E0EF0F0;
                     if ((aligned[0] != 0x3050A14A) || (aligned[1] != 0xBCFCF506)) {
-                        osPiStartDma(&gRomIoMesg, 0, 0, func_150ADA20() & 0xFFFF, (void *)((func_150ADA20() & 0xFFFFE) + 0x80300000), 0x100, gMessageQueue);
+                        osPiStartDma(&gRomIoMesg, 0, 0, math_random() & 0xFFFF, (void *)((math_random() & 0xFFFFE) + 0x80300000), 0x100, gMessageQueue);
                         osRecvMesg(gMessageQueue, NULL, OS_MESG_BLOCK);
                     }
                     gPauseCursor -= 2;
@@ -849,10 +849,10 @@ void func_151DF1BC(void) {
             D_8008FEF8 = D_8008FEF8 == 0;
             if (D_8008FEF8 == 0) {
                 anim = 0xE;
-                mp3_startTrack((func_150ADA20() & 1) + 0xC8, 0x7D00, 0x40);
+                mp3_startTrack((math_random() & 1) + 0xC8, 0x7D00, 0x40);
             } else {
                 anim = 0xF;
-                mp3_startTrack((func_150ADA20() % 3U) + 0xBE, 0x7D00, 0x40);
+                mp3_startTrack((math_random() % 3U) + 0xBE, 0x7D00, 0x40);
             }
             if (obj != NULL) {
                 obj->intelwalk = anim;
@@ -2344,7 +2344,7 @@ void save_setupMatch(void) {
                 if (gRosterTeams[i] != 0) {
                     D_80087270[i] = 3;
                 } else {
-                    D_80087270[i] = (func_150ADA20() & 0xF) + 17;
+                    D_80087270[i] = (math_random() & 0xF) + 17;
                 }
             } else if ((gRosterTeams[i] != 0) && (entry->unk8 == 4)) {
                 D_80087270[i] = 3;
@@ -3590,7 +3590,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                         variants = 4;
                     }
                 } else if (cause == 0x34) {
-                    if ((func_150ADA20() & 3) == 3) {
+                    if ((math_random() & 3) == 3) {
                         sound = 0x52A;
                     }
                 } else {
@@ -3614,26 +3614,26 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                         sound = 0x65A;
                     }
                 } else if (sourceState == 2) {
-                    if ((victim->energy <= 0) || ((func_150ADA20() & 7) == 0)) {
+                    if ((victim->energy <= 0) || ((math_random() & 7) == 0)) {
                         variants = 3;
                         sound = 0x571;
                     }
                 } else if (victim->mv->on_fire != 0) {
-                    if ((cause != 0x21) && ((victim->energy <= 0) || ((func_150ADA20() & 3) == 3))) {
+                    if ((cause != 0x21) && ((victim->energy <= 0) || ((math_random() & 3) == 3))) {
                         variants = 4;
                         sound = 0x582;
                         delay = 0x1E;
                     }
                 } else if (cause == 0x2E) {
                     delay = 0x1E;
-                    if ((attacker->mv->rt_context_b == 0x23) && ((func_150ADA20() & 3) == 0)) {
+                    if ((attacker->mv->rt_context_b == 0x23) && ((math_random() & 3) == 0)) {
                         sound = 0x587;
                     } else {
                         sound = 0x579;
                         variants = 3;
                     }
                 } else if (cause == 0x2F) {
-                    if (func_150ADA20() & 1) {
+                    if (math_random() & 1) {
                         sound = 0x588;
                         delay = 0x1E;
                     }
@@ -3642,7 +3642,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                     variants = 7;
                     delay = 0x3C;
                 } else if (((cause == 0x21) || (cause == 0x20) || (cause == 0x31)) &&
-                           ((victim->energy <= 0) || ((func_150ADA20() & 7) == 3))) {
+                           ((victim->energy <= 0) || ((math_random() & 7) == 3))) {
                     sound = 0x571;
                     variants = 3;
                     delay = 0x1E;
@@ -3659,7 +3659,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                     sourceState2 = source->headEffectState;
                 }
                 if (sourceState2 == 2) {
-                    if ((victim->energy <= 0) || ((func_150ADA20() & 7) == 7)) {
+                    if ((victim->energy <= 0) || ((math_random() & 7) == 7)) {
                         sound = 0x538;
                         variants = 3;
                     }
@@ -3683,12 +3683,12 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                         delay = 0x1E;
                     }
                 } else if (cause == 0x21) {
-                    if ((func_150ADA20() & 3) == 3) {
+                    if ((math_random() & 3) == 3) {
                         sound = 0x52C;
                         delay = 0x1E;
                     }
                 } else if (cause == 0x20) {
-                    roll = func_150ADA20() & 0xF;
+                    roll = math_random() & 0xF;
                     if (roll != 0) {
                         roll++;
                     }
@@ -3705,7 +3705,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                 }
             } else if ((attacker->character_type == 0x88) && (victim->energy <= 0)) {
                 if (cause == 0x34) {
-                    if ((func_150ADA20() & 3) == 3) {
+                    if ((math_random() & 3) == 3) {
                         sound = 0x52A;
                     }
                 } else if (cause == 0x21) {

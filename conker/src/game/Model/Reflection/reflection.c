@@ -44,7 +44,7 @@ void model_mirrorMatrices(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *sr
                 srcMtx[i][3][3] = 1.0f;
                 src = (void *)((i << 6) + (u8 *)srcMtx);
             }
-            func_150A7A48(src, flip, dstMtx[i]);
+            math_mtxMulF(src, flip, dstMtx[i]);
             dstMtx[i][3][1] = src[3][1] - 2.0f * (src[3][1] - planeY);
             if (dstToFixed) {
                 bcopy((i << 6) + (u8 *)dstMtx, temp, sizeof(temp));
@@ -72,8 +72,8 @@ void model_mirrorMatrices(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *sr
         }
     } else if (mode == 2) {
         flip[0][0] = -1.0f;
-        func_150A8050(rotA, 0.0f, -angle, 0.0f);
-        func_150A8050(rotB, 0.0f, angle, 0.0f);
+        math_mtxRotateRPYF(rotA, 0.0f, -angle, 0.0f);
+        math_mtxRotateRPYF(rotB, 0.0f, angle, 0.0f);
         for (i = 0; i < count; i++) {
             if (srcIsFixed) {
                 guMtxL2F(temp, (Mtx *)((i << 6) + (u8 *)srcMtx));
@@ -89,9 +89,9 @@ void model_mirrorMatrices(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *sr
             dstMtx[i][3][0] -= planeX;
             dstMtx[i][3][1] -= planeY;
             dstMtx[i][3][2] -= planeZ;
-            func_150A7A48(dstMtx[i], rotA, dstMtx[i]);
-            func_150A7A48(dstMtx[i], flip, dstMtx[i]);
-            func_150A7A48(dstMtx[i], rotB, dstMtx[i]);
+            math_mtxMulF(dstMtx[i], rotA, dstMtx[i]);
+            math_mtxMulF(dstMtx[i], flip, dstMtx[i]);
+            math_mtxMulF(dstMtx[i], rotB, dstMtx[i]);
             dstMtx[i][3][0] += planeX;
             dstMtx[i][3][1] += planeY;
             dstMtx[i][3][2] += planeZ;
@@ -100,7 +100,7 @@ void model_mirrorMatrices(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *sr
                 guMtxF2L2(temp, (Mtx *)dstMtx + i);
             }
         }
-        dist = func_150AD960(planeX, planeZ, objX, objZ);
+        dist = math_distance2D(planeX, planeZ, objX, objZ);
         if (fadeEnd < dist) {
             entry->alpha = 0;
         } else if (dist < fadeStart) {
@@ -161,7 +161,7 @@ s32 model_isReflectionCulled(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     } else {
         y = obj->ypos + height;
     }
-    if (func_150A6360(recp, gViewMatrices[0], mtx[3][0], y, mtx[3][2], radiusXZ, radiusY, 20000.0f) == 0) {
+    if (view_testCylinderInView(recp, gViewMatrices[0], mtx[3][0], y, mtx[3][2], radiusXZ, radiusY, 20000.0f) == 0) {
         return 1;
     }
     return 0;

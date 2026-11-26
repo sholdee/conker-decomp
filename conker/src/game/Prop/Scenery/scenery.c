@@ -188,13 +188,13 @@ void func_150BF21C(WorldObject *obj) {
     } else {
         height = 0.0f;
     }
-    func_150A7DA0(translate, 0.0f, height, 0.0f);
+    math_mtxTranslateF(translate, 0.0f, height, 0.0f);
     math_mtxFRotScaleTrans(model, obj->t, obj->u, obj->v, obj->xScale, obj->yScale, obj->zScale, obj->x, obj->y, obj->z);
-    func_150A7A48(translate, model, translate);
+    math_mtxMulF(translate, model, translate);
     dst = obj->vertices[D_800BE9C0];
     src = obj->srcVertices;
     for (i = 0; i < obj->numVertices; i++) {
-        func_150A7960(translate, src->v.ob[0], src->v.ob[1], src->v.ob[2], &x, &height, &z);
+        math_transformPoint(translate, src->v.ob[0], src->v.ob[1], src->v.ob[2], &x, &height, &z);
         dst->v.ob[0] = x;
         dst->v.ob[1] = height;
         dst->v.ob[2] = z;
@@ -601,7 +601,7 @@ void prop_scatterPieces(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32
 s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
     u8 flags;
 
-    if (func_150ADA68() < piece->burstChance) {
+    if (math_randomFloat() < piece->burstChance) {
         {
             DebrisScatter config;
             AngleRange angles;

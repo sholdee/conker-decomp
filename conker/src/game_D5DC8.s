@@ -501,10 +501,10 @@ glabel .L150A9000
     /* D64CC 150A901C 00000000 */   nop
     /* D64D0 150A9020 84C90002 */  lh         $t1, 0x2($a2)
   .L150A9024:
-    /* D64D4 150A9024 3C018009 */  lui        $at, %hi(D_8008857C)
-    /* D64D8 150A9028 AC29857C */  sw         $t1, %lo(D_8008857C)($at)
-    /* D64DC 150A902C 3C078009 */  lui        $a3, %hi(D_80088540)
-    /* D64E0 150A9030 8CE78540 */  lw         $a3, %lo(D_80088540)($a3)
+    /* D64D4 150A9024 3C018009 */  lui        $at, %hi(gAnimModAngle)
+    /* D64D8 150A9028 AC29857C */  sw         $t1, %lo(gAnimModAngle)($at)
+    /* D64DC 150A902C 3C078009 */  lui        $a3, %hi(gAnimMtxCursor)
+    /* D64E0 150A9030 8CE78540 */  lw         $a3, %lo(gAnimMtxCursor)($a3)
     /* D64E4 150A9034 8FB00070 */  lw         $s0, 0x70($sp)
     /* D64E8 150A9038 00108100 */  sll        $s0, $s0, 4
     /* D64EC 150A903C 0208A821 */  addu       $s5, $s0, $t0
@@ -774,8 +774,8 @@ glabel func_150A9400
     /* D68B4 150A9404 00A01825 */  or         $v1, $a1, $zero
     /* D68B8 150A9408 00408825 */  or         $s1, $v0, $zero
     /* D68BC 150A940C C4600000 */  lwc1       $f0, 0x0($v1)
-    /* D68C0 150A9410 3C158009 */  lui        $s5, %hi(D_80088540)
-    /* D68C4 150A9414 8EB58540 */  lw         $s5, %lo(D_80088540)($s5)
+    /* D68C0 150A9410 3C158009 */  lui        $s5, %hi(gAnimMtxCursor)
+    /* D68C4 150A9414 8EB58540 */  lw         $s5, %lo(gAnimMtxCursor)($s5)
     /* D68C8 150A9418 C4610004 */  lwc1       $f1, 0x4($v1)
     /* D68CC 150A941C 3C108009 */  lui        $s0, %hi(D_80088548)
     /* D68D0 150A9420 8E108548 */  lw         $s0, %lo(D_80088548)($s0)
@@ -802,8 +802,8 @@ glabel func_150A9400
     /* D6924 150A9474 8FB20070 */  lw         $s2, 0x70($sp)
     /* D6928 150A9478 0012A180 */  sll        $s4, $s2, 6
     /* D692C 150A947C 0295A021 */  addu       $s4, $s4, $s5
-    /* D6930 150A9480 3C178009 */  lui        $s7, %hi(D_80088544)
-    /* D6934 150A9484 8EF78544 */  lw         $s7, %lo(D_80088544)($s7)
+    /* D6930 150A9480 3C178009 */  lui        $s7, %hi(gAnimMtxCursorPtr)
+    /* D6934 150A9484 8EF78544 */  lw         $s7, %lo(gAnimMtxCursorPtr)($s7)
     /* D6938 150A9488 AEF40000 */  sw         $s4, 0x0($s7)
     /* D693C 150A948C 0016A180 */  sll        $s4, $s6, 6
     /* D6940 150A9490 0295B821 */  addu       $s7, $s4, $s5
@@ -988,8 +988,8 @@ glabel func_150A94DC
     /* D6BF8 150A9748 03E00008 */  jr         $ra
     /* D6BFC 150A974C 00000000 */   nop
   .L150A9750:
-    /* D6C00 150A9750 3C118009 */  lui        $s1, %hi(D_8008857C)
-    /* D6C04 150A9754 2631857C */  addiu      $s1, $s1, %lo(D_8008857C)
+    /* D6C00 150A9750 3C118009 */  lui        $s1, %hi(gAnimModAngle)
+    /* D6C04 150A9754 2631857C */  addiu      $s1, $s1, %lo(gAnimModAngle)
     /* D6C08 150A9758 02338821 */  addu       $s1, $s1, $s3
     /* D6C0C 150A975C 8E330004 */  lw         $s3, 0x4($s1)
     /* D6C10 150A9760 8E310000 */  lw         $s1, 0x0($s1)

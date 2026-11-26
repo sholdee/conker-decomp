@@ -44,31 +44,31 @@ void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     sp.fadeStart = 0x4000;
     sp.fadeRate = 0;
 
-    for (i = (func_150ADA20() % 8U) + 3; i > 0; i--) {
-        scale = (func_150ADA68() * 0.7f) + 0.3f;
-        yaw = func_150ADA20() & 0xFF;
-        pitch = -0x10 - (func_150ADA20() % 32U);
-        speed = (func_150ADA68() * 10.0f) + 5.0f;
+    for (i = (math_random() % 8U) + 3; i > 0; i--) {
+        scale = (math_randomFloat() * 0.7f) + 0.3f;
+        yaw = math_random() & 0xFF;
+        pitch = -0x10 - (math_random() % 32U);
+        speed = (math_randomFloat() * 10.0f) + 5.0f;
         sinYaw = math_cosBinAngleMasked(yaw - 0x40);
         cosYaw = math_cosBinAngleMasked(yaw);
         sinPitch = math_cosBinAngleMasked(pitch - 0x40);
         cosPitch = math_cosBinAngleMasked(pitch);
-        spread = func_150ADA68() * 20.0f;
+        spread = math_randomFloat() * 20.0f;
         sp.pos.x = (spread * sinYaw) + arg0;
         sp.pos.y = arg1;
         sp.pos.z = (spread * cosYaw) + arg2;
         sp.vel.x = speed * cosPitch * sinYaw;
         sp.vel.y = -speed * sinPitch;
         sp.vel.z = speed * cosPitch * cosYaw;
-        sp.lifetime = (func_150ADA20() % 32U) + 0x14;
+        sp.lifetime = (math_random() % 32U) + 0x14;
         sp.radius = scale;
         sp.sizeXZ = scale;
         sp.sizeY = scale;
-        sp.rot.x = func_150ADA68() * 360.0f;
-        sp.rot.y = func_150ADA68() * 360.0f;
-        sp.rot.z = func_150ADA68() * 360.0f;
-        sp.rotVel.x = 25.0f - (func_150ADA68() * 50.0f);
-        sp.rotVel.y = 25.0f - (func_150ADA68() * 50.0f);
+        sp.rot.x = math_randomFloat() * 360.0f;
+        sp.rot.y = math_randomFloat() * 360.0f;
+        sp.rot.z = math_randomFloat() * 360.0f;
+        sp.rotVel.x = 25.0f - (math_randomFloat() * 50.0f);
+        sp.rotVel.y = 25.0f - (math_randomFloat() * 50.0f);
         particle_newModelParticle(&sp, 3, 0xFF, 0, arg3, arg4);
     }
 
@@ -77,11 +77,11 @@ void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     sp2.pos.z = arg2;
     sp2.width = 0x1F4;
     sp2.height = 0x1F4;
-    sp2.widthStep = (func_150ADA20() % 16U) + 0x32;
-    sp2.heightStep = (func_150ADA20() % 16U) + 0x32;
+    sp2.widthStep = (math_random() % 16U) + 0x32;
+    sp2.heightStep = (math_random() % 16U) + 0x32;
     sp2.velX = 0;
     sp2.velZ = 0;
-    sp2.velY = (func_150ADA20() % 201U) + 0x12C;
+    sp2.velY = (math_random() % 201U) + 0x12C;
     sp2.accelY = 0;
     sp2.life = 0x258;
     math_pickPaletteColour(1, &sp2.primColor[0], &sp2.primColor[1], &sp2.primColor[2]);

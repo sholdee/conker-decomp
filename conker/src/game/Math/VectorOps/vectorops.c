@@ -43,13 +43,13 @@ void math_mtxRigidInverse(MtxF mtx, MtxF out) {
     translate[3][1] = -y;
     translate[3][2] = -z;
 
-    func_150A8050(rotXMtx, -rotX, 0.0f, 0.0f);
-    func_150A8050(rotYMtx, 0.0f, -rotY, 0.0f);
-    func_150A8050(rotZMtx, 0.0f, 0.0f, -rotZ);
+    math_mtxRotateRPYF(rotXMtx, -rotX, 0.0f, 0.0f);
+    math_mtxRotateRPYF(rotYMtx, 0.0f, -rotY, 0.0f);
+    math_mtxRotateRPYF(rotZMtx, 0.0f, 0.0f, -rotZ);
 
-    func_150A7A48(translate, rotZMtx, tmp1);
-    func_150A7A48(tmp1, rotYMtx, tmp2);
-    func_150A7A48(tmp2, rotXMtx, out);
+    math_mtxMulF(translate, rotZMtx, tmp1);
+    math_mtxMulF(tmp1, rotYMtx, tmp2);
+    math_mtxMulF(tmp2, rotXMtx, out);
 }
 
 /* asinf: rational approximation, with range reduction for |x| >= 0.5. */
@@ -199,7 +199,7 @@ void math_vec3Scale(Vec3f *vec, f32 scale, Vec3f *out) {
 
 /* out = vec normalized (a zero vector stays zero) */
 void math_vec3Unit(Vec3f *vec, Vec3f *out) {
-    f32 scale = func_150AD930(&vec->x);
+    f32 scale = math_length3(&vec->x);
 
     if (scale != 0.0f) {
         scale = 1.0f / scale;

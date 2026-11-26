@@ -197,7 +197,7 @@ void hud_removeBlock(void) {
     BlockDebris *node;
 
     gHudBlockCount -= 1;
-    gHudBlockStackWobbleVel[0] = func_150ADA20() % 5U;
+    gHudBlockStackWobbleVel[0] = math_random() % 5U;
     gHudBlockStackWobbleVel[2] = sqrtf(25.0f - gHudBlockStackWobbleVel[0] * gHudBlockStackWobbleVel[0]);
     node = allocate_memory(sizeof(*node), 1, 1, 0);
     node->next = gHudBlockDebris;
@@ -205,12 +205,12 @@ void hud_removeBlock(void) {
     guMtxL2F(mtx, &gHudBlockMtx[gHudBlockCount][D_800BE9C0 ^ 1]);
     model_decomposeMatrix(mtx, &node->pos.x, &node->pos.y, &node->pos.z, &node->rot.x, &node->rot.y, &node->rot.z,
                   &unused, &unused, &unused);
-    node->vel.x = (func_150ADA20() & 0xFU) + 10;
-    node->vel.y = (func_150ADA20() & 0x1FU) + 20;
+    node->vel.x = (math_random() & 0xFU) + 10;
+    node->vel.y = (math_random() & 0x1FU) + 20;
     node->vel.z = 0.0f;
-    node->rotVel.x = func_150ADA20() & 0xFU;
-    node->rotVel.y = func_150ADA20() & 0xFU;
-    node->rotVel.z = func_150ADA20() & 0xFU;
+    node->rotVel.x = math_random() & 0xFU;
+    node->rotVel.y = math_random() & 0xFU;
+    node->rotVel.z = math_random() & 0xFU;
     node->timer = 120;
 }
 
@@ -281,7 +281,7 @@ void hud_updateBubbles(void) {
                 p->y = 96;
                 p->size = 0;
                 p->accel = 0;
-                p->angle = func_150ADA20();
+                p->angle = math_random();
                 p->radius = 0x500;
                 p->originX = 252 - ((s32)(p->radius * math_sinBinAngle(p->angle)) >> 8);
                 p->phase = 0;
@@ -437,7 +437,7 @@ Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
         y = gHudBlockStackPath[4] - 52.0f;
         z = gHudBlockStackPath[5] - 344.7000122f;
         count = movement_obj[0].energy;
-        func_150A8050(base, 50.0f, -20.0f, -20.0f);
+        math_mtxRotateRPYF(base, 50.0f, -20.0f, -20.0f);
         scale = 1.0f;
         {
             Gfx *cmd = dl;
@@ -459,18 +459,18 @@ Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
         x = gHudBlockStackPos[0];
         y = gHudBlockStackPos[1];
         z = gHudBlockStackPos[2];
-        func_150A8050(base, gHudBlockStackWobble[0] + 50.0f, -20.0f, gHudBlockStackWobble[2] + -20.0f);
+        math_mtxRotateRPYF(base, gHudBlockStackWobble[0] + 50.0f, -20.0f, gHudBlockStackWobble[2] + -20.0f);
     }
     math_mtxSetScaleTrans(base, 1.0f, 1.0f, 1.0f, x, y, z);
     for (i = 0; i < count; i++) {
         if (fixed == 0) {
             scale = gHudBlockScales[i];
         }
-        func_150A7CB0(mtx, scale, scale, scale);
+        math_mtxScaleF(mtx, scale, scale, scale);
         mtx[3][0] = gHudBlockOffsets[i][0];
         mtx[3][1] = gHudBlockOffsets[i][1];
         mtx[3][2] = gHudBlockOffsets[i][2];
-        func_150A7A48(mtx, base, mtx);
+        math_mtxMulF(mtx, base, mtx);
         guMtxF2L(mtx, &gHudBlockMtx[i][D_800BE9C0]);
         gSPMatrix(gfx++, &gHudBlockMtx[i][D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
         gSPDisplayList(gfx++, dl);
@@ -547,10 +547,10 @@ Gfx *hud_drawBubbles(Gfx *gfx) {
             y = gHudBubbles[i].y;
             sprite.w = size;
             sprite.h = size;
-            if ((u8)func_150ADA20() < 0x80U) {
+            if ((u8)math_random() < 0x80U) {
                 flags = SPRITE_FLIP_X;
             }
-            if ((u8)func_150ADA20() < 0x80U) {
+            if ((u8)math_random() < 0x80U) {
                 flags |= SPRITE_FLIP_Y;
             }
             sprite.flags = flags;
@@ -613,7 +613,7 @@ void hud_updateWaterSurface(void) {
             gHudWaterStage.unkA4 = 3.2f;
             gHudWaterStage.unkA8 = 0;
             gHudWaterStage.unkAC = 0;
-            gHudWaterStage.timer = (func_150ADA20() & 63) + 60;
+            gHudWaterStage.timer = (math_random() & 63) + 60;
         }
     } else {
         gHudWaterStage.alpha = 0;
@@ -765,7 +765,7 @@ void hud_updateWaterSurface(void) {
         gHudWaterStage.unkA8 = -4.0f - gHudWaterStage.unkA8;
         gHudWaterStage.unkAC = -gHudWaterStage.unkAC;
     } else if (gHudWaterStage.timer == 0 && fadeRaw < 480 * 255 && gHudWaterStage.unkA8 >= 0 && gHudWaterStage.unkA8 < gHudWaterStage.unkAC * dt) {
-        gHudWaterStage.timer = (func_150ADA20() & 63) + 60;
+        gHudWaterStage.timer = (math_random() & 63) + 60;
         gHudWaterStage.unkA8 = 0.0f;
         gHudWaterStage.unkAC = 0.0f;
     }

@@ -1224,7 +1224,7 @@ Vtx *particle_buildRotatedQuad(DefParticleHead *particle, s16 viewport) {
         corners[2][1] = -particle->def.height;
         corners[3][0] = particle->def.width;
         corners[3][1] = -particle->def.height;
-        func_150A8050(mtx, particle->def.rot.x, particle->def.rot.y, particle->def.rot.z);
+        math_mtxRotateRPYF(mtx, particle->def.rot.x, particle->def.rot.y, particle->def.rot.z);
         mtx[3][0] = particle->def.pos.x;
         mtx[3][1] = particle->def.pos.y;
         mtx[3][2] = particle->def.pos.z;
@@ -1240,7 +1240,7 @@ Vtx *particle_buildRotatedQuad(DefParticleHead *particle, s16 viewport) {
         for (i = 0; i < 4; i++) {
             f32 *c = corners[i];
 
-            func_150A7960(mtx, c[0], c[1], 0.0f, &c[0], &c[1], &c[2]);
+            math_transformPoint(mtx, c[0], c[1], 0.0f, &c[0], &c[1], &c[2]);
             vertices->v.ob[0] = c[0];
             vertices->v.ob[1] = c[1];
             vertices->v.ob[2] = c[2];
@@ -1347,7 +1347,7 @@ Vtx *particle_buildRotatedRectQuadUnrolled(DefParticleHead *particle, s16 viewpo
     } else {
         return NULL;
     }
-    func_150A8050(mtx, particle->def.rot.x, particle->def.rot.y, particle->def.rot.z);
+    math_mtxRotateRPYF(mtx, particle->def.rot.x, particle->def.rot.y, particle->def.rot.z);
     mtx[3][0] = particle->def.pos.x;
     mtx[3][1] = particle->def.pos.y;
     mtx[3][2] = particle->def.pos.z;
@@ -1359,10 +1359,10 @@ Vtx *particle_buildRotatedRectQuadUnrolled(DefParticleHead *particle, s16 viewpo
     corners[2][1] = -particle->def.height;
     corners[3][0] = particle->def.width;
     corners[3][1] = -particle->def.height;
-    func_150A7960(mtx, corners[0][0], corners[0][1], 0.0f, &out[0][0], &out[0][1], &out[0][2]);
-    func_150A7960(mtx, corners[1][0], corners[1][1], 0.0f, &out[1][0], &out[1][1], &out[1][2]);
-    func_150A7960(mtx, corners[2][0], corners[2][1], 0.0f, &out[2][0], &out[2][1], &out[2][2]);
-    func_150A7960(mtx, corners[3][0], corners[3][1], 0.0f, &out[3][0], &out[3][1], &out[3][2]);
+    math_transformPoint(mtx, corners[0][0], corners[0][1], 0.0f, &out[0][0], &out[0][1], &out[0][2]);
+    math_transformPoint(mtx, corners[1][0], corners[1][1], 0.0f, &out[1][0], &out[1][1], &out[1][2]);
+    math_transformPoint(mtx, corners[2][0], corners[2][1], 0.0f, &out[2][0], &out[2][1], &out[2][2]);
+    math_transformPoint(mtx, corners[3][0], corners[3][1], 0.0f, &out[3][0], &out[3][1], &out[3][2]);
     vertices->v.ob[0] = out[0][0];
     vertices->v.ob[1] = out[0][1];
     vertices->v.ob[2] = out[0][2];
@@ -1713,7 +1713,7 @@ Vtx *particle_buildBeamQuad(DefParticleHead *particle, u8 reversed, BeamScale *s
     view.x = middle.x - camera->x;
     view.y = middle.y - camera->y;
     view.z = middle.z - camera->z;
-    func_150AD8B0(&delta.x, &view.x, &side.x);
+    math_cross3(&delta.x, &view.x, &side.x);
     lengthSquared = side.x * side.x + side.y * side.y + side.z * side.z;
     if (lengthSquared != 0.0f) {
         f32 sideScale = width / sqrtf(lengthSquared);
@@ -1870,14 +1870,14 @@ Vtx *particle_buildRotatedRectQuad(DefParticleHead *particle, s16 viewport) {
         corners[3][0] = particle->def.width;
         corners[3][1] = -particle->def.height;
         corners[3][2] = 0.0f;
-        func_150A8050(mtx, particle->def.rot.x, particle->def.rot.y, particle->def.rot.z);
+        math_mtxRotateRPYF(mtx, particle->def.rot.x, particle->def.rot.y, particle->def.rot.z);
         mtx[3][0] = particle->def.pos.x;
         mtx[3][1] = particle->def.pos.y;
         mtx[3][2] = particle->def.pos.z;
         for (i = 0; i < 4; i++) {
             f32 *c = corners[i];
 
-            func_150A7960(mtx, c[0], c[1], 0.0f, &c[0], &c[1], &c[2]);
+            math_transformPoint(mtx, c[0], c[1], 0.0f, &c[0], &c[1], &c[2]);
             vertices->v.ob[0] = c[0];
             vertices->v.ob[1] = c[1];
             vertices->v.ob[2] = c[2];

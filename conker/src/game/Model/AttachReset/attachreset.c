@@ -9,5 +9,5 @@ void func_15004F00(void) {
 }
 
 void func_15004F10(void) {
-    D_800C4000 = 0xF;
+    gBoneChainResetMask = 0xF;
 }

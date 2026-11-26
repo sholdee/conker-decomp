@@ -137,7 +137,7 @@ void particle_updateFallingParticle(FallingParticle *particle) {
             }
             if ((func_150ADA20_u8() & 0xFF) < 15) {
                 func_150ADA20_u8();
-                func_10010F88(0x70, 5000, 0, 0, 0, particle->x, floorY, particle->z, 500, 2000);
+                sound_playAt(0x70, 5000, 0, 0, 0, particle->x, floorY, particle->z, 500, 2000);
             }
         }
     } else {

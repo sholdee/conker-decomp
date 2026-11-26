@@ -195,7 +195,7 @@ s32 rom_loadInto(u8 *romAddr, void *dst, u32 info, u32 maxSize) {
         unpackedSize = *(s32 *)packed & 0x7FFFFFFF;
         if ((size = func_10006240(packed, dst, D_8003809C)) != unpackedSize) {
             D_8003C8E0 = 0x0C000036;
-            func_150AD770();
+            debug_fatalTrap();
         }
         heap_free(packed);
         return size;

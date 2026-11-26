@@ -24,8 +24,8 @@ void func_150124A0(void) {
         s32 i;
 
         for (i = 0; i < 10; i++) {
-            yaw = gPipeSpots[row].yaw + func_150ADA20() % 13U - 0x86;
-            pitch = (func_150ADA20() & 0xF) - 10;
+            yaw = gPipeSpots[row].yaw + math_random() % 13U - 0x86;
+            pitch = (math_random() & 0xF) - 10;
             yawCos = math_cosBinAngleMasked(yaw - 0x40);
             yawSin = math_cosBinAngleMasked(yaw);
             pitchCos = math_cosBinAngleMasked(pitch - 0x40);
@@ -34,7 +34,7 @@ void func_150124A0(void) {
             dirX = radius * yawCos;
             dirY = -10.0f * pitchCos;
             dirZ = radius * yawSin;
-            if (func_150AC9C0(0.0f, 300.0f, 0.0f, dirX, dirY, dirZ, NULL, NULL,
+            if (collision_castRayWorld(0.0f, 300.0f, 0.0f, dirX, dirY, dirZ, NULL, NULL,
                               &hit.x, &hit.y, &hit.z, NULL, NULL, NULL, 0.0f) == 0) {
                 gPipeBurstPoints[row][i].pos.x = 0.0f;
                 gPipeBurstPoints[row][i].pos.y = 0.0f;

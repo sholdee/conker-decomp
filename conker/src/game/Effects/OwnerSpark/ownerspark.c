@@ -53,22 +53,22 @@ void effect_updateOwnerSpark(OwnerSparkEffect *effect) {
         return;
     }
     actor_flashFog(owner, 0xFF, 0xFF, 0xFF, 30, 0, 10);
-    data->sparkAccum += (0.2560000122f + (func_150ADA68() * 0.2960000038f)) * gFrameDelta;
+    data->sparkAccum += (0.2560000122f + (math_randomFloat() * 0.2960000038f)) * gFrameDelta;
     while (data->sparkAccum > 1.0f) {
         u8 colour[4];
 
         colour[0] = 0xBA;
         colour[1] = 0xD2;
         colour[2] = 0xFF;
-        colour[3] = (func_150ADA20() % 126U) + 130;
-        beam_spawnBoundsBolt(owner, func_150ADA20() & 0xFF, (func_150ADA20() % 101U) - 63,
-                      (func_150ADA20() & 0xF) + 15, 4, 129.0f, (func_150ADA68() * 75.0f) + 35.0f, 0, 1,
+        colour[3] = (math_random() % 126U) + 130;
+        beam_spawnBoundsBolt(owner, math_random() & 0xFF, (math_random() % 101U) - 63,
+                      (math_random() & 0xF) + 15, 4, 129.0f, (math_randomFloat() * 75.0f) + 35.0f, 0, 1,
                       colour, effect->base.header.owner, effect->base.header.kind);
         data->sparkAccum -= 1.0f;
     }
-    data->unkCAccum += (0.2090000063f + (func_150ADA68() * 0.1840000153f)) * gFrameDelta;
+    data->unkCAccum += (0.2090000063f + (math_randomFloat() * 0.1840000153f)) * gFrameDelta;
     while (data->unkCAccum > 1.0f) {
-        func_15107B78(owner, func_150ADA20() & 0xFF, (func_150ADA20() % 101U) - 63, effect->base.header.owner,
+        func_15107B78(owner, math_random() & 0xFF, (math_random() % 101U) - 63, effect->base.header.owner,
                       effect->base.header.kind);
         data->unkCAccum -= 1.0f;
     }

@@ -483,7 +483,7 @@ s32 particle_movePhysics(ModelParticle *particle) {
             }
             probe.noshove = 0;
 
-            if (func_15044380(prev.x, prev.y, prev.z, &probe, 0, 0) != 0) {
+            if (collision_resolveActorWalls(prev.x, prev.y, prev.z, &probe, 0, 0) != 0) {
                 particle->hitFlags |= 4;
                 if (particle->flags & 0x10) {
                     speed = sqrtf(particle->vel.x * particle->vel.x + particle->vel.y * particle->vel.y +
@@ -760,8 +760,8 @@ s32 particle_floorBounceSettle(ModelParticle *particle, f32 x, f32 y, f32 z, f32
 /* Floor handler: particle_floorBounceSettle, plus (half the time) a random sound 0x2DE..0x2E6 at the hit position. */
 s32 func_15133C58(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
     particle_floorBounceSettle(particle, x, y, z, floorHeight, surface);
-    if (func_150ADA20() & 1) {
-        func_10010F88((func_150ADA20() % 9U) + 0x2DE, 12000, 0, 0, 0, x, y, z, 500, 1000);
+    if (math_random() & 1) {
+        sound_playAt((math_random() % 9U) + 0x2DE, 12000, 0, 0, 0, x, y, z, 500, 1000);
     }
     return 1;
 }
@@ -769,8 +769,8 @@ s32 func_15133C58(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight,
 /* Floor handler: particle_floorBounceSettle, plus (half the time) a random sound 0x1B8..0x1C1 at the hit position. */
 s32 func_15133D20(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
     particle_floorBounceSettle(particle, x, y, z, floorHeight, surface);
-    if (func_150ADA20() & 1) {
-        func_10010F88((func_150ADA20() % 10U) + 0x1B8, 24000, 0, 0, 0, x, y, z, 500, 1000);
+    if (math_random() & 1) {
+        sound_playAt((math_random() % 10U) + 0x1B8, 24000, 0, 0, 0, x, y, z, 500, 1000);
     }
     return 1;
 }

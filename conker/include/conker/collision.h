@@ -98,7 +98,7 @@ void collision_loadCylinderSets(s32 arg0);
 
 /* game/Collision/Probe/probe.c */
 void func_15044370(void);
-s32 func_15044380(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass);
+s32 collision_resolveActorWalls(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass);
 void collision_rotateTriVerts(s16 **vertices, Vec3f *out, f32 sinY, f32 cosY, f32 ox, f32 oy, f32 oz, s32 offset);
 void func_15044658(void);
 void collision_setProbeHeights(Actor *obj, f32 x, f32 y, f32 z);
@@ -108,7 +108,7 @@ TriggerNode *collision_addTriggerNode(s32 size, s32 check, s32 lifetime, s32 del
 void collision_updateTriggers(void);
 s32 collision_checkPlayerInVolume(TriggerVolume *volume);
 s32 collision_checkTrackedVolume(TriggerVolume *volume);
-s32 func_15044D40(TriggerVolume *volume);
+s32 collision_runVolumeAttack(TriggerVolume *volume);
 void func_15044DA0(void);
 void func_15044DE8(void);
 void func_15044E40(void);
@@ -145,16 +145,16 @@ void guLookAtReflectF(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt,
                    f32 zUp);
 void guLookAtReflect(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp);
-extern f32 D_800CBD90; // ledge probe results (written by func_150AC3E4, game_D86A0.s)
-extern f32 D_800CBD94;
-extern f32 D_800CBD98;
+extern f32 gLedgeZ; // ledge probe results (written by collision_findLedge, game_D86A0.s)
+extern f32 gLedgeAngle1;
+extern f32 gLedgeAngle2;
 extern u16 gActorTouchedObject[25]; // per movement_obj: 1 + the world object it touches, 0 if none
 extern u8 D_800CBDD2;
 extern u8 D_800CBDD3;
 extern u8 D_800CBDD4;
-extern f32 D_800CBDF4; // ledge heights, -32768.0f if none
-extern f32 D_800CBDF8;
-extern f32 D_800CBDFC;
+extern f32 gLedgeHeight1; // ledge heights, -32768.0f if none
+extern f32 gLedgeHeight2;
+extern f32 gLedgeX;
 extern TriggerNode *gTriggerNodes; // timed trigger nodes (collision_addTriggerNode)
 
 /* game/Collision/HitSphere/hitsphere.c */
@@ -177,7 +177,7 @@ s32 collision_trySpawnRecord(s32 spawnIdx, s32 arg1);
 void collision_trySpawnRecords(s32 arg0, s32 arg1, s32 firstRange);
 void func_150829D8(Actor *obj);
 s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
-void func_150832AC(Actor *obj);
+void collision_allocActorLights(Actor *obj);
 void func_15083384(Actor *obj, s32 arg1);
 void *collision_createPartSet(Actor *parent, s32 setId, f32 arg2, s32 arg3);
 void collision_removePartSet(Actor *parent, s32 setId);
@@ -190,7 +190,7 @@ s32 collision_getFreeUniqueId(void);
 s32 collision_findSpawnById(u8 id);
 Actor *collision_findObjectById(u8 id);
 s32 collision_findObjectSlotById(u8 id);
-s32 func_15084000(s32 id);
+s32 collision_findSlotBySpawnIndex(s32 id);
 s32 collision_initModelData(Actor *obj, s32 model);
 void collision_releaseAllModelData(Actor *obj);
 void collision_releaseModelData(Actor *obj, s32 model);
@@ -200,7 +200,7 @@ s32 collision_getModelId(Actor *obj);
 s32 collision_getLodModelId(Actor *obj, s32 *outIndex);
 void collision_updateModelUnload(void);
 void func_15084C30(Actor *obj);
-s32 func_15084CB0(s32 modelId);
+s32 collision_getSpawnModelTypeIndex(s32 modelId);
 extern u8 *gModelData[187]; // per model id: model data (just past its header)
 extern ModelDef *gModelDefs[187];
 extern u8 D_800D1F80[187];
@@ -221,134 +221,134 @@ extern const u8 *gSubModelLists[6]; // per ModelDef.subModelList: the sub-model 
 extern PartSet gPartSets[175]; // per ModelDef.partSet (1-based)
 extern const u8 gModel0ExpressionActions[5];  // the expression actions of model 0
 
-/* game_D0F20.s: the ground probe. func_150A3A70 gathers the candidate hits under (x, z) into
- * D_800D3300 and returns their count; func_150A3FC4 gives the height of a triangle at (x, z), from
+/* game_D0F20.s: the ground probe. collision_gatherGroundTris gathers the candidate hits under (x, z) into
+ * gGroundCandidates and returns their count; collision_getTriHeightAt gives the height of a triangle at (x, z), from
  * its three vertex pointers or, when triVerts is NULL, from the vertices in tri. */
-s32 func_150A3A70(s32 x, s32 z);
-s32 func_150A3FC4(f32 x, f32 z, Vec3s **triVerts, Vec3s *tri, f32 *y);
+s32 collision_gatherGroundTris(s32 x, s32 z);
+s32 collision_getTriHeightAt(f32 x, f32 z, Vec3s **triVerts, Vec3s *tri, f32 *y);
 
 /* game_D1890.s */
-s32 func_150A43E0(s32 x, s32 z, s32 count, u16 *props);
+s32 collision_gatherPropGroundTris(s32 x, s32 z, s32 count, u16 *props);
 
 /* game_D19A0.s */
-void func_150A44F0(s32 count, u16 *props, s32 arg2);
+void collision_transformPropTris(s32 count, u16 *props, s32 arg2);
 /* (s32 map); declared without a prototype: collision_selectMap (game/Collision/Floor/floor.c) passes its own argument on */
-void func_150A49F4();
+void collision_setCurMap();
 
 /* game_D1FB4.s */
-void func_150A4B04(Actor *actor);
+void collision_updateActorHitMesh(Actor *actor);
 
 /* game_D2450.s */
-s32 func_150A4FA0(s32 x, s32 z);
+s32 collision_gatherActorGroundTris(s32 x, s32 z);
 
 /* game_D2570.s */
-Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
+Gfx *gfx_copyDlCulled(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
 
 /* game_D260C.s */
-Gfx *func_150A5378(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
+Gfx *gfx_copyLevelDlCulled(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
 
 /* game_D3040.s */
-struct ShadowVtx *func_150A5B90(u32 *tris, struct ShadowVtx *out, f32 *mtx, struct ShadowVtx *end);
-struct ShadowVtx *func_150A5E44(u16 *props, struct ShadowVtx *out, f32 *mtx, struct ShadowVtx *end);
+struct ShadowVtx *shadow_projectLevelFaces(u32 *tris, struct ShadowVtx *out, f32 *mtx, struct ShadowVtx *end);
+struct ShadowVtx *shadow_projectPropFaces(u16 *props, struct ShadowVtx *out, f32 *mtx, struct ShadowVtx *end);
 
 /* game_D36C0.s */
-s32 func_150A6210(MtxF mtx, f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
+s32 view_getQuadViewDepth(MtxF mtx, f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
 
-/* game_D3810.s: func_150A6360 tests a cylinder against a view's frustum and returns its distance */
-s32 func_150A6360(RenderView *view, MtxF viewMtx, f32 x, f32 y, f32 z, f32 radius, f32 height, f32 farDist);
-void func_150A64C8(s16 x, s16 z, s32 *groups, s32 y);
+/* game_D3810.s: view_testCylinderInView tests a cylinder against a view's frustum and returns its distance */
+s32 view_testCylinderInView(RenderView *view, MtxF viewMtx, f32 x, f32 y, f32 z, f32 radius, f32 height, f32 farDist);
+void collision_findPropsBelow(s16 x, s16 z, s32 *groups, s32 y);
 
 /* game_D39B0.s */
-s32 func_150A6500(s16 x, s16 z, s32 *groups, u16 mask);
+s32 collision_findPropsAt(s16 x, s16 z, s32 *groups, u16 mask);
 
 /* game_D3A18.s */
-s32 func_150A6568(s16 x, s16 z, s32 *groups, u16 group, s32 ix, s32 iz, s32 minY, s32 maxY);
+s32 collision_findPropsInBox(s16 x, s16 z, s32 *groups, u16 group, s32 ix, s32 iz, s32 minY, s32 maxY);
 void func_150A6760(s32 index);
 
 /* game_D4450.s: wave deformers of vertex lists */
-void func_150A6FA0(Vtx *dst, u16 count, WaveParams *params, s8 *phase, f32 *weight, Vtx *src);
-void func_150A70C0(Vtx *dst, u16 count, WaveParams *params, s8 *phase, Vtx *src);
-void func_150A71C8(Vtx *dst, u16 count, WaveParams *params, u8 *unk, s8 *phase, Vtx *src);
-void func_150A7360(Vtx *dst, u16 count, WaveParams *params, u8 *unk, s8 *phase, f32 *weight, Vtx *src);
-void func_150A751C(Vtx *dst, u16 count, WaveParams *params, u8 *angle, s8 *phase, f32 *weight, Vtx *src);
+void prop_waveVerticesWeighted(Vtx *dst, u16 count, WaveParams *params, s8 *phase, f32 *weight, Vtx *src);
+void prop_waveVertices(Vtx *dst, u16 count, WaveParams *params, s8 *phase, Vtx *src);
+void prop_waveVerticesMode1(Vtx *dst, u16 count, WaveParams *params, u8 *unk, s8 *phase, Vtx *src);
+void prop_waveVerticesMode1Weighted(Vtx *dst, u16 count, WaveParams *params, u8 *unk, s8 *phase, f32 *weight, Vtx *src);
+void prop_waveVerticesMode2Weighted(Vtx *dst, u16 count, WaveParams *params, u8 *angle, s8 *phase, f32 *weight, Vtx *src);
 
 /* game_D4E10.s: transforms the point (x, y, z) by mtx */
-void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void math_transformPoint(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* game_D4EB0.s: the same with the w of the result */
-void func_150A7A00(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
+void math_transformPointW(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
 
 /* game_D4EF8.s: out = a * b */
-void func_150A7A48(MtxF a, MtxF b, MtxF out);
+void math_mtxMulF(MtxF a, MtxF b, MtxF out);
 
 /* game_D5030.s: an identity Mtx */
-void func_150A7B80(Mtx *m);
+void math_mtxIdentity(Mtx *m);
 
 /* game_D51B0.s: a translation Mtx */
 void math_mtxTranslate(Mtx *m, f32 x, f32 y, f32 z);
 
 /* game_D5250.s */
-void func_150A7DA0(MtxF mtx, f32 x, f32 y, f32 z);
+void math_mtxTranslateF(MtxF mtx, f32 x, f32 y, f32 z);
 
 /* game_D52A0.s: a rotation Mtx, angles in degrees */
-void func_150A7DF0(Mtx *m, f32 rx, f32 ry, f32 rz);
+void math_mtxRotateRPY(Mtx *m, f32 rx, f32 ry, f32 rz);
 
 /* game_D5500.s */
-void func_150A8050(MtxF mtx, f32 rx, f32 ry, f32 rz);
+void math_mtxRotateRPYF(MtxF mtx, f32 rx, f32 ry, f32 rz);
 
 /* game_D5680.s */
 /* cursor: the address of a matrix cursor (an Mtx * or a byte pointer), moved past the numParts float
    matrices that it writes */
-void func_150A81D0(void *cursor, MtxF transform, AnimInstance *anim, s32 arg3, s32 numParts, s16 *arg5, u8 *remap, s32 scale);
+void anim_buildBoneMatrices(void *cursor, MtxF transform, AnimInstance *anim, s32 arg3, s32 numParts, s16 *arg5, u8 *remap, s32 scale);
 
 /* game_D6E34.s: converts count float matrices (MtxF) in place into Mtx */
-void func_150A9984(void *mtx, s32 count);
+void math_mtxFToLInPlace(void *mtx, s32 count);
 
 /* game_D6FBC.s */
-void func_150A9B0C(MtxF mtx, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
+void math_mtxRotScaleF(MtxF mtx, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 
 /* game_D8248.s */
-s32 func_150AAD98(Tri3f tri);
+s32 math_triBoxOverlap(Tri3f tri);
 
 /* game_D86A0.s */
-s32 func_150AB1F0(f32 x, f32 y, f32 z, Actor *actor, s32 arg4);
-void func_150AC3E4(f32 x, f32 y, f32 z, Actor *actor, s32 arg4);
+s32 collision_resolveMapWalls(f32 x, f32 y, f32 z, Actor *actor, s32 arg4);
+void collision_findLedge(f32 x, f32 y, f32 z, Actor *actor, s32 arg4);
 
 /* game_D9E70.s: casts the ray from (x, y, z) along (dx, dy, dz), up to maxDist when it is not 0. Each
  * output pointer can be NULL. */
-s32 func_150AC9C0(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void *outTriVerts, CollisionTri *outTri, f32 *hitX,
+s32 collision_castRayWorld(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void *outTriVerts, CollisionTri *outTri, f32 *hitX,
                   f32 *hitY, f32 *hitZ, f32 *outDist, s32 *outObject, s32 *outSurface, f32 maxDist);
 
 /* game_DAC20.s */
-void func_150AD770(void);
+void debug_fatalTrap(void);
 
 /* game_DAC30.s */
-f32 func_150AD780(f32 x);
-f32 func_150AD78C(f32 x);
+f32 math_cos(f32 x);
+f32 math_sin(f32 x);
 
 /* game_DAD60.s: out = a x b */
-void func_150AD8B0(f32 *a, f32 *b, f32 *out);
+void math_cross3(f32 *a, f32 *b, f32 *out);
 
 /* game_DADB0.s */
-f32 func_150AD900(f32 *a, f32 *b);
-f32 func_150AD930(f32 *v);
+f32 math_dot3(f32 *a, f32 *b);
+f32 math_length3(f32 *v);
 
 /* game_DAE10.s */
-s32 func_150AD960(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 math_distance2D(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* game_DAE50.s */
-u32 func_150ADA20(void);
+u32 math_random(void);
 /* The same random function at the same address, under a u8 return type. 14 files were compiled with
  * that view: they use the result as a byte without masking it. */
 u8 func_150ADA20_u8(void);
-f32 func_150ADA68(void);
-void func_150ADACC(s32 seed);
+f32 math_randomFloat(void);
+void math_seedRandom(s32 seed);
 
 /* game_DAFA0.s */
-void func_150ADAF0(IdRecord *node, s32 mode);
+void script_runTask(IdRecord *node, s32 mode);
 
 /* game_DB730.s */
-void func_150AE280(void);
+void script_exitTask(void);
 
 /* game/Collision/WobbleQuad/wobblequad.c */
 s32 func_150AE2A0(struct Foo150AE280 *arg0);

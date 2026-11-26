@@ -32,11 +32,11 @@ void effect_spawnImpactBlast(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s
         hitGround = TRUE;
         impact.y = hit.height;
         impact.z = top.z;
-        particle_spawnImpactMark(func_150ADA68() * 125.0f + 204.0f, func_150ADA20() % 101U + 155, &hit.tri, &impact,
-                      func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg5, 0);
+        particle_spawnImpactMark(math_randomFloat() * 125.0f + 204.0f, math_random() % 101U + 155, &hit.tri, &impact,
+                      math_random() % 302U + 500, 0, 1, 0, 0, 0, arg5, 0);
     }
 
-    particle_startRandomEmitter(hitGround ? &impact : pos, func_150ADA20() % 62U + 120, arg5, arg6);
+    particle_startRandomEmitter(hitGround ? &impact : pos, math_random() % 62U + 120, arg5, arg6);
     particle_startPlayerRumbles(pos, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg5, arg6);
     particle_startPlayerCameraWobbles(pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg5, arg6);
     particle_spawnBlastSpray(pos, arg5, arg6);
@@ -53,5 +53,5 @@ void effect_spawnImpactBlast(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s
     }
 
     func_15055A2C(0, pos->x, pos->y, pos->z, 1);
-    particle_spawnGrowFade(pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f, func_150ADA20() % 56U + 200, 0.0f, arg5, arg6);
+    particle_spawnGrowFade(pos, math_randomFloat() * 4.0f + 12.0f, 1.6409999f, math_random() % 56U + 200, 0.0f, arg5, arg6);
 }

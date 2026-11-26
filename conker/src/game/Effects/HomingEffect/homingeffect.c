@@ -154,7 +154,7 @@ void effect_destroyHomingEffect(HomingEffect *effect) {
     if (sound != 0) {
         sound_stop(sound);
         effect->sound = 0;
-        func_10010F88(0x2D7, 0x5DC0, 0, 0, 0, effect->origin.x, effect->origin.y, effect->origin.z, 0x3E8, 0x1770);
+        sound_playAt(0x2D7, 0x5DC0, 0, 0, 0, effect->origin.x, effect->origin.y, effect->origin.z, 0x3E8, 0x1770);
     }
 
     effect_destroyObject(&effect->header);
@@ -293,15 +293,15 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
         step = delta;
     }
     effect->pos = nextPos;
-    effect->particleAccum += (526.0f + func_150ADA68() * 1228.0f) * 0.001f * gFrameDelta;
+    effect->particleAccum += (526.0f + math_randomFloat() * 1228.0f) * 0.001f * gFrameDelta;
     while (effect->particleAccum > 1.0f) {
         from = effect->origin;
         {
             f32 rnd;
 
-            rnd = func_150ADA68();
-            randAngle = func_150ADA20();
-            math_dirFromBinAngleXZ(randAngle & 0xFF, func_150ADA68() * 129.0f, &offsetX, &offsetZ);
+            rnd = math_randomFloat();
+            randAngle = math_random();
+            math_dirFromBinAngleXZ(randAngle & 0xFF, math_randomFloat() * 129.0f, &offsetX, &offsetZ);
             point.x = rnd * step.x + prevPos.x + offsetX;
             point.y = rnd * step.y + prevPos.y + 200.0f;
             point.z = rnd * step.z + prevPos.z + offsetZ;
@@ -318,7 +318,7 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
             dir.z = end.z - from.z;
         }
         if (math_vec3Normalize(&dir, &dir, &length, &unusedOut) != 0) {
-            move = func_150ADA68() * gFrameDelta;
+            move = math_randomFloat() * gFrameDelta;
             scale = 190.0f * move;
             from.x += dir.x * scale;
             from.y += dir.y * scale;
@@ -343,9 +343,9 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
             particle.surface = NULL;
         }
         particle.material = effect->ground.material;
-        randWidth = func_150ADA68();
-        scale = func_150ADA68(); // matching: scale and randAngle are reused so they keep their registers
-        randByte = func_150ADA20();
+        randWidth = math_randomFloat();
+        scale = math_randomFloat(); // matching: scale and randAngle are reused so they keep their registers
+        randByte = math_random();
         if (spawned != 0 || effect->follow != NULL) {
             randAngle = 2;
         } else {
@@ -359,12 +359,12 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
         effect->particleAccum -= 1.0f;
     }
     if (effect->follow == NULL) {
-        effect->sparkAccum += (56.0f + func_150ADA68() * 235.0f) * 0.001f * gFrameDelta;
+        effect->sparkAccum += (56.0f + math_randomFloat() * 235.0f) * 0.001f * gFrameDelta;
         while (effect->sparkAccum > 1.0f) {
-            randByte = func_150ADA20();
-            randAngle = func_150ADA20();
+            randByte = math_random();
+            randAngle = math_random();
             effect_spawnFlashParticle((randByte & 3) + 6, (randAngle % 156U) + 100,
-                          func_150ADA68() * 1548.0f + 1093.0f, &effect->origin, 0xFF, effect->header.owner, effect->header.kind);
+                          math_randomFloat() * 1548.0f + 1093.0f, &effect->origin, 0xFF, effect->header.owner, effect->header.kind);
             effect->sparkAccum -= 1.0f;
         }
     }

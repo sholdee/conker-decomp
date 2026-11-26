@@ -22,7 +22,7 @@ f32 D_800CC240[4]; // not referenced
 
 /* Tests a triangle against the box set up by math_setTestBox. */
 s32 math_testTriBox(Tri3f tri) {
-    return func_150AAD98(tri);
+    return math_triBoxOverlap(tri);
 }
 
 /* Sets up the box for math_testTriBox: its size, half-size and the height and depth

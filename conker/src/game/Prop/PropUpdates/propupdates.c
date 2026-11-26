@@ -104,7 +104,7 @@ void func_1511AF30(WorldObject *obj) {
         }
         WORK(obj)->w1511AF30.wobble = 0.0f;
     } else {
-        roll = func_150ADA20() % 1000;
+        roll = math_random() % 1000;
         if (roll < 500) {
             WORK(obj)->w1511AF30.wobbleTarget = roll * 5.0f * intensity * 0.002000000095f * 0.009999999776f;
         }
@@ -577,7 +577,7 @@ void func_1511BEBC(WorldObject *obj) {
                         timer -= D_800BE9E4;
                     } else {
                         timer = 0;
-                        func_10010F88(0x1A4, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
+                        sound_playAt(0x1A4, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
                     }
                 } else {
                     velocity += 1.0f;
@@ -590,7 +590,7 @@ void func_1511BEBC(WorldObject *obj) {
                         if (target != NULL) {
                             target->mv->unk6B = 0;
                         }
-                        func_10010F88(0x1A5, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
+                        sound_playAt(0x1A5, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
                     }
                 }
                 if (target != NULL) {
@@ -732,22 +732,22 @@ void func_1511C638(WorldObject *obj) {
                     sound_play(0x2BE, 0x7FFF, 64, 0, 0);
                     break;
                 case 0: {
-                    u16 first = func_150ADA20() % 3U;
+                    u16 first = math_random() % 3U;
                     u16 second;
                     SoundTriple sounds = D_800A2F84;
 
-                    second = ((func_150ADA20() & 1) + first + 1) % 3U;
+                    second = ((math_random() & 1) + first + 1) % 3U;
                     first = sounds.ids[first];
                     second = sounds.ids[second];
                     sound_play(0x2B7, 0x7FFF, 64, 0, 0);
                     sound_play(first, 0x7FFF, 10, 0, 0);
                     sound_play(second, 0x7FFF, 54, 0, 0);
-                    first = func_150ADA20() % 5U;
-                    second = ((func_150ADA20() & 3) + first + 1) % 5U;
+                    first = math_random() % 5U;
+                    second = ((math_random() & 3) + first + 1) % 5U;
                     sound_addDynamicSound(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, sound_delayedPlayCallback, (void *)0x1001E, 0, 0x200, 0);
                     sound_addDynamicSound(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, sound_delayedPlayCallback, (void *)0x1001E, 0, 0, 0);
-                    first = func_150ADA20() % 5U;
-                    second = ((func_150ADA20() & 3) + first + 1) % 5U;
+                    first = math_random() % 5U;
+                    second = ((math_random() & 3) + first + 1) % 5U;
                     sound_addDynamicSound(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, sound_delayedPlayCallback, (void *)60, 0, 0x300, 0);
                     sound_addDynamicSound(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, sound_delayedPlayCallback, (void *)60, 0, 0x100, 0);
                 }
@@ -1239,7 +1239,7 @@ void prop_playImpactSound(WorldObject *obj, Actor *character) {
         break;
     case 0x3A:
         if (isChar3B) {
-            sound = (func_150ADA20() & 1) + 0x53E;
+            sound = (math_random() & 1) + 0x53E;
         } else if (isChar80) {
             sound = 0x567;
         } else {
@@ -1269,7 +1269,7 @@ void prop_playImpactSound(WorldObject *obj, Actor *character) {
         break;
     case 0x50:
     case 0x55:
-        sound = (func_150ADA20() & 1) + 0xB;
+        sound = (math_random() & 1) + 0xB;
         break;
     case 0x52:
     case 0x58:
@@ -1544,7 +1544,7 @@ void prop_swingHinge(WorldObject *prop) {
         WORK(prop)->wobble.phase += 0.0399999991059f * D_800BE9E4;
         prop->v = sinf(WORK(prop)->wobble.phase) * 10.0f;
         if (WORK(prop)->wobble.phase > 12.5663709641f) { /* 4 pi */
-            WORK(prop)->wobble.phase -= 12.5663709641f * ((func_150ADA20() & 4) + 1); // u32 multiplier
+            WORK(prop)->wobble.phase -= 12.5663709641f * ((math_random() & 4) + 1); // u32 multiplier
             gfx_playObjectSound(prop, 0x503, 8000, 150, 600, 0);
         }
         break;

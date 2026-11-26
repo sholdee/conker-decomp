@@ -119,14 +119,14 @@ Actor *math_findActorById(u8 uniqueId, Actor *self) {
 }
 
 /*
- * Builds out = scale * rotation * translation: func_150A8050 makes the rotation, rows 0/2 are scaled
+ * Builds out = scale * rotation * translation: math_mtxRotateRPYF makes the rotation, rows 0/2 are scaled
  * by scaleXZ and row 1 by scaleY, columns by (sx, sy, sz).
  */
 void math_mtxRotScaleAxes(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 sx, f32 sy, f32 sz,
                    f32 x, f32 y, f32 z) {
     MtxF mf;
 
-    func_150A8050(mf, rotX, rotY, rotZ);
+    math_mtxRotateRPYF(mf, rotX, rotY, rotZ);
     mf[3][0] = x;
     mf[3][1] = y;
     mf[3][2] = z;
@@ -190,7 +190,7 @@ void math_mtxLookAtScale(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 
 void math_mtxRotScaleXZ(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
     MtxF mf;
 
-    func_150A8050(mf, rotX, rotY, rotZ);
+    math_mtxRotateRPYF(mf, rotX, rotY, rotZ);
     mf[3][0] = x;
     mf[3][1] = y;
     mf[3][2] = z;
@@ -208,7 +208,7 @@ void math_mtxRotScaleXZ(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f
 
 /* Float version of math_mtxRotScaleXZ. */
 void math_mtxFRotScaleXZ(MtxF mf, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
-    func_150A8050(mf, rotX, rotY, rotZ);
+    math_mtxRotateRPYF(mf, rotX, rotY, rotZ);
     mf[3][0] = x;
     mf[3][1] = y;
     mf[3][2] = z;
@@ -227,7 +227,7 @@ void math_mtxFRotScaleXZ(MtxF mf, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f
 void math_pickPaletteColour(u8 palette, u8 *r, u8 *g, u8 *b) {
     u8 *color;
 
-    color = &gColourPalettes[(func_150ADA20() & 3) * 3 + palette * 12];
+    color = &gColourPalettes[(math_random() & 3) * 3 + palette * 12];
     *r = color[0];
     *g = color[1];
     *b = color[2];
@@ -437,14 +437,14 @@ void math_transformOffset(const Vec3f *offset, Vec3f *out, void *mtx) {
             D_800DCA00 = 3;
             D_800DCA04 = mtx;
             guMtxL2F(mf, mtx);
-            func_150A7960(mf, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
+            math_transformPoint(mf, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
             D_800DCA00 = 4;
         // matching: an (unused) label here changes how IDO lays out the branch to the final store
         state4_done:;
         } else {
             D_800DCA00 = 5;
             D_800DCA04 = mtx;
-            func_150A7960(mtx, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
+            math_transformPoint(mtx, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
             D_800DCA00 = 6;
         }
     } else {
@@ -476,8 +476,8 @@ void math_randomZoneFootprintPoint(TriggerZone *region, f32 *x, f32 *z, f32 *top
             angle = region->yaw * (256.0f / 360.0f);
             sine = math_cosBinAngleMasked(angle - 0x40);
             cosine = math_cosBinAngleMasked(angle);
-            offsetX = func_150ADA68() * (2.0f * region->xSize) + -region->xSize;
-            offsetZ = func_150ADA68() * (2.0f * region->zSize) + -region->zSize;
+            offsetX = math_randomFloat() * (2.0f * region->xSize) + -region->xSize;
+            offsetZ = math_randomFloat() * (2.0f * region->zSize) + -region->zSize;
             *x = region->x + (offsetX * cosine + offsetZ * sine);
             *z = region->z + (offsetZ * cosine - offsetX * sine);
             *top = region->y + region->ySize;
@@ -492,10 +492,10 @@ void math_randomZoneFootprintPoint(TriggerZone *region, f32 *x, f32 *z, f32 *top
             f32 cosine;
             f32 radius;
 
-            angle = func_150ADA20() & 0xFF;
+            angle = math_random() & 0xFF;
             sine = math_cosBinAngleMasked(angle - 0x40);
             cosine = math_cosBinAngleMasked(angle);
-            radius = func_150ADA68() * region->xSize;
+            radius = math_randomFloat() * region->xSize;
             *x = region->x + radius * cosine;
             *z = region->z - radius * sine;
             *top = region->y + region->ySize;
@@ -510,10 +510,10 @@ void math_randomZoneFootprintPoint(TriggerZone *region, f32 *x, f32 *z, f32 *top
             f32 cosine;
             f32 radius;
 
-            angle = func_150ADA20() & 0xFF;
+            angle = math_random() & 0xFF;
             sine = math_cosBinAngleMasked(angle - 0x40);
             cosine = math_cosBinAngleMasked(angle);
-            radius = func_150ADA68() * region->xSize;
+            radius = math_randomFloat() * region->xSize;
             *x = region->x + radius * cosine;
             *z = region->z - radius * sine;
             *top = region->y + region->ySize;
@@ -817,8 +817,8 @@ start:
         if (found2) {
             camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], arg0, 1);
             spawn.flags = 1;
-            spawn.duration = (func_150ADA20() & 0xF) + 0x14;
-            spawn.strength = (func_150ADA20() & 3) + 4;
+            spawn.duration = (math_random() & 0xF) + 0x14;
+            spawn.strength = (math_random() & 3) + 4;
             spawn.updateKind = -1;
             spawn.playerMask = 1;
             cont_spawnRumble(&spawn, 0, 0xFF, 0);
@@ -1099,9 +1099,9 @@ void math_randomPointInZone(TriggerZone *region, Vec3f *out) {
             f32 savedX;
             f32 rotatedZ;
 
-            x = func_150ADA68() * (2.0f * radiusX) - radiusX;
-            y = func_150ADA68() * height;
-            z = func_150ADA68() * (2.0f * radiusZ) - radiusZ;
+            x = math_randomFloat() * (2.0f * radiusX) - radiusX;
+            y = math_randomFloat() * height;
+            z = math_randomFloat() * (2.0f * radiusZ) - radiusZ;
             savedX = x;
             mixed = y * sinPitch + z * cosPitch;
             x = x * cosYaw + mixed * sinYaw;
@@ -1122,10 +1122,10 @@ void math_randomPointInZone(TriggerZone *region, Vec3f *out) {
             f32 radius;
             u8 angle;
 
-            radius = func_150ADA68() * radiusX;
-            angle = func_150ADA20() & 0xFF;
+            radius = math_randomFloat() * radiusX;
+            angle = math_random() & 0xFF;
             x = math_cosBinAngleMasked(angle - 0x40) * radius;
-            y = func_150ADA68() * height;
+            y = math_randomFloat() * height;
             z = math_cosBinAngleMasked(angle) * radius;
             savedX = x;
             mixed = y * sinPitch + z * cosPitch;
@@ -1140,8 +1140,8 @@ void math_randomPointInZone(TriggerZone *region, Vec3f *out) {
         {
             Vec3f offset;
 
-            math_dirFromAngles(func_150ADA68() * 6.2831855f, func_150ADA68() * 6.2831855f,
-                          func_150ADA68() * radiusX, &offset);
+            math_dirFromAngles(math_randomFloat() * 6.2831855f, math_randomFloat() * 6.2831855f,
+                          math_randomFloat() * radiusX, &offset);
             out->x = region->x + offset.x;
             out->y = region->y + offset.y;
             out->z = region->z + offset.z;
@@ -1263,7 +1263,7 @@ s32 math_projectToScreen(pos, screen, outA, outDepth, outInvDepth, viewport)
     if (outInvDepth == NULL) {
         outInvDepth = &invDepth;
     }
-    func_150A7A00(gViewProjMatrices[viewport], pos[0], pos[1], pos[2], screen, screen + 1,
+    math_transformPointW(gViewProjMatrices[viewport], pos[0], pos[1], pos[2], screen, screen + 1,
                   outA, outDepth);
     if ((6000.0f <= *outDepth) || (*outDepth <= gDefaultNear)) {
         return 0;
@@ -1668,7 +1668,7 @@ void math_transformObjectPointRefs(WorldObject *placement, const f32 **in, f32 *
     const f32 *p;
     f32 *q;
 
-    func_150A8050(mf, placement->t, placement->u, placement->v);
+    math_mtxRotateRPYF(mf, placement->t, placement->u, placement->v);
     mf[3][0] = placement->x;
     mf[3][1] = placement->y;
     mf[3][2] = placement->z;
@@ -1680,7 +1680,7 @@ void math_transformObjectPointRefs(WorldObject *placement, const f32 **in, f32 *
     do {
         p = *src;
         q = *dst;
-        func_150A7960(mf, p[0], p[1], p[2], q, q + 1, q + 2);
+        math_transformPoint(mf, p[0], p[1], p[2], q, q + 1, q + 2);
         count--;
         src++;
         dst++;
@@ -1692,12 +1692,12 @@ void math_transformObjectPoints(WorldObject *placement, Vec3f *in, Vec3f *out, s
     MtxF mf;
     s32 i;
 
-    func_150A8050(mf, placement->t, placement->u, placement->v);
+    math_mtxRotateRPYF(mf, placement->t, placement->u, placement->v);
     mf[3][0] = placement->x;
     mf[3][1] = placement->y;
     mf[3][2] = placement->z;
     for (i = 0; count > 0; i++) {
-        func_150A7960(mf, in[i].x, in[i].y, in[i].z, &out[i].x, &out[i].y, &out[i].z);
+        math_transformPoint(mf, in[i].x, in[i].y, in[i].z, &out[i].x, &out[i].y, &out[i].z);
         count--;
     }
 }
@@ -1719,7 +1719,7 @@ void math_transformOffsets(const Vec3f **offsets, Vec3f **results, void *mtx, s3
                 input = *inputs;
                 if (input != NULL && (input->x != 0.0f || input->y != 0.0f || input->z != 0.0f)) {
                     output = *outputs;
-                    func_150A7960(mf, input->x, input->y, input->z, &output->x, &output->y, &output->z);
+                    math_transformPoint(mf, input->x, input->y, input->z, &output->x, &output->y, &output->z);
                 } else {
                     math_getBoneTranslation(mtx, 0, *outputs);
                 }
@@ -1737,7 +1737,7 @@ void math_transformOffsets(const Vec3f **offsets, Vec3f **results, void *mtx, s3
                 input = *inputs;
                 if (input != NULL && (input->x != 0.0f || input->y != 0.0f || input->z != 0.0f)) {
                     output = *outputs;
-                    func_150A7960(mtx, input->x, input->y, input->z, &output->x, &output->y, &output->z);
+                    math_transformPoint(mtx, input->x, input->y, input->z, &output->x, &output->y, &output->z);
                 } else {
                     math_getBoneTranslation(mtx, 0, *outputs);
                 }
@@ -1949,7 +1949,7 @@ s32 math_transformAttachmentOffsets(Actor *actor, ModelAttachment *point, s32 in
     if (mtx != NULL) {
         guMtxL2F(mf, mtx);
         for (i = 0; i < count; i++) {
-            func_150A7960(mf, offsets[i]->x, offsets[i]->y, offsets[i]->z, &results[i]->x, &results[i]->y,
+            math_transformPoint(mf, offsets[i]->x, offsets[i]->y, offsets[i]->z, &results[i]->x, &results[i]->y,
                           &results[i]->z);
         }
     } else {
@@ -1977,11 +1977,11 @@ s32 math_isInWorldBounds(Vec3f *pos) {
 void math_randomDrift(f32 *timer, f32 maxTime, f32 *target, f32 lo, f32 mid, f32 hi, f32 rate, f32 *value) {
     *timer = *timer - gFrameDelta;
     if (*timer < 0.0f) {
-        *timer = func_150ADA68() * maxTime;
-        if ((func_150ADA20() & 3) != 0) {
-            *target = (func_150ADA68() * (mid - lo)) + lo;
+        *timer = math_randomFloat() * maxTime;
+        if ((math_random() & 3) != 0) {
+            *target = (math_randomFloat() * (mid - lo)) + lo;
         } else {
-            *target = (func_150ADA68() * (hi - mid)) + mid;
+            *target = (math_randomFloat() * (hi - mid)) + mid;
         }
     }
     *value = ((*target - *value) * rate) + *value;

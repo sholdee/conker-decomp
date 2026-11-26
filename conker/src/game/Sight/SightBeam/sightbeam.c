@@ -40,8 +40,8 @@ s32 sight_placeBeam(TriggerZone *beam) {
     originX = beam->x;
     originY = beam->y;
     originZ = beam->z;
-    func_150A8050(matrix, beam->pitch, beam->yaw, 0);
-    func_150A7960(matrix, 0.0f, beam->ySize, 0.0f, &endX, &endY, &endZ);
+    math_mtxRotateRPYF(matrix, beam->pitch, beam->yaw, 0);
+    math_transformPoint(matrix, 0.0f, beam->ySize, 0.0f, &endX, &endY, &endZ);
     endX += originX;
     endY += originY;
     endZ += originZ;
@@ -54,9 +54,9 @@ s32 sight_placeBeam(TriggerZone *beam) {
     revX = -dirX;
     revY = -dirY;
     revZ = -dirZ;
-    hit1 = func_150AC9C0(midX, midY, midZ, revX, revY, revZ, 0, &triangle1, &point1.x, &point1.y, &point1.z,
+    hit1 = collision_castRayWorld(midX, midY, midZ, revX, revY, revZ, 0, &triangle1, &point1.x, &point1.y, &point1.z,
                          &distance1, &object1, 0, 0.0f);
-    hit2 = func_150AC9C0(midX, midY, midZ, dirX, dirY, dirZ, 0, &triangle2, &point2.x, &point2.y, &point2.z,
+    hit2 = collision_castRayWorld(midX, midY, midZ, dirX, dirY, dirZ, 0, &triangle2, &point2.x, &point2.y, &point2.z,
                          &distance2, &object2, 0, 0.0f);
     if (hit1 == 0 || hit2 == 0) {
         return 1;
@@ -115,14 +115,14 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
     state.inactiveTime = inactiveTime;
     state.timer = startTime;
     state.period = activeTime + inactiveTime;
-    state.texS = state.centerS = func_150ADA68() * 1024.0f + -2560.0f + 2048.0f;
-    state.texT = state.centerT = func_150ADA68() * 1024.0f + 1536.0f + 2048.0f;
-    state.radiusS = func_150ADA68() * 768.0f + 768.0f;
-    state.radiusT = func_150ADA68() * 768.0f + 768.0f;
-    state.angleS = func_150ADA68() * 6.283185482f;
-    state.angleT = func_150ADA68() * 6.283185482f;
-    state.speedS = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
-    state.speedT = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
+    state.texS = state.centerS = math_randomFloat() * 1024.0f + -2560.0f + 2048.0f;
+    state.texT = state.centerT = math_randomFloat() * 1024.0f + 1536.0f + 2048.0f;
+    state.radiusS = math_randomFloat() * 768.0f + 768.0f;
+    state.radiusT = math_randomFloat() * 768.0f + 768.0f;
+    state.angleS = math_randomFloat() * 6.283185482f;
+    state.angleT = math_randomFloat() * 6.283185482f;
+    state.speedS = (math_randomFloat() * 80.0f + 50.0f) * 0.001000000047f;
+    state.speedT = (math_randomFloat() * 80.0f + 50.0f) * 0.001000000047f;
     {
         // matching: a block-scope declaration gives IDO a scope boundary here
         extern void sight_spawnEmitter(SightEmitter **, Vec3f *, CollisionTri *, Vec3f *, ZoneNode *, u8, u8, u8, s32);
@@ -233,7 +233,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
             objState->endEffect1 = NULL;
         }
         if (objState->midEffect != NULL) {
-            sound_addDynamicSound(0x4D0, pos.x, pos.y, pos.z, 0x1F40, 0xFA, 0x64, (SoundRecordCallback)func_151C87AC, objState, 0, 8, (u8)func_150ADA20());
+            sound_addDynamicSound(0x4D0, pos.x, pos.y, pos.z, 0x1F40, 0xFA, 0x64, (SoundRecordCallback)func_151C87AC, objState, 0, 8, (u8)math_random());
         }
     }
     return obj;
@@ -348,8 +348,8 @@ s32 sight_updateBeam(SightBeamObject *obj) {
         state->angleT += state->speedT * gFrameDelta;
         state->angleS = math_wrapRadians(state->angleS);
         state->angleT = math_wrapRadians(state->angleT);
-        state->texS = func_150AD78C(state->angleS) * state->radiusS + state->centerS;
-        state->texT = func_150AD78C(state->angleT) * state->radiusT + state->centerT;
+        state->texS = math_sin(state->angleS) * state->radiusS + state->centerS;
+        state->texT = math_sin(state->angleT) * state->radiusT + state->centerT;
         midEffect = state->midEffect;
         if (midEffect != NULL) {
             midEffect->light->disabled = 0;
@@ -395,7 +395,7 @@ s32 sight_updateBeam(SightBeamObject *obj) {
         emitter3->head.flags &= ~0x20000;
     }
     if (state->flags & 8) {
-        obj->head.def.unk44 = func_150AD78C(state->pulseAngle) * 112.5f + 142.5f;
+        obj->head.def.unk44 = math_sin(state->pulseAngle) * 112.5f + 142.5f;
         state->pulseAngle = math_wrapRadians(state->pulseAngle + state->pulseSpeed * gFrameDelta);
     }
     return 1;
@@ -566,15 +566,15 @@ void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
     pos.z = obj->head.def.pos.z;
     header.flags = LIGHT_EFFECT_TIMED | LIGHT_EFFECT_OWNS_LIGHT;
     header.update = -1;
-    header.lifetime = func_150ADA20() % 9U + 17;
+    header.lifetime = math_random() % 9U + 17;
     header.lightType = 0;
-    light_createWithEffect(&header, &pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
+    light_createWithEffect(&header, &pos, math_random() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
     pos.x = obj->head.def.rot.x;
     pos.y = obj->head.def.rot.y;
     pos.z = obj->head.def.rot.z;
-    light_createWithEffect(&header, &pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
-    particle_spawnImpactMark(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->head.def.pos, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
-    particle_spawnImpactMark(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->head.def.rot, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
+    light_createWithEffect(&header, &pos, math_random() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
+    particle_spawnImpactMark(math_randomFloat() * 101.0f + 55.0f, (u8)(math_random() % 66U + 190), &state->triangle0, &obj->head.def.pos, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
+    particle_spawnImpactMark(math_randomFloat() * 101.0f + 55.0f, (u8)(math_random() % 66U + 190), &state->triangle1, &obj->head.def.rot, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     if (actor != NULL) {
         camera_startWobblePreset(2, actor->CameraPtr->CNumber, 0, obj->head.header.owner, obj->head.header.kind);
         params8868.flags = 1;
@@ -587,8 +587,8 @@ void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
     if (actor != NULL) {
         actor_hitScripted(actor, D_800AAC30[state->unk94], 0, -1);
     }
-    func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 2000, 2200);
-    sound_addDynamicSound(0x2F6, obj->head.def.rot.x, obj->head.def.rot.y, obj->head.def.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)sound_delayedPlayCallback, (void *)5, 0, 0, func_150ADA20() % 500U);
+    sound_playAt(0x2F5, 0x7FFF, math_random() % 500U, 0, 0, obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 2000, 2200);
+    sound_addDynamicSound(0x2F6, obj->head.def.rot.x, obj->head.def.rot.y, obj->head.def.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)sound_delayedPlayCallback, (void *)5, 0, 0, math_random() % 500U);
     effect_destroyObject(&obj->head.header);
 }
 
@@ -883,21 +883,21 @@ void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
             hit = 1;
             impact.y = collision.height;
             impact.z = query.z;
-            particle_spawnImpactMark(func_150ADA68() * 125.0f + 204.0f, (func_150ADA20() % 101U + 155) & 0xFF,
-                          &collision.tri, &impact, func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
+            particle_spawnImpactMark(math_randomFloat() * 125.0f + 204.0f, (math_random() % 101U + 155) & 0xFF,
+                          &collision.tri, &impact, math_random() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
         }
     }
     particle_startPlayerRumbles(&origin, 506.0f, 1013.0f, 0.000987166888f, 15, 20, arg1, arg2);
     particle_startPlayerCameraWobbles(&origin, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
     particle_spawnBlastSpray(&origin, arg1, arg2);
     particle_spawnLightFlash(&origin, arg1, arg2);
-    particle_startRandomEmitter(hit ? &impact : &origin, func_150ADA20() % 62U + 120, arg1, arg2);
-    particle_spawnGrowFade(&origin, 2.0f * func_150ADA68() + 8.0f, 2.4641099f,
-        func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
+    particle_startRandomEmitter(hit ? &impact : &origin, math_random() % 62U + 120, arg1, arg2);
+    particle_spawnGrowFade(&origin, 2.0f * math_randomFloat() + 8.0f, 2.4641099f,
+        math_random() % 56U + 200, 0.0f, arg1, arg2);
     if (!airborne) {
         blood_spawnHitEffects(actor, 0, 0, 1, 0, 0, arg1, arg2);
     }
-    func_10010F88(0x60D, 0x7D00, 0, 0, 0, origin.x,
+    sound_playAt(0x60D, 0x7D00, 0, 0, 0, origin.x,
         origin.y, origin.z, 500, 1000);
     if (airborne) {
         func_151C9AC0(actor, arg1, arg2);

@@ -4,9 +4,9 @@
  * This file's .bss, in the original order. IDO lays out .bss in an order that depends on the declarations
  * before it, so it is defined before functions.h and variables.h.
  */
-f32 D_800CBD90; // ledge probe results (func_150AB1F0 family in game_D86A0.s)
-f32 D_800CBD94;
-f32 D_800CBD98;
+f32 gLedgeZ; // ledge probe results (collision_resolveMapWalls family in game_D86A0.s)
+f32 gLedgeAngle1;
+f32 gLedgeAngle2;
 s32 D_800CBD9C; // cleared by func_15044370
 u16 gActorTouchedObject[25]; // per movement_obj: 1 + the world object it touches, 0 if none
 u8 D_800CBDD2;
@@ -15,9 +15,9 @@ u8 D_800CBDD4;
 f32 gProbeHeight; // collision probe height (collision_setProbeHeights)
 f32 gProbeMidHeight; // collision probe mid-height
 f32 D_800CBDE0[5]; /* not referenced */
-f32 D_800CBDF4; // ledge heights, -32768.0f if none
-f32 D_800CBDF8;
-f32 D_800CBDFC;
+f32 gLedgeHeight1; // ledge heights, -32768.0f if none
+f32 gLedgeHeight2;
+f32 gLedgeX;
 struct TriggerNode *gTriggerNodes; // timed trigger nodes (collision_addTriggerNode)
 
 #include "functions.h"
@@ -47,7 +47,7 @@ static AccentedLetter gAccentedLetters[52] = { /* not referenced */
 };
 
 /* Trigger checks (TriggerNode.check) and actions (TriggerNode.action). */
-static s32 (*gTriggerChecks[])() = { collision_checkPlayerInVolume, collision_checkTrackedVolume, func_15044D40 };
+static s32 (*gTriggerChecks[])() = { collision_checkPlayerInVolume, collision_checkTrackedVolume, collision_runVolumeAttack };
 static void (*gTriggerActions[])(void) = { NULL, func_15044DA0, func_15044DE8, func_15044E40, func_15044E88 };
 
 /* Up to guLookAtF, sqrtf is a real call (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
@@ -59,16 +59,16 @@ void func_15044370(void) {
 }
 
 /*
- * Runs func_150AB1F0 for obj against each enabled collision set (3 down to 0; set 3 is skipped when obj
- * flag 0x200 is set) and returns the summed results. With secondPass, also runs func_150AC3E4 on sets 0-2.
+ * Runs collision_resolveMapWalls for obj against each enabled collision set (3 down to 0; set 3 is skipped when obj
+ * flag 0x200 is set) and returns the summed results. With secondPass, also runs collision_findLedge on sets 0-2.
  */
-s32 func_15044380(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass) {
+s32 collision_resolveActorWalls(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass) {
     s32 i;
     s32 total;
     s32 saved_mode;
 
-    D_800CBDF4 = -32768.0f;
-    D_800CBDF8 = -32768.0f;
+    gLedgeHeight1 = -32768.0f;
+    gLedgeHeight2 = -32768.0f;
     total = 0;
     obj->touching_char = 0;
     collision_setProbeHeights(obj, x, y, z);
@@ -77,7 +77,7 @@ s32 func_15044380(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass) {
         if (gFloorProbeTypeEnabled[i] == 1 && (i != 3 || !(obj->noshove & 0x200))) {
             collision_selectMap(i);
             if (gMeshBuilt == 0) continue;
-            total += func_150AB1F0(x, y, z, obj, arg4);
+            total += collision_resolveMapWalls(x, y, z, obj, arg4);
         }
     }
     if (secondPass) {
@@ -85,7 +85,7 @@ s32 func_15044380(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass) {
             if (gFloorProbeTypeEnabled[i] == 1) {
                 collision_selectMap(i);
                 if (gMeshBuilt != 0) {
-                    func_150AC3E4(x, y, z, obj, 0);
+                    collision_findLedge(x, y, z, obj, 0);
                 }
             }
         }
@@ -310,7 +310,7 @@ s32 collision_checkTrackedVolume(TriggerVolume *volume) {
 }
 
 /* Check 2: calls actor_runAttackAt at the node's position with its depth; never fires. */
-s32 func_15044D40(TriggerVolume *volume) {
+s32 collision_runVolumeAttack(TriggerVolume *volume) {
     actor_runAttackAt(volume->node.x, volume->node.y, volume->node.z, volume->depth, 0xFF, 0, 0, 0);
     return FALSE;
 }
@@ -347,7 +347,7 @@ void func_15044E88(void) {
     actor_hitScripted(&movement_obj[0], 1, movement_obj[0].langle, -1);
 }
 
-/* One candidate triangle returned by the func_150A3A70/func_150A4FA0/func_150A43E0 grid queries. */
+/* One candidate triangle returned by the collision_gatherGroundTris/collision_gatherActorGroundTris/collision_gatherPropGroundTris grid queries. */
 
 
 /* Ceiling probe against collision set 0: lowest triangle between pos.y and top. */
@@ -364,9 +364,9 @@ s32 collision_probeCeilingSet0(Vec3f *pos, f32 top, CollisionHit *hit) {
     hit->height = 99999.8984375f;
     best = -1;
     collision_selectMap(0);
-    count = func_150A3A70(pos->x, pos->z);
+    count = collision_gatherGroundTris(pos->x, pos->z);
     for (i = 0; i < count; i++) {
-        height = D_800D3300[i].height * 0.00390625f;
+        height = gGroundCandidates[i].height * 0.00390625f;
         if (pos->y <= height && height < hit->height) {
             best = i;
             hit->height = height;
@@ -378,7 +378,7 @@ s32 collision_probeCeilingSet0(Vec3f *pos, f32 top, CollisionHit *hit) {
         u32 j;
         s32 index;
 
-        candidate = &D_800D3300[best];
+        candidate = &gGroundCandidates[best];
         vertices = candidate->tri;
         index = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
@@ -422,9 +422,9 @@ s32 collision_probeFloorSet0(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     gFloorQueryY = pos->y;
     gFloorQueryZ = pos->z;
     gRayProbeBottom = bottom;
-    count = func_150A3A70(pos->x, pos->z);
+    count = collision_gatherGroundTris(pos->x, pos->z);
     for (i = 0; i < count; i++) {
-        height = D_800D3300[i].height * 0.00390625f;
+        height = gGroundCandidates[i].height * 0.00390625f;
         if (height <= pos->y && hit->height < height) {
             best = i;
             hit->height = height;
@@ -436,7 +436,7 @@ s32 collision_probeFloorSet0(Vec3f *pos, f32 bottom, CollisionHit *hit) {
         u32 j;
         s32 index;
 
-        candidate = &D_800D3300[best];
+        candidate = &gGroundCandidates[best];
         vertices = candidate->tri;
         index = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
@@ -491,9 +491,9 @@ s32 collision_probeCeilingSet3(Vec3f *pos, f32 top, CollisionHit *hit) {
     hit->height = 99999.8984375f;
     best = -1;
     collision_selectMap(3);
-    count = func_150A4FA0(pos->x, pos->z);
+    count = collision_gatherActorGroundTris(pos->x, pos->z);
     for (i = 0; i < count; i++) {
-        height = D_800D3300[i].height * 0.00390625f;
+        height = gGroundCandidates[i].height * 0.00390625f;
         if (pos->y <= height && height < hit->height) {
             best = i;
             hit->height = height;
@@ -505,7 +505,7 @@ s32 collision_probeCeilingSet3(Vec3f *pos, f32 top, CollisionHit *hit) {
         u32 j;
         s32 offset;
 
-        candidate = &D_800D3300[best];
+        candidate = &gGroundCandidates[best];
         vertices = candidate->tri;
         offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
@@ -542,9 +542,9 @@ s32 collision_probeFloorSet3(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     hit->height = -10000.0f;
     best = -1;
     collision_selectMap(3);
-    count = func_150A4FA0(pos->x, pos->z);
+    count = collision_gatherActorGroundTris(pos->x, pos->z);
     for (i = 0; i < count; i++) {
-        height = D_800D3300[i].height * 0.00390625f;
+        height = gGroundCandidates[i].height * 0.00390625f;
         if (height <= pos->y && hit->height < height) {
             best = i;
             hit->height = height;
@@ -556,7 +556,7 @@ s32 collision_probeFloorSet3(Vec3f *pos, f32 bottom, CollisionHit *hit) {
         u32 j;
         s32 offset;
 
-        candidate = &D_800D3300[best];
+        candidate = &gGroundCandidates[best];
         vertices = candidate->tri;
         offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
@@ -582,7 +582,7 @@ s32 collision_probeFloorSet3(Vec3f *pos, f32 bottom, CollisionHit *hit) {
 /* Selects the two surface sets (collision set 2) under pos for the collision_probeCeilingInSurfA-style probes. */
 void collision_selectSurfaceSets(Vec3f *pos, u16 mask, s32 *setA, s32 *setB) {
     collision_selectMap(2);
-    *setA = func_150A6500(pos->x, pos->z, setB, mask);
+    *setA = collision_findPropsAt(pos->x, pos->z, setB, mask);
 }
 
 
@@ -621,10 +621,10 @@ s32 collision_probeCeilingInSurfA(Vec3f *pos, f32 top, s32 *set, CollisionHit *h
 
     hit->height = 99999.8984375f;
     best = -1;
-    func_150A44F0(*set, D_800D37E0, 0);
-    count = func_150A43E0(pos->x, pos->z, *set, D_800D37E0);
+    collision_transformPropTris(*set, gSurfSetA, 0);
+    count = collision_gatherPropGroundTris(pos->x, pos->z, *set, gSurfSetA);
     for (i = 0; i < count; i++) {
-        height = D_800D3300[i].height * 0.00390625f;
+        height = gGroundCandidates[i].height * 0.00390625f;
         if (pos->y <= height && height < hit->height) {
             best = i;
             hit->height = height;
@@ -638,7 +638,7 @@ s32 collision_probeCeilingInSurfA(Vec3f *pos, f32 top, s32 *set, CollisionHit *h
         s32 *materials;
         u32 surface;
 
-        candidate = &D_800D3300[best];
+        candidate = &gGroundCandidates[best];
         vertices = candidate->tri;
         offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
@@ -685,10 +685,10 @@ s32 collision_probeFloorInSurfA(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *
 
     hit->height = -10000.0f;
     best = -1;
-    func_150A44F0(*set, D_800D37E0, 0);
-    count = func_150A43E0(pos->x, pos->z, *set, D_800D37E0);
+    collision_transformPropTris(*set, gSurfSetA, 0);
+    count = collision_gatherPropGroundTris(pos->x, pos->z, *set, gSurfSetA);
     for (i = 0; i < count; i++) {
-        height = D_800D3300[i].height * 0.00390625f;
+        height = gGroundCandidates[i].height * 0.00390625f;
         if (height <= pos->y && hit->height < height) {
             best = i;
             hit->height = height;
@@ -702,7 +702,7 @@ s32 collision_probeFloorInSurfA(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *
         s32 *materials;
         u32 surface;
 
-        candidate = &D_800D3300[best];
+        candidate = &gGroundCandidates[best];
         vertices = candidate->tri;
         offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
@@ -749,10 +749,10 @@ s32 collision_probeCeilingInSurfB(Vec3f *pos, f32 top, s32 *set, CollisionHit *h
 
     hit->height = 99999.8984375f;
     best = -1;
-    func_150A44F0(*set, D_800D3830, 0);
-    count = func_150A43E0(pos->x, pos->z, *set, D_800D3830);
+    collision_transformPropTris(*set, gSurfSetB, 0);
+    count = collision_gatherPropGroundTris(pos->x, pos->z, *set, gSurfSetB);
     for (i = 0; i < count; i++) {
-        height = D_800D3300[i].height * 0.00390625f;
+        height = gGroundCandidates[i].height * 0.00390625f;
         if (pos->y <= height && height < hit->height) {
             best = i;
             hit->height = height;
@@ -766,7 +766,7 @@ s32 collision_probeCeilingInSurfB(Vec3f *pos, f32 top, s32 *set, CollisionHit *h
         s32 *materials;
         s32 surface;
 
-        candidate = &D_800D3300[best];
+        candidate = &gGroundCandidates[best];
         vertices = candidate->tri;
         offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
@@ -808,10 +808,10 @@ s32 collision_probeFloorInSurfB(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *
 
     hit->height = -10000.0f;
     best = -1;
-    func_150A44F0(*set, D_800D3830, 0);
-    count = func_150A43E0(pos->x, pos->z, *set, D_800D3830);
+    collision_transformPropTris(*set, gSurfSetB, 0);
+    count = collision_gatherPropGroundTris(pos->x, pos->z, *set, gSurfSetB);
     for (i = 0; i < count; i++) {
-        height = D_800D3300[i].height * 0.00390625f;
+        height = gGroundCandidates[i].height * 0.00390625f;
         if (height <= pos->y && hit->height < height) {
             best = i;
             hit->height = height;
@@ -825,7 +825,7 @@ s32 collision_probeFloorInSurfB(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *
         s32 *materials;
         s32 surface;
 
-        candidate = &D_800D3300[best];
+        candidate = &gGroundCandidates[best];
         vertices = candidate->tri;
         offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
@@ -1125,7 +1125,7 @@ s32 collision_retestCachedFloor(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     f32 height;
 
     if (hit->flags & 4) {
-        if (func_150A3FC4(pos->x, pos->z, 0, hit->tri.v, &height)) {
+        if (collision_getTriHeightAt(pos->x, pos->z, 0, hit->tri.v, &height)) {
             if (bottom <= height) {
                 if (height <= pos->y) {
                     hit->height = height;
@@ -1144,7 +1144,7 @@ s32 collision_retestCachedCeiling(Vec3f *pos, f32 top, CollisionHit *hit) {
     f32 height;
 
     if (hit->flags & 4) {
-        if (func_150A3FC4(pos->x, pos->z, 0, hit->tri.v, &height)) {
+        if (collision_getTriHeightAt(pos->x, pos->z, 0, hit->tri.v, &height)) {
             if (height <= top) {
                 if (pos->y <= height) {
                     hit->height = height;

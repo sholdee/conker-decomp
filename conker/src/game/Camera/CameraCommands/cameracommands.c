@@ -82,7 +82,7 @@ void camera_runCommand(Camera *camera) {
                     linkPos.y = gPathNodes[(u8)link].y;
                     linkPos.z = gPathNodes[(u8)link].z;
                     math_dirTowards(&nodePos, &linkPos, &dir);
-                    math_vec3Scale(&dir, func_150AD900(&dir.x, &toCamera.x), &offset);
+                    math_vec3Scale(&dir, math_dot3(&dir.x, &toCamera.x), &offset);
                     math_vec3Add(&nodePos, &offset, &closest);
                     dx = camera->eye.x - closest.x;
                     dy = camera->eye.y - closest.y;
@@ -307,8 +307,8 @@ void camera_runCommand(Camera *camera) {
             camera->TripodMagnitude = sqrtf(((camera->eye.x - camera->focus.x) * (camera->eye.x - camera->focus.x)) + ((camera->eye.z - camera->focus.z) * (camera->eye.z - camera->focus.z)));
             if (camera->TripodMagnitude < camera->IdealTripodMagnitude) {
                 shortfall = camera->IdealTripodMagnitude - camera->TripodMagnitude;
-                camera->eye.x += shortfall * cam->pushRate * func_150AD78C(camera->CameraAngleRad);
-                camera->eye.z += shortfall * cam->pushRate * func_150AD780(camera->CameraAngleRad);
+                camera->eye.x += shortfall * cam->pushRate * math_sin(camera->CameraAngleRad);
+                camera->eye.z += shortfall * cam->pushRate * math_cos(camera->CameraAngleRad);
                 cam->pushRate += 0.004999999888f;
                 cam->pushRate = (cam->pushRate > 0.03999999911f) ? 0.03999999911f : cam->pushRate;
             }
@@ -338,8 +338,8 @@ void camera_runCommand(Camera *camera) {
             cmd->unk34 = cmd->unk20;
             if ((dist < camera->IdealTripodMagnitude) && (cmd->type == 1)) {
                 shortfall = camera->IdealTripodMagnitude - dist;
-                camera->eye.x += shortfall * cam->pushRate * func_150AD78C(camera->CameraAngleRad);
-                camera->eye.z += shortfall * cam->pushRate * func_150AD780(camera->CameraAngleRad);
+                camera->eye.x += shortfall * cam->pushRate * math_sin(camera->CameraAngleRad);
+                camera->eye.z += shortfall * cam->pushRate * math_cos(camera->CameraAngleRad);
                 cam->pushRate += 0.002499999944f;
                 cam->pushRate = (cam->pushRate > 0.03999999911f) ? 0.03999999911f : cam->pushRate;
             }

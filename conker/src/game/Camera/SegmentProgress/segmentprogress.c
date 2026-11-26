@@ -29,9 +29,9 @@ void func_150F6B00(Camera *actor) {
         actor->AvailableModes |= 0xC0001000;
         math_vec3Diff(&D_800A1B80, &actor->focus, &offset);
         math_vec3Diff(&D_800A1B80, &D_800A1B8C, &direction);
-        inverseLength = 1.0f / func_150AD930(&direction.x);
+        inverseLength = 1.0f / math_length3(&direction.x);
         math_vec3Unit(&direction, &normalized);
-        projection = func_150AD900(&normalized.x, &offset.x) * inverseLength * 0.75f;
+        projection = math_dot3(&normalized.x, &offset.x) * inverseLength * 0.75f;
         if (projection < 0.0f) {
             blend = 0.0f;
         } else {

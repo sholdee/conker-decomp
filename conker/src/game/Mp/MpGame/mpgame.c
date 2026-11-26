@@ -414,9 +414,9 @@ s32 mp_update(void) {
                     if (type == 5) {
                         aimTimes[i] = 30;
                         gMpGame->aimRate[i] = gBotAimRates[D_800E0BD0];
-                        gMpGame->aimX[i] = (func_150ADA68() * 50.0f) + obj->xpos;
+                        gMpGame->aimX[i] = (math_randomFloat() * 50.0f) + obj->xpos;
                         gMpGame->aimY[i] = obj->ypos + 40.0f;
-                        gMpGame->aimZ[i] = (func_150ADA68() * 50.0f) + obj->zpos;
+                        gMpGame->aimZ[i] = (math_randomFloat() * 50.0f) + obj->zpos;
                         if ((arr31C[i] - 2) >= 2) {
                             tgt = &movement_obj[arr31C[i] - 2];
                             gMpGame->aimX[i] += (tgt->xpos - obj->xpos) * 0.5f;
@@ -444,13 +444,13 @@ s32 mp_update(void) {
                 if (attackTimers[i] == 0) {
                     gMpGame->sideGoal[i] = 0;
                     gMpGame->dropGoal[i] = 0;
-                    if (D_800872E8[D_800E0BD0] < (s32)(func_150ADA68() * 100.0f)) {
-                        if (func_150ADA68() > 0.5f) {
+                    if (D_800872E8[D_800E0BD0] < (s32)(math_randomFloat() * 100.0f)) {
+                        if (math_randomFloat() > 0.5f) {
                             gMpGame->sideGoal[i] = -50;
                         } else {
                             gMpGame->sideGoal[i] = 50;
                         }
-                        if (func_150ADA68() > 0.5f) {
+                        if (math_randomFloat() > 0.5f) {
                             gMpGame->dropGoal[i] = 50;
                         } else {
                             gMpGame->dropGoal[i] = 0;
@@ -766,8 +766,8 @@ void mp_randomizeWeights(void) {
         dir = -1;
         val = 0x55;
         delta = step;
-        pos = func_150ADA68() * fn;
-        if (func_150ADA68() > 0.5f) {
+        pos = math_randomFloat() * fn;
+        if (math_randomFloat() > 0.5f) {
             dir = 1;
         }
         while (used[pos] != 0) {
@@ -949,7 +949,7 @@ void mp_checkLineOfSight(s32 a, s32 b) {
         }
         distance = sqrtf((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0) +
                          (z1 - z0) * (z1 - z0));
-        if (func_150AC9C0(x0, y0, z0, x1 - x0, y1 - y0, z1 - z0, NULL, NULL, &hitX,
+        if (collision_castRayWorld(x0, y0, z0, x1 - x0, y1 - y0, z1 - z0, NULL, NULL, &hitX,
                           &hitY, &hitZ, &hitDistance, NULL, NULL, 0.0f) == 0) {
             blocked = 1;
         } else if (distance < hitDistance) {
@@ -1456,7 +1456,7 @@ s32 mp_updateBotAttack(s32 player) {
     }
     if (*(s32 *)(timers + off) == 0) {
         obj->mv->unk12A = 0;
-        if (D_800872E8[D_800E0BD0] < (s32)(func_150ADA68() * 100.0f)) {
+        if (D_800872E8[D_800E0BD0] < (s32)(math_randomFloat() * 100.0f)) {
             obj->mv->unk12A = 1;
         }
     }
@@ -1753,7 +1753,7 @@ s32 mp_updatePickups(void) {
                     if (flags[i] & 1) {
                         x = gMpGame->numSpawns;
                         do {
-                            r = func_150ADA68() * 0.9999899864f * x;
+                            r = math_randomFloat() * 0.9999899864f * x;
                             for (k = 0; k < gMpGame->numSpawns; k++) {
                                 if (r == spawns[k]) {
                                     r = -1;

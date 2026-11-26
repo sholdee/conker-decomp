@@ -22,8 +22,8 @@ void effect_pickPerimeterPoint(Actor *owner, Actor *player, f32 *forward, f32 *r
     f32 side;
 
     *outAngle = owner->theta * 0.7111111283f - 128.0f;
-    along = func_150ADA68() * 248.0f;
-    spread = func_150ADA68() + -0.5f;
+    along = math_randomFloat() * 248.0f;
+    spread = math_randomFloat() + -0.5f;
     if (along < 122.0f) {
         outPos->x = forward[0] * -31.5f + (right[0] * spread) * 122.0f;
         outPos->y = 0.0f;
@@ -116,7 +116,7 @@ void effect_updatePerimeterEmitter(DDB60Effect *effect) {
         }
     }
     if (emit) {
-        data->timer += (gPerimeterEmitRates[emit] + func_150ADA68() * gPerimeterEmitRateRanges[emit]) * gFrameDelta;
+        data->timer += (gPerimeterEmitRates[emit] + math_randomFloat() * gPerimeterEmitRateRanges[emit]) * gFrameDelta;
         if (data->timer > 1.0f) {
             if (sprite_findActorMotion(owner, &refVel) == 0) {
                 refVel = &gZeroVec3f;
@@ -126,12 +126,12 @@ void effect_updatePerimeterEmitter(DDB60Effect *effect) {
             right[1] = -forward[0];
             do {
                 effect_pickPerimeterPoint(owner, &movement_obj[idx], forward, right, &pos, &angle);
-                math_dirFromBinAngles(angle, (func_150ADA20() % 26) - 41, func_150ADA68() * 3.769999981f + 4.059999943f, &vel);
+                math_dirFromBinAngles(angle, (math_random() % 26) - 41, math_randomFloat() * 3.769999981f + 4.059999943f, &vel);
                 vel.x -= refVel->x * 0.9250000715f;
                 vel.z -= refVel->z * 0.9250000715f;
-                particle_spawnSteamParticle(&pos, &vel, 5, func_150ADA68() * 0.1780000031f + -0.4420000315f,
-                              (func_150ADA20() % 21) + 20, (func_150ADA20() % 101) + 155,
-                              func_150ADA68() * 50.0f + 80.0f, func_150ADA68() < 0.04400000349f, 1.399999976f,
+                particle_spawnSteamParticle(&pos, &vel, 5, math_randomFloat() * 0.1780000031f + -0.4420000315f,
+                              (math_random() % 21) + 20, (math_random() % 101) + 155,
+                              math_randomFloat() * 50.0f + 80.0f, math_randomFloat() < 0.04400000349f, 1.399999976f,
                               1.399999976f, 1, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);
                 data->timer -= 1.0f;
             } while (data->timer > 1.0f);

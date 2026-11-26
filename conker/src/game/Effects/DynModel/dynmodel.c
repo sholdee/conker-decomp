@@ -153,7 +153,7 @@ Gfx *effect_drawDynModel(Gfx *gfx, DynModel *obj, s16 viewport) {
 }
 
 s32 effect_setDynModelIdentityMtx(DynModel *obj, s16 viewport) {
-    func_150A7B80(&obj->mtx[D_800BE9C0]);
+    math_mtxIdentity(&obj->mtx[D_800BE9C0]);
     return 1;
 }
 

@@ -136,8 +136,8 @@ void beam_updateTracer(Game10EF60Effect *effect) {
         if (effect->attachDelay == 0) {
             if (effect->owner != NULL && effect->owner->ob_matrix_ptr != NULL && effect->owner->unique_id == effect->ownerId && (aim = effect->owner->playernumber) != 0xFF) {
                 bone = effect->owner->ob_matrix_ptr[effect->bone];
-                func_150A7960(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
-                func_150A7960(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
+                math_transformPoint(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
+                math_transformPoint(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
                 effect->attachDelay = 3;
             }
         } else {
@@ -148,9 +148,9 @@ void beam_updateTracer(Game10EF60Effect *effect) {
             effect->timer = effect->onTime;
             if (effect->owner != NULL && effect->owner->ob_matrix_ptr != NULL && effect->owner->unique_id == effect->ownerId) {
                 bone = effect->owner->ob_matrix_ptr[effect->bone];
-                func_150A7960(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
+                math_transformPoint(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
                 aim = effect->owner->playernumber;
-                func_150A7960(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
+                math_transformPoint(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
                 stopDist = 0.0f;
                 if (effect->fireCounter-- == 0) {
                     effect->fireCounter = 2;
@@ -174,13 +174,13 @@ void beam_updateTracer(Game10EF60Effect *effect) {
                                 incoming[0] = effect->target_x - effect->x;
                                 incoming[1] = effect->target_y - effect->y;
                                 incoming[2] = effect->target_z - effect->z;
-                                math_vec3Scale((Vec3f *)gAimImpacts[aim].normal, 2.0f * func_150AD900(gAimImpacts[aim].normal, incoming), &reflected);
+                                math_vec3Scale((Vec3f *)gAimImpacts[aim].normal, 2.0f * math_dot3(gAimImpacts[aim].normal, incoming), &reflected);
                                 math_vec3Sub((Vec3f *)incoming, &reflected, &reflected);
                                 reflected.x += effect->target_x;
                                 reflected.y += effect->target_y;
                                 reflected.z += effect->target_z;
                                 beam_spawnTracer(0, effect->target_x, effect->target_y, effect->target_z, reflected.x, reflected.y, reflected.z, math_rand() % 35 + 20.0f, 0.0f, 8.0f, 320.0f, 30, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-                                func_10010F88(math_rand() % 6 + 0x2B, 10000, 0, 0, aim, effect->target_x, effect->target_y, effect->target_z, 500, 2000);
+                                sound_playAt(math_rand() % 6 + 0x2B, 10000, 0, 0, aim, effect->target_x, effect->target_y, effect->target_z, 500, 2000);
                             }
                         }
                         stopDist = 1.0f;
@@ -198,7 +198,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
                         rayY = effect->target_y - effect->y;
                         rayZ = effect->target_z - effect->z;
                         len = (75.0f * speed) / sqrtf(rayX * rayX + rayY * rayY + rayZ * rayZ);
-                        if (func_150AC9C0(effect->x, effect->y, effect->z, rayX * len, rayY * len, rayZ * len, &hitTri, 0, &rayX, &rayY, &rayZ, 0, 0, 0, 0.0f)) {
+                        if (collision_castRayWorld(effect->x, effect->y, effect->z, rayX * len, rayY * len, rayZ * len, &hitTri, 0, &rayX, &rayY, &rayZ, 0, 0, 0, 0.0f)) {
                             effect->target_x = rayX;
                             effect->target_y = rayY;
                             effect->target_z = rayZ;
@@ -229,13 +229,13 @@ void beam_updateTracer(Game10EF60Effect *effect) {
     if (effect->timer > 0) {
         fwdY = 0.0f;
         fwdZ = -1.0f;
-        sinA = func_150AD78C(effect->pitch);
-        cosA = func_150AD780(effect->pitch);
+        sinA = math_sin(effect->pitch);
+        cosA = math_cos(effect->pitch);
         rx = fwdY * cosA;
         ry = fwdY * cosA - sinA * fwdZ;
         rz = fwdY * sinA + cosA * fwdZ;
-        sinA = func_150AD78C(effect->yaw);
-        cosA = func_150AD780(effect->yaw);
+        sinA = math_sin(effect->yaw);
+        cosA = math_cos(effect->yaw);
         vx = cosA * rx + sinA * rz;
         vy = ry;
         vz = -sinA * rx + cosA * rz;

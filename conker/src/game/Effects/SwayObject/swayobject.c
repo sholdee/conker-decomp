@@ -107,7 +107,7 @@ s32 effect_buildSwayMatrix(DynModel *model, s32 arg1) {
     SwayBlock *block;
 
     block = DYNMODEL_USERDATA(model);
-    func_150A8050(mtx, block->rotX, 0.0f, block->rotZ);
+    math_mtxRotateRPYF(mtx, block->rotX, 0.0f, block->rotZ);
     mtx[3][0] = block->pos[0];
     mtx[3][1] = block->pos[1];
     mtx[3][2] = block->pos[2];
@@ -124,11 +124,11 @@ s32 effect_placeSwayLight(LightEffect *effect) {
     MtxF mtx;
 
     link = (SwayObject **)&effect->data;
-    func_150A8050(mtx, (*link)->rotX * 3.0f, 0.0f, (*link)->rotZ * 3.0f);
+    math_mtxRotateRPYF(mtx, (*link)->rotX * 3.0f, 0.0f, (*link)->rotZ * 3.0f);
     mtx[3][0] = (*link)->x;
     mtx[3][1] = (*link)->y;
     mtx[3][2] = (*link)->z;
-    func_150A7960(mtx, 0.0f, -495.0f, 0.0f, &outX, &outY, &outZ);
+    math_transformPoint(mtx, 0.0f, -495.0f, 0.0f, &outX, &outY, &outZ);
     effect->light->x = outX;
     effect->light->y = outY;
     effect->light->z = outZ;

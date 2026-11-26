@@ -41,7 +41,7 @@ void particle_updateSmokeEmitter(SmokeEmitter *emitter) {
     SmokeEmitterData *data;
 
     data = &emitter->data;
-    data->spawnAccum += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * gFrameDelta;
+    data->spawnAccum += (1352.0f + math_randomFloat() * 1698.0f) * 0.0001f * gFrameDelta;
     if (data->spawnAccum > 1.0f) {
         ParticleDesc spawn;
         WobbleData wobble;
@@ -83,16 +83,16 @@ void particle_updateSmokeEmitter(SmokeEmitter *emitter) {
         spawn.vel.y = 0.0f;
         spawn.vel.z = 0.0f;
         do {
-            wobble.phaseStep[0] = func_150ADA20() % 5U + 4;
-            wobble.phaseStep[1] = func_150ADA20() % 5U + 4;
-            wobble.amplitude[0] = func_150ADA68() * 11.0f;
-            wobble.amplitude[1] = func_150ADA68() * 11.0f;
-            spawn.gravity = func_150ADA68() * 0.172f + 0.09800000489f;
+            wobble.phaseStep[0] = math_random() % 5U + 4;
+            wobble.phaseStep[1] = math_random() % 5U + 4;
+            wobble.amplitude[0] = math_randomFloat() * 11.0f;
+            wobble.amplitude[1] = math_randomFloat() * 11.0f;
+            spawn.gravity = math_randomFloat() * 0.172f + 0.09800000489f;
             spawn.flags &= ~0xC0;
-            spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-            spawn.alpha = func_150ADA20() % 101U + 100;
-            spawn.timer = func_150ADA20() % 51U + 80;
-            spawn.width = spawn.height = func_150ADA68() * 71.0f + 80.0f;
+            spawn.flags |= ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0);
+            spawn.alpha = math_random() % 101U + 100;
+            spawn.timer = math_random() % 51U + 80;
+            spawn.width = spawn.height = math_randomFloat() * 71.0f + 80.0f;
             particle = particle_newSpriteParticleWithFloor(&spawn, 0, 0, 0x10, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->data.wobble, &wobble, sizeof(wobble));
@@ -153,17 +153,17 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
     timers = &source->timers;
     timers->puff -= D_800BE9E4;
     if (timers->puff < 0) {
-        motion.x = func_150ADA68() * 280.0f + -140.0f;
-        motion.y = func_150ADA68() * 50.0f;
-        motion.phase = 2.0f * (func_150ADA68() * 3.141592741f);
-        motion.unkC = func_150ADA68() * 0.2680000067f;
+        motion.x = math_randomFloat() * 280.0f + -140.0f;
+        motion.y = math_randomFloat() * 50.0f;
+        motion.phase = 2.0f * (math_randomFloat() * 3.141592741f);
+        motion.unkC = math_randomFloat() * 0.2680000067f;
         puff.x = 0.0f;
         puff.y = 0.0f;
-        func_150ADA68(); /* a random value the original draws and discards */
+        math_randomFloat(); /* a random value the original draws and discards */
         puff.texture = 0xFF;
         puff.halfWidth = 1.0f;
         puff.halfHeight = 115.0f;
-        puff.timer = func_150ADA20() % 71U + 20;
+        puff.timer = math_random() % 71U + 20;
         if (source->base.header.state < puff.timer) {
             puff.timer = source->base.header.state;
         }
@@ -174,7 +174,7 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
         puff.color1.red = 0xFF;
         puff.color1.green = 0xFF;
         puff.color1.blue = 0xFF;
-        puff.color1.alpha = func_150ADA20() % 71U + 40;
+        puff.color1.alpha = math_random() % 71U + 40;
         puff.color2.red = 0xFF;
         puff.color2.green = 0xFF;
         puff.color2.blue = 0xFF;
@@ -194,26 +194,26 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
         if (sprite != NULL) {
             memcpy(&sprite->motion, &motion, sizeof(motion));
         }
-        timers->puff = func_150ADA20() % 41U + 45;
+        timers->puff = math_random() % 41U + 45;
     }
     timers->spark -= D_800BE9E4;
     if (timers->spark < 0) {
-        spark.x = func_150ADA68() * 280.0f + -140.0f;
-        spark.y = func_150ADA68() * 200.0f + -100.0f;
-        spark.halfWidth = spark.halfHeight = 2.0f * func_150ADA68() + 1.0f;
+        spark.x = math_randomFloat() * 280.0f + -140.0f;
+        spark.y = math_randomFloat() * 200.0f + -100.0f;
+        spark.halfWidth = spark.halfHeight = 2.0f * math_randomFloat() + 1.0f;
         spark.texture = func_151D8E6C();
-        spark.timer = func_150ADA20() % 7U + 5;
+        spark.timer = math_random() % 7U + 5;
         if (source->base.header.state < spark.timer) {
             spark.timer = source->base.header.state;
         }
-        spark.flags = 1 | (func_150ADA20() ? 2 : 0) | (func_150ADA20() ? 4 : 0) | 0x20;
+        spark.flags = 1 | (math_random() ? 2 : 0) | (math_random() ? 4 : 0) | 0x20;
         spark.fadeStart = 1;
         spark.fadeRate = 0xFF;
         spark.kind = 0;
         spark.color1.red = 0xFF;
         spark.color1.green = 0xFF;
         spark.color1.blue = 0xFF;
-        spark.color1.alpha = func_150ADA20() % 121U + 80;
+        spark.color1.alpha = math_random() % 121U + 80;
         spark.color2.red = 0xFF;
         spark.color2.green = 0xFF;
         spark.color2.blue = 0xFF;
@@ -230,7 +230,7 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
         spark.unk41 = 7;
         spark.viewport = 0;
         sprite_newScreenSprite(&spark, 0, 0, 0, 0, source->base.header.owner, source->base.header.kind);
-        timers->spark = func_150ADA20() % 11U + 3;
+        timers->spark = math_random() % 11U + 3;
     }
 }
 
@@ -299,11 +299,11 @@ void particle_fireActorBoneTracer(s32 altBone) {
         startX = 0.0f;
         startY = 0.0f;
         startZ = -20.0f;
-        func_150A7960(mtx, startX, startY, startZ, &startX, &startY, &startZ);
+        math_transformPoint(mtx, startX, startY, startZ, &startX, &startY, &startZ);
         endX = 0.0f;
         endY = 0.0f;
         endZ = -150.0f;
-        func_150A7960(mtx, endX, endY, endZ, &endX, &endY, &endZ);
+        math_transformPoint(mtx, endX, endY, endZ, &endX, &endY, &endZ);
         /* speed 40, stopDist 0, halfWidth 2, length 120, lifetime 60, texture 35 */
         beam_spawnTracer(0, startX, startY, startZ, endX, endY, endZ, 40.0f, 0.0f, 2.0f, 120.0f, 60, 35,
                       0, 0, 0, NULL, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);

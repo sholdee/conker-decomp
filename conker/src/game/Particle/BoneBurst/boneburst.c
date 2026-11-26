@@ -104,9 +104,9 @@ void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
                 particle.target = target;
                 particle.targetId = target->unique_id;
                 particle.age = 0.0f;
-                particle.lifetime = func_150ADA68() * 6.0f + 13.0f;
+                particle.lifetime = math_randomFloat() * 6.0f + 13.0f;
                 particle.growth = 58.14f;
-                particle.fadeFrom = func_150ADA68() * 40.0f + 60.0f;
+                particle.fadeFrom = math_randomFloat() * 40.0f + 60.0f;
                 particle.fadeRate = particle.fadeFrom / (particle.lifetime * particle.lifetime);
                 {
                     const Vec3f *src[2];

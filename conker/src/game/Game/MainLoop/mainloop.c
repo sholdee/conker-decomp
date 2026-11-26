@@ -271,7 +271,7 @@ void game_beginFrame(void) {
     music_update(camera_global_Cameras->focus.x, camera_global_Cameras->focus.y, camera_global_Cameras->focus.z);
     sound_update();
     if (gFrontEndState == 2) {
-        func_150ADACC(0x81280783);
+        math_seedRandom(0x81280783);
     }
     audio_updateMix();
 }

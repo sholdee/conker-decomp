@@ -95,9 +95,9 @@ void particle_updateBounceDebris(Debris *debris) {
                           debris->z, 20.0f, 50, 0.000457763671875f, 0, 4, debris->header.owner,
                           debris->header.kind);
             if (debris->kind == 2) {
-                if (func_150ADA20() & 0x8000) {
+                if (math_random() & 0x8000) {
                     // matching: the original treats this random draw as signed (sra + signed int->float)
-                    debris->spinX = (f32)((s32)func_150ADA20() >> 16) * 0.000152587890625f + 40.0f;
+                    debris->spinX = (f32)((s32)math_random() >> 16) * 0.000152587890625f + 40.0f;
                 }
             } else if (debris->kind == 5) {
                 particle_spawnStyleBurst(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
@@ -172,9 +172,9 @@ void particle_updateSplashFx(SplashFx *fx) {
     s32 intensity;
 
     if (fx->frame >= 0x300) {
-        texture = func_150ADA20() % 3;
+        texture = math_random() % 3;
         intensity = fx->unk25;
-        angle = func_150ADA20() % 360;
+        angle = math_random() % 360;
         particle_spawnFloorSprite(fx->x, fx->y - 10, fx->z, 100, 0, texture + 0x20, angle, 0,
                       (intensity * 25) / 255 + 25, 0, 0x100, 0, fx->owner, fx->list);
     }

@@ -44,8 +44,8 @@ void blood_attachMirroredStrips(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
         desc.lifetime = 300;
     }
 
-    desc.duration = func_150ADA20() % 66U + 35;
-    desc.pause = func_150ADA20() % 26U + 25;
+    desc.duration = math_random() % 66U + 35;
+    desc.pause = math_random() % 26U + 25;
     blood_spawnStrip(&desc, 0);
 
     desc.bone = 12;
@@ -56,8 +56,8 @@ void blood_attachMirroredStrips(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     desc.offsetB.y = 0.0f;
     desc.offsetB.z = 34.0f;
 
-    desc.duration = func_150ADA20() % 66U + 35;
-    desc.pause = func_150ADA20() % 26U + 25;
+    desc.duration = math_random() % 66U + 35;
+    desc.pause = math_random() % 26U + 25;
     blood_spawnStrip(&desc, 0);
 }
 
@@ -73,11 +73,11 @@ void blood_emitMirroredStripParticle(f32 *from, f32 *to, s32 arg2, s32 arg3, s32
     vel[0] = (to[0] - from[0]) * 0.407f;
     vel[1] = (to[1] - from[1]) * 0.407f;
     vel[2] = (to[2] - from[2]) * 0.407f;
-    fadeTime = func_150ADA20() % 31U + 42;
-    rand0 = func_150ADA68();
-    rand1 = func_150ADA68();
-    rand2 = func_150ADA68();
-    lifetime = func_150ADA20() % 101U + 155;
+    fadeTime = math_random() % 31U + 42;
+    rand0 = math_randomFloat();
+    rand1 = math_randomFloat();
+    rand2 = math_randomFloat();
+    lifetime = math_random() % 101U + 155;
     particle_spawnKindSprite(0, from, vel, rand0 * 70.0f + 30.0f, rand1 * 0.020000001f + 1.0400001f, 1.0f,
                   rand2 * 0.194f + -0.35000002f, fadeTime, lifetime, fadeTime, 255 / fadeTime, 1, task->owner,
                   task->kind);

@@ -38,15 +38,15 @@ s32 collision_getFloorNearY(f32 x, f32 z, f32 y, f32 *out) {
     s32 best;
 
     collision_selectMap(0);
-    count = func_150A3A70(x, z);
+    count = collision_gatherGroundTris(x, z);
     if (count == 0) {
         return 0;
     }
     n = 0;
     for (i = 0; i < count; i++) {
-        t = D_800D3300[i].tri;
+        t = gGroundCandidates[i].tri;
         for (j = 0; j < 3; j++) {
-            v = (s16 *)(D_800D3300[i].vtxBase + t[j]);
+            v = (s16 *)(gGroundCandidates[i].vtxBase + t[j]);
             vx[j] = v[0];
             vz[j] = v[2];
         }
@@ -65,13 +65,13 @@ s32 collision_getFloorNearY(f32 x, f32 z, f32 y, f32 *out) {
     bestd = 10000.0f;
     for (k = 0; k < n; k++) {
         i = list[k];
-        b = D_800D3300[i].height * 0.00390625f - y;
-        if (b < 0.0f) b = -(D_800D3300[i].height * 0.00390625f - y);
+        b = gGroundCandidates[i].height * 0.00390625f - y;
+        if (b < 0.0f) b = -(gGroundCandidates[i].height * 0.00390625f - y);
         if (b < bestd || best == -1) {
             bestd = b;
             best = i;
         }
     }
-    *out = D_800D3300[best].height * 0.00390625f;
+    *out = gGroundCandidates[best].height * 0.00390625f;
     return 1;
 }

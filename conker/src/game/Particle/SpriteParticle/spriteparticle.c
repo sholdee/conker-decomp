@@ -699,8 +699,8 @@ SpriteParticle *particle_spawnFlash(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
 
     flash.elapsed = 0.0f;
     flash.growth = 594.4899902f * size;
-    flash.duration = func_150ADA68() * 2.0f + 5.0f;
-    flash.startAlpha = func_150ADA68() * 15.0f + 240.0f;
+    flash.duration = math_randomFloat() * 2.0f + 5.0f;
+    flash.startAlpha = math_randomFloat() * 15.0f + 240.0f;
     flash.alphaDecay = flash.startAlpha / (flash.duration * flash.duration);
 
     desc.alpha = (u32)flash.startAlpha;
@@ -725,8 +725,8 @@ SpriteParticle *particle_spawnFlash(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
     desc.scaleStart = 1;
     desc.scaleRate = 1.0f;
 
-    flipX = (func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0;
-    flipY = (func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0;
+    flipX = (math_random() & 1) ? PARTICLE_FLIP_S : 0;
+    flipY = (math_random() & 1) ? PARTICLE_FLIP_T : 0;
     desc.flags = flipY | (PARTICLE_VIEWS | PARTICLE_DRAW_FUNC | PARTICLE_HANDLERS) | flipX;
     desc.primColorMode = 6;
     desc.envColorMode = 6;

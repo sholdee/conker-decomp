@@ -90,7 +90,7 @@ void beam_updateAreaEmitter(Emitter *emitter) {
         return;
     }
 
-    state->pending += (state->def.rate + func_150ADA68() * state->def.rateRange) * gFrameDelta * state->area;
+    state->pending += (state->def.rate + math_randomFloat() * state->def.rateRange) * gFrameDelta * state->area;
 
     if (state->pending > 1.0f) {
         if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
@@ -128,7 +128,7 @@ void beam_pickRadiusPoint(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
     EmitterDef *def;
 
     def = &emitter->state.def;
-    math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, def->radius * func_150ADA68(), &pos->x, &pos->z);
+    math_dirFromBinAngleXZ(math_random() & 0xFF, def->radius * math_randomFloat(), &pos->x, &pos->z);
     pos->x += def->pos.x;
     pos->z += def->pos.z;
     pos->y = def->pos.y;
@@ -245,8 +245,8 @@ void beam_spawnSpriteParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround
     s32 rand2;
     s32 rand1;
 
-    size = func_150ADA68() * 50.0f + 50.0f;
-    pick = func_150ADA20() % 3;
+    size = math_randomFloat() * 50.0f + 50.0f;
+    pick = math_random() % 3;
 
     spawn.unk6 = choices.ids[pick];
     spawn.unk7 = 0;
@@ -264,11 +264,11 @@ void beam_spawnSpriteParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround
     spawn.unk15 = 0xFF;
     spawn.unk18 = 0x3B0002;
 
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
+    rand1 = math_random();
+    rand2 = math_random();
     particle_spawnSurfaceQuadSprite(&spawn, 1, 0, &emitter->state.ground.tri, pos->x, pos->y, pos->z,
                   size, size, rand1 & 0xFF,
-                  (rand2 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
+                  (rand2 & 1) + (math_random() & 1), 3, 0xFF, 0,
                   emitter->base.header.owner, emitter->base.header.kind);
 }
 
@@ -418,16 +418,16 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     u32 rand1;
 
     settings = (ParticleSettings *)emitter->data;
-    vec[0] = func_150ADA68() * settings->vec0Range + settings->vec0Base;
-    vec[1] = func_150ADA68() * settings->vec1Range + settings->vec1Base;
-    extra.gravity = func_150ADA68() * settings->unk20Range + settings->unk20Base;
-    extra.lifetime = func_150ADA20() % (settings->relaunchLifetime.range + 1) + settings->relaunchLifetime.base;
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
+    vec[0] = math_randomFloat() * settings->vec0Range + settings->vec0Base;
+    vec[1] = math_randomFloat() * settings->vec1Range + settings->vec1Base;
+    extra.gravity = math_randomFloat() * settings->unk20Range + settings->unk20Base;
+    extra.lifetime = math_random() % (settings->relaunchLifetime.range + 1) + settings->relaunchLifetime.base;
+    rand1 = math_random();
+    rand2 = math_random();
     if (settings->flags & 1) {
         kind = 0x71;
     } else {
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             choice = 0x13;
         } else {
             choice = 0x14;
@@ -472,8 +472,8 @@ void beam_spawnAtGroundPoints(Vec3f *center, f32 minY, f32 radius, CollisionHit 
 
     probe.y = center->y;
     for (; count > 0; count--) {
-        angle = func_150ADA68();
-        dist = func_150ADA68();
+        angle = math_randomFloat();
+        dist = math_randomFloat();
         math_dirFromAngleXZ((angle + angle) * 3.14159265f, dist * radius, &probe.x, &probe.z);
         probe.x += center->x;
         probe.z += center->z;

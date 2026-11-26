@@ -158,7 +158,7 @@ glabel func_150A5174
     /* D2820 150A5370 03E00008 */  jr         $ra
     /* D2824 150A5374 00000000 */   nop
 
-glabel func_150A5378
+glabel gfx_copyLevelDlCulled
     /* D2828 150A5378 3C0A800D */  lui        $t2, %hi(D_800D3668)
     /* D282C 150A537C 8D4A3668 */  lw         $t2, %lo(D_800D3668)($t2)
     /* D2830 150A5380 3C0B800D */  lui        $t3, %hi(D_800D366C)

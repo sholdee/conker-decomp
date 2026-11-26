@@ -38,7 +38,7 @@ s32 script_swarmCommand(s32 tag, s32 op, SwarmTargetCmd *cmd) {
     switch (op) {
     case 0: {
         s32 mask = ~0x2000; // matching: the inline constant schedules differently
-        swarm_setTarget(tag & 0xFF, &movement_obj[func_15084000(cmd->target & mask)].xpos, cmd->argC.follow.yOffset);
+        swarm_setTarget(tag & 0xFF, &movement_obj[collision_findSlotBySpawnIndex(cmd->target & mask)].xpos, cmd->argC.follow.yOffset);
         return 1;
     }
     case 1:
@@ -52,7 +52,7 @@ s32 script_swarmCommand(s32 tag, s32 op, SwarmTargetCmd *cmd) {
 s32 script_swarmQuery(s32 tag, s32 op, SwarmTargetCmd *cmd) {
     if (op == 0) {
         s32 mask = ~0x2000; // matching: the inline constant schedules differently
-        return swarm_getDistanceToActor(tag & 0xFF, func_15084000(cmd->target & mask));
+        return swarm_getDistanceToActor(tag & 0xFF, collision_findSlotBySpawnIndex(cmd->target & mask));
     }
     return 0;
 }

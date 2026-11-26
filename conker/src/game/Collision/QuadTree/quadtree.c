@@ -554,7 +554,7 @@ void collision_threadQuadTree(QuadNode *node, QuadNode *parentNext) {
 
 /**
  * Loads this map's two resources (2 * map and 2 * map + 1 of resource table 5) and hands them to
- * func_150183D0 with a row stride of ceil(D_800DBE2A / 8) bytes, rounded up to 16. Clears
+ * func_150183D0 with a row stride of ceil(gMap0QuadNodeCount / 8) bytes, rounded up to 16. Clears
  * D_800BE5D0 when the map has no such resource.
  */
 void func_150025FC(void) {
@@ -563,16 +563,16 @@ void func_150025FC(void) {
     u8 *res0;
     s32 *res1;
 
-    width = D_800DBE2A;
-    height = D_800DBE2C;
+    width = gMap0QuadNodeCount;
+    height = gMap0QuadLeafCount;
 
-    D_800DBE28 = (((width + 7) / 8) + 15) & 0xFFF0;
+    gQuadNodeBitmapStride = (((width + 7) / 8) + 15) & 0xFFF0;
     res0 = rom_loadPath(NULL, 2, 5, level * 2);
     res1 = rom_loadPath(NULL, 2, 5, level * 2 + 1);
     if (res0 == NULL) {
         D_800BE5D0 = 0;
     } else {
-        func_150183D0(D_800DBE28, height, res0, res1);
+        func_150183D0(gQuadNodeBitmapStride, height, res0, res1);
         heap_free(res1);
     }
 }
@@ -854,11 +854,11 @@ void collision_loadMapSettings(s32 map) {
         D_800B0DF0 = res->header;
         if (loaded == 0) {
             D_8003C8E0 = 0xC000037;
-            func_150AD770();
+            debug_fatalTrap();
         }
         if (D_800B0DF0 == NULL) {
             D_8003C8E0 = 0xC000037;
-            func_150AD770();
+            debug_fatalTrap();
         }
     }
     // collision_xorScramble(0x40F0FAAC) == 0xB0000A5C, collision_xorScramble(0xE7B00F09) == 0x1740FFF9

@@ -28,9 +28,9 @@ DriftQuad *particle_spawnDriftQuad(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     packet.rgba[3] = 0xFF;
     *(ParticleSize *)&packet.width = spawn->size; // matching: copied whole (lw/sw); two f32 assignments move through FPRs
     packet.pos = spawn->pos;
-    packet.rot.x = func_150ADA68() * 360.0f;
-    packet.rot.y = func_150ADA68() * 360.0f;
-    packet.rot.z = func_150ADA68() * 360.0f;
+    packet.rot.x = math_randomFloat() * 360.0f;
+    packet.rot.y = math_randomFloat() * 360.0f;
+    packet.rot.z = math_randomFloat() * 360.0f;
     packet.flags = 0xC03E1;
     packet.scale.x = 0.0f;
     packet.scale.y = 0.0f;
@@ -44,15 +44,15 @@ DriftQuad *particle_spawnDriftQuad(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     drift.minVy = spawn->minVy;
     drift.drag = spawn->drag;
     drift.gravity = spawn->gravity;
-    drift.spin.x = (func_150ADA68() * 20000.0f + -10000.0f) * 0.001f;
-    drift.spin.y = (func_150ADA68() * 20000.0f + -10000.0f) * 0.001f;
-    drift.spin.z = (func_150ADA68() * 20000.0f + -10000.0f) * 0.001f;
+    drift.spin.x = (math_randomFloat() * 20000.0f + -10000.0f) * 0.001f;
+    drift.spin.y = (math_randomFloat() * 20000.0f + -10000.0f) * 0.001f;
+    drift.spin.z = (math_randomFloat() * 20000.0f + -10000.0f) * 0.001f;
     drift.swayLength = 0.0f;
-    drift.swayLengthRate = (func_150ADA68() * 206.0f + 58.0f) * 0.001f;
-    drift.swayYaw = func_150ADA68() * 360.0f;
+    drift.swayLengthRate = (math_randomFloat() * 206.0f + 58.0f) * 0.001f;
+    drift.swayYaw = math_randomFloat() * 360.0f;
     drift.phase = 0.0f;
-    drift.phaseSpeed = func_150ADA68() * 1210.0f * 0.0001f;
-    drift.phaseScale = (func_150ADA68() * 12960.0f + 15241.0f) * 0.0001f;
+    drift.phaseSpeed = math_randomFloat() * 1210.0f * 0.0001f;
+    drift.phaseScale = (math_randomFloat() * 12960.0f + 15241.0f) * 0.0001f;
 
     effect = particle_newQuadParticleWhite(&packet, 0x13, 0x1E, 0, 0x11, 0, 0x40, arg1, arg2);
     if (effect != NULL) {
@@ -142,7 +142,7 @@ Vtx_t *particle_buildDriftQuad(DriftQuad *effect, s16 bufferIndex) {
         corners[3][0] = effect->halfWidth;
         corners[3][1] = -effect->halfHeight;
         corners[3][2] = 0.0f;
-        func_150A8050(mtx, effect->dir.x, effect->dir.y, effect->dir.z);
+        math_mtxRotateRPYF(mtx, effect->dir.x, effect->dir.y, effect->dir.z);
         translation[0] = effect->pos.x;
         translation[1] = effect->pos.y;
         translation[2] = effect->pos.z;
@@ -154,7 +154,7 @@ Vtx_t *particle_buildDriftQuad(DriftQuad *effect, s16 bufferIndex) {
         for (i = 0; i < 4; i++) {
             f32 *corner = corners[i];
 
-            func_150A7960(mtx, corner[0], corner[1], 0.0f, &corner[0], &corner[1], &corner[2]);
+            math_transformPoint(mtx, corner[0], corner[1], 0.0f, &corner[0], &corner[1], &corner[2]);
             vertices->ob[0] = corner[0];
             vertices->ob[1] = corner[1];
             vertices->ob[2] = corner[2];
@@ -188,8 +188,8 @@ void particle_updateDriftBurstEmitter(DriftBurstEmitter *emitter) {
         burst.minVy = -10.1175995f;
         do {
             yaws = gDriftBurstYaws;
-            index = func_150ADA20() % 5U;
-            yaw = yaws.yaw[index] + func_150ADA68() * 0.59999996f;
+            index = math_random() % 5U;
+            yaw = yaws.yaw[index] + math_randomFloat() * 0.59999996f;
             heading = camera_global_Cameras[gCurrentView].TrueCameraAngle - 180.0f;
             while (heading > 360.0f) {
                 heading -= 360.0f;
@@ -200,7 +200,7 @@ void particle_updateDriftBurstEmitter(DriftBurstEmitter *emitter) {
             heading *= 0.017453292f; /* degrees to radians */
             diff = yaw - heading;
             if (fabsf(diff) < 0.39269912f) {
-                r = func_150ADA68();
+                r = math_randomFloat();
                 burst.pos.y = 1613.5835f * r + 2411.0085f + 500.0f;
                 math_dirFromAngleXZ(yaw, r * (10426.68 - 8400.0) + 8400.0, &burst.pos.x, &burst.pos.z);
                 burst.countBase = 15;

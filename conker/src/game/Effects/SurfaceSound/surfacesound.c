@@ -27,8 +27,8 @@ void effect_updateSurfaceSound(s32 arg0) {
                 gSurfaceSoundTimer = (gSurfaceSoundTimer - D_800BE9E4);
             }
         } else {
-            gSurfaceSoundTimer = ((func_150ADA20() & 0x3F) + 0xC0);
-            sound_play(15, 18000, ((func_150ADA20() & 0x3F) + 0x20), 0, 0);
+            gSurfaceSoundTimer = ((math_random() & 0x3F) + 0xC0);
+            sound_play(15, 18000, ((math_random() & 0x3F) + 0x20), 0, 0);
         }
     }
 }

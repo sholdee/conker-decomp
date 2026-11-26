@@ -97,8 +97,8 @@ TrailEmitter *trail_spawnEmitter(TrailEmitterParams *params, u8 owner, s32 list)
         return NULL;
     }
     memcpy(&emitter->params, params, sizeof(TrailEmitterParams));
-    emitter->timers[0] = func_150ADA20() & 0x1F;
-    emitter->timers[1] = func_150ADA20() & 0x1F;
+    emitter->timers[0] = math_random() & 0x1F;
+    emitter->timers[1] = math_random() & 0x1F;
     return emitter;
 }
 
@@ -138,11 +138,11 @@ void trail_updateEmitter(TrailEmitter *emitter) {
             if (emitter->timers[i] < 0) {
                 point = i;
                 if (point) {} // matching: a second use keeps the copy of i in its own register
-                angle = func_150ADA20() % (emitter->params.angleRange + 1);
+                angle = math_random() % (emitter->params.angleRange + 1);
                 sinA = math_cosBinAngleMasked(angle);
                 cosA = math_cosBinAngleMasked(angle - 0x40);
-                speed = func_150ADA68() * emitter->params.speedRange + emitter->params.speedMin;
-                emitter->timers[i] = func_150ADA20() % 23U + 5;
+                speed = math_randomFloat() * emitter->params.speedRange + emitter->params.speedMin;
+                emitter->timers[i] = math_random() % 23U + 5;
                 render.unk0 = 0;
                 render.setGeometryMode = 1;
                 render.clearGeometryMode = 0x160600;
@@ -152,12 +152,12 @@ void trail_updateEmitter(TrailEmitter *emitter) {
                 render.unk18 = 0x20;
                 render.primMode = 0;
                 render.envMode = 9;
-                spawn.itemCount = func_150ADA20() % (emitter->params.pointRange + 1) + 3;
+                spawn.itemCount = math_random() % (emitter->params.pointRange + 1) + 3;
                 spawn.kind = 1;
                 spawn.flags = 1;
-                spawn.life = func_150ADA20() % 21U + 80;
+                spawn.life = math_random() % 21U + 80;
                 motion.texture = emitter->params.texture;
-                motion.halfWidth = func_150ADA68() * emitter->params.halfWidthRange + emitter->params.halfWidthMin;
+                motion.halfWidth = math_randomFloat() * emitter->params.halfWidthRange + emitter->params.halfWidthMin;
                 motion.velocity.y = 0.0f;
                 motion.gravity = 0.6539999843f;
                 motion.velocity.x = speed * cosA;
@@ -317,7 +317,7 @@ s32 trail_spawnHitPuff(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hit
     fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
     fx.z = points[trail->head.start].pos.z;
-    fx.unk94 = func_150ADA20() % 21U + 35;
+    fx.unk94 = math_random() % 21U + 35;
     fx.unk92 = fx.unk94;
     fx.callback = -1;
     fx.animIndex = 0x12;
@@ -343,7 +343,7 @@ s32 trail_spawnHitPuffAndEffect(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hit
     fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
     fx.z = points[trail->head.start].pos.z;
-    fx.unk94 = func_150ADA20() % 21U + 35;
+    fx.unk94 = math_random() % 21U + 35;
     fx.unk92 = fx.unk94;
     fx.callback = -1;
     fx.animIndex = 0x12;
@@ -361,7 +361,7 @@ s32 trail_spawnHitPuffAndEffect(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hit
         pos[1] = hitY;
         pos[2] = points[trail->head.start].pos.z;
         kind = particle_getContextEffectKind();
-        particle_spawnKindMark(kind, func_150ADA68() * 40.0f + 100.0f, 0xFF, surface, pos, trail->head.header.owner, trail->head.header.kind);
+        particle_spawnKindMark(kind, math_randomFloat() * 40.0f + 100.0f, 0xFF, surface, pos, trail->head.header.owner, trail->head.header.kind);
     }
     return 1;
 }

@@ -220,11 +220,11 @@ s32 func_151606A8(LightEffect *effect) {
     f32 x;
 
     mount = &effect->data.mount;
-    func_150A8050(mtx.mf, (*mount)->t, (*mount)->u, (*mount)->v);
+    math_mtxRotateRPYF(mtx.mf, (*mount)->t, (*mount)->u, (*mount)->v);
     mtx.mf[3][0] = (*mount)->x;
     mtx.mf[3][1] = (*mount)->y;
     mtx.mf[3][2] = (*mount)->z;
-    func_150A7960(mtx.mf, D_800A66B4[0], D_800A66B4[1], D_800A66B4[2], &x, &y, &z);
+    math_transformPoint(mtx.mf, D_800A66B4[0], D_800A66B4[1], D_800A66B4[2], &x, &y, &z);
     effect->light->x = x;
     effect->light->y = y;
     effect->light->z = z;
@@ -247,8 +247,8 @@ s32 func_151607A4(LightEffect *effect) {
         } else {
             flicker->delay -= gFrameDelta;
         }
-    } else if (func_150ADA68() < 0.005000000354f) {
-        flicker->count = (func_150ADA20() % 5U) + 1;
+    } else if (math_randomFloat() < 0.005000000354f) {
+        flicker->count = (math_random() % 5U) + 1;
         light_startFlicker(&flicker->level, &flicker->peak, &flicker->rate, &flicker->delay, effect);
     }
     effect->light->radius = flicker->level;
@@ -262,8 +262,8 @@ void light_startFlicker(f32 *intensity, f32 *peak, f32 *rate, f32 *delay, LightE
     s32 pad1; // matching: unused stack slot
 
     *intensity = 0.0f;
-    *rate = *peak / ((func_150ADA68() * 12.0f) + 8.0f);
-    *delay = (func_150ADA68() * 28.0f) + 1.0f;
+    *rate = *peak / ((math_randomFloat() * 12.0f) + 8.0f);
+    *delay = (math_randomFloat() * 28.0f) + 1.0f;
 
     position.x = effect->light->x;
     position.y = effect->light->y;
@@ -495,7 +495,7 @@ LightEffect *func_1516127C(PointLight *light, u8 arg1, s32 arg2) {
 
     pulse.base = 50.0f;
     pulse.amplitude = 40.0f;
-    pulse.phase = func_150ADA68() * 6.283185482f;
+    pulse.phase = math_randomFloat() * 6.283185482f;
 
     header.flags = 0;
     header.update = 1;
@@ -586,7 +586,7 @@ LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2) {
 
     pulse.base = 28.0f;
     pulse.amplitude = 27.0f;
-    pulse.phase = func_150ADA68() * 6.283185482f;
+    pulse.phase = math_randomFloat() * 6.283185482f;
     pulse.speed = 0.07660000026f;
 
     header.flags = 0;
@@ -693,7 +693,7 @@ void func_15161860(LightEffect *effect) {
 void light_playRandomSound(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *position, s16 arg5, s16 arg6) {
     const s32 sounds[10] = { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 };
 
-    func_10010F88(sounds[func_150ADA20() % 10U], arg0, arg1, arg2, arg3, position->x, position->y, position->z, arg5, arg6);
+    sound_playAt(sounds[math_random() % 10U], arg0, arg1, arg2, arg3, position->x, position->y, position->z, arg5, arg6);
 }
 
 /*
@@ -1221,8 +1221,8 @@ s32 light_updateLightning(LightEffect *effect) {
     if (storm->flashes > 0) {
         storm->flashTimer -= gFrameDelta;
         if (storm->flashTimer < 0.0f) {
-            storm->level = func_150ADA68() * storm->flashRange + storm->flashMin;
-            storm->flashTimer = func_150ADA68() * storm->flashGapRange + storm->flashGapMin;
+            storm->level = math_randomFloat() * storm->flashRange + storm->flashMin;
+            storm->flashTimer = math_randomFloat() * storm->flashGapRange + storm->flashGapMin;
         // matching: this label keeps IDO from moving the flashTimer store into the jal delay slot
         thunder:
             pan = math_rand() % 1200 + storm->flashes * 800 - 2400;
@@ -1235,9 +1235,9 @@ s32 light_updateLightning(LightEffect *effect) {
     } else {
         storm->waitTimer -= gFrameDelta;
         if (storm->waitTimer < 0.0f) {
-            storm->flashes = func_150ADA20() % (storm->flashesRange + 1) + storm->flashesMin;
+            storm->flashes = math_random() % (storm->flashesRange + 1) + storm->flashesMin;
             storm->flashTimer = 0.0f;
-            storm->waitTimer = func_150ADA68() * storm->waitRange + storm->waitMin;
+            storm->waitTimer = math_randomFloat() * storm->waitRange + storm->waitMin;
         }
     }
     return 1;
@@ -1306,7 +1306,7 @@ LightEffect *light_createPulse(PointLight *light, u8 kind, u8 type, s16 lifetime
 
     pulse.base = D_800A6964[kind];
     pulse.amplitude = D_800A699C[kind];
-    pulse.phase = func_150ADA68() * 6.283185482f;
+    pulse.phase = math_randomFloat() * 6.283185482f;
     pulse.speed = D_800A69D4[kind];
 
     header.flags = arg4;
@@ -1407,7 +1407,7 @@ LightEffect *light_createObjectPulse(u8 objectId, u8 arg1, s32 arg2) {
     }
     pulse.base = D_800A6964[6];
     pulse.amplitude = D_800A699C[6];
-    pulse.phase = func_150ADA68() * 6.283185482f;
+    pulse.phase = math_randomFloat() * 6.283185482f;
     pulse.speed = D_800A69D4[6];
 
     position.x = object->x;
@@ -1450,7 +1450,7 @@ LightEffect *light_createActorPulse(Actor *actor, u8 arg1, s32 arg2) {
 
     pulse.base = D_800A6964[6];
     pulse.amplitude = D_800A699C[6];
-    pulse.phase = func_150ADA68() * 6.283185482f;
+    pulse.phase = math_randomFloat() * 6.283185482f;
     pulse.speed = D_800A69D4[6];
 
     effect = light_createAttached(actor, 1, &D_800A6A0C, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(pulse), 1, arg1, arg2);
@@ -1478,11 +1478,11 @@ void light_applyPulse(LightPulse *pulse, LightEffect *effect) {
 void light_applyJitter(LightEffect *effect, LightJitter *jitter) {
     jitter->timer = jitter->timer - gFrameDelta;
     if (jitter->timer < 0.0f) {
-        jitter->timer = func_150ADA68() * jitter->interval;
-        if ((func_150ADA20() & 3) != 0) {
-            jitter->target = (func_150ADA68() * (jitter->mid - jitter->low)) + jitter->low;
+        jitter->timer = math_randomFloat() * jitter->interval;
+        if ((math_random() & 3) != 0) {
+            jitter->target = (math_randomFloat() * (jitter->mid - jitter->low)) + jitter->low;
         } else {
-            jitter->target = (func_150ADA68() * (jitter->high - jitter->mid)) + jitter->mid;
+            jitter->target = (math_randomFloat() * (jitter->high - jitter->mid)) + jitter->mid;
         }
     }
     jitter->level += (jitter->target - jitter->level) * jitter->smoothing;
@@ -1671,11 +1671,11 @@ void func_151644F4(LightEffect *effect, Vec3f *pivot, f32 offset, f32 angleX, f3
     f32 x;
     MtxF mtx;
 
-    func_150A8050(mtx, angleX, 0.0f, angleZ);
+    math_mtxRotateRPYF(mtx, angleX, 0.0f, angleZ);
     mtx[3][0] = pivot->x;
     mtx[3][1] = pivot->y;
     mtx[3][2] = pivot->z;
-    func_150A7960(mtx, 0.0f, offset, 0.0f, &x, &y, &z);
+    math_transformPoint(mtx, 0.0f, offset, 0.0f, &x, &y, &z);
     effect->light->x = x;
     effect->light->y = y;
     effect->light->z = z;

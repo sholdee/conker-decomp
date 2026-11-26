@@ -32,8 +32,8 @@ Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
     math_getActorAim(obj, &direction, &axis0, NULL, 0.0f);
     func_150FE49C(obj, arg1, arg2, &position, &origin);
 
-    random0 = func_150ADA68();
-    random1 = func_150ADA68();
+    random0 = math_randomFloat();
+    random1 = math_randomFloat();
     randomInt = func_150ADA20_u8();
 
     return weapon_spawnProjectile(&origin, &direction, 0, 0, 0, 0, 300.0f, 0.003333333414f,
@@ -92,8 +92,8 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
 
     if (obj->ob_matrix_ptr != NULL) {
         if ((obj->unk74 & 0xF) != 0xF) {
-            motion.height = func_150ADA68() * (1.0f + 1.0f) + 3.7099998f; // matching: a plain 2.0f literal mismatches
-            motion.width = func_150ADA68() * 15.0f + 35.0f;
+            motion.height = math_randomFloat() * (1.0f + 1.0f) + 3.7099998f; // matching: a plain 2.0f literal mismatches
+            motion.width = math_randomFloat() * 15.0f + 35.0f;
 
             if ((obj->mv != NULL) && (obj->mv->SniperState != 0) && (obj->CameraPtr != NULL)) {
                 mask = ~(1 << obj->CameraPtr->CNumber) & 0xFF;
@@ -105,7 +105,7 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
             random1 = func_150ADA20_u8();
             effect_spawnBoneBeamParticle(obj, D_80088B94, &D_800A1FC8, &D_800A1FE0, &motion,
                           (random0 % 3U) + 4, (random1 % 56U) + 200,
-                          func_150ADA68() * 301.0f + 500.0f, position, mask,
+                          math_randomFloat() * 301.0f + 500.0f, position, mask,
                           0, -1, arg2, arg3);
         }
     }

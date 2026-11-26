@@ -29,12 +29,12 @@ void func_150B3DD0(void) {
 }
 
 void trail_destroyScatterTrail(ScatterTrail *trail) {
-    func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
+    sound_stopDynamicSoundAt(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
     effect_defaultDestroyEffectObj(trail);
 }
 
 void trail_freeScatterTrail(ScatterTrail *trail) {
-    func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
+    sound_stopDynamicSoundAt(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
     effect_defaultFreeEffectObj(trail);
 }
 
@@ -59,8 +59,8 @@ ScatterTrail *trail_spawnScatterTrail(TrailStateParams *params, Vec3f *pos, s16 
 
     trail = effect_newEffectObj(&spawn, sizeof(ScatterTrailState), sizeof(ScatterTrailPoint), 7, 7, 7, 0, 0, 0, 0xFF, 1);
     if (trail != NULL) {
-        sound_addDynamicSound(0x221, pos->x, pos->y, pos->z, 25000, 4000, 600, func_1000EF40, 0, 0, 8,
-                      func_150ADA20() & 0x40);
+        sound_addDynamicSound(0x221, pos->x, pos->y, pos->z, 25000, 4000, 600, sound_stopWhenSilentCallback, 0, 0, 8,
+                      math_random() & 0x40);
         memcpy(trail->state, &state, sizeof(ScatterTrailState));
     }
     return trail;
@@ -138,7 +138,7 @@ s32 trail_emitScatterTrail(ScatterTrail *trail) {
 
     state = trail->state;
     points = trail->points;
-    state->phase += (func_150ADA20() % (state->phaseJitter + 1)) * D_800BE9E4;
+    state->phase += (math_random() % (state->phaseJitter + 1)) * D_800BE9E4;
     state->speedTarget = math_cosBinAngleMasked(state->phase - 0x40) * state->speedSwing + state->speedBase;
     state->emitAccum += state->emitRate * gFrameDelta;
     if (state->emitAccum > 1.0f) {
@@ -162,7 +162,7 @@ s32 trail_emitScatterTrail(ScatterTrail *trail) {
             points[trail->head.end].alpha = 0xFF;
             points[trail->head.end].life = state->life;
             points[trail->head.end].texS = state->texS;
-            state->texS += state->texStep + func_150ADA68() * state->texStepJitter;
+            state->texS += state->texStep + math_randomFloat() * state->texStepJitter;
             points[trail->head.end].vel.y += state->gravity * dt;
             points[trail->head.end].pos.x += points[trail->head.end].vel.x * dt;
             points[trail->head.end].pos.y += points[trail->head.end].vel.y * dt;
@@ -454,9 +454,9 @@ void trail_burstScatterTrail(ScatterTrail *trail) {
     spawn.pos = trail->head.tmpl.pos;
 
     do {
-        speed = func_150ADA68() * preset->speedRange + preset->speed;
-        angA = func_150ADA20() & 0xFF;
-        angB = func_150ADA20() & 0xFF;
+        speed = math_randomFloat() * preset->speedRange + preset->speed;
+        angA = math_random() & 0xFF;
+        angB = math_random() & 0xFF;
         cosA = math_cosBinAngleMasked(angA - 0x40);
         sinA = math_cosBinAngleMasked(angA);
         cosB = math_cosBinAngleMasked(angB - 0x40);
@@ -464,10 +464,10 @@ void trail_burstScatterTrail(ScatterTrail *trail) {
         x = state->baseVel.x + preset->radius * sinB * cosA;
         y = state->baseVel.y - preset->radius * cosB;
         z = state->baseVel.z + preset->radius * sinB * sinA;
-        spawn.itemCount = (func_150ADA20() % (preset->itemCountRange + 1)) + preset->itemCount;
-        spawn.life = (func_150ADA20() % (preset->lifeRange + 1)) + preset->life;
-        particle.halfWidth = func_150ADA68() * preset->halfWidthRange + preset->halfWidth;
-        particle.gravity = func_150ADA68() * preset->gravityRange + preset->gravity;
+        spawn.itemCount = (math_random() % (preset->itemCountRange + 1)) + preset->itemCount;
+        spawn.life = (math_random() % (preset->lifeRange + 1)) + preset->life;
+        particle.halfWidth = math_randomFloat() * preset->halfWidthRange + preset->halfWidth;
+        particle.gravity = math_randomFloat() * preset->gravityRange + preset->gravity;
         particle.velocity.x = speed * x;
         particle.velocity.y = speed * y;
         particle.velocity.z = speed * z;

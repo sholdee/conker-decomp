@@ -130,14 +130,14 @@ void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32
     template.unk2F = 0xFF;
     template.unk34 = 0;
     for (i = 0; i < memberCount; i++) {
-        angle = func_150ADA20() & 0xFF;
+        angle = math_random() & 0xFF;
         c = math_sinBinAngle(angle);
         s = math_cosBinAngle(angle);
-        r = (func_150ADA20() & 0xFFFF) * 50.0f * (1.0f / 65536.0f);
+        r = (math_random() & 0xFFFF) * 50.0f * (1.0f / 65536.0f);
         px = x + r * c;
         pz = z + r * s;
-        py = (func_150ADA20() & 0xFF) + y - 78;
-        template.turnRate = (func_150ADA20() & 7) + 7;
+        py = (math_random() & 0xFF) + y - 78;
+        template.turnRate = (math_random() & 7) + 7;
         template.unkC = 0;
         template.unkE = 0;
         template.x = px;
@@ -208,7 +208,7 @@ void swarm_updateMember(SwarmMember *member) {
     timer = member->s.steer & 0xF;
     if (timer == 0) {
         heading = math_vec3HeadingBin(&vec);
-        heading += (s32)(func_150ADA20() & 0x1F) - 15;
+        heading += (s32)(math_random() & 0x1F) - 15;
         if (!fast) {
             timer = 10;
         } else {
@@ -249,8 +249,8 @@ void swarm_updateMember(SwarmMember *member) {
     member->s.velX = velX;
     member->s.velZ = c * radius;
     member->s.angle = angle;
-    rnd = (func_150ADA20() & 0x7F) + 100;
-    if ((func_150ADA20() & 0x3F) + (y + 50.0f) < member->s.y) {
+    rnd = (math_random() & 0x7F) + 100;
+    if ((math_random() & 0x3F) + (y + 50.0f) < member->s.y) {
         member->s.unk22 = -rnd;
     } else {
         member->s.unk22 = rnd;
@@ -365,7 +365,7 @@ void swarm_updateSwarm(Swarm *swarm, s32 x, s32 y, s32 z) {
         s32 pad;
         mask = 0;
         for (i = 0; i <= gScreenLayout; i++) {
-            if (func_150A6360(&gViews[i], gViewMatrices[i], swarm->x, swarm->y, swarm->z,
+            if (view_testCylinderInView(&gViews[i], gViewMatrices[i], swarm->x, swarm->y, swarm->z,
                               100.0f, 100.0f, 2500.0f)) {
                 mask |= 1 << i;
             }
@@ -374,9 +374,9 @@ void swarm_updateSwarm(Swarm *swarm, s32 x, s32 y, s32 z) {
     swarm->viewMask = mask;
     if (swarm->playSfx) {
         if (swarm->sfxHandle == 0) {
-            swarm->sfxHandle = func_10010F88(0x4A2, 10000, 0, 0, 0, swarm->x, swarm->y, swarm->z, 100, 800);
+            swarm->sfxHandle = sound_playAt(0x4A2, 10000, 0, 0, 0, swarm->x, swarm->y, swarm->z, 100, 800);
         } else {
-            func_1000F91C(swarm->sfxHandle, 10000, 0, 0, 0, swarm->x, swarm->y, swarm->z, 100, 800);
+            sound_setVoiceSpatial(swarm->sfxHandle, 10000, 0, 0, 0, swarm->x, swarm->y, swarm->z, 100, 800);
         }
     }
     if (swarm->targetZ.z == -0x8000) {

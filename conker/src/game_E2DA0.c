@@ -34,14 +34,14 @@ void effect_updateObjBurst(ObjBurstEffect *effect) {
     }
 
     if (obj->ob_matrix_ptr != NULL) {
-        if (func_150ADA68() < 0.10824f) {
+        if (math_randomFloat() < 0.10824f) {
             pos.x = obj->xpos;
             pos.y = obj->ypos;
             pos.z = obj->zpos;
             effect_spawnObjBurstAt(posp, effect->base.header.owner, effect->base.header.kind);
         }
 
-        if (func_150ADA68() < 0.10824f) {
+        if (math_randomFloat() < 0.10824f) {
             effect_getBone5Point(obj, posp);
             effect_spawnObjBurstAt(posp, effect->base.header.owner, effect->base.header.kind);
         }
@@ -182,7 +182,7 @@ void effect_spawnObjBurstParticle(Vec3f *pos, u8 owner, s32 kind) {
     spawn.renderMode = 0x4403;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0x20000;
-    spawn.timer = func_150ADA20() % 7U + 4;
+    spawn.timer = math_random() % 7U + 4;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.r = 0xFF;
@@ -194,7 +194,7 @@ void effect_spawnObjBurstParticle(Vec3f *pos, u8 owner, s32 kind) {
     spawn.b2 = 0xFF;
     spawn.alpha = 0xFF;
     spawn.brightness = 0xFF;
-    spawn.width = spawn.height = func_150ADA68() * 500.0f + 500.0f;
+    spawn.width = spawn.height = math_randomFloat() * 500.0f + 500.0f;
     spawn.pos = *pos;
     spawn.fadeStart = 3;
     spawn.fadeRate = 0x55;
@@ -207,8 +207,8 @@ void effect_spawnObjBurstParticle(Vec3f *pos, u8 owner, s32 kind) {
     spawn.vel.z = 0.0f;
     spawn.gravity = 0.0f;
     spawn.scaleRate = 1.0f;
-    flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
-    flag80 = (func_150ADA20() & 1) ? 0x80 : 0;
+    flag40 = (math_random() & 1) ? 0x40 : 0;
+    flag80 = (math_random() & 1) ? 0x80 : 0;
     spawn.flags = flag80 | 1 | flag40 | 0x200 | 0x4000 | 0x8000;
     spawn.primColorMode = 6;
     spawn.envColorMode = 6;
@@ -226,14 +226,14 @@ void effect_spawnObjBurstLight(Vec3f *pos, u8 owner, s32 kind) {
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = func_150ADA20() % 9U + 3;
+    header.lifetime = math_random() % 9U + 3;
     header.lightType = 0;
 
     ipos.x = pos->x;
     ipos.y = pos->y;
     ipos.z = pos->z;
 
-    light_createWithEffect(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
+    light_createWithEffect(&header, &ipos, math_random() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
 }
 
 static const Vec3f gBone5PointOffset = { 0.0f, -205.0f, 0.0f };
@@ -274,7 +274,7 @@ void effect_updateBoltRing(BoltRingEffect *effect) {
         return;
     }
     data = &effect->data;
-    data->spawnAccum += (0.15f + func_150ADA68() * 0.155f) * gFrameDelta;
+    data->spawnAccum += (0.15f + math_randomFloat() * 0.155f) * gFrameDelta;
     if (data->spawnAccum > 1.0f) {
         BoltChainConfig config;
         Vec3f start;
@@ -302,11 +302,11 @@ void effect_updateBoltRing(BoltRingEffect *effect) {
         start.y = emitter->y + emitter->ySize;
         end.y = emitter->y + emitter->ySize;
         do {
-            angle = func_150ADA20();
+            angle = math_random();
             math_dirFromAngleXZ((u32)angle, emitter->xSize, &start.x, &start.z); // matching: (u32) selects IDO's unsigned int-to-float sequence
             start.x += emitter->x;
             start.z += emitter->z;
-            angle += func_150ADA20() % 129 + 64;
+            angle += math_random() % 129 + 64;
             math_dirFromAngleXZ((u32)angle, emitter->xSize, &end.x, &end.z);
             end.x += emitter->x;
             end.z += emitter->z;
@@ -421,7 +421,7 @@ void effect_flashViewLightBlue(u8 owner, s32 kind) {
     u32 rand2;
     u32 rand1;
 
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
+    rand1 = math_random();
+    rand2 = math_random();
     screen_spawnFlash(0xCC, 0xCC, 0xFF, rand1 % 56 + 200, rand2 % 11 + 15, 0, owner, kind);
 }

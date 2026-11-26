@@ -271,35 +271,35 @@ void effect_updateBoltEmitter(BoltEmitter *emitter) {
         pos.z = obj->zpos;
         header.flags = 3;
         header.update = -1;
-        header.lifetime = func_150ADA20() % 11U + 5;
+        header.lifetime = math_random() % 11U + 5;
         header.lightType = 0;
-        light_createWithEffect(&header, &pos, func_150ADA20() % 121U + 50, 255, 255, 255, 255, 0, 0,
+        light_createWithEffect(&header, &pos, math_random() % 121U + 50, 255, 255, 255, 255, 0, 0,
                       emitter->base.header.owner, emitter->base.header.kind);
-        src->flashTimer = func_150ADA20() % 81U + 69;
+        src->flashTimer = math_random() % 81U + 69;
     }
     src->boltTimer -= D_800BE9E4;
     if (src->boltTimer < 0) {
         u8 colour[4];
 
         /* 2-4 bolts */
-        count = func_150ADA20() % 3U + 2;
+        count = math_random() % 3U + 2;
         do {
             colour[0] = 174;
             colour[1] = 210;
             colour[2] = 255;
-            colour[3] = func_150ADA20() % 61U + 150;
-            beam_spawnBoundsBolt(obj, func_150ADA20() & 0xFF, func_150ADA20() % 129U - 63,
-                          func_150ADA20() % 21U + 10, 4, 40.0f, func_150ADA68() * 20.0f + 25.0f, 0, 2,
+            colour[3] = math_random() % 61U + 150;
+            beam_spawnBoundsBolt(obj, math_random() & 0xFF, math_random() % 129U - 63,
+                          math_random() % 21U + 10, 4, 40.0f, math_randomFloat() * 20.0f + 25.0f, 0, 2,
                           colour, emitter->base.header.owner, emitter->base.header.kind);
             count--;
         } while (count > 0);
-        src->boltTimer = func_150ADA20() % 141U + 25;
+        src->boltTimer = math_random() % 141U + 25;
     }
     src->timer2 -= D_800BE9E4;
     if (src->timer2 < 0) {
-        func_15107B78(obj, func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 64,
+        func_15107B78(obj, math_random() & 0xFF, (math_random() & 0x7F) - 64,
                       emitter->base.header.owner, emitter->base.header.kind);
-        src->timer2 = func_150ADA20() % 26U + 15;
+        src->timer2 = math_random() % 26U + 15;
     }
 }
 
@@ -352,21 +352,21 @@ void effect_spawnDripDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHea
     position.x = x;
     position.y = y;
     position.z = z;
-    random_a = func_150ADA20();
-    random_b = func_150ADA20();
-    alpha_random = func_150ADA68();
+    random_a = math_random();
+    random_b = math_random();
+    alpha_random = math_randomFloat();
     math_dirFromBinAngles(random_a & 0xFF, random_b % 65U - 32, alpha_random * 5.87f, &velocity);
-    scale = func_150ADA68() * 0.16900001f + 0.186f;
+    scale = math_randomFloat() * 0.16900001f + 0.186f;
     acceleration.x = 0.0f;
     acceleration.y = 0.0f;
     acceleration.z = 0.0f;
     velocity.x += -dx * gFrameDeltaInv * scale;
     velocity.y += -dy * gFrameDeltaInv * scale;
     velocity.z += -dz * gFrameDeltaInv * scale;
-    alpha_random = func_150ADA68();
-    size_random = func_150ADA68();
-    random_a = func_150ADA20();
-    random_b = func_150ADA20();
+    alpha_random = math_randomFloat();
+    size_random = math_randomFloat();
+    random_a = math_random();
+    random_b = math_random();
     particle_spawnDragFadeSprite(&position, &acceleration, &velocity, 0.986891f, alpha_random * 0.23f + -0.337f,
                   size_random * 200.0f + 150.0f, random_a % 26U + 40, random_b % 201U + 55, 30, 20, 0, -1,
                   52, 53, 52, effect->owner, effect->kind);
@@ -420,11 +420,11 @@ void effect_spawnSlotBoneBeam(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     dst[0] = &start;
     math_transformOffsets(src, dst, actor->ob_matrix_ptr + gSlotBoneBeamBone, 1);
     scale = 1.0f; // matching: IDO keeps the multiply by 1.0 only through a variable
-    params.height = func_150ADA68() * scale + 2.0f;
-    params.width = func_150ADA68() * 14.0f + 28.0f;
-    randA = func_150ADA20();
-    randB = func_150ADA20();
-    rand0 = func_150ADA68() * 300.0f + 400.0f;
+    params.height = math_randomFloat() * scale + 2.0f;
+    params.width = math_randomFloat() * 14.0f + 28.0f;
+    randA = math_random();
+    randB = math_random();
+    rand0 = math_randomFloat() * 300.0f + 400.0f;
     effect_spawnBoneBeamParticle(actor, gSlotBoneBeamBone, &gSlotBoneBeamStarts[slot], &gSlotBoneBeamEnds[slot], &params, randA % 3U + 4,
                   randB % 156U + 100, rand0, &start, 255, 0, -1, arg2, arg3);
 }

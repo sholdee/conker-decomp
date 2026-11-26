@@ -142,13 +142,13 @@ void particle_scatterChannelParticles(f32 x, f32 y, f32 z, f32 radius, s16 count
         particle.pos.y = y;
 
         do {
-            // matching: explicit mask; func_150ADA20 really returns a full word
-            angle = func_150ADA20() & 0xFF;
+            // matching: explicit mask; math_random really returns a full word
+            angle = math_random() & 0xFF;
             sin = math_cosBinAngleMasked(angle - 0x40);
             cos = math_cosBinAngleMasked(angle);
-            dist = func_150ADA68() * radius;
-            size = func_150ADA68() * sizeRange + sizeBase;
-            height = func_150ADA68() * heightRange + heightBase;
+            dist = math_randomFloat() * radius;
+            size = math_randomFloat() * sizeRange + sizeBase;
+            height = math_randomFloat() * heightRange + heightBase;
             particle.pos.x = dist * sin + x;
             particle.pos.z = dist * cos + z;
             particle.maxA = 22.6f * size;
@@ -156,7 +156,7 @@ void particle_scatterChannelParticles(f32 x, f32 y, f32 z, f32 radius, s16 count
             particle.maxB = 57.969f * height;
             particle.minB = 42.714f * height;
             particle.altB = 118.763f * height;
-            particle.life = func_150ADA20() % (lifeRange + 1) + lifeBase;
+            particle.life = math_random() % (lifeRange + 1) + lifeBase;
             particle_spawnChannelParticle(&particle, 10, 0, 0, 0xFF, 1);
             count--;
         } while (count != 0);
@@ -184,17 +184,17 @@ void particle_spawnRandomChannelParticle(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.maxHeight = 0.0f;
     particle.shrinkRate = 0.080000006f;
     particle.growRate = 0.4f;
-    size = (func_150ADA68() * 501.0f + 999.0f) * 0.001f;
-    height = func_150ADA68();
+    size = (math_randomFloat() * 501.0f + 999.0f) * 0.001f;
+    height = math_randomFloat();
     particle.maxA = 22.6f * size;
     particle.minA = 13.786f * size;
     height = (height * 1007.0f + 1505.0f) * 0.001f;
     particle.maxB = 57.969f * height;
     particle.minB = 42.714f * height;
     particle.altB = 118.763f * height;
-    particle.life = func_150ADA20() % 17U + 16;
-    particle.scale = (func_150ADA68() * 347.0f + 50.0f) * 0.001f;
-    particle.unk2C = func_150ADA20() % 156U + 100;
+    particle.life = math_random() % 17U + 16;
+    particle.scale = (math_randomFloat() * 347.0f + 50.0f) * 0.001f;
+    particle.unk2C = math_random() % 156U + 100;
     particle_spawnChannelParticle(&particle, 10, 0, 0, arg1, arg2);
 }
 
@@ -221,7 +221,7 @@ void particle_scatterChannelParticlesInDisc(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 size;
     f32 height;
 
-    count = (func_150ADA68() * 20.0f + 29.0f) * 0.0001f * 5541.7695f;
+    count = (math_randomFloat() * 20.0f + 29.0f) * 0.0001f * 5541.7695f;
     if (count > 1.0f) {
         particle.maxC = 0x6231;
         particle.minC = 0x1A4D;
@@ -238,22 +238,22 @@ void particle_scatterChannelParticlesInDisc(Vec3f *pos, u8 arg1, s32 arg2) {
         particle.effect = 28;
         particle.maxHeight = 0.0f;
         do {
-            angle = func_150ADA20();
-            math_dirFromBinAngleXZ(angle & 0xFF, func_150ADA68() * 42.0f, &particle.pos.x, &particle.pos.z);
+            angle = math_random();
+            math_dirFromBinAngleXZ(angle & 0xFF, math_randomFloat() * 42.0f, &particle.pos.x, &particle.pos.z);
             particle.pos.x += pos->x;
             particle.pos.z += pos->z;
-            particle.shrinkRate = (func_150ADA68() * 16.0f + 29.0f) * 0.001f;
-            particle.growRate = (func_150ADA68() * 600.0f + 400.0f) * 0.001f;
-            size = (func_150ADA68() * 1205.0f + 304.0f) * 0.001f;
-            height = (func_150ADA68() * 1006.0f + 504.0f) * 0.001f;
+            particle.shrinkRate = (math_randomFloat() * 16.0f + 29.0f) * 0.001f;
+            particle.growRate = (math_randomFloat() * 600.0f + 400.0f) * 0.001f;
+            size = (math_randomFloat() * 1205.0f + 304.0f) * 0.001f;
+            height = (math_randomFloat() * 1006.0f + 504.0f) * 0.001f;
             particle.maxA = 22.6f * size;
             particle.minA = 13.786f * size;
             particle.maxB = 57.969f * height;
             particle.minB = 42.714f * height;
             particle.altB = 118.763f * height;
-            particle.life = func_150ADA20() % 31U + 20;
-            particle.scale = func_150ADA68() * 497.0f * 0.001f;
-            particle.unk2C = func_150ADA20() % 156U + 100;
+            particle.life = math_random() % 31U + 20;
+            particle.scale = math_randomFloat() * 497.0f * 0.001f;
+            particle.unk2C = math_random() % 156U + 100;
             particle_spawnChannelParticle(&particle, 10, 0, 0, arg1, arg2);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -362,7 +362,7 @@ void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 arg2,
         emit.handlers[4] = 0;
         emit.handlers[5] = 0;
         emit.blue = 0xFF;
-        emit.alpha = func_150ADA20() % 101U + 155;
+        emit.alpha = math_random() % 101U + 155;
         particle_spawnSimplePuffSpray(&emit, 0xFF);
     }
     particle_scatterChannelParticlesInDisc(&pos, arg2, arg3);
@@ -392,16 +392,16 @@ void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 arg2,
         desc.scale.y = 1.0f;
         desc.scale.z = 1.0f;
         desc.flags = 0x400C0001;
-        desc.unk44 = func_150ADA20() % 101U + 100;
+        desc.unk44 = math_random() % 101U + 100;
         desc.unk45 = 0xFF;
         desc.unk46 = 0;
         desc.unk47 = 6;
-        desc.rgba[0] = func_150ADA20() % 51U + 180;
-        desc.rgba[1] = func_150ADA20() % 101U;
-        desc.rgba[2] = func_150ADA20() % 1U;
-        randA = func_150ADA20();
-        randB = func_150ADA20();
-        randC = func_150ADA20();
+        desc.rgba[0] = math_random() % 51U + 180;
+        desc.rgba[1] = math_random() % 101U;
+        desc.rgba[2] = math_random() % 1U;
+        randA = math_random();
+        randB = math_random();
+        randC = math_random();
         sum = (randB & 1) + (randA & 1);
         particle_spawnAxisQuadParticleNoModel(&desc, 0, 18, 29, 0, sum, (u8)randC,
                       100.0f, 100.0f, NULL, &ground->tri, 0, 0, arg2, arg3);
@@ -502,7 +502,7 @@ void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 li
     desc.unk48 = 0;
     desc.fadeStart = argD;
     desc.fadeRate = argE;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         flag = 1;
     } else {
         flag = 0;
@@ -521,24 +521,24 @@ void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 li
 s32 particle_updateJitter(JitterParticle *p, ParticleJitter *w) {
     w->widthTimer -= gFrameDelta;
     if (w->widthTimer < 0.0f) {
-        w->widthTimer = func_150ADA68() * 4.0f;
-        w->widthTarget = func_150ADA68() * w->widthRange + w->widthBase;
+        w->widthTimer = math_randomFloat() * 4.0f;
+        w->widthTarget = math_randomFloat() * w->widthRange + w->widthBase;
     }
     p->head.def.width += (w->widthTarget - p->head.def.width) * 0.35f;
     w->heightTimer -= gFrameDelta;
     if (w->heightTimer < 0.0f) {
-        w->heightTimer = func_150ADA68() * 9.0f;
-        if (func_150ADA20() & 1) {
-            w->heightTarget = func_150ADA68() * w->heightRangeA + w->heightBase;
+        w->heightTimer = math_randomFloat() * 9.0f;
+        if (math_random() & 1) {
+            w->heightTarget = math_randomFloat() * w->heightRangeA + w->heightBase;
         } else {
-            w->heightTarget = func_150ADA68() * w->heightRangeB + w->heightBase;
+            w->heightTarget = math_randomFloat() * w->heightRangeB + w->heightBase;
         }
     }
     p->head.def.height += (w->heightTarget - p->head.def.height) * 0.4f;
     w->speedTimer -= gFrameDelta;
     if (w->speedTimer < 0.0f) {
-        w->speedTimer = func_150ADA68() * 7.0f;
-        w->speedTarget = func_150ADA68() * w->speedRange + w->speedBase;
+        w->speedTimer = math_randomFloat() * 7.0f;
+        w->speedTarget = math_randomFloat() * w->speedRange + w->speedBase;
     }
     w->speed += (w->speedTarget - w->speed) * 0.4f;
     p->head.def.frameSpeed = w->speed;

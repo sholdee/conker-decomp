@@ -63,10 +63,10 @@ void debug_checkDl(void *dl, u32 end) {
     debug_walkCheckDl(dl, end, NULL);
 }
 
-/** Posts error code 0xC00005B to D_8003C8E0 and calls func_150AD770. */
+/** Posts error code 0xC00005B to D_8003C8E0 and calls debug_fatalTrap. */
 #define DL_ERROR()                          \
     D_8003C8E0 = 0xC00005B;                 \
-    func_150AD770();
+    debug_fatalTrap();
 
 /** DL_ERROR(), then calls func_10007DA0 with D_800BE9C0 toggled for the call. */
 #define DL_ERROR_FLIP()                   \

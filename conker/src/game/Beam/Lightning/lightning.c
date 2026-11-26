@@ -81,7 +81,7 @@ void beam_updateLightning(Bolt *bolt) {
         bolt->jitterTimer -= gFrameDelta;
         if (bolt->jitterTimer < 0.0f) {
             beam_displaceLightning(bolt, 0, bolt->def.numPoints - 1, bolt->def.jitter, 100);
-            bolt->jitterTimer = func_150ADA68() * bolt->def.jitterDelayRange + bolt->def.jitterDelay;
+            bolt->jitterTimer = math_randomFloat() * bolt->def.jitterDelayRange + bolt->def.jitterDelay;
         }
         if (bolt->def.flags & BOLT_ACTIVE) {
             BoltPoint *pt;
@@ -264,8 +264,8 @@ void beam_displaceLightning(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth)
             dy = b->y - bolt->points[first].local.y;
             dz = b->z - bolt->points[first].local.z;
         }
-        bolt->points[middle].local.x = (a->x + dx * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
-        bolt->points[middle].local.y = (a->y + dy * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
+        bolt->points[middle].local.x = (a->x + dx * 0.5f) + (math_randomFloat() * (amp + amp) + -amp);
+        bolt->points[middle].local.y = (a->y + dy * 0.5f) + (math_randomFloat() * (amp + amp) + -amp);
         bolt->points[middle].local.z = a->z + dz * 0.5f;
     }
     beam_displaceLightning(bolt, first, middle, amp, depth - 1);
@@ -409,7 +409,7 @@ s32 beam_followBoneLightning(Bolt *bolt) {
             dx = bolt->def.start.x - (owner->xpos + link->targetOffset.x);
             dy = bolt->def.start.y - (owner->ypos + link->targetOffset.y);
             dz = bolt->def.start.z - (owner->zpos + link->targetOffset.z);
-            if (func_150AC9C0(bolt->def.start.x, bolt->def.start.y, bolt->def.start.z, dx, dy, dz, 0, 0,
+            if (collision_castRayWorld(bolt->def.start.x, bolt->def.start.y, bolt->def.start.z, dx, dy, dz, 0, 0,
                               &bolt->def.end.x, &bolt->def.end.y, &bolt->def.end.z, 0, &hit, 0, 0.0f)) {
                 if (math_isObjectHidden(hit)) {
                     link->linkFlags |= 1;

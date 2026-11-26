@@ -78,7 +78,7 @@ void effect_spawnDelayedBurst(Actor *actor, u8 owner, s32 kind) {
             spawn.unk47 = 7;
             spawn.unk48 = 0;
             for (spark.index = 0; spark.index < 2; spark.index++) {
-                burst->sparks[spark.index] = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x25, 0, 0x1D, ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), owner, kind);
+                burst->sparks[spark.index] = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x25, 0, 0x1D, ((math_random() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), owner, kind);
                 if (burst->sparks[spark.index] != NULL) {
                     memcpy(&burst->sparks[spark.index]->data, &spark, sizeof(spark));
                 }
@@ -355,8 +355,8 @@ void effect_spawnBonePointImpact(Actor *actor, u8 point, u8 owner, s32 kind) {
 
             data[0] = 0.0f;
             data[2] = 1369.429932f;
-            data[1] = func_150ADA68() * 3.0f + 10.0f;
-            data[3] = func_150ADA68() * 100.0f + 100.0f;
+            data[1] = math_randomFloat() * 3.0f + 10.0f;
+            data[3] = math_randomFloat() * 100.0f + 100.0f;
             data[4] = data[3] / (data[1] * data[1]);
             spawn.alpha = data[3];
             spawn.texture = 0x79;
@@ -379,7 +379,7 @@ void effect_spawnBonePointImpact(Actor *actor, u8 point, u8 owner, s32 kind) {
             spawn.fadeRate = 0xFF;
             spawn.scaleStart = 1;
             spawn.scaleRate = 1.0f;
-            spawn.flags = 0x4C000 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+            spawn.flags = 0x4C000 | ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0);
             spawn.primColorMode = 6;
             spawn.envColorMode = 6;
             spawn.updateFunc = 0x27;
@@ -445,16 +445,16 @@ void effect_updateLineEmitter(LineEmitter *effect) {
     VariantList *variants;
 
     data = &effect->data;
-    data->pending += (0.08000000566f + func_150ADA68() * 0.18f) * gFrameDelta;
+    data->pending += (0.08000000566f + math_randomFloat() * 0.18f) * gFrameDelta;
     while (data->pending > 1.0f) {
         math_randomPointInZone(data->from, &from);
         math_randomPointInZone(data->to, &to);
         variants = &gSpiralVariantLists[1];
-        i = func_150ADA20() % variants->count;
-        duration = func_150ADA68() * 25.0f + 30.0f;
+        i = math_random() % variants->count;
+        duration = math_randomFloat() * 25.0f + 30.0f;
         // matching: the "* 1" is kept; a plain random + 1.0f schedules differently
         particle_spawnSpiral(&from, &to, variants->ids[i], duration, 1.0f / duration,
-                      variants->scales[i] * (func_150ADA68() * 1 + 1), 1, func_150ADA20() % 3 + 750,
+                      variants->scales[i] * (math_randomFloat() * 1 + 1), 1, math_random() % 3 + 750,
                       effect->base.header.owner, effect->base.header.kind);
         data->pending -= 1.0f;
     }

@@ -347,7 +347,7 @@ void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
         }
         for (i = 0; i < emitter->burst; i++) {
             if (emitter->chance != 0) {
-                roll = func_150ADA20() & 0xFF;
+                roll = math_random() & 0xFF;
                 if (emitter->flags & 4) {
                     threshold = emitter->chance;
                     threshold = (emitter->timer * threshold) / emitter->initialTimer;
@@ -385,10 +385,10 @@ void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
                     toY = gSpriteEmitterSegments[emitter->x][4];
                     toZ = gSpriteEmitterSegments[emitter->x][5];
                     if (gSpriteEmitterSegments[emitter->x][6] != 0) {
-                        toZ += func_150ADA20() & gSpriteEmitterSegments[emitter->x][6];
+                        toZ += math_random() & gSpriteEmitterSegments[emitter->x][6];
                     }
-                    func_150A7960(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
-                    func_150A7960(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
+                    math_transformPoint(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
+                    math_transformPoint(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
                     velX = (toX - fromX) * 8.0f;
                     velY = (toY - fromY) * 8.0f;
                     velZ = (toZ - fromZ) * 8.0f;
@@ -413,7 +413,7 @@ void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
                     y += offset * velY;
                     velY = speed * velY;
                     velocityY = velY;
-                    func_150ADA20();
+                    math_random();
                     x += velX * offset;
                     z += velZ * offset;
                     velX *= speed;
@@ -426,22 +426,22 @@ void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
                     velZLow = fixed.bytes[3];
                 }
                 if (emitter->radiusXZ != 0) {
-                    angle = func_150ADA20();
+                    angle = math_random();
                     s = math_sinBinAngle(angle);
                     c = math_cosBinAngle(angle);
-                    speed = (func_150ADA20() & 0xFFFF) * emitter->radiusXZ * (1.0f / 65536.0f);
+                    speed = (math_random() & 0xFFFF) * emitter->radiusXZ * (1.0f / 65536.0f);
                     x += speed * s;
                     z += speed * c;
                 }
                 if (emitter->radiusY != 0) {
-                    s = math_sinBinAngle(func_150ADA20() & 0xFF);
-                    speed = (func_150ADA20() & 0xFFFF) * emitter->radiusY * (1.0f / 65536.0f);
+                    s = math_sinBinAngle(math_random() & 0xFF);
+                    speed = (math_random() & 0xFFFF) * emitter->radiusY * (1.0f / 65536.0f);
                     y += (s32)(speed * s);
                 }
                 scaleX = emitter->scaleX;
                 scaleY = emitter->scaleY;
                 if (emitter->scaleXRandom != 0) {
-                    scaleRandom = func_150ADA20() % emitter->scaleXRandom;
+                    scaleRandom = math_random() % emitter->scaleXRandom;
                 } else {
                     scaleRandom = 0;
                 }
@@ -451,38 +451,38 @@ void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
                 } else {
                     scaleX += scaleRandom;
                     if (emitter->scaleYRandom != 0) {
-                        scaleY += func_150ADA20() % emitter->scaleYRandom;
+                        scaleY += math_random() % emitter->scaleYRandom;
                     }
                 }
                 if (!(emitter->flags & 8) && !(emitter->flags & 0x80)) {
                     velocityY = emitter->velocityY;
                     if (emitter->velocityYRandom != 0) {
-                        velocityY += func_150ADA20() % emitter->velocityYRandom;
+                        velocityY += math_random() % emitter->velocityYRandom;
                     }
                     velXHigh = emitter->velocityXHigh;
                     if (emitter->velocityXHighRandom != 0) {
-                        velXHigh += func_150ADA20() % emitter->velocityXHighRandom;
+                        velXHigh += math_random() % emitter->velocityXHighRandom;
                         if (velXHigh >= 0x100) {
                             velXHigh = 0xFF;
                         }
                     }
                     velXLow = emitter->velocityXLow;
                     if (emitter->velocityXLowRandom != 0) {
-                        velXLow += func_150ADA20() % emitter->velocityXLowRandom;
+                        velXLow += math_random() % emitter->velocityXLowRandom;
                         if (velXLow >= 0x100) {
                             velXLow = 0xFF;
                         }
                     }
                     velZHigh = emitter->velocityZHigh;
                     if (emitter->velocityZHighRandom != 0) {
-                        velZHigh += func_150ADA20() % emitter->velocityZHighRandom;
+                        velZHigh += math_random() % emitter->velocityZHighRandom;
                         if (velZHigh >= 0x100) {
                             velZHigh = 0xFF;
                         }
                     }
                     velZLow = emitter->velocityZLow;
                     if (emitter->velocityZLowRandom != 0) {
-                        velZLow += func_150ADA20() % emitter->velocityZLowRandom;
+                        velZLow += math_random() % emitter->velocityZLowRandom;
                         if (velZLow >= 0x100) {
                             velZLow = 0xFF;
                         }
@@ -1027,10 +1027,10 @@ void particle_getRandomDirection(s32 flags, f32 *outX, f32 *outY, f32 *outZ) {
     s32 angle;
 
     mask = (flags & 0x40) ? 0x3F : 0x7F;
-    angle = func_150ADA20() & mask;
+    angle = math_random() & mask;
     *outY = math_cosBinAngle(angle);
     horizontal = math_sinBinAngle(angle);
-    angle = func_150ADA20() & 0xFF;
+    angle = math_random() & 0xFF;
     yawB = math_cosBinAngle(angle);
     yawA = math_sinBinAngle(angle);
     *outX = horizontal * yawA;
@@ -1096,9 +1096,9 @@ void particle_spawnQuadEdgeStyleParticles(f32 (*verts)[3], f32 x, f32 z, u8 styl
             pz = p0[2] + (p1[2] - p0[2]) * t;
             if (i) { // matching: the empty branch on i steers IDO's register allocation
             }
-            lifetime = (func_150ADA20() & 0x1F) + 0xF;
-            size = (func_150ADA20() % sizeRandom) + sizeMin;
-            velocityY = (func_150ADA20() % velocityYRandom) + velocityYMin;
+            lifetime = (math_random() & 0x1F) + 0xF;
+            size = (math_random() % sizeRandom) + sizeMin;
+            velocityY = (math_random() % velocityYRandom) + velocityYMin;
             particle_newStyleParticle(px, py, pz, 0xD, 0,
                 color[0], color[1], color[2], 0, 0, 0, 0, 2,
                 (u8)((velocityX >> 8) & 0xFF), (u8)(velocityX & 0xFF), (u8)((velocityZ >> 8) & 0xFF), (u8)(velocityZ & 0xFF),
@@ -1172,7 +1172,7 @@ s32 func_151707E0(StyleParticle *particle) {
     alpha = particle->alpha;
     if (lifetime != 0) {
         if (alpha == 0) {
-            particle->lifetime = (func_150ADA20() % 25U) + 200;
+            particle->lifetime = (math_random() % 25U) + 200;
         }
         if (alpha != 0xFE) {
             alpha += D_800BE9E4 << 6;

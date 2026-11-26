@@ -346,7 +346,7 @@ void anim_pickIdleSequence(void) {
             idle->timer = 0;
             idle->phase = 0;
             seq = 0xC;
-            func_1507FF94(gCurrentActor);
+            anim_sendIdleDelayEvent(gCurrentActor);
         } else {
             seq = 0xB; // matching: the redundant store keeps the else-branch block
         }
@@ -818,7 +818,7 @@ void anim_updateIdleTimer(Actor *actor) {
         if (D_800BE9E4 < delay) {
             actor->mv->idle.delay = delay - D_800BE9E4;
         } else {
-            func_1507FF94(actor);
+            anim_sendIdleDelayEvent(actor);
             actor->mv->idle.delay = 0;
         }
     }
@@ -826,7 +826,7 @@ void anim_updateIdleTimer(Actor *actor) {
 }
 
 /* Sends event 0xD about actor (pointer plus unique id) to both event handlers. */
-void func_1507FF94(Actor *actor) {
+void anim_sendIdleDelayEvent(Actor *actor) {
     ActorRef event;
 
     event.actor = actor;

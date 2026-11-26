@@ -333,7 +333,7 @@ void view_projectPoint(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY
     f32 projZ;
     f32 invW;
 
-    func_150A7A00(gViewProjMatrices[view], x, y, z, &projX, &projY, &projZ, &invW);
+    math_transformPointW(gViewProjMatrices[view], x, y, z, &projX, &projY, &projZ, &invW);
     invW = 1.0f / invW;
     *screenX = RENDER_VIEWS[view].centerX + (RENDER_VIEWS[view].halfWidth + 5.0f) * projX * invW;
     *screenY = RENDER_VIEWS[view].centerY - (RENDER_VIEWS[view].halfHeight + 5.0f) * projY * invW;

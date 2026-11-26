@@ -107,12 +107,12 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
             spawn.pos.x = gExplosionOffsets[i].x + pos->x;
             spawn.pos.y = gExplosionOffsets[i].y + pos->y;
             spawn.pos.z = gExplosionOffsets[i].z + pos->z;
-            spawn.vel.y = gExplosionRiseSpeeds[idx] + func_150ADA68() * gExplosionRiseSpeedRanges[idx];
+            spawn.vel.y = gExplosionRiseSpeeds[idx] + math_randomFloat() * gExplosionRiseSpeedRanges[idx];
             spawn.rotVel.x = gExplosionSpinSpeeds[i] * gExplosionSpinWeightsX[i] * 0.01900000125f;
             spawn.rotVel.z = gExplosionSpinSpeeds[i] * gExplosionSpinWeightsZ[i] * 0.01900000125f;
-            spawn.gravity = func_150ADA68() * 0.2080000043f + -1.032000065f;
-            spawn.lifetime = func_150ADA20() % 111U + 130;
-            if (func_150ADA20() & 1) {
+            spawn.gravity = math_randomFloat() * 0.2080000043f + -1.032000065f;
+            spawn.lifetime = math_random() % 111U + 130;
+            if (math_random() & 1) {
                 spawn.model = 0xC4;
             } else {
                 spawn.model = 0xC5;
@@ -126,9 +126,9 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
     particle_startPlayerCameraWobbles(pos, 506.0f, 1013.0f, 0.0009871668881f, 5, *(u8 *)&owner, kind);
     particle_spawnBlastSpray(pos, *(u8 *)&owner, kind);
     particle_spawnLightFlash(pos, *(u8 *)&owner, kind);
-    particle_spawnGrowFade(pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
-                  func_150ADA20() % 56U + 200, 0.0f, *(u8 *)&owner, kind);
-    debris.count = (func_150ADA20() & 3) + 3;
+    particle_spawnGrowFade(pos, math_randomFloat() * 4.0f + 12.0f, 1.6409999f,
+                  math_random() % 56U + 200, 0.0f, *(u8 *)&owner, kind);
+    debris.count = (math_random() & 3) + 3;
     debris.lifetime = 190;
     debris.yawBase = yaw - 0x40;
     debris.yawRange = 0x80;
@@ -189,11 +189,11 @@ void effect_dropPointEffect(PointEffect *effect) {
         groundPos.z = pos->z;
         onGround = 1;
     }
-    particle_startRandomEmitter(onGround ? &groundPos : pos, func_150ADA20() % 62U + 120, effect->base.header.owner, effect->base.header.kind);
+    particle_startRandomEmitter(onGround ? &groundPos : pos, math_random() % 62U + 120, effect->base.header.owner, effect->base.header.kind);
     pos = onGround ? &groundPos : &effect->pos;
     center = *pos;
     center.y += 500.0f;
-    beam_spawnAtGroundPoints(&center, center.y - 1000.0f, 250.0f, &hit, func_150ADA20() % 3U + 3, 1, 0, effect->base.header.owner,
+    beam_spawnAtGroundPoints(&center, center.y - 1000.0f, 250.0f, &hit, math_random() % 3U + 3, 1, 0, effect->base.header.owner,
                   effect->base.header.kind);
 }
 
@@ -205,21 +205,21 @@ void effect_spawnScatteredParticles(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s3
     s32 count;
 
     emitter.pos = *pos;
-    scaleA = func_150ADA68() * 0.5f + 1.0f;
-    scaleB = func_150ADA68() * 0.5f + 1.0f;
+    scaleA = math_randomFloat() * 0.5f + 1.0f;
+    scaleB = math_randomFloat() * 0.5f + 1.0f;
     emitter.maxA = 22.6f * scaleA;
     emitter.minA = 13.786f * scaleA;
     emitter.maxC = 0x6231; emitter.minC = 0x1A4D; // matching: same line, -g3 line numbers order the two sh
     emitter.maxB = 57.969f * scaleB;
     emitter.minB = 42.714f * scaleB;
     emitter.altB = 118.763f * scaleB;
-    emitter.life = func_150ADA20() % 151U + 150;
+    emitter.life = math_random() % 151U + 150;
     emitter.color[0] = 0;
     emitter.color[1] = 0;
     emitter.color[2] = 0;
     emitter.color[3] = 255;
     emitter.flags = 1;
-    emitter.unk2C = func_150ADA20() % 156U + 100;
+    emitter.unk2C = math_random() % 156U + 100;
     emitter.unk2D = 255;
     emitter.unk2E = 0;
     emitter.unk2F = 1;
@@ -230,19 +230,19 @@ void effect_spawnScatteredParticles(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s3
     emitter.shrinkRate = 0.0450000018f;
     emitter.growRate = 0.699999988f;
     particle_spawnChannelParticle(&emitter, 10, 0, 0, owner, kind);
-    for (count = func_150ADA20() % 3U + 1; count > 0; count--) {
-        math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, 30.0f, &emitter.pos.x, &emitter.pos.z);
+    for (count = math_random() % 3U + 1; count > 0; count--) {
+        math_dirFromBinAngleXZ(math_random() & 0xFF, 30.0f, &emitter.pos.x, &emitter.pos.z);
         emitter.pos.x += pos->x;
         emitter.pos.z += pos->z;
-        scaleA = func_150ADA68() * 0.5f + 0.75f;
-        scaleB = func_150ADA68() * 0.5f + 0.75f;
+        scaleA = math_randomFloat() * 0.5f + 0.75f;
+        scaleB = math_randomFloat() * 0.5f + 0.75f;
         emitter.maxA = 22.6f * scaleA;
         emitter.minA = 13.786f * scaleA;
         emitter.maxB = 57.969f * scaleB;
         emitter.minB = 42.714f * scaleB;
         emitter.altB = 118.763f * scaleB;
-        emitter.life = func_150ADA20() % 151U + 150;
-        emitter.unk2C = func_150ADA20() % 156U + 100;
+        emitter.life = math_random() % 151U + 150;
+        emitter.unk2C = math_random() % 156U + 100;
         emitter.unk2F = 0;
         particle_spawnChannelParticle(&emitter, 10, 0, 0, owner, kind);
     }

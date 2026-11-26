@@ -10,14 +10,14 @@ s32 script_streamCommand(s32 id, s32 opcode, ScriptCmd *cmd) {
     case 0: {
         s32 volume = 0x7FFF;
 
-        if (D_800D3840 >= 3) {
+        if (gScriptCmdWordCount >= 3) {
             volume = cmd->a[0].w;
         }
         mp3_startTrack(id, volume, 64);
         return 1;
     }
     case 1:
-        if (D_800D3840 == 4) {
+        if (gScriptCmdWordCount == 4) {
             func_151F2D6C(cmd->a[0].w, cmd->a[1].w);
         } else {
             func_151F2D6C(cmd->a[0].w, 0);
@@ -58,18 +58,18 @@ s32 script_musicCommand(s32 id, u32 opcode, ScriptCmd *cmd) {
         music_stopTune(id & 0xFFF, cmd->a[0].w);
         return 1;
     case 3:
-        if (D_800D3840 == 5) {
+        if (gScriptCmdWordCount == 5) {
             return music_fadeChannelVolume(id & 0xFFF, cmd->a[0].w, cmd->a[1].w, cmd->a[2].w);
         }
         return music_fadeChannelVolume(id & 0xFFF, cmd->a[0].w, cmd->a[1].w, 60);
     case 4:
-        if (D_800D3840 == 5) {
+        if (gScriptCmdWordCount == 5) {
             return music_jumpToMarker(id & 0xFFF, cmd->a[0].w, cmd->a[1].w, cmd->a[2].w & 0xFFF);
         }
         return music_jumpToMarker(id & 0xFFF, cmd->a[0].w, cmd->a[1].w, id & 0xFFF);
     case 6:
         mode = 1;
-        if (D_800D3840 == 3) {
+        if (gScriptCmdWordCount == 3) {
             mode = cmd->a[0].w;
         }
         music_pauseTune(id & 0xFFF, mode);

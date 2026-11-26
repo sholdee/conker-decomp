@@ -5,7 +5,7 @@
 
 /*
  * This unit's .data and .bss, by their place between game/Mp/MpGame/mpgame's and game/Hud/PlayerOverlay/playeroverlay's: no function
- * here reads them. D_80087358 is read by the hand-written func_150ADAF0 (game_DAFA0.s);
+ * here reads them. D_80087358 is read by the hand-written script_runTask (game_DAFA0.s);
  * gLinkGroupCount and gLinkGroups by the link-group functions at the end of game/Mp/MpGame/mpgame (func_15017578
  * in game/Player/StatsInit/statsinit fills them).
  */

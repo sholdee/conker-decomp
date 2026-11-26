@@ -312,7 +312,7 @@ void level_prepareObjects(s32 arg0) {
         if ((obj->state & 1) == 1) {
             gfx_getObjectModelMtx(mtx, obj);
             for (j = 0; j < obj->numVertices; j++) {
-                func_150A7960(mtx, obj->srcVertices[j].v.ob[0], obj->srcVertices[j].v.ob[1],
+                math_transformPoint(mtx, obj->srcVertices[j].v.ob[0], obj->srcVertices[j].v.ob[1],
                               obj->srcVertices[j].v.ob[2], &x, &y, &z);
                 obj->vertices[0][j].v.ob[0] = x;
                 obj->vertices[0][j].v.ob[1] = y;
@@ -322,8 +322,8 @@ void level_prepareObjects(s32 arg0) {
         }
         collision_selectMap(2);
         if ((obj->viewFlags & 0x80) == 0x80 && (obj->object_status & 0x60) != 0x20) {
-            D_800D37E0[0] = i;
-            func_150A44F0(1, D_800D37E0, 1);
+            gSurfSetA[0] = i;
+            collision_transformPropTris(1, gSurfSetA, 1);
         }
     }
     for (i = 0; i < gWorldObjectCount; i++) {

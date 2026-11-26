@@ -301,24 +301,24 @@ s32 effect_updateFallingStream(StreamActor *actor) {
 
                 state->splashCount += state->splashRate;
                 while (state->splashCount > 1.0f) {
-                    speed = func_150ADA68() * state->splashSpeedRange + state->splashSpeedBase;
-                    angle = func_150ADA20();
+                    speed = math_randomFloat() * state->splashSpeedRange + state->splashSpeedBase;
+                    angle = math_random();
                     sine1 = math_cosBinAngleMasked(angle);
                     cosine1 = math_cosBinAngleMasked(angle - 0x40);
-                    angle2 = (func_150ADA20() % (state->splashPitchRange + 1)) + state->splashPitchBase;
+                    angle2 = (math_random() % (state->splashPitchRange + 1)) + state->splashPitchBase;
                     sine2 = math_cosBinAngleMasked(angle2);
                     cosine2 = math_cosBinAngleMasked(angle2 - 0x40);
-                    radius = func_150ADA68() * state->splashRadius;
+                    radius = math_randomFloat() * state->splashRadius;
                     pos.x = rec->pos.x + radius * cosine1;
                     pos.y = state->floor;
                     pos.z = rec->pos.z + radius * sine1;
                     vel.x = speed * sine2 * cosine1;
                     vel.y = -speed * cosine2;
                     vel.z = speed * sine2 * sine1;
-                    particle_spawnSplash(&pos, &vel, func_150ADA68() * state->splashSizeRange + state->splashSizeBase,
+                    particle_spawnSplash(&pos, &vel, math_randomFloat() * state->splashSizeRange + state->splashSizeBase,
                                   state->splashLifetime, (state->trailTexture == 0x18) ? 0x7D : 0xFF,
-                                  func_150ADA68() * state->splashScaleRange + state->splashScaleBase,
-                                  func_150ADA20() % (state->splashCountRange + 1) + state->splashCountBase, 1,
+                                  math_randomFloat() * state->splashScaleRange + state->splashScaleBase,
+                                  math_random() % (state->splashCountRange + 1) + state->splashCountBase, 1,
                                   1.7f, 1.7f, 1, (state->trailTexture == 0x18) ? 7 : 2, 0, 0x10, 0xF, 0,
                                   actor->head.header.owner, actor->head.header.kind);
                     state->splashCount -= 1.0f;
@@ -357,22 +357,22 @@ s32 effect_updateFallingStream(StreamActor *actor) {
                     packet.y = state->floor;
                     packet.life = state->dropLifetime;
                     do {
-                        speed = func_150ADA68() * state->dropSpeedRange + state->dropSpeedBase;
-                        angle = func_150ADA20();
+                        speed = math_randomFloat() * state->dropSpeedRange + state->dropSpeedBase;
+                        angle = math_random();
                         sine1 = math_cosBinAngleMasked(angle);
                         cosine1 = math_cosBinAngleMasked(angle - 0x40);
-                        angle2 = (func_150ADA20() % (state->dropPitchRange + 1)) + state->dropPitchBase;
+                        angle2 = (math_random() % (state->dropPitchRange + 1)) + state->dropPitchBase;
                         sine2 = math_cosBinAngleMasked(angle2);
                         cosine2 = math_cosBinAngleMasked(angle2 - 0x40);
-                        radius = func_150ADA68() * state->dropRadius;
+                        radius = math_randomFloat() * state->dropRadius;
                         packet.x = rec->pos.x + radius * cosine1;
                         packet.z = rec->pos.z + radius * sine1;
                         packet.velX = speed * sine2 * cosine1;
                         packet.velY = -speed * cosine2;
                         packet.velZ = speed * sine2 * sine1;
-                        packet.accelY = (func_150ADA20() % (state->dropAccelRange + 1)) + state->dropAccelBase;
-                        packet.fadeStep = (func_150ADA20() % (state->dropFadeRange + 1)) + state->dropFadeBase;
-                        packet.width = packet.height = func_150ADA68() * state->dropSizeRange + state->dropSizeBase;
+                        packet.accelY = (math_random() % (state->dropAccelRange + 1)) + state->dropAccelBase;
+                        packet.fadeStep = (math_random() % (state->dropFadeRange + 1)) + state->dropFadeBase;
+                        packet.width = packet.height = math_randomFloat() * state->dropSizeRange + state->dropSizeBase;
                         if (effect_spawnBillboard(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind) == NULL) {
                             ok = 0;
                         }
@@ -404,8 +404,8 @@ s32 effect_updateFallingStream(StreamActor *actor) {
                     ring.rgba[3] = 0xFF;
                     ring.renderModes = 0x30001;
                     do {
-                        scale = func_150ADA68() * state->ringScaleRange + state->ringScaleBase;
-                        switch (func_150ADA20() & 1) {
+                        scale = math_randomFloat() * state->ringScaleRange + state->ringScaleBase;
+                        switch (math_random() & 1) {
                         case 0:
                             ring.texture = 0x1D;
                             break;
@@ -414,7 +414,7 @@ s32 effect_updateFallingStream(StreamActor *actor) {
                             break;
                         }
                         if (particle_spawnFlatQuadSpriteNoModel(&ring, NULL, 5, 0, rec->pos.x, state->ringY, rec->pos.z, scale, scale,
-                                          func_150ADA20() & 0xFF, (func_150ADA20() & 1) + (func_150ADA20() & 1), 0, 0xFF, 0) == NULL) {
+                                          math_random() & 0xFF, (math_random() & 1) + (math_random() & 1), 0, 0xFF, 0) == NULL) {
                             ok = 0;
                         }
                         state->ringCount -= 1.0f;
@@ -459,8 +459,8 @@ s32 effect_updateFallingStream(StreamActor *actor) {
         timer = state->soundTimer;
         timer -= D_800BE9E4; // matching: a separate statement (one expression reorders the loads)
         if (timer <= 0) {
-            sound_play(func_150ADA20() % 10U + state->sound, 0x7FFF, 0x40, 0, 0);
-            timer = func_150ADA20() & 0xC;
+            sound_play(math_random() % 10U + state->sound, 0x7FFF, 0x40, 0, 0);
+            timer = math_random() & 0xC;
         }
         state->soundTimer = timer;
     }
@@ -495,8 +495,8 @@ s32 effect_updateFallingStreamTrail(StreamActor *actor) {
 
     state = actor->state;
     records = actor->records;
-    state->angleX += (func_150ADA20() % (state->angleXRange + 1)) * D_800BE9E4;
-    state->angleZ += (func_150ADA20() % (state->angleZRange + 1)) * D_800BE9E4;
+    state->angleX += (math_random() % (state->angleXRange + 1)) * D_800BE9E4;
+    state->angleZ += (math_random() % (state->angleZRange + 1)) * D_800BE9E4;
     state->count += state->rate * gFrameDelta;
     if (state->count > 0.99999f) {
         inverse = 1.0f / state->count;
@@ -542,11 +542,11 @@ s32 effect_updateFallingStreamTrail(StreamActor *actor) {
                         packet.y = actor->head.tmpl.pos.y;
                         packet.life = state->lifetime;
                         do {
-                            speed = func_150ADA68() * state->speedRange + state->speedBase;
-                            yaw = func_150ADA20();
+                            speed = math_randomFloat() * state->speedRange + state->speedBase;
+                            yaw = math_random();
                             sinYaw = math_cosBinAngleMasked(yaw);
                             cosYaw = math_cosBinAngleMasked(yaw - 0x40);
-                            pitch = (func_150ADA20() % (state->pitchRange + 1)) + state->pitchBase;
+                            pitch = (math_random() % (state->pitchRange + 1)) + state->pitchBase;
                             sinPitch = math_cosBinAngleMasked(pitch);
                             cosPitch = math_cosBinAngleMasked(pitch - 0x40);
                             packet.x = actor->head.tmpl.pos.x + state->radius * cosYaw;
@@ -554,9 +554,9 @@ s32 effect_updateFallingStreamTrail(StreamActor *actor) {
                             packet.velX = speed * sinPitch * cosYaw;
                             packet.velY = -speed * cosPitch;
                             packet.velZ = speed * sinPitch * sinYaw;
-                            packet.accelY = func_150ADA68() * state->accelRange + state->accelBase;
-                            packet.fadeStep = (func_150ADA20() % (state->fadeRange + 1)) + state->fadeBase;
-                            packet.width = packet.height = func_150ADA68() * state->sizeRange + state->sizeBase;
+                            packet.accelY = math_randomFloat() * state->accelRange + state->accelBase;
+                            packet.fadeStep = (math_random() % (state->fadeRange + 1)) + state->fadeBase;
+                            packet.width = packet.height = math_randomFloat() * state->sizeRange + state->sizeBase;
                             if (effect_spawnBillboard(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind) == NULL) {
                                 spawned = FALSE;
                             }
@@ -570,11 +570,11 @@ s32 effect_updateFallingStreamTrail(StreamActor *actor) {
                     records[actor->head.end].pos.y = actor->head.tmpl.pos.y;
                     records[actor->head.end].pos.z = z;
                     records[actor->head.end].velocityY = state->velocityY;
-                    state->widthAngle += func_150ADA20() % (state->widthAngleRange + 1);
+                    state->widthAngle += math_random() % (state->widthAngleRange + 1);
                     records[actor->head.end].width = math_cosBinAngleMasked(state->widthAngle - 0x40) * state->widthRange + state->widthBase;
                     records[actor->head.end].alpha = state->alpha;
                     records[actor->head.end].texCoord = state->texCoord;
-                    state->texCoord += state->texCoordStep + (func_150ADA20() % (state->texCoordStepRange + 1));
+                    state->texCoord += state->texCoordStep + (math_random() % (state->texCoordStepRange + 1));
                     records[actor->head.end].velocityY += state->gravity * scale;
                     records[actor->head.end].pos.y += records[actor->head.end].velocityY * scale;
                     actor->head.end++;

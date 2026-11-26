@@ -47,16 +47,16 @@ s32 trail_spawnKind2Trail(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX
     spawn.pos.z = z;
 
     do {
-        pitch = (func_150ADA20() % 13U) - 63;
+        pitch = (math_random() % 13U) - 63;
         pitchSin = math_cosBinAngleMasked(pitch);
         pitchCos = math_cosBinAngleMasked(pitch - 64);
         angleSin = math_cosBinAngleMasked(angle);
         angleCos = math_cosBinAngleMasked(angle - 64);
-        speed = func_150ADA68() * 17.4f + 25.5f;
-        spawn.itemCount = func_150ADA20() % 9U + 5;
-        spawn.life = (func_150ADA20() & 0x3F) + 90;
-        motion.halfWidth = func_150ADA68() * 20.2f + 24.7f;
-        motion.gravity = func_150ADA68() * 0.2f + 0.4f;
+        speed = math_randomFloat() * 17.4f + 25.5f;
+        spawn.itemCount = math_random() % 9U + 5;
+        spawn.life = (math_random() & 0x3F) + 90;
+        motion.halfWidth = math_randomFloat() * 20.2f + 24.7f;
+        motion.gravity = math_randomFloat() * 0.2f + 0.4f;
         motion.velocity.x = speed * pitchSin * angleCos;
         motion.velocity.y = -speed * pitchCos;
         motion.velocity.z = speed * pitchSin * angleSin;

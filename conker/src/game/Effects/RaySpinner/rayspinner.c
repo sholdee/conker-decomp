@@ -69,7 +69,7 @@ void effect_updateRaySpinner(FF0E0Object *obj) {
         state->rotation.x += state->angularVelocity.x * gFrameDelta;
         state->rotation.y += state->angularVelocity.y * gFrameDelta;
         state->rotation.z += state->angularVelocity.z * gFrameDelta;
-        func_150A8050(mtx, state->rotation.x, state->rotation.y, state->rotation.z);
+        math_mtxRotateRPYF(mtx, state->rotation.x, state->rotation.y, state->rotation.z);
         for (i = 0; i < 6; i++) {
             child = state->children[i];
             if (child != NULL) {
@@ -80,8 +80,8 @@ void effect_updateRaySpinner(FF0E0Object *obj) {
                 f32 hitY;
                 f32 hitX;
                 f32 fraction;
-                func_150A7960(mtx, gRaySpinnerDirections[i].x, gRaySpinnerDirections[i].y, gRaySpinnerDirections[i].z, &targetX, &targetY, &targetZ);
-                if (func_150AC9C0(state->position.x, state->position.y, state->position.z, targetX, targetY, targetZ,
+                math_transformPoint(mtx, gRaySpinnerDirections[i].x, gRaySpinnerDirections[i].y, gRaySpinnerDirections[i].z, &targetX, &targetY, &targetZ);
+                if (collision_castRayWorld(state->position.x, state->position.y, state->position.z, targetX, targetY, targetZ,
                                   NULL, NULL, &hitX, &hitY, &hitZ, &fraction, NULL, NULL, 0.0f)) {
                     child->unk14->unk9 = 0;
                     child->unk14->unkE = hitX;

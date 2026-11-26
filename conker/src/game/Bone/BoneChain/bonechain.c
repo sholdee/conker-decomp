@@ -22,7 +22,7 @@ static const u16 gChainPosingAnims[90] = {
 };
 static const u16 D_80098830[3] = { 0xE9, 0x48, 0x4B };
 
-u8 D_800C4000;            /* one bit per object: reset its chain once it has bones again */
+u8 gBoneChainResetMask;            /* one bit per object: reset its chain once it has bones again */
 static f32 gChainAnchor[3]; /* chain anchor position */
 
 /* Allocates and initialises the bone chain state of an object. */
@@ -30,7 +30,7 @@ void bone_initChain(Actor *obj) {
     obj->mv->boneChain = allocate_memory(sizeof(BoneChain), 1, 0, 0);
     bzero(obj->mv->boneChain, sizeof(BoneChain));
     obj->mv->boneChain->swaySpeed = 30.0f;
-    obj->mv->boneChain->swayTimer = func_150ADA20() % 30U;
+    obj->mv->boneChain->swayTimer = math_random() % 30U;
 }
 
 /*
@@ -128,13 +128,13 @@ void bone_updateChain(s32 objIndex) {
     }
     chain = obj->mv->boneChain;
     mode = bone_isChainSimulated(objIndex, chain);
-    resetMask = &D_800C4000; /* one bit per object: reset the chain once it has bones again */
+    resetMask = &gBoneChainResetMask; /* one bit per object: reset the chain once it has bones again */
     if (obj->ob_matrix_ptr == NULL) {
         *resetMask |= 1 << objIndex;
         return;
     }
-    if (D_800C4000 & (1 << objIndex)) {
-        *resetMask = D_800C4000 & ~(1 << objIndex);
+    if (gBoneChainResetMask & (1 << objIndex)) {
+        *resetMask = gBoneChainResetMask & ~(1 << objIndex);
         reset = 1;
     } else {
         reset = 0;
@@ -148,7 +148,7 @@ void bone_updateChain(s32 objIndex) {
         chain->bobPhase = 0.0f;
         chain->swayAngle = 0.0f;
         chain->swayAmp = 100.0f;
-        chain->swayTimer = func_150ADA20() % 30U;
+        chain->swayTimer = math_random() % 30U;
     }
     if (mode == 0) {
         if (D_800BE9E4 < chain->blendTimer) {
@@ -292,9 +292,9 @@ void bone_updateChain(s32 objIndex) {
                 chain->swayTimer -= D_800BE9E4;
                 if (chain->swayTimer <= 0) {
                     chain->swayAngle = 0.0f;
-                    chain->swayAmp = func_150ADA20() % 100U;
-                    bob = func_150ADA20() % 10U + 10;
-                    if (func_150ADA20() & 1) {
+                    chain->swayAmp = math_random() % 100U;
+                    bob = math_random() % 10U + 10;
+                    if (math_random() & 1) {
                         chain->swaySpeed = bob;
                     } else {
                         chain->swaySpeed = -bob;
@@ -320,7 +320,7 @@ void bone_updateChain(s32 objIndex) {
                                 chain->swayAngle += 360.0f;
                             }
                         } else {
-                            chain->swayTimer = func_150ADA20() % 200U;
+                            chain->swayTimer = math_random() % 200U;
                         }
                     }
                 }
@@ -437,7 +437,7 @@ void bone_rebuildChainMatrices(s32 objIndex, s32 mode, f32 blend, BoneChain *cha
     f32 (*bone)[4];
 
     obj = &movement_obj[objIndex];
-    func_150A9B0C(rootMtx, obj->vtilt, obj->theta, obj->lean_angle, 1.0f, 1.0f, 1.0f);
+    math_mtxRotScaleF(rootMtx, obj->vtilt, obj->theta, obj->lean_angle, 1.0f, 1.0f, 1.0f);
     joint = 0;
     boneOffset = 24 * sizeof(MtxF);
 

@@ -86,7 +86,7 @@ struct DefParticleHead;
 //func_101A0538
 
 
-void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
+void math_mtxScaleF(MtxF mtx, f32 x, f32 y, f32 z);
 #include "subsystems.h"
 
 #endif

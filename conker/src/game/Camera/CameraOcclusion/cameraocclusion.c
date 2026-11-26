@@ -60,7 +60,7 @@ void camera_updateFloorHeights(Camera *arg0) {
         return;
     }
     if ((arg0->Snap != 0) || (arg0->AvailableModes & 0x400000) || (arg0->SpecialFlags & 0x40) ||
-        (func_150A3FC4(arg0->eye.x, arg0->eye.z, arg0->TrianglePtr, arg0->floorTri.v, &arg0->floorY) == 0)) {
+        (collision_getTriHeightAt(arg0->eye.x, arg0->eye.z, arg0->TrianglePtr, arg0->floorTri.v, &arg0->floorY) == 0)) {
         collision_findFloorEx(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->floorY, &arg0->waterY, &arg0->Attributes, 0,
                       arg0->eye.x, arg0->floorY, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
     }
@@ -599,7 +599,7 @@ void camera_collide(Camera *arg0) {
         } else {
             D_800CBDD4 = 0;
         }
-        hit = func_15044380(arg0->prevEye.x, arg0->prevEye.y, arg0->prevEye.z, &probe, 0, 0);
+        hit = collision_resolveActorWalls(arg0->prevEye.x, arg0->prevEye.y, arg0->prevEye.z, &probe, 0, 0);
         D_800CBDD4 = savedDD4;
         D_800CBDD2 = 0;
         D_800CBDD3 = savedDD3;

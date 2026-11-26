@@ -102,7 +102,7 @@ struct S151BEB20 {
 s32 func_151BEB20(struct S151BEB20 *arg0) {
     f32 scale;
 
-    func_150A8050(arg0->mtx[D_800BE9C0], 0.0f, arg0->rotY, 0.0f);
+    math_mtxRotateRPYF(arg0->mtx[D_800BE9C0], 0.0f, arg0->rotY, 0.0f);
 
     scale = 0.9230000377f;
     arg0->mtx[D_800BE9C0][3][0] = arg0->pos.x;

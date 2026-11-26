@@ -142,12 +142,12 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
         gPoseCommands[args[2]].poseIndex = args[3];
         gPoseCommands[args[2]].timer = args[4];
         gPoseCommands[args[2]].state = 1;
-        if (D_800D3840 >= 6) {
+        if (gScriptCmdWordCount >= 6) {
             gPoseCommands[args[2]].flags = args[5];
         } else {
             gPoseCommands[args[2]].flags = 0;
         }
-        if (D_800D3840 >= 7) {
+        if (gScriptCmdWordCount >= 7) {
             gPoseCommands[args[2]].scale = args[6] * (1.0f / 65536.0f);
         } else {
             gPoseCommands[args[2]].scale = 1.0f;
@@ -237,18 +237,18 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
         break;
     case 15:
         actor->XZOffsetTget = args[2];
-        if (D_800D3840 == 4) {
+        if (gScriptCmdWordCount == 4) {
             actor->XZOffset = args[3];
         }
         break;
     case 16:
         actor->YOffsetTget = args[2];
-        if (D_800D3840 == 4) {
+        if (gScriptCmdWordCount == 4) {
             actor->YOffset = args[3];
         }
         break;
     case 17:
-        if (D_800D3840 == 5 && args[4] != 0) {
+        if (gScriptCmdWordCount == 5 && args[4] != 0) {
             camera_startEnvelope(actor, args[2], args[3]);
             return 1;
         }
@@ -258,15 +258,15 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
         }
         return 0;
     case 18:
-        camera_attachToObject(actor, func_15084000(args[2] & 0xFFF));
+        camera_attachToObject(actor, collision_findSlotBySpawnIndex(args[2] & 0xFFF));
         break;
     case 19:
-        camera_setPairObject(actor, func_15084000(args[2] & 0xFFF));
+        camera_setPairObject(actor, collision_findSlotBySpawnIndex(args[2] & 0xFFF));
         break;
     case 20:
         actor->TgetFOVX = args[2] * (1.0f / 65536.0f);
         actor->TgetFOVY = args[3] * (1.0f / 65536.0f);
-        if (D_800D3840 == 5 && args[4] != 0) {
+        if (gScriptCmdWordCount == 5 && args[4] != 0) {
             actor->FOVX = actor->TgetFOVX;
             actor->FOVY = actor->TgetFOVY;
         }
@@ -288,7 +288,7 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
         actor->CentreBiasTarget = args[2] * (1.0f / 65536.0f);
         break;
     case 24:
-        if (D_800D3840 == 5) {
+        if (gScriptCmdWordCount == 5) {
             actor->aim.useOverride = 1;
             actor->aim.overrideYawOffset = args[2];
             actor->aim.overridePitch = args[3];
@@ -361,7 +361,7 @@ s32 script_cameraQuery(s32 actorIndex, s32 query, s32 *args) {
         facing.z = cosf(angle);
         math_vec3Diff(&actor->eye, (Vec3f *)&target->xpos, &toTarget);
         toTarget.y = 0.0f;
-        if (func_150AD900(&facing.x, &toTarget.x) >= 0.0f) {
+        if (math_dot3(&facing.x, &toTarget.x) >= 0.0f) {
             side = -1;
         } else {
             side = 1;

@@ -50,26 +50,26 @@ s32 particle_flickerSize(FlickerParticle *effect) {
 
     params->heightTimer -= D_800BE9E4;
     if (params->heightTimer < 0) {
-        params->heightTimer = func_150ADA20() % 6U;
-        if (func_150ADA20() & 3) {
-            params->heightTarget = func_150ADA68() * (params->heightMid - params->heightMin) + params->heightMin;
+        params->heightTimer = math_random() % 6U;
+        if (math_random() & 3) {
+            params->heightTarget = math_randomFloat() * (params->heightMid - params->heightMin) + params->heightMin;
         } else {
-            params->heightTarget = func_150ADA68() * (params->heightMax - params->heightMid) + params->heightMid;
+            params->heightTarget = math_randomFloat() * (params->heightMax - params->heightMid) + params->heightMid;
         }
     }
     effect->head.def.height += (params->heightTarget - effect->head.def.height) * 0.359f;
 
     params->widthTimer -= D_800BE9E4;
     if (params->widthTimer < 0) {
-        params->widthTimer = func_150ADA20() % 17U;
-        params->widthTarget = func_150ADA68() * (params->widthMax - params->widthMin) + params->widthMin;
+        params->widthTimer = math_random() % 17U;
+        params->widthTarget = math_randomFloat() * (params->widthMax - params->widthMin) + params->widthMin;
     }
     effect->head.def.width += (params->widthTarget - effect->head.def.width) * 0.186f;
 
     params->unk24Timer -= D_800BE9E4;
     if (params->unk24Timer < 0) {
-        params->unk24Timer = func_150ADA20() % 15U;
-        params->unk24Target = func_150ADA68() * (params->unk24Max - params->unk24Min) + params->unk24Min;
+        params->unk24Timer = math_random() % 15U;
+        params->unk24Target = math_randomFloat() * (params->unk24Max - params->unk24Min) + params->unk24Min;
     }
     effect->head.def.frameSpeed += (s32)((params->unk24Target - effect->head.def.frameSpeed) * 0.231f);
     return 1;

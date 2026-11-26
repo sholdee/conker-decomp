@@ -453,7 +453,7 @@ void camera_updateFollow(Camera *camera) {
             camera->CameraAngle += (f32)1 * camera->MatrixEffectDirection * D_800BEA08;
             camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
             angle = camera->CameraAngleRad;
-        } else if (func_150ADA20() & 1) {
+        } else if (math_random() & 1) {
             camera->MatrixEffectDirection = -1.0f;
         } else {
             camera->MatrixEffectDirection = 1.0f;
@@ -492,7 +492,7 @@ void camera_updateFollow(Camera *camera) {
                 dir.x = sinf(camera->CameraAngleRad);
                 dir.y = 0.0f;
                 dir.z = cosf(camera->CameraAngleRad);
-                if ((func_150AC9C0(camera->focus.x, camera->focus.y + 140.0f, camera->focus.z, dir.x, dir.y, dir.z, 0,
+                if ((collision_castRayWorld(camera->focus.x, camera->focus.y + 140.0f, camera->focus.z, dir.x, dir.y, dir.z, 0,
                                    &tri, &hit[0], &hit[1], &hit[2], &dist, 0, 0, camera->IdealTripodMagnitude + 30.0f) != 0) &&
                     (dist < camera->IdealTripodMagnitude)) {
                     backX = sinf(camera->CameraAngleRad + 3.1415927410125732f) * camera->IdealTripodMagnitude;
@@ -508,10 +508,10 @@ void camera_updateFollow(Camera *camera) {
                     v2.z = tri.v[2].z;
                     math_vec3Diff(&v0, &v1, &edge1);
                     math_vec3Diff(&v0, &v2, &edge2);
-                    func_150AD8B0(&edge2.x, &edge1.x, &normal.x);
+                    math_cross3(&edge2.x, &edge1.x, &normal.x);
                     math_vec3Unit(&normal, &normal);
-                    if (0.3253220021724701f < func_150AD900(&dir.x, &normal.x)) {
-                        if (func_150AC9C0(camera->focus.x - backX, camera->focus.y + 140.0f, camera->focus.z - backZ, backX,
+                    if (0.3253220021724701f < math_dot3(&dir.x, &normal.x)) {
+                        if (collision_castRayWorld(camera->focus.x - backX, camera->focus.y + 140.0f, camera->focus.z - backZ, backX,
                                           0.0f, backZ, 0, &tri2, &hit2[0], &hit2[1], &hit2[2], &dist2, 0, 0,
                                           camera->IdealTripodMagnitude + 30.0f) != 0) {
                             f32 dx;
@@ -1035,7 +1035,7 @@ void camera_updateSway(Camera *camera) {
     f32 targetScale;
 
     if ((camera->Mode & 0x80000) || ((camera->SpecialFlags & 8) && !(camera->Mode & 0x40000))) {
-        amount = func_150ADA20() % 3;
+        amount = math_random() % 3;
         twoPi = 6.2831854820251465f;
         camera->DrunkRoll += ((amount + amount) * DEG2RAD) * gFrameDelta;
         while (twoPi < camera->DrunkRoll) {

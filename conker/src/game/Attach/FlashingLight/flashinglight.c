@@ -29,7 +29,7 @@ s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner) {
     }
 
     if (light->unk38 < 60) {
-        brightness = (func_150ADA20() & 1) * ((light->unk38 / 60.0f) / 4.0f);
+        brightness = (math_random() & 1) * ((light->unk38 / 60.0f) / 4.0f);
     } else if (light->unk38 < 300) {
         progress = (light->unk38 - 60) / 240.0f;
         brightness = (progress * 0.75f) + 0.25f;
@@ -54,7 +54,7 @@ s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner) {
 
     if (brightness != 0.0f) {
         if (light->hiddenDLists != 2) {
-            sound_play((func_150ADA20() & 7) + 0x44B, 0x7D00, 0x40, 0, 0);
+            sound_play((math_random() & 7) + 0x44B, 0x7D00, 0x40, 0, 0);
         }
         light->hiddenDLists = 2;
         if (owner->taskint[0] != 1) {

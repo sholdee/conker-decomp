@@ -874,7 +874,7 @@ void func_15077508(void) {
                 bestRoll = 10.0f;
                 for (i = 0; i < 5; i++) {
                     if (node->links[i] != 0xFF && gCurrentActor->unk210 != node->links[i]) {
-                        roll = func_150ADA68();
+                        roll = math_randomFloat();
                         if (roll < bestRoll) {
                             bestRoll = roll;
                             best = node->links[i];
@@ -907,7 +907,7 @@ void func_15077508(void) {
                     dz = z - gCurrentActor->zpos;
                     dist = sqrtf(dx * dx + dz * dz);
                     if (dist > 1.0f) {
-                        dist = func_150ADA68() * width / dist;
+                        dist = math_randomFloat() * width / dist;
                         x -= dz * dist;
                         z += dx * dist;
                     }

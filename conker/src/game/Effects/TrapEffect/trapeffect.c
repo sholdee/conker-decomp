@@ -71,10 +71,10 @@ s32 effect_spawnTrailSpriteLarge(EffectSpawnSource *source, f32 x, f32 y, f32 z,
 
     state = source->state;
     points = source->points;
-    size = func_150ADA68() * 70.0f + 10.0f;
+    size = math_randomFloat() * 70.0f + 10.0f;
     state->unk20 = 4;
 
-    switch (func_150ADA20() & 1) {
+    switch (math_random() & 1) {
     case 0:
         def.texture = 0x1D;
         break;
@@ -95,9 +95,9 @@ s32 effect_spawnTrailSpriteLarge(EffectSpawnSource *source, f32 x, f32 y, f32 z,
     def.rgba[3] = 0xFF;
     def.renderModes = 0x30002;
 
-    rand0 = func_150ADA20();
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
+    rand0 = math_random();
+    rand1 = math_random();
+    rand2 = math_random();
 
     particle_spawnSurfaceQuadSpriteNoModel(&def, 5, 0, surface, points[source->head.start].x, height, points[source->head.start].z, size, size,
                   rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
@@ -116,10 +116,10 @@ s32 effect_spawnTrailSpriteSmall(EffectSpawnSource *source, f32 x, f32 y, f32 z,
 
     state = source->state;
     points = source->points;
-    size = func_150ADA68() * 10.0f + 10.0f;
+    size = math_randomFloat() * 10.0f + 10.0f;
     state->unk20 = 4;
 
-    switch (func_150ADA20() & 1) {
+    switch (math_random() & 1) {
     case 0:
         def.texture = 0x1B;
         break;
@@ -140,9 +140,9 @@ s32 effect_spawnTrailSpriteSmall(EffectSpawnSource *source, f32 x, f32 y, f32 z,
     def.rgba[3] = 0xAA;
     def.renderModes = 0x30002;
 
-    rand0 = func_150ADA20();
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
+    rand0 = math_random();
+    rand1 = math_random();
+    rand2 = math_random();
 
     particle_spawnSurfaceQuadSpriteNoModel(&def, 5, 0, surface, points[source->head.start].x, height, points[source->head.start].z, size, size,
                   rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);

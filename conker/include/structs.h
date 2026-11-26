@@ -380,7 +380,7 @@ struct SoundRecord {
     } callback_param1;
     /* 0x1C */ union {
         s32 val;        /* sound_followOwnerCallback: the owner's unique_id in the low byte */
-        Actor *obj;     /* the object the delayed sound plays on (func_1000ECCC, game/Audio/ObjectSound/objectsound.c) */
+        Actor *obj;     /* the object the delayed sound plays on (sound_actorSound1DelayCallback, game/Audio/ObjectSound/objectsound.c) */
         u16 *ids;       /* func_1000EFB4: 0-terminated list of the owner's animation ids (Actor.unk84) */
     } callback_param2;
     /* 0x20 */ s16 pitch_shift_cent;
@@ -1181,7 +1181,7 @@ struct Actor {
     /* 0x1F8 */ f32 unk1F8;
     /* 0x1FC */ u8  unk1FC;
     /* 0x1FD */ u8  unk1FD;
-    /* 0x1FE */ u8  level;       // 0..255, moved by levelStep each update (func_15034860)
+    /* 0x1FE */ u8  level;       // 0..255, moved by levelStep each update (bone_addLevelCommands)
     /* 0x1FF */ u8  levelMode;   // 0: fall, 2: rise, else random walk (3: until levelTimer runs out)
     /* 0x200 */ u8  levelTimer;
     /* 0x201 */ u8  unk201;
@@ -1383,7 +1383,7 @@ struct WorldObject {
     /* 0x6C */ u16 effectFlags;
     /* 0x6E */ u8 inactive;          // 1: not updated (finished or removed), no floor probe
     /* 0x6F */ u8 viewFlags;         // bits 0-3: visible in view N, 0x40: update this frame, 0x80: hidden
-    /* 0x70 */ u8 state;             // 1: vertices transformed into per-frame copies, 2: drawn by func_150A50C0,
+    /* 0x70 */ u8 state;             // 1: vertices transformed into per-frame copies, 2: drawn by gfx_copyDlCulled,
                                      // 8: removed, high nibble: objects following in its group
     /* 0x71 */ u8 object_num;        // own index in db_Object_array
     /* 0x72 */ u8 unique_id;         // found by gfx_findObjectById
@@ -1462,7 +1462,7 @@ typedef struct CamCmd {
 } CamCmd; // size 0x38
 
 /* Four-byte entry of a game command stream (an opcode and its value), as written by the bone command
- * builders (game/Bone/BoneCommands/bonecommands.c, func_150344A0, func_15034860) and their per-actor helpers (effect_emitFacingCommand,
+ * builders (game/Bone/BoneCommands/bonecommands.c, func_150344A0, bone_addLevelCommands) and their per-actor helpers (effect_emitFacingCommand,
  * func_150F1B48). An opcode of 0x1000 ends the stream. */
 typedef struct GameCommand {
     /* 0x0 */ s16 opcode;
@@ -2529,7 +2529,7 @@ typedef struct LightTransformed {
 
 /* A light swinging about a pivot with an object's rotation (func_151644A8). */
 typedef struct LightSwing {
-    /* 0x00 */ f32 offset;          // passed as y to func_150A7960
+    /* 0x00 */ f32 offset;          // passed as y to math_transformPoint
     /* 0x04 */ f32 scale;           // applied to the object's rotX / rotZ
     /* 0x08 */ WorldObject *object;
     /* 0x0C */ Vec3f pivot;
@@ -2667,7 +2667,7 @@ typedef struct LightEventMsg {
 
 #define TASK_ID(task) ((task)->TaskID & ~TASK_FLAGS)
 
-/* Entry points of a task's script (the `mode` of func_150ADAF0, which interprets it). */
+/* Entry points of a task's script (the `mode` of script_runTask, which interprets it). */
 enum TaskEntry {
     TASK_ENTRY_START, /* the script right after the 0x20-byte header, run when the task is created */
     TASK_ENTRY_INIT,  /* InitOffset */
@@ -2804,7 +2804,7 @@ typedef struct VtxTri {
     /* 0x0 */ s32 v[3];
 } VtxTri;
 
-/* The part of a WaveDeformer that the func_150A6FA0 family of vertex routines reads. */
+/* The part of a WaveDeformer that the prop_waveVerticesWeighted family of vertex routines reads. */
 typedef struct {
     /* 0x00 */ f32 falloff;   // 1 / (radius / 100)^2
     /* 0x04 */ f32 amplitude;
@@ -2896,7 +2896,7 @@ typedef struct MeshTri {
     /* 0x0 */ Vtx *verts[3];
 } MeshTri;
 
-/* A ground-probe candidate hit (func_150A3A70 / func_150A43E0 fill the D_800D3300 array with these). */
+/* A ground-probe candidate hit (collision_gatherGroundTris / collision_gatherPropGroundTris fill the gGroundCandidates array with these). */
 typedef struct GroundCandidate {
     /* 0x0 */ s32 height;  // 24.8 fixed point
     /* 0x4 */ s32 *tri;    // collision triangle (a gCurMapTris entry): three vertex offsets from vtxBase
@@ -3272,7 +3272,7 @@ typedef struct {
 /* Per-view list of the objects to draw this frame (gViewDrawListPtrs, built in game/Gfx/Turret/turret.c). */
 typedef struct DrawEntry {
     /* 0x0 */ u16 index;    // into db_Object_array
-    /* 0x2 */ u16 distance; // from func_150A6360
+    /* 0x2 */ u16 distance; // from view_testCylinderInView
 } DrawEntry;
 
 /*

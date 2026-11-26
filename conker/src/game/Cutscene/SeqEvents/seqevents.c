@@ -1469,9 +1469,9 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                             hit = 0;
                         }
                         if (hit) {
-                            blood_spawnGrowingParticle((func_150ADA68() * 0.02000000142f) + 0.09000000358f,
-                                          (func_150ADA68() * 0.0004399999743f) + 0.0008799999487f,
-                                          (func_150ADA20() % 101) + 0x9B, 0xFF, duration, &floor.tri, &point,
+                            blood_spawnGrowingParticle((math_randomFloat() * 0.02000000142f) + 0.09000000358f,
+                                          (math_randomFloat() * 0.0004399999743f) + 0.0008799999487f,
+                                          (math_random() % 101) + 0x9B, 0xFF, duration, &floor.tri, &point,
                                           !event->unk6, 1, sceneTag, 1);
                         }
                         break;
@@ -1589,12 +1589,12 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 
             if (event->unk4 == 0) {
                 duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 1, event->unk5, scene) - eventTime;
-                offset.x = (func_150ADA68() * 200.0f) + -100.0f;
-                offset.y = (func_150ADA68() * 300.0f) + -150.0f;
-                blood_spawnSplat(&offset, (func_150ADA68() * 20.0f) + 10.0f,
-                              ((func_150ADA68() * 65.0f) + 35.0f) * 0.001000000047f,
-                              ((func_150ADA68() * 160.0f) + 200.0f) * 0.001000000047f,
-                              (func_150ADA20() % 101) + 100, 0xFF, (func_150ADA20() % 3) + 4, duration, 4,
+                offset.x = (math_randomFloat() * 200.0f) + -100.0f;
+                offset.y = (math_randomFloat() * 300.0f) + -150.0f;
+                blood_spawnSplat(&offset, (math_randomFloat() * 20.0f) + 10.0f,
+                              ((math_randomFloat() * 65.0f) + 35.0f) * 0.001000000047f,
+                              ((math_randomFloat() * 160.0f) + 200.0f) * 0.001000000047f,
+                              (math_random() % 101) + 100, 0xFF, (math_random() % 3) + 4, duration, 4,
                               0x40, sceneTag, 1);
             }
         } else if (event->value == 0xF) {
@@ -1780,13 +1780,13 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 
                         switch (event->unk5) {
                             case 0:
-                                sel = &a[func_150ADA20() % 3];
+                                sel = &a[math_random() % 3];
                                 break;
                             case 1:
-                                sel = &b[func_150ADA20() & 3];
+                                sel = &b[math_random() & 3];
                                 break;
                             case 2:
-                                sel = &c[func_150ADA20() % 6];
+                                sel = &c[math_random() % 6];
                                 break;
                         }
                         math_transformOffset(sel, &out, &obj->ob_matrix_ptr[bones[event->unk5]]);
@@ -1804,7 +1804,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     break;
                 }
                 case 12:
-                    func_15107B78(obj, func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x40, sceneTag, 1);
+                    func_15107B78(obj, math_random() & 0xFF, (math_random() & 0x7F) - 0x40, sceneTag, 1);
                     break;
                 case 13:
                     sight_flashSprites(camera_global_Cameras);
@@ -1836,13 +1836,13 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     colour[0] = 0xAE;
                     colour[1] = 0xD2;
                     colour[2] = 0xFF;
-                    colour[3] = (func_150ADA20() % 61) + 0x96;
-                    size = (func_150ADA68() * 20.0f) + 25.0f;
+                    colour[3] = (math_random() % 61) + 0x96;
+                    size = (math_randomFloat() * 20.0f) + 25.0f;
                     if (event->unk5 != 0) {
                         size *= 0.349999994f;
                     }
-                    beam_spawnBoundsBolt(obj, func_150ADA20() & 0xFF, (func_150ADA20() % 129) - 0x3F,
-                                  (func_150ADA20() % 21) + 0xA, 4, 40.0f, size, 0, 2, colour, sceneTag, 1);
+                    beam_spawnBoundsBolt(obj, math_random() & 0xFF, (math_random() % 129) - 0x3F,
+                                  (math_random() % 21) + 0xA, 4, 40.0f, size, 0, 2, colour, sceneTag, 1);
                     break;
                 }
                 case 16:
@@ -1915,7 +1915,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         } else if (event->value == 0x4D) {
             DebrisEmitter sp;
 
-            sp.count = (func_150ADA20() % 5) + 5;
+            sp.count = (math_random() % 5) + 5;
             sp.pos.x = pos[0];
             sp.pos.y = pos[1];
             sp.pos.z = pos[2];
@@ -1944,7 +1944,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         } else if (event->value == 0x4E) {
             DebrisEmitter sp;
 
-            sp.count = (func_150ADA20() % 6) + 6;
+            sp.count = (math_random() % 6) + 6;
             sp.pos.x = pos[0];
             sp.pos.y = pos[1];
             sp.pos.z = pos[2];

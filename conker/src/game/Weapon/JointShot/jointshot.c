@@ -117,31 +117,31 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
     particle_intersectAimPlane(arg0, &origin, &aim, &sp118, &spE4, &sp130, &sp124, &spF4, &spF0, &shotPos);
     if (arg0->CameraPtr != NULL) {
         event.flags = 1;
-        event.duration = (func_150ADA20() % 11U) + 11;
+        event.duration = (math_random() % 11U) + 11;
         event.playerMask = 1 << arg0->CameraPtr->CNumber;
-        func_150ADA20();
+        math_random();
         event.strength = 8;
         event.updateKind = -1;
         cont_spawnRumble(&event, 0, 0xFF, 1);
     }
     if ((arg0->ob_matrix_ptr != NULL) && ((arg0->unk74 & 0xF) != 0xF)) {
-        if (arg2 || ((gScreenLayout < 2) && (func_150ADA20() & 1))) {
+        if (arg2 || ((gScreenLayout < 2) && (math_random() & 1))) {
             particle_spawnShortLightFlash(&origin, arg5, arg6);
         }
-        if ((arg2 || (gScreenLayout < 2)) && (func_150ADA20() & 1)) {
+        if ((arg2 || (gScreenLayout < 2)) && (math_random() & 1)) {
             particle_spawnBoneDirParticle(&start, &dir, matrix, arg0, 1.0f, arg5, arg6);
         }
         mask = 1;
         for (i = D_800DCA20; i > 0; i--) {
             mask |= 1 << i;
         }
-        if (arg2 || !(func_150ADA20() & mask)) {
+        if (arg2 || !(math_random() & mask)) {
             weapon_spawnJointBeam(arg0, side, &origin, arg4, arg5, arg6);
         }
     }
     return weapon_spawnProjectile(&shotPos, &aim, spF4, spF0, 1, 0, 300.0f, 0.003333333414f,
-                         func_150ADA68() * 10.0f + 25.0f, func_150ADA68() * 150.0f + 400.0f, 50.0f,
-                         (func_150ADA20() % 156U) + 100, arg0, arg2 ? 0 : 1, arg2 ? 0 : 1, arg2 ? 0 : 1, 8, arg2 ? 0 : 1, 1, 0, 0x1A, 0.0f, 0xFF,
+                         math_randomFloat() * 10.0f + 25.0f, math_randomFloat() * 150.0f + 400.0f, 50.0f,
+                         (math_random() % 156U) + 100, arg0, arg2 ? 0 : 1, arg2 ? 0 : 1, arg2 ? 0 : 1, 8, arg2 ? 0 : 1, 1, 0, 0x1A, 0.0f, 0xFF,
                          -1, 0, arg5, arg6);
 }
 
@@ -257,11 +257,11 @@ void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, 
     u32 random1;
     u32 random0;
 
-    values.height = (func_150ADA68() * 1.001f) + 0.6040000319f;
-    values.width = (func_150ADA68() * 5.9f) + 14.1f;
-    random0 = func_150ADA20();
-    random1 = func_150ADA20();
-    angle = func_150ADA68();
+    values.height = (math_randomFloat() * 1.001f) + 0.6040000319f;
+    values.width = (math_randomFloat() * 5.9f) + 14.1f;
+    random0 = math_random();
+    random1 = math_random();
+    angle = math_randomFloat();
     effect_spawnBoneBeamParticle(arg0, (u32)D_800AAB00[side] >> 6, &D_800AAB08[side], &D_800AAB20[side], &values,
                   (random0 % 4U) + 6, (random1 % 1U) + 255, (angle * 270.0f) + 359.0f, pos, 255, 0, arg3, arg4,
                   arg5);

@@ -10,7 +10,7 @@ void particle_updateAreaEmitter(AreaEmitter *emitter) {
     AreaEmitterData *data;
 
     data = &emitter->data;
-    data->spawnAccum += (0.030000001f + func_150ADA68() * 0.010000001f) * gFrameDelta;
+    data->spawnAccum += (0.030000001f + math_randomFloat() * 0.010000001f) * gFrameDelta;
     if (data->spawnAccum > 1.0f) {
         if (data->flags & EMITTER_ENABLED) {
             ParticleDesc desc;
@@ -52,17 +52,17 @@ void particle_updateAreaEmitter(AreaEmitter *emitter) {
             desc.b2 = 0xFF;
             extra.flashTimer = 0.0f;
             do {
-                extra.life = extra.lifetime = func_150ADA68() * 20.0f + 30.0f;
+                extra.life = extra.lifetime = math_randomFloat() * 20.0f + 30.0f;
                 extra.frame1Time = extra.life * 0.15f;
                 extra.frame0Time = extra.frame1Time * 0.5f;
-                desc.width = func_150ADA68() * 500.0f + 600.0f;
+                desc.width = math_randomFloat() * 500.0f + 600.0f;
                 desc.height = desc.width * 0.5f;
-                math_dirFromAngleXZ(func_150ADA68() * 3.1415927f * 2.0f, data->area->radius, &desc.pos.x, &desc.pos.z);
+                math_dirFromAngleXZ(math_randomFloat() * 3.1415927f * 2.0f, data->area->radius, &desc.pos.x, &desc.pos.z);
                 desc.pos.x += data->area->x;
                 desc.pos.z += data->area->z;
-                desc.pos.y = data->area->y + data->area->height * func_150ADA68();
-                desc.flags = ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) | PARTICLE_DRAW_FUNC | PARTICLE_HANDLERS;
-                desc.alpha = (func_150ADA20() & 0x7F) + 0x80;
+                desc.pos.y = data->area->y + data->area->height * math_randomFloat();
+                desc.flags = ((math_random() & 1) ? PARTICLE_FLIP_S : 0) | PARTICLE_DRAW_FUNC | PARTICLE_HANDLERS;
+                desc.alpha = (math_random() & 0x7F) + 0x80;
                 particle = particle_newSpriteParticleWithFloor(&desc, 2, 0, sizeof(extra), emitter->base.header.owner, emitter->base.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->data, &extra, sizeof(extra));
@@ -110,7 +110,7 @@ s32 particle_updateAreaFlash(AreaFlashParticle *particle, s32 arg1) {
         if (data->life < 0.0f) {
             return 0;
         }
-        if (particle->head.desc.frame == 0x20000 && func_150ADA68() < 0.051000003f) {
+        if (particle->head.desc.frame == 0x20000 && math_randomFloat() < 0.051000003f) {
             data->flashTimer = 11.0f;
         }
     }

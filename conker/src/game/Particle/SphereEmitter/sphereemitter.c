@@ -127,25 +127,25 @@ void particle_updateGatherEmitter(SphereEmitter *emitter) {
         packet.height = 2000;
         packet.width = 2000;
         do {
-            angle1 = func_150ADA20() & 255;
-            angle2 = func_150ADA20() & 255;
+            angle1 = math_random() & 255;
+            angle2 = math_random() & 255;
             cos1 = math_cosBinAngleMasked(angle1 - 64);
             sin1 = math_cosBinAngleMasked(angle1);
             cos2 = math_cosBinAngleMasked(angle2 - 64);
             sin2 = math_cosBinAngleMasked(angle2);
-            dist = func_150ADA68() * params->radius;
+            dist = math_randomFloat() * params->radius;
             horiz = dist * sin2;
             tx = params->x + horiz * cos1;
             ty = params->y - dist * cos2;
             tz = params->z + horiz * sin1;
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 packet.flags |= BILLBOARD_FLIP_S;
             }
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 packet.flags |= BILLBOARD_FLIP_T;
             }
-            packet.frameStep = func_150ADA20() % (params->frameStepRange + 1) + params->frameStep;
-            size = func_150ADA20() % (params->sizeRange + 1) + params->size;
+            packet.frameStep = math_random() % (params->frameStepRange + 1) + params->frameStep;
+            size = math_random() % (params->sizeRange + 1) + params->size;
             packet.life = gEffectTextures[39].frameCount * (256 / packet.frameStep);
             life = packet.life;
             data.growStart = data.fadeInStart = life;
@@ -319,24 +319,24 @@ void particle_updateHoverEmitter(SphereEmitter *emitter) {
         packet.primA = 0;
         packet.width = packet.height = 2000;
         do {
-            angle1 = func_150ADA20() & 255;
-            angle2 = func_150ADA20() & 255;
+            angle1 = math_random() & 255;
+            angle2 = math_random() & 255;
             cos1 = math_cosBinAngleMasked(angle1 - 64);
             sin1 = math_cosBinAngleMasked(angle1);
             cos2 = math_cosBinAngleMasked(angle2 - 64);
             sin2 = math_cosBinAngleMasked(angle2);
-            dist = func_150ADA68() * params->radius;
+            dist = math_randomFloat() * params->radius;
             x = params->x + dist * sin2 * cos1;
             y = params->y - dist * cos2;
             z = params->z + dist * sin2 * sin1;
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 packet.flags |= BILLBOARD_FLIP_S;
             }
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 packet.flags |= BILLBOARD_FLIP_T;
             }
-            packet.frameStep = func_150ADA20() % (params->frameStepRange + 1) + params->frameStep;
-            size = func_150ADA20() % (params->sizeRange + 1) + params->size;
+            packet.frameStep = math_random() % (params->frameStepRange + 1) + params->frameStep;
+            size = math_random() % (params->sizeRange + 1) + params->size;
             life = packet.life = gEffectTextures[39].frameCount * (256 / packet.frameStep);
             data.fadeInStart = life;
             data.fadeInEnd = life - (life >> 2);
@@ -483,24 +483,24 @@ void particle_updateSwellEmitter(SphereEmitter *emitter) {
         packet.height = 2000;
         packet.width = 2000;
         do {
-            angle1 = func_150ADA20() & 255;
-            angle2 = func_150ADA20() & 255;
+            angle1 = math_random() & 255;
+            angle2 = math_random() & 255;
             cos1 = math_cosBinAngleMasked(angle1 - 64);
             sin1 = math_cosBinAngleMasked(angle1);
             cos2 = math_cosBinAngleMasked(angle2 - 64);
             sin2 = math_cosBinAngleMasked(angle2);
-            dist = func_150ADA68() * params->radius;
+            dist = math_randomFloat() * params->radius;
             x = params->x + dist * sin2 * cos1;
             y = params->y - dist * cos2;
             z = params->z + dist * sin2 * sin1;
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 packet.flags |= BILLBOARD_FLIP_S;
             }
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 packet.flags |= BILLBOARD_FLIP_T;
             }
-            packet.frameStep = func_150ADA20() % (params->frameStepRange + 1) + params->frameStep;
-            size = func_150ADA20() % (params->sizeRange + 1) + params->size;
+            packet.frameStep = math_random() % (params->frameStepRange + 1) + params->frameStep;
+            size = math_random() % (params->sizeRange + 1) + params->size;
             packet.life = gEffectTextures[39].frameCount * (256 / packet.frameStep);
             data.fadeInStart = packet.life;
             data.growStart = packet.life;
@@ -514,9 +514,9 @@ void particle_updateSwellEmitter(SphereEmitter *emitter) {
             data.fadeOutStart = packet.life >> 2;
             data.fadeOutStep = 255 / (packet.life >> 2);
             data.swellStart = packet.life >> 1;
-            data.swellRate = func_150ADA20() % (params->growRateRange + 1) + params->growRate;
+            data.swellRate = math_random() % (params->growRateRange + 1) + params->growRate;
             data.accelStart = packet.life >> 1;
-            data.accel = func_150ADA20() % 81U + 80;
+            data.accel = math_random() % 81U + 80;
             packet.x = x;
             packet.y = y;
             packet.z = z;
@@ -645,7 +645,7 @@ s32 particle_spawnDragFadeSprite(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag
     desc.gravity = gravity;
     desc.scaleRate = 1.0f;
     // matching: this grouping of the constant flags sets IDO's or-chain order
-    desc.flags = (func_150ADA20() & 1 ? 0x40 : 0) | (1 | 2 | 4 | (func_150ADA20() & 1 ? 0x80 : 0)) | 0x200 |
+    desc.flags = (math_random() & 1 ? 0x40 : 0) | (1 | 2 | 4 | (math_random() & 1 ? 0x80 : 0)) | 0x200 |
                  0x1000 | 0x4000 | 0x8000 | 0x800000;
     desc.primColorMode = 7;
     desc.envColorMode = 2;
@@ -753,16 +753,16 @@ void particle_spawnDragFadeBurst(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 s
         s32 a;  // matching: a and b are reused for the alpha roll and the event time
         s32 b;
 
-        delay = func_150ADA20() % (delayRange + 1) + delayBase;
-        a = func_150ADA20();
-        b = func_150ADA20();
-        math_dirFromBinAngles(a & 0xFF, b & 0xFF, func_150ADA68() * spread, &offset);
+        delay = math_random() % (delayRange + 1) + delayBase;
+        a = math_random();
+        b = math_random();
+        math_dirFromBinAngles(a & 0xFF, b & 0xFF, math_randomFloat() * spread, &offset);
         velocityFunc(dir, yaw, pitch, speed, t, &vel);
         colors = D_8008F8E8;
-        color = func_150ADA20() & 3;
-        rand = func_150ADA68();
-        a = func_150ADA20();
-        if (func_150ADA68() < 0.0802000016f) {
+        color = math_random() & 3;
+        rand = math_randomFloat();
+        a = math_random();
+        if (math_randomFloat() < 0.0802000016f) {
             b = 25;
         } else {
             b = -1;

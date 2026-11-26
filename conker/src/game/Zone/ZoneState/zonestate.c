@@ -32,7 +32,7 @@ void zone_updateGlobal(s32 ticks) {
             if (zones[i].data3 == 1) {
                 zones[i].data3 ^= 3;
             } else if (zones[i].data3 == 2) {
-                func_1000FC18(zones[i].data2 >> 16,
+                sound_stopDynamicSoundAt(zones[i].data2 >> 16,
                               zones[i].x,
                               zones[i].y,
                               zones[i].z,
@@ -106,11 +106,11 @@ void zone_cacheAngles(TriggerZone *zone) {
     f32 angle;
 
     angle = zone->pitch * 0.01745329238f; /* degrees to radians */
-    zone->sinPitch = func_150AD78C(angle);
-    zone->cosPitch = func_150AD780(angle);
+    zone->sinPitch = math_sin(angle);
+    zone->cosPitch = math_cos(angle);
     angle = zone->yaw * 0.01745329238f;
-    zone->sinYaw = func_150AD78C(angle);
-    zone->cosYaw = func_150AD780(angle);
+    zone->sinYaw = math_sin(angle);
+    zone->cosYaw = math_cos(angle);
 }
 
 s32 math_distance3D(s32 dx, s32 dy, s32 dz); /* game_DAE50.s */
@@ -510,7 +510,7 @@ s32 zone_isOutside(Actor *actor, TriggerZone *zone, s32 withMargin) {
                 dz = r * c - a * s;
                 dy = a * c + r * s;
             }
-            if (func_150AD960(dx, dz, 0, 0) < zone->xSize + margin && dy > 0 && dy < zone->ySize) {
+            if (math_distance2D(dx, dz, 0, 0) < zone->xSize + margin && dy > 0 && dy < zone->ySize) {
                 return 0;
             }
             break;
@@ -1022,7 +1022,7 @@ s32 zone_segmentHitsCylinder(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit)
 /* Segment p0-p1 vs. cylinder: moves both points into the cylinder's local space, clips the
    segment to the height slab [0, height] and to the radius, and on overlap writes the first
    contact point (back in world space) to hit and returns TRUE.
-   func_150AD78C / func_150AD780 are sin / cos of an angle in radians. */
+   math_sin / math_cos are sin / cos of an angle in radians. */
 s32 zone_segmentCylinder(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit) {
     s32 i;
     f32 scale;
@@ -1148,13 +1148,13 @@ s32 zone_segmentCylinder(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit) {
         hz = org[2] + dir[2] * a;
         /* Rotate the contact point back to world space (by -pitch, then -yaw). */
         ang = -(cyl->pitch * 0.01745329238f);
-        s = func_150AD78C(ang);
-        c = func_150AD780(ang);
+        s = math_sin(ang);
+        c = math_cos(ang);
         hit->z = hz * c - hy * s;
         hit->y = hy * c + hz * s;
         ang = -(cyl->yaw * 0.01745329238f);
-        s = func_150AD78C(ang);
-        c = func_150AD780(ang);
+        s = math_sin(ang);
+        c = math_cos(ang);
         hit->x = hx * c - hit->z * s;
         hit->z = hit->z * c + hx * s;
         hit->x += cyl->x;

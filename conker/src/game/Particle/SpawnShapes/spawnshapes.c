@@ -116,7 +116,7 @@ void particle_emitOnRandomCircle(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s1
     }
     for (i = 0; i < count; i++) {
         py = y;
-        angle = func_150ADA20() % range + low;
+        angle = math_random() % range + low;
         dirX = math_cosBinAngleMasked(angle - 0x40);
         dirZ = math_cosBinAngleMasked(angle);
         px = radius * dirX + x;
@@ -159,7 +159,7 @@ void particle_emitOnRandomArc(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angl
         low = angleA;
     }
     for (i = 0; i < count; i++) {
-        angle = func_150ADA20() % range + low;
+        angle = math_random() % range + low;
         elevY = math_cosBinAngleMasked(angle - 0x40);
         elevH = math_cosBinAngleMasked(angle);
         px = radius * yawX * elevH + x;

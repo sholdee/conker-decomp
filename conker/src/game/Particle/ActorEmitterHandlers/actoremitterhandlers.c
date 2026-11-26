@@ -30,11 +30,11 @@ void particle_freeActorEmitter(ActorEmitterProcess *emitter) {
 /* Particle spawn callback: texture 0x13 or 0x14 at random, opaque black. */
 void particle_pickBlackTexture(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, u16 *renderModes) {
     *flip = 2;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         *flip |= 1;
     }
 
-    switch (func_150ADA20() & 1) {
+    switch (math_random() & 1) {
     case 0:
         *texture = 0x13;
         break;
@@ -52,11 +52,11 @@ void particle_pickBlackTexture(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *a
 
 /* Particle spawn callback: texture 0x16 tinted with palette 3 or 4 at random. */
 void particle_pickPaletteTexture(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, u16 *renderModes) {
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         *flip |= 1;
     }
     *texture = 0x16;
-    math_pickPaletteColour((func_150ADA20() & 1) ? 3 : 4, r, g, b);
+    math_pickPaletteColour((math_random() & 1) ? 3 : 4, r, g, b);
     *alpha = 200;
     *renderModes = 0x401;
 }

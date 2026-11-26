@@ -250,7 +250,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                 self->pos.y = self->params.owner->ypos + info->yOffset;
                 self->pos.z = self->params.owner->zpos;
             } else if (info->mode == 2) {
-                func_150A7960(self->params.owner->ob_matrix_ptr[info->bone], info->x, info->y, info->z,
+                math_transformPoint(self->params.owner->ob_matrix_ptr[info->bone], info->x, info->y, info->z,
                               &self->pos.x, &self->pos.y, &self->pos.z);
             }
             slot = self->slots;
@@ -289,7 +289,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                         particle_setQuadParticleFuncs(&slot->particle->head, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D,
                                       data->tmpl->unk3E);
                         slot->particle->head.def.lifetime =
-                            func_150ADA20() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
+                            math_random() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
                         slot->particle->head.def.flags |= 1;
                         slot->particle = NULL;
                         self->count--;
@@ -349,7 +349,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                     while (ok && numFree != 0 && !(self->accum < 1.0f) && self->count < info->maxCount) {
                         s32 skip;
 
-                        skip = func_150ADA20() % (numFree + 1);
+                        skip = math_random() % (numFree + 1);
                         while (skip--) {
                             prevFree = freeSlot;
                             freeSlot = freeSlot->next;
@@ -372,9 +372,9 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                                     f32 c3;
                                     f32 c4;
 
-                                    yaw = func_150ADA20() & 0xFF;
-                                    pitch = func_150ADA20() & 0xFF;
-                                    speed = func_150ADA68() * info->speed;
+                                    yaw = math_random() & 0xFF;
+                                    pitch = math_random() & 0xFF;
+                                    speed = math_randomFloat() * info->speed;
                                     c1 = math_cosBinAngleMasked(pitch - 0x40);
                                     c2 = math_cosBinAngleMasked(pitch);
                                     c3 = math_cosBinAngleMasked(yaw - 0x40);
@@ -388,10 +388,10 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                                     u8 pitch;
                                     f32 speed;
 
-                                    pitch = func_150ADA20() & 0xFF;
-                                    speed = func_150ADA68() * info->speed;
+                                    pitch = math_random() & 0xFF;
+                                    speed = math_randomFloat() * info->speed;
                                     freeSlot->offset.x = math_cosBinAngleMasked(pitch) * speed;
-                                    freeSlot->offset.y = func_150ADA68() * info->speedY;
+                                    freeSlot->offset.y = math_randomFloat() * info->speedY;
                                     freeSlot->offset.z = -math_cosBinAngleMasked(pitch - 0x40) * speed;
                                 }
                                     break;
@@ -407,7 +407,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                                               self->params.owner->ob_matrix_ptr + info->points[idx].bone);
                             }
                             freeSlot->particle->head.def.rot = freeSlot->particle->head.def.pos;
-                            freeSlot->timer = func_150ADA20() % (info->lifeRange + 1) + info->lifeMin;
+                            freeSlot->timer = math_random() % (info->lifeRange + 1) + info->lifeMin;
                             freeSlot = freeSlot->next;
                             prevFree->next = freeSlot;
                             self->count++;

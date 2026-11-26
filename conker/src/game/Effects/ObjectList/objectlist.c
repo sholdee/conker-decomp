@@ -162,7 +162,7 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  72 */ { particle_updateModelParticle, NULL, particle_drawModelParticle, particle_buildModelParticleMatrix, NULL, NULL, NULL, particle_onModelParticleEvent, NULL, NULL, particle_destroyModelParticle, particle_freeModelParticle, 1 },
     /*  73 */ { particle_updateQuadParticle, NULL, particle_drawQuadParticle, NULL, gQuadParticleSetupDl, NULL, NULL, particle_onQuadParticleEvent, NULL, gQuadParticleEndDl, particle_destroyQuadParticle, particle_freeQuadParticle, 1 },
     /*  74 */ { particle_updateQuadSprite, NULL, particle_drawQuadSprite, NULL, gQuadParticleSetupDl, NULL, NULL, particle_onQuadSpriteEvent, NULL, gQuadParticleEndDl, particle_destroyQuadSprite, particle_freeQuadSprite, 1 },
-    /*  75 */ { shadow_updateBlob, NULL, shadow_drawBlob, NULL, gBlobShadowSetupDl, NULL, NULL, NULL, func_1510E634, NULL, NULL, NULL, 1 },
+    /*  75 */ { shadow_updateBlob, NULL, shadow_drawBlob, NULL, gBlobShadowSetupDl, NULL, NULL, NULL, shadow_loadIdentityMtx, NULL, NULL, NULL, 1 },
     /*  76 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
     /*  77 */ { effect_updateEffectObj, NULL, effect_drawEffectObj, NULL, gEffectObjRenderSetupDl, NULL, NULL, effect_handleEffectObjMessage, NULL, gEffectObjRenderResetDl, effect_destroyEffectObj, effect_freeEffectObj, 1 },
     /*  78 */ { NULL, rope_update, rope_draw, NULL, NULL, NULL, NULL, rope_message, NULL, NULL, NULL, NULL, 1 },

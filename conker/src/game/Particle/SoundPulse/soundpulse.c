@@ -105,7 +105,7 @@ void particle_updateSoundPulse(PulseParticle *particle) {
     pulse->phase += 1.002000093f * gFrameDelta;
     if (pulse->phase > 29.89999962f) {
         pulse->phase = 0.0f;
-        func_10010F88(0x502, 0x5DC0, 0, 0, -1, particle->head.pos.x, particle->head.pos.y, particle->head.pos.z, 100, 500);
+        sound_playAt(0x502, 0x5DC0, 0, 0, -1, particle->head.pos.x, particle->head.pos.y, particle->head.pos.z, 100, 500);
     }
     if (pulse->phase < 12.56637096f) {
         f32 wave = sinf(pulse->phase);

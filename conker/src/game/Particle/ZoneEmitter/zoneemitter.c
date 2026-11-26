@@ -15,7 +15,7 @@ s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
     state->phase += state->phaseSpeed * D_800BE9E4;
     state->alpha = math_cosBinAngleMasked(state->phase - 0x40) * 63.0f + 192.0f;
     if (math_isZoneHiddenFromViews(obj->head.def.unk48) == 0) {
-        state->pending += (0.3930000067f + func_150ADA68() * 0.4370000064f) * gFrameDelta;
+        state->pending += (0.3930000067f + math_randomFloat() * 0.4370000064f) * gFrameDelta;
         if (state->pending > 1.0f) {
             ParticleDesc spawn;
 
@@ -47,18 +47,18 @@ s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
             spawn.drawFunc = -1;
             spawn.handlerSet = 0;
             do {
-                math_dirFromBinAngleXZ((u8)func_150ADA20(), state->region->xSize * func_150ADA68(), &spawn.pos.x,
+                math_dirFromBinAngleXZ((u8)math_random(), state->region->xSize * math_randomFloat(), &spawn.pos.x,
                               &spawn.pos.z);
                 spawn.pos.x += state->region->x;
                 spawn.pos.y = state->region->y;
                 spawn.pos.z += state->region->z;
-                spawn.timer = (func_150ADA20() & 0xF) + 25;
-                spawn.alpha = func_150ADA20() % 101U + 100;
-                spawn.width = spawn.height = func_150ADA68() * 205.0f + 98.0f;
-                math_dirFromBinAngles((u8)func_150ADA20(), func_150ADA20() % 35U - 64, func_150ADA68() * 10.0f + 10.0f,
+                spawn.timer = (math_random() & 0xF) + 25;
+                spawn.alpha = math_random() % 101U + 100;
+                spawn.width = spawn.height = math_randomFloat() * 205.0f + 98.0f;
+                math_dirFromBinAngles((u8)math_random(), math_random() % 35U - 64, math_randomFloat() * 10.0f + 10.0f,
                               &spawn.vel);
                 // matching: `+ -x` (a subtraction emits sub.s instead of add.s)
-                spawn.gravity = func_150ADA68() * 0.2840000093f + -0.9100000262f;
+                spawn.gravity = math_randomFloat() * 0.2840000093f + -0.9100000262f;
                 particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, obj->head.header.owner, obj->head.header.kind);
                 state->pending -= 1.0f;
             } while (state->pending > 1.0f);
@@ -67,10 +67,10 @@ s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
     return 1;
 }
 
-/* Shuts the emitter down: marks its region off, calls sound_stopByCallback with func_1000EF40 on it, and frees unk10. */
+/* Shuts the emitter down: marks its region off, calls sound_stopByCallback with sound_stopWhenSilentCallback on it, and frees unk10. */
 void particle_shutZoneEmitter(ZoneEmitter *obj) {
     obj->state.region->inactive = 1;
-    sound_stopByCallback(func_1000EF40, obj->state.region, 0);
+    sound_stopByCallback(sound_stopWhenSilentCallback, obj->state.region, 0);
     if (obj->state.unk10 != NULL) {
         effect_destroyObject(obj->state.unk10);
     }

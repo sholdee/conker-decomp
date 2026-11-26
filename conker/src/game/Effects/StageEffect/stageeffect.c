@@ -35,12 +35,12 @@ void effect_hitReactLightBurst(s32 arg0, Actor *obj, s32 arg2) {
 
         header.flags = 3;
         header.update = -1;
-        header.lifetime = (func_150ADA20() % 9U) + 5;
+        header.lifetime = (math_random() % 9U) + 5;
         header.lightType = 0;
         header2.x = pos.x;
         header2.y = pos.y;
         header2.z = pos.z;
-        light_createWithEffect(&header, &header2, (func_150ADA20() % 31U) + 90, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+        light_createWithEffect(&header, &header2, (math_random() % 31U) + 90, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
     }
     {
         TrailBurst spawn;
@@ -173,7 +173,7 @@ void effect_advanceStage(StageObj *obj) {
         state->stageTimer -= D_800BE9E4 * count;
         if (state->stageTimer < 0) {
             RumbleParams event;
-            func_10010F88(func_150ADA20() % 3U + 0x2B3, 24000, 0, 0, -1, state->parts[state->stage]->x,
+            sound_playAt(math_random() % 3U + 0x2B3, 24000, 0, 0, -1, state->parts[state->stage]->x,
                           state->parts[state->stage]->y, state->parts[state->stage]->z, 500, 1000);
             state->parts[state->stage]->inactive = 1;
             state->stage++;
@@ -185,31 +185,31 @@ void effect_advanceStage(StageObj *obj) {
             event.strength = 8;
             event.updateKind = -1;
             cont_spawnRumble(&event, 0, obj->unkC, obj->unk1);
-            state->stageTimer = func_150ADA20() % 31U + 70;
+            state->stageTimer = math_random() % 31U + 70;
         }
     }
     state->eventTimer -= D_800BE9E4 * count;
     if (state->eventTimer < 0) {
         RumbleParams event;
         event.flags = 1;
-        event.duration = func_150ADA20() % 21U + 10;
+        event.duration = math_random() % 21U + 10;
         event.playerMask = 1;
-        event.strength = (func_150ADA20() & 3) + 1;
+        event.strength = (math_random() & 3) + 1;
         event.updateKind = -1;
         cont_spawnRumble(&event, 0, obj->unkC, obj->unk1);
-        func_10010F88((func_150ADA20() & 3) + 0x6D6, 24000, 0, 0, -1, state->parts[state->stage]->x,
+        sound_playAt((math_random() & 3) + 0x6D6, 24000, 0, 0, -1, state->parts[state->stage]->x,
                       state->parts[state->stage]->y, state->parts[state->stage]->z, 500, 1000);
-        state->eventTimer = func_150ADA20() % 151U + 150;
+        state->eventTimer = math_random() % 151U + 150;
     }
 
-    state->unk38 += (0.02000000142f + func_150ADA68() * 0.025f) * (gFrameDelta * count);
+    state->unk38 += (0.02000000142f + math_randomFloat() * 0.025f) * (gFrameDelta * count);
     if (state->unk38 > 1.0f) {
         s16 side;
         Vec3f pos;
         side = (state->mirror & 1) ? -1 : 1;
         do {
-            math_dirFromBinAngleXZ((func_150ADA20() % 126U - 220) * side, state->radius, &pos.x, &pos.z);
-            pos.y = func_150ADA68() * 150.0f + 30.0f;
+            math_dirFromBinAngleXZ((math_random() % 126U - 220) * side, state->radius, &pos.x, &pos.z);
+            pos.y = math_randomFloat() * 150.0f + 30.0f;
             pos.x += state->centerX;
             pos.z += state->centerZ;
             weapon_spawnImpactBurst(&pos, obj->unkC, obj->unk1);
@@ -217,7 +217,7 @@ void effect_advanceStage(StageObj *obj) {
         } while (state->unk38 > 1.0f);
     }
 
-    state->unk34 += (0.02000000142f + func_150ADA68() * 0.06000000238f) * (gFrameDelta * count);
+    state->unk34 += (0.02000000142f + math_randomFloat() * 0.06000000238f) * (gFrameDelta * count);
     if (state->unk34 > 1.0f) {
         s16 pieces;
         s16 side;
@@ -251,31 +251,31 @@ void effect_advanceStage(StageObj *obj) {
         do {
             s16 angle;
 
-            pieces = func_150ADA20() % 7U + 5;
-            angle = (func_150ADA20() % 126U - 220) * side;
+            pieces = math_random() % 7U + 5;
+            angle = (math_random() % 126U - 220) * side;
             math_dirFromBinAngleXZ(angle, state->radius, &spawn.pos.x, &spawn.pos.z);
-            spawn.pos.y = func_150ADA68() * 150.0f + 30.0f;
+            spawn.pos.y = math_randomFloat() * 150.0f + 30.0f;
             spawn.pos.x += state->centerX;
             spawn.pos.z += state->centerZ;
             i = angle - 7; // matching: the base angle reuses the counter i (a new local changes registers)
             for (; pieces > 0; pieces--) {
-                spawn.lifetime = (func_150ADA20() & 0xF) + 35;
-                spawn.sizeXZ = spawn.sizeY = func_150ADA68() * 0.012f + 0.005f;
-                spawn.rot.x = func_150ADA68() * 360.0f;
-                spawn.rot.y = func_150ADA68() * 360.0f;
-                spawn.rot.z = func_150ADA68() * 360.0f;
-                math_dirFromBinAngles((func_150ADA20() & 0xF) + i, func_150ADA20() % 37U - 63,
-                              func_150ADA68() * 8.0f + 10.0f, &spawn.vel);
-                spawn.rotVel.x = func_150ADA68() * 32.41f + -16.205f;
-                spawn.rotVel.z = func_150ADA68() * 32.41f + -16.205f;
-                spawn.gravity = func_150ADA68() * 0.337f + -1.177f;
+                spawn.lifetime = (math_random() & 0xF) + 35;
+                spawn.sizeXZ = spawn.sizeY = math_randomFloat() * 0.012f + 0.005f;
+                spawn.rot.x = math_randomFloat() * 360.0f;
+                spawn.rot.y = math_randomFloat() * 360.0f;
+                spawn.rot.z = math_randomFloat() * 360.0f;
+                math_dirFromBinAngles((math_random() & 0xF) + i, math_random() % 37U - 63,
+                              math_randomFloat() * 8.0f + 10.0f, &spawn.vel);
+                spawn.rotVel.x = math_randomFloat() * 32.41f + -16.205f;
+                spawn.rotVel.z = math_randomFloat() * 32.41f + -16.205f;
+                spawn.gravity = math_randomFloat() * 0.337f + -1.177f;
                 particle_newModelParticleWithFloor(&spawn, 3, 1, 0, 0, 0xFF, 1);
             }
             state->unk34 -= 1.0f;
         } while (state->unk34 > 1.0f);
     }
 
-    state->unk30 += (0.05500000343f + func_150ADA68() * 0.05f) * (gFrameDelta * count);
+    state->unk30 += (0.05500000343f + math_randomFloat() * 0.05f) * (gFrameDelta * count);
     if (state->unk30 > 1.0f) {
         s16 side;
         s32 flares;
@@ -313,32 +313,32 @@ void effect_advanceStage(StageObj *obj) {
         do {
             s16 angle;
 
-            flares = func_150ADA20() % 13U + 7;
-            angle = (func_150ADA20() % 126U - 220) * side;
+            flares = math_random() % 13U + 7;
+            angle = (math_random() % 126U - 220) * side;
             math_dirFromBinAngleXZ(angle, state->radius, &flare.pos.x, &flare.pos.z);
-            flare.pos.y = func_150ADA68() * 150.0f + 30.0f;
+            flare.pos.y = math_randomFloat() * 150.0f + 30.0f;
             flare.pos.x += state->centerX;
             flare.pos.z += state->centerZ;
             i = angle - 4; // matching: the base angle reuses the counter i (a new local changes registers)
             for (; flares > 0; flares--) {
                 s32 flip;
 
-                flare.timer = func_150ADA20() % 21U + 30;
-                flare.alpha = func_150ADA20() % 156U + 100;
-                flare.width = flare.height = func_150ADA68() * 110.0f + 70.0f;
+                flare.timer = math_random() % 21U + 30;
+                flare.alpha = math_random() % 156U + 100;
+                flare.width = flare.height = math_randomFloat() * 110.0f + 70.0f;
                 flare.flags &= ~0xC0;
-                flip = (func_150ADA20() & 1) ? 0x80 : 0;
-                flare.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flip;
-                math_dirFromBinAngles(func_150ADA20() % 9U + i, (func_150ADA20() & 7) - 16,
-                              func_150ADA68() * 10.0f + 6.0f, &flare.vel);
-                flare.gravity = func_150ADA68() * 0.268f + -0.3870000243f;
+                flip = (math_random() & 1) ? 0x80 : 0;
+                flare.flags |= ((math_random() & 1) ? 0x40 : 0) | flip;
+                math_dirFromBinAngles(math_random() % 9U + i, (math_random() & 7) - 16,
+                              math_randomFloat() * 10.0f + 6.0f, &flare.vel);
+                flare.gravity = math_randomFloat() * 0.268f + -0.3870000243f;
                 particle_newSpriteParticleWithFloor(&flare, 1, 0, 0, 0xFF, 1);
             }
             state->unk30 -= 1.0f;
         } while (state->unk30 > 1.0f);
     }
 
-    state->unk2C += (0.3360000253f + func_150ADA68() * 0.126f) * (gFrameDelta * count);
+    state->unk2C += (0.3360000253f + math_randomFloat() * 0.126f) * (gFrameDelta * count);
     if (state->unk2C > 1.0f) {
         s16 side;
         Vec3f pos;
@@ -347,16 +347,16 @@ void effect_advanceStage(StageObj *obj) {
         do {
             s16 angle;
 
-            angle = (func_150ADA20() % 126U - 220) * side;
+            angle = (math_random() % 126U - 220) * side;
             math_dirFromBinAngleXZ(angle, state->radius, &pos.x, &pos.z);
-            pos.y = func_150ADA68() * 150.0f + 30.0f;
+            pos.y = math_randomFloat() * 150.0f + 30.0f;
             pos.x += state->centerX;
             pos.z += state->centerZ;
-            math_dirFromBinAngles(func_150ADA20() % 9U + angle - 4, (func_150ADA20() & 7) - 16,
-                          func_150ADA68() * 6.0f + 4.0f, &vel);
-            particle_spawnKindSprite(8, &pos.x, &vel.x, func_150ADA68() * 200.0f + 200.0f, 1.025439024f, 0.938816011f,
-                          func_150ADA68() * 0.2070000172f + -0.1690000147f, func_150ADA20() % 21U + 35,
-                          func_150ADA20() % 121U + 100, 50, 5, 0, 0xFF, 1);
+            math_dirFromBinAngles(math_random() % 9U + angle - 4, (math_random() & 7) - 16,
+                          math_randomFloat() * 6.0f + 4.0f, &vel);
+            particle_spawnKindSprite(8, &pos.x, &vel.x, math_randomFloat() * 200.0f + 200.0f, 1.025439024f, 0.938816011f,
+                          math_randomFloat() * 0.2070000172f + -0.1690000147f, math_random() % 21U + 35,
+                          math_random() % 121U + 100, 50, 5, 0, 0xFF, 1);
             state->unk2C -= 1.0f;
         } while (state->unk2C > 1.0f);
     }
@@ -412,12 +412,12 @@ s32 arg2;
     mtx = obj->ob_matrix_ptr[gCutsceneBoneBeamBone];
     math_transformOffsets(&src, &dst, mtx, 1);
     one = 1.0f; // matching: IDO folds a literal "* 1.0f" away; the original multiplies by a variable
-    motion.height = func_150ADA68() * one + 2.0f;
-    motion.width = func_150ADA68() * 14.0f + 28.0f;
-    random0 = func_150ADA20();
-    random1 = func_150ADA20();
+    motion.height = math_randomFloat() * one + 2.0f;
+    motion.width = math_randomFloat() * 14.0f + 28.0f;
+    random0 = math_random();
+    random1 = math_random();
     effect_spawnBoneBeamParticle(obj, gCutsceneBoneBeamBone, &gCutsceneBoneBeamStart, &gCutsceneBoneBeamEnd, &motion, (random0 % 3U) + 4, (random1 % 156U) + 100,
-                  func_150ADA68() * 300.0f + 400.0f, &pos, 0xFF, 0, -1, arg1, arg2);
+                  math_randomFloat() * 300.0f + 400.0f, &pos, 0xFF, 0, -1, arg1, arg2);
 }
 
 /* Muzzle effects of `obj`'s gun attachment (set 0x82): flash at the muzzle, impact at the hit point. */

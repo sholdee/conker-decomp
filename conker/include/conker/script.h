@@ -46,7 +46,7 @@ typedef union CmdArg {
 typedef struct ScriptCmd {
     /* 0x00 */ s32 id;     /* bits 12-15: handler table + 1, bits 0-11: command or object id */
     /* 0x04 */ CmdArg arg; /* the handler's opcode, phase or first argument */
-    /* 0x08 */ CmdArg a[7]; /* the parameters (D_800D3840 - 2 of them) */
+    /* 0x08 */ CmdArg a[7]; /* the parameters (gScriptCmdWordCount - 2 of them) */
 } ScriptCmd;
 
 /* Object id arguments carry flags above the low 12 bits. */

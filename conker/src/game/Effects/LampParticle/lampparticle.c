@@ -37,7 +37,7 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
 
     swing.out = 0.0f;
     swing.targetAmp = swing.amp = 17.31599998f;
-    swing.phase = func_150ADA68() * 6.283185482f;
+    swing.phase = math_randomFloat() * 6.283185482f;
     swing.targetSpeed = swing.speed = 0.08799999952f;
     swing.timer = 0.0f;
     swing.ampRate = 0.0f;
@@ -189,7 +189,7 @@ s32 light_getLampParticleMatrix(Mtx *dest, LampParticle *particle) {
     MtxF mtx;
     s32 pad[2]; // matching: unused stack space below the matrix
 
-    func_150A8050(mtx, 0.0f, 0.0f, particle->swing.out);
+    math_mtxRotateRPYF(mtx, 0.0f, 0.0f, particle->swing.out);
 
     mtx[3][0] = particle->head.pos.x;
     mtx[3][1] = particle->head.pos.y;
@@ -225,7 +225,7 @@ s32 light_updateLampParticleLight(LightEffect *effect) {
 
     state = (SwingingLight *)&effect->data;
     lamp = state->lamp;
-    func_150A8050(mtx, 0.0f, 0.0f, lamp->swing.out);
+    math_mtxRotateRPYF(mtx, 0.0f, 0.0f, lamp->swing.out);
     mtx[3][0] = lamp->head.pos.x;
     mtx[3][1] = lamp->head.pos.y;
     mtx[3][2] = lamp->head.pos.z;
@@ -238,7 +238,7 @@ s32 light_updateLampParticleLight(LightEffect *effect) {
     mtx[2][0] *= lamp->head.sizeXZ;
     mtx[2][1] *= lamp->head.sizeXZ;
     mtx[2][2] *= lamp->head.sizeXZ;
-    func_150A7960(mtx, 0.0f, -150.0f, 0.0f, &point.x, &point.y, &point.z);
+    math_transformPoint(mtx, 0.0f, -150.0f, 0.0f, &point.x, &point.y, &point.z);
     effect->light->x = point.x;
     effect->light->y = point.y;
     effect->light->z = point.z;

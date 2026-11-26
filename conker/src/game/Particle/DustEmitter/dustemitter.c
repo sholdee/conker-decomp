@@ -65,7 +65,7 @@ void particle_updateDustEmitter(DustEmitter *effect) {
         effect->base.header.state = -1;
         return;
     }
-    data->accum += (data->rateBase + func_150ADA68() * data->rateRandom) * gFrameDelta;
+    data->accum += (data->rateBase + math_randomFloat() * data->rateRandom) * gFrameDelta;
     if (data->accum > 1.0f) {
         if (owner->ob_matrix_ptr != NULL) {
             math_transformOffset(&data->offset, &position, (u8 *)owner->ob_matrix_ptr + data->matrixOffset);
@@ -84,15 +84,15 @@ void particle_updateDustEmitter(DustEmitter *effect) {
                 floorY = -9500.0f;
             }
             do {
-                hit = (func_150ADA68() < data->unk60) ? TRUE : FALSE; // passed to an unused parameter
+                hit = (math_randomFloat() < data->unk60) ? TRUE : FALSE; // passed to an unused parameter
                 velocity.x = 0.0f;
                 velocity.y = 0.0f;
                 velocity.z = 0.0f;
                 particle_spawnDustParticle(&position, &velocity,
-                              func_150ADA68() * data->gravityRandom + data->gravityBase,
-                              func_150ADA20() % (data->lifetimeRandom + 1) + data->lifetimeBase,
-                              func_150ADA20() % (data->alphaRandom + 1) + data->alphaBase, 0xFF,
-                              func_150ADA68() * data->sizeRandom + data->sizeBase, hit, floorY,
+                              math_randomFloat() * data->gravityRandom + data->gravityBase,
+                              math_random() % (data->lifetimeRandom + 1) + data->lifetimeBase,
+                              math_random() % (data->alphaRandom + 1) + data->alphaBase, 0xFF,
+                              math_randomFloat() * data->sizeRandom + data->sizeBase, hit, floorY,
                               &data->floor.tri, data->kind, effect->base.header.owner, effect->base.header.kind);
                 data->accum -= 1.0f;
             } while (data->accum > 1.0f);
@@ -137,12 +137,12 @@ DustParticle *particle_spawnDustParticle(Vec3f *position, Vec3f *velocity, f32 g
     desc.gravity = gravity;
     desc.scaleStart = 1;
     desc.scaleRate = 1.0f;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         flipS = PARTICLE_FLIP_S;
     } else {
         flipS = 0;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         flipT = PARTICLE_FLIP_T;
     } else {
         flipT = 0;
@@ -158,16 +158,16 @@ DustParticle *particle_spawnDustParticle(Vec3f *position, Vec3f *velocity, f32 g
     desc.deathFunc = -1;
     desc.drawFunc = -1;
     desc.handlerSet = 3;
-    dust.phase[0] = func_150ADA20() & 0xFF;
-    dust.phase[1] = func_150ADA20() & 0xFF;
+    dust.phase[0] = math_random() & 0xFF;
+    dust.phase[1] = math_random() & 0xFF;
     desc.texture = gKindParticleTexturePickers[kind]();
     desc.height = size;
     desc.width = size;
     dust.baseSize = size;
-    dust.phaseStep[0] = func_150ADA20() % 6U + 5;
-    dust.phaseStep[1] = func_150ADA20() % 6U + 5;
-    dust.amplitude[0] = (func_150ADA68() * 0.25f + 0.2f) * dust.baseSize;
-    dust.amplitude[1] = (func_150ADA68() * 0.25f + 0.2f) * dust.baseSize;
+    dust.phaseStep[0] = math_random() % 6U + 5;
+    dust.phaseStep[1] = math_random() % 6U + 5;
+    dust.amplitude[0] = (math_randomFloat() * 0.25f + 0.2f) * dust.baseSize;
+    dust.amplitude[1] = (math_randomFloat() * 0.25f + 0.2f) * dust.baseSize;
     dust.floorY = floorY;
     dust.floor = *floor;
     dust.kind = kind;
@@ -206,16 +206,16 @@ u8 particle_landDust(DustParticle *particle, Vec3f *prevPos) {
         position.z = particle->head.desc.pos.z;
         particle_spawnKindEmitter(dust->kind, dust->baseSize * 0.08308f, particle->head.desc.alpha, &dust->floor,
                       &position, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
-        angleRandom = func_150ADA68();
-        speedRandom = func_150ADA68();
-        sizeRandom = func_150ADA68();
+        angleRandom = math_randomFloat();
+        speedRandom = math_randomFloat();
+        sizeRandom = math_randomFloat();
         math_dirFromAngles(angleRandom * 6.2831855f,
                       (speedRandom * 1000.0f + -1207.0f) * 0.001f,
                       (sizeRandom * 3557.0f + 5336.0f) * 0.001f,
                       &velocity);
-        sizeRandom = func_150ADA68();
-        durationRandom = func_150ADA20();
-        countRandom = func_150ADA20();
+        sizeRandom = math_randomFloat();
+        durationRandom = math_random();
+        countRandom = math_random();
         particle_spawnSplash(&position, &velocity, sizeRandom * 0.20600002f + 0.20600002f,
                       durationRandom % 21U + 35, particle->head.desc.alpha,
                       dust->baseSize * 0.02495f, countRandom % 7U + 5, 0,

@@ -20,12 +20,12 @@ void __osDevMgrMain(void *arg) {
         osRecvMesg(dm->cmdQueue, (OSMesg *)&mb, OS_MESG_BLOCK);
         switch (mb->hdr.type) {
             case OS_MESG_TYPE_DMAREAD:
-                if (D_8003A572 != 0) {
-                    D_8003A575 = 1;
+                if (gRomCopyActive != 0) {
+                    gPiThreadStopped = 1;
                     osStopThread(&D_80035910);
-                    D_8003A575 = 0;
+                    gPiThreadStopped = 0;
                 }
-                D_8003A573 = 1;
+                gPiDmaReadBusy = 1;
                 osRecvMesg(dm->acsQueue, &dummy, OS_MESG_BLOCK);
                 ret = dm->dma(OS_READ, mb->devAddr, mb->dramAddr, mb->size);
                 break;
@@ -54,7 +54,7 @@ void __osDevMgrMain(void *arg) {
             osSendMesg(mb->hdr.retQueue, mb, OS_MESG_NOBLOCK);
             osSendMesg(dm->acsQueue, NULL, OS_MESG_NOBLOCK);
             if (mb->hdr.type == OS_MESG_TYPE_DMAREAD) {
-                D_8003A573 = 0;
+                gPiDmaReadBusy = 0;
             }
         }
     }

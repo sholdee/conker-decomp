@@ -184,9 +184,9 @@ void weapon_spawnHitDecal(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxL
     f32 rand;
     u32 duration;
 
-    rand = func_150ADA68();
-    shade.w = func_150ADA20();
-    duration = func_150ADA20();
+    rand = math_randomFloat();
+    shade.w = math_random();
+    duration = math_random();
     particle_spawnImpactMark(rand * 75.0f + 75.0f, shade.w % 56 + 200, surface, pos,
                   duration % 205 + 299, 1, 1, 0, 0, 0, fxOwner, 0);
 }
@@ -197,14 +197,14 @@ void weapon_spawnHitLight(Vec3f *pos, u8 fxOwner, s32 fxList) {
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = func_150ADA20() % 11 + 20;
+    header.lifetime = math_random() % 11 + 20;
     header.lightType = 0;
 
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
 
-    light_createWithEffect(&header, &header2, func_150ADA20() % 121 + 60, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
+    light_createWithEffect(&header, &header2, math_random() % 121 + 60, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
 void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList) {
@@ -212,8 +212,8 @@ void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList) {
     union { f32 f; f64 align; } rand;
     u32 shade;
 
-    rand.f = func_150ADA68();
-    shade = func_150ADA20();
+    rand.f = math_randomFloat();
+    shade = math_random();
     particle_spawnGrowFade(pos, rand.f * 4.0f + 14.0f, 1.182089925f, shade % 56 + 200, 0.0f, fxOwner, fxList);
 }
 
@@ -226,7 +226,7 @@ void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList) {
 }
 
 void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
-    particle_startRandomEmitter(pos, func_150ADA20() % 62 + 120, fxOwner, fxList);
+    particle_startRandomEmitter(pos, math_random() % 62 + 120, fxOwner, fxList);
 }
 
 
@@ -401,7 +401,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             header2.z = pos.z;
             bulletState->trail = light_createWithEffect(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
             bulletState->follow = (struct FollowFx *)weapon_spawnBulletSprite(obj);
-            bulletState->sound = sound_addDynamicSound(func_150ADA20() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
+            bulletState->sound = sound_addDynamicSound(math_random() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
                                                (SoundRecordCallback)weapon_bulletSoundCallback, obj, 0, 4, 0);
             bulletState->unk88 = (struct Bullet88 *)weapon_spawnBulletParticle(obj);
             if (gScreenLayout < 2 && D_8008FD8C < 4) {
@@ -430,18 +430,18 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 const Vec3f *in[2];
                 Vec3f *out[2];
 
-                scale.width = func_150ADA68() * 10.0f + 25.0f;
-                scale.height = func_150ADA68() * 1.009000063f + 2.013000011f;
+                scale.width = math_randomFloat() * 10.0f + 25.0f;
+                scale.height = math_randomFloat() * 1.009000063f + 2.013000011f;
                 in[0] = &a;
                 in[1] = &b;
                 out[0] = &outA;
                 out[1] = &outB;
                 math_transformOffsets(in, out, &shooter->ob_matrix_ptr[9], 2);
-                effect_spawnBoneBeamParticle(shooter, 9, &a, &c, &scale, func_150ADA20() % 3 + 8,
-                              func_150ADA20() % 56 + 200, func_150ADA68() * 204.0f + 601.0f,
+                effect_spawnBoneBeamParticle(shooter, 9, &a, &c, &scale, math_random() % 3 + 8,
+                              math_random() % 56 + 200, math_randomFloat() * 204.0f + 601.0f,
                               &outA, 0xFF, 0, -1, fxOwner, fxList);
-                effect_spawnFlashParticle(func_150ADA20() % 3 + 8, func_150ADA20() % 56 + 200,
-                              func_150ADA68() * 204.0f + 601.0f, &outB, 0xFF, fxOwner, fxList);
+                effect_spawnFlashParticle(math_random() % 3 + 8, math_random() % 56 + 200,
+                              math_randomFloat() * 204.0f + 601.0f, &outB, 0xFF, fxOwner, fxList);
                 func_151C1860(&outB, fxOwner, fxList);
             }
         }
@@ -642,14 +642,14 @@ void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList) {
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = func_150ADA20() % 5 + 5;
+    header.lifetime = math_random() % 5 + 5;
     header.lightType = 0;
 
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
 
-    light_createWithEffect(&header, &header2, func_150ADA20() % 11 + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
+    light_createWithEffect(&header, &header2, math_random() % 11 + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
 /* Target filter callback: weapon_isBulletTarget with the ignore list packed in a struct. */
@@ -790,9 +790,9 @@ void weapon_rumbleShooter(Actor *obj) {
 
     if (obj->CameraPtr != NULL) {
         event.flags = 1;
-        event.duration = (func_150ADA20() & 7) + 13;
+        event.duration = (math_random() & 7) + 13;
         event.playerMask = 1 << obj->CameraPtr->CNumber;
-        event.strength = func_150ADA20() % 3 + 6;
+        event.strength = math_random() % 3 + 6;
         event.updateKind = -1;
         cont_spawnRumble(&event, 0, 0xFF, 1);
     }

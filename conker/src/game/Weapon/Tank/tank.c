@@ -59,7 +59,7 @@ f32 weapon_getShellAimError(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32
     if (obj->ob_matrix_ptr != NULL) {
         bones = (Mtx *)obj->ob_matrix_ptr;
         guMtxL2F(mf, &bones[3]);
-        func_150A7960(mf, 0.0f, 0.0f, 1.0f, &x, &y, &z);
+        math_transformPoint(mf, 0.0f, 0.0f, 1.0f, &x, &y, &z);
         x -= mf[3][0];
         y -= mf[3][1];
         z -= mf[3][2];
@@ -541,7 +541,7 @@ void weapon_updateTank(Actor *obj) {
                     dir[1] *= score;
                     dir[2] *= score;
                     dist = 100000.0f;
-                    hit = func_150AC9C0(camera->eye.x, camera->eye.y, camera->eye.z, dir[0], dir[1], dir[2], 0, 0, &hitX, &hitY, &hitZ, &dist, 0, 0, 0.0f);
+                    hit = collision_castRayWorld(camera->eye.x, camera->eye.y, camera->eye.z, dir[0], dir[1], dir[2], 0, 0, &hitX, &hitY, &hitZ, &dist, 0, 0, 0.0f);
                     if (hit != 0) {
                         hit = 1;
                     }

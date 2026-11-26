@@ -274,7 +274,7 @@ void screen_moveIris(s32 onScreen, f32 x, f32 y, f32 z, s32 view) {
     RenderView *rv;
 
     if (onScreen == 0) {
-        func_150A7A00(gViewProjMatrices[view], x, y, z, &screenX, &screenY, &screenZ, &screenW);
+        math_transformPointW(gViewProjMatrices[view], x, y, z, &screenX, &screenY, &screenZ, &screenW);
         if (screenW == 0.0f) {
             screenW = 1.0f;
         }
@@ -676,7 +676,7 @@ void screen_updateIrises(void) {
                     model += 12; // bone 12
                 }
                 height = actor->scale_y * 40.0f;
-                func_150A7960(*model, 0.0f, height, 0.0f, &x, &y, &z);
+                math_transformPoint(*model, 0.0f, height, 0.0f, &x, &y, &z);
             } else {
                 x = actor->xpos;
                 y = actor->ypos;

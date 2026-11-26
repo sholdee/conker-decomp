@@ -241,7 +241,7 @@ s32 effect_setModelEffectRootRotScale(ModelEffect *fx) {
     EffectMotion *motion;
 
     motion = &fx->extra.motion;
-    func_150A8050(fx->mtx[D_800BE9C0], motion->rot.x, motion->rot.y, motion->rot.z);
+    math_mtxRotateRPYF(fx->mtx[D_800BE9C0], motion->rot.x, motion->rot.y, motion->rot.z);
     fx->mtx[D_800BE9C0][3][0] = fx->params.pos.x;
     fx->mtx[D_800BE9C0][3][1] = fx->params.pos.y;
     fx->mtx[D_800BE9C0][3][2] = fx->params.pos.z;
@@ -314,7 +314,7 @@ s32 effect_setModelEffectRootFromExtra(ModelEffect *fx) {
  * axes scaled by xform[3] and the Y axis by xform[4].
  */
 void effect_setModelEffectRootXform(ModelEffect *fx, f32 *xform) {
-    func_150A8050(fx->mtx[D_800BE9C0], xform[0], xform[1], xform[2]);
+    math_mtxRotateRPYF(fx->mtx[D_800BE9C0], xform[0], xform[1], xform[2]);
     fx->mtx[D_800BE9C0][3][0] = fx->params.pos.x;
     fx->mtx[D_800BE9C0][3][1] = fx->params.pos.y;
     fx->mtx[D_800BE9C0][3][2] = fx->params.pos.z;

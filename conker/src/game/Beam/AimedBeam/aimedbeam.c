@@ -66,7 +66,7 @@ void beam_fireSlot(actor, slot)
         math_transformOffset(&D_800A15F0[slot], &muzzle, &bones[D_800A1638[slot]]);
         header.flags = 3;
         header.update = -1;
-        header.lifetime = (func_150ADA20() % 3U) + 4;
+        header.lifetime = (math_random() % 3U) + 4;
         header.lightType = 0;
         origin.x = muzzle.x;
         origin.y = muzzle.y;
@@ -103,8 +103,8 @@ AimedBeam *beam_spawnAimed(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     if (slot >= 2) {
         return NULL;
     }
-    init.widthPhase = func_150ADA68() * 6.283185482f;
-    init.alphaPhase = func_150ADA68() * 6.283185482f;
+    init.widthPhase = math_randomFloat() * 6.283185482f;
+    init.alphaPhase = math_randomFloat() * 6.283185482f;
     init.actor = actor;
     init.actorId = actor->unique_id;
     init.target = collision_findObjectById(0x12);
@@ -417,7 +417,7 @@ void beam_updateEmitter(BeamEmitter *emitter) {
     f32 pad; // matching: unused stack slot
 
     link = &emitter->link;
-    link->accum += (364.0f + func_150ADA68() * 300.0f) * 0.001000000047f;
+    link->accum += (364.0f + math_randomFloat() * 300.0f) * 0.001000000047f;
     if (link->accum > 1.0f) {
         beam = link->beam;
         if (beam->link.flags & 1) {
@@ -447,14 +447,14 @@ void beam_updateEmitter(BeamEmitter *emitter) {
             part.unk38 = -1;
             part.unk39 = 0;
             do {
-                spawn.itemCount = func_150ADA20() % 3U + 3;
-                spawn.life = (func_150ADA20() & 0xF) + 40;
-                part.width = func_150ADA68() * 10.0f + 22.0f;
-                yaw = func_150ADA20();
-                pitch = func_150ADA20();
-                math_dirFromBinAngles(yaw & 0xFF, pitch % 31U - 55, func_150ADA68() * 15.0f + 25.0f, &part.vel);
-                part.gravity = (func_150ADA68() * 740.0f + -1761.0f) * 0.001000000047f;
-                part.color.alpha = func_150ADA20() % 101U + 155;
+                spawn.itemCount = math_random() % 3U + 3;
+                spawn.life = (math_random() & 0xF) + 40;
+                part.width = math_randomFloat() * 10.0f + 22.0f;
+                yaw = math_random();
+                pitch = math_random();
+                math_dirFromBinAngles(yaw & 0xFF, pitch % 31U - 55, math_randomFloat() * 15.0f + 25.0f, &part.vel);
+                part.gravity = (math_randomFloat() * 740.0f + -1761.0f) * 0.001000000047f;
+                part.color.alpha = math_random() % 101U + 155;
                 trail_spawnFallingTrail(&spawn, 0, &part, 0, emitter->base.header.owner, emitter->base.header.kind);
                 link->accum -= 1.0f;
             } while (link->accum > 1.0f);
@@ -695,29 +695,29 @@ Game1EF500Trail *beam_fireSlotProjectile(actor, slot, arg2, arg3)
     dir.y -= muzzle.y;
     dir.z -= muzzle.z;
     {
-        f32 func_150ADA68(void); // matching: this block's extra line steers as1 scheduling
+        f32 math_randomFloat(void); // matching: this block's extra line steers as1 scheduling
 
-        rand0 = func_150ADA68();
-        rand1 = func_150ADA68();
-        func_150ADA20();
+        rand0 = math_randomFloat();
+        rand1 = math_randomFloat();
+        math_random();
         ret = weapon_spawnProjectile(&muzzle, &dir, 0, 0, 0, 0, 150.0f, 0.006666666828f, rand0 * 19.0f + 38.0f,
                             rand1 * 363.0f + 149.0f, 50.0f, 0xFF, actor, 1, 1, 0, 8, 0, 1, 0, 0xA0038, 0.0f,
                             0xFF, -1, 0, arg2, arg3);
     }
     hdr.flags = 3;
     hdr.update = -1;
-    hdr.lifetime = (func_150ADA20() % 5U) + 4;
+    hdr.lifetime = (math_random() % 5U) + 4;
     hdr.lightType = 0;
     origin.x = muzzle.x;
     origin.y = muzzle.y;
     origin.z = muzzle.z;
-    randA = (func_150ADA20() % 51U) + 80;
+    randA = (math_random() % 51U) + 80;
     light_createWithEffect(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg2, arg3);
-    params.height = (func_150ADA68() * 1906.0f + 969.0f) * 0.001000000047f;
-    params.width = (func_150ADA68() * 911.0f + 628.0f) * 0.1000000015f;
-    randA = func_150ADA20();
-    randB = func_150ADA20();
-    rand0 = func_150ADA68() * 2000.0f + 2000.0f;
+    params.height = (math_randomFloat() * 1906.0f + 969.0f) * 0.001000000047f;
+    params.width = (math_randomFloat() * 911.0f + 628.0f) * 0.1000000015f;
+    randA = math_random();
+    randB = math_random();
+    rand0 = math_randomFloat() * 2000.0f + 2000.0f;
     effect_spawnBoneBeamParticle(actor, D_800A1670[slot], &D_800A1640[slot], &D_800A1658[slot], &params,
                   (randA % 3U) + 8, (randB % 1U) + 0xFF, rand0, &muzzle, 0xFF, 0, -1, arg2, arg3);
     return ret;
@@ -867,12 +867,12 @@ void beam_spawnFollowParticle(Actor *actor) {
     spawn.scaleStart = 1;
     spawn.gravity = 0.0f;
     spawn.scaleRate = 1.0f;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         flipX = 0x40;
     } else {
         flipX = 0;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         flipY = 0x80;
     } else {
         flipY = 0;
@@ -890,9 +890,9 @@ void beam_spawnFollowParticle(Actor *actor) {
     link.actor = actor;
     spawn.maxSize = 10000.0f;
     link.actorId = actor->unique_id;
-    link.phase[0] = func_150ADA68() * 2.0f * 3.141592741f;
-    link.phase[1] = func_150ADA68() * 2.0f * 3.141592741f;
-    link.phase[2] = func_150ADA68() * 2.0f * 3.141592741f;
+    link.phase[0] = math_randomFloat() * 2.0f * 3.141592741f;
+    link.phase[1] = math_randomFloat() * 2.0f * 3.141592741f;
+    link.phase[2] = math_randomFloat() * 2.0f * 3.141592741f;
     particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0x14, 0xFF, 1);
     if (particle != NULL) {
         memcpy(&particle->link.actor, &link, sizeof(link));
@@ -998,7 +998,7 @@ void beam_updateTrailEmitter(ActorTrailEmitter *emitter) {
     dx = link->lastPos.x - last.x;
     dy = link->lastPos.y - last.y;
     dz = link->lastPos.z - last.z;
-    link->accum += (0.1090000048f + func_150ADA68() * 0.2840000093f) * gFrameDelta;
+    link->accum += (0.1090000048f + math_randomFloat() * 0.2840000093f) * gFrameDelta;
     if (link->accum > 1.0f) {
         s32 pad; // matching: unused stack slot
 
@@ -1034,7 +1034,7 @@ void beam_updateTrailEmitter(ActorTrailEmitter *emitter) {
         do {
             {
             f32 r;
-            r = func_150ADA68();
+            r = math_randomFloat();
             spawn.pos.x = dx * r + last.x;
             spawn.pos.y = dy * r + last.y;
             spawn.pos.z = dz * r + last.z;
@@ -1042,19 +1042,19 @@ void beam_updateTrailEmitter(ActorTrailEmitter *emitter) {
             spawn.vel.x = dx * gFrameDeltaInv * 0.3330000043f;
             spawn.vel.y = dy * gFrameDeltaInv * 0.3330000043f;
             spawn.vel.z = dz * gFrameDeltaInv * 0.3330000043f;
-            ext.unk0 = func_150ADA20();
-            ext.unk1 = (s16)func_150ADA20(); // matching: the s16 cast keeps the value in its own temp
-            ext.unk2 = (func_150ADA20() % 5U) + 4;
-            ext.unk3 = (func_150ADA20() % 5U) + 4;
-            ext.unk4 = func_150ADA68() * 39.0f;
-            ext.unk8 = func_150ADA68() * 39.0f;
-            spawn.gravity = func_150ADA68() * 0.5139999986f + 0.6560000181f;
+            ext.unk0 = math_random();
+            ext.unk1 = (s16)math_random(); // matching: the s16 cast keeps the value in its own temp
+            ext.unk2 = (math_random() % 5U) + 4;
+            ext.unk3 = (math_random() % 5U) + 4;
+            ext.unk4 = math_randomFloat() * 39.0f;
+            ext.unk8 = math_randomFloat() * 39.0f;
+            spawn.gravity = math_randomFloat() * 0.5139999986f + 0.6560000181f;
             spawn.flags &= ~0xC0;
-            flipY = (func_150ADA20() & 1) ? 0x80 : 0;
-            spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipY;
-            spawn.alpha = (func_150ADA20() % 71U) + 80;
-            spawn.timer = (func_150ADA20() % 31U) + 60;
-            spawn.width = spawn.height = func_150ADA68() * 514.0f + 404.0f;
+            flipY = (math_random() & 1) ? 0x80 : 0;
+            spawn.flags |= ((math_random() & 1) ? 0x40 : 0) | flipY;
+            spawn.alpha = (math_random() % 71U) + 80;
+            spawn.timer = (math_random() % 31U) + 60;
+            spawn.width = spawn.height = math_randomFloat() * 514.0f + 404.0f;
             particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0x10, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->link.trail, &ext, sizeof(ext));
@@ -1145,18 +1145,18 @@ void beam_spawnMuzzleBurst(actor, slot, variant, arg3, arg4)
         math_transformOffsets(src, dst, &actor->ob_matrix_ptr[D_800A180C[kind][slot]], 1);
         hdr.flags = 3;
         hdr.update = -1;
-        hdr.lifetime = (func_150ADA20() % 5U) + 4;
+        hdr.lifetime = (math_random() % 5U) + 4;
         hdr.lightType = 0;
         origin.x = muzzle.x;
         origin.y = muzzle.y;
         origin.z = muzzle.z;
-        randA = (func_150ADA20() % 51U) + 80;
+        randA = (math_random() % 51U) + 80;
         light_createWithEffect(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
-        params.height = (func_150ADA68() * 701.0f + 1925.0f) * 0.001000000047f;
-        params.width = (func_150ADA68() * 1155.0f + 1526.0f) * 0.1000000015f;
-        randA = func_150ADA20();
-        randB = func_150ADA20();
-        rand0 = func_150ADA68() * 1877.0f + 2414.0f;
+        params.height = (math_randomFloat() * 701.0f + 1925.0f) * 0.001000000047f;
+        params.width = (math_randomFloat() * 1155.0f + 1526.0f) * 0.1000000015f;
+        randA = math_random();
+        randB = math_random();
+        rand0 = math_randomFloat() * 1877.0f + 2414.0f;
         effect_spawnBoneBeamParticle(actor, D_800A180C[kind][slot], &D_800A168C[kind][variant][slot],
                       &D_800A174C[kind][variant][slot], &params, (randA % 6U) + 8, (randB % 1U) + 0xFF,
                       rand0, &muzzle, 0xFF, 0, -1, arg3, arg4);
