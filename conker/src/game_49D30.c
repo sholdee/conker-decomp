@@ -143,10 +143,22 @@ typedef struct {
 } UcodeRomEntry;
 
 extern u8 ucode_ROM_START[];
-extern s8 D_80084070;
-extern s8 D_80084074;
-extern UcodeRomEntry D_80084078[];
 extern s32 D_800BEB98;
+
+static s8 D_80084070 = -1; // the ucode pair now loaded (-1: none yet)
+static s8 D_80084074 = -1; // its offset (0 or 4) into D_80084078 for D_800BEBB0's ucode (-1: none yet)
+/* Indexed by the graphics mode: entries 0-3 for D_800C1060, 4-7 for D_800BEBB0. */
+static UcodeRomEntry D_80084078[8] = {
+    { 0x4560, 0x5A70, 0x10460, 0x10B20 },
+    { 0x6F80, 0x84B0, 0x111E0, 0x118A0 },
+    { 0x5A70, 0x6F80, 0x10B20, 0x111E0 },
+    { 0x84B0, 0x99E0, 0x118A0, 0x11F60 },
+    { 0x99E0, 0xAE80, 0x11F60, 0x12620 },
+    { 0xC320, 0xD7C0, 0x12CE0, 0x133A0 },
+    { 0xAE80, 0xC320, 0x12620, 0x12CE0 },
+    { 0xD7C0, 0xEC60, 0x133A0, 0x13A60 },
+};
+static s32 D_800840F8 = 0; /* not referenced */
 
 /* DMA the two RSP microcodes (D_800C1060 and D_800BEBB0, each text then data) for the current
    graphics mode, unless they are already loaded. */
@@ -338,7 +350,8 @@ s32 func_1501D2C4(s32 map, s32 cutscene) {
     return 0;
 }
 
-extern void (*D_800840FC[])(s32, s32, s32, s32);
+/* Cutscene start callbacks (func_1501D348's `callback`; 0: none). */
+static void (*D_800840FC[])(s32, s32, s32, s32) = { NULL, func_15023870 };
 extern u8 D_800C35A8;
 
 /* Start cutscene `cutscene` of map `map` in scene slot `scene`. If another map is loaded, switch
