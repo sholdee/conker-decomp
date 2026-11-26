@@ -26,6 +26,9 @@ void func_10004DB0(void);
 void func_10004F00(void);
 void func_10004FE0(void);
 void func_10005020(void);
+extern u8 D_8002AC5C; // a reset (pre-NMI) is pending
+extern u8 D_8002AC60;
+extern u16 D_8002AC64;
 
 /* init_50A0.c */
 void func_100050A0(OSMesgQueue *queue);

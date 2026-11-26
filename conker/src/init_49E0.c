@@ -3,6 +3,15 @@
 #include "functions.h"
 #include "variables.h"
 
+static OSScTask *D_8002AC50 = NULL; // the current graphics task
+static OSScTask *D_8002AC54 = NULL; // the audio task (from the D_8003B200 queue)
+static OSScTask *D_8002AC58 = NULL; // the graphics task last started on the RSP
+u8 D_8002AC5C = FALSE;              // a reset (pre-NMI) is pending
+u8 D_8002AC60 = TRUE;
+u16 D_8002AC64 = 800;
+s32 D_8002AC68 = -1; // not referenced
+static s8 D_8002AC6C = 0;
+
 /* Messages received on the scheduler's interrupt queue D_8003B218. */
 #define SCHED_MESG_RETRACE     0 /* VI retrace (osViSetEvent) */
 #define SCHED_MESG_RDP_DONE    1 /* OS_EVENT_DP */
