@@ -35,7 +35,7 @@ s32 func_151C4B0C(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 
             hit->dir.y = hit->pos.y - origin->y;
             hit->dir.z = hit->pos.z - origin->z;
             hit->origin = *origin;
-            if (func_15145128(&hit->dir.x, &hit->dir.x, &hit->dist, NULL) == 0) {
+            if (func_15145128(&hit->dir, &hit->dir, &hit->dist, NULL) == 0) {
                 return 0;
             }
         }
@@ -79,7 +79,7 @@ s32 func_151C4B0C(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 
             hit->dir.x = hit->pos.x - origin->x;
             hit->dir.y = hit->pos.y - origin->y;
             hit->dir.z = hit->pos.z - origin->z;
-            if (func_15145128(&hit->dir.x, &hit->dir.x, &hit->dist, NULL) == 0) {
+            if (func_15145128(&hit->dir, &hit->dir, &hit->dist, NULL) == 0) {
                 return 0;
             }
             dist = hit->dist;
@@ -102,11 +102,11 @@ s32 func_151C4B0C(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 
                 hit->dir.y = hit->pos.y - origin->y;
                 hit->dir.z = hit->pos.z - origin->z;
                 hit->origin = *origin;
-                if (func_15145128(&hit->dir.x, &hit->dir.x, &hit->dist, NULL) == 0) {
+                if (func_15145128(&hit->dir, &hit->dir, &hit->dist, NULL) == 0) {
                     return 0;
                 }
             }
-            func_151C2050(owner, &hit->pos.x, &hit->dir.x, hit->material, hit->dist);
+            func_151C2050(owner, &hit->pos, &hit->dir, hit->material, hit->dist);
             if (index == -1) {
                 hit->surface = NULL;
             } else {

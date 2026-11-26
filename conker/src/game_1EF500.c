@@ -98,7 +98,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
     ext.listener = 0;
     if (altOrigin != NULL && altDirection != NULL) {
         if (!useTarget) {
-            if (func_15145128(&altDirection->x, &targetDir.x, NULL, NULL) != 0) {
+            if (func_15145128(altDirection, &targetDir, NULL, NULL) != 0) {
                 useTarget = TRUE;
             } else {
                 return NULL;
@@ -108,7 +108,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
         dir = &targetDir;
     } else {
         if (direction != NULL) {
-            if (func_15145128(&direction->x, &sourceDir.x, NULL, NULL) != 0) {
+            if (func_15145128(direction, &sourceDir, NULL, NULL) != 0) {
                 useSource = TRUE;
             } else {
                 return NULL;

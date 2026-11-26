@@ -12,7 +12,8 @@ extern Vec3f D_800AAB50[];
 
 /* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
  * a func_151D8868 event for its camera, side effects, then func_151C229C along `aim` (from the joints when arg2). */
-s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5, s32 arg6) {
+Game1EF500Trail *func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
+                               s32 arg6) {
     Vec3f origin;
     Vec3f aim;
     Vec3f shotPos;
@@ -21,7 +22,7 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s1
     Vec3f sp118;
     Vec3f start;
     Vec3f dir;
-    s32 matrix;
+    void *matrix;
     MtxF *joints;
     Vec3f *spF4;
     Vec3f *spF0;
@@ -37,13 +38,13 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s1
     u32 i;
 
     if (arg0 == NULL) {
-        return 0;
+        return NULL;
     }
     if (side >= 2) {
-        return 0;
+        return NULL;
     }
     if (func_15142A5C(arg0) != 0) {
-        return 0;
+        return NULL;
     }
     func_151D5148(arg0);
     if (!arg2) {
@@ -54,7 +55,7 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s1
         // matching: a block-scope declaration; its -g3 scope steers the schedule
         extern Vec3f D_800AAB68[];
 
-        matrix = (s32)joints + D_800AAB00[side];
+        matrix = (u8 *)joints + D_800AAB00[side];
         results[0] = &origin;
         results[1] = &start;
         results[2] = &dir;
@@ -67,7 +68,7 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s1
         points[4] = &D_800AAB20[side];
         if (attachment != NULL) {
             if (func_1514654C(arg0, attachment, 0, points, results, arg2 ? 5 : 4) == 0) {
-                return 0;
+                return NULL;
             }
         } else {
             func_15145EA4(points, results, matrix, arg2 ? 5 : 4);
@@ -82,7 +83,7 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s1
         }
     } else {
         if (arg2) {
-            return 0;
+            return NULL;
         }
         /* No skeleton: start 34 units to the side of the aim direction (in the xz plane), 49 units up. */
         if ((fabsf(aim.x) > 9.999999747e-05f) || (fabsf(aim.z) > 9.999999747e-05f)) {
@@ -147,26 +148,15 @@ void func_151C69A0(Actor *arg0, s32 arg1, Vec3f *out) {
 
 /* Transforms this side's D_800AAB08 point by its joint matrix (D_800AAB00 bytes into arg0->ob_matrix_ptr) into *out. */
 void func_151C69CC(Actor *arg0, Vec3f *out, u8 side) {
-    s32 matrix = (s32)arg0->ob_matrix_ptr + D_800AAB00[side];
+    void *matrix = (u8 *)arg0->ob_matrix_ptr + D_800AAB00[side];
 
     func_15143134(&D_800AAB08[side], out, matrix);
 }
 
-/* A 0x64-byte projectile description, passed to func_150F7470. */
-typedef struct {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ u8 pad14[0x2C - 0x14];
-    /* 0x2C */ Vec3f end;
-    /* 0x38 */ u8 pad38[0x59 - 0x38];
-    /* 0x59 */ u8 count;
-    /* 0x5A */ u8 pad5A[0x64 - 0x5A];
-} ShotDesc;
-
 /* The object whose shot description func_151C6A28 copies. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
-    /* 0x10 */ ShotDesc shot;
+    /* 0x10 */ RayHit shot; /* the ray of the last shot */
 } ShotHolder;
 
 typedef struct {
@@ -181,16 +171,16 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
     Vec3f origin;
     Vec3f start;
     Vec3f dir;
-    s32 matrix;
+    void *matrix;
 
     if ((arg0 != NULL) && (side < 2) && (func_15142A5C(arg0) == 0)) {
         func_151D5148(arg0);
         if (arg0->ob_matrix_ptr != NULL) {
             {
-                Vec3f *points[3];
+                const Vec3f *points[3];
                 Vec3f *results[3];
 
-                matrix = (s32)arg0->ob_matrix_ptr + D_800AAB00[side];
+                matrix = (u8 *)arg0->ob_matrix_ptr + D_800AAB00[side];
                 points[0] = &D_800AAB08[side];
                 points[1] = &D_800AAB38[side];
                 points[2] = &D_800AAB50[side];
@@ -212,15 +202,15 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
                 Vec3f end;
                 Attachment *entry;
                 ShotHolder *holder;
-                ShotDesc *src;
+                RayHit *src;
 
                 if (func_1514ECE0(arg0->attachments, 0x1B, &entry) != 0) {
                     source = entry->handle;
                     holder = &source->holder;
                     if (source->flags & 1) {
                         src = &holder->shot;
-                        if (src->count != 0) {
-                            if (src->count >= 2) {
+                        if (src->hitType != 0) {
+                            if (src->hitType >= 2) {
                                 f32 dx;
                                 f32 dy;
                                 f32 dz;
@@ -235,12 +225,12 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
                                 end = src->pos;
                             }
                             {
-                                ShotDesc shot;
+                                RayHit shot;
 
                                 shot = *src;
-                                shot.end = end;
-                                func_150F7470(&origin, 0, 0, 0, 0, &shot, 54.00000381f, 0.01851851679f, 500.0f, arg0, 0,
-                                              (src->count >= 2) ? 0 : 1, 1, 0, 0x1A, -1, 0, 1, arg2, arg3);
+                                shot.origin = end;
+                                func_150F7470(&origin, NULL, NULL, NULL, 0, &shot, 54.00000381f, 0.01851851679f, 500.0f, arg0, 0,
+                                              (src->hitType >= 2) ? 0 : 1, 1, 0, 0x1A, -1, 0, 1, arg2, arg3);
                             }
                         }
                     }
@@ -280,7 +270,7 @@ void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
     struct {
         u8 unk0;
     } state;
-    Vec3f *origin = &D_800A5480;
+    const Vec3f *origin = &D_800A5480;
     SpawnedEffect *effect;
 
     state.unk0 = 0;

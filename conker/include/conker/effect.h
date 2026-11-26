@@ -630,7 +630,7 @@ void func_150F5340(void);
 /* game_124920.c */
 typedef struct TrailPuff TrailPuff;
 typedef struct ProjectileParticle ProjectileParticle;
-void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsDir, s32 arg5, f32 speed, f32 arg7,
+void func_150F7470(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *target, u8 targetIsDir, RayHit *knownHit, f32 speed, f32 arg7,
                    f32 arg8, Actor *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14, s8 arg15, s32 sound,
                    u8 arg17, u8 arg18, s32 arg19);
 s8 func_150F78B4(ProjectileParticle *obj);

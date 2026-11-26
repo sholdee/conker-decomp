@@ -138,7 +138,7 @@ ModelAttachment *func_150FF288(Actor *obj);
 void func_150FF2AC(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
 void func_150FF2D4(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal,
                    Vec3f *direction, Vec3f *axis0, Vec3f *axis1, Vec3f *output0, Vec3f *output1,
-                   s32 *value0, s32 *value1, Vec3f *endpoint, Actor *obj, ModelAttachment *gun);
+                   Vec3f **value0, Vec3f **value1, Vec3f *endpoint, Actor *obj, ModelAttachment *gun);
 void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
 s32 func_150FF6B4(Actor *obj, s32 arg1, s32 arg2);
 u8 func_150FF6E0(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal, Vec3f *endpoint,
@@ -250,7 +250,8 @@ extern const Vec3f D_800AAA9C;
 extern const Vec3f D_800AAAA8;
 
 /* game_1F3780.c */
-s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5, s32 arg6);
+Game1EF500Trail *func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
+                               s32 arg6);
 void func_151C6974(Actor *arg0, s32 arg1, Vec3f *out);
 void func_151C69A0(Actor *arg0, s32 arg1, Vec3f *out);
 void func_151C69CC(Actor *arg0, Vec3f *out, u8 side);
