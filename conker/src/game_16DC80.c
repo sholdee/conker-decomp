@@ -48,8 +48,6 @@ extern void (*D_80089FE4[])(GlowObj *);
 typedef void (*GlowMsgFn)(GlowObj *, u8 *, u8);
 extern GlowMsgFn D_8008A02C[];
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /*
  * Spawns a glow through func_1513D524 and copies paramSize bytes of params into it.

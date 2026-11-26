@@ -3,8 +3,6 @@
 #include "variables.h"
 
 void *memcpy(void *, const void *, u32);
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /*
  * Fills this camera's four beam vertices: a quad from start toward end (scaled by progress),

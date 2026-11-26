@@ -3,8 +3,6 @@
 #include "variables.h"
 
 void *memcpy(void *, const void *, u32);
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 extern char D_800A7460[];
 extern char D_800A749C[];

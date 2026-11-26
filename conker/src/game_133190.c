@@ -245,8 +245,6 @@ void func_15106610(BoltObj *bolt) {
     }
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 extern s32 D_800A4AC8[][2];
 
 /* Draws the bolt as a camera-facing strip: three vertices (one side, centre, other side) per joint point. */

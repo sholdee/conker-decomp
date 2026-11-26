@@ -45,8 +45,6 @@ void func_1511A7C0(WorldObject *mesh) {
     }
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /*
  * Per-frame update of a wobbling, rippling mesh: lazily allocates the ripple state, advances the

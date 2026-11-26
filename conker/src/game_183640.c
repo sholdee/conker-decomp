@@ -107,8 +107,6 @@ void func_151563B8(StreakParticle *arg0) {
 }
 
 extern RenderModePair D_800A4AC8[];
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /* Draws a streak particle for one view as a single triangle facing that view's eye. */
 Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {

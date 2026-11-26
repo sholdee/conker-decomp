@@ -954,8 +954,6 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     return 1;
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /* A TextureDesc whose frame table is the single address in front of it. */
 typedef struct OneFrameTextureDesc {

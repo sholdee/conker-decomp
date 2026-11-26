@@ -6,9 +6,6 @@
 #define VIEWS ((RenderView *)D_800BE628)
 
 extern MpGame *D_800D23B0;
-extern f32 sqrtf(f32);
-
-#pragma intrinsic(sqrtf)
 
 
 

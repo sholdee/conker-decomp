@@ -367,9 +367,6 @@ void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
                   52, 53, 52, effect->owner, effect->kind);
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-
 /* Sets alpha from the distance to camera_global_Cameras's unk2F8 point: opaque within 2570, fading out
  * linearly to transparent at 3850. */
 void func_150E05F8(WorldObject *obj) {

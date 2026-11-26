@@ -898,8 +898,6 @@ s32 func_150380C0(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 
     return 0;
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /*
  * Converts a bone-local direction (x, y, z) to yaw/pitch in degrees, (-180, 180]. axisMode picks which

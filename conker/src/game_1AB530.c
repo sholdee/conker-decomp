@@ -310,8 +310,6 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     return 0;
 }
 
-extern f32 sqrtf(f32);
-#pragma intrinsic (sqrtf)
 
 // matching: the f64 member gives the clip z/w pair the 8-byte-aligned stack slot IDO used
 typedef union {

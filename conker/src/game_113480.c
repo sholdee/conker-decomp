@@ -109,8 +109,6 @@ typedef struct {
     u8 alpha;
 } StreakVtx;
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /* Builds the streak's camera-facing quad (4 vertices) for view index viewIdx; returns NULL without a buffer. */
 void *func_150E63A0(Streak *streak, s16 viewIdx) {

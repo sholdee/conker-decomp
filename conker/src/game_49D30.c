@@ -1420,8 +1420,6 @@ void func_15020388(s32 track, s32 scene) {
     }
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /* Cache the cubic and the 101-sample arc-length table of segment `segment` of track `track`. */
 void func_15020878(s32 track, s32 segment, s32 scene) {

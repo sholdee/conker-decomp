@@ -9,9 +9,6 @@ extern s8 D_800D239A;
 extern s8 D_800D2398;
 extern s8 D_800D2399;
 extern MpGame *D_800D23B0;
-extern f32 sqrtf(f32);
-
-#pragma intrinsic(sqrtf)
 
 /* Distance between two path nodes, 0 if either is 0xFF. */
 f32 func_15086BD0(s32 a, s32 b) {

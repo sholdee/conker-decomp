@@ -24,8 +24,6 @@ WavyBeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
     return effect;
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 extern u8 D_8008FB80;
 extern u8 D_8008FB84;
 extern u8 D_80090F68[];

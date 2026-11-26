@@ -3,8 +3,6 @@
 #include "variables.h"
 
 void *memcpy(void *, const void *, u32);
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /* D_800A9D40: lifetime and wobble of each kind of falling drop. */
 typedef struct {

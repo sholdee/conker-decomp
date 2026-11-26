@@ -103,8 +103,6 @@ void func_151A7A90(Bolt *bolt) {
     }
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 extern s32 D_800A4AC8[][2];
 
 /*

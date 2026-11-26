@@ -100,12 +100,6 @@ typedef struct TrailSpawner {
     /* 0x28 */ SurfaceTrailLink link;
 } TrailSpawner;
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-
-f32 fabsf(f32);
-#pragma intrinsic(fabsf)
-
 /* Computes where side `side`'s trail attaches to the owner's actor; returns 0 if the actor is gone. */
 s32 func_1519EF90(config, side, out)
     SurfaceTrailConfig *config;
