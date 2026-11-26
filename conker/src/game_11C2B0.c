@@ -653,13 +653,13 @@ void func_150F03E8(LightEffect *flash) {
 
 /* Fires a projectile (func_151C229C) from slot `slot` of `actor` once actor->taskint[2]
  * reaches 90, with a spark burst and a func_15102B38 effect at the muzzle. */
-s32 func_150F03F8(actor, slot, arg2, arg3)
+Game1EF500Trail *func_150F03F8(actor, slot, arg2, arg3)
     Actor *actor;
     u8 slot;
     u8 arg2;
     s32 arg3;
 {
-    s32 ret;
+    Game1EF500Trail *ret;
     Vec3f muzzle;
     Vec3f dir;
     f32 *src[2];

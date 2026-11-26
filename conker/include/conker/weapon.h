@@ -64,7 +64,7 @@ typedef struct Game1EF500TrailExt {
 } Game1EF500TrailExt; /* 0xB0 */
 
 /* The projectile object (allocated by func_1513D2F0). */
-typedef struct {
+typedef struct Game1EF500Trail {
     /* 0x000 */ DefParticleHead head;    /* head.def.unk44: alpha */
     /* 0x110 */ Game1EF500TrailExt trail;
 } Game1EF500Trail;

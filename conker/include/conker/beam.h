@@ -763,7 +763,7 @@ void func_150F0380(Glow *glow);
 void func_150F0390(LightEffect *flash);
 void func_150F03BC(LightEffect *flash);
 void func_150F03E8(LightEffect *flash);
-s32 func_150F03F8(Actor *actor, s32 slot, s32 arg2, s32 arg3); /* K&R definition (u8 slot, arg2): no caller declares it */
+struct Game1EF500Trail *func_150F03F8(Actor *actor, s32 slot, s32 arg2, s32 arg3); /* K&R definition (u8 slot, arg2): no caller declares it */
 void func_150F07E4(Bolt *spark, s32 data, u8 type);
 void func_150F088C(Glow *glow, ActorMsg *msg, u8 type);
 void func_150F0938(Actor *actor);
