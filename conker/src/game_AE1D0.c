@@ -220,14 +220,13 @@ s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, V
 
 /* Finds the first live object of the given model whose hit spheres the point `dist` ahead of
  * `self` (with reach `radius`) touches.  Stores it in *outTarget and returns bone + 1, or 0. */
-/* include/functions.h declares outTarget (really a Actor **) as s32. */
-s32 func_15081574(s32 self, f32 dist, f32 radius, s32 outTarget, s32 arg4, s32 model) {
+s32 func_15081574(Actor *self, f32 dist, f32 radius, Actor **outTarget, s32 arg4, s32 model) {
     s32 i;
     Actor *obj;
     s32 idx;
     s32 bone;
 
-    *(Actor **)outTarget = NULL;
+    *outTarget = NULL;
     for (i = 0; i < 25; i++) {
         obj = &movement_obj[i];
         if (obj->type == 0 || obj->ob_matrix_ptr == NULL || model != obj->character_type) {
@@ -237,9 +236,9 @@ s32 func_15081574(s32 self, f32 dist, f32 radius, s32 outTarget, s32 arg4, s32 m
         if (idx == -1) {
             continue;
         }
-        bone = func_15080D20((Actor *)self, obj, D_8009BD30[idx].sphereTable, dist, radius, arg4);
+        bone = func_15080D20(self, obj, D_8009BD30[idx].sphereTable, dist, radius, arg4);
         if (bone != 0) {
-            *(Actor **)outTarget = obj;
+            *outTarget = obj;
             return bone;
         }
     }
