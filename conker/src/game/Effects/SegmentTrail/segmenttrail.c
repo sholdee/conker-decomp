@@ -96,23 +96,23 @@ s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
 struct Sub150BDB3C {
     /* 0x00 */ u8 pad0[0x1B];
-    /* 0x1B */ u8 unk1B;
+    /* 0x1B */ u8 alpha;
 };
 
 struct Obj150BDB3C {
     /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 unk1C;
+    /* 0x1C */ s16 life;
     /* 0x1E */ u8 pad1E[0x98 - 0x1E];
-    /* 0x98 */ struct Sub150BDB3C *unk98;
+    /* 0x98 */ struct Sub150BDB3C *params;
 };
 
-/* Caps obj->unk98->unk1B at obj->unk1C * 8. */
+/* Caps obj->params->alpha at obj->life * 8. */
 s32 func_150BDB3C(struct Obj150BDB3C *obj) {
-    struct Sub150BDB3C *sub = obj->unk98;
-    s32 limit = obj->unk1C * 8;
+    struct Sub150BDB3C *sub = obj->params;
+    s32 limit = obj->life * 8;
 
-    if (limit < sub->unk1B) {
-        sub->unk1B = limit;
+    if (limit < sub->alpha) {
+        sub->alpha = limit;
     }
     return 1;
 }

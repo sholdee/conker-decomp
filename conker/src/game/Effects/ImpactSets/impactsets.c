@@ -222,7 +222,7 @@ typedef struct {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 y;
     /* 0x08 */ f32 z;
-    /* 0x0C */ f32 unkC;
+    /* 0x0C */ f32 velocityY;
     /* 0x10 */ f32 unk10;
 } FxEmitterPoint; // size 0x14
 
@@ -238,12 +238,12 @@ typedef struct {
 struct FxEmitter {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
+    /* 0x84 */ u8 buffers[0x10];
     /* 0x94 */ FxEmitterPoint *points;
     /* 0x98 */ FxEmitterData *data;
 };
 
-/* Lowers the effect's alpha to unk1C * 8 (capped at 255) once that is below it. */
+/* Lowers the effect's alpha to head.tmpl.life * 8 (capped at 255) once that is below it. */
 s32 func_151AC3CC(FxEmitter *emitter) {
     FxEmitterData *data = emitter->data;
     s32 alpha = emitter->head.tmpl.life * 8;

@@ -1053,8 +1053,8 @@ struct Spawner {
 };
 
 struct SpawnerTemplate {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
+    /* 0x00 */ f32 rate;
+    /* 0x04 */ f32 rateRange;
     /* 0x08 */ SpawnerData data;
 };
 
@@ -1081,8 +1081,8 @@ void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
     if (variant <= 0) {
         info.flags = 0xF;
         info.anchor = (TriggerZone *)src;
-        info.rate = D_800A636C[variant].unk0;
-        info.rateRange = D_800A636C[variant].unk4;
+        info.rate = D_800A636C[variant].rate;
+        info.rateRange = D_800A636C[variant].rateRange;
         info.pos.x = 0.0f;
         info.pos.y = 0.0f;
         info.pos.z = 0.0f;

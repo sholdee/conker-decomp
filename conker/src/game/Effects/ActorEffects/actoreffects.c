@@ -4,13 +4,13 @@
 #include "variables.h"
 
 struct Msg151419D0 {
-    /* 0x00 */ s32 unk0;
+    /* 0x00 */ s32 actorA;
     /* 0x04 */ union {
         s32 w;
         u8 b;
     } unk4;
-    /* 0x08 */ u8 unk8;
-    /* 0x09 */ u8 unk9;
+    /* 0x08 */ u8 idA;
+    /* 0x09 */ u8 idB;
 };
 
 /* The block at 0x28 of the receiving object. */
@@ -45,17 +45,17 @@ void effect_timedHandlerMessage(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 
     s32 first;
 
     if (msgType == 0) {
-        first = msg->unk0;
+        first = msg->actorA;
         if ((first == link->owner) || (msg->unk4.b == link->ownerId)) {
             effect_destroyObject(&obj->base.header);
         }
     } else if (msgType == 0x2D) {
-        if (link->owner == msg->unk0) {
+        if (link->owner == msg->actorA) {
             link->owner = msg->unk4.w;
-            link->ownerId = msg->unk9;
+            link->ownerId = msg->idB;
         } else if (link->owner == msg->unk4.w) {
-            link->owner = msg->unk0;
-            link->ownerId = msg->unk8;
+            link->owner = msg->actorA;
+            link->ownerId = msg->idA;
         }
     }
 }

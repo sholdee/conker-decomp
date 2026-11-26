@@ -417,7 +417,7 @@ void func_151BB044(Actor *obj) {
 
 /* A playing positional sound, as seen by its update callback. */
 struct SoundChannel {
-    /* 0x00 */ u16 unk0;
+    /* 0x00 */ u16 sample;
     /* 0x02 */ s16 x;
     /* 0x04 */ s16 y;
     /* 0x06 */ s16 z;
@@ -427,7 +427,7 @@ struct SoundChannel {
     /* 0x18 */ Actor *obj;
     /* 0x1C */ u32 userData; /* bits 0-6 state, 7 fading in, 8-15 fade volume, 16-27 timer */
     /* 0x20 */ u8 pad20[0x24 - 0x20];
-    /* 0x24 */ u16 unk24;
+    /* 0x24 */ u16 sound_id; /* voice handle */
 };
 
 /*
@@ -523,9 +523,9 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
         }
         chan->userData = (fadingIn << 7) | state | (fade << 8) | (timer << 16);
         if ((*volume == 0) || (chan->flags & 0x80)) {
-            if (chan->unk24 != 0) {
-                sound_stop(chan->unk24);
-                chan->unk24 = 0;
+            if (chan->sound_id != 0) {
+                sound_stop(chan->sound_id);
+                chan->sound_id = 0;
             }
             *soundId = 0;
             chan->flags &= ~0x80;
