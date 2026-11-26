@@ -10,16 +10,6 @@ typedef struct {
     s16 altThreshold;
 } ZScanParams;
 
-/* State of one z-buffer occlusion scan (see func_1512B630). */
-typedef struct ZScan {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    s32 offset; // distance from the scan centre of the last occluder
-    s32 gap;    // its depth in front of the target
-} ZScan;
-
 /* One set of scans per player. */
 typedef struct {
     /* 0x00 */ ZScan scan[4];

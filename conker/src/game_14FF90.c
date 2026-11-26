@@ -8,21 +8,6 @@
 
 #define DEG2RAD 0.01745329238474369f
 
-/* Sound emitter handed to the aim sound callbacks by func_1000FA64. */
-typedef struct CamSound {
-    /* 0x00 */ u16 unk0;
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x8];
-    /* 0x10 */ s32 flags;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ Camera *camera;
-    /* 0x1C */ u32 data;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u16 voice;
-} CamSound;
-
 extern f32 D_800DC000;
 extern f32 D_800C3614;
 extern f32 D_800C3618;

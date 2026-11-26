@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 #include "structs.h"
+#include "effects.h"
 
 /*
  * Subsystem "camera": prototypes of the non-static functions and declarations of the globals
@@ -79,14 +80,88 @@
  *   game_191C30.c
  */
 
-/* Defined in the C files of this subsystem. A typedef here can reorder the .bss of other files (see
- * init_50A0.c), a struct tag does not. */
-struct CamSound;
-struct ZScan;
-struct CamWobble;
-struct CamWobblePreset;
-struct CamWobbleFalloff;
-struct CamWobbleEnv;
+/* Sound emitter handed to the aim sound callbacks by func_1000FA64. */
+typedef struct CamSound {
+    /* 0x00 */ u16 unk0;
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
+    /* 0x08 */ u8 pad8[0x8];
+    /* 0x10 */ s32 flags;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ Camera *camera;
+    /* 0x1C */ u32 data;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ u16 voice;
+} CamSound;
+
+/* State of one z-buffer occlusion scan (see func_1512B630). */
+typedef struct ZScan {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    s32 offset; // distance from the scan centre of the last occluder
+    s32 gap;    // its depth in front of the target
+} ZScan;
+
+/* One flag per axis: 1 while that wave's phase is below pi (its sine is positive). */
+typedef struct {
+    u8 v[3];
+} CamWobbleHalves;
+
+/* A camera wobble (game_191C30.c): six sine waves summed into a player's camera offset. */
+typedef struct CamWobble {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ CamWobbleDef def;
+    /* 0x48 */ f32 phase[6];
+    /* 0x60 */ CamWobbleHalves posHalf;
+    /* 0x63 */ CamWobbleHalves rotHalf;
+} CamWobble; // size 0x68
+
+/* The amplitudes and speeds of CamWobbleDef seen as four vectors. */
+typedef struct {
+    /* 0x00 */ Vec3f ampPos;
+    /* 0x0C */ Vec3f ampRot;
+    /* 0x18 */ Vec3f speedPos;
+    /* 0x24 */ Vec3f speedRot;
+} CamWobbleShape;
+
+/* A wobble that ramps up to peak over riseTime, holds it for holdTime and ramps down over fallTime. */
+typedef struct CamWobblePreset {
+    /* 0x00 */ CamWobbleShape peak;
+    /* 0x30 */ f32 riseTime;
+    /* 0x34 */ f32 holdTime;
+    /* 0x38 */ f32 fallTime;
+} CamWobblePreset;
+
+typedef struct {
+    /* 0x00 */ CamWobbleShape riseRate; // peak / riseTime
+    /* 0x30 */ CamWobbleShape fallRate; // peak / fallTime, with the pos and rot vectors swapped
+    /* 0x60 */ CamWobbleShape peak;
+    /* 0x90 */ f32 riseTime;
+    /* 0x94 */ f32 holdTime;
+    /* 0x98 */ f32 fallTime;
+    /* 0x9C */ f32 time;
+} CamWobbleEnvelope; // size 0xA0
+
+/* Distance falloff used by scaleFn 1 (func_15165B80). */
+typedef struct CamWobbleFalloff {
+    /* 0x00 */ Vec3f origin;
+    /* 0x0C */ f32 radius;       // full strength within this distance of origin
+    /* 0x10 */ f32 fadeRange;    // then fades to nothing over this distance
+    /* 0x14 */ f32 invFadeRange; // 1 / fadeRange
+} CamWobbleFalloff; // size 0x18
+
+/* A CamWobble made by func_15165628, with its envelope and room for a falloff after it. */
+typedef struct CamWobbleEnv {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
+    /* 0x018 */ CamWobbleShape shape; // CamWobble.def.amplitude and .speed
+    /* 0x048 */ u8 pad48[0x20];       // rest of the CamWobble
+    /* 0x068 */ CamWobbleEnvelope envelope;
+    /* 0x108 */ CamWobbleFalloff falloff; // only with extraSize 24
+} CamWobbleEnv;
 
 /* game_32740.c */
 void func_15005290(s32 resource, s32 mode);
@@ -294,8 +369,8 @@ void func_15125DB4(Camera *camera);
 void func_15126138(Camera *camera);
 void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView);
 s32 func_15126378(Camera *camera);
-s32 func_15127520(struct CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId);
-s32 func_151277B0(struct CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId);
+s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId);
+s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId);
 s32 func_151279A0(Actor *obj, OSContPad *contPad);
 void func_15127EB8(Camera *camera);
 void func_15127FEC(Camera *camera, s32 arg1, s32 arg2);
@@ -329,8 +404,8 @@ void func_1512AD54(Camera *arg0);
 void func_1512B100(Camera *arg0);
 void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth);
 s32 func_1512B53C(Camera *arg0);
-void func_1512B5FC(struct ZScan *scan, s32 offset, s32 gap);
-s32 func_1512B630(Camera *arg0, struct ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold);
+void func_1512B5FC(ZScan *scan, s32 offset, s32 gap);
+s32 func_1512B630(Camera *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold);
 s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused);
 void func_1512BB10(Camera *arg0);
 void func_1512C068(Camera *arg0);
@@ -382,14 +457,14 @@ void func_1512E8E0(Camera *camera);
 void func_1512FE00(Camera *camera, s32 action);
 
 /* game_191C30.c */
-struct CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3);
-void func_15164888(struct CamWobble *wobble);
-void func_1516489C(struct CamWobble *wobble);
+CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3);
+void func_15164888(CamWobble *wobble);
+void func_1516489C(CamWobble *wobble);
 void func_15164EE4(void);
-struct CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, struct CamWobbleFalloff *falloff, u8 arg3, s32 arg4);
-struct CamWobbleEnv *func_15165628(struct CamWobblePreset *preset, u8 playerIndex, s8 scaleFn, s32 extraSize, u8 arg4, s32 arg5);
-s32 func_151658DC(struct CamWobbleEnv *wobble);
-f32 func_15165B80(struct CamWobbleEnv *wobble);
-f32 func_15165BB0(struct CamWobble *wobble, Vec3f *origin, f32 radius, f32 fadeRange, f32 invFadeRange);
+CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *falloff, u8 arg3, s32 arg4);
+CamWobbleEnv *func_15165628(CamWobblePreset *preset, u8 playerIndex, s8 scaleFn, s32 extraSize, u8 arg4, s32 arg5);
+s32 func_151658DC(CamWobbleEnv *wobble);
+f32 func_15165B80(CamWobbleEnv *wobble);
+f32 func_15165BB0(CamWobble *wobble, Vec3f *origin, f32 radius, f32 fadeRange, f32 invFadeRange);
 
 #endif
