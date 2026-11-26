@@ -1,8 +1,6 @@
 #include <ultra64.h>
-#define func_15171D4C func_15171D4C_header // matching: this file keeps its own declarations of these
-#define func_15171F04 func_15171F04_header
+#define func_15171F04 func_15171F04_header // matching: this file keeps its own declaration of func_15171F04
 #include "functions.h"
-#undef func_15171D4C
 #undef func_15171F04
 #include "variables.h"
 
@@ -67,8 +65,11 @@ const u16 D_800A1110[][2] = { { 128, 96 }, { 256, 256 }, { 384, 384 } };
 
 /* Particle count multiplier per `size`. */
 const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
-// matching: s32 where the definition has s16 (arg 4), u16 (arg 5), u8 (args 6, 13)
-extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
+/* Defined in game_19F150.c as void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex,
+   f32 angle, s32 dist, s32 size, s32 flags, s32 animSpeed, s32 arg11, u8 arg12, s32 arg13). This file was
+   compiled with a view that takes s32 for the narrow parameters. */
+void func_15171D4C(f32 x, f32 y, f32 z, s32 lifetime, s32 color, s32 animIndex, f32 angle, s32 dist, s32 size,
+                   s32 flags, s32 animSpeed, s32 arg11, s32 arg12, s32 arg13);
 // matching: a pointer where the definition has s32 (arg 4); s32 where the definition has s16 (arg 5)
 extern void func_15171F04(f32, f32, f32, s16 **, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
