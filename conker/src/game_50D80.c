@@ -1606,15 +1606,15 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 func_150EA500(obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x48) {
-            f32 offset[2];
+            Vec2f offset;
             s32 duration;
             SeqEvent *found;
 
             if (event->unk4 == 0) {
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 1, event->unk5, scene) - eventTime;
-                offset[0] = (func_150ADA68() * 200.0f) + -100.0f;
-                offset[1] = (func_150ADA68() * 300.0f) + -150.0f;
-                func_151356D4(offset, (func_150ADA68() * 20.0f) + 10.0f,
+                offset.x = (func_150ADA68() * 200.0f) + -100.0f;
+                offset.y = (func_150ADA68() * 300.0f) + -150.0f;
+                func_151356D4(&offset, (func_150ADA68() * 20.0f) + 10.0f,
                               ((func_150ADA68() * 65.0f) + 35.0f) * 0.001000000047f,
                               ((func_150ADA68() * 160.0f) + 200.0f) * 0.001000000047f,
                               (func_150ADA20() % 101) + 100, 0xFF, (func_150ADA20() % 3) + 4, duration, 4,
@@ -1937,116 +1937,62 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->value == 0x40) {
             func_151A0A10(obj, 0x28, sceneTag, 1);
         } else if (event->value == 0x4D) {
-            struct {
-                s16 unk0;
-                f32 unk4;
-                f32 unk8;
-                f32 unkC;
-                s16 unk10;
-                f32 unk14;
-                s16 unk18;
-                s16 unk1A;
-                s16 unk1C;
-                s16 unk1E;
-                f32 unk20;
-                f32 unk24;
-                u8 pad28[8];
-                f32 unk30;
-                f32 unk34;
-                f32 unk38;
-                f32 unk3C;
-                f32 unk40;
-                f32 unk44;
-                f32 unk48;
-                f32 unk4C;
-                f32 unk50;
-                s8 unk54;
-                s8 unk55;
-                s16 unk56;
-                s16 unk58;
-            } sp;
+            DebrisEmitter sp;
 
-            sp.unk0 = (func_150ADA20() % 5) + 5;
-            sp.unk4 = pos[0];
-            sp.unk8 = pos[1];
-            sp.unkC = pos[2];
-            sp.unk14 = 4.700000286f;
-            sp.unk20 = 24.80000114f;
-            sp.unk24 = 15.5f;
-            sp.unk3C = 0.2670000196f;
-            sp.unk10 = 0x5A;
-            sp.unk18 = -7;
-            sp.unk1A = 0x2D;
-            sp.unk1C = -0x34;
-            sp.unk1E = 0x20;
-            sp.unk54 = 0;
-            sp.unk55 = 0;
-            sp.unk56 = 0x32;
-            sp.unk58 = 0x19;
-            sp.unk40 = 0.2430000156f;
-            sp.unk44 = -2.041000128f;
-            sp.unk30 = 0.0f;
-            sp.unk34 = 0.0f;
-            sp.unk38 = 0.0f;
-            sp.unk48 = 0;
-            sp.unk4C = -3.0f;
-            sp.unk50 = 6.0f;
+            sp.count = (func_150ADA20() % 5) + 5;
+            sp.pos.x = pos[0];
+            sp.pos.y = pos[1];
+            sp.pos.z = pos[2];
+            sp.radius = 4.700000286f;
+            sp.speedBase = 24.80000114f;
+            sp.speedRange = 15.5f;
+            sp.sizeBase = 0.2670000196f;
+            sp.lifetime = 0x5A;
+            sp.yawBase = -7;
+            sp.yawRange = 0x2D;
+            sp.pitchBase = -0x34;
+            sp.pitchRange = 0x20;
+            sp.landPuffs = 0;
+            sp.landPuffFlag = 0;
+            sp.landPuffLifeBase = 0x32;
+            sp.landPuffLifeRange = 0x19;
+            sp.sizeRange = 0.2430000156f;
+            sp.gravityBase = -2.041000128f;
+            sp.dir.x = 0.0f;
+            sp.dir.y = 0.0f;
+            sp.dir.z = 0.0f;
+            sp.gravityRange = 0;
+            sp.spinBase = -3.0f;
+            sp.spinRange = 6.0f;
             func_151A6F00(&sp, 1, sceneTag, 1);
         } else if (event->value == 0x4E) {
-            struct {
-                s16 unk0;
-                f32 unk4;
-                f32 unk8;
-                f32 unkC;
-                s16 unk10;
-                f32 unk14;
-                s16 unk18;
-                s16 unk1A;
-                s16 unk1C;
-                s16 unk1E;
-                f32 unk20;
-                f32 unk24;
-                u8 pad28[8];
-                f32 unk30;
-                f32 unk34;
-                f32 unk38;
-                f32 unk3C;
-                f32 unk40;
-                f32 unk44;
-                f32 unk48;
-                f32 unk4C;
-                f32 unk50;
-                s8 unk54;
-                s8 unk55;
-                s16 unk56;
-                s16 unk58;
-            } sp;
+            DebrisEmitter sp;
 
-            sp.unk0 = (func_150ADA20() % 6) + 6;
-            sp.unk4 = pos[0];
-            sp.unk8 = pos[1];
-            sp.unkC = pos[2];
-            sp.unk14 = 151.5f;
-            sp.unk20 = 15.10000038f;
-            sp.unk24 = 25.20000076f;
-            sp.unk3C = 0.3880000114f;
-            sp.unk10 = 0x5A;
-            sp.unk1A = 0xFF;
-            sp.unk18 = 0;
-            sp.unk1C = -0x40;
-            sp.unk1E = 0x28;
-            sp.unk54 = 0;
-            sp.unk55 = 0;
-            sp.unk56 = 0x32;
-            sp.unk58 = 0x19;
-            sp.unk40 = 0.2430000156f;
-            sp.unk44 = -1.0200001f;
-            sp.unk30 = 0.0f;
-            sp.unk34 = 0.0f;
-            sp.unk38 = 0.0f;
-            sp.unk48 = 0;
-            sp.unk4C = -4.0f;
-            sp.unk50 = 8.0f;
+            sp.count = (func_150ADA20() % 6) + 6;
+            sp.pos.x = pos[0];
+            sp.pos.y = pos[1];
+            sp.pos.z = pos[2];
+            sp.radius = 151.5f;
+            sp.speedBase = 15.10000038f;
+            sp.speedRange = 25.20000076f;
+            sp.sizeBase = 0.3880000114f;
+            sp.lifetime = 0x5A;
+            sp.yawRange = 0xFF;
+            sp.yawBase = 0;
+            sp.pitchBase = -0x40;
+            sp.pitchRange = 0x28;
+            sp.landPuffs = 0;
+            sp.landPuffFlag = 0;
+            sp.landPuffLifeBase = 0x32;
+            sp.landPuffLifeRange = 0x19;
+            sp.sizeRange = 0.2430000156f;
+            sp.gravityBase = -1.0200001f;
+            sp.dir.x = 0.0f;
+            sp.dir.y = 0.0f;
+            sp.dir.z = 0.0f;
+            sp.gravityRange = 0;
+            sp.spinBase = -4.0f;
+            sp.spinRange = 8.0f;
             func_151A6F00(&sp, 1, sceneTag, 1);
         } else if (event->value == 0x4F) {
             SplashSpraySpec sp;
