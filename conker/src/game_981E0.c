@@ -86,7 +86,116 @@ typedef struct TimedEvent {
 } TimedEvent;
 
 typedef void EventHandler(void);
-extern EventHandler *D_800863FC[];
+
+/* Animation-command handlers, indexed by the command (see func_15071D38). */
+void (*D_80086150[])(s32) = {
+    func_1506EFC8, func_1506F004, NULL, func_1506F02C,
+    func_1506F05C, NULL, func_1506F0C4, func_1506F0F0,
+    func_1506F17C, func_1506F1A8, func_1506F524, func_1506F8C0,
+    func_1506F54C, func_15070C18, NULL, func_1506F8F0,
+    func_1506F9C0, func_1506FA90, NULL, func_1506FB60,
+    func_1506FB60, NULL, NULL, func_1506FBE8,
+    func_1506FC50, func_1506FC1C, NULL, func_1506F11C,
+    func_1506F14C, func_1506FC9C, NULL, func_1506F524,
+    func_1506FD30, func_1506FCFC, func_1506FC74, func_1506FDF0,
+    func_1506FE1C, func_1506FE48, func_1506FE74, func_1506FEA0,
+    func_1506FECC, func_1506FEF8, func_1506FF24, func_1506FF50,
+    func_1506FF78, func_1506FFAC, func_1506FFE0, func_15070014,
+    func_1507003C, func_150700B4, func_15070084, func_1506FCC8,
+    func_1506F524, func_150700E4, func_15070114, func_15070144,
+    func_150701C4, NULL, NULL, func_150701F4,
+    func_15070224, func_15070300, func_15070690, func_15070690,
+    func_150706C4, func_150706C4, func_150706F8, func_15070760,
+    func_15070794, func_150707C8, func_150707F8, func_15070830,
+    func_15070860, func_15070898, func_15070CDC, func_15070D00,
+    func_15070D24, func_15071230, func_15071254, NULL,
+    NULL, func_15071278, func_150712AC, func_15071360,
+    func_15071434, func_15071628, func_15071628, func_15071668,
+    func_15071544, func_1507158C, func_150715D4, func_1507161C,
+    func_15071470, func_150714AC, func_150714E8, func_15071690,
+    func_150716EC, func_15071764, func_150717E0, func_15071830,
+    func_15071860, func_15071888, func_150718E4, func_15071998,
+    func_150719CC, func_15071A00, func_15071A34, func_15071A64,
+    func_1506F090, func_15071B18, func_15071D08,
+};
+/* Per-frame state handlers, indexed by the state number of an animation entry (see game_83300.c). */
+void (*D_8008630C[])(void) = {
+    func_1506D950, func_1507F640, func_1506AF74, func_1506AFE0,
+    func_1506B020, func_1506B070, func_1506B078, func_1506D950,
+    func_1506B14C, func_1506B198, func_1506B1E8, func_1506B228,
+    func_1506B268, func_1506B328, func_1506B2BC, func_1506B368,
+    func_15072AF8, func_1506B370, NULL, func_1506B5A4,
+    func_1506B5AC, func_1506B5B4, func_1506B5CC, NULL,
+    func_1506B5E4, func_1506D950, func_1506D950, func_1506D950,
+    NULL, func_1506B3B0, NULL, func_1506B3B8,
+    func_1506B50C, func_1506B520, func_15071ED4, func_15071F14,
+    func_1506B740, func_1506B82C, func_1506B7F4, func_15072918,
+    func_15072968, func_150729D0, func_15072B44, func_15072A14,
+    func_1506B860, func_1506B88C, func_1506B8B4, func_1506B91C,
+    func_1506B984, func_15073C28, func_15073C48, func_1506B944,
+    func_1506B8F4, func_15073F54, func_1506B9AC, func_1506B9C0,
+    func_15072A40, func_15072A7C, func_15072940, func_1506D898,
+};
+/* Timed event handlers, indexed by the event id (see func_1506AD30). */
+static EventHandler *D_800863FC[] = {
+    func_1506D950, func_1506BCA0, func_1506BCC8, func_1506BE2C,
+    func_1506BE84, func_1506BE98, func_1506BEC0, func_1506BEDC,
+    func_1506BF1C, func_1506BF5C, func_1506C32C, func_1506CE6C,
+    func_1506D584, func_1506D570, func_1506EF5C, func_1506D950,
+    func_1506D4EC, func_1506EFB4, func_1506D4F4, func_1506D538,
+    func_15074870, func_1506D950, func_1506D74C, func_1506BE54,
+    func_1507490C, func_1506EBC0, func_1506D934, func_1506D950,
+    func_15155F3C, func_1506D958, func_150748F4, func_1506DA78,
+    func_1506DA94, func_15074980, func_1506DB30, func_15074A44,
+    func_1506DB5C, func_1506DCC0, func_1506DB84, func_1506DBA0,
+    func_1506DC10, func_1506DBD4, func_15073D34, func_1506DCA4,
+    func_1506DCDC, func_1506DCF8, func_15074A6C, func_15074A94,
+    func_1506DD00, func_1506DD6C, func_1506DDB8, func_1506DDC0,
+    func_1506DE04, func_1506E5FC, func_1506EA98, func_1506EA18,
+    func_1506E73C, func_15074B7C, NULL, NULL,
+    func_1506EC50, func_1506ECD0, NULL, func_1506ECF0,
+    NULL, NULL, func_1506ED0C, NULL,
+    func_1506ED4C, func_1506ED68, func_1506ED90, func_1506B4EC,
+    func_1506EDAC, func_1506EE14, func_1506EE38, func_1506EDC8,
+    func_1506E7FC, func_1506E77C, func_1506DE84, func_1506EE60,
+    func_1506E63C, func_1506EED8, func_1506E8D8, func_1506E918,
+    func_1506EA58, func_1506EDF0, func_15071E20, func_15071E3C,
+    func_15071E58, func_15071F80, func_15071D38, func_1506EEF4,
+    func_15071F54, func_15071FB0, func_15071FDC, func_150722F0,
+    func_1507266C, func_15071DC8, func_15071DF4, func_150727AC,
+    func_150727F0, func_15071D78, func_1506D6B4, func_150729B4,
+    func_15072DA0, func_15072DD8, func_15072E38, func_1506C418,
+    func_1506C43C, func_1506E848, func_1506E6BC, func_1506E7BC,
+    func_150721A4, func_15072E7C, func_15072E98, func_15072EC0,
+    func_15072EF4, func_15072F10, func_1506BDE8, func_1506D2E8,
+    func_1507304C, func_15073054, func_15072420, func_1507233C,
+    func_15072360, func_15072388, func_150723AC, func_150723E0,
+    func_15073078, func_150730A4, func_1507342C, func_150730D0,
+    func_150738E8, func_150739A4, func_150739C0, func_15073A28,
+    func_15073A50, func_1506EEAC, func_15073B38, func_15073C50,
+    func_15072740, func_1506E998, func_15073CB8, func_1506E9D8,
+    func_1506E6FC, func_1506E67C, func_1506E958, func_15073CF4,
+    func_15073D74, func_15073DA4, func_1506B82C, func_15073F5C,
+    func_1506DD44, func_15073F78, func_1506E898, func_15073FA0,
+    func_150746F0, func_15074644, func_15074664, func_150747E4,
+    func_15074840, func_1507488C, func_15073E2C, func_15073EA4,
+    func_15073F1C,
+};
+s32 D_80086690 = 0x0FA10CDF; /* not referenced */
+/* Hit-reaction handlers, indexed by AttackReaction.unk8 (see game_83300.c). Declared without a
+   prototype: most take (Actor *self, Actor *other, u8 *result), a few take other arguments. */
+void (*D_80086694[])() = {
+    func_15074BD8, func_15074BEC, func_15194320, func_15074C00,
+    func_15074C80, func_15194394, func_15074DEC, func_15074E04,
+    func_15194588, func_15074E80, func_151945CC, func_15194810,
+    func_15074EE8, func_15074F30, func_15074F48, func_15074FD4,
+    func_151949E0, func_15075050, func_15194BF0, func_15194DA4,
+    func_15194A68, func_15194E54, func_15194B94, func_15194EA8,
+    func_15194F48, func_150F85A0, func_15194D80, func_15195528,
+    func_151942B0, func_150750A4, func_150750C4, func_150FFD2C,
+    func_15195650, func_151942E8, func_15195698, func_15194DC8,
+    func_15195738,
+};
 
 /*
  * Runs every event of the object's event list whose time is <= `time`. Each event stores its
@@ -3191,12 +3300,6 @@ void func_15072B44(void) {
     }
 }
 
-/* The original TU defined the state-handler table D_8008630C (now asm/data/22AC10.rodata.s)
- * holding this function's address. That data reference makes as1 treat the entry as an
- * indirect-jump target, which changes its delay-slot filling (the jump-table index
- * subtractions are hoisted into earlier delay slots). Game .c.o(.rodata) is discarded at
- * link, so this only restores the assembler's view. */
-static void (*const D_8008630C_entry[])(void) = { func_15072B44 };
 void func_15072DA0(void) {
     D_800D154C->unk2F8 &= 0xFFF8;
     D_800D154C->unk2F8 |= D_800D1580;

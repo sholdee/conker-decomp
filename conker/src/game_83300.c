@@ -18,7 +18,6 @@ const s32 D_8009942C[3] = { 0x12, 0x0B, 0x13 };
 
 
 struct HitReaction;
-extern void (*D_80086694[])(void *, Actor *, u8 *);
 struct HitReaction;
 extern MtxF *D_800CC4A4;
 
@@ -3209,7 +3208,6 @@ void func_1505E060(AnimInstance *state) {
     bcopy(state->header[0], state->header[1], sizeof(state->header[0]));
 }
 
-extern void (*D_8008630C[])(void);
 
 /*
  * Starts animation `anim` (entry `animEntry`) on a playback state, or only updates its speed when it is

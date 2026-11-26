@@ -1061,7 +1061,7 @@ segments:
       - {start: 0x22AB80, type: .data, name: game_83300, linker_section_order: .rodata}
       - {start: 0x22ABC0, type: .data, name: game_90840, linker_section_order: .rodata}
       - {start: 0x22ABD0, type: .data, name: game_97AA0, linker_section_order: .rodata}
-      - [0x22AC10, rodata]
+      - {start: 0x22AC10, type: .data, name: game_981E0, linker_section_order: .rodata}
       - {start: 0x22B1F0, type: .data, name: game_A28B0, linker_section_order: .rodata}
       - [0x22B560, rodata]
       - [0x22B660, rodata]

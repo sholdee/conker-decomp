@@ -344,6 +344,9 @@ void func_15075050(Actor *self, Actor *other, u8 *result);
 void func_150750A4(Actor *self, Actor *other, u8 *result);
 void func_150750C4(Actor *self, Actor *other, u8 *result);
 Actor *func_1507515C(Actor *owner);
+extern void (*D_80086150[])(s32);
+extern void (*D_8008630C[])(void);
+extern void (*D_80086694[])(); /* see game_981E0.c */
 extern const u8 D_80099A30[12];
 extern const u8 D_80099A3C[12][10]; /* turn-angle thresholds per row */
 extern const u8 D_80099AB4[8];
