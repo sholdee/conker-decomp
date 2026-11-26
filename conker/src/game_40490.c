@@ -41,28 +41,6 @@ static s32 (*gZoneSpawnHandlers[26])(TriggerZone *) = {
 };
 
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    u8 unk30;
-    u8 unk31;
-    u8 unk32;
-    u8 unk33;
-    u8 unk34;
-    u8 pad35[3];
-} Struct150139ACEntry;
-
-typedef struct {
     TriggerZone *unk0;
     f32 unk4;
     f32 unk8;
@@ -96,7 +74,6 @@ typedef struct {
     ZoneNode *zone;
 } Struct150139ACLocal;
 
-extern Struct150139ACEntry D_80095FA0[];
 
 
 void func_15012FE0(void) {
@@ -417,7 +394,7 @@ s32 func_1501396C(TriggerZone *obj) {
 // matching: index lives in the (unused) second argument register
 s32 func_150139AC(TriggerZone *obj, s32 index) {
     Struct150139ACLocal data;
-    Struct150139ACEntry *entry;
+    const Struct150139ACEntry *entry;
     TimedEffect *effect;
 
     index = obj->data1;

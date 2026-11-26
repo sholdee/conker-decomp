@@ -232,7 +232,6 @@ extern TextureDesc D_800918A0;
 // this chunk0 data
 // D_800959E0 is 0x80082B20 + 0x00012ec0
 
-extern ParticleTexInfo D_80095CE0[69];
 
 
 // code_75400.c

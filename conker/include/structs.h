@@ -1951,7 +1951,7 @@ typedef struct ParticleTexInfo {
     /* 0x4 */ s16 scaleX;     // base x scale of the sprite
     /* 0x6 */ s16 scaleY;     // base y scale of the sprite
     /* 0x8 */ u8  width;      // texture width (func_1500AC14: tile extent (width << 5) - 1)
-    /* 0x9 */ u8  pad9;
+    /* 0x9 */ u8  unk9;       // 5 for two resources, else 0; not read by the code
 } ParticleTexInfo; /* size 0xA */
 
 /* The resource picked for one of the 15 particle sprite types (D_800BE4A0[15], game_38050.c). */

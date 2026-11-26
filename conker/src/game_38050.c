@@ -74,7 +74,7 @@ extern u8 D_800DDC20[][2];
 
 /** Sets up particle slot `slot` for resource `id` (0xFF: unused). */
 void func_1500AD84(s32 slot, s32 id, s32 flags) {
-    ParticleTexInfo *info;
+    const ParticleTexInfo *info;
     u8 *frames;
     s32 infoFlags;
 
