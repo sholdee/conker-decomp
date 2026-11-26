@@ -624,7 +624,7 @@ void func_150F26A0(Camera *actor);
 void func_150F2994(Camera *actor, s32 flag);
 
 /* game/done/game_122650.c */
-void func_150F51A0(s32 arg0, s32 arg1);
+void func_150F51A0(Actor *obj, TriggerZone *zone);
 s32 func_150F51BC(void);
 void func_150F51E8(s32 arg0);
 extern u8 D_80088B40; // set by func_150F51A0, read and cleared by func_150F51BC
@@ -649,7 +649,7 @@ s32 func_150F81BC(ProjectileParticle *obj);
 typedef struct StageObj StageObj;
 typedef struct StageMsg StageMsg;
 void func_150F85A0(s32 arg0, Actor *obj, s32 arg2);
-void func_150F884C(s32 arg0, s32 arg1);
+void func_150F884C(Actor *obj, TriggerZone *zone);
 void func_150F887C(StageObj *obj, StageMsg *msg, u8 type);
 void func_150F892C(StageObj *obj);
 void func_150F9720(u8 index);
@@ -659,9 +659,6 @@ void func_150F97C0(TimedEffect *arg0);
 void func_150F97EC(Actor *obj, u8 arg1, s32 arg2);
 void func_150F9950(Actor *obj, u8 arg1, s32 arg2);
 extern const u8 D_800A1C00[8][8];
-extern const u8 D_800A1C40[4][2];
-extern const Vec3f D_800A1C48;
-extern const Vec3f D_800A1C54;
 
 /* game_127060.c */
 typedef struct Obj150FADC8 Obj150FADC8;

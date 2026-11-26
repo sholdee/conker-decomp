@@ -2081,6 +2081,29 @@ typedef struct TriggerZone {
 } TriggerZone; // size 0x34
 
 /*
+ * A stage-parts object (set up by func_15011D60, run by func_150F892C): it steps through eight parts, one
+ * shown at a time, while emitting effects on an arc of radius `radius` around (centerX, centerZ).
+ */
+typedef struct {
+    /* 0x00 */ TriggerZone *zone; /* the zone that set it up; message 0x3F (StageMsg.zone) names it */
+    /* 0x04 */ u8 set;            /* zone->data2: the column of D_800A1C00, the id of message 0x42 */
+    /* 0x05 */ u8 mirror;         /* set >= 4; bit 0 mirrors the effect angles */
+    /* 0x06 */ s16 stageTimer;
+    /* 0x08 */ u8 stage;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ WorldObject *parts[8]; /* the inactive ones are hidden */
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ s16 eventTimer;
+    /* 0x3E */ u8 pad3E[2];
+    /* 0x40 */ f32 centerX; /* from the type-3 zone 0x15 of the same set */
+    /* 0x44 */ f32 centerZ;
+    /* 0x48 */ f32 radius;
+} StageState; /* size 0x4C */
+
+/*
  * A dynamic point light (0x34 bytes). Every allocated light sits in the singly
  * linked list D_800DCD78. A LightEffect (below) drives one through LightEffect.light.
  */

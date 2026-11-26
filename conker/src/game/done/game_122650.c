@@ -6,7 +6,8 @@ u8 D_80088B40 = 0;
 static u8 D_80088B44 = 0;
 
 
-void func_150F51A0(s32 arg0, s32 arg1) {
+/* Zone handler: sets D_80088B40. */
+void func_150F51A0(Actor *obj, TriggerZone *zone) {
     D_80088B40 = 1;
 }
 
