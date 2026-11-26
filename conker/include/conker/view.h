@@ -26,7 +26,7 @@ void func_15015FBC(s32 width, s32 height);
 /* game_476D0.c */
 void func_1501A220(s32 numPlayers, s32 arg1);
 void func_1501A39C(void);
-Gfx *func_1501A490(Gfx *dl, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode); /* defined with s32 dl */
+Gfx *func_1501A490(Gfx *gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode);
 Gfx *func_1501A680(Gfx *gfx);
 Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry);
 void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *depth);

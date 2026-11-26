@@ -1,10 +1,6 @@
 #include <ultra64.h>
 
-// matching: func_1501A490 is defined below with the display list as an integer (conker/view.h gives callers the
-// Gfx * prototype); a Gfx * parameter, even copied into an integer local, changes its code.
-#define func_1501A490 func_1501A490_hdr
 #include "functions.h"
-#undef func_1501A490
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
@@ -77,17 +73,10 @@ void func_1501A39C(void) {
 
 /* Emits a pipe sync and a scissor around view viewIndex (the whole drawable area for 0xFF), clipping its
  * bottom edge to maxBottom when that is non-zero. Returns the advanced display list. */
-// matching: the display list is advanced as an integer and IDO's -g3 frame only fits one Gfx * per command,
-// so gDPPipeSync/gDPSetScissor are expanded by hand, each advancing gfx before its stores (the sync must stay
-// on one line: -g3 line numbers steer the scheduler).
-s32 func_1501A490(s32 gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode) {
-    { Gfx *cmd = (Gfx *)gfx; gfx += sizeof(Gfx); cmd->words.w0 = _SHIFTL(G_RDPPIPESYNC, 24, 8); cmd->words.w1 = 0; }
+Gfx *func_1501A490(Gfx *gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode) {
+    gDPPipeSync(gfx++);
     if (viewIndex == 0xFF) {
-        Gfx *cmd = (Gfx *)gfx;
-        gfx += sizeof(Gfx);
-        cmd->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) | _SHIFTL(2 * 4, 12, 12) | _SHIFTL(0 * 4, 0, 12);
-        cmd->words.w1 = _SHIFTL(mode, 24, 2) | _SHIFTL((s32)((f32)(D_800BE620 - 2) * 4.0f), 12, 12) |
-                        _SHIFTL((s32)((f32)D_800BE624 * 4.0f), 0, 12);
+        gDPSetScissor(gfx++, mode, 2, 0, D_800BE620 - 2, D_800BE624);
     } else {
         f32 left;
         f32 right;
@@ -109,14 +98,7 @@ s32 func_1501A490(s32 gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32
             bottom = view->bottom;
         }
         func_1501AF44(&left, &top, &right, &bottom);
-        {
-            Gfx *cmd = (Gfx *)gfx;
-            gfx += sizeof(Gfx);
-            cmd->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) | _SHIFTL((s32)(left * 4.0f), 12, 12) |
-                            _SHIFTL((s32)(top * 4.0f), 0, 12);
-            cmd->words.w1 = _SHIFTL(mode, 24, 2) | _SHIFTL((s32)(right * 4.0f), 12, 12) |
-                            _SHIFTL((s32)(bottom * 4.0f), 0, 12);
-        }
+        gDPSetScissor(gfx++, mode, left, top, right, bottom);
     }
     return gfx;
 }
