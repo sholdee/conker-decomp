@@ -20,6 +20,7 @@ struct SoundRecord;
 struct S150D88AC;
 
 /* game_5D2C0.c */
+extern ModelAttachment *D_800C3EE0; // head of the model attachment list
 s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6);
 s32 func_1502FFD8(ModelAttachment *att, Actor *owner);
 void func_15030158(ModelAttachment *att, s32 immediate);

@@ -7,6 +7,7 @@
 /*
  * Subsystem "bone": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
+ *   game_228CF0.c (data only; linked between game_5D2C0 and game_61490)
  *   game_61490.c
  *   game_61950.c
  *   game_61D10.c
@@ -24,6 +25,9 @@ typedef struct BoneChain {
     /* 0x4C */ s16 swayTimer;   /* frames until the next idle sway */
     /* 0x4E */ u8 blendTimer;   /* frames left blending back from the animated pose */
 } BoneChain;
+
+/* game_228CF0.c */
+extern const u8 *D_80084230[]; // per remap set (1-based): (bone, value) pairs terminated by 0xFF
 
 /* game_61490.c */
 void func_15033FE0(GameCommand *commands, s32 index);

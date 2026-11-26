@@ -41,7 +41,6 @@ Gfx D_80084190[] = {
     gsSPEndDisplayList(),
 };
 
-extern u8 *D_8008422C[];
 extern s32 D_80088554;
 extern s32 D_80088558;
 extern s32 D_8008857C;
@@ -885,11 +884,11 @@ load:
                 s32 k;
 
                 if (D_800D1C90[id]->unk29 != 0) {
-                    u8 *p;
+                    const u8 *p;
 
                     D_800C3FFA = 0;
                     bzero(remapBuf, D_800C4ED0[id]);
-                    p = D_8008422C[D_800D1C90[id]->unk29];
+                    p = D_80084230[D_800D1C90[id]->unk29 - 1];
                     while (*p != 0xFF) {
                         k = p[0];
                         remapBuf[k] = p[1];
