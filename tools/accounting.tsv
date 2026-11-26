@@ -3613,10 +3613,10 @@ func_1510B3B0	0x1510B3B0	168	game	c		build/src/game_138520.c.o
 func_1510B458	0x1510B458	196	game	c		build/src/game_138520.c.o
 func_1510B51C	0x1510B51C	220	game	c		build/src/game_138520.c.o
 func_1510B5F8	0x1510B5F8	152	game	c		build/src/game_138520.c.o
-func_1510B690	0x1510B690	292	game	c		build/src/game_138B40.c.o
-func_1510B7B4	0x1510B7B4	420	game	c		build/src/game_138B40.c.o
-func_1510B958	0x1510B958	120	game	c		build/src/game_138B40.c.o
-func_1510B9D0	0x1510B9D0	1424	game	c		build/src/game_138B40.c.o
+func_1510B690	0x1510B690	292	game	c		build/src/game_138520.c.o
+func_1510B7B4	0x1510B7B4	420	game	c		build/src/game_138520.c.o
+func_1510B958	0x1510B958	120	game	c		build/src/game_138520.c.o
+func_1510B9D0	0x1510B9D0	1424	game	c		build/src/game_138520.c.o
 func_1510BF60	0x1510BF60	1356	game	c		build/src/game_139410.c.o
 func_1510C4AC	0x1510C4AC	1020	game	c		build/src/game_139410.c.o
 func_1510C8A8	0x1510C8A8	616	game	c		build/src/game_139410.c.o

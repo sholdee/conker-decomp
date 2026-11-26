@@ -12,7 +12,6 @@
  *   game_433F0.c
  *   game_476D0.c
  *   game_138520.c
- *   game_138B40.c
  */
 
 /* game_3F820.c */
@@ -75,15 +74,6 @@ extern u8 D_800D9B84[3];
 extern u8 D_800D9B88[3];
 extern u8 D_800D9B8B;
 extern u8 D_800D9B8C;
-void func_1510B070(s32 arg0);
-void func_1510B128(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 near);
-void func_1510B32C(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale);
-void func_1510B3B0(void);
-void func_1510B458(s32 viewIndex, f32 near, f32 far);
-void func_1510B51C(void);
-void func_1510B5F8(s32 viewIndex, u16 *perspNorm, f32 fovy, f32 aspect, f32 near, f32 far, f32 scale);
-
-/* game_138B40.c */
 extern LookAt D_800D9B90[2];
 extern Ambient D_800D9BD0[4][2];
 extern MtxF D_800D9C10[4];
@@ -92,6 +82,13 @@ extern PointLightGfx *D_800D9E10[4];
 extern u8 D_800D9E20;
 extern u8 D_800D9E21;
 extern PointLight *D_800D9E28[14];
+void func_1510B070(s32 arg0);
+void func_1510B128(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 near);
+void func_1510B32C(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale);
+void func_1510B3B0(void);
+void func_1510B458(s32 viewIndex, f32 near, f32 far);
+void func_1510B51C(void);
+void func_1510B5F8(s32 viewIndex, u16 *perspNorm, f32 fovy, f32 aspect, f32 near, f32 far, f32 scale);
 void func_1510B690(void);
 Gfx *func_1510B7B4(Gfx *gfx, s32 view);
 void func_1510B958(s32 view);
