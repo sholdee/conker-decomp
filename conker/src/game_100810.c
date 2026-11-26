@@ -911,9 +911,9 @@ s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
     *pitchOut = snd->pitch = pitch;
 
     if (*arg2 == 0) {
-        if (snd->unk24 != 0) {
-            func_100111C8(snd->unk24);
-            snd->unk24 = 0;
+        if (snd->voiceHandle != 0) {
+            func_100111C8(snd->voiceHandle);
+            snd->voiceHandle = 0;
         }
         *playing = 0;
     }

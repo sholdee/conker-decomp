@@ -473,7 +473,7 @@ Gfx *func_150D9C7C(PissTrail *trail, Gfx *gfx, s16 view) {
     }
     data = trail->data;
     points = trail->points;
-    func_151D5D60(trail->unk84, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), &vtx, NULL);
+    func_151D5D60(trail->vtxBuf, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }

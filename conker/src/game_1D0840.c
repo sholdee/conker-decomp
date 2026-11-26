@@ -268,7 +268,7 @@ Gfx *func_151A3BE4(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
     BoneTrailState *state;
 
     if (effect->head.count >= 2) {
-        func_151D5D60(effect->unk84, view, (effect->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
+        func_151D5D60(effect->vtxBuf, view, (effect->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             state = effect->state;
             camPos = &camera_global_Cameras[view].eye.x;

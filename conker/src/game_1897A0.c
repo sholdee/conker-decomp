@@ -137,7 +137,7 @@ Gfx *func_1515C6F4(FallingTrail *trail, Gfx *gfx, s16 view) {
     f32 scale;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->unk84, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        func_151D5D60(trail->vtxBuf, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             data = trail->data;
             update = 1;

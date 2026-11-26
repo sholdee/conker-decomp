@@ -1983,7 +1983,7 @@ void func_1506F1A8(s32 cmd) {
     descriptor.seed.alpha = 200;
     descriptor.emit.rateRange = 0.312f;
     descriptor.seed.initFn = -1;
-    descriptor.seed.unk35 = 2;
+    descriptor.seed.attackFn = 2;
     descriptor.seed.destroyFn = -1;
     descriptor.seed.updateFn = -1;
     descriptor.kind = 15;
@@ -2061,7 +2061,7 @@ void func_1506F54C(s32 cmd) {
     descriptor.seed.sizeRate = 4.9f;
     descriptor.seed.alpha = 159;
     descriptor.seed.initFn = 0;
-    descriptor.seed.unk35 = -1;
+    descriptor.seed.attackFn = -1;
     descriptor.seed.destroyFn = 0;
     descriptor.seed.soundFn = 0;
     descriptor.seed.soundUpdateFn = 0;
@@ -2457,7 +2457,7 @@ void func_15070898(s32 cmd) {
     descriptor.seed.sizeRate = 5.0f;
     descriptor.seed.alpha = 180;
     descriptor.seed.initFn = -1;
-    descriptor.seed.unk35 = 1;
+    descriptor.seed.attackFn = 1;
     descriptor.seed.destroyFn = -1;
     descriptor.seed.soundFn = -1;
     descriptor.seed.soundUpdateFn = -1;

@@ -2684,8 +2684,8 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
             } while (flame->lineAccum > 1.0f);
         }
     }
-    if (flame->seed.unk35 != -1) {
-        D_8008F8A8[flame->seed.unk35](actor);
+    if (flame->seed.attackFn != -1) {
+        D_8008F8A8[flame->seed.attackFn](actor);
     }
     if ((flame->flags & 2) && actor->head.count >= 2) {
         Vec3f *end;
@@ -3277,7 +3277,7 @@ void func_1519C9C4(FlamethrowerController *ctrl) {
     setup.seed.sizeRate = 6.599999905f;
     setup.seed.alpha = 200;
     setup.seed.initFn = -1;
-    setup.seed.unk35 = 0;
+    setup.seed.attackFn = 0;
     setup.seed.destroyFn = -1;
     setup.seed.soundFn = 0;
     setup.seed.soundUpdateFn = 0;

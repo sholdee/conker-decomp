@@ -224,7 +224,7 @@ Gfx *func_150B4710(ScatterTrail *trail, Gfx *gfx, s16 camIdx) {
     f32 nextScale;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->unk84, camIdx, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        func_151D5D60(trail->vtxBuf, camIdx, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             cam = &camera_global_Cameras[camIdx].eye.x;
             state = trail->state;

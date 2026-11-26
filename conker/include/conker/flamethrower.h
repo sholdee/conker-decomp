@@ -36,7 +36,7 @@ typedef struct FlameSeed {
     /* 0x2C */ f32 size;
     /* 0x30 */ f32 sizeRate;
     /* 0x34 */ s8 initFn;      /* D_8008F8A4 index */
-    /* 0x35 */ s8 unk35;       /* D_8008F8A8 index */
+    /* 0x35 */ s8 attackFn;    /* D_8008F8A8 index */
     /* 0x36 */ s8 destroyFn;   /* D_8008F8B4 index */
     /* 0x37 */ s8 soundFn;     /* D_8008F8B8 index */
     /* 0x38 */ s8 soundUpdateFn; /* D_8008F8BC index */

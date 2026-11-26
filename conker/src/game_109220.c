@@ -667,7 +667,7 @@ Gfx *func_150DD640(StreamActor *actor, Gfx *gfx, s16 view) {
     StreamPoint *records;
 
     if (actor->head.count >= 2) {
-        func_151D5D60(actor->unk84, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        func_151D5D60(actor->vtxBuf, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             state = actor->state;
             records = actor->records;

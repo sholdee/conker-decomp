@@ -79,7 +79,7 @@ typedef struct {
 typedef struct ScatterTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
+    /* 0x84 */ u8 vtxBuf[0x10]; /* per-view vertex buffers (func_151D5D60) */
     /* 0x94 */ ScatterTrailPoint *points;
     /* 0x98 */ ScatterTrailState *state;
 } ScatterTrail;
@@ -138,7 +138,7 @@ typedef struct TrailSound {
     s32 soundId;
     s16 pitch;
     u8 pad22[2];
-    u16 unk24;
+    u16 voiceHandle; /* SoundRecord.sound_id: the handle func_100111C8 stops */
 } TrailSound;
 
 /* One point of a trail's ring buffer (0x24 bytes). */
@@ -177,7 +177,7 @@ typedef struct {
 typedef struct PissTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
+    /* 0x84 */ u8 vtxBuf[0x10]; /* per-view vertex buffers (func_151D5D60) */
     /* 0x94 */ PissTrailPoint *points;
     /* 0x98 */ PissTrailData *data;
 } PissTrail;
@@ -319,7 +319,7 @@ typedef struct StreamState {
 struct StreamActor {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];  /* per-view vertex buffers (func_151D5D60) */
+    /* 0x84 */ u8 vtxBuf[0x10]; /* per-view vertex buffers (func_151D5D60) */
     /* 0x94 */ StreamPoint *records;
     /* 0x98 */ StreamState *state;
 };
@@ -334,7 +334,7 @@ typedef struct FallingTrailPoint {
 typedef struct FallingTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
+    /* 0x84 */ u8 vtxBuf[0x10]; /* per-view vertex buffers (func_151D5D60) */
     /* 0x94 */ FallingTrailPoint *points;
     /* 0x98 */ TrailBurstParams *data;
 } FallingTrail;
@@ -561,7 +561,7 @@ typedef struct SurfaceTrailPoint {
 typedef struct SurfaceTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ CollisionHit collision; /* the last ground probe */
-    /* 0x84 */ u8 unk84[0x10];
+    /* 0x84 */ u8 vtxBuf[0x10]; /* per-view vertex buffers (func_151D5D60) */
     /* 0x94 */ SurfaceTrailPoint *points;
     /* 0x98 */ SurfaceTrailConfig *config;
 } SurfaceTrail;
@@ -632,7 +632,7 @@ typedef struct {
 typedef struct BoneTrailEffect {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
+    /* 0x84 */ u8 vtxBuf[0x10]; /* per-view vertex buffers (func_151D5D60) */
     /* 0x94 */ BoneTrailPoint *points;
     /* 0x98 */ BoneTrailState *state;
 } BoneTrailEffect;
@@ -774,7 +774,7 @@ typedef struct {
 typedef struct AnchoredTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
+    /* 0x84 */ u8 vtxBuf[0x10]; /* per-view vertex buffers (func_151D5D60) */
     /* 0x94 */ AnchoredTrailPoint *points;
     /* 0x98 */ AnchoredTrailData *data;
 } AnchoredTrail;

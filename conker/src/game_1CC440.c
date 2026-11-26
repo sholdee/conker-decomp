@@ -496,7 +496,7 @@ Gfx *func_1519FE6C(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
     s32 k;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->unk84, arg2, (trail->head.tmpl.itemCount * 3 + 18) * sizeof(Vtx), &vtx, NULL);
+        func_151D5D60(trail->vtxBuf, arg2, (trail->head.tmpl.itemCount * 3 + 18) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             config = trail->config;
             points = trail->points;
