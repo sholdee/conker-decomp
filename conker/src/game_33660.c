@@ -6,8 +6,6 @@
 static OSContStatus D_800BE2C0[MAXCONTROLLERS];
 static OSMesg D_800BE2D0[8]; // message buffer of the SI event queue D_800BE900
 
-extern s32 D_800BE72C;
-
 
 void func_150061B0(void) {
     osCreateMesgQueue(&D_800BE900, D_800BE2D0, 8);

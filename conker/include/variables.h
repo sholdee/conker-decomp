@@ -320,10 +320,6 @@ extern u8 D_800BE590;
 extern u16 D_800BE598[];
 extern s32 *D_800BE5A8[]; // per spawn model type: data loaded by func_1502B7F0
 extern s32 D_800BE5D0;
-extern f32 D_800BE6C0[]; // per-player smoothed light pitch (degrees, -180..180)
-extern f32 D_800BE6D0[]; // per-player smoothed light yaw (degrees, 0..360)
-extern u8 D_800BE740;
-extern u16 D_800BE930[4]; // button bits per controller (menu reads)
 extern u8  D_800BE9A0;
 extern f32 D_800BE9A4;
 extern f32 D_800BE9A8;
@@ -333,28 +329,12 @@ extern s32 level;
 
 
 
-extern OSPfs D_800BE760[MAXCONTROLLERS]; // rumble pak per controller channel
-extern OSMesgQueue D_800BE900;
-extern OSContPad D_800BE918[4]; // controller pads (read in game_48FD0.c)
-extern u8   D_800BE938;
 extern Gfx *D_800BE9C8[2]; // display-list buffer per framebuffer (D_800BE9C0)
 extern Gfx *D_800BE9D0;    // display-list write head
 extern Gfx *D_800BE9D8[2]; // per framebuffer: end of the prologue built by func_1501A39C
 
-extern u8   D_800BE93C[];
 
-extern u16  D_800BE710[];
-extern u16  D_800BE720[];
-extern OSContPad **D_800BE728; // per-player controller pads (the table func_1501BBB8 returns)
-extern u8   D_800BE940[];
-extern u8   D_800BE944[];
-extern u8   D_800BE948[];
-extern f32  D_800BE950[];
-extern f32  D_800BE960[];
-extern f32  D_800BE970[];
-extern f32  D_800BE980[];
 
-extern OSMesg      D_800BE990;
 extern u8   D_800BE9B4;
 extern u8   D_800BE9C0; // which of the two matrix buffers is being built this frame
 extern u16 *D_800BE9C4; // z-buffer (D_800BE620 x D_800BE624)
@@ -367,8 +347,6 @@ extern s16 D_800BE9F2;
 extern s32 D_800BE9F4;   // current scene / game mode id
 extern s32  D_800BE9F8;
 
-extern OSContPad *D_800BE730[4]; // per-player pointers into D_800BE748
-extern OSContPad D_800BE748[4];   // per-player controller pads
 
 extern s32 D_800BEA00;
 extern s32 D_800BEA04;

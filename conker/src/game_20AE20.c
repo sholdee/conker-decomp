@@ -776,7 +776,6 @@ void func_151DF1BC(void) {
 
 extern s8 D_800AB804[];
 extern char D_800AB810[];
-extern s8 D_800BE91B; /* == D_800BE918[0].stick_y; the field spelling mismatches */
 
 s8 D_8008FF00 = 0;
 u8 D_8008FF04 = 0;
@@ -946,12 +945,12 @@ void func_151DF574(void) {
         scroll += 2;
     }
     if ((scroll == 0) && (D_800E0A95 == 0xFF)) {
-        if (D_800BE91B < -49) {
+        if (D_800BE918[0].stick_y < -49) {
             prevRow = D_8008FDB0;
             D_8008FDB0++;
             scroll = -10;
             sfx = 0x4FF;
-        } else if (D_800BE91B >= 50) {
+        } else if (D_800BE918[0].stick_y >= 50) {
             prevRow = D_8008FDB0;
             D_8008FDB0--;
             scroll = 10;
@@ -2797,7 +2796,6 @@ void func_151E4314(void) {
         func_151E2834();
     }
 }
-extern s8 D_800BE91A;
 extern char D_800AB8CC[];
 extern char D_800AB8D0[];
 extern char D_800AB8D4[];
@@ -2908,7 +2906,7 @@ void func_151E43DC(void) {
                     }
                 }
             }
-            cur = D_800BE91A;
+            cur = D_800BE918[0].stick_x;
             if ((D_8008FF3C >= -30 && cur < -30) || (D_8008FF3C < 31 && cur >= 31)) {
                 D_8008FE2C = 1 - D_8008FE2C;
                 func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
