@@ -233,7 +233,7 @@ void func_15063B64(Actor *arg0) {
 
         packet.throwerId = (arg0 - movement_obj) + 1;
         packet.thrower = arg0;
-        func_1506AC8C(arg0, 0xB, (s32)&packet);
+        func_1506AC8C(arg0, 0xB, &packet);
         func_150836CC(arg0, packet.anim);
 
         if (arg0->mv->numGrenades != 0) {
@@ -341,7 +341,7 @@ void func_15063FA0(Actor *arg0, s32 kind) {
     }
     func_1505A184((s16)(pitch * 182.0444489f), dist, 0.0f, &velX, &velY, &velZ);
     velY = -velY;
-    func_1506C460(yaw, velX, velY, 0.0f, 100, kind, 0.0f, 0.5f, (s32)pos, 1, 1);
+    func_1506C460(yaw, velX, velY, 0.0f, 100, kind, 0.0f, 0.5f, pos, 1, 1);
 }
 
 /* Picks animA or animB at random; if one of them is already playing, picks animC instead
@@ -989,10 +989,17 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
     return anim;
 }
 
-extern u16 D_800996A0[][4];
-extern u16 D_800996C0[];
-extern u16 D_800996C8[];
-extern u16 D_800996D0[];
+/* Per held-item kind: the animations of its four action steps. */
+static const u16 D_800996A0[][4] = {
+    { 0x0138, 0x003E, 0x003D, 0x0139 },
+    { 0x0138, 0x003E, 0x00D9, 0x0139 },
+    { 0x0035, 0x003A, 0x003F, 0x005D },
+    { 0x01CD, 0x01CE, 0x01CF, 0x01D0 },
+};
+/* Zero-terminated sound lists for func_1000FA64. */
+static const u16 D_800996C0[] = { 0x007C, 0x020D, 0x0238, 0 };
+static const u16 D_800996C8[] = { 0x01E0, 0x0253, 0x0254, 0 };
+static const u16 D_800996D0[] = { 0x01A4, 0x0350, 0 };
 extern WorldObject *D_800CC5EC;
 
 /* Per-frame handler for the object's held item / special action `act`: starts, steps and ends
@@ -1922,7 +1929,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         anims[0] = 0xE7;
                         anims[1] = 0x22B;
                         arg0->mv->shotsfired++;
-                        func_1506AC8C(arg0, 9, (s32)anims);
+                        func_1506AC8C(arg0, 9, anims);
                     }
                 } else {
                     anim = func_15063E84(arg0, 0xE4, 1, 0, pressedButtons);

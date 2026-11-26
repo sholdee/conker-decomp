@@ -1,4 +1,29 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/*
+ * Per-model tables, indexed by model id (0..186), linked at 0x800C4020..0x800C6650 in this order. They are
+ * defined before functions.h and variables.h declare them (conker/model.h): IDO lays out .bss in the order
+ * it first sees each name, and that order also depends on the declarations before it (see init_50A0.c).
+ */
+s32 *D_800C4020[187];                 // per model: first vertex of each part
+u16 D_800C4310[187];                  // per model: part count
+Gfx **D_800C4488[187];                // per model: display-list parts (ModelHeader dlists)
+u16 D_800C4778[187];                  // per model: display-list part count
+Gfx **D_800C48F0[187];                // per model: display list table (ModelHeader dlists2)
+void *D_800C4BE0[187];                // per model: bone table (16-byte entries)
+u16 D_800C4ED0[187];                  // per model: bone count
+void *D_800C5048[187];                // per model: ModelHeader unk20
+ObjTexture *D_800C5338[187];          // per model: texture table
+u16 D_800C5628[187];                  // per model: texture count
+u16 D_800C57A0[187];                  // per model: vertex count
+u16 D_800C5918[187];                  // per model: triangle weight, see func_1503D984
+u16 D_800C5A90[187];                  // per model: animation count
+VtxRun *D_800C5C08[187];              // per model: vertex runs (D_800C5EF8[id] of them)
+u16 D_800C5EF8[187];                  // per model: vertex run count
+VtxTri *D_800C6070[187];              // per model: triangles
+TexCoord *D_800C6360[187];            // per model: saved texture coordinates (func_1503D804)
+
 #include "functions.h"
 #include "variables.h"
 
@@ -31,9 +56,6 @@ typedef struct GfxBytes {
     /* 0x3 */ u8 index; // G_MOVEMEM: what is moved
     /* 0x4 */ s32 addr;
 } GfxBytes;
-
-/* Per-model tables, indexed by model id (0..186). */
-extern void *D_800C5048[];
 
 
 /*
@@ -200,8 +222,15 @@ void func_1503D484(ActorAnim *anim, s32 id) {
 }
 
 /* Groups of model ids that share one animation table: D_80098888[i] ids in row D_80084410[i]. */
-extern u8 D_80098888[];
-extern u8 *D_80084410[];
+static const u8 D_80098860[] = {
+    0x00, 0x01, 0x02, 0x03, 0x04, 0x3B, 0x82, 0x88, 0x90, 0x96, 0x98, 0x9C, 0x9D, 0x9F, 0xA0, 0xB0, 0xB1, 0xB2, 0x75, 0xB4,
+};
+static const u8 D_80098874[] = { 0x15, 0x18, 0x1E };
+static const u8 D_80098878[] = { 0x3A, 0x3D };
+static const u8 D_8009887C[] = { 0x5A, 0x74, 0x74, 0x5F, 0x8D };
+static const u8 D_80098884[] = { 0x05, 0xAD, 0xAE, 0xAF };
+static const u8 D_80098888[] = { 20, 3, 2, 5, 4 };
+static const u8 *D_80084410[] = { D_80098860, D_80098874, D_80098878, D_8009887C, D_80098884 };
 
 /* Copies model id's animation table and count to the other models of its group. */
 void func_1503D510(s32 id) {
@@ -376,7 +405,7 @@ s32 func_1503DA3C(s32 id, s32 index) {
     if (data == NULL) {
         return 0xFF;
     }
-    if (hdr->unk30Size < (u32)(index + 1)) {
+    if (hdr->unk30Size < index + 1) {
         return 0xFF;
     }
     table = hdr->unk30;
@@ -426,7 +455,7 @@ s32 func_1503DC3C(s32 id) {
 
     for (i = 0; i < D_800C5628[id]; i++) {
         D_800C5338[id][i].addr = func_1510D0EC(D_800C5338[id][i].id, NULL, 0x3E, 1);
-        if (D_800C5338[id][i].addr == (s32)0x80000000) {
+        if (D_800C5338[id][i].addr == 0x80000000) {
             ret |= 0x10;
         }
     }

@@ -34,16 +34,18 @@ void func_1507E7E4(Actor *actor, u8 index, u8 priority, u16 timer, s32 morphDura
 ExpressionRecord *func_1507E908(Actor *actor, s32 index);
 s32 func_1507E968(Actor *actor);
 void func_1507E9E8(Actor *actor, s32 index);
-u8 *func_1507E9F8(Actor *actor, s32 *count);
+const u8 *func_1507E9F8(Actor *actor, s32 *count);
 void func_1507EA44(Actor *actor, s32 action, s32 param);
 void func_1507EABC(Actor *actor);
 void func_1507EB2C(Actor *actor);
 void func_1507EB4C(Actor *actor, s32 expression);
+extern BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (func_150163D0 loads, func_15055E50 uses)
 
 /* game_AD6B0.c */
 void func_15080200(void);
 void func_15080228(void);
 void func_15080348(Actor *actor);
 void func_15080430(Actor *actor, s32 expression, s32 morphDuration);
+extern u8 D_800D18D0; // the object whose expression the messages set (index into movement_obj)
 
 #endif

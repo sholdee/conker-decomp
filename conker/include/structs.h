@@ -689,11 +689,23 @@ typedef struct PathPoint {
     /* 0x6 */ u16 param; /* point 0: radius / 8 of the path's area; later points: speed */
 } PathPoint;
 
-/* D_800D2138 (0x20C bytes, cleared by func_15017300): match state. D_800D213C (per-player stats) and
- * D_800D2340 (= unk208) are separately named views into it. */
+/* Per-player stats, read and written through func_150859AC / func_15085710 (game_B2BC0). */
+typedef struct PlayerStats {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s8 unk8;   /* 0..100 */
+    /* 0x09 */ s8 health; /* 0..99 */
+    /* 0x0A */ u8 unkA;
+    /* 0x0B */ u8 padB;
+    /* 0x0C */ s32 unkC;  /* >= 0 */
+    /* 0x10 */ u8 pad10[0xC];
+} PlayerStats; // size 0x1C
+
+/* D_800D2138 (0x20C bytes, defined in game_B2BC0, cleared by func_15017300): match state. */
 typedef struct MatchState {
     /* 0x000 */ s32 unk0;      /* indexes D_80087280; 1 = two views */
-    /* 0x004 */ u8  pad4[0x204];
+    /* 0x004 */ PlayerStats players[18]; /* indexed by player number; 18 fit before unk208 */
+    /* 0x1FC */ u8  pad1FC[0xC];
     /* 0x208 */ u16 unk208;    /* bit per player */
     /* 0x20A */ u8  pad20A[2];
 } MatchState; // size 0x20C
@@ -804,7 +816,7 @@ typedef struct ActorAnim {
 /* The 16 bytes before a model's animation table (loaded as offsets, made absolute by func_1503D660). */
 typedef struct AnimHeader {
     /* 0x0 */ struct ScriptEntry *scripts;            // A28B0: script id -> script
-    /* 0x4 */ struct HitReaction *hits;             // 83300: hit-reaction table (func_1505C1A4)
+    /* 0x4 */ const struct HitReaction *hits;           // 83300: hit-reaction table (func_1505C1A4)
     /* 0x8 */ struct Game83300AnimEntry *reactions;   // 83300: reaction entries
     /* 0xC */ u32 reactionsSize;                      // byte size of reactions
 } AnimHeader; // size 0x10
@@ -1179,7 +1191,7 @@ struct Actor {
     /* 0x212 */ u8  unk212[0x2];
     /* 0x214 */ s16 unk214;
     /* 0x216 */ s16 unk216;      // distance bias (game_C4DC0)
-    /* 0x218 */ ObjScriptCmd *scriptCmd; // current script command
+    /* 0x218 */ const ObjScriptCmd *scriptCmd; // current script command
     /* 0x21C */ u16 unk21C;
     /* 0x21E */ u8  unk21E;
     /* 0x21F */ u8  unk21F;
@@ -1258,7 +1270,7 @@ struct Actor {
     /* 0x288 */ u8  unk288;
     /* 0x289 */ u8  pad289[0x3];
     /* 0x28C */ u8 *modelData[7][2]; // per model in modelIds, per frame buffer
-    /* 0x2C4 */ u8 *modelIds;
+    /* 0x2C4 */ const u8 *modelIds;
     /* 0x2C8 */ u8  lodCount;   // models in modelIds that are LODs
     /* 0x2C9 */ u8  modelCount; // lodCount + extra sub-models
     /* 0x2CA */ s8  unk2CA;
@@ -1847,7 +1859,7 @@ typedef struct AimPoint {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
     /* 0x04 */ s16 z;
-    /* 0x06 */ s16 flags;    /* 2: removed (aim_removePoint) */
+    /* 0x06 */ u16 flags;    /* 2: removed (aim_removePoint) */
     /* 0x08 */ u32 radiusSq;
     /* 0x0C */ s16 unkC;
     /* 0x0E */ s16 maxX;     /* x + radius */
@@ -3247,6 +3259,14 @@ typedef struct HitReaction {
     /* 0x24 */ u16 unk24; /* flags */
     /* 0x26 */ u8 pad26[2];
 } HitReaction; /* size 0x28 */
+
+/* One rule of a hit route (D_80086AA0, game_A9260.c), checked by func_1505C1E4 (game_83300.c). */
+typedef struct HitRule {
+    /* 0x0 */ u8 unk0; /* condition: 1, 2 by the attack angle (func_1505C140); 3 only a stunned victim, 4 only one not stunned */
+    /* 0x1 */ u8 unk1; /* the reaction kind it matches */
+    /* 0x2 */ u8 unk2; /* bit 0x80: matches every other kind; & 0x7F: action */
+    /* 0x3 */ u8 unk3; /* the table entry to use */
+} HitRule;
 
 /* File header of an attachment model (func_1502B6BC table 9), cached per model in D_800E0148 with the load
  * reference counts in D_800DF7D0. game_5D2C0 relocates the display-list table; game_1B9DB0 passes the

@@ -36,6 +36,8 @@ void func_150183D0(s32 stride, s32 height, u8 *bitmap, s32 *cells);
 s32 func_1503F800(void *unused, s16 x, s16 z, s32 bit, s32 unused2);
 s32 func_1503F904(Actor *obj, s32 bit, s32 unused);
 void func_1503F964(void);
+extern u8 D_800C67F0; // nonzero: func_1503F964 cycles the zone-object cursor
+extern u8 D_800C67F1; // zone-object cursor: index into movement_obj (0..24)
 
 /* game_CDE80.c */
 void func_150A09D0(s32 ticks);

@@ -1,4 +1,22 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+u8 D_800D1940;
+u8 D_800D1941;
+TextResource *D_800D1944; // current text
+TextResource *D_800D1948; // header text prepended to it, or NULL
+u8 *D_800D194C;           // header + page break + current text
+TextBox *D_800D1950;      // open text box
+TextBoxConfig D_800D1958;
+f32 D_800D1988;
+f32 D_800D198C;
+f32 D_800D1990;
+u8 D_800D1994;
+u8 D_800D1995;
+u16 *D_800D1998;          // sound effects voiced while the text types out
+static TriggerZone *D_800D199C; /* zone to disable once the text box closes */
+
 #include "functions.h"
 #include "variables.h"
 
@@ -7,8 +25,6 @@
 
 /* Tests bit n of a byte-array bit set. */
 #define BIT_IS_SET(bits, n) ((bits)[(n) >> 3] & (1 << ((n) & 7)))
-
-extern TriggerZone *D_800D199C;   /* zone to disable once the text box closes */
 
 s32 strlen(const char *);
 

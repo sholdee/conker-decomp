@@ -52,21 +52,6 @@ void func_1504CA60(Actor *actor) {
     actor->count2 = 1;
 }
 
-/* The part of the rope (ActorCtl.rope) read here; game_1D9F10.c has the full Rope. */
-typedef struct Sub9C {
-    /* 0x00 */ u8 pad0[0x2C];
-    /* 0x2C */ f32 unk2C;
-} Sub9C;
-
-
-
-
-extern f32 D_800CBD90;
-extern f32 D_800CBD94;
-extern f32 D_800CBD98;
-extern f32 D_800CBDFC;
-extern u16 D_800CC27E;
-
 // matching: second names for D_800CC280/D_800CC2BC (aliases in undefined_syms.us.txt). As separate
 // symbols IDO neither shares their %hi nor reuses loads across them; a few uses need that.
 extern s32 D_800cc280;
@@ -162,7 +147,7 @@ void func_1504CB98(Actor *actor) {
     s32 lockDiff;
     s32 wantAngle;
     f32 climbInput;
-    struct Sub9C *path;
+    Rope *path;
     u16 dirAngle;
     u16 otherFacing;
     f32 tiltDeg;
@@ -945,7 +930,7 @@ void func_1504CB98(Actor *actor) {
                 climbAnimSpeed = -stickY;
             }
         }
-        path = (Sub9C *)actor->mv->ropePtr;
+        path = actor->mv->ropePtr;
         climbRate = path->unk2C;
         climbRate = 0.08f / climbRate;
         actor->mv->ropeProgress += stickY * climbRate * D_800D1550;

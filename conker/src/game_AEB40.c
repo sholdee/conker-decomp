@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 (*D_80086C90[])(Actor *, Actor *, void *);
 
 
 /* Casts a ray from origin along dir against the world and every active object (except self and those in
@@ -263,7 +262,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
         case 10:
             effect = -1;
             func_15104608(hit->pos.x, hit->pos.y, hit->pos.z, self->owner);
-            func_1506AC8C(self, 2, 0);
+            func_1506AC8C(self, 2, NULL);
             break;
         default:
             effect = 5;
@@ -276,7 +275,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
     }
     obj = hit->obj;
     if (kind == 5 || kind == 9 || kind == 10) {
-        func_1506AC8C(self, 3, 0);
+        func_1506AC8C(self, 3, NULL);
     }
     if (obj->energy == 0) {
     // matching: an (unused) label here stops IDO hoisting the store out of the then-block

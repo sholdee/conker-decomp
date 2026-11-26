@@ -1,4 +1,13 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
+ * it first sees each name (see init_50A0.c). The multiplayer spawn points of the level: */
+s32 D_800D2120;          // team 0 spawn mask (bit per spawn point)
+s32 D_800D2124;          // team 1 spawn mask
+s32 D_800D2128;          // number of entries in D_800D212C
+SpawnPoint *D_800D212C;  // the level's spawn point table
+
 #include "functions.h"
 #include "variables.h"
 
@@ -20,7 +29,10 @@ const u8 D_8009D950[] = { 0x05, 0xAD, 0xAE, 0xAF };
 /* Row lengths (12 bytes in the ROM: the unit's literals start at the next 16-byte line). */
 const u8 D_8009D954[12] = { 21, 5, 2, 3, 2, 2, 4 };
 
-extern u8 *D_80087240[];
+/* This file's .data: the rows above, one pointer each. */
+static const u8 *D_80087240[7] = {
+    D_8009D920, D_8009D938, D_8009D940, D_8009D944, D_8009D948, D_8009D94C, D_8009D950,
+};
 
 /* Looks obj->id up in the 7 rows of D_80087240 (row lengths in D_8009D954) and returns
  * the first entry of the row that contains it, or the id itself when no row does.

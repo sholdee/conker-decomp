@@ -3,13 +3,15 @@
 #include "variables.h"
 
 
-void func_15023870(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    s32 temp;
+/* Cutscene start callback 1 (D_800840FC): when map 0xB starts cutscene 2, track 5 targets the
+   actor of path `actorPath` (its unique id). */
+void func_15023870(s32 map, s32 cutscene, s32 scene, s32 actorPath) {
+    Actor *actor;
 
-    if (arg0 == 0xB && arg1 == 2) {
-        temp = (s32)func_1505EEF4(arg3);
-        if (temp != 0) {
-            D_800C35F0[arg2][5].targetId = ((u8 *)temp)[0x3B];
+    if (map == 0xB && cutscene == 2) {
+        actor = func_1505EEF4(actorPath);
+        if (actor != NULL) {
+            D_800C35F0[scene][5].targetId = actor->unique_id;
         }
     }
 }

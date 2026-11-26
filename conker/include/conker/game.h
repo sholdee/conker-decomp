@@ -2,6 +2,7 @@
 #define CONKER_GAME_H
 
 #include <ultra64.h>
+#include <PR/sched.h>
 #include "structs.h"
 
 /*
@@ -60,6 +61,41 @@ extern u8 D_800BE61A;
 
 /* game_49BE0.c */
 void func_1501C730(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern u8 D_800BE9A0; // frame steps of this frame (half the ticks, see func_15019F20)
+extern f32 D_800BE9A4; // frame delta: half the ticks of this frame
+extern f32 D_800BE9A8; // 1 / D_800BE9A4 (0 when that is 0)
+extern s32 D_800BE9AC; // ticks since the start
+extern s32 D_800BE9B0; // D_800BE9AC % 30
+extern u8 D_800BE9B4;
+extern f32 D_800BE9B8; // the average of the last 10 frame deltas
+extern f32 D_800BE9BC; // 1 / D_800BE9B8
+extern u8 D_800BE9C0; // which of the two matrix buffers is being built this frame
+extern u16 *D_800BE9C4; // z-buffer (D_800BE620 x D_800BE624)
+extern Gfx *D_800BE9C8[2]; // display-list buffer per framebuffer (D_800BE9C0)
+extern Gfx *D_800BE9D0; // display-list write head
+extern Gfx *D_800BE9D8[2]; // per framebuffer: end of the prologue built by func_1501A39C
+extern OSMesg D_800BE9E0;
+extern s32 D_800BE9E4; // frames elapsed this update
+extern s32 D_800BE9E8; // number of players minus one
+extern u8 D_800BE9EC;
+extern u8 D_800BE9ED;
+extern s32 level; // the current map
+extern s32 D_800BE9F4; // current scene / game mode id
+extern s32 D_800BE9F8; // the previous map
+extern s32 D_800BEA00;
+extern s32 D_800BEA04;
+extern s32 D_800BEA08; // the ticks of this frame, before the D_800BEA0C divider
+extern u8 D_800BEA0C; // frame rate divider (0: none; 1: time stands still)
+extern OSMesgQueue D_800BEA10; // graphics task done messages
+extern OSMesg D_800BEA28[16]; // D_800BEA10's buffer
+extern OSScMsg D_800BEA68[2]; // "task done" messages, one per frame buffer
+extern s16 D_800BEAA8; // graphics tasks sent
+extern u8 D_800BEAAA;
+extern u8 D_800BEAAB;
+extern u8 D_800BEAC0;
+extern u8 D_800BEAC1;
+extern u8 D_800BEAC2;
+extern u8 D_800BEAC3;
 
 /* game/done/game_49D10.c */
 void func_1501C860(void);

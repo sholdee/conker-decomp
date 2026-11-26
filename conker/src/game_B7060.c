@@ -5,7 +5,8 @@
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
 
-extern MpGame *D_800D23B0;
+/* This file's .bss. */
+MpGame *D_800D23B0; // the loaded multiplayer game resource (func_15089BC0)
 
 
 
@@ -728,7 +729,7 @@ s32 func_1508B9BC(void) {
         dx = actor->xpos - other->xpos;
         dz = actor->zpos - other->zpos;
         distance = sqrtf(dx * dx + dz * dz);
-        D_800D23B0->opponentDist[current] = (s32)distance;
+        D_800D23B0->opponentDist[current] = distance;
     } else {
         D_800D23B0->opponentDist[current] = minimum;
     }
@@ -1226,8 +1227,8 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             dx = (victim->xpos + dx) - D_800D23B0->aimX[player];
             dz = (victim->zpos + dz) - D_800D23B0->aimZ[player];
         } else {
-            dx = ((f32)victim->aim.x + dx) - D_800D23B0->aimX[player];
-            dz = ((f32)victim->aim.z + dz) - D_800D23B0->aimZ[player];
+            dx = (victim->aim.x + dx) - D_800D23B0->aimX[player];
+            dz = (victim->aim.z + dz) - D_800D23B0->aimZ[player];
         }
         scale = D_800D23B0->aimRate[player] * D_800BE9E4;
         if (type == 3) {
@@ -1281,7 +1282,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         if (aimAtPoint == 0) {
             cur = ((victim->ypos + height) - dropOffset) - D_800D23B0->aimY[player];
         } else {
-            cur = ((f32)victim->aim.y - (f32)dropOffset) - D_800D23B0->aimY[player];
+            cur = (victim->aim.y - (f32)dropOffset) - D_800D23B0->aimY[player];
         }
         D_800D23B0->aimY[player] += cur * scale;
         cur = obj->mv->aimEye.y - D_800D23B0->aimY[player];
@@ -1332,12 +1333,12 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             obj->mv->stick_y = 0;
         } else if (hasCam != 0) {
             ptr = &cam->TgetFOVX;
-            cam->PadPtr->stick_x = (s32)yaw;
-            cam->PadPtr->stick_y = (s32)-roll;
+            cam->PadPtr->stick_x = yaw;
+            cam->PadPtr->stick_y = -roll;
         } else {
             ptr = &obj->mv->unk90;
-            obj->mv->stick_x = (s32)yaw;
-            obj->mv->stick_y = (s32)-roll;
+            obj->mv->stick_x = yaw;
+            obj->mv->stick_y = -roll;
         }
         if (mode != 0) {
             if (type == 0x1B) {
@@ -1361,7 +1362,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
                 obj->mv->stick_x = 0;
                 obj->angle -= (s32)(yaw * 16.0f);
                 obj->langle = obj->angle;
-                obj->theta = (f32)(s16)(obj->langle + 0x4000) * 0.005493164f;
+                obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
                 func_150DA5EC(obj, f);
             } else if (D_800D23B0->attackTimer[player] >= 0) {
                 obj->mv->buttons = Z_TRIG;

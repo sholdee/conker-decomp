@@ -501,8 +501,6 @@ s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused) {
     return blocked;
 }
 
-extern u8 D_800CBDD2;
-
 /* Picks the camera collision radii for the current mode, then moves a temporary probe object (type 0x2D)
  * from the camera position through the world and applies the corrected position. */
 void func_1512BB10(Camera *arg0) {

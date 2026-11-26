@@ -12,10 +12,74 @@ u8 D_800C3FFA; /* aim pass / slot counter */
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Per group (D_80097E7C[character_type] - 1): the animations during which an object does not aim
+ * (func_15039CC8). D_80098050 holds the length of each group's list.
+ */
+static const u16 D_80097D90[] = {
+    0x16, 0xEB, 0xD, 0x19F, 0xE, 8, 0xF0, 0x30, 0x72, 0xEF, 0x58, 0xF1, 0xF2, 0x59, 0xF5, 0x14, 0x13,
+    7, 0x3E, 0x3D, 0x41, 0x25, 0x2C, 0xA9, 0x24, 0xAD, 0x2E, 0x2D, 0x69, 0x2F, 0x171, 0x173, 0x174,
+    0x17A, 0x172, 0xF6, 0x11, 0x26, 0x29, 0x7C, 0x55, 0x56, 0x57, 0x49, 0x47, 0x35, 0x3A, 0x3F, 0x5D,
+    0x5E, 0x5F, 0x60, 0x61, 0x63, 0x82, 0x87, 0x88, 0x89, 0x8A, 0x67, 0x73, 0x86, 0x9A, 0x9B, 0xAF,
+    0x94, 0x76, 0x77, 0x78, 0xBD, 0xC4, 0xC5, 0xC6, 0xC7, 0xBE, 0xBF, 0xC0, 0xC1, 0xB4, 0xB5, 0xB6,
+    0xD9, 0xFA, 0x11B, 0x11C, 0x11D, 0x12C, 0x12D, 0x142, 0x12E, 0x10A, 0x3E, 0x3A, 0x18A, 0x18B,
+    0x1B9, 0x1BA, 0x1BB, 0x1BC, 0x1CB, 0x1CC, 0x20E, 0x20F, 0x25A, 0x25B, 0x256, 0x25F, 0x1CD, 0x1CE,
+    0x1CF, 0x1D0, 0x26F, 0x270, 0x271, 0x272, 0x273, 0x274
+};
+static const u8 D_80097E7C[] = {
+    0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x01, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x06, 0x12, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x15, 0x00, 0x00, 0x0E, 0x00, 0x04, 0x00, 0x00, 0x00, 0x07, 0x0C, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x00,
+    0x0A, 0x00, 0x00, 0x05, 0x0B, 0x00, 0x00, 0x00, 0x17, 0x00, 0x10, 0x11, 0x00, 0x00, 0x16, 0x10,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x10, 0x0C, 0x00, 0x00, 0x00, 0x13, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x14, 0x06, 0x10, 0x00, 0x00,
+    0x0C, 0x00, 0x00, 0x06, 0x00, 0x00, 0x0C, 0x18, 0x00, 0x00, 0x0A, 0x0A, 0x0C, 0x0C, 0x00, 0x0C,
+    0x0C, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C,
+    0x0C, 0x0C, 0x02, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+static const u16 D_80097F38[] = { 4, 5, 6, 7, 9, 0xA, 0xB };
+static const u16 D_80097F48[] = { 1, 3, 4, 5, 6 };
+static const u16 D_80097F54[] = { 1 };
+static const u16 D_80097F58[] = { 0, 1, 2, 3, 4, 5 };
+static const u16 D_80097F64[] = { 0, 1, 2, 3, 4, 5, 6 };
+static const u16 D_80097F74[] = { 1, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 2 }; /* 11 entries; D_80098050 counts 10 */
+static const u16 D_80097F8C[] = { 1, 2, 5, 6, 8, 9 };
+static const u16 D_80097F98[] = { 2, 3, 5 };
+static const u16 D_80097FA0[] = { 0, 2, 5, 0x22 };
+static const u16 D_80097FA8[] = { 2, 3, 6, 7, 8, 9 };
+static const u16 D_80097FB4[] = {
+    2, 3, 6, 7, 8, 9, 0xC, 0xE, 0x11, 0x12, 0x13, 0x19, 0xB, 0xD, 0x10, 0x15, 0x1D, 0x1C, 0x22, 0x1F,
+    4, 5, 0xD, 0x10
+};
+static const u16 D_80097FE4[] = { 0, 3, 4, 5 };
+static const u16 D_80097FEC[] = { 0x15 };
+static const u16 D_80097FF0[] = { 0, 6, 9, 0xA, 0xB, 0x18 };
+static const u16 D_80097FFC[] = { 0xF };
+static const u16 D_80098000[] = { 0xD, 0xE, 0x10, 0x16, 0x12, 0x1E };
+static const u16 D_8009800C[] = { 0xF };
+static const u16 D_80098010[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0x10, 0x11, 0x12, 0x13 };
+static const u16 D_80098034[] = { 0x25 };
+static const u16 D_80098038[] = { 8, 9 };
+static const u16 D_8009803C[] = { 0x3B, 0x3C };
+static const u16 D_80098040[] = { 0xB, 0x13, 0x15, 0x14 };
+static const u16 D_80098048[] = { 0x1A, 0, 0, 0 };
+static const u8 D_80098050[] = {
+    0x06, 0x03, 0x04, 0x06, 0x18, 0x04, 0x01, 0x06, 0x01, 0x06, 0x01, 0x75, 0x12, 0x0A, 0x07, 0x01,
+    0x02, 0x07, 0x05, 0x01, 0x06, 0x04, 0x02, 0x04,
+};
 
-extern u16 *D_80084380[];
-extern u8 D_80097E7C[];
-extern u8 D_80098050[];
+static const u16 *D_80084380[] = {
+    D_80097F8C, D_80097F98, D_80097FA0, D_80097FA8,
+    D_80097FB4, D_80097FE4, D_80097FEC, D_80097FF0,
+    D_80097FFC, D_80098000, D_8009800C, D_80097D90,
+    D_80098010, D_80097F74, D_80097F64, D_80098034,
+    D_80098038, D_80097F38, D_80097F48, D_80097F54,
+    D_80097F58, D_80098040, D_8009803C, D_80098048,
+};
+
 
 
 /* Yaw/pitch window an aim may turn within; beyond max + margin (or min - margin) it gives up. */
@@ -28,7 +92,22 @@ struct AimLimits {
     /* 0x14 */ f32 pitchMargin;
 };
 
-extern AimLimits D_80098068[];
+/* The aim limits slots (func_15039A54). */
+static const AimLimits D_80098068[] = {
+    { 70.0f, -70.0f, 47.0f, -47.0f, 30.0f, 43.0f },
+    { 68.0f, -80.0f, 47.0f, -47.0f, 30.0f, 43.0f },
+    { 70.0f, -70.0f, 30.0f, -10.0f, 20.0f, 60.0f },
+    { 400.0f, -400.0f, 400.0f, -400.0f, 0.0f, 0.0f },
+    { 120.0f, -120.0f, 90.0f, -40.0f, 50.0f, 30.0f },
+    { 70.0f, -70.0f, 150.0f, -40.0f, 50.0f, 30.0f },
+    { 90.0f, -90.0f, 80.0f, -80.0f, 30.0f, 30.0f },
+    { 60.0f, -60.0f, 90.0f, -40.0f, 80.0f, 30.0f },
+    { 70.0f, -70.0f, 40.0f, -40.0f, 20.0f, 30.0f },
+    { 70.0f, -70.0f, 90.0f, -90.0f, 0.0f, 0.0f },
+    { 90.0f, -90.0f, 90.0f, -90.0f, 0.0f, 0.0f },
+    { 180.0f, -180.0f, 90.0f, -90.0f, 0.0f, 0.0f },
+    { 35.0f, -35.0f, 90.0f, -90.0f, 45.0f, 45.0f },
+};
 
 /* Per-object aim easing state (Actor +0x324), one entry per aim slot (pass, D_800C3FFA). */
 typedef struct CamData {
@@ -566,8 +645,8 @@ s32 func_15037880(s32 objIndex, f32 *out) {
     }
     if (mode == 2) {
         if (obj->drawtype == 4) {
-            dx = obj->xpos - (f32)D_800C3FF4[0];
-            dz = obj->zpos - (f32)D_800C3FF4[2];
+            dx = obj->xpos - D_800C3FF4[0];
+            dz = obj->zpos - D_800C3FF4[2];
             if (62500.0f < dx * dx + dz * dz) {
                 return 1;
             }
@@ -674,7 +753,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         }
     }
     foundKind = 0;
-    objX = (s32)movement_obj[objIndex].xpos;
+    objX = movement_obj[objIndex].xpos;
     bestDist = 1600000000.0f;
     hitObj = func_150380C0(out, refBone, bone, objIndex, range, preferId, &bestDist, 0, 0, 0, axisMode);
     if (hitObj != 0 && bestDist != 1600000000.0f) {
@@ -699,7 +778,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
             bestIdx = -1;
             do {
                 point = &((AimPoint *)gAimPoints)[idx]; // matching: the no-op cast keeps the addu operand order
-                if (objX < point->maxX && point->minX < objX && (u16)point->flags == 0) {
+                if (objX < point->maxX && point->minX < objX && point->flags == 0) {
                     radiusSq = point->radiusSq;
                     px = point->x;
                     py = point->y;
@@ -939,7 +1018,20 @@ typedef struct {
     /* 0x30 */ s32 unk30;
 } GameStruct_800BE9B4;
 
-extern f32 D_800981A0[][4]; /* per rate index: yaw rate, pitch rate, yaw max step, pitch max step */
+/* Per rate index: yaw rate, pitch rate, yaw max step, pitch max step. */
+static const f32 D_800981A0[][4] = {
+    { 0.1f, 0.1f, 0.6f, 0.6f },
+    { 0.4f, 0.4f, 1.5f, 1.5f },
+    { 0.35f, 0.35f, 0.5f, 0.5f },
+    { 0.35f, 0.35f, 0.5f, 0.5f },
+    { 0.8f, 0.8f, 0.3f, 0.3f },
+    { 0.7f, 0.7f, 2.0f, 2.0f },
+    { 0.008f, 0.008f, 0.6f, 0.6f },
+    { 0.08f, 0.08f, 0.6f, 0.6f },
+    { 1.0f, 1.0f, 360.0f, 360.0f },
+    { 0.08f, 0.08f, 0.6f, 0.6f },
+    { 0.0f, 0.0f, 0.0f, 0.0f },
+};
 
 /*
  * Turns bone matrix `bone` of object objIndex (measured against refBone) toward target (-99999 for none),
@@ -1335,7 +1427,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
 }
 
 /* Returns aim limits slot limitIdx (the same for every object). */
-AimLimits *func_15039A54(s32 objIndex, s32 limitIdx) {
+const AimLimits *func_15039A54(s32 objIndex, s32 limitIdx) {
     return &D_80098068[limitIdx];
 }
 
@@ -1346,7 +1438,7 @@ AimLimits *func_15039A54(s32 objIndex, s32 limitIdx) {
  */
 void func_15039A78(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw, f32 fallbackPitch,
                    s32 objIndex) {
-    AimLimits *lim;
+    const AimLimits *lim;
     Camera *camera;
 
     camera = movement_obj[objIndex].CameraPtr;
@@ -1387,7 +1479,7 @@ void func_15039CC8(Actor *obj) {
     s32 i;
     s32 group;
     s32 count;
-    u16 *anims;
+    const u16 *anims;
     CamData *data;
 
     data = obj->camData;
@@ -1428,7 +1520,7 @@ void func_15039CC8(Actor *obj) {
 /* func_15039A78 for limits slot limitIdx (0 uses func_15039A78's camera-aware rules). */
 void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw,
                    f32 fallbackPitch, s32 objIndex, s32 slot) {
-    AimLimits *lim;
+    const AimLimits *lim;
 
     if (limitIdx == 0) {
         func_15039A78(yaw, pitch, prevYaw, prevPitch, fallbackYaw, fallbackPitch, objIndex);

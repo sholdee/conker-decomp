@@ -77,9 +77,9 @@ typedef struct {
     s32         numPVoices;
     s32         maxAuxBusses;
     /* 0x54 */ s32         outputRate;
-    s32         maxOutSamples;
-    s32         sv_dramout;
-    s32         sv_first;
+    /* 0x58 */ s32         maxOutSamples;
+    /* Conker's SDK revision has no sv_dramout/sv_first here: its N_ALGlobals (D_8003E640 in
+     * init_8F90.c) is 0x5C bytes, and the next .bss object starts at +0x60. */
 } N_ALSynth;
 
 /*

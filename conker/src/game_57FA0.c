@@ -19,7 +19,8 @@ typedef struct {
     RomTableEntry entry;
 } RomTableCacheLine;
 
-extern RomTableCacheLine D_800C3D68[16];
+static u32 D_800C3D60;                   /* bumped on every cache miss */
+static RomTableCacheLine D_800C3D68[16]; /* the cache, oldest line first */
 
 /* Drops the oldest `count` cache lines and appends `count` entries read from `romAddr` onwards. */
 void func_1502AB04(s32 count, RomTableEntry *entries, s32 tick, u32 romAddr) {
@@ -38,8 +39,6 @@ void func_1502AB04(s32 count, RomTableEntry *entries, s32 tick, u32 romAddr) {
         romAddr += sizeof(RomTableEntry);
     }
 }
-
-extern u32 D_800C3D60; /* bumped on every cache miss */
 
 /*
  * Looks up entry `index` of the ROM table at `table` and returns its offset, storing its info word in

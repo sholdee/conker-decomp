@@ -58,7 +58,7 @@ void func_15052408(Actor *actor) {
     actor->speed = 15.0f;
 }
 
-void func_15052458(s32 unused) {
+void func_15052458(Actor *unused) {
 }
 
 /* Calls func_15060F28(actor, 1) once the actor's health reaches zero. */

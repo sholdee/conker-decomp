@@ -81,7 +81,7 @@ s32 func_1503F62C(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, 
 
 /* Releases an AnimInstance and its part matrices. */
 void func_1503F7B8(AnimInstance *model) {
-    func_100043B4((s32 *)model->partMtx[0], 4);
-    func_100043B4((s32 *)model->partMtx[1], 4);
+    func_100043B4(model->partMtx[0], 4);
+    func_100043B4(model->partMtx[1], 4);
     func_10004074(model);
 }

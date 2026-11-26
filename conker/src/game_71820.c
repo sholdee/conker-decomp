@@ -1,6 +1,50 @@
 #include <ultra64.h>
+
+/*
+ * This file's .bss, in the original order. IDO lays out .bss in an order that depends on the declarations
+ * before it, so it is defined before functions.h and variables.h.
+ */
+f32 D_800CBD90; // ledge probe results (func_150AB1F0 family in game_D9894.s)
+f32 D_800CBD94;
+f32 D_800CBD98;
+s32 D_800CBD9C; // cleared by func_15044370
+u16 D_800CBDA0[25]; // per movement_obj: 1 + the world object it touches, 0 if none
+u8 D_800CBDD2;
+u8 D_800CBDD3;
+u8 D_800CBDD4;
+f32 D_800CBDD8; // collision probe height (func_15044660)
+f32 D_800CBDDC; // collision probe mid-height
+f32 D_800CBDE0[5]; /* not referenced */
+f32 D_800CBDF4; // ledge heights, -32768.0f if none
+f32 D_800CBDF8;
+f32 D_800CBDFC;
+struct TriggerNode *D_800CBE00; // timed trigger nodes (func_15044964)
+
 #include "functions.h"
 #include "variables.h"
+
+/* A Latin-1 accented letter: its string, its code and the index of its upper/lower case pair. */
+typedef struct {
+    char *str;
+    u8 code;
+    u8 index;
+} AccentedLetter;
+
+static AccentedLetter D_80085CE0[52] = { /* not referenced */
+    { "\337", 0xDF, 0 }, { "\340", 0xE0, 1 }, { "\300", 0xC0, 1 }, { "\341", 0xE1, 2 },
+    { "\301", 0xC1, 2 }, { "\342", 0xE2, 3 }, { "\302", 0xC2, 3 }, { "\343", 0xE3, 4 },
+    { "\303", 0xC3, 4 }, { "\344", 0xE4, 5 }, { "\304", 0xC4, 5 }, { "\347", 0xE7, 6 },
+    { "\307", 0xC7, 6 }, { "\350", 0xE8, 7 }, { "\310", 0xC8, 7 }, { "\351", 0xE9, 8 },
+    { "\311", 0xC9, 8 }, { "\352", 0xEA, 9 }, { "\312", 0xCA, 9 }, { "\353", 0xEB, 10 },
+    { "\313", 0xCB, 10 }, { "\354", 0xEC, 11 }, { "\314", 0xCC, 11 }, { "\355", 0xED, 12 },
+    { "\315", 0xCD, 12 }, { "\356", 0xEE, 13 }, { "\316", 0xCE, 13 }, { "\357", 0xEF, 14 },
+    { "\317", 0xCF, 14 }, { "\361", 0xF1, 15 }, { "\321", 0xD1, 15 }, { "\362", 0xF2, 16 },
+    { "\322", 0xD2, 16 }, { "\363", 0xF3, 17 }, { "\323", 0xD3, 17 }, { "\364", 0xF4, 18 },
+    { "\324", 0xD4, 18 }, { "\365", 0xF5, 19 }, { "\325", 0xD5, 19 }, { "\366", 0xF6, 20 },
+    { "\326", 0xD6, 20 }, { "\371", 0xF9, 21 }, { "\331", 0xD9, 21 }, { "\372", 0xFA, 22 },
+    { "\332", 0xDA, 22 }, { "\373", 0xFB, 23 }, { "\333", 0xDB, 23 }, { "\374", 0xFC, 24 },
+    { "\334", 0xDC, 24 }, { "\375", 0xFD, 25 }, { "\335", 0xDD, 25 }, { "\377", 0xFF, 26 }
+};
 
 /* A TriggerNode with a box volume (func_150448D0). */
 struct TriggerVolume {
@@ -14,9 +58,9 @@ struct TriggerVolume {
     /* 0x1C */ s16 *size;
 };
 
-extern s32 (*D_80085E80[])(TriggerNode *);
-extern void (*D_80085E8C[])(void);
-extern s32 D_800CBD9C;
+/* Trigger checks (TriggerNode.check) and actions (TriggerNode.action). */
+static s32 (*D_80085E80[])() = { func_15044B78, func_15044CE4, func_15044D40 };
+static void (*D_80085E8C[])(void) = { NULL, func_15044DA0, func_15044DE8, func_15044E40, func_15044E88 };
 
 /* Up to func_15047390, sqrtf is a real call (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
 #pragma function sqrtf
@@ -84,9 +128,6 @@ void func_1504452C(s16 **vertices, Vec3f *out, f32 sinY, f32 cosY, f32 ox, f32 o
 
 void func_15044658(void) {
 }
-
-extern f32 D_800CBDD8;
-extern f32 D_800CBDDC;
 
 /* Sets D_800CBDD8/D_800CBDDC (a height and a mid-height) for obj's collision probe. */
 void func_15044660(Actor *obj, f32 x, f32 y, f32 z) {
@@ -223,7 +264,7 @@ void func_15044A28(void) {
                 } else {
                     prev->next = node->next;
                 }
-                func_100043B4((s32 *)node, 2);
+                func_100043B4(node, 2);
             } else {
                 node->lifetime = lifetime;
                 prev = node;

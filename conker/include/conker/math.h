@@ -70,7 +70,7 @@ f32 func_15048A70(f32 current, f32 target);
 s32 func_15048AD0(s32 current, s32 target);
 
 /* game_75FC0.c */
-void func_15048B10(s32 mtx, s32 out);
+void func_15048B10(MtxF mtx, MtxF out);
 f32 func_15048C30(f32 x);
 void func_15048F20(Vec3f *a, Vec3f *b, Vec3f *out);
 void func_15048F58(Vec3f *a, Vec3f *b, Vec3f *out);
@@ -85,6 +85,18 @@ void func_150491EC(Vec3f *from, Vec3f *to, Vec3f *out);
 s32 func_15049260(Tri3f tri);
 void func_150492CC(f32 width, f32 height, f32 depth);
 void func_15049350(Tri3f tri);
+extern f32 D_800CC210; // plane of the last triangle: normal x, y, z
+extern f32 D_800CC214;
+extern f32 D_800CC218;
+extern f32 D_800CC21C; // normal . first vertex
+extern f32 D_800CC220; // box: width, height, depth
+extern f32 D_800CC224;
+extern f32 D_800CC228;
+extern f32 D_800CC22C; // box half sizes
+extern f32 D_800CC230;
+extern f32 D_800CC234;
+extern f32 D_800CC238; // height / width
+extern f32 D_800CC23C; // depth / width
 
 /* game/done/game_768F0.c */
 s32 func_15049440(MtxF mf, f32 x, f32 y, f32 z, f32 xExtent, f32 yExtent, f32 nearBound, f32 farBound, f32 xBound,
@@ -121,6 +133,9 @@ f32 func_1504A620(f32 x);
 
 /* game_BC430.c */
 void func_1508EF80(Vec3f *arg0, Vec3f *arg1, f32 arg2, Vec3f *arg3);
+extern u8 D_80087358[40];     /* read by func_150ADAF0 (game_DAFA0.s) */
+extern u32 D_80087380;        /* number of groups in D_800D23C0 */
+extern ObjGroup *D_800D23C0;  /* the level's link groups (func_15017578) */
 
 /* game_21CAC0.c */
 s32 func_151EF610(void);

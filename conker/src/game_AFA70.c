@@ -1,29 +1,22 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+u8 *D_800D19A0[187]; // per model id: model data (just past its header)
+ModelDef *D_800D1C90[187];
+u8 D_800D1F80[187];
+u8 D_800D2040[187]; // per model id counter
+SpawnRecord *D_800D20FC;
+u8 D_800D2100;
+u8 D_800D2101;
+PathPoint **D_800D2104;
+u8 *D_800D2108;
+u8 *D_800D210C;
+u16 *D_800D2110;
 
 #include "functions.h"
 #include "variables.h"
 
-// One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
-typedef struct PartDef {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 unk2;
-    /* 0x03 */ u8 type;     // 0: child object (func_15083AC8), otherwise func_15030AF4
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ u16 data[3]; // the attachment's ownerStates
-    /* 0x0E */ u8 unkE;
-    /* 0x0F */ u8 unkF;
-} PartDef;
-
-typedef struct PartSet {
-    /* 0x0 */ PartDef *parts;
-    /* 0x4 */ u8 count;
-} PartSet;
-
-extern PartSet D_80086CC4[];
 
 
 /* Spawns the object for spawn record spawnIdx once it is due: skips records that are in use,
@@ -467,7 +460,7 @@ void func_15083384(Actor *obj, s32 arg1) {
 /* Creates every part of part set setId (1-based) on parent; returns the last part created (a child
  * Actor or a ModelAttachment, depending on its type). */
 void *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3) {
-    PartDef *parts;
+    const PartDef *parts;
     void *ret;
     s32 i;
 
@@ -487,9 +480,9 @@ void *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3) {
 
 /* Removes the child objects of part set setId (1-based) that belong to parent. */
 void func_150836CC(Actor *parent, s32 setId) {
-    PartSet *set;
+    const PartSet *set;
     s32 i;
-    PartDef *parts;
+    const PartDef *parts;
 
     func_150302F0(parent, setId);
     setId--;
@@ -885,7 +878,7 @@ void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2) {
     s32 count;
     s32 i;
     ModelDef *def;
-    u8 *list;
+    const u8 *list;
     s32 modelId;
 
     modelId = spawn->type;
@@ -911,7 +904,7 @@ void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2) {
    active object still uses. */
 void func_15084558(Actor *self) {
     s32 id;
-    u8 *list;
+    const u8 *list;
     s32 i;
     s32 j;
     s32 count;
@@ -921,7 +914,7 @@ void func_15084558(Actor *self) {
     s32 freeDef;
     Actor *obj;
     u8 otherCount;
-    u8 *otherList;
+    const u8 *otherList;
     // matching: unused stack slot
     s32 pad;
     ActorAnim *data;

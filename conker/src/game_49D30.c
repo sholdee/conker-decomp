@@ -143,10 +143,22 @@ typedef struct {
 } UcodeRomEntry;
 
 extern u8 ucode_ROM_START[];
-extern s8 D_80084070;
-extern s8 D_80084074;
-extern UcodeRomEntry D_80084078[];
 extern s32 D_800BEB98;
+
+static s8 D_80084070 = -1; // the ucode pair now loaded (-1: none yet)
+static s8 D_80084074 = -1; // its offset (0 or 4) into D_80084078 for D_800BEBB0's ucode (-1: none yet)
+/* Indexed by the graphics mode: entries 0-3 for D_800C1060, 4-7 for D_800BEBB0. */
+static UcodeRomEntry D_80084078[8] = {
+    { 0x4560, 0x5A70, 0x10460, 0x10B20 },
+    { 0x6F80, 0x84B0, 0x111E0, 0x118A0 },
+    { 0x5A70, 0x6F80, 0x10B20, 0x111E0 },
+    { 0x84B0, 0x99E0, 0x118A0, 0x11F60 },
+    { 0x99E0, 0xAE80, 0x11F60, 0x12620 },
+    { 0xC320, 0xD7C0, 0x12CE0, 0x133A0 },
+    { 0xAE80, 0xC320, 0x12620, 0x12CE0 },
+    { 0xD7C0, 0xEC60, 0x133A0, 0x13A60 },
+};
+static s32 D_800840F8 = 0; /* not referenced */
 
 /* DMA the two RSP microcodes (D_800C1060 and D_800BEBB0, each text then data) for the current
    graphics mode, unless they are already loaded. */
@@ -338,7 +350,8 @@ s32 func_1501D2C4(s32 map, s32 cutscene) {
     return 0;
 }
 
-extern void (*D_800840FC[])(s32, s32, s32, s32);
+/* Cutscene start callbacks (func_1501D348's `callback`; 0: none). */
+static void (*D_800840FC[])(s32, s32, s32, s32) = { NULL, func_15023870 };
 extern u8 D_800C35A8;
 
 /* Start cutscene `cutscene` of map `map` in scene slot `scene`. If another map is loaded, switch
@@ -1023,7 +1036,7 @@ void func_1501EC38(s32 scene) {
                     } else if (nextTime[j] == -9999) {
                         value[j] = lastValue[j];
                     } else {
-                        t = (f32)(D_800C35B0[scene] - prevTime[j]) / (f32)(nextTime[j] - prevTime[j]);
+                        t = (f32)(D_800C35B0[scene] - prevTime[j]) / (nextTime[j] - prevTime[j]);
                         mask = 6;
                         found = -1;
                         if (prevInterp[j] == 0) {
@@ -1197,7 +1210,7 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
         } while (hi >= lo);
         j = 0;
         for (i = 0; i < 2; i++) {
-            t = (f32)(sample + i) * 0.01f;
+            t = (sample + i) * 0.01f;
             ((Vec3f *)out)[j].x = ((D_800C3A50[scene][track].coef3[0] * t + D_800C3A50[scene][track].coef2[0]) * t + D_800C3A50[scene][track].coef1[0]) * t + D_800C3A50[scene][track].coef0[0];
             ((Vec3f *)out)[j].y = ((D_800C3A50[scene][track].coef3[1] * t + D_800C3A50[scene][track].coef2[1]) * t + D_800C3A50[scene][track].coef1[1]) * t + D_800C3A50[scene][track].coef0[1];
             ((Vec3f *)out)[j].z = ((D_800C3A50[scene][track].coef3[2] * t + D_800C3A50[scene][track].coef2[2]) * t + D_800C3A50[scene][track].coef1[2]) * t + D_800C3A50[scene][track].coef0[2];
@@ -1471,7 +1484,7 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
     } else {
         total = D_800C3A50[scene][track].keyDistance[segment + 1] - total;
         for (k = 0; k < 101; k++) {
-            D_800C3A50[scene][track].arcLength[k] = (f32)k * total / 101.0f;
+            D_800C3A50[scene][track].arcLength[k] = k * total / 101.0f;
         }
     }
     D_800C3A50[scene][track].segment = segment;
@@ -1793,7 +1806,7 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
             event = &D_800C3688[scene][track][active[2]];
             other = event->unk5;
             target[0] = D_800C3958[scene][other].x;
-            target[1] = D_800C3958[scene][other].y + (f32)event->unk6;
+            target[1] = D_800C3958[scene][other].y + event->unk6;
             target[2] = D_800C3958[scene][other].z;
             return 0;
         }
@@ -1809,7 +1822,7 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
             }
             player = camera_global_Cameras;
             target[0] = player->eye.x;
-            target[1] = player->eye.y + (f32)event->unk6;
+            target[1] = player->eye.y + event->unk6;
             target[2] = player->eye.z;
             return 0;
         }

@@ -216,7 +216,7 @@ void func_15018DFC(void) {
         } else {
             func_1504A730();
         }
-        func_15085ABC(D_800D2340);
+        func_15085ABC(D_800D2138.unk208);
     }
     func_1507C370();
     func_1507C8FC();
@@ -527,10 +527,6 @@ Gfx *func_15019E60(Gfx *gfx) {
     }
     return func_15043384(func_151E8620(func_1501A490(gfx, 0xFF, 0, 0, 0, 0)));
 }
-
-extern s32 D_800BE9B0;
-extern f32 D_800BE9B8;
-extern f32 D_800BE9BC;
 
 /*
  * Frame timing: turns the ticks elapsed since the last frame (D_800BE9E4) into the frame delta

@@ -1,4 +1,13 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/*
+ * This file's .bss, defined before the headers declare it (see init_50A0.c). Its code does not use it:
+ * game_43880.c loads the table and game_83300.c reads it. It lies between the .bss of game_A9D90 and
+ * of game_AC030 on its own 16-byte line, so this unit is the one that defines it.
+ */
+BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (func_150163D0 loads, func_15055E50 uses)
+
 #include "functions.h"
 #include "variables.h"
 
@@ -16,7 +25,6 @@ typedef struct {
 } ExpressionTableHeader;
 
 
-extern u8 D_8009D910[];
 
 /* Advances eye blinking: random open periods of 10-149 frames, closed for one frame. */
 void func_1507E2B0(Actor *actor) {
@@ -94,7 +102,7 @@ void func_1507E3C0(Actor *actor) {
 /* Switches to expression `index`, stopping the previous expression's action. */
 void func_1507E500(Actor *actor, s32 index, s32 morphDuration) {
     ExpressionRecord *previous;
-    u8 *actions;
+    const u8 *actions;
 
     if (index < func_1507E968(actor)) {
         previous = func_1507E908(actor, actor->expression);
@@ -201,7 +209,7 @@ void func_1507E73C(Actor *actor) {
  */
 void func_1507E7E4(Actor *actor, u8 index, u8 priority, u16 timer, s32 morphDuration) {
     ExpressionRecord *previous;
-    u8 *actions;
+    const u8 *actions;
 
     if (((index != actor->expression) || (priority != actor->expressionPriority) ||
          (timer != actor->expressionTimer)) &&
@@ -263,7 +271,7 @@ void func_1507E9E8(Actor *actor, s32 index) {
 }
 
 /* Returns the table of expression action ids (only model 0 has one) and its length. */
-u8 *func_1507E9F8(Actor *actor, s32 *count) {
+const u8 *func_1507E9F8(Actor *actor, s32 *count) {
     if (func_150849A0(actor) == 0) {
         if (count != NULL) {
             *count = 5;
@@ -278,7 +286,7 @@ u8 *func_1507E9F8(Actor *actor, s32 *count) {
 
 /* Starts expression action `action` (1-based) with `param` thousandths. */
 void func_1507EA44(Actor *actor, s32 action, s32 param) {
-    u8 *actions;
+    const u8 *actions;
 
     if (action != 0) {
         actions = func_1507E9F8(actor, NULL);

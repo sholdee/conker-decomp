@@ -97,11 +97,22 @@ void func_1502F948(Actor *obj);
 Gfx *func_1502F9FC(Gfx *gdl, s32 index);
 void func_1502FBE8(Actor *obj);
 void func_1502FD70(Actor *arg0);
+extern Gfx D_80084160[]; // opens a pass: modelview matrix D_80089470, lit smooth shading
+extern Gfx D_80084190[]; // closes a pass: clears the lighting modes and the prim/env colours
+extern u8 dc_glbl_CharNum;
+extern u16 D_800C3E7A; // bone matrices used this frame
+extern u16 D_800C3E7C; // bone-matrix pool size, in 0x40-byte matrices
+/* The bone-matrix pool of each frame buffer. Bones are built in it as MtxF; func_1502E474 converts them in
+   place to Mtx for drawing. The cursors move in bytes. */
+extern u8 *D_800C3E80[2];
+extern u8 *D_800C3E88; // bone-matrix pool cursor
+extern u8 *D_800C3E8C; // bone-matrix pool start
+extern u8 D_800C3E90;
 
 /* game_77BE0.c */
 void func_1504A730(void);
 void func_1504ADD0(void);
-s32 func_1504AEF4(s32 arg0, s32 arg1);
+s32 func_1504AEF4(s32 arg0, s32 *arg1);
 void func_1504AF10(Actor *obj, s32 force, s32 release);
 f32 func_1504B0FC(Actor *obj, f32 arg1);
 void func_1504BA38(Actor *obj);
@@ -115,18 +126,32 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2);
 void func_1504C854(Actor *obj);
 s32 func_1504C8BC(Actor *obj);
 void func_1504C9E4(Actor *obj, s8 target, u8 mode);
+extern s32 D_80086000;
+extern void (*D_80086014[])(Actor *); // per-type update handlers
+extern s32 D_800CC250;
+extern f32 D_800CC254; // object position saved at the hit test (x, y, z)
+extern f32 D_800CC258;
+extern f32 D_800CC25C;
+extern s32 D_800CC260;
+extern s16 D_800CC264; // frame speed in percent
+extern s32 D_800CC268;
+extern u8 D_800CC26C;
+extern u8 D_800CC26D;
+extern u8 D_800CC26E;
+extern f32 D_800CC270; // attacker position saved at the hit (x, z, y)
+extern f32 D_800CC274;
+extern f32 D_800CC278;
+extern u8 D_800CC27C; // floor material class of the object being updated
+extern u16 D_800CC27E;
 extern const f32 D_800990C0[8];
 extern const f32 D_800990E0[8];
-extern const f32 D_80099100[8];
-extern const f32 D_80099120[8];
-extern const Struct80099140 D_80099140[20];
 extern const u16 D_8009917C[16];
 extern const u16 D_8009919C[6];
 
 /* game_7F710.c */
 void func_15052260(Actor *actor);
 void func_15052408(Actor *actor);
-void func_15052458(s32 unused);
+void func_15052458(Actor *unused);
 void func_15052464(Actor *actor);
 void func_15052490(Actor *actor, u16 angle, f32 amount, f32 scale);
 void func_1505250C(Actor *actor, s32 unused);
@@ -157,7 +182,7 @@ void func_1505371C(Actor *obj);
 void func_15053750(Actor *obj);
 void func_15053894(Actor *obj);
 void func_150538CC(Actor *obj);
-void func_150548D8(s32 arg0);
+void func_150548D8(Actor *obj);
 void func_150548E4(Actor *obj);
 void func_15054A0C(Actor *obj);
 void func_15054A5C(Actor *obj, Actor *other);
@@ -203,11 +228,11 @@ f32 func_1505A72C(Actor *a, Actor *b);
 void func_1505A770(Actor *actor);
 void func_1505A9AC(Actor *actor, f32 floorY);
 void func_1505B5F8(Actor *actor, f32 floorY);
-void func_1505B9C4(Actor *attacker, Actor *victim, HitReaction *base, HitReaction *hit, u8 index, s32 victimSlot,
+void func_1505B9C4(Actor *attacker, Actor *victim, const HitReaction *base, const HitReaction *hit, u8 index, s32 victimSlot,
                    u8 damageMask);
 s16 func_1505C140(Actor *attacker, Actor *victim);
-HitReaction *func_1505C1A4(Actor *actor);
-s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index, s32 victimSlot, s32 hitMask,
+const HitReaction *func_1505C1A4(Actor *actor);
+s32 func_1505C1E4(Actor *attacker, Actor *victim, const HitReaction *table, s32 index, s32 victimSlot, s32 hitMask,
                   s32 damageMask);
 s32 func_1505C7D8(Actor *attacker, s32 selfSlot);
 s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot);
@@ -308,7 +333,7 @@ void func_1506AB7C(Actor *obj, Arg1506AB7C *arg);
 void func_1506ABC4(Actor *obj, Arg1506AB7C *arg);
 void func_1506AC0C(Actor *obj, s32 arg1);
 void func_1506AC58(Actor *obj, s32 arg1);
-void func_1506AC8C(Actor *obj, s32 type, s32 arg);
+void func_1506AC8C(Actor *obj, s32 type, void *arg);
 
 /* game_A9820.c */
 void func_1507C370(void);
@@ -333,6 +358,11 @@ void func_1507DF10(Actor *obj, s32 part);
 void func_1507DFE4(s32 resource, s32 arg1);
 s32 func_1507E114(s32 *arg0);
 void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z);
+extern u16 D_800D18A0;
+extern u16 D_800D18A2;
+extern u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
+extern u8 D_800D18A8;
+extern u8 D_800D18A9;
 
 /* game_DE5A0.c */
 void func_150B10F0(Actor *obj);

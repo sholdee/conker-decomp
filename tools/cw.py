@@ -169,8 +169,58 @@ def yaml_changed(ws):
     return bool(splat_changes(ws))
 
 
+def sync_from_main(ws):
+    """Bring main's changes since the workspace's base into the workspace (3-way, like land in reverse).
+
+    Other agents land while a workspace is open. Without this, a check pairs main's newer data layout
+    (linker script, splat outputs) with the workspace's older sources and fails to link. Returns the
+    files that conflict (left untouched); an empty list means the workspace is now on main."""
+    conflicts = []
+    with open(LOCK, "a") as lk:
+        fcntl.flock(lk, fcntl.LOCK_SH)  # never read main in the middle of a land
+        rels = set()
+        for d in ("src", "include"):
+            for root in (MAIN / d, ws / "base" / d):
+                rels |= {p.relative_to(root.parent) for p in root.rglob("*")
+                         if p.is_file() and p.suffix in (".c", ".h", ".inc", ".s")}
+        rels |= {Path(n) for n in SPLAT_INPUTS}
+        for rel in sorted(rels):
+            main_f, base_f, ws_f = MAIN / rel, ws / "base" / rel, ws / "conker" / rel
+            if not base_f.parent.is_dir() and not main_f.exists():
+                continue
+            if main_f.exists() and base_f.exists() and filecmp.cmp(main_f, base_f, shallow=False):
+                continue  # main did not change this file
+            if not main_f.exists() and not base_f.exists():
+                continue
+            if not main_f.exists():  # main deleted it
+                if ws_f.exists() and filecmp.cmp(ws_f, base_f, shallow=False):
+                    ws_f.unlink()
+                    base_f.unlink()
+                continue
+            untouched = (not ws_f.exists() and not base_f.exists()) or (
+                ws_f.exists() and base_f.exists() and filecmp.cmp(ws_f, base_f, shallow=False))
+            if untouched:
+                merged = main_f.read_bytes()
+            else:
+                p = subprocess.run(["git", "merge-file", "-p", str(ws_f), str(base_f) if base_f.exists() else "/dev/null",
+                                    str(main_f)], capture_output=True)
+                if p.returncode != 0:
+                    conflicts.append(str(rel))
+                    continue
+                merged = p.stdout
+            ws_f.parent.mkdir(parents=True, exist_ok=True)
+            base_f.parent.mkdir(parents=True, exist_ok=True)
+            ws_f.write_bytes(merged)
+            shutil.copy(main_f, base_f)
+    return conflicts
+
+
 def build(ws):
     wc = ws / "conker"
+    conflicts = sync_from_main(ws)
+    if conflicts:
+        print("REBASE-CONFLICT: main changed these files in a way that conflicts with your edits: "
+              + ", ".join(conflicts) + ". Copy main's file into the workspace and base/, apply your edit again, check.")
     ensure_build(wc)
     (wc / BIN).unlink(missing_ok=True)
     stamp = ws / ".splat_yaml"

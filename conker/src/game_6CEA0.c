@@ -43,7 +43,7 @@ void func_1503F9F0(s16 controller, s16 *dirX, s16 *dirY) {
 
 /* State of the task list menu drawn by func_1503FB40. */
 static s32 D_80084488 = 0; // scroll in progress: 1 = up, -1 = down, 0 = idle
-extern f32 D_800C6850; // scroll animation offset, +-11 at the end of a step
+static f32 D_800C6850;     // scroll animation offset, +-11 at the end of a step
 static s32 D_8008448C = 0; // frames left showing "RESETTING ALL TASKS"
 static s8 D_80084490 = 0;  // frames until the selection blink toggles
 static u8 D_80084494 = 0;  // blink phase
@@ -59,9 +59,9 @@ void func_1503FB08(void) {
 
 static u8 D_80084498 = 0;     // selected task (index into the list of tasks in use)
 static char D_8008449C[] = "ERROR";
-extern char D_80098930[]; // "RESETTING ALL TASKS"
-extern char D_80098944[]; // "."
-extern char D_80098948[]; // "RESET TO PLAY !"
+static const char D_80098930[] = "RESETTING ALL TASKS";
+static const char D_80098944[] = "."; // drawn above flagged tasks
+static const char D_80098948[] = "RESET TO PLAY !";
 s32 strlen(const char *);
 
 /* Bit `idx` of the task bitset at D_800D2E4C (see game_C9EC0.c). */

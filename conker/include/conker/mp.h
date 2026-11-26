@@ -154,8 +154,15 @@ void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
 u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 param);
 void func_150891E8(Racer *racer, Actor *obj);
 void func_150896EC(Racer *racer, Actor *obj, s32 leave);
+extern Racer *D_800872A0; /* per-racer state of the race mode */
+extern f32 D_800D239C;    /* camera target circling the actor until the start */
+extern f32 D_800D23A0;
+extern f32 D_800D23A4;
+extern s8 D_800D23A8;     /* race direction: 0 = towards higher node params */
+extern s8 D_800D23A9;
 
 /* game_B7060.c */
+extern MpGame *D_800D23B0; /* the loaded multiplayer game resource (func_15089BC0) */
 void func_15089BB0(void);
 s32 func_15089BC0(void);
 s32 func_15089F9C(s32 player);

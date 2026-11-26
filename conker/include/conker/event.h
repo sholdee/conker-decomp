@@ -71,7 +71,7 @@ void func_1506C32C(void);
 void func_1506C418(void);
 void func_1506C43C(void);
 u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32 kind, f32 minHeight,
-                  f32 scale, s32 pos, s32 flags, s32 arg10);
+                  f32 scale, f32 *pos, s32 flags, s32 arg10);
 void func_1506CE6C(void);
 void func_1506D2E8(void);
 void func_1506D4EC(void);
@@ -344,6 +344,9 @@ void func_15075050(Actor *self, Actor *other, u8 *result);
 void func_150750A4(Actor *self, Actor *other, u8 *result);
 void func_150750C4(Actor *self, Actor *other, u8 *result);
 Actor *func_1507515C(Actor *owner);
+extern void (*D_80086150[])(s32);
+extern void (*D_8008630C[])(void);
+extern void (*D_80086694[])(); /* see game_981E0.c */
 extern const u8 D_80099A30[12];
 extern const u8 D_80099A3C[12][10]; /* turn-angle thresholds per row */
 extern const u8 D_80099AB4[8];
@@ -360,5 +363,7 @@ extern const Vec3f D_80099BBC; /* 0, 17, 7 */
 extern const Vec3f D_80099BC8[3];
 extern const s32 D_80099BEC[6];
 extern const f32 D_80099C04[6];
+extern s32 D_800D1580; /* parameter of the animation event being run */
+extern ActorAnim *D_800D1588[187]; /* per model id: animation table, after its AnimHeader */
 
 #endif

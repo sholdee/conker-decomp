@@ -14,6 +14,7 @@
  *   game_AE1D0.c
  *   game_AEB40.c
  *   game_AFA70.c
+ *   game_22B750.c (data only, linked after game_AFA70)
  *   game_D0960.c
  *   game_D0F20.s .. game_DB730.s (hand-written asm)
  *   game_DB750.c
@@ -28,6 +29,26 @@ typedef struct TriggerVolume TriggerVolume;
 struct Foo150AE280;
 struct ShadowVtx;
 struct Foo150AE36C;
+
+// One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
+typedef struct PartDef {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 unk2;
+    /* 0x03 */ u8 type;     // 0: child object (func_15083AC8), otherwise func_15030AF4
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 unk5;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ u16 data[3]; // the attachment's ownerStates
+    /* 0x0E */ u8 unkE;
+    /* 0x0F */ u8 unkF;
+} PartDef;
+
+typedef struct PartSet {
+    /* 0x0 */ const PartDef *parts;
+    /* 0x4 */ u8 count;
+} PartSet;
 
 /* game_2DF70.c */
 void func_15000AC0(void);
@@ -111,13 +132,24 @@ void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f3
                    f32 zUp);
 void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp);
+extern f32 D_800CBD90; // ledge probe results (written by game_D9894.s)
+extern f32 D_800CBD94;
+extern f32 D_800CBD98;
+extern u16 D_800CBDA0[25]; // per movement_obj: 1 + the world object it touches, 0 if none
+extern u8 D_800CBDD2;
+extern u8 D_800CBDD3;
+extern u8 D_800CBDD4;
+extern f32 D_800CBDF4; // ledge heights, -32768.0f if none
+extern f32 D_800CBDF8;
+extern f32 D_800CBDFC;
+extern TriggerNode *D_800CBE00; // timed trigger nodes (func_15044964)
 
 /* game_AE1D0.c */
 s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 arg5);
 s32 func_1508108C(Actor *obj);
 s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre,
                   f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
-s32 func_15081574(s32 self, f32 dist, f32 radius, s32 outTarget, s32 arg4, s32 model);
+s32 func_15081574(Actor *self, f32 dist, f32 radius, Actor **outTarget, s32 arg4, s32 model);
 
 /* game_AEB40.c */
 void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out,
@@ -156,6 +188,25 @@ s32 func_150849CC(Actor *obj, s32 *outIndex);
 void func_15084A18(void);
 void func_15084C30(Actor *obj);
 s32 func_15084CB0(s32 modelId);
+extern u8 *D_800D19A0[187]; // per model id: model data (just past its header)
+extern ModelDef *D_800D1C90[187];
+extern u8 D_800D1F80[187];
+extern u8 D_800D2040[187]; // per model id counter
+extern SpawnRecord *D_800D20FC;
+extern u8 D_800D2100;
+extern u8 D_800D2101;
+extern PathPoint **D_800D2104;
+extern u8 *D_800D2108;
+extern u8 *D_800D210C;
+extern u16 *D_800D2110;
+
+/* game_22B750.c */
+/* The object filters: s32 (Actor *obj, Actor *self, arg); declared without a prototype, as their
+   second and third parameters differ. */
+extern s32 (*D_80086C90[7])();
+extern const u8 *D_80086CAC[6]; // per ModelDef.subModelList: the sub-model list
+extern PartSet D_80086CC4[175]; // per ModelDef.partSet (1-based)
+extern const u8 D_8009D910[5];  // the expression actions of model 0
 
 /* game_D0960.c */
 s32 func_150A34B0(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);

@@ -83,6 +83,7 @@ void func_15093818(s32 enable);
 void func_15093878(void);
 Gfx *func_150938BC(Gfx *gfx);
 Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large);
+extern const s16 D_8009DCB4[6]; /* the block stack's start [0..2] and target [3..5] position */
 
 /* game_1EC390.c */
 void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 arg7, s32 arg8);

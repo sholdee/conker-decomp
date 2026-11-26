@@ -7,8 +7,10 @@
 #define FONT_GLYPH_HEIGHT 12
 #define FONT_GLYPHS_PER_ROW 8
 
-extern u8 D_80084930[]; // 64x128 I4 font texture
-extern u8 D_800848D0[]; // font charset, FONT_CHAR_COUNT entries
+/* The font charset: glyph i of the font texture shows character D_800848D0[i]. */
+static u8 D_800848D0[] = "abcdefhiuvsnorm.klxz4321567890_!gjpqytw,EFGHKLNOPRSUVXZ@JM:WIYABCD_T\"+-=Q%/?() *";
+static Gfx D_80084928[] = { gsSPEndDisplayList() }; /* not referenced */
+extern u8 D_80084930[]; // 64x128 I4 font texture (an asset: the ROM bytes after this file's .data)
 
 /** Sets up the render state and loads the 64x128 I4 font texture into TMEM. */
 Gfx *func_150412C0(Gfx *gfx) {

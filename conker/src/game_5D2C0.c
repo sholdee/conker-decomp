@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+ModelAttachment *D_800C3EE0; // head of the model attachment list
+
 extern s32 D_800902BC[];
 
 
@@ -211,7 +213,33 @@ s32 func_150303E4(Actor *owner) {
 
 /* Per-model hooks, indexed by ModelAttachment.handler; a nonzero return removes the attachment. */
 typedef s32 (*AttachmentHook)(ModelAttachment *att, Actor *owner);
-extern AttachmentHook D_800841C0[];
+static AttachmentHook D_800841C0[] = {
+    NULL,
+    func_150D82BC,
+    func_15031E2C,
+    func_15031E7C,
+    func_150F56B0,
+    func_15031FC8,
+    func_1503327C,
+    func_15033328,
+    func_150C73E0,
+    func_150331B8,
+    func_150C8730,
+    func_15033440,
+    func_150DFDD0,
+    func_150334B8,
+    func_1503378C,
+    func_150337E4,
+    func_15033838,
+    func_150339C8,
+    func_15033AD8,
+    func_150D83D8,
+    func_15033E00,
+    func_150F5A54,
+    func_150333A8,
+    func_15033F0C,
+    func_15033F70,
+};
 
 /* Per-frame update of every attachment: runs its hook, builds its matrix for this frame and removes
  * it when its owner is gone or it has expired. Attachments that follow another attachment's
@@ -412,7 +440,7 @@ void func_15030468(void) {
 /* Attaches `model` to bone `bone` of `owner` as part of set `setId`. Returns NULL on failure, or
  * (unless flags & 8) when that model of that set is already attached. */
 ModelAttachment *func_15030AF4(Actor *owner, s32 model, s32 bone, s32 flags, s32 unk15, s32 unk16, s32 lifetime,
-                          s32 setId, s32 handler, u16 *ownerStates, s32 unk17, s32 parentSet, s32 parentMtx) {
+                          s32 setId, s32 handler, const u16 *ownerStates, s32 unk17, s32 parentSet, s32 parentMtx) {
     ModelAttachment *att;
     ModelAttachment *next;
     s32 err;
@@ -2236,10 +2264,6 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-/* D_800841C0 (.data) holds this function's address: restores as1's indirect-jump-target view. */
-static AttachmentHook const D_800841D4_entry[] = { func_15031FC8 };
-
-
 /* Hook: plays the owner's taskint[0] animation on the attachment and keeps it in step with the owner's frame. */
 s32 func_150331B8(ModelAttachment *att, Actor *owner) {
     AnimInstance *ownerAnim;
@@ -2435,7 +2459,7 @@ ModelAttachment *func_150335C8(Actor *obj, Actor *target, s32 setId, s32 bone, s
         }
 
         guMtxL2F(boneMtx, (Mtx *)target->ob_matrix_ptr + bone);
-        func_15048B10((s32)boneMtx, (s32)invBoneMtx);
+        func_15048B10(boneMtx, invBoneMtx);
 
         scale = obj->scale_xz;
         func_150A9B0C(objMtx, obj->vtilt, obj->theta, obj->lean_angle, scale, obj->scale_y, scale);

@@ -321,7 +321,7 @@ void func_150BFA7C(WorldObject *platform) {
     if ((platform->object_status & 4) && movement_obj[0].mv->unk57 == 1) {
         func_1518B6B0(movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 0xFF, 0);
         if (state == TASK_FLAG_OFF) {
-            func_15164F0C(3, D_800BE9EB, NULL, 0xFF, 0);
+            func_15164F0C(3, D_800BE9E8, NULL, 0xFF, 0);
             fx.flags = 1;
             fx.duration = 60;
             fx.playerMask = 1;

@@ -1,18 +1,39 @@
 #include <ultra64.h>
+
+/*
+ * .bss, linked at 0x800C3E70..0x800C3EE0 in this order. Defined before conker/actor.h declares them:
+ * IDO lays out .bss in first-declaration order, and an extern there would count.
+ */
+static u8 D_800C3E70;  // cleared at the end of func_1502BEE4
+static s32 D_800C3E74; // a bit for each character that some object stands on
+u8 dc_glbl_CharNum;
+u16 D_800C3E7A;
+u16 D_800C3E7C;
+u8 *D_800C3E80[2];
+u8 *D_800C3E88;
+u8 *D_800C3E8C;
+u8 D_800C3E90;
+static Mtx D_800C3E98; // the modelview matrix of the object being drawn
+
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    u8 unk0;
-    u8 pad1[0xF];
-} D_800C666FEntry;
+Gfx D_80084160[] = {
+    gsDPPipeSync(),
+    gsSPMatrix(OS_K0_TO_PHYSICAL(&D_80089470), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPSetGeometryMode(G_SHADE | G_LIGHTING | G_SHADING_SMOOTH | 0x400000),
+    gsSPClearGeometryMode(G_FOG | G_LOD),
+    gsDPSetConvert(0, 0, 0, 0, 0, 255),
+    gsSPEndDisplayList(),
+};
+Gfx D_80084190[] = {
+    gsDPPipeSync(),
+    gsSPClearGeometryMode(G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_LOD | 0x400000),
+    gsDPSetEnvColor(0, 0, 0, 0),
+    gsDPSetPrimColor(0, 0, 0, 0, 0, 255),
+    gsSPEndDisplayList(),
+};
 
-extern u8 D_800C3E70;
-extern s32 D_800C3E74;
-extern D_800C666FEntry D_800C666F[];
-extern Mtx D_800C3E98;
-extern u8 D_C3E98[];
-extern u8 *D_8008422C[];
 extern s32 D_80088554;
 extern s32 D_80088558;
 extern s32 D_8008857C;
@@ -116,7 +137,7 @@ void func_1502BD84(Actor *obj, s32 index) {
         func_150345E4(index);
         func_1503A830(obj);
     }
-    if (D_800C666F[index].unk0 != 0) {
+    if (D_800C6660[index].state != 0) {
         func_1503DF48(index);
     }
     if (obj->type != 0) {
@@ -617,7 +638,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
                 }
             } else {
                 func_151EFE88(&D_800C3E98);
-                gSPMatrix(gdl++, D_C3E98, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                gSPMatrix(gdl++, OS_K0_TO_PHYSICAL(&D_800C3E98), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
                 gSPDisplayList(gdl++, D_800C4488[id][i]);
             }
         }
@@ -856,11 +877,11 @@ load:
                 s32 k;
 
                 if (D_800D1C90[id]->unk29 != 0) {
-                    u8 *p;
+                    const u8 *p;
 
                     D_800C3FFA = 0;
                     bzero(remapBuf, D_800C4ED0[id]);
-                    p = D_8008422C[D_800D1C90[id]->unk29];
+                    p = D_80084230[D_800D1C90[id]->unk29 - 1];
                     while (*p != 0xFF) {
                         k = p[0];
                         remapBuf[k] = p[1];
@@ -1086,7 +1107,7 @@ void func_1502E4C4(s32 index) {
     if (D_800C3638 != 0 && D_800C3656[0] == 0 && func_150229E4(obj) == 0) {
         return;
     }
-    if (obj->playernumber != 0xFF && !(D_800D2340 & (1 << obj->playernumber))) {
+    if (obj->playernumber != 0xFF && !(D_800D2138.unk208 & (1 << obj->playernumber))) {
         return;
     }
     if ((obj->unk101 & 1) == 1) {

@@ -653,6 +653,8 @@ src/game_21D420.c	libc	sprintf
 src/game_21D5F0.c	os	guMtxCatF copy
 src/libultra/audio/game_21FC90.c	mp3	streaming music player (StreamVoice), set up by game_43620.c
 src/game_221290.c	mp3	MPEG layer III decoder
+src/game_228CF0.c	bone	data-only unit: bone remap byte lists and their pointer table
+src/game_22B750.c	collision	data-only unit: model part sets, sub-model lists, object filters
 src/debugger_256F80.c	debugger	debugger copy of controller read
 src/debugger_257330.c	debugger	debugger stub
 src/debugger_257350.c	debugger	debugger printf

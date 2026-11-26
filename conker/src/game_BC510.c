@@ -3,6 +3,29 @@
 #include "functions.h"
 #include "variables.h"
 
+/* This file's .rodata: the block positions and the stack's base, then the race time formats. */
+static const s16 D_8009DC90[6][3] = {
+    { -83, 0, -166 }, { 83, 0, -166 }, { -83, 0, 0 }, { 83, 0, 0 }, { -83, 0, 166 }, { 83, 0, 166 },
+};
+const s16 D_8009DCB4[6] = { -1500, 580, -1668, -600, 580, -1668 }; // [0..2] start, [3..5] target
+
+typedef struct HudBars {
+    u8 b[4];
+} HudBars;
+
+/* This file's .data. */
+static Gfx D_80087390[] = {
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
+    gsSPEndDisplayList(),
+};
+static HudBars D_800873B0 = { 0 };
+static u8 D_800873B4[5] = { 4, 16, 25, 39, 53 };
+static u8 D_800873BC[5] = { 12, 9, 14, 12, 10 };
+static u8 D_800873C4[4] = { 1, 8, 15, 21 };
+static u8 D_800873C8[3] = { 0, 8, 16 };
+
 
 extern u8 D_D16[];
 
@@ -66,7 +89,7 @@ void func_1508F0D4(void) {
         D_800D2444 = 240;
         while (D_800CC49A != D_800D2457) {
             D_800D2457--;
-            if (D_800D2428[0] == (f32)D_8009DCB4[3]) {
+            if (D_800D2428[0] == D_8009DCB4[3]) {
                 func_1508F7BC();
             }
         }
@@ -75,7 +98,7 @@ void func_1508F0D4(void) {
         D_800D2444 = 240;
         while (D_800CC49A != D_800D2457) {
             D_800D2457++;
-            if (D_800D2428[0] == (f32)D_8009DCB4[3]) {
+            if (D_800D2428[0] == D_8009DCB4[3]) {
                 func_1508F9C4();
             }
         }
@@ -92,12 +115,12 @@ void func_1508F0D4(void) {
                 for (i = 0; i < D_800BE9E4; i++) {
                     D_800D2890[j] += D_800D2438[j] * -0.1f;
                     D_800D2890[j] *= 0.85f;
-                    D_800D2438[j] += D_800D2890[j] * (f32)D_800BE9E4;
+                    D_800D2438[j] += D_800D2890[j] * D_800BE9E4;
                 }
             }
         } else if (D_800D2457 < D_800D2456) {
             count = D_800D2456 - D_800D2457;
-            D_800D2428[0] += 50.0f * (f32)D_800BE9E4;
+            D_800D2428[0] += 50.0f * D_800BE9E4;
             if (target <= D_800D2428[0]) {
                 D_800D2428[0] = target;
                 for (i = 0; i < count; i++) {
@@ -107,7 +130,7 @@ void func_1508F0D4(void) {
             }
         } else {
             count = D_800D2457 - D_800D2456;
-            D_800D2428[0] += 50.0f * (f32)D_800BE9E4;
+            D_800D2428[0] += 50.0f * D_800BE9E4;
             if (target <= D_800D2428[0]) {
                 D_800D2428[0] = target;
                 for (i = 0; i < count; i++) {
@@ -118,12 +141,12 @@ void func_1508F0D4(void) {
     } else {
         cur = D_800D2428[0];
         base = D_8009DCB4[0];
-        if (D_800D2428[0] != (f32)D_8009DCB4[0]) {
-            target = ((f32)D_8009DCB4[3] - D_800D2428[0]) * 0.1f;
+        if (D_800D2428[0] != D_8009DCB4[0]) {
+            target = (D_8009DCB4[3] - D_800D2428[0]) * 0.1f;
             if (target < 0.01f) {
                 target = 0.01f;
             }
-            D_800D2428[0] -= target * (f32)D_800BE9E4;
+            D_800D2428[0] -= target * D_800BE9E4;
             if (D_800D2428[0] < base) {
                 D_800D2428[0] = base;
             }
@@ -319,9 +342,9 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     if (D_8008CD00 != 0) {
         step = 0x400;
         if (D_8008FE1C != 1.0f) {
-            step = (s32)((f32)step / D_8008FE1C);
+            step = step / D_8008FE1C;
             for (i = 0; i < 33; i++) {
-                scaled[i] = (s32)((f32)i * D_8008FE1C);
+                scaled[i] = i * D_8008FE1C;
             }
         } else {
             // matching: one line; the loop body's line number steers as1's unrolled store order
@@ -329,7 +352,7 @@ Gfx *func_1508FD38(register Gfx *gfx) {
         }
         gfx = func_15093B58(gfx, step, scaled, 0x2C30, 1);
     }
-    if (D_800D2428[0] != (f32)D_8009DCB4[0]) {
+    if (D_800D2428[0] != D_8009DCB4[0]) {
         gfx = func_150900F0(gfx, 0);
     } else if (D_800D2588 != NULL) {
         func_1518CA04(0xB8);
@@ -345,7 +368,6 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     }
     return gfx;
 }
-extern s16 D_8009DC90[][3];
 
 /* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws D_800CC49A
  * blocks at full scale at a fixed spot near D_8009DCB4[3..5], after patching the block display
@@ -384,9 +406,9 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
     count = D_800D2456;
     dl = D_800D2588;
     if (fixed != 0) {
-        x = (f32)D_8009DCB4[3] - 54.0f;
-        y = (f32)D_8009DCB4[4] - 52.0f;
-        z = (f32)D_8009DCB4[5] - 344.7000122f;
+        x = D_8009DCB4[3] - 54.0f;
+        y = D_8009DCB4[4] - 52.0f;
+        z = D_8009DCB4[5] - 344.7000122f;
         count = D_800CC49A;
         func_150A8050(base, 50.0f, -20.0f, -20.0f);
         scale = 1.0f;
@@ -394,7 +416,7 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
             Gfx *cmd = dl;
             u32 op;
             do {
-                op = (u8)(cmd->words.w0 >> 24);
+                op = (u8)(cmd->words.w0 >> 24); // matching: the mask stays in the original
                 switch (op) {
                 case G_SETCOMBINE:
                     cmd->words.w0 = 0;
@@ -580,7 +602,7 @@ void func_1509093C(void) {
         return;
     }
     {
-        D_800D24C8.unk9C = (f32)(u32)tmp / 720.0f;
+        D_800D24C8.unk9C = (u32)tmp / 720.0f;
         if (D_800D24C8.unk9C > 1.0f) {
             D_800D24C8.unk9C = 1.0f;
         }
@@ -632,9 +654,9 @@ void func_1509093C(void) {
         target = D_800D24C8.target;
         blend = D_800D24C8.unk94;
         for (i = 0; i < D_800D24C8.count; i++) {
-            dst[i].ob[0] = (f32)base[i].ob[0] + ((f32)target[i].ob[0] - (f32)base[i].ob[0]) * blend;
-            dst[i].ob[1] = (f32)base[i].ob[1] + ((f32)target[i].ob[1] - (f32)base[i].ob[1]) * blend;
-            dst[i].ob[2] = (f32)base[i].ob[2] + ((f32)target[i].ob[2] - (f32)base[i].ob[2]) * blend;
+            dst[i].ob[0] = base[i].ob[0] + ((f32)target[i].ob[0] - (f32)base[i].ob[0]) * blend;
+            dst[i].ob[1] = base[i].ob[1] + ((f32)target[i].ob[1] - (f32)base[i].ob[1]) * blend;
+            dst[i].ob[2] = base[i].ob[2] + ((f32)target[i].ob[2] - (f32)base[i].ob[2]) * blend;
         }
         if (intensity < 480) {
             tex = D_8009026E;
@@ -795,7 +817,7 @@ Gfx *func_15091534(Gfx *gfx, s32 sheet, u8 *loaded) {
     *loaded = FALSE;
     tex = func_1510D0EC(sheet + (s32)D_D16, 0, 3, 0);
 
-    if (tex != (s32)0x80000000) {
+    if (tex != 0x80000000) {
         gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, tex);
         gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
         gDPLoadSync(gfx++);
@@ -833,29 +855,17 @@ void func_150916B4(s32 x, s32 y, s32 frames, s32 style) {
     x -= 8;
     if (frames >= 0) {
         seconds = frames / 60;
-        func_15042D94((x - (((seconds / 60) >= 10) ? 5 : 0)) - 8, y, (u8)style, D_8009DCC0, seconds / 60);
-        func_15042D94(x, y, style, D_8009DCC4, seconds % 60);
-        func_15042D94(x + 16, y, style, D_8009DCCC, hundredths);
+        func_15042D94((x - (((seconds / 60) >= 10) ? 5 : 0)) - 8, y, style, "%d", seconds / 60);
+        func_15042D94(x, y, style, ":%02d", seconds % 60);
+        func_15042D94(x + 16, y, style, ":%02d", hundredths);
         return;
     }
 
-    func_15042D94(x - 8, y, (u8)style, D_8009DCD4);
-    func_15042D94(x, y, style, D_8009DCD8);
-    func_15042D94(x + 16, y, style, D_8009DCE0);
+    func_15042D94(x - 8, y, style, "--");
+    func_15042D94(x, y, style, ": --");
+    func_15042D94(x + 16, y, style, ": --");
 }
 
-typedef struct HudBars {
-    u8 b[4];
-} HudBars;
-
-
-
-extern HudBars D_800873B0;
-extern Gfx D_80087390[];
-extern u8 D_800873B4[];
-extern u8 D_800873BC[];
-extern u8 D_800873C4[];
-extern u8 D_800873C8[];
 extern u8 D_CF1[];
 extern u8 D_CF2[];
 extern u8 D_D13[];
@@ -906,9 +916,9 @@ Gfx *func_150918EC(Gfx *gfx) {
     func_1504332C(255, 255, 255, 255);
     step = 0x400;
     if (D_8008FE1C != 1.0f) {
-        step = (s32)((f32)step / D_8008FE1C);
+        step = step / D_8008FE1C;
         for (j = 0; j < 33; j++) {
-            scaled[j] = (s32)((f32)j * D_8008FE1C);
+            scaled[j] = j * D_8008FE1C;
         }
     } else {
         // matching: one line; the loop body's line number steers as1's unrolled store order
@@ -926,7 +936,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                     if (!texLoaded) {
                         n = func_1510D0EC((s32)D_D14, 0, 3, 0);
                         texLoaded = 1;
-                        if (n != (s32)0x80000000) {
+                        if (n != 0x80000000) {
                             gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, n);
                             gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
                             gDPLoadSync(gfx++);
@@ -1254,7 +1264,7 @@ Gfx *func_150918EC(Gfx *gfx) {
             rowY = (s32)D_800BE628[i].top + 5;
             func_1504332C(255, 255, 255, 255);
             if (D_800872A0[i].lastLapTime > 0) {
-                x = (s32)D_800BE628[i].left;
+                x = D_800BE628[i].left;
                 func_150916B4(x + 23, rowY + 25, D_800872A0[i].lastLapTime, 0xC0);
             }
             x = (s32)D_800BE628[i].left + (vpWidth >> 1);
@@ -1367,7 +1377,7 @@ Gfx *func_150938BC(Gfx *gfx) {
     segment = 4;
     do {
         tex = func_1510D0EC((s32)D_11AD + (value % 10), 0, 3, 0);
-        if (tex == (s32)0x80000000) {
+        if (tex == 0x80000000) {
             return gfx;
         }
         gSPSegment(gfx++, segment, tex);
@@ -1428,7 +1438,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
     dotSize = (D_8008FE1C == 1.0f) ? 4 : 6;
     radiusSq *= D_8008FE1C;
     tex = func_1510D0EC((s32)(D_CF2 + 1), 0, 3, 0);
-    if (tex == (s32)0x80000000) {
+    if (tex == 0x80000000) {
         return gfx;
     }
     gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, tex);
@@ -1461,7 +1471,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
             gDPSetEnvColor(gfx++, 255, 255, 255, 128);
             gDPSetCombine(gfx++, 0x129A25, 0xFF37FFFF);
             if (large) {
-                halfSize = (s32)((f32)(radius * 4) * 0.8580000401f);
+                halfSize = radius * 4 * 0.8580000401f;
                 // matching: the original rounds dotStep through s32 before scaling it
                 dsdx = (s32)((f32)(s32)(f32)dotStep * 1.165501118f);
             } else {

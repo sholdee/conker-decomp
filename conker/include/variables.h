@@ -72,48 +72,11 @@ extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 // 0x80044B20 + 253952 = 0x80082B20
 
 /* 80080000 */
-extern u8 D_80084160[];
-extern u8 D_80084190[];
-extern Vtx  D_80084300[5];
-extern void (*D_800844B0[])(s32 arg0);
-extern s32  D_800848B0;
 
 extern u8 (*D_80085990[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
 extern FontGlyph *D_80085994[];
-extern Gfx D_800859A0[]; // shared display list (2D/sprite render setup)
-extern f32 D_80085FD0;
-extern f32 D_80085FD4;
-extern f32 D_80085FD8;
-extern f32 D_80085FDC;
-extern f32 D_80085FE0;
-extern f32 D_80085FE4;
-extern f32 D_80085FE8;
 
-extern u16 D_80085EC0[];
-extern u16 D_80085F3C[];
-extern u16 D_80085FBC[];
 
-extern s32 D_80086000;
-extern void (*D_80086004[])(s32);
-extern void (*D_8008600C[])(s32);
-extern void (*D_80086014[])(Actor *);
-extern s16 D_800860C0[];
-extern f32 D_800860CC[];
-extern u16 D_800860E4[];
-extern void (*D_80086150[])(s32);
-extern void (*D_80086730[])(void);
-extern u8 * D_80086CAC[];
-extern s8  D_80087260;
-extern s8  D_80087264;
-extern s8 D_80087268;
-extern s8  D_8008726C;
-extern s8  D_80087270[];
-extern u8  D_80087280[];
-extern s16 D_80087290; /* node count */
-extern u8 D_80087298; /* goal node reached by the last search, 0xFF if none */
-extern u8 D_8008729C;
-extern Racer *D_800872A0; // per-racer state of the race mode
-extern u32 D_80087380;
 
 extern Gfx D_800873D0[];
 extern Gfx D_80087408[];
@@ -236,20 +199,8 @@ extern TextureDesc D_800918A0;
 
 // code_75400.c
 
-extern f32 D_8009A220[];
-extern f32 D_8009A420[];
-extern f32 D_8009A620[];
-extern HitReaction D_8009A6D8[]; // knockback reactions
-extern HitReaction D_8009A9F8[]; // hit-reaction table
 
-extern s16 D_8009DCB4[];
-extern char D_8009DCC0[];
-extern char D_8009DCC4[];
-extern char D_8009DCD4[];
-extern char D_8009DCD8[];
-extern char D_8009DCE0[];
 
-extern char D_8009DCCC[];
 
 extern u8 D_8009DEB0[];
 extern u8 D_8009DEB4[];
@@ -289,51 +240,17 @@ extern s32 D_800AB754[];
 extern LevelHeader *D_800B0DF0;
 
 extern s32 D_800BE5D0;
-extern u8  D_800BE9A0;
-extern f32 D_800BE9A4;
-extern f32 D_800BE9A8;
-extern s32 D_800BE9AC;
-extern u8 D_800BE9EB;
-extern s32 level;
 
 
 
-extern Gfx *D_800BE9C8[2]; // display-list buffer per framebuffer (D_800BE9C0)
-extern Gfx *D_800BE9D0;    // display-list write head
-extern Gfx *D_800BE9D8[2]; // per framebuffer: end of the prologue built by func_1501A39C
 
 
 
-extern u8   D_800BE9B4;
-extern u8   D_800BE9C0; // which of the two matrix buffers is being built this frame
-extern u16 *D_800BE9C4; // z-buffer (D_800BE620 x D_800BE624)
-extern OSMesg D_800BE9E0;
-extern s32  D_800BE9E4; // frames elapsed this update
-extern s32  D_800BE9E8;
-extern u8   D_800BE9EC;
-extern u8   D_800BE9ED;
-extern s16 D_800BE9F2;
-extern s32 D_800BE9F4;   // current scene / game mode id
-extern s32  D_800BE9F8;
 
 
-extern s32 D_800BEA00;
-extern s32 D_800BEA04;
-extern s32 D_800BEA08;
-extern u8 D_800BEA0C;
-extern OSMesgQueue D_800BEA10;
-extern OSMesg      D_800BEA28;
-extern OSScMsg D_800BEA68[2]; // "task done" messages, one per frame buffer
-extern s16 D_800BEAA8;
-extern u8  D_800BEAAA;
-extern u8  D_800BEAAB;
-extern u8  D_800BEAC0;
-extern u8  D_800BEAC1;
 
 /* 800C0000 */
 
-extern u8 D_800BEAC2;
-extern u8 D_800BEAC3;
 extern u64 *D_800BEB9C; // RSP ucode data, right after its text in D_800C1060
 extern u8 D_800BEBA0;
 extern s32 D_800BEBA4;
@@ -399,94 +316,10 @@ extern u8 D_800C3C9D;
 extern s16 D_800C3C9E;
 extern SeqSubtitle D_800C3CA0[3];
 extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
-extern u8  dc_glbl_CharNum;
-extern u16 D_800C3E7A; // bone matrices used this frame
-extern u16 D_800C3E7C; // bone-matrix pool size, in 0x40-byte matrices
-/* The bone-matrix pool of each frame buffer. Bones are built in it as MtxF; func_1502E474 converts them in
-   place to Mtx for drawing. The cursors move in bytes. */
-extern u8 *D_800C3E80[2];
-extern u8 *D_800C3E88; // bone-matrix pool cursor
-extern u8 *D_800C3E8C; // bone-matrix pool start
-extern u8 D_800C3E90;
-extern ModelAttachment *D_800C3EE0; // head of the model attachment list
-extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is the template D_80084300
-extern s32 D_800C3FC4;
 extern s64 D_800C3A60[];
-extern u8  D_800C4000;
 
-extern s32 * D_800C4020[]; // per-id first vertex of each part
-extern u16 D_800C4310[]; // part count, indexed by VtxMorphGroup.kind
-extern Gfx **D_800C4488[]; // per-model display-list parts
-extern u16 D_800C4778[]; // display-list parts per model id
-extern Gfx **D_800C48F0[]; // per model: display list table (ModelHeader dlists2)
-extern void *D_800C4BE0[]; // per model: bone table (16-byte entries)
-extern u16 D_800C4ED0[]; // bone count per model id
-extern ObjTexture *D_800C5338[]; // per-model texture tables
-extern u16 D_800C5628[]; // textures count
-extern u16 D_800C57A0[]; // vertex count
-extern u16 D_800C5918[]; // triangle weight, see func_1503D984
-extern u16 D_800C5A90[187]; // per model: animation count
-extern VtxRun *D_800C5C08[187]; // per model id: vertex runs (D_800C5EF8[id] of them)
-extern u16 D_800C5EF8[];
-extern VtxTri *D_800C6070[187]; // per model id: triangles
-extern TexCoord *D_800C6360[187]; // per model id: saved texture coordinates (func_1503D804)
 
-extern AimPoint *gAimPoints; // aim points (gAimPointCount of them)
-extern s32 gAimPointCount;
-extern ObjPartsState D_800C6660[];
-extern u8  D_800C67F0;
-extern u8  D_800C67F1;
-extern s32 D_800C6860[];
-extern u8  D_800C68A0;
-extern u8  D_800C68A1;
 
-extern u16 D_800CBD4E; // animation clock (high bits pick icon frames)
-extern u16 D_800CBDA0[];
-extern u8 D_800CBDD3;
-extern u8 D_800CBDD4;
-extern f32 D_800CBDF4;
-extern f32 D_800CBDF8;
-extern TriggerNode *D_800CBE00; // timed trigger nodes (func_15044964)
-extern u8  D_800CBD60;
-extern u8  D_800CBD61;
-extern u8  D_800CBD62;
-extern u8  D_800CBD63;
-extern s16 D_800CBD70;
-extern s16 D_800CBD72;
-extern u8  D_800CBD74;
-extern Actor *D_800CBD78; // text queue: anchor actor for the next text
-extern s16 D_800CBD7C;
-
-extern f32 D_800CBD80;
-
-extern f32 D_800CC210;
-extern f32 D_800CC214;
-extern f32 D_800CC218;
-extern f32 D_800CC21C;
-extern f32 D_800CC220;
-extern f32 D_800CC224;
-extern f32 D_800CC228;
-extern f32 D_800CC22C;
-extern f32 D_800CC230;
-extern f32 D_800CC234;
-extern f32 D_800CC238;
-extern f32 D_800CC23C;
-
-extern s32 D_800CC250;
-
-extern f32 D_800CC254;
-extern f32 D_800CC258;
-extern f32 D_800CC25C;
-extern s32 D_800CC260;
-extern s16 D_800CC264;
-extern s32 D_800CC268;
-extern u8 D_800CC26C;
-extern u8 D_800CC26D;
-extern u8  D_800CC26E;
-extern f32 D_800CC270; // attacker position saved at the hit (x, z, y)
-extern f32 D_800CC274;
-extern f32 D_800CC278;
-extern u8  D_800CC27C;
 
 extern f32 D_800CC2C0;
 extern f32 D_800CC2C4;
@@ -530,62 +363,11 @@ extern f32 D_800D136C;
 
 extern s32 D_800D1510;
 extern f32 D_800D1550; // frame time step
-extern s32 D_800D1580; // parameter of the animation event being run (D_800D1874: the same bits as an f32)
-extern s16 D_800D1582;
-extern u8  D_800D1583;
-extern ActorAnim *D_800D1588[187]; // per model id: animation table, after its AnimHeader (see func_1503D660)
 extern s32 D_800D1548;
 extern Actor *D_800D154C;
 
-extern f32 D_800D1874;
-extern f32 D_800D1878;
-extern s32 D_800D1880;
-extern u8  D_800D1890;
-extern u8  D_800D1891;
-extern u8  D_800D1892;
-extern u8  D_800D1893;
-extern f32 D_800D1898[];
-extern u16 D_800D18A0;
-extern u16 D_800D18A2;
-extern u8  D_800D18A4[4]; // per player: half-size of the square, minus 4 (game_A9D90)
-extern u8  D_800D18A8;
-extern u8 D_800D18A9;
-extern BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (func_150163D0 loads, func_15055E50 uses)
-extern u8  D_800D18C0;
-extern u8  D_800D18D0;
 
-extern u8  D_800D1940;
-extern u8  D_800D1941;
-extern TextResource *D_800D1944; // current text
-extern TextResource *D_800D1948; // header text prepended to it, or NULL
-extern u8 *D_800D194C; // header + page break + current text
-extern TextBox *D_800D1950; // open text box
-extern TextBoxConfig D_800D1958;
-extern f32 D_800D1988;
-extern f32 D_800D198C;
-extern f32 D_800D1990;
-extern u8  D_800D1994;
-extern u8  D_800D1995;
-extern u16 *D_800D1998; // sound effects voiced while the text types out
 
-extern u8 *D_800D19A0[187]; // per model id: model data (just past its header)
-extern ModelDef *D_800D1C90[187];
-extern u8  D_800D1F80[187];
-extern u8  D_800D2040[187]; // per model id counter
-extern SpawnRecord *D_800D20FC;
-
-extern u8 D_800D2100;
-extern u8 D_800D2101;
-extern PathPoint **D_800D2104;
-extern u8 *D_800D2108;
-extern u8 * D_800D210C;
-extern s8 D_800D2130;
-extern PathNode *D_800D2350; // the level path graph nodes (func_15085B70)
-extern s32 D_800D2354;
-extern f32 D_800D239C;
-extern f32 D_800D23A0;
-extern f32 D_800D23A4;
-extern s8 D_800D23A8;
 extern s32 D_800D2450;
 extern s32 D_800D2C9C; // G_TT_RGBA16 when the last loaded texture has a palette, else G_TT_NONE
 extern u8 *D_800D2CA0; // current texture frame (0x80000000 = missing asset)
@@ -594,17 +376,7 @@ extern u8 D_800D2DA8; // sprite prim colour r, g, b (used while D_800D2DAB is 0)
 extern u8 D_800D2DA9;
 extern u8 D_800D2DAA;
 extern u8  D_800D2DAB;
-extern u16 *D_800D2110;
-extern s32 D_800D2120;
-extern s32 D_800D2124;
-extern s32 D_800D2128;
-extern SpawnPoint *D_800D212C;
-extern s16 D_800D2132;
-extern MatchState D_800D2138;
 
-extern u16 D_800D2340;
-extern s8  D_800D23A9;
-extern ObjGroup *D_800D23C0;
 extern Mtx  D_800D23D0;
 
 extern f32 D_800D2410[];

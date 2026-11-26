@@ -18,7 +18,6 @@ const s32 D_8009942C[3] = { 0x12, 0x0B, 0x13 };
 
 
 struct HitReaction;
-extern void (*D_80086694[])(void *, Actor *, u8 *);
 struct HitReaction;
 extern MtxF *D_800CC4A4;
 
@@ -548,7 +547,7 @@ void func_15056B08(Actor *actor) {
                 }
                 if (actor->unk22A != 0) {
                     range = actor->unk22A * 8.0f;
-                    if ((dc_glbl_CharNum != 0) && (fabsf(actor->ypos - D_800CC2E8[0]) < range)) {
+                    if ((dc_glbl_CharNum != 0) && (fabsf(actor->ypos - movement_obj[0].ypos) < range)) {
                         ok = 0;
                     }
                 }
@@ -635,8 +634,8 @@ void func_15056B08(Actor *actor) {
             if (info->unk18 <= actor->speed) {
                 if (func_1505693C(actor, 0) != 0) {
                     spotted = 0;
-                    px = D_800CC2E4 - actor->aim.x;
-                    pz = actor->aim.z - D_800CC2EC;
+                    px = movement_obj[0].xpos - actor->aim.x;
+                    pz = actor->aim.z - movement_obj[0].zpos;
                     if ((actor->character_type == 0x9E) && (actor->taskint[0] == 0)) {
                         rangeSq = 129600.0f;
                     }
@@ -649,7 +648,7 @@ void func_15056B08(Actor *actor) {
                                 dsq = actor->unk229 * 8.0f;
                             }
                             if ((dc_glbl_CharNum != 0) &&
-                                (!actor->unk229 || (fabsf(actor->ypos - D_800CC2E8[0]) < dsq))) {
+                                (!actor->unk229 || (fabsf(actor->ypos - movement_obj[0].ypos) < dsq))) {
                                 if (actor->character_type == 0x9E) {
                                     MtxF mtx;
                                     f32 lookX;
@@ -662,7 +661,7 @@ void func_15056B08(Actor *actor) {
                                     lookY += actor->ypos;
                                     func_15047390(mtx, actor->xpos, actor->ypos, actor->zpos, lookX, lookY,
                                                   lookZ, 0.0f, 1.0f, 0);
-                                    if (func_15049440(mtx, D_800CC2E4, D_800CC2E8[0], D_800CC2EC, 80.0f, 80.0f, 0.0f,
+                                    if (func_15049440(mtx, movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 80.0f, 80.0f, 0.0f,
                                                       4000.0f, 320.0f, 320.0f) != 0) {
                                         spotted = 1;
                                     }
@@ -1334,6 +1333,11 @@ void func_15059444(Actor *actor) {
     }
 }
 
+/* Per carry variant (see func_1505959C): the host's animation, its speed and the carried actor's reaction. */
+static s16 D_800860C0[] = { 0x00D5, 0x0114, 0x0017, 0x0288, 0x0034, 0x01FA };
+static f32 D_800860CC[] = { 3.0f, 1.0f, 1.0f, 1.0f, 1.5f, 1.0f };
+static u16 D_800860E4[] = { 0x000D, 0x000D, 0x0039, 0x000D, 0x000D, 0x000D };
+
 /* Attaches the actor to movement_obj[hostIdx] (grabbed/carried) and starts both actors' animations. */
 void func_1505959C(Actor *actor, s32 hostIdx) {
     Game83300AnimEntry *anims;
@@ -1739,7 +1743,7 @@ f32 func_1505A5CC(OSContPad *pad) {
 
 /* Binary angle (0x10000 = full turn) of the direction (x, z); the third argument is unused. */
 u16 func_1505A630(f32 x, f32 z, s32 unused) {
-    return ((u16)  (func_150484A0(-x, z) * 10430.37793f)) + 16384;
+    return (u16)(func_150484A0(-x, z) * 10430.37793f) + 16384;
 }
 
 /* Horizontal (xz) distance between two actors. */
@@ -2206,7 +2210,7 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
  * Applies a hit to `victim`: base[index] holds the attack's defaults and hit[index] the reaction chosen
  * for this victim. Sets knockback, damage and the reaction animation, and releases anything it carried.
  */
-void func_1505B9C4(Actor *attacker, Actor *victim, HitReaction *base, HitReaction *hit, u8 index,
+void func_1505B9C4(Actor *attacker, Actor *victim, const HitReaction *base, const HitReaction *hit, u8 index,
                    s32 victimSlot, u8 damageMask) {
     u8 reaction;
     s32 slot;
@@ -2330,13 +2334,13 @@ void func_1505B9C4(Actor *attacker, Actor *victim, HitReaction *base, HitReactio
     if (base[index].unk4 != 0) {
         D_800D1580 = base[index].unk4;
         if (func_1506E46C(victim, &D_800D1580, 0) != 0) {
-            func_10010630(D_800D1582, victim, 0x6D60, 0x12C, 0x708);
+            func_10010630(D_800D1580, victim, 0x6D60, 0x12C, 0x708);
         }
     } else {
         if (hit[index].unk4 != 0) {
             D_800D1580 = hit[index].unk4;
             if (func_1506E46C(victim, &D_800D1580, 0) != 0) {
-                func_10010630(D_800D1582, victim, 0x6D60, 0x12C, 0x708);
+                func_10010630(D_800D1580, victim, 0x6D60, 0x12C, 0x708);
             }
         }
     }
@@ -2407,9 +2411,9 @@ s16 func_1505C140(Actor *attacker, Actor *victim) {
 }
 
 /* The actor type's hit-reaction table (stored before its animation table), or the default one. */
-HitReaction *func_1505C1A4(Actor *actor) {
-    HitReaction **slot;
-    HitReaction *ret;
+const HitReaction *func_1505C1A4(Actor *actor) {
+    const HitReaction **slot;
+    const HitReaction *ret;
 
     if ((actor->character_type != 0xFF) && (D_800D1588[actor->character_type] != NULL)) {
         slot = &ANIM_HEADER(D_800D1588[actor->character_type])->hits; // matching: the address is formed before the load
@@ -2420,32 +2424,19 @@ HitReaction *func_1505C1A4(Actor *actor) {
     return ret;
 }
 
-struct HitReaction;
-struct HitReaction;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-} Rule1505C1E4;
-
-extern u8 D_8009A6A0[];
-extern Rule1505C1E4 *D_80086AA0[];
-
 /*
  * Resolves a hit on `victim` through the victim's reaction rules (unk239): may redirect to another
  * table entry, cancel the hit or handle it specially; otherwise applies it with func_1505B9C4.
  * Returns hitMask with the victim's bit set when the hit landed.
  */
-s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index, s32 victimSlot, s32 hitMask, s32 damageMask) {
+s32 func_1505C1E4(Actor *attacker, Actor *victim, const HitReaction *table, s32 index, s32 victimSlot, s32 hitMask, s32 damageMask) {
     s32 i;
     u8 done;
     u8 kind;
     u8 count;
     u8 flags;
-    HitReaction *entry;
-    Rule1505C1E4 *rules;
+    const HitReaction *entry;
+    const HitRule *rules;
     s32 angle;
     u8 type;
     u8 idx;
@@ -2608,9 +2599,9 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
     s32 attackIdx;
     s32 ret;
     Actor *victim;
-    HitReaction *hits;
+    const HitReaction *hits;
     f32 dz2;
-    HitReaction *hit;
+    const HitReaction *hit;
     f32 x;
     f32 y;
     f32 z;
@@ -2666,10 +2657,10 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
     hits = func_1505C1A4(attacker);
     if (hits[attackIdx].unk24 & 0x80) {
         // matching: byte-offset form (not &hits[attackIdx]) keeps IDO's addu operand order
-        hit = (HitReaction *)((u8 *)hits + attackIdx * sizeof(HitReaction));
+        hit = (const HitReaction *)((const u8 *)hits + attackIdx * sizeof(HitReaction));
         y = attacker->ypos;
     } else {
-        hit = (HitReaction *)((u8 *)hits + attackIdx * sizeof(HitReaction));
+        hit = (const HitReaction *)((const u8 *)hits + attackIdx * sizeof(HitReaction));
         dist = hit->unkA;
         dist *= attacker->scale_xz / 0.125f;
         func_1505A184((hit->unk9 << 8) + attacker->langle, dist, 0.0f, &x, &z, &y);
@@ -2694,7 +2685,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
         if (i == selfSlot || victim->energy == 0 || victim->imune != 0) {
             continue;
         }
-        hit = (HitReaction *)((u8 *)hits + attackIdx * sizeof(HitReaction));
+        hit = (const HitReaction *)((const u8 *)hits + attackIdx * sizeof(HitReaction));
         if (i == attacker->owner && !(hit->unk24 & 0x1000)) {
             continue;
         }
@@ -2786,7 +2777,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
         }
     }
     if (ret != 0) {
-        hit = (HitReaction *)((u8 *)hits + attackIdx * sizeof(HitReaction));
+        hit = (const HitReaction *)((const u8 *)hits + attackIdx * sizeof(HitReaction));
         /* unk108 holds victim slot | 0x80 */
         if (movement_obj[attacker->unk108 - 0x80].type == 1) {
             if (attacker->unk254 != 0) {
@@ -2809,7 +2800,7 @@ s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
     s32 pad;
     s32 ret;
     s32 slot;
-    HitReaction *table;
+    const HitReaction *table;
 
     table = D_8009A9F8;
     if (D_800C35EA[0] == 1) {
@@ -2875,7 +2866,7 @@ s32 func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, 
 
 /* Starts the knockback reaction D_8009A6D8[entryIdx] on the actor. */
 void func_1505D2B8(Actor *actor, u8 entryIdx) {
-    HitReaction *entry;
+    const HitReaction *entry;
 
     entry = &D_8009A6D8[entryIdx];
     actor->yspd = entry->yVelocity;
@@ -3204,7 +3195,6 @@ void func_1505E060(AnimInstance *state) {
     bcopy(state->header[0], state->header[1], sizeof(state->header[0]));
 }
 
-extern void (*D_8008630C[])(void);
 
 /*
  * Starts animation `anim` (entry `animEntry`) on a playback state, or only updates its speed when it is
@@ -3234,7 +3224,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, 
     }
     if (changed != FALSE) {
         if (actor != NULL) {
-            index = ((s32)actor - (s32)&movement_obj) / 812;
+            index = actor - movement_obj;
             kind = 2;
             bank = actor->unk6;
         } else {
@@ -4481,14 +4471,14 @@ void func_15060F28(Actor *actor, s32 mode) {
     if (actor->morph != NULL) {
         func_10004074(actor->morph);
     }
-    if (actor->hit_vtx_array != 0) {
-        func_10004074((void *)actor->hit_vtx_array);
+    if (actor->hit_vtx_array != NULL) {
+        func_10004074(actor->hit_vtx_array);
     }
-    if (actor->hit_box_array != 0) {
-        func_10004074((void *)actor->hit_box_array);
+    if (actor->hit_box_array != NULL) {
+        func_10004074(actor->hit_box_array);
     }
-    if (actor->hit_ylimit_array != 0) {
-        func_10004074((void *)actor->hit_ylimit_array);
+    if (actor->hit_ylimit_array != NULL) {
+        func_10004074(actor->hit_ylimit_array);
     }
     if (actor->prevBones != NULL) {
         func_10004074(actor->prevBones);
@@ -4783,10 +4773,6 @@ void func_150619A8(void) {
     }
 }
 
-typedef struct Game83300Step4 {
-    u8 b[4];
-} Game83300Step4;
-extern Game83300Step4 D_800860F0;
 
 /* Per-frame texture/morph animations of actor types that have them (once per type for most). */
 void func_15061B4C(void) {
@@ -4843,12 +4829,12 @@ void func_15061B4C(void) {
         } else if ((id == 0x3A) && (done[4] == 0)) {
             f32 weights[4];
             s32 j;
-            Game83300Step4 step = D_800860F0;
+            u8 step[4] = { 4, 6, 4, 5 };
 
             if (movement_obj[i].ob_matrix_ptr != NULL) {
                 for (j = 0; j < 4; j++) {
                     weights[j] = (func_150489B0(D_800CC298.unkB[j]) + 1.0f) * 0.5f;
-                    D_800CC298.unkB[j] += step.b[j];
+                    D_800CC298.unkB[j] += step[j];
                 }
                 func_1501B660(&movement_obj[i], weights, 1);
                 done[4] = 1;
@@ -5060,7 +5046,7 @@ void func_150627D4(Actor *actor) {
 /* Swaps two actor slots (b becomes the player with a camera), fixing up indices and carry links. */
 void func_15062800(Actor *a, Actor *b) {
     s32 idx0; // matching: idx0, cam and pad are dead, but keep the frame layout
-    s32 cam;
+    Camera *cam;
     Actor swap;
     SpawnRecord *pad;
     s32 i;
@@ -5071,7 +5057,7 @@ void func_15062800(Actor *a, Actor *b) {
     bcopy(a, b, sizeof(Actor));
     bcopy(&swap, a, sizeof(Actor));
     idx0 = OBJ_INDEX(a);
-    cam = (s32)&camera_global_Cameras[OBJ_INDEX(b)];
+    cam = &camera_global_Cameras[OBJ_INDEX(b)];
     b->playernumber = OBJ_INDEX(b);
     b->unique_id = OBJ_INDEX(b) + 1;
     b->listpos = OBJ_INDEX(b);
@@ -5296,7 +5282,7 @@ void func_15063168(Actor *actor) {
     s32 self;
     ActorCtl *movement;
 
-    self = ((s32)actor - (s32)movement_obj) / (s32)sizeof(Actor);
+    self = actor - movement_obj;
     for (i = 0; i < D_8008FD8C; i++) {
         if (i == self) {
             continue;
@@ -5344,7 +5330,7 @@ void func_15063254(Actor *actor, s32 type, s32 interaction_state, f32 scale) {
     unk40 = actor->theta;
     unkC4 = actor->lean_angle;
     angle = actor->angle;
-    index = ((s32)actor - (s32)&movement_obj) / 812;
+    index = actor - movement_obj;
     func_15060F28(actor, 0);
     func_15082A44(spawn, pathIdx, 0, 0, index + 1);
     actor->CameraPtr = camera;

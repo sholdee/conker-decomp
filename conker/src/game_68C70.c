@@ -2,6 +2,29 @@
 #include "functions.h"
 #include "variables.h"
 
+/* The bone chain tables (func_1503B9BC). */
+static const f32 D_800986F0[4] = { 52.26f, 55.3f, 50.0f, 26.0f }; /* link lengths */
+static const f32 D_80098700[4] = { 40.32f, 66.96f, 53.7f, 59.4f }; /* link lengths for objects 0x80 and 0xB0 */
+static const f32 D_80098710[4] = { 0.3f, 0.2f, 0.1f, 0.05f }; /* per-link x/z follow factors */
+static const f32 D_80098720[4] = { 0.225f, 0.15f, 0.75f, 0.8f }; /* per-link y follow factors */
+static const f32 D_80098730[4] = { 45.0f, 45.0f, 45.0f, 45.0f }; /* per-link bend limits, degrees */
+static const f32 D_80098740[5] = { 0.4f, 5.6f, -0.6f, -0.64f, 1.0f }; /* per-joint lift weights */
+static const f32 D_80098754[5] = { -0.4f, 0.0f, 0.0f, 0.0f, 0.0f }; /* per-joint lift weights for animations 0x1B and 0x18B */
+static const f32 D_80098768[5] = { 0.16f, 0.66f, -0.62f, -0.42f, 0.98f }; /* per-joint lift weights for objects 0x80 and 0xB0 */
+/* Animations that pose the bone chain themselves (func_1503B840). */
+static const u16 D_8009877C[90] = {
+    0xCE, 0xE9, 0xB, 0x30, 0xF0, 0xF1, 0xF2, 0x58, 0x59, 0x13, 7, 0x28, 0x24, 0x2C, 0x2D,
+    0xF6, 0x61, 0x70, 0xA2, 0x8C, 0xA3, 0x52, 0xAE, 0xB9, 0xD0, 0xD4, 0xC2, 0x104, 0x107, 0x12F,
+    0x18A, 0x128, 0x19E, 0x1BD, 0x1B6, 0x1B5, 0x1B4, 0x1B3, 0x1BE, 0x1BF, 0x1C0, 0x1C1, 0x1C2, 0x1C3, 0x1C4,
+    0x1C5, 0x1C6, 0x1C7, 0x1C8, 0x1C9, 0x1CA, 0x1B9, 0x1BA, 0x1BB, 0x1BC, 0x1CB, 0x1CC, 0x208, 0x1FE, 0x1FF,
+    0x211, 0x212, 0x218, 0x21D, 0x21F, 0x1F2, 0x1E9, 0x1E6, 0x201, 0x202, 0x1E5, 0x1E7, 0x200, 0x205, 0x1CD,
+    0x1CE, 0x1CF, 0x1D0, 0x321, 0x322, 0x31C, 0x31D, 0x169, 0x2FD, 0x2FF, 0x2FE, 0x2FC, 0x300, 0xF5, 0x27,
+};
+static const u16 D_80098830[3] = { 0xE9, 0x48, 0x4B };
+
+u8 D_800C4000;            /* one bit per object: reset its chain once it has bones again */
+static f32 D_800C4008[3]; /* chain anchor position */
+
 /* Allocates and initialises the bone chain state of an object. */
 void func_1503B7C0(Actor *obj) {
     obj->mv->boneChain = allocate_memory(sizeof(BoneChain), 1, 0, 0);
@@ -9,9 +32,6 @@ void func_1503B7C0(Actor *obj) {
     obj->mv->boneChain->swaySpeed = 30.0f;
     obj->mv->boneChain->swayTimer = func_150ADA20() % 30U;
 }
-
-extern u16 D_8009877C[90];
-extern u16 D_80098830[3];
 
 /*
  * Flags in unk2FB whether the object's current animation (unk84) poses the bone chain itself:
@@ -50,15 +70,6 @@ s32 func_1503B95C(s32 objIndex, BoneChain *chain) {
     return 1;
 }
 
-extern f32 D_800986F0[4]; /* link lengths */
-extern f32 D_80098700[4]; /* link lengths for objects 0x80 and 0xB0 */
-extern f32 D_80098710[4]; /* per-link x/z follow factors */
-extern f32 D_80098720[4]; /* per-link y follow factors */
-extern f32 D_80098730[4]; /* per-link bend limits, degrees */
-extern f32 D_80098740[5]; /* per-joint lift weights */
-extern f32 D_80098754[5]; /* per-joint lift weights for animations 0x1B and 0x18B */
-extern f32 D_80098768[5]; /* per-joint lift weights for objects 0x80 and 0xB0 */
-extern f32 D_800C4008[3]; /* chain anchor position */
 
 #define CLAMP(x, lo, hi) ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
 
@@ -89,7 +100,7 @@ void func_1503B9BC(s32 objIndex) {
     s32 k;
     f32 delta;
     f32 angle;
-    f32 *liftWeights;
+    const f32 *liftWeights;
     f32 yaw;
     s32 facingCamera;
     f32 speed;
@@ -99,7 +110,7 @@ void func_1503B9BC(s32 objIndex) {
     s32 reset;
     f32 bob;
     Camera *cam;
-    f32 *linkLen;
+    const f32 *linkLen;
     BoneChain *chain;
     s32 anim;
     f32 unused2; // matching: unused, keeps the stack frame layout
@@ -319,7 +330,7 @@ void func_1503B9BC(s32 objIndex) {
         }
     }
     if (mode == 2) {
-        blend = (f32)(30 - chain->blendTimer) / 30.0f;
+        blend = (30 - chain->blendTimer) / 30.0f;
     }
     for (i = 1; i < 5; i++) {
         prev = i - 1;

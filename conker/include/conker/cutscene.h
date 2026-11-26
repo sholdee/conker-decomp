@@ -47,7 +47,7 @@ typedef struct {
     /* 0x18 */ SeqSound *userData;
 } SeqVoice;
 
-/* Owner of a func_1519E970 timer (EvNodeData in game_50D80.c): unk30 holds the running timer. */
+/* Owner of a func_1519E970 timer (an attachment handle in game_50D80.c): `timer` holds the running timer. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x30];
     /* 0x30 */ struct EvTimer *timer;

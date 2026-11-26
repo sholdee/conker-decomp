@@ -124,7 +124,7 @@ GameCommand *func_15034420(GameCommand *cmd, s32 index) {
     s16 part;
     s16 value;
 
-    value = (f32)movement_obj[index].taskint[0] * (65536.0f / 3600.0f);
+    value = movement_obj[index].taskint[0] * (65536.0f / 3600.0f);
     part = value >> 4;
     value -= part;
     cmd[0].value = part;

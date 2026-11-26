@@ -39,6 +39,8 @@ void func_150415E0(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noComb
 Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 scaleX, f32 scaleY, s32 len);
 void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth);
 s32 func_15042C40(u8 ch);
+extern u8 D_800CBD4C;  // cleared by func_15015910
+extern u16 D_800CBD4E; // animation clock (high bits pick icon frames)
 
 /* game_70200.c */
 void func_15042D50(void);
@@ -51,6 +53,7 @@ void func_150432CC(Actor *object, s32 yOffset);
 void func_150432FC(s16 x, s16 y);
 void func_1504332C(u8 red, u8 green, u8 blue, u8 alpha);
 Gfx *func_15043384(Gfx *gfx);
+extern Gfx D_800859A0[]; // render setup for 2D text and sprites
 void func_15043A00(MsgRing *ring, u8 *buffer, s32 capacity);
 s32 func_15043A20(u8 *buffer, s32 capacity, s32 offset, u8 *src, s32 size);
 s32 func_15043AC8(u8 *buffer, s32 capacity, s32 offset, u8 *dst, s32 size);
@@ -71,6 +74,19 @@ void func_15080828(s32 arg0);
 void func_15080BE8(void);
 void func_15080C64(void);
 s32 func_15080CF4(void);
+extern u8 D_800D1940;
+extern u8 D_800D1941;
+extern TextResource *D_800D1944; // current text
+extern TextResource *D_800D1948; // header text prepended to it, or NULL
+extern u8 *D_800D194C; // header + page break + current text
+extern TextBox *D_800D1950; // open text box
+extern TextBoxConfig D_800D1958;
+extern f32 D_800D1988;
+extern f32 D_800D198C;
+extern f32 D_800D1990;
+extern u8 D_800D1994;
+extern u8 D_800D1995;
+extern u16 *D_800D1998; // sound effects voiced while the text types out
 
 /* game_197C20.c */
 s32 func_1516A770(u8 *text);

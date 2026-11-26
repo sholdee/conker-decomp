@@ -7,6 +7,8 @@
  * bone) that fly off, spin, fall and bounce. D_800C6660[objIndex] holds the per-object state.
  */
 
+ObjPartsState D_800C6660[25]; /* per object (movement_obj index) */
+
 #define PARTS_STATE_IDLE    0
 #define PARTS_STATE_RUNNING 1
 #define PARTS_STATE_START   2
@@ -17,13 +19,43 @@
 #define PART_SKIP        -2
 
 typedef struct {
-    s32 lo;
-    s32 hi;
+    u32 lo;
+    u32 hi;
 } PartMasks;
 
-extern PartMasks *D_8008446C[];
-extern s8 *D_80084454[];
-extern u8 D_80098914[];   /* part count per kind */
+/* Per kind, per part: the parent part (bone), or PART_PARENT_NONE / PART_SKIP. */
+static const s8 D_80098890[] = {
+    PART_SKIP, PART_SKIP, PART_SKIP, PART_PARENT_NONE, PART_PARENT_NONE, 4, 5, 6, 4, 8, 4, 10, 4,
+    4, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, 3, 18, 19, 20, PART_PARENT_NONE, 22, 23,
+    PART_PARENT_NONE, 25, 26, PART_PARENT_NONE, 28, 29,
+};
+static const s8 D_800988B0[] = {
+    PART_SKIP, PART_PARENT_NONE, PART_PARENT_NONE, 2, 3, PART_PARENT_NONE, 5, 6, PART_PARENT_NONE,
+    8, 9, PART_PARENT_NONE, 11, 12, PART_PARENT_NONE, PART_PARENT_NONE, PART_PARENT_NONE, 16,
+    PART_PARENT_NONE, 18, PART_PARENT_NONE, 20, PART_PARENT_NONE, 22, 23, 24, 25,
+};
+static const s8 D_800988CC[] = {
+    PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP,
+    PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP,
+    PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP,
+    PART_SKIP, PART_PARENT_NONE, 25, 26, 25, 28, 25, 30, PART_SKIP, PART_SKIP, PART_SKIP,
+    PART_SKIP, PART_PARENT_NONE, 36, 37, 36, 39, 36, 41, PART_SKIP, PART_PARENT_NONE,
+};
+/* The part variants of kind 2 (func_1503DE70). */
+static const PartMasks D_800988FC[] = {
+    { 0xFE000000, 0 },
+    { 0, 0x7F0 },
+    { 0, 0x1000 },
+};
+static const u8 D_80098914[] = { 27, 31, 45 }; /* part count per kind */
+
+/* The per-kind tables. */
+static void (*D_80084430[])(ObjPart *part, s32 objIndex) = { func_1503F078, func_1503F0AC, func_1503F0D8 }; /* per-part init */
+static void (*D_8008443C[])(s32 objIndex) = { func_1503EFC4, func_1503F108, func_1503F16C };               /* start */
+static void (*D_80084448[])(s32 objIndex) = { func_1503EEC0, func_1503EEC0, func_1503F2B0 };               /* update */
+static const s8 *D_80084454[] = { D_800988B0, D_80098890, D_800988CC };                                     /* part parents */
+static u8 *D_80084460[] = { NULL, NULL, NULL };                                                             /* per-part flag bits */
+static const PartMasks *D_8008446C[] = { NULL, NULL, D_800988FC };                                         /* part variants */
 
 /* Start breaking `obj` into parts; variant -1 selects every part, otherwise D_8008446C[kind][variant]. */
 void func_1503DE70(Actor *obj, s32 kind, s32 variant) {
@@ -41,16 +73,13 @@ void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi) {
     D_800C6660[objIndex].state = PARTS_STATE_START;
 }
 
-extern void (*D_80084430[])(ObjPart *part, s32 objIndex);  /* per-part init, per kind */
-extern void (*D_8008443C[])(s32 objIndex);                 /* start, per kind */
-extern void (*D_80084448[])(s32 objIndex);                 /* update, per kind */
 
 /* Per-frame driver of an object's parts state machine. */
 void func_1503DF48(s32 objIndex) {
     ObjPartsState *ps;
     ObjPart *parts;
     ObjPart *part;
-    s8 *parents;
+    const s8 *parents;
     s32 state;
     s32 count;
     s32 i;
@@ -119,7 +148,6 @@ s32 func_1503E1F4(s32 partIndex, s32 objIndex) {
     return FALSE;
 }
 
-extern u8 *D_80084460[];
 
 /* Stop an object's parts effect: apply the per-part flag bits, free the parts and clear the busy flag. */
 void func_1503E260(s32 objIndex) {
@@ -139,7 +167,7 @@ void func_1503E260(s32 objIndex) {
         }
         D_800C6660[objIndex].state = PARTS_STATE_IDLE;
         if (D_800C6660[objIndex].parts != NULL) {
-            func_10004074((s32)D_800C6660[objIndex].parts);
+            func_10004074((s32)D_800C6660[objIndex].parts); // matching: the cast keeps the pointer in v1 and copies it to a0; uncast IDO loads it into a0
         }
         D_800C6660[objIndex].parts = NULL;
         movement_obj[objIndex].unk74 &= ~0x80;
@@ -265,7 +293,7 @@ void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *
 /* Rebuild the object's bone matrices from its simulated parts. */
 void func_1503E82C(s32 objIndex) {
     s32 count;
-    s8 *parents;
+    const s8 *parents;
     s32 i;
     s32 parent;
     f32 (*bone)[4];
@@ -432,7 +460,7 @@ void func_1503EEC0(s32 objIndex) {
 
 /* Whether the object's selected parts overlap each non-empty mask word of D_8008446C[kind][variant]. */
 s32 func_1503EF4C(s32 kind, s32 variant, s32 objIndex) {
-    PartMasks *row;
+    const PartMasks *row;
     PartMasks *masks;
 
     row = D_8008446C[kind];

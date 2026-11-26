@@ -1,4 +1,16 @@
 #include <ultra64.h>
+
+#include "structs.h"
+
+/* This file's .bss (0x800D1580-0x800D188F), defined in address order before the headers declare it
+   (see game_79F10.c). */
+s32 D_800D1580; // parameter of the animation event being run (D_800D1874: the same bits as an f32)
+ActorAnim *D_800D1588[187]; // per model id: animation table, after its AnimHeader (see func_1503D660)
+static f32 D_800D1874;
+static f32 D_800D1878;
+static s32 D_800D187C;
+static s32 D_800D1880;
+
 #include "functions.h"
 #include "variables.h"
 
@@ -6,7 +18,6 @@
 void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
                    s32 arg9);
 
-extern s32 D_800D187C;
 
 /* matching: four scalars, not s32[4] (an array gets an 8-aligned, larger frame) */
 struct SoundChoices {
@@ -86,7 +97,116 @@ typedef struct TimedEvent {
 } TimedEvent;
 
 typedef void EventHandler(void);
-extern EventHandler *D_800863FC[];
+
+/* Animation-command handlers, indexed by the command (see func_15071D38). */
+void (*D_80086150[])(s32) = {
+    func_1506EFC8, func_1506F004, NULL, func_1506F02C,
+    func_1506F05C, NULL, func_1506F0C4, func_1506F0F0,
+    func_1506F17C, func_1506F1A8, func_1506F524, func_1506F8C0,
+    func_1506F54C, func_15070C18, NULL, func_1506F8F0,
+    func_1506F9C0, func_1506FA90, NULL, func_1506FB60,
+    func_1506FB60, NULL, NULL, func_1506FBE8,
+    func_1506FC50, func_1506FC1C, NULL, func_1506F11C,
+    func_1506F14C, func_1506FC9C, NULL, func_1506F524,
+    func_1506FD30, func_1506FCFC, func_1506FC74, func_1506FDF0,
+    func_1506FE1C, func_1506FE48, func_1506FE74, func_1506FEA0,
+    func_1506FECC, func_1506FEF8, func_1506FF24, func_1506FF50,
+    func_1506FF78, func_1506FFAC, func_1506FFE0, func_15070014,
+    func_1507003C, func_150700B4, func_15070084, func_1506FCC8,
+    func_1506F524, func_150700E4, func_15070114, func_15070144,
+    func_150701C4, NULL, NULL, func_150701F4,
+    func_15070224, func_15070300, func_15070690, func_15070690,
+    func_150706C4, func_150706C4, func_150706F8, func_15070760,
+    func_15070794, func_150707C8, func_150707F8, func_15070830,
+    func_15070860, func_15070898, func_15070CDC, func_15070D00,
+    func_15070D24, func_15071230, func_15071254, NULL,
+    NULL, func_15071278, func_150712AC, func_15071360,
+    func_15071434, func_15071628, func_15071628, func_15071668,
+    func_15071544, func_1507158C, func_150715D4, func_1507161C,
+    func_15071470, func_150714AC, func_150714E8, func_15071690,
+    func_150716EC, func_15071764, func_150717E0, func_15071830,
+    func_15071860, func_15071888, func_150718E4, func_15071998,
+    func_150719CC, func_15071A00, func_15071A34, func_15071A64,
+    func_1506F090, func_15071B18, func_15071D08,
+};
+/* Per-frame state handlers, indexed by the state number of an animation entry (see game_83300.c). */
+void (*D_8008630C[])(void) = {
+    func_1506D950, func_1507F640, func_1506AF74, func_1506AFE0,
+    func_1506B020, func_1506B070, func_1506B078, func_1506D950,
+    func_1506B14C, func_1506B198, func_1506B1E8, func_1506B228,
+    func_1506B268, func_1506B328, func_1506B2BC, func_1506B368,
+    func_15072AF8, func_1506B370, NULL, func_1506B5A4,
+    func_1506B5AC, func_1506B5B4, func_1506B5CC, NULL,
+    func_1506B5E4, func_1506D950, func_1506D950, func_1506D950,
+    NULL, func_1506B3B0, NULL, func_1506B3B8,
+    func_1506B50C, func_1506B520, func_15071ED4, func_15071F14,
+    func_1506B740, func_1506B82C, func_1506B7F4, func_15072918,
+    func_15072968, func_150729D0, func_15072B44, func_15072A14,
+    func_1506B860, func_1506B88C, func_1506B8B4, func_1506B91C,
+    func_1506B984, func_15073C28, func_15073C48, func_1506B944,
+    func_1506B8F4, func_15073F54, func_1506B9AC, func_1506B9C0,
+    func_15072A40, func_15072A7C, func_15072940, func_1506D898,
+};
+/* Timed event handlers, indexed by the event id (see func_1506AD30). */
+static EventHandler *D_800863FC[] = {
+    func_1506D950, func_1506BCA0, func_1506BCC8, func_1506BE2C,
+    func_1506BE84, func_1506BE98, func_1506BEC0, func_1506BEDC,
+    func_1506BF1C, func_1506BF5C, func_1506C32C, func_1506CE6C,
+    func_1506D584, func_1506D570, func_1506EF5C, func_1506D950,
+    func_1506D4EC, func_1506EFB4, func_1506D4F4, func_1506D538,
+    func_15074870, func_1506D950, func_1506D74C, func_1506BE54,
+    func_1507490C, func_1506EBC0, func_1506D934, func_1506D950,
+    func_15155F3C, func_1506D958, func_150748F4, func_1506DA78,
+    func_1506DA94, func_15074980, func_1506DB30, func_15074A44,
+    func_1506DB5C, func_1506DCC0, func_1506DB84, func_1506DBA0,
+    func_1506DC10, func_1506DBD4, func_15073D34, func_1506DCA4,
+    func_1506DCDC, func_1506DCF8, func_15074A6C, func_15074A94,
+    func_1506DD00, func_1506DD6C, func_1506DDB8, func_1506DDC0,
+    func_1506DE04, func_1506E5FC, func_1506EA98, func_1506EA18,
+    func_1506E73C, func_15074B7C, NULL, NULL,
+    func_1506EC50, func_1506ECD0, NULL, func_1506ECF0,
+    NULL, NULL, func_1506ED0C, NULL,
+    func_1506ED4C, func_1506ED68, func_1506ED90, func_1506B4EC,
+    func_1506EDAC, func_1506EE14, func_1506EE38, func_1506EDC8,
+    func_1506E7FC, func_1506E77C, func_1506DE84, func_1506EE60,
+    func_1506E63C, func_1506EED8, func_1506E8D8, func_1506E918,
+    func_1506EA58, func_1506EDF0, func_15071E20, func_15071E3C,
+    func_15071E58, func_15071F80, func_15071D38, func_1506EEF4,
+    func_15071F54, func_15071FB0, func_15071FDC, func_150722F0,
+    func_1507266C, func_15071DC8, func_15071DF4, func_150727AC,
+    func_150727F0, func_15071D78, func_1506D6B4, func_150729B4,
+    func_15072DA0, func_15072DD8, func_15072E38, func_1506C418,
+    func_1506C43C, func_1506E848, func_1506E6BC, func_1506E7BC,
+    func_150721A4, func_15072E7C, func_15072E98, func_15072EC0,
+    func_15072EF4, func_15072F10, func_1506BDE8, func_1506D2E8,
+    func_1507304C, func_15073054, func_15072420, func_1507233C,
+    func_15072360, func_15072388, func_150723AC, func_150723E0,
+    func_15073078, func_150730A4, func_1507342C, func_150730D0,
+    func_150738E8, func_150739A4, func_150739C0, func_15073A28,
+    func_15073A50, func_1506EEAC, func_15073B38, func_15073C50,
+    func_15072740, func_1506E998, func_15073CB8, func_1506E9D8,
+    func_1506E6FC, func_1506E67C, func_1506E958, func_15073CF4,
+    func_15073D74, func_15073DA4, func_1506B82C, func_15073F5C,
+    func_1506DD44, func_15073F78, func_1506E898, func_15073FA0,
+    func_150746F0, func_15074644, func_15074664, func_150747E4,
+    func_15074840, func_1507488C, func_15073E2C, func_15073EA4,
+    func_15073F1C,
+};
+s32 D_80086690 = 0x0FA10CDF; /* not referenced */
+/* Hit-reaction handlers, indexed by AttackReaction.unk8 (see game_83300.c). Declared without a
+   prototype: most take (Actor *self, Actor *other, u8 *result), a few take other arguments. */
+void (*D_80086694[])() = {
+    func_15074BD8, func_15074BEC, func_15194320, func_15074C00,
+    func_15074C80, func_15194394, func_15074DEC, func_15074E04,
+    func_15194588, func_15074E80, func_151945CC, func_15194810,
+    func_15074EE8, func_15074F30, func_15074F48, func_15074FD4,
+    func_151949E0, func_15075050, func_15194BF0, func_15194DA4,
+    func_15194A68, func_15194E54, func_15194B94, func_15194EA8,
+    func_15194F48, func_150F85A0, func_15194D80, func_15195528,
+    func_151942B0, func_150750A4, func_150750C4, func_150FFD2C,
+    func_15195650, func_151942E8, func_15195698, func_15194DC8,
+    func_15195738,
+};
 
 /*
  * Runs every event of the object's event list whose time is <= `time`. Each event stores its
@@ -305,7 +425,7 @@ void func_1506B634(s32 count) {
     ActorCtl *ext;
 
     rand = func_150ADA20();
-    pick = rand % (u32)(u8)count;
+    pick = rand % (u8)count;
     index = pick;
     ext = D_800D154C->mv;
     if (ext->pissed_hangover != 0) {
@@ -408,7 +528,7 @@ void func_1506B9C0(void) {
     func_1507F640();
 }
 
-/* Sound handlers: play sound D_800D1580 / D_800D1582 at the current object (0 stops it). */
+/* Sound handlers: play sound D_800D1580 (its low half) at the current object (0 stops it). */
 void func_1506BA4C(s32 minDistance, s32 maxDistance) {
     if (D_800D1580 == 0) {
         func_100109D0(D_800D154C);
@@ -434,22 +554,22 @@ void func_1506BAD8(s32 minDistance, s32 maxDistance) {
 }
 
 void func_1506BB64(s32 minDistance, s32 maxDistance) {
-    func_10012718(D_800D1582, D_800D154C, 28000, minDistance, maxDistance);
+    func_10012718(D_800D1580, D_800D154C, 28000, minDistance, maxDistance);
 }
 
 void func_1506BBA8(s32 minDistance, s32 maxDistance) {
     if (D_800D154C->CameraPtr == 0) {
-        func_10010154(D_800D1582, D_800D154C, 14000, minDistance, maxDistance);
+        func_10010154(D_800D1580, D_800D154C, 14000, minDistance, maxDistance);
     } else {
-        func_10010154(D_800D1582, D_800D154C, 12000, 500, 2500);
+        func_10010154(D_800D1580, D_800D154C, 12000, 500, 2500);
     }
 }
 
 void func_1506BC24(s32 minDistance, s32 maxDistance) {
     if (D_800D154C->CameraPtr == 0) {
-        func_10010344(D_800D1582, D_800D154C, 14000, minDistance, maxDistance);
+        func_10010344(D_800D1580, D_800D154C, 14000, minDistance, maxDistance);
     } else {
-        func_10010344(D_800D1582, D_800D154C, 12000, 500, 2500);
+        func_10010344(D_800D1580, D_800D154C, 12000, 500, 2500);
     }
 }
 
@@ -674,7 +794,7 @@ void func_1506C43C(void) {
  * 0x10 = lead the target unk222, 0x20 = remember unk222. Returns the new object.
  */
 u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32 kind, f32 minHeight,
-                  f32 scale, s32 pos, s32 flags, s32 arg10) {
+                  f32 scale, f32 *pos, s32 flags, s32 arg10) {
     Actor *obj;
     u16 aimAngle;
     s16 angle;
@@ -709,9 +829,9 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     obj->energy = 1;
     obj->langle = D_800D154C->langle;
     if (pos != 0) {
-        obj->xpos = ((f32 *)pos)[0];
-        obj->ypos = ((f32 *)pos)[1];
-        obj->zpos = ((f32 *)pos)[2];
+        obj->xpos = pos[0];
+        obj->ypos = pos[1];
+        obj->zpos = pos[2];
     } else if (D_800D154C->ob_matrix_ptr == NULL) {
         obj->xpos = D_800D154C->xpos;
         obj->ypos = D_800D154C->ypos + 50.0f;
@@ -889,11 +1009,11 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     }
     switch (kind) {
     case 1:
-        func_1506AC8C(obj, 1, 0);
+        func_1506AC8C(obj, 1, NULL);
         func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
         break;
     case 15:
-        func_1506AC8C(obj, 13, 0);
+        func_1506AC8C(obj, 13, NULL);
         break;
     case 13:
         func_10010154(567, obj, 30000, 500, 2000);
@@ -901,10 +1021,10 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     case 5:
     case 9:
     case 10:
-        func_1506AC8C(obj, 12, 0);
+        func_1506AC8C(obj, 12, NULL);
         break;
     case 0:
-        func_1506AC8C(obj, 8, 0);
+        func_1506AC8C(obj, 8, NULL);
         func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
         break;
     }
@@ -1029,7 +1149,7 @@ void func_1506CE6C(void) {
     }
     func_1505A184((s16)(elevation * 182.04445f), dist, 0.0f, &speed, &yVelocity, &unused);
     yVelocity = -yVelocity;
-    func_1506C460(heading, speed, yVelocity, gravity, 100, kind, 0.0f, scale, (s32)pos, flags, allocExt);
+    func_1506C460(heading, speed, yVelocity, gravity, 100, kind, 0.0f, scale, pos, flags, allocExt);
 }
 
 /* Spawns object D_800D1580 & 0xFF ahead of the current object, with its marker 5000 units out. */
@@ -1118,7 +1238,7 @@ void func_1506D584(void) {
             divisor = 0.01f;
         }
         if (value != 0xFFFF) {
-            value = (u32)(value / divisor);
+            value = value / divisor;
         }
         func_1507E7E4(obj, hi, lo, value, 0);
     }
@@ -1316,7 +1436,7 @@ void func_1506DE84(void) {
         }
         return;
     case 1:
-        if ((u32)(func_150ADA20() & 0xFF) < 0x40U) { // 1 in 4
+        if ((func_150ADA20() & 0xFF) < 0x40U) { // 1 in 4
             func_151875E0(D_800D154C->xpos, D_800D154C->ypos, D_800D154C->zpos,
                           10, 20, 7, 0.03f, 0.02f);
             D_800D1580 = 262;
@@ -1569,7 +1689,7 @@ void func_1506E7FC(void) {
 }
 
 void func_1506E848(void) {
-    if ((func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) && (func_1000F4D8((u16)D_800D1582) == 0)) {
+    if ((func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) && (func_1000F4D8(D_800D1580) == 0)) {
         func_1506BA4C(80, 800);
     }
 }
@@ -2880,7 +3000,7 @@ void func_150721A4(void) {
     u16 mid = D_800D1580 >> 8;
     u16 hi = D_800D1580 >> 16;
 
-    func_1506160C(D_800D154C, (u8)hi, lo, mid, 0);
+    func_1506160C(D_800D154C, hi, lo, mid, 0);
 }
 
 Actor *func_150721E8(Actor *owner) {
@@ -2930,7 +3050,7 @@ void func_15072388(void) {
 }
 
 void func_150723AC(void) {
-    Actor *obj = func_15083E90(D_800D1583);
+    Actor *obj = func_15083E90(D_800D1580);
 
     if (obj != NULL) {
         func_15060F28(obj, 0);
@@ -2938,7 +3058,7 @@ void func_150723AC(void) {
 }
 
 void func_150723E0(void) {
-    Actor *obj = func_15083E90(D_800D1583);
+    Actor *obj = func_15083E90(D_800D1580);
 
     if (obj != NULL && obj->attach_char != 0) {
         func_15060F28(obj, 0);
@@ -3093,7 +3213,7 @@ void func_15072A40(void) {
 void func_15072A7C(void) {
     if (D_800D154C->mv != NULL) {
         D_800D154C->mv->unk1A9++;
-        if ((func_150ADA20() & 7) < (u32)D_800D154C->mv->unk1A9) {
+        if ((func_150ADA20() & 7) < D_800D154C->mv->unk1A9) {
             func_1505E650(D_800D154C, 394, 1.0f, 4.0f, 0.0f, 0.0f, 0);
         }
     }
@@ -3191,12 +3311,6 @@ void func_15072B44(void) {
     }
 }
 
-/* The original TU defined the state-handler table D_8008630C (now asm/data/22AC10.rodata.s)
- * holding this function's address. That data reference makes as1 treat the entry as an
- * indirect-jump target, which changes its delay-slot filling (the jump-table index
- * subtractions are hoisted into earlier delay slots). Game .c.o(.rodata) is discarded at
- * link, so this only restores the assembler's view. */
-static void (*const D_8008630C_entry[])(void) = { func_15072B44 };
 void func_15072DA0(void) {
     D_800D154C->unk2F8 &= 0xFFF8;
     D_800D154C->unk2F8 |= D_800D1580;
@@ -3245,9 +3359,9 @@ void func_15072F10(void) {
     f32 targetY;
     s16 pitch;
 
-    pitch = (s16)(D_800D154C->unk1D1 * 200);
+    pitch = D_800D154C->unk1D1 * 200;
     D_800D154C->mv->gun_before_reload -= 1;
-    func_1505A184((u16)(D_800D154C->langle - D_800D154C->mv->pssd_waist_tilt), 2000.0f, pitch * 0.0054931640625f,
+    func_1505A184(D_800D154C->langle - D_800D154C->mv->pssd_waist_tilt, 2000.0f, pitch * 0.0054931640625f,
                   &targetX, &targetZ, &targetY);
     targetX = targetX * 5000.0f + D_800D154C->xpos;
     targetZ = targetZ * 5000.0f + D_800D154C->zpos;
@@ -3493,7 +3607,7 @@ void func_15073B38(void) {
     low = *param & 0xFFFF;
     (*objp)->mv->ropeSwingForce = low;
     mid = (*param >> 16) & 0xFF;
-    (*objp)->mv->ropeSwingAngle = (u32)mid;
+    (*objp)->mv->ropeSwingAngle = mid;
     (*objp)->mv->ropeSwingTimer = (*param >> 24) & 0xFF;
 }
 
@@ -3506,7 +3620,7 @@ void func_15073C48(void) {
 }
 
 void func_15073C50(void) {
-    D_800D154C->unk224 = (s32)(movement_obj[D_800D154C->unk222].ypos + D_800D1580);
+    D_800D154C->unk224 = movement_obj[D_800D154C->unk222].ypos + D_800D1580;
 }
 
 void func_15073CB8(void) {
@@ -3528,7 +3642,7 @@ void func_15073D34(void) {
 void func_15073D74(void) {
     Actor *obj;
 
-    obj = func_15083E90(D_800D1583);
+    obj = func_15083E90(D_800D1580);
     if (obj != NULL) {
         obj->attach_char = 0;
     }
@@ -3542,15 +3656,15 @@ void func_15073DA4(void) {
     } else {
         kind = 2;
     }
-    func_1506C460(D_800D154C->theta, 150.0f, 0, 0, 100, kind, 60.0f, 0.5f, 0, 0, 1);
+    func_1506C460(D_800D154C->theta, 150.0f, 0, 0, 100, kind, 60.0f, 0.5f, NULL, 0, 1);
 }
 
 void func_15073E2C(void) {
-    func_1506C460(D_800D154C->theta, 80.0f, 0, 0, 100, 11, 40.0f, 0.5f, 0, 14, 1);
+    func_1506C460(D_800D154C->theta, 80.0f, 0, 0, 100, 11, 40.0f, 0.5f, NULL, 14, 1);
 }
 
 void func_15073EA4(void) {
-    func_1506C460(D_800D154C->theta, 60.0f, 0, 0, 100, 12, 40.0f, 0.5f, 0, 14, 1);
+    func_1506C460(D_800D154C->theta, 60.0f, 0, 0, 100, 12, 40.0f, 0.5f, NULL, 14, 1);
 }
 
 void func_15073F1C(void) {
@@ -3653,7 +3767,7 @@ void func_15073FA0(void) {
                 cmd = (D_800D1580 >> 16) & 1;
                 obj->ygrav = 4.0; // matching: double literal
                 player = D_800D154C;
-                speed = ((f32)(0xF0 - player->mv->GrenadeTimer) * 60.0f) / 240.0f;
+                speed = ((0xF0 - player->mv->GrenadeTimer) * 60.0f) / 240.0f;
                 speed += 40.0f;
                 if (cmd) {
                     speed = 0.0f;
@@ -3679,7 +3793,7 @@ void func_15073FA0(void) {
                 }
                 player = D_800D154C;
             }
-            angle = (s16)player->langle;
+            angle = player->langle;
             if (player->mv != NULL) {
                 angle -= player->mv->pssd_waist_tilt;
             }
@@ -3700,7 +3814,7 @@ void func_15073FA0(void) {
                     D_800D2104[obj->listpos][1].y = 980;
                     D_800D2104[obj->listpos][1].z = movement_obj[0].zpos;
                     obj->unique_id = 0xFF - idx;
-                    func_1506AC8C(obj, 0xC, 0);
+                    func_1506AC8C(obj, 0xC, NULL);
                     func_150F16DC(D_800D154C, func_150ADA20() & 1, func_150ADA20() & 3, 0xFF, 1);
                 } else if (arg == 0xA) {
                     state = 0xE;
@@ -3713,7 +3827,7 @@ void func_15073FA0(void) {
                 }
             } else if (player->character_type == 0x9A) {
                 rnd = (func_150ADA20() & 0xFFF) - 0x800;
-                speed = (f32)(s16)(func_150ADA20() % 800U) * 0.01f;
+                speed = (s16)(func_150ADA20() % 800U) * 0.01f;
                 state = 7;
                 func_1505A184(D_800D154C->angle + rnd, 30.0f - speed, 0.0f, &x2, &z2, &y2);
                 obj->xpos -= x2;
@@ -3929,18 +4043,18 @@ void func_15074C00(Actor *self, Actor *other, u8 *result) {
 void func_15074C80(Actor *self, Actor *other) {
     s32 anim;
 
-    if ((u16)self->headEffectState == 17) {
+    if (self->headEffectState == 17) {
         func_151942E8(self, other);
     }
 
-    if ((u16)self->headEffectState == 2 || (u16)self->headEffectState == 18 || (u16)self->headEffectState == 3 || (u16)self->headEffectState == 6) {
+    if (self->headEffectState == 2 || self->headEffectState == 18 || self->headEffectState == 3 || self->headEffectState == 6) {
         if (other->energy == 0) {
-            if ((u16)self->headEffectState == 2) {
+            if (self->headEffectState == 2) {
                 anim = 0x2A;
-            } else if ((u16)self->headEffectState == 18) {
+            } else if (self->headEffectState == 18) {
                 anim = 0x2F;
             } else {
-                if ((u16)self->headEffectState == 3) {
+                if (self->headEffectState == 3) {
                     anim = 0x39;
                 } else {
                     anim = 0x51;
@@ -3952,11 +4066,11 @@ void func_15074C80(Actor *self, Actor *other) {
     }
 
     if (other->type == 0x19) {
-        func_15166118((s32)(256.0f - (func_150484A0(self->yspd, self->speed) * 40.743664f)),
-                      0xC0 - ((s32)self->angle >> 8),
-                      (s32)self->xpos,
-                      (s32)self->ypos,
-                      (s32)self->zpos,
+        func_15166118(256.0f - (func_150484A0(self->yspd, self->speed) * 40.743664f),
+                      0xC0 - (self->angle >> 8),
+                      self->xpos,
+                      self->ypos,
+                      self->zpos,
                       16,
                       20,
                       0,

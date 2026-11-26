@@ -882,7 +882,6 @@ void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *
     }
 }
 
-extern s32 (*D_80086C90[])(Actor *, Actor *, void *);
 
 /* Runs func_151452C4(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter
    is not -1, only for those D_80086C90[filter] accepts). Returns a mask with bit i cleared for each

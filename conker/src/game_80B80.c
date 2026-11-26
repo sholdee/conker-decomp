@@ -415,7 +415,7 @@ void func_150538CC(Actor *obj) {
     obj->unk103 = 1;
 }
 
-void func_150548D8(s32 arg0) {
+void func_150548D8(Actor *obj) {
 }
 
 void func_150548E4(Actor *obj) {
@@ -668,7 +668,7 @@ void func_1505528C(Actor *obj) {
         if ((obj->ygrav != 0.0f) && ((obj->yspd > 0.0f) || (obj->shad > hoverHeight))) {
             obj->vtilt = -func_150484A0(obj->yspd, obj->speed) * 57.29577637f;
         }
-        hit = func_15081574((s32)obj, 40.0f, 10.0f, (s32)&target, 0xF, 0x53);
+        hit = func_15081574(obj, 40.0f, 10.0f, &target, 0xF, 0x53);
         if (hit != 0) {
             func_15055260(obj, target, hit - 1);
             func_15060F28(obj, 1);
