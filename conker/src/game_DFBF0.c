@@ -6,8 +6,12 @@ typedef struct PipeIds {
     s32 id[3];
 } PipeIds;
 
-extern PipeIds D_8009F950;
-extern PipeIds D_8009F95C;
+/* The three exploding pipes: where each is and which way it faces (game_3F820.c reads it too). */
+const PipeSpot D_8009F920[] = {
+    { { 975.0f, 351.0f, 1723.0f }, 0x94 },
+    { { 1005.0f, 351.0f, -1706.0f }, 0xEA },
+    { { -1980.0f, 351.0f, -17.0f }, 0x3F },
+};
 
 /* Explodes pipe `pipe`: fires the four effect spawners at its spot and plays two sounds there. */
 void func_150B2740(u8 pipe, u8 arg1) {
@@ -153,19 +157,17 @@ void func_150B2740(u8 pipe, u8 arg1) {
     argsD.burstRate = 0.3000000119f;
     {
         u8 idBuf[4];
-        PipeIds idsA;
-        PipeIds idsB;
+        const PipeIds idsA = { { 0, 2, 4 } };
+        const PipeIds idsB = { { 1, 3, 5 } };
 
-        idsA = D_8009F950;
-        idsB = D_8009F95C;
         idBuf[0] = idsA.id[pipe];
         func_151494E0((s32)idBuf, 0x17);
         idBuf[0] = idsB.id[pipe];
         func_151494E0((s32)idBuf, 0x17);
     }
     func_150B3F5C(&argsD, &origin, 20);
-    func_10010F88(0xE7, 0x7FFF, 0, 2, 0, (s16)D_8009F920[pipe].pos.x, (s16)D_8009F920[pipe].pos.y, (s16)D_8009F920[pipe].pos.z, 1000, 3000);
-    func_10010F88(0x22, 0x7FFF, 0, 0, 0, (s16)D_8009F920[pipe].pos.x, (s16)D_8009F920[pipe].pos.y, (s16)D_8009F920[pipe].pos.z, 1000, 3000);
+    func_10010F88(0xE7, 0x7FFF, 0, 2, 0, D_8009F920[pipe].pos.x, D_8009F920[pipe].pos.y, D_8009F920[pipe].pos.z, 1000, 3000);
+    func_10010F88(0x22, 0x7FFF, 0, 0, 0, D_8009F920[pipe].pos.x, D_8009F920[pipe].pos.y, D_8009F920[pipe].pos.z, 1000, 3000);
 }
 
 /* Spawns one pipe chunk at (x, y, z), flung out along yaw `arg8` with a random speed. */
@@ -411,7 +413,8 @@ typedef struct PipeKinds {
     s16 kind[3];
 } PipeKinds;
 
-extern PipeKinds D_80088700;
+/* The particle kinds func_150B37C8 picks from. */
+static PipeKinds D_80088700 = { { 15, 16, 17 } };
 
 /* Spawns a random particle and a trail at the actor's current point, at the given height. */
 s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
