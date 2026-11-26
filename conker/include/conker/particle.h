@@ -13,7 +13,6 @@
  *   game_DF2D0.c
  *   game_DF930.c
  *   game_E5E90.c
- *   game_E6A10.c
  *   game_E7380.c
  *   game_E7970.c
  *   game_E7DE0.c
@@ -264,14 +263,6 @@ typedef struct {
     /* 0x128 */ f32 motion[2];
 } AxisParticle;
 
-s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, void *surface);
-s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, f32 z);
-extern Actor *D_80088720;
-extern Vec3f D_80088724;
-extern Actor *D_80088730;
-extern s32 D_80088740;
-
-/* game_E6A10.c */
 /* A live particle of game_169510.c whose motion block is a fall speed (func_150B9560); the update callbacks
  * of D_80089CB8 / D_80089D60 get one. */
 typedef struct {
@@ -297,12 +288,17 @@ typedef struct {
     /* 0xA6 */ s16 unkA6;
 } Obj150B9D8C;
 
+s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, void *surface);
+s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, f32 z);
 s32 func_150B9560(FallGrowParticle *particle);
 s32 func_150B95FC(FallGrowParticle *particle);
 s32 func_150B961C(QuadSprite *sprite);
 s32 func_150B963C(ModelParticle *particle);
 s32 func_150B9D14(Mtx *mtx, ModelParticle *particle);
 void func_150B9D8C(Obj150B9D8C *obj);
+extern Actor *D_80088720;
+extern Vec3f D_80088724;
+extern Actor *D_80088730;
 
 /* game_E7380.c */
 /* Per-behaviour motion block stored right after a particle. */

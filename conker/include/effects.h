@@ -1646,7 +1646,7 @@ typedef struct SpriteDef {
     /* 0x26 */ u8 pad26[2];
 } SpriteDef; /* size 0x28 */
 
-/* matching: a 0x2C stack copy of SpriteDef (game_E6A10.c); the extra word keeps func_150B9D8C's frame layout. */
+/* matching: a 0x2C stack copy of SpriteDef (game_E5E90.c); the extra word keeps func_150B9D8C's frame layout. */
 typedef struct SpriteDef2C {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s16 lifetime;
