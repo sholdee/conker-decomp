@@ -111,6 +111,17 @@ void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f3
                    f32 zUp);
 void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp);
+extern f32 D_800CBD90; // ledge probe results (written by game_D9894.s)
+extern f32 D_800CBD94;
+extern f32 D_800CBD98;
+extern u16 D_800CBDA0[25]; // per movement_obj: 1 + the world object it touches, 0 if none
+extern u8 D_800CBDD2;
+extern u8 D_800CBDD3;
+extern u8 D_800CBDD4;
+extern f32 D_800CBDF4; // ledge heights, -32768.0f if none
+extern f32 D_800CBDF8;
+extern f32 D_800CBDFC;
+extern TriggerNode *D_800CBE00; // timed trigger nodes (func_15044964)
 
 /* game_AE1D0.c */
 s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 arg5);

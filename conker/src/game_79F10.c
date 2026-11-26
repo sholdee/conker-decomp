@@ -52,14 +52,6 @@ void func_1504CA60(Actor *actor) {
     actor->count2 = 1;
 }
 
-
-
-
-extern f32 D_800CBD90;
-extern f32 D_800CBD94;
-extern f32 D_800CBD98;
-extern f32 D_800CBDFC;
-
 // matching: second names for D_800CC280/D_800CC2BC (aliases in undefined_syms.us.txt). As separate
 // symbols IDO neither shares their %hi nor reuses loads across them; a few uses need that.
 extern s32 D_800cc280;

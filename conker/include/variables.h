@@ -347,12 +347,6 @@ extern AimPoint *gAimPoints; // aim points (gAimPointCount of them)
 extern s32 gAimPointCount;
 extern ObjPartsState D_800C6660[];
 
-extern u16 D_800CBDA0[];
-extern u8 D_800CBDD3;
-extern u8 D_800CBDD4;
-extern f32 D_800CBDF4;
-extern f32 D_800CBDF8;
-extern TriggerNode *D_800CBE00; // timed trigger nodes (func_15044964)
 
 extern f32 D_800CC2C0;
 extern f32 D_800CC2C4;
