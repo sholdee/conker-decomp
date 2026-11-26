@@ -1299,8 +1299,6 @@ void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 ar
     return object;
 }
 
-f32 sqrtf(f32);
-
 /* Per-frame update for func_151541B8's objects: grow, fade, move; returns 0 once expired. */
 s32 func_1515452C(Object15132A4C *object) {
     f32 size;

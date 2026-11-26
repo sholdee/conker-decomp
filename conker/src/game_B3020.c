@@ -80,8 +80,6 @@ s32 func_15085BE8(void) {
     return overlap;
 }
 
-extern f32 sqrtf(f32);
-
 /* Returns the layer of the height band containing `y`. */
 u8 func_15085DA8(f32 y) {
     s32 i = 0;

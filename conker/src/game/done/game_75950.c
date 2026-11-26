@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 
-// undo intrinsic
+/* The calls to sqrtf in this file are real calls (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
 #pragma function sqrtf
 
 #define PI 3.1415927410125732f

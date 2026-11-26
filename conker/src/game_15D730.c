@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "libc/string.h"
 
-extern f32 sqrtf(f32);
-
 typedef struct ParticleViewMask {
     s16 unk0;
     s16 views;

@@ -72,8 +72,6 @@ extern f32 D_80098754[5]; /* per-joint lift weights for animations 0x1B and 0x18
 extern f32 D_80098768[5]; /* per-joint lift weights for objects 0x80 and 0xB0 */
 extern f32 D_800C4008[3]; /* chain anchor position */
 
-extern f32 sqrtf(f32);
-
 #define CLAMP(x, lo, hi) ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
 
 /*

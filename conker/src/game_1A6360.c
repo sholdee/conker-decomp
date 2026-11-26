@@ -22,8 +22,6 @@ extern s32 D_800DD440;
 #define RAIN_DROP(i) (*(QuadFx **)(D_800DD440 + (i) * sizeof(QuadFx *)))
 extern s8 D_800DD446;       /* rain state */
 
-extern f32 sqrtf(f32);
-
 /* Resets the rain state. */
 void func_15178EB0(void) {
     D_800DD434 = 0;

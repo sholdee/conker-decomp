@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 sqrtf(f32);
-
 extern s32 D_8008CA64;
 
 /* Object type 0x3A: a swarm centre that steers towards a target and owns a group of members. */

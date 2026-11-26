@@ -286,8 +286,6 @@ s32 func_150D8FAC(PissTrail *trail) {
     return 1;
 }
 
-f32 sqrtf(f32);
-
 /*
  * Walks the trail from newest to oldest point: clamps its total length, ray casts every
  * segment (hits trim the trail and affect the object hit), then scrolls the texture and

@@ -34,7 +34,6 @@ extern PartMasks *D_8008446C[];
 extern s8 *D_80084454[];
 extern u8 D_80098914[];   /* part count per kind */
 
-extern f32 sqrtf(f32);
 extern void func_150A7A48(MtxF a, MtxF b, MtxF out);  /* out = a * b */
 
 /* Start breaking `obj` into parts; variant -1 selects every part, otherwise D_8008446C[kind][variant]. */

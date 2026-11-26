@@ -15,8 +15,7 @@ void func_15049C40(f32 *arg0, f32 *arg1) {
     }
 }
 
-extern f32 sqrtf(f32);
-
+/* The calls to sqrtf in this file are real calls (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
 #pragma function sqrtf
 
 typedef struct { s32 v[3]; } Nxt3;
@@ -31,7 +30,7 @@ void func_15049CB8(MtxF m, f32 *q) {
 
     tr = m[0][0] + m[1][1] + m[2][2] + 1.0f;
     if (tr > 0.01f) {
-        extern f32 sqrtf(f32);
+        extern f32 sqrtf(f32); // matching: a declaration here opens a -g3 scope block (scheduling)
 
         s = sqrtf(tr);
         q[0] = s * 0.5f;

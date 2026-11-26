@@ -4,10 +4,6 @@
 #undef func_1514B8E4
 #include "variables.h"
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-
-
 /*
  * Spawns an emitter object for def with extraSize bytes of user data. lifetime -1 means untimed.
  * The spawn rate is scaled by the emitter's area: the anchor's, or that of a circle of def->radius.

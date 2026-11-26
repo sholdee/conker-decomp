@@ -16,9 +16,9 @@ struct TriggerVolume {
 
 extern s32 (*D_80085E80[])(TriggerNode *);
 extern void (*D_80085E8C[])(void);
-extern f32 sqrtf(f32);
 extern s32 D_800CBD9C;
 
+/* Up to func_15047390, sqrtf is a real call (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
 #pragma function sqrtf
 
 /* Clears D_800CBD9C. */
@@ -1299,6 +1299,7 @@ void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 z
     guMtxF2L(mf, m);
 }
 
+/* From here on, sqrtf is inline (sqrt.s) again. */
 #pragma intrinsic(sqrtf)
 
 /* guLookAtReflectF equivalent: view matrix plus the reflection LookAt for highlights. */
