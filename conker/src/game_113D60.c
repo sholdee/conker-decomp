@@ -26,7 +26,7 @@ typedef struct Game113D60Source {
     u8 padD[3];
 } Game113D60Source;
 
-typedef void (*Game113D60EndCallback)(Vec3f *, s32);
+typedef void (*Game113D60EndCallback)(Vec3f *, Actor *);
 typedef void (*Game113D60StartCallback)(Vec3f *);
 typedef void (*Game113D60MotionCallback)(Vec3f *, Vec3f *, Vec3f *, Game113D60Emission *);
 
@@ -38,7 +38,7 @@ extern Game113D60Source D_800A1190[];
 
 /* Randomly starts an emission of the source effect `sourceIndex` from one of the start
  * points towards `actor`. */
-void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
+void func_150E68B0(Actor *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex) {
     Game113D60Source *source;
     Vec3f end;
     Vec3f start;
@@ -46,7 +46,7 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
     Game113D60Emission emission;
     Game113D60Effect *effect;
 
-    if ((actor != 0) && ((D_800C35EA[0] != 1) || (D_800C35E8[0] != 9))) {
+    if ((actor != NULL) && ((D_800C35EA[0] != 1) || (D_800C35E8[0] != 9))) {
         source = &D_800A1190[sourceIndex];
         if ((func_150ADA68() < source->chance) && (source->start != -1)) {
             if (source->end != -1) {

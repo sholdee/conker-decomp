@@ -853,7 +853,7 @@ typedef struct {
     /* 0x170 */ Game113D60DebrisExtra extra;
 } Game113D60Debris;
 
-void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex);
+void func_150E68B0(Actor *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex);
 void func_150E6B84(Game113D60Effect *effect);
 void func_150E6E34(Vec3f *out);
 void func_150E6ED8(Vec3f *out);
