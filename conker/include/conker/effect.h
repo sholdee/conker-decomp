@@ -938,7 +938,7 @@ s32 func_15146970(s32 kind, Actor *actor);
 void func_15146A98(s32 actor, s32 side, s32 strength);
 void func_15146BB8(s32 actor, s32 side, s32 strength);
 void func_15146BD8(s32 actor, s32 side, s32 strength);
-void func_15146BF8(s32 actor, s32 side, s32 strength, s32 alt);
+void func_15146BF8(s32 actor, s32 side, s32 strength, u8 alt);
 void func_15146D60(s32 actor, s32 side, s32 strength);
 void func_15146E84(s32 actor, s32 side, s32 strength);
 void func_15147040(s32 actor, s32 side, s32 strength);
@@ -963,6 +963,7 @@ void *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 upda
 void *func_15147C4C(void *gfx, EffectObj *obj, s16 arg2);
 void func_15147D1C(EffectObj *obj, s32 arg1, u8 arg2);
 void func_15147D64(s32 arg0, u8 arg1);
+extern const s32 D_800A5760[2]; /* the two effect object types */
 
 /* game/done/game_1765E0.c */
 /* Both return a TimedEffect followed by dataSize bytes of its kind's data (the kind's own type). */

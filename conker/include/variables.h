@@ -177,7 +177,6 @@ extern f32 D_8009F6C0; // 0.01745329238474369f
 extern s32 D_800A4AA0; //?
 extern s32 D_800A5168[4]; // object list indices (game_16DC80)
 extern s32 D_800A5178[3]; // effect-object kinds (game_169510)
-extern s32 D_800A5760[]; // event types passed to func_15169260
 extern s32 D_800A5770[];
 
 // in game_18D770.c
