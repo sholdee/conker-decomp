@@ -29,7 +29,7 @@ typedef struct PathGraph {
 void func_15085B70(s32 id) {
     PathGraph *graph;
 
-    graph = func_1502B5C8(NULL, 2, 25, id);
+    graph = rom_loadPath(NULL, 2, 25, id);
     if (graph == NULL) {
         D_80087290 = 0;
         D_80087294 = 0;
@@ -178,7 +178,7 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoi
     nearest = func_15085DF8(x, y, z, 0, func_15085DA8(y));
     if (nGoals > 0 && nearest != 0xFF) {
         zone = func_15086C70(nearest);
-        if (zone != NULL && func_150A32B4(zone, x, y, z)) {
+        if (zone != NULL && zone_containsPoint(zone, x, y, z)) {
             result = func_15086364(nearest, nGoals, nAvoid, goals, avoid);
         } else {
             node = &D_800D2350[nearest];

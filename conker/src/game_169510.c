@@ -40,20 +40,20 @@ static s32 (*D_80089CA8[])() = { NULL, func_151AB180, func_150C5EFC, func_150C68
 
 /* Particle update (DefParticleHead.updateFn1, updateFn2; 0 = none) and expire callbacks, as for sprites. */
 static s32 (*D_80089CB8[])() = {
-    NULL, func_1513E6E8, func_1518A094, func_150B9560, func_150BA37C, func_1514A4EC, func_1514A594, func_1518EF54,
-    func_1518F058, func_150DB114, func_15197AB4, func_151AC9EC, func_15190F9C, func_15191520, func_151DA368,
+    NULL, func_1513E6E8, func_1518A094, func_150B9560, func_150BA37C, func_1514A4EC, func_1514A594, beam_updateMotionPull,
+    beam_updateMotion, beam_updateQuad, flamethrower_moveJetLine, func_151AC9EC, func_15190F9C, func_15191520, func_151DA368,
     func_150E6230, func_151B118C, func_151B1828, func_1514B87C, func_150CD17C, func_150C308C, func_15101378,
-    func_151C2734, func_150AE35C, func_1513F6E8, func_1513F728, func_151C82D0, func_151B85AC, func_151CEA20,
-    func_150EF38C, func_150F00EC, func_1519C26C, func_1514C258, func_1514C288, func_150E4174, func_151B8CFC,
+    weapon_updateProjectile, func_150AE35C, func_1513F6E8, func_1513F728, sight_updateBeam, weapon_updateBulletParticle, trail_integrateScalarMotion,
+    beam_updateAimed, beam_updateGlow, flamethrower_moveFlameLine, func_1514C258, func_1514C288, func_150E4174, func_151B8CFC,
     func_150F7E20, func_15141928, func_150F3214, func_1519EF04, func_150DEACC, func_15102D90,
 };
 static s32 (*D_80089D60[])() = {
-    NULL, func_150B95FC, func_150BA424, func_1514143C, func_1514A19C, func_1514A380, func_1514A498, func_1518F108,
-    func_1518F15C, func_1518F1A0, func_150DB630, func_15197BBC, func_1518F384, func_15149838, func_15149A94,
+    NULL, func_150B95FC, func_150BA424, func_1514143C, func_1514A19C, func_1514A380, func_1514A498, beam_shrinkMotion,
+    beam_shrinkMotionProgress, func_1518F1A0, beam_updateLinkedQuad, flamethrower_fadeJetLine, func_1518F384, func_15149838, func_15149A94,
     func_15149BF4, func_15149C58, func_151ACA20, func_1519187C, func_151DA6A8, func_151DADA0, func_150E679C,
     func_151AFC08, func_150CBA30, func_150CC638, func_150C2FCC, func_151368A8, func_151B1478, func_1514AF74,
-    func_1514B8B0, func_150CD17C, func_151022AC, func_15141478, func_151415D4, func_1519C4E4, func_1514BE00,
-    func_1514BF7C, func_151BE210, func_150D317C, func_150D4CC4, func_151A6600, func_15141564, func_151BE6CC,
+    func_1514B8B0, func_150CD17C, func_151022AC, func_15141478, func_151415D4, flamethrower_fadeFlameLine, func_1514BE00,
+    func_1514BF7C, func_151BE210, func_150D317C, trail_updateTrailGlow, func_151A6600, func_15141564, func_151BE6CC,
     func_150FD514,
 };
 static s32 (*D_80089E10[])() = { NULL, func_15149EC4, func_1514C2B8 };
@@ -61,10 +61,10 @@ static s32 (*D_80089E10[])() = { NULL, func_15149EC4, func_1514C2B8 };
 /* Vertex functions of a particle (DefParticleHead.vertexFn), see func_1513E83C. The prototype keeps the viewport an
  * s16; most entries take their own view of the particle. */
 static Vtx *(*D_80089E1C[])(DefParticleHead *, s16) = {
-    func_1513E83C, func_151408A4, func_15149FD0, func_1513F114, func_1514A6A0, func_1518E73C, func_1518EB10,
-    func_150DB2D8, func_150DB714, func_15197C10, func_15149D18, func_151AC810, func_1513F4B0, func_1519108C,
-    func_151DAE28, func_150E63A0, func_151B14AC, func_150CD59C, func_151019C4, func_15101F50, func_151C2AD0,
-    func_150AE36C, func_15102EB8, func_1513EE14, func_151C7E98, func_151B863C, func_1519C56C, func_1513FA2C,
+    func_1513E83C, func_151408A4, func_15149FD0, func_1513F114, func_1514A6A0, func_1518E73C, beam_fillMotionVerts,
+    beam_drawQuad, beam_drawLinkedQuad, flamethrower_buildJetLineQuad, func_15149D18, func_151AC810, func_1513F4B0, func_1519108C,
+    func_151DAE28, func_150E63A0, func_151B14AC, func_150CD59C, func_151019C4, func_15101F50, weapon_buildProjectileTail,
+    func_150AE36C, func_15102EB8, func_1513EE14, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, func_1513FA2C,
     func_1513FA70, func_151BE4B8, func_15140190, func_150D2D6C, func_151A6350, func_150F7F58, func_1513EDB4,
     func_1513EDE4, func_150FDBA0, func_150F337C, func_150DEB58,
 };
@@ -85,19 +85,19 @@ Gfx D_80089ED8[] = {
 static void (*D_80089EE8[])(QuadSprite *) = { func_1513C8D4, func_1513C8D4 };
 static void (*D_80089EF0[])(QuadSprite *) = { func_1513C900, func_1513C900 };
 static void (*D_80089EF8[])() = {
-    func_1513CA6C, func_15101090, func_151011E8, func_151411E4, func_1513CA6C, func_1513CA6C, func_151C94D4,
-    func_150EF7B0, func_151BE674, func_150F6420, func_151A6B10, func_150FDCAC, func_1513CA6C,
+    func_1513CA6C, func_15101090, func_151011E8, func_151411E4, func_1513CA6C, func_1513CA6C, sight_freeBeam,
+    beam_destroyAimed, func_151BE674, beam_destroyModelBeam, func_151A6B10, func_150FDCAC, func_1513CA6C,
 };
 static void (*D_80089F2C[])() = {
     func_1513CAA0, func_15101148, func_15101210, func_15141250, func_1513CAA0, func_1513CAA0, func_151C95D8,
-    func_150EF860, func_151BE6A0, func_150F644C, func_151A6B3C, func_150FDCD8, func_1513CAA0,
+    beam_freeAimed, func_151BE6A0, beam_freeModelBeam, func_151A6B3C, func_150FDCD8, func_1513CAA0,
 };
 /* Event handler of a sprite (func_1513CF9C). */
 static void (*D_80089F60[])(s32, s32, u8) = { func_1513CFD0 };
 /* Event handlers of a particle (ParticleDef.type, func_1513DF9C); several take their own view of the particle and
  * of the event data. */
 static void (*D_80089F64[])(DefParticleHead *, s32, u8) = {
-    func_1513E070, func_1513E084, func_15102D50, func_151C86AC, func_151416E8, func_150EF910, func_151BE604,
+    func_1513E070, func_1513E084, func_15102D50, sight_handleBeamMessage, func_151416E8, beam_aimedMessage, func_151BE604,
     func_151BE604, func_151C4AB0, func_150FDB0C, func_150F31D4,
 };
 
@@ -148,7 +148,7 @@ void func_1513C060(QuadSprite *sprite) {
     if (!expired) {
         speed = sprite->def.frameSpeed;
         if (speed != 0) {
-            numFrames = D_80090B60[sprite->def.texture].frameCount;
+            numFrames = gEffectTextures[sprite->def.texture].frameCount;
             lastFrame = (numFrames << 16) - 1;
             sprite->def.frame += speed * D_800BE9E4;
             if (lastFrame < sprite->def.frame) {
@@ -236,8 +236,8 @@ QuadSprite *func_1513C350(void *def, const void *colors, u8 updateFn, u8 expireF
 
     sprite->link.sharedHandle = NULL;
     if (model) {
-        for (i = 0; i <= D_80082FA0; i++) {
-            sprite->link.handles[i] = func_1515D480(model);
+        for (i = 0; i <= gScreenLayout; i++) {
+            sprite->link.handles[i] = light_allocGfxLights(model);
         }
         sprite->link.sharedHandle = func_1515D440();
     }
@@ -344,7 +344,7 @@ void func_1513C92C(QuadSprite *sprite) {
     s32 i;
 
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         if (sprite->link.handles[i]) {
             func_100043B4((void *)(s32)sprite->link.handles[i], 4);
         }
@@ -398,7 +398,7 @@ void func_1513CAD4(DefParticleHead *arg0) {
     s32 i;
 
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         if (arg0->link.handles[i]) {
             func_100043B4((void *)(s32)arg0->link.handles[i], 4);
         }
@@ -505,7 +505,7 @@ Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
         }
         gfx = func_15142B7C(gfx, ((sprite->def.flags & 0x400) ? G_LIGHTING : 0) | geometry | G_ZBUFFER, G_CULL_BOTH);
         if (sprite->def.texture != 0xFF) {
-            gfx = func_15142E24(gfx, &D_80090B60[sprite->def.texture], sprite->def.frame, 2, 0, 0, sprite->def.texture,
+            gfx = func_15142E24(gfx, &gEffectTextures[sprite->def.texture], sprite->def.frame, 2, 0, 0, sprite->def.texture,
                                 0, 0, &needSync, (sprite->def.flags & 0x20000) ? 0x3E : 3);
         }
         gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
@@ -513,7 +513,7 @@ Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
         gfx = func_1513F4E4(gfx, combiner, &needSync);
         gfx = func_15142FBC(gfx,
                             G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
-                                ((sprite->def.texture == 0xFF) ? 0 : (u32)D_800D2C9C /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
+                                ((sprite->def.texture == 0xFF) ? 0 : (u32)gSpriteTlutMode /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
                                 G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[blendMode].cycle1 | D_800A4AC8[blendMode].cycle2, &needSync);
 
@@ -584,7 +584,7 @@ void func_1513CFE4(DefParticleHead *particle) {
     if (!expired) {
         speed = particle->def.frameSpeed;
         if (speed != 0) {
-            numFrames = D_80090B60[particle->def.texture].frameCount;
+            numFrames = gEffectTextures[particle->def.texture].frameCount;
             lastFrame = (numFrames << 16) - 1;
             particle->def.frame += speed * D_800BE9E4;
             if (lastFrame < particle->def.frame) {
@@ -671,8 +671,8 @@ void *func_1513D2F0(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u
 
     particle->link.sharedHandle = NULL;
     if (model) {
-        for (i = 0; i <= D_80082FA0; i++) {
-            particle->link.handles[i] = func_1515D480(model);
+        for (i = 0; i <= gScreenLayout; i++) {
+            particle->link.handles[i] = light_allocGfxLights(model);
         }
         particle->link.sharedHandle = func_1515D440();
     }
@@ -718,7 +718,7 @@ void *func_1513D668(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u
 
 /*
  * Computes the two half-axes of a particle quad rotated by angle. With onSlope the quad lies on the
- * slope func_1510E388 returns (each axis keeps its length); otherwise it lies in the plane of the
+ * slope shadow_getTriSlopes returns (each axis keeps its length); otherwise it lies in the plane of the
  * basis func_15144E80 returns.
  */
 s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface,
@@ -751,7 +751,7 @@ s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, Vec3s **
         sinA = func_151423D8(angle);
         widthSin = width * sinA;
         heightSin = height * sinA;
-        if (func_1510E388(triPtrs, surface->v, &slopeX, &slopeZ) == 0) {
+        if (shadow_getTriSlopes(triPtrs, surface->v, &slopeX, &slopeZ) == 0) {
             return 0;
         }
         {
@@ -905,7 +905,7 @@ Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
             s32 clamp;
 
             clamp = (particle->def.flags & 0x200000) ? 0 : 2;
-            gfx = func_15142E24(gfx, &D_80090B60[particle->def.texture], particle->def.frame, clamp, 0, 0,
+            gfx = func_15142E24(gfx, &gEffectTextures[particle->def.texture], particle->def.frame, clamp, 0, 0,
                                 particle->def.texture, 0, 0, &needSync,
                                 (particle->def.flags & 0x40000000) ? 0x3E : 3);
         }
@@ -915,7 +915,7 @@ Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
         gfx = func_15142FBC(gfx,
                             G_PM_NPRIMITIVE | ((particle->def.flags & 0x20000000) ? G_CYC_2CYCLE : G_CYC_1CYCLE) |
                                 G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
-                                ((particle->def.texture == 0xFF) ? 0 : (u32)D_800D2C9C /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
+                                ((particle->def.texture == 0xFF) ? 0 : (u32)gSpriteTlutMode /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
                                 G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[blendMode].cycle1 | D_800A4AC8[blendMode].cycle2, &needSync);
         gSPVertex(gfx++, vtx, 4, 0);
@@ -1049,7 +1049,7 @@ void func_1513E2A4(void) {
 
 /*
  * Places a sprite's quad (half-size width x height, rotated by angle) around (x, y, z): in the plane of
- * the basis func_15144E80 returns for surface, or with no surface on the slope from func_1510E388.
+ * the basis func_15144E80 returns for surface, or with no surface on the slope from shadow_getTriSlopes.
  */
 s32 func_1513E2AC(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
                   f32 height, u8 angle) {
@@ -1117,7 +1117,7 @@ s32 func_1513E2AC(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f3
         v[3].ob[2] = z - uz - vz;
         return 1;
     }
-    if (func_1510E388(triPtrs, surface->v, &slopeX, &slopeZ) == 0) {
+    if (shadow_getTriSlopes(triPtrs, surface->v, &slopeX, &slopeZ) == 0) {
         return 0;
     }
     heightSin = height * sinA;
@@ -1167,22 +1167,22 @@ s32 func_1513E6E8(DefParticleHead *particle) {
 
     motion = PARTICLE_MOTION(particle);
     if (particle->def.flags & 0x20) {
-        motion->drift.vel.y += motion->drift.gravity * D_800BE9A4;
+        motion->drift.vel.y += motion->drift.gravity * gFrameDelta;
     }
     if (particle->def.flags & 0x40) {
-        particle->def.pos.x += motion->drift.vel.x * D_800BE9A4;
-        particle->def.pos.y += motion->drift.vel.y * D_800BE9A4;
-        particle->def.pos.z += motion->drift.vel.z * D_800BE9A4;
+        particle->def.pos.x += motion->drift.vel.x * gFrameDelta;
+        particle->def.pos.y += motion->drift.vel.y * gFrameDelta;
+        particle->def.pos.z += motion->drift.vel.z * gFrameDelta;
     }
     if (particle->def.flags & 0x80) {
-        particle->def.rot.x += motion->drift.rotVel.x * D_800BE9A4;
-        particle->def.rot.y += motion->drift.rotVel.y * D_800BE9A4;
-        particle->def.rot.z += motion->drift.rotVel.z * D_800BE9A4;
+        particle->def.rot.x += motion->drift.rotVel.x * gFrameDelta;
+        particle->def.rot.y += motion->drift.rotVel.y * gFrameDelta;
+        particle->def.rot.z += motion->drift.rotVel.z * gFrameDelta;
     }
     if (particle->def.flags & 0x100) {
-        particle->def.scale.x += motion->drift.scaleVel.x * D_800BE9A4;
-        particle->def.scale.y += motion->drift.scaleVel.y * D_800BE9A4;
-        particle->def.scale.z += motion->drift.scaleVel.z * D_800BE9A4;
+        particle->def.scale.x += motion->drift.scaleVel.x * gFrameDelta;
+        particle->def.scale.y += motion->drift.scaleVel.y * gFrameDelta;
+        particle->def.scale.z += motion->drift.scaleVel.z * gFrameDelta;
     }
     particle->def.unk45 = 0xFF;
     return 1;
@@ -1425,7 +1425,7 @@ Vtx *func_1513F114(DefParticleHead *particle, s16 viewport) {
         bottom = -(particle->def.scale.y * particle->def.height);
         top = particle->def.height + bottom;
         dist = (((particle->def.rot.x - particle->def.pos.x) * cosDir) -
-                (sinDir * (particle->def.rot.z - particle->def.pos.z))) * D_800BE9A8;
+                (sinDir * (particle->def.rot.z - particle->def.pos.z))) * gFrameDeltaInv;
         sign = -1.0f;
         if (dist < 0.0f) {
             sign = 1.0f;
@@ -1611,8 +1611,8 @@ void func_1513F6C0(QuadSprite *sprite, u8 updateFn, u8 expireFn) {
 s32 func_1513F6E8(DefParticleHead *particle) {
     f32 rate = PARTICLE_MOTION(particle)->grow.rate;
 
-    particle->def.width += rate * D_800BE9A4;
-    particle->def.height += rate * D_800BE9A4;
+    particle->def.width += rate * gFrameDelta;
+    particle->def.height += rate * gFrameDelta;
     return 1;
 }
 
@@ -1637,17 +1637,17 @@ s32 func_1513F728(DefParticleHead *particle) {
         f32 ay;
         f32 az;
 
-        motion->ballistic.vel.y += motion->ballistic.gravity * D_800BE9A4;
-        ax = (motion->ballistic.vel.x - oldVel.x) * D_800BE9A8;
-        ay = (motion->ballistic.vel.y - oldVel.y) * D_800BE9A8;
-        az = (motion->ballistic.vel.z - oldVel.z) * D_800BE9A8;
-        particle->def.pos.x += (oldVel.x + 0.5f * ax * D_800BE9A4) * D_800BE9A4;
-        particle->def.pos.y += (oldVel.y + 0.5f * ay * D_800BE9A4) * D_800BE9A4;
-        particle->def.pos.z += (oldVel.z + 0.5f * az * D_800BE9A4) * D_800BE9A4;
+        motion->ballistic.vel.y += motion->ballistic.gravity * gFrameDelta;
+        ax = (motion->ballistic.vel.x - oldVel.x) * gFrameDeltaInv;
+        ay = (motion->ballistic.vel.y - oldVel.y) * gFrameDeltaInv;
+        az = (motion->ballistic.vel.z - oldVel.z) * gFrameDeltaInv;
+        particle->def.pos.x += (oldVel.x + 0.5f * ax * gFrameDelta) * gFrameDelta;
+        particle->def.pos.y += (oldVel.y + 0.5f * ay * gFrameDelta) * gFrameDelta;
+        particle->def.pos.z += (oldVel.z + 0.5f * az * gFrameDelta) * gFrameDelta;
     }
-    particle->def.rot.x += motion->ballistic.rotVel.x * D_800BE9A4;
-    particle->def.rot.y += motion->ballistic.rotVel.y * D_800BE9A4;
-    particle->def.rot.z += motion->ballistic.rotVel.z * D_800BE9A4;
+    particle->def.rot.x += motion->ballistic.rotVel.x * gFrameDelta;
+    particle->def.rot.y += motion->ballistic.rotVel.y * gFrameDelta;
+    particle->def.rot.z += motion->ballistic.rotVel.z * gFrameDelta;
     return 1;
 }
 
@@ -1782,7 +1782,7 @@ void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip) {
     s32 coord;
 
     if (texture != 0xFF) {
-        tex = &D_80090B60[texture];
+        tex = &gEffectTextures[texture];
         maxS = tex->width - 1;
         maxT = tex->height - 1;
 

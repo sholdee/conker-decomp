@@ -145,10 +145,10 @@ void func_15169040(s32 event, u8 eventType);
 
 extern u64 D_800CBE10[];
 
-/* Append a parameterless GBI command (gDPNoParam) at the display-list write head D_800BE9D0. */
+/* Append a parameterless GBI command (gDPNoParam) at the display-list write head gDisplayListHead. */
 #define GFX_APPEND_NOPARAM(cmd)                 \
 {                                               \
-    Gfx *gfx = D_800BE9D0++;                    \
+    Gfx *gfx = gDisplayListHead++;                    \
     gfx->words.w0 = _SHIFTL(cmd, 24, 8);        \
     gfx->words.w1 = 0;                          \
 }
@@ -159,27 +159,27 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
     Gfx **dlBase;
     s32 used;
 
-    dlBase = D_800BE9C8;
+    dlBase = gDisplayListBuffers;
     capacity = dlBase[1] - dlBase[0];
     D_800BEAD4 = &D_800BEAD8[D_800BE9C0];
     D_800BEAD4->next = 0;
-    used = D_800BE9D0 - dlBase[D_800BE9C0];
+    used = gDisplayListHead - dlBase[D_800BE9C0];
     if ((used < 0) || (used > capacity)) {
-        func_1501A39C();
-        D_800BE9D0 = D_800BE9D8[D_800BE9C0];
+        view_initFrameDisplayLists();
+        gDisplayListHead = D_800BE9D8[D_800BE9C0];
         GFX_APPEND_NOPARAM(G_RDPFULLSYNC);
         GFX_APPEND_NOPARAM(G_ENDDL);
-        used = D_800BE9D0 - dlBase[D_800BE9C0];
+        used = gDisplayListHead - dlBase[D_800BE9C0];
     }
 
     if ((used < 0) || (used > (capacity - 400))) {
-        D_800BE9D0 = dlBase[D_800BE9C0] + (capacity - 400);
+        gDisplayListHead = dlBase[D_800BE9C0] + (capacity - 400);
         GFX_APPEND_NOPARAM(G_RDPFULLSYNC);
         GFX_APPEND_NOPARAM(G_ENDDL);
     }
 
     D_800BEAD4->list.t.data_ptr = (u64 *)dlBase[D_800BE9C0];
-    D_800BEAD4->list.t.data_size = (D_800BE9D0 - dlBase[D_800BE9C0]) * sizeof(Gfx);
+    D_800BEAD4->list.t.data_size = (gDisplayListHead - dlBase[D_800BE9C0]) * sizeof(Gfx);
     func_1501CC3C();
 
     D_800BEAD4->list.t.type = M_GFXTASK;
@@ -205,11 +205,11 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
         D_800BEAD4->flags |= 0x40;
     }
     if (D_800BE617 != 0) {
-        D_800BEAD4->flags |= (D_80082FA0 + 1) << 16;
+        D_800BEAD4->flags |= (gScreenLayout + 1) << 16;
         D_800BE617 = 0;
     }
-    D_800BEAD4->msgQ = &D_800BEA10;
-    D_800BEAD4->msg = &D_800BEA68[D_800BE9C0];
+    D_800BEAD4->msgQ = &gGameMesgQueue;
+    D_800BEAD4->msg = &gTaskDoneMsgs[D_800BE9C0];
     D_800BEAD4->framebuffer = D_8002AAE8[D_800BE9C0];
     osWritebackDCacheAll();
     osSendMesg(&D_8003B1E8, D_800BEAD4, 1);
@@ -262,15 +262,15 @@ void func_1501CC3C(void) {
         ucode += 2;
     }
     if ((ucode != D_80084070) || (altOffset != D_80084074)) {
-        func_10004514(D_80084078[ucode].textStart + (s32)ucode_ROM_START, D_800C1060, D_80084078[ucode].textEnd - D_80084078[ucode].textStart, 1);
+        rom_read(D_80084078[ucode].textStart + (s32)ucode_ROM_START, D_800C1060, D_80084078[ucode].textEnd - D_80084078[ucode].textStart, 1);
         D_800BEB9C = (u64 *)((D_80084078[ucode].textEnd - D_80084078[ucode].textStart) + (u8 *)D_800C1060);
-        func_10004514(D_80084078[ucode].dataStart + (s32)ucode_ROM_START, D_800BEB9C, D_80084078[ucode].dataEnd - D_80084078[ucode].dataStart, 1);
+        rom_read(D_80084078[ucode].dataStart + (s32)ucode_ROM_START, D_800BEB9C, D_80084078[ucode].dataEnd - D_80084078[ucode].dataStart, 1);
         D_80084070 = ucode;
         D_80084074 = altOffset;
         alt = D_80084078 + (ucode + altOffset);
-        func_10004514(alt->textStart + (s32)ucode_ROM_START, D_800BEBB0, alt->textEnd - alt->textStart, 1);
+        rom_read(alt->textStart + (s32)ucode_ROM_START, D_800BEBB0, alt->textEnd - alt->textStart, 1);
         D_800BEAD0 = (u64 *)((alt->textEnd - alt->textStart) + (u8 *)D_800BEBB0);
-        func_10004514(alt->dataStart + (s32)ucode_ROM_START, D_800BEAD0, alt->dataEnd - alt->dataStart, 1);
+        rom_read(alt->dataStart + (s32)ucode_ROM_START, D_800BEAD0, alt->dataEnd - alt->dataStart, 1);
     }
 }
 
@@ -403,7 +403,7 @@ SeqFileEntry *func_1501D1D4(s32 map, s32 cutscene, s32 scene) {
     u32 unused;
     SeqFileEntry *file;
 
-    file = func_1502B6BC(&unused, 0, &size, 3, 6, map, cutscene);
+    file = rom_loadPathTable(&unused, 0, &size, 3, 6, map, cutscene);
     if (file != NULL) {
         D_800C3668[scene] = file;
     } else {
@@ -435,7 +435,7 @@ s32 func_1501D2C4(s32 map, s32 cutscene) {
 static void (*D_800840FC[])(s32, s32, s32, s32) = { NULL, func_15023870 };
 
 /* Start cutscene `cutscene` of map `map` in scene slot `scene`. If another map is loaded, switch
-   maps first (func_1501C730) and leave the request pending in D_800C35C4. Otherwise load the
+   maps first (game_requestLevelChange) and leave the request pending in D_800C35C4. Otherwise load the
    cutscene file, allocate and fill the per-track tables, and run the first frame. */
 void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackArg) {
     SeqFileHeader *hdr;
@@ -451,7 +451,7 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
         D_800C3C94 = callbackArg;
         if (map != level) {
             D_800C35C4 = cutscene + 1;
-            func_1501C730(1, map, 0, 0, 0);
+            game_requestLevelChange(1, map, 0, 0, 0);
             if (D_800C35EA[scene] != 0) {
                 D_800C35C5 = 0;
                 return;
@@ -561,7 +561,7 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
 
 /* Scan the scene's scripts for type-5 events with values 0x1E, 0xE, 0x68 and 0x44 (setting the
    flags D_800C3C99, D_800C3C9C, D_800C35AA, D_800C35A9) and 0x77 (start time D_800C3C8E), and start
-   the screen fade (func_1517EE40) to the D_80084110 colour named by the earliest type-1 value-1 event. */
+   the screen fade (screen_startViewFade) to the D_80084110 colour named by the earliest type-1 value-1 event. */
 void func_1501DAAC(s32 scene) {
     s32 i;
     s32 best;
@@ -615,9 +615,9 @@ void func_1501DAAC(s32 scene) {
                 if ((best == -1) || (score < best)) {
                     best = score;
                     if (found->unk6 == 1) {
-                        func_1517EE40(D_80084110[found->unk5].r, D_80084110[found->unk5].g, D_80084110[found->unk5].b, 0, 1, 0);
+                        screen_startViewFade(D_80084110[found->unk5].r, D_80084110[found->unk5].g, D_80084110[found->unk5].b, 0, 1, 0);
                     } else {
-                        func_1517EE40(D_80084110[found->unk5].r, D_80084110[found->unk5].g, D_80084110[found->unk5].b, 0, 0, 0);
+                        screen_startViewFade(D_80084110[found->unk5].r, D_80084110[found->unk5].g, D_80084110[found->unk5].b, 0, 0, 0);
                     }
                 }
             }
@@ -661,12 +661,12 @@ void func_1501DF04(s32 scene) {
     s32 sceneCopy;
     s32 i;
 
-    if (func_100127D0() != 0) {
+    if (mp3_isPlaying() != 0) {
         func_151F2BA8();
     }
-    obj = func_15072208(movement_obj, 0);
+    obj = event_getOwnedObject(movement_obj, 0);
     if (obj != NULL) {
-        func_15060F28(obj, 0);
+        actor_remove(obj, 0);
     }
     chained = D_800C3C99;
     func_1501DE18(scene);
@@ -680,7 +680,7 @@ void func_1501DF04(s32 scene) {
         }
     }
     if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) {
-        func_1517EE40(0, 0, 0, 0x1E, 0, 0);
+        screen_startViewFade(0, 0, 0, 0x1E, 0, 0);
     }
     for (i = 0; i < 25; i++) {
         if (movement_obj[i].type != 0) {
@@ -754,7 +754,7 @@ void func_1501E1B4(s32 scene) {
         }
         D_800C3C88 = 1;
         D_800C3C89 = 30;
-        func_1517EE40(0, 0, 0, 0x1E, 1, 0);
+        screen_startViewFade(0, 0, 0, 0x1E, 1, 0);
         func_1000E17C();
         if ((func_151F2CDC() == 1) || (func_151F2CDC() == 2)) {
             func_151F2D6C(0, 0x2B02);
@@ -799,7 +799,7 @@ void func_1501E400(s32 scene) {
     D_800C35B8[scene] = D_800C35B0[scene];
     if (D_800C35EA[scene] == 1) {
         func_1501E1B4(scene);
-        if ((scene != 0) || (D_800BEAC0 == 0)) {
+        if ((scene != 0) || (gPaused == 0)) {
             D_800C35B0[scene] += D_800BEA08;
         }
         if ((D_800C35C0[scene] == 0) &&
@@ -862,7 +862,7 @@ void func_1501E73C(s32 scene) {
 
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35F0[scene][i].type == 2) {
-            obj = func_15083E90(D_800C35F0[scene][i].targetId);
+            obj = collision_findObjectById(D_800C35F0[scene][i].targetId);
             if (obj == NULL) {
                 continue;
             }
@@ -909,7 +909,7 @@ void func_1501E81C(s32 skipped, s32 scene) {
         D_800C3648 = 0.0f;
         D_800C364C = 0.0f;
         D_800C3650 = 0.0f;
-        func_1510B32C(0, player->FOVX, player->FOVY, 1.0f);
+        view_recordFovChange(0, player->FOVX, player->FOVY, 1.0f);
         if (D_800C35C2 != 0) {
             s32 savedMap;
             s32 map;
@@ -929,7 +929,7 @@ void func_1501E81C(s32 skipped, s32 scene) {
             return;
         }
         if (D_800C3C8B != 0) {
-            func_1517EE40(0, 0, 0, 0x1E, 0, 0);
+            screen_startViewFade(0, 0, 0, 0x1E, 0, 0);
         }
         D_8008FD84[0] = 0;
         D_800C3670 = 0;
@@ -1573,7 +1573,7 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
 
 /* Apply the scene's evaluated tracks: the camera track (type 1, the one chosen by func_15023264)
    drives the player camera through func_1512D560 message 7, type 3 tracks drive actors, type 2
-   tracks objects (func_1502178C) and type 5 tracks func_1517D5FC. Non-camera tracks go first. */
+   tracks objects (func_1502178C) and type 5 tracks sprite_queuePlayerBillboard. Non-camera tracks go first. */
 void func_15020EC4(s32 scene) {
     s32 track;
     s32 pass;
@@ -1655,7 +1655,7 @@ void func_15020EC4(s32 scene) {
                     } else if (ENT(scene, track)->targetId == 2) {
                         Actor *obj;
 
-                        obj = func_15083E90(ENT(scene, track)->unk3);
+                        obj = collision_findObjectById(ENT(scene, track)->unk3);
                         if (obj == NULL) {
                             continue;
                         }
@@ -1669,7 +1669,7 @@ void func_15020EC4(s32 scene) {
                     } else if (ENT(scene, track)->targetId == 3) {
                         WorldObject *actor3;
 
-                        actor3 = func_151149AC(ENT(scene, track)->unk3);
+                        actor3 = gfx_findObjectById(ENT(scene, track)->unk3);
                         if (actor3 == NULL) {
                             continue;
                         }
@@ -1693,7 +1693,7 @@ void func_15020EC4(s32 scene) {
                         func_1512D560(player, 7, &gCamShot);
                     }
                 } else if (ENT(scene, track)->type == 3) {
-                    actor = func_151149AC(ENT(scene, track)->targetId);
+                    actor = gfx_findObjectById(ENT(scene, track)->targetId);
                     if (actor == NULL) {
                         continue;
                     }
@@ -1725,7 +1725,7 @@ void func_15020EC4(s32 scene) {
                 } else if (ENT(scene, track)->type == 2) {
                     Actor *obj2;
 
-                    obj2 = func_15083E90(ENT(scene, track)->targetId);
+                    obj2 = collision_findObjectById(ENT(scene, track)->targetId);
                     func_1502178C(obj2, scene, track);
                 } else if (ENT(scene, track)->type == 4) {
                     s32 arr[3];
@@ -1736,7 +1736,7 @@ void func_15020EC4(s32 scene) {
                 } else if (ENT(scene, track)->type == 5) {
                     state = ELEM(scene, track);
                     if (state->unk34 >= 1.0f) {
-                        func_1517D5FC(state->x, state->y, state->z, 0, state->unk18, state->unk1C);
+                        sprite_queuePlayerBillboard(state->x, state->y, state->z, 0, state->unk18, state->unk1C);
                     }
                 }
             }
@@ -1776,7 +1776,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
             }
             info = &D_800C35F0[scene][track];
             if (info->type == 2) {
-                obj = func_15083E90(info->targetId);
+                obj = collision_findObjectById(info->targetId);
                 if (obj != NULL && obj == target) {
                     oldPos[0] = obj->xpos;
                     oldPos[1] = obj->ypos;
@@ -1800,7 +1800,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                     obj->unkCC = 0;
                     rescaled = 0;
                     D_800D35DC = (target - movement_obj) + 1;
-                    func_1510E7A4(&obj->floorTriVerts, obj->floorTri.v, &floorY, &obj->unk118, &obj->floorMaterial, &obj->floorType,
+                    collision_findFloorInRange(&obj->floorTriVerts, obj->floorTri.v, &floorY, &obj->unk118, &obj->floorMaterial, &obj->floorType,
                                   obj->xpos, obj->ypos, obj->zpos, obj->ypos, 0, obj,
                                   -10000.0f, target->ypos);
                     ((u8 *)&D_800D35E0)[-4] = 0;
@@ -1826,7 +1826,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                         obj->unk158 = D_800C3958[scene][track].unk1C * 0.009999999776f;
                     }
                     if (rescaled) {
-                        func_15062BDC(obj, obj->scale_xz, obj->scale_y);
+                        actor_setScale(obj, obj->scale_xz, obj->scale_y);
                     }
                     obj->vtilt = D_800C3958[scene][track].unkC;
                     angle = D_800C3958[scene][track].unk10 + 180.0f;
@@ -1840,7 +1840,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                     obj->theta = angle;
                     obj->lean_angle = D_800C3958[scene][track].unk14;
                     D_800C3958[scene][track].unk34 = (D_800C3958[scene][track].unk34 < 0.0f) ? 0.0f : (D_800C3958[scene][track].unk34 > 255.0f) ? 255.0f : D_800C3958[scene][track].unk34;
-                    func_1506160C(obj, 1, D_800C3958[scene][track].unk34, 0, 0);
+                    actor_fadeCommand(obj, 1, D_800C3958[scene][track].unk34, 0, 0);
                     obj->old_xpos = obj->xpos;
                     obj->old_ypos = obj->ypos;
                     obj->old_zpos = obj->zpos;
@@ -1997,7 +1997,7 @@ void func_150222E0(s32 track, s32 scene) {
     if (D_800C35C8[scene][track] != 0) {
         info = &D_800C35F0[scene][track];
         if (info->type == 2) {
-            obj = func_15083E90(info->targetId);
+            obj = collision_findObjectById(info->targetId);
             if (obj != NULL) {
                 obj->eyeCode[0] = 0;
                 obj->eyeCode[1] = 0;
@@ -2015,7 +2015,7 @@ void func_150222E0(s32 track, s32 scene) {
     }
 }
 
-/* Make sure the object bound to the scene's track `track` exists: spawn it from its D_800D20FC
+/* Make sure the object bound to the scene's track `track` exists: spawn it from its gSpawnRecords
    slot if needed and add it to the scene's D_800C3518 list. */
 void func_15022398(s32 track, s32 scene) {
     Actor *obj;
@@ -2025,9 +2025,9 @@ void func_15022398(s32 track, s32 scene) {
     if (D_800C35C8[scene][track] != 0) {
         if (D_800C35F0[scene][track].type == 2) {
             id = D_800C35F0[scene][track].targetId;
-            slot = func_15083E0C(id);
+            slot = collision_findSpawnById(id);
             if (slot != -1) {
-                obj = func_1505EEF4(slot);
+                obj = actor_findOnPath(slot);
                 if (obj != NULL) {
                     if (obj->drawtype == 3) {
                         if (D_800C35F0 != &D_800C35F0[scene]) {
@@ -2040,11 +2040,11 @@ void func_15022398(s32 track, s32 scene) {
                         obj->mvmt_control &= -0x2B;
                     }
                 } else {
-                    if (slot < D_800D2100) {
-                        func_15082A44((void *)((slot * 0x30) + (s32)D_800D20FC), slot, 0, scene, 0); // matching: integer address math
-                        obj = func_1505EEF4(slot);
+                    if (slot < gSpawnRecordCount) {
+                        collision_spawnObject((void *)((slot * 0x30) + (s32)gSpawnRecords), slot, 0, scene, 0); // matching: integer address math
+                        obj = actor_findOnPath(slot);
                         if (obj != NULL) {
-                            func_1505E650(obj, 0, 0.0f, 0.0f, 0.0f, 0.0f, 1);
+                            actor_playAnim(obj, 0, 0.0f, 0.0f, 0.0f, 0.0f, 1);
                             func_1502225C(obj - movement_obj, scene);
                         }
                     }
@@ -2067,7 +2067,7 @@ void func_15022528(s32 scene) {
             continue;
         }
         if (D_800C35F0[scene][track].type == 2) {
-            obj = func_15083E90(D_800C35F0[scene][track].targetId);
+            obj = collision_findObjectById(D_800C35F0[scene][track].targetId);
             if (obj != NULL) {
                 func_1502178C(obj, scene, track);
             }
@@ -2109,7 +2109,7 @@ void func_150226BC(s32 track, s32 scene) {
     if (D_800C35C8[scene][track] != 0) {
         info = &D_800C35F0[scene][track];
         if (info->type == 3) {
-            actor = func_151149AC(info->targetId);
+            actor = gfx_findObjectById(info->targetId);
             if (actor != NULL) {
                 if (actor->inactive == 1) {
                     func_15022640(actor->unique_id, scene);
@@ -2135,7 +2135,7 @@ void func_150227BC(s32 scene) {
 
     count = &D_800C354A[scene];
     for (i = 0; i < *count; i++) {
-        func_151149AC(D_800C3550[scene][i])->inactive = 1;
+        gfx_findObjectById(D_800C3550[scene][i])->inactive = 1;
     }
 }
 
@@ -2152,7 +2152,7 @@ void func_15022848(s32 scene) {
     }
 }
 
-/* Call func_15060F28 on every live object in the scene's D_800C3518 list. */
+/* Call actor_remove on every live object in the scene's D_800C3518 list. */
 void func_150228E4(s32 scene) {
     s32 i;
     s32 count;
@@ -2164,17 +2164,17 @@ void func_150228E4(s32 scene) {
     for (i = 0; i < count; i++) {
         obj = &movement_obj[D_800C3518[scene][i]];
         if (obj->type != 0) {
-            func_15060F28(obj, 0);
+            actor_remove(obj, 0);
             count = *countPtr;
         }
     }
 }
 
-/* Run the D_80086014 handler of an object whose state (its first word) is 0x1B or 4. */
+/* Run the gActorUpdateHandlers handler of an object whose state (its first word) is 0x1B or 4. */
 void func_15022998(Actor *obj) {
     if ((obj->type == 0x1B) || (obj->type == 4)) {
-        if (D_80086014[obj->type] != NULL) {
-            D_80086014[obj->type](obj);
+        if (gActorUpdateHandlers[obj->type] != NULL) {
+            gActorUpdateHandlers[obj->type](obj);
         }
     }
 }
@@ -2262,7 +2262,7 @@ void func_15022BA4(s32 scene) {
             }
             if (D_800C35F0[scene][track].targetId == 0) {
                 Actor *obj;
-                obj = func_15083E90(D_800C35F0[scene][track].unk3);
+                obj = collision_findObjectById(D_800C35F0[scene][track].unk3);
                 if (obj == NULL) {
                     return;
                 }
@@ -2273,7 +2273,7 @@ void func_15022BA4(s32 scene) {
                 WorldObject *obj;
                 // matching: the s8 id goes through the pointer variable before the call
                 obj = (WorldObject *)(s8)D_800C35F0[scene][track].unk3;
-                obj = func_151149AC((s32)obj);
+                obj = gfx_findObjectById((s32)obj);
                 if (obj == NULL) {
                     return;
                 }
@@ -2410,7 +2410,7 @@ void func_150233E4(void) {
     do {
         entry = &D_800C3CA0[i];
         if (entry->active != 0) {
-            func_1516D2E0(entry->handle);
+            text_removeBox(entry->handle);
             entry->handle = 0;
             // matching: the cleared value goes through a local
             zero = 0;
@@ -2420,16 +2420,16 @@ void func_150233E4(void) {
     } while ((SeqSubtitle *)D_800C3D48 != &D_800C3CA0[i]);
 }
 
-/* Release subtitle slot `sub`: close it now if `force`, else let an open one finish (func_1516D328). */
+/* Release subtitle slot `sub`: close it now if `force`, else let an open one finish (text_closeBoxSkipPages). */
 void func_15023440(SeqSubtitle *sub, s32 force) {
     SeqSubtitle *entry;
 
     entry = sub;
     if (force != 0) {
-        func_1516D2E0(entry->handle);
+        text_removeBox(entry->handle);
         entry->handle = 0;
     } else if (entry->isOpen != 0) {
-        func_1516D328(entry->handle);
+        text_closeBoxSkipPages(entry->handle);
     } else {
         entry->handle = 0;
     }
@@ -2485,7 +2485,7 @@ s32 func_150235DC(s32 scene) {
 
     movement_obj[0].task_attrib &= ~0x200;
     if (D_800C35AA == 0) {
-        obj = func_15083E90(1);
+        obj = collision_findObjectById(1);
         if (obj != NULL) {
             dc_glbl_CharNum = obj - movement_obj;
             ctl = obj->mv;
@@ -2520,7 +2520,7 @@ s32 func_150235DC(s32 scene) {
             obj->nojump = 0;
             obj->stunned = 0;
             obj->shad = obj->ypos - obj->floorY;
-            D_800D154C = obj;
+            gCurrentActor = obj;
             func_1507F640();
             obj->mv->door_walkf_time = 0;
             obj->unk287 = 0;
@@ -2537,7 +2537,7 @@ s32 func_150235DC(s32 scene) {
     }
 }
 
-/* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to func_1504A730): run
+/* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to actor_updateAll): run
    each live object's handler and apply the track of objects bound to one. */
 void func_1502378C(void) {
     s32 bound;
@@ -2549,7 +2549,7 @@ void func_1502378C(void) {
     obj = movement_obj;
     i = 0;
     if (D_800C3654[0] != 0) {
-        func_1504A730();
+        actor_updateAll();
         return;
     }
     // matching: 1 and 25 live in registers; the no-op `^ 0` and `& 0xFFFFFFFF` and the empty
@@ -2571,5 +2571,5 @@ void func_1502378C(void) {
         i++;
     }
 
-    func_15061B4C();
+    actor_updateTypeAnims();
 }

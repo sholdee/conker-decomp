@@ -35,7 +35,7 @@ f32 func_15117518(WorldObject *obj, f32 angle) {
     if (angle != target || velocity != 0.0f) {
         soundIndex = obj->moveData.word >> 10;
         if (velocity == 0.0f && soundIndex != 0 && D_80089260[soundIndex].open != 0) {
-            func_15114D24(obj, D_80089260[soundIndex].open, 24000, 200, 2500, 0);
+            gfx_playObjectSound(obj, D_80089260[soundIndex].open, 24000, 200, 2500, 0);
         }
         before = func_15048A70(angle, target);
         angle += velocity * D_800BE9E4;

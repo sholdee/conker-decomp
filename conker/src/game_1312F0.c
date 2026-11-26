@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "variables.h"
 
-// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
+// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game/Sight/SightBeam/sightbeam.c were
 // compiled with a different view of it.
 void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
@@ -25,9 +25,9 @@ void func_15103E40(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u
     top.x = pos->x;
     top.y = pos->y + 100.0f;
     top.z = pos->z;
-    func_1504715C(&hit, obj);
+    collision_initHitFromObject(&hit, obj);
 
-    if (func_15046C80(&top, 0, pos->y - 100.0f, &hit) && (hit.flags & 1)) {
+    if (collision_probeFloorSurfABSet0Cached(&top, 0, pos->y - 100.0f, &hit) && (hit.flags & 1)) {
         impact.x = top.x;
         hitGround = TRUE;
         impact.y = hit.height;

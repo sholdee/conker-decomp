@@ -411,7 +411,7 @@ s32 func_15159370(Actor *chr, u8 *mode) {
     s32 ret;
 
     ret = 0;
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         *mode = 0;
         ret = 1;
     }
@@ -527,7 +527,7 @@ typedef struct {
     /* 0x14 */ f32 swayX;
     /* 0x18 */ f32 swayZ;
     /* 0x1C */ f32 damping;
-    /* 0x20 */ f32 groundHeight; /* GROUND_UNKNOWN: query func_15046C00 each frame */
+    /* 0x20 */ f32 groundHeight; /* GROUND_UNKNOWN: query collision_probeCeilingSurfABSet0Cached each frame */
 } ParticleDriftMotion;
 
 #define GROUND_UNKNOWN -99999.8984375f
@@ -564,7 +564,7 @@ u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
             if (func_1514672C(&pos) == 0) {
                 return 0;
             }
-            found = func_15046C00(&pos, 0, particle->head.desc.pos.y, &particle->head.floor);
+            found = collision_probeCeilingSurfABSet0Cached(&pos, 0, particle->head.desc.pos.y, &particle->head.floor);
             if (found != 0) {
                 pos.y = particle->head.floor.height;
                 if (particle->head.floor.source == 3) {
@@ -730,7 +730,7 @@ void func_15159C08(DiskEmitterObject *obj) {
 
     emitter = &obj->emitter;
     if (func_151454BC(D_800BE9E8, 3000.0f, &emitter->position)) {
-        emitter->pending += (emitter->rate + (func_150ADA68() * emitter->rateRandom)) * D_800BE9A4;
+        emitter->pending += (emitter->rate + (func_150ADA68() * emitter->rateRandom)) * gFrameDelta;
         if (emitter->pending > 1.0f) {
             ParticleDesc6C spawn;
             OscillateMotion oscillate;
@@ -843,7 +843,7 @@ s32 func_1515A11C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     particle->head.desc.height = osc->baseSize + (osc->heightWobble * sin1);
     if ((osc && osc) && osc) { // matching: these dead tests of osc steer IDO's schedule of the angle update
     }
-    osc->angle += osc->angleSpeed * D_800BE9A4;
+    osc->angle += osc->angleSpeed * gFrameDelta;
     osc->angle = func_15144B68(osc->angle);
     sin0 = sinf(osc->angle);
     particle->head.desc.offset.x = osc->direction.x * sin0;
@@ -926,7 +926,7 @@ EffectMotionParticle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 d
             hit.flags = 0;
         }
         if (func_1514672C(pos)) {
-            if (func_15046C00(pos, 0, 19500.0f, &hit)) {
+            if (collision_probeCeilingSurfABSet0Cached(pos, 0, 19500.0f, &hit)) {
                 ground = &hit;
                 drift.groundHeight = hit.height;
             } else {
@@ -986,7 +986,7 @@ u8 func_1515A78C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
         if (func_1514672C(&pos) == 0) {
             return 0;
         }
-        if (func_15046C00(&pos, 0, particle->head.desc.pos.y, &particle->head.floor) != 0) {
+        if (collision_probeCeilingSurfABSet0Cached(&pos, 0, particle->head.desc.pos.y, &particle->head.floor) != 0) {
             pos.y = particle->head.floor.height;
             alive = 0;
         }
@@ -1045,7 +1045,7 @@ typedef struct {
     /* 0x04 */ EmitterSettings settings;
 } SpawnerData;
 
-/* Spawner object created by func_151A8B20 (func_1515A974). */
+/* Spawner object created by beam_newAreaEmitter (func_1515A974). */
 struct Spawner {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterState state;
@@ -1093,7 +1093,7 @@ void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
         info.spawn = 2;
         data.types = D_800A636C[variant].data.types;
         data.settings = D_800A636C[variant].data.settings;
-        spawner = (Spawner *)func_151A8B20(&info, -1, sizeof(SpawnerData), 0xFF, 0); /* an Emitter with SpawnerData */
+        spawner = (Spawner *)beam_newAreaEmitter(&info, -1, sizeof(SpawnerData), 0xFF, 0); /* an Emitter with SpawnerData */
         if (spawner != NULL) {
             memcpy(&spawner->data, &data, sizeof(SpawnerData));
         }
@@ -1137,7 +1137,7 @@ void func_1515AB88(RiseEmitterObject *obj) {
     RiseEmitter *emitter;
 
     emitter = &obj->emitter;
-    emitter->pending += (emitter->settings.rate + (func_150ADA68() * emitter->settings.rateRandom)) * D_800BE9A4;
+    emitter->pending += (emitter->settings.rate + (func_150ADA68() * emitter->settings.rateRandom)) * gFrameDelta;
     if (emitter->pending > 1.0f) {
         ParticleDesc spawn;
         RiseMotion rise;

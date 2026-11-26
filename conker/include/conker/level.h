@@ -116,7 +116,7 @@ typedef struct {
 } ObjectSpawn; // size 0x44
 
 /* game_2DDF0.c */
-/* (s32 arg0); declared without a prototype: game_2D4B0.c calls it without the (unused) argument */
+/* (s32 arg0); declared without a prototype: game/Audio/LevelMusic/levelmusic.c calls it without the (unused) argument */
 void func_15000940();
 
 /* game_305D0.c */
@@ -335,7 +335,7 @@ s32 func_150156F4(TriggerZone *obj);
 extern const s32 D_8009658C[5]; // defined after func_150130B4, which reads them: their .rodata follows its const local
 extern const s32 D_800965A0[5];
 extern const s32 D_800965B4[8];
-extern u16 *D_800BE570; // RGBA16 screen copy, D_800BE620 x D_800BE624 (game_203340)
+extern u16 *D_800BE570; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game/Screen/FrameImage/frameimage)
 extern u8 D_800BE574;
 extern u8 D_800BE575;
 
@@ -345,7 +345,7 @@ void func_150169A0(s32 levelId);
 void func_15017114(s32 levelId);
 extern u8 D_800BE590;      // number of distinct spawn model types in D_800BE598
 extern u16 D_800BE598[8];  // the distinct spawn model types (< 0xBB) of the level
-extern s32 *D_800BE5A8[8]; // per spawn model type: data loaded by func_1502B7F0
+extern s32 *D_800BE5A8[8]; // per spawn model type: data loaded by rom_loadPathTo
 
 /* game_FDD70.c */
 void func_150D08C0(Camera *camera);

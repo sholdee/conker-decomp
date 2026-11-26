@@ -28,8 +28,8 @@ Gfx *func_15172F70(Gfx *arg0) {
         WGFX15172F70(arg0++, 0xE3000F00, 0);
         WGFX15172F70(arg0++, 0xFCFFFFFF, 0xFFFDF6FB);
         WGFX15172F70(arg0++,
-            0xF6000000 | ((((u32)D_800BE628->bottom) & 0x3FF) << 2) | ((((u32)D_800BE628->right) & 0x3FF) << 14),
-            ((((u32)D_800BE628->top) & 0x3FF) << 2) | ((((u32)D_800BE628->left) & 0x3FF) << 14));
+            0xF6000000 | ((((u32)gViews->bottom) & 0x3FF) << 2) | ((((u32)gViews->right) & 0x3FF) << 14),
+            ((((u32)gViews->top) & 0x3FF) << 2) | ((((u32)gViews->left) & 0x3FF) << 14));
     }
 
     return arg0;

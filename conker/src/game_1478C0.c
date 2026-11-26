@@ -144,11 +144,11 @@ void func_1511A494(WorldObject *obj, s32 *texIndices, s32 *animState) {
         } else {
             flags = 0x3E;
         }
-        addr = func_1510D0EC(value, &size, flags, 0);
+        addr = texture_getAddress(value, &size, flags, 0);
         if (second != 0) {
             paletteAddr = size + addr - 0x20;
         }
-        func_1510D874(obj, addr, paletteAddr, 4, 5);
+        texture_addBinding(obj, addr, paletteAddr, 4, 5);
         *animState = (direction << 16) | tick;
     }
 }

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/particle.h describes it. */
-u8 D_800E0A10; /* the effect kind of the current context (func_151D8E20); game_3B920 sets it */
+u8 D_800E0A10; /* the effect kind of the current context (func_151D8E20); game/Game/LevelInit/levelinit sets it */
 
 // functions.h declares these three with other return types; this file uses the s32 versions below.
 #include "functions.h"
@@ -20,7 +20,7 @@ static const u8 D_800AB320[13] = { 119, 118, 29, 147, 91, 45, 103, 149, 119, 159
 static const u8 D_800AB330[13] = { 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 };
 
 /*
- * Per effect kind (0..12): texture id pickers. No header declares D_8008FCD0: game_11C2B0 was compiled
+ * Per effect kind (0..12): texture id pickers. No header declares D_8008FCD0: game/Beam/AimedBeam/aimedbeam was compiled
  * with a view that passes the kind 12 picker two arguments (u8 slot by prototype), so each file that
  * reads it declares its own view.
  */
@@ -40,9 +40,9 @@ static void (*D_8008FD38[13])(ParticleDesc *) = {
 
 
 
-/* Effect kind for the current context: D_800E0A10, or kind 10 when level is clear and func_150A29C8(0, 0x1C) fails. */
+/* Effect kind for the current context: D_800E0A10, or kind 10 when level is clear and zone_isActorOutsideId(0, 0x1C) fails. */
 s32 func_151D8E20(void) {
-    if ((level == 0) && (func_150A29C8(0, 0x1C) == 0)) {
+    if ((level == 0) && (zone_isActorOutsideId(0, 0x1C) == 0)) {
         return 10;
     }
     return D_800E0A10;
@@ -239,7 +239,7 @@ u8 func_151D9534(SteamParticle *particle, Vec3f *arg1) {
         if (func_1514672C(&point) == 0) {
             return 0;
         }
-        if (func_15046C80(&point, 0,
+        if (collision_probeFloorSurfABSet0Cached(&point, 0,
  particle->head.desc.pos.y, &particle->head.floor) != 0) {
             point.y = particle->head.floor.height + 2.0f;
             if (particle->data.wobble.flags & WOBBLE_FLAG_BOUNCE) {
@@ -530,7 +530,7 @@ s32 func_151DA368(SteamEffect *effect) {
     effect->head.def.width = func_151423D8(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
     effect->head.def.height = func_151423D8(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
 lbl: // matching: ends the basic block so the scaleY store is not moved into the next call's delay slot
-    steam->spawnCredit += (0.15f + func_150ADA68() * 0.1f) * D_800BE9A4;
+    steam->spawnCredit += (0.15f + func_150ADA68() * 0.1f) * gFrameDelta;
     avgScale = (effect->head.def.width + effect->head.def.height) * 0.5f;
     if (steam->spawnCredit > 1.0f) {
         radius = avgScale * 500.0f;
@@ -652,7 +652,7 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
             c = 0;
             d = 0;
         }
-        splash = func_15147DA0(&spawn, &motion, 16, 1, 0, 0, a, b, 0, c, d, &style, ground, arg10, arg11);
+        splash = trail_createMotionTrail(&spawn, &motion, 16, 1, 0, 0, a, b, 0, c, d, &style, ground, arg10, arg11);
     }
     if (splash != NULL) {
         memcpy(&splash->state->burst, &burst, sizeof(burst));

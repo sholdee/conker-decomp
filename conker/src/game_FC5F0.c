@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c and game/Effects/Blood/blood.c
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
 SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
@@ -43,10 +43,10 @@ void func_150CF140(ActorEmitter *emitter) {
         return;
     }
     if (actor->ob_matrix_ptr != NULL) {
-        state->spawnCredit += (0.06f + (func_150ADA68() * 0.0704f)) * D_800BE9A4;
-        func_1515C244(actor, &center, &extentA, &extentB);
+        state->spawnCredit += (0.06f + (func_150ADA68() * 0.0704f)) * gFrameDelta;
+        sprite_getActorBodyBounds(actor, &center, &extentA, &extentB);
         radius = (extentA + extentB) * 0.5f;
-        func_1504715C(&ground, actor);
+        collision_initHitFromObject(&ground, actor);
         while (state->spawnCredit > 1.0f) {
             yaw = func_150ADA20() & 0xFF;
             func_15143794(yaw, (func_150ADA20() % 76U) - 64, radius, &pos);

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c and game/Effects/Blood/blood.c
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
 SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
@@ -101,9 +101,9 @@ Vtx *func_151AC810(QuadParticle *particle, s16 view) {
     return result;
 }
 
-/* Grows the quad's width and height by unk4C per second (D_800BE9A4 = frame time). */
+/* Grows the quad's width and height by unk4C per second (gFrameDelta = frame time). */
 s32 func_151AC9EC(QuadParticle *particle) {
-    f32 growth = particle->unk4C * D_800BE9A4;
+    f32 growth = particle->unk4C * gFrameDelta;
 
     particle->width += growth;
     particle->height += growth;

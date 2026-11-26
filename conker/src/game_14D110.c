@@ -11,7 +11,7 @@
 #define DEG2RAD 0.01745329238f
 #define BAM2DEG 0.005493164f /* 360 / 65536: 16-bit binary angle to degrees */
 
-/* Zones whose aim yaw follows the player's facing angle; func_151C9BA0 runs while in one of them. */
+/* Zones whose aim yaw follows the player's facing angle; sight_startPlayerEffects runs while in one of them. */
 #define IS_FACING_ZONE(z)                                                                                  \
     (((z) == 9) || ((z) == 0x38) || ((z) == 0x39) || ((z) == 0x37) || ((z) == 0x3B) || ((z) == 0x15) || \
      ((z) == 0x26) || ((z) == 0x3A))
@@ -38,7 +38,7 @@ void func_1511FC60(Camera *camera) {
     } else if (aim->unk4D) {
         if (IS_FACING_ZONE(camera->CharContext)) {
             aim->targetYaw = ((camera->CharPtr->langle - camera->mv->pssd_waist_tilt) + 0xC000) * BAM2DEG;
-        } else if ((D_800D1940 == 0x42) && (zone == 0x1A)) {
+        } else if ((gContextTextId == 0x42) && (zone == 0x1A)) {
             aim->targetYaw = camera->CharPtr->theta;
         } else {
             aim->targetYaw = camera->CharPtr->theta - 180.0f;
@@ -50,7 +50,7 @@ void func_1511FC60(Camera *camera) {
     if (IS_FACING_ZONE(zone)) {
         aim->targetPitch = 0.0f;
         aim->pitch = 0.0f;
-        func_151C9BA0(camera, zone);
+        sight_startPlayerEffects(camera, zone);
         camera->AimTargetOn = TRUE;
     } else if ((zone == 2) || (zone == 0x13)) {
         aim->targetPitch = 0.0f;
@@ -130,8 +130,8 @@ void func_15120158(Camera *camera) {
 
     aim = &camera->aim;
     zone = camera->CharContext;
-    inMap42Zone1A = (D_800D1940 == 0x42) && (zone == 0x1A);
-    func_1510E7A4(0, 0, &probeY, &camera->waterY, 0, 0,
+    inMap42Zone1A = (gContextTextId == 0x42) && (zone == 0x1A);
+    collision_findFloorInRange(0, 0, &probeY, &camera->waterY, 0, 0,
                  camera->eye.x, camera->eye.y, camera->eye.z, camera->eye.y, 0, 0, -10000.0f, camera->eye.y);
     camera->mv->AimState = camera->DoingAim;
     camera->TripodMagnitude = sqrtf((camera->eye.x - camera->target.x) * (camera->eye.x - camera->target.x) +
@@ -166,7 +166,7 @@ void func_15120158(Camera *camera) {
         }
     }
     camera->unk35C = camera->unk354 = camera->target.y;
-    func_1506160C(camera->CharPtr, 2, 0xFF, 0x20, camera->CNumber);
+    actor_fadeCommand(camera->CharPtr, 2, 0xFF, 0x20, camera->CNumber);
     dist = aim->distance;
     if (camera->DoingAim == 1) {
         s32 horizontal;
@@ -252,11 +252,11 @@ void func_15120158(Camera *camera) {
         }
         if (IS_FACING_ZONE(zone)) {
             if (!camera->AimTargetOn) {
-                func_151C9BA0(camera, zone);
+                sight_startPlayerEffects(camera, zone);
                 camera->AimTargetOn = TRUE;
             }
         } else if (camera->AimTargetOn) {
-            func_151C9ED4(camera);
+            sight_resetPlayerEffects(camera);
             camera->AimTargetOn = FALSE;
         }
         if (zone != 0xD) {
@@ -317,7 +317,7 @@ void func_15120158(Camera *camera) {
             } else {
                 aim->targetPitch = (aim->targetPitch < -45.0f) ? -45.0f : ((aim->targetPitch > 80.0f) ? 80.0f : aim->targetPitch);
             }
-            if ((D_800BE616 == 0) && IS_FACING_ZONE(zone)) {
+            if ((gIsMultiplayer == 0) && IS_FACING_ZONE(zone)) {
                 aim->targetPitch = (aim->targetPitch < -20.0f) ? -20.0f : aim->targetPitch;
             }
             if (camera->Snap) {
@@ -552,9 +552,9 @@ void func_151218C4(Camera *camera) {
     camera->YOffsetTget = 0.0f;
     camera->sideOffsetTarget = 0.0f;
     camera->XZOffsetTget = 0.0f;
-    func_1506160C(camera->CharPtr, 2, 0xFF, 0x20, camera->CNumber);
+    actor_fadeCommand(camera->CharPtr, 2, 0xFF, 0x20, camera->CNumber);
     if (camera->AimTargetOn) {
-        func_151C9ED4(camera);
+        sight_resetPlayerEffects(camera);
         camera->AimTargetOn = FALSE;
     }
 }

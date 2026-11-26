@@ -90,35 +90,35 @@ static ObjType D_8008B4A8[OBJ_TYPE_COUNT] = {
     /*   0 */ { func_15169824, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*   1 */ { func_15168A2C, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*   2 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /*   3 */ { func_15167B44, NULL, func_15167C58, NULL, D_800873D0, NULL, NULL, NULL, NULL, D_80087408, NULL, NULL, 1 },
+    /*   3 */ { func_15167B44, NULL, func_15167C58, NULL, gSpriteRenderDl, NULL, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*   4 */ { func_15166204, NULL, func_15166268, NULL, D_8008B3A0, func_151668B8, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*   5 */ { func_15167E0C, NULL, func_15168118, NULL, D_800873D0, func_15169668, NULL, NULL, NULL, D_80087408, NULL, NULL, 1 },
+    /*   5 */ { func_15167E0C, NULL, func_15168118, NULL, gSpriteRenderDl, func_15169668, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*   6 */ { func_15187978, NULL, func_15187A98, NULL, D_8008D4F0, NULL, NULL, NULL, NULL, D_8008D520, NULL, NULL, 1 },
     /*   7 */ { func_151B9CB0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
     /*   8 */ { func_1517A1EC, NULL, func_1517A3A0, NULL, D_8008CE20, func_1517A958, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*   9 */ { func_1517A84C, NULL, func_1517A3A0, NULL, D_8008CE20, func_1517A958, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  10 */ { func_15175958, NULL, func_15176DF0, NULL, NULL, func_15183BA4, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  11 */ { func_150E1D14, NULL, func_150E28DC, NULL, D_800889E0, NULL, NULL, func_150E2FC0, func_150E2F90, NULL, NULL, NULL, 1 },
-    /*  12 */ { func_1517A1EC, NULL, func_1517A3A0, NULL, D_8008CE40, func_1517A958, NULL, NULL, func_1517AB7C, D_80087408, NULL, NULL, 1 },
+    /*  10 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*  11 */ { beam_updateTracer, NULL, beam_drawTracer, NULL, gTracerRenderSetupDl, NULL, NULL, beam_tracerSwapMessage, func_150E2F90, NULL, NULL, NULL, 1 },
+    /*  12 */ { func_1517A1EC, NULL, func_1517A3A0, NULL, D_8008CE40, func_1517A958, NULL, NULL, func_1517AB7C, gSpriteEndDl, NULL, NULL, 1 },
     /*  13 */ { func_15166B50, NULL, func_15166D68, NULL, D_8008B440, func_15166F6C, NULL, NULL, func_15166FD8, NULL, NULL, NULL, 1 },
     /*  14 */ { func_15168870, NULL, func_150A6860, NULL, D_8008B480, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  15 */ { func_15171FC0, NULL, func_151720C4, NULL, D_8008CC30, NULL, NULL, NULL, NULL, D_8008CC58, NULL, NULL, 0 },
     /*  16 */ { func_15168BAC, NULL, func_15168C4C, NULL, NULL, NULL, NULL, NULL, NULL, D_8008B498, NULL, NULL, 0 },
     /*  17 */ { func_1516DB90, NULL, NULL, NULL, NULL, NULL, func_1516D400, NULL, NULL, NULL, NULL, NULL, 0 },
     /*  18 */ { func_1516D678, NULL, func_1516D738, NULL, D_8008CB70, NULL, NULL, NULL, NULL, D_8008CB90, NULL, NULL, 1 },
-    /*  19 */ { func_1517685C, NULL, func_151770C8, NULL, NULL, func_15183BA4, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  20 */ { func_15175958, NULL, func_15176DF0, NULL, NULL, func_15183BA4, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  21 */ { func_15176B84, NULL, func_15176DF0, NULL, NULL, func_15183BA4, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  22 */ { func_15176B84, NULL, func_15176DF0, NULL, NULL, func_15183BA4, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  23 */ { func_15176B84, NULL, func_15176DF0, NULL, NULL, func_15183BA4, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
-    /*  24 */ { func_15176B84, NULL, func_15176DF0, NULL, NULL, func_15183BA4, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*  19 */ { swarm_updatePercher, NULL, swarm_drawActor, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*  20 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*  21 */ { swarm_updateHoverer, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*  22 */ { swarm_updateHoverer, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*  23 */ { swarm_updateHoverer, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
+    /*  24 */ { swarm_updateHoverer, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  25 */ { func_151321D0, NULL, func_15132B80, func_15132A88, NULL, NULL, NULL, func_15133588, NULL, NULL, func_151323AC, func_151323F8, 1 },
-    /*  26 */ { func_15189A00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
+    /*  26 */ { trail_updateSprayEmitter, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  27 */ { func_1513C060, NULL, func_1513CBF0, NULL, D_80089EB8, NULL, NULL, func_1513CF9C, NULL, D_80089ED8, func_1513C9B0, func_1513C9FC, 1 },
     /*  28 */ { func_1513CFE4, NULL, func_1513DB00, NULL, D_80089EB8, func_151406AC, NULL, func_1513DF9C, NULL, D_80089ED8, func_1513CB58, func_1513CBA4, 1 },
     /*  29 */ { func_1518AA10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  30 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /*  31 */ { func_1518BD60, NULL, NULL, NULL, NULL, NULL, NULL, func_1518C850, NULL, NULL, NULL, NULL, -1 },
+    /*  31 */ { trail_updateEmitter, NULL, NULL, NULL, NULL, NULL, NULL, trail_onEmitterMessage, NULL, NULL, NULL, NULL, -1 },
     /*  32 */ { func_15190898, NULL, NULL, NULL, NULL, NULL, NULL, func_15191980, NULL, NULL, func_15190840, func_1519086C, -1 },
     /*  33 */ { func_1518D6E0, NULL, NULL, NULL, NULL, NULL, NULL, func_1518F49C, NULL, NULL, func_1518E4CC, func_1518E4F8, 0 },
     /*  34 */ { func_15147740, NULL, func_15147C4C, NULL, D_8008A1D0, NULL, NULL, func_15147D1C, NULL, D_8008A1F0, func_151479E0, func_15147A30, 1 },
@@ -132,62 +132,62 @@ static ObjType D_8008B4A8[OBJ_TYPE_COUNT] = {
     /*  42 */ { func_151349D0, NULL, NULL, NULL, NULL, NULL, NULL, func_15134C98, NULL, NULL, NULL, NULL, -1 },
     /*  43 */ { func_151303EC, NULL, func_15130A9C, NULL, D_80089700, NULL, NULL, func_15131C2C, NULL, D_80089730, func_1513177C, func_151317C8, 1 },
     /*  44 */ { func_151563B8, NULL, func_151564F8, NULL, D_8008AD40, NULL, NULL, NULL, NULL, NULL, func_15156FB8, func_15156FE4, 1 },
-    /*  45 */ { func_151A7A90, NULL, func_151A7D6C, NULL, D_8008F910, NULL, NULL, func_151A8A20, NULL, D_8008F930, func_151A8584, func_151A85D4, 1 },
+    /*  45 */ { beam_updateLightning, NULL, beam_drawLightning, NULL, gLightningRenderSetupDl, NULL, NULL, beam_lightningMessage, NULL, gLightningRenderTeardownDl, beam_destroyLightning, beam_freeLightning, 1 },
     /*  46 */ { func_15158D2C, NULL, NULL, NULL, NULL, NULL, NULL, func_15158FA4, NULL, NULL, func_15158CD4, func_15158D00, -1 },
     /*  47 */ { NULL, func_151AD174, func_151AD92C, NULL, NULL, NULL, NULL, func_151AE640, NULL, NULL, NULL, NULL, 1 },
     /*  48 */ { NULL, func_151ACB60, NULL, NULL, NULL, NULL, NULL, func_151ACB94, NULL, NULL, NULL, NULL, -1 },
     /*  49 */ { func_150C8A68, NULL, func_150C8DB8, NULL, D_80088828, NULL, NULL, NULL, NULL, D_80088848, NULL, NULL, 1 },
-    /*  50 */ { func_1515BFA8, NULL, NULL, NULL, NULL, NULL, NULL, func_1515C0B8, NULL, NULL, func_1515BF50, func_1515BF7C, -1 },
+    /*  50 */ { sprite_updateActorTracker, NULL, NULL, NULL, NULL, NULL, NULL, sprite_actorTrackerMessage, NULL, NULL, sprite_destroyActorTracker, sprite_freeActorTracker, -1 },
     /*  51 */ { func_151B3184, NULL, func_151B32C8, NULL, D_8008FB18, NULL, NULL, func_151B3A34, NULL, D_8008FB40, func_151B4C6C, func_151B4C98, 1 },
-    /*  52 */ { func_1515FFEC, NULL, NULL, NULL, NULL, NULL, NULL, func_15160090, NULL, NULL, NULL, NULL, -1 },
-    /*  53 */ { func_151603FC, NULL, NULL, NULL, NULL, NULL, NULL, func_151604A0, NULL, NULL, func_15161804, func_15161860, -1 },
+    /*  52 */ { colourfb_updateScreenEffect, NULL, NULL, NULL, NULL, NULL, NULL, colourfb_dispatchMessage, NULL, NULL, NULL, NULL, -1 },
+    /*  53 */ { light_updateEffect, NULL, NULL, NULL, NULL, NULL, NULL, light_handleEffectEvent, NULL, NULL, func_15161804, func_15161860, -1 },
     /*  54 */ { func_151572D0, NULL, func_15157420, NULL, D_8008AD60, NULL, NULL, func_15157D88, NULL, D_8008AD80, func_15157248, func_1515728C, 1 },
     /*  55 */ { func_15158224, NULL, func_151582C8, NULL, D_8008ADD0, NULL, NULL, func_15158B3C, NULL, D_8008ADF0, func_15158AA4, func_15158AD0, 1 },
     /*  56 */ { func_1513B798, NULL, func_1513B83C, NULL, D_80089BC0, NULL, NULL, func_1513BA78, NULL, D_80089C08, func_1513BA10, func_1513BA44, 1 },
     /*  57 */ { func_1516489C, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /*  58 */ { func_151787AC, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, func_15178DA4, func_15178DA4, 0 },
-    /*  59 */ { func_15167E0C, NULL, func_15178750, NULL, D_800873D0, func_15169668, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  60 */ { func_151D275C, NULL, func_151D2830, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
+    /*  58 */ { swarm_updateSwarm, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, swarm_freeSwarm, swarm_freeSwarm, 0 },
+    /*  59 */ { func_15167E0C, NULL, swarm_drawMember, NULL, gSpriteRenderDl, func_15169668, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*  60 */ { screen_updateOverlay, NULL, screen_drawOverlay, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
     /*  61 */ { func_151D2C40, NULL, NULL, NULL, NULL, NULL, NULL, func_151D2E5C, NULL, NULL, func_151D2DCC, func_151D2E14, -1 },
     /*  62 */ { func_151D2F90, NULL, NULL, NULL, NULL, NULL, NULL, func_151D324C, NULL, NULL, func_151D31F4, func_151D3220, -1 },
     /*  63 */ { func_151D8A24, NULL, NULL, NULL, NULL, NULL, NULL, func_151D8D5C, NULL, NULL, func_151D8B88, func_151D8BB4, -1 },
-    /*  64 */ { func_1510608C, NULL, func_151067B8, NULL, D_80088BE0, NULL, NULL, func_15106F50, NULL, D_80088C00, func_15106EF8, func_15106F24, 1 },
+    /*  64 */ { beam_updateBolt, NULL, beam_drawBolt, NULL, gBoltRenderSetupDl, NULL, NULL, beam_boltMessage, NULL, gBoltRenderTeardownDl, beam_destroyBolt, beam_freeBolt, 1 },
     /*  65 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  66 */ { func_15167E0C, NULL, func_15168118, NULL, D_800873D0, func_15169668, NULL, NULL, NULL, D_80087408, NULL, NULL, 1 },
+    /*  66 */ { func_15167E0C, NULL, func_15168118, NULL, gSpriteRenderDl, func_15169668, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*  67 */ { func_15171FC0, NULL, func_151720C4, NULL, D_8008CC30, NULL, NULL, NULL, NULL, D_8008CC58, NULL, NULL, 0 },
-    /*  68 */ { func_15175958, NULL, func_15176DF0, NULL, NULL, func_15183BA4, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  69 */ { func_15175958, NULL, func_15176DF0, NULL, NULL, func_15183BA4, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  70 */ { func_150C5568, NULL, func_150C56A4, NULL, D_80088768, NULL, NULL, func_150C5CC4, NULL, D_80088790, func_150C5470, func_150C54C0, 1 },
+    /*  68 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*  69 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*  70 */ { beam_updateStrip, NULL, beam_drawStrip, NULL, gStripRenderSetupDl, NULL, NULL, beam_stripMessage, NULL, gStripRenderResetDl, beam_destroyStrip, beam_freeStrip, 1 },
     /*  71 */ { func_151303EC, NULL, func_15130A9C, NULL, D_80089700, NULL, NULL, func_15131C2C, NULL, D_80089730, func_1513177C, func_151317C8, 1 },
     /*  72 */ { func_151321D0, NULL, func_15132B80, func_15132A88, NULL, NULL, NULL, func_15133588, NULL, NULL, func_151323AC, func_151323F8, 1 },
     /*  73 */ { func_1513CFE4, NULL, func_1513DB00, NULL, D_80089EB8, NULL, NULL, func_1513DF9C, NULL, D_80089ED8, func_1513CB58, func_1513CBA4, 1 },
     /*  74 */ { func_1513C060, NULL, func_1513CBF0, NULL, D_80089EB8, NULL, NULL, func_1513CF9C, NULL, D_80089ED8, func_1513C9B0, func_1513C9FC, 1 },
-    /*  75 */ { func_1510DA84, NULL, func_1510E120, NULL, D_800890C0, NULL, NULL, NULL, func_1510E634, NULL, NULL, NULL, 1 },
+    /*  75 */ { shadow_updateBlob, NULL, shadow_drawBlob, NULL, gBlobShadowSetupDl, NULL, NULL, NULL, func_1510E634, NULL, NULL, NULL, 1 },
     /*  76 */ { func_151572D0, NULL, func_15157420, NULL, D_8008AD60, NULL, NULL, func_15157D88, NULL, D_8008AD80, func_15157248, func_1515728C, 1 },
     /*  77 */ { func_15147740, NULL, func_15147C4C, NULL, D_8008A1D0, NULL, NULL, func_15147D1C, NULL, D_8008A1F0, func_151479E0, func_15147A30, 1 },
     /*  78 */ { NULL, func_151AD174, func_151AD92C, NULL, NULL, NULL, NULL, func_151AE640, NULL, NULL, NULL, NULL, 1 },
     /*  79 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  80 */ { func_1515589C, NULL, func_15155CFC, NULL, NULL, NULL, NULL, func_15156028, NULL, D_8008AD30, func_15155EF8, func_15155EF8, 0 },
-    /*  81 */ { func_1516AA70, NULL, func_1516B6BC, NULL, D_800873D0, NULL, NULL, NULL, NULL, D_80087408, NULL, NULL, -1 },
+    /*  81 */ { text_updateBox, NULL, text_drawBox, NULL, gSpriteRenderDl, NULL, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, -1 },
     /*  82 */ { func_151303EC, NULL, func_15130A9C, NULL, D_80089700, NULL, NULL, func_15131C2C, NULL, D_80089730, func_1513177C, func_151317C8, 1 },
     /*  83 */ { func_151563B8, NULL, func_151564F8, NULL, D_8008AD40, NULL, NULL, NULL, NULL, NULL, func_15156FB8, func_15156FE4, 1 },
     /*  84 */ { func_1513B798, NULL, func_1513B83C, NULL, D_80089BC0, NULL, NULL, func_1513BA78, NULL, D_80089C08, func_1513BA10, func_1513BA44, 1 },
     /*  85 */ { func_15158224, NULL, func_151582C8, NULL, D_8008ADD0, NULL, NULL, func_15158B3C, NULL, D_8008ADF0, func_15158AA4, func_15158AD0, 1 },
     /*  86 */ { func_1513CFE4, NULL, func_1513DB00, NULL, D_80089EB8, func_151406AC, NULL, func_1513DF9C, NULL, D_80089ED8, func_1513CB58, func_1513CBA4, 1 },
-    /*  87 */ { func_15154C90, NULL, func_15154D80, NULL, D_8008AC70, NULL, NULL, func_15155564, NULL, D_8008AC98, NULL, NULL, 1 },
+    /*  87 */ { sprite_updateScreenSprite, NULL, sprite_drawScreenSprite, NULL, gScreenSpriteSetupDl, NULL, NULL, sprite_screenSpriteMessage, NULL, gScreenSpriteTeardownDl, NULL, NULL, 1 },
     /*  88 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  89 */ { func_1517A1EC, NULL, func_1517A3A0, NULL, D_8008CE40, func_1517A958, NULL, NULL, func_1517AB7C, NULL, NULL, NULL, 1 },
-    /*  90 */ { func_151A5070, NULL, func_151A5130, NULL, D_800873D0, NULL, NULL, func_151A55D4, NULL, D_80087408, NULL, NULL, 1 },
+    /*  90 */ { screen_updateTintEffect, NULL, func_151A5130, NULL, gSpriteRenderDl, NULL, NULL, func_151A55D4, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*  91 */ { func_151572D0, NULL, func_15157420, NULL, D_8008AD60, NULL, NULL, func_15157D88, NULL, D_8008AD80, func_15157248, func_1515728C, 1 },
     /*  92 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /*  93 */ { func_15154C90, NULL, func_15154D80, NULL, D_8008AC70, NULL, NULL, func_15155564, NULL, D_8008AC98, NULL, NULL, 1 },
-    /*  94 */ { func_15169988, NULL, func_15169A48, NULL, D_800873D0, func_15169668, NULL, NULL, NULL, D_80087408, NULL, NULL, 1 },
+    /*  93 */ { sprite_updateScreenSprite, NULL, sprite_drawScreenSprite, NULL, gScreenSpriteSetupDl, NULL, NULL, sprite_screenSpriteMessage, NULL, gScreenSpriteTeardownDl, NULL, NULL, 1 },
+    /*  94 */ { sprite_updateSprite2D, NULL, sprite_drawSprite2D, NULL, gSpriteRenderDl, func_15169668, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*  95 */ { func_15149264, NULL, func_15149490, NULL, D_8008A470, NULL, NULL, func_15149434, NULL, D_8008A498, func_15149394, func_151493E4, 1 },
     /*  96 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /*  97 */ { func_1515BAE0, NULL, func_1515BBF0, NULL, D_8008B050, NULL, NULL, NULL, NULL, D_8008B068, NULL, NULL, 1 },
+    /*  97 */ { sprite_updateTexQuad, NULL, sprite_drawTexQuad, NULL, gTexQuadSetupDl, NULL, NULL, NULL, NULL, gTexQuadResetDl, NULL, NULL, 1 },
     /*  98 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  99 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /* 100 */ { NULL, func_151041E4, func_1510448C, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /* 100 */ { NULL, screen_updateFade, screen_drawFade, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /* 101 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /* 102 */ { func_1516DB90, NULL, NULL, NULL, NULL, NULL, func_1516D400, NULL, NULL, NULL, NULL, NULL, 0 },
     /* 103 */ { func_1516D678, NULL, func_1516D738, NULL, D_8008CB70, NULL, NULL, NULL, NULL, D_8008CB90, NULL, NULL, 1 },
@@ -197,7 +197,7 @@ static ObjType D_8008B4A8[OBJ_TYPE_COUNT] = {
  * own particle type. */
 static void (*D_8008C9C8[])() = {
     func_151B9964, func_151797B0, func_15168B44, NULL,
-    NULL, func_15174920, func_15178268, func_1516A3F4,
+    NULL, func_15174920, swarm_updateMember, func_1516A3F4,
     NULL, func_1518CCA8, func_150AECCC, func_150AED4C,
     func_150DE2C4, func_150E4CBC, func_15179CB0, func_151934B4,
     func_151A175C, func_151A1E34, func_151A24A8, func_151A25E0,
@@ -208,8 +208,8 @@ static void (*D_8008C9C8[])() = {
  * declared without a prototype: each takes its own object type. */
 void (*D_8008CA20[])() = {
     NULL, NULL, func_15169C70, func_1516A538,
-    func_150B6DFC, func_150B6E3C, func_150B71A8, func_150B73F0,
-    func_150B709C, func_150F5590, func_150F55C8,
+    func_150B6DFC, func_150B6E3C, sprite_updateGrowIn, sprite_updateLinearMove,
+    func_150B709C, beam_updateGrowSprite, beam_updateSpriteFade,
 };
 
 /* The texture table: the effects' animIndex / texture indices select an entry. */
@@ -236,7 +236,7 @@ TextureDesc *D_8008CA4C[] = {
 
 /* Per-frame hooks run by func_1516706C. */
 static void (*D_8008CB64[])(void) = {
-    func_15164EE4, func_1515C158, func_151787A4,
+    func_15164EE4, sprite_resetActorTrackers, swarm_doNothing,
 };
 
 /* Calls every object type's per-frame global hook (D_8008B4A8[i].unk18). */
@@ -324,7 +324,7 @@ void func_15167310(void) {
     s32 player;
     f32 angle;
 
-    for (player = 0; player < D_80082FA0 + 1; player++) {
+    for (player = 0; player < gScreenLayout + 1; player++) {
         angle = camera_global_Cameras[player].TrueCameraAngleRad;
         D_800DD1D8[player] = sinf(angle);
         D_800DD1E8[player] = cosf(angle);
@@ -422,7 +422,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                         prev = gfx;
                         D_800DD198[D_800DD190] = node->next;
                         gfx = D_8008B4A8[type].draw(gfx, node, arg2);
-                        full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                        full = ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
                         if (full) {
                             overflowed = TRUE;
                             gfx = prev;
@@ -446,14 +446,14 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     gfx = D_8008B4A8[type].drawEnd(gfx, type, arg2);
                 }
                 if (overflowed) {
-                    full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                    full = ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
                     if (full) {
                         gSPSetGeometryMode(gfx, G_ZBUFFER);
                         return mode1Start;
                     }
                 }
                 if (D_8008B4A8[type].drawMode == 0) {
-                    full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                    full = ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
                     if (full) {
                         gSPSetGeometryMode(gfx, G_ZBUFFER);
                         return mode0Start;
@@ -573,7 +573,7 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
         renderMode = 9;
     }
     gfx = func_15142FBC(gfx, 0x2C00, D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, (u8 *)&update);
-    return func_15095760(gfx, &params);
+    return sprite_drawWorld(gfx, &params);
 }
 /* Spawns a particle (type 0x42 when `altType` is set, else 5) from the 0x38-byte template at `src`. */
 BillboardParticle *func_15167D84(src, altType, extra, onDeath, owner, list)
@@ -775,23 +775,23 @@ Gfx *func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         combineMode = (p->tmpl.unk4 & 0xFFFF0000) >> 16;
         gfx = func_15142B7C(gfx, 5, 0);
         gfx = func_1513F4E4(gfx, combineMode, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((p->tmpl.flags & BILLBOARD_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((p->tmpl.flags & BILLBOARD_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, &update);
     } else if (p->tmpl.anim->fmt != 5) {
         gfx = func_1513F4E4(gfx, 0xD, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
     } else if (p->tmpl.anim->fmt == 3) {
         gfx = func_1513F4E4(gfx, 0xE, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
     } else if (p->tmpl.flags & 0x10) {
         gfx = func_1513F4E4(gfx, 0xD, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[0x12].unk0 | D_800A4AC8[0x12].unk4 | 4, &update);
     } else {
         gfx = func_1513F4E4(gfx, 0xF, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_2CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_2CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[0x11].unk0 | D_800A4AC8[0x11].unk4 | 4, &update);
     }
     c0 = p->tmpl.primG;
@@ -820,7 +820,7 @@ Gfx *func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         }
     }
     gfx = func_15142C10(gfx, c0, c1, c2, 0, &update);
-    return func_15095760(gfx, &params);
+    return sprite_drawWorld(gfx, &params);
 }
 
 /* Fills a QuadFxData template's vertex colours and texture coordinates from its animation. */

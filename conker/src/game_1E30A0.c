@@ -4,7 +4,7 @@
 
 
 /* Spawns a pulsing particle of the given size at pos (fading out over 0x100 >> fadeShift frames at the end
- * of its lifetime). Also checksums func_15002FB4's code as an anti-tamper check. */
+ * of its lifetime). Also checksums collision_loadMapSettings's code as an anti-tamper check. */
 PulseParticle *func_151B5BF0(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rotVel, f32 gravity,
                         s16 lifetime, u8 alpha, s32 unused, f32 elasticity, u8 fadeShift, u8 arg11, u8 arg12,
                         s32 arg13) {
@@ -47,14 +47,14 @@ PulseParticle *func_151B5BF0(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f
         s32 sum;
 
         sum = 0;
-        p = (u32 *)func_15002FB4;
+        p = (u32 *)collision_loadMapSettings;
         end = (u32 *)func_1500310C;
         for (; p < end; p++) {
             sum += *p;
             sum <<= 1;
         }
         if (sum != 0x80D2D760) {
-            D_8008FDA8 = -1;
+            gCurrentSaveSlot = -1;
         }
     }
     if (rotVel != NULL) {
@@ -102,7 +102,7 @@ void func_151B5E94(PulseParticle *particle) {
     Pulse *pulse;
 
     pulse = &particle->pulse;
-    pulse->phase += 1.002000093f * D_800BE9A4;
+    pulse->phase += 1.002000093f * gFrameDelta;
     if (pulse->phase > 29.89999962f) {
         pulse->phase = 0.0f;
         func_10010F88(0x502, 0x5DC0, 0, 0, -1, particle->head.pos.x, particle->head.pos.y, particle->head.pos.z, 100, 500);
@@ -124,7 +124,7 @@ void func_151B5E94(PulseParticle *particle) {
 /* Stops the object's sound, if one is playing. */
 void func_151B5FCC(SoundOwner *obj) {
     if (obj->sound != 0) {
-        func_100111C8(obj->sound);
+        sound_stop(obj->sound);
         obj->sound = 0;
     }
 }

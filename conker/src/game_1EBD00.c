@@ -11,7 +11,7 @@ typedef struct {
 
 
 /*
- * Spawns an effect (variant 0-2) at `pos`, facing `angle` degrees. In one mode (D_800D2E4C[0x19] bit 2,
+ * Spawns an effect (variant 0-2) at `pos`, facing `angle` degrees. In one mode (gTaskDoneBits[0x19] bit 2,
  * or variant 2) it is a model effect 39 units ahead of and 40 below `pos`; otherwise func_151BEEE0 makes it.
  * The callers also pass the usual effect owner and list, which it does not use.
  */
@@ -21,12 +21,12 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
     EffectParams params;
     Extra151BE850 extra;
 
-    func_1510F800(0);
-    zone = func_1510FD20(pos->x, pos->z);
+    collision_selectMap(0);
+    zone = collision_findZoneLeaf(pos->x, pos->z);
     if (variant >= 3) {
         return NULL;
     }
-    if ((D_800D2E4C[0x19] & 4) || (variant == 2)) {
+    if ((gTaskDoneBits[0x19] & 4) || (variant == 2)) {
         const u8 variantIds[3] = { 3, 1, 2 };
         Vec3f offset;
         s32 flag;
@@ -145,7 +145,7 @@ struct S151BECB8 {
     /* 0x048 */ u8 unk48;
     /* 0x049 */ u8 pad49[0xB];
     /* 0x054 */ Vec3f unk54;
-    /* 0x060 */ ZoneNode *zone; /* EffectParams.mask: func_1510FD20 at the spawn position */
+    /* 0x060 */ ZoneNode *zone; /* EffectParams.mask: collision_findZoneLeaf at the spawn position */
     /* 0x064 */ u8 pad64[0x98];
     /* 0x0FC */ s32 unkFC;
     /* 0x100 */ u8 pad100[0x1B];
@@ -178,7 +178,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                 f32 dist;
 
                 params = &arg0->params;
-                func_1515C1A0(obj, &objPos, &radius, &height);
+                sprite_getActorBounds(obj, &objPos, &radius, &height);
                 diff.x = objPos.x - params->pos.x;
                 diff.y = objPos.y - params->pos.y;
                 diff.z = objPos.z - params->pos.z;
@@ -187,9 +187,9 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                     s32 mode;
                     s32 kind; // matching: switching on arg0->unk48 directly changes the frame size
 
-                    func_15085710(obj->playernumber, 3, params->unk10);
+                    player_setStat(obj->playernumber, 3, params->unk10);
                     untouched = 0;
-                    func_10010F30(0x511, 0x7D00, 0x40, 0, 0);
+                    sound_play(0x511, 0x7D00, 0x40, 0, 0);
                     func_151BF340(arg0->unkC, arg0->unk1);
                     func_151BF0C8(&params->pos);
                     kind = arg0->unk48;
@@ -364,7 +364,7 @@ void func_151BF0C8(Vec3f *pos) {
     func_15153634(&second, 0xFF, 0xFF, 1);
 }
 
-/* Shows the value of func_150859AC(0, 3) (less one, capped at 99) as a two-digit counter that slides in. */
+/* Shows the value of player_getStat(0, 3) (less one, capped at 99) as a two-digit counter that slides in. */
 void func_151BF340(u8 owner, s32 kind) {
     CounterDisplay init;
     CounterEffect *effect;
@@ -373,7 +373,7 @@ void func_151BF340(u8 owner, s32 kind) {
     CounterDisplay *display;
 
     func_151494E0(0, 0x57);
-    count = func_150859AC(0, 3);
+    count = player_getStat(0, 3);
     if (count != 0) {
         count--;
     }
@@ -484,12 +484,12 @@ void func_151BF340(u8 owner, s32 kind) {
                 digitArg.scaleY = 1.f;
                 if (digits[0] == 0) {
                     digitArg.texture = digitSprites[digits[1]];
-                    display->digits[0] = func_1515548C(&digitArg, 0, NULL, 0, 0, owner, kind);
+                    display->digits[0] = sprite_newScreenSprite(&digitArg, 0, NULL, 0, 0, owner, kind);
                     display->digits[1] = NULL;
                 } else {
                     for (i = 0; i < 2; i++) {
                         digitArg.texture = digitSprites[digits[i]];
-                        display->digits[i] = func_1515548C(&digitArg, 0, NULL, 0, 0, owner, kind);
+                        display->digits[i] = sprite_newScreenSprite(&digitArg, 0, NULL, 0, 0, owner, kind);
                     }
                 }
             }
@@ -497,15 +497,15 @@ void func_151BF340(u8 owner, s32 kind) {
     }
 }
 
-/* Update of func_151BF340's counter. It waits until D_800C35EA != 1, func_15181CC8(0) != 0, func_1517EF00(0) == 0
- * and D_800BE9B4 == 0; then, as its 110-unit timer runs down by D_800BE9A4, it slides in over the first 20.57
+/* Update of func_151BF340's counter. It waits until D_800C35EA != 1, screen_isIrisOpen(0) != 0, screen_getViewFadeAlpha(0) == 0
+ * and D_800BE9B4 == 0; then, as its 110-unit timer runs down by gFrameDelta, it slides in over the first 20.57
  * units, holds, slides out over the last 20.57 and ends the effect. */
 void func_151BF81C(CounterEffect *effect) {
     f32 slide;
     CounterDisplay *display;
 
     display = &effect->display;
-    if (D_800BEAC1 != 0 || D_800BEAC0 != 0) {
+    if (gPauseRequested != 0 || gPaused != 0) {
         effect->base.header.state = -1;
         effect->base.header.flags |= 1;
         return;
@@ -514,10 +514,10 @@ void func_151BF81C(CounterEffect *effect) {
         if (D_800C35EA[0] == 1) {
             return;
         }
-        if (func_15181CC8(0) == 0) {
+        if (screen_isIrisOpen(0) == 0) {
             return;
         }
-        if (func_1517EF00(0) != 0 || D_800BE9B4 != 0) {
+        if (screen_getViewFadeAlpha(0) != 0 || D_800BE9B4 != 0) {
             return;
         }
         display->flags |= 1;
@@ -554,7 +554,7 @@ void func_151BF81C(CounterEffect *effect) {
             display->digits[1]->y = -62.0f;
         }
     }
-    display->timer -= D_800BE9A4;
+    display->timer -= gFrameDelta;
     if (display->timer < 0.0f) {
         effect->base.header.state = -1;
         effect->base.header.flags |= 1;

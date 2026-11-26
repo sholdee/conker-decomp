@@ -14,7 +14,7 @@ void func_1503F4B0(AnimInstance *anim) {
     frameBuf = NULL;
     if (anim->matrices[D_800BE9C0] != NULL) {
         frameBuf = allocate_memory(0x320, 1, 2, 2);
-        func_1502D824(anim, NULL, frameBuf);
+        actor_loadAnimFrames(anim, NULL, frameBuf);
         unk8 = 0x1000;
         transform = anim->matrices[D_800BE9C0];
         mtx = anim->partMtx[D_800BE9C0];
@@ -22,7 +22,7 @@ void func_1503F4B0(AnimInstance *anim) {
         func_150A9984(anim->partMtx[D_800BE9C0], anim->numParts);
         anim->unk3F6 = TRUE;
     }
-    func_1507BDB0(anim, D_800BE9A4, NULL, 0);
+    func_1507BDB0(anim, gFrameDelta, NULL, 0);
     if (frameBuf != NULL) {
         func_10004074(frameBuf);
     }
@@ -30,11 +30,11 @@ void func_1503F4B0(AnimInstance *anim) {
 
 /* Starts animation `anim` from the model's bank. */
 void func_1503F5B8(AnimInstance *model, s32 restart, s32 anim, f32 speed, f32 blendFrames, s32 flag8000) {
-    func_1505E0C4(NULL, NULL, model, 0, restart, anim, model->bank, speed, blendFrames, 0.0f, 0.0f, flag8000);
+    actor_startAnimState(NULL, NULL, model, 0, restart, anim, model->bank, speed, blendFrames, 0.0f, 0.0f, flag8000);
 }
 
 /*
- * Loads model `model` (see func_1502FE10) and creates its AnimInstance in *out, playing animation 0.
+ * Loads model `model` (see attach_loadModel) and creates its AnimInstance in *out, playing animation 0.
  * Returns 1 on failure.
  */
 s32 func_1503F62C(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg5, AnimInstance **out) {
@@ -49,7 +49,7 @@ s32 func_1503F62C(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, 
     bzero(*out, 0x40);
     (*out)->header[1][5] = 1;
     (*out)->header[0][5] = 1;
-    func_1502FE10(model, dlists, numDLists, data, arg5, &(*out)->unk3F0, &numParts);
+    attach_loadModel(model, dlists, numDLists, data, arg5, &(*out)->unk3F0, &numParts);
     (*out)->numParts = numParts;
     (*out)->bank = bank;
     (*out)->unk3F6 = FALSE;

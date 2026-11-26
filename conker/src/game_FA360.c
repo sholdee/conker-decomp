@@ -70,10 +70,10 @@ s32 func_150CD17C(DriftQuad *effect) {
     f32 period;
 
     drift = &effect->drift;
-    effect->pos.x += drift->vel.x * D_800BE9A4;
-    effect->pos.y += drift->vel.y * D_800BE9A4 + 0.5f * drift->gravity * D_800BE9A4 * D_800BE9A4;
-    effect->pos.z += drift->vel.z * D_800BE9A4;
-    drift->vel.y += drift->gravity * D_800BE9A4;
+    effect->pos.x += drift->vel.x * gFrameDelta;
+    effect->pos.y += drift->vel.y * gFrameDelta + 0.5f * drift->gravity * gFrameDelta * gFrameDelta;
+    effect->pos.z += drift->vel.z * gFrameDelta;
+    drift->vel.y += drift->gravity * gFrameDelta;
     for (i = D_800BE9E4; i != 0; i--) {
         drift->vel.x *= drift->drag;
         drift->vel.z *= drift->drag;
@@ -91,8 +91,8 @@ s32 func_150CD17C(DriftQuad *effect) {
         pitch = drift->phaseScale * wave + 1.5707964f;
         func_151436B4(drift->swayYaw, pitch, drift->swayLength, &effect->sway);
         period = 6.2831855f;
-        drift->swayLength += drift->swayLengthRate * D_800BE9A4;
-        drift->phase += drift->phaseSpeed * D_800BE9A4;
+        drift->swayLength += drift->swayLengthRate * gFrameDelta;
+        drift->phase += drift->phaseSpeed * gFrameDelta;
         while (drift->phase > period) {
             drift->phase -= period;
         }
@@ -179,7 +179,7 @@ void func_150CD7F8(DriftBurstEmitter *emitter) {
     f32 diff;
     f32 r;
 
-    timer->pending += 0.08f * D_800BE9A4 * timer->rate;
+    timer->pending += 0.08f * gFrameDelta * timer->rate;
     if (timer->pending > 1.0f) {
         burst.angles.pitchBase = -23;
         burst.angles.pitchRange = 6;
@@ -190,7 +190,7 @@ void func_150CD7F8(DriftBurstEmitter *emitter) {
             yaws = D_80088874;
             index = func_150ADA20() % 5U;
             yaw = yaws.yaw[index] + func_150ADA68() * 0.59999996f;
-            heading = camera_global_Cameras[D_80082FA4].TrueCameraAngle - 180.0f;
+            heading = camera_global_Cameras[gCurrentView].TrueCameraAngle - 180.0f;
             while (heading > 360.0f) {
                 heading -= 360.0f;
             }

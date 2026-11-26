@@ -34,13 +34,13 @@ void func_151A1010(f32 x, f32 y, f32 z, s16 duration, f32 scaleA, f32 scaleB, u8
     if (offset <= 0) {
         count = 1;
     }
-    // matching: the dead `| (D_800BE9A4 == 0 & 0)` global read (no code, no relocation) keeps uopt from
+    // matching: the dead `| (gFrameDelta == 0 & 0)` global read (no code, no relocation) keeps uopt from
     // merging each s32 into its s16 copy; a parameter in its place changes the code
     func_151A11CC(x, y, z, 250.0f * scaleA, 1.0f,
-                  a = a32 = (s32)(70.0f * scaleB) | (D_800BE9A4 == 0 & 0),
-                  b = b32 = (s32)(30.0f * scaleB) | (D_800BE9A4 == 0 & 0),
-                  c = c32 = (s32)(1500.0f * scaleA) | (D_800BE9A4 == 0 & 0),
-                  d = d32 = (s32)(100.0f * scaleA) | (D_800BE9A4 == 0 & 0), 18, 1.0f,
+                  a = a32 = (s32)(70.0f * scaleB) | (gFrameDelta == 0 & 0),
+                  b = b32 = (s32)(30.0f * scaleB) | (gFrameDelta == 0 & 0),
+                  c = c32 = (s32)(1500.0f * scaleA) | (gFrameDelta == 0 & 0),
+                  d = d32 = (s32)(100.0f * scaleA) | (gFrameDelta == 0 & 0), 18, 1.0f,
                   90.0f * scaleB, 20.0f * scaleB, c, d,
                   count, 16, 1.0f,
                   a, b, c, d,
@@ -104,7 +104,7 @@ void func_151A11E4(SphereEmitter *emitter) {
     f32 vx;
     BillboardParticle *particle;
 
-    emitter->params.spawnAccum += emitter->params.spawnRate * D_800BE9A4;
+    emitter->params.spawnAccum += emitter->params.spawnRate * gFrameDelta;
     params = &emitter->params;
     if (emitter->params.spawnAccum > 1.0f) {
         packet.primR = 255;
@@ -117,7 +117,7 @@ void func_151A11E4(SphereEmitter *emitter) {
         packet.flags = 0x120;
         packet.unk4 = 0xC0001;
         packet.frame = 0;
-        packet.anim = &D_80090B60[39];
+        packet.anim = &gEffectTextures[39];
         packet.velX = 0;
         packet.velY = 0;
         packet.velZ = 0;
@@ -146,7 +146,7 @@ void func_151A11E4(SphereEmitter *emitter) {
             }
             packet.frameStep = func_150ADA20() % (params->frameStepRange + 1) + params->frameStep;
             size = func_150ADA20() % (params->sizeRange + 1) + params->size;
-            packet.life = D_80090B60[39].frameCount * (256 / packet.frameStep);
+            packet.life = gEffectTextures[39].frameCount * (256 / packet.frameStep);
             life = packet.life;
             data.growStart = data.fadeInStart = life;
             data.fadeInEnd = life - (life >> 2);
@@ -297,7 +297,7 @@ void func_151A1998(SphereEmitter *emitter) {
     s16 life;
     BillboardParticle *particle;
 
-    emitter->params.spawnAccum += emitter->params.spawnRate * D_800BE9A4;
+    emitter->params.spawnAccum += emitter->params.spawnRate * gFrameDelta;
     if (emitter->params.spawnAccum > 1.0f) {
         params = &emitter->params;
         packet.primR = 255;
@@ -310,7 +310,7 @@ void func_151A1998(SphereEmitter *emitter) {
         packet.flags = 0x120;
         packet.unk4 = 0xC0001;
         packet.frame = 0;
-        packet.anim = &D_80090B60[39];
+        packet.anim = &gEffectTextures[39];
         packet.velX = 0;
         packet.velY = 0;
         packet.velZ = 0;
@@ -337,7 +337,7 @@ void func_151A1998(SphereEmitter *emitter) {
             }
             packet.frameStep = func_150ADA20() % (params->frameStepRange + 1) + params->frameStep;
             size = func_150ADA20() % (params->sizeRange + 1) + params->size;
-            life = packet.life = D_80090B60[39].frameCount * (256 / packet.frameStep);
+            life = packet.life = gEffectTextures[39].frameCount * (256 / packet.frameStep);
             data.fadeInStart = life;
             data.fadeInEnd = life - (life >> 2);
             data.fadeInStep = 255 / (data.fadeInStart - data.fadeInEnd);
@@ -460,7 +460,7 @@ void func_151A1FB4(SphereEmitter *emitter) {
     s16 size;
     BillboardParticle *particle;
 
-    emitter->params.spawnAccum += emitter->params.spawnRate * D_800BE9A4;
+    emitter->params.spawnAccum += emitter->params.spawnRate * gFrameDelta;
     params = &emitter->params;
     if (emitter->params.spawnAccum > 1.0f) {
         packet.primR = 5;
@@ -473,7 +473,7 @@ void func_151A1FB4(SphereEmitter *emitter) {
         packet.flags = 0x120;
         packet.unk4 = 0xC0001;
         packet.frame = 0;
-        packet.anim = &D_80090B60[39];
+        packet.anim = &gEffectTextures[39];
         packet.velX = 0;
         packet.velY = 0;
         packet.velZ = 0;
@@ -501,7 +501,7 @@ void func_151A1FB4(SphereEmitter *emitter) {
             }
             packet.frameStep = func_150ADA20() % (params->frameStepRange + 1) + params->frameStep;
             size = func_150ADA20() % (params->sizeRange + 1) + params->size;
-            packet.life = D_80090B60[39].frameCount * (256 / packet.frameStep);
+            packet.life = gEffectTextures[39].frameCount * (256 / packet.frameStep);
             data.fadeInStart = packet.life;
             data.growStart = packet.life;
             data.fadeInEnd = packet.life - (packet.life >> 2);
@@ -670,7 +670,7 @@ s32 func_151A2960(SpriteParticle *particle, Vec3f *prevPos) {
     if (particle->head.desc.timer < fade->fadeOutStart) {
         particle->head.desc.brightness = particle->head.desc.timer * fade->fadeOutStep;
     }
-    if (D_800BE616 == 0 && fade->eventTime != -1 && fade->eventFunc != -1 &&
+    if (gIsMultiplayer == 0 && fade->eventTime != -1 && fade->eventFunc != -1 &&
         fade->eventTime >= particle->head.desc.timer) {
         D_8008F8E0[fade->eventFunc](particle, fade->eventTime);
         fade->eventTime = -1;

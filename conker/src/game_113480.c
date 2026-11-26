@@ -95,9 +95,9 @@ s8 func_150E6230(Streak *streak) {
         f32 vy = streak->head.def.rot.y * streak->head.def.scale.y;
         f32 vz = streak->head.def.rot.z * streak->head.def.scale.y;
 
-        streak->head.def.pos.x += vx * D_800BE9A4;
-        streak->head.def.pos.y += vy * D_800BE9A4;
-        streak->head.def.pos.z += vz * D_800BE9A4;
+        streak->head.def.pos.x += vx * gFrameDelta;
+        streak->head.def.pos.y += vy * gFrameDelta;
+        streak->head.def.pos.z += vz * gFrameDelta;
     }
     return ret;
 }

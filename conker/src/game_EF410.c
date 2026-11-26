@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c and game/Effects/Blood/blood.c
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
 SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
@@ -159,7 +159,7 @@ void func_150C2424(u8 arg0) {
                   (func_150ADA68() * 3.0f) + 4.0f, 3, 0, 0.0f, 0, arg0);
 }
 
-/* Trail update handler (D_8008A3F8): sets the trail's alpha from its remaining life (as func_150C1978). */
+/* Trail update handler (gMotionTrailUpdateProcs): sets the trail's alpha from its remaining life (as trail_fadeKind2Trail). */
 s32 func_150C251C(MotionTrail *trail) {
     TrailParams *params = trail->params;
     s32 alpha = trail->head.tmpl.life << 3;

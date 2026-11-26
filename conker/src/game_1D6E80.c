@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c and game/Effects/Blood/blood.c
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
 SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
@@ -75,7 +75,7 @@ void func_151A99D0(ActorTask *task) {
             pos.y = actor->ypos + 150.0f;
         }
         pos.z = actor->zpos;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, &task->watcher.hit, 3, task->watcher.header.owner, task->watcher.header.kind);
         }
@@ -98,10 +98,10 @@ void func_151A9AA4(ActorTask *task) {
         }
         pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
-            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+            sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
     func_151ABE00(actor);
@@ -123,10 +123,10 @@ void func_151A9BA0(ActorTask *task) {
         }
         pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 1, task->watcher.header.owner, task->watcher.header.kind);
-            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+            sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
 }
@@ -148,10 +148,10 @@ void func_151A9CA0(ActorTask *task) {
         pos.y = actor->ypos + 150.0f;
     }
     pos.z = actor->zpos;
-    if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+    if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
         pos.y = task->watcher.hit.height;
         func_151ABE40(&pos, &task->watcher.hit, 1, task->watcher.header.owner, task->watcher.header.kind);
-        func_10010FFC(0, 8, 0x6978, 0, 0, actor);
+        sound_playOnActor(0, 8, 0x6978, 0, 0, actor);
     }
     func_151AA264(actor, &task->watcher.hit);
     func_151ABE00(actor);
@@ -173,10 +173,10 @@ void func_151A9DC0(ActorTask *task) {
         }
         pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
-            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+            sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
 }
@@ -197,10 +197,10 @@ void func_151A9EC0(ActorTask *task) {
         }
         pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
-            func_10010FFC(0, 8, 0x6978, 0, 0, actor);
+            sound_playOnActor(0, 8, 0x6978, 0, 0, actor);
         }
     }
     func_151AA264(actor, &task->watcher.hit);
@@ -221,7 +221,7 @@ void func_151A9FC8(ActorTask *task) {
             pos.y = actor->ypos + 150.0f;
         }
         pos.z = actor->zpos;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
         }
@@ -242,7 +242,7 @@ void func_151AA09C(ActorTask *task) {
             pos.y = actor->ypos + 150.0f;
         }
         pos.z = actor->zpos;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
         }
@@ -258,7 +258,7 @@ typedef struct {
     /* 0x04 */ u8 characterId;
 } Msg151AA17C;
 
-/* Sends message 10 ({unk18, unk1C}) through func_15147D64 and func_151494E0, then func_1519F3B8. */
+/* Sends message 10 ({unk18, unk1C}) through func_15147D64 and func_151494E0, then trail_startSurfaceTrails. */
 void func_151AA17C(SurfaceTrailOwner *owner) {
     s32 word;
     Msg151AA17C msg;
@@ -270,7 +270,7 @@ void func_151AA17C(SurfaceTrailOwner *owner) {
     word = (s32)&msg;
     func_15147D64(word, 10);
     func_151494E0(word, 10);
-    func_1519F3B8(owner);
+    trail_startSurfaceTrails(owner);
 }
 
 void func_151AA1D0(void) {
@@ -293,7 +293,7 @@ void func_151AA210(SurfaceTrailOwner *owner) {
     word = (s32)&msg;
     func_15147D64(word, 10);
     func_151494E0(word, 10);
-    func_1519F3B8(owner);
+    trail_startSurfaceTrails(owner);
 }
 
 /* When the ground hit has flag bit 0 set, spawns a func_1513418C effect on the actor. */
@@ -559,12 +559,12 @@ void func_151AABC4(Actor *actor, u8 index) {
     if ((actor != NULL) && (actor->ob_matrix_ptr != NULL)) {
         color = func_151D8E20();
         func_15142314(actor->ob_matrix_ptr, D_800A8F70[index], &pos, actor);
-        func_1504715C(&floor, actor);
+        collision_initHitFromObject(&floor, actor);
         y = pos.y + 50.0f;
         probe.x = pos.x;
         probe.y = y;
         probe.z = pos.z;
-        if (func_1504697C(&probe, 0, y - 100.0f, &floor) != 0) {
+        if (collision_probeFloorSurfABSet0(&probe, 0, y - 100.0f, &floor) != 0) {
             hit.x = pos.x;
             hit.y = floor.height;
             hit.z = pos.z;
@@ -602,7 +602,7 @@ void func_151AABC4(Actor *actor, u8 index) {
     }
 }
 
-/* Trail update handler (D_8008A3F8): caps the trail's alpha at its remaining life * 16 (at most 255). */
+/* Trail update handler (gMotionTrailUpdateProcs): caps the trail's alpha at its remaining life * 16 (at most 255). */
 s32 func_151AADBC(MotionTrail *trail) {
     TrailParams *params;
     s32 limit;
@@ -646,7 +646,7 @@ void func_151AADF8(ActorTask *task) {
         pos.y = actor->ypos + 150.0f;
     }
     pos.z = actor->zpos;
-    if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+    if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
         color = func_151D8E20();
         pos.y = task->watcher.hit.height;
         size = (func_150ADA68() * 30.0f) + 50.0f;
@@ -728,10 +728,10 @@ void func_151AB1C4(ActorTask *task) {
         }
         pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
             func_151ABE40(&pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
-            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+            sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
     func_151AA264(actor, &task->watcher.hit);
@@ -852,10 +852,10 @@ s32 func_151AB6B8(LoopSoundFx *fx) {
     alive = TRUE;
     sound = &fx->payload;
     if ((fx->payload.soundHandle != 0) && !(camera_global_Cameras->SpecialFlags & 1)) {
-        func_100111C8(sound->soundHandle);
+        sound_stop(sound->soundHandle);
         sound->soundHandle = 0;
     } else if ((sound->soundHandle == 0) && (camera_global_Cameras->SpecialFlags & 1)) {
-        sound->soundHandle = func_10010F30(0x355, 32000, 64, 0, 0);
+        sound->soundHandle = sound_play(0x355, 32000, 64, 0, 0);
     }
     if (sound->keepAlive == 0) {
         alive = FALSE;
@@ -870,7 +870,7 @@ void func_151AB788(LoopSoundFx *fx) {
     ActorTaskFx *ownerFx = &sound->owner->fx;
 
     if (fx->payload.soundHandle != 0) {
-        func_100111C8(sound->soundHandle);
+        sound_stop(sound->soundHandle);
     }
     ownerFx->sound = NULL;
     func_151346EC(&fx->header);
@@ -882,7 +882,7 @@ void func_151AB7D8(LoopSoundFx *fx) {
     ActorTaskFx *ownerFx = &sound->owner->fx;
 
     if (fx->payload.soundHandle != 0) {
-        func_100111C8(sound->soundHandle);
+        sound_stop(sound->soundHandle);
     }
     ownerFx->sound = NULL;
     func_1513470C(&fx->header);
@@ -984,9 +984,9 @@ void func_151AB9C8(EmitterTask *task) {
         dead = TRUE;
     }
     if (!dead) {
-        emitter->accum += (emitter->rate + func_150ADA68() * emitter->rateRandom) * D_800BE9A4;
+        emitter->accum += (emitter->rate + func_150ADA68() * emitter->rateRandom) * gFrameDelta;
         if (emitter->accum > 1.0f) {
-            func_1504715C(&floor, emitter->actor);
+            collision_initHitFromObject(&floor, emitter->actor);
             do {
                 yaw = func_150ADA20() & 0xFF;
                 pitch = (func_150ADA20() % 46U) - 0x3F;

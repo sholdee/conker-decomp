@@ -57,9 +57,9 @@ void func_1500FA64(void) {
     func_1500F9D0(-0xBD5, 0x3F1, 0x659, -0x602, 2);
     func_1500F9D0(-0xE6B, -0x263, -0x427, -0x647, 1);
 
-    D_800DCDA4 = D_800DCD20[0];
-    D_800DCDA8 = D_800DCD20[1];
-    D_800DCDAC = D_800DCD20[2];
+    D_800DCDA4 = gAmbientColour[0];
+    D_800DCDA8 = gAmbientColour[1];
+    D_800DCDAC = gAmbientColour[2];
     D_800DCDB0 = D_800DCD28[0];
     D_800DCDB4 = D_800DCD28[1];
     D_800DCDB8 = D_800DCD28[2];

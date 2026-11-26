@@ -93,7 +93,7 @@ GREP := grep -rl
 GLOBAL_ASM_C_FILES := $(shell $(GREP) GLOBAL_ASM $(SRC_DIR) </dev/null)
 GLOBAL_ASM_O_FILES := $(foreach file,$(GLOBAL_ASM_C_FILES),$(BUILD_DIR)/$(file:.c=.c.o))
 
-INCLUDE_CFLAGS := -I . -I include -I include/2.0L -I include/2.0L/PR -I include/libc -I src/libultra/os -I src/libultra/audio -I src/libultra/io
+INCLUDE_CFLAGS := -I . -I include -I include/2.0L -I include/2.0L/PR -I include/libc -I src/libultra/os -I src/libultra/audio -I src/libultra/io -I src
 
 ASFLAGS = -EB -mtune=vr4300 -march=vr4300 -mabi=32 -no-pad-sections -I include
 
@@ -113,16 +113,16 @@ $(BUILD_DIR)/$(SRC_DIR)/libultra/audio/%.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init_17F10.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init_17F80.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init_19B50.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_1AAE0.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_1C060.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_1E480.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_1E4A0.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_1E530.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_1FB40.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_20000.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_214F0.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_22040.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_22460.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/SeqVoice/seqvoice.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/EvtQueue/n_evtqueue.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/SynDelete/n_syndelete.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/SynAllocFx/n_synallocfx.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/Reverb/n_reverb.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/MainBus/n_mainbus.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/Env/n_env.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/AdpcmLoad/adpcmload.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/VoiceLowPass/voicelowpass.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/Resample/n_resample.c.o: OPT_FLAGS := -g
 
 
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/ai.c.o: OPT_FLAGS := -O1
@@ -137,22 +137,24 @@ $(BUILD_DIR)/$(SRC_DIR)/libultra/io/crc2.c.o: OPT_FLAGS := -O1
 # (uopt ~1000 blocks, as1 500) come out unoptimized otherwise (func_1504CB98, func_150265CC,
 # func_1502460C, func_15065A5C). The whole bin is unchanged with it (2026-11-16).
 $(BUILD_DIR)/$(SRC_DIR)/game_%.c.o: OLIMIT := -Olimit 3000
+# Files in Rare's layout (src/game/<Area>/<Name>/<name>.c) are not named game_*: they need the same limit.
+$(BUILD_DIR)/$(SRC_DIR)/game/%.c.o: OLIMIT := -Olimit 3000
 
 $(BUILD_DIR)/$(SRC_DIR)/init_3920.c.o: OPT_FLAGS := -O2
 
 # Per-file flags (proven by the sha1 gate). libultra shipped without debug info, and the game
 # links its own private libultra copy at 0x151Dxxxx-0x151Fxxxx built at plain -O1/-O2.
-$(BUILD_DIR)/$(SRC_DIR)/init_210C0.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/AuxBus/n_auxbus.c.o: OPT_FLAGS := -g
 # Rare's compressed-audio bitstream decoder: the whole TU is unoptimised -g output.
-$(BUILD_DIR)/$(SRC_DIR)/game_221290.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/game/Audio/Mp3Decoder/mp3decoder.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/pfsisplug2.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/pfschecker2.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/$(SRC_DIR)/libultra/gu/guNormalize.c.o: OPT_FLAGS := -O2
-$(BUILD_DIR)/$(SRC_DIR)/game_21C4F0.c.o: OPT_FLAGS := -O1
-$(BUILD_DIR)/$(SRC_DIR)/game_21C540.c.o: OPT_FLAGS := -O1
-$(BUILD_DIR)/$(SRC_DIR)/game_21CAF0.c.o: OPT_FLAGS := -O1
-$(BUILD_DIR)/$(SRC_DIR)/game_21D420.c.o: OPT_FLAGS := -O2
-$(BUILD_DIR)/$(SRC_DIR)/game_21D5F0.c.o: OPT_FLAGS := -O3
+$(BUILD_DIR)/$(SRC_DIR)/game/Os/PiReadIo/pireadio.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/$(SRC_DIR)/game/Os/ContInit/continit.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/$(SRC_DIR)/game/Os/ViSetSpecial/visetspecial.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/$(SRC_DIR)/game/Libc/Sprintf/sprintf.c.o: OPT_FLAGS := -O2
+$(BUILD_DIR)/$(SRC_DIR)/game/Os/MtxCatF/mtxcatf.c.o: OPT_FLAGS := -O3
 
 # $(BUILD_DIR)/$(SRC_DIR)/init_B1B0.o: OPT_FLAGS := -O2
 

@@ -5,7 +5,7 @@
 
 /* Per-object state of the projectile spawned by func_150F7470 (updated by func_150F78B4). */
 typedef struct {
-    /* 0x00 */ RayHit hit;   /* func_151C4B0C's ray along the flight path */
+    /* 0x00 */ RayHit hit;   /* weapon_setupProjectileRay's ray along the flight path */
     /* 0x64 */ s32 unk64;
     /* 0x68 */ f32 timeLeft;
     /* 0x6C */ f32 speed;
@@ -54,7 +54,7 @@ struct ProjectileParticle {
 };
 
 /* Spawns a projectile at `pos`, aimed along `aim` (or from `altOrigin` at `target` when both are set). `knownHit`
- * is a ray already cast (see func_151C4B0C). */
+ * is a ray already cast (see weapon_setupProjectileRay). */
 void func_150F7470(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *target, u8 targetIsDir, RayHit *knownHit, f32 speed,
                    f32 arg7, f32 arg8, Actor *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14,
                    s8 arg15, s32 sound, u8 arg17, u8 arg18, s32 arg19) {
@@ -86,7 +86,7 @@ void func_150F7470(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *target, u8 t
         }
         hasAimDir = TRUE;
     }
-    if (!func_151C4B0C(knownHit, &state.hit, pos, hasAimDir ? &aimDir : NULL, &state.timeLeft, arg7, arg10, altOrigin,
+    if (!weapon_setupProjectileRay(knownHit, &state.hit, pos, hasAimDir ? &aimDir : NULL, &state.timeLeft, arg7, arg10, altOrigin,
                        hasTargetDir ? &targetDir : NULL, &state.flags, 1, arg8, owner, arg15, arg12, arg13, 0,
                        arg17)) {
         return;
@@ -185,13 +185,13 @@ s8 func_150F78B4(ProjectileParticle *obj) {
     alive = TRUE;
     state = &obj->state.projectile;
     owner = obj->owner;
-    dt = (state->timeLeft < D_800BE9A4) ? state->timeLeft : D_800BE9A4;
+    dt = (state->timeLeft < gFrameDelta) ? state->timeLeft : gFrameDelta;
     if (obj->sound != 0) {
         func_1000F9D4(obj->sound, obj->pos.x, obj->pos.y, obj->pos.z);
     }
     dist = state->speed * dt;
     if (state->flags & 2) {
-        func_15081690(owner, obj->pos.x, obj->pos.y, obj->pos.z, state->hit.dir.x, state->hit.dir.y,
+        collision_castRay(owner, obj->pos.x, obj->pos.y, obj->pos.z, state->hit.dir.x, state->hit.dir.y,
                       state->hit.dir.z, &hit, dist, 1, 0, !(state->flags & 4), state->unkB0, 0, 0);
         if (hit.hitType >= 2) {
             func_151D4DAC(hit.obj, owner, &hit.pos, &hit.far, &hit, 0x1A, &state->hit.dir, obj->unkC, obj->unk1);
@@ -205,7 +205,7 @@ s8 func_150F78B4(ProjectileParticle *obj) {
     obj->pos.y += obj->vel.y * dt;
     obj->pos.z += obj->vel.z * dt;
     if (alive == TRUE) {
-        state->timeLeft -= D_800BE9A4;
+        state->timeLeft -= gFrameDelta;
         if (state->timeLeft <= 0.0f) {
             alive = FALSE;
             if (state->flags & 1) {
@@ -283,8 +283,8 @@ s32 func_150F7E20(TrailPuff *obj) {
     size = (sinf(state->phase) * state->sizeAmplitude) + state->sizeBase;
     obj->head.def.height = size;
     obj->head.def.width = size;
-    state->phase = func_15144B68(state->phase + (state->phaseSpeed * D_800BE9A4));
-    state->timeLeft -= D_800BE9A4;
+    state->phase = func_15144B68(state->phase + (state->phaseSpeed * gFrameDelta));
+    state->timeLeft -= gFrameDelta;
     if (state->timeLeft < 0.0f) {
         return 0;
     }
@@ -385,7 +385,7 @@ s32 func_150F81BC(ProjectileParticle *obj) {
         delta.x = obj->pos.x - follow->trailPos.x;
         delta.y = obj->pos.y - follow->trailPos.y;
         delta.z = obj->pos.z - follow->trailPos.z;
-        follow->trailAge += D_800BE9A4;
+        follow->trailAge += gFrameDelta;
         if (func_15145128(&delta, &dir, &dist, &unused) != 0) {
             Vec3f step;
             TrailPuff *puff;

@@ -51,7 +51,7 @@ void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     if (owner == NULL || owner->ob_matrix_ptr == NULL) {
         return;
     }
-    func_1504715C(&ground, owner);
+    collision_initHitFromObject(&ground, owner);
     def = &D_800A0640[index];
     func_15143134(&def->offset, &pos, &owner->ob_matrix_ptr[def->bone]);
     {
@@ -60,7 +60,7 @@ void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
         ray.x = pos.x;
         ray.y = pos.y + 200.0f;
         ray.z = pos.z;
-        if (func_15046C80(&ray, 0, pos.y - 2000.0f, &ground) == 0) {
+        if (collision_probeFloorSurfABSet0Cached(&ray, 0, pos.y - 2000.0f, &ground) == 0) {
             return;
         }
     }
@@ -185,7 +185,7 @@ s32 func_150CC638(GrowParticle *p) {
             }
         }
         if (extra->growDelay < p->age) {
-            f32 growth = extra->growRate * D_800BE9A4;
+            f32 growth = extra->growRate * gFrameDelta;
 
             p->size0 += growth;
             p->size1 += growth;
@@ -334,12 +334,12 @@ s32 func_150CCA7C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
 /* Integrates a tumbling particle's position (with gravity) and rotation over one frame step. */
 s32 func_150CCCB4(TumbleParticle *p) {
-    p->position[0] += p->velocity[0] * D_800BE9A4;
-    p->position[1] += p->velocity[1] * D_800BE9A4 + p->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f;
-    p->position[2] += p->velocity[2] * D_800BE9A4;
-    p->velocity[1] += p->gravity * D_800BE9A4;
-    p->rotation[0] += p->rotationVel[0] * D_800BE9A4;
-    p->rotation[1] += p->rotationVel[1] * D_800BE9A4;
-    p->rotation[2] += p->rotationVel[2] * D_800BE9A4;
+    p->position[0] += p->velocity[0] * gFrameDelta;
+    p->position[1] += p->velocity[1] * gFrameDelta + p->gravity * gFrameDelta * gFrameDelta * 0.5f;
+    p->position[2] += p->velocity[2] * gFrameDelta;
+    p->velocity[1] += p->gravity * gFrameDelta;
+    p->rotation[0] += p->rotationVel[0] * gFrameDelta;
+    p->rotation[1] += p->rotationVel[1] * gFrameDelta;
+    p->rotation[2] += p->rotationVel[2] * gFrameDelta;
     return 1;
 }

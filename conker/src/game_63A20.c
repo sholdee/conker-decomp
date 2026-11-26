@@ -103,7 +103,7 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     if (movement_obj[index].mv->context_b != 2 && movement_obj[index].mv->context_b != 0x13) {
         return gfx;
     }
-    attachment = func_1503195C(&movement_obj[index], 8, 0);
+    attachment = attach_find(&movement_obj[index], 8, 0);
     if (attachment == NULL) {
         return gfx;
     }
@@ -122,7 +122,7 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     }
     func_15036570(index, bones[9], bones[4]);
     gSPDisplayList(gfx++, D_80084350);
-    gfx = func_1515E544(gfx, movement_obj[index].unk304[view], movement_obj[index].unk301,
+    gfx = light_reemitLights(gfx, movement_obj[index].unk304[view], movement_obj[index].unk301,
                         movement_obj[index].unk302, &movement_obj[index].unk314[D_800BE9C0]);
     if ((movement_obj[index].unk66 & 0xC) == 0xC) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
@@ -133,7 +133,7 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     } else {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
     }
-    gfx = func_15094F70(gfx, &D_800903BC, 0, NULL, 0, 0, 0, 2, 3);
+    gfx = sprite_loadDescFrame(gfx, &D_800903BC, 0, NULL, 0, 0, 0, 2, 3);
     gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, &D_800C3FC0[index][0], 1, 0);
     gSPMatrix(gfx++, &bones[4], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

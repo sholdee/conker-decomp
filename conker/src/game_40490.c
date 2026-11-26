@@ -3,7 +3,7 @@
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init_50A0.c).
-u16 *D_800BE570; // RGBA16 screen copy, D_800BE620 x D_800BE624 (game_203340)
+u16 *D_800BE570; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game/Screen/FrameImage/frameimage)
 u8 D_800BE574;
 u8 D_800BE575;
 
@@ -173,8 +173,8 @@ start:
     emit.fadeRate = 9.999999975e-07f;
     if (onGround) {
 ground:
-        func_1510F800(0);
-        spawn.unk48 = func_1510FD20(spawn.pos.x, spawn.pos.z);
+        collision_selectMap(0);
+        spawn.unk48 = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
     } else {
         spawn.unk48 = 0;
         onGround = FALSE; // matching: redundant store, but IDO's allocation needs it
@@ -235,7 +235,7 @@ ground:
         Payload18_150130B4 extra;
         u8 ids[6] = { 2, 3, 4, 5, 6, 7 };
 
-        extra.unk8 = func_151149AC(ids[kind - 13]);
+        extra.unk8 = gfx_findObjectById(ids[kind - 13]);
         if (extra.unk8 == NULL) {
             return 1;
         }
@@ -279,7 +279,7 @@ static s32 (*D_80082EA0[11])(TriggerZone *zone) = {
     func_1501374C,
     func_15013778,
     NULL,
-    func_151C71A0,
+    sight_placeBeam,
     func_15013FC4,
     func_15013F9C,
 };
@@ -297,7 +297,7 @@ s32 func_1501370C(TriggerZone *obj) {
 
 s32 func_1501374C(TriggerZone *obj) {
     obj->flags |= 4;
-    func_1515D088(obj);
+    trail_spawnLevelEffect(obj);
     return 1;
 }
 
@@ -344,7 +344,7 @@ s32 func_15013778(TriggerZone *obj) {
             memcpy((u8 *)effect + 0x28, &packet, sizeof(packet));
         }
         height = obj->ySize;
-        func_1000FA64(0x67C, obj->x, obj->y + height, obj->z,
+        sound_addDynamicSound(0x67C, obj->x, obj->y + height, obj->z,
                       12000, height * 2, height / 2, func_1000EF40, 0, 0, 8, 0);
     }
     return 1;
@@ -357,7 +357,7 @@ static s32 (*D_80082ECC[23])() = {
     NULL,
     NULL,
     func_150139AC,
-    func_151A9060,
+    beam_runZoneHandler,
     func_150156F4,
     func_150151D4,
     NULL,
@@ -443,14 +443,14 @@ s32 func_150139AC(TriggerZone *obj, s32 index) {
     data.unk48 = -10000.0f;
 
     if (entry->unk34 != 0) {
-        func_1510F800(0);
-        data.zone = func_1510FD20(obj->x, obj->z);
+        collision_selectMap(0);
+        data.zone = collision_findZoneLeaf(obj->x, obj->z);
     } else {
         data.zone = NULL;
     }
 
     if (entry->unk33 != 0) {
-        data.unk44 = func_1000FA64(0x4D, obj->x, obj->y, obj->z, 24000, 1000, 300, 0, NULL, 0, 0, 0);
+        data.unk44 = sound_addDynamicSound(0x4D, obj->x, obj->y, obj->z, 24000, 1000, 300, 0, NULL, 0, 0, 0);
     } else {
         data.unk44 = 0;
     }
@@ -476,7 +476,7 @@ s32 func_15013C38(TriggerZone *obj) {
     obj->flags |= 4;
     index = obj->data1;
 
-    if ((D_800D2E4C[0x11] & 4) && (level == 0x13)) { // low byte of D_800D2E4C[0x10]
+    if ((gTaskDoneBits[0x11] & 4) && (level == 0x13)) { // low byte of gTaskDoneBits[0x10]
         return 1;
     }
 
@@ -559,7 +559,7 @@ s32 func_15013DE8(TriggerZone *obj) {
 }
 
 s32 func_15013F9C(TriggerZone *obj) {
-    func_151CD2C0(obj, 0xFF, 1);
+    trail_createStreamTask(obj, 0xFF, 1);
     return 1;
 }
 
@@ -590,7 +590,7 @@ s32 func_15013FC4(TriggerZone *obj) {
     return 1;
 }
 
-/** Registers the object in slot data2 (0-5) of D_800E0900. */
+/** Registers the object in slot data2 (0-5) of gFlamethrowerZones. */
 s32 func_15014004(TriggerZone *obj) {
     s32 slot = obj->data2;
 
@@ -600,7 +600,7 @@ s32 func_15014004(TriggerZone *obj) {
     if (slot >= 6) {
         return 1;
     }
-    D_800E0900[slot] = obj;
+    gFlamethrowerZones[slot] = obj;
     return 1;
 }
 
@@ -640,8 +640,8 @@ s32 func_15014094(TriggerZone *obj) {
     data.unk4 = func_15144598(obj);
     data.unk8 = 0.0f;
 
-    func_1510F800(0);
-    data.zone = func_1510FD20(obj->x, obj->z);
+    collision_selectMap(0);
+    data.zone = collision_findZoneLeaf(obj->x, obj->z);
     data.unk2C = 0;
 
     effect = func_15149130(300, -1, 0x21, -1, 0, 0, sizeof(data), 0xFF, 1);
@@ -650,7 +650,7 @@ s32 func_15014094(TriggerZone *obj) {
     }
 }
 
-/** Calls func_151A9390 for the object with option bits taken from data1 (bit 1 inverted). */
+/** Calls beam_spawnEmitterPreset for the object with option bits taken from data1 (bit 1 inverted). */
 s32 func_15014144(TriggerZone *obj) {
     s32 flags;
     s32 bit8;
@@ -666,7 +666,7 @@ s32 func_15014144(TriggerZone *obj) {
     bit1 = (flags & 1) ? 1 : 0;
     bit16 = (flags & 0x10) ? 0x10 : 0;
 
-    func_151A9390(bit16 | bit1 | bit2 | bit4 | bit8, obj->data2, obj, 0, -10000.0f, 100.0f, -1, 0xFF, 1);
+    beam_spawnEmitterPreset(bit16 | bit1 | bit2 | bit4 | bit8, obj->data2, obj, 0, -10000.0f, 100.0f, -1, 0xFF, 1);
     return 1;
 }
 
@@ -720,11 +720,11 @@ s32 func_150142EC(TriggerZone *obj) {
     f32 scale;
 
     obj->flags |= 4;
-    if (D_80082FA0 >= 2) {
+    if (gScreenLayout >= 2) {
         return 1;
     }
 
-    if ((D_800D2E4C[0x11] & 4) && (level == 0x13)) { // low byte of D_800D2E4C[0x10]
+    if ((gTaskDoneBits[0x11] & 4) && (level == 0x13)) { // low byte of gTaskDoneBits[0x10]
         return 1;
     }
 
@@ -760,7 +760,7 @@ s32 func_150144B8(TriggerZone *obj) {
     } scratch;
 
     obj->flags |= 4;
-    if (D_80082FA0 >= 2) {
+    if (gScreenLayout >= 2) {
         return 1;
     }
     func_150A8050(scratch.matrix, obj->pitch, obj->yaw, 0.0f);
@@ -868,7 +868,7 @@ typedef struct Game4049014B60Packet {
     u8 active;
 } Game4049014B60Packet;
 
-/** Creates six func_151602C0 objects at the object's position, coloured from D_800A0938, and an effect
+/** Creates six light_createWithEffect objects at the object's position, coloured from D_800A0938, and an effect
  * with a random rotation that owns them (they are freed again if no effect slot is free). */
 s32 func_15014B60(TriggerZone *obj) {
     Game4049014B60Packet packet;
@@ -908,7 +908,7 @@ s32 func_15014B60(TriggerZone *obj) {
         r = (level == 0x40) ? 0xFF : D_800A0938[i][0];
         g = (level == 0x40) ? 0 : D_800A0938[i][1];
         count = (level == 0x40) ? 0 : D_800A0938[i][2]; // matching: blue reuses count's register
-        packet.effects[i] = func_151602C0(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
+        packet.effects[i] = light_createWithEffect(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
     }
     effect = func_15149130(300, -1, 0x2E, -1, 0, 0x29, sizeof(packet), 0xFF, 0);
     if (effect != NULL) {
@@ -981,8 +981,8 @@ s32 func_15015104(TriggerZone *obj) {
     data.zone = obj;
     data.unk4 = obj->data2;
 
-    func_1510F800(0);
-    data.node = func_1510FD20(obj->x, obj->z);
+    collision_selectMap(0);
+    data.node = collision_findZoneLeaf(obj->x, obj->z);
 
     value = obj->data3;
     bit1 = (value != 0) ? 1 : 0;
@@ -1033,8 +1033,8 @@ s32 func_150151D4(TriggerZone *obj) {
     data.unk3C = 0;
     data.unk38 = 0;
 
-    func_1510F800(0);
-    data.zone = func_1510FD20(obj->x, obj->z);
+    collision_selectMap(0);
+    data.zone = collision_findZoneLeaf(obj->x, obj->z);
 
     effect = func_15149130(300, -1, 0x3C, -1, 0, 0x2D, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
@@ -1122,8 +1122,8 @@ void func_15015354(TriggerZone *obj) {
     data.edges[3][1] = data.points[0][1] - data.points[3][1];
     data.edges[3][2] = data.points[0][2] - data.points[3][2];
 
-    func_1510F800(0);
-    data.node = func_1510FD20(obj->x, obj->z);
+    collision_selectMap(0);
+    data.node = collision_findZoneLeaf(obj->x, obj->z);
     data.actor = NULL;
 
     effect = func_15149130(300, -1, 0x3D, -1, 0, 0x2E, sizeof(data), 0xFF, 0);
@@ -1146,8 +1146,8 @@ s32 func_15015644(TriggerZone *obj) {
 
     data.unk0 = obj;
     data.unk4 = func_15144598(obj);
-    func_1510F800(0);
-    data.zone = func_1510FD20(obj->x, obj->z);
+    collision_selectMap(0);
+    data.zone = collision_findZoneLeaf(obj->x, obj->z);
     data.unkC = 0;
 
     effect = func_15149130(300, -1, 0x44, -1, 0, 0x2F, sizeof(data), 0xFF, 0);

@@ -143,7 +143,7 @@ Gfx *func_1517A394(Gfx *gfx) {
  * texture, matrix, primitive alpha and render mode, and the shared particle display list D_8008CDF0. */
 Gfx *func_1517A3A0(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
     if (particle->header.type != 0xC && particle->header.type != 0x59 &&
-        func_1510AEE0(D_800D9C10[view], particle->x, particle->y, particle->z, D_800D9B20, D_800D9B1C,
+        func_1510AEE0(gViewMatrices[view], particle->x, particle->y, particle->z, gDefaultNear, gDefaultFar,
                       D_800D35E0, D_800D35E4, NULL, NULL) != 0) {
         if (particle->header.type == 8 && (particle->viewFlags & (1 << view))) {
             particle->viewFlags |= 0x10 << view;
@@ -169,7 +169,7 @@ Gfx *func_1517A3A0(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
         u8 needSync;
         needSync = 0;
         modeL = ((particle->header.type == 8) || (particle->header.type == 9)) ? 0x5049D8 : 0x504240;
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C |
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode |
                                      G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             modeL, &needSync);
     }
@@ -189,7 +189,7 @@ void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
     if (range != 0) {
         particle = func_15167A68(9, 0, sizeof(SpinDebrisParticle), 1, 0xFF, 1);
         if (particle != NULL) {
-            func_1510E82C(0, 0, &groundY, 0, 0, 0, x, y, z, y, 0, 0);
+            collision_findFloor(0, 0, &groundY, 0, 0, 0, x, y, z, y, 0, 0);
             particle->y = particle->groundY = groundY + 3.0f;
             particle->x = x;
             particle->z = z;
@@ -268,11 +268,11 @@ Gfx *func_1517A958(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
 
 /* Loads particle texture `texture` unless it is already the current one. */
 Gfx *func_1517A9A8(Gfx *gfx, s32 texture) {
-    SpriteParams texState; // filled in by func_15094F70; unused here
+    SpriteParams texState; // filled in by sprite_loadDescFrame; unused here
 
     if (texture != D_800DD1B0) {
         // matching: the unsigned shift changes IDO's code
-        gfx = func_15094F70(gfx, &D_80090614, (u32)texture << 8, &texState, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, &D_80090614, (u32)texture << 8, &texState, 0, 0, 0, 2, 3);
         D_800DD1B0 = texture;
     }
     return gfx;
@@ -300,7 +300,7 @@ void func_1517AA20(f32 size, s32 x, s32 y, s32 z, s32 count) {
     }
 }
 
-/* Draw callback for another object type in the same table; forwards to func_1510B7B4. */
+/* Draw callback for another object type in the same table; forwards to view_emitRspSetup. */
 Gfx *func_1517AB7C(Gfx *gfx, s32 arg1, s16 player) {
-    return func_1510B7B4(gfx, player);
+    return view_emitRspSetup(gfx, player);
 }

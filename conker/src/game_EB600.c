@@ -20,7 +20,7 @@ void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
 
 /* Advances unk14 by unk80 per frame; returns 0 once it passes 120. */
 s32 func_150BE1C4(EB340Rising *arg0) {
-    arg0->unk14 += arg0->unk80 * D_800BE9A4;
+    arg0->unk14 += arg0->unk80 * gFrameDelta;
     if (arg0->unk14 > 120.0f) {
         return 0;
     }
@@ -44,7 +44,7 @@ void func_150BE210(WorldObject *obj) {
         obj->task_flag &= ~TASK_FLAG_STATE;
         obj->task_flag |= TASK_FLAG_ON;
         obj->spinY = 0.0f;
-        func_100111C8(obj->sound_id);
+        sound_stop(obj->sound_id);
         obj->sound_id = 0;
     }
 }
@@ -117,8 +117,8 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
 
     if (obj != NULL) {
         halfSize = (obj->scale_xz + obj->scale_y) * 0.5f;
-        func_1515C244(obj, &pos, &radius, &unk2);
-        func_1504715C(&ground, obj);
+        sprite_getActorBodyBounds(obj, &pos, &radius, &unk2);
+        collision_initHitFromObject(&ground, obj);
         primary.countBase = 10;
         primary.countRange = 0;
         primary.pos = pos;

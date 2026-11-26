@@ -23,15 +23,15 @@ void func_1500FE30(void) {
 }
 
 void func_1500FF9C(void) {
-    func_1510C4AC(D_800917B8, 0, 0xAD, 0x75);
+    texture_addUvWobble(D_800917B8, 0, 0xAD, 0x75);
 }
 
 void func_1500FFCC(void) {
     f32 sp44;
     TimedEffect *fx;
 
-    func_15195AA8(D_800B0E00[0], D_800902DC, 1, -1, 0, 0, 0, -4);
-    func_15195AA8(D_800B0E00[1], D_800902DC, 1, -1, 0, 1, 0, -4);
+    flamethrower_addTexScroll(D_800B0E00[0], D_800902DC, 1, -1, 0, 0, 0, -4);
+    flamethrower_addTexScroll(D_800B0E00[1], D_800902DC, 1, -1, 0, 1, 0, -4);
     func_1500FE30();
     func_1500FF9C();
     sp44 = 0.0f;

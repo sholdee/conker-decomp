@@ -4,7 +4,7 @@
 
 
 void func_150F9A20(Camera *arg0) {
-    if (func_1509BE40(1, 0x4025, 6, 0x2000)) {
+    if (script_query(1, 0x4025, 6, 0x2000)) {
         arg0->AvailableModes |= 0x80;
         arg0->AvailableModes &= ~8;
         arg0->YOffsetTget = 85.0f;

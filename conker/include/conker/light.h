@@ -7,17 +7,17 @@
 /*
  * Subsystem "light": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_36680.c
+ *   game/Lighting/LevelLights/levellights.c
  *   game_38050.c
- *   game_487D0.c
- *   game_FEFF0.c
- *   game_FF900.c
- *   game_135D00.c
- *   game_18A8F0.c
- *   game_18C660.c
+ *   game/Lighting/PlayerLight/playerlight.c
+ *   game/Effects/AmbientPulse/ambientpulse.c
+ *   game/Effects/ColourWave/colourwave.c
+ *   game/Effects/SwingingLamp/swinginglamp.c
+ *   game/Lighting/PointLight/pointlight.c
+ *   game/Lighting/AmbientZone/ambientzone.c
  *   game/Effects/Light/light.c
- *   game_1BD880.c
- *   game_1E6260.c
+ *   game/Effects/ActorFlicker/actorflicker.c
+ *   game/Effects/LampParticle/lampparticle.c
  */
 
 /* Per-channel colour wave: channel = base + amplitude * sin(phase). */
@@ -95,10 +95,10 @@ typedef struct {
     /* 0x170 */ LampSwing swing;
 } LampParticle;
 
-/* game_36680.c */
-void func_150091D0(void);
-void func_150092DC(void);
-void func_15009334(s32 index);
+/* game/Lighting/LevelLights/levellights.c */
+void light_reset(void);
+void light_applyZones(void);
+void light_applyZone(s32 index);
 void func_150095D8(PointLight *light, s32 id);
 void func_15009600(PointLight *light, s32 id);
 void func_15009628(PointLight *light, s32 id);
@@ -162,88 +162,88 @@ void func_1500A79C(PointLight *light, s32 id);
 void func_1500A7E8(PointLight *light, s32 id);
 void func_1500A8C8(PointLight *light, s32 id);
 void func_1500A904(PointLight *light, s32 id);
-void func_1500A94C(PointLight *light, s32 id);
+void light_runCallback(PointLight *light, s32 id);
 void func_1500A990(s32 unused);
-void func_1500AB5C(s32 action);
+void light_runAmbientAction(s32 action);
 
 /* game_38050.c */
-void func_1500ABA0(s32 arg0);
-void func_1500AC14(void);
-void func_1500AD84(s32 slot, s32 id, s32 flags);
+void light_initParticleSlots(s32 arg0);
+void light_loadParticleTextures(void);
+void light_setupParticleSlot(s32 slot, s32 id, s32 flags);
 s32 func_1500AF08(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jitter, u8 kind, s32 parity);
-s32 func_1500B1F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-s32 func_1500B3B0(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 light_scatterParticles(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 light_placeParticlePattern(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
 s32 func_1500B714(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
 s32 func_1500B8F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
 s32 func_1500BAB8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
 s32 func_1500BC7C(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
 void func_1500BE40(s32 unused);
-void func_1500BE68(void);
-void func_1500BEC0(void);
+void light_resetParticles(void);
+void light_buildLevelParticles(void);
 
-/* game_487D0.c */
-void func_1501B320(s32 player);
+/* game/Lighting/PlayerLight/playerlight.c */
+void light_easePlayerLight(s32 player);
 void func_1501B640(s32 player);
 
-/* game_FEFF0.c */
+/* game/Effects/AmbientPulse/ambientpulse.c */
 void func_150D1B40(AmbientPulse *arg0); /* AmbientPulse: conker/effect.h */
 void func_150D1BD0(s32 *arg0);
 
-/* game_FF900.c */
-void func_150D2450(ColourWaveEffect *object);
+/* game/Effects/ColourWave/colourwave.c */
+void light_updateColourWave(ColourWaveEffect *object);
 
-/* game_135D00.c */
-void func_15108850(PointLight *light);
+/* game/Effects/SwingingLamp/swinginglamp.c */
+void light_spawnSwingingLamps(PointLight *light);
 s32 func_15108AB4(DynModel *model);
 void func_15108B80(DynModel *model);
 void func_15108BC0(DynModel *model);
 s32 func_15108C38(DynModel *model);
 s32 func_15108D24(DynModel *model, s32 viewport);
-s32 func_15108E10(LightEffect *effect);
-void func_15108FFC(s32 track, s32 duration, u8 sceneTag);
-void func_15109064(DynModel *model, LampTrackMsg *msg, u8 event);
-void func_151090DC(void);
+s32 light_updateLampLight(LightEffect *effect);
+void light_setLampTrack(s32 track, s32 duration, u8 sceneTag);
+void light_handleLampMessage(DynModel *model, LampTrackMsg *msg, u8 event);
+void light_toggleLamp(void);
 s32 func_15109120(DynModel *model, s16 viewport);
 
-/* game_18A8F0.c */
-extern u8 D_800DCD20[3]; // ambient light colour
+/* game/Lighting/PointLight/pointlight.c */
+extern u8 gAmbientColour[3]; // ambient light colour
 extern u8 D_800DCD24[3]; // tint colour
-extern u8 D_800DCD27; // priority of the current ambient colour
+extern u8 gAmbientPriority; // priority of the current ambient colour
 extern u8 D_800DCD28[3];
-extern s8 D_800DCD30[4][3]; // per-player directional light direction
+extern s8 gPlayerLightDirs[4][3]; // per-player directional light direction
 extern u8 D_800DCD3C;
 extern u8 D_800DCD3D;
 extern PointLightGfx D_800DCD40; // padding light for odd light counts
-extern PointLight *D_800DCD78; // list of all point lights
+extern PointLight *gPointLights; // list of all point lights
 extern s32 D_800DCD7C;
-extern ZoneLink *D_800DCD80; // ambient colour TriggerZones
-extern ZoneLink *D_800DCD84; // tint TriggerZones
+extern ZoneLink *gAmbientZones; // ambient colour TriggerZones
+extern ZoneLink *gDirectionalZones; // tint TriggerZones
 void *func_1515D440(void);
-void *func_1515D480(s32 count);
-void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority);
-PointLight *func_1515D520(void);
+void *light_allocGfxLights(s32 count);
+void light_setAmbient(s32 r, s32 g, s32 b, u8 priority);
+PointLight *light_allocPointLight(void);
 PointLight *func_1515D5AC(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group);
-PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group); /* func_1515F10C frees it */
-void func_1515D69C(void);
+PointLight *light_createPointLight(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group); /* light_freePointLight frees it */
+void light_clearPlayerMasks(void);
 void func_1515D6C8(void);
 Gfx *func_1515D6D0(Gfx *gfx, s32 player);
-Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLightGfx *lightBuf, s32 maxLights,
+Gfx *light_pickLights(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLightGfx *lightBuf, s32 maxLights,
                    Ambient *ambient, u8 *outCount, s32 mask, u8 *smoothColor, s32 flags, PointLight **outLights);
-void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags);
+void light_getAmbientAt(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags);
 void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB);
-Gfx *func_1515E544(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte, Ambient *ambient);
-void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg6, s32 flags);
-TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node);
-void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags);
+Gfx *light_reemitLights(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte, Ambient *ambient);
+void light_getLitColourAt(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg6, s32 flags);
+TriggerZone *light_findZone(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node);
+void light_fillGfxLight(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags);
 void func_1515EF74(s16 *mtx);
-f32 func_1515F008(s16 *mtx, s32 i);
+f32 light_getMtxElement(s16 *mtx, s32 i);
 void func_1515F040(f32 value, s32 i);
 void func_1515F0AC(f32 value, s32 i);
 /* (PointLight *light); declared without a prototype: game/Effects/Light/light.c passes a second argument */
-void func_1515F10C();
-void func_1515F170(s32 group, u8 disabled);
+void light_freePointLight();
+void light_setGroupDisabled(s32 group, u8 disabled);
 
-/* game_18C660.c */
+/* game/Lighting/AmbientZone/ambientzone.c */
 extern f32 D_800DCD90; // total area of the D_800DCDC4 spawn regions
 extern f32 D_800DCD94; // ambient effect colour being eased (red, green, blue)
 extern f32 D_800DCD98;
@@ -275,32 +275,32 @@ void func_1515FC60(Actor *obj, TriggerZone *zone);
 
 /* game/Effects/Light/light.c */
 extern u8 D_800DCDD0;
-LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
+LightEffect *light_createWithEffect(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                            u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA);
-LightEffect *func_1516037C(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
-void func_151603FC(LightEffect *effect);
-void func_151604A0(void *arg0, u8 *message, u8 event);
+LightEffect *light_createEffect(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
+void light_updateEffect(LightEffect *effect);
+void light_handleEffectEvent(void *arg0, u8 *message, u8 event);
 s32 func_15160600(LightEffect *effect);
 s32 func_1516065C(LightEffect *effect);
 s32 func_15160684(LightEffect *effect);
 s32 func_151606A8(LightEffect *effect);
 s32 func_151607A4(LightEffect *effect);
-void func_15160954(f32 *intensity, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect);
-LightEffect *func_15160A58(Actor *actor, u8 bone, const Vec3f *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7,
+void light_startFlicker(f32 *intensity, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect);
+LightEffect *light_createAttached(Actor *actor, u8 bone, const Vec3f *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7,
                            s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 eventHandler, u8 argE,
                            s32 argF);
-u8 func_15160B74(LightEffect *effect);
-LightEffect *func_15160CDC(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, f32 scale, u8 arg5, s16 lifetime,
+u8 light_followActor(LightEffect *effect);
+LightEffect *light_createBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, f32 scale, u8 arg5, s16 lifetime,
                            s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 eventHandler, u8 flagHit, u8 argE,
                            s32 argF);
-s32 func_15160E30(LightEffect *effect);
-s32 func_15161238(Actor *actor, Actor *exclude);
+s32 light_updateBeam(LightEffect *effect);
+s32 light_isActorLive(Actor *actor, Actor *exclude);
 LightEffect *func_1516127C(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_15161334(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_15161408(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_15161494(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2);
-LightEffect *func_151615F8(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg4, s32 arg5);
+LightEffect *light_createFlicker(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg4, s32 arg5);
 void light_sendEvent(u8 lightType, u8 event, void *arg2);
 void func_15161714(LightEffect *effect);
 void func_15161740(LightEffect *effect);
@@ -310,49 +310,49 @@ void func_151617C4(LightEffect *effect);
 void func_151617E4(LightEffect *effect);
 void func_15161804(LightEffect *effect);
 void func_15161860(LightEffect *effect);
-void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *position, s16 arg5, s16 arg6);
+void light_playRandomSound(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *position, s16 arg5, s16 arg6);
 LightEffect *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3);
 s32 func_15161A68(LightEffect *effect);
-LightEffect *func_15161E24(Actor *actor, u8 eventHandler, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6,
+LightEffect *light_createAtActor(Actor *actor, u8 eventHandler, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6,
                            s32 arg7, u8 arg8, s32 arg9);
 s32 func_15161F2C(LightEffect *effect);
-void func_15161F4C(LightEffect *effect, ActorEvent *event, u8 eventId);
+void light_handleActorEvent(LightEffect *effect, ActorEvent *event, u8 eventId);
 LightEffect *func_15162034(PointLight *light, u8 arg1, s32 arg2);
-void func_15162110(s32 arg0);
-void func_151621B8(ColourPulseEffect *object);
-LightEffect *func_151623F4(PointLight *light, u8 kind, u8 type, u8 arg3, s8 update, s16 lifetime, u8 arg6, s32 arg7);
-s32 func_15162510(LightEffect *effect);
-LightEffect *func_15162740(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
-LightEffect *func_1516284C(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, u8 arg5,
+void light_startColourCycle(s32 arg0);
+void light_updateColourCycle(ColourPulseEffect *object);
+LightEffect *light_createColourCycle(PointLight *light, u8 kind, u8 type, u8 arg3, s8 update, s16 lifetime, u8 arg6, s32 arg7);
+s32 light_updateColourCycleEffect(LightEffect *effect);
+LightEffect *light_createJitter(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
+LightEffect *light_createJitterAt(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, u8 arg5,
                            u8 arg6, s32 extraSize, u8 kind, u8 arg9, s32 argA);
-LightEffect *func_1516295C(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, s8 onLow,
+LightEffect *light_createCycle(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, s8 onLow,
                            s8 onRise, s8 onHigh, s8 onFall, s32 extraSize, u8 argB, s32 argC);
-s32 func_15162B28(LightEffect *effect);
+s32 light_updateCycle(LightEffect *effect);
 void func_15162EF8(LightEffect *effect);
 void func_15162F50(LightEffect *effect);
-LightEffect *func_15162FAC(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
-s32 func_151630F4(LightEffect *effect);
-LightEffect *func_15163414(LightEffectHeader *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6,
+LightEffect *light_createLightning(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
+s32 light_updateLightning(LightEffect *effect);
+LightEffect *light_createTracking(LightEffectHeader *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6,
                            u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 extraSize, u8 argD, s32 argE);
-s32 func_15163504(LightEffect *effect);
+s32 light_updateTracking(LightEffect *effect);
 void func_151635A8(LightEffect *effect, s32 arg1, u8 eventId);
-LightEffect *func_15163604(PointLight *light, u8 kind, u8 type, s16 lifetime, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
-s32 func_15163704(LightEffect *effect);
+LightEffect *light_createPulse(PointLight *light, u8 kind, u8 type, s16 lifetime, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
+s32 light_updateOneShotPulse(LightEffect *effect);
 void func_1516381C(PointLight *light, u8 type, u8 arg2, s32 arg3);
 LightEffect *func_1516387C(PointLight *light, u8 flags, s8 update, s16 lifetime, u8 type, s32 size, u8 arg6, s32 arg7);
 s32 func_151638E0(LightEffect *effect);
 void func_151639D0(LightEffect *effect, s32 arg1, u8 eventId);
 void func_15163A18(LightEffect *effect, s32 arg1, u8 eventId);
-LightEffect *func_15163A60(u8 objectId, u8 arg1, s32 arg2);
-s32 func_15163B98(LightEffect *effect);
-LightEffect *func_15163BE8(Actor *actor, u8 arg1, s32 arg2);
+LightEffect *light_createObjectPulse(u8 objectId, u8 arg1, s32 arg2);
+s32 light_updateObjectPulse(LightEffect *effect);
+LightEffect *light_createActorPulse(Actor *actor, u8 arg1, s32 arg2);
 s32 func_15163CD0(LightEffect *effect);
-void func_15163CF8(LightPulse *pulse, LightEffect *effect);
-void func_15163DEC(LightEffect *effect, LightJitter *jitter);
+void light_applyPulse(LightPulse *pulse, LightEffect *effect);
+void light_applyJitter(LightEffect *effect, LightJitter *jitter);
 s32 func_15163F50(LightEffect *effect, LightActorRef *ref);
 void func_15163FEC(LightEffect *effect, ActorEvent *event, u8 eventId);
 void func_151640C0(LightEffect *effect, ActorEvent *event, u8 eventId);
-void func_15164134(LightEffect *effect, ActorEvent *event, u8 eventId);
+void light_handleBeamEvent(LightEffect *effect, ActorEvent *event, u8 eventId);
 LightEffect *func_15164208(PointLight *light, u8 id, u8 arg2, s32 arg3);
 s32 func_1516429C(LightEffect *effect);
 void func_1516434C(LightEffect *effect, LightFlashEvent *event, u8 eventId);
@@ -366,14 +366,14 @@ extern const f32 D_800A6760[24];
 extern const f32 D_800A67C0[24];
 extern const f32 D_800A6820[24];
 
-/* game_1BD880.c */
-void func_151903D0(LightEffect *effect);
+/* game/Effects/ActorFlicker/actorflicker.c */
+void light_updateActorFlicker(LightEffect *effect);
 
-/* game_1E6260.c */
-void func_151B8DB0(PointLight *light, u8 kind, u8 arg2, s32 arg3);
-s32 func_151B9214(LampParticle *particle);
-s32 func_151B9310(Mtx *dest, LampParticle *particle);
-s32 func_151B9408(LightEffect *effect);
+/* game/Effects/LampParticle/lampparticle.c */
+void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3);
+s32 light_updateLampParticle(LampParticle *particle);
+s32 light_getLampParticleMatrix(Mtx *dest, LampParticle *particle);
+s32 light_updateLampParticleLight(LightEffect *effect);
 void func_151B9660(LampParticle *particle);
 
 #endif

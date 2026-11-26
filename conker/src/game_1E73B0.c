@@ -90,7 +90,7 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
     if ((owner->unk74 & 0xF) == 0xF) {
         return 0;
     }
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         if (owner->CameraPtr != NULL && owner->mv != NULL &&
             owner->mv->SniperState != 0 && viewport == owner->CameraPtr->CNumber) {
             return 0;
@@ -115,7 +115,7 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
     modelMtx[2][3] = 0.0f;
     modelMtx[3][3] = 1.0f;
     guMtxF2L(modelMtx, &effect->mtx[D_800BE9C0]);
-    memcpy(viewMtx, &D_800D9D10[viewport], sizeof(viewMtx));
+    memcpy(viewMtx, &gViewProjMatrices[viewport], sizeof(viewMtx));
     viewMtx[0][3] = 0.0f;
     viewMtx[1][3] = 0.0f;
     viewMtx[2][3] = 0.0f;
@@ -216,7 +216,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     burst.angles.pitchBase = -0x3F;
     burst.angles.pitchRange = 0x34;
     burst.spray.countBase = 6;
-    if (D_80082FA0 >= 2) {
+    if (gScreenLayout >= 2) {
         shift = 1;
     } else {
         shift = 0;
@@ -232,7 +232,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     burst.spray.sizeRange = 68.0f;
     burst.spray.sizeSlopeBase = 609.0f;
     burst.spray.sizeSlopeRange = 271.0f;
-    if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
+    if ((gScreenLayout >= 2) || (D_8008FD8C >= 8)) {
         shift = 1;
     } else {
         shift = 0;
@@ -248,18 +248,18 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     burst.spray.drag = 0.7690000534f;
     burst.spray.gravityBase = -0.1690000147f;
     burst.spray.gravityRange = 0;
-    if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
+    if ((gScreenLayout >= 2) || (D_8008FD8C >= 8)) {
         burst.spray.eventFunc = -1;
     } else {
         burst.spray.eventFunc = 0;
     }
     func_1514FCE8(&burst, arg1, arg2);
     if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
-        func_1504715C(&floor, obj);
+        collision_initHitFromObject(&floor, obj);
         mtx = &obj->ob_matrix_ptr[1];
         {
             typedef s32 T151; // matching: a declaration makes -g3 open a scope here, which steers the scheduler
-            func_1503F404(mtx, &outA0, &outA1, &outA2, &objPos.x, &objPos.y, &objPos.z, &outB0, &outB1, &outB2);
+            model_decomposeBoneMatrix(mtx, &outA0, &outA1, &outA2, &objPos.x, &objPos.y, &objPos.z, &outB0, &outB1, &outB2);
         }
         {
             typedef s32 T152; // matching: as above
@@ -411,7 +411,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
 
 /* Starts sound 0x4A7 at `obj`; func_151BB0E0 keeps it updated. */
 void func_151BB044(Actor *obj) {
-    func_1000FA64(0x4A7, obj->xpos, obj->ypos, obj->zpos, 0x2000, 0x320, 0xC8,
+    sound_addDynamicSound(0x4A7, obj->xpos, obj->ypos, obj->zpos, 0x2000, 0x320, 0xC8,
                   (SoundRecordCallback)func_151BB0E0, obj, 0, 8, 0);
 }
 
@@ -470,10 +470,10 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
             if ((((state ^ prevState) & 0x7F) & 2) && (state & 2)) {
                 sound = 0x4A5;
             } else {
-                sound = func_1000F568(0x4A3, 4);
+                sound = sound_pickVariant(0x4A3, 4);
             }
-            if (!func_10010894(obj)) {
-                func_10010154(sound, obj, 0x6D60, 300, 1800);
+            if (!sound_isActorSound1Playing(obj)) {
+                sound_playActorSound2(sound, obj, 0x6D60, 300, 1800);
             }
             sound = 0;
         }
@@ -488,7 +488,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
             param = 0x2000;
         }
         if (sound != 0) {
-            func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, param, 0x320, 0xC8,
+            sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, param, 0x320, 0xC8,
                           (SoundRecordCallback)func_151BB0E0, obj, state | 0x12CFF00, 8, 0);
             goto end; // matching: a plain return 1 here is scheduled differently
         }
@@ -513,7 +513,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
                 if (timer <= 0) {
                     timer = 0;
                     if (*soundId == 0x4A8) {
-                        func_1000FA64(0x4A9, obj->xpos, obj->ypos, obj->zpos, 0x2EE0, 0x320,
+                        sound_addDynamicSound(0x4A9, obj->xpos, obj->ypos, obj->zpos, 0x2EE0, 0x320,
                                       0xC8, (SoundRecordCallback)func_151BB0E0, obj, state | 0x880, 8, 0);
                         timer = (func_150ADA20() & 0x200) + 900;
                     }
@@ -524,7 +524,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
         chan->userData = (fadingIn << 7) | state | (fade << 8) | (timer << 16);
         if ((*volume == 0) || (chan->flags & 0x80)) {
             if (chan->unk24 != 0) {
-                func_100111C8(chan->unk24);
+                sound_stop(chan->unk24);
                 chan->unk24 = 0;
             }
             *soundId = 0;
@@ -654,7 +654,7 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         burst.angles.pitchBase = -0x40;
         burst.angles.pitchRange = 0x47;
         burst.spray.countBase = 6;
-        burst.spray.countRange = 4 >> ((D_80082FA0 >= 2) ? 1 : 0);
+        burst.spray.countRange = 4 >> ((gScreenLayout >= 2) ? 1 : 0);
         burst.spray.pos = center;
         burst.spray.particleCountBase = 7;
         burst.spray.speedBase = 23.0f;
@@ -663,7 +663,7 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         burst.spray.sizeRange = 53.0f;
         burst.spray.sizeSlopeBase = 203.0f;
         burst.spray.sizeSlopeRange = 414.0f;
-        burst.spray.particleCountRange = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
+        burst.spray.particleCountRange = 3 >> ((gScreenLayout >= 2 || D_8008FD8C >= 8) ? 1 : 0);
         burst.spray.delayBase = 25;
         burst.spray.delayRange = 15;
         burst.spray.alphaBase = 100;
@@ -674,17 +674,17 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         burst.spray.drag = 0.8720000386f;
         burst.spray.gravityBase = -0.3980000317f;
         burst.spray.gravityRange = 0.3640000224f;
-        if (D_80082FA0 >= 2 || D_8008FD8C >= 8) {
+        if (gScreenLayout >= 2 || D_8008FD8C >= 8) {
             burst.spray.eventFunc = -1;
         } else {
             burst.spray.eventFunc = 0;
         }
         func_1514FCE8(&burst, arg3, arg4);
-        func_1504715C(&floor, obj);
+        collision_initHitFromObject(&floor, obj);
         probe.x = center.x;
         probe.y = center.y + 100.0f;
         probe.z = center.z;
-        if (func_15046C80(&probe, 0, center.y - 1000.0f, &floor) != 0) {
+        if (collision_probeFloorSurfABSet0Cached(&probe, 0, center.y - 1000.0f, &floor) != 0) {
             hit.x = probe.x;
             hit.y = floor.height;
             hit.z = probe.z;
@@ -733,7 +733,7 @@ void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     header2.y = pos->y;
     header2.z = pos->z;
 
-    func_151602C0(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
 // matching: this file was compiled with s32 parameters where the definition (game_113D60.c) has u8 and s16,
@@ -757,10 +757,10 @@ void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
 static const Vec3f D_800AA760 = { 0.0f, 100.0f, 80.0f };
 static const Vec3f D_800AA76C = { 0.0f, -90.0f, 450.0f };
 
-/* Spawns the func_15160CDC effect (tables D_800AA760/D_800AA76C) on `obj`. */
+/* Spawns the light_createBeam effect (tables D_800AA760/D_800AA76C) on `obj`. */
 void func_151BC074(Actor *obj) {
     if (obj != NULL) {
-        func_15160CDC(obj, 1, &D_800AA760, &D_800AA76C, 0.01769899949f, 2, 300,
+        light_createBeam(obj, 1, &D_800AA760, &D_800AA76C, 0.01769899949f, 2, 300,
                       0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
     }
 }
@@ -784,13 +784,13 @@ typedef struct {
 } Fx15147A80;
 
 /*
- * Spawns three effects that follow `obj` (the first only while D_80082FA0 < 2 and D_8008FD8C < 5),
+ * Spawns three effects that follow `obj` (the first only while gScreenLayout < 2 and D_8008FD8C < 5),
  * each with a reference back to its owner.
  */
 void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
     BloodTrail *fx1;
 
-    if ((D_80082FA0 < 2) && (D_8008FD8C < 5)) {
+    if ((gScreenLayout < 2) && (D_8008FD8C < 5)) {
         BloodTrailDesc desc;
         ActorRef ref;
 
@@ -846,7 +846,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         header.update = 14;
         header.lifetime = 300;
         header.lightType = 31;
-        fx3 = func_15163414(&header, &obj->xpos, &obj->ypos, &obj->zpos,
+        fx3 = light_createTracking(&header, &obj->xpos, &obj->ypos, &obj->zpos,
                            0, 0, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, arg1, arg2);
         if (fx3 != NULL) {
             memcpy(&fx3->data.trackActor.ref, &ref, sizeof(ref));
@@ -878,9 +878,9 @@ void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     offset.x = 0.0f;
     offset.y = 0.0f;
     offset.z = 0.0f;
-    velocity.x += -dx * D_800BE9A8 * scale;
-    velocity.y += -dy * D_800BE9A8 * scale;
-    velocity.z += -dz * D_800BE9A8 * scale;
+    velocity.x += -dx * gFrameDeltaInv * scale;
+    velocity.y += -dy * gFrameDeltaInv * scale;
+    velocity.z += -dz * gFrameDeltaInv * scale;
     fraction_a = func_150ADA68();
     fraction_b = func_150ADA68();
     random_a = func_150ADA20();
@@ -992,7 +992,7 @@ s32 func_151BC794(RibbonTrail *trail) {
     delta.y = trail->head.tmpl.pos.y - data->lastPos.y;
     delta.z = trail->head.tmpl.pos.z - data->lastPos.z;
     dist = func_15143E64(&delta);
-    data->pending += dist * 0.04870799929f * D_800BE9A4;
+    data->pending += dist * 0.04870799929f * gFrameDelta;
     data->texU += dist * 9.708835602f;
     if (data->pending > 1.0f) {
         Vec3f pos;
@@ -1005,7 +1005,7 @@ s32 func_151BC794(RibbonTrail *trail) {
         f32 uSpan;
 
         inv = 1.0f / data->pending;
-        y = data->unk18 + D_800BE9A4;
+        y = data->unk18 + gFrameDelta;
         pos = data->lastPos;
         startU = data->lastTexU;
         u = startU;
@@ -1087,11 +1087,11 @@ Gfx *func_151BCA90(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
             points = trail->points;
             camPos = func_15144B34(viewport);
             dirty = 1;
-            gfx = func_15142E24(gfx, &D_80090B60[31], 0, 0, 0, 0, 0x1F, 0, 0, &dirty, 3);
+            gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &dirty, 3);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &dirty);
             gfx = func_1513F4E4(gfx, 0x4E, &dirty);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &dirty);
+            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &dirty);
             if (trail->head.tmpl.flags & 2) {
                 /* ribbon starts at the live position */
                 i = trail->head.end - 1;
@@ -1715,13 +1715,13 @@ void func_151BE1E4(BurstEffect *effect) {
 s32 func_151BE210(BurstSpark *spark) {
     BurstSparkData *data = &spark->data;
 
-    data->widthTimer -= D_800BE9A4;
+    data->widthTimer -= gFrameDelta;
     if (data->widthTimer < 0.0f) {
         data->widthTimer = func_150ADA68() * 4.0f;
         data->widthTarget = func_150ADA68() * data->widthRange + data->widthBase;
     }
     spark->head.def.width += (data->widthTarget - spark->head.def.width) * 0.35f;
-    data->heightTimer -= D_800BE9A4;
+    data->heightTimer -= gFrameDelta;
     if (data->heightTimer < 0.0f) {
         data->heightTimer = func_150ADA68() * 9.0f;
         if (func_150ADA20() & 1) {
@@ -1731,7 +1731,7 @@ s32 func_151BE210(BurstSpark *spark) {
         }
     }
     spark->head.def.height += (data->heightTarget - spark->head.def.height) * 0.4f;
-    data->alphaTimer -= D_800BE9A4;
+    data->alphaTimer -= gFrameDelta;
     if (data->alphaTimer < 0.0f) {
         data->alphaTimer = func_150ADA68() * 10.0f;
         data->alphaTarget = func_150ADA68() * data->alphaRange + data->alphaBase;

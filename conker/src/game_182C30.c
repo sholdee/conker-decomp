@@ -22,7 +22,7 @@ PlayerMarker *func_15155780(s32 playerId, s32 owner) {
     marker->heightOffset = 0.0f;
     marker->state = 0;
     marker->light = NULL;
-    func_1518C900(0xA6);
+    attach_loadModelDl(0xA6);
     return marker;
 }
 
@@ -66,13 +66,13 @@ void func_1515589C(PlayerMarker *marker) {
     case 0:
         info = movement_obj[playerId].mv;
         kind = (info != NULL) ? info->context_b : 0;
-        if (!(kind & 0x80) && (kind != 0x2A) && (kind != 0x2B) && ((kind != 0x42) || !(D_800D2E60[8] & 4)) &&
+        if (!(kind & 0x80) && (kind != 0x2A) && (kind != 0x2B) && ((kind != 0x42) || !(gSeenTextBits[8] & 4)) &&
             (kind != 0x2C) && (info->SniperState == 0) && (kind != 0) && (kind != 0x1F) && !player->inwater) {
             marker->state = 1;
             marker->header.state = 120;
-            func_10010F30(0x1EB, 0x7FFF, 0x40, 0, 0);
+            sound_play(0x1EB, 0x7FFF, 0x40, 0, 0);
         } else if (marker->light != NULL) {
-            func_1515F10C(marker->light);
+            light_freePointLight(marker->light);
             marker->light = NULL;
         }
         break;
@@ -98,7 +98,7 @@ void func_1515589C(PlayerMarker *marker) {
                                    (player->ypos + 160.0f + marker->heightOffset + extraHeight);
             marker->light->z = player->zpos;
         } else {
-            marker->light = func_1515D5F8(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+            marker->light = light_createPointLight(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
         }
         break;
     case 2:
@@ -106,7 +106,7 @@ void func_1515589C(PlayerMarker *marker) {
             marker->state = 0;
         }
         if (marker->light != NULL) {
-            func_1515F10C(marker->light);
+            light_freePointLight(marker->light);
             marker->light = NULL;
         }
         break;
@@ -125,7 +125,7 @@ void func_1515589C(PlayerMarker *marker) {
             marker->light->y = func_15048A40(marker->bobPhase) * 15.0f + (player->ypos + 160.0f);
             marker->light->z = player->zpos;
         } else {
-            marker->light = func_1515D5F8(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+            marker->light = light_createPointLight(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
         }
         break;
     }
@@ -149,14 +149,14 @@ Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
             extraHeight = 0.0f;
         }
         yaw = camera_global_Cameras[view].TrueCameraAngle;
-        gfx = func_15096934(gfx);
+        gfx = sprite_endDraw(gfx);
         func_15043D90(&marker->mtx[D_800BE9C0], 0.0f, yaw, 0.0f, 2.25f, 2.25f, 2.25f, player->xpos,
                       func_15048A40(marker->bobPhase) * 15.0f +
                           (player->ypos + 160.0f + extraHeight + marker->heightOffset),
                       player->zpos);
         gSPMatrix(gfx++, &marker->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPClearGeometryMode(gfx++, G_ZBUFFER);
-        gSPDisplayList(gfx++, D_800E0148[166]->dlists); /* attachment model 166, loaded by func_1518C900 */
+        gSPDisplayList(gfx++, gAttachModelHeaders[166]->dlists); /* attachment model 166, loaded by attach_loadModelDl */
         gSPSetGeometryMode(gfx++, G_ZBUFFER);
     }
     return gfx;
@@ -168,10 +168,10 @@ void func_15155EF8(PlayerMarker *arg0) {
     PlayerMarker *marker = arg0; // matching: IDO keeps the object in a1 only through a copy of the parameter
 
     if (marker->light != NULL) {
-        func_1515F10C(marker->light);
+        light_freePointLight(marker->light);
     }
     func_15169804(&marker->header);
-    func_1518CA04(0xA6);
+    attach_releaseModel(0xA6);
 }
 
 /* For the current player: re-arms a finished marker (state 2 -> 0) or ends a timed one (state 3 -> 2). */

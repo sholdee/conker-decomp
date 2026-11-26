@@ -92,8 +92,8 @@ void func_15010A60(void) {
         part.pos = pos;
         tail.unk18 = pos;
 
-        func_1510F800(0);
-        part.unk5C = func_1510FD20(part.pos.x, part.pos.z);
+        collision_selectMap(0);
+        part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
 
         rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
@@ -143,7 +143,7 @@ void func_15010A60(void) {
             header.update = 0x16;
             header.lifetime = 0x12C;
             header.lightType = 0;
-            snd = func_151602C0(&header, &header2, 0xC, 0xFF, 0xFF, 0xFF, 0xFF, 0, 4, 0xFF, 1);
+            snd = light_createWithEffect(&header, &header2, 0xC, 0xFF, 0xFF, 0xFF, 0xFF, 0, 4, 0xFF, 1);
             if (snd != NULL) {
                 memcpy(&snd->data.object, &payload, sizeof(payload));
             }

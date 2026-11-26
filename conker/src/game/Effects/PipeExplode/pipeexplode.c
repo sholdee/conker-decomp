@@ -6,15 +6,15 @@ typedef struct PipeIds {
     s32 id[3];
 } PipeIds;
 
-/* The three exploding pipes: where each is and which way it faces (game_3F820.c reads it too). */
-const PipeSpot D_8009F920[] = {
+/* The three exploding pipes: where each is and which way it faces (game/View/ViewOrtho/viewortho.c reads it too). */
+const PipeSpot gPipeSpots[] = {
     { { 975.0f, 351.0f, 1723.0f }, 0x94 },
     { { 1005.0f, 351.0f, -1706.0f }, 0xEA },
     { { -1980.0f, 351.0f, -17.0f }, 0x3F },
 };
 
 /* Explodes pipe `pipe`: fires the four effect spawners at its spot and plays two sounds there. */
-void func_150B2740(u8 pipe, u8 arg1) {
+void pipeexplode_explode(u8 pipe, u8 arg1) {
     DebrisEmitter argsA;
     s16 i;
     s32 pad; // matching: stack space (an unused local)
@@ -27,14 +27,14 @@ void func_150B2740(u8 pipe, u8 arg1) {
 
     func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
     argsA.count = (func_150ADA20() & 1) + 3;
-    argsA.pos = D_8009F920[pipe].pos;
+    argsA.pos = gPipeSpots[pipe].pos;
     argsA.radius = 170.0f;
     argsA.speedBase = 16.20000076f;
     argsA.speedRange = 17.60000038f;
     argsA.velYBase = 19.30000114f;
     argsA.velYRange = 21.30000114f;
     argsA.lifetime = 300;
-    argsA.yawBase = D_8009F920[pipe].yaw - 0x20;
+    argsA.yawBase = gPipeSpots[pipe].yaw - 0x20;
     argsA.yawRange = 65;
     argsA.pitchBase = -40;
     argsA.pitchRange = 80;
@@ -55,12 +55,12 @@ void func_150B2740(u8 pipe, u8 arg1) {
     i = (func_150ADA20() & 1) + 1;
     while (i--) {
         yawSin = (func_150ADA68() * 73.0f) + 31.0f;
-        func_1514C858(D_8009F920[pipe].pos.x, D_8009F920[pipe].pos.y, D_8009F920[pipe].pos.z, yawSin, D_8009F920[pipe].yaw + 0x40, 0, 0xFF, (func_150ADA20() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
+        func_1514C858(gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, yawSin, gPipeSpots[pipe].yaw + 0x40, 0, 0xFF, (func_150ADA20() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
     }
     argsB.countBase = 30;
     argsB.countRange = 15;
-    argsB.pos = D_8009F920[pipe].pos;
-    argsB.yawBase = D_8009F920[pipe].yaw - 0x40;
+    argsB.pos = gPipeSpots[pipe].pos;
+    argsB.yawBase = gPipeSpots[pipe].yaw - 0x40;
     argsB.yawRange = 128;
     argsB.pitchBase = -45;
     argsB.pitchRange = 90;
@@ -92,10 +92,10 @@ void func_150B2740(u8 pipe, u8 arg1) {
     // matching: a declaration here opens a -g3 lexical block, which steers as1's scheduling
     extern void func_15152F70(SimplePuffSpray *, u8);
 
-    argsC.pos = D_8009F920[pipe].pos;
+    argsC.pos = gPipeSpots[pipe].pos;
     argsC.countBase = 15;
     argsC.countRange = 8;
-    argsC.angles.yawBase = D_8009F920[pipe].yaw - 25;
+    argsC.angles.yawBase = gPipeSpots[pipe].yaw - 25;
     argsC.angles.yawRange = 50;
     argsC.angles.pitchBase = -50;
     argsC.angles.pitchRange = 60;
@@ -128,11 +128,11 @@ void func_150B2740(u8 pipe, u8 arg1) {
     argsC.red = 9;
     argsC.handlers[3] = 5;
     func_15152F70(&argsC, arg1);
-    yawSin = func_151423D8(D_8009F920[pipe].yaw);
-    yawCos = func_151423D8(D_8009F920[pipe].yaw - 0x40);
-    origin.x = D_8009F920[pipe].pos.x - 150.0f * yawCos;
-    origin.y = D_8009F920[pipe].pos.y;
-    origin.z = D_8009F920[pipe].pos.z - 150.0f * yawSin;
+    yawSin = func_151423D8(gPipeSpots[pipe].yaw);
+    yawCos = func_151423D8(gPipeSpots[pipe].yaw - 0x40);
+    origin.x = gPipeSpots[pipe].pos.x - 150.0f * yawCos;
+    origin.y = gPipeSpots[pipe].pos.y;
+    origin.z = gPipeSpots[pipe].pos.z - 150.0f * yawSin;
     argsD.shade = 0x80;
     argsD.baseVel.x = 10.0f * yawCos;
     argsD.baseVel.y = 3.0f;
@@ -165,13 +165,13 @@ void func_150B2740(u8 pipe, u8 arg1) {
         idBuf[0] = idsB.id[pipe];
         func_151494E0((s32)idBuf, 0x17);
     }
-    func_150B3F5C(&argsD, &origin, 20);
-    func_10010F88(0xE7, 0x7FFF, 0, 2, 0, D_8009F920[pipe].pos.x, D_8009F920[pipe].pos.y, D_8009F920[pipe].pos.z, 1000, 3000);
-    func_10010F88(0x22, 0x7FFF, 0, 0, 0, D_8009F920[pipe].pos.x, D_8009F920[pipe].pos.y, D_8009F920[pipe].pos.z, 1000, 3000);
+    trail_spawnScatterTrail(&argsD, &origin, 20);
+    func_10010F88(0xE7, 0x7FFF, 0, 2, 0, gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, 1000, 3000);
+    func_10010F88(0x22, 0x7FFF, 0, 0, 0, gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, 1000, 3000);
 }
 
 /* Spawns one pipe chunk at (x, y, z), flung out along yaw `arg8` with a random speed. */
-s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
+s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB,
                   f32 argC, s32 argD, u8 argE) {
     f32 yawCos;
@@ -247,7 +247,7 @@ s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 void *memcpy(void *, const void *, u32);
 
 /*
- * Tunable variant of func_150B2EB4: the ranges come from debug sliders (func_151422DC), and the chunk
+ * Tunable variant of pipeexplode_spawnChunk: the ranges come from debug sliders (func_151422DC), and the chunk
  * bounces until it lands slowly.
  */
 s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
@@ -349,7 +349,7 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 }
 
 /* Floor-hit callback for a pipe chunk: bounce it, or stop it once it lands slowly enough. */
-s32 func_150B36AC(PipeChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
+s32 pipeexplode_onChunkFloorHit(PipeChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     chunk->head.pos.y = chunk->head.radius + arg4;
     if (chunk->minBounceVelY < chunk->head.vel.y) {
         chunk->head.flags &= ~0x7;
@@ -441,7 +441,7 @@ s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, Coll
         particle.unk00 = 0x11;
         particle.unk04 = 150;
         particle.unk10 = state->alpha;
-        particle.unk11 = state->unk1A;
+        particle.unk11 = state->shade;
         particle.unk12 = 0;
         particle.unk13 = 0;
         particle.unk14 = 0;
@@ -472,8 +472,8 @@ s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, Coll
     style.envMode = 9;
     pos.kind = 1;
     pos.flags = 1;
-    motion.texture = state->unk19;
-    motion.shade = state->unk1A;
+    motion.texture = state->texture;
+    motion.shade = state->shade;
     motion.flags = 8;
     motion.alpha = state->alpha;
     pos.pos.x = particle.points[actor->head.start].x;
@@ -482,10 +482,10 @@ s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, Coll
     pos.itemCount = actor->head.tmpl.itemCount;
     pos.life = 60;
     motion.halfWidth = state->unk00 * 0.75f;
-    motion.gravity = state->unk10;
-    motion.velocity.x = state->unk04;
+    motion.gravity = state->gravity;
+    motion.velocity.x = state->velocityX;
     motion.velocity.y = func_150ADA68() * 15.0f + 15.0f;
-    motion.velocity.z = state->unk0C;
-    func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
+    motion.velocity.z = state->velocityZ;
+    trail_createMotionTrail(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
     return 1;
 }

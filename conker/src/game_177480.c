@@ -121,13 +121,13 @@ s32 func_1514A4EC(FlickerParticle *effect) {
     damping = effect->params.damping;
     effect->head.def.rot = effect->head.def.pos;
     effect->params.vel.x *= damping;
-    effect->params.vel.y += effect->params.gravity * D_800BE9A4;
-    // matching: block boundary makes IDO load the return value 1 into v0 early, freeing it from &D_800BE9A4
+    effect->params.vel.y += effect->params.gravity * gFrameDelta;
+    // matching: block boundary makes IDO load the return value 1 into v0 early, freeing it from &gFrameDelta
     if (1) {}
     effect->params.vel.z *= damping;
-    effect->head.def.pos.x += effect->params.vel.x * D_800BE9A4;
-    effect->head.def.pos.y += effect->params.vel.y * D_800BE9A4;
-    effect->head.def.pos.z += effect->params.vel.z * D_800BE9A4;
+    effect->head.def.pos.x += effect->params.vel.x * gFrameDelta;
+    effect->head.def.pos.y += effect->params.vel.y * gFrameDelta;
+    effect->head.def.pos.z += effect->params.vel.z * gFrameDelta;
     return 1;
 }
 
@@ -138,11 +138,11 @@ s32 func_1514A594(FlickerParticle *effect) {
     f32 dz;
 
     effect->params.vel.x *= effect->params.damping;
-    effect->params.vel.y += effect->params.gravity * D_800BE9A4;
+    effect->params.vel.y += effect->params.gravity * gFrameDelta;
     effect->params.vel.z *= effect->params.damping;
-    dx = effect->params.vel.x * D_800BE9A4;
-    dy = effect->params.vel.y * D_800BE9A4;
-    dz = effect->params.vel.z * D_800BE9A4;
+    dx = effect->params.vel.x * gFrameDelta;
+    dy = effect->params.vel.y * gFrameDelta;
+    dz = effect->params.vel.z * gFrameDelta;
     // matching: volatile read makes pos.x a fresh CSE entry after pos.y/z, giving the lerp its FP registers
     effect->head.def.pos.x = *(volatile f32 *)&effect->head.def.pos.x + dx;
     effect->head.def.pos.y += dy;

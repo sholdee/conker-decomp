@@ -8,13 +8,13 @@
 /*
  * Subsystem "libc": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   init_1420.c
- *   init_2070.c
- *   game_21D420.c
+ *   init/Libc/Xldtob/xldtob.c
+ *   init/Libc/Xprintf/xprintf.c
+ *   game/Libc/Sprintf/sprintf.c
  */
 
-/* printf conversion state (libultra xstdio.h), shared by the printf back ends in init_1420.c (_Ldtob,
- * _Genld) and init_2070.c (_Litob, the argument fetcher). IDO has no long double, so ld is a double. qual is
+/* printf conversion state (libultra xstdio.h), shared by the printf back ends in init/Libc/Xldtob/xldtob.c (_Ldtob,
+ * _Genld) and init/Libc/Xprintf/xprintf.c (_Litob, the argument fetcher). IDO has no long double, so ld is a double. qual is
  * unsigned char: libultra's char is unsigned, but the game is built with -signed. */
 typedef struct {
     /* 0x00 */ union {
@@ -35,7 +35,7 @@ typedef struct {
     /* 0x34 */ unsigned char qual;
 } _Pft; /* size 0x38 */
 
-/* init_1420.c */
+/* init/Libc/Xldtob/xldtob.c */
 void func_10001420(void);
 void func_10001444(void);
 void func_100014A0(void);
@@ -44,14 +44,14 @@ void func_10001550(void *arg0, unsigned char code);
 s16 func_100019F0(s16 *pex, _Pft *px);
 void func_10001AA8(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp);
 
-/* init_2070.c */
+/* init/Libc/Xprintf/xprintf.c */
 u8 *func_10002070(u8 *arg, u8 *buf, u32 count);
 void func_10002088(const char *fmt, ...); /* libultra's declaration is in include/2.0L/PR/n_libaudio.h */
 /* _Printf: the libultra formatter core */
 int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args);
 void func_10002718(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
 
-/* game_21D420.c */
+/* game/Libc/Sprintf/sprintf.c */
 u8 *func_151EFF70(u8 *dst, u8 *src, u32 count);
 s32 func_151EFF94(u8 *buf, u8 *fmt, ...);
 

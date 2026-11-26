@@ -173,7 +173,7 @@ typedef struct {
     /* 0x0 */ f32 base;
     /* 0x4 */ f32 amplitude;
     /* 0x8 */ f32 phase;
-    /* 0xC */ f32 rate; /* per unit of D_800BE9A4 */
+    /* 0xC */ f32 rate; /* per unit of gFrameDelta */
 } TimeOscillator;
 
 typedef struct {
@@ -186,7 +186,7 @@ typedef struct {
 /* A projectile created by func_1513264C. */
 typedef struct {
     /* 0x000 */ ModelParticle head;
-    /* 0x170 */ EffectObj *trail; /* ribbon effect (func_151B7328) following the projectile */
+    /* 0x170 */ EffectObj *trail; /* ribbon effect (trail_spawnRibbon) following the projectile */
 } GameDC6B0Projectile;
 
 struct Obj150B060C {
@@ -215,7 +215,7 @@ void func_150B02C0(GameDC6B0Projectile *projectile);
 void func_150B02F0(GameDC6B0Projectile *projectile);
 void func_150B031C(GameDC6B0Projectile *projectile);
 void func_150B0348(Actor *obj, u8 arg1, s32 arg2);
-/* (u8 id, struct Obj150B060C *out); declared without a prototype: game_36680.c passes a third argument */
+/* (u8 id, struct Obj150B060C *out); declared without a prototype: game/Lighting/LevelLights/levellights.c passes a third argument */
 s32 func_150B060C();
 
 /* game_DF2D0.c */
@@ -893,7 +893,7 @@ void func_150E6FAC(Vec3f *out, Actor *actor);
 void func_150E70CC(Vec3f *out, Actor *actor);
 void func_150E70EC(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission);
 void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission);
-/* (u8 arg0, u8 owner, s32 kind); declared without a prototype: game_CDE80.c passes an s32 arg0 without narrowing it */
+/* (u8 arg0, u8 owner, s32 kind); declared without a prototype: game/Zone/ZoneState/zonestate.c passes an s32 arg0 without narrowing it */
 void func_150E7290();
 void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
                    s32 idCount, u8 owner, s32 kind);
@@ -923,7 +923,7 @@ extern TriggerZone *D_800D9A20[2]; /* end points of source 1; func_15014040 regi
 /* Spawner state at +0x28 of a burst emitter. */
 typedef struct {
     /* 0x00 */ TriggerZone *source; // where func_1514470C places each burst
-    /* 0x04 */ f32 rateBase;    // bursts per unit of D_800BE9A4
+    /* 0x04 */ f32 rateBase;    // bursts per unit of gFrameDelta
     /* 0x08 */ f32 rateRange;
     /* 0x0C */ f32 scaleBase;   // size scale passed to func_150E9890
     /* 0x10 */ f32 scaleRange;
@@ -1143,7 +1143,7 @@ typedef struct {
     /* 0x23 */ u8 unk23;
     /* 0x24 */ u8 *particleA;       /* func_15130374 particle */
     /* 0x28 */ u8 *subParticle;     /* func_1513D4B8 particle */
-    /* 0x2C */ LightEffect *flash;    /* func_151602C0 */
+    /* 0x2C */ LightEffect *flash;    /* light_createWithEffect */
     /* 0x30 */ u8 *glow;            /* func_151407D0 glow */
     /* 0x34 */ u8 *particleB;       /* func_15130374 particle */
     /* 0x38 */ f32 unk38;
@@ -1168,7 +1168,7 @@ typedef struct {
     /* 0x84 */ f32 unk84;
     /* 0x88 */ f32 unk88;
     /* 0x8C */ f32 unk8C;
-    /* 0x90 */ s16 sound;           /* func_10010F30 handle */
+    /* 0x90 */ s16 sound;           /* sound_play handle */
     /* 0x92 */ u8 pad92[2];
 } EffectParticleState; /* size 0x94 */
 
@@ -1266,7 +1266,7 @@ typedef struct {
 
 /* Data of effect 0x1B (func_15109ED4 / func_15109FB8). */
 typedef struct {
-    /* 0x00 */ void *unk0; /* passed to func_1511490C to build the emitter's matrix */
+    /* 0x00 */ void *unk0; /* passed to gfx_getObjectModelMtx to build the emitter's matrix */
     /* 0x04 */ f32 spawnAccum;
     /* 0x08 */ f32 spawnRate;
     /* 0x0C */ s8 tickFunc; /* index into D_80088C60, -1: none */
@@ -1329,7 +1329,7 @@ s32 func_15131814(s32 arg0, s32 arg1);
 void func_15131828(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseStep);
 void func_151318E8(Vec3f *vel, f32 drag);
 void func_15131918(Vec3f *vel, f32 drag);
-/* void func_15131958(Vec3f *vel, f32 drag) is declared in the files that call it: game_105FC0.c and
+/* void func_15131958(Vec3f *vel, f32 drag) is declared in the files that call it: game/Trail/PissTrail/pisstrail.c and
    game_200930.c pass a third argument. */
 s32 func_151319A4(SpriteParticle *p, Vec3f *prevPos);
 s32 func_151319C4(SpriteParticle *p, Vec3f *prevPos, ParticleBounce *bounce);
@@ -1638,7 +1638,7 @@ void func_15152190(DebrisBurst *config, const s32 *variantIds, const f32 *varian
 void func_15152520(ModelBurst *config, u8 arg1, s32 arg2);
 void func_15152874(DriftBurst *config, u8 arg1, s32 arg2);
 void func_15152ABC(Color8 *out);
-/* (TrailBurst *config, u8 arg1, s32 arg2); declared without a prototype: game_11C2B0.c passes a fourth argument */
+/* (TrailBurst *config, u8 arg1, s32 arg2); declared without a prototype: game/Beam/AimedBeam/aimedbeam.c passes a fourth argument */
 void func_15152B38();
 void func_15152F70(SimplePuffSpray *config, u8 arg1);
 void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2);
@@ -1764,7 +1764,7 @@ void func_15156FE4(StreakParticle *particle);
 /* Emitter state stored in an effect object at +0x28. */
 typedef struct {
     /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 rate;        // particles per unit of D_800BE9A4
+    /* 0x0C */ f32 rate;        // particles per unit of gFrameDelta
     /* 0x10 */ f32 accumulator; // pending particles; one is spawned per whole unit
     /* 0x14 */ f32 unk14;
 } RiseEmitterState;
@@ -2077,7 +2077,7 @@ void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3);
 void func_15170034(s32 flags, f32 *outX, f32 *outY, f32 *outZ);
 /* void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
    s32 arg9) is declared in the files that call it: game_19E040.c passes an s32 style. */
-/* (s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 arg6); declared without a prototype: game_1A89B0.c
+/* (s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 arg6); declared without a prototype: game/Sprite/LevelSprites/levelsprites.c
  * passes the coordinates without narrowing them */
 void func_15170500();
 s32 func_151707E0(StyleParticle *particle);
@@ -2445,7 +2445,7 @@ typedef struct {
     /* 0x00 */ u8 dropKind;         /* D_800A9D40 index */
     /* 0x04 */ s32 numMounts;
     /* 0x08 */ const BoneMount *mounts;
-    /* 0x0C */ f32 rate;            /* new drops per unit of D_800BE9A4 */
+    /* 0x0C */ f32 rate;            /* new drops per unit of gFrameDelta */
     /* 0x10 */ s32 maxDrops;
     /* 0x14 */ s16 holdMin;         /* D_800BE9E4 ticks a drop hangs before it falls */
     /* 0x16 */ s16 holdRange;
@@ -2993,7 +2993,7 @@ typedef struct Game1F1CD0Actor {
 void func_151C4820(Game1F1CD0Actor *actor);
 
 /* game_200930.c */
-extern const Vec3f *D_8008FC8C[]; /* muzzle point of each gun (game_12CCF0 reads gun 0) */
+extern const Vec3f *D_8008FC8C[]; /* muzzle point of each gun (game/Weapon/GunShot/gunshot reads gun 0) */
 extern u8 *D_8008FC94[];          /* the bone that point is on */
 /* Bobbing motion stored in a debris particle's user data (object + 0x170). */
 typedef struct {

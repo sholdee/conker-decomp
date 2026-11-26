@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined below. Not in particle.h: game_105FC0.c and game_200930.c call it with a third
+/* Defined below. Not in particle.h: game/Trail/PissTrail/pisstrail.c and game_200930.c call it with a third
    argument. */
 void func_15131958(Vec3f *vel, f32 drag);
 
@@ -74,7 +74,7 @@ void *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
 
 /* Update functions, indexed by ParticleDesc.updateFunc (0 kills the particle). */
 static s32 (*D_80089760[])() = {
-    func_151A483C, func_151A4900, func_150BB260, func_15159594,
+    trail_updateBurstParticle, func_151A4900, func_150BB260, func_15159594,
     func_151596BC, func_151DB97C, func_151AFEA4, func_150CBCE0,
     func_150CC8D4, func_150CAC28, func_151316DC, func_151025F4,
     func_1515A11C, func_15192308, func_15192358, func_1519257C,
@@ -83,7 +83,7 @@ static s32 (*D_80089760[])() = {
     func_15108658, func_150E8824, func_151316AC, func_151319A4,
     func_15131AFC, func_15131B3C, func_150D6CC4, func_150D6F0C,
     func_151D4D04, func_151D93F4, func_151D9450, func_151D9534,
-    func_150DA628, func_150F0E48, func_15131D9C, func_15131DEC,
+    func_150DA628, beam_updateFollowParticle, func_15131D9C, func_15131DEC,
 };
 /* Death functions, indexed by ParticleDesc.deathFunc. */
 static void (*D_80089800[])() = { func_150C1198 };
@@ -106,13 +106,13 @@ void func_151303EC(SpriteParticle *p) {
         }
     }
     if (p->head.desc.flags & PARTICLE_GRAVITY) {
-        p->head.desc.vel.y += p->head.desc.gravity * D_800BE9A4;
+        p->head.desc.vel.y += p->head.desc.gravity * gFrameDelta;
     }
     prevPos = p->head.desc.pos;
     if (p->head.desc.flags & PARTICLE_MOVE) {
-        p->head.desc.pos.x += p->head.desc.vel.x * D_800BE9A4;
-        p->head.desc.pos.y += p->head.desc.vel.y * D_800BE9A4;
-        p->head.desc.pos.z += p->head.desc.vel.z * D_800BE9A4;
+        p->head.desc.pos.x += p->head.desc.vel.x * gFrameDelta;
+        p->head.desc.pos.y += p->head.desc.vel.y * gFrameDelta;
+        p->head.desc.pos.z += p->head.desc.vel.z * gFrameDelta;
     }
     if (p->head.desc.flags & PARTICLE_FADE) {
         if (p->head.desc.timer < p->head.desc.fadeStart) {
@@ -151,7 +151,7 @@ void func_151303EC(SpriteParticle *p) {
     if (!dead) {
         rate = p->head.desc.frameRate;
         if (rate != 0) {
-            frameCount = D_80090B60[p->head.desc.texture].frameCount;
+            frameCount = gEffectTextures[p->head.desc.texture].frameCount;
             maxFrame = (frameCount << 16) - 1;
             p->head.desc.frame += rate * D_800BE9E4;
             if (maxFrame < p->head.desc.frame) {
@@ -262,8 +262,8 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
         s32 t;
         s32 dsdx;
 
-        // matching: byte-offset form; &D_800BE628[viewIdx] schedules differently
-        view = &D_800BE628[viewIdx];
+        // matching: byte-offset form; &gViews[viewIdx] schedules differently
+        view = &gViews[viewIdx];
         sizeX = p->head.desc.width * scale * view->unk1C * 16.94900131f;
         sizeY = p->head.desc.height * scale * view->unk20 * 16.94900131f;
         if (p->head.desc.flags & PARTICLE_MAX_SIZE) {
@@ -297,8 +297,8 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
                 gDPPipeSync(gfx++);
                 needSync = FALSE;
             }
-            gDPSetPrimDepth(gfx++, (s32)((depth * scale * D_800BE628[viewIdx].viewports[D_800BE9C0].vp.vscale[2] + D_800BE628[viewIdx].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
-            tex = &D_80090B60[p->head.desc.texture];
+            gDPSetPrimDepth(gfx++, (s32)((depth * scale * gViews[viewIdx].viewports[D_800BE9C0].vp.vscale[2] + gViews[viewIdx].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
+            tex = &gEffectTextures[p->head.desc.texture];
             texW = tex->width;
             texH = tex->height;
             height = lry - uly;
@@ -326,7 +326,7 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
                 u8 color[4];
 
                 func_1513137C(&primR, &primG, &primB, &primA, p);
-                func_1515E888(viewIdx, pos.x, pos.y, pos.z, 0xFF, color, NULL, NULL);
+                light_getLitColourAt(viewIdx, pos.x, pos.y, pos.z, 0xFF, color, NULL, NULL);
                 envR = color[0];
                 envG = color[1];
                 envB = color[2];
@@ -338,8 +338,8 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
             gfx = func_15142B7C(gfx, p->head.desc.unk0, p->head.desc.unk4 | 0x10000 | 0x100000);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
             gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
-            gfx = func_15142E24(gfx, &D_80090B60[p->head.desc.texture], p->head.desc.frame, 2, 0, 0, p->head.desc.texture, 0, 0, &needSync, (p->head.desc.flags & 0x800000) ? 0x3E : 3);
-            gfx = func_15142FBC(gfx, ((p->head.desc.flags & 0x100) ? 0x100000 : 0) | D_800D2C9C | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4 | 4, &needSync);
+            gfx = func_15142E24(gfx, &gEffectTextures[p->head.desc.texture], p->head.desc.frame, 2, 0, 0, p->head.desc.texture, 0, 0, &needSync, (p->head.desc.flags & 0x800000) ? 0x3E : 3);
+            gfx = func_15142FBC(gfx, ((p->head.desc.flags & 0x100) ? 0x100000 : 0) | gSpriteTlutMode | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4 | 4, &needSync);
             gSPScisTextureRectangle(gfx++, (s32)ulx, (s32)uly, (s32)lrx, (s32)lry, 0, s, t, dsdx, dtdy);
         }
     }
@@ -487,7 +487,7 @@ void func_1513175C(DescParticleHead *p) {
 static void (*D_80089814[])() = {
     func_1513173C, func_15101288, func_1513173C, func_1513173C,
     func_1513173C, func_15101328, func_1513173C, func_1513173C,
-    func_1513173C, func_1513173C, func_1513173C, func_151D0F08,
+    func_1513173C, func_1513173C, func_1513173C, trail_destroyCarrierParticle,
 };
 
 /* Calls the particle's D_80089814 handler (set 0 without PARTICLE_HANDLERS). */
@@ -505,7 +505,7 @@ void func_1513177C(SpriteParticle *p) {
 static s32 (*D_80089844[])() = {
     func_1513175C, func_151012B0, func_1513175C, func_1513175C,
     func_1513175C, func_15101350, func_1513175C, func_1513175C,
-    func_1513175C, func_1513175C, func_1513175C, func_151D0F34,
+    func_1513175C, func_1513175C, func_1513175C, trail_freeCarrierParticle,
 };
 
 /* Calls the particle's D_80089844 handler (set 0 without PARTICLE_HANDLERS). */
@@ -585,7 +585,7 @@ s32 func_151319C4(SpriteParticle *p, Vec3f *prevPos, ParticleBounce *bounce) {
         if (func_1514672C(&probe) == 0) {
             return FALSE;
         }
-        if (func_15046C80(&probe, 0, p->head.desc.pos.y - p->head.desc.height * 0.06000000238f, &p->head.floor) != 0) {
+        if (collision_probeFloorSurfABSet0Cached(&probe, 0, p->head.desc.pos.y - p->head.desc.height * 0.06000000238f, &p->head.floor) != 0) {
             f32 hit[3];
 
             hit[0] = probe.x;
@@ -630,7 +630,7 @@ s32 func_15131B7C(SpriteParticle *p, Vec3f *prevPos, f32 *hit, ParticleBounce *b
 
 static void (*D_80089878[])() = {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    func_151BE558, func_150D6E60, func_150D7068, func_150F1020, NULL, NULL, NULL,
+    func_151BE558, func_150D6E60, func_150D7068, beam_followParticleMessage, NULL, NULL, NULL,
 };
 
 /* Calls the particle's D_80089878 handler, if it has one. */
@@ -681,7 +681,7 @@ s32 func_15131DEC(SpriteParticle *p, Vec3f *prevPos) {
     p->head.desc.width = size;
 
     p->head.desc.alpha = (u32)(p->data.flash.startAlpha - p->data.flash.alphaDecay * elapsed * elapsed);
-    p->data.flash.elapsed = elapsed + D_800BE9A4;
+    p->data.flash.elapsed = elapsed + gFrameDelta;
 
     if (p->data.flash.duration < p->data.flash.elapsed) {
         return FALSE;

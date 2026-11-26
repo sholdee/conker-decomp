@@ -711,7 +711,7 @@ void func_150031EC(s32 levelId) {
     if (levelId >= 69) {
         levelId = 0;
     }
-    models = func_1502B6BC(&loaded, 0, &count, 2, 4, levelId);
+    models = rom_loadPathTable(&loaded, 0, &count, 2, 4, levelId);
     D_800B0E50 = models;
     for (k = 1; k < 4; k++) {
         D_800B0E00[k] = 0;
@@ -747,7 +747,7 @@ void func_150031EC(s32 levelId) {
                         func_150039BC((s32)model->materials);
                     }
                     func_150049A4((DlCommand *)D_800B0E00[i], (s32)D_800B0E10[i] + 0xFF000000, (s32)model);
-                    func_1510CE60(D_800B0E00[i], 0, 1, 63, NULL);
+                    texture_resolveDl(D_800B0E00[i], 0, 1, 63, NULL);
                 } else {
                     func_150049A4((DlCommand *)model->displayList, 0, (s32)model);
                 }
@@ -757,7 +757,7 @@ void func_150031EC(s32 levelId) {
     if (D_800B0DF0->assetList != 0) {
         j = 0;
         while ((id = D_80082B20[D_800B0DF0->assetList][j++]) != 0) {
-            func_1510D0EC(id, &size, 62, 0);
+            texture_getAddress(id, &size, 62, 0);
         }
     }
 }
@@ -771,13 +771,13 @@ s32 func_150034B4(void) {
         D_800BC448[i] = 0;
     }
 
-    D_800D9F58 = 0xFFFF;
-    D_800D9F5C = -1;
+    gTexAgeFirst = 0xFFFF;
+    gTexAgeLast = -1;
 
     if (level != 1 && level != 50) {
-        D_800D9F60 = 0;
+        gTexAgeThrottle = 0;
     } else {
-        D_800D9F60 = 1;
+        gTexAgeThrottle = 1;
     }
 }
 
@@ -801,7 +801,7 @@ void func_15003570(void) {
         } else {
             odd = D_80091D20[i] * 0; // matching: a use here ranks the size-table IV above the store IV
         }
-        func_10004514(romAddr, buf, 16, 1);
+        rom_read(romAddr, buf, 16, 1);
         header = odd + buf; // matching: operand order fixes the addu operand order
         size = (header[0] << 24) + (header[1] << 16) + (header[2] << 8) + header[3];
         D_800B87A0[i] = size;
@@ -821,66 +821,66 @@ void func_15003668(s32 unused) {
     s32 size;
     s32 i;
 
-    D_800DBE62 = 0;
-    func_15001970();
+    gMeshBuilt = 0;
+    collision_initTriArena();
     D_800D2C68 = 0;
 
-    func_150026C4(0);
-    func_15002724(D_800B0E00[0]);
-    func_15002754();
-    func_15001460(D_800B0E00[0]);
-    func_150026E8(0);
+    collision_beginMapTris(0);
+    collision_addDlTriCount(D_800B0E00[0]);
+    collision_allocMapTriTables();
+    collision_addDlTris(D_800B0E00[0]);
+    collision_endMapTris(0);
 
-    func_150026C4(1);
-    func_15002724(D_800B0E00[3]);
-    func_15002754();
-    func_15001460(D_800B0E00[3]);
-    func_150026E8(1);
+    collision_beginMapTris(1);
+    collision_addDlTriCount(D_800B0E00[3]);
+    collision_allocMapTriTables();
+    collision_addDlTris(D_800B0E00[3]);
+    collision_endMapTris(1);
 
-    func_150026C4(2);
+    collision_beginMapTris(2);
     for (i = 0; i < gWorldObjectCount; i++) {
         if ((db_Object_array[i].object_status & 0x60) != 0x20) {
-            func_15002724(db_Object_array[i].displayList);
+            collision_addDlTriCount(db_Object_array[i].displayList);
         }
     }
-    func_15002754();
+    collision_allocMapTriTables();
 
     D_800D2C68 = 1;
-    D_800D2C28[1] = 0;
+    gSegmentBases[1] = 0;
     for (i = 0; i < gWorldObjectCount; i++) {
         if ((db_Object_array[i].object_status & 0x60) != 0x20) {
-            // matching: storing D_800DBE38 rather than firstTri keeps firstTri at two references (regalloc)
-            firstTri = D_800DBE38;
-            db_Object_array[i].firstTri = D_800DBE38;
-            func_15001460(db_Object_array[i].displayList);
-            db_Object_array[i].numTris = D_800DBE38 - firstTri;
+            // matching: storing gMapTriCollected rather than firstTri keeps firstTri at two references (regalloc)
+            firstTri = gMapTriCollected;
+            db_Object_array[i].firstTri = gMapTriCollected;
+            collision_addDlTris(db_Object_array[i].displayList);
+            db_Object_array[i].numTris = gMapTriCollected - firstTri;
         } else {
             db_Object_array[i].firstTri = 0;
             db_Object_array[i].numTris = 0;
         }
     }
-    func_150026E8(2);
+    collision_endMapTris(2);
 
     D_800D2C68 = 0;
     D_800D3300[0].height = 0;
-    D_800D3300[0].tri = (s32 *)((s32)D_800DBE3C << 8);
-    func_1510F800(0);
+    D_800D3300[0].tri = (s32 *)((s32)gCurMapTris << 8);
+    collision_selectMap(0);
 
-    size = (func_15002878() + 7) & ~7;
+    size = (collision_getMaxMapTriCount() + 7) & ~7;
     D_800D3668 = (u8 *)D_8003809C;
     D_800D366C = D_800D3668 + size;
-    func_1510F800(2);
+    collision_selectMap(2);
 }
 
 /* Builds the quadtrees of the three collision maps (map 2 gets a single leaf). */
 void func_150038A0(void) {
-    func_15001A08();
-    func_15001BC8(0, &D_800DBE2A, &D_800DBE2C);
-    func_15001BC8(1, NULL, NULL);
-    func_15001CEC(2);
-    func_1510F800(0);
+    collision_allocQuadTree();
+    collision_buildQuadTree(0, &D_800DBE2A, &D_800DBE2C);
+    collision_buildQuadTree(1, NULL, NULL);
+    collision_buildLeafQuadTree(2);
+    collision_selectMap(0);
     func_150025FC();
-    D_800DBE62 = 1;
+    gMeshBuilt = 1;
 }
 
 /* Returns the id of the texture loaded at `addr`, or -1. */
@@ -898,10 +898,10 @@ s32 func_1500390C(s32 addr) {
 void func_150039B0(s32 arg0) {
 }
 
-/* Sets D_800DBE5C to `addr` + 8 (past the material block's header), or to NULL when `addr` is 0. */
+/* Sets gMeshTriMaterials to `addr` + 8 (past the material block's header), or to NULL when `addr` is 0. */
 void func_150039BC(s32 addr) {
-    D_800DBE5C = (u32 *)addr;
-    if (D_800DBE5C != NULL) {
-        D_800DBE5C += 2;
+    gMeshTriMaterials = (u32 *)addr;
+    if (gMeshTriMaterials != NULL) {
+        gMeshTriMaterials += 2;
     }
 }

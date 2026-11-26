@@ -24,7 +24,7 @@ void func_150124A0(void) {
         s32 i;
 
         for (i = 0; i < 10; i++) {
-            yaw = D_8009F920[row].yaw + func_150ADA20() % 13U - 0x86;
+            yaw = gPipeSpots[row].yaw + func_150ADA20() % 13U - 0x86;
             pitch = (func_150ADA20() & 0xF) - 10;
             yawCos = func_151423D8(yaw - 0x40);
             yawSin = func_151423D8(yaw);

@@ -35,7 +35,7 @@ void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind) {
         func_15150178(&drops.angles, &drops.spray, 0, owner, kind);
     }
     func_151D3F14(pos, owner, kind);
-    func_15182670(0xFF, 0xFF, 0xFF, func_150ADA20() % 51U + 150, func_150ADA20() % 5U + 8, 0, owner, kind);
+    screen_spawnFlash(0xFF, 0xFF, 0xFF, func_150ADA20() % 51U + 150, func_150ADA20() % 5U + 8, 0, owner, kind);
 }
 
 /* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by func_151DC97C
@@ -66,12 +66,12 @@ void func_151DC8BC(pos, duration, burst, randomColors, owner, kind)
 }
 
 /* Update function of the func_151DC8BC emitter: emits particles at its position at a random rate
- * of (0.136 to 0.257) * D_800BE9A4 per frame, in a fixed colour or one of three random colour pairs. */
+ * of (0.136 to 0.257) * gFrameDelta per frame, in a fixed colour or one of three random colour pairs. */
 void func_151DC97C(ColorEmitter *emitter) {
     ColorEmitterData *data;
 
     data = &emitter->data;
-    data->accum += (0.136f + func_150ADA68() * 0.12100001f) * D_800BE9A4;
+    data->accum += (0.136f + func_150ADA68() * 0.12100001f) * gFrameDelta;
     if (data->accum > 1.0f) {
         ParticleDesc desc;
         WobbleData extra;

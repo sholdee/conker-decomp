@@ -111,7 +111,7 @@ WatcherEmitter *func_150C68C4(Actor *character, Watcher *watcher) {
         pos.x = character->xpos;
         pos.y = character->ypos + D_800A0450.rayStart;
         pos.z = character->zpos;
-        if (func_15045800(&pos, 0, character->ypos - 100.0f, &watcher->watcher.hit) != 0) {
+        if (collision_probeFloorSurfBCached(&pos, 0, character->ypos - 100.0f, &watcher->watcher.hit) != 0) {
             link.ceiling = watcher->watcher.hit.height;
         } else {
             link.ceiling = character->ypos + D_800A0450.defaultCeiling;
@@ -254,7 +254,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
         probe.x = pos.x;
         probe.y = pos.y + 200.0f;
         probe.z = pos.z;
-        if (func_15045800(&probe, 0, pos.y - 200.0f, &watcher->watcher.hit) != 0) {
+        if (collision_probeFloorSurfBCached(&probe, 0, pos.y - 200.0f, &watcher->watcher.hit) != 0) {
             SpriteDef def;
             SpriteFlicker flicker;
             f32 size;

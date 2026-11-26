@@ -137,7 +137,7 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
     s32 combine;
     s32 newCycle;
     s32 newCombine;
-    SpriteParams texState; // filled in by func_15094F70; unused here
+    SpriteParams texState; // filled in by sprite_loadDescFrame; unused here
     s32 tex;
     s32 frame;
     s32 needSync;
@@ -156,7 +156,7 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
             frame = 0;
         }
         if (tex != D_800DD1B4 || frame != D_800DD1B8) {
-            gfx = func_15094F70(gfx, anim, particle->animFrame, &texState, 0, 0, 0, 2, 3);
+            gfx = sprite_loadDescFrame(gfx, anim, particle->animFrame, &texState, 0, 0, 0, 2, 3);
             D_800DD1B4 = tex;
             D_800DD1B8 = frame;
         }
@@ -198,7 +198,7 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
             gSPClearGeometryMode(gfx++, G_FOG | G_LOD);
         }
         // sic: passes the high byte of the s32 needSync
-        gfx = func_15142FBC(gfx, othermodeH | G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE |
+        gfx = func_15142FBC(gfx, othermodeH | G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE |
                                      G_AD_DISABLE,
                             othermodeL, (u8 *)&needSync);
         if (!(particle->flags & 8)) {
@@ -314,7 +314,7 @@ s32 func_151725FC(Vtx *vtx, void *tri, f32 x, f32 y, f32 z, f32 angle, s32 size,
     if (n == 0) {
         n = 1;
     }
-    if (func_1510E388(tri, NULL, &slopeX, &slopeZ) == 0) {
+    if (shadow_getTriSlopes(tri, NULL, &slopeX, &slopeZ) == 0) {
         return 0;
     }
     axis[0][0] = 0.0f;
@@ -401,7 +401,7 @@ s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, 
     sinT = sinf((angle - 90.0f) * 0.01745329238f);
     x += dist * sinT;
     z += dist * cosT;
-    func_1510E82C(&floor.tri, 0, &floor.floorY, 0, &floor.unk8, 0, x, y, z, y, 0, 0);
+    collision_findFloor(&floor.tri, 0, &floor.floorY, 0, &floor.unk8, 0, x, y, z, y, 0, 0);
     if (floor.tri == NULL) {
         return 0;
     }

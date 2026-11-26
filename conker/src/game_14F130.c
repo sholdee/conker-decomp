@@ -20,8 +20,8 @@ void func_15121C80(Camera *camera, f32 yawOffset) {
     if (active) {
         active = (camera->PadPtr->button & 0x10) != 0;
     }
-    if (!active && (D_800BE616 || camera->CharContext == 9 || camera->CharContext == 59) && camera->mv->unk1B3) {
-        if (D_800BE616) {
+    if (!active && (gIsMultiplayer || camera->CharContext == 9 || camera->CharContext == 59) && camera->mv->unk1B3) {
+        if (gIsMultiplayer) {
             camera->targetSpeed = 5.0f;
             camera->targetLimit = 8.0f;
             func_150495B0(&camera->speed, 5.0f, &camera->speedVel, 1.0f, 2.0f, camera->SpringTime);
@@ -58,7 +58,7 @@ void func_15121C80(Camera *camera, f32 yawOffset) {
                 limit = 6.0f;
             } else {
                 mode = camera->CharContext;
-                if ((mode == 9 && D_800BE616) || mode == 56 || mode == 57 || mode == 55 || mode == 59 ||
+                if ((mode == 9 && gIsMultiplayer) || mode == 56 || mode == 57 || mode == 55 || mode == 59 ||
                     mode == 18) {
                     speed = 2.0f;
                     limit = 6.0f;
@@ -70,7 +70,7 @@ void func_15121C80(Camera *camera, f32 yawOffset) {
                     limit = 2.2f;
                 }
             }
-            if (!D_800BEA0C) {
+            if (!gFrameRateDivider) {
                 func_15049688(&camera->CameraAngle, angle, &camera->AutoBehindAngleVel, speed, limit, camera->SpringTime);
             }
         }

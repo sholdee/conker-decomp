@@ -3,10 +3,10 @@
 
 /*
  * This file's .bss, defined before the headers declare it (see init_50A0.c). Its code does not use it:
- * game_43880.c loads the table and game_83300.c reads it. It lies between the .bss of game_A9D90 and
+ * game/Collision/CylinderSets/cylindersets.c loads the table and game/Actor/ActorMotion/actormotion.c reads it. It lies between the .bss of game/Actor/KillRespawn/killrespawn and
  * of game_AC030 on its own 16-byte line, so this unit is the one that defines it.
  */
-BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (func_150163D0 loads, func_15055E50 uses)
+BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (collision_loadCylinderSets loads, actor_clampToZoneSet uses)
 
 #include "functions.h"
 #include "variables.h"
@@ -15,10 +15,10 @@ BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (func_1
  * Character expressions and eye blinking.
  *
  * Each character model has a table of 10-byte expression records. The table is described by an
- * 8-byte header stored just before the model's D_800D1C90 entry.
+ * 8-byte header stored just before the model's gModelDefs entry.
  */
 
-/* Header stored 8 bytes before a model's D_800D1C90 entry. */
+/* Header stored 8 bytes before a model's gModelDefs entry. */
 typedef struct {
     /* 0x0 */ ExpressionRecord *records;
     /* 0x4 */ u32 size; // in bytes
@@ -109,7 +109,7 @@ void func_1507E500(Actor *actor, s32 index, s32 morphDuration) {
         if (previous->action != 0) {
             actions = func_1507E9F8(actor, NULL);
             if (actions != NULL) {
-                func_150302F0(actor, actions[previous->action - 1]);
+                attach_removeSet(actor, actions[previous->action - 1]);
             }
         }
         actor->expression = index;
@@ -142,12 +142,12 @@ void func_1507E5C8(Actor *actor, s32 morphDuration) {
         if (record->unk8 != 0) {
             actor->unk68[0] = record->unk8;
         } else {
-            actor->unk68[0] = D_800D1C90[actor->character_type]->eyeDefault[0];
+            actor->unk68[0] = gModelDefs[actor->character_type]->eyeDefault[0];
         }
         if (record->unk9 != 0) {
             actor->unk68[1] = record->unk9;
         } else {
-            actor->unk68[1] = D_800D1C90[actor->character_type]->eyeDefault[1];
+            actor->unk68[1] = gModelDefs[actor->character_type]->eyeDefault[1];
         }
     }
 }
@@ -163,7 +163,7 @@ s32 func_1507E6B8(Actor *actor) {
     if (actor->expression == actor->defaultExpression) {
         return TRUE;
     }
-    model = func_150849A0(actor);
+    model = collision_getModelId(actor);
     expression = actor->expression;
     if (model == 0) {
         if (expression == 0x15) {
@@ -221,7 +221,7 @@ void func_1507E7E4(Actor *actor, u8 index, u8 priority, u16 timer, s32 morphDura
         if (previous->action != 0) {
             actions = func_1507E9F8(actor, NULL);
             if (actions != NULL) {
-                func_150302F0(actor, actions[previous->action - 1]);
+                attach_removeSet(actor, actions[previous->action - 1]);
             }
         }
         actor->expression = index;
@@ -236,7 +236,7 @@ ExpressionRecord *func_1507E908(Actor *actor, s32 index) {
     ExpressionTableHeader *header;
     ExpressionRecord *records;
 
-    header = (ExpressionTableHeader *)D_800D1C90[func_150849A0(actor)];
+    header = (ExpressionTableHeader *)gModelDefs[collision_getModelId(actor)];
     if (header != NULL) {
         header--;
         records = header->records;
@@ -254,11 +254,11 @@ s32 func_1507E968(Actor *actor) {
     s32 id;
 
     id = actor->character_type;
-    model = (id != 0x96) ? func_150849A0(actor) : id;
+    model = (id != 0x96) ? collision_getModelId(actor) : id;
     if (model == 0xFF) {
         return 0;
     }
-    header = (ExpressionTableHeader *)D_800D1C90[model];
+    header = (ExpressionTableHeader *)gModelDefs[model];
     if (header != NULL) {
         header--;
         return header->size / sizeof(ExpressionRecord);
@@ -272,11 +272,11 @@ void func_1507E9E8(Actor *actor, s32 index) {
 
 /* Returns the table of expression action ids (only model 0 has one) and its length. */
 const u8 *func_1507E9F8(Actor *actor, s32 *count) {
-    if (func_150849A0(actor) == 0) {
+    if (collision_getModelId(actor) == 0) {
         if (count != NULL) {
             *count = 5;
         }
-        return D_8009D910;
+        return gModel0ExpressionActions;
     }
     if (count != NULL) {
         *count = 0;
@@ -291,7 +291,7 @@ void func_1507EA44(Actor *actor, s32 action, s32 param) {
     if (action != 0) {
         actions = func_1507E9F8(actor, NULL);
         if (actions != NULL) {
-            func_15083568(actor, actions[action - 1], param * 0.001f, 0);
+            collision_createPartSet(actor, actions[action - 1], param * 0.001f, 0);
         }
     }
 }

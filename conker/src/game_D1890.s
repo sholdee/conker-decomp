@@ -56,16 +56,16 @@ glabel func_150A43E0
     /* D193C 150A448C 02328821 */  addu       $s1, $s1, $s2
     /* D1940 150A4490 96330058 */  lhu        $s3, 0x58($s1)
     /* D1944 150A4494 001398C0 */  sll        $s3, $s3, 3
-    /* D1948 150A4498 3C0C800E */  lui        $t4, %hi(D_800DBE40)
-    /* D194C 150A449C 8D8CBE40 */  lw         $t4, %lo(D_800DBE40)($t4)
+    /* D1948 150A4498 3C0C800E */  lui        $t4, %hi(gCurMapTriXZBounds)
+    /* D194C 150A449C 8D8CBE40 */  lw         $t4, %lo(gCurMapTriXZBounds)($t4)
     /* D1950 150A44A0 01936021 */  addu       $t4, $t4, $s3
-    /* D1954 150A44A4 3C0B800E */  lui        $t3, %hi(D_800DBE3C)
-    /* D1958 150A44A8 8D6BBE3C */  lw         $t3, %lo(D_800DBE3C)($t3)
+    /* D1954 150A44A4 3C0B800E */  lui        $t3, %hi(gCurMapTris)
+    /* D1958 150A44A8 8D6BBE3C */  lw         $t3, %lo(gCurMapTris)($t3)
     /* D195C 150A44AC 01735821 */  addu       $t3, $t3, $s3
     /* D1960 150A44B0 00139842 */  srl        $s3, $s3, 1
     /* D1964 150A44B4 01735821 */  addu       $t3, $t3, $s3
-    /* D1968 150A44B8 3C08800E */  lui        $t0, %hi(D_800DBEF8)
-    /* D196C 150A44BC 8D08BEF8 */  lw         $t0, %lo(D_800DBEF8)($t0)
+    /* D1968 150A44B8 3C08800E */  lui        $t0, %hi(gObjectBlocks)
+    /* D196C 150A44BC 8D08BEF8 */  lw         $t0, %lo(gObjectBlocks)($t0)
     /* D1970 150A44C0 001C8080 */  sll        $s0, $gp, 2
     /* D1974 150A44C4 01104021 */  addu       $t0, $t0, $s0
     /* D1978 150A44C8 8D080000 */  lw         $t0, 0x0($t0)

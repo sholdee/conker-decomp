@@ -12,7 +12,7 @@ void func_150EC520(EmitterEffect *effect) {
 
     if (func_151464B8(effect->data.emitter.zone) == 0) {
         emitter = &effect->data.emitter;
-        emitter->accumulator += (9.04e-08f + func_150ADA68() * 9.87e-08f) * emitter->rate * D_800BE9A4;
+        emitter->accumulator += (9.04e-08f + func_150ADA68() * 9.87e-08f) * emitter->rate * gFrameDelta;
         if (emitter->accumulator > 1.0f) {
             point.w = 0.0f;
             do {
@@ -35,7 +35,7 @@ void func_150EC6B0(EmitterEffect *effect) {
     ParticleSourceData *source;
 
     source = &effect->data.source;
-    source->accumulator += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
+    source->accumulator += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * gFrameDelta;
     if (source->accumulator > 1.0f) {
         ParticleDesc spawn;
         WobbleData data;
@@ -130,7 +130,7 @@ void func_150ECB8C(EmitterEffect *effect) {
     if ((owner->type == 0) || (owner->unique_id != fog->ownerId)) {
         effect->base.header.state = -1;
     } else {
-        func_1502EA98(owner, fog->r, fog->g, fog->b, fog->a, FALSE, fog->rate);
+        actor_flashFog(owner, fog->r, fog->g, fog->b, fog->a, FALSE, fog->rate);
     }
 }
 
@@ -159,22 +159,22 @@ void func_150ECC70(Camera *obj) {
     s32 value9A;
     s32 half;
 
-    if (func_1509BE40(1, 0x403B, 6, 0x2000) != 0) {
+    if (script_query(1, 0x403B, 6, 0x2000) != 0) {
         s32 mode;
 
-        func_1509BFB0(0, 0x4031, 1);
-        func_1509BFB0(0, 0x4032, 1);
-        func_1509BFB0(0, 0x4033, 1);
+        script_command(0, 0x4031, 1);
+        script_command(0, 0x4032, 1);
+        script_command(0, 0x4033, 1);
         obj->AvailableModes |= 0x80021200;
-        if (func_1509BE40(1, 0x4038, 6, 0x2000) != 0) {
+        if (script_query(1, 0x4038, 6, 0x2000) != 0) {
             D_80088ADC = 128.0f;
             D_80088AE0 = 255.0f;
             D_80088AE4 = 255.0f;
-        } else if (func_1509BE40(1, 0x4039, 6, 0x2000) != 0) {
+        } else if (script_query(1, 0x4039, 6, 0x2000) != 0) {
             D_80088ADC = 255.0f;
             D_80088AE0 = 128.0f;
             D_80088AE4 = 255.0f;
-        } else if (func_1509BE40(1, 0x403A, 6, 0x2000) != 0) {
+        } else if (script_query(1, 0x403A, 6, 0x2000) != 0) {
             D_80088ADC = 255.0f;
             D_80088AE0 = 255.0f;
             D_80088AE4 = 128.0f;
@@ -183,8 +183,8 @@ void func_150ECC70(Camera *obj) {
             D_80088AE0 = 255.0f;
             D_80088AE4 = 255.0f;
         }
-        mode = func_1509BE40(0, 0x2007, 0xB7) | 0x2000;
-        if (func_1509BE40(1, 0x4010, 6, 0x2000) == 0) {
+        mode = script_query(0, 0x2007, 0xB7) | 0x2000;
+        if (script_query(1, 0x4010, 6, 0x2000) == 0) {
             obj->Tightness = 0;
             obj->YOffsetTget = 0.0f;
             return;
@@ -194,9 +194,9 @@ void func_150ECC70(Camera *obj) {
             return;
         }
         obj->Tightness = 1;
-        value9C = func_1509BE40(1, mode, 0x9C, 0x2000);
-        func_1509BFB0(1, 0x9000, 0x17, value9C);
-        value9A = func_1509BE40(1, mode, 0x9A, 0x2000);
+        value9C = script_query(1, mode, 0x9C, 0x2000);
+        script_command(1, 0x9000, 0x17, value9C);
+        value9A = script_query(1, mode, 0x9A, 0x2000);
         half = value9A >> 1;
         if (value9A < 900) {
             value9A = 900;
@@ -208,22 +208,22 @@ void func_150ECC70(Camera *obj) {
         } else if (half > 231) {
             half = 231;
         }
-        func_1509BFB0(2, 0x9000, 8, value9A, half);
+        script_command(2, 0x9000, 8, value9A, half);
         obj->YOffsetTget = 220.0f;
     } else {
         D_80088ADC = 255.0f;
         D_80088AE0 = 255.0f;
         D_80088AE4 = 255.0f;
-        func_1509BFB0(0, 0x4031, 0);
-        func_1509BFB0(0, 0x4032, 0);
-        func_1509BFB0(0, 0x4033, 0);
+        script_command(0, 0x4031, 0);
+        script_command(0, 0x4032, 0);
+        script_command(0, 0x4033, 0);
         obj->AvailableModes &= ~0x80021200;
         obj->AvailableModes |= 8;
     }
     func_150495B0(&D_80088AD0, D_80088ADC, &D_80088AE8, 4.0f, 6.0f, obj->SpringTime);
     func_150495B0(&D_80088AD4, D_80088AE0, &D_80088AEC, 4.0f, 6.0f, obj->SpringTime);
     func_150495B0(&D_80088AD8, D_80088AE4, &D_80088AF0, 4.0f, 6.0f, obj->SpringTime);
-    func_1509BFB0(1, 0x30F3, 0x12, (u8)D_80088AD0);
-    func_1509BFB0(1, 0x30F4, 0x12, (u8)D_80088AD4);
-    func_1509BFB0(1, 0x30F5, 0x12, (u8)D_80088AD8);
+    script_command(1, 0x30F3, 0x12, (u8)D_80088AD0);
+    script_command(1, 0x30F4, 0x12, (u8)D_80088AD4);
+    script_command(1, 0x30F5, 0x12, (u8)D_80088AD8);
 }

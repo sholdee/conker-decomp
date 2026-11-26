@@ -9,11 +9,11 @@ void func_15131958(void *vel, f32 drag, void *arg2);
 /* The point functions of func_151D469C's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is
  * their second argument). */
 static void (*D_8008FC70[])(Actor *obj, s16 arg1, Vec3f *out) = {
-    func_151C6974, func_151C69A0, func_150FE794, func_150FE248, func_150FFBDC, func_150FEBC8, func_150FEFD0,
+    weapon_getSide0JointPos, weapon_getSide1JointPos, func_150FE794, weapon_getLauncherMuzzlePos, weapon_getGunMuzzlePos, weapon_getForwardProjectileStart, weapon_getAttachmentPos,
 };
 /* The guns' muzzle points and the bones they are on, for func_151D5A18 (by gun). */
-const Vec3f *D_8008FC8C[] = { &D_800A2130, &D_800A19E0 };
-u8 *D_8008FC94[] = { &D_80088BB0, &D_80088B10 };
+const Vec3f *D_8008FC8C[] = { &gGunMuzzleStart, &D_800A19E0 };
+u8 *D_8008FC94[] = { &gGunMuzzleBone, &D_80088B10 };
 
 void *memcpy(void *, const void *, u32);
 
@@ -78,9 +78,9 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
     if (kind == 1) {
         if (big) {
             sfx = (func_150ADA20() % 3U) + 0x459;
-            if (D_80082FA0 == 0) {
-                func_1000FA64(sfx, pos->x, pos->y, pos->z, 0x4000, 1200, 800,
-                              (SoundRecordCallback)func_1000EC24, (void *)40, 0, 0, 0);
+            if (gScreenLayout == 0) {
+                sound_addDynamicSound(sfx, pos->x, pos->y, pos->z, 0x4000, 1200, 800,
+                              (SoundRecordCallback)sound_delayedPlayCallback, (void *)40, 0, 0, 0);
                 sfx = 0x106;
             }
         } else {
@@ -145,7 +145,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
         sparks.unk73 = -1;
         func_15152B38(&sparks, arg4, arg5);
     }
-    if (particleType != 0 && D_80082FA0 < 2) {
+    if (particleType != 0 && gScreenLayout < 2) {
         ParticleSpawn p;
 
         p.pos = *pos;
@@ -227,7 +227,7 @@ s32 func_151D3D50(WobbleParticle *particle) {
     BobMotion *wobble = &particle->wobble;
 
     if (wobble->timer > 0) {
-        wobble->phase += wobble->phaseSpeed * D_800BE9A4;
+        wobble->phase += wobble->phaseSpeed * gFrameDelta;
         wobble->phase = func_15144B68(wobble->phase);
         particle->unk20.y = particle->unk50.y + sinf(wobble->phase) * wobble->amplitude;
         wobble->timer -= D_800BE9E4;
@@ -249,7 +249,7 @@ void func_151D3E04(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bone, f32 y
     }
 }
 
-/* Calls func_1505D1C4 at the midpoint of a and b, with obj's movement angle relative to its mv. */
+/* Calls actor_runAttackAt at the midpoint of a and b, with obj's movement angle relative to its mv. */
 void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
     f32 x = (a->x + b->x) * 0.5f;
     f32 y = (a->y + b->y) * 0.5f;
@@ -263,7 +263,7 @@ void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
         } else {
             angle = obj->angle;
         }
-        func_1505D1C4(x, y, z, arg3, obj - movement_obj, angle, 0, 0);
+        actor_runAttackAt(x, y, z, arg3, obj - movement_obj, angle, 0, 0);
     }
 }
 
@@ -280,7 +280,7 @@ void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2) {
     header2.y = pos->y;
     header2.z = pos->z;
 
-    func_151602C0(&header, &header2, (func_150ADA20() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (func_150ADA20() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
 }
 
 void func_151D3FF4(const Vec3f *pos, u8 arg1, s32 arg2) {
@@ -296,10 +296,10 @@ void func_151D3FF4(const Vec3f *pos, u8 arg1, s32 arg2) {
     header2.y = pos->y;
     header2.z = pos->z;
 
-    func_151602C0(&header, &header2, (func_150ADA20() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (func_150ADA20() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
 }
 
-/* Calls func_1505D1C4 twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
+/* Calls actor_runAttackAt twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
    or pos raised by half of target's height when there is no dir. */
 void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionTri *surface, s32 arg5, s32 arg6,
                    s32 arg7) {
@@ -316,13 +316,13 @@ void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionT
     } else {
         point = *pos;
         if (target != NULL) {
-            func_1507C3E0(target, &height, NULL, NULL);
+            actor_computeSize(target, &height, NULL, NULL);
             point.y += height >> 1;
         }
         angle = 0;
     }
-    func_1505D1C4(pos->x, pos->y, pos->z, arg5, obj - movement_obj, angle, arg7, (s32)&point);
-    func_1505D1C4(pos->x, pos->y, pos->z, arg6, obj - movement_obj, angle, arg7, (s32)&point);
+    actor_runAttackAt(pos->x, pos->y, pos->z, arg5, obj - movement_obj, angle, arg7, (s32)&point);
+    actor_runAttackAt(pos->x, pos->y, pos->z, arg6, obj - movement_obj, angle, arg7, (s32)&point);
 }
 
 void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 arg4) {
@@ -335,10 +335,10 @@ void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s3
     } else {
         angle = 0;
     }
-    func_1505D1C4(pos->x, pos->y, pos->z, arg4, obj - movement_obj, angle, 0, 0);
+    actor_runAttackAt(pos->x, pos->y, pos->z, arg4, obj - movement_obj, angle, 0, 0);
 }
 
-/* Unused outputs of func_1503F404's matrix decomposition. */
+/* Unused outputs of model_decomposeBoneMatrix's matrix decomposition. */
 struct S151D4408Temps {
     f32 unk00;
     f32 unk04;
@@ -355,7 +355,7 @@ void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u
     struct S151D4408Temps unused;
     f32 speed;
 
-    func_1503F404(mtx, &unused.unk0C, &unused.unk10, &unused.unk14, &p.rot.x, &p.rot.y, &p.rot.z,
+    model_decomposeBoneMatrix(mtx, &unused.unk0C, &unused.unk10, &unused.unk14, &p.rot.x, &p.rot.y, &p.rot.z,
                   &unused.unk00, &unused.unk04, &unused.unk08);
     p.rot.x += 180.0f;
 block_151D4408: // matching: an unused label ends the basic block, keeping the store above out of the jal delay slot
@@ -472,7 +472,7 @@ void func_151D4794(ObjEmitterEffect *effect) {
         if (func_15143E64(&diff) > 5.0f) {
             return;
         }
-        emitter->spawnTimer += (0.200000003f + func_150ADA68() * 0.2090000063f) * D_800BE9A4;
+        emitter->spawnTimer += (0.200000003f + func_150ADA68() * 0.2090000063f) * gFrameDelta;
         if (emitter->spawnTimer > 1.0f) {
             ParticleDesc spawn;
             WobbleData extra;
@@ -515,9 +515,9 @@ void func_151D4794(ObjEmitterEffect *effect) {
                     spawn.pos.y = diff.y * t + prev.y;
                     spawn.pos.z = diff.z * t + prev.z;
                 }
-                spawn.vel.x = diff.x * D_800BE9A8 * 0.2980000079f;
-                spawn.vel.y = diff.y * D_800BE9A8 * 0.2980000079f;
-                spawn.vel.z = diff.z * D_800BE9A8 * 0.2980000079f;
+                spawn.vel.x = diff.x * gFrameDeltaInv * 0.2980000079f;
+                spawn.vel.y = diff.y * gFrameDeltaInv * 0.2980000079f;
+                spawn.vel.z = diff.z * gFrameDeltaInv * 0.2980000079f;
                 extra.phase[0] = func_150ADA20() & 0xFF;
                 extra.phase[1] = func_150ADA20() & 0xFF;
                 extra.phaseStep[0] = func_150ADA20() % 5U + 4;
@@ -599,7 +599,7 @@ s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit
         (victim->character_type == 0x8C) || (victim->character_type == 0x8E) || (victim->character_type == 0x8F) || (victim->character_type == 0x91) ||
         (victim->character_type == 0x9E) || (victim->character_type == 0xA6) || (victim->character_type == 0xAB) || (victim->character_type == 0xAC) ||
         (victim->character_type == 0xB2) || (victim->character_type == 0xB4) || (victim->character_type == 0x5B)) {
-        func_151C2050(attacker, from, dir, 9, (hit != NULL) ? hit->dist : 0.0f);
+        weapon_queueShotSound(attacker, from, dir, 9, (hit != NULL) ? hit->dist : 0.0f);
     }
 
     health = victim->energy;
@@ -626,10 +626,10 @@ s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit
 
     if (!alreadyDead) {
         angle = func_150484A0(dir->x, dir->z) * 10430.37793f;
-        func_1505D024(victim, flags | 0x80000, (angle - 0x4000) | 1,
+        actor_hitScripted(victim, flags | 0x80000, (angle - 0x4000) | 1,
                       (attacker != NULL) ? (attacker - movement_obj) : -1);
     }
-    // no return statement here: the original falls off the end (game_1EF500.c returns what is left in v0)
+    // no return statement here: the original falls off the end (game/Weapon/Projectile/projectile.c returns what is left in v0)
 }
 
 /* Counts down mv->gun_before_reload and counts up mv->shotsfired. */
@@ -693,7 +693,7 @@ typedef struct {
     /* 0x14 */ f32 unk14;
 } Params151D5334;
 
-/* Calls func_15164F0C once for each i in 0..D_80082FA0 with the same parameters. */
+/* Calls func_15164F0C once for each i in 0..gScreenLayout with the same parameters. */
 void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
     s32 i;
     Params151D5334 params;
@@ -703,7 +703,7 @@ void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s
     params.unk10 = arg2;
     params.unk14 = arg3;
 
-    for (i = 0; i < D_80082FA0 + 1; i++) {
+    for (i = 0; i < gScreenLayout + 1; i++) {
         // matching: &params goes through an int (a plain pointer changes the register allocation)
         func_15164F0C(arg4, i, (void *)(s32)&params, arg5, arg6);
     }
@@ -719,7 +719,7 @@ typedef struct {
     /* 0x19 */ u8 pad19[7]; // matching: the original stack slot is 0x20 bytes; only 0x1C are copied
 } Params151D5404;
 
-/* Creates one func_151D8868 effect for each i in 0..D_80082FA0, with unk2 random in [base, base + range]. */
+/* Creates one func_151D8868 effect for each i in 0..gScreenLayout, with unk2 random in [base, base + range]. */
 void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7) {
     Params151D5404 params;
     RumbleParams header;
@@ -735,7 +735,7 @@ void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range
     header.strength = 0;
     header.updateKind = 0;
 
-    for (i = 0; i < D_80082FA0 + 1; i++) {
+    for (i = 0; i < gScreenLayout + 1; i++) {
         header.playerMask = 1 << i;
         params.index = i;
         effect = func_151D8868(&header, 0x1C, 255, 0);
@@ -818,7 +818,7 @@ void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u
 }
 
 /* Computes obj's emission point and direction for slot `slot`, stores a far target point along it in
-   unk31C->unkB8..unkC0, and calls func_15081690 from the point towards that target. */
+   unk31C->unkB8..unkC0, and calls collision_castRay from the point towards that target. */
 void func_151D57F8(Actor *obj, u8 slot) {
     Vec3f pos;
     Vec3f forward;
@@ -849,7 +849,7 @@ void func_151D57F8(Actor *obj, u8 slot) {
         delta.y = obj->mv->rayHit.pos.y - pos.y;
         delta.z = obj->mv->rayHit.pos.z - pos.z;
         if (func_15145128(&delta, &delta, &len, NULL) != 0) {
-            func_15081690(obj, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z,
+            collision_castRay(obj, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z,
                           &obj->mv->rayHit, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
         }
     }
@@ -891,7 +891,7 @@ void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *
 
 
 /* Runs func_151452C4(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter
-   is not -1, only for those D_80086C90[filter] accepts). Returns a mask with bit i cleared for each
+   is not -1, only for those gObjectFilters[filter] accepts). Returns a mask with bit i cleared for each
    object i it reports. */
 s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg) {
     f32 radius;
@@ -912,7 +912,7 @@ s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg)
         if (level != 0x23 && obj->character_type == 0xFF) continue;
         if (obj == self) continue;
         if (!(obj->noshove & 0x40)) continue;
-        if (filter != -1 && D_80086C90[filter](obj, self, filterArg) == 0) continue;
+        if (filter != -1 && gObjectFilters[filter](obj, self, filterArg) == 0) continue;
         if (obj->unkD2 < obj->unkD4) {
             radius = obj->unkD4;
         } else {

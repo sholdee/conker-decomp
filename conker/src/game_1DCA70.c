@@ -41,8 +41,8 @@ s32 func_151AF5C0(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 side) {
     probe.x = pos->x;
     probe.y = pos->y + 100.0f;
     probe.z = pos->z;
-    func_1504715C(ground, actor);
-    return func_15046C80(&probe, 0, pos->y - 500.0f, ground);
+    collision_initHitFromObject(ground, actor);
+    return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 500.0f, ground);
 }
 
 s32 func_151AF6C0(s32 arg0, s32 arg1) {
@@ -187,7 +187,7 @@ s32 func_151AFC08(SprayParticle *spray) {
             }
         }
         if (growth->growEndTimer < spray->head.def.lifetime) {
-            f32 grow = growth->growRate * D_800BE9A4;
+            f32 grow = growth->growRate * gFrameDelta;
 
             spray->head.def.width = spray->head.def.width + grow;
             spray->head.def.height = spray->head.def.height + grow;

@@ -34,8 +34,8 @@ EffectActor *func_151580B0(EffectActorTemplate *template, s32 attachment, s32 ar
 
     actor->attachment.sharedHandle = NULL;
     if (attachment) {
-        for (i = 0; i <= D_80082FA0; i++) {
-            actor->attachment.handles[i] = func_1515D480(attachment);
+        for (i = 0; i <= gScreenLayout; i++) {
+            actor->attachment.handles[i] = light_allocGfxLights(attachment);
         }
         actor->attachment.sharedHandle = func_1515D440();
     }
@@ -154,17 +154,17 @@ s32 func_15158684(EffectActor *actor) {
         f32 accelZ;
         f32 accelY;
 
-        motion->vel.y += motion->gravity * D_800BE9A4;
-        accelX = (motion->vel.x - prevVelocity.x) * D_800BE9A8;
+        motion->vel.y += motion->gravity * gFrameDelta;
+        accelX = (motion->vel.x - prevVelocity.x) * gFrameDeltaInv;
         accelY = motion->gravity;
-        accelZ = (motion->vel.z - prevVelocity.z) * D_800BE9A8;
-        actor->tmpl.position.x += (prevVelocity.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
-        actor->tmpl.position.y += (prevVelocity.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
-        actor->tmpl.position.z += (prevVelocity.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
+        accelZ = (motion->vel.z - prevVelocity.z) * gFrameDeltaInv;
+        actor->tmpl.position.x += (prevVelocity.x + 0.5f * accelX * gFrameDelta) * gFrameDelta;
+        actor->tmpl.position.y += (prevVelocity.y + 0.5f * accelY * gFrameDelta) * gFrameDelta;
+        actor->tmpl.position.z += (prevVelocity.z + 0.5f * accelZ * gFrameDelta) * gFrameDelta;
     }
-    motion->rot.x += motion->rotVel.x * D_800BE9A4;
-    motion->rot.y += motion->rotVel.y * D_800BE9A4;
-    motion->rot.z += motion->rotVel.z * D_800BE9A4;
+    motion->rot.x += motion->rotVel.x * gFrameDelta;
+    motion->rot.y += motion->rotVel.y * gFrameDelta;
+    motion->rot.z += motion->rotVel.z * gFrameDelta;
     return 1;
 }
 
@@ -207,7 +207,7 @@ void func_15158A20(EffectActor *actor) {
 
     void *handle; // matching: copied after each NULL test so IDO keeps the load in v0
 
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         if (actor->attachment.handles[i] != NULL) {
             handle = actor->attachment.handles[i];
             func_100043B4(handle, 4);

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 (*D_8008FCD0[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game_11C2B0 has its own view) */
+extern u8 (*D_8008FCD0[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game/Beam/AimedBeam/aimedbeam has its own view) */
 
 /* This file's .data: the texture scroll offsets; >> 7 gives the 10.2 fixed-point tile coordinate. */
 s32 D_80088890 = 0;
@@ -11,7 +11,7 @@ s32 D_80088898 = 0;
 s32 D_8008889C = 0;
 
 void func_150CF530(s32 arg0) {
-    func_151CF898(&movement_obj[0], movement_obj[0].ypos + 300.0f, -10000.0f);
+    trail_spawnNearCamera(&movement_obj[0], movement_obj[0].ypos + 300.0f, -10000.0f);
 }
 
 /* Advances the texture scroll offsets by the frames elapsed. */
@@ -44,7 +44,7 @@ typedef struct {
     /* 0x0C */ f32 floorY;
 } BounceMotion;
 
-/* A screen sprite made by func_1515548C (ScreenSprite in game_182140.c, 0x70 bytes) with its motion data. */
+/* A screen sprite made by sprite_newScreenSprite (ScreenSprite in game/Sprite/ScreenSprite/screensprite.c, 0x70 bytes) with its motion data. */
 struct HopSprite {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
@@ -102,9 +102,9 @@ void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
     spawn.scaleX = 1.0f;
     spawn.offsetT = 0.0f;
     spawn.offsetS = 0.0f;
-    spawn.viewport = D_80082FA0;
+    spawn.viewport = gScreenLayout;
 
-    particle = func_1515548C(&spawn, 12, 0, 0, 0x10, unkC, unk1);
+    particle = sprite_newScreenSprite(&spawn, 12, 0, 0, 0x10, unkC, unk1);
     if (particle != NULL) {
         memcpy(&particle->motion.hop, &hop, sizeof(hop));
     }
@@ -124,7 +124,7 @@ s32 func_150CF800(HopSprite *hopper) {
 
     hop = &hopper->motion.hop;
     if (hop->flags & 1) {
-        hop->phase += 0.19000001f * D_800BE9A4;
+        hop->phase += 0.19000001f * gFrameDelta;
         phase = hop->phase;
         if (phase >= 1.0f) {
             hop->phase = 1.0f;
@@ -157,7 +157,7 @@ s32 func_150CF800(HopSprite *hopper) {
             spawn.scaleY = 1.0f;
             spawn.offsetT = 0.0f;
             spawn.offsetS = 0.0f;
-            spawn.viewport = D_80082FA0;
+            spawn.viewport = gScreenLayout;
             for (; count > 0; count--) {
                 spawn.color1.alpha = (func_150ADA20() % 101U) + 155;
                 spawn.texture = D_8008FCD0[2]();
@@ -178,7 +178,7 @@ s32 func_150CF800(HopSprite *hopper) {
                     rand = 0;
                 }
                 spawn.flags = rand | 1 | bit2 | 8 | 0x10 | 0x20; // matching: folding the constants into 0x39 changes the code
-                particle = func_1515548C(&spawn, 13, 0, 0, 0x10, hopper->unkC, hopper->unk1);
+                particle = sprite_newScreenSprite(&spawn, 13, 0, 0, 0x10, hopper->unkC, hopper->unk1);
                 if (particle != NULL) {
                     memcpy(&particle->motion.bounce, &dust, sizeof(dust));
                 }
@@ -214,9 +214,9 @@ void func_150CFC38(f32 targetX) {
 s32 func_150CFC60(HopSprite *particle) {
     BounceMotion *m = &particle->motion.bounce;
 
-    particle->pos.x += m->vel.x * D_800BE9A4;
-    particle->pos.y += (m->vel.y * D_800BE9A4) + (((0.5f * m->gravity) * D_800BE9A4) * D_800BE9A4);
-    m->vel.y += m->gravity * D_800BE9A4;
+    particle->pos.x += m->vel.x * gFrameDelta;
+    particle->pos.y += (m->vel.y * gFrameDelta) + (((0.5f * m->gravity) * gFrameDelta) * gFrameDelta);
+    m->vel.y += m->gravity * gFrameDelta;
     if (m->floorY < particle->pos.y) {
         particle->pos.y = m->floorY;
         m->vel.x *= 0.3f;

@@ -20,7 +20,7 @@ typedef struct ScreenEffect {
     /* 0x16 */ u8 pad16[2];
 } ScreenEffect;
 
-/* Effect data filled in by func_151600D8 from the debug tunables. */
+/* Effect data filled in by colourfb_readTunables from the debug tunables. */
 typedef struct {
     /* 0x00 */ f32 pos[2];  /* s, t */
     /* 0x08 */ f32 size[2]; /* s, t */
@@ -33,12 +33,12 @@ typedef struct {
 } ColourFrameBufferEffect;
 
 /* game/Effects/ColourFrameBuffer/colourframebuffer.c */
-void func_1515FDA0(s32 arg0);
-ScreenEffect *func_1515FF74(EffectDesc *desc, s32 dataSize, u8 owner, s32 list);
-void func_1515FFEC(ScreenEffect *effect);
-void func_15160090(ScreenEffect *effect, s32 data, u8 event);
-s32 func_151600D8(ColourFrameBufferEffect *effect);
-/* (s32 data, u8 event); declared without a prototype: game_1F7050.c passes a third argument */
-void func_15160274();
+void colourfb_drawScreenEffects(s32 arg0);
+ScreenEffect *colourfb_createScreenEffect(EffectDesc *desc, s32 dataSize, u8 owner, s32 list);
+void colourfb_updateScreenEffect(ScreenEffect *effect);
+void colourfb_dispatchMessage(ScreenEffect *effect, s32 data, u8 event);
+s32 colourfb_readTunables(ColourFrameBufferEffect *effect);
+/* (s32 data, u8 event); declared without a prototype: game/Sight/SightHud/sighthud.c passes a third argument */
+void colourfb_broadcastMessage();
 
 #endif

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_15D730.c. Not in particle.h: game_105FC0.c and game_200930.c call it with a third
+/* Defined in game_15D730.c. Not in particle.h: game/Trail/PissTrail/pisstrail.c and game_200930.c call it with a third
    argument. */
 void func_15131958(Vec3f *vel, f32 drag);
 
@@ -23,7 +23,7 @@ void func_150D5440(Actor *obj, u8 arg1, s32 arg2) {
 
 /*
  * FollowEffect update: while the owner is low (unk28 < 8) on a type-0xE surface, emits
- * particles on both sides of it at a rate of 3-4 per second (scaled by D_800BE9A4).
+ * particles on both sides of it at a rate of 3-4 per second (scaled by gFrameDelta).
  */
 void func_150D54C8(FollowEffect *effect) {
     Actor *owner;
@@ -48,9 +48,9 @@ void func_150D54C8(FollowEffect *effect) {
     }
     if (owner->shad < 8.0f && (owner->floorMaterial & 0x1F) == 0xE) {
         // matching: (f32)1 keeps the multiply by 1.0 that a 1.0f literal would fold away
-        data->spawnAccum += (3.000000238f + func_150ADA68() * (f32)1) * D_800BE9A4;
+        data->spawnAccum += (3.000000238f + func_150ADA68() * (f32)1) * gFrameDelta;
         if (data->spawnAccum > 1.0f) {
-            if (func_1515C0F8(owner, &refVel) == 0) {
+            if (sprite_findActorMotion(owner, &refVel) == 0) {
                 refVel = &D_800A5480;
             }
             func_1514373C(owner->theta * 0.01745329238f, 1.0f, &sinYaw, &cosYaw);
@@ -185,12 +185,12 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
         return;
     }
     if ((obj->floorMaterial & 0x1F) == 0xE) {
-        func_10010630(0x434, obj, 32000, 700, 2000);
+        sound_playActorUntracked(0x434, obj, 32000, 700, 2000);
     } else {
-        func_10010630(0x4C8, obj, -32000, 700, 2000);
+        sound_playActorUntracked(0x4C8, obj, -32000, 700, 2000);
     }
-    func_10010630((func_150ADA20() & 1) + 0x2B6, obj, 32000, 1000, 3000);
-    func_10010630((func_150ADA20() & 3) + 0x2B1, obj, 32000, 700, 2000);
+    sound_playActorUntracked((func_150ADA20() & 1) + 0x2B6, obj, 32000, 1000, 3000);
+    sound_playActorUntracked((func_150ADA20() & 3) + 0x2B1, obj, 32000, 700, 2000);
     func_151C05A4(&pos, arg1, arg2);
     func_151C05F0(&pos, arg1, arg2);
     func_15145A50(obj);
@@ -332,14 +332,14 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
                 func_15132A4C(&piece, 0, 0, 0, arg1, arg2);
             }
         }
-        if (obj->CameraPtr != NULL && D_80082FA0 <= 0) {
+        if (obj->CameraPtr != NULL && gScreenLayout <= 0) {
             func_150D66A4(obj->CameraPtr->CNumber, arg1, arg2);
         }
         if (hit && obj->CameraPtr != NULL) {
             if ((hitSurface & 0x1F) == 0xE) {
                 func_150D65F0((CollisionTri *)hitTri, &hitPos, arg1, arg2);
             } else {
-                func_151C0360((CollisionTri *)hitTri, &hitPos, arg1, arg2);
+                weapon_spawnHitDecal((CollisionTri *)hitTri, &hitPos, arg1, arg2);
             }
         }
         func_150D6434(&pos, arg1, arg2);
@@ -369,7 +369,7 @@ void func_150D6434(Vec3f *pos, u8 arg1, s32 arg2) {
     func_15154884(pos, rand1 * 3.0f + 8.0f, rand2 * 0.4030000269f + 1.305000067f, rand3 * 50.0f + 100.0f, arg1, arg2);
 }
 
-/* Fills in fixed settings; unk50 is -1 when D_80082FA0 >= 2 or D_8008FD8C >= 8, else 0. */
+/* Fills in fixed settings; unk50 is -1 when gScreenLayout >= 2 or D_8008FD8C >= 8, else 0. */
 void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
     info->unk00 = 6;
     info->unk04 = 3;
@@ -393,7 +393,7 @@ void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
     info->unk4C = 12;
     info->unk4E = 20;
 
-    if (D_80082FA0 >= 2 || D_8008FD8C >= 8) {
+    if (gScreenLayout >= 2 || D_8008FD8C >= 8) {
         info->unk50 = -1;
     } else {
         info->unk50 = 0;
@@ -412,14 +412,14 @@ void func_150D65F0(CollisionTri *surface, Vec3f *pos, u8 arg2, s32 arg3) {
     func_151A5D58(rand1 * 100.0f + 150.0f, rand2 % 71 + 130, surface, pos, rand3 % 31 + 50, 0, 1, arg2, arg3);
 }
 
-/* Calls func_15182670 for camera arg0 with 0xFF, 0xFF, 0xFF, a random 200-255 and a random 25-30. */
+/* Calls screen_spawnFlash for camera arg0 with 0xFF, 0xFF, 0xFF, a random 200-255 and a random 25-30. */
 void func_150D66A4(u8 arg0, u8 arg1, s32 arg2) {
     u32 rand2;
     u32 rand1;
 
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
-    func_15182670(0xFF, 0xFF, 0xFF, rand1 % 56 + 200, rand2 % 6 + 25, arg0, arg1, arg2);
+    screen_spawnFlash(0xFF, 0xFF, 0xFF, rand1 % 56 + 200, rand2 % 6 + 25, arg0, arg1, arg2);
 }
 
 /* Spawns 15-25 drift particles and one grow particle that follow obj. */
@@ -564,17 +564,17 @@ s32 func_150D6CC4(FollowParticle *particle, s32 arg1) {
         f32 accelY;
         f32 accelZ;
 
-        particle->head.desc.vel.y += particle->head.desc.gravity * D_800BE9A4;
+        particle->head.desc.vel.y += particle->head.desc.gravity * gFrameDelta;
         func_15131958(&particle->head.desc.vel, data->drag);
-        accelX = (particle->head.desc.vel.x - prevVel.x) * D_800BE9A8;
-        accelY = (particle->head.desc.vel.y - prevVel.y) * D_800BE9A8;
-        accelZ = (particle->head.desc.vel.z - prevVel.z) * D_800BE9A8;
-        particle->head.desc.offset.x += prevVel.x * D_800BE9A4 +
-            accelX * D_800BE9A4 * D_800BE9A4 * 0.5f;
-        particle->head.desc.offset.y += prevVel.y * D_800BE9A4 +
-            accelY * D_800BE9A4 * D_800BE9A4 * 0.5f;
-        particle->head.desc.offset.z += prevVel.z * D_800BE9A4 +
-            accelZ * D_800BE9A4 * D_800BE9A4 * 0.5f;
+        accelX = (particle->head.desc.vel.x - prevVel.x) * gFrameDeltaInv;
+        accelY = (particle->head.desc.vel.y - prevVel.y) * gFrameDeltaInv;
+        accelZ = (particle->head.desc.vel.z - prevVel.z) * gFrameDeltaInv;
+        particle->head.desc.offset.x += prevVel.x * gFrameDelta +
+            accelX * gFrameDelta * gFrameDelta * 0.5f;
+        particle->head.desc.offset.y += prevVel.y * gFrameDelta +
+            accelY * gFrameDelta * gFrameDelta * 0.5f;
+        particle->head.desc.offset.z += prevVel.z * gFrameDelta +
+            accelZ * gFrameDelta * gFrameDelta * 0.5f;
     }
     return 1;
 }
@@ -624,7 +624,7 @@ s32 func_150D6F0C(FollowParticle *particle, s32 arg1) {
     particle->head.desc.width = size;
 
     particle->head.desc.alpha = data->fadeStart - data->fadeRate * data->time * data->time;
-    data->time += D_800BE9A4;
+    data->time += gFrameDelta;
 
     if (data->lifetime < data->time) {
         return 0;

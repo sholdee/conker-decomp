@@ -3,7 +3,7 @@
 #include "variables.h"
 
 void func_15107FE0(Camera *arg0) {
-    if (func_150859AC(arg0->CharPtr->playernumber, 1) == 9) {
+    if (player_getStat(arg0->CharPtr->playernumber, 1) == 9) {
         func_151239CC(arg0, CAMERA_MODE_ZONES);
         if (func_15123934(arg0, 8, 0, arg0->Tightness, CAMERA_MODE_TRANSPORT) != 0) {
             arg0->DoingAim = 0;
@@ -19,7 +19,7 @@ void func_15107FE0(Camera *arg0) {
     } else {
         arg0->SpecialFlags &= ~0x800;
     }
-    if (func_1509BE40(1, 0x401A, 6, 0x9000) || func_1509BE40(1, 0x401B, 6, 0x9000)) {
+    if (script_query(1, 0x401A, 6, 0x9000) || script_query(1, 0x401B, 6, 0x9000)) {
         arg0->AvailableModes |= 0x10000;
     } else {
         arg0->AvailableModes &= 0xFFFEFFFF;

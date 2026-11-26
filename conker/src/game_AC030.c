@@ -280,7 +280,7 @@ void func_1507EEF4(void) {
     IdleState *idle;
     s32 phase;
 
-    idle = &D_800D154C->mv->idle;
+    idle = &gCurrentActor->mv->idle;
     phase = idle->phase;
 
     if (phase == 0) {
@@ -329,44 +329,44 @@ void func_1507EFD0(void) {
     s32 reused;
     s32 seq;
 
-    idle = &D_800D154C->mv->idle;
+    idle = &gCurrentActor->mv->idle;
     count = 0;
     /* unk139: a requested sequence, unk13A: its countdown */
-    if (D_800D154C->unk13A != 0) {
-        if (D_800D154C->unk139 < 0x21) {
-            func_1507EB80(candidates, &count, D_800D154C->unk139);
+    if (gCurrentActor->unk13A != 0) {
+        if (gCurrentActor->unk139 < 0x21) {
+            func_1507EB80(candidates, &count, gCurrentActor->unk139);
         }
     } else if (D_800D18C0 & 2) {
         func_1507EB80(candidates, &count, 3);
         D_800D18C0 = 0;
-    } else if (D_800D154C->mv->idle.delay != 0 && D_800D154C->mv->rt_context_b == 0) {
+    } else if (gCurrentActor->mv->idle.delay != 0 && gCurrentActor->mv->rt_context_b == 0) {
         seq = 0xB;
         if (idle->timer >= 121) {
-            D_800D154C->mv->idle.delay = 0;
+            gCurrentActor->mv->idle.delay = 0;
             idle->timer = 0;
             idle->phase = 0;
             seq = 0xC;
-            func_1507FF94(D_800D154C);
+            func_1507FF94(gCurrentActor);
         } else {
             seq = 0xB; // matching: the redundant store keeps the else-branch block
         }
         func_1507EB80(candidates, &count, seq);
-    } else if (D_800D154C->energy < 2) {
+    } else if (gCurrentActor->energy < 2) {
         func_1507EB80(candidates, &count, 0);
     } else if (func_1515942C(&movement_obj[dc_glbl_CharNum], 0, 0, -1, -1, -1) != 0) {
         func_1507EB80(candidates, &count, 0);
     } else if (idle->timer >= func_1507F4C0(idle->phase)) {
         func_1507EEF4();
         category = -1;
-        if (D_800D154C->unk2F8 & 0x200) {
+        if (gCurrentActor->unk2F8 & 0x200) {
             category = 2;
-        } else if (D_800D154C->mv->rt_context_b == 9) {
+        } else if (gCurrentActor->mv->rt_context_b == 9) {
             category = 5;
-        } else if (D_800D154C->mv->rt_context_b == 0x23) {
+        } else if (gCurrentActor->mv->rt_context_b == 0x23) {
             category = 9;
-        } else if (D_800D154C->mv->rt_context_b == 0x16) {
+        } else if (gCurrentActor->mv->rt_context_b == 0x16) {
             category = 10;
-        } else if (func_1503195C(D_800D154C, 0x17, 0) != NULL) {
+        } else if (attach_find(gCurrentActor, 0x17, 0) != NULL) {
             category = 6;
         } else if (level == 0x31) {
             if (D_800D18C0 & 4) {
@@ -374,7 +374,7 @@ void func_1507EFD0(void) {
             } else {
                 category = 7;
             }
-        } else if (D_800D154C->character_type == 0x96 || level == 0x10 || level == 0x1B ||
+        } else if (gCurrentActor->character_type == 0x96 || level == 0x10 || level == 0x1B ||
                    level == 0x1E || level == 0x26 || level == 0x2F ||
                    level == 0xE || level == 0x28 || level == 0x23 ||
                    level == 0x1C || level == 0x36 || level == 0x3A) {
@@ -392,7 +392,7 @@ void func_1507EFD0(void) {
             func_1507EBB8(candidates, &count, 0);
         } else {
             func_1507EBB8(candidates, &count, 1);
-            if (idle->phase == 2 && idle->phaseCount >= 4 && func_1507FFD8(D_800D154C) != 0) {
+            if (idle->phase == 2 && idle->phaseCount >= 4 && func_1507FFD8(gCurrentActor) != 0) {
                 func_1507EBB8(candidates, &count, 3);
             }
         }
@@ -424,7 +424,7 @@ s32 func_1507F454(void) {
     s32 sequence;
     s32 next;
 
-    idle = &D_800D154C->mv->idle;
+    idle = &gCurrentActor->mv->idle;
     sequence = idle->sequence;
 
     if (sequence == 0) {
@@ -489,14 +489,14 @@ void func_1507F54C(Actor *actor) {
             anim = 0xD8;
             break;
         }
-        func_1505E650(actor, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+        actor_playAnim(actor, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
         return;
     }
 
-    func_1505E650(actor, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
+    actor_playAnim(actor, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
 }
 
-/* Per-frame idle animation update for the current actor (D_800D154C). */
+/* Per-frame idle animation update for the current actor (gCurrentActor). */
 void func_1507F640(void) {
     s32 type;
     const IdleFrame *entry;
@@ -514,18 +514,18 @@ void func_1507F640(void) {
     if (D_800C35EA[0] == 1) {
         return;
     }
-    if (D_800D154C->drawtype == 4) {
+    if (gCurrentActor->drawtype == 4) {
         return;
     }
     if (dc_glbl_CharNum >= D_8008FD8C) {
         return;
     }
-    idle = &D_800D154C->mv->idle;
+    idle = &gCurrentActor->mv->idle;
     idle->active = TRUE;
-    if (D_800D154C->unk2F8 & 0x20) {
+    if (gCurrentActor->unk2F8 & 0x20) {
         return;
     }
-    if (D_800D154C->mv->death_State) {
+    if (gCurrentActor->mv->death_State) {
         return;
     }
     if (idle->holdFrames > 0) {
@@ -533,30 +533,30 @@ void func_1507F640(void) {
         idle->timer = 0;
         return;
     }
-    if (D_800D154C->energy == 0) {
-        func_1507CD64(D_800D154C, 0);
+    if (gCurrentActor->energy == 0) {
+        actor_kill(gCurrentActor, 0);
         return;
     }
     anim = 0x4F;
-    if (D_800D154C->norun >= 250) {
-        D_800D154C->norun = 0;
+    if (gCurrentActor->norun >= 250) {
+        gCurrentActor->norun = 0;
     }
-    if (D_800D154C->nojump == 0xFF) {
-        D_800D154C->nojump = 0;
+    if (gCurrentActor->nojump == 0xFF) {
+        gCurrentActor->nojump = 0;
     }
-    D_800D154C->count5 = 0;
-    D_800D154C->unkAA = 0;
-    D_800D154C->angle = D_800D154C->langle;
-    D_800D154C->unk100 &= 0xFE;
-    D_800D154C->unk2F8 &= ~7;
-    D_800D154C->unk2F8 |= 0; // matching: a second store, as from setting a 3-bit field to 0
-    owner = D_800D154C->mv;
+    gCurrentActor->count5 = 0;
+    gCurrentActor->unkAA = 0;
+    gCurrentActor->angle = gCurrentActor->langle;
+    gCurrentActor->unk100 &= 0xFE;
+    gCurrentActor->unk2F8 &= ~7;
+    gCurrentActor->unk2F8 |= 0; // matching: a second store, as from setting a 3-bit field to 0
+    owner = gCurrentActor->mv;
     if (owner->env_suit) {
         s32 pad; // matching: unused stack slot
         if (func_150ADA20_u8() & 3) {
             anim = 0x4D;
         }
-        func_1505E650(D_800D154C, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+        actor_playAnim(gCurrentActor, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
         return;
     }
     type = owner->rt_context_b;
@@ -645,19 +645,19 @@ void func_1507F640(void) {
         blend = 8.0f;
     }
     if (override != -1) {
-        func_1505E650(D_800D154C, override, speed, blend, 0.0f, 0.0f, 0);
+        actor_playAnim(gCurrentActor, override, speed, blend, 0.0f, 0.0f, 0);
         return;
     }
-    if (D_800D154C->lifting >= 100) {
-        func_1507F54C(D_800D154C);
+    if (gCurrentActor->lifting >= 100) {
+        func_1507F54C(gCurrentActor);
         return;
     }
-    if (D_800BE616 && type != 35 && type != 22 && type != 9) {
-        func_1505E650(D_800D154C, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
+    if (gIsMultiplayer && type != 35 && type != 22 && type != 9) {
+        actor_playAnim(gCurrentActor, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
         return;
     }
     if (func_1507F454()) {
-        owner = D_800D154C->mv;
+        owner = gCurrentActor->mv;
         if (owner->AimState && idle->sequence == 0) {
             switch (owner->rt_context_b) {
             case 3:
@@ -673,11 +673,11 @@ void func_1507F640(void) {
                 override = 0x165;
                 break;
             default:
-                func_1507F54C(D_800D154C);
+                func_1507F54C(gCurrentActor);
                 return;
             }
             if (override != -1) { // matching: always true here, but the compare is in the asm
-                func_1505E650(D_800D154C, override, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+                actor_playAnim(gCurrentActor, override, 1.0f, 4.0f, 0.0f, 0.0f, 0);
                 return;
             }
         }
@@ -688,7 +688,7 @@ void func_1507F640(void) {
     override = D_80086BA0[sequence][frame];
     entry = &D_8009B8B0[override];
     if (override == 0) {
-        owner = D_800D154C->mv;
+        owner = gCurrentActor->mv;
         sequence = -1;
         switch (owner->rt_context_b) {
         case 9:
@@ -701,7 +701,7 @@ void func_1507F640(void) {
             sequence = 0x44;
             break;
         default:
-            if (D_800D154C->energy == 1) {
+            if (gCurrentActor->energy == 1) {
                 sequence = 0xE;
             } else if (owner->injured) {
                 sequence = 0x25;
@@ -712,7 +712,7 @@ void func_1507F640(void) {
             entry = &D_8009B8B0[sequence];
         }
     }
-    func_1505E650(D_800D154C, entry->anim, entry->speed * 0.01f, entry->blend * 0.1f, 0.0f,
+    actor_playAnim(gCurrentActor, entry->anim, entry->speed * 0.01f, entry->blend * 0.1f, 0.0f,
                   0.0f, 0);
     idle->holdFrames = entry->holdFrames;
     idle->active = TRUE;
@@ -741,7 +741,7 @@ void func_1507FC2C(Actor *actor) {
     }
 
     if (flags & 0x10) {
-        intensity = D_800418B0[D_800419A0][0];
+        intensity = gMusicEventLevels[gLastMarkerChannel][0];
         if (intensity >= 0.0f) {
             sound = actor->unk2D0;
             sound->frame[0] = (sound->numFrames[0] * (32768.0f - intensity)) / 32768.0f;
@@ -770,13 +770,13 @@ void func_1507FC2C(Actor *actor) {
             } else if (D_800D18C4++ == 0x17) {
                 D_800D18C4 = 0x15;
             }
-            func_1000D96C(D_800D18C4, 0, 0);
+            music_playTune(D_800D18C4, 0, 0);
         } else if ((changed & prev & 4) == 4) {
-            func_1000DE1C(D_800D18C4, 0);
+            music_stopTune(D_800D18C4, 0);
         }
 
         if ((changed & flags & 8) != 8 && (changed & prev & 8) == 8) {
-            func_100109D0(actor);
+            sound_stopActorSound2(actor);
         }
 
         idle->frameFlags = flags;

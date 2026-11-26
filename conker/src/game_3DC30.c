@@ -29,7 +29,7 @@ dummy_label_15010880:
     if (temp_v0 != NULL) {
         memcpy(temp_v0 + 1, &tmp, sizeof(tmp));
     }
-    if (D_800D2E4C[0x12] & 0x40) {
+    if (gTaskDoneBits[0x12] & 0x40) {
         func_15149130(5, 9, -1, -1, 1, 0, NULL, 0xFF, 1);
     }
 }
@@ -49,7 +49,7 @@ dummy_label_15010880:
 //     if (temp_v0 != NULL) {
 //         memcpy(&temp_v0->unk28, &tmp, 12); // memcpy
 //     }
-//     if ((D_800D2E4C[0x12] & 0x40) != 0) {
+//     if ((gTaskDoneBits[0x12] & 0x40) != 0) {
 //         func_15149130(5, 9, -1, -1, 1, 0, 0, 255, 1);
 //     }
 // }

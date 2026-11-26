@@ -80,7 +80,7 @@ void func_151177C0(WorldObject *prop) {
         travel = 10;
         autoReturn = TRUE;
         step = 6;
-        onArrive = func_15104A80;
+        onArrive = beam_onPropArrival;
     } else if (kind == 4) {
         travel = 15;
     }
@@ -233,7 +233,7 @@ void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
     f32 rotatedX;
 
     if (prop->modelId == 0x8006 && level == 53) {
-        prop = func_151149AC(0xFD);
+        prop = gfx_findObjectById(0xFD);
         func_1511F31C(prop);
         y = -555.0f;
         x = 0.0f;
@@ -428,7 +428,7 @@ void func_15117F3C(WorldObject *prop) {
     }
     if (target != NULL || motion == TASK_FLAG_GOING_ON) {
         if (target != NULL && started == 0) {
-            func_15060A30(0x16B, target);
+            actor_playSound(0x16B, target);
         }
         if (flag4 == 0) {
             motion = TASK_FLAG_GOING_ON;
@@ -458,7 +458,7 @@ void func_15117F3C(WorldObject *prop) {
                 accel += 0.02999999933f;
                 if (0.200000003f < accel) {
                     if (prop->sound_id == 0) {
-                        func_15114D24(prop, sound, 0x7D00, 0x5DC, 0xDAC, 0);
+                        gfx_playObjectSound(prop, sound, 0x7D00, 0x5DC, 0xDAC, 0);
                     }
                 }
                 prop->t += speed;
@@ -468,7 +468,7 @@ void func_15117F3C(WorldObject *prop) {
                     accel = 0.0f;
                     motion = TASK_FLAG_ON;
                     started = 0;
-                    func_15114D24(prop, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
+                    gfx_playObjectSound(prop, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
                     if (target != NULL) {
                         target->mv->unk6B = 0;
                     }
@@ -660,7 +660,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
         }
         PROP_SET_MOTION(prop, motion);
         if (sound != 0) {
-            func_15114D24(prop, sound, 0x5DC0, 0x9C4, 0x1194, 0);
+            gfx_playObjectSound(prop, sound, 0x5DC0, 0x9C4, 0x1194, 0);
         }
     }
     WORK(prop)->swing.speed = speed;
@@ -999,7 +999,7 @@ void func_15119938(WorldObject *prop) {
         func_151196D4(prop);
     }
     if (WORK(prop)->sway.timer >= 0x400) {
-        WORK(prop)->sway.phase += ((WORK(prop)->sway.timer - 0x400) - WORK(prop)->sway.phase) * 0.1000000015f * D_800BE9A4;
+        WORK(prop)->sway.phase += ((WORK(prop)->sway.timer - 0x400) - WORK(prop)->sway.phase) * 0.1000000015f * gFrameDelta;
         if (WORK(prop)->sway.timer != 0x420) {
             WORK(prop)->sway.timer--;
             if (WORK(prop)->sway.timer == 0x400) {
@@ -1008,7 +1008,7 @@ void func_15119938(WorldObject *prop) {
             }
         }
     } else {
-        WORK(prop)->sway.phase += (0.01953125f + 0.00390625f * (func_151EF610() % 6)) * D_800BE9A4;
+        WORK(prop)->sway.phase += (0.01953125f + 0.00390625f * (func_151EF610() % 6)) * gFrameDelta;
         WORK(prop)->sway.timer -= func_151EF610() % 3;
         if (WORK(prop)->sway.timer < 20) {
             WORK(prop)->sway.timer = 236;
@@ -1031,7 +1031,7 @@ void func_15119938(WorldObject *prop) {
         }
     }
     if (WORK(prop)->sway.timer != 0x420) {
-        player = func_1505EFD0(0);
+        player = actor_findByPlayerNumber(0);
         if (player != NULL) {
             x = player->xpos - prop->x;
             y = player->ypos - prop->y;

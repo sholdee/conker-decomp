@@ -8,8 +8,8 @@
 void func_150DE320(s32 arg0) {
 }
 
-/* For each of eight zones records that func_150A32B4 accepts, sets the moving state of the
- * matching func_151149AC object, or (for records without one) calls func_150A2864(id, 1). */
+/* For each of eight zones records that zone_containsPoint accepts, sets the moving state of the
+ * matching gfx_findObjectById object, or (for records without one) calls zone_setDisabled(id, 1). */
 void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
     WorldObject *prop;
@@ -17,12 +17,12 @@ void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
     u8 propIds[8] = { 0xF6, 0xF3, 0xF0, 0xED, 0, 0, 0, 0 };
 
     for (i = 0; i < 8; i++) {
-        if (func_150A32B4(&zones[ids[i]], arg0, arg1, arg2) != 0) {
+        if (zone_containsPoint(&zones[ids[i]], arg0, arg1, arg2) != 0) {
             if (propIds[i] != 0) {
-                prop = func_151149AC(propIds[i]);
+                prop = gfx_findObjectById(propIds[i]);
                 prop->task_flag = (prop->task_flag & ~TASK_FLAG_STATE) | TASK_FLAG_ON;
             } else {
-                func_150A2864(ids[i], 1);
+                zone_setDisabled(ids[i], 1);
             }
         }
     }
@@ -30,7 +30,7 @@ void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
 
 /* Per-frame update: while moving, spins the rotation (wrapping each angle), applies gravity and
  * velocity (moveX..moveZ, gravity in param) to the position and counts alpha down as a lifetime
- * until inactive; kind 0xC props also get two assets of D_80090204 row touch.i.a passed to func_1510D874. */
+ * until inactive; kind 0xC props also get two assets of D_80090204 row touch.i.a passed to texture_addBinding. */
 void func_150DE458(WorldObject *prop) {
     s32 pad[4]; // matching: unused frame space above size
     s32 size;
@@ -90,8 +90,8 @@ void func_150DE458(WorldObject *prop) {
         slot = 4;
         nextSlot = 5;
         do {
-            addr = func_1510D0EC(*asset, &size, 3, 0);
-            func_1510D874(prop, addr, size + addr - 0x200, slot, nextSlot);
+            addr = texture_getAddress(*asset, &size, 3, 0);
+            texture_addBinding(prop, addr, size + addr - 0x200, slot, nextSlot);
             nextSlot += 2;
             asset++;
             slot += 2;
@@ -220,20 +220,20 @@ void func_150DE7C0(ZonePairEffect *emitter) {
 
 /* Moves the particle along its travel velocity; returns 0 once its travel time has run out. */
 s32 func_150DEACC(TravelParticle *particle) {
-    particle->head.def.pos.x += particle->travel.velocity.x * D_800BE9A4;
-    particle->head.def.pos.y += particle->travel.velocity.y * D_800BE9A4;
-    particle->head.def.pos.z += particle->travel.velocity.z * D_800BE9A4;
-    particle->travel.timeLeft -= D_800BE9A4;
+    particle->head.def.pos.x += particle->travel.velocity.x * gFrameDelta;
+    particle->head.def.pos.y += particle->travel.velocity.y * gFrameDelta;
+    particle->head.def.pos.z += particle->travel.velocity.z * gFrameDelta;
+    particle->travel.timeLeft -= gFrameDelta;
     if (particle->travel.timeLeft < 0.0f) {
         return 0;
     }
     return 1;
 }
 
-/* Calls func_15140410 with the particle's side / forward axes, unless camera_global_Cameras[D_80082FA0].CameraPitch is
+/* Calls func_15140410 with the particle's side / forward axes, unless camera_global_Cameras[gScreenLayout].CameraPitch is
  * below 5. */
 Vtx *func_150DEB58(TravelParticle *particle, s16 arg1) {
-    if (camera_global_Cameras[D_80082FA0].CameraPitch < 5.0f) {
+    if (camera_global_Cameras[gScreenLayout].CameraPitch < 5.0f) {
         return NULL;
     }
     return func_15140410(&particle->head, &particle->travel.side, &particle->travel.forward, arg1);

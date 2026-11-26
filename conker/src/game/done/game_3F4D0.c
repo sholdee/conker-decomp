@@ -20,5 +20,5 @@ void func_15012020(s32 arg0, s32 arg1) {
     tmp.update = -1;
     tmp.spawn = 3;
 
-    func_151A8B20(&tmp, -1, 0, 0xFF, 0);
+    beam_newAreaEmitter(&tmp, -1, 0, 0xFF, 0);
 }

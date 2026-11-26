@@ -42,7 +42,7 @@ void func_151B1B34(Task151B1AB0 *task) {
     Vec3f emitPointB;
 
     data = &task->data;
-    data->timer += (697.0f + (func_150ADA68() * 342.0f)) * 0.001000000047f * D_800BE9A4;
+    data->timer += (697.0f + (func_150ADA68() * 342.0f)) * 0.001000000047f * gFrameDelta;
     if (data->timer > 1.0f) {
         if (data->owner->ob_matrix_ptr != NULL) {
             {

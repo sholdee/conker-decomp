@@ -20,8 +20,8 @@ void func_150B10F0(Actor *obj) {
     obj->unk178 = obj->zpos;
     obj->imune = 100;
     obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
-    if (func_1505A6F8(movement_obj, obj) < 1100.0f) {
-        dist = func_1505A6F8(obj, movement_obj);
+    if (actor_distanceXZ(movement_obj, obj) < 1100.0f) {
+        dist = actor_distanceXZ(obj, movement_obj);
         distCopy = dist;
         range = obj->ypos - movement_obj[0].ypos; // matching: height above the player reuses `range`
         if (range < 0.0f) {
@@ -31,16 +31,16 @@ void func_150B10F0(Actor *obj) {
         }
         if (dist < range && movement_obj[0].inwater == 1) {
             closeness = 1100.0f - distCopy;
-            angle = func_1505A630(obj->unk174 - movement_obj[0].xpos, movement_obj[0].zpos - obj->unk178, 0);
+            angle = actor_getDirectionAngle(obj->unk174 - movement_obj[0].xpos, movement_obj[0].zpos - obj->unk178, 0);
             if (850.0f < closeness) {
                 movement_obj[0].ypos -= (closeness - 820.0f) * 0.09f * D_800D1550;
             }
-            func_1505A184(angle - 0x3000, closeness * 0.045f + 5.0f, 0.0f, &pushX, &pushZ, &unusedOut);
+            actor_splitVelocity(angle - 0x3000, closeness * 0.045f + 5.0f, 0.0f, &pushX, &pushZ, &unusedOut);
             movement_obj[0].ob_slopex = pushX;
             movement_obj[0].ob_slopey = pushZ;
         }
     }
-    func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    actor_playAnim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
 /* Holds the object at its path's centre height and eases unkC4 toward its turn rate (clamped to +-6). */
@@ -54,10 +54,10 @@ void func_150B12FC(Actor *obj) {
     {
         f32 height;
 
-        height = D_800D2104[obj->listpos][0].y;
+        height = gSpawnPaths[obj->listpos][0].y;
         func_15058EA4(obj, height, 1.0f, height, -0.7f, 12.0f, -16.0f);
     }
-    func_15056B08(obj);
+    actor_updateChaseAi(obj);
     prevAngle -= obj->angle;
     turn = prevAngle * 6;
     leanStep = turn * 0.00390625f - obj->lean_angle;
@@ -73,7 +73,7 @@ void func_150B12FC(Actor *obj) {
         obj->lean_angle += obj->unk148;
     }
     obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
-    func_15059140(obj);
+    actor_updatePhysics(obj);
     if (func_150535F4(obj) == 0) {
         func_1502178C(obj, 0, -1);
     }
@@ -92,7 +92,7 @@ void func_150B1484(Actor *obj) {
     if (obj->stunned == 0) {
         f32 targetY;
 
-        targetY = D_800D20FC[obj->listpos].y + 210.0f;
+        targetY = gSpawnRecords[obj->listpos].y + 210.0f;
         if (!(obj->unk22C & 8)) {
             if (obj->unk223 != 3) {
                 obj->vtilt = obj->yspd * -0.5f;
@@ -103,7 +103,7 @@ void func_150B1484(Actor *obj) {
         if (obj->unk223 == 14) {
             f32 time;
 
-            time = func_1505A6F8(&movement_obj[obj->unk222], obj) / obj->speed;
+            time = actor_distanceXZ(&movement_obj[obj->unk222], obj) / obj->speed;
             obj->yspd = (movement_obj[obj->unk222].ypos + obj->unk224 - obj->ypos) / time;
             obj->ygrav = 0.0f;
         } else {
@@ -115,7 +115,7 @@ void func_150B1484(Actor *obj) {
             heightCode = obj->unk224;
             if (heightCode != 0) {
                 if (heightCode == 10000) {
-                    targetY = D_800D2104[obj->listpos][obj->unk21E + 1].y;
+                    targetY = gSpawnPaths[obj->listpos][obj->unk21E + 1].y;
                 } else if ((obj->character_type == 0x50) || (obj->character_type == 5) || (obj->character_type == 0xAD) || (obj->character_type == 0xAE) || (obj->character_type == 0xAF)) {
                     targetY = heightCode * 8;
                 } else {
@@ -127,7 +127,7 @@ void func_150B1484(Actor *obj) {
                 f32 maxSpeed;
 
                 if (obj->character_type == 0x44) {
-                    targetY = D_800D2104[obj->listpos][obj->unk21E + 1].y;
+                    targetY = gSpawnPaths[obj->listpos][obj->unk21E + 1].y;
                     gravity = 3.0f;
                     maxSpeed = 12.0f;
                 } else {
@@ -137,12 +137,12 @@ void func_150B1484(Actor *obj) {
                 func_15058EA4(obj, targetY, gravity, targetY, -gravity, maxSpeed, -maxSpeed);
             }
         }
-        func_15056B08(obj);
+        actor_updateChaseAi(obj);
     } else {
-        func_150585F0(obj, 0.05f);
+        actor_updateStunned(obj, 0.05f);
     }
     obj->theta = (s16)(obj->langle + 0x4000) * 0.0054931640625f;
-    func_15059140(obj);
+    actor_updatePhysics(obj);
     if ((obj->character_type == 5) || (obj->character_type == 0xAD) || (obj->character_type == 0xAE) || (obj->character_type == 0xAF) || (obj->character_type == 0x44)) {
         func_15052760(obj, prevAngle);
     }
@@ -164,8 +164,8 @@ void func_150B17DC(Actor *obj) {
     f32 unusedOut;
     Actor *other;
 
-    other = func_1505EEB0(10, &otherIdx);
-    func_15056B08(obj);
+    other = actor_findByState(10, &otherIdx);
+    actor_updateChaseAi(obj);
     if (obj->unk1E5 == 2) {
         obj->xpos = other->xpos;
         obj->zpos = other->zpos;
@@ -177,10 +177,10 @@ void func_150B17DC(Actor *obj) {
         phase = obj->unk7E;
         phase *= 0.2f;
         other->vtilt = func_150AD78C(phase) * 6.0f;
-        func_1505A770(obj);
+        actor_applyGravity(obj);
         other->ypos = obj->ypos - 170.0f;
         other->lifting = dc_glbl_CharNum + 100;
-        func_1505A184(other->langle, other->vtilt * -7.0f, 0.0f, &offsetX, &offsetZ, &unusedOut);
+        actor_splitVelocity(other->langle, other->vtilt * -7.0f, 0.0f, &offsetX, &offsetZ, &unusedOut);
         other->xpos = obj->xpos + offsetX;
         other->zpos = obj->zpos + offsetZ;
         other->langle += D_800BE9A0 << 8;
@@ -190,7 +190,7 @@ void func_150B17DC(Actor *obj) {
         other->ob_overslopex = 0.0f;
         other->ob_overslopey = 0.0f;
     }
-    obj->langle = func_1505A630(movement_obj[0].xpos - obj->xpos, obj->zpos - movement_obj[0].zpos, 0);
+    obj->langle = actor_getDirectionAngle(movement_obj[0].xpos - obj->xpos, obj->zpos - movement_obj[0].zpos, 0);
     obj->theta = (s16)(obj->langle + 0x4000) * 0.0054931640625f;
 }
 
@@ -227,16 +227,16 @@ void func_150B19E0(Actor *obj) {
         obj->old_zpos = movement_obj[0].zpos;
     }
     if (obj->carried != 0) {
-        func_150562FC(obj);
+        actor_moveToHost(obj);
         if ((movement_obj[obj->carried - 100].stunned == 0 || (D_800CC250 & 4)) && obj->unk21C >= 9) {
             target = -20.0f;
         }
     }
     obj->vtilt += (target - obj->vtilt) * 0.2f;
     obj->theta = (s16)(obj->langle + 0x4000) * 0.0054931640625f;
-    func_15059140(obj);
-    func_150597FC(obj);
-    func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    actor_updatePhysics(obj);
+    actor_checkGrab(obj);
+    actor_playAnim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     func_1502178C(obj, 0, -1);
     if (obj->carried != 0 && (u8)func_150ADA20() < 40U) {
         random = func_150ADA20() % 40U;
@@ -250,8 +250,8 @@ void func_150B19E0(Actor *obj) {
         particle.x = obj->xpos + sine * radius;
         particle.y = obj->ypos;
         particle.z = obj->zpos + cosine * radius;
-        func_1510F800(0);
-        particle.unk4 = func_1510F8D8(particle.x, particle.y, particle.z, 0);
+        collision_selectMap(0);
+        particle.unk4 = collision_findMeshFloorNear(particle.x, particle.y, particle.z, 0);
         angle = movement_obj[0].angle >> 8;
         speed = movement_obj[0].speed * 64.0f;
         particle.velX = func_150489B0(angle) * speed;

@@ -36,6 +36,6 @@ s32 func_15008BF0(TriggerZone *zone) {
     descriptor.extent.x = 2.0f * offsetX;
     descriptor.extent.y = 0.0f;
     descriptor.extent.z = 2.0f * offsetZ;
-    func_15189900(&descriptor, zone->data1);
+    trail_createSprayEmitter(&descriptor, zone->data1);
     return 1;
 }

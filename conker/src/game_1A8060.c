@@ -55,7 +55,7 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     Vtx *vtxBase;
 
     id = movement_obj[actorIndex].character_type;
-    kind = func_150849A0(&movement_obj[actorIndex]);
+    kind = collision_getModelId(&movement_obj[actorIndex]);
     set = movement_obj[actorIndex].current_lod;
     config = NULL;
     for (i = 0; i < 2; i++) {
@@ -72,9 +72,9 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     if (set != 0) {
         set = 0;
         id = kind;
-        if (movement_obj[actorIndex].modelData[set][D_800BE9C0] == NULL || D_800D19A0[id] == NULL) {
+        if (movement_obj[actorIndex].modelData[set][D_800BE9C0] == NULL || gModelData[id] == NULL) {
             if (frame == morph->cur) {
-                if (D_800BEAC0 == 0) {
+                if (gPaused == 0) {
                     morph->blend += morph->rate * D_800BE9E4;
                 }
                 if (morph->blend > 1.0f) {
@@ -95,7 +95,7 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
             return -1;
         }
     }
-    if (D_800D19A0[id] == NULL) {
+    if (gModelData[id] == NULL) {
         return -1;
     }
     if (movement_obj[actorIndex].modelData[set][D_800BE9C0] == NULL) {
@@ -143,7 +143,7 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
             return -1;
         }
     }
-    if (D_800BEAC0 == 0) {
+    if (gPaused == 0) {
         morph->blend += morph->rate * D_800BE9E4;
     }
     if (morph->blend > 1.0f) {
@@ -153,14 +153,14 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     for (part = 0; part < D_800C4310[config->kind]; part++) {
         if (D_800DD460[group][part][morph->cur].positions == NULL) {
             D_800DD460[group][part][morph->cur].positions =
-                func_1502B5C8(&size, 4, 0x13, group, part, morph->cur);
+                rom_loadPath(&size, 4, 0x13, group, part, morph->cur);
             if (D_800DD460[group][part][morph->cur].positions == NULL) {
                 return -1;
             }
         }
         if (D_800DD460[group][part][morph->prev].positions == NULL) {
             D_800DD460[group][part][morph->prev].positions =
-                func_1502B5C8(&size, 4, 0x13, group, part, morph->prev);
+                rom_loadPath(&size, 4, 0x13, group, part, morph->prev);
             if (D_800DD460[group][part][morph->prev].positions == NULL) {
                 func_10004074(D_800DD460[group][part][morph->cur].positions);
                 D_800DD460[group][part][morph->cur].positions = NULL;

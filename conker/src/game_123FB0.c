@@ -11,7 +11,7 @@ static const Vec3f D_800A1B8C = { 0.0f, 98.0f, 1198.0f };
 /*
  * While query 0x4003 holds and the actor is alive, measures how far the actor's position has progressed
  * along the segment from D_800A1B80 to D_800A1B8C (scaled by 0.75, clamped to [0, 1]) and passes values
- * derived from it to func_1509BFB0; also sets unk374 and turns unk37C via func_15049688. Otherwise clears
+ * derived from it to script_command; also sets unk374 and turns unk37C via func_15049688. Otherwise clears
  * the flags it set.
  */
 void func_150F6B00(Camera *actor) {
@@ -25,7 +25,7 @@ void func_150F6B00(Camera *actor) {
     f32 projection;
     f32 clamped;
 
-    if (func_1509BE40(1, 0x4003, 6, 0x2000) && actor->CharPtr->energy) {
+    if (script_query(1, 0x4003, 6, 0x2000) && actor->CharPtr->energy) {
         actor->AvailableModes |= 0xC0001000;
         func_15048F90(&D_800A1B80, &actor->focus, &offset);
         func_15048F90(&D_800A1B80, &D_800A1B8C, &direction);
@@ -39,10 +39,10 @@ void func_150F6B00(Camera *actor) {
             clamped = (projection > 1.0f) ? 1.0f : projection;
             blend = clamped;
         }
-        if (func_1509BE40(4, 0x2000, 0xAC, 0x4040, 0x4041, 0x4042, 0x4043)) {
+        if (script_query(4, 0x2000, 0xAC, 0x4040, 0x4041, 0x4042, 0x4043)) {
             lateral = LERP(-900.0f, -900.0f, blend);
             actor->IdealTripodMagnitude = 220.0f;
-        } else if (func_1509BE40(4, 0x2000, 0xAC, 0x4047, 0x4046, 0x4045, 0x4044)) {
+        } else if (script_query(4, 0x2000, 0xAC, 0x4047, 0x4046, 0x4045, 0x4044)) {
             lateral = LERP(900.0f, 900.0f, blend);
             actor->IdealTripodMagnitude = 220.0f;
         } else {
@@ -50,8 +50,8 @@ void func_150F6B00(Camera *actor) {
             lateral = LERP(0.0f, 0.0f, blend);
         }
         vertical = -20.0f;
-        func_1509BFB0(3, 0x4003, 3, (s32)lateral, (s32)vertical, (s32)LERP(-5530.0f, 1198.0f, blend)); // z of the segment ends
-        func_15049688(&actor->CameraAngle, func_15048FC8(&D_800D9A50) - 180.0f, &actor->AutoBehindAngleVel, 8.0f, 10.0f, actor->SpringTime);
+        script_command(3, 0x4003, 3, (s32)lateral, (s32)vertical, (s32)LERP(-5530.0f, 1198.0f, blend)); // z of the segment ends
+        func_15049688(&actor->CameraAngle, func_15048FC8(&gLastBeamDir) - 180.0f, &actor->AutoBehindAngleVel, 8.0f, 10.0f, actor->SpringTime);
         actor->CameraAngleRad = actor->CameraAngle * 0.01745329238f; // degrees to radians
     } else {
         actor->AvailableModes &= 0x3FFFEFFF;

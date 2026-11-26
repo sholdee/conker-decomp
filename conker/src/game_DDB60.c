@@ -11,9 +11,9 @@ static const s32 D_8009F818[] = { 0x39 };
 static const f32 D_8009F81C[] = { 1.0f };
 
 /*
- * Spawns effects at actor's position, aimed by func_15143E24(other): actor id 0xA6 gets func_151C329C
+ * Spawns effects at actor's position, aimed by func_15143E24(other): actor id 0xA6 gets weapon_spawnImpactBurst
  * 50 units above it and one func_15152190 burst; any other actor gets a different burst plus two
- * func_15153F18 passes (unk3C = 0, then 1) using the func_1504715C info for actor.
+ * func_15153F18 passes (unk3C = 0, then 1) using the collision_initHitFromObject info for actor.
  */
 void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
     Vec3f pos;
@@ -24,7 +24,7 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
     pos.y = actor->ypos;
     pos.z = actor->zpos;
     angle = func_15143E24(other) + 0x40;
-    func_1504715C(&floor, actor);
+    collision_initHitFromObject(&floor, actor);
     if (actor->character_type == 0xA6) {
         Vec3f raisedPos;
         DebrisBurst burst;
@@ -32,7 +32,7 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
         raisedPos.x = pos.x;
         raisedPos.y = pos.y + 50.0f;
         raisedPos.z = pos.z;
-        func_151C329C(&raisedPos, arg2, arg3);
+        weapon_spawnImpactBurst(&raisedPos, arg2, arg3);
         burst.countBase = 10;
         burst.countRange = 10;
         burst.pos = pos;

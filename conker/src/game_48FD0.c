@@ -112,9 +112,9 @@ OSContPad **func_1501BBB8(void) {
             D_800BE918[i].stick_y = 0;
         }
     }
-    if (D_800E0B94 == 2 || D_800E0B95 == 2) {
+    if (gFrontEndState == 2 || D_800E0B95 == 2) {
         replaying = 1;
-        func_151DD8C0();
+        os_playDemoInput();
     } else {
         replaying = 0;
     }
@@ -218,7 +218,7 @@ void func_1501C1B0(void) {
                 D_800BE948[channel] = 0;
                 D_800BE93C[channel] = 0;
             }
-            if (!D_800BEAC1 && !D_800BEAC0 && !D_800BEAC2 && !D_800BEAC3 && !D_800E0A00) {
+            if (!gPauseRequested && !gPaused && !D_800BEAC2 && !D_800BEAC3 && !D_800E0A00) {
                 switch (D_800BE93C[channel]) {
                 case 0:
                     if (D_800BE940[channel] == 1) {
@@ -228,7 +228,7 @@ void func_1501C1B0(void) {
                     }
                     break;
                 case 1:
-                    D_800BE950[channel] += D_800BE9A4;
+                    D_800BE950[channel] += gFrameDelta;
                     while (D_800BE950[channel] > D_800BE980[channel]) {
                         D_800BE950[channel] -= D_800BE980[channel];
                     }
@@ -266,14 +266,14 @@ void func_1501C53C(void) {
 void func_1501C57C(void) {
     s32 i;
 
-    func_151DCFD8(0);
-    if (D_80082BB4 != 0) {
+    save_pollEepromWrite(0);
+    if (gEepromRequest != 0) {
         if (D_80084068 != 2) {
             D_80084068 = func_151DD460(&D_800BE900);
         }
         if (D_80084068 != 2) {
             // matching: empty switch emits the original's 7-entry jump table
-            switch (D_80082BB4) {
+            switch (gEepromRequest) {
                 case 1:
                 case 2:
                 case 3:
@@ -290,42 +290,42 @@ void func_1501C57C(void) {
                 i--;
                 goto delay;
             }
-            if (D_80082BB4 == 1) {
-                func_150064E0();
-            } else if (D_80082BB4 == 4) {
-                func_15007168();
+            if (gEepromRequest == 1) {
+                save_resetGameState();
+            } else if (gEepromRequest == 4) {
+                save_resetModeSettings();
             }
-            D_80082BB4 = 0;
+            gEepromRequest = 0;
         // matching: an unused label ends the block, so as1 keeps the store out of the branch delay slot
         end:;
         } else {
-            switch (D_80082BB4) {
+            switch (gEepromRequest) {
                 case 1:
-                    func_15006590(D_800BE3EC);
+                    save_readFile(gEepromRequestArg);
                     break;
                 case 2:
-                    func_15006BEC(D_800BE3EC);
+                    save_writeSlot(gEepromRequestArg);
                     break;
                 case 3:
-                    func_1500707C(D_800BE3EC);
+                    save_eraseSlot(gEepromRequestArg);
                     break;
                 case 4:
-                    func_1500727C();
+                    save_readModeSettings();
                     break;
                 case 5:
-                    func_15007360();
+                    save_writeModeSettings();
                     break;
                 case 6:
-                    func_15007440();
+                    save_readSettings();
                     break;
                 case 7:
-                    func_15007558();
+                    save_writeSettings();
                     break;
             }
-            D_80082BB4 = 0;
-            if (D_800BE3F0 != NULL) {
-                func_10004074(D_800BE3F0 - 8);
-                D_800BE3F0 = NULL;
+            gEepromRequest = 0;
+            if (gSaveEntryBits != NULL) {
+                func_10004074(gSaveEntryBits - 8);
+                gSaveEntryBits = NULL;
             }
         }
     }

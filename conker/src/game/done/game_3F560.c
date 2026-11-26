@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-/* Starts a global colour cycle (timed effect 30, func_151621B8) around grey 50. */
+/* Starts a global colour cycle (timed effect 30, light_updateColourCycle) around grey 50. */
 void func_150120B0(s32 arg0) {
     TimedEffect *effect;
     LightColourPulse tmp;

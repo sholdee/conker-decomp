@@ -4,8 +4,8 @@
 
 
 void func_150D0650(Camera *arg0) {
-    if ((D_800D2E4C[0x0] & 0x80) == 0) {
-        if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
+    if ((gTaskDoneBits[0x0] & 0x80) == 0) {
+        if (script_query(0, 0x2000, 0xBB) != -1) {
             if (func_15123934(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
                 arg0->AvailableModes |= 0x1000000;
                 func_151254F4(arg0, movement_obj[0].attach_char - 1);

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c and game/Effects/Blood/blood.c
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
 SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
@@ -584,7 +584,7 @@ void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
             motion.velocity.x = (axis0.x * first + axis1.x * second + normal.x) * speed;
             motion.velocity.y = (axis0.y * first + axis1.y * second + normal.y) * speed;
             motion.velocity.z = (axis0.z * first + axis1.z * second + normal.z) * speed;
-            func_15147DA0(&spawn, &motion, 0, config->handlers[0], config->handlers[1],
+            trail_createMotionTrail(&spawn, &motion, 0, config->handlers[0], config->handlers[1],
                           config->handlers[2], config->handlers[3], config->handlers[4],
                           config->handlers[5], config->unk74, config->unk78,
                           &config->render, 0, kind, arg2);
@@ -635,7 +635,7 @@ void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2) {
         motion.velocity.x = horizontal * sinYaw;
         motion.velocity.y = -speed * sinPitch;
         motion.velocity.z = horizontal * cosYaw;
-        func_15147DA0(&spawn, &motion, 0, config->handlers[0], config->handlers[1], config->handlers[2], config->handlers[3],
+        trail_createMotionTrail(&spawn, &motion, 0, config->handlers[0], config->handlers[1], config->handlers[2], config->handlers[3],
                       config->handlers[4], config->handlers[5], config->unk58, config->unk5C, &config->render, 0, arg1, arg2);
         count--;
     }
@@ -935,12 +935,12 @@ void func_15152B38(config, arg1, arg2)
         spawn.color2.blue = (func_150ADA20() % (config->color2Range.blue + 1)) + config->color2Base.blue;
         spawn.color2.alpha = (func_150ADA20() % (config->color2Range.alpha + 1)) + config->color2Base.alpha;
         spawn.colorLevel = (func_150ADA20() % (config->colorLevelRange + 1)) + config->colorLevelBase;
-        func_1515C2F0(&param, 0, &spawn, 0, arg1, arg2);
+        trail_spawnFallingTrail(&param, 0, &spawn, 0, arg1, arg2);
         count--;
     }
 }
 
-/* Like func_15151A38, with a fixed color and fixed func_15147DA0 parameters. */
+/* Like func_15151A38, with a fixed color and fixed trail_createMotionTrail parameters. */
 void func_15152F70(SimplePuffSpray *config, u8 arg1) {
     EffectTemplate spawn;
     s32 count;
@@ -986,7 +986,7 @@ void func_15152F70(SimplePuffSpray *config, u8 arg1) {
         motion.velocity.x = (speed * cosPitch) * sinYaw;
         motion.velocity.y = -speed * sinPitch;
         motion.velocity.z = (speed * cosPitch) * cosYaw;
-        func_15147DA0(&spawn, &motion, 0, config->handlers[0], config->handlers[1], config->handlers[2], config->handlers[3],
+        trail_createMotionTrail(&spawn, &motion, 0, config->handlers[0], config->handlers[1], config->handlers[2], config->handlers[3],
                       config->handlers[4], config->handlers[5], 0, 0, &params, 0, arg1, 1);
         count--;
     }
@@ -1320,13 +1320,13 @@ s32 func_1515452C(Object15132A4C *object) {
     {
         f32 elapsed = extra->elapsed;
         object->alpha = (s8)(u32)(extra->alpha - (extra->fade * elapsed * elapsed));
-        extra->elapsed += D_800BE9A4;
+        extra->elapsed += gFrameDelta;
         if (extra->duration < extra->elapsed) {
             return 0;
         }
-        object->position.x += object->velocity.x * D_800BE9A4;
-        object->position.y += object->velocity.y * D_800BE9A4;
-        object->position.z += object->velocity.z * D_800BE9A4;
+        object->position.x += object->velocity.x * gFrameDelta;
+        object->position.y += object->velocity.y * gFrameDelta;
+        object->position.z += object->velocity.z * gFrameDelta;
         return 1;
     }
 }
@@ -1429,14 +1429,14 @@ s32 func_15154A88(Object15132A4C *object) {
     object->unk1C = size;
     object->unk18 = size;
     object->alpha = (f32)(u8)(u32)extra->alpha * wave;
-    extra->remaining -= D_800BE9A4;
+    extra->remaining -= gFrameDelta;
     if (extra->remaining <= 0.0f) {
         return 0;
     }
 
-    extra->phase += extra->phaseRate * D_800BE9A4;
-    object->position.x += object->velocity.x * D_800BE9A4;
-    object->position.y += object->velocity.y * D_800BE9A4;
-    object->position.z += object->velocity.z * D_800BE9A4;
+    extra->phase += extra->phaseRate * gFrameDelta;
+    object->position.x += object->velocity.x * gFrameDelta;
+    object->position.y += object->velocity.y * gFrameDelta;
+    object->position.z += object->velocity.z * gFrameDelta;
     return 1;
 }

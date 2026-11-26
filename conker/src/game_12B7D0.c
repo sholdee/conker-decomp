@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* This file's .rodata: the ends of a bone beam that func_15071888 (game_981E0.c) draws, then the effect
+/* This file's .rodata: the ends of a bone beam that func_15071888 (game/Event/TimedEvent/timedevent.c) draws, then the effect
  * points of this file, in the local space of bone D_80088B94. */
 const Vec3f D_800A1FB0 = { 0.0f, -28.0f, 24.0f };
 const Vec3f D_800A1FBC = { 0.0f, 0.0f, 24.0f };
@@ -14,7 +14,7 @@ static const Vec3f D_800A1FE0 = { 0.0f, -210.0f, 27.0f };
 u8 D_80088B90 = 9;
 static u8 D_80088B94 = 9;
 
-/* Runs the func_150FE49C effects for `obj`, then spawns a func_151C229C effect from the result. */
+/* Runs the func_150FE49C effects for `obj`, then spawns a weapon_spawnProjectile effect from the result. */
 Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
     Vec3f axis0;
@@ -36,7 +36,7 @@ Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
     random1 = func_150ADA68();
     randomInt = func_150ADA20_u8();
 
-    return func_151C229C(&origin, &direction, 0, 0, 0, 0, 300.0f, 0.003333333414f,
+    return weapon_spawnProjectile(&origin, &direction, 0, 0, 0, 0, 300.0f, 0.003333333414f,
                          random0 * 10.0f + 25.0f,
                          random1 * 200.0f + 600.0f, 50.0f,
                          (randomInt % 56U) + 200, obj, 1, 1, 0, 0xFF, 1, 1,

@@ -98,12 +98,12 @@ void func_1512D980(Camera *view) {
                 if (env->stage == 0 && env->mode != 0) {
                     env->stage = 1;
                 }
-                env->amplitude += env->attackRate * D_800BE9A4;
+                env->amplitude += env->attackRate * gFrameDelta;
             } else if (env->elapsed <= env->decayEnd) {
                 if (env->stage == 1 && env->mode != 0) {
                     env->stage = 2;
                 }
-                env->amplitude -= env->decayRate * D_800BE9A4;
+                env->amplitude -= env->decayRate * gFrameDelta;
             } else if (env->elapsed <= env->sustainEnd) {
                 if (env->stage == 2 && env->mode != 0) {
                     env->stage = 3;
@@ -112,7 +112,7 @@ void func_1512D980(Camera *view) {
                 if (env->stage == 3 && env->mode != 0) {
                     env->stage = 4;
                 }
-                env->amplitude -= env->releaseRate * D_800BE9A4;
+                env->amplitude -= env->releaseRate * gFrameDelta;
             } else {
                 func_1512D6F0(view);
             }

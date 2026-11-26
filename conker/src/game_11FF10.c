@@ -9,7 +9,7 @@ ZoneNode *D_800D9A40;
 
 
 /* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs
- * movement_obj[0] through func_15136C3C .. func_1507CD64(6) once; then offsets the four D_800BE4F0 entries
+ * movement_obj[0] through func_15136C3C .. actor_kill(6) once; then offsets the four D_800BE4F0 entries
  * by object 0xE's taskint[0]. */
 void func_150F2A60(s32 arg0) {
     s32 i;
@@ -26,30 +26,30 @@ void func_150F2A60(s32 arg0) {
         if (player->mv->death_State == 0) {
             // matching: `| 0` hides the induction variable, so IDO keeps `slti` instead of testing i != 2
             for (i = 0; i < 2; i = (i + 1) | 0) {
-                entry = func_151149AC(0xFA - i);
+                entry = gfx_findObjectById(0xFA - i);
                 entryIndex = entry - db_Object_array;
                 if (gWorldObjectContacts[entryIndex] & 1) {
                     if (player->lifting) {
-                        func_15060F28(&movement_obj[player->lifting - 100], 0);
+                        actor_remove(&movement_obj[player->lifting - 100], 0);
                     }
                     player->energy = 0;
                     func_15136C3C(movement_obj, 0, 0, 1, 1, 0, 0xFF, 1);
-                    func_10010630(0x627, movement_obj, 0x6D60, 500, 1000);
+                    sound_playActorUntracked(0x627, movement_obj, 0x6D60, 500, 1000);
                     func_15145A50(movement_obj);
-                    func_1507CD64(movement_obj, 6);
+                    actor_kill(movement_obj, 6);
                     break;
                 }
             }
-            obj = func_15083E90(0xE);
+            obj = collision_findObjectById(0xE);
             if (obj != NULL) {
                 scroll = obj->taskint[0];
             } else {
                 scroll = 0;
             }
-            func_15196318(D_800BE4F0[0], scroll, 0);
-            func_15196318(D_800BE4F0[1], 0, -scroll);
-            func_15196318(D_800BE4F0[2], scroll, 0);
-            func_15196318(D_800BE4F0[3], -scroll, 0);
+            flamethrower_setTexScrollSpeed(D_800BE4F0[0], scroll, 0);
+            flamethrower_setTexScrollSpeed(D_800BE4F0[1], 0, -scroll);
+            flamethrower_setTexScrollSpeed(D_800BE4F0[2], scroll, 0);
+            flamethrower_setTexScrollSpeed(D_800BE4F0[3], -scroll, 0);
         }
     }
 }
@@ -95,10 +95,10 @@ void func_150F2D14(BoneBurstEmitter *emitter) {
     }
     state->prevUnk222 = target->unk222;
     if (target->unk222 != 0) {
-        func_1502EA98(&movement_obj[target->unk222], 0xFF, 0, 0, 0x50, 0, 0xF);
+        actor_flashFog(&movement_obj[target->unk222], 0xFF, 0, 0, 0x50, 0, 0xF);
     }
     if (target->ob_matrix_ptr != NULL && state->count > 0) {
-        state->timer += 0.148f * D_800BE9A4;
+        state->timer += 0.148f * gFrameDelta;
         if (state->timer > 1.0f) {
             do {
                 particle.target = target;
@@ -192,7 +192,7 @@ s32 func_150F3214(BoneBurstParticle *particle) {
     particle->head.def.width = size;
 
     particle->head.def.unk44 = (u32)(state->fadeFrom - ((state->fadeRate * state->age) * state->age));
-    state->age = state->age + D_800BE9A4;
+    state->age = state->age + gFrameDelta;
 
     if (state->lifetime < state->age) {
         return 0;

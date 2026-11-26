@@ -136,7 +136,7 @@ void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
         } else if (speed > 0.01f) {
             func_1000F91C(handle, volume, amount, 0, -1, obj->x, obj->y, obj->z, 200, 2000);
         } else {
-            func_100111C8(handle);
+            sound_stop(handle);
             obj->sound_id = 0;
         }
     }

@@ -52,7 +52,7 @@ void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
             }
             angle += (func_150ADA20() & 0x3F) + 90;
         }
-        func_1517E05C(x, y, z);
+        sprite_setDisturbPoint(x, y, z);
     }
 }
 
@@ -132,7 +132,7 @@ Gfx *func_15166D68(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
 /* Loads texture D_8009054C, using the frame and mode already in D_800DD220/D_800DD224. */
 Gfx *func_15166F6C(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
     D_800DD228 = &D_8009054C;
-    return func_15094F70(gfx, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3);
+    return sprite_loadDescFrame(gfx, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3);
 }
 
 

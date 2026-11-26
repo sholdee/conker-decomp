@@ -3,7 +3,7 @@
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
-#define VIEWS ((RenderView *)D_800BE628)
+#define VIEWS ((RenderView *)gViews)
 
 /* This file's .bss. */
 MpGame *D_800D23B0; // the loaded multiplayer game resource (func_15089BC0)
@@ -30,15 +30,15 @@ s16 D_80087320[5][3] = { // [level][range] attack timer limit
     { 900, 300, 80 }, { 600, 300, 80 }, { 420, 300, 80 }, { 360, 240, 60 }, { 300, 180, 60 },
 };
 
-/* Loads the multiplayer game resource D_800D2E48 and resets its per-player state. */
+/* Loads the multiplayer game resource gCurrentTaskId and resets its per-player state. */
 s32 func_15089BC0(void) {
     f32 *scales;
     s32 i;
     s32 id;
     void *resource;
 
-    id = D_800D2E48;
-    resource = func_1509B570(id);
+    id = gCurrentTaskId;
+    resource = script_getTaskBss(id);
     if (resource == NULL) {
         return 0;
     }
@@ -239,7 +239,7 @@ s32 func_1508A1BC(void) {
                     if (i >= D_8008FD90) {
                         dist *= 2;
                     }
-                    dist = dist / (func_150859AC(i, 6) + 2);
+                    dist = dist / (player_getStat(i, 6) + 2);
                 }
             }
             if (i < D_8008FD90 && dist != -1) {
@@ -367,7 +367,7 @@ s32 func_1508A6FC(void) {
             if (D_800D23B0->grenades != NULL) {
                 D_800D23B0->grenades[i] = obj->mv->numGrenades;
             }
-            arr39C[i] = func_150859AC(i, 4);
+            arr39C[i] = player_getStat(i, 4);
             layers[i] = func_15085DA8(obj->ypos);
             if (arr39C[i] == 0 || isNew || obj->unk2FD != 0) {
                 if (arr35C[i] == 0) {
@@ -487,11 +487,11 @@ s32 func_1508A6FC(void) {
     }
     if (D_800D23B0->gameType == 0xB9) {
         half = (s32)(VIEWS[0].right - VIEWS[0].left) >> 1;
-        func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
-        for (j = 0; j <= D_80082FA0; j++) {
+        text_setColor(0xFF, 0xFF, 0xFF, 0xFF);
+        for (j = 0; j <= gScreenLayout; j++) {
             if (movement_obj[j].team == 0) {
                 vp = &VIEWS[j];
-                func_15042D94(vp->left + half, vp->top + 6.0f, 1, "%d", countdowns[j] / 60);
+                text_printAt(vp->left + half, vp->top + 6.0f, 1, "%d", countdowns[j] / 60);
             }
         }
 
@@ -505,13 +505,13 @@ s32 func_1508B194(s32 player) {
         return 0;
     }
 
-    return D_8008FDD4->stats[player].unkA;
+    return gMenuState->stats[player].unkA;
 }
 
 /* Clears player's score record value. */
 void func_1508B1D4(s32 player) {
     if (player < D_8008FD90) {
-        D_8008FDD4->stats[player].unkA = 0;
+        gMenuState->stats[player].unkA = 0;
     }
 }
 
@@ -908,8 +908,8 @@ void func_1508C1A4(s32 a, s32 b) {
 
     seen = 0;
     blocked = 0;
-    from = func_1505EEF4(a & 0xFFFF0FFF);
-    to = func_1505EEF4(b & 0xFFFF0FFF);
+    from = actor_findOnPath(a & 0xFFFF0FFF);
+    to = actor_findOnPath(b & 0xFFFF0FFF);
     if (from != NULL && to != NULL) {
         x0 = from->xpos;
         z0 = from->zpos;
@@ -1164,7 +1164,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         if (type == 9 || type == 0x38 || type == 0x15) {
             hasCam = 0;
         }
-        victim = func_1505EEF4(target & 0xFFFF0FFF);
+        victim = actor_findOnPath(target & 0xFFFF0FFF);
         if (victim == NULL) {
             return 1;
         }
@@ -1264,7 +1264,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             dx -= dz * mag;
             dz += tx * mag;
         }
-        ang = func_1505A630(dx, -dz, 0) * 0.005493164f;
+        ang = actor_getDirectionAngle(dx, -dz, 0) * 0.005493164f;
         if (type != 3) {
             curYaw = obj->mv->aimYaw;
         } else {
@@ -1286,7 +1286,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         }
         D_800D23B0->aimY[player] += cur * scale;
         cur = obj->mv->aimEye.y - D_800D23B0->aimY[player];
-        ang = func_1505A630(dist, cur, 0) * 0.005493164f;
+        ang = actor_getDirectionAngle(dist, cur, 0) * 0.005493164f;
         curYaw = obj->mv->aimPitch;
         while (ang > 180.0f) {
             ang -= 360.0f;
@@ -1353,7 +1353,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
                 if (f < 0.0f) {
                     f = 0.0f;
                 }
-                f = (sinf((D_800BE9AC & 0x3F) * 0.09815625101f) * 0.174999997f) + f;
+                f = (sinf((gTotalTicks & 0x3F) * 0.09815625101f) * 0.174999997f) + f;
                 if (f > 1.0f) {
                     f = 1.0f;
                 }
@@ -1363,7 +1363,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
                 obj->angle -= (s32)(yaw * 16.0f);
                 obj->langle = obj->angle;
                 obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
-                func_150DA5EC(obj, f);
+                trail_setPissSpeedScale(obj, f);
             } else if (D_800D23B0->attackTimer[player] >= 0) {
                 obj->mv->buttons = Z_TRIG;
                 if (mode == 1) {
@@ -1530,7 +1530,7 @@ s32 func_1508DAEC(s32 player, s32 mode) {
  * Per-frame pickup update. Gives each player the item of its override, its slot or the default
  * (swapping attachments when it changes), then moves the slot pickups: drop timers, respawns at
  * a spawn node, and handing a touched pickup to its player (0x8AE adds 3 grenades, up to 6).
- * Declared int but returns no value, in the pre-ANSI way: func_1509DFC4 returns what it leaves in v0.
+ * Declared int but returns no value, in the pre-ANSI way: script_miscCommand returns what it leaves in v0.
  */
 s32 func_1508DC24(void) {
     static s8 D_80087340 = 0;
@@ -1627,7 +1627,7 @@ s32 func_1508DC24(void) {
 
             if (D_800D23B0->gameType == 0xB8) {
                 if (prev == 0x80) {
-                    func_1502EA50(&movement_obj[i]);
+                    actor_fadeFogPulse(&movement_obj[i]);
                     movement_obj[i].imune = 0;
                 }
                 movement_obj[i].mv->unk128 = cur;
@@ -1635,12 +1635,12 @@ s32 func_1508DC24(void) {
                     movement_obj[i].mv->unk12C = 600;
                 } else if (cur == 0x80) {
                     movement_obj[i].mv->unk12C = 1800;
-                    func_1502EA0C(&movement_obj[i], 0, 0, 0xFF, 0xBF, 4);
+                    actor_startFogPulse(&movement_obj[i], 0, 0, 0xFF, 0xBF, 4);
                 } else if (cur == 0x10) {
                     movement_obj[i].mv->unk12C = 3;
                 }
             } else {
-                func_15080620(i, 1, cur, 0);
+                text_lockObjectText(i, 1, cur, 0);
                 if (cur == 0 && prev != 3) {
                     movement_obj[i].mv->rt_context_b = 0;
                 }
@@ -1656,11 +1656,11 @@ s32 func_1508DC24(void) {
         if (D_80087340 == i && base->gameType != 0xB8) {
             setId = func_1508E780(cur);
             found = 0;
-            numAttached = func_15033E28(&movement_obj[i], attached);
+            numAttached = attach_getAll(&movement_obj[i], attached);
             if (numAttached == 0 && movement_obj[i].mv->weapon_status == 2 && setId != 0x55 && setId != 0x2E) {
-                func_15083568(&movement_obj[i], setId, 1.0f, 0);
+                collision_createPartSet(&movement_obj[i], setId, 1.0f, 0);
                 if (setId == 0x1D) {
-                    func_15083568(&movement_obj[i], 0x1E, 1.0f, 0);
+                    collision_createPartSet(&movement_obj[i], 0x1E, 1.0f, 0);
                 }
             }
             if (numAttached != 0 && cur != 0x20) {
@@ -1672,16 +1672,16 @@ s32 func_1508DC24(void) {
                             attached[j]->setId != 0x2D && attached[j]->setId != 0x72 &&
                             attached[j]->setId != 0x73 && attached[j]->setId != 0x76 &&
                             attached[j]->setId != 0x77 && attached[j]->setId != 0x78 && attached[j]->setId != 7) {
-                            func_15030158(attached[j], 0);
+                            attach_free(attached[j], 0);
                             movement_obj[i].mv->weapon_status = 0;
                         } else if (setId == attached[j]->setId) {
                             found = 1;
                         }
                     }
                     if (found == 0 && movement_obj[i].mv->weapon_status == 2 && setId != 0x55 && setId != 0x2E) {
-                        func_15083568(&movement_obj[i], setId, 1.0f, 0);
+                        collision_createPartSet(&movement_obj[i], setId, 1.0f, 0);
                         if (setId == 0x1D) {
-                            func_15083568(&movement_obj[i], 0x1E, 1.0f, 0);
+                            collision_createPartSet(&movement_obj[i], 0x1E, 1.0f, 0);
                         }
                     }
                 } else {
@@ -1691,7 +1691,7 @@ s32 func_1508DC24(void) {
                             attached[j]->setId != 0x2D && attached[j]->setId != 0x72 &&
                             attached[j]->setId != 0x73 && attached[j]->setId != 0x76 &&
                             attached[j]->setId != 0x77 && attached[j]->setId != 0x78 && attached[j]->setId != 7) {
-                            func_15030158(attached[j], 0);
+                            attach_free(attached[j], 0);
                             movement_obj[i].mv->weapon_status = 0;
                         }
                     }
@@ -1711,7 +1711,7 @@ s32 func_1508DC24(void) {
                         continue;
                     }
                     func_151027E8(other);
-                    func_15060F28(other, 0);
+                    actor_remove(other, 0);
                     break;
                 }
                 // matching: empty tests of the original source; without them IDO allocates registers differently
@@ -1728,7 +1728,7 @@ s32 func_1508DC24(void) {
         D_80087340 = 0;
     }
     for (i = 0; i < base->numSlots; i++) {
-        pickup = func_151149AC(entities[i]);
+        pickup = gfx_findObjectById(entities[i]);
         if (pickup == NULL) {
             base = D_800D23B0;
             continue;
@@ -1933,9 +1933,9 @@ s32 func_1508E89C(s32 player, s32 source) {
             D_800D18A2 |= bit0;
             D_800D18A0 &= ~bit0;
             D_800D18A0 |= (1 << source);
-            tmp = func_150859AC(source, 3);
-            func_15085710(player, 2, tmp);
-            func_15085710(source, 2, 0);
+            tmp = player_getStat(source, 3);
+            player_setStat(player, 2, tmp);
+            player_setStat(source, 2, 0);
             if (D_800D23B0->seenMask != 0) {
                 D_800D23B0->seenMask &= ~bit0;
                 D_800D23B0->seenMask |= (1 << source);
@@ -1957,11 +1957,11 @@ s32 func_1508E89C(s32 player, s32 source) {
             }
             D_800D23B0->unk16C0[player] = D_800D23B0->unk16C0[source];
             savedRot = obj->mv->shotsfired;
-            func_15062800(&movement_obj[source], obj);
+            actor_swapSlots(&movement_obj[source], obj);
             if (level == 0x3F) {
                 if (obj->lifting >= 100) {
                     slot = obj->lifting - 100;
-                    res = func_1509B570(D_800D2E48);
+                    res = script_getTaskBss(gCurrentTaskId);
                     if (res != NULL) {
                         s32 idx;
                         s32 id;
@@ -1984,22 +1984,22 @@ s32 func_1508E89C(s32 player, s32 source) {
     return 0;
 }
 
-/* Calls func_1509BFB0(1, actor | 0x2000, id, param) for player's actor (unk13F). */
+/* Calls script_command(1, actor | 0x2000, id, param) for player's actor (unk13F). */
 void func_1508EB90(s32 player, s32 id, s32 param) {
     s32 temp = movement_obj[player].listpos;
-    func_1509BFB0(1, temp | 0x2000, id, param);
+    script_command(1, temp | 0x2000, id, param);
 }
 
 /* func_1508EB90(player, 0x14, param). */
 void func_1508EBF8(s32 player, s32 param) {
     s32 temp = movement_obj[player].listpos;
-    func_1509BFB0(1, temp | 0x2000, 0x14, param);
+    script_command(1, temp | 0x2000, 0x14, param);
 }
 
 /* func_1508EB90(player, 0x61, param). */
 void func_1508EC5C(s32 player, s32 param) {
     s32 temp = movement_obj[player].listpos;
-    func_1509BFB0(1, temp | 0x2000, 0x61, param);
+    script_command(1, temp | 0x2000, 0x61, param);
 }
 
 /* Finds the entry of kind `kind` linked to (type, id); returns its id or -1. */
@@ -2049,7 +2049,7 @@ void func_1508EE0C(u16 type, u16 id) {
                     operand = D_800D23C0[i].members[j] & 0xFFF;
                     switch (D_800D23C0[i].members[j] >> 12) {
                     case 2:
-                        func_15114B94(operand);
+                        gfx_removeObject(operand);
                         break;
                     case 3:
                         aim_removePoint(operand);

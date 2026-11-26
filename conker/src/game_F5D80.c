@@ -113,7 +113,7 @@ void func_150C8A68(RadialEffect *effect) {
         s16 age;
 
         oldRadius = effect->radius;
-        effect->radius += effect->def.speed * D_800BE9A4;
+        effect->radius += effect->def.speed * gFrameDelta;
         // matching: remaining must be loaded inside the condition, after growUntil
         if (effect->def.growUntil < (remaining = effect->def.remaining)) {
             age = effect->duration - remaining;
@@ -124,9 +124,9 @@ void func_150C8A68(RadialEffect *effect) {
         }
 
         if (effect->def.emitCallback != -1) {
-            effect->pending += effect->def.emitRate * D_800BE9A4 * (6.283185482f * effect->radius);
+            effect->pending += effect->def.emitRate * gFrameDelta * (6.283185482f * effect->radius);
             while (effect->pending > 1.0f) {
-                bias = camera_global_Cameras[D_80082FA4].TrueCameraAngle * 0.7111111283f;
+                bias = camera_global_Cameras[gCurrentView].TrueCameraAngle * 0.7111111283f;
                 angle = (func_150ADA20() % 81U) + bias - 40;
                 cosine = func_151423D8(angle - 64);
                 sine = func_151423D8(angle);
@@ -179,7 +179,7 @@ Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
     gdl = func_1513F4E4(gdl, 0x21, &flag);
     gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4AC8[14].unk0 | D_800A4AC8[14].unk4, &flag);
     {
-    s32 texAddr = func_1510D0EC(*(s32 *)D_80090B60[67].addr, &palOffset, 3, 0);
+    s32 texAddr = texture_getAddress(*(s32 *)gEffectTextures[67].addr, &palOffset, 3, 0);
 
 
     gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
@@ -422,7 +422,7 @@ void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
                         actor->intelwalk = 0x14;
                     }
                 } else {
-                    func_1505D024(actor, 0x6000E, actor->langle, -1);
+                    actor_hitScripted(actor, 0x6000E, actor->langle, -1);
                 }
             }
         }
@@ -491,13 +491,13 @@ void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
 
 /* Integrates a burst particle's position (with gravity) and rotation over one frame. */
 s32 func_150CA07C(BurstParticle *particle) {
-    particle->p.pos.x += particle->p.vel.x * D_800BE9A4;
-    particle->p.pos.y += (particle->p.vel.y * D_800BE9A4) + (particle->p.gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
-    particle->p.pos.z += particle->p.vel.z * D_800BE9A4;
-    particle->p.vel.y += particle->p.gravity * D_800BE9A4;
-    particle->p.rot.x += particle->p.rotVel.x * D_800BE9A4;
-    particle->p.rot.y += particle->p.rotVel.y * D_800BE9A4;
-    particle->p.rot.z += particle->p.rotVel.z * D_800BE9A4;
+    particle->p.pos.x += particle->p.vel.x * gFrameDelta;
+    particle->p.pos.y += (particle->p.vel.y * gFrameDelta) + (particle->p.gravity * gFrameDelta * gFrameDelta * 0.5f);
+    particle->p.pos.z += particle->p.vel.z * gFrameDelta;
+    particle->p.vel.y += particle->p.gravity * gFrameDelta;
+    particle->p.rot.x += particle->p.rotVel.x * gFrameDelta;
+    particle->p.rot.y += particle->p.rotVel.y * gFrameDelta;
+    particle->p.rot.z += particle->p.rotVel.z * gFrameDelta;
     return 1;
 }
 
@@ -530,12 +530,12 @@ void func_150CA150(Actor *actor) {
 
     onGround = 0;
     if (actor != NULL) {
-        func_1504715C(&floorInfo, actor);
+        collision_initHitFromObject(&floorInfo, actor);
         func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
         pos.x = actor->xpos;
         pos.y = actor->ypos + 100.0f;
         pos.z = actor->zpos;
-        if (func_15046C80(&pos, 0, actor->ypos - 300.0f, &floorInfo) != 0) {
+        if (collision_probeFloorSurfABSet0Cached(&pos, 0, actor->ypos - 300.0f, &floorInfo) != 0) {
             onGround = 1;
             pos.y = floorInfo.height;
         } else {
@@ -548,7 +548,7 @@ void func_150CA150(Actor *actor) {
             sum ^= ~*(s32 *)addr;
         }
         if (sum != 0x79844C6B) {
-            D_800C3E7C = 0;
+            gBonePoolSize = 0;
         }
         func_150CCD90(pos.z, &r, &g, &b);
         red = r;
@@ -802,12 +802,12 @@ s32 func_150CADD0(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
 /* Same per-frame integration as func_150CA07C. */
 s32 func_150CB008(BurstParticle *particle) {
-    particle->p.pos.x += particle->p.vel.x * D_800BE9A4;
-    particle->p.pos.y += (particle->p.vel.y * D_800BE9A4) + (particle->p.gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
-    particle->p.pos.z += particle->p.vel.z * D_800BE9A4;
-    particle->p.vel.y += particle->p.gravity * D_800BE9A4;
-    particle->p.rot.x += particle->p.rotVel.x * D_800BE9A4;
-    particle->p.rot.y += particle->p.rotVel.y * D_800BE9A4;
-    particle->p.rot.z += particle->p.rotVel.z * D_800BE9A4;
+    particle->p.pos.x += particle->p.vel.x * gFrameDelta;
+    particle->p.pos.y += (particle->p.vel.y * gFrameDelta) + (particle->p.gravity * gFrameDelta * gFrameDelta * 0.5f);
+    particle->p.pos.z += particle->p.vel.z * gFrameDelta;
+    particle->p.vel.y += particle->p.gravity * gFrameDelta;
+    particle->p.rot.x += particle->p.rotVel.x * gFrameDelta;
+    particle->p.rot.y += particle->p.rotVel.y * gFrameDelta;
+    particle->p.rot.z += particle->p.rotVel.z * gFrameDelta;
     return 1;
 }

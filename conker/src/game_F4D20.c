@@ -30,9 +30,9 @@ static s32 D_800887F0 = 0; /* not referenced */
 static s32 D_800887F4 = 0; /* set while the camera is inside the zone of func_150C79BC */
 
 /* Runs func_1511650C with sound 0x353 (or 0x43 at a lower pitch once object 0's flag bit 2 is set), unless
- * bit 3 of byte 0xA of the 27-byte flag record at D_800D2E4C is set. */
+ * bit 3 of byte 0xA of the 27-byte flag record at gTaskDoneBits is set. */
 void func_150C7870(WorldObject *obj) {
-    if (!(D_800D2E4C[0xA] & 8)) {
+    if (!(gTaskDoneBits[0xA] & 8)) {
         if (!(db_Object_array[0].task_flag & TASK_FLAG_LOCKED)) {
             func_1511650C(obj, 1, 0x353, 1000.0f);
         } else {
@@ -79,7 +79,7 @@ void func_150C7968(WorldObject *obj) {
 }
 
 
-/* For camera `view`: switches func_1000D96C ids 0xF <-> 0x5F as the camera enters or leaves a cylinder of
+/* For camera `view`: switches music_playTune ids 0xF <-> 0x5F as the camera enters or leaves a cylinder of
  * radius 1200 around (-2418, 1775) above y 2300, and while it is below y 1583 within 900 of that axis,
  * sometimes spawns a particle at a random point within 900 of it at y 1583. */
 void func_150C79BC(s32 view) {
@@ -95,13 +95,13 @@ void func_150C79BC(s32 view) {
     dz = (s32)camera_global_Cameras[view].eye.z - 1775;
     if (dy > -200 && dx * dx + dz * dz < 1200 * 1200) {
         if (D_800887F4 == 0) {
-            func_1000D96C(0x5F, 0xF, 6);
-            func_1000DE1C(0x10, 4);
+            music_playTune(0x5F, 0xF, 6);
+            music_stopTune(0x10, 4);
             D_800887F4 = 1;
         }
     } else if (D_800887F4 != 0) {
-        func_1000D96C(0xF, 0x5F, 4);
-        func_1000D96C(0x10, 0, 3);
+        music_playTune(0xF, 0x5F, 4);
+        music_playTune(0x10, 0, 3);
         D_800887F4 = 0;
     }
     dy = (s32)camera_global_Cameras[view].eye.y - 1583;
@@ -136,7 +136,7 @@ void func_150C7C90(WorldObject *obj) {
         index = count;
     }
     last = &((F4D20Entry *)obj->displayList)[index];
-    angle = -669 - func_151149AC(obj->moveData.word & 0xFF)->y;
+    angle = -669 - gfx_findObjectById(obj->moveData.word & 0xFF)->y;
     if (obj->moveData.word & 0x8000) {
         angle = 836 - angle;
     }
@@ -150,11 +150,11 @@ void func_150C7C90(WorldObject *obj) {
     last->head.word |= angle;
 }
 
-/* Places the object at (-30, +50, +30) from the Actor that func_15083E90(0xC) returns. */
+/* Places the object at (-30, +50, +30) from the Actor that collision_findObjectById(0xC) returns. */
 void func_150C7D7C(WorldObject *obj) {
     Actor *target;
 
-    target = func_15083E90(0xC);
+    target = collision_findObjectById(0xC);
     obj->x = target->xpos - 30.0f;
     obj->y = target->ypos + 50.0f;
     obj->z = target->zpos + 30.0f;

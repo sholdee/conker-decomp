@@ -20,17 +20,17 @@ void func_150D0730(s32 arg0) {
         return;
     }
 
-    if (func_150A29C8(0, 0x15) == 0) {
+    if (zone_isActorOutsideId(0, 0x15) == 0) {
         var_s0 = 0x15;
-    } else if (func_150A29C8(0, 0x1A) == 0) {
+    } else if (zone_isActorOutsideId(0, 0x1A) == 0) {
         var_s0 = 0x1A;
-    } else if (func_150A29C8(0, 0x1B) == 0) {
+    } else if (zone_isActorOutsideId(0, 0x1B) == 0) {
         var_s0 = 0x1B;
-    } else if (func_150A29C8(0, 0x1C) == 0) {
+    } else if (zone_isActorOutsideId(0, 0x1C) == 0) {
         var_s0 = 0x1C;
-    } else if (func_150A29C8(0, 0x1D) == 0) {
+    } else if (zone_isActorOutsideId(0, 0x1D) == 0) {
         var_s0 = 0x1D;
-    } else if (func_150A29C8(0, 0x20) == 0) {
+    } else if (zone_isActorOutsideId(0, 0x20) == 0) {
         var_s0 = 0x20;
     }
 

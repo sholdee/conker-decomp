@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Each view's orthographic projection (func_15012370 of game_3F820 builds them). */
+/* Each view's orthographic projection (view_buildOrthoMatrices of game/View/ViewOrtho/viewortho builds them). */
 Mtx D_800DCC10[4];
 
 /* The model effect types, for func_15158078's event. */
@@ -68,8 +68,8 @@ ModelEffect *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachA
     }
     fx->attach.sharedHandle = NULL;
     if (attachArg) {
-        for (i = 0; i <= D_80082FA0; i++) {
-            fx->attach.handles[i] = func_1515D480(attachArg);
+        for (i = 0; i <= gScreenLayout; i++) {
+            fx->attach.handles[i] = light_allocGfxLights(attachArg);
         }
         fx->attach.sharedHandle = func_1515D440();
     }
@@ -81,7 +81,7 @@ void func_151571C4(ModelEffect *fx) {
     s32 i;
 
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         if (fx->attach.handles[i] != NULL) {
             func_100043B4((void *)(s32)fx->attach.handles[i], 4);
         }
@@ -95,7 +95,7 @@ void func_151571C4(ModelEffect *fx) {
 /* Destroy handler: frees the attachments and model instance, then the object (func_15169804). */
 void func_15157248(ModelEffect *fx) {
     func_151571C4(fx);
-    func_1518CA04(fx->params.model);
+    attach_releaseModel(fx->params.model);
     func_1503F7B8(fx->model);
     func_15169804(&fx->header);
 }
@@ -103,7 +103,7 @@ void func_15157248(ModelEffect *fx) {
 /* As func_15157248, but releases the object through func_15169824. */
 void func_1515728C(ModelEffect *fx) {
     func_151571C4(fx);
-    func_1518CA04(fx->params.model);
+    attach_releaseModel(fx->params.model);
     func_1503F7B8(fx->model);
     func_15169824(&fx->header);
 }
@@ -279,21 +279,21 @@ s32 func_15157AA8(ModelEffect *fx) {
             }
         }
         if (motion->flags & 4) {
-            motion->vel.y += motion->gravity * D_800BE9A4;
+            motion->vel.y += motion->gravity * gFrameDelta;
             accelY = motion->gravity;
         } else {
             accelY = 0.0f;
         }
-        accelX = (motion->vel.x - oldVel.x) * D_800BE9A8;
-        accelZ = (motion->vel.z - oldVel.z) * D_800BE9A8;
-        fx->params.pos.x += (oldVel.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
-        fx->params.pos.y += (oldVel.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
-        fx->params.pos.z += (oldVel.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
+        accelX = (motion->vel.x - oldVel.x) * gFrameDeltaInv;
+        accelZ = (motion->vel.z - oldVel.z) * gFrameDeltaInv;
+        fx->params.pos.x += (oldVel.x + 0.5f * accelX * gFrameDelta) * gFrameDelta;
+        fx->params.pos.y += (oldVel.y + 0.5f * accelY * gFrameDelta) * gFrameDelta;
+        fx->params.pos.z += (oldVel.z + 0.5f * accelZ * gFrameDelta) * gFrameDelta;
     }
     if (motion->flags & 2) {
-        motion->rot.x += motion->rotVel.x * D_800BE9A4;
-        motion->rot.y += motion->rotVel.y * D_800BE9A4;
-        motion->rot.z += motion->rotVel.z * D_800BE9A4;
+        motion->rot.x += motion->rotVel.x * gFrameDelta;
+        motion->rot.y += motion->rotVel.y * gFrameDelta;
+        motion->rot.z += motion->rotVel.z * gFrameDelta;
     }
     return TRUE;
 }
@@ -340,7 +340,7 @@ Gfx *func_15157F80(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *procee
 
 /* Post-draw callback (D_8008ADCC[0]): reloads this view's projection matrices for the current frame. */
 Gfx *func_15157FE8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync) {
-    gSPMatrix(gfx++, &D_800BE628[view].projectionMtx[D_800BE9C0],
+    gSPMatrix(gfx++, &gViews[view].projectionMtx[D_800BE9C0],
               G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, D_800DC2A0[D_800BE9C0] + view, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
     return gfx;

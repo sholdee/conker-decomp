@@ -3,8 +3,8 @@
 #include "variables.h"
 
 /* This file's .data: the update functions and message handlers of the text box styles (TextLines.updateFn, .msgFn). */
-static s32 (*D_800888A0[])(TextObj *) = { func_150D01A0, func_150D032C, func_150D0534, func_151D7000 };
-static void (*D_800888B0[])(TextObj *, u8 *, u8) = { NULL, func_151D70CC };
+static s32 (*D_800888A0[])(TextObj *) = { func_150D01A0, func_150D032C, func_150D0534, text_updateAmount };
+static void (*D_800888B0[])(TextObj *, u8 *, u8) = { NULL, text_handleAmountMessage };
 
 /* Returns the end of the line at str: its 0xBD line break or the string's terminating 0. */
 u8 *func_150CFD20(u8 *str) {
@@ -173,12 +173,12 @@ s32 func_150D01A0(TextObj *obj) {
         fade = 0;
     }
     if (alpha) {
-        func_1504332C(0xCE, 0xC4, 0x61, alpha);
-        func_15042D94(0x92, 0xBE, 0x81, (char *)text->lines[text->page]);
+        text_setColor(0xCE, 0xC4, 0x61, alpha);
+        text_printAt(0x92, 0xBE, 0x81, (char *)text->lines[text->page]);
     }
     if (fade) {
-        func_1504332C(0xCE, 0xC4, 0x61, fade);
-        func_15042D94(0x92, 0xBE, 0x81, (char *)text->lines[text->page ^ 1]);
+        text_setColor(0xCE, 0xC4, 0x61, fade);
+        text_printAt(0x92, 0xBE, 0x81, (char *)text->lines[text->page ^ 1]);
     }
     return 1;
 }
@@ -219,7 +219,7 @@ s32 func_150D032C(TextObj *obj) {
     }
 
     if (style->progress < text->lineLen) {
-        style->progress += 0.437f * D_800BE9A4;
+        style->progress += 0.437f * gFrameDelta;
         while (style->progress > 1.0f) {
             style->shown++;
             if (text->lineLen < style->shown) {
@@ -234,8 +234,8 @@ s32 func_150D032C(TextObj *obj) {
     buf[style->shown + 4] = ' ';
     buf[style->shown + 5] = 0xBB;
     buf[style->shown + 6] = 0;
-    func_1504332C(0, 0xFF, 0, 0x96);
-    func_15042D94(15, 0xBE, 0x80, (char *)buf);
+    text_setColor(0, 0xFF, 0, 0x96);
+    text_printAt(15, 0xBE, 0x80, (char *)buf);
     return 1;
 }
 
@@ -272,12 +272,12 @@ s32 func_150D0534(TextObj *obj) {
         fade = 0;
     }
     if (alpha) {
-        func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-        func_15042D94(20, 20, 0x80, (char *)text->lines[text->page]);
+        text_setColor(0xFF, 0xFF, 0xFF, alpha);
+        text_printAt(20, 20, 0x80, (char *)text->lines[text->page]);
     }
     if (fade) {
-        func_1504332C(0xFF, 0xFF, 0xFF, fade);
-        func_15042D94(20, 20, 0x80, (char *)text->lines[text->page ^ 1]);
+        text_setColor(0xFF, 0xFF, 0xFF, fade);
+        text_printAt(20, 20, 0x80, (char *)text->lines[text->page ^ 1]);
     }
     return 1;
 }

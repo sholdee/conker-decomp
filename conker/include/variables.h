@@ -48,7 +48,7 @@ extern u32  __osShutdown;
 /* BSS STARTS at D_8002D4B0 */
 
 /* 80030000 */
-extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares it itself); stopped by the PI manager in init_2E50
+extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares it itself); stopped by the PI manager in init/Os/DevMgr/devmgr
 
 
 
@@ -73,8 +73,8 @@ extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 
 /* 80080000 */
 
-extern u8 (*D_80085990[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
-extern FontGlyph *D_80085994[];
+extern u8 (*gFontBitmaps[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
+extern FontGlyph *gFontGlyphs[];
 
 
 
@@ -213,7 +213,7 @@ extern u8  D_800D987C;
 
 /* One unit's whole .bss (0x800D9920..0x800D994F: two bytes, two 8-aligned u8[14] and the unit's padding). It lies
  * between game_1048D0's .bss and game_10CD70's; no file of that range uses it, so it stays in asm. Set by script
- * command 2 (game_C9EC0.c), cleared by game_3BA70.c and game_3D9A0.c; nothing reads it. */
+ * command 2 (game/Script/EffectCmd/effectcmd.c), cleared by game_3BA70.c and game_3D9A0.c; nothing reads it. */
 extern u8  D_800D9920;
 extern u8  D_800D9921;
 extern u8  D_800D9928[14];
@@ -222,26 +222,26 @@ extern u8  D_800D9938[14];
 
 
 
-extern s32 D_800DBE18[4];
+extern s32 gMapTriCounts[4];
 extern s16 D_800DBE28;
 extern s16 D_800DBE2A;
 extern s16 D_800DBE2C;
-extern s16 D_800DBE30[4]; // per-view camera zone
-extern s32 D_800DBE38;
-extern MeshTri *D_800DBE3C;
-extern struct XZRange *D_800DBE40;
-extern struct YRange *D_800DBE44;
-extern ZoneNode *D_800DBE48; // zone tree root
-extern s32 D_800DBE4C;
-extern s32 D_800DBE50;
-extern u32 *D_800DBE5C; // per world-mesh triangle: material / surface flags
-extern u8  D_800DBE62;
+extern s16 gViewCameraZones[4]; // per-view camera zone
+extern s32 gMapTriCollected;
+extern MeshTri *gCurMapTris;
+extern struct XZRange *gCurMapTriXZBounds;
+extern struct YRange *gCurMapTriYBounds;
+extern ZoneNode *gCurMapQuadTree; // zone tree root
+extern s32 gCurMapTriCount;
+extern s32 gCurMap;
+extern u32 *gMeshTriMaterials; // per world-mesh triangle: material / surface flags
+extern u8  gMeshBuilt;
 extern u8  D_800DBE63;
-extern f32 D_800DBE64;
-extern f32 D_800DBE68;
-extern f32 D_800DBE6C;
-extern f32 D_800DBE70;
-extern f32 D_800DBE74;
+extern f32 gFloorQueryReach;
+extern f32 gFloorQueryX;
+extern f32 gFloorQueryY;
+extern f32 gFloorQueryZ;
+extern f32 gRayProbeBottom;
 
 extern u8 D_800DCA20;
 extern f32 D_800DCA24;

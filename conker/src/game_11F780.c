@@ -39,13 +39,13 @@ s32 func_150F237C(s32 arg0, s32 arg1) {
     return 14;
 }
 
-/* Spawns a func_151C329C effect at the bone point of `slot`, if the owner has a skeleton. */
+/* Spawns a weapon_spawnImpactBurst effect at the bone point of `slot`, if the owner has a skeleton. */
 void func_150F2390(Actor *owner, s32 slot, s32 arg2) {
     Vec3f pos;
 
     if (owner->ob_matrix_ptr != NULL) {
         func_150F22D0(&pos, owner, slot);
-        func_151C329C(&pos, 0xFF, 0);
+        weapon_spawnImpactBurst(&pos, 0xFF, 0);
     }
 }
 
@@ -85,8 +85,8 @@ s32 func_150F23E0(SwayObject *obj) {
 
     obj->rotX = sway->amplitudeX * sinf(sway->phaseX);
     obj->rotZ = sway->amplitudeZ * sinf(sway->phaseZ);
-    sway->phaseX = func_15144B68(sway->phaseX + sway->speedX * D_800BE9A4);
-    sway->phaseZ = func_15144B68(sway->phaseZ + sway->speedZ * D_800BE9A4);
+    sway->phaseX = func_15144B68(sway->phaseX + sway->speedX * gFrameDelta);
+    sway->phaseZ = func_15144B68(sway->phaseZ + sway->speedZ * gFrameDelta);
     return 1;
 }
 
@@ -96,8 +96,8 @@ s32 func_150F2480(DynModel *model) {
 
     block->rotX = block->sway.amplitudeX * sinf(block->sway.phaseX);
     block->rotZ = block->sway.amplitudeZ * sinf(block->sway.phaseZ);
-    block->sway.phaseX = func_15144B68(block->sway.phaseX + block->sway.speedX * D_800BE9A4);
-    block->sway.phaseZ = func_15144B68(block->sway.phaseZ + block->sway.speedZ * D_800BE9A4);
+    block->sway.phaseX = func_15144B68(block->sway.phaseX + block->sway.speedX * gFrameDelta);
+    block->sway.phaseZ = func_15144B68(block->sway.phaseZ + block->sway.speedZ * gFrameDelta);
     return 1;
 }
 
@@ -190,35 +190,35 @@ void func_150F26A0(Camera *actor) {
             func_150F2994(actor, FALSE);
         }
     }
-    if (func_1509BE40(1, 0x405A, 6, 0x9000) != 0) {
+    if (script_query(1, 0x405A, 6, 0x9000) != 0) {
         actor->AvailableModes |= 0x80000000;
     } else {
         actor->AvailableModes &= ~0x80000000;
     }
-    if (func_1509BE40(1, 0x405E, 6, 0x9000) != 0) {
+    if (script_query(1, 0x405E, 6, 0x9000) != 0) {
         actor->AvailableModes |= 0x10000;
     } else {
         actor->AvailableModes &= ~0x10000;
     }
-    if (func_1509BE40(1, 0x405F, 6, 0x2000) != 0) {
+    if (script_query(1, 0x405F, 6, 0x2000) != 0) {
         actor->AvailableModes |= 0x10;
     } else {
         actor->AvailableModes &= ~0x10;
     }
 }
 
-/* Calls func_1509BFB0(0, id, flag) for ids 0x4016-0x4023, 0x405D and 0x405F, and 0x4063-0x4065 when bit 3 of D_800D2E4C byte 0x15 is set. */
+/* Calls script_command(0, id, flag) for ids 0x4016-0x4023, 0x405D and 0x405F, and 0x4063-0x4065 when bit 3 of gTaskDoneBits byte 0x15 is set. */
 void func_150F2994(Camera *actor, s32 flag) {
     s32 i;
 
     for (i = 0; i < 14; i++) {
-        func_1509BFB0(0, 0x4016 + i, flag);
+        script_command(0, 0x4016 + i, flag);
     }
-    func_1509BFB0(0, 0x405D, flag);
-    func_1509BFB0(0, 0x405F, flag);
-    if (D_800D2E4C[0x15] & 8) {
-        func_1509BFB0(0, 0x4063, flag);
-        func_1509BFB0(0, 0x4064, flag);
-        func_1509BFB0(0, 0x4065, flag);
+    script_command(0, 0x405D, flag);
+    script_command(0, 0x405F, flag);
+    if (gTaskDoneBits[0x15] & 8) {
+        script_command(0, 0x4063, flag);
+        script_command(0, 0x4064, flag);
+        script_command(0, 0x4065, flag);
     }
 }

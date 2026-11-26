@@ -93,12 +93,12 @@ static s32 (*D_8008A084[12])() = {
 
 /*
  * The actor effects: the handler and the duration of its timed effect (-1: runs once). Only this file uses it,
- * but it stays global: one declaration fewer in the headers changes the .bss order of game_476D0.c.
+ * but it stays global: one declaration fewer in the headers changes the .bss order of game/View/Views/views.c.
  */
 ActorEffectDef D_8008A0B4[20] = {
     { func_15146BB8, 130 }, { func_15146BD8, 130 }, { func_15146A98, 85 },  { func_15146D60, 85 },
     { func_15146E84, 80 },  { func_15147040, -1 },  { func_15147318, 130 }, { func_150C1A40, -1 },
-    { func_150D8A34, -1 },  { func_150BAA14, -1 },  { func_150B2494, -1 },  { func_150CB1F4, -1 },
+    { attach_spawnBonePointEffects, -1 },  { func_150BAA14, -1 },  { func_150B2494, -1 },  { func_150CB1F4, -1 },
     { func_151AF6D4, -1 },  { func_150EB090, 85 },  { func_150F2390, -1 },  { func_15147478, 130 },
     { func_151475D8, 130 }, { func_150BEACC, 85 },  { func_150BED4C, 85 },  { NULL, -1 },
 };
@@ -109,10 +109,10 @@ void func_15141A7C(Actor *actor, s32 arg1) {
     s32 selector;
     s32 handler;
 
-    if (D_800BE616 == 0) {
+    if (gIsMultiplayer == 0) {
         selector = func_15141C0C(actor);
         if (D_8008A084[selector] != 0) {
-            handler = D_8008A084[selector](func_15141CC0(func_1510F8CC(actor->floorMaterial)), actor);
+            handler = D_8008A084[selector](func_15141CC0(collision_getSurfaceType(actor->floorMaterial)), actor);
             if (handler != -1) {
                 if (D_8008A0B4[handler].handler != NULL) {
                     if (D_8008A0B4[handler].duration > 0) {
@@ -224,7 +224,7 @@ s32 func_15141CC0(u32 type) {
 void func_15141DA4(void *actor, s32 selector, s32 handler) {
     if ((selector < 12) && (selector >= 0) &&
         (handler < 20) && (handler >= 0) &&
-        (D_800BE616 == 0) &&
+        (gIsMultiplayer == 0) &&
         (D_8008A084[selector] != 0) && (handler != -1)) {
         if ((D_8008A0B4[handler].handler != NULL) && (D_8008A0B4[handler].duration > 0)) {
             func_15141E38(actor, handler);
@@ -303,7 +303,7 @@ void func_15141F78(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f *pos, u
     func_1513C650(&packet, 0, 0, &src->tri, pos->x, src->height, pos->z, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
 }
 
-/* Template copied onto the stack for func_150A2AEC. */
+/* Template copied onto the stack for zone_findActorZone. */
 struct Args151420F8 {
     s32 unk0;
     s32 unk4;
@@ -319,7 +319,7 @@ s32 func_151420F8(Actor *actor) {
     Args151420F8 args;
 
     args = D_800A5200;
-    if (func_150A2AEC(actor - movement_obj, 6, &args, actor) == -1) {
+    if (zone_findActorZone(actor - movement_obj, 6, &args, actor) == -1) {
         return 0;
     }
     return 1;

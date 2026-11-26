@@ -4,7 +4,7 @@
 
 
 /* Spawns a burst at pos scaled by scale: one func_15130374 particle moving along vel,
- * 5-12 func_15132A4C pieces flung in random directions, and a func_151602C0 flash. */
+ * 5-12 func_15132A4C pieces flung in random directions, and a light_createWithEffect flash. */
 void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
     s32 count;
     ParticleDesc6C spawn;
@@ -102,7 +102,7 @@ void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
     origin.x = pos->x;
     origin.y = pos->y;
     origin.z = pos->z;
-    func_151602C0(&flash, &origin, (func_150ADA20() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
+    light_createWithEffect(&flash, &origin, (func_150ADA20() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
 }
 
 
@@ -117,7 +117,7 @@ void func_150E9E34(RandomBurstEmitter *emitter) {
     s32 pitch;
 
     spawner = &emitter->spawner;
-    spawner->spawnAccum += (spawner->rateBase + func_150ADA68() * spawner->rateRange) * D_800BE9A4;
+    spawner->spawnAccum += (spawner->rateBase + func_150ADA68() * spawner->rateRange) * gFrameDelta;
     while (spawner->spawnAccum > 1.0f) {
         scale = func_150ADA68() * spawner->scaleRange + spawner->scaleBase;
         func_1514470C(spawner->source, &pos);

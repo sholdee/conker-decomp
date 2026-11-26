@@ -74,7 +74,7 @@ WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
         from.x = actor->xpos;
         from.y = actor->ypos + 5000.0f;
         from.z = actor->zpos;
-        if (func_15045800(&from, 0, actor->ypos - 100.0f, &emitter->watcher.hit) != 0) {
+        if (collision_probeFloorSurfBCached(&from, 0, actor->ypos - 100.0f, &emitter->watcher.hit) != 0) {
             link.ceiling = emitter->watcher.hit.height;
         } else {
             link.ceiling = actor->ypos + 5000.0f;
@@ -224,7 +224,7 @@ FlickerSprite *func_150C6460(GameF3270Emitter *emitter) {
         probe.x = pos.x;
         probe.y = pos.y + 200.0f;
         probe.z = pos.z;
-        if (func_15045800(&probe, 0, pos.y - 200.0f, &emitter->watcher.hit) != 0) {
+        if (collision_probeFloorSurfBCached(&probe, 0, pos.y - 200.0f, &emitter->watcher.hit) != 0) {
             SpriteDef desc;
             SpriteFlicker flicker;
             f32 size;

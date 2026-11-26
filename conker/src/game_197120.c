@@ -28,8 +28,8 @@ void func_15169C70(Debris *debris) {
                                                            debris->velZ * debris->velZ)) *
                        57.29577637f;
     }
-    func_1510F800(0);
-    floorHeight = func_1510F8D8(debris->x, debris->y, debris->z, 0) + debris->floorOffset;
+    collision_selectMap(0);
+    floorHeight = collision_findMeshFloorNear(debris->x, debris->y, debris->z, 0) + debris->floorOffset;
     if (debris->y < floorHeight && debris->velY < 0.0f) {
         debris->y = floorHeight;
         if (debris->kind == 1) {
@@ -42,14 +42,14 @@ void func_15169C70(Debris *debris) {
             func_151718F0(debris->x, (debris->y - (f32)(u32)debris->floorOffset) + 15.0f,
                           debris->z, 30.0f, 40, 0.0030517578125f, 0, 10, debris->header.owner,
                           debris->header.kind);
-            func_1518CA04(debris->sound);
+            attach_releaseModel(debris->sound);
             func_1516972C(&debris->header);
             return;
         }
         if (debris->kind == 4) {
             func_15171200(3, 0xB, debris->x, debris->y, debris->z, debris->velY * debris->bounce,
                           0.5f, 0.6999999881f, 40.0f, 2, 60, -0.5f, debris->header.owner, debris->header.kind);
-            func_1518CA04(debris->sound);
+            attach_releaseModel(debris->sound);
             func_1516972C(&debris->header);
             return;
         }
@@ -58,7 +58,7 @@ void func_15169C70(Debris *debris) {
                           -0.6999999881f, debris->header.owner, debris->header.kind);
             func_151709B4(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
                           debris->header.owner, debris->header.kind);
-            func_1518CA04(debris->sound);
+            attach_releaseModel(debris->sound);
             func_1516972C(&debris->header);
             return;
         }
@@ -75,7 +75,7 @@ void func_15169C70(Debris *debris) {
             return;
         }
         if (debris->kind == 8) {
-            func_1518CA04(debris->sound);
+            attach_releaseModel(debris->sound);
             func_1516972C(&debris->header);
             return;
         }
@@ -115,7 +115,7 @@ void func_15169C70(Debris *debris) {
             alpha = debris->alpha;
             alpha -= D_800BE9E4 * 4;
             if (alpha <= 0) {
-                func_1518CA04(debris->sound);
+                attach_releaseModel(debris->sound);
                 func_1516972C(&debris->header);
                 return;
             }
@@ -138,8 +138,8 @@ void func_1516A3F4(DropParticle *drop) {
     bottom = drop->y + drop->unk2A;
     floorY = drop->floorY;
     if (floorY >= bottom) {
-        func_1510F800(0);
-        floorY = drop->floorY = func_1510F8D8(drop->x, drop->y, drop->z, 0);
+        collision_selectMap(0);
+        floorY = drop->floorY = collision_findMeshFloorNear(drop->x, drop->y, drop->z, 0);
     }
     if (floorY >= bottom) {
         drop->life = 0;
@@ -209,7 +209,7 @@ s32 func_1516A648(StyleParticle *particle) {
 
     particle->velocityY -= 300;
     func_1516F864(particle);
-    floorY = func_1510F8D8(particle->x, particle->y, particle->z, 0) + 10;
+    floorY = collision_findMeshFloorNear(particle->x, particle->y, particle->z, 0) + 10;
     particle->u.bounce.floorHi = floorY >> 8;
     // matching: the redundant mask steers IDO's scratch registers for the code that follows
     particle->u.bounce.floorLo = floorY & 0xFF;

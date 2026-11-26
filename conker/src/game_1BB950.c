@@ -111,7 +111,7 @@ Vtx *func_1518E73C(ActorEmitterParticle *p, s16 vp) {
     viewZ = D_800DD1D8[vp];
     viewX = D_800DD1E8[vp];
     negative = -1; // matching: the target loads -1, not 1, as the true value
-    speed = (((p->head.def.rot.x - p->head.def.pos.x) * viewX) - (viewZ * (p->head.def.rot.z - p->head.def.pos.z))) * D_800BE9A8;
+    speed = (((p->head.def.rot.x - p->head.def.pos.x) * viewX) - (viewZ * (p->head.def.rot.z - p->head.def.pos.z))) * gFrameDeltaInv;
     if (speed < 0.0f) {
         speed = -speed;
         negative = FALSE;

@@ -4,7 +4,7 @@
 
 
 /* Get the position of one of the actor's bones (picked by `side`, 0x10 by default).  With a `hit`
-   buffer, also look for the ground below that point and return func_15046C80's result. */
+   buffer, also look for the ground below that point and return collision_probeFloorSurfABSet0Cached's result. */
 s32 func_150BE9B0(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     Vec3f probe;
     s32 bone;
@@ -32,8 +32,8 @@ s32 func_150BE9B0(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     probe.x = pos->x;
     probe.y = pos->y + 10.0f;
     probe.z = pos->z;
-    func_1504715C(hit, actor);
-    return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
+    collision_initHitFromObject(hit, actor);
+    return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 50.0f, hit);
 }
 
 /* Returns 0x11 for `arg0` 0 or 1, -1 otherwise. */
@@ -90,8 +90,8 @@ s32 func_150BEC30(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     probe.x = pos->x;
     probe.y = pos->y + 10.0f;
     probe.z = pos->z;
-    func_1504715C(hit, actor);
-    return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
+    collision_initHitFromObject(hit, actor);
+    return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 50.0f, hit);
 }
 
 /* Returns 0x12 for `arg0` 0 or 1, -1 otherwise. */
@@ -119,14 +119,14 @@ void func_150BED4C(s32 actor, s32 side, s32 strength) {
     }
 }
 
-/* Sets or clears flag bits in unk84 from func_1509BE40 queries. */
+/* Sets or clears flag bits in unk84 from script_query queries. */
 void func_150BEEB0(Camera *arg0) {
-    if (func_1509BE40(1, 0x4063, 6, 0x2000) || func_1509BE40(1, 0x4001, 6, 0x9000)) {
+    if (script_query(1, 0x4063, 6, 0x2000) || script_query(1, 0x4001, 6, 0x9000)) {
         arg0->AvailableModes |= 0x1010;
     } else {
         arg0->AvailableModes &= ~0x1010;
     }
-    if (func_1509BE40(1, 0x4069, 6, 0x2000)) {
+    if (script_query(1, 0x4069, 6, 0x2000)) {
         arg0->AvailableModes |= 0x1000000;
     } else {
         arg0->AvailableModes &= ~0x1000000;

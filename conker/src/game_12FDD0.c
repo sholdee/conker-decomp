@@ -11,7 +11,7 @@ typedef struct {
     /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId;
     /* 0x08 */ s32 boneOffset; /* byte offset of the bone's matrix in target->ob_matrix_ptr */
-    /* 0x0C */ s16 node;       /* func_1503195C node, -1: use the bone matrix */
+    /* 0x0C */ s16 node;       /* attach_find node, -1: use the bone matrix */
     /* 0x10 */ s32 bone;
     /* 0x14 */ u8 flags;       /* bit 0: start/end are valid this frame */
     /* 0x18 */ Vec3f start; /* def.pos and def.rot transformed to world space */
@@ -36,7 +36,7 @@ QuadSprite *func_15102920(f32 size, u8 arg1, CollisionTri *surface, Vec3f *posit
 
     arg.fadeStart = 10;
     arg.fadeRate = 25;
-    material = func_1510F8CC(surfaceFlags);
+    material = collision_getSurfaceType(surfaceFlags);
     arg.texture = 0x5C;
     switch (level) {
     case 0x36:
@@ -173,7 +173,7 @@ s32 func_15102D90(BoneBeamParticle *particle) {
     if (beam->node != -1) {
         ModelAttachment *node;
 
-        node = func_1503195C(target, beam->node, 0);
+        node = attach_find(target, beam->node, 0);
         if (node == NULL) {
             return 0;
         }

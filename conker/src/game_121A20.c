@@ -108,7 +108,7 @@ s32 func_150F48D0(SpiralParticle *obj) {
     SpiralState *spiral;
 
     spiral = &obj->spiral;
-    spiral->timeLeft -= D_800BE9A4;
+    spiral->timeLeft -= gFrameDelta;
     if (spiral->timeLeft <= 0.0f) {
         return 0;
     }
@@ -116,17 +116,17 @@ s32 func_150F48D0(SpiralParticle *obj) {
         f32 up;
         f32 side;
         func_1514373C(spiral->phase, spiral->radius, &side, &up);
-        spiral->phase += spiral->phaseRate * D_800BE9A4;
-        spiral->center.x += obj->vel.x * D_800BE9A4;
-        spiral->center.y += obj->vel.y * D_800BE9A4;
-        spiral->center.z += obj->vel.z * D_800BE9A4;
+        spiral->phase += spiral->phaseRate * gFrameDelta;
+        spiral->center.x += obj->vel.x * gFrameDelta;
+        spiral->center.y += obj->vel.y * gFrameDelta;
+        spiral->center.z += obj->vel.z * gFrameDelta;
         obj->pos.x = spiral->center.x + side * spiral->cosDir;
         obj->pos.y = spiral->center.y + up;
         obj->pos.z = spiral->center.z - side * spiral->sinDir;
     }
-    obj->rot.x += obj->spin.x * D_800BE9A4;
-    obj->rot.y += obj->spin.y * D_800BE9A4;
-    obj->rot.z += obj->spin.z * D_800BE9A4;
+    obj->rot.x += obj->spin.x * gFrameDelta;
+    obj->rot.y += obj->spin.y * gFrameDelta;
+    obj->rot.z += obj->spin.z * gFrameDelta;
     // matching: the original falls off the end here without setting a return value
 }
 
@@ -197,7 +197,7 @@ void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind
 }
 
 /* Emitter update: while its condition callback (if any) holds, spawns 0.05-0.20 spirals per frame
- * (times D_800BE9A4) around the camera, each between two random points on either side of
+ * (times gFrameDelta) around the camera, each between two random points on either side of
  * its view direction. */
 void func_150F4DEC(CameraEmitter *emitter) {
     CameraEmitterData *data;
@@ -213,7 +213,7 @@ void func_150F4DEC(CameraEmitter *emitter) {
     if (data->condition != -1 && !D_80088B38[data->condition]()) {
         return;
     }
-    data->pending += (0.05100000277f + func_150ADA68() * 0.153000012f) * D_800BE9A4;
+    data->pending += (0.05100000277f + func_150ADA68() * 0.153000012f) * gFrameDelta;
     if (data->pending > 1.0f) {
         eye = func_15144B34(data->camera->CNumber);
         /* degrees to 256-step binary angle */

@@ -58,10 +58,10 @@ glabel func_150FB4C0
     /* 128A24 150FB574 00008812 */  mflo       $s1
     /* 128A28 150FB578 02308821 */  addu       $s1, $s1, $s0
     /* 128A2C 150FB57C 44809000 */  mtc1       $zero, $f18
-    /* 128A30 150FB580 3C08800C */  lui        $t0, %hi(D_800BE628)
-    /* 128A34 150FB584 8D08E628 */  lw         $t0, %lo(D_800BE628)($t0)
-    /* 128A38 150FB588 3C098008 */  lui        $t1, %hi(D_80082FA4)
-    /* 128A3C 150FB58C 8D292FA4 */  lw         $t1, %lo(D_80082FA4)($t1)
+    /* 128A30 150FB580 3C08800C */  lui        $t0, %hi(gViews)
+    /* 128A34 150FB584 8D08E628 */  lw         $t0, %lo(gViews)($t0)
+    /* 128A38 150FB588 3C098008 */  lui        $t1, %hi(gCurrentView)
+    /* 128A3C 150FB58C 8D292FA4 */  lw         $t1, %lo(gCurrentView)($t1)
     /* 128A40 150FB590 240A0180 */  addiu      $t2, $zero, 0x180
     /* 128A44 150FB594 012A0018 */  mult       $t1, $t2
     /* 128A48 150FB598 00004812 */  mflo       $t1

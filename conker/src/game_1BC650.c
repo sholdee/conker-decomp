@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_1514B8E4 (game_177B50.c) is declared in each file that calls it: game_1D5FD0.c was compiled with a
+// func_1514B8E4 (game_177B50.c) is declared in each file that calls it: game/Beam/AreaEmitter/areaemitter.c was compiled with a
 // different view of it.
 void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, const Vec3f *velocity, f32 gravity, f32 drag,
                     f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10,
@@ -197,7 +197,7 @@ AnchorEmitter *func_1518F5D0(Actor *owner, const AnchorEmitterTemplate *tmpl, s1
             dest->child = NULL;
         }
         func_151D2AB0(dest->tmpl.anchorSet);
-        func_1000FA64(0x4D, owner->xpos, owner->ypos, owner->zpos, 15000, 2000, 800,
+        sound_addDynamicSound(0x4D, owner->xpos, owner->ypos, owner->zpos, 15000, 2000, 800,
                       func_1518E298, emitter, (s32)owner, 0, 0);
     }
     return emitter;
@@ -208,7 +208,7 @@ s32 func_1518F7C4(AnchorEmitter *emitter) {
     AnchorEmitterParams *params;
 
     params = &emitter->params;
-    params->accum += (params->tmpl.rate + func_150ADA68() * params->tmpl.rateRange) * D_800BE9A4;
+    params->accum += (params->tmpl.rate + func_150ADA68() * params->tmpl.rateRange) * gFrameDelta;
     func_1518F8E0(emitter);
     if (params->updateFunc != -1) {
         return D_8008D67C[params->updateFunc](emitter);
@@ -638,7 +638,7 @@ LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 du
     pos.y = owner->ypos;
     pos.z = owner->zpos;
 
-    child = func_151602C0(&desc.header, &pos, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, arg4, arg5);
+    child = light_createWithEffect(&desc.header, &pos, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, arg4, arg5);
     if (child != NULL) {
         memcpy(&child->data.actorJitter.ref, &desc.owner, sizeof(desc.owner));
         memcpy(&child->data.actorJitter.jitter, &desc.jitter, sizeof(desc.jitter));

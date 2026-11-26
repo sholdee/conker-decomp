@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
+// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game/Sight/SightBeam/sightbeam.c were
 // compiled with a different view of it.
 void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
@@ -18,8 +18,8 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
         return;
     }
     if (D_800C35EA[0] != 1) {
-        func_10010630(0x2BB, obj, 0x7FFF, 1000, 2000);
-        func_10010630(0x2BA, obj, 0x7FFF, 1000, 2000);
+        sound_playActorUntracked(0x2BB, obj, 0x7FFF, 1000, 2000);
+        sound_playActorUntracked(0x2BA, obj, 0x7FFF, 1000, 2000);
     }
     origin.x = obj->xpos;
     origin.y = obj->ypos + 20.0f;
@@ -32,8 +32,8 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
         top.x = origin.x;
         top.y = origin.y + 100.0f;
         top.z = origin.z;
-        func_1504715C(&hit, obj);
-        if (func_15046C80(&top, 0, origin.y - 200.0f, &hit) && (hit.flags & 1)) {
+        collision_initHitFromObject(&hit, obj);
+        if (collision_probeFloorSurfABSet0Cached(&top, 0, origin.y - 200.0f, &hit) && (hit.flags & 1)) {
             impact.x = top.x;
             hitGround = TRUE;
             impact.y = hit.height;
@@ -80,10 +80,10 @@ void func_150E0BE0(Actor *obj) {
         }
     } else {
         if (obj->count5 > 60) {
-            D_800D1580 = 0xFF020133;
-            D_800D154C = movement_obj;
+            gEventParam = 0xFF020133;
+            gCurrentActor = movement_obj;
             func_1506E8D8();
-            D_800D154C = obj;
+            gCurrentActor = obj;
         }
         obj->count5 = 0;
     }
@@ -92,19 +92,19 @@ void func_150E0BE0(Actor *obj) {
         if (obj->count5 == 0) {
             obj->fangle = obj->angle;
         }
-        func_150599C8(obj, 3, obj->fangle);
+        actor_turnFacing(obj, 3, obj->fangle);
     }
 
     obj->unk87 = 0;
     if (!obj->stunned) {
-        func_15056B08(obj);
+        actor_updateChaseAi(obj);
     } else {
-        func_150585F0(obj, 0.05f);
+        actor_updateStunned(obj, 0.05f);
     }
 
     /* facing angle (0x10000 units per turn) rotated a quarter turn, in degrees */
     obj->theta = (s16)(obj->langle + 0x4000) * (360.0f / 0x10000);
-    func_15059140(obj);
+    actor_updatePhysics(obj);
     obj->unkBC = obj->xpos - obj->old_xpos; // 0xBC is an f32 that structs.h still calls padBC
     obj->unk148 = obj->zpos - obj->old_zpos;
     if (func_150535F4(obj) == 0) {

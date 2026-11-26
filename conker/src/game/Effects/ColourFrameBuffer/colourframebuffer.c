@@ -7,14 +7,14 @@
 
 /* Update and draw handlers per screen effect kind (EffectDesc.updateIndex, drawIndex). Declared without
  * a prototype: each handler takes the effect as its own type. */
-static s32 (*D_8008B0D0[])() = { func_151600D8, func_150CE200 };
-static void (*D_8008B0D8[])() = { func_150CE450, func_151CB110, func_150AF790 };
-/* Message handlers per kind (EffectDesc.messageIndex), as func_15160090 calls them; the handlers take
+static s32 (*gScreenEffectUpdateProcs[])() = { colourfb_readTunables, screen_updateMosaic };
+static void (*gScreenEffectDrawProcs[])() = { screen_drawMosaic, sight_drawLens, func_150AF790 };
+/* Message handlers per kind (EffectDesc.messageIndex), as colourfb_dispatchMessage calls them; the handlers take
  * the effect and the message as their own types. */
-static void (*D_8008B0E4[])(ScreenEffect *, s32, u8) = { NULL, func_151CB49C, func_150CE694 };
+static void (*gScreenEffectMessageProcs[])(ScreenEffect *, s32, u8) = { NULL, sight_handleLensMessage, screen_handleMosaicMessage };
 
 /* Draws every screen effect in both object lists through its draw handler. */
-void func_1515FDA0(s32 arg0) {
+void colourfb_drawScreenEffects(s32 arg0) {
     u8 list;
     ScreenEffect *effect;
     u8 visible;
@@ -35,11 +35,11 @@ void func_1515FDA0(s32 arg0) {
             if ((effect->desc.flags & 2) && (D_800C35EA[0] == 1)) {
                 visible = FALSE;
             }
-            if ((effect->desc.flags & 8) && ((func_15181CC8(0) == 0) || (func_1517EF00(0) != 0))) {
+            if ((effect->desc.flags & 8) && ((screen_isIrisOpen(0) == 0) || (screen_getViewFadeAlpha(0) != 0))) {
                 visible = FALSE;
             }
             if (visible) {
-                D_8008B0D8[effect->desc.drawIndex](effect, arg0);
+                gScreenEffectDrawProcs[effect->desc.drawIndex](effect, arg0);
             }
         }
         {
@@ -52,7 +52,7 @@ void func_1515FDA0(s32 arg0) {
 }
 
 /* Creates a screen effect from desc with dataSize bytes of effect data after the header. */
-ScreenEffect *func_1515FF74(EffectDesc *desc, s32 dataSize, u8 owner, s32 list) {
+ScreenEffect *colourfb_createScreenEffect(EffectDesc *desc, s32 dataSize, u8 owner, s32 list) {
     ScreenEffect *effect;
 
     effect = func_15167A68(OBJ_TYPE_SCREEN_EFFECT, list, dataSize + sizeof(ScreenEffect), 1, owner, 1);
@@ -64,7 +64,7 @@ ScreenEffect *func_1515FF74(EffectDesc *desc, s32 dataSize, u8 owner, s32 list) 
 }
 
 /* Update: counts down the lifetime and runs the update handler; destroys the effect when either ends it. */
-void func_1515FFEC(ScreenEffect *effect) {
+void colourfb_updateScreenEffect(ScreenEffect *effect) {
     s32 updateIndex;
     u8 finished;
 
@@ -78,7 +78,7 @@ void func_1515FFEC(ScreenEffect *effect) {
     if (!finished) {
         updateIndex = effect->desc.updateIndex;
         if (updateIndex != -1) {
-            if (D_8008B0D0[updateIndex](effect) == 0) {
+            if (gScreenEffectUpdateProcs[updateIndex](effect) == 0) {
                 finished = TRUE;
             }
         }
@@ -89,17 +89,17 @@ void func_1515FFEC(ScreenEffect *effect) {
 }
 
 /* Message handler: forwards the message to the effect's own handler, if it has one. */
-void func_15160090(ScreenEffect *effect, s32 data, u8 event) {
+void colourfb_dispatchMessage(ScreenEffect *effect, s32 data, u8 event) {
     void (*handler)(ScreenEffect *, s32, u8);
 
-    handler = D_8008B0E4[effect->desc.messageIndex];
+    handler = gScreenEffectMessageProcs[effect->desc.messageIndex];
     if (handler != NULL) {
         handler(effect, data, event);
     }
 }
 
 /* Update handler: reads the effect's position, size and pixelation from the debug tunables. */
-s32 func_151600D8(ColourFrameBufferEffect *effect) {
+s32 colourfb_readTunables(ColourFrameBufferEffect *effect) {
     ColourFrameBufferData *data;
     s32 tunable;
 
@@ -119,7 +119,7 @@ s32 func_151600D8(ColourFrameBufferEffect *effect) {
 }
 
 /* Sends message `event` with `data` to every screen effect. */
-void func_15160274(data, event)
+void colourfb_broadcastMessage(data, event)
     s32 data;
     u8 event;
 {

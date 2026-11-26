@@ -3,7 +3,7 @@
 #include "variables.h"
 #include "libc/string.h"
 
-extern u8 (*D_8008FCD0[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game_11C2B0 has its own view) */
+extern u8 (*D_8008FCD0[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game/Beam/AimedBeam/aimedbeam has its own view) */
 
 
 /* Spawns a dust emitter effect (func_15191D54) on `owner`'s bone; it emits dust particles at `offset`
@@ -26,7 +26,7 @@ DustEmitter *func_15191BE0(Actor *owner, const Vec3f *offset, u8 bone, f32 rateB
     data.rateBase = rateBase;
     data.accum = 0.0f;
     data.rateRandom = rateRandom;
-    func_1504715C(&data.floor, owner);
+    collision_initHitFromObject(&data.floor, owner);
 
     data.gravityBase = gravityBase;
     data.gravityRandom = gravityRandom;
@@ -65,7 +65,7 @@ void func_15191D54(DustEmitter *effect) {
         effect->base.header.state = -1;
         return;
     }
-    data->accum += (data->rateBase + func_150ADA68() * data->rateRandom) * D_800BE9A4;
+    data->accum += (data->rateBase + func_150ADA68() * data->rateRandom) * gFrameDelta;
     if (data->accum > 1.0f) {
         if (owner->ob_matrix_ptr != NULL) {
             func_15143134(&data->offset, &position, (u8 *)owner->ob_matrix_ptr + data->matrixOffset);
@@ -74,7 +74,7 @@ void func_15191D54(DustEmitter *effect) {
                     floorY = -9500.0f;
                 } else {
                     minY = -9500.0f;
-                    if (func_15046F84(&position, 0, minY, &data->floor) != 0) {
+                    if (collision_probeFloorWithSet3Cached(&position, 0, minY, &data->floor) != 0) {
                         floorY = data->floor.height;
                     } else {
                         floorY = minY;

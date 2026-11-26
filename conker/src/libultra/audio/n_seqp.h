@@ -57,8 +57,8 @@ void              func_1001AAE0(N_ALSeqPlayer *seqp, N_ALVoice *voice);
 s32               func_1001ADA4(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime);
 N_ALVoiceState   *func_1001AFEC(N_ALSeqPlayer *seqp, u8 key, u8 channel);
 ALSound          *func_1001B07C(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 chan);
-u8                func_1001B310(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
-s32               func_1001B7D0(N_ALSeqPlayer *seqp, s32 instNum, s32 chan);
+u8                audio_getVoiceFxMix(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
+s32               audio_loadChannelProgram(N_ALSeqPlayer *seqp, s32 instNum, s32 chan);
 
 /* Conker: the controller-change handlers of the compact sequence player (src/libultra/audio/init_19B50.c).
  * D_8002BA50[0..0x5C] is indexed by the controller number, D_8002BA50[0x5D..0x60] by 0xFF - controller

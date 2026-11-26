@@ -24,7 +24,7 @@ void func_1500E5C0(void) {
         // matching: IDO materializes &D_800D98D0 before the two scalar stores only via a local
         EffectHeader **entries = D_800D98D0;
 
-        D_800D9890 = 0;
+        gSpriteQueuedCmd = 0;
         D_800D9894 = NULL;
         entries[0] = NULL;
         entries[1] = NULL;
@@ -49,9 +49,9 @@ void func_1500E70C(s32 id) {
     }
 }
 
-/* Sets two (shift, scale = 1 / 2^shift) pairs: D_800DCA20/24 from D_80082FA0, D_800DCA28/2C from D_8008FD8C. */
+/* Sets two (shift, scale = 1 / 2^shift) pairs: D_800DCA20/24 from gScreenLayout, D_800DCA28/2C from D_8008FD8C. */
 void func_1500E738(void) {
-    switch (D_80082FA0) {
+    switch (gScreenLayout) {
     case 0:
         D_800DCA20 = 0;
         D_800DCA24 = 1.0f;
@@ -108,10 +108,10 @@ void func_1500E890(void) {
     func_15008E10(1);
 }
 
-/* Starts two func_15195AA8 entries, spawns one func_15189900 emitter and calls func_1000FA64. */
+/* Starts two flamethrower_addTexScroll entries, spawns one trail_createSprayEmitter emitter and calls sound_addDynamicSound. */
 void func_1500E8C0(void) {
-    func_15195AA8(D_800B0E00[0], D_800902E8, 0, -1, 0, 0, 0, -6);
-    func_15195AA8(D_800B0E00[1], D_800902E8, 0, -1, 0, 1, 0, -6);
+    flamethrower_addTexScroll(D_800B0E00[0], D_800902E8, 0, -1, 0, 0, 0, -6);
+    flamethrower_addTexScroll(D_800B0E00[1], D_800902E8, 0, -1, 0, 1, 0, -6);
     {
         SprayDesc descriptor;
 
@@ -139,12 +139,12 @@ void func_1500E8C0(void) {
         descriptor.origin.x = 800.0f;
         descriptor.origin.y = -3000.0f;
         descriptor.extent.z = 900.0f - descriptor.origin.z;
-        func_15189900(&descriptor, 1);
+        trail_createSprayEmitter(&descriptor, 1);
     }
-    func_1000FA64(1567, (level == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);
+    sound_addDynamicSound(1567, (level == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);
 }
 
 void func_1500EAA0(void) {
-    func_15195AA8(D_800B0E00[0], D_80090320, 0, -1, 0, 0, 0, -8);
-    func_15195AA8(D_800B0E00[1], D_80090320, 0, -1, 0, 1, 0, -8);
+    flamethrower_addTexScroll(D_800B0E00[0], D_80090320, 0, -1, 0, 0, 0, -8);
+    flamethrower_addTexScroll(D_800B0E00[1], D_80090320, 0, -1, 0, 1, 0, -8);
 }

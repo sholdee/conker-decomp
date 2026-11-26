@@ -12,7 +12,7 @@ Mtx *D_800DBEB0;       // sky projection matrices, 2 per view
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
-#define RENDER_VIEWS ((RenderView *)D_800BE628)
+#define RENDER_VIEWS ((RenderView *)gViews)
 
 
 
@@ -94,44 +94,44 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     gfx = func_151106A8(gfx);
     gDPPipeSync(gfx++);
     if (D_800BE635 != 0) {
-        gfx = func_15110544(gfx, 0, 0, D_800BE620, D_800BE624, 0, 0, 0);
+        gfx = func_15110544(gfx, 0, 0, gScreenWidth, gScreenHeight, 0, 0, 0);
     }
     if (D_800C35EA[0] == 1 && D_800C3681 != 0) {
         return gfx;
     }
-    pitch = 360.0f - (camera_global_Cameras[D_80082FA4].CameraPitch + D_800DCDE0[D_80082FA4].rot.x);
+    pitch = 360.0f - (camera_global_Cameras[gCurrentView].CameraPitch + D_800DCDE0[gCurrentView].rot.x);
     while (pitch < -180.0f) {
         pitch += 360.0f;
     }
     while (pitch >= 180.0f) {
         pitch -= 360.0f;
     }
-    yaw = 360.0f - (camera_global_Cameras[D_80082FA4].TrueCameraAngle + D_800DCDE0[D_80082FA4].rot.y);
+    yaw = 360.0f - (camera_global_Cameras[gCurrentView].TrueCameraAngle + D_800DCDE0[gCurrentView].rot.y);
     while (yaw < 0.0f) {
         yaw += 360.0f;
     }
     while (yaw >= 360.0f) {
         yaw -= 360.0f;
     }
-    roll = camera_global_Cameras[D_80082FA4].Roll + D_800DCDE0[D_80082FA4].rot.z;
+    roll = camera_global_Cameras[gCurrentView].Roll + D_800DCDE0[gCurrentView].rot.z;
     while (roll < -180.0f) {
         roll += 360.0f;
     }
     while (roll >= 180.0f) {
         roll -= 360.0f;
     }
-    x = camera_global_Cameras[D_80082FA4].eye.x;
-    y = camera_global_Cameras[D_80082FA4].eye.y;
-    z = camera_global_Cameras[D_80082FA4].eye.z;
+    x = camera_global_Cameras[gCurrentView].eye.x;
+    y = camera_global_Cameras[gCurrentView].eye.y;
+    z = camera_global_Cameras[gCurrentView].eye.z;
     if (D_800C3682 != 0) {
-        view = &RENDER_VIEWS[D_80082FA4];
+        view = &RENDER_VIEWS[gCurrentView];
         return func_15110544(gfx, view->left, view->top, view->right - 1.0f, view->bottom, 0x16, 0x1C, 0x1B);
     }
     visible = func_151108C4(x, y, z, pitch, yaw);
     if (visible != 0) {
         gfx = D_800891D8[D_800B0DF0->unk8](gfx, x, y, z, pitch, yaw, roll, visible);
     }
-    gfx = func_1501A490(gfx, D_80082FA4, 0, 0, 0, 0);
+    gfx = view_setScissor(gfx, gCurrentView, 0, 0, 0, 0);
     gSPSetGeometryMode(gfx++, G_CULL_BACK);
     return gfx;
 }
@@ -155,21 +155,21 @@ void func_15110360(s32 viewIndex, MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
 }
 
 /* Fills the current view with the background colour D_800DBEA8 and, on view 0 in split screen, draws the
- * black divider bars (only the horizontal one when D_80082FA0 is 1). */
+ * black divider bars (only the horizontal one when gScreenLayout is 1). */
 Gfx *func_151103C8(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
     RenderView *view;
 
-    view = &RENDER_VIEWS[D_80082FA4];
+    view = &RENDER_VIEWS[gCurrentView];
     gfx = func_15110544(gfx, view->left, view->top, view->right - 1.0f, view->bottom,
                         D_800DBEA8[0], D_800DBEA8[1], D_800DBEA8[2]);
-    if (D_80082FA0 != 0) {
-        if (D_80082FA4 == 0) {
+    if (gScreenLayout != 0) {
+        if (gCurrentView == 0) {
             gDPPipeSync(gfx++);
-            gfx = func_1501A490(gfx, 0xFF, 0, 0, 0, 0);
+            gfx = view_setScissor(gfx, 0xFF, 0, 0, 0, 0);
             gDPSetFillColor(gfx++, (GPACK_RGBA5551(0, 0, 0, 1) << 16) | GPACK_RGBA5551(0, 0, 0, 1));
-            gfx = func_1501A6CC(gfx, 0, (D_800BE624 >> 1) - 6, D_800BE620, (D_800BE624 >> 1) + 6);
-            if (D_80082FA0 != 1) {
-                gfx = func_1501A6CC(gfx, (D_800BE620 >> 1) - 1, 0, (D_800BE620 >> 1) + 1, D_800BE624);
+            gfx = view_fillRect(gfx, 0, (gScreenHeight >> 1) - 6, gScreenWidth, (gScreenHeight >> 1) + 6);
+            if (gScreenLayout != 1) {
+                gfx = view_fillRect(gfx, (gScreenWidth >> 1) - 1, 0, (gScreenWidth >> 1) + 1, gScreenHeight);
             }
         }
     }
@@ -182,10 +182,10 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
 
     gDPPipeSync(gfx++);
     gDPSetOtherMode(gfx++, 0x302C0F, 4);
-    gfx = func_1501A680(gfx);
+    gfx = view_setColorImage(gfx);
     color = GPACK_RGBA5551(r, g, b, 1);
     gDPSetFillColor(gfx++, (color << 16) | color);
-    return func_1501A6CC(gfx, ulx, uly, lrx, lry);
+    return view_fillRect(gfx, ulx, uly, lrx, lry);
 }
 
 /* On maps 0x1B and 0x1E (and 0x31 while camera 0's unk3D4 has state 3) fills the whole drawable area with the
@@ -194,7 +194,7 @@ Gfx *func_15110600(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     // unk78 is the high byte of Actor's u16 unk78
     if (level == 0x1B || level == 0x1E ||
         (level == 0x31 && camera_global_Cameras->mv->rt_context_b == 3)) {
-        gfx = func_15110544(gfx, 2, 0, D_800BE620 - 2, D_800BE624,
+        gfx = func_15110544(gfx, 2, 0, gScreenWidth - 2, gScreenHeight,
                             D_800DBEA8[0], D_800DBEA8[1], D_800DBEA8[2]);
     }
     return gfx;
@@ -204,26 +204,26 @@ Gfx *func_15110600(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
 /* On view 0, clears the depth buffer (fills it with the maximum depth) and switches back to the framebuffer;
  * in split screen also draws the black divider bars, and blacks out the whole screen while D_800BEAC2 is set. */
 Gfx *func_151106A8(Gfx *gfx) {
-    if (D_80082FA4 == 0) {
+    if (gCurrentView == 0) {
         gDPPipeSync(gfx++);
         gDPSetOtherMode(gfx++, 0x302C0F, 4);
         gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
-        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_800BE9C4);
+        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gZBuffer);
         gDPSetFillColor(gfx++, (GPACK_ZDZ(G_MAXFBZ, 0) << 16) | GPACK_ZDZ(G_MAXFBZ, 0));
-        gfx = func_1501A490(gfx, 0xFF, 0, 0, 0, 0);
-        gDPFillRectangle(gfx++, 2, 0, D_800BE620 - 2, D_800BE624);
+        gfx = view_setScissor(gfx, 0xFF, 0, 0, 0, 0);
+        gDPFillRectangle(gfx++, 2, 0, gScreenWidth - 2, gScreenHeight);
         gDPPipeSync(gfx++);
-        gfx = func_1501A680(gfx);
-        if (D_80082FA0 != 0) {
+        gfx = view_setColorImage(gfx);
+        if (gScreenLayout != 0) {
             gDPPipeSync(gfx++);
-            gfx = func_1501A490(gfx, 0xFF, 0, 0, 0, 0);
+            gfx = view_setScissor(gfx, 0xFF, 0, 0, 0, 0);
             gDPSetFillColor(gfx++, (GPACK_RGBA5551(0, 0, 0, 1) << 16) | GPACK_RGBA5551(0, 0, 0, 1));
-            gfx = func_1501A6CC(gfx, 0, (D_800BE624 >> 1) - 6, D_800BE620, (D_800BE624 >> 1) + 6);
-            if (D_80082FA0 != 1) {
-                gfx = func_1501A6CC(gfx, (D_800BE620 >> 1) - 1, 0, (D_800BE620 >> 1) + 1, D_800BE624);
+            gfx = view_fillRect(gfx, 0, (gScreenHeight >> 1) - 6, gScreenWidth, (gScreenHeight >> 1) + 6);
+            if (gScreenLayout != 1) {
+                gfx = view_fillRect(gfx, (gScreenWidth >> 1) - 1, 0, (gScreenWidth >> 1) + 1, gScreenHeight);
             }
             if (D_800BEAC2 != 0) {
-                gfx = func_1501A6CC(gfx, 0, 0, D_800BE620, D_800BE624);
+                gfx = view_fillRect(gfx, 0, 0, gScreenWidth, gScreenHeight);
             }
         }
     }
@@ -276,8 +276,8 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
         break;
     case 0xB:
         byHeight = FALSE;
-        if (func_150A29C8(0, 0x18) == 1) {
-            if (func_150A29C8(0, 0x2E) == 0) {
+        if (zone_isActorOutsideId(0, 0x18) == 1) {
+            if (zone_isActorOutsideId(0, 0x2E) == 0) {
                 if (pitch > 0.0f) {
                     ret = 0;
                 } else {
@@ -465,7 +465,7 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4,
                     colIdx >= 2 && colIdx < 4) {
                     texIndex = (s32)&D_1673[colIdx * 3 + rowIdx - 10];
                 }
-                texAddr = func_1510D0EC(texIndex, 0, 3, 0);
+                texAddr = texture_getAddress(texIndex, 0, 3, 0);
                 if (!D_800DBEAB || rowIdx < limit) {
                     maxT = (u16)(s32)((tileH + 0.5f) * 32.0f);
                     maxS = (u16)(s32)((tileW + 0.5f) * 32.0f);
@@ -565,12 +565,12 @@ void func_1511172C(s32 sky) {
     if (sky != D_800B0DF0->unk9 && D_800B0DF0->unk8 == 4) {
         if (D_80038080 != 0) {
             for (i = 0; i != 360; i++) {
-                func_1510D694(D_800891BC[D_800B0DF0->unk9][0] + i);
+                texture_releaseId(D_800891BC[D_800B0DF0->unk9][0] + i);
             }
         }
         func_10004074(D_800DBE80);
         D_800B0DF0->unk9 = sky;
-        func_1502B7F0(&D_800DBE80, 2, 13, D_800B0DF0->unk9);
+        rom_loadPathTo(&D_800DBE80, 2, 13, D_800B0DF0->unk9);
     }
 }
 
@@ -658,8 +658,8 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     tlutCounts = D_800891F8;
     tiles = D_800891FC;
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
-    gfx = func_1501A680(func_1501A490(gfx, D_80082FA4, 0, 0, 0, 0));
-    fov = (D_80082FA0 != 1) ? 80.0f : 95.0f;
+    gfx = view_setColorImage(view_setScissor(gfx, gCurrentView, 0, 0, 0, 0));
+    fov = (gScreenLayout != 1) ? 80.0f : 95.0f;
     if (level == 0x41) {
         yaw -= 119.0f;
         if (yaw < 0.0f) {
@@ -667,8 +667,8 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
         }
     } else if (level == 0x3C ||
                (level == 0x13 && D_800C35EA[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1))) {
-        gfx = func_15110544(gfx, RENDER_VIEWS[D_80082FA4].left, RENDER_VIEWS[D_80082FA4].top,
-                            RENDER_VIEWS[D_80082FA4].right - 1.0f, RENDER_VIEWS[D_80082FA4].bottom, 0, 0, 0);
+        gfx = func_15110544(gfx, RENDER_VIEWS[gCurrentView].left, RENDER_VIEWS[gCurrentView].top,
+                            RENDER_VIEWS[gCurrentView].right - 1.0f, RENDER_VIEWS[gCurrentView].bottom, 0, 0, 0);
     }
     color[0] = D_800B0DF0->unk5;
     color[1] = D_800B0DF0->unk6;
@@ -691,14 +691,14 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     gDPSetTileSize(gfx++, G_TX_RENDERTILE + 1, 0, 0, 61 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
     gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 256, G_TX_LOADTILE - 1, 0, 0, 0, 0, 0, 0, 0);
     func_151102CC(rotation, pitch, yaw, roll);
-    func_150A7A48(rotation, RENDER_VIEWS[D_80082FA4].projection, viewProj);
-    guMtxF2L(viewProj, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]);
-    gSPMatrix(gfx++, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    func_150A7A48(rotation, RENDER_VIEWS[gCurrentView].projection, viewProj);
+    guMtxF2L(viewProj, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0]);
+    gSPMatrix(gfx++, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPPerspNormalize(gfx++, RENDER_VIEWS[D_80082FA4].perspNorm);
+    gSPPerspNormalize(gfx++, RENDER_VIEWS[gCurrentView].perspNorm);
     texList = D_800891BC[D_800B0DF0->unk9];
     vtxCount = 0;
-    vtx = D_800DBE88[D_80082FA4][D_800BE9C0];
+    vtx = D_800DBE88[gCurrentView][D_800BE9C0];
     vtxIdx = 0;
     lastFormat = -1;
     if (extent < 0) {

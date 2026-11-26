@@ -119,7 +119,7 @@ void func_151094FC(Effect1368C0 *effect) {
         effect->base.header.state = -1;
         return;
     }
-    data->spawnAccum += data->spawnRate * D_800A2504[6] * D_800BE9A4;
+    data->spawnAccum += data->spawnRate * D_800A2504[6] * gFrameDelta;
     if (data->emitFunc != -1 && object->ob_matrix_ptr != NULL) {
         while (data->spawnAccum > 1.0f) {
             r = func_150ADA68() * D_800A2504[6];
@@ -357,13 +357,13 @@ TimedEffect *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f
 
 /*
  * Effect 0x1B update: emits one particle per whole unit of spawnAccum from a random point on the
- * emission segments, transformed by the matrix func_1511490C builds from data.unk0.
+ * emission segments, transformed by the matrix gfx_getObjectModelMtx builds from data.unk0.
  */
 void func_15109FB8(Effect1368C0 *effect) {
     MatrixEmitterData *data;
 
     data = &effect->data.matrix;
-    data->spawnAccum += data->spawnRate * D_800A2504[6] * D_800BE9A4;
+    data->spawnAccum += data->spawnRate * D_800A2504[6] * gFrameDelta;
     if (data->emitFunc != -1) {
         while (data->spawnAccum > 1.0f) {
             MtxF mtx;
@@ -380,7 +380,7 @@ void func_15109FB8(Effect1368C0 *effect) {
             f32 y;
             f32 z;
 
-            func_1511490C(mtx, data->unk0);
+            gfx_getObjectModelMtx(mtx, data->unk0);
             r = func_150ADA68() * D_800A2504[6];
             for (i = 0; D_800A2504[i] < r; i++) {
                 r -= D_800A2504[i];
@@ -456,7 +456,7 @@ void func_1510A40C(Effect1368C0 *effect) {
         effect->base.header.state = -1;
         return;
     }
-    data->spawnAccum += (data->spawnRate + func_150ADA68() * data->spawnRateRandom) * D_800BE9A4;
+    data->spawnAccum += (data->spawnRate + func_150ADA68() * data->spawnRateRandom) * gFrameDelta;
     if (data->spawnAccum > 1.0f && object->ob_matrix_ptr != NULL) {
         matrix = &object->ob_matrix_ptr[9];
         func_15143134(&D_800A2604, &points[0], matrix);

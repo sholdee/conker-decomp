@@ -6,7 +6,7 @@ ParticleNode *D_800DC460; // loaded particle models: list head
 ParticleNode *D_800DC464; // list tail
 s16 D_800DC468[233];      // per model: live particles that use it
 s32 D_800DC63C;           // live particles (at most 300)
-s16 *D_800DC640[233];     // per model: the textures its display list uses (func_1510CE60)
+s16 *D_800DC640[233];     // per model: the textures its display list uses (texture_resolveDl)
 
 #include "functions.h"
 #include "variables.h"
@@ -33,7 +33,7 @@ typedef void (*ParticleEventFn)(ModelParticle *particle, void *data, u8 event);
 static s32 (*D_800898B0[])() = {
     NULL, func_15132DDC, func_150CBE88, func_150CCCB4,
     func_150CB008, func_151B5E94, func_151B6254, func_150CA07C,
-    func_151337C0, func_151B9214, func_151C1180, func_150AE2A0,
+    func_151337C0, light_updateLampParticle, weapon_updateBullet, func_150AE2A0,
     func_151D3D50, func_15133894, func_151B8B40, func_1515452C,
     func_150F23E0, func_150E971C, func_15154A88, func_150F78B4,
     func_150F81BC, func_1519ED24, func_150F48D0, func_151C7038,
@@ -45,7 +45,7 @@ static s32 (*D_80089914[])() = {
 };
 static ParticleFloorHitFn D_80089934[] = {
     NULL, func_150B89E0, func_150BCFB8, func_150E5810,
-    func_151A743C, func_150B36AC, func_151339D4, func_15133A50,
+    func_151A743C, pipeexplode_onChunkFloorHit, func_151339D4, func_15133A50,
     func_151389A8, func_15139578, func_15133B98, func_15133D20,
     func_15133C58, func_150C01DC, func_150C0648,
 };
@@ -55,7 +55,7 @@ static void (*D_8008997C[])() = { NULL, func_151A7908, func_151B5FCC };
 static s32 (*D_80089988[])() = { func_151332DC };
 static s32 (*D_8008998C[])() = {
     func_15133510, func_150B9D14, func_15133760, func_150C773C,
-    func_151B9310, func_15133A94,
+    light_getLampParticleMatrix, func_15133A94,
 };
 static Gfx *(*D_800899A4[])(Gfx *gfx, ModelParticle *particle, s16 arg2) = { func_15133E84, func_15133EB8, func_15133FD8 };
 static void (*D_800899B0[])() = {
@@ -69,7 +69,7 @@ static void (*D_800899D4[])() = {
     func_1513259C,
 };
 static ParticleEventFn D_800899F8[] = {
-    NULL, func_151C1814, NULL, NULL,
+    NULL, weapon_onBulletPairEvent, NULL, NULL,
     NULL, func_15133DE8, func_1513B0B8, NULL,
     func_150F4CFC, NULL,
 };
@@ -155,7 +155,7 @@ void func_15132444(ModelParticle *particle) {
         if (particle->node->keepLoaded) {
             D_800DC468[particle->model] = 1;
         } else {
-            func_1510D630(D_800DC640[particle->model]);
+            texture_releaseList(D_800DC640[particle->model]);
             node = particle->node;
             if (node->prev == NULL) {
                 D_800DC460 = node->next;
@@ -190,12 +190,12 @@ void func_1513259C(ModelParticle *particle) {
     func_15169824(&particle->header);
 }
 
-/* Free the light buffers func_1513264C allocated into link.handles[0..D_80082FA0] and link.sharedHandle. */
+/* Free the light buffers func_1513264C allocated into link.handles[0..gScreenLayout] and link.sharedHandle. */
 void func_151325C8(ModelParticle *particle) {
     s32 i;
 
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         if (particle->link.handles[i] != NULL) {
             func_100043B4((void *)(s32)particle->link.handles[i], 4);
         }
@@ -240,7 +240,7 @@ void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floo
             node->prev = NULL;
             node->model = spawn->model;
             if (spawn->flags & 0x100000) {
-                if (level == 0x3B || level == 6 || level == 0x13 || D_800BE616 != 0 ||
+                if (level == 0x3B || level == 6 || level == 0x13 || gIsMultiplayer != 0 ||
                     level == 2) {
                     node->keepLoaded = FALSE;
                 } else {
@@ -302,8 +302,8 @@ void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floo
     }
     particle->link.sharedHandle = NULL;
     if (arg1 != 0) {
-        for (i = 0; i <= D_80082FA0; i++) {
-            particle->link.handles[i] = func_1515D480(arg1);
+        for (i = 0; i <= gScreenLayout; i++) {
+            particle->link.handles[i] = light_allocGfxLights(arg1);
         }
         particle->link.sharedHandle = func_1515D440();
     }
@@ -408,19 +408,19 @@ s32 func_15132DDC(ModelParticle *particle) {
     }
 
     if (particle->flags & 8) {
-        particle->vel.y += particle->gravity * D_800BE9A4;
+        particle->vel.y += particle->gravity * gFrameDelta;
     }
 
     if (particle->flags & 0x20) {
-        particle->pos.x += particle->vel.x * D_800BE9A4;
-        particle->pos.y += particle->vel.y * D_800BE9A4;
-        particle->pos.z += particle->vel.z * D_800BE9A4;
+        particle->pos.x += particle->vel.x * gFrameDelta;
+        particle->pos.y += particle->vel.y * gFrameDelta;
+        particle->pos.z += particle->vel.z * gFrameDelta;
     }
 
     if (particle->flags & 0x40) {
-        particle->rot.x += particle->rotVel.x * D_800BE9A4;
-        particle->rot.y += particle->rotVel.y * D_800BE9A4;
-        particle->rot.z += particle->rotVel.z * D_800BE9A4;
+        particle->rot.x += particle->rotVel.x * gFrameDelta;
+        particle->rot.y += particle->rotVel.y * gFrameDelta;
+        particle->rot.z += particle->rotVel.z * gFrameDelta;
     }
 
     if (particle->flags & 7) {
@@ -428,7 +428,7 @@ s32 func_15132DDC(ModelParticle *particle) {
         test.y = prev.y;
         test.z = particle->pos.z;
 
-        if (func_15046C80(&test, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
+        if (collision_probeFloorSurfABSet0Cached(&test, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
             if (particle->floor.source == 1 || (particle->floor.source == 2 && (particle->floor.flags & 1))) {
                 particle->hitFlags |= 1;
                 if (particle->flags & 0x10) {
@@ -526,9 +526,9 @@ s32 func_151332DC(ModelParticle *particle) {
     particle->scale.y = 1.0f;
     particle->scale.z = 1.0f;
     if (particle->flags & 0x40) {
-        particle->rot.x += particle->rotVel.x * D_800BE9A4;
-        particle->rot.y += particle->rotVel.y * D_800BE9A4;
-        particle->rot.z += particle->rotVel.z * D_800BE9A4;
+        particle->rot.x += particle->rotVel.x * gFrameDelta;
+        particle->rot.y += particle->rotVel.y * gFrameDelta;
+        particle->rot.z += particle->rotVel.z * gFrameDelta;
     }
     particle->squashPhase += (s32)(576.0f * particle->invSpeed) * D_800BE9E4;
     if (particle->squashPhase < 0x80) {
@@ -610,11 +610,11 @@ s32 func_151336A8(s32 model, ParticleNode *node, ModelParticle *particle) {
     u32 out1;
     s32 out2;
 
-    node->resource = func_1502B6BC(&out1, 0, &out2, 2, 9, D_800A3880[model]);
+    node->resource = rom_loadPathTable(&out1, 0, &out2, 2, 9, D_800A3880[model]);
     if (node->resource == NULL) {
         return FALSE;
     }
-    func_1510CE60(*node->resource, 0, 1, 0x3E, &D_800DC640[model]);
+    texture_resolveDl(*node->resource, 0, 1, 0x3E, &D_800DC640[model]);
     func_15168E54(*node->resource, (s32)node->resource);
     return TRUE;
 }
@@ -628,13 +628,13 @@ s32 func_15133760(Mtx *mtx, ModelParticle *particle) {
 
 /* Ballistic step: integrate position under gravity (y gains vel.y*dt + gravity*dt*dt/2), then velocity and spin. */
 s32 func_151337C0(ModelParticle *particle) {
-    particle->pos.x += particle->vel.x * D_800BE9A4;
-    particle->pos.y += (particle->vel.y * D_800BE9A4) + (((particle->gravity * D_800BE9A4) * D_800BE9A4) * 0.5f);
-    particle->pos.z += particle->vel.z * D_800BE9A4;
-    particle->vel.y += particle->gravity * D_800BE9A4;
-    particle->rot.x += particle->rotVel.x * D_800BE9A4;
-    particle->rot.y += particle->rotVel.y * D_800BE9A4;
-    particle->rot.z += particle->rotVel.z * D_800BE9A4;
+    particle->pos.x += particle->vel.x * gFrameDelta;
+    particle->pos.y += (particle->vel.y * gFrameDelta) + (((particle->gravity * gFrameDelta) * gFrameDelta) * 0.5f);
+    particle->pos.z += particle->vel.z * gFrameDelta;
+    particle->vel.y += particle->gravity * gFrameDelta;
+    particle->rot.x += particle->rotVel.x * gFrameDelta;
+    particle->rot.y += particle->rotVel.y * gFrameDelta;
+    particle->rot.z += particle->rotVel.z * gFrameDelta;
     return 1;
 }
 
@@ -654,7 +654,7 @@ s32 func_15133894(ModelParticle *particle) {
         test.x = particle->pos.x;
         test.y = particle->radius + prev.y;
         test.z = particle->pos.z;
-        if (func_15046C80(&test, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
+        if (collision_probeFloorSurfABSet0Cached(&test, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
             skip = FALSE;
             if (particle->floor.surface != NULL) {
                 surface = particle->floor.surface;
@@ -795,7 +795,7 @@ void func_15133E3C(s32 arg0, u8 arg1) {
     func_15169260(kinds, ARRAY_COUNT(kinds), arg0, arg1);
 }
 
-/* A texture to bind to a segment: D_80090B60 index, segment number, and func_1510D0EC's third argument. */
+/* A texture to bind to a segment: gEffectTextures index, segment number, and texture_getAddress's third argument. */
 typedef struct {
     /* 0x0 */ u16 index;
     /* 0x2 */ u8 segment;
@@ -825,7 +825,7 @@ Gfx *func_15133EB8(Gfx *gfx, ModelParticle *particle, s16 arg2) {
 }
 
 
-/* Bind texture D_80090B60[index] to `segment` (and its palette, at the end of the data, to segment + 1). */
+/* Bind texture gEffectTextures[index] to `segment` (and its palette, at the end of the data, to segment + 1). */
 Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3) {
     s32 data;
     u8 format;
@@ -833,11 +833,11 @@ Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3) {
     TextureDesc *entry;
     s32 size;
 
-    entry = &D_80090B60[index];
+    entry = &gEffectTextures[index];
     data = *(s32 *)entry->addr;
     format = entry->fmt;
     unkB = entry->siz;
-    data = func_1510D0EC(data, &size, arg3, 0);
+    data = texture_getAddress(data, &size, arg3, 0);
     gSPSegment(gfx++, segment, data);
     if (format == 2) {
         gSPSegment(gfx++, segment + 1, data + size - ((unkB == 1) ? 0x200 : 0x20));

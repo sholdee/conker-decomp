@@ -17,13 +17,13 @@ void func_151C4820(Game1F1CD0Actor *actor) {
     Vec3f direction;
 
     emission = &actor->emission;
-    emission->stream.remaining += emission->stream.rate * D_800BE9A4;
+    emission->stream.remaining += emission->stream.rate * gFrameDelta;
     if (emission->stream.remaining > 1.0f) {
         inverse = 1.0f / emission->stream.remaining;
-        time = emission->stream.time + D_800BE9A4;
+        time = emission->stream.time + gFrameDelta;
         timeStep = time * inverse;
-        speedX = emission->stream.speedX * D_800BE9A4;
-        speedY = emission->stream.speedY * D_800BE9A4;
+        speedX = emission->stream.speedX * gFrameDelta;
+        speedY = emission->stream.speedY * gFrameDelta;
         phaseX = emission->stream.phaseX;
         phaseY = emission->stream.phaseY;
         phaseStepX = speedX * inverse;
@@ -43,7 +43,7 @@ void func_151C4820(Game1F1CD0Actor *actor) {
             func_151436B4(x, y, 5.0f, &direction);
             randomX = func_150ADA68();
             randomY = func_150ADA68();
-            func_151C229C(&emission->stream.position, &direction, 0, NULL, 0, 0, emission->speed, emission->unk3C,
+            weapon_spawnProjectile(&emission->stream.position, &direction, 0, NULL, 0, 0, emission->speed, emission->unk3C,
                           randomX * 40.0f + 55.0f, randomY * 300.0f + 250.0f, emission->unk40,
                           func_150ADA20() % 56U + 200, NULL, 0, 0, 0, 0, 0, 0, -1, 0, time, 255, -1, 0,
                           actor->base.header.owner, actor->base.header.kind);

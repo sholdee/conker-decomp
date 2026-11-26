@@ -6,7 +6,7 @@
  * Called when the actor has moved from (prevX, prevZ): casts a ray from 80 units above it back towards
  * the previous position and, on a hit, spawns a burst of particles off the hit triangle (plus a
  * sprite when func_15145C90 accepts the hit object). First runs an anti-tamper checksum over the code
- * from func_151E7EF8 to func_151E7F60 (a mismatch breaks player 1's controller mapping). Nothing is spawned while func_150A3058(2 or 1, position) reports anything.
+ * from save_checkCodeTamper to save_spawnMenuCharacter (a mismatch breaks player 1's controller mapping). Nothing is spawned while zone_isInNeutralZone(2 or 1, position) reports anything.
  */
 void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
     s32 pad[3]; // matching: unused locals of the original; the frame is 16 bytes larger than the named ones need
@@ -18,15 +18,15 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
         return;
     }
     sum = 0;
-    end = (u32)func_151E7F60;
-    for (addr = (u32)func_151E7EF8; addr < end; addr += sizeof(s32)) {
+    end = (u32)save_spawnMenuCharacter;
+    for (addr = (u32)save_checkCodeTamper; addr < end; addr += sizeof(s32)) {
         sum += ~*(s32 *)addr;
     }
     if (sum != 0x3843095E) {
         D_80084060[0] = 0xFF;
     }
-    if ((func_150A3058(2, actor->xpos, actor->ypos, actor->zpos) == 0) &&
-        (func_150A3058(1, actor->xpos, actor->ypos, actor->zpos) == 0)) {
+    if ((zone_isInNeutralZone(2, actor->xpos, actor->ypos, actor->zpos) == 0) &&
+        (zone_isInNeutralZone(1, actor->xpos, actor->ypos, actor->zpos) == 0)) {
         f32 rayY = actor->ypos + 80.0f;
         f32 dz;
         f32 dy;
@@ -113,12 +113,12 @@ s32 func_150BA35C(QuadSprite *sprite) {
 
 /* Moves the particle by its velocity and spins it, under gravity of -0.6 per frame. */
 s32 func_150BA37C(TumblingParticle *particle) {
-    particle->motion.vel.y += -0.6f * D_800BE9A4;
-    particle->head.def.pos.x += particle->motion.vel.x * D_800BE9A4;
-    particle->head.def.pos.y += particle->motion.vel.y * D_800BE9A4;
-    particle->head.def.pos.z += particle->motion.vel.z * D_800BE9A4;
-    particle->head.def.rot.x += particle->motion.rotVelX * D_800BE9A4;
-    particle->head.def.rot.y += particle->motion.rotVelY * D_800BE9A4;
+    particle->motion.vel.y += -0.6f * gFrameDelta;
+    particle->head.def.pos.x += particle->motion.vel.x * gFrameDelta;
+    particle->head.def.pos.y += particle->motion.vel.y * gFrameDelta;
+    particle->head.def.pos.z += particle->motion.vel.z * gFrameDelta;
+    particle->head.def.rot.x += particle->motion.rotVelX * gFrameDelta;
+    particle->head.def.rot.y += particle->motion.rotVelY * gFrameDelta;
     return 1;
 }
 

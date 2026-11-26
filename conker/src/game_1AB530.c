@@ -83,7 +83,7 @@ void func_1517E134(LensFlare *flare) {
     func_10004074(flare);
 }
 
-/* Samples the z-buffer (D_800BE9C4) under each on-screen flare. */
+/* Samples the z-buffer (gZBuffer) under each on-screen flare. */
 void func_1517E1AC(void) {
     LensFlare *cur;
     f32 x;
@@ -91,10 +91,10 @@ void func_1517E1AC(void) {
 
     for (cur = D_800DDD64; cur != NULL; cur = cur->next) {
         x = cur->screenX;
-        if (x >= 0.0f && x < D_800BE620) {
+        if (x >= 0.0f && x < gScreenWidth) {
             y = cur->screenY;
-            if (y >= 0.0f && y < D_800BE624) {
-                cur->zbufSample = D_800BE9C4[(s32)x + (s32)y * D_800BE620];
+            if (y >= 0.0f && y < gScreenHeight) {
+                cur->zbufSample = gZBuffer[(s32)x + (s32)y * gScreenWidth];
             }
         }
     }
@@ -175,8 +175,8 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
     f32 y;
     SpriteParams sprite;
 
-    dx = flare->screenX - D_800BE620 * 0.5f;
-    dy = flare->screenY - D_800BE624 * 0.5f;
+    dx = flare->screenX - gScreenWidth * 0.5f;
+    dy = flare->screenY - gScreenHeight * 0.5f;
     if (flash != NULL) {
         if (strength == -1) {
             target = 0;
@@ -200,8 +200,8 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
         *flash = intensity;
     }
     dist = ((s32)dx * (s32)dx + (s32)dy * (s32)dy) * falloff / 10;
-    if (flare->screenX < 2.0f || D_800BE620 - 2 <= flare->screenX || flare->screenY < 0.0f ||
-        D_800BE624 <= flare->screenY) {
+    if (flare->screenX < 2.0f || gScreenWidth - 2 <= flare->screenX || flare->screenY < 0.0f ||
+        gScreenHeight <= flare->screenY) {
         intensity = 0;
     } else if (strength == -1) {
         intensity = 0;
@@ -218,15 +218,15 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
     }
     if (dist < 200000 && flare->brightness > 0 && fabsf(flare->screenX) < 2000.0f &&
         fabsf(flare->screenY) < 2000.0f) {
-        D_800D2DA8 = 0xFF;
-        D_800D2DA9 = 0xFF;
-        D_800D2DAA = 0xFF;
-        sprite.tex = &D_800903AC;
+        gSpritePrimR = 0xFF;
+        gSpritePrimG = 0xFF;
+        gSpritePrimB = 0xFF;
+        sprite.tex = &gFlareTexture;
         sprite.animSpeed = 0;
         sprite.animTimer = 0;
         sprite.flip = 0;
         if (!D_800DDD60) {
-            gfx = func_150950D4(func_1517EA4C(gfx), &D_800903AC, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
+            gfx = sprite_loadTexture(func_1517EA4C(gfx), &gFlareTexture, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
             D_800DDD60 = TRUE;
         }
         intensity = flare->alpha;
@@ -240,7 +240,7 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
             sprite.scaleX = (size << 12) * D_800380A0 / 255.0f;
             sprite.scaleY = (size << 12) * D_800380A4 / 255.0f;
             D_800D2DAB = 0;
-            gfx = func_15095A48(gfx, &sprite, x, y);
+            gfx = sprite_drawScreen(gfx, &sprite, x, y);
             gDPPipeSync(gfx++);
         }
     }
@@ -268,7 +268,7 @@ typedef struct {
     /* 0x0E */ s16 transW;
 } FlareViewport;
 
-#define VIEWPORTS ((FlareViewport *)D_800BE628->viewports)
+#define VIEWPORTS ((FlareViewport *)gViews->viewports)
 
 /*
  * Projects a world point to the current player's screen. Returns 1 and the screen position when the point
@@ -289,13 +289,13 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     f32 scale;
 
     // matching: IDO adds base + offset in this order only for explicit byte arithmetic, not &camera_global_Cameras[i]
-    player = (Camera *)((u8 *)camera_global_Cameras + D_80082FA4 * sizeof(Camera));
+    player = (Camera *)((u8 *)camera_global_Cameras + gCurrentView * sizeof(Camera));
     pitch = -player->CameraPitch;
     yaw = -player->TrueCameraAngle;
     roll = player->Roll;
-    func_15110360(D_80082FA4, mtx, pitch, yaw, roll);
-    cx = D_800BE628[D_80082FA4].halfWidth;
-    cy = D_800BE628[D_80082FA4].halfHeight;
+    func_15110360(gCurrentView, mtx, pitch, yaw, roll);
+    cx = gViews[gCurrentView].halfWidth;
+    cy = gViews[gCurrentView].halfHeight;
     func_150A7A00(mtx, x, y, z, &sx, &sy, &sz, &sw);
     if (sw > 10.0f) {
         scale = 1.0f / sw;
@@ -322,7 +322,7 @@ typedef union {
 
 /*
  * Projects a flare and computes its z-buffer depth. Stores the decoded z-buffer sample in *outZbufDepth.
- * Returns 0 when func_1509563C rejects the flare (max distance 4000), and 1 otherwise; a FLARE_DIRECTED
+ * Returns 0 when sprite_project rejects the flare (max distance 4000), and 1 otherwise; a FLARE_DIRECTED
  * flare whose cone the viewer is outside of returns 1 early without updating anything.
  */
 s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
@@ -333,7 +333,7 @@ s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
     s32 exponent;
     ClipZW clip;
 
-    if (func_1509563C(flare->pos[0], flare->pos[1], flare->pos[2], &flare->screenX, &flare->screenY, &clip.f.z,
+    if (sprite_project(flare->pos[0], flare->pos[1], flare->pos[2], &flare->screenX, &flare->screenY, &clip.f.z,
                       &clip.f.w, 4000.0f) == 1) {
         if (flare->flags & FLARE_DIRECTED) {
             dx = flare->pos[0] - camera_global_Cameras->eye.x;

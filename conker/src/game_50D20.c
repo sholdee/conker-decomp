@@ -9,7 +9,7 @@ void func_15023870(s32 map, s32 cutscene, s32 scene, s32 actorPath) {
     Actor *actor;
 
     if (map == 0xB && cutscene == 2) {
-        actor = func_1505EEF4(actorPath);
+        actor = actor_findOnPath(actorPath);
         if (actor != NULL) {
             D_800C35F0[scene][5].targetId = actor->unique_id;
         }

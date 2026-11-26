@@ -45,7 +45,7 @@ typedef struct {
 
 
 /*
- * Per-frame update of a particle emitter effect: accumulates rate * scale * D_800BE9A4 and spawns one
+ * Per-frame update of a particle emitter effect: accumulates rate * scale * gFrameDelta and spawns one
  * particle per whole unit at a random point of the emitter's region, optionally snapped to the ground.
  */
 void func_151A5660(u8 *effect) {
@@ -67,7 +67,7 @@ void func_151A5660(u8 *effect) {
     if (emitter->zone != NULL && func_151464B8(emitter->zone) != 0) {
         return;
     }
-    emitter->pending += emitter->scale * emitter->rate * D_800BE9A4;
+    emitter->pending += emitter->scale * emitter->rate * gFrameDelta;
     if (emitter->pending > 1.0f) {
         particle.maxC = 0x6231;
         particle.minC = 0x1A4D;
@@ -144,7 +144,7 @@ void func_151A5660(u8 *effect) {
                 probe.x = particle.pos.x;
                 probe.y = high;
                 probe.z = particle.pos.z;
-                if (func_15046C80(&probe, 0, low, &emitter->ground) != 0) {
+                if (collision_probeFloorSurfABSet0Cached(&probe, 0, low, &emitter->ground) != 0) {
                     particle.pos.y = emitter->ground.height;
                 } else {
                     particle.pos.y = low;
@@ -200,7 +200,7 @@ void func_151A5CEC(TimedEffect *arg0) {
 
 /* Releases a sound handle. */
 void func_151A5D2C(u16 soundHandle) {
-    func_100111C8(soundHandle);
+    sound_stop(soundHandle);
 }
 
 /*
@@ -317,7 +317,7 @@ typedef struct Game1D3420EffectState {
     /* 0x04 */ f32 unk4;
     /* 0x08 */ f32 unk8;
     /* 0x0C */ f32 unkC;
-    /* 0x10 */ LightEffect *light; /* returned by func_1516284C */
+    /* 0x10 */ LightEffect *light; /* returned by light_createJitterAt */
     /* 0x14 */ u8 unk14;
     /* 0x15 */ u8 unk15;
     /* 0x16 */ u8 unk16;
@@ -330,7 +330,7 @@ typedef struct Game1D3420Effect {
     /* 0x110 */ Game1D3420EffectState state;
 } Game1D3420Effect;
 
-/* Spawns an effect object at the emitter; with playSound also starts a func_1516284C handle at the
+/* Spawns an effect object at the emitter; with playSound also starts a light_createJitterAt handle at the
  * emitter's mid-height and plays sound 0x1AA there. */
 void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 arg4, s32 arg5) {
     ParticleDef spawn;
@@ -390,11 +390,11 @@ void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 
             header.update = 2;
             header.lifetime = 300;
             header.lightType = 6;
-            state->light = func_1516284C(&header, &pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 14, arg4, arg5);
+            state->light = light_createJitterAt(&header, &pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 14, arg4, arg5);
         }
     }
     if (playSound) {
-        func_1000FA64(0x1AA, emitter->x, emitter->y, emitter->z, 0x4000, 1000, 750, func_1000EF40, emitter,
+        sound_addDynamicSound(0x1AA, emitter->x, emitter->y, emitter->z, 0x4000, 1000, 750, func_1000EF40, emitter,
                       0, 8, func_150ADA20() & 0x300);
     }
 }

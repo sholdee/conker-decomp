@@ -50,10 +50,10 @@ void func_150C3230(Actor *obj) {
         obj->unk222 = 0;
     }
 
-    func_15059C84(obj);
-    func_1505A770(obj);
-    func_15058898(obj, obj->old_ypos);
-    func_1505B5F8(obj, obj->floorY);
+    actor_moveHorizontal(obj);
+    actor_applyGravity(obj);
+    actor_updateFloorAndWalls(obj, obj->old_ypos);
+    actor_landNonPlayer(obj, obj->floorY);
 
     if (obj->shad == 0.0f) {
         obj->speed *= 0.5f;
@@ -74,7 +74,7 @@ void func_150C3230(Actor *obj) {
         type = 0;
     }
 
-    func_1505E650(obj, type, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+    actor_playAnim(obj, type, 0.0f, 0.0f, 0.0f, 0.0f, 0);
 
     if (obj->attach_char != 0) {
         func_1507C324(obj, &movement_obj[obj->attach_char - 1]);
@@ -91,13 +91,13 @@ void func_150C3230(Actor *obj) {
             target = NULL;
         }
 
-        if ((D_800BE616 == 0) && (D_800C35EA[0] == 0) && (obj->attach_char == 0)) {
+        if ((gIsMultiplayer == 0) && (D_800C35EA[0] == 0) && (obj->attach_char == 0)) {
             obj->taskint[0] = 0;
         }
 
         if (D_800BE9E4 < obj->taskint[0]) {
             obj->taskint[0] -= D_800BE9E4;
-            if (D_800BE616 != 0) {
+            if (gIsMultiplayer != 0) {
                 func_1508B20C(obj->xpos, obj->ypos, obj->zpos, 900.0f);
             }
         } else {
@@ -112,8 +112,8 @@ void func_150C3230(Actor *obj) {
                     target->energy = 1;
                 }
             }
-            func_1506AC8C(obj, (D_800BE616 != 0) ? 0xB : 0xE, &eventData);
-            func_15060F28(obj, 1);
+            actor_runHitHandler(obj, (gIsMultiplayer != 0) ? 0xB : 0xE, &eventData);
+            actor_remove(obj, 1);
         }
     }
 }
@@ -129,14 +129,14 @@ void func_150C3574(Actor *obj) {
     scale = 0.5f;
     obj->count2 = 10;
     if (obj->character_type == 0x25) {
-        func_1505A250(0.0f, 0.0f, 0.15f, &obj->ob_slopex, &obj->ob_slopey);
+        actor_stepVector2D(0.0f, 0.0f, 0.15f, &obj->ob_slopex, &obj->ob_slopey);
         accel = 0.1f;
         if (obj->unk87 & 1) {
             obj->unk224 = obj->ypos;
         }
         obj->shadow_size = 0;
     }
-    func_1505A3A8(0.0f, obj, 2.0f, accel, 0);
+    actor_accelerate(0.0f, obj, 2.0f, accel, 0);
     obj->ygrav = 3.0f;
     if (obj->character_type == 0x10) {
         scale = 0.375f;
@@ -145,36 +145,36 @@ void func_150C3574(Actor *obj) {
         scale = 1.5f;
     }
     scale *= 0.75f;
-    func_15056B08(obj);
+    actor_updateChaseAi(obj);
     if (obj->carried != 0) {
-        func_150562FC(obj);
+        actor_moveToHost(obj);
     }
-    func_15059140(obj);
-    obj->unkBC = (obj->xpos - obj->old_xpos) * D_800BE9A8;
-    obj->unk148 = (obj->zpos - obj->old_zpos) * D_800BE9A8;
+    actor_updatePhysics(obj);
+    obj->unkBC = (obj->xpos - obj->old_xpos) * gFrameDeltaInv;
+    obj->unk148 = (obj->zpos - obj->old_zpos) * gFrameDeltaInv;
     dist = sqrtf(obj->unkBC * obj->unkBC + obj->unk148 * obj->unk148);
     if ((dist + 4.0f) + (dist + 4.0f) < obj->speed) {
         obj->speed = dist + dist;
     }
     if (obj->unk87 == 4) {
-        D_800D1580 = 0xFF020133;
-        D_800D154C = movement_obj;
+        gEventParam = 0xFF020133;
+        gCurrentActor = movement_obj;
         func_1506E8D8();
-        D_800D154C = obj;
+        gCurrentActor = obj;
         obj->ob_slopex = obj->unkBC;
         obj->ob_slopey = obj->unk148;
         obj->speed = 0.0f;
     }
     obj->unk87 *= 2;
     if ((dist > 0.5f) && (obj->carried == 0)) {
-        obj->fangle = func_1505A630(obj->xpos - obj->old_xpos, obj->old_zpos - obj->zpos, 0);
+        obj->fangle = actor_getDirectionAngle(obj->xpos - obj->old_xpos, obj->old_zpos - obj->zpos, 0);
     }
     if (((obj->langle - obj->fangle) - 0x4000) & 0x8000) {
         angle = obj->fangle;
     } else {
         angle = obj->fangle ^ 0x8000;
     }
-    func_150599C8(obj, 2, angle);
+    actor_turnFacing(obj, 2, angle);
     if (obj->shad > 30.0f) {
         obj->stickspeed *= 0.9f;
     } else {
@@ -185,14 +185,14 @@ void func_150C3574(Actor *obj) {
     }
     func_15052490(obj, obj->fangle, obj->stickspeed, (2.0f - obj->scale_xz) * scale);
     if (obj->stickspeed < 0.2f) {
-        func_100109D0(obj);
-    } else if (func_100107F8(obj) == 0) {
+        sound_stopActorSound2(obj);
+    } else if (sound_isActorSound2Playing(obj) == 0) {
         if (obj->character_type == 0xAC) {
-            D_800D1580 = 0x630;
+            gEventParam = 0x630;
         } else if (obj->character_type == 0x25) {
-            D_800D1580 = 0x67A;
+            gEventParam = 0x67A;
         } else {
-            D_800D1580 = 0x62A;
+            gEventParam = 0x62A;
         }
         func_1506E5FC();
     } else {
@@ -203,10 +203,10 @@ void func_150C3574(Actor *obj) {
         if (obj->character_type == 0x25) {
             vol >>= 1;
         }
-        func_1001091C(obj, vol);
+        sound_setActorSound2Volume(obj, vol);
     }
     if (obj->stickspeed < 0.2f) {
-        func_100109D0(obj);
+        sound_stopActorSound2(obj);
     }
 }
 
@@ -215,12 +215,12 @@ void func_150C3994(Actor *obj) {
         if (obj->taskint[0] == 0) {
             func_151B9BF0(0x2F, 1, obj->xpos, obj->ypos + 30.0f, obj->zpos, 0x7D0, 0x3E8, 0x190, 0xC8, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);
         } else {
-            func_15188810(obj, 0x64, 0);
+            trail_startActorAfterimage(obj, 0x64, 0);
         }
     }
     if (obj->yspd < 0.0f) {
         if ((obj->shad > 20.0f) && (obj->unk136 == 0) && (obj->shad < (-20.0f * obj->yspd))) {
-            func_10010630(0x92, obj, 0x7D00, 0xC8, 0x9C4);
+            sound_playActorUntracked(0x92, obj, 0x7D00, 0xC8, 0x9C4);
             obj->unk136 = 1;
         }
     }
@@ -228,12 +228,12 @@ void func_150C3994(Actor *obj) {
         obj->unk148 = 70.0f;
         if (obj->taskint[0] == 0) {
             func_151B9BF0(0x2F, 1, obj->xpos, obj->ypos + 30.0f, obj->zpos, 0x898, 0x500, 0x320, 0x2BC, 0xC00, 0xC00, 0x14, 1, 0, 0xFF, 0);
-            func_150C1660(obj->xpos, obj->ypos + 30.0f, obj->zpos, 0xFF);
-            func_1506AC8C(obj, 6, NULL);
+            trail_spawnKind2Ring(obj->xpos, obj->ypos + 30.0f, obj->zpos, 0xFF);
+            actor_runHitHandler(obj, 6, NULL);
         } else {
-            func_15188810(obj, 0x64, 0);
+            trail_startActorAfterimage(obj, 0x64, 0);
         }
-        func_10010344(0x1A9, obj, 0x7FFF, 0x3E8, 0x7D0);
+        sound_playActorSound1(0x1A9, obj, 0x7FFF, 0x3E8, 0x7D0);
         obj->doing_hit = 1;
         obj->unk114 = 500.0f;
         obj->noshove |= 0x01008000;
@@ -244,13 +244,13 @@ void func_150C3994(Actor *obj) {
         obj->noshove &= ~0x8000;
     }
     obj->theta = (obj->langle + 0x4000) * 0.005493164f; // 360 / 65536: binary angle to degrees
-    func_15059140(obj);
+    actor_updatePhysics(obj);
     obj->vtilt += obj->unk148;
     obj->unk148 *= 0.96f;
     if (((obj->shad == 0.0f) && (obj->count5 >= 0x15) && (obj->unkCC == 0)) || (obj->ivehitit != 0) || (obj->energy == 0)) {
         func_150C3D5C(obj);
-        func_10010630(0x93, obj, 0x7D00, 0xC8, 0x9C4);
-        func_15060F28(obj, 1);
+        sound_playActorUntracked(0x93, obj, 0x7D00, 0xC8, 0x9C4);
+        actor_remove(obj, 1);
     }
 }
 
@@ -291,6 +291,6 @@ void func_150C3D5C(Actor *obj) {
     locals.pos.x = obj->xpos;
     locals.pos.y = obj->ypos;
     locals.pos.z = obj->zpos;
-    func_151602C0(&locals.header, &locals.pos, (func_150ADA20() % 52U) + 0x28,
+    light_createWithEffect(&locals.header, &locals.pos, (func_150ADA20() % 52U) + 0x28,
                   0xFF, 0xFF, 0x5A, 0xFF, 0, 0, 0xFF, 1);
 }

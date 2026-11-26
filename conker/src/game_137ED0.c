@@ -71,7 +71,7 @@ void func_1510AA44(WorldObject *minuteHand) {
     if (CLOCK_WORK(minuteHand)->chimesLeft != 0 && CLOCK_WORK(minuteHand)->lastChimeSecond != second) {
         CLOCK_WORK(minuteHand)->lastChimeSecond = second;
         CLOCK_WORK(minuteHand)->chimesLeft--;
-        func_15114D24(minuteHand, 0x4CC, 0x7FFF, 200, 1000, 12);
+        gfx_playObjectSound(minuteHand, 0x4CC, 0x7FFF, 200, 1000, 12);
     }
     minuteHand[0].spinZ = 5.0f;
     minuteHand[1].spinZ = 5.0f;
@@ -90,13 +90,13 @@ void func_1510ADD8(WorldObject *obj) {
     if (SWING_WORK(obj)->secondHalf == 0) {
         if (3.1415927f <= SWING_WORK(obj)->phase) {
             SWING_WORK(obj)->secondHalf = 1;
-            func_15114D24(obj, 0x4CA, 12000, 200, 1000, 4);
+            gfx_playObjectSound(obj, 0x4CA, 12000, 200, 1000, 4);
         }
     } else {
         if (6.2831855f <= SWING_WORK(obj)->phase) {
             SWING_WORK(obj)->phase -= 6.2831855f;
             SWING_WORK(obj)->secondHalf = 0;
-            func_15114D24(obj, 0x4CB, 12000, 200, 1000, 4);
+            gfx_playObjectSound(obj, 0x4CB, 12000, 200, 1000, 4);
         }
     }
 }

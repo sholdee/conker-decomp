@@ -127,7 +127,7 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     } else {
         b = 0xFF;
     }
-    tex = &D_80090B60[rope->textureId];
+    tex = &gEffectTextures[rope->textureId];
     quarterW = tex->width >> 2;
     rowH = tex->height - 1;
     texS0 = 0x100 << 5;
@@ -309,7 +309,7 @@ void func_151AD174(Rope *rope) {
     }
 
     /* Creak when swinging hard, unless the last creak is still playing. */
-    if (motion > 250.0f && (rope->soundHandle == 0 || func_1000F3D0(rope->soundHandle) == 0)) {
+    if (motion > 250.0f && (rope->soundHandle == 0 || sound_isPlaying(rope->soundHandle) == 0)) {
         rope->soundHandle = func_10010E78(0, (func_150ADA20() % 9) + 0x507, 30000, 0, 0, 0, pos[0], pos[1], pos[2], 250, -0x7E0C);
     }
 }
@@ -330,8 +330,8 @@ Gfx *func_151AD92C(Gfx *dl, Rope *rope, s32 arg2) {
 
     dy = 0.0f; // matching: dead store; changes IDO's float register assignment
     n = rope->nodeCount;
-    w = D_80090B60[rope->textureId].width;
-    rowH = D_80090B60[rope->textureId].height - 1;
+    w = gEffectTextures[rope->textureId].width;
+    rowH = gEffectTextures[rope->textureId].height - 1;
     if (rope->textureId == 0x36) {
         shift = 5;
     } else {
@@ -398,9 +398,9 @@ Gfx *func_151AD92C(Gfx *dl, Rope *rope, s32 arg2) {
     gSPClearGeometryMode(dl++, G_CULL_FRONT);
     gSPTexture(dl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(dl++);
-    dl = func_15094FE8(dl, &D_80090B60[rope->textureId], 0, 0, 0, 0, 0, 0, 0x100, 0x100, 0x3E);
+    dl = sprite_loadDescFrameAt(dl, &gEffectTextures[rope->textureId], 0, 0, 0, 0, 0, 0, 0x100, 0x100, 0x3E);
     gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-    gDPSetOtherMode(dl++, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | 0xF, 0x552078);
+    gDPSetOtherMode(dl++, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | 0xF, 0x552078);
     for (i = 0; i < n - 1; i++) {
         gSPVertex(dl++, &rope->vertices[(D_800BE9C0 * n + i) * 4], 8, 0);
         gSP1Triangle(dl++, 0, 1, 4, 0);

@@ -19,7 +19,7 @@ void func_150DB9E0(Actor *owner, s32 type, u8 sceneTag) {
     if (owner != NULL) {
         switch (type) {
         case 0:
-            func_15196438(owner, 1, sceneTag, 0);
+            flamethrower_spawnJet(owner, 1, sceneTag, 0);
 
             puff.pos.x = 177.9017487f;
             puff.countBase = 8;
@@ -84,7 +84,7 @@ void func_150DB9E0(Actor *owner, s32 type, u8 sceneTag) {
             func_15153298(&burst, sceneTag, 1);
             break;
         case 1:
-            func_15196438(owner, 2, sceneTag, 0);
+            flamethrower_spawnJet(owner, 2, sceneTag, 0);
             break;
         }
     }

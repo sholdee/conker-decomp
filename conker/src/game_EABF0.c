@@ -90,7 +90,7 @@ s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.life = func_150ADA20() % 31U + 39;
     motion.halfWidth = (func_150ADA68() * 602.0f + 407.0f) * 0.01f;
     motion.gravity = (func_150ADA68() * 356.0f + 1017.0f) * 0.001f;
-    func_15147DA0(&spawn, &motion, 0, 1, 11, 0, 0, 0, 0, 0, 0, &render, 0, arg14, 1);
+    trail_createMotionTrail(&spawn, &motion, 0, 1, 11, 0, 0, 0, 0, 0, 0, &render, 0, arg14, 1);
     return 1;
 }
 

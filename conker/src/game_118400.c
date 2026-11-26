@@ -5,7 +5,7 @@
 
 /* Get the position of one of the actor's bones (0x21 for side 1, 0x1D for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return
-   func_15046C80's result.  (Same as func_15146890 with different bones.) */
+   collision_probeFloorSurfABSet0Cached's result.  (Same as func_15146890 with different bones.) */
 s32 func_150EAF50(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     Vec3f probe;
     s32 bone;
@@ -28,8 +28,8 @@ s32 func_150EAF50(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     probe.x = pos->x;
     probe.y = pos->y + 10.0f;
     probe.z = pos->z;
-    func_1504715C(hit, actor);
-    return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
+    collision_initHitFromObject(hit, actor);
+    return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 50.0f, hit);
 }
 
 /* Effect id for an actor's effect kind: kind 1 in world 4 (level) is 6 when func_151420F8

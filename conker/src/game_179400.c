@@ -35,13 +35,13 @@ void func_1514BF9C(JitterParticle *p) {
         f32 accelY;
         f32 accelZ;
 
-        motion->velocity.y += motion->gravity * D_800BE9A4;
-        accelX = (motion->velocity.x - oldVel.x) * D_800BE9A8;
-        accelY = (motion->velocity.y - oldVel.y) * D_800BE9A8;
-        accelZ = (motion->velocity.z - oldVel.z) * D_800BE9A8;
-        p->head.def.pos.x += (oldVel.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
-        p->head.def.pos.y += (oldVel.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
-        p->head.def.pos.z += (oldVel.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
+        motion->velocity.y += motion->gravity * gFrameDelta;
+        accelX = (motion->velocity.x - oldVel.x) * gFrameDeltaInv;
+        accelY = (motion->velocity.y - oldVel.y) * gFrameDeltaInv;
+        accelZ = (motion->velocity.z - oldVel.z) * gFrameDeltaInv;
+        p->head.def.pos.x += (oldVel.x + 0.5f * accelX * gFrameDelta) * gFrameDelta;
+        p->head.def.pos.y += (oldVel.y + 0.5f * accelY * gFrameDelta) * gFrameDelta;
+        p->head.def.pos.z += (oldVel.z + 0.5f * accelZ * gFrameDelta) * gFrameDelta;
     }
 }
 

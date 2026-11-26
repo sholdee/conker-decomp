@@ -146,11 +146,11 @@ glabel func_150A6568
     /* D3C1C 150A676C 24060001 */   addiu     $a2, $zero, 0x1
     /* D3C20 150A6770 00863004 */  sllv       $a2, $a2, $a0
     /* D3C24 150A6774 00C03027 */  not        $a2, $a2
-    /* D3C28 150A6778 3C09800E */  lui        $t1, %hi(D_800DBE48)
-    /* D3C2C 150A677C 8D29BE48 */  lw         $t1, %lo(D_800DBE48)($t1)
+    /* D3C28 150A6778 3C09800E */  lui        $t1, %hi(gCurMapQuadTree)
+    /* D3C2C 150A677C 8D29BE48 */  lw         $t1, %lo(gCurMapQuadTree)($t1)
     /* D3C30 150A6780 240B0000 */  addiu      $t3, $zero, 0x0
-    /* D3C34 150A6784 3C02800E */  lui        $v0, %hi(D_800DBE30)
-    /* D3C38 150A6788 2442BE30 */  addiu      $v0, $v0, %lo(D_800DBE30)
+    /* D3C34 150A6784 3C02800E */  lui        $v0, %hi(gViewCameraZones)
+    /* D3C38 150A6788 2442BE30 */  addiu      $v0, $v0, %lo(gViewCameraZones)
     /* D3C3C 150A678C 00441021 */  addu       $v0, $v0, $a0
     /* D3C40 150A6790 00441021 */  addu       $v0, $v0, $a0
     /* D3C44 150A6794 84420000 */  lh         $v0, 0x0($v0)

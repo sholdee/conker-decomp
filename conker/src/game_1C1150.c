@@ -8,7 +8,7 @@ void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
     CollisionHit ground;
     s32 type;
 
-    func_1504715C(&ground, obj);
+    collision_initHitFromObject(&ground, obj);
     pos.x = D_800CC2C0;
     pos.y = D_800CC2C4;
     pos.z = D_800CC2C8;
@@ -19,7 +19,7 @@ void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
         u32 end;
         s32 pad; // matching: IDO needs the extra stack slot
 
-        addr = (u32)&func_150A11C4;
+        addr = (u32)&zone_updateActor;
         end = (u32)&zone_isOutside;
         sum = 0;
         for (; addr < end; addr += 4) {
@@ -31,7 +31,7 @@ void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
         }
     }
     if (obj->character_type == 6 || obj->character_type == 6 || obj->character_type == 9 || obj->character_type == 0xC || obj->character_type == 0xF || obj->character_type == 0x10 || obj->character_type == 0x12 || obj->character_type == 0x17 || obj->character_type == 0x1B || obj->character_type == 0x1E || obj->character_type == 0x28 || obj->character_type == 0x29 || obj->character_type == 0x2A || obj->character_type == 0x2B || obj->character_type == 0x2C || obj->character_type == 0x2D || obj->character_type == 0x2E || obj->character_type == 0x30 || obj->character_type == 0x34 || obj->character_type == 0x38 || obj->character_type == 0x3A || obj->character_type == 0x41 || obj->character_type == 0x42 || obj->character_type == 0x4B || obj->character_type == 0x46 || obj->character_type == 0x47 || obj->character_type == 0x49 || obj->character_type == 0x4A || obj->character_type == 0x4C || obj->character_type == 0x4D || obj->character_type == 0x4E || obj->character_type == 0x4F || obj->character_type == 0x51 || obj->character_type == 0x52 || obj->character_type == 0x55 || obj->character_type == 0x56 || obj->character_type == 0x5D || obj->character_type == 0x60 || obj->character_type == 0x61 || obj->character_type == 0x62 || obj->character_type == 0x63 || obj->character_type == 0x66 || obj->character_type == 0x67 || obj->character_type == 0x6F || obj->character_type == 0x70 || obj->character_type == 0x73 || obj->character_type == 0x77 || obj->character_type == 0x7B || obj->character_type == 0x7D || obj->character_type == 0x7E || obj->character_type == 0x7F || obj->character_type == 0x82 || obj->character_type == 0x83 || obj->character_type == 0x84 || obj->character_type == 0x89 || obj->character_type == 0x8C || obj->character_type == 0x8E || obj->character_type == 0x8F || obj->character_type == 0x91 || obj->character_type == 0x94 || obj->character_type == 0x9E || obj->character_type == 0xA1 || obj->character_type == 0xA6 || obj->character_type == 0xAB || obj->character_type == 0xAC || obj->character_type == 0xB2 || obj->character_type == 0xB4 || obj->character_type == 0xB7 || obj->character_type == 0xB8 || obj->character_type == 0xB9) { // matching: the repeated first id test is in the original
-        func_151C329C(&pos, arg2, arg3);
+        weapon_spawnImpactBurst(&pos, arg2, arg3);
         return;
     }
     if (obj->character_type == 5 || obj->character_type == 5 || obj->character_type == 7 || obj->character_type == 0x13 || obj->character_type == 0x20 || obj->character_type == 0x23 || obj->character_type == 0x44 || obj->character_type == 0x5A || obj->character_type == 0x5C || obj->character_type == 0x5E || obj->character_type == 0x5F || obj->character_type == 0x6D || obj->character_type == 0x74 || obj->character_type == 0x75 || obj->character_type == 0x78 || obj->character_type == 0x7A || obj->character_type == 0x8A || obj->character_type == 0x8D || obj->character_type == 0xAD || obj->character_type == 0xAE || obj->character_type == 0xAF || obj->character_type == 0xB1) { // matching: repeated first test, as above
@@ -108,7 +108,7 @@ void func_15194408(Actor *self, Actor *other) {
     }
 
     func_151AE7B0(other, 0.6f, 90, 0xFF, 1);
-    func_1504715C(&ground, other);
+    collision_initHitFromObject(&ground, other);
     burst.spray.pos.x = other->xpos;
     burst.spray.pos.y = other->ypos + 50.0f;
     burst.spray.pos.z = other->zpos;
@@ -158,7 +158,7 @@ void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
         s32 kind;
         s32 profile;
 
-        func_1504715C(&ground, other);
+        collision_initHitFromObject(&ground, other);
         kind = func_15134070(other);
         if (kind != 0x63) {
             profile = D_800A3FD8[kind].unkE;
@@ -230,7 +230,7 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
         pos.y = other->ypos + 95.0f;
         pos.z = other->zpos;
     fence: // matching: this basic-block boundary keeps as1 from scheduling across it
-        func_1504715C(&ground, other);
+        collision_initHitFromObject(&ground, other);
         burst.spray.pos = pos;
         burst.spray.scaleBase = 10.0f;
         burst.spray.countBase = 15;
@@ -269,10 +269,10 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
 void func_151949E0(Actor *self, Actor *other, u8 *arg2) {
 }
 
-// Calls func_15104170 when D_8008FD90 == 1 and self's mv->unk1A0 cooldown has run out, then restarts it.
+// Calls screen_spawnFade when D_8008FD90 == 1 and self's mv->unk1A0 cooldown has run out, then restarts it.
 void func_151949F4(s32 arg0, Actor *self, Actor *other) {
     if (D_8008FD90 == 1 && self->playernumber == 0 && (D_800E9D00 & 8) && self->mv->unk1A0 == 0) {
-        func_15104170(arg0, self, other);
+        screen_spawnFade(arg0, self, other);
         self->mv->unk1A0 = 1200;
     }
 }
@@ -298,7 +298,7 @@ void func_15194AB4(Actor *obj) {
         break;
     }
     if (anim != -1) {
-        func_15083568(obj, anim, 1.0f, 0);
+        collision_createPartSet(obj, anim, 1.0f, 0);
     }
 }
 
@@ -368,9 +368,9 @@ void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
     case 0xB4:
         func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
-        func_1507CD64(other, 6);
+        actor_kill(other, 6);
         if (other->mv != NULL && other->mv->GrenadeThrowState != 0) {
-            func_15063B64(other);
+            actor_throwGrenade(other);
         }
         break;
     }
@@ -387,12 +387,12 @@ void func_15194DA4(Actor *self, Actor *other, u8 *arg2) {
 void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     CollisionHit ground;
 
-    if (D_800BE616 != 0) {
+    if (gIsMultiplayer != 0) {
         func_15194DA4(self, other, arg2);
     } else {
         func_1518D1C0(other, 11, 0, 1, 0xFF, 1, "effects_impact_lava");
     }
-    func_1504715C(&ground, other);
+    collision_initHitFromObject(&ground, other);
     func_1514B364((Vec3f *)&other->xpos, &ground, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
 }
 
@@ -411,7 +411,7 @@ void func_15194EA8(Actor *self, Actor *other, u8 *arg2) {
     if (other->CameraPtr != NULL) {
         rand0 = func_150ADA20();
         rand1 = func_150ADA20();
-        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->CameraPtr->CNumber, 0xFF, 1);
+        screen_spawnFlash(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->CameraPtr->CNumber, 0xFF, 1);
         if (rand0) { } // matching: keeps the unused first random value live across the second call
     }
     func_15194BF0(self, other, &result);
@@ -423,10 +423,10 @@ void func_15194F48(Actor *self, Actor *other, u8 *arg2) {
     pos.x = other->xpos;
     pos.y = other->ypos + 50.0f;
     pos.z = other->zpos;
-    func_151C0098(&pos, other, 1, 0xFF, 1);
+    weapon_spawnObjectHit(&pos, other, 1, 0xFF, 1);
     func_15136C3C(other, 0, 0, 1, 0, 0, 0xFF, 1);
     func_15145A50(other);
-    func_1507CD64(other, 6);
+    actor_kill(other, 6);
 }
 
 void func_15194FF4(self, other, arg2)
@@ -444,7 +444,7 @@ u8 arg2;
     case 0x75: case 0x7A: case 0x80: case 0x87: case 0x88: case 0x90: case 0x96: case 0x98:
     case 0x99: case 0x9C: case 0x9D: case 0x9F: case 0xA0: case 0xB0: case 0xB1: case 0xB2:
     case 0xB4:
-        if (D_800BE616 != 0) {
+        if (gIsMultiplayer != 0) {
             trigger.interval = 0x7D;
             trigger.elapsed = 5;
             if (self->character_type == 0xFF && self->owner != 0) { // an id-0xFF object names its owner by slot + 1
@@ -476,7 +476,7 @@ void func_151951E0(Actor *obj) {
     Actor *copy;
 
     obj->energy = 0;
-    func_1507CD64(obj, 5);
+    actor_kill(obj, 5);
     func_15194AB4(obj);
     obj->type = 0x28;
     obj->speed = -3.0f;
@@ -484,7 +484,7 @@ void func_151951E0(Actor *obj) {
     obj->unk148 = (func_150ADA20() % 10U) - 5.0f;
     obj->yspd = 0.0f;
     obj->ygrav = 0.0f;
-    copy = func_1505ED34();
+    copy = actor_alloc();
     copy->type = 0x28;
     copy->character_type = obj->character_type;
     copy->imune = 0xFF;
@@ -511,7 +511,7 @@ void func_151951E0(Actor *obj) {
     copy->theta = (obj->angle + 0x4000) * (360.0f / 65536);
     copy->noshove = obj->noshove;
     copy->unk9C |= 0x0FFF0000;
-    func_150838EC(copy, obj->animseq.uh, 0, obj->animsp);
+    collision_allocAnimState(copy, obj->animseq.uh, 0, obj->animsp);
     func_150D10E4(obj, 0);
     func_150D10E4(copy, 1);
 }
@@ -554,7 +554,7 @@ void func_15195698(Actor *self, Actor *other, u8 *arg2) {
     if (other->energy == 0 && other->playernumber != 0xFF) {
         func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
-        func_1507CD64(other, 6);
+        actor_kill(other, 6);
     }
     if (self->character_type == 0x47) {
         self->energy = 0;

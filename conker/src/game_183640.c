@@ -95,12 +95,12 @@ void func_151563B8(StreakParticle *arg0) {
         }
     }
     if (!expired) {
-        particle->headPos.x += particle->headVel.x * D_800BE9A4;
-        particle->headPos.y += particle->headVel.y * D_800BE9A4;
-        particle->headPos.z += particle->headVel.z * D_800BE9A4;
-        particle->tailPos.x += particle->tailVel.x * D_800BE9A4;
-        particle->tailPos.y += particle->tailVel.y * D_800BE9A4;
-        particle->tailPos.z += particle->tailVel.z * D_800BE9A4;
+        particle->headPos.x += particle->headVel.x * gFrameDelta;
+        particle->headPos.y += particle->headVel.y * gFrameDelta;
+        particle->headPos.z += particle->headVel.z * gFrameDelta;
+        particle->tailPos.x += particle->tailVel.x * gFrameDelta;
+        particle->tailPos.y += particle->tailVel.y * gFrameDelta;
+        particle->tailPos.z += particle->tailVel.z * gFrameDelta;
         if (particle->flags & 8) {
             if (particle->lifetime < particle->fadeStart) {
                 fadedAlpha = particle->lifetime * particle->fadeRate;
@@ -267,7 +267,7 @@ void func_151568F8(desc, owner)
     func_15130374(&particle, desc->particleKind, 0, owner, 0);
 }
 
-/* When the timer runs out, sets off a burst (func_15156D24 and func_151602C0) at a random table point
+/* When the timer runs out, sets off a burst (func_15156D24 and light_createWithEffect) at a random table point
  * that has no zero coordinate, then restarts the timer at a random interval. */
 void func_15156B54(RandomBurstEffect *effect) {
     RandomTimer *timer;
@@ -289,7 +289,7 @@ void func_15156B54(RandomBurstEffect *effect) {
             intPos.x = D_800DCA30[row][col].pos.x;
             intPos.y = D_800DCA30[row][col].pos.y;
             intPos.z = D_800DCA30[row][col].pos.z;
-            func_151602C0(&header, &intPos, (func_150ADA20() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
+            light_createWithEffect(&header, &intPos, (func_150ADA20() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
                           effect->base.header.owner, effect->base.header.kind);
         }
         timer = &effect->timer;

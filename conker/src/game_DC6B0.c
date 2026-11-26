@@ -2,11 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_15D730.c. Not in particle.h: game_105FC0.c and game_200930.c call it with a third
+/* Defined in game_15D730.c. Not in particle.h: game/Trail/PissTrail/pisstrail.c and game_200930.c call it with a third
    argument. */
 void func_15131958(Vec3f *vel, f32 drag);
 
-/* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls func_1505D024 on
+/* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls actor_hitScripted on
  * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while movement_obj[0].stunned is set. */
 void func_150AF200(s32 idA, s32 idB) {
     WorldObject *obj;
@@ -16,32 +16,32 @@ void func_150AF200(s32 idA, s32 idB) {
         return;
     }
 
-    obj = func_151149AC(idA);
+    obj = gfx_findObjectById(idA);
     index = obj - db_Object_array;
     if (gWorldObjectContacts[index] & 1) {
-        func_1505D024(&movement_obj[0], 0x3F, 0x6E00, -1);
+        actor_hitScripted(&movement_obj[0], 0x3F, 0x6E00, -1);
         return;
     }
 
-    obj = func_151149AC(idB);
+    obj = gfx_findObjectById(idB);
     index = obj - db_Object_array;
     if (gWorldObjectContacts[index] & 1) {
-        func_1505D024(&movement_obj[0], 0x3F, 0xEE00, -1);
+        actor_hitScripted(&movement_obj[0], 0x3F, 0xEE00, -1);
     }
 }
 
-/* Calls func_151CF898(arg0, unk2 + unk8, unk2). */
+/* Calls trail_spawnNearCamera(arg0, unk2 + unk8, unk2). */
 void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
-    func_151CF898(arg0, range->unk2 + range->unk8, range->unk2);
+    trail_spawnNearCamera(arg0, range->unk2 + range->unk8, range->unk2);
 }
 
-/* Emitter update: accumulates 0.1352..0.305 particles per unit of D_800BE9A4 and spawns one
+/* Emitter update: accumulates 0.1352..0.305 particles per unit of gFrameDelta and spawns one
  * randomly sized particle at the emitter's position for each whole one. */
 void func_150AF328(SmokeEmitter *emitter) {
     SmokeEmitterData *data;
 
     data = &emitter->data;
-    data->spawnAccum += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
+    data->spawnAccum += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * gFrameDelta;
     if (data->spawnAccum > 1.0f) {
         ParticleDesc spawn;
         WobbleData wobble;
@@ -121,7 +121,7 @@ void func_150AF738(s16 lifetime, u8 arg1, s32 arg2) {
     desc.drawIndex = 2;
     desc.lifetime = lifetime;
     desc.messageIndex = 0;
-    func_1515FF74(&desc, 0, arg1, arg2);
+    colourfb_createScreenEffect(&desc, 0, arg1, arg2);
 }
 
 void func_150AF790(void *arg0, u8 *arg1) {
@@ -134,7 +134,7 @@ typedef struct GameDC6B0SmokeMotion {
     f32 unkC;
 } GameDC6B0SmokeMotion;
 
-/* A sprite created by func_1515548C; the puffs carry their motion at 0x70. */
+/* A sprite created by sprite_newScreenSprite; the puffs carry their motion at 0x70. */
 typedef struct {
     u8 pad0[0x70];
     GameDC6B0SmokeMotion motion;
@@ -190,7 +190,7 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         puff.unk40 = 0;
         puff.unk41 = 0xA;
         puff.viewport = 0;
-        sprite = func_1515548C(&puff, 6, 0, 0, 0x10, source->base.header.owner, source->base.header.kind);
+        sprite = sprite_newScreenSprite(&puff, 6, 0, 0, 0x10, source->base.header.owner, source->base.header.kind);
         if (sprite != NULL) {
             memcpy(&sprite->motion, &motion, sizeof(motion));
         }
@@ -229,7 +229,7 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         spark.unk40 = 0;
         spark.unk41 = 7;
         spark.viewport = 0;
-        func_1515548C(&spark, 0, 0, 0, 0, source->base.header.owner, source->base.header.kind);
+        sprite_newScreenSprite(&spark, 0, 0, 0, 0, source->base.header.owner, source->base.header.kind);
         timers->spark = func_150ADA20() % 11U + 3;
     }
 }
@@ -238,7 +238,7 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
 s32 func_150AFBF4(Obj150AFBF4 *obj) {
     TimeOscillator *osc = &obj->osc;
 
-    osc->phase = osc->phase + osc->rate * D_800BE9A4;
+    osc->phase = osc->phase + osc->rate * gFrameDelta;
     osc->phase = func_15144B68(osc->phase);
     obj->unk10 = sinf(osc->phase) * osc->amplitude + osc->base;
     return 1;
@@ -276,8 +276,8 @@ void func_150AFDB0(void) {
     D_800DD190--;
 }
 
-/* Fires a tracer along the -z axis of bone 3 (bone 2 if `altBone`) of D_800D154C, from 20 to
- * 150 units out, plus a tracer (func_150E2DB4) attached to the same bone. */
+/* Fires a tracer along the -z axis of bone 3 (bone 2 if `altBone`) of gCurrentActor, from 20 to
+ * 150 units out, plus a tracer (beam_spawnBoneTracer) attached to the same bone. */
 void func_150AFE64(s32 altBone) {
     f32 startX;
     f32 startY;
@@ -288,14 +288,14 @@ void func_150AFE64(s32 altBone) {
     s32 bone;
     f32 (*mtx)[4];
 
-    if (D_800D154C->ob_matrix_ptr != NULL) {
+    if (gCurrentActor->ob_matrix_ptr != NULL) {
         if (altBone == 0) {
             bone = 3;
         } else {
             bone = 2;
         }
 
-        mtx = D_800D154C->ob_matrix_ptr[bone];
+        mtx = gCurrentActor->ob_matrix_ptr[bone];
         startX = 0.0f;
         startY = 0.0f;
         startZ = -20.0f;
@@ -305,10 +305,10 @@ void func_150AFE64(s32 altBone) {
         endZ = -150.0f;
         func_150A7960(mtx, endX, endY, endZ, &endX, &endY, &endZ);
         /* speed 40, stopDist 0, halfWidth 2, length 120, lifetime 60, texture 35 */
-        func_150E1AB0(0, startX, startY, startZ, endX, endY, endZ, 40.0f, 0.0f, 2.0f, 120.0f, 60, 35,
+        beam_spawnTracer(0, startX, startY, startZ, endX, endY, endZ, 40.0f, 0.0f, 2.0f, 120.0f, 60, 35,
                       0, 0, 0, NULL, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         /* from (0, 0, -39) to (0, 0, -150) in bone space; on 3 frames, off 255, lifetime 4 */
-        func_150E2DB4(D_800D154C, D_800D154C->unique_id, bone, -1, 0.0f, 0.0f, -39.0f, 0.0f, 0.0f, -150.0f,
+        beam_spawnBoneTracer(gCurrentActor, gCurrentActor->unique_id, bone, -1, 0.0f, 0.0f, -39.0f, 0.0f, 0.0f, -150.0f,
                       3, 0xFF, 4, 0);
     }
 }
@@ -323,7 +323,7 @@ void func_150B003C(s32 arg0) {
     func_150AF200(0xDF, 0xDE);
 }
 
-/* Arguments the projectile's ribbon trail keeps (func_151B7328 selector 1). */
+/* Arguments the projectile's ribbon trail keeps (trail_spawnRibbon selector 1). */
 typedef struct GameDC6B0TrailArgs {
     GameDC6B0Projectile *source;
     s32 unk4;
@@ -381,7 +381,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
             trail = &projectile->trail;
             memcpy(trail, &trailArgs.unk4, sizeof(trailArgs.unk4));
             trailArgs.source = projectile;
-            *trail = func_151B7328(&trailArgs, 1, sizeof(trailArgs), arg2, arg3);
+            *trail = trail_spawnRibbon(&trailArgs, 1, sizeof(trailArgs), arg2, arg3);
         }
     }
 }
@@ -494,7 +494,7 @@ s32 func_150B060C(id, out)
     u8 id;
     struct Obj150B060C *out;
 {
-    out->object = func_151149AC(id);
+    out->object = gfx_findObjectById(id);
     if (out->object == NULL) {
         return 0;
     }

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Registers a TexScroll on res's display list (game/Effects/CharacterFlameThrower/characterflamethrower.c). */
-/* Height of the prop surface below (x, y, z), or -10000 (game_13BB20.c). */
+/* Height of the prop surface below (x, y, z), or -10000 (game/Collision/Floor/floor.c). */
 
 /*
  * Behaviour scratch state (WorldObject.touch) of the objects in this file:
@@ -28,7 +28,7 @@ void func_15116110(WorldObject *obj) {
         texture = (u16)info & 0x7FFF; // matching: the (u16) and (s8) casts pick IDO's register assignment
         doubled = info >> 15;
         info >>= 0; // matching: keeps the speed shifts below the texture/doubled setup (as1 orders by -g3 line)
-        WORK(obj)->texScroll = func_15195FB0(obj, texture, doubled, -1, 0, (s8)(info >> 24) & 0xFF, (s8)(info >> 16) & 0xFF);
+        WORK(obj)->texScroll = flamethrower_addObjectTexScroll(obj, texture, doubled, -1, 0, (s8)(info >> 24) & 0xFF, (s8)(info >> 16) & 0xFF);
         obj->moveData.word = 0;
     }
 }
@@ -40,7 +40,7 @@ void func_1511617C(WorldObject *obj) {
     s16 oldY;
 
     oldY = obj->y;
-    WORK(obj)->groundY = func_1510F648(obj->x, obj->y, obj->z);
+    WORK(obj)->groundY = collision_getPropSurfaceHeight(obj->x, obj->y, obj->z);
     if (fabsf(WORK(obj)->groundY - obj->y) > 200.0f) {
         obj->moveData.word = 0;
     }

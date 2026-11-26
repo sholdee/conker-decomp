@@ -84,7 +84,7 @@ s32 func_1518A5F4(EffectActor *actor) {
         s32 i;
 
         prevVel = motion->vel;
-        motion->vel.y += motion->gravity * D_800BE9A4;
+        motion->vel.y += motion->gravity * gFrameDelta;
         for (i = D_800BE9E4; i != 0; i--) {
             motion->vel.x *= motion->drag;
             motion->vel.y *= motion->drag;
@@ -95,17 +95,17 @@ s32 func_1518A5F4(EffectActor *actor) {
             f32 accelY;
             f32 accelZ;
 
-            accelX = (motion->vel.x - prevVel.x) * D_800BE9A8;
-            accelY = (motion->vel.y - prevVel.y) * D_800BE9A8;
-            accelZ = (motion->vel.z - prevVel.z) * D_800BE9A8;
-            actor->tmpl.position.x += (prevVel.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
-            actor->tmpl.position.y += (prevVel.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
-            actor->tmpl.position.z += (prevVel.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
+            accelX = (motion->vel.x - prevVel.x) * gFrameDeltaInv;
+            accelY = (motion->vel.y - prevVel.y) * gFrameDeltaInv;
+            accelZ = (motion->vel.z - prevVel.z) * gFrameDeltaInv;
+            actor->tmpl.position.x += (prevVel.x + 0.5f * accelX * gFrameDelta) * gFrameDelta;
+            actor->tmpl.position.y += (prevVel.y + 0.5f * accelY * gFrameDelta) * gFrameDelta;
+            actor->tmpl.position.z += (prevVel.z + 0.5f * accelZ * gFrameDelta) * gFrameDelta;
         }
     }
-    motion->rot.x += motion->rotVel.x * D_800BE9A4;
-    motion->rot.y += motion->rotVel.y * D_800BE9A4;
-    motion->rot.z += motion->rotVel.z * D_800BE9A4;
+    motion->rot.x += motion->rotVel.x * gFrameDelta;
+    motion->rot.y += motion->rotVel.y * gFrameDelta;
+    motion->rot.z += motion->rotVel.z * gFrameDelta;
     return 1;
 }
 

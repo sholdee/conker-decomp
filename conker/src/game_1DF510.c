@@ -12,7 +12,7 @@ static const Vec3f D_800AA35C = { 12.0f, 0.0f, 0.0f };
 static const Vec3f D_800AA368 = { 27.0f, 42.0f, 0.0f };
 static const Vec3f D_800AA374 = { -27.0f, 42.0f, 0.0f };
 
-/* Spawns a RopeTie between `obj` and the object from func_15083E90(1). */
+/* Spawns a RopeTie between `obj` and the object from collision_findObjectById(1). */
 void func_151B2060(Actor *obj) {
     RopeTie *effect;
     RopeTieData tie;
@@ -20,7 +20,7 @@ void func_151B2060(Actor *obj) {
     if (obj != NULL) {
         tie.obj0 = obj;
         tie.obj0Id = obj->unique_id;
-        tie.obj1 = func_15083E90(1);
+        tie.obj1 = collision_findObjectById(1);
         tie.obj1Id = 1;
         tie.state = 0;
         bzero(tie.ropes, sizeof(tie.ropes));
@@ -314,11 +314,11 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         update = 1;
         camera = &camera_global_Cameras[view].eye.x;
         gfx = func_15142B7C(gfx, 0x200005, 0x60600);
-        gfx = func_15142E24(gfx, &D_80090B60[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
+        gfx = func_15142E24(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = func_1513F4E4(gfx, 0x2B, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[5].unk0 | D_800A4AC8[5].unk4, &update);
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[5].unk0 | D_800A4AC8[5].unk4, &update);
         // side = (end - start) x (midpoint - camera), scaled to halfWidth; texture is 30x30 texels (S10.5)
         dx = end.x - start.x;
         toCamX = ((dx * 0.5f) + start.x) - camera[0];

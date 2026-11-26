@@ -216,7 +216,7 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBloodTrail
     if (dt) {
     }
     speed = func_150ADA68();
-    dt = D_800BE9A8;
+    dt = gFrameDeltaInv;
     speed = speed * 166.0f + 160.0f;
     offset.x = 0.0f;
     offset.y = 0.0f;

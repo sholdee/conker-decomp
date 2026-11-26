@@ -50,7 +50,7 @@ void func_15178EFC(s32 state) {
             func_10004074((void *)D_800DD440);
             D_800DD440 = 0;
         }
-        func_100111C8(D_800DD430);
+        sound_stop(D_800DD430);
         D_800DD444 = 0;
         D_800DD436 = 0;
     } else if (state == 3) {
@@ -100,7 +100,7 @@ void func_15179008(s32 player) {
             if (D_800DD440 != 0) {
                 D_800DD446 = 1;
                 D_800DD444 = 0;
-                D_800DD430 = func_10010F30(0x6F, 200, 0x40, 0, 0x80);
+                D_800DD430 = sound_play(0x6F, 200, 0x40, 0, 0x80);
             }
         } else if (D_800C35EA[player] == 0) {
             D_800DD444 += D_800BE9E4;
@@ -118,8 +118,8 @@ void func_15179008(s32 player) {
             }
         }
         if (D_800DD444 > 10 && D_800DD436 < maxDrops) {
-            func_1000F85C(D_800DD430, 8, (D_800DD436 << 14) / maxDrops);
-            func_1000F85C(D_800DD430, 0x2000, 0);
+            sound_setVoiceParam(D_800DD430, 8, (D_800DD436 << 14) / maxDrops);
+            sound_setVoiceParam(D_800DD430, 0x2000, 0);
         }
         D_800DD444 += D_800BE9E4;
         break;
@@ -138,7 +138,7 @@ void func_15179008(s32 player) {
         if (D_800DD436 == 0) {
             D_800DD446 = 0;
             D_800DD444 = 0;
-            func_100111C8(D_800DD430);
+            sound_stop(D_800DD430);
             func_10004074((void *)D_800DD440);
             D_800DD440 = 0;
             break;
@@ -147,7 +147,7 @@ void func_15179008(s32 player) {
             func_15179AB8();
         }
         if (D_800DD444 != 0) {
-            func_1000F85C(D_800DD430, 8, (D_800DD436 << 13) / D_800DD444);
+            sound_setVoiceParam(D_800DD430, 8, (D_800DD436 << 13) / D_800DD444);
         }
         break;
     case 4:
@@ -369,7 +369,7 @@ void func_15179B14(s32 count) {
     for (i = 0; i < count; i++) {
         x = (func_150ADA20_u8() % 500) + centerX;
         z = (func_150ADA20_u8() % 500) + centerZ;
-        groundY = func_1510F8D8(x, 10000, z, 0);
+        groundY = collision_findMeshFloorNear(x, 10000, z, 0);
         if (groundY != -10000.0f) {
             packet.dropFlags = 0;
             packet.frameStep = 0x80;

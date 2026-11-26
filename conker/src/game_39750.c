@@ -96,7 +96,7 @@ void func_1500C2F0(TriggerZone *region, f32 density) {
             f32 y;
             f32 below;
 
-            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
+            zone_getRandomPoint(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -123,8 +123,8 @@ void func_1500C2F0(TriggerZone *region, f32 density) {
             } else {
                 part.sizeXZ = part.sizeY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             }
-            func_1510F800(0);
-            part.unk5C = func_1510FD20(part.pos.x, part.pos.z);
+            collision_selectMap(0);
+            part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -222,7 +222,7 @@ void func_1500C8D0(TriggerZone *region, f32 density) {
             // matching: a separate statement makes IDO call func_150ADA20 for 0x40 first
             flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
             part.flags = flag40 | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x4000 | 0x8000 | 0x10000 | 0x20000;
-            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
+            zone_getRandomPoint(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -237,8 +237,8 @@ void func_1500C8D0(TriggerZone *region, f32 density) {
             }
             part.vel.x = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
             part.vel.z = RANDOM_U16() * inv65535 * 0.01300000027f + 0.005000000354f;
-            func_1510F800(0);
-            part.viewMask = func_1510FD20(part.pos.x, part.pos.z);
+            collision_selectMap(0);
+            part.viewMask = collision_findZoneLeaf(part.pos.x, part.pos.z);
             obj = func_15130280(&part, 2, 0, 28, 255, 1);
             if (obj != NULL) {
                 memcpy(obj + 1, &extra, sizeof(extra));
@@ -301,7 +301,7 @@ void func_1500CE4C(TriggerZone *region, f32 density) {
             temp = RANDOM_U16() * inv65535 * 12.0f + 10.0f;
             part.width = temp;
             part.height = temp;
-            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
+            zone_getRandomPoint(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             extra.centerY = y;
@@ -322,8 +322,8 @@ void func_1500CE4C(TriggerZone *region, f32 density) {
             part.rot.y = RANDOM_U16() * inv65535 * 360.0f;
             part.rot.z = RANDOM_U16() * inv65535 * 360.0f;
             part.unk44 = RANDOM() % 156 + 100;
-            func_1510F800(0);
-            part.unk48 = func_1510FD20(part.pos.x, part.pos.z);
+            collision_selectMap(0);
+            part.unk48 = collision_findZoneLeaf(part.pos.x, part.pos.z);
             obj = func_1513D2F0(&part, &D_800A4AA0, 0x23, 0, 0, 0x1E, 0, 3, 0xFF, 0x1C, 0xFF, 1);
             if (obj != NULL) {
                 memcpy(obj + 1, &extra, sizeof(extra));
@@ -373,7 +373,7 @@ void func_1500D3AC(TriggerZone *region, f32 density) {
         inv65535 = 1.525902189e-05f;
         part.rotVel.y = 0.0f;
         do {
-            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
+            zone_getRandomPoint(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -394,8 +394,8 @@ void func_1500D3AC(TriggerZone *region, f32 density) {
             part.rotVel.x = RANDOM_U16() * inv65535 * 1.600000024f;
             part.rotVel.z = RANDOM_U16() * inv65535 * 1.600000024f;
             part.sizeXZ = part.sizeY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
-            func_1510F800(0);
-            part.unk5C = func_1510FD20(part.pos.x, part.pos.z);
+            collision_selectMap(0);
+            part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -444,7 +444,7 @@ void func_1500D8C8(TriggerZone *region, f32 density) {
             f32 y;
             f32 below;
 
-            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
+            zone_getRandomPoint(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -470,8 +470,8 @@ void func_1500D8C8(TriggerZone *region, f32 density) {
                 part.sizeXZ *= 0.349999994f;
                 part.sizeY *= 0.349999994f;
             }
-            func_1510F800(0);
-            part.unk5C = func_1510FD20(part.pos.x, part.pos.z);
+            collision_selectMap(0);
+            part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -543,7 +543,7 @@ void func_1500DE88(TriggerZone *region, f32 density) {
                          0x8000 | 0x20000 | 0x800000;
             part.r2 = RANDOM() % 56 + 80;
             part.r = RANDOM() % 46 + 180;
-            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
+            zone_getRandomPoint(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -558,8 +558,8 @@ void func_1500DE88(TriggerZone *region, f32 density) {
             }
             part.vel.x = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
             part.vel.z = RANDOM_U16() * inv65535 * 0.01000000071f + 0.002000000095f;
-            func_1510F800(0);
-            part.viewMask = func_1510FD20(part.pos.x, part.pos.z);
+            collision_selectMap(0);
+            part.viewMask = collision_findZoneLeaf(part.pos.x, part.pos.z);
             obj = func_15130280(&part, 2, 0, 28, 255, 1);
             if (obj != NULL) {
                 memcpy(obj + 1, &extra, sizeof(extra));

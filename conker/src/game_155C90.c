@@ -42,7 +42,7 @@ void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
     if (camera->Mode & 0x40) {
         camera->Tightness = 0;
     }
-    if ((D_800D2DB4 != 0) || ((camera->DoingAim != 0) && (camera->DoingAim != 3)) || (camera->mv->death_State != 0)) {
+    if ((gPoseCommandRunning != 0) || ((camera->DoingAim != 0) && (camera->DoingAim != 3)) || (camera->mv->death_State != 0)) {
         func_150495B0(&camera->YawAngle, 0.0f, &camera->CentYawAngleVel, 6.0f, 9.0f, camera->SpringTime);
         func_150495B0(&camera->APitchAngle, 0.0f, &camera->CentPitchAngleVel, 1.5f, 2.5f, camera->SpringTime);
         return;

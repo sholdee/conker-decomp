@@ -74,12 +74,12 @@ DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, 
     s32 count;
     s32 i;
 
-    asset = func_1502B6BC(&loaded, 0, &count, 2, desc->unk30, desc->unk34);
+    asset = rom_loadPathTable(&loaded, 0, &count, 2, desc->unk30, desc->unk34);
     {
         s32 type;
 
         vtxSize = (u8 *)asset->displayList - (u8 *)asset->vertices;
-        buffersSize = vtxSize * 2 * (D_80082FA0 + 1);
+        buffersSize = vtxSize * 2 * (gScreenLayout + 1);
         if (arg1) {
             type = 0x54;
         } else {
@@ -92,7 +92,7 @@ DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, 
         memcpy(&obj->desc, desc, sizeof(DynModelDesc));
         obj->asset = asset;
     }
-    for (i = 0, buffer = obj->buffers; i < D_80082FA0 + 1; i++) {
+    for (i = 0, buffer = obj->buffers; i < gScreenLayout + 1; i++) {
         obj->vertices[0][i] = (Vtx *)buffer;
         obj->vertices[1][i] = (Vtx *)(buffer + vtxSize);
         memcpy(buffer, asset->vertices, vtxSize);
@@ -102,7 +102,7 @@ DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, 
     }
     obj->displayList = asset->displayList;
     obj->buffersSize = buffersSize;
-    func_1510CE60(obj->displayList, 0, 1, 0x3E, 0);
+    texture_resolveDl(obj->displayList, 0, 1, 0x3E, 0);
     return obj;
 }
 
@@ -178,7 +178,7 @@ void func_1513BA44(DynModel *obj) {
 void func_1513BA78(DynModel *obj, s32 arg1, u8 arg2) {
     switch (obj->desc.kind) {
     case 1:
-        func_15109064(obj, arg1, arg2);
+        light_handleLampMessage(obj, arg1, arg2);
         break;
     case 2:
         func_151BA468(obj, arg1, arg2);
@@ -293,12 +293,12 @@ s32 func_1513BEB0(DynModel *obj) {
     TexWarpState *state;
 
     state = (TexWarpState *)(obj->buffers + obj->buffersSize);
-    state->scrollTPhase += 0.03700000048f * D_800BE9A4;
+    state->scrollTPhase += 0.03700000048f * gFrameDelta;
     state->scrollTPhase = func_15144B68(state->scrollTPhase);
-    state->scrollS += 1.899999976f * D_800BE9A4;
+    state->scrollS += 1.899999976f * gFrameDelta;
     state->scrollT = sinf(state->scrollTPhase) * 77.30000305f;
-    state->scalePhaseS += 0.01900000125f * D_800BE9A4;
-    state->scalePhaseT += 0.01000000071f * D_800BE9A4;
+    state->scalePhaseS += 0.01900000125f * gFrameDelta;
+    state->scalePhaseT += 0.01000000071f * gFrameDelta;
     state->scalePhaseS = func_15144B68(state->scalePhaseS);
     state->scalePhaseT = func_15144B68(state->scalePhaseT);
 

@@ -212,7 +212,7 @@ void *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
 /* Drop emitters of a drip (BloodDripDesc.emitter): called with the drop position, the path moved and the drip.
  * The prototype keeps the f32 arguments unpromoted; several emitters take their own view of the emitter object. */
 static void (*D_80089A70[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    func_151348F0, func_151A4638, func_151AA30C, func_151AB3A4, func_150C60D8, func_150C6A08,
+    func_151348F0, trail_emitBurst, func_151AA30C, func_151AB3A4, func_150C60D8, func_150C6A08,
     func_151AE890, func_150EA5CC, func_151B4E4C, func_151B50A4, func_151AF338, func_150E03F8,
 };
 /* Drip callbacks (BloodDripDesc.callback): 0 kills the drip. */
@@ -284,7 +284,7 @@ void func_151342BC(BloodDrip *drip) {
     deltaZ = source[2] - position[2];
     distance = sqrtf(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
     scale = drip->inverseDiameter * distance + 1.0f;
-    drip->accumulator += scale * D_800BE9A4 * drip->desc.rate;
+    drip->accumulator += scale * gFrameDelta * drip->desc.rate;
     if (drip->accumulator > 7.0f) {
         drip->accumulator = 7.0f;
     }
@@ -433,7 +433,7 @@ void *func_15134908(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
 
 /* Drop emitters of a trail (BloodTrail.emitter), as D_80089A70 (with a prototype for the same reason). */
 static void (*D_80089AFC[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    func_15134CD4, func_151A7610, func_15159BB0, func_151B86F4, func_151BC370, func_15136AE4, func_150C2898,
+    func_15134CD4, func_151A7610, func_15159BB0, weapon_emitBulletTrailParticle, func_151BC370, func_15136AE4, func_150C2898,
 };
 /* Trail callbacks (BloodTrail.callback): 0 kills the trail. */
 static s32 (*D_80089B18[])() = { func_151BC580 };
@@ -469,7 +469,7 @@ void func_151349D0(BloodTrail *trail) {
         deltaZ = trail->previous.z - position[2];
         distance = sqrtf(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
         scale = trail->inverseDiameter * distance + 1.0f;
-        trail->accumulator += scale * D_800BE9A4 * trail->rate;
+        trail->accumulator += scale * gFrameDelta * trail->rate;
         if (trail->accumulator > 7.0f) {
             trail->accumulator = 7.0f;
         }
@@ -515,11 +515,11 @@ void func_15134CD4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *em
 s32 func_15134CEC(Struct15134CEC *particle) {
     s32 fade;
 
-    particle->unk70 += 0.125f * D_800BE9A4;
+    particle->unk70 += 0.125f * gFrameDelta;
     fade = particle->unk2E;
-    particle->unk74 += 0.07999999821f * D_800BE9A4;
-    particle->unk14 += particle->unk70 * D_800BE9A4;
-    particle->unk1C += particle->unk74 * D_800BE9A4;
+    particle->unk74 += 0.07999999821f * gFrameDelta;
+    particle->unk14 += particle->unk70 * gFrameDelta;
+    particle->unk1C += particle->unk74 * gFrameDelta;
     if (particle->unk14 > 130.0f) {
         return 0;
     }
@@ -560,7 +560,7 @@ static s32 (*D_80089B1C[])() = {
 };
 static void (*D_80089B38[])(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32, BloodStrip *) = {
     func_151AA6D8, func_150C71C0, func_150EA11C, func_151938FC, func_151BD43C,
-    func_15137E60, func_151C5E74, func_150D1204, func_150F695C,
+    func_15137E60, weapon_emitBloodStripParticle, func_150D1204, beam_emitBloodParticle,
 };
 static f32 (*D_80089B5C[])() = { func_15135670, func_151AAA4C, func_150EA490, func_151BD750 };
 static s32 (*D_80089B6C[])() = { func_151AABA0 };
@@ -591,7 +591,7 @@ void func_15134E48(BloodStrip *arg0) {
                 if (strip->rateCallback != -1) {
                     strip->power = D_80089B5C[strip->rateCallback](strip);
                 }
-                strip->accumulator += strip->rate * D_800BE9A4;
+                strip->accumulator += strip->rate * gFrameDelta;
                 if (strip->accumulator > 1.0f) {
                     Vec3f newA;
                     Vec3f newB;
@@ -613,7 +613,7 @@ void func_15134E48(BloodStrip *arg0) {
                     f32 stepBY;
                     f32 stepBZ;
                     invCount = 1.0f / strip->accumulator;
-                    time = strip->time + D_800BE9A4;
+                    time = strip->time + gFrameDelta;
                     timeStep = time * invCount;
                     pointA = strip->posA;
                     pointB = strip->posB;
@@ -630,12 +630,12 @@ void func_15134E48(BloodStrip *arg0) {
                     stepBX = deltaB.x * invCount;
                     stepBY = deltaB.y * invCount;
                     stepBZ = deltaB.z * invCount;
-                    velocityA.x = deltaAX * D_800BE9A8;
-                    velocityA.y = deltaAY * D_800BE9A8;
-                    velocityA.z = deltaAZ * D_800BE9A8;
-                    velocityB.x = deltaB.x * D_800BE9A8;
-                    velocityB.y = deltaB.y * D_800BE9A8;
-                    velocityB.z = deltaB.z * D_800BE9A8;
+                    velocityA.x = deltaAX * gFrameDeltaInv;
+                    velocityA.y = deltaAY * gFrameDeltaInv;
+                    velocityA.z = deltaAZ * gFrameDeltaInv;
+                    velocityB.x = deltaB.x * gFrameDeltaInv;
+                    velocityB.y = deltaB.y * gFrameDeltaInv;
+                    velocityB.z = deltaB.z * gFrameDeltaInv;
                     do {
                         if (strip->emitCallback != -1) {
                             D_80089B38[strip->emitCallback](&pointA, &pointB, &velocityA, &velocityB, time, strip);
@@ -695,7 +695,7 @@ void func_1513532C(BloodStrip *arg0) {
         mode = 0;
     }
     if (strip->sound != 0) {
-        func_100111C8(strip->sound);
+        sound_stop(strip->sound);
         strip->sound = 0;
     }
     D_80089B70[mode](strip);
@@ -717,7 +717,7 @@ void func_151353A8(BloodStrip *arg0) {
         mode = 0;
     }
     if (strip->sound != 0) {
-        func_100111C8(strip->sound);
+        sound_stop(strip->sound);
         strip->sound = 0;
     }
     D_80089B88[mode](strip);
@@ -908,7 +908,7 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
     particle.unk3C = 32;
     particle.color1.alpha = alpha;
     particle.unk23 = endAlpha;
-    result = func_1515548C(&particle, 3, spriteKinds, 1, sizeof(motion), arg10, arg11);
+    result = sprite_newScreenSprite(&particle, 3, spriteKinds, 1, sizeof(motion), arg10, arg11);
     if (result != NULL) {
         memcpy(&result->motion, &motion, sizeof(motion));
         scale = (particle.halfWidth + particle.halfHeight) * 0.5f;
@@ -961,7 +961,7 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
             if (func_150ADA20() & 1) {
                 spark.flags |= 4;
             }
-            func_1515548C(&spark, 0, 0, 0, 0, arg10, arg11);
+            sprite_newScreenSprite(&spark, 0, 0, 0, 0, arg10, arg11);
             count -= 1.0f;
         }
     }
@@ -978,16 +978,16 @@ s32 func_15135BF8(BloodSplat *splat) {
     alive = 1;
     if (splat->motion.timer > 0) {
         motion->timer -= D_800BE9E4;
-        splat->position.x += motion->velocity.x * D_800BE9A4;
-        splat->position.y += motion->velocity.y * D_800BE9A4;
-        splat->width += motion->growth * D_800BE9A4;
-        splat->height += motion->growth * D_800BE9A4;
+        splat->position.x += motion->velocity.x * gFrameDelta;
+        splat->position.y += motion->velocity.y * gFrameDelta;
+        splat->width += motion->growth * gFrameDelta;
+        splat->height += motion->growth * gFrameDelta;
     } else {
         Vec2f average;
 
         average = motion->velocity;
-        splat->position.y += motion->velocity.y * D_800BE9A4 + motion->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f;
-        motion->velocity.y += motion->gravity * D_800BE9A4;
+        splat->position.y += motion->velocity.y * gFrameDelta + motion->gravity * gFrameDelta * gFrameDelta * 0.5f;
+        motion->velocity.y += motion->gravity * gFrameDelta;
         average.x += motion->velocity.x;
         average.y += motion->velocity.y;
         average.x *= 0.5f;
@@ -995,8 +995,8 @@ s32 func_15135BF8(BloodSplat *splat) {
         {
             f32 growth = fabsf(average.x) * motion->spread;
 
-            splat->width += growth * D_800BE9A4;
-            splat->height += growth * D_800BE9A4;
+            splat->width += growth * gFrameDelta;
+            splat->height += growth * gFrameDelta;
         }
     }
     if (splat->position.x > 200.0f || splat->position.x < -200.0f || splat->position.y > 200.0f ||
@@ -1045,7 +1045,7 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     probe.x = fromX;
     probe.y = 10000.0f;
     probe.z = from->z;
-    if (func_15046460(&probe, 0, from->y, &hit) != 0 && hit.source == 3) {
+    if (collision_probeFloorSurfAB(&probe, 0, from->y, &hit) != 0 && hit.source == 3) {
         for (drops = func_150ADA20() % 11U + 10; drops > 0; drops--) {
             speed = (func_150ADA68() * 67.0f + 86.0f) * 0.001000000047f;
             velocity.x = direction.x * speed;
@@ -1105,13 +1105,13 @@ void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
     if (actor != NULL) {
         area = 3.141592741f * radius * radius;
         count = (func_150ADA68() * 305.0f + 108.0f) * 9.999999975e-07f * area;
-        func_1504715C(&hit, actor);
+        collision_initHitFromObject(&hit, actor);
         while (count > 1.0f) {
             func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * radius, &probe.x, &probe.z);
             probe.x += actor->xpos;
             probe.z += actor->zpos;
             probe.y = actor->ypos + 500.0f;
-            if (func_15046C80(&probe, 0, actor->ypos - 5000.0f, &hit) != 0 && hit.source != 3) {
+            if (collision_probeFloorSurfABSet0Cached(&probe, 0, actor->ypos - 5000.0f, &hit) != 0 && hit.source != 3) {
                 pos.x = probe.x;
                 pos.y = hit.height;
                 pos.z = probe.z;
@@ -1198,8 +1198,8 @@ s32 func_151368A8(GrowingBloodParticle *particle) {
             particle->head.def.unk44 = alpha;
         }
     }
-    particle->head.def.width += *growth * D_800BE9A4;
-    particle->head.def.height += *growth * D_800BE9A4;
+    particle->head.def.width += *growth * gFrameDelta;
+    particle->head.def.height += *growth * gFrameDelta;
     return 1;
 }
 
@@ -1323,12 +1323,12 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
         return;
     }
     scale = (actor->scale_xz + actor->scale_y) * 0.5f;
-    func_1515C244(actor, &position, &unused0, &unused1);
+    sprite_getActorBodyBounds(actor, &position, &unused0, &unused1);
     kind = func_15134070(actor);
     if (kind == BLOOD_PROFILE_NONE) {
         return;
     }
-    func_1504715C(&hit, actor);
+    collision_initHitFromObject(&hit, actor);
     if (arg3 != 0) {
         func_1513A24C(&position, D_80089A20[kind], D_800A3C30,
                       ((arg5 != 0) || ((kind == 4) && (actor->character_type != MODEL_UGA_BUGA_BLUE_HEADGEAR)))
@@ -1368,7 +1368,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
         } else {
             heavy = 0;
         }
-        func_151A9834(&position, position.y - 300.0f, 300.0f, &hit,
+        beam_spawnAtGroundPoints(&position, position.y - 300.0f, 300.0f, &hit,
                       (func_150ADA20() % 6U) + 18, 0, &heavy, arg6, arg7);
     }
     if (arg4 != 0) {
@@ -1456,7 +1456,7 @@ void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s
                 } while (sparks != 0);
             }
         }
-        if (doDecals && D_800BE616) {
+        if (doDecals && gIsMultiplayer) {
             count = (func_150ADA20() & 3) + 3;
             if (count != 0) {
                 do {
@@ -1553,10 +1553,10 @@ void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
     }
     switch (mode) {
         case 1:
-            func_151C577C(from, to, direction, 1, 1, 1, arg4, arg5);
+            weapon_spawnHitBurst(from, to, direction, 1, 1, 1, arg4, arg5);
             return;
         case 2:
-            func_151C329C(from, arg4, arg5);
+            weapon_spawnImpactBurst(from, arg4, arg5);
             return;
         case 3:
             func_15136F50(from, to, direction, 1, arg4, arg5);
@@ -1596,15 +1596,15 @@ void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
         return;
     }
     scale = (actor->scale_xz + actor->scale_y) * 0.5f;
-    func_1515C244(actor, &position, &unused0, &unused1);
-    func_1504715C(&hit, actor);
+    sprite_getActorBodyBounds(actor, &position, &unused0, &unused1);
+    collision_initHitFromObject(&hit, actor);
     probe.x = position.x;
     probe.y = position.y + 100.0f;
     probe.z = position.z;
     if (func_1514672C(&probe) == 0) {
         return;
     }
-    if (func_15046C80(&probe, 0, probe.y - 500.0f, &hit) != 0) {
+    if (collision_probeFloorSurfABSet0Cached(&probe, 0, probe.y - 500.0f, &hit) != 0) {
         if (hit.flags & 1) {
             pool = 1;
         } else {
@@ -1789,10 +1789,10 @@ void func_15138120(Actor *actor, s32 kind, u8 arg2) {
         desc.mode = 0;
         desc.updateCallback = -1;
         desc.rate = 1.0f;
-        desc.sound = func_1000FA64(0x4FE, (s32)actor->xpos,
+        desc.sound = sound_addDynamicSound(0x4FE, (s32)actor->xpos,
                                    (s32)actor->ypos,
                                    (s32)actor->zpos, 0x5DC0,
-                                   600, 300, (SoundRecordCallback)func_1000EBC4,
+                                   600, 300, (SoundRecordCallback)sound_fadeOutCallback,
                                    (void *)120, 0, 0, 0);
         func_15134DAC(&desc, 0);
     }
@@ -1847,7 +1847,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
     Vec3f a;
     Vec3f b;
 
-    func_1503F404(BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
+    model_decomposeBoneMatrix(BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
     spawn.scale.x = 1.0f;
     spawn.radius = 20.0f;
     spawn.elasticity = 0.5610000491f;
@@ -1897,7 +1897,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
         i = 0;
         found = 0;
         do {
-            if (func_1503195C(actor, ids[i], 0) != NULL) {
+            if (attach_find(actor, ids[i], 0) != NULL) {
                 found = 1;
             } else {
                 i++;
@@ -1991,7 +1991,7 @@ void func_15138BC0(Actor *actor, u8 arg1, s32 arg2) {
         valid = func_151380B4(actor, kind, &position);
         func_15138120(actor, kind, 1);
         if (valid != 0) {
-            func_1504715C(&hit, actor);
+            collision_initHitFromObject(&hit, actor);
             func_151382E0(&position, kind, &hit, arg1, arg2);
             func_15138424(actor, &position, kind, &hit, arg1, arg2);
         }
@@ -2010,7 +2010,7 @@ void func_15138C80(Actor *actor, u8 arg1, s32 arg2) {
         valid = func_151380B4(actor, kind, &position);
         func_15138120(actor, kind, 1);
         if (valid != 0) {
-            func_1504715C(&hit, actor);
+            collision_initHitFromObject(&hit, actor);
             func_151382E0(&position, kind, &hit, arg1, arg2);
             switch (kind) {
             case 16:
@@ -2150,7 +2150,7 @@ void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit
         u32 yaw;
         u32 pitch;
 
-        func_1503F404(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
+        model_decomposeBoneMatrix(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
                       &position.x, &position.y, &position.z,
                       &second[0], &second[1], &second[2]);
         packet.radius = 1.0f;
@@ -2365,7 +2365,7 @@ void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8
         }
         {
             s32 q; // matching: unused stack slot
-            func_1503F404(BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
+            model_decomposeBoneMatrix(BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
         }
         spawn2.radius = 1.0f;
         spawn2.elasticity = 0.6490000486f;
@@ -2494,7 +2494,7 @@ void func_15139D74(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
         u8 j;
         u8 bit;
 
-        func_1503F404(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
+        model_decomposeBoneMatrix(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
                       &position.x, &position.y, &position.z,
                       &second[0], &second[1], &second[2]);
         packet.radius = 1.0f;
@@ -2602,7 +2602,7 @@ void func_1513A24C(Vec3f *position, const s32 *table, const f32 *arg2, s32 count
         break;
     }
     }
-    func_1515080C(&config, table, arg2, count, &extra, 0xC, 6, 1, flag, hit, 5.0f, 1, D_800BE616 ? 1 : 0, arg9, argA);
+    func_1515080C(&config, table, arg2, count, &extra, 0xC, 6, 1, flag, hit, 5.0f, 1, gIsMultiplayer ? 1 : 0, arg9, argA);
     func_15133E3C(0, 0x45);
 }
 
@@ -2748,7 +2748,7 @@ void func_1513A6E0(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
         func_1513A5E0(origin, arg3, arg4);
         {
             s32 q; // matching: unused stack slot
-            func_1503F404(BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
+            model_decomposeBoneMatrix(BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
         }
         spawn2.radius = 1.0f;
         spawn2.elasticity = 0.6490000486f;
@@ -2878,7 +2878,7 @@ void func_1513ABB8(Actor *actor, Vec3f *origin, u8 variant, CollisionHit *hit, u
         u8 j;
         u8 bit;
 
-        func_1503F404(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
+        model_decomposeBoneMatrix(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
                       &position.x, &position.y, &position.z,
                       &second[0], &second[1], &second[2]);
         packet.radius = 1.0f;
@@ -3018,7 +3018,7 @@ void func_1513B0F8(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1503F404(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
+    model_decomposeBoneMatrix(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
                   &rotation.x, &rotation.y, &rotation.z,
                   &second[0], &second[1], &second[2]);
     drop.radius = 1.0f;

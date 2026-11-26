@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c and game/Effects/Blood/blood.c
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
 SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
@@ -116,9 +116,9 @@ void func_150B0D20(DDB60Effect *effect) {
         }
     }
     if (emit) {
-        data->timer += (D_8009F860[emit] + func_150ADA68() * D_8009F868[emit]) * D_800BE9A4;
+        data->timer += (D_8009F860[emit] + func_150ADA68() * D_8009F868[emit]) * gFrameDelta;
         if (data->timer > 1.0f) {
-            if (func_1515C0F8(owner, &refVel) == 0) {
+            if (sprite_findActorMotion(owner, &refVel) == 0) {
                 refVel = &D_800A5480;
             }
             func_1514373C(owner->theta * 0.01745329238f, 1.0f, &forward[0], &forward[1]);

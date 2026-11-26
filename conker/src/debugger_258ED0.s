@@ -11,14 +11,14 @@
 /* Handwritten function */
 glabel func_16003650
     /* 258ED0 16003650 24080000 */  addiu      $t0, $zero, 0x0
-    /* 258ED4 16003654 3C041600 */  lui        $a0, %hi(D_160038AC)
-    /* 258ED8 16003658 248438AC */  addiu      $a0, $a0, %lo(D_160038AC)
-    /* 258EDC 1600365C 3C051600 */  lui        $a1, %hi(D_1600392C)
-    /* 258EE0 16003660 24A5392C */  addiu      $a1, $a1, %lo(D_1600392C)
-    /* 258EE4 16003664 3C061600 */  lui        $a2, %hi(D_160039AC)
-    /* 258EE8 16003668 24C639AC */  addiu      $a2, $a2, %lo(D_160039AC)
-    /* 258EEC 1600366C 3C071600 */  lui        $a3, %hi(D_16003A2C)
-    /* 258EF0 16003670 24E73A2C */  addiu      $a3, $a3, %lo(D_16003A2C)
+    /* 258ED4 16003654 3C041600 */  lui        $a0, %hi(gTlbEntryLo0)
+    /* 258ED8 16003658 248438AC */  addiu      $a0, $a0, %lo(gTlbEntryLo0)
+    /* 258EDC 1600365C 3C051600 */  lui        $a1, %hi(gTlbEntryLo1)
+    /* 258EE0 16003660 24A5392C */  addiu      $a1, $a1, %lo(gTlbEntryLo1)
+    /* 258EE4 16003664 3C061600 */  lui        $a2, %hi(gTlbEntryHi)
+    /* 258EE8 16003668 24C639AC */  addiu      $a2, $a2, %lo(gTlbEntryHi)
+    /* 258EEC 1600366C 3C071600 */  lui        $a3, %hi(gTlbPageMask)
+    /* 258EF0 16003670 24E73A2C */  addiu      $a3, $a3, %lo(gTlbPageMask)
   .L16003674:
     /* 258EF4 16003674 40880000 */  mtc0       $t0, $0 /* handwritten instruction */
     /* 258EF8 16003678 00000000 */  nop

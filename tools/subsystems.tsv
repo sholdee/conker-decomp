@@ -1,7 +1,7 @@
 src/init_1050.c	boot	main and idle threads: heap/framebuffer/VI setup, boot data load and decompression
-src/init_1420.c	libc	printf back end (_Ldtob/_Ldunscale/_Genld) and a block release helper
-src/init_2070.c	libc	printf back end (_Litob-style integer conversion with jump table)
-src/init_2E50.c	os	Rare's copy of __osDevMgrMain with PI-thread interlock
+src/init/Libc/Xldtob/xldtob.c	libc	printf back end (_Ldtob/_Ldunscale/_Genld) and a block release helper
+src/init/Libc/Xprintf/xprintf.c	libc	printf back end (_Litob-style integer conversion with jump table)
+src/init/Os/DevMgr/devmgr.c	os	Rare's copy of __osDevMgrMain with PI-thread interlock
 src/init_38C0.c	boot	empty early-boot stub
 src/init_38E0.c	boot	early-boot helper pair (permuter-matched)
 src/init_3920.c	heap	clears the expansion-pak flag used for memory layout
@@ -10,42 +10,42 @@ src/init_39B0.c	boot	empty early-boot stub
 src/init_39C0.c	boot	screen width/height setup
 src/init_3BD0.c	heap	heap initialisation: whole heap as one free block
 src/init_3C40.c	heap	tagged block allocator: alloc, free, alignment classes
-src/init_4470.c	rom	cartridge ROM reads: blocking/non-blocking PI DMA and uncached copies
+src/init/Rom/RomDma/romdma.c	rom	cartridge ROM reads: blocking/non-blocking PI DMA and uncached copies
 src/init_49E0.c	sched	scheduler thread: VI retrace, RSP/RDP completion, gfx task state machine
 src/init_50A0.c	sched	scheduler client helpers and thread stop
 src/init_5570.c	cont	Rumble Pak motor control (osMotorStop/Start copy)
 src/init_57E0.c	cont	Rumble Pak motor init (_MakeMotorData copy)
-src/init_8180.c	audio	audio driver/device/sound-player configuration tables
-src/init_8F90.c	audio	audio manager: synthesis driver setup, audio thread, sample DMA cache, sound banks
-src/init_A420.c	sound	positional sound pan/volume, sounds spread along a path
-src/init_B1B0.c	music	music sequence manager: tracks, volume ramps, per-frame sequence hooks
-src/init_EB00.c	sound	sound record / voice slot system: spatial records, queue, variants, callbacks
-src/init_11FA0.c	audio	per-frame audio mix selector (override/fallback/one-shot)
-src/init_12560.c	mp3	streamed-audio front end: message ring and track start helpers
+src/init/Audio/SeqPlayer/seqplayer.c	audio	audio driver/device/sound-player configuration tables
+src/init/Audio/AudioMgr/audiomgr.c	audio	audio manager: synthesis driver setup, audio thread, sample DMA cache, sound banks
+src/init/Audio/SoundPan/soundpan.c	sound	positional sound pan/volume, sounds spread along a path
+src/init/Audio/Tune/tune.c	music	music sequence manager: tracks, volume ramps, per-frame sequence hooks
+src/init/Audio/DynamicSound/dynamicsound.c	sound	sound record / voice slot system: spatial records, queue, variants, callbacks
+src/init/Audio/MixSelector/mixselector.c	audio	per-frame audio mix selector (override/fallback/one-shot)
+src/init/Audio/Mp3Stream/mp3stream.c	mp3	streamed-audio front end: message ring and track start helpers
 src/libultra/audio/init_17870.c	audio	Rare audio output-mode setup
-src/init_1AAE0.c	audio	Conker's synthesis driver with bank-loading hooks, channel state
-src/init_1C060.c	audio	libaudio node linking helpers (alLink-style)
-src/init_1E480.c	audio	n_alSynDelete
-src/init_1E4A0.c	audio	synth FX allocation wrapper (n_alFxNew)
-src/init_1E530.c	audio	Rare's reverb/chorus FX (n_reverb variant)
-src/init_1FB40.c	audio	Rare's aux-bus low-pass filter and main bus handler
-src/init_20000.c	audio	n_alEnvmixerPull (envelope mixer)
-src/init_210C0.c	audio	aux voice pull (N_PVoice priority)
-src/init_214F0.c	audio	ADPCM decoder stage (Rare rework of _decodeChunk)
-src/init_22040.c	audio	per-voice low-pass filter stage
-src/init_22460.c	audio	Rare's rework of n_alResamplePull
-src/game_2D4B0.c	music	per-level music setup and update (LevelMusic)
+src/init/Audio/SeqVoice/seqvoice.c	audio	Conker's synthesis driver with bank-loading hooks, channel state
+src/init/Audio/EvtQueue/n_evtqueue.c	audio	libaudio node linking helpers (alLink-style)
+src/init/Audio/SynDelete/n_syndelete.c	audio	n_alSynDelete
+src/init/Audio/SynAllocFx/n_synallocfx.c	audio	synth FX allocation wrapper (n_alFxNew)
+src/init/Audio/Reverb/n_reverb.c	audio	Rare's reverb/chorus FX (n_reverb variant)
+src/init/Audio/MainBus/n_mainbus.c	audio	Rare's aux-bus low-pass filter and main bus handler
+src/init/Audio/Env/n_env.c	audio	n_alEnvmixerPull (envelope mixer)
+src/init/Audio/AuxBus/n_auxbus.c	audio	aux voice pull (N_PVoice priority)
+src/init/Audio/AdpcmLoad/adpcmload.c	audio	ADPCM decoder stage (Rare rework of _decodeChunk)
+src/init/Audio/VoiceLowPass/voicelowpass.c	audio	per-voice low-pass filter stage
+src/init/Audio/Resample/n_resample.c	audio	Rare's rework of n_alResamplePull
+src/game/Audio/LevelMusic/levelmusic.c	music	per-level music setup and update (LevelMusic)
 src/game_2DDF0.c	level	per-level colour/parameter tables setup from the level header
-src/game_2DF70.c	collision	map background setup and triangle quadtree (collision triangle tables)
-src/game_2E910.c	collision	split from game_2DF70.c (unit boundary in the ROM); collision-triangle code
+src/game/Collision/MapBackground/mapbackground.c	collision	map background setup and triangle quadtree (collision triangle tables)
+src/game/Collision/QuadTree/quadtree.c	collision	split from game_2DF70.c (unit boundary in the ROM); collision-triangle code
 src/game_305D0.c	level	level model loading/rebasing, vertex colour groups, texture size table
 src/game_30E90.c	level	level object placements: spawning objects from the level's object lists
 src/game_32200.c	model	per-view vertex buffer copies for actor quads
-src/game/done/game_322B0.c	model	object parts state reset and per-level buffer allocation
-src/game/done/game_323B0.c	model	attachment/bone-chain globals reset
-src/game/done/game_323E0.c	actor	clears the per-object-id tables
+src/game/Model/PartsReset/partsreset.c	model	object parts state reset and per-level buffer allocation
+src/game/Model/AttachReset/attachreset.c	model	attachment/bone-chain globals reset
+src/game/Actor/ClearModelTables/clearmodeltables.c	actor	clears the per-object-id tables
 src/game_32490.c	aim	loads the aim point (sphere) table for the level
-src/game/done/game_32720.c	zone	resets the zone-object cursor
+src/game/Zone/ZoneCursor/zonecursor.c	zone	resets the zone-object cursor
 src/game_32740.c	camera	camera views init and placing a camera at an eye/target
 src/game/done/game_32F10.c	camera	per-level camera init dispatch
 src/game/done/game_32F60.c	camera	per-level camera preset hook
@@ -70,24 +70,24 @@ src/game/done/game_33460.c	camera	per-level camera preset hook
 src/game/done/game_334C0.c	camera	per-level camera hook with zone-dependent heights
 src/game/done/game_33620.c	camera	per-level camera preset hook
 src/game_33660.c	cont	Rumble Pak osMotorStop/_MakeMotorData as real functions
-src/game_33990.c	save	EEPROM save data: blocks, checksums, request queue
-src/game/done/game_34ED0.c	game	clears BSS and the scratch buffer
-src/game_34F20.c	game	starts a level: sets map, runs subsystem setup
-src/game_357F0.c	zone	random point inside a trigger region; uniform random
+src/game/Save/SaveData/savedata.c	save	EEPROM save data: blocks, checksums, request queue
+src/game/Game/ClearBss/clearbss.c	game	clears BSS and the scratch buffer
+src/game/Game/LevelStart/levelstart.c	game	starts a level: sets map, runs subsystem setup
+src/game/Zone/RandomPoint/randompoint.c	zone	random point inside a trigger region; uniform random
 src/game/done/game_35CF0.c	effect	clears the homing-effect slot table
 src/game_35D20.c	effect	empties the object lists and runs reset callbacks
 src/game/done/game_35E80.c	particle	resets the sprite-particle slots
-src/game/done/game_35EC0.c	screen	resets per-view screen-effect state
+src/game/Screen/ResetEffects/reseteffects.c	screen	resets per-view screen-effect state
 src/game/done/game_36040.c	effect	allocates the effect FIFO queue
 src/game_360A0.c	level	level setup: spray emitter spanning an object's radius
 src/game/done/game_36280.c	anim	resets the vertex morph slots
 src/game_362B0.c	prop	allocates wave-chain sample buffers
 src/game/done/game_36600.c	flare	resets lens-flare state
-src/game_36680.c	light	level light points: global light colour, colour tables, light callbacks
+src/game/Lighting/LevelLights/levellights.c	light	level light points: global light colour, colour tables, light callbacks
 src/game_38050.c	light	split off in the per-file pass; level particle and sprite setup (header group in light.h)
-src/game/done/game_39690.c	swarm	resets the effect model slots
+src/game/Swarm/SwarmReset/swarmreset.c	swarm	resets the effect model slots
 src/game_39750.c	particle	ambient particles spawned over a region; random helpers
-src/game_3B920.c	game	resets game globals and runs per-level subsystem init
+src/game/Game/LevelInit/levelinit.c	game	resets game globals and runs per-level subsystem init
 src/game_3BA70.c	level	level module reset and per-level start effects
 src/game/done/game_3BFD0.c	level	per-level setup stub (empty)
 src/game/done/game_3BFE0.c	level	per-level setup: timed effects at fixed points
@@ -123,61 +123,61 @@ src/game/done/game_3F450.c	level	per-level setup: timed effect
 src/game/done/game_3F4D0.c	level	per-level setup: bolt effect
 src/game/done/game_3F560.c	level	per-level setup: timed effect
 src/game_3F670.c	level	per-level setup: particles over ground triangles
-src/game_3F820.c	view	per-view projection matrices from view sizes (level setup)
+src/game/View/ViewOrtho/viewortho.c	view	per-view projection matrices from view sizes (level setup)
 src/game_3F950.c	view	split from game_3F820.c (two .rodata units in the ROM); level setup (header group in view.h)
 src/game/done/game_3FBD0.c	level	per-level query by map id
 src/game/done/game_3FC20.c	level	per-level setup stub (empty)
 src/game/done/game_3FC30.c	level	resets wave-deformer slots
 src/game_3FC60.c	env	level vertex colour group setup
 src/game_40490.c	level	level object spawn handlers: emitters, beams, area effects
-src/game_42DC0.c	text	font loading from ROM and glyph unpacking
-src/game_43330.c	gfx	allocates the per-frame display list buffers
-src/game_433F0.c	view	player count and split-screen view layouts
-src/game_43620.c	mp3	streamed-audio player voice init
-src/game/done/game_43760.c	actor	clears the actor array and multiplayer mode globals
-src/game/done/game_43820.c	actor	sets default actor bounds for players
-src/game_43880.c	collision	loads the level's collision cylinder sets
-src/game_439B0.c	text	text box config table setup
-src/game/done/game_43B20.c	player	spawn point table load
+src/game/Text/FontLoad/fontload.c	text	font loading from ROM and glyph unpacking
+src/game/Gfx/DisplayListAlloc/displaylistalloc.c	gfx	allocates the per-frame display list buffers
+src/game/View/ViewLayout/viewlayout.c	view	player count and split-screen view layouts
+src/game/Audio/Mp3Voice/mp3voice.c	mp3	streamed-audio player voice init
+src/game/Actor/ClearActors/clearactors.c	actor	clears the actor array and multiplayer mode globals
+src/game/Actor/DefaultSize/defaultsize.c	actor	sets default actor bounds for players
+src/game/Collision/CylinderSets/cylindersets.c	collision	loads the level's collision cylinder sets
+src/game/Text/TextInit/textinit.c	text	text box config table setup
+src/game/Player/SpawnLoad/spawnload.c	player	spawn point table load
 src/game_43D00.c	level	spawn table and path allocation per level
-src/game_447B0.c	player	player stats init per player mask
+src/game/Player/StatsInit/statsinit.c	player	player stats init per player mask
 src/game_44A90.c	player	player stat limits and globals init
-src/game_44C40.c	zone	level object bounds and zone bitsets
-src/game_45B80.c	game	main loop: frame message handling, display list head, per-frame draw
-src/game_476D0.c	view	view allocation and framebuffer display list setup
-src/game_487D0.c	light	player directional light easing toward camera
-src/game_48B10.c	model	model vertex colour copy
+src/game/Zone/ZoneBounds/zonebounds.c	zone	level object bounds and zone bitsets
+src/game/Game/MainLoop/mainloop.c	game	main loop: frame message handling, display list head, per-frame draw
+src/game/View/Views/views.c	view	view allocation and framebuffer display list setup
+src/game/Lighting/PlayerLight/playerlight.c	light	player directional light easing toward camera
+src/game/Model/VertexColour/vertexcolour.c	model	model vertex colour copy
 src/game_48FD0.c	cont	controller reading, pad mapping and read timer
-src/game_49BE0.c	game	game mode / map switch requests
-src/game/done/game_49D10.c	game	stub (empty)
-src/game/done/game_49D20.c	game	stub (empty)
+src/game/Game/LevelChange/levelchange.c	game	game mode / map switch requests
+src/game/Game/FrameStub/framestub.c	game	stub (empty)
+src/game/Game/UpdateStub/updatestub.c	game	stub (empty)
 src/game_49D30.c	cutscene	cutscene sequences: tracks, paths, channel keyframes, subtitles
 src/game_50D20.c	cutscene	cutscene event: track target id
 src/game_50D80.c	cutscene	cutscene script runner and cutscene sounds
-src/game_57FA0.c	rom	ROM file tables with compression flags, MRU cache
-src/game_58F80.c	actor	per-frame object update: LOD, culling, bone matrices, attachments
-src/game_5D2C0.c	attach	model attachments: hooks, per-frame matrices, loading
-src/game_61490.c	bone	bone command lists for actors (angle commands)
-src/game_61D10.c	bone	bone channel commands and levels
-src/game_623D0.c	model	reflections: mirrored model matrices queue and draw
-src/game_637C0.c	bone	look-at bone matrix rebuild
+src/game/Rom/RomTable/romtable.c	rom	ROM file tables with compression flags, MRU cache
+src/game/Actor/ObjectUpdate/objectupdate.c	actor	per-frame object update: LOD, culling, bone matrices, attachments
+src/game/Attach/Attachment/attachment.c	attach	model attachments: hooks, per-frame matrices, loading
+src/game/Bone/BoneCommands/bonecommands.c	bone	bone command lists for actors (angle commands)
+src/game/Bone/BoneChannels/bonechannels.c	bone	bone channel commands and levels
+src/game/Model/Reflection/reflection.c	model	reflections: mirrored model matrices queue and draw
+src/game/Bone/BoneLookAt/bonelookat.c	bone	look-at bone matrix rebuild
 src/game_63A20.c	model	actor quad vertices (pinned billboard) placement and draw
 src/game_64120.c	aim	aim update: turning bones toward targets, aim limits
-src/game_68C70.c	bone	5-joint bone chain simulation
-src/game_6A3D0.c	model	model file loading: sections, vertices, animation headers
+src/game/Bone/BoneChain/bonechain.c	bone	5-joint bone chain simulation
+src/game/Model/ModelLoad/modelload.c	model	model file loading: sections, vertices, animation headers
 src/game_6B280.c	aim	releases aim point entries
-src/game_6B320.c	model	object parts: skeleton broken into flying parts
+src/game/Model/ObjParts/objparts.c	model	object parts: skeleton broken into flying parts
 src/game_6C960.c	anim	animation instance creation and per-frame part matrices
-src/game_6CCB0.c	zone	zone tree walk and zone-object cursor
-src/game_6CEA0.c	debug	debug task menu (reset tasks) and analog menu repeat
-src/game_6D800.c	debug	display list checker: segments, malformed commands
-src/game_6E240.c	debug	debug pixel markers in the framebuffer
-src/game_6E770.c	text	font glyph lookup and string drawing
-src/game_6EA90.c	text	glyph sprites, icon glyphs
-src/game_70200.c	text	queued HUD text lines and icons, formatting
+src/game/Zone/ZoneTree/zonetree.c	zone	zone tree walk and zone-object cursor
+src/game/Debug/TaskMenu/taskmenu.c	debug	debug task menu (reset tasks) and analog menu repeat
+src/game/Debug/DlCheck/dlcheck.c	debug	display list checker: segments, malformed commands
+src/game/Debug/PixelMarker/pixelmarker.c	debug	debug pixel markers in the framebuffer
+src/game/Text/FixedFont/fixedfont.c	text	font glyph lookup and string drawing
+src/game/Text/FontDraw/fontdraw.c	text	glyph sprites, icon glyphs
+src/game/Text/TextQueue/textqueue.c	text	queued HUD text lines and icons, formatting
 src/game_71240.c	math	look-at and rotate-scale matrix builders
 src/game_71770.c	math	matrix translate in local axes
-src/game_71820.c	collision	collision sets, floors/ceilings, trigger volumes and nodes
+src/game/Collision/Probe/probe.c	collision	collision sets, floors/ceilings, trigger volumes and nodes
 src/game/done/game_75810.c	math	float arcsine/arccos wrappers over fixed-point tables
 src/game/done/game_75950.c	math	fixed-point trig helper
 src/game/done/game_75A90.c	math	fixed-point arc cosine / arc sine tables
@@ -195,47 +195,47 @@ src/game_77760.c	math	expf
 src/game_778B0.c	math	powf
 src/game/done/game_77A90.c	math	tanf
 src/game_77AD0.c	math	logf
-src/game_77BE0.c	actor	per-frame actor update loop, player-controlled actor update, move-to-target, path following (merged unit; defines movement_obj)
-src/game_83300.c	actor	actor zones, animation playback state, hit reactions
-src/game_90840.c	actor	actor turning, throws and linked-object helpers
-src/game_97AA0.c	actor	movement-hit handlers
-src/game_981E0.c	event	actor timed event list handlers (sounds, effects, collision handlers)
-src/game_A28B0.c	script	object byte-code script interpreter commands
+src/game/Actor/Movement/movement.c	actor	per-frame actor update loop, player-controlled actor update, move-to-target, path following (merged unit; defines movement_obj)
+src/game/Actor/ActorMotion/actormotion.c	actor	actor zones, animation playback state, hit reactions
+src/game/Actor/ActorActions/actoractions.c	actor	actor turning, throws and linked-object helpers
+src/game/Actor/MovementHit/movementhit.c	actor	movement-hit handlers
+src/game/Event/TimedEvent/timedevent.c	event	actor timed event list handlers (sounds, effects, collision handlers)
+src/game/Script/ObjScript/objscript.c	script	object byte-code script interpreter commands
 src/game_A9260.c	anim	animation playback stepping, looping, end callbacks
-src/game_A9820.c	actor	object size computation
-src/game_A9D90.c	actor	actor kill / respawn
+src/game/Actor/ObjectSize/objectsize.c	actor	object size computation
+src/game/Actor/KillRespawn/killrespawn.c	actor	actor kill / respawn
 src/game_AB760.c	face	character expressions and eye blinking
 src/game_AC030.c	anim	idle animation sequences
 src/game_AD6B0.c	face	scripted expressions
-src/game_AD9B0.c	text	object text slots and text queueing
-src/game_AE1D0.c	collision	hit-sphere point/ray tests
-src/game_AEB40.c	collision	ray casts against world and objects, cylinders
-src/game_AFA70.c	collision	split from game_AEB40.c; same subsystem
-src/game_B21B0.c	player	player stats and spawn points
-src/game_B2BC0.c	player	split from game_B21B0.c; same subsystem
+src/game/Text/ContextText/contexttext.c	text	object text slots and text queueing
+src/game/Collision/HitSphere/hitsphere.c	collision	hit-sphere point/ray tests
+src/game/Collision/RayCast/raycast.c	collision	ray casts against world and objects, cylinders
+src/game/Collision/Spawn/spawn.c	collision	split from game_AEB40.c; same subsystem
+src/game/Player/SpawnPoint/spawnpoint.c	player	player stats and spawn points
+src/game/Player/PlayerStats/playerstats.c	player	split from game_B21B0.c; same subsystem
 src/game_B3020.c	path	path graph: nodes, layers, nearest node, search
 src/game_B4080.c	mp	multiplayer game state, zones, racers
 src/game_B7060.c	mp	split from game_B4080.c; same subsystem
 src/game_BC430.c	math	degrees-to-radians helper
 src/game_BC510.c	hud	per-player HUD overlay: blocks, water, bubbles, race time/laps
-src/game_C1D70.c	sprite	rotated texcoords and point groups
-src/game_C2350.c	sprite	textures and sprite drawing
-src/game_C3E20.c	script	scripted actor moves to camera poses
-src/game_C4DC0.c	script	script set commands for objects
-src/game_C8950.c	script	task/record store and script query/command dispatch
-src/game_C98F0.c	script	script event handler
-src/game_C9EC0.c	script	task resources: dependencies, loaded bits, script command start/end/poll
-src/game_CB1C0.c	script	script handler: swarm follow
-src/game_CB3D0.c	script	script command/query handlers with integer params
-src/game_CBAF0.c	script	script handlers: music/sound start and stop
-src/game_CBDB0.c	script	script query/set handlers for objects
-src/game_CCD00.c	script	record command and query handlers
-src/game_CD5A0.c	script	slot records
-src/game_CD860.c	script	record command/query handlers
-src/game_CDE80.c	zone	zone state: sound zones, music-channel zones, respawn; cylinder collision of trigger zones, segment tests (merged unit)
-src/game_DB750.c	collision	split from game_D0960.c; same subsystem
+src/game/Sprite/PointGroup/pointgroup.c	sprite	rotated texcoords and point groups
+src/game/Sprite/SpriteDraw/spritedraw.c	sprite	textures and sprite drawing
+src/game/Script/CameraCmd/cameracmd.c	script	scripted actor moves to camera poses
+src/game/Script/ActorCmd/actorcmd.c	script	script set commands for objects
+src/game/Script/TaskSet/taskset.c	script	task/record store and script query/command dispatch
+src/game/Script/CutsceneCmd/cutscenecmd.c	script	script event handler
+src/game/Script/EffectCmd/effectcmd.c	script	task resources: dependencies, loaded bits, script command start/end/poll
+src/game/Script/SwarmCmd/swarmcmd.c	script	script handler: swarm follow
+src/game/Script/MiscCmd/misccmd.c	script	script command/query handlers with integer params
+src/game/Script/MusicCmd/musiccmd.c	script	script handlers: music/sound start and stop
+src/game/Script/ObjectCmd/objectcmd.c	script	script query/set handlers for objects
+src/game/Script/TaskCmd/taskcmd.c	script	record command and query handlers
+src/game/Script/TimerCmd/timercmd.c	script	slot records
+src/game/Script/ZoneCmd/zonecmd.c	script	record command/query handlers
+src/game/Zone/ZoneState/zonestate.c	zone	zone state: sound zones, music-channel zones, respawn; cylinder collision of trigger zones, segment tests (merged unit)
+src/game/Collision/WobbleQuad/wobblequad.c	collision	split from game_D0960.c; same subsystem
 src/game_DBA60.c	effect	actor-attached effect lists; level flag hook; code checksum (anti-tamper)
-src/game_DC360.c	trail	motion trails sprayed from a ring around an object
+src/game/Trail/TrailSpray/trailspray.c	trail	motion trails sprayed from a ring around an object
 src/game_DC6B0.c	particle	smoke emitters and projectile smoke particles
 src/game_DDB60.c	effect	effects at an actor and perimeter spawn points
 src/game_DDF10.c	effect	split from game_DDB60.c; same subsystem
@@ -244,11 +244,11 @@ src/game_DF2D0.c	particle	emitter effect spawning particles at a random rate; le
 src/game_DF930.c	particle	streak particle spawns and object effect burst
 src/game/Effects/PipeExplode/pipeexplode.c	pipeexplode	pipe explosion effect (../Effects/PipeExplode/pipeexplode.c)
 src/game_E0F60.c	effect	bone effect with camera event and streak particles
-src/game_E1280.c	trail	particle trails: ring buffer of points drawn as a ribbon
+src/game/Trail/ScatterTrail/scattertrail.c	trail	particle trails: ring buffer of points drawn as a ribbon
 src/game_E2880.c	effect	spark effect attached to an owner
 src/game_E2DA0.c	effect	particle bursts at tracked objects, bolt rings, facing command
 src/game_E3C90.c	camera	per-level camera setup from game-flag queries
-src/game_E4070.c	sprite	2D sprite update routines (scroll, fade, slide, blink)
+src/game/Sprite/SpriteRoutines/spriteroutines.c	sprite	2D sprite update routines (scroll, fade, slide, blink)
 src/game_E4FF0.c	effect	break-up effects: debris and tumbling pieces
 src/game_E5E90.c	particle	collision handlers of pooled physics particles
 src/game_E7380.c	particle	particle motion and surface bursts on movement (with checksum range)
@@ -258,7 +258,7 @@ src/game_E8090.c	effect	joint effects: sound, particle bursts, ground effect
 src/game_E8BB0.c	camera	per-level camera flag hook
 src/game_E8C10.c	effect	actor-specific particle bursts and ground bounce callback
 src/game_EABF0.c	effect	split from game_E8C10.c; same subsystem
-src/game_EB020.c	actor	follower update copying the owner's angles
+src/game/Actor/Follower/follower.c	actor	follower update copying the owner's angles
 src/game_EB340.c	effect	level effect spawners (bee cavern sfx effects)
 src/game_EB600.c	effect	split from game_EB340.c; same subsystem
 src/game_EBD00.c	camera	per-level camera hook
@@ -266,7 +266,7 @@ src/game_EBE60.c	effect	ground effects under an actor's bones
 src/game_EC420.c	prop	scenery behaviours: bobbing, scrolling, platforms, mirrored emitters
 src/game_EDE60.c	particle	emitter slot pools
 src/game_EE710.c	particle	dust at an actor's feet
-src/game_EEB10.c	trail	particle kind 2: trail launched outward; ring of trails
+src/game/Trail/TrailRing/trailring.c	trail	particle kind 2: trail launched outward; ring of trails
 src/game_EEE70.c	effect	bone effect: particle ring and flat quad; growing billboard particle
 src/game_EF410.c	particle	particle emitters (puff sprays) with tamper check
 src/game_EFEA0.c	particle	split from game_EF410.c; same subsystem
@@ -274,25 +274,25 @@ src/game_F0610.c	particle	split from game_EFEA0.c; same subsystem
 src/game_F15D0.c	effect	effect following an owner with a pulsing particle
 src/game/done/game_F20A0.c	camera	per-level camera flag hook
 src/game_F21D0.c	prop	pendulum and texture scroll behaviours
-src/game_F2820.c	beam	camera-facing textured strip between two points (object type 0x46)
+src/game/Beam/Strip/strip.c	beam	camera-facing textured strip between two points (object type 0x46)
 src/game_F3270.c	particle	randomised particles and watcher emitters
 src/game_F3BA0.c	effect	character watcher effects: flickering floor sprite and emitter
 src/game_F44D0.c	blood	mirrored blood strips attached to an owner
 src/game_F4800.c	camera	per-level camera flag hook
-src/game_F4890.c	attach	attachment hook 8: flashing light
+src/game/Attach/FlashingLight/flashinglight.c	attach	attachment hook 8: flashing light
 src/game_F4B20.c	effect	small effect update (near-miss function)
 src/game_F4C20.c	camera	per-level camera flag hook
 src/game_F4D20.c	prop	spinning linked scenery objects with sound
 src/game_F52B0.c	camera	per-level camera flags and range from flag queries
 src/game_F5800.c	effect	bounce records and texture frame tables
-src/game_F5BE0.c	attach	attachment hook 10: projectile while in a state
+src/game/Attach/AttachProjectile/attachprojectile.c	attach	attachment hook 10: projectile while in a state
 src/game_F5D80.c	effect	expanding ring effects and radial bursts
 src/game_F8590.c	particle	dust, spark and ballistic particles at bones
 src/game_F9430.c	particle	ground bursts at bone-relative points
 src/game_FA240.c	particle	RGB tint from z coordinate (for ground particles)
 src/game_FA360.c	particle	tumbling, drifting quads
 src/game_FB060.c	particle	random coloured particles launched along a yaw
-src/game_FB600.c	screen	mosaic effect on the framebuffer
+src/game/Screen/Mosaic/mosaic.c	screen	mosaic effect on the framebuffer
 src/game_FBBF0.c	screen	split from game_FB600.c; same subsystem
 src/game/done/game_FC3C0.c	camera	per-level camera preset hook
 src/game_FC410.c	effect	rotated slot positions driven by an object's angle
@@ -306,19 +306,19 @@ src/game_FDD70.c	level	level logic: channel easing, scroll counters, prop kills
 src/game_FE850.c	effect	spin-decay object with colour pulse
 src/game_FE9E0.c	camera	camera distance scaling by speed
 src/game_FECC0.c	env	sky quad gradient
-src/game_FEFF0.c	light	ambient colour pulse
+src/game/Effects/AmbientPulse/ambientpulse.c	light	ambient colour pulse
 src/game_FF0E0.c	effect	spinning ray-casting object moving its children to hit points
-src/game_FF5C0.c	screen	strobe effect and strobe spawner
-src/game_FF900.c	light	ambient colour wave
+src/game/Screen/Strobe/strobe.c	screen	strobe effect and strobe spawner
+src/game/Effects/ColourWave/colourwave.c	light	ambient colour wave
 src/game_FFBA0.c	particle	spark emitters and beams
-src/game_100810.c	trail	character trail with emitters and sounds
+src/game/Trail/CharacterTrail/charactertrail.c	trail	character trail with emitters and sounds
 src/game_1028F0.c	particle	follow effects with drifting and growing particles
 src/game_1045D0.c	effect	hit effects with jet sprays and debris
 src/game_1048D0.c	effect	tinted objects (message 0x36) and texture animation clock
-src/game_105760.c	attach	attachment hooks 1 and 19 (texture scroll) and impact effects
-src/game_105D90.c	attach	split from game_105760.c; same subsystem
-src/game_105FC0.c	trail	trails with sparks and impact origins
-src/game_108320.c	beam	self-propelled beam quads and linked quads
+src/game/Attach/TextureScroll/texturescroll.c	attach	attachment hooks 1 and 19 (texture scroll) and impact effects
+src/game/Attach/BonePoint/bonepoint.c	attach	split from game_105760.c; same subsystem
+src/game/Trail/PissTrail/pisstrail.c	trail	trails with sparks and impact origins
+src/game/Beam/BeamQuad/beamquad.c	beam	self-propelled beam quads and linked quads
 src/game_108E90.c	effect	puff timer effects
 src/game_109220.c	effect	falling stream with splashes
 src/game_10B380.c	effect	trap trigger effects and sprite spawns
@@ -330,10 +330,10 @@ src/game_10CCD0.c	camera	per-level camera hook (water)
 src/game_10CD70.c	effect	swing objects, bolt emitters, scrolling material textures
 src/game_10DD20.c	effect	object burst and displacement update
 src/game_10E240.c	effect	prop emitter effects; level camera flags
-src/game_10EA20.c	collision	ray cast against the first 25 objects
+src/game/Collision/ObjectRay/objectray.c	collision	ray cast against the first 25 objects
 src/game/done/game_10ECB0.c	camera	per-level camera flag hook
 src/game_10ED10.c	camera	per-level camera hook
-src/game_10EF60.c	beam	tracer beam effect
+src/game/Beam/Tracer/tracer.c	beam	tracer beam effect
 src/game_1104D0.c	effect	homing effects (object type 0x27)
 src/game_111670.c	effect	random ground hits ahead of the player with surface effects
 src/game_111A00.c	effect	split from game_111670.c; same subsystem
@@ -346,11 +346,11 @@ src/game_117FC0.c	effect	split from game_117490.c; same subsystem
 src/game_118400.c	effect	actor bone positions and effect ids
 src/game_118670.c	camera	per-level camera hook
 src/game_1188E0.c	prop	mover swing handler and cylinder tests
-src/game_119370.c	weapon	muzzle shots with ray casts
+src/game/Weapon/TwinMuzzle/twinmuzzle.c	weapon	muzzle shots with ray casts
 src/game/done/game_119960.c	camera	per-level camera flag hook
 src/game_1199D0.c	particle	shape emitters and fog flash
-src/game_11A680.c	weapon	ballistic aim error for shells
-src/game_11C2B0.c	beam	beam slots, flashes and glows
+src/game/Weapon/Tank/tank.c	weapon	ballistic aim error for shells
+src/game/Beam/AimedBeam/aimedbeam.c	beam	beam slots, flashes and glows
 src/game_11EEB0.c	beam	split from game_11C2B0.c; same subsystem
 src/game_11F780.c	effect	sway objects and light placement
 src/game_11FF10.c	particle	emitter object with per-particle state
@@ -359,9 +359,9 @@ src/game_121A20.c	particle	spiral effect and camera emitter
 src/game/done/game_122650.c	effect	level effect flag helpers
 src/game_122760.c	camera	per-level camera flag hook
 src/game_1227F0.c	effect	level setup of cylinders and light toggles
-src/game_1228D0.c	beam	sparks, beams and attachment hooks 4/21
+src/game/Beam/ModelBeam/modelbeam.c	beam	sparks, beams and attachment hooks 4/21
 src/game_123FB0.c	camera	per-level camera hook: progress along a segment
-src/game_124260.c	beam	beam re-cast and end sprites
+src/game/Beam/CastBeam/castbeam.c	beam	beam re-cast and end sprites
 src/game_124920.c	effect	projectile, follow and puff effect objects
 src/game_125A50.c	effect	split from game_124920.c; same subsystem
 src/game_126ED0.c	camera	per-level camera hook
@@ -373,11 +373,11 @@ src/game_129E80.c	effect	effect tick callback
 src/game/done/game_129EB0.c	camera	per-level camera preset hook
 src/game_129EE0.c	effect	area effects with sounds and particle bursts
 src/game_12B1C0.c	effect	level effect hook on objects
-src/game_12B250.c	weapon	projectile fire from muzzle
+src/game/Weapon/Launcher/launcher.c	weapon	projectile fire from muzzle
 src/game_12B7D0.c	effect	bone-point effect positions
-src/game_12BD10.c	weapon	projectile spawn along actor direction
-src/game_12C1E0.c	weapon	gun attachment shots
-src/game_12CCF0.c	weapon	split from game_12C1E0.c; same subsystem
+src/game/Weapon/ForwardShot/forwardshot.c	weapon	projectile spawn along actor direction
+src/game/Weapon/AttachedGun/attachedgun.c	weapon	gun attachment shots
+src/game/Weapon/GunShot/gunshot.c	weapon	split from game_12C1E0.c; same subsystem
 src/game_12D630.c	effect	owner-bound timed effect
 src/game/done/game_12D7E0.c	effect	effect stub (empty)
 src/game_12D7F0.c	effect	random flag toggles and cycling segment assets
@@ -385,30 +385,30 @@ src/game_12DAB0.c	particle	effect with main particle and sub-particles
 src/game_12FDD0.c	effect	surface effects and quad sprites
 src/game_1308E0.c	camera	per-level camera/actor flag hook
 src/game_130B40.c	effect	debris burst
-src/game_130CB0.c	sound	object sound record callback
+src/game/Audio/ObjectSound/objectsound.c	sound	object sound record callback
 src/game_1312F0.c	effect	impact burst with ground splash
-src/game_131620.c	screen	screen fade-to-black effect
+src/game/Screen/Fade/fade.c	screen	screen fade-to-black effect
 src/game_1319D0.c	camera	camera distance reset
-src/game_131A90.c	collision	floor height from triangles near a point
-src/game_131F30.c	beam	bolt rain and arcs, sparks, prop arrival
-src/game_133190.c	beam	lightning bolt chains (Bezier with jitter)
+src/game/Collision/GroundHeight/groundheight.c	collision	floor height from triangles near a point
+src/game/Beam/BoltRain/boltrain.c	beam	bolt rain and arcs, sparks, prop arrival
+src/game/Beam/BoltChain/boltchain.c	beam	lightning bolt chains (Bezier with jitter)
 src/game_135490.c	camera	per-level camera hook
 src/game_1355D0.c	effect	effect with debris throw
 src/game_135780.c	particle	flash particle emitter
-src/game_135D00.c	light	swinging lamp models carrying light effects
+src/game/Effects/SwingingLamp/swinginglamp.c	light	swinging lamp models carrying light effects
 src/game_1368C0.c	particle	object-attached particle emitters (effects 0x1A-0x1C)
-src/game_137DE0.c	sprite	fade-in/hold/fade-out sprite
+src/game/Sprite/FadeSprite/fadesprite.c	sprite	fade-in/hold/fade-out sprite
 src/game_137ED0.c	prop	clock hands behaviour; frustum point test
-src/game_138520.c	view	view frustum FOV and projection
-src/game_139410.c	texture	UV wobble on display-list vertices
-src/game_139FC0.c	texture	texture loading and display-list texture resolution
-src/game_13AAE0.c	texture	id list reference release
-src/game_13ABD0.c	texture	texture use counts and aging
-src/game_13AE20.c	shadow	blob shadows under objects
-src/game_13BB20.c	collision	floor finding across world mesh, props, objects
+src/game/View/Projection/projection.c	view	view frustum FOV and projection
+src/game/Texture/UvWobble/uvwobble.c	texture	UV wobble on display-list vertices
+src/game/Texture/TextureLoad/textureload.c	texture	texture loading and display-list texture resolution
+src/game/Texture/TextureRelease/texturerelease.c	texture	id list reference release
+src/game/Texture/TextureUse/textureuse.c	texture	texture use counts and aging
+src/game/Shadow/BlobShadow/blobshadow.c	shadow	blob shadows under objects
+src/game/Collision/Floor/floor.c	collision	floor finding across world mesh, props, objects
 src/game_13D350.c	env	sky, stars and background fill
-src/game_13F9D0.c	gfx	object visibility and per-view draw lists
-src/game_13FF30.c	gfx	split from game_13F9D0 (two units in the ROM): draw lists and per-view matrix tables
+src/game/Gfx/Turret/turret.c	gfx	object visibility and per-view draw lists
+src/game/Gfx/WorldObject/worldobject.c	gfx	split from game_13F9D0 (two units in the ROM): draw lists and per-view matrix tables
 src/game_142560.c	prop	shake-and-sink behaviour
 src/game_142A70.c	prop	moving platforms, seesaw, texture scroll
 src/game_1435C0.c	prop	texture scroll and height behaviours
@@ -459,7 +459,7 @@ src/game_16EE20.c	effect	generic effect helpers: RDP state cache, attached effec
 src/game_16F770.c	math	split from game_16EE20.c; same subsystem
 src/game_173D40.c	effect	actor bone positions and damage effect kinds
 src/game_174BF0.c	effect	effect object core: life and update handlers
-src/game_175250.c	trail	motion trails with ground tests
+src/game/Trail/MotionTrail/motiontrail.c	trail	motion trails with ground tests
 src/game/done/game_1765E0.c	effect	timed callback objects (TimedEffect core)
 src/game_176A00.c	particle	particle motion channels
 src/game_177480.c	particle	flickering billboard particles
@@ -470,17 +470,17 @@ src/game_179400.c	particle	ballistic particle update
 src/game_1797A0.c	particle	per-kind particle spawn shapes (line, circle)
 src/game_179F30.c	effect	character effects: per-object spawn callbacks
 src/game_17CAF0.c	particle	particle spawn configs, cone basis
-src/game_182140.c	sprite	screen sprites
+src/game/Sprite/ScreenSprite/screensprite.c	sprite	screen sprites
 src/game_182C30.c	effect	player marker (light and sprite)
 src/game_183640.c	particle	streak particles
 src/game_1844C0.c	effect	model instance effects
 src/game_185560.c	effect	effect actors and motions
 src/game_186080.c	effect	split from game_185560 (unit boundary in the ROM)
 src/game_188440.c	particle	ground particles and sliding sprites
-src/game_188F90.c	sprite	animated textured quads and actor trackers
-src/game_1897A0.c	trail	trails with bursts for level effects
-src/game_18A8F0.c	light	point lights, ambient colour, light regions
-src/game_18C660.c	light	split from game_18A8F0.c; same subsystem
+src/game/Sprite/TexQuad/texquad.c	sprite	animated textured quads and actor trackers
+src/game/Trail/FallingTrail/fallingtrail.c	trail	trails with bursts for level effects
+src/game/Lighting/PointLight/pointlight.c	light	point lights, ambient colour, light regions
+src/game/Lighting/AmbientZone/ambientzone.c	light	split from game_18A8F0.c; same subsystem
 src/game/Effects/ColourFrameBuffer/colourframebuffer.c	colourfb	colour frame buffer effect (../Effects/ColourFrameBuffer/colourframebuffer.c)
 src/game/Effects/Light/light.c	light	light effects (../Effects/Light/light.c)
 src/game_191C30.c	camera	camera wobble effects
@@ -489,52 +489,52 @@ src/game/done/game_193420.c	effect	effect stub (empty)
 src/game_193430.c	effect	quad effect
 src/game_193E50.c	particle	puff quads
 src/game_1944C0.c	effect	effect object lists and model/sprite/quad object types
-src/game_196DB0.c	sprite	2D sprite effect
+src/game/Sprite/Sprite2D/sprite2d.c	sprite	2D sprite effect
 src/game_197120.c	particle	bouncing debris and drop particles
-src/game_197C20.c	text	text box creation
-src/game_197F20.c	text	text box drawing and logic
+src/game/Text/TextBoxCreate/textboxcreate.c	text	text box creation
+src/game/Text/TextBox/textbox.c	text	text box drawing and logic
 src/game_19A8B0.c	particle	sprite particles with style tables
 src/game_19E040.c	effect	model bursts
 src/game_19F150.c	particle	floor sprite particles
-src/game_1A0100.c	player	pending warps and respawn
+src/game/Player/PlayerWarp/playerwarp.c	player	pending warps and respawn
 src/game_1A0420.c	flare	full-screen flare colour display list
 src/game_1A0790.c	env	fog presets and blending
 src/game_1A0E60.c	env	vertex colour fades
 src/game_1A11B0.c	flare	z-buffer visibility probes
 src/game_1A1B40.c	particle	puff particles behind objects
 src/game_1A1E50.c	effect	animation frame counter and level texture scrolls
-src/game_1A20A0.c	swarm	flying swarm members (bats/birds)
+src/game/Swarm/SwarmActor/swarmactor.c	swarm	flying swarm members (bats/birds)
 src/game_1A48C0.c	prop	wave deformer
-src/game_1A5440.c	swarm	swarm centre steering and members
+src/game/Swarm/SwarmCentre/swarmcentre.c	swarm	swarm centre steering and members
 src/game/done/game_1A6300.c	level	water height query
 src/game_1A6360.c	effect	QuadFx objects
 src/game_1A7260.c	particle	spinning debris particles
 src/game_1A7490.c	particle	split from game_1A7260.c; same subsystem
 src/game_1A8060.c	anim	vertex morph keyframes
-src/game_1A89B0.c	sprite	sprite animation callbacks
+src/game/Sprite/LevelSprites/levelsprites.c	sprite	sprite animation callbacks
 src/game_1AB530.c	flare	lens flares
-src/game_1AC2F0.c	screen	per-view screen effects: fade, flash, tint, iris, letterbox
+src/game/Screen/ViewEffects/vieweffects.c	screen	per-view screen effects: fade, flash, tint, iris, letterbox
 src/game_1AFC80.c	prop	wave chains
-src/game_1B0740.c	swarm	effect model slots and swarm groups
-src/game_1B1600.c	shadow	real-time shadows
+src/game/Swarm/ModelSlots/modelslots.c	swarm	effect model slots and swarm groups
+src/game/Shadow/RealTimeShadow/realtimeshadow.c	shadow	real-time shadows
 src/game_1B4A90.c	effect	burst effect pieces
 src/game_1B5370.c	effect	animated RGB colours
-src/game_1B5CC0.c	trail	bone-matrix afterimages
-src/game_1B6DB0.c	trail	spray emitter trails
+src/game/Trail/Afterimage/afterimage.c	trail	bone-matrix afterimages
+src/game/Trail/SprayEmitter/sprayemitter.c	trail	spray emitter trails
 src/game_1B74A0.c	particle	emitter handlers attached to bones
 src/game_1B7870.c	effect	tumbling pieces
 src/game_1B7EC0.c	effect	fixed-capacity FIFO with release callbacks
 src/game_1B81D0.c	particle	droplets and splashes
 src/game_1B8B60.c	particle	billboard particle spawn
-src/game_1B8F40.c	trail	trail emitters
-src/game_1B9DB0.c	attach	attach model header
+src/game/Trail/TrailEmitter/trailemitter.c	trail	trail emitters
+src/game/Attach/AttachModel/attachmodel.c	attach	attach model header
 src/game_1B9F30.c	particle	growing billboard particles
 src/game_1BA1D0.c	particle	particle ring spawn
 src/game_1BA670.c	particle	bone emission points
 src/game_1BB950.c	particle	actor emitter process
-src/game_1BBFC0.c	beam	beam motion and vertices
+src/game/Beam/BeamMotion/beammotion.c	beam	beam motion and vertices
 src/game_1BC650.c	particle	anchored emitters and sprite particles
-src/game_1BD880.c	light	flickering light tied to an actor
+src/game/Effects/ActorFlicker/actorflicker.c	light	flickering light tied to an actor
 src/game_1BD8B0.c	effect	effect bound to an actor
 src/game_1BD940.c	particle	anchor emitter destroy
 src/game_1BDA00.c	effect	periodic triggers and handler objects
@@ -548,21 +548,21 @@ src/game_1C0840.c	effect	falling object spawns
 src/game_1C0B10.c	particle	segment emitters and model bursts
 src/game_1C1150.c	effect	effect bursts and splashes
 src/game/Effects/CharacterFlameThrower/characterflamethrower.c	flamethrower	character flamethrower (../Effects/CharacterFlameThrower/characterflamethrower.c)
-src/game_1CA420.c	trail	ribbon trails on object points
+src/game/Trail/MatrixTrail/matrixtrail.c	trail	ribbon trails on object points
 src/game_1CBE20.c	cutscene	cutscene event effects and timers
 src/game/done/game_1CC420.c	effect	effect stub (empty)
-src/game_1CC440.c	trail	surface trails behind an actor
+src/game/Trail/SurfaceTrail/surfacetrail.c	trail	surface trails behind an actor
 src/game_1CDEC0.c	particle	spark emitter
 src/game_1CE2F0.c	particle	emitters, smoke and billboard particles
-src/game_1D0840.c	trail	bone trails
-src/game_1D2480.c	screen	full-screen tint
+src/game/Trail/BoneTrail/bonetrail.c	trail	bone trails
+src/game/Screen/Tint/tint.c	screen	full-screen tint
 src/game_1D2B10.c	particle	particle emitter effect with sound
 src/game_1D3AB0.c	particle	region emitter
 src/game_1D3FC0.c	effect	owned-object lookup and messages
 src/game_1D4140.c	effect	debris burst
 src/game_1D43B0.c	blood	blood trail debris
-src/game_1D4E00.c	beam	lightning bolts
-src/game_1D5FD0.c	beam	split from game_1D4E00.c; same subsystem
+src/game/Beam/Lightning/lightning.c	beam	lightning bolts
+src/game/Beam/AreaEmitter/areaemitter.c	beam	split from game_1D4E00.c; same subsystem
 src/game_1D6E80.c	effect	actor task effects: pulses, looping sounds, ground drops
 src/game_1D92F0.c	effect	impact effect sets
 src/game_1D9A00.c	particle	quad particles from emitter callbacks
@@ -576,67 +576,67 @@ src/game_1DEF60.c	particle	particles from points beside an owner
 src/game_1DF510.c	rope	Holten ropes tying objects
 src/game_1E0560.c	rope	Holten rope effect
 src/game_1E2180.c	blood	blood emitters by model profile
-src/game_1E26F0.c	beam	wavy beam between actors
+src/game/Beam/WavyBeam/wavybeam.c	beam	wavy beam between actors
 src/game_1E3050.c	effect	emitter attachment hook
 src/game_1E30A0.c	particle	pulsing particle with sound
 src/game_1E34C0.c	particle	pulsing particle
-src/game_1E37D0.c	trail	ribbon effect objects
+src/game/Trail/RibbonTrail/ribbontrail.c	trail	ribbon effect objects
 src/game_1E5820.c	effect	effect kind handlers
-src/game_1E58B0.c	weapon	bullet particles
+src/game/Weapon/BulletParticle/bulletparticle.c	weapon	bullet particles
 src/game_1E5FF0.c	particle	bobbing callbacks
-src/game_1E6260.c	light	swinging lamp light particle
+src/game/Effects/LampParticle/lampparticle.c	light	swinging lamp light particle
 src/game_1E6B40.c	particle	falling particles
 src/game_1E73B0.c	effect	model-following effects and bursts
 src/game_1EBD00.c	effect	effect variants with extension
 src/game_1ED080.c	hud	counter destructor
-src/game_1ED0F0.c	weapon	bullets and bullet hits
-src/game_1EF500.c	weapon	projectiles with flyby sounds
+src/game/Weapon/Bullet/bullet.c	weapon	bullets and bullet hits
+src/game/Weapon/Projectile/projectile.c	weapon	projectiles with flyby sounds
 src/game_1F1CD0.c	particle	projectile stream particles
-src/game_1F1F60.c	weapon	projectile ray setup
-src/game_1F2730.c	weapon	projectile along a segment
-src/game_1F3780.c	weapon	shots from joint points
-src/game_1F4650.c	sight	sight beams (laser tripwires)
-src/game_1F7050.c	sight	split from game_1F4650.c; same subsystem
-src/game_1FA770.c	trail	level-placed particle streams, random-point emitter, wave trails, ribbon trails and trackers (merged unit)
-src/game_1FEA80.c	trail	tracker trails
+src/game/Weapon/ProjectileRay/projectileray.c	weapon	projectile ray setup
+src/game/Weapon/SegmentShot/segmentshot.c	weapon	projectile along a segment
+src/game/Weapon/JointShot/jointshot.c	weapon	shots from joint points
+src/game/Sight/SightBeam/sightbeam.c	sight	sight beams (laser tripwires)
+src/game/Sight/SightHud/sighthud.c	sight	split from game_1F4650.c; same subsystem
+src/game/Trail/LevelStream/levelstream.c	trail	level-placed particle streams, random-point emitter, wave trails, ribbon trails and trackers (merged unit)
+src/game/Trail/TrackerTrail/trackertrail.c	trail	tracker trails
 src/game_1FF760.c	effect	sound and particle effects at an actor
-src/game_1FFB70.c	screen	full-screen scrolling overlay
+src/game/Screen/Overlay/overlay.c	screen	full-screen scrolling overlay
 src/game_1FFF60.c	effect	bone followers
 src/game_200930.c	particle	wobble particles and object emitters
-src/game_203340.c	screen	framebuffer image draw
-src/game_203E20.c	text	amount text box
-src/game_204660.c	trail	bone trails with emitters
+src/game/Screen/FrameImage/frameimage.c	screen	framebuffer image draw
+src/game/Text/AmountText/amounttext.c	text	amount text box
+src/game/Trail/AnchoredTrail/anchoredtrail.c	trail	bone trails with emitters
 src/game_205C90.c	cont	rumble effects
 src/game_2062D0.c	particle	steam and drip particles
 src/game_209B50.c	particle	emitter effect
 src/game_20A290.c	particle	debris burst
-src/game_20A3A0.c	save	EEPROM request with timer
-src/game_20A5F0.c	os	EEPROM read (__osPackEepReadData copy)
-src/game_20A850.c	os	EEPROM long read loop
-src/game_20A910.c	os	osEepromProbe copy
-src/game_20A990.c	os	osEepromWrite copy
-src/game_20AE20.c	save	settings record defaults and ranges
+src/game/Save/EepromTimedWrite/eepromtimedwrite.c	save	EEPROM request with timer
+src/game/Os/EepromRead/eepromread.c	os	EEPROM read (__osPackEepReadData copy)
+src/game/Os/EepromLongRead/eepromlongread.c	os	EEPROM long read loop
+src/game/Os/EepromProbe/eepromprobe.c	os	osEepromProbe copy
+src/game/Os/EepromWrite/eepromwrite.c	os	osEepromWrite copy
+src/game/Save/FrontEnd/frontend.c	save	settings record defaults and ranges
 src/game_215960.c	hud	HUD overlay, HUD models and sprites
-src/game_21C4F0.c	os	osPiReadIo copy
-src/game_21C540.c	os	osContInit copy
+src/game/Os/PiReadIo/pireadio.c	os	osPiReadIo copy
+src/game/Os/ContInit/continit.c	os	osContInit copy
 src/game_21CAC0.c	math	pseudo-random number generator
-src/game_21CAF0.c	os	osViSetSpecialFeatures copy
-src/game_21D420.c	libc	sprintf
-src/game_21D5F0.c	os	guMtxCatF copy
+src/game/Os/ViSetSpecial/visetspecial.c	os	osViSetSpecialFeatures copy
+src/game/Libc/Sprintf/sprintf.c	libc	sprintf
+src/game/Os/MtxCatF/mtxcatf.c	os	guMtxCatF copy
 src/libultra/audio/game_21FC90.c	mp3	streaming music player (StreamVoice), set up by game_43620.c
-src/game_221290.c	mp3	MPEG layer III decoder
-src/game_228CF0.c	bone	data-only unit: bone remap byte lists and their pointer table
-src/game_22B750.c	collision	data-only unit: model part sets, sub-model lists, object filters
-src/game_22CEE0.c	script	data-only unit: script command handler tables by class (start, end, query, command)
-src/game_22D5D0.c	weapon	data-only unit: the second gun muzzle point and bone, between game_120950 and game_121A20
+src/game/Audio/Mp3Decoder/mp3decoder.c	mp3	MPEG layer III decoder
+src/game/Bone/BoneRemap/boneremap.c	bone	data-only unit: bone remap byte lists and their pointer table
+src/game/Collision/PartSets/partsets.c	collision	data-only unit: model part sets, sub-model lists, object filters
+src/game/Script/CmdTables/cmdtables.c	script	data-only unit: script command handler tables by class (start, end, query, command)
+src/game/Weapon/SecondGun/secondgun.c	weapon	data-only unit: the second gun muzzle point and bone, between game_120950 and game_121A20
 src/game_22D750.c	level	data-only unit: level-object behaviour handlers and grouped-object defaults
 src/game_22DF30.c	camera	data-only unit: identity matrix, camera frame count, camera table, hold timers
 src/game_22F650.c	effect	data-only unit (effect tables)
 src/game_232150.c	particle	data-only unit (wave 5)
 src/game_234530.c	particle	data-only unit: drip bone points, drop kinds and emitter kinds of game_1BDC20
-src/game_234C10.c	texture	data-only unit: shared texture tables (asset id lists, texture descriptors, the effect texture table D_80090B60)
-src/debugger_256F80.c	debugger	debugger copy of controller read
-src/debugger_257330.c	debugger	debugger stub
-src/debugger_257350.c	debugger	debugger printf
-src/debugger/debugger.c	debugger	crash debugger screens
+src/game/Texture/TextureTables/texturetables.c	texture	data-only unit: shared texture tables (asset id lists, texture descriptors, the effect texture table D_80090B60)
+src/debugger/Debugger/DebuggerCont/debuggercont.c	debugger	debugger copy of controller read
+src/debugger/Debugger/DebuggerStub/debuggerstub.c	debugger	debugger stub
+src/debugger/Debugger/DebuggerPrintf/debuggerprintf.c	debugger	debugger printf
+src/debugger/Debugger/CrashScreen/crashscreen.c	debugger	crash debugger screens
 src/game/entrypoint.c	boot	game entrypoint: subsystem init and main loop

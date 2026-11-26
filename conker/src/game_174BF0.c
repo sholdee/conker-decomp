@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* This file's .rodata: the two object types of the effect objects (func_15147A80), read by game_1FA770.c too. */
+/* This file's .rodata: the two object types of the effect objects (func_15147A80), read by game/Trail/LevelStream/levelstream.c too. */
 const s32 D_800A5760[2] = { 0x4D, 0x22 };
 
 /*
@@ -26,44 +26,44 @@ Gfx D_8008A1F0[] = {
  */
 /* Update handlers (head.updateKind, then head.updateKind2), (obj, dead): 0 destroys the object. */
 static s32 (*D_8008A200[15])() = {
-    NULL,          func_15147EB8, func_15196748, func_1519D240, func_150DC558, func_1519F4F0, func_151A361C,
-    func_150B40E8, func_1515C388, func_151CD674, func_151BC64C, func_151B6420, func_15199A10, func_151D792C,
-    func_150D8E4C,
+    NULL,          trail_updateMotionTrail, flamethrower_updateJet, trail_ageMatrixTrail, func_150DC558, trail_ageSurfaceTrail, trail_ageBoneTrail,
+    trail_ageScatterTrail, trail_moveFallingTrail, trail_moveStreamParticles, func_151BC64C, trail_ageFollowTrail, flamethrower_updateFlame, trail_fallAnchoredTrail,
+    trail_movePissPoints,
 };
 static s32 (*D_8008A23C[18])() = {
-    NULL,          func_150D8FAC, func_15196B4C, func_1519D454, func_150DCEA0, func_1519F7F0, func_151A37C0,
-    func_150B4294, func_1515C534, func_151CD7BC, func_151BC794, func_151B65D4, func_15199C34, func_150D3A68,
-    func_151B77F4, func_151CEC54, func_151D7A38, func_151D15D0,
+    NULL,          trail_emitPissPoints, flamethrower_emitJet, trail_followMatrixTrail, func_150DCEA0, trail_followSurfaceTrail, trail_followBoneTrail,
+    trail_emitScatterTrail, trail_fadeFallingTrail, trail_spawnStreamParticles, func_151BC794, trail_followTarget, flamethrower_emitFlame, trail_updateCharacterTrail,
+    trail_moveRibbon, trail_followWaveTrail, trail_followAnchoredTrail, trail_sampleTrackerTrail,
 };
 /* Update handlers by head.tmpl.unk14 (flag 0x10). */
 static s32 (*D_8008A284[8])() = {
-    func_1519A9A4, func_150D3FD4, func_151B7998, func_151CF120, func_151D7CD0, func_150D942C, func_151D197C,
-    func_151CDB94,
+    flamethrower_shapeFlame, trail_trimCharacterTrail, trail_shapeRibbon, trail_shapeWaveTrail, trail_shapeAnchoredTrail, trail_tracePissTrail, trail_shapeTrackerTrail,
+    trail_fadeStreamEnds,
 };
 /* Draw handlers (head.drawKind), (obj, gfx, view): return the advanced display list. */
 static Gfx *(*D_8008A2A4[19])() = {
-    NULL,          func_1514803C, func_15197148, func_1519D9F4, func_150DD640, func_1519FE6C, func_151A3BE4,
-    func_150B4710, func_1515C6F4, func_151CDE20, func_151BCA90, func_151B6928, func_1519B4B8, func_150D4300,
-    func_151B7C38, func_151CF380, func_151D80C4, func_150D9C7C, func_151D1C98,
+    NULL,          trail_drawMotionTrail, flamethrower_drawJet, trail_drawMatrixTrail, func_150DD640, trail_drawSurfaceTrail, trail_drawBoneTrail,
+    trail_drawScatterTrail, trail_drawFallingTrail, trail_drawStream, func_151BCA90, trail_drawFollowTrail, flamethrower_drawFlame, trail_drawCharacterTrail,
+    trail_drawRibbon, trail_drawWaveRibbon, trail_drawAnchoredTrail, trail_drawPissTrail, trail_drawTrackerTrail,
 };
 /* Destroy handlers (head.tmpl.kind). */
 static void (*D_8008A2F0[20])() = {
-    func_151478F4, func_15149104, func_150DA4B4, func_15196330, func_1519CFD0, func_151478F4, func_1519F108,
-    func_1519F108, func_151478F4, func_150B3E74, func_151478F4, func_151CE49C, func_151478F4, func_151478F4,
-    func_15199928, func_150D4BD4, func_151B83A0, func_151478F4, func_151D8780, func_151D2258,
+    func_151478F4, trail_destroyEffectObj, trail_destroyPissTrail, flamethrower_destroyJet, trail_destroyMatrixTrail, func_151478F4, trail_destroySurfaceTrail,
+    trail_destroySurfaceTrail, func_151478F4, trail_destroyScatterTrail, func_151478F4, trail_destroyStreamEmitter, func_151478F4, func_151478F4,
+    flamethrower_destroyFlame, trail_destroyCharacterTrail, func_151B83A0, func_151478F4, trail_destroyAnchoredTrail, trail_destroyTrackerTrail,
 };
 /* Free handlers (head.tmpl.kind). */
 static void (*D_8008A340[20])() = {
-    func_15147928, func_15149104, func_150DA4E0, func_151963B4, func_1519D000, func_15147928, func_1519F168,
-    func_1519F168, func_15147928, func_150B3EE8, func_15147928, func_151CE4DC, func_15147928, func_15147928,
-    func_15199954, func_150D4C00, func_151B83CC, func_15147928, func_151D87AC, func_151D2284,
+    func_15147928, trail_destroyEffectObj, trail_freePissTrail, flamethrower_freeJet, trail_freeMatrixTrail, func_15147928, trail_freeSurfaceTrail,
+    trail_freeSurfaceTrail, func_15147928, trail_freeScatterTrail, func_15147928, trail_freeStreamEmitter, func_15147928, func_15147928,
+    flamethrower_freeFlame, trail_freeCharacterTrail, func_151B83CC, func_15147928, trail_freeAnchoredTrail, trail_freeTrackerTrail,
 };
 /* Message handlers (head.tmpl.kind); optional. func_15147D1C calls them through this prototype (the ROM
  * passes msgType as a u8). */
 static void (*D_8008A390[20])(EffectObj *obj, s32 msg, u8 msgType) = {
-    NULL,          NULL,          func_150DA50C, func_15198054, func_1519E1F4, NULL,          func_151A0950,
-    func_151A0950, func_151A4CE0, func_150B538C, NULL,          NULL,          func_151BD21C, func_151B70B4,
-    func_1519986C, func_150D49C0, func_151B82CC, func_151CF844, NULL,          NULL,
+    NULL,          NULL,          trail_onPissTrailMessage, flamethrower_onJetMessage, trail_onMatrixTrailEvent, NULL,          trail_onSurfaceTrailEvent,
+    trail_onSurfaceTrailEvent, trail_onBoneTrailMessage, trail_onScatterTrailMessage, NULL,          NULL,          func_151BD21C, trail_onFollowTrailMessage,
+    flamethrower_onFlameMessage, trail_onCharacterTrailMessage, trail_onRibbonMessage, trail_onFollowerMessage, NULL,          NULL,
 };
 
 /* Per-frame update: counts down the life and runs the update handlers; any failure destroys the object. */
@@ -144,7 +144,7 @@ void func_1514795C(EffectObj *obj) {
     s32 i;
 
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         if (obj->head.model.handles[i] != NULL) {
             func_100043B4((void *)(s32)obj->head.model.handles[i], 4);
         }
@@ -226,8 +226,8 @@ void *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 upda
     obj->head.model.sharedHandle = NULL;
 
     if (arg6 != 0) {
-        for (i = 0; i <= D_80082FA0; i++) {
-            obj->head.model.handles[i] = func_1515D480(arg6);
+        for (i = 0; i <= gScreenLayout; i++) {
+            obj->head.model.handles[i] = light_allocGfxLights(arg6);
         }
         obj->head.model.sharedHandle = func_1515D440();
     }

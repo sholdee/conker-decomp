@@ -13,8 +13,8 @@ ChannelParticle *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u
     spawn.pos = emitter->pos;
     if (arg2) {
         spawn.flags |= 0x01000000;
-        func_1510F800(0);
-        spawn.unk48 = func_1510FD20(spawn.pos.x, spawn.pos.z);
+        collision_selectMap(0);
+        spawn.unk48 = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
     } else {
         spawn.flags &= ~0x01000000;
         spawn.unk48 = 0;
@@ -181,8 +181,8 @@ s32 func_15149BF4(ChannelParticle *particle) {
 s32 func_15149C58(ChannelParticle *particle) {
     particle->head.def.width -= particle->head.def.width * particle->motion.shrinkRate;
     particle->head.def.height -= particle->head.def.height * particle->motion.shrinkRate;
-    particle->head.def.scale.y += particle->head.def.scale.x * D_800BE9A4;
-    particle->head.def.pos.y += particle->head.def.scale.y * D_800BE9A4;
+    particle->head.def.scale.y += particle->head.def.scale.x * gFrameDelta;
+    particle->head.def.pos.y += particle->head.def.scale.y * gFrameDelta;
     if (particle->motion.maxHeight < particle->head.def.pos.y) {
         return 0;
     }

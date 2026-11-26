@@ -10,13 +10,13 @@ void func_150D13A0(Actor *arg0) {
     arg0->speed *= 0.97f;
     arg0->lean_angle += arg0->unk148;
     arg0->unk148 *= 0.95f;
-    func_15059C84(arg0);
+    actor_moveHorizontal(arg0);
 }
 
 void func_150D1410(Actor *arg0) {
     WorldObject *temp;
 
-    temp = func_151149AC(0xF9);
+    temp = gfx_findObjectById(0xF9);
     if (temp != 0) {
         if ((arg0 - movement_obj) == 0) {
             temp->inactive = 1;
@@ -29,7 +29,7 @@ void func_150D1410(Actor *arg0) {
 void func_150D146C(Actor *arg0) {
     WorldObject *temp;
 
-    temp = func_151149AC(0xF9);
+    temp = gfx_findObjectById(0xF9);
     if (temp != 0) {
         temp->inactive = 1;
     }
@@ -45,5 +45,5 @@ void func_150D149C(AmbientPulse *arg0) {
     f32 *p = &arg0->unk28;
 
     func_151467A4(&arg0->unk30, 10.0f, &arg0->unk2C, 50.0f, 100.0f, 123.0f, D_800A08C0, p);
-    func_1515D4D4(*p, D_800DCD20[1], D_800DCD20[2], 0);
+    light_setAmbient(*p, gAmbientColour[1], gAmbientColour[2], 0);
 }

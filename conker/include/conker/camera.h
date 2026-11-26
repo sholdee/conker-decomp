@@ -81,7 +81,7 @@
  *   game_191C30.c
  */
 
-/* Sound emitter handed to the aim sound callbacks by func_1000FA64. */
+/* Sound emitter handed to the aim sound callbacks by sound_addDynamicSound. */
 typedef struct CamSound {
     /* 0x00 */ u16 unk0;
     /* 0x02 */ s16 x;

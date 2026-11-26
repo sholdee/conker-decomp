@@ -13,10 +13,10 @@ extern u32 __osShutdown;
 extern u8 D_8002AAE0;
 extern u8 D_8002AAE4;
 extern u8 D_8002AC5C;
-extern u8 D_8002AE40;
+extern u8 gAudioThreadStarted;
 extern OSThread D_80031AE0;
 extern OSThread D_80035910; /* piThread */
-extern OSThread D_8003E3A0;
+extern OSThread gAudioThread;
 extern u8 D_80084064;
 extern OSPfs D_800BE760[MAXCONTROLLERS]; /* rumble pak per controller channel */
 extern OSMesgQueue D_800BE900;
@@ -24,7 +24,7 @@ extern u8 D_800BE944[];
 extern u8 D_800BE948[];
 extern OSMesg D_800BE990;
 void func_100039C0(void);
-void func_100093CC(void);
+void audio_stopThread(void);
 
 /*
  * Scheduler state, linked at 0x8003B1E8..0x8003BC28 in this order (with D_8003BC20 of func_100052A0 last).
@@ -106,7 +106,7 @@ void func_100052A0(void *arg) {
     D_8002AC5C = 1;
     osStopThread(&D_80035910);
     osStopThread(&D_80031AE0);
-    func_100093CC(); // stop thread D_8003E3A0 if D_8002AE40 not null
+    audio_stopThread(); // stop thread gAudioThread if gAudioThreadStarted not null
     D_8003BC20 = osGetTime();
     __osViInit();
     D_8002AAE0 = 1;

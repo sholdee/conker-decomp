@@ -58,7 +58,7 @@ void func_151D2AB0(s32 index) {
 
     D_800E0950[index]++;
     if (D_800E0950[index] < 2) {
-        D_800E0990[index] = func_1502B5C8(&loadInfo, 2, 9, D_800AB140[index]);
+        D_800E0990[index] = rom_loadPath(&loadInfo, 2, 9, D_800AB140[index]);
         D_800E0968[index] = loadInfo >> 4;
     }
 }

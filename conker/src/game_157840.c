@@ -52,7 +52,7 @@ void func_1512A390(Camera *arg0) {
         targetHeight = arg0->mv->height;
     } else {
         flag4E = 0;
-        func_1507C3E0(arg0->CharPtr, &height, &width, &depth);
+        actor_computeSize(arg0->CharPtr, &height, &width, &depth);
         targetHeight = height;
     }
     if (!arg0->AvailableModes & 0x40) { // sic: (!unk84) & 0x40 is always 0, but the original computes it
@@ -61,7 +61,7 @@ void func_1512A390(Camera *arg0) {
     }
     if ((arg0->Snap != 0) || (arg0->AvailableModes & 0x400000) || (arg0->SpecialFlags & 0x40) ||
         (func_150A3FC4(arg0->eye.x, arg0->eye.z, arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C) == 0)) {
-        func_1510E8BC(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
+        collision_findFloorEx(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
                       arg0->eye.x, arg0->unk35C, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
     }
     if (unused28) {} // matching: keeps the otherwise dead unk28 load
@@ -78,12 +78,12 @@ void func_1512A390(Camera *arg0) {
         func_15128774(arg0, arg0->CharPtr);
     }
     if (-10000.0f == arg0->unk35C) {
-        if (D_800BE616 != 0) {
+        if (gIsMultiplayer != 0) {
             arg0->unk35C = arg0->CharPtr->floorY;
         } else {
             arg0->unk35C = 10000.0f;
             arg0->AvailableModes |= 0x800000;
-            func_1510E8BC(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
+            collision_findFloorEx(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
                           arg0->eye.x, arg0->eye.y, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
         }
     } else {
@@ -195,7 +195,7 @@ void func_1512ABF8(void) {
         j = 0; // matching: a for loop schedules this init differently
         while (j < 4) {
             D_800DC200[i][j] = D_80089590[j];
-            if ((D_80082FA0 > 0) && (D_80082FA0 < 4)) {
+            if ((gScreenLayout > 0) && (gScreenLayout < 4)) {
                 D_800DC200[i][j].halfWidth *= 0.5f;
                 D_800DC200[i][j].unk2 *= 0.5f;
             }
@@ -231,11 +231,11 @@ void func_1512AD54(Camera *arg0) {
             }
         }
     }
-    func_1501A764(arg0->CNumber, arg0->target.x, targetY, arg0->target.z, &D_800DC1F0, &D_800DC1F4, &D_800DC1F8);
+    view_projectPoint(arg0->CNumber, arg0->target.x, targetY, arg0->target.z, &D_800DC1F0, &D_800DC1F4, &D_800DC1F8);
     q = (f32 *)(s32)D_800DC1F8;
-    screenX = ((s32)D_800DC1F0 < (s32)D_800BE628[arg0->CNumber].left) ? (s32)D_800BE628[arg0->CNumber].left : (((s32)D_800BE628[arg0->CNumber].right < (s32)D_800DC1F0) ? (s32)D_800BE628[arg0->CNumber].right : (s32)D_800DC1F0);
-    screenY = ((s32)D_800DC1F4 < (s32)D_800BE628[arg0->CNumber].top) ? (s32)D_800BE628[arg0->CNumber].top : (((s32)D_800BE628[arg0->CNumber].bottom < (s32)D_800DC1F4) ? (s32)D_800BE628[arg0->CNumber].bottom : (s32)D_800DC1F4);
-    if ((screenX < D_800BE628[arg0->CNumber].left) || (D_800BE628[arg0->CNumber].right <= screenX) || (screenY < D_800BE628[arg0->CNumber].top) || (D_800BE628[arg0->CNumber].bottom <= screenY)) {
+    screenX = ((s32)D_800DC1F0 < (s32)gViews[arg0->CNumber].left) ? (s32)gViews[arg0->CNumber].left : (((s32)gViews[arg0->CNumber].right < (s32)D_800DC1F0) ? (s32)gViews[arg0->CNumber].right : (s32)D_800DC1F0);
+    screenY = ((s32)D_800DC1F4 < (s32)gViews[arg0->CNumber].top) ? (s32)gViews[arg0->CNumber].top : (((s32)gViews[arg0->CNumber].bottom < (s32)D_800DC1F4) ? (s32)gViews[arg0->CNumber].bottom : (s32)D_800DC1F4);
+    if ((screenX < gViews[arg0->CNumber].left) || (gViews[arg0->CNumber].right <= screenX) || (screenY < gViews[arg0->CNumber].top) || (gViews[arg0->CNumber].bottom <= screenY)) {
         arg0->SideHitsClear = 1;
         arg0->HitsZBufferReadFlag = 0;
         return;
@@ -279,7 +279,7 @@ void func_1512AD54(Camera *arg0) {
 /* Runs the z-buffer occlusion check (func_1512AD54) when the camera mode allows it; otherwise marks the
  * check as off and arms the unk5FC/unk5FE countdowns. */
 void func_1512B100(Camera *arg0) {
-    if ((arg0->Mode & ~0x100) && (D_800BEAC0 == 0) && (D_800C3671 == 0)) {
+    if ((arg0->Mode & ~0x100) && (gPaused == 0) && (D_800C3671 == 0)) {
         if (arg0->Mode != 0x40) {
             if ((arg0->AvailableModes & 8) && !(arg0->AvailableModes & 0x200) && (arg0->Snap == 0)) {
                 if (!(arg0->SpecialFlags & 0x80) && !(arg0->SpecialFlags & 0x40)) {
@@ -317,7 +317,7 @@ void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
     mid = (halfWidth * 3) / 4;
 
     for (i = start; i < halfWidth; i++) {
-        if (D_800BE628[arg0->CNumber].left < screenX - i) {
+        if (gViews[arg0->CNumber].left < screenX - i) {
             {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
             zcode = arg0->HitsZBufferHoriDataPtr[screenX - i];
@@ -331,7 +331,7 @@ void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
         }
     }
     for (i = start; i < halfWidth; i++) {
-        if (screenX + i < D_800BE628[arg0->CNumber].right) {
+        if (screenX + i < gViews[arg0->CNumber].right) {
             {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
             zcode = arg0->HitsZBufferHoriDataPtr[screenX + i];
@@ -353,7 +353,7 @@ s32 func_1512B53C(Camera *arg0) {
         s32 i;
 
         arg0->SideHitsClear = 1;
-        for (i = 0; i < D_800BE628[arg0->CNumber].width; i++) {
+        for (i = 0; i < gViews[arg0->CNumber].width; i++) {
             arg0->HitsZBufferHoriDataPtr[i] = 0xFFFC;
         }
         arg0->CurrentHitsWidth = 0.0f;
@@ -526,8 +526,8 @@ void func_1512BB10(Camera *arg0) {
     // matching: sub is loaded inside the condition, after the first flag test
     if (!(arg0->AvailableModes & 0x40000) && (sub = arg0->mv, sub->ladder == 0) && (arg0->Mode != 0x40) &&
         !(arg0->AvailableModes & 0x80) && !(arg0->AvailableModes & 0x200)) {
-        saved2 = D_80089120[2];
-        saved1 = D_80089120[1];
+        saved2 = gFloorProbeTypeEnabled[2];
+        saved1 = gFloorProbeTypeEnabled[1];
         if (arg0->SpecialFlags & 0x800) {
             arg0->unk94C = 20.0f;
             arg0->unk950 = 40.0f;
@@ -581,10 +581,10 @@ void func_1512BB10(Camera *arg0) {
         probe.yspd = 0.0f;
         probe.theta = arg0->CameraAngle;
         if ((arg0->AvailableModes & 0x80000000) || (level == 0x37)) {
-            D_80089120[2] = 0;
+            gFloorProbeTypeEnabled[2] = 0;
         }
         if (arg0->AvailableModes & 0x10000) {
-            D_80089120[1] = 0;
+            gFloorProbeTypeEnabled[1] = 0;
         }
         D_800CBDD2 = 1;
         savedDD3 = D_800CBDD3;
@@ -603,8 +603,8 @@ void func_1512BB10(Camera *arg0) {
         D_800CBDD4 = savedDD4;
         D_800CBDD2 = 0;
         D_800CBDD3 = savedDD3;
-        D_80089120[2] = saved2;
-        D_80089120[1] = saved1;
+        gFloorProbeTypeEnabled[2] = saved2;
+        gFloorProbeTypeEnabled[1] = saved1;
         if (hit != 0) {
             arg0->TonyHitsClear = 0;
             arg0->SlackenK = 0.004999999888f;
@@ -622,7 +622,7 @@ void func_1512BB10(Camera *arg0) {
         }
         arg0->eye.z = probe.zpos;
         if ((level != 0x1B) && (hit != 0) && (arg0->Mode != 0x100)) {
-            func_1510E8BC(NULL, NULL, &floorY, NULL, NULL, 0, arg0->eye.x, arg0->eye.y, arg0->eye.z,
+            collision_findFloorEx(NULL, NULL, &floorY, NULL, NULL, 0, arg0->eye.x, arg0->eye.y, arg0->eye.z,
                           arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
             if (arg0->eye.y < floorY + 40.0f) {
                 s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local

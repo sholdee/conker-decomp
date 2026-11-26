@@ -35,20 +35,20 @@ void func_151F2960(s32 arg0, s32 arg1) {
     D_800E0D80.unk84 = 4;
     if (D_800E0E2C == 0) {
       D_800E0E2C = 1;
-        D_800E0E30 = allocate_memory(0x8000, 0xFF, 2, 1);
-        if (D_800E0E30 == 0) {
+        gMp3Pow43Buffer = allocate_memory(0x8000, 0xFF, 2, 1);
+        if (gMp3Pow43Buffer == 0) {
             D_800E0E2C = 0;
             return;
         }
-        D_800E0E20 = func_1502B5C8(0, 2, 0x17, 4);
+        D_800E0E20 = rom_loadPath(0, 2, 0x17, 4);
         if (D_800E0E20 != 0) {
             func_100043B4(D_800E0E20, 0xFF);
         }
-        D_800E0E24 = func_1502B5C8(0, 2, 0x17, 5);
+        D_800E0E24 = rom_loadPath(0, 2, 0x17, 5);
         if (D_800E0E24 != 0) {
             func_100043B4(D_800E0E24, 0xFF);
         }
-        D_800E0E28 = func_1502B5C8(0, 2, 0x17, 6);
+        D_800E0E28 = rom_loadPath(0, 2, 0x17, 6);
         if (D_800E0E28 != 0) {
             func_100043B4(D_800E0E28, 0xFF);
         }
@@ -62,12 +62,12 @@ void func_151F2960(s32 arg0, s32 arg1) {
             if (D_800E0E28 != 0) {
                 func_10004074(D_800E0E28);
             }
-            func_10004074(D_800E0E30);
-            D_800E0E30 = NULL;
+            func_10004074(gMp3Pow43Buffer);
+            gMp3Pow43Buffer = NULL;
             D_800E0E2C = 0;
             return;
         }
-        func_151F3DE0();
+        mp3_initTables();
     }
     D_800E0D80.romAddr = arg0;
     D_800E0D80.streamSize = arg1;
@@ -184,7 +184,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
     if (D_800E0D80.unk84 == 5) {
         func_151F3D78();
         if (D_800E0D80.unk98 == 0) {
-            D_800E0D80.decoder = func_151F85C4(0, D_800E0D80.read, D_800E0D80.streamSize);
+            D_800E0D80.decoder = mp3_open(0, D_800E0D80.read, D_800E0D80.streamSize);
             if (D_800E0D80.decoder == 0) {
                 D_800E0D80.streamPos = 0;
                 D_800E0D80.unk90 = 0;
@@ -225,7 +225,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             }
             D_800E0D80.pcmPos = 0;
             D_800E0D80.pcmCount = 0;
-            if (func_151F86B0(D_800E0D80.decoder, &ptr, &count) != 0) {
+            if (mp3_decodeFrame(D_800E0D80.decoder, &ptr, &count) != 0) {
                 D_800E0D80.pcm = ptr;
                 for (i = 0; i < count; i++) {
                     {
@@ -371,9 +371,9 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             func_10004074(D_800E0E28);
             D_800E0E2C = 0;
         }
-        if (D_800E0E30 != 0) {
-            func_10004074(D_800E0E30);
-            D_800E0E30 = NULL;
+        if (gMp3Pow43Buffer != 0) {
+            func_10004074(gMp3Pow43Buffer);
+            gMp3Pow43Buffer = NULL;
         }
         D_800E0D80.unk84 = 0;
         return 0;

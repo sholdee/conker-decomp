@@ -150,11 +150,11 @@ void func_150C4E9C(WorldObject *obj) {
         }
     }
     tailAddr = 0;
-    addr = func_1510D0EC(texture, &size, 3, 0);
+    addr = texture_getAddress(texture, &size, 3, 0);
     if (scroll->secondSetTImg != 0) {
         tailAddr = size + addr - 0x200;
     }
-    func_1510D874(obj, addr, tailAddr, 4, 5);
+    texture_addBinding(obj, addr, tailAddr, 4, 5);
 }
 
 // the four objects func_1500F40C spawns with func_1500F290

@@ -26,7 +26,7 @@ typedef struct Cfg15128CB0 {
 } Cfg15128CB0;
 
 
-s32 D_80089520 = 0; // frames left before a pending yaw override applies (set by game_C3E20.c)
+s32 D_80089520 = 0; // frames left before a pending yaw override applies (set by game/Script/CameraCmd/cameracmd.c)
 s32 D_80089524[4] = { 0 }; // per view: SniperState saved over a camera switch
 s32 D_80089534[4] = { 0 }; // per view: aim state saved over a camera switch
 static Vec3f D_80089544 = { 0.0f, 0.0f, -400.0f };
@@ -42,7 +42,7 @@ void func_15128CB0(Camera *cam) {
 
     cam->cmdState.unk0 = 0;
     if (cam->LastMagsZone != 0 && func_1512D6B0(cam)) {
-        if (func_1509BE40(1, cam->LastMagsZone, 6, 0x9000) && cam->LastMagsZoneConsider) {
+        if (script_query(1, cam->LastMagsZone, 6, 0x9000) && cam->LastMagsZoneConsider) {
             func_1512D560(cam, 1, &zones[cam->LastMagsZone & 0xFFF]);
             cam->cmd.id = cam->LastMagsZone & 0xFFF;
         } else {
@@ -78,7 +78,7 @@ void func_15128CB0(Camera *cam) {
             }
             func_1512D6F0(cam);
             if (cam->AimTargetOn) {
-                func_151C9ED4(cam);
+                sight_resetPlayerEffects(cam);
                 cam->AimTargetOn = 0;
             }
             D_800DC010[msg->arg.index] = camera_global_Cameras[cam->CNumber];
@@ -121,7 +121,7 @@ void func_15128CB0(Camera *cam) {
                             cam->CameraButtons |= 0x10;
                             cam->PadPtr->button |= 0x10;
                             cam->mv->SniperState = D_80089524[cam->CNumber];
-                            func_151C9BA0(cam, cam->CharContext);
+                            sight_startPlayerEffects(cam, cam->CharContext);
                             angle = cam->aim.targetYaw;
                         } else {
                             cam->mv->AimState = 0;
@@ -145,8 +145,8 @@ void func_15128CB0(Camera *cam) {
                     cam->savedEye = cam->eye;
                     cam->prevTarget = cam->target;
                     cam->prevEye = cam->eye;
-                    func_150A09D0(D_800BE9E4);
-                    func_150A11C4(&movement_obj[cam->CNumber]);
+                    zone_updateGlobal(D_800BE9E4);
+                    zone_updateActor(&movement_obj[cam->CNumber]);
                     func_1512E8E0(cam);
                     func_151287E0(cam, 0, 0);
                     func_151283B8(cam);
@@ -259,13 +259,13 @@ void func_15128CB0(Camera *cam) {
             }
             if (D_800C35EA[data->unk4] == 1) {
                 D_800C3648 = data->unk8;
-                func_1510B128(cam->CNumber, cam->FOVX, cam->FOVY, 1.0f, 0.0f);
+                view_widenFov(cam->CNumber, cam->FOVX, cam->FOVY, 1.0f, 0.0f);
             }
             if (D_800DBFF4[0]) {
-                func_1501B320(0);
+                light_easePlayerLight(0);
             }
-            if (!D_800BEAC0) {
-                func_1510E7A4(&cam->TrianglePtr, cam->floorTri.v, &surface, &cam->waterY, &cam->Attributes, 0,
+            if (!gPaused) {
+                collision_findFloorInRange(&cam->TrianglePtr, cam->floorTri.v, &surface, &cam->waterY, &cam->Attributes, 0,
                               cam->eye.x, cam->eye.y, cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
                 func_151236D0(cam);
             }

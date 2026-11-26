@@ -45,14 +45,14 @@ Gfx *func_15100464(Gfx *gdl) {
 
     frame = D_800DD405 >> 2;
 
-    addr = func_1510D0EC(D_80090324[frame % 3], size, 3, 0);
+    addr = texture_getAddress(D_80090324[frame % 3], size, 3, 0);
     gSPSegment(gdl++, 2, addr);
 
-    addr = func_1510D0EC(D_80090324[(frame + 1) % 3], size, 3, 0);
+    addr = texture_getAddress(D_80090324[(frame + 1) % 3], size, 3, 0);
     gSPSegment(gdl++, 3, addr);
 
     for (i = 0; i < 5; i++) {
-        addr = func_1510D0EC(D_80090324[D_800BE500[i] + 3], size, 3, 0);
+        addr = texture_getAddress(D_80090324[D_800BE500[i] + 3], size, 3, 0);
         gSPSegment(gdl++, i + 4, addr);
     }
 

@@ -137,7 +137,7 @@ typedef struct {
     /* 0x28 */ EB340Spawn spawn;
 } EB340Obj;
 
-/* Copied to +0x70 of the emitter object func_1515548C returns. */
+/* Copied to +0x70 of the emitter object sprite_newScreenSprite returns. */
 typedef struct {
     /* 0x00 */ Camera *owner;
     /* 0x04 */ u8   pad4[0x8];
@@ -447,7 +447,7 @@ void func_150D0730(s32 arg0);
 extern u8 D_800D98F0;
 
 /* game_FE850.c */
-/* A timed effect that pulses the ambient colour (func_150D149C, and func_150D1B40 of game_FEFF0.c). */
+/* A timed effect that pulses the ambient colour (func_150D149C, and func_150D1B40 of game/Effects/AmbientPulse/ambientpulse.c). */
 typedef struct {
     TimedEffect base;
     /* 0x28 */ f32 unk28;
@@ -686,7 +686,7 @@ void func_150FA1B8(BurstEffect *effect);
 void func_150FA468(TimedEffect *effect, s32 arg1, u8 event);
 void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind);
 void func_150FAA40(u8 owner, s32 kind);
-extern u8 D_80088B60; // set once func_150FAA40's emitter runs; game_3B920 clears it
+extern u8 D_80088B60; // set once func_150FAA40's emitter runs; game/Game/LevelInit/levelinit clears it
 void func_150FAAEC(LineEmitter *effect);
 void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event);
 void func_150FAD28(void);
@@ -874,7 +874,7 @@ f32 func_15144598(TriggerZone *region);
 f32 func_1514462C(TriggerZone *region);
 void func_1514470C(TriggerZone *region, Vec3f *out);
 f32 func_15144A74(Vec3f *a, Vec3f *b); /* dot product */
-/* (s32 index); declared without a prototype: game_1ED0F0.c passes a second argument */
+/* (s32 index); declared without a prototype: game/Weapon/Bullet/bullet.c passes a second argument */
 f32 func_15144AA8();
 Vec3f *func_15144B34(s32 index);
 f32 func_15144B68(f32 angle);
@@ -1063,7 +1063,7 @@ extern const AttachmentType *D_8008ABE8[];
 extern Gfx D_8008AD30[]; /* render teardown (object type table D_8008B4A8) */
 /*
  * Type 0x50 object: a marker over player movement_obj[playerId], made of a white point light and a sprite
- * (attachment model 166, D_800E0148[166]) that bob 160 units above the player.
+ * (attachment model 166, gAttachModelHeaders[166]) that bob 160 units above the player.
  */
 typedef struct PlayerMarker {
     /* 0x00 */ EffectHeader header;
@@ -1087,7 +1087,7 @@ PlayerMarker *func_15155FD4(s32 playerId);
 void func_15156028(PlayerMarker *marker, Actor **actors, u8 eventType);
 
 /* game_1844C0.c */
-extern Mtx D_800DCC10[]; /* per-view orthographic projection (func_15012370 builds them) */
+extern Mtx D_800DCC10[]; /* per-view orthographic projection (view_buildOrthoMatrices builds them) */
 extern const s32 D_800A6060[3]; /* the model effect types */
 extern Gfx D_8008AD60[]; /* render setup (object type table D_8008B4A8) */
 extern Gfx D_8008AD80[]; /* render teardown (object type table D_8008B4A8) */
@@ -1239,7 +1239,7 @@ struct ModelFxData {
     /* 0x57 */ u8 phase;
     /* 0x58 */ u8 flags;
     /* 0x59 */ u8 floorOffset;
-    /* 0x5A */ u8 modelId;      /* the func_1518C900 resource displayList came from */
+    /* 0x5A */ u8 modelId;      /* the attach_loadModelDl resource displayList came from */
     /* 0x5B */ u8 kind;
     /* 0x5C */ u8 renderMode;
     /* 0x5D */ u8 combineMode;
@@ -1429,7 +1429,7 @@ void func_151934B4(FallingObject *obj);
 /* game_1C1150.c */
 void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3);
 void func_151942B0(Actor *self, Actor *other, u8 *arg2);
-/* (Actor *self, Actor *other, u8 *arg2); declared without a prototype: game_981E0.c passes two arguments */
+/* (Actor *self, Actor *other, u8 *arg2); declared without a prototype: game/Event/TimedEvent/timedevent.c passes two arguments */
 void func_151942E8();
 void func_15194320(Actor *self, Actor *other, u8 *arg2);
 void func_15194394(Actor *self, Actor *other, u8 *arg2);
@@ -1583,7 +1583,7 @@ void func_151B1A58(Game1DD500Task *task);
 void func_151B1A84(Game1DD500Task *task);
 
 /* game_1E3050.c */
-/* (Actor *spawner, Actor *spawned); declared without a prototype: game_981E0.c also passes an angle */
+/* (Actor *spawner, Actor *spawned); declared without a prototype: game/Event/TimedEvent/timedevent.c also passes an angle */
 void func_151B5BA0();
 
 /* game_1E5820.c */
@@ -1649,7 +1649,7 @@ typedef struct {
     /* 0x10 */ f32 unk10;
 } PanelExtra;
 
-/* The object func_1515548C returns: one digit of the counter. */
+/* The object sprite_newScreenSprite returns: one digit of the counter. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ f32 x;

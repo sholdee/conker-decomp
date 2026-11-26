@@ -46,7 +46,7 @@ void func_151B01B8(Actor *actor, Actor *other) {
     s32 profile;
 
     if (actor != NULL && actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
-        func_1504715C(&ground, actor);
+        collision_initHitFromObject(&ground, actor);
         profile = EFFECT_PROFILE(other);
         if (profile != 99) {
             if (D_800A3FD8[profile].unkE != 2) {
@@ -97,7 +97,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
     CollisionHit centerGround;
 
     if (actor != NULL) {
-        func_1504715C(&ground, actor);
+        collision_initHitFromObject(&ground, actor);
         impact.spray.pos.x = actor->xpos;
         impact.spray.pos.y = actor->ypos;
         impact.spray.pos.z = actor->zpos;
@@ -141,7 +141,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
                 spot[2] += actor->zpos;
                 probe.x = spot[0];
                 probe.z = spot[2];
-                if (!func_15046C80(&probe, 0, actor->ypos - 500.0f, &scatterGround) || scatterGround.source == 3) {
+                if (!collision_probeFloorSurfABSet0Cached(&probe, 0, actor->ypos - 500.0f, &scatterGround) || scatterGround.source == 3) {
                     return;
                 }
                 spot[1] = scatterGround.height;
@@ -174,7 +174,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
             above.x = center[0];
             above.y = center[1] + 100.0f;
             above.z = center[2];
-            if (!func_1504697C(&above, 0, center[1] - 500.0f, &centerGround) || centerGround.source == 3) {
+            if (!collision_probeFloorSurfABSet0(&above, 0, center[1] - 500.0f, &centerGround) || centerGround.source == 3) {
                 return;
             }
         }
@@ -358,9 +358,9 @@ void func_151B0B88(Game1DD500Task *task) {
                     if (slot->timer < 0) {
                         Vec3f *velocity = &slot->particle->motion.velocity;
 
-                        velocity->x = (slot->particle->head.def.pos.x - slot->particle->head.def.rot.x) * D_800BE9A8;
+                        velocity->x = (slot->particle->head.def.pos.x - slot->particle->head.def.rot.x) * gFrameDeltaInv;
                         velocity->y = 0.0f;
-                        velocity->z = (slot->particle->head.def.pos.z - slot->particle->head.def.rot.z) * D_800BE9A8;
+                        velocity->z = (slot->particle->head.def.pos.z - slot->particle->head.def.rot.z) * gFrameDeltaInv;
                         func_1513F680(&slot->particle->head, 0x10, 0x1B, 0, 0x10);
                         slot->particle->head.def.flags |= 1;
                         slot->particle = NULL;
@@ -382,7 +382,7 @@ void func_151B0B88(Game1DD500Task *task) {
                 }
             }
             if (freeCount != 0) {
-                emitter->spawnTime += func_150ADA68() * 307.0f * 0.001f * D_800BE9A4;
+                emitter->spawnTime += func_150ADA68() * 307.0f * 0.001f * gFrameDelta;
                 if (emitter->spawnTime > 1.0f) {
                     ParticleDef desc;
                     Game1DD500Motion motion;
@@ -478,12 +478,12 @@ s32 func_151B118C(Game1DD500Particle *particle) {
     oldVx = motion->velocity.x;
     oldVz = motion->velocity.z;
     alive = TRUE;
-    motion->velocity.x *= 0.25f * D_800BE9A4;
-    motion->velocity.z *= 0.25f * D_800BE9A4;
-    dx = (motion->velocity.x + oldVx) * 0.5f * D_800BE9A4;
-    dy = motion->velocity.y * D_800BE9A4 + motion->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f;
-    dz = (motion->velocity.z + oldVz) * 0.5f * D_800BE9A4;
-    motion->velocity.y += motion->gravity * D_800BE9A4;
+    motion->velocity.x *= 0.25f * gFrameDelta;
+    motion->velocity.z *= 0.25f * gFrameDelta;
+    dx = (motion->velocity.x + oldVx) * 0.5f * gFrameDelta;
+    dy = motion->velocity.y * gFrameDelta + motion->gravity * gFrameDelta * gFrameDelta * 0.5f;
+    dz = (motion->velocity.z + oldVz) * 0.5f * gFrameDelta;
+    motion->velocity.y += motion->gravity * gFrameDelta;
     particle->head.def.pos.x += dx;
     particle->head.def.pos.y += dy;
     particle->head.def.pos.z += dz;
@@ -497,7 +497,7 @@ s32 func_151B118C(Game1DD500Particle *particle) {
         probe.x = particle->head.def.pos.x;
         probe.y = oldY - particle->head.def.height;
         probe.z = particle->head.def.pos.z;
-        if (func_15046C80(&probe, 0, particle->head.def.pos.y - particle->head.def.height, &particle->head.ground)) {
+        if (collision_probeFloorSurfABSet0Cached(&probe, 0, particle->head.def.pos.y - particle->head.def.height, &particle->head.ground)) {
             splat.x = probe.x;
             splat.y = particle->head.ground.height + 5.0f;
             splat.z = probe.z;
@@ -557,7 +557,7 @@ Vtx *func_151B14AC(Game1DD500Particle *particle, s16 view) {
     camX = &D_800DD1E8[view];
     sign = -1.0f;
     lateral = ((*camX * (particle->head.def.rot.x - particle->head.def.pos.x)) -
-               (D_800DD1D8[view] * (particle->head.def.rot.z - particle->head.def.pos.z))) * D_800BE9A8;
+               (D_800DD1D8[view] * (particle->head.def.rot.z - particle->head.def.pos.z))) * gFrameDeltaInv;
     if (lateral < 0.0f) {
         sign = 1.0f;
         lateral = -lateral;

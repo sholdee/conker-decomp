@@ -37,7 +37,7 @@ struct FF0E0Object {
 
 /*
  * This file's .rodata front-end data: the six ray directions, the colours of the six children
- * (func_15014B60 of game_40490.c reads the first six), and the spin presets that game_C9EC0.c sends
+ * (func_15014B60 of game_40490.c reads the first six), and the spin presets that game/Script/EffectCmd/effectcmd.c sends
  * with message 0x32.
  */
 static const Vec3f D_800A08F0[6] = {
@@ -66,9 +66,9 @@ void func_150D1C30(FF0E0Object *obj) {
 
     state = &obj->state;
     if (obj->state.flags & 1) {
-        state->rotation.x += state->angularVelocity.x * D_800BE9A4;
-        state->rotation.y += state->angularVelocity.y * D_800BE9A4;
-        state->rotation.z += state->angularVelocity.z * D_800BE9A4;
+        state->rotation.x += state->angularVelocity.x * gFrameDelta;
+        state->rotation.y += state->angularVelocity.y * gFrameDelta;
+        state->rotation.z += state->angularVelocity.z * gFrameDelta;
         func_150A8050(mtx, state->rotation.x, state->rotation.y, state->rotation.z);
         for (i = 0; i < 6; i++) {
             child = state->children[i];

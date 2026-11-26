@@ -29,14 +29,14 @@ static const s16 D_800A6E30[6][7] = {
 
 /* Render setup and teardown of the style particles (object types 18 and 103 of D_8008B4A8). */
 Gfx D_8008CB70[] = {
-    gsSPDisplayList(D_800873D0),
+    gsSPDisplayList(gSpriteRenderDl),
     gsDPSetCombineLERP(PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0,
                        PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0),
     gsDPSetRenderMode(G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2),
     gsSPEndDisplayList(),
 };
 Gfx D_8008CB90[] = {
-    gsSPDisplayList(D_80087408),
+    gsSPDisplayList(gSpriteEndDl),
     gsSPEndDisplayList(),
 };
 
@@ -102,7 +102,7 @@ void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
         particle->u.drift.unk2E = unk2E;
         particle->u.drift.unk2F = unk2F;
         if (linkArg != 0) {
-            particle->link = func_150448D0(-1, 0, linkArg, 20, 20, 20, 0, &particle->x, &particle->scaleX);
+            particle->link = collision_addTriggerVolume(-1, 0, linkArg, 20, 20, 20, 0, &particle->x, &particle->scaleX);
         } else {
             particle->link = NULL;
         }
@@ -146,7 +146,7 @@ void func_1516D678(StyleParticle *particle) {
 
 
 Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
-    SpriteParams sprite; // func_15142E24 points it at the texture, func_15095760 draws it
+    SpriteParams sprite; // func_15142E24 points it at the texture, sprite_drawWorld draws it
     s32 pad; // matching: unused stack slot in the original frame
     TextureDesc *texture;
     s32 synced;
@@ -187,7 +187,7 @@ Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
                               0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
         }
     }
-    gfx = func_15142FBC(gfx, cycleType | D_800D2C9C | G_TF_BILERP | G_TC_FILT, 0x5049DC, (u8 *)&synced);
+    gfx = func_15142FBC(gfx, cycleType | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT, 0x5049DC, (u8 *)&synced);
     sprite.x = particle->x;
     sprite.y = particle->y;
     sprite.z = particle->z;
@@ -195,9 +195,9 @@ Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     sprite.scaleY = particle->scaleY;
     sprite.alpha = particle->alpha;
     sprite.flip = 0;
-    D_800D2DA8 = particle->r;
-    D_800D2DA9 = particle->g;
-    D_800D2DAA = particle->b;
+    gSpritePrimR = particle->r;
+    gSpritePrimG = particle->g;
+    gSpritePrimB = particle->b;
     r = particle->envR;
     g = particle->envG;
     b = particle->envB;
@@ -210,7 +210,7 @@ Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
         }
         gDPSetEnvColor(gfx++, r, g, b, 0);
     }
-    return func_15095760(gfx, &sprite);
+    return sprite_drawWorld(gfx, &sprite);
 }
 
 // matching: only a K&R definition makes IDO narrow the u8/s16 args by reloading them from the stack
@@ -586,8 +586,8 @@ s32 func_1516E8CC(StyleParticle *particle) {
 
 /* The ROM has 8 bytes of `jr ra; nop` between func_1516E8CC and func_1516ECAC.
  * splat has no symbol for them so they fold into func_1516E8CC's size; they are an
- * empty leaf function, the same shape game_981E0.c func_1507304C and
- * game_1A5440.c func_15178750_pad already reconstruct. */
+ * empty leaf function, the same shape game/Event/TimedEvent/timedevent.c func_1507304C and
+ * game/Swarm/SwarmCentre/swarmcentre.c func_15178750_pad already reconstruct. */
 static void func_1516ECA4_pad(void) {
 }
 
@@ -770,8 +770,8 @@ void func_1516F548(
         (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
         (s16)velocityY, 0xC8, 1, 6, 0, 1, 0, 0,
         0, 0, 0, arg15, arg16);
-    func_1000FA64(7, x, y, z, 0x36B0, 0x3E8, 0x64,
-        (SoundRecordCallback)func_1000EBC4, (void *)arg3, 0, 0, 0);
+    sound_addDynamicSound(7, x, y, z, 0x36B0, 0x3E8, 0x64,
+        (SoundRecordCallback)sound_fadeOutCallback, (void *)arg3, 0, 0, 0);
 }
 
 /* x and z are 8.8 fixed point with their fractions in u.drift; the velocities are 8.8 too. */

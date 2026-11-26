@@ -118,12 +118,12 @@ void func_15012ED8(Gfx *dl) {
     }
 }
 
-/* Clears the attachment model reference counts (game_1B9DB0), all but the last of the 0x1E4. */
+/* Clears the attachment model reference counts (game/Attach/AttachModel/attachmodel), all but the last of the 0x1E4. */
 void func_15012F90(void) {
     s32 i;
 
     // matching: IDO peels the 3 left over from 0x1E3 / 4 before the unrolled loop
     for (i = 0; i < 0x1E3; i++) {
-        D_800DF7D0[i] = 0;
+        gAttachModelRefCounts[i] = 0;
     }
 }

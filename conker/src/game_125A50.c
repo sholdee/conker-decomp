@@ -22,7 +22,7 @@ static const u8 D_800A1C40[4][2] = { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } };
 static const Vec3f D_800A1C48 = { -124.0f, -8.0f, 28.0f };
 static const Vec3f D_800A1C54 = { -170.0f, -8.0f, 28.0f };
 
-/* Effects 50 units above `obj`: a func_151602C0 burst and a func_15152B38 emitter. */
+/* Effects 50 units above `obj`: a light_createWithEffect burst and a func_15152B38 emitter. */
 void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
     Vec3f pos;
 
@@ -40,7 +40,7 @@ void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
         header2.x = pos.x;
         header2.y = pos.y;
         header2.z = pos.z;
-        func_151602C0(&header, &header2, (func_150ADA20() % 31U) + 90, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+        light_createWithEffect(&header, &header2, (func_150ADA20() % 31U) + 90, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
     }
     {
         TrailBurst spawn;
@@ -202,7 +202,7 @@ void func_150F892C(StageObj *obj) {
         state->eventTimer = func_150ADA20() % 151U + 150;
     }
 
-    state->unk38 += (0.02000000142f + func_150ADA68() * 0.025f) * (D_800BE9A4 * count);
+    state->unk38 += (0.02000000142f + func_150ADA68() * 0.025f) * (gFrameDelta * count);
     if (state->unk38 > 1.0f) {
         s16 side;
         Vec3f pos;
@@ -212,12 +212,12 @@ void func_150F892C(StageObj *obj) {
             pos.y = func_150ADA68() * 150.0f + 30.0f;
             pos.x += state->centerX;
             pos.z += state->centerZ;
-            func_151C329C(&pos, obj->unkC, obj->unk1);
+            weapon_spawnImpactBurst(&pos, obj->unkC, obj->unk1);
             state->unk38 -= 1.0f;
         } while (state->unk38 > 1.0f);
     }
 
-    state->unk34 += (0.02000000142f + func_150ADA68() * 0.06000000238f) * (D_800BE9A4 * count);
+    state->unk34 += (0.02000000142f + func_150ADA68() * 0.06000000238f) * (gFrameDelta * count);
     if (state->unk34 > 1.0f) {
         s16 pieces;
         s16 side;
@@ -275,7 +275,7 @@ void func_150F892C(StageObj *obj) {
         } while (state->unk34 > 1.0f);
     }
 
-    state->unk30 += (0.05500000343f + func_150ADA68() * 0.05f) * (D_800BE9A4 * count);
+    state->unk30 += (0.05500000343f + func_150ADA68() * 0.05f) * (gFrameDelta * count);
     if (state->unk30 > 1.0f) {
         s16 side;
         s32 flares;
@@ -338,7 +338,7 @@ void func_150F892C(StageObj *obj) {
         } while (state->unk30 > 1.0f);
     }
 
-    state->unk2C += (0.3360000253f + func_150ADA68() * 0.126f) * (D_800BE9A4 * count);
+    state->unk2C += (0.3360000253f + func_150ADA68() * 0.126f) * (gFrameDelta * count);
     if (state->unk2C > 1.0f) {
         s16 side;
         Vec3f pos;
@@ -433,12 +433,12 @@ s32 arg2;
     Vec3f unk30;
     ModelAttachment *gun;
 
-    gun = func_150FF288(obj);
+    gun = weapon_getGunAttachment(obj);
     if (gun != NULL) {
-        if (func_150FF6E0(points, &position, &hit, &normal, &unk30, obj, gun) != 0) {
+        if (weapon_getGunMuzzlePoints(points, &position, &hit, &normal, &unk30, obj, gun) != 0) {
             func_151D3F14(&position, arg1, arg2);
             func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f, arg1, arg2);
-            func_150FF474(&position, points, arg1, arg2);
+            weapon_spawnMuzzleFlashes(&position, points, arg1, arg2);
         }
     }
 }

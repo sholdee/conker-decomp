@@ -13,15 +13,15 @@ Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, void *zDest, void *colorD
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPSetColorDither(gfx++, G_CD_DISABLE);
     gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-    gDPLoadTextureBlock(gfx++, D_800BE9C4 + y * D_800BE620, G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)D_800BE628[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadTextureBlock(gfx++, gZBuffer + y * gScreenWidth, G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)gViews[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, zDest);
-    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, (s32)D_800BE628[view].width, 1);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, (s32)gViews[view].width, 1);
     gSPTextureRectangle(gfx++, 0, 0, 3 << 2, 1 << 2, G_TX_RENDERTILE, x << 5, 0, 4 << 10, 1 << 10);
-    gDPLoadTextureBlock(gfx++, (u8 *)D_8002AAE8[D_800BE9C0] + (y * D_800BE620 * 2), G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)D_800BE628[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadTextureBlock(gfx++, (u8 *)D_8002AAE8[D_800BE9C0] + (y * gScreenWidth * 2), G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)gViews[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, colorDest);
     gSPTextureRectangle(gfx++, 0, 0, 3 << 2, 1 << 2, G_TX_RENDERTILE, x << 5, 0, 4 << 10, 1 << 10);
 
-    gfx = func_1501A490(func_1501A680(gfx), D_80082FA4, 0, 0, 0, 0);
+    gfx = view_setScissor(view_setColorImage(gfx), gCurrentView, 0, 0, 0, 0);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     return gfx;
 }
@@ -103,12 +103,12 @@ Gfx *func_151742EC(Gfx *gfx, s32 view) {
             // matching: byte offsets here (not D_800DD310[i]) keep IDO's shared i * 8 address
             *(u16 *)((u8 *)D_800DD310 + i * 8) = 0xFFFF;
             D_800DD348[i].state = D_800BE9C0 + 1;
-            func_1501A764(view, D_800DD348[i].x, D_800DD348[i].y, D_800DD348[i].z, &screenX, &screenY, &screenZ);
+            view_projectPoint(view, D_800DD348[i].x, D_800DD348[i].y, D_800DD348[i].z, &screenX, &screenY, &screenZ);
             x = screenX;
             y = screenY;
             D_800DD300[i] = screenZ;
-            if (x >= (s32)D_800BE628[view].left && x < (s32)D_800BE628[view].right && y >= (s32)D_800BE628[view].top &&
-                y < (s32)D_800BE628[view].bottom) {
+            if (x >= (s32)gViews[view].left && x < (s32)gViews[view].right && y >= (s32)gViews[view].top &&
+                y < (s32)gViews[view].bottom) {
                 // matching: byte offsets, as at the store above
                 gfx = func_15173D00(gfx, x, y, 1, (u8 *)D_800DD310 + i * 8, (u8 *)D_800DD328 + i * 8, view);
             }

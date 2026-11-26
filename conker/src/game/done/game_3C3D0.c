@@ -13,8 +13,8 @@ void func_1500EF20(void) {
     Effect1500EF20 *temp_v0;
     DiscEmitter tmp;
 
-    func_15195AA8(D_800B0E00[0], D_800902B8, 1, -1, 0, 0, 0, -8);
-    func_15195AA8(D_800B0E00[1], D_800902B8, 1, -1, 0, 1, 0, -8);
+    flamethrower_addTexScroll(D_800B0E00[0], D_800902B8, 1, -1, 0, 0, 0, -8);
+    flamethrower_addTexScroll(D_800B0E00[1], D_800902B8, 1, -1, 0, 1, 0, -8);
 
     tmp.x = 9776.0f;
     tmp.z = -1770.0f;
@@ -47,8 +47,8 @@ void func_1500EF20(void) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
 
-    D_800DCD94 = D_800DCD20[0];
-    D_800DCD98 = D_800DCD20[1];
-    D_800DCD9C = D_800DCD20[2];
+    D_800DCD94 = gAmbientColour[0];
+    D_800DCD98 = gAmbientColour[1];
+    D_800DCD9C = gAmbientColour[2];
     D_800DCDA0 = 0.0f;
 }
