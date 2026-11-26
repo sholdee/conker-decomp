@@ -1089,7 +1089,7 @@ segments:
       - {start: 0x22BE90, type: .data, name: game_C2350, linker_section_order: .rodata}
       - {start: 0x22BED0, type: .data, name: game_C8950, linker_section_order: .rodata}
       - [0x22BEF0, rodata]   # resource manifest (names are game content: extracted, not in C)
-      - [0x22CEE0, rodata]
+      - {start: 0x22CEE0, type: .data, name: game_22CEE0, linker_section_order: .rodata}
       - {start: 0x22CFD0, type: .data, name: game_CD5A0, linker_section_order: .rodata}
       - [0x22CFF0, rodata]
       - {start: 0x22D000, type: .data, name: game_D5650, linker_section_order: .rodata}

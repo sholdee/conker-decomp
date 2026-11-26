@@ -320,9 +320,6 @@ void func_1509BBA0(s32 mode) {
     D_800D3858 = 0;
 }
 
-extern s32 (*D_80088498[])(s32, s32, s32 *);
-extern s32 (*D_800884D4[])(s32, s32, s32 *);
-
 /*
  * Command dispatchers: bits 12-15 of `cmd` select a handler in the table, bits 0-11 are passed
  * to it with `arg` and `count` further variadic words (collected in D_800D2F60 with cmd and arg).

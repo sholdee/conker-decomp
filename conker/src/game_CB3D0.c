@@ -8,8 +8,9 @@ static f32 D_800D2FD8[5]; // value
 static u8 D_800D2FEC[5];  // set by func_1509DF20
 
 // On a type-1 record (only while D_800D3840 == 3), sets both float slots of entry `index` to the
-// 16.16 fixed-point `value` and flags the entry.
-void func_1509DF20(s32 arg0, ScriptCmd *record) {
+// 16.16 fixed-point `value` and flags the entry. A start handler of D_80088420: it has the table's s32
+// type but no return statement.
+s32 func_1509DF20(s32 arg0, ScriptCmd *record) {
     if (record->arg.w == 1 && D_800D3840 == 3) {
         D_800D2FC0[record->a[0].w] = record->a[1].w * (1.0f / 65536.0f);
         D_800D2FD8[record->a[0].w] = record->a[1].w * (1.0f / 65536.0f);
@@ -17,8 +18,8 @@ void func_1509DF20(s32 arg0, ScriptCmd *record) {
     }
 }
 
-// Empty handler.
-void func_1509DFB4(s32 arg0, s32 arg1) {
+// Empty end handler of D_8008845C: it has the table's s32 type but no return statement.
+s32 func_1509DFB4(s32 arg0, ScriptCmd *record) {
 }
 
 // Runs command `cmd` with up to four integer params; most commands forward to a helper.
