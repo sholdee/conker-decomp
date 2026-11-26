@@ -2,80 +2,17 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Particle template, referenced by an EmitterInfo. */
-typedef struct ParticleTemplate {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ s16 lifeMin;   // lifetime given to a particle when its slot releases it
-    /* 0x36 */ s16 lifeRange;
-    /* 0x38 */ u8 unk38;
-    /* 0x39 */ u8 unk39;
-    /* 0x3A */ u8 unk3A;
-    /* 0x3B */ u8 unk3B;
-    /* 0x3C */ u8 unk3C;
-    /* 0x3D */ u8 unk3D;
-    /* 0x3E */ u8 unk3E;
-    /* 0x3F */ u8 spawnCb; // index into D_8008D620
-} ParticleTemplate; /* 0x40 */
-
-/* An emission point attached to one of the owner's bones. */
-typedef struct {
-    /* 0x0 */ Vec3f pos;
-    /* 0xC */ s16 bone;
-} EmitterPoint; /* 0x10 */
-
-typedef struct {
-    /* 0x00 */ ParticleTemplate *tmpl;
-    /* 0x04 */ s32 numSlots;
-    /* 0x08 */ EmitterPoint *points; // one per slot (attached mode)
-    /* 0x0C */ f32 rate;             // particles added per frame
-    /* 0x10 */ s32 maxCount;
-    /* 0x14 */ s16 lifeMin;          // frames a slot holds its particle
-    /* 0x16 */ s16 lifeRange;
-    /* 0x18 */ u8 spread;            // 1: sphere, 2: horizontal disc (world mode)
-    /* 0x19 */ u8 mode;              // 2: emit around one point instead of per-bone points
-    /* 0x1A */ u8 pad1A[2];
-    /* 0x1C */ f32 speed;
-    /* 0x20 */ f32 speedY;
-    /* 0x24 */ f32 yOffset;
-    /* 0x28 */ f32 x;
-    /* 0x2C */ f32 y;
-    /* 0x30 */ f32 z;
-    /* 0x34 */ u8 bone;
-} EmitterInfo;
-
-/* IDs (Actor.unk84) that select one row of an EmitterTable. */
-typedef struct {
-    /* 0x0 */ s16 count;
-    /* 0x4 */ u8 *ids;
-} EmitterIdList;
-
 /*
- * infos holds (n + 2) entries per owner variant (Actor.lod): one per id list,
- * then the attached-mode default, then the unattached one.
+ * This file's .data. The emitter tables by ActorEmitterParams.table; the tables are in game_232150.c.
  */
-typedef struct {
-    /* 0x0 */ EmitterInfo **infos;
-    /* 0x4 */ s16 n;
-    /* 0x8 */ EmitterIdList *idLists;
-} EmitterTable;
-
-/* Process lists, by priority and process type. */
-extern EmitterTable *D_8008D5E0[];
-extern void (*D_8008D620[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, s16 *);
-extern s32 (*D_8008D628[])(ActorEmitterProcess *);
+static EmitterTable *D_8008D5E0[] = {
+    &D_8008F780, &D_8008F78C, &D_8008F7A4, &D_8008F7B0, &D_8008F7D4, &D_8008F7BC, &D_8008F7C8, &D_8008F798,
+    &D_8008F7E0, &D_8008F7EC, &D_8008F7F8, &D_8008F804, &D_8008F810, &D_8008F81C, &D_8008F828, &D_8008F834,
+};
+/* Particle spawn callbacks, by ParticleTemplate.spawnCb (game_1BB950.c). */
+static void (*D_8008D620[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, u16 *) = { func_1518E524, func_1518E5D8 };
+/* Lifetime callbacks, by ActorEmitterParams.expireCb (game_1BB950.c). */
+static s32 (*D_8008D628[])(ActorEmitterProcess *) = { func_1518E66C, func_1518E6D4 };
 
 void *memcpy(void *, const void *, u32);
 

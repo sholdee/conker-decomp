@@ -4,6 +4,8 @@
 
 void *memcpy(void *, const void *, u32);
 
+// The string literals of func_1518E66C and func_1518E6D4: they lie in the front-end .rodata of the unit that
+// begins at game_1BA670 (before game_1BA670's literals), so this file cannot own them until the unit is merged.
 extern char D_800A7460[];
 extern char D_800A749C[];
 
@@ -26,7 +28,7 @@ void func_1518E4F8(ActorEmitterProcess *emitter) {
 }
 
 /* Particle spawn callback: texture 0x13 or 0x14 at random, opaque black. */
-void func_1518E524(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, s16 *renderModes) {
+void func_1518E524(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, u16 *renderModes) {
     *flip = 2;
     if (func_150ADA20() & 1) {
         *flip |= 1;
@@ -49,7 +51,7 @@ void func_1518E524(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, s16 *r
 }
 
 /* Particle spawn callback: texture 0x16 tinted with palette 3 or 4 at random. */
-void func_1518E5D8(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, s16 *renderModes) {
+void func_1518E5D8(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, u16 *renderModes) {
     if (func_150ADA20() & 1) {
         *flip |= 1;
     }
