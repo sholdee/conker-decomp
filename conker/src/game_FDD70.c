@@ -2,6 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
+// func_151DB5D0 (game_2062D0.c) is declared in each file that calls it: game_161520.c was compiled with a
+// different view of it.
+SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
+                             u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
+
 
 /* Eases *value toward target, tracking its rate of change in *velocity. */
 

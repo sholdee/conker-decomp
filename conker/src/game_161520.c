@@ -1,10 +1,7 @@
 #include <ultra64.h>
-#define func_151DB5D0 func_151DB5D0_header // matching: this file keeps its own declarations of these
-#define func_151DC034 func_151DC034_header
+#define func_151DC034 func_151DC034_header // matching: this file keeps its own declaration of func_151DC034
 #include "functions.h"
-#undef func_151DB5D0
 #undef func_151DC034
-#undef func_151DB5D0
 #include "variables.h"
 
 /* Scale factors passed to func_1513A24C (all 1.0f). */
@@ -973,8 +970,12 @@ s32 func_15135BF8(BloodSplat *splat) {
     return alive;
 }
 
-// matching: u8 where the definition has s32 (arg 1); s32 where the definition has s16 (args 8, 10-11), u8 (args 9, 12); returns void (the definition: SteamParticle *)
-extern void func_151DB5D0(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
+// matching: this file was compiled with u8 where the definition (game_2062D0.c) has s32 (arg 1), s32 where it has
+// s16 (args 8, 10, 11) and u8 (args 9, 12), and with a void return. The definition is
+// SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
+// u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD).
+void func_151DB5D0(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
+
 // matching: this file was compiled with s32 where the definition (game_2062D0.c) has u8 (args 3, 6, 11, 15) and
 // s16 (arg 5), and with a void return. The definition is SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel,
 // u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,

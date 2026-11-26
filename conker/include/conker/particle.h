@@ -3206,8 +3206,6 @@ void func_151DB330(ParticleDesc *desc);
 void func_151DB3D8(ParticleDesc *desc);
 void func_151DB43C(ParticleDesc *desc);
 void func_151DB4CC(ParticleDesc *desc);
-SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
-                             u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 s32 func_151DB97C(SteamParticle *particle, s32 arg1);
 void func_151DBAA8(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4);
 void func_151DBBD4(Vec3f *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4);
