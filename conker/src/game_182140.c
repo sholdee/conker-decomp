@@ -2,17 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct ScreenSprite {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ ScreenSpriteInfo info;
-    /* 0x68 */ u8 unk68;      /* low nibble: index into D_8008ACC8 */
-} ScreenSprite;
-
 typedef struct {
     s32 unk0;
     s32 unk4;
 } CombineMode;
-
 
 /* The two sprite lists func_151555AC searches. */
 typedef struct {

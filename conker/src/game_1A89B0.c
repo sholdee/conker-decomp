@@ -4,21 +4,6 @@
 #undef func_15170500
 #include "variables.h"
 
-/* One sprite placed in the level (D_800DDD18 holds D_800DDD20 of them, sorted by x or z). */
-typedef struct Game1A89B0Position {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 unk6;     /* low nibble: sprite type (texture slot 0..14) */
-    u8 phaseIdx; /* index into D_800DDC90 */
-    u8 texInfo;  /* index into D_80095CE0 */
-    u8 pad9;
-    u8 animIdx;  /* column of D_8008CF00 */
-    u8 unkB;
-    s8 halfWidth;
-    s8 height;
-} Game1A89B0Position;
-
 typedef struct {
     u8 unk0;
     u8 frameCount;

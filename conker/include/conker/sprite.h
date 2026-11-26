@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 #include "structs.h"
+#include "effects.h"
 
 /*
  * Subsystem "sprite": prototypes of the non-static functions and declarations of the globals
@@ -17,18 +18,93 @@
  *   game_1A89B0.c
  */
 
-/* Defined in their C files. A typedef here would reorder the .bss of game_6EA90.c and game_E4070.c. */
-struct GroupPoint;
-struct PointGroup;
-struct ScreenSprite;
-struct TexturedQuad;
-struct ActorTracker;
-struct ActorTrackerDesc;
-struct Game1A89B0Position;
+/* One 16-byte entry of a point group; only the position is read here. */
+typedef struct GroupPoint {
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad6[0xA];
+} GroupPoint;
+
+typedef struct PointGroup {
+    u8 pad0;
+    u8 slots; /* low nibble: first slot, high nibble: last slot */
+    u8 pad2[2];
+    GroupPoint *points;
+} PointGroup;
+
+typedef struct ScreenSprite {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ ScreenSpriteInfo info;
+    /* 0x68 */ u8 unk68;      /* low nibble: index into D_8008ACC8 */
+} ScreenSprite;
+
+/* Animated, textured quad (update func_1515BAE0, draw func_1515BBF0). */
+typedef struct TexturedQuad {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 texture;          // index into D_80090B60
+    /* 0x11 */ u8 flags;            // 1: lifetime counts down, 2: two-cycle mode
+    /* 0x12 */ u8 animFlags;        // end-of-animation behaviour, see func_1514401C
+    /* 0x13 */ u8 pad13;
+    /* 0x14 */ s16 lifetime;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 frame;           // 16.16 frame position
+    /* 0x1C */ u32 frameSpeed;
+    /* 0x20 */ u8 color0[4];
+    /* 0x24 */ u8 color1[4];
+    /* 0x28 */ u8 colorLevel;
+    /* 0x29 */ u8 primMode;
+    /* 0x2A */ u8 envMode;
+    /* 0x2B */ u8 renderMode;       // index into D_800A4AC8
+    /* 0x2C */ u8 combiner;
+    /* 0x2D */ u8 pad2D[3];
+    /* 0x30 */ s32 geometrySet;
+    /* 0x34 */ s32 geometryClear;
+    /* 0x38 */ s8 updateFunc;       // index into D_8008B078, -1 = none
+    /* 0x39 */ s8 destroyFunc;      // index into D_8008B07C, -1 = none
+    /* 0x3A */ u8 pad3A[0x16];
+    /* 0x50 */ Vtx vtx[4];
+} TexturedQuad;
+
+/* What an actor tracker is created from (func_1514EE70 builds one). */
+typedef struct ActorTrackerDesc {
+    /* 0x0 */ Actor *actor;
+    /* 0x4 */ u8 actorId;           // the actor's unique_id
+    /* 0x5 */ u8 flags;             // 1: lifetime counts down
+    /* 0x6 */ s16 lifetime;
+} ActorTrackerDesc;
+
+/* Object type 0x32: follows an actor's position every frame and keeps its frame-to-frame motion. */
+typedef struct ActorTracker {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ ActorTrackerDesc desc;
+    /* 0x20 */ Vec3f pos;
+    /* 0x2C */ Vec3f prevPos;
+    /* 0x38 */ Vec3f motion;        // (prevPos - pos) * D_800BE9A8
+    /* 0x44 */ s32 unk44;
+    /* 0x48 */ s32 unk48;
+} ActorTracker;
+
+/* One sprite placed in the level (D_800DDD18 holds D_800DDD20 of them, sorted by x or z). */
+typedef struct Game1A89B0Position {
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 unk6;     /* low nibble: sprite type (texture slot 0..14) */
+    u8 phaseIdx; /* index into D_800DDC90 */
+    u8 texInfo;  /* index into D_80095CE0 */
+    u8 pad9;
+    u8 animIdx;  /* column of D_8008CF00 */
+    u8 unkB;
+    s8 halfWidth;
+    s8 height;
+} Game1A89B0Position;
 
 /* game_C1D70.c */
-void func_150948C0(struct PointGroup *group, f32 (*out)[3]);
-void func_1509499C(struct PointGroup *group, struct GroupPoint **slots);
+void func_150948C0(PointGroup *group, f32 (*out)[3]);
+void func_1509499C(PointGroup *group, GroupPoint **slots);
 void func_15094AB8(Vtx *verts, s16 (*texcoords)[2], s32 count, f32 angle, s32 width, s32 height);
 void func_15094E98(void);
 
@@ -75,22 +151,22 @@ extern EffectHeader *D_800D9894;
 void func_1510A930(s32 fadeIn, s32 hold, s32 fadeOut);
 
 /* game_182140.c */
-void func_15154C90(struct ScreenSprite *sprite);
-Gfx *func_15154D80(Gfx *gfx, struct ScreenSprite *sprite, s16 viewport);
+void func_15154C90(ScreenSprite *sprite);
+Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport);
 void *func_1515548C(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6);
-void func_15155564(struct ScreenSprite *sprite, s32 arg1, u8 arg2);
+void func_15155564(ScreenSprite *sprite, s32 arg1, u8 arg2);
 s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount);
 void func_1515572C(s32 arg0, u8 arg1);
 
 /* game_188F90.c */
-void func_1515BAE0(struct TexturedQuad *quad);
-Gfx *func_1515BBF0(Gfx *gfx, struct TexturedQuad *quad, s32 view);
+void func_1515BAE0(TexturedQuad *quad);
+Gfx *func_1515BBF0(Gfx *gfx, TexturedQuad *quad, s32 view);
 void func_1515BE48(void);
-struct ActorTracker *func_1515BE50(struct ActorTrackerDesc *desc, s32 extraSize, u8 owner, s32 list);
-void func_1515BF50(struct ActorTracker *tracker);
-void func_1515BF7C(struct ActorTracker *tracker);
-void func_1515BFA8(struct ActorTracker *tracker);
-void func_1515C0B8(struct ActorTracker *tracker, s32 event, u8 eventType);
+ActorTracker *func_1515BE50(ActorTrackerDesc *desc, s32 extraSize, u8 owner, s32 list);
+void func_1515BF50(ActorTracker *tracker);
+void func_1515BF7C(ActorTracker *tracker);
+void func_1515BFA8(ActorTracker *tracker);
+void func_1515C0B8(ActorTracker *tracker, s32 event, u8 eventType);
 s32 func_1515C0F8(Actor *actor, Vec3f **motion);
 void func_1515C158(void);
 void func_1515C1A0(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3);
@@ -103,10 +179,10 @@ void func_15169988(Sprite2D *sprite);
 Gfx *func_15169A48(Gfx *gfx, Sprite2D *sprite, s32 arg2);
 
 /* game_1A89B0.c */
-s32 func_1517B500(struct Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
-s32 func_1517B6E8(struct Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
-s32 func_1517B7A8(struct Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
-s32 func_1517B7F8(struct Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
+s32 func_1517B500(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
+s32 func_1517B6E8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
+s32 func_1517B7A8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
+s32 func_1517B7F8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
 void func_1517B89C(s32 first, s32 last);
 void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fadeY, s32 fadeZ);
 void func_1517CFC4(void);

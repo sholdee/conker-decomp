@@ -2,21 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One 16-byte entry of a point group; only the position is read here. */
-typedef struct GroupPoint {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad6[0xA];
-} GroupPoint;
-
-typedef struct PointGroup {
-    u8 pad0;
-    u8 slots; /* low nibble: first slot, high nibble: last slot */
-    u8 pad2[2];
-    GroupPoint *points;
-} PointGroup;
-
 extern f32 *D_800D2C20;
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 

@@ -2,54 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Animated, textured quad (update func_1515BAE0, draw func_1515BBF0). */
-typedef struct TexturedQuad {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 texture;          // index into D_80090B60
-    /* 0x11 */ u8 flags;            // 1: lifetime counts down, 2: two-cycle mode
-    /* 0x12 */ u8 animFlags;        // end-of-animation behaviour, see func_1514401C
-    /* 0x13 */ u8 pad13;
-    /* 0x14 */ s16 lifetime;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 frame;           // 16.16 frame position
-    /* 0x1C */ u32 frameSpeed;
-    /* 0x20 */ u8 color0[4];
-    /* 0x24 */ u8 color1[4];
-    /* 0x28 */ u8 colorLevel;
-    /* 0x29 */ u8 primMode;
-    /* 0x2A */ u8 envMode;
-    /* 0x2B */ u8 renderMode;       // index into D_800A4AC8
-    /* 0x2C */ u8 combiner;
-    /* 0x2D */ u8 pad2D[3];
-    /* 0x30 */ s32 geometrySet;
-    /* 0x34 */ s32 geometryClear;
-    /* 0x38 */ s8 updateFunc;       // index into D_8008B078, -1 = none
-    /* 0x39 */ s8 destroyFunc;      // index into D_8008B07C, -1 = none
-    /* 0x3A */ u8 pad3A[0x16];
-    /* 0x50 */ Vtx vtx[4];
-} TexturedQuad;
-
-/* What an actor tracker is created from (func_1514EE70 builds one). */
-typedef struct ActorTrackerDesc {
-    /* 0x0 */ Actor *actor;
-    /* 0x4 */ u8 actorId;           // the actor's unique_id
-    /* 0x5 */ u8 flags;             // 1: lifetime counts down
-    /* 0x6 */ s16 lifetime;
-} ActorTrackerDesc;
-
-/* Object type 0x32: follows an actor's position every frame and keeps its frame-to-frame motion. */
-typedef struct ActorTracker {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ ActorTrackerDesc desc;
-    /* 0x20 */ Vec3f pos;
-    /* 0x2C */ Vec3f prevPos;
-    /* 0x38 */ Vec3f motion;        // (prevPos - pos) * D_800BE9A8
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ s32 unk48;
-} ActorTracker;
-
 extern s32 (*D_8008B078[])(TexturedQuad *);
 extern s32 (*D_8008B07C[])(TexturedQuad *);
 extern EffectTexture D_80090B60[];
