@@ -2084,7 +2084,7 @@ void func_15199980(CharacterFlamethrowerActor *actor) {
     }
     light = flame->light;
     if (light != NULL) {
-        func_1516972C((EffectHeader *)light);
+        func_1516972C(light);
     }
 }
 

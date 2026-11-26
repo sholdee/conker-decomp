@@ -744,7 +744,7 @@ void func_151C94D4(SightBeamObject *obj) {
 
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
-        func_1516972C((EffectHeader *)state->midEffect);
+        func_1516972C(state->midEffect);
         func_1000FD38((SoundRecordCallback)func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
@@ -792,7 +792,7 @@ void func_151C95D8(SightBeamObject *obj) {
 
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
-        func_1516972C((EffectHeader *)state->midEffect);
+        func_1516972C(state->midEffect);
         func_1000FD38((SoundRecordCallback)func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register

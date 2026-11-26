@@ -16,7 +16,7 @@ void func_15101090(RayBeam *beam) {
         func_1516972C(&data->hitFx->header);
     }
     if (data->endPoint != NULL) {
-        func_1516972C((EffectHeader *)data->endPoint);
+        func_1516972C(data->endPoint);
     }
     if (data->startFx != NULL) {
         func_1516972C(&data->startFx->head.header);
@@ -38,7 +38,7 @@ void func_15101148(RayBeam *beam) {
         func_1516979C(&data->hitFx->header);
     }
     if (data->endPoint != NULL) {
-        func_1516979C((EffectHeader *)data->endPoint);
+        func_1516979C(data->endPoint);
     }
     if (data->startFx != NULL) {
         func_1516979C(&data->startFx->head.header);

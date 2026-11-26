@@ -1251,10 +1251,15 @@ void func_1516962C(s32 type, Actor *actor, u8 eventType);
 s32 func_15169668(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType);
 void func_151696DC(EffectHeader *obj);
-void func_1516972C(EffectHeader *obj);
-void func_1516979C(EffectHeader *obj);
-void func_15169804(EffectHeader *obj);
-void func_15169824(EffectHeader *obj);
+/* These take any object of the object lists. Each object type has its own struct. The list code uses
+ * only the bytes 0x0-0xC of an object (type, list, prev, next, owner), which EffectHeader describes
+ * together with flags and state at 0xD-0xF. A struct of only those bytes cannot be a member (its size
+ * rounds up to 0x10), and many types (LightEffect, RumbleObj, TextBox, StyleParticle, ...) keep their
+ * own fields at 0xD-0xF. */
+void func_1516972C(void *obj);
+void func_1516979C(void *obj);
+void func_15169804(void *obj);
+void func_15169824(void *obj);
 void func_15169850(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj);
 
 /* game_19E040.c */

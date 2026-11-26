@@ -1173,13 +1173,15 @@ void func_151696DC(EffectHeader *obj) {
 }
 
 /* Destroys an object of type 2 or above: its type's destroy hook, or by default func_15169804. */
-void func_1516972C(EffectHeader *obj) {
+void func_1516972C(void *obj) {
+    EffectHeader *head;
     void (*destroy)(EffectHeader *obj);
 
     func_151696DC(obj);
 
-    if (obj->type >= 2) {
-        destroy = D_8008B4A8[obj->type].destroy;
+    head = obj;
+    if (head->type >= 2) {
+        destroy = D_8008B4A8[head->type].destroy;
         if (destroy != NULL) {
             destroy(obj);
             return;
@@ -1189,11 +1191,13 @@ void func_1516972C(EffectHeader *obj) {
 }
 
 /* Frees an object: its type's free hook, or by default func_15169824. */
-void func_1516979C(EffectHeader *obj) {
+void func_1516979C(void *obj) {
+    EffectHeader *head;
     void (*free)(EffectHeader *obj);
 
     func_151696DC(obj);
-    free = D_8008B4A8[obj->type].free;
+    head = obj;
+    free = D_8008B4A8[head->type].free;
     if (free != NULL) {
         free(obj);
         return;
@@ -1202,12 +1206,12 @@ void func_1516979C(EffectHeader *obj) {
 }
 
 /* Default destroy: moves the object to type 1 (pending free). */
-void func_15169804(EffectHeader *obj) {
+void func_15169804(void *obj) {
     func_15168B10(obj, 1);
 }
 
 /* Default free: unlinks the object and releases its memory. */
-void func_15169824(EffectHeader *obj) {
+void func_15169824(void *obj) {
     func_15168A9C(obj);
     func_10004074(obj);
 }

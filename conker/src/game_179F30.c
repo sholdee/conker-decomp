@@ -1267,7 +1267,7 @@ Attachment *func_1514EC1C(void *handle, Actor *owner, s16 type) {
         } else if (D_8008ABE8[type]->destroyHandler != -1) {
             D_8008AB58[D_8008ABE8[type]->destroyHandler]((s32)handle);
         } else {
-            func_1516972C((EffectHeader *)handle);
+            func_1516972C(handle);
         }
     }
     return result;

@@ -2478,8 +2478,9 @@ typedef union LightEffectData {
 
 /*
  * A light effect instance (object type 53, allocated by func_1516037C with func_15167A68): a 0x18-byte
- * header, then a payload of the requested size. The first 0xE bytes are the object-list link of
- * EffectHeader. The allocation is 0x18 + payload size, so sizeof(LightEffect) is not used.
+ * header, then a payload of the requested size. The first 0xD bytes (type to owner) are the object-list
+ * head of EffectHeader; 0xD-0xF differ from it. The allocation is 0x18 + payload size, so
+ * sizeof(LightEffect) is not used.
  */
 typedef struct LightEffect {
     /* 0x00 */ u8 type;

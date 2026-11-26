@@ -421,7 +421,7 @@ void func_150F631C(ModelBeamEffect *effect) {
         func_1516972C(&data->beam->head.header);
     }
     if (data->flash != NULL) {
-        func_1516972C((EffectHeader *)data->flash);
+        func_1516972C(data->flash);
     }
 }
 
