@@ -20,7 +20,7 @@ static s32 (*gBoltUpdateHandlers[])(BoltObj *bolt, u8 *moved) = { beam_followBou
 static void (*gBoltCleanupHandlers[])(BoltObj *bolt) = { NULL, beam_unlinkChainBolt, NULL, NULL };
 static void (*gBoltMsgHandlers[])(BoltObj *bolt, s32 arg1, u8 arg2) = { NULL, NULL, beam_boundsBoltMessage, beam_boneBoltMessage };
 /* Per BoltChain.kind: message handlers. */
-static void (*gBoltChainMsgHandlers[])(EffectHeader *obj, s32 arg1, u8 arg2) = { NULL, effect_boltRingMessage, func_1510550C };
+static void (*gBoltChainMsgHandlers[])(EffectHeader *obj, s32 arg1, u8 arg2) = { NULL, effect_boltRingMessage, beam_destroyOnMessage4B };
 
 /*
  * Allocates a bolt for desc with extraSize bytes of user data, samples and jitters it, and spawns its
@@ -699,7 +699,7 @@ void beam_getStraightCtrlPoints(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *c
 }
 
 /* Calls weapon_spawnImpactBurst at the point on the actor's bounds in direction yaw/pitch. */
-void func_15107B78(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4) {
+void beam_spawnBoundsImpact(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4) {
     Vec3f pos;
     Vec3f center;
     f32 radius;

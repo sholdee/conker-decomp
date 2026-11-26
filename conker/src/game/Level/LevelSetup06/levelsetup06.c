@@ -4,6 +4,6 @@
 #include "variables.h"
 
 
-void func_15010680(void) {
+void level_setup06(void) {
     gProjectileHitCallback = func_150EA904;
 }

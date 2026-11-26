@@ -4,14 +4,14 @@
 #include "variables.h"
 
 /* The level's rope (higher end first). */
-static const RopeEnds D_80096430 = { { -2495.0f, 729.0f, -906.0f }, { -2495.0f, 129.0f, -906.0f } };
+static const RopeEnds gSetup22RopeEnds = { { -2495.0f, 729.0f, -906.0f }, { -2495.0f, 129.0f, -906.0f } };
 
-void func_15010780(void) {
+void level_setup18(void) {
     prop_createWaveDeformer(1, 255,    0, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
     prop_createWaveDeformer(0, 255, 6628, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
 }
 
-void func_15010880(void) {
+void level_setup20(void) {
     ZonePairEmitter tmp;
     TimedEffect *temp_v0;
     TriggerZone *base;
@@ -34,7 +34,7 @@ dummy_label_15010880:
     }
 }
 // NON-MATCHING: ops in wrong order
-// void func_15010880(void) {
+// void level_setup20(void) {
 //     ZonePairEmitter tmp;
 //     TimedEffect *temp_v0;
 
@@ -54,11 +54,11 @@ dummy_label_15010880:
 //     }
 // }
 
-void func_150109D0(void) {
+void level_setup22(void) {
     RopeSpawn tmp;
 
     tmp.unk20 = 0;  
-    tmp.ends = D_80096430;
+    tmp.ends = gSetup22RopeEnds;
 
     tmp.id = 1;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y); 

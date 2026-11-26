@@ -4,11 +4,11 @@
 
 /* Points in bone space: the ends of the beam_updateBoneSparks spark segment (bone 5), of the beam_updateModelBeam beam,
  * and the origin of the beam_updateFlashBurst bolts. */
-static const Vec3f D_800A1B00 = { 0.0f, 0.0f, 14.0f };
-static const Vec3f D_800A1B0C = { 0.0f, 0.0f, 78.0f };
-static const Vec3f D_800A1B18 = { 0.0f, -55.0f, 0.0f };
-static const Vec3f D_800A1B24 = { 0.0f, -115.0f, 0.0f };
-static const Vec3f D_800A1B30 = { 0.0f, 465.0f, -102.0f };
+static const Vec3f gBoneSparksStart = { 0.0f, 0.0f, 14.0f };
+static const Vec3f gBoneSparksEnd = { 0.0f, 0.0f, 78.0f };
+static const Vec3f gModelBeamStart = { 0.0f, -55.0f, 0.0f };
+static const Vec3f gModelBeamEnd = { 0.0f, -115.0f, 0.0f };
+static const Vec3f gFlashBurstOffset = { 0.0f, 465.0f, -102.0f };
 
 
 /* Shows a sprite (picked by `style`) that fades in over `fadeIn` frames, holds for
@@ -101,7 +101,7 @@ void beam_updateSpriteFade(Sprite2D *sprite) {
     }
 }
 
-void func_150F568C(s32 arg0) {
+void beam_levelUpdateRain(s32 arg0) {
     effect_updateRain(0);
 }
 
@@ -280,8 +280,8 @@ void beam_updateBoneSparks(BoneSparkEffect *effect) {
             spawn.r2 = 0xB4;
             spawn.g2 = 0xB4;
             spawn.b2 = 0xB4;
-            srcs[0] = &D_800A1B00;
-            srcs[1] = &D_800A1B0C;
+            srcs[0] = &gBoneSparksStart;
+            srcs[1] = &gBoneSparksEnd;
             dsts[0] = &start;
             dsts[1] = &end;
             math_transformOffsets(srcs, dsts, &owner->ob_matrix_ptr[5], 2);
@@ -372,8 +372,8 @@ void beam_updateModelBeam(ModelBeamEffect *effect) {
         LightEffect *flash;
         PointLight *light;
 
-        srcs[0] = &D_800A1B18;
-        srcs[1] = &D_800A1B24;
+        srcs[0] = &gModelBeamStart;
+        srcs[1] = &gModelBeamEnd;
         dsts[0] = &start;
         dsts[1] = &end;
         math_transformOffsets(srcs, dsts, owner->ob_matrix_ptr, 2);
@@ -503,7 +503,7 @@ void beam_updateFlashBurst(FlashBurstEffect *effect) {
                 s32 rand2;
                 s32 rand3;
 
-                math_transformOffset(&D_800A1B30, &pos, owner->ob_matrix_ptr);
+                math_transformOffset(&gFlashBurstOffset, &pos, owner->ob_matrix_ptr);
                 header.flags = 3;
                 header.update = -1;
                 header.lifetime = (math_random() % 9U) + 10;
@@ -522,7 +522,7 @@ void beam_updateFlashBurst(FlashBurstEffect *effect) {
                     rand1 = math_random();
                     rand2 = math_random();
                     rand3 = math_random();
-                    beam_spawnBoneBolt(owner, 0, &D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
+                    beam_spawnBoneBolt(owner, 0, &gFlashBurstOffset, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
                                   27.0f, (math_randomFloat() * 16.0f) + 20.0f, 0, 2, color, effect->base.header.owner,
                                   effect->base.header.kind);
                     count--;
@@ -539,7 +539,7 @@ void beam_flashBurstMessage(FlashBurstEffect *effect, s32 arg1, u8 arg2) {
 }
 
 /* Creates a blood_spawnStrip object attached to `owner`. */
-void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
+void beam_spawnBoneBloodStrip(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     BloodStripDesc desc;
 
     desc.ownerId = owner->unique_id;

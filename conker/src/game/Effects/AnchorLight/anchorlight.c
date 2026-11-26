@@ -35,5 +35,5 @@ void effect_unlinkAnchorLight(LightEffect *obj) {
 
 void effect_destroyAnchorLight(LightEffect *obj) {
     effect_unlinkAnchorLight(obj);
-    func_151617C4(obj);
+    light_defaultDestroy(obj);
 }

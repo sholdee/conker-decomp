@@ -707,7 +707,7 @@ void zone_applyEffect(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits)
         sight_notifyActorMoved(actor, zone);
         break;
     case 9:
-        func_1515F270(actor, zone);
+        light_runHandlerZone(actor, zone);
         break;
     case 10:
         trail_testStreamContact(actor, zone);

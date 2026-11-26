@@ -129,7 +129,7 @@ s32 game_processMessage(void) {
                         for (i = 0; i <= gScreenLayout; i++) {
                             savedHead = gDisplayListHead;
                             gCurrentView = gViewPlayers[i];
-                            gDisplayListHead = func_1515D6D0(gDisplayListHead, gCurrentView);
+                            gDisplayListHead = light_beginView(gDisplayListHead, gCurrentView);
                             gDisplayListHead = game_drawMainPass(gDisplayListHead, gCurrentView);
                             // Out of display-list space: drop this player's commands.
                             // matching: the ?: materialises the flag (move v1,zero / li v1,1)
@@ -142,7 +142,7 @@ s32 game_processMessage(void) {
                         gDisplayListHead = game_drawScreenPass(gDisplayListHead);
                         for (i = 0; i <= gScreenLayout; i++) {
                             gCurrentView = gViewPlayers[i];
-                            gDisplayListHead = func_1515D6D0(gDisplayListHead, gCurrentView);
+                            gDisplayListHead = light_beginView(gDisplayListHead, gCurrentView);
                             gDisplayListHead = func_15019CC8(gDisplayListHead, gCurrentView);
                             if (gPaused == 0 && gScreenLayout > 0) {
                                 gDisplayListHead = game_drawViewOverlays(gDisplayListHead, gCurrentView);
@@ -250,7 +250,7 @@ void game_prepareView(s16 player) {
     if ((screen_isViewFadeDone(player) == 0) && (gPaused == 0)) {
         screen_advanceViewFade(player);
     }
-    func_1501B640(player);
+    light_updatePlayerLight(player);
     D_800D3674 = (camera->CameraPitch < 0.0f) ? -1000 : 5000;
     player_updateWarp(player);
     gDebugStatusCode = 0;
@@ -358,7 +358,7 @@ s32 game_updateFrame(void) {
     }
     screen_updateViewFlashes();
     screen_updateTint();
-    func_15036148();
+    model_queueWaterReflections();
     func_1515D6C8();
     for (i = 0; i < TLB_SLOT_COUNT; i++) {
         ((TlbSlot *)gPageSlots)[i].age++;
@@ -391,7 +391,7 @@ Gfx *game_drawWorldPass(Gfx *gfx, s16 player) {
     if ((screen_isViewFadedOut(player) != 0) || (gEliminatedPlayers & (1 << player))) {
         return gfx;
     }
-    gfx = func_1515D6D0(gfx, player);
+    gfx = light_beginView(gfx, player);
     return view_buildWorldDisplayList(gfx, player);
 }
 
@@ -409,13 +409,13 @@ Gfx *game_drawMainPass(Gfx *gfx, s16 player) {
         return gfx;
     }
     if (gScreenLayout > 0) {
-        gfx = func_1515D6D0(view_emitRspSetup(gfx, player), player);
+        gfx = light_beginView(view_emitRspSetup(gfx, player), player);
         func_1510B958(player);
         gSPViewport(gfx++, &gViews[player].viewports[gDrawBufferIndex]);
         gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
     }
     gfx = gfx_drawObjectList(gfx, 1, player);
-    if (D_800BE575 == 2) {
+    if (gFrameEchoPass == 2) {
         gfx = screen_drawFrameEcho(gfx);
     }
     gfx = effect_drawObjectGroup(gfx, 6, player, 0);
@@ -445,7 +445,7 @@ Gfx *game_drawMainPass(Gfx *gfx, s16 player) {
 Gfx *game_drawScreenPass(Gfx *gfx) {
     static s8 gPauseBlurFrames = 0; // frames drawn since gPaused was set, counting up to 5
 
-    if (D_800BE575 == 1) {
+    if (gFrameEchoPass == 1) {
         gfx = screen_drawFrameEcho(gfx);
     }
     if (gScreenLayout != 0) {

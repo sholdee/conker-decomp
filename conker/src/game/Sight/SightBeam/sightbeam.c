@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-/* Neutral zone handler 8 (D_80082EA0): the zone is a sight beam placement. It casts rays both ways from the
+/* Neutral zone handler 8 (gEffectZoneSpawnHandlers): the zone is a sight beam placement. It casts rays both ways from the
  * beam's midpoint (the beam runs ySize units along the zone's pitch/yaw) and spawns a sight beam between the
  * two surfaces hit. data1 holds the beam's timings and flags, data2 its colour and data3 its widths. */
 s32 sight_placeBeam(TriggerZone *beam) {

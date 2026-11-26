@@ -423,14 +423,14 @@ void particle_destroyBeamEndPoint(LightEffect *endPoint) {
     RayBeamData *data = &((RayBeam *)endPoint->data.object)->data;
 
     data->endPoint = NULL;
-    func_151617C4(endPoint);
+    light_defaultDestroy(endPoint);
 }
 
 void particle_freeBeamEndPoint(LightEffect *endPoint) {
     RayBeamData *data = &((RayBeam *)endPoint->data.object)->data;
 
     data->endPoint = NULL;
-    func_151617E4(endPoint);
+    light_defaultFree(endPoint);
 }
 
 void particle_destroyBeamStartFx(BeamStartFx *fx) {

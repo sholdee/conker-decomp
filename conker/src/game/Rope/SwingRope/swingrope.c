@@ -540,7 +540,7 @@ s32 rope_placeRider(RopeRider *rider) {
 
     obj = rider->owner;
     rope = obj->mv->ropePtr;
-    angle = func_15143E08(obj) - 0x80;
+    angle = math_getActorFacingBin(obj) - 0x80;
     dirX = math_cosBinAngleMasked(angle - 0x40);
     dirZ = math_cosBinAngleMasked(angle);
     ride = obj->mv;

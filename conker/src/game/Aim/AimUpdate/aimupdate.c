@@ -1560,7 +1560,7 @@ void aim_updatePoints(Actor *obj) {
 
     if (obj->character_type != 0xFF) {
         if ((obj->ob_matrix_ptr != NULL) && (gModelDefs[obj->character_type] != NULL)) {
-            if (func_1503D774(obj->character_type, 0) == 0) {
+            if (model_loadDef(obj->character_type, 0) == 0) {
                 def = gModelDefs[obj->character_type];
                 bone = obj->ob_matrix_ptr[0];
                 bone = ((MtxF *)bone)[def->aimBone]; // matching: two steps; one OBJ_BONES() index mismatches

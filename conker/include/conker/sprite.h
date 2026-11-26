@@ -186,7 +186,7 @@ Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2);
 /* game/Sprite/LevelSprites/levelsprites.c */
 /*
  * One sprite placed on a level triangle (gLevelSprites holds gLevelSpriteCount of them, sorted by x or z; filled by
- * func_1500AF08 when the level loads).
+ * light_addLevelParticle when the level loads).
  */
 typedef struct Game1A89B0Position {
     s16 x;

@@ -3051,16 +3051,16 @@ LightEffect *flamethrower_createFlameLight(CharacterFlamethrowerActor *flame, Ve
     return light;
 }
 
-/* Light destroy: detaches it from its flame, then func_151617C4. */
+/* Light destroy: detaches it from its flame, then light_defaultDestroy. */
 void flamethrower_destroyFlameLight(LightEffect *light) {
     flamethrower_detachFlameLight(light);
-    func_151617C4(light);
+    light_defaultDestroy(light);
 }
 
-/* Light destroy: detaches it from its flame, then func_151617E4. */
+/* Light destroy: detaches it from its flame, then light_defaultFree. */
 void flamethrower_freeFlameLight(LightEffect *light) {
     flamethrower_detachFlameLight(light);
-    func_151617E4(light);
+    light_defaultFree(light);
 }
 
 /* Clears the flame's pointer to this light. */

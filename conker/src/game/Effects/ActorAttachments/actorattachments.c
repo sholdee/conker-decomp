@@ -13,11 +13,11 @@ static void (*gAttachSpawnFuncs[])(Actor *) = {
 /* Spawn callbacks by object id; entry 0 runs for every object first. */
 static void (*gAttachSpawnFuncsById[])(Actor *) = {
     effect_attachActorTracker, func_1514DD2C, func_1514DD4C, func_1514DD6C, func_1514DD8C, func_1514EECC,
-    func_1514F110, func_150F0938, func_1514DDAC, func_1514DDCC, func_1514DDEC, func_1514DE38,
+    func_1514F110, beam_attachActorLights, func_1514DDAC, func_1514DDCC, func_1514DDEC, func_1514DE38,
     func_1514DE44, func_1514F308, func_1514DE0C, func_1514DC84, func_1514F3CC, func_1514DE2C,
-    func_1514DC98, func_1514DC38, func_1514DBB8, func_1514F44C, func_15010538, effect_attachTrailToBone1,
+    func_1514DC98, func_1514DC38, func_1514DBB8, func_1514F44C, level_spawnBoltEmitter, effect_attachTrailToBone1,
     effect_attachTrailToBone2, effect_attachTrailToBone3, effect_attachPulseEffect, func_1514F590, effect_attachPerimeterEmitter, effect_spawnActorPoolEmitter,
-    particle_spawnBoneBurstEmitter, func_1501214C, func_1514DC5C, effect_attachTrailToBone4, func_1514D978,
+    particle_spawnBoneBurstEmitter, level_attachDripEmitter, func_1514DC5C, effect_attachTrailToBone4, func_1514D978,
 };
 
 /* Attachment type handlers (AttachmentType.destroyHandler, .messageHandler). Declared without a
@@ -756,7 +756,7 @@ void func_1514DBB8(Actor *obj) {
 }
 
 void func_1514DC38(Actor *obj) {
-    func_1500EE18(obj, 0xFF, 1);
+    level_spawnObjBurst(obj, 0xFF, 1);
 }
 
 void func_1514DC5C(Actor *obj) {
@@ -1541,7 +1541,7 @@ void effect_attachPulseEffect(Actor *obj) {
 
 void func_1514F590(Actor *obj) {
     func_1501175C(obj, 0xFF, 1);
-    func_15011A78(obj, 0xFF, 1);
+    level_spawnFlashBurst(obj, 0xFF, 1);
 }
 
 void effect_spawnActorPoolEmitter(Actor *obj) {

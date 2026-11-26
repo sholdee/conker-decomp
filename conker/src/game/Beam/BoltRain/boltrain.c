@@ -201,7 +201,7 @@ void beam_updateBoltArc(BoltArcObj *obj) {
 }
 
 /* Message handler: on 0x4B, calls effect_destroyObject on the object. */
-void func_1510550C(EffectHeader *obj, s32 arg1, u8 msg) {
+void beam_destroyOnMessage4B(EffectHeader *obj, s32 arg1, u8 msg) {
     if (msg == 0x4B) {
         effect_destroyObject(obj);
     }
@@ -220,8 +220,8 @@ void beam_boltArcMessage(BoltArcObj *obj, s32 *arg1, u8 msg) {
 /* One-entry variant lists for particle_spawnSurfaceDebrisBurst, copied from rodata. */
 typedef struct { s32 v[1]; } S32x1;
 typedef struct { f32 v[1]; } F32x1;
-static const S32x1 D_800A23A4 = { { 0x85 } };
-static const F32x1 D_800A23A8 = { { 0.1f } };
+static const S32x1 gImpactDebrisIds = { { 0x85 } };
+static const F32x1 gImpactDebrisScales = { { 0.1f } };
 
 /* Spawns the effects of an impact: a effect_spawnSurfaceSprite effect, weapon_spawnImpactBurst by chance and, except on
  * surface type 9, sometimes debris flying back along the impact direction. */
@@ -254,8 +254,8 @@ void beam_spawnImpactEffects(ImpactObj *obj) {
             weapon_spawnImpactBurst(&hit->position, obj->base.header.owner, obj->base.header.kind);
         }
         if (math_randomFloat() < 0.400000006f) {
-            debris.variantIds = D_800A23A4;
-            debris.variantScales = D_800A23A8;
+            debris.variantIds = gImpactDebrisIds;
+            debris.variantScales = gImpactDebrisScales;
             debris.desc.countBase = 1;
             debris.desc.countRange = 3;
             debris.desc.pos = hit->position;
@@ -349,7 +349,7 @@ void beam_updateSparkRegion(SparkObj *obj) {
 }
 
 /* While the sparks are on, calls mp_addZone at the region's position. */
-void func_15105BC8(SparkObj *obj) {
+void beam_updateSparkZone(SparkObj *obj) {
     if (obj->state.flags & 1) {
         mp_addZone(obj->state.region->x, obj->state.region->y, obj->state.region->z, 500.0f);
     }

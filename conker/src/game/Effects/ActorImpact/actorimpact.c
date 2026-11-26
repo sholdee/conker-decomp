@@ -11,7 +11,7 @@ static const s32 gActorImpactDebrisKindsB[] = { 0x39 };
 static const f32 gActorImpactDebrisScalesB[] = { 1.0f };
 
 /*
- * Spawns effects at actor's position, aimed by func_15143E24(other): actor id 0xA6 gets weapon_spawnImpactBurst
+ * Spawns effects at actor's position, aimed by math_getActorRelFacingBin(other): actor id 0xA6 gets weapon_spawnImpactBurst
  * 50 units above it and one particle_spawnDebrisBurst burst; any other actor gets a different burst plus two
  * particle_spawnSplashSprayAtAngles passes (unk3C = 0, then 1) using the collision_initHitFromObject info for actor.
  */
@@ -23,7 +23,7 @@ void effect_spawnActorImpactDebris(Actor *actor, Actor *other, u8 arg2, s32 arg3
     pos.x = actor->xpos;
     pos.y = actor->ypos;
     pos.z = actor->zpos;
-    angle = func_15143E24(other) + 0x40;
+    angle = math_getActorRelFacingBin(other) + 0x40;
     collision_initHitFromObject(&floor, actor);
     if (actor->character_type == 0xA6) {
         Vec3f raisedPos;

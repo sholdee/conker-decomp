@@ -88,7 +88,7 @@ void func_150F1CB0(Actor *actor) {
 
 /* Burst of effects at `actor` (particle_startPlayerRumbles and friends, sound 0x2B6/0x2BE, two particle
  * sprays scaled by the actor's size). */
-void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
+void beam_spawnActorExplosion(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f pos;
     f32 scale;
 

@@ -19,7 +19,7 @@ void view_buildOrthoMatrices(void);
 void view_initGroundDecalQueue(void);
 
 /* game_3F950.c */
-void func_150124A0(void);
+void level_initPipeBurstPoints(void);
 
 /* game/View/ViewLayout/viewlayout.c */
 void view_setPlayerCount(s16 count, s32 map);

@@ -1,2 +1,2 @@
-void func_150106A0(void) {
+void level_emptySetup07(void) {
 }

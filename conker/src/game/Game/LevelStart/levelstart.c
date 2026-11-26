@@ -115,11 +115,11 @@ void game_loadLevel(void) {
     env_clearAttachModelRefs();
     screen_resetEffects();
     collision_clearUvWobbles();
-    func_15012780();
+    level_resetWaveDeformers();
     light_resetParticles();
     func_15044370();
     func_15016670();
-    func_15004F00();
+    model_resetAttachments();
     model_allocBonePools();
     zone_reloadSectionTasks();
     env_initFog(level);
@@ -162,15 +162,15 @@ void game_loadLevel(void) {
     flare_resetFlares(level);
     path_load(level);
     anim_clearMorphCache();
-    func_1501B640(0);
+    light_updatePlayerLight(0);
     face_resetScripted();
     D_800BE9E4 = 2;
     func_15015910();
-    func_15004F10();
+    model_resetBoneChains();
     func_1501748C(gMatchState.playerMask);
     swarm_resetModelSlots();
     model_resetParts();
-    func_15004D50();
+    model_allocActorQuadVtx();
     game_startPendingCutscene();
     if (gIsMultiplayer == 0) {
         player_setStat(0, 9, D_800BE3E4);

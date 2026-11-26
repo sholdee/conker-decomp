@@ -3,14 +3,14 @@
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init/Sched/SchedInit/schedinit.c).
-Vtx *D_800C3FC0[1];          // per actor: its 5-vertex quad buffer; [0] is D_80084300
+Vtx *gActorQuadVtx[1];          // per actor: its 5-vertex quad buffer; [0] is gActorQuadVtxTemplate
 static s16 D_800C3FC4[1][3]; // per actor (only actor 0 draws a quad): the smoothed position of quad vertex 0
 
 #include "functions.h"
 #include "variables.h"
 
-/* Per actor: the 5 quad vertices. Actor 0 uses the template D_80084300; game_32200 copies it for the others. */
-Vtx D_80084300[5] = {
+/* Per actor: the 5 quad vertices. Actor 0 uses the template gActorQuadVtxTemplate; game_32200 copies it for the others. */
+Vtx gActorQuadVtxTemplate[5] = {
     { { { -7, -17, -7 }, 0, { 0x2000, 0x2100 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
     { { { -14, -19, 57 }, 0, { 0x2400, 0x2000 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
     { { { -21, -21, 60 }, 0, { 0x2400, 0x2200 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
@@ -19,7 +19,7 @@ Vtx D_80084300[5] = {
 };
 
 /* Render state for the quad: textured, shaded, no lighting or culling. */
-static Gfx D_80084350[] = {
+static Gfx gActorQuadDl[] = {
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsDPPipeSync(),
     gsSPClearGeometryMode(G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_LOD | G_CULL_BOTH),
@@ -35,7 +35,7 @@ static Gfx D_80084350[] = {
  * Places vertex 0 of actor `index`'s quad. During some animation states it snaps to a fixed point of
  * pinMtx; otherwise it eases toward the midpoint of vertices 2 and 3 transformed by followMtx.
  */
-void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
+void model_placeActorQuadAnchor(s32 index, MtxF pinMtx, MtxF followMtx) {
     f32 x;
     f32 y;
     f32 z;
@@ -50,7 +50,7 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
     f32 blend;
     f32 delta;
 
-    vtx = D_800C3FC0[index];
+    vtx = gActorQuadVtx[index];
     actor = &movement_obj[index];
     state = actor->animseq.uh;
     frame = actor->unk2D0->frame[0];
@@ -92,9 +92,9 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
 /*
  * Draws two triangles from actor `index`'s 5-vertex buffer (only actor 0, and only for models of type 2
  * or 0x13 that carry attachment set 8). The vertices take their color from that attachment's vertex 48;
- * vertex 0 is placed by func_15036570 and drawn with gIdentityMtx, vertices 1-4 with bone matrix 4.
+ * vertex 0 is placed by model_placeActorQuadAnchor and drawn with gIdentityMtx, vertices 1-4 with bone matrix 4.
  */
-Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
+Gfx *model_drawActorQuad(Gfx *gfx, s32 index, s32 view) {
     MtxF *bones;
     ModelAttachment *attachment;
     Vtx *color;
@@ -112,32 +112,32 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     }
     color = &((Vtx *)attachment->vtx[gDrawBufferIndex])[48];
     for (i = 0; i < 5; i++) {
-        D_800C3FC0[index][i].v.cn[0] = color->v.cn[0];
-        D_800C3FC0[index][i].v.cn[1] = color->v.cn[1];
-        D_800C3FC0[index][i].v.cn[2] = color->v.cn[2];
+        gActorQuadVtx[index][i].v.cn[0] = color->v.cn[0];
+        gActorQuadVtx[index][i].v.cn[1] = color->v.cn[1];
+        gActorQuadVtx[index][i].v.cn[2] = color->v.cn[2];
     }
     bones = movement_obj[index].ob_matrix_ptr;
     if (bones == NULL) {
         return gfx;
     }
-    func_15036570(index, bones[9], bones[4]);
-    gSPDisplayList(gfx++, D_80084350);
+    model_placeActorQuadAnchor(index, bones[9], bones[4]);
+    gSPDisplayList(gfx++, gActorQuadDl);
     gfx = light_reemitLights(gfx, movement_obj[index].unk304[view], movement_obj[index].unk301,
                         movement_obj[index].unk302, &movement_obj[index].unk314[gDrawBufferIndex]);
     if ((movement_obj[index].unk66 & 0xC) == 0xC) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
     } else if ((movement_obj[index].unk66 & 0xC) != 8 && !(attachment->flags & 1)) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
-    } else if (D_800DCD7C != 0) {
+    } else if (gLightingEnabled != 0) {
         gSPSetGeometryMode(gfx++, G_LIGHTING);
     } else {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
     }
     gfx = sprite_loadDescFrame(gfx, &D_800903BC, 0, NULL, 0, 0, 0, 2, 3);
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, &D_800C3FC0[index][0], 1, 0);
+    gSPVertex(gfx++, &gActorQuadVtx[index][0], 1, 0);
     gSPMatrix(gfx++, &bones[4], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, &D_800C3FC0[index][1], 4, 1);
+    gSPVertex(gfx++, &gActorQuadVtx[index][1], 4, 1);
     gSP1Triangle(gfx++, 0, 1, 2, 0);
     gSP1Triangle(gfx++, 0, 3, 4, 0);
     return gfx;

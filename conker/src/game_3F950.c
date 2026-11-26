@@ -5,7 +5,7 @@
 
 void *memcpy(void *, const void *, u32);
 
-void func_150124A0(void) {
+void level_initPipeBurstPoints(void) {
     s32 row;
     s16 yaw;
     s16 pitch;

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Random burst points around each pipe: func_150124A0 (game_3F950) fills them, particle_updateRandomBurstEffect uses them. */
+/* Random burst points around each pipe: level_initPipeBurstPoints (game_3F950) fills them, particle_updateRandomBurstEffect uses them. */
 BurstPoint gPipeBurstPoints[3][10];
 
 /* The streak particle type's render setup display list (object type table). */

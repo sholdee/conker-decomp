@@ -68,6 +68,6 @@ void light_easePlayerLight(s32 player) {
     }
 }
 
-void func_1501B640(s32 player) {
+void light_updatePlayerLight(s32 player) {
     light_easePlayerLight(player);
 }

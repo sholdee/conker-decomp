@@ -12,7 +12,7 @@ static void (*gLevelHooks[])() = {
     func_150CF080, func_150ECC70, camera_levelHook18, camera_levelHook19,
     camera_scaleBySpeed, func_150B2340, camera_levelHook22, camera_levelHook23,
     func_150F43F0, camera_levelHook25, func_150F26A0, func_150BEEB0,
-    camera_levelHook28, func_150B1E20, func_150D08C0, func_150D1BD0,
+    camera_levelHook28, func_150B1E20, level_hook30, func_150D1BD0,
     camera_levelHook32, camera_levelHook33, camera_levelHook34, camera_levelHook35,
 };
 

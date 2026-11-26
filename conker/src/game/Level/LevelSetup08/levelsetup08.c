@@ -4,7 +4,7 @@
 
 
 /* Spawns a flat sprite (texture 0x38) of 110 x 110 at (x, y, z). */
-void *func_1500F290(f32 x, f32 y, f32 z) {
+void *level_spawnFlatSprite(f32 x, f32 y, f32 z) {
     SpriteDef def;
     s32 rand;
 
@@ -25,7 +25,7 @@ void *func_1500F290(f32 x, f32 y, f32 z) {
 }
 
 /* Starts an object emitter at (x, y, z) over the floor at floorY. */
-void func_1500F378(s32 x, s32 y, s32 z, s32 floorY) {
+void level_queueObjectDrop08(s32 x, s32 y, s32 z, s32 floorY) {
     ObjectEmitter *emitter;
 
     emitter = effect_newTimedEffectNoDraw((math_random() & 0x7F) + 0xA, 1, -1, 1, 0, 0xA, 0xFF, 0);
@@ -38,18 +38,18 @@ void func_1500F378(s32 x, s32 y, s32 z, s32 floorY) {
     }
 }
 
-void func_1500F40C(void) {
+void level_setup08(void) {
     SprayDesc descriptor;
 
     {
         extern EffectHeader *gLevelSprayEffects[4]; // matching: the block-scope redeclaration changes IDO's store scheduling
 
-        func_1500F378(0x1612, -0x553, -0x2DC, -0x69F);
-        func_1500F378(0x1633, -0x553, -0x3C2, -0x69F);
-        gLevelSprayEffects[0] = func_1500F290(4054.0f, -1692.0f, 0.0f);
-        gLevelSprayEffects[1] = func_1500F290(3890.0f, -1692.0f, -78.0f);
-        gLevelSprayEffects[2] = func_1500F290(4380.0f, -1692.0f, -664.0f);
-        gLevelSprayEffects[3] = func_1500F290(4218.0f, -1692.0f, -740.0f);
+        level_queueObjectDrop08(0x1612, -0x553, -0x2DC, -0x69F);
+        level_queueObjectDrop08(0x1633, -0x553, -0x3C2, -0x69F);
+        gLevelSprayEffects[0] = level_spawnFlatSprite(4054.0f, -1692.0f, 0.0f);
+        gLevelSprayEffects[1] = level_spawnFlatSprite(3890.0f, -1692.0f, -78.0f);
+        gLevelSprayEffects[2] = level_spawnFlatSprite(4380.0f, -1692.0f, -664.0f);
+        gLevelSprayEffects[3] = level_spawnFlatSprite(4218.0f, -1692.0f, -740.0f);
     }
     descriptor.rate = 0.0f;
     descriptor.rateRange = 0.2400000244f;

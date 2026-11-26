@@ -229,7 +229,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
         }
     }
     collision_selectMap(0);
-    if (D_800DCD7C == 0) {
+    if (gLightingEnabled == 0) {
         gDma2p(gfx++, G_MOVEMEM, &gViewAmbients[view][gDrawBufferIndex], 48, G_MV_LIGHT, G_MVO_L2);
     }
     gfx = light_pickLights(gfx, view, camera_global_Cameras[view].eye.x, camera_global_Cameras[view].eye.y, camera_global_Cameras[view].eye.z, 0,

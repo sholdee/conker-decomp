@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* D_800BE4E0: ten BounceRecords (allocated and seeded by func_1500FE30). */
+/* gBounceRecords: ten BounceRecords (allocated and seeded by level_initBounceRecords). */
 #define RECORD_COUNT 10
 #define POS_LIMIT 0x500
 
@@ -21,39 +21,39 @@ void effect_updateBounceRecords(void) {
     s32 pos;
 
     for (i = 0; i < RECORD_COUNT; i++) {
-        if (D_800BE4E0[i].speed != D_800BE4E0[i].targetSpeed) {
-            target = D_800BE4E0[i].targetSpeed;
-            if (D_800BE4E0[i].speed < 0) {
+        if (gBounceRecords[i].speed != gBounceRecords[i].targetSpeed) {
+            target = gBounceRecords[i].targetSpeed;
+            if (gBounceRecords[i].speed < 0) {
                 target = -target;
             }
-            diff = target - D_800BE4E0[i].speed;
+            diff = target - gBounceRecords[i].speed;
             step = D_800BE9E4 * 16;
             dist = diff < 0 ? -diff : diff;
             if (dist < step) {
-                D_800BE4E0[i].speed = target;
+                gBounceRecords[i].speed = target;
             } else {
                 if (diff < 0) {
                     sign = -1;
                 } else {
                     sign = 1;
                 }
-                D_800BE4E0[i].speed = D_800BE4E0[i].speed + step * sign;
+                gBounceRecords[i].speed = gBounceRecords[i].speed + step * sign;
             }
         }
-        D_800BE4E0[i].pos += D_800BE4E0[i].speed * D_800BE4E0[i].dir * gFrameSteps;
-        pos = D_800BE4E0[i].pos;
+        gBounceRecords[i].pos += gBounceRecords[i].speed * gBounceRecords[i].dir * gFrameSteps;
+        pos = gBounceRecords[i].pos;
         if (pos >= POS_LIMIT) {
-            D_800BE4E0[i].pos = pos - POS_LIMIT;
-            D_800BE4E0[i].pos = POS_LIMIT - D_800BE4E0[i].pos;
-            D_800BE4E0[i].dir = -D_800BE4E0[i].dir;
-            if (D_800BE4E0[i].pos >= POS_LIMIT) {
-                D_800BE4E0[i].pos = POS_LIMIT - 1;
+            gBounceRecords[i].pos = pos - POS_LIMIT;
+            gBounceRecords[i].pos = POS_LIMIT - gBounceRecords[i].pos;
+            gBounceRecords[i].dir = -gBounceRecords[i].dir;
+            if (gBounceRecords[i].pos >= POS_LIMIT) {
+                gBounceRecords[i].pos = POS_LIMIT - 1;
             }
         } else if (pos < 0) {
-            D_800BE4E0[i].pos = -pos;
-            D_800BE4E0[i].dir = -D_800BE4E0[i].dir;
-            if (D_800BE4E0[i].pos < 0) {
-                D_800BE4E0[i].pos = 0;
+            gBounceRecords[i].pos = -pos;
+            gBounceRecords[i].dir = -gBounceRecords[i].dir;
+            if (gBounceRecords[i].pos < 0) {
+                gBounceRecords[i].pos = 0;
             }
         }
     }
@@ -73,14 +73,14 @@ void effect_randomizeBounceRecordSpeeds(s32 scale) {
     s32 minSpeed;
     s32 range;
 
-    if (D_800BE4E0 != NULL) {
+    if (gBounceRecords != NULL) {
         particle_setDriftBurstRate(scale);
         range = ((scale * 50) >> 8) + 50;
         minSpeed = (scale * 300) >> 8;
         for (i = 0; i < RECORD_COUNT; i++) {
             speed = minSpeed; // matching: one combined expression shifts the code
             speed += math_random() % range;
-            D_800BE4E0[i].targetSpeed = speed;
+            gBounceRecords[i].targetSpeed = speed;
         }
     }
 }
@@ -96,16 +96,16 @@ Gfx *effect_bindBounceRecordFrames(Gfx *gdl) {
     TextureFrameTables tables = gBounceRecordFrameTables;
 
     for (i = 0; i < RECORD_COUNT; i++) {
-        frame = D_800BE4E0[i].pos >> 8;
+        frame = gBounceRecords[i].pos >> 8;
         if (frame < 0) {
             frame = 0;
         } else if (frame >= 5) {
             frame = 4;
         }
-        if (D_800BE4E0[i].table >= 2) {
-            D_800BE4E0[i].table = 0;
+        if (gBounceRecords[i].table >= 2) {
+            gBounceRecords[i].table = 0;
         }
-        addr = texture_getAddress(tables.frames[D_800BE4E0[i].table][frame], &size, 3, 0);
+        addr = texture_getAddress(tables.frames[gBounceRecords[i].table][frame], &size, 3, 0);
         segment = i + 1;
         gSPSegment(gdl++, segment, addr);
     }

@@ -6,19 +6,19 @@
 /* Per-level setup routines, indexed by LevelHeader.unkA (0: none). */
 static void (*gLevelSetupFuncs[])(void) = {
     NULL,
-    func_1500E8C0, func_15010600, func_1500EB20,
-    func_1500EBC4, func_1500EF20, func_15010680,
-    func_150106A0, func_1500F40C, func_1500ED80,
-    func_150106B0, func_1500FA64, func_1500FFCC,
-    func_150113E0, func_15011C40, func_150104F0,
-    func_15011330, func_15011B94, func_15010780,
-    func_15010110, func_15010880, func_1500E890,
-    func_150109D0, func_15010A60, func_15010240,
-    func_15011CC0, func_15011D40, func_150102C0,
-    func_15011C70, func_15011CA0, func_150102D0,
-    func_15011360, func_150103E0, func_15010FB0,
-    func_1500F210, func_150110F0, func_1500EAA0,
-    func_15011170,
+    level_setup01, level_setup02, level_emptySetup03,
+    level_setup04, level_setup05, level_setup06,
+    level_emptySetup07, level_setup08, level_setup09,
+    level_setup10, level_setup11, level_setup12,
+    level_setup13, level_setup14, level_setup15,
+    level_setup16, level_setup17, level_setup18,
+    level_setup19, level_setup20, level_setup21,
+    level_setup22, level_setup23, level_setup24,
+    level_setup25, level_setup26, level_emptySetup27,
+    level_setup28, level_setup29, level_setup30,
+    level_setup31, level_setup32, level_setup33,
+    level_setup34, level_setup35, level_setup36,
+    level_setup37,
 };
 
 /* Resets game globals, then runs the subsystem init routines for the given level. */
@@ -33,10 +33,10 @@ void game_initLevelSubsystems(s32 levelId) {
     gProjectileHitCallback = 0;
     D_8008CD00 = 0;
     gLineEmitterStarted = 0;
-    D_800BE4E0 = NULL;
+    gBounceRecords = NULL;
     {
         // matching: IDO schedules the store differently without the block-scoped temp
-        u8 result = func_15012720();
+        u8 result = level_getEffectKind();
 
         gLevelEffectKind = result;
     }

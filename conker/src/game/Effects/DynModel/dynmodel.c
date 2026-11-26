@@ -36,11 +36,11 @@ Gfx gDynModelRenderResetDl[] = {
 };
 
 /* Update callbacks (DynModelDesc.updateFunc): 0 frees the model. */
-static s32 (*gDynModelUpdateFuncs[])(DynModel *) = { func_15108AB4, func_15108C38, effect_updateWarpModel, effect_updateModelSway };
-/* Draw callbacks (DynModelDesc.drawFunc): 0 skips the draw. func_15108D24 and effect_buildSwayMatrix take the viewport as
+static s32 (*gDynModelUpdateFuncs[])(DynModel *) = { light_updateLampModel, light_updateLampLitModel, effect_updateWarpModel, effect_updateModelSway };
+/* Draw callbacks (DynModelDesc.drawFunc): 0 skips the draw. light_buildLampMatrix and effect_buildSwayMatrix take the viewport as
  * an s32. */
 static s32 (*gDynModelDrawFuncs[])(DynModel *, s16) = {
-    effect_setDynModelIdentityMtx, func_15108D24, effect_skipDynModelDraw, effect_projectOwnerModelTexCoords, func_15109120, effect_warpModelTexCoords, effect_buildSwayMatrix,
+    effect_setDynModelIdentityMtx, light_buildLampMatrix, effect_skipDynModelDraw, effect_projectOwnerModelTexCoords, light_drawLampLitModel, effect_warpModelTexCoords, effect_buildSwayMatrix,
 };
 /* Destroy and free handlers per model kind. */
 static void (*gDynModelDestroyFuncs[])(DynModel *) = { effect_defaultDestroyDynModel, effect_defaultDestroyDynModel, effect_defaultDestroyDynModel, effect_defaultDestroyDynModel };

@@ -4,17 +4,17 @@
 
 /* Per-type beam parameters (one type): the two bone-relative end points, the bone, the speed scale,
  * the lifetime, the size and its rate, the damping, the fade rate and the two scale rates. */
-static Vec3f D_80088910[] = { { 0.0f, -33.0f, 40.0f } };
-static Vec3f D_8008891C[] = { { 0.0f, -74.0f, 98.0f } };
-static s32 D_80088928[] = { 15 };
-static f32 D_8008892C[] = { 0.108f };
-static s16 D_80088930[] = { 100 };
-static f32 D_80088934[] = { 8.11f };
-static f32 D_80088938[] = { 0.7f };
-static f32 D_8008893C[] = { 0.948f };
-static u8 D_80088940[] = { 4 };
-static f32 D_80088944[] = { 0.007f };
-static f32 D_80088948[] = { 0.012f };
+static Vec3f gBoneQuadStarts[] = { { 0.0f, -33.0f, 40.0f } };
+static Vec3f gBoneQuadEnds[] = { { 0.0f, -74.0f, 98.0f } };
+static s32 gBoneQuadBones[] = { 15 };
+static f32 gBoneQuadSpeeds[] = { 0.108f };
+static s16 gBoneQuadLifetimes[] = { 100 };
+static f32 gBoneQuadSizes[] = { 8.11f };
+static f32 gBoneQuadSizeRates[] = { 0.7f };
+static f32 gBoneQuadDampings[] = { 0.948f };
+static u8 gBoneQuadFadeRates[] = { 4 };
+static f32 gBoneQuadScaleXRates[] = { 0.007f };
+static f32 gBoneQuadScaleYRates[] = { 0.012f };
 
 /* Spawns a beam effect between two bone-relative points of the owner's skeleton. */
 void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3) {
@@ -28,19 +28,19 @@ void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3) {
     BeamQuad *effect;
 
     if (owner != NULL && owner->ob_matrix_ptr != NULL) {
-        mtx = &owner->ob_matrix_ptr[D_80088928[type]];
-        math_transformOffset(&D_80088910[type], &from, mtx);
-        math_transformOffset(&D_8008891C[type], &to, mtx);
-        vel.x = D_8008892C[type] * (to.x - from.x);
-        vel.y = D_8008892C[type] * (to.y - from.y);
-        vel.z = D_8008892C[type] * (to.z - from.z);
+        mtx = &owner->ob_matrix_ptr[gBoneQuadBones[type]];
+        math_transformOffset(&gBoneQuadStarts[type], &from, mtx);
+        math_transformOffset(&gBoneQuadEnds[type], &to, mtx);
+        vel.x = gBoneQuadSpeeds[type] * (to.x - from.x);
+        vel.y = gBoneQuadSpeeds[type] * (to.y - from.y);
+        vel.z = gBoneQuadSpeeds[type] * (to.z - from.z);
         distSq = (vel.x * vel.x) + (vel.z * vel.z);
         if (!(fabsf(distSq) < 9.999999747e-05f)) {
             spawn.texture = 0x17;
             spawn.frameSpeed = 0x243A;
             spawn.frame = 0;
             spawn.flags = 0x401;
-            spawn.lifetime = D_80088930[type];
+            spawn.lifetime = gBoneQuadLifetimes[type];
             spawn.unk44 = 255;
             spawn.unk45 = 255;
             // matching: the three stores share one line so as1 keeps IDO's t6-t9 constant order
@@ -58,13 +58,13 @@ void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3) {
             effect = particle_newQuadParticleWhite(&spawn, 9, 0, 0, 7, 0, 0x2C, arg2, arg3);
             if (effect != NULL) {
                 effect->u.beam.vel = vel;
-                effect->u.beam.size = D_80088934[type];
-                effect->u.beam.sizeRate = D_80088938[type];
-                effect->u.beam.scaleXRate = D_80088944[type];
-                effect->u.beam.scaleYRate = D_80088948[type];
+                effect->u.beam.size = gBoneQuadSizes[type];
+                effect->u.beam.sizeRate = gBoneQuadSizeRates[type];
+                effect->u.beam.scaleXRate = gBoneQuadScaleXRates[type];
+                effect->u.beam.scaleYRate = gBoneQuadScaleYRates[type];
                 effect->u.beam.scaleX = effect->u.beam.scaleY = 1.0f;
-                effect->u.beam.damping = D_8008893C[type];
-                effect->u.beam.fadeRate = D_80088940[type];
+                effect->u.beam.damping = gBoneQuadDampings[type];
+                effect->u.beam.fadeRate = gBoneQuadFadeRates[type];
             }
         }
     }

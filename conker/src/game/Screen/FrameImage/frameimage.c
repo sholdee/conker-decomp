@@ -118,9 +118,9 @@ void screen_setFrameEcho(s32 arg0, s32 arg1) {
     }
     gScreenCopyAlpha = arg0;
     if (arg0 != 0) {
-        D_800BE575 = arg1;
+        gFrameEchoPass = arg1;
     } else {
-        D_800BE575 = 0;
+        gFrameEchoPass = 0;
     }
     if (arg0 == 0) {
         if (gScreenCopy != NULL) {

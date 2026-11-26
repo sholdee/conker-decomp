@@ -262,12 +262,12 @@ s32 beam_stripFollowTargetBone(StripObj *strip) {
 }
 
 /** Sends message 1 to `obj`'s type-0x15 attachments (its strips). */
-void func_150C5C74(Actor *obj) {
+void beam_sendStripMessage1(Actor *obj) {
     effect_sendAttachmentMessage(obj, 0x15, 1, 0);
 }
 
 /** Sends message 2 to `obj`'s type-0x15 attachments (its strips). */
-void func_150C5C9C(Actor *obj) {
+void beam_sendStripMessage2(Actor *obj) {
     effect_sendAttachmentMessage(obj, 0x15, 2, 0);
 }
 

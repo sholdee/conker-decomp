@@ -6,10 +6,10 @@ typedef struct {
     u8 unk0[5];
 } Struct15100340;
 
-/* This file's .data: the light ids of the five D_800BE500 flags. */
+/* This file's .data: the light ids of the five gFlagLightStates flags. */
 static Struct15100340 gFlagLightEventIds = { { 9, 10, 11, 12, 13 } };
 
-/* When arg0 is 0: advances gLevelTexFrame, then randomly toggles each of the five D_800BE500 flags,
+/* When arg0 is 0: advances gLevelTexFrame, then randomly toggles each of the five gFlagLightStates flags,
  * passing the matching gFlagLightEventIds id to light_sendEvent on each toggle. */
 void effect_levelUpdateFlagLights(s32 arg0) {
     s32 pad; // matching: unused stack slot, sets the frame size
@@ -19,7 +19,7 @@ void effect_levelUpdateFlagLights(s32 arg0) {
     u32 chance;
 
     if (arg0 == 0) {
-        flag = D_800BE500;
+        flag = gFlagLightStates;
         gLevelTexFrame++;
         for (i = 0; i < 5; i++, flag++) {
             chance = (*flag != 0) ? 70 : 35;
@@ -36,7 +36,7 @@ void effect_levelUpdateFlagLights(s32 arg0) {
 }
 
 /* Sets segments 2 and 3 to D_80090324 assets cycling with gLevelTexFrame, and segments 4-8 to
- * D_80090324[3] or [4] depending on each D_800BE500 flag. */
+ * D_80090324[3] or [4] depending on each gFlagLightStates flag. */
 Gfx *effect_bindFlagLightTextures(Gfx *gdl) {
     s32 size[4]; // matching: a 16-byte buffer sets the frame size; a scalar mismatches
     s32 frame;
@@ -52,7 +52,7 @@ Gfx *effect_bindFlagLightTextures(Gfx *gdl) {
     gSPSegment(gdl++, 3, addr);
 
     for (i = 0; i < 5; i++) {
-        addr = texture_getAddress(D_80090324[D_800BE500[i] + 3], size, 3, 0);
+        addr = texture_getAddress(D_80090324[gFlagLightStates[i] + 3], size, 3, 0);
         gSPSegment(gdl++, i + 4, addr);
     }
 

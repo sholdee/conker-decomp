@@ -91,7 +91,7 @@ Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player) {
         } else {
             gdl = actor_drawModel(gdl, i, player, mode, 0);
             if (i == 0) {
-                gdl = func_150368C4(gdl, i, player);
+                gdl = model_drawActorQuad(gdl, i, player);
             }
         }
     }
@@ -589,7 +589,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     } else if ((obj->unk66 & 0xC) != 8) {
         gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
         lit = FALSE;
-    } else if (D_800DCD7C != 0) {
+    } else if (gLightingEnabled != 0) {
         gSPSetGeometryMode(gdl++, G_LIGHTING | 0x400000);
     } else {
         gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);

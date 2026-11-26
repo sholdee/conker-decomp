@@ -1,4 +1,4 @@
-/* game/Level/LevelSetup23/levelsetup23.c -- func_15010A60: the level's six floating models, three of them with a light. */
+/* game/Level/LevelSetup23/levelsetup23.c -- level_setup23: the level's six floating models, three of them with a light. */
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
@@ -17,13 +17,13 @@ typedef struct {
     /* 0x28 */ f32 unk28;
 } Struct3DF10Tail; /* size 0x2C */
 
-static const Vec3f D_80096450[6] = {
+static const Vec3f gSetup23ModelPositions[6] = {
     { 3432.0f, 593.0f, -255.0f }, { 3627.0f, 593.0f, 291.0f }, { 3065.0f, 593.0f, 290.0f },
     { 2984.0f, 593.0f, -274.0f }, { 2489.0f, 593.0f, 298.0f }, { 2519.0f, 593.0f, -261.0f },
 };
-static const u8 D_80096498[6] = { 1, 0, 1, 0, 0, 1 }; /* which of them get a light */
+static const u8 gSetup23ModelLights[6] = { 1, 0, 1, 0, 0, 1 }; /* which of them get a light */
 
-void func_15010A60(void) {
+void level_setup23(void) {
     ModelParticle *result;
     ParticleSpawn78 part;
     s32 i;
@@ -88,7 +88,7 @@ void func_15010A60(void) {
     tail.unk28 = 0.0f;
 
     for (i = 0; i < 6; i++) {
-        pos = D_80096450[i];
+        pos = gSetup23ModelPositions[i];
         part.pos = pos;
         tail.unk18 = pos;
 
@@ -130,14 +130,14 @@ void func_15010A60(void) {
             memcpy(result + 1, sp, sizeof(sp));
         }
 
-        if (D_80096498[i] != 0) {
+        if (gSetup23ModelLights[i] != 0) {
             ent = effect_newDynModel(&desc, 0, 0x2C, 0xFF, 1);
             if (ent != NULL) {
                 memcpy(DYNMODEL_USERDATA(ent), &tail, sizeof(tail));
             }
-            header2.x = D_80096450[i].x;
-            header2.y = D_80096450[i].y;
-            header2.z = D_80096450[i].z;
+            header2.x = gSetup23ModelPositions[i].x;
+            header2.y = gSetup23ModelPositions[i].y;
+            header2.z = gSetup23ModelPositions[i].z;
             payload = result;
             header.flags = 2;
             header.update = 0x16;

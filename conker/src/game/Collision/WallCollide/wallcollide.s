@@ -381,8 +381,8 @@ glabel collision_resolveMapWalls
     /* D8C18 150AB768 8D080000 */  lw         $t0, 0x0($t0)
     /* D8C1C 150AB76C 3C01800E */  lui        $at, %hi(gCurMapTris)
     /* D8C20 150AB770 AC28BE3C */  sw         $t0, %lo(gCurMapTris)($at)
-    /* D8C24 150AB774 3C08800C */  lui        $t0, %hi(D_800C5918)
-    /* D8C28 150AB778 25085918 */  addiu      $t0, $t0, %lo(D_800C5918)
+    /* D8C24 150AB774 3C08800C */  lui        $t0, %hi(gModelTriCounts)
+    /* D8C28 150AB778 25085918 */  addiu      $t0, $t0, %lo(gModelTriCounts)
     /* D8C2C 150AB77C 00094842 */  srl        $t1, $t1, 1
     /* D8C30 150AB780 01094021 */  addu       $t0, $t0, $t1
     /* D8C34 150AB784 95080000 */  lhu        $t0, 0x0($t0)

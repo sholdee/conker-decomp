@@ -600,7 +600,7 @@ Actor *collision_createChildObject(Actor *parent, s32 arg1, s32 modelId, s32 arg
     s32 blocked;
     s32 i;
 
-    func_1503D774(modelId, 0);
+    model_loadDef(modelId, 0);
     model_loadAnimTable(modelId, 0);
     obj = actor_alloc();
     obj->unique_id = 0xFF - (obj - movement_obj);
@@ -637,7 +637,7 @@ Actor *collision_createChildObject(Actor *parent, s32 arg1, s32 modelId, s32 arg
     }
     obj->unk101 = inheritScale;
     obj->unkAC = arg5;
-    func_1503D774(modelId, 0);
+    model_loadDef(modelId, 0);
     if (arg5 & 1) {
         obj->noshove |= 0x4000;
         obj->cull_radius_xz = gModelDefs[modelId]->bodyRadius * obj->scale_xz;
@@ -883,7 +883,7 @@ void collision_loadSpawnModel(SpawnRecord *spawn, s32 arg1, s32 arg2) {
 
     modelId = spawn->type;
     if (modelId != 0xFF) {
-        func_1503D774(modelId, arg2);
+        model_loadDef(modelId, arg2);
         def = gModelDefs[modelId];
         list = &spawn->type;
         count = def->subModelCount;
@@ -894,7 +894,7 @@ void collision_loadSpawnModel(SpawnRecord *spawn, s32 arg1, s32 arg2) {
         }
         count += def->extraModelCount;
         for (i = 0; i < count; i++) {
-            func_1503D774(list[i], arg2);
+            model_loadDef(list[i], arg2);
             model_loadAnimTable(list[i], arg2);
         }
     }

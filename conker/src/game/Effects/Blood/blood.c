@@ -556,11 +556,11 @@ void *blood_spawnStrip(BloodStripDesc *desc, s32 extraSize) {
 /* Callbacks of a strip: sample (0 kills it), emit, rate and update (0 kills it). The emit table has a prototype
  * for its f32 argument. */
 static s32 (*gBloodStripSampleCallbacks[])() = {
-    blood_sampleFullPower, effect_restartTaskPulse, effect_resetOscillator, func_151938E4, effect_resetBloodStripAge, blood_sampleRandomPower, func_150D11B4,
+    blood_sampleFullPower, effect_restartTaskPulse, effect_resetOscillator, func_151938E4, effect_resetBloodStripAge, blood_sampleRandomPower, level_sampleBloodStripPower,
 };
 static void (*gBloodStripEmitCallbacks[])(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32, BloodStrip *) = {
     effect_emitStripRiseParticle, blood_emitMirroredStripParticle, effect_spawnSegmentParticle, particle_emitOnSegment, effect_emitBloodStripParticle,
-    blood_emitStripParticle, weapon_emitBloodStripParticle, func_150D1204, beam_emitBloodParticle,
+    blood_emitStripParticle, weapon_emitBloodStripParticle, level_emitBloodStripParticle, beam_emitBloodParticle,
 };
 static f32 (*gBloodStripRateCallbacks[])() = { blood_getTunedPower, effect_stepTaskPulse, effect_stepOscillator, effect_getBloodStripRate };
 static s32 (*gBloodStripUpdateCallbacks[])() = { effect_isTaskPulseAlive };

@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15012780(void) {
+void level_resetWaveDeformers(void) {
     s32 i;
 
     gNumWaveDeformers = 0;

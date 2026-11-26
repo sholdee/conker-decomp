@@ -1414,7 +1414,7 @@ void func_1506DDB8(void) {
 }
 
 void func_1506DDC0(void) {
-    if (func_15178E50(level) != 0) {
+    if (level_isCameraAboveLimit(level) != 0) {
         particle_spawnThrottledEmitter(dc_glbl_CharNum, gEventParam, 0xFF, 0);
     }
 }

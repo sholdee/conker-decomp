@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Zone handler D_80082ECC[...]: flags the zone and spawns a spray spanning its xSize, oriented by its pitch/yaw;
+/* Zone handler gNeutralZoneSpawnHandlers[...]: flags the zone and spawns a spray spanning its xSize, oriented by its pitch/yaw;
    data1 selects the spray style. */
 s32 level_spawnZoneSpray(TriggerZone *zone) {
     SprayDesc descriptor;

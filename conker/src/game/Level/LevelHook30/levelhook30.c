@@ -21,7 +21,7 @@ static s32 D_800888E4[7] = { 0 }; /* not referenced */
 
 /* Picks targets for three channels (255, or one of them 64 per flags 0x4043-0x4045 while 0x403D is
  * set), eases the channels toward them, and writes them to ids 0x30F3-0x30F5 and 0x30F8-0x30FA. */
-void func_150D08C0(Camera *camera) {
+void level_hook30(Camera *camera) {
     if (script_query(1, 0x403D, 6, 0x9000)) {
         camera->AvailableModes |= 0x80021000;
         if (script_query(1, 0x4043, 6, 0x9000)) {
@@ -62,7 +62,7 @@ void func_150D08C0(Camera *camera) {
 /* Steps four scroll counters by D_800BE9E4; then, unless movement_obj[0]'s mv->death_State is set, kills
  * movement_obj[0] once per prop 0xFA-0xF8 it stands on, and if it stands on prop 0xFB plays sound 0x627 and
  * runs it through blood_spawnHitEffects .. actor_kill(6). */
-void func_150D0E90(s32 arg0) {
+void level_updateHazardProps(s32 arg0) {
     WorldObject *prop;
     s32 propIndex;
     s32 i;
@@ -95,7 +95,7 @@ void func_150D0E90(s32 arg0) {
 
 /* Spawns a blood strip on obj that uses sample callback 6 and emit callback 7 (below);
  * mirrored selects which way it is offset. */
-void func_150D10E4(Actor *obj, u8 mirrored) {
+void level_spawnBloodStrip(Actor *obj, u8 mirrored) {
     BloodStripDesc desc;
 
     desc.ownerId = obj->unique_id;
@@ -126,14 +126,14 @@ void func_150D10E4(Actor *obj, u8 mirrored) {
 }
 
 /* BloodStrip sample callback 6: random power in [0.35, 0.5). */
-s32 func_150D11B4(BloodStrip *strip) {
+s32 level_sampleBloodStripPower(BloodStrip *strip) {
     strip->power = (math_randomFloat() * 150.0f + 350.0f) * 0.001f;
     return 1;
 }
 
 /* BloodStrip emit callback 7: moves both strip points `time` along their velocities and emits one
  * particle_spawnKindSprite particle at A, heading from A to B scaled by the strip's power. */
-void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
+void level_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
     Vec3f start;
     f32 endX;
     f32 endY;

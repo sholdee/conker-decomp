@@ -17,11 +17,11 @@ void mp_clearGame(void) {
 }
 
 /* Per-difficulty bot tuning (indexed by D_800E0BD0): this file's .data, in the original order. */
-f32 D_800872B0[5] = { 1.5f, 1.2f, 0.8f, 0.4f, 0.15f };
+f32 gBotTargetDistScales[5] = { 1.5f, 1.2f, 0.8f, 0.4f, 0.15f };
 s16 gBotAimTimeLimits[5] = { -1, -1, 600, 240, 0 }; // aim time limit, -1 = none
-s8 D_800872D0[5] = { 80, 70, 60, 60, 45 };
-s8 D_800872D8[5] = { 10, 20, 30, 60, 45 };
-s8 D_800872E0[5] = { 120, 80, 40, 10, 0 };
+s8 gBotAttackIntervals[5] = { 80, 70, 60, 60, 45 };
+s8 gBotFireHoldTimes[5] = { 10, 20, 30, 60, 45 };
+s8 gBotAttackDelays[5] = { 120, 80, 40, 10, 0 };
 s8 D_800872E8[5] = { 10, 20, 50, 80, 100 }; // percent chance
 s8 D_800872F0[5] = { 30, 25, 20, 15, 15 };
 f32 gBotAimRates[5] = { 0.05f, 0.1f, 0.125f, 0.25f, 1.0f }; // aim rate
@@ -76,7 +76,7 @@ s32 mp_loadGame(void) {
     gMpGame->nextBot = 0;
     gMpGame->targetListPlayer = 0;
     gMpGame->gameType = id;
-    gMpGame->targetDistScale = D_800872B0[D_800E0BD0];
+    gMpGame->targetDistScale = gBotTargetDistScales[D_800E0BD0];
     gMpGame->numZones = 0;
     scales = gBotAimRates;
     for (i = 0; i < 16; i++) {
@@ -360,7 +360,7 @@ s32 mp_update(void) {
                 countdowns[i] = 0;
             }
             if (arr19C[i] == 3 && (arr25C[i] & 0x1F) >= 0x1D) {
-                func_1508EC5C(i, 0x8000);
+                mp_sendPlayerCommand61(i, 0x8000);
             }
             attackers[i] = D_800E0BB8[i];
             D_800E0BB8[i] &= 0x7F;
@@ -406,7 +406,7 @@ s32 mp_update(void) {
                     type = obj->intelwalk;
                     obj->unk222 = arr31C[i] - 2;
                     if (type != 4 && type != 5) {
-                        func_1508EBF8(i, 4);
+                        mp_sendPlayerCommand14(i, 4);
                     }
                     if (type == 4) {
                         aimTimes[i] = 0;
@@ -426,7 +426,7 @@ s32 mp_update(void) {
                 }
                 flag = 0;
                 bit = 0;
-                if (D_800872D0[D_800E0BD0] < attackTimers[i]) {
+                if (gBotAttackIntervals[D_800E0BD0] < attackTimers[i]) {
                     attackTimers[i] = 0;
                     old = -1;
                 }
@@ -459,7 +459,7 @@ s32 mp_update(void) {
                 }
             }
             if (flag && gMpGame->gameType != 0xB8) {
-                attackTimers[i] = -D_800872E0[D_800E0BD0];
+                attackTimers[i] = -gBotAttackDelays[D_800E0BD0];
             }
             flags = obj->unk22C & 0x200;
             obj->unk22C &= ~0x200;
@@ -1368,7 +1368,7 @@ s32 mp_aimBot(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, 
                 obj->mv->buttons = Z_TRIG;
                 if (mode == 1) {
                     obj->mv->buttonsTimer = 2;
-                    if (D_800872D8[D_800E0BD0] < gMpGame->attackTimer[player]) {
+                    if (gBotFireHoldTimes[D_800E0BD0] < gMpGame->attackTimer[player]) {
                         obj->mv->buttons &= ~Z_TRIG;
                         obj->mv->buttonsTimer = 0;
                     }
@@ -1533,7 +1533,7 @@ s32 mp_releaseSlot(s32 player, s32 mode) {
  * Declared int but returns no value, in the pre-ANSI way: script_miscCommand returns what it leaves in v0.
  */
 s32 mp_updatePickups(void) {
-    static s8 D_80087340 = 0;
+    static s8 gPickupCheckPlayer = 0;
     MpGame *base;
     s32 i;
     Actor *obj; // matching: unused stack slot in the original frame
@@ -1653,7 +1653,7 @@ s32 mp_updatePickups(void) {
             }
         }
         base = gMpGame;
-        if (D_80087340 == i && base->gameType != 0xB8) {
+        if (gPickupCheckPlayer == i && base->gameType != 0xB8) {
             setId = mp_getItemAttachSet(cur);
             found = 0;
             numAttached = attach_getAll(&movement_obj[i], attached);
@@ -1723,9 +1723,9 @@ s32 mp_updatePickups(void) {
         }
         count = base->numPlayers;
     }
-    D_80087340++;
-    if (D_80087340 >= count) {
-        D_80087340 = 0;
+    gPickupCheckPlayer++;
+    if (gPickupCheckPlayer >= count) {
+        gPickupCheckPlayer = 0;
     }
     for (i = 0; i < base->numSlots; i++) {
         pickup = gfx_findObjectById(entities[i]);
@@ -1991,13 +1991,13 @@ void mp_sendPlayerCommand(s32 player, s32 id, s32 param) {
 }
 
 /* mp_sendPlayerCommand(player, 0x14, param). */
-void func_1508EBF8(s32 player, s32 param) {
+void mp_sendPlayerCommand14(s32 player, s32 param) {
     s32 temp = movement_obj[player].listpos;
     script_command(1, temp | 0x2000, 0x14, param);
 }
 
 /* mp_sendPlayerCommand(player, 0x61, param). */
-void func_1508EC5C(s32 player, s32 param) {
+void mp_sendPlayerCommand61(s32 player, s32 param) {
     s32 temp = movement_obj[player].listpos;
     script_command(1, temp | 0x2000, 0x61, param);
 }

@@ -3,11 +3,11 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15011D40(void) {
+void level_setup26(void) {
     sound_clearCooldowns();
 }
 
-s32 func_15011D60(TriggerZone *zone) {
+s32 level_spawnStageZone(TriggerZone *zone) {
     StageState tmp;
     u8 pad[0xC]; // matching: stack space
     TriggerZone key;

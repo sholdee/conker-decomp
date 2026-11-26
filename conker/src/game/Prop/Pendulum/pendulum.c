@@ -157,7 +157,7 @@ void func_150C4E9C(WorldObject *obj) {
     texture_addBinding(obj, addr, tailAddr, 4, 5);
 }
 
-// the four objects func_1500F40C spawns with func_1500F290
+// the four objects level_setup08 spawns with level_spawnFlatSprite
 
 /* Destroys the four objects in gLevelSprayEffects (effect_destroyObject) and clears their slots. */
 void prop_destroyLevelSprays(void) {

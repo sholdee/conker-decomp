@@ -2384,7 +2384,7 @@ typedef struct ProjectileStream {
 } ProjectileStream; /* size 0x44 */
 
 /* A timed emitter of ProjectileStreams (TimedEffect tick callback 0x2A, weapon_updateStreamEmitter, game/Weapon/Projectile/projectile.c; spawned by
- * func_150144B8, game/Level/ZoneSpawn/zonespawn.c): after a random delay it starts one stream and picks a new delay. */
+ * level_spawnBulletZone, game/Level/ZoneSpawn/zonespawn.c): after a random delay it starts one stream and picks a new delay. */
 typedef struct StreamEmitter {
     /* 0x00 */ s16 *position;     /* x, y, z (of the spawning TriggerZone) */
     /* 0x04 */ s32 timer;
@@ -2568,7 +2568,7 @@ typedef struct ParticleJitter {
     /* 0x4C */ f32 easeFactor;     /* particle_easeBendTarget eases def.rot towards 100 units above def.pos by it */
 } ParticleJitter; /* size 0x50 */
 
-/* Caller data at 0x160 of a JitterParticle spawned by func_151A9634 (game/Beam/AreaEmitter/areaemitter.c): particle_relaunchJitterParticle
+/* Caller data at 0x160 of a JitterParticle spawned by beam_launchJitterParticle (game/Beam/AreaEmitter/areaemitter.c): particle_relaunchJitterParticle
  * (game/Particle/JitterBallistic/jitterballistic.c) relaunches the particle with this life and gravity. */
 typedef struct JitterRelaunch {
     /* 0x0 */ f32 gravity;
@@ -2982,7 +2982,7 @@ typedef struct FlashBurstData {
     /* 0x06 */ s16 timer; /* frames until the next burst */
 } FlashBurstData;
 
-/* Timed effect 0x55 (effect_newTimedEffect, spawned by func_15011A78), updated by beam_updateFlashBurst. */
+/* Timed effect 0x55 (effect_newTimedEffect, spawned by level_spawnFlashBurst), updated by beam_updateFlashBurst. */
 typedef struct FlashBurstEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ FlashBurstData data;
@@ -3013,7 +3013,7 @@ typedef struct ShapeEmitter {
 /* Zone effects: timed effects (object type 35 or 95, gTimedEffectTypes) that game/Level/ZoneSpawn/zonespawn.c makes for a TriggerZone,
  * with the zone first in their data. effect_findZoneEffect (game/Effects/ZoneEffect/zoneeffect.c) finds the ZoneEffect of a zone (callbackSet
  * 0x2C) and beam_findZoneRectEffect (game/Beam/BoltRain/boltrain.c) its ZoneRectEffect (callbackSet 0x2E). */
-typedef struct ZoneEffectData {     /* filled by func_15015104 */
+typedef struct ZoneEffectData {     /* filled by level_spawnZoneEffect */
     /* 0x00 */ TriggerZone *zone;
     /* 0x04 */ u8 unk4;             /* the zone's data2 */
     /* 0x08 */ ZoneNode *node;      /* collision_findZoneLeaf at the zone's x/z */
@@ -3026,7 +3026,7 @@ typedef struct ZoneEffect {
     /* 0x28 */ ZoneEffectData data;
 } ZoneEffect;
 
-typedef struct ZoneRectData {       /* filled by func_15015354 */
+typedef struct ZoneRectData {       /* filled by level_spawnBoltArcZone */
     /* 0x00 */ TriggerZone *zone;
     /* 0x04 */ s16 unk4;
     /* 0x08 */ f32 unk8;

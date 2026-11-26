@@ -447,7 +447,7 @@ void effect_playRandomZoneSounds(s32 arg0);
 extern u8 gRandomSoundTimer;
 
 /* game_FE850.c */
-/* A timed effect that pulses the ambient colour (effect_updateAmbientPulse, and func_150D1B40 of game/Effects/AmbientPulse/ambientpulse.c). */
+/* A timed effect that pulses the ambient colour (effect_updateAmbientPulse, and light_updateAmbientRedDrift of game/Effects/AmbientPulse/ambientpulse.c). */
 typedef struct {
     TimedEffect base;
     /* 0x28 */ f32 red;    /* the ambient red level, eased toward target */
@@ -859,10 +859,10 @@ void math_dirFromBinAngleXZ(s16 angle, f32 length, f32 *x, f32 *z);
 TriggerZone *math_findMatchingZone(s32 start, s32 end, u16 fields, TriggerZone *key);
 void math_clampRange(s32 *start, s32 *end, s32 lo, s32 hi);
 s32 math_clampInt(s32 *value, s32 lo, s32 hi);
-s32 func_15143E08(Actor *actor);
-s32 func_15143E24(Actor *actor);
+s32 math_getActorFacingBin(Actor *actor);
+s32 math_getActorRelFacingBin(Actor *actor);
 f32 math_vec3Length(const Vec3f *v);
-u8 func_15143E94(s32 arg0, s32 arg1);
+u8 math_shakeIfPlayerInZone(s32 arg0, s32 arg1);
 s32 math_advanceFrameSeq(u8 id, u32 *speed, s32 *pos, u8 flags);
 void math_pickPrimColour(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1, u8 a1,
                    u8 weight, u8 mode);
@@ -908,7 +908,7 @@ s32 math_buildPerpendicularBasis(Vec3f *n, Vec3f *u, Vec3f *v); /* two axes perp
 void *math_emitPointLights(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos, u8 flags,
                     s32 arg8);
 u8 math_isZoneHiddenFromViews(ZoneNode *zone);
-void func_15146508(Actor *a, Actor *b);
+void math_broadcastActorSwap(Actor *a, Actor *b);
 s32 math_transformAttachmentOffsets(Actor *actor, ModelAttachment *point, s32 index, const Vec3f **offsets, Vec3f **results,
                   s32 count);
 s32 math_isInWorldBounds(Vec3f *pos);

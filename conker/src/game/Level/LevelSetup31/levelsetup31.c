@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15011360(void) {
+void level_setup31(void) {
     prop_clearWaveChains();
     prop_startWaveChain(2);
     prop_startWaveChain(3);

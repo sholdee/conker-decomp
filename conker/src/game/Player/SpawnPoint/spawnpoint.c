@@ -36,7 +36,7 @@ static const u8 *gCharacterTypeGroups[7] = {
 
 /* Looks obj->id up in the 7 rows of gCharacterTypeGroups (row lengths in gCharacterTypeGroupLengths) and returns
  * the first entry of the row that contains it, or the id itself when no row does.
- * Same search as func_1503D5F0 (game/Model/ModelLoad/modelload). */
+ * Same search as model_getAnimGroupLeader (game/Model/ModelLoad/modelload). */
 s32 player_getBaseCharacterType(Actor *obj) {
     s32 id = obj->character_type;
     s32 i;

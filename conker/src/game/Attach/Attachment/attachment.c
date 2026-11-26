@@ -220,7 +220,7 @@ static AttachmentHook gAttachHooks[] = {
     beam_hookFrameTexture,
     attach_hookHeldProp,
     attach_hookPlayOnce,
-    func_15033328,
+    attach_hookRemoveWhenDry,
     attach_hookFlashingLight,
     attach_hookFollowAnim,
     attach_hookSpawnProjectile,
@@ -230,7 +230,7 @@ static AttachmentHook gAttachHooks[] = {
     func_1503378C,
     attach_hookToggleTexture,
     attach_hookStateEffect,
-    func_150339C8,
+    attach_hookScrollTileSound,
     attach_hookDelayedSound,
     attach_hookScrollTexV,
     func_15033E00,
@@ -704,7 +704,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
     } else if (((owner->unk66 & 0xC) != 8) && !(att->flags & 1)) {
         gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
         lit = FALSE;
-    } else if (D_800DCD7C != 0) {
+    } else if (gLightingEnabled != 0) {
         gSPSetGeometryMode(gdl++, G_LIGHTING | 0x400000);
     } else {
         gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
@@ -2301,7 +2301,7 @@ s32 attach_hookPlayOnce(ModelAttachment *att, Actor *owner) {
 }
 
 /* Hook: removes the attachment after 30 ticks with its owner out of water and waterHeight < unk180. */
-s32 func_15033328(ModelAttachment *att, Actor *owner) {
+s32 attach_hookRemoveWhenDry(ModelAttachment *att, Actor *owner) {
     s32 delta;
 
     if (gCutsceneStates[0] == 1) {
@@ -2560,7 +2560,7 @@ s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
 
 /* Hook (model 0x37): scrolls the texture and keeps looping sound 0x448 playing at the owner
  * unless gFrameRateDivider is set. */
-s32 func_150339C8(ModelAttachment *att, Actor *owner) {
+s32 attach_hookScrollTileSound(ModelAttachment *att, Actor *owner) {
     attach_scrollTile(att, owner);
     if (gCutsceneStates[0] != 1) {
         if (gFrameRateDivider != 0) {

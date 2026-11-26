@@ -512,8 +512,8 @@ void effect_killAndSplitActor(Actor *obj) {
     copy->noshove = obj->noshove;
     copy->unk9C |= 0x0FFF0000;
     collision_allocAnimState(copy, obj->animseq.uh, 0, obj->animsp);
-    func_150D10E4(obj, 0);
-    func_150D10E4(copy, 1);
+    level_spawnBloodStrip(obj, 0);
+    level_spawnBloodStrip(copy, 1);
 }
 
 // Calls blood_spawnActorImpact on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.

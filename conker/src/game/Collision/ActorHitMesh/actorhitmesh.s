@@ -99,8 +99,8 @@ glabel collision_updateActorHitMesh
     /* D2104 150A4C54 AE020264 */  sw         $v0, 0x264($s0)
   .L150A4C58:
     /* D2108 150A4C58 4495F800 */  mtc1       $s5, $f31
-    /* D210C 150A4C5C 3C1E800C */  lui        $fp, %hi(D_800C5918)
-    /* D2110 150A4C60 27DE5918 */  addiu      $fp, $fp, %lo(D_800C5918)
+    /* D210C 150A4C5C 3C1E800C */  lui        $fp, %hi(gModelTriCounts)
+    /* D2110 150A4C60 27DE5918 */  addiu      $fp, $fp, %lo(gModelTriCounts)
     /* D2114 150A4C64 03D7F021 */  addu       $fp, $fp, $s7
     /* D2118 150A4C68 97DE0000 */  lhu        $fp, 0x0($fp)
     /* D211C 150A4C6C 8E160268 */  lw         $s6, 0x268($s0)
@@ -195,8 +195,8 @@ glabel collision_updateActorHitMesh
     /* D2270 150A4DC0 0011B880 */  sll        $s7, $s1, 2
     /* D2274 150A4DC4 0337C821 */  addu       $t9, $t9, $s7
     /* D2278 150A4DC8 8F390000 */  lw         $t9, 0x0($t9)
-    /* D227C 150A4DCC 3C03800C */  lui        $v1, %hi(D_800C5918)
-    /* D2280 150A4DD0 24635918 */  addiu      $v1, $v1, %lo(D_800C5918)
+    /* D227C 150A4DCC 3C03800C */  lui        $v1, %hi(gModelTriCounts)
+    /* D2280 150A4DD0 24635918 */  addiu      $v1, $v1, %lo(gModelTriCounts)
     /* D2284 150A4DD4 0011B840 */  sll        $s7, $s1, 1
     /* D2288 150A4DD8 00771821 */  addu       $v1, $v1, $s7
     /* D228C 150A4DDC 94630000 */  lhu        $v1, 0x0($v1)

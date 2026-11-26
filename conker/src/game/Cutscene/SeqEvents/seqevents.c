@@ -765,9 +765,9 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             }
         } else if (event->value == 0x46) {
             if (event->unk4 != 0) {
-                func_150C5C74(obj);
+                beam_sendStripMessage1(obj);
             } else {
-                func_150C5C9C(obj);
+                beam_sendStripMessage2(obj);
             }
         } else if (event->value == 0x25) {
             if (event->unk4 != 0) {
@@ -1336,7 +1336,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         particle_startPointPairEmitter(obj, duration, sceneTag, 1);
                         break;
                     case 6:
-                        func_151619A0(track, duration, sceneTag, 1);
+                        light_createSeqTrack(track, duration, sceneTag, 1);
                         break;
                     case 7:
                         light_setLampTrack(track, duration, sceneTag);
@@ -1415,7 +1415,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                         break;
                     case 16:
                         if (obj != NULL && duration > 0) {
-                            func_150F6890(obj, duration, sceneTag, 1);
+                            beam_spawnBoneBloodStrip(obj, duration, sceneTag, 1);
                         }
                         break;
                     case 17:
@@ -1804,7 +1804,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     break;
                 }
                 case 12:
-                    func_15107B78(obj, math_random() & 0xFF, (math_random() & 0x7F) - 0x40, sceneTag, 1);
+                    beam_spawnBoundsImpact(obj, math_random() & 0xFF, (math_random() & 0x7F) - 0x40, sceneTag, 1);
                     break;
                 case 13:
                     sight_flashSprites(camera_global_Cameras);

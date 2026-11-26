@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
-TriggerZone *gSprayAreas[3]; // the three areas effect_sprayFromArea sprays from (func_150142AC registers them)
+TriggerZone *gSprayAreas[3]; // the three areas effect_sprayFromArea sprays from (level_registerSprayAreaZone registers them)
 
 #include "functions.h"
 #include "variables.h"
@@ -295,7 +295,7 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 /*
- * Per-frame update of the effect_spawnActorBeam particle: follows its owner (calling func_15107B78 on it at a random
+ * Per-frame update of the effect_spawnActorBeam particle: follows its owner (calling beam_spawnBoundsImpact on it at a random
  * rate), grows to maxWidth while its timer falls from 50 to 20 and shrinks below 10, firing a
  * one-time burst as it starts shrinking, pulses def.unk44 and scrolls its texture. Returns 0 once expired.
  */
@@ -324,7 +324,7 @@ s32 effect_updateActorBeam(Actor150FD514 *particle) {
         actor_flashFog(owner, 0xFF, 0, 0, 0xFF, 0, 4);
         ext->emitCounter += (0.091000006f + math_randomFloat() * 0.07f) * gFrameDelta;
         while (ext->emitCounter > 1.0f) {
-            func_15107B78(owner, math_random() & 0xFF, (math_random() % 101) - 63, particle->head.header.owner, particle->head.header.kind);
+            beam_spawnBoundsImpact(owner, math_random() & 0xFF, (math_random() % 101) - 63, particle->head.header.owner, particle->head.header.kind);
             ext->emitCounter -= 1.0f;
         }
     }

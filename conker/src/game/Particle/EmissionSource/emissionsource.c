@@ -185,7 +185,7 @@ void particle_randomPointOnTwoSegments(Vec3f *out) {
     out->z = (segment->end.z - segment->start.z) * t + segment->start.z;
 }
 
-/* The two zones that func_15014040 registers (by unk18). */
+/* The two zones that level_registerEmissionSourceZone registers (by unk18). */
 TriggerZone *gEmissionSourceZones[2];
 
 /* End callback: the position of one of the two entries of the gEmissionSourceZones table. */
@@ -748,7 +748,7 @@ void particle_updateShakeTimer(Game113D60TimerEffect *effect) {
 }
 
 /* Fires a pair of effect objects through effect_sendEventToTypes plus an event, effects 0x33 and 0x36 when the
- * D_800DCDC4 region list exists, and two sounds. */
+ * gDustRegions region list exists, and two sounds. */
 void particle_fireShake() {
     s32 ids[2] = { 0x19, 0x48 };
     RumbleParams event;
@@ -761,10 +761,10 @@ void particle_fireShake() {
     event.strength = (math_random() % 6) + 3;
     event.updateKind = -1;
     cont_spawnRumble(&event, 0, 0xFF, 1);
-    if (D_800DCDC4 != NULL) {
+    if (gDustRegions != NULL) {
         particle_startDustRegionSpawner();
     }
-    if (D_800DCDC4 != NULL) {
+    if (gDustRegions != NULL) {
         particle_startDebrisRegionSpawner();
     }
     sound_play(0x4C8, 0x7FFF, 0x40, 0x200 - (math_random() & 0x400), 0);
@@ -815,11 +815,11 @@ void particle_updateDustRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
     dataPtr = &data; // matching: using &data directly at each use does not match
     center = math_getCameraPos(D_800BE9E8);
     spawner = &effect->spawner;
-    spawner->accum += (spawner->rate + (math_randomFloat() * spawner->rateRange)) * gFrameDelta * D_800DCD90;
+    spawner->accum += (spawner->rate + (math_randomFloat() * spawner->rateRange)) * gFrameDelta * gDustRegionsArea;
     if (spawner->accum > 1.0f) {
         do {
-            pick = math_randomFloat() * D_800DCD90;
-            node = D_800DCDC4;
+            pick = math_randomFloat() * gDustRegionsArea;
+            node = gDustRegions;
             while (node->area < pick) {
                 pick -= node->area;
                 node = node->next;
@@ -972,11 +972,11 @@ void particle_updateDebrisRegionSpawner(Game113D60RegionSpawnerEffect *effect) {
 
     center = math_getCameraPos(D_800BE9E8);
     spawner = &effect->spawner;
-    spawner->accum += (spawner->rate + (math_randomFloat() * spawner->rateRange)) * gFrameDelta * D_800DCD90;
+    spawner->accum += (spawner->rate + (math_randomFloat() * spawner->rateRange)) * gFrameDelta * gDustRegionsArea;
     if (spawner->accum > 1.0f) {
         do {
-            pick = math_randomFloat() * D_800DCD90;
-            node = D_800DCDC4;
+            pick = math_randomFloat() * gDustRegionsArea;
+            node = gDustRegions;
             while (node->area < pick) {
                 pick -= node->area;
                 node = node->next;

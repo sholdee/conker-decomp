@@ -24,17 +24,17 @@ typedef struct {
 } PartMasks;
 
 /* Per kind, per part: the parent part (bone), or PART_PARENT_NONE / PART_SKIP. */
-static const s8 D_80098890[] = {
+static const s8 gPartParentsKind1[] = {
     PART_SKIP, PART_SKIP, PART_SKIP, PART_PARENT_NONE, PART_PARENT_NONE, 4, 5, 6, 4, 8, 4, 10, 4,
     4, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, 3, 18, 19, 20, PART_PARENT_NONE, 22, 23,
     PART_PARENT_NONE, 25, 26, PART_PARENT_NONE, 28, 29,
 };
-static const s8 D_800988B0[] = {
+static const s8 gPartParentsKind0[] = {
     PART_SKIP, PART_PARENT_NONE, PART_PARENT_NONE, 2, 3, PART_PARENT_NONE, 5, 6, PART_PARENT_NONE,
     8, 9, PART_PARENT_NONE, 11, 12, PART_PARENT_NONE, PART_PARENT_NONE, PART_PARENT_NONE, 16,
     PART_PARENT_NONE, 18, PART_PARENT_NONE, 20, PART_PARENT_NONE, 22, 23, 24, 25,
 };
-static const s8 D_800988CC[] = {
+static const s8 gPartParentsKind2[] = {
     PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP,
     PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP,
     PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP, PART_SKIP,
@@ -42,7 +42,7 @@ static const s8 D_800988CC[] = {
     PART_SKIP, PART_PARENT_NONE, 36, 37, 36, 39, 36, 41, PART_SKIP, PART_PARENT_NONE,
 };
 /* The part variants of kind 2 (model_breakIntoParts). */
-static const PartMasks D_800988FC[] = {
+static const PartMasks gPartVariantsKind2[] = {
     { 0xFE000000, 0 },
     { 0, 0x7F0 },
     { 0, 0x1000 },
@@ -50,23 +50,23 @@ static const PartMasks D_800988FC[] = {
 static const u8 gPartCounts[] = { 27, 31, 45 }; /* part count per kind */
 
 /* The per-kind tables. */
-static void (*gPartInitFuncs[])(ObjPart *part, s32 objIndex) = { func_1503F078, func_1503F0AC, func_1503F0D8 }; /* per-part init */
-static void (*gPartStartFuncs[])(s32 objIndex) = { func_1503EFC4, func_1503F108, func_1503F16C };               /* start */
-static void (*gPartUpdateFuncs[])(s32 objIndex) = { func_1503EEC0, func_1503EEC0, func_1503F2B0 };               /* update */
-static const s8 *gPartParents[] = { D_800988B0, D_80098890, D_800988CC };                                     /* part parents */
-static u8 *D_80084460[] = { NULL, NULL, NULL };                                                             /* per-part flag bits */
-static const PartMasks *gPartVariants[] = { NULL, NULL, D_800988FC };                                         /* part variants */
+static void (*gPartInitFuncs[])(ObjPart *part, s32 objIndex) = { model_initPartKind0, model_initPartKind1, model_initPartKind2 }; /* per-part init */
+static void (*gPartStartFuncs[])(s32 objIndex) = { model_startPartsKind0, model_startPartsKind1, model_startPartsKind2 };               /* start */
+static void (*gPartUpdateFuncs[])(s32 objIndex) = { model_updatePartsTimed, model_updatePartsTimed, model_updatePartsKind2 };               /* update */
+static const s8 *gPartParents[] = { gPartParentsKind0, gPartParentsKind1, gPartParentsKind2 };                                     /* part parents */
+static u8 *gPartFlagBits[] = { NULL, NULL, NULL };                                                             /* per-part flag bits */
+static const PartMasks *gPartVariants[] = { NULL, NULL, gPartVariantsKind2 };                                         /* part variants */
 
 /* Start breaking `obj` into parts; variant -1 selects every part, otherwise gPartVariants[kind][variant]. */
 void model_breakIntoParts(Actor *obj, s32 kind, s32 variant) {
     if (variant != -1) {
-        func_1503DF0C(obj - movement_obj, kind, gPartVariants[kind][variant].lo, gPartVariants[kind][variant].hi);
+        model_startParts(obj - movement_obj, kind, gPartVariants[kind][variant].lo, gPartVariants[kind][variant].hi);
         return;
     }
-    func_1503DF0C(obj - movement_obj, kind, -1, -1);
+    model_startParts(obj - movement_obj, kind, -1, -1);
 }
 
-void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi) {
+void model_startParts(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi) {
     gObjPartsStates[objIndex].partMaskLo |= maskLo;
     gObjPartsStates[objIndex].partMaskHi |= maskHi;
     gObjPartsStates[objIndex].kind = kind;
@@ -156,7 +156,7 @@ void model_stopParts(s32 objIndex) {
     s32 count;
 
     if (gObjPartsStates[objIndex].state != PARTS_STATE_IDLE) {
-        flagBits = D_80084460[gObjPartsStates[objIndex].kind];
+        flagBits = gPartFlagBits[gObjPartsStates[objIndex].kind];
         if (flagBits != NULL) {
             count = gPartCounts[gObjPartsStates[objIndex].kind];
             for (i = 0; i < count; i++) {
@@ -444,7 +444,7 @@ void func_1503EEB8(void) {
 }
 
 /* Update for kinds 0 and 1: bounce the parts until the timer runs out, then call actor_remove. */
-void func_1503EEC0(s32 objIndex) {
+void model_updatePartsTimed(s32 objIndex) {
     ObjPartsState *ps;
     s32 timer;
 
@@ -459,7 +459,7 @@ void func_1503EEC0(s32 objIndex) {
 }
 
 /* Whether the object's selected parts overlap each non-empty mask word of gPartVariants[kind][variant]. */
-s32 func_1503EF4C(s32 kind, s32 variant, s32 objIndex) {
+s32 model_hasPartVariant(s32 kind, s32 variant, s32 objIndex) {
     const PartMasks *row;
     PartMasks *masks;
 
@@ -479,7 +479,7 @@ fail: // matching: one shared `return FALSE` block
 }
 
 /* Start for kind 0: 120-tick timer and a random vertical kick for every part. */
-void func_1503EFC4(s32 objIndex) {
+void model_startPartsKind0(s32 objIndex) {
     ObjPartsState *ps = &gObjPartsStates[objIndex];
     s32 i;
     s32 count;
@@ -492,20 +492,20 @@ void func_1503EFC4(s32 objIndex) {
 }
 
 /* Per-part init for kinds 0, 1 and 2 (gPartInitFuncs). */
-void func_1503F078(ObjPart *part, s32 objIndex) {
+void model_initPartKind0(ObjPart *part, s32 objIndex) {
     model_randomizePart(part, 2.0f, 2.0f, FALSE);
 }
 
-void func_1503F0AC(ObjPart *part, s32 objIndex) {
+void model_initPartKind1(ObjPart *part, s32 objIndex) {
     model_randomizePart(part, 1.0f, 2.0f, TRUE);
 }
 
-void func_1503F0D8(ObjPart *part, s32 objIndex) {
+void model_initPartKind2(ObjPart *part, s32 objIndex) {
     model_randomizePart(part, 2.06f, 3.0f, TRUE);
 }
 
 /* Start for kind 1: 140-tick timer; sets the object's unk94 to 6 and kicks part 4 upwards. */
-void func_1503F108(s32 objIndex) {
+void model_startPartsKind1(s32 objIndex) {
     ObjPartsState *ps = &gObjPartsStates[objIndex];
 
     ps->timer = 140;
@@ -514,23 +514,23 @@ void func_1503F108(s32 objIndex) {
 }
 
 /* Start for kind 2: 300-tick timer; updates unk94 flags for the selected variants 0..2. */
-void func_1503F16C(s32 objIndex) {
+void model_startPartsKind2(s32 objIndex) {
     gObjPartsStates[objIndex].timer = 300;
-    if (func_1503EF4C(2, 0, objIndex)) {
+    if (model_hasPartVariant(2, 0, objIndex)) {
         movement_obj[objIndex].unk94 |= 0x40;
         movement_obj[objIndex].unk94 &= ~0x200;
     }
-    if (func_1503EF4C(2, 1, objIndex)) {
+    if (model_hasPartVariant(2, 1, objIndex)) {
         movement_obj[objIndex].unk94 |= 0x80;
         movement_obj[objIndex].unk94 &= ~0x100;
     }
-    if (func_1503EF4C(2, 2, objIndex)) {
+    if (model_hasPartVariant(2, 2, objIndex)) {
         movement_obj[objIndex].unk94 &= ~0x400;
     }
 }
 
 /* Update for kind 2: bounce the parts; when the timer runs out stop the effect and set unk94 flags. */
-void func_1503F2B0(s32 objIndex) {
+void model_updatePartsKind2(s32 objIndex) {
     ObjPartsState *ps;
 
     model_bounceParts(objIndex);
@@ -540,13 +540,13 @@ void func_1503F2B0(s32 objIndex) {
         return;
     }
     model_stopParts(objIndex);
-    if (func_1503EF4C(2, 0, objIndex)) {
+    if (model_hasPartVariant(2, 0, objIndex)) {
         movement_obj[objIndex].unk94 |= 8;
     }
-    if (func_1503EF4C(2, 1, objIndex)) {
+    if (model_hasPartVariant(2, 1, objIndex)) {
         movement_obj[objIndex].unk94 |= 4;
     }
-    if (func_1503EF4C(2, 2, objIndex)) {
+    if (model_hasPartVariant(2, 2, objIndex)) {
         movement_obj[objIndex].unk94 |= 2;
     }
 }

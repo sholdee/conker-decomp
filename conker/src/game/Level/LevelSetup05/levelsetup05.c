@@ -9,7 +9,7 @@ typedef struct {
     /* 0x28 */ DiscEmitter data;
 } Effect1500EF20;
 
-void func_1500EF20(void) {
+void level_setup05(void) {
     Effect1500EF20 *temp_v0;
     DiscEmitter tmp;
 
@@ -47,8 +47,8 @@ void func_1500EF20(void) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
 
-    D_800DCD94 = gAmbientColour[0];
-    D_800DCD98 = gAmbientColour[1];
-    D_800DCD9C = gAmbientColour[2];
-    D_800DCDA0 = 0.0f;
+    gAmbientEaseRed = gAmbientColour[0];
+    gAmbientEaseGreen = gAmbientColour[1];
+    gAmbientEaseBlue = gAmbientColour[2];
+    gAmbientEasePhase = 0.0f;
 }

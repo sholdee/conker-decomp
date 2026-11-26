@@ -43,7 +43,7 @@ void effect_spawnJointStepEffects(Actor *obj, u8 side, u8 arg2) {
     // matching: an integer cast keeps ob_matrix_ptr out of a0 (a pointer argument is loaded straight into a0)
     math_getBoneTranslation((s32)obj->ob_matrix_ptr, joint, &pos);
     pos.y = obj->floorY;
-    func_15143E94(5, 0x4022);
+    math_shakeIfPlayerInZone(5, 0x4022);
     effect_spawnQuadEffect(-1, pos.x, pos.y + 6.0f, pos.z, 25, 18, 0, *(u8 *)&arg2, 1);
     particle_emitOnRandomCircle(pos.x, pos.y, pos.z, math_randomFloat() * 50.0f + 40.0f, yaw + 60, yaw - 60,
                   math_random() % 11U + 30, 5, 0, 0.0f, 0, *(u8 *)&arg2);

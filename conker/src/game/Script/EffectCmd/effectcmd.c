@@ -505,7 +505,7 @@ s32 script_endEffect(s32 cmdId, ScriptCmd *cmd) {
             if (obj == NULL) {
                 return 0;
             }
-            func_150C5C9C(obj);
+            beam_sendStripMessage2(obj);
             break;
         case 10:
             prop_destroyLevelSprays();

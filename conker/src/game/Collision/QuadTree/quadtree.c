@@ -711,7 +711,7 @@ s32 collision_buildVertexRuns(s32 map) {
     if (*RUNS == NULL) {
         return 1;
     }
-    *TRIS = (VtxTri *)allocate_memory(D_800C5918[map] * sizeof(VtxTri), 1, 0, 2);
+    *TRIS = (VtxTri *)allocate_memory(gModelTriCounts[map] * sizeof(VtxTri), 1, 0, 2);
     if (*TRIS == NULL) {
         heap_free(*RUNS);
         *RUNS = NULL;
@@ -728,7 +728,7 @@ s32 collision_buildVertexRuns(s32 map) {
             k = 0;
             if (opcode == G_VTX) {
                 { // matching: this block (its extern takes no stack slot) steers IDO's frame layout
-                    extern u16 D_800C5918[];
+                    extern u16 gModelTriCounts[];
 
                     count = (W0 >> 12) & 0xFF;
                     first = (W0 >> 1) & 0x7F;

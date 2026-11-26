@@ -2,16 +2,16 @@
 #include "functions.h"
 #include "variables.h"
 
-static const Vec3f D_800A15F0[4] = { { -78.0f, 0.0f, 0.0f }, { 78.0f, 0.0f, 0.0f }, { -150.0f, 0.0f, 0.0f }, { 150.0f, 0.0f, 0.0f } };
-static const Vec3f D_800A1620[2] = { { -78.0f, 20.0f, 0.0f }, { 78.0f, 20.0f, 0.0f } };
-static const u8 D_800A1638[4] = { 0x16, 0x1A, 0x00, 0x00 };
-static const u8 D_800A163C[4] = { 0x40, 0x20, 0x00, 0x00 };
-static const Vec3f D_800A1640[2] = { { -175.0f, 42.0f, 0.0f }, { 175.0f, 42.0f, 0.0f } };
-static const Vec3f D_800A1658[2] = { { -300.0f, 42.0f, 0.0f }, { 300.0f, 42.0f, 0.0f } };
-static const u8 D_800A1670[4] = { 0x16, 0x1A, 0x00, 0x00 };
+static const Vec3f gBeamMuzzleOffsets[4] = { { -78.0f, 0.0f, 0.0f }, { 78.0f, 0.0f, 0.0f }, { -150.0f, 0.0f, 0.0f }, { 150.0f, 0.0f, 0.0f } };
+static const Vec3f gBeamSparkUpOffsets[2] = { { -78.0f, 20.0f, 0.0f }, { 78.0f, 20.0f, 0.0f } };
+static const u8 gBeamMuzzleBones[4] = { 0x16, 0x1A, 0x00, 0x00 };
+static const u8 gBeamSlotMasks[4] = { 0x40, 0x20, 0x00, 0x00 };
+static const Vec3f gBeamProjectileStarts[2] = { { -175.0f, 42.0f, 0.0f }, { 175.0f, 42.0f, 0.0f } };
+static const Vec3f gBeamProjectileEnds[2] = { { -300.0f, 42.0f, 0.0f }, { 300.0f, 42.0f, 0.0f } };
+static const u8 gBeamProjectileBones[4] = { 0x16, 0x1A, 0x00, 0x00 };
 static const Vec3f D_800A1674 = { 0.0f, -29.0f, 0.0f };
 static const Vec3f D_800A1680 = { 0.0f, 62.0f, 98.0f };
-static const Vec3f D_800A168C[2][4][2] = {
+static const Vec3f gBeamMuzzleBurstStarts[2][4][2] = {
     {
         { { -125.0f, 10.0f, -30.0f }, { 125.0f, 10.0f, 30.0f } },
         { { -125.0f, 10.0f, 30.0f }, { 125.0f, 10.0f, -30.0f } },
@@ -25,7 +25,7 @@ static const Vec3f D_800A168C[2][4][2] = {
         { { -170.0f, 90.0f, 40.0f }, { 170.0f, 90.0f, -40.0f } },
     },
 };
-static const Vec3f D_800A174C[2][4][2] = {
+static const Vec3f gBeamMuzzleBurstEnds[2][4][2] = {
     {
         { { -200.0f, 10.0f, -30.0f }, { 200.0f, 10.0f, 30.0f } },
         { { -200.0f, 10.0f, 30.0f }, { 200.0f, 10.0f, -30.0f } },
@@ -39,7 +39,7 @@ static const Vec3f D_800A174C[2][4][2] = {
         { { -270.0f, 90.0f, 40.0f }, { 270.0f, 90.0f, -40.0f } },
     },
 };
-static const u8 D_800A180C[2][2] = { { 0x16, 0x1A }, { 0x09, 0x06 } };
+static const u8 gBeamMuzzleBurstBones[2][2] = { { 0x16, 0x1A }, { 0x09, 0x06 } };
 
 /* The texture id pickers by effect kind (game/Particle/Steam/steam.c, where each takes no argument). This file was
  * compiled with a view that passes the actor and the slot (as a u8, by prototype) to the kind 12 picker. */
@@ -56,14 +56,14 @@ void beam_fireSlot(actor, slot)
     Vec3i origin;
     MtxF *bones;
 
-    if (D_800A163C[slot] & actor->unk94) {
+    if (gBeamSlotMasks[slot] & actor->unk94) {
         return;
     }
 
     beam_spawnAimed(actor, slot, 0xFF, 1);
     bones = actor->ob_matrix_ptr;
     if (bones != NULL) {
-        math_transformOffset(&D_800A15F0[slot], &muzzle, &bones[D_800A1638[slot]]);
+        math_transformOffset(&gBeamMuzzleOffsets[slot], &muzzle, &bones[gBeamMuzzleBones[slot]]);
         header.flags = 3;
         header.update = -1;
         header.lifetime = (math_random() % 3U) + 4;
@@ -217,12 +217,12 @@ s32 beam_updateAimed(AimedBeam *beam) {
     if (target->unique_id != link->targetId || target->type == 0) {
         return 0;
     }
-    if (actor->unk94 & D_800A163C[link->slot]) {
+    if (actor->unk94 & gBeamSlotMasks[link->slot]) {
         return 0;
     }
     link->flags &= ~1;
     if (actor->ob_matrix_ptr != NULL) {
-        math_transformOffset(&D_800A15F0[link->slot], &beam->head.def.pos, &actor->ob_matrix_ptr[D_800A1638[link->slot]]);
+        math_transformOffset(&gBeamMuzzleOffsets[link->slot], &beam->head.def.pos, &actor->ob_matrix_ptr[gBeamMuzzleBones[link->slot]]);
         beam->head.def.rot.x = target->xpos;
         beam->head.def.rot.y = target->ypos;
         beam->head.def.rot.z = target->zpos;
@@ -392,7 +392,7 @@ s32 beam_updateSpark(Bolt *spark) {
             spark->def.end = beam->head.def.rot;
             spark->def.length = link->distance;
             spark->def.invLength = link->inverse;
-            math_transformOffset(&D_800A1620[slot], &spark->def.up, &actor->ob_matrix_ptr[D_800A1638[slot]]);
+            math_transformOffset(&gBeamSparkUpOffsets[slot], &spark->def.up, &actor->ob_matrix_ptr[gBeamMuzzleBones[slot]]);
             spark->def.up.x = spark->def.up.x - spark->def.start.x;
             spark->def.up.y = spark->def.up.y - spark->def.start.y;
             spark->def.up.z = spark->def.up.z - spark->def.start.z;
@@ -638,12 +638,12 @@ void beam_unlinkGlow(Glow *glow) {
 
 void beam_destroyFlash(LightEffect *flash) {
     beam_unlinkFlash(flash);
-    func_151617C4(flash);
+    light_defaultDestroy(flash);
 }
 
 void beam_freeFlash(LightEffect *flash) {
     beam_unlinkFlash(flash);
-    func_151617E4(flash);
+    light_defaultFree(flash);
 }
 
 /* Clears the beam's reference to this flash. */
@@ -686,11 +686,11 @@ Game1EF500Trail *beam_fireSlotProjectile(actor, slot, arg2, arg3)
     if (actor->taskint[2] < 90) {
         return 0;
     }
-    src[0] = &D_800A1640[slot];
-    src[1] = &D_800A1658[slot];
+    src[0] = &gBeamProjectileStarts[slot];
+    src[1] = &gBeamProjectileEnds[slot];
     dst[0] = &muzzle;
     dst[1] = &dir;
-    math_transformOffsets(src, dst, &actor->ob_matrix_ptr[D_800A1670[slot]], 2);
+    math_transformOffsets(src, dst, &actor->ob_matrix_ptr[gBeamProjectileBones[slot]], 2);
     dir.x -= muzzle.x;
     dir.y -= muzzle.y;
     dir.z -= muzzle.z;
@@ -718,7 +718,7 @@ Game1EF500Trail *beam_fireSlotProjectile(actor, slot, arg2, arg3)
     randA = math_random();
     randB = math_random();
     rand0 = math_randomFloat() * 2000.0f + 2000.0f;
-    effect_spawnBoneBeamParticle(actor, D_800A1670[slot], &D_800A1640[slot], &D_800A1658[slot], &params,
+    effect_spawnBoneBeamParticle(actor, gBeamProjectileBones[slot], &gBeamProjectileStarts[slot], &gBeamProjectileEnds[slot], &params,
                   (randA % 3U) + 8, (randB % 1U) + 0xFF, rand0, &muzzle, 0xFF, 0, -1, arg2, arg3);
     return ret;
 }
@@ -767,7 +767,7 @@ void beam_glowMessage(Glow *glow, ActorMsg *msg, u8 type) {
     }
 }
 
-void func_150F0938(Actor *actor) {
+void beam_attachActorLights(Actor *actor) {
     light_createAttached(actor, 0x25, &D_800A1674, 2, 300, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
     light_createAttached(actor, 2, &D_800A1680, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
@@ -1140,9 +1140,9 @@ void beam_spawnMuzzleBurst(actor, slot, variant, arg3, arg4)
         if (actor->ob_matrix_ptr == NULL) {
             return;
         }
-        src[0] = &D_800A168C[kind][variant][slot];
+        src[0] = &gBeamMuzzleBurstStarts[kind][variant][slot];
         dst[0] = &muzzle;
-        math_transformOffsets(src, dst, &actor->ob_matrix_ptr[D_800A180C[kind][slot]], 1);
+        math_transformOffsets(src, dst, &actor->ob_matrix_ptr[gBeamMuzzleBurstBones[kind][slot]], 1);
         hdr.flags = 3;
         hdr.update = -1;
         hdr.lifetime = (math_random() % 5U) + 4;
@@ -1157,8 +1157,8 @@ void beam_spawnMuzzleBurst(actor, slot, variant, arg3, arg4)
         randA = math_random();
         randB = math_random();
         rand0 = math_randomFloat() * 1877.0f + 2414.0f;
-        effect_spawnBoneBeamParticle(actor, D_800A180C[kind][slot], &D_800A168C[kind][variant][slot],
-                      &D_800A174C[kind][variant][slot], &params, (randA % 6U) + 8, (randB % 1U) + 0xFF,
+        effect_spawnBoneBeamParticle(actor, gBeamMuzzleBurstBones[kind][slot], &gBeamMuzzleBurstStarts[kind][variant][slot],
+                      &gBeamMuzzleBurstEnds[kind][variant][slot], &params, (randA % 6U) + 8, (randB % 1U) + 0xFF,
                       rand0, &muzzle, 0xFF, 0, -1, arg3, arg4);
     }
 }

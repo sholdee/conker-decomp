@@ -576,7 +576,7 @@ void particle_onModelParticleEvent(ModelParticle *particle, void *data, u8 event
     Actor *obj;
 
     if (event == 0x1B && particle->model == 0x22) {
-        func_151B9660((LampParticle *)particle);
+        light_startLampSwing((LampParticle *)particle);
     }
     if (event == 0x2D) {
         ActorSwapMsg *swap = data;

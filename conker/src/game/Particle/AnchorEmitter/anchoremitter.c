@@ -602,7 +602,7 @@ u8 *particle_getObjEmitterData(Actor *obj, s32 *found) {
     return data;
 }
 
-/* Creates the child sprite of an emitter, colored from the D_800A67C0/6760/6820 tables. */
+/* Creates the child sprite of an emitter, colored from the gLightJitterMids/6760/6820 tables. */
 LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
     ChildDesc desc;
     Vec3i pos;
@@ -612,9 +612,9 @@ LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *ow
         return NULL;
     }
 
-    desc.jitter.mid = D_800A67C0[kind];
-    desc.jitter.low = D_800A6760[kind];
-    desc.jitter.high = D_800A6820[kind];
+    desc.jitter.mid = gLightJitterMids[kind];
+    desc.jitter.low = gLightJitterLows[kind];
+    desc.jitter.high = gLightJitterHighs[kind];
     desc.jitter.target = 1.0f;
     desc.jitter.interval = 5.0f;
     desc.jitter.timer = 0.0f;

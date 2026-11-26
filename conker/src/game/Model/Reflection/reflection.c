@@ -385,7 +385,7 @@ Gfx *model_drawReflections(Gfx *gfx, s32 player) {
  * that is above that plane while unk180 lies below it, when the gap is larger than the height from
  * actor_computeSize.
  */
-void func_15036148(void) {
+void model_queueWaterReflections(void) {
     s32 pad; // matching: stack slot
     s16 height;
     s16 unusedA;

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Defined in game/Effects/ObjectList/objectlist.c as void effect_broadcastEvent(s32 event, u8 eventType). This file was compiled without
-   a prototype: func_15146508 passes the two actors after the message as well. */
+   a prototype: math_broadcastActorSwap passes the two actors after the message as well. */
 void effect_broadcastEvent();
 
 /* This file's .data: nine palettes of four RGB colours (math_pickPaletteColour). */
@@ -20,11 +20,11 @@ static u8 gColourPalettes[9 * 12] = {
 };
 
 /* This file's .bss: the debug breadcrumbs of math_transformOffset. */
-static s32 D_800DCA00;   /* the step reached */
-static void *D_800DCA04; /* the matrix */
-static f32 D_800DCA08;   /* the offset */
-static f32 D_800DCA0C;
-static f32 D_800DCA10;
+static s32 gTransformOffsetStep;   /* the step reached */
+static void *gTransformOffsetMtx; /* the matrix */
+static f32 gTransformOffsetX;   /* the offset */
+static f32 gTransformOffsetY;
+static f32 gTransformOffsetZ;
 
 /* Debug tunable stub: returns the midpoint of min and max (the name and source location are unused). */
 s32 math_debugTunableRange(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line) {
@@ -422,37 +422,37 @@ s32 math_getTextureFrameId(TextureDesc *desc, s32 texture, s32 frame, u8 mode) {
 }
 /*
  * Transforms `offset` by mtx into out (just mtx's translation when offset is NULL or zero).
- * D_800DCA00 records the progress through the function (a debug breadcrumb).
+ * gTransformOffsetStep records the progress through the function (a debug breadcrumb).
  */
 void math_transformOffset(const Vec3f *offset, Vec3f *out, void *mtx) {
     MtxF mf;
 
-    D_800DCA00 = 1;
+    gTransformOffsetStep = 1;
     if ((offset != NULL) && ((offset->x != 0.0f) || (offset->y != 0.0f) || (offset->z != 0.0f))) {
-        D_800DCA00 = 2;
-        D_800DCA08 = offset->x;
-        D_800DCA0C = offset->y;
-        D_800DCA10 = offset->z;
+        gTransformOffsetStep = 2;
+        gTransformOffsetX = offset->x;
+        gTransformOffsetY = offset->y;
+        gTransformOffsetZ = offset->z;
         if (gBoneMatricesFlushed) {
-            D_800DCA00 = 3;
-            D_800DCA04 = mtx;
+            gTransformOffsetStep = 3;
+            gTransformOffsetMtx = mtx;
             guMtxL2F(mf, mtx);
             math_transformPoint(mf, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
-            D_800DCA00 = 4;
+            gTransformOffsetStep = 4;
         // matching: an (unused) label here changes how IDO lays out the branch to the final store
         state4_done:;
         } else {
-            D_800DCA00 = 5;
-            D_800DCA04 = mtx;
+            gTransformOffsetStep = 5;
+            gTransformOffsetMtx = mtx;
             math_transformPoint(mtx, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
-            D_800DCA00 = 6;
+            gTransformOffsetStep = 6;
         }
     } else {
-        D_800DCA00 = 7;
+        gTransformOffsetStep = 7;
         math_getBoneTranslation(mtx, 0, out);
-        D_800DCA00 = 8;
+        gTransformOffsetStep = 8;
     }
-    D_800DCA00 = 0;
+    gTransformOffsetStep = 0;
 }
 
 /* Picks a random (x, z) in the region's footprint, with the region's top and bottom heights. */
@@ -758,12 +758,12 @@ s32 math_clampInt(s32 *value, s32 lo, s32 hi) {
 }
 
 /* The actor's facing angle (unk7A) as a binary angle, a quarter turn ahead. */
-s32 func_15143E08(Actor *actor) {
+s32 math_getActorFacingBin(Actor *actor) {
     return ((actor->langle >> 8) + 64) & 0xFF;
 }
 
 /* The actor's facing angle in 256ths of a turn, relative to mv's angle when it has one. */
-s32 func_15143E24(Actor *actor) {
+s32 math_getActorRelFacingBin(Actor *actor) {
     ActorCtl *ref = actor->mv;
     if (ref != NULL) {
         return (s16)((actor->langle - ref->pssd_waist_tilt) >> 8);
@@ -783,7 +783,7 @@ f32 math_vec3Length(const Vec3f *v) {
  * If any actor is alive and some i passes zone_isActorOutsideId(i, arg1) == 0, plays arg0 through camera_startEnvelope
  * and spawns a short random cont_spawnRumble effect. Returns whether it did.
  */
-u8 func_15143E94(s32 arg0, s32 arg1) {
+u8 math_shakeIfPlayerInZone(s32 arg0, s32 arg1) {
     u8 ret;
     s8 i;
     s8 count;
@@ -1893,7 +1893,7 @@ u8 math_isZoneHiddenFromViews(ZoneNode *zone) {
 }
 
 /* Broadcasts message 45 (0x2D, an actor swap; see effect_timedHandlerMessage) for actors a and b. */
-void func_15146508(Actor *a, Actor *b) {
+void math_broadcastActorSwap(Actor *a, Actor *b) {
     ActorSwapMsg msg;
 
     msg.actorA = a;

@@ -19,7 +19,7 @@ void anim_ageMorphCache(void) {
 
     for (group = 0; group < 2; group++) {
         if (gVtxMorphCache[group] != NULL) {
-            for (part = 0; part < D_800C4310[gVtxMorphGroups[group].kind]; part++) {
+            for (part = 0; part < gModelVtxIndexCounts[gVtxMorphGroups[group].kind]; part++) {
                 for (frame = 0; frame < gVtxMorphGroups[group].frameCount; frame++) {
                     if (gVtxMorphCache[group][part][frame].positions != NULL) {
                         if (gVtxMorphCache[group][part][frame].timer != 0) {
@@ -120,12 +120,12 @@ s32 anim_morphVertices(s32 frame, s32 duration, s32 actorIndex) {
     if (gVtxMorphCache[group] == NULL) {
         s32 failed;
 
-        gVtxMorphCache[group] = allocate_memory(D_800C4310[config->kind] * sizeof(VtxMorphFrame *), 1, 0, 2);
+        gVtxMorphCache[group] = allocate_memory(gModelVtxIndexCounts[config->kind] * sizeof(VtxMorphFrame *), 1, 0, 2);
         if (gVtxMorphCache[group] == NULL) {
             return -1;
         }
         failed = FALSE;
-        for (i = 0; i < D_800C4310[config->kind]; i++) {
+        for (i = 0; i < gModelVtxIndexCounts[config->kind]; i++) {
             gVtxMorphCache[group][i] = allocate_memory(config->frameCount * sizeof(VtxMorphFrame), 1, 0, 2);
             if (gVtxMorphCache[group][i] != NULL) {
                 bzero(gVtxMorphCache[group][i], config->frameCount * sizeof(VtxMorphFrame));
@@ -134,7 +134,7 @@ s32 anim_morphVertices(s32 frame, s32 duration, s32 actorIndex) {
             }
         }
         if (failed) {
-            for (i = 0; i < D_800C4310[config->kind]; i++) {
+            for (i = 0; i < gModelVtxIndexCounts[config->kind]; i++) {
                 if (gVtxMorphCache[group][i] != NULL) {
                     // matching: the s32 round trip changes IDO's register choice for the row pointer
                     heap_free((void *)(s32)gVtxMorphCache[group][i]);
@@ -150,7 +150,7 @@ s32 anim_morphVertices(s32 frame, s32 duration, s32 actorIndex) {
         morph->blend = 1.0f;
     }
     vtxBase = (Vtx *)movement_obj[actorIndex].modelData[set][gDrawBufferIndex];
-    for (part = 0; part < D_800C4310[config->kind]; part++) {
+    for (part = 0; part < gModelVtxIndexCounts[config->kind]; part++) {
         if (gVtxMorphCache[group][part][morph->cur].positions == NULL) {
             gVtxMorphCache[group][part][morph->cur].positions =
                 rom_loadPath(&size, 4, 0x13, group, part, morph->cur);
@@ -171,7 +171,7 @@ s32 anim_morphVertices(s32 frame, s32 duration, s32 actorIndex) {
         gVtxMorphCache[group][part][morph->prev].timer = 3;
         from = gVtxMorphCache[group][part][morph->prev].positions;
         to = gVtxMorphCache[group][part][morph->cur].positions;
-        vtx = &vtxBase[D_800C4020[id][part]];
+        vtx = &vtxBase[gModelVtxIndices[id][part]];
         for (i = 0; i < config->partVtxCounts[part]; i++) {
             vtx[i].v.ob[0] = from[i][0] + ((f32)to[i][0] - from[i][0]) * morph->blend;
             vtx[i].v.ob[1] = from[i][1] + ((f32)to[i][1] - from[i][1]) * morph->blend;

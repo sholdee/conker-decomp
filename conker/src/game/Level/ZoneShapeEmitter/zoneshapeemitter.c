@@ -4,8 +4,8 @@
 #include "variables.h"
 
 
-/* Zone handler D_80082ECC[...]: spawns timed effect 89 for the zone at its x/z. */
-s32 func_150106D0(TriggerZone *zone) {
+/* Zone handler gNeutralZoneSpawnHandlers[...]: spawns timed effect 89 for the zone at its x/z. */
+s32 level_spawnShapeEmitterZone(TriggerZone *zone) {
     ShapeEmitter tmp;
     TimedEffect *effect;
 

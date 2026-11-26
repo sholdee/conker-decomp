@@ -44,7 +44,7 @@ Bolt *beam_newLightning(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
 
 /* Update hooks (BoltDef.update1, BoltDef.update2); a hook that returns 0 ends the bolt. */
 static s32 (*gLightningUpdateHooks[])(Bolt *) = { beam_updateSpark, beam_followBoneLightning };
-static s32 (*D_8008F948[])(Bolt *) = { NULL };
+static s32 (*gLightningUpdate2Hooks[])(Bolt *) = { NULL };
 
 /*
  * Per-frame update: counts down the lifetime, runs the update hooks, re-jitters the points when the
@@ -74,7 +74,7 @@ void beam_updateLightning(Bolt *bolt) {
     }
     update2 = bolt->def.update2;
     if (update2 != -1 && !done) {
-        done = (D_8008F948[update2](bolt) == 0);
+        done = (gLightningUpdate2Hooks[update2](bolt) == 0);
     }
 
     if (!done) {

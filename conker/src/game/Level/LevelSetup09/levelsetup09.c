@@ -4,12 +4,12 @@
 #include "variables.h"
 
 
-void func_1500ED80(void) {
+void level_setup09(void) {
     prop_createWaveDeformer(1, 0xD8, -0xDAC, 0, 0x4BB, 0.0f, 15000, 30.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);
-    func_150124A0();
+    level_initPipeBurstPoints();
 }
 
-void func_1500EE18(Actor *arg0, s32 arg1, s32 arg2) {
+void level_spawnObjBurst(Actor *arg0, s32 arg1, s32 arg2) {
     ActorRef tmp;
     TimedEffect *effect;
 
@@ -23,7 +23,7 @@ void func_1500EE18(Actor *arg0, s32 arg1, s32 arg2) {
 }
 
 /* Zone handler D_80082F70[1]: spawns timed effect 0x46 for the zone. */
-void func_1500EE94(TriggerZone *zone) {
+void level_spawnBoltRingZone(TriggerZone *zone) {
     BoltRingData tmp;
     TimedEffect *effect;
 

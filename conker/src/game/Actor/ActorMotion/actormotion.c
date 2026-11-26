@@ -4789,9 +4789,9 @@ void actor_updateTypeAnims(void) {
                 D_800CC298.unk8 = (math_random() % 5U) - 2;
             }
             actor_scrollTypeTexture(id, 4, -4, D_800CC298.unk8, 0, 0);
-            if (D_800C4020[id] != NULL) {
-                func_15062E24(id, D_800C4020[id][0], 0x37, 0, D_800CC298.unk4, 2, 1);
-                func_15062E24(id, D_800C4020[id][1], 0x27, 0x37, D_800CC298.unk0, 1, 0);
+            if (gModelVtxIndices[id] != NULL) {
+                func_15062E24(id, gModelVtxIndices[id][0], 0x37, 0, D_800CC298.unk4, 2, 1);
+                func_15062E24(id, gModelVtxIndices[id][1], 0x27, 0x37, D_800CC298.unk0, 1, 0);
             }
             D_800CC298.unk0 += -4.0f * D_800BE9E4;
             if (D_800CC298.unk0 <= 0.0f) {
@@ -4821,7 +4821,7 @@ void actor_updateTypeAnims(void) {
                     weights[j] = (math_cosBinAngle(D_800CC298.unkB[j]) + 1.0f) * 0.5f;
                     D_800CC298.unkB[j] += step[j];
                 }
-                func_1501B660(&movement_obj[i], weights, 1);
+                model_rampVertexGroupColours(&movement_obj[i], weights, 1);
                 done[4] = 1;
             }
         } else if ((id == 0x3F) && (done[5] == 0)) {
@@ -4888,7 +4888,7 @@ void actor_updateTypeAnims(void) {
                 D_800CC298.unk10 = 0;
             }
             scale = D_800CC298.unk10 * 0.003921568859f;
-            func_1501B660(&movement_obj[i], &scale, 0);
+            model_rampVertexGroupColours(&movement_obj[i], &scale, 0);
         } else if (id == 0x8A) {
             s32 delta;
             s32 pad;
@@ -5037,7 +5037,7 @@ void actor_swapSlots(Actor *a, Actor *b) {
     s32 i;
     s32 u;
 
-    func_15146508(a, b);
+    math_broadcastActorSwap(a, b);
     bcopy(b, &swap, sizeof(Actor));
     bcopy(a, b, sizeof(Actor));
     bcopy(&swap, a, sizeof(Actor));
@@ -5237,7 +5237,7 @@ void actor_scrollVertexTexCoords(Actor *actor, s32 group, s32 arg2, s32 wrapS, s
         return;
     }
     if (group != -1) {
-        offset = D_800C4020[actor->character_type][group] * sizeof(Vtx);
+        offset = gModelVtxIndices[actor->character_type][group] * sizeof(Vtx);
         target = (Vtx *)((u8 *)target + offset);
         source = (Vtx *)((u8 *)source + offset);
     }

@@ -23,7 +23,7 @@ typedef struct {
 
 /*
  * Spawns the two swinging lamp models (assets 427 and 428). The first gets a light effect that moves
- * `light` with it; the second is drawn by func_15109120 while the light is on.
+ * `light` with it; the second is drawn by light_drawLampLitModel while the light is on.
  */
 void light_spawnSwingingLamps(PointLight *light) {
     DynModel *model;
@@ -118,7 +118,7 @@ void light_spawnSwingingLamps(PointLight *light) {
 }
 
 /* Update function 0 (first lamp model): advances the sway phases, then the track timer and height. */
-s32 func_15108AB4(DynModel *model) {
+s32 light_updateLampModel(DynModel *model) {
     LampData *lamp = LAMP_DATA(model);
 
     lamp->phaseX += 0.0857f * gFrameDelta;
@@ -127,13 +127,13 @@ s32 func_15108AB4(DynModel *model) {
     lamp->phaseZ = math_wrapRadians(lamp->phaseZ);
     lamp->swingX = sinf(lamp->phaseX) * 7.1050005f;
     lamp->swingZ = sinf(lamp->phaseZ) * 7.1050005f;
-    func_15108B80(model);
-    func_15108BC0(model);
+    light_updateLampTrackTimer(model);
+    light_updateLampHeight(model);
     return 1;
 }
 
 /* Counts the track duration down and drops the track when it runs out. */
-void func_15108B80(DynModel *model) {
+void light_updateLampTrackTimer(DynModel *model) {
     LampData *lamp = LAMP_DATA(model);
 
     if (lamp->track != TRACK_NONE) {
@@ -144,7 +144,7 @@ void func_15108B80(DynModel *model) {
 }
 
 /* Takes the lamp height from its sequence track, or the default 226. */
-void func_15108BC0(DynModel *model) {
+void light_updateLampHeight(DynModel *model) {
     LampData *lamp = LAMP_DATA(model);
     s32 track = lamp->track;
 
@@ -159,8 +159,8 @@ void func_15108BC0(DynModel *model) {
     }
 }
 
-/* Update function 1 (second lamp model): as func_15108AB4, then draws with func_15109120 while lit. */
-s32 func_15108C38(DynModel *model) {
+/* Update function 1 (second lamp model): as light_updateLampModel, then draws with light_drawLampLitModel while lit. */
+s32 light_updateLampLitModel(DynModel *model) {
     LampData *lamp = LAMP_DATA(model);
 
     lamp->phaseX += 0.0857f * gFrameDelta;
@@ -169,8 +169,8 @@ s32 func_15108C38(DynModel *model) {
     lamp->phaseZ = math_wrapRadians(lamp->phaseZ);
     lamp->swingX = sinf(lamp->phaseX) * 7.1050005f;
     lamp->swingZ = sinf(lamp->phaseZ) * 7.1050005f;
-    func_15108B80(model);
-    func_15108BC0(model);
+    light_updateLampTrackTimer(model);
+    light_updateLampHeight(model);
     if (lamp->lightOn) {
         model->desc.drawFunc = 4;
     } else {
@@ -180,7 +180,7 @@ s32 func_15108C38(DynModel *model) {
 }
 
 /* Draw function 1: builds this frame's lamp matrix, swung, raised to its height and scaled by 0.157. */
-s32 func_15108D24(DynModel *model, s32 viewport) {
+s32 light_buildLampMatrix(DynModel *model, s32 viewport) {
     MtxF mtx;
     LampData *lamp;
 
@@ -296,7 +296,7 @@ void light_toggleLamp(void) {
  * Draw function 4: builds the lamp matrix and recomputes the texture coordinates of the 16 vertices of
  * `viewport`'s buffer, projected on the horizontal axis perpendicular to the camera.
  */
-s32 func_15109120(DynModel *model, s16 viewport) {
+s32 light_drawLampLitModel(DynModel *model, s16 viewport) {
     MtxF mtx;
     LampData *lamp;
     Vec3f *camera;

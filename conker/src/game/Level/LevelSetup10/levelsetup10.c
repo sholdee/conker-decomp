@@ -4,6 +4,6 @@
 #include "variables.h"
 
 
-void func_150106B0(void) {
+void level_setup10(void) {
     gBulletHitTest = prop_shotHitsCylinders;
 }

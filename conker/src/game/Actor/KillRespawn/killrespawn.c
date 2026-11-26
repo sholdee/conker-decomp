@@ -428,7 +428,7 @@ s32 actor_runDeathEffect(Actor *obj) {
         attach_spawnFootImpact(obj);
         break;
     case 0x4A:
-        func_150F1D10(obj, 0xFF, 1);
+        beam_spawnActorExplosion(obj, 0xFF, 1);
         break;
     case 0x47:
         sight_explodeAtActor(obj, 0xFF, 1);

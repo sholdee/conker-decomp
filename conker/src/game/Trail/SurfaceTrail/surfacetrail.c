@@ -45,7 +45,7 @@ s32 trail_getSurfaceAttachPoint(config, side, out)
     } else {
         u8 angle;
 
-        angle = func_15143E08(actor);
+        angle = math_getActorFacingBin(actor);
         dirX = math_cosBinAngleMasked(angle);
         dirZ = math_cosBinAngleMasked(angle - 0x40);
     }

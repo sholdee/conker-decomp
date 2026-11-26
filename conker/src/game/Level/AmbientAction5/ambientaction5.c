@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15011FA0(s32 arg0) {
+void level_startAmbientPulse(s32 arg0) {
     Vec3f tmp;
     TimedEffect *effect;
 

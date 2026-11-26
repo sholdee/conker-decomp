@@ -248,7 +248,7 @@ struct BoltEmitter {
     /* 0x28 */ BoltSource src;
 };
 
-/* Spawns flashes (light_createWithEffect), light-blue bolts (beam_spawnBoundsBolt) and func_15107B78 effects
+/* Spawns flashes (light_createWithEffect), light-blue bolts (beam_spawnBoundsBolt) and beam_spawnBoundsImpact effects
  * around the emitter's source actor, each on its own random timer,
  * and ends the emitter (unkE = -1) once that actor is gone or its slot was reused. */
 void effect_updateBoltEmitter(BoltEmitter *emitter) {
@@ -297,7 +297,7 @@ void effect_updateBoltEmitter(BoltEmitter *emitter) {
     }
     src->timer2 -= D_800BE9E4;
     if (src->timer2 < 0) {
-        func_15107B78(obj, math_random() & 0xFF, (math_random() & 0x7F) - 64,
+        beam_spawnBoundsImpact(obj, math_random() & 0xFF, (math_random() & 0x7F) - 64,
                       emitter->base.header.owner, emitter->base.header.kind);
         src->timer2 = math_random() % 26U + 15;
     }

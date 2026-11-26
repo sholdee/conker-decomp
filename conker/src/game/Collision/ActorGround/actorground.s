@@ -49,8 +49,8 @@ glabel collision_gatherActorGroundTris
     /* D24E0 150A5030 8CCCFF3C */   lw        $t4, -0xC4($a2)
     /* D24E4 150A5034 90D8FCD8 */  lbu        $t8, -0x328($a2)
     /* D24E8 150A5038 1100FFF1 */  beqz       $t0, .L150A5000
-    /* D24EC 150A503C 3C19800C */   lui       $t9, %hi(D_800C5918)
-    /* D24F0 150A5040 27395918 */  addiu      $t9, $t9, %lo(D_800C5918)
+    /* D24EC 150A503C 3C19800C */   lui       $t9, %hi(gModelTriCounts)
+    /* D24F0 150A5040 27395918 */  addiu      $t9, $t9, %lo(gModelTriCounts)
     /* D24F4 150A5044 00184840 */  sll        $t1, $t8, 1
     /* D24F8 150A5048 01394821 */  addu       $t1, $t1, $t9
     /* D24FC 150A504C 95290000 */  lhu        $t1, 0x0($t1)

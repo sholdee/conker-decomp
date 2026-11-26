@@ -2,23 +2,23 @@
 #include "functions.h"
 #include "variables.h"
 
-BounceRecord *D_800BE4E0; /* ten bouncing cursors */
+BounceRecord *gBounceRecords; /* ten bouncing cursors */
 
 
 
-void func_1500FE30(void) {
+void level_initBounceRecords(void) {
     s32 i;
 
-    D_800BE4E0 = allocate_memory(10 * sizeof(BounceRecord), 1, 0, 0);
-    bzero(D_800BE4E0, 10 * sizeof(BounceRecord));
+    gBounceRecords = allocate_memory(10 * sizeof(BounceRecord), 1, 0, 0);
+    bzero(gBounceRecords, 10 * sizeof(BounceRecord));
     for (i = 0; i < 10; i++) {
-        D_800BE4E0[i].table = i / 5;
-        D_800BE4E0[i].dir = -1;
-        D_800BE4E0[i].pos = math_random() % 5;
+        gBounceRecords[i].table = i / 5;
+        gBounceRecords[i].dir = -1;
+        gBounceRecords[i].pos = math_random() % 5;
     }
     effect_randomizeBounceRecordSpeeds(100);
     for (i = 0; i < 10; i++) {
-        D_800BE4E0[i].speed = D_800BE4E0[i].targetSpeed;
+        gBounceRecords[i].speed = gBounceRecords[i].targetSpeed;
     }
 }
 
@@ -26,13 +26,13 @@ void func_1500FF9C(void) {
     texture_addUvWobble(D_800917B8, 0, 0xAD, 0x75);
 }
 
-void func_1500FFCC(void) {
+void level_setup12(void) {
     f32 sp44;
     TimedEffect *fx;
 
     flamethrower_addTexScroll(gLevelDisplayLists[0], D_800902DC, 1, -1, 0, 0, 0, -4);
     flamethrower_addTexScroll(gLevelDisplayLists[1], D_800902DC, 1, -1, 0, 1, 0, -4);
-    func_1500FE30();
+    level_initBounceRecords();
     func_1500FF9C();
     sp44 = 0.0f;
     fx = effect_newTimedEffectNoDraw(0x12C, -1, 0x12, 0, 0xE, 4, 0xFF, 0);

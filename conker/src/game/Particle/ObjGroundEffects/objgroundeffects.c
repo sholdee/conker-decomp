@@ -43,7 +43,7 @@ void particle_spawnObjEffects(Actor *obj, s32 arg1, s32 arg2) {
 
     onGround = particle_getObjGroundPos(&pos, obj, &hit, (u8)arg1);
     particle_startPlayerRumbles(&pos, 1307.0f, 2000.0f, 0.0005f, 0xC, 0xF, 0xFF, 0);
-    func_15143E94(5, 0x4022);
+    math_shakeIfPlayerInZone(5, 0x4022);
 
     if (onGround) {
         angle = camera_global_Cameras[gCurrentView].TrueCameraAngle * 0.7111111283f;

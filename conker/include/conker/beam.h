@@ -38,7 +38,7 @@ typedef struct {
     /* 0x14 */ BoltColor color;
     /* 0x18 */ f32 width;
     /* 0x1C */ s8 update1;           /* index into gLightningUpdateHooks, -1 for none */
-    /* 0x1D */ s8 update2;           /* index into D_8008F948, -1 for none */
+    /* 0x1D */ s8 update2;           /* index into gLightningUpdate2Hooks, -1 for none */
     /* 0x20 */ Vec3f start;
     /* 0x2C */ Vec3f end;
     /* 0x38 */ Vec3f up;
@@ -599,7 +599,7 @@ typedef struct {
     s16 range;
 } RangeS16; /* base + rand % (range + 1) */
 
-/* User data of a type 2 emitter: the particles spawn hook 1 (func_151A9634) launches. */
+/* User data of a type 2 emitter: the particles spawn hook 1 (beam_launchJitterParticle) launches. */
 typedef struct {
     /* 0x00 */ f32 vec0Base;         /* the two floats passed to particle_spawnJitterParticle: base + rand * range */
     /* 0x04 */ f32 vec1Base;
@@ -658,7 +658,7 @@ struct BoltArcObj {
     /* 0x28 */ BoltArcState state;
 };
 
-/* Sparks thrown up from random points of a spawn region (beam_updateSparkRegion, beam_sparkRegionMessage, func_15105BC8). */
+/* Sparks thrown up from random points of a spawn region (beam_updateSparkRegion, beam_sparkRegionMessage, beam_updateSparkZone). */
 typedef struct SparkState {
     /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 rate;
@@ -685,8 +685,8 @@ void beam_updateStrip(StripObj *strip);
 Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view);
 s32 beam_stripFollowTarget(StripObj *strip);
 s32 beam_stripFollowTargetBone(StripObj *strip);
-void func_150C5C74(Actor *obj);
-void func_150C5C9C(Actor *obj);
+void beam_sendStripMessage1(Actor *obj);
+void beam_sendStripMessage2(Actor *obj);
 void beam_stripMessage(StripObj *strip, ActorMsg *data, u8 msg);
 void beam_stripTargetMessage(StripObj *strip, ActorMsg *data, u8 msg);
 
@@ -747,7 +747,7 @@ void beam_unlinkFlash(LightEffect *flash);
 struct Game1EF500Trail *beam_fireSlotProjectile(Actor *actor, s32 slot, s32 arg2, s32 arg3); /* K&R definition (u8 slot, arg2): no caller declares it */
 void beam_sparkMessage(Bolt *spark, s32 data, u8 type);
 void beam_glowMessage(Glow *glow, ActorMsg *msg, u8 type);
-void func_150F0938(Actor *actor);
+void beam_attachActorLights(Actor *actor);
 void beam_spawnMuzzleParticles(Vec3f *pos);
 void beam_spawnFollowParticle(Actor *actor);
 s32 beam_updateFollowParticle(AttachedSpriteParticle *particle, s32 arg1);
@@ -762,7 +762,7 @@ void beam_spawnMuzzleBurst(Actor *actor, u8 slot, u8 variant, u8 arg3, s32 arg4)
 void func_150F1A00(Actor *actor);
 GameCommand *func_150F1B48(GameCommand *cmd, s32 index);
 void func_150F1CB0(Actor *actor);
-void func_150F1D10(Actor *actor, u8 arg1, s32 arg2);
+void beam_spawnActorExplosion(Actor *actor, u8 arg1, s32 arg2);
 void func_150F20F0(s32 index);
 void func_150F2230(Actor *actor, s32 arg1, s32 arg2);
 
@@ -770,7 +770,7 @@ void func_150F2230(Actor *actor, s32 arg1, s32 arg2);
 void beam_showFadeSprite(s32 fadeIn, s32 hold, s32 fadeOut, s32 style);
 void beam_updateGrowSprite(Sprite2D *sprite);
 void beam_updateSpriteFade(Sprite2D *sprite);
-void func_150F568C(s32 arg0);
+void beam_levelUpdateRain(s32 arg0);
 s32 beam_hookFrameTexture(ModelAttachment *att, Actor *actor);
 s32 beam_hookSlideTexture(ModelAttachment *att, Actor *actor);
 void beam_spawnBoneSparks(Actor *owner, s16 arg1, u8 arg2, s32 arg3);
@@ -789,7 +789,7 @@ void func_150F6484(DefParticleHead *obj);
 void func_150F64B0(DefParticleHead *obj);
 void beam_updateFlashBurst(FlashBurstEffect *effect);
 void beam_flashBurstMessage(FlashBurstEffect *effect, s32 arg1, u8 arg2);
-void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3);
+void beam_spawnBoneBloodStrip(Actor *owner, s16 arg1, u8 arg2, s32 arg3);
 void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
 
 /* game/Beam/CastBeam/castbeam.c */
@@ -807,12 +807,12 @@ void beam_onPropArrival(WorldObject *prop);
 void beam_updateBoltRain(BoltRainObj *obj);
 void beam_boltRainMessage(BoltRainObj *obj, s32 arg1, u8 msg);
 void beam_updateBoltArc(BoltArcObj *obj);
-void func_1510550C(EffectHeader *obj, s32 arg1, u8 msg);
+void beam_destroyOnMessage4B(EffectHeader *obj, s32 arg1, u8 msg);
 void beam_boltArcMessage(BoltArcObj *obj, s32 *arg1, u8 msg);
 void beam_spawnImpactEffects(ImpactObj *obj);
 void beam_sparkRegionMessage(SparkObj *obj, s32 arg1, u8 msg);
 void beam_updateSparkRegion(SparkObj *obj);
-void func_15105BC8(SparkObj *obj);
+void beam_updateSparkZone(SparkObj *obj);
 ZoneRectEffect *beam_findZoneRectEffect(TriggerZone *zone);
 
 /* game/Beam/BoltChain/boltchain.c */
@@ -852,7 +852,7 @@ void beam_boundsBoltMessage(BoltObj *bolt, s32 arg1, u8 arg2);
 s32 beam_followBoundsBolt(BoltObj *bolt, u8 *moved);
 void beam_getBoundsPoint(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
 void beam_getStraightCtrlPoints(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
-void func_15107B78(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4);
+void beam_spawnBoundsImpact(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4);
 BoltObj *beam_spawnBoneBolt(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments,
                        f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD);
 s32 beam_followBoneBolt(BoltObj *bolt, u8 *moved);
@@ -895,7 +895,7 @@ void beam_spawnSpriteParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround
 void beam_switchEmitterMessage(Emitter *emitter, u8 *msg, u8 msgType);
 void beam_spawnEmitterPreset(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos, f32 bottom, f32 radius, s16 lifetime,
                    u8 arg7, s32 arg8);
-void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround);
+void beam_launchJitterParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround);
 void beam_spawnAtGroundPoints(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit, s32 count, u8 spawnFunc, void *arg6,
                    u8 arg7, s32 arg8);
 

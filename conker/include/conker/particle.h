@@ -917,7 +917,7 @@ void particle_startDebrisRegionSpawner(void);
 void particle_updateDebrisRegionSpawner(Game113D60RegionSpawnerEffect *effect);
 void particle_updateFallingDebrisSpawner(Game113D60PointSpawnerEffect *effect);
 s32 particle_updateFallingDebris(Game113D60Debris *debris);
-extern TriggerZone *gEmissionSourceZones[2]; /* end points of source 1; func_15014040 registers them (by unk18) */
+extern TriggerZone *gEmissionSourceZones[2]; /* end points of source 1; level_registerEmissionSourceZone registers them (by unk18) */
 
 /* game/Particle/ImpactBurst/impactburst.c */
 /* Spawner state at +0x28 of a burst emitter. */
@@ -1654,7 +1654,7 @@ void *particle_spawnSwell(Vec3f *position, f32 duration, f32 size, f32 alpha, u8
 s32 particle_updateSwell(Object15132A4C *object);
 
 /* game/Particle/StreakParticle/streakparticle.c */
-extern BurstPoint gPipeBurstPoints[3][10]; /* random burst points around each pipe (func_150124A0 fills them) */
+extern BurstPoint gPipeBurstPoints[3][10]; /* random burst points around each pipe (level_initPipeBurstPoints fills them) */
 extern Gfx gStreakParticleSetupDl[]; /* render setup (object type table gObjectTypes) */
 /*
  * A streak particle: a camera-facing triangle from its tail point to a

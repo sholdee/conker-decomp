@@ -402,7 +402,7 @@ struct WORD {
     s32 unk0;
 };
 
-/* Per model-type definition, gModelDefs[id] (loaded by func_1503D774; freed by collision_freeObjectModels with its
+/* Per model-type definition, gModelDefs[id] (loaded by model_loadDef; freed by collision_freeObjectModels with its
  * allocation starting 0x10 bytes earlier). An ExpressionTableHeader (game/Face/Expression/expression) sits 8 bytes before it.
  * Only the fields the code reads are typed; the full size is unknown (at least 0x40). */
 typedef struct ModelDef {
@@ -2085,7 +2085,7 @@ typedef struct TriggerZone {
 } TriggerZone; // size 0x34
 
 /*
- * A stage-parts object (set up by func_15011D60, run by effect_advanceStage): it steps through eight parts, one
+ * A stage-parts object (set up by level_spawnStageZone, run by effect_advanceStage): it steps through eight parts, one
  * shown at a time, while emitting effects on an arc of radius `radius` around (centerX, centerZ).
  */
 typedef struct {
@@ -2254,7 +2254,7 @@ typedef struct {
     u8 pad5[3];
 } VtxMorphFrame;
 
-/* The two end points of a rope (level data such as D_80096320), higher end first. */
+/* The two end points of a rope (level data such as gSetup11Rope1Ends), higher end first. */
 typedef struct RopeEnds {
     /* 0x00 */ Vec3f top;
     /* 0x0C */ Vec3f bottom;
@@ -2415,7 +2415,7 @@ typedef struct LightJitter {
     /* 0x1C */ f32 level;     // current radius
 } LightJitter; // size 0x20
 
-/* Flicker (func_151607A4): bursts of flickers that ramp the light up from dark. */
+/* Flicker (light_updateFlicker): bursts of flickers that ramp the light up from dark. */
 typedef struct LightFlicker {
     /* 0x00 */ f32 peak;  // radius a flicker ramps up to
     /* 0x04 */ f32 level; // current radius
@@ -2508,26 +2508,26 @@ typedef struct LightTrack {
     /* 0xD */ u8 handler;  // gLightTrackEventHandlers event handler index
 } LightTrack; // size 0x10
 
-/* Radius follows the value read by effect_getColorAnimBlend (func_151638E0). */
+/* Radius follows the value read by effect_getColorAnimBlend (light_updateColourAnimFollow). */
 typedef struct LightFollow {
     /* 0x0 */ s32 source;
     /* 0x4 */ f32 base;
     /* 0x8 */ f32 scale;
 } LightFollow; // size 0xC
 
-/* Flash (func_1516429C): decays each frame; event 0x33 relights it. */
+/* Flash (light_updateFlash): decays each frame; event 0x33 relights it. */
 typedef struct LightFlash {
     /* 0x0 */ f32 level;
     /* 0x4 */ u8 id;
 } LightFlash; // size 0x8
 
-/* A fixed point transformed by a matrix each frame (func_151643F8). */
+/* A fixed point transformed by a matrix each frame (light_updateTransformed). */
 typedef struct LightTransformed {
     /* 0x00 */ Vec3f position;
     /* 0x0C */ struct WorldObject *placement; // its rotation and position transform the point (math_transformObjectPointRefs)
 } LightTransformed; // size 0x10
 
-/* A light swinging about a pivot with an object's rotation (func_151644A8). */
+/* A light swinging about a pivot with an object's rotation (light_updateSwing). */
 typedef struct LightSwing {
     /* 0x00 */ f32 offset;          // passed as y to math_transformPoint
     /* 0x04 */ f32 scale;           // applied to the object's rotX / rotZ
@@ -2547,9 +2547,9 @@ struct GroundFlash {
 
 /* LightEffect.data: one payload per kind of light effect. */
 typedef union LightEffectData {
-    s32 index;            // func_15161A68: entry of gSeqTrackStates[0]
+    s32 index;            // light_updateSeqTrack: entry of gSeqTrackStates[0]
     void *object;         // a plain pointer payload (e.g. the lamp DynModel of game/Effects/SwingingLamp/swinginglamp.c)
-    WorldObject *mount;   // func_151606A8: the light hangs below this object
+    WorldObject *mount;   // light_updateMounted: the light hangs below this object
     LightPulse pulse;
     LightJitter jitter;
     LightFlicker flicker;
@@ -2585,7 +2585,7 @@ typedef union LightEffectData {
         /* 0x00 */ LightCycle cycle;
         /* 0x2C */ u8 pad2C[4];
         /* 0x30 */ u8 objectId; // WorldObject id (gfx_findObjectById) flagged by the cycle callbacks
-    } objectCycle;    // func_15009990
+    } objectCycle;    // light_cbObjectCycle
     struct GroundFlash groundFlash; // effect_updateGroundFlash
 } LightEffectData;
 
@@ -2634,10 +2634,10 @@ typedef struct SeqTrackState {
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18; // light intensity (func_15161A68)
+    /* 0x18 */ f32 unk18; // light intensity (light_updateSeqTrack)
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24; // light colour r, g, b (func_15161A68)
+    /* 0x24 */ f32 unk24; // light colour r, g, b (light_updateSeqTrack)
     /* 0x28 */ f32 unk28;
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
@@ -2750,7 +2750,7 @@ typedef struct ObjGroup {
     /* 0x08 */ u16 members[8];
 } ObjGroup; // size 0x18
 
-/* One of the 10 bouncing cursors in D_800BE4E0 (created by func_1500FE30 in game/Level/LevelSetup12/levelsetup12, stepped in
+/* One of the 10 bouncing cursors in gBounceRecords (created by level_initBounceRecords in game/Level/LevelSetup12/levelsetup12, stepped in
  * game/Effects/BounceRecords/bouncerecords). */
 typedef struct BounceRecord {
     /* 0x0 */ u8  table;        // which gBounceRecordFrameTables table to draw from (0 or 1)
@@ -2845,12 +2845,12 @@ typedef struct LensFlare {
     /* 0x30 */ u8 alpha;
 } LensFlare; // size 0x34
 
-/* A trigger zone in a weighted list (built by func_1515F1B0 in game/Lighting/PointLight/pointlight). D_800DCDC4 is a list of
- * spawn regions whose areas add up to D_800DCD90; game/Particle/EmissionSource/emissionsource picks one at random by area. */
+/* A trigger zone in a weighted list (built by light_newRegionNode in game/Lighting/PointLight/pointlight). gDustRegions is a list of
+ * spawn regions whose areas add up to gDustRegionsArea; game/Particle/EmissionSource/emissionsource picks one at random by area. */
 typedef struct RegionNode {
     /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 volume;
-    /* 0x08 */ f32 area;          // the pick weight in D_800DCDC4
+    /* 0x08 */ f32 area;          // the pick weight in gDustRegions
     /* 0x0C */ struct RegionNode *next;
 } RegionNode;
 
