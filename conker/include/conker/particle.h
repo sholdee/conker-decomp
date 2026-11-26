@@ -2141,8 +2141,8 @@ void func_1518A360(BoneGlow *emitter, ActorSwapMsg *msg, u8 msgId);
 s32 func_1518AD20(FloorParticle *particle);
 s32 func_1518B1AC(FloorParticle *particle);
 s32 func_1518B1D8(FloorParticle *particle);
-void func_1518B264(Vec3f *pos, f32 radius, f32 size, s32 count, u8 arg4);
-void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6);
+void func_1518B264(f32 *pos, f32 radius, f32 size, s32 count, u8 arg4);
+void func_1518B2A8(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6);
 
 /* game_1B8B60.c */
 void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4);

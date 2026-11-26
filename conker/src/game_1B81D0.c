@@ -169,7 +169,7 @@ s32 func_1518B1D8(FloorParticle *particle) {
 }
 
 /* func_1518B2A8 with model 4. */
-void func_1518B264(Vec3f *pos, f32 radius, f32 size, s32 count, u8 arg4) {
+void func_1518B264(f32 *pos, f32 radius, f32 size, s32 count, u8 arg4) {
     func_1518B2A8(pos, radius, size, count, 4, 0xFF, arg4);
 }
 
@@ -178,7 +178,7 @@ void func_1518B264(Vec3f *pos, f32 radius, f32 size, s32 count, u8 arg4) {
  * is spawned only where func_15046C80 finds a floor below the point, together with 1-4 smaller ones
  * above it; every droplet remembers that floor height (see func_1518AD20). arg5 is unused.
  */
-void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
+void func_1518B2A8(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
     ParticleSpawn spawn;
     CollisionHit floor;
     u8 angle;
@@ -230,9 +230,9 @@ void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 a
             spawn.rot.x = func_150ADA68() * 360.0f;
             spawn.rot.y = func_150ADA68() * 360.0f;
             spawn.rot.z = func_150ADA68() * 360.0f;
-            spawn.pos.x = pos->x + func_151423D8(angle) * dist;
-            spawn.pos.y = (pos->y + radius) - (func_150ADA68() * 2.0f * radius);
-            spawn.pos.z = pos->z - func_151423D8(angle - 0x40) * dist;
+            spawn.pos.x = pos[0] + func_151423D8(angle) * dist;
+            spawn.pos.y = (pos[1] + radius) - (func_150ADA68() * 2.0f * radius);
+            spawn.pos.z = pos[2] - func_151423D8(angle - 0x40) * dist;
             spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
             spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
             if (func_15046C80(&spawn.pos, 0, -10000.0f, &floor) != 0) {
