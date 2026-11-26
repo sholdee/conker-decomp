@@ -199,12 +199,12 @@ void func_1514AD9C(Vec3f *pos, u8 arg1, s32 arg2) {
 }
 
 /*
- * Shrinks unk2C/unk30 by the fraction unk150 and integrates unk38 with velocity unk50 and
+ * Shrinks unk2C/unk30 by the fraction shrinkFraction and integrates unk38 with velocity unk50 and
  * acceleration unk4C over one frame. Returns 0 once either size drops below 10.
  */
 s32 func_1514AF74(Particle177B50 *p) {
-    p->head.def.width -= p->head.def.width * p->unk150;
-    p->head.def.height -= p->head.def.height * p->unk150;
+    p->head.def.width -= p->head.def.width * p->shrinkFraction;
+    p->head.def.height -= p->head.def.height * p->shrinkFraction;
     p->head.def.pos.y += p->head.def.scale.y * gFrameDelta + 0.5f * p->head.def.scale.x * gFrameDelta * gFrameDelta;
     p->head.def.scale.y += p->head.def.scale.x * gFrameDelta;
     if (p->head.def.width < 10.0f || p->head.def.height < 10.0f) {

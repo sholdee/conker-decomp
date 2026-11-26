@@ -332,7 +332,7 @@ void func_1516DB90(SpriteEmitter *arg0) {
     s32 countdown;
 
     emitter = arg0;
-    if (emitter->unk0 == 0x11) {
+    if (emitter->type == 0x11) {
         isAlt = 0;
     } else {
         isAlt = 1;
@@ -501,7 +501,7 @@ void func_1516DB90(SpriteEmitter *arg0) {
                 func_1516D4E8(x, y, z, emitter->texture, emitter->frame, r, g, b, emitter->alpha, envR, envG, envB,
                               emitter->kind, velXHigh, velXLow, velZHigh, velZLow, unk32, unk33, unk34, unk35,
                               emitter->unk36, emitter->unk37, scaleX, scaleY, emitter->particleLifetime, velocityY,
-                              isAlt, emitter->particleLink, emitter->unkC, emitter->unk1);
+                              isAlt, emitter->particleLink, emitter->owner, emitter->list);
             }
         }
     }

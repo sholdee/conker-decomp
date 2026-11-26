@@ -266,9 +266,9 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
+    /* 0x01 */ u8 list; /* EffectHeader byte 1: the object list */
     /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
+    /* 0x0C */ u8 owner; /* EffectHeader.owner */
     /* 0x0D */ u8 padD[0x83];
     /* 0x90 */ s32 unk90;
     /* 0x94 */ u8 pad94[4];
@@ -1496,8 +1496,8 @@ typedef struct {
     /* 0x3C */ f32 unk24Min;
     /* 0x40 */ f32 unk24Target;
     /* 0x44 */ s16 unk24Timer;
-    /* 0x46 */ s16 unk156;
-    /* 0x48 */ s16 unk158;
+    /* 0x46 */ s16 fadeStart; /* while def.lifetime is below it, alpha = lifetime * fadeRate */
+    /* 0x48 */ s16 fadeRate;
 } FlickerParams;
 
 /* Effect instance shared by the update callbacks in this file. */
@@ -1531,7 +1531,7 @@ typedef struct Beam1514A6A0 {
 typedef struct {
     /* 0x00 */ DefParticleHead head;
     /* 0x110 */ u8 pad110[0x40];
-    /* 0x150 */ f32 unk150;
+    /* 0x150 */ f32 shrinkFraction; /* width and height lose this fraction every call (func_1514AF74) */
 } Particle177B50;
 
 typedef struct {
@@ -1911,10 +1911,10 @@ extern u8 D_800DD2A0[4]; /* per style object: intensity, raised to 0xFF over tim
 /* A 0x34-byte sprite particle, spawned by func_1516D4E8 and updated every frame by the
  * handler that D_8008CBA0 holds for its kind. The bytes from 0x26 on depend on the kind. */
 typedef struct StyleParticle {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
+    /* 0x00 */ u8 type;  /* EffectHeader.type: 0x12, or 0x67 */
+    /* 0x01 */ u8 list;  /* EffectHeader byte 1: the object list (func_15167A68) */
     /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
+    /* 0x0C */ u8 owner; /* EffectHeader.owner */
     /* 0x0D */ u8 padD;
     /* 0x0E */ s16 x;
     /* 0x10 */ s16 y;
@@ -1985,10 +1985,10 @@ typedef struct StyleParticle {
 /* A 0x4C-byte particle emitter, spawned by func_1516D99C and run by func_1516DB90. Most of
  * its bytes are the template that func_1516D4E8 gets for each particle it spawns. */
 typedef struct SpriteEmitter {
-    /* 0x00 */ u8 unk0; /* 0x11, or 0x66 for an emitter whose particles are 0x67s */
-    /* 0x01 */ u8 unk1;
+    /* 0x00 */ u8 type; /* EffectHeader.type: 0x11, or 0x66 for an emitter whose particles are 0x67s */
+    /* 0x01 */ u8 list; /* EffectHeader byte 1: the object list (func_15167A68) */
     /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
+    /* 0x0C */ u8 owner; /* EffectHeader.owner */
     /* 0x0D */ u8 padD;
     /* 0x0E */ s16 x; /* also a pointer's high half (flags 0x30) or a D_800A6E30 row */
     /* 0x10 */ s16 y; /* also a pointer's low half (flags 0x30) */

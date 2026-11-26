@@ -104,12 +104,12 @@ s32 func_1514A380(FlickerParticle *effect) {
     return 1;
 }
 
-/* Shrinks width and height by shrinkRate; while unk1C < unk156, sets unk5C = unk1C * unk158. */
+/* Shrinks width and height by shrinkRate; while lifetime < fadeStart, sets the alpha (unk44) to lifetime * fadeRate. */
 s32 func_1514A498(FlickerParticle *effect) {
     effect->head.def.height -= effect->head.def.height * effect->params.shrinkRate;
     effect->head.def.width -= effect->head.def.width * effect->params.shrinkRate;
-    if (effect->head.def.lifetime < effect->params.unk156) {
-        effect->head.def.unk44 = effect->head.def.lifetime * effect->params.unk158;
+    if (effect->head.def.lifetime < effect->params.fadeStart) {
+        effect->head.def.unk44 = effect->head.def.lifetime * effect->params.fadeRate;
     }
     return 1;
 }

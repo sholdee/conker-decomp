@@ -506,7 +506,7 @@ void func_150B9D8C(Obj150B9D8C *obj) {
         randFlipHi = func_150ADA20();
 
         func_1513C4EC(&def, 0, 2, 0, obj->unk9C, obj->unkA6 + 2, obj->unkA0, obj->unkA2, obj->unkA2,
-                      randAngle & 0xFF, ((randFlipHi & 1) << 1) + (randFlipLo & 1), 3, 0xFF, 0, obj->unkC,
-                      obj->unk1);
+                      randAngle & 0xFF, ((randFlipHi & 1) << 1) + (randFlipLo & 1), 3, 0xFF, 0, obj->owner,
+                      obj->list);
     }
 }
