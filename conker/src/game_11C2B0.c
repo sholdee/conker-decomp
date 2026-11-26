@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_15152B38 func_15152B38_header // matching: this file keeps its own declaration of func_15152B38
 #include "functions.h"
-#undef func_15152B38
 #include "variables.h"
 
 static const f32 D_800A15F0[4][3] = { { -78.0f, 0.0f, 0.0f }, { 78.0f, 0.0f, 0.0f }, { -150.0f, 0.0f, 0.0f }, { 150.0f, 0.0f, 0.0f } };
@@ -789,8 +787,6 @@ void func_150F0938(s32 arg0) {
     func_15160A58(arg0, 0x25, D_800A1674, 2, 300, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
     func_15160A58(arg0, 2, D_800A1680, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
-
-void func_15152B38(TrailBurst *, s32, s32, void *); // matching: called with an extra argument
 
 /* Spawns a particle effect (func_15152B38) at `pos`; func_150EEE00 uses it at the muzzle. */
 void func_150F0A24(f32 *pos) {

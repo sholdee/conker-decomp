@@ -887,7 +887,11 @@ void func_15152ABC(Color8 *out) {
     out->blue = rgb[2];
 }
 
-void func_15152B38(TrailBurst *config, u8 arg1, s32 arg2) {
+void func_15152B38(config, arg1, arg2)
+    TrailBurst *config;
+    u8 arg1;
+    s32 arg2;
+{
     EffectTemplate param;
     TrailBurstParams spawn;
     s32 count;

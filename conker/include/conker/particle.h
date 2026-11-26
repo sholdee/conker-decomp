@@ -1574,7 +1574,8 @@ void func_15152190(DebrisBurst *config, s32 *variantIds, f32 *variantScales, u32
 void func_15152520(ModelBurst *config, u8 arg1, s32 arg2);
 void func_15152874(DriftBurst *config, u8 arg1, s32 arg2);
 void func_15152ABC(Color8 *out);
-void func_15152B38(TrailBurst *config, u8 arg1, s32 arg2);
+/* (TrailBurst *config, u8 arg1, s32 arg2); declared without a prototype: game_11C2B0.c passes a fourth argument */
+void func_15152B38();
 void func_15152F70(SimplePuffSpray *config, u8 arg1);
 void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2);
 void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3);
