@@ -88,25 +88,6 @@ extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares i
 
 extern s32 D_800364C4;
 
-
-extern OSMesg      D_800380E0;
-extern OSMesgQueue D_800388B0;
-
-extern OSMesg      gMessage0;
-extern OSMesgQueue gMessageQueue0;
-
-extern OSMesg      gMessages[3];
-extern OSMesgQueue gMessageQueue[3];
-
-extern s32 D_80038904;
-extern OSIoMesg D_80038950[];
-
-extern u8  D_8003A570;
-extern u8  D_8003A571;
-extern vu8 D_8003A572; // PI interlock flags shared with the PI manager thread (init_2E50)
-extern vu8 D_8003A573;
-extern u8  D_8003A574;
-extern vu8 D_8003A575;
 extern s8   D_8003A580;
 extern u8  D_8003A581;
 extern u8  D_8003A582;

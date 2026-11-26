@@ -138,7 +138,6 @@ void func_151DDBA0(void) {
 
 /* ---- formerly game_20B0D0.c ---- */
 
-extern OSIoMesg D_800388E0;
 extern void (*D_800E0A88)(void);
 
 extern s8 D_800E0A85;
