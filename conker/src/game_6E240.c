@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+/* This file's .data: 16 zero bytes between game_6D800's .data and game_6E770's. */
+static s32 D_800848C0[4] = { 0, 0, 0, 0 }; /* not referenced */
 
 void func_15040D90(s32 arg0) {
 

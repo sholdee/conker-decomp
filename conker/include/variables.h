@@ -73,8 +73,6 @@ extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 
 /* 80080000 */
 extern Vtx  D_80084300[5];
-extern void (*D_800844B0[])(s32 arg0);
-extern s32  D_800848B0;
 
 extern u8 (*D_80085990[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
 extern FontGlyph *D_80085994[];
@@ -407,9 +405,6 @@ extern TexCoord *D_800C6360[187]; // per model id: saved texture coordinates (fu
 extern AimPoint *gAimPoints; // aim points (gAimPointCount of them)
 extern s32 gAimPointCount;
 extern ObjPartsState D_800C6660[];
-extern s32 D_800C6860[];
-extern u8  D_800C68A0;
-extern u8  D_800C68A1;
 
 extern u16 D_800CBD4E; // animation clock (high bits pick icon frames)
 extern u16 D_800CBDA0[];

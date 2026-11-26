@@ -20,7 +20,7 @@ extern s16 D_80084480;
 
 /* game_6D800.c */
 void func_15040350(void *dl, u32 end);
-void func_150403C8(void *dl, u32 end, s32 parent);
+void func_150403C8(void *dl, u32 end, Gfx *parent);
 s32 func_1504072C(s32 addr);
 void func_15040748(Gfx *gfx);
 s32 func_15040754(Gfx *gfx);

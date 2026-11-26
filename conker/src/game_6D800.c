@@ -3,14 +3,51 @@
 #include "functions.h"
 #include "variables.h"
 
-/**
- * Display-list checker state:
- *   D_800C6860[16]  segment base table, mirrored from G_MW_SEGMENT moveword commands (-1 = unset)
- *   D_800C68A0      set once something is drawn, cleared by G_RDPPIPESYNC
- *   D_800C68A1      current G_DL nesting depth
- *   D_800848B0      last G_SETTIMG address
- *   D_800844B0[256] per-opcode handlers used when dumping commands
- */
+/* Display-list checker state. */
+static s32 D_800C6860[16]; // segment base table, mirrored from G_MW_SEGMENT moveword commands (-1 = unset)
+static u8 D_800C68A0;      // set once something is drawn, cleared by G_RDPPIPESYNC
+static u8 D_800C68A1;      // current G_DL nesting depth
+
+#define DL_NONE func_15040748  /* opcodes without their own handler */
+#define DL_RSP1X func_15040820 /* opcodes 0x10-0x1F */
+
+/* Per-opcode handlers used when dumping commands (func_15040A78, func_15040CC8), indexed by the command byte. */
+static void (*D_800844B0[256])() = {
+    /* 0x00 */ func_1504092C, func_150407A0, func_150407A8, func_150407B4, func_150407C0, func_1504086C, func_15040814, func_15040808,
+    /* 0x08 */ func_150407CC, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x10 */ DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X,
+    /* 0x18 */ DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X, DL_RSP1X,
+    /* 0x20 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x28 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x30 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x38 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x40 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x48 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x50 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x58 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x60 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x68 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x70 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x78 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x80 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x88 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x90 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0x98 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0xA0 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0xA8 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0xB0 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0xB8 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0xC0 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0xC8 */ DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE, DL_NONE,
+    /* 0xD0 */ DL_NONE, DL_NONE, DL_NONE, func_15040998, func_150409A4, func_150409B0, func_150409BC, func_15040D6C,
+    /* 0xD8 */ func_15040A28, func_15040A40, func_15040A34, func_15040A6C, func_15040A60, func_15040A54, func_150408F0, func_15040A1C,
+    /* 0xE0 */ func_15040938, func_150407D8, func_15040908, func_150408FC, func_150409E0, func_150409EC, func_150408B4, func_150408A8,
+    /* 0xE8 */ func_15040890, func_1504089C, func_150407F0, func_150407FC, func_15040914, func_15040920, func_15040D60, func_15040D78,
+    /* 0xF0 */ func_15040878, func_150407E4, func_15040A10, func_150409F8, func_15040884, func_15040A04, func_150409D4, func_150409C8,
+    /* 0xF8 */ func_1504098C, func_15040980, func_15040974, func_15040968, func_150408C0, func_1504095C, func_15040950, func_15040944
+};
+static s32 D_800848B0 = 0; // last G_SETTIMG address
+
 
 /** Checks the display list at dl (up to end, or up to its G_ENDDL when end is 0). */
 void func_15040350(void *dl, u32 end) {
@@ -23,7 +60,7 @@ void func_15040350(void *dl, u32 end) {
         D_800C6860[i] = -1;
     }
     D_800C6860[0] = 0;
-    func_150403C8(dl, end, 0);
+    func_150403C8(dl, end, NULL);
 }
 
 /** Posts error code 0xC00005B to D_8003C8E0 and calls func_150AD770. */
@@ -45,7 +82,7 @@ void func_15040350(void *dl, u32 end) {
  * drawing without a G_RDPPIPESYNC. Each report dumps the commands around the
  * culprit with func_15040CC8. parent (the calling G_DL command) is unused.
  */
-void func_150403C8(void *dl, u32 end, s32 parent) {
+void func_150403C8(void *dl, u32 end, Gfx *parent) {
     Gfx *gfx;
     s32 pad[2]; // matching: reserves the stack slots the original frame has
     s32 isBad = 0;
@@ -70,7 +107,7 @@ void func_150403C8(void *dl, u32 end, s32 parent) {
                     DL_ERROR();
                 }
                 if (addr > 0x80000000 && addr < 0xA0000000 && !(addr & 7)) {
-                    func_150403C8((void *)addr, 0, (s32)gfx);
+                    func_150403C8((void *)addr, 0, gfx);
                 } else {
                     func_15040CC8(gfx);
                     DL_ERROR_FLIP();
@@ -448,7 +485,7 @@ void func_15040A78(Gfx *start, Gfx *from, Gfx *to) {
         }
         cmd = gfx->dma.cmd;
         if (inRange) {
-            D_800844B0[cmd]((s32)gfx);
+            D_800844B0[cmd](gfx);
         }
         if (gfx == to) {
             inRange = 0;
@@ -521,7 +558,7 @@ void func_15040CC8(Gfx *gfx) {
     s32 i;
     s32 addr; // matching: a Gfx * local here changes the generated code
     s32 lastTexture;
-    void (**handlers)(s32);
+    void (**handlers)();
 
     for (i = 0; i < 16; i++) {
         // empty: the loop itself is emitted
