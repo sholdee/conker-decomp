@@ -117,7 +117,7 @@ s32 func_15081574(s32 self, f32 dist, f32 radius, s32 outTarget, s32 arg4, s32 m
 
 /* game_AEB40.c */
 void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out,
-                   f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, s32 filterArg, s32 ignoreMask);
+                   f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, void *filterArg, s32 ignoreMask);
 s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist,
                   f32 *outFarDist);
 void func_15081E0C(Actor *obj, u16 part, u8 skip);

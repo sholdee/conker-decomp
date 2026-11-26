@@ -119,7 +119,7 @@ void func_150EEC84(Actor *obj);
 void func_150EEDA8(Actor *obj);
 
 /* game_12B250.c */
-s32 func_150FDDA0(Actor *obj, s32 arg1, s32 arg2);
+Game1EF500Trail *func_150FDDA0(Actor *obj, s32 arg1, s32 arg2);
 void func_150FDF38(Actor *obj, u8 arg1, s32 arg2, Vec3f *muzzleOut, Vec3f *launchOut);
 void func_150FE0B8(Actor *obj, Vec3f *muzzle, u8 arg2, s32 arg3);
 void func_150FE248(Actor *obj, s32 arg1, Vec3f *out);

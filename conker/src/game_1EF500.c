@@ -117,7 +117,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
         from = origin;
         dir = &sourceDir;
     }
-    ext.handle = collide ? func_151D5B6C(from, dir, owner, arg23, 0) : -1;
+    ext.handle = collide ? func_151D5B6C(from, dir, owner, arg23, NULL) : -1;
     if (func_151C4B0C(knownHit, &ext.path, origin, useSource ? &sourceDir : NULL, &ext.remaining, arg7, arg13,
                       altOrigin, useTarget ? &targetDir : NULL, &ext.flags, 3, arg10, owner, arg23, collide, arg15,
                       ext.handle, 0) == 0) {

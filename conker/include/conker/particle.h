@@ -2989,8 +2989,9 @@ void func_151D3E04(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bone, f32 y
 void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3);
 void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2);
 void func_151D3FF4(Vec3f *pos, u8 arg1, s32 arg2);
-void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
-void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, s32 arg3, s32 arg4);
+void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionTri *surface, s32 arg5, s32 arg6,
+                   s32 arg7);
+void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 arg4);
 void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
 void func_151D4668(Actor *obj);
 void func_151D469C(Actor *obj, s32 posFunc, s32 arg2, s32 arg3, s32 arg4);
@@ -3010,7 +3011,7 @@ void func_151D5648(Vec3f *pos, u8 arg1, s32 arg2);
 void func_151D5714(Actor *obj, const Vec3f *from, const Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6);
 void func_151D57F8(Actor *obj, u8 slot);
 void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, Vec3f *localPos, u8 bone);
-s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, s32 filterArg);
+s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg);
 void func_151D5D60(void *slots, s16 index, s32 size, void *out, u8 *allocated);
 void func_151D5E30(void *slots);
 

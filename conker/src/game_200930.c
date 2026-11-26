@@ -294,7 +294,8 @@ void func_151D3FF4(Vec3f *pos, u8 arg1, s32 arg2) {
 
 /* Calls func_1505D1C4 twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
    or pos raised by half of target's height when there is no dir. */
-void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionTri *surface, s32 arg5, s32 arg6,
+                   s32 arg7) {
     u16 angle;
     Vec3f point;
     s16 height;
@@ -317,7 +318,7 @@ void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, s32 arg4, 
     func_1505D1C4(pos->x, pos->y, pos->z, arg6, obj - movement_obj, angle, arg7, (s32)&point);
 }
 
-void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, s32 arg3, s32 arg4) {
+void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 arg4) {
     f32 yaw;
     u16 angle;
 
@@ -881,12 +882,12 @@ void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *
     }
 }
 
-extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
+extern s32 (*D_80086C90[])(Actor *, Actor *, void *);
 
 /* Runs func_151452C4(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter
    is not -1, only for those D_80086C90[filter] accepts). Returns a mask with bit i cleared for each
    object i it reports. */
-s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, s32 filterArg) {
+s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg) {
     f32 radius;
     Actor *obj;
     s32 mask;

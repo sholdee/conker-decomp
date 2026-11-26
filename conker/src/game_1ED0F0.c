@@ -252,7 +252,8 @@ void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactTy
     Vec3f *src;
     Actor *who;
     f32 angle;
-    u8 scratch[0x14];
+    u8 pad[8]; // matching: stack space
+    Vec3f scratch; // func_15145740's unused dir
     BulletState state;
     ParticleSpawn desc;
     void *obj; // matching: one local (one stack slot) holds the camera, then the new bullet
@@ -313,7 +314,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         aimDir.y = who->mv->aimDir.y;
         aimDir.z = who->mv->aimDir.z;
     } else {
-        func_15145740(shooter, &dir, scratch, 0, 0.0f);
+        func_15145740(shooter, &dir, &scratch, 0, 0.0f);
         useAim = FALSE;
         dir.x *= 0.001000000047f;
         dir.y *= 0.001000000047f;
@@ -557,12 +558,12 @@ void func_151C1570(Bullet *bullet) {
 
 void func_151C15FC(Bullet *bullet) {
     func_151C1570(bullet);
-    func_15132570(bullet);
+    func_15132570(&bullet->head);
 }
 
 void func_151C1628(Bullet *bullet) {
     func_151C1570(bullet);
-    func_1513259C(bullet);
+    func_1513259C(&bullet->head);
 }
 
 /* Impact sound/decal for a bullet hit, chosen by impactType. */
