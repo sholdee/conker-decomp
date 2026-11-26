@@ -581,7 +581,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             D_800C35C2 = event->unk4 + 1;
             D_800C35C3 = level;
         } else if (event->value == 3) {
-            WorldObject *target = func_151149AC((u8) event->unk6);
+            WorldObject *target = func_151149AC(event->unk6);
 
             if (target == NULL) {
                 return 1;
@@ -804,7 +804,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             if (obj != NULL) {
                 if (event->unk4 == 0) {
-                    r = func_15083FB0((u8) event->unk6);
+                    r = func_15083FB0(event->unk6);
                     if (r != -1) {
                         obj->unk101 |= 4;
                         obj->attach_char = r + 1;
@@ -1055,11 +1055,6 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
     }
     return 1;
 }
-
-typedef struct EvNodeData {
-    u8 pad0[0x30];
-    s32 unk30;
-} EvNodeData;
 
 extern TextureDesc *D_8008CA50;
 
@@ -1320,7 +1315,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         func_151494E0((s32)val, 0x51);
                         break;
                     case 0x13:
-                        func_150CFC38(((f32)event->unk6 * 0.009999999776f * 300.0f) - 150.0f);
+                        func_150CFC38((event->unk6 * 0.009999999776f * 300.0f) - 150.0f);
                         break;
                 }
             }
@@ -1387,10 +1382,10 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         s16 data[2];
                         void *p;
 
-                        func_150AF738((s16)duration, sceneTag, 1);
+                        func_150AF738(duration, sceneTag, 1);
                         data[0] = 0;
                         data[1] = 0;
-                        p = func_15149130((s16)duration, -1, 0x4B, -1, 1, 0, 4, sceneTag, 1);
+                        p = func_15149130(duration, -1, 0x4B, -1, 1, 0, 4, sceneTag, 1);
                         if (p != NULL) {
                             memcpy((u8 *)p + 0x28, data, 4);
                         }
@@ -1414,7 +1409,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                             f32 half;
 
                             obj->taskint[2] = 1;
-                            half = (f32)duration * 0.5f;
+                            half = duration * 0.5f;
                             obj->unk2D8[0] = half;
                             obj->unk2D8[1] = 1.0f / half;
                             func_150C4120(obj, duration, sceneTag, 1);
@@ -1610,7 +1605,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_150C7020(obj, (s16)duration, sceneTag, 1);
+                func_150C7020(obj, duration, sceneTag, 1);
             }
         } else if (event->value == 0x3E || event->value == 0x3F) {
         } else if (event->value == 0x32) {
@@ -1639,9 +1634,9 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 node = obj->attachments;
                 while (node != NULL) {
                     if (node->type == kind || func_1514D4B8(D_8008ABE8[kind]->firstChild, node->type) != 0) {
-                        ((EvNodeData *)node->handle)->unk30 = (s32)func_1519E970(duration, node->handle, 0,
-                                                                           &D_800C3958[scene][track].unk30,
-                                                                           &D_800C3958[scene][track].unk20, sceneTag, 0);
+                        ((EvTimerOwner *)node->handle)->timer =
+                            func_1519E970(duration, node->handle, 0, &D_800C3958[scene][track].unk30,
+                                          &D_800C3958[scene][track].unk20, sceneTag, 0);
                     }
                     node = node->next;
                 }
@@ -1853,7 +1848,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 }
                 case 16:
-                    func_150F16DC(obj, event->unk5, (u8) event->unk6, sceneTag, 1);
+                    func_150F16DC(obj, event->unk5, event->unk6, sceneTag, 1);
                     break;
                 case 17: {
                     s32 unused; // matching: stack padding
@@ -2246,7 +2241,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 snd->fadeOut = fadeOut;
                 snd->volume = (vol * 0x7FFF) >> 8;
                 snd->stopAtEnd = event->type == 10;
-                func_1000FA64(event->value, (s16)pos[0], (s16)pos[1], (s16)pos[2], snd->volume, 0x7D00, 0x7918,
+                func_1000FA64(event->value, pos[0], pos[1], pos[2], snd->volume, 0x7D00, 0x7918,
                               (SoundRecordCallback)func_150238D8, snd, 0, sflags, fade);
             }
         }
