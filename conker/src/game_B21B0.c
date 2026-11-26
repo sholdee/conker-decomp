@@ -45,7 +45,7 @@ s32 func_15084D00(Actor *obj) {
  * point farthest from the other team's players, plus a random term. When `useLink` is set, the
  * point's link is followed. Remembers the chosen index in the player's state; returns 1 when
  * there is no spawn table, else 0. */
-s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32 *outUnk8, u8 *outUnk6,
+s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec3f *outUnk8, u8 *outUnk6,
                   u8 *outFacing, s32 *outUnk14, s32 *outUnk15, s32 unused, s32 *outLinkFlag) {
     s32 remember;
     ActorCtl *state;
@@ -149,9 +149,9 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
         } else if (useLink && D_800D212C[spawnIndex].link == 0) {
             D_800DDE38 = 2;
         }
-        outUnk8[0] = D_800D212C[j].unk8[0];
-        outUnk8[1] = D_800D212C[j].unk8[1];
-        outUnk8[2] = D_800D212C[j].unk8[2];
+        outUnk8->x = D_800D212C[j].unk8.x;
+        outUnk8->y = D_800D212C[j].unk8.y;
+        outUnk8->z = D_800D212C[j].unk8.z;
         outPos[0] = D_800D212C[j].pos[0];
         outPos[1] = D_800D212C[j].pos[1];
         outPos[2] = D_800D212C[j].pos[2];
@@ -187,7 +187,7 @@ u8 func_15085420(Actor *obj) {
  * clears its motion, places its camera and passes {obj, unique_id} to func_15169040. */
 void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     s16 pos[3];
-    f32 unk8[3];
+    Vec3f unk8;
     u8 unk6;
     u8 facing;
     s32 unk15;
@@ -196,7 +196,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     s32 savedIndex;
     ActorRef event;
 
-    func_15084D70(obj->playernumber, spawnIndex, D_800D18A8, pos, unk8, &unk6, &facing, &unk14, &unk15, unused, NULL);
+    func_15084D70(obj->playernumber, spawnIndex, D_800D18A8, pos, &unk8, &unk6, &facing, &unk14, &unk15, unused, NULL);
     savedObject = D_800D154C;
     savedIndex = dc_glbl_CharNum;
     D_800D154C = obj;
@@ -240,7 +240,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
         obj->count5 = 0;
     }
     if (obj->CameraPtr != NULL) {
-        func_15005818(obj->CameraPtr, obj, unk8);
+        func_15005818(obj->CameraPtr, obj, &unk8);
     }
     event.actor = obj;
     event.uniqueId = obj->unique_id;

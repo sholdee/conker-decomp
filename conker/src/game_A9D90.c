@@ -641,7 +641,7 @@ void func_1507DF10(Actor *obj, s32 part) {
 void func_1507DFE4(s32 resource, s32 arg1) {
     s32 savedMode;
     s16 pos[3];
-    f32 vec[3];
+    Vec3f vec;
     u8 unk4F;
     u8 angle;
     s32 unk48;
@@ -651,7 +651,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
     s32 type;
 
     if (D_800C35EA[0] != 1) {
-        func_15084D70(0, resource, 1, pos, vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
+        func_15084D70(0, resource, 1, pos, &vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
         yaw = (f32)(angle - 64) * (360.0f / 256.0f) + 180.0f;
         if (type == 0) {
             kind = 1;
@@ -674,7 +674,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
 s32 func_1507E114(s32 arg0) {
     s32 type;
     s16 pos[3];
-    f32 vec[3];
+    Vec3f vec;
     s32 unk44;
     u8 unk43;
     u8 unk42;
@@ -689,7 +689,7 @@ s32 func_1507E114(s32 arg0) {
         return 0;
     }
     D_800BE9F4 = D_800BE3DF;
-    func_15084D70(0, D_800BE3E0, 1, pos, vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
+    func_15084D70(0, D_800BE3E0, 1, pos, &vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
     return type + 1;
 }
 

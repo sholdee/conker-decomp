@@ -2234,7 +2234,7 @@ typedef struct SpawnPoint {
     /* 0x00 */ s16 pos[3];
     /* 0x06 */ u8  unk6;   /* angle, 256 units per turn */
     /* 0x07 */ u8  facing; /* angle, 256 units per turn */
-    /* 0x08 */ f32 unk8[3];
+    /* 0x08 */ Vec3f unk8;  /* the camera eye (func_15005818) */
     /* 0x14 */ u8  unk14;
     /* 0x15 */ s8  unk15;
     /* 0x16 */ s8  link;   /* index of the spawn point to use instead; 0 = none, -1 = invalid */

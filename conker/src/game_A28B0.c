@@ -487,22 +487,22 @@ void func_15076760(void) {
 }
 
 void func_15076768(void) {
-    f32 position[3];
-    f32 matrix[9];
+    Vec3f position;
+    CollisionHit floor;
 
     switch (D_800D1890) {
     case 0:
         func_15197A7C(D_800D154C);
         break;
     case 1:
-        position[0] = D_800D154C->xpos;
-        position[1] = -390.0f;
-        position[2] = D_800D154C->zpos;
+        position.x = D_800D154C->xpos;
+        position.y = -390.0f;
+        position.z = D_800D154C->zpos;
         // matching: the jump ends the basic block, so as1 keeps the stores before the call
         goto setup_done;
     setup_done:
-        func_1504715C(matrix, D_800D154C);
-        func_1514B364(position, matrix, 0xFF, 0);
+        func_1504715C(&floor, D_800D154C);
+        func_1514B364(&position, &floor, 0xFF, 0);
         break;
     }
 }

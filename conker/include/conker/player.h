@@ -55,7 +55,7 @@ extern s32 D_800CC2BC;
 
 /* game_B21B0.c */
 s32 func_15084D00(Actor *obj);
-s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32 *outUnk8, u8 *outUnk6,
+s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec3f *outUnk8, u8 *outUnk6,
                   u8 *outFacing, s32 *outUnk14, s32 *outUnk15, s32 unused, s32 *outLinkFlag);
 void func_15085410(Actor *obj, s32 spawnIndex);
 u8 func_15085420(Actor *obj);
