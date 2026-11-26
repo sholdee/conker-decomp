@@ -411,6 +411,30 @@ typedef struct {
     /* 0xE */ s16 delay;
 } IdleState; // size 0x10
 
+/* A triangle of three s16 vertices: an actor's floor triangle, collision hits (game_71820). */
+typedef struct CollisionTri {
+    /* 0x00 */ Vec3s v[3];
+} CollisionTri; // size 0x12
+
+/* Result of a ray cast: func_15081690 (level mesh, then the actors' collision cylinders or models). */
+typedef struct RayHit {
+    /* 0x00 */ Actor *obj;                  // actor hit (hitType 2/3), else NULL
+    /* 0x04 */ f32 dist;                    // distance from origin to pos; -1.0f: no hit
+    /* 0x08 */ Vec3f pos;                   // hit point (entry point on an actor)
+    /* 0x14 */ Vec3f centre;                // model hit (hitType 3): centre of the part hit
+    /* 0x20 */ Vec3f far;                   // exit point on an actor; = pos on a level-mesh hit
+    /* 0x2C */ Vec3f origin;                // the ray
+    /* 0x38 */ Vec3f dir;
+    /* 0x44 */ CollisionTri tri;            // level triangle hit (hitType 1)
+    /* 0x56 */ u16 bone;                    // model hit: bone of the part hit
+    /* 0x58 */ u8 part;                     // model hit: part hit
+    /* 0x59 */ u8 hitType;                  // 0 none, 1 level mesh, 2 actor cylinder, 3 actor model
+    /* 0x5A */ u8 index;                    // model hit: index from func_1508114C
+    /* 0x5B */ u8 pad5B;
+    /* 0x5C */ struct WorldObject *surface; // level-mesh hit on an object surface, else NULL
+    /* 0x60 */ s32 material;                // level-mesh hit: surface material
+} RayHit; // size 0x64
+
 /* Per-character control block (Actor.mv, 0x1C0 bytes, allocated for player-controlled and
  * scripted characters): movement state, controller input, rope riding, idle animation and the
  * first-person aim state.
@@ -516,18 +540,7 @@ typedef struct {
     /* 0x0AD */ u8  ropeSwingTimer;
     /* 0x0AE */ u8  ropeNode;
     /* 0x0AF */ u8  unkAF;
-    /* 0x0B0 */ Actor *unkB0;
-    /* 0x0B4 */ u8  padB4[4];
-    /* 0x0B8 */ f32 unkB8;
-    /* 0x0BC */ f32 unkBC;
-    /* 0x0C0 */ f32 unkC0;
-    /* 0x0C4 */ u8  padC4[0x18];
-    /* 0x0DC */ Vec3f unkDC;
-    /* 0x0E8 */ Vec3f unkE8;      // a direction (func_15145974 turns it into heading/elevation)
-    /* 0x0F4 */ u8  padF4[0x14];
-    /* 0x108 */ u8  unk108;
-    /* 0x109 */ u8  unk109;
-    /* 0x10A */ u8  pad10A[0xA];
+    /* 0x0B0 */ RayHit rayHit;    // last aim or shot ray cast (func_15081690)
     /* 0x114 */ s16 height;      // cached size from func_1507C3E0
     /* 0x116 */ s16 width;
     /* 0x118 */ s16 depth;
@@ -867,11 +880,6 @@ typedef struct ActorAimPoints {
     /* 0x14 */ s8  dir[3];     // facing direction in 1/256 units
 } ActorAimPoints; // size 0x18
 
-/* A triangle of three s16 vertices: an actor's floor triangle, collision hits (game_71820). */
-typedef struct CollisionTri {
-    /* 0x00 */ Vec3s v[3];
-} CollisionTri; // size 0x12
-
 /* Result of a floor/ceiling probe: func_15046C80 (probe down from a point) / func_1504715C (an actor's floor). */
 typedef struct CollisionHit {
     /* 0x00 */ f32 height;            // y of the surface hit
@@ -883,25 +891,6 @@ typedef struct CollisionHit {
     /* 0x1E */ u8 pad1E[2];
     /* 0x20 */ struct WorldObject *surface; // object surface hit (source 2-4), else NULL
 } CollisionHit; // size 0x24
-
-/* Result of a ray cast: func_15081690 (level mesh, then the actors' collision cylinders or models). */
-typedef struct RayHit {
-    /* 0x00 */ Actor *obj;                  // actor hit (hitType 2/3), else NULL
-    /* 0x04 */ f32 dist;                    // distance from origin to pos; -1.0f: no hit
-    /* 0x08 */ Vec3f pos;                   // hit point (entry point on an actor)
-    /* 0x14 */ Vec3f centre;                // model hit (hitType 3): centre of the part hit
-    /* 0x20 */ Vec3f far;                   // exit point on an actor; = pos on a level-mesh hit
-    /* 0x2C */ Vec3f origin;                // the ray
-    /* 0x38 */ Vec3f dir;
-    /* 0x44 */ CollisionTri tri;            // level triangle hit (hitType 1)
-    /* 0x56 */ u16 bone;                    // model hit: bone of the part hit
-    /* 0x58 */ u8 part;                     // model hit: part hit
-    /* 0x59 */ u8 hitType;                  // 0 none, 1 level mesh, 2 actor cylinder, 3 actor model
-    /* 0x5A */ u8 index;                    // model hit: index from func_1508114C
-    /* 0x5B */ u8 pad5B;
-    /* 0x5C */ struct WorldObject *surface; // level-mesh hit on an object surface, else NULL
-    /* 0x60 */ s32 material;                // level-mesh hit: surface material
-} RayHit; // size 0x64
 
 /* Per-actor vertex morph state (Actor.morph): blends from keyframe `prev` to keyframe `cur`. */
 typedef struct VtxMorphState {

@@ -349,7 +349,7 @@ void func_1504CB98(Actor *actor) {
                 }
                 scratch *= 0.91022223f;
                 lean = scratch;
-                if ((D_800BE616 != 0) && ((actor->character_type == 0x3B) || (actor->character_type == 0x80)) && ((mode == 0x18) || (mode == 0x41) || (mode == 0x23) || (mode == 0x24)) && (D_800CC284->button & 0x2000) && ((actor->mv->unk109 == 3) || (actor->mv->unk109 == 2))) {
+                if ((D_800BE616 != 0) && ((actor->character_type == 0x3B) || (actor->character_type == 0x80)) && ((mode == 0x18) || (mode == 0x41) || (mode == 0x23) || (mode == 0x24)) && (D_800CC284->button & 0x2000) && ((actor->mv->rayHit.hitType == 3) || (actor->mv->rayHit.hitType == 2))) {
                     chance = 0;
                     if (actor->mv->unkAF < 0x3C) {
                         chance = 0x30;
@@ -366,7 +366,7 @@ void func_1504CB98(Actor *actor) {
                             } else if ((D_800CC284->button & 8) && !(func_150ADA20_u8() & 1)) {
                                 func_15060A30(0x532, actor);
                             } else {
-                                if ((actor->mv->unk109 == 3) && (actor->mv->unk108 == 0xA) && !(func_150ADA20_u8() & 3)) {
+                                if ((actor->mv->rayHit.hitType == 3) && (actor->mv->rayHit.part == 0xA) && !(func_150ADA20_u8() & 3)) {
                                     func_15060A30(0x533, actor);
                                 } else {
                                     func_15060A30((func_150ADA20_u8() & 3) + 0x534, actor);

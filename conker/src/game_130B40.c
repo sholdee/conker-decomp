@@ -31,6 +31,6 @@ void func_151036B4(Vec3f *origin, u8 arg1, s32 arg2) {
     func_15152190(&debris, variantIds, variantScales, 1, 0.0f, 1, arg1, arg2);
 }
 
-s32 func_151037DC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+s32 func_151037DC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound) {
     return 0;
 }

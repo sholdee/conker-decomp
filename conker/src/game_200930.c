@@ -823,26 +823,26 @@ void func_151D57F8(Actor *obj, u8 slot) {
 
     func_151D5A18(obj, &pos, &forward, &axis1, &axis2, D_8008FC8C[slot], *D_8008FC94[slot]);
     func_151D5174(obj, &pos, &forward, &axis1, &axis2, &pointBuf, &dirBuf, &origin, &dir, NULL);
-    obj->mv->unk109 = 1;
+    obj->mv->rayHit.hitType = 1;
     if (origin == NULL) {
         origin = &pos;
     }
     if (dir == NULL) {
         dir = &forward;
     }
-    obj->mv->unkB8 = origin->x + dir->x * 9999.0f;
-    obj->mv->unkBC = origin->y + dir->y * 9999.0f;
-    obj->mv->unkC0 = origin->z + dir->z * 9999.0f;
-    if (obj->mv->unk109) {
+    obj->mv->rayHit.pos.x = origin->x + dir->x * 9999.0f;
+    obj->mv->rayHit.pos.y = origin->y + dir->y * 9999.0f;
+    obj->mv->rayHit.pos.z = origin->z + dir->z * 9999.0f;
+    if (obj->mv->rayHit.hitType) {
         Vec3f delta;
         f32 len;
 
-        delta.x = obj->mv->unkB8 - pos.x;
-        delta.y = obj->mv->unkBC - pos.y;
-        delta.z = obj->mv->unkC0 - pos.z;
+        delta.x = obj->mv->rayHit.pos.x - pos.x;
+        delta.y = obj->mv->rayHit.pos.y - pos.y;
+        delta.z = obj->mv->rayHit.pos.z - pos.z;
         if (func_15145128(&delta, &delta, &len, NULL) != 0) {
             func_15081690(obj, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z,
-                          &obj->mv->unkB0, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
+                          &obj->mv->rayHit, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
         }
     }
     func_150636A4(obj);

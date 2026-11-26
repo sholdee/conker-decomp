@@ -280,8 +280,8 @@ void func_150538CC(Actor *obj) {
         dir[0] *= inv;
         dir[1] *= inv;
         dir[2] *= inv;
-        func_15081690(obj, obj->old_xpos, obj->old_ypos, obj->old_zpos, dir[0], dir[1], dir[2], &obj->mv->unkB0, len, 0, 0, 0, -1, 0, 0);
-        hit = func_15081E78(obj, &obj->mv->unkB0, kind);
+        func_15081690(obj, obj->old_xpos, obj->old_ypos, obj->old_zpos, dir[0], dir[1], dir[2], &obj->mv->rayHit, len, 0, 0, 0, -1, 0, 0);
+        hit = func_15081E78(obj, &obj->mv->rayHit, kind);
         if (hit != 0) {
             done = 1;
             if ((hit == 1) && (obj->owner > 0)) {

@@ -761,7 +761,9 @@ void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 ar
 /* game_130B40.c */
 void func_15103690(s32 arg0);
 void func_151036B4(Vec3f *origin, u8 arg1, s32 arg2);
-s32 func_151037DC(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+struct SoundRecord;
+/* A sound record callback (SoundRecordCallback, conker/sound.h) that never stops its record. */
+s32 func_151037DC(struct SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 
 /* game_1312F0.c */
 void func_15103E40(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u8 arg5, s32 arg6);

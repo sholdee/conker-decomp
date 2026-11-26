@@ -1097,10 +1097,10 @@ void func_1506CE6C(void) {
         break;
     case 3:
         dist = 500.0f;
-        func_15145974(&movement_obj[0].mv->unkE8, &heading, &elevation);
-        vec[0] = movement_obj[0].mv->unkDC.x;
-        vec[1] = movement_obj[0].mv->unkDC.y;
-        vec[2] = movement_obj[0].mv->unkDC.z;
+        func_15145974(&movement_obj[0].mv->rayHit.dir, &heading, &elevation);
+        vec[0] = movement_obj[0].mv->rayHit.origin.x;
+        vec[1] = movement_obj[0].mv->rayHit.origin.y;
+        vec[2] = movement_obj[0].mv->rayHit.origin.z;
         allocExt = 1;
         pos = vec;
         elevation = -elevation;
