@@ -2334,7 +2334,8 @@ s32 func_1519187C(DripParticle *drop);
 void func_151918BC(DripRetryTask *task);
 void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg);
 void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg);
-void func_15191B8C(ActorRef *ref, u8 msg);
+/* (ActorRef *ref, u8 msg); declared without a prototype: game_AC030.c passes the ref as an integer */
+void func_15191B8C();
 
 /* game_1BF090.c */
 /* Per-particle data of a dust particle (func_1519203C, updated by func_1519257C). */

@@ -526,7 +526,10 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
 
 
 /* Sends msg about ref's actor through func_151494E0 and to every object of type 0x20. */
-void func_15191B8C(ActorRef *ref, u8 msg) {
+void func_15191B8C(ref, msg)
+    ActorRef *ref;
+    u8 msg;
+{
     const s32 types[1] = { 0x20 };
 
     func_151494E0((s32)ref, msg);

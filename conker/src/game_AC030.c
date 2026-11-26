@@ -2,10 +2,8 @@
 // matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
 // prototype (callers use the low byte without masking it), so it keeps that view.
 #define func_150ADA20 func_150ADA20_functions_h
-#define func_15191B8C func_15191B8C_header // matching: this file keeps its own declaration of func_15191B8C
 #include "functions.h"
 #undef func_150ADA20
-#undef func_15191B8C
 u8 func_150ADA20(void);
 #include "variables.h"
 
@@ -31,7 +29,6 @@ extern u8 D_8009BBF0[];       // number of candidates per category
 extern u8 *D_80086BA0[];      // sequences: 0-terminated lists of D_8009B8B0 indices
 extern IdleFrame D_8009B8B0[];
 extern s32 D_800D18C4;
-void func_15191B8C(s32 arg0, u8 arg1); // matching: s32 where the definition has a pointer (arg 1)
 
 /* Appends one sequence to a 40-entry candidate list. */
 void func_1507EB80(u8 *list, s32 *count, u8 seq) {
