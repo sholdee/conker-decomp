@@ -254,7 +254,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
         // matching: this block and its redundant extern declarations are -g3 scope barriers that keep the
         // light store and the onGround test ahead of the ground particle's constants (plain if mismatches)
         {
-            extern s32 D_800A4AA0;
+            extern const VtxColor D_800A4AA0[4];
 
             if (onGround) {
                 extern const Vec3f D_800A5480;

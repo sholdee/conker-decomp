@@ -1403,7 +1403,7 @@ void func_1513CB58(DefParticleHead *particle);
 void func_1513CBA4(DefParticleHead *particle);
 Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport);
 void func_1513CF9C(s32 arg0, s32 arg1, u8 arg2);
-void func_1513CFD0(s32 arg0, s32 arg1, s32 arg2);
+void func_1513CFD0(s32 arg0, s32 arg1, u8 arg2);
 void func_1513CFE4(DefParticleHead *particle);
 void *func_1513D2F0(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
                     s32 arg8, s32 motionSize, u8 argA, s32 argB);
@@ -1420,7 +1420,7 @@ s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, Vec3s **
                    u8 onSlope);
 Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport);
 void func_1513DF9C(DefParticleHead *particle, s32 arg1, u8 arg2);
-void func_1513E070(s32 arg0, s32 arg1, s32 arg2);
+void func_1513E070(DefParticleHead *particle, s32 arg1, u8 arg2);
 void func_1513E084(DefParticleHead *particle, ActorMsg *msg, u8 eventId);
 void func_1513E134(void);
 void func_1513E13C(QuadSprite *sprite, f32 x, f32 y, f32 z, f32 width, f32 length, u8 angle);
@@ -1450,6 +1450,8 @@ void func_151403A8(s32 arg0, u8 arg1);
 void func_151403DC(s32 arg0, u8 arg1);
 Vtx *func_15140410(DefParticleHead *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport);
 s32 func_151406AC(s32 arg0, s32 list, s32 group, s16 phase);
+extern const VtxColor D_800A4AA0[4];
+extern const s32 D_800A5168[4];
 
 /* game_176A00.c */
 ChannelParticle *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5);
