@@ -4,7 +4,7 @@
 
 
 /* Uniform random value in [0, 1], from the CPU counter times the RNG byte. */
-#define RAND_UNIT() ((f32)((osGetCount() * func_150ADA20()) & 0xFFFF) * (1.0f / 65535.0f))
+#define RAND_UNIT() (((osGetCount() * func_150ADA20()) & 0xFFFF) * (1.0f / 65535.0f))
 
 #define DEG_TO_RAD ((f32)(M_PI / 180.0))
 
@@ -21,8 +21,8 @@ void func_15008340(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
     default:
         *x = region->x;
         *z = region->z;
-        *top = (f32)region->y + (f32)region->ySize;
-        *bottom = (f32)region->y - (f32)region->ySize;
+        *top = (f32)region->y + region->ySize;
+        *bottom = (f32)region->y - region->ySize;
         break;
     case ZONE_AREA_BOX: {
         f32 angle;
@@ -38,7 +38,7 @@ void func_15008340(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
         dz = RAND_UNIT() * (2.0f * region->zSize) + -region->zSize;
         *x = region->x + (dx * c + dz * s);
         *z = region->z + (dz * c - dx * s);
-        *top = (f32)region->y + (f32)region->ySize;
+        *top = (f32)region->y + region->ySize;
         *bottom = region->y;
     } break;
     case ZONE_AREA_CYLINDER: {
@@ -53,7 +53,7 @@ void func_15008340(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
         dist = RAND_UNIT() * region->xSize;
         *x = region->x + dist * c;
         *z = region->z - dist * s;
-        *top = (f32)region->y + (f32)region->ySize;
+        *top = (f32)region->y + region->ySize;
         *bottom = region->y;
     } break;
     case ZONE_AREA_SPHERE: {
@@ -68,8 +68,8 @@ void func_15008340(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
         dist = RAND_UNIT() * region->xSize;
         *x = region->x + dist * c;
         *z = region->z - dist * s;
-        *top = (f32)region->y + (f32)region->xSize;
-        *bottom = (f32)region->y - (f32)region->xSize;
+        *top = (f32)region->y + region->xSize;
+        *bottom = (f32)region->y - region->xSize;
     } break;
     }
 }

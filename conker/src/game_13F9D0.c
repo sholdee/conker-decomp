@@ -320,9 +320,6 @@ Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     return gfx;
 }
 
-extern u8 D_80083D40[];
-extern u8 D_80083EC0[];
-
 /*
  * Draws one object in one view, if it belongs to this pass (opaque pass: alpha 255 and no flags bit 0x10).
  * Returns gfx unchanged if nothing was drawn or the display list would overflow.

@@ -64,11 +64,6 @@ typedef struct {
     /* 0x4 */ u32 addr;
 } DlCommand;
 
-typedef struct {
-    /* 0x00 */ u8  pad0[0x1C];
-    /* 0x1C */ s32 unk1C;
-} Arg11D60;
-
 /* game_30E90.c */
 typedef void (*ObjectFunc)();
 
@@ -112,6 +107,19 @@ typedef struct {
 void func_15000940();
 
 /* game_305D0.c */
+extern s32 *D_80082B20[]; // per level (LevelHeader.assetList): zero-terminated asset id list. The segment
+                          // starts here; init_1050 first DMAs its 16-byte header in (word 0: compressed data offset).
+extern const u16 D_80091D20[7762]; // per texture: compressed size
+extern Gfx *D_800B0E00[4]; // level display lists
+extern Vtx *D_800B0E10[4]; // level mesh vertices of the four level models (each display list follows its vertices)
+extern VtxColorGroup **D_800B0E30; // groups of each vertex color set
+extern u8 *D_800B0E34; // group count of each vertex color set
+extern u8 D_800B0E38;
+extern s32 D_800B0E40[4];
+extern LevelModelEntry *D_800B0E50; // the current level's models
+extern s32 D_800B0E58[7762]; // per texture: its address once loaded, or -1
+extern u16 D_800B87A0[7762]; // per texture: size
+extern s8 D_800BC448[7762]; // per texture: frames left before it is freed (0 = not loaded)
 void func_15003120(s32 index, s32 base, s32 list);
 void func_150031EC(s32 levelId);
 s32 func_150034B4(void);
@@ -163,15 +171,16 @@ void func_1500EF20(void);
 void func_1500F210(void);
 
 /* game_3C740.c */
-void *func_1500F290(f32 arg0, f32 arg1, f32 arg2);
-s32 func_1500F378(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void *func_1500F290(f32 x, f32 y, f32 z);
+void func_1500F378(s32 x, s32 y, s32 z, s32 floorY);
 void func_1500F40C(void);
 
 /* game_3CE80.c */
-s32 func_1500F9D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void func_1500F9D0(s32 x, s32 y, s32 z, s32 floorY, s32 arg4);
 void func_1500FA64(void);
 
 /* game_3D2E0.c */
+extern BounceRecord *D_800BE4E0; /* ten bouncing cursors (func_1500FE30) */
 void func_1500FE30(void);
 void func_1500FF9C(void);
 void func_1500FFCC(void);
@@ -215,6 +224,7 @@ void func_150109D0(void);
 void func_15010A60(void);
 
 /* game_3E460.c */
+extern struct TexScroll **D_800BE4F0; /* four texture scrolls (func_15010FB0) */
 void func_15010FB0(void);
 
 /* game_3E5A0.c */
@@ -239,6 +249,7 @@ void func_15011B00(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_15011B94(void);
 
 /* game_3F0F0.c */
+extern u8 D_800BE500[5]; /* five level flags, cleared by func_15011C40 */
 void func_15011C40(void);
 
 /* game_3F120.c */
@@ -248,7 +259,7 @@ void func_15011CC0(void);
 
 /* game_3F1F0.c */
 void func_15011D40(void);
-s32 func_15011D60(Arg11D60 *arg0);
+s32 func_15011D60(TriggerZone *zone);
 
 /* game_3F3D0.c */
 void func_15011F20(s32 arg0);
@@ -264,7 +275,7 @@ void func_150120B0(s32 arg0);
 void func_1501214C(Actor *arg0);
 
 /* game_3F670.c */
-void func_150121C0(s32 arg0);
+void func_150121C0(LightEffect *effect);
 
 /* game_3FBD0.c */
 u8 func_15012720(void);
@@ -308,15 +319,20 @@ s32 func_15015300(TriggerZone *obj);
 void func_15015354(TriggerZone *obj);
 s32 func_15015644(TriggerZone *obj);
 s32 func_150156F4(TriggerZone *obj);
-extern s32 (*gZoneSpawnHandlers[26])(TriggerZone *);
-extern const s32 D_8009658C[5];
+extern const s32 D_8009658C[5]; // defined after func_150130B4, which reads them: their .rodata follows its const local
 extern const s32 D_800965A0[5];
 extern const s32 D_800965B4[8];
+extern u16 *D_800BE570; // RGBA16 screen copy, D_800BE620 x D_800BE624 (game_203340)
+extern u8 D_800BE574;
+extern u8 D_800BE575;
 
 /* game_43D00.c */
 void func_15016850(void);
 void func_150169A0(s32 levelId);
 void func_15017114(s32 levelId);
+extern u8 D_800BE590;      // number of distinct spawn model types in D_800BE598
+extern u16 D_800BE598[8];  // the distinct spawn model types (< 0xBB) of the level
+extern s32 *D_800BE5A8[8]; // per spawn model type: data loaded by func_1502B7F0
 
 /* game_FDD70.c */
 void func_150D08C0(Camera *camera);

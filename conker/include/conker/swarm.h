@@ -51,6 +51,7 @@ struct SwarmActor {
 };
 
 /* game/done/game_39690.c */
+extern const ParticleTexInfo D_80095CE0[69];
 void func_1500C1E0(void);
 
 /* game_1A20A0.c */

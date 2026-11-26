@@ -3,12 +3,12 @@
 #include "functions.h"
 #include "variables.h"
 
-extern OSContStatus D_800BE2C0[];
-extern s32 D_800BE72C;
+static OSContStatus D_800BE2C0[MAXCONTROLLERS];
+static OSMesg D_800BE2D0[8]; // message buffer of the SI event queue D_800BE900
 
 
 void func_150061B0(void) {
-    osCreateMesgQueue(&D_800BE900, &D_800BE2D0, 8);
+    osCreateMesgQueue(&D_800BE900, D_800BE2D0, 8);
     osSetEventMesg(OS_EVENT_SI, &D_800BE900, D_800BE9E0);
     D_800BE730[0] = &D_800BE748[0];
     D_800BE730[1] = &D_800BE748[1];

@@ -3,6 +3,8 @@
 #include "functions.h"
 #include "variables.h"
 
+struct TexScroll **D_800BE4F0; /* four texture scrolls */
+
 
 void func_15010FB0(void) {
     D_800BE4F0 = allocate_memory(16, 1, 0, 0);

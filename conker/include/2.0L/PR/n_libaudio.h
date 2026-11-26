@@ -46,6 +46,13 @@ typedef struct N_ALVoice_s {
     /* 0x22 */  s16                 unityPitch;
 } N_ALVoice; // size 0x20
 
+/* Conker: the driver's bank loader resolves an instrument slot (isInst) or a sound slot to the loaded object. */
+typedef void *(*BankLoadProc)(void *slot, s32 isInst);
+
+/* Conker: the compact sequence player's initOsc takes a 7th argument. */
+typedef ALMicroTime (*N_ALCSPOscInit)(void **oscState, f32 *initVal, u8 oscType,
+                                      u8 oscRate, u8 oscDepth, u8 oscDelay, u8 arg6);
+
 typedef struct {
     /* 0x00 */  ALPlayer    *head;          /* client list head                     */
     // ALPlayer    *n_seqp1;    /* for fade in / fade out */
@@ -56,10 +63,14 @@ typedef struct {
     ALLink      pLameList;      /* list of voices ready to be freed     */
     /* 0x1C */  s32         paramSamples;
     /* 0x20 */  s32         curSamples;     /* samples from start of game           */
-    /* 0x24 */  u8          pad24[0x8];
-    /* 0x2C */  ALDMANew    dma;
-    ALHeap      *heap;
-    u8 pad[0xC];
+    /* 0x24 */  ALDMANew    dma;
+    /* Conker: the bank hooks of the driver config (SynDriverConfig in init_8F90.c) */
+    /* 0x28 */  BankLoadProc (*getLoadProc)(void);
+    /* 0x2C */  void        (*bankDecRef)(void *record);
+    /* 0x30 */  void        (*bankAddRef)(void *record);
+    /* 0x34 */  void        (*bankRelease)(void *record);
+    /* 0x38 */  s32         waveTableBase;  /* handed to func_10012C5C */
+    /* 0x3C */  ALHeap      *heap;
     /* 0x40 */  struct ALParam_s      *paramList;
     /* 0x44 */  struct N_ALMainBus_s  *mainBus;
     /* 0x48 */  struct N_ALAuxBus_s   *auxBus;
@@ -181,27 +192,9 @@ typedef struct {
     u8  pad8[0x4];
 } N_ALUnknownEvent1;
 
+/* Rare's sound player event: the sound-state record (SndState, src/libultra/audio/init_15550.c). */
 typedef struct {
-    /* 0x00 */  ALLink              node;
-    /* 0x08 */  u8                  pad8[0x4];
-    /* 0x0C */  s32                 unkC;
-    /* 0x10 */  N_ALVoice          *unk10;
-    /* 0x14 */  u8                  pad14[0x1C];
-    /* 0x30 */  f32                 unk30;
-    /* 0x34 */  u8                  pad34[0x4];
-    /* 0x38 */  s32                *unk38;
-    /* 0x3C */  s32                 unk3C;
-    /* 0x40 */  s32                 unk40;
-    /* 0x44 */  u8                  pad44[0x8];
-    /* 0x4C */  s16                 unk4C;
-    /* 0x4E */  s8                  unk4E;
-    /* 0x4F */  u8                  pad4F[0x4];
-    /* 0x53 */  u8                  unk53;
-    /* 0x54 */  u8                  unk54;
-} N_ALUnknownStruct1;
-
-typedef struct {
-    N_ALUnknownStruct1 *unk0;
+    struct SndState *unk0;
     u8  pad4[0x8];
 } N_ALUnknownEvent2;
 
@@ -265,7 +258,8 @@ typedef struct N_ALVoiceState_s {
     /* 0x3A */  u8                 tremelo;        /* current value of the tremelo */
     /* 0x3B */  u8                 flags;          /* bit 0 tremelo flag
                                                       bit 1 vibrato flag           */
-    u8 pad3C[0x8];
+    /* 0x3C */  void               *tremOscState;  /* Conker: the oscillator states __n_seqpStopOsc stops */
+    /* 0x40 */  void               *vibOscState;
 } N_ALVoiceState;
 
 typedef struct {
@@ -321,7 +315,7 @@ typedef struct {
     /* 0x64 */  N_ALVoiceState     *vAllocHead;     /* list head for allocated voices   */
     /* 0x68 */  N_ALVoiceState     *vAllocTail;     /* list tail for allocated voices   */
     /* 0x6C */  N_ALVoiceState     *vFreeList;      /* list of free voice state structs */
-    /* 0x70 */  ALOscInit           initOsc;
+    /* 0x70 */  N_ALCSPOscInit      initOsc;
     /* 0x74 */  ALOscUpdate         updateOsc;
     /* 0x78 */  ALOscStop           stopOsc;
     /* RARE CUSTOM (mpegBank, voiceLimit and voiceCount are the Oct 2000 debugger's names) */
@@ -447,9 +441,9 @@ void    func_10012BD0(ALInstrument *inst, s32 arg1);
 void    func_10012C5C(ALSound *sound, s32 offset, s32 table);
 void    func_10012CFC(WaveTable *wave, s32 offset, s32 table);
 f32     func_10012D80(u8 arg0);
-s32     func_10012E04(s32 *arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5); /* the oscillators */
+s32     func_10012E04(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5); /* the oscillators */
 s32     func_10012F94(struct OscState *arg0, f32 *arg1);
-void    func_100131D8(s32 *arg0);
+void    func_100131D8(struct OscState *arg0);
 void    func_100131FC(ALSeqpConfig *config, s32 arg1);                  /* installs the oscillators */
 void    func_10017AA0(N_ALCSPlayer *seqp);                              /* code_17AA0.c: play */
 void    func_10017AF0(N_ALCSPlayer *seqp, struct OSMesgQueue_s *queue); /* init_17AF0.c */
@@ -470,7 +464,7 @@ void    func_10018C60(N_ALCSPlayer *seqp);                              /* code_
 void    func_10018CB0(N_ALCSPlayer *seqp, ALCSeq *seq);                 /* code_18CB0.c */
 void    func_10018D00(N_ALCSPlayer *seqp, s16 vol);                     /* init_18D00.c */
 void    func_10018D50(N_ALCSPlayer *seqp);                              /* init_18D50.c */
-void    func_1001A704(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3); /* init_19B50.c */
+void    func_1001A704(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 value); /* init_19B50.c */
 void    func_1001CA90(N_ALVoice *v, f32 pitch);                         /* n_synsetpitch2.c */
 f32     func_1001CEA4(s32 arg0);                                        /* init_1CBF0.c */
 void   *func_1001D9B0(s16 bus);                                         /* init_1D900.c: the bus's effect */
@@ -482,7 +476,7 @@ void    func_1001E350(N_ALVoice *v, u8 fxmix);                          /* init_
 void    func_1001E400(N_ALCSPlayer *seqp, s32 deltaTime, u8 status, u8 byte1, u8 byte2); /* init_1E400.c: send MIDI */
 
 /* Conker: Rare's debug printf in src/init_2070.c, used by init_15550.c (the game's declaration is in include/conker/libc.h). */
-void    func_10002088(s32 arg0, ...);
+void    func_10002088(const char *fmt, ...);
 
 /* Conker: Rare's instrument loading in src/init_1AAE0.c (subsystem audio), used by init_15550.c. */
 void   *func_1001BD34(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx);

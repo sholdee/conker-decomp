@@ -1,9 +1,39 @@
 #include <ultra64.h>
+
 #include "functions.h"
 #include "variables.h"
 
-extern OSTimer D_800BE6E0;
+/* This file's .bss, in the order of the declarations in conker/cont.h (IDO lays out .bss in the order of the
+ * first declaration of each name, so these are not static). */
+OSTimer D_800BE6E0;             // the timer that starts the next controller read
+u16 D_800BE700[4];              // per player: the buttons held at the last read
+u16 D_800BE708[4];              // per player: the buttons held at the last read, for D_800BE930
+u16 D_800BE710[4];              // per player: the newly pressed buttons
+u16 D_800BE718[4];              // per player: the buttons held before this read
+u16 D_800BE720[4];              // per channel: buttons to add at the next read
+OSContPad **D_800BE728;         // the per-player pads (the table that func_1501BBB8 returns)
+s32 D_800BE72C;                 // the number of connected controllers (game_33660.c)
+OSContPad *D_800BE730[4];       // per player: a pointer into D_800BE748
+u8 D_800BE740;                  // a bit for each controller that answered the last read
+OSContPad D_800BE748[4];        // the per-player pads
+OSPfs D_800BE760[MAXCONTROLLERS]; // the rumble pak of each channel
+OSMesgQueue D_800BE900;         // the SI message queue
+OSContPad D_800BE918[4];        // the per-player pads with the stick dead zone (menu reads)
+u16 D_800BE930[4];              // per player: the newly pressed buttons (menu reads)
+u8 D_800BE938;                  // look for rumble paks at the next update
+u8 D_800BE93C[MAXCONTROLLERS];  // per channel: the rumble is on
+u8 D_800BE940[MAXCONTROLLERS];  // per channel: the rumble was on at the last update
+u8 D_800BE944[MAXCONTROLLERS];  // per channel: a rumble pak is present
+u8 D_800BE948[MAXCONTROLLERS];  // per channel: the motor is running
+f32 D_800BE950[MAXCONTROLLERS]; // per channel: the time in the rumble cycle
+f32 D_800BE960[MAXCONTROLLERS]; // per channel: the on time of the rumble cycle
+f32 D_800BE970[MAXCONTROLLERS]; // per channel: the off time of the rumble cycle
+f32 D_800BE980[MAXCONTROLLERS]; // per channel: the length of the rumble cycle
+OSMesg D_800BE990;              // the message received from D_800BE900
 
+u8 D_80084060[4] = { 0, 1, 2, 3 }; // the controller channel of each player; 4 or more: none
+u8 D_80084064 = 1;                 // a controller read has finished: func_1501BB20 arms the timer for the next
+static u8 D_80084068 = 3;          // the EEPROM probe result (2: a 16K EEPROM); 3 until the first probe
 
 /* After each controller read (func_1501BBB8 sets D_80084064), arms a one-shot timer of
    25 * osClockRate / 1000000 ticks that posts message 6 to D_8003B218. */
@@ -13,11 +43,6 @@ void func_1501BB20(void) {
         D_80084064 = 0;
     }
 }
-
-extern u16 D_800BE700[];
-extern u16 D_800BE708[];
-extern u16 D_800BE718[];
-
 
 /* Reads the controllers into the per-player pads (D_80084060 maps player slots to channels),
    records newly pressed buttons, applies the stick dead zone and returns the pad pointer table. */
@@ -233,9 +258,6 @@ void func_1501C53C(void) {
         func_1501C17C(player);
     }
 }
-
-extern u8 D_80084068;
-
 
 /* Runs the pending EEPROM request. Without a 16K EEPROM (probe result D_80084068 != 2), load
    requests fall back to defaults and the others are dropped. */

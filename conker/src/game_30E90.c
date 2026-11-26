@@ -23,9 +23,9 @@ extern GroupedObjectDefaults D_800A26C0[];
 extern void *D_800DBED0[4];
 extern void *D_800DBEE0;
 extern void *D_800DBEE4;
-extern u16 D_800BE2A0;
-extern u16 D_800BE2A2;
-extern u16 D_800BE2A4;
+static u16 D_800BE2A0; // objects whose preset radius is too small (func_15004AAC)
+static u16 D_800BE2A2; // objects whose radius was computed
+static u16 D_800BE2A4; // objects whose preset radius is large enough
 
 /* Creates the level's objects (db_Object_array) from its two placement lists and allocates per-object buffers. */
 void func_150039E0(s32 levelId, s32 arg1) {
@@ -283,8 +283,8 @@ void func_150039E0(s32 levelId, s32 arg1) {
 /* Saves the display list and source vertices of object D_800DBF88, unless it is 0xFF (none). */
 void func_15004574(void) {
     if (D_800DBF88 != 0xFF) {
-        D_800DBF8C = (s32)db_Object_array[D_800DBF88].displayList;
-        D_800DBF90 = (s32)db_Object_array[D_800DBF88].srcVertices;
+        D_800DBF8C = db_Object_array[D_800DBF88].displayList;
+        D_800DBF90 = db_Object_array[D_800DBF88].srcVertices;
     }
 }
 

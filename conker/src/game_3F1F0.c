@@ -4,25 +4,6 @@
 #include "variables.h"
 
 typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8  unk14;
-    /* 0x15 */ u8  unk15;
-    /* 0x16 */ u8  unk16;
-    /* 0x17 */ u8  unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u8  unk24[0x1C];
-} ObjRec; /* size 0x40 */
-
-typedef struct {
     /* 0x00 */ void *unk0;
     /* 0x04 */ u8  unk4;
     /* 0x05 */ u8  unk5;
@@ -45,18 +26,20 @@ void func_15011D40(void) {
     func_15103800();
 }
 
-s32 func_15011D60(Arg11D60 *arg0) {
+s32 func_15011D60(TriggerZone *zone) {
     Struct11D60 tmp;
-    ObjRec obj;
-    ObjRec *found;
+    u8 pad[0xC]; // matching: stack space
+    TriggerZone key;
+    TriggerZone *found;
+    TimedEffect *effect;
     u8 flag;
 
-    bzero(&tmp, 0x4C);
+    bzero(&tmp, sizeof(tmp));
     tmp.unk8 = 0;
     tmp.unk6 = (func_150ADA20() % 0x79U) + 0x12C;
-    tmp.unk0 = arg0;
+    tmp.unk0 = zone;
 
-    tmp.unk4 = arg0->unk1C;
+    tmp.unk4 = zone->data2;
     if (tmp.unk4 >= 4) {
         flag = 1;
     } else {
@@ -74,20 +57,20 @@ s32 func_15011D60(Arg11D60 *arg0) {
         tmp.unk34 = 0.0f;
         tmp.unk38 = 0.0f;
     }
-    obj.unk15 = 3;
-    obj.unk17 = 0x15;
-    obj.unk18 = tmp.unk4;
-    found = func_151438D8(0, gZoneCount, 0x11A0, &obj);
+    key.kind = 3;
+    key.subTypeData = 0x15;
+    key.data1 = tmp.unk4;
+    found = func_151438D8(0, gZoneCount, 0x11A0, &key);
     if (found != NULL) {
-        tmp.unk40 = found->unk0;
-        tmp.unk44 = found->unk4;
-        tmp.unk48 = found->unk6;
+        tmp.unk40 = found->x;
+        tmp.unk44 = found->z;
+        tmp.unk48 = found->xSize;
     } else {
         tmp.unk48 = 10.0f;
     }
-    found = func_15149130(0x12C, -1, -1, -1, 0, 0x38, 0x4C, 0xFF, 1);
-    if (found != NULL) {
-        memcpy((u8 *)found + 0x28, &tmp, 0x4C);
+    effect = func_15149130(0x12C, -1, -1, -1, 0, 0x38, sizeof(tmp), 0xFF, 1);
+    if (effect != NULL) {
+        memcpy(effect + 1, &tmp, sizeof(tmp));
     }
     return 1;
 }

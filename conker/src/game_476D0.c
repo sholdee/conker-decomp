@@ -3,8 +3,204 @@
 #include "functions.h"
 #include "variables.h"
 
+/* This file's .bss, in address order. */
+s32 D_800BE620;              // the screen width
+s32 D_800BE624;              // the screen height
+RenderView *D_800BE628;      // the views
+Vp *D_800BE62C;              // one viewport per view
+u8 D_800BE630[5];            // the player of each view
+u8 D_800BE635;
+s32 D_800BE638[6];           // the view width of each screen layout
+s32 D_800BE650[6];           // the view height of each screen layout
+s16 D_800BE668[4][5][2];     // the centre (x, y) of each view, by screen layout
+f32 D_800BE6B8;              // the width scale of the two-player layout
+
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
+
+/* The screen layout: the number of players (0 for one full-screen view). */
+s32 D_80082FA0 = 0;
+/* The view being drawn. Callers that take an s16 view read its low half. */
+s32 D_80082FA4 = 0;
+/* The unk64 value of each screen layout's views. */
+static f32 D_80082FA8[6] = { 1.659999967f, 0.8299999833f, 1.679999948f, 1.679999948f, 1.659999967f, 0.0f };
+
+/* A one-command display list that sets the other modes (high and low words). */
+#define RENDER_MODE(hi, lo) { gsDPSetOtherMode(hi, lo), gsSPEndDisplayList() }
+
+/*
+ * Render mode tables. Code binds one of them to segment 8. A model's display lists then call entry n
+ * (at segment offset n * 16) to set the render mode of a part.
+ */
+Gfx D_80082FC0[24][2] = {
+    RENDER_MODE(0x182C3F, 0x04D049D8), RENDER_MODE(0x182C3F, 0x04D049D8),
+    RENDER_MODE(0x182C3F, 0x04D04DD8), RENDER_MODE(0x182C3F, 0x04D049D8),
+    RENDER_MODE(0x18AC3F, 0x04D049D8), RENDER_MODE(0x18AC3F, 0x04D049D8),
+    RENDER_MODE(0x18AC3F, 0x04D04DD8), RENDER_MODE(0x18AC3F, 0x04D049D8),
+    RENDER_MODE(0x18EC3F, 0x04D049D8), RENDER_MODE(0x18EC3F, 0x04D049D8),
+    RENDER_MODE(0x18EC3F, 0x04D04DD8), RENDER_MODE(0x18EC3F, 0x04D049D8),
+    RENDER_MODE(0x192C3F, 0x04D049D8), RENDER_MODE(0x192C3F, 0x04D049D8),
+    RENDER_MODE(0x192C3F, 0x04D04DD8), RENDER_MODE(0x192C3F, 0x04D049D8),
+    RENDER_MODE(0x19AC3F, 0x04D049D8), RENDER_MODE(0x19AC3F, 0x04D049D8),
+    RENDER_MODE(0x19AC3F, 0x04D04DD8), RENDER_MODE(0x19AC3F, 0x04D049D8),
+    RENDER_MODE(0x19EC3F, 0x04D049D8), RENDER_MODE(0x19EC3F, 0x04D049D8),
+    RENDER_MODE(0x19EC3F, 0x04D04DD8), RENDER_MODE(0x19EC3F, 0x04D049D8),
+};
+
+Gfx D_80083140[24][2] = {
+    RENDER_MODE(0x182C3F, 0x04D12078), RENDER_MODE(0x182C3F, 0x04D13078),
+    RENDER_MODE(0x182C3F, 0x04D12D58), RENDER_MODE(0x182C3F, 0x04D12278),
+    RENDER_MODE(0x18AC3F, 0x04D12078), RENDER_MODE(0x18AC3F, 0x04D13078),
+    RENDER_MODE(0x18AC3F, 0x04D12D58), RENDER_MODE(0x18AC3F, 0x04D12278),
+    RENDER_MODE(0x18EC3F, 0x04D12078), RENDER_MODE(0x18EC3F, 0x04D13078),
+    RENDER_MODE(0x18EC3F, 0x04D12D58), RENDER_MODE(0x18EC3F, 0x04D12278),
+    RENDER_MODE(0x192C3F, 0x04D12078), RENDER_MODE(0x192C3F, 0x04D13078),
+    RENDER_MODE(0x192C3F, 0x04D12D58), RENDER_MODE(0x192C3F, 0x04D12278),
+    RENDER_MODE(0x19AC3F, 0x04D12078), RENDER_MODE(0x19AC3F, 0x04D13078),
+    RENDER_MODE(0x19AC3F, 0x04D12D58), RENDER_MODE(0x19AC3F, 0x04D12278),
+    RENDER_MODE(0x19EC3F, 0x04D12078), RENDER_MODE(0x19EC3F, 0x04D13078),
+    RENDER_MODE(0x19EC3F, 0x04D12D58), RENDER_MODE(0x19EC3F, 0x04D12278),
+};
+
+Gfx D_800832C0[24][2] = {
+    RENDER_MODE(0x182C3F, 0x07C24000), RENDER_MODE(0x182C3F, 0x07C27008),
+    RENDER_MODE(0x182C3F, 0x07C24000), RENDER_MODE(0x182C3F, 0x07C24000),
+    RENDER_MODE(0x18AC3F, 0x07C24000), RENDER_MODE(0x18AC3F, 0x07C27008),
+    RENDER_MODE(0x18AC3F, 0x07C24000), RENDER_MODE(0x18AC3F, 0x07C24000),
+    RENDER_MODE(0x18EC3F, 0x07C24000), RENDER_MODE(0x18EC3F, 0x07C27008),
+    RENDER_MODE(0x18EC3F, 0x07C24000), RENDER_MODE(0x18EC3F, 0x07C24000),
+    RENDER_MODE(0x192C3F, 0x07C24000), RENDER_MODE(0x192C3F, 0x07C27008),
+    RENDER_MODE(0x192C3F, 0x07C24000), RENDER_MODE(0x192C3F, 0x07C24000),
+    RENDER_MODE(0x19AC3F, 0x07C24000), RENDER_MODE(0x19AC3F, 0x07C27008),
+    RENDER_MODE(0x19AC3F, 0x07C24000), RENDER_MODE(0x19AC3F, 0x07C24000),
+    RENDER_MODE(0x19EC3F, 0x07C24000), RENDER_MODE(0x19EC3F, 0x07C27008),
+    RENDER_MODE(0x19EC3F, 0x07C24000), RENDER_MODE(0x19EC3F, 0x07C24000),
+};
+
+Gfx D_80083440[24][2] = {
+    RENDER_MODE(0x182C3F, 0x04D041C8), RENDER_MODE(0x182C3F, 0x04D041C8),
+    RENDER_MODE(0x182C3F, 0x04D041C8), RENDER_MODE(0x182C3F, 0x04D041C8),
+    RENDER_MODE(0x18AC3F, 0x04D041C8), RENDER_MODE(0x18AC3F, 0x04D041C8),
+    RENDER_MODE(0x18AC3F, 0x04D041C8), RENDER_MODE(0x18AC3F, 0x04D041C8),
+    RENDER_MODE(0x18EC3F, 0x04D041C8), RENDER_MODE(0x18EC3F, 0x04D041C8),
+    RENDER_MODE(0x18EC3F, 0x04D041C8), RENDER_MODE(0x18EC3F, 0x04D041C8),
+    RENDER_MODE(0x192C3F, 0x04D041C8), RENDER_MODE(0x192C3F, 0x04D041C8),
+    RENDER_MODE(0x192C3F, 0x04D041C8), RENDER_MODE(0x192C3F, 0x04D041C8),
+    RENDER_MODE(0x19AC3F, 0x04D041C8), RENDER_MODE(0x19AC3F, 0x04D041C8),
+    RENDER_MODE(0x19AC3F, 0x04D041C8), RENDER_MODE(0x19AC3F, 0x04D041C8),
+    RENDER_MODE(0x19EC3F, 0x04D041C8), RENDER_MODE(0x19EC3F, 0x04D041C8),
+    RENDER_MODE(0x19EC3F, 0x04D041C8), RENDER_MODE(0x19EC3F, 0x04D041C8),
+};
+
+Gfx D_800835C0[24][2] = {
+    RENDER_MODE(0x182C3F, 0x04D12048), RENDER_MODE(0x182C3F, 0x04D13048),
+    RENDER_MODE(0x182C3F, 0x04D12048), RENDER_MODE(0x182C3F, 0x04D12248),
+    RENDER_MODE(0x18AC3F, 0x04D12048), RENDER_MODE(0x18AC3F, 0x04D13048),
+    RENDER_MODE(0x18AC3F, 0x04D12048), RENDER_MODE(0x18AC3F, 0x04D12248),
+    RENDER_MODE(0x18EC3F, 0x04D12048), RENDER_MODE(0x18EC3F, 0x04D13048),
+    RENDER_MODE(0x18EC3F, 0x04D12048), RENDER_MODE(0x18EC3F, 0x04D12248),
+    RENDER_MODE(0x192C3F, 0x04D12048), RENDER_MODE(0x192C3F, 0x04D13048),
+    RENDER_MODE(0x192C3F, 0x04D12048), RENDER_MODE(0x192C3F, 0x04D12248),
+    RENDER_MODE(0x19AC3F, 0x04D12048), RENDER_MODE(0x19AC3F, 0x04D13048),
+    RENDER_MODE(0x19AC3F, 0x04D12048), RENDER_MODE(0x19AC3F, 0x04D12248),
+    RENDER_MODE(0x19EC3F, 0x04D12048), RENDER_MODE(0x19EC3F, 0x04D13048),
+    RENDER_MODE(0x19EC3F, 0x04D12048), RENDER_MODE(0x19EC3F, 0x04D12248),
+};
+
+Gfx D_80083740[24][2] = {
+    RENDER_MODE(0x182CAF, 0x0C1849D8), RENDER_MODE(0x182CAF, 0x0C1849D8),
+    RENDER_MODE(0x182CAF, 0x0C184DD8), RENDER_MODE(0x182CAF, 0x0C1849D8),
+    RENDER_MODE(0x18ACAF, 0x0C1849D8), RENDER_MODE(0x18ACAF, 0x0C1849D8),
+    RENDER_MODE(0x18ACAF, 0x0C184DD8), RENDER_MODE(0x18ACAF, 0x0C1849D8),
+    RENDER_MODE(0x18ECAF, 0x0C1849D8), RENDER_MODE(0x18ECAF, 0x0C1849D8),
+    RENDER_MODE(0x18ECAF, 0x0C184DD8), RENDER_MODE(0x18ECAF, 0x0C1849D8),
+    RENDER_MODE(0x192CAF, 0x0C1849D8), RENDER_MODE(0x192CAF, 0x0C1849D8),
+    RENDER_MODE(0x192CAF, 0x0C184DD8), RENDER_MODE(0x192CAF, 0x0C1849D8),
+    RENDER_MODE(0x19ACAF, 0x0C1849D8), RENDER_MODE(0x19ACAF, 0x0C1849D8),
+    RENDER_MODE(0x19ACAF, 0x0C184DD8), RENDER_MODE(0x19ACAF, 0x0C1849D8),
+    RENDER_MODE(0x19ECAF, 0x0C1849D8), RENDER_MODE(0x19ECAF, 0x0C1849D8),
+    RENDER_MODE(0x19ECAF, 0x0C184DD8), RENDER_MODE(0x19ECAF, 0x0C1849D8),
+};
+
+Gfx D_800838C0[24][2] = {
+    RENDER_MODE(0x182CAF, 0x0C192078), RENDER_MODE(0x182CAF, 0x0C193078),
+    RENDER_MODE(0x182CAF, 0x0C192D58), RENDER_MODE(0x182CAF, 0x0C192278),
+    RENDER_MODE(0x18ACAF, 0x0C192078), RENDER_MODE(0x18ACAF, 0x0C193078),
+    RENDER_MODE(0x18ACAF, 0x0C192D58), RENDER_MODE(0x18ACAF, 0x0C192278),
+    RENDER_MODE(0x18ECAF, 0x0C192078), RENDER_MODE(0x18ECAF, 0x0C193078),
+    RENDER_MODE(0x18ECAF, 0x0C192D58), RENDER_MODE(0x18ECAF, 0x0C192278),
+    RENDER_MODE(0x192CAF, 0x0C192078), RENDER_MODE(0x192CAF, 0x0C193078),
+    RENDER_MODE(0x192CAF, 0x0C192D58), RENDER_MODE(0x192CAF, 0x0C192278),
+    RENDER_MODE(0x19ACAF, 0x0C192078), RENDER_MODE(0x19ACAF, 0x0C193078),
+    RENDER_MODE(0x19ACAF, 0x0C192D58), RENDER_MODE(0x19ACAF, 0x0C192278),
+    RENDER_MODE(0x19ECAF, 0x0C192078), RENDER_MODE(0x19ECAF, 0x0C193078),
+    RENDER_MODE(0x19ECAF, 0x0C192D58), RENDER_MODE(0x19ECAF, 0x0C192278),
+};
+
+Gfx D_80083A40[24][2] = {
+    RENDER_MODE(0x182CAF, 0x0C1841C8), RENDER_MODE(0x182CAF, 0x0C1841C8),
+    RENDER_MODE(0x182CAF, 0x0C184DD8), RENDER_MODE(0x182CAF, 0x0C1841C8),
+    RENDER_MODE(0x18ACAF, 0x0C1841C8), RENDER_MODE(0x18ACAF, 0x0C1841C8),
+    RENDER_MODE(0x18ACAF, 0x0C184DD8), RENDER_MODE(0x18ACAF, 0x0C1841C8),
+    RENDER_MODE(0x18ECAF, 0x0C1841C8), RENDER_MODE(0x18ECAF, 0x0C1841C8),
+    RENDER_MODE(0x18ECAF, 0x0C184DD8), RENDER_MODE(0x18ECAF, 0x0C1841C8),
+    RENDER_MODE(0x192CAF, 0x0C1841C8), RENDER_MODE(0x192CAF, 0x0C1841C8),
+    RENDER_MODE(0x192CAF, 0x0C184DD8), RENDER_MODE(0x192CAF, 0x0C1841C8),
+    RENDER_MODE(0x19ACAF, 0x0C1841C8), RENDER_MODE(0x19ACAF, 0x0C1841C8),
+    RENDER_MODE(0x19ACAF, 0x0C184DD8), RENDER_MODE(0x19ACAF, 0x0C1841C8),
+    RENDER_MODE(0x19ECAF, 0x0C1841C8), RENDER_MODE(0x19ECAF, 0x0C1841C8),
+    RENDER_MODE(0x19ECAF, 0x0C184DD8), RENDER_MODE(0x19ECAF, 0x0C1841C8),
+};
+
+Gfx D_80083BC0[24][2] = {
+    RENDER_MODE(0x182CAF, 0x0C192048), RENDER_MODE(0x182CAF, 0x0C193048),
+    RENDER_MODE(0x182CAF, 0x0C192D58), RENDER_MODE(0x182CAF, 0x0C192248),
+    RENDER_MODE(0x18ACAF, 0x0C192048), RENDER_MODE(0x18ACAF, 0x0C193048),
+    RENDER_MODE(0x18ACAF, 0x0C192D58), RENDER_MODE(0x18ACAF, 0x0C192248),
+    RENDER_MODE(0x18ECAF, 0x0C192048), RENDER_MODE(0x18ECAF, 0x0C193048),
+    RENDER_MODE(0x18ECAF, 0x0C192D58), RENDER_MODE(0x18ECAF, 0x0C192248),
+    RENDER_MODE(0x192CAF, 0x0C192048), RENDER_MODE(0x192CAF, 0x0C193048),
+    RENDER_MODE(0x192CAF, 0x0C192D58), RENDER_MODE(0x192CAF, 0x0C192248),
+    RENDER_MODE(0x19ACAF, 0x0C192048), RENDER_MODE(0x19ACAF, 0x0C193048),
+    RENDER_MODE(0x19ACAF, 0x0C192D58), RENDER_MODE(0x19ACAF, 0x0C192248),
+    RENDER_MODE(0x19ECAF, 0x0C192048), RENDER_MODE(0x19ECAF, 0x0C193048),
+    RENDER_MODE(0x19ECAF, 0x0C192D58), RENDER_MODE(0x19ECAF, 0x0C192248),
+};
+
+Gfx D_80083D40[24][2] = {
+    RENDER_MODE(0x182C3F, 0x0C1849D8), RENDER_MODE(0x182C3F, 0x0C1849D8),
+    RENDER_MODE(0x182C3F, 0x0C184DD8), RENDER_MODE(0x182C3F, 0x0C1849D8),
+    RENDER_MODE(0x18AC3F, 0x0C1849D8), RENDER_MODE(0x18AC3F, 0x0C1849D8),
+    RENDER_MODE(0x18AC3F, 0x0C184DD8), RENDER_MODE(0x18AC3F, 0x0C1849D8),
+    RENDER_MODE(0x18EC3F, 0x0C1849D8), RENDER_MODE(0x18EC3F, 0x0C1849D8),
+    RENDER_MODE(0x18EC3F, 0x0C184DD8), RENDER_MODE(0x18EC3F, 0x0C1849D8),
+    RENDER_MODE(0x192C3F, 0x0C1849D8), RENDER_MODE(0x192C3F, 0x0C1849D8),
+    RENDER_MODE(0x192C3F, 0x0C184DD8), RENDER_MODE(0x192C3F, 0x0C1849D8),
+    RENDER_MODE(0x19AC3F, 0x0C1849D8), RENDER_MODE(0x19AC3F, 0x0C1849D8),
+    RENDER_MODE(0x19AC3F, 0x0C184DD8), RENDER_MODE(0x19AC3F, 0x0C1849D8),
+    RENDER_MODE(0x19EC3F, 0x0C1849D8), RENDER_MODE(0x19EC3F, 0x0C1849D8),
+    RENDER_MODE(0x19EC3F, 0x0C184DD8), RENDER_MODE(0x19EC3F, 0x0C1849D8),
+};
+
+Gfx D_80083EC0[24][2] = {
+    RENDER_MODE(0x182C3F, 0x0C192078), RENDER_MODE(0x182C3F, 0x0C193078),
+    RENDER_MODE(0x182C3F, 0x0C192D58), RENDER_MODE(0x182C3F, 0x0C192278),
+    RENDER_MODE(0x18AC3F, 0x0C192078), RENDER_MODE(0x18AC3F, 0x0C193078),
+    RENDER_MODE(0x18AC3F, 0x0C192D58), RENDER_MODE(0x18AC3F, 0x0C192278),
+    RENDER_MODE(0x18EC3F, 0x0C192078), RENDER_MODE(0x18EC3F, 0x0C193078),
+    RENDER_MODE(0x18EC3F, 0x0C192D58), RENDER_MODE(0x18EC3F, 0x0C192278),
+    RENDER_MODE(0x192C3F, 0x0C192078), RENDER_MODE(0x192C3F, 0x0C193078),
+    RENDER_MODE(0x192C3F, 0x0C192D58), RENDER_MODE(0x192C3F, 0x0C192278),
+    RENDER_MODE(0x19AC3F, 0x0C192078), RENDER_MODE(0x19AC3F, 0x0C193078),
+    RENDER_MODE(0x19AC3F, 0x0C192D58), RENDER_MODE(0x19AC3F, 0x0C192278),
+    RENDER_MODE(0x19EC3F, 0x0C192078), RENDER_MODE(0x19EC3F, 0x0C193078),
+    RENDER_MODE(0x19EC3F, 0x0C192D58), RENDER_MODE(0x19EC3F, 0x0C192278),
+};
+
+#undef RENDER_MODE
+
+// matching: a one-element const table; with a 0.8f literal IDO picks other FP registers in func_1501A220
+static const f32 D_800968E0[] = { 0.8f };
 
 /* Allocates the views for numPlayers players (numPlayers + 2 of them, or 1 when it is 0) and lays out views
  * 0..numPlayers with layout numPlayers, plus a layout-0 (full-screen) view after them. */
@@ -29,11 +225,11 @@ void func_1501A220(s32 numPlayers, s32 arg1) {
     D_800BE62C = allocate_memory(numViews * sizeof(Vp), 1, 1, 0);
 
     if (D_80082FA0 == 1) {
-        width = (f32)D_800BE638[1] - 2.0f;
+        width = D_800BE638[1] - 2.0f;
         scaled = width;
-        scaled *= *(f32 *)&D_800968E0; // matching: 0.8f; the rodata load and in-place multiply pick IDO's FP regs
+        scaled *= D_800968E0[0];
         scaledWidth = scaled;
-        D_800BE6B8 = (f32)(scaledWidth - (scaledWidth % 4)) / width;
+        D_800BE6B8 = (scaledWidth - (scaledWidth % 4)) / width;
     }
 
     func_150006E0(level);
@@ -89,8 +285,8 @@ Gfx *func_1501A490(Gfx *gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s
         right = view->right;
         top = view->top;
         if (maxBottom != 0) {
-            if ((f32)maxBottom < view->bottom) {
-                bottom = (f32)maxBottom;
+            if (maxBottom < view->bottom) {
+                bottom = maxBottom;
             } else {
                 bottom = view->bottom;
             }
@@ -143,8 +339,6 @@ void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f3
               RENDER_VIEWS[view].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f;
 }
 
-extern f32 D_80082FA8[];
-
 /* Lays out view `view` for screen layout `layout` (D_800BE668 holds each view's centre) and sets up its
  * projection and viewport, with depth range zRange. */
 void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
@@ -190,10 +384,10 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
         func_1501B0A0(view, layout);
     } else {
         fullWidth = D_800BE638[0];
-        fullAspect = fullWidth / (f32)D_800BE650[0];
+        fullAspect = fullWidth / D_800BE650[0];
         aspect = RENDER_VIEWS[view].width / RENDER_VIEWS[view].height;
         RENDER_VIEWS[view].scaleX = (RENDER_VIEWS[view].width / fullWidth) * (fullAspect / aspect);
-        RENDER_VIEWS[view].scaleY = RENDER_VIEWS[view].height / (f32)D_800BE650[0];
+        RENDER_VIEWS[view].scaleY = RENDER_VIEWS[view].height / D_800BE650[0];
     }
     halfFov = RENDER_VIEWS[view].fovX * 0.5f * 0.01745329238f;
     sine = sinf(halfFov);
@@ -226,8 +420,8 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
 
 /* Returns whether view's rectangle lies entirely inside the drawable framebuffer area. */
 s32 func_1501AE94(s32 viewIndex) {
-    f32 maxX = (f32)D_800BE620 - 2.0f;
-    f32 maxY = (f32)D_800BE624;
+    f32 maxX = D_800BE620 - 2.0f;
+    f32 maxY = D_800BE624;
     RenderView *view = &RENDER_VIEWS[viewIndex];
 
     if (view->left < 2.0f || maxX < view->right) {
@@ -246,8 +440,8 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     if (*left < 2.0f) {
         *left = 2.0f;
     } else {
-        if ((f32)D_800BE620 - 2.0f < *left) {
-            clamped = (f32)D_800BE620 - 2.0f;
+        if (D_800BE620 - 2.0f < *left) {
+            clamped = D_800BE620 - 2.0f;
         } else {
             clamped = *left;
         }
@@ -257,8 +451,8 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     if (*right < 2.0f) {
         *right = 2.0f;
     } else {
-        if ((f32)D_800BE620 - 2.0f < *right) {
-            clamped = (f32)D_800BE620 - 2.0f;
+        if (D_800BE620 - 2.0f < *right) {
+            clamped = D_800BE620 - 2.0f;
         } else {
             clamped = *right;
         }
@@ -268,8 +462,8 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     if (*top < 0.0f) {
         *top = 0.0f;
     } else {
-        if ((f32)D_800BE624 < *top) {
-            clamped = (f32)D_800BE624;
+        if (D_800BE624 < *top) {
+            clamped = D_800BE624;
         } else {
             clamped = *top;
         }
@@ -279,8 +473,8 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     if (*bottom < 0.0f) {
         *bottom = 0.0f;
     } else {
-        if ((f32)D_800BE624 < *bottom) {
-            clamped = (f32)D_800BE624;
+        if (D_800BE624 < *bottom) {
+            clamped = D_800BE624;
         } else {
             clamped = *bottom;
         }
@@ -304,8 +498,8 @@ void func_1501B0A0(s32 view, s32 layout) {
     halfFovY = RENDER_VIEWS[view].fovY * 0.008726646f;
     tanX = sinf(halfFovX) / cosf(halfFovX);
     tanY = sinf(halfFovY) / cosf(halfFovY);
-    distX = (f32)D_800BE638[layout] / (2.0f * tanX);
-    distY = (f32)D_800BE650[layout] / (2.0f * tanY);
+    distX = D_800BE638[layout] / (2.0f * tanX);
+    distY = D_800BE650[layout] / (2.0f * tanY);
     x = func_150484A0(RENDER_VIEWS[view].halfWidth, distX) * 114.59155f - RENDER_VIEWS[layout].fovX;
     y = func_150484A0(RENDER_VIEWS[view].halfHeight, distY) * 114.59155f - RENDER_VIEWS[layout].fovY;
     func_1510B128(view, x, y, 1.0f, 0.0f);

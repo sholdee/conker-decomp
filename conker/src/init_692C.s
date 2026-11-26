@@ -25,3 +25,15 @@ glabel func_1000692C
     /* 6960 10006960 8FBF0A44 */  lw         $ra, 0xA44($sp)
     /* 6964 10006964 03E00008 */  jr         $ra
     /* 6968 10006968 24020000 */   addiu     $v0, $zero, 0x0
+
+.section .bss
+
+/* The work area of the inflate code (init_6240.s to init_709C.s) */
+glabel D_8003BE90
+    /* 8003BE90 */ .space 0x04
+
+glabel D_8003BE94
+    /* 8003BE94 */ .space 0x9C4
+
+glabel D_8003C858
+    /* 8003C858 */ .space 0x88

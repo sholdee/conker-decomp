@@ -22,6 +22,7 @@ src/init_B1B0.c	music	music sequence manager: tracks, volume ramps, per-frame se
 src/init_EB00.c	sound	sound record / voice slot system: spatial records, queue, variants, callbacks
 src/init_11FA0.c	audio	per-frame audio mix selector (override/fallback/one-shot)
 src/init_12560.c	mp3	streamed-audio front end: message ring and track start helpers
+src/libultra/audio/init_17870.c	audio	Rare audio output-mode setup
 src/init_1AAE0.c	audio	Conker's synthesis driver with bank-loading hooks, channel state
 src/init_1C060.c	audio	libaudio node linking helpers (alLink-style)
 src/init_1E480.c	audio	n_alSynDelete
@@ -36,6 +37,7 @@ src/init_22460.c	audio	Rare's rework of n_alResamplePull
 src/game_2D4B0.c	music	per-level music setup and update (LevelMusic)
 src/game_2DDF0.c	level	per-level colour/parameter tables setup from the level header
 src/game_2DF70.c	collision	map background setup and triangle quadtree (collision triangle tables)
+src/game_2E910.c	collision	split from game_2DF70.c (unit boundary in the ROM); collision-triangle code
 src/game_305D0.c	level	level model loading/rebasing, vertex colour groups, texture size table
 src/game_30E90.c	level	level object placements: spawning objects from the level's object lists
 src/game_32200.c	model	per-view vertex buffer copies for actor quads
@@ -82,6 +84,7 @@ src/game/done/game_36280.c	anim	resets the vertex morph slots
 src/game_362B0.c	prop	allocates wave-chain sample buffers
 src/game/done/game_36600.c	flare	resets lens-flare state
 src/game_36680.c	light	level light points: global light colour, colour tables, light callbacks
+src/game_38050.c	light	split off in the per-file pass; level particle and sprite setup (header group in light.h)
 src/game/done/game_39690.c	swarm	resets the effect model slots
 src/game_39750.c	particle	ambient particles spawned over a region; random helpers
 src/game_3B920.c	game	resets game globals and runs per-level subsystem init
@@ -121,6 +124,7 @@ src/game/done/game_3F4D0.c	level	per-level setup: bolt effect
 src/game/done/game_3F560.c	level	per-level setup: timed effect
 src/game_3F670.c	level	per-level setup: particles over ground triangles
 src/game_3F820.c	view	per-view projection matrices from view sizes (level setup)
+src/game_3F950.c	view	split from game_3F820.c (two .rodata units in the ROM); level setup (header group in view.h)
 src/game/done/game_3FBD0.c	level	per-level query by map id
 src/game/done/game_3FC20.c	level	per-level setup stub (empty)
 src/game/done/game_3FC30.c	level	resets wave-deformer slots
@@ -647,11 +651,10 @@ src/game_21CAC0.c	math	pseudo-random number generator
 src/game_21CAF0.c	os	osViSetSpecialFeatures copy
 src/game_21D420.c	libc	sprintf
 src/game_21D5F0.c	os	guMtxCatF copy
+src/libultra/audio/game_21FC90.c	mp3	streaming music player (StreamVoice), set up by game_43620.c
 src/game_221290.c	mp3	MPEG layer III decoder
 src/debugger_256F80.c	debugger	debugger copy of controller read
 src/debugger_257330.c	debugger	debugger stub
 src/debugger_257350.c	debugger	debugger printf
 src/debugger/debugger.c	debugger	crash debugger screens
 src/game/entrypoint.c	boot	game entrypoint: subsystem init and main loop
-src/libultra/audio/game_21FC90.c	mp3	streaming music player (StreamVoice), set up by game_43620.c
-src/libultra/audio/init_17870.c	audio	Rare audio output-mode setup

@@ -1,7 +1,5 @@
 #include "n_synthInternals.h"
 
-extern f32 D_8002C750;
-
 static s32 __n_nextSampleTime(ALPlayer **client);
 
 typedef struct {
@@ -399,14 +397,14 @@ void _n_collectPVoices(void)
             to->next->prev = ln;
         to->next = ln;
 
-        element2 = (ALLink *)&pvoice->vvoice;
+        element2 = &pvoice->busLink;
         if (element2->next)
             element2->next->prev = element2->prev;
         if (element2->prev)
             element2->prev->next = element2->next;
 
-        pvoice->vvoice = 0;
-        *(s32 *)((u8 *)pvoice + 0xC) = 0;
+        pvoice->busLink.next = 0;
+        pvoice->busLink.prev = 0;
     }
 }
 
@@ -432,7 +430,7 @@ void _n_freePVoice(N_PVoice *pvoice)
 }
 
 s32 _n_timeToSamplesNoRound(s32 micros) {
-    f32 tmp = (((f32) micros * (f32) n_syn->outputRate) / D_8002C750) + 0.5f; // 1000000.0f
+    f32 tmp = (((f32) micros * (f32) n_syn->outputRate) / 1000000.0f) + 0.5f;
     return (s32) tmp;
 }
 

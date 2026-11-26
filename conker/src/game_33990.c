@@ -1,13 +1,20 @@
 #include <ultra64.h>
+#include "structs.h"
 
 /* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
- * it first sees each name, and the static D_800BE3D8 comes first. */
+ * it first sees each name. */
+static u8 D_800BE2F0[0x68]; /* the EEPROM record of blocks 0x44-0x51: a u16 checksum, then D_80082BBC */
+static u8 D_800BE358[0x80]; /* EEPROM transfer buffer; [0..1] is a u16 checksum */
 static s8 D_800BE3D8[4]; /* save slot loaded from each EEPROM save file, -1 if none */
 s16 D_800BE3DC;
 u8 D_800BE3DE;
 s8 D_800BE3DF;
 u8 D_800BE3E0;
 u32 D_800BE3E4; // saved clock (seconds)
+s32 D_800BE3E8; // play time (seconds)
+s8 D_800BE3EC; // argument of the pending EEPROM request D_80082BB4
+u8 *D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
+SaveSlotInfo D_800BE3F8[3]; // the three save slots
 
 #include "functions.h"
 #include "variables.h"
@@ -16,7 +23,7 @@ u32 D_800BE3E4; // saved clock (seconds)
  * EEPROM save data. The EEPROM is addressed in 8-byte blocks:
  *   blocks 0x00-0x03  settings (D_800E0BE0, range-checked by func_151DD9E4), 0x20 bytes
  *   blocks 0x04-0x43  four save files of 0x80 bytes (16 blocks) each
- *   blocks 0x44-0x51  D_800BE2F0, 0x70 bytes
+ *   blocks 0x44-0x51  D_800BE2F0, 0x70 bytes (the array has 0x68)
  * Every record starts with a u16 checksum of its remaining bytes (see the checksum loops below).
  * D_800BE358 is the 0x80-byte transfer buffer.
  * Under -g3 the line table steers the scheduling of the unrolled loops, so short loop bodies stay on
@@ -35,8 +42,11 @@ enum EepromRequest {
     EEPROM_REQ_SAVE_SETTINGS  /* func_15007558 */
 };
 
-extern u8 D_800BE2F0[0x70];
-extern u8 D_800BE35A[];
+static s32 D_80082BB0 = 0xFF000000; // not referenced
+s8 D_80082BB4 = EEPROM_REQ_NONE; // the pending EEPROM request, run by func_1501C57C
+static s32 D_80082BB8 = 0; // not referenced
+ModeSettings *D_80082BBC = (ModeSettings *)&D_800BE2F0[2]; // saved settings, one record per multiplayer mode
+u8 D_80082BC0 = FALSE; // scanning the EEPROM save files (func_15006590 records each in its save slot)
 
 /* EEPROM access (game_20A3A0.c, game_20A850.c) */
 /* Defined in game_20A850.c as s32 func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size) (read).
@@ -224,7 +234,7 @@ void func_15006BEC(s32 saveSlot) {
     if (D_800BE3F0 == NULL) {
         D_800BE3F0 = (u8 *)func_1502B5C8(NULL, 1, 7) + 8;
     }
-    p = (u8 *)(u32)D_800BE35A; // matching: &D_800BE358[2] or a plain D_800BE35A changes codegen
+    p = (u8 *)(u32)&D_800BE358[2]; // matching: without the (u32) round trip the code changes
     *p++ = saveSlot;
     *p++ = (sequence >> 24) & 0xFF;
     *p++ = (sequence >> 16) & 0xFF;

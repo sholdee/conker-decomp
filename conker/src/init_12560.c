@@ -1,4 +1,14 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/*
+ * This file's .bss. It is defined before functions.h and variables.h: IDO places a variable that an
+ * extern declared earlier (conker/mp3.h) after the others.
+ */
+static MsgRing D_800427A0;
+static u8 D_800427B0[64]; /* D_800427A0's buffer */
+s32 D_800427F0;           /* read and cleared by game_AD6B0.c */
+u16 D_800427F4;           /* the track last started */
 
 #include "functions.h"
 #include "variables.h"

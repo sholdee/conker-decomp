@@ -221,10 +221,25 @@ segments:
     bss_size: 0x16690
     subsegments:
       - [0x290D0, data] # could be larger/smaller
+      - [0x2AAD0, .data, init_1050]
+      - [0x2AAF0, .data, init_2070]
       - [0x2AB40, .data, libultra/io/aisetnextbuf]
       - [0x2AB50, .data, libultra/io/pimgr]
       - [0x2AB70, .data, libultra/io/vimgr]
-      - [0x2AB90, data]
+      - [0x2AB90, .data, init_39C0]
+      - [0x2AC30, .data, init_3C40]
+      - [0x2AC50, .data, init_49E0]
+      - [0x2AC70, .data, init_71D0]
+      - [0x2AC84, data] # crash screen font of init_71D0 (an asset)
+      - [0x2ADEC, .data, init_7DAC]
+      - [0x2AE40, .data, init_8F90]
+      - [0x2B070, .data, init_B1B0]
+      - [0x2BA10, .data, init_11FA0]
+      - [0x2BA20, .data, libultra/audio/init_15550]
+      - [0x2BA40, .data, libultra/audio/n_sl]
+      - [0x2BA50, .data, libultra/audio/init_19B50]
+      - [0x2BBE0, .data, libultra/audio/init_1CBF0]
+      - [0x2BC10, .data, init_20000]
       - [0x2BD10, .data, libultra/os/initialize]
       - [0x2BD30, .data, libultra/libc/xlitob]
       - [0x2BD60, .data, libultra/os/piacs]
@@ -238,48 +253,64 @@ segments:
       - [0x2BED0, .data, libultra/io/vimodentsclan1]
 
       - [0x2BF20, .rodata, init_1420]
-      - [0x2BF7C, rodata]
-      - [0x2BFA4, .rodata, init_2070]
-      - [0x2C074, rodata]
+      - [0x2BF80, .rodata, init_2070]
       - [0x2C080, .rodata, init_2E50]
-      - [0x2C09C, rodata]
       - [0x2C0A0, .rodata, init_49E0]
-      - [0x2C0BC, rodata]
-      - [0x2C0C0, rodata]
-      - [0x2C120, rodata]
-      - [0x2C1B0, rodata]
+      - [0x2C0C0, .rodata, init_6380] # the inflate tables of init_6240..init_709C
+      - [0x2C1B0, .rodata, init_71D0]
       - [0x2C200, .rodata, init_A420]
       - [0x2C220, .rodata, init_B1B0]
-      - [0x2C23C, rodata]
-      - [0x2C240, rodata]
-      - [0x2C250, rodata]
+      - [0x2C240, .rodata, init_EB00]
       - [0x2C410, .rodata, init_11FA0]
-      - [0x2C448, rodata]
       - [0x2C450, .rodata, libultra/audio/init_128D0]
       - [0x2C460, .rodata, libultra/audio/n_csplayer]
-      - [0x2C6A4, rodata]
       - [0x2C6B0, .rodata, libultra/audio/init_15550]
-      - [0x2C748, rodata]
-      - [0x2C750, rodata]
+      - [0x2C750, .rodata, libultra/audio/n_synthesizer]
       - [0x2C760, .rodata, libultra/audio/cents2ratio]
-      - [0x2C770, rodata]
+      - [0x2C770, .rodata, libultra/audio/init_1CBF0]
       - [0x2C790, .rodata, libultra/audio/init_1D900]
       - [0x2C7A0, .rodata, init_1E530]
-      - [0x2C7CC, rodata]
       - [0x2C7D0, .rodata, init_20000]
-      - [0x2C818, rodata]
-      - [0x2C820, rodata]
-      - [0x2C830, rodata]
-      - [0x2C850, rodata]
+      - [0x2C820, .rodata, init_210C0]
+      - [0x2C830, .rodata, init_22040]
+      - [0x2C840, .rodata, init_22460]
+      - [0x2C850, .rodata, libultra/os/setintmask]
       - [0x2C8D0, .rodata, libultra/gu/sinf_init]
-      - [0x2C920, rodata]
+      - [0x2C920, .rodata, libultra/gu/libm_vals]
+      - [0x2C930, rodata]
       - [0x2C960, rodata]
       # init bss: func_10001050 clears 0x8002D4B0..0x80043B40 (bss_size)
-      - {start: 0x2D4B0, type: bss, vram: 0x8002D4B0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8002D4B0, name: init_1050}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80035500, name: init_2070}
+      - {start: 0x2D4B0, type: bss, vram: 0x80035510, name: bss_80035510}
       - {start: 0x2D4B0, type: .bss, vram: 0x80036DD0, name: libultra/io/vimgr}
-      - {start: 0x2D4B0, type: bss, vram: 0x80037E40, name: bss_80037E40}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80037E40, name: init_71D0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80038070, name: init_38E0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80038080, name: init_3920}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80038090, name: init_3930}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800380A0, name: init_39C0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800380B0, name: init_3C40}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800380E0, name: init_4470}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003A580, name: init_49E0}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003B1E8, name: init_50A0}
       - {start: 0x2D4B0, type: bss, vram: 0x8003BC28, name: bss_8003BC28}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003BC30, name: init_5570}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003BE30, name: init_57E0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003BE70, name: init_5AB0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003BE90, name: init_692C}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003C8E0, name: init_7DAC}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003C900, name: init_8180}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003E380, name: init_8F90}
+      - {start: 0x2D4B0, type: bss, vram: 0x800406A0, name: bss_800406A0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800417B0, name: init_B1B0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80041F10, name: init_EB00}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042770, name: init_11FA0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800427A0, name: init_12560}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042800, name: libultra/audio/init_128D0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042810, name: libultra/audio/n_csplayer}
+      - {start: 0x2D4B0, type: bss, vram: 0x80042850, name: bss_80042850}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800428C0, name: libultra/audio/init_17870}
+      - {start: 0x2D4B0, type: bss, vram: 0x800428D0, name: bss_800428D0}
       # libultra objects that link their own .bss. A list-form bss entry has no ROM: splat takes its vram
       # from the first field as if it were a ROM offset, and in init_data vram = 0x80000000 + offset.
       - [0x428E0, .bss, libultra/os/initialize]
@@ -301,6 +332,7 @@ segments:
       - [0x2D4B0, c, game_2D4B0]
       - [0x2DDF0, c, game_2DDF0]
       - [0x2DF70, c, game_2DF70]
+      - [0x2E910, c, game_2E910]
       - [0x305D0, c, game_305D0]
       - [0x30E90, c, game_30E90]
       - [0x32200, c, game_32200]
@@ -348,6 +380,7 @@ segments:
       - [0x362B0, c, game_362B0]
       - [0x36600, c, game/done/game_36600]
       - [0x36680, c, game_36680]
+      - [0x38050, c, game_38050]
       - [0x39690, c, game/done/game_39690]
       - [0x39750, c, game_39750]
       - [0x3B920, c, game_3B920]
@@ -387,6 +420,7 @@ segments:
       - [0x3f560, c, game/done/game_3F560]
       - [0x3F670, c, game_3F670]
       - [0x3F820, c, game_3F820]
+      - [0x3F950, c, game_3F950]
       - [0x3fbd0, c, game/done/game_3FBD0]
       - [0x3fc20, c, game/done/game_3FC20]
       - [0x3fc30, c, game/done/game_3FC30]
@@ -998,11 +1032,20 @@ segments:
     bss_size: 0x38F40   # the game setup clears 0x800B0DC0..0x800E9D00
     subalign: 4
     subsegments:
-      - [0x2275E0, data]
+      - [0x2275E0, .data, game_305D0]
+      - [0x227600, .data, game/done/game_32F10]
+      - [0x227670, .data, game_33990]
+      - [0x227690, .data, game_35D20]
+      - [0x2276A0, .data, game_36680]
+      - [0x227840, .data, game_38050]
+      - [0x227850, .data, game_3B920]
       - [0x2278F0, .data, game_40490]
-      - [0x227960, data]
+      - [0x227A40, .data, game_42DC0]
       - [0x227A50, .data, game_45B80]
-      - [0x227A60, data]
+      - [0x227A60, .data, game_476D0]
+      - [0x228B00, .data, game_48B10]
+      - [0x228B20, .data, game_48FD0]
+      - [0x228B30, data]
       - [0x228BD0, .data, game_50D80]
       - [0x228C20, data]
       - [0x228EA0, .data, game_64120]
@@ -1206,67 +1249,43 @@ segments:
       - {start: 0x236430, type: .data, name: game_21CAC0, linker_section_order: .rodata}
       - [0x236440, rodata]
       - [0x2364F0, .rodata, game_2D4B0]
-      - [0x236504, rodata]
       - [0x236510, .rodata, game_2DF70]
-      - [0x2365AC, rodata]
-      - [0x2365B0, rodata]
-      - [0x2367E0, rodata]
+      - [0x2365B0, .rodata, game_2E910]
+      - [0x2367E0, .rodata, game_305D0]
       - [0x23A490, .rodata, game_30E90]
-      - [0x23A498, rodata]
       - [0x23A4A0, .rodata, game_32740]
-      - [0x23A4B4, rodata]
       - [0x23A4C0, .rodata, game_33990]
-      - [0x23A4E8, rodata]
       - [0x23A4F0, .rodata, game/entrypoint]
-      - [0x23A504, rodata]
       - [0x23A510, .rodata, game_34F20]
-      - [0x23A5C4, rodata]
       - [0x23A5D0, .rodata, game_357F0]
-      - [0x23A5F4, rodata]
       - [0x23A600, .rodata, game_360A0]
-      - [0x23A618, rodata]
       - [0x23A620, .rodata, game_36680]
-      - [0x23A69C, rodata]
-      - [0x23A6A0, rodata]
-      - [0x23A7A0, rodata]
-      - [0x23AA60, rodata]
-      - [0x23ABB0, .rodata, game_39750]
-      - [0x23AC84, rodata]
+      - [0x23A6A0, .rodata, game_38050]
+      - [0x23A7A0, .rodata, game/done/game_39690]
+      - [0x23AA60, .rodata, game_39750]
       - [0x23AC90, .rodata, game_3BA70]
-      - [0x23ACE0, rodata]
+      - [0x23ACE0, .rodata, game/done/game_3C3D0]
       - [0x23AD10, .rodata, game_3C740]
-      - [0x23ADDC, rodata]
-      - [0x23ADE0, rodata]
-      - [0x23AE60, rodata]
-      - [0x23AF10, rodata]
-      - [0x23AF60, .rodata, game_3DF10]
-      - [0x23AF74, rodata]
+      - [0x23ADE0, .rodata, game_3CE80]
+      - [0x23AE60, .rodata, game_3D5C0]
+      - [0x23AEF0, .rodata, game_3DC30]
+      - [0x23AF10, .rodata, game_3DF10]
       - [0x23AF80, .rodata, game_3E890]
-      - [0x23AFE8, rodata]
-      - [0x23AFF0, rodata] # D_80096530?
-      - [0x23B000, rodata]
-      - [0x23B010, rodata]
-      - [0x23B020, rodata]
-      - [0x23B030, .rodata, game_3F820]
-      - [0x23B034, rodata]
+      - [0x23AFF0, .rodata, game/done/game_3F4D0]
+      - [0x23B000, .rodata, game/done/game_3F560]
+      - [0x23B010, .rodata, game_3F670]
+      - [0x23B020, .rodata, game_3F820]
+      - [0x23B030, .rodata, game_3F950]
       - [0x23B040, .rodata, game_40490]
-      - [0x23B178, rodata]
       - [0x23B180, .rodata, game_433F0]
-      - [0x23B218, rodata]
       - [0x23B220, .rodata, game_43D00]
-      - [0x23B36C, rodata]
-      - [0x23B370, rodata]
+      - [0x23B370, .rodata, game_44A90]
       - [0x23B380, .rodata, game_44C40]
-      - [0x23B384, rodata]
       - [0x23B390, .rodata, game_45B80]
-      - [0x23B394, rodata]
-      - [0x23B3A0, rodata]
-      - [0x23B3A4, .rodata, game_476D0]
-      - [0x23B3C8, rodata]
+      - [0x23B3A0, .rodata, game_476D0]
       - [0x23B3D0, .rodata, game_487D0]
-      - [0x23B3E0, rodata]
+      - [0x23B3E0, .rodata, game_48B10]
       - [0x23B420, .rodata, game_48FD0]
-      - [0x23B45C, rodata]
       - [0x23B460, .rodata, game_49BE0]
       - [0x23B47C, rodata]
       - [0x23B480, .rodata, game_49D30]
@@ -2097,11 +2116,27 @@ segments:
       - [0x255710, rodata]
 
       # BSS ?
-      - {start: 0x255880, type: bss, vram: 0x800B0DC0}
-      - {start: 0x255880, type: .bss, vram: 0x800BE3D8, name: game_33990}
-      - {start: 0x255880, type: bss, vram: 0x800BE3E8, name: bss_800BE3E8}
-      - {start: 0x255880, type: .bss, vram: 0x800BE5E8, name: game_45B80}
-      - {start: 0x255880, type: bss, vram: 0x800BE618, name: bss_800BE618}
+      - {start: 0x255880, type: .bss, vram: 0x800B0DC0, name: game_2E910}
+      - {start: 0x255880, type: bss, vram: 0x800B0DF0, name: bss_800B0DF0}
+      - {start: 0x255880, type: .bss, vram: 0x800B0E00, name: game_305D0}
+      - {start: 0x255880, type: .bss, vram: 0x800BE2A0, name: game_30E90}
+      - {start: 0x255880, type: .bss, vram: 0x800BE2B0, name: game_32740}
+      - {start: 0x255880, type: .bss, vram: 0x800BE2C0, name: game_33660}
+      - {start: 0x255880, type: .bss, vram: 0x800BE2F0, name: game_33990}
+      - {start: 0x255880, type: .bss, vram: 0x800BE430, name: game_38050}
+      - {start: 0x255880, type: .bss, vram: 0x800BE4E0, name: game_3D2E0}
+      - {start: 0x255880, type: .bss, vram: 0x800BE4F0, name: game/done/game_3E460}
+      - {start: 0x255880, type: .bss, vram: 0x800BE500, name: game/done/game_3F0F0}
+      - {start: 0x255880, type: .bss, vram: 0x800BE510, name: game_3FC60}
+      - {start: 0x255880, type: .bss, vram: 0x800BE570, name: game_40490}
+      - {start: 0x255880, type: .bss, vram: 0x800BE580, name: game_439B0}
+      - {start: 0x255880, type: .bss, vram: 0x800BE590, name: game_43D00}
+      - {start: 0x255880, type: .bss, vram: 0x800BE5D0, name: game_45880}
+      - {start: 0x255880, type: .bss, vram: 0x800BE5E0, name: game_45B80}
+      - {start: 0x255880, type: .bss, vram: 0x800BE620, name: game_476D0}
+      - {start: 0x255880, type: .bss, vram: 0x800BE6C0, name: game_487D0}
+      - {start: 0x255880, type: .bss, vram: 0x800BE6E0, name: game_48FD0}
+      - {start: 0x255880, type: bss, vram: 0x800BE9A0, name: bss_800BE9A0}
       - {start: 0x255880, type: .bss, vram: 0x800C3620, name: game_49D30}
       - {start: 0x255880, type: bss, vram: 0x800C3630, name: bss_800C3630}
       - {start: 0x255880, type: .bss, vram: 0x800C3FD0, name: game_64120}

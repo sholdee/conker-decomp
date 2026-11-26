@@ -26,6 +26,10 @@ void func_10004DB0(void);
 void func_10004F00(void);
 void func_10004FE0(void);
 void func_10005020(void);
+extern u8 D_8002AC5C; // a reset (pre-NMI) is pending
+extern u8 D_8002AC60;
+extern u16 D_8002AC64;
+extern u64 D_8003A5E8[OS_YIELD_DATA_SIZE / sizeof(u64)]; // the graphics task's yield buffer
 
 /* init_50A0.c */
 void func_100050A0(OSMesgQueue *queue);
@@ -33,7 +37,7 @@ void func_100051C8(SchedulerClient *client, OSMesgQueue *msgQ);
 void func_100051E8(void);
 void func_10005218(void);
 void func_10005298(void);
-void func_100052A0(s32 arg0);
+void func_100052A0(void *arg);
 extern OSMesgQueue D_8003B1E8;
 extern OSMesgQueue D_8003B200;
 extern OSMesgQueue D_8003B218;

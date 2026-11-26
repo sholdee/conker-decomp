@@ -19,9 +19,8 @@
 
 #include "n_synthInternals.h"
 
-// FIXME: when we can...
-// N_ALGlobals *n_alGlobals=0;
-// N_ALSynth *n_syn=0;
+N_ALGlobals *n_alGlobals=0;
+N_ALSynth *n_syn=0;
 
 void n_alInit(N_ALGlobals *g, ALSynConfig *c)
 {

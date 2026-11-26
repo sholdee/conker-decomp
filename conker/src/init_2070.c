@@ -1,5 +1,8 @@
 #include <ultra64.h>
 
+/* This file's .bss, defined before the headers: IDO lays out .bss in the order it first sees each name. */
+static s16 D_80035500; // reset by osSyncPrintf; nothing reads it in this build
+
 #include "libc/stdarg.h"
 #include "functions.h"
 #include "variables.h"
@@ -10,19 +13,18 @@ u8 *func_10002070(u8 *arg, u8 *buf, u32 count) {
     return (u8 *)1;
 }
 
-void func_10002088(s32 arg0, ...) {
+/* osSyncPrintf: formats and discards the text (debug output is compiled out). */
+void func_10002088(const char *fmt, ...) {
     va_list args;
 
-    va_start(args, arg0);
+    va_start(args, fmt);
     D_80035500 = 0;
-    func_100020D0(func_10002070, 0, arg0, args);
+    // the formatter reads unsigned chars (libultra's char is unsigned; this build uses -signed)
+    func_100020D0(func_10002070, NULL, (u8 *)fmt, args);
 }
 
-extern u8 D_8002AAF0[];
-extern u8 D_8002AB14[];
-extern u8 D_8002BF80[];
-extern u8 D_8002BF84[];
-extern u32 D_8002BF8C[];
+static u8 D_8002AAF0[] = "                                "; // spaces
+static u8 D_8002AB14[] = "00000000000000000000000000000000"; // zeroes
 char *strchr(const char *str, s32 ch);
 
 #define ATOI(dst, src)                         \
@@ -53,7 +55,9 @@ int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
     while (1) {
         u8 *s;
         u8 c;
-        u8 *t;
+        char *t;
+        static const char D_8002BF84[] = " +-#0"; // the flag characters
+        static const u32 D_8002BF8C[] = { 1, 2, 4, 8, 16, 0 }; // their bits in _Pft.flags
         u8 ac[32];
 
         s = fmt;
@@ -68,7 +72,7 @@ int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
             return x.nchar;
         }
         fmt = ++s;
-        for (x.flags = 0; (t = (u8 *)strchr((char *)D_8002BF84, *s)) != NULL; s++) {
+        for (x.flags = 0; (t = strchr(D_8002BF84, *s)) != NULL; s++) {
             x.flags |= D_8002BF8C[t - D_8002BF84];
         }
         if (*s == '*') {
@@ -89,7 +93,7 @@ int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
         } else {
             ATOI(x.prec, s);
         }
-        x.qual = strchr((char *)D_8002BF80, *s) ? *s++ : '\0';
+        x.qual = strchr("hlL", *s) ? *s++ : '\0';
         if (x.qual == 'l' && *s == 'l') {
             x.qual = 'L';
             ++s;

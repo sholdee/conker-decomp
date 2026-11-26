@@ -58,10 +58,9 @@ typedef struct {
 } N_ALFreeParam;
 
 typedef struct N_PVoice_s {
-    ALLink               node;
-    struct N_ALVoice_s    *vvoice;
-    /* RARE CUSTOM */
-    u8                          pad[0x8];
+    /* 0x00 */ ALLink               node;
+    /* 0x08 */ ALLink               busLink;    /* Conker: link in its aux bus's source list */
+    /* 0x10 */ struct N_ALVoice_s  *vvoice;
 /** ALLoadFilter *********************************/
     ADPCM_STATE                 *dc_state;
     ADPCM_STATE                 *dc_lstate;

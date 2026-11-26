@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15005B70(s32 arg0) {
+void func_15005B70(Camera *arg0) {
     s32 i;
 
     func_1509BFB0(0, 0x4014, 0);

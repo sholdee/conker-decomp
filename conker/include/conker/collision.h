@@ -8,6 +8,7 @@
  * Subsystem "collision": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game_2DF70.c
+ *   game_2E910.c
  *   game_43880.c
  *   game_71820.c
  *   game_AE1D0.c
@@ -31,6 +32,8 @@ struct Foo150AE36C;
 /* game_2DF70.c */
 void func_15000AC0(void);
 void func_15000AD0(s32 arg0);
+
+/* game_2E910.c */
 void func_15001460(Gfx *dl);
 void func_15001970(void);
 void func_15001A08(void);
@@ -56,6 +59,7 @@ void func_15002F40(s32 map);
 s32 func_15002FA0(s32 value);
 void func_15002FB4(s32 map);
 void func_1500310C(void);
+extern u8 *D_800B0DC0; /* triangle-data arena cursor; game_34ED0 clears the game .bss from here */
 
 /* game_43880.c */
 void func_150163D0(s32 arg0);

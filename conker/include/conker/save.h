@@ -36,11 +36,18 @@ void func_150076BC(s32 eepromSlot);
 void func_15007718(s32 saveSlot);
 void func_15007750(s32 saveSlot);
 void func_15007778(void);
+extern s8 D_80082BB4; // the pending EEPROM request
+extern ModeSettings *D_80082BBC; // saved settings, one record per multiplayer mode
+extern u8 D_80082BC0; // scanning the EEPROM save files
 extern s16 D_800BE3DC;
 extern u8 D_800BE3DE;
 extern s8 D_800BE3DF;
 extern u8 D_800BE3E0;
 extern u32 D_800BE3E4; // saved clock (seconds)
+extern s32 D_800BE3E8; // play time (seconds)
+extern s8 D_800BE3EC; // argument of the pending EEPROM request D_80082BB4
+extern u8 *D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
+extern SaveSlotInfo D_800BE3F8[3]; // the three save slots
 
 /* game_20A3A0.c */
 s32 func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* timed EEPROM write request */

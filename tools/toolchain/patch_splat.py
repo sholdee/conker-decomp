@@ -17,7 +17,30 @@ PATCH = ANCHOR + ('        spimdisasm.common.GlobalConfig.ASM_NM_LABEL = ""\n'
                   '        spimdisasm.common.GlobalConfig.ASM_DATA_END_LABEL = ""\n')
 
 
+SPLAT_DATA = SPLAT_DIS.parent.parent / "segtypes" / "common" / "data.py"
+DATA_ANCHOR = ("                # Implied C file\n"
+               "                return options.opts.src_path / self.dir / f\"{self.name}.c\"\n")
+DATA_PATCH = ("                # Implied C file, or the hand-written asm file of the same name (a data\n"
+              "                # subsegment in another segment than its code, e.g. init_data for init)\n"
+              "                asm = options.opts.src_path / self.dir / f\"{self.name}.s\"\n"
+              "                if asm.exists():\n"
+              "                    return asm\n"
+              "                return options.opts.src_path / self.dir / f\"{self.name}.c\"\n")
+
+
+def patch_data_out_path():
+    """A named data subsegment whose code is a hand-written .s file links that file's object."""
+    s = SPLAT_DATA.read_text()
+    if "hand-written asm file of the same name" in s:
+        return
+    if DATA_ANCHOR not in s:
+        sys.exit("data.py anchor not found; n64splat layout changed")
+    SPLAT_DATA.write_text(s.replace(DATA_ANCHOR, DATA_PATCH, 1))
+    print("  patched", SPLAT_DATA)
+
+
 def main():
+    patch_data_out_path()
     if not SPLAT_DIS.exists():
         sys.exit(f"{SPLAT_DIS}: missing (git submodule update --init first)")
     s = SPLAT_DIS.read_text()

@@ -4,7 +4,7 @@
     cw.py new  FILE       private workspace ~/conker-ws/clean.<name> for src/FILE (e.g. game_79F10.c)
     cw.py check NAME      rebuild the workspace; RESULT: MATCH | MISMATCH | BUILD-FAIL, and on MISMATCH
                           the functions whose ROM bytes changed (with the first differing offset)
-    cw.py land NAME       3-way merge into main, rebuild, whole-bin sha gate, commit "cleanup: FILE [cw]"
+    cw.py land NAME [-m MSG]  3-way merge into main, rebuild, whole-bin sha gate, commit "MSG [cw]" (default "cleanup: FILE [cw]")
     cw.py list            open cleanup workspaces
 
 NAME is the workspace name printed by `new` (clean.game_79F10). Same lock, RAM builds, crash recovery and
@@ -333,9 +333,9 @@ def cmd_land(a):
         git("add", *rels, "tools/accounting.tsv")
         for f in deleted:
             git("rm", "-q", "--cached", "--ignore-unmatch", str(Path("conker") / f))
-        msg = f"cleanup: {m['file'] or m.get('tree')} [cw]"
-        if a.message:
-            msg += "\n\n" + a.message
+        msg = f"{a.message.splitlines()[0]} [cw]" if a.message else f"cleanup: {m['file'] or m.get('tree')} [cw]"
+        if a.message and len(a.message.splitlines()) > 1:
+            msg += "\n\n" + "\n".join(a.message.splitlines()[1:]).strip()
         git("commit", "-q", "-m", msg + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")
         # the merged files are now main's: make them the new merge base for further edits
         for f in files:

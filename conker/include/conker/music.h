@@ -66,6 +66,14 @@ void func_1000E8C4(s32 event);
 u8 func_1000E8F0(s32 id);
 void func_1000E934(void);
 u16 func_1000EA94(s32 arg0);
+extern s32 D_800418B0[3][16];  /* per-channel music event level */
+extern u8 D_800419A0;          /* channel of the last marker event */
+extern OSMesgQueue D_80041E58[3];
+extern OSMesg D_80041EA0[3][8]; /* message buffers of the D_80041E58 queues */
+extern u8 D_80041F00;
+extern s32 D_80041F04;
+extern s32 D_80041F08;
+extern s32 D_80041F0C;
 
 /* game_2D4B0.c */
 void func_15000000(void);

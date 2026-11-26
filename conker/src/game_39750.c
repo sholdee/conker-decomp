@@ -3,6 +3,34 @@
 #include "functions.h"
 #include "variables.h"
 
+/* The area effects of func_150139AC (game_40490.c), indexed by the zone's data1. */
+const Struct150139ACEntry D_80095FA0[6] = {
+    { 6.50000004e-07f, 2.180000067f, 1.230000019f, 1.610000014f, 4.829999924f,
+      252, 50,
+      0.3999999762f, 0.09999999404f, 0.01620000042f, 0.005299999844f, 0.8600000143f, 0.5940000415f,
+      1, 0xFF, 0, 0, 0 },
+    { 3.499999934e-07f, 1.419999957f, 0.5500000119f, 1.639999986f, 2.629999876f,
+      252, 50,
+      0.5999999642f, 0.1799999923f, 0.02630000003f, 0.01189999934f, 0.4650000334f, 0.1790000051f,
+      1, 0xFF, 0, 0, 0 },
+    { 3.499999934e-07f, 1.419999957f, 0.5500000119f, 1.639999986f, 2.629999876f,
+      252, 50,
+      0.5999999642f, 0.1799999923f, 0.02630000003f, 0.01189999934f, 0.4650000334f, 0.1790000051f,
+      1, 0xFF, 0, 0, 0 },
+    { 2.499999937e-05f, 0.8999999762f, 0.5999999642f, 0.8999999762f, 0.5999999642f,
+      40, 110,
+      0.25f, 0.25f, 0.01549999975f, 0.009999999776f, 0.200000003f, 0.1030000076f,
+      0, 0x64, 0x64, 0, 0 },
+    { 8.510000043e-05f, 0.6999999881f, 0.5f, 1.149999976f, 0.7400000095f,
+      15, 30,
+      0.1499999911f, 0.2399999946f, 0.03350000083f, 0.0223999992f, 0.0530000031f, 0.1920000017f,
+      1, 0x77, 0x76, 0, 1 },
+    { 5.149999924e-05f, 0.2800000012f, 0.2599999905f, 0.2199999988f, 0.2599999905f,
+      10, 40,
+      0.07999999821f, 0.1999999881f, 0.05900000036f, 0.009200000204f, 0.4010000229f, 0.3050000072f,
+      1, 0x4E, 0x93, 0, 1 },
+};
+
 /* Pseudo-random value mixed from the CPU cycle counter and func_150ADA20. */
 #define RANDOM() (osGetCount() * func_150ADA20())
 /* Low 16 bits of RANDOM(); multiply by 1/65535 for a fraction in [0, 1]. */
@@ -96,7 +124,7 @@ void func_1500C2F0(TriggerZone *region, f32 density) {
                 part.sizeXZ = part.sizeY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             }
             func_1510F800(0);
-            part.unk5C = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+            part.unk5C = func_1510FD20(part.pos.x, part.pos.z);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -128,7 +156,7 @@ void func_1500C8D0(TriggerZone *region, f32 density) {
         f32 inv65535;
         ParticleDesc68 part;
         Particle15130280Extra extra;
-        void *obj;
+        DescParticleHead *obj;
         f32 top;
         f32 bottom;
         f32 range; // matching: reused for the distance to the nearer bound
@@ -210,10 +238,10 @@ void func_1500C8D0(TriggerZone *region, f32 density) {
             part.vel.x = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
             part.vel.z = RANDOM_U16() * inv65535 * 0.01300000027f + 0.005000000354f;
             func_1510F800(0);
-            part.viewMask = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+            part.viewMask = func_1510FD20(part.pos.x, part.pos.z);
             obj = func_15130280(&part, 2, 0, 28, 255, 1);
             if (obj != NULL) {
-                memcpy((u8 *)obj + 0xA8, &extra, sizeof(extra));
+                memcpy(obj + 1, &extra, sizeof(extra));
             }
             count -= 1.0f;
         } while (count > 1.0f);
@@ -231,8 +259,6 @@ typedef struct {
     /* 0x18 */ f32 unk18;
 } Particle1513D2F0Extra; /* size 0x1C */
 
-// The real prototype: functions.h has an s32 second parameter, and passing (s32)&D_800A4AA0 changes codegen.
-
 /* Spawns func_1514462C(region) * density * 2e-7 func_1513D2F0 particles using D_800A4AA0. */
 void func_1500CE4C(TriggerZone *region, f32 density) {
     f32 count;
@@ -248,7 +274,7 @@ void func_1500CE4C(TriggerZone *region, f32 density) {
         f32 top;
         f32 bottom;
         f32 temp;
-        void *obj;
+        DefParticleHead *obj;
         s32 pad2; // matching: stack slots
         s32 pad3;
 
@@ -297,10 +323,10 @@ void func_1500CE4C(TriggerZone *region, f32 density) {
             part.rot.z = RANDOM_U16() * inv65535 * 360.0f;
             part.unk44 = RANDOM() % 156 + 100;
             func_1510F800(0);
-            part.unk48 = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+            part.unk48 = func_1510FD20(part.pos.x, part.pos.z);
             obj = func_1513D2F0(&part, &D_800A4AA0, 0x23, 0, 0, 0x1E, 0, 3, 0xFF, 0x1C, 0xFF, 1);
             if (obj != NULL) {
-                memcpy((u8 *)obj + 0x110, &extra, sizeof(extra));
+                memcpy(obj + 1, &extra, sizeof(extra));
             }
             count -= 1.0f;
         } while (count > 1.0f);
@@ -369,7 +395,7 @@ void func_1500D3AC(TriggerZone *region, f32 density) {
             part.rotVel.z = RANDOM_U16() * inv65535 * 1.600000024f;
             part.sizeXZ = part.sizeY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             func_1510F800(0);
-            part.unk5C = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+            part.unk5C = func_1510FD20(part.pos.x, part.pos.z);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -445,7 +471,7 @@ void func_1500D8C8(TriggerZone *region, f32 density) {
                 part.sizeY *= 0.349999994f;
             }
             func_1510F800(0);
-            part.unk5C = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+            part.unk5C = func_1510FD20(part.pos.x, part.pos.z);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -463,7 +489,7 @@ void func_1500DE88(TriggerZone *region, f32 density) {
         f32 inv65535;
         ParticleDesc68 part;
         Particle15130280Extra extra;
-        void *obj;
+        DescParticleHead *obj;
         f32 top;
         f32 bottom;
         f32 range; // matching: reused for the distance to the nearer bound
@@ -533,10 +559,10 @@ void func_1500DE88(TriggerZone *region, f32 density) {
             part.vel.x = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
             part.vel.z = RANDOM_U16() * inv65535 * 0.01000000071f + 0.002000000095f;
             func_1510F800(0);
-            part.viewMask = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+            part.viewMask = func_1510FD20(part.pos.x, part.pos.z);
             obj = func_15130280(&part, 2, 0, 28, 255, 1);
             if (obj != NULL) {
-                memcpy((u8 *)obj + 0xA8, &extra, sizeof(extra));
+                memcpy(obj + 1, &extra, sizeof(extra));
             }
             count -= 1.0f;
         } while (count > 1.0f);

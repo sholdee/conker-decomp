@@ -6,21 +6,8 @@
 
 /* defined */
 
-extern f32 D_8002C3F8;
-extern f32 D_8002C3FC;
-
-// 0x0002C820
-extern f32 D_8002C820;
-// 0x0002C830
-extern f32 D_8002C830;
-extern f32 D_8002C834;
-extern f32 D_8002C838;
-// 0x0002C840
-extern f64 D_8002C840; // double
-extern f32 D_8002C848;
 
 
-extern s32 D_8003E384;
 extern u32 D_80042450[512]; // chunk0 offsets
 
 
@@ -49,34 +36,10 @@ extern s32  D_8000031C[16]; // osAppNMIBuffer (64 bytes); libultra's declaration
 
 /* 80020000 */
 
-extern u8   D_8002AAE0;
-extern u8   D_8002AAE4;
-extern u16 *D_8002AAE8[2]; // the two framebuffers
-extern u8   D_8002AB40;
-extern OSViMode D_8002AB90;
-extern OSViMode D_8002ABE0;
-extern s32  D_8002AC30;
-extern OSScTask *D_8002AC50;
-extern OSScTask *D_8002AC54;
-extern OSScTask *D_8002AC58;
-extern u8   D_8002AC5C;
-extern u8   D_8002AC60;
-extern u16  D_8002AC64;
-extern s8   D_8002AC6C;
-extern u8   D_8002AE40;
-extern u32  D_8002AE44;
-extern u32  D_8002AE48; /* sample DMAs issued this frame */
-extern s32  D_8002AE4C;
-
-extern s32  D_8002B070;
-extern s32  D_8002B078[][4]; // probably not correct...
-extern s32  D_8002B9D4[]; /* default music eventTypes */
-extern u16  D_8002B9F4[]; /* default music eventMasks */
 
 
 
-extern s16  D_8002BC10[];
-extern s16  D_8002BD0E[];
+
 extern u32  __osShutdown;
 
 /* DATA section from D_8002C080 to D_8002D4B0 */
@@ -84,158 +47,20 @@ extern u32  __osShutdown;
 
 /* BSS STARTS at D_8002D4B0 */
 
-extern s32  D_8002D4B0; // BSS
-extern s32 *D_8002D8B0;
-
 /* 80030000 */
-extern OSThread D_80031AE0;
-extern OSThread D_800318B0; // thread 1
-
-extern s32  D_80032B30;
-extern s32  D_80033330;
-
-extern s32  D_800354F8;
-extern s32 *D_800354FC; // contains chunk0 offsets
-extern s16  D_80035500;
 extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares it itself); stopped by the PI manager in init_2E50
 
-extern s32 D_800364C4;
 
-extern u32  D_80038070;
-extern u16  D_80038074;
-extern u8   D_80038080;
-extern u32  D_80038090; // RDP output buffer address (u64 *); matching: init_3930 must store it as an integer like D_80038098/9C so IDO shares the constants
-extern u32  D_80038094; // its end address (same as D_80038090)
-extern u32  D_80038098;
-extern u32  D_8003809C;
-extern f32  D_800380A0;
-extern f32  D_800380A4;
-extern AllocatorFreeBlock *D_800380B0; // largest free heap block
-extern AllocatorBlock *D_800380B4;     // first heap block (all blocks, address order)
-extern AllocatorFreeBlock *D_800380B8; // free list head (address order)
-extern AllocatorFreeBlock *D_800380BC; // free list tail
 
-extern s32  D_800380C0;
-extern s32  D_800380C4;
-extern s32  D_800380C8;
-extern s32  D_800380CC;
-extern s32  D_800380D0;
-extern OSMesg      D_800380E0;
-extern OSMesgQueue D_800388B0;
-
-extern OSMesg      gMessage0;
-extern OSMesgQueue gMessageQueue0;
-
-extern OSMesg      gMessages[3];
-extern OSMesgQueue gMessageQueue[3];
-
-extern s32 D_80038904;
-extern OSIoMesg D_80038950[];
-
-extern u8  D_8003A570;
-extern u8  D_8003A571;
-extern vu8 D_8003A572; // PI interlock flags shared with the PI manager thread (init_2E50)
-extern vu8 D_8003A573;
-extern u8  D_8003A574;
-extern vu8 D_8003A575;
-extern s8   D_8003A580;
-extern u8  D_8003A581;
-extern u8  D_8003A582;
-extern u8  D_8003A583;
-extern u8  D_8003A584;
-extern OSTimer D_8003A588; /* audio start timer */
-extern OSScMsg D_8003A5C8; /* pre-NMI message */
-
-extern u8   D_8003BC30[][64];
-extern u8   D_8003BD30[][64];
-extern u8   D_8003BE30[32];
-extern u8   D_8003BE50[];
-extern s32  D_8003BE70;
-extern s32  D_8003BE74;
-extern s16  D_8003BE78;
-extern s8   D_8003BE7C;
-extern s32  D_8003BE94;
-
-extern s32  D_8003C858;
-extern s32  D_8003C8E0;
-extern ALSeqFile *D_8003CD40;          // sequence table
-extern ALCSeqMarker D_8003CD48[][8];
-extern u16  D_8003C910[];              // sequence lengths, rounded up to even
-
-extern ALBank *D_8003E368;
-extern ALHeap D_8003E370;              // audio heap
-extern OSThread  D_8003E3A0;
-extern s32  D_8003E640;
-
-extern OSMesgQueue D_8003E608;
-extern OSMesg      D_8003E620[8];
-extern OSMesgQueue D_8003E5D0;
-extern OSMesg      D_8003E5E8[8];
-
-extern u16  D_8003CA3C[];              // sequence loaded in each player (0xFFFF: none)
-extern u8  *D_8003CA48[];              // each player's sequence data buffer
-extern ALCSeq D_8003CA58[];
-extern s32  D_8003C90C;
 
 /* 80040000 */
 
 
 extern s32  D_80040000;
-extern u8   D_80040F84;
-extern u32  D_80040F88; /* short audio frame, in samples */
-extern u32  D_80040F8C; /* audio frame, in samples */
-extern u32  D_80040F90; /* longest audio frame, in samples */
-extern OSIoMesg D_80040F98[];
-extern u8   D_80041F00;
-extern s32  D_80041F04;
-extern s32  D_80041F08;
-extern s32  D_80041F0C;
-extern s32  D_80041F50;
-extern s32  D_80041F54;
-extern u16  D_80041F56;
-extern f32  D_80041F58;
-extern u8   *D_80041F5C; /* per-sound variant history */
-extern u8   D_80041F60;
-extern u8   D_80041F61;
-extern s8   D_80041FD8;
-extern u8   D_80041FD9;
-extern s32  D_80041FDC;
-extern s32 D_80041FEC[][12];
 
-extern OSMesgQueue D_80041298;
-extern OSMesg      D_800412B0[];
-extern OSMesgQueue D_800416F0;
-extern OSMesg      D_80041708[];
 
-extern u32 D_800417BC;
-extern u8 D_800418AC[];
-extern s32 D_800418B0[3][16]; /* per-channel music event level */
 
-extern u8 D_800419A0;
-extern OSMesgQueue D_80041E58[3];
-extern OSMesg      D_80041EA0[3][8]; /* message buffers of the D_80041E58 queues */
 
-extern s32  D_80042760;
-extern s32  D_80042770;
-extern s32  D_80042774;
-extern s32  D_80042778;
-extern s32  D_8004277C;
-extern f32  D_80042780[2]; // per channel: frequency last sent
-extern f32  D_80042784;
-extern f32  D_80042788[2]; // per channel: gain last sent
-extern f32  D_80042790;
-extern f32  D_80042794;
-extern f32  D_80042798;
-extern MsgRing D_800427A0;
-extern u8   D_800427B0[64]; // D_800427A0's buffer
-extern u16  D_800427F4;
-extern SoundSlot D_800425E0[];
-extern u8   D_800428C0;
-extern u8   D_800428C1;
-extern u8   D_800428C2;
-extern u8   D_800428C4[];
-extern u8   D_800428C6[];
-extern u8   D_800428C8[];
 
 // BSS ENDS AT D_80043B40
 
@@ -247,32 +72,6 @@ extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 // 0x80044B20 + 253952 = 0x80082B20
 
 /* 80080000 */
-extern s32 *D_80082B20[]; // per level (LevelHeader.assetList): zero-terminated asset id list. The segment
-                          // starts here; init_1050 first DMAs its 16-byte header in (word 0: compressed data offset).
-extern void (*D_80082B40[])(Camera *);
-extern s8   D_80082BB4; // pending EEPROM request (game_33990)
-extern ModeSettings *D_80082BBC; // saved settings, one record per multiplayer mode
-extern u8   D_80082BC0;
-extern u8   D_80082BE0[4];
-extern u8   D_80082BE4[5];
-extern void (*D_80082BFC[])(PointLight *light);
-extern void (*D_80082D60[])(void);
-extern void (*D_80082D90[])(void);
-extern void (*D_80082EA0[])(void);
-extern void (*D_80082ECC[])(void);
-extern void (*D_80082F40[])(void);
-extern void (*D_80082F70[])(void);
-extern s32  D_80082FA0;
-extern s32  D_80082FA4;
-extern s16 D_80082FA6;
-extern u8 D_80082FC0[];
-extern u8 D_80083140[];
-extern u8 D_80083740[]; // segment-8 texture data bound by effect pre-draws
-extern u8 D_800838C0[];
-extern u8 D_80083A40[];
-extern u8 D_80083BC0[];
-extern u8 D_80084060[]; /* controller port of each player, >= 4: none */
-extern u8   D_80084064;
 extern u8 D_80084160[];
 extern u8 D_80084190[];
 extern Vtx  D_80084300[5];
@@ -395,6 +194,7 @@ extern u8 (*D_8008FD04[])(void); // a second picker table by effect kind (game_2
 extern s32 D_80090298[]; // texture ids
 extern s32 D_800902B8;
 extern s32 D_800902E4;
+extern s32 D_800902DC;
 extern s32 D_800902E8;
 extern s32 D_800902EC;
 extern s32 D_80090310;
@@ -407,6 +207,11 @@ extern s32 jtbl_80091A30[];
 
 extern s32 D_80090324[];
 extern TextureDesc D_80090514;
+/* Asset id lists of D_80082B20 (game_305D0.c). */
+extern s32 D_80090150[];
+extern s32 D_8009016C[];
+extern s32 D_80090184[];
+extern s32 D_800901C4[];
 extern TextureDesc D_80090B60[]; /* the effect texture table (the `texture` index of the effect descriptors) */
 /* Entries of the effect texture table D_80090B60, referenced directly. */
 extern TextureDesc D_80090CD4;
@@ -422,36 +227,12 @@ extern HudSprite D_800917EC;
 extern HudSprite D_800917F8;
 extern TextureDesc D_8009187C;
 extern TextureDesc D_800918A0;
-extern s32 D_80091AF0[];
-extern s32 D_80091C04[];
-extern u16 D_80091D20[]; // per texture: compressed size
 
 // chunk0 data starts at rom 0x80082B20
 // this chunk0 data
 // D_800959E0 is 0x80082B20 + 0x00012ec0
 
-extern f32 D_80096220;
-extern f32 D_80096224;
-extern f32 D_80096228;
-extern f32 D_8009622C;
-extern f32 D_80096230;
-extern f32 D_80096234;
-extern f32 D_80096238;
-extern f32 D_8009623C;
-extern f32 D_80096240;
-extern f32 D_80096244;
 
-extern RopeEnds D_800963A0[6];
-extern RopeEnds D_80096430;
-
-extern f32 D_80096530;
-extern f32 D_80096534;
-
-extern f32 D_80096540;
-
-extern f32 D_80096560;
-extern f32 D_800968B0;
-extern s32 D_800968E0;
 
 // code_75400.c
 
@@ -505,58 +286,9 @@ extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
 extern u8 D_800AB62C[][3]; // team colours (RGB)
 extern ModeEntry D_800AB68C[]; // multiplayer game-mode table
 extern s32 D_800AB754[];
-extern u8  *D_800B0DC0; // triangle-data arena: cursor, start, end
-extern u8  *D_800B0DC4;
-extern u8  *D_800B0DC8;
-extern s32  D_800B0DCC;
-extern s32  D_800B0DD0;
-extern s32  D_800B0DD4;
-extern u16  D_800B0DD8;
-extern u8  *D_800B0DDC;
-extern u8  *D_800B0DE0;
-extern s32  D_800B0DE4;
 extern LevelHeader *D_800B0DF0;
-extern Gfx *D_800B0E00[4]; // level display lists (D_800B0E04 is [1])
-extern Gfx *D_800B0E04;
 
-extern Vtx *D_800B0E10[4]; // level mesh vertices of the four level models (each display list follows its vertices)
-extern VtxColorGroup **D_800B0E30; // groups of each vertex color set
-extern u8 *D_800B0E34; // group count of each vertex color set
-
-extern u8 D_800B0E38;
-extern s32 D_800B0E40[];
-extern LevelModelEntry *D_800B0E50; // the current level's models
-extern s32 D_800B0E58[7762];
-
-extern u16 D_800B87A0[]; // per texture: size
-
-extern s8  D_800BC448[]; // per texture: frames left before it is freed (0 = not loaded)
-
-extern u8 * D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
-extern ParticleResource D_800BE4A0[15];
-extern struct TexScroll **D_800BE4F0; /* four texture scrolls (func_15010FB0) */
-extern BounceRecord *D_800BE4E0;
-extern u8  D_800BE500[5]; // might be a struct?
-extern u8 (*D_800BE510)[3]; // base RGB of every level vertex, then the props'; (&D_800BE510)[i] for i < 4 is level model i's first vertex (no symbols of their own)
-extern u8 (***D_800BE520)[3]; // [set][group][i]: base RGB of each color-group vertex
-extern u16 * D_800BE524; // first D_800BE510 entry of each prop
-extern u16 *D_800BE570; // RGBA16 screen copy, D_800BE620 x D_800BE624 (game_203340)
-extern u8  D_800BE574;
-extern u8  D_800BE575;
-extern u8 D_800BE580[]; /* bit set over text ids */
-extern u8 D_800BE590;
-extern u16 D_800BE598[];
-extern s32 *D_800BE5A8[]; // per spawn model type: data loaded by func_1502B7F0
 extern s32 D_800BE5D0;
-extern u8  D_800BE5E0;
-extern u8 D_800BE619;
-extern u8 D_800BE61A;
-extern u8 D_800BE630[];
-extern s16 D_800BE668[4][5][2];
-extern f32 D_800BE6C0[]; // per-player smoothed light pitch (degrees, -180..180)
-extern f32 D_800BE6D0[]; // per-player smoothed light yaw (degrees, 0..360)
-extern u8 D_800BE740;
-extern u16 D_800BE930[4]; // button bits per controller (menu reads)
 extern u8  D_800BE9A0;
 extern f32 D_800BE9A4;
 extern f32 D_800BE9A8;
@@ -565,47 +297,13 @@ extern u8 D_800BE9EB;
 extern s32 level;
 
 
-extern u16 *D_800BE2B0[]; // per camera: a row buffer of D_800BE620 u16 (HitsZBufferHoriDataPtr)
-extern OSMesg  D_800BE2D0;
-extern u8   D_800BE358[0x80]; // EEPROM/mempak transfer buffer; [0..1] is a u16 checksum
-extern s8   D_800BE3D9;
-extern s8   D_800BE3DA;
-extern s8   D_800BE3DB;
-extern s32  D_800BE3E8;
-extern s8   D_800BE3EC; // its save-slot argument
-extern SaveSlotInfo D_800BE3F8[3]; // the three save slots
 
-extern s8   D_800BE618;
-extern s32  D_800BE620;
-extern s32  D_800BE624;
-extern RenderView *D_800BE628; // one per player view
-extern Vp  *D_800BE62C; // one viewport per view
-extern u8   D_800BE635;
-extern s32  D_800BE638[6]; // per-layout view widths
-extern s32  D_800BE650[6]; // per-layout view heights
-extern f32  D_800BE6B8;
-extern OSPfs D_800BE760[MAXCONTROLLERS]; // rumble pak per controller channel
-extern OSMesgQueue D_800BE900;
-extern OSContPad D_800BE918[4]; // controller pads (read in game_48FD0.c)
-extern u8   D_800BE938;
 extern Gfx *D_800BE9C8[2]; // display-list buffer per framebuffer (D_800BE9C0)
 extern Gfx *D_800BE9D0;    // display-list write head
 extern Gfx *D_800BE9D8[2]; // per framebuffer: end of the prologue built by func_1501A39C
 
-extern u8   D_800BE93C[];
 
-extern u16  D_800BE710[];
-extern u16  D_800BE720[];
-extern OSContPad **D_800BE728; // per-player controller pads (the table func_1501BBB8 returns)
-extern u8   D_800BE940[];
-extern u8   D_800BE944[];
-extern u8   D_800BE948[];
-extern f32  D_800BE950[];
-extern f32  D_800BE960[];
-extern f32  D_800BE970[];
-extern f32  D_800BE980[];
 
-extern OSMesg      D_800BE990;
 extern u8   D_800BE9B4;
 extern u8   D_800BE9C0; // which of the two matrix buffers is being built this frame
 extern u16 *D_800BE9C4; // z-buffer (D_800BE620 x D_800BE624)
@@ -618,8 +316,6 @@ extern s16 D_800BE9F2;
 extern s32 D_800BE9F4;   // current scene / game mode id
 extern s32  D_800BE9F8;
 
-extern OSContPad *D_800BE730[4]; // per-player pointers into D_800BE748
-extern OSContPad D_800BE748[4];   // per-player controller pads
 
 extern s32 D_800BEA00;
 extern s32 D_800BEA04;
@@ -994,6 +690,7 @@ extern u8  D_800D9938[14];
 extern u8  D_800D9939;
 extern u8  D_800D992A[];
 extern u8  D_800D993A[];
+extern u8  D_800D9946[]; // just past the end of D_800D993A (func_15010600 stops there)
 
 extern u8 D_800D9950[];
 extern AimImpact D_800D9960[]; // aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none)
@@ -1090,8 +787,8 @@ extern u8 *D_800DBEFC; // per object: frames to keep the handle once hidden
 extern u8  D_800DBF00;
 extern MtxF D_800DBF08[]; // per-frame
 extern u8  D_800DBF88;
-extern s32 D_800DBF8C;
-extern s32 D_800DBF90;
+extern Gfx *D_800DBF8C; // display list of object D_800DBF88 (func_15004574)
+extern Vtx *D_800DBF90; // its source vertices
 extern s32 * gWorldObjectContacts; // per object: bit N set when actor movement_obj[N] touches it
 extern s32 D_800DBF98; // grouped objects, kept at the end of db_Object_array
 extern Camera *camera_global_Cameras;
@@ -1110,6 +807,8 @@ extern ViewEnvelope D_800DC2C0[4]; // per-view camera wobble envelope (game_15AB
 extern s32 D_800DC9F0; /* live glow count */
 extern u8 D_800DCA20;
 extern f32 D_800DCA24;
+extern u8 D_800DCA28;
+extern f32 D_800DCA2C;
 extern BurstPoint D_800DCA30[3][10]; // random burst points around each pipe (func_150124A0 fills, func_15156B54 uses)
 extern Mtx D_800DCC10[]; // per-view orthographic projection (func_151EF954)
 extern ParticleNode *D_800DC460; // loaded particle models: list head
@@ -1141,6 +840,14 @@ extern f32 D_800DCD94;
 extern f32 D_800DCD98;
 extern f32 D_800DCD9C;
 extern f32 D_800DCDA0;
+extern f32 D_800DCDA4;
+extern f32 D_800DCDA8;
+extern f32 D_800DCDAC;
+extern f32 D_800DCDB0;
+extern f32 D_800DCDB4;
+extern f32 D_800DCDB8;
+extern f32 D_800DCDBC;
+extern f32 D_800DCDC0;
 
 extern u8 D_800DCD20[3]; // ambient light colour
 
@@ -1310,7 +1017,7 @@ extern void (*D_800E0E00)(s32, void *, s32); // stream tag callback (set by func
 extern s32  D_800E0E04;
 extern TriggerZone *D_800E0900[6]; // per flamethrower character
 extern void *D_800E0930;
-extern s32  D_800E0934;
+extern void (*D_800E0934)(s32 x, s32 y, s32 z); // bullet impact hook (func_151C1654), set per level
 extern void *D_800E0940;
 extern u8   D_800E0950[20]; // reference counts (game_1FFF60)
 extern s32  D_800E0964;

@@ -2601,8 +2601,6 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index,
     return hitMask;
 }
 
-extern s32 D_800B2CD0;
-
 /* Tests the attacker's active attack (unkD0) against every other actor and applies the hits; returns the hit mask. */
 s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
     s32 i;
@@ -2789,8 +2787,8 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
     }
     if (ret != 0) {
         hit = (HitReaction *)((u8 *)hits + attackIdx * sizeof(HitReaction));
-        /* unk108 holds victim slot | 0x80, and D_800B2CD0 + 0x80 * 0x32C is movement_obj */
-        if (((s32 (*)[0x32C / 4])&D_800B2CD0)[attacker->unk108][0] == 1) {
+        /* unk108 holds victim slot | 0x80 */
+        if (movement_obj[attacker->unk108 - 0x80].type == 1) {
             if (attacker->unk254 != 0) {
                 attacker->intelwalk = attacker->unk254;
                 attacker->scriptCmd = NULL;

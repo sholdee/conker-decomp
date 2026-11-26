@@ -1,4 +1,17 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order it first
+ * sees each name. */
+AllocatorFreeBlock *D_800380B0; // largest free heap block
+AllocatorBlock *D_800380B4;     // first heap block (all blocks, address order)
+AllocatorFreeBlock *D_800380B8; // free list head (address order)
+AllocatorFreeBlock *D_800380BC; // free list tail
+static s32 D_800380C0;
+static s32 D_800380C4;
+static s32 D_800380C8;
+static s32 D_800380CC;
+static s32 D_800380D0;
 
 #include "functions.h"
 #include "variables.h"
@@ -12,18 +25,12 @@
  *   D_800380C0..D_800380D0  arguments of the last func_10003C6C call
  */
 
+static s32 D_8002AC30 = 0x10000000; // size of the largest free block
+
 /* Allocates size bytes from the front of the heap; see func_10003C6C. */
 void *allocate_memory(s32 size, s32 tag, s32 align, s32 mode) {
     return func_10003C6C(size, tag, align, FALSE, mode);
 }
-
-/* Per-alignment-class tables: payload offset to round from, and the rounding mask. */
-typedef struct AllocAlignTable {
-    s16 values[5];
-} AllocAlignTable;
-
-extern AllocAlignTable D_8002AC34;
-extern AllocAlignTable D_8002AC40;
 
 /*
  * Allocates a block with a size-byte payload and the given tag, aligned by class
@@ -44,12 +51,11 @@ void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
     AllocatorFreeBlock *prevFree;
     s32 alignOffset;
     s32 alignMask;
-    AllocAlignTable offsets;
-    AllocAlignTable masks;
+    // per alignment class: the payload offset to round from, and the rounding mask
+    s16 offsets[5] = { 3, 7, 15, 63, 0x1FFF };
+    s16 masks[5] = { ~3, ~7, ~15, ~63, ~0x1FFF };
     OSIntMask intMask;
 
-    offsets = D_8002AC34;
-    masks = D_8002AC40;
     D_800380C0 = size;
     D_800380C4 = tag;
     D_800380C8 = align;
@@ -62,8 +68,8 @@ void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
         size = 8;
     }
     size = (size + 3) & ~3;
-    alignOffset = offsets.values[align];
-    alignMask = masks.values[align];
+    alignOffset = offsets[align];
+    alignMask = masks[align];
     if (mode == 1 && D_8002AC30 < 0x7800) {
         return NULL;
     }
@@ -98,7 +104,7 @@ void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
 
     // block is the aligned payload so far; step back to its header.
     if (!fromEnd) {
-        block = (AllocatorBlock *)((u32)block - sizeof(AllocatorBlock));
+        block--;
         following = (AllocatorBlock *)((u32)block + size + sizeof(AllocatorBlock));
         remainder = ((u32)freeBlock + freeSize) - ((u32)block + size);
     } else {

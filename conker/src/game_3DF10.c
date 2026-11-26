@@ -1,14 +1,4 @@
-/* game_3DF10.c -- func_15010A60.
- *
- * The five float constants are this function's OWN anonymous literal pool, not
- * globals: golden hoists them into callee-saved $f20..$f30, and IDO only hoists
- * LITERALS -- an `extern f32` is a memory object it reloads inside a
- * call-containing loop (measured: extern 330 / frame -0x1A0, literals 0 / -0x1D0;
- * `extern const f32` is identical to extern at 330).
- *
- * The pool is therefore migrated to this TU in conker.us.yaml:
- *     [0x23AF60, .rodata, game_3DF10]
- */
+/* game_3DF10.c -- func_15010A60: the level's six floating models, three of them with a light. */
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
@@ -27,11 +17,14 @@ typedef struct {
     /* 0x28 */ f32 unk28;
 } Struct3DF10Tail; /* size 0x2C */
 
-extern Vec3f D_80096450[];
-extern u8 D_80096498[];
+static const Vec3f D_80096450[6] = {
+    { 3432.0f, 593.0f, -255.0f }, { 3627.0f, 593.0f, 291.0f }, { 3065.0f, 593.0f, 290.0f },
+    { 2984.0f, 593.0f, -274.0f }, { 2489.0f, 593.0f, 298.0f }, { 2519.0f, 593.0f, -261.0f },
+};
+static const u8 D_80096498[6] = { 1, 0, 1, 0, 0, 1 }; /* which of them get a light */
 
 void func_15010A60(void) {
-    void *result;
+    ModelParticle *result;
     ParticleSpawn78 part;
     s32 i;
     DynModelDesc desc;
@@ -100,41 +93,41 @@ void func_15010A60(void) {
         tail.unk18 = pos;
 
         func_1510F800(0);
-        part.unk5C = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+        part.unk5C = func_1510FD20(part.pos.x, part.pos.z);
 
-        rnd = (u32)(osGetCount() * func_150ADA20()) & 0xFFFF;
+        rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
         sp[0] = (rnd + rnd) * 3.141592741f;
         tail.unk00 = sp[0];
 
-        rnd = (u32)(osGetCount() * func_150ADA20()) & 0xFFFF;
+        rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
         sp[1] = (rnd + rnd) * 3.141592741f;
         tail.unk04 = sp[1];
 
-        rnd = (u32)(osGetCount() * func_150ADA20()) & 0xFFFF;
+        rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
         sp[4] = rnd * 3.800000191f + 2.0f;
         tail.unk10 = sp[4];
 
-        rnd = (u32)(osGetCount() * func_150ADA20()) & 0xFFFF;
+        rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
         sp[5] = rnd * 3.800000191f + 2.0f;
         tail.unk14 = sp[5];
 
-        rnd = (u32)(osGetCount() * func_150ADA20()) & 0xFFFF;
+        rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
         sp[2] = rnd * 0.1100000069f + 0.05000000075f;
         tail.unk08 = sp[2];
 
-        rnd = (u32)(osGetCount() * func_150ADA20()) & 0xFFFF;
+        rnd = (osGetCount() * func_150ADA20()) & 0xFFFF;
         rnd *= 1.525902189e-05f;
         sp[3] = rnd * 0.1100000069f + 0.05000000075f;
         tail.unk0C = sp[3];
 
         result = func_15132A4C(&part, 3, 0xFF, 0x18, 0xFF, 1);
         if (result != NULL) {
-            memcpy((u8 *)result + 0x170, sp, 0x18);
+            memcpy(result + 1, sp, sizeof(sp));
         }
 
         if (D_80096498[i] != 0) {
@@ -142,9 +135,9 @@ void func_15010A60(void) {
             if (ent != NULL) {
                 memcpy(DYNMODEL_USERDATA(ent), &tail, sizeof(tail));
             }
-            header2.x = (s32)D_80096450[i].x;
-            header2.y = (s32)D_80096450[i].y;
-            header2.z = (s32)D_80096450[i].z;
+            header2.x = D_80096450[i].x;
+            header2.y = D_80096450[i].y;
+            header2.z = D_80096450[i].z;
             payload = result;
             header.flags = 2;
             header.update = 0x16;

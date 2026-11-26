@@ -10,13 +10,29 @@ typedef struct Game48B10Vertex {
     u8 r, g, b, a;
 } Game48B10Vertex;
 typedef struct Game48B10Color { u8 r, g, b; } Game48B10Color;
-extern Game48B10Color *D_80084040[];
-extern u8 D_80096920[];
+
+/* The number of colours in the ramp of each vertex group (groups 1..5). */
+static const u8 D_80096920[] = { 4, 4, 3, 3, 2 };
+/* The colour ramps. */
+static const Game48B10Color D_80096928[4] = {
+    { 0xFF, 0x64, 0x00 }, { 0xFF, 0x00, 0x00 }, { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF },
+};
+static const Game48B10Color D_80096934[4] = {
+    { 0xFF, 0x5A, 0x00 }, { 0xFF, 0x1E, 0x00 }, { 0xFF, 0xFF, 0xFF },
+};
+static const Game48B10Color D_80096940[4] = {
+    { 0xB4, 0x3C, 0x00 }, { 0xB4, 0x00, 0x00 }, { 0xFF, 0xFF, 0xFF },
+};
+static const Game48B10Color D_8009694C[4] = {
+    { 0xFF, 0xFF, 0xFF }, { 0xFF, 0x00, 0x00 },
+};
+/* The colour ramp of each vertex group. */
+static const Game48B10Color *D_80084040[] = { D_80096928, D_80096928, D_80096934, D_80096940, D_8009694C };
 
 void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
     Game48B10Vertex *vertices;
-    Game48B10Color *first;
-    Game48B10Color *second;
+    const Game48B10Color *first;
+    const Game48B10Color *second;
     f32 value;
     f32 interval;
     f32 fraction;
@@ -43,7 +59,7 @@ void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
                 previous = group;
                 group--;
                 steps = D_80096920[group];
-                interval = 1.0f / (f32) (steps - 1);
+                interval = 1.0f / (steps - 1);
                 if (arg2 != 0) {
                     value = arg1[group];
                 } else {
@@ -52,13 +68,13 @@ void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
                 sample = value / interval;
                 first = &D_80084040[group][sample];
                 second = &D_80084040[group][sample + 1];
-                fraction = (value - (f32) (u32) sample * interval) / interval;
+                fraction = (value - (u32)sample * interval) / interval;
                 r = first->r;
-                outR = (f32) (s32) (second->r - r) * fraction + (f32) r;
+                outR = (s32)(second->r - r) * fraction + r;
                 g = first->g;
-                outG = (f32) (s32) (second->g - g) * fraction + (f32) g;
+                outG = (s32)(second->g - g) * fraction + g;
                 b = first->b;
-                outB = (f32) (s32) (second->b - b) * fraction + (f32) b;
+                outB = (s32)(second->b - b) * fraction + b;
             }
             vertices[i].r = outR;
             vertices[i].g = outG;

@@ -1,7 +1,14 @@
 #include <ultra64.h>
+
+// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// the order it first sees each name, and that order also depends on how many types and variables are
+// declared before it (see init_50A0.c).
+u8 D_800BE590;      // number of distinct spawn model types in D_800BE598
+u16 D_800BE598[8];  // the distinct spawn model types (< 0xBB) of the level
+s32 *D_800BE5A8[8]; // per spawn model type: data loaded by func_1502B7F0
+
 #include "functions.h"
 #include "variables.h"
-
 
 /* Collects the distinct spawn-table model types (< 0xBB) and the data func_1502B7F0 loads for each. */
 void func_15016850(void) {
@@ -85,7 +92,7 @@ void func_150169A0(s32 levelId) {
     D_800D1548 = 0;
 players: // matching: unused label splits the basic block; IDO schedules the loop setup differently without it
     for (i = 0; i < D_8008FD8C; i++) {
-        if ((1 << i) & (u16)D_800D2340) {
+        if ((1 << i) & D_800D2340) {
             s32 type = func_150859AC(i, 1);
 
             D_800D20FC[i].unk2 = 0;

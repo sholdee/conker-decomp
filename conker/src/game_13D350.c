@@ -113,7 +113,7 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     if (visible != 0) {
         gfx = D_800891D8[D_800B0DF0->unk8](gfx, x, y, z, pitch, yaw, roll, visible);
     }
-    gfx = func_1501A490(gfx, D_80082FA6, 0, 0, 0, 0);
+    gfx = func_1501A490(gfx, D_80082FA4, 0, 0, 0, 0);
     gSPSetGeometryMode(gfx++, G_CULL_BACK);
     return gfx;
 }
@@ -669,7 +669,7 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     tlutCounts = D_800891F8;
     tiles = D_800891FC;
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
-    gfx = func_1501A680(func_1501A490(gfx, D_80082FA6, 0, 0, 0, 0));
+    gfx = func_1501A680(func_1501A490(gfx, D_80082FA4, 0, 0, 0, 0));
     fov = (D_80082FA0 != 1) ? 80.0f : 95.0f;
     if (level == 0x41) {
         yaw -= 119.0f;

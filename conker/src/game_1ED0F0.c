@@ -570,7 +570,7 @@ void func_151C1628(Bullet *bullet) {
 void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface) {
     void (*callback)(s32, s32, s32);
 
-    callback = (void (*)(s32, s32, s32))D_800E0934;
+    callback = D_800E0934;
     if (callback != NULL) {
         callback(pos->x, pos->y, pos->z);
     }

@@ -6,7 +6,6 @@
  * Scripted expression control for the current object.
  */
 
-extern s32 D_800427F0;
 extern s32 D_8009BD10[];
 extern s32 D_800D1928;
 extern s32 D_800D192C;

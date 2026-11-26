@@ -3,12 +3,16 @@
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init_50A0.c), which the subsystem headers change often.
+u8 D_800BE5E0;      // the ticks of this frame; bit 0 carries over to the next
 f32 D_800BE5E8[10]; // the last 10 frame deltas
 u32 D_800BE610;     // the leftover tick remainder
 u8 D_800BE614;
 u8 D_800BE615;
 u8 D_800BE616;
 u8 D_800BE617;
+s8 D_800BE618;
+u8 D_800BE619; // the next slot of D_800BE5E8
+u8 D_800BE61A; // the number of filled slots of D_800BE5E8
 
 #include "functions.h"
 #include "variables.h"
@@ -212,7 +216,7 @@ void func_15018DFC(void) {
         } else {
             func_1504A730();
         }
-        func_15085ABC((s16)D_800D2340);
+        func_15085ABC(D_800D2340);
     }
     func_1507C370();
     func_1507C8FC();
@@ -552,7 +556,7 @@ void func_15019F20(void) {
         } else {
             i = ((u32 *)D_800BE5E8)[10]; // matching: reads D_800BE610 (the word after the array) through D_800BE5E8, keeping its address out of CSE
             i += ticks;
-            D_800BE9A4 = (f32)ticks / (f32)(u32)rate;
+            D_800BE9A4 = (f32)ticks / (u32)rate;
             D_800BE9E4 = D_800BE9A4;
             D_800BE9A4 *= 0.5f;
             if (i >= rate) {
@@ -567,7 +571,7 @@ void func_15019F20(void) {
             }
         }
     } else {
-        D_800BE9A4 = (f32)ticks * 0.5f;
+        D_800BE9A4 = ticks * 0.5f;
     }
     D_800BE5E0 &= 1;
     D_800BE5E0 += ticks;

@@ -5,9 +5,6 @@
  * (after the SDK's audiomgr.c) and Conker's sound bank loader.
  */
 
-#include "functions.h"
-#include "variables.h"
-
 #define QUIT_MSG 10
 
 #define NUM_DMA_BUFFERS   52
@@ -17,6 +14,8 @@
 #define NUM_BANK_RECORDS 50
 #define MAX_BANK_DMAS    40 /* bank loads in flight */
 
+#define AUDIO_STACK_SIZE 0x2000
+
 /* Output frames are a whole number of 184-sample blocks. */
 #define FRAME_SAMPLE_ALIGN 184
 #define EXTRA_SAMPLES      84
@@ -24,6 +23,30 @@
 /* libaudio's alLink() and alUnlink(), inlined for any node type with next/prev links. */
 #define LIST_LINK(type, element, after) { type *ln = (element); type *to = (after); ln->next = to->next; ln->prev = to; if (to->next != NULL) { to->next->prev = ln; } to->next = ln; }
 #define LIST_UNLINK(type, element) { type *ln = (element); if (ln->next != NULL) { ln->next->prev = ln->prev; } if (ln->prev != NULL) { ln->prev->next = ln->next; } }
+
+typedef struct {
+    Acmd *ACMDList[2];
+    struct AudioInfo_s *audioInfo[3];
+} AudioMgr;
+
+/*
+ * This file's .bss, from 0x8003E380. It is defined before functions.h and variables.h: IDO places a
+ * variable that an extern declared earlier (D_8003E384, of conker/audio.h) after the others.
+ */
+static void *D_8003E380;          /* the synthesis driver's globals */
+s32 D_8003E384;
+static AudioMgr D_8003E388;
+static OSThread D_8003E3A0;       /* audio thread */
+static u8 D_8003E550[0x80];       /* not referenced */
+static OSMesgQueue D_8003E5D0;    /* retrace and pre-NMI messages from the scheduler */
+static OSMesg D_8003E5E8[8];
+static OSMesgQueue D_8003E608;    /* audio task done messages */
+static OSMesg D_8003E620[8];
+static u8 D_8003E640[0x60];       /* N_ALGlobals of the synthesis driver (n_alInit) */
+static u64 D_8003E6A0[AUDIO_STACK_SIZE / sizeof(u64)]; /* audio thread stack */
+
+#include "functions.h"
+#include "variables.h"
 
 
 typedef union {
@@ -45,11 +68,6 @@ struct AudioInfo_s {
     OSScTask task;
     AudioMsg msg;
 };
-
-typedef struct {
-    Acmd *ACMDList[2];
-    AudioInfo *audioInfo[3];
-} AudioMgr;
 
 struct AudioMgrConfig {
     u32 frequency;
@@ -133,12 +151,41 @@ struct SynDriverConfig {
     s32 *params[2];
 };
 
-extern u32 D_8002AE50; /* bank DMAs in flight */
-extern FxParams D_8002AE54;
 extern u8 D_8002C960[];
-extern void *D_8003E380;
-extern AudioMgr D_8003E388;
-extern AudioInfo *D_8003E390[3]; /* D_8003E388.audioInfo */
+
+/* This file's .data. */
+static u8 D_8002AE40 = FALSE; /* the audio thread was started */
+static u32 D_8002AE44 = 0;    /* audio frame count */
+static u32 D_8002AE48 = 0;    /* sample DMAs issued this frame */
+static s32 D_8002AE4C = 0;    /* the command list being built */
+static u32 D_8002AE50 = 0;    /* bank DMAs in flight */
+/* Effect parameters of the two FX busses: the section count, the delay length, then
+   8 values per section (input, output, fbcoef, ffcoef, gain, chorus rate, chorus depth, lowpass). */
+static FxParams D_8002AE54 = { {
+        { 8, 6712,
+          0, 192, 9830, -9830, 0, 0, 0, 0,
+          192, 392, 9830, -9830, 11140, 0, 0, 9472,
+          880, 2816, 16384, -16384, 4587, 0, 0, 12288,
+          1056, 2112, 8192, -8192, 0, 0, 0, 0,
+          3520, 6160, 16384, -16384, 4587, 0, 0, 13568,
+          3696, 5280, 8192, -8192, 0, 0, 0, 0,
+          5280, 5944, 8192, -8192, 0, 0, 0, 0,
+          0, 6512, 13000, -13000, 0, 380, 10, 17664 },
+        { 1, 1760,
+          0, 1536, 13108, 0, 29493, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0 },
+} };
+
+/*
+ * The rest of the .bss (0x800406A0-0x800417B0) is still in asm: the stores below to D_800406A4 and
+ * D_800406B0 need their own symbols inside D_800406A0, and C cannot define two objects at one address.
+ */
 extern BankState D_800406A0;
 /* matching: some stores to D_800406A0.loadedList/releaseList go through these aliases (no shared base register) */
 extern BankRecord *D_800406A4; /* D_800406A0.loadedList */
@@ -146,8 +193,17 @@ extern BankRecord *D_800406B0; /* D_800406A0.releaseList */
 extern DMABuffer D_800406B8[NUM_DMA_BUFFERS];
 extern BankRecord D_80040AC8[NUM_BANK_RECORDS];
 extern DMAState D_80040F78;
-extern u32 D_80040F94;
+extern u8 D_80040F84;      /* frames left before the next short frame */
+extern u32 D_80040F88;     /* short audio frame, in samples */
+extern u32 D_80040F8C;     /* audio frame, in samples */
+extern u32 D_80040F90;     /* longest audio frame, in samples */
+extern u32 D_80040F94;     /* command list length */
+extern OSIoMesg D_80040F98[MAX_SAMPLE_DMAS];
+extern OSMesgQueue D_80041298; /* sample DMA completions */
+extern OSMesg D_800412B0[MAX_SAMPLE_DMAS];
 extern OSIoMesg D_80041330[MAX_BANK_DMAS];
+extern OSMesgQueue D_800416F0; /* bank DMA completions */
+extern OSMesg D_80041708[MAX_BANK_DMAS];
 
 Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 maxSamples);
 
@@ -216,8 +272,7 @@ void func_10008F90(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amCo
     osCreateMesgQueue(&D_8003E5D0, D_8003E5E8, 8);
     osCreateMesgQueue(&D_80041298, D_800412B0, MAX_SAMPLE_DMAS);
     osCreateMesgQueue(&D_800416F0, D_80041708, MAX_BANK_DMAS);
-    /* The thread's stack ends where D_800406A0 begins. */
-    osCreateThread(&D_8003E3A0, 4, func_10009400, NULL, &D_800406A0, priority);
+    osCreateThread(&D_8003E3A0, 4, func_10009400, NULL, D_8003E6A0 + AUDIO_STACK_SIZE / sizeof(u64), priority);
     D_8002AE40 = TRUE;
     osStartThread(&D_8003E3A0);
 }
@@ -254,7 +309,7 @@ void func_10009400(void *arg) {
                 if (fieldCount >= 2) {
                     fieldCount = 0;
                 }
-                if (fieldCount == 0 && func_100095A0(D_8003E390[D_8002AE44 % 3], lastInfo) != 0) {
+                if (fieldCount == 0 && func_100095A0(D_8003E388.audioInfo[D_8002AE44 % 3], lastInfo) != 0) {
                     if (!firstFrame) {
                         /* wait for the previous frame's task */
                         osRecvMesg(&D_8003E608, (OSMesg *)&msg, OS_MESG_BLOCK);
@@ -639,7 +694,7 @@ void func_1000A03C(void) {
                     }
                     if (record->mode == 1) {
                         instrument = record->buffer;
-                        for (sound = 0; sound < (u32)instrument->soundCount; sound++) {
+                        for (sound = 0; sound < instrument->soundCount; sound++) {
                             instrument->sounds[sound] =
                                 (AudioBankSound *)((u32)instrument->sounds[sound] + (u32)record->buffer);
                         }
@@ -663,7 +718,7 @@ void func_1000A03C(void) {
             if (record->mode == 1) {
                 AudioInstrument *instrument = record->buffer;
 
-                for (sound = 0; sound < (u32)instrument->soundCount; sound++) {
+                for (sound = 0; sound < instrument->soundCount; sound++) {
                     wave = instrument->sounds[sound]->wave;
                     if (wave->fieldA != 0) {
                         wave->fieldA = 0;

@@ -24,6 +24,11 @@ void func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 blocking);
 void func_10004674(void);
 void func_100046E4(s32 devAddr, void *dramAddr, u32 size);
 void func_1000480C(u32 romAddr, void *dest, u32 size);
+extern OSIoMesg D_800388E0;
+extern OSMesgQueue gMessageQueue[3]; // completions of the blocking reads, one per game thread
+extern vu8 D_8003A572; // PI interlock flags shared with the PI manager thread (init_2E50)
+extern vu8 D_8003A573;
+extern vu8 D_8003A575;
 
 /* game_57FA0.c */
 void func_1502AAF0(void);

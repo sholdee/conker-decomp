@@ -5,7 +5,6 @@
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define gRenderViews ((RenderView *)D_800BE628)
 
-extern Gfx *D_800B0E08;
 // matching: 0x800D35E4 has no symbol; addressing it as D_800D35E0[1] lets IDO share one %hi, the original doesn't
 
 #define D_800D35E4 ((&D_800D35E8)[-1])
@@ -108,14 +107,14 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
                     } else {
                         gSPDisplayList(gfx++, D_800B0E00[0]);
                     }
-                    if (D_800B0E04 != NULL) {
+                    if (D_800B0E00[1] != NULL) {
                         gDPPipeSync(gfx++);
                         gfx = func_1510CDB8(gfx, 0xFF, 0xFF, view);
                         gfx = func_151733D8(gfx, 1);
                         if (level == 0x35) {
                             gfx = func_150CF5E8(gfx);
                         }
-                        gSPDisplayList(gfx++, D_800B0E04);
+                        gSPDisplayList(gfx++, D_800B0E00[1]);
                     }
                     D_800BEBA0 = 0;
                     // byte 0x8B8 of Camera is not yet a named field in structs.h
@@ -133,10 +132,10 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
             }
         }
         gfx = func_1515E544(gfx, D_800D9E10[view], D_800D9E20, D_800D9E21, &D_800D9BD0[view][D_800BE9C0]);
-        if (D_800B0E08 != NULL) {
+        if (D_800B0E00[2] != NULL) {
             gDPPipeSync(gfx++);
             gfx = func_1510CDB8(gfx, 0xFF, 0xFF, view);
-            gSPDisplayList(gfx++, D_800B0E08);
+            gSPDisplayList(gfx++, D_800B0E00[2]);
         }
     }
     gfx = func_151742EC(gfx, view);

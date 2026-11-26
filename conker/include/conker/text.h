@@ -26,6 +26,7 @@ void func_15015A38(u8 *record, s32 glyph, s32 font);
 /* game_439B0.c */
 void func_15016500(void);
 void func_15016588(void);
+extern u8 D_800BE580[9]; // bit set over the 0x43 text ids
 
 /* game_6E770.c */
 Gfx *func_150412C0(Gfx *gfx);

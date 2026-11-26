@@ -334,7 +334,7 @@ typedef struct ObjType {
     /* 0x31 */ u8 pad31[3];
 } ObjType; // size 0x34
 
-/* A positional sound slot of init_EB00.c (D_800425E0[16]); a handle's low 4 bits are its slot. */
+/* A positional sound slot of init_EB00.c (D_800425E0); a handle's low 4 bits are its slot. */
 typedef struct {
     /* 0x0 */ u16 handle;
     /* 0x2 */ u16 nextHandle;  /* handed out next, then advanced by 16 */
@@ -342,6 +342,47 @@ typedef struct {
     /* 0x6 */ u16 unk6;
     /* 0x8 */ SndState *voice;
 } SoundSlot;
+
+/* Positional sound records (init_EB00.c). A record callback runs each update with the values about to be
+ * applied and may change them; returning nonzero stops the record. */
+typedef struct SoundRecord SoundRecord;
+typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix,
+                                   u16 *sound);
+
+/* A positional sound being tracked by func_10011624 (dynamicSounds, up to 32).
+ * original: struct AlSSound (rom_debug_struct.c); field names are Rare's labels with spaces as underscores,
+ * except mix and the members of the two callback parameter unions. */
+struct SoundRecord {
+    /* 0x00 */ u16 sample;
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
+    /* 0x08 */ u16 distance_max;
+    /* 0x0A */ s16 distance_loudest;
+    /* 0x0C */ s32 max_volume;
+    /* 0x10 */ u32 flags; /* see init_EB00.c */
+    /* 0x14 */ SoundRecordCallback callback_ptr;
+    /* 0x18 */ union {
+        void *ptr;
+        Actor *owner;   /* the object the sound follows (func_1000EE70, func_1000EFB4) */
+        s32 timer;      /* countdown (func_1000EB00, func_1000EBC4) */
+        s32 delay;      /* low half: countdown; high half: the sound held back meanwhile */
+        u16 half[2];
+    } callback_param1;
+    /* 0x1C */ union {
+        s32 val;        /* func_1000EE70: the owner's unique_id in the low byte */
+        Actor *obj;     /* the object the delayed sound plays on (func_1000ECCC, game_130CB0.c) */
+        u16 *ids;       /* func_1000EFB4: 0-terminated list of the owner's animation ids (Actor.unk84) */
+    } callback_param2;
+    /* 0x20 */ s16 pitch_shift_cent;
+    /* 0x22 */ u8 pan;     /* last pan sent to the voice; bit 7 is the fx-mix bit */
+    /* 0x23 */ u8 mix;
+    /* 0x24 */ u16 sound_id; /* voice handle */
+    /* 0x26 */ s16 current_volume;
+    /* 0x28 */ s16 distance_current;
+    /* 0x2A */ u8 pad2A[2];
+    /* 0x2C */ f32 pitch;
+}; /* size 0x30 */
 
 struct SHORTS {
     s16 unk0;
@@ -1634,7 +1675,7 @@ struct Camera {
     /* 0x408 */ u8 pad408[0x1C4];
     /* 0x5CC */ f32 LockedCamAngleK;
     /* 0x5D0 */ f32 ClampYAngle;
-    /* 0x5D4 */ s32 ClampYTop;
+    /* 0x5D4 */ f32 ClampYTop;
     /* 0x5D8 */ f32 ClampYBottom;
     /* 0x5DC */ f32 PanButtonAddOn;
     /* 0x5E0 */ f32 IdealYaw;                         /* not accessed by US code */
@@ -1901,7 +1942,19 @@ typedef struct TexCoord {
     /* 0x2 */ s16 t;
 } TexCoord;
 
-/* The resource picked for one of the 15 particle sprite types (D_800BE4A0[15], game_36680.c). */
+/* The texture of one particle resource (D_80095CE0[id]; game_38050.c and game_1A89B0.c read it). */
+typedef struct ParticleTexInfo {
+    /* 0x0 */ u8  flags;      // 0x01, 0x08: the slot's bit in D_800DDC04, D_800DDC08; 0x04: more y jitter
+                              // 0x10: one frame fewer; 0x80: D_800DDBF0 = 2 (func_1500AD84)
+    /* 0x1 */ u8  frameCount;
+    /* 0x2 */ u16 frameSize;  // bytes of one frame
+    /* 0x4 */ s16 scaleX;     // base x scale of the sprite
+    /* 0x6 */ s16 scaleY;     // base y scale of the sprite
+    /* 0x8 */ u8  width;      // texture width (func_1500AC14: tile extent (width << 5) - 1)
+    /* 0x9 */ u8  unk9;       // 5 for two resources, else 0; not read by the code
+} ParticleTexInfo; /* size 0xA */
+
+/* The resource picked for one of the 15 particle sprite types (D_800BE4A0[15], game_38050.c). */
 typedef struct ParticleResource {
     /* 0x0 */ u16 id; // 0xFF: none
     /* 0x2 */ u16 flags;
@@ -2678,7 +2731,7 @@ typedef struct CamMsgQueue {
 } CamMsgQueue; // size 0xB0
 
 /* A run of consecutive model vertices loaded under one matrix (bone); D_800C5C08[id] holds
- * D_800C5EF8[id] of them, sorted by address (built by func_150028BC in game_2DF70). */
+ * D_800C5EF8[id] of them, sorted by address (built by func_150028BC in game_2E910). */
 typedef struct VtxRun {
     /* 0x0 */ Vtx *start;
     /* 0x4 */ s32 count;
@@ -3220,7 +3273,7 @@ typedef struct ModelAsset {
     /* 0x14 */ s32 unk14;
     /* 0x18 */ s32 unk18;
     /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 rangeList;    // offset of a RelocRange list, rebased by func_15003120
+    /* 0x20 */ s32 rangeList;    // offset of its VtxColorGroup list, rebased by func_15003120
     /* 0x24 */ s32 unk24;
     /* 0x28 */ Vtx vertices[1];
 } ModelAsset;
@@ -3244,5 +3297,11 @@ typedef struct IdList2 {
 typedef struct IdList3 {
     /* 0x0 */ s32 ids[3];
 } IdList3;
+
+/* A file's range in the ROM (D_8002AAD0, the compressed game code). */
+typedef struct RomFile {
+    /* 0x0 */ s32 start;
+    /* 0x4 */ s32 end;
+} RomFile;
 
 #endif

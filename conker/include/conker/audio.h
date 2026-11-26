@@ -61,6 +61,8 @@ s32 func_10008CE8(u8 player, s32 sequence);
 void func_10008EE0(u8 player, s32 vol);
 void func_10008F24(u8 player);
 void func_10008F58(u8 player);
+extern ALBank *D_8003E368; // sound bank
+extern ALHeap D_8003E370;  // audio heap
 
 /* init_8F90.c */
 void func_10008F90(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amConfig);
@@ -78,6 +80,7 @@ void *func_10009CBC(u32 *slot, s32 mode);
 BankFetchProc func_10009FFC(void);
 void func_1000A03C(void);
 void func_1000A348(void);
+extern s32 D_8003E384;
 
 /* init_1AAE0.c to init_22460.c are Rare's copies of the n_audio library (sequence player, event queue,
  * synthesizer, reverb, envelope mixer, resampler, loader). Like libultra, they are declared by the SDK headers
@@ -93,5 +96,13 @@ void func_10012020(void);
 /* libultra/audio/init_17870.c */
 void func_10017870(u8 arg0);
 void func_10017944(s32 arg0, u32 arg1);
+extern u8 D_800428C0;
+extern u8 D_800428C1;
+extern u8 D_800428C2;
+extern u8 D_800428C4[2];
+extern u8 D_800428C6[2];
+
+/* init_20000.c */
+extern s16 D_8002BC10[128]; /* n_eqpower: equal-power pan curve */
 
 #endif

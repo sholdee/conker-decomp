@@ -191,8 +191,8 @@ void func_150006E0() {
     s32 i;
     s32 j;
 
-    D_800D9B20 = (u32)D_800B0DF0->unk2;
-    D_800D9B1C = (u32)D_800B0DF0->unk0;
+    D_800D9B20 = D_800B0DF0->unk2;
+    D_800D9B1C = D_800B0DF0->unk0;
     D_800D3670 = 100.0f - D_800D9B1C;
 
     func_15000940();

@@ -2,40 +2,24 @@
 #include "functions.h"
 #include "variables.h"
 
-extern RopeEnds D_80096320;
-extern RopeEnds D_80096338;
-extern RopeEnds D_80096350;
-extern RopeEnds D_80096368;
-extern RopeEnds D_80096380;
+/* The five ropes of the level (higher end first). */
+static const RopeEnds D_80096320 = { { -2544.0f, 2426.0f, 2213.0f }, { -2544.0f, 1144.0f, 2213.0f } };
+static const RopeEnds D_80096338 = { { -1987.0f, 1380.0f, 1904.0f }, { -1987.0f, 249.0f, 1904.0f } };
+static const RopeEnds D_80096350 = { { -2162.0f, 534.0f, 1344.0f }, { -2162.0f, -645.0f, 1344.0f } };
+static const RopeEnds D_80096368 = { { -2128.0f, -701.0f, 2129.0f }, { -2128.0f, -1545.0f, 2129.0f } };
+static const RopeEnds D_80096380 = { { -2893.0f, 2648.0f, 2174.0f }, { -2893.0f, 2111.0f, 2174.0f } };
 
-extern f32 D_800DCDA4;
-extern f32 D_800DCDA8;
-extern f32 D_800DCDAC;
-extern f32 D_800DCDB0;
-extern f32 D_800DCDB4;
-extern f32 D_800DCDB8;
-extern f32 D_800DCDBC;
-extern f32 D_800DCDC0;
+/* Starts an object emitter at (x, y, z) over the floor at floorY. */
+void func_1500F9D0(s32 x, s32 y, s32 z, s32 floorY, s32 arg4) {
+    ObjectEmitter *emitter;
 
-typedef struct {
-    TimedEffect base;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s8  unk30;
-} Struct1500F9D0;
-
-s32 func_1500F9D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    Struct1500F9D0 *temp;
-
-    temp = func_151491F4((s16)((func_150ADA20() & 0x7F) + 0xA), 1, -1, 1, 0, 0xA, 0xFF, 0);
-    if (temp != 0) {
-        temp->unk28 = arg0;
-        temp->unk2A = arg1;
-        temp->unk2C = arg2;
-        temp->unk2E = arg3;
-        temp->unk30 = arg4;
+    emitter = func_151491F4((func_150ADA20() & 0x7F) + 0xA, 1, -1, 1, 0, 0xA, 0xFF, 0);
+    if (emitter != NULL) {
+        emitter->pos.x = x;
+        emitter->pos.y = y;
+        emitter->pos.z = z;
+        emitter->pos.floorY = floorY;
+        emitter->pos.unk8 = arg4;
     }
 }
 
@@ -73,12 +57,12 @@ void func_1500FA64(void) {
     func_1500F9D0(-0xBD5, 0x3F1, 0x659, -0x602, 2);
     func_1500F9D0(-0xE6B, -0x263, -0x427, -0x647, 1);
 
-    D_800DCDA4 = (f32)(u32)D_800DCD20[0];
-    D_800DCDA8 = (f32)(u32)D_800DCD20[1];
-    D_800DCDAC = (f32)(u32)D_800DCD20[2];
-    D_800DCDB0 = (f32)(u32)D_800DCD28[0];
-    D_800DCDB4 = (f32)(u32)D_800DCD28[1];
-    D_800DCDB8 = (f32)(u32)D_800DCD28[2];
-    D_800DCDBC = (f32)(u32)D_800DCD3C;
-    D_800DCDC0 = (f32)(u32)D_800DCD3D;
+    D_800DCDA4 = D_800DCD20[0];
+    D_800DCDA8 = D_800DCD20[1];
+    D_800DCDAC = D_800DCD20[2];
+    D_800DCDB0 = D_800DCD28[0];
+    D_800DCDB4 = D_800DCD28[1];
+    D_800DCDB8 = D_800DCD28[2];
+    D_800DCDBC = D_800DCD3C;
+    D_800DCDC0 = D_800DCD3D;
 }

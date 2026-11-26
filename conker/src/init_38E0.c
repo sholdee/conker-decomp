@@ -1,5 +1,9 @@
 #include <ultra64.h>
 
+/* This file's .bss, defined before the headers: IDO lays out .bss in the order it first sees each name. */
+static u32 D_80038070;
+static u16 D_80038074;
+
 #include "functions.h"
 #include "variables.h"
 

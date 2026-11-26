@@ -8,11 +8,6 @@ typedef struct {
     u8      pad1C[0x28];
 } AuxBusElem;           /* size 0x44 */
 
-typedef struct {
-    u8      pad0[0x90];
-    s32     offset;     /* 0x90 */
-} PVoiceOff;
-
 s32 n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc) {
     N_PVoice *pvoice = 0;
     ALParam *update;
@@ -24,15 +19,15 @@ s32 n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc) {
     voice->fxBus      = vc->fxBus;
     voice->state      = AL_STOPPED;
     voice->pvoice     = 0;
-    voice->unk14      = (void *)vc->unk8;
+    voice->unk14      = vc->unk8;
 
     stolen = _allocatePVoice(&pvoice, vc->priority);
 
     if (pvoice != 0) {
         if (stolen != 0) {
-            *(s32 *)((u8 *)pvoice + 0x90) = 0x228;
-            (*(N_ALVoice **)((u8 *)pvoice + 0x10))->pvoice = 0;
-            *(N_ALVoice **)((u8 *)pvoice + 0x10) = voice;
+            pvoice->offset = 0x228;
+            pvoice->vvoice->pvoice = 0;
+            pvoice->vvoice = voice;
             voice->pvoice = pvoice;
 
             update = __n_allocParam();
@@ -46,7 +41,7 @@ s32 n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc) {
             }
             update = __n_allocParam();
             if (update) {
-                update->delta = n_syn->paramSamples + ((PVoiceOff *)pvoice)->offset;
+                update->delta = n_syn->paramSamples + pvoice->offset;
                 update->type  = AL_FILTER_STOP_VOICE;
                 update->next  = 0;
                 n_alEnvmixerParam(voice->pvoice, AL_FILTER_ADD_UPDATE, update);
@@ -57,22 +52,22 @@ s32 n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc) {
             ALLink *ln;
             ALLink *to;
 
-            *(s32 *)((u8 *)pvoice + 0x90) = 0;
-            *(N_ALVoice **)((u8 *)pvoice + 0x10) = voice;
+            pvoice->offset = 0;
+            pvoice->vvoice = voice;
             voice->pvoice = pvoice;
 
-            element = (ALLink *)((u8 *)pvoice + 8);
+            element = &pvoice->busLink;
             if (element->next) element->next->prev = element->prev;
             if (element->prev) element->prev->next = element->next;
 
-            ln = (ALLink *)((u8 *)pvoice + 8);
+            ln = &pvoice->busLink;
             to = &((AuxBusElem *)n_syn->auxBus)[vc->fxBus].link;
             ln->next = to->next;
             ln->prev = to;
             if (to->next) to->next->prev = ln;
             to->next = ln;
 
-            *(s32 *)((u8 *)pvoice + 0x28) = 0;
+            pvoice->dc_table = 0;
         }
     }
     return (pvoice != 0);
@@ -228,9 +223,9 @@ s32 _allocatePVoice(N_PVoice **pvoice, s16 priority) {
     } else {
         for (pv = (N_PVoice *)n_syn->pAllocList.next; pv != 0; pv = (N_PVoice *)pv->node.next) {
             v = pv;
-            if (priority >= (*(N_ALVoice **)((u8 *)v + 0x10))->priority && *(s32 *)((u8 *)v + 0x90) == 0) {
+            if (priority >= v->vvoice->priority && v->offset == 0) {
                 *pvoice = v;
-                priority = (*(N_ALVoice **)((u8 *)v + 0x10))->priority;
+                priority = v->vvoice->priority;
                 stolen = 1;
             }
         }

@@ -737,9 +737,6 @@ void func_1509093C(void) {
     }
 }
 
-extern u8 D_80083440[];
-extern u8 D_800835C0[];
-
 /* Draws the water surface mesh animated by func_1509093C. */
 Gfx *func_150911F4(Gfx *gfx) {
     s32 texBuf[6];

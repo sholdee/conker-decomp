@@ -110,6 +110,31 @@ typedef struct Rgb8 {
 void func_150089D0(void);
 
 /* game_39750.c */
+/* An area effect of func_150139AC (game_40490.c): the particles spawned over a zone. */
+typedef struct Struct150139ACEntry {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    s16 unk14;
+    s16 unk16;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    u8 unk30;
+    u8 unk31;
+    u8 unk32;
+    u8 unk33;
+    u8 unk34;
+    u8 pad35[3];
+} Struct150139ACEntry;
+
+extern const Struct150139ACEntry D_80095FA0[6];
+
 void func_1500C2A0(void);
 void func_1500C2F0(TriggerZone *region, f32 density);
 void func_1500C8D0(TriggerZone *region, f32 density);
@@ -560,6 +585,8 @@ typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ BurstTimer timer;
 } DriftBurstEmitter;
+
+extern DriftBurstEmitter *D_80088870;
 
 DriftQuad *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2);
 s32 func_150CD17C(DriftQuad *effect);

@@ -41,6 +41,6 @@ void func_15016690(s32 arg0) {
             D_800D212C->unk6 = 0;
             D_800D212C->facing = 0;
             D_800D212C->unk15 = 0;
-          }
+        }
     }
 }

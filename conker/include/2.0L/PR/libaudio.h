@@ -297,10 +297,16 @@ typedef struct {
     s32                 maxUpdates;
     s32                 maxFXbusses;
     void                *dmaproc;
+    /* Conker: the bank hooks that n_alSynNew copies into the driver (N_ALSynth) */
+    void             *(*(*getLoadProc)(void))(void *slot, s32 isInst); /* returns a BankLoadProc */
+    void                (*bankDecRef)(void *record);
+    void                (*bankAddRef)(void *record);
+    void                (*bankRelease)(void *record);
+    s32                 waveTableBase;
     ALHeap              *heap;
     s32                 outputRate;     /* output sample rate */
-    ALFxId              fxType;
-    s32                 *params;
+    u8                  fxType[4];      /* Conker: one per fx bus */
+    s32                 *params[2];     /* Conker: one per fx bus, for AL_FX_CUSTOM */
 } ALSynConfig;
 
 typedef struct ALPlayer_s {
@@ -326,7 +332,7 @@ typedef struct ALVoiceConfig_s {
     s16                 priority;       /* voice priority               */
     s16                 fxBus;          /* bus assignment               */
     u8                  unityPitch;     /* unity pitch flag             */
-    s32                 unk8;
+    void               *unk8;           /* Conker: becomes the voice's unk14, the bank record n_alSynFreeVoice drops */
 } ALVoiceConfig;
 
 typedef struct {
@@ -669,11 +675,30 @@ typedef struct {
     /* 0x0F */  u8                  unkF;
     /* 0x10 */  f32                 unk10;
     /* 0x14 */  u8                  unk14;
-    /* 0x15 */  s8                  unk15;
+    /* 0x15 */  u8                  unk15;
     /* 0x16 */  u8                  unk16;
     /* 0x17 */  u8                  unk17;
     /* 0x18 */  f32                 pitchBend;  /* current pitch bend val in cents  */
-    /* 0x1C */  u8                  pad1C[0x20];
+    /* 0x1C */  ALMicroTime         attackTime;     /* per-channel envelope, used instead of */
+    /* 0x20 */  ALMicroTime         decayTime;      /* the sound's envelope when useEnv is set */
+    /* 0x24 */  ALMicroTime         releaseTime;
+    /* 0x28 */  u8                  useEnv;
+    /* 0x29 */  u8                  attackVolume;
+    /* 0x2A */  u8                  decayVolume;
+    /* 0x2B */  s8                  detune;
+    /* 0x2C */  u8                  tremType;       /* per-channel oscillator override */
+    /* 0x2D */  u8                  tremRate;
+    /* 0x2E */  u8                  tremDepth;
+    /* 0x2F */  u8                  tremDelay;
+    /* 0x30 */  u8                  vibType;
+    /* 0x31 */  u8                  vibRate;
+    /* 0x32 */  u8                  vibDepth;
+    /* 0x33 */  u8                  vibDelay;
+    /* 0x34 */  u8                  unk34;
+    /* 0x35 */  u8                  unk35;
+    /* 0x36 */  u8                  instMissing;    /* set when the program failed to load */
+    /* 0x37 */  u8                  unk37;
+    /* 0x38 */  s16                 instNum;        /* bank program the channel holds */
 /* END OF RARE EXTRAS */
 } ALChanState;
 

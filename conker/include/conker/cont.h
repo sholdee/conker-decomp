@@ -58,6 +58,8 @@ typedef struct {
 /* init_5570.c */
 s32 osMotorStop(OSPfs *device);
 s32 osMotorStart(OSPfs *device);
+extern u8 D_8003BC30[MAXCONTROLLERS][64]; // per channel: the PIF command block that stops the motor
+extern u8 D_8003BD30[MAXCONTROLLERS][64]; // per channel: the PIF command block that starts the motor
 
 /* init_57E0.c. Its osMotorInit has another signature than the one in PR/os_motor.h, so only
  * init_57E0.c declares it. */
@@ -76,6 +78,33 @@ void func_1501C17C(u8 player);
 void func_1501C1B0(void);
 void func_1501C53C(void);
 void func_1501C57C(void);
+extern u8 D_80084060[4]; // the controller channel of each player; 4 or more: none
+extern u8 D_80084064;    // a controller read has finished
+extern OSTimer D_800BE6E0; // the timer that starts the next controller read
+extern u16 D_800BE700[4]; // per player: the buttons held at the last read
+extern u16 D_800BE708[4]; // per player: the buttons held at the last read, for D_800BE930
+extern u16 D_800BE710[4]; // per player: the newly pressed buttons
+extern u16 D_800BE718[4]; // per player: the buttons held before this read
+extern u16 D_800BE720[4]; // per channel: buttons to add at the next read
+extern OSContPad **D_800BE728; // the per-player pads (the table that func_1501BBB8 returns)
+extern s32 D_800BE72C; // the number of connected controllers
+extern OSContPad *D_800BE730[4]; // per player: a pointer into D_800BE748
+extern u8 D_800BE740; // a bit for each controller that answered the last read
+extern OSContPad D_800BE748[4]; // the per-player pads
+extern OSPfs D_800BE760[MAXCONTROLLERS]; // the rumble pak of each channel
+extern OSMesgQueue D_800BE900; // the SI message queue
+extern OSContPad D_800BE918[4]; // the per-player pads with the stick dead zone (menu reads)
+extern u16 D_800BE930[4]; // per player: the newly pressed buttons (menu reads)
+extern u8 D_800BE938; // look for rumble paks at the next update
+extern u8 D_800BE93C[MAXCONTROLLERS]; // per channel: the rumble is on
+extern u8 D_800BE940[MAXCONTROLLERS]; // per channel: the rumble was on at the last update
+extern u8 D_800BE944[MAXCONTROLLERS]; // per channel: a rumble pak is present
+extern u8 D_800BE948[MAXCONTROLLERS]; // per channel: the motor is running
+extern f32 D_800BE950[MAXCONTROLLERS]; // per channel: the time in the rumble cycle
+extern f32 D_800BE960[MAXCONTROLLERS]; // per channel: the on time of the rumble cycle
+extern f32 D_800BE970[MAXCONTROLLERS]; // per channel: the off time of the rumble cycle
+extern f32 D_800BE980[MAXCONTROLLERS]; // per channel: the length of the rumble cycle
+extern OSMesg D_800BE990; // the message received from D_800BE900
 
 /* game_205C90.c */
 s32 func_151D87E0(u8 playerMask);
