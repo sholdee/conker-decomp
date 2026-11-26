@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
+typedef struct Cfg15128CB0 {
     /* 0x00 */ s16 unk0;
     /* 0x02 */ s16 unk2;
     /* 0x04 */ s16 unk4;
@@ -20,15 +20,6 @@ typedef struct {
     /* 0x30 */ f32 unk30;
 } Cfg15128CB0;
 
-typedef struct {
-    s32 type;
-    union {
-        s32 index;          /* types 5, 6 */
-        Cfg15128CB0 *cfg;   /* type 1 */
-        CamShot *data; /* types 7, 8, 10 */
-        f32 *value;         /* type 9 */
-    } arg;
-} Msg15128CB0;
 
 extern Vec3f D_80089544;
 
@@ -39,7 +30,7 @@ extern Vec3f D_80089544;
  * branch by source line).
  */
 void func_15128CB0(Camera *cam) {
-    Msg15128CB0 *msg;
+    CamMsg *msg;
 
     cam->cmdState.unk0 = 0;
     if (cam->LastMagsZone != 0 && func_1512D6B0(cam)) {

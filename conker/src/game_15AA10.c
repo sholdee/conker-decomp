@@ -29,13 +29,13 @@ void func_1512D560(Camera *camera, s32 type, void *arg) {
 
 // matching: temp is a scratch variable in the parameter list (callers pass only the camera); a local
 // changes the register allocation
-u8 *func_1512D604(Camera *camera, s32 temp) {
+CamMsg *func_1512D604(Camera *camera, s32 temp) {
     u8 *entry;
-    u8 *ret;
+    CamMsg *ret;
 
     entry = (*(Entry15 **)&D_800DC2B0)[camera->CNumber];
     temp = *(s32 *)&entry[0xA8];
-    ret = (u8 *)((s32)entry + (temp * 8));
+    ret = (CamMsg *)((s32)entry + (temp * 8));
     *(s32 *)&entry[0xA8] = temp + 1;
     entry = (*(Entry15 **)&D_800DC2B0)[camera->CNumber];
     if (*(s32 *)&entry[0xA8] == 0x14) {

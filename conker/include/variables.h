@@ -561,7 +561,7 @@ extern u8 D_800BE9EB;
 extern s32 level;
 
 
-extern s32  D_800BE2B0[]; // type?
+extern u16 *D_800BE2B0[]; // per camera: a row buffer of D_800BE620 u16 (HitsZBufferHoriDataPtr)
 extern OSMesg  D_800BE2D0;
 extern u8   D_800BE358[0x80]; // EEPROM/mempak transfer buffer; [0..1] is a u16 checksum
 extern s8   D_800BE3D9;

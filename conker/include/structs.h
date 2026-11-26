@@ -2665,8 +2665,18 @@ typedef struct EffectModelSlot {
 
 /* A camera's message ring buffer, D_800DC2B0[camera index] (game_15AA10; allocated in game_32740).
  * func_1512D560 appends, func_1512D604 takes the next message. */
+typedef struct CamMsg {
+    /* 0x0 */ s32 type;
+    /* 0x4 */ union {
+        s32 index;               /* types 5, 6 */
+        struct Cfg15128CB0 *cfg; /* type 1 (game_156160.c) */
+        CamShot *data;           /* types 7, 8, 10 */
+        f32 *value;              /* type 9 */
+    } arg;                       /* a pointer or a small integer, depending on the type */
+} CamMsg;
+
 typedef struct CamMsgQueue {
-    /* 0x00 */ struct { s32 type; s32 arg; } msgs[20];
+    /* 0x00 */ CamMsg msgs[20];
     /* 0xA0 */ u8  padA0[8];
     /* 0xA8 */ s32 head;   // next message to read
     /* 0xAC */ s32 tail;   // next free slot
