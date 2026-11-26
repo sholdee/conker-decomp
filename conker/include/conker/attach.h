@@ -16,7 +16,7 @@
  */
 
 /* Types that these files define; the declarations below use them. */
-typedef struct AttachmentSound AttachmentSound;
+struct SoundRecord;
 struct S150D88AC;
 
 /* game_5D2C0.c */
@@ -54,7 +54,8 @@ s32 func_150337E4(ModelAttachment *att, Actor *owner);
 s32 func_15033838(ModelAttachment *att, Actor *owner);
 s32 func_150339C8(ModelAttachment *att, Actor *owner);
 s32 func_15033AD8(ModelAttachment *att, Actor *owner);
-s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
+/* A sound record callback (SoundRecordCallback, conker/sound.h). */
+s32 func_15033BDC(struct SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 s32 func_15033E00(ModelAttachment *att, Actor *owner);
 s32 func_15033E28(Actor *owner, ModelAttachment **out);
 ModelAttachment *func_15033E84(Actor *owner);

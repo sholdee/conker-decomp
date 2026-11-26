@@ -898,7 +898,7 @@ void func_15031C14(ModelAttachment *att) {
         case 0x37:
         case 0x4B:
         case 0x4C:
-            func_1000FD38((SoundRecordCallback)func_15033BDC, att, (s32)owner);
+            func_1000FD38(func_15033BDC, att, (s32)owner);
             if (att->model == 0x37) {
                 func_15100180(owner);
             }
@@ -2547,12 +2547,12 @@ s32 func_150339C8(ModelAttachment *att, Actor *owner) {
     if (D_800C35EA[0] != 1) {
         if (D_800BEA0C != 0) {
             if (att->unk3C != 0) {
-                func_1000FD38((SoundRecordCallback)func_15033BDC, att, (s32)owner);
+                func_1000FD38(func_15033BDC, att, (s32)owner);
             }
             att->unk3C = 0;
         } else if (att->unk3C == 0) {
             att->unk3C = func_1000FA64(0x448, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
-                                       500, (SoundRecordCallback)func_15033BDC, att, (s32)owner, 0, 0) |
+                                       500, func_15033BDC, att, (s32)owner, 0, 0) |
                          0x80000000;
         }
     }
@@ -2569,41 +2569,29 @@ s32 func_15033AD8(ModelAttachment *att, Actor *owner) {
             att->unk3C += D_800BE9E4;
         } else {
             att->unk3C = func_1000FA64(0x513, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
-                                       500, (SoundRecordCallback)func_15033BDC, att, (s32)owner, 0, 0);
+                                       500, func_15033BDC, att, (s32)owner, 0, 0);
             att->unk38 = 0x513;
         }
     }
     return 0;
 }
 
-/* Sound started by the attachment hooks (func_1000FA64); only the fields used here. */
-struct AttachmentSound {
-    /* 0x00 */ u16 unk0;
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x10];
-    /* 0x18 */ ModelAttachment *att;
-    /* 0x1C */ Actor *owner;
-    /* 0x20 */ u8 pad20[0x4];
-    /* 0x24 */ u16 unk24;
-};
-
-/* Sound callback: tracks the owner's position and plays the model's follow-up sounds. Returns 1
- * when the sound should stop. */
-s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+/* Sound record callback of the sounds the attachment hooks start (func_1000FA64 with the attachment
+ * and its owner as the parameters): tracks the owner's position and plays the model's follow-up
+ * sounds. Returns 1 when the sound should stop. */
+s32 func_15033BDC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound) {
     ModelAttachment *att;
     Actor *owner;
     ActorCtl *unk;
 
-    att = sound->att;
-    owner = sound->owner;
+    att = record->callback_param1.ptr;
+    owner = record->callback_param2.obj;
     if ((att != NULL) && (owner != NULL) && (owner->type != 0)) {
-        sound->x = owner->xpos;
-        sound->y = owner->ypos;
-        sound->z = owner->zpos;
+        record->x = owner->xpos;
+        record->y = owner->ypos;
+        record->z = owner->zpos;
 
-        if (*arg2 != 0) {
+        if (*volume != 0) {
             if (att->model == 0x37) {
                 s32 lastState = att->unk38;
                 s32 sfxId = -1;
@@ -2624,7 +2612,7 @@ s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg
                         if (att->unk38 == 0x513) {
                             att->unk38 = 0x3A1;
                             att->unk3C = func_1000FA64(0x3A1, owner->xpos, owner->ypos,
-                                                       owner->zpos, 32000, 1000, 500, (SoundRecordCallback)func_15033BDC, att,
+                                                       owner->zpos, 32000, 1000, 500, func_15033BDC, att,
                                                        (s32)owner, 0, 0);
                             return 1;
                         }
@@ -2635,11 +2623,11 @@ s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg
         }
 
         if (att->model == 0x37) {
-            if (sound->unk24 != 0) {
-                func_100111C8(sound->unk24);
-                sound->unk24 = 0;
+            if (record->sound_id != 0) {
+                func_100111C8(record->sound_id);
+                record->sound_id = 0;
             }
-            *arg6 = 0;
+            *sound = 0;
             return 0;
         }
     }

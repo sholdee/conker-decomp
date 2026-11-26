@@ -4143,7 +4143,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                     if (actor->animseq.uh != 0xE9) {
                         func_100109D0(actor);
                         func_1000FA64(0x61E, actor->xpos, actor->ypos, actor->zpos,
-                                      0x7FFF, 0x1F4, 0xC8, (SoundRecordCallback)func_1000EFB4, actor, (s32)D_80099428, 0, 0);
+                                      0x7FFF, 0x1F4, 0xC8, func_1000EFB4, actor, (s32)D_80099428, 0, 0);
                         func_151C6EA0(actor, 0xFF, 1);
                     }
                 }

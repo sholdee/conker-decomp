@@ -754,12 +754,12 @@ void func_1511C638(WorldObject *obj) {
                     func_10010F30(second, 0x7FFF, 54, 0, 0);
                     first = func_150ADA20() % 5U;
                     second = ((func_150ADA20() & 3) + first + 1) % 5U;
-                    func_1000FA64(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (SoundRecordCallback)func_1000EC24, (void *)0x1001E, 0, 0x200, 0);
-                    func_1000FA64(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (SoundRecordCallback)func_1000EC24, (void *)0x1001E, 0, 0, 0);
+                    func_1000FA64(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, func_1000EC24, (void *)0x1001E, 0, 0x200, 0);
+                    func_1000FA64(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, func_1000EC24, (void *)0x1001E, 0, 0, 0);
                     first = func_150ADA20() % 5U;
                     second = ((func_150ADA20() & 3) + first + 1) % 5U;
-                    func_1000FA64(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (SoundRecordCallback)func_1000EC24, (void *)60, 0, 0x300, 0);
-                    func_1000FA64(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (SoundRecordCallback)func_1000EC24, (void *)60, 0, 0x100, 0);
+                    func_1000FA64(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, func_1000EC24, (void *)60, 0, 0x300, 0);
+                    func_1000FA64(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, func_1000EC24, (void *)60, 0, 0x100, 0);
                 }
                 break;
                 case 2:
