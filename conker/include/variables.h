@@ -260,7 +260,6 @@ extern TextureDesc D_800918A0;
 
 extern ParticleTexInfo D_80095CE0[69];
 
-extern f32 D_80096560;
 extern f32 D_800968B0;
 
 // code_75400.c

@@ -833,7 +833,7 @@ func_1501214C	0x1501214C	116	game	c		build/src/game/done/game_3F560.c.o
 func_150121C0	0x150121C0	432	game	c		build/src/game_3F670.c.o
 func_15012370	0x15012370	256	game	c		build/src/game_3F820.c.o
 func_15012470	0x15012470	48	game	c		build/src/game_3F820.c.o
-func_150124A0	0x150124A0	640	game	c		build/src/game_3F820.c.o
+func_150124A0	0x150124A0	640	game	c		build/src/game_3F950.c.o
 func_15012720	0x15012720	80	game	c		build/src/game/done/game_3FBD0.c.o
 func_15012770	0x15012770	16	game	c		build/src/game/done/game_3FC20.c.o
 func_15012780	0x15012780	48	game	c		build/src/game/done/game_3FC30.c.o

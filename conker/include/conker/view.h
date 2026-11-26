@@ -8,6 +8,7 @@
  * Subsystem "view": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game_3F820.c
+ *   game_3F950.c
  *   game_433F0.c
  *   game_476D0.c
  *   game_138520.c
@@ -17,6 +18,8 @@
 /* game_3F820.c */
 void func_15012370(void);
 void func_15012470(void);
+
+/* game_3F950.c */
 void func_150124A0(void);
 
 /* game_433F0.c */
