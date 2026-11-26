@@ -260,7 +260,7 @@ void *func_151C7E98(SightBeamObject *obj, s16 view) {
             return NULL;
         }
     }
-    func_151D5D60(obj->head.vtxBuffers, view, sizeof(obj->head.vtxTemplate), (void **)&vertices, &fresh);
+    func_151D5D60(obj->head.vtxBuffers, view, sizeof(obj->head.vtxTemplate), &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {

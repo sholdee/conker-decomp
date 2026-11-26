@@ -190,7 +190,7 @@ Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index) {
     s32 pad; // matching: unused stack slot in the original frame
     u8 isNew;
 
-    func_151D5D60(owner->buffers, index, 0x40, (void **)&vertices, &isNew);
+    func_151D5D60(owner->buffers, index, 0x40, &vertices, &isNew);
     result = vertices;
     if (vertices != NULL) {
         if (isNew) {

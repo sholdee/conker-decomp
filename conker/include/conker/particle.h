@@ -3029,8 +3029,8 @@ void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 ar
 void func_151D57F8(Actor *obj, u8 slot);
 void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, Vec3f *localPos, u8 bone);
 s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, s32 filterArg);
-void func_151D5D60(void **slots, s16 index, s32 size, void **out, s8 *allocated);
-void func_151D5E30(s32 *slots);
+void func_151D5D60(void *slots, s16 index, s32 size, void *out, s8 *allocated);
+void func_151D5E30(void *slots);
 
 /* game_2062D0.c */
 /* Data of a func_151DA08C effect: wobbles its scale and keeps spawning func_151DB5D0 particles. */

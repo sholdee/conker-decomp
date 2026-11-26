@@ -513,7 +513,7 @@ Gfx *func_151D80C4(AnchoredTrail *trail, Gfx *gfx, s16 view) {
     }
     data = trail->data;
     points = trail->points;
-    func_151D5D60(trail->unk84, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, 0);
+    func_151D5D60(trail->unk84, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, 0);
     if (vtx == NULL) {
         return gfx;
     }

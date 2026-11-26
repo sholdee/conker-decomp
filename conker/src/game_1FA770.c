@@ -335,7 +335,7 @@ Gfx *func_151CDE20(LevelStream *emitter, Gfx *gfx, s16 view) {
     f32 offsetX;
 
     if (emitter->head.count >= 2) {
-        func_151D5D60(emitter->buffers, view, (emitter->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(emitter->buffers, view, (emitter->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             data = emitter->data;
             particles = emitter->particles;

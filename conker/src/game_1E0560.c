@@ -117,7 +117,7 @@ Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
     if (effect->flags & ROPE_FLAG_RESET) {
         return gfx;
     }
-    func_151D5D60(effect->vtxBuffer, view, 25 * sizeof(Vtx), (void **)&vtx, NULL);
+    func_151D5D60(effect->vtxBuffer, view, 25 * sizeof(Vtx), &vtx, NULL);
     if (vtx != NULL) {
         u8 needSync;
         s32 mode0;

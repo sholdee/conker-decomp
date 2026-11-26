@@ -33,7 +33,7 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     if (info->owner != NULL && info->owner->ob_matrix_ptr == NULL) {
         return gfx;
     }
-    func_151D5D60(ribbon->vtxBuffer, cameraIdx, (ribbon->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+    func_151D5D60(ribbon->vtxBuffer, cameraIdx, (ribbon->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
     update = 1;
     gfx = func_15142B7C(func_15142C10(gfx, 0xED, 0xD2, 0x85, 0xC8, &update), 0x200005, 0x1F0600);
     gfx = func_15142FBC(func_1513F4E4(gfx, 0x54, &update), D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].cycle1 | D_800A4AC8[1].cycle2, &update);
@@ -385,7 +385,7 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     if (owner->ob_matrix_ptr == NULL) {
         return gfx;
     }
-    func_151D5D60(effect->base.buffers, cameraIdx, 0x1C0, (void **)&vtx, NULL);
+    func_151D5D60(effect->base.buffers, cameraIdx, 0x1C0, &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }

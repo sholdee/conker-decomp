@@ -21,7 +21,7 @@ void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
     f32 radiusSquared;
     u8 fresh;
 
-    func_151D5D60(beam->buffers, cam, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(beam->buffers, cam, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {

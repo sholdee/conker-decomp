@@ -132,7 +132,7 @@ Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
     Vec3f *to;
 
     if (bolt->def.flags & BOLT_ACTIVE) {
-        func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, (void **)&vtx, NULL);
+        func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, &vtx, NULL);
         if (vtx != NULL) {
             camera = func_15144B34(view);
             changed = 1;

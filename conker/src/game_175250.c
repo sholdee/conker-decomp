@@ -119,7 +119,7 @@ Gfx *func_1514803C(MotionTrail *trail, Gfx *gfx, s16 arg2) {
 
     params = trail->params;
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->buffers, arg2, (trail->head.tmpl.itemCount - 1) * 2 * sizeof(Vtx), (void **)&vtx, 0);
+        func_151D5D60(trail->buffers, arg2, (trail->head.tmpl.itemCount - 1) * 2 * sizeof(Vtx), &vtx, 0);
         if (vtx == NULL) {
             return gfx;
         }

@@ -126,7 +126,7 @@ void *func_150E63A0(Streak *streak, s16 viewIdx) {
     u8 fresh;
     s32 pad3; // matching: unused stack slot (frame layout)
 
-    func_151D5D60(streak->head.vtxBuffers, viewIdx, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(streak->head.vtxBuffers, viewIdx, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {

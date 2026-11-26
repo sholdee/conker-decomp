@@ -194,7 +194,7 @@ Gfx *func_151BCA90(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
     f32 scale;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->buffers, viewport, (trail->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(trail->buffers, viewport, (trail->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             points = trail->points;
             camPos = func_15144B34(viewport);

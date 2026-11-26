@@ -280,7 +280,7 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
     u8 fresh;
     Vtx *unusedVtx; // matching: as above
 
-    func_151D5D60(trail->head.vtxBuffers, index, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(trail->head.vtxBuffers, index, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {

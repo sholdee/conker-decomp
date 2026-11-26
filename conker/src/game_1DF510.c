@@ -303,7 +303,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         dead = 1;
     }
     if ((dead == 0) && (line->anchor.target->ob_matrix_ptr != NULL)) {
-        func_151D5D60(self->base.buffers, view, 4 * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(self->base.buffers, view, 4 * sizeof(Vtx), &vtx, NULL);
         if (vtx == NULL) {
             return gfx;
         }

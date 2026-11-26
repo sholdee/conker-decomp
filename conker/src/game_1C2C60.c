@@ -985,7 +985,7 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     s32 newStrip;
 
     if (actor->head.count >= 2) {
-        func_151D5D60(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             eye = &camera_global_Cameras[view].eye;
             jet = actor->state;
@@ -1270,7 +1270,7 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
     Vec3f *eye;
     f32 scale;
 
-    func_151D5D60(beam->head.vtxBuffers, view, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(beam->head.vtxBuffers, view, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh != 0) {
@@ -2898,7 +2898,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
             return gfx;
         }
     }
-    func_151D5D60(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
+    func_151D5D60(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
@@ -3273,7 +3273,7 @@ void *func_1519C56C(SceneParticle *beam, s16 view) {
     u8 fresh;
     f32 scale;
 
-    func_151D5D60(beam->head.vtxBuffers, view, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(beam->head.vtxBuffers, view, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {

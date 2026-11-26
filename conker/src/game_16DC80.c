@@ -112,7 +112,7 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
         s16 glowDepth;
         u16 zraw;
 
-        func_151D5D60((void **)obj->vtxBuf, view, sizeof(obj->vtxTemplate), (void **)&vtx, &fresh);
+        func_151D5D60(obj->vtxBuf, view, sizeof(obj->vtxTemplate), &vtx, &fresh);
         quad = vtx;
         if (vtx != NULL) {
             if (fresh) {

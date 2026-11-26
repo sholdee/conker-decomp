@@ -379,7 +379,7 @@ Gfx *func_1519D9F4(MatrixTrail *trail, Gfx *gfx, s16 view) {
     s32 k;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->vtxBuffers, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(trail->vtxBuffers, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             data = trail->data;
             points = trail->points;

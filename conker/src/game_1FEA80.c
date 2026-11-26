@@ -250,7 +250,7 @@ Gfx *func_151D1C98(TrackerTrail *actor, Gfx *gfx, s16 arg2) {
     }
     state = actor->state;
     points = actor->points;
-    func_151D5D60(actor->unk84, arg2, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+    func_151D5D60(actor->unk84, arg2, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }

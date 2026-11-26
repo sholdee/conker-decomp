@@ -922,32 +922,35 @@ s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, s32 filterArg) {
 }
 
 /* Returns in *out the half of the double buffer slots[index] selected by D_800BE9C0, allocating the buffer
-   (2 * size bytes) on first use; *allocated (optional) is set when it was allocated now. */
-void func_151D5D60(void **slots, s16 index, s32 size, void **out, s8 *allocated) {
+   (2 * size bytes) on first use; *allocated (optional) is set when it was allocated now. The buffers hold
+   vertices of several types, so slots points to an array of buffer pointers of any type and out to a
+   pointer of any type. */
+void func_151D5D60(void *slots, s16 index, s32 size, void *out, s8 *allocated) {
     s8 dummy;
 
     if (allocated == NULL) {
         allocated = &dummy;
     }
     *allocated = 0;
-    if (slots[index] == NULL) {
-        slots[index] = (void *)allocate_memory(size * 2, 1, 2, 1);
-        if (slots[index] == NULL) {
-            *out = NULL;
+    if (((void **)slots)[index] == NULL) {
+        ((void **)slots)[index] = allocate_memory(size * 2, 1, 2, 1);
+        if (((void **)slots)[index] == NULL) {
+            *(void **)out = NULL;
             return;
         }
         *allocated = 1;
     }
-    *out = (u8 *)slots[index] + ((D_800BE9C0 != 0) ? 0 : size);
+    *(void **)out = (u8 *)((void **)slots)[index] + ((D_800BE9C0 != 0) ? 0 : size);
 }
 
 /* Releases the four buffers of a func_151D5D60 slot array. */
-void func_151D5E30(s32 *slots) {
+void func_151D5E30(void *slots) {
     u8 i;
 
     for (i = 0; i < 4; i++) {
-        if (slots[i] != 0) {
-            func_100043B4((s32 *)slots[i], 3);
+        // matching: the buffer addresses are read as integers and converted to pointers
+        if (((s32 *)slots)[i] != 0) {
+            func_100043B4((void *)((s32 *)slots)[i], 3);
         }
     }
 }

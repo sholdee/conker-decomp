@@ -235,7 +235,7 @@ Gfx *func_151B6928(EffectObj *obj, Gfx *gfx, s16 view) {
     f32 scale;
 
     if (obj->head.count >= 2) {
-        func_151D5D60(obj->buffers, view, (obj->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(obj->buffers, view, (obj->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             points = obj->items;
             camera = func_15144B34(view);
@@ -781,7 +781,7 @@ Gfx *func_151B7C38(EffectObj *obj, Gfx *gfx, s16 view) {
         return gfx;
     }
     points = obj->items;
-    func_151D5D60(obj->buffers, view, (obj->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
+    func_151D5D60(obj->buffers, view, (obj->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }

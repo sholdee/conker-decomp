@@ -93,7 +93,7 @@ Vtx *func_151AC810(QuadParticle *particle, s16 view) {
     f32 offsetX;
     u8 fresh;
 
-    func_151D5D60(particle->buffers, view, 0x40, (void **)&vtx, &fresh);
+    func_151D5D60(particle->buffers, view, 0x40, &vtx, &fresh);
     result = vtx;
     if (vtx != NULL) {
         if (fresh) {

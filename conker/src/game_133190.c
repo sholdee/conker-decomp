@@ -262,7 +262,7 @@ Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
     Vec3f previous;
 
     if (0) { gdl = gdl; } // matching: dead IR resets uopt alias state so the first strip reloads vtx
-    func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, (void **)&vtx, NULL);
+    func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, &vtx, NULL);
     if (vtx == NULL) {
         return gdl;
     }
