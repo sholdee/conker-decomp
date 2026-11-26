@@ -733,7 +733,7 @@ typedef struct OwnedEffect {
 /* Partial view of the particle func_15130280 creates. */
 typedef struct CarrierParticle {
     /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ TimedEffect *effect; /* effect that travels with the particle */
+    /* 0xA8 */ struct WaveTrail *effect; /* wave trail that travels with the particle (func_151CEAAC) */
 } CarrierParticle;
 
 /* Emitter data at 0x28: where the trail is anchored this frame. */

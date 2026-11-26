@@ -2173,7 +2173,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         flame->flags &= ~0x10;
     }
     if (obj->ob_matrix_ptr != NULL) {
-        Vec3f *inputs[4];
+        const Vec3f *inputs[4];
         Vec3f *outputs[4];
 
         inputs[0] = &flame->seed.startOffset;
