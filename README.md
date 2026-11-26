@@ -21,9 +21,10 @@ game text.
 - **Fully linked.** No address is pinned: every reference goes through a symbol, so the code and the
   data can move. CI fails on a pinned address, a pointer written as a number, or a jump without a
   relocation. Emulator tests added code to each segment (init, game, debugger) and data to each
-  `.data`, `.rodata` and `.bss`. The shifted ROMs still ran the boot and attract sequence. One fixed
-  limit remains: the page-fault handler maps 0x1FC000 bytes of game code, which leaves room for about
-  7.9 KB more. Beyond that, the link fails with a message.
+  `.data`, `.rodata` and `.bss`. The shifted ROMs still ran the boot and attract sequence. A few fixed
+  sizes remain, for example the 0x1FC000 bytes of game code that the page-fault handler maps (room for
+  about 7.9 KB more). The build stops with a message before one of them breaks the game.
+  [CONTRIBUTING.md](CONTRIBUTING.md) lists them.
 - **Data in source.** The game's `.data`, `.rodata` and `.bss` are defined in C (or in the hand-written
   `.s` file that owns them), except for a few small pieces whose owner the evidence does not show.
   Assets and game text (microcode, fonts, the resource manifest with its names) stay data that the build
@@ -36,8 +37,8 @@ game text.
   example `src/game/Effects/PipeExplode/pipeexplode.c`. Only a few paths are known from the ROM. The
   other directory and file names are descriptive.
 - **Clean C.** Each function and global is declared in the subsystem header of the file that defines
-  it. About 60 local declarations remain in C files. Each is there because IDO needs it to reproduce
-  the original code, and a `/* matching: */` comment says why. Most are callers that saw a different
+  it, or in the shared `variables.h`. About 70 local declarations remain in C files. Each is there
+  because IDO needs it to reproduce the original code, and a `/* matching: */` comment says why. Most are callers that saw a different
   prototype than the definition, or block-scope declarations that shape the generated code. The number
   of compiler type warnings can only go down. `tools/warnings_max.txt` holds the limit, and CI fails
   above it.

@@ -48,6 +48,15 @@ The IDO warning count is correct only after a clean build of the objects.
   The build changes one thing in compiled objects: it removes IDO's alignment padding at some file
   boundaries (`tools/rodata_extern.py`). Some of the project's files are parts of one original file,
   and the original had no padding there.
+- **Known fake matches.** A few functions match only with code that the original probably did not
+  have. Each is marked `/* matching: */`. Natural C that matches in their place is welcome:
+  - `objectsize.c`: dead blocks that call stand-in functions (`dbg3`, `dbgp`, `dbgu`, `dbgx`) that
+    exist nowhere.
+  - `actormotion.c` (`D_800ZZZZ`) and `quadparticle.c` (`D_1513D6FC_dummy`): block-scope declarations
+    of symbols that are never defined.
+  - `movement.c`: two blocks that only declare a type. `bonetrail.c`: dead loads in nine scopes.
+  - `levelobjects.c`: it does not include the umbrella headers, so that it can declare its own view
+    of `allocate_memory` (a `u32` tag).
 - **One declaration for each symbol.** A function or global that other files use is declared once,
   in the subsystem header of the file that owns it (`conker/include/conker/<subsystem>.h`). IDO
   rejects a second declaration that does not agree. A local declaration in a C file is allowed only

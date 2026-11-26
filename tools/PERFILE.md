@@ -33,7 +33,7 @@ the `.text`, then A's `.rodata`, `.data` and `.bss` also come before B's.
    data, game text and other large binary blobs are not code data. Game text is the text content of the
    game: dialogue, menus, subtitles, credits, and the tables of task, level, character and item names.
    These stay extracted from the ROM at build time. A table that holds them also stays extracted data,
-   for example the resource manifest at 0x22BEF0. The C code refers to such a table through an `extern`.
+   for example the resource names at 0x242F30. The C code refers to such a table through an `extern`.
    Never write game text as C strings, initializers or comments. Identifiers are not game text: a symbol
    can name the character, model or level that the code handles (`MODEL_TEDIZ`).
    Code data goes into C: the tables of numbers, pointers and structs that the code uses. The format

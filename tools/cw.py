@@ -227,7 +227,7 @@ def build(ws):
     if not yaml_changed(ws) and not stamp.exists() and (wc / "asm").is_symlink():
         # this workspace does not change splat's inputs, but main may have (another land): its asm/ is
         # main's through the symlink, so take main's matching splat outputs too, then rebuild fully
-        stale = [n for n in SPLAT_INPUTS + ("conker.ld", "undefined_syms_auto.txt", "undefined_funcs_auto.txt", "jtbl_labels.us.txt")
+        stale = [n for n in SPLAT_INPUTS + ("conker.ld", "undefined_syms_auto.txt", "undefined_funcs_auto.txt")
                  if (MAIN / n).exists() and (not (wc / n).exists() or not filecmp.cmp(MAIN / n, wc / n, shallow=False))]
         if stale:
             for n in stale:

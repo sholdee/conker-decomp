@@ -21,7 +21,7 @@ SYMS = M / "symbol_addrs.us.txt"
 ID = re.compile(r"^[A-Za-z_]\w*$")
 ALLOW_USED = set()
 TEXT_GLOBS = ["src/**/*.c", "src/**/*.h", "src/**/*.s", "include/**/*.h",
-              "undefined_syms.us.txt", "undefined_funcs.us.txt", "jtbl_labels.us.txt",
+              "undefined_syms.us.txt", "undefined_funcs.us.txt",
               "undefined_syms_auto.txt", "undefined_funcs_auto.txt"]
 AUTO = ("undefined_funcs_auto.txt", "undefined_syms_auto.txt")
 
@@ -164,7 +164,7 @@ def main():
         if not ok:
             errs = [l for l in r.stdout.splitlines() if "rror" in l or "undefined reference" in l][:20]
             mw.git("checkout", "--", "conker/src", "conker/include", "conker/symbol_addrs.us.txt",
-                   "conker/undefined_syms.us.txt", "conker/undefined_funcs.us.txt", "conker/jtbl_labels.us.txt")
+                   "conker/undefined_syms.us.txt", "conker/undefined_funcs.us.txt")
             for f in AUTO:  # untracked: put the pre-rename copies back
                 shutil.copy(orig / f, M / f)
             mw.run("python3 ../tools/n64splat/split.py conker.us.yaml >/dev/null 2>&1", M, timeout=3600)

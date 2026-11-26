@@ -38,7 +38,6 @@ and re-gates every merge.
   makes the definitions of the game's private libultra copies weak. It can also retarget a C object's
   `.rodata` references to data that is still asm; today every C object owns its `.rodata`, so this is
   unused. Write literals naturally — `extern f32 D_...` is NOT codegen-equivalent.
-- `conker/jtbl_labels.us.txt`: PROVIDEs the case labels the asm jump tables reference.
 
 ## Fresh host
 ```

@@ -6,8 +6,10 @@ stubs, no inline asm, and no `asm` code segments. Two `GLOBAL_ASM` blocks remain
 (`hudoverlay.c`, `n_resample.c`). Each is a run of `nop`s that pads between objects, not code.
 
 The hand-written assembly is 63,664 bytes (2.8% of the code), counted in 289 labelled pieces. A piece is
-a `glabel`: a function, or an entry point into a larger routine (about 136 of the pieces are call
-targets). 281 pieces have a proof by the rules below. The other 8 (592 bytes) are in a search tier: no
+a `glabel`. 126 pieces are `jal` targets, and 139 are entry points: a `jal` target, an address stored in
+data, or the target of a jump from another object. The other labels are inside routines. The rules are
+computed on runs that start at an object start or an entry point, so a label alone cannot create a proof.
+281 pieces have a proof by the rules below. The other 8 (592 bytes) are in a search tier: no
 rule covers them, and they are accepted as hand-written because no compiler search reproduced them. That
 is evidence, not a proof (see "Search tier").
 
@@ -93,7 +95,7 @@ with pinned FP registers and a contrived statement order. That is not evidence t
 | guMtxIdentF        | 80 | A second, custom copy of guMtxIdentF; the SDK's C one is separately at 0x151EFE00. It sits in hasm block D2450–D7980, one function per 16-byte unit, in SDK `mgu` order |
 | math_mtxScaleF     | 80 | guScaleF-like. Its hasm neighbours use `sd $zero` |
 | math_mtxTranslateF | 80 | guTranslateF-like. It follows the hasm math_mtxTranslate |
-| math_transformPoint | 160 | guMtxXFMF-like. Proven-asm func_150A7A00 calls it with a hand-set `ra`, and func_150A7A14 then reads the `$f0/$f2/$f4` values it leaves behind |
+| math_transformPoint | 160 | guMtxXFMF-like. Proven-asm math_transformPointW calls it with a hand-set `ra`, and math_storeTransformW then reads the `$f0/$f2/$f4` values it leaves behind |
 | math_cross3        | 80 | Cross product. Every `mul.s` alternates with another instruction, which IDO's reorder mode cannot produce |
 | math_dot3          | 48 | Dot product accumulating in place in `$f0`. None of 19,200 instruction orders fed to IDO's assembler gives this schedule |
 | math_length3       | 48 | Vector length. A plain reorder-mode `.s` assembled by IDO with `-r4300_mul` gives exactly these bytes |

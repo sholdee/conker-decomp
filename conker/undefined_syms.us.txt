@@ -93,3 +93,37 @@ D_16005958 = debugger_VRAM_END + 0xC00;
 /* Fixed sizes in hand-written code, where a symbol would change the instructions. The link fails before
    such a limit breaks the game at run time. */
 ASSERT(game_TEXT_END - game_VRAM <= 0x1FC000, "the game code is larger than 0x1FC000 bytes: the page-fault handler (pagefault.s) pages in only 0x15000000..0x151FC000, and gPageSlots has 508 page slots");
+
+/* Fixed addresses of the memory map that the code reaches as absolute symbols (they do not move):
+   0x20000000..: values that starfield.s builds through %hi/%lo (not RAM); 0x80000000..: low RAM (exception vectors, the boot
+   parameters at 0x80000300..); 0xA0000000..: the uncached view of RAM; 0xA4xxxxxx: hardware registers
+   (SP, MI, VI, AI, PI, SI). */
+D_20000000 = 0x20000000;
+D_20000008 = 0x20000008;
+D_20000010 = 0x20000010;
+D_20000018 = 0x20000018;
+D_20000020 = 0x20000020;
+D_20000028 = 0x20000028;
+D_20000030 = 0x20000030;
+D_20000038 = 0x20000038;
+D_20000040 = 0x20000040;
+D_80000000 = 0x80000000;
+D_8000000D = 0x8000000D;
+D_80000300 = 0x80000300;
+D_80000308 = 0x80000308;
+D_8000030C = 0x8000030C;
+D_80000310 = 0x80000310;
+D_8000031C = 0x8000031C;
+D_A0000000 = 0xA0000000;
+D_A0000010 = 0xA0000010;
+D_A0000020 = 0xA0000020;
+D_A0000030 = 0xA0000030;
+D_A4040010 = 0xA4040010;
+D_A4300000 = 0xA4300000;
+D_A4300008 = 0xA4300008;
+D_A430000C = 0xA430000C;
+D_A4400010 = 0xA4400010;
+D_A450000C = 0xA450000C;
+D_A4600000 = 0xA4600000;
+D_A4600010 = 0xA4600010;
+D_A4800018 = 0xA4800018;

@@ -19,7 +19,7 @@ void actor_updateSizes(void) {
  * $f20 are saved and a1-a3 homed although no call survives). The dbg* names below are
  * stand-ins that are never referenced by the emitted code; the dead blocks only steer
  * uopt's live-range splitting (height: split, in $f18 across the selection; depth: $f20;
- * width: stack). See ~/conker-ws/actor_computeSize/notes.md for the full ledger. */
+ * width: stack). */
 void dbg3(f32, f32, f32);
 void dbgp(f32 *);
 void dbgu();

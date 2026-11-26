@@ -22,7 +22,7 @@ the bytes, and finally to address 0 — the object always links, so `mw check` c
 and a wrong guess can only make the whole-bin sha1 fail, never pass.
 
 Case labels that the asm tables reference (`.L1502DB54...`) are PROVIDEd by
-jtbl_labels.<ver>.txt so they resolve once their function is C.
+jtbl_labels.<ver>.txt so they resolve once their function is C. (Unused now: the file is no longer linked.)
 
 usage: rodata_extern.py BASEBIN YAML OBJ
        rodata_extern.py --labels ASM_DATA_DIR OUT     (regenerate jtbl_labels.<ver>.txt)

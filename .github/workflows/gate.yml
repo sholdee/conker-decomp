@@ -149,8 +149,8 @@ jobs:
             echo "### Gate files changed by this pull request"
             if git -C test fetch --quiet --no-tags --depth=1 "$BASE_REPO" "$BASE_SHA"; then
               changed=$(git -C test diff --name-only "$BASE_SHA" HEAD -- \
-                '**/Makefile' '*.mk' '*.yaml' '*.ld' '*.sha1' 'tools/**' '.gitmodules' \
-                'conker/include/macro.inc' 'conker/*.txt' '.github/**')
+                'Makefile' '**/Makefile' '*.mk' '*.yaml' '*.ld' '*.sha1' 'tools/**' '.gitmodules' \
+                'conker/include/**' 'conker/*.txt' '.github/**')
               if [ -n "$changed" ]; then
                 echo "Review these by hand: the build runs the pull request's own versions of them."
                 echo '```'; echo "$changed"; echo '```'

@@ -21,8 +21,8 @@ disagree with the definition" in `tools/HEADERS.md`.
 ```
 python3 ~/conker/tools/cw.py new --tree cast.<name>          # a tree workspace
 #   edit types and code; then show the warnings of a file:
-python3 -c "import sys; sys.path.insert(0,'/home/ethan/conker/tools'); import mw; \
-print(mw.run('make -B build/src/game_X.c.o 2>&1 | grep Warning', '/home/ethan/conker-ws/clean.cast.<name>/conker').stdout)"
+python3 -c "import os, sys; sys.path.insert(0, os.path.expanduser('~/conker/tools')); import mw; \
+print(mw.run('make -B build/src/game_X.c.o 2>&1 | grep Warning', os.path.expanduser('~/conker-ws/clean.cast.<name>/conker')).stdout)"
 python3 ~/conker/tools/cw.py check clean.cast.<name>          # must print RESULT: MATCH
 python3 ~/conker/tools/cw.py land  clean.cast.<name> -m "types: <what>"
 ```
