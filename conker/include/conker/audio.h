@@ -80,6 +80,7 @@ void *func_10009CBC(u32 *slot, s32 mode);
 BankFetchProc func_10009FFC(void);
 void func_1000A03C(void);
 void func_1000A348(void);
+extern s32 D_8003E384;
 
 /* init_1AAE0.c to init_22460.c are Rare's copies of the n_audio library (sequence player, event queue,
  * synthesizer, reverb, envelope mixer, resampler, loader). Like libultra, they are declared by the SDK headers

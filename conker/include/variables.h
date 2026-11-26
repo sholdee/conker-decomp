@@ -8,7 +8,6 @@
 
 
 
-extern s32 D_8003E384;
 extern u32 D_80042450[512]; // chunk0 offsets
 
 
@@ -37,10 +36,6 @@ extern s32  D_8000031C[16]; // osAppNMIBuffer (64 bytes); libultra's declaration
 
 /* 80020000 */
 
-extern u8   D_8002AE40;
-extern u32  D_8002AE44;
-extern u32  D_8002AE48; /* sample DMAs issued this frame */
-extern s32  D_8002AE4C;
 
 extern s32  D_8002B070;
 extern s32  D_8002B078[][4]; // probably not correct...
@@ -59,24 +54,13 @@ extern u32  __osShutdown;
 /* 80030000 */
 extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares it itself); stopped by the PI manager in init_2E50
 
-extern OSThread  D_8003E3A0;
-extern s32  D_8003E640;
 
-extern OSMesgQueue D_8003E608;
-extern OSMesg      D_8003E620[8];
-extern OSMesgQueue D_8003E5D0;
-extern OSMesg      D_8003E5E8[8];
 
 
 /* 80040000 */
 
 
 extern s32  D_80040000;
-extern u8   D_80040F84;
-extern u32  D_80040F88; /* short audio frame, in samples */
-extern u32  D_80040F8C; /* audio frame, in samples */
-extern u32  D_80040F90; /* longest audio frame, in samples */
-extern OSIoMesg D_80040F98[];
 extern u8   D_80041F00;
 extern s32  D_80041F04;
 extern s32  D_80041F08;
@@ -93,10 +77,6 @@ extern u8   D_80041FD9;
 extern s32  D_80041FDC;
 extern s32 D_80041FEC[][12];
 
-extern OSMesgQueue D_80041298;
-extern OSMesg      D_800412B0[];
-extern OSMesgQueue D_800416F0;
-extern OSMesg      D_80041708[];
 
 extern u32 D_800417BC;
 extern u8 D_800418AC[];
