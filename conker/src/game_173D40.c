@@ -1,9 +1,5 @@
 #include <ultra64.h>
-// matching: this file calls func_150A2AEC with a fourth argument (the actor); hide the header's prototype
-#define func_150A2AEC func_150A2AEC_hdr
 #include "functions.h"
-#undef func_150A2AEC
-s32 func_150A2AEC(s32 index, s32 count, const s32 *list, Actor *actor);
 #include "variables.h"
 
 extern u8 (*D_8008FD1C)(void);

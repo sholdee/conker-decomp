@@ -774,7 +774,11 @@ s32 func_150A29C8(u32 actor, u32 id) {
 }
 
 /* Returns the first of the count zone ids in ids[] that contains actor `actor`, or -1. */
-s32 func_150A2AEC(u32 actor, s32 count, s32 *ids) {
+s32 func_150A2AEC(actor, count, ids)
+    u32 actor;
+    s32 count;
+    s32 *ids;
+{
     s32 i;
     u32 id;
 

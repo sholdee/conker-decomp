@@ -1,9 +1,6 @@
 #include <ultra64.h>
 
-// matching: this file calls func_150A2AEC with a fourth argument (the actor); hide the header's prototype
-#define func_150A2AEC func_150A2AEC_hdr
 #include "functions.h"
-#undef func_150A2AEC
 #include "variables.h"
 
 struct Msg151419D0 {
@@ -299,7 +296,6 @@ struct Args151420F8 {
 };
 
 const Args151420F8 D_800A5200 = { 0x402E, 0x402F, 0x4030, 0x4031, 0x4032, 0x4033 };
-s32 func_150A2AEC(s32, s32, Args151420F8 *, s32);
 
 s32 func_151420F8(s32 actor) {
     Args151420F8 args;

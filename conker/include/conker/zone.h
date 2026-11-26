@@ -48,7 +48,8 @@ void func_150A278C(Actor *actor);
 void func_150A2864(u32 id, s32 disabled);
 void func_150A2940(s32 id, s32 data1, s32 subTypeData);
 s32 func_150A29C8(u32 actor, u32 id);
-s32 func_150A2AEC(u32 actor, s32 count, s32 *ids);
+/* (u32 actor, s32 count, s32 *ids); declared without a prototype: two callers also pass the Actor */
+s32 func_150A2AEC();
 s32 func_150A2CA4(u32 id);
 s32 func_150A2D84(s32 camIndex, s32 id);
 s32 func_150A2E4C(TriggerZone *zone, f32 x, f32 y, f32 z);
