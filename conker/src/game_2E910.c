@@ -58,16 +58,12 @@ typedef struct YRange {
     s16 max;
 } YRange;
 
-extern YRange *D_800DBE44;
-
 typedef struct XZRange {
     s16 minx;
     s16 minz;
     s16 maxx;
     s16 maxz;
 } XZRange;
-
-extern XZRange *D_800DBE40;
 
 /**
  * Appends every triangle drawn by display list `dl` to the triangle table D_800DBE3C

@@ -1813,7 +1813,6 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D9E70, name: game_139FC0}
       - {start: 0x255880, type: .bss, vram: 0x800D9ED0, name: game_13ABD0}
       - {start: 0x255880, type: .bss, vram: 0x800DBDC0, name: game_13BB20}
-      - {start: 0x255880, type: bss, vram: 0x800DBE18, name: bss_800DBE18}
       - {start: 0x255880, type: .bss, vram: 0x800DBE80, name: game_13D350}
       - {start: 0x255880, type: .bss, vram: 0x800DBEC0, name: game_13F9D0}
       - {start: 0x255880, type: .bss, vram: 0x800DBED0, name: game_13FF30}

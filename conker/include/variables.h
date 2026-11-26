@@ -243,19 +243,15 @@ extern u8  D_800D9946[]; // just past the end of D_800D993A (func_15010600 stops
 
 
 
-extern s32 D_800DBE18[];
-extern s32 D_800DBE1C[];
-extern s32 D_800DBE20;
-extern s32 D_800DBE24;
+extern s32 D_800DBE18[4];
 extern s16 D_800DBE28;
 extern s16 D_800DBE2A;
 extern s16 D_800DBE2C;
-extern s16 D_800DBE30[]; // per-view camera zone
-extern u16 D_800DBE32;
-extern u16 D_800DBE34;
-extern u16 D_800DBE36;
+extern s16 D_800DBE30[4]; // per-view camera zone
 extern s32 D_800DBE38;
 extern MeshTri *D_800DBE3C;
+extern struct XZRange *D_800DBE40;
+extern struct YRange *D_800DBE44;
 extern ZoneNode *D_800DBE48; // zone tree root
 extern s32 D_800DBE4C;
 extern s32 D_800DBE50;
@@ -266,6 +262,7 @@ extern f32 D_800DBE64;
 extern f32 D_800DBE68;
 extern f32 D_800DBE6C;
 extern f32 D_800DBE70;
+extern f32 D_800DBE74;
 
 extern u8 D_800DCA20;
 extern f32 D_800DCA24;

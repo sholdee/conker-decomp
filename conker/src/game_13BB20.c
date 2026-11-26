@@ -2,10 +2,9 @@
 #include "structs.h"
 
 /*
- * The first part of this unit's .bss, defined before the headers declare it (see init_50A0.c). The rest
- * (D_800DBE18..D_800DBE7F) stays in asm: game_2E910.c resets the per-map counts D_800DBE18[4] and the
- * per-view zones D_800DBE30[4] through the symbols of their elements (D_800DBE1C..D_800DBE24 and
- * D_800DBE32..D_800DBE36), and as array elements IDO shares one %hi between the stores.
+ * This unit's .bss, defined before the headers declare it (see init_50A0.c). The externs of D_800DBE18 and
+ * later stay in variables.h: 20 new names in conker/collision.h, which comes before conker/cont.h, rotate the
+ * .bss of game_48FD0.c (its variables are first declared in cont.h).
  */
 s32 D_800DBDC0;                 // the camera that func_1510FC34 last placed
 s32 D_800DBDC4;                 // its zone
@@ -16,6 +15,29 @@ void *D_800DBDD8[4];            // per map: triangle table (carved from D_800B0D
 void *D_800DBDE8[4];            // per map: x/z bounds
 void *D_800DBDF8[4];            // per map: y bounds
 struct QuadNode *D_800DBE08[4]; // per map: quadtree root
+s32 D_800DBE18[4];              // per map: triangle count
+s16 D_800DBE28;                 // quadtree node bitmap: row stride in bytes
+s16 D_800DBE2A;                 // map 0 quadtree: node count
+s16 D_800DBE2C;                 // map 0 quadtree: leaf count
+s16 D_800DBE30[4];              // per view: camera zone
+s32 D_800DBE38;                 // triangles collected for the current map
+MeshTri *D_800DBE3C;            // world mesh: triangles
+struct XZRange *D_800DBE40;     // world mesh: x/z bounds per triangle
+struct YRange *D_800DBE44;      // world mesh: y bounds per triangle
+ZoneNode *D_800DBE48;           // zone tree root
+s32 D_800DBE4C;                 // world mesh: triangle count
+s32 D_800DBE50;                 // map whose triangle table is carved next
+f32 D_800DBE54;                 // last floor query: highest floor
+f32 D_800DBE58;                 // last floor query: ceiling
+u32 *D_800DBE5C;                // per world-mesh triangle: material / surface flags
+u16 D_800DBE60;                 // last floor query: prop hit (index + 1, 0: none)
+u8 D_800DBE62;                  // set once the world mesh is built
+u8 D_800DBE63;
+f32 D_800DBE64;                 // floor query reach
+f32 D_800DBE68;                 // last floor query: x
+f32 D_800DBE6C;                 // last floor query: y
+f32 D_800DBE70;                 // last floor query: z
+f32 D_800DBE74;                 // last ray probe: bottom
 
 #include "functions.h"
 #include "variables.h"
@@ -84,9 +106,6 @@ void func_1510E8BC(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropF
                   -10000.0f, 20000.0f, noFallback);
 }
 
-extern f32 D_800DBE54;
-extern f32 D_800DBE58;
-extern u16 D_800DBE60;
 
 // D_800DBE5C points at the world mesh's per-triangle materials, or is NULL.
 // World-mesh triangles are 12 bytes (three vertex offsets) from D_800DBE3C on.

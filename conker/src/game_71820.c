@@ -349,7 +349,6 @@ void func_15044E88(void) {
 
 /* One candidate triangle returned by the func_150A3A70/func_150A4FA0/func_150A43E0 grid queries. */
 
-extern f32 D_800DBE74;
 
 /* Ceiling probe against collision set 0: lowest triangle between pos.y and top. */
 s32 func_15044ED0(Vec3f *pos, f32 top, CollisionHit *hit) {
