@@ -49,8 +49,7 @@ ModeSettings *gModeSettings = (ModeSettings *)&gModeSettingsRecord[2]; // saved 
 u8 gSaveScanning = FALSE; // scanning the EEPROM save files (save_readFile records each in its save slot)
 
 /* EEPROM access (game/Save/EepromTimedWrite/eepromtimedwrite.c, game/Os/EepromLongRead/eepromlongread.c) */
-/* Defined in game/Os/EepromLongRead/eepromlongread.c as s32 func_151DD3A0(OSMesgQueue *mq, u8 address, u8 *buffer, int length) (read).
-   This file was compiled with a view that returns nothing. */
+/* matching: compiled with a void return, where eepromlongread.c's definition returns s32 (save_readFile's registers change) */
 void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size);
 
 /* Resets the saved game state (zone_resetTaskProgress, every gPlayedCutscenes entry and the values saved with them). */

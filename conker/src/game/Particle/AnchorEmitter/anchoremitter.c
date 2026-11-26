@@ -3,8 +3,7 @@
 #include "variables.h"
 #include "libc/string.h"
 
-// particle_spawnJitterParticle (game/Particle/GroundCluster/groundcluster.c) is declared in each file that calls it: game/Beam/AreaEmitter/areaemitter.c was compiled with a
-// different view of it.
+/* matching: no header declares particle_spawnJitterParticle (groundcluster.c): areaemitter.c was compiled with another view */
 void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, const Vec3f *velocity, f32 gravity, f32 drag,
                     f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10,
                     s32 arg11);

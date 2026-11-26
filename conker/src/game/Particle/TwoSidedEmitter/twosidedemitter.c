@@ -108,7 +108,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
     dstPoints[2] = &edgeB;
     math_transformOffsets(srcPoints, dstPoints, matrix, useTarget ? 3 : 2);
     if (useTarget) {
-        // matching: a declaration here opens a -g3 scope block (scheduling)
+        /* matching: a declaration here opens a -g3 scope block (scheduling) */
         extern void math_vec3Cross(Vec3f *, Vec3f *, Vec3f *);
 
         linePoint = &target->mv->aimEye;

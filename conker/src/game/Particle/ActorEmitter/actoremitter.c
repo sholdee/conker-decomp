@@ -37,7 +37,7 @@ ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 life
                 emitter = gObjectWalkNext[gObjectWalkDepth];
             }
             {
-                // matching: the block-scope redeclaration makes IDO rematerialize &gObjectWalkDepth
+                /* matching: the block-scope redeclaration makes IDO rematerialize &gObjectWalkDepth */
                 extern s8 gObjectWalkDepth;
 
                 gObjectWalkDepth--;
