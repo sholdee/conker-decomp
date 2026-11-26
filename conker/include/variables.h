@@ -300,7 +300,6 @@ extern f32 D_800CC2C4;
 extern f32 D_800CC2C8;
 
 extern Actor movement_obj[26]; // objects
-extern u8  D_800CC2D4[];
 extern u16 D_800CC382;
 
 extern u8 D_800CC49A;
@@ -308,20 +307,7 @@ extern u8 D_800CC49A;
 
 /* 800D0000 */
 
-extern Actor D_800D121C; // == &movement_obj[25]: dummy attacker for scripted hits; also the end of the 25 live actors
-extern f32 D_800D1230;
-extern f32 D_800D1234;
-extern f32 D_800D1238;
-extern s16 D_800D1292;
-extern s16 D_800D1296;
-extern s8  D_800D12EC;
-extern f32 D_800D1330;
-extern u8  D_800D1340;
-extern s8  D_800D1359;
-extern f32 D_800D1368;
-extern f32 D_800D136C;
 
-extern s32 D_800D1510;
 extern f32 D_800D1550; // frame time step
 extern s32 D_800D1548;
 extern Actor *D_800D154C;

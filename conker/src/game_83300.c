@@ -19,7 +19,6 @@ const s32 D_8009942C[3] = { 0x12, 0x0B, 0x13 };
 
 struct HitReaction;
 struct HitReaction;
-extern MtxF *D_800CC4A4;
 
 
 
@@ -2795,13 +2794,14 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
     return ret;
 }
 
-/* Hits `victim` with a scripted attack from the dummy attacker D_800D121C; flags & 0xFF picks the entry. */
+/* Hits `victim` with a scripted attack from the dummy attacker movement_obj[25]; flags & 0xFF picks the entry. */
 s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
-    s32 pad;
+    Actor *dummy;
     s32 ret;
     s32 slot;
     const HitReaction *table;
 
+    dummy = &movement_obj[25];
     table = D_8009A9F8;
     if (D_800C35EA[0] == 1) {
         return 0;
@@ -2816,12 +2816,12 @@ s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
         return 0;
     }
     if (sourceSlot == -1) {
-        D_800D1340 = 0;
+        dummy->owner = 0;
     } else {
-        D_800D1340 = sourceSlot + 1;
+        dummy->owner = sourceSlot + 1;
     }
-    D_800D1292 = angle;
-    D_800D1296 = angle;
+    dummy->angle = angle;
+    dummy->langle = angle;
     if (flags & 0x10000) {
         table = func_1505C1A4(D_800D154C);
     }
@@ -2829,38 +2829,39 @@ s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
     slot = victim - movement_obj;
     ret = 1 << slot;
     if (flags & 0x80000) {
-        ret = func_1505C1E4(&D_800D121C, victim, table, flags & 0xFF, slot + 1, 0, 7);
+        ret = func_1505C1E4(dummy, victim, table, flags & 0xFF, slot + 1, 0, 7);
     } else {
-        func_1505B9C4(&D_800D121C, victim, table, table, flags & 0xFF, slot + 1, 7);
+        func_1505B9C4(dummy, victim, table, table, flags & 0xFF, slot + 1, 7);
     }
     return ret;
 }
 
 /*
- * Runs attack attackId from point (x, y, z) through the dummy attacker D_800D121C. The D_800D12xx..D_800D15xx
- * globals written here are that dummy's Actor fields: position (0x14), unk124, unk13D, unk76, unk2F4
- * (line-of-sight origin), unk114 (timer), unkD0 (attack + 1) and the xz/y scales.
+ * Runs attack attackId from point (x, y, z) through the dummy attacker movement_obj[25]: sets its position,
+ * owner, carried (the slot the line of sight skips), angle, attachments (the line-of-sight origin), unk114
+ * (timer), doing_hit (attack + 1) and the xz/y scales.
  * Declared int but returns no value, in the pre-ANSI way: func_150E1570 uses what func_1505C7D8 leaves in v0.
  */
 s32 func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin) {
-    s32 pad;
+    Actor *dummy;
     s32 savedIdx;
 
     savedIdx = dc_glbl_CharNum;
-    func_1505F188(&D_800D121C);
-    D_800D1230 = x;
-    D_800D1234 = y;
-    D_800D1238 = z;
-    D_800D1340 = sourceSlot + 1;
-    D_800D1359 = losSkipSlot;
-    D_800D1292 = angle;
+    dummy = &movement_obj[25];
+    func_1505F188(dummy);
+    dummy->xpos = x;
+    dummy->ypos = y;
+    dummy->zpos = z;
+    dummy->owner = sourceSlot + 1;
+    dummy->carried = losSkipSlot;
+    dummy->angle = angle;
     dc_glbl_CharNum = 25;
-    D_800D1510 = losOrigin;
-    D_800D1330 = 100.0f;
-    D_800D12EC = (attackId & 0xFFFF) + 1;
-    D_800D1368 = 0.5f;
-    D_800D136C = 0.5f;
-    func_1505C7D8(&D_800D121C, 25);
+    dummy->attachments = (Attachment *)losOrigin;
+    dummy->unk114 = 100.0f;
+    dummy->doing_hit = (attackId & 0xFFFF) + 1;
+    dummy->scale_xz = 0.5f;
+    dummy->scale_y = 0.5f;
+    func_1505C7D8(dummy, 25);
     dc_glbl_CharNum = savedIdx;
 }
 
@@ -3622,13 +3623,7 @@ Actor *func_1505ED34(void) {
     }
 
     if (i == 25) {
-        ptr = movement_obj;
-        i = 0;
-        if ((0x27 != ptr->type) || (D_800CC4A4 != NULL)) {
-            do {
-                i++;
-                ptr++;
-            } while ((i < 25) && ((0x27 != ptr->type) || (ptr->ob_matrix_ptr != NULL)));
+        for (ptr = movement_obj, i = 0; (i < 25) && ((0x27 != ptr->type) || (ptr->ob_matrix_ptr != NULL)); i++, ptr++) {
         }
 
         if (i != 25) {
@@ -3685,26 +3680,16 @@ Actor *func_1505EEF4(s32 pathIdx) {
     return NULL;
 }
 
-/* matching: aliases of movement_obj[0].unk127 and &movement_obj[1]; IDO addresses each symbol separately */
-extern u8 D_800CC3F7;
-extern Actor D_800CC5FC;
-
-/* The live actor whose unk127 is `key`, or NULL. */
+/* The live actor whose playernumber is `key`, or NULL. */
 Actor *func_1505EFD0(s32 key) {
-    Actor *actor;
+    Actor *actor = movement_obj;
     s32 i;
 
-    actor = &D_800CC5FC;
-    if (movement_obj[0].type != 0) {
-        if (key == D_800CC3F7) {
-            return (Actor *)(D_800CC2D4 - 4); /* &movement_obj[0] */
-        }
-    }
-
-    for (i = 1; i < 25; i++, actor++) {
+    for (i = 0; i < 25; i++) {
         if ((actor->type != 0) && (key == actor->playernumber)) {
             return actor;
         }
+        actor++;
     }
     return NULL;
 }
