@@ -81,8 +81,6 @@ extern FontGlyph *D_80085994[];
 extern u64 D_800885B0;
 extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern s32 * D_800891BC[];
-extern DrawEntry **D_80089240[]; // per-view draw lists
-extern Mtx ** D_80089250[]; // per frame buffer: one Mtx per object
 extern PropSounds D_80089260[]; // prop sound rows (doors, movers, sliders)
 extern Mtx D_80089470; // fixed modelview matrix
 extern s32 D_800894B0;
@@ -372,18 +370,6 @@ extern u8 D_800DBEA8[];
 extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
 extern Mtx *D_800DBEB0; // sky projection matrices, 2 per view
-extern u16 D_800DBEE8[]; // per view: entries in D_80089240
-extern s32 gWorldObjectCount; // number of db_Object_array entries
-extern WorldObject *db_Object_array; // original name (Oct 2000 debugger); gWorldObjectCount entries
-extern void **D_800DBEF8; // per object: handle released with func_10004074
-extern u8 *D_800DBEFC; // per object: frames to keep the handle once hidden
-extern u8  D_800DBF00;
-extern MtxF D_800DBF08[]; // per-frame
-extern u8  D_800DBF88;
-extern Gfx *D_800DBF8C; // display list of object D_800DBF88 (func_15004574)
-extern Vtx *D_800DBF90; // its source vertices
-extern s32 * gWorldObjectContacts; // per object: bit N set when actor movement_obj[N] touches it
-extern s32 D_800DBF98; // grouped objects, kept at the end of db_Object_array
 extern Camera *camera_global_Cameras;
 extern u8  D_800DBFF4[4]; // per-player camera hold timers; *(s32 *)D_800DBFF4 tests all four at once
 extern u8  D_800DBFF5;

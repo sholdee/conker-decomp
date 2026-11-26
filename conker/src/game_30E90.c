@@ -7,9 +7,6 @@
 void *allocate_memory(s32 size, u32 tag, s32 align, s32 mode);
 #include "variables.h"
 
-extern void *D_800DBED0[4];
-extern void *D_800DBEE0;
-extern void *D_800DBEE4;
 static u16 D_800BE2A0; // objects whose preset radius is too small (func_15004AAC)
 static u16 D_800BE2A2; // objects whose radius was computed
 static u16 D_800BE2A4; // objects whose preset radius is large enough
@@ -279,8 +276,6 @@ void func_15004574(void) {
 void func_150045BC(void) {
 }
 
-extern MtxF D_800DBF48;
-
 /*
  * Prepares the objects for the level: builds each object's matrices for both frames (or, for objects with
  * state bit 0, transforms its vertices into its per-frame copies), then probes the floor under objects
@@ -300,7 +295,7 @@ void func_150045C4(s32 arg0) {
 
     func_15004A4C();
     guMtxIdentF(D_800DBF08[0]);
-    guMtxIdentF(D_800DBF48);
+    guMtxIdentF(D_800DBF08[1]);
     for (i = 0; i < gWorldObjectCount; i++) {
         obj = &db_Object_array[i];
         if (obj->moveProc == NULL || obj->moveProc == func_15116058 || obj->moveProc == func_15116110) {
