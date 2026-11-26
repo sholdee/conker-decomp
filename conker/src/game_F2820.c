@@ -18,9 +18,7 @@ Gfx D_80088790[] = {
     gsDPPipeSync(),
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
     gsDPPipeSync(),
-    // gsDPSetConvert(G_CV_K0, G_CV_K1, G_CV_K2, G_CV_K3, G_CV_K4, G_CV_K5) as Rare's gbi.h encoded it: it
-    // shifted k2's high bits left (_SHIFTL(k2, 5, 4)) where 2.0L shifts them right
-    {{ 0xEC15FDF0, 0x3B78E42A }},
+    gsDPSetConvert(G_CV_K0, G_CV_K1, G_CV_K2, G_CV_K3, G_CV_K4, G_CV_K5),
     gsSPEndDisplayList(),
 };
 

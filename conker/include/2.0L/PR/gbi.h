@@ -4345,13 +4345,18 @@ typedef union {
 			_SHIFTL(MAX((uly),0), 2, 10));			\
 }
 
+/*
+ * Conker's SDK revision encodes k2's high bits with _SHIFTL(k2, 5, 4), where
+ * later revisions of gbi.h use _SHIFTR(k2, 5, 4). The ROM's G_SETCONVERT words
+ * (0xEC15FDF0 for the G_CV_K* constants) show the _SHIFTL form.
+ */
 #define	gDPSetConvert(pkt, k0, k1, k2, k3, k4, k5)			\
 {									\
 	Gfx *_g = (Gfx *)(pkt);						\
 									\
 	_g->words.w0 = (_SHIFTL(G_SETCONVERT, 24, 8) |			\
 			_SHIFTL(k0, 13, 9) | _SHIFTL(k1, 4, 9) | 	\
-			_SHIFTR(k2, 5, 4));				\
+			_SHIFTL(k2, 5, 4));				\
 	_g->words.w1 = (_SHIFTL(k2, 27, 5) | _SHIFTL(k3, 18, 9) |	\
 			_SHIFTL(k4, 9, 9) | _SHIFTL(k5, 0, 9));		\
 }
@@ -4359,7 +4364,7 @@ typedef union {
 #define gsDPSetConvert(k0, k1, k2, k3, k4, k5)				\
 {{									\
 	(_SHIFTL(G_SETCONVERT, 24, 8) |					\
-	 _SHIFTL(k0, 13, 9) | _SHIFTL(k1, 4, 9) | _SHIFTR(k2, 5, 4)),	\
+	 _SHIFTL(k0, 13, 9) | _SHIFTL(k1, 4, 9) | _SHIFTL(k2, 5, 4)),	\
 	(_SHIFTL(k2, 27, 5) | _SHIFTL(k3, 18, 9) | _SHIFTL(k4, 9, 9) | 	\
 	 _SHIFTL(k5, 0, 9))						\
 }}
