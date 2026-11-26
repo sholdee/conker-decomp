@@ -1,9 +1,16 @@
 #include <ultra64.h>
+#include "structs.h"
 
 /*
- * Text state: this file's .bss (0x800CBD50-0x800CBD5F), in the original order. IDO lays out .bss in an order
- * that depends on the declarations before it, so it is defined before functions.h and variables.h.
+ * This file's .bss, in the original order. IDO lays out .bss in an order that depends on the declarations
+ * before it, so it is defined before functions.h and variables.h.
  */
+u8 D_800C68B0[95][0xE0]; // font 0: glyph bitmaps (I4, unpacked by func_15015A38), one per charset entry
+FontGlyph D_800CBBD0[95]; // font 0: glyph metrics
+u8 D_800CBD4C;            // cleared by func_15015910
+u16 D_800CBD4E;           // animation clock (high bits pick icon frames)
+
+/* Text state. */
 static u8 D_800CBD50; // control/icon code of the current character, 0xFF if none
 static u8 D_800CBD51, D_800CBD52, D_800CBD53, D_800CBD54, D_800CBD55, D_800CBD56; // not referenced by any code
 static u8 D_800CBD57; // current primitive colour r, g, b, a (D_800CBD57-5A)
@@ -18,7 +25,10 @@ static u8 D_800CBD5E; // wave phase
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_80085930[]; // font charset, 95 entries
+/* The font charset: glyph i shows character D_80085930[i] (uppercase only; func_15042C40 folds case). */
+static u8 D_80085930[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ&\\^:,$\"=!.>#{([<-%+?})];/~'\304\344\326\366\334\374\337\300\340\302\342\307\347\311\351\310\353\312\352\313\352\316\356\317\357\324\364\333\364\331\372@";
+u8 (*D_80085990[])[0xE0] = { D_800C68B0 }; // per font: glyph bitmaps
+FontGlyph *D_80085994[] = { D_800CBBD0 };   // per font: glyph metrics
 
 /*
  * Size and layout of a special (icon) glyph, codes 0xA8-0xFF: its width and height in texels, how far

@@ -39,6 +39,8 @@ void func_150415E0(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noComb
 Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 scaleX, f32 scaleY, s32 len);
 void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth);
 s32 func_15042C40(u8 ch);
+extern u8 D_800CBD4C;  // cleared by func_15015910
+extern u16 D_800CBD4E; // animation clock (high bits pick icon frames)
 
 /* game_70200.c */
 void func_15042D50(void);

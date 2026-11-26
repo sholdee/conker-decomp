@@ -397,7 +397,6 @@ extern AimPoint *gAimPoints; // aim points (gAimPointCount of them)
 extern s32 gAimPointCount;
 extern ObjPartsState D_800C6660[];
 
-extern u16 D_800CBD4E; // animation clock (high bits pick icon frames)
 extern u16 D_800CBDA0[];
 extern u8 D_800CBDD3;
 extern u8 D_800CBDD4;

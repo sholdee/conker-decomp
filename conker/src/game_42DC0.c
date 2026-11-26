@@ -16,8 +16,6 @@ static FontRomRange D_80082F80[1] = {
     { (s32)&font_ROM_START, (s32)&game_us_rzip_ROM_START },
 };
 
-extern u8 D_800CBD4C;
-
 void func_15015910(void) {
     D_800CBD4C = 0;
 }
