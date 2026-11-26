@@ -15,7 +15,7 @@ typedef struct {
     /* 0x20 */ f32 savedCameraAngle; // actor->CameraAngle at setup, written to actor->CutbackAngle when done
 } C3E20Command; // size 0x24
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 f32 D_800D2DB0;
 s32 gPoseCommandRunning; // a command is running
 f32 D_800D2DB8; // actor->unk2C0 saved while a command runs

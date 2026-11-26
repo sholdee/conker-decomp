@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/cont.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/cont.h describes it. */
 u8 gRumbleSuppressed; /* set by cont_killAllRumble; game/Cont/PadRead/padread keeps the motors off while it is set */
 
 #include "functions.h"

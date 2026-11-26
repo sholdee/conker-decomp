@@ -7,7 +7,7 @@
  * float literals and jump tables of game/Collision/Spawn/spawn (0x2416F0-0x24188C, then its padding), so it is not part
  * of that unit; its .data (0x22B750) starts on a 16-byte unit boundary after game/Collision/HitSphere/hitsphere's. It holds the
  * model tables of the actor code: the object filters, the sub-model lists, the part sets, and the
- * expression actions of model 0 (game_AB760).
+ * expression actions of model 0 (game/Face/Expression/expression).
  */
 
 /* Sub-model lists (gSubModelLists): model ids, ModelDef.subModelCount LODs then the extra models. */

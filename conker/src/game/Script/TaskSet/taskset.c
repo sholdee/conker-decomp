@@ -2,7 +2,7 @@
 #include "libc/stdarg.h"
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 D_800D2E40;
 u8 D_800D2E41;
 u8 D_800D2E42;

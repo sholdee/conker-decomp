@@ -1888,7 +1888,7 @@ Vtx *func_15140190(DefParticleHead *particle, s16 viewport) {
     return result;
 }
 
-/* The object list types of the glow sprites (game_16DC80) and of the effect objects, for effect_sendEventToTypes. */
+/* The object list types of the glow sprites (game/Flare/Glow/glow) and of the effect objects, for effect_sendEventToTypes. */
 const s32 gQuadParticleTypes[4] = { 0x1C, 0x49, 0x56, 0x62 };
 static const s32 gQuadSpriteTypes[3] = { 0x1B, 0x61, 0x4A };
 

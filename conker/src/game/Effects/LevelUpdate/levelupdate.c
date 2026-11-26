@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/effect.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/effect.h describes it. */
 s32 D_800DD400; /* not referenced */
 u8 D_800DD404;
 u8 gLevelTexFrame;

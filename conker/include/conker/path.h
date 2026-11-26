@@ -7,10 +7,10 @@
 /*
  * Subsystem "path": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_B3020.c
+ *   game/Path/PathGraph/pathgraph.c
  */
 
-/* game_B3020.c */
+/* game/Path/PathGraph/pathgraph.c */
 void path_load(s32 id);
 s32 path_splitBands(void);
 u8 path_getLayerAt(f32 y);

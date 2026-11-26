@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
- * it first sees each name (see init_50A0.c). The multiplayer spawn points of the level: */
+ * it first sees each name (see init/Sched/SchedInit/schedinit.c). The multiplayer spawn points of the level: */
 s32 gTeam0SpawnMask;          // team 0 spawn mask (bit per spawn point)
 s32 gTeam1SpawnMask;          // team 1 spawn mask
 s32 gSpawnPointCount;          // number of entries in gSpawnPoints
@@ -11,7 +11,7 @@ SpawnPoint *gSpawnPoints;  // the level's spawn point table
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game/Math/MathUtil/mathutil.c calls it with two more arguments. */
 void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Defined in game/Event/TimedEvent/timedevent.c. Not in event.h: game/Actor/ActorMotion/actormotion.c calls it with a fourth argument. */

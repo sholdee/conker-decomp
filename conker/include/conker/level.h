@@ -7,54 +7,54 @@
 /*
  * Subsystem "level": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_2DDF0.c
- *   game_305D0.c
- *   game_30E90.c
- *   game_360A0.c
- *   game_3BA70.c
- *   game/done/game_3BFD0.c
- *   game/done/game_3BFE0.c
- *   game/done/game_3C230.c
- *   game/done/game_3C3D0.c
- *   game/done/game_3C6C0.c
- *   game_3C740.c
- *   game_3CE80.c
- *   game_3D2E0.c
- *   game_3D5C0.c
- *   game/done/game_3D6F0.c
- *   game/done/game_3D770.c
- *   game/done/game_3D780.c
- *   game_3D9A0.c
- *   game/done/game_3DB30.c
- *   game/done/game_3DB50.c
- *   game/done/game_3DB60.c
- *   game/done/game_3DB80.c
- *   game_3DC30.c
- *   game_3DF10.c
- *   game/done/game_3E460.c
- *   game/done/game_3E5A0.c
- *   game/done/game_3E620.c
- *   game/done/game_3E7E0.c
- *   game/done/game_3E810.c
- *   game_3E890.c
- *   game/done/game_3EFB0.c
- *   game/done/game_3F0F0.c
- *   game/done/game_3F120.c
- *   game_3F1F0.c
- *   game/done/game_3F3D0.c
- *   game/done/game_3F450.c
- *   game/done/game_3F4D0.c
- *   game/done/game_3F560.c
- *   game_3F670.c
- *   game/done/game_3FBD0.c
- *   game/done/game_3FC20.c
- *   game/done/game_3FC30.c
- *   game_40490.c
- *   game_43D00.c
- *   game_FDD70.c
- *   game_22D750.c (data only, linked after game/Prop/Clock/clock)
- *   game_15D6E0.c
- *   game/done/game_1A6300.c
+ *   game/Level/LevelTints/leveltints.c
+ *   game/Level/LevelModels/levelmodels.c
+ *   game/Level/LevelObjects/levelobjects.c
+ *   game/Level/ZoneSpray/zonespray.c
+ *   game/Level/LevelSetupReset/levelsetupreset.c
+ *   game/Level/LevelSetup03/levelsetup03.c
+ *   game/Level/LevelSetup04/levelsetup04.c
+ *   game/Level/LevelSetup09/levelsetup09.c
+ *   game/Level/LevelSetup05/levelsetup05.c
+ *   game/Level/LevelSetup34/levelsetup34.c
+ *   game/Level/LevelSetup08/levelsetup08.c
+ *   game/Level/LevelSetup11/levelsetup11.c
+ *   game/Level/LevelSetup12/levelsetup12.c
+ *   game/Level/LevelSetup19/levelsetup19.c
+ *   game/Level/LevelSetup24/levelsetup24.c
+ *   game/Level/LevelSetup27/levelsetup27.c
+ *   game/Level/LevelSetup30/levelsetup30.c
+ *   game/Level/LevelSetup02/levelsetup02.c
+ *   game/Level/LevelSetup06/levelsetup06.c
+ *   game/Level/LevelSetup07/levelsetup07.c
+ *   game/Level/LevelSetup10/levelsetup10.c
+ *   game/Level/ZoneShapeEmitter/zoneshapeemitter.c
+ *   game/Level/LevelSetup18/levelsetup18.c
+ *   game/Level/LevelSetup23/levelsetup23.c
+ *   game/Level/LevelSetup33/levelsetup33.c
+ *   game/Level/LevelSetup35/levelsetup35.c
+ *   game/Level/LevelSetup37/levelsetup37.c
+ *   game/Level/LevelSetup16/levelsetup16.c
+ *   game/Level/LevelSetup31/levelsetup31.c
+ *   game/Level/LevelSetup13/levelsetup13.c
+ *   game/Level/LevelSetup17/levelsetup17.c
+ *   game/Level/LevelSetup14/levelsetup14.c
+ *   game/Level/LevelSetup25/levelsetup25.c
+ *   game/Level/LevelSetup26/levelsetup26.c
+ *   game/Level/AmbientAction3/ambientaction3.c
+ *   game/Level/AmbientAction5/ambientaction5.c
+ *   game/Level/ZoneAreaEmitter/zoneareaemitter.c
+ *   game/Level/AmbientColourCycle/ambientcolourcycle.c
+ *   game/Level/GroundParticles/groundparticles.c
+ *   game/Level/EffectKind/effectkind.c
+ *   game/Level/SetupResetStub/setupresetstub.c
+ *   game/Level/WaveReset/wavereset.c
+ *   game/Level/ZoneSpawn/zonespawn.c
+ *   game/Level/SpawnTable/spawntable.c
+ *   game/Level/LevelHook30/levelhook30.c
+ *   game/Level/ObjectTables/objecttables.c (data only, linked after game/Prop/Clock/clock)
+ *   game/Level/LevelHooks/levelhooks.c
+ *   game/Level/HeightCheck/heightcheck.c
  */
 
 /* A display list command, viewed as its opcode, the G_MOVEMEM index byte and the address word. */
@@ -65,7 +65,7 @@ typedef struct {
     /* 0x4 */ u32 addr;
 } DlCommand;
 
-/* game_30E90.c */
+/* game/Level/LevelObjects/levelobjects.c */
 typedef void (*ObjectFunc)();
 
 /* Defaults for objects of the second (grouped) list, indexed by model id (gGroupedObjectDefaults). */
@@ -115,11 +115,11 @@ typedef struct {
     /* 0x42 */ u8 pad42[2];
 } ObjectSpawn; // size 0x44
 
-/* game_2DDF0.c */
+/* game/Level/LevelTints/leveltints.c */
 /* (s32 arg0); declared without a prototype: game/Audio/LevelMusic/levelmusic.c calls it without the (unused) argument */
 void level_initTintWaves();
 
-/* game_305D0.c */
+/* game/Level/LevelModels/levelmodels.c */
 extern s32 *gLevelAssetLists[]; // per level (LevelHeader.assetList): zero-terminated asset id list. The segment
                           // starts here; init/Boot/BootMain/bootmain first DMAs its 16-byte header in (word 0: compressed data offset).
 extern const u16 gTextureRomSizes[7762]; // per texture: compressed size
@@ -143,7 +143,7 @@ s32 level_findTextureByAddr(s32 addr);
 void func_150039B0(s32 arg0);
 void level_setMeshTriMaterials(s32 addr);
 
-/* game_30E90.c */
+/* game/Level/LevelObjects/levelobjects.c */
 void level_spawnObjects(s32 levelId, s32 arg1);
 void func_15004574(void);
 void func_150045BC(void);
@@ -154,10 +154,10 @@ void level_setObjectCullRadius(WorldObject *obj, ObjectSpawn *spawn);
 s32 level_findFreeObjectId(s32 fromTop);
 void level_rebaseDlMatrices(DlCommand *dl, u32 base);
 
-/* game_360A0.c */
+/* game/Level/ZoneSpray/zonespray.c */
 s32 level_spawnZoneSpray(TriggerZone *zone);
 
-/* game_3BA70.c */
+/* game/Level/LevelSetupReset/levelsetupreset.c */
 void level_resetSetupState(void);
 void func_1500E70C(s32 id);
 void func_1500E738(void);
@@ -183,22 +183,22 @@ void func_1500EF20(void);
 /* game_3C6C0.c */
 void func_1500F210(void);
 
-/* game_3C740.c */
+/* game/Level/LevelSetup08/levelsetup08.c */
 void *func_1500F290(f32 x, f32 y, f32 z);
 void func_1500F378(s32 x, s32 y, s32 z, s32 floorY);
 void func_1500F40C(void);
 
-/* game_3CE80.c */
+/* game/Level/LevelSetup11/levelsetup11.c */
 void func_1500F9D0(s32 x, s32 y, s32 z, s32 floorY, s32 arg4);
 void func_1500FA64(void);
 
-/* game_3D2E0.c */
+/* game/Level/LevelSetup12/levelsetup12.c */
 extern BounceRecord *D_800BE4E0; /* ten bouncing cursors (func_1500FE30) */
 void func_1500FE30(void);
 void func_1500FF9C(void);
 void func_1500FFCC(void);
 
-/* game_3D5C0.c */
+/* game/Level/LevelSetup19/levelsetup19.c */
 void func_15010110(void);
 
 /* game_3D6F0.c */
@@ -211,7 +211,7 @@ void func_150102C0(void);
 void func_150102D0(void);
 void func_150103E0(void);
 
-/* game_3D9A0.c */
+/* game/Level/LevelSetup02/levelsetup02.c */
 void func_150104F0(void);
 void func_15010538(Actor *arg0);
 void func_15010600(void);
@@ -228,12 +228,12 @@ void func_150106B0(void);
 /* game_3DB80.c */
 s32 func_150106D0(TriggerZone *zone);
 
-/* game_3DC30.c */
+/* game/Level/LevelSetup18/levelsetup18.c */
 void func_15010780(void);
 void func_15010880(void);
 void func_150109D0(void);
 
-/* game_3DF10.c */
+/* game/Level/LevelSetup23/levelsetup23.c */
 void func_15010A60(void);
 
 /* game_3E460.c */
@@ -252,7 +252,7 @@ void func_15011330(void);
 /* game_3E810.c */
 void func_15011360(void);
 
-/* game_3E890.c */
+/* game/Level/LevelSetup13/levelsetup13.c */
 void func_150113E0(void);
 void func_1501175C(Actor *owner, u8 arg1, s32 arg2);
 void func_15011A78(Actor *owner, u8 arg1, s32 arg2);
@@ -270,7 +270,7 @@ void func_15011C70(void);
 void func_15011CA0(void);
 void func_15011CC0(void);
 
-/* game_3F1F0.c */
+/* game/Level/LevelSetup26/levelsetup26.c */
 void func_15011D40(void);
 s32 func_15011D60(TriggerZone *zone);
 
@@ -287,7 +287,7 @@ void func_15012020(s32 arg0, s32 arg1);
 void func_150120B0(s32 arg0);
 void func_1501214C(Actor *arg0);
 
-/* game_3F670.c */
+/* game/Level/GroundParticles/groundparticles.c */
 void func_150121C0(LightEffect *effect);
 
 /* game_3FBD0.c */
@@ -299,7 +299,7 @@ void func_15012770(void);
 /* game_3FC30.c */
 void func_15012780(void);
 
-/* game_40490.c */
+/* game/Level/ZoneSpawn/zonespawn.c */
 void level_resetScreenCopy(void);
 void level_spawnZones(void);
 s32 level_spawnPointGlowZone(TriggerZone *obj);
@@ -339,7 +339,7 @@ extern u16 *gScreenCopy; // RGBA16 screen copy, gScreenWidth x gScreenHeight (ga
 extern u8 gScreenCopyAlpha;
 extern u8 D_800BE575;
 
-/* game_43D00.c */
+/* game/Level/SpawnTable/spawntable.c */
 void level_collectSpawnModelTypes(void);
 void level_loadSpawnTable(s32 levelId);
 void level_allocSpawnPaths(s32 levelId);
@@ -347,18 +347,18 @@ extern u8 gSpawnModelTypeCount;      // number of distinct spawn model types in 
 extern u16 gSpawnModelTypes[8];  // the distinct spawn model types (< 0xBB) of the level
 extern s32 *gSpawnModelData[8]; // per spawn model type: data loaded by rom_loadPathTo
 
-/* game_FDD70.c */
+/* game/Level/LevelHook30/levelhook30.c */
 void func_150D08C0(Camera *camera);
 void func_150D0E90(s32 arg0);
 void func_150D10E4(Actor *obj, u8 mirrored);
 s32 func_150D11B4(BloodStrip *strip);
 void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
 
-/* game_22D750.c (data only, linked after game/Prop/Clock/clock) */
+/* game/Level/ObjectTables/objecttables.c (data only, linked after game/Prop/Clock/clock) */
 extern ObjectBehavior gObjectBehaviors[89];               // level-object behaviour handlers
 extern const GroupedObjectDefaults gGroupedObjectDefaults[114];
 
-/* game_15D6E0.c */
+/* game/Level/LevelHooks/levelhooks.c */
 void level_runHook(void *arg0, s32 arg1);
 
 /* game_1A6300.c */

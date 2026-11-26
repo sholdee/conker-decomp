@@ -75,7 +75,7 @@ Gfx *texture_emitBindings(Gfx *gfx, void *object);
 
 /* game/Texture/TextureTables/texturetables.c: the shared texture tables (a data-only unit). The TextureDesc entries are the ones the
  * texture table gEffectAnimTextures (game/Effects/ObjectList/objectlist.c) and the code use by name; D_80090150, D_8009016C, D_80090184
- * and D_800901C4 are the asset id lists of gLevelAssetLists (game_305D0.c); D_80090230 and D_80090244 are the
+ * and D_800901C4 are the asset id lists of gLevelAssetLists (game/Level/LevelModels/levelmodels.c); D_80090230 and D_80090244 are the
  * two frame tables of gBounceRecordFrameTables and gTexAnimFrameTables. */
 extern s32 D_80090150[7];
 extern s32 D_8009016C[6];

@@ -4,7 +4,7 @@
 /*
  * Per-model tables, indexed by model id (0..186), linked at 0x800C4020..0x800C6650 in this order. They are
  * defined before functions.h and variables.h declare them (conker/model.h): IDO lays out .bss in the order
- * it first sees each name, and that order also depends on the declarations before it (see init_50A0.c).
+ * it first sees each name, and that order also depends on the declarations before it (see init/Sched/SchedInit/schedinit.c).
  */
 s32 *D_800C4020[187];                 // per model: first vertex of each part
 u16 D_800C4310[187];                  // per model: part count

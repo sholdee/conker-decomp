@@ -412,7 +412,7 @@ void effect_actorEmitterMessage(ActorEmitter *emitter, ActorMsg *msg, u8 type);
 
 /* game/Effects/HopSprite/hopsprite.c */
 typedef struct HopSprite HopSprite;
-extern s32 gTile0ScrollS; /* texture scroll offsets (also advanced by game_FDD70.c) */
+extern s32 gTile0ScrollS; /* texture scroll offsets (also advanced by game/Level/LevelHook30/levelhook30.c) */
 extern s32 gTile0ScrollT;
 extern s32 gTile1ScrollS;
 extern s32 gTile1ScrollT;
@@ -817,11 +817,11 @@ void effect_attachActorEffect(Actor *actor, s32 handler);
 void func_15141F78(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5);
 s32 func_151420F8(Actor *actor);
 void effect_spawnSplashSpray(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB);
-extern void (*gProbeVisibleCallbacks[])(void *probe, s32 r, s32 g, s32 b); /* probe visible callbacks of game_1A11B0.c */
+extern void (*gProbeVisibleCallbacks[])(void *probe, s32 r, s32 g, s32 b); /* probe visible callbacks of game/Flare/VisProbe/visprobe.c */
 extern ActorEffectDef gActorEffects[20];
 extern const Args151420F8 D_800A5200;
 
-/* game_16F770.c */
+/* game/Math/MathUtil/mathutil.c */
 s32 math_debugTunableRange(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line);
 s32 math_debugTunable(s32 id, const char *name, s32 min, s32 max, s32 value, const char *file, s32 line);
 s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -1297,7 +1297,7 @@ void effect_getDrawGroupTypes(s32 group, s32 *first, s32 *last);
  * int parameters. So callers write (s32)&msg.
  */
 /* void effect_broadcastEvent(s32 event, u8 eventType) is declared in the files that call it:
-   game_16F770.c calls it with two more arguments. */
+   game/Math/MathUtil/mathutil.c calls it with two more arguments. */
 void effect_sendEventToTypeRange(s32 first, s32 last, s32 event, u8 eventType);
 void effect_sendEventToTypes(const s32 *types, s32 count, s32 event, u8 eventType);
 void effect_sendEventToType(s32 type, s32 event, u8 eventType);
@@ -1642,7 +1642,7 @@ void effect_destroyBurstGlow(BurstGlow *glow);
 void effect_freeBurstGlow(BurstGlow *glow);
 
 /* game/Effects/StatCounter/statcounter.c */
-/* The two-digit counter of effect_showStatCounter (game_1ED080.c frees it). The block copied to its panel's +0x120. */
+/* The two-digit counter of effect_showStatCounter (game/Hud/CounterFree/counterfree.c frees it). The block copied to its panel's +0x120. */
 typedef struct {
     /* 0x00 */ Vec3f unk0;
     /* 0x0C */ f32 unkC;

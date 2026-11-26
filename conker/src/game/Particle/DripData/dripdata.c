@@ -3,8 +3,8 @@
 #include "variables.h"
 
 /*
- * A data-only unit after game_1D9F10 in the link. Its .rodata (0x24DD60) starts on a 16-byte boundary after
- * game_1D9F10's literals and their padding, and it is front-end data (const tables), which IDO would place
+ * A data-only unit after game/Rope/SwingRope/swingrope in the link. Its .rodata (0x24DD60) starts on a 16-byte boundary after
+ * game/Rope/SwingRope/swingrope's literals and their padding, and it is front-end data (const tables), which IDO would place
  * before the literals of one unit; its last table ends at 0x24E828, padded to 0x24E830, where game/Effects/TaskGroundFx/taskgroundfx's
  * .rodata starts. Its .data (0x234530) starts on a 16-byte boundary after game/Beam/AreaEmitter/areaemitter's tables and their
  * padding (no unit in between has .data) and ends at 0x234590, where game/Particle/OwnerSideEmitter/ownersideemitter's .data starts. It holds the

@@ -80,7 +80,7 @@ void actor_startFogFadeOut(Actor *obj, s32 rate);
 void actor_startFogFadeIn(Actor *obj, s32 rate);
 void actor_flashFog(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rate);
 void actor_updateFog(Actor *obj);
-/* (Actor *obj, s32 *r, s32 *g, s32 *b, s32 *a); declared without a prototype: game_1E0560.c passes a u32 *a */
+/* (Actor *obj, s32 *r, s32 *g, s32 *b, s32 *a); declared without a prototype: game/Effects/HoltenRope/holtenrope.c passes a u32 *a */
 void actor_getFogColour();
 s32 func_1502EE8C(s32 index, s32 slot);
 void func_1502EEF4(s32 index);

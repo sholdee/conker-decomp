@@ -2,7 +2,7 @@
 
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
-// declared before it (see init_50A0.c).
+// declared before it (see init/Sched/SchedInit/schedinit.c).
 Vtx *D_800C3FC0[1];          // per actor: its 5-vertex quad buffer; [0] is D_80084300
 static s16 D_800C3FC4[1][3]; // per actor (only actor 0 draws a quad): the smoothed position of quad vertex 0
 

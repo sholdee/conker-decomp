@@ -2,7 +2,7 @@
 
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
-// declared before it (see init_50A0.c), which the subsystem headers change often.
+// declared before it (see init/Sched/SchedInit/schedinit.c), which the subsystem headers change often.
 u8 D_800BE5E0;      // the ticks of this frame; bit 0 carries over to the next
 f32 gFrameDeltaHistory[10]; // the last 10 frame deltas
 u32 gTickRemainder;     // the leftover tick remainder
@@ -17,7 +17,7 @@ u8 gFrameDeltaHistoryCount; // the number of filled slots of gFrameDeltaHistory
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game/Math/MathUtil/mathutil.c calls it with two more arguments. */
 void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Game main loop: runs frames until game_processMessage says to stop. */

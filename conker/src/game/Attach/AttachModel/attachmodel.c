@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/attach.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/attach.h describes it. */
 u8 gAttachModelRefCounts[0x1E4];                  /* per-model load reference counts */
 s16 *gAttachModelTexIds[0x1E4];                /* per model: written by texture_resolveDl */
 AttachModelHeader *gAttachModelHeaders[0x1E4];  /* per model: loaded attachment model header */

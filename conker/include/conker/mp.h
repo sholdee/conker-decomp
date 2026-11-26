@@ -122,7 +122,7 @@ f32 mp_nodeDistance(s32 a, s32 b);
 void func_15086C68(void);
 TriggerZone *mp_findNodeZone(s32 index);
 s32 mp_getNodePos(s32 index, f32 *x, f32 *y, f32 *z);
-/* (s32 id); declared without a prototype: game_215960.c passes a second argument */
+/* (s32 id); declared without a prototype: game/Hud/HudOverlay/hudoverlay.c passes a second argument */
 s32 mp_findNodeById();
 f32 mp_castWallRay(f32 x, f32 y, f32 z, f32 dx, f32 dz);
 void mp_initRacers(s32 startId, s32 numRacers, s32 numSpare);

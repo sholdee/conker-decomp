@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /*
- * This unit's .bss, defined before the headers declare it (see init_50A0.c). The externs of gMapTriCounts and
+ * This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). The externs of gMapTriCounts and
  * later stay in variables.h: 20 new names in conker/collision.h, which comes before conker/cont.h, rotate the
  * .bss of game/Cont/PadRead/padread.c (its variables are first declared in cont.h).
  */

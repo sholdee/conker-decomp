@@ -7,10 +7,10 @@
 /*
  * Subsystem "sched": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   init_49E0.c
- *   init_50A0.c
+ *   init/Sched/Scheduler/scheduler.c
+ *   init/Sched/SchedInit/schedinit.c
  *
- * init_50A0.c includes this header. A new type here can change the order of its .bss: see init_50A0.c.
+ * init/Sched/SchedInit/schedinit.c includes this header. A new type here can change the order of its .bss: see init/Sched/SchedInit/schedinit.c.
  */
 
 /* A thread that receives the scheduler's retrace message; sched_addClient links it into gSchedClients. */
@@ -20,7 +20,7 @@ typedef struct SchedulerClient {
     /* 0x8 */ u32 flags; /* bit 0: don't send retrace messages */
 } SchedulerClient;
 
-/* init_49E0.c */
+/* init/Sched/Scheduler/scheduler.c */
 void sched_threadMain(void *arg);
 void sched_updateGfxTask(void);
 void sched_startGfxTask(void);
@@ -31,7 +31,7 @@ extern u8 D_8002AC60;
 extern u16 D_8002AC64;
 extern u64 gGfxYieldBuffer[OS_YIELD_DATA_SIZE / sizeof(u64)]; // the graphics task's yield buffer
 
-/* init_50A0.c */
+/* init/Sched/SchedInit/schedinit.c */
 void sched_init(OSMesgQueue *queue);
 void sched_addClient(SchedulerClient *client, OSMesgQueue *msgQ);
 void sched_sendRetraceMsg(void);

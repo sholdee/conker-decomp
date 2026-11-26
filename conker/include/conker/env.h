@@ -7,20 +7,20 @@
 /*
  * Subsystem "env": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_3FC60.c
- *   game_FECC0.c
- *   game_13D350.c
- *   game_1A0790.c
- *   game_1A0E60.c
+ *   game/Env/VtxColourSetup/vtxcoloursetup.c
+ *   game/Env/SkyGradient/skygradient.c
+ *   game/Env/Sky/sky.c
+ *   game/Env/Fog/fog.c
+ *   game/Env/VtxColourFade/vtxcolourfade.c
  */
 
-/* A queued sky tile (game_13D350.c): its loaded texture and its format (the index into the per-format load tables). */
+/* A queued sky tile (game/Env/Sky/sky.c): its loaded texture and its format (the index into the per-format load tables). */
 typedef struct SkyTile {
     s32 texture;
     s32 format;
 } SkyTile;
 
-/* game_3FC60.c */
+/* game/Env/VtxColourSetup/vtxcoloursetup.c */
 void env_initVtxColours(void);
 void env_recordVtxColours(Vtx *arg0, u32 arg1);
 void env_recordEnvColours(Gfx *dl);
@@ -29,10 +29,10 @@ extern u8 (*gVtxBaseColours[4])[3]; // [0]: base RGB of every level vertex, then
 extern u8 (***gVtxGroupBaseColours)[3]; // [set][group][i]: base RGB of each color-group vertex
 extern u16 *gPropVtxColourStarts;       // first gVtxBaseColours[0] entry of each prop
 
-/* game_FECC0.c */
+/* game/Env/SkyGradient/skygradient.c */
 Gfx *env_drawSkyGradient(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
-/* game_13D350.c */
+/* game/Env/Sky/sky.c */
 extern void *gSkyData;
 extern Vtx *gSkyQuadVtx[4][2];
 extern u8 gBackgroundColour[3];
@@ -56,7 +56,7 @@ void env_setSky(s32 sky);
 void env_initStars(void);
 Gfx *env_drawSkybox(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
-/* game_1A0790.c */
+/* game/Env/Fog/fog.c */
 extern s8 gHasLevelFogPreset;     /* 1 when the level has its own fog preset */
 extern u8 gFogColour[4];  /* the active fog: colour */
 extern u16 D_800DD2E8;
@@ -72,7 +72,7 @@ void env_blendFog(s32 from, s32 to, s32 arg2, s32 blend, s32 dest);
 void env_reapplyFog(s32 arg0);
 s8 env_getLevelFogPreset(s32 arg0);
 
-/* game_1A0E60.c */
+/* game/Env/VtxColourFade/vtxcolourfade.c */
 void env_fadeVtxColours(s32 colorSet, s32 isProp, s32 blend, s32 group, s32 propIndex);
 void env_fadeLevelVtxColours(s32 blend, s32 group);
 void env_fadePropVtxColours(s32 blend, s32 group, s32 propId);

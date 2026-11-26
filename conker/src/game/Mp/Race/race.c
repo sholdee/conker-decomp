@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
- * it first sees each name (see init_50A0.c). */
+ * it first sees each name (see init/Sched/SchedInit/schedinit.c). */
 static s8 D_800D2390;  // camera target mode of the racers (1..3)
 static s32 gSpareRacerMask; // bit per spare racer slot in use
 static s8 gNumRacers;  // number of racing racers

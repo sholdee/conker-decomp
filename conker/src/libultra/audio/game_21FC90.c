@@ -2,7 +2,7 @@
 #include <n_libaudio.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 D_800E0D30[0x50]; /* not referenced */
 StreamVoice D_800E0D80; /* the streaming music player's voice */
 s32 *D_800E0E20;        /* Huffman table pointers, relocated by D_800E0E28 */

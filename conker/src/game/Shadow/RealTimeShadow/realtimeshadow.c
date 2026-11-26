@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/shadow.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/shadow.h describes it. */
 Vec3f gShadowLightPositions[8]; /* light position per shadow slot */
 Vec3f gShadowDefaultLightOffset;    /* default light offset from the object */
 /* Shadow settings, set per level by shadow_initLevelSettings. */

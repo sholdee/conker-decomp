@@ -12,7 +12,7 @@ f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered);
 /* not referenced */
 const u16 D_8009A210[8] = { 0x0000, 0x4001, 0x8001, 0x4000, 0x0001, 0xC000, 0x8000, 0xC001 };
 
-/* Quarter-wave cosine table: gCosTable[i] = cos(i * 2pi / 256), i = 0..64 (game_75E60.c, game_16F770.c). */
+/* Quarter-wave cosine table: gCosTable[i] = cos(i * 2pi / 256), i = 0..64 (game/Math/BinAngle/binangle.c, game/Math/MathUtil/mathutil.c). */
 const f32 gCosTable[65] = {
     1.0f, 0.9996988f, 0.9987954f, 0.9972904f, 0.9951847f, 0.9924795f,
     0.9891765f, 0.9852775f, 0.9807852f, 0.9757021f, 0.9700312f, 0.963776f,

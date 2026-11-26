@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 *gModelData[187]; // per model id: model data (just past its header)
 ModelDef *gModelDefs[187];
 u8 D_800D1F80[187];

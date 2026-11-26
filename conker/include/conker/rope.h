@@ -7,9 +7,9 @@
 /*
  * Subsystem "rope": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_1D9F10.c
- *   game_1DF510.c
- *   game_1E0560.c
+ *   game/Rope/SwingRope/swingrope.c
+ *   game/Rope/RopeTie/ropetie.c
+ *   game/Effects/HoltenRope/holtenrope.c
  */
 
 /* Template copied over HoltenRopeEffect 0x10-0x47 when a rope is created (rope_createEffect). */
@@ -185,7 +185,7 @@ typedef struct {
     Actor *colorSource;
 } HoltenRopeTinted;
 
-/* game_1D9F10.c */
+/* game/Rope/SwingRope/swingrope.c */
 RopeRider *rope_createRider(Actor *obj, f32 radius, s32 extraSize);
 s32 rope_canRide(Actor *obj, u8 *out);
 s32 rope_updateRider(RopeRider *rider);
@@ -201,7 +201,7 @@ s32 func_151AE3A8(RopeRider *rider);
 Rope *rope_findById(u8 id);
 void rope_message(Rope *rope, Actor **objs, u8 msg);
 
-/* game_1DF510.c */
+/* game/Rope/RopeTie/ropetie.c */
 void rope_spawnTie(Actor *obj);
 void rope_updateTie(RopeTie *self);
 void func_151B220C(RopeTie *self);
@@ -221,7 +221,7 @@ void func_151B2FE8(RopeLine *self);
 void func_151B3014(RopeLine *self);
 void rope_tiedRopeMessage(TiedRope *self, s32 arg1, u8 event);
 
-/* game_1E0560.c */
+/* game/Effects/HoltenRope/holtenrope.c */
 extern Gfx gRopeRenderSetupDl[]; /* render setup (object type table gObjectTypes) */
 extern Gfx gRopeRenderResetDl[]; /* render teardown (object type table gObjectTypes) */
 HoltenRopeEffect *rope_createEffect(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4);

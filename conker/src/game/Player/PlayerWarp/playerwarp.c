@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/player.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/player.h describes it. */
 s8 gPendingWarpLevels[16];
 u8 gPlayerSpawnPoints[16];
 

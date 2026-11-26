@@ -7,11 +7,11 @@
 /*
  * Subsystem "face": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_AB760.c
- *   game_AD6B0.c
+ *   game/Face/Expression/expression.c
+ *   game/Face/ScriptedExpression/scriptedexpression.c
  */
 
-/* One entry of a model's expression table (game_AB760.c). */
+/* One entry of a model's expression table (game/Face/Expression/expression.c). */
 typedef struct {
     /* 0x0 */ u8 eyeCode[2];    // stored +10 into Actor.eyeCode
     /* 0x2 */ u8 unk2;
@@ -23,7 +23,7 @@ typedef struct {
     /* 0x9 */ u8 unk9;          // 0 = use the model default
 } ExpressionRecord; // size 0xA
 
-/* game_AB760.c */
+/* game/Face/Expression/expression.c */
 void face_updateBlink(Actor *actor);
 void face_showEyeParts(Actor *actor);
 void face_setExpression(Actor *actor, s32 index, s32 morphDuration);
@@ -41,7 +41,7 @@ void face_resetDefaultExpression(Actor *actor);
 void face_setDefaultExpression(Actor *actor, s32 expression);
 extern BoundCylinderSet *gCylinderSets; // per-level actor-confining cylinder sets (collision_loadCylinderSets loads, actor_clampToZoneSet uses)
 
-/* game_AD6B0.c */
+/* game/Face/ScriptedExpression/scriptedexpression.c */
 void face_resetScripted(void);
 void face_processMessages(void);
 void face_updateScripted(Actor *actor);

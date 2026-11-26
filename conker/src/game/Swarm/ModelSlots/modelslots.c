@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/swarm.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/swarm.h describes it. */
 EffectModelSlot gEffectModelSlots[11];
 u8 gSwarmGroupsInUse[4];
 u8 gSwarmGroupSoundTimers[4];

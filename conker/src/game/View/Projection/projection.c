@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 Vec3f gFovChanges[4];     // FOV changes view_recordFovChange recorded per view: x = scale (-1.0f: none), y/z = deltas
 u8 gFovChangePending;           // set while a gFovChanges record is pending
 ViewClip gViewClips[4];

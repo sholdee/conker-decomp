@@ -8,10 +8,10 @@
 /*
  * Subsystem "cutscene": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_49D30.c
- *   game_50D20.c
- *   game_50D80.c
- *   game_1CBE20.c
+ *   game/Cutscene/Sequence/sequence.c
+ *   game/Cutscene/StartCallback/startcallback.c
+ *   game/Cutscene/SeqEvents/seqevents.c
+ *   game/Cutscene/EventEffects/eventeffects.c
  */
 
 /* An event queued for dispatch by cutscene_queueEvent, kept sorted by time. */
@@ -47,7 +47,7 @@ typedef struct {
     /* 0x18 */ SeqSound *userData;
 } SeqVoice;
 
-/* Owner of a cutscene_startTimer timer (an attachment handle in game_50D80.c): `timer` holds the running timer. */
+/* Owner of a cutscene_startTimer timer (an attachment handle in game/Cutscene/SeqEvents/seqevents.c): `timer` holds the running timer. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x30];
     /* 0x30 */ struct EvTimer *timer;
@@ -87,7 +87,7 @@ typedef struct {
     /* 0x110 */ SeqTrackState *track;
 } TrackParticle;
 
-/* game_49D30.c */
+/* game/Cutscene/Sequence/sequence.c */
 void cutscene_sendGfxTask(s32 unused, s32 swapBuffers);
 void cutscene_loadMicrocodes(void);
 void cutscene_clearActiveEvents(s32 scene);
@@ -146,10 +146,10 @@ SeqSubtitle *cutscene_getSubtitleSlot(s32 track, s32 replaceOpen);
 s32 cutscene_releasePlayer(s32 scene);
 void cutscene_updateActors(void);
 
-/* game_50D20.c */
+/* game/Cutscene/StartCallback/startcallback.c */
 void func_15023870(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
-/* game_50D80.c */
+/* game/Cutscene/SeqEvents/seqevents.c */
 void func_150238D0(void);
 s32 cutscene_updateSound(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
 s32 cutscene_findEvent(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s32 matchValue, s32 value,
@@ -165,7 +165,7 @@ s32 cutscene_handleEvent3(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 void cutscene_dispatchEvent(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene);
 extern Color24 gCutsceneFadeColours[2]; /* screen fade colours for screen_startViewFade, picked by sequence events */
 
-/* game_1CBE20.c */
+/* game/Cutscene/EventEffects/eventeffects.c */
 EvTimer *cutscene_startTimer(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 arg5,
                        s32 arg6);
 void cutscene_updateTimer(EvTimer *timer);

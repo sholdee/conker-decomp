@@ -1,0 +1,1593 @@
+#include <ultra64.h>
+#include "structs.h"
+
+/*
+ * This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). The ECTS build lays
+ * out these globals in a rotated order (gHudBlockStackWobbleVel comes first), but the 0x380 unreferenced bytes
+ * still follow them: they were a static, which IDO places after the globals.
+ */
+Mtx gHudProjection;            // the HUD's projection matrix
+f32 gHudBlockScales[6];         // per block: its scale while it grows in
+f32 gHudBlockStackPos[3];         // the block stack's position
+f32 gHudBlockStackWobble[3];         // the stack's wobble
+s32 gHudBlockStackTimer;            // the stack's display timer
+Gfx *gHudClockDl;           // the clock's display list
+Mtx *gHudClockMtx;           // the clock's matrices, one per frame buffer
+s32 gHudClockTime;            // the race time in frames
+u16 gHudPerspNorm;            // perspNorm for gHudProjection
+u8 gHudBlockCount;             // blocks on the stack
+u8 gHudBlockTarget;             // blocks it moves to
+u8 gHudClockShown;             // the stack is shown
+BlockDebris *gHudBlockDebris;   // the debris list
+Bubble gHudBubbles[6];
+s32 D_800D24C0;
+WaterStage gHudWaterStage;
+Gfx *D_800D2588;           // display list built by game/Hud/PlayerOverlay/playeroverlay
+Mtx gHudBlockMtx[6][2];      // per block: its matrix per frame buffer
+f32 gHudBlockStackWobbleVel[3];         // the stack's wobble velocity
+static u8 D_800D28A0[0x380]; /* not referenced */
+
+#include "functions.h"
+#include "variables.h"
+
+/* This file's .rodata: the block positions and the stack's base, then the race time formats. */
+static const s16 gHudBlockOffsets[6][3] = {
+    { -83, 0, -166 }, { 83, 0, -166 }, { -83, 0, 0 }, { 83, 0, 0 }, { -83, 0, 166 }, { 83, 0, 166 },
+};
+const s16 gHudBlockStackPath[6] = { -1500, 580, -1668, -600, 580, -1668 }; // [0..2] start, [3..5] target
+
+typedef struct HudBars {
+    u8 b[4];
+} HudBars;
+
+/* This file's .data. */
+static Gfx D_80087390[] = {
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
+    gsSPEndDisplayList(),
+};
+static HudBars D_800873B0 = { 0 };
+static u8 D_800873B4[5] = { 4, 16, 25, 39, 53 };
+static u8 D_800873BC[5] = { 12, 9, 14, 12, 10 };
+static u8 D_800873C4[4] = { 1, 8, 15, 21 };
+static u8 D_800873C8[3] = { 0, 8, 16 };
+
+
+extern u8 D_D16[];
+
+/* Resets all bubbles to the idle state. */
+void hud_resetBubbles(void) {
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        gHudBubbles[i].state = 0;
+    }
+    D_800D24C0 = 0;
+}
+
+/* Per-frame update of the block stack, the bubbles and the water surface. */
+void hud_updateOverlay(void) {
+    hud_updateBlockStack();
+    hud_updateBubbles();
+    hud_updateWaterSurface();
+}
+
+/* Moves the debris particles, adds/removes blocks to follow movement_obj[0].energy and moves the stack. */
+void hud_updateBlockStack(void) {
+    s32 timer;
+    s32 i;
+    s32 j;
+    s32 pad1; // matching: unused stack slot in the original frame
+    s32 count;
+    BlockDebris *node;
+    BlockDebris **link;
+    f32 target;
+    f32 base;
+    f32 cur;
+    f32 inc;
+
+    link = &gHudBlockDebris;
+    node = gHudBlockDebris;
+    while (node != NULL) {
+        node->vel.y -= 5.0f;
+        node->pos.x += node->vel.x;
+        node->pos.y += node->vel.y;
+        node->pos.z += node->vel.z;
+        node->rot.x += node->rotVel.x;
+        node->rot.y += node->rotVel.y;
+        node->rot.z += node->rotVel.z;
+        timer = node->timer;
+        timer -= D_800BE9E4;
+        if (timer <= 0) {
+            *link = node->next;
+            heap_setTag(node, 3);
+        } else {
+            node->timer = timer;
+            link = &node->next;
+        }
+        node = node->next;
+    }
+
+    if (movement_obj[0].energy < gHudBlockTarget) {
+        // matching: an empty if here splits the block; IDO's layout of the branch below depends on it
+        if (node != NULL) {
+        }
+        gHudBlockStackTimer = 240;
+        while (movement_obj[0].energy != gHudBlockTarget) {
+            gHudBlockTarget--;
+            if (gHudBlockStackPos[0] == gHudBlockStackPath[3]) {
+                hud_removeBlock();
+            }
+        }
+        sound_play(0x1A6, 0x7FFF, 0x40, 0, 0);
+    } else if (gHudBlockTarget < movement_obj[0].energy) {
+        gHudBlockStackTimer = 240;
+        while (movement_obj[0].energy != gHudBlockTarget) {
+            gHudBlockTarget++;
+            if (gHudBlockStackPos[0] == gHudBlockStackPath[3]) {
+                hud_addBlock();
+            }
+        }
+    }
+    if (gHudBlockStackTimer != 0) {
+        cur = gHudBlockStackPos[0];
+        target = gHudBlockStackPath[3];
+        if (cur == target) {
+            gHudBlockStackTimer -= D_800BE9E4;
+            if (gHudBlockStackTimer <= 0) {
+                gHudBlockStackTimer = 0;
+            }
+            for (j = 0; j < 4; j += 2) {
+                for (i = 0; i < D_800BE9E4; i++) {
+                    gHudBlockStackWobbleVel[j] += gHudBlockStackWobble[j] * -0.1f;
+                    gHudBlockStackWobbleVel[j] *= 0.85f;
+                    gHudBlockStackWobble[j] += gHudBlockStackWobbleVel[j] * D_800BE9E4;
+                }
+            }
+        } else if (gHudBlockTarget < gHudBlockCount) {
+            count = gHudBlockCount - gHudBlockTarget;
+            gHudBlockStackPos[0] += 50.0f * D_800BE9E4;
+            if (target <= gHudBlockStackPos[0]) {
+                gHudBlockStackPos[0] = target;
+                for (i = 0; i < count; i++) {
+                    hud_removeBlock();
+                }
+                sound_play(0x1A6, 0x7FFF, 0x40, 0, 0);
+            }
+        } else {
+            count = gHudBlockTarget - gHudBlockCount;
+            gHudBlockStackPos[0] += 50.0f * D_800BE9E4;
+            if (target <= gHudBlockStackPos[0]) {
+                gHudBlockStackPos[0] = target;
+                for (i = 0; i < count; i++) {
+                    hud_addBlock();
+                }
+            }
+        }
+    } else {
+        cur = gHudBlockStackPos[0];
+        base = gHudBlockStackPath[0];
+        if (gHudBlockStackPos[0] != gHudBlockStackPath[0]) {
+            target = (gHudBlockStackPath[3] - gHudBlockStackPos[0]) * 0.1f;
+            if (target < 0.01f) {
+                target = 0.01f;
+            }
+            gHudBlockStackPos[0] -= target * D_800BE9E4;
+            if (gHudBlockStackPos[0] < base) {
+                gHudBlockStackPos[0] = base;
+            }
+        }
+    }
+    for (i = 0; i < 6; i++) {
+        if (gHudBlockScales[i] != 1.0f) {
+            inc = D_800BE9E4 * 0.03f;
+            gHudBlockScales[i] += inc;
+            if (gHudBlockScales[i] > 1.0f) {
+                gHudBlockScales[i] = 1.0f;
+            }
+        }
+    }
+}
+
+/* Removes the top block and spawns a debris particle at its position. */
+void hud_removeBlock(void) {
+    MtxF mtx;
+    f32 unused;
+    BlockDebris *node;
+
+    gHudBlockCount -= 1;
+    gHudBlockStackWobbleVel[0] = func_150ADA20() % 5U;
+    gHudBlockStackWobbleVel[2] = sqrtf(25.0f - gHudBlockStackWobbleVel[0] * gHudBlockStackWobbleVel[0]);
+    node = allocate_memory(sizeof(*node), 1, 1, 0);
+    node->next = gHudBlockDebris;
+    gHudBlockDebris = node;
+    guMtxL2F(mtx, &gHudBlockMtx[gHudBlockCount][D_800BE9C0 ^ 1]);
+    model_decomposeMatrix(mtx, &node->pos.x, &node->pos.y, &node->pos.z, &node->rot.x, &node->rot.y, &node->rot.z,
+                  &unused, &unused, &unused);
+    node->vel.x = (func_150ADA20() & 0xFU) + 10;
+    node->vel.y = (func_150ADA20() & 0x1FU) + 20;
+    node->vel.z = 0.0f;
+    node->rotVel.x = func_150ADA20() & 0xFU;
+    node->rotVel.y = func_150ADA20() & 0xFU;
+    node->rotVel.z = func_150ADA20() & 0xFU;
+    node->timer = 120;
+}
+
+/* Adds a block on top; it grows in from zero scale. */
+void hud_addBlock(void) {
+    gHudBlockScales[gHudBlockCount++] = 0.0f;
+}
+
+
+/* Spawns and animates the bubbles while player 1 is in water (driven by its unkB2 counter). */
+void hud_updateBubbles(void) {
+    s32 i;
+    s32 v;
+    s32 spawn;
+    s32 dt;
+    s32 duration;
+    s32 size;
+    s32 air;
+    s32 j;
+    s32 y;
+
+    air = D_800D24C0;
+    if (air != 0) {
+        air -= D_800BE9E4;
+        if (air < 0) {
+            air = 0;
+        }
+        D_800D24C0 = air;
+    }
+    if (movement_obj[0].inwater) {
+        air = movement_obj[0].unkB2;
+    } else {
+        air = 0;
+    }
+    if (air > 90) {
+        duration = air / 240;
+        if (duration > 6) {
+            duration = 6;
+        }
+        duration = 6 - duration;
+        duration = duration * 9;
+        if (duration == 0) {
+            spawn = 0;
+        }
+    } else {
+        spawn = 0;
+    }
+    for (i = 0; i < 6; i++) {
+        Bubble *p = &gHudBubbles[i];
+        if (p->state == 2) {
+            v = p->timer;
+            v -= D_800BE9E4;
+            if (v <= 0) {
+                v = 6;
+                p->state = 3;
+            }
+            p->timer = v;
+        }
+        switch (p->state) {
+        case 0:
+    // matching: the two labels split case 0 into extra blocks; IDO then drops a bnel at the loop end
+    LX: ;
+        l0:
+            if (spawn != 0 && D_800D24C0 == 0) {
+                D_800D24C0 = 10;
+                p->state = 1;
+                p->x = 252;
+                p->y = 96;
+                p->size = 0;
+                p->accel = 0;
+                p->angle = func_150ADA20();
+                p->radius = 0x500;
+                p->originX = 252 - ((s32)(p->radius * math_sinBinAngle(p->angle)) >> 8);
+                p->phase = 0;
+                p->timer = duration;
+            }
+            break;
+        case 1:
+            v = p->size;
+            v += D_800BE9E4 * 200;
+            if (v >= 0x666) {
+                p->state = 2;
+                v = 0x666;
+            }
+            p->size = v;
+            break;
+        case 2:
+            dt = D_800BE9E4;
+            j = 0;
+            v = p->accel;
+            if (v < 32) {
+                v = v + dt;
+                if (v > 32) {
+                    v = 32;
+                }
+                p->accel = v;
+            }
+            y = p->y;
+            y -= (dt * p->accel) >> 4;
+            // matching: volatile keeps the size load after the y store
+            *(volatile s16 *)&p->y = y;
+            size = *(volatile s16 *)&p->size;
+            if (dt > 0) {
+                do {
+                    j++;
+                    size = (size * 0x104) >> 8;
+                } while (j < dt);
+            }
+            p->size = size;
+            p->angle += dt * 5;
+            p->radius += dt * 30;
+            p->x = ((s32)(math_sinBinAngle(p->angle) * p->radius) >> 8) + p->originX;
+            p->phase += D_800BE9E4 * 10;
+        // matching: label steers block layout of case 2's exit
+        lbl:
+            break;
+        case 3:
+            if (p->timer == 0) {
+                p->state = 0;
+            }
+            break;
+        }
+    }
+}
+
+/* Builds this level's overlay display list: blocks, water, bubbles and HUD. Returns the
+ * original pointer (drops everything) if the frame's display list buffer would overflow. */
+Gfx *hud_drawOverlay(register Gfx *gfx) {
+    Gfx *start;
+    s32 i;
+    s32 step;
+    s32 overflow;
+    s16 scaled[33]; /* scaled[i]: i pixels at the HUD scale D_8008FE1C */
+
+    start = gfx;
+    if (level == 0x1D) {
+        return gfx;
+    }
+    gSPPerspNormalize(gfx++, gHudPerspNorm);
+    gSPMatrix(gfx++, &gHudProjection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    if (gIsMultiplayer != 0) {
+        gfx = hud_drawMultiplayerHud(gfx);
+        // matching: the 0/1 flag variable; testing the comparison directly changes the code
+        overflow = D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0] ? 1 : 0;
+        if (overflow != 0) {
+            return start;
+        }
+        return gfx;
+    }
+    if (gHudClockShown != 0) {
+        gfx = hud_drawClock(gfx);
+    }
+    if (gCutsceneStates[0] == 1) {
+        return gfx;
+    }
+    if (D_8008CD00 != 0) {
+        step = 0x400;
+        if (D_8008FE1C != 1.0f) {
+            step = step / D_8008FE1C;
+            for (i = 0; i < 33; i++) {
+                scaled[i] = i * D_8008FE1C;
+            }
+        } else {
+            // matching: one line; the loop body's line number steers as1's unrolled store order
+            for (i = 0; i < 33; i++) scaled[i] = i;
+        }
+        gfx = hud_drawRadar(gfx, step, scaled, 0x2C30, 1);
+    }
+    if (gHudBlockStackPos[0] != gHudBlockStackPath[0]) {
+        gfx = hud_drawBlocks(gfx, 0);
+    } else if (D_800D2588 != NULL) {
+        attach_releaseModel(0xB8);
+        D_800D2588 = NULL;
+    }
+    gfx = hud_drawWaterSurface(gfx);
+    gfx = sprite_beginDraw(gfx);
+    gfx = hud_drawBubbles(gfx);
+    gfx = sprite_endDraw(gfx);
+    overflow = D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0] ? 1 : 0;
+    if (overflow != 0) {
+        return start;
+    }
+    return gfx;
+}
+
+/* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws movement_obj[0].energy
+ * blocks at full scale at a fixed spot near gHudBlockStackPath[3..5], after patching the block display
+ * list's combiner and other-mode commands. */
+Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
+    s32 i;
+    s32 count;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 scale;
+    MtxF mtx;
+    MtxF base;
+    BlockDebris *node;
+    Gfx *dl;
+
+    if (D_800D2588 == NULL) {
+        D_800D2588 = attach_loadModelDl(0xB8);
+    }
+    gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
+    gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    gSPSetGeometryMode(gfx++, G_CULL_BACK);
+    gDPPipeSync(gfx++);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
+    if (fixed == 0) {
+        gDPSetOtherMode(gfx++, 0x08AC0F, 0x55204C);
+        gDPSetCombine(gfx++, 0x127E24, 0xFFFFF9FC);
+        gDPSetEnvColor(gfx++, 0, 0, 0, 0);
+    } else {
+        gSPPerspNormalize(gfx++, gHudPerspNorm);
+        gSPMatrix(gfx++, &gHudProjection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+        gDPSetOtherMode(gfx++, 0x08AC0F, 0x5041CC);
+        gDPSetCombine(gfx++, 0x12D225, 0xFFA7FFFF);
+        gDPSetEnvColor(gfx++, 255, 255, 255, D_8008FDCC);
+    }
+    count = gHudBlockCount;
+    dl = D_800D2588;
+    if (fixed != 0) {
+        x = gHudBlockStackPath[3] - 54.0f;
+        y = gHudBlockStackPath[4] - 52.0f;
+        z = gHudBlockStackPath[5] - 344.7000122f;
+        count = movement_obj[0].energy;
+        func_150A8050(base, 50.0f, -20.0f, -20.0f);
+        scale = 1.0f;
+        {
+            Gfx *cmd = dl;
+            u32 op;
+            do {
+                op = (u8)(cmd->words.w0 >> 24); // matching: the mask stays in the original
+                switch (op) {
+                case G_SETCOMBINE:
+                    cmd->words.w0 = 0;
+                    break;
+                case G_RDPSETOTHERMODE:
+                    cmd->words.w1 = 0x5041C8;
+                    break;
+                }
+                cmd++;
+            } while (op != G_ENDDL);
+        }
+    } else {
+        x = gHudBlockStackPos[0];
+        y = gHudBlockStackPos[1];
+        z = gHudBlockStackPos[2];
+        func_150A8050(base, gHudBlockStackWobble[0] + 50.0f, -20.0f, gHudBlockStackWobble[2] + -20.0f);
+    }
+    math_mtxSetScaleTrans(base, 1.0f, 1.0f, 1.0f, x, y, z);
+    for (i = 0; i < count; i++) {
+        if (fixed == 0) {
+            scale = gHudBlockScales[i];
+        }
+        func_150A7CB0(mtx, scale, scale, scale);
+        mtx[3][0] = gHudBlockOffsets[i][0];
+        mtx[3][1] = gHudBlockOffsets[i][1];
+        mtx[3][2] = gHudBlockOffsets[i][2];
+        func_150A7A48(mtx, base, mtx);
+        guMtxF2L(mtx, &gHudBlockMtx[i][D_800BE9C0]);
+        gSPMatrix(gfx++, &gHudBlockMtx[i][D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPDisplayList(gfx++, dl);
+    }
+    if (fixed == 0) {
+        for (node = gHudBlockDebris; node != NULL; node = node->next) {
+            math_mtxRotTrans(&node->mtx[D_800BE9C0], node->rot.x, node->rot.y, node->rot.z, node->pos.x,
+                          node->pos.y, node->pos.z);
+            gSPMatrix(gfx++, &node->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+            gSPDisplayList(gfx++, dl);
+        }
+    }
+    return gfx;
+}
+/* matching: SpriteParams before tex (0x10 bytes), as an older revision with other field names; a full
+ * SpriteParams on the stack changes the frame. sprite_loadDescFrame still writes tex past its end, and
+ * sprite_drawScreen reads it back (see ParticleDesc64 in effects.h). */
+typedef struct TexSprite {
+    s32 unk0;
+    s16 unk4;
+    s16 w;
+    s16 h;
+    u8 alpha;
+    u8 unkB;
+    u8 unkC;
+    u8 flags; /* SPRITE_FLIP_* */
+    u8 padE[2];
+} TexSprite;
+
+#define SPRITE_FLIP_X 1
+#define SPRITE_FLIP_Y 2
+
+
+/* Draws the bubbles: rising ones (states 1 and 2) wobble, popping ones (state 3) flip randomly. */
+Gfx *hud_drawBubbles(Gfx *gfx) {
+    s32 i;
+    TexSprite sprite;
+    s32 first;
+    s32 x;
+    s32 y;
+    s32 flags;
+    f32 wobble;
+    s32 size;
+    s32 timer;
+    s32 tex;
+
+    sprite.alpha = 255;
+    sprite.flags = 0;
+    gDPPipeSync(gfx++);
+    gDPSetCombine(gfx++, 0xFFB5FF, 0xFFFCFE38);
+    gDPSetOtherMode(gfx++, 0x102C0F, 0x0C184244);
+    first = TRUE;
+    for (i = 0; i < 6; i++) {
+        if (gHudBubbles[i].state == 1 || gHudBubbles[i].state == 2) {
+            if (first) {
+                texture_getAddress(D_80091840.addr, &tex, 3, 0);
+                first = FALSE;
+                gfx = sprite_loadDescFrame(gfx, &D_800903D4, 0, &sprite, 0, 0, 0, 2, 3);
+            }
+            wobble = math_sinBinAngle(gHudBubbles[i].phase);
+            x = gHudBubbles[i].x;
+            y = gHudBubbles[i].y;
+            sprite.w = gHudBubbles[i].size * (0.2f * wobble + 1.0f);
+            sprite.h = gHudBubbles[i].size * (-0.2f * wobble + 1.0f);
+            gfx = sprite_drawScreen(gfx, &sprite, x, y);
+        }
+    }
+    first = TRUE;
+    for (i = 0; i != 6; i++) {
+        flags = 0;
+        if (gHudBubbles[i].state == 3) {
+            size = gHudBubbles[i].size;
+            x = gHudBubbles[i].x;
+            y = gHudBubbles[i].y;
+            sprite.w = size;
+            sprite.h = size;
+            if ((u8)func_150ADA20() < 0x80U) {
+                flags = SPRITE_FLIP_X;
+            }
+            if ((u8)func_150ADA20() < 0x80U) {
+                flags |= SPRITE_FLIP_Y;
+            }
+            sprite.flags = flags;
+            if (first) {
+                first = FALSE;
+                gfx = sprite_loadDescFrame(gfx, &D_80091840, 0, &sprite, 0, 0, 0, 2, 3);
+            }
+            gfx = sprite_drawScreen(gfx, &sprite, x, y);
+            timer = gHudBubbles[i].timer;
+            timer -= D_800BE9E4;
+            if (timer < 0) {
+                timer = 0;
+            }
+            gHudBubbles[i].timer = timer;
+        }
+    }
+    return gfx;
+}
+
+/* Animates the water surface mesh while player 1 is in water: blends its vertex positions,
+ * tints its vertex colours and picks its textures by player 1's unkB2 counter. */
+void hud_updateWaterSurface(void) {
+    WaterVtx *dst;
+    WaterBase *base;
+    WaterBase *target;
+    s32 i;
+    f32 blend;
+    s32 tmp;
+    s32 intensity;
+    f32 lo;
+    f32 hi;
+    s32 fadeRaw;
+    Gfx **dlists;
+    u8 numDLists;
+    WaterVtx *vtxStart;
+    s32 unkOut1;
+    s32 unkOut2;
+    s32 unkOut3;
+    s32 fade;
+    s32 r;
+    s32 g;
+    u16 tex;
+    f32 dt;
+    s32 r2;
+    s32 g2;
+    s32 b2;
+    s32 b;
+
+    if (movement_obj->inwater) {
+        intensity = movement_obj->unkB2;
+    } else {
+        intensity = 0;
+    }
+    if (intensity > 90) {
+        if (gHudWaterStage.alpha == 0) {
+            gHudWaterStage.alpha = 255;
+            gHudWaterStage.unk94 = 0.0f;
+            gHudWaterStage.unk98 = 0.02f;
+            gHudWaterStage.unkA0 = 0;
+            gHudWaterStage.unkA4 = 3.2f;
+            gHudWaterStage.unkA8 = 0;
+            gHudWaterStage.unkAC = 0;
+            gHudWaterStage.timer = (func_150ADA20() & 63) + 60;
+        }
+    } else {
+        gHudWaterStage.alpha = 0;
+        return;
+    }
+    gHudWaterStage.unk9C = (u32)movement_obj->unkB2 / 720.0f;
+    if (gHudWaterStage.unk9C > 1.0f) {
+        gHudWaterStage.unk9C = 1.0f;
+    }
+    if (intensity < 1441) {
+        gHudWaterStage.unk94 += gHudWaterStage.unk98 * D_800BE9E4;
+        lo = gHudWaterStage.unk9C - 0.2f;
+        if (lo < 0.0f) {
+            lo = 0.0f;
+        }
+        if (gHudWaterStage.unk94 <= lo) {
+            gHudWaterStage.unk94 = (lo + lo) - gHudWaterStage.unk94;
+            gHudWaterStage.unk98 = -gHudWaterStage.unk98;
+        } else {
+            hi = gHudWaterStage.unk9C + 0.2f;
+            if (hi > 1.0f) {
+                hi = 1.0f;
+            }
+            if (hi <= gHudWaterStage.unk94) {
+                gHudWaterStage.unk94 = (hi + hi) - gHudWaterStage.unk94;
+                gHudWaterStage.unk98 = -gHudWaterStage.unk98;
+            }
+        }
+    }
+    if (gHudWaterStage.dl == 0) {
+        attach_loadModel(0xB9, &dlists, &numDLists, &vtxStart, &unkOut1, &unkOut2, &unkOut3);
+        gHudWaterStage.dl = *dlists;
+        gHudWaterStage.count = ((u32)dlists - (u32)vtxStart) >> 4;
+        gHudWaterStage.vtx[0] = vtxStart;
+        gHudWaterStage.vtx[1] = allocate_memory(gHudWaterStage.count * sizeof(WaterVtx), 1, 2, 0);
+        bcopy(vtxStart, gHudWaterStage.vtx[1], gHudWaterStage.count * sizeof(WaterVtx));
+        gHudWaterStage.shapes[0] = allocate_memory(gHudWaterStage.count * sizeof(WaterBase), 1, 0, 0);
+        target = gHudWaterStage.shapes[0];
+        for (i = 0; i < gHudWaterStage.count; i++) {
+            target[i].ob[0] = vtxStart[i].ob[0];
+            target[i].ob[1] = vtxStart[i].ob[1];
+            target[i].ob[2] = vtxStart[i].ob[2];
+            target[i].cn[0] = vtxStart[i].cn[0];
+            target[i].cn[1] = vtxStart[i].cn[1];
+            target[i].cn[2] = vtxStart[i].cn[2];
+            target[i].cn[3] = vtxStart[i].cn[3];
+        }
+        /* shapes[0] is the rest shape copied above; the others are loaded */
+        for (i = 1; i < 2; i++) {
+            rom_loadPathTo(&gHudWaterStage.shapes[i], 2, 0x18, i - 1);
+        }
+    }
+    base = gHudWaterStage.shapes[0];
+    dst = gHudWaterStage.vtx[D_800BE9C0];
+    target = gHudWaterStage.shapes[1];
+    blend = gHudWaterStage.unk94;
+    for (i = 0; i < gHudWaterStage.count; i++) {
+        dst[i].ob[0] = base[i].ob[0] + ((f32)target[i].ob[0] - (f32)base[i].ob[0]) * blend;
+        dst[i].ob[1] = base[i].ob[1] + ((f32)target[i].ob[1] - (f32)base[i].ob[1]) * blend;
+        dst[i].ob[2] = base[i].ob[2] + ((f32)target[i].ob[2] - (f32)base[i].ob[2]) * blend;
+    }
+    if (intensity < 480) {
+        tex = D_8009026C;
+        gHudWaterStage.tex[3] = tex;
+        gHudWaterStage.tex[2] = tex;
+        tex = D_80090258;
+        gHudWaterStage.tex[1] = tex;
+        gHudWaterStage.tex[0] = tex;
+    } else if (intensity < 960) {
+        tex = D_80090270;
+        gHudWaterStage.tex[3] = tex;
+        gHudWaterStage.tex[2] = tex;
+        tex = D_80090258;
+        gHudWaterStage.tex[1] = tex;
+        gHudWaterStage.tex[0] = tex;
+    } else if (intensity < 1200) {
+        tex = D_80090270;
+        gHudWaterStage.tex[3] = tex;
+        gHudWaterStage.tex[2] = tex;
+        tex = D_80090264;
+        gHudWaterStage.tex[1] = tex;
+        gHudWaterStage.tex[0] = tex;
+    } else {
+        tex = D_80090270;
+        gHudWaterStage.tex[3] = tex;
+        gHudWaterStage.tex[2] = tex;
+        tex = D_80090260;
+        gHudWaterStage.tex[1] = tex;
+        gHudWaterStage.tex[0] = tex;
+    }
+    fadeRaw = (intensity - 720) * 255;
+    fade = fadeRaw / 480;
+    if (fade < 0) {
+        fade = 0;
+    } else if (fade >= 256) {
+        fade = 255;
+    }
+    r = ((fade * -151) >> 8) + 255;
+    g = ((fade * -164) >> 8) + 255;
+    b = 255;
+    r2 = ((fade * -97) >> 8) + 255;
+    g2 = ((fade * -94) >> 8) + 255;
+    b2 = ((fade * -91) >> 8) + 255;
+    // matching: the dead store, the do-while shape and the |= 0 no-ops steer uopt's register choice
+    fade = 0;
+    i = 0;
+    if (i < gHudWaterStage.count) {
+        r |= 0;
+        g |= 0;
+        b |= 0;
+        do {
+            if (i < 208) {
+                dst[i].cn[0] = (base[i].cn[0] * r) >> 8;
+                dst[i].cn[1] = (base[i].cn[1] * g) >> 8;
+                dst[i].cn[2] = (base[i].cn[2] * b) >> 8;
+            } else if (i >= 220) {
+                dst[i].cn[0] = r;
+                dst[i].cn[1] = g;
+                dst[i].cn[2] = b;
+            } else {
+                dst[i].cn[0] = r2;
+                dst[i].cn[1] = g2;
+                dst[i].cn[2] = b2;
+            }
+            i++;
+        } while (i < gHudWaterStage.count);
+    }
+    dt = D_800BE9E4;
+    if (fadeRaw > 0x2CE2E) {
+        gHudWaterStage.unkAC = 0.0f;
+    } else if (fadeRaw > 0x1DF1E) {
+        if (fabsf(gHudWaterStage.unkAC) < 0.6f) {
+            gHudWaterStage.unkAC = 0.6f;
+        }
+    } else if (gHudWaterStage.timer != 0) {
+        tmp = gHudWaterStage.timer - D_800BE9E4;
+        if (tmp <= 0) {
+            tmp = 0;
+            gHudWaterStage.unkAC = 0.2f;
+            gHudWaterStage.unkA8 = dt * gHudWaterStage.unkAC;
+        }
+        gHudWaterStage.timer = tmp;
+    }
+    gHudWaterStage.unkA8 += gHudWaterStage.unkAC * dt;
+    if (gHudWaterStage.unkA8 > 2.0f) {
+        gHudWaterStage.unkA8 = 4.0f - gHudWaterStage.unkA8;
+        gHudWaterStage.unkAC = -gHudWaterStage.unkAC;
+    } else if (gHudWaterStage.unkA8 < -2.0f) {
+        gHudWaterStage.unkA8 = -4.0f - gHudWaterStage.unkA8;
+        gHudWaterStage.unkAC = -gHudWaterStage.unkAC;
+    } else if (gHudWaterStage.timer == 0 && fadeRaw < 480 * 255 && gHudWaterStage.unkA8 >= 0 && gHudWaterStage.unkA8 < gHudWaterStage.unkAC * dt) {
+        gHudWaterStage.timer = (func_150ADA20() & 63) + 60;
+        gHudWaterStage.unkA8 = 0.0f;
+        gHudWaterStage.unkAC = 0.0f;
+    }
+    if (fadeRaw >= 720 * 255 && gHudWaterStage.unkA0 > -22.0f) {
+        gHudWaterStage.unkA4 -= 0.25f * D_800BE9E4;
+        gHudWaterStage.unkA0 += gHudWaterStage.unkA4;
+    }
+}
+
+/* Draws the water surface mesh animated by hud_updateWaterSurface. */
+Gfx *hud_drawWaterSurface(Gfx *gfx) {
+    s32 texBuf[6];
+    f32 y;
+    f32 x;
+    s32 tex;
+
+    if (gHudWaterStage.alpha == 0) {
+        return gfx;
+    }
+    gSPDisplayList(gfx++, gObjectPassBeginDL);
+    gSPSetGeometryMode(gfx++, G_CULL_BACK);
+    gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
+    gSPClearGeometryMode(gfx++, G_LIGHTING | 0x400000);
+    if (gHudWaterStage.alpha < 255) {
+        gSPSegment(gfx++, 8, D_80083440);
+    } else {
+        gSPSegment(gfx++, 8, D_800835C0);
+    }
+    y = -11.0f + gHudWaterStage.unkA8;
+    x = -1.0f - gHudWaterStage.unkA0;
+    math_mtxRotScaleTrans(&gHudWaterStage.mtx[D_800BE9C0], x, y, 0.0f,
+                  4.05f, 4.05f, 4.05f, 667.0f, 152.0f, -1668.0f);
+    gSPMatrix(gfx++, &gHudWaterStage.mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gDPSetFogColor(gfx++, 0, 0, 0, 255);
+    gDPSetPrimColor(gfx++, 0xF2, 0, 0, 0, 0, 0);
+    gDPSetEnvColor(gfx++, 0, 0, 0, gHudWaterStage.alpha);
+    gSPSegment(gfx++, 3, &gHudWaterStage.mtx[D_800BE9C0]);
+    gSPSegment(gfx++, 1, gHudWaterStage.vtx[D_800BE9C0]);
+    if (gHudWaterStage.tex[0]) {
+        tex = texture_getAddress(gHudWaterStage.tex[0], texBuf, 3, 0);
+        gSPSegment(gfx++, 6, tex);
+    }
+    if (gHudWaterStage.tex[1]) {
+        tex = texture_getAddress(gHudWaterStage.tex[1], texBuf, 3, 0);
+        gSPSegment(gfx++, 7, tex);
+    }
+    if (gHudWaterStage.tex[2]) {
+        tex = texture_getAddress(gHudWaterStage.tex[2], texBuf, 3, 0);
+        gSPSegment(gfx++, 10, tex);
+    }
+    if (gHudWaterStage.tex[3]) {
+        tex = texture_getAddress(gHudWaterStage.tex[3], texBuf, 3, 0);
+        gSPSegment(gfx++, 11, tex);
+    }
+    gSPDisplayList(gfx++, gHudWaterStage.dl);
+    gSPDisplayList(gfx++, gObjectPassEndDL);
+    return gfx;
+}
+
+/* Loads HUD icon sheet D_D16 + `sheet` (a 64x64 CI4 texture with its palette after it).
+ * Sets *loaded when the texture was available. */
+Gfx *hud_loadIconSheet(Gfx *gfx, s32 sheet, u8 *loaded) {
+    s32 tex;
+
+    *loaded = FALSE;
+    tex = texture_getAddress(sheet + (s32)D_D16, 0, 3, 0);
+
+    if (tex != 0x80000000) {
+        gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, tex);
+        gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
+        gDPLoadSync(gfx++);
+        gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 1023, 0);
+        gDPPipeSync(gfx++);
+        gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b, 4, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
+        gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0xFC, 0xFC);
+        gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, tex + 0x800);
+        gDPLoadSync(gfx++);
+        gDPLoadTLUTCmd(gfx++, 6, 15);
+        gDPSetOtherMode(gfx++, 0x00AC3F, 0x00504244);
+
+        *loaded = TRUE;
+    }
+
+    return gfx;
+}
+
+/* Prints a race time given in frames (60 per second) as minutes, seconds and hundredths,
+ * capped at 99 minutes; a negative time prints the placeholder strings instead. */
+void hud_printRaceTime(s32 x, s32 y, s32 frames, s32 style) {
+    s32 pad[2]; // matching: reserves the original frame size
+    s32 seconds;
+    s32 hundredths;
+
+    if (frames >= 99 * 60 * 60) {
+        frames = 99 * 60 * 60;
+    }
+
+    hundredths = ((frames % 60) * 100) / 60;
+    if (hundredths >= 100) {
+        hundredths = 99;
+    }
+
+    x -= 8;
+    if (frames >= 0) {
+        seconds = frames / 60;
+        text_printAt((x - (((seconds / 60) >= 10) ? 5 : 0)) - 8, y, style, "%d", seconds / 60);
+        text_printAt(x, y, style, ":%02d", seconds % 60);
+        text_printAt(x + 16, y, style, ":%02d", hundredths);
+        return;
+    }
+
+    text_printAt(x - 8, y, style, "--");
+    text_printAt(x, y, style, ": --");
+    text_printAt(x + 16, y, style, ": --");
+}
+
+extern u8 D_CF1[];
+extern u8 D_CF2[];
+extern u8 D_D13[];
+extern u8 D_D14[];
+
+/* Draws the multiplayer HUD in each player's viewport, as enabled by the D_8008FDC0 flags:
+ * 0x002 an icon picked by player_getStat(i, 3), 0x400 score, 0x800 name, 0x004 held-item icons
+ * (repeated per count) and bars from ActorCtl field 0x12C, 0x010 two rows of bars from
+ * player_getStat(i, 4), grenade icons, 0x080 race time and lap, 0x1000 a map with player dots,
+ * 0x020 the radar (hud_drawRadar). */
+Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
+    s32 i;
+    s32 j;
+    s32 x;
+    s32 y;
+    s32 mapTop;
+    s32 h;
+    s32 iconH;
+    s32 texT;
+    s32 n;
+    s32 s;
+    s32 v;
+    s32 texS;
+    s32 vpWidth;
+    s32 lapCount;
+    s32 vpRight;
+    ActorCtl *a1; // matching: unused, yet removing it changes the register allocation
+    Actor *player;
+    s32 rowY;
+    s32 cellShift;
+    s32 k;
+    s32 icon;
+    s32 vpLeft;
+    s32 barShift;
+    s32 step;
+    u8 texOk;
+    u8 texLoaded;
+    u8 barMode;
+    HudBars barLen;
+    s8 grenades;
+    s16 scaled[33];
+
+    barMode = 0;
+    grenades = 0;
+    barLen = D_800873B0;
+    vpWidth = gViews->right - gViews->left;
+    gSPDisplayList(gfx++, D_80087390);
+    text_setColor(255, 255, 255, 255);
+    step = 0x400;
+    if (D_8008FE1C != 1.0f) {
+        step = step / D_8008FE1C;
+        for (j = 0; j < 33; j++) {
+            scaled[j] = j * D_8008FE1C;
+        }
+    } else {
+        // matching: one line; the loop body's line number steers as1's unrolled store order
+        for (j = 0; j < 33; j++) scaled[j] = j;
+    }
+
+    if (D_8008FDC0 & 0xC02) {
+        texLoaded = 0;
+        texOk = 0;
+        for (i = 0; i <= gScreenLayout; i++) {
+            if (D_80087270[i] != 10) {
+                vpLeft = gViews[i].left;
+                y = gViews[i].top + scaled[6];
+                if (D_8008FDC0 & 2) {
+                    if (!texLoaded) {
+                        n = texture_getAddress((s32)D_D14, 0, 3, 0);
+                        texLoaded = 1;
+                        if (n != 0x80000000) {
+                            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, n);
+                            gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
+                            gDPLoadSync(gfx++);
+                            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 1023, 0);
+                            gDPPipeSync(gfx++);
+                            gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 8, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
+                            gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 31 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
+                            texOk = 1;
+                        }
+                        gDPSetOtherMode(gfx++, 0x002C3F, 0x00504244);
+                        gDPPipeSync(gfx++);
+                        gDPSetEnvColor(gfx++, 255, 255, 255, 128);
+                    }
+                    x = scaled[5] + vpLeft;
+                    n = player_getStat(i, 3);
+                    // matching: both on one line (as1 orders the two loads by line number)
+                    texS = D_800873C4[n & 3] << 5; texT = D_800873C8[n >> 2] << 5;
+                    if (texOk) {
+                        gSPScisTextureRectangle(gfx++, x * 4, y * 4, (scaled[5] + x) * 4, (scaled[7] + y) * 4, 0, texS, texT, step, step);
+                    }
+                }
+                if (D_8008FDC0 & 0x400) {
+                    x = (vpWidth >> 1) + vpLeft - 8;
+                    if (D_8008FE1C != 1.0f) {
+                        x -= 8;
+                    }
+                    text_printAt(x, y, 0x41, "%d", gMenuState->score[i]);
+                }
+                if (D_8008FDC0 & 0x800) {
+                    x = (vpWidth >> 1) + vpLeft + 16;
+                    if (D_8008FE1C != 1.0f) {
+                        x += 16;
+                    }
+                    text_printAt(x, y, 0x41, "(%s)", gTextStrings[8 + gPlayerRanks[i]]);
+                }
+            }
+        }
+    }
+
+    if (D_8008FDC0 & 0x14) {
+        texLoaded = 0;
+        texOk = 0;
+        for (i = 0; i <= gScreenLayout; i++) {
+            if (D_80087270[i] != 10) {
+                vpLeft = gViews[i].left + scaled[5];
+                vpRight = gViews[i].right - scaled[5];
+                y = gViews[i].top + scaled[5];
+                if (D_8008FDC0 & 4) {
+                    player = &movement_obj[i];
+                    n = 1;
+                    h = player->mv->context_b;
+                    h &= 0x7F;
+                    if (player->type == 0x1F) {
+                        h = 0;
+                    }
+                    switch (h) {
+                    case 0x9:
+                        icon = 0;
+                        break;
+                    case 0x16:
+                        icon = 1;
+                        break;
+                    case 0x14:
+                    case 0x3F:
+                        icon = 3;
+                        break;
+                    case 0x20:
+                        icon = 5;
+                        break;
+                    case 0x18:
+                    case 0x41:
+                        icon = 6;
+                        break;
+                    case 0x15:
+                        icon = 7;
+                        break;
+                    case 0x22:
+                        icon = 9;
+                        break;
+                    case 0x23:
+                        icon = 10;
+                        break;
+                    case 0x21:
+                        icon = 12;
+                        break;
+                    case 0x24:
+                        icon = 13;
+                        break;
+                    case 0x25:
+                        icon = 14;
+                        break;
+                    case 0x26:
+                    case 0x3A:
+                        icon = -1;
+                        if (player->energy != 0) {
+                            grenades = 1;
+                        }
+                        break;
+                    case 0x38:
+                        icon = -1;
+                        break;
+                    case 0x32:
+                    case 0x33:
+                        n = player->mv->ammo_count;
+                        icon = 11;
+                        break;
+                    case 0x40:
+                        icon = 4;
+                        cellShift = -3;
+                        break;
+                    default:
+                        if (level == 0x1A) {
+                            icon = 4;
+                            cellShift = 4;
+                        } else {
+                            icon = -1;
+                        }
+                        break;
+                    }
+                    if (player->lifting != 0) {
+                        icon = -1;
+                    }
+                    if (icon >= 0) {
+                        j = 0;
+                        if (!texLoaded) {
+                            texLoaded = 1;
+                            gfx = hud_loadIconSheet(gfx, 0, &texOk);
+                        }
+                        x = (vpRight - scaled[25]) * 4;
+                        texT = D_800873B4[icon / 3] << 5;
+                        iconH = scaled[D_800873BC[icon / 3]] * 4;
+                        if (icon == 4) {
+                            j = 4;
+                            iconH -= 8;
+                            texT += cellShift << 5;
+                        }
+                        if (icon == 1) {
+                            iconH -= 4;
+                        }
+                        do {
+                            if (texOk) {
+                                gSPTextureRectangle(gfx++, x, y * 4 + j, scaled[22] * 4 + x, y * 4 + iconH + j, 0, ((icon % 3) * 25) << 5, texT, step, step);
+                            }
+                            x -= 72;
+                        } while (--n > 0);
+                    }
+                }
+                if (D_8008FDC0 & 0x10) {
+                    if (!texLoaded) {
+                        gfx = hud_loadIconSheet(gfx, 0, &texOk);
+                    }
+                    s = player_getStat(i, 4);
+                    x = scaled[22] + vpLeft;
+                    h = ((s + 1) >> 1) * 5;
+                    if (h != 0 && texOk) {
+                        gSPTextureRectangle(gfx++, (x - scaled[h]) * 4, y * 4, x * 4, scaled[4] * 4 + y * 4, 0, 0x620, 0xA0, step, step);
+                    }
+                    h = (s >> 1) * 5;
+                    if (h != 0 && texOk) {
+                        gSPTextureRectangle(gfx++, (x - scaled[h]) * 4, scaled[5] * 4 + y * 4, x * 4, scaled[9] * 4 + y * 4, 0, 0x620, 0xA0, step, step);
+                    }
+                }
+            }
+        }
+    }
+
+    if (D_8008FDC0 & 4) {
+        u8 pad3a; // matching: unused stack slots in the original frame
+        s32 cellOffset;
+        s32 pad3b;
+        texLoaded = 0;
+        texOk = 0;
+        for (i = 0; i <= gScreenLayout; i++) {
+            if (D_80087270[i] != 10) {
+
+                vpRight = gViews[i].right - 5.0f;
+                y = gViews[i].top + 5.0f;
+                n = 1;
+                icon = -1;
+                cellOffset = 0;
+                if (movement_obj[i].type == 0x1E) {
+                    j = movement_obj[i].mv->unk128;
+                    if (j & 1) {
+                        icon = 6;
+                        barShift = 4;
+                    } else if (j & 2) {
+                        icon = 3;
+                    } else if (j & 0x80) {
+                        icon = 0;
+                        barShift = 6;
+                    } else if (j & 0x10) {
+                        icon = 9;
+                        barShift = -3;
+                    }
+                    if (icon >= 0 && icon != 3) {
+                        if (barShift > 0) {
+                            barLen.b[i] = movement_obj[i].mv->unk12C >> barShift;
+                        } else {
+                            barLen.b[i] = movement_obj[i].mv->unk12C << -barShift;
+                        }
+                        barMode = 1;
+                    }
+                } else {
+                    cellOffset = 3;
+                    switch (movement_obj[i].mv->context_b & 0x7F) {
+                    case 0x37:
+                        icon = 7;
+                        break;
+                    case 0x38:
+                        icon = 4;
+                        break;
+                    case 0x39:
+                        icon = 10;
+                        break;
+                    case 0x30:
+                    case 0x31:
+                        n = movement_obj[i].mv->ammo_count;
+                        icon = 6;
+                        break;
+                    case 0x3E:
+                        barLen.b[i] = movement_obj[i].mv->unk12C >> 4;
+                        barMode = 2;
+                        break;
+                    }
+                }
+                if (icon >= 0) {
+                    if (!texLoaded) {
+                        texLoaded = 1;
+                        gfx = hud_loadIconSheet(gfx, 1, &texOk);
+                    }
+                    x = vpRight - scaled[25];
+                    texS = (icon % 3) * 25;
+                    icon = icon / 3;
+                    texT = D_800873B4[icon] + cellOffset;
+                    texS <<= 5;
+                    texT <<= 5;
+                    do {
+                        if (texOk) {
+                            gSPTextureRectangle(gfx++, x * 4, y * 4, (x + scaled[22]) * 4, (scaled[D_800873BC[icon]] + y) * 4, 0, texS, texT, step, step);
+                        }
+                        x -= 18;
+                    } while (--n > 0);
+                }
+            }
+        }
+    }
+
+    if (barMode) {
+        gDPPipeSync(gfx++);
+        gDPSetOtherMode(gfx++, 0x002C3F, 0x0F0A4004);
+        gDPSetCombine(gfx++, 0xFFFFFF, 0xFFFDF6FB);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, 255);
+        if (barMode == 2) {
+            k = 15;
+        } else {
+            k = 30;
+        }
+        for (i = 0; i <= gScreenLayout; i++) {
+            if (barLen.b[i]) {
+                x = (s32)gViews[i].right - k;
+                rowY = (s32)gViews[i].top + 10;
+                gDPFillRectangle(gfx++, x - barLen.b[i], rowY, x, rowY + 4);
+            }
+        }
+    }
+
+    if (grenades) {
+        s32 pad2; // matching: three unused stack slots in the original frame
+        s32 pad3;
+        s32 pad4;
+        s32 cellH;
+        s32 cellW;
+        // matching: the original keeps the pipe-sync command word in a variable (cellW, reused below)
+        cellW = G_RDPPIPESYNC << 24;
+        j = texture_getAddress((s32)D_D13, 0, 3, 0);
+        gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, j);
+        gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
+        gDPLoadSync(gfx++);
+        gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 1023, 0);
+        { Gfx *g = gfx++; g->words.w0 = cellW; g->words.w1 = 0; } /* gDPPipeSync */
+        gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 8, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
+        gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 31 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
+        { Gfx *g = gfx++; g->words.w0 = cellW; g->words.w1 = 0; } /* gDPPipeSync */
+        gDPSetOtherMode(gfx++, 0x002C3F, 0x00504244);
+        for (i = 0; i <= gScreenLayout; i++) {
+            j = movement_obj[i].mv->context_b;
+            if ((j &= 0x7F) == 0x26 || j == 0x3A) {
+                x = (s32)gViews[i].right - 15;
+                x *= 4;
+                rowY = (s32)gViews[i].top + 5;
+                rowY *= 4;
+                // matching: constant-first operands; the swapped form changes the code
+                if (0x1A == level || 0x3F == level) {
+                    cellW = 11;
+                    cellH = 14;
+                    texS = 0x200;
+                    v = 0x1E0;
+                } else if (movement_obj[i].character_type == 0x75 || movement_obj[i].character_type == 0xB1) {
+                    cellW = 5;
+                    cellH = 20;
+                    texS = 0xC0;
+                    v = 0x100;
+                } else if (movement_obj[i].character_type == 0x3B) {
+                    cellW = 11;
+                    cellH = 14;
+                    texS = 0x200;
+                    v = 0x1E0;
+                } else {
+                    cellW = 8;
+                    cellH = 9;
+                    texS = 0x240;
+                    v = 0x60;
+                }
+                for (j = 0; j < movement_obj[i].mv->numGrenades; j++) {
+                    gSPScisTextureRectangle(gfx++, x, rowY, scaled[cellW] * 4 + x, scaled[cellH] * 4 + rowY, 0, texS, v, 0x400, step);
+                    x -= 44;
+                }
+            }
+        }
+    }
+
+    if ((D_8008FDC0 & 0x80) && gRacers != NULL) {
+        lapCount = gSettings[7];
+        for (i = 0; i <= gScreenLayout; i++) {
+            rowY = (s32)gViews[i].top + 5;
+            text_setColor(255, 255, 255, 255);
+            if (gRacers[i].lastLapTime > 0) {
+                x = gViews[i].left;
+                hud_printRaceTime(x + 23, rowY + 25, gRacers[i].lastLapTime, 0xC0);
+            }
+            x = (s32)gViews[i].left + (vpWidth >> 1);
+            icon = (s8)(gRacers[i].lap + 1); /* the current lap */
+            if (icon <= lapCount) {
+                text_printAt(x, rowY, 0xC1, "%s", gTextStrings[8 + gPlayerRanks[i]]);
+                text_printAt((s32)gViews[i].left + 29, rowY + 14, 0xC1, "lap %d/%d", icon, lapCount);
+                hud_printRaceTime(x, (s32)gViews[i].bottom - 12, gRacers[i].raceTime, 0xC0);
+            }
+        }
+    }
+
+    if (gPauseRequested == 0 && (D_8008FDC0 & 0x1000)) {
+        s32 shift;
+        s32 size;
+        f32 scale;
+        f32 ax;
+        f32 az;
+        scale = 0.013f;
+        i = 0;
+        x = (s32)gViews->right - scaled[32];
+        x *= 4;
+        if (D_8008FE1C != 1.0f) {
+            shift = 6;
+            scale *= 1.56f;
+            size = 99;
+        } else {
+            shift = 4;
+            size = 64;
+        }
+        k = (D_8008FDBC & 0x40) ? (s32)D_CF2 : (s32)D_CF1;
+        vpRight = texture_getAddress(k, 0, 3, 0);
+        gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, vpRight);
+        gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
+        gDPLoadSync(gfx++);
+        gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 2047, 0);
+        gDPPipeSync(gfx++);
+        gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
+        gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 63 << G_TEXTURE_IMAGE_FRAC, 63 << G_TEXTURE_IMAGE_FRAC);
+        gDPSetOtherMode(gfx++, 0x002C3F, 0x00504244);
+        for (i = 0; i < D_8008FD90; i++) {
+            if (player_getStat(i, 3) > 0) {
+                rowY = scaled[21] + ((s32)gViews[i].top + scaled[24]);
+                rowY *= 4;
+                gDPPipeSync(gfx++);
+                gDPSetEnvColor(gfx++, 255, 255, 255, 128);
+                gDPSetCombine(gfx++, 0x129A25, 0xFF37FFFF);
+                s = x - scaled[32] * 4;
+                mapTop = rowY - scaled[32] * 4;
+                gSPScisTextureRectangle(gfx++, s, mapTop, size * 4 + s, size * 4 + mapTop, 0, 0, 0, step, step);
+                gDPPipeSync(gfx++);
+                gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
+                for (k = 0, player = movement_obj; k != 25; k++, player++) {
+                    if (k == i || (k < D_8008FD8C && player_getStat(k, 3) > 0) || player->unk328 != 0) {
+                        gDPPipeSync(gfx++);
+                        if (k == i) {
+                            gDPSetEnvColor(gfx++, 0, 255, 0, 255);
+                        } else if (k < D_8008FD8C) {
+                            gDPSetEnvColor(gfx++, 255, 0, 0, 255);
+                        } else {
+                            gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+                        }
+                        ax = player->xpos * scale;
+                        az = player->zpos * scale;
+                        v = (rowY + 3.4f) + (s32)az;
+                        n = (x + 3.6f) + (s32)ax;
+                        gSPScisTextureRectangle(gfx++, n - shift, v - shift, n + shift, v + shift, 0, 0, 0, 0x400, 0x400);
+                    }
+                }
+            }
+        }
+    }
+    if (gPauseRequested == 0 && (D_8008FDC0 & 0x20)) {
+        gfx = hud_drawRadar(gfx, step, scaled, 0x2C30, 0);
+    }
+    return gfx;
+}
+
+/* Turns the on-screen clock (hud_drawClock) on or off, loading its model when turned on. */
+void hud_setClockEnabled(s32 enable) {
+    if ((enable != 0) && (gHudClockShown == 0)) {
+        gHudClockShown = 1;
+        hud_loadClock();
+        return;
+    }
+    if ((enable == 0) && (gHudClockShown != 0)) {
+        gHudClockShown = 0;
+    }
+}
+
+/* Loads the clock model and allocates its two (double-buffered) matrices. */
+void hud_loadClock(void) {
+    gHudClockDl = attach_loadModelDl(0xBA);
+    gHudClockMtx = allocate_memory(2 * sizeof(Mtx), 1, 1, 0);
+}
+
+extern u8 D_11AD[];
+
+/* Draws the clock: the four digits of gHudClockTime (frame count, 30 per second) as minutes and
+ * seconds go into segments 1-4 as digit textures from D_11AD, then the clock model. */
+Gfx *hud_drawClock(Gfx *gfx) {
+    s32 x = 120;
+    s32 y = 129;
+    s32 z = -303;
+    s32 segment;
+    s32 value;
+    s32 tex;
+
+    value = (gHudClockTime / 30) % 60;
+    segment = 4;
+    do {
+        tex = texture_getAddress((s32)D_11AD + (value % 10), 0, 3, 0);
+        if (tex == 0x80000000) {
+            return gfx;
+        }
+        gSPSegment(gfx++, segment, tex);
+        if (segment == 3) {
+            value = (gHudClockTime / 30) / 60;
+        } else {
+            value = value / 10;
+        }
+        segment--;
+    } while (segment != 0);
+
+    func_150A7D00(&gHudClockMtx[D_800BE9C0], x, y, z);
+    gSPMatrix(gfx++, &gHudClockMtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPDisplayList(gfx++, gHudClockDl);
+    return gfx;
+}
+
+/* Draws the radar: a disc around each local player (larger when `large`) with a dot for every
+ * visible other character, rotated by the camera heading; a dot gets a bar above or below it when
+ * the character is on a higher or lower floor (path_getLayerAt). */
+Gfx *hud_drawRadar(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
+    f32 scale;
+    f32 zoom;
+    f32 sinv;
+    f32 cosv;
+    f32 px;
+    f32 pz;
+    f32 angle;
+    f32 dx;
+    f32 radiusSq;
+    f32 dz;
+    s32 j;
+    s32 i;
+    s32 tex;
+    s32 dotStep;
+    s32 radius;
+    s32 dotSize;
+    s8 otherFloor;
+    s8 floor;
+    s32 skip;
+
+    scale = 0.01349999942f;
+    radiusSq = 3136.0f;
+    dotStep = step;
+    radius = scaled[16];
+    if (large) {
+        zoom = 1.329000115f;
+    } else {
+        zoom = 1.0f;
+    }
+    if (D_8008FD90 == 1) {
+        scale = 0.02025f;
+        radiusSq = 7744.0f;
+        dotStep = (step * 2) / 3;
+        radius = scaled[24];
+    }
+    scale *= D_8008FE1C;
+    dotSize = (D_8008FE1C == 1.0f) ? 4 : 6;
+    radiusSq *= D_8008FE1C;
+    tex = texture_getAddress((s32)(D_CF2 + 1), 0, 3, 0);
+    if (tex == 0x80000000) {
+        return gfx;
+    }
+    gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, tex);
+    gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
+    gDPLoadSync(gfx++);
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 511, 0);
+    gDPPipeSync(gfx++);
+    gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_8b, 4, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 31 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
+    gDPSetOtherMode(gfx++, renderMode | 0xF, 0x00504244);
+
+    for (i = 0; i < D_8008FD90; i++) {
+        if (player_getStat(i, 3) > 0) {
+            s32 halfSize;
+            s32 dsdx;
+            s32 x;
+            s32 y;
+            Actor *obj;
+            Camera *cam;
+            Camera *cam2;
+
+            x = (((s32)gViews[i].right - scaled[7]) - radius) * 4;
+            y = ((s32)gViews[i].top + scaled[21] + radius) * 4;
+            obj = &movement_obj[i];
+            if (large) {
+                x -= 454;
+                y -= 70;
+            }
+            gDPPipeSync(gfx++);
+            gDPSetEnvColor(gfx++, 255, 255, 255, 128);
+            gDPSetCombine(gfx++, 0x129A25, 0xFF37FFFF);
+            if (large) {
+                halfSize = radius * 4 * 0.8580000401f;
+                // matching: the original rounds dotStep through s32 before scaling it
+                dsdx = (s32)((f32)(s32)(f32)dotStep * 1.165501118f);
+            } else {
+                halfSize = radius * 4;
+                dsdx = dotStep;
+            }
+            gSPScisTextureRectangle(gfx++, x - halfSize, y - halfSize, x + halfSize, y + halfSize, G_TX_RENDERTILE, 0, 0, dsdx, dsdx);
+            gDPPipeSync(gfx++);
+            gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
+            gDPSetEnvColor(gfx++, 255, 0, 0, 255);
+            cam = &camera_global_Cameras[i];
+            angle = cam->CameraAngle * 0.01745327935f;
+            sinv = sinf(angle);
+            cosv = cosf(angle);
+            if (obj->type != 0x25) {
+                /* matching: as1 (-g3) orders equally ranked instructions of a block by source line, lowest
+                 * first. The target schedule (li; lwc1; lwc1; sw) needs the px/pz loads emitted
+                 * before `skip = -1` while that statement carries the lower line number. The
+                 * numbers only have to exceed every real line of this file with
+                 * line(skip = -1) < line(px/pz); the lines after them stay monotonic. */
+#line 20002
+                px = obj->xpos; pz = obj->zpos;
+#line 20000
+                skip = -1;
+                floor = path_getLayerAt(obj->ypos);
+            } else {
+                cam2 = obj->CameraPtr;
+                obj = movement_obj;
+                skip = 0;
+                if (cam2 != NULL && cam2->CNumber == 3) {
+                    skip = 1;
+                }
+                obj += skip;
+                px = obj->xpos;
+                pz = obj->zpos;
+                floor = path_getLayerAt(obj->ypos);
+            }
+            for (j = 0; j != 25; j++) {
+                s32 color;
+                s32 rx;
+                s32 ry;
+                s32 xl;
+                s32 yl;
+                s32 xh;
+                s32 yh;
+                Actor *other;
+                const u8 *rgb;
+
+                if (j == i || j == skip) {
+                    continue;
+                }
+                other = &movement_obj[j];
+                if (other->type != 0) {
+                    if (other->unk328 != 0) {
+                        color = other->unk328 - 1;
+                        if (j < D_8008FD8C) {
+                            if (player_getStat(j, 3) <= 0) {
+                                color = -1;
+                            } else if (player_getStat(j, 4) <= 0) {
+                                color = -1;
+                            } else if (D_800E0BCC & (1 << j)) {
+                                color = -1;
+                            } else if (other->energy == 0) {
+                                color = -1;
+                            } else if ((other->mv->context_b & 0x7F) == 0x21) {
+                                color = -1;
+                            }
+                        }
+                        if (color != -1) {
+                            dx = (other->xpos - px) * scale;
+                            dz = (other->zpos - pz) * scale;
+                            // matching: the tripled index plus a row-0 pointer, not D_800AB62C[color]
+                            color = color + color + color;
+                            rgb = D_800AB62C[0] + color;
+                            if (dx * dx + dz * dz < radiusSq) {
+                                gDPPipeSync(gfx++);
+                                gDPSetEnvColor(gfx++, rgb[0], rgb[1], rgb[2], 255);
+                                rx = (s32)((dx * cosv - dz * sinv) * zoom) + x;
+                                ry = (s32)((dx * sinv + dz * cosv) * zoom) + y;
+                                xh = rx + dotSize;
+                                xl = rx - dotSize;
+                                yh = ry + dotSize;
+                                yl = ry - dotSize;
+                                gSPScisTextureRectangle(gfx++, xl, yl, xh, yh, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+                                otherFloor = path_getLayerAt(other->ypos);
+                                if (floor != otherFloor) {
+                                    gDPPipeSync(gfx++);
+                                    gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+                                    if (floor < otherFloor) {
+                                        gSPScisTextureRectangle(gfx++, xl, yl - dotSize, xh, yl, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+                                    } else if (otherFloor < floor) {
+                                        gSPScisTextureRectangle(gfx++, xl, yh, xh, yh + dotSize, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return gfx;
+}

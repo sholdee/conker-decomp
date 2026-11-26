@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-/* This file's .bss, defined before the headers declare the globals (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare the globals (see init/Sched/SchedInit/schedinit.c). */
 u16 D_800D18A0;
 u16 D_800D18A2;
 u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
@@ -10,7 +10,7 @@ u8 D_800D18A9;
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game/Math/MathUtil/mathutil.c calls it with two more arguments. */
 void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Puts obj into state 2 with the given timer. */

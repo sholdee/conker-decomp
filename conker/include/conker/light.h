@@ -258,7 +258,7 @@ extern f32 D_800DCDB8;
 extern f32 D_800DCDBC;
 extern f32 D_800DCDC0;
 extern RegionNode *D_800DCDC4; // spawn regions; their areas add up to D_800DCD90
-/* (TriggerZone *region); declared without a prototype: game_40490.c calls it without the region */
+/* (TriggerZone *region); declared without a prototype: game/Level/ZoneSpawn/zonespawn.c calls it without the region */
 RegionNode *func_1515F1B0();
 void func_1515F25C(RegionNode **list, RegionNode *node);
 void func_1515F270(Actor *obj, TriggerZone *zone);

@@ -79,7 +79,7 @@ typedef struct {
 
 /* This file's .data. */
 
-/* The probe visible callbacks of game_1A11B0.c (probe, r, g, b); the only entry is empty. */
+/* The probe visible callbacks of game/Flare/VisProbe/visprobe.c (probe, r, g, b); the only entry is empty. */
 void (*gProbeVisibleCallbacks[1])(void *probe, s32 r, s32 g, s32 b) = { NULL };
 
 /*

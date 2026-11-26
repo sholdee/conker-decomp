@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 D_800DCDD0;
 
 #include "functions.h"

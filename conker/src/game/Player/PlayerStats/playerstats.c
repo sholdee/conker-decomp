@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
- * it first sees each name (see init_50A0.c). */
+ * it first sees each name (see init/Sched/SchedInit/schedinit.c). */
 s8 D_800D2130;
 s16 D_800D2132;
 MatchState gMatchState;

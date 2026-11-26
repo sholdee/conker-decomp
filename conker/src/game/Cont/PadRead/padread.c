@@ -3,7 +3,7 @@
 
 /* This file's .bss, defined in address order before functions.h and variables.h declare the globals: IDO
  * lays out .bss in the order it first sees each name, and that order also depends on how many types and
- * variables are declared before it (see init_50A0.c). */
+ * variables are declared before it (see init/Sched/SchedInit/schedinit.c). */
 OSTimer gContReadTimer;             // the timer that starts the next controller read
 u16 gButtonsHeld[4];              // per player: the buttons held at the last read
 u16 gMenuButtonsHeld[4];              // per player: the buttons held at the last read, for gMenuButtonsPressed

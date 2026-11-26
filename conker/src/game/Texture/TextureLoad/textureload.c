@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c): per camera slot, the tint
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c): per camera slot, the tint
  * channels texture_updateTint steps and waves (set up by level_initTintWaves from the tables below). */
 u16 gTintWavePhases[4][3]; // wave phase (12 bits after >> 4)
 u8 gTintWaveSteps[4][3];  // wave phase step

@@ -80,7 +80,7 @@
  *   game/Particle/RegionEmitter/regionemitter.c
  *   game/Particle/ZoneEmitter/zoneemitter.c
  *   game/Particle/EmitterQuads/emitterquads.c
- *   game/Particle/DripData/dripdata.c (data only, linked after game_1D9F10)
+ *   game/Particle/DripData/dripdata.c (data only, linked after game/Rope/SwingRope/swingrope)
  *   game/Particle/SideSpray/sidespray.c
  *   game/Particle/OwnerSideEmitter/ownersideemitter.c
  *   game/Particle/SoundPulse/soundpulse.c
@@ -105,7 +105,7 @@ typedef struct Rgb8 {
 void particle_resetStyleEmitterTimers(void);
 
 /* game/Particle/AreaParticles/areaparticles.c */
-/* An area effect of level_spawnZoneAreaEffect (game_40490.c): the particles spawned over a zone. */
+/* An area effect of level_spawnZoneAreaEffect (game/Level/ZoneSpawn/zonespawn.c): the particles spawned over a zone. */
 typedef struct Struct150139ACEntry {
     f32 unk0;
     f32 unk4;
@@ -2059,7 +2059,7 @@ void particle_spawnThrottledEmitter(s32 object, s32 threshold, u8 arg2, s32 arg3
 s32 func_1516F024(StyleParticle *particle);
 void func_1516F1C0(s32 object, s32 duration, u8 arg2, s32 arg3);
 /* (u8 object, s32 duration, s32 particleLifetime, s32 speed, u8 arg4, s32 arg5); declared without a prototype:
-   game_50D80.c passes the object index and arg4 unnarrowed */
+   game/Cutscene/SeqEvents/seqevents.c passes the object index and arg4 unnarrowed */
 void func_1516F2F8();
 void func_1516F548(s32 x, s32 y, s32 z, s32 arg3, s32 velocityXHigh, s32 velocityY, s32 velocityZHigh, s32 scale,
                    s32 scaleRandom, s32 radius, s32 style0, s32 style1, s32 arg12, s32 arg13, s32 arg14, u8 arg15,
@@ -2767,7 +2767,7 @@ Vtx *particle_buildQuadParticleBillboard(QuadParticle *particle, s16 view);
 s32 particle_growQuadParticle(QuadParticle *particle);
 s32 particle_fadeQuadParticleByLife(QuadParticle *particle);
 
-/* game/Particle/DripData/dripdata.c (data only, linked after game_1D9F10) */
+/* game/Particle/DripData/dripdata.c (data only, linked after game/Rope/SwingRope/swingrope) */
 /* The drip data of game/Particle/Drips/drips.c. */
 extern const DropKind D_800A9D40[];
 extern EmitterKind D_8008FA70[];
@@ -3238,7 +3238,7 @@ typedef struct {
 
 void particle_spawnFlashBurst(Vec3f *pos, u8 owner, s32 kind);
 /* (Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner, s32 kind); declared without a prototype:
- * game_50D80.c passes an s32 owner without narrowing it */
+ * game/Cutscene/SeqEvents/seqevents.c passes an s32 owner without narrowing it */
 void particle_startColorEmitter();
 void particle_updateColorEmitter(ColorEmitter *emitter);
 

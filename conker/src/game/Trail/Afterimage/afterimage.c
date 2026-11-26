@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/trail.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/trail.h describes it. */
 MtxS16 *gBoneTrailMtxs;
 u8 D_800DF7C4;
 BoneTrail *gBoneTrailLists[2];

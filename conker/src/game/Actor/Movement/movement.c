@@ -3,7 +3,7 @@
 
 /* This file's .bss (0x800CC250-0x800D155F), defined in address order before functions.h and variables.h
    declare the globals: IDO lays out .bss in the order it first sees each name, and that order also
-   depends on how many types and variables are declared before it (see init_50A0.c). */
+   depends on how many types and variables are declared before it (see init/Sched/SchedInit/schedinit.c). */
 s32 D_800CC250;
 f32 D_800CC254; // object position saved at the hit test (x, y, z)
 f32 D_800CC258;
@@ -73,7 +73,7 @@ s32 D_80086000 = 0; /* cleared by game_43760.c */
 static void (*gLevelPreUpdateFuncs[])(Actor *) = { NULL, func_150D1410 };
 static void (*gLevelPostUpdateFuncs[])(Actor *) = { NULL, func_150D146C };
 
-/* Per-type update handlers, indexed by the object's type (also run by game_49D30.c). */
+/* Per-type update handlers, indexed by the object's type (also run by game/Cutscene/Sequence/sequence.c). */
 void (*gActorUpdateHandlers[])(Actor *) = {
     NULL, actor_updatePlayer, func_15052590, func_15053894,
     func_150538CC, func_150548D8, func_15052458, func_150B12FC,

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 gContextTextId;
 u8 gContextTextOpen;
 TextResource *gContextText; // current text

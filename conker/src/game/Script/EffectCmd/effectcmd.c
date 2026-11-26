@@ -23,7 +23,7 @@ typedef struct ResourceSlot {
     /* 0x4 */ s32 unk4;
 } ResourceSlot;
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 D_800D2FA0[0x10]; /* not referenced */
 static ResourceSlot *gResourceTable;
 

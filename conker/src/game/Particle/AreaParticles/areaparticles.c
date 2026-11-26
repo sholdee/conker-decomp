@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The area effects of level_spawnZoneAreaEffect (game_40490.c), indexed by the zone's data1. */
+/* The area effects of level_spawnZoneAreaEffect (game/Level/ZoneSpawn/zonespawn.c), indexed by the zone's data1. */
 const Struct150139ACEntry gAreaEffectDefs[6] = {
     { 6.50000004e-07f, 2.180000067f, 1.230000019f, 1.610000014f, 4.829999924f,
       252, 50,

@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /*
- * This file's .bss, defined before the headers declare it (see init_50A0.c). Head/tail of the texture-scroll
+ * This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). Head/tail of the texture-scroll
  * reference list (TexScrollRef) and the texture-scroll list (TexScroll).
  */
 static struct ListNode *gTexScrollRefHead;
@@ -13,7 +13,7 @@ static struct ListNode *gTexScrollTail;
 static s32 gNextAutoTexScrollId;
 static s32 D_800E08F4;    /* not referenced */
 static s32 D_800E08F8[2]; /* not referenced */
-/* The trigger zones of the flamethrower characters, by slot (game_40490.c registers them). */
+/* The trigger zones of the flamethrower characters, by slot (game/Level/ZoneSpawn/zonespawn.c registers them). */
 TriggerZone *gFlamethrowerZones[6];
 
 #include "functions.h"

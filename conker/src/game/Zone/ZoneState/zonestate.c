@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 gEffectZoneTimer;                // timer of the ZONE_TYPE_EFFECT subtype-6 zone
 u32 gZoneCount;               // number of TriggerZones in zones
 TriggerZone *zones;           // level placement / marker table (0x34-byte records)

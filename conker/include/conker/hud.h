@@ -7,9 +7,9 @@
 /*
  * Subsystem "hud": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_BC510.c
- *   game_1ED080.c
- *   game_215960.c
+ *   game/Hud/PlayerOverlay/playeroverlay.c
+ *   game/Hud/CounterFree/counterfree.c
+ *   game/Hud/HudOverlay/hudoverlay.c
  */
 
 /* A 3D model drawn on the HUD: its display lists, patched copies, and a transform per frame buffer. */
@@ -35,7 +35,7 @@ typedef struct {
     s16 *usedTextures; /* the distinct textures dl uses (texture_resolveDl's usedOut) */
 } Struct151EDF4C;
 
-/* game_BC510.c */
+/* game/Hud/PlayerOverlay/playeroverlay.c */
 void hud_resetBubbles(void);
 void hud_updateOverlay(void);
 void hud_updateBlockStack(void);
@@ -69,13 +69,13 @@ extern BlockDebris *gHudBlockDebris; /* the debris list */
 extern Bubble gHudBubbles[6];
 extern s32 D_800D24C0;
 extern WaterStage gHudWaterStage;
-extern Gfx *D_800D2588;         /* display list built by game_BC510 */
+extern Gfx *D_800D2588;         /* display list built by game/Hud/PlayerOverlay/playeroverlay */
 
-/* game_1ED080.c */
+/* game/Hud/CounterFree/counterfree.c */
 void hud_freeCounter(CounterEffect *effect);
 void func_151BFBFC(EffectHeader *obj, s32 arg1, u8 msg);
 
-/* game_215960.c */
+/* game/Hud/HudOverlay/hudoverlay.c */
 Gfx *hud_drawMain(Gfx *gfx);
 Gfx *hud_drawModeOverlay(Gfx *gfx);
 Gfx *hud_texRectScaled(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/effect.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/effect.h describes it. */
 EffectHeader *gObjectLists[2][OBJ_TYPE_COUNT];
 s8 gObjectWalkDepth;
 void *gObjectWalkNext[6];

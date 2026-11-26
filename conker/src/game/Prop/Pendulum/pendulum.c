@@ -2,7 +2,7 @@
 #include "structs.h"
 
 // This file's .bss (0x800D98C0-0x800D98DF). gLevelSprayEffects has its extern in conker/prop.h, so it is
-// defined here, before functions.h (see init_50A0.c).
+// defined here, before functions.h (see init/Sched/SchedInit/schedinit.c).
 u8 D_800D98C0[16]; /* not referenced */
 EffectHeader *gLevelSprayEffects[4];
 

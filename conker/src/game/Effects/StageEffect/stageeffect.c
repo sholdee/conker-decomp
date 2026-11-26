@@ -7,7 +7,7 @@
 SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
                              u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
-/* Read by game_3F1F0.c. */
+/* Read by game/Level/LevelSetup26/levelsetup26.c. */
 const u8 D_800A1C00[8][8] = {
     { 0xFD, 0xFB, 0xF9, 0xF7, 0xF5, 0xF3, 0xF1, 0xEF },
     { 0xFC, 0xFA, 0xF8, 0xF6, 0xF4, 0xF2, 0xF0, 0xEE },

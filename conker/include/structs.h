@@ -33,7 +33,7 @@ typedef struct Vec3f {
     /* 0x8 */ f32 z;
 } Vec3f; // size 0xC
 
-/* A triangle's three vertex positions, passed by value to the triangle tests of game_76710.c
+/* A triangle's three vertex positions, passed by value to the triangle tests of game/Math/TriBox/tribox.c
  * (math_testTriBox, math_computeTriPlane). */
 typedef struct Tri3f {
     /* 0x00 */ Vec3f pts[3];
@@ -258,11 +258,11 @@ typedef struct LevelHeader {
     /* 0x1C */ u16 gfxCount;        // display list length in Gfx (gfx_allocDisplayLists adds 400)
     /* 0x1E */ u16 unk1E;           // game/Shadow/RealTimeShadow/realtimeshadow
     /* 0x20 */ u8  pad20;
-    /* 0x21 */ u8  vtxColorFlags;   // game_1A0E60
+    /* 0x21 */ u8  vtxColorFlags;   // game/Env/VtxColourFade/vtxcolourfade
     /* 0x22 */ u8  pad22[7];
     /* 0x29 */ u8  unk29;
     /* 0x2A */ u8  flags;           // bit 0 checked by init/Audio/MixSelector/mixselector
-    /* 0x2B */ u8  ucode;           // game_49D30
+    /* 0x2B */ u8  ucode;           // game/Cutscene/Sequence/sequence
     /* 0x2C */ LevelMusic music;
     /* 0x3A */ s16 unk3A;           // fog (gFogPresets.unk4..unkA)
     /* 0x3C */ s16 unk3C;
@@ -403,7 +403,7 @@ struct WORD {
 };
 
 /* Per model-type definition, gModelDefs[id] (loaded by func_1503D774; freed by collision_freeObjectModels with its
- * allocation starting 0x10 bytes earlier). An ExpressionTableHeader (game_AB760) sits 8 bytes before it.
+ * allocation starting 0x10 bytes earlier). An ExpressionTableHeader (game/Face/Expression/expression) sits 8 bytes before it.
  * Only the fields the code reads are typed; the full size is unknown (at least 0x40). */
 typedef struct ModelDef {
     /* 0x00 */ s16 aimHeight;       // aim top point, above the aim bone (aim_updatePoints)
@@ -1316,7 +1316,7 @@ struct Actor {
 
 /*
  * A world object: one 0xA0-byte entry of the level's object array db_Object_array (gWorldObjectCount entries),
- * built by level_spawnObjects (game_30E90.c) from the level's placement lists. Owner type 1 for effects and trails.
+ * built by level_spawnObjects (game/Level/LevelObjects/levelobjects.c) from the level's placement lists. Owner type 1 for effects and trails.
  * original: db_Object_struct (rom_debug_struct.c)
  */
 typedef struct Shadow Shadow; // blob shadow under an object, see game/Shadow/BlobShadow/blobshadow.c
@@ -2206,7 +2206,7 @@ typedef struct Bubble {
     /* 0xF */ u8  phase;
 } Bubble; // size 0x10
 
-/* A water-surface vertex (Vtx layout) and its rest position/colour (game_BC510.c). */
+/* A water-surface vertex (Vtx layout) and its rest position/colour (game/Hud/PlayerOverlay/playeroverlay.c). */
 typedef struct WaterVtx {
     /* 0x0 */ s16 ob[3];
     /* 0x6 */ u16 flag;
@@ -2219,7 +2219,7 @@ typedef struct WaterBase {
     /* 0x6 */ u8  cn[4];
 } WaterBase; // size 0xA
 
-/* gHudWaterStage: the animated water surface (game_BC510.c). */
+/* gHudWaterStage: the animated water surface (game/Hud/PlayerOverlay/playeroverlay.c). */
 typedef struct WaterStage {
     /* 0x00 */ Mtx mtx[2];
     /* 0x80 */ Gfx *dl;
@@ -2260,7 +2260,7 @@ typedef struct RopeEnds {
     /* 0x0C */ Vec3f bottom;
 } RopeEnds; /* size 0x18 */
 
-/* Spawn data of a rope; rope_create (game_1D9F10.c) copies it into the new Rope from its id field on. */
+/* Spawn data of a rope; rope_create (game/Rope/SwingRope/swingrope.c) copies it into the new Rope from its id field on. */
 typedef struct RopeSpawn {
     /* 0x00 */ s8 id;
     /* 0x01 */ u8 pad1[3];
@@ -2705,12 +2705,12 @@ typedef struct IdRecordList {
 /* The BSS of task 0x83 (script_getTaskBss(0x83)); only the field read by the money counters is known. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x64];
-    /* 0x64 */ s32 unk64; /* money amount scale: game/Text/AmountText/amounttext.c and game_215960.c apply it in thirds */
+    /* 0x64 */ s32 unk64; /* money amount scale: game/Text/AmountText/amounttext.c and game/Hud/HudOverlay/hudoverlay.c apply it in thirds */
 } Struct1509B570;
 
   // size 0x28
 
-/* A debris particle of game_BC510.c's block stack (a block knocked off the top, hud_removeBlock), in the list
+/* A debris particle of game/Hud/PlayerOverlay/playeroverlay.c's block stack (a block knocked off the top, hud_removeBlock), in the list
  * gHudBlockDebris; hud_updateBlockStack moves it and frees it when its timer runs out. */
 struct BlockDebris {
     /* 0x00 */ Mtx mtx[2];                 /* double-buffered by D_800BE9C0 */
@@ -2750,7 +2750,7 @@ typedef struct ObjGroup {
     /* 0x08 */ u16 members[8];
 } ObjGroup; // size 0x18
 
-/* One of the 10 bouncing cursors in D_800BE4E0 (created by func_1500FE30 in game_3D2E0, stepped in
+/* One of the 10 bouncing cursors in D_800BE4E0 (created by func_1500FE30 in game/Level/LevelSetup12/levelsetup12, stepped in
  * game/Effects/BounceRecords/bouncerecords). */
 typedef struct BounceRecord {
     /* 0x0 */ u8  table;        // which gBounceRecordFrameTables table to draw from (0 or 1)
@@ -2829,7 +2829,7 @@ typedef struct WaveDeformer {
     /* 0x28 */ u8 *vertexAngle;   // mode 2 only; byte angle (256 per turn)
 } WaveDeformer; // size 0x2C
 
-/* A lens flare (game_1AB530); gLensFlares heads the list. */
+/* A lens flare (game/Flare/LensFlare/lensflare); gLensFlares heads the list. */
 typedef struct LensFlare {
     /* 0x00 */ f32 pos[3];
     /* 0x0C */ f32 screenX;
@@ -3253,7 +3253,7 @@ typedef struct {
 } VariantList;
 
 /* One 8-byte cutscene script event (gSeqEventTracks[scene][track][i]). Each track starts with a
-   4-event header whose value is the start time (see game_50D80.c). */
+   4-event header whose value is the start time (see game/Cutscene/SeqEvents/seqevents.c). */
 typedef struct {
     /* 0x0 */ s8 type;
     /* 0x1 */ u8 delta; /* time step to the next event; 0 chains events at the same time */

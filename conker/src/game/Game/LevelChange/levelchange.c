@@ -6,7 +6,7 @@
  * This file's .bss, linked at 0x800BE9A0..0x800BEAD0 in this order. Defined before functions.h and
  * variables.h declare the globals (conker/game.h): IDO lays out .bss in the order it first sees each
  * name, and an earlier extern would count. The order also depends on how many types and variables
- * are declared before it (see init_50A0.c).
+ * are declared before it (see init/Sched/SchedInit/schedinit.c).
  */
 u8 D_800BE9A0;               // frame steps of this frame (half the ticks, see game_updateFrameTiming)
 f32 gFrameDelta;              // frame delta: half the ticks of this frame

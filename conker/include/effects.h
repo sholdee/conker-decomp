@@ -611,7 +611,7 @@ typedef struct BloodDrip {
 #define BLOOD_DRIP_NO_PREVIOUS   0x08
 #define BLOOD_DRIP_STATIC        0x10
 
-/* Glow animations (GlowParams.anim); GlowParams.type selects the handler (game_16DC80.c). */
+/* Glow animations (GlowParams.anim); GlowParams.type selects the handler (game/Flare/Glow/glow.c). */
 
 /* flare_glowFlicker: random flicker */
 typedef struct GlowFlicker {
@@ -653,7 +653,7 @@ typedef struct GlowOrbit {
     /* 0x0C */ f32 pivot[3];
 } GlowOrbit; /* size 0x18 */
 
-/* Shape of a glow sprite (game_16DC80.c): the part of GlowParams every caller of flare_spawnGlow fills in. */
+/* Shape of a glow sprite (game/Flare/Glow/glow.c): the part of GlowParams every caller of flare_spawnGlow fills in. */
 typedef struct GlowShape {
     /* 0x00 */ f32 width1;   /* width, height and offset when facing the viewer (intensity 1)... */
     /* 0x04 */ f32 height1;
@@ -675,7 +675,7 @@ typedef struct GlowShape {
     /* 0x5A */ u8 pad5A[2];
 } GlowShape; /* size 0x5C */
 
-/* Glow parameters: flare_spawnGlow (game_16DC80.c) copies paramSize bytes of them into the glow at +0x110. */
+/* Glow parameters: flare_spawnGlow (game/Flare/Glow/glow.c) copies paramSize bytes of them into the glow at +0x110. */
 typedef struct GlowParams {
     /* 0x00 */ GlowShape shape;
     /* 0x5C */ u8 pad5C[4];
@@ -2384,7 +2384,7 @@ typedef struct ProjectileStream {
 } ProjectileStream; /* size 0x44 */
 
 /* A timed emitter of ProjectileStreams (TimedEffect tick callback 0x2A, weapon_updateStreamEmitter, game/Weapon/Projectile/projectile.c; spawned by
- * func_150144B8, game_40490.c): after a random delay it starts one stream and picks a new delay. */
+ * func_150144B8, game/Level/ZoneSpawn/zonespawn.c): after a random delay it starts one stream and picks a new delay. */
 typedef struct StreamEmitter {
     /* 0x00 */ s16 *position;     /* x, y, z (of the spawning TriggerZone) */
     /* 0x04 */ s32 timer;
@@ -3010,7 +3010,7 @@ typedef struct ShapeEmitter {
     /* 0x0C */ f32 accumulator;
 } ShapeEmitter;
 
-/* Zone effects: timed effects (object type 35 or 95, gTimedEffectTypes) that game_40490.c makes for a TriggerZone,
+/* Zone effects: timed effects (object type 35 or 95, gTimedEffectTypes) that game/Level/ZoneSpawn/zonespawn.c makes for a TriggerZone,
  * with the zone first in their data. effect_findZoneEffect (game/Effects/ZoneEffect/zoneeffect.c) finds the ZoneEffect of a zone (callbackSet
  * 0x2C) and beam_findZoneRectEffect (game/Beam/BoltRain/boltrain.c) its ZoneRectEffect (callbackSet 0x2E). */
 typedef struct ZoneEffectData {     /* filled by func_15015104 */
@@ -3042,7 +3042,7 @@ typedef struct ZoneRectEffect {
 } ZoneRectEffect;
 
 /* State a DDB60Effect keeps at +0x28: func_150B0C58 (game/Effects/PerimeterEmitter/perimeteremitter.c) fills it, func_150B0D20 updates it each frame.
- * (Effect-subsystem only, but here rather than conker/effect.h: one more type in a header that init_50A0.c sees
+ * (Effect-subsystem only, but here rather than conker/effect.h: one more type in a header that init/Sched/SchedInit/schedinit.c sees
  * moves sched_preNmiThread's static D_8003BC20 to the start of that file's .bss.) */
 typedef struct DDB60EffectData {
     /* 0x00 */ struct Actor *owner;

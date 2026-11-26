@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Level hooks, installed by the per-level setup (game_3DB60.c, game_3DC30.c) and cleared by game_initLevelSubsystems. */
+/* Level hooks, installed by the per-level setup (game_3DB60.c, game/Level/LevelSetup18/levelsetup18.c) and cleared by game_initLevelSubsystems. */
 s32 (*D_800E0930)(Vec3f *start, Vec3f *delta, Vec3f *hit);
 void (*D_800E0934)(s32 x, s32 y, s32 z);
 

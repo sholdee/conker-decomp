@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 struct UvWobble *gUvWobbles[1]; // the registered UV wobbles; only one fits
 u8 gUvWobbleCount;                  // number of registered UV wobbles
 

@@ -18,11 +18,11 @@ typedef struct {
     u8 values[3];
 } Game10CD70Indices;
 
-/* Set once the one-time setup of func_150E0300 has run (cleared by game_3BA70.c and game_3D9A0.c). */
+/* Set once the one-time setup of func_150E0300 has run (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
 u8 D_80088980 = 0;
 static Game10CD70Indices D_80088984 = { { 0x3B, 0x3C, 0x3D } };
 
-/* Per zone (D_80088984): the glow level of its scrolling material, 0..0x60 (cleared by game_3BA70.c and game_3D9A0.c). */
+/* Per zone (D_80088984): the glow level of its scrolling material, 0..0x60 (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
 u8 gMaterialGlowLevels[3];
 
 /* Returns whether the zones record selected by D_80088984[index] is active. */

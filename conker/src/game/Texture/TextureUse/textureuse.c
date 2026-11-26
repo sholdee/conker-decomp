@@ -9,7 +9,7 @@ typedef struct {
     /* 0xD */ u8 paletteSegment;
 } TextureBinding; // size 0x10
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 gTexBindingCount; // number of bindings in use
 TextureBinding gTexBindings[8];
 s32 gTexAgeFirst;      // lowest texture id that texture_updateAging must age

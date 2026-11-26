@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/particle.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/particle.h describes it. */
 u8 D_800E0A10; /* the effect kind of the current context (particle_getContextEffectKind); game/Game/LevelInit/levelinit sets it */
 
 // functions.h declares these three with other return types; this file uses the s32 versions below.

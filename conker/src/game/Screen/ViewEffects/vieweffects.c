@@ -10,7 +10,7 @@ typedef struct {
     u8 b;
 } FadeColor;
 
-/* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 gIrisWobbleFrames[4];         // iris: wobble frames left
 u8 gIrisWobbleAngles[4];         // iris: wobble angle
 u8 gIrisOverlayFrames[4];         // iris: overlay animation frame

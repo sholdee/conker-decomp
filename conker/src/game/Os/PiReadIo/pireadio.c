@@ -10,7 +10,7 @@ s32 osPiRawReadIo(u32 devAddr, u32 *data);
  * the stack (frame 0x20, no $s0, `addiu $sp` left out of the jr delay slot) and the function
  * is one instruction short at every flag setting.  With it, at -O1, both functions here are
  * byte-perfect -- which also puts this TU in the same -O1 family as the game's other private
- * libultra copies (game/Os/ContInit/continit, game/Os/ViSetSpecial/visetspecial, game_21CAC0). */
+ * libultra copies (game/Os/ContInit/continit, game/Os/ViSetSpecial/visetspecial, game/Math/Random/random). */
 s32 func_151EF040(u32 devAddr, u32 *data) {
     register s32 status;
 

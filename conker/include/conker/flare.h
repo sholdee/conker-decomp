@@ -8,14 +8,14 @@
 /*
  * Subsystem "flare": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game/done/game_36600.c
- *   game_16DC80.c
- *   game_1A0420.c
- *   game_1A11B0.c
- *   game_1AB530.c
+ *   game/Flare/FlareReset/flarereset.c
+ *   game/Flare/Glow/glow.c
+ *   game/Flare/ScreenFlash/screenflash.c
+ *   game/Flare/VisProbe/visprobe.c
+ *   game/Flare/LensFlare/lensflare.c
  */
 
-/* A glow sprite (game_16DC80.c). */
+/* A glow sprite (game/Flare/Glow/glow.c). */
 typedef struct GlowObj {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x1B];
@@ -32,15 +32,15 @@ typedef struct GlowObj {
     /* 0x110 */ GlowParams params;
 } GlowObj;
 
-/* Caller data copied into a z-buffer probe (game_1A11B0.c) and handed back to its callback. */
+/* Caller data copied into a z-buffer probe (game/Flare/VisProbe/visprobe.c) and handed back to its callback. */
 typedef struct ProbeData {
     s32 unk0[9];
 } ProbeData;
 
-/* game/done/game_36600.c */
+/* game/Flare/FlareReset/flarereset.c */
 void flare_resetFlares(s32 arg0);
 
-/* game_16DC80.c */
+/* game/Flare/Glow/glow.c */
 extern s32 gGlowCount; /* live glow count */
 /* Spawns a glow and copies paramSize bytes of params (a GlowParams, or a caller struct that starts with a
  * GlowShape) into it. Callers keep their own view of the glow object. */
@@ -61,16 +61,16 @@ s32 func_15141818(s32 arg0, s32 arg1);
 void flare_placeGlowOnPivot(GlowObj *obj, f32 *pivot, f32 distance, f32 spread, f32 angleX, f32 angleZ);
 s32 flare_glowOrbit(GlowObj *obj);
 
-/* game_1A0420.c */
+/* game/Flare/ScreenFlash/screenflash.c */
 extern u8 gScreenFlash; /* screen flash level (0 for none), which the lens flares raise */
 Gfx *flare_drawScreenFlash(Gfx *arg0);
 
-/* game_1A11B0.c */
+/* game/Flare/VisProbe/visprobe.c */
 Gfx *flare_copyProbePixels(Gfx *gfx, s32 x, s32 y, s32 unused, void *zDest, void *colorDest, s16 view);
 Gfx *flare_runProbes(Gfx *gfx, s32 view);
 s32 flare_queueProbe(f32 x, f32 y, f32 z, ProbeData *data, s8 callback, s32 arg5);
 
-/* game_1AB530.c */
+/* game/Flare/LensFlare/lensflare.c */
 extern u8 D_800DDD61;
 extern LensFlare *gLensFlares; /* head of the lens flare list */
 extern f32 *gSunPositions[2]; /* per LevelHeader.unk10: sun position (FLARE_SUN) */

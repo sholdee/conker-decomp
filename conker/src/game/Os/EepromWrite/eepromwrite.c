@@ -10,7 +10,7 @@ struct DemoInput {
     u16 buttons;
 };
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 OSPifRam D_800E0A30; /* __osEepPifRam */
 void *gDemoInput; /* the recorded input: 500 struct DemoInput frames */
 s32 gDemoInputIndex;

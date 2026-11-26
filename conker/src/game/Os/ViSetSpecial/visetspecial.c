@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Rare linked a private copy of the libultra VI code into the game binary; this TU is
- * osViSetSpecialFeatures().  Like the rest of that embedded copy (see game_21CAC0) it was
+ * osViSetSpecialFeatures().  Like the rest of that embedded copy (see game/Math/Random/random) it was
  * built at -O1, not the tree default -O2 -g3 -- hence the Makefile OPT_FLAGS override.
  *
  * __OSViContext is not in include/, so the layout is declared

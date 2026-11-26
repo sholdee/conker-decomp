@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/effect.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/effect.h describes it. */
 u8 gAnchorRefCounts[20];                 /* reference count per shared anchor resource (gAnchorResourceIds) */
 u16 gAnchorCounts[20];                /* anchor count of each loaded set */
 struct BoneAnchor *gAnchorSets[20]; /* the loaded anchor set of each resource (type in game/Particle/AnchorEmitter/anchoremitter) */

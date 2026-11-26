@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 TriggerZone *gSprayAreas[3]; // the three areas effect_sprayFromArea sprays from (func_150142AC registers them)
 
 #include "functions.h"

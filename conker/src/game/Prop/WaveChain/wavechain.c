@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/prop.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/prop.h describes it. */
 u8 gNumWaveChains;
 u8 gWaveChainPresetIds[4];
 s32 D_800DDE58; /* not referenced */

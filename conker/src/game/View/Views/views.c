@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, in address order, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, in address order, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 s32 gScreenWidth;              // the screen width
 s32 gScreenHeight;              // the screen height
 RenderView *gViews;      // the views

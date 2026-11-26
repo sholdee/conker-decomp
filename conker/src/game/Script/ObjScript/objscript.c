@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-/* This file's .bss, defined before the headers declare the globals (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare the globals (see init/Sched/SchedInit/schedinit.c). */
 u8 gScriptArg0;      // the argument bytes of the current command, arg0..arg3
 u8 gScriptArg1;
 u8 gScriptArg2;
