@@ -1,4 +1,9 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
+CamOffset D_800DCDE0[4];
+
 #include "functions.h"
 #include "variables.h"
 
@@ -7,8 +12,10 @@
  * player's camera offset each frame (D_800DCDE0, applied to the view matrix in game_159940.c).
  */
 
-extern s32 (*D_8008B390[])(CamWobble *); // update callbacks, return 0 to stop
-extern f32 (*D_8008B394[])(CamWobble *); // amplitude scale callbacks
+/* Update callbacks (CamWobbleDef.updateFn; 0 stops the wobble) and amplitude scale callbacks
+ * (CamWobbleDef.scaleFn). Declared without a prototype: the callbacks take the wobble as their own type. */
+static s32 (*D_8008B390[])() = { func_151658DC };
+static f32 (*D_8008B394[])() = { func_150FCF1C, func_15165B80 };
 
 /*
  * Creates a wobble effect from def with extraSize bytes of extra state after it. Returns NULL if the

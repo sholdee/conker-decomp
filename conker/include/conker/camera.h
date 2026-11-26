@@ -478,6 +478,7 @@ void func_1512E8E0(Camera *camera);
 void func_1512FE00(Camera *camera, s32 action);
 
 /* game_191C30.c */
+extern CamOffset D_800DCDE0[4]; // per-player camera offset (position, rotation), summed from the wobbles
 CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3);
 void func_15164888(CamWobble *wobble);
 void func_1516489C(CamWobble *wobble);

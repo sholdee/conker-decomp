@@ -401,7 +401,6 @@ extern ParticleNode *D_800DC460; // loaded particle models: list head
 extern ParticleNode *D_800DC464; // list tail
 extern s16 D_800DC468[];
 extern s32 D_800DC63C;
-extern CamOffset D_800DCDE0[4]; // per-player camera offset (position, rotation), summed from the wobbles (game_191C30.c)
 extern s8   D_800DD190;
 extern void *D_800DD198[6]; // per object-list walk depth (D_800DD190): the next node to visit
 extern s32 D_800DD1B0; // texture last loaded by func_1517A9A8
