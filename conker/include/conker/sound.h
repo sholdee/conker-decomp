@@ -94,7 +94,7 @@ void func_10010720(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farD
 s32 func_100107F8(Actor *obj);
 s32 func_10010894(Actor *obj);
 void func_1001091C(Actor *obj, u32 volume);
-void func_100109D0(Actor *obj);
+s32 func_100109D0(Actor *obj);
 void func_10010A3C(Actor *obj);
 void func_10010AA8(Actor *obj);
 u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, u8 bus);

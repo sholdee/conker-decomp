@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// matching: this file calls func_100109D0 (void (Actor *)) through an unprototyped view
-#define func_100109D0 func_100109D0_hdr
 #include "functions.h"
-#undef func_100109D0
 #include "variables.h"
 
 /* Packet handed to func_1506AC8C by func_15063B64. */

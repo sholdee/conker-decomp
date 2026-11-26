@@ -814,7 +814,9 @@ void func_1001091C(Actor *obj, u32 volume) {
     }
 }
 
-void func_100109D0(Actor *obj) {
+// Declared int but returns no value, in the pre-ANSI way: game_90840.c's calls only match with an
+// int-returning view (the other callers match either way).
+s32 func_100109D0(Actor *obj) {
     if (obj->CameraPtr != NULL) {
         if (obj->unk8E != 0) {
             func_100111C8(obj->unk8E);
