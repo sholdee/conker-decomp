@@ -816,14 +816,9 @@ start:
     }
     return ret;
 }
-typedef struct {
-    u8 unk0;
-    u8 pad1[0xB];
-} Unk80090B64;
-extern Unk80090B64 D_80090B64[];
 
 /*
- * Advances a 16.16 position through sequence `id` (D_80090B64[id].unk0 steps long) by speed * D_800BE9E4.
+ * Advances a 16.16 position through sequence `id` (D_80090B60[id].frameCount steps long) by speed * D_800BE9E4.
  * Past either end it stops (1), clamps (2/0x10), bounces (4) or wraps; returns 1 when it stopped.
  */
 s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags) {
@@ -832,7 +827,7 @@ s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags) {
     s32 n;
 
     ret = 0;
-    n = D_80090B64[id].unk0;
+    n = D_80090B60[id].frameCount;
     max = (n << 16) - 1;
     *pos += *speed * D_800BE9E4;
     if (max < *pos) {

@@ -1180,7 +1180,7 @@ extern s32 D_800DD218;
 extern s32 D_800DD21C;
 extern s32 D_800DD220;
 extern s32 D_800DD224;
-extern void *D_800DD228;
+extern TextureDesc *D_800DD228; // texture of the current draw hook (func_151668B8, func_15166F6C)
 extern SpriteParams D_800DD230;
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;

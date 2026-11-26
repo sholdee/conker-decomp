@@ -109,7 +109,7 @@ Gfx *func_15166D68(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
     return gfx;
 }
 
-extern s32 D_8009054C;
+extern TextureDesc D_8009054C;
 
 /* Loads texture D_8009054C, using the frame and mode already in D_800DD220/D_800DD224. */
 Gfx *func_15166F6C(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
