@@ -459,7 +459,7 @@ void func_1000F91C(u16 handle, u16 volume, s16 cents, u8 mix, s32 arg4,
 }
 
 void func_1000F9D4(u16 handle, s16 x, s16 y, s16 z) {
-    u32 pan;
+    s32 pan;
 
     func_1000F6B8(-1, x, y, z, &pan, 32760, 32765);
     func_1000F85C(handle, 4, pan & 0x7F);

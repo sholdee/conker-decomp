@@ -84,7 +84,7 @@ void func_1000A348(void);
  * (n_libaudio.h, n_synthInternals.h) and by their own files, which do not include functions.h. */
 
 /* init_11FA0.c */
-void func_10011FA0(s32 *selector);
+void func_10011FA0(s32 selector);
 void func_10011FB0(s32 selector);
 void func_10011FDC(s32 selector);
 void func_10011FEC(void);

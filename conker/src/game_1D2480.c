@@ -39,7 +39,7 @@ void func_151A5070(struct Obj151A4FD0 *effect) {
     }
 
     if (effect->unk19 == 0) {
-        func_10011FA0((s32 *)2);
+        func_10011FA0(2);
     }
 
     red = effect->red;

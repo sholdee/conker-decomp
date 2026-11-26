@@ -4,7 +4,7 @@
 #include "variables.h"
 
 /* Requests an audio-mix selector for the next update (cleared after each func_10012020). */
-void func_10011FA0(s32 *selector) {
+void func_10011FA0(s32 selector) {
     D_80042770 = selector;
 }
 

@@ -248,7 +248,7 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
     }
 
     if (level == 39) {
-        func_10011FA0((s32 *)4);
+        func_10011FA0(4);
         if (bit1 == 0) {
             bit1 = 2;
             func_1000E704(1, 1, 0xFFFF);
@@ -514,7 +514,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
             break;
         case 2:
             state = 0xF8;
-            func_10011FA0((s32 *)4);
+            func_10011FA0(4);
             func_1000E704(34, 1, 0xFFFF);
             func_1000E46C(34, 0, 0xFE0, started);
             break;
@@ -723,7 +723,7 @@ s32 func_1000CAE4(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     bit1 = state & 2;
     state &= 1;
     if (level == 66) {
-        func_10011FA0((s32 *)4);
+        func_10011FA0(4);
         if (state == 0) {
             state = 1;
             func_1000E704(88, 1, 0xFFFF);

@@ -17,7 +17,7 @@ void func_10017714(s32 arg0, s16 arg1, s32 arg2);
 
 
 void n_alInit(void *globals, void *config);
-void n_alClose(s32 arg0);
+void n_alClose(void *globals);
 f32  alCents2Ratio(s32 arg0);
 /* chunk0 */
 
