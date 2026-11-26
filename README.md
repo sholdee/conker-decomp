@@ -20,8 +20,8 @@ game text.
   compiler search reproduced them. [ACCOUNTING.md](ACCOUNTING.md) gives the proofs and the evidence.
 - **Fully linked.** No address is pinned: every reference goes through a symbol, so the code and the
   data can move. CI fails on a pinned address, a pointer written as a number, or a jump without a
-  relocation. Emulator tests added code and data in each segment (init, game, debugger) and in each
-  `.data`, `.rodata` and `.bss`, and the shifted ROMs still ran the boot and attract sequence. One fixed
+  relocation. Emulator tests added code to each segment (init, game, debugger) and data to each
+  `.data`, `.rodata` and `.bss`. The shifted ROMs still ran the boot and attract sequence. One fixed
   limit remains: the page-fault handler maps 0x1FC000 bytes of game code, which leaves room for about
   7.9 KB more. Beyond that, the link fails with a message.
 - **Data in source.** The game's `.data`, `.rodata` and `.bss` are defined in C (or in the hand-written
@@ -35,8 +35,12 @@ game text.
 - **Source layout.** The files follow the pattern of the source paths in the game's own strings, for
   example `src/game/Effects/PipeExplode/pipeexplode.c`. Only a few paths are known from the ROM. The
   other directory and file names are descriptive.
-- **Clean C.** Each symbol has one declaration, in its subsystem header. The number of compiler type
-  warnings can only go down. `tools/warnings_max.txt` holds the limit, and CI fails above it.
+- **Clean C.** Each function and global is declared in the subsystem header of the file that defines
+  it. About 60 local declarations remain in C files. Each is there because IDO needs it to reproduce
+  the original code, and a `/* matching: */` comment says why. Most are callers that saw a different
+  prototype than the definition, or block-scope declarations that shape the generated code. The number
+  of compiler type warnings can only go down. `tools/warnings_max.txt` holds the limit, and CI fails
+  above it.
 - **Other versions.** Splat configurations for the EU, debug and ECTS ROMs exist, but those versions are
   not decompiled and their builds are not verified.
 

@@ -50,7 +50,13 @@ The IDO warning count is correct only after a clean build of the objects.
   and the original had no padding there.
 - **One declaration for each symbol.** A function or global that other files use is declared once,
   in the subsystem header of the file that owns it (`conker/include/conker/<subsystem>.h`). IDO
-  rejects a second declaration that does not agree.
+  rejects a second declaration that does not agree. A local declaration in a C file is allowed only
+  when the header route does not match. Examples are a caller compiled with another prototype, or a
+  block-scope declaration that shapes IDO's output. Put a `/* matching: */` comment above it that
+  says why ([tools/HEADERS.md](tools/HEADERS.md), "Callers that disagree with the definition").
+- **Adding an extern can move another file's `.bss`.** IDO orders a file's `.bss` by a counter that
+  every declaration before it advances. A file that defines its `.bss` after the headers can change
+  when a header gains externs. If you can, define a file's `.bss` before its headers.
 - **Data goes with its owner.** A C file defines its own `.data`, `.rodata` and `.bss`, with real
   types and initializers. [tools/PERFILE.md](tools/PERFILE.md) gives the rules and the IDO facts
   about data order.
