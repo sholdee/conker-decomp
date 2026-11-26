@@ -66,7 +66,7 @@ extern u8 D_800DD2D0; /* screen flash level (0 for none), which the lens flares 
 Gfx *func_15172F70(Gfx *arg0);
 
 /* game_1A11B0.c */
-Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, s32 zDest, s32 colorDest, s16 view);
+Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, void *zDest, void *colorDest, s16 view);
 Gfx *func_151742EC(Gfx *gfx, s32 view);
 s32 func_151745F0(f32 x, f32 y, f32 z, ProbeData *data, s8 callback, s32 arg5);
 

@@ -4,7 +4,7 @@
 
 /* Copies 4 pixels starting at (x, y) of the z-buffer into zDest and of the current frame buffer into
  * colorDest, using copy-mode texture rectangles that load one screen row of view's width. */
-Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, s32 zDest, s32 colorDest, s16 view) {
+Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, void *zDest, void *colorDest, s16 view) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, 0, 0);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
@@ -37,12 +37,11 @@ typedef struct {
     /* 0x38 */ s32 unk38;
 } Probe;
 
-extern Probe D_800DD348[3];
-
-extern s32 D_800DD300[]; // each probe's projected depth
-extern u16 D_800DD310[][4]; // each probe's z-buffer sample
-extern u16 D_800DD328[][4]; // each probe's frame buffer sample
-extern s32 D_800DD340; // the last visible probe's frame buffer sample
+s32 D_800DD300[3]; // each probe's projected depth
+u16 D_800DD310[3][4]; // each probe's z-buffer sample
+u16 D_800DD328[3][4]; // each probe's frame buffer sample
+s32 D_800DD340; // the last visible probe's frame buffer sample
+Probe D_800DD348[3];
 
 /* Runs the visibility probes (view 0 only): a probe sampled last frame calls its callback with the sampled
  * pixel color when the z-buffer depth there is within 300 of its own depth; a newly queued probe is projected
@@ -110,7 +109,8 @@ Gfx *func_151742EC(Gfx *gfx, s32 view) {
             D_800DD300[i] = screenZ;
             if (x >= (s32)D_800BE628[view].left && x < (s32)D_800BE628[view].right && y >= (s32)D_800BE628[view].top &&
                 y < (s32)D_800BE628[view].bottom) {
-                gfx = func_15173D00(gfx, x, y, 1, (s32)((u8 *)D_800DD310 + i * 8), (s32)((u8 *)D_800DD328 + i * 8), view);
+                // matching: byte offsets, as at the store above
+                gfx = func_15173D00(gfx, x, y, 1, (u8 *)D_800DD310 + i * 8, (u8 *)D_800DD328 + i * 8, view);
             }
             // matching: dead guard; gives 0xFFFF a 2nd reference so it outranks view for a register
             if (never != 0) {
