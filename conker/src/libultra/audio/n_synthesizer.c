@@ -397,14 +397,14 @@ void _n_collectPVoices(void)
             to->next->prev = ln;
         to->next = ln;
 
-        element2 = (ALLink *)&pvoice->vvoice;
+        element2 = &pvoice->busLink;
         if (element2->next)
             element2->next->prev = element2->prev;
         if (element2->prev)
             element2->prev->next = element2->next;
 
-        pvoice->vvoice = 0;
-        *(s32 *)((u8 *)pvoice + 0xC) = 0;
+        pvoice->busLink.next = 0;
+        pvoice->busLink.prev = 0;
     }
 }
 

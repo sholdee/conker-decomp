@@ -269,7 +269,7 @@ void _n_handleEvent(SndEvent *event) {
                     vc.fxBus = state->unk51;
                     vc.priority = state->priority;
                     vc.unityPitch = 0;
-                    vc.unk8 = (s32)state->bank->instArray[0]->soundArray[state->unk4C];
+                    vc.unk8 = state->bank->instArray[0]->soundArray[state->unk4C];
                     noRoom = (D_8002BA30 >= D_8002BA2C->maxSounds);
                     if ((noRoom == 0) || (state->unk53 & 0x10)) {
                         voice = n_alSynAllocVoice(&state->voice, &vc);

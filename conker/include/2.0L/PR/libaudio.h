@@ -326,7 +326,7 @@ typedef struct ALVoiceConfig_s {
     s16                 priority;       /* voice priority               */
     s16                 fxBus;          /* bus assignment               */
     u8                  unityPitch;     /* unity pitch flag             */
-    s32                 unk8;
+    void               *unk8;           /* Conker: becomes the voice's unk14, the bank record n_alSynFreeVoice drops */
 } ALVoiceConfig;
 
 typedef struct {
