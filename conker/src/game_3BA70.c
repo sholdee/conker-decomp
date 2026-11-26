@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 *D_80088870;
-
 /* Resets this module's state: runs three sub-resets, then clears its flags, tables and pointers. */
 void func_1500E5C0(void) {
     s32 i;
@@ -50,9 +48,6 @@ void func_1500E70C(s32 id) {
         func_15011C70();
     }
 }
-
-extern u8 D_800DCA28;
-extern f32 D_800DCA2C;
 
 /* Sets two (shift, scale = 1 / 2^shift) pairs: D_800DCA20/24 from D_80082FA0, D_800DCA28/2C from D_8008FD8C. */
 void func_1500E738(void) {

@@ -561,6 +561,8 @@ typedef struct {
     /* 0x28 */ BurstTimer timer;
 } DriftBurstEmitter;
 
+extern DriftBurstEmitter *D_80088870;
+
 DriftQuad *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2);
 s32 func_150CD17C(DriftQuad *effect);
 Vtx_t *func_150CD59C(DriftQuad *effect, s16 bufferIndex);

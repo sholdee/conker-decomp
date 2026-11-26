@@ -16,33 +16,33 @@ void func_1500EF20(void) {
     func_15195AA8(D_800B0E00[0], D_800902B8, 1, -1, 0, 0, 0, -8);
     func_15195AA8(D_800B0E00[1], D_800902B8, 1, -1, 0, 1, 0, -8);
 
-    tmp.x = D_80096220;
-    tmp.z = D_80096224;
-    tmp.y = D_80096228;
+    tmp.x = 9776.0f;
+    tmp.z = -1770.0f;
+    tmp.y = -1278.0f;
     tmp.radius = 400.0f;
-    temp_v0 = func_151491F4((s16) ((func_150ADA20() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = func_151491F4((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
 
-    tmp.x = D_8009622C;
-    tmp.z = D_80096230;
-    tmp.y = D_80096234;
-    temp_v0 = func_151491F4((s16) ((func_150ADA20() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
+    tmp.x = 7207.0f;
+    tmp.z = -1412.0f;
+    tmp.y = -1733.0f;
+    temp_v0 = func_151491F4((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
 
-    tmp.z = D_80096238;
-    temp_v0 = func_151491F4((s16) ((func_150ADA20() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
+    tmp.z = 1412.0f;
+    temp_v0 = func_151491F4((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
 
-    tmp.x = D_8009623C;
-    tmp.z = D_80096240;
-    tmp.y = D_80096244;
-    temp_v0 = func_151491F4((s16) ((func_150ADA20() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
+    tmp.x = 9776.0f;
+    tmp.z = 1770.0f;
+    tmp.y = -1278.0f;
+    temp_v0 = func_151491F4((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }

@@ -285,6 +285,7 @@ extern u8 (*D_8008FD04[])(void); // a second picker table by effect kind (game_2
 extern s32 D_80090298[]; // texture ids
 extern s32 D_800902B8;
 extern s32 D_800902E4;
+extern s32 D_800902DC;
 extern s32 D_800902E8;
 extern s32 D_800902EC;
 extern s32 D_80090310;
@@ -319,17 +320,6 @@ extern u16 D_80091D20[]; // per texture: compressed size
 // chunk0 data starts at rom 0x80082B20
 // this chunk0 data
 // D_800959E0 is 0x80082B20 + 0x00012ec0
-
-extern f32 D_80096220;
-extern f32 D_80096224;
-extern f32 D_80096228;
-extern f32 D_8009622C;
-extern f32 D_80096230;
-extern f32 D_80096234;
-extern f32 D_80096238;
-extern f32 D_8009623C;
-extern f32 D_80096240;
-extern f32 D_80096244;
 
 extern RopeEnds D_800963A0[6];
 extern RopeEnds D_80096430;
@@ -993,6 +983,8 @@ extern ViewEnvelope D_800DC2C0[4]; // per-view camera wobble envelope (game_15AB
 extern s32 D_800DC9F0; /* live glow count */
 extern u8 D_800DCA20;
 extern f32 D_800DCA24;
+extern u8 D_800DCA28;
+extern f32 D_800DCA2C;
 extern BurstPoint D_800DCA30[3][10]; // random burst points around each pipe (func_150124A0 fills, func_15156B54 uses)
 extern Mtx D_800DCC10[]; // per-view orthographic projection (func_151EF954)
 extern ParticleNode *D_800DC460; // loaded particle models: list head

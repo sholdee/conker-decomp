@@ -96,7 +96,7 @@ void func_1500C2F0(TriggerZone *region, f32 density) {
                 part.sizeXZ = part.sizeY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             }
             func_1510F800(0);
-            part.unk5C = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+            part.unk5C = func_1510FD20(part.pos.x, part.pos.z);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -210,7 +210,7 @@ void func_1500C8D0(TriggerZone *region, f32 density) {
             part.vel.x = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
             part.vel.z = RANDOM_U16() * inv65535 * 0.01300000027f + 0.005000000354f;
             func_1510F800(0);
-            part.viewMask = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+            part.viewMask = func_1510FD20(part.pos.x, part.pos.z);
             obj = func_15130280(&part, 2, 0, 28, 255, 1);
             if (obj != NULL) {
                 memcpy((u8 *)obj + 0xA8, &extra, sizeof(extra));
@@ -230,8 +230,6 @@ typedef struct {
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
 } Particle1513D2F0Extra; /* size 0x1C */
-
-// The real prototype: functions.h has an s32 second parameter, and passing (s32)&D_800A4AA0 changes codegen.
 
 /* Spawns func_1514462C(region) * density * 2e-7 func_1513D2F0 particles using D_800A4AA0. */
 void func_1500CE4C(TriggerZone *region, f32 density) {
@@ -297,7 +295,7 @@ void func_1500CE4C(TriggerZone *region, f32 density) {
             part.rot.z = RANDOM_U16() * inv65535 * 360.0f;
             part.unk44 = RANDOM() % 156 + 100;
             func_1510F800(0);
-            part.unk48 = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+            part.unk48 = func_1510FD20(part.pos.x, part.pos.z);
             obj = func_1513D2F0(&part, &D_800A4AA0, 0x23, 0, 0, 0x1E, 0, 3, 0xFF, 0x1C, 0xFF, 1);
             if (obj != NULL) {
                 memcpy((u8 *)obj + 0x110, &extra, sizeof(extra));
@@ -369,7 +367,7 @@ void func_1500D3AC(TriggerZone *region, f32 density) {
             part.rotVel.z = RANDOM_U16() * inv65535 * 1.600000024f;
             part.sizeXZ = part.sizeY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             func_1510F800(0);
-            part.unk5C = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+            part.unk5C = func_1510FD20(part.pos.x, part.pos.z);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -445,7 +443,7 @@ void func_1500D8C8(TriggerZone *region, f32 density) {
                 part.sizeY *= 0.349999994f;
             }
             func_1510F800(0);
-            part.unk5C = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+            part.unk5C = func_1510FD20(part.pos.x, part.pos.z);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -533,7 +531,7 @@ void func_1500DE88(TriggerZone *region, f32 density) {
             part.vel.x = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
             part.vel.z = RANDOM_U16() * inv65535 * 0.01000000071f + 0.002000000095f;
             func_1510F800(0);
-            part.viewMask = func_1510FD20((s32)part.pos.x, (s32)part.pos.z);
+            part.viewMask = func_1510FD20(part.pos.x, part.pos.z);
             obj = func_15130280(&part, 2, 0, 28, 255, 1);
             if (obj != NULL) {
                 memcpy((u8 *)obj + 0xA8, &extra, sizeof(extra));
