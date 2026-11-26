@@ -1,9 +1,5 @@
 #include <ultra64.h>
-// matching: func_151C9ED4 calls func_15160274 with a third argument; hide the header's prototype
-#define func_15160274 func_15160274_hdr
 #include "functions.h"
-#undef func_15160274
-void func_15160274(s32, s32, s32);
 #include "variables.h"
 
 

@@ -115,7 +115,10 @@ s32 func_151600D8(ColourFrameBufferEffect *effect) {
 }
 
 /* Sends message `event` with `data` to every screen effect. */
-void func_15160274(s32 data, u8 event) {
+void func_15160274(data, event)
+    s32 data;
+    u8 event;
+{
     const s32 kinds[1] = { OBJ_TYPE_SCREEN_EFFECT };
 
     func_15169260(kinds, 1, data, event);
