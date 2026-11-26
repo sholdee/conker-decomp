@@ -2005,7 +2005,9 @@ void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3);
 void func_1516EED4(s32 object, s32 threshold, u8 arg2, s32 arg3);
 s32 func_1516F024(StyleParticle *particle);
 void func_1516F1C0(s32 object, s32 duration, u8 arg2, s32 arg3);
-void func_1516F2F8(u8 object, s32 duration, s32 particleLifetime, s32 speed, u8 arg4, s32 arg5);
+/* (u8 object, s32 duration, s32 particleLifetime, s32 speed, u8 arg4, s32 arg5); declared without a prototype:
+   game_50D80.c passes the object index and arg4 unnarrowed */
+void func_1516F2F8();
 void func_1516F548(s32 x, s32 y, s32 z, s32 arg3, s32 velocityXHigh, s32 velocityY, s32 velocityZHigh, s32 scale,
                    s32 scaleRandom, s32 radius, s32 style0, s32 style1, s32 arg12, s32 arg13, s32 arg14, u8 arg15,
                    s32 arg16);

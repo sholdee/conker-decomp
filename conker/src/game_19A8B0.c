@@ -714,7 +714,14 @@ void func_1516F1C0(s32 object, s32 duration, u8 arg2, s32 arg3) {
         0, 4, 2, arg2, arg3);
 }
 
-void func_1516F2F8(u8 object, s32 duration, s32 particleLifetime, s32 speed, u8 arg4, s32 arg5) {
+void func_1516F2F8(object, duration, particleLifetime, speed, arg4, arg5)
+    u8 object;
+    s32 duration;
+    s32 particleLifetime;
+    s32 speed;
+    u8 arg4;
+    s32 arg5;
+{
     func_1516D99C(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 2,

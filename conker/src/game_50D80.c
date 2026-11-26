@@ -1,9 +1,7 @@
 #include <ultra64.h>
 #define func_1516E778 func_1516E778_header // matching: this file keeps its own declarations of these
-#define func_1516F2F8 func_1516F2F8_header
 #include "functions.h"
 #undef func_1516E778
-#undef func_1516F2F8
 #include "variables.h"
 
 /* Defined in game_803A0.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
@@ -1094,7 +1092,6 @@ extern void func_151F2C4C(void);
 extern void func_151F2D6C(s32, s32);
 extern void func_1516E778(f32 *, s32, s8, u8, s32); // matching: s8 where the definition has u8 (arg 3)
 // matching: an s16 duration where the definition has s32 (the call truncates it)
-extern void func_1516F2F8(s32, s32, s32, s32, s32, s32); // matching: s32 where the definition has u8 (args 1, 5)
 
 /*
  * Second cutscene event handler: types 0xB (func_1001263C / func_151F2xxx) and
