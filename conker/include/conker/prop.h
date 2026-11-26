@@ -207,6 +207,16 @@ s32 func_1510AEE0(MtxF mtx, f32 x, f32 y, f32 z, f32 nearZ, f32 farZ, f32 slopeX
                   f32 *marginY);
 
 /* game_142560.c */
+/* (vertex, pivot) index pairs: vertices that follow the rotation of a preceding object (func_1511B7D4). */
+typedef struct VertexPivots {
+    /* 0x0 */ u8 count;
+    /* 0x1 */ u8 pairs[8][2];
+} VertexPivots;
+typedef struct SoundTriple {
+    /* 0x0 */ u16 ids[3];
+} SoundTriple;
+extern const VertexPivots D_800A2F70;
+extern const SoundTriple D_800A2F84;
 void func_151150B0(WorldObject *obj);
 void func_151150BC(WorldObject *obj);
 void func_1511515C(WorldObject *obj);
@@ -242,6 +252,7 @@ void func_15116BAC(WorldObject *obj);
 void func_15116D7C(WorldObject *obj);
 void func_15116EA4(WorldObject *obj);
 f32 func_151172D8(WorldObject *obj, f32 angle);
+extern PropSounds D_80089260[16]; // prop sound rows (doors, movers, sliders)
 
 /* game_144950.c */
 void func_151174A0(WorldObject *obj);

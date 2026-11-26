@@ -2,6 +2,16 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * The ROM shows one compilation unit from game_142560.c to game_14C3F0.c: their .rodata and .data
+ * follow each other without the 16-byte unit padding. IDO put the unit's front-end data before all of
+ * its float literals, so before this file's: it is defined here, and game_1483E0.c reads it.
+ */
+/* func_1511B7D4: the (vertex, pivot) index pairs of the vertices that follow the preceding objects. */
+const VertexPivots D_800A2F70 = { 8, { { 0, 0 }, { 1, 1 }, { 2, 0 }, { 3, 1 }, { 4, 0 }, { 5, 1 }, { 6, 1 }, { 7, 0 } } };
+/* func_1511C638: the three sound ids it picks from. */
+const SoundTriple D_800A2F84 = { { 0x2B6, 0x2BD, 0x2BE } };
+
 /* Behaviour scratch state (WorldObject.touch) of the objects driven by the callbacks in this file. */
 typedef struct {
     /* 0x7C */ s32 homeY;

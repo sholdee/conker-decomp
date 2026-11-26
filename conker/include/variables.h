@@ -81,7 +81,6 @@ extern FontGlyph *D_80085994[];
 extern u64 D_800885B0;
 extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern s32 * D_800891BC[];
-extern PropSounds D_80089260[]; // prop sound rows (doors, movers, sliders)
 extern Mtx D_80089470; // fixed modelview matrix
 extern s32 D_800894B0;
 extern void (*D_80089AAC[10])(void);

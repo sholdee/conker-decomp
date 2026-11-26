@@ -337,10 +337,6 @@ void func_1511B51C(WorldObject *obj) {
     }
 }
 
-/* (vertex, pivot) index pairs: vertices that follow the rotation of a preceding object. */
-extern u8 D_800A2F70;
-extern u8 D_800A2F71[];
-
 /* Rotates the listed vertices about the pivot objects just before this one in the object array. */
 void func_1511B7D4(WorldObject *obj) {
     u8 *pair;
@@ -358,8 +354,8 @@ void func_1511B7D4(WorldObject *obj) {
 
     count = 0;
     if (obj->moveData.word == 0) {
-        pair = D_800A2F71;
-        count = D_800A2F70;
+        pair = D_800A2F70.pairs[0];
+        count = D_800A2F70.count;
         pivots[0] = obj - 1;
         pivots[1] = obj - 2;
     }
@@ -683,12 +679,6 @@ void func_1511C548(WorldObject *obj) {
 }
 
 
-/* The three sound ids func_1511C638 picks from: { 0x2B6, 0x2BD, 0x2BE }. The original local
- * initializer lies in the rodata of the larger original compilation unit (before game_142560's
- * slice), so it is copied from there. */
-typedef struct { u16 ids[3]; } SoundTriple;
-extern const SoundTriple D_800A2F84;
-
 /*
  * Fades the object (and the one or two objects after it) in when triggered, playing the
  * effect chosen by the next object's param; turns them off again when reset.
@@ -979,7 +969,10 @@ struct Entry1511D394 {
 };
 
 /* Texture-scroll settings, indexed by bits 8..15 of the object's param. */
-extern struct Entry1511D394 D_80089444[];
+static struct Entry1511D394 D_80089444[2] = {
+    { 0.6700000167f, 0.02600000054f, 0x49, 0x31A, 0xE6, 0, 0x19, 0x00, 0, { 0, 0 } },
+    { 0.6700000167f, 0.02600000054f, 0x49, 0x31A, 0xE6, 0, 0x19, 0x80, 0, { 0, 0 } },
+};
 
 /*
  * Scrolls the mesh texture with the wave phase of the owner object (numbered by the low param
