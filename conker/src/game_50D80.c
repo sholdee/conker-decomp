@@ -1056,7 +1056,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 }
 
 
-/* Defined in game_19A8B0.c as void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4).
+/* Defined in game/Particle/StyleParticle/styleparticle.c as void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4).
    Not in particle.h: this file was compiled with an s8 texture (the call passes event->unk5 without narrowing). */
 void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, s8 texture, u8 arg3, s32 arg4);
 // matching: an s16 duration where the definition has s32 (the call truncates it)

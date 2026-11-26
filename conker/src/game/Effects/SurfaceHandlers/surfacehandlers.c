@@ -6,7 +6,7 @@ typedef void (*ObjectHandler)(Actor *obj);
 
 /*
  * This file's .data: the handlers by id group (effect_getSurfaceHandlerGroup), then surface slot. Slot 2 (surface type 5 in level
- * 20) runs particle_attachSideEmitter (game_1BFDD0.c) for group 0 and particle_startOwnerSideTask (game_1DEF60.c) for group 1.
+ * 20) runs particle_attachSideEmitter (game/Particle/SideEmitter/sideemitter.c) for group 0 and particle_startOwnerSideTask (game/Particle/OwnerSideEmitter/ownersideemitter.c) for group 1.
  */
 static ObjectHandler D_8008F840[] = { NULL, NULL, particle_attachSideEmitter, NULL };
 static ObjectHandler D_8008F850[] = { NULL, NULL, particle_startOwnerSideTask, NULL };

@@ -551,7 +551,7 @@ static const PartDef D_8009D900[1] = {
 const u8 gModel0ExpressionActions[5] = { 5, 6, 7, 10, 11 };
 
 /*
- * This file's .data. The object filters of the ray and range searches (game/Collision/RayCast/raycast.c, game_200930.c):
+ * This file's .data. The object filters of the ray and range searches (game/Collision/RayCast/raycast.c, game/Particle/HitImpact/hitimpact.c):
  * declared without a prototype, as the filters differ in their second and third parameters.
  */
 s32 (*gObjectFilters[7])() = {

@@ -4,7 +4,7 @@
 /* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/effect.h describes it. */
 u8 gAnchorRefCounts[20];                 /* reference count per shared anchor resource (gAnchorResourceIds) */
 u16 gAnchorCounts[20];                /* anchor count of each loaded set */
-struct BoneAnchor *gAnchorSets[20]; /* the loaded anchor set of each resource (type in game_1BC650) */
+struct BoneAnchor *gAnchorSets[20]; /* the loaded anchor set of each resource (type in game/Particle/AnchorEmitter/anchoremitter) */
 
 #include "functions.h"
 #include "variables.h"
@@ -39,7 +39,7 @@ struct BoneFollower {
 /*
  * The follower and group callbacks, indexed by the fields named above. They are declared without a
  * prototype: each entry takes the follower or group as its own, longer view (EmitterParticle,
- * AnchorEmitter in game_1BC650.c). The message table keeps the prototype of its call, which passes the
+ * AnchorEmitter in game/Particle/AnchorEmitter/anchoremitter.c). The message table keeps the prototype of its call, which passes the
  * type as a u8; its entry still takes the AnchorEmitter view (warning 709).
  */
 static s32 (*gBoneFollowerUpdateFuncs[])() = { particle_followAnchorEased, particle_followAnchor }; /* BoneFollower.updateFn */

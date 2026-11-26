@@ -78,7 +78,7 @@ static const FxSpawnRange gImpactSecondEffects[] = {
     { 5.0f, 15, 10 },
 };
 
-/* The particle parameters of the impact emitters (FxImpactSet.emitter, particle_spawnYawSteam in game_1D9A00.c). */
+/* The particle parameters of the impact emitters (FxImpactSet.emitter, particle_spawnYawSteam in game/Particle/EmitterQuads/emitterquads.c). */
 const EmitterConfig gImpactEmitterConfigs[] = {
     { 10, 25, -63, 50, 5.19f, 9.849999f, 40, 30, 100, 155, 49.0f, 105.5f, -1.0780001f, 0.49400002f, 1.0f },
     { 10, 25, -48, 4, 7.0699997f, 3.9099998f, 50, 20, 100, 100, 39.5f, 65.0f, -0.57000005f, 0.07f, 0.4f },

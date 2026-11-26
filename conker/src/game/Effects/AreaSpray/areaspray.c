@@ -16,7 +16,7 @@ static const VtxColor D_800A1EEC[4] = {
     { 255, 255, 255, 255, 0 },
 };
 
-// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
+// func_150E7FEC (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
 // compiled with a different view of it.
 void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
@@ -154,7 +154,7 @@ typedef struct {
     /* 0x59 */ u8 onGround;
 } Ext150FCFD4; /* 0x5C */
 
-/* A particle (Particle in game_169510.c) with Ext150FCFD4 as its motion state. */
+/* A particle (Particle in game/Particle/QuadParticle/quadparticle.c) with Ext150FCFD4 as its motion state. */
 struct Actor150FD514 {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Ext150FCFD4 ext;

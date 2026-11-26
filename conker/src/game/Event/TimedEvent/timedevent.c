@@ -14,7 +14,7 @@ static s32 D_800D1880;
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_19A8B0.c. Not in particle.h: game/Effects/ModelBurst/modelburst.c passes an s32 style. */
+/* Defined in game/Particle/StyleParticle/styleparticle.c. Not in particle.h: game/Effects/ModelBurst/modelburst.c passes an s32 style. */
 void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
                    s32 arg9);
 

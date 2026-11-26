@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_15D730.c as void particle_applyDrag(Vec3f *vel, f32 drag). This file was compiled with a
+/* Defined in game/Particle/SpriteParticle/spriteparticle.c as void particle_applyDrag(Vec3f *vel, f32 drag). This file was compiled with a
    view that takes a third argument. */
 void particle_applyDrag(void *vel, f32 drag, void *arg2);
 

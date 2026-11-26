@@ -1219,7 +1219,7 @@ typedef struct SpriteFx SpriteFx;
 typedef struct ModelFxData ModelFxData;
 /*
  * Data of a type 0x10 model effect (ModelFx in game/Effects/ObjectList/objectlist.c); effect_spawnModelFx copies a template of it into
- * the object. The callback-2 update, func_15169C70, reads it as Debris in game_197120.c.
+ * the object. The callback-2 update, func_15169C70, reads it as Debris in game/Particle/BounceDebris/bouncedebris.c.
  */
 struct ModelFxData {
     /* 0x00 */ f32 position[3];
@@ -1528,7 +1528,7 @@ typedef struct FxImpactSet {
     /* 0x00 */ s8 first;      /* gImpactFirstEffects index */
     /* 0x01 */ s8 firstStyle; /* gImpactSprays index (read by effect_spawnImpactSprayParticle) */
     /* 0x02 */ s8 second;     /* gImpactSecondEffects index */
-    /* 0x03 */ s8 emitter;    /* gImpactEmitterConfigs index (read by particle_spawnYawSteam, game_1D9A00.c) */
+    /* 0x03 */ s8 emitter;    /* gImpactEmitterConfigs index (read by particle_spawnYawSteam, game/Particle/EmitterQuads/emitterquads.c) */
     /* 0x04 */ s8 impact;     /* gImpactGroundEffects index */
 } FxImpactSet; // size 0x5
 

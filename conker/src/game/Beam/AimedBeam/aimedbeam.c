@@ -41,7 +41,7 @@ static const Vec3f D_800A174C[2][4][2] = {
 };
 static const u8 D_800A180C[2][2] = { { 0x16, 0x1A }, { 0x09, 0x06 } };
 
-/* The texture id pickers by effect kind (game_2062D0.c, where each takes no argument). This file was
+/* The texture id pickers by effect kind (game/Particle/Steam/steam.c, where each takes no argument). This file was
  * compiled with a view that passes the actor and the slot (as a u8, by prototype) to the kind 12 picker. */
 extern u8 (*gKindParticleTexturePickers[])(Actor *actor, u8 slot);
 

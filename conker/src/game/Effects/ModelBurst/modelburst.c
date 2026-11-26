@@ -29,7 +29,7 @@ const ModelBurstPiece gBurstPieces[6] = {
     { 338, { -92.0f, -66.0f, 55.0f }, { 36.0f, 300.0f, 0.0f } },
 };
 
-/* Defined in game_19A8B0.c with a u8 style. This file was compiled with a view that takes an s32 style (no
+/* Defined in game/Particle/StyleParticle/styleparticle.c with a u8 style. This file was compiled with a view that takes an s32 style (no
    narrowing at the call). */
 void func_151700D8(f32 (*verts)[3], f32 x, f32 z, s32 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
                    s32 arg9);

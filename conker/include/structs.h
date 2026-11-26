@@ -2349,7 +2349,7 @@ typedef struct ViewClip {
     /* 0x4 */ f32 far;
 } ViewClip;
 
-/* The two half-axes that span a particle quad (particle_computeQuadAxes, game_169510.c). */
+/* The two half-axes that span a particle quad (particle_computeQuadAxes, game/Particle/QuadParticle/quadparticle.c). */
 typedef struct ParticleAxes {
     /* 0x00 */ Vec3f u;
     /* 0x0C */ Vec3f v;
@@ -2846,7 +2846,7 @@ typedef struct LensFlare {
 } LensFlare; // size 0x34
 
 /* A trigger zone in a weighted list (built by func_1515F1B0 in game/Lighting/PointLight/pointlight). D_800DCDC4 is a list of
- * spawn regions whose areas add up to D_800DCD90; game_113D60 picks one at random by area. */
+ * spawn regions whose areas add up to D_800DCD90; game/Particle/EmissionSource/emissionsource picks one at random by area. */
 typedef struct RegionNode {
     /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 volume;

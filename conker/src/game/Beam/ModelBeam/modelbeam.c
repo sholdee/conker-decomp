@@ -566,7 +566,7 @@ void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     blood_spawnStrip(&desc, 0);
 }
 
-// matching: this file was compiled with s32 where the definition (game_2062D0.c) has u8 (args 3, 6, 11, 15) and
+// matching: this file was compiled with s32 where the definition (game/Particle/Steam/steam.c) has u8 (args 3, 6, 11, 15) and
 // s16 (arg 5), and with a void return. The definition is SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel,
 // u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,
 // CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE, s32 argF).

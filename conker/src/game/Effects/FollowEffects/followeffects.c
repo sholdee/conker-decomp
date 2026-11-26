@@ -736,7 +736,7 @@ void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     light_createWithEffect(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
-// matching: this file was compiled with s32 parameters where the definition (game_113D60.c) has u8 and s16,
+// matching: this file was compiled with s32 parameters where the definition (game/Particle/EmissionSource/emissionsource.c) has u8 and s16,
 // so its calls do not narrow them. The definition is (f32 size, u8 arg1, s32 arg2, Vec3f *position,
 // s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 owner, s32 kind).
 void func_150E7FEC(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -1761,7 +1761,7 @@ Vtx *effect_buildBurstSparkVtx(BurstSpark *spark, s16 viewport) {
     return particle_buildBeamQuad(&spark->head, FALSE, &scale, viewport);
 }
 
-/* A particle_newSpriteParticleWithFloor particle (game_15D730.c's Particle) whose caller-sized data (at 0xA8) holds its owner at +8. */
+/* A particle_newSpriteParticleWithFloor particle (game/Particle/SpriteParticle/spriteparticle.c's Particle) whose caller-sized data (at 0xA8) holds its owner at +8. */
 struct OwnedParticle {
     EffectHeader header;
     u8 pad10[0xA0];

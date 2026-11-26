@@ -399,7 +399,7 @@ void beam_spawnEmitterPreset(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos
 }
 
 // matching: this file was compiled with s32 for the u8, s16 and pointer parameters of the definition
-// (game_177B50.c), so its call does not narrow them. The definition is (Vec3f *pos, Struct1514B8E4Size *scale,
+// (game/Particle/GroundCluster/groundcluster.c), so its call does not narrow them. The definition is (Vec3f *pos, Struct1514B8E4Size *scale,
 // s16 life, u8 arg3, Vec3f *velocity, f32 gravity, f32 drag, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB,
 // u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11), returning void *.
 u8 *particle_spawnJitterParticle(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,

@@ -1006,13 +1006,13 @@ s32 blood_updateSplat(BloodSplat *splat) {
     return alive;
 }
 
-// matching: this file was compiled with u8 where the definition (game_2062D0.c) has s32 (arg 1), s32 where it has
+// matching: this file was compiled with u8 where the definition (game/Particle/Steam/steam.c) has s32 (arg 1), s32 where it has
 // s16 (args 8, 10, 11) and u8 (args 9, 12), and with a void return. The definition is
 // SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
 // u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD).
 void particle_spawnKindSprite(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
 
-// matching: this file was compiled with s32 where the definition (game_2062D0.c) has u8 (args 3, 6, 11, 15) and
+// matching: this file was compiled with s32 where the definition (game/Particle/Steam/steam.c) has u8 (args 3, 6, 11, 15) and
 // s16 (arg 5), and with a void return. The definition is SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel,
 // u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,
 // CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE, s32 argF).

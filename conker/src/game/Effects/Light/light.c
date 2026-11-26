@@ -698,7 +698,7 @@ void light_playRandomSound(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *positio
 
 /*
  * More light effect tables. They follow light_playRandomSound because its sound list goes before them in the
- * .rodata (game_1BC650.c reads the jitter colour tables D_800A6760/67C0/6820 too).
+ * .rodata (game/Particle/AnchorEmitter/anchoremitter.c reads the jitter colour tables D_800A6760/67C0/6820 too).
  */
 static const Vec3f D_800A670C[3] = { { 128.0f, 59.5f, 59.5f }, { 187.0f, 59.5f, 59.5f }, { 128.0f, 17.5f, 0.0f } };
 static const Vec3f D_800A6730[3] = { { 128.0f, 128.0f, 128.0f }, { 68.0f, 59.5f, 59.5f }, { 127.0f, 17.5f, 0.0f } };
