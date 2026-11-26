@@ -662,6 +662,7 @@ src/game_22DF30.c	camera	data-only unit: identity matrix, camera frame count, ca
 src/game_22F650.c	effect	data-only unit (effect tables)
 src/game_232150.c	particle	data-only unit (wave 5)
 src/game_234530.c	particle	data-only unit: drip bone points, drop kinds and emitter kinds of game_1BDC20
+src/game_234C10.c	texture	data-only unit: shared texture tables (asset id lists, texture descriptors, the effect texture table D_80090B60)
 src/debugger_256F80.c	debugger	debugger copy of controller read
 src/debugger_257330.c	debugger	debugger stub
 src/debugger_257350.c	debugger	debugger printf
