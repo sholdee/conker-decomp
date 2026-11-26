@@ -26,7 +26,7 @@ void __osSetHWIntrRoutine(OSHWIntr interrupt, s32 (*handler)(void), void* stackE
 #else
 
 #if !(defined(_DEBUG) && BUILD_VERSION <= VERSION_G)
-extern struct s32 (*__osHwIntTable[])(void);
+extern s32 (*__osHwIntTable[])(void);
 #endif
 
 void __osSetHWIntrRoutine(OSHWIntr interrupt, s32 (*handler)(void)) {
