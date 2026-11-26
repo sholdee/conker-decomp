@@ -524,7 +524,8 @@ void func_1503F2B0(s32 objIndex) {
 
 
 /* func_1503E5F8 on an Mtx, which is fixed point when D_800C3E90 is set and plain floats otherwise. */
-void func_1503F404(Mtx *mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
+/* mtx: a bone matrix, fixed point (Mtx) when D_800C3E90 is set, else float (MtxF) */
+void func_1503F404(void *mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                    f32 *scaleX, f32 *scaleY, f32 *scaleZ) {
     MtxF m;
 

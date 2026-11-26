@@ -1974,7 +1974,7 @@ s32 func_15128540(Camera *camera) {
     }
 
     if (mode & 0x400000) {
-        func_1512D380((s32)camera);
+        func_1512D380(camera);
         func_151236D0(camera);
         func_151284C4(camera);
         return 1;

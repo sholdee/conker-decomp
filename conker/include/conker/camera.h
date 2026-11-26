@@ -424,7 +424,7 @@ void func_1512D2F8(Camera *camera);
 void func_1512D368(Camera *camera);
 
 /* game/done/game_15A830.c */
-void func_1512D380(s32 arg0);
+void func_1512D380(Camera *camera);
 
 /* game_15A840.c */
 void func_1512D390(Camera *camera);

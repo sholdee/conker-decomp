@@ -1946,7 +1946,7 @@ s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, const Vec3f *
     } else if (point->mtx != NULL) {
         mtx = point->mtx + D_800BE9C0;
     } else {
-        func_15145EA4(offsets, results, (Mtx *)actor->ob_matrix_ptr + point->bone, count);
+        func_15145EA4(offsets, results, &actor->ob_matrix_ptr[point->bone], count);
         return 1;
     }
     if (mtx != NULL) {

@@ -101,6 +101,6 @@ void func_1503F0D8(ObjPart *part, s32 objIndex);
 void func_1503F108(s32 objIndex);
 void func_1503F16C(s32 objIndex);
 void func_1503F2B0(s32 objIndex);
-void func_1503F404(Mtx *mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ, f32 *scaleX, f32 *scaleY, f32 *scaleZ);
+void func_1503F404(void *mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ, f32 *scaleX, f32 *scaleY, f32 *scaleZ);
 
 #endif

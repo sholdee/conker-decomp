@@ -91,7 +91,7 @@ enum {
 #define BLOOD_PROFILE_NONE 99
 
 /* An actor's bone matrix (ob_matrix_ptr holds 0x40-byte matrices). */
-#define BONE_MATRIX(actor, bone) ((Mtx *)((u8 *)(actor)->ob_matrix_ptr + (bone) * 0x40))
+#define BONE_MATRIX(actor, bone) (&(actor)->ob_matrix_ptr[bone])
 
 /* Returns the blood profile index (0-19) for an actor's model, or BLOOD_PROFILE_NONE. */
 s32 func_15134070(Actor *actor) {
@@ -536,7 +536,7 @@ extern s32 (*D_80089B6C[])(BloodStrip *);
 void func_15134E48(BloodStrip *arg0) {
     BloodStrip *strip = arg0; // matching: the parameter copy reserves the stack slot IDO kept
     u8 kill;
-    Mtx *boneMatrix;
+    MtxF *boneMatrix;
 
     kill = 0;
     if (strip->owner->type == 0 || strip->owner->unique_id != strip->ownerId) {
@@ -1680,7 +1680,7 @@ void func_15137E60(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA,
     func_15137F30(pointA, pointB, velocityA, velocityB, time, strip,
                   &start, &end, &velocity, &arg3, &arg4, &arg5, &arg6);
     func_151D9014(&start, &velocity, 0, arg3, arg4, arg5, arg6, 0, 1.0f, 1.0f,
-                  1, 0, 1, 0, ((u8 *)strip)[0xC], ((u8 *)strip)[1]);
+                  1, 0, 1, 0, strip->header.owner, strip->header.kind);
 }
 
 /*
