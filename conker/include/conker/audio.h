@@ -82,6 +82,9 @@ void audio_updateBanks(void);
 void audio_releaseRawBanks(void);
 extern s32 gReleaseRawBanksPending;
 
+/* The .rodata slice at 0x2C960 of conker.us.yaml (no C file); audiomgr.c points the audio tasks at it. */
+extern u8 D_8002C960[]; /* data of the audio microcode */
+
 /* init/Audio/SeqVoice/seqvoice.c to init/Audio/Resample/n_resample.c are Rare's copies of the n_audio library (sequence player, event queue,
  * synthesizer, reverb, envelope mixer, resampler, loader). Like libultra, they are declared by the SDK headers
  * (n_libaudio.h, n_synthInternals.h) and by their own files, which do not include functions.h. */

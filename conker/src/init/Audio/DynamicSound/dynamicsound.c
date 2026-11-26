@@ -88,9 +88,6 @@ static const s16 D_8002C3D0[2][10] = {
     { 9000, 9000, 16382, 9000, 9000, 9000, 9000, 9000, 0, 0 },
 };
 
-void func_10017780(u8 arg0, u16 arg1);
-SndState *func_10017438(ALBank *, s16, u16, u8, f32, u8, u8, SndState **);
-
 // Random ambient chirp: every 128-255 ticks, play one of sounds 0x6C-0x6E.
 s32 sound_chirpCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
