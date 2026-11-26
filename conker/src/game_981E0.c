@@ -1,8 +1,7 @@
 #include <ultra64.h>
 
-// matching: func_1506FB60 passes the side to these as an int, (cmd - 0x13) & 0xFF; hide the header's prototypes
+// matching: func_1506FB60 passes the side to func_151C6A28 as an int, (cmd - 0x13) & 0xFF; hide the header's prototype
 #define func_151C6A28 func_151C6A28_hdr
-#define func_151C62D0 func_151C62D0_hdr
 // matching: a call here passes func_151B5BA0 a different number of arguments than it takes, so the file keeps it unprototyped
 #define func_151B5BA0 func_151B5BA0_effect_h
 #include "functions.h"
@@ -10,8 +9,6 @@
 void func_151B5BA0();
 #undef func_151C6A28
 void func_151C6A28(Actor *, s32, s32, s32);
-#undef func_151C62D0
-s32 func_151C62D0(Actor *, s32, s32, ModelAttachment *, s32, s32, s32);
 #include "variables.h"
 
 extern s32 D_800D187C;
@@ -2146,7 +2143,7 @@ void func_1506FB60(s32 cmd) {
     if (func_151044F4() != 0) {
         func_151C6A28(D_800D154C, (cmd - 0x13) & 0xFF, 0xFF, 0);
     } else {
-        func_151C62D0(D_800D154C, (cmd - 0x13) & 0xFF, 0, 0, -1, 0xFF, 0);
+        func_151C62D0(D_800D154C, cmd - 0x13, 0, 0, -1, 0xFF, 0);
     }
 }
 
