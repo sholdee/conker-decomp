@@ -112,7 +112,7 @@ void func_150C3230(Actor *obj) {
                     target->energy = 1;
                 }
             }
-            func_1506AC8C(obj, (D_800BE616 != 0) ? 0xB : 0xE, (s32)&eventData);
+            func_1506AC8C(obj, (D_800BE616 != 0) ? 0xB : 0xE, &eventData);
             func_15060F28(obj, 1);
         }
     }

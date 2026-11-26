@@ -1009,11 +1009,11 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     }
     switch (kind) {
     case 1:
-        func_1506AC8C(obj, 1, 0);
+        func_1506AC8C(obj, 1, NULL);
         func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
         break;
     case 15:
-        func_1506AC8C(obj, 13, 0);
+        func_1506AC8C(obj, 13, NULL);
         break;
     case 13:
         func_10010154(567, obj, 30000, 500, 2000);
@@ -1021,10 +1021,10 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     case 5:
     case 9:
     case 10:
-        func_1506AC8C(obj, 12, 0);
+        func_1506AC8C(obj, 12, NULL);
         break;
     case 0:
-        func_1506AC8C(obj, 8, 0);
+        func_1506AC8C(obj, 8, NULL);
         func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
         break;
     }
@@ -3814,7 +3814,7 @@ void func_15073FA0(void) {
                     D_800D2104[obj->listpos][1].y = 980;
                     D_800D2104[obj->listpos][1].z = movement_obj[0].zpos;
                     obj->unique_id = 0xFF - idx;
-                    func_1506AC8C(obj, 0xC, 0);
+                    func_1506AC8C(obj, 0xC, NULL);
                     func_150F16DC(D_800D154C, func_150ADA20() & 1, func_150ADA20() & 3, 0xFF, 1);
                 } else if (arg == 0xA) {
                     state = 0xE;

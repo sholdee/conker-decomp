@@ -233,7 +233,7 @@ void func_15063B64(Actor *arg0) {
 
         packet.throwerId = (arg0 - movement_obj) + 1;
         packet.thrower = arg0;
-        func_1506AC8C(arg0, 0xB, (s32)&packet);
+        func_1506AC8C(arg0, 0xB, &packet);
         func_150836CC(arg0, packet.anim);
 
         if (arg0->mv->numGrenades != 0) {
@@ -1929,7 +1929,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         anims[0] = 0xE7;
                         anims[1] = 0x22B;
                         arg0->mv->shotsfired++;
-                        func_1506AC8C(arg0, 9, (s32)anims);
+                        func_1506AC8C(arg0, 9, anims);
                     }
                 } else {
                     anim = func_15063E84(arg0, 0xE4, 1, 0, pressedButtons);

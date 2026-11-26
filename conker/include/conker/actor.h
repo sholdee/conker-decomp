@@ -333,7 +333,7 @@ void func_1506AB7C(Actor *obj, Arg1506AB7C *arg);
 void func_1506ABC4(Actor *obj, Arg1506AB7C *arg);
 void func_1506AC0C(Actor *obj, s32 arg1);
 void func_1506AC58(Actor *obj, s32 arg1);
-void func_1506AC8C(Actor *obj, s32 type, s32 arg);
+void func_1506AC8C(Actor *obj, s32 type, void *arg);
 
 /* game_A9820.c */
 void func_1507C370(void);

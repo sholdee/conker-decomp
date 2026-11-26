@@ -172,7 +172,7 @@ static void (*D_80086110[])() = {
 };
 
 /* Runs movement-hit handler `type` (0..14) for obj, passing arg on to it. */
-void func_1506AC8C(Actor *obj, s32 type, s32 arg) {
+void func_1506AC8C(Actor *obj, s32 type, void *arg) {
     if (type >= 0 && type < 15) {
         D_800D1560.x = obj->old_xpos;
         D_800D1560.y = obj->old_ypos;
