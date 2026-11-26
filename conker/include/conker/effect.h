@@ -1159,7 +1159,22 @@ void func_151671E8(void);
 void func_15167310(void);
 Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list);
 void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
-void func_15167AD8(SpriteFx *src, u8 owner, s32 list);
+/* The 0x18-byte template func_15167AD8 copies into a new SpriteFx from its anim field on. */
+typedef struct SpriteFxTemplate {
+    /* 0x00 */ EffectTexture *anim;
+    /* 0x04 */ s16 frame;
+    /* 0x06 */ s16 frameStep;
+    /* 0x08 */ s16 x;
+    /* 0x0A */ s16 y;
+    /* 0x0C */ s16 z;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s8 fadeStep;
+    /* 0x13 */ u8 pad13;        /* alpha, set by func_15167AD8 */
+    /* 0x14 */ s8 callback;     /* index into D_8008CA20 */
+    /* 0x15 */ u8 unk15;
+} SpriteFxTemplate;
+void func_15167AD8(SpriteFxTemplate *src, u8 owner, s32 list);
 void func_15167B44(SpriteFx *fx);
 Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2);
 BillboardParticle *func_15167D84(BillboardTemplate *src, s32 altType, s32 extra, s8 onDeath, u8 owner, s32 list);

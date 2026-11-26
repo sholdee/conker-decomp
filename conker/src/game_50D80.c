@@ -1062,21 +1062,7 @@ typedef struct EvNodeData {
     s32 unk30;
 } EvNodeData;
 
-typedef struct {
-    s32 unk0;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s8 unk12;
-    s8 pad13;
-    s8 unk14;
-} Ev15167AD8;
-
-extern s32 D_8008CA50;
+extern EffectTexture *D_8008CA50;
 
 /* Defined in game_19A8B0.c as void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4).
    Not in particle.h: this file was compiled with an s8 texture (the call passes event->unk5 without narrowing). */
@@ -1185,18 +1171,18 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 func_151B9BF0(0x2F, 1, 0, 0, 0, 0x7D0, 0x3E8, 0x190, 0xC8, 0x400, 0x400, 6, duration, pos, sceneTag, 0);
             }
         } else if (event->value == 0xC) {
-            Ev15167AD8 sp;
+            SpriteFxTemplate sp;
 
-            sp.unk0 = D_8008CA50;
-            sp.unk4 = 0;
-            sp.unk6 = 0x100;
-            sp.unk8 = pos[0];
-            sp.unkA = pos[1] + event->unk4;
-            sp.unkC = pos[2];
+            sp.anim = D_8008CA50;
+            sp.frame = 0;
+            sp.frameStep = 0x100;
+            sp.x = pos[0];
+            sp.y = pos[1] + event->unk4;
+            sp.z = pos[2];
             sp.unkE = 0x5DC;
             sp.unk10 = 0x5DC;
-            sp.unk12 = -10;
-            sp.unk14 = 0;
+            sp.fadeStep = -10;
+            sp.callback = 0;
             func_15167AD8(&sp, sceneTag, 1);
         } else if (event->value == 0x19) {
             s32 duration;
