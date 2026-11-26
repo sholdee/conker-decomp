@@ -12,7 +12,6 @@
  *   game_C4DC0.c
  *   game_C8950.c
  *   game_C98F0.c
- *   game_22BEF0.c (data only, linked after game_C98F0)
  *   game_C9EC0.c
  *   game_CB1C0.c
  *   game_CB3D0.c
@@ -339,7 +338,9 @@ s32 func_1509C440(s32 id, s32 event, ScriptCmd *params);
 s32 func_1509C7C8(s32 id, s32 event, s32 unused);
 void func_1509C8FC(s32 ref, s32 alt);
 
-/* game_22BEF0.c */
+/* The resource manifest D_80087430 (.data 0x22BEF0) and its dependency lists and names (.rodata
+ * 0x242F30) stay data extracted from the ROM: the names are game content, which stays out of the
+ * repository. */
 /* One 0x14-byte record per resource/task; D_80087430 holds RESOURCE_COUNT of them. */
 typedef struct ResourceDescriptor {
     /* 0x00 */ const char *name;                 // NULL for unused slots
