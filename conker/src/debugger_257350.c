@@ -24,9 +24,9 @@ const u32 D_1600480C[] = { FLAGS_SPACE, FLAGS_PLUS, FLAGS_MINUS, FLAGS_HASH, FLA
 const double D_16004828[] = { 1e1, 1e2, 1e4, 1e8, 1e16, 1e32, 1e64, 1e128, 1e256 }; // powers of ten for _Ldtob
 
 /* memcpy: copies count bytes from src to dst and returns dst. */
-u8 *func_16001AD0(u8 *dst, u8 *src, u32 count) {
+void *func_16001AD0(void *dst, const void *src, u32 count) {
     u8 *out = dst;
-    u8 *in = src;
+    const u8 *in = src;
 
     while (count > 0) {
         *out++ = *in++;
@@ -49,7 +49,7 @@ s32 func_16001B00(u8 *str) {
 }
 
 /* sprintf: formats into buf and NUL-terminates it; returns the length written. */
-s32 func_16001B34(u8 *buf, u8 *fmt, ...) {
+s32 func_16001B34(u8 *buf, const u8 *fmt, ...) {
     va_list args;
     s32 len;
 
@@ -62,8 +62,8 @@ s32 func_16001B34(u8 *buf, u8 *fmt, ...) {
 }
 
 /* sprintf output callback: copies count bytes to dst and returns the advanced dst. */
-s32 func_16001B8C(u8 *dst, u8 *src, u32 count) {
-    return func_16001AD0(dst, src, count) + count;
+u8 *func_16001B8C(u8 *dst, const u8 *src, u32 count) {
+    return (u8 *)func_16001AD0(dst, src, count) + count;
 }
 
 #define ATOI(dst, src)                         \
@@ -73,7 +73,7 @@ s32 func_16001B8C(u8 *dst, u8 *src, u32 count) {
     }
 #define PUT(s, n)                              \
     if (0 < (n)) {                                      \
-        if ((arg = (u8 *)(*pfn)(arg, s, n)) != NULL)    \
+        if ((arg = (*pfn)(arg, s, n)) != NULL)          \
             x.nchar += (n);                             \
         else                                            \
             return x.nchar;                             \
@@ -90,12 +90,12 @@ s32 func_16001B8C(u8 *dst, u8 *src, u32 count) {
 
 /* _Printf (libultra xprintf.c), private debugger copy: formats fmt with args, handing each
  * piece to pfn(arg, piece, len). Returns the number of characters written. */
-s32 func_16001BB4(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
+s32 func_16001BB4(u8 *(*pfn)(u8 *, const u8 *, u32), u8 *arg, const u8 *fmt, va_list args) {
     DebuggerPft x;
 
     x.nchar = 0;
     while (1) {
-        u8 *s;
+        const u8 *s;
         u8 c;
         u8 *t;
         u8 ac[32];
@@ -426,7 +426,7 @@ s16 func_16002D2C(s16 *pex, u16 *ps) {
  * e/f/g conversion in px. */
 void func_16002DE4(DebuggerPft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
     if (nsig <= 0) {
-        p = "0";
+        p = (u8 *)"0";
         nsig = 1;
     }
 
