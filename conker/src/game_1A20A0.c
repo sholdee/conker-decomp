@@ -2,39 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
-/* A flying swarm member (bat/bird): spawned by func_15174BF0 / func_15174FA4 / func_15175390,
- * updated by func_15175958 and friends, drawn by func_151770C8 / func_15176DF0. */
-struct SwarmActor {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ Mtx mtx[2];           /* double-buffered by D_800BE9C0 */
-    /* 0x90 */ u8 group;             /* index into D_800DDF5C / D_800DDF60 */
-    /* 0x91 */ u8 state;
-    /* 0x92 */ s16 flags;
-    /* 0x94 */ Vtx *vertices;        /* bound to segment 1 when drawn */
-    /* 0x98 */ f32 x, y, z;
-    /* 0xA4 */ s16 speed;
-    /* 0xA6 */ s16 speedStep;
-    /* 0xA8 */ f32 pitch, yaw, roll;
-    /* 0xB4 */ f32 pitchStep, yawStep, rollStep;
-    /* 0xC0 */ f32 scale;
-    /* 0xC4 */ u8 padC4[4];
-    /* 0xC8 */ f32 groundHeight;
-    /* 0xCC */ f32 perchPitchStep;   /* head-bob pitch rate while perched (func_1517685C) */
-    /* 0xD0 */ s16 originX, originY, originZ;
-    /* 0xD6 */ s16 maxRadius, minRadius, heightRange;
-    /* 0xDC */ s16 turnTimer, hoverTimer;
-    /* 0xE0 */ f32 targetYaw;
-    /* 0xE4 */ f32 targetY;
-    /* 0xE8 */ u32 surfaceFlags;
-    /* 0xEC */ u8 brightness;
-    /* 0xED */ u8 modelIndex;        /* index into D_800DDE80 / D_8008D0B0 */
-    /* 0xEE */ u16 sound;
-    /* 0xF0 */ u8 alpha;
-    /* 0xF1 */ u8 fadingOut;
-};
-
-
 extern u8 D_800A7170[];
 
 /* Spawns `count` swarm actors of type 10 around (x, y, z), heading roughly away from player `player`. */

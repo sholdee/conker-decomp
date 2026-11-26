@@ -1579,37 +1579,17 @@ s32 func_151987CC(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-/* An object in the D_800DCE50 lists (only the fields used here). */
-typedef struct ListedObject {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x91 - 0x10];
-    /* 0x91 */ u8 unk91;
-    /* 0x92 */ s16 unk92;
-    /* 0x94 */ s32 unk94;
-    /* 0x98 */ Vec3f pos;
-    /* 0xA4 */ u8 padA4[0x4];
-    /* 0xA8 */ f32 unkA8;
-    /* 0xAC */ u8 padAC[0x8];
-    /* 0xB4 */ f32 unkB4;
-    /* 0xB8 */ f32 unkB8;
-    /* 0xBC */ u8 padBC[0xC];
-    /* 0xC8 */ f32 unkC8;
-    /* 0xCC */ u8 padCC[0xED - 0xCC];
-    /* 0xED */ u8 unkED;
-} ListedObject;
-
-
 /*
- * Jet update callback, active while the owner's mv->unk58 is 1: objects in lists 0x15-0x17 that a
- * point touches are hit (func_15168B10 message 0x18) and put into state 5.
+ * Jet update callback, active while the owner's mv->unk58 is 1: the swarm actors of types 0x15-0x17 that
+ * a point touches are hit (func_15168B10 message 0x18), get model 5 and go into state 4.
  */
 s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet = actor->state;
     JetPoint *points = actor->points;
     Actor *owner;
     ActorCtl *sub;
-    ListedObject *head;
-    ListedObject *node;
+    SwarmActor *head;
+    SwarmActor *node;
     s32 i;
     s32 j;
     f32 nx;
@@ -1634,16 +1614,16 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     if (&points) { // matching: address-taken points stays in its stack slot
     }
     for (i = 0; i < 3; i++) {
-        head = (ListedObject *)D_800DCE50[0][lists[i]]; // flat index over both rows
+        head = (SwarmActor *)D_800DCE50[0][lists[i]]; // flat index over both rows
         if (head != NULL) {
             node = head;
             j = actor->head.end;
             D_800DD190++;
             while (node != NULL) {
                 D_800DD198[D_800DD190] = node->header.next;
-                nx = node->pos.x;
-                ny = node->pos.y;
-                nz = node->pos.z;
+                nx = node->x;
+                ny = node->y;
+                nz = node->z;
                 while (j != actor->head.start) {
                     j--;
                     if (j < 0) {
@@ -1657,14 +1637,14 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
                     if (dx * dx + dy * dy + dz * dz < r * r + 900.0f) {
                         func_15183ACC(5);
                         func_15168B10(&node->header, 0x18);
-                        node->unkED = 5;
-                        node->unk94 = (s32)D_800DDE80[5].unk8;
-                        node->unk92 = 9;
-                        node->unkB8 = 40.0f;
-                        node->unkA8 = 40.0f;
-                        node->unkB4 = 0.0f;
-                        node->unkC8 = func_1510F8D8(node->pos.x, node->pos.y, node->pos.z, 0);
-                        node->unk91 = 4;
+                        node->modelIndex = 5;
+                        node->vertices = D_800DDE80[5].unk8;
+                        node->flags = 9;
+                        node->yawStep = 40.0f;
+                        node->pitch = 40.0f;
+                        node->pitchStep = 0.0f;
+                        node->groundHeight = func_1510F8D8(node->x, node->y, node->z, 0);
+                        node->state = 4;
                     }
                 }
                 node = D_800DD198[D_800DD190];
