@@ -118,8 +118,6 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     return gfx;
 }
 
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
-
 /* Builds the camera rotation matrix in mtx: yaw, then pitch, then roll (func_150A8050 makes a rotation from
  * three angles, func_150A7A48 multiplies). */
 void func_151102CC(MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
@@ -318,7 +316,6 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
     return ret;
 }
 
-s32 func_150A6210(MtxF mtx, f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
 extern u8 D_1673[];
 
 /* Draws one sky face, with texture set texSet (tiles from firstTex on): a width x height grid of tileW x tileH

@@ -7,8 +7,6 @@
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
 #define ID_FLAG(id) (*(((id) >> 3) + D_800D2E4C) & (1 << ((id) & 7)))
 
-void func_150ADAF0(IdRecord *node, s32 mode);
-
 /* Gets (and, if needed, creates) the task of every id listed in D_800D2F40 that func_1509CBD4 accepts. */
 void func_1509B4A0(s32 unused, s32 reload) {
     s32 i;

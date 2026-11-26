@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150A7DF0(Mtx *m, f32 rx, f32 ry, f32 rz); // rotation, angles in degrees
-void func_150A7D00(Mtx *m, f32 x, f32 y, f32 z);    // translation
-
 extern CamOffset *D_800DC280[4]; // camera shake tables: one CamOffset delta per frame
 extern s32 D_800DC290[4];        // their lengths in frames
 

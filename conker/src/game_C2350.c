@@ -5,9 +5,6 @@
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
 
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
-void func_150A7A00(void *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
-
 
 /* Combines view `view`'s current projection and view matrices into D_800D2CA8[view]. */
 void func_15094EA0(s32 view) {

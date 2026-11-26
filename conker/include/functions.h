@@ -99,15 +99,7 @@ void func_1001C224(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 f32  func_15047C00(f32 arg0);
 f32  func_15047D60(f32 arg0);
 void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
-void func_150A8050(MtxF mtx, f32 arg1, f32 arg2, f32 arg3);
-void func_150A9B0C(MtxF mtx, f32, f32, f32, f32, f32, f32);
-void func_150AD770(void);
-f32  func_150AD780(f32);
-f32  func_150AD78C(f32);
-f32  func_150AD900(f32 *arg0, f32 *arg1);
-f32  func_150AD930(f32 *arg0);
 u32  func_150ADA20(void);
-f32  func_150ADA68(void);
 void func_151EF954(Mtx *m, f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far, f32 scale); // guOrtho: builds the float matrix (func_151EF800) and converts it with guMtxF2L2
 s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset);
 void func_151FA130(void);

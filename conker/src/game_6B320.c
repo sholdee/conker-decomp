@@ -30,8 +30,6 @@ extern PartMasks *D_8008446C[];
 extern s8 *D_80084454[];
 extern u8 D_80098914[];   /* part count per kind */
 
-extern void func_150A7A48(MtxF a, MtxF b, MtxF out);  /* out = a * b */
-
 /* Start breaking `obj` into parts; variant -1 selects every part, otherwise D_8008446C[kind][variant]. */
 void func_1503DE70(Actor *obj, s32 kind, s32 variant) {
     if (variant != -1) {
@@ -212,8 +210,6 @@ void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s
     part->vel[2] = dz * len;
 }
 
-void func_150AD8B0(f32 *a, f32 *b, f32 *out);
-
 /* Decompose a 4x4 transform into translation, rotation (degrees) and per-axis scale. */
 void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                    f32 *scaleX, f32 *scaleY, f32 *scaleZ) {
@@ -269,8 +265,6 @@ void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *
     *rotY = ry * 57.29577637f;
     *rotZ = rz * 57.29577637f;
 }
-
-extern void func_150A7DA0(MtxF mtx, f32 x, f32 y, f32 z);
 
 /* Rebuild the object's bone matrices from its simulated parts. */
 void func_1503E82C(s32 objIndex) {

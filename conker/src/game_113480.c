@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
-
 /* Spawns a streak particle from start along dir; when checkHit is set, records where its path hits a surface. */
 void *func_150E5FD0(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6, u8 checkHit, u8 arg8,
                     s16 life, s8 callback) {

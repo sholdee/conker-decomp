@@ -7,7 +7,6 @@
 extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
 
 extern s32 D_800902BC[];
-extern void func_150A7A48(MtxF a, MtxF b, MtxF out);
 
 
 /* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */

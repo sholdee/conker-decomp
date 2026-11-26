@@ -884,9 +884,6 @@ s32 func_1508C194(s32 player) {
     return 0;
 }
 
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *,
-                  f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-
 /* Line-of-sight test between players a and b; sets their visibility bits in unk16C0. */
 void func_1508C1A4(s32 a, s32 b) {
     s32 blocked;

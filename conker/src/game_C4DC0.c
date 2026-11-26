@@ -66,8 +66,6 @@ s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
 #define OBJ_INDEX(o) ((o) - movement_obj)
 
 
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-
 /* Script "set" commands: applies command `opcode` with arguments `cmd->a` to object `objId`.
  * Returns 0 for an unknown command or missing object, 1 otherwise.
  * matching: the unused `pad` locals reserve stack slots of the original's block locals; each one is needed. */

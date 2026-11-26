@@ -6,8 +6,6 @@
 // matching: integer address math hides the base from IDO's alias analysis (s16 (*)[3] indexing reorders loads)
 #define QUAD_ANCHOR(index) ((s16 *)((s32)&D_800C3FC4 + (index) * 6))
 
-void func_150A7960(MtxF, f32, f32, f32, f32 *, f32 *, f32 *);
-
 /*
  * Places vertex 0 of actor `index`'s quad. During some animation states it snaps to a fixed point of
  * pinMtx; otherwise it eases toward the midpoint of vertices 2 and 3 transformed by followMtx.

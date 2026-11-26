@@ -1081,8 +1081,6 @@ s32 func_1513E6E8(DefParticleHead *particle) {
     return 1;
 }
 
-void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
-
 /*
  * Vertex functions (D_80089E1C): each fetches the particle's vertex buffer for a viewport (refilled
  * from vtxTemplate when new), writes the quad's corner positions and returns it, or NULL.
@@ -1452,8 +1450,6 @@ s32 func_1513F728(DefParticleHead *particle) {
     particle->def.rot.z += motion->ballistic.rotVel.z * D_800BE9A4;
     return 1;
 }
-
-extern void func_150AD8B0(Vec3f *a, Vec3f *b, Vec3f *out);
 
 void func_1513FA2C(DefParticleHead *particle, s16 viewport) {
     BeamScale scale;

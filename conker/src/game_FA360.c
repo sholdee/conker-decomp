@@ -98,8 +98,6 @@ s32 func_150CD17C(DriftQuad *effect) {
     return 1;
 }
 
-void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /* Draw: fills this frame's vertex buffer with the quad, rotated by dir and placed at pos (plus sway while falling). */
 Vtx_t *func_150CD59C(DriftQuad *effect, s16 bufferIndex) {
     s32 pad; // matching: unused stack slot

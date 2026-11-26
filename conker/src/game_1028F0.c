@@ -145,8 +145,6 @@ void func_150D5A4C(TimedEffect *effect) {
 }
 
 
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, s32 *, s32 *, s32 *, f32 *, s32, s32 *, f32);
-
 /*
  * Breakup effect for obj: plays sounds, then spawns pieces (three fixed models, then
  * D_800A3F14[type] - 2 type-specific ones) flying off the surface obj's last move hit,

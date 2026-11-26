@@ -39,7 +39,6 @@ s32 (*gZoneSpawnHandlers[26])(TriggerZone *) = {
     /* 25 */ NULL,
 };
 extern void (*D_80082F28[])(TriggerZone *, f32);
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 
 typedef struct {
     f32 unk0;

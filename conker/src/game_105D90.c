@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150A7960(MtxF, f32, f32, f32, f32 *, f32 *, f32 *);
-
 /* Writes to *out the world position of a fixed offset from one of the actor's bones, chosen by
  * point (3..6). */
 s32 func_150D88E0(Vec3f *out, Actor *actor, u8 point) {

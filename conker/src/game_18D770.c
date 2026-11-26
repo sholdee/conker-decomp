@@ -133,8 +133,6 @@ s32 func_15160684(LightEffect *effect) {
     return 1;
 }
 
-void func_150A7960(f32 *mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /* Places the light at the point (0, -415, 0) in the mount's rotated and translated frame. */
 s32 func_151606A8(LightEffect *effect) {
     WorldObject **mount;

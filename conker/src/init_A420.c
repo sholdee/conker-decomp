@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_150AD960(s32, s32, s32, s32);
 s32 math_distance3D(s32, s32, s32);
 
 /*

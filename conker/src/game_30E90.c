@@ -293,8 +293,6 @@ void func_150045BC(void) {
 }
 
 extern MtxF D_800DBF48;
-void func_150A44F0(s32, u16 *, s32);
-void func_150A7960(MtxF mf, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Prepares the objects for the level: builds each object's matrices for both frames (or, for objects with

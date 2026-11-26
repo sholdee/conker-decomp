@@ -8,7 +8,6 @@ extern void (*D_8008FC70[])(Actor *, s16, Vec3f *);
 
 void func_15131958(void *, f32, void *); // matching: called with a third argument (the definition takes two)
 
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, s32, f32);
 void *memcpy(void *, const void *, u32);
 
 /* Spawns the impact effects (sound, sparks, debris, decal) of a hit at pos travelling along dir. */

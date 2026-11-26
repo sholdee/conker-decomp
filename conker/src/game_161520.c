@@ -1350,7 +1350,6 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     }
 }
 
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 extern void func_151DC034(Vec3f *, f32, s32, s16, u8, u8, s32); // matching: s32 where the definition has u8 (arg 3)
 
 /* Blood for an impact from `from` to `to`: a burst, a spray along the decalPos and wall decals. */

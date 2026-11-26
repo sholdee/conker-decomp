@@ -17,8 +17,6 @@ s32 func_15104620(s32 arg0, s32 arg1) {
     return 0x1;
 }
 
-s32 func_150A3A70(s32, s32);
-
 #define ABS(x) (((x) < 0.0f) ? -(x) : (x))
 
 s32 func_15104634(f32 x, f32 z, f32 y, f32 *out) {

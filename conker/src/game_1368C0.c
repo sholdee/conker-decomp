@@ -32,8 +32,6 @@ extern Vec3f D_800A2628;
 extern void (*D_80088C60[])(void *);
 extern void (*D_80088C64[])(void *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *);
 
-extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /*
  * Creates effect 0x1A on `object`, lasting `duration` frames (negative: 300), emitting
  * particles at `spawnRate` through D_80088C64[emitFunc]. `extraSize` more data bytes are reserved.

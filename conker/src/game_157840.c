@@ -21,8 +21,6 @@ extern ZScanSet D_800DC0C0[4];
 extern ZScanParams D_80089590[4];
 extern ZScanParams D_800DC200[4][4];
 
-s32 func_150A3FC4(f32, f32, s32, void *, void *);
-
 /* Updates the camera's floor heights (unk35C, unk360; -10000 means none found) and the height it aims for
  * (unk354), with special cases for the camera modes and the tracked objects. */
 void func_1512A390(Camera *arg0) {

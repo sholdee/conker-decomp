@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /* Emitter handlers run by func_1518A094 before it follows the bone. Returning 0 ends the emitter's
  * update (func_1518A094 returns 0); setting *follow to FALSE skips this frame's bone follow. */
 extern s32 (*D_8008D5A0[])(BoneGlow *, u8 *);

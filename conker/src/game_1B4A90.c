@@ -32,8 +32,6 @@ struct FadeBurstEffect {
     s16 duration;        /* 0xAA */
 }; /* size 0xB0 */
 
-extern void func_150A7DA0(MtxF mtx, f32 x, f32 y, f32 z);
-extern void func_150A7A48(MtxF a, MtxF b, MtxF c);
 extern void func_151EFE00(MtxF mtx); /* identity matrix */
 extern Vtx D_8008D538[];
 

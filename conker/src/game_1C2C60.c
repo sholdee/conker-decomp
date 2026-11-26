@@ -2536,8 +2536,6 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-
 /*
  * Flame shaping: clips the ribbon to maxLength (and to a wall hit when flags & 4), fades the far part,
  * scrolls the texture, sheds line particles near `line.position` of the length, and (flags & 2) calls
@@ -2840,7 +2838,6 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
 }
 
 
-s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
 extern u8 D_80091064[];
 extern s32 D_800A4AC8[][2];
 

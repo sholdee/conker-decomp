@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 typedef struct {
     u8 *phaseOffsets;  /* per-vertex wobble angle offset */
     f32 *heights;      /* per-vertex ripple displacement */

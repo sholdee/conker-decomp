@@ -79,8 +79,6 @@ typedef struct {
     f32 rotZ;
 } SwayBlock;
 
-extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /* Steps the object's sway and stores the resulting X/Z rotation. */
 s32 func_150F23E0(SwayObject *obj) {
     Sway *sway = &obj->sway;

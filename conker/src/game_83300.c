@@ -1039,8 +1039,6 @@ void func_150585F0(Actor *actor, f32 decel) {
     }
 }
 
-s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
-
 /* Updates the actor's floor height (unk180) and pushes it out of walls, reacting to a wall hit. */
 void func_15058898(Actor *actor, f32 prevY) {
     f32 groundY;
@@ -2633,7 +2631,6 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index,
 }
 
 extern s32 D_800B2CD0;
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
 
 /* Tests the attacker's active attack (unkD0) against every other actor and applies the hits; returns the hit mask. */
 s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
@@ -3109,7 +3106,6 @@ void func_1505D6F0(Actor *actor, s32 selfIdx) {
         }
     }
 }
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
 
 /*
  * Picks the nearest visible living actor inside a cone around the actor's facing (halfCone wide,
@@ -4998,7 +4994,6 @@ void func_15061B4C(void) {
         }
     }
 }
-s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
 
 /*
  * Whether the actor should be drawn: TRUE when it has no cull radius (spawn->unk2A) or is a player, when

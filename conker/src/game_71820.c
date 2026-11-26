@@ -26,9 +26,6 @@ void func_15044370(void) {
     D_800CBD9C = 0;
 }
 
-s32 func_150AB1F0(f32, f32, f32, Actor *, s32);
-void func_150AC3E4(f32, f32, f32, Actor *, s32);
-
 /*
  * Runs func_150AB1F0 for obj against each enabled collision set (3 down to 0; set 3 is skipped when obj
  * flag 0x200 is set) and returns the summed results. With secondPass, also runs func_150AC3E4 on sets 0-2.
@@ -323,12 +320,6 @@ void func_15044E88(void) {
 
 /* One candidate triangle returned by the func_150A3A70/func_150A4FA0/func_150A43E0 grid queries. */
 
-s32 func_150A3A70(s32, s32);
-s32 func_150A4FA0(s32, s32);
-s32 func_150A43E0(s32, s32, s32, void *);
-void func_150A44F0(s32, void *, s32);
-s32 func_150A6500(s16, s16, s32 *, u16);
-s32 func_150A3FC4(f32, f32, s32, CollisionTri *, f32 *);
 extern f32 D_800DBE74;
 
 /* Ceiling probe against collision set 0: lowest triangle between pos.y and top. */

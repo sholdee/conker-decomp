@@ -451,8 +451,6 @@ void func_150A11C4(Actor *actor) {
     }
 }
 
-s32 func_150AD960(s32, s32, s32, s32);
-
 /*
  * Returns 0 if the actor is inside the zone, 1 if not (or the zone is inactive).  withMargin widens the
  * zone by the actor's unkE4.  Shapes: 0 cylinder (optionally rotated), 1 sphere, 2 rotated box,

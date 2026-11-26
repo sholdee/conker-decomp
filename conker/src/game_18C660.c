@@ -188,8 +188,6 @@ void func_1515FC34(Actor *obj, TriggerZone *zone) {
     func_1505D024(obj, 0x33, 0xC000, -1);
 }
 
-s32 func_150AD960(s32, s32, s32, s32);
-
 /*
  * TriggerZone handler: unless the zone has a range (data2, in hundredths of its radius) that `obj`
  * is outside of, fires event 0x2F on `obj`.

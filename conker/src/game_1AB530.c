@@ -268,8 +268,6 @@ typedef struct {
 
 #define VIEWPORTS ((FlareViewport *)D_800BE628->viewports)
 
-void func_150A7A00(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
-
 /*
  * Projects a world point to the current player's screen. Returns 1 and the screen position when the point
  * is in front of the camera, otherwise 0 with (0, 0).

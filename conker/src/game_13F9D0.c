@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
-
 extern f32 D_800DBEC0; // turret's squared distance to the player
 
 /* Turret settings in the data (no code reads this name; a turret object's moveData can point here). */
@@ -114,8 +112,6 @@ void func_15112520(WorldObject *turret) {
     }
 }
 
-
-extern s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
 
 /* Builds each view's draw list: distance-culls and fades every object group, then appends visible groups. */
 void func_15112A80(s32 player) {
@@ -237,8 +233,6 @@ void func_15113180(void) {
     }
 }
 
-void func_150A7B80(void *);
-
 /* Writes this frame's model matrix for every object in each view's draw list. */
 void func_15113218(void) {
     WorldObject *obj;
@@ -326,7 +320,6 @@ Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     return gfx;
 }
 
-Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, MtxF mtx, s32, s32, s32);
 extern u8 D_80083D40[];
 extern u8 D_80083EC0[];
 
@@ -544,8 +537,6 @@ void func_15114188(void) {
         }
     }
 }
-
-void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Moves the point (*x, *y, *z) along with object objIndex: rotates it about the object by this frame's spin

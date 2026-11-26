@@ -3,9 +3,6 @@
 #include "variables.h"
 
 
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, void *, s32, f32);
-
 /* Casts rays both ways from the beam's midpoint and spawns a sight beam between the two surfaces hit. */
 s32 func_151C71A0(SightBeamParams *beam) {
     f32 originZ;

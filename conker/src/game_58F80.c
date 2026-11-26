@@ -43,12 +43,6 @@ extern u8 *D_8008CA4C[];
 /* This file */
 
 /* Other files */
-void func_150A4B04(Actor *);
-s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
-void func_150A7960(MtxF mtx, f32, f32, f32, f32 *, f32 *, f32 *);
-void func_150A7A00(MtxF mtx, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
-void func_150A81D0(s32 *, MtxF mtx, ObjAnim *, s32, s32, s16 *, u8 *, s32);
-void func_150A9984(s32, s32);
 void func_151EFE88(void *);
 
 /* Emits the display list of every object drawn in one render pass (mode) for one player. */

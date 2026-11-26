@@ -346,7 +346,6 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     return gfx;
 }
 extern s16 D_8009DC90[][3];
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
 /* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws D_800CC49A
  * blocks at full scale at a fixed spot near D_8009DCB4[3..5], after patching the block display
@@ -1360,7 +1359,6 @@ void func_15093878(void) {
 }
 
 extern u8 D_11AD[];
-void func_150A7D00(Mtx *, f32, f32, f32);
 
 /* Draws the clock: the four digits of D_800D2450 (frame count, 30 per second) as minutes and
  * seconds go into segments 1-4 as digit textures from D_11AD, then the clock model. */

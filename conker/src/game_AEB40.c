@@ -5,8 +5,6 @@
 
 extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
 
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-
 
 /* Casts a ray from origin along dir against the world and every active object (except self and those in
    ignoreMask or rejected by filter), recording the nearest hit closer than maxDist in out. */

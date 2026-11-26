@@ -124,8 +124,6 @@ void func_15101350(BeamEndFx *fx) {
     func_1513175C((struct DescParticleHead *)fx);
 }
 
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32 *, CollisionTri *, f32 *, f32 *, f32 *, s32, s32, s32, f32);
-
 /*
  * Places the beam: start at the owner's bone, end at the owner's aim target or at the first
  * collision along the beam, then moves or hides the child objects to match.

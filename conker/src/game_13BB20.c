@@ -11,11 +11,6 @@ extern f32 D_800DBDD0;
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
-extern s32 func_150A3A70(s32, s32);
-extern void func_150A6760(s32);
-
-extern void func_150AD8B0(f32 *, f32 *, f32 *);
-
 /* Returns whether ground hit `index`'s triangle faces up (its normal has y >= 0). */
 s32 func_1510E670(s32 index) {
     s32 *tri;
@@ -74,11 +69,6 @@ void func_1510E8BC(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outProp
                   -10000.0f, 20000.0f, noFallback);
 }
 
-extern void func_150A64C8(s16, s16, s32 *, s32);
-extern void func_150A44F0(s32, u16 *, s32);
-extern s32 func_150A43E0(s32, s32, s32, u16 *);
-extern s32 func_150A4FA0(s32, s32);
-extern s32 func_150A6568(s16, s16, s32 *, u16, s32, s32, s32, s32);
 extern f32 D_800DBE54;
 extern f32 D_800DBE58;
 extern u16 D_800DBE60;
@@ -469,8 +459,6 @@ s32 func_1510F720(s32 x, s32 z, s32 radius, ZoneNode **outLeaves) {
     }
     return count;
 }
-
-extern void func_150A49F4(void);
 
 /* Prepares the collision probe; callers pass the probe type, which is unused. */
 void func_1510F800() { // matching: a declared s32 parameter changes the code

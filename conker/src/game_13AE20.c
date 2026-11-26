@@ -64,8 +64,6 @@ Shadow *func_1510D970(s32 ownerType, void *owner, s32 texture, s32 createFlags, 
     return shadow;
 }
 
-extern s32 func_150A3FC4(f32, f32, s32, Vec3s *, f32 *);
-
 /* Places the shadow under its owner and builds its quad, tilted to the floor and faded with height. */
 void func_1510DA84(Shadow *shadow) {
     s32 i;
@@ -213,7 +211,6 @@ onFloor: // matching: an unused label splits the block, so the call setup stays 
     }
 }
 
-extern void func_150A7D00(Mtx *, f32 x, f32 y, f32 z); /* translation matrix */
 extern s32 D_80091770[];
 
 /* Draws the shadow quad, loading its texture and alpha only when they differ from the last shadow drawn. */

@@ -239,8 +239,6 @@ void func_1517F7B4(void) {
     }
 }
 
-void func_150A7A00(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
-
 /* Moves the iris hole of `view` to the screen position x,y (`onScreen`) or to the projection
  * of the world point x,y,z, clamped to +-10000. */
 void func_1517F814(s32 onScreen, f32 x, f32 y, f32 z, s32 view) {
@@ -574,7 +572,6 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
     return gfx;
 }
 
-void func_150A7960(void *mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern f32 D_800A7260[]; // scripted iris hold closure, by D_80082FA0
 extern f32 D_800A7270[]; // scripted iris final closure, by D_80082FA0
 

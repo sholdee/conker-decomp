@@ -91,8 +91,6 @@ extern f32 D_800D3684;
 extern f32 D_800D368C;
 extern s8 D_8008D3F8[8][3];
 extern s32 math_distance3D(s32, s32, s32);
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
 /*
  * Sets up the shadow projection for object objIndex in shadow slot `slot`: picks the nearest light node
@@ -651,7 +649,6 @@ s32 func_15185F24(ShadowVtx *in, s32 count, s32 maxVerts, Vtx_t *out, s32 *quadE
     return count;
 }
 
-extern ShadowVtx *func_150A5B90(u32 *, ShadowVtx *, f32 *, ShadowVtx *);
 extern u32 *D_800D3694;
 extern MeshTri *D_800D3690;
 extern s32 D_800DF0E8;
@@ -970,9 +967,6 @@ void func_151872B0(s32 levelId) {
     }
 }
 
-
-extern void func_150A44F0(s32, u16 *, s32);
-extern ShadowVtx *func_150A5E44(u16 *, ShadowVtx *, f32 *, ShadowVtx *);
 
 extern s32 D_800DF0E4;
 

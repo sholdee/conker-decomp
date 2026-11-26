@@ -7,13 +7,6 @@
 #define WAVE_WEIGHTED 4      // per-vertex falloff weights
 #define WAVE_DIRECTIONAL 0x10 // phase follows distance along a heading instead of from the center
 
-extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-extern void func_150A6FA0(Vtx *dst, u16 count, WaveParams *params, s8 *phase, f32 *weight, Vtx *src);
-extern void func_150A70C0(Vtx *dst, u16 count, WaveParams *params, s8 *phase, Vtx *src);
-extern void func_150A71C8(Vtx *dst, u16 count, WaveParams *params, u8 *unk, s8 *phase, Vtx *src);
-extern void func_150A7360(Vtx *dst, u16 count, WaveParams *params, u8 *unk, s8 *phase, f32 *weight, Vtx *src);
-extern void func_150A751C(Vtx *dst, u16 count, WaveParams *params, u8 *angle, s8 *phase, f32 *weight, Vtx *src);
-
 /**
  * Creates a wave deformer for object `objectId` centred at (x, y, z) and precomputes each vertex's
  * phase offset (and, with the matching flags, its falloff weight and its angle around the center).

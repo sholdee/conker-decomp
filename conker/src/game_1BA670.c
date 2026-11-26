@@ -78,7 +78,6 @@ extern void (*D_8008D620[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, s16 *);
 extern s32 (*D_8008D628[])(ActorEmitterProcess *);
 
 void *memcpy(void *, const void *, u32);
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
 ActorEmitterProcess *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,

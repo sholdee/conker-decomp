@@ -55,8 +55,6 @@ void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
 }
 
 
-void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
-
 /*
  * Per-frame update of an effect that follows its owner's model: builds the effect's matrix from the
  * owner's and sets each vertex's texture coordinates from its projected position in `viewport`.
@@ -521,7 +519,6 @@ typedef struct { s32 v[9]; } S32x9;
 typedef struct { f32 v[9]; } F32x9;
 extern S32x9 D_800AA718;
 extern F32x9 D_800AA73C;
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 
 /*
  * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the

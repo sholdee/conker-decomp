@@ -12,8 +12,6 @@ struct Entry151298C0 {
 
 extern struct Entry151298C0 D_800DC028[];
 
-s32 func_150A3FC4(f32, f32, s32, s32 *, f32 *);
-
 /* Resets this camera's D_800DC028 entry when D_80089550 is set. */
 void func_151298C0(Camera *cam, s32 arg1) {
     if (D_80089550 != 0) {

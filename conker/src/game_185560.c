@@ -912,8 +912,6 @@ struct DiskEmitterObject {
     /* 0x28 */ DiskEmitter emitter;
 };
 
-void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /* Emitter update: spawns oscillating particles at random points of a rotated disk. */
 void func_15159C08(DiskEmitterObject *obj) {
     DiskEmitter *emitter;

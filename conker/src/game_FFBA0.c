@@ -50,8 +50,6 @@ void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1) {
     }
 }
 
-extern void func_150A7960(f32 *matrix, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /*
  * Accumulates the emitter's spawn rate and, for each whole spark due, spawns one on a circle around
  * the emitter's record (rotating by angleStep) with a random sway; sparks fade out 22 time units in.
@@ -123,8 +121,6 @@ void func_150D2924(SparkEffect *obj) {
         } while (emitter->spawnAccum > 1.0f);
     }
 }
-
-void func_150AD8B0(f32 *a, f32 *b, f32 *out);
 
 /*
  * Builds the beam's camera-facing quad (start to end, `width` to each side) in this frame's

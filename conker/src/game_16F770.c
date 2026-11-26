@@ -16,8 +16,6 @@ extern f32 D_800DCA08;
 extern f32 D_800DCA0C;
 extern f32 D_800DCA10;
 
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-
 /* Debug tunable stub: returns the midpoint of min and max (the name and source location are unused). */
 s32 func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line) {
     return (max + min) >> 1;
@@ -1234,8 +1232,6 @@ f32 func_15144C8C(f32 a, f32 b) {
     }
     return diff;
 }
-
-void func_150A7A00(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 *arg7);
 
 /*
  * Projects world point pos through viewport's matrix (D_800D9D10) to screen coordinates in screen[2].

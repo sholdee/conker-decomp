@@ -30,7 +30,6 @@ f32 func_150ED234(Actor *self, Actor *target) {
 }
 
 /* Transforms the point (x, y, z) by the 4x4 float matrix `mf`. */
-extern void func_150A7960(f32 *mf, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Ballistic aim error for a shell fired from `obj` (from its bone matrix 3 when it has a skeleton) at
@@ -151,7 +150,6 @@ void func_150ED638(Actor *obj, s32 left, s32 right) {
     func_15062FC0(obj, 1, size, 0x800, 0x800, size, -left * 7, 0);
 }
 
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 /* Ray (origin, normalized dir) vs sphere (center, radius); 0 on a miss or when the near hit is behind. */
 
 /*

@@ -305,9 +305,6 @@ s32 func_15178750(s32 arg0, SwarmMember *member, s16 view) {
 void func_151787A4(void) {
 }
 
-extern s32 func_150A6360(void *arg0, MtxF arg1, f32 arg2, f32 arg3, f32 arg4,
-                         f32 arg5, f32 arg6, f32 arg7);
-
 /*
  * Swarm update: move up to 16 units towards the target, recompute viewMask, update the looping sound,
  * and speed members up while far from the target.

@@ -376,7 +376,6 @@ void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32
         }
     }
 }
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 
 /* Casts a random number of rays from config->origin and spawns a decal (func_151D9B8C) on each
  * suitable surface hit closer than config->maxDistance. */

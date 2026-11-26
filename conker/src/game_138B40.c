@@ -10,10 +10,6 @@ extern Gfx *D_800B0E08;
 
 #define D_800D35E4 ((&D_800D35E8)[-1])
 
-void func_150A7A48(MtxF a, MtxF b, MtxF out);
-Gfx *func_150A5378(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
-Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
-
 /* Rebuilds every view's float view matrix and its view * projection product for this frame. */
 void func_1510B690(void) {
     s16 view;

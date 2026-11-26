@@ -10,9 +10,6 @@ void func_15034F20(void) {
     D_800C3F00 = 0;
 }
 
-void func_150A7A48(void *, void *, void *);
-s32 func_150AD960(s32, s32, s32, s32);
-
 /*
  * Mirrors `count` matrices from `srcMtx` into `dstMtx` and sets the entry's alpha from the distance
  * to the mirror. Modes 0 and 1 mirror in the horizontal plane y = planeY; mode 2 mirrors in the
@@ -133,8 +130,6 @@ ReflectionEntry *func_150356C8(void) {
     D_800C3F00++;
     return &D_800C3F08[D_800C3F00 - 1];
 }
-
-s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
 
 /*
  * Returns 1 when the reflection of `obj`, whose mirrored root matrix is `mtx`, is outside the view.

@@ -7,7 +7,6 @@ extern f32 D_800A150C[3];
 extern f32 D_800A1518[][3];
 extern f32 D_800A1530[][3];
 extern u8 D_800A1548[];
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 
 /* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
  * func_151C229C effect from the muzzle towards the jittered hit point (or along the aim on a miss), a

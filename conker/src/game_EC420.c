@@ -91,10 +91,6 @@ typedef struct {
 
 #define BOB_WORK(obj) ((BobWork *)&(obj)->touch)
 
-extern void func_150A7DA0(f32 [4][4], f32, f32, f32);
-extern void func_150A7A48(f32 [4][4], f32 [4][4], f32 [4][4]);
-extern void func_150A7960(f32 [4][4], f32, f32, f32, f32 *, f32 *, f32 *);
-
 /* Moves the object toward its target height (param) (accelerating, with sounds), bobs it while at rest, then
  * writes its transformed mesh into the current vertex buffer. */
 void func_150BF21C(WorldObject *obj) {

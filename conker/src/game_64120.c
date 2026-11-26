@@ -944,7 +944,6 @@ typedef struct {
     /* 0x30 */ s32 unk30;
 } GameStruct_800BE9B4;
 
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
 extern f32 D_800981A0[][4]; /* per rate index: yaw rate, pitch rate, yaw max step, pitch max step */
 
 /*

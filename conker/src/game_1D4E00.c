@@ -368,8 +368,6 @@ Bolt *func_151A8624(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
     return bolt;
 }
 
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
-
 /*
  * Update hook 1 of a bolt spawned by func_151A8624: puts the start on the owner's bone and, until
  * a ray cast succeeds, casts from there towards the target point to place the end. Deactivates

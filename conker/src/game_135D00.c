@@ -200,9 +200,6 @@ s32 func_15108D24(DynModel *model, s32 viewport) {
     return 1;
 }
 
-void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
-
 /*
  * Update for the lamp's light effect (owner model stored at effect->data.object): moves the light to where a
  * ray from the lamp down along its swing hits the ground, and switches it with the lamp's light state.

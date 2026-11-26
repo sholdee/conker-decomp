@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150A81D0(Mtx **mtx, f32 (*transform)[4], AnimInstance *anim, s32 arg3, s32 numParts, s16 *arg5, u8 *remap,
-                   s32 scale);
-void func_150A9984(Mtx *mtx, u8 count);
-
 /* Builds this frame buffer's part matrices from the current animation frame, then advances the animation. */
 void func_1503F4B0(AnimInstance *anim) {
     u8 *frameBuf;

@@ -1303,9 +1303,6 @@ void func_150896EC(Racer *racer, Actor *obj, s32 leave) {
     func_1512D560(obj->CameraPtr, 7, p);
 }
 
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *,
-                  f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-
 
 
 

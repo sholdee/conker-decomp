@@ -270,7 +270,6 @@ void func_1516D99C(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
 
 
 extern s16 D_800A6E30[][7];
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 
 
 void func_1516DB90(SpriteEmitter *arg0) {

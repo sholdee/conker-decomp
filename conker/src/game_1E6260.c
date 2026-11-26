@@ -200,8 +200,6 @@ s32 func_151B9310(Mtx *dest, LampParticle *particle) {
     return 1;
 }
 
-void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /* Light effect update (D_8008B0F0 slot 7): moves the light to a point 150 units below the swinging lamp
  * and aims the beam from the lamp along the swing. */
 s32 func_151B9408(LightEffect *effect) {

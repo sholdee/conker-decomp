@@ -17,8 +17,6 @@ void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event) {
     }
 }
 
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-
 /*
  * Sets up the ray `hit` for a projectile starting at `origin`: reuses `knownHit` when given (re-aimed from
  * `origin`), otherwise casts along `dir` (or from `altOrigin` along `altDir`) when `castRay` is set.

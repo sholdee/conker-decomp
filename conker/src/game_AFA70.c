@@ -25,8 +25,6 @@ typedef struct PartSet {
 
 extern PartSet D_80086CC4[];
 
-extern s32 func_150A6360(void *arg0, MtxF arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
-
 
 /* Spawns the object for spawn record spawnIdx once it is due: skips records that are in use,
    disabled (x == 0x7FFF) or still counting down their D_800D2110 delay, and records whose flags

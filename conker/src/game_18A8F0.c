@@ -497,8 +497,6 @@ TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node) {
     return NULL;
 }
 
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-
 /*
  * Fills the microcode light `out` from `light` as seen by player `player`: colour, direction
  * towards the light from (x, y, z) when flags & 2, and the view-space position (cached per player).

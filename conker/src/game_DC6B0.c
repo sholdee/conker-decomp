@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls func_1505D024 on
  * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while D_800CC3D4[0] is set. */
 void func_150AF200(s32 idA, s32 idB) {
@@ -121,8 +119,6 @@ void func_150AF738(s16 lifetime, u8 arg1, s32 arg2) {
     desc.messageIndex = 0;
     func_1515FF74(&desc, 0, arg1, arg2);
 }
-
-extern void func_150B1DB0(void *, void *);
 
 void func_150AF790(void *arg0, u8 *arg1) {
     func_150B1DB0(arg1, arg1 + 0x1ECC0);

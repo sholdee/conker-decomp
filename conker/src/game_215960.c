@@ -1883,8 +1883,6 @@ void func_151EDF4C(void) {
     }
 }
 
-extern void func_150A7D00(void *, f32, f32, f32);
-
 /*
  * Text entry on a 3D letter grid (cursor D_800E0C81 row, D_800E0C80 column, text in D_800E0C7C):
  * moves the cursor, types letters, and on enter matches the text against the code strings

@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
-
 /*
  * Called when the actor has moved from (prevX, prevZ): casts a ray from 80 units above it back towards
  * the previous position and, on a hit, spawns a burst of particles off the hit triangle (plus a

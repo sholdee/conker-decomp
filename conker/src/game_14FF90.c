@@ -21,9 +21,6 @@ const f32 D_800A34B0[4][2] = {
 };
 extern u16 D_800894E0[2][3];
 
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-void func_150AD8B0(Vec3f *, Vec3f *, Vec3f *);
-
 /* Per-frame update of every active player camera. */
 void func_15122AE0(void) {
     Camera *camera;

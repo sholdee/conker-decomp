@@ -113,8 +113,6 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
     }
 }
 
-s32 func_150A3A70(s32, s32);
-
 /* Spawns `count` swarm actors of type 0x13 scattered over a `spread`-wide square around (x, z).
  * With `airborne` clear they start just above the ground; otherwise they start 300+ units up. */
 void func_15174FA4(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 arg6, s32 airborne,
@@ -345,7 +343,6 @@ typedef struct SwarmFlight {
 
 extern SwarmFlight D_8008D0B0[];
 #define D_800D35E4 ((&D_800D35E8)[-1])
-s32 func_150AD960(s32, s32, s32, s32);
 
 /* Common per-frame flight update for a swarm actor: fading, wandering inside its home ring,
  * pitch/yaw/roll easing, wing-frame swapping and movement. Frees the actor when its model
@@ -752,8 +749,6 @@ void func_15176B84(SwarmActor *actor) {
     }
     func_15175958(actor);
 }
-
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
 /* Draws a flying swarm actor: builds its scaled model matrix, eases its brightness towards
  * the lighting of the surface below it, and draws its model with that colour and its alpha. */

@@ -143,10 +143,6 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
     }
 }
 
-extern void func_150A44F0(s32, s16 *, s32);
-extern s32 func_150A43E0(s32, s32, s32, s16 *);
-extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /*
  * Probes the ground below `obj` (up to 5 random points within its radius), then spawns the hit
  * surface's impact effects there, passing the hit triangle transformed by obj's matrix.

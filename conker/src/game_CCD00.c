@@ -27,8 +27,6 @@ extern s32 D_800D3004;
 #define ID_FLAG_BYTE(id) (*(((id) >> 3) + D_800D2E4C))
 #define ID_FLAG_BIT(id) (1 << ((id) & 7))
 
-void func_150AE280(void);
-
 /*
  * Runs command `cmd` for record `id` with arguments `args`. Returns 1 for some record commands, else 0.
  * Note: the "clear" forms below keep only `bit & 7` of the byte, exactly as the game does.

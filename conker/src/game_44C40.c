@@ -155,10 +155,6 @@ void func_15017B20(TriggerZone *objects, s32 count) {
     }
 }
 
-void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
-void func_150A7DA0(MtxF mtx, f32, f32, f32);
-
 /*
  * Computes obj's axis-aligned bounds: the extremes (and the origin) of the unit cube's corners transformed by the
  * object's scale (from its size and shape) and rotation, offset by its position. Unknown shapes

@@ -128,8 +128,6 @@ Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry) {
     return gfx;
 }
 
-void func_150A7A00(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
-
 /* Projects a world point through view's matrix to screen x, y and a depth value. */
 void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *depth) {
     f32 projX;

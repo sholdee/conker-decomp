@@ -42,8 +42,6 @@ typedef struct TargetTrailPoint {
     /* 0x18 */ f32 distance; /* distance travelled when emitted */
 } TargetTrailPoint;
 
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-
 /* Spawns a trail effect that follows target. */
 void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {
     s32 top_dummy; // matching: stack pad
