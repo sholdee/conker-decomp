@@ -390,46 +390,6 @@ extern ParticleNode *D_800DC460; // loaded particle models: list head
 extern ParticleNode *D_800DC464; // list tail
 extern s16 D_800DC468[];
 extern s32 D_800DC63C;
-extern u8 D_800DCD27; // priority of the current ambient colour
-extern s8 D_800DCD30[4][3]; // per-player directional light direction
-extern u8  D_800DCD31;
-extern u8  D_800DCD32;
-extern u8  D_800DCD33;
-extern u8  D_800DCD34;
-extern u8  D_800DCD35;
-extern u8  D_800DCD36;
-extern u8  D_800DCD37;
-extern u8  D_800DCD38;
-extern u8  D_800DCD39;
-extern u8  D_800DCD3A;
-extern u8  D_800DCD3B;
-extern u8  D_800DCD3C;
-extern u8  D_800DCD3D;
-extern PointLightGfx D_800DCD40; // padding light for odd light counts
-extern PointLight *D_800DCD78; // list of all point lights
-extern s32 D_800DCD7C;
-extern ZoneLink *D_800DCD80; // ambient colour TriggerZones
-extern ZoneLink *D_800DCD84; // tint TriggerZones
-extern f32 D_800DCD90;
-extern f32 D_800DCD94;
-extern f32 D_800DCD98;
-extern f32 D_800DCD9C;
-extern f32 D_800DCDA0;
-extern f32 D_800DCDA4;
-extern f32 D_800DCDA8;
-extern f32 D_800DCDAC;
-extern f32 D_800DCDB0;
-extern f32 D_800DCDB4;
-extern f32 D_800DCDB8;
-extern f32 D_800DCDBC;
-extern f32 D_800DCDC0;
-
-extern u8 D_800DCD20[3]; // ambient light colour
-
-extern u8 D_800DCD24[3]; // tint colour
-extern u8 D_800DCD28[3];
-
-extern RegionNode *D_800DCDC4; // spawn regions; their areas add up to D_800DCD90
 extern u8   D_800DCDD0;
 extern CamOffset D_800DCDE0[4]; // per-player camera offset (position, rotation), summed from the wobbles (game_191C30.c)
 extern s8   D_800DD190;

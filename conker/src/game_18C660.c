@@ -1,4 +1,22 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
+f32 D_800DCD90;
+f32 D_800DCD94;
+f32 D_800DCD98;
+f32 D_800DCD9C;
+f32 D_800DCDA0;
+f32 D_800DCDA4;
+f32 D_800DCDA8;
+f32 D_800DCDAC;
+f32 D_800DCDB0;
+f32 D_800DCDB4;
+f32 D_800DCDB8;
+f32 D_800DCDBC;
+f32 D_800DCDC0;
+RegionNode *D_800DCDC4;
+
 #include "functions.h"
 #include "variables.h"
 
@@ -35,7 +53,12 @@ void func_1515F25C(RegionNode **list, RegionNode *node) {
 
 typedef void (*ZoneHandler)(Actor *obj, TriggerZone *zone);
 
-extern ZoneHandler D_8008B090[12];
+/* TriggerZone handlers per zone->data1. Declared without a prototype: func_150AF2E0 reads the zone
+ * through its own view. */
+static void (*D_8008B090[12])() = {
+    func_1515F2B8, func_1515F2E8, func_1515FB70, func_150AF2E0, func_151A6B68, func_1515FB94,
+    func_1515FC60, func_1515FC34, func_1515FBC4, func_150F884C, NULL,          func_150F51A0,
+};
 
 /* Runs zone handler zone->data1 for `obj`. */
 void func_1515F270(Actor *obj, TriggerZone *zone) {
@@ -52,7 +75,8 @@ void func_1515F2B8(Actor *obj, TriggerZone *zone) {
     func_1505D024(obj, 0x6001D, obj->langle, -1);
 }
 
-extern ZoneHandler D_8008B0C0[3];
+/* Ambient effects per zone->data2 */
+static ZoneHandler D_8008B0C0[3] = { func_1515F338, func_1515F5C4, func_1515F850 };
 
 /* TriggerZone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->data2. */
 void func_1515F2E8(Actor *obj, TriggerZone *zone) {
@@ -197,7 +221,7 @@ void func_1515FC60(Actor *obj, TriggerZone *zone) {
     if (obj->mv != NULL && obj->mv->death_State == 0) {
         value = zone->data2;
         if (value != 0) {
-            scale = (f32)(u32)value * 0.009999999776f;
+            scale = (u32)value * 0.009999999776f;
             value = func_150AD960(zone->x, zone->z, obj->xpos, obj->zpos);
             limit = (zone->xSize * scale) - obj->bodyRadius;
             if (limit > value) {

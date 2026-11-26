@@ -206,6 +206,18 @@ void func_151090DC(void);
 s32 func_15109120(DynModel *model, s16 viewport);
 
 /* game_18A8F0.c */
+extern u8 D_800DCD20[3]; // ambient light colour
+extern u8 D_800DCD24[3]; // tint colour
+extern u8 D_800DCD27; // priority of the current ambient colour
+extern u8 D_800DCD28[3];
+extern s8 D_800DCD30[4][3]; // per-player directional light direction
+extern u8 D_800DCD3C;
+extern u8 D_800DCD3D;
+extern PointLightGfx D_800DCD40; // padding light for odd light counts
+extern PointLight *D_800DCD78; // list of all point lights
+extern s32 D_800DCD7C;
+extern ZoneLink *D_800DCD80; // ambient colour TriggerZones
+extern ZoneLink *D_800DCD84; // tint TriggerZones
 void *func_1515D440(void);
 void *func_1515D480(s32 count);
 void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority);
@@ -232,6 +244,20 @@ void func_1515F10C();
 void func_1515F170(s32 group, u8 disabled);
 
 /* game_18C660.c */
+extern f32 D_800DCD90; // total area of the D_800DCDC4 spawn regions
+extern f32 D_800DCD94; // ambient effect colour being eased (red, green, blue)
+extern f32 D_800DCD98;
+extern f32 D_800DCD9C;
+extern f32 D_800DCDA0; // ambient effect 2 pulse phase
+extern f32 D_800DCDA4;
+extern f32 D_800DCDA8;
+extern f32 D_800DCDAC;
+extern f32 D_800DCDB0;
+extern f32 D_800DCDB4;
+extern f32 D_800DCDB8;
+extern f32 D_800DCDBC;
+extern f32 D_800DCDC0;
+extern RegionNode *D_800DCDC4; // spawn regions; their areas add up to D_800DCD90
 /* (TriggerZone *region); declared without a prototype: game_40490.c calls it without the region */
 RegionNode *func_1515F1B0();
 void func_1515F25C(RegionNode **list, RegionNode *node);

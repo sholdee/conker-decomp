@@ -1193,7 +1193,7 @@ segments:
       - [0x22FA90, rodata]
       - {start: 0x22FB10, type: .data, name: game_188F90, linker_section_order: .rodata}
       - {start: 0x22FB40, type: .data, name: game_1897A0, linker_section_order: .rodata}
-      - [0x22FB50, rodata]
+      - {start: 0x22FB50, type: .data, name: game_18C660, linker_section_order: .rodata}
       - [0x22FB90, rodata]
       - [0x22FE50, rodata]
       - [0x22FE60, rodata]
@@ -1944,6 +1944,9 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DC9F0, name: game_16DC80}
       - {start: 0x255880, type: .bss, vram: 0x800DCA00, name: game_16F770}
       - {start: 0x255880, type: bss, vram: 0x800DCA20, name: bss_800DCA20}
+      - {start: 0x255880, type: .bss, vram: 0x800DCD10, name: game_18A8F0}
+      - {start: 0x255880, type: .bss, vram: 0x800DCD90, name: game_18C660}
+      - {start: 0x255880, type: bss, vram: 0x800DCDD0, name: bss_800DCDD0}
       - {start: 0x255880, type: .bss, vram: 0x800E0BA0, name: game_20AE20}
       - {start: 0x255880, type: bss, vram: 0x800E0C00, name: bss_800E0C00}
       - {start: 0x255880, type: .bss, vram: 0x800E0D20, name: libultra/io/siacs2}
