@@ -86,12 +86,6 @@ extern void (*D_80089EF8[])(void);
 extern void (*D_80089F2C[])(void);
 extern void (*D_80089F60[])(s32, s32, u8);
 extern ZDecode D_80089630[8]; // z-buffer decompression table
-extern void (*D_8008A4E8[])(TimedEffect*);
-extern void (*D_8008A4C0[])(TimedEffect*);
-extern void (*D_8008A688[])(TimedEffect*);
-extern void (*D_8008A7B0[])(TimedEffect*);
-extern void (*D_8008A8D8[74])(TimedEffect*, s32, u8);
-extern s32 (*D_8008A670[])(s32, TimedEffect*, s16);
 
 extern EffectHeader *D_800DCE50[2][OBJ_TYPE_COUNT]; /* object lists: [list][type] heads a doubly linked list (game_1944C0.c) */
 
@@ -224,7 +218,6 @@ extern f32 D_8009F6C0; // 0.01745329238474369f
 extern s32 D_800A4AA0; //?
 extern s32 D_800A5168[4]; // object list indices (game_16DC80)
 extern s32 D_800A5178[3]; // effect-object kinds (game_169510)
-extern s32 D_800A5770[];
 
 // in game_18D770.c
 extern s32 D_800A6060[3]; /* { 0x36, 0x4C, 0x5B }: the model effect types */

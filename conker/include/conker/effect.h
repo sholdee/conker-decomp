@@ -987,9 +987,10 @@ void func_15149368(TimedEffect *object);
 void func_15149394(TimedEffect *object);
 void func_151493E4(TimedEffect *object);
 void func_15149434(TimedEffect *object, s32 arg1, u8 arg2);
-s32 func_15149490(s32 arg0, TimedEffect *object, s16 arg2);
+Gfx *func_15149490(Gfx *gfx, TimedEffect *object, s16 view);
 void func_151494E0(s32 arg0, u8 arg1);
 void func_15149514(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj);
+extern const s32 D_800A5770[2]; /* the two timed effect object types */
 
 /* game_179F30.c */
 typedef struct ToggleTarget ToggleTarget;
