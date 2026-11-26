@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_15133B98 func_15133B98_header // matching: this file keeps its own declaration of func_15133B98
 #include "functions.h"
-#undef func_15133B98
 #include "variables.h"
 
 void func_150BEF70(s32 arg0) {
@@ -590,11 +588,9 @@ void func_150C04C0(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5
     func_15150400(&config, &angles, arg4, arg5);
 }
 
-extern s32 func_15133B98(Piece *, s32, s32, s32, f32, s32); // matching: passes the coordinates in integer registers (the definition takes f32)
-
-/* Piece handler: with probability burstChance, bursts into smaller pieces and particles 20 units above
- * `y`; otherwise falls back to func_15133B98. */
-s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+/* Floor handler: with probability burstChance, bursts into smaller pieces and particles 20 units above
+ * the floor; otherwise falls back to func_15133B98. */
+s32 func_150C0648(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
     u8 flags;
 
     if (func_150ADA68() < piece->burstChance) {
@@ -608,7 +604,7 @@ s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
             config.countBase = 2;
             config.countRange = 0;
             config.origin.x = piece->position.x;
-            config.origin.y = y + 20.0f;
+            config.origin.y = floorHeight + 20.0f;
             config.origin.z = piece->position.z;
             config.speedBase = 5.0f;
             config.speedRange = 4.0f;
@@ -646,7 +642,7 @@ s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
             SpriteBurst spawn;
             f32 spawnY;
 
-            spawnY = y + 20.0f;
+            spawnY = floorHeight + 20.0f;
             spawn.countBase = 1;
             spawn.countRange = 2;
             spawn.texture = 0x6C;
@@ -696,5 +692,5 @@ s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
         }
         return 0;
     }
-    return func_15133B98(piece, arg1, arg2, arg3, y, arg5);
+    return func_15133B98((ModelParticle *)piece, x, y, z, floorHeight, surface);
 }

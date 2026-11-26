@@ -169,7 +169,7 @@ void func_150BFA7C(WorldObject *platform);
 void func_150BFFE0(Actor *obj);
 s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y);
 void func_150C04C0(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5);
-s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5);
+s32 func_150C0648(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface);
 
 /* game_F21D0.c */
 void func_150C4D20(WorldObject *pendulum);
