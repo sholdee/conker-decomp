@@ -686,7 +686,7 @@ void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2) {
 }
 
 /* Calls func_151C329C at the point on the actor's bounds in direction yaw/pitch. */
-void func_15107B78(Actor *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
+void func_15107B78(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4) {
     Vec3f pos;
     Vec3f center;
     f32 radius;
@@ -694,12 +694,12 @@ void func_15107B78(Actor *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
 
     if (actor->ob_matrix_ptr != NULL) {
         func_1515C244(actor, &center, &radius, &unused);
-        func_15143794((s16)yaw, (s16)pitch, radius, &pos);
+        func_15143794(yaw, pitch, radius, &pos);
         pos.y *= actor->unkF0;
         pos.x += center.x;
         pos.y += center.y;
         pos.z += center.z;
-        func_151C329C(&pos, (u8)arg3, arg4);
+        func_151C329C(&pos, arg3, arg4);
     }
 }
 

@@ -68,7 +68,7 @@ void func_150B54A8(OwnerSparkEffect *effect) {
     }
     data->unkCAccum += (0.2090000063f + (func_150ADA68() * 0.1840000153f)) * D_800BE9A4;
     while (data->unkCAccum > 1.0f) {
-        func_15107B78(owner, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 101U) - 63), effect->base.header.owner,
+        func_15107B78(owner, func_150ADA20() & 0xFF, (func_150ADA20() % 101U) - 63, effect->base.header.owner,
                       effect->base.header.kind);
         data->unkCAccum -= 1.0f;
     }

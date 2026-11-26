@@ -314,7 +314,7 @@ s32 func_150FD514(Actor150FD514 *particle) {
         func_1502EA98(owner, 0xFF, 0, 0, 0xFF, 0, 4);
         ext->emitCounter += (0.091000006f + func_150ADA68() * 0.07f) * D_800BE9A4;
         while (ext->emitCounter > 1.0f) {
-            func_15107B78(owner, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 101) - 63), particle->head.header.owner, particle->head.header.kind);
+            func_15107B78(owner, func_150ADA20() & 0xFF, (func_150ADA20() % 101) - 63, particle->head.header.owner, particle->head.header.kind);
             ext->emitCounter -= 1.0f;
         }
     }

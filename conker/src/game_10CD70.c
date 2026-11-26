@@ -292,7 +292,7 @@ void func_150DFEFC(BoltEmitter *emitter) {
     }
     src->timer2 -= D_800BE9E4;
     if (src->timer2 < 0) {
-        func_15107B78(obj, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 64),
+        func_15107B78(obj, func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 64,
                       emitter->base.header.owner, emitter->base.header.kind);
         src->timer2 = func_150ADA20() % 26U + 15;
     }
