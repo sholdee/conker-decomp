@@ -8,7 +8,12 @@ typedef struct {
     s32 romEnd;
 } FontRomRange;
 
-extern FontRomRange D_80082F80[];
+extern u8 game_us_rzip_ROM_START;
+
+/* ROM extent of the font's packed glyph data: it ends where the compressed game code starts. */
+static FontRomRange D_80082F80[1] = {
+    { 0x40F10, (s32)&game_us_rzip_ROM_START },
+};
 
 extern u8 D_800CBD4C;
 
