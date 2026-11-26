@@ -90,8 +90,8 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
     CollisionHit ground;
     s32 count;
     CollisionHit scatterGround;
-    f32 probe[3];
-    f32 spot[3];
+    Vec3f probe;
+    f32 spot[3];   // matching: spot and center stay f32[3] (a Vec3f changes IDO's schedule); passed as Vec3f below
     f32 center[3];
     CollisionHit centerGround;
 
@@ -131,16 +131,16 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
         scatterGround.source = 0;
         scatterGround.surface = 0;
         scatterGround.height = -10000.0f;
-        probe[1] = actor->ypos + 100.0f;
+        probe.y = actor->ypos + 100.0f;
         if (count != 0) {
             // matching: a do/while (--count != 0) loop schedules differently from this break form
             for (;;) {
                 func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 100.0f + 110.0f, &spot[0], &spot[2]);
                 spot[0] += actor->xpos;
                 spot[2] += actor->zpos;
-                probe[0] = spot[0];
-                probe[2] = spot[2];
-                if (!func_15046C80(probe, 0, actor->ypos - 500.0f, &scatterGround) || scatterGround.source == 3) {
+                probe.x = spot[0];
+                probe.z = spot[2];
+                if (!func_15046C80(&probe, 0, actor->ypos - 500.0f, &scatterGround) || scatterGround.source == 3) {
                     return;
                 }
                 spot[1] = scatterGround.height;
@@ -148,10 +148,10 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
                 // matching: (f32)100 is not CSE'd with the 100.0f above, which would tie up an FP register
                 if (func_150ADA20() & 1) {
                     func_151D9B8C(0, func_150ADA68() * 4.5f + 15.0f, (u32)(func_150ADA68() * (f32)100 + 155.0f),
-                                  &scatterGround.tri, spot, 100, 0, 1, 0, arg1, arg2);
+                                  &scatterGround.tri, (Vec3f *)spot, 100, 0, 1, 0, arg1, arg2);
                 } else {
                     func_151DAB58(0, func_150ADA68() * 5.9f + 6.1f, (u32)(func_150ADA68() * (f32)100 + 155.0f),
-                                  spot, 1, arg1, arg2);
+                                  (Vec3f *)spot, 1, arg1, arg2);
                 }
                 if (--count == 0) {
                     break;
@@ -168,12 +168,12 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
         centerGround.material = 0;
         centerGround.height = -10000.0f;
         {
-            f32 above[3];
+            Vec3f above;
 
-            above[0] = center[0];
-            above[1] = center[1] + 100.0f;
-            above[2] = center[2];
-            if (!func_1504697C(above, 0, center[1] - 500.0f, &centerGround) || centerGround.source == 3) {
+            above.x = center[0];
+            above.y = center[1] + 100.0f;
+            above.z = center[2];
+            if (!func_1504697C(&above, 0, center[1] - 500.0f, &centerGround) || centerGround.source == 3) {
                 return;
             }
         }
@@ -181,7 +181,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
         center[1] += 10.0f;
         func_15136698((func_150ADA68() * 40.0f + 120.0f) * 0.001f, (func_150ADA68() * 123.0f + 123.0f) * 0.00001f,
                       func_150ADA20() % 101 + 155, func_150ADA20() % 101 + 100, func_150ADA20() % 56 + 70,
-                      &centerGround.tri, center, 0, 1, arg1, arg2);
+                      &centerGround.tri, (Vec3f *)center, 0, 1, arg1, arg2);
     }
 }
 

@@ -9,10 +9,10 @@ void func_151AECA0(Actor *obj, u8 arg1, s32 arg2) {
     CollisionHit ground;
     SplashSpraySpec burst;
     s32 count;
-    f32 probe[3];
-    f32 pos[3];
+    Vec3f probe;
+    f32 pos[3];    // matching: pos and center stay f32[3] (a Vec3f changes IDO's schedule); passed as Vec3f below
     f32 center[3];
-    f32 centerProbe[3];
+    Vec3f centerProbe;
     f32 unused[15]; // matching: unused, pads the frame to the original 0x160 bytes
     u32 randA;
     u32 randB;
@@ -56,26 +56,26 @@ lbD:
     func_15153F18(&burst.angles, &burst.spray, &ground, 255, 1);
 lbA:
     count = (func_150ADA20() % 6) + 7;
-    probe[1] = obj->ypos + 100.0f;
+    probe.y = obj->ypos + 100.0f;
     while (count != 0) {
         angle = func_150ADA20();
         func_15143874((u8)angle, (func_150ADA68() * 59.0f) + 90.0f, &pos[0], &pos[2]);
 lbC:
         pos[0] += obj->xpos;
         pos[2] += obj->zpos;
-        probe[0] = pos[0];
-        probe[2] = pos[2];
-        if (func_15046C80(probe, 0, obj->ypos - 500.0f, &ground) == 0 || ground.source == 3) {
+        probe.x = pos[0];
+        probe.z = pos[2];
+        if (func_15046C80(&probe, 0, obj->ypos - 500.0f, &ground) == 0 || ground.source == 3) {
             return;
         }
         pos[1] = ground.height;
         pos[1] += 10.0f;
         if (func_150ADA20() & 1) {
             func_151D9B8C(0, (func_150ADA68() * 4.5f) + 15.0f, (func_150ADA68() * 100.0f) + 155.0f,
-                          &ground.tri, pos, 100, 0, 1, 0, arg1, arg2);
+                          &ground.tri, (Vec3f *)pos, 100, 0, 1, 0, arg1, arg2);
         } else {
             func_151DAB58(0, (func_150ADA68() * 5.900000095f) + 6.099999905f, (func_150ADA68() * 100) + 155, // matching: int 100/155 here, float literals change allocation
-                          pos, 1, arg1, arg2);
+                          (Vec3f *)pos, 1, arg1, arg2);
         }
         count--;
     }
@@ -83,10 +83,10 @@ lbB:
     center[0] = obj->xpos;
     center[1] = obj->ypos;
     center[2] = obj->zpos;
-    centerProbe[0] = center[0];
-    centerProbe[1] = center[1] + 100.0f;
-    centerProbe[2] = center[2];
-    if (func_15046C80(centerProbe, 0, center[1] - 500.0f, &ground) == 0 || ground.source == 3) {
+    centerProbe.x = center[0];
+    centerProbe.y = center[1] + 100.0f;
+    centerProbe.z = center[2];
+    if (func_15046C80(&centerProbe, 0, center[1] - 500.0f, &ground) == 0 || ground.source == 3) {
         return;
     }
     center[1] = ground.height;
@@ -98,6 +98,6 @@ lbB:
     func_15136698(((randF1 * 30.0f) + 90.0f) * 0.001000000047f,
                   ((randF2 * 103.0f) + 103.0f) * 9.999999747e-06f,
                   (randA % 101) + 155, (randB % 101) + 100,
-                  (func_150ADA20() % 56) + 70, &ground.tri, center, 0, 1, arg1, arg2);
+                  (func_150ADA20() % 56) + 70, &ground.tri, (Vec3f *)center, 0, 1, arg1, arg2);
 lbl:;
 }
