@@ -2,24 +2,6 @@
 
 void __n_resetPerfChanState(N_ALSeqPlayer *seqp, s32 chan);
 
-/*
- * Conker's synthesis driver (seqp->drvr) carries bank-loading hooks where the
- * shared N_ALSynth still has dma/heap/pad; this file-local view spells them out.
- */
-typedef void *(*BankLoadProc)(void *slot, s32 isInst);
-typedef BankLoadProc (*BankLoadProcGetter)(void);
-
-typedef struct {
-    /* 0x00 */ u8                 pad0[0x28];
-    /* 0x28 */ BankLoadProcGetter getLoadProc;
-    /* 0x2C */ u8                 pad2C[0x4];
-    /* 0x30 */ void             (*releaseProc)(void *instOrSound);
-    /* 0x34 */ void             (*releaseInstProc)(ALInstrument *inst);
-    /* 0x38 */ s32                waveTableBase; /* base handed to func_10012C5C */
-} SynthX;
-
-#define SYNX(drvr) ((SynthX *)(drvr))
-
 /* Unlinks the voice state that owns `voice` from the allocated list and returns it to the free list. */
 void func_1001AAE0(N_ALSeqPlayer *seqp, N_ALVoice *voice) {
     N_ALVoiceState *prev = NULL;
@@ -338,7 +320,7 @@ s32 func_1001B7D0(N_ALSeqPlayer *seqp, s32 instNum, s32 chan) {
 
     inst = func_1001BD34(seqp->drvr, &seqp->bank->instArray[instNum], -1);
     if (seqp->chanState[chan].instrument != NULL) {
-        SYNX(seqp->drvr)->releaseInstProc(seqp->bank->instArray[seqp->chanState[chan].instNum]);
+        seqp->drvr->bankRelease(seqp->bank->instArray[seqp->chanState[chan].instNum]);
         seqp->chanState[chan].instrument = NULL;
     }
     if (inst != NULL) {
@@ -346,7 +328,7 @@ s32 func_1001B7D0(N_ALSeqPlayer *seqp, s32 instNum, s32 chan) {
             sound = inst->soundArray[i];
             /* a small envelope "pointer" is still an offset from the instrument */
             if ((u32)sound->envelope < 0x100000) {
-                func_10012C5C(sound, (s32)inst, SYNX(seqp->drvr)->waveTableBase);
+                func_10012C5C(sound, (s32)inst, seqp->drvr->waveTableBase);
             }
         }
         sound = inst->soundArray[0];
@@ -399,7 +381,7 @@ void *func_1001BD34(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx) {
     BankLoadProc loadProc;
     void *addr = NULL;
 
-    loadProc = SYNX(drvr)->getLoadProc();
+    loadProc = drvr->getLoadProc();
     if (loadProc != NULL) {
         if (soundIdx == -1) {
             addr = loadProc(instSlot, TRUE);
@@ -418,9 +400,9 @@ void *func_1001BD34(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx) {
 /* Releases an instrument (soundIdx == -1) or one of its sounds through the driver. */
 void func_1001BE1C(N_ALSynth *drvr, ALInstrument *inst, s32 soundIdx) {
     if (soundIdx == -1) {
-        SYNX(drvr)->releaseProc(inst);
+        drvr->bankAddRef(inst);
     } else {
-        SYNX(drvr)->releaseProc(inst->soundArray[soundIdx]);
+        drvr->bankAddRef(inst->soundArray[soundIdx]);
     }
 }
 

@@ -7,22 +7,6 @@
 #include "cseq.h"
 #include "n_cseqp.h"
 
-/* N_ALVoiceState's pad3C[]: the oscillator states __n_seqpStopOsc stops */
-typedef struct {
-    /* 0x00 */  u8                  pad0[0x3C];
-    /* 0x3C */  void                *tremOscState;
-    /* 0x40 */  void                *vibOscState;
-} CSPVoiceStateX;
-
-/* N_ALSynth's pad[] */
-typedef struct {
-    /* 0x00 */  u8                  pad0[0x34];
-    /* 0x34 */  void                (*unk34)(ALInstrument *inst);
-} CSPSynthX;
-
-#define VSX(vs)            ((CSPVoiceStateX *)(vs))
-#define SYNX(drvr)         ((CSPSynthX *)(drvr))
-
 /* Conker's initOsc takes a 7th argument */
 typedef ALMicroTime (*CSPOscInit)(void **oscState, f32 *initVal, u8 oscType,
                                   u8 oscRate, u8 oscDepth, u8 oscDelay, u8 arg6);
@@ -282,7 +266,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                             /* debug output compiled out */
                         }
                         if (seqp->chanState[chan].instrument) {
-                            SYNX(seqp->drvr)->unk34(seqp->bank->instArray[seqp->chanState[chan].instNum]);
+                            seqp->drvr->bankRelease(seqp->bank->instArray[seqp->chanState[chan].instNum]);
                             seqp->chanState[chan].instrument = 0;
                         }
                     }
@@ -517,7 +501,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                             evt.msg.osc.oscState = oscState;
                             n_alEvtqPostEvent(&seqp->evtq, &evt, deltaTime, 0);
                             vs->flags |= 0x01; /* set tremelo flag bit */
-                            VSX(vs)->tremOscState = oscState;
+                            vs->tremOscState = oscState;
                         }
                     }
                 }
@@ -548,7 +532,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                             evt.msg.osc.chan = chan;
                             n_alEvtqPostEvent(&seqp->evtq, &evt, deltaTime, 0);
                             vs->flags |= 0x02; /* set the vibrato flag bit */
-                            VSX(vs)->vibOscState = oscState;
+                            vs->vibOscState = oscState;
                         }
                     }
                 }

@@ -225,7 +225,7 @@ void _n_handleEvent(SndEvent *event) {
             switch (event->type) {
                 case 0x4000:
                     if (snd == NULL) {
-                        snd = (ALSound *)func_1001BD34(D_8002BA2C->drvr,
+                        snd = func_1001BD34(D_8002BA2C->drvr,
                                                        &state->bank->instArray[0],
                                                        state->unk4C);
                         state->snd = snd;

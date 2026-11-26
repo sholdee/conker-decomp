@@ -46,6 +46,9 @@ typedef struct N_ALVoice_s {
     /* 0x22 */  s16                 unityPitch;
 } N_ALVoice; // size 0x20
 
+/* Conker: the driver's bank loader resolves an instrument slot (isInst) or a sound slot to the loaded object. */
+typedef void *(*BankLoadProc)(void *slot, s32 isInst);
+
 typedef struct {
     /* 0x00 */  ALPlayer    *head;          /* client list head                     */
     // ALPlayer    *n_seqp1;    /* for fade in / fade out */
@@ -56,10 +59,14 @@ typedef struct {
     ALLink      pLameList;      /* list of voices ready to be freed     */
     /* 0x1C */  s32         paramSamples;
     /* 0x20 */  s32         curSamples;     /* samples from start of game           */
-    /* 0x24 */  u8          pad24[0x8];
-    /* 0x2C */  ALDMANew    dma;
-    ALHeap      *heap;
-    u8 pad[0xC];
+    /* 0x24 */  ALDMANew    dma;
+    /* Conker: the bank hooks of the driver config (SynDriverConfig in init_8F90.c) */
+    /* 0x28 */  BankLoadProc (*getLoadProc)(void);
+    /* 0x2C */  void        (*bankDecRef)(void *record);
+    /* 0x30 */  void        (*bankAddRef)(void *record);
+    /* 0x34 */  void        (*bankRelease)(void *record);
+    /* 0x38 */  s32         waveTableBase;  /* handed to func_10012C5C */
+    /* 0x3C */  ALHeap      *heap;
     /* 0x40 */  struct ALParam_s      *paramList;
     /* 0x44 */  struct N_ALMainBus_s  *mainBus;
     /* 0x48 */  struct N_ALAuxBus_s   *auxBus;
@@ -247,7 +254,8 @@ typedef struct N_ALVoiceState_s {
     /* 0x3A */  u8                 tremelo;        /* current value of the tremelo */
     /* 0x3B */  u8                 flags;          /* bit 0 tremelo flag
                                                       bit 1 vibrato flag           */
-    u8 pad3C[0x8];
+    /* 0x3C */  void               *tremOscState;  /* Conker: the oscillator states __n_seqpStopOsc stops */
+    /* 0x40 */  void               *vibOscState;
 } N_ALVoiceState;
 
 typedef struct {
