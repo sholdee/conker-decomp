@@ -1088,6 +1088,8 @@ segments:
       - {start: 0x22BE90, type: .data, name: game_C2350, linker_section_order: .rodata}
       - [0x22BED0, rodata]
       - [0x22BEF0, rodata]
+      - {start: 0x22CFD0, type: .data, name: game_CD5A0, linker_section_order: .rodata}
+      - [0x22CFF0, rodata]
       - [0x22D000, rodata]
       - [0x22D040, rodata]
       - [0x22D070, rodata]
@@ -1999,6 +2001,7 @@ segments:
       - {start: 0x255880, type: bss, vram: 0x800D2DB0, name: bss_800D2DB0}
       - {start: 0x255880, type: .bss, vram: 0x800D2F60, name: game_C8950}
       - {start: 0x255880, type: bss, vram: 0x800D2FA0, name: bss_800D2FA0}
+      - {start: 0x255880, type: .bss, vram: 0x800D3000, name: game_CCD00}
       - {start: 0x255880, type: .bss, vram: 0x800D3010, name: game_CD5A0}
       - {start: 0x255880, type: bss, vram: 0x800D3090, name: bss_800D3090}
       - {start: 0x255880, type: .bss, vram: 0x800D9890, name: game_E4070}
