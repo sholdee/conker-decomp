@@ -6,9 +6,8 @@
 typedef void (*ResetFunc)(void);
 
 /* One-entry reset callback tables for modes 1 and 2. */
-extern ResetFunc D_80082BD0;
-extern ResetFunc D_80082BD4;
-/* Texture last loaded by the object draw code; -1 forces a reload. */
+static ResetFunc D_80082BD0[] = { func_150089D0 };
+static ResetFunc D_80082BD4[] = { func_150089D0 };
 
 /* Empties the object lists of both groups: mode 1 clears types 0-100, mode 2 types 101-103, any other mode all. */
 void func_15008870(s32 mode) {
@@ -29,17 +28,17 @@ void func_15008870(s32 mode) {
     }
 }
 
-/* Runs the reset callbacks for mode 1 or 2, then invalidates the cached texture. */
+/* Runs the reset callbacks for mode 1 or 2, then invalidates the cached texture (D_800DD1B0 = -1 forces a reload). */
 void func_15008930(s32 mode) {
     ResetFunc *funcs;
     s32 count;
     s32 i;
 
     if (mode == 1) {
-        funcs = &D_80082BD0;
+        funcs = D_80082BD0;
         count = 1;
     } else if (mode == 2) {
-        funcs = &D_80082BD4;
+        funcs = D_80082BD4;
         count = 1;
     } else {
         count = 0;

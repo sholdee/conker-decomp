@@ -671,7 +671,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
 }
 
 /* Returns 0, or 1 + the type func_15084D70 reports for D_800BE3E0 (after setting D_800BE9F4 from D_800BE3DF). */
-s32 func_1507E114(s32 arg0) {
+s32 func_1507E114(s32 *arg0) {
     s32 type;
     s16 pos[3];
     Vec3f vec;

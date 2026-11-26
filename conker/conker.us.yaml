@@ -1017,6 +1017,8 @@ segments:
     subalign: 4
     subsegments:
       - [0x2275E0, data]
+      - [0x227690, .data, game_35D20]
+      - [0x2276A0, data]
       - [0x227850, .data, game_3B920]
       - [0x2278F0, .data, game_40490]
       - [0x227960, data]
@@ -1241,11 +1243,8 @@ segments:
       - [0x23A4F0, .rodata, game/entrypoint]
       - [0x23A504, rodata]
       - [0x23A510, .rodata, game_34F20]
-      - [0x23A5C4, rodata]
       - [0x23A5D0, .rodata, game_357F0]
-      - [0x23A5F4, rodata]
       - [0x23A600, .rodata, game_360A0]
-      - [0x23A618, rodata]
       - [0x23A620, .rodata, game_36680]
       - [0x23A69C, rodata]
       - [0x23A6A0, rodata]

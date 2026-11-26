@@ -331,7 +331,7 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player);
 void func_1507DE4C(Actor *obj);
 void func_1507DF10(Actor *obj, s32 part);
 void func_1507DFE4(s32 resource, s32 arg1);
-s32 func_1507E114(s32 arg0);
+s32 func_1507E114(s32 *arg0);
 void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z);
 
 /* game_DE5A0.c */

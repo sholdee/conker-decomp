@@ -83,7 +83,7 @@ void func_15007B3C(void) {
     func_15008840();
     D_8003E384 = 1;
     resource = D_800DD2C0[0];
-    slot = func_1507E114((s32)&resource);
+    slot = func_1507E114(&resource);
     if (D_800E0B94 == 2) {
         resource = D_800E0BD1;
     }
@@ -234,8 +234,8 @@ void func_150081E4(void) {
 
 
 void func_15008230(void) {
-    D_800C35C4 = (u8)0;
-    D_800C3C88 = (u8)0;
+    D_800C35C4 = 0;
+    D_800C3C88 = 0;
 }
 
 void func_15008248(s32 arg0) {
