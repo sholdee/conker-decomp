@@ -7,7 +7,7 @@
 u8 D_800D9890; // queued command for func_150B6BC0
 EffectHeader *D_800D9894;
 // matching: defined in-file so as1 shares one lui across the unrolled stores in func_150B6C90
-static EffectHeader *D_800D9898[10];
+static struct Sprite2D *D_800D9898[10];
 
 #include "functions.h"
 #include "variables.h"
@@ -67,7 +67,7 @@ void func_150B6D34(void) {
     Sprite2D *sprite;
 
     for (i = 0; i < 3; i++) {
-        sprite = (Sprite2D *)D_800D9898[i + 5];
+        sprite = D_800D9898[i + 5];
         if (sprite != NULL) {
             sprite->params.data.scroll.stage = 1;
         }
@@ -85,7 +85,7 @@ void func_150B6D78(void) {
     }
     for (i = 0; i < 10; i++) {
         if (D_800D9898[i] != NULL) {
-            func_1516972C(D_800D9898[i]);
+            func_1516972C(&D_800D9898[i]->header);
             D_800D9898[i] = NULL;
         }
     }
@@ -314,7 +314,7 @@ void func_150B7484(void) {
     desc.scaleX = 0x51;
     desc.scaleY = 0x51;
     if (D_800D9898[0] != NULL) {
-        func_1516972C(D_800D9898[0]);
+        func_1516972C(&D_800D9898[0]->header);
     }
     D_800D9898[0] = func_15169968(&desc);
     D_800D9890 = 3;
@@ -325,7 +325,7 @@ void func_150B7560(void) {
     Sprite2DParams desc;
 
     if (D_800D9898[0] != NULL) {
-        func_1516972C(D_800D9898[0]);
+        func_1516972C(&D_800D9898[0]->header);
         D_800D9898[0] = NULL;
     }
     desc.frameSpeed = 0x4D;
@@ -351,7 +351,7 @@ void func_150B7560(void) {
     desc.x = 60.0f;
     desc.y = 60.0f;
     if (D_800D9898[3] != NULL) {
-        func_1516972C(D_800D9898[3]);
+        func_1516972C(&D_800D9898[3]->header);
     }
     D_800D9898[3] = func_15169968(&desc);
     D_800D9890 = 3;
@@ -396,7 +396,7 @@ void func_150B76BC(s32 x, s32 slot) {
     desc.scaleX = 0x51;
     desc.scaleY = 0x51;
     if (D_800D9898[slot] != NULL) {
-        func_1516972C(D_800D9898[slot]);
+        func_1516972C(&D_800D9898[slot]->header);
     }
     D_800D9898[slot] = func_15169968(&desc);
 }
@@ -407,7 +407,7 @@ void func_150B77A8(void) {
     Sprite2DParams desc;
 
     if (D_800D9898[1] != NULL) {
-        func_1516972C(D_800D9898[1]);
+        func_1516972C(&D_800D9898[1]->header);
         D_800D9898[1] = NULL;
     }
 
@@ -435,7 +435,7 @@ void func_150B77A8(void) {
     desc.scaleX = 0x1000;
     desc.scaleY = 0x1000;
     if (D_800D9898[4] != NULL) {
-        func_1516972C(D_800D9898[4]);
+        func_1516972C(&D_800D9898[4]->header);
     }
     D_800D9898[4] = func_15169968(&desc);
 
@@ -449,7 +449,7 @@ void func_150B77A8(void) {
     desc.texture = &D_800918E8;
     desc.cycleType = 1;
     if (D_800D9898[8] != NULL) {
-        func_1516972C(D_800D9898[8]);
+        func_1516972C(&D_800D9898[8]->header);
     }
     D_800D9898[8] = func_15169968(&desc);
     D_800D9890 = 3;
@@ -463,7 +463,7 @@ void func_150B791C(void) {
     Sprite2DParams desc;
 
     if (D_800D9898[2] != NULL) {
-        func_1516972C(D_800D9898[2]);
+        func_1516972C(&D_800D9898[2]->header);
         D_800D9898[2] = NULL;
     }
     desc.x = 230.0f;
@@ -493,7 +493,7 @@ void func_150B791C(void) {
     desc.scaleX = 0x1000;
     desc.scaleY = 0x1000;
     if (D_800D9898[5] != NULL) {
-        func_1516972C(D_800D9898[5]);
+        func_1516972C(&D_800D9898[5]->header);
     }
     D_800D9898[5] = func_15169968(&desc);
     desc.frame = 0x100;
@@ -502,7 +502,7 @@ void func_150B791C(void) {
     desc.data.scroll.y = desc.y;
     desc.alpha = 0xFF;
     if (D_800D9898[6] != NULL) {
-        func_1516972C(D_800D9898[5]); /* sic: frees slot 5, not 6 */
+        func_1516972C(&D_800D9898[5]->header); /* sic: frees slot 5, not 6 */
     }
     D_800D9898[6] = func_15169968(&desc);
     desc.frame = 0x200;
@@ -511,7 +511,7 @@ void func_150B791C(void) {
     desc.data.scroll.y = desc.y;
     desc.alpha = 0x80;
     if (D_800D9898[7] != NULL) {
-        func_1516972C(D_800D9898[5]); /* sic */
+        func_1516972C(&D_800D9898[5]->header); /* sic */
     }
     D_800D9898[7] = func_15169968(&desc);
     desc.timer = 0;
@@ -526,7 +526,7 @@ void func_150B791C(void) {
     desc.x = 230.0f;
     desc.y = 170.0f;
     if (D_800D9898[9] != NULL) {
-        func_1516972C(D_800D9898[9]);
+        func_1516972C(&D_800D9898[9]->header);
     }
     D_800D9898[9] = func_15169968(&desc);
     D_800D9890 = 3;

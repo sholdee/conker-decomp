@@ -90,10 +90,10 @@ TextBox *func_1516A7B0(u32 msgIndex, s32 objIndex, s32 arg2,
         for (i = 0; i < config->numPages; i++) {
             page = func_1516C878(config, i, box->source);
             func_150428D4(page, &width, &height, &advance);
-            if (box->width < (f32)width) {
+            if (box->width < width) {
                 box->width = width;
             }
-            if (box->height < (f32)height) {
+            if (box->height < height) {
                 box->height = height;
             }
         }

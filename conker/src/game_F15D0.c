@@ -4,7 +4,7 @@
 
 // func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
 // game_1DC720.c were compiled with a different view of it.
-SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
@@ -47,7 +47,7 @@ void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
         data.unk14 = 0x54;
         data.flags = 1;
     }
-    effect = (PulseEffect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
+    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
                                      0x40, sizeof(EffectData), arg2, arg3); /* arg6 is the data size; its prototype is wrong */
     if (effect != NULL) {
         state = &effect->data;
@@ -130,11 +130,11 @@ void func_150C44A4(PulseEffect *effect) {
     s32 i;
     f32 t;
     CollisionHit ground;
-    Vec3f *offsetPtr;
+    const Vec3f *offsetPtr;
     Vec3f *posPtr;
     ModelAttachment *attachment;
     s32 emit;
-    Vec3f *wind;
+    const Vec3f *wind;
     Vec3f vel;
     s32 rand1;
     s32 rand0;

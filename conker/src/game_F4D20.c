@@ -109,7 +109,7 @@ void func_150C79BC(s32 view) {
         // dx and dz now hold the spawn point itself
         dx = func_150489B0(angle) * radius + -2418.0f; // matching: "- 2418.0f" emits sub.s instead of add.s
         dz = func_15048A40(angle) * radius + 1775.0f;
-        texture = (f32)((func_150ADA20() & 0xFFFF) * 2) * (1.0f / 65536.0f);
+        texture = ((func_150ADA20() & 0xFFFF) * 2) * (1.0f / 65536.0f);
         func_15179FE0(texture, dx, 1583, dz, 7, 1200, 37, 10, 30, 3, 8);
     }
 }

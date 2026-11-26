@@ -3,12 +3,12 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
+extern s32 (*D_80086C90[])(Actor *, Actor *, void *);
 
 
 /* Casts a ray from origin along dir against the world and every active object (except self and those in
    ignoreMask or rejected by filter), recording the nearest hit closer than maxDist in out. */
-void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out, f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, s32 filterArg, s32 ignoreMask) {
+void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out, f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, void *filterArg, s32 ignoreMask) {
     s32 surf;
     f32 hitX;
     f32 hitY;

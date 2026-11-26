@@ -26,7 +26,7 @@ void func_15016850(void) {
             continue;
         }
         if (id < 0xBB) {
-            func_1502B7F0((void **)&data, 2, 0x12, id);
+            func_1502B7F0(&data, 2, 0x12, id);
         }
         if (data != NULL) {
             D_800BE5A8[D_800BE590] = data;
@@ -255,7 +255,7 @@ void func_15017114(s32 levelId) {
         bzero(D_800D2104[i], 2 * sizeof(PathPoint));
         D_800D2108[i] = 2;
     }
-    if (func_1502B7F0((void **)&table, 2, 0x10, levelId) != 0) {
+    if (func_1502B7F0(&table, 2, 0x10, levelId) != 0) {
         for (i = D_800D2101; i < D_800D2100; i++) {
             if (table[i - D_800D2101].offset != 0) {
                 D_800D2108[i] = table[i - D_800D2101].count;

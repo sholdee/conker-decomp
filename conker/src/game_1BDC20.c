@@ -125,7 +125,7 @@ void func_15190898(DripEmitter *emitter) {
                         fall->vel.y = 0.0f;
                         fall->vel.x = dx;
                         fall->vel.z = dz;
-                        func_1513F680(slot->drop, 13, 18, 0, 13);
+                        func_1513F680(&slot->drop->head, 13, 18, 0, 13);
                         isFree = 1;
                         slot->drop->head.def.lifetime = func_150ADA20() % (u32)(dropKind->lifeRange + 1) + dropKind->lifeMin;
                         slot->drop->head.def.flags |= 1;
@@ -230,7 +230,7 @@ void func_15190898(DripEmitter *emitter) {
                 hasTimer = 0;
                 timer = 300;
             }
-            task = (DripRetryTask *)func_151491F4(timer, -1, 13, hasTimer, 8, sizeof(ActorLink), 0xFF, 0);
+            task = func_151491F4(timer, -1, 13, hasTimer, 8, sizeof(ActorLink), 0xFF, 0);
             if (task != NULL) {
                 memcpy(&task->link, &emitter->link, sizeof(ActorLink));
             }
@@ -351,7 +351,7 @@ void func_15191400(DripEmitter *emitter) {
             motion->vel.x = 0.0f;
             motion->vel.y = 0.0f;
             motion->vel.z = 0.0f;
-            func_1513F680(slot->drop, 13, 18, 0, 13);
+            func_1513F680(&slot->drop->head, 13, 18, 0, 13);
             slot->drop->head.def.lifetime = func_150ADA20() % (u32)(dropKind->lifeRange + 1) + dropKind->lifeMin;
             slot->drop->head.def.flags |= 1;
         }
@@ -403,7 +403,7 @@ s8 func_15191520(DripParticle *drop) {
             probe.y = motion->ground.height;
             if (motion->ground.source == 3) {
                 func_151DBCBC(motion->kind, drop->head.def.width * drop->head.def.height * 0.25f, drop->head.def.unk44,
-                              (s32)&motion->ground.tri, &probe, drop->head.header.owner, drop->head.header.kind);
+                              &motion->ground.tri, &probe, drop->head.header.owner, drop->head.header.kind);
             } else if (func_150ADA20() & 1) {
                 func_151D9B8C(motion->kind, drop->head.def.width * drop->head.def.height * 0.150000006f, drop->head.def.unk44,
                               &motion->ground.tri, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,

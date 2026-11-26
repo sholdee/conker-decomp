@@ -13,19 +13,19 @@ EffectActor *func_151580B0(EffectActorTemplate *template, s32 attachment, s32 ar
         return NULL;
     }
     memcpy(&actor->tmpl, template, sizeof(EffectActorTemplate));
-    actor->attachment = attachment;
-    actor->unkF4 = arg2;
-    actor->unkDC = 0;
+    actor->attachment.model = attachment;
+    actor->attachment.unk1C = arg2;
+    actor->attachment.unk4 = 0;
     for (i = 0; i < 4; i++) {
-        actor->handles[i] = NULL;
+        actor->attachment.handles[i] = NULL;
     }
 
-    actor->sharedHandle = NULL;
+    actor->attachment.sharedHandle = NULL;
     if (attachment) {
         for (i = 0; i <= D_80082FA0; i++) {
-            actor->handles[i] = func_1515D480(attachment);
+            actor->attachment.handles[i] = func_1515D480(attachment);
         }
-        actor->sharedHandle = func_1515D440();
+        actor->attachment.sharedHandle = func_1515D440();
     }
     return actor;
 }
@@ -188,20 +188,20 @@ s32 func_15158920(Mtx *mtx, EffectActor *actor) {
     return 1;
 }
 
-/* Releases the attachment handles allocated by func_151580B0. */
+/* Releases the attachment's light buffers allocated by func_151580B0. */
 void func_15158A20(EffectActor *actor) {
     s32 i;
 
-    s32 *handle; // matching: copied after each NULL test so IDO keeps the load in v0
+    void *handle; // matching: copied after each NULL test so IDO keeps the load in v0
 
     for (i = 0; i <= D_80082FA0; i++) {
-        if (actor->handles[i] != NULL) {
-            handle = actor->handles[i];
+        if (actor->attachment.handles[i] != NULL) {
+            handle = actor->attachment.handles[i];
             func_100043B4(handle, 4);
         }
     }
-    if (actor->sharedHandle != NULL) {
-        handle = actor->sharedHandle;
+    if (actor->attachment.sharedHandle != NULL) {
+        handle = actor->attachment.sharedHandle;
         func_100043B4(handle, 4);
     }
 }
@@ -758,7 +758,7 @@ u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
                 pos.y = particle->head.floor.height;
                 if (particle->head.floor.source == 3) {
                     func_151DBCBC(func_151D8E20(), particle->motion.rise.baseSize * 0.200000003f, 0xFF,
-                                  (s32)&particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
+                                  &particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
                 }
                 alive = 0;
             }
@@ -1188,7 +1188,7 @@ u8 func_1515A78C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
         if (func_150ADA68() < 0.200000003f) {
             if (particle->head.floor.source == 3) {
                 func_151DBCBC(func_151D8E20(), drift->baseSize * 0.200000003f, particle->head.desc.alpha,
-                              (s32)&particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
+                              &particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
             }
         }
     }
@@ -1237,12 +1237,9 @@ typedef struct {
 
 /* Spawner object created by func_151A8B20 (func_1515A974). */
 struct Spawner {
-    /* 0x00 */ u8 pad0[0x1];
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x73];
-    /* 0x80 */ SpawnerData data;
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ EmitterState state;
+    /* 0x80 */ SpawnerData data; /* Emitter.data */
 };
 
 struct SpawnerTemplate {
@@ -1286,7 +1283,7 @@ void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
         info.spawn = 2;
         data.types = D_800A636C[variant].data.types;
         data.settings = D_800A636C[variant].data.settings;
-        spawner = func_151A8B20(&info, -1, sizeof(SpawnerData), 0xFF, 0);
+        spawner = (Spawner *)func_151A8B20(&info, -1, sizeof(SpawnerData), 0xFF, 0); /* an Emitter with SpawnerData */
         if (spawner != NULL) {
             memcpy(&spawner->data, &data, sizeof(SpawnerData));
         }
@@ -1317,9 +1314,9 @@ void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
     emitter.position = *pos;
     emitter.ceiling = ceiling;
     emitter.settings = data->settings;
-    obj = (RiseEmitterObject *)func_15149130(func_150ADA20() % (data->types.range + 1) + data->types.base,
-                                             -1, 0x3F, -1, 1, 0, sizeof(RiseEmitter), spawner->unkC,
-                                             spawner->unk1);
+    obj = func_15149130(func_150ADA20() % (data->types.range + 1) + data->types.base,
+                                             -1, 0x3F, -1, 1, 0, sizeof(RiseEmitter), spawner->base.header.owner,
+                                             spawner->base.header.kind);
     if (obj != NULL) {
         memcpy(&obj->emitter, &emitter, sizeof(RiseEmitter));
     }

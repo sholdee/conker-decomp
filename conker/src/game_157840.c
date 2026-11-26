@@ -47,8 +47,8 @@ void func_1512A390(Camera *arg0) {
         return;
     }
     if ((arg0->Snap != 0) || (arg0->AvailableModes & 0x400000) || (arg0->SpecialFlags & 0x40) ||
-        (func_150A3FC4(arg0->eye.x, arg0->eye.z, arg0->TrianglePtr, &arg0->unk648, &arg0->unk35C) == 0)) {
-        func_1510E8BC(&arg0->TrianglePtr, &arg0->unk648, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
+        (func_150A3FC4(arg0->eye.x, arg0->eye.z, arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C) == 0)) {
+        func_1510E8BC(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
                       arg0->eye.x, arg0->unk35C, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
     }
     if (unused28) {} // matching: keeps the otherwise dead unk28 load
@@ -70,7 +70,7 @@ void func_1512A390(Camera *arg0) {
         } else {
             arg0->unk35C = 10000.0f;
             arg0->AvailableModes |= 0x800000;
-            func_1510E8BC(&arg0->TrianglePtr, &arg0->unk648, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
+            func_1510E8BC(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
                           arg0->eye.x, arg0->eye.y, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
         }
     } else {

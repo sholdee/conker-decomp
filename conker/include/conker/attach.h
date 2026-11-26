@@ -16,7 +16,7 @@
  */
 
 /* Types that these files define; the declarations below use them. */
-typedef struct AttachmentSound AttachmentSound;
+struct SoundRecord;
 struct S150D88AC;
 
 /* game_5D2C0.c */
@@ -54,7 +54,8 @@ s32 func_150337E4(ModelAttachment *att, Actor *owner);
 s32 func_15033838(ModelAttachment *att, Actor *owner);
 s32 func_150339C8(ModelAttachment *att, Actor *owner);
 s32 func_15033AD8(ModelAttachment *att, Actor *owner);
-s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
+/* A sound record callback (SoundRecordCallback, conker/sound.h). */
+s32 func_15033BDC(struct SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 s32 func_15033E00(ModelAttachment *att, Actor *owner);
 s32 func_15033E28(Actor *owner, ModelAttachment **out);
 ModelAttachment *func_15033E84(Actor *owner);
@@ -72,7 +73,7 @@ s32 func_150C8730(ModelAttachment *att, Actor *actor);
 void func_150D82B0(s32 arg0);
 s32 func_150D82BC(ModelAttachment *att, Actor *actor);
 s32 func_150D83D8(ModelAttachment *att, Actor *actor);
-s16 *func_150D8590(s16 *cmd, s32 arg1);
+GameCommand *func_150D8590(GameCommand *cmd, s32 arg1);
 void func_150D85AC(Actor *actor);
 s32 func_150D88AC(struct S150D88AC *arg0);
 
@@ -82,7 +83,7 @@ s32 func_150D8A20(s32 arg0, s32 arg1);
 void func_150D8A34(Actor *actor, s32 point, s32 arg2);
 
 /* game_1B9DB0.c */
-s32 func_1518C900(s32 arg0);
+Gfx *func_1518C900(s32 arg0);
 void func_1518CA04(s32 arg0);
 
 #endif

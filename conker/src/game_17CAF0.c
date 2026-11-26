@@ -4,7 +4,7 @@
 
 // func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
 // game_1DC720.c were compiled with a different view of it.
-SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
@@ -19,7 +19,7 @@ SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 l
 void func_1514F640(TriangleSource *source, ConeBasis *cone) {
     cone->flags = 2;
     cone->spread = source->spread;
-    if (func_15144E80(source->triangle.v, &cone->axis0, &cone->axis1, &cone->direction) != 0) {
+    if (func_15144E80(&source->triangle, &cone->axis0, &cone->axis1, &cone->direction) != 0) {
         if (func_15144A74(&cone->direction, &source->normal) < 0.0f) {
             cone->direction.x = -cone->direction.x;
             cone->direction.y = -cone->direction.y;
@@ -119,7 +119,7 @@ void func_1514FBFC(SurfaceJetSpray *emitter, u8 arg1, s32 arg2) {
     f32 normalLength;
     f32 normalInverse;
 
-    if (func_15144E80(emitter->source.triangle.v, &axis0, &axis1, &normal) != 0) {
+    if (func_15144E80(&emitter->source.triangle, &axis0, &axis1, &normal) != 0) {
         func_15145128(&axis0, &axis0, &length0, &inverse0);
         func_15145128(&axis1, &axis1, &length1, &inverse1);
         func_15145128(&normal, &normal, &normalLength, &normalInverse);
@@ -190,7 +190,7 @@ void func_15150178(AngleRange *angles, DropSpray *config, CollisionHit *ground, 
         func_15143794((s16)((func_150ADA20() % (u32)(angles->yawRange + 1)) + angles->yawBase),
                       (s16)((func_150ADA20() % (u32)(angles->pitchRange + 1)) + angles->pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
-                      &velocity.x);
+                      &velocity);
         func_151D9014(&config->pos, &velocity, config->kind,
                       (func_150ADA68() * config->gravityRange) + config->gravityBase,
                       (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase,
@@ -246,12 +246,12 @@ void func_15150400(DebrisScatter *config, AngleRange *angles, u8 arg2, s32 arg3)
         spawn.rot.x = func_150ADA68() * 360.0f;
         spawn.rot.y = func_150ADA68() * 360.0f;
         spawn.rot.z = func_150ADA68() * 360.0f;
-        func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel.x);
+        func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel);
         spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
         spawn.lifetime = (func_150ADA20() % (u32)(config->lifetimeRange + 1)) + config->lifetimeBase;
-        func_15143794(yaw, pitch, config->radius, &spawn.pos.x);
+        func_15143794(yaw, pitch, config->radius, &spawn.pos);
         spawn.pos.x += config->origin.x;
         spawn.pos.y += config->origin.y;
         spawn.pos.z += config->origin.z;
@@ -321,8 +321,8 @@ void func_1515080C(DebrisSpray *config, const s32 *variantIds, const f32 *varian
         while (count != 0) {
             yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;
             pitch = (func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase;
-            func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel.x);
-            func_15143794(yaw, pitch, radius, &spawn.pos.x);
+            func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel);
+            func_15143794(yaw, pitch, radius, &spawn.pos);
             spawn.pos.x += config->pos.x;
             spawn.pos.y += config->pos.y;
             spawn.pos.z += config->pos.z;
@@ -397,7 +397,7 @@ void func_15150D1C(DecalSpray *config, u8 arg1, s32 arg2) {
     while (count != 0) {
         func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
                       (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
-                      100.0f, &direction.x);
+                      100.0f, &direction);
         if (func_150AC9C0(config->pos.x, config->pos.y, config->pos.z,
                           direction.x, direction.y, direction.z, NULL, hitTriangle,
                           &hit.x, &hit.y, &hit.z, &distance, &surface, 0, 0.0f) != 0
@@ -429,7 +429,7 @@ void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
         func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
                       (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
                       func_150ADA68() * config->directionRange + config->directionBase,
-                      &direction.x);
+                      &direction);
         jitter.x = func_150ADA68() * width - config->jitter;
         jitter.z = func_150ADA68() * width - config->jitter;
         func_1518A3C0(&config->pos, &rotation,
@@ -491,7 +491,7 @@ void func_151511FC(SurfaceBurst *config, u8 arg1, s32 arg2) {
     desc.unk46 = config->unk46;
     desc.unk47 = config->unk47;
     extra.unk10 = config->unk6C;
-    if (func_15144E80(config->triangle.v, &axis0, &axis1, &normal) != 0) {
+    if (func_15144E80(&config->triangle, &axis0, &axis1, &normal) != 0) {
         func_15145128(&axis0, &axis0, &length0, &inverse0);
         func_15145128(&axis1, &axis1, &length1, &inverse1);
         func_15145128(&normal, &normal, &normalLength, &normalInverse);
@@ -550,7 +550,7 @@ void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
     u32 rand;
 
     kind = arg1; // matching: IDO keeps arg1 in a saved register only through a copy
-    if (func_15144E80(config->source.triangle.v, &axis0, &axis1, &normal) != 0) {
+    if (func_15144E80(&config->source.triangle, &axis0, &axis1, &normal) != 0) {
         func_15145128(&axis0, &axis0, &length0, &inverse0);
         func_15145128(&axis1, &axis1, &length1, &inverse1);
         func_15145128(&normal, &normal, &normalLength, &normalInverse);
@@ -570,7 +570,7 @@ void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
         motion.unk1C = config->unk9C;
         motion.unk1E = config->unk9E;
         spawn.pos = config->pos;
-        spawn.unk18 = (void *)config->unkA0;
+        spawn.material = config->unkA0;
         count = func_150ADA20() % (u32)(config->countRange + 1) + config->countBase;
         while (count != 0) {
             rand = func_150ADA20();
@@ -616,7 +616,7 @@ void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2) {
     spawn.pos = config->pos;
     motion.unk1C = config->unk80;
     motion.unk1E = config->unk82;
-    spawn.unk18 = (void *)config->unk84;
+    spawn.material = config->unk84;
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
     while (count != 0) {
         yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;
@@ -661,7 +661,7 @@ void func_15151D6C(SurfaceDebrisBurst *config, s32 *variantIds, f32 *variantScal
     f32 speed;
     f32 pad[2]; // matching: unused stack slots in the original frame
 
-    if (func_15144E80(config->source.triangle.v, &axis0, &axis1, &normal) != 0) {
+    if (func_15144E80(&config->source.triangle, &axis0, &axis1, &normal) != 0) {
         func_15145128(&axis0, &axis0, &length0, &inverse0);
         func_15145128(&axis1, &axis1, &length1, &inverse1);
         func_15145128(&normal, &normal, &normalLength, &normalInverse);
@@ -726,7 +726,7 @@ void func_15151D6C(SurfaceDebrisBurst *config, s32 *variantIds, f32 *variantScal
 
 /* Spawns a random number of pieces in random directions around config->origin, each using a random
  * entry of the variant tables. */
-void func_15152190(DebrisBurst *config, s32 *variantIds, f32 *variantScales, u32 variantCount, f32 radius, u8 arg5, u8 arg6, s32 arg7) {
+void func_15152190(DebrisBurst *config, const s32 *variantIds, const f32 *variantScales, u32 variantCount, f32 radius, u8 arg5, u8 arg6, s32 arg7) {
     s32 count;
     s32 variant;
     ParticleSpawn78 spawn;
@@ -763,12 +763,12 @@ void func_15152190(DebrisBurst *config, s32 *variantIds, f32 *variantScales, u32
         spawn.rot.x = func_150ADA68() * 360.0f;
         spawn.rot.y = func_150ADA68() * 360.0f;
         spawn.rot.z = func_150ADA68() * 360.0f;
-        func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel.x);
+        func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel);
         spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
         spawn.lifetime = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
-        func_15143794(yaw, pitch, radius, &spawn.pos.x);
+        func_15143794(yaw, pitch, radius, &spawn.pos);
         spawn.pos.x += config->pos.x;
         spawn.pos.y += config->pos.y;
         spawn.pos.z += config->pos.z;
@@ -830,7 +830,7 @@ void func_15152520(ModelBurst *config, u8 arg1, s32 arg2) {
         func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
                       (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
-                      &motion.vel.x);
+                      &motion.vel);
         motion.rotVel.x = (func_150ADA68() * config->rotVelRange.x) + config->rotVelBase.x;
         motion.rotVel.y = (func_150ADA68() * config->rotVelRange.y) + config->rotVelBase.y;
         motion.rotVel.z = (func_150ADA68() * config->rotVelRange.z) + config->rotVelBase.z;
@@ -854,7 +854,7 @@ void func_15152874(DriftBurst *config, u8 arg1, s32 arg2) {
         func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
                       (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
-                      &spawn.vel.x);
+                      &spawn.vel);
         spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
         spawn.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
         spawn.size.width = (func_150ADA68() * config->widthRange) + config->widthBase;
@@ -922,7 +922,7 @@ void func_15152B38(config, arg1, arg2)
         func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
                       (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
-                      &spawn.vel.x);
+                      &spawn.vel);
         spawn.color.red = (func_150ADA20() % (u32)(config->colorRange.red + 1)) + config->colorBase.red;
         spawn.color.green = (func_150ADA20() % (u32)(config->colorRange.green + 1)) + config->colorBase.green;
         spawn.color.blue = (func_150ADA20() % (u32)(config->colorRange.blue + 1)) + config->colorBase.blue;
@@ -1200,7 +1200,7 @@ void func_15153F18(AngleRange *angles, SplashSpray *config, CollisionHit *ground
         func_15143794((s16)((func_150ADA20() % (u32)(angles->yawRange + 1)) + angles->yawBase),
                       (s16)((func_150ADA20() % (u32)(angles->pitchRange + 1)) + angles->pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
-                      &velocity.x);
+                      &velocity);
         func_151DA6F8(&config->pos, &velocity,
                       (func_150ADA68() * config->sizeRange) + config->sizeBase,
                       (s16)((func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase),
@@ -1340,8 +1340,8 @@ void func_15154684(ParticleBurst *config, u8 arg1, s32 arg2) {
         func_15143794((s16)(func_150ADA20() & 0xFF),
                       (s16)((func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
-                      &velocity.x);
-        func_151C5F44(config->pos, &velocity.x,
+                      &velocity);
+        func_151C5F44(config->pos, &velocity,
                       (func_150ADA68() * config->gravityRange) + config->gravityBase,
                       config->unk20,
                       (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase,

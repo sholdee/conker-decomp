@@ -461,7 +461,7 @@ s32 func_1507D754(Actor *obj) {
         func_15145A50(obj);
         if (D_800BE616 != 0) {
             func_1507CD64(obj, 6);
-            spawned = func_151149AC((u8)(obj->playernumber + 11));
+            spawned = func_151149AC((obj->playernumber + 11));
         } else {
             if (level == 0x23) {
                 spawned = func_151149AC(1);
@@ -570,7 +570,7 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
     }
     size = D_800D18A4[player] + 4;
     // matching: indexing through the (no-op) cast orders the addu as the original
-    view = &((RenderView *)D_800BE628)[player];
+    view = &((RenderView *)D_800BE628)[player]; // matching: the no-op cast changes the code
     left = right = (s32)(view->right + view->left) * 2;
     top = bottom = (s32)(view->bottom + view->top) * 2;
     left -= size;
@@ -641,7 +641,7 @@ void func_1507DF10(Actor *obj, s32 part) {
 void func_1507DFE4(s32 resource, s32 arg1) {
     s32 savedMode;
     s16 pos[3];
-    f32 vec[3];
+    Vec3f vec;
     u8 unk4F;
     u8 angle;
     s32 unk48;
@@ -651,8 +651,8 @@ void func_1507DFE4(s32 resource, s32 arg1) {
     s32 type;
 
     if (D_800C35EA[0] != 1) {
-        func_15084D70(0, resource, 1, pos, vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
-        yaw = (f32)(angle - 64) * (360.0f / 256.0f) + 180.0f;
+        func_15084D70(0, resource, 1, pos, &vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
+        yaw = (angle - 64) * (360.0f / 256.0f) + 180.0f;
         if (type == 0) {
             kind = 1;
         } else if (type == 1) {
@@ -674,7 +674,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
 s32 func_1507E114(s32 arg0) {
     s32 type;
     s16 pos[3];
-    f32 vec[3];
+    Vec3f vec;
     s32 unk44;
     u8 unk43;
     u8 unk42;
@@ -689,7 +689,7 @@ s32 func_1507E114(s32 arg0) {
         return 0;
     }
     D_800BE9F4 = D_800BE3DF;
-    func_15084D70(0, D_800BE3E0, 1, pos, vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
+    func_15084D70(0, D_800BE3E0, 1, pos, &vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
     return type + 1;
 }
 
@@ -697,19 +697,19 @@ s32 func_1507E114(s32 arg0) {
 void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z) {
     if (obj->ob_matrix_ptr != NULL) {
         MtxF *bone;
-        f32 in[3];
+        Vec3f in;
         f32 out[3];
 
-        in[0] = 0.0f;
-        in[1] = obj->scale_y * 30.0f;
-        in[2] = 0.0f;
+        in.x = 0.0f;
+        in.y = obj->scale_y * 30.0f;
+        in.z = 0.0f;
         bone = obj->ob_matrix_ptr;
         if (obj->type == 1) {
             bone += 12;
         } else if (obj->type == 0x1E) {
             bone += 3;
         }
-        func_15143134(in, out, bone);
+        func_15143134(&in, out, bone);
         *x = out[0];
         *y = out[1];
         *z = out[2];

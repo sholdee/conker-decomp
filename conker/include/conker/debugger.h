@@ -49,11 +49,11 @@ s32 func_16001A6C(f32 arg0);
 void func_16001AB0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* debugger_257350.c */
-u8 *func_16001AD0(u8 *dst, u8 *src, u32 count);
+void *func_16001AD0(void *dst, const void *src, u32 count);
 s32 func_16001B00(u8 *str);
-s32 func_16001B34(u8 *buf, u8 *fmt, ...);
-s32 func_16001B8C(u8 *dst, u8 *src, u32 count);
-s32 func_16001BB4(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args);
+s32 func_16001B34(u8 *buf, const u8 *fmt, ...);
+u8 *func_16001B8C(u8 *dst, const u8 *src, u32 count);
+s32 func_16001BB4(u8 *(*pfn)(u8 *, const u8 *, u32), u8 *arg, const u8 *fmt, va_list args);
 void func_160021FC(DebuggerPft *px, va_list *pap, u8 code, u8 *ac);
 void func_1600288C(void *arg0, unsigned char code);
 s16 func_16002D2C(s16 *pex, u16 *ps);
@@ -81,7 +81,7 @@ s32 func_16000A5C(void);
 s32 func_16000B14(OSThread *thread);
 void func_16000F8C(s32 position, f32 value);
 void func_16001044(s32 position, s32 mode, u32 value);
-void func_160012B0(s32 position, u8 *text);
+void func_160012B0(s32 position, const u8 *text);
 void func_16001338(u8 red, u8 green, u8 blue);
 void func_16001390(s16 left, s16 top, s16 right, s16 bottom);
 u8 *func_160014F0(u8 *destination, u8 character);

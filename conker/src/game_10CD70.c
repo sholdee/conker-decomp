@@ -335,34 +335,34 @@ void func_150E0348(Actor *actor, u8 arg1, s32 arg2) {
 /* Blood-drip emitter callback (D_80089A70): spawns one drop at (x, y, z), flung in a random
  * direction and pushed against the drip's movement (dx, dy, dz). */
 void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
-    f32 position[3];
-    f32 velocity[3];
-    f32 acceleration[3];
+    Vec3f position;
+    Vec3f velocity;
+    Vec3f acceleration;
     f32 scale;
     f32 size_random;
     u32 random_b;
     u32 random_a;
     f32 alpha_random;
 
-    position[0] = x;
-    position[1] = y;
-    position[2] = z;
+    position.x = x;
+    position.y = y;
+    position.z = z;
     random_a = func_150ADA20();
     random_b = func_150ADA20();
     alpha_random = func_150ADA68();
-    func_15143794(random_a & 0xFF, random_b % 65U - 32, alpha_random * 5.87f, velocity);
+    func_15143794(random_a & 0xFF, random_b % 65U - 32, alpha_random * 5.87f, &velocity);
     scale = func_150ADA68() * 0.16900001f + 0.186f;
-    acceleration[0] = 0.0f;
-    acceleration[1] = 0.0f;
-    acceleration[2] = 0.0f;
-    velocity[0] += -dx * D_800BE9A8 * scale;
-    velocity[1] += -dy * D_800BE9A8 * scale;
-    velocity[2] += -dz * D_800BE9A8 * scale;
+    acceleration.x = 0.0f;
+    acceleration.y = 0.0f;
+    acceleration.z = 0.0f;
+    velocity.x += -dx * D_800BE9A8 * scale;
+    velocity.y += -dy * D_800BE9A8 * scale;
+    velocity.z += -dz * D_800BE9A8 * scale;
     alpha_random = func_150ADA68();
     size_random = func_150ADA68();
     random_a = func_150ADA20();
     random_b = func_150ADA20();
-    func_151A26EC(position, acceleration, velocity, 0.986891f, alpha_random * 0.23f + -0.337f,
+    func_151A26EC(&position, &acceleration, &velocity, 0.986891f, alpha_random * 0.23f + -0.337f,
                   size_random * 200.0f + 150.0f, random_a % 26U + 40, random_b % 201U + 55, 30, 20, 0, -1,
                   52, 53, 52, effect->owner, effect->kind);
 }
@@ -393,17 +393,17 @@ void func_150E05F8(WorldObject *obj) {
 
 extern u8 D_80088988;
 /* Effect start and end points (bone space) of the two slots. */
-static const f32 D_800A0F70[2][3] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
-static const f32 D_800A0F88[2][3] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
+static const Vec3f D_800A0F70[2] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
+static const Vec3f D_800A0F88[2] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
 
 /* Spawns a func_15102B38 effect between points D_800A0F70[slot] and D_800A0F88[slot] of the
  * actor's bone D_80088988, starting at the first point in world space. */
 void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     Vec3f start;
     f32 scale;
-    f32 params[2];
-    f32 *src[1];
-    f32 *dst[1];
+    ParticleSize params;
+    const Vec3f *src[1];
+    Vec3f *dst[1];
     f32 rand0;
     s32 randB;
     s32 randA;
@@ -411,15 +411,15 @@ void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     if (actor->ob_matrix_ptr == NULL) {
         return;
     }
-    src[0] = D_800A0F70[slot];
-    dst[0] = &start.x;
+    src[0] = &D_800A0F70[slot];
+    dst[0] = &start;
     func_15145EA4(src, dst, (Mtx *)actor->ob_matrix_ptr + D_80088988, 1);
     scale = 1.0f; // matching: IDO keeps the multiply by 1.0 only through a variable
-    params[1] = func_150ADA68() * scale + 2.0f;
-    params[0] = func_150ADA68() * 14.0f + 28.0f;
+    params.height = func_150ADA68() * scale + 2.0f;
+    params.width = func_150ADA68() * 14.0f + 28.0f;
     randA = func_150ADA20();
     randB = func_150ADA20();
     rand0 = func_150ADA68() * 300.0f + 400.0f;
-    func_15102B38(actor, D_80088988, D_800A0F70[slot], D_800A0F88[slot], params, randA % 3U + 4,
+    func_15102B38(actor, D_80088988, &D_800A0F70[slot], &D_800A0F88[slot], &params, randA % 3U + 4,
                   randB % 156U + 100, rand0, &start, 255, 0, -1, arg2, arg3);
 }

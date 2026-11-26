@@ -196,7 +196,7 @@ void func_15160954(f32 *intensity, f32 *peak, f32 *rate, f32 *delay, LightEffect
 }
 
 /* Creates a light that follows `actor` (see func_15160B74). */
-LightEffect *func_15160A58(Actor *actor, u8 bone, Vec3f *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 eventHandler, u8 argE, s32 argF) {
+LightEffect *func_15160A58(Actor *actor, u8 bone, const Vec3f *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 eventHandler, u8 argE, s32 argF) {
     LightEffect *effect;
     LightEffectHeader header;
     LightAttach attach;
@@ -247,12 +247,12 @@ u8 func_15160B74(LightEffect *effect) {
         return 0;
     }
     if (actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
-        f32 position[3];
+        Vec3f position;
 
-        func_15143134(&attach->offset.x, position, actor->ob_matrix_ptr[attach->bone]);
-        effect->light->x = position[0];
-        effect->light->y = position[1];
-        effect->light->z = position[2];
+        func_15143134(&attach->offset, &position, actor->ob_matrix_ptr[attach->bone]);
+        effect->light->x = position.x;
+        effect->light->y = position.y;
+        effect->light->z = position.z;
     } else {
         effect->light->x = actor->xpos;
         effect->light->y = actor->ypos;
@@ -266,7 +266,7 @@ u8 func_15160B74(LightEffect *effect) {
 }
 
 /* Creates a beam light on `actor` (see func_15160E30). */
-LightEffect *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 scale, u8 arg5, s16 lifetime, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 eventHandler, u8 flagHit, u8 argE, s32 argF) {
+LightEffect *func_15160CDC(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, f32 scale, u8 arg5, s16 lifetime, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 eventHandler, u8 flagHit, u8 argE, s32 argF) {
     LightEffect *effect;
     LightEffectHeader header;
     LightBeam beam;
@@ -321,27 +321,27 @@ s32 func_15160E30(LightEffect *effect) {
         return 0;
     }
     if (actor->ob_matrix_ptr != NULL && (beam->flags & 1) && (actor->unk74 & 0xF) != 0xF) {
-        f32 start[3];
-        f32 dir[3];
+        Vec3f start;
+        Vec3f dir;
         RayHit ray;
-        f32 *in[2];
-        f32 *out[2];
+        const Vec3f *in[2];
+        Vec3f *out[2];
 
-        in[0] = &beam->start.x;
-        in[1] = &beam->end.x;
-        out[0] = start;
-        out[1] = dir;
+        in[0] = &beam->start;
+        in[1] = &beam->end;
+        out[0] = &start;
+        out[1] = &dir;
         func_15145EA4(in, out, actor->ob_matrix_ptr[beam->bone], 2);
         {
             f32 length;
 
-            dir[0] -= start[0];
-            dir[1] -= start[1];
-            dir[2] -= start[2];
+            dir.x -= start.x;
+            dir.y -= start.y;
+            dir.z -= start.z;
             {
                 f32 invLength;
 
-                if (func_15145128(dir, dir, &length, &invLength) == 0) {
+                if (func_15145128(&dir, &dir, &length, &invLength) == 0) {
                     effect->light->x = actor->xpos;
                     effect->light->y = actor->ypos;
                     effect->light->z = actor->zpos;
@@ -351,7 +351,7 @@ s32 func_15160E30(LightEffect *effect) {
                 }
             }
         }
-        func_15081690(actor, start[0], start[1], start[2], dir[0], dir[1], dir[2], &ray, 0.0f, 0, 0, 1, -1, 0, 0);
+        func_15081690(actor, start.x, start.y, start.z, dir.x, dir.y, dir.z, &ray, 0.0f, 0, 0, 1, -1, 0, 0);
         hitType = ray.hitType;
         if (hitType == 0) {
             effect->light->x = actor->xpos;
@@ -557,7 +557,7 @@ LightEffect *func_151615F8(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg
 }
 
 /* Sends event `event` to every light effect (of type lightType, for the addressed events). */
-void light_sendEvent(u8 lightType, u8 event, s32 arg2) {
+void light_sendEvent(u8 lightType, u8 event, void *arg2) {
     LightEventMsg message;
 
     message.lightType = lightType;
@@ -1563,13 +1563,13 @@ s32 func_151643F8(LightEffect *effect) {
 
 /* Moves the light to the point transformed by its matrix. */
 void func_1516441C(LightEffect *effect, LightTransformed *point) {
-    LightTransformed *in;
+    f32 *in;
     f32 *out;
     f32 position[3];
 
-    in = point;
+    in = &point->position.x;
     out = &position[0];
-    func_15145CD0(point->mtx, &in, &out, 1);
+    func_15145CD0(point->placement, &in, &out, 1);
     effect->light->x = position[0];
     effect->light->y = position[1];
     effect->light->z = position[2];

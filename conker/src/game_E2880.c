@@ -32,7 +32,7 @@ OwnerSparkEffect *func_150B53D0(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     data.unkCAccum = 0.0f;
 
     // matching: `duration != -1` compiles to sltu/xori; IDO only emits this branchy form for ?:
-    effect = (OwnerSparkEffect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x24, -1,
+    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x24, -1,
                                                (duration == -1) ? 0 : 1, 0x23, 0x10, arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));

@@ -20,7 +20,7 @@ s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4,
         for (i = 0; i < *numDLists; i++) {
             (*dlists)[i] = (Gfx *)((u8 *)(*dlists)[i] + (s32)header);
             func_1510CE60((*dlists)[i], 0, 1, 0x3E, &D_800DF9B8[model]);
-            func_15168E54((*dlists)[i], header);
+            func_15168E54((*dlists)[i], (s32)header);
         }
         D_800E0148[model] = header;
     } else {
@@ -114,7 +114,7 @@ void func_15030158(ModelAttachment *att, s32 immediate) {
         if (immediate) {
             func_10004074(att->mtx);
         } else {
-            func_100043B4((s32 *)att->mtx, 4);
+            func_100043B4(att->mtx, 4);
         }
     }
     if (att->offset != NULL) {
@@ -299,7 +299,7 @@ void func_15030468(void) {
                             guMtxL2F(boneMtx, parentMtx);
                         }
                     } else {
-                        boneMtx = (f32 (*)[4])((Mtx *)owner->ob_matrix_ptr + att->bone);
+                        boneMtx = (f32 (*)[4])(owner->ob_matrix_ptr + att->bone);
                     }
                     if (att->mtx != NULL) {
                         mtx = att->mtx;
@@ -651,7 +651,7 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
     alpha = att->alpha;
     v = func_1506196C(owner, view);
     if (v != 0xFF) {
-        alpha = (s32)((u32)v * alpha) >> 8;
+        alpha = (v * alpha) >> 8;
     }
     if (alpha < 0xFF) {
         gSPSegment(gdl++, 8, D_80082FC0);
@@ -698,11 +698,11 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
             }
             if ((owner->drawtype != 5) && (owner->unk302 != 0) && (owner->unk66 & 0xC) && !i) {
                 gdl = func_1515E544(gdl, owner->unk304[view], owner->unk301, owner->unk302,
-                                    owner->unk314[D_800BE9C0]);
+                                    &owner->unk314[D_800BE9C0]);
             } else {
-                gdl = func_1515D914(gdl, view, (s32)owner->xpos, (s32)owner->ypos, (s32)owner->zpos,
+                gdl = func_1515D914(gdl, view, owner->xpos, owner->ypos, owner->zpos,
                                     owner->floorMaterial, owner->unk304[view], owner->unk301,
-                                    owner->unk314[D_800BE9C0], &owner->unk302, 2,
+                                    &owner->unk314[D_800BE9C0], &owner->unk302, 2,
                                     owner->unk1DD, v, D_800D9E28);
             }
         }
@@ -719,11 +719,12 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
     gSPSegment(gdl++, 1, att->vtx[D_800BE9C0]);
     segId = att->seg6Id;
     if (segId != 0) {
-        v = func_1510D0EC((void *)segId, segScratch, 0x3E, 0);
+        // matching: the ids go through a pointer conversion; a plain int argument numbers IDO's temps differently
+        v = func_1510D0EC((s32)(void *)segId, segScratch, 0x3E, 0);
         gSPSegment(gdl++, 6, v);
     }
     if (att->seg7Id != 0) {
-        v = func_1510D0EC((void *)att->seg7Id, segScratch, 0x3E, 0);
+        v = func_1510D0EC((s32)(void *)att->seg7Id, segScratch, 0x3E, 0);
         gSPSegment(gdl++, 7, v);
     }
     if (arg4 == 0) {
@@ -897,7 +898,7 @@ void func_15031C14(ModelAttachment *att) {
         case 0x37:
         case 0x4B:
         case 0x4C:
-            func_1000FD38((SoundRecordCallback)func_15033BDC, att, (s32)owner);
+            func_1000FD38(func_15033BDC, att, (s32)owner);
             if (att->model == 0x37) {
                 func_15100180(owner);
             }
@@ -2222,7 +2223,7 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
     copy_frame:
         anim->frame = ownerAnim->frame;
         anim = att->anim;
-        if (syncAll && (anim->unk39 != 0 || anim->unk215 == 0)) {
+        if (syncAll && (anim->unk39 != 0 || anim->prevHeader[5] == 0)) {
             anim->unk3A = ownerAnim->unk3A;
             att->anim->unk3C = ownerAnim->unk3C;
             anim = att->anim;
@@ -2546,12 +2547,12 @@ s32 func_150339C8(ModelAttachment *att, Actor *owner) {
     if (D_800C35EA[0] != 1) {
         if (D_800BEA0C != 0) {
             if (att->unk3C != 0) {
-                func_1000FD38((SoundRecordCallback)func_15033BDC, att, (s32)owner);
+                func_1000FD38(func_15033BDC, att, (s32)owner);
             }
             att->unk3C = 0;
         } else if (att->unk3C == 0) {
             att->unk3C = func_1000FA64(0x448, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
-                                       500, (SoundRecordCallback)func_15033BDC, att, (s32)owner, 0, 0) |
+                                       500, func_15033BDC, att, (s32)owner, 0, 0) |
                          0x80000000;
         }
     }
@@ -2568,41 +2569,29 @@ s32 func_15033AD8(ModelAttachment *att, Actor *owner) {
             att->unk3C += D_800BE9E4;
         } else {
             att->unk3C = func_1000FA64(0x513, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
-                                       500, (SoundRecordCallback)func_15033BDC, att, (s32)owner, 0, 0);
+                                       500, func_15033BDC, att, (s32)owner, 0, 0);
             att->unk38 = 0x513;
         }
     }
     return 0;
 }
 
-/* Sound started by the attachment hooks (func_1000FA64); only the fields used here. */
-struct AttachmentSound {
-    /* 0x00 */ u16 unk0;
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x10];
-    /* 0x18 */ ModelAttachment *att;
-    /* 0x1C */ Actor *owner;
-    /* 0x20 */ u8 pad20[0x4];
-    /* 0x24 */ u16 unk24;
-};
-
-/* Sound callback: tracks the owner's position and plays the model's follow-up sounds. Returns 1
- * when the sound should stop. */
-s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+/* Sound record callback of the sounds the attachment hooks start (func_1000FA64 with the attachment
+ * and its owner as the parameters): tracks the owner's position and plays the model's follow-up
+ * sounds. Returns 1 when the sound should stop. */
+s32 func_15033BDC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound) {
     ModelAttachment *att;
     Actor *owner;
     ActorCtl *unk;
 
-    att = sound->att;
-    owner = sound->owner;
+    att = record->callback_param1.ptr;
+    owner = record->callback_param2.obj;
     if ((att != NULL) && (owner != NULL) && (owner->type != 0)) {
-        sound->x = owner->xpos;
-        sound->y = owner->ypos;
-        sound->z = owner->zpos;
+        record->x = owner->xpos;
+        record->y = owner->ypos;
+        record->z = owner->zpos;
 
-        if (*arg2 != 0) {
+        if (*volume != 0) {
             if (att->model == 0x37) {
                 s32 lastState = att->unk38;
                 s32 sfxId = -1;
@@ -2623,7 +2612,7 @@ s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg
                         if (att->unk38 == 0x513) {
                             att->unk38 = 0x3A1;
                             att->unk3C = func_1000FA64(0x3A1, owner->xpos, owner->ypos,
-                                                       owner->zpos, 32000, 1000, 500, (SoundRecordCallback)func_15033BDC, att,
+                                                       owner->zpos, 32000, 1000, 500, func_15033BDC, att,
                                                        (s32)owner, 0, 0);
                             return 1;
                         }
@@ -2634,11 +2623,11 @@ s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg
         }
 
         if (att->model == 0x37) {
-            if (sound->unk24 != 0) {
-                func_100111C8(sound->unk24);
-                sound->unk24 = 0;
+            if (record->sound_id != 0) {
+                func_100111C8(record->sound_id);
+                record->sound_id = 0;
             }
-            *arg6 = 0;
+            *sound = 0;
             return 0;
         }
     }

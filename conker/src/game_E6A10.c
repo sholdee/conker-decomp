@@ -135,8 +135,8 @@ s32 func_150B963C(ModelParticle *particle) {
                     def.unk50 = particle->floor.material;
                     spawned = func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), func_150ADA20() & 0xFF,
-                                            500.0f, 500.0f, 0, (s32)&particle->floor.tri, particle->unk14C,
-                                            particle->unk168, 0, 8, particle->header.owner, particle->header.kind);
+                                            500.0f, 500.0f, NULL, &particle->floor.tri, particle->link.model,
+                                            particle->link.unk1C, 0, 8, particle->header.owner, particle->header.kind);
                     if (spawned != 0) {
                         /* the 8-byte extra block after the particle and its motion axes (0x110 + 0x18); 4 bytes past extra are copied too */
                         memcpy((u8 *)spawned + 0x128, &extra, 8);
@@ -174,8 +174,8 @@ s32 func_150B963C(ModelParticle *particle) {
                 burst.growthRange = 0.31f;
                 burst.speedBase = 5.0f;
                 burst.speedRange = 7.0f;
-                burst.unk58 = particle->unk14C;
-                burst.unk5C = particle->unk168;
+                burst.unk58 = particle->link.model;
+                burst.unk5C = particle->link.unk1C;
                 burst.render.unk0 = 0;
                 burst.render.setGeometryMode = 0x220005;
                 burst.render.clearGeometryMode = 0x1D0600;

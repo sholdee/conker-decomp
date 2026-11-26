@@ -2,16 +2,17 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Creates a trail object from a spawn description, motion block and render settings. */
-MotionTrail *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
-                           s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
-                           s32 arg12, u8 arg13, s32 arg14) {
+/* Creates a trail object from a spawn description, motion block and render settings. Returns the MotionTrail
+ * as void *: callers whose params extend TrailParams (extraSize bytes) keep it in their own view. */
+void *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
+                    s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
+                    CollisionHit *hit, u8 arg13, s32 arg14) {
     MotionTrail *trail;
     TrailParams *params;
 
     spawn->kind = 1;
     trail = func_15147A80(spawn, extraSize + sizeof(TrailParams), sizeof(MotionTrailPoint), 1, 0, 1, arg9, arg10,
-                          arg12, arg13, arg14);
+                          hit, arg13, arg14);
     if (trail == NULL) {
         return NULL;
     }
@@ -80,7 +81,7 @@ s8 func_15147EB8(MotionTrail *trail) {
     return ret;
 }
 
-extern s32 D_800915A4;
+extern Texture D_800915A4; /* addr is set to the trail texture before each draw */
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -119,7 +120,7 @@ Gfx *func_1514803C(MotionTrail *trail, Gfx *gfx, s16 arg2) {
 
     params = trail->params;
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->buffers, arg2, (trail->head.tmpl.itemCount - 1) * 2 * sizeof(Vtx), (void **)&vtx, 0);
+        func_151D5D60(trail->buffers, arg2, (trail->head.tmpl.itemCount - 1) * 2 * sizeof(Vtx), &vtx, 0);
         if (vtx == NULL) {
             return gfx;
         }
@@ -132,7 +133,7 @@ Gfx *func_1514803C(MotionTrail *trail, Gfx *gfx, s16 arg2) {
             points = trail->points;
             tex = func_1514306C(0, params->motion.texture, 0, 2);
             if (tex != D_800DD1B0) {
-                D_800915A4 = D_80091564[params->motion.texture];
+                D_800915A4.addr = D_80091564[params->motion.texture];
                 gfx = func_150950D4(gfx, &D_800915A4, 0, 0, 0, 0, 2, 0x100, 0x100, (params->motion.flags & 0x80) ? 0x3E : 3);
                 D_800DD1B0 = tex;
             }
@@ -372,7 +373,7 @@ s32 func_15148BA4(MotionTrail *trail) {
             position.x = points[trail->head.start].pos.x;
             position.y = oldPosition.y;
             position.z = points[trail->head.start].pos.z;
-            if (func_15046C80(&position.x, 0, points[trail->head.start].pos.y,
+            if (func_15046C80(&position, 0, points[trail->head.start].pos.y,
                               &trail->collision) != 0) {
                 if (trail->collision.source == 3) {
                     callback = params->hitKind3Fn;

@@ -67,12 +67,13 @@ s32 func_151B85AC(BulletParticle *particle) {
 
 /* Draws the particle with the default particle drawer. */
 void func_151B863C(BulletParticle *particle, s16 viewport) {
-    func_1513FA70(particle, viewport);
+    func_1513FA70(&particle->head, viewport);
 }
 
 /* Starts a BloodTrail effect (emitter 3) that tracks the bullet's position. */
 BloodTrail *func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
-    BloodTrailDesc20 desc;
+    s32 pad; // matching: stack space
+    BloodTrailDesc desc;
 
     desc.radius = 10.0f;
     desc.x = &bullet->head.pos.x;
@@ -89,34 +90,34 @@ BloodTrail *func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
 /* Emitter callback (D_80089B08): spawns one particle at (x, y, z), flung in a random direction and
  * pushed against the emitter's movement (dx, dy, dz). */
 void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
-    f32 position[3];
-    f32 velocity[3];
-    f32 acceleration[3];
+    Vec3f position;
+    Vec3f velocity;
+    Vec3f acceleration;
     f32 push;
     f32 random_c;
     u32 random_b;
     u32 random_a;
     f32 random_f;
 
-    position[0] = x;
-    position[1] = y;
-    position[2] = z;
+    position.x = x;
+    position.y = y;
+    position.z = z;
     random_a = func_150ADA20();
     random_b = func_150ADA20();
     random_f = func_150ADA68();
-    func_15143794(random_a & 0xFF, random_b % 65U - 32, random_f * 945.0f * 0.00999999977648f, velocity);
+    func_15143794(random_a & 0xFF, random_b % 65U - 32, random_f * 945.0f * 0.00999999977648f, &velocity);
     push = (func_150ADA68() * 157.0f + 604.0f) * 0.00100000005f;
-    acceleration[0] = 0.0f;
-    acceleration[1] = 0.0f;
-    acceleration[2] = 0.0f;
-    velocity[0] += -dx * D_800BE9A8 * push;
-    velocity[1] += -dy * D_800BE9A8 * push;
-    velocity[2] += -dz * D_800BE9A8 * push;
+    acceleration.x = 0.0f;
+    acceleration.y = 0.0f;
+    acceleration.z = 0.0f;
+    velocity.x += -dx * D_800BE9A8 * push;
+    velocity.y += -dy * D_800BE9A8 * push;
+    velocity.z += -dz * D_800BE9A8 * push;
     random_f = func_150ADA68();
     random_c = func_150ADA68();
     random_a = func_150ADA20();
     random_b = func_150ADA20();
-    func_151A26EC(position, acceleration, velocity, 1.0f, (random_f * 157.0f + -151.0f) * 0.00100000005f,
+    func_151A26EC(&position, &acceleration, &velocity, 1.0f, (random_f * 157.0f + -151.0f) * 0.00100000005f,
                   random_c * 55.0f + 75.0f, random_a % 26U + 25, random_b % 101U + 100, 10, 25, 0, -1, 0, 0, 0,
                   effect->owner, effect->kind);
 }

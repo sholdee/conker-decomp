@@ -228,7 +228,7 @@ extern const s32 D_8009F818[1];
 extern const f32 D_8009F81C[1];
 
 /* game_DDF10.c */
-void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *outPos, s16 *outAngle);
+void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f *outPos, s16 *outAngle);
 void func_150B0C34(Actor *owner);
 void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
 void func_150B0CE0(DDB60Effect *effect, s32 arg1, u8 arg2);
@@ -478,13 +478,12 @@ s32 func_150DBD70(u8 kind);
 s32 func_150DC558(StreamActor *actor);
 
 /* game_10B380.c */
-typedef struct TrapTrigger TrapTrigger;
 typedef struct TrapEffect TrapEffect;
 typedef struct EffectSpawnSource EffectSpawnSource;
-void func_150DDED0(TrapTrigger *trap);
+void func_150DDED0(WorldObject *trap);
 s32 func_150DDF88(TrapEffect *obj);
-s32 func_150DDFAC(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5);
-s32 func_150DE12C(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5);
+s32 func_150DDFAC(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
+s32 func_150DE12C(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 s32 func_150DE2A4(QuadSprite *sprite);
 void func_150DE2C4(BillboardParticle *particle);
 
@@ -558,7 +557,7 @@ void func_150E35DC(s32 handle);
 void func_150E36BC(s32 handle, s32 *x, s32 *y, s32 *z);
 void func_150E3738(HomingEffect *arg0);
 void func_150E4010(Obj4010 *obj);
-void func_150E411C(s32 arg0);
+void func_150E411C(struct Game1EF500Trail *trail);
 s32 func_150E4174(Obj4174 *obj);
 
 /* game_111670.c */
@@ -609,7 +608,7 @@ void func_150EB090(s32 actor, s32 side, s32 strength);
 
 /* game_11F780.c */
 typedef struct SwayObject SwayObject;
-s32 func_150F22D0(f32 *out, Actor *owner, u8 slot);
+s32 func_150F22D0(Vec3f *out, Actor *owner, u8 slot);
 s32 func_150F237C(s32 arg0, s32 arg1);
 void func_150F2390(Actor *owner, s32 slot, s32 arg2);
 s32 func_150F23E0(SwayObject *obj);
@@ -630,7 +629,7 @@ void func_150F5340(void);
 /* game_124920.c */
 typedef struct TrailPuff TrailPuff;
 typedef struct ProjectileParticle ProjectileParticle;
-void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsDir, s32 arg5, f32 speed, f32 arg7,
+void func_150F7470(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *target, u8 targetIsDir, RayHit *knownHit, f32 speed, f32 arg7,
                    f32 arg8, Actor *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14, s8 arg15, s32 sound,
                    u8 arg17, u8 arg18, s32 arg19);
 s8 func_150F78B4(ProjectileParticle *obj);
@@ -687,12 +686,18 @@ Gfx *func_150FB4C0(Gfx *gfx, MtxF viewMtx);
 
 /* game_129DE0.c */
 typedef struct Effect_129DE0 Effect_129DE0;
+/* An effect that holds a EffectHeader at 0x38 (see func_150FC974). */
+struct Effect_129DE0 {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ u8 pad28[0x10];
+    /* 0x38 */ EffectHeader *unk38;
+};
 s32 func_150FC930(Actor *obj, s32 arg1, s32 arg2);
 void func_150FC974(Effect_129DE0 *effect);
 void func_150FC9A4(Effect_129DE0 *effect);
 
 /* game_129E80.c */
-void func_150FC9D0(TimedEffect *obj);
+void func_150FC9D0(Effect_129DE0 *obj);
 
 /* game_129EE0.c */
 typedef struct Actor150FD514 Actor150FD514;
@@ -712,7 +717,7 @@ void func_150FDCD8(Actor150FD514 *actor);
 void func_150FDD10(s32 arg0);
 
 /* game_12B7D0.c */
-s32 func_150FE320(Actor *obj, u8 arg1, s32 arg2);
+struct Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2);
 void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *outOrigin);
 void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3);
 void func_150FE794(Actor *obj, s32 arg1, Vec3f *out);
@@ -740,7 +745,7 @@ typedef struct Obj15102884 Obj15102884;
 Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport);
 s32 func_151022AC(Owner151022AC *obj);
 s32 func_151025F4(Owner151025F4 *obj, s32 arg1);
-s32 func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5);
+struct EffectParticle *func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5);
 void func_151027E8(Actor *actor);
 s32 func_1510281C(Owner1510281C *owner, s16 key);
 s32 func_15102884(Obj15102884 *obj, s32 arg1);
@@ -748,10 +753,10 @@ s32 func_151028AC(Owner1510281C *owner, s16 key);
 
 /* game_12FDD0.c */
 typedef struct BoneBeamParticle BoneBeamParticle;
-QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
+QuadSprite *func_15102920(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
                           s32 surfaceFlags, u8 arg8, s32 arg9);
-BoneBeamParticle *func_15102B38(Actor *target, u8 bone, Vec3f *start, Vec3f *end, ParticleSize *size, s16 lifetime,
-                                u8 alpha, f32 flashSize, Vec3f *flashPos, u8 viewMask, s32 extraSize, s16 node,
+BoneBeamParticle *func_15102B38(Actor *target, u8 bone, const Vec3f *start, const Vec3f *end, ParticleSize *size,
+                                s16 lifetime, u8 alpha, f32 flashSize, Vec3f *flashPos, u8 viewMask, s32 extraSize, s16 node,
                                 u8 arg12, s32 arg13);
 void func_15102D50(BoneBeamParticle *particle, s32 arg1, u8 arg2);
 s32 func_15102D90(BoneBeamParticle *particle);
@@ -761,7 +766,9 @@ void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 ar
 /* game_130B40.c */
 void func_15103690(s32 arg0);
 void func_151036B4(Vec3f *origin, u8 arg1, s32 arg2);
-s32 func_151037DC(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+struct SoundRecord;
+/* A sound record callback (SoundRecordCallback, conker/sound.h) that never stops its record. */
+s32 func_151037DC(struct SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 
 /* game_1312F0.c */
 void func_15103E40(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u8 arg5, s32 arg6);
@@ -785,7 +792,6 @@ s32 func_1513BBFC(DynModel *obj, s16 viewport);
 s32 func_1513BEB0(DynModel *obj);
 
 /* game_16EE20.c */
-typedef struct Source15141F78 Source15141F78;
 typedef struct Msg151419D0 Msg151419D0;
 typedef struct LinkedObject151419D0 LinkedObject151419D0;
 typedef struct Args151420F8 Args151420F8;
@@ -798,13 +804,12 @@ s32 func_15141C0C(Actor *actor);
 s32 func_15141CC0(u32 type);
 void func_15141DA4(void *actor, s32 selector, s32 handler);
 void func_15141E38(Actor *actor, s32 handler);
-void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5);
-s32 func_151420F8(s32 actor);
+void func_15141F78(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5);
+s32 func_151420F8(Actor *actor);
 void func_15142180(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB);
 extern const Args151420F8 D_800A5200;
 
 /* game_16F770.c */
-typedef struct Tri15144E80 Tri15144E80;
 s32 func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line);
 s32 func_151422DC(s32 id, const char *name, s32 min, s32 max, s32 value, const char *file, s32 line);
 s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -827,24 +832,24 @@ f32 func_15142B44(f32 t);
 Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
+Gfx *func_15142E24(Gfx *gfx, EffectTexture *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
                    u8 *needSync, s32 argA);
 Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 s16 func_15143044(u8 arg0, s32 arg1);
-s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode);
-void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx);
+s32 func_1514306C(EffectTexture *arg0, s32 arg1, s32 arg2, u8 mode);
+void func_15143134(const Vec3f *offset, Vec3f *out, void *mtx);
 void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
-void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out);
+void func_151436B4(f32 yaw, f32 pitch, f32 length, Vec3f *out);
 void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-void func_15143794(s16 yaw, s16 pitch, f32 length, f32 *out); /* (yaw, pitch, length) -> vector */
-void func_15143834(s16 yaw, s16 pitch, f32 length, f32 *out);
+void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out); /* (yaw, pitch, length) -> vector */
+void func_15143834(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 void func_15143874(s16 angle, f32 length, f32 *x, f32 *z);
 TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key);
 void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);
 s32 func_15143DA8(s32 *value, s32 lo, s32 hi);
 s32 func_15143E08(Actor *actor);
 s32 func_15143E24(Actor *actor);
-f32 func_15143E64(Vec3f *v);
+f32 func_15143E64(const Vec3f *v);
 u8 func_15143E94(s32 arg0, s32 arg1);
 s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags);
 void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1, u8 a1,
@@ -855,7 +860,7 @@ s32 func_151444DC(s32 value, s32 hi, s32 lo);
 f32 func_15144528(f32 value, f32 hi, f32 lo);
 f32 func_15144598(TriggerZone *region);
 f32 func_1514462C(s32 arg0);
-void func_1514470C(TriggerZone *region, f32 *out);
+void func_1514470C(TriggerZone *region, Vec3f *out);
 f32 func_15144A74(Vec3f *a, Vec3f *b); /* dot product */
 /* (s32 index); declared without a prototype: game_1ED0F0.c passes a second argument */
 f32 func_15144AA8();
@@ -867,7 +872,7 @@ f32 func_15144C8C(f32 a, f32 b);
 /* (f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDepth, u8 viewport); declared without a prototype:
  * func_151408A4 passes its s16 view without narrowing it */
 s32 func_15144CEC();
-s32 func_15144E80(Tri15144E80 *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal); /* triangle edges + normal */
+s32 func_15144E80(CollisionTri *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal); /* triangle edges + normal */
 void func_151450B4(Vec3f *a, Vec3f *b, Vec3f *out);
 s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength); /* normalize */
 s32 func_151451F0(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, f32 maxDist, Vec3f *hitNear, Vec3f *hitFar,
@@ -886,13 +891,14 @@ s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f 
 u8 func_15145C90(s32 index);
 void func_15145CD0(WorldObject *placement, f32 **in, f32 **out, s32 count);
 void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count);
-void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count);
+void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count);
 s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v); /* two axes perpendicular to a direction */
-void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos, u8 flags,
+void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos, u8 flags,
                     s32 arg8);
 u8 func_151464B8(s16 *flags);
 void func_15146508(Actor *a, Actor *b);
-s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets, f32 **results, s32 count);
+s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, const Vec3f **offsets, Vec3f **results,
+                  s32 count);
 s32 func_1514672C(Vec3f *pos);
 void func_151467A4(f32 *timer, f32 maxTime, f32 *target, f32 lo, f32 mid, f32 hi, f32 rate, f32 *value);
 extern const Vec3f D_800A5480; /* zero vector */
@@ -917,22 +923,25 @@ void func_151475D8(s32 actor, s32 side, s32 strength);
 /* game_174BF0.c */
 void func_15147740(EffectObj *obj);
 void func_151478D0(EffectObj *obj);
-void func_151478F4(EffectObj *obj);
-void func_15147928(EffectObj *obj);
+/* func_151478F4 and func_15147928 take any view of a func_15147A80 object. */
+void func_151478F4(void *obj);
+void func_15147928(void *obj);
 void func_1514795C(EffectObj *obj);
 void func_151479E0(EffectObj *obj);
 void func_15147A30(EffectObj *obj);
-EffectObj *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
-                         s32 drawKind, s32 arg6, s32 arg7, EffectObjUnk60 *arg8, u8 arg9, s32 argA);
+/* Returns the new object; each caller keeps it in its own view (TrackerTrail, MotionTrail, ...). */
+void *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
+                    s32 drawKind, s32 arg6, s32 arg7, CollisionHit *hit, u8 arg9, s32 argA);
 void *func_15147C4C(void *gfx, EffectObj *obj, s16 arg2);
 void func_15147D1C(EffectObj *obj, s32 arg1, u8 arg2);
 void func_15147D64(s32 arg0, u8 arg1);
 
 /* game/done/game_1765E0.c */
-TimedEffect *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags, u8 callbackSet,
-                           s32 dataSize, u8 owner, s32 list);
-TimedEffect *func_151491F4(s16 timer, s8 expireCallback, s8 tickCallback, u8 flags, u8 callbackSet, s32 dataSize,
-                           u8 owner, s32 list);
+/* Both return a TimedEffect followed by dataSize bytes of its kind's data (the kind's own type). */
+void *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags, u8 callbackSet,
+                    s32 dataSize, u8 owner, s32 list);
+void *func_151491F4(s16 timer, s8 expireCallback, s8 tickCallback, u8 flags, u8 callbackSet, s32 dataSize,
+                    u8 owner, s32 list);
 void func_15149264(TimedEffect *object);
 void func_15149318(TimedEffect *object);
 void func_1514933C(TimedEffect *object);
@@ -946,7 +955,6 @@ void func_15149514(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *ob
 
 /* game_179F30.c */
 typedef struct ToggleTarget ToggleTarget;
-typedef struct ModeTarget ModeTarget;
 s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
 s32 func_1514D15C(Actor *obj);
 s32 func_1514D310(Actor *owner);
@@ -1001,7 +1009,7 @@ s32 func_1514E89C(ToggleTarget *target, s32 msg, s32 arg);
 s32 func_1514E920(s32 handle, s32 msg, s32 arg);
 void func_1514E9DC(s32 handle, s32 msg, s32 arg);
 void func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg);
-s32 func_1514EA1C(ModeTarget *target, s32 msg, s32 arg);
+s32 func_1514EA1C(ActorEmitterProcess *target, s32 msg, s32 arg);
 void func_1514EB6C(ToggleTarget *target, s32 msg, s32 arg);
 s32 func_1514EB8C(s32 handle, s32 msg, s32 arg);
 Attachment *func_1514EBA4(void *handle, s16 type, s32 extraSize);
@@ -1037,7 +1045,21 @@ extern const Vec3f D_800A5958;
 extern const Vec3f D_800A5964;
 
 /* game_182C30.c */
-typedef struct PlayerMarker PlayerMarker;
+/*
+ * Type 0x50 object: a marker over player movement_obj[playerId], made of a white point light and a sprite
+ * (*D_800E03E0) that bob 160 units above the player.
+ */
+typedef struct PlayerMarker {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 playerId;
+    /* 0x11 */ u8 state;
+    /* 0x12 */ u8 bobPhase;
+    /* 0x13 */ u8 pad13;
+    /* 0x14 */ PointLight *light;
+    /* 0x18 */ Mtx mtx[2];
+    /* 0x98 */ f32 heightOffset;
+} PlayerMarker;
+
 PlayerMarker *func_15155780(s32 playerId, s32 owner);
 void func_151557FC(s32 playerId, s32 duration, f32 heightOffset);
 void func_1515589C(PlayerMarker *marker);
@@ -1146,6 +1168,34 @@ Gfx *func_151668B8(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3);
 /* game_1944C0.c */
 typedef struct SpriteFx SpriteFx;
 typedef struct ModelFxData ModelFxData;
+/*
+ * Data of a type 0x10 model effect (ModelFx in game_1944C0.c); func_15168BE4 copies a template of it into
+ * the object. The callback-2 update, func_15169C70, reads it as Debris in game_197120.c.
+ */
+struct ModelFxData {
+    /* 0x00 */ f32 position[3];
+    /* 0x0C */ f32 rotation[3];
+    /* 0x18 */ f32 velocity[3];
+    /* 0x24 */ f32 spin[3];
+    /* 0x30 */ f32 scale[3];
+    /* 0x3C */ s32 life;
+    /* 0x40 */ Gfx *displayList;
+    /* 0x44 */ u32 pad44;
+    /* 0x48 */ f32 friction;
+    /* 0x4C */ f32 bounce;
+    /* 0x50 */ f32 spinDamp;
+    /* 0x54 */ u8 callback;     /* index into D_8008CA20 */
+    /* 0x55 */ u8 primA;
+    /* 0x56 */ u8 tileUlt;
+    /* 0x57 */ u8 phase;
+    /* 0x58 */ u8 flags;
+    /* 0x59 */ u8 floorOffset;
+    /* 0x5A */ u8 modelId;      /* the func_1518C900 resource displayList came from */
+    /* 0x5B */ u8 kind;
+    /* 0x5C */ u8 renderMode;
+    /* 0x5D */ u8 combineMode;
+    /* 0x5E */ u8 pad5E[2];
+};
 typedef struct ModelFx ModelFx;
 typedef struct DLCommand DLCommand;
 void func_15167010(void);
@@ -1155,7 +1205,22 @@ void func_151671E8(void);
 void func_15167310(void);
 Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list);
 void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
-void func_15167AD8(SpriteFx *src, u8 owner, s32 list);
+/* The 0x18-byte template func_15167AD8 copies into a new SpriteFx from its anim field on. */
+typedef struct SpriteFxTemplate {
+    /* 0x00 */ EffectTexture *anim;
+    /* 0x04 */ s16 frame;
+    /* 0x06 */ s16 frameStep;
+    /* 0x08 */ s16 x;
+    /* 0x0A */ s16 y;
+    /* 0x0C */ s16 z;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s8 fadeStep;
+    /* 0x13 */ u8 pad13;        /* alpha, set by func_15167AD8 */
+    /* 0x14 */ s8 callback;     /* index into D_8008CA20 */
+    /* 0x15 */ u8 unk15;
+} SpriteFxTemplate;
+void func_15167AD8(SpriteFxTemplate *src, u8 owner, s32 list);
 void func_15167B44(SpriteFx *fx);
 Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2);
 BillboardParticle *func_15167D84(BillboardTemplate *src, s32 altType, s32 extra, s8 onDeath, u8 owner, s32 list);
@@ -1173,13 +1238,13 @@ void func_15168BAC(ModelFx *fx);
 void func_15168BE4(ModelFxData *src, u8 owner, s32 list);
 Gfx *func_15168C4C(Gfx *gfx, ModelFx *fx, s32 arg2);
 void func_15168E34(s32 *addr, s32 offset);
-void func_15168E54(s8 *dl, s32 offset);
+void func_15168E54(Gfx *dl, s32 offset);
 void func_15168F08(DLCommand *dl, s32 base);
 void func_15168F84(s32 group, s32 *first, s32 *last);
 /* void func_15169040(s32 event, u8 eventType) is declared in the files that call it:
    game_16F770.c calls it with two more arguments. */
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
-void func_15169260(void *types, s32 count, s32 event, u8 eventType);
+void func_15169260(const s32 *types, s32 count, s32 event, u8 eventType);
 void func_1516944C(s32 type, s32 event, u8 eventType);
 void func_151695F0(Actor *actor, u8 eventType);
 void func_1516962C(s32 type, Actor *actor, u8 eventType);
@@ -1253,20 +1318,18 @@ typedef struct QueueNode QueueNode;
 typedef struct Queue Queue;
 void func_1518AA10(Queue *arg);
 Queue *func_1518AADC(s32 capacity, s16 lifetime, u8 flags);
-QueueNode *func_1518AB60(s32 value, u8 releaseFunc);
-s32 func_1518ABD0(Queue *queue, s32 value, u8 releaseFunc);
+QueueNode *func_1518AB60(void *value, u8 releaseFunc);
+s32 func_1518ABD0(Queue *queue, void *value, u8 releaseFunc);
 
 /* game_1BD8B0.c */
-typedef struct Game1BD8B0Object Game1BD8B0Object;
 typedef struct BoundEffect BoundEffect;
 void func_15190400(BoundEffect *effect, ActorRef *msg, u8 type);
-void func_15190454(Game1BD8B0Object *obj);
-void func_15190464(Game1BD8B0Object *obj);
+void func_15190454(LightEffect *obj);
+void func_15190464(LightEffect *obj);
 
 /* game_1BDA00.c */
 typedef struct PeriodicObject PeriodicObject;
-typedef struct HandlerObject HandlerObject;
-void func_15190550(HandlerObject *obj, s32 arg1, u8 event);
+void func_15190550(AnchorEmitter *obj, union ActorMsg *msg, u8 event);
 s32 func_151905BC(PeriodicObject *obj);
 void func_151906C4(PeriodicObject *obj);
 
@@ -1330,8 +1393,9 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
 Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index);
 
 /* game_1D3FC0.c */
-void func_151A6B10(struct DefParticleHead *obj);
-void func_151A6B3C(struct DefParticleHead *obj);
+struct ZoneEmitter; /* include/conker/particle.h */
+void func_151A6B10(struct ZoneEmitter *obj);
+void func_151A6B3C(struct ZoneEmitter *obj);
 void func_151A6B68(Actor *target, s32 owner);
 ListObj *func_151A6BD8(s32 owner);
 
@@ -1384,7 +1448,7 @@ void func_151AB788(LoopSoundFx *fx);
 void func_151AB7D8(LoopSoundFx *fx);
 void func_151AB828(ActorTask *task);
 void func_151AB854(ActorTask *task);
-void func_151AB920(s32 arg0, s32 arg1);
+void func_151AB920(Actor *actor, s32 arg1);
 void func_151AB930(Actor *actor);
 void func_151AB9C8(EmitterTask *task);
 void func_151ABD54(EmitterTask *task, ActorMsg *msg, u8 msgId);
@@ -1397,7 +1461,7 @@ void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 arg4);
 s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 argA,
                   s32 type, s32 argC, FxSpawnPayload *payload, u8 argE);
 s32 func_151AC3CC(FxEmitter *emitter);
-s32 func_151AC408(FxEmitter *emitter, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5);
+s32 func_151AC408(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 
 /* game_1DBB60.c */
 void func_151AE6B0(CharacterWatcher *task);

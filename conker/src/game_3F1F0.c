@@ -85,7 +85,7 @@ s32 func_15011D60(Arg11D60 *arg0) {
     } else {
         tmp.unk48 = 10.0f;
     }
-    found = (ObjRec *)func_15149130(0x12C, -1, -1, -1, 0, 0x38, 0x4C, 0xFF, 1);
+    found = func_15149130(0x12C, -1, -1, -1, 0, 0x38, 0x4C, 0xFF, 1);
     if (found != NULL) {
         memcpy((u8 *)found + 0x28, &tmp, 0x4C);
     }

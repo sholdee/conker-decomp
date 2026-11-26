@@ -7,7 +7,7 @@ struct Struct15101F50 {
     /* 0x00 */ DefParticleHead head;
     /* 0x110 */ u8 flags;
     /* 0x111 */ u8 unk111;
-    /* 0x112 */ u8 unk112[0xC];
+    /* 0x112 */ CollisionTri surface;
 };
 
 /* Fills the viewport's vertex buffer with a quad centred on pos, half-axes axisU * width and axisV * height. */
@@ -35,7 +35,7 @@ Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
         return NULL;
     }
 
-    if (func_15144E80(particle->unk112, &axisU, &axisV, NULL) == 0) {
+    if (func_15144E80(&particle->surface, &axisU, &axisV, NULL) == 0) {
         return NULL;
     }
 
@@ -214,17 +214,17 @@ s32 func_151025F4(Owner151025F4 *obj, s32 arg1) {
     return 1;
 }
 
-extern f32 D_800A21A0[][3];
-extern f32 D_800A21F4[][3];
+extern Vec3f D_800A21A0[];
+extern Vec3f D_800A21F4[];
 extern u8 D_800A2248[];
 
 /* Starts effect `kind` on obj, using the effect tables for its parameters; picks one of two styles by object id. */
-s32 func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
+EffectParticle *func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
     s32 unk5;
     s32 unk6;
 
     if (obj == NULL) {
-        return 0;
+        return NULL;
     }
     switch (obj->character_type) {
         case 0x58:
@@ -252,7 +252,7 @@ s32 func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
             break;
     }
     // matching: the int 20 is converted separately; 20.0f would share one register with the other 20.0f
-    return func_15100600((u8 *)obj, D_800A21A0[kind], D_800A21F4[kind], D_800A2248[kind], arg1, unk5, unk6, 0,
+    return func_15100600(obj, &D_800A21A0[kind], &D_800A21F4[kind], D_800A2248[kind], arg1, unk5, unk6, 0,
                          20.0f, 20, 4.0f, 0.08f, arg3, arg4, arg5);
 }
 

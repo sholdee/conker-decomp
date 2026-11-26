@@ -14,12 +14,12 @@
  * Message callback registered with the stream player, called as (0, message, size).
  * Pushes the message onto the ring.
  */
-void func_10012560(s32 unused, u8 *message, s32 size) {
+void func_10012560(s32 unused, void *message, s32 size) {
     func_15043BB8(&D_800427A0, message, size);
 }
 
 /* Initialise the stream player from `heap` and hook its messages into the ring. */
-void func_10012588(s32 heap) {
+void func_10012588(ALHeap *heap) {
     func_15016170(heap);
     func_15043A00(&D_800427A0, D_800427B0, sizeof(D_800427B0));
     func_151F3C1C(func_10012560);

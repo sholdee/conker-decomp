@@ -411,6 +411,30 @@ typedef struct {
     /* 0xE */ s16 delay;
 } IdleState; // size 0x10
 
+/* A triangle of three s16 vertices: an actor's floor triangle, collision hits (game_71820). */
+typedef struct CollisionTri {
+    /* 0x00 */ Vec3s v[3];
+} CollisionTri; // size 0x12
+
+/* Result of a ray cast: func_15081690 (level mesh, then the actors' collision cylinders or models). */
+typedef struct RayHit {
+    /* 0x00 */ Actor *obj;                  // actor hit (hitType 2/3), else NULL
+    /* 0x04 */ f32 dist;                    // distance from origin to pos; -1.0f: no hit
+    /* 0x08 */ Vec3f pos;                   // hit point (entry point on an actor)
+    /* 0x14 */ Vec3f centre;                // model hit (hitType 3): centre of the part hit
+    /* 0x20 */ Vec3f far;                   // exit point on an actor; = pos on a level-mesh hit
+    /* 0x2C */ Vec3f origin;                // the ray
+    /* 0x38 */ Vec3f dir;
+    /* 0x44 */ CollisionTri tri;            // level triangle hit (hitType 1)
+    /* 0x56 */ u16 bone;                    // model hit: bone of the part hit
+    /* 0x58 */ u8 part;                     // model hit: part hit
+    /* 0x59 */ u8 hitType;                  // 0 none, 1 level mesh, 2 actor cylinder, 3 actor model
+    /* 0x5A */ u8 index;                    // model hit: index from func_1508114C
+    /* 0x5B */ u8 pad5B;
+    /* 0x5C */ struct WorldObject *surface; // level-mesh hit on an object surface, else NULL
+    /* 0x60 */ s32 material;                // level-mesh hit: surface material
+} RayHit; // size 0x64
+
 /* Per-character control block (Actor.mv, 0x1C0 bytes, allocated for player-controlled and
  * scripted characters): movement state, controller input, rope riding, idle animation and the
  * first-person aim state.
@@ -516,18 +540,7 @@ typedef struct {
     /* 0x0AD */ u8  ropeSwingTimer;
     /* 0x0AE */ u8  ropeNode;
     /* 0x0AF */ u8  unkAF;
-    /* 0x0B0 */ Actor *unkB0;
-    /* 0x0B4 */ u8  padB4[4];
-    /* 0x0B8 */ f32 unkB8;
-    /* 0x0BC */ f32 unkBC;
-    /* 0x0C0 */ f32 unkC0;
-    /* 0x0C4 */ u8  padC4[0x18];
-    /* 0x0DC */ Vec3f unkDC;
-    /* 0x0E8 */ Vec3f unkE8;      // a direction (func_15145974 turns it into heading/elevation)
-    /* 0x0F4 */ u8  padF4[0x14];
-    /* 0x108 */ u8  unk108;
-    /* 0x109 */ u8  unk109;
-    /* 0x10A */ u8  pad10A[0xA];
+    /* 0x0B0 */ RayHit rayHit;    // last aim or shot ray cast (func_15081690)
     /* 0x114 */ s16 height;      // cached size from func_1507C3E0
     /* 0x116 */ s16 width;
     /* 0x118 */ s16 depth;
@@ -719,7 +732,7 @@ typedef struct {
  * current animation and the previous one, kept for blending. Actors allocate only the first 0x3E0
  * bytes (game_AEB40); animated models (game_6C960, used by ModelAttachment) also use the fields
  * past that (size 0x3F8).
- * File-local views of the same object: AnimPlaybackState (83300), ObjAnim (58F80). */
+ * File-local view of the same object: ObjAnim (58F80), which indexes the current/previous pairs. */
 typedef struct AnimInstance {
     /* 0x000 */ void (*callback)(void); // called once when playback reaches the last frame
     /* 0x004 */ u16 anim;           // current animation; bit 15: hold on the last frame
@@ -733,16 +746,16 @@ typedef struct AnimInstance {
     /* 0x020 */ f32 start;          // playback start (loop point)
     /* 0x024 */ f32 prevStart;
     /* 0x028 */ s32 animId;         // changes whenever a new animation is started
-    /* 0x02C */ u8  pad2C[0xC];
+    /* 0x02C */ s32 prevAnimId;
+    /* 0x030 */ s32 unk30;
+    /* 0x034 */ s32 unk34;
     /* 0x038 */ s8  unk38;
     /* 0x039 */ s8  unk39;
     /* 0x03A */ s16 unk3A;          // blend step
     /* 0x03C */ s16 unk3C;          // blend countdown
-    /* 0x03E */ u8  pad3E[0x45 - 0x3E];
-    /* 0x045 */ u8  unk45;          // byte 5 of the animation's data header
-    /* 0x046 */ u8  pad46[0x215 - 0x46];
-    /* 0x215 */ u8  unk215;         // byte 5 of the previous animation's data header
-    /* 0x216 */ u8  pad216[0x3E0 - 0x216];
+    /* 0x03E */ u8  pad3E[2];
+    /* 0x040 */ u8  header[0x1D0];  // the animation's data header: [3] frame count, [5] frame size
+    /* 0x210 */ u8  prevHeader[0x1D0];
     /* 0x3E0 */ f32 (*matrices[2])[4]; // model transform, one per frame buffer; set by the owner
     /* 0x3E8 */ Mtx *partMtx[2];    // numParts matrices, one array per frame buffer
     /* 0x3F0 */ s32 unk3F0;
@@ -867,11 +880,6 @@ typedef struct ActorAimPoints {
     /* 0x14 */ s8  dir[3];     // facing direction in 1/256 units
 } ActorAimPoints; // size 0x18
 
-/* A triangle of three s16 vertices: an actor's floor triangle, collision hits (game_71820). */
-typedef struct CollisionTri {
-    /* 0x00 */ Vec3s v[3];
-} CollisionTri; // size 0x12
-
 /* Result of a floor/ceiling probe: func_15046C80 (probe down from a point) / func_1504715C (an actor's floor). */
 typedef struct CollisionHit {
     /* 0x00 */ f32 height;            // y of the surface hit
@@ -883,25 +891,6 @@ typedef struct CollisionHit {
     /* 0x1E */ u8 pad1E[2];
     /* 0x20 */ struct WorldObject *surface; // object surface hit (source 2-4), else NULL
 } CollisionHit; // size 0x24
-
-/* Result of a ray cast: func_15081690 (level mesh, then the actors' collision cylinders or models). */
-typedef struct RayHit {
-    /* 0x00 */ Actor *obj;                  // actor hit (hitType 2/3), else NULL
-    /* 0x04 */ f32 dist;                    // distance from origin to pos; -1.0f: no hit
-    /* 0x08 */ Vec3f pos;                   // hit point (entry point on an actor)
-    /* 0x14 */ Vec3f centre;                // model hit (hitType 3): centre of the part hit
-    /* 0x20 */ Vec3f far;                   // exit point on an actor; = pos on a level-mesh hit
-    /* 0x2C */ Vec3f origin;                // the ray
-    /* 0x38 */ Vec3f dir;
-    /* 0x44 */ CollisionTri tri;            // level triangle hit (hitType 1)
-    /* 0x56 */ u16 bone;                    // model hit: bone of the part hit
-    /* 0x58 */ u8 part;                     // model hit: part hit
-    /* 0x59 */ u8 hitType;                  // 0 none, 1 level mesh, 2 actor cylinder, 3 actor model
-    /* 0x5A */ u8 index;                    // model hit: index from func_1508114C
-    /* 0x5B */ u8 pad5B;
-    /* 0x5C */ struct WorldObject *surface; // level-mesh hit on an object surface, else NULL
-    /* 0x60 */ s32 material;                // level-mesh hit: surface material
-} RayHit; // size 0x64
 
 /* Per-actor vertex morph state (Actor.morph): blends from keyframe `prev` to keyframe `cur`. */
 typedef struct VtxMorphState {
@@ -1262,7 +1251,7 @@ struct Actor {
     /* 0x302 */ u8  unk302;
     /* 0x303 */ u8  unk303;
     /* 0x304 */ struct PointLightGfx *unk304[4]; // one per view
-    /* 0x314 */ u8 (*unk314)[8]; // one per frame buffer
+    /* 0x314 */ Ambient *unk314; // one per frame buffer (func_1515D440)
     /* 0x318 */ Camera *CameraPtr;
     /* 0x31C */ ActorCtl *mv;
     /* 0x320 */ u32 unk320;
@@ -1361,7 +1350,7 @@ struct WorldObject {
         } f;                         // float view (not named by the debugger)
         struct {
             /* 0x7C */ s32 unk7C;
-            /* 0x80 */ s32 tri;      // floor probe results, see func_150045C4
+            /* 0x80 */ void *tri;    // floor probe results, see func_150045C4
             /* 0x84 */ f32 y;
         } floor;
     } touch;                         // per-behaviour scratch state
@@ -1682,10 +1671,10 @@ struct Camera {
     /* 0x636 */ u8 pad636[0x2];
     /* 0x638 */ s32 ForceAttribute;                   /* not accessed by US code */
     /* 0x63C */ s32 AttributeSet;                     /* not accessed by US code */
-    /* 0x640 */ s32 Attributes;
-    /* 0x644 */ s32 TrianglePtr;
-    /* 0x648 */ s32 unk648;
-    /* 0x64C */ u8 pad64C[0x10];
+    /* 0x640 */ u32 Attributes;
+    /* 0x644 */ void *TrianglePtr;                    /* floor triangle under the eye (the floor probe's outTri) */
+    /* 0x648 */ CollisionTri floorTri;                /* its vertices */
+    /* 0x65A */ u8 pad65A[0x2];
     /* 0x65C */ f32 CentPitchAngleVel;
     /* 0x660 */ f32 CentYawAngleVel;
     /* 0x664 */ Vec3f forward;
@@ -2147,7 +2136,7 @@ typedef struct WaterBase {
 /* D_800D24C8: the animated water surface (game_BC510.c). */
 typedef struct WaterStage {
     /* 0x00 */ Mtx mtx[2];
-    /* 0x80 */ s32 dl;
+    /* 0x80 */ Gfx *dl;
     /* 0x84 */ WaterVtx *vtx[2];
     /* 0x8C */ WaterBase *base;
     /* 0x90 */ WaterBase *target;
@@ -2245,7 +2234,7 @@ typedef struct SpawnPoint {
     /* 0x00 */ s16 pos[3];
     /* 0x06 */ u8  unk6;   /* angle, 256 units per turn */
     /* 0x07 */ u8  facing; /* angle, 256 units per turn */
-    /* 0x08 */ f32 unk8[3];
+    /* 0x08 */ Vec3f unk8;  /* the camera eye (func_15005818) */
     /* 0x14 */ u8  unk14;
     /* 0x15 */ s8  unk15;
     /* 0x16 */ s8  link;   /* index of the spawn point to use instead; 0 = none, -1 = invalid */
@@ -2439,7 +2428,7 @@ typedef struct LightFlash {
 /* A fixed point transformed by a matrix each frame (func_151643F8). */
 typedef struct LightTransformed {
     /* 0x00 */ Vec3f position;
-    /* 0x0C */ s32 mtx; // passed to func_15145CD0
+    /* 0x0C */ struct WorldObject *placement; // its rotation and position transform the point (func_15145CD0)
 } LightTransformed; // size 0x10
 
 /* A light swinging about a pivot with an object's rotation (func_151644A8). */
@@ -2554,7 +2543,7 @@ typedef struct SeqTrackState {
 typedef struct LightEventMsg {
     /* 0x0 */ s8  lightType; /* events 0x17-0x22 only reach effects whose lightType matches */
     /* 0x1 */ u8  pad1[0x3];
-    /* 0x4 */ s32 arg;
+    /* 0x4 */ void *arg; // event 0x29: an ActorRef; the effects that refer to its actor are dropped
 } LightEventMsg; // size 0x8
 
 /* IdRecord.TaskID: bits 9-0 are the task id, bits 15-10 flags. The four original flag names are from
@@ -2671,13 +2660,23 @@ typedef struct EffectModelSlot {
     /* 0x04 */ Vtx *unk4;          // two vertex buffers (swarm flap frames, wave deformation)
     /* 0x08 */ Vtx *unk8;
     /* 0x0C */ Gfx *displayList;
-    /* 0x10 */ void *unk10;
+    /* 0x10 */ s16 *unk10;         // texture ids used by the display list (func_1510CE60's usedOut)
 } EffectModelSlot; // size 0x14
 
 /* A camera's message ring buffer, D_800DC2B0[camera index] (game_15AA10; allocated in game_32740).
  * func_1512D560 appends, func_1512D604 takes the next message. */
+typedef struct CamMsg {
+    /* 0x0 */ s32 type;
+    /* 0x4 */ union {
+        s32 index;               /* types 5, 6 */
+        struct Cfg15128CB0 *cfg; /* type 1 (game_156160.c) */
+        CamShot *data;           /* types 7, 8, 10 */
+        f32 *value;              /* type 9 */
+    } arg;                       /* a pointer or a small integer, depending on the type */
+} CamMsg;
+
 typedef struct CamMsgQueue {
-    /* 0x00 */ struct { s32 type; s32 arg; } msgs[20];
+    /* 0x00 */ CamMsg msgs[20];
     /* 0xA0 */ u8  padA0[8];
     /* 0xA8 */ s32 head;   // next message to read
     /* 0xAC */ s32 tail;   // next free slot

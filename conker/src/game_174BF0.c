@@ -61,15 +61,19 @@ void func_151478D0(EffectObj *obj) {
     func_151D5E30(obj->buffers);
 }
 
-/* Frees the object's buffers, then hands it to func_15169804. */
-void func_151478F4(EffectObj *obj) {
+/* Frees the object's buffers, then hands it to func_15169804. obj is any view of a func_15147A80 object. */
+void func_151478F4(void *arg) {
+    EffectObj *obj = arg;
+
     func_151478D0(obj);
     func_1514795C(obj);
     func_15169804(&obj->head.header);
 }
 
-/* Frees the object's buffers, then hands it to func_15169824. */
-void func_15147928(EffectObj *obj) {
+/* Frees the object's buffers, then hands it to func_15169824. obj is any view of a func_15147A80 object. */
+void func_15147928(void *arg) {
+    EffectObj *obj = arg;
+
     func_151478D0(obj);
     func_1514795C(obj);
     func_15169824(&obj->head.header);
@@ -79,14 +83,15 @@ void func_15147928(EffectObj *obj) {
 void func_1514795C(EffectObj *obj) {
     s32 i;
 
+    // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
     for (i = 0; i <= D_80082FA0; i++) {
-        if (obj->head.model.handles[i] != 0) {
-            func_100043B4((s32 *)obj->head.model.handles[i], 4);
+        if (obj->head.model.handles[i] != NULL) {
+            func_100043B4((void *)(s32)obj->head.model.handles[i], 4);
         }
     }
 
-    if (obj->head.model.sharedHandle != 0) {
-        func_100043B4((s32 *)obj->head.model.sharedHandle, 4);
+    if (obj->head.model.sharedHandle != NULL) {
+        func_100043B4((void *)(s32)obj->head.model.sharedHandle, 4);
     }
 }
 
@@ -118,9 +123,10 @@ void func_15147A30(EffectObj *obj) {
     D_8008A340[kind](obj);
 }
 
-/* Allocates an effect object with dataSize bytes of user data and header->itemCount items of itemSize bytes. */
-EffectObj *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
-                         s32 drawKind, s32 arg6, s32 arg7, EffectObjUnk60 *arg8, u8 arg9, s32 argA) {
+/* Allocates an effect object with dataSize bytes of user data and header->itemCount items of itemSize bytes.
+ * Returns it as void *: each caller keeps it in its own view of the object. */
+void *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
+                    s32 drawKind, s32 arg6, s32 arg7, CollisionHit *hit, u8 arg9, s32 argA) {
     EffectObj *obj;
     u8 type;
     s32 itemsSize;
@@ -148,10 +154,10 @@ EffectObj *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32
     obj->head.updateKind2 = updateKind2;
     obj->head.drawKind = drawKind;
 
-    if (arg8 != NULL) {
-        obj->unk60 = *arg8;
+    if (hit != NULL) {
+        obj->collision = *hit;
     } else {
-        obj->unk60.unk1C = 0;
+        obj->collision.flags = 0;
     }
 
     obj->head.model.model = arg6;
@@ -159,9 +165,9 @@ EffectObj *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32
     obj->head.model.unk4 = 0;
 
     for (i = 0; i < 4; i++) {
-        obj->head.model.handles[i] = 0;
+        obj->head.model.handles[i] = NULL;
     }
-    obj->head.model.sharedHandle = 0;
+    obj->head.model.sharedHandle = NULL;
 
     if (arg6 != 0) {
         for (i = 0; i <= D_80082FA0; i++) {
@@ -181,14 +187,14 @@ extern void *(*D_8008A2A4[])(EffectObj *, void *, s16);
 
 /* Draws the object through func_151462C8 and then its drawKind handler; returns the advanced display list. */
 void *func_15147C4C(void *gfx, EffectObj *obj, s16 arg2) {
-    void *unk18;
+    s32 material;
 
     if (obj->head.tmpl.flags & 0x20) {
-        unk18 = obj->head.tmpl.unk18;
+        material = obj->head.tmpl.material;
     } else {
-        unk18 = NULL;
+        material = 0;
     }
-    gfx = func_151462C8(gfx, &obj->head.model, 0, NULL, 0, arg2, &obj->head.modelPos, 2, unk18);
+    gfx = func_151462C8(gfx, &obj->head.model, 0, NULL, 0, arg2, &obj->head.modelPos, 2, material);
     if (obj->head.drawKind >= 19) {
         func_1516972C(&obj->head.header);
         return gfx;

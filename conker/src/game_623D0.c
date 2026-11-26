@@ -141,12 +141,12 @@ s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     f32 radiusY;
     f32 radius;
     f32 y;
-    s32 recp;
+    RenderView *recp;
     ModelDef *bounds;
     s32 id;
     f32 delta;
 
-    recp = (s32)D_800BE628;
+    recp = D_800BE628;
     id = obj->character_type;
     bounds = D_800D1C90[id];
     radius = bounds->bodyRadius;
@@ -161,7 +161,7 @@ s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     } else {
         y = obj->ypos + height;
     }
-    if (func_150A6360(recp, D_800D9C10, mtx[3][0], y, mtx[3][2], radiusXZ, radiusY, 20000.0f) == 0) {
+    if (func_150A6360(recp, D_800D9C10[0], mtx[3][0], y, mtx[3][2], radiusXZ, radiusY, 20000.0f) == 0) {
         return 1;
     }
     return 0;

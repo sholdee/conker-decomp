@@ -4,7 +4,7 @@
 
 // func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
 // game_1DC720.c were compiled with a different view of it.
-SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
@@ -16,7 +16,7 @@ SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 l
  * (-31.5 along forward), or 63 units along either side (61 out along right). Writes the point to outPos
  * (y taken from player->unk118) and a matching s16 yaw to outAngle.
  */
-void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *outPos, s16 *outAngle) {
+void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f *outPos, s16 *outAngle) {
     f32 along;
     f32 spread;
     f32 side;
@@ -25,9 +25,9 @@ void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *o
     along = func_150ADA68() * 248.0f;
     spread = func_150ADA68() + -0.5f;
     if (along < 122.0f) {
-        outPos[0] = forward[0] * -31.5f + (right[0] * spread) * 122.0f;
-        outPos[1] = 0.0f;
-        outPos[2] = forward[1] * -31.5f + (right[1] * spread) * 122.0f;
+        outPos->x = forward[0] * -31.5f + (right[0] * spread) * 122.0f;
+        outPos->y = 0.0f;
+        outPos->z = forward[1] * -31.5f + (right[1] * spread) * 122.0f;
     } else {
         f32 sideLength = 63.0f; // matching: a named local, not the literal, keeps 63.0f in one register
 
@@ -39,13 +39,13 @@ void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *o
         } else {
             *outAngle -= 0x40;
         }
-        outPos[0] = forward[0] * sideLength * spread + right[0] * side;
-        outPos[1] = 0.0f;
-        outPos[2] = forward[1] * sideLength * spread + right[1] * side;
+        outPos->x = forward[0] * sideLength * spread + right[0] * side;
+        outPos->y = 0.0f;
+        outPos->z = forward[1] * sideLength * spread + right[1] * side;
     }
-    outPos[0] += owner->xpos;
-    outPos[1] += player->unk118;
-    outPos[2] += owner->zpos;
+    outPos->x += owner->xpos;
+    outPos->y += player->unk118;
+    outPos->z += owner->zpos;
 }
 
 /* func_150B0C58 with the default arguments (0xFF, 1). */
@@ -62,7 +62,7 @@ void func_150B0C58(Actor *owner, u8 arg1, s32 arg2) {
     data.ownerId = owner->unique_id;
     data.timer = 0.0f;
 
-    effect = (DDB60Effect *)func_15149130(300, -1, 0x58, -1, 0, 0x43, sizeof(data), arg1, arg2);
+    effect = func_15149130(300, -1, 0x58, -1, 0, 0x43, sizeof(data), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -90,9 +90,9 @@ void func_150B0D20(DDB60Effect *effect) {
     s32 idx;
     f32 forward[2];
     f32 right[2];
-    Vec3f *refVel;
-    f32 pos[3];
-    f32 vel[3];
+    const Vec3f *refVel;
+    Vec3f pos;
+    Vec3f vel;
     s16 angle;
 
     owner = effect->data.owner;
@@ -125,11 +125,11 @@ void func_150B0D20(DDB60Effect *effect) {
             right[0] = forward[1];
             right[1] = -forward[0];
             do {
-                func_150B0A60(owner, &movement_obj[idx], forward, right, pos, &angle);
-                func_15143794(angle, (func_150ADA20() % 26) - 41, func_150ADA68() * 3.769999981f + 4.059999943f, vel);
-                vel[0] -= refVel->x * 0.9250000715f;
-                vel[2] -= refVel->z * 0.9250000715f;
-                func_151D9014(pos, vel, 5, func_150ADA68() * 0.1780000031f + -0.4420000315f,
+                func_150B0A60(owner, &movement_obj[idx], forward, right, &pos, &angle);
+                func_15143794(angle, (func_150ADA20() % 26) - 41, func_150ADA68() * 3.769999981f + 4.059999943f, &vel);
+                vel.x -= refVel->x * 0.9250000715f;
+                vel.z -= refVel->z * 0.9250000715f;
+                func_151D9014(&pos, &vel, 5, func_150ADA68() * 0.1780000031f + -0.4420000315f,
                               (func_150ADA20() % 21) + 20, (func_150ADA20() % 101) + 155,
                               func_150ADA68() * 50.0f + 80.0f, func_150ADA68() < 0.04400000349f, 1.399999976f,
                               1.399999976f, 1, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);

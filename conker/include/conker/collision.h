@@ -23,7 +23,6 @@
 
 /* Types that these files define; the declarations below use them. */
 typedef struct QuadNode QuadNode;
-typedef struct Game71820FloorSrc Game71820FloorSrc;
 typedef struct TriggerVolume TriggerVolume;
 struct Foo150AE280;
 struct ShadowVtx;
@@ -36,19 +35,19 @@ void func_15001460(Gfx *dl);
 void func_15001970(void);
 void func_15001A08(void);
 void func_15001B08(void);
-u16 *func_15001B10(void);
+QuadNode *func_15001B10(void);
 void func_15001B5C(u8 value);
 void func_15001B8C(u16 value);
 void func_15001BC8(s32 map, s16 *nodeCount, s16 *leafCount);
 void func_15001CEC(s32 map);
-u16 *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, s32 triList);
+QuadNode *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, u16 *triList);
 void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList);
 int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, u16 *triList, u16 **subList);
 void func_15002560(QuadNode *node, QuadNode *parentNext);
 void func_150025FC(void);
 void func_150026C4(s32 map);
 void func_150026E8(s32 map);
-void func_15002724(s32 dl);
+void func_15002724(Gfx *dl);
 void func_15002754(void);
 s32 func_150027F8(Gfx *dl);
 s32 func_15002878(void);
@@ -101,7 +100,7 @@ s32 func_15046F84(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
 s32 func_15047004(Vec3f *pos, f32 bottom, CollisionHit *hit);
 s32 func_150470B0(Vec3f *pos, f32 top, CollisionHit *hit);
 void func_1504715C(CollisionHit *hit, Actor *obj);
-void func_150472C0(CollisionHit *hit, Game71820FloorSrc *src);
+void func_150472C0(CollisionHit *hit, RayHit *src);
 void func_15047390(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp);
 void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp);
 void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
@@ -118,7 +117,7 @@ s32 func_15081574(s32 self, f32 dist, f32 radius, s32 outTarget, s32 arg4, s32 m
 
 /* game_AEB40.c */
 void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out,
-                   f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, s32 filterArg, s32 ignoreMask);
+                   f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, void *filterArg, s32 ignoreMask);
 s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist,
                   f32 *outFarDist);
 void func_15081E0C(Actor *obj, u16 part, u8 skip);
@@ -155,8 +154,8 @@ void func_15084C30(Actor *obj);
 s32 func_15084CB0(s32 modelId);
 
 /* game_D0960.c */
-s32 func_150A34B0(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit);
-s32 func_150A3504(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit);
+s32 func_150A34B0(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);
+s32 func_150A3504(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);
 
 /* game_D0F20.s: the ground probe. func_150A3A70 gathers the candidate hits under (x, z) into
  * D_800D3300 and returns their count; func_150A3FC4 gives the height of a triangle at (x, z), from
@@ -306,14 +305,14 @@ s32 func_15104634(f32 x, f32 z, f32 y, f32 *out);
 
 /* game_13BB20.c */
 s32 func_1510E670(s32 index);
-void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags, s16 *outType,
+void func_1510E7A4(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
                    f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj, f32 minY, f32 maxY);
-void func_1510E82C(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags, s16 *outType,
+void func_1510E82C(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
                    f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj);
-void func_1510E8BC(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags, s16 *outType,
+void func_1510E8BC(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
                    f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj, f32 unused12, f32 unused13, s32 noFallback);
-void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 *outFloorY, f32 *outPropFloorY,
-                   s32 *outFlags, s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *object, f32 minY,
+void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *outFloorY, f32 *outPropFloorY,
+                   u32 *outFlags, s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *object, f32 minY,
                    f32 maxY, s32 noFallback);
 f32 func_1510F648(f32 x, f32 y, f32 z);
 s32 func_1510F720(s32 x, s32 z, s32 radius, ZoneNode **outLeaves);

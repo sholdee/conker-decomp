@@ -148,7 +148,7 @@ SurfaceTrail *func_1519F1C8(owner, side)
     config.color[0] = D_800AB414[colorIndex].r;
     config.color[1] = D_800AB414[colorIndex].g;
     config.color[2] = D_800AB414[colorIndex].b;
-    trail = func_15147A80(&header, sizeof(SurfaceTrailConfig), sizeof(SurfaceTrailPoint), 5, 5, 5, 0, 0, owner->unk34, 0xFF, 1);
+    trail = func_15147A80(&header, sizeof(SurfaceTrailConfig), sizeof(SurfaceTrailPoint), 5, 5, 5, 0, 0, &owner->hit, 0xFF, 1);
     if (trail != NULL) {
         memcpy(trail->config, &config, sizeof(SurfaceTrailConfig));
     }
@@ -250,8 +250,8 @@ s32 func_1519F4F0(SurfaceTrail *trail) {
             probe.z = point->z;
             if (20000.0f < fabsf(probe.x) || 20000.0f < fabsf(probe.z)) {
                 expired = 1;
-            } else if (func_15045800(&probe, 0, point->y - 30.0f, &trail->groundY) != 0) {
-                point->y = trail->groundY;
+            } else if (func_15045800(&probe, 0, point->y - 30.0f, &trail->collision) != 0) {
+                point->y = trail->collision.height;
             } else {
                 expired = 1;
             }
@@ -343,7 +343,7 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
         sides = config->owner->trails.sides;
         link.owner = config->owner;
         link.side = trail->head.tmpl.kind;
-        spawner = (TrailSpawner *)func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0);
+        spawner = func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0);
         if (spawner != NULL) {
             memcpy(&spawner->link, &link, sizeof(SurfaceTrailLink));
         }
@@ -427,8 +427,8 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
                 probe.z = point->z;
                 if (fabsf(probe.x) > 20000.0f || fabsf(probe.z) > 20000.0f) {
                     ok = 0;
-                } else if (func_15045800(&probe, 0, probe.y - 200.0f, &trail->groundY) != 0) {
-                    point->y = trail->groundY;
+                } else if (func_15045800(&probe, 0, probe.y - 200.0f, &trail->collision) != 0) {
+                    point->y = trail->collision.height;
                 } else {
                     ok = 0;
                 }
@@ -461,7 +461,7 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
     return 1;
 }
 
-extern u8 D_80090E0C[];
+extern EffectTexture D_80090E0C; /* an entry of the effect texture table D_80090B60 */
 
 /*
  * Draws the trail as a strip three vertices wide (outer edge, centre line, outer edge), from the newest
@@ -536,7 +536,7 @@ Gfx *func_1519FE6C(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
                     }
                 } while (headFadeLeft != 0 && j != trail->head.end);
             }
-            gfx = func_15142E24(gfx, (s32)D_80090E0C, 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
+            gfx = func_15142E24(gfx, &D_80090E0C, 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
             gfx = func_15142B7C(gfx, 1, 0x160600);
             gfx = func_15142C10(gfx, config->color[0], config->color[1], config->color[2], 0xFF, &update);
             gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &update);

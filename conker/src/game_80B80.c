@@ -73,15 +73,15 @@ void func_150538CC(Actor *obj) {
     Actor *target;
 
     done = 0;
-    kind = (u16)obj->headEffectState;
-    sweep = (s8)obj->unk284;
+    kind = obj->headEffectState;
+    sweep = obj->unk284;
     hitFlags = 0;
-    if (((kind == 2) || (kind == 18)) && (u16)obj->headEffectTimer) {
-        if (D_800BE9E4 < (u16)obj->headEffectTimer) {
-            obj->headEffectTimer = (u16)obj->headEffectTimer - D_800BE9E4;
+    if (((kind == 2) || (kind == 18)) && obj->headEffectTimer) {
+        if (D_800BE9E4 < obj->headEffectTimer) {
+            obj->headEffectTimer = obj->headEffectTimer - D_800BE9E4;
         } else {
             // matching: dead leftover; keeps the target's dead `move a0,v0` (as1 drops the subu, not the copy)
-            left = (u16)obj->headEffectTimer - D_800BE9E4;
+            left = obj->headEffectTimer - D_800BE9E4;
             if (left + left) {
             }
             obj->headEffectTimer = 0;
@@ -184,8 +184,8 @@ void func_150538CC(Actor *obj) {
             obj->count4 = 40;
         }
         obj->fangle = func_1505A630(movement_obj[obj->unk126].xpos - obj->xpos, obj->zpos - movement_obj[obj->unk126].zpos, 0);
-        if ((u8)(((s32)(obj->fangle - obj->angle) >> 8) + obj->count4) < (obj->count4 * 2)) {
-            climb = ((movement_obj[obj->unk126].ypos + (s16)obj->unk224) - obj->ypos) * 0.1800000072f;
+        if ((u8)(((obj->fangle - obj->angle) >> 8) + obj->count4) < (obj->count4 * 2)) {
+            climb = ((movement_obj[obj->unk126].ypos + obj->unk224) - obj->ypos) * 0.1800000072f;
             ownerDist = func_1505A72C(&movement_obj[obj->unk126], obj);
             func_15059B54(obj, 0x300);
             if ((obj->unk102 != 0) && (ownerDist < (obj->speed * 16.0f))) {
@@ -280,8 +280,8 @@ void func_150538CC(Actor *obj) {
         dir[0] *= inv;
         dir[1] *= inv;
         dir[2] *= inv;
-        func_15081690(obj, obj->old_xpos, obj->old_ypos, obj->old_zpos, dir[0], dir[1], dir[2], &obj->mv->unkB0, len, 0, 0, 0, -1, 0, 0);
-        hit = func_15081E78(obj, &obj->mv->unkB0, kind);
+        func_15081690(obj, obj->old_xpos, obj->old_ypos, obj->old_zpos, dir[0], dir[1], dir[2], &obj->mv->rayHit, len, 0, 0, 0, -1, 0, 0);
+        hit = func_15081E78(obj, &obj->mv->rayHit, kind);
         if (hit != 0) {
             done = 1;
             if ((hit == 1) && (obj->owner > 0)) {
@@ -392,15 +392,15 @@ void func_150538CC(Actor *obj) {
         switch (kind) {
         case 13:
             if (hitFlags & 8) {
-                func_150D7120(&obj->xpos, 0xFF, 1);
+                func_150D7120((Vec3f *)&obj->xpos, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
             } else {
-                f32 vec[3];
+                Vec3f vec;
 
-                vec[0] = D_800CC254 - obj->old_xpos;
-                vec[1] = D_800CC258 - obj->old_ypos;
-                vec[2] = D_800CC25C - obj->old_zpos;
-                if (func_15145128(vec, vec, NULL, NULL) != 0) {
-                    func_150D728C(NULL, &obj->xpos, vec, 0xFF, 1);
+                vec.x = D_800CC254 - obj->old_xpos;
+                vec.y = D_800CC258 - obj->old_ypos;
+                vec.z = D_800CC25C - obj->old_zpos;
+                if (func_15145128(&vec, &vec, NULL, NULL) != 0) {
+                    func_150D728C(NULL, (Vec3f *)&obj->xpos, &vec, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
                 }
             }
             func_15088780(obj);
@@ -649,7 +649,7 @@ void func_1505528C(Actor *obj) {
     s32 timer;
     Actor *target;
 
-    kind = (u16)obj->headEffectState;
+    kind = obj->headEffectState;
     hitFlags = 0;
     hoverHeight = 0.0f;
 
@@ -717,7 +717,7 @@ void func_1505528C(Actor *obj) {
         obj->count1++;
         hitFlags |= 2;
         if ((obj->floorMaterial & 0x1F) == 0xE) {
-            func_1514AD9C(&obj->xpos, 0xFF, 0);
+            func_1514AD9C((Vec3f *)&obj->xpos, 0xFF, 0); // xpos, ypos, zpos as one Vec3f
             func_15060F28(obj, 1);
             return;
         }

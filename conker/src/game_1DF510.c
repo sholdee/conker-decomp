@@ -25,7 +25,7 @@ void func_151B2060(Actor *obj) {
         bzero(tie.ropes, sizeof(tie.ropes));
         tie.line = NULL;
 
-        effect = (RopeTie *)func_151491F4(300, -1, 0x16, 0, 0x12, 0x20, 0xFF, 1);
+        effect = func_151491F4(300, -1, 0x16, 0, 0x12, 0x20, 0xFF, 1);
         if (effect != NULL) {
             memcpy(&effect->tie, &tie, sizeof(tie));
         }
@@ -254,7 +254,7 @@ void func_151B2690(RopeTie *self) {
     lineData.endOffset = D_800AA374;
     lineData.halfWidth = 5.0f;
     lineData.owner = self;
-    tie->line = (RopeLine *)func_15149130(300, -1, -1, 0, 0, 0x13, sizeof(RopeLineData), 0xFF, 1);
+    tie->line = func_15149130(300, -1, -1, 0, 0, 0x13, sizeof(RopeLineData), 0xFF, 1);
     if (tie->line != NULL) {
         memcpy(&tie->line->line, &lineData, sizeof(lineData));
     }
@@ -303,7 +303,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         dead = 1;
     }
     if ((dead == 0) && (line->anchor.target->ob_matrix_ptr != NULL)) {
-        func_151D5D60(self->base.buffers, view, 4 * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(self->base.buffers, view, 4 * sizeof(Vtx), &vtx, NULL);
         if (vtx == NULL) {
             return gfx;
         }
@@ -313,7 +313,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         update = 1;
         camera = &camera_global_Cameras[view].eye.x;
         gfx = func_15142B7C(gfx, 0x200005, 0x60600);
-        gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
+        gfx = func_15142E24(gfx, &D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = func_1513F4E4(gfx, 0x2B, &update);

@@ -91,7 +91,7 @@ void func_150403C8(void *dl, u32 end, s32 parent) {
                 D_800C68A0 = 1;
                 break;
             case G_TRI1:
-                isBad = func_1504082C(&gfx->words.w0);
+                isBad = func_1504082C(gfx);
                 D_800C68A0 = 1;
                 break;
             case G_VTX:
@@ -233,10 +233,10 @@ void func_15040820(Gfx *gfx) {
  * G_TRI1 check: the three vertex indices are stored doubled, so an odd byte
  * means a corrupt command. Returns nonzero in that case.
  */
-s32 func_1504082C(u32 *w0) {
-    s32 v0 = (*w0 >> 16) & 0xFF;
-    s32 v1 = (*w0 >> 8) & 0xFF;
-    s32 v2 = *w0 & 0xFF;
+s32 func_1504082C(Gfx *tri) {
+    s32 v0 = (tri->words.w0 >> 16) & 0xFF;
+    s32 v1 = (tri->words.w0 >> 8) & 0xFF;
+    s32 v2 = tri->words.w0 & 0xFF;
 
     if ((v0 & 1) || (v1 & 1) || (v2 & 1)) {
         return 1;

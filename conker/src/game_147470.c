@@ -43,13 +43,13 @@ void func_15119FC0(WorldObject *obj) {
                 if (movement_obj[i].type == 0 || movement_obj[i].playernumber == 0xFF || obj->moveData.word < 0) {
                     continue;
                 }
-                distSq = ((f32)obj->x - movement_obj[i].xpos) * ((f32)obj->x - movement_obj[i].xpos) +
-                         ((f32)obj->z - movement_obj[i].zpos) * ((f32)obj->z - movement_obj[i].zpos);
+                distSq = (obj->x - movement_obj[i].xpos) * (obj->x - movement_obj[i].xpos) +
+                         (obj->z - movement_obj[i].zpos) * (obj->z - movement_obj[i].zpos);
                 if (distSq < 80.0f * 80.0f) {
                     func_1507C3E0(&movement_obj[i], &height, &width, &depth);
                     obj->object_status = 0x31;
                     playerY = movement_obj[i].ypos;
-                    if (playerY < (f32)obj->y + 80.0f && (f32)obj->y - 80.0f < playerY + (f32)height &&
+                    if (playerY < obj->y + 80.0f && obj->y - 80.0f < playerY + height &&
                         movement_obj[i].energy > 0) {
                         if (func_15060BA4(&movement_obj[i], 1)) {
                             if (obj->moveData.word != 0) {

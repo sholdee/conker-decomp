@@ -143,7 +143,7 @@ void func_15042ECC(u8 *format, s32 *argumentWords) {
                         f32 *number = (f32 *)argumentWords[argumentIndex++];
                         f32 value = *number;
 
-                        func_151EFF94(out, D_80085CC0, "", "", (f64)value);
+                        func_151EFF94(out, D_80085CC0, "", "", value);
                         while (*out != 0) {
                             out++;
                         }
@@ -225,11 +225,11 @@ void func_150432BC(f32 scale) {
 }
 
 /** Attach the next queued text to an object, `yOffset` above its position. */
-void func_150432CC(s32 object, s32 yOffset) {
+void func_150432CC(Actor *object, s32 yOffset) {
     D_800CBD74 |= TEXT_FLAG_CENTERED;
     D_800CBD74 = D_800CBD74; // matching: IDO re-stores the flags byte after the OR
     D_800CBD7C = yOffset;
-    D_800CBD78 = (Actor *)object;
+    D_800CBD78 = object;
 }
 
 /** Set the screen position of subsequently queued text. */
@@ -322,11 +322,11 @@ Gfx *func_15043384(Gfx *gfx) {
                     scale = node->scale * 4096.0f;
                     if (shadow) {
                         gfx = func_150417AC(gfx, node->x + 1, node->y + 1, node->text, 0, 0, 0,
-                                            node->alpha, scale, scale, strlen(node->text));
+                                            node->alpha, scale, scale, strlen((char *)node->text));
                     }
                     gfx = func_150417AC(gfx, node->x, node->y, node->text, node->red,
                                         node->green, node->blue, node->alpha, scale,
-                                        scale, strlen(node->text));
+                                        scale, strlen((char *)node->text));
                 }
                 gDPPipeSync(gfx++);
             } else {

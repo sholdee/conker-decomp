@@ -45,7 +45,7 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
         end.y = 500.0f;
     }
     // matching: one local holds the actor and then its state (a separate actor local adds a stack slot)
-    state = (CharacterTrailState *)func_15147A80(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
+    state = func_15147A80(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
     if (state == NULL) {
         return;
     }
@@ -303,7 +303,7 @@ s32 func_150D3A68(CharacterTrail *actor) {
                 }
                 state->targetWidth = 50.0f;
                 if (prevMode != state->mode) {
-                    Vec3f *vel;
+                    const Vec3f *vel;
 
                     if (func_1515C0F8(owner, &vel) == 0) {
                         vel = &D_800A5480;
@@ -339,7 +339,7 @@ s32 func_150D3FD4(CharacterTrail *actor) {
     CharacterTrailPoint *points;
     f32 total;
     f32 invTotal;
-    Vec3f *vel;
+    const Vec3f *vel;
     f32 speed;
     f32 maxLen;
     f32 t;
@@ -515,7 +515,7 @@ Gfx *func_150D4300(CharacterTrail *actor, Gfx *gfx, s16 view) {
     }
     eye = func_15144B34(view);
     update = 1;
-    gfx = func_15142E24(gfx, (s32)D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &update, 0x3E);
+    gfx = func_15142E24(gfx, &D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &update, 0x3E);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x55, &update);
@@ -670,7 +670,7 @@ extern Vec3f D_800A09DC;
  * (returns 1 when found, 0 when not), or 100 and 600 units above the owner when it has no model (2).
  */
 s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment) {
-    Vec3f *modelPoints[2];
+    const Vec3f *modelPoints[2];
     Vec3f *out[2];
 
     if (owner->ob_matrix_ptr != NULL) {
@@ -736,7 +736,7 @@ s32 func_150D4CC4(TrailGlow *particle) {
 }
 
 /* Throws 10-20 sparks from `pos`, fanned around the owner's facing `angle` (degrees) and against `vel`. */
-void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
+void func_150D4D58(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
     ParticleDesc spawn;
     s32 count;
     s16 yaw;
@@ -784,7 +784,7 @@ void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
         spawn.width = spawn.height = func_150ADA68() * 233.0f + 199.0f;
         r1 = func_150ADA20();
         r2 = func_150ADA20();
-        func_15143794(r1 % 130U + yaw, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.vel.x);
+        func_15143794(r1 % 130U + yaw, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.vel);
         spawn.vel.x -= vel->x * scale;
         spawn.vel.z -= vel->z * scale;
         // matching: `+ -x` (a subtraction emits sub.s instead of add.s)

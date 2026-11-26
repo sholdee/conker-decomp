@@ -121,17 +121,17 @@ void func_150EAB10(struct_EAB10 *actor) {
 /* Slides the flash along the ground and keeps its light on the ground; returns 0 once it expires. */
 s32 func_150EAE24(FlashObject *obj) {
     GroundFlash *flash;
-    f32 probe[3];
+    Vec3f probe;
 
     obj->flash.position.x += obj->flash.velocity.x * D_800BE9A4;
     obj->flash.position.z += obj->flash.velocity.z * D_800BE9A4;
-    probe[0] = obj->flash.position.x;
-    probe[1] = obj->flash.height;
-    probe[2] = obj->flash.position.z;
+    probe.x = obj->flash.position.x;
+    probe.y = obj->flash.height;
+    probe.z = obj->flash.position.z;
     obj->light->x = obj->flash.position.x;
     obj->light->z = obj->flash.position.z;
     flash = &obj->flash;
-    if (func_15046C80(probe, 0, obj->flash.probeHeight, &flash->ground) != 0) {
+    if (func_15046C80(&probe, 0, obj->flash.probeHeight, &flash->ground) != 0) {
         obj->light->y = flash->ground.height;
     } else {
         obj->light->y = flash->height;

@@ -171,7 +171,7 @@ void func_15178268(SwarmMember *member) {
     f32 y;
     f32 z;
     s32 rnd;
-    f32 vec[3]; /* direction to the target; only [0] and [2] are set */
+    Vec3f vec; /* direction to the target; only x and z are set */
     f32 dx;
     f32 dz;
     f32 s;
@@ -205,11 +205,11 @@ void func_15178268(SwarmMember *member) {
         x = dx * dist + swarm->x;
         z = dz * dist + swarm->z;
     }
-    vec[0] = x - member->s.x;
-    vec[2] = z - member->s.z;
+    vec.x = x - member->s.x;
+    vec.z = z - member->s.z;
     timer = member->s.steer & 0xF;
     if (timer == 0) {
-        heading = func_150490A8(vec);
+        heading = func_150490A8(&vec);
         heading += (s32)(func_150ADA20() & 0x1F) - 15;
         if (!fast) {
             timer = 10;
@@ -367,8 +367,7 @@ void func_151787AC(Swarm *swarm, s32 x, s32 y, s32 z) {
         s32 pad;
         mask = 0;
         for (i = 0; i <= D_80082FA0; i++) {
-            /* D_800BE628 points to 0x180-byte per-view records */
-            if (func_150A6360(i * 0x180 + (u8 *)D_800BE628, D_800D9C10[i], swarm->x, swarm->y, swarm->z,
+            if (func_150A6360(&D_800BE628[i], D_800D9C10[i], swarm->x, swarm->y, swarm->z,
                               100.0f, 100.0f, 2500.0f)) {
                 mask |= 1 << i;
             }

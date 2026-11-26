@@ -8,105 +8,6 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type,
 
 extern s32 D_800D187C;
 
-/* Parameter block for func_151994B8 (CharacterFlamethrowerSetup in game_1C2C60.c). */
-typedef struct Func151994B8Desc {
-    s32 kind;
-    Actor *owner;
-    u8 ownerUniqueId;
-    s8 joint;
-    u8 pad0A[2];
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    s8 unk38;
-    s8 unk39;
-    s8 unk3A;
-    s8 unk3B;
-    s8 unk3C;
-    s8 unk3D;
-    u8 unk3E;
-    u8 pad3F[1];
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    s8 unk4C;
-    u8 pad4D[3];
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-    s8 unk54;
-    u8 pad55[3];
-    f32 unk58;
-    f32 unk5C;
-    s16 unk60;
-    s16 unk62;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    s16 unk8C;
-    s16 unk8E;
-    f32 unk90;
-    u8 unk94;
-    u8 unk95;
-    u8 pad96[2];
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-    f32 unkA4;
-    f32 unkA8;
-    f32 unkAC;
-    s32 unkB0;
-    s32 unkB4;
-    s16 unkB8;
-    s16 unkBA;
-    f32 unkBC;
-    f32 unkC0;
-    f32 unkC4;
-    f32 unkC8;
-    f32 unkCC;
-    f32 unkD0;
-    f32 unkD4;
-    s16 unkD8;
-    s16 unkDA;
-    s16 unkDC;
-    s16 unkDE;
-    f32 unkE0;
-    f32 unkE4;
-    f32 unkE8;
-    f32 unkEC;
-    f32 unkF0;
-    s16 unkF4;
-    s16 unkF6;
-    s16 unkF8;
-    s16 unkFA;
-    f32 unkFC;
-    f32 unk100;
-    f32 unk104;
-    f32 unk108;
-    f32 unk10C;
-    f32 unk110;
-    f32 unk114;
-    s16 unk118;
-    s16 unk11A;
-} Func151994B8Desc;
-
-
 /* matching: four scalars, not s32[4] (an array gets an 8-aligned, larger frame) */
 struct SoundChoices {
     s32 sound0;
@@ -152,22 +53,22 @@ const s16 D_80099AD8[19][4] = {
 };
 
 /* Effect offsets (the words are f32 bit patterns). */
-const Vec3w D_80099B70 = { 0x00000000, 0x41400000, 0x42F00000 }; /* 0, 12, 120 */
-const Vec3w D_80099B7C = { 0x00000000, 0x41D80000, 0x43570000 }; /* 0, 27, 215 */
-const Vec3w D_80099B88 = { 0x00000000, 0x00000000, 0x44080000 }; /* 0, 0, 544 */
-const Vec3w D_80099B94 = { 0x00000000, 0x00000000, 0x442F0000 }; /* 0, 0, 700 */
-const Vec3w D_80099BA0 = { 0x00000000, 0x00000000, 0x438B0000 }; /* 0, 0, 278 */
-const Vec3w D_80099BAC = { 0x00000000, 0x00000000, 0x440B0000 }; /* 0, 0, 556 */
+const Vec3f D_80099B70 = { 0.0f, 12.0f, 120.0f };
+const Vec3f D_80099B7C = { 0.0f, 27.0f, 215.0f };
+const Vec3f D_80099B88 = { 0.0f, 0.0f, 544.0f };
+const Vec3f D_80099B94 = { 0.0f, 0.0f, 700.0f };
+const Vec3f D_80099BA0 = { 0.0f, 0.0f, 278.0f };
+const Vec3f D_80099BAC = { 0.0f, 0.0f, 556.0f };
 
 /* Locals of the effect spawners func_15070D24 / func_15070F60, in stack order. */
 typedef struct EffectLocals {
     Vec3i header2;
     LightEffectHeader header;
     u8 pad16[2];
-    f32 worldPos[3];
-    f32 randoms[2];
-    Vec3w vec78;
-    Vec3w localPos;
+    Vec3f worldPos;
+    ParticleSize randoms;
+    Vec3f vec78;
+    Vec3f localPos;
 } EffectLocals;
 
 /* A floor probe result together with a point (func_15071A64, func_15074C00). */
@@ -781,7 +682,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     s32 anim;
     s32 count;
     s32 i;
-    f32 *mtx;
+    MtxF *mtx;
     f32 x;
     f32 y;
     f32 z;
@@ -816,15 +717,14 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
         obj->ypos = D_800D154C->ypos + 50.0f;
         obj->zpos = D_800D154C->zpos;
     } else {
-        mtx = (f32 *)D_800D154C->ob_matrix_ptr;
+        mtx = D_800D154C->ob_matrix_ptr;
         if (D_800C3E90) {
-            // matching: byte arithmetic for bone D_80099AD8[kind][3] (Mtx * indexing mismatches)
-            guMtxL2F(mf, (Mtx *)((u8 *)mtx + (D_80099AD8[kind][3] << 6)));
-            mtx = (f32 *)mf;
+            guMtxL2F(mf, (Mtx *)&mtx[D_80099AD8[kind][3]]);
+            mtx = &mf;
         } else {
-            mtx = (f32 *)((u8 *)mtx + (D_80099AD8[kind][3] << 6));
+            mtx = &mtx[D_80099AD8[kind][3]];
         }
-        func_150A7960(mtx, D_80099AD8[kind][0], D_80099AD8[kind][1], D_80099AD8[kind][2], &x, &y, &z);
+        func_150A7960(*mtx, D_80099AD8[kind][0], D_80099AD8[kind][1], D_80099AD8[kind][2], &x, &y, &z);
         obj->xpos = x;
         obj->ypos = y;
         obj->zpos = z;
@@ -1023,7 +923,7 @@ void func_1506CE6C(void) {
     f32 yVelocity;
     f32 scale;
     f32 unused;
-    f32 (*mtxs)[16];
+    MtxF *mtxs;
     f32 x;
     f32 y;
     f32 z;
@@ -1050,11 +950,11 @@ void func_1506CE6C(void) {
     }
     if (bone != -1) {
         if (D_800D154C->ob_matrix_ptr != NULL) {
-            mtxs = (f32 (*)[16])D_800D154C->ob_matrix_ptr;
+            mtxs = D_800D154C->ob_matrix_ptr;
             func_150A7960(mtxs[bone], 0.0f, 0.0f, 1.0f, &x, &y, &z);
-            x -= mtxs[bone][12];
-            y -= mtxs[bone][13];
-            z -= mtxs[bone][14];
+            x -= mtxs[bone][3][0];
+            y -= mtxs[bone][3][1];
+            z -= mtxs[bone][3][2];
             a = func_150484A0(x, z);
             b = func_150484A0(y, sqrtf(x * x + z * z));
             a *= 57.295776f;
@@ -1097,10 +997,10 @@ void func_1506CE6C(void) {
         break;
     case 3:
         dist = 500.0f;
-        func_15145974(&movement_obj[0].mv->unkE8, &heading, &elevation);
-        vec[0] = movement_obj[0].mv->unkDC.x;
-        vec[1] = movement_obj[0].mv->unkDC.y;
-        vec[2] = movement_obj[0].mv->unkDC.z;
+        func_15145974(&movement_obj[0].mv->rayHit.dir, &heading, &elevation);
+        vec[0] = movement_obj[0].mv->rayHit.origin.x;
+        vec[1] = movement_obj[0].mv->rayHit.origin.y;
+        vec[2] = movement_obj[0].mv->rayHit.origin.z;
         allocExt = 1;
         pos = vec;
         elevation = -elevation;
@@ -1483,7 +1383,7 @@ void func_1506E0EC(void) {
         height = D_800D154C->floorY;
         for (i = 0; i < 4; i++) {
             y = 0.0f;
-            func_150A7960((f32 *)D_800D154C->ob_matrix_ptr, x, 0.0f, z, &x, &y, &z);
+            func_150A7960(*D_800D154C->ob_matrix_ptr, x, 0.0f, z, &x, &y, &z);
             vertices[i][0] = x;
             vertices[i][1] = height;
             vertices[i][2] = z;
@@ -1501,7 +1401,7 @@ void func_1506E0EC(void) {
         }
         posX = D_800D154C->xpos;
         posZ = D_800D154C->zpos;
-        func_151700D8(vertices[0], posX, posZ, 4, D_800D154C->scale_xz, 0, 4, 4, 0xFF, 0);
+        func_151700D8(vertices, posX, posZ, 4, D_800D154C->scale_xz, 0, 4, 4, 0xFF, 0);
     }
 }
 
@@ -1526,7 +1426,7 @@ void func_1506E2CC(void) {
         z = halfX;
         for (i = 0; i < 4; i++) {
             y = 0.0f;
-            func_150A7960((f32 *)D_800D154C->ob_matrix_ptr, x, y, z, &x, &y, &z);
+            func_150A7960(*D_800D154C->ob_matrix_ptr, x, y, z, &x, &y, &z);
             verts[i][0] = x;
             verts[i][1] = height;
             verts[i][2] = z;
@@ -1543,7 +1443,7 @@ void func_1506E2CC(void) {
         }
         posX = D_800D154C->xpos;
         posZ = D_800D154C->zpos;
-        func_151700D8((f32 *)verts, posX, posZ, 5, D_800D154C->scale_xz * 0.5f, 0, 4, 4, 0xFF, 0);
+        func_151700D8(verts, posX, posZ, 5, D_800D154C->scale_xz * 0.5f, 0, 4, 4, 0xFF, 0);
     }
 }
 /*
@@ -1921,99 +1821,99 @@ void func_1506F17C(s32 cmd) {
 }
 
 void func_1506F1A8(s32 cmd) {
-    Func151994B8Desc descriptor;
+    CharacterFlamethrowerSetup descriptor;
     Actor *obj;
 
     obj = D_800D154C;
-    descriptor.owner = obj;
-    descriptor.ownerUniqueId = obj->unique_id;
-    descriptor.unk14 = 80.0f;
-    descriptor.unk20 = 102.0f;
-    descriptor.unk24 = 0.1223f;
-    descriptor.unk28 = 0.6f;
-    descriptor.unk2C = 1200.0f;
-    descriptor.unk40 = 0.656f;
-    descriptor.unk30 = 26.0f;
-    descriptor.unk34 = 4.8f;
-    descriptor.unk44 = -187.0f;
-    descriptor.unk48 = 4.64f;
-    descriptor.unk58 = 0.00502f;
-    descriptor.unk5C = 0.003f;
-    descriptor.unk64 = 0.606f;
-    descriptor.unk6C = 0.418f;
-    descriptor.unk68 = 0.23900001f;
-    descriptor.unk70 = 0.20500001f;
-    descriptor.unk74 = 1.177f;
-    descriptor.unk78 = 0.572f;
-    descriptor.unk7C = 0.81900007f;
-    descriptor.unk80 = 0.846f;
-    descriptor.unk84 = 0.94086f;
-    descriptor.unk88 = 0.942411f;
-    descriptor.unk90 = 0.39200002f;
-    descriptor.unk98 = 0.008f;
-    descriptor.unkA8 = 0.24900001f;
-    descriptor.unkAC = 0.35200003f;
-    descriptor.unkBC = 14.0f;
-    descriptor.unkC0 = 9.0f;
-    descriptor.unkCC = 25.0f;
-    descriptor.unkD0 = 0.44000003f;
-    descriptor.unkD4 = 0.45100003f;
-    descriptor.unkEC = 0.30900002f;
-    descriptor.joint = 12;
-    descriptor.unk3E = 200;
-    descriptor.unkF0 = 0.312f;
-    descriptor.unk38 = -1;
-    descriptor.unk39 = 2;
-    descriptor.unk3A = -1;
-    descriptor.unk4C = -1;
+    descriptor.seed.owner = obj;
+    descriptor.seed.ownerId = obj->unique_id;
+    descriptor.seed.startOffset.z = 80.0f;
+    descriptor.seed.endOffset.z = 102.0f;
+    descriptor.seed.gravity = 0.1223f;
+    descriptor.seed.emitRate = 0.6f;
+    descriptor.seed.maxLength = 1200.0f;
+    descriptor.seed.fadeStart = 0.656f;
+    descriptor.seed.size = 26.0f;
+    descriptor.seed.sizeRate = 4.8f;
+    descriptor.seed.texSpeed = -187.0f;
+    descriptor.seed.texScale = 4.64f;
+    descriptor.line.rate = 0.00502f;
+    descriptor.line.rateRange = 0.003f;
+    descriptor.line.unkC = 0.606f;
+    descriptor.line.unk14 = 0.418f;
+    descriptor.line.unk10 = 0.23900001f;
+    descriptor.line.unk18 = 0.20500001f;
+    descriptor.line.speedMin = 1.177f;
+    descriptor.line.speedRange = 0.572f;
+    descriptor.line.gravityMin = 0.81900007f;
+    descriptor.line.gravityRange = 0.846f;
+    descriptor.line.dragA = 0.94086f;
+    descriptor.line.dragB = 0.942411f;
+    descriptor.line.position = 0.39200002f;
+    descriptor.line.shrinkRate = 0.008f;
+    descriptor.scatter.rate = 0.24900001f;
+    descriptor.scatter.rateRange = 0.35200003f;
+    descriptor.scatter.unk20 = 14.0f;
+    descriptor.scatter.unk24 = 9.0f;
+    descriptor.scatter.spread = 25.0f;
+    descriptor.scatter.unk34 = 0.44000003f;
+    descriptor.scatter.unk38 = 0.45100003f;
+    descriptor.emit.rate = 0.30900002f;
+    descriptor.seed.bone = 12;
+    descriptor.seed.alpha = 200;
+    descriptor.emit.rateRange = 0.312f;
+    descriptor.seed.initFn = -1;
+    descriptor.seed.unk35 = 2;
+    descriptor.seed.destroyFn = -1;
+    descriptor.seed.updateFn = -1;
     descriptor.kind = 15;
-    descriptor.unk54 = 1;
+    descriptor.flags = 1;
     descriptor.red = 60;
     descriptor.green = 255;
     descriptor.blue = 235;
     descriptor.alpha = 82;
-    descriptor.unkFC = 402.0f;
-    descriptor.unk60 = 30;
-    descriptor.unk62 = 15;
-    descriptor.unk8C = 12;
-    descriptor.unk8E = 21;
-    descriptor.unk94 = 80;
-    descriptor.unk95 = 120;
-    descriptor.unkB0 = 4;
-    descriptor.unkB4 = 2;
-    descriptor.unkB8 = 30;
-    descriptor.unkBA = 17;
-    descriptor.unk0C = 0.0f;
-    descriptor.unk10 = 0.0f;
-    descriptor.unk18 = 0.0f;
-    descriptor.unk1C = 0.0f;
-    descriptor.unk3B = 0;
-    descriptor.unk3C = 0;
-    descriptor.unk3D = 0;
-    descriptor.unk9C = 0.0f;
-    descriptor.unkA0 = 5.0f;
-    descriptor.unkA4 = 100.0f;
-    descriptor.unkC4 = 0.5f;
-    descriptor.unkC8 = 0.5f;
-    descriptor.unkD8 = 80;
-    descriptor.unkDA = 120;
-    descriptor.unkDC = 16;
-    descriptor.unkDE = 15;
-    descriptor.unkE0 = 0.0f;
-    descriptor.unkE4 = 5.0f;
-    descriptor.unkE8 = 100.0f;
-    descriptor.unkF4 = 40;
-    descriptor.unkF6 = 15;
-    descriptor.unkF8 = 80;
-    descriptor.unkFA = 80;
-    descriptor.unk118 = 20;
-    descriptor.unk11A = 12;
-    descriptor.unk100 = 303.0f;
-    descriptor.unk104 = 0.101f;
-    descriptor.unk108 = 0.19800001f;
-    descriptor.unk10C = 45.0f;
-    descriptor.unk110 = -0.65500003f;
-    descriptor.unk114 = 0.30800003f;
+    descriptor.emit.unk1C = 402.0f;
+    descriptor.line.lifeMin = 30;
+    descriptor.line.lifeRange = 15;
+    descriptor.line.fadeStart = 12;
+    descriptor.line.alphaPerLife = 21;
+    descriptor.line.unk3C = 80;
+    descriptor.line.unk3D = 120;
+    descriptor.scatter.unk14 = 4;
+    descriptor.scatter.unk18 = 2;
+    descriptor.scatter.unk1C = 30;
+    descriptor.scatter.unk1E = 17;
+    descriptor.seed.startOffset.x = 0.0f;
+    descriptor.seed.startOffset.y = 0.0f;
+    descriptor.seed.endOffset.x = 0.0f;
+    descriptor.seed.endOffset.y = 0.0f;
+    descriptor.seed.soundFn = 0;
+    descriptor.seed.soundUpdateFn = 0;
+    descriptor.seed.soundStopFn = 0;
+    descriptor.scatter.target.x = 0.0f;
+    descriptor.scatter.target.y = 5.0f;
+    descriptor.scatter.target.z = 100.0f;
+    descriptor.scatter.speedMin = 0.5f;
+    descriptor.scatter.speedRange = 0.5f;
+    descriptor.scatter.unk3C = 80;
+    descriptor.scatter.unk3E = 120;
+    descriptor.scatter.unk40 = 16;
+    descriptor.scatter.unk42 = 15;
+    descriptor.emit.target.x = 0.0f;
+    descriptor.emit.target.y = 5.0f;
+    descriptor.emit.target.z = 100.0f;
+    descriptor.emit.unk14 = 40;
+    descriptor.emit.unk16 = 15;
+    descriptor.emit.unk18 = 80;
+    descriptor.emit.unk1A = 80;
+    descriptor.emit.unk38 = 20;
+    descriptor.emit.unk3A = 12;
+    descriptor.emit.unk20 = 303.0f;
+    descriptor.emit.speedMin = 0.101f;
+    descriptor.emit.speedRange = 0.19800001f;
+    descriptor.emit.spread = 45.0f;
+    descriptor.emit.unk30 = -0.65500003f;
+    descriptor.emit.unk34 = 0.30800003f;
     func_151994B8(0, &descriptor, 0xFF, 0);
 }
 
@@ -2022,97 +1922,97 @@ void func_1506F524(s32 cmd) {
 }
 
 void func_1506F54C(s32 cmd) {
-    Func151994B8Desc descriptor;
+    CharacterFlamethrowerSetup descriptor;
 
-    descriptor.owner = D_800D154C;
-    descriptor.ownerUniqueId = D_800D154C->unique_id;
-    descriptor.joint = 13;
-    descriptor.unk0C = 22.0f;
-    descriptor.unk10 = 22.0f;
-    descriptor.unk14 = 165.0f;
-    descriptor.unk18 = 22.0f;
-    descriptor.unk1C = 22.0f;
-    descriptor.unk20 = 193.0f;
-    descriptor.unk24 = 1.138f;
-    descriptor.unk28 = 0.795f;
-    descriptor.unk2C = 370.0f;
-    descriptor.unk40 = 0.615f;
-    descriptor.unk30 = 17.800001f;
-    descriptor.unk34 = 4.9f;
-    descriptor.unk3E = 159;
-    descriptor.unk38 = 0;
-    descriptor.unk39 = -1;
-    descriptor.unk3A = 0;
-    descriptor.unk3B = 0;
-    descriptor.unk3C = 0;
-    descriptor.unk3D = 0;
-    descriptor.unk44 = -191.0f;
-    descriptor.unk48 = 7.85f;
-    descriptor.unk4C = -1;
+    descriptor.seed.owner = D_800D154C;
+    descriptor.seed.ownerId = D_800D154C->unique_id;
+    descriptor.seed.bone = 13;
+    descriptor.seed.startOffset.x = 22.0f;
+    descriptor.seed.startOffset.y = 22.0f;
+    descriptor.seed.startOffset.z = 165.0f;
+    descriptor.seed.endOffset.x = 22.0f;
+    descriptor.seed.endOffset.y = 22.0f;
+    descriptor.seed.endOffset.z = 193.0f;
+    descriptor.seed.gravity = 1.138f;
+    descriptor.seed.emitRate = 0.795f;
+    descriptor.seed.maxLength = 370.0f;
+    descriptor.seed.fadeStart = 0.615f;
+    descriptor.seed.size = 17.800001f;
+    descriptor.seed.sizeRate = 4.9f;
+    descriptor.seed.alpha = 159;
+    descriptor.seed.initFn = 0;
+    descriptor.seed.unk35 = -1;
+    descriptor.seed.destroyFn = 0;
+    descriptor.seed.soundFn = 0;
+    descriptor.seed.soundUpdateFn = 0;
+    descriptor.seed.soundStopFn = 0;
+    descriptor.seed.texSpeed = -191.0f;
+    descriptor.seed.texScale = 7.85f;
+    descriptor.seed.updateFn = -1;
     descriptor.kind = 15;
-    descriptor.unk54 = 1;
+    descriptor.flags = 1;
     descriptor.red = 60;
     descriptor.green = 255;
     descriptor.blue = 235;
     descriptor.alpha = 82;
-    descriptor.unk58 = 0.0029f;
-    descriptor.unk5C = 0.00235f;
-    descriptor.unk60 = 35;
-    descriptor.unk62 = 10;
-    descriptor.unk64 = 0.80200005f;
-    descriptor.unk6C = 0.367f;
-    descriptor.unk68 = 0.58900005f;
-    descriptor.unk70 = 0.307f;
-    descriptor.unk74 = 0.614f;
-    descriptor.unk78 = 0.29900003f;
-    descriptor.unk7C = 0.0f;
-    descriptor.unk80 = 0.73800003f;
-    descriptor.unk84 = 0.962646f;
-    descriptor.unk88 = 0.961868f;
-    descriptor.unk8C = 15;
-    descriptor.unk8E = 17;
-    descriptor.unk90 = 0.36900002f;
-    descriptor.unk94 = 80;
-    descriptor.unk95 = 80;
-    descriptor.unk98 = 0.024f;
-    descriptor.unk9C = 22.0f;
-    descriptor.unkA0 = 58.0f;
-    descriptor.unkA4 = 212.0f;
-    descriptor.unkA8 = 0.2f;
-    descriptor.unkAC = 0.105000004f;
-    descriptor.unkB0 = 3;
-    descriptor.unkB4 = 2;
-    descriptor.unkB8 = 25;
-    descriptor.unkBA = 10;
-    descriptor.unkBC = 6.0f;
-    descriptor.unkC0 = 10.0f;
-    descriptor.unkC4 = 0.3f;
-    descriptor.unkC8 = 0.2f;
-    descriptor.unkCC = 37.0f;
-    descriptor.unkD0 = 0.75100005f;
-    descriptor.unkD4 = 0.32200003f;
-    descriptor.unkD8 = 80;
-    descriptor.unkDA = 80;
-    descriptor.unkDC = 15;
-    descriptor.unkDE = 17;
-    descriptor.unkE0 = 22.0f;
-    descriptor.unkE4 = 130.0f;
-    descriptor.unkE8 = 306.0f;
-    descriptor.unkEC = 0.208f;
-    descriptor.unkF0 = 0.193f;
-    descriptor.unkF4 = 35;
-    descriptor.unkF6 = 15;
-    descriptor.unkF8 = 80;
-    descriptor.unkFA = 100;
-    descriptor.unkFC = 198.0f;
-    descriptor.unk100 = 102.0f;
-    descriptor.unk104 = 0.040000003f;
-    descriptor.unk108 = 0.040000003f;
-    descriptor.unk10C = 89.0f;
-    descriptor.unk110 = -0.49500004f;
-    descriptor.unk114 = 0.44300002f;
-    descriptor.unk118 = 15;
-    descriptor.unk11A = 17;
+    descriptor.line.rate = 0.0029f;
+    descriptor.line.rateRange = 0.00235f;
+    descriptor.line.lifeMin = 35;
+    descriptor.line.lifeRange = 10;
+    descriptor.line.unkC = 0.80200005f;
+    descriptor.line.unk14 = 0.367f;
+    descriptor.line.unk10 = 0.58900005f;
+    descriptor.line.unk18 = 0.307f;
+    descriptor.line.speedMin = 0.614f;
+    descriptor.line.speedRange = 0.29900003f;
+    descriptor.line.gravityMin = 0.0f;
+    descriptor.line.gravityRange = 0.73800003f;
+    descriptor.line.dragA = 0.962646f;
+    descriptor.line.dragB = 0.961868f;
+    descriptor.line.fadeStart = 15;
+    descriptor.line.alphaPerLife = 17;
+    descriptor.line.position = 0.36900002f;
+    descriptor.line.unk3C = 80;
+    descriptor.line.unk3D = 80;
+    descriptor.line.shrinkRate = 0.024f;
+    descriptor.scatter.target.x = 22.0f;
+    descriptor.scatter.target.y = 58.0f;
+    descriptor.scatter.target.z = 212.0f;
+    descriptor.scatter.rate = 0.2f;
+    descriptor.scatter.rateRange = 0.105000004f;
+    descriptor.scatter.unk14 = 3;
+    descriptor.scatter.unk18 = 2;
+    descriptor.scatter.unk1C = 25;
+    descriptor.scatter.unk1E = 10;
+    descriptor.scatter.unk20 = 6.0f;
+    descriptor.scatter.unk24 = 10.0f;
+    descriptor.scatter.speedMin = 0.3f;
+    descriptor.scatter.speedRange = 0.2f;
+    descriptor.scatter.spread = 37.0f;
+    descriptor.scatter.unk34 = 0.75100005f;
+    descriptor.scatter.unk38 = 0.32200003f;
+    descriptor.scatter.unk3C = 80;
+    descriptor.scatter.unk3E = 80;
+    descriptor.scatter.unk40 = 15;
+    descriptor.scatter.unk42 = 17;
+    descriptor.emit.target.x = 22.0f;
+    descriptor.emit.target.y = 130.0f;
+    descriptor.emit.target.z = 306.0f;
+    descriptor.emit.rate = 0.208f;
+    descriptor.emit.rateRange = 0.193f;
+    descriptor.emit.unk14 = 35;
+    descriptor.emit.unk16 = 15;
+    descriptor.emit.unk18 = 80;
+    descriptor.emit.unk1A = 100;
+    descriptor.emit.unk1C = 198.0f;
+    descriptor.emit.unk20 = 102.0f;
+    descriptor.emit.speedMin = 0.040000003f;
+    descriptor.emit.speedRange = 0.040000003f;
+    descriptor.emit.spread = 89.0f;
+    descriptor.emit.unk30 = -0.49500004f;
+    descriptor.emit.unk34 = 0.44300002f;
+    descriptor.emit.unk38 = 15;
+    descriptor.emit.unk3A = 17;
     func_151994B8(0, &descriptor, 0xFF, 0);
 }
 
@@ -2296,12 +2196,12 @@ void func_15070300(s32 cmd) {
     Actor *other;
     u8 idx;
     IgnoreList info;
-    Vec3w localPos;
-    Vec3w vec74;
-    f32 randoms[2];
-    f32 worldPos[3];
-    s32 *srcs[1];
-    f32 *dsts[1];
+    Vec3f localPos;
+    Vec3f vec74;
+    ParticleSize randoms;
+    Vec3f worldPos;
+    const Vec3f *srcs[1];
+    Vec3f *dsts[1];
 
     other = NULL;
     if (D_800D154C->character_type == 0x77) {
@@ -2364,16 +2264,16 @@ void func_15070300(s32 cmd) {
     }
     localPos = D_80099B70;
     vec74 = D_80099B7C;
-    randoms[0] = (func_150ADA68() * 30.0f) + 40.0f;
-    randoms[1] = (func_150ADA68() * 2.512f) + 3.5900002f;
-    srcs[0] = (s32 *)&localPos;
-    dsts[0] = worldPos;
-    func_15145EA4(srcs, dsts, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 4), 1);
-    func_15102B38((s32)D_800D154C, 4, (s32)&localPos, (s32)&vec74, randoms,
+    randoms.width = (func_150ADA68() * 30.0f) + 40.0f;
+    randoms.height = (func_150ADA68() * 2.512f) + 3.5900002f;
+    srcs[0] = &localPos;
+    dsts[0] = &worldPos;
+    func_15145EA4(srcs, dsts, &D_800D154C->ob_matrix_ptr[4], 1);
+    func_15102B38(D_800D154C, 4, &localPos, &vec74, &randoms,
                   (func_150ADA20() % 5U) + 5, (func_150ADA20() % 56U) + 200,
                   (func_150ADA68() * 510.0f) + 1296.0f,
-                  (s32)worldPos, 0xFF, 0, -1, 0xFF, 1);
-    func_151C1860(worldPos, 0xFF, 1);
+                  &worldPos, 0xFF, 0, -1, 0xFF, 1);
+    func_151C1860(&worldPos, 0xFF, 1);
 }
 
 void func_15070690(s32 cmd) {
@@ -2418,97 +2318,97 @@ void func_15070860(s32 cmd) {
 }
 
 void func_15070898(s32 cmd) {
-    Func151994B8Desc descriptor;
+    CharacterFlamethrowerSetup descriptor;
 
-    descriptor.owner = D_800D154C;
-    descriptor.ownerUniqueId = D_800D154C->unique_id;
-    descriptor.joint = 9;
-    descriptor.unk0C = -4.734001f;
-    descriptor.unk10 = -111.957596f;
-    descriptor.unk14 = 33.473396f;
-    descriptor.unk18 = -8.837997f;
-    descriptor.unk1C = -159.75f;
-    descriptor.unk20 = 33.473396f;
-    descriptor.unk24 = 0.278f;
-    descriptor.unk28 = 0.82800007f;
-    descriptor.unk2C = 312.0f;
-    descriptor.unk40 = 0.325f;
-    descriptor.unk30 = 7.1f;
-    descriptor.unk34 = 5.0f;
-    descriptor.unk3E = 180;
-    descriptor.unk38 = -1;
-    descriptor.unk39 = 1;
-    descriptor.unk3A = -1;
-    descriptor.unk3B = -1;
-    descriptor.unk3C = -1;
-    descriptor.unk3D = -1;
-    descriptor.unk44 = -232.0f;
-    descriptor.unk48 = 9.07f;
-    descriptor.unk4C = -1;
+    descriptor.seed.owner = D_800D154C;
+    descriptor.seed.ownerId = D_800D154C->unique_id;
+    descriptor.seed.bone = 9;
+    descriptor.seed.startOffset.x = -4.734001f;
+    descriptor.seed.startOffset.y = -111.957596f;
+    descriptor.seed.startOffset.z = 33.473396f;
+    descriptor.seed.endOffset.x = -8.837997f;
+    descriptor.seed.endOffset.y = -159.75f;
+    descriptor.seed.endOffset.z = 33.473396f;
+    descriptor.seed.gravity = 0.278f;
+    descriptor.seed.emitRate = 0.82800007f;
+    descriptor.seed.maxLength = 312.0f;
+    descriptor.seed.fadeStart = 0.325f;
+    descriptor.seed.size = 7.1f;
+    descriptor.seed.sizeRate = 5.0f;
+    descriptor.seed.alpha = 180;
+    descriptor.seed.initFn = -1;
+    descriptor.seed.unk35 = 1;
+    descriptor.seed.destroyFn = -1;
+    descriptor.seed.soundFn = -1;
+    descriptor.seed.soundUpdateFn = -1;
+    descriptor.seed.soundStopFn = -1;
+    descriptor.seed.texSpeed = -232.0f;
+    descriptor.seed.texScale = 9.07f;
+    descriptor.seed.updateFn = -1;
     descriptor.kind = 15;
-    descriptor.unk54 = 17;
+    descriptor.flags = 17;
     descriptor.red = 60;
     descriptor.green = 255;
     descriptor.blue = 235;
     descriptor.alpha = 82;
-    descriptor.unk58 = 0.00689f;
-    descriptor.unk5C = 0.01038f;
-    descriptor.unk60 = 25;
-    descriptor.unk62 = 10;
-    descriptor.unk64 = 0.367f;
-    descriptor.unk6C = 0.256f;
-    descriptor.unk68 = 0.35000002f;
-    descriptor.unk70 = 0.20500001f;
-    descriptor.unk74 = 0.776f;
-    descriptor.unk78 = 0.81100005f;
-    descriptor.unk7C = 0.125f;
-    descriptor.unk80 = 1.3110001f;
-    descriptor.unk84 = 0.935119f;
-    descriptor.unk88 = 0.943452f;
-    descriptor.unk8C = 12;
-    descriptor.unk8E = 21;
-    descriptor.unk90 = 0.307f;
-    descriptor.unk94 = 80;
-    descriptor.unk95 = 80;
-    descriptor.unk98 = 0.002f;
-    descriptor.unk9C = -8.837997f;
-    descriptor.unkA0 = -159.75f;
-    descriptor.unkA4 = 33.473396f;
-    descriptor.unkA8 = 0.3f;
-    descriptor.unkAC = 0.40100002f;
-    descriptor.unkB0 = 4;
-    descriptor.unkB4 = 2;
-    descriptor.unkB8 = 26;
-    descriptor.unkBA = 16;
-    descriptor.unkBC = 6.0f;
-    descriptor.unkC0 = 5;
-    descriptor.unkC4 = 0.3f;
-    descriptor.unkC8 = 0.3f;
-    descriptor.unkCC = 50.0f;
-    descriptor.unkD0 = 0.0f;
-    descriptor.unkD4 = 0.712f;
-    descriptor.unkD8 = 80;
-    descriptor.unkDA = 120;
-    descriptor.unkDC = 15;
-    descriptor.unkDE = 17;
-    descriptor.unkE0 = -8.837997f;
-    descriptor.unkE4 = -159.75f;
-    descriptor.unkE8 = 33.473396f;
-    descriptor.unkEC = 0.20400001f;
-    descriptor.unkF0 = 0.504f;
-    descriptor.unkF4 = 30;
-    descriptor.unkF6 = 15;
-    descriptor.unkF8 = 80;
-    descriptor.unkFA = 80;
-    descriptor.unkFC = 140.0f;
-    descriptor.unk100 = 182.0f;
-    descriptor.unk104 = 0.16000001f;
-    descriptor.unk108 = 0.113000005f;
-    descriptor.unk10C = 42.0f;
-    descriptor.unk110 = -0.518f;
-    descriptor.unk114 = 0.37600002f;
-    descriptor.unk118 = 10;
-    descriptor.unk11A = 25;
+    descriptor.line.rate = 0.00689f;
+    descriptor.line.rateRange = 0.01038f;
+    descriptor.line.lifeMin = 25;
+    descriptor.line.lifeRange = 10;
+    descriptor.line.unkC = 0.367f;
+    descriptor.line.unk14 = 0.256f;
+    descriptor.line.unk10 = 0.35000002f;
+    descriptor.line.unk18 = 0.20500001f;
+    descriptor.line.speedMin = 0.776f;
+    descriptor.line.speedRange = 0.81100005f;
+    descriptor.line.gravityMin = 0.125f;
+    descriptor.line.gravityRange = 1.3110001f;
+    descriptor.line.dragA = 0.935119f;
+    descriptor.line.dragB = 0.943452f;
+    descriptor.line.fadeStart = 12;
+    descriptor.line.alphaPerLife = 21;
+    descriptor.line.position = 0.307f;
+    descriptor.line.unk3C = 80;
+    descriptor.line.unk3D = 80;
+    descriptor.line.shrinkRate = 0.002f;
+    descriptor.scatter.target.x = -8.837997f;
+    descriptor.scatter.target.y = -159.75f;
+    descriptor.scatter.target.z = 33.473396f;
+    descriptor.scatter.rate = 0.3f;
+    descriptor.scatter.rateRange = 0.40100002f;
+    descriptor.scatter.unk14 = 4;
+    descriptor.scatter.unk18 = 2;
+    descriptor.scatter.unk1C = 26;
+    descriptor.scatter.unk1E = 16;
+    descriptor.scatter.unk20 = 6.0f;
+    descriptor.scatter.unk24 = 5;
+    descriptor.scatter.speedMin = 0.3f;
+    descriptor.scatter.speedRange = 0.3f;
+    descriptor.scatter.spread = 50.0f;
+    descriptor.scatter.unk34 = 0.0f;
+    descriptor.scatter.unk38 = 0.712f;
+    descriptor.scatter.unk3C = 80;
+    descriptor.scatter.unk3E = 120;
+    descriptor.scatter.unk40 = 15;
+    descriptor.scatter.unk42 = 17;
+    descriptor.emit.target.x = -8.837997f;
+    descriptor.emit.target.y = -159.75f;
+    descriptor.emit.target.z = 33.473396f;
+    descriptor.emit.rate = 0.20400001f;
+    descriptor.emit.rateRange = 0.504f;
+    descriptor.emit.unk14 = 30;
+    descriptor.emit.unk16 = 15;
+    descriptor.emit.unk18 = 80;
+    descriptor.emit.unk1A = 80;
+    descriptor.emit.unk1C = 140.0f;
+    descriptor.emit.unk20 = 182.0f;
+    descriptor.emit.speedMin = 0.16000001f;
+    descriptor.emit.speedRange = 0.113000005f;
+    descriptor.emit.spread = 42.0f;
+    descriptor.emit.unk30 = -0.518f;
+    descriptor.emit.unk34 = 0.37600002f;
+    descriptor.emit.unk38 = 10;
+    descriptor.emit.unk3A = 25;
     func_151994B8(0, &descriptor, 0xFF, 0);
 }
 
@@ -2552,24 +2452,24 @@ void func_15070D24(s32 cmd) {
         return;
     }
 
-    fx.randoms[0] = (func_150ADA68() * 101.0f) + 151.0f;
-    fx.randoms[1] = (func_150ADA68() * 4.0f) + 4.0f;
+    fx.randoms.width = (func_150ADA68() * 101.0f) + 151.0f;
+    fx.randoms.height = (func_150ADA68() * 4.0f) + 4.0f;
 
-    func_15143134(&fx.localPos, fx.worldPos, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 1));
+    func_15143134(&fx.localPos, &fx.worldPos, &D_800D154C->ob_matrix_ptr[1]);
 
-    func_15102B38((s32)D_800D154C, 1, (s32)&fx.localPos, (s32)&fx.vec78, fx.randoms,
+    func_15102B38(D_800D154C, 1, &fx.localPos, &fx.vec78, &fx.randoms,
                   (func_150ADA20() % 6U) + 5, (func_150ADA20() % 156U) + 100,
                   (func_150ADA68() * 2496.0f) + 3496.0f,
-                  (s32)fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
+                  &fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
 
     fx.header.flags = 3;
     fx.header.update = -1;
     fx.header.lifetime = (func_150ADA20() % 6U) + 0xA;
     fx.header.lightType = 0;
 
-    fx.header2.x = fx.worldPos[0];
-    fx.header2.y = fx.worldPos[1];
-    fx.header2.z = fx.worldPos[2];
+    fx.header2.x = fx.worldPos.x;
+    fx.header2.y = fx.worldPos.y;
+    fx.header2.z = fx.worldPos.z;
 
     func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
 }
@@ -2589,28 +2489,28 @@ void func_15070F60(cmd)
         return;
     }
 
-    fx.randoms[0] = (func_150ADA68() * 180.0f) + 150.0f;
-    fx.randoms[1] = func_150ADA68() * 2.0f + 2.5f;
+    fx.randoms.width = (func_150ADA68() * 180.0f) + 150.0f;
+    fx.randoms.height = func_150ADA68() * 2.0f + 2.5f;
 
-    func_15143134(&fx.localPos, fx.worldPos, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + (cmd ? 1 : 2)));
+    func_15143134(&fx.localPos, &fx.worldPos, &D_800D154C->ob_matrix_ptr[cmd ? 1 : 2]);
 
-    func_15102B38((s32)D_800D154C, cmd ? 1 : 2, (s32)&fx.localPos, (s32)&fx.vec78, fx.randoms,
+    func_15102B38(D_800D154C, cmd ? 1 : 2, &fx.localPos, &fx.vec78, &fx.randoms,
                   (func_150ADA20() % 5U) + 5, (func_150ADA20() % 156U) + 100,
                   (func_150ADA68() * 4000.0f) + 4000.0f,
-                  (s32)fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
+                  &fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
 
     fx.header.flags = 3;
     fx.header.update = -1;
     fx.header.lifetime = (func_150ADA20() % 5U) + 3;
     fx.header.lightType = 0;
 
-    fx.header2.x = fx.worldPos[0];
-    fx.header2.y = fx.worldPos[1];
-    fx.header2.z = fx.worldPos[2];
+    fx.header2.x = fx.worldPos.x;
+    fx.header2.y = fx.worldPos.y;
+    fx.header2.z = fx.worldPos.z;
 
     func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
-    func_151D5404((Vec3f *)fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
-    func_151D5334((Vec3f *)fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
+    func_151D5404(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
+    func_151D5334(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
 }
 void func_15071230(s32 cmd) {
     func_15070F60(0);
@@ -2758,20 +2658,18 @@ void func_15071888(s32 cmd) {
 
 /* Spawns effect func_151C329C at one of four random bones. */
 void func_150718E4(s32 cmd) {
-    f32 *p;
-    f32 pos[2];
+    Vec3f pos;
     const u8 bones[4] = { 13, 16, 24, 27 };
 
     if (D_800D154C->ob_matrix_ptr != NULL || (D_800D154C->unk74 & 0xF) == 0xF) {
-        p = pos;
-        func_15143134(&D_800A5480, p, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + bones[func_150ADA20() & 3]));
-        pos[1] = D_800D154C->floorY + 20.0f;
-        func_151C329C((s32)p, 0xFF, 1);
+        func_15143134(&D_800A5480, &pos, &D_800D154C->ob_matrix_ptr[bones[func_150ADA20() & 3]]);
+        pos.y = D_800D154C->floorY + 20.0f;
+        func_151C329C(&pos, 0xFF, 1);
     }
 }
 
-const Vec3w D_80099BBC = { 0x00000000, 0x41880000, 0x40E00000 }; /* 0, 17, 7 */
-const f32 D_80099BC8[3][3] = {
+const Vec3f D_80099BBC = { 0.0f, 17.0f, 7.0f };
+const Vec3f D_80099BC8[3] = {
     { 0.0f, 2.0f, 145.0f },
     { 62.0f, 11.0f, 114.0f },
     { -62.0f, 11.0f, 114.0f },
@@ -2803,7 +2701,7 @@ void func_15071A64(s32 cmd) {
     if (!(func_150ADA20() & 1) && D_800D154C->ob_matrix_ptr != NULL && (D_800D154C->unk74 & 0xF) != 0xF &&
         movement_obj[0].stunned != 0 && movement_obj[0].energy > 0) {
         func_1504715C(&hit.ground, D_800D154C);
-        func_15143134(&D_80099BBC, &hit.pos.x, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 15));
+        func_15143134(&D_80099BBC, &hit.pos, &D_800D154C->ob_matrix_ptr[15]);
         func_151DC484(&hit.pos.x, &hit.ground, 0, 0xFF, 1);
     }
 }
@@ -2813,7 +2711,7 @@ void func_15071B18(s32 cmd) {
     CollisionHit collision;
 
     if (D_800D154C->ob_matrix_ptr != NULL && (D_800D154C->unk74 & 0xF) != 0xF) {
-        func_15143134(D_80099BC8[func_150ADA20() % 3U], &point.x, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 7));
+        func_15143134(&D_80099BC8[func_150ADA20() % 3U], &point, &D_800D154C->ob_matrix_ptr[7]);
         func_1504715C(&collision, D_800D154C);
         if (func_150ADA20() & 1) {
             if (func_150ADA20() & 1) {
@@ -3392,7 +3290,7 @@ void func_150730D0(void) {
  */
 Actor *func_15073118(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, f32 yawOffset, f32 speed,
                      f32 yVelocity, f32 gravity, s32 unk83) {
-    Mtx *mtx;
+    MtxF *mtx;
     MtxF mf;
     Actor *obj;
     f32 x;
@@ -3406,12 +3304,12 @@ Actor *func_15073118(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 
     obj->speed = speed;
     obj->count5 = unk83;
     if (parent->ob_matrix_ptr != NULL && bone != -1) {
-        mtx = (Mtx *)parent->ob_matrix_ptr + bone;
+        mtx = &parent->ob_matrix_ptr[bone];
         if (D_800C3E90 != 0) {
-            guMtxL2F(mf, mtx);
-            mtx = (Mtx *)mf;
+            guMtxL2F(mf, (Mtx *)mtx);
+            mtx = &mf;
         }
-        func_150A7960((f32 *)mtx, offX, offY, offZ, &x, &y, &z);
+        func_150A7960(*mtx, offX, offY, offZ, &x, &y, &z);
     } else {
         x = parent->xpos;
         y = parent->ypos;
@@ -3734,8 +3632,8 @@ void func_15073FA0(void) {
                     break;
                 }
                 if (!useDefault) {
-                    slot = (s32)((Mtx *)player->ob_matrix_ptr + bone);
-                    func_15143134(NULL, &obj->xpos, slot);
+                    slot = (s32)&player->ob_matrix_ptr[bone];
+                    func_15143134(NULL, (Vec3f *)&obj->xpos, slot); // xpos, ypos, zpos as one Vec3f
                     {
                         typedef s32 padA; // matching: a scope with a declaration steers as1 (-g3)
                         player = D_800D154C;
@@ -4008,15 +3906,15 @@ void func_15074B7C(void) {
     }
 }
 
-void func_15074BD8(s32 arg0, s32 arg1, s32 arg2) {
+void func_15074BD8(Actor *self, Actor *other, u8 *result) {
 }
 
-void func_15074BEC(s32 arg0, s32 arg1, s32 arg2) {
+void func_15074BEC(Actor *self, Actor *other, u8 *result) {
 }
 
 /* Collision handlers (self, other, result): */
 
-void func_15074C00(s32 self, Actor *other, s32 result) {
+void func_15074C00(Actor *self, Actor *other, u8 *result) {
     GroundPoint hit;
 
     if (((u8)other->intelhitroute & 0x7F) == 5) {
@@ -4024,7 +3922,7 @@ void func_15074C00(s32 self, Actor *other, s32 result) {
         hit.pos.x = D_800CC2C0;
         hit.pos.y = D_800CC2C4;
         hit.pos.z = D_800CC2C8;
-        func_150C04C0(&hit.pos.x, &hit.ground, 22, 1, 0xFF, 0);
+        func_150C04C0(&hit.pos, &hit.ground, 22, 1, 0xFF, 0);
     }
 }
 
@@ -4067,17 +3965,17 @@ void func_15074C80(Actor *self, Actor *other) {
     }
 }
 
-void func_15074DEC(Actor *self, s32 other, s32 result) {
+void func_15074DEC(Actor *self, Actor *other, u8 *result) {
     self->taskint[1] = 1;
 }
 
-void func_15074E04(s32 self, s32 other, s32 result) {
-    func_1516FE1C((Actor *)other - movement_obj, 180, 0xFF, 0);
+void func_15074E04(Actor *self, Actor *other, u8 *result) {
+    func_1516FE1C(other - movement_obj, 180, 0xFF, 0);
     func_1518D1C0(other, 11, 0, 1, 0xFF, 0, "mvmt_imp_set_up_smoke");
 }
 
-void func_15074E80(Actor *self, Actor *other, s32 result) {
-    s8 hitResult = 0;
+void func_15074E80(Actor *self, Actor *other, u8 *result) {
+    u8 hitResult = 0;
 
     func_15194794(self, other, &hitResult);
     if (other->type == 1) {
@@ -4088,7 +3986,7 @@ void func_15074E80(Actor *self, Actor *other, s32 result) {
     }
 }
 
-void func_15074EE8(Actor *self, Actor *other, s32 result) {
+void func_15074EE8(Actor *self, Actor *other, u8 *result) {
     if (other->type == 1) {
         self->imune = 0xFF;
         other->imune = 200;
@@ -4097,13 +3995,13 @@ void func_15074EE8(Actor *self, Actor *other, s32 result) {
     }
 }
 
-void func_15074F30(Actor *self, Actor *other, s32 result) {
+void func_15074F30(Actor *self, Actor *other, u8 *result) {
     self->intelwalk = other->unk109;
     self->scriptCmd = NULL;
 }
 
 /* Sends `other` towards (-2641, 3039). */
-void func_15074F48(Actor *self, Actor *other, s32 result) {
+void func_15074F48(Actor *self, Actor *other, u8 *result) {
     f32 dx = -2641.0f - self->xpos;
     f32 dz = self->zpos - 3039.0f;
 
@@ -4112,7 +4010,7 @@ void func_15074F48(Actor *self, Actor *other, s32 result) {
     func_15194408(self, other);
 }
 
-void func_15074FD4(Actor *self, Actor *other, s32 result) {
+void func_15074FD4(Actor *self, Actor *other, u8 *result) {
     if (other->type == 1) {
         self->imune = 0xFF;
         other->imune = 200;
@@ -4125,7 +4023,7 @@ void func_15074FD4(Actor *self, Actor *other, s32 result) {
     func_151942B0(self, other, result);
 }
 
-void func_15075050(Actor *self, s32 other, s32 result) {
+void func_15075050(Actor *self, Actor *other, u8 *result) {
     self->vtilt = 5.0f;
     if (self->speed > 0.0f) {
         self->vtilt = -5.0f;
@@ -4134,7 +4032,7 @@ void func_15075050(Actor *self, s32 other, s32 result) {
     self->yspd = 12.0f;
 }
 
-void func_150750A4(Actor *self, s32 other, s32 result) {
+void func_150750A4(Actor *self, Actor *other, u8 *result) {
     self->ygrav = 5.0f;
 }
 

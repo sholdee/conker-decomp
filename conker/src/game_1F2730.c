@@ -4,7 +4,7 @@
 
 // func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
 // game_1DC720.c were compiled with a different view of it.
-SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
@@ -18,13 +18,13 @@ const Vec3f D_800AAAA8 = { 7.3199987f, -14.082394f, 4.5422006f };
  * position, or, when it has ob_matrix_ptr, between two points of model part 0x46, plus func_151C56A4 and
  * (half the time) func_151C5588 effects at the segment start. */
 void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
-    f32 start[3];
-    f32 end[3];
-    f32 dir[3];
-    f32 unkB0[3];
+    Vec3f start;
+    Vec3f end;
+    Vec3f dir;
+    Vec3f unkB0;
     ModelAttachment *part;
     const Vec3f *modelPoints[2];
-    f32 *worldPoints[2];
+    Vec3f *worldPoints[2];
     s32 arg16;
     s32 arg23;
     s32 randInt;
@@ -32,15 +32,15 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
     f32 randA;
 
     if (obj != NULL) {
-        func_15145740(obj, dir, unkB0, NULL, 0.0f);
-        dir[0] *= 0.001f;
-        dir[1] *= 0.001f;
-        dir[2] *= 0.001f;
+        func_15145740(obj, &dir, &unkB0, NULL, 0.0f);
+        dir.x *= 0.001f;
+        dir.y *= 0.001f;
+        dir.z *= 0.001f;
         if (obj->ob_matrix_ptr != NULL) {
             modelPoints[0] = &D_800AAA90;
             modelPoints[1] = &D_800AAAA8;
-            worldPoints[0] = start;
-            worldPoints[1] = end;
+            worldPoints[0] = &start;
+            worldPoints[1] = &end;
             part = func_1503195C(obj, 0x46, 0);
             if (part == NULL) {
                 return;
@@ -48,20 +48,20 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
             if (func_1514654C(obj, part, 0, modelPoints, worldPoints, 2) == 0) {
                 return;
             }
-            func_151C56A4(start, arg1, arg2);
+            func_151C56A4(&start, arg1, arg2);
             if (func_150ADA20() & 1) {
-                func_151C5588(obj, start, 0x46, arg1, arg2);
+                func_151C5588(obj, &start, 0x46, arg1, arg2);
             }
         } else {
-            start[0] = obj->xpos;
-            start[1] = obj->ypos + 106.0f;
-            start[2] = obj->zpos;
-            end[0] = start[0] + (dir[0] * -82.0f);
-            end[1] = start[1] + (dir[1] * -82.0f);
-            end[2] = start[2] + (dir[2] * -82.0f);
-            start[0] -= dir[0] * -120.0f;
-            start[1] -= dir[1] * -120.0f;
-            start[2] -= dir[2] * -120.0f;
+            start.x = obj->xpos;
+            start.y = obj->ypos + 106.0f;
+            start.z = obj->zpos;
+            end.x = start.x + (dir.x * -82.0f);
+            end.y = start.y + (dir.y * -82.0f);
+            end.z = start.z + (dir.z * -82.0f);
+            start.x -= dir.x * -120.0f;
+            start.y -= dir.y * -120.0f;
+            start.z -= dir.z * -120.0f;
         }
         randA = func_150ADA68();
         randB = func_150ADA68();
@@ -76,29 +76,29 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
         } else {
             arg23 = 2;
         }
-        func_151C229C(start, 0, end, dir, 1, 0, 300.0f, 1.0f / 300.0f, (randA * 10.0f) + 25.0f,
+        func_151C229C(&start, 0, &end, &dir, 1, 0, 300.0f, 1.0f / 300.0f, (randA * 10.0f) + 25.0f,
                       (randB * 150.0f) + 400.0f, 80.0f, (randInt % 56U) + 200, obj, 1, 1, 0, arg16, 0, 1, 0,
                       0x1A, 0.0f, 0xFF, arg23, 0, arg1, arg2);
     }
 }
 
 /* Spawns a func_15102B38 effect at `pos` on `obj` with randomized scale and parameters. */
-void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {
-    f32 scale[2];
+void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
+    ParticleSize scale;
     f32 angle;
     s32 rand[2]; /* rand[1] is drawn but never used */
 
-    scale[1] = (func_150ADA68() * 1001.0f + 604.0f) * 0.01f;
-    scale[0] = (func_150ADA68() * 59.0f + 141.0f) * 0.1f;
+    scale.height = (func_150ADA68() * 1001.0f + 604.0f) * 0.01f;
+    scale.width = (func_150ADA68() * 59.0f + 141.0f) * 0.1f;
     rand[0] = func_150ADA20();
     rand[1] = func_150ADA20();
     angle = func_150ADA68();
-    func_15102B38(obj, 0, &D_800AAA90, &D_800AAA9C, scale, (rand[0] & 3) + 6, 0xFF,
+    func_15102B38(obj, 0, &D_800AAA90, &D_800AAA9C, &scale, (rand[0] & 3) + 6, 0xFF,
                   angle * 270.0f + 359.0f, pos, 0xFF, 0, arg2, arg3, arg4);
 }
 
 /* Spawns a func_151602C0 effect at `pos`, converted to integer coordinates. */
-void func_151C56A4(f32 *pos, u8 arg1, s32 arg2) {
+void func_151C56A4(Vec3f *pos, u8 arg1, s32 arg2) {
     LightEffectHeader header;
     Vec3i intPos;
 
@@ -107,9 +107,9 @@ void func_151C56A4(f32 *pos, u8 arg1, s32 arg2) {
     header.lifetime = (func_150ADA20() % 3U) + 3;
     header.lightType = 0;
 
-    intPos.x = pos[0];
-    intPos.y = pos[1];
-    intPos.z = pos[2];
+    intPos.x = pos->x;
+    intPos.y = pos->y;
+    intPos.z = pos->z;
 
     func_151602C0(&header, &intPos, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
 }
@@ -121,6 +121,7 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
                    s32 arg7) {
     Vec3f unkPos;
     Vec3f origin;
+    // matching: dir and the basis are arrays; Vec3f locals change the stack layout
     f32 dir[3];
     f32 basisA[3];
     f32 basisB[3];
@@ -140,7 +141,7 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
     s32 randC;
     SpriteParticle *particle;
 
-    if (func_15137C64(&unkPos, &origin, dir, basisA, basisB, arg0, arg1, arg2) != 0) {
+    if (func_15137C64(&unkPos, &origin, (Vec3f *)dir, (Vec3f *)basisA, (Vec3f *)basisB, arg0, arg1, arg2) != 0) {
         f2 = func_150ADA68();
         randA = func_150ADA20();
         func_151DC034(&unkPos, f2 * 24.0f + 168.0f, randA % 101U + 155, (func_150ADA20() & 7) + 15, 1, arg6, arg7);
@@ -237,8 +238,9 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
     }
 }
 
-/* Spawns one func_151D9014 particle whose position, velocity and parameters func_15137F30 computes. */
-void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect) {
+/* Blood strip emit callback (D_80089B38): spawns one func_151D9014 particle whose position, velocity and
+ * parameters func_15137F30 computes. */
+void func_151C5E74(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
     Vec3f pos;
     Vec3f unk60;
     Vec3f vel;
@@ -248,15 +250,16 @@ void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *e
     u8 param5;
     f32 param6;
 
-    func_15137F30(a0, a1, a2, a3, arg4, effect, &pos, &unk60, &vel, &param3, &param4, &param5, &param6);
-    func_151D9014(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, effect->owner,
-                  effect->kind);
+    func_15137F30(pointA, pointB, velocityA, velocityB, time, strip, &pos, &unk60, &vel, &param3, &param4, &param5,
+                  &param6);
+    func_151D9014(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, strip->header.owner,
+                  strip->header.kind);
 }
 
 /* Spawns a func_15130280 particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag
  * bit 0 clear. Returns the particle, or NULL. */
 SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
-                        u8 altUnk62, s32 arg8, u8 arg9, s32 argA) {
+                        u8 altUnk62, CollisionHit *arg8, u8 arg9, s32 argA) {
     ParticleDesc spawn;
     f32 unkA8;
     SpriteParticle *particle;
@@ -324,7 +327,7 @@ SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value,
 }
 
 /* Spawns a fixed func_15154684 effect between the points `arg0` and `arg1`. */
-void func_151C61A0(Vec3f *arg0, Vec3f *arg1, u8 arg2, s32 arg3) {
+void func_151C61A0(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3) {
     ParticleBurst desc;
 
     desc.countBase = 10;

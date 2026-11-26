@@ -64,7 +64,7 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
 }
 
 extern Gfx D_80084350[];
-extern u8 D_800903BC[];
+extern TextureDesc D_800903BC;
 
 /*
  * Draws two triangles from actor `index`'s 5-vertex buffer (only actor 0, and only for models of type 2
@@ -100,7 +100,7 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     func_15036570(index, bones[9], bones[4]);
     gSPDisplayList(gfx++, D_80084350);
     gfx = func_1515E544(gfx, movement_obj[index].unk304[view], movement_obj[index].unk301,
-                        movement_obj[index].unk302, movement_obj[index].unk314[D_800BE9C0]);
+                        movement_obj[index].unk302, &movement_obj[index].unk314[D_800BE9C0]);
     if ((movement_obj[index].unk66 & 0xC) == 0xC) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
     } else if ((movement_obj[index].unk66 & 0xC) != 8 && !(attachment->flags & 1)) {
@@ -110,7 +110,7 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     } else {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
     }
-    gfx = func_15094F70(gfx, D_800903BC, 0, NULL, 0, 0, 0, 2, 3);
+    gfx = func_15094F70(gfx, &D_800903BC, 0, NULL, 0, 0, 0, 2, 3);
     gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, &D_800C3FC0[index][0], 1, 0);
     gSPMatrix(gfx++, &bones[4], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

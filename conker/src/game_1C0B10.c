@@ -95,7 +95,7 @@ s32 func_151938E4(SegmentEmitter *emitter) {
 void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, SegmentEmitter *emitter) {
     EffectParams params;
     EffectMotion motion;
-    Vec3f *ownerMotion;
+    const Vec3f *ownerMotion;
     s32 pad[2]; // matching: unused stack slots
     f32 x;
     f32 y;

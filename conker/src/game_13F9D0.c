@@ -130,10 +130,10 @@ void func_15112A80(s32 player) {
     s32 *dp;
 
     for (view = 0; view <= D_80082FA0; view++) {
-        s32 recp;
+        RenderView *recp;
 
         count = &D_800DBEE8[view];
-        recp = (s32)&D_800BE628[view];
+        recp = &D_800BE628[view];
         if (func_150859AC(view, 0) != 0) {
             D_800DBEE8[view] = 0;
             for (i = 0; i < gWorldObjectCount;) {
@@ -308,8 +308,8 @@ Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     gSPSetGeometryMode(gfx++, G_LIGHTING);
     viewOffset = view * 4; // matching: indexing both tables by view computes view * 4 twice
     list = (DrawEntry ***)((u8 *)D_80089240 + viewOffset);
-    gfx = func_1515E544(gfx, *(s32 *)((u8 *)D_800D9E10 + viewOffset), D_800D9E20, D_800D9E21,
-                        D_800D9BD0[view][D_800BE9C0]);
+    gfx = func_1515E544(gfx, *(PointLightGfx **)((u8 *)D_800D9E10 + viewOffset), D_800D9E20, D_800D9E21,
+                        &D_800D9BD0[view][D_800BE9C0]);
     for (i = 0; i < D_800DBEE8[view]; i++) {
         gfx = func_151137D4(gfx, &db_Object_array[(**list)[i].index], &(*D_80089250[D_800BE9C0])[(**list)[i].index], view,
                             (**list)[i].distance, pass);
@@ -441,7 +441,7 @@ void func_15113E54(s32 arg0) {
     s16 moveX;
     s16 moveY;
     s16 moveZ;
-    s32 leaderFloorTri;
+    void *leaderFloorTri;
     s32 i;
     s32 j;
     s32 count;
@@ -649,7 +649,7 @@ WorldObject *func_151149AC(u8 id) {
 /* Releases the handle of each object that is no longer drawn (after its delay, if it is unattached). */
 void func_15114A1C(void) {
     s32 i;
-    s32 handle;
+    void *handle;
 
     for (i = 0; i < gWorldObjectCount; i++) {
         if ((db_Object_array[i].state & 1) != 1) {

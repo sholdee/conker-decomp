@@ -28,13 +28,13 @@ void func_151163C0(WorldObject *obj) {
     f32 sway;
 
     heightRate = (obj->moveData.word >> 16) & 0xFF;
-    heightScale = (f32)(obj->moveData.word & 0xFF);
+    heightScale = (obj->moveData.word & 0xFF);
     swayRate = (obj->moveData.word >> 24) & 0xFF;
-    swayScale = (f32)(u32)((obj->moveData.word >> 8) & 0xFF) * 1.40625f;
+    swayScale = (u32)((obj->moveData.word >> 8) & 0xFF) * 1.40625f;
     previousY = obj->y;
     previousSway = obj->t;
-    obj->yOffset = cosf((f32)WORK(obj)->bob.heightPhase * 9.58738e-05f) * heightScale;
-    sway = cosf((f32)WORK(obj)->bob.swayPhase * 9.58738e-05f) * swayScale;
+    obj->yOffset = cosf(WORK(obj)->bob.heightPhase * 9.58738e-05f) * heightScale;
+    sway = cosf(WORK(obj)->bob.swayPhase * 9.58738e-05f) * swayScale;
     obj->t = sway;
     WORK(obj)->bob.heightPhase += heightRate * D_800BE9E4;
     WORK(obj)->bob.swayPhase += swayRate * D_800BE9E4;
@@ -152,8 +152,8 @@ s32 func_15116888(s32 x, s32 z, s32 *unused, Actor *other) {
     f32 cosine;
     Vec3f delta;
 
-    otherX = (s32)other->xpos;
-    otherZ = (s32)other->zpos;
+    otherX = other->xpos;
+    otherZ = other->zpos;
     delta.x = otherX - x;
     delta.z = otherZ - z;
 

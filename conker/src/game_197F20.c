@@ -242,7 +242,7 @@ void func_1516AA70(TextBox *box) {
             }
             box->config->flags &= ~TEXTBOX_CB_CLOSED;
             D_800CC4B3[box->config->objIndex][0] = 0;
-            *(s16 *)((u8 *)player + 0x6CC) = 0; /* Camera has no field here yet */
+            player->cmdState.unk0 = 0;
             box->config->numPages = 0;
             func_1516972C((EffectHeader *)box);
         }
@@ -252,34 +252,17 @@ void func_1516AA70(TextBox *box) {
 }
 
 /* Sprite parameters passed to func_15094F70 / func_15095A48. */
-typedef struct {
-    /* 0x00 */ u8 pad0[6];
-    /* 0x06 */ s16 w;
-    /* 0x08 */ s16 h;
-    /* 0x0A */ u8 alpha;
-    /* 0x0B */ u8 unkB;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 flags; /* SPRITE_FLIP_* */
-    /* 0x0E */ u8 padE[2];
-    /* 0x10 */ void *tex;
-} TextBoxSprite;
 
 #define SPRITE_FLIP_X 1 /* set while the body is left of the anchor */
 #define SPRITE_FLIP_Y 2 /* set while the body is below the anchor */
 
-/* Sprite texture header (D_8009055C body, D_8009056C bubble body, D_8009057C / D_8009059C tails,
- * D_8009058C bubble circle). */
-typedef struct {
-    /* 0x0 */ u8 pad0[6];
-    /* 0x6 */ u16 width;
-    /* 0x8 */ u16 height;
-} TextBoxTexture;
-
-extern TextBoxTexture D_8009055C;
-extern TextBoxTexture D_8009057C;
-extern TextBoxTexture D_8009056C;
-extern TextBoxTexture D_8009058C;
-extern TextBoxTexture D_8009059C;
+/* Text box textures: D_8009055C body, D_8009056C bubble body, D_8009057C / D_8009059C tails,
+ * D_8009058C bubble circle. */
+extern TextureDesc D_8009055C;
+extern TextureDesc D_8009057C;
+extern TextureDesc D_8009056C;
+extern TextureDesc D_8009058C;
+extern TextureDesc D_8009059C;
 /* Render mode pairs: cycle 1 and cycle 2 blender settings. */
 extern struct {
     u32 cycle1;
@@ -289,7 +272,7 @@ extern struct {
 /* Draws a text box: shadow, body, tail (or thought-bubble circles), then the text via func_1516C934.
  * Returns gfx unchanged if the display list would overflow. */
 Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
-    TextBoxSprite sprite;
+    SpriteParams sprite;
     s32 pad; // matching: unused stack slot
     f32 xoff;
     f32 yoff;
@@ -314,12 +297,12 @@ Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
     }
     D_800D2DA8 = D_800D2DA9 = D_800D2DAA = 0;
     fade = D_800E0BDC + 1;
-    sprite.flags = 0;
+    sprite.flip = 0;
     sprite.alpha = (64 * fade) >> 8;
     texW = D_8009055C.width;
     texH = D_8009055C.height;
-    sprite.w = (2.0f * box->width + 1.0f) / D_8009055C.width * 2355.2f * box->scale;
-    sprite.h = (box->height + 1.0f) / D_8009055C.height * 4259.84f * box->scale;
+    sprite.scaleX = (2.0f * box->width + 1.0f) / D_8009055C.width * 2355.2f * box->scale;
+    sprite.scaleY = (box->height + 1.0f) / D_8009055C.height * 4259.84f * box->scale;
     xoff = box->width / D_8009055C.width * D_8009057C.width * 0.25f * box->scale;
     yoff = box->height / D_8009055C.height * D_8009057C.height * 0.5f * box->scale;
     box->bodyX = cosf(box->angle + 3.1415927f) * (box->width * 0.5f) * 1.15f * box->scale + box->x - xoff;
@@ -340,14 +323,14 @@ Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
         gfx = func_15095A48(gfx, &sprite, box->bodyX + 5.0f, box->bodyY + -5.0f);
     }
     if (box->angle > 0.0f && box->angle < 3.1415927f) {
-        sprite.flags &= ~SPRITE_FLIP_Y;
+        sprite.flip &= ~SPRITE_FLIP_Y;
     } else {
-        sprite.flags |= SPRITE_FLIP_Y;
+        sprite.flip |= SPRITE_FLIP_Y;
     }
     if (box->angle > 1.5707964f && box->angle < 4.712389f) {
-        sprite.flags |= SPRITE_FLIP_X;
+        sprite.flip |= SPRITE_FLIP_X;
     } else {
-        sprite.flags &= ~SPRITE_FLIP_X;
+        sprite.flip &= ~SPRITE_FLIP_X;
     }
     overflow = (gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
     if (overflow) {
@@ -367,8 +350,8 @@ Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
             box->bubbleX += (box->x - xoff - box->bubbleX) * 0.3f;
             gfx = func_15095A48(gfx, &sprite, box->bubbleX, box->y - yoff);
         }
-        sprite.w /= 2;
-        sprite.h /= 2;
+        sprite.scaleX /= 2;
+        sprite.scaleY /= 2;
         sprite.alpha = box->bubbleAlpha[2] * 64.0f / 255.0f;
         sprite.alpha = (sprite.alpha * fade) >> 8;
         gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
@@ -399,7 +382,7 @@ Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
         D_800D2DA9 = box->config->g;
         D_800D2DAA = box->config->b;
     }
-    sprite.flags = 0;
+    sprite.flip = 0;
     if (dark) {
         sprite.alpha = 0x55;
     } else {
@@ -411,24 +394,24 @@ Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
                       TEXEL0, 0);
     gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, D_800A4AC8[25].cycle1 | D_800A4AC8[25].cycle2 | G_ZS_PRIM);
     if (box->angle > 0.0f && box->angle < 3.1415927f) {
-        sprite.flags &= ~SPRITE_FLIP_Y;
+        sprite.flip &= ~SPRITE_FLIP_Y;
     } else {
-        sprite.flags |= SPRITE_FLIP_Y;
+        sprite.flip |= SPRITE_FLIP_Y;
     }
     if (box->angle > 1.5707964f && box->angle < 4.712389f) {
-        sprite.flags |= SPRITE_FLIP_X;
+        sprite.flip |= SPRITE_FLIP_X;
     } else {
-        sprite.flags &= ~SPRITE_FLIP_X;
+        sprite.flip &= ~SPRITE_FLIP_X;
     }
-    sprite.w = box->width / D_8009055C.width * 2355.2f * box->scale;
-    sprite.h = box->height / D_8009055C.height * 4259.84f * box->scale;
+    sprite.scaleX = box->width / D_8009055C.width * 2355.2f * box->scale;
+    sprite.scaleY = box->height / D_8009055C.height * 4259.84f * box->scale;
     if (box->config->flags & TEXTBOX_BUBBLES) {
         gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
         sprite.alpha = box->bubbleAlpha[1];
         sprite.alpha = (sprite.alpha * fade) >> 8;
         gfx = func_15095A48(gfx, &sprite, box->bubbleX, box->y - yoff);
-        sprite.w /= 2;
-        sprite.h /= 2;
+        sprite.scaleX /= 2;
+        sprite.scaleY /= 2;
         gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
         sprite.alpha = box->bubbleAlpha[2];
         sprite.alpha = (sprite.alpha * fade) >> 8;
@@ -452,8 +435,8 @@ Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
             gfx = func_15095A48(gfx, &sprite, box->x - xoff, box->y - yoff);
         }
     }
-    sprite.w = 2.0f * box->width / D_8009055C.width * 2355.2f * box->scale;
-    sprite.h = box->height / D_8009055C.height * 4259.84f * box->scale;
+    sprite.scaleX = 2.0f * box->width / D_8009055C.width * 2355.2f * box->scale;
+    sprite.scaleY = box->height / D_8009055C.height * 4259.84f * box->scale;
     if (box->config->flags & TEXTBOX_BUBBLES) {
         sprite.alpha = box->bubbleAlpha[0];
         sprite.alpha = (sprite.alpha * fade) >> 8;

@@ -339,7 +339,7 @@ void func_151058B4(SparkObj *obj) {
                 spawn.life = func_150ADA20() % 31U + 30;
                 part.width = func_150ADA68() * 10.13f + 7.399999619f;
                 angle = func_150ADA20();
-                func_15143794(angle & 0xFF, func_150ADA20() % 22U - 54, func_150ADA68() * 20.0f + 30.0f, &part.vel.x);
+                func_15143794(angle & 0xFF, func_150ADA20() % 22U - 54, func_150ADA68() * 20.0f + 30.0f, &part.vel);
                 part.gravity = func_150ADA68() * 1.486000061f + -3.048f;
                 func_1515C2F0(&spawn, 0, &part, 0, obj->base.header.owner, obj->base.header.kind);
                 count -= 1.0f;

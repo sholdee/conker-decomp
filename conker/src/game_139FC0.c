@@ -114,7 +114,7 @@ s32 func_1510CE60(Gfx *dl, s32 strict, u32 countUse, s32 lifetime, s16 **usedOut
         gfx = &dl[i];
         if (GFX_OPCODE(&dl[i]) == (s8)G_SETTIMG) {
             dram = gfx->words.w1;
-            if ((strict == 0 || !(dram & 0xFF000000)) && (u32)(dram & 0xFF000000) < 0x06000000) {
+            if ((strict == 0 || !(dram & 0xFF000000)) && (dram & 0xFF000000) < 0x06000000) {
                 flags = dram >> 22;
                 seg = dram & 0x0F000000;
                 dram &= 0xF03FFFFF;
@@ -197,7 +197,7 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
     s32 romAddr;
     s32 texture;
     s32 odd;
-    s32 packed;
+    u8 *packed;
     s32 len;
 
     if (index < D_800D9F58) {
@@ -230,18 +230,18 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
             len++;
         }
         packed = func_10003C6C((len + odd + 0xF) & ~0xF, 1, 2, 1, 2);
-        if (packed == 0) {
+        if (packed == NULL) {
             return 0x80000000;
         }
-        func_10004514(romAddr, (void *)packed, (len + odd + 0xF) & ~0xF, 1);
+        func_10004514(romAddr, packed, (len + odd + 0xF) & ~0xF, 1);
         len = D_800B87A0[index];
-        texture = func_10003C6C(len, 1, 1, 0, 2);
+        texture = (s32)func_10003C6C(len, 1, 1, 0, 2); // the texture cache D_800B0E58 holds addresses as s32
         if (texture == 0) {
-            func_10004074((s16 *)packed);
+            func_10004074(packed);
             return 0x80000000;
         }
-        func_10006240((u8 *)(packed + odd), (Entry1510D404 *)texture, D_8003809C);
-        func_10004074((s16 *)packed);
+        func_10006240(packed + odd, texture, D_8003809C);
+        func_10004074(packed);
         D_800B0E58[index] = texture;
         D_800D9F68[index] = 0;
     }
@@ -259,7 +259,7 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
         }
     }
     // matching: taking texture's address keeps it in memory, as in the original
-    if (0) { func_10004074((s16 *)&texture); }
+    if (0) { func_10004074(&texture); }
     return len;
 }
 
@@ -329,7 +329,7 @@ void func_1510D404(void) {
                 data = ((Entry1510D404 *)D_800B0E58[i])->data;
                 size = ((Entry1510D404 *)D_800B0E58[i])->size;
                 func_10006240(data + size, (Entry1510D404 *)D_800B0E58[i], D_8003809C);
-                func_10004074((s16 *)data);
+                func_10004074(data);
                 D_800BC448[i] &= ~0x40;
                 if (i < D_800D9F58) {
                     D_800D9F58 = i;

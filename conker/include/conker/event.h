@@ -10,12 +10,6 @@
  *   game_981E0.c
  */
 
-typedef struct Vec3w {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Vec3w;
-
 /* game_981E0.c */
 /* f32 func_1506AD30(Actor *obj, f32 time, u8 filtered) is declared in the files that call it:
    game_83300.c calls it with a fourth argument. */
@@ -335,19 +329,19 @@ void func_15074A44(void);
 void func_15074A6C(void);
 void func_15074A94(void);
 void func_15074B7C(void);
-void func_15074BD8(s32 arg0, s32 arg1, s32 arg2);
-void func_15074BEC(s32 arg0, s32 arg1, s32 arg2);
-void func_15074C00(s32 self, Actor *other, s32 result);
+void func_15074BD8(Actor *self, Actor *other, u8 *result);
+void func_15074BEC(Actor *self, Actor *other, u8 *result);
+void func_15074C00(Actor *self, Actor *other, u8 *result);
 void func_15074C80(Actor *self, Actor *other);
-void func_15074DEC(Actor *self, s32 other, s32 result);
-void func_15074E04(s32 self, s32 other, s32 result);
-void func_15074E80(Actor *self, Actor *other, s32 result);
-void func_15074EE8(Actor *self, Actor *other, s32 result);
-void func_15074F30(Actor *self, Actor *other, s32 result);
-void func_15074F48(Actor *self, Actor *other, s32 result);
-void func_15074FD4(Actor *self, Actor *other, s32 result);
-void func_15075050(Actor *self, s32 other, s32 result);
-void func_150750A4(Actor *self, s32 other, s32 result);
+void func_15074DEC(Actor *self, Actor *other, u8 *result);
+void func_15074E04(Actor *self, Actor *other, u8 *result);
+void func_15074E80(Actor *self, Actor *other, u8 *result);
+void func_15074EE8(Actor *self, Actor *other, u8 *result);
+void func_15074F30(Actor *self, Actor *other, u8 *result);
+void func_15074F48(Actor *self, Actor *other, u8 *result);
+void func_15074FD4(Actor *self, Actor *other, u8 *result);
+void func_15075050(Actor *self, Actor *other, u8 *result);
+void func_150750A4(Actor *self, Actor *other, u8 *result);
 void func_150750C4(Actor *self, Actor *other, u8 *result);
 Actor *func_1507515C(Actor *owner);
 extern const u8 D_80099A30[12];
@@ -356,14 +350,14 @@ extern const u8 D_80099AB4[8];
 extern const u8 D_80099ABC[8];
 extern const u8 D_80099AC4[20];
 extern const s16 D_80099AD8[19][4];
-extern const Vec3w D_80099B70; /* 0, 12, 120 */
-extern const Vec3w D_80099B7C; /* 0, 27, 215 */
-extern const Vec3w D_80099B88; /* 0, 0, 544 */
-extern const Vec3w D_80099B94; /* 0, 0, 700 */
-extern const Vec3w D_80099BA0; /* 0, 0, 278 */
-extern const Vec3w D_80099BAC; /* 0, 0, 556 */
-extern const Vec3w D_80099BBC; /* 0, 17, 7 */
-extern const f32 D_80099BC8[3][3];
+extern const Vec3f D_80099B70; /* 0, 12, 120 */
+extern const Vec3f D_80099B7C; /* 0, 27, 215 */
+extern const Vec3f D_80099B88; /* 0, 0, 544 */
+extern const Vec3f D_80099B94; /* 0, 0, 700 */
+extern const Vec3f D_80099BA0; /* 0, 0, 278 */
+extern const Vec3f D_80099BAC; /* 0, 0, 556 */
+extern const Vec3f D_80099BBC; /* 0, 17, 7 */
+extern const Vec3f D_80099BC8[3];
 extern const s32 D_80099BEC[6];
 extern const f32 D_80099C04[6];
 

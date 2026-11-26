@@ -246,8 +246,8 @@ void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-extern f32 D_800A1B00[3];
-extern f32 D_800A1B0C[3];
+extern Vec3f D_800A1B00;
+extern Vec3f D_800A1B0C;
 
 /* Spark effect: while the owner lives, emits sparks along the segment between two points of
  * its bone 5, at a random rate. */
@@ -261,8 +261,8 @@ void func_150F5C98(BoneSparkEffect *effect) {
     f32 dx;
     f32 dy;
     f32 dz;
-    f32 *srcs[2];
-    f32 *dsts[2];
+    const Vec3f *srcs[2];
+    Vec3f *dsts[2];
 
     owner = effect->data.owner;
     data = &effect->data;
@@ -279,11 +279,11 @@ void func_150F5C98(BoneSparkEffect *effect) {
             spawn.r2 = 0xB4;
             spawn.g2 = 0xB4;
             spawn.b2 = 0xB4;
-            srcs[0] = D_800A1B00;
-            srcs[1] = D_800A1B0C;
-            dsts[0] = &start.x;
-            dsts[1] = &end.x;
-            func_15145EA4(srcs, dsts, (Mtx *)owner->ob_matrix_ptr + 5, 2);
+            srcs[0] = &D_800A1B00;
+            srcs[1] = &D_800A1B0C;
+            dsts[0] = &start;
+            dsts[1] = &end;
+            func_15145EA4(srcs, dsts, &owner->ob_matrix_ptr[5], 2);
             spawn.texture = 0x6C;
             spawn.renderMode = 0x5103;
             spawn.unk0 = 0x200005;
@@ -350,8 +350,8 @@ void func_150F6138(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-extern f32 D_800A1B18[3];
-extern f32 D_800A1B24[3];
+extern Vec3f D_800A1B18;
+extern Vec3f D_800A1B24;
 
 /* Beam effect: while the owner lives and has a model (and unk94 bit 1 is clear), stretches the
  * beam between two points of the model and puts the flash at the first; otherwise hides both. */
@@ -360,8 +360,8 @@ void func_150F6178(ModelBeamEffect *effect) {
     Actor *owner;
     Vec3f start;
     Vec3f end;
-    f32 *srcs[2];
-    f32 *dsts[2];
+    const Vec3f *srcs[2];
+    Vec3f *dsts[2];
 
     data = &effect->data;
     owner = data->owner;
@@ -374,11 +374,11 @@ void func_150F6178(ModelBeamEffect *effect) {
         LightEffect *flash;
         PointLight *light;
 
-        srcs[0] = D_800A1B18;
-        srcs[1] = D_800A1B24;
-        dsts[0] = &start.x;
-        dsts[1] = &end.x;
-        func_15145EA4(srcs, dsts, (Mtx *)owner->ob_matrix_ptr, 2);
+        srcs[0] = &D_800A1B18;
+        srcs[1] = &D_800A1B24;
+        dsts[0] = &start;
+        dsts[1] = &end;
+        func_15145EA4(srcs, dsts, owner->ob_matrix_ptr, 2);
         if (data->beam != NULL) {
             beam = data->beam;
             beam->part.flags |= 1;
@@ -476,7 +476,7 @@ void func_150F64B0(DefParticleHead *obj) {
     func_151411C4(obj);
 }
 
-extern f32 D_800A1B30[3];
+extern Vec3f D_800A1B30;
 
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
  * frames calls func_10010F88(0x679) at the owner, makes a flash at a point of the model and emits
@@ -499,7 +499,7 @@ void func_150F64DC(FlashBurstEffect *effect) {
                           0x7918, 0x7D00);
             count = (func_150ADA20() & 1) + 2;
             {
-                f32 pos[3];
+                Vec3f pos;
                 LightEffectHeader header;
                 Vec3i origin;
                 u8 color[4];
@@ -507,14 +507,14 @@ void func_150F64DC(FlashBurstEffect *effect) {
                 s32 rand2;
                 s32 rand3;
 
-                func_15143134(D_800A1B30, pos, (Mtx *)owner->ob_matrix_ptr);
+                func_15143134(&D_800A1B30, &pos, owner->ob_matrix_ptr);
                 header.flags = 3;
                 header.update = -1;
                 header.lifetime = (func_150ADA20() % 9U) + 10;
                 header.lightType = 0;
-                origin.x = pos[0];
-                origin.y = pos[1];
-                origin.z = pos[2];
+                origin.x = pos.x;
+                origin.y = pos.y;
+                origin.z = pos.z;
                 rand3 = (func_150ADA20() % 61U) + 60;
                 func_151602C0(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->base.header.owner,
                               effect->base.header.kind);
@@ -526,7 +526,7 @@ void func_150F64DC(FlashBurstEffect *effect) {
                     rand1 = func_150ADA20();
                     rand2 = func_150ADA20();
                     rand3 = func_150ADA20();
-                    func_15107C1C(owner, 0, D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
+                    func_15107C1C(owner, 0, &D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
                                   27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, effect->base.header.owner,
                                   effect->base.header.kind);
                     count--;
@@ -571,26 +571,26 @@ void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 }
 
 // matching: this file was compiled with s32 where the definition (game_2062D0.c) has u8 (args 3, 6, 11, 15) and
-// s16 (arg 5), and with a void return. The definition is SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel,
+// s16 (arg 5), and with a void return. The definition is SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel,
 // u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,
 // CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE, s32 argF).
-void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
+void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, s32, s32);
 /* BloodStrip emit callback: one func_151D9014 blood particle, larger than func_15137E60's. 60% of
  * them get a ground probe under the strip's owner; the rest get none (height -10000). */
-void func_150F695C(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32 time, BloodStrip *strip) {
-    f32 start[3];
-    f32 end[3];
-    f32 velocity[3];
+void func_150F695C(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
+    Vec3f start;
+    Vec3f end;
+    Vec3f velocity;
     f32 arg3;
     s16 arg4;
-    s8 arg5;
+    u8 arg5;
     f32 arg6;
     CollisionHit ground;
     u8 probeGround;
     s32 flag;
     f32 random;
 
-    func_15137F30(pointA, pointB, velocityA, velocityB, time, strip, start, end, velocity, &arg3,
+    func_15137F30(pointA, pointB, velocityA, velocityB, time, strip, &start, &end, &velocity, &arg3,
                   &arg4, &arg5, &arg6);
     random = func_150ADA68();
     arg6 *= 1.0f + (random + random);
@@ -609,6 +609,6 @@ void func_150F695C(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32
     } else {
         flag = 0;
     }
-    func_151D9014(start, velocity, 1, arg3, arg4, (u8)arg5, arg6, probeGround, 1.8f, 1.8f, 1,
-                  (s32)&ground, 1, flag, strip->header.owner, strip->header.kind);
+    func_151D9014(&start, &velocity, 1, arg3, arg4, arg5, arg6, probeGround, 1.8f, 1.8f, 1,
+                  &ground, 1, flag, strip->header.owner, strip->header.kind);
 }

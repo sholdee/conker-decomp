@@ -13,18 +13,7 @@
 
 /* The chunk object func_15132A4C creates; func_150B36AC is its floor-hit callback. */
 typedef struct PipeChunk {
-    /* 0x000 */ EffectHeader header;
-    /* 0x010 */ f32 unk10;
-    /* 0x014 */ f32 restitution;
-    /* 0x018 */ u8 pad18[0x3C - 0x18];
-    /* 0x03C */ f32 unk3C;
-    /* 0x040 */ u8 pad40[0x44 - 0x40];
-    /* 0x044 */ Vec3f vel;
-    /* 0x050 */ Vec3f unk50;
-    /* 0x05C */ u8 pad5C[0x60 - 0x5C];
-    /* 0x060 */ s32 flags;
-    /* 0x064 */ s16 lifetime;
-    /* 0x066 */ u8 pad66[0x170 - 0x66];
+    /* 0x000 */ ModelParticle head;
     /* 0x170 */ f32 minBounceVelY; // a hit with vel.y above this stops the chunk
 } PipeChunk;
 
@@ -69,6 +58,6 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   f32 argC, s32 argD, u8 argE);
 s32 func_150B36AC(PipeChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 arg4);
 s32 func_150B378C(PipeExplodeActor *actor);
-s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5);
+s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 
 #endif

@@ -2,14 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151A6B10(struct DefParticleHead *obj) {
+void func_151A6B10(ZoneEmitter *obj) {
     func_151A6AB8(obj);
-    func_1513CA6C(obj);
+    func_1513CA6C(&obj->head);
 }
 
-void func_151A6B3C(struct DefParticleHead *obj) {
+void func_151A6B3C(ZoneEmitter *obj) {
     func_151A6AB8(obj);
-    func_1513CAA0(obj);
+    func_1513CAA0(&obj->head);
 }
 
 /* Sends message 0x60034 to `target` with its facing angle and the index of the actor owned by `owner`

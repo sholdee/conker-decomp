@@ -86,14 +86,14 @@ void func_151D7404(AnchoredTrailEmitter *emitter) {
     func_151D77C8(emitter);
 }
 
-void func_151D7424(TimedEffect *emitter) {
+void func_151D7424(AnchoredTrailEmitter *emitter) {
     func_151D7404(emitter);
-    func_1514933C(emitter);
+    func_1514933C(&emitter->base);
 }
 
-void func_151D7450(TimedEffect *emitter) {
+void func_151D7450(AnchoredTrailEmitter *emitter) {
     func_151D7404(emitter);
-    func_15149368(emitter);
+    func_15149368(&emitter->base);
 }
 
 /* Broadcasts message 0x3D ({actor, unique_id}): the actor is going away. */
@@ -166,7 +166,7 @@ s32 func_151D75C4(AnchoredTrailEmitter *emitter) {
         anchor->flags &= ~1;
         return 1;
     }
-    func_15143134(&D_800AB280[link->bone], &anchor->pos.x, (Mtx *)actor->ob_matrix_ptr + D_800AB2D4[link->bone]);
+    func_15143134(&D_800AB280[link->bone], &anchor->pos, &actor->ob_matrix_ptr[D_800AB2D4[link->bone]]);
     anchor->flags |= 1;
     if (link->condition != -1) {
         return D_8008FCA8[link->condition](emitter);
@@ -244,7 +244,7 @@ void func_151D7830(AnchoredTrailEmitter *emitter) {
     header.flags = 0x76;
     header.kind = 0x12;
     header.unk14 = 4;
-    header.unk18 = 0;
+    header.material = 0;
 
     trail = func_15147A80(&header, 0x20, sizeof(AnchoredTrailData), 0xD, 0x10, 0x10, 0, 0, 0, emitter->base.header.owner, emitter->base.header.kind);
     if (trail != NULL) {
@@ -513,12 +513,12 @@ Gfx *func_151D80C4(AnchoredTrail *trail, Gfx *gfx, s16 view) {
     }
     data = trail->data;
     points = trail->points;
-    func_151D5D60(trail->unk84, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, 0);
+    func_151D5D60(trail->unk84, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, 0);
     if (vtx == NULL) {
         return gfx;
     }
     needSync = 1;
-    gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &needSync, 0x3E);
+    gfx = func_15142E24(gfx, &D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &needSync, 0x3E);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x4C, &needSync);
     gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].unk0 | D_800A4AC8[1].unk4, &needSync);

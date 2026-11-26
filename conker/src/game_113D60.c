@@ -26,7 +26,7 @@ typedef struct Game113D60Source {
     u8 padD[3];
 } Game113D60Source;
 
-typedef void (*Game113D60EndCallback)(Vec3f *, s32);
+typedef void (*Game113D60EndCallback)(Vec3f *, Actor *);
 typedef void (*Game113D60StartCallback)(Vec3f *);
 typedef void (*Game113D60MotionCallback)(Vec3f *, Vec3f *, Vec3f *, Game113D60Emission *);
 
@@ -38,7 +38,7 @@ extern Game113D60Source D_800A1190[];
 
 /* Randomly starts an emission of the source effect `sourceIndex` from one of the start
  * points towards `actor`. */
-void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
+void func_150E68B0(Actor *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex) {
     Game113D60Source *source;
     Vec3f end;
     Vec3f start;
@@ -46,7 +46,7 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
     Game113D60Emission emission;
     Game113D60Effect *effect;
 
-    if ((actor != 0) && ((D_800C35EA[0] != 1) || (D_800C35E8[0] != 9))) {
+    if ((actor != NULL) && ((D_800C35EA[0] != 1) || (D_800C35E8[0] != 9))) {
         source = &D_800A1190[sourceIndex];
         if ((func_150ADA68() < source->chance) && (source->start != -1)) {
             if (source->end != -1) {
@@ -85,7 +85,7 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
                 emission.duration = source->duration;
                 emission.durationRange = source->durationRange;
                 emission.color = source->color;
-                effect = (Game113D60Effect *)func_151491F4(func_150ADA68() * 70.0f + 30.0f, -1, 15, 1, 11,
+                effect = func_151491F4(func_150ADA68() * 70.0f + 30.0f, -1, 15, 1, 11,
                                                            sizeof(Game113D60Emission), 0xFF, 1);
                 if (effect != NULL) {
                     memcpy(&effect->emission, &emission, sizeof(Game113D60Emission));
@@ -522,7 +522,7 @@ void func_150E7C9C(Game113D60BurstEffect *effect) {
 
 /* Spawns a func_1513C650 effect of the given size at `position`, lasting `duration` frames
  * (-1: a fixed 300 frames without the timed flag). */
-void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind) {
     s32 pad; // matching: unused stack slot
     SpriteDef arg;
@@ -553,7 +553,7 @@ void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u
         argB = 0;
         argC = 0;
     }
-    func_1513C650(&arg, 0, 0, arg2, position->x, position->y, position->z, size, size, func_150ADA20() & 0xFF,
+    func_1513C650(&arg, 0, 0, surface, position->x, position->y, position->z, size, size, func_150ADA20() & 0xFF,
                   (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0, owner, kind);
 }
 
@@ -700,7 +700,7 @@ void func_150E8470(Game113D60EmitterEffect *effect) {
 
 /* Update callback of the particles func_150E8470 spawns. */
 s32 func_150E8824(Game113D60Particle *particle, s32 arg1) {
-    func_15131828(particle, particle->extra.amplitude, particle->extra.phase, particle->extra.phaseStep);
+    func_15131828(&particle->head, particle->extra.amplitude, particle->extra.phase, particle->extra.phaseStep);
     return 1;
 }
 
@@ -735,7 +735,7 @@ void func_150E8930() {
     RumbleParams event;
 
     ids = D_80088A80;
-    func_15169260(&ids, 2, 0, 0x1B);
+    func_15169260(ids.ids, 2, 0, 0x1B);
     func_15164F0C(0, D_800BE9EB, NULL, 0xFF, 1);
     event.flags = 1;
     event.duration = (func_150ADA20() % 21) + 20;
@@ -806,7 +806,7 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
                 pick -= node->area;
                 node = node->next;
             }
-            func_1514470C(node->region, dataPtr);
+            func_1514470C(node->region, &dataPtr->position);
             dx = data.position.x - center->x;
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;
@@ -963,7 +963,7 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
                 pick -= node->area;
                 node = node->next;
             }
-            func_1514470C(node->region, &data);
+            func_1514470C(node->region, &data.position);
             dx = data.position.x - center->x;
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;
@@ -1065,9 +1065,9 @@ s32 func_150E971C(Game113D60Debris *debris) {
     Game113D60DebrisExtra *extra;
     SpriteDef splash;
 
-    func_151337C0(debris);
+    func_151337C0(&debris->base);
     extra = &debris->extra;
-    if (debris->position.y < extra->floorY) {
+    if (debris->base.pos.y < extra->floorY) {
         if ((extra->unk4 & 0x1F) == 0xA) {
             f32 size;
 
@@ -1091,8 +1091,8 @@ s32 func_150E971C(Game113D60Debris *debris) {
             splash.fadeStart = 20;
             splash.fadeRate = 12;
 
-            func_1513C73C(&splash, 0, 0, (s32)extra->unk8, debris->position.x, extra->floorY + 5.0f,
-                          debris->position.z, size, size, func_150ADA20() & 0xFF, 0, 0, debris->base.header.owner,
+            func_1513C73C(&splash, 0, 0, &extra->floorTri, debris->base.pos.x, extra->floorY + 5.0f,
+                          debris->base.pos.z, size, size, func_150ADA20() & 0xFF, 0, 0, debris->base.header.owner,
                           debris->base.header.kind);
         }
         return 0;

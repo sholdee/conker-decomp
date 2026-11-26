@@ -28,7 +28,7 @@ void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode);
 void func_10004074(void *ptr);
 void func_10004250(void);
 void func_10004308(void);
-void func_100043B4(s32 *ptr, u32 tag);
+void func_100043B4(void *ptr, u32 tag);
 void func_1000440C(void);
 
 #endif

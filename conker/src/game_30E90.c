@@ -32,7 +32,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
     s32 i;
     s32 found;
     s32 id;
-    s32 loaded;
+    u32 loaded;
     s32 j;
     ObjectSpawn *spawns;
     ObjectSpawn *groupedSpawns;
@@ -264,7 +264,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
     }
     D_800DBEE0 = allocate_memory(gWorldObjectCount * 0x40, 1, 2, 0);
     D_800DBEE4 = allocate_memory(gWorldObjectCount * 0x40, 1, 2, 0);
-    D_800DBEF8 = allocate_memory(gWorldObjectCount * sizeof(s32), 1, 0, 0);
+    D_800DBEF8 = allocate_memory(gWorldObjectCount * sizeof(void *), 1, 0, 0);
     D_800DBEFC = allocate_memory(gWorldObjectCount, 1, 0, 0);
     for (i = 0; i < 4; i++) {
         D_800DBED0[i] = allocate_memory(gWorldObjectCount * 4, 1, 0, 0);
@@ -304,9 +304,9 @@ void func_150045C4(s32 arg0) {
     WorldObject *obj;
     MtxF mtx;
     s32 j;
-    s32 floorFlags;
+    u32 floorFlags;
     f32 floorY;
-    s32 floorTri;
+    void *floorTri;
     f32 x;
     f32 y;
     f32 z;

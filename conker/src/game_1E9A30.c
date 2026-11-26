@@ -194,12 +194,12 @@ Gfx *func_151BCA90(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
     f32 scale;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->buffers, viewport, (trail->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(trail->buffers, viewport, (trail->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             points = trail->points;
             camPos = func_15144B34(viewport);
             dirty = 1;
-            gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &dirty, 3);
+            gfx = func_15142E24(gfx, &D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &dirty, 3);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &dirty);
             gfx = func_1513F4E4(gfx, 0x4E, &dirty);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
@@ -432,7 +432,7 @@ s32 func_151BD42C(AgedBloodStrip *strip) {
 /* BloodStrip emit callback: spawns one blood droplet at pointA moving towards pointB. */
 void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 time,
                    BloodStrip *strip) {
-    BloodDroplet *particle;
+    SpriteParticle *particle; /* with data.dragOwner */
     Actor *owner;
     ParticleDesc68 desc;
     f32 drag;
@@ -491,8 +491,8 @@ void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 t
         desc.offset.z = strip->owner->zpos;
         particle = func_15130374(&desc, 1, 0x10, strip->header.owner, strip->header.kind);
         if (particle != NULL) {
-            memcpy(&particle->drag, &drag, sizeof(drag));
-            memcpy(&particle->owner, &ownerRef, sizeof(ownerRef));
+            memcpy(&particle->data.dragOwner.drag, &drag, sizeof(drag));
+            memcpy(&particle->data.dragOwner.owner, &ownerRef, sizeof(ownerRef));
         }
     }
 }
@@ -510,13 +510,13 @@ f32 func_151BD750(AgedBloodStrip *strip) {
 }
 
 /* Particle update: keeps the droplet moving with its owner, then runs the standard update. */
-void func_151BD79C(BloodDroplet *particle, Vec3f *prevPos) {
-    Actor *owner = particle->owner.actor;
+void func_151BD79C(SpriteParticle *particle, Vec3f *prevPos) {
+    Actor *owner = particle->data.dragOwner.owner.actor;
 
     if (owner->type != 0 && owner->character_type != 0xFF) {
-        particle->offset.x = owner->xpos;
-        particle->offset.y = owner->ypos;
-        particle->offset.z = owner->zpos;
+        particle->head.desc.offset.x = owner->xpos;
+        particle->head.desc.offset.y = owner->ypos;
+        particle->head.desc.offset.z = owner->zpos;
     }
     func_1513170C(particle, prevPos);
 }
@@ -542,7 +542,7 @@ void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
     burst.sparks[1] = NULL;
     burst.glows[0] = NULL;
     burst.glows[1] = NULL;
-    effect = (BurstEffect *)func_15149130(300, -1, 0x40, -1, 0, 0x33, sizeof(BurstData), arg1, arg2);
+    effect = func_15149130(300, -1, 0x40, -1, 0, 0x33, sizeof(BurstData), arg1, arg2);
     if (effect != NULL) {
         data = &effect->data;
         memcpy(data, &burst, sizeof(burst));
@@ -691,7 +691,7 @@ void func_151BDD8C(BurstEffect *effect) {
     u8 i;
     u8 j;
     u8 k;
-    Vec3f *srcs[4];
+    const Vec3f *srcs[4];
     Vec3f *dsts[4];
     s32 player;
 
@@ -770,7 +770,6 @@ void func_151BDD8C(BurstEffect *effect) {
     }
 }
 
-/* Message handler of the burst: message 0x3B (func_151BD7F4) for its owner frees it; the rest go to func_15169850. */
 /* Message handler of the burst: message 0x3B (func_151BD7F4) for its owner frees it; the rest go to func_15169850. */
 void func_151BE0AC(s32 effect, s32 msg, u8 msgId) {
     // matching: the original reads its parameters through this pointer; typed parameters

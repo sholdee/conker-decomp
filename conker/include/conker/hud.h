@@ -20,16 +20,6 @@ typedef struct {
     /* 0x10 */ f32 unk10;
 } PanelExtra;
 
-/* The object func_15157010 returns: the counter's background panel. */
-typedef struct {
-    /* 0x000 */ EffectHeader header;
-    /* 0x010 */ u8 pad10[0x44];
-    /* 0x054 */ f32 x;
-    /* 0x058 */ f32 y;
-    /* 0x05C */ u8  pad5C[0x120 - 0x5C];
-    /* 0x120 */ PanelExtra extra;
-} CounterPanel;
-
 /* The object func_1515548C returns: one digit of the counter. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
@@ -39,7 +29,7 @@ typedef struct {
 
 /* Effect data of the two-digit counter that slides onto the screen (the 0x18 bytes at effect+0x28). */
 typedef struct {
-    /* 0x00 */ CounterPanel *panel;
+    /* 0x00 */ ModelEffect *panel;      /* the background panel (func_15157010), with a PanelExtra */
     /* 0x04 */ CounterDigit *digits[2]; /* digits[1] is NULL for a one-digit count */
     /* 0x0C */ f32 timer;               /* counts down from 110 */
     /* 0x10 */ f32 plateau;             /* the slide curve's value while fully shown */
@@ -51,13 +41,6 @@ typedef struct {
     /* 0x28 */ CounterDisplay display;
 } CounterEffect;
 
-/* Animation state of a HUD model, created by func_1503F62C; only the fields used here. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x3E0];
-    /* 0x3E0 */ f32 (*matrices[2])[4]; /* one per frame buffer */
-    /* 0x3E8 */ s32 segment3[2];        /* segment 3 base, one per frame buffer */
-} HudModelAnim;
-
 /* A 3D model drawn on the HUD: its display lists, patched copies, and a transform per frame buffer. */
 typedef struct {
     /* 0x00 */ Gfx **srcDisplayLists;
@@ -65,9 +48,9 @@ typedef struct {
     /* 0x14 */ u8 displayListCount;
     /* 0x15 */ u8 blinkTimer;
     /* 0x16 */ u8 unk16[6];
-    /* 0x1C */ s32 unk1C; /* segment 1 base */
+    /* 0x1C */ u8 *unk1C; /* the model's vertex data: segment 1 base */
     /* 0x20 */ s32 unk20;
-    /* 0x24 */ HudModelAnim *anim;
+    /* 0x24 */ AnimInstance *anim; /* created by func_1503F62C */
     /* 0x28 */ MtxF matrices[2];
 } HudModel;
 
@@ -149,7 +132,7 @@ extern HudModel *D_8009005C;
 extern HudSprite D_80090060;
 extern u8 D_8009006C[4];
 extern u8 D_80090070[3];
-extern void *D_80090074[10];
+extern s32 D_80090074[10];
 extern PlaceValueTable D_8009009C;
 extern Gfx D_80090110[];
 extern Gfx D_80090128[];

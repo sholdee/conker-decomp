@@ -105,7 +105,7 @@ void func_150499A0(MtxF m, MtxF out);
 void func_15049C40(f32 *arg0, f32 *arg1);
 void func_15049CB8(MtxF m, f32 *q);
 void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out);
-void func_1504A140(f32 *q, f32 *m);
+void func_1504A140(f32 *q, MtxF m);
 
 /* game_77760.c */
 f32 func_1504A2B0(f32 arg0);

@@ -46,7 +46,7 @@ void func_15042D94(s32 x, s32 y, u8 flags, char *format, ...);
 void func_15042E3C(char *format, ...);
 void func_15042ECC(u8 *format, s32 *argumentWords);
 void func_150432BC(f32 scale);
-void func_150432CC(s32 object, s32 yOffset);
+void func_150432CC(Actor *object, s32 yOffset);
 void func_150432FC(s16 x, s16 y);
 void func_1504332C(u8 red, u8 green, u8 blue, u8 alpha);
 Gfx *func_15043384(Gfx *gfx);

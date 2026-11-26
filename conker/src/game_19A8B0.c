@@ -146,7 +146,8 @@ Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     texture = D_8008CA4C[particle->texture];
     frame = particle->frame;
     frameIndex = frame++; // matching: the dead increment steers IDO's register choice here
-    gfx = func_15142E24(gfx, (s32)D_8008CA4C[particle->texture], frameIndex << 8, 2, 0x100, 0x100, 0, 6,
+    // matching: the pointer goes through an integer (IDO keeps the converted value in a temporary)
+    gfx = func_15142E24(gfx, (EffectTexture *)(s32)D_8008CA4C[particle->texture], frameIndex << 8, 2, 0x100, 0x100, 0, 6,
                         (s32)&sprite, (u8 *)&synced, 3);
     if (texture->format == 5) {
         cycles = 2;

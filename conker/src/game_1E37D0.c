@@ -4,8 +4,8 @@
 
 /* State block of a trail effect (func_151B6320). */
 typedef struct TargetTrailState {
-    /* 0x00 */ TrailTarget *target;
-    /* 0x04 */ u8 targetUnk3B; /* target->unk3B when the trail was spawned */
+    /* 0x00 */ Actor *target;
+    /* 0x04 */ u8 targetUnk3B; /* target->unique_id when the trail was spawned */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ Vec3f lastPos;
     /* 0x14 */ f32 pending; /* points still to emit */
@@ -27,7 +27,7 @@ typedef struct TargetTrailPoint {
 } TargetTrailPoint;
 
 /* Spawns a trail effect that follows target. */
-void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {
+void func_151B6320(Actor *target, u8 arg1, s32 arg2) {
     s32 top_dummy; // matching: stack pad
     EffectTemplate18 spawn;
     s32 pad_dummy; // matching: stack pad
@@ -35,13 +35,13 @@ void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {
     EffectObj *obj;
 
     spawn.itemCount = 10;
-    spawn.pos.x = target->pos.x;
-    spawn.pos.y = target->pos.y;
-    spawn.pos.z = target->pos.z;
+    spawn.pos.x = target->xpos;
+    spawn.pos.y = target->ypos;
+    spawn.pos.z = target->zpos;
     spawn.life = 300;
     spawn.flags = 6;
     state.target = target;
-    state.targetUnk3B = target->unk3B;
+    state.targetUnk3B = target->unique_id;
     state.lastPos = spawn.pos;
     state.pending = 0.0f;
     state.elapsed = 0.0f;
@@ -50,7 +50,7 @@ void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {
     state.distance = 0.0f;
     spawn.kind = 13;
 
-    obj = func_15147A80(&spawn, 0x30, sizeof(TargetTrailPoint), 11, 11, 11, 0, 0, 0, arg1, arg2);
+    obj = func_15147A80((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, 0x30, sizeof(TargetTrailPoint), 11, 11, 11, 0, 0, 0, arg1, arg2);
     if (obj != NULL) {
         memcpy(obj->userData, &state, sizeof(state));
     }
@@ -116,7 +116,7 @@ s32 func_151B6420(EffectObj *obj) {
 s32 func_151B65D4(EffectObj *obj) {
     TargetTrailState *state;
     TargetTrailPoint *points;
-    TrailTarget *target;
+    Actor *target;
     Vec3f delta;
     s32 pad0; // matching: stack pad
     s32 pad1; // matching: stack pad
@@ -125,14 +125,14 @@ s32 func_151B65D4(EffectObj *obj) {
     state = obj->userData;
     points = obj->items;
     target = state->target;
-    if (target->unk0 == 0 || target->unk3B != state->targetUnk3B || target->unk3C < 15.0f) {
+    if (target->type == 0 || target->unique_id != state->targetUnk3B || target->speed < 15.0f) {
         obj->head.updateKind2 = 0;
         obj->head.tmpl.flags |= 8;
         return 1;
     }
-    obj->head.tmpl.pos.x = target->pos.x;
-    obj->head.tmpl.pos.y = target->pos.y;
-    obj->head.tmpl.pos.z = target->pos.z;
+    obj->head.tmpl.pos.x = target->xpos;
+    obj->head.tmpl.pos.y = target->ypos;
+    obj->head.tmpl.pos.z = target->zpos;
     delta.x = obj->head.tmpl.pos.x - state->lastPos.x;
     delta.y = obj->head.tmpl.pos.y - state->lastPos.y;
     delta.z = obj->head.tmpl.pos.z - state->lastPos.z;
@@ -235,12 +235,12 @@ Gfx *func_151B6928(EffectObj *obj, Gfx *gfx, s16 view) {
     f32 scale;
 
     if (obj->head.count >= 2) {
-        func_151D5D60(obj->buffers, view, (obj->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(obj->buffers, view, (obj->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             points = obj->items;
             camera = func_15144B34(view);
             flag = 1;
-            gfx = func_15142E24(gfx, D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
+            gfx = func_15142E24(gfx, &D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
             gfx = func_1513F4E4(gfx, 0x4E, &flag);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
@@ -373,8 +373,8 @@ Gfx *func_151B6928(EffectObj *obj, Gfx *gfx, s16 view) {
 
 /* Message 0x2D: objA and objB swap identities. */
 typedef struct SwapMessage {
-    /* 0x00 */ TrailTarget *objA;
-    /* 0x04 */ TrailTarget *objB;
+    /* 0x00 */ Actor *objA;
+    /* 0x04 */ Actor *objB;
     /* 0x08 */ u8 objAUnk3B;
     /* 0x09 */ u8 objBUnk3B;
 } SwapMessage;
@@ -383,8 +383,8 @@ typedef struct SwapMessage {
  * message 0x2D (a SwapMessage) moves the trail to the other object of the swap. */
 void func_151B70B4(EffectObj *obj, void *msg, u8 msgType) {
     TargetTrailState *state;
-    TrailTarget *current;
-    TrailTarget *objA;
+    Actor *current;
+    Actor *objA;
 
     state = obj->userData;
     current = state->target;
@@ -412,7 +412,7 @@ void func_151B70B4(EffectObj *obj, void *msg, u8 msgType) {
 }
 
 /* Spawns a particle at target's position. */
-void func_151B7144(TrailTarget *target, u8 arg1, s32 arg2) {
+void func_151B7144(Actor *target, u8 arg1, s32 arg2) {
     ParticleDesc spawn;
     s32 flag80;
     s32 flag40;
@@ -453,9 +453,9 @@ void func_151B7144(TrailTarget *target, u8 arg1, s32 arg2) {
     spawn.brightness = 0xFF;
     spawn.gravity = 0.0f;
     spawn.scaleRate = 1.05674696f;
-    spawn.pos.x = target->pos.x;
-    spawn.pos.y = target->pos.y;
-    spawn.pos.z = target->pos.z;
+    spawn.pos.x = target->xpos;
+    spawn.pos.y = target->ypos;
+    spawn.pos.z = target->zpos;
     spawn.offset.x = 0.0f;
     spawn.offset.y = 0.0f;
     spawn.offset.z = 0.0f;
@@ -512,7 +512,7 @@ EffectObj *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg
     spawn.flags = 20;
     spawn.kind = 16;
     spawn.unk14 = 2;
-    obj = func_15147A80(&spawn, argsSize + 0x10, sizeof(RibbonEffectPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
+    obj = func_15147A80((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, argsSize + 0x10, sizeof(RibbonEffectPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
     if (obj != NULL) {
         state = obj->userData;
         memcpy(state, &init, sizeof(init));
@@ -587,22 +587,22 @@ typedef struct RotatedTarget {
     /* 0x38 */ Vec3f pos;
 } RotatedTarget;
 
-/* D_8008FB90 callback: reads the followed TrailTarget's position; fails once the target is gone. */
+/* D_8008FB90 callback: reads the followed actor's position; fails once the target is gone. */
 s32 func_151B7678(EffectObj *obj, Vec3f *pos) {
     RibbonState *state;
     TrailTargetRef *ref;
-    TrailTarget *target;
+    Actor *target;
 
     state = obj->userData;
     ref = state->args;
     target = ref->target;
-    if (target->unk0 == 0 || target->unk3B != ref->targetUnk3B) {
+    if (target->type == 0 || target->unique_id != ref->targetUnk3B) {
         return 0;
     }
 
-    pos->x = target->pos.x;
-    pos->y = target->pos.y;
-    pos->z = target->pos.z;
+    pos->x = target->xpos;
+    pos->y = target->ypos;
+    pos->z = target->zpos;
     return 1;
 }
 
@@ -781,13 +781,13 @@ Gfx *func_151B7C38(EffectObj *obj, Gfx *gfx, s16 view) {
         return gfx;
     }
     points = obj->items;
-    func_151D5D60(obj->buffers, view, (obj->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
+    func_151D5D60(obj->buffers, view, (obj->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
     camera = func_15144B34(view);
     flag = 1;
-    gfx = func_15142E24(gfx, D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
+    gfx = func_15142E24(gfx, &D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x56, &flag);
     gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
@@ -907,13 +907,13 @@ void func_151B82CC(EffectObj *obj, void *msg, u8 msgType) {
     }
 }
 
-/* D_8008FB98 handler of a ribbon that follows a TrailTarget: message 0 naming the target destroys the ribbon. */
+/* D_8008FB98 handler of a ribbon that follows an actor: message 0 naming the target destroys the ribbon. */
 void func_151B8318(EffectObj *obj, TrailTargetRef *msg, u8 msgType) {
     RibbonState *state = obj->userData;
     TrailTargetRef *ref = state->args;
 
     if (msgType == 0) {
-        TrailTarget *target = msg->target;
+        Actor *target = msg->target;
 
         if (target == ref->target || msg->targetUnk3B == ref->targetUnk3B) {
             func_1516972C(&obj->head.header);

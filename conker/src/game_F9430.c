@@ -119,7 +119,7 @@ lbl: // matching: unused label ends the basic block so the pos[1] store stays ou
         extra.growDelay = (spawn.lifetime - (func_150ADA20() % (u32)(def->growDelayRange + 1))) - def->growDelayMin;
         extra.growRate = ((func_150ADA68() * def->growRateRange) + def->growRateMin) * spawn.width;
         particle = func_1513D668(&spawn, colors, 0, 0x18, 0, 0, (owner->langle >> 8) + def->yawOffset,
-                                 500.0f, 500.0f, 0, (s32)&ground.tri, 1, 8, arg3, arg2);
+                                 500.0f, 500.0f, NULL, &ground.tri, 1, 8, arg3, arg2);
         if (particle != NULL) {
             memcpy(&particle->extra, &extra, sizeof(extra));
         }
@@ -229,7 +229,7 @@ s32 func_150CC6B8(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     random = func_150ADA20();
     speed = (func_150ADA68() * 200.0f + 350.0f) * 0.1000000015f;
-    func_15143794(yaw, (s16)((random % 21U) - 25), speed, &spawn.vel.x);
+    func_15143794(yaw, (s16)((random % 21U) - 25), speed, &spawn.vel);
 
     spawn.gravity = 0.0f;
     spawn.flags = 0xE05;
@@ -296,7 +296,7 @@ s32 func_150CCA7C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     random = func_150ADA20();
     speed = (func_150ADA68() * 200.0f + 300.0f) * 0.1000000015f;
-    func_15143794(yaw, (s16)((random % 44U) - 63), speed, &spawn.vel.x);
+    func_15143794(yaw, (s16)((random % 44U) - 63), speed, &spawn.vel);
 
     spawn.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
     spawn.rotVel.z = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;

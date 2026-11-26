@@ -33,7 +33,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
     Actor *obj;
     s32 anim;
     s32 callF28;
-    u8 *info;
+    ModelAttachment *info;
     u16 pad; // matching: unused stack slot
     s32 state;
 
@@ -42,7 +42,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
     if (arg0->character_type == 0x48) {
         info = func_15033E84(arg0);
         if (info != NULL) {
-            anim = info[6];
+            anim = info->setId;
         }
     }
     obj = &movement_obj[arg0->owner];

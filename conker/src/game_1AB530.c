@@ -137,19 +137,7 @@ Gfx *func_1517E28C(Gfx *gfx, s32 arg1) {
     return gfx;
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[6];
-    /* 0x06 */ s16 width;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ u8 alpha;
-    /* 0x0B */ u8 r;
-    /* 0x0C */ u8 g;
-    /* 0x0D */ u8 b;
-    /* 0x0E */ u8 padE[2];
-    /* 0x10 */ void *texture;
-} FlareSprite;
-
-extern u8 D_800903AC;          /* flare sprite texture */
+extern Texture D_800903AC;     /* flare sprite texture */
 extern u8 D_800A7250[][7];     /* sprite sizes, one row per flare type */
 
 #ifndef ABS
@@ -171,7 +159,7 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
     s32 size;
     f32 x;
     f32 y;
-    FlareSprite sprite;
+    SpriteParams sprite;
 
     dx = flare->screenX - D_800BE620 * 0.5f;
     dy = flare->screenY - D_800BE624 * 0.5f;
@@ -219,10 +207,10 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
         D_800D2DA8 = 0xFF;
         D_800D2DA9 = 0xFF;
         D_800D2DAA = 0xFF;
-        sprite.texture = &D_800903AC;
-        sprite.r = 0;
-        sprite.g = 0;
-        sprite.b = 0;
+        sprite.tex = &D_800903AC;
+        sprite.animSpeed = 0;
+        sprite.animTimer = 0;
+        sprite.flip = 0;
         if (!D_800DDD60) {
             gfx = func_150950D4(func_1517EA4C(gfx), &D_800903AC, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
             D_800DDD60 = TRUE;
@@ -235,8 +223,8 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
             size = D_800A7250[sizeRow][i];
             y += size / 64.0f;
             sprite.alpha = intensity;
-            sprite.width = (f32)(size << 12) * D_800380A0 / 255.0f;
-            sprite.height = (f32)(size << 12) * D_800380A4 / 255.0f;
+            sprite.scaleX = (f32)(size << 12) * D_800380A0 / 255.0f;
+            sprite.scaleY = (f32)(size << 12) * D_800380A4 / 255.0f;
             D_800D2DAB = 0;
             gfx = func_15095A48(gfx, &sprite, x, y);
             gDPPipeSync(gfx++);

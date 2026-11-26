@@ -254,7 +254,7 @@ s32 func_1519D454(MatrixTrail *trail) {
         taskData.owner = data->owner;
         taskData.ownerId = data->owner->unique_id;
         taskData.unk8 = data->specIndex;
-        task = (TrailTask *)func_151491F4(trail->head.tmpl.life, -1, 8, (trail->head.tmpl.flags & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
+        task = func_151491F4(trail->head.tmpl.life, -1, 8, (trail->head.tmpl.flags & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
         if (task != NULL) {
             memcpy(&task->data, &taskData, sizeof(TrailTaskData));
             if (func_1514ED3C(data->owner->attachments, trail, NULL) != 0) {
@@ -379,7 +379,7 @@ Gfx *func_1519D9F4(MatrixTrail *trail, Gfx *gfx, s16 view) {
     s32 k;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->vtxBuffers, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(trail->vtxBuffers, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             data = trail->data;
             points = trail->points;
@@ -418,7 +418,7 @@ Gfx *func_1519D9F4(MatrixTrail *trail, Gfx *gfx, s16 view) {
                     }
                 } while (count != 0 && k != trail->head.end);
             }
-            gfx = func_15142E24(gfx, D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
+            gfx = func_15142E24(gfx, &D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
             gfx = func_15142C10(gfx, data->brightness, data->brightness, data->brightness, 0xFF, &update);
             gfx = func_1513F4E4(gfx, 6, &update);
             gfx = func_15142B7C(gfx, 1, 0x160600);
@@ -568,7 +568,7 @@ s32 func_1519E304(MatrixTrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t)
         return 0;
     }
     /* 64-byte matrices */
-    func_15143134(&data->offset, &pos, (u8 *)data->owner->ob_matrix_ptr + (data->matrixIndex << 6));
+    func_15143134(&data->offset, &pos, &data->owner->ob_matrix_ptr[data->matrixIndex]);
     out->x = (pos.x - x) * t + x;
     out->y = (pos.y - y) * t + y;
     out->z = (pos.z - z) * t + z;
@@ -660,7 +660,7 @@ void func_1519E6BC(Actor *owner) {
         taskData.unk8 = 0;
         taskData.owner = owner;
         taskData.ownerId = owner->unique_id;
-        D_800E0920 = (TrailTask *)func_151491F4(300, -1, 9, 0, 4, 0xC, 0xFF, 0);
+        D_800E0920 = func_151491F4(300, -1, 9, 0, 4, 0xC, 0xFF, 0);
         if (D_800E0920 != NULL) {
             memcpy(&D_800E0920->data, &taskData, sizeof(TrailTaskData));
         }

@@ -93,7 +93,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
     f32 textX;
     f32 rowY;
     f32 textY;
-    char *text;
+    const char *text;
     s32 step;
     u16 buttons;
     u8 entry;

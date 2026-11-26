@@ -6,7 +6,7 @@
 
 /* Tests the segment p0-p1 against cyl (only an active ZONE_AREA_CYLINDER zone);
    on a hit writes the entry point to hit and returns TRUE. */
-s32 func_150A34B0(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit) {
+s32 func_150A34B0(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit) {
     if (cyl->inactive == 1) {
         return FALSE;
     }
@@ -20,7 +20,7 @@ s32 func_150A34B0(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit) {
    segment to the height slab [0, height] and to the radius, and on overlap writes the first
    contact point (back in world space) to hit and returns TRUE.
    func_150AD78C / func_150AD780 are sin / cos of an angle in radians. */
-s32 func_150A3504(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit) {
+s32 func_150A3504(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit) {
     s32 i;
     f32 scale;
     f32 tSlabMin;
@@ -44,9 +44,9 @@ s32 func_150A3504(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit) {
     f32 t2;
 
     /* Rotate p0, then p1, into cylinder space (rotate by yaw, then pitch). */
-    dx = p0[0] - cyl->x;
-    dy = p0[1] - cyl->y;
-    dz = p0[2] - cyl->z;
+    dx = p0->x - cyl->x;
+    dy = p0->y - cyl->y;
+    dz = p0->z - cyl->z;
     for (i = 0; i < 2; i++) {
         c = cyl->cosYaw;
         s = cyl->sinYaw;
@@ -57,9 +57,9 @@ s32 func_150A3504(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit) {
         local[i][2] = dz * c - dy * s;
         local[i][1] = dy * c + dz * s;
         if (i == 0) {
-            dx = p1[0] - cyl->x;
-            dy = p1[1] - cyl->y;
-            dz = p1[2] - cyl->z;
+            dx = p1->x - cyl->x;
+            dy = p1->y - cyl->y;
+            dz = p1->z - cyl->z;
         }
     }
     org[0] = local[0][0];
@@ -147,16 +147,16 @@ s32 func_150A3504(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit) {
         ang = -(cyl->pitch * 0.01745329238f);
         s = func_150AD78C(ang);
         c = func_150AD780(ang);
-        hit[2] = hz * c - hy * s;
-        hit[1] = hy * c + hz * s;
+        hit->z = hz * c - hy * s;
+        hit->y = hy * c + hz * s;
         ang = -(cyl->yaw * 0.01745329238f);
         s = func_150AD78C(ang);
         c = func_150AD780(ang);
-        hit[0] = hx * c - hit[2] * s;
-        hit[2] = hit[2] * c + hx * s;
-        hit[0] += cyl->x;
-        hit[1] += cyl->y;
-        hit[2] += cyl->z;
+        hit->x = hx * c - hit->z * s;
+        hit->z = hit->z * c + hx * s;
+        hit->x += cyl->x;
+        hit->y += cyl->y;
+        hit->z += cyl->z;
     }
     return TRUE;
 }

@@ -719,7 +719,7 @@ extern ObjTypeList D_80086C50;
  * objects of the three D_80086C50 types is within 1000 units and inside its 90-degree view.
  */
 s32 func_1507FFD8(Actor *actor) {
-    s32 inZone;
+    TriggerZone *inZone;
     s32 i;
     ListObject *obj;
     ObjTypeList types;

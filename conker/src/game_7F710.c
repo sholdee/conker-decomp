@@ -20,9 +20,9 @@ void func_15052260(Actor *actor) {
     actor->unk1CC = actor->ypos;
 
     if (ctrl->unk6B < 4) {
-        actor->xpos += ((f32)ctrl->holdX - actor->xpos) * blend;
-        actor->ypos += ((f32)(ctrl->holdY - 80) - actor->ypos) * blend;
-        actor->zpos += ((f32)ctrl->holdZ - actor->zpos) * blend;
+        actor->xpos += (ctrl->holdX - actor->xpos) * blend;
+        actor->ypos += ((ctrl->holdY - 80) - actor->ypos) * blend;
+        actor->zpos += (ctrl->holdZ - actor->zpos) * blend;
         func_1505E650(actor, 20, 1.0f, 6.0f, 0.0f, 0.0f, 0);
         actor->yspd = -10.0f;
     } else {

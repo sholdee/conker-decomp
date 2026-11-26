@@ -112,7 +112,7 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
         s16 glowDepth;
         u16 zraw;
 
-        func_151D5D60((void **)obj->vtxBuf, view, sizeof(obj->vtxTemplate), (void **)&vtx, &fresh);
+        func_151D5D60(obj->vtxBuf, view, sizeof(obj->vtxTemplate), &vtx, &fresh);
         quad = vtx;
         if (vtx != NULL) {
             if (fresh) {
@@ -412,7 +412,7 @@ void func_151417C4(u8 arg0, u8 arg1) {
 
     data = D_8008A074;
     payload[0] = arg0;
-    func_15169260(&data, 2, (s32)payload, arg1);
+    func_15169260(data.ids, 2, (s32)payload, arg1);
 }
 
 s32 func_15141818(s32 arg0, s32 arg1) {

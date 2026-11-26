@@ -2,13 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    u8 pad0[6];
-    u16 width;
-    u16 height;
-} Game10EF60Texture;
-
-extern Game10EF60Texture *D_8008CA4C[];
+extern TextureDesc *D_8008CA4C[];
 
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
 void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
@@ -99,7 +93,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
     f32 stopDist;
     f32 dist;
     f32 speed;
-    f32 *bone;
+    f32 (*bone)[4];
     s32 aim;
     s32 texture;
     s32 fire;
@@ -121,7 +115,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
     impact = (s32)D_800D9960[aim].normal;
     fire = effect->owner->angle - effect->owner->mv->pssd_waist_tilt;
     i = (s32)&effect->target_x;
-    bone = &effect->target_z;
+    bone = (void *)&effect->target_z;
     texture = 0x23;
     dist = 0.0f;
     effect->lifetime -= D_800BE9E4;
@@ -132,7 +126,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
     if (effect->mode != 0) {
         if (effect->attachDelay == 0) {
             if (effect->owner != NULL && effect->owner->ob_matrix_ptr != NULL && effect->owner->unique_id == effect->ownerId && (aim = effect->owner->playernumber) != 0xFF) {
-                bone = effect->owner->ob_matrix_ptr[effect->bone][0];
+                bone = effect->owner->ob_matrix_ptr[effect->bone];
                 func_150A7960(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
                 func_150A7960(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
                 effect->attachDelay = 3;
@@ -144,7 +138,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
         if (effect->timer < -effect->offTime) {
             effect->timer = effect->onTime;
             if (effect->owner != NULL && effect->owner->ob_matrix_ptr != NULL && effect->owner->unique_id == effect->ownerId) {
-                bone = effect->owner->ob_matrix_ptr[effect->bone][0];
+                bone = effect->owner->ob_matrix_ptr[effect->bone];
                 func_150A7960(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
                 aim = effect->owner->playernumber;
                 func_150A7960(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
@@ -281,10 +275,6 @@ void func_150E1D14(Game10EF60Effect *effect) {
     }
 }
 
-typedef struct {
-    u8 pad0[0x10];
-    void *unk10;
-} Game10EF60TexState;
 
 /* Draws a tracer as a camera-facing quad from its position along its direction. */
 Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
@@ -300,7 +290,7 @@ Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
     f32 temp;
     f32 distances[2]; // written but never read
     f32 halfWidth;
-    Game10EF60TexState texState;
+    SpriteParams texState;
     u8 flag;
 
     if (effect->timer > 0) {

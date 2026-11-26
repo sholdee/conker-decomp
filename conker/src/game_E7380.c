@@ -63,7 +63,7 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
             sprite.unk17 = 7;
             sprite.fadeStart = 25;
             sprite.fadeRate = 10;
-            func_1513C650(&sprite, 0, 0, (s32)&triangle, hit.x, hit.y, hit.z,
+            func_1513C650(&sprite, 0, 0, &triangle, hit.x, hit.y, hit.z,
                           (func_150ADA68() * 20.0f) + 40.0f, (func_150ADA68() * 20.0f) + 40.0f, func_150ADA20() & 0xFF,
                           ((func_150ADA20() & 1) * 2) + (func_150ADA20() & 1), 3, 0xFF, 0, arg3, arg4);
         }

@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-/* Streamed per-frame animation data (((ObjAnim *)obj->unk2D0)). */
+/* func_1502D824's view of an AnimInstance: the current/previous pairs as arrays, and the two data
+ * headers (at 0x40 and 0x210) as the frameSize/unk48 bytes of anim[0] and anim[1]. */
 typedef struct ObjAnim {
     /* 0x000 */ u8 pad0[0x8];
     /* 0x008 */ f32 frame[2];
@@ -38,7 +39,7 @@ extern u8 *D_8008422C[];
 extern s32 D_80088554;
 extern s32 D_80088558;
 extern s32 D_8008857C;
-extern u8 *D_8008CA4C[];
+extern TextureDesc *D_8008CA4C[];
 
 /* This file */
 
@@ -328,7 +329,7 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
     sprite.scaleX = w;
     sprite.scaleY = h;
     sprite.x = movement_obj[index].xpos;
-    sprite.y = movement_obj[index].ypos + (f32)(size / 2);
+    sprite.y = movement_obj[index].ypos + (size / 2);
     sprite.z = movement_obj[index].zpos;
     gdl = func_15095760(gdl, &sprite);
     gSPDisplayList(gdl++, D_80087408);
@@ -345,7 +346,7 @@ void func_1502C608(s32 index) {
         scroll = movement_obj[index].texScroll;
         speed = movement_obj[index].texScrollSpeed;
         if (movement_obj[index].unk7 != 0) {
-            period = D_8008CA4C[func_1502C3BC(index)][4] << 8;
+            period = D_8008CA4C[func_1502C3BC(index)]->frames << 8;
             scroll += speed;
             if (scroll >= period) {
                 scroll -= period;
@@ -481,7 +482,7 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     }
     if (mode == 4) {
         alpha = (D_800DF7C4 * alpha) >> 8;
-        model = (s32)D_800DF7C0;
+        model = D_800DF7C0;
     } else {
         model = obj->ob_matrix_ptr;
     }
@@ -607,8 +608,8 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
         if (D_800D9900 != 0) {
             lightFlags |= 8;
         }
-        gdl = func_1515D914(gdl, player, (s32)obj->xpos, (s32)obj->ypos, (s32)obj->zpos,
-                            obj->floorMaterial, obj->unk304[player], obj->unk301, obj->unk314[D_800BE9C0],
+        gdl = func_1515D914(gdl, player, obj->xpos, obj->ypos, obj->zpos,
+                            obj->floorMaterial, obj->unk304[player], obj->unk301, &obj->unk314[D_800BE9C0],
                             &obj->unk302, 2, obj->unk1DD, lightFlags, D_800D9E28);
     }
     colourSet = -1;
@@ -706,8 +707,8 @@ void func_1502D630(obj, colour, player)
         last = 0.001000000047f;
     }
     step = (first - last) * 0.001000000047f;
-    near = (f32)(u32)D_800DD2E8 * step + last;
-    far = (f32)(u32)D_800DD2EC * step + last;
+    near = D_800DD2E8 * step + last;
+    far = D_800DD2EC * step + last;
     func_150A7A00(D_800D2CA8[player], obj->xpos, obj->ypos, obj->zpos, &x, &y, &z, &w);
     w = (w != 0.0f) ? 1.0f / w : 0.001000000047f;
     if (w < 0) { // matching: integer zeros here; 0.0f literals share the 1.0f register differently
@@ -722,7 +723,7 @@ void func_1502D630(obj, colour, player)
     colour[3] = (1.0f - amount) * 255.0f;
 }
 
-/* DMAs the current frame of each animation channel into buf (anim, or ((ObjAnim *)obj->unk2D0) when obj is given). */
+/* DMAs the current frame of each animation channel into buf (anim, or obj->unk2D0 when obj is given). */
 void func_1502D824(ObjAnim *anim, Actor *obj, u8 *buf) {
     s32 frameSize;
     u32 size;
@@ -860,16 +861,16 @@ void func_1502DB84(MtxF mtx, s32 index) {
             return;
         }
     }
-    if (((ObjAnim *)obj->unk2D0) != NULL) {
+    if (obj->unk2D0 != NULL) {
         goto animated;
     }
     // matching: the unused label splits the block so as1 keeps the call's argument setup after the test
 load:
     if (func_150838EC(obj, 0, 0, 1.0f) == 0) {
     animated:
-        if (D_800C4ED0[id] < 2 || ((ObjAnim *)obj->unk2D0) != NULL) {
+        if (D_800C4ED0[id] < 2 || obj->unk2D0 != NULL) {
             count = func_1502DB20(id);
-            if ((u32)(D_800C3E7C << 6) < (u32)(D_800C3E88 + (count << 6) - D_800C3E8C)) {
+            if ((D_800C3E7C << 6) < (D_800C3E88 + (count << 6) - D_800C3E8C)) {
                 obj->ob_matrix_ptr = NULL;
                 return;
             }
@@ -902,7 +903,7 @@ load:
                 } else {
                     scale = 0;
                 }
-                func_150A81D0(&D_800C3E88, mtx, ((ObjAnim *)obj->unk2D0), (s32)D_800C4BE0[id], count, cmd, remap, scale);
+                func_150A81D0(&D_800C3E88, mtx, obj->unk2D0, (s32)D_800C4BE0[id], count, cmd, remap, scale);
             }
             obj->mod_angle = D_8008857C;
             moved = D_80088558;
@@ -925,9 +926,9 @@ load:
                     f0 = moved * 0.03125f;
                     if (1) {} // matching: with the volatile below, keeps IDO from reusing the earlier speed load
                     f0 = obj->scale_xz * f0;
-                    f0 = f0 / ((ObjAnim *)obj->unk2D0)->frameCount[0];
+                    f0 = f0 / obj->unk2D0->numFrames;
                     f0 = *(volatile f32 *)&obj->speed / f0;
-                    ((ObjAnim *)obj->unk2D0)->unk10 = f0 * 0.5f;
+                    obj->unk2D0->speed = f0 * 0.5f;
                 }
             }
             D_800C3E7A += count;
@@ -1054,7 +1055,7 @@ void func_1502DF38(s32 index, s32 rootOnly) {
             mtx[3][1] = obj->ypos + obj->scale_y * obj->unkC8;
             mtx[3][2] = obj->zpos;
         }
-        if (((ObjAnim *)other->unk2D0) != NULL && ((ObjAnim *)other->unk2D0)->frameData[0] == NULL) {
+        if (other->unk2D0 != NULL && other->unk2D0->animId == 0) {
             mtx[3][1] += other->unkCC;
         }
     }
@@ -1083,7 +1084,7 @@ void func_1502E4C4(s32 index) {
     Actor *obj;
     u8 id;
     MtxF *tbl;
-    s32 view;
+    RenderView *view;
     f32 width;
     f32 height;
     f32 yOffset;
@@ -1109,7 +1110,7 @@ void func_1502E4C4(s32 index) {
     if (D_800C3638 != 0 && D_800C3656[0] == 0 && func_150229E4(obj) == 0) {
         return;
     }
-    if (obj->playernumber != 0xFF && !((u16)D_800D2340 & (1 << obj->playernumber))) {
+    if (obj->playernumber != 0xFF && !(D_800D2340 & (1 << obj->playernumber))) {
         return;
     }
     if ((obj->unk101 & 1) == 1) {
@@ -1122,8 +1123,8 @@ void func_1502E4C4(s32 index) {
         obj->unk74 = movement_obj[obj->attach_char - 1].unk74;
         return;
     }
-    width = (u32)D_800D1C90[id]->bodyRadius * obj->scale_xz;
-    height = (u32)D_800D1C90[id]->bodyRadius * obj->scale_y;
+    width = D_800D1C90[id]->bodyRadius * obj->scale_xz;
+    height = D_800D1C90[id]->bodyRadius * obj->scale_y;
     yOffset = (D_800D1C90[id]->bodyHeight + obj->unkCC) * obj->scale_y;
     obj->cull_radius_xz = width;
     range = obj->cullDistance;
@@ -1139,13 +1140,13 @@ void func_1502E4C4(s32 index) {
         } else if (D_800D1C90[id]->cullDistance == 1) {
             cullDist = 0.0f;
         } else {
-            cullDist = (u32)D_800D1C90[id]->cullDistance * obj->scale_xz;
+            cullDist = D_800D1C90[id]->cullDistance * obj->scale_xz;
         }
     }
     for (i = 0; i <= D_80082FA0; i++) {
         s32 dist;
 
-        view = (s32)&D_800BE628[i];
+        view = &D_800BE628[i];
         tbl = &D_800D9C10[i];
         inside = FALSE;
         if (camera_global_Cameras[i].mv->SniperState != 0) {
@@ -1153,7 +1154,7 @@ void func_1502E4C4(s32 index) {
         } else {
             playerRange = range;
         }
-        dist = func_150A6360(view, tbl, obj->xpos, obj->ypos + yOffset, obj->zpos, width,
+        dist = func_150A6360(view, *tbl, obj->xpos, obj->ypos + yOffset, obj->zpos, width,
                              height, 20000.0f);
         if (dist == 0) {
             inside = TRUE;

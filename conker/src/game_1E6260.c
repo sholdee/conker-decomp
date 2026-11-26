@@ -19,7 +19,7 @@ typedef struct {
 
 /* Light callback: spawns a swinging lamp of the given kind with a light effect (D_8008B0F0 slot 7) that
  * follows it, and a beam shining from it. */
-void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
+void func_151B8DB0(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
     void *obj; // matching: one local holds the lamp, then the effect (two locals shift the stack)
     ParticleSpawn spawn;
     LampSwing swing;
@@ -85,7 +85,7 @@ void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
             header.update = 7;
             header.lifetime = 300;
             header.lightType = 0x12;
-            obj = func_1516037C(&header, (PointLight *)light, sizeof(data), arg2, arg3);
+            obj = func_1516037C(&header, light, sizeof(data), arg2, arg3);
             if (obj != NULL) {
                 state = (SwingingLight *)&((LightEffect *)obj)->data;
                 memcpy(state, &data, sizeof(data));

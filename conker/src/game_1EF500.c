@@ -98,7 +98,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
     ext.listener = 0;
     if (altOrigin != NULL && altDirection != NULL) {
         if (!useTarget) {
-            if (func_15145128(&altDirection->x, &targetDir.x, NULL, NULL) != 0) {
+            if (func_15145128(altDirection, &targetDir, NULL, NULL) != 0) {
                 useTarget = TRUE;
             } else {
                 return NULL;
@@ -108,7 +108,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
         dir = &targetDir;
     } else {
         if (direction != NULL) {
-            if (func_15145128(&direction->x, &sourceDir.x, NULL, NULL) != 0) {
+            if (func_15145128(direction, &sourceDir, NULL, NULL) != 0) {
                 useSource = TRUE;
             } else {
                 return NULL;
@@ -117,7 +117,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
         from = origin;
         dir = &sourceDir;
     }
-    ext.handle = collide ? func_151D5B6C(from, dir, owner, arg23, 0) : -1;
+    ext.handle = collide ? func_151D5B6C(from, dir, owner, arg23, NULL) : -1;
     if (func_151C4B0C(knownHit, &ext.path, origin, useSource ? &sourceDir : NULL, &ext.remaining, arg7, arg13,
                       altOrigin, useTarget ? &targetDir : NULL, &ext.flags, 3, arg10, owner, arg23, collide, arg15,
                       ext.handle, 0) == 0) {
@@ -280,7 +280,7 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
     u8 fresh;
     Vtx *unusedVtx; // matching: as above
 
-    func_151D5D60(trail->head.vtxBuffers, index, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(trail->head.vtxBuffers, index, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
@@ -740,7 +740,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         debris.fadeStart = 0x20;
         debris.fadeRate = 7;
         ext = &trail->trail;
-        func_1513C650(&debris, 0, 0, (s32)&ext->path.tri, ext->path.pos.x, ext->path.pos.y, ext->path.pos.z,
+        func_1513C650(&debris, 0, 0, &ext->path.tri, ext->path.pos.x, ext->path.pos.y, ext->path.pos.z,
                       scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < sparkChance) {

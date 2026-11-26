@@ -38,7 +38,7 @@ void *func_1502B350(u8 *romAddr, s32 info, u32 *size);
 s32 func_1502B4A8(RomTableEntry *table, s32 count);
 void *func_1502B5C8(u32 *size, s32 depth, ...); /* loads ROM table data */
 void *func_1502B6BC(u32 *size, s32 count, s32 *countOut, s32 depth, ...);
-u32 func_1502B7F0(void **data, s32 depth, ...);
+u32 func_1502B7F0(void *data, s32 depth, ...); /* data: where to store the loaded block's address */
 s32 func_1502B8E0(void *dst, u32 maxSize, s32 depth, ...);
 s32 func_1502B9B4(s32 depth, ...);
 

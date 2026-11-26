@@ -91,7 +91,7 @@ enum {
 #define BLOOD_PROFILE_NONE 99
 
 /* An actor's bone matrix (ob_matrix_ptr holds 0x40-byte matrices). */
-#define BONE_MATRIX(actor, bone) ((Mtx *)((u8 *)(actor)->ob_matrix_ptr + (bone) * 0x40))
+#define BONE_MATRIX(actor, bone) (&(actor)->ob_matrix_ptr[bone])
 
 /* Returns the blood profile index (0-19) for an actor's model, or BLOOD_PROFILE_NONE. */
 s32 func_15134070(Actor *actor) {
@@ -211,7 +211,7 @@ void func_151342BC(BloodDrip *drip) {
     u8 dead;
     u8 flags;
     f32 position[3];
-    s32 target;
+    Mtx *target;
     u8 *bones;
     f32 deltaZ;
     f32 deltaY;
@@ -247,14 +247,15 @@ void func_151342BC(BloodDrip *drip) {
                 drip->desc.flags = flags | BLOOD_DRIP_NO_PREVIOUS;
                 return;
             }
-            target = (s32)((u8 (*)[0x40])bones)[drip->desc.bone];
+            target = (Mtx *)bones + drip->desc.bone;
         } else if (!(flags & BLOOD_DRIP_STATIC)) {
             index = D_800BE9C0 ? 0 : 1;
             target = drip->desc.target[index];
         } else {
             return;
         }
-        func_15143134(&drip->desc.offset, position, (void *)target);
+        // matching: position must be an f32[3] (a Vec3f local changes the float register allocation)
+        func_15143134(&drip->desc.offset, (Vec3f *)position, target);
     }
     deltaX = source[0] - position[0];
     deltaY = source[1] - position[1];
@@ -389,11 +390,12 @@ void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 #define BLOOD_TRAIL_SKIP_FRAME 0x02 /* don't emit on the next update */
 #define BLOOD_TRAIL_CALLBACK   0x04
 
-/* Spawns a BloodTrail effect from desc, starting at the current position. */
-BloodTrail *func_15134908(BloodTrailDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
+/* Spawns a BloodTrail effect from desc, starting at the current position. Returns the BloodTrail, followed
+ * by extraSize bytes of the caller's data (the caller's own type). */
+void *func_15134908(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
     BloodTrail *trail;
 
-    trail = func_15167A68(0x2A, arg3, arg1 + 0x40, 1, arg2, 1);
+    trail = func_15167A68(0x2A, arg3, extraSize + 0x40, 1, arg2, 1);
     if (trail == NULL) {
         return NULL;
     }
@@ -473,9 +475,9 @@ void func_151349D0(BloodTrail *trail) {
 }
 
 /* Message handler: forwards to func_151BC5A4 while the effect's unk28 is 1. */
-void func_15134C98(Effect15134C98 *arg0, s32 arg1, u8 arg2) {
-    if (arg0->unk28 == 1) {
-        func_151BC5A4(&arg0->base, arg1, arg2);
+void func_15134C98(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
+    if (effect->unk28 == 1) {
+        func_151BC5A4(effect, msg, msgId);
     }
 }
 
@@ -507,10 +509,11 @@ s32 func_15134CEC(Struct15134CEC *particle) {
 #define BLOOD_STRIP_LIFETIME 0x02
 
 /* Spawns a BloodStrip effect from desc. */
-BloodStrip *func_15134DAC(BloodStripDesc *desc, s32 arg1) {
+/* Returns a BloodStrip followed by extraSize bytes of the caller's data (the caller's own type). */
+void *func_15134DAC(BloodStripDesc *desc, s32 extraSize) {
     BloodStrip *strip;
 
-    strip = func_15167A68(0x29, 0, arg1 + 0x80, 1, 0xFF, 1);
+    strip = func_15167A68(0x29, 0, extraSize + 0x80, 1, 0xFF, 1);
     if (strip == NULL) {
         return NULL;
     }
@@ -533,7 +536,7 @@ extern s32 (*D_80089B6C[])(BloodStrip *);
 void func_15134E48(BloodStrip *arg0) {
     BloodStrip *strip = arg0; // matching: the parameter copy reserves the stack slot IDO kept
     u8 kill;
-    Mtx *boneMatrix;
+    MtxF *boneMatrix;
 
     kill = 0;
     if (strip->owner->type == 0 || strip->owner->unique_id != strip->ownerId) {
@@ -684,7 +687,7 @@ void func_151353A8(BloodStrip *arg0) {
 
 /* Transforms inA and inB by matrix into outA and outB. */
 void func_15135424(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *outB) {
-    Vec3f *in[2];
+    const Vec3f *in[2];
     Vec3f *out[2];
 
     in[0] = inA;
@@ -975,7 +978,7 @@ s32 func_15135BF8(BloodSplat *splat) {
 void func_151DB5D0(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
 
 // matching: this file was compiled with s32 where the definition (game_2062D0.c) has u8 (args 3, 6, 11, 15) and
-// s16 (arg 5), and with a void return. The definition is SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel,
+// s16 (arg 5), and with a void return. The definition is SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel,
 // u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,
 // CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE, s32 argF).
 void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
@@ -1022,7 +1025,7 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     } else {
         for (count = func_150ADA20() % 5U + 3; count > 0; count--) {
             scale = (func_150ADA68() * 618.0f + 201.0f) * 0.001000000047f;
-            func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, radius, &offset.x);
+            func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, radius, &offset);
             offset.x += direction.x * scale;
             offset.y += direction.y * scale;
             offset.z += direction.z * scale;
@@ -1039,7 +1042,7 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
             u32 randB;
             for (count = func_150ADA20() % 11U + 10; count > 0; count--) {
                 scale = func_150ADA68() * 200.0f * 0.001000000047f;
-                func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, radius, &spread.x);
+                func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, radius, &spread);
                 spread.x += direction.x * scale;
                 spread.y += direction.y * scale;
                 spread.z += direction.z * scale;
@@ -1086,8 +1089,9 @@ void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
 }
 
 /* Spawns a blood particle of the given size with one of the four D_80089BAC textures. */
-s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5, Vec3f *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10) {
-    s32 particle;
+GrowingBloodParticle *func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, CollisionTri *surface,
+                                    Vec3f *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10) {
+    GrowingBloodParticle *particle;
     ParticleDef desc;
     f32 extra;
     Struct15136698Table textures;
@@ -1141,9 +1145,9 @@ s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5,
     random0 = func_150ADA20();
     random1 = func_150ADA20();
     value = func_150ADA20();
-    particle = func_1513D594(&desc, 0, 0, 0x1A, 0, (random1 & 1) + (random0 & 1), value & 0xFF, 500.0f, 500.0f, 0, arg5, argB, argC, 0, 4, arg9, arg10);
-    if (particle != 0) {
-        memcpy(particle + 0x128, &extra, sizeof(extra));
+    particle = func_1513D594(&desc, 0, 0, 0x1A, 0, (random1 & 1) + (random0 & 1), value & 0xFF, 500.0f, 500.0f, NULL, surface, argB, argC, 0, 4, arg9, arg10);
+    if (particle != NULL) {
+        memcpy(&particle->growth, &extra, sizeof(extra));
     }
     return particle;
 }
@@ -1187,7 +1191,8 @@ struct LocalDef15136918 {
 };
 
 /* Spawns a func_1513C73C particle (type 0xD) of the given size at position. */
-void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, s32 arg5, f32 *position, u8 arg7, s32 arg8) {
+void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, CollisionTri *surface, f32 *position, u8 arg7,
+                   s32 arg8) {
     struct LocalDef15136918 desc;
     f64 pad; // matching: an unused 8-byte stack slot
 
@@ -1211,7 +1216,7 @@ void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, s32 arg5,
         desc.unk0 = 0x301;
         desc.unk4 = lifetime + 32;
     }
-    func_1513C73C(&desc, 0xD, 0, arg5, position[0], position[1], position[2], size, size, arg4, 0, 0, arg7, arg8);
+    func_1513C73C(&desc, 0xD, 0, surface, position[0], position[1], position[2], size, size, arg4, 0, 0, arg7, arg8);
 }
 
 /* Particle callback: fades rgba[0] out over the last 32 frames. */
@@ -1334,7 +1339,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     }
     if (arg4 != 0) {
         if ((D_800A3FF8 == &D_800A3FD8[kind]) || (D_800A40C8 == &D_800A3FD8[kind])) {
-            func_151C61A0((s32)&position, (s32)&hit, arg6, arg7);
+            func_151C61A0(&position, &hit, arg6, arg7);
         } else {
             func_1513A48C(&position, arg6, arg7);
         }
@@ -1366,9 +1371,7 @@ void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s
     s32 j;
     f32 decalSide;
     f32 decalUp;
-    s32 pad1;
-    s32 pad2;
-    f32 normal[3];
+    CollisionTri tri; /* the hit triangle */
     Vec3f decalPos;
     f32 distance;
     s32 surface;
@@ -1429,11 +1432,11 @@ void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s
                                       dir.x * 100.0f + side.x * decalUp + up.x * decalSide,
                                       dir.y * 100.0f + side.y * decalUp + up.y * decalSide,
                                       dir.z * 100.0f + side.z * decalUp + up.z * decalSide,
-                                      0, normal, &decalPos.x, &decalPos.y, &decalPos.z, &distance, &surface, 0, 0.0f) != 0 &&
+                                      0, &tri, &decalPos.x, &decalPos.y, &decalPos.z, &distance, &surface, 0, 0.0f) != 0 &&
                         func_15145C90(surface) != 0 && distance < 1999.0f) {
                         randomA = func_150ADA68();
                         random = func_150ADA20();
-                        func_151D9B8C(arg3, randomA * 16.0f + 25.0f, random % 156U + 0x64, normal, &decalPos,
+                        func_151D9B8C(arg3, randomA * 16.0f + 25.0f, random % 156U + 0x64, &tri, &decalPos,
                                       func_150ADA20() % 101U + 0x64, 1, 1, 1, arg4, arg5);
                     }
                     count--;
@@ -1531,8 +1534,9 @@ void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
     }
 }
 
-typedef void *(*Blood3783CSpawn)(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32,
-                                 s32, s32, s32, f32, s32, s32, s32, s32);
+/* func_151B5BF0 or func_151B6010 */
+typedef PulseParticle *(*Blood3783CSpawn)(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s16, u8, s32, f32, u8, u8,
+                                          u8, s32);
 
 /* Blood when an actor dies: a burst, a splat and, on flagged ground, a pool and a chunk. */
 void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
@@ -1563,7 +1567,7 @@ void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
     probe.x = position.x;
     probe.y = position.y + 100.0f;
     probe.z = position.z;
-    if (func_1514672C(&probe.x) == 0) {
+    if (func_1514672C(&probe) == 0) {
         return;
     }
     if (func_15046C80(&probe, 0, probe.y - 500.0f, &hit) != 0) {
@@ -1587,7 +1591,7 @@ void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
                           ((func_150ADA68() * 106.0f) + 75.0f) * 9.999999747e-06f,
                           (func_150ADA20() % 101U) + 155,
                           (func_150ADA20() % 101U) + 100,
-                          (func_150ADA20() % 56U) + 203, (s32)&hit.tri,
+                          (func_150ADA20() % 56U) + 203, &hit.tri,
                           &probe, 1, 1, arg1, arg2);
             if (func_150ADA20() & 1) {
                 spawn = func_151B5BF0;
@@ -1676,7 +1680,7 @@ void func_15137E60(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA,
     func_15137F30(pointA, pointB, velocityA, velocityB, time, strip,
                   &start, &end, &velocity, &arg3, &arg4, &arg5, &arg6);
     func_151D9014(&start, &velocity, 0, arg3, arg4, arg5, arg6, 0, 1.0f, 1.0f,
-                  1, 0, 1, 0, ((u8 *)strip)[0xC], ((u8 *)strip)[1]);
+                  1, 0, 1, 0, strip->header.owner, strip->header.kind);
 }
 
 /*
@@ -1702,16 +1706,16 @@ void func_15137F30(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *veloci
 }
 
 /* Writes the actor's blood point for profile `kind` (bone 12 space) to out; 0 if no skeleton. */
-s32 func_151380B4(Actor *actor, s32 kind, f32 *out) {
-    s32 bones = (s32)actor->ob_matrix_ptr;
+s32 func_151380B4(Actor *actor, s32 kind, Vec3f *out) {
+    MtxF *bones = actor->ob_matrix_ptr;
 
-    if (bones == 0) {
+    if (bones == NULL) {
         return 0;
     }
     if ((actor->unk74 & 0xF) == 0xF) {
         return 0;
     }
-    func_15143134(&D_800A3FD8[kind].offset, out, (void *)(bones + 12 * 0x40));
+    func_15143134(&D_800A3FD8[kind].offset, out, bones + 12);
     return 1;
 }
 
@@ -1830,7 +1834,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
     spawn.sizeXZ = spawn.sizeY;
     spawn.gravity = (func_150ADA68() * 292.0f + -1099.0f) * 0.001000000047f;
     spawn.pos = *position;
-    func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 21U - 83), func_150ADA68() * 8.0f + 9.0f, &spawn.vel.x);
+    func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 21U - 83), func_150ADA68() * 8.0f + 9.0f, &spawn.vel);
     spawn.rot = v;
     spawn.rotVel.x = (func_150ADA68() * 24496.0f + -12248.0f) * 0.001000000047f;
     spawn.rotVel.z = (func_150ADA68() * 24496.0f + -12248.0f) * 0.001000000047f;
@@ -1850,7 +1854,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
     spawn.ownerId = actor->unique_id;
     spawn.fadeStart = 12;
     spawn.fadeRate = 21;
-    func_1513264C(&spawn, 3, 0xFF, (s32)arg3, 0, arg4, arg5);
+    func_1513264C(&spawn, 3, 0xFF, arg3, 0, arg4, arg5);
     if (D_800A4018 == &D_800A3FD8[kind]) {
         const s32 ids[3] = { 0x76, 0x77, 0x78 };
         u8 i;
@@ -1897,7 +1901,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
 }
 
 /* BloodChunk ground-hit callback: bounces off groundY and leaves a blood decal there. */
-s32 func_151389A8(BloodChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s32 surface) {
+s32 func_151389A8(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, CollisionTri *surface) {
     Vec3f pos;
     f32 bounce;
     u32 random;
@@ -1950,7 +1954,7 @@ void func_15138BC0(Actor *actor, u8 arg1, s32 arg2) {
 
     kind = func_15134070(actor);
     if (kind != BLOOD_PROFILE_NONE) {
-        valid = func_151380B4(actor, kind, &position.x);
+        valid = func_151380B4(actor, kind, &position);
         func_15138120(actor, kind, 1);
         if (valid != 0) {
             func_1504715C(&hit, actor);
@@ -1969,41 +1973,41 @@ void func_15138C80(Actor *actor, u8 arg1, s32 arg2) {
 
     kind = func_15134070(actor);
     if (kind != BLOOD_PROFILE_NONE) {
-        valid = func_151380B4(actor, kind, &position.x);
+        valid = func_151380B4(actor, kind, &position);
         func_15138120(actor, kind, 1);
         if (valid != 0) {
             func_1504715C(&hit, actor);
             func_151382E0(&position, kind, &hit, arg1, arg2);
             switch (kind) {
             case 16:
-                func_1513B0F8(actor, &position.x, &hit, arg1, arg2);
+                func_1513B0F8(actor, &position, &hit, arg1, arg2);
                 return;
             case 17:
-                func_151036B4(&position.x, arg1, arg2);
+                func_151036B4(&position, arg1, arg2);
                 return;
             case 0:
             case 7:
-                func_1513A6E0(actor, &position.x, &hit, arg1, arg2);
+                func_1513A6E0(actor, &position, &hit, arg1, arg2);
                 return;
             case 3:
-                func_15138E98(actor, &position.x, 1, &hit, arg1, arg2);
+                func_15138E98(actor, &position, 1, &hit, arg1, arg2);
                 return;
             case 5:
             case 6:
-                func_15138E98(actor, &position.x, 0, &hit, arg1, arg2);
+                func_15138E98(actor, &position, 0, &hit, arg1, arg2);
                 return;
             case 15:
-                func_15139768(actor, &position.x, 0.6f, &hit, arg1, arg2);
+                func_15139768(actor, &position, 0.6f, &hit, arg1, arg2);
                 return;
             case 2:
-                func_15139768(actor, &position.x, 1.0f, &hit, arg1, arg2);
+                func_15139768(actor, &position, 1.0f, &hit, arg1, arg2);
                 return;
             case 4:
                 func_1513A594(actor, &position, &hit, arg1, arg2);
                 return;
             case 8:
             case 9:
-                func_1513ABB8(actor, &position.x, kind == 9, &hit, arg1, arg2);
+                func_1513ABB8(actor, &position, kind == 9, &hit, arg1, arg2);
                 return;
             case 10:
             case 11:
@@ -2015,7 +2019,7 @@ void func_15138C80(Actor *actor, u8 arg1, s32 arg2) {
             case 12:
             case 13:
             default:
-                func_15139D74(actor, &position.x, &hit, arg1, arg2);
+                func_15139D74(actor, &position, &hit, arg1, arg2);
                 break;
             }
         }
@@ -2034,7 +2038,7 @@ const Vec3f D_800A4188[4] = {
 const Vec3f D_800A41B8 = { -0.2532f, 47.663998f, -2.545f };
 
 /* Gore for profile 3, 5 and 6 actors: a random chunk set from D_800A4160 and, with extraSpray, chunk model 0x48. */
-void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4, s32 arg5) {
+void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit, u8 arg4, s32 arg5) {
     u8 index;
     Vec3f position;
 
@@ -2042,7 +2046,7 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
     {
         ParticleSpawn burst;
         u8 tag[1];
-        s32 result;
+        BloodChunk *result;
         u8 i;
         u8 mask;
 
@@ -2090,8 +2094,8 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
             }
             burst.model = D_800A4168[i];
             result = func_15132A4C(&burst, 3, 0xFF, 1, arg4, arg5);
-            if (result != 0) {
-                memcpy(&((BloodChunk *)result)->unk170, tag, 1);
+            if (result != NULL) {
+                memcpy(&result->unk170, tag, 1);
             }
         }
     }
@@ -2101,7 +2105,7 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1513A5E0((Vec3f *)origin, arg4, arg5);
+    func_1513A5E0(origin, arg4, arg5);
     {
         f32 first[3];
         f32 second[3];
@@ -2147,12 +2151,12 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
-                              &packet.vel.x);
+                              &packet.vel);
                 packet.rotVel.x = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.rotVel.z = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.gravity = func_150ADA68() * 0.208f + -0.708f;
                 packet.lifetime = func_150ADA20() % 101U + 60;
-                func_1513264C(&packet, 3, 0xFF, (s32)hit, 0, arg4, arg5);
+                func_1513264C(&packet, 3, 0xFF, hit, 0, arg4, arg5);
             }
         }
         if (extraSpray == 0) {
@@ -2188,17 +2192,17 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
         yaw = func_150ADA20();
         pitch = func_150ADA20();
         func_15143794((u8)yaw, (s16)(pitch % 16U - 60), func_150ADA68() * 7.1499996f + 10.889999f,
-                      &spray.vel.x);
+                      &spray.vel);
         spray.rotVel.x = func_150ADA68() * 48.158f + -24.079f;
         spray.rotVel.z = func_150ADA68() * 48.158f + -24.079f;
         spray.gravity = func_150ADA68() * 0.323f + -1.4210001f;
         spray.lifetime = func_150ADA20() % 61U + 100;
-        func_1513264C(&spray, 3, 0xFF, (s32)hit, 0, arg4, arg5);
+        func_1513264C(&spray, 3, 0xFF, hit, 0, arg4, arg5);
     }
 }
 
 /* BloodChunk ground-hit callback: bounces off groundY and leaves a blood decal there. */
-s32 func_15139578(BloodChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s32 surface) {
+s32 func_15139578(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, CollisionTri *surface) {
     Vec3f pos;
     f32 bounce;
     u32 random;
@@ -2252,7 +2256,7 @@ const Vec3f D_800A41E8[4] = {
 };
 
 /* Gore for profile 2/15 actors, chunk sizes scaled by `scale`. */
-void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32 arg5) {
+void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8 arg4, s32 arg5) {
     u8 idx;
     u8 i;
     u8 mask;
@@ -2302,11 +2306,11 @@ void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32
         spawn.fadeRate = 21;
         for (i = 0, mask = 1; i < 4; i++, mask <<= 1) {
             if (D_800A41C4[idx] & mask) {
-                s32 ret;
+                BloodChunk *ret;
                 spawn.model = D_800A41C8[i];
                 ret = func_15132A4C(&spawn, 3, 0xFF, 1, arg4, arg5);
-                if (ret != 0) {
-                    memcpy(&((BloodChunk *)ret)->unk170, tag, 1);
+                if (ret != NULL) {
+                    memcpy(&ret->unk170, tag, 1);
                 }
             }
         }
@@ -2320,10 +2324,10 @@ void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32
         Vec3f b;
         ParticleSpawn spawn2;
         for (count = (func_150ADA20() & 3) + 5; count > 0; count--) {
-            func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 71U - 60), func_150ADA68() * 6.0f + 6.0f, &dir.x);
-            func_151C5F44((s32)origin, &dir.x, func_150ADA68() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
+            func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 71U - 60), func_150ADA68() * 6.0f + 6.0f, &dir);
+            func_151C5F44(origin, &dir, func_150ADA68() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
                           func_150ADA20() % 66U + 190, func_150ADA20() % 45U + 44, func_150ADA68() * 20.0f + 50.0f,
-                          0, (s32)hit, arg4, arg5);
+                          0, hit, arg4, arg5);
         }
         {
             s32 q; // matching: unused stack slot
@@ -2358,12 +2362,12 @@ void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32
             if (!(D_800A41C4[idx] & mask2)) {
                 spawn2.model = D_800A41D8[j];
                 func_15143134(&D_800A41E8[j], &spawn2.pos, BONE_MATRIX(actor, 12));
-                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 35U - 84), func_150ADA68() * 6.119999886f + 3.0f, &spawn2.vel.x);
+                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 35U - 84), func_150ADA68() * 6.119999886f + 3.0f, &spawn2.vel);
                 spawn2.rotVel.x = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.rotVel.z = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.gravity = func_150ADA68() * 0.2080000043f + -0.7080000043f;
                 spawn2.lifetime = func_150ADA20() % 101U + 60;
-                func_1513264C(&spawn2, 3, 0xFF, (s32)hit, 0, arg4, arg5);
+                func_1513264C(&spawn2, 3, 0xFF, hit, 0, arg4, arg5);
             }
         }
     }
@@ -2379,7 +2383,7 @@ const Vec3f D_800A4234[3] = {
 };
 
 /* Default gore (profiles 1, 12, 13 and others): a random chunk set from bone 12. */
-void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
+void func_15139D74(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
     u8 index;
     Vec3f position;
 
@@ -2387,7 +2391,7 @@ void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
     {
         ParticleSpawn burst;
         u8 tag[1];
-        s32 result;
+        BloodChunk *result;
         u8 i;
         u8 mask;
 
@@ -2435,8 +2439,8 @@ void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
             }
             burst.model = D_800A421C[i];
             result = func_15132A4C(&burst, 3, 0xFF, 1, arg3, arg4);
-            if (result != 0) {
-                memcpy(&((BloodChunk *)result)->unk170, tag, 1);
+            if (result != NULL) {
+                memcpy(&result->unk170, tag, 1);
             }
         }
     }
@@ -2446,7 +2450,7 @@ void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1513A5E0((Vec3f *)origin, arg3, arg4);
+    func_1513A5E0(origin, arg3, arg4);
     {
         f32 first[3];
         f32 second[3];
@@ -2491,12 +2495,12 @@ void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
-                              &packet.vel.x);
+                              &packet.vel);
                 packet.rotVel.x = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.rotVel.z = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.gravity = func_150ADA68() * 0.208f + -0.708f;
                 packet.lifetime = func_150ADA20() % 101U + 60;
-                func_1513264C(&packet, 3, 0xFF, (s32)hit, 0, arg3, arg4);
+                func_1513264C(&packet, 3, 0xFF, hit, 0, arg3, arg4);
             }
         }
     }
@@ -2510,7 +2514,7 @@ typedef struct {
 } Extra080C_1513A24C;
 
 /* Blood burst (func_1515080C) for an actor of blood profile `kind`; actor is a Actor. */
-void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor, void *hit, u8 arg9, s32 argA) {
+void func_1513A24C(Vec3f *position, const s32 *table, const f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor, CollisionHit *hit, u8 arg9, s32 argA) {
     DebrisSpray config;
     Extra080C_1513A24C extra;
     s32 flag;
@@ -2640,7 +2644,7 @@ const Vec3f D_800A42A0[4] = {
 };
 
 /* Gore for profile 0/7 actors. */
-void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
+void func_1513A6E0(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
     u8 idx;
     u8 i;
     u8 mask;
@@ -2691,11 +2695,11 @@ void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
         spawn.fadeRate = 21;
         for (i = 0, mask = 1; i < 4; i++, mask <<= 1) {
             if (D_800A4278[idx] & mask) {
-                s32 ret;
+                BloodChunk *ret;
                 spawn.model = D_800A4280[i];
                 ret = func_15132A4C(&spawn, 3, 0xFF, 1, arg3, arg4);
-                if (ret != 0) {
-                    memcpy((void *)(ret + 0x170), extra, 1);
+                if (ret != NULL) {
+                    memcpy(&ret->unk170, extra, 1);
                 }
             }
         }
@@ -2707,7 +2711,7 @@ void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
         u8 mask2;
         u32 r1;
         u32 r2;
-        func_1513A5E0((Vec3f *)origin, arg3, arg4);
+        func_1513A5E0(origin, arg3, arg4);
         {
             s32 q; // matching: unused stack slot
             func_1503F404(BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
@@ -2743,12 +2747,12 @@ void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
                 func_15143134(&D_800A42A0[i], &spawn2.pos, BONE_MATRIX(actor, 12));
                 r1 = func_150ADA20();
                 r2 = func_150ADA20();
-                func_15143794(r1 & 0xFF, r2 % 35U - 84, func_150ADA68() * 6.119999886f + 3.0f, &spawn2.vel.x);
+                func_15143794(r1 & 0xFF, r2 % 35U - 84, func_150ADA68() * 6.119999886f + 3.0f, &spawn2.vel);
                 spawn2.rotVel.x = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.rotVel.z = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.gravity = func_150ADA68() * 0.2080000043f + -0.7080000043f;
                 spawn2.lifetime = func_150ADA20() % 101U + 60;
-                func_1513264C(&spawn2, 3, 0xFF, (s32)hit, 0, arg3, arg4);
+                func_1513264C(&spawn2, 3, 0xFF, hit, 0, arg3, arg4);
             }
         }
     }
@@ -2763,7 +2767,7 @@ const Vec3f D_800A42F4[2][2] = {
 };
 
 /* Gore for profile 8/9 actors (variant 1 for profile 9). */
-void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s32 arg5) {
+void func_1513ABB8(Actor *actor, Vec3f *origin, u8 variant, CollisionHit *hit, u8 arg4, s32 arg5) {
     u8 index;
     Vec3f position;
 
@@ -2771,7 +2775,7 @@ void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s3
     {
         ParticleSpawn burst;
         u8 tag[1];
-        s32 result;
+        BloodChunk *result;
         u8 i;
         u8 mask;
 
@@ -2819,8 +2823,8 @@ void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s3
             }
             burst.model = D_800A42D4[variant][i];
             result = func_15132A4C(&burst, 3, 0xFF, 1, arg4, arg5);
-            if (result != 0) {
-                memcpy(&((BloodChunk *)result)->unk170, tag, 1);
+            if (result != NULL) {
+                memcpy(&result->unk170, tag, 1);
             }
         }
     }
@@ -2830,7 +2834,7 @@ void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s3
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1513A5E0((Vec3f *)origin, arg4, arg5);
+    func_1513A5E0(origin, arg4, arg5);
     {
         f32 first[3];
         f32 second[3];
@@ -2875,12 +2879,12 @@ void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s3
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
-                              &packet.vel.x);
+                              &packet.vel);
                 packet.rotVel.x = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.rotVel.z = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.gravity = func_150ADA68() * 0.208f + -0.708f;
                 packet.lifetime = func_150ADA20() % 101U + 60;
-                func_1513264C(&packet, 3, 0xFF, (s32)hit, 0, arg4, arg5);
+                func_1513264C(&packet, 3, 0xFF, hit, 0, arg4, arg5);
             }
         }
     }
@@ -2900,12 +2904,12 @@ void func_1513B0B8(BloodChunk *chunk, s32 arg1, u8 message) {
 const u8 D_800A4324[3] = { 0x00, 0x01, 0x02 };
 const s32 D_800A4328[2] = { 0xE3, 0xE5 };
 const s32 D_800A4330[2] = { 0xE4, 0xE6 };
-const f32 D_800A4338[2][3] = {
+const Vec3f D_800A4338[2] = {
     { -15.369999f, 15.095f, 13.3182f },
     { -0.0834f, -19.5498f, 23.541f },
 };
 /* Gore for profile 16 actors. */
-void func_1513B0F8(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
+void func_1513B0F8(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
     u8 index;
     Vec3f rotation;
     ParticleSpawn spawn;
@@ -2968,7 +2972,7 @@ void func_1513B0F8(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
             void *particle;
 
             spawn.model = D_800A4328[i];
-            particle = (void *)func_15132A4C(&spawn, 3, 0xFF, 1, arg3, arg4);
+            particle = func_15132A4C(&spawn, 3, 0xFF, 1, arg3, arg4);
             if (particle != NULL) {
                 memcpy(&((BloodChunk *)particle)->unk170, &tag, 1);
             }
@@ -3013,16 +3017,16 @@ void func_1513B0F8(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
             u32 random;
 
             drop.model = D_800A4330[i];
-            func_15143134(D_800A4338[i], &drop.pos, BONE_MATRIX(actor, 12));
+            func_15143134(&D_800A4338[i], &drop.pos, BONE_MATRIX(actor, 12));
             yaw = func_150ADA20();
             pitch = func_150ADA20();
-            func_15143794((u8)yaw, (pitch % 35U) - 0x54, (func_150ADA68() * 6.12f) + 3.0f, &drop.vel.x);
+            func_15143794((u8)yaw, (pitch % 35U) - 0x54, (func_150ADA68() * 6.12f) + 3.0f, &drop.vel);
             drop.rotVel.x = (func_150ADA68() * 30.746002f) + -15.373001f;
             drop.rotVel.z = (func_150ADA68() * 30.746002f) + -15.373001f;
             drop.gravity = (func_150ADA68() * 0.208f) + -0.708f;
             random = func_150ADA20();
             drop.lifetime = (random % 101U) + 0x3C;
-            func_1513264C(&drop, 3, 0xFF, (s32)hit, 0, arg3, arg4);
+            func_1513264C(&drop, 3, 0xFF, hit, 0, arg3, arg4);
         }
     }
 }

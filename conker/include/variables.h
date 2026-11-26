@@ -297,7 +297,7 @@ extern u16 D_80085FBC[];
 extern s32 D_80086000;
 extern void (*D_80086004[])(s32);
 extern void (*D_8008600C[])(s32);
-extern void (*D_80086014[])(s32);
+extern void (*D_80086014[])(Actor *);
 extern s16 D_800860C0[];
 extern f32 D_800860CC[];
 extern u16 D_800860E4[];
@@ -321,7 +321,7 @@ extern Gfx D_80087408[];
 extern u64 D_800885B0;
 extern Actor *D_80088720;
 extern Actor *D_80088730;
-extern s32 D_80088750;
+extern struct Queue *D_80088750;
 extern Vec3f D_80088724;
 extern s32 D_80088890;
 extern s32 D_80088894;
@@ -356,7 +356,7 @@ extern void (*D_80089F2C[])(void);
 extern void (*D_80089F60[])(s32, s32, u8);
 extern f32 D_800895B0;
 extern ZDecode D_80089630[8]; // z-buffer decompression table
-extern s32 * D_80089A20[];
+extern const s32 *D_80089A20[];
 extern IdList2 D_8008A074; // effect-object kinds (game_16DC80)
 extern ActorEffectDef D_8008A0B4[];
 extern s32  D_8008A084[];
@@ -405,18 +405,19 @@ extern s32 D_80090320;
 extern s32 jtbl_80091A30[];
 
 extern s32 D_80090324[];
-extern u8 D_80090514[];
-extern u8 D_80090CD4[];
-extern u8 D_80090D70[];
-extern u8 D_80090DE8[];
-extern u8 D_80091100[];
-extern u8 D_80091238[];
+extern struct EffectTexture D_80090514;
+/* Entries of the effect texture table D_80090B60, referenced directly. */
+extern struct EffectTexture D_80090CD4;
+extern struct EffectTexture D_80090D70;
+extern struct EffectTexture D_80090DE8;
+extern struct EffectTexture D_80091100;
+extern struct EffectTexture D_80091238;
 extern s32 D_80091564[];
 extern s32 D_800917B8;
 extern HudSprite D_800917EC;
 extern HudSprite D_800917F8;
-extern u8 D_8009187C[];
-extern u8 D_800918A0[];
+extern struct EffectTexture D_8009187C;
+extern struct EffectTexture D_800918A0;
 extern s32 D_80091AF0[];
 extern s32 D_80091C04[];
 extern u16 D_80091D20[]; // per texture: compressed size
@@ -457,13 +458,13 @@ extern HitReaction D_8009A6D8[]; // knockback reactions
 extern HitReaction D_8009A9F8[]; // hit-reaction table
 
 extern s16 D_8009DCB4[];
-extern s32 D_8009DCC0;
-extern s32 D_8009DCC4;
-extern s32 D_8009DCD4;
-extern s32 D_8009DCD8;
-extern s32 D_8009DCE0;
+extern char D_8009DCC0[];
+extern char D_8009DCC4[];
+extern char D_8009DCD4[];
+extern char D_8009DCD8[];
+extern char D_8009DCE0[];
 
-extern s32 D_8009DCCC;
+extern char D_8009DCCC[];
 
 extern u8 D_8009DEB0[];
 extern u8 D_8009DEB4[];
@@ -475,8 +476,8 @@ extern f32 D_8009F6C0; // 0.01745329238474369f
 extern PipeSpot D_8009F920[3]; // the three exploding pipes
 extern Vec3f D_800A1B80;
 extern Vec3f D_800A1B8C;
-extern f32 D_800A1FB0;
-extern f32 D_800A1FBC;
+extern const Vec3f D_800A1FB0;
+extern const Vec3f D_800A1FBC;
 extern u8  D_800A2CD0[][3];
 
 extern s32 D_800A4AA0; //?
@@ -500,14 +501,14 @@ extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
 extern u8 D_800AB62C[][3]; // team colours (RGB)
 extern ModeEntry D_800AB68C[]; // multiplayer game-mode table
 extern s32 D_800AB754[];
-extern s32  D_800B0DC0;
-extern s32  D_800B0DC4;
-extern s32  D_800B0DC8;
+extern u8  *D_800B0DC0; // triangle-data arena: cursor, start, end
+extern u8  *D_800B0DC4;
+extern u8  *D_800B0DC8;
 extern s32  D_800B0DCC;
 extern s32  D_800B0DD0;
 extern s32  D_800B0DD4;
 extern u16  D_800B0DD8;
-extern s32  D_800B0DDC;
+extern u8  *D_800B0DDC;
 extern u8  *D_800B0DE0;
 extern s32  D_800B0DE4;
 extern LevelHeader *D_800B0DF0;
@@ -560,7 +561,7 @@ extern u8 D_800BE9EB;
 extern s32 level;
 
 
-extern s32  D_800BE2B0[]; // type?
+extern u16 *D_800BE2B0[]; // per camera: a row buffer of D_800BE620 u16 (HitsZBufferHoriDataPtr)
 extern OSMesg  D_800BE2D0;
 extern u8   D_800BE358[0x80]; // EEPROM/mempak transfer buffer; [0..1] is a u16 checksum
 extern s8   D_800BE3D9;
@@ -604,7 +605,7 @@ extern OSMesg      D_800BE990;
 extern u8   D_800BE9B4;
 extern u8   D_800BE9C0; // which of the two matrix buffers is being built this frame
 extern u16 *D_800BE9C4; // z-buffer (D_800BE620 x D_800BE624)
-extern s32  D_800BE9E0; // OSMesg
+extern OSMesg D_800BE9E0;
 extern s32  D_800BE9E4; // frames elapsed this update
 extern s32  D_800BE9E8;
 extern u8   D_800BE9EC;
@@ -909,7 +910,7 @@ extern f32 D_800D2410[];
 extern f32 D_800D2428[3];
 extern f32 D_800D2438[3];
 extern s32 D_800D2444;
-extern s32 D_800D2448;
+extern Gfx *D_800D2448;
 extern Mtx  *D_800D244C;
 extern u16  D_800D2454; // perspNorm for D_800D23D0
 extern u8  D_800D2456;
@@ -974,7 +975,7 @@ extern s32 D_800D3840;
 extern s32 D_800D3858;
 
 extern EffectHeader *D_800D98D0[4];
-extern s32 D_800D98E0;
+extern struct Queue *D_800D98E0;
 extern u8  D_800D987C;
 
 extern u8 D_800D98F0;
@@ -1011,8 +1012,8 @@ extern u8  D_800D9B88[];
 extern u8  D_800D9B8B;
 extern u8  D_800D9B8C;
 extern LookAt D_800D9B90[];
-extern u8  D_800D9BD0[][2][8];
-extern s32 D_800D9E10[];
+extern Ambient D_800D9BD0[][2]; // per view and framebuffer
+extern PointLightGfx *D_800D9E10[];
 extern u8  D_800D9E20;
 
 // extern u16 D_800D9E70[][3];
@@ -1042,11 +1043,11 @@ extern s32 D_800D9F5C;
 extern u8  D_800D9F60;
 
 extern u8 D_800D9F68[]; /* per-id reference count */
-extern s32 D_800DBDD8[];
-extern s32 D_800DBDE8[];
-extern s32 D_800DBDF8[];
+extern void *D_800DBDD8[]; // per map: triangle table, x/z bounds, y bounds (carved from D_800B0DC0)
+extern void *D_800DBDE8[];
+extern void *D_800DBDF8[];
 
-extern u16* D_800DBE08[];
+extern struct QuadNode *D_800DBE08[];
 extern s32 D_800DBE18[];
 extern s32 D_800DBE1C[];
 extern s32 D_800DBE20;
@@ -1079,7 +1080,7 @@ extern Mtx *D_800DBEB0; // sky projection matrices, 2 per view
 extern u16 D_800DBEE8[]; // per view: entries in D_80089240
 extern s32 gWorldObjectCount; // number of db_Object_array entries
 extern WorldObject *db_Object_array; // original name (Oct 2000 debugger); gWorldObjectCount entries
-extern s32 *D_800DBEF8; // per object: handle released with func_10004074
+extern void **D_800DBEF8; // per object: handle released with func_10004074
 extern u8 *D_800DBEFC; // per object: frames to keep the handle once hidden
 extern u8  D_800DBF00;
 extern MtxF D_800DBF08[]; // per-frame
@@ -1175,7 +1176,7 @@ extern s32 D_800DD21C;
 extern s32 D_800DD220;
 extern s32 D_800DD224;
 extern void *D_800DD228;
-extern s32 D_800DD230;
+extern SpriteParams D_800DD230;
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;
 extern u8   D_800DD2C0[16]; // per player: spawn point
@@ -1316,7 +1317,7 @@ extern StreamVoice D_800E0D80; // the streaming music player's voice
 // end of zero'd out section
 
 extern s32 *D_800E0E20; // Huffman table pointers, relocated by D_800E0E28
-extern s32 D_800E0E28;
+extern void *D_800E0E28; // the Huffman table data
 extern f32 *D_800E0E30; // pow43 table storage (0x8000 bytes)
 extern s32  D_800E9D00;
 extern u8   D_800E9D10[]; // heap arena: from here to 0x80400000

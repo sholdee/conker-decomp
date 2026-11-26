@@ -21,7 +21,7 @@ void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
     f32 radiusSquared;
     u8 fresh;
 
-    func_151D5D60(beam->buffers, cam, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(beam->buffers, cam, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
@@ -404,7 +404,7 @@ void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
         randC = func_150ADA20();
         sum = (randB & 1) + (randA & 1);
         func_1513D668(&desc, 0, 18, 29, 0, sum, (u8)randC,
-                      100.0f, 100.0f, 0, (s32)&ground->tri, 0, 0, arg2, arg3);
+                      100.0f, 100.0f, NULL, &ground->tri, 0, 0, arg2, arg3);
     }
 }
 

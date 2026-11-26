@@ -70,7 +70,7 @@ void func_1518BBF4(Actor *actor) {
         for (i = 0; i < 2; i++) {
             D_800DD190++;
             for (emitter = (TrailEmitter *)D_800DCE50[i][OBJ_TYPE_TRAIL_EMITTER]; emitter != NULL;
-                 emitter = (TrailEmitter *)D_800DD198[D_800DD190]) {
+                 emitter = D_800DD198[D_800DD190]) {
                 D_800DD198[D_800DD190] = emitter->link.next;
                 emitter->params.owner = actor;
                 // the owner test always passes: every emitter is destroyed
@@ -165,7 +165,7 @@ void func_1518BD60(TrailEmitter *emitter) {
                 motion.flags = emitter->params.flags | 8;
                 motion.shade = 0xFF - ((u8)((u32)emitter->params.owner->floorMaterial >> 5) << 6);
                 motion.alpha = 0xFF;
-                trail = func_15147DA0(&spawn, &motion, spawn.itemCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
+                trail = func_15147DA0((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, &motion, spawn.itemCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
                                       0, &render, 0, emitter->link.owner, emitter->link.kind);
                 if (trail != NULL) {
                     link = &((EmitterTrailParams *)trail->params)->link;
@@ -331,7 +331,7 @@ s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
 }
 
 /* Same as func_1518C57C, plus a func_151D8E20() effect (arg5) at the hit point. */
-s32 func_1518C69C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5) {
+s32 func_1518C69C(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY, CollisionTri *surface) {
     QuadFxData fx;
     TrailParams *params;
     MotionTrailPoint *points;
@@ -361,7 +361,7 @@ s32 func_1518C69C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s3
         pos[1] = hitY;
         pos[2] = points[trail->head.start].pos.z;
         kind = func_151D8E20();
-        func_151DBCBC(kind, func_150ADA68() * 40.0f + 100.0f, 0xFF, arg5, pos, trail->head.header.owner, trail->head.header.kind);
+        func_151DBCBC(kind, func_150ADA68() * 40.0f + 100.0f, 0xFF, surface, pos, trail->head.header.owner, trail->head.header.kind);
     }
     return 1;
 }

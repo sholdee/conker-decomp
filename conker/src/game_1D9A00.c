@@ -4,21 +4,21 @@
 
 // func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
 // game_1DC720.c were compiled with a different view of it.
-SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
-/* Calls func_151DBCBC at the current sample's (x, z) with height y, then sets the payload's
+/* Calls func_151DBCBC at the current sample's (x, z) at the given height, then sets the payload's
  * unk20 to 4. */
-s32 func_151AC550(SampleTrail *state, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+s32 func_151AC550(SampleTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     EffectPayload *payload = state->payload;
     EffectSample *samples = state->samples;
-    f32 position[3];
+    Vec3f position;
 
-    position[0] = samples[state->head.start].x;
-    position[1] = y;
-    position[2] = samples[state->head.start].z;
-    func_151DBCBC(func_151D8E20(), payload->unk0 * 7.0f, payload->unk1B, arg5, position,
+    position.x = samples[state->head.start].x;
+    position.y = height;
+    position.z = samples[state->head.start].z;
+    func_151DBCBC(func_151D8E20(), payload->unk0 * 7.0f, payload->unk1B, surface, &position,
                   state->head.header.owner, state->head.header.kind);
     payload->unk20 = 4;
     return 1;
@@ -56,20 +56,20 @@ s32 func_151AC61C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     EmitterOwner *emitter; // matching: the owner copy, scale and entry each reserve the frame slots IDO used
     f32 scale;
     s8 *entry;
-    f32 position[3];
-    f32 velocity[3];
+    Vec3f position;
+    Vec3f velocity;
     EmitterConfig *config;
 
     emitter = owner;
     scale = 1.0f;
     entry = &D_800A9023[kind * 5];
     config = &D_800A9180[*entry];
-    position[0] = x;
-    position[1] = y;
-    position[2] = z;
+    position.x = x;
+    position.y = y;
+    position.z = z;
     func_15143794((s16)yaw, (s16)((func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitch),
-                  func_150ADA68() * config->speedRange + config->speed, velocity);
-    func_151D9014(position, velocity, emitter->unk8,
+                  func_150ADA68() * config->speedRange + config->speed, &velocity);
+    func_151D9014(&position, &velocity, emitter->unk8,
                   func_150ADA68() * config->unk20Range + config->unk20,
                   (func_150ADA20() % (u32)(config->unk10Range + 1)) + config->unk10,
                   (func_150ADA20() % (u32)(config->unk14Range + 1)) + config->unk14,
@@ -93,7 +93,7 @@ Vtx *func_151AC810(QuadParticle *particle, s16 view) {
     f32 offsetX;
     u8 fresh;
 
-    func_151D5D60(particle->buffers, view, 0x40, (void **)&vtx, &fresh);
+    func_151D5D60(particle->buffers, view, 0x40, &vtx, &fresh);
     result = vtx;
     if (vtx != NULL) {
         if (fresh) {

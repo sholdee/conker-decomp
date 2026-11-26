@@ -66,7 +66,7 @@ void func_150D8B88(Actor *actor) {
         spawn.flags = 54;
         spawn.kind = 2;
         spawn.unk14 = 5;
-        spawn.unk18 = 0;
+        spawn.material = 0;
 
         trail = func_15147A80(&spawn, sizeof(PissTrailData), sizeof(PissTrailPoint), 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
         if (trail != NULL) {
@@ -253,7 +253,7 @@ s32 func_150D942C(PissTrail *trail) {
     f32 pad; // matching: unused stack slot
     f32 maxLen;
     f32 excess;
-    f32 delta[3];
+    Vec3f delta;
     f32 len;
     f32 invLen;
     f32 dir[3];
@@ -298,10 +298,10 @@ s32 func_150D942C(PissTrail *trail) {
                 i = trail->head.tmpl.itemCount - 1;
             }
             cur = &points[i];
-            delta[0] = cur->pos.x - prev->pos.x;
-            delta[1] = cur->pos.y - prev->pos.y;
-            delta[2] = cur->pos.z - prev->pos.z;
-            len = func_15143E64(delta);
+            delta.x = cur->pos.x - prev->pos.x;
+            delta.y = cur->pos.y - prev->pos.y;
+            delta.z = cur->pos.z - prev->pos.z;
+            len = func_15143E64(&delta);
             totalLen += len;
             cur->len = len;
             if (maxLen < totalLen) {
@@ -309,13 +309,13 @@ s32 func_150D942C(PissTrail *trail) {
                 // matching: integer 0 here; 0.0f hoists the zero constant and grows the frame
                 if (cur->len != 0) {
                     invLen = 1.0f / cur->len;
-                    dir[0] = delta[0] * invLen;
-                    dir[1] = delta[1] * invLen;
+                    dir[0] = delta.x * invLen;
+                    dir[1] = delta.y * invLen;
                     excess = (totalLen - maxLen) * invLen;
-                    dir[2] = delta[2] * invLen;
-                    cur->pos.x -= delta[0] * excess;
-                    cur->pos.y -= delta[1] * excess;
-                    cur->pos.z -= delta[2] * excess;
+                    dir[2] = delta.z * invLen;
+                    cur->pos.x -= delta.x * excess;
+                    cur->pos.y -= delta.y * excess;
+                    cur->pos.z -= delta.z * excess;
                     cur->len *= 1.0f - excess;
                 }
                 totalLen = maxLen;
@@ -331,9 +331,9 @@ s32 func_150D942C(PissTrail *trail) {
             if (cur->len != 0.0f) {
                 if (invLen == -9999.0f) {
                     invLen = 1.0f / cur->len;
-                    dir[0] = delta[0] * invLen;
-                    dir[1] = delta[1] * invLen;
-                    dir[2] = delta[2] * invLen;
+                    dir[0] = delta.x * invLen;
+                    dir[1] = delta.y * invLen;
+                    dir[2] = delta.z * invLen;
                 }
                 func_15081690(owner, prev->pos.x, prev->pos.y, prev->pos.z, dir[0], dir[1], dir[2], &hit, cur->len, 0, 0, 1, -1, 0, 0);
                 if (hit.hitType != 0) {
@@ -473,13 +473,13 @@ Gfx *func_150D9C7C(PissTrail *trail, Gfx *gfx, s16 view) {
     }
     data = trail->data;
     points = trail->points;
-    func_151D5D60(trail->unk84, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
+    func_151D5D60(trail->unk84, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
     camera = func_15144B34(view);
     flag = 1;
-    gfx = func_15142E24(gfx, D_80091238, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
+    gfx = func_15142E24(gfx, &D_80091238, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x220005, 0x1D0600);
     gfx = func_1513F4E4(gfx, 0x4E, &flag);
     gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
@@ -674,12 +674,12 @@ void func_150DA5EC(Actor *actor, f32 speedScale) {
     func_15147D64(&msg, 0x44);
 }
 
-s32 func_150DA628(TrailSpark *particle, s32 arg1) {
+s32 func_150DA628(SpriteParticle *particle, s32 arg1) {
     WobbleData *spark;
 
-    spark = &particle->spark;
-    func_15131828(particle, spark->amplitude, spark->phase, spark->phaseStep);
-    func_15131958(particle->unk58, spark->drag, spark);
+    spark = &particle->data.wobble;
+    func_15131828(&particle->head, spark->amplitude, spark->phase, spark->phaseStep);
+    func_15131958(&particle->head.desc.vel, spark->drag, spark);
     return 1;
 }
 
@@ -696,7 +696,7 @@ void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir) {
             if (data->sparkAccum > 1.0f) {
                 ParticleDesc spawn;
                 WobbleData sub;
-                TrailSpark *spark;
+                SpriteParticle *spark;
 
                 sub.drag = 0.9936270118f;
                 spawn.texture = 0x6C;
@@ -744,7 +744,7 @@ void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir) {
                     spawn.width = spawn.height = func_150ADA68() * 116.0f + 131.0f;
                     spark = func_15130280(&spawn, 1, 0, 0x10, trail->head.header.owner, trail->head.header.kind);
                     if (spark != NULL) {
-                        memcpy(&spark->spark, &sub, sizeof(sub));
+                        memcpy(&spark->data.wobble, &sub, sizeof(sub));
                     }
                     data->sparkAccum -= 1.0f;
                 } while (data->sparkAccum > 1.0f);

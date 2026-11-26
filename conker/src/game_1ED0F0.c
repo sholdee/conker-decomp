@@ -4,7 +4,7 @@
 
 // func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
 // compiled with a different view of it.
-void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
 
 /* Fills in the impact particle parameters; fewer particles on busy frames. */
@@ -108,7 +108,7 @@ void func_151C0098(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwner, s32 
     func_151C05F0(pos, fxOwner, fxList);
 
     // matching: taking the address keeps withParticles in its stack slot (reloaded at each use)
-    if (*(u8 *)&withParticles) {
+    if (*&withParticles) {
         fx.angles.yawBase = 0;
         fx.angles.yawRange = 255;
         fx.angles.pitchBase = -64;
@@ -252,7 +252,8 @@ void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactTy
     Vec3f *src;
     Actor *who;
     f32 angle;
-    u8 scratch[0x14];
+    u8 pad[8]; // matching: stack space
+    Vec3f scratch; // func_15145740's unused dir
     BulletState state;
     ParticleSpawn desc;
     void *obj; // matching: one local (one stack slot) holds the camera, then the new bullet
@@ -313,7 +314,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         aimDir.y = who->mv->aimDir.y;
         aimDir.z = who->mv->aimDir.z;
     } else {
-        func_15145740(shooter, &dir, scratch, 0, 0.0f);
+        func_15145740(shooter, &dir, &scratch, 0, 0.0f);
         useAim = FALSE;
         dir.x *= 0.001000000047f;
         dir.y *= 0.001000000047f;
@@ -419,20 +420,20 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 const Vec3f a = { 3.0f, 125.0f, 35.0f };
                 const Vec3f b = { 6.0f, -50.0f, 35.0f };
                 const Vec3f c = { 3.0f, 200.0f, 35.0f };
-                f32 scale[2];
+                ParticleSize scale;
                 Vec3f outA;
                 Vec3f outB;
-                Vec3f *in[2];
+                const Vec3f *in[2];
                 Vec3f *out[2];
 
-                scale[0] = func_150ADA68() * 10.0f + 25.0f;
-                scale[1] = func_150ADA68() * 1.009000063f + 2.013000011f;
+                scale.width = func_150ADA68() * 10.0f + 25.0f;
+                scale.height = func_150ADA68() * 1.009000063f + 2.013000011f;
                 in[0] = &a;
                 in[1] = &b;
                 out[0] = &outA;
                 out[1] = &outB;
                 func_15145EA4(in, out, &shooter->ob_matrix_ptr[9], 2);
-                func_15102B38(shooter, 9, &a, &c, scale, func_150ADA20() % 3 + 8,
+                func_15102B38(shooter, 9, &a, &c, &scale, func_150ADA20() % 3 + 8,
                               func_150ADA20() % 56 + 200, func_150ADA68() * 204.0f + 601.0f,
                               &outA, 0xFF, 0, -1, fxOwner, fxList);
                 func_15103254(func_150ADA20() % 3 + 8, func_150ADA20() % 56 + 200,
@@ -557,12 +558,12 @@ void func_151C1570(Bullet *bullet) {
 
 void func_151C15FC(Bullet *bullet) {
     func_151C1570(bullet);
-    func_15132570(bullet);
+    func_15132570(&bullet->head);
 }
 
 void func_151C1628(Bullet *bullet) {
     func_151C1570(bullet);
-    func_1513259C(bullet);
+    func_1513259C(&bullet->head);
 }
 
 /* Impact sound/decal for a bullet hit, chosen by impactType. */

@@ -28,9 +28,6 @@
  *   game_EB020.c
  */
 
-/* File-local views of AnimInstance (structs.h), defined in game_58F80.c and game_83300.c. */
-struct ObjAnim;
-struct AnimPlaybackState;
 
 // 3-byte entries of D_80099140
 typedef struct {
@@ -76,6 +73,8 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
 void func_1502D54C(s32 index, s32 *colour);
 /* (Actor *obj, s32 *colour, s32 player); declared without a prototype: game_5D2C0.c passes 4 arguments */
 void func_1502D630();
+/* anim: an AnimInstance seen as struct ObjAnim (game_58F80.c), which indexes its current/previous pairs */
+struct ObjAnim;
 void func_1502D824(struct ObjAnim *anim, Actor *obj, u8 *buf);
 s32 func_1502DB20(s32 id);
 void func_1502DB84(MtxF mtx, s32 index);
@@ -225,8 +224,8 @@ u8 func_1505DADC(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone)
 s8 func_1505DDA8(Actor *actor, s32 unused, u16 cone, f32 time);
 f32 func_1505DF10(Actor *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ, f32 *outDy, s32 unused);
 void func_1505DFDC(Actor *actor);
-void func_1505E060(struct AnimPlaybackState *state);
-void func_1505E0C4(Actor *actor, u16 *animEntry, struct AnimPlaybackState *state, s32 arg3, s32 restart, s32 anim,
+void func_1505E060(AnimInstance *state);
+void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, s32 restart, s32 anim,
                    s32 bank, f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000);
 void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 arg5, s32 flag8000);
 u32 func_1505E7CC(s32 kind, Actor *actor);

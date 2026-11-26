@@ -93,7 +93,8 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
         return gfx;
     }
     if (sprite->info.texture != 0xFF) {
-        gfx = func_15142E24(gfx, (s32)&D_80090B60[sprite->info.texture], 0, (sprite->info.flags & 0x200) ? 0 : 2,
+        // matching: the pointer goes through an integer (IDO keeps the converted value in a temporary)
+        gfx = func_15142E24(gfx, (EffectTexture *)(s32)&D_80090B60[sprite->info.texture], 0, (sprite->info.flags & 0x200) ? 0 : 2,
                             0, 0, sprite->info.texture, 0, 0, &update, (sprite->info.flags & 0x400) ? 0x3E : 3);
     }
     gfx = func_15142B7C(gfx, sprite->info.unk28, sprite->info.unk2C);
@@ -246,5 +247,5 @@ void func_1515572C(s32 arg0, u8 arg1) {
     IdList2 pair;
 
     pair = D_800A6038;
-    func_15169260(&pair, 2, arg0, arg1);
+    func_15169260(pair.ids, 2, arg0, arg1);
 }

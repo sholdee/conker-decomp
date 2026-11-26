@@ -20,7 +20,7 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
     init.ground.source = 0;
     init.ground.surface = 0;
 
-    emitter = (Emitter *)func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (extraSize + sizeof(EmitterState)), arg3, arg4);
+    emitter = func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (extraSize + sizeof(EmitterState)), arg3, arg4);
     if (emitter != NULL) {
         state = &emitter->state;
         memcpy(state, &init, sizeof(EmitterState));
@@ -258,7 +258,7 @@ void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
 
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
-    func_1513C650(&spawn, 1, 0, (s32)&emitter->state.ground.tri, pos->x, pos->y, pos->z,
+    func_1513C650(&spawn, 1, 0, &emitter->state.ground.tri, pos->x, pos->y, pos->z,
                   size, size, rand1 & 0xFF,
                   (rand2 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
                   emitter->base.header.owner, emitter->base.header.kind);
@@ -357,7 +357,7 @@ void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
 
     if (options & 4) {
         LightEffectHeader spawn;
-        s32 spawnPos[3];
+        Vec3i spawnPos;
 
         spawn.flags = ((lifetime == -1) ? 0 : 1) | 2;
         spawn.update = 2;
@@ -365,16 +365,16 @@ void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
         spawn.lightType = D_8008F9AC[preset].unkB;
 
         if (pos != NULL) {
-            spawnPos[0] = pos->x;
-            spawnPos[1] = pos->y;
-            spawnPos[2] = pos->z;
+            spawnPos.x = pos->x;
+            spawnPos.y = pos->y;
+            spawnPos.z = pos->z;
         } else {
-            spawnPos[0] = obj->x;
-            spawnPos[1] = obj->y;
-            spawnPos[2] = obj->z;
+            spawnPos.x = obj->x;
+            spawnPos.y = obj->y;
+            spawnPos.z = obj->z;
         }
 
-        func_1516284C(&spawn, spawnPos, D_8008F9AC[preset].unk8, D_8008F9AC[preset].unk9,
+        func_1516284C(&spawn, &spawnPos, D_8008F9AC[preset].unk8, D_8008F9AC[preset].unk9,
                       D_8008F9AC[preset].unkA, 0xFF, 0, 0, D_8008F9AC[preset].unkC,
                       0xFF, 1);
     }
@@ -427,7 +427,8 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     }
 }
 
-extern void (*D_8008FA60[])(Vec3f *, CollisionHit *, s32, u8, s32);
+/* The spawn functions; `data` is passed through from func_151A9834 (func_151DBBD4 reads a u8 kind there). */
+extern void (*D_8008FA60[])(Vec3f *, CollisionHit *, void *, u8, s32);
 
 /*
  * Calls spawn function D_8008FA60[spawnFunc] at `count` random points within radius of center
@@ -435,7 +436,7 @@ extern void (*D_8008FA60[])(Vec3f *, CollisionHit *, s32, u8, s32);
  * NULL uses a local one.
  */
 void func_151A9834(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit,
-                   s32 count, u8 spawnFunc, s32 arg6, u8 arg7, s32 arg8) {
+                   s32 count, u8 spawnFunc, void *arg6, u8 arg7, s32 arg8) {
     CollisionHit localHit;
     Vec3f probe;
     Vec3f spawnPos;

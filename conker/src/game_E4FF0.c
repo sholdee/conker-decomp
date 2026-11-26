@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_8009FD30[3];
-extern f32 D_8009FD3C[3];
-extern f32 D_8009FD48[3];
+extern Vec3f D_8009FD30;
+extern Vec3f D_8009FD3C;
+extern Vec3f D_8009FD48;
 
 
 /*
@@ -53,21 +53,21 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
         velX = obj->speed * dirX;
         velZ = obj->speed * dirZ;
         {
-            f32 bottom[3];
-            f32 side[3];
+            Vec3f bottom;
+            Vec3f side;
 
             if (obj->ob_matrix_ptr != NULL) {
-                void *mtx;
+                MtxF *mtx;
                 f32 dx;
                 f32 dz;
 
-                mtx = (u8 *)obj->ob_matrix_ptr + 0x80; /* bone 2 */
-                func_15143134(D_8009FD30, &center.x, mtx);
-                func_15143134(D_8009FD3C, bottom, mtx);
-                func_15143134(D_8009FD48, side, mtx);
-                height = fabsf(center.y - bottom[1]);
-                dx = side[0] - bottom[0];
-                dz = side[2] - bottom[2];
+                mtx = &obj->ob_matrix_ptr[2];
+                func_15143134(&D_8009FD30, &center, mtx);
+                func_15143134(&D_8009FD3C, &bottom, mtx);
+                func_15143134(&D_8009FD48, &side, mtx);
+                height = fabsf(center.y - bottom.y);
+                dx = side.x - bottom.x;
+                dz = side.z - bottom.z;
                 radius = sqrtf(dx * dx + dz * dz);
             } else {
                 func_1515C244(obj, &center, &radius, &height);
@@ -220,30 +220,30 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
  */
 void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4, s32 arg5) {
     s32 count;
-    f32 pos[3];
-    f32 rot[3];
-    f32 vel[3];
-    f32 accel[3];
+    Vec3f pos;
+    Vec3f rot;
+    Vec3f vel;
+    Vec3f accel;
     s16 yaw;
     s16 pitch;
 
     for (count = (func_150ADA20() % 26U) + 35; count > 0; count--) {
         yaw = func_150ADA20() & 0xFF;
         pitch = (func_150ADA20() % 61U) - 63;
-        func_15143794(yaw, pitch, *radius, pos);
-        pos[1] *= *yScale;
-        pos[0] += center->x;
-        pos[1] += center->y;
-        pos[2] += center->z;
-        rot[0] = func_150ADA68() * 360.0f;
-        rot[1] = func_150ADA68() * 360.0f;
-        rot[2] = func_150ADA68() * 360.0f;
-        func_15143794(yaw, pitch, ((func_150ADA68() * 1221.0f) + 1806.0f) * 0.01f, vel);
+        func_15143794(yaw, pitch, *radius, &pos);
+        pos.y *= *yScale;
+        pos.x += center->x;
+        pos.y += center->y;
+        pos.z += center->z;
+        rot.x = func_150ADA68() * 360.0f;
+        rot.y = func_150ADA68() * 360.0f;
+        rot.z = func_150ADA68() * 360.0f;
+        func_15143794(yaw, pitch, ((func_150ADA68() * 1221.0f) + 1806.0f) * 0.01f, &vel);
         // matching: random ranges are written `rand * range + min`; `- 1570.0f` would emit sub.s
-        accel[0] = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.01f;
-        accel[1] = 0.0f;
-        accel[2] = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.01f;
-        func_1518A3C0(pos, rot, ((func_150ADA68() * 104.0f) + 78.0f) * 0.001f, vel, accel,
+        accel.x = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.01f;
+        accel.y = 0.0f;
+        accel.z = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.01f;
+        func_1518A3C0(&pos, &rot, ((func_150ADA68() * 104.0f) + 78.0f) * 0.001f, &vel, &accel,
                       ((func_150ADA68() * 633.0f) + -1064.0f) * 0.001f, 0.9425339699f, 1,
                       (func_150ADA20() % 51U) + 75, 0, 0, 0xFF, 1);
     }

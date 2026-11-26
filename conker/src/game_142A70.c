@@ -168,9 +168,9 @@ void func_1511575C(WorldObject *obj) {
             } else if (soundId && handle == 0) {
                 handle = func_10010E78(handle, soundId, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000) & 0xFFFF; // matching: masks the u16 again
             }
-            obj->x = homeX + (f32)(targetX - homeX) * (progress * (1.0f / 255.0f));
-            obj->y = homeY + (f32)(targetY - homeY) * (progress * (1.0f / 255.0f));
-            obj->z = homeZ + (f32)(targetZ - homeZ) * (progress * (1.0f / 255.0f));
+            obj->x = homeX + (targetX - homeX) * (progress * (1.0f / 255.0f));
+            obj->y = homeY + (targetY - homeY) * (progress * (1.0f / 255.0f));
+            obj->z = homeZ + (targetZ - homeZ) * (progress * (1.0f / 255.0f));
         }
     }
     if (state > 0) {
@@ -192,9 +192,9 @@ void func_1511575C(WorldObject *obj) {
                 func_10010F88(0x83, 0x5000, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000);
             }
         }
-        obj->x = homeX + (f32)(targetX - homeX) * (progress * (1.0f / 255.0f));
-        obj->y = homeY + (f32)(targetY - homeY) * (progress * (1.0f / 255.0f));
-        obj->z = homeZ + (f32)(targetZ - homeZ) * (progress * (1.0f / 255.0f));
+        obj->x = homeX + (targetX - homeX) * (progress * (1.0f / 255.0f));
+        obj->y = homeY + (targetY - homeY) * (progress * (1.0f / 255.0f));
+        obj->z = homeZ + (targetZ - homeZ) * (progress * (1.0f / 255.0f));
     }
     if (state < 0) {
         state++;
@@ -217,8 +217,8 @@ void func_15115E0C(WorldObject *obj, Actor *player) {
 
     sinYaw = func_150AD780(obj->u * 0.01745329238f);
     cosYaw = func_150AD78C(obj->u * 0.01745329238f);
-    dx = player->xpos - (f32)obj->x;
-    dz = player->zpos - (f32)obj->z;
+    dx = player->xpos - obj->x;
+    dz = player->zpos - obj->z;
     if ((obj->object_status & 4) == 4) {
         WORK(obj)->seesaw.weightX += (cosYaw * dx + sinYaw * dz);
         WORK(obj)->seesaw.weightZ -= (cosYaw * dz + sinYaw * dx);
@@ -255,7 +255,7 @@ void func_15115F68(WorldObject *obj) {
     if (divisor) {
         obj->t += (WORK(obj)->seesaw.weightX / divisor) + bias;
     } else {
-        obj->t += (s32)(bias * D_800BE9E4);
+        obj->t += (bias * D_800BE9E4);
     }
     if (maxTilt < obj->t) {
         obj->t = maxTilt;

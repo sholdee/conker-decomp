@@ -424,14 +424,14 @@ void func_1512D2F8(Camera *camera);
 void func_1512D368(Camera *camera);
 
 /* game/done/game_15A830.c */
-void func_1512D380(s32 arg0);
+void func_1512D380(Camera *camera);
 
 /* game_15A840.c */
 void func_1512D390(Camera *camera);
 
 /* game_15AA10.c */
 void func_1512D560(Camera *camera, s32 type, void *arg);
-u8 *func_1512D604(); /* (Camera *camera): the definition has a second, scratch parameter */
+CamMsg *func_1512D604(); /* (Camera *camera): the definition has a second, scratch parameter */
 void func_1512D66C(Camera *camera);
 s32 func_1512D6B0(Camera *camera);
 

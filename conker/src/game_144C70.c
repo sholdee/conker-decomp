@@ -405,7 +405,7 @@ void func_15117F3C(WorldObject *prop) {
                 continue;
             }
             if (obj->ypos + 40.0f < anchor[1]) {
-                dy = (obj->ypos + (f32)obj->bodyHeight) - anchor[1];
+                dy = (obj->ypos + obj->bodyHeight) - anchor[1];
                 dz = obj->zpos - anchor[2];
                 dx = obj->xpos - anchor[0];
                 distSq = dz * dz + (dx * dx + dy * dy);
@@ -672,11 +672,11 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
         }
         index = (prop->moveData.word >> 24) & 0xFF;
         if (level == 2) {
-            func_1000E75C(255.0f - fabsf(((angle - (f32)openAngle) * 255.0f) / (f32)openAngle));
+            func_1000E75C(255.0f - fabsf(((angle - openAngle) * 255.0f) / openAngle));
             return;
         }
         if (index != 0) {
-            scale = 1.0f - fabsf((fabsf(angle) - (openAngle < 0 ? -openAngle : openAngle)) / (f32)openAngle);
+            scale = 1.0f - fabsf((fabsf(angle) - (openAngle < 0 ? -openAngle : openAngle)) / openAngle);
             func_1518804C(index - 1, scale);
             func_15173C60(scale * 255.0f, index - 1);
             if (level == 1 && index - 1 == 0) {
@@ -776,7 +776,7 @@ void func_15118F24(WorldObject *prop) {
         prop->v = angle;
         index = (prop->moveData.word >> 24) & 0xFF;
         if (index != 0 && openAngle != 0) {
-            scale = 1.0f - fabsf((angle - (f32)openAngle) / (f32)openAngle);
+            scale = 1.0f - fabsf((angle - openAngle) / openAngle);
             func_1518804C(index - 1, scale);
             func_15173C60(scale * 255.0f, index - 1);
         }
@@ -939,7 +939,7 @@ void func_151196D4(WorldObject *prop) {
         }
         if (sumX != 0 || sumZ != 0) {
             vtx = vertices;
-            angle = (u8)(s32)(func_150484A0((f32)sumX, (f32)sumZ) * 40.74366379f); /* radians to 1/256 turns */
+            angle = (u8)(s32)(func_150484A0(sumX, sumZ) * 40.74366379f); /* radians to 1/256 turns */
             if (group < angle) {
                 back = -angle;
                 sinA = func_15048A40(back);
@@ -999,7 +999,7 @@ void func_15119938(WorldObject *prop) {
         func_151196D4(prop);
     }
     if (WORK(prop)->sway.timer >= 0x400) {
-        WORK(prop)->sway.phase += ((f32)(WORK(prop)->sway.timer - 0x400) - WORK(prop)->sway.phase) * 0.1000000015f * D_800BE9A4;
+        WORK(prop)->sway.phase += ((WORK(prop)->sway.timer - 0x400) - WORK(prop)->sway.phase) * 0.1000000015f * D_800BE9A4;
         if (WORK(prop)->sway.timer != 0x420) {
             WORK(prop)->sway.timer--;
             if (WORK(prop)->sway.timer == 0x400) {

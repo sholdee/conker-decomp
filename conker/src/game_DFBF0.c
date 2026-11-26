@@ -13,7 +13,8 @@ extern PipeIds D_8009F95C;
 void func_150B2740(u8 pipe, u8 arg1) {
     DebrisEmitter argsA;
     s16 i;
-    StreakBurst4C argsB;
+    s32 pad; // matching: stack space (an unused local)
+    StreakBurst argsB;
     SimplePuffSpray argsC;
     f32 yawSin; // matching: also holds the debris size; a separate local mismatches
     f32 yawCos;
@@ -347,25 +348,25 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
 /* Floor-hit callback for a pipe chunk: bounce it, or stop it once it lands slowly enough. */
 s32 func_150B36AC(PipeChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
-    chunk->unk3C = chunk->unk10 + arg4;
-    if (chunk->minBounceVelY < chunk->vel.y) {
-        chunk->flags &= ~0x7;
-        chunk->flags &= ~0x8;
-        chunk->flags &= ~0x40;
-        chunk->flags &= ~0x20;
-        chunk->vel.x = 0.0f;
-        chunk->vel.y = 0.0f;
-        chunk->vel.z = 0.0f;
-        if (chunk->lifetime > 32) {
-            chunk->lifetime = 32;
+    chunk->head.pos.y = chunk->head.radius + arg4;
+    if (chunk->minBounceVelY < chunk->head.vel.y) {
+        chunk->head.flags &= ~0x7;
+        chunk->head.flags &= ~0x8;
+        chunk->head.flags &= ~0x40;
+        chunk->head.flags &= ~0x20;
+        chunk->head.vel.x = 0.0f;
+        chunk->head.vel.y = 0.0f;
+        chunk->head.vel.z = 0.0f;
+        if (chunk->head.lifetime > 32) {
+            chunk->head.lifetime = 32;
         }
     } else {
-        chunk->vel.x *= chunk->restitution;
-        chunk->vel.y = -chunk->vel.y * chunk->restitution;
-        chunk->vel.z *= chunk->restitution;
-        chunk->unk50.x *= chunk->restitution;
-        chunk->unk50.y *= chunk->restitution;
-        chunk->unk50.z *= chunk->restitution;
+        chunk->head.vel.x *= chunk->head.elasticity;
+        chunk->head.vel.y = -chunk->head.vel.y * chunk->head.elasticity;
+        chunk->head.vel.z *= chunk->head.elasticity;
+        chunk->head.rotVel.x *= chunk->head.elasticity;
+        chunk->head.rotVel.y *= chunk->head.elasticity;
+        chunk->head.rotVel.z *= chunk->head.elasticity;
     }
     return 1;
 }
@@ -412,8 +413,8 @@ typedef struct PipeKinds {
 
 extern PipeKinds D_80088700;
 
-/* Spawns a random particle and a trail at the actor's current point, at height `y`. */
-s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+/* Spawns a random particle and a trail at the actor's current point, at the given height. */
+s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     PipeExplodeState *state;
     PipeExplodeParticle particle;
     f32 size;
@@ -448,9 +449,9 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
         rand1 = func_150ADA20();
         rand2 = func_150ADA20();
 
-        func_1513C73C(&particle, 1, 0, arg5,
+        func_1513C73C(&particle, 1, 0, surface,
                       particle.points[actor->head.start].x,
-                      y,
+                      height,
                       particle.points[actor->head.start].z,
                       size, size,
                       rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0,
@@ -473,7 +474,7 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
     motion.flags = 8;
     motion.alpha = state->alpha;
     pos.pos.x = particle.points[actor->head.start].x;
-    pos.pos.y = y;
+    pos.pos.y = height;
     pos.pos.z = particle.points[actor->head.start].z;
     pos.itemCount = actor->head.tmpl.itemCount;
     pos.life = 60;

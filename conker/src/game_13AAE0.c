@@ -4,14 +4,14 @@
 
 
 
-/* Releases every id in the list, then frees the list. */
-void func_1510D630(IdList *list) {
-    s16 *id = list->ids;
+/* Releases every id in the count-prefixed list (list[0] ids follow), then frees the list. */
+void func_1510D630(s16 *list) {
+    s16 *id = &list[1];
     s16 *end;
-    s16 count = list->count;
+    s16 count = list[0];
 
     if (count > 0) {
-        end = count + list->ids; // matching: operand order sets IDO's addu register order
+        end = count + &list[1]; // matching: operand order sets IDO's addu register order
         do {
             func_1510D694(*id);
             id++;

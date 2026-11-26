@@ -466,11 +466,11 @@ void func_15123A54(Camera *camera) {
             if ((camera->DoingAim != 0) || (camera->Snap != 0) || (camera->CharPtr->unk102 != 0) ||
                 (!(camera->AvailableModes & 0x1000) && (camera->DoingRail == 0) && !(camera->AvailableModes & 0x40000) && !(camera->SpecialFlags & 0x80))) {
                 Vec3f dir;
-                s16 tri[10];
+                CollisionTri tri;
                 f32 hit[3];
                 f32 dist;
                 f32 pad1; // matching: unused stack slots (pad1, pad2) in the frame
-                s16 tri2[10];
+                CollisionTri tri2;
                 f32 backZ;
                 f32 pad2;
                 f32 backX;
@@ -488,26 +488,26 @@ void func_15123A54(Camera *camera) {
                 dir.y = 0.0f;
                 dir.z = cosf(camera->CameraAngleRad);
                 if ((func_150AC9C0(camera->focus.x, camera->focus.y + 140.0f, camera->focus.z, dir.x, dir.y, dir.z, 0,
-                                   tri, &hit[0], &hit[1], &hit[2], &dist, 0, 0, camera->IdealTripodMagnitude + 30.0f) != 0) &&
+                                   &tri, &hit[0], &hit[1], &hit[2], &dist, 0, 0, camera->IdealTripodMagnitude + 30.0f) != 0) &&
                     (dist < camera->IdealTripodMagnitude)) {
                     backX = sinf(camera->CameraAngleRad + 3.1415927410125732f) * camera->IdealTripodMagnitude;
                     backZ = cosf(camera->CameraAngleRad + 3.1415927410125732f) * camera->IdealTripodMagnitude;
-                    v0.x = tri[0];
-                    v0.y = tri[1];
-                    v0.z = tri[2];
-                    v1.x = tri[3];
-                    v1.y = tri[4];
-                    v1.z = tri[5];
-                    v2.x = tri[6];
-                    v2.y = tri[7];
-                    v2.z = tri[8];
+                    v0.x = tri.v[0].x;
+                    v0.y = tri.v[0].y;
+                    v0.z = tri.v[0].z;
+                    v1.x = tri.v[1].x;
+                    v1.y = tri.v[1].y;
+                    v1.z = tri.v[1].z;
+                    v2.x = tri.v[2].x;
+                    v2.y = tri.v[2].y;
+                    v2.z = tri.v[2].z;
                     func_15048F90(&v0, &v1, &edge1);
                     func_15048F90(&v0, &v2, &edge2);
                     func_150AD8B0(&edge2.x, &edge1.x, &normal.x);
                     func_1504917C(&normal, &normal);
                     if (0.3253220021724701f < func_150AD900(&dir.x, &normal.x)) {
                         if (func_150AC9C0(camera->focus.x - backX, camera->focus.y + 140.0f, camera->focus.z - backZ, backX,
-                                          0.0f, backZ, 0, tri2, &hit2[0], &hit2[1], &hit2[2], &dist2, 0, 0,
+                                          0.0f, backZ, 0, &tri2, &hit2[0], &hit2[1], &hit2[2], &dist2, 0, 0,
                                           camera->IdealTripodMagnitude + 30.0f) != 0) {
                             f32 dx;
                             f32 dz;
@@ -715,7 +715,7 @@ void func_15124AB4(Camera *camera) {
 /* Loads the follow distance and height of the current preset (or of a mode/player state override). */
 void func_15124B18(Camera *camera) {
     s32 mode80;
-    f32 *preset;
+    const f32 *preset;
 
     if (camera->DistIndex == 0) {
         camera->DistIndex = 4;
@@ -1283,10 +1283,10 @@ void func_15126138(Camera *camera) {
    else the object position raised to 3/4 of its height. */
 void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView) {
     s32 useObjectPos;
-    f32 localPos[3];
-    f32 worldPos[3];
+    Vec3f localPos;
+    Vec3f worldPos;
     s32 bone;
-    Mtx *boneMtx;
+    MtxF *boneMtx;
     f32 offsetY;
 
     useObjectPos = 1;
@@ -1295,26 +1295,26 @@ void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f3
         if (lowView != 0) {
             bone = 3;
             offsetY = 20.0f;
-            localPos[0] = 0.0f;
-            localPos[1] = offsetY;
-            localPos[2] = 0.0f;
+            localPos.x = 0.0f;
+            localPos.y = offsetY;
+            localPos.z = 0.0f;
         } else if (zone == 0x1B) {
             bone = 4;
             offsetY = 116.0f;
-            localPos[1] = offsetY;
-            localPos[0] = 0.0f;
-            localPos[2] = 130.0f;
+            localPos.y = offsetY;
+            localPos.x = 0.0f;
+            localPos.z = 130.0f;
         } else {
             useObjectPos = 1;
         }
 
         if (useObjectPos == 0) {
-            boneMtx = (Mtx *)obj->ob_matrix_ptr;
+            boneMtx = obj->ob_matrix_ptr;
             boneMtx += bone;
-            func_15143134(localPos, worldPos, boneMtx);
-            *outX = worldPos[0];
-            *outY = worldPos[1];
-            *outZ = worldPos[2];
+            func_15143134(&localPos, &worldPos, boneMtx);
+            *outX = worldPos.x;
+            *outY = worldPos.y;
+            *outZ = worldPos.z;
         }
     }
 
@@ -1600,7 +1600,7 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
             func_10010F30(D_800894E0[index][1], 20000, 0x40, 0, 0);
             sound->flags &= ~0x80;
         } else if (sound->flags & 0x80) {
-            func_151CC290((s32)camera);
+            func_151CC290(camera);
             func_10010F30(D_800894E0[index][2], 20000, 0x40, 0, 0);
         }
     } else {
@@ -1974,7 +1974,7 @@ s32 func_15128540(Camera *camera) {
     }
 
     if (mode & 0x400000) {
-        func_1512D380((s32)camera);
+        func_1512D380(camera);
         func_151236D0(camera);
         func_151284C4(camera);
         return 1;

@@ -37,7 +37,7 @@ DustEmitter *func_15191BE0(Actor *owner, Vec3f *offset, u8 bone, f32 rateBase, f
     data.unk60 = unk60;
     data.kind = kind;
 
-    effect = (DustEmitter *)func_15149130((duration == -1) ? 300 : duration, -1, 0x1D, -1,
+    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x1D, -1,
                                           (duration == -1) ? 0 : 1, 0x1D, sizeof(data), arg16,
                                           arg17);
     if (effect != NULL) {
@@ -210,11 +210,11 @@ u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
         func_151436B4(angleRandom * 6.2831855f,
                       (speedRandom * 1000.0f + -1207.0f) * 0.001f,
                       (sizeRandom * 3557.0f + 5336.0f) * 0.001f,
-                      &velocity.x);
+                      &velocity);
         sizeRandom = func_150ADA68();
         durationRandom = func_150ADA20();
         countRandom = func_150ADA20();
-        func_151DA6F8(&position.x, &velocity.x, sizeRandom * 0.20600002f + 0.20600002f,
+        func_151DA6F8(&position, &velocity, sizeRandom * 0.20600002f + 0.20600002f,
                       durationRandom % 21U + 35, particle->head.desc.alpha,
                       dust->baseSize * 0.02495f, countRandom % 7U + 5, 0,
                       1.0f, 1.0f, 1, dust->kind, 0, 0x10, 0xF, 0,

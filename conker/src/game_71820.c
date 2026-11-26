@@ -1177,21 +1177,8 @@ void func_1504715C(CollisionHit *hit, Actor *obj) {
     }
 }
 
-/* Source of func_150472C0 (layout only as far as used). */
-struct Game71820FloorSrc {
-    /* 0x00 */ u8 pad0[0xC];
-    /* 0x0C */ f32 height;
-    /* 0x10 */ u8 pad10[0x34];
-    /* 0x44 */ CollisionTri tri;
-    /* 0x56 */ u8 pad56[3];
-    /* 0x59 */ u8 unk59;
-    /* 0x5A */ u8 pad5A[2];
-    /* 0x5C */ WorldObject *surface;
-    /* 0x60 */ s32 material;
-};
-
-/* Fills a CollisionHit from a Game71820FloorSrc; unk59 == 1 marks it valid (flags 7, source 1). */
-void func_150472C0(CollisionHit *hit, Game71820FloorSrc *src) {
+/* Fills a CollisionHit from a ray hit; a level-mesh hit (hitType 1) is valid (flags 7, source 1). */
+void func_150472C0(CollisionHit *hit, RayHit *src) {
     s32 one;
     s32 inRange;
     s32 flag1;
@@ -1199,15 +1186,15 @@ void func_150472C0(CollisionHit *hit, Game71820FloorSrc *src) {
     s32 hasTri;
 
     one = 1; // matching: keeps the constant 1 in a register for every compare
-    hit->height = src->height;
+    hit->height = src->pos.y;
     hit->tri = src->tri;
     hit->material = src->material;
-    valid = src->unk59;
+    valid = src->hitType;
     inRange = (1 == (valid ^ 0)) ? 2 : 0; // matching: the ^ 0 keeps IDO from swapping the compare operands
     flag1 = (one == valid) ? one : 0;
     hasTri = (one == valid) ? 4 : 0;
     hit->flags = hasTri | flag1 | inRange;
-    if (src->unk59 == one) {
+    if (src->hitType == one) {
         hit->source = 1;
     } else {
         hit->source = 0;

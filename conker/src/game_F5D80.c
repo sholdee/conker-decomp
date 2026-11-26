@@ -372,7 +372,7 @@ void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
     pitch = (func_150ADA20() % 11U) - 18;
     speed = func_150ADA68() * (effect->def.speed * 0.2430000156f) + effect->def.speed * 0.9610000253f;
 
-    func_15143794(heading, pitch, speed, &packet.vel.x);
+    func_15143794(heading, pitch, speed, &packet.vel);
     func_15130374(&packet, 1, 0, effect->header.owner, effect->header.kind);
 }
 
@@ -446,7 +446,7 @@ void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
     ((s32 *)&packet)[-5] = func_150ADA20();
     func_15143794(heading, (s16)((((s32 *)&packet)[-5] % 26U) - 45),
                   (func_150ADA68() * 81.0f + 60.0f) * effect->def.speed * 0.009999999776f,
-                  &packet.vel.x);
+                  &packet.vel);
     packet.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
     packet.rotVel.z = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
     packet.lifetime = (func_150ADA20() % 41U) + 40;
@@ -686,7 +686,7 @@ s32 func_150CAA04(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     random = func_150ADA20();
     func_15143794(heading, (s16)((random % 12U) - 21),
                   (func_150ADA68() * 300.0f + 498.0f) * 0.1000000015f,
-                  &packet.vel.x);
+                  &packet.vel);
 
     packet.gravity = 0.0f;
     packet.flags = 0xE05;
@@ -753,7 +753,7 @@ s32 func_150CADD0(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     ((s32 *)&packet)[-2] = func_150ADA20();
     func_15143794(heading, (s16)((((s32 *)&packet)[-2] % 21U) - 40),
                   (func_150ADA68() * 204.0f + 500.0f) * 0.1000000015f,
-                  &packet.vel.x);
+                  &packet.vel);
 
     packet.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
     packet.rotVel.z = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;

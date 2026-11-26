@@ -262,14 +262,14 @@ Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
     Vec3f previous;
 
     if (0) { gdl = gdl; } // matching: dead IR resets uopt alias state so the first strip reloads vtx
-    func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, (void **)&vtx, NULL);
+    func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, &vtx, NULL);
     if (vtx == NULL) {
         return gdl;
     }
     camera = func_15144B34(view);
     flag = 1;
     points = func_151061EC(bolt);
-    gdl = func_15142E24(gdl, (s32)D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
+    gdl = func_15142E24(gdl, &D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
     gdl = func_15142C10(gdl, bolt->desc.color.red, bolt->desc.color.green, bolt->desc.color.blue, bolt->desc.color.alpha, &flag);
     gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
     gdl = func_1513F4E4(gdl, 0x44, &flag);
@@ -423,7 +423,7 @@ BoltChainObj *func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig
     chain.config = *config;
     chain.kind = kind;
 
-    obj = (BoltChainObj *)func_15149130(0, -1, 0x3E, -1, 0, 0x30, (chain.count * sizeof(Vec3f) + 0x48), arg6, arg7);
+    obj = func_15149130(0, -1, 0x3E, -1, 0, 0x30, (chain.count * sizeof(Vec3f) + 0x48), arg6, arg7);
     if (obj != NULL) {
         data = &obj->chain;
         memcpy(data, &chain, sizeof(BoltChain));
@@ -789,7 +789,7 @@ s32 func_15107E48(BoltObj *bolt, u8 *moved) {
 
 /* Transforms localPos by the actor's bone matrix (64 bytes each, at ob_matrix_ptr). */
 void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out) {
-    func_15143134(localPos, out, (s32)actor->ob_matrix_ptr + (bone << 6));
+    func_15143134(localPos, out, &actor->ob_matrix_ptr[bone]);
 }
 
 /* D_80088C28 handler for kind 3. */

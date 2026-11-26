@@ -593,22 +593,21 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 FU8(target, 0x73) |= 1;
             }
         } else if (event->value == 0x6C) {
-            f32 point[3];
-            f32 point2[3];
+            Vec3f point;
+            Vec3f point2;
 
-            // matching: the switch reads the field as an unsigned byte
-            switch (*(u8 *) &event->unk4) {
+            switch (event->unk4) {
                 case 0:
-                    point[0] = D_800C3958[scene][track].x;
-                    point[1] = D_800C3958[scene][track].y;
-                    point[2] = D_800C3958[scene][track].z;
-                    func_151BE850(point, D_800C3958[scene][track].unk10, 1, 0, 2, 0xFF, 1);
+                    point.x = D_800C3958[scene][track].x;
+                    point.y = D_800C3958[scene][track].y;
+                    point.z = D_800C3958[scene][track].z;
+                    func_151BE850(&point, D_800C3958[scene][track].unk10, 1, 0, 2, 0xFF, 1);
                     break;
                 case 1:
-                    point2[0] = D_800C3958[scene][track].x;
-                    point2[1] = D_800C3958[scene][track].y;
-                    point2[2] = D_800C3958[scene][track].z;
-                    func_151A9390(5, 1, 0, point2, -10000.0f, 100.0f, -1, sceneTag, 1);
+                    point2.x = D_800C3958[scene][track].x;
+                    point2.y = D_800C3958[scene][track].y;
+                    point2.z = D_800C3958[scene][track].z;
+                    func_151A9390(5, 1, 0, &point2, -10000.0f, 100.0f, -1, sceneTag, 1);
                     break;
                 case 2:
                     func_151494E0(0, event->unk5 ? 0x2B : 0x2C);
@@ -642,7 +641,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 0x12, 0x13, 0x14, 0x15 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(2, (s32)&zones[ids[i]]);
+                        func_151C970C(2, &zones[ids[i]]);
                     }
                     break;
                 }
@@ -1062,30 +1061,7 @@ typedef struct EvNodeData {
     s32 unk30;
 } EvNodeData;
 
-typedef struct {
-    s32 unk0;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s8 unk12;
-    s8 pad13;
-    s8 unk14;
-} Ev15167AD8;
-
-typedef struct {
-    Actor *unk0;
-    u8 unk4;
-    s16 unk6;
-    s8 unk8;
-    s8 unk9;
-    s8 unkA;
-} Ev15190770;
-
-extern s32 D_8008CA50;
+extern EffectTexture *D_8008CA50;
 
 /* Defined in game_19A8B0.c as void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4).
    Not in particle.h: this file was compiled with an s8 texture (the call passes event->unk5 without narrowing). */
@@ -1194,18 +1170,18 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 func_151B9BF0(0x2F, 1, 0, 0, 0, 0x7D0, 0x3E8, 0x190, 0xC8, 0x400, 0x400, 6, duration, pos, sceneTag, 0);
             }
         } else if (event->value == 0xC) {
-            Ev15167AD8 sp;
+            SpriteFxTemplate sp;
 
-            sp.unk0 = D_8008CA50;
-            sp.unk4 = 0;
-            sp.unk6 = 0x100;
-            sp.unk8 = pos[0];
-            sp.unkA = pos[1] + event->unk4;
-            sp.unkC = pos[2];
+            sp.anim = D_8008CA50;
+            sp.frame = 0;
+            sp.frameStep = 0x100;
+            sp.x = pos[0];
+            sp.y = pos[1] + event->unk4;
+            sp.z = pos[2];
             sp.unkE = 0x5DC;
             sp.unk10 = 0x5DC;
-            sp.unk12 = -10;
-            sp.unk14 = 0;
+            sp.fadeStep = -10;
+            sp.callback = 0;
             func_15167AD8(&sp, sceneTag, 1);
         } else if (event->value == 0x19) {
             s32 duration;
@@ -1222,16 +1198,16 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x1A) {
             if (event->unk4 != 0 && event->unk4 == 1) { // matching: redundant test kept for codegen
-                f32 from[3];
-                f32 to[3];
+                Vec3f from;
+                Vec3f to;
 
-                from[0] = D_800C3868[scene][track]->x;
-                from[1] = D_800C3868[scene][track]->y;
-                from[2] = D_800C3868[scene][track]->z;
-                to[0] = D_800C3958[scene][track].x;
-                to[1] = D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset;
-                to[2] = D_800C3958[scene][track].z;
-                func_150B0094(from, to, sceneTag, 1);
+                from.x = D_800C3868[scene][track]->x;
+                from.y = D_800C3868[scene][track]->y;
+                from.z = D_800C3868[scene][track]->z;
+                to.x = D_800C3958[scene][track].x;
+                to.y = D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset;
+                to.z = D_800C3958[scene][track].z;
+                func_150B0094(&from, &to, sceneTag, 1);
             } else {
                 func_150E1AB0(0, D_800C3868[scene][track]->x, D_800C3868[scene][track]->y, D_800C3868[scene][track]->z,
                               D_800C3958[scene][track].x, D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset,
@@ -1261,8 +1237,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                // matching: the switch reads the field as an unsigned halfword
-                switch (*(u16 *) &event->unk6) {
+                switch (event->unk6) {
                     case 0:
                         func_1516E778(pos, duration, event->unk5, sceneTag, 0);
                         break;
@@ -1374,39 +1349,39 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         func_15108FFC(track, duration, sceneTag);
                         break;
                     case 8: {
-                        f32 p[3];
+                        Vec3f p;
 
-                        p[0] = D_800C3958[scene][track].x;
-                        p[1] = D_800C3958[scene][track].y;
-                        p[2] = D_800C3958[scene][track].z;
-                        func_151A9390(5, 1, 0, p, -10000.0f, 100.0f, duration, sceneTag, 1);
+                        p.x = D_800C3958[scene][track].x;
+                        p.y = D_800C3958[scene][track].y;
+                        p.z = D_800C3958[scene][track].z;
+                        func_151A9390(5, 1, 0, &p, -10000.0f, 100.0f, duration, sceneTag, 1);
                         break;
                     }
                     case 9: {
-                        Ev15190770 sp;
+                        ActorLink sp;
 
-                        sp.unk0 = obj;
-                        sp.unk4 = obj->unique_id;
-                        sp.unk6 = duration;
-                        sp.unk8 = 1;
+                        sp.actor = obj;
+                        sp.actorId = obj->unique_id;
+                        sp.timer = duration;
+                        sp.flags = 1;
                         sp.unk9 = 0;
                         switch (obj->character_type) {
                             case 0x57:
                             case 0x71:
-                                sp.unkA = 1;
+                                sp.kind = 1;
                                 break;
                             case 0x96:
-                                sp.unkA = 3;
+                                sp.kind = 3;
                                 break;
                             default:
-                                sp.unkA = 0;
+                                sp.kind = 0;
                                 break;
                         }
                         func_15190770(&sp, 0, sceneTag, 1);
                         break;
                     }
                     case 10:
-                        func_150F802C(&D_800C3958[scene][track], duration, sceneTag, 1);
+                        func_150F802C(&D_800C3958[scene][track].x, duration, sceneTag, 1);
                         break;
                     case 11: {
                         s16 data[2];
@@ -1479,21 +1454,21 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         func_150FAE18(duration, sceneTag, 1);
                         break;
                     case 24: {
-                        f32 point[3];
-                        f32 probe[3];
+                        Vec3f point;
+                        Vec3f probe;
                         CollisionHit floor;
                         s32 hit;
 
-                        point[0] = D_800C3958[scene][track].x;
-                        point[1] = D_800C3958[scene][track].y + 100.0f;
-                        point[2] = D_800C3958[scene][track].z;
-                        probe[0] = point[0];
-                        probe[1] = point[1] + 100.0f;
-                        probe[2] = point[2];
-                        if (func_15046C80(probe, 0, point[1] - 1000.0f, &floor) != 0) {
+                        point.x = D_800C3958[scene][track].x;
+                        point.y = D_800C3958[scene][track].y + 100.0f;
+                        point.z = D_800C3958[scene][track].z;
+                        probe.x = point.x;
+                        probe.y = point.y + 100.0f;
+                        probe.z = point.z;
+                        if (func_15046C80(&probe, 0, point.y - 1000.0f, &floor) != 0) {
                             if (floor.source != 3) {
                                 hit = 1;
-                                point[1] = floor.height;
+                                point.y = floor.height;
                             } else {
                                 hit = 0;
                             }
@@ -1503,7 +1478,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         if (hit) {
                             func_15136698((func_150ADA68() * 0.02000000142f) + 0.09000000358f,
                                           (func_150ADA68() * 0.0004399999743f) + 0.0008799999487f,
-                                          (func_150ADA20() % 101) + 0x9B, 0xFF, duration, &floor.tri, point,
+                                          (func_150ADA20() % 101) + 0x9B, 0xFF, duration, &floor.tri, &point,
                                           !event->unk6, 1, sceneTag, 1);
                         }
                         break;
@@ -1518,7 +1493,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         to[0] = D_800C3958[scene][track].x;
                         to[1] = D_800C3958[scene][track].y;
                         to[2] = D_800C3958[scene][track].z;
-                        func_150E3340(from, to, &D_800C3958[scene][track], duration);
+                        func_150E3340(from, to, &D_800C3958[scene][track].x, duration);
                         break;
                     }
                     case 26: {
@@ -1615,15 +1590,15 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 func_150EA500(obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x48) {
-            f32 offset[2];
+            Vec2f offset;
             s32 duration;
             SeqEvent *found;
 
             if (event->unk4 == 0) {
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 1, event->unk5, scene) - eventTime;
-                offset[0] = (func_150ADA68() * 200.0f) + -100.0f;
-                offset[1] = (func_150ADA68() * 300.0f) + -150.0f;
-                func_151356D4(offset, (func_150ADA68() * 20.0f) + 10.0f,
+                offset.x = (func_150ADA68() * 200.0f) + -100.0f;
+                offset.y = (func_150ADA68() * 300.0f) + -150.0f;
+                func_151356D4(&offset, (func_150ADA68() * 20.0f) + 10.0f,
                               ((func_150ADA68() * 65.0f) + 35.0f) * 0.001000000047f,
                               ((func_150ADA68() * 160.0f) + 200.0f) * 0.001000000047f,
                               (func_150ADA20() % 101) + 100, 0xFF, (func_150ADA20() % 3) + 4, duration, 4,
@@ -1664,7 +1639,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 node = obj->attachments;
                 while (node != NULL) {
                     if (node->type == kind || func_1514D4B8(D_8008ABE8[kind]->firstChild, node->type) != 0) {
-                        ((EvNodeData *)node->handle)->unk30 = (s32)func_1519E970(duration, (EvTimerOwner *)node->handle, 0,
+                        ((EvNodeData *)node->handle)->unk30 = (s32)func_1519E970(duration, node->handle, 0,
                                                                            &D_800C3958[scene][track].unk30,
                                                                            &D_800C3958[scene][track].unk20, sceneTag, 0);
                     }
@@ -1699,23 +1674,22 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
             func_15136404(obj, 90.0f, sceneTag, 1);
         } else if (event->value == 0x5F) {
-            // matching: the switch reads the field as an unsigned byte
-            switch (*(u8 *) &event->unk4) {
+            switch (event->unk4) {
                 case 0:
                     if (obj != NULL) {
-                        f32 pos[3];
+                        Vec3f pos;
                         CollisionHit floor;
-                        f32 out[3];
+                        Vec3f out;
 
                         func_1504715C(&floor, obj);
-                        pos[0] = obj->xpos;
-                        pos[1] = obj->ypos + 100.0f;
-                        pos[2] = obj->zpos;
-                        if (func_15046C80(pos, 0, obj->ypos - 300.0f, &floor) != 0) {
-                            out[0] = pos[0];
-                            out[1] = floor.height;
-                            out[2] = pos[2];
-                            func_150CA930(out);
+                        pos.x = obj->xpos;
+                        pos.y = obj->ypos + 100.0f;
+                        pos.z = obj->zpos;
+                        if (func_15046C80(&pos, 0, obj->ypos - 300.0f, &floor) != 0) {
+                            out.x = pos.x;
+                            out.y = floor.height;
+                            out.z = pos.z;
+                            func_150CA930(&out);
                         }
                     }
                     break;
@@ -1724,7 +1698,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 2: {
                     ModelAttachment *attachment;
-                    f32 vec[3];
+                    Vec3f vec;
 
                     if (obj != NULL) {
                         switch (obj->character_type) {
@@ -1734,14 +1708,14 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                             case 0x7A:
                                 attachment = func_1503195C(obj, 0x46, 0);
                                 if (attachment != NULL) {
-                                    f32 *p1;
-                                    f32 *p2;
+                                    const Vec3f *p1;
+                                    Vec3f *p2;
 
-                                    p1 = (f32 *)&D_800AAA90.x;
-                                    p2 = vec;
+                                    p1 = &D_800AAA90;
+                                    p2 = &vec;
                                     if (func_1514654C(obj, attachment, 0, &p1, &p2, 1) != 0) {
-                                        func_151C5588(obj, vec, 0x46, sceneTag, 1);
-                                        func_151C56A4(vec, sceneTag, 1);
+                                        func_151C5588(obj, &vec, 0x46, sceneTag, 1);
+                                        func_151C56A4(&vec, sceneTag, 1);
                                     }
                                 }
                                 break;
@@ -1762,12 +1736,12 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 }
                 case 3: {
-                    f32 p[3];
+                    Vec3f p;
 
-                    p[0] = D_800C3958[scene][track].x;
-                    p[1] = D_800C3958[scene][track].y;
-                    p[2] = D_800C3958[scene][track].z;
-                    func_151BE850(p, D_800C3958[scene][track].unk10, 1, 0, 2, sceneTag, 1);
+                    p.x = D_800C3958[scene][track].x;
+                    p.y = D_800C3958[scene][track].y;
+                    p.z = D_800C3958[scene][track].z;
+                    func_151BE850(&p, D_800C3958[scene][track].unk10, 1, 0, 2, sceneTag, 1);
                     break;
                 }
                 case 4:
@@ -1791,12 +1765,12 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_150E0870(obj, sceneTag, 1);
                     break;
                 case 8: {
-                    f32 p[3];
+                    Vec3f p;
 
-                    p[0] = pos[0];
-                    p[1] = pos[1];
-                    p[2] = pos[2];
-                    func_151D5648(p, sceneTag, 1);
+                    p.x = pos[0];
+                    p.y = pos[1];
+                    p.z = pos[2];
+                    func_151D5648(&p, sceneTag, 1);
                     break;
                 }
                 case 9:
@@ -1804,26 +1778,26 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 10: {
                     if (obj->ob_matrix_ptr != NULL) {
-                        const f32 *sel;
-                        const f32 a[3][3] = { { 73.0f, 14.0f, 0.0f }, { 68.0f, -10.0f, 8.0f }, { 62.0f, 1.0f, -5.0f } };
-                        const f32 b[4][3] = { { -55.0f, -6.0f, -1.0f }, { -47.0f, -1.0f, -10.0f }, { -53.0f, -14.0f, 6.0f }, { -57.0f, 10.0f, 6.0f } };
-                        const f32 c[6][3] = { { -1.0f, 123.0f, 10.0f }, { -10.0f, 116.0f, -1.0f }, { -36.0f, 88.0f, 6.0f }, { 4.0f, 112.0f, 6.0f }, { -6.0f, 112.0f, -18.0f }, { -14.0f, 101.0f, 34.0f } };
+                        const Vec3f *sel;
+                        const Vec3f a[3] = { { 73.0f, 14.0f, 0.0f }, { 68.0f, -10.0f, 8.0f }, { 62.0f, 1.0f, -5.0f } };
+                        const Vec3f b[4] = { { -55.0f, -6.0f, -1.0f }, { -47.0f, -1.0f, -10.0f }, { -53.0f, -14.0f, 6.0f }, { -57.0f, 10.0f, 6.0f } };
+                        const Vec3f c[6] = { { -1.0f, 123.0f, 10.0f }, { -10.0f, 116.0f, -1.0f }, { -36.0f, 88.0f, 6.0f }, { 4.0f, 112.0f, 6.0f }, { -6.0f, 112.0f, -18.0f }, { -14.0f, 101.0f, 34.0f } };
                         const s32 bones[3] = { 0x15, 0x20, 3 };
-                        f32 out[3];
+                        Vec3f out;
 
                         switch (event->unk5) {
                             case 0:
-                                sel = a[func_150ADA20() % 3];
+                                sel = &a[func_150ADA20() % 3];
                                 break;
                             case 1:
-                                sel = b[func_150ADA20() & 3];
+                                sel = &b[func_150ADA20() & 3];
                                 break;
                             case 2:
-                                sel = c[func_150ADA20() % 6];
+                                sel = &c[func_150ADA20() % 6];
                                 break;
                         }
-                        func_15143134(sel, out, &((MtxF *) obj->ob_matrix_ptr)[bones[event->unk5]]);
-                        func_151C329C(out, sceneTag, 1);
+                        func_15143134(sel, &out, &obj->ob_matrix_ptr[bones[event->unk5]]);
+                        func_151C329C(&out, sceneTag, 1);
                     }
                     break;
                 }
@@ -1832,7 +1806,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 6, 7, 8, 9 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(1, (s32)&zones[ids[i]]);
+                        func_151C970C(1, &zones[ids[i]]);
                     }
                     break;
                 }
@@ -1840,7 +1814,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_15107B78(obj, func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x40, sceneTag, 1);
                     break;
                 case 13:
-                    func_151CC290((s32)camera_global_Cameras);
+                    func_151CC290(camera_global_Cameras);
                     break;
                 case 14: {
                     f32 p[3];
@@ -1895,22 +1869,22 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 }
                 case 18: {
                     if (obj->ob_matrix_ptr) {
-                        f32 out[3];
-                        const f32 offs[2][3] = { { -65.0f, 172.0f, 9.0f }, { 15.0f, 63.0f, 9.0f } };
+                        Vec3f out;
+                        const Vec3f offs[2] = { { -65.0f, 172.0f, 9.0f }, { 15.0f, 63.0f, 9.0f } };
 
-                        func_15143134(offs[event->unk5], out, obj->ob_matrix_ptr);
-                        func_15131EE4(out, 0.6460000277f, sceneTag, 0);
+                        func_15143134(&offs[event->unk5], &out, obj->ob_matrix_ptr);
+                        func_15131EE4(&out, 0.6460000277f, sceneTag, 0);
                     }
                     break;
                 }
                 case 19: {
                     if (obj->ob_matrix_ptr) {
-                        f32 out[3];
-                        const f32 offs[8][3] = { { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { -5.0f, 25.0f, -7.0f }, { -11.0f, 28.0f, -5.0f }, { -4.0f, 30.0f, -4.0f }, { 3.0f, 30.0f, -8.0f } };
+                        Vec3f out;
+                        const Vec3f offs[8] = { { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { -5.0f, 25.0f, -7.0f }, { -11.0f, 28.0f, -5.0f }, { -4.0f, 30.0f, -4.0f }, { 3.0f, 30.0f, -8.0f } };
                         const u8 bones[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };
 
-                        func_15143134(offs[event->unk5], out, &((MtxF *) obj->ob_matrix_ptr)[bones[event->unk5]]);
-                        func_15131EE4(out, 6.990000248f, sceneTag, 0);
+                        func_15143134(&offs[event->unk5], &out, &obj->ob_matrix_ptr[bones[event->unk5]]);
+                        func_15131EE4(&out, 6.990000248f, sceneTag, 0);
                     }
                     break;
                 }
@@ -1946,116 +1920,62 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->value == 0x40) {
             func_151A0A10(obj, 0x28, sceneTag, 1);
         } else if (event->value == 0x4D) {
-            struct {
-                s16 unk0;
-                f32 unk4;
-                f32 unk8;
-                f32 unkC;
-                s16 unk10;
-                f32 unk14;
-                s16 unk18;
-                s16 unk1A;
-                s16 unk1C;
-                s16 unk1E;
-                f32 unk20;
-                f32 unk24;
-                u8 pad28[8];
-                f32 unk30;
-                f32 unk34;
-                f32 unk38;
-                f32 unk3C;
-                f32 unk40;
-                f32 unk44;
-                f32 unk48;
-                f32 unk4C;
-                f32 unk50;
-                s8 unk54;
-                s8 unk55;
-                s16 unk56;
-                s16 unk58;
-            } sp;
+            DebrisEmitter sp;
 
-            sp.unk0 = (func_150ADA20() % 5) + 5;
-            sp.unk4 = pos[0];
-            sp.unk8 = pos[1];
-            sp.unkC = pos[2];
-            sp.unk14 = 4.700000286f;
-            sp.unk20 = 24.80000114f;
-            sp.unk24 = 15.5f;
-            sp.unk3C = 0.2670000196f;
-            sp.unk10 = 0x5A;
-            sp.unk18 = -7;
-            sp.unk1A = 0x2D;
-            sp.unk1C = -0x34;
-            sp.unk1E = 0x20;
-            sp.unk54 = 0;
-            sp.unk55 = 0;
-            sp.unk56 = 0x32;
-            sp.unk58 = 0x19;
-            sp.unk40 = 0.2430000156f;
-            sp.unk44 = -2.041000128f;
-            sp.unk30 = 0.0f;
-            sp.unk34 = 0.0f;
-            sp.unk38 = 0.0f;
-            sp.unk48 = 0;
-            sp.unk4C = -3.0f;
-            sp.unk50 = 6.0f;
+            sp.count = (func_150ADA20() % 5) + 5;
+            sp.pos.x = pos[0];
+            sp.pos.y = pos[1];
+            sp.pos.z = pos[2];
+            sp.radius = 4.700000286f;
+            sp.speedBase = 24.80000114f;
+            sp.speedRange = 15.5f;
+            sp.sizeBase = 0.2670000196f;
+            sp.lifetime = 0x5A;
+            sp.yawBase = -7;
+            sp.yawRange = 0x2D;
+            sp.pitchBase = -0x34;
+            sp.pitchRange = 0x20;
+            sp.landPuffs = 0;
+            sp.landPuffFlag = 0;
+            sp.landPuffLifeBase = 0x32;
+            sp.landPuffLifeRange = 0x19;
+            sp.sizeRange = 0.2430000156f;
+            sp.gravityBase = -2.041000128f;
+            sp.dir.x = 0.0f;
+            sp.dir.y = 0.0f;
+            sp.dir.z = 0.0f;
+            sp.gravityRange = 0;
+            sp.spinBase = -3.0f;
+            sp.spinRange = 6.0f;
             func_151A6F00(&sp, 1, sceneTag, 1);
         } else if (event->value == 0x4E) {
-            struct {
-                s16 unk0;
-                f32 unk4;
-                f32 unk8;
-                f32 unkC;
-                s16 unk10;
-                f32 unk14;
-                s16 unk18;
-                s16 unk1A;
-                s16 unk1C;
-                s16 unk1E;
-                f32 unk20;
-                f32 unk24;
-                u8 pad28[8];
-                f32 unk30;
-                f32 unk34;
-                f32 unk38;
-                f32 unk3C;
-                f32 unk40;
-                f32 unk44;
-                f32 unk48;
-                f32 unk4C;
-                f32 unk50;
-                s8 unk54;
-                s8 unk55;
-                s16 unk56;
-                s16 unk58;
-            } sp;
+            DebrisEmitter sp;
 
-            sp.unk0 = (func_150ADA20() % 6) + 6;
-            sp.unk4 = pos[0];
-            sp.unk8 = pos[1];
-            sp.unkC = pos[2];
-            sp.unk14 = 151.5f;
-            sp.unk20 = 15.10000038f;
-            sp.unk24 = 25.20000076f;
-            sp.unk3C = 0.3880000114f;
-            sp.unk10 = 0x5A;
-            sp.unk1A = 0xFF;
-            sp.unk18 = 0;
-            sp.unk1C = -0x40;
-            sp.unk1E = 0x28;
-            sp.unk54 = 0;
-            sp.unk55 = 0;
-            sp.unk56 = 0x32;
-            sp.unk58 = 0x19;
-            sp.unk40 = 0.2430000156f;
-            sp.unk44 = -1.0200001f;
-            sp.unk30 = 0.0f;
-            sp.unk34 = 0.0f;
-            sp.unk38 = 0.0f;
-            sp.unk48 = 0;
-            sp.unk4C = -4.0f;
-            sp.unk50 = 8.0f;
+            sp.count = (func_150ADA20() % 6) + 6;
+            sp.pos.x = pos[0];
+            sp.pos.y = pos[1];
+            sp.pos.z = pos[2];
+            sp.radius = 151.5f;
+            sp.speedBase = 15.10000038f;
+            sp.speedRange = 25.20000076f;
+            sp.sizeBase = 0.3880000114f;
+            sp.lifetime = 0x5A;
+            sp.yawRange = 0xFF;
+            sp.yawBase = 0;
+            sp.pitchBase = -0x40;
+            sp.pitchRange = 0x28;
+            sp.landPuffs = 0;
+            sp.landPuffFlag = 0;
+            sp.landPuffLifeBase = 0x32;
+            sp.landPuffLifeRange = 0x19;
+            sp.sizeRange = 0.2430000156f;
+            sp.gravityBase = -1.0200001f;
+            sp.dir.x = 0.0f;
+            sp.dir.y = 0.0f;
+            sp.dir.z = 0.0f;
+            sp.gravityRange = 0;
+            sp.spinBase = -4.0f;
+            sp.spinRange = 8.0f;
             func_151A6F00(&sp, 1, sceneTag, 1);
         } else if (event->value == 0x4F) {
             SplashSpraySpec sp;
@@ -2088,19 +2008,19 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             sp.spray.unk38 = 0.5f;
             func_15153F18(&sp.angles, &sp.spray, 0, sceneTag, 1);
         } else if (event->value == 0x24) {
-            f32 p[3];
+            Vec3f p;
             s32 count;
             u8 type;
 
-            p[0] = pos[0];
-            p[1] = pos[1];
-            p[2] = pos[2];
+            p.x = pos[0];
+            p.y = pos[1];
+            p.z = pos[2];
             count = (event->unk4 != 0) ? event->unk4 : 0xA;
             type = event->unk5;
             if (type >= 0xD) {
                 type = 0;
             }
-            func_151DBAA8(p, count, type, sceneTag, 0);
+            func_151DBAA8(&p, count, type, sceneTag, 0);
         } else if (event->value == 0x10) {
             u8 type;
 
@@ -2233,14 +2153,14 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 func_150C2804(pos, pos + 1, pos + 2, duration, sceneTag, 0);
             }
         } else if (event->value == 0x3A) {
-            f32 p[3];
+            Vec3f p;
             s32 count;
 
-            p[0] = pos[0];
-            p[1] = pos[1];
-            p[2] = pos[2];
+            p.x = pos[0];
+            p.y = pos[1];
+            p.z = pos[2];
             count = (event->unk4 != 0) ? event->unk4 : 0xA;
-            func_151DBAA8(p, count, 6, sceneTag, 0);
+            func_151DBAA8(&p, count, 6, sceneTag, 0);
         } else {
             return 0;
         }

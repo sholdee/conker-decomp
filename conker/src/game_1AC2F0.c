@@ -3,7 +3,7 @@
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
-#define gRenderViews ((RenderView *)D_800BE628)
+#define gRenderViews ((RenderView *)D_800BE628) // matching: the no-op cast changes the code; plain D_800BE628 mismatches
 
 /* Per-view screen effects: a colour fade, a colour flash, a global tint, an iris wipe and the
  * cutscene letterbox. Per-view arrays are indexed by view (0..D_80082FA0). */
@@ -346,11 +346,11 @@ Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
         G_TX_RENDERTILE,
         ((s32)((centerX + dx) * 32.0f) & 0x1F) + (texSize << 5),
         ((s32)(lowerY * 32.0f) & 0x1F) + (texSize << 5),
-        -(u16)((f32)texSize / fsize * 1024.0f), -(u16)((f32)texSize / fsize * 1024.0f));
+        -(u16)(texSize / fsize * 1024.0f), -(u16)(texSize / fsize * 1024.0f));
     upperY = centerY - dy;
     leftX = centerX - dx;
-    tmpA = (s32)((centerY - dy) - (f32)size);
-    tmpB = (s32)((centerX - dx) - (f32)size);
+    tmpA = ((centerY - dy) - size);
+    tmpB = ((centerX - dx) - size);
     frac[1] = (s32)((leftX - fsize) * 32.0f) & 0x1F;
     frac[0] = (s32)((upperY - fsize) * 32.0f) & 0x1F;
     gSPScisTextureRectangle(gfx++,
@@ -359,8 +359,8 @@ Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
         G_TX_RENDERTILE,
         0x1F - frac[1],
         0x1F - frac[0],
-        (u16)((f32)texSize / fsize * 1024.0f), (u16)((f32)texSize / fsize * 1024.0f));
-    upperY = (centerY - dy) - (f32)size;
+        (u16)(texSize / fsize * 1024.0f), (u16)(texSize / fsize * 1024.0f));
+    upperY = (centerY - dy) - size;
     frac[1] = (s32)((centerX + dx) * 32.0f) & 0x1F;
     tmpA = (s32)(centerX + dx) << 2;
     tmpB = (s32)((centerY - dy) - fsize) << 2;
@@ -371,17 +371,17 @@ Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
         G_TX_RENDERTILE,
         frac[1] + (texSize << 5),
         0x1F - frac[0],
-        -(u16)((f32)texSize / fsize * 1024.0f), (u16)((f32)texSize / fsize * 1024.0f));
+        -(u16)(texSize / fsize * 1024.0f), (u16)(texSize / fsize * 1024.0f));
     view = 0x1F - ((s32)(((centerX - dx) - fsize) * 32.0f) & 0x1F);
     tmpB = (s32)(centerX - dx) << 2;
-    tmpA = (s32)((centerX - dx) - (f32)size) << 2;
+    tmpA = (s32)((centerX - dx) - size) << 2;
     gSPScisTextureRectangle(gfx++,
         tmpA, (s32)lowerY << 2,
         tmpB, (s32)(lowerY + fsize) << 2,
         G_TX_RENDERTILE,
         view,
         ((s32)(lowerY * 32.0f) & 0x1F) + (texSize << 5),
-        (u16)((f32)texSize / fsize * 1024.0f), -(u16)((f32)texSize / fsize * 1024.0f));
+        (u16)(texSize / fsize * 1024.0f), -(u16)(texSize / fsize * 1024.0f));
     return gfx;
 }
 
@@ -438,26 +438,26 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
         left = gRenderViews[view].left;
         bottom = gRenderViews[view].bottom;
         right = gRenderViews[view].right;
-        size = (s32)(-399.0f * closure + 400.0f);
+        size = (-399.0f * closure + 400.0f);
         // black bands above, below, left and right of the hole
         uly = top;
         ulx = left;
-        lry = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
+        lry = ((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
         lrx = right;
         gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, view);
-        uly = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) + size);
+        uly = ((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) + size);
         ulx = left;
         lry = bottom;
         lrx = right;
         gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, view);
-        uly = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
+        uly = ((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
         ulx = left;
-        lry = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) + size);
-        lrx = (s32)((D_800DDDE8[view][0] + gRenderViews[view].halfWidth) - size);
+        lry = ((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) + size);
+        lrx = ((D_800DDDE8[view][0] + gRenderViews[view].halfWidth) - size);
         gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, view);
-        uly = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
-        ulx = (s32)((D_800DDDE8[view][0] + gRenderViews[view].halfWidth) + size);
-        lry = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) + size);
+        uly = ((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
+        ulx = ((D_800DDDE8[view][0] + gRenderViews[view].halfWidth) + size);
+        lry = ((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) + size);
         lrx = right;
         gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, view);
         if (D_800DDE1C[view] != 0) {
@@ -467,11 +467,11 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
             gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
             // crosshair (and corner marks), first as a 1-pixel-wider outline, then on top
             for (i = 0; i < 2; i++) {
-                uly = (s32)(gRenderViews[view].halfHeight - 1);
-                lry = (s32)(gRenderViews[view].halfHeight + 1);
+                uly = (gRenderViews[view].halfHeight - 1);
+                lry = (gRenderViews[view].halfHeight + 1);
                 gfx = func_1517F9F4(gfx, left - i, uly - i, right + i, lry + i, view);
-                ulx = (s32)(gRenderViews[view].halfWidth - 1);
-                lrx = (s32)(gRenderViews[view].halfWidth + 1);
+                ulx = (gRenderViews[view].halfWidth - 1);
+                lrx = (gRenderViews[view].halfWidth + 1);
                 gfx = func_1517F9F4(gfx, ulx - i, top - i, lrx + i, bottom + i, view);
                 if (D_800DDE1C[view] == 1) {
                     s32 center[2];
@@ -655,7 +655,7 @@ void func_151814FC(void) {
                     model += 12; // bone 12
                 }
                 height = actor->scale_y * 40.0f;
-                func_150A7960(model, 0.0f, height, 0.0f, &x, &y, &z);
+                func_150A7960(*model, 0.0f, height, 0.0f, &x, &y, &z);
             } else {
                 x = actor->xpos;
                 y = actor->ypos;

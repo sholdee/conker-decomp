@@ -2,12 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The trap object func_1511BEBC passes to its trigger callback. */
-struct TrapTrigger {
-    /* 0x00 */ u8 pad0[0x72];
-    /* 0x72 */ u8 tag;
-};
-
 typedef struct {
     /* 0x00 */ u8 pad0[0x20];
     /* 0x20 */ u8 unk20;
@@ -35,12 +29,12 @@ struct TrapEffect {
     /* 0x28 */ u8 kind;      /* func_150DBD70 selector */
 };
 
-/* Trap trigger callback: spawns a timed effect (timer 100) whose kind follows the trap's tag (0xFB-0xFE). */
-void func_150DDED0(TrapTrigger *trap) {
-    TrapEffect *obj = (TrapEffect *)func_151491F4(100, 2, -1, 1, 0, 1, 0xFF, 0);
+/* Trap trigger callback: spawns a timed effect (timer 100) whose kind follows the trap's unique_id (0xFB-0xFE). */
+void func_150DDED0(WorldObject *trap) {
+    TrapEffect *obj = func_151491F4(100, 2, -1, 1, 0, 1, 0xFF, 0);
 
     if (obj != NULL) {
-        switch (trap->tag) {
+        switch (trap->unique_id) {
         case 0xFB:
             obj->kind = 1;
             break;
@@ -65,8 +59,8 @@ s32 func_150DDF88(TrapEffect *obj) {
     return func_150DBD70(obj->kind);
 }
 
-/* Spawns a sprite (texture 0x1D or 0x1E, random size 10-80) at the source's current point, at height y. */
-s32 func_150DDFAC(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+/* Spawns a sprite (texture 0x1D or 0x1E, random size 10-80) at the source's current point, at the given height. */
+s32 func_150DDFAC(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     EffectSpawnState *state;
     EffectSpawnPoint *points;
     SpriteDef def;
@@ -105,13 +99,13 @@ s32 func_150DDFAC(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C(&def, 5, 0, arg5, points[source->head.start].x, y, points[source->head.start].z, size, size,
+    func_1513C73C(&def, 5, 0, surface, points[source->head.start].x, height, points[source->head.start].z, size, size,
                   rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
     return 1;
 }
 
-/* Spawns a sprite (texture 0x1B or 0x1C, random size 10-20) at the source's current point, at height y. */
-s32 func_150DE12C(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+/* Spawns a sprite (texture 0x1B or 0x1C, random size 10-20) at the source's current point, at the given height. */
+s32 func_150DE12C(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     EffectSpawnState *state;
     EffectSpawnPoint *points;
     SpriteDef def;
@@ -150,7 +144,7 @@ s32 func_150DE12C(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C(&def, 5, 0, arg5, points[source->head.start].x, y, points[source->head.start].z, size, size,
+    func_1513C73C(&def, 5, 0, surface, points[source->head.start].x, height, points[source->head.start].z, size, size,
                   rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
     return 1;
 }

@@ -211,11 +211,11 @@ void func_150ED748(Actor *obj) {
     f32 hitX;
     f32 hitY;
     f32 hitZ;
-    f32 dir[3];
+    f32 dir[3]; // matching: an array; a Vec3f changes the register allocation
     f32 limit;
     f32 dist;
-    f32 nearPoint[3];
-    f32 farPoint[3];
+    Vec3f nearPoint;
+    Vec3f farPoint;
     f32 tNear;
     f32 tFar;
     Camera *camera;
@@ -550,7 +550,7 @@ void func_150ED748(Actor *obj) {
                             hitX = movement_obj[j].xpos - camera->eye.x;
                             hitZ = movement_obj[j].zpos - camera->eye.z;
                             if (sqrtf(hitX * hitX + hitZ * hitZ) + 200.0f < dist) {
-                                if (func_151452C4(&camera->eye.x, dir, &movement_obj[j].xpos, 150.0f, nearPoint, farPoint, &tNear, &tFar) && (tNear < dist)) {
+                                if (func_151452C4(&camera->eye, (Vec3f *)dir, (Vec3f *)&movement_obj[j].xpos, 150.0f, &nearPoint, &farPoint, &tNear, &tFar) && (tNear < dist)) {
                                     dist = tNear;
                                     hit = 2;
                                 }

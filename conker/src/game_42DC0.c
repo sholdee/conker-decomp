@@ -25,7 +25,7 @@ void func_15015920(s16 font) {
     u8 *record;
     s32 glyph;
 
-    buffer = (u8 *)func_10003C6C(0x2800, 1, 2, 1, 0);
+    buffer = func_10003C6C(0x2800, 1, 2, 1, 0);
     func_10004514(D_80082F80[font].romStart, buffer, D_80082F80[font].romEnd - D_80082F80[font].romStart, 1);
     record = buffer;
     glyph = 0;

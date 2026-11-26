@@ -96,7 +96,7 @@ u8 func_151D8FE0(void) {
 #define SPIN_FLAG_DRAG 2 /* scale the velocity by `drag` every frame */
 
 /* Spawns a wobbling sprite particle of effect kind `kind`; lifetime -99 means it never times out. */
-SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                         f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE,
                         s32 argF) {
     SteamParticle *particle;
@@ -238,7 +238,7 @@ u8 func_151D9534(SteamParticle *particle, Vec3f *arg1) {
                 avgScale = (particle->head.desc.width + particle->head.desc.height) * 0.5f;
                 if (particle->head.floor.source == 3) {
                     func_151D9FC0(wobble->kind, wobble->altBurstScale * avgScale, particle->head.desc.alpha,
-                                  (s32)&particle->head.floor.tri, &point, particle->head.header.owner, particle->head.header.kind);
+                                  &particle->head.floor.tri, &point, particle->head.header.owner, particle->head.header.kind);
                 } else if (func_150ADA20() & 1) {
                     func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->burstScale, particle->head.desc.alpha,
                                   &particle->head.floor.tri, &point, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
@@ -364,7 +364,7 @@ void func_151D9B8C(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos, s16 lifeti
     desc.unk17 = 7;
     desc.viewportMask = 0xFF;
     desc.unk1C = 0;
-    if (func_1513C650(&desc, 0, 0, (s32)tri, pos->x, pos->y, pos->z, size, size,
+    if (func_1513C650(&desc, 0, 0, tri, pos->x, pos->y, pos->z, size, size,
                       func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                       arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
         arg8 && func_15144E80(tri, &outA, &outB, &normal)) {
@@ -407,16 +407,17 @@ void func_151D9EB0(DripEffect *effect) {
 }
 
 /* Splash for effect kind `kind`: an emitter plus, except for kinds 2 and 5, a func_151DA08C effect. */
-void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6) {
-    func_151DBCBC(kind, size * 0.5f, arg2, arg3, pos, arg5, arg6);
+void func_151D9FC0(u8 kind, f32 size, u8 arg2, CollisionTri *surface, Vec3f *pos, u8 arg5, s32 arg6) {
+    func_151DBCBC(kind, size * 0.5f, arg2, surface, pos, arg5, arg6);
     if ((kind != 5) && (kind != 2)) {
-        func_151DA08C(kind, size * 0.0003f, 1.01f, arg2, 100, arg3, pos, arg5, arg6);
+        func_151DA08C(kind, size * 0.0003f, 1.01f, arg2, 100, surface, pos, arg5, arg6);
     }
 }
 
 /* Starts a steam effect of kind `kind` at `pos` (lifetime -1: untimed, shrinking by `shrink` otherwise). */
-s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, Vec3f *pos, s32 arg7, s32 arg8) {
-    s32 effect;
+SteamEffect *func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, CollisionTri *surface, Vec3f *pos,
+                          s32 arg7, s32 arg8) {
+    SteamEffect *effect;
     ParticleDef desc;
     SteamData steam;
     s32 rand3;
@@ -481,10 +482,10 @@ s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
     rand3 = func_150ADA20();
-    effect = func_1513D668(&desc, 0, 14, 19, 0, (rand2 & 1) + (rand1 & 1), rand3 & 0xFF, 500.0f, 500.0f, 0,
-                           arg5, 0, sizeof(steam), 0xFF, 0);
-    if (effect != 0) {
-        memcpy(&((SteamEffect *)effect)->steam, &steam, sizeof(steam));
+    effect = func_1513D668(&desc, 0, 14, 19, 0, (rand2 & 1) + (rand1 & 1), rand3 & 0xFF, 500.0f, 500.0f, NULL,
+                           surface, 0, sizeof(steam), 0xFF, 0);
+    if (effect != NULL) {
+        memcpy(&effect->steam, &steam, sizeof(steam));
     }
     return effect;
 }
@@ -566,8 +567,8 @@ s32 func_151DA6A8(SteamEffect *effect) {
 
 /* Spawns a splash of effect kind `kind` at `pos` moving with `vel`. */
 Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
-                      f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, s32 argC, s16 argD, s16 argE, s32 argF,
-                      u8 arg10, s32 arg11) {
+                      f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, CollisionHit *ground, s16 argD, s16 argE,
+                      s32 material, u8 arg10, s32 arg11) {
     Splash *splash;
     EffectTemplate spawn;
     TrailMotion motion;
@@ -586,7 +587,7 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
     spawn.flags = 0x35;
     spawn.kind = 1;
     spawn.unk14 = -1;
-    spawn.unk18 = argF;
+    spawn.material = material;
     motion.halfWidth = scale;
     motion.velocity = *vel;
     motion.gravity = size;
@@ -629,7 +630,7 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
             c = 0;
             d = 0;
         }
-        splash = func_15147DA0(&spawn, &motion, 16, 1, 0, 0, a, b, 0, c, d, &style, argC, arg10, arg11);
+        splash = func_15147DA0(&spawn, &motion, 16, 1, 0, 0, a, b, 0, c, d, &style, ground, arg10, arg11);
     }
     if (splash != NULL) {
         memcpy(&splash->state->burst, &burst, sizeof(burst));
@@ -639,7 +640,7 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
 
 
 /* Splash impact handler: bursts into a func_151D9B8C emitter or a func_151DAB58 effect at floor height. */
-s32 func_151DA938(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 arg5) {
+s32 func_151DA938(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, CollisionTri *surface) {
     SplashState *state = splash->state;
     SplashNode *nodes = splash->nodes;
     Vec3f point;
@@ -649,7 +650,7 @@ s32 func_151DA938(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
     point.y = floorY + 2.0f;
     point.z = nodes[splash->head.start].pos.z;
     if (func_150ADA20() & 1) {
-        func_151D9B8C(burst->kind, (state->motion.halfWidth * 3.0f) * burst->burstScale, state->motion.alpha, arg5,
+        func_151D9B8C(burst->kind, (state->motion.halfWidth * 3.0f) * burst->burstScale, state->motion.alpha, surface,
                       &point, 100, 0, 1, 0, splash->head.header.owner, splash->head.header.kind);
     } else {
         func_151DAB58(burst->kind, (state->motion.halfWidth * 1.1f) * burst->burstScale, state->motion.alpha, &point, 1,
@@ -660,7 +661,7 @@ s32 func_151DA938(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
 }
 
 /* Splash impact handler: a func_151D9FC0 burst at floor height. */
-s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 arg5) {
+s32 func_151DAA88(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, CollisionTri *surface) {
     SplashState *state = splash->state;
     SplashNode *nodes = splash->nodes;
     Vec3f point;
@@ -669,7 +670,7 @@ s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
     point.y = floorY;
     point.z = nodes[splash->head.start].pos.z;
     func_151D9FC0(state->burst.kind, state->motion.halfWidth * 11.0f * state->burst.altBurstScale, state->motion.alpha,
-                  arg5, &point, splash->head.header.owner, splash->head.header.kind);
+                  surface, &point, splash->head.header.owner, splash->head.header.kind);
     state->unk20 = 4;
     return 1;
 }
@@ -1044,7 +1045,7 @@ void func_151DBAA8(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
 }
 
 /* Spawns a func_151D9B8C emitter of effect kind *kind just above `pos`, with random size and lifetime. */
-void func_151DBBD4(Vec3f *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4) {
+void func_151DBBD4(Vec3f *pos, CollisionHit *hit, u8 *kind, u8 arg3, s32 arg4) {
     Vec3f point;
     u8 emitterKind;
     s32 pad; // matching: unused stack slot
@@ -1059,13 +1060,14 @@ void func_151DBBD4(Vec3f *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4) {
     sizeRand = func_150ADA68();
     rand = func_150ADA20();
 
-    func_151D9B8C(emitterKind, (sizeRand * 25.0f) + 10.0f, (rand % 56U) + 200, arg1 + 4, &point,
+    func_151D9B8C(emitterKind, (sizeRand * 25.0f) + 10.0f, (rand % 56U) + 200, &hit->tri, &point,
                   (func_150ADA20() % 151U) + 150, 0, 1, 0, arg3, arg4);
 }
 
 
-/* Spawns an emitter of effect kind `kind` (coloured from D_800AB414) at `pos`, via func_1513C73C when arg3 is set. */
-void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s32 arg6) {
+/* Spawns an emitter of effect kind `kind` (coloured from D_800AB414) at `pos`, via func_1513C73C on surface when it
+ * is set. */
+void func_151DBCBC(u8 kind, f32 size, s16 arg2, CollisionTri *surface, void *pos, u8 arg5, s32 arg6) {
     SpriteDef desc;
 
     desc.texture = 0x38;
@@ -1087,8 +1089,8 @@ void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s3
     desc.fadeRate = 0xFF;
     desc.viewportMask = 0xFF;
     desc.unk1C = 0;
-    if (arg3 != 0) {
-        func_1513C73C(&desc, 0, 0, arg3, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y,
+    if (surface != NULL) {
+        func_1513C73C(&desc, 0, 0, surface, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y,
                       ((Vec3f *)pos)->z, size, size, func_150ADA20() & 0xFF,
                       (func_150ADA20() & 1) + (func_150ADA20() & 1) * 2, 0, arg5, arg6);
     } else {
@@ -1135,7 +1137,7 @@ void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, Collis
     desc.rot.z = 0.0f;
 
     func_1513D668(&desc, 0, 11, 17, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1),
-                  (s16)(func_150ADA20() & 0xFF), size, size, 0, (s32)tri, 0, 0, arg8, arg9);
+                  (s16)(func_150ADA20() & 0xFF), size, size, NULL, tri, 0, 0, arg8, arg9);
 }
 
 /* Spawns a plain sprite particle of effect kind `kind` (id from D_800AB320) at `pos`. */

@@ -43,13 +43,8 @@ void func_1510D404(void);
 void func_1510D608(s32 index, s32 lifetime);
 
 /* game_13AAE0.c */
-/* A count-prefixed list of s16 ids, freed after it is released. */
-typedef struct {
-    /* 0x0 */ s16 count;
-    /* 0x2 */ s16 ids[1]; /* actually [count] */
-} IdList;
-
-void func_1510D630(IdList *list);
+/* list: a count-prefixed array of s16 texture ids (built by func_1510CE60), freed after it is released. */
+void func_1510D630(s16 *list);
 void func_1510D694(s32 id);
 
 /* game_13ABD0.c */

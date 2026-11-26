@@ -34,7 +34,7 @@ void *func_150E5FD0(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f32 arg4, u8 a
     info.flags = 1;
     impact.flags = 0;
     impact.callback = callback;
-    if (checkHit && func_150AC9C0(start->x, start->y, start->z, dir->x, dir->y, dir->z, &impact.unk10, &impact.unk14,
+    if (checkHit && func_150AC9C0(start->x, start->y, start->z, dir->x, dir->y, dir->z, &impact.unk10, &impact.tri,
                                   &impact.point.x, &impact.point.y, &impact.point.z, NULL, &hitObject, NULL, 0.0f) &&
         func_15145C90(hitObject)) {
         impact.flags |= 1;
@@ -126,7 +126,7 @@ void *func_150E63A0(Streak *streak, s16 viewIdx) {
     u8 fresh;
     s32 pad3; // matching: unused stack slot (frame layout)
 
-    func_151D5D60(streak->head.vtxBuffers, viewIdx, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(streak->head.vtxBuffers, viewIdx, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
@@ -243,7 +243,7 @@ s32 func_150E67D0(Streak *streak) {
     info.unk18 = 0x130001;
 
     impact = &streak->impact;
-    func_1513C73C(&info, 0, 0, (s32)impact->unk14, impact->point.x, impact->point.y, impact->point.z, 50.0f,
+    func_1513C73C(&info, 0, 0, &impact->tri, impact->point.x, impact->point.y, impact->point.z, 50.0f,
                   50.0f, func_150ADA20() & 0xFF, 0, 0, streak->head.header.owner, streak->head.header.kind);
     return 0;
 }

@@ -5,7 +5,7 @@
 /* Packet handed to func_1506AC8C by func_15063B64. */
 typedef struct ThrowPacket {
     Actor *thrower;
-    f32 position[3];
+    Vec3f position;
     s32 throwerId;          /* object index + 1 */
     volatile s32 anim;      // matching: volatile keeps the anim in its stack slot across the call
 } ThrowPacket;
@@ -58,17 +58,17 @@ void func_15063628(Actor *arg0, f32 arg1) {
     ActorCtl *ctl = arg0->mv;
 
     func_15081690(arg0, ctl->aimEye.x, ctl->aimEye.y, ctl->aimEye.z,
-                  ctl->aimDir.x, ctl->aimDir.y, ctl->aimDir.z, &ctl->unkB0,
+                  ctl->aimDir.x, ctl->aimDir.y, ctl->aimDir.z, &ctl->rayHit,
                   arg1, 0, 0, 0, -1, 0, 0);
     func_150636A4(arg0);
 }
 
-/* Tells the object in unkB0 (if any) that this object is targeting it. */
+/* Tells the actor hit by the last ray (if any) that this object is targeting it. */
 void func_150636A4(Actor *arg0) {
     Actor *target;
     ActorCtl *targetCtl;
 
-    target = arg0->mv->unkB0;
+    target = arg0->mv->rayHit.obj;
     if (target != NULL) {
         targetCtl = target->mv;  // matching: the null test uses this copy; the stores reload mv
         if (targetCtl != NULL) {
@@ -83,10 +83,10 @@ void func_150636F0(void) {
     Actor *actor;
     s32 index;
     s32 action;
-    f32 position[3];
-    f32 direction[3];
-    f32 side[3];
-    f32 up[3];
+    Vec3f position;
+    Vec3f direction;
+    Vec3f side;
+    Vec3f up;
     ActorCtl *ctl;
     Camera *camera;
 
@@ -137,7 +137,7 @@ void func_150636F0(void) {
                     }
                     break;
                 case 0x24:
-                    if (func_15081E78(actor, &ctl->unkB0, 7) != 2) {
+                    if (func_15081E78(actor, &ctl->rayHit, 7) != 2) {
                         ctl = actor->mv;
                         if (ctl->unkAF != 0) {
                             ctl->unkAF = 0;
@@ -152,12 +152,12 @@ void func_150636F0(void) {
                     }
                     break;
                 case 0x3B:
-                    func_15081E78(actor, &ctl->unkB0, 0x10);
-                    func_150FFCC8(actor, position, direction, side, up);
-                    func_150FFD84(position, direction, 0xFF, 1);
+                    func_15081E78(actor, &ctl->rayHit, 0x10);
+                    func_150FFCC8(actor, &position, &direction, &side, &up);
+                    func_150FFD84(&position, &direction, 0xFF, 1);
                     break;
                 case 0x23:
-                    func_15081E78(actor, &ctl->unkB0, 8);
+                    func_15081E78(actor, &ctl->rayHit, 8);
                     camera = actor->CameraPtr;
                     if (camera != NULL) {
                         func_1512D2E4(camera, 0);
@@ -224,11 +224,11 @@ void func_15063B64(Actor *arg0) {
 
     if (func_1503195C(arg0, packet.anim, 0) != NULL) {
         if (arg0->ob_matrix_ptr != NULL) {
-            func_15143134(NULL, packet.position, (s32)arg0->ob_matrix_ptr + 0x100);
+            func_15143134(NULL, &packet.position, &arg0->ob_matrix_ptr[4]);
         } else {
-            packet.position[0] = arg0->xpos;
-            packet.position[1] = arg0->ypos;
-            packet.position[2] = arg0->zpos;
+            packet.position.x = arg0->xpos;
+            packet.position.y = arg0->ypos;
+            packet.position.z = arg0->zpos;
         }
 
         packet.throwerId = (arg0 - movement_obj) + 1;
@@ -329,13 +329,13 @@ void func_15063FA0(Actor *arg0, s32 kind) {
     pos[1] = arg0->mv->aimEye.y + height;
     pos[2] = off[1] + arg0->mv->aimEye.z;
     ctl = arg0->mv;
-    if (ctl->unk109 == 0) {
+    if (ctl->rayHit.hitType == 0) {
         pitch = -ctl->aimPitch;
         yaw = ctl->aimYaw + 90.0f;
     } else {
-        dx = ctl->unkB8 - pos[0];
-        dy = ctl->unkBC - pos[1];
-        dz = ctl->unkC0 - pos[2];
+        dx = ctl->rayHit.pos.x - pos[0];
+        dy = ctl->rayHit.pos.y - pos[1];
+        dz = ctl->rayHit.pos.z - pos[2];
         pitch = func_150484A0(dy, sqrtf(dx * dx + dz * dz)) * 57.29577637f;
         yaw = func_150484A0(dx, dz) * 57.29577637f;
     }
@@ -1691,8 +1691,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             D_800D1580 = 0x53;
                             func_15071D38();
                         }
-                        func_1000FD38((SoundRecordCallback)func_151037DC, arg0, arg0->unique_id);
-                        func_1000FA64((func_150ADA20() & 1) + 0x2F3, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x5DC, 0x1F4, func_151037DC, arg0, (void *)arg0->unique_id, 0, 0);
+                        func_1000FD38(func_151037DC, arg0, arg0->unique_id);
+                        func_1000FA64((func_150ADA20() & 1) + 0x2F3, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x5DC, 0x1F4, func_151037DC, arg0, arg0->unique_id, 0, 0);
                         if (arg0->CameraPtr != NULL) {
                             func_10010558((func_150ADA20() % 3U) + 0x2EB, arg0, 0x7D00, 0x64, 0x78, 0x1E);
                         }
@@ -2535,13 +2535,13 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
 
             arg0->headEffectTimer = 0x64;
             if ((s8)arg0->unk284 == 0) {  // matching: read signed (lb); Actor declares u8
-                arg0->headEffectState = (u16)arg0->headEffectState + D_800BE9E4;
-                if (((func_150ADA20() % 120U) + 0xB4) < (u16)arg0->headEffectState) {
+                arg0->headEffectState = arg0->headEffectState + D_800BE9E4;
+                if (((func_150ADA20() % 120U) + 0xB4) < arg0->headEffectState) {
                     func_1507E7E4(arg0, sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
                     arg0->headEffectState = 0;
                     arg0->unk284 = 1;
                 }
-            } else if (((s8)arg0->unk284 != 0) && (arg0->expression == arg0->defaultExpression)) {
+            } else if ((arg0->unk284 != 0) && (arg0->expression == arg0->defaultExpression)) {
                 arg0->unk284 = 0;
             }
             arg0->norun = 0xA;
@@ -2592,7 +2592,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         func_150FC438(obj, arg0, 0, animGrab);
                         func_10010A3C(obj);
                         if ((arg0->character_type == 0x80) && !(func_150ADA20() & 3)) {
-                            func_1000FA64(func_1000F568(0x57C, 6), arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, D_800996D0, 0, 0);
+                            func_1000FA64(func_1000F568(0x57C, 6), arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996D0, 0, 0);
                         }
                     }
                     if (D_800BE9E4 < arg0->mv->gun_before_reload) {
@@ -2606,7 +2606,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     obj->scriptCmd = NULL;
                 } else if (arg0->mv->shotCount == 1) {
                     arg0->mv->shotCount = 0;
-                    if (func_1000FF90(func_1000EC24, -1, -1) == -1) {
+                    if (func_1000FF90(func_1000EC24, (void *)-1, -1) == -1) {
                         func_1000FA64((func_150ADA20() % 3U) + 0x618, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x1F4, 0xC8, func_1000EC24, (void *)0x1E, 0, 0x300, 0);
                     }
                 }

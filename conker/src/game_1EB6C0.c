@@ -54,7 +54,7 @@ Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport) {
     }
     scale.width = data->beamWidth * data->scale;
     scale.length = data->beamLength * data->scale;
-    return func_1513FAB4(spark, FALSE, &scale, viewport);
+    return func_1513FAB4(&spark->head, FALSE, &scale, viewport);
 }
 
 /* A func_15130280 particle (game_15D730.c's Particle) whose caller-sized data (at 0xA8) holds its owner at +8. */

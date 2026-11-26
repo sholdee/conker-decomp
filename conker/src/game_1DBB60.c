@@ -8,20 +8,20 @@ void func_151AE6B0(CharacterWatcher *task) {
     Actor *actor = task->character;
 
     {
-        f32 pos[3];
+        Vec3f pos;
         CollisionHit *hit;
 
-        pos[0] = actor->xpos;
+        pos.x = actor->xpos;
         if (-9500.0f < actor->unk118) {
-            pos[1] = actor->unk118 + 100.0f;
+            pos.y = actor->unk118 + 100.0f;
         } else {
-            pos[1] = actor->ypos + 150.0f;
+            pos.y = actor->ypos + 150.0f;
         }
-        pos[2] = actor->zpos;
+        pos.z = actor->zpos;
         hit = &task->hit;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 5, task->header.owner, task->header.kind);
+        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+            pos.y = task->hit.height;
+            func_151ABE40(&pos, hit, 5, task->header.owner, task->header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }

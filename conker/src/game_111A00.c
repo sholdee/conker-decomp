@@ -14,27 +14,6 @@ struct Struct800A1070 {
     /* 0x07 */ u8 countRange;
 };
 
-typedef struct Struct150E4550 {
-    /* 0x00 */ u8 pad0[0x84];
-    /* 0x84 */ u16 unk84;
-    /* 0x86 */ u16 unk86;
-    /* 0x88 */ u8 pad88[4];
-    /* 0x8C */ s16 x;
-    /* 0x8E */ s16 y;
-    /* 0x90 */ s16 z;
-    /* 0x92 */ s16 unk92;
-    /* 0x94 */ s16 unk94;
-    /* 0x96 */ u8 pad96[2];
-    /* 0x98 */ s16 unk98;
-    /* 0x9A */ u8 pad9A[6];
-    /* 0xA0 */ u8 unkA0;
-    /* 0xA1 */ u8 padA1;
-    /* 0xA2 */ u8 unkA2;
-    /* 0xA3 */ u8 padA3;
-    /* 0xA4 */ u8 unkA4;
-    /* 0xA5 */ u8 padA5[3];
-} Struct150E4550;
-
 const Struct800A1070 D_800A1070[] = {
     { 0, 0, 50, 0, 17, 40 },
     { 58, 59, 2, 10, 30, 12 },
@@ -71,11 +50,11 @@ const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
  * Bit 0x8000 of `material` is forwarded to func_150E4E04.
  */
 void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 slot) {
-    Struct800A1070 *entry;
+    const Struct800A1070 *entry;
     s32 lifetime;
     s32 flag;
     s32 count;
-    Struct150E4550 obj;
+    QuadFxData obj;
 
     lifetime = 120;
     flag = 0;
@@ -93,7 +72,7 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
         if (entry->particleType == 0x13) {
             func_15171D4C(x, y, z, 30, 0, 0x13, 0.0f, 0, count, 0xF, 0x55, 0, 0xFF, 0);
         } else if (tri != NULL) {
-            func_15171F04(x, y, z, (s32)tri, lifetime, 0xB5AD, entry->particleType, count, 0, 0, 0, 0xFF, 0);
+            func_15171F04(x, y, z, tri, lifetime, 0xB5AD, entry->particleType, count, 0, 0, 0, 0xFF, 0);
         } else {
             func_15171D4C(x, y, z, (s16)lifetime, 0xB5AD, entry->particleType, 0.0f, 0, count, 0, 0, 0, 0xFF, 0);
         }
@@ -103,13 +82,13 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
     }
     if (size != 0 && func_151EF610() % 100 < entry->chance) {
         {
-            f32 pos[3];
+            Vec3f pos;
             s32 pad; // matching: keeps pos at its original stack offset
 
-            pos[0] = x;
-            pos[1] = y + 20.0f;
-            pos[2] = z;
-            func_151C329C(pos, 0xFF, 1);
+            pos.x = x;
+            pos.y = y + 20.0f;
+            pos.z = z;
+            func_151C329C(&pos, 0xFF, 1);
         }
         if (slot != 0xFF) {
             D_800D9960[slot].ricochetChance = 100;
@@ -122,11 +101,11 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
         obj.x = x;
         obj.y = y;
         obj.z = z;
-        obj.unkA2 = 0xD;
-        obj.unkA0 = entry->objectType;
-        obj.unk84 = D_800A1110[size][0];
+        obj.callback = 0xD;
+        obj.animIndex = entry->objectType;
+        obj.slot = D_800A1110[size][0];
         obj.unk86 = D_800A1110[size][1];
-        obj.unk98 = 0x2A00;
+        obj.flags = 0x2A00;
         obj.unk92 = 1;
         obj.unk94 = 1;
         obj.unkA4 = 0xFF;
@@ -140,7 +119,7 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
  * surface's impact effects there, passing the hit triangle transformed by obj's matrix.
  */
 void func_150E4928(WorldObject *obj) {
-    s16 idx;
+    u16 idx;
     s32 i;
     s32 found;
     s32 tries;
@@ -258,8 +237,8 @@ void func_150E4CBC(Struct150E4CBC *fx) {
 
 /* Computes the plane of a triangle; the (unnormalised) normal lands in D_800CC210..D_800CC218. */
 
-extern u8 D_800918AC[];
-extern u8 D_80090520[];
+extern EffectTexture D_800918AC; /* entries of the effect texture table D_80090B60 */
+extern EffectTexture D_80090520;
 
 /*
  * Sprays debris particles of `kind` from (x, y, z). With a hit triangle `tri` the spray follows the
@@ -345,17 +324,17 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
         minScale = D_800A1110[size][1] * 95.0f / 256.0f;
         rangeScale = D_800A1110[size][1] * 130.0f / 256.0f;
         if (kind == 0x11) {
-            spawn.anim = D_8009187C;
+            spawn.anim = &D_8009187C;
         } else if (kind == 0xA) {
-            spawn.anim = D_800918A0;
+            spawn.anim = &D_800918A0;
         } else if (kind == 4 || kind == 9) {
-            spawn.anim = D_800918A0;
+            spawn.anim = &D_800918A0;
         } else if (kind == 8) {
-            spawn.anim = D_80090520;
+            spawn.anim = &D_80090520;
             minScale = 180.0f;
             rangeScale = 200.0f;
         } else {
-            spawn.anim = D_800918AC;
+            spawn.anim = &D_800918AC;
         }
         if (size == 2) {
             big = 1;

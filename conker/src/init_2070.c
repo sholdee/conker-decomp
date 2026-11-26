@@ -5,8 +5,9 @@
 #include "variables.h"
 
 
-s32 func_10002070(s32 arg0, s32 arg1, s32 arg2) {
-    return 1;
+/* The output callback of func_10002088: discards the text; any non-NULL return lets the formatting go on. */
+u8 *func_10002070(u8 *arg, u8 *buf, u32 count) {
+    return (u8 *)1;
 }
 
 void func_10002088(s32 arg0, ...) {

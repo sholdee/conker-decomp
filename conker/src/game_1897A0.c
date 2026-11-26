@@ -4,11 +4,11 @@
 #include "variables.h"
 
 /* Spawns a trail with extraSize + 0x40 bytes of data and copies *data into it. */
-FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, void *arg3, u8 arg4, s32 arg5) {
+FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, CollisionHit *hit, u8 arg4, s32 arg5) {
     FallingTrail *trail;
 
     header->kind = 10;
-    trail = func_15147A80(header, extraSize + 0x40, sizeof(FallingTrailPoint), 8, 8, 8, 0, 0, arg3, arg4, arg5);
+    trail = func_15147A80(header, extraSize + 0x40, sizeof(FallingTrailPoint), 8, 8, 8, 0, 0, hit, arg4, arg5);
     if (trail == NULL) {
         return NULL;
     }
@@ -93,7 +93,7 @@ s32 func_1515C534(FallingTrail *trail) {
     return 1;
 }
 
-extern u8 D_80090E78[];
+extern EffectTexture D_80090E78; /* an entry of the effect texture table D_80090B60 */
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -147,7 +147,7 @@ Gfx *func_1515C6F4(FallingTrail *trail, Gfx *gfx, s16 view) {
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->primMode);
             func_151442FC(&envR, &envG, &envB, &envA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->envMode);
-            gfx = func_15142E24(gfx, D_80090E78, 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
+            gfx = func_15142E24(gfx, &D_80090E78, 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
             gfx = func_1513F4E4(gfx, data->unk21, &update);
             gfx = func_15142B7C(gfx, data->setGeometryMode, data->clearGeometryMode);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
@@ -312,12 +312,12 @@ s32 func_1515D030(FallingTrail *trail, TrailBurstParams *data) {
     return result;
 }
 
-/* Spawns an effect for the level object when its unk18 kind is 0 or 1; returns it, or NULL. */
-LevelEffect *func_1515D088(LevelObject *obj) {
+/* Spawns an effect for the level object when its data1 kind is 0 or 1; returns it, or NULL. */
+LevelEffect *func_1515D088(TriggerZone *obj) {
     s32 value; // matching: one variable holds the kind and then the effect (IDO's register and spill slot)
     LevelEffectData data;
 
-    value = obj->unk18;
+    value = obj->data1;
     data.kind = (u16)value; // matching: the u16 step keeps the loaded word apart from value & 0xFF
     if ((value & 0xFF) < 0 || (value & 0xFF) >= 2) {
         return NULL;

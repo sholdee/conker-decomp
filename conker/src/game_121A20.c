@@ -181,7 +181,7 @@ void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind
     data.condition = condition;
     data.variants = variants;
 
-    emitter = (CameraEmitter *)func_15149130(300, -1, 0x56, -1, 0, 0, sizeof(data), owner, kind);
+    emitter = func_15149130(300, -1, 0x56, -1, 0, 0, sizeof(data), owner, kind);
     if (emitter != NULL) {
         memcpy(&emitter->data, &data, sizeof(data));
     }

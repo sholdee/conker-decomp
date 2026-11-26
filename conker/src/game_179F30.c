@@ -3,18 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct Struct1514F5CCArg {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ Actor *obj;
-    /* 0x0C */ u8 uniqueId;
-    /* 0x0D */ u8 pad0D[3];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ u8 unk18;
-} Struct1514F5CCArg;
-
 /* Spawn-callback tables (see func_1514D15C). */
 extern void (*D_8008AA70[])(Actor *);
 extern void (*D_8008AACC[])(Actor *);
@@ -407,7 +395,7 @@ s32 func_1514D15C(Actor *obj) {
     s32 found;
     s32 slot;
     s32 handler;
-    EffectHeader *queued;
+    PlayerMarker *queued;
 
     uniqueSlot = -1;
     globalSlot = -1;
@@ -420,7 +408,7 @@ s32 func_1514D15C(Actor *obj) {
     do {
         queued = func_15155FD4(slot);
         if (queued != NULL) {
-            func_1516972C(queued);
+            func_1516972C(&queued->header);
         }
     } while (queued != NULL);
 
@@ -515,51 +503,30 @@ s32 func_1514D4B8(s16 root, s16 type) {
     return 0;
 }
 
-typedef struct Struct1514D564Payload {
-    Actor *obj;
-    u8 uniqueId;
-    s8 unk5;
-    u8 pad6[2];
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-} Struct1514D564Payload;
-
-/* func_150C5370 copies the first 0x24 bytes and caches the distance between p0 and p1. */
-typedef struct Struct1514D564Desc {
-    /* 0x00 */ Vec3f p0;
-    /* 0x0C */ Vec3f p1;
-    /* 0x18 */ s8 unk18;
-    u8 pad19[3];
-    f32 unk1C;
-    s8 unk20;
-    u8 pad21[3];
-} Struct1514D564Desc;
-
 /** Spawns a func_150C5370 object running from a fixed point to `obj` and attaches it (type 0x15). */
 void func_1514D564(Actor *obj) {
-    Struct1514D564Desc desc;
-    void *spawned; // the object func_150C5370 allocated; the payload goes at +0xC8
-    Struct1514D564Payload payload;
+    StripDesc desc;
+    StripObj *spawned;
+    StripTarget payload;
 
     payload.obj = obj;
     payload.uniqueId = obj->unique_id;
-    payload.unk8 = 0.0f;
-    payload.unkC = -180.0f;
-    payload.unk10 = 77.0f;
+    payload.offset.x = 0.0f;
+    payload.offset.y = -180.0f;
+    payload.offset.z = 77.0f;
     desc.p0.x = -477.0f;
     desc.p0.y = -2015.0f;
     desc.p0.z = 2244.0f;
-    payload.unk5 = 6;
-    desc.unk18 = 1;
+    payload.bone = 6;
+    desc.updateIdx = 1;
     desc.p1.x = obj->xpos;
     desc.p1.y = obj->ypos;
     desc.p1.z = obj->zpos;
     desc.unk20 = 1;
-    desc.unk1C = 0.3199999928f;
+    desc.texScale = 0.3199999928f;
     spawned = func_150C5370(&desc, sizeof(payload));
     if (spawned != NULL) {
-        memcpy((u8 *)spawned + 0xC8, &payload, sizeof(payload));
+        memcpy(&spawned->target, &payload, sizeof(payload));
         func_1514EC1C(spawned, obj, 0x15);
     }
 }
@@ -664,7 +631,7 @@ void func_1514D64C(Actor *obj) {
     emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 0xA);
-    func_15160A58(obj, 5, &attach, 2, 300, 40, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
+    func_15160A58(obj, 5, &attach.p0, 2, 300, 40, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
 }
 
 void func_1514D96C(Actor *obj) {
@@ -1204,16 +1171,11 @@ void func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg) {
     func_1514E89C(target, msg, arg);
 }
 
-struct ModeTarget {
-    /* 0x00 */ u8 pad0[0x22];
-    /* 0x22 */ u8 mode;                 // set through func_1518E37C
-};
-
-/** Messages 3..12 switch the target between mode 2 and modes 3, 5 and 6. */
-s32 func_1514EA1C(ModeTarget *target, s32 msg, s32 arg) {
+/** Messages 3..12 switch the emitter between table 2 and tables 3, 5 and 6. */
+s32 func_1514EA1C(ActorEmitterProcess *target, s32 msg, s32 arg) {
     switch (msg) {
     case 3:
-        if (target->mode == 2) {
+        if (target->params.table == 2) {
             func_1518E37C(target, 3);
         } else {
             func_1518E37C(target, 2);
@@ -1226,7 +1188,7 @@ s32 func_1514EA1C(ModeTarget *target, s32 msg, s32 arg) {
         func_1518E37C(target, 2);
         break;
     case 6:
-        if (target->mode == 2) {
+        if (target->params.table == 2) {
             func_1518E37C(target, 5);
         } else {
             func_1518E37C(target, 2);
@@ -1239,7 +1201,7 @@ s32 func_1514EA1C(ModeTarget *target, s32 msg, s32 arg) {
         func_1518E37C(target, 2);
         break;
     case 9:
-        if (target->mode == 2) {
+        if (target->params.table == 2) {
             func_1518E37C(target, 6);
         } else {
             func_1518E37C(target, 2);
@@ -1396,22 +1358,15 @@ void func_1514EDF0(void *handle, Actor *owner) {
     } while (found);
 }
 
-struct Struct1514EE70 {
-    Actor *obj;
-    u8 uniqueId;
-    u8 unk5;
-    u16 unk6;
-};
-
 /** Attaches a func_1515BE50 object for `obj` (type 0x16). */
 void func_1514EE70(Actor *obj) {
-    struct Struct1514EE70 desc;
-    void *handle;
+    ActorTrackerDesc desc;
+    ActorTracker *handle;
 
-    desc.obj = obj;
-    desc.uniqueId = obj->unique_id;
-    desc.unk5 = 0;
-    desc.unk6 = 300;
+    desc.actor = obj;
+    desc.actorId = obj->unique_id;
+    desc.flags = 0;
+    desc.lifetime = 300;
     handle = func_1515BE50(&desc, 0, 0xFF, 1);
     func_1514EC1C(handle, obj, 0x16);
 }
@@ -1582,15 +1537,15 @@ void func_1514F590(Actor *obj) {
 }
 
 void func_1514F5CC(Actor *obj) {
-    Struct1514F5CCArg desc;
+    PoolEmitterDesc desc;
 
-    desc.unk00 = 0;
-    desc.obj = obj;
-    desc.unk04 = 0.0f;
-    desc.uniqueId = obj->unique_id;
-    desc.unk10 = 0.349999994f;
-    desc.unk14 = 20;
-    desc.unk16 = 300;
-    desc.unk18 = 4;
+    desc.source = NULL;
+    desc.target = obj;
+    desc.unk4 = 0.0f;
+    desc.targetId = obj->unique_id;
+    desc.rate = 0.349999994f;
+    desc.slotCount = 20;
+    desc.timer = 300;
+    desc.flags = 4;
     func_150C0AC0(&desc, 0xFF, 1);
 }

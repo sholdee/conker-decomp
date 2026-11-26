@@ -137,7 +137,7 @@ Gfx *func_150C56A4(Gfx *gfx, StripObj *strip, s16 view) {
         vtx = strip->quad[D_800BE9C0];
         eye = &camera_global_Cameras[view].eye;
         gfx = func_15142B7C(gfx, 1, 0x600);
-        gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
+        gfx = func_15142E24(gfx, &D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         if (camera_global_Cameras[view].SpecialFlags & 1) {
             gfx = func_15142C10(gfx, D_800D9B78[view][0], D_800D9B78[view][1], D_800D9B78[view][2], 0xFF, &update);
             gfx = func_15142CF0(gfx, 0xF2, 0, D_800D9B68[view][0], D_800D9B68[view][1], D_800D9B68[view][2], 0xFF, &update);
@@ -221,7 +221,7 @@ s32 func_150C5B88(StripObj *strip) {
  */
 s32 func_150C5BD4(StripObj *strip) {
     StripTarget *target = &strip->target;
-    Mtx *bones;
+    MtxF *bones;
 
     if (target->obj->type == 0) {
         return 0;
@@ -229,26 +229,26 @@ s32 func_150C5BD4(StripObj *strip) {
     if (target->obj->unique_id != target->uniqueId) {
         return 0;
     }
-    bones = (Mtx *)target->obj->ob_matrix_ptr;
+    bones = target->obj->ob_matrix_ptr;
     if (bones == NULL) {
         strip->p1.x = target->obj->xpos;
         strip->p1.y = target->obj->ypos;
         strip->p1.z = target->obj->zpos;
     } else {
         // matching: byte offset; &bones[target->bone] swaps the addu operands
-        func_15143134(&target->offset, &strip->p1, (Mtx *)((u8 *)bones + target->bone * sizeof(Mtx)));
+        func_15143134(&target->offset, &strip->p1, (u8 *)bones + target->bone * sizeof(MtxF));
     }
     return 1;
 }
 
 /** Sends message 1 to `obj`'s type-0x15 attachments (its strips). */
 void func_150C5C74(Actor *obj) {
-    func_1514D3B0((s32)obj, 0x15, 1, 0);
+    func_1514D3B0(obj, 0x15, 1, 0);
 }
 
 /** Sends message 2 to `obj`'s type-0x15 attachments (its strips). */
 void func_150C5C9C(Actor *obj) {
-    func_1514D3B0((s32)obj, 0x15, 2, 0);
+    func_1514D3B0(obj, 0x15, 2, 0);
 }
 
 extern void (*D_800887C8[])(StripObj *, ActorMsg *, u8);

@@ -60,10 +60,10 @@ s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight,
             extra[0] = ((func_150ADA68() * 80.0f) + 50.0f) * 1e-05f;
             def.unk50 = particle->floor.material;
             // matching: the spawned particle reuses the surface parameter; a new local takes another stack slot
-            surface = (void *)func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
+            surface = func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
-                                            func_150ADA20() & 0xFF, 500.0f, 500.0f, 0, (s32)surface,
-                                            particle->unk14C, particle->unk168, 0, 8, particle->header.owner,
+                                            func_150ADA20() & 0xFF, 500.0f, 500.0f, NULL, surface,
+                                            particle->link.model, particle->link.unk1C, 0, 8, particle->header.owner,
                                             particle->header.kind);
             if (surface != NULL) {
                 memcpy(((AxisParticle *)surface)->motion, extra, 8);
@@ -102,8 +102,8 @@ s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight,
                 burst.pos.z = z;
                 burst.growthBase = 0.661f;
                 burst.growthRange = 0; // matching: 0.0f would keep the float zero above live in $f20 across the calls
-                burst.unk58 = particle->unk14C;
-                burst.unk5C = particle->unk168;
+                burst.unk58 = particle->link.model;
+                burst.unk5C = particle->link.unk1C;
                 burst.render.unk0 = 0;
                 burst.render.setGeometryMode = 0x220005;
                 burst.render.clearGeometryMode = 0x1D0600;
@@ -198,8 +198,8 @@ s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, 
                     def.unk50 = particle->floor.material;
                     spawned = (AxisParticle *)func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
-                                                            func_150ADA20() & 0xFF, 500.0f, 500.0f, 0,
-                                                            (s32)&triangle, particle->unk14C, particle->unk168, 0,
+                                                            func_150ADA20() & 0xFF, 500.0f, 500.0f, NULL,
+                                                            &triangle, particle->link.model, particle->link.unk1C, 0,
                                                             8, particle->header.owner, particle->header.kind);
                     if (spawned != NULL) {
                         /* the 8-byte motion block; 4 bytes past extra are copied too */
@@ -240,8 +240,8 @@ s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, 
                     burst.blue = 0;
                     burst.alphaBase = 155;
                     burst.alphaRange = 100;
-                    burst.unk74 = particle->unk14C;
-                    burst.unk78 = particle->unk168;
+                    burst.unk74 = particle->link.model;
+                    burst.unk78 = particle->link.unk1C;
                     burst.render.unk0 = 0;
                     burst.render.setGeometryMode = 0x220005;
                     burst.render.clearGeometryMode = 0x1D0600;

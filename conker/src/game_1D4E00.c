@@ -15,7 +15,7 @@ Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     }
     memcpy(&bolt->def, def, sizeof(BoltDef));
     bolt->points = bolt->pointData;
-    bolt->link = (BoltLink *)(bolt->points + def->numPoints);
+    bolt->link = bolt->points + def->numPoints;
     bolt->jitterTimer = 0.0f;
     bolt->points[0].local.x = 0.0f;
     bolt->points[0].local.y = 0.0f;
@@ -132,14 +132,14 @@ Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
     Vec3f *to;
 
     if (bolt->def.flags & BOLT_ACTIVE) {
-        func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, (void **)&vtx, NULL);
+        func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, &vtx, NULL);
         if (vtx != NULL) {
             camera = func_15144B34(view);
             changed = 1;
             last = bolt->def.numPoints - 1;
             j = 0;
             i = 1;
-            gdl = func_15142E24(gdl, D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
+            gdl = func_15142E24(gdl, &D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
             gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
             gdl = func_15142C10(gdl, bolt->def.color.r, bolt->def.color.g, bolt->def.color.b, bolt->def.color.a, &changed);
             gdl = func_1513F4E4(gdl, 0x19, &changed);
@@ -389,7 +389,7 @@ s32 func_151A87F8(Bolt *bolt) {
         return 0;
     }
     if (owner->ob_matrix_ptr != NULL) {
-        func_15143134(&link->boneOffset, &bolt->def.start, (s32)owner->ob_matrix_ptr + (link->bone << 6)); /* 0x40-byte bone matrices */
+        func_15143134(&link->boneOffset, &bolt->def.start, &owner->ob_matrix_ptr[link->bone]);
         if (!(link->linkFlags & 1)) {
             dx = bolt->def.start.x - (owner->xpos + link->targetOffset.x);
             dy = bolt->def.start.y - (owner->ypos + link->targetOffset.y);

@@ -184,7 +184,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
         break;
     case 0x66:
-        func_150432CC((s32)obj, cmd->a[0].w);
+        func_150432CC(obj, cmd->a[0].w);
         break;
     case 0x67: {
         s32 v;
@@ -1271,8 +1271,8 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 i;
         s32 ret;
         s8 count;
-        s8 n2;
-        s8 nodes[18];
+        s8 n2; // matching: s8 (a u8 count changes the code); &n2 is also the empty avoid list
+        u8 nodes[18];
 
         /* Resolve the cmd->a[0].w node ids in cmd->a[1..].w (dropping unknown ones), then pick one from the
          * object position with func_15086098 / func_15086364. */
@@ -1281,17 +1281,17 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         count = 0;
         for (i = 0; i < ret; i++) {
             nodes[count] = func_15086D48(cmd->a[1 + i].w);
-            if ((u8)nodes[count] != 0xFF) {
+            if (nodes[count] != 0xFF) {
                 count++;
             }
         }
         ret = -1;
         if (count != 0) {
-            found = func_15086098(obj->xpos, obj->ypos, obj->zpos, count, n2, nodes, &n2);
+            found = func_15086098(obj->xpos, obj->ypos, obj->zpos, count, n2, nodes, (u8 *)&n2);
             foundNode = found;
             D_80087298 = 0xFF;
             if ((u8)found != 0xFF) {
-                func_15086364(foundNode, count, n2, nodes, &n2);
+                func_15086364(foundNode, count, n2, nodes, (u8 *)&n2);
             }
             if (D_80087298 != 0xFF) {
                 ret = D_800D2350[D_80087298].unk7;

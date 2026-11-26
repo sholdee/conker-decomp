@@ -232,21 +232,21 @@ s32 func_151D3D50(WobbleParticle *particle) {
 
 /* Writes the world position of a point attached to bone `bone` of obj to out; objects without bone
    matrices use their origin raised by yOffset. */
-void func_151D3E04(Actor *obj, f32 *out, void *localPos, u8 bone, f32 yOffset) {
+void func_151D3E04(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bone, f32 yOffset) {
     if (obj->ob_matrix_ptr != NULL) {
-        func_15143134(localPos, (s32)out, (s32)obj->ob_matrix_ptr + (bone << 6));
+        func_15143134(localPos, out, &obj->ob_matrix_ptr[bone]);
     } else {
-        out[0] = obj->xpos;
-        out[1] = obj->ypos + yOffset;
-        out[2] = obj->zpos;
+        out->x = obj->xpos;
+        out->y = obj->ypos + yOffset;
+        out->z = obj->zpos;
     }
 }
 
 /* Calls func_1505D1C4 at the midpoint of a and b, with obj's movement angle relative to its mv. */
-void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3) {
-    f32 x = (b[0] + a[0]) * 0.5f;
-    f32 y = (b[1] + a[1]) * 0.5f;
-    f32 z = (b[2] + a[2]) * 0.5f;
+void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
+    f32 x = (a->x + b->x) * 0.5f;
+    f32 y = (a->y + b->y) * 0.5f;
+    f32 z = (a->z + b->z) * 0.5f;
 
     {
         u16 angle;
@@ -294,7 +294,8 @@ void func_151D3FF4(Vec3f *pos, u8 arg1, s32 arg2) {
 
 /* Calls func_1505D1C4 twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
    or pos raised by half of target's height when there is no dir. */
-void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionTri *surface, s32 arg5, s32 arg6,
+                   s32 arg7) {
     u16 angle;
     Vec3f point;
     s16 height;
@@ -317,7 +318,7 @@ void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, s32 arg4, 
     func_1505D1C4(pos->x, pos->y, pos->z, arg6, obj - movement_obj, angle, arg7, (s32)&point);
 }
 
-void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, s32 arg3, s32 arg4) {
+void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 arg4) {
     f32 yaw;
     u16 angle;
 
@@ -554,12 +555,12 @@ void func_151D4C38(ObjEmitterEffect *effect, ActorRef *handle, u8 msg) {
 }
 
 /* Puff update callback. */
-s32 func_151D4D04(Puff151D4794 *puff, s32 arg1) {
+s32 func_151D4D04(SpriteParticle *puff, s32 arg1) {
     WobbleData *extra;
 
-    extra = &puff->extra;
-    func_15131828(puff, extra->amplitude, extra->phase, extra->phaseStep);
-    func_15131958(puff->unk58, extra->drag, extra);
+    extra = &puff->data.wobble;
+    func_15131828(&puff->head, extra->amplitude, extra->phase, extra->phaseStep);
+    func_15131958(&puff->head.desc.vel, extra->drag, extra);
     return 1;
 }
 
@@ -783,11 +784,11 @@ void func_151D5648(Vec3f *pos, u8 arg1, s32 arg2) {
 }
 
 /* Spawns a func_151D4408 particle on bone `bone` of obj, from local point from towards local point to. */
-void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
+void func_151D5714(Actor *obj, const Vec3f *from, const Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
     Vec3f start;
     Vec3f dir;
     s32 mtx;
-    Vec3f *srcs[2];
+    const Vec3f *srcs[2];
     Vec3f *dsts[2];
 
     if (obj->ob_matrix_ptr != NULL) {
@@ -823,26 +824,26 @@ void func_151D57F8(Actor *obj, u8 slot) {
 
     func_151D5A18(obj, &pos, &forward, &axis1, &axis2, D_8008FC8C[slot], *D_8008FC94[slot]);
     func_151D5174(obj, &pos, &forward, &axis1, &axis2, &pointBuf, &dirBuf, &origin, &dir, NULL);
-    obj->mv->unk109 = 1;
+    obj->mv->rayHit.hitType = 1;
     if (origin == NULL) {
         origin = &pos;
     }
     if (dir == NULL) {
         dir = &forward;
     }
-    obj->mv->unkB8 = origin->x + dir->x * 9999.0f;
-    obj->mv->unkBC = origin->y + dir->y * 9999.0f;
-    obj->mv->unkC0 = origin->z + dir->z * 9999.0f;
-    if (obj->mv->unk109) {
+    obj->mv->rayHit.pos.x = origin->x + dir->x * 9999.0f;
+    obj->mv->rayHit.pos.y = origin->y + dir->y * 9999.0f;
+    obj->mv->rayHit.pos.z = origin->z + dir->z * 9999.0f;
+    if (obj->mv->rayHit.hitType) {
         Vec3f delta;
         f32 len;
 
-        delta.x = obj->mv->unkB8 - pos.x;
-        delta.y = obj->mv->unkBC - pos.y;
-        delta.z = obj->mv->unkC0 - pos.z;
+        delta.x = obj->mv->rayHit.pos.x - pos.x;
+        delta.y = obj->mv->rayHit.pos.y - pos.y;
+        delta.z = obj->mv->rayHit.pos.z - pos.z;
         if (func_15145128(&delta, &delta, &len, NULL) != 0) {
             func_15081690(obj, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z,
-                          &obj->mv->unkB0, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
+                          &obj->mv->rayHit, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
         }
     }
     func_150636A4(obj);
@@ -851,7 +852,7 @@ void func_151D57F8(Actor *obj, u8 slot) {
 /* Computes obj's axes (forward, axis1, axis2) and the world position of localPos on bone `bone`;
    objects without bone matrices use a point 34 units out and 49 up from their origin. */
 void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, Vec3f *localPos, u8 bone) {
-    Vec3f *src;
+    const Vec3f *src;
     Vec3f *dst;
 
     func_15145740(obj, forward, axis1, axis2, 0.8110000491f);
@@ -881,12 +882,12 @@ void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *
     }
 }
 
-extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
+extern s32 (*D_80086C90[])(Actor *, Actor *, void *);
 
 /* Runs func_151452C4(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter
    is not -1, only for those D_80086C90[filter] accepts). Returns a mask with bit i cleared for each
    object i it reports. */
-s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, s32 filterArg) {
+s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg) {
     f32 radius;
     Actor *obj;
     s32 mask;
@@ -922,32 +923,35 @@ s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, s32 filterArg) {
 }
 
 /* Returns in *out the half of the double buffer slots[index] selected by D_800BE9C0, allocating the buffer
-   (2 * size bytes) on first use; *allocated (optional) is set when it was allocated now. */
-void func_151D5D60(void **slots, s16 index, s32 size, void **out, s8 *allocated) {
-    s8 dummy;
+   (2 * size bytes) on first use; *allocated (optional) is set when it was allocated now. The buffers hold
+   vertices of several types, so slots points to an array of buffer pointers of any type and out to a
+   pointer of any type. */
+void func_151D5D60(void *slots, s16 index, s32 size, void *out, u8 *allocated) {
+    u8 dummy;
 
     if (allocated == NULL) {
         allocated = &dummy;
     }
     *allocated = 0;
-    if (slots[index] == NULL) {
-        slots[index] = (void *)allocate_memory(size * 2, 1, 2, 1);
-        if (slots[index] == NULL) {
-            *out = NULL;
+    if (((void **)slots)[index] == NULL) {
+        ((void **)slots)[index] = allocate_memory(size * 2, 1, 2, 1);
+        if (((void **)slots)[index] == NULL) {
+            *(void **)out = NULL;
             return;
         }
         *allocated = 1;
     }
-    *out = (u8 *)slots[index] + ((D_800BE9C0 != 0) ? 0 : size);
+    *(void **)out = (u8 *)((void **)slots)[index] + ((D_800BE9C0 != 0) ? 0 : size);
 }
 
 /* Releases the four buffers of a func_151D5D60 slot array. */
-void func_151D5E30(s32 *slots) {
+void func_151D5E30(void *slots) {
     u8 i;
 
     for (i = 0; i < 4; i++) {
-        if (slots[i] != 0) {
-            func_100043B4((s32 *)slots[i], 3);
+        // matching: the buffer addresses are read as integers and converted to pointers
+        if (((s32 *)slots)[i] != 0) {
+            func_100043B4((void *)((s32 *)slots)[i], 3);
         }
     }
 }

@@ -4,7 +4,7 @@
 
 // func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
 // compiled with a different view of it.
-void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
 
 
@@ -96,10 +96,10 @@ s32 func_150D83D8(ModelAttachment *att, Actor *actor) {
 }
 
 /* Writes the two-halfword command { 0x42, 0 } and returns the position after it. */
-s16 *func_150D8590(s16 *cmd, s32 arg1) {
-    cmd[0] = 0x42;
-    cmd[1] = 0;
-    return cmd + 2;
+GameCommand *func_150D8590(GameCommand *cmd, s32 arg1) {
+    cmd->opcode = 0x42;
+    cmd->value = 0;
+    return cmd + 1;
 }
 
 
@@ -132,7 +132,7 @@ void func_150D85AC(Actor *actor) {
                     pos.z = probe.z;
                     randomScale = func_150ADA68();
                     random.value = func_150ADA20();
-                    func_150E7FEC(randomScale * 109.0f + 140.0f, (u8)((random.value % 86U) + 170),
+                    func_150E7FEC(randomScale * 109.0f + 140.0f, ((random.value % 86U) + 170),
                                   &ground.tri, &pos, (func_150ADA20() % 251U) + 500, 0, 1, 0, 0, 0, 255, 0);
                 }
                 func_150E83AC(&pos, (func_150ADA20() % 62U) + 120, 255, 1);

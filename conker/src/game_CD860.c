@@ -33,7 +33,7 @@ s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
     case 5:
         // matching: `== 0` would compile to sltiu; the inverted test keeps the branchy form
         mode = (msg->params[0] == 999) ? 2 : (msg->params[0] != 0) ? 0 : 1;
-        func_151C970C(mode, (s32)&zones[slot]);
+        func_151C970C(mode, &zones[slot]);
         break;
     }
     return 0;

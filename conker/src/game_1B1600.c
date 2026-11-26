@@ -225,7 +225,7 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     maxX = 0.0f;
     maxZ = -1000000.0f;
     for (i = 0; i < 8; i++) {
-        func_150A7960((f32 *)D_800DF0F8[slot], D_8008D3F8[i][0] * halfX + objPos.x, D_8008D3F8[i][1] * halfY + objPos.y,
+        func_150A7960(D_800DF0F8[slot], D_8008D3F8[i][0] * halfX + objPos.x, D_8008D3F8[i][1] * halfY + objPos.y,
                       D_8008D3F8[i][2] * halfZ + objPos.z, &sx, &sy, &sz);
         if (sz == 0.0f) {
             sz = 0.0001f;
@@ -585,7 +585,7 @@ ClipVtx *func_15185DD4(ClipVtx *in, s32 count, s32 plane, ClipVtx *out) {
  * y == 0 into four quadrants, whose vertex ranges end at quadEnd[1..4] (quadEnd[0] = 0). Returns the
  * number of vertices written.
  */
-s32 func_15185F24(ShadowVtx *in, s32 count, s32 maxVerts, Vtx_t *out, s32 *quadEnd, s32 split) {
+s32 func_15185F24(ShadowVtx *in, s32 count, s32 maxVerts, Vtx *out, s32 *quadEnd, s32 split) {
     ClipVtx buf[2][26];
     s32 i;
     s32 j;
@@ -631,19 +631,19 @@ s32 func_15185F24(ShadowVtx *in, s32 count, s32 maxVerts, Vtx_t *out, s32 *quadE
     }
     dst = buf[i & 1];
     for (i = 0; i < count; i++) {
-        out[i].ob[0] = dst->modelX;
-        out[i].ob[1] = dst->modelY;
-        out[i].ob[2] = dst->modelZ;
+        out[i].v.ob[0] = dst->modelX;
+        out[i].v.ob[1] = dst->modelY;
+        out[i].v.ob[2] = dst->modelZ;
         scale = 1020.0f / dst->z;
         dst->x *= scale;
         dst->y *= scale;
-        out[i].tc[0] = 1024.0f - dst->x;
-        out[i].tc[1] = dst->y + 1024.0f;
-        out[i].cn[0] = 0;
-        out[i].cn[1] = 0;
-        out[i].cn[2] = 0;
-        out[i].cn[3] = (u32)(D_800DE02C - ((dst->z - D_800D368C) / (D_800D3688 - D_800D368C)) * D_800DE02C);
-        out[i].flag = 0;
+        out[i].v.tc[0] = 1024.0f - dst->x;
+        out[i].v.tc[1] = dst->y + 1024.0f;
+        out[i].v.cn[0] = 0;
+        out[i].v.cn[1] = 0;
+        out[i].v.cn[2] = 0;
+        out[i].v.cn[3] = (u32)(D_800DE02C - ((dst->z - D_800D368C) / (D_800D3688 - D_800D368C)) * D_800DE02C);
+        out[i].v.flag = 0;
         dst++;
     }
     return count;
@@ -662,7 +662,7 @@ extern s32 D_800DF0F4;
  * func_150A5B90 to fill out[] (up to end). Returns the number of vertices written.
  */
 s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx *end) {
-    u8 *cells[16];
+    ZoneNode *cells[16];
     s32 count;
     u32 bits[0x1760 / 32];
     u32 face;
@@ -678,7 +678,7 @@ s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx 
         while (count != 0) {
             face = 0;
             count--;
-            p = cells[count] + 0xE;
+            p = (u8 *)(cells[count] + 1); // the leaf's delta-encoded face list follows its node
             if (D_800DE041 != 0) {
                 while (*p != 0) {
                     c = *p;

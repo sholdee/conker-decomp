@@ -126,23 +126,7 @@ void func_15169C70(Debris *debris) {
     }
 }
 
-/* The 0x18-byte template func_15167AD8 copies into a new SpriteFx from its anim field on. */
-typedef struct {
-    /* 0x00 */ void *anim;
-    /* 0x04 */ s16 frame;
-    /* 0x06 */ s16 frameStep;
-    /* 0x08 */ s16 x;
-    /* 0x0A */ s16 y;
-    /* 0x0C */ s16 z;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s8 fadeStep;
-    /* 0x13 */ u8 pad13;        /* alpha, set by func_15167AD8 */
-    /* 0x14 */ s8 callback;     /* index into D_8008CA20 */
-    /* 0x15 */ u8 unk15;
-} SpriteFxTemplate;
-
-extern void *D_8008CADC;
+extern EffectTexture *D_8008CADC;
 
 /* Drop callback: once it reaches the floor it dies and leaves a splash sprite; in the air, x/z drag. */
 void func_1516A3F4(DropParticle *drop) {

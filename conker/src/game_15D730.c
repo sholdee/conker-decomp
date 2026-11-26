@@ -17,7 +17,7 @@ extern IdList3 D_800A37F0;
 
 
 /* Allocates a particle of the given kind with dataSize bytes of per-particle data and copies desc into it. */
-SpriteParticle *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5) {
+void *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5) {
     SpriteParticle *particle;
     s32 type;
 
@@ -52,11 +52,11 @@ SpriteParticle *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground,
     return particle;
 }
 
-SpriteParticle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4) {
+void *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4) {
     return func_15130280(desc, kind, NULL, dataSize, arg3, arg4);
 }
 
-SpriteParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
+void *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
     return func_15130374(desc, kind, dataSize, 0xFF, 0);
 }
 
@@ -449,12 +449,12 @@ s32 func_1513170C(SpriteParticle *p, Vec3f *prevPos) {
     return TRUE;
 }
 
-void func_1513173C(SpriteParticle *p) {
-    func_15169804(&p->head.header);
+void func_1513173C(DescParticleHead *p) {
+    func_15169804(&p->header);
 }
 
-void func_1513175C(SpriteParticle *p) {
-    func_15169824(&p->head.header);
+void func_1513175C(DescParticleHead *p) {
+    func_15169824(&p->header);
 }
 
 extern void (*D_80089814[])(SpriteParticle *);
@@ -490,9 +490,9 @@ s32 func_15131814(s32 arg0, s32 arg1) {
 }
 
 /* Moves the particle's x/z offset around an ellipse with radii amplitude[0..1] as phase advances. */
-void func_15131828(SpriteParticle *p, f32 *amplitude, u8 *phase, u8 *phaseStep) {
-    p->head.desc.offset.x = amplitude[0] * func_151423D8((u8)(phase[0] - 0x40));
-    p->head.desc.offset.z = amplitude[1] * func_151423D8((u8)(phase[1] - 0x40));
+void func_15131828(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseStep) {
+    head->desc.offset.x = amplitude[0] * func_151423D8((u8)(phase[0] - 0x40));
+    head->desc.offset.z = amplitude[1] * func_151423D8((u8)(phase[1] - 0x40));
     phase[0] += phaseStep[0] * D_800BE9E4;
     phase[1] += phaseStep[1] * D_800BE9E4;
 }
@@ -620,7 +620,7 @@ void func_15131D4C(s32 arg0, u8 arg1) {
     IdList3 types;
 
     types = D_800A37F0;
-    func_15169260(&types, 3, arg0, arg1);
+    func_15169260(types.ids, 3, arg0, arg1);
 }
 
 /* Particle update func: pulses the particle's width and height (p->data.pulse). */

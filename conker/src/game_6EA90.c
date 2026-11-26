@@ -95,39 +95,26 @@ void func_150415E0(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noComb
     }
 }
 
-/* Sprite parameters passed to func_15094F70 / func_15095A48. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 w;
-    /* 0x08 */ s16 h;
-    /* 0x0A */ u8 alpha;
-    /* 0x0B */ u8 unkB;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 flags; /* flip bits */
-    /* 0x0E */ u8 padE[2];
-} GlyphSprite;
-
-extern u8 D_800915DC[];
-extern u8 D_800915EC[];
-extern u8 D_800915FC[];
-extern u8 D_8009160C[];
-extern u8 D_8009161C[];
-extern u8 D_8009162C[];
-extern u8 D_8009163C[];
-extern u8 D_8009164C[];
-extern u8 D_8009165C[];
-extern u8 D_80091690[];
-extern u8 D_800916AC[];
-extern u8 D_800916C8[];
-extern u8 D_800916E4[];
-extern u8 D_80091700[];
-extern u8 D_80091710[];
-extern u8 D_80091720[];
-extern u8 D_80091730[];
-extern u8 D_80091740[];
-extern u8 D_80091750[];
-extern u8 D_80091764[];
+extern TextureDesc D_800915DC;
+extern TextureDesc D_800915EC;
+extern TextureDesc D_800915FC;
+extern TextureDesc D_8009160C;
+extern TextureDesc D_8009161C;
+extern TextureDesc D_8009162C;
+extern TextureDesc D_8009163C;
+extern TextureDesc D_8009164C;
+extern TextureDesc D_8009165C;
+extern TextureDesc D_80091690;
+extern TextureDesc D_800916AC;
+extern TextureDesc D_800916C8;
+extern TextureDesc D_800916E4;
+extern TextureDesc D_80091700;
+extern TextureDesc D_80091710;
+extern TextureDesc D_80091720;
+extern TextureDesc D_80091730;
+extern TextureDesc D_80091740;
+extern TextureDesc D_80091750;
+extern TextureDesc D_80091764;
 extern s32 D_800A4AC8[][2];
 
 /*
@@ -138,9 +125,8 @@ extern s32 D_800A4AC8[][2];
  */
 Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 scaleX, f32 scaleY, s32 len) {
     u8 c;
-    u8 *tex;
-    s32 pad1AC; // matching: stack-slot pads (frame layout of the IDO original)
-    GlyphSprite sprite;
+    TextureDesc *tex;
+    SpriteParams sprite;
     s32 frame;
     f32 sx;
     f32 sy;
@@ -156,7 +142,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     s32 i;
     s32 dtdy;
     s32 yi;
-    s32 pad15C;
+    s32 pad15C; // matching: stack-slot pads (frame layout of the IDO original)
     s32 pad158;
     s32 pad154;
     s32 pad150;
@@ -272,90 +258,90 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
             case 0xA6:
                 D_800CBD5B = 1;
                 D_800CBD5C += D_800BE9E4 * 8;
-                flash = (cosf((f32)D_800CBD5C * 0.02454369329f) + 1.0f) * 0.5f;
+                flash = (cosf(D_800CBD5C * 0.02454369329f) + 1.0f) * 0.5f;
                 break;
             case 0xA7:
                 D_800CBD5D = 1;
                 break;
             case 0xA8:
-                tex = D_800915DC;
+                tex = &D_800915DC;
                 frame = 0;
                 break;
             case 0xA9:
-                tex = D_800915EC;
+                tex = &D_800915EC;
                 frame = 0;
                 break;
             case 0xAE:
-                tex = D_800915FC;
+                tex = &D_800915FC;
                 frame = 0;
                 break;
             case 0xAF:
-                tex = D_8009160C;
+                tex = &D_8009160C;
                 frame = 0;
                 break;
             case 0xB0:
-                tex = D_8009161C;
+                tex = &D_8009161C;
                 frame = 0;
                 break;
             case 0xAA:
-                tex = D_8009162C;
+                tex = &D_8009162C;
                 frame = 0;
                 break;
             case 0xAB:
-                tex = D_8009163C;
+                tex = &D_8009163C;
                 frame = 0;
                 break;
             case 0xAC:
-                tex = D_8009164C;
+                tex = &D_8009164C;
                 frame = 0;
                 break;
             case 0xAD:
-                tex = D_8009165C;
+                tex = &D_8009165C;
                 frame = 0;
                 break;
             case 0xB2:
-                tex = D_800916AC;
+                tex = &D_800916AC;
                 frame = (D_800CBD4E >> 8) & 3;
                 break;
             case 0xB4:
-                tex = D_800916C8;
+                tex = &D_800916C8;
                 frame = (D_800CBD4E >> 8) & 3;
                 break;
             case 0xB3:
-                tex = D_800916E4;
+                tex = &D_800916E4;
                 frame = (D_800CBD4E >> 8) & 3;
                 break;
             case 0xB5:
-                tex = D_80091700;
+                tex = &D_80091700;
                 frame = (D_800CBD4E >> 8) & 3;
                 break;
             case 0xB6:
-                tex = D_80091710;
+                tex = &D_80091710;
                 frame = 0;
                 break;
             case 0xB7:
-                tex = D_80091720;
+                tex = &D_80091720;
                 frame = 0;
                 break;
             case 0xB8:
-                tex = D_80091730;
+                tex = &D_80091730;
                 frame = 0;
                 break;
             case 0xB9:
-                tex = D_80091740;
+                tex = &D_80091740;
                 frame = 0;
                 break;
             case 0xBA:
-                tex = D_80091750;
+                tex = &D_80091750;
                 frame = 0;
                 break;
             case 0xBB:
-                tex = D_80091764;
+                tex = &D_80091764;
                 frame = (D_800CBD4E >> 10) & 1;
                 break;
             case 0xB1:
                 frame = (D_800CBD4E >> 8) % 10;
-                tex = D_80091690;
+                tex = &D_80091690;
                 break;
         }
         gDPPipeSync(gfx++);
@@ -379,11 +365,11 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 dx = D_800BE628[D_80082FA4].scaleX * ((w >> 1) * scale) * D_800380A0;
                 x += dx;
                 dy = D_800BE628[D_80082FA4].scaleY * ((h >> 1) * scale) * D_800380A4;
-                sprite.flags = 0;
+                sprite.flip = 0;
                 sprite.alpha = a;
                 y += dy;
-                sprite.w = scaleX * scale;
-                sprite.h = scaleY * scale;
+                sprite.scaleX = scaleX * scale;
+                sprite.scaleY = scaleY * scale;
                 gSPDisplayList(gfx++, D_800873D0);
                 D_800D2DAB = 1;
                 gDPSetOtherMode(gfx++, 0x002C3F, D_800A4AC8[25][0] | D_800A4AC8[25][1] | 4);
@@ -422,8 +408,8 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 if (D_800CBD5D != 0) {
                     gy += wave;
                 }
-                x += (f32)D_80085994[font][c].x * D_800380A0 * sx;
-                y += ((f32)D_80085994[font][c].y - gy) * D_800380A4 * sy;
+                x += D_80085994[font][c].x * D_800380A0 * sx;
+                y += (D_80085994[font][c].y - gy) * D_800380A4 * sy;
                 ix = scaleX;
                 iy = scaleY;
                 if (D_800BE628[D_80082FA4].left <= x + w * D_800380A0 && x < D_800BE628[D_80082FA4].right &&
@@ -438,13 +424,13 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                     gDPLoadBlock(gfx++, 1, 0, 0, ((((w + 7) & 0xFFF8) * (h + 1) + 1) >> 1) - 1, 0);
                     yi = y;
                     gSPScisTextureRectangle(gfx++,
-                        (s32)(x * 4), yi * 4,
-                        (s32)(x * 4 + (f32)((w * ix) / 4096) * 4),
+                        (x * 4), yi * 4,
+                        (x * 4 + (f32)((w * ix) / 4096) * 4),
                         ((s32)(f32)((h * iy) / 4096) + yi) * 4,
-                        3, 0, ((-(s32)((y - (f32)yi) * 32.0f) * 4096) + 0x20000) / iy, dsdx, dtdy);
+                        3, 0, ((-(s32)((y - yi) * 32.0f) * 4096) + 0x20000) / iy, dsdx, dtdy);
                 }
-                y -= ((f32)D_80085994[font][c].y - gy) * D_800380A4 * sx;
-                x += (f32)(D_80085994[font][c].w - 1) * D_800380A0 * sy;
+                y -= (D_80085994[font][c].y - gy) * D_800380A4 * sx;
+                x += (D_80085994[font][c].w - 1) * D_800380A0 * sy;
                 }
             }
             i++;

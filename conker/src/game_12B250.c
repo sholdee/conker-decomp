@@ -8,10 +8,10 @@ extern Vec3f D_800A1F7C;
 extern Vec3f D_800A1F88; // launch point, in bone space
 
 /* Fires a projectile (func_151C229C) from obj's launch point towards its target, after the muzzle
- * effects of func_150FDF38. Returns func_151C229C's result, or 0 without an obj. */
+ * effects of func_150FDF38. Returns func_151C229C's result, or NULL without an obj. */
 // matching: arg1 is a u8 read from its stack slot at each use; a K&R u8 parameter is
 // narrowed once into a spilled copy instead
-s32 func_150FDDA0(Actor *obj, s32 arg1, s32 arg2) {
+Game1EF500Trail *func_150FDDA0(Actor *obj, s32 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
     Vec3f dir;
     Vec3f muzzle;
@@ -23,7 +23,7 @@ s32 func_150FDDA0(Actor *obj, s32 arg1, s32 arg2) {
     f32 rand0;
 
     if (obj == NULL) {
-        return 0;
+        return NULL;
     }
 
     func_15145740(obj, &target, &dir, NULL, 0.0f);
@@ -50,7 +50,7 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
 {
     Vec3f muzzle;
     Vec3f launch;
-    Vec3f *src[2];
+    const Vec3f *src[2];
     Vec3f *dst[2];
 
     if (obj != NULL) {
@@ -59,7 +59,7 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
             src[1] = &D_800A1F88;
             dst[0] = &muzzle;
             dst[1] = &launch;
-            func_15145EA4(src, dst, (Mtx *)obj->ob_matrix_ptr + D_80088B80, 2);
+            func_15145EA4(src, dst, obj->ob_matrix_ptr + D_80088B80, 2);
         } else {
             muzzle.x = obj->xpos;
             muzzle.y = obj->ypos + 56.0f;
@@ -87,15 +87,15 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
     u8 arg2;
     s32 arg3;
 {
-    f32 params[2];
+    ParticleSize params;
     u8 cameraMask;
     s32 pad; // matching: unused stack slot
     s32 random1;
     s32 random0;
 
     if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
-        params[1] = func_150ADA68() * 1.5f + 2.0f;
-        params[0] = func_150ADA68() * 10.10000038f + 2.059999943f;
+        params.height = func_150ADA68() * 1.5f + 2.0f;
+        params.width = func_150ADA68() * 10.10000038f + 2.059999943f;
 
         if (obj->mv != NULL && obj->mv->SniperState != 0 && obj->CameraPtr != NULL) {
             cameraMask = ~(1 << obj->CameraPtr->CNumber) & 0xFF;
@@ -105,7 +105,7 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
 
         random0 = func_150ADA20();
         random1 = func_150ADA20();
-        func_15102B38(obj, D_80088B80, &D_800A1F70, &D_800A1F7C, params, (random0 % 5U) + 6, (random1 % 101U) + 155,
+        func_15102B38(obj, D_80088B80, &D_800A1F70, &D_800A1F7C, &params, (random0 % 5U) + 6, (random1 % 101U) + 155,
                       func_150ADA68() * 199.0f + 501.0f, muzzle, cameraMask, 0, -1, arg2, arg3);
     }
 }

@@ -64,7 +64,7 @@ typedef struct Game1EF500TrailExt {
 } Game1EF500TrailExt; /* 0xB0 */
 
 /* The projectile object (allocated by func_1513D2F0). */
-typedef struct {
+typedef struct Game1EF500Trail {
     /* 0x000 */ DefParticleHead head;    /* head.def.unk44: alpha */
     /* 0x110 */ Game1EF500TrailExt trail;
 } Game1EF500Trail;
@@ -104,7 +104,7 @@ typedef struct {
 } Func151C7038Arg;
 
 /* game_119370.c */
-s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3);
+Game1EF500Trail *func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3);
 s32 func_150EC3D4(Actor *actor, Actor *self);
 void func_150EC45C(void *particle);
 
@@ -119,7 +119,7 @@ void func_150EEC84(Actor *obj);
 void func_150EEDA8(Actor *obj);
 
 /* game_12B250.c */
-s32 func_150FDDA0(Actor *obj, s32 arg1, s32 arg2);
+Game1EF500Trail *func_150FDDA0(Actor *obj, s32 arg1, s32 arg2);
 void func_150FDF38(Actor *obj, u8 arg1, s32 arg2, Vec3f *muzzleOut, Vec3f *launchOut);
 void func_150FE0B8(Actor *obj, Vec3f *muzzle, u8 arg2, s32 arg3);
 void func_150FE248(Actor *obj, s32 arg1, Vec3f *out);
@@ -138,7 +138,7 @@ ModelAttachment *func_150FF288(Actor *obj);
 void func_150FF2AC(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
 void func_150FF2D4(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal,
                    Vec3f *direction, Vec3f *axis0, Vec3f *axis1, Vec3f *output0, Vec3f *output1,
-                   s32 *value0, s32 *value1, Vec3f *endpoint, Actor *obj, ModelAttachment *gun);
+                   Vec3f **value0, Vec3f **value1, Vec3f *endpoint, Actor *obj, ModelAttachment *gun);
 void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
 s32 func_150FF6B4(Actor *obj, s32 arg1, s32 arg2);
 u8 func_150FF6E0(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal, Vec3f *endpoint,
@@ -236,21 +236,22 @@ s32 func_151C4B0C(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 
 
 /* game_1F2730.c */
 void func_151C5280(Actor *obj, u8 arg1, s32 arg2);
-void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4);
-void func_151C56A4(f32 *pos, u8 arg1, s32 arg2);
+void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4);
+void func_151C56A4(Vec3f *pos, u8 arg1, s32 arg2);
 void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
                    s32 arg7);
-void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect);
+void func_151C5E74(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
 SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
-                        u8 altUnk62, s32 arg8, u8 arg9, s32 argA);
-void func_151C61A0(Vec3f *arg0, Vec3f *arg1, u8 arg2, s32 arg3);
+                        u8 altUnk62, CollisionHit *arg8, u8 arg9, s32 argA);
+void func_151C61A0(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3);
 s32 func_151C6290(Actor *obj, Actor *self, s32 arg2);
 extern const Vec3f D_800AAA90; /* bone-attachment offset */
 extern const Vec3f D_800AAA9C;
 extern const Vec3f D_800AAAA8;
 
 /* game_1F3780.c */
-s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5, s32 arg6);
+Game1EF500Trail *func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
+                               s32 arg6);
 void func_151C6974(Actor *arg0, s32 arg1, Vec3f *out);
 void func_151C69A0(Actor *arg0, s32 arg1, Vec3f *out);
 void func_151C69CC(Actor *arg0, Vec3f *out, u8 side);

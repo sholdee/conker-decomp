@@ -147,25 +147,26 @@ void func_1513259C(ModelParticle *particle) {
     func_15169824(&particle->header);
 }
 
-/* Free the buffers func_1513264C allocated into unk154[0..D_80082FA0] and unk164. */
+/* Free the light buffers func_1513264C allocated into link.handles[0..D_80082FA0] and link.sharedHandle. */
 void func_151325C8(ModelParticle *particle) {
     s32 i;
 
+    // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
     for (i = 0; i <= D_80082FA0; i++) {
-        if (particle->unk154[i] != 0) {
-            func_100043B4((s32 *)particle->unk154[i], 4);
+        if (particle->link.handles[i] != NULL) {
+            func_100043B4((void *)(s32)particle->link.handles[i], 4);
         }
     }
 
-    if (particle->unk164 != 0) {
-        func_100043B4((s32 *)particle->unk164, 4);
+    if (particle->link.sharedHandle != NULL) {
+        func_100043B4((void *)(s32)particle->link.sharedHandle, 4);
     }
 }
 
 /* Spawn a particle from a template: allocate it (failing past 300 live), find or load the shared node for
  * its model, copy the template, reset collision state (or copy `floor`) and allocate its buffers. */
-ModelParticle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floor, s32 extraSize, u8 arg5,
-                        s32 arg6) {
+void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floor, s32 extraSize, u8 arg5,
+                    s32 arg6) {
     ModelParticle *particle;
     ParticleNode *node;
     s32 i;
@@ -181,7 +182,7 @@ ModelParticle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, Collision
     if (D_800DC468[spawn->model] == 0) {
         node = allocate_memory(sizeof(ParticleNode), 1, 2, (spawn->flags & 0x400000) ? 2 : 1);
         if (node == NULL) {
-            func_15168A9C(particle);
+            func_15168A9C(&particle->header);
             func_10004074(particle);
             return NULL;
         }
@@ -206,7 +207,7 @@ ModelParticle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, Collision
                 node->keepLoaded = FALSE;
             }
         } else {
-            func_15168A9C(particle);
+            func_15168A9C(&particle->header);
             func_10004074(particle);
             func_10004074(node);
             return NULL;
@@ -224,7 +225,7 @@ ModelParticle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, Collision
             }
         }
         if (tries <= 0) {
-            func_15168A9C(particle);
+            func_15168A9C(&particle->header);
             func_10004074(particle);
             return NULL;
         }
@@ -250,24 +251,24 @@ ModelParticle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, Collision
         particle->floor.material = 0;
     }
     D_800DC63C++;
-    particle->unk150 = 0;
-    particle->unk14C = arg1;
-    particle->unk168 = arg2;
-    for (i = 0; i < ARRAY_COUNT(particle->unk154); i++) {
-        particle->unk154[i] = 0;
+    particle->link.unk4 = 0;
+    particle->link.model = arg1;
+    particle->link.unk1C = arg2;
+    for (i = 0; i < ARRAY_COUNT(particle->link.handles); i++) {
+        particle->link.handles[i] = NULL;
     }
-    particle->unk164 = 0;
+    particle->link.sharedHandle = NULL;
     if (arg1 != 0) {
         for (i = 0; i <= D_80082FA0; i++) {
-            particle->unk154[i] = func_1515D480(arg1);
+            particle->link.handles[i] = func_1515D480(arg1);
         }
-        particle->unk164 = func_1515D440();
+        particle->link.sharedHandle = func_1515D440();
     }
     particle->flags &= ~0x200000;
     return particle;
 }
 
-ModelParticle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5) {
+void *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5) {
     return func_1513264C(spawn, arg1, arg2, NULL, extraSize, arg4, arg5);
 }
 
@@ -347,7 +348,7 @@ Gfx *func_15132B80(Gfx *gfx, ModelParticle *arg1, s16 arg2) {
                         ((particle->flags & 0x800) ? 0 : G_LIGHTING) | ((particle->flags & 0x1000) ? 0 : 0x400000) |
                             G_CULL_BOTH | G_FOG | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     if (particle->flags & 0x800) {
-        gfx = func_151462C8(gfx, &particle->unk14C, particle->unk7A, particle->owner, particle->ownerId, arg2,
+        gfx = func_151462C8(gfx, &particle->link, particle->unk7A, particle->owner, particle->ownerId, arg2,
                             &particle->pos.x, (particle->flags & 0x1000) ? 1 : 0, particle->floor.material);
     }
     gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -540,7 +541,7 @@ void func_15133588(ModelParticle *particle, void *data, u8 event) {
     Actor *obj;
 
     if (event == 0x1B && particle->model == 0x22) {
-        func_151B9660(particle);
+        func_151B9660((LampParticle *)particle);
     }
     if (event == 0x2D) {
         ActorSwapMsg *swap = data;

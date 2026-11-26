@@ -2,35 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/*
- * Template for a type 0x10 model effect; func_15168BE4 copies it into the object's data (ModelFxData in
- * game_1944C0.c; the callback-2 update, func_15169C70, reads it as Debris in game_197120.c).
- */
-typedef struct {
-    /* 0x00 */ f32 position[3];
-    /* 0x0C */ f32 rotation[3];
-    /* 0x18 */ f32 velocity[3];
-    /* 0x24 */ f32 spin[3];
-    /* 0x30 */ f32 scale[3];
-    /* 0x3C */ s32 life;
-    /* 0x40 */ void *displayList;
-    /* 0x44 */ u32 pad44;
-    /* 0x48 */ f32 friction;
-    /* 0x4C */ f32 bounce;
-    /* 0x50 */ f32 spinDamp;
-    /* 0x54 */ u8 callback;     /* index into D_8008CA20 */
-    /* 0x55 */ u8 primA;
-    /* 0x56 */ u8 tileUlt;
-    /* 0x57 */ u8 phase;
-    /* 0x58 */ u8 flags;
-    /* 0x59 */ u8 floorOffset;
-    /* 0x5A */ u8 modelId;      /* the func_1518C900 resource displayList came from */
-    /* 0x5B */ u8 kind;
-    /* 0x5C */ u8 renderMode;
-    /* 0x5D */ u8 combineMode;
-    /* 0x5E */ u8 pad5E[2];
-} ModelFxTemplate;
-
 /* One piece of the func_15170F4C burst. */
 struct ModelBurstPiece {
     /* 0x00 */ u16 modelId;
@@ -66,7 +37,7 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, s32 style, f32 scale, s32 type
 /* Spawns six models bursting up and out of the actor, plus a ring of dust particles around its feet. */
 void func_15170B90(WorldObject *actor, s32 modelId, s32 kind, s32 mode, u8 owner, s32 list) {
     s32 i;
-    ModelFxTemplate fx;
+    ModelFxData fx;
     f32 x;
     f32 y;
     f32 z;
@@ -144,8 +115,8 @@ void func_15170EC4(WorldObject *actor, u8 owner, s32 list) {
 /* Spawns the six D_800A6ED8 pieces flying out of the actor. */
 void func_15170F4C(WorldObject *actor, u8 owner, s32 list) {
     s32 i;
-    ModelFxTemplate fx;
-    ModelBurstPiece *piece;
+    ModelFxData fx;
+    const ModelBurstPiece *piece;
     f32 x;
     f32 y;
     f32 z;
@@ -214,7 +185,7 @@ void func_151711C4(Actor *obj) {
 void func_15171200(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed, f32 minScale, f32 maxScale,
                    f32 radius, s32 kind, s32 life, f32 bounce, u8 owner, s32 list) {
     s32 i;
-    ModelFxTemplate fx;
+    ModelFxData fx;
     f32 scaleRange;
     void *displayList;
     f32 scaleZ;

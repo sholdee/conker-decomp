@@ -88,7 +88,7 @@ void func_150127B0(void) {
                 }
             }
         }
-        func_15012ED8((u32 *)D_800B0E00[0]);
+        func_15012ED8(D_800B0E00[0]);
     }
 }
 
@@ -103,16 +103,17 @@ void func_15012C84(Vtx *arg0, u32 arg1) {
     }
 }
 
-void func_15012ED8(u32 *arg0) {
+/* Records the colour of each G_SETENVCOLOR command (opcode 0xFB) in display list dl, up to its G_ENDDL. */
+void func_15012ED8(Gfx *dl) {
     s32 i;
     s32 op;
 
-    for (i = 0; (op = (s8)(arg0[i * 2] >> 24)) != -0x21; i++) {
+    for (i = 0; (op = (s8)(dl[i].words.w0 >> 24)) != -0x21; i++) {
         if (op == -5) {
             D_800BE550[D_800BE564] = i;
-            D_800BE530[D_800BE564 * 3] = (arg0[i * 2 + 1] >> 24) & 0xFF;
-            D_800BE530[D_800BE564 * 3 + 1] = (arg0[i * 2 + 1] >> 16) & 0xFF;
-            D_800BE530[D_800BE564 * 3 + 2] = (arg0[i * 2 + 1] >> 8) & 0xFF;
+            D_800BE530[D_800BE564 * 3] = (dl[i].words.w1 >> 24) & 0xFF;
+            D_800BE530[D_800BE564 * 3 + 1] = (dl[i].words.w1 >> 16) & 0xFF;
+            D_800BE530[D_800BE564 * 3 + 2] = (dl[i].words.w1 >> 8) & 0xFF;
             D_800BE564++;
         }
     }

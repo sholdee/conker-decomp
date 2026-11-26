@@ -19,7 +19,7 @@ void func_150D2110(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 dark
     data.litAlpha = litAlpha;
     data.darkAlpha = darkAlpha;
 
-    effect = (StrobeEffect *)func_15149130(duration, -1, 0x2F, 2, 1, 0x26, sizeof(data), owner, kind);
+    effect = func_15149130(duration, -1, 0x2F, 2, 1, 0x26, sizeof(data), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -73,8 +73,8 @@ void func_150D2374(StrobeSpawner *spawner) {
 
     data->delay -= D_800BE9E4;
     if (data->delay < 0) {
-        func_150D2110(func_150ADA20() % (u32)(data->durationRange + 1) + data->minDuration, data->litTime,
+        func_150D2110(func_150ADA20() % (data->durationRange + 1) + data->minDuration, data->litTime,
                       data->darkTime, data->litAlpha, data->darkAlpha, spawner->unkC, spawner->unk1);
-        data->delay = func_150ADA20() % (u32)(data->delayRange + 1) + data->minDelay;
+        data->delay = func_150ADA20() % (data->delayRange + 1) + data->minDelay;
     }
 }

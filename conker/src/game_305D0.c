@@ -40,7 +40,7 @@ void func_150031EC(s32 levelId) {
     LevelModelEntry *models;
     ModelAsset *model;
     s32 count;
-    s32 loaded;
+    u32 loaded;
     u32 i;
     s32 j;
     s32 k;

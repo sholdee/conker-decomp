@@ -160,7 +160,7 @@ void func_15007B3C(void) {
     }
     func_1500E470(level);
     func_15009150(level);
-    func_15085B70((void *)level);
+    func_15085B70(level);
     func_15008DD0();
     func_1501B640(0);
     func_15080200();

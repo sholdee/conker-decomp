@@ -355,7 +355,7 @@ void *func_1502B6BC(u32 *size, s32 count, s32 *countOut, s32 depth, ...) {
  * Follows `depth` table indices from the root ROM table and loads the data reached into a new buffer
  * (see func_1502B350), stored in *data (NULL if missing). Returns the size loaded.
  */
-u32 func_1502B7F0(void **data, s32 depth, ...) {
+u32 func_1502B7F0(void *data, s32 depth, ...) {
     va_list args;
     u8 *addr;
     s32 index;
@@ -375,9 +375,9 @@ u32 func_1502B7F0(void **data, s32 depth, ...) {
     }
 
     if (size != 0) {
-        *data = func_1502B350(addr, info, &size);
+        *(void **)data = func_1502B350(addr, info, &size);
     } else {
-        *data = NULL;
+        *(void **)data = NULL;
     }
 
     return size;

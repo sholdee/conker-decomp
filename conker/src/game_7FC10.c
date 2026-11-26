@@ -36,7 +36,7 @@ void func_15052760(Actor *obj, s16 prevAngle) {
         }
         rate = obj->unk1E5;
         if (rate != 0) {
-            obj->lean_angle += ((f32) (turnRate / (rate * divisor)) - obj->lean_angle) * blend;
+            obj->lean_angle += ( (turnRate / (rate * divisor)) - obj->lean_angle) * blend;
         }
     }
 }
@@ -74,8 +74,8 @@ void func_150528C8(Actor *obj) {
     } else {
         targetY = D_800D2104[obj->listpos][obj->unk21E + 1].y;
     }
-    if ((s16)obj->unk224 != 0) {
-        targetY = (s16)obj->unk224;
+    if (obj->unk224 != 0) {
+        targetY = obj->unk224;
     }
     if ((obj->unk223 == 14) || (obj->unk223 == 3)) {
         targetY = movement_obj[obj->unk222].ypos - 40.0f;
@@ -94,8 +94,8 @@ void func_150528C8(Actor *obj) {
     }
     if (obj->character_type == 8) {
         targetY = movement_obj[obj->unk222].ypos - 40.0f;
-        if ((s16)obj->unk224 != 0) {
-            targetY = (s16)obj->unk224;
+        if (obj->unk224 != 0) {
+            targetY = obj->unk224;
         }
         if ((floorY < obj->ypos) && (obj->yspd > 0.0f)) {
             obj->yspd *= 0.8000000119f;
@@ -129,7 +129,7 @@ void func_150528C8(Actor *obj) {
                 obj->mv->unk12C = 0;
             }
             if ((obj->mv->pressedButtons & 0x2000) && (obj->energy != 0)) {
-                func_150D7790((u8 *)obj, obj->mv->context_b & 0x7F);
+                func_150D7790(obj, obj->mv->context_b & 0x7F);
             }
         }
         func_1504CA60(obj);
@@ -141,7 +141,7 @@ void func_150528C8(Actor *obj) {
     } else {
         // matching: as above, the compare needs the u32 cast
         if ((heightMode != 2) && ((u32)obj->unk226 != 0)) {
-            range = (u32)obj->unk226 * 0.1000000015f;
+            range = obj->unk226 * 0.1000000015f;
             func_15058EA4(obj, targetY, range, targetY, -range, climbSpeed, -climbSpeed);
         }
         if ((autoTilt != 0) && (obj->character_type != 0x49) && !(obj->unk22C & 8)) {

@@ -8,16 +8,16 @@ extern s16  D_800E0E14;
 extern s16  D_800E0E16;
 extern u8   D_800E0E18;
 extern u8   D_800E0E2C;
-extern s32  D_800E0E24;
+extern void *D_800E0E24;
 extern s16  D_800E0DB0;
 extern s16  D_800E0DB2;
 extern s32  D_800E0DD8;
 extern s32  D_800E0DE0;
 extern s32  D_800E0DE4;
-extern s32  D_800E0DFC;
+extern Mp3ReadFn D_800E0DFC;
 
-extern s32  D_800E0D84;
-extern s32  D_800E0D88;
+extern Mp3Decoder *D_800E0D84;
+extern void *D_800E0D88; /* D_800E0D80.unk8 */
 extern s16  D_800E0D8C;
 extern s16  D_800E0D8E;
 extern s16  D_800E0D90;
@@ -33,8 +33,8 @@ extern s16  D_800E0DA2;
 extern s16  D_800E0DA4;
 extern s32  D_800E0DA8;
 extern s32  D_800E0DAC;
-extern s32  D_800E0DDC;
-extern s32  D_800E0DE8;
+extern void *D_800E0DDC; /* D_800E0D80.unk5C */
+extern u8  *D_800E0DE8;
 extern s32  D_800E0DEC;
 extern s32  D_800E0DF0;
 extern void *D_800E0DF4[];
@@ -69,15 +69,15 @@ void func_151F2960(s32 arg0, s32 arg1) {
             D_800E0E2C = 0;
             return;
         }
-        D_800E0E20 = (s32 *)func_1502B5C8(0, 2, 0x17, 4);
+        D_800E0E20 = func_1502B5C8(0, 2, 0x17, 4);
         if (D_800E0E20 != 0) {
             func_100043B4(D_800E0E20, 0xFF);
         }
-        D_800E0E24 = (s32)func_1502B5C8(0, 2, 0x17, 5);
+        D_800E0E24 = func_1502B5C8(0, 2, 0x17, 5);
         if (D_800E0E24 != 0) {
             func_100043B4(D_800E0E24, 0xFF);
         }
-        D_800E0E28 = (s32)func_1502B5C8(0, 2, 0x17, 6);
+        D_800E0E28 = func_1502B5C8(0, 2, 0x17, 6);
         if (D_800E0E28 != 0) {
             func_100043B4(D_800E0E28, 0xFF);
         }
@@ -160,15 +160,15 @@ void func_151F2D6C(s32 arg0, s32 arg1) {
 
 void func_151F2DFC(s32 arg0, s32 arg1) {
     if (arg0 >= 0x80) {
-        arg0 = (u16)0x7F;
+        arg0 = 0x7F;
     } else {
         if (arg0 < 0) {
-            arg0 = (u16)0;
+            arg0 = 0;
         }
     }
     D_800E0E16 = arg0;
     if (arg1 != 0) {
-        D_800E0E14 = (s16) D_800E0E16;
+        D_800E0E14 =  D_800E0E16;
     }
 }
 
@@ -192,8 +192,8 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
     s32 i;
     s32 diff;
     s32 count = 0;
-    s32 ptr;
-    s32 buf = 0;
+    u8 *ptr;
+    u8 *buf = NULL;
     s32 len;
     s32 dmemL = 0x4E0;
     s32 dmemR = 0x650;
@@ -265,7 +265,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                     {
                         Acmd *_a = (*cmdList)++;
                         _a->words.w0 = 0x07000000 | (D_800E0DF8 & 0xFFFF);
-                        _a->words.w1 = osVirtualToPhysical((void *) ptr);
+                        _a->words.w1 = osVirtualToPhysical(ptr);
                     }
                     ptr += 0x488;
                 }
@@ -286,18 +286,18 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             dmemL = 0;
         }
         /* leftovers from the previous block, if any */
-        if (buf != 0) {
+        if (buf != NULL) {
             {
                 Acmd *_a = (*cmdList)++;
                 _a->words.w0 = 0x04000000 | (((len + len) & 0xFFF) << 12) | (dmemL & 0xFFF);
-                _a->words.w1 = osVirtualToPhysical((void *) buf);
+                _a->words.w1 = osVirtualToPhysical(buf);
             }
             if (D_800E0E19 != 0) {
                 buf += 0x488;
                 {
                     Acmd *_a = (*cmdList)++;
                     _a->words.w0 = 0x04000000 | (((len + len) & 0xFFF) << 12) | (dmemR & 0xFFF);
-                    _a->words.w1 = osVirtualToPhysical((void *) buf);
+                    _a->words.w1 = osVirtualToPhysical(buf);
                 }
             }
             dmemL += len + len;
@@ -309,14 +309,14 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             {
                 Acmd *_a = (*cmdList)++;
                 _a->words.w0 = 0x04000000 | (((nSamples + nSamples) & 0xFFF) << 12) | (dmemL & 0xFFF);
-                _a->words.w1 = osVirtualToPhysical((void *) buf);
+                _a->words.w1 = osVirtualToPhysical(buf);
             }
             if (D_800E0E19 != 0) {
                 buf += 0x488;
                 {
                     Acmd *_a = (*cmdList)++;
                     _a->words.w0 = 0x04000000 | (((nSamples + nSamples) & 0xFFF) << 12) | (dmemR & 0xFFF);
-                    _a->words.w1 = osVirtualToPhysical((void *) buf);
+                    _a->words.w1 = osVirtualToPhysical(buf);
                 }
             }
             D_800E0DF0 = D_800E0DF0 + nSamples;
@@ -349,7 +349,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                     Acmd *_a = (*cmdList)++;
                     _a->words.w0 = 0x0E000000 | ((D_800E0DD8 & 0xFF) << 16);
                     /* the outer mask is redundant but is in the ROM: two `and`s at 0x151F3620 */
-                    _a->words.w1 = (osVirtualToPhysical((void *) D_800E0DDC) & 0xFFFFFF) & 0xFFFFFF;
+                    _a->words.w1 = (osVirtualToPhysical(D_800E0DDC) & 0xFFFFFF) & 0xFFFFFF;
                 }
                 D_800E0DD8 = 0;
             }
@@ -379,13 +379,13 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                 {
                     Acmd *_a = (*cmdList)++;
                     _a->words.w0 = 0x03010000 | (D_800E0D92 & 0xFFFF);
-                    _a->words.w1 = osVirtualToPhysical((void *) D_800E0D88);
+                    _a->words.w1 = osVirtualToPhysical(D_800E0D88);
                 }
             } else {
                 {
                     Acmd *_a = (*cmdList)++;
                     _a->words.w0 = 0x03000000;
-                    _a->words.w1 = osVirtualToPhysical((void *) D_800E0D88);
+                    _a->words.w1 = osVirtualToPhysical(D_800E0D88);
                 }
             }
             D_800E0DA8 = D_800E0DA8 + 0xB8;
@@ -460,7 +460,7 @@ void func_151F3C1C(void (*callback)(s32, void *, s32)) {
 }
 
 void func_151F3C34(read)
-    s32 read;
+    Mp3ReadFn read;
 {
     D_800E0DFC = read;
 }

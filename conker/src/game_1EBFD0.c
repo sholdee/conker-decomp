@@ -81,7 +81,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
         f32 range = 43.0f; // matching: a local keeps 43.0f in $f20 across the loop
         f32 radius;
         f32 height;
-        f32 objPos[3];
+        Vec3f objPos;
         Vec3f diff;
 
         obj = movement_obj;
@@ -90,10 +90,10 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                 f32 dist;
 
                 params = &arg0->params;
-                func_1515C1A0(obj, objPos, &radius, &height);
-                diff.x = objPos[0] - params->pos.x;
-                diff.y = objPos[1] - params->pos.y;
-                diff.z = objPos[2] - params->pos.z;
+                func_1515C1A0(obj, &objPos, &radius, &height);
+                diff.x = objPos.x - params->pos.x;
+                diff.y = objPos.y - params->pos.y;
+                diff.z = objPos.z - params->pos.z;
                 dist = func_15143E64(&diff);
                 if (dist - radius < range) {
                     s32 mode;

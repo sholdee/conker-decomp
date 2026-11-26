@@ -21,7 +21,7 @@ Vtx *func_1518EB10(Game1BBFC0Beam *beam, s16 cam) {
     Vec3f *eye;
     f32 scale;
 
-    func_151D5D60(beam->buffers, cam, 4 * sizeof(Vtx), (void **)&vtx, &fresh);
+    func_151D5D60(beam->buffers, cam, 4 * sizeof(Vtx), &vtx, &fresh);
     result = vtx;
     // matching: IDO lays out the branches as in the target only with the NULL return in the else
     if (vtx != NULL) {

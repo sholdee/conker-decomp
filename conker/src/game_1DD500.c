@@ -21,17 +21,17 @@ extern Vec3f D_800AA120;
 /* Spawns one randomized particle at (x, y, z) launched in direction (yaw, pitch). */
 s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7,
                   s16 pitch, s16 yaw, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
-    f32 pos[3];
-    f32 dir[3];
+    Vec3f pos;
+    Vec3f dir;
     f32 speed;
 
-    pos[0] = x;
-    pos[1] = y;
-    pos[2] = z;
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
     speed = func_150ADA68() * 5.3f + 4.4f;
-    func_15143794(yaw, pitch, speed, dir);
+    func_15143794(yaw, pitch, speed, &dir);
     // matching: a literal 0.0f scale is folded away; IDO keeps the multiply for (0.68f - 0.68f)
-    func_151DA6F8(pos, dir, func_150ADA68() * (0.68f - 0.68f) + 0.68f, func_150ADA20() % 20 + 31,
+    func_151DA6F8(&pos, &dir, func_150ADA68() * (0.68f - 0.68f) + 0.68f, func_150ADA20() % 20 + 31,
                   func_150ADA20() % 101 + 155, func_150ADA68() * 2.33f + 6.7f,
                   (func_150ADA20() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, argE, 1);
     return 1;
@@ -90,8 +90,8 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
     CollisionHit ground;
     s32 count;
     CollisionHit scatterGround;
-    f32 probe[3];
-    f32 spot[3];
+    Vec3f probe;
+    f32 spot[3];   // matching: spot and center stay f32[3] (a Vec3f changes IDO's schedule); passed as Vec3f below
     f32 center[3];
     CollisionHit centerGround;
 
@@ -131,16 +131,16 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
         scatterGround.source = 0;
         scatterGround.surface = 0;
         scatterGround.height = -10000.0f;
-        probe[1] = actor->ypos + 100.0f;
+        probe.y = actor->ypos + 100.0f;
         if (count != 0) {
             // matching: a do/while (--count != 0) loop schedules differently from this break form
             for (;;) {
                 func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 100.0f + 110.0f, &spot[0], &spot[2]);
                 spot[0] += actor->xpos;
                 spot[2] += actor->zpos;
-                probe[0] = spot[0];
-                probe[2] = spot[2];
-                if (!func_15046C80(probe, 0, actor->ypos - 500.0f, &scatterGround) || scatterGround.source == 3) {
+                probe.x = spot[0];
+                probe.z = spot[2];
+                if (!func_15046C80(&probe, 0, actor->ypos - 500.0f, &scatterGround) || scatterGround.source == 3) {
                     return;
                 }
                 spot[1] = scatterGround.height;
@@ -148,10 +148,10 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
                 // matching: (f32)100 is not CSE'd with the 100.0f above, which would tie up an FP register
                 if (func_150ADA20() & 1) {
                     func_151D9B8C(0, func_150ADA68() * 4.5f + 15.0f, (u32)(func_150ADA68() * (f32)100 + 155.0f),
-                                  &scatterGround.tri, spot, 100, 0, 1, 0, arg1, arg2);
+                                  &scatterGround.tri, (Vec3f *)spot, 100, 0, 1, 0, arg1, arg2);
                 } else {
                     func_151DAB58(0, func_150ADA68() * 5.9f + 6.1f, (u32)(func_150ADA68() * (f32)100 + 155.0f),
-                                  spot, 1, arg1, arg2);
+                                  (Vec3f *)spot, 1, arg1, arg2);
                 }
                 if (--count == 0) {
                     break;
@@ -168,12 +168,12 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
         centerGround.material = 0;
         centerGround.height = -10000.0f;
         {
-            f32 above[3];
+            Vec3f above;
 
-            above[0] = center[0];
-            above[1] = center[1] + 100.0f;
-            above[2] = center[2];
-            if (!func_1504697C(above, 0, center[1] - 500.0f, &centerGround) || centerGround.source == 3) {
+            above.x = center[0];
+            above.y = center[1] + 100.0f;
+            above.z = center[2];
+            if (!func_1504697C(&above, 0, center[1] - 500.0f, &centerGround) || centerGround.source == 3) {
                 return;
             }
         }
@@ -181,7 +181,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
         center[1] += 10.0f;
         func_15136698((func_150ADA68() * 40.0f + 120.0f) * 0.001f, (func_150ADA68() * 123.0f + 123.0f) * 0.00001f,
                       func_150ADA20() % 101 + 155, func_150ADA20() % 101 + 100, func_150ADA20() % 56 + 70,
-                      &centerGround.tri, center, 0, 1, arg1, arg2);
+                      &centerGround.tri, (Vec3f *)center, 0, 1, arg1, arg2);
     }
 }
 
@@ -295,7 +295,7 @@ Game1DD500Task *func_151B09BC(Actor *actor, Actor *other, s16 lifetime, u8 arg3,
             emitter.slots[i].next = NULL;
         }
     }
-    task = (Game1DD500Task *)func_151491F4(life, -1, 0x13, timed, 0xF, sizeof(emitter), arg3, arg4);
+    task = func_151491F4(life, -1, 0x13, timed, 0xF, sizeof(emitter), arg3, arg4);
     if (task != NULL) {
         memcpy(&task->emitter, &emitter, sizeof(emitter));
     }
@@ -456,8 +456,8 @@ s32 func_151B118C(Game1DD500Particle *particle) {
     f32 oldY;
     f32 oldVz;
     f32 oldVx;
-    f32 probe[3];
-    f32 splat[3];
+    Vec3f probe;
+    Vec3f splat;
     f32 size;
 
     motion = &particle->motion;
@@ -481,19 +481,19 @@ s32 func_151B118C(Game1DD500Particle *particle) {
     particle->previous.y = particle->position.y + (particle->previous.y - particle->position.y) * 0.706000030f;
     particle->previous.z = particle->position.z + (particle->previous.z - particle->position.z) * 0.706000030f;
     if (motion->checkGround) {
-        probe[0] = particle->position.x;
-        probe[1] = oldY - particle->height;
-        probe[2] = particle->position.z;
-        if (func_15046C80(probe, 0, particle->position.y - particle->height, &particle->ground)) {
-            splat[0] = probe[0];
-            splat[1] = particle->ground.height + 5.0f;
-            splat[2] = probe[2];
+        probe.x = particle->position.x;
+        probe.y = oldY - particle->height;
+        probe.z = particle->position.z;
+        if (func_15046C80(&probe, 0, particle->position.y - particle->height, &particle->ground)) {
+            splat.x = probe.x;
+            splat.y = particle->ground.height + 5.0f;
+            splat.z = probe.z;
             size = ((motion->baseWidth + motion->swingWidth * 0.5f) + (motion->baseHeight + motion->swingHeight * 0.5f)) * 0.5f;
             if (func_150ADA20() & 1) {
-                func_151D9B8C(motion->unk25, size * 1.7f, particle->alpha, &particle->ground.tri, splat, 100, 0, 1, 0,
+                func_151D9B8C(motion->unk25, size * 1.7f, particle->alpha, &particle->ground.tri, &splat, 100, 0, 1, 0,
                               particle->header.owner, particle->header.kind);
             } else {
-                func_151DAB58(motion->unk25, size * 0.68f, particle->alpha, splat, 1, particle->header.owner, particle->header.kind);
+                func_151DAB58(motion->unk25, size * 0.68f, particle->alpha, &splat, 1, particle->header.owner, particle->header.kind);
             }
             alive = FALSE;
         }

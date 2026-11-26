@@ -15,7 +15,7 @@ void n_alEvtqNew(ALEventQueue *evtq, N_ALEventListItem *items, s32 itemCount)
     evtq->freeList.prev  = 0;
 
     for (i = 0; i < itemCount; i++) {
-        item = &items[i];
+        item = &items[i].node;
         to = &evtq->freeList;
         // effectively alLink, TODO: macro this?
         item->next = to->next;

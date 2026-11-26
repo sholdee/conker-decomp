@@ -21,7 +21,7 @@ void func_15005290(s32 resource, s32 mode) {
     D_800DC2A0[1] = allocate_memory(count * sizeof(Mtx), 1, 1, 0);
     for (i = 0; i <= D_80082FA0; i++) {
         view = &camera_global_Cameras[i];
-        D_800BE2B0[i] = (s32)allocate_memory(D_800BE620 * 2, 1, 2, 0);
+        D_800BE2B0[i] = allocate_memory(D_800BE620 * 2, 1, 2, 0);
         func_150054C4(view, i, resource, mode);
         {
             s32 pad; // matching: -g3 block marker keeps this store after the call
@@ -133,7 +133,7 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
     view->prevEye = view->eye;
 
     viewEye = &view->eye; // matching: kept live across the call in a stack slot
-    func_1510E7A4(&view->TrianglePtr, &view->unk648, &view->unk354, &view->waterY, &view->Attributes, 0,
+    func_1510E7A4(&view->TrianglePtr, view->floorTri.v, &view->unk354, &view->waterY, &view->Attributes, 0,
                   view->eye.x, view->eye.y, view->eye.z, view->eye.y, 0, 0, -10000.0f, view->eye.y);
 
     view->unk358 = view->unk354;

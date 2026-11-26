@@ -13,29 +13,6 @@ extern void (*D_8008CA20[])(EffectHeader *);
 extern void (*D_8008C9C8[])(EffectHeader *);
 extern void (*D_8008CB64[3])(void);
 
-/* Template / payload of a type 0x10 object. */
-struct ModelFxData {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 rotX;
-    /* 0x10 */ f32 rotY;
-    /* 0x14 */ f32 rotZ;
-    /* 0x18 */ u8 pad18[0x18];
-    /* 0x30 */ f32 scaleX;
-    /* 0x34 */ f32 scaleY;
-    /* 0x38 */ f32 scaleZ;
-    /* 0x3C */ u8 pad3C[4];
-    /* 0x40 */ Gfx *displayList;
-    /* 0x44 */ u8 pad44[0x10];
-    /* 0x54 */ u8 callback;     /* index into D_8008CA20, 0 = none */
-    /* 0x55 */ u8 primA;
-    /* 0x56 */ u8 tileUlt;
-    /* 0x57 */ u8 pad57[5];
-    /* 0x5C */ u8 renderMode;
-    /* 0x5D */ u8 combineMode;
-};
-
 /* Type 0x10 object (0xF0 bytes): a display list drawn with a per-frame matrix (created by func_15168BE4). */
 struct ModelFx {
     /* 0x00 */ EffectHeader link;
@@ -312,7 +289,7 @@ void *func_15167A68(type, list, size, arg3, owner, arg5)
 }
 
 /* Spawns a type 3 SpriteFx from the 0x18-byte template at `src` (anim .. fadeStep), fully opaque. */
-void func_15167AD8(SpriteFx *src, u8 owner, s32 list) {
+void func_15167AD8(SpriteFxTemplate *src, u8 owner, s32 list) {
     SpriteFx *fx;
 
     fx = func_15167A68(3, list, sizeof(SpriteFx), 0, owner, 1);
@@ -381,7 +358,7 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     update.unk0 = 1;
     frame = fx->frame;
     anim = fx->anim;
-    gfx = func_15142E24(gdl, (s32)anim, frame << 8, 2, 0x100, 0x100,
+    gfx = func_15142E24(gdl, anim, frame << 8, 2, 0x100, 0x100,
                         anim->frames[frame >> 8], 5, (s32)&params, (u8 *)&update, 3);
     params.x = fx->x;
     params.y = fx->y;
@@ -561,7 +538,7 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         } else {
             texture = anim->frames[p->tmpl.frame >> 8];
         }
-        gfx = func_15142E24(gfx, (s32)anim, p->tmpl.frame << 8, 2, 0x100, 0x100, texture, 5, (s32)&params, &update, 3);
+        gfx = func_15142E24(gfx, anim, p->tmpl.frame << 8, 2, 0x100, 0x100, texture, 5, (s32)&params, &update, 3);
     }
     view = viewIndex;
     params.x = p->tmpl.x;
@@ -927,8 +904,8 @@ Gfx *func_15168C4C(Gfx *gfx, ModelFx *fx, s32 arg2) {
     s32 renderMode;
     u8 update;
 
-    func_15043D90(&fx->mtx[D_800BE9C0], fx->data.rotX, fx->data.rotY, fx->data.rotZ,
-                  fx->data.scaleX, fx->data.scaleY, fx->data.scaleZ, fx->data.x, fx->data.y, fx->data.z);
+    func_15043D90(&fx->mtx[D_800BE9C0], fx->data.rotation[0], fx->data.rotation[1], fx->data.rotation[2],
+                  fx->data.scale[0], fx->data.scale[1], fx->data.scale[2], fx->data.position[0], fx->data.position[1], fx->data.position[2]);
 
     gDPPipeSync(gfx++);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, fx->data.primA);
@@ -982,13 +959,13 @@ struct DLCommand {
     ((cmd)->opcode == G_VTX || ((cmd)->opcode == (s8)G_MOVEMEM && (cmd)->index == G_MV_MATRIX))
 
 /* Relocates the vertex and matrix addresses of a display list by `offset` (segmented ones are left alone). */
-void func_15168E54(s8 *dl, s32 offset) {
+void func_15168E54(Gfx *dl, s32 offset) {
     s32 i;
     DLCommand *cmd;
 
-    // matching: byte-pointer indexing (not a DLCommand array) gives the target's saved-register use
-    for (i = 0; dl[i << 3] != (s8)G_ENDDL; i++) {
-        cmd = (DLCommand *)(dl + (i << 3));
+    // matching: indexing the Gfx array (not a DLCommand array) gives the target's saved-register use
+    for (i = 0; ((DLCommand *)&dl[i])->opcode != (s8)G_ENDDL; i++) {
+        cmd = (DLCommand *)&dl[i];
         if (IS_RELOCATABLE(cmd)) {
             func_15168E34((s32 *)&cmd->addr, offset);
         }
@@ -1087,8 +1064,8 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
 }
 
 /* Sends an event to every object of the `count` types listed in `types`. */
-void func_15169260(void *types, s32 count, s32 event, u8 eventType) {
-    s32 *type;
+void func_15169260(const s32 *types, s32 count, s32 event, u8 eventType) {
+    const s32 *type;
     s32 i;
     s32 list;
     EffectHeader *node;

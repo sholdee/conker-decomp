@@ -12,7 +12,7 @@
 /* Spawns the effects attached to an actor: a trail and two more effects. */
 void func_151A3390(Actor *owner, u8 arg1) {
     BoneTrailParams params;
-    f32 origin[3];
+    Vec3f origin;
 
     params.owner = owner;
     params.ownerId = owner->unique_id;
@@ -37,10 +37,10 @@ void func_151A3390(Actor *owner, u8 arg1) {
     func_151A4590(owner, arg1);
     func_151A499C(owner, arg1);
     func_10010154(0x1AA, owner, 0x55F0, 1000, 4000);
-    origin[0] = 0.0f;
-    origin[1] = 0.0f;
-    origin[2] = 0.0f;
-    func_15160A58(owner, 1, origin, 2, 300, 80, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
+    origin.x = 0.0f;
+    origin.y = 0.0f;
+    origin.z = 0.0f;
+    func_15160A58(owner, 1, &origin, 2, 300, 80, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
 }
 
 /* Creates a trail effect object from params. Returns NULL if there is no owner. */
@@ -160,7 +160,7 @@ s32 func_151A37C0(BoneTrailEffect *effect) {
         func_151A4E9C(effect);
         memcpy(&retry, state, sizeof(BoneTrailParams));
         {
-            TrailRetryTask *task = (TrailRetryTask *)func_151491F4(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->head.header.owner, 0);
+            TrailRetryTask *task = func_151491F4(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->head.header.owner, 0);
             if (task != NULL) {
                 memcpy(&task->trail, &retry, sizeof(BoneTrailParams));
             }
@@ -268,7 +268,7 @@ Gfx *func_151A3BE4(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
     BoneTrailState *state;
 
     if (effect->head.count >= 2) {
-        func_151D5D60(effect->unk84, view, (effect->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(effect->unk84, view, (effect->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             state = effect->state;
             camPos = &camera_global_Cameras[view].eye.x;
@@ -312,7 +312,7 @@ Gfx *func_151A3BE4(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
                     }
                 } while (remaining != 0 && idx != effect->head.end);
             }
-            gfx = func_15142E24(gfx, D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &stateFlag, 3);
+            gfx = func_15142E24(gfx, &D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &stateFlag, 3);
             gfx = func_15142B7C(gfx, 1, 0x160600);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &stateFlag);
             gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &stateFlag);
@@ -604,7 +604,7 @@ void func_151A499C(Actor *owner, u8 arg1) {
     emitter.offset.y = 0.0f;
     emitter.offset.z = 0.0f;
     emitter.rate = 0.7220000029f;
-    task = (BoneEmitterTask *)func_151491F4(300, -1, 5, 0, 1, sizeof(BoneEmitter), arg1, 0);
+    task = func_151491F4(300, -1, 5, 0, 1, sizeof(BoneEmitter), arg1, 0);
     if (task != NULL) {
         memcpy(&task->emitter, &emitter, sizeof(BoneEmitter));
     }
@@ -638,7 +638,7 @@ void func_151A4A38(BoneEmitterTask *task) {
     emitter->pending += emitter->rate * D_800BE9A4;
     if (emitter->pending > 1.0f) {
         angle = (emitter->owner->angle >> 8) - 0x40;
-        func_15143134(&emitter->offset, &pos, (s32)emitter->owner->ob_matrix_ptr + emitter->bone * sizeof(Mtx));
+        func_15143134(&emitter->offset, &pos, &emitter->owner->ob_matrix_ptr[emitter->bone]);
 
         spawn.countBase = emitter->pending;
         spawn.countRange = 0;
@@ -738,7 +738,7 @@ void func_151A4D88(BoneEmitterTask *task, ActorMsg *msg, u8 type) {
  */
 s32 func_151A4E34(BoneTrailParams *params, Vec3f *out) {
     Actor *owner = params->owner;
-    u8 *bones = (u8 *)owner->ob_matrix_ptr;
+    MtxF *bones = owner->ob_matrix_ptr;
 
     if (bones == NULL) {
         return 0;
@@ -746,7 +746,8 @@ s32 func_151A4E34(BoneTrailParams *params, Vec3f *out) {
     if ((owner->unk74 & 0xF) == 0xF) {
         return 0;
     }
-    func_15143134(&params->offset, out, (s32)bones + params->bone * sizeof(Mtx));
+    // matching: a byte offset; &bones[params->bone] scales the index differently
+    func_15143134(&params->offset, out, (u8 *)bones + params->bone * sizeof(Mtx));
     return 1;
 }
 

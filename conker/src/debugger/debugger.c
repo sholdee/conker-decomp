@@ -589,7 +589,7 @@ void func_16001044(s32 position, s32 mode, u32 value) {
 }
 
 /* Print a NUL-terminated string at a text position (row * 32 + column). */
-void func_160012B0(s32 position, u8 *text) {
+void func_160012B0(s32 position, const u8 *text) {
     u8 *destination;
     u8 character;
 

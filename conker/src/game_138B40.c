@@ -93,10 +93,10 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
     }
     func_1510F800(0);
     if (D_800DCD7C == 0) {
-        gDma2p(gfx++, G_MOVEMEM, D_800D9BD0[view][D_800BE9C0], 48, G_MV_LIGHT, G_MVO_L2);
+        gDma2p(gfx++, G_MOVEMEM, &D_800D9BD0[view][D_800BE9C0], 48, G_MV_LIGHT, G_MVO_L2);
     }
     gfx = func_1515D914(gfx, view, camera_global_Cameras[view].eye.x, camera_global_Cameras[view].eye.y, camera_global_Cameras[view].eye.z, 0,
-                        D_800D9E10[view], D_800D9E20, D_800D9BD0[view][D_800BE9C0], &D_800D9E21, 1, 0, 0x25,
+                        D_800D9E10[view], D_800D9E20, &D_800D9BD0[view][D_800BE9C0], &D_800D9E21, 1, 0, 0x25,
                         D_800D9E28);
     if (!skipWorld) {
         if (level != 5) {
@@ -132,7 +132,7 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
                 gSPDisplayList(gfx++, D_800B0E00[0]);
             }
         }
-        gfx = func_1515E544(gfx, D_800D9E10[view], D_800D9E20, D_800D9E21, D_800D9BD0[view][D_800BE9C0]);
+        gfx = func_1515E544(gfx, D_800D9E10[view], D_800D9E20, D_800D9E21, &D_800D9BD0[view][D_800BE9C0]);
         if (D_800B0E08 != NULL) {
             gDPPipeSync(gfx++);
             gfx = func_1510CDB8(gfx, 0xFF, 0xFF, view);

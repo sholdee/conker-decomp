@@ -66,7 +66,7 @@ void func_100050A0(OSMesgQueue *queue) {
     osViSetEvent(&D_8003B218, 0, 1);
     osSetEventMesg(OS_EVENT_DP, &D_8003B218, (OSMesg *) 1);
     osSetEventMesg(OS_EVENT_SP, &D_8003B218, (OSMesg *) 2);
-    osCreateThread(&D_8003B6A0, 0x14, (void *) func_100049E0, 0, &D_8003B660, 13);
+    osCreateThread(&D_8003B6A0, 0x14, func_100049E0, 0, &D_8003B660, 13);
     osStartThread(&D_8003B6A0);
 }
 

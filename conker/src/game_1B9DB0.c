@@ -15,17 +15,17 @@
 // created by the post-increment `D_800DF7D0[arg0]++` -- which yields the old value as a
 // separate live range while the CSE of the load feeds the addiu. Writing the increment as
 // `= D_800DF7D0[arg0] + 1` collapses the two live ranges and costs 847.
-s32 func_1518C900(s32 arg0) {
+Gfx *func_1518C900(s32 arg0) {
     AttachModelHeader *ret;
 
     if (D_800DF7D0[arg0] == 0) {
         ret = func_1502B6BC(0, 0, 0, 2, 9, arg0);
         if (ret == NULL) {
-            return 0;
+            return NULL;
         }
         // the table pointer is passed as one display list here
         func_1510CE60((Gfx *)ret->dlists, 0, 1, 0x3E, &D_800DF9B8[arg0]);
-        func_15168E54((Gfx *)ret->dlists, ret);
+        func_15168E54((Gfx *)ret->dlists, (s32)ret);
         D_800E0148[arg0] = ret;
     } else {
         ret = D_800E0148[arg0];
@@ -33,7 +33,7 @@ s32 func_1518C900(s32 arg0) {
     if (D_800DF7D0[arg0] != 0xFF) {
         D_800DF7D0[arg0]++;
     }
-    return (s32)ret->dlists;
+    return (Gfx *)ret->dlists; // the table is used as one display list
 }
 
 void func_1518CA04(s32 arg0) {

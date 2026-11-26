@@ -235,7 +235,7 @@ void func_15141E38(Actor *actor, s32 handler) {
         info.handler = handler;
         info.owner = actor;
         info.ownerId = actor->unique_id;
-        effect = (TimedHandlerEffect *)func_15149130(D_8008A0B4[handler].duration, -1, -1, -1, 1, 50, 0xC, 0xFF, 1);
+        effect = func_15149130(D_8008A0B4[handler].duration, -1, -1, -1, 1, 50, 0xC, 0xFF, 1);
         if (effect != NULL) {
             memcpy(&effect->info, &info, sizeof(info));
             func_1514EC1C(effect, actor, ATTACH_TIMED_EFFECT);
@@ -243,14 +243,8 @@ void func_15141E38(Actor *actor, s32 handler) {
     }
 }
 
-struct Source15141F78 {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ u8 unk4[0x14];
-    /* 0x18 */ s32 unk18;
-};
-
 /* Spawns a burst of particles of the given kind, sized by `scale`. */
-void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5) {
+void func_15141F78(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5) {
     SpriteDef packet;
     f32 size;
     s32 flag;
@@ -271,7 +265,7 @@ void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, Vec3f *pos,
     packet.unk16 = 0;
     packet.unk17 = 7;
     packet.viewportMask = 0xFF;
-    packet.unk1C = src->unk18;
+    packet.unk1C = src->material;
     packet.fadeStart = 40;
     packet.fadeRate = 6;
 
@@ -282,7 +276,7 @@ void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, Vec3f *pos,
         flag = 0;
     }
 
-    func_1513C650(&packet, 0, 0, (s32)src->unk4, pos->x, src->unk0, pos->z, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
+    func_1513C650(&packet, 0, 0, &src->tri, pos->x, src->height, pos->z, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
 }
 
 /* Template copied onto the stack for func_150A2AEC. */
@@ -297,11 +291,11 @@ struct Args151420F8 {
 
 const Args151420F8 D_800A5200 = { 0x402E, 0x402F, 0x4030, 0x4031, 0x4032, 0x4033 };
 
-s32 func_151420F8(s32 actor) {
+s32 func_151420F8(Actor *actor) {
     Args151420F8 args;
 
     args = D_800A5200;
-    if (func_150A2AEC((actor - (s32)movement_obj) / (s32)sizeof(Actor), 6, &args, actor) == -1) {
+    if (func_150A2AEC(actor - movement_obj, 6, &args, actor) == -1) {
         return 0;
     }
     return 1;

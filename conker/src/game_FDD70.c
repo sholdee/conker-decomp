@@ -162,7 +162,7 @@ void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *veloci
     random1 = func_150ADA68();
     randomInt = func_150ADA20();
 
-    func_151DB5D0(0, &start, &velocity, random0 * 61.0f + 60.0f, 1.03571403f, 0.9704080224f,
+    func_151DB5D0(0, &start.x, &velocity.x, random0 * 61.0f + 60.0f, 1.03571403f, 0.9704080224f,
                   random1 * 0.1570000052f + -0.08000000566f, (randomInt & 0xF) + 35,
                   func_150ADA20() % 156U + 100, 30, 8, 0, strip->header.owner, strip->header.kind);
 }

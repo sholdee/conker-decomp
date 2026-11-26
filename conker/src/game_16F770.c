@@ -10,7 +10,7 @@ void func_15169040();
 extern u8 D_8008A160[]; /* palettes of four RGB triples */
 /* Debug breadcrumbs of func_15143134. */
 extern s32 D_800DCA00;
-extern Mtx *D_800DCA04;
+extern void *D_800DCA04;
 extern f32 D_800DCA08;
 extern f32 D_800DCA0C;
 extern f32 D_800DCA10;
@@ -134,7 +134,7 @@ void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 ro
     mf[2][0] *= sx * scaleXZ;
     mf[2][1] *= sy * scaleXZ;
     mf[2][2] *= sz * scaleXZ;
-    guMtxF2L(&mf, out);
+    guMtxF2L(mf, out);
 }
 
 /* Builds a matrix at (x, y, z) whose forward axis points at (atX, atY, atZ), scaled per axis. */
@@ -333,7 +333,7 @@ Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32
 }
 
 /* Loads a texture through func_15094FE8 unless the same one is already loaded (cached state). */
-Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
+Gfx *func_15142E24(Gfx *gfx, EffectTexture *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
                    u8 *needSync, s32 argA) {
     s32 texture;
 
@@ -383,7 +383,7 @@ extern s32 D_80091514;
 extern s32 D_800915B0;
 
 /* Resolves the texture word for func_15142E24 according to `mode`. */
-s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode) {
+s32 func_1514306C(EffectTexture *arg0, s32 arg1, s32 arg2, u8 mode) {
     s32 ret;
 
     switch (mode) {
@@ -403,10 +403,10 @@ s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode) {
             ret = arg1;
             break;
         case 6:
-            /* *arg0 is either a pointer (KSEG addresses) to a table, or the value itself */
-            arg1 = *arg0;
-            if ((u32)*arg0 >= 0x10000000) {
-                ret = ((s32 *)*arg0)[arg2];
+            /* arg0->frames is either a pointer (KSEG addresses) to a table, or the value itself */
+            arg1 = (s32)arg0->frames;
+            if ((u32)arg0->frames >= 0x10000000) {
+                ret = arg0->frames[arg2];
             } else {
                 ret = arg1;
             }
@@ -421,7 +421,7 @@ s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode) {
  * Transforms `offset` by mtx into out (just mtx's translation when offset is NULL or zero).
  * D_800DCA00 records the progress through the function (a debug breadcrumb).
  */
-void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx) {
+void func_15143134(const Vec3f *offset, Vec3f *out, void *mtx) {
     MtxF mf;
 
     D_800DCA00 = 1;
@@ -434,14 +434,14 @@ void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx) {
             D_800DCA00 = 3;
             D_800DCA04 = mtx;
             guMtxL2F(mf, mtx);
-            func_150A7960(mf, offset->x, offset->y, offset->z, out, out + 1, out + 2);
+            func_150A7960(mf, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
             D_800DCA00 = 4;
         // matching: an (unused) label here changes how IDO lays out the branch to the final store
         state4_done:;
         } else {
             D_800DCA00 = 5;
             D_800DCA04 = mtx;
-            func_150A7960((f32 *)mtx, offset->x, offset->y, offset->z, out, out + 1, out + 2);
+            func_150A7960(mtx, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
             D_800DCA00 = 6;
         }
     } else {
@@ -521,7 +521,7 @@ void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
 }
 
 /* Direction (yaw, pitch in radians) scaled by length, into out[3]. */
-void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out) {
+void func_151436B4(f32 yaw, f32 pitch, f32 length, Vec3f *out) {
     f32 cosYaw;
     f32 sinYaw;
     f32 cosPitch;
@@ -533,9 +533,9 @@ void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out) {
     cosPitch = cosf(pitch);
     sinPitch = sinf(pitch);
     horizontal = length * cosPitch;
-    out[0] = horizontal * sinYaw;
-    out[1] = -length * sinPitch;
-    out[2] = horizontal * cosYaw;
+    out->x = horizontal * sinYaw;
+    out->y = -length * sinPitch;
+    out->z = horizontal * cosYaw;
 }
 
 /* Planar direction (angle in radians) scaled by length. */
@@ -550,7 +550,7 @@ void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z) {
 }
 
 /* Binary-angle (256 per turn) version of func_151436B4. */
-void func_15143794(s16 yaw, s16 pitch, f32 length, f32 *out) {
+void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out) {
     f32 cosYaw;
     f32 sinYaw;
     f32 cosPitch;
@@ -566,12 +566,12 @@ void func_15143794(s16 yaw, s16 pitch, f32 length, f32 *out) {
     quarterPitch = (s16)pitch - 0x40;
     sinPitch = func_151423D8(quarterPitch);
     horizontal = length * cosPitch;
-    out[0] = horizontal * sinYaw;
-    out[1] = -length * sinPitch;
-    out[2] = horizontal * cosYaw;
+    out->x = horizontal * sinYaw;
+    out->y = -length * sinPitch;
+    out->z = horizontal * cosYaw;
 }
 
-void func_15143834(s16 yaw, s16 pitch, f32 length, f32 *out) {
+void func_15143834(s16 yaw, s16 pitch, f32 length, Vec3f *out) {
     func_15143794(yaw, pitch, length, out);
 }
 
@@ -768,7 +768,7 @@ s32 func_15143E24(Actor *actor) {
     return (s16)(actor->langle >> 8);
 }
 /* Length of a vector. */
-f32 func_15143E64(Vec3f *v) {
+f32 func_15143E64(const Vec3f *v) {
     f32 x = v->x;
     f32 y = v->y;
     f32 z = v->z;
@@ -1069,7 +1069,7 @@ f32 func_1514462C(s32 arg0) {
 }
 
 /* Picks a random point inside the region into out[3], applying its tilt for boxes and cylinders. */
-void func_1514470C(TriggerZone *region, f32 *out) {
+void func_1514470C(TriggerZone *region, Vec3f *out) {
     f32 radiusZ;
     f32 height;
     f32 radiusX;
@@ -1089,9 +1089,9 @@ void func_1514470C(TriggerZone *region, f32 *out) {
     mode = ZONE_AREA_TYPE(region);
     switch (mode) {
     default:
-        out[0] = region->x;
-        out[1] = region->y;
-        out[2] = region->z;
+        out->x = region->x;
+        out->y = region->y;
+        out->z = region->z;
         return;
     case ZONE_AREA_BOX:
         {
@@ -1109,10 +1109,10 @@ void func_1514470C(TriggerZone *region, f32 *out) {
             mixed = y * sinPitch + z * cosPitch;
             x = x * cosYaw + mixed * sinYaw;
             y = y * cosPitch - z * sinPitch;
-            out[0] = region->x + x;
-            out[1] = region->y + y;
+            out->x = region->x + x;
+            out->y = region->y + y;
             rotatedZ = mixed * cosYaw - savedX * sinYaw;
-            out[2] = region->z + rotatedZ;
+            out->z = region->z + rotatedZ;
         }
         return;
     case ZONE_AREA_CYLINDER:
@@ -1134,9 +1134,9 @@ void func_1514470C(TriggerZone *region, f32 *out) {
             mixed = y * sinPitch + z * cosPitch;
             x = x * cosYaw + mixed * sinYaw;
             y = y * cosPitch - z * sinPitch;
-            out[0] = region->x + x;
-            out[1] = region->y + y;
-            out[2] = region->z + (mixed * cosYaw - savedX * sinYaw);
+            out->x = region->x + x;
+            out->y = region->y + y;
+            out->z = region->z + (mixed * cosYaw - savedX * sinYaw);
         }
         return;
     case ZONE_AREA_SPHERE:
@@ -1144,10 +1144,10 @@ void func_1514470C(TriggerZone *region, f32 *out) {
             Vec3f offset;
 
             func_151436B4(func_150ADA68() * 6.2831855f, func_150ADA68() * 6.2831855f,
-                          func_150ADA68() * radiusX, &offset.x);
-            out[0] = region->x + offset.x;
-            out[1] = region->y + offset.y;
-            out[2] = region->z + offset.z;
+                          func_150ADA68() * radiusX, &offset);
+            out->x = region->x + offset.x;
+            out->y = region->y + offset.y;
+            out->z = region->z + offset.z;
         }
         return;
     }
@@ -1266,7 +1266,7 @@ s32 func_15144CEC(pos, screen, outA, outDepth, outInvDepth, viewport)
     if (outInvDepth == NULL) {
         outInvDepth = &invDepth;
     }
-    func_150A7A00((s32)((u8 *)D_800D9D10 + viewport * sizeof(Mtx)), pos[0], pos[1], pos[2], screen, screen + 1,
+    func_150A7A00(D_800D9D10[viewport], pos[0], pos[1], pos[2], screen, screen + 1,
                   outA, outDepth);
     if ((6000.0f <= *outDepth) || (*outDepth <= D_800D9B20)) {
         return 0;
@@ -1283,18 +1283,11 @@ s32 func_15144CEC(pos, screen, outA, outDepth, outInvDepth, viewport)
     return 1;
 }
 
-/* A triangle as three s16 vertices. */
-struct Tri15144E80 {
-    s16 v0[3];
-    s16 v1[3];
-    s16 v2[3];
-};
-
 /*
  * Edge vectors of a triangle: normal = (v0 - v1) x (v2 - v1), binormal = edge x normal, edge = v0 - v1.
  * Returns 0 for a degenerate triangle (two equal vertices). `normal` may be NULL.
  */
-s32 func_15144E80(Tri15144E80 *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal) {
+s32 func_15144E80(CollisionTri *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal) {
     f32 c[3];
     f32 b[3];
     f32 a[3];
@@ -1306,15 +1299,15 @@ s32 func_15144E80(Tri15144E80 *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *norm
         normal = &normalBuf;
     }
 
-    a[0] = tri->v0[0];
-    a[1] = tri->v0[1];
-    a[2] = tri->v0[2];
-    b[0] = tri->v1[0];
-    b[1] = tri->v1[1];
-    b[2] = tri->v1[2];
-    c[0] = tri->v2[0];
-    c[1] = tri->v2[1];
-    c[2] = tri->v2[2];
+    a[0] = tri->v[0].x;
+    a[1] = tri->v[0].y;
+    a[2] = tri->v[0].z;
+    b[0] = tri->v[1].x;
+    b[1] = tri->v[1].y;
+    b[2] = tri->v[1].z;
+    c[0] = tri->v[2].x;
+    c[1] = tri->v[2].y;
+    c[2] = tri->v[2].z;
 
     if ((a[0] == b[0]) && (a[1] == b[1]) && (a[2] == b[2])) {
         return 0;
@@ -1713,23 +1706,23 @@ void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count) {
 }
 
 /* Array version of func_15143134: mfs each offsets[i] by mtx into results[i]. */
-void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count) {
-    f32 *input;
+void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count) {
+    const Vec3f *input;
     MtxF mf;
-    f32 *output;
-    f32 **outputs;
+    Vec3f *output;
+    Vec3f **outputs;
 
     if (D_800C3E90 != 0) {
         guMtxL2F(mf, mtx);
         if (count > 0) {
-            f32 **inputs = offsets;
+            const Vec3f **inputs = offsets;
 
             outputs = results;
             do {
                 input = *inputs;
-                if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
+                if (input != NULL && (input->x != 0.0f || input->y != 0.0f || input->z != 0.0f)) {
                     output = *outputs;
-                    func_150A7960(mf, input[0], input[1], input[2], output, output + 1, output + 2);
+                    func_150A7960(mf, input->x, input->y, input->z, &output->x, &output->y, &output->z);
                 } else {
                     func_15142314(mtx, 0, *outputs);
                 }
@@ -1740,14 +1733,14 @@ void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count) {
         }
     } else {
         if (count > 0) {
-            f32 **inputs = offsets;
+            const Vec3f **inputs = offsets;
 
             outputs = results;
             do {
                 input = *inputs;
-                if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
+                if (input != NULL && (input->x != 0.0f || input->y != 0.0f || input->z != 0.0f)) {
                     output = *outputs;
-                    func_150A7960((f32 *)mtx, input[0], input[1], input[2], output, output + 1, output + 2);
+                    func_150A7960(mtx, input->x, input->y, input->z, &output->x, &output->y, &output->z);
                 } else {
                     func_15142314(mtx, 0, *outputs);
                 }
@@ -1847,15 +1840,15 @@ s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v) {
  * Draws `slot` of a model: with the owning actor's own textures (mode 1, falling back to the shared
  * ones in mode 2 when the actor is gone or has none), or plainly through func_1515D914.
  */
-void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos,
+void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos,
                     u8 flags, s32 arg8) {
-    s32 tex;
-    s32 unk18;
+    PointLightGfx *tex;
+    Ambient *unk18;
 
-    tex = model[slot + 2];
-    if (tex != 0) {
-        unk18 = model[6];
-        if (unk18 != 0) {
+    tex = link->handles[slot];
+    if (tex != NULL) {
+        unk18 = link->sharedHandle;
+        if (unk18 != NULL) {
             if (mode == 1) {
                 if (actor != NULL) {
                     if ((actor->type == 0) || (actor->unique_id != uniqueId) ||
@@ -1873,12 +1866,12 @@ void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s
                                     actor->unk314);
                 break;
             case 2:
-                gfx = func_1515E544(gfx, D_800D9E10[slot], D_800D9E20, D_800D9E21, D_800D9BD0[slot][D_800BE9C0]);
+                gfx = func_1515E544(gfx, D_800D9E10[slot], D_800D9E20, D_800D9E21, &D_800D9BD0[slot][D_800BE9C0]);
                 break;
             case 0:
             default:
-                gfx = func_1515D914(gfx, slot, (s32)pos->x, (s32)pos->y, (s32)pos->z, arg8, tex, model[0],
-                                    unk18, model + 1, model[7], 0,
+                gfx = func_1515D914(gfx, slot, (s32)pos->x, (s32)pos->y, (s32)pos->z, arg8, tex, link->model,
+                                    unk18, &link->unk4, link->unk1C, 0,
                                     ((flags & 1) ? 2 : 0) | (((flags & 2) ? 0x10 : 0) | 8), 0);
                 break;
             }
@@ -1918,7 +1911,8 @@ void func_15146508(Actor *a, Actor *b) {
  * matrix, a parent attachment's matrix, a fixed matrix, or else one of the actor's bones. Returns 0
  * if it is unavailable.
  */
-s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets, f32 **results, s32 count) {
+s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, const Vec3f **offsets, Vec3f **results,
+                  s32 count) {
     s32 i;
     Mtx *mtx;
     ModelAttachment *part;
@@ -1952,14 +1946,14 @@ s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets
     } else if (point->mtx != NULL) {
         mtx = point->mtx + D_800BE9C0;
     } else {
-        func_15145EA4(offsets, results, (Mtx *)actor->ob_matrix_ptr + point->bone, count);
+        func_15145EA4(offsets, results, &actor->ob_matrix_ptr[point->bone], count);
         return 1;
     }
     if (mtx != NULL) {
         guMtxL2F(mf, mtx);
         for (i = 0; i < count; i++) {
-            func_150A7960(mf, offsets[i][0], offsets[i][1], offsets[i][2], results[i], results[i] + 1,
-                          results[i] + 2);
+            func_150A7960(mf, offsets[i]->x, offsets[i]->y, offsets[i]->z, &results[i]->x, &results[i]->y,
+                          &results[i]->z);
         }
     } else {
         return 0;

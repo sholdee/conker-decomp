@@ -68,7 +68,7 @@ Cmd *func_10022040(Voice *voice, s16 *outp, s32 arg2, Cmd *p) {
 }
 
 s32 n_alLoadParam(N_PVoice *filter, s32 paramID, void *param) {
-    f32 *paramAsFloat = &param;
+    f32 *paramAsFloat = (f32 *)&param;
 
     switch (paramID) {
         case 4:
@@ -76,7 +76,7 @@ s32 n_alLoadParam(N_PVoice *filter, s32 paramID, void *param) {
             func_10021C40(filter, 4, param);
             break;
         case 18:
-            filter->unkA2 = param;
+            filter->unkA2 = (s32)param;
             filter->unkC8 |= 2;
             break;
         case 19:
@@ -84,7 +84,7 @@ s32 n_alLoadParam(N_PVoice *filter, s32 paramID, void *param) {
             filter->unkC8 |= 2;
             break;
         case 17:
-            filter->unk99 = param;
+            filter->unk99 = (s32)param;
             break;
         default:
             func_10021C40(filter, paramID, param);

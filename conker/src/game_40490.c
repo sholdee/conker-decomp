@@ -707,7 +707,7 @@ s32 func_150144B8(TriggerZone *obj) {
     StreamEmitter emitter;
     u32 value; // matching: holds the random number, then the effect address; two locals grow the frame
     struct {
-        f32 direction[3];
+        Vec3f direction;
         MtxF matrix;
     } scratch;
 
@@ -716,8 +716,8 @@ s32 func_150144B8(TriggerZone *obj) {
         return 1;
     }
     func_150A8050(scratch.matrix, obj->pitch, obj->yaw, 0.0f);
-    func_150A7960(scratch.matrix, 0.0f, 100.0f, 0.0f, &scratch.direction[0], &scratch.direction[1], &scratch.direction[2]);
-    func_15145974(scratch.direction, &emitter.angleX, &emitter.angleY);
+    func_150A7960(scratch.matrix, 0.0f, 100.0f, 0.0f, &scratch.direction.x, &scratch.direction.y, &scratch.direction.z);
+    func_15145974(&scratch.direction, &emitter.angleX, &emitter.angleY);
     emitter.angleX *= 0.017453292f;
     emitter.angleY *= 0.017453292f;
     emitter.minDelay = obj->data1 & 0xFF;

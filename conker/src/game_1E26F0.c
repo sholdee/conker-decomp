@@ -17,7 +17,7 @@ WavyBeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
     data.fadeMax = 0.9f;
     data.fadeScale = 1.0f / data.fadeEnd;
 
-    effect = (WavyBeamEffect *)func_15149130(duration, -1, -1, 1, 1, 0x15, sizeof(data), arg1, arg2);
+    effect = func_15149130(duration, -1, -1, 1, 1, 0x15, sizeof(data), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -26,10 +26,10 @@ WavyBeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
 
 extern u8 D_8008FB80;
 extern u8 D_8008FB84;
-extern u8 D_80090F68[];
+extern EffectTexture D_80090F68; /* an entry of the effect texture table D_80090B60 */
 extern s32 D_800A4AC8[][2];
-static const f32 D_800AA400[3] = { -3.0f, 11.0f, -4.0f };  // beam start, in first's bone space
-static const f32 D_800AA40C[3] = { 0.0f, -5.0f, -7.0f };   // beam end, in second's bone space
+static const Vec3f D_800AA400 = { -3.0f, 11.0f, -4.0f };  // beam start, in first's bone space
+static const Vec3f D_800AA40C = { 0.0f, -5.0f, -7.0f };   // beam end, in second's bone space
 
 /*
  * Beam effect draw: a red textured strip of 10 quads from a point on first's bone D_8008FB80 to a
@@ -70,13 +70,13 @@ Gfx *func_151B5328(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx) {
         failed = 1;
     }
     if (!failed && data->first->ob_matrix_ptr != NULL && data->second->ob_matrix_ptr != NULL) {
-        func_15143134(D_800AA400, &start, &data->first->ob_matrix_ptr[D_8008FB80]);
-        func_15143134(D_800AA40C, &end, &data->second->ob_matrix_ptr[D_8008FB84]);
+        func_15143134(&D_800AA400, &start, &data->first->ob_matrix_ptr[D_8008FB80]);
+        func_15143134(&D_800AA40C, &end, &data->second->ob_matrix_ptr[D_8008FB84]);
         flag = 1;
         vtx = data->vertices[D_800BE9C0];
         eye = &camera_global_Cameras[viewIdx].eye;
         gdl = func_15142B7C(gdl, 0x200005, 0x60600);
-        gdl = func_15142E24(gdl, D_80090F68, 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
+        gdl = func_15142E24(gdl, &D_80090F68, 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
         gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
         gdl = func_15142CF0(gdl, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
         gdl = func_1513F4E4(gdl, 0x2E, &flag);

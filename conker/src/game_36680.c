@@ -535,7 +535,7 @@ void func_1500A990(s32 unused) {
     params[10] = 0.048f;
     params[11] = 0.007f;
 
-    effect = (Game36680ParticleEffect *)func_15149130(300, -1, 45, -1, 0, 0, sizeof(params), 255, 1);
+    effect = func_15149130(300, -1, 45, -1, 0, 0, sizeof(params), 255, 1);
     if (effect != NULL) {
         memcpy(effect->params, params, sizeof(params));
     }

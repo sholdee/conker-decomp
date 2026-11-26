@@ -23,7 +23,7 @@ struct BoneBeamParticle {
 
 /* Spawns a func_1513C650 effect of the given size on a surface (none for some materials on maps 0x36 and 0x26);
  * a duration of -1 means a fixed 300 frames without the timed flag. */
-QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
+QuadSprite *func_15102920(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
                          s32 surfaceFlags, u8 arg8, s32 arg9) {
     QuadSprite *result;
     SpriteDef arg;
@@ -74,7 +74,7 @@ QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 dura
         argB = 0;
         argC = 0;
     }
-    result = func_1513C650(&arg, 0, 0, arg2, position->x, position->y, position->z, size, size,
+    result = func_1513C650(&arg, 0, 0, surface, position->x, position->y, position->z, size, size,
                            func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0,
                            arg8, arg9);
     return result;
@@ -82,7 +82,7 @@ QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 dura
 
 /* Spawns a beam particle from `start` to `end`, attached to bone `bone` of `target` (or to its model node `node`),
  * plus a flash at `flashPos`. */
-BoneBeamParticle *func_15102B38(Actor *target, u8 bone, Vec3f *start, Vec3f *end, ParticleSize *size, s16 lifetime,
+BoneBeamParticle *func_15102B38(Actor *target, u8 bone, const Vec3f *start, const Vec3f *end, ParticleSize *size, s16 lifetime,
                   u8 alpha, f32 flashSize, Vec3f *flashPos, u8 viewMask, s32 extraSize, s16 node, u8 arg12,
                   s32 arg13) {
     BoneBeamParticle *particle;
@@ -151,7 +151,7 @@ void func_15102D50(BoneBeamParticle *particle, s32 arg1, u8 arg2) {
 s32 func_15102D90(BoneBeamParticle *particle) {
     Actor *target;
     BoneBeamData *beam;
-    Vec3f *src[2];
+    const Vec3f *src[2];
     Vec3f *dst[2];
 
     beam = &particle->beam;

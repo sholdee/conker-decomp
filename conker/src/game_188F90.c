@@ -159,7 +159,7 @@ void func_1515C0B8(ActorTracker *tracker, s32 event, u8 eventType) {
 }
 
 /* Finds `actor`'s tracker attachment (type 0x16); on success stores a pointer to its motion in *motion. */
-s32 func_1515C0F8(Actor *actor, Vec3f **motion) {
+s32 func_1515C0F8(Actor *actor, const Vec3f **motion) {
     Attachment *node;
     ActorTracker *tracker;
 

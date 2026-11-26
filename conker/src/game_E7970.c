@@ -22,14 +22,14 @@ void func_150BA55C(EffectE7970 *effect) {
     Actor *owner;
     EffectE7970Data *data;
     s32 heading;
-    f32 ownerPos[3];
+    Vec3f ownerPos;
     f32 radius;
     f32 unused;
-    f32 growth[3];
+    Vec3f growth;
     f32 size;
-    f32 spawnPos[3];
-    f32 angles[3];
-    f32 velocity[3];
+    Vec3f spawnPos;
+    Vec3f angles;
+    Vec3f velocity;
     f32 speed;
     u32 randomYaw;
 
@@ -44,25 +44,25 @@ void func_150BA55C(EffectE7970 *effect) {
         if (data->spawnAccum > 1.0f) {
             size = (owner->scale_xz + owner->scale_y) * 0.5f;
             heading = (owner->angle >> 8) - 64;
-            func_1515C244(owner, ownerPos, &radius, &unused);
-            growth[1] = 0.0f;
+            func_1515C244(owner, &ownerPos, &radius, &unused);
+            growth.y = 0.0f;
             do {
                 randomYaw = func_150ADA20();
-                func_15143794((randomYaw % 127U) + heading - 63, (func_150ADA20() % 31U) - 50, radius, spawnPos);
-                spawnPos[1] *= owner->unkF0;
-                spawnPos[0] += ownerPos[0];
-                spawnPos[1] += ownerPos[1];
-                spawnPos[2] += ownerPos[2];
-                angles[0] = func_150ADA68() * 360.0f;
-                angles[1] = func_150ADA68() * 360.0f;
-                angles[2] = func_150ADA68() * 360.0f;
+                func_15143794((randomYaw % 127U) + heading - 63, (func_150ADA20() % 31U) - 50, radius, &spawnPos);
+                spawnPos.y *= owner->unkF0;
+                spawnPos.x += ownerPos.x;
+                spawnPos.y += ownerPos.y;
+                spawnPos.z += ownerPos.z;
+                angles.x = func_150ADA68() * 360.0f;
+                angles.y = func_150ADA68() * 360.0f;
+                angles.z = func_150ADA68() * 360.0f;
                 speed = (func_150ADA68() * 0.09400000423f) + 0.05100000277f;
-                velocity[0] = (spawnPos[0] - ownerPos[0]) * speed;
-                velocity[1] = (spawnPos[1] - ownerPos[1]) * speed;
-                velocity[2] = (spawnPos[2] - ownerPos[2]) * speed;
-                growth[0] = (func_150ADA68() * 18.64500046f) + -9.322500229f;
-                growth[2] = (func_150ADA68() * 18.64500046f) + -9.322500229f;
-                func_1518A3C0(spawnPos, angles, ((func_150ADA68() * 0.08000000566f) + 0.1000000015f) * size, velocity, growth,
+                velocity.x = (spawnPos.x - ownerPos.x) * speed;
+                velocity.y = (spawnPos.y - ownerPos.y) * speed;
+                velocity.z = (spawnPos.z - ownerPos.z) * speed;
+                growth.x = (func_150ADA68() * 18.64500046f) + -9.322500229f;
+                growth.z = (func_150ADA68() * 18.64500046f) + -9.322500229f;
+                func_1518A3C0(&spawnPos, &angles, ((func_150ADA68() * 0.08000000566f) + 0.1000000015f) * size, &velocity, &growth,
                               (func_150ADA68() * 0.324000001f) + -0.5630000234f, 0.9448540211f, 7, (func_150ADA20() % 41U) + 60, 0, 0,
                               effect->base.header.owner, effect->base.header.kind);
                 data->spawnAccum -= 1.0f;

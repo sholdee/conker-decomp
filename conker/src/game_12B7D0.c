@@ -10,7 +10,7 @@ extern Vec3f D_800A1FD4;
 extern Vec3f D_800A1FE0;
 
 /* Runs the func_150FE49C effects for `obj`, then spawns a func_151C229C effect from the result. */
-s32 func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
+Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
     Vec3f axis0;
     Vec3f position;
@@ -21,7 +21,7 @@ s32 func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
     f32 random0;
 
     if (obj == NULL) {
-        return 0;
+        return NULL;
     }
 
     func_15145740(obj, &direction, &axis0, NULL, 0.0f);
@@ -45,7 +45,7 @@ s32 func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
 void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *outOrigin) {
     Vec3f position;
     Vec3f origin;
-    Vec3f *src[2];
+    const Vec3f *src[2];
     Vec3f *dst[2];
 
     if (obj != NULL) {
@@ -79,7 +79,7 @@ void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *out
  * when the object has bone matrices and unk74's low nibble isn't 0xF.
  */
 void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
-    f32 motion[2];
+    ParticleSize motion;
     u8 mask;
     s32 pad; // matching: unused stack slot
     s32 random1;
@@ -87,8 +87,8 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
 
     if (obj->ob_matrix_ptr != NULL) {
         if ((obj->unk74 & 0xF) != 0xF) {
-            motion[1] = func_150ADA68() * (1.0f + 1.0f) + 3.7099998f; // matching: a plain 2.0f literal mismatches
-            motion[0] = func_150ADA68() * 15.0f + 35.0f;
+            motion.height = func_150ADA68() * (1.0f + 1.0f) + 3.7099998f; // matching: a plain 2.0f literal mismatches
+            motion.width = func_150ADA68() * 15.0f + 35.0f;
 
             if ((obj->mv != NULL) && (obj->mv->SniperState != 0) && (obj->CameraPtr != NULL)) {
                 mask = ~(1 << obj->CameraPtr->CNumber) & 0xFF;
@@ -98,7 +98,7 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
 
             random0 = func_150ADA20_u8();
             random1 = func_150ADA20_u8();
-            func_15102B38(obj, D_80088B94, &D_800A1FC8, &D_800A1FE0, motion,
+            func_15102B38(obj, D_80088B94, &D_800A1FC8, &D_800A1FE0, &motion,
                           (random0 % 3U) + 4, (random1 % 56U) + 200,
                           func_150ADA68() * 301.0f + 500.0f, position, mask,
                           0, -1, arg2, arg3);

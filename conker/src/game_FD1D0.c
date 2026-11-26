@@ -87,7 +87,7 @@ TextObj *func_150CFF10(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn,
 
     lineSize = func_150CFDB8(str) + 1;
 
-    obj = (TextObj *)func_15149130(duration, -1, -1, 5, 3, 0x47, (sizeof(TextLines) + styleSize + lineSize * 2), arg6, arg7);
+    obj = func_15149130(duration, -1, -1, 5, 3, 0x47, (sizeof(TextLines) + styleSize + lineSize * 2), arg6, arg7);
     if (obj != NULL) {
         text = &obj->text;
         memcpy(text, &init, sizeof(TextLines));

@@ -56,7 +56,8 @@ void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {
 s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, f32 *dir, u8 arg14) {
-    EffectTemplate20 spawn;
+    u8 pad[4]; // matching: frame size
+    EffectTemplate spawn;
     TrailMotion motion;
     f32 speed;
     TrailRender render;

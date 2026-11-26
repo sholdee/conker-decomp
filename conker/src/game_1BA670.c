@@ -349,7 +349,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
                             data->vel.z = -10.0f;
                         }
                         data->vel.y = 0.0f;
-                        func_1513F680(slot->particle, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D,
+                        func_1513F680(&slot->particle->head, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D,
                                       data->tmpl->unk3E);
                         slot->particle->head.def.lifetime =
                             func_150ADA20() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
@@ -492,7 +492,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
         done = 1;
     }
     if (done) {
-        func_1516972C(self);
+        func_1516972C(&self->header);
     }
 }
 

@@ -29,7 +29,7 @@ typedef struct {
 s32 func_1500F9D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     Struct1500F9D0 *temp;
 
-    temp = (Struct1500F9D0 *)func_151491F4((s16)((func_150ADA20() & 0x7F) + 0xA), 1, -1, 1, 0, 0xA, 0xFF, 0);
+    temp = func_151491F4((s16)((func_150ADA20() & 0x7F) + 0xA), 1, -1, 1, 0, 0xA, 0xFF, 0);
     if (temp != 0) {
         temp->unk28 = arg0;
         temp->unk2A = arg1;

@@ -53,7 +53,7 @@ void func_1504A730(void) {
         obj->unk300 = 0;
         obj->mvmt_control &= 0xFFEE5FFF;
         dc_glbl_CharNum = i;
-        if (obj->ypos <= (f32)obj->unk38) {
+        if (obj->ypos <= obj->unk38) {
             if (obj->playernumber == 0xFF) {
                 func_15060F28(obj, 0);
                 continue;
@@ -125,7 +125,7 @@ void func_1504A730(void) {
             }
             if (!(obj->task_attrib & 0x200)) {
                 if (D_80086014[obj->type] != NULL) {
-                    D_80086014[obj->type]((s32)obj);
+                    D_80086014[obj->type](obj);
                 }
             }
             if (obj->type != 0) {
@@ -433,7 +433,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
 }
 
 void func_1504BA38(Actor *obj) {
-    Struct80099140 *entry;
+    const Struct80099140 *entry;
     s8 unk2;
     s32 unk1;
 

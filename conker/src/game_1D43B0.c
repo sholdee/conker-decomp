@@ -119,7 +119,7 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
             trailDesc.emitter = 1;
             trailDesc.rate = 0.3580000103f;
             data->trail = NULL;
-            trail = (DebrisBloodTrail *)func_15134908(&trailDesc, sizeof(f32), arg2, arg3);
+            trail = func_15134908(&trailDesc, sizeof(f32), arg2, arg3);
             data->trail = trail;
             if (trail != NULL) {
                 memcpy(&trail->size, &size, sizeof(f32));
@@ -194,9 +194,9 @@ s32 func_151A743C(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY
  * flung back against the trail's motion (dx, dy, dz) and sized by the debris piece.
  */
 void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBloodTrail *trail) {
-    f32 pos[3];
-    f32 vel[3];
-    f32 offset[3];
+    Vec3f pos;
+    Vec3f vel;
+    Vec3f offset;
     f32 speed;
     f32 size;
     f32 dt;
@@ -208,9 +208,9 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBloodTrail
     } rand;
 
     size = trail->size;
-    pos[0] = x;
-    pos[1] = y;
-    pos[2] = z;
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
     // matching: an early (empty) use of dt makes IDO give it $f12 and speed $f2
     do { } while (0);
     if (dt) {
@@ -218,18 +218,18 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBloodTrail
     speed = func_150ADA68();
     dt = D_800BE9A8;
     speed = speed * 166.0f + 160.0f;
-    offset[0] = 0.0f;
-    offset[1] = 0.0f;
-    offset[2] = 0.0f;
+    offset.x = 0.0f;
+    offset.y = 0.0f;
+    offset.z = 0.0f;
     speed *= 0.001000000047f;
-    vel[0] = -dx * dt * speed;
-    vel[1] = -dy * dt * speed;
-    vel[2] = -dz * dt * speed;
+    vel.x = -dx * dt * speed;
+    vel.y = -dy * dt * speed;
+    vel.z = -dz * dt * speed;
     rand.gravity = func_150ADA68();
     rand.size = func_150ADA68();
     rand.timer = func_150ADA20();
     // matching: `+ -600.0f` (add.s); `- 600.0f` would emit sub.s
-    func_151A26EC(pos, offset, vel, 1.0f, (rand.gravity * 591.0f + -600.0f) * 0.001000000047f,
+    func_151A26EC(&pos, &offset, &vel, 1.0f, (rand.gravity * 591.0f + -600.0f) * 0.001000000047f,
                   (rand.size * 500.0f + 400.0f) * size, rand.timer % 21 + 15, func_150ADA20() % 101 + 100,
                   15, 20, 0, -1, 86, 39, 0, trail->trail.header.owner, trail->trail.header.kind);
 }

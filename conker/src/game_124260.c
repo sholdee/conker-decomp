@@ -23,7 +23,7 @@ BeamObj *func_150F6DE4(Actor *owner) {
         state.ends[i] = NULL;
     }
     state.flags = 0;
-    obj = (BeamObj *)func_15149130(300, -1, 0x43, -1, 0, 0x37, sizeof(BeamState), 0xFF, 1);
+    obj = func_15149130(300, -1, 0x43, -1, 0, 0x37, sizeof(BeamState), 0xFF, 1);
     if (obj != NULL) {
         BeamState *beam;
 

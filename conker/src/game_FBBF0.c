@@ -88,7 +88,7 @@ void func_150CE740(Actor *obj) {
             }
             obj->fangle = ((func_150ADA20() % 10000U) + heading) - 5000;
             obj->stickspeed = (obj->stickspeed * 0.5f) + 22.0f;
-            if ((u8)(((s32)(obj->angle - obj->fangle) >> 8) - 0x50) < 0x60) {
+            if ((u8)(((obj->angle - obj->fangle) >> 8) - 0x50) < 0x60) {
                 obj->scriptCmd = NULL;
                 obj->intelwalk = 0x10;
             }
@@ -106,7 +106,7 @@ void func_150CE740(Actor *obj) {
                 }
                 obj->unk1E6 = v;
                 obj->unk1E5 = v;
-                if ((u8)(((s32)(obj->angle - obj->fangle) >> 8) - 0x50) < 0x60) {
+                if ((u8)(((obj->angle - obj->fangle) >> 8) - 0x50) < 0x60) {
                     if (obj->speed > 35.0f) {
                         obj->intelwalk = 4;
                     } else {

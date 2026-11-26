@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 D_8008CAE0;
+extern EffectTexture *D_8008CAE0; /* entry 37 of the D_8008CA4C texture table */
 extern u8 D_800B86A4[][0x32C];
 
 
@@ -62,7 +62,7 @@ void func_150B12FC(Actor *obj) {
     func_15056B08(obj);
     prevAngle -= obj->angle;
     turn = prevAngle * 6;
-    leanStep = (f32)turn * 0.00390625f - obj->lean_angle;
+    leanStep = turn * 0.00390625f - obj->lean_angle;
     if (leanStep > 6.0f) {
         leanStep = 6.0f;
     } else if (leanStep < -6.0f) {
@@ -74,7 +74,7 @@ void func_150B12FC(Actor *obj) {
         obj->unk148 += (leanStep - current) * 0.05f;
         obj->lean_angle += obj->unk148;
     }
-    obj->theta = (f32)(s16)(obj->langle + 0x4000) * 0.005493164f;
+    obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
     func_15059140(obj);
     if (func_150535F4(obj) == 0) {
         func_1502178C(obj, 0, -1);
@@ -94,7 +94,7 @@ void func_150B1484(Actor *obj) {
     if (obj->stunned == 0) {
         f32 targetY;
 
-        targetY = (f32)D_800D20FC[obj->listpos].y + 210.0f;
+        targetY = D_800D20FC[obj->listpos].y + 210.0f;
         if (!(obj->unk22C & 8)) {
             if (obj->unk223 != 3) {
                 obj->vtilt = obj->yspd * -0.5f;
@@ -106,7 +106,7 @@ void func_150B1484(Actor *obj) {
             f32 time;
 
             time = func_1505A6F8(&movement_obj[obj->unk222], obj) / obj->speed;
-            obj->yspd = (movement_obj[obj->unk222].ypos + (s16)obj->unk224 - obj->ypos) / time;
+            obj->yspd = (movement_obj[obj->unk222].ypos + obj->unk224 - obj->ypos) / time;
             obj->ygrav = 0.0f;
         } else {
             s16 heightCode;
@@ -114,7 +114,7 @@ void func_150B1484(Actor *obj) {
             if (obj->unk223 == 1) {
                 targetY = movement_obj[0].ypos + 210.0f;
             }
-            heightCode = (s16)obj->unk224;
+            heightCode = obj->unk224;
             if (heightCode != 0) {
                 if (heightCode == 10000) {
                     targetY = D_800D2104[obj->listpos][obj->unk21E + 1].y;

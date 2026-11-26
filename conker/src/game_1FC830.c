@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800D9860;
+extern CollisionHit D_800D9860; /* the floor under the last spawn point */
 
 extern RenderModePair D_800A4AC8[];
 
@@ -33,7 +33,7 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     if (info->owner != NULL && info->owner->ob_matrix_ptr == NULL) {
         return gfx;
     }
-    func_151D5D60(ribbon->vtxBuffer, cameraIdx, (ribbon->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+    func_151D5D60(ribbon->vtxBuffer, cameraIdx, (ribbon->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
     update = 1;
     gfx = func_15142B7C(func_15142C10(gfx, 0xED, 0xD2, 0x85, 0xC8, &update), 0x200005, 0x1F0600);
     gfx = func_15142FBC(func_1513F4E4(gfx, 0x54, &update), D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].cycle1 | D_800A4AC8[1].cycle2, &update);
@@ -146,11 +146,11 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
             spawnPos.z = camPos->z - (cosf(angle) * distance);
 
             if (func_15046C80(&spawnPos, 0, arg2, &D_800D9860) != 0) {
-                spawnPos.y = D_800D9860;
+                spawnPos.y = D_800D9860.height;
                 data.pos = spawnPos;
                 data.unkC = 0.0f;
 
-                effect = (GroundEffect *)func_15149130((s16)((func_150ADA20() % 131U) + 51), -1, 0x20, -1, 1, 0,
+                effect = func_15149130((s16)((func_150ADA20() % 131U) + 51), -1, 0x20, -1, 1, 0,
                                                        sizeof(data), 0xFF, 1);
                 if (effect != NULL) {
                     memcpy(&effect->data, &data, sizeof(data));
@@ -212,7 +212,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
                 u32 pitch;
 
                 piece.model = models[i];
-                func_15143134(&D_800AAEEC[i], &piece.pos, (Mtx *)obj->ob_matrix_ptr);
+                func_15143134(&D_800AAEEC[i], &piece.pos, obj->ob_matrix_ptr);
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794(yaw & 0xFF, (pitch % 25U) - 64, (func_150ADA68() * 11.44999981f) + 16.93000031f, &piece.vel);
@@ -220,7 +220,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
                 piece.rotVel.z = (func_150ADA68() * 19.75200081f) + -9.876000404f;
                 piece.gravity = (func_150ADA68() * 0.5180000067f) + -1.539000034f;
                 piece.lifetime = (func_150ADA20() % 101U) + 100;
-                func_15132A4C(&piece, 3, 0xFF, 0, arg1, arg2);
+                func_15132A4C((ParticleSpawn *)&piece /* matching: an 0x78-byte view */, 3, 0xFF, 0, arg1, arg2);
             }
         }
         {
@@ -268,7 +268,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
             cfg.render.envMode = 7;
             cfg.unk80 = 10;
             cfg.unk82 = 25;
-            func_15151A38(&cfg, arg1, arg2);
+            func_15151A38((PuffSpray *)&cfg /* matching: an 0x84-byte view */, arg1, arg2);
         }
         {
             DecalSpray cfg2;
@@ -321,7 +321,7 @@ void func_151D0058(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
     data.alpha = (func_150ADA20() % 56U) + 200;
     data.ownerUnk84 = obj->animseq.uh;
 
-    effect = (StripEffect *)func_15149130(300, -1, 0x61, 4, 0, 0x31, sizeof(data), arg2, arg3);
+    effect = func_15149130(300, -1, 0x61, 4, 0, 0x31, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -339,7 +339,7 @@ void func_151D0128(StripEffect *effect) {
 extern Vec3f D_800AAF5C[];
 extern Vec3f D_800AAF74;
 extern u8 D_800AAF80[];
-extern u8 D_80091154[];
+extern EffectTexture D_80091154; /* an entry of the effect texture table D_80090B60 */
 
 /* Draws the strip effect: six camera-facing quads joining two of the owner's model points, pinched
  * in the middle when the points are far apart. */
@@ -385,16 +385,16 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     if (owner->ob_matrix_ptr == NULL) {
         return gfx;
     }
-    func_151D5D60(effect->base.buffers, cameraIdx, 0x1C0, (void **)&vtx, NULL);
+    func_151D5D60(effect->base.buffers, cameraIdx, 0x1C0, &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
     update = 1;
-    func_15143134(&D_800AAF5C[data->variant], &from, (Mtx *)owner->ob_matrix_ptr + 2);
-    func_15143134(&D_800AAF74, &to, (Mtx *)owner->ob_matrix_ptr + D_800AAF80[data->variant]);
+    func_15143134(&D_800AAF5C[data->variant], &from, &owner->ob_matrix_ptr[2]);
+    func_15143134(&D_800AAF74, &to, &owner->ob_matrix_ptr[D_800AAF80[data->variant]]);
     camPos = func_15144B34(cameraIdx);
     gfx = func_15142B7C(gfx, 0x200005, 0x60600);
-    gfx = func_15142E24(gfx, (s32)D_80091154, 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
+    gfx = func_15142E24(gfx, &D_80091154, 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
     gfx = func_1513F4E4(gfx, 0x3B, &update);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, data->alpha, &update);
     gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].cycle1 | D_800A4AC8[3].cycle2, &update);
@@ -515,8 +515,8 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
     }
 }
 
-extern f32 D_800AAF84[3];
-extern f32 D_800AAF90[3];
+extern Vec3f D_800AAF84;
+extern Vec3f D_800AAF90;
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
  * 5-10 more particles that each carry a func_151CEAAC effect. */
 void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
@@ -527,14 +527,14 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
 
     if (obj->ob_matrix_ptr != NULL) {
         {
-            f32 *srcs[2];
+            const Vec3f *srcs[2];
             Vec3f *dsts[2];
 
-            srcs[0] = D_800AAF84;
-            srcs[1] = D_800AAF90;
+            srcs[0] = &D_800AAF84;
+            srcs[1] = &D_800AAF90;
             dsts[0] = &pos;
             dsts[1] = &dir;
-            func_15145EA4(srcs, dsts, (Mtx *)obj->ob_matrix_ptr + 2, 2);
+            func_15145EA4(srcs, dsts, &obj->ob_matrix_ptr[2], 2);
             dir.x -= pos.x;
             dir.y -= pos.y;
             dir.z -= pos.z;
@@ -642,7 +642,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
                 spawn.gravity = (func_150ADA68() * 1.340000033f) + -2.328999996f;
                 particle = func_15130280(&spawn, 1, 0, 4, arg1, arg2);
                 if (particle != NULL) {
-                    particle->effect = func_151CEAAC(NULL, particle, 0, arg1, arg2);
+                    particle->effect = func_151CEAAC(NULL, &particle->head, 0, arg1, arg2);
                 }
                 count--;
             }
@@ -661,13 +661,13 @@ void func_151D0ED8(CarrierParticle *particle) {
 /* Particle handler: frees the attached effect, then runs func_1513173C. */
 void func_151D0F08(CarrierParticle *particle) {
     func_151D0ED8(particle);
-    func_1513173C(particle);
+    func_1513173C(&particle->head);
 }
 
 /* Particle handler: frees the attached effect, then runs func_1513175C. */
 void func_151D0F34(CarrierParticle *particle) {
     func_151D0ED8(particle);
-    func_1513175C(particle);
+    func_1513175C(&particle->head);
 }
 
 /* Point functions: each writes a point of the object to out and returns whether it has one. */
@@ -691,7 +691,7 @@ void func_151D0F60(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
     data.dist = 0.0f;
     data.pointFn = pointFn;
 
-    effect = (TrackerEffect *)func_15149130(300, -1, 0x5F, -1, 0, 0x48, sizeof(data), arg2, arg3);
+    effect = func_15149130(300, -1, 0x5F, -1, 0, 0x48, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -843,7 +843,7 @@ void func_151D1448(TrackerEffect *effect) {
     req.spawn.flags = 54;
     req.spawn.kind = 19;
     req.spawn.unk14 = 6;
-    req.spawn.unk18 = 0;
+    req.spawn.material = 0;
     trail = func_15147A80(&req.spawn, sizeof(TrackerTrailData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->base.header.owner, effect->base.header.kind);
     if (trail != NULL) {
         memcpy(trail->state, &req.data, sizeof(TrackerTrailData));

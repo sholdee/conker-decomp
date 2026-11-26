@@ -167,7 +167,7 @@ void func_1515BF50(ActorTracker *tracker);
 void func_1515BF7C(ActorTracker *tracker);
 void func_1515BFA8(ActorTracker *tracker);
 void func_1515C0B8(ActorTracker *tracker, s32 event, u8 eventType);
-s32 func_1515C0F8(Actor *actor, Vec3f **motion);
+s32 func_1515C0F8(Actor *actor, const Vec3f **motion);
 void func_1515C158(void);
 void func_1515C1A0(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3);
 void func_1515C244(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3);

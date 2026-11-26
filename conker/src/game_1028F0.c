@@ -15,7 +15,7 @@ void func_150D5440(Actor *obj, u8 arg1, s32 arg2) {
     data.ownerId = obj->unique_id;
     data.spawnAccum = 0.0f;
 
-    effect = (FollowEffect *)func_15149130(300, -1, 0x38, -1, 0, 0x28, sizeof(data), arg1, arg2);
+    effect = func_15149130(300, -1, 0x38, -1, 0, 0x28, sizeof(data), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -33,7 +33,7 @@ void func_150D54C8(FollowEffect *effect) {
     f32 sinYaw;
     f32 rightX;
     f32 rightZ;
-    Vec3f *refVel;
+    const Vec3f *refVel;
     u8 right;
     f32 along;
     f32 speed;
@@ -157,12 +157,13 @@ void func_150D5A4C(TimedEffect *effect) {
 void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
     Vec3f vel;
-    s32 hitOut[3];
+    Vec3f hitPos;
     u8 hit;
     s32 useDefaultBasis;
-    f32 hitPos[3];
-    s32 ignored0;
-    s32 ignored1;
+    // matching: only 12 bytes, although func_150AC9C0 writes a whole CollisionTri (18 bytes) here
+    f32 hitTri[3];
+    f32 ignored0;
+    f32 ignored1;
     s32 hitSurface;
     s32 type;
     f32 dist;
@@ -204,7 +205,7 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
         typedef s32 ScopeBarrier1; // matching: -g3 scope pins the 0.0f register setup at block entry
 
         if (func_150AC9C0(obj->old_xpos, obj->old_ypos, obj->old_zpos, vel.x, vel.y, vel.z, 0,
-                          hitPos, &hitOut[0], &hitOut[1], &hitOut[2], &dist, 0, &hitSurface, 0.0f) &&
+                          (CollisionTri *)hitTri, &hitPos.x, &hitPos.y, &hitPos.z, &dist, 0, &hitSurface, 0.0f) &&
             dist < 397.0f) {
             hit = 1;
         }
@@ -215,13 +216,13 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
         useDefaultBasis = 1;
         if (hit) {
             useDefaultBasis = 0;
-            if (func_15144E80(hitPos, &tangentU, &tangentV, &normal)) {
-                s32 ignored2;
-                s32 ignored3;
-                s32 ignored4;
-                s32 ignored5;
-                s32 ignored6;
-                s32 ignored7;
+            if (func_15144E80((CollisionTri *)hitTri, &tangentU, &tangentV, &normal)) {
+                f32 ignored2;
+                f32 ignored3;
+                f32 ignored4;
+                f32 ignored5;
+                f32 ignored6;
+                f32 ignored7;
 
                 func_15145128(&tangentU, &tangentU, &ignored2, &ignored3);
                 func_15145128(&tangentV, &tangentV, &ignored4, &ignored5);
@@ -336,9 +337,9 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
         }
         if (hit && obj->CameraPtr != NULL) {
             if ((hitSurface & 0x1F) == 0xE) {
-                func_150D65F0(hitPos, hitOut, arg1, arg2);
+                func_150D65F0((CollisionTri *)hitTri, &hitPos, arg1, arg2);
             } else {
-                func_151C0360(hitPos, hitOut, arg1, arg2);
+                func_151C0360((CollisionTri *)hitTri, &hitPos, arg1, arg2);
             }
         }
         func_150D6434(&pos, arg1, arg2);
@@ -400,7 +401,7 @@ void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
 }
 
 /* Impact effect on a type-0xE surface hit at pos (func_151A5D58 with randomized parameters). */
-void func_150D65F0(f32 *pos, s32 *arg1, u8 arg2, s32 arg3) {
+void func_150D65F0(CollisionTri *surface, Vec3f *pos, u8 arg2, s32 arg3) {
     u32 rand3;
     u32 rand2;
     f32 rand1;
@@ -408,7 +409,7 @@ void func_150D65F0(f32 *pos, s32 *arg1, u8 arg2, s32 arg3) {
     rand1 = func_150ADA68();
     rand2 = func_150ADA20();
     rand3 = func_150ADA20();
-    func_151A5D58(rand1 * 100.0f + 150.0f, rand2 % 71 + 130, pos, arg1, rand3 % 31 + 50, 0, 1, arg2, arg3);
+    func_151A5D58(rand1 * 100.0f + 150.0f, rand2 % 71 + 130, surface, pos, rand3 % 31 + 50, 0, 1, arg2, arg3);
 }
 
 /* Calls func_15182670 for camera arg0 with 0xFF, 0xFF, 0xFF, a random 200-255 and a random 25-30. */
