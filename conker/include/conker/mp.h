@@ -178,7 +178,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
 s32 func_1508D850(s32 player);
 s32 func_1508DA1C(void);
 s32 func_1508DAEC(s32 player, s32 mode);
-void func_1508DC24(void);
+s32 func_1508DC24(void);
 void func_1508E6C8(void);
 s32 func_1508E6D0(s32 type);
 s32 func_1508E780(s32 type);

@@ -1532,8 +1532,9 @@ s32 func_1508DAEC(s32 player, s32 mode) {
  * Per-frame pickup update. Gives each player the item of its override, its slot or the default
  * (swapping attachments when it changes), then moves the slot pickups: drop timers, respawns at
  * a spawn node, and handing a touched pickup to its player (0x8AE adds 3 grenades, up to 6).
+ * Declared int but returns no value, in the pre-ANSI way: func_1509DFC4 returns what it leaves in v0.
  */
-void func_1508DC24(void) {
+s32 func_1508DC24(void) {
     static s8 D_80087340 = 0;
     MpGame *base;
     s32 i;

@@ -1,9 +1,5 @@
 #include <ultra64.h>
-#define func_1508DC24 func_1508DC24_header
 #include "functions.h"
-#undef func_1508DC24
-// matching: func_1508DC24 returns nothing, but this file returns what it leaves in v0
-s32 func_1508DC24(void);
 #include "variables.h"
 
 struct CB3D0_arg1 {
