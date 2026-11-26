@@ -458,13 +458,13 @@ extern HitReaction D_8009A6D8[]; // knockback reactions
 extern HitReaction D_8009A9F8[]; // hit-reaction table
 
 extern s16 D_8009DCB4[];
-extern s32 D_8009DCC0;
-extern s32 D_8009DCC4;
-extern s32 D_8009DCD4;
-extern s32 D_8009DCD8;
-extern s32 D_8009DCE0;
+extern char D_8009DCC0[];
+extern char D_8009DCC4[];
+extern char D_8009DCD4[];
+extern char D_8009DCD8[];
+extern char D_8009DCE0[];
 
-extern s32 D_8009DCCC;
+extern char D_8009DCCC[];
 
 extern u8 D_8009DEB0[];
 extern u8 D_8009DEB4[];

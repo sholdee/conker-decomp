@@ -51,7 +51,7 @@ void func_1508F0D4(void) {
         timer -= D_800BE9E4;
         if (timer <= 0) {
             *link = node->next;
-            func_100043B4((s32 *)node, 3);
+            func_100043B4(node, 3);
         } else {
             node->timer = timer;
             link = &node->next;
@@ -834,15 +834,15 @@ void func_150916B4(s32 x, s32 y, s32 frames, s32 style) {
     x -= 8;
     if (frames >= 0) {
         seconds = frames / 60;
-        func_15042D94((x - (((seconds / 60) >= 10) ? 5 : 0)) - 8, y, (u8)style, (char *)&D_8009DCC0, seconds / 60);
-        func_15042D94(x, y, style, (char *)&D_8009DCC4, seconds % 60);
-        func_15042D94(x + 16, y, style, (char *)&D_8009DCCC, hundredths);
+        func_15042D94((x - (((seconds / 60) >= 10) ? 5 : 0)) - 8, y, (u8)style, D_8009DCC0, seconds / 60);
+        func_15042D94(x, y, style, D_8009DCC4, seconds % 60);
+        func_15042D94(x + 16, y, style, D_8009DCCC, hundredths);
         return;
     }
 
-    func_15042D94(x - 8, y, (u8)style, (char *)&D_8009DCD4);
-    func_15042D94(x, y, style, (char *)&D_8009DCD8);
-    func_15042D94(x + 16, y, style, (char *)&D_8009DCE0);
+    func_15042D94(x - 8, y, (u8)style, D_8009DCD4);
+    func_15042D94(x, y, style, D_8009DCD8);
+    func_15042D94(x + 16, y, style, D_8009DCE0);
 }
 
 typedef struct HudBars {

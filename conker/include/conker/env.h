@@ -23,7 +23,7 @@ typedef struct SkyTile {
 /* game_3FC60.c */
 void func_150127B0(void);
 void func_15012C84(Vtx *arg0, u32 arg1);
-void func_15012ED8(u32 *arg0);
+void func_15012ED8(Gfx *dl);
 void func_15012F90(void);
 
 /* game_FECC0.c */

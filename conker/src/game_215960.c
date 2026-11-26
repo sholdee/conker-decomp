@@ -1731,9 +1731,9 @@ void func_151EDB58(HudModel *model) {
 
     if (model != NULL) {
         func_1503F7B8(model->anim);
-        func_100043B4((s32 *)model, 4);
+        func_100043B4(model, 4);
         for (i = 0; i < model->displayListCount; i++) {
-            func_100043B4((s32 *)model->displayLists[i], 4);
+            func_100043B4(model->displayLists[i], 4);
         }
     }
 }
