@@ -1,6 +1,5 @@
 #include <ultra64.h>
 
-#define func_10010630 func_10010630_hdr
 #define func_1505DADC func_1505DADC_header // matching: this file keeps its own declaration of func_1505DADC
 // matching: func_1506FB60 passes the side to these as an int, (cmd - 0x13) & 0xFF; hide the header's prototypes
 #define func_151C6A28 func_151C6A28_hdr
@@ -26,9 +25,6 @@ void func_150EEF40();
 void func_151C6A28(Actor *, s32, s32, s32);
 #undef func_151C62D0
 s32 func_151C62D0(Actor *, s32, s32, ModelAttachment *, s32, s32, s32);
-#undef func_10010630
-// matching: callers here were compiled with an unsigned volume (arg2); the definition takes s32.
-void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 #include "variables.h"
 #undef func_1505DADC
 extern u8 func_1505DADC(Actor *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4); // matching: s32 pitch and halfCone: this caller does not narrow them

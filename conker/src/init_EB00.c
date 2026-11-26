@@ -728,7 +728,7 @@ void func_10010558(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farD
 }
 
 // matching: the empty ifs add uses of volume so that IDO keeps it in s1 like the target
-void func_10010630(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance) {
+void func_10010630(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDistance) {
     if (volume) {}
     if (volume) {}
     if (volume) {}
