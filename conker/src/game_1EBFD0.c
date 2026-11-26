@@ -35,9 +35,10 @@ s32 func_151BEB20(struct S151BEB20 *arg0) {
     return 1;
 }
 
-s32 func_151BEC94(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4) {
-    *arg4 = 1;
-    return arg0;
+/* Pre-draw callback (D_8008ADBC[0]): adds nothing and lets the model draw. */
+Gfx *func_151BEC94(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
+    *proceed = TRUE;
+    return gfx;
 }
 
 typedef struct {

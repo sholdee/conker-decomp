@@ -180,9 +180,6 @@ s32 func_150C5280(void) {
     return FALSE;
 }
 
-// update callbacks of one effect type; func_150C52CC is entry 4
-extern s32 (*D_8008ADA8[])(void *);
-
 /* Update callback (D_8008ADA8[4]): runs D_8008ADA8[0] unless func_150C5280 holds. */
 s32 func_150C52CC(void *fx) {
     if (func_150C5280()) {

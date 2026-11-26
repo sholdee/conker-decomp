@@ -209,7 +209,6 @@ extern f32 D_8009F6C0; // 0.01745329238474369f
 
 
 // in game_18D770.c
-extern s32 D_800A6060[3]; /* { 0x36, 0x4C, 0x5B }: the model effect types */
 
 
 extern VtxMorphGroup D_800A7230[2]; // vertex morph groups
@@ -387,7 +386,6 @@ extern u8 D_800DCA20;
 extern f32 D_800DCA24;
 extern u8 D_800DCA28;
 extern f32 D_800DCA2C;
-extern Mtx D_800DCC10[]; // per-view orthographic projection (func_151EF954)
 extern ParticleNode *D_800DC460; // loaded particle models: list head
 extern ParticleNode *D_800DC464; // list tail
 extern s16 D_800DC468[];

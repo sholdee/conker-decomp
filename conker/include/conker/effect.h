@@ -700,7 +700,7 @@ void func_150FAD78(void);
 void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event);
 void func_150FAE18(s16 duration, u8 owner, s32 kind);
 s32 func_150FB188(ModelEffect *fx);
-void func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
+Gfx *func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 void func_150FB240(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeRate);
 s32 func_150FB29C(FadeInEffect *effect);
 s32 func_150FB2E0(FadeInSprite *sprite);
@@ -1108,8 +1108,13 @@ PlayerMarker *func_15155FD4(s32 playerId);
 void func_15156028(PlayerMarker *marker, Actor **actors, u8 eventType);
 
 /* game_1844C0.c */
+extern Mtx D_800DCC10[]; /* per-view orthographic projection (func_15012370 builds them) */
+extern const s32 D_800A6060[3]; /* the model effect types */
 extern Gfx D_8008AD60[]; /* render setup (object type table D_8008B4A8) */
 extern Gfx D_8008AD80[]; /* render teardown (object type table D_8008B4A8) */
+extern s32 (*D_8008AD90[])();
+extern s32 (*D_8008ADA0[])(ModelEffect *);
+extern s32 (*D_8008ADA8[])();
 ModelEffect *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s32 arg4, s32 extraSize, u8 owner,
                            s32 list);
 void func_151571C4(ModelEffect *fx);
@@ -1622,7 +1627,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
 struct S151BEB20;
 typedef struct S151BECB8 S151BECB8;
 s32 func_151BEB20(struct S151BEB20 *arg0);
-s32 func_151BEC94(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4);
+Gfx *func_151BEC94(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 s32 func_151BECB8(S151BECB8 *arg0);
 s32 func_151BEE94(Actor *arg0);
 
