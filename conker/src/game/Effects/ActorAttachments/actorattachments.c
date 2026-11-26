@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* Spawn callbacks by slot (see effect_spawnAttachments); slot 0 is empty. */
 static void (*gAttachSpawnFuncs[])(Actor *) = {
@@ -719,7 +720,7 @@ void func_1514DAA4(Actor *obj) {
     payload[0] = 0;
     payload[1] = 0;
     {
-        // matching: a declaration here opens a scope block, which changes how as1 schedules the argument setup
+        /* matching: a declaration here opens a scope block, which changes how as1 schedules the argument setup */
         extern CharacterWatcher *effect_newCharacterWatcher(Actor *chr, u8 enableActions, s32 extraSize);
 
         if ((handle = effect_newCharacterWatcher(obj, 1, sizeof(payload))) != NULL) {

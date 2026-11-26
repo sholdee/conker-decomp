@@ -366,6 +366,11 @@ extern const f32 gLightJitterLows[24];
 extern const f32 gLightJitterMids[24];
 extern const f32 gLightJitterHighs[24];
 
+/* rodata 0x22D1B0 (a slice of conker.us.yaml without a unit): the light colours that light.c sets for levels 6 and 57 */
+extern u8 D_800886F0[];
+extern u8 D_800886F4[];
+extern u8 D_800886F8[];
+
 /* game/Effects/ActorFlicker/actorflicker.c */
 void light_updateActorFlicker(LightEffect *effect);
 

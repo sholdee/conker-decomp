@@ -8,16 +8,12 @@
 
 
 
-extern u32 D_80042450[512]; // chunk0 offsets
 
 
 /* undefined */
 
 extern OSThread *__osRunningThread;
 
-/* FUNCTIONS */
-// FIXME: we should be able to reference these directly
-extern s32  D_10013598;
 
 
 /* 80000000 */
@@ -56,7 +52,6 @@ extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares i
 /* 80040000 */
 
 
-extern s32  D_80040000;
 
 
 
@@ -86,7 +81,6 @@ extern u64 gRandomState;
 
 /* 8009 */
 
-extern s32 jtbl_80091A30[];
 
 
 // chunk0 data starts at rom 0x80082B20
@@ -261,14 +255,9 @@ extern u8   D_800E9D10[]; // heap arena: from here to 0x80400000
 
 /* other */
 
-extern u32  D_00AB1950; // offsets table
 
 extern s32 *D_1002AAD0;
-extern s32  D_151F3C4C;
 
-/* what is this */
-extern u16  D_BC000C02;
-extern s32  D_1FC007FC;
 
 #include "subsystems.h"
 

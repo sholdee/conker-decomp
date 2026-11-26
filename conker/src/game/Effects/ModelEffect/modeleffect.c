@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* Each view's orthographic projection (view_buildOrthoMatrices of game/View/ViewOrtho/viewortho builds them). */
 Mtx gViewOrthoMtxs[4];

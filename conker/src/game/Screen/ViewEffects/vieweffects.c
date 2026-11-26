@@ -44,6 +44,7 @@ f32 *gCutsceneIrisY;          // cutscene iris: hole y, percent of the view heig
 
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define gRenderViews ((RenderView *)gViews) // matching: the no-op cast changes the code; plain gViews mismatches
@@ -833,9 +834,6 @@ void screen_startOpening(s32 view) {
     }
 }
 
-// matching: 0.7f read from rodata; a literal would let IDO fold 1.0f - 0.7f
-extern f32 D_800A72C0;
-
 /* Draws the cutscene letterbox over view 0: black bars that slide in from the top and bottom by
  * *gLetterbox percent, with soft textured inner edges. */
 Gfx *screen_drawLetterbox(Gfx *gfx) {
@@ -915,8 +913,6 @@ Gfx *screen_drawLetterbox(Gfx *gfx) {
     gSPSetGeometryMode(gfx++, G_ZBUFFER);
     return gfx;
 }
-
-void *memcpy(void *, const void *, u32);
 
 /* Spawns an effect that flashes `view` with colour r,g,b, fading out from `alpha` over
  * `duration` frames. */

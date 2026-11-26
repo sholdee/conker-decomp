@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* Bounds points in the model's root space: centre, base and side (effect_spawnBreakUp). */
 const Vec3f gBreakUpCentre = { 0.0f, 0.0f, 0.0f };
@@ -298,8 +299,6 @@ void effect_spawnBreakUpParticle(Vec3f *center, f32 *height, f32 *radius, u8 arg
     spawn.scaleRate = 1.009518027f;
     particle_newOwnedSpriteParticle(&spawn, 1, 0, arg3, arg4);
 }
-
-void *memcpy(void *, const void *, u32);
 
 /* Spawns one particle at (x, y, z) moving along `angle`; its extra data is a float. */
 s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle, s32 arg9,

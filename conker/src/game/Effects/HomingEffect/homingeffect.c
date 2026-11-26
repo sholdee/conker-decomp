@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 math_distance3D(s32, s32, s32);
-
 /*
  * Object type 0x27: moves from pos toward target (a fixed point, a Actor or a followed f32[3]) at
  * speed units per frame, spawning particles that run from origin to the moving point. Live effects are
@@ -279,7 +277,8 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
         }
     }
     if (dist != 0.0f) {
-        extern f32 gFrameDelta; // matching: a declaration opens a -g3 block marker without a stack slot
+        /* matching: a declaration opens a -g3 block marker without a stack slot */
+        extern f32 gFrameDelta;
 
         scale = move / dist;
         step.x = scale * delta.x;
@@ -311,7 +310,8 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
             end.y = effect->ground.height;
         }
         {
-            extern s32 math_vec3Normalize(Vec3f *, Vec3f *, f32 *, f32 *); // matching: -g3 block marker, as above
+            /* matching: a -g3 block marker, as above */
+            extern s32 math_vec3Normalize(Vec3f *, Vec3f *, f32 *, f32 *);
 
             dir.x = end.x - from.x;
             dir.y = end.y - from.y;

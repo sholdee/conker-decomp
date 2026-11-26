@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_A48[];
-
 /* Spawns an overlay for the given id. */
 ScreenOverlay *screen_spawnOverlay(s16 id) {
     ScreenOverlay *overlay;

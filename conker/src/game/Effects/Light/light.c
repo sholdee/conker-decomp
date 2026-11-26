@@ -6,10 +6,7 @@ u8 D_800DCDD0;
 
 #include "functions.h"
 #include "variables.h"
-
-extern u8 D_800886F0[];
-extern u8 D_800886F4[];
-extern u8 D_800886F8[];
+#include "libc/string.h"
 
 /* Update callbacks per LightEffect.update; 0 ends the effect. Declared without a prototype: the
  * caller passes no argument, the callbacks take the effect and some return u8 or nothing. */

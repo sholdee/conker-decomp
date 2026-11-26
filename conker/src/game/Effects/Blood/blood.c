@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* Scale factors passed to blood_spawnProfileBurst (all 1.0f). */
 const f32 gBloodBurstScales[15] = {

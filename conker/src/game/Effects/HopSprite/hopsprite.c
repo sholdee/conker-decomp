@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 extern u8 (*gKindParticleTexturePickers[])(void); /* texture id pickers by effect kind (game/Particle/Steam/steam.c; no header: game/Beam/AimedBeam/aimedbeam has its own view) */
 

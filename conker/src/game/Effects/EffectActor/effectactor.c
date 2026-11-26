@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* The effect actor type's render setup and teardown display lists (object type table). */
 Gfx gEffectActorRenderSetupDl[] = {

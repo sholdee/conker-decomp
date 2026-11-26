@@ -409,7 +409,8 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
         }
     }
     if (floorTri != 0 && outVerts != NULL) {
-        extern MeshTri *gCurMapTris; // matching: a declaration here keeps IDO from using beqzl on this test
+        /* matching: a declaration here keeps IDO from using beqzl on this test */
+        extern MeshTri *gCurMapTris;
         for (i = 0; i < 3; i++) {
             vtx = (s16 *)(((s32 *)floorTri)[i] + floorVtxBase);
             outVerts[i].x = vtx[0];

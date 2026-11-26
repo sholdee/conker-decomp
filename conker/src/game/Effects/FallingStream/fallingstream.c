@@ -1,14 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /*
  * A falling stream: a ring buffer of points that fall under gravity and, where they reach the
  * floor, splash (splash and drop particles plus flat ripple sprites) and play a sound. The stream
  * is drawn as a textured ribbon of its records (effect_updateFallingStreamTrail updates it, effect_drawFallingStream draws it).
  */
-
-void *memcpy(void *, const void *, u32);
 
 /*
  * Creates falling stream `kind` (0 and 5: single streams; 1-4: four streams at (+-650, 736, +-650)

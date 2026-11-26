@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /*
  * Two effects that character-watcher actions (gWatcherActions) keep alive around a character:
@@ -22,8 +23,6 @@ struct Watcher {
     /* 0x00 */ CharacterWatcher watcher;
     /* 0x58 */ WatcherEffects effects;
 };
-
-void *memcpy(void *, const void *, u32);
 
 static Vec3f gWatcherRootOffset = { 0.0f, 0.0f, 0.0f }; /* the point below the character's root */
 /*

@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 
 
@@ -54,8 +55,6 @@ static const f32 gExplosionPieceKinds[15] = {
 static f32 gExplosionRiseSpeeds[3] = { 28.0f, 23.0f, 15.0f };
 static f32 gExplosionRiseSpeedRanges[3] = { 4.0f, 5.0f, 4.0f };
 
-void *memcpy(void *, const void *, u32);
-
 /*
  * Explosion at pos: 15 spawned effects (offsets from gExplosionOffsets), followed by effect_spawnQuadEffect,
  * particle_startPlayerRumbles/5334/5514/3FF4 and particle_spawnGrowFade effects, a burst of 3-6 debris aimed
@@ -71,7 +70,8 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
     // camera yaw in degrees -> 0..255 binary angle
     yaw = camera_global_Cameras[gCurrentView].TrueCameraAngle * 0.7111111283f;
     {
-        extern const f32 gExplosionPieceKinds[15]; // matching: a block with a decl is a -g3 scheduling barrier; an extern takes no stack slot
+        /* matching: a block with a declaration is a -g3 scheduling barrier; an extern takes no stack slot */
+        extern const f32 gExplosionPieceKinds[15];
 
         spawn.radius = 15.0f;
         spawn.sizeY = 1.0f;

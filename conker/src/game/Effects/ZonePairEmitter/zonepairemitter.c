@@ -3,6 +3,7 @@
  * included and declare the real ones below. */
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 
 void func_150DE320(s32 arg0) {
@@ -135,7 +136,6 @@ struct ZonePairEffect {
     /* 0x28 */ ZonePairEmitter link;
 };
 
-void *memcpy(void *, const void *, u32);
 /* Particle textures: 0xBE, or 0xBF for the slower ones. */
 const TexturePair gTravelParticleTextures = { { 0xBE, 0xBF } };
 

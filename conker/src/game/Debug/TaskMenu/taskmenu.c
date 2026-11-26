@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 s16 D_80084480 = 0; // the first word of this file's .data; read by game/Camera/Camera/camera.c and game/Game/MainLoop/mainloop.c
 
@@ -62,8 +63,6 @@ static char gTaskMenuErrorLabel[] = "ERROR";
 static const char gTaskMenuResetAllLabel[] = "RESETTING ALL TASKS";
 static const char gTaskMenuFlagMark[] = "."; // drawn above flagged tasks
 static const char gTaskMenuResetPrompt[] = "RESET TO PLAY !";
-s32 strlen(const char *);
-
 /* Bit `idx` of the task bitset at gTaskDoneBits (see game/Script/EffectCmd/effectcmd.c). */
 #define TASK_BIT_SET(idx) (gTaskDoneBits[(idx) >> 3] & (1 << ((idx) & 7)))
 

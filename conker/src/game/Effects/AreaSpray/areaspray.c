@@ -6,6 +6,7 @@ TriggerZone *gSprayAreas[3]; // the three areas effect_sprayFromArea sprays from
 
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* This file's .rodata: the burst angle ranges per area, then the four vertex colours of the beam particle. */
 static const s16 gSprayAreaAngleRanges[3][2] = { { -40, 80 }, { -13, 63 }, { -50, 63 } };
@@ -251,12 +252,12 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
         posInt.y = pos.y;
         posInt.z = pos.z;
         dst->light = light_createJitterAt(&header, &posInt, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, arg1, arg2);
-        // matching: this block and its redundant extern declarations are -g3 scope barriers that keep the
-        // light store and the onGround test ahead of the ground particle's constants (plain if mismatches)
         {
+            /* matching: a -g3 scope barrier: keeps the light store and the onGround test ahead of the constants */
             extern const VtxColor gWhiteVtxColors[4];
 
             if (onGround) {
+                /* matching: a second -g3 scope barrier (a plain if mismatches) */
                 extern const Vec3f gZeroVec3f;
 
                 groundDef.texture = 3;
