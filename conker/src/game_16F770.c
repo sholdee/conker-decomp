@@ -6,14 +6,25 @@
    a prototype: func_15146508 passes the two actors after the message as well. */
 void func_15169040();
 
-/* Cached RDP state (prim/env colour, geometry and other modes, last texture) for func_15142B7C..func_15142FBC. */
-extern u8 D_8008A160[]; /* palettes of four RGB triples */
-/* Debug breadcrumbs of func_15143134. */
-extern s32 D_800DCA00;
-extern void *D_800DCA04;
-extern f32 D_800DCA08;
-extern f32 D_800DCA0C;
-extern f32 D_800DCA10;
+/* This file's .data: nine palettes of four RGB colours (func_151429E0). */
+static u8 D_8008A160[9 * 12] = {
+    0x83, 0x94, 0xAA, 0x50, 0x5E, 0x76, 0x28, 0x34, 0x40, 0x1A, 0x24, 0x30,
+    0xFF, 0xFF, 0xDE, 0xCA, 0xAA, 0x7A, 0xE9, 0xD4, 0x9F, 0xD5, 0xBC, 0x8A,
+    0xFF, 0xFF, 0x00, 0xF0, 0xDC, 0x00, 0xFF, 0xDC, 0x14, 0xF5, 0xEB, 0x0A,
+    0xDC, 0xDC, 0xDC, 0xBE, 0xBE, 0xBE, 0xA0, 0xA0, 0xA0, 0x82, 0x82, 0x82,
+    0x6E, 0x6E, 0x6E, 0x50, 0x50, 0x50, 0x3C, 0x3C, 0x3C, 0x28, 0x28, 0x28,
+    0x96, 0x96, 0xFF, 0x64, 0x64, 0xFF, 0x32, 0x32, 0xFF, 0x00, 0x00, 0xFF,
+    0xFF, 0x96, 0x96, 0xFF, 0x64, 0x64, 0xFF, 0x32, 0x32, 0xFF, 0x00, 0x00,
+    0x96, 0xFF, 0x96, 0x64, 0xFF, 0x64, 0x32, 0xFF, 0x32, 0x00, 0xFF, 0x00,
+    0xFF, 0xFF, 0xFF, 0xFA, 0xFA, 0xFA, 0xE6, 0xE6, 0xE6, 0xC8, 0xC8, 0xC8,
+};
+
+/* This file's .bss: the debug breadcrumbs of func_15143134. */
+static s32 D_800DCA00;   /* the step reached */
+static void *D_800DCA04; /* the matrix */
+static f32 D_800DCA08;   /* the offset */
+static f32 D_800DCA0C;
+static f32 D_800DCA10;
 
 /* Debug tunable stub: returns the midpoint of min and max (the name and source location are unused). */
 s32 func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line) {
@@ -51,9 +62,9 @@ void func_15142314(bones, bone, out)
         m = (MtxView *)((u8 *)bones + bone * sizeof(Mtx));
         {
             f32 scale = 1.0f / 65536.0f;
-            out->x = ((f32)(m->fx.intPart[3][0] << 16) + (f32)m->fx.fracPart[3][0]) * scale;
-            out->y = ((f32)(m->fx.intPart[3][1] << 16) + (f32)m->fx.fracPart[3][1]) * scale;
-            out->z = ((f32)(m->fx.intPart[3][2] << 16) + (f32)m->fx.fracPart[3][2]) * scale;
+            out->x = ((f32)(m->fx.intPart[3][0] << 16) + m->fx.fracPart[3][0]) * scale;
+            out->y = ((f32)(m->fx.intPart[3][1] << 16) + m->fx.fracPart[3][1]) * scale;
+            out->z = ((f32)(m->fx.intPart[3][2] << 16) + m->fx.fracPart[3][2]) * scale;
         }
         return;
     }
@@ -551,11 +562,11 @@ void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out) {
     u8 quarterPitch;
     f32 horizontal;
 
-    cosYaw = func_151423D8((u8)yaw);
-    quarterYaw = (s16)yaw - 0x40;
+    cosYaw = func_151423D8(yaw);
+    quarterYaw = yaw - 0x40;
     sinYaw = func_151423D8(quarterYaw);
-    cosPitch = func_151423D8((u8)pitch);
-    quarterPitch = (s16)pitch - 0x40;
+    cosPitch = func_151423D8(pitch);
+    quarterPitch = pitch - 0x40;
     sinPitch = func_151423D8(quarterPitch);
     horizontal = length * cosPitch;
     out->x = horizontal * sinYaw;
@@ -573,8 +584,8 @@ void func_15143874(s16 angle, f32 length, f32 *x, f32 *z) {
     f32 s;
     u8 quarter;
 
-    c = func_151423D8((u8)angle);
-    quarter = (s16)angle - 0x40;
+    c = func_151423D8(angle);
+    quarter = angle - 0x40;
     s = func_151423D8(quarter);
     *x = length * s;
     *z = length * c;
@@ -748,7 +759,7 @@ s32 func_15143DA8(s32 *value, s32 lo, s32 hi) {
 
 /* The actor's facing angle (unk7A) as a binary angle, a quarter turn ahead. */
 s32 func_15143E08(Actor *actor) {
-    return (((s32)actor->langle >> 8) + 64) & 0xFF;
+    return ((actor->langle >> 8) + 64) & 0xFF;
 }
 
 /* The actor's facing angle in 256ths of a turn, relative to mv's angle when it has one. */
@@ -1020,12 +1031,12 @@ f32 func_15144598(TriggerZone *region) {
         area = 1.0f;
         break;
     case ZONE_AREA_BOX:
-        area = (f32)(region->xSize * region->zSize) * 4.0f;
+        area = region->xSize * region->zSize * 4.0f;
         break;
     case ZONE_AREA_CYLINDER:
     case ZONE_AREA_SPHERE:
         radius = region->xSize;
-        area = (f32)(radius * radius) * 3.1415927f;
+        area = radius * radius * 3.1415927f;
         break;
     }
     return area;
@@ -1041,13 +1052,13 @@ f32 func_1514462C(TriggerZone *region) {
         volume = 1.0f;
         break;
     case ZONE_AREA_BOX:
-        volume = (f32)(region->xSize * region->ySize * region->zSize);
+        volume = region->xSize * region->ySize * region->zSize;
         break;
     case ZONE_AREA_CYLINDER:
-        volume = (f32)(region->xSize * region->xSize) * 3.1415927f * (f32)region->ySize;
+        volume = region->xSize * region->xSize * 3.1415927f * region->ySize;
         break;
     case ZONE_AREA_SPHERE:
-        radius = (f32)region->xSize;
+        radius = region->xSize;
         volume = ((radius * 1.0471976f) * radius) * radius;
         break;
     }
@@ -1856,7 +1867,7 @@ void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 unique
                 break;
             case 0:
             default:
-                gfx = func_1515D914(gfx, slot, (s32)pos->x, (s32)pos->y, (s32)pos->z, arg8, tex, link->model,
+                gfx = func_1515D914(gfx, slot, pos->x, pos->y, pos->z, arg8, tex, link->model,
                                     unk18, &link->unk4, link->unk1C, 0,
                                     ((flags & 1) ? 2 : 0) | (((flags & 2) ? 0x10 : 0) | 8), 0);
                 break;
