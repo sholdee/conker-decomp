@@ -322,6 +322,9 @@ typedef struct ObjPartsState {
  * struct, so the one-argument handlers (unk0, unk4, unkC, destroy, free: the object) are declared without a
  * prototype. draw, drawBegin, drawEnd and handleEvent keep theirs: their calls pass an s16 view or a u8
  * event type, and the calls only match with those parameter types in scope.
+ * So IDO warns (709) at the entries of those four fields whose handler takes a more specific object type
+ * than EffectHeader *. This is expected: it is the original form (IDO accepts it, and the ROM matches), and
+ * a cast in each handler only hides it. tools/warncheck.py keeps the total number of warnings from rising.
  */
 typedef struct ObjType {
     /* 0x00 */ void (*unk0)();
