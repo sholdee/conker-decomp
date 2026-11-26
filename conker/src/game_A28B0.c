@@ -3,15 +3,11 @@
 // matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
 // prototype (callers use the low byte without masking it), so it keeps that view.
 #define func_150ADA20 func_150ADA20_functions_h
-// matching: func_1506160C takes a u8 cmd; this file was built against an s32 view (no narrowing at the calls)
-#define func_1506160C func_1506160C_functions_h
 // matching: func_1514D3B0 takes s32 msg/arg; this file narrows them to u8 at the call (u8 view)
 #define func_1514D3B0 func_1514D3B0_functions_h
 #include "functions.h"
 #undef func_1514D3B0
 s32 func_1514D3B0(Actor *owner, s16 type, u8 msg, u8 arg);
-#undef func_1506160C
-void func_1506160C(Actor *actor, s32 cmd, u8 value, u8 step, s32 player);
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
@@ -723,7 +719,7 @@ void func_15077190(void) {
 }
 
 void func_150771F0(void) {
-    s32 mode;
+    u8 mode;
     u8 param0;
     u8 param1;
 

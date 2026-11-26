@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_1506160C func_1506160C_hdr
 #include "functions.h"
-#undef func_1506160C
 #include "variables.h"
 
 
@@ -45,8 +43,6 @@ extern u8 *D_8008CA4C[];
 /* This file */
 
 /* Other files */
-// matching: the command goes in as s32 (functions.h has u8)
-void func_1506160C(Actor *obj, s32 arg1, u8 arg2, u8 arg3, s32 player);
 void func_150A4B04(Actor *);
 s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
 void func_150A7960(MtxF mtx, f32, f32, f32, f32 *, f32 *, f32 *);
@@ -1186,7 +1182,7 @@ void func_1502E4C4(s32 index) {
                 } else {
                     event = 9;
                 }
-                func_1506160C(obj, event & 0xFF, 0, 0, i);
+                func_1506160C(obj, event, 0, 0, i);
             } else {
                 obj->unkF |= (1 << i) << 4;
                 func_1506160C(obj, 9, 0, 0, i);
@@ -1199,7 +1195,7 @@ void func_1502E4C4(s32 index) {
             event = 10;
         }
         if (event != -1) {
-            func_1506160C(obj, event & 0xFF, 1, 0, i);
+            func_1506160C(obj, event, 1, 0, i);
         }
         if (!inside) {
             obj->unk74 &= ~mask;
