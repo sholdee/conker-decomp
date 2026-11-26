@@ -1,45 +1,16 @@
 #include <ultra64.h>
 #include <n_libaudio.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+u8 D_800E0D30[0x50]; /* not referenced */
+StreamVoice D_800E0D80; /* the streaming music player's voice */
+s32 *D_800E0E20;        /* Huffman table pointers, relocated by D_800E0E28 */
+void *D_800E0E24;
+void *D_800E0E28;       /* the Huffman table data */
+u8 D_800E0E2C;          /* nonzero: the decoder tables are loaded */
+
 #include "variables.h"
-
-extern s32  D_800E0E08;
-extern s32  D_800E0E10;
-extern s16  D_800E0E14;
-extern s16  D_800E0E16;
-extern u8   D_800E0E18;
-extern u8   D_800E0E2C;
-extern void *D_800E0E24;
-extern s16  D_800E0DB0;
-extern s16  D_800E0DB2;
-extern s32  D_800E0DD8;
-extern s32  D_800E0DE0;
-extern s32  D_800E0DE4;
-extern Mp3ReadFn D_800E0DFC;
-
-extern Mp3Decoder *D_800E0D84;
-extern void *D_800E0D88; /* D_800E0D80.unk8 */
-extern s16  D_800E0D8C;
-extern s16  D_800E0D8E;
-extern s16  D_800E0D90;
-extern s16  D_800E0D92;
-extern s16  D_800E0D94;
-extern s16  D_800E0D96;
-extern u16  D_800E0D98;
-extern s16  D_800E0D9A;
-extern s16  D_800E0D9C;
-extern u16  D_800E0D9E;
-extern s16  D_800E0DA0;
-extern s16  D_800E0DA2;
-extern s16  D_800E0DA4;
-extern s32  D_800E0DA8;
-extern s32  D_800E0DAC;
-extern void *D_800E0DDC; /* D_800E0D80.unk5C */
-extern u8  *D_800E0DE8;
-extern s32  D_800E0DEC;
-extern s32  D_800E0DF0;
-extern void *D_800E0DF4[];
-extern s32  D_800E0DF8;
-extern u8   D_800E0E19;
 
 extern s32  _getRate(f32 ivol, f32 tvol, s32 count, u16 *ratel);
 
@@ -58,10 +29,10 @@ typedef struct {
 extern s16 _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
 
 void func_151F2960(s32 arg0, s32 arg1) {
-    if (D_800E0DFC == 0) {
+    if (D_800E0D80.read == 0) {
         return;
     }
-    D_800E0E04 = 4;
+    D_800E0D80.unk84 = 4;
     if (D_800E0E2C == 0) {
       D_800E0E2C = 1;
         D_800E0E30 = allocate_memory(0x8000, 0xFF, 2, 1);
@@ -99,37 +70,37 @@ void func_151F2960(s32 arg0, s32 arg1) {
         func_151F3DE0();
     }
     D_800E0D80.romAddr = arg0;
-    D_800E0DE0 = arg1;
-    D_800E0DE4 = 0;
-    D_800E0E10 = 0;
-    D_800E0E18 = 5;
-    D_800E0E04 = 5;
+    D_800E0D80.streamSize = arg1;
+    D_800E0D80.streamPos = 0;
+    D_800E0D80.unk90 = 0;
+    D_800E0D80.unk98 = 5;
+    D_800E0D80.unk84 = 5;
 }
 
 void func_151F2BA8(void) {
     u32 mask = osSetIntMask(1);
-    D_800E0E04 = 3;
+    D_800E0D80.unk84 = 3;
     osSetIntMask(mask);
 }
 
 void func_151F2BE8(void) {
     u32 mask = osSetIntMask(1);
-    if (D_800E0E04 == 5) {
-        D_800E0E04 = 6;
+    if (D_800E0D80.unk84 == 5) {
+        D_800E0D80.unk84 = 6;
     } else {
-        D_800E0E04 = 2;
+        D_800E0D80.unk84 = 2;
     }
     osSetIntMask(mask);
 }
 
 void func_151F2C4C(void) {
     u32 mask = osSetIntMask(1);
-    if (D_800E0E04 == 2) {
-        D_800E0E18 = 5;
-        D_800E0E04 = 7;
-    } else if (D_800E0E04 == 6) {
-        D_800E0E18 = 5;
-        D_800E0E04 = 5;
+    if (D_800E0D80.unk84 == 2) {
+        D_800E0D80.unk98 = 5;
+        D_800E0D80.unk84 = 7;
+    } else if (D_800E0D80.unk84 == 6) {
+        D_800E0D80.unk98 = 5;
+        D_800E0D80.unk84 = 5;
     }
     osSetIntMask(mask);
 }
@@ -138,8 +109,8 @@ s32 func_151F2CDC(void) {
     s32 ret = 0;
     u32 mask = osSetIntMask(1);
 
-    if ((D_800E0E04 == 1) || (D_800E0E04 == 5) || (D_800E0E04 == 6) || (D_800E0E04 == 7) || (D_800E0E04 == 2)) {
-        ret = D_800E0E04;
+    if ((D_800E0D80.unk84 == 1) || (D_800E0D80.unk84 == 5) || (D_800E0D80.unk84 == 6) || (D_800E0D80.unk84 == 7) || (D_800E0D80.unk84 == 2)) {
+        ret = D_800E0D80.unk84;
     }
     osSetIntMask(mask);
     return ret;
@@ -148,13 +119,13 @@ s32 func_151F2CDC(void) {
 void func_151F2D6C(s32 arg0, s32 arg1) {
     u32 mask = osSetIntMask(1);
     if (arg0 < 0) {
-        D_800E0E08 = 0;
+        D_800E0D80.unk88 = 0;
     } else if (arg0 >= 0x8000) {
-        D_800E0E08 = 0x7FFF;
+        D_800E0D80.unk88 = 0x7FFF;
     } else {
-        D_800E0E08 = arg0;
+        D_800E0D80.unk88 = arg0;
     }
-    D_800E0E10 = arg1;
+    D_800E0D80.unk90 = arg1;
     osSetIntMask(mask);
 }
 
@@ -166,23 +137,23 @@ void func_151F2DFC(s32 arg0, s32 arg1) {
             arg0 = 0;
         }
     }
-    D_800E0E16 = arg0;
+    D_800E0D80.unk96 = arg0;
     if (arg1 != 0) {
-        D_800E0E14 =  D_800E0E16;
+        D_800E0D80.unk94 =  D_800E0D80.unk96;
     }
 }
 
 void func_151F2E4C(s32 arg0, s32 arg1) {
-    D_800E0DB2 = arg0;
-    D_800E0DB0 = arg1;
-    if (D_800E0DD8 == 0) {
-        D_800E0DD8 = 2;
+    D_800E0D80.unk32 = arg0;
+    D_800E0D80.unk30 = arg1;
+    if (D_800E0D80.unk58 == 0) {
+        D_800E0D80.unk58 = 2;
     }
 }
 
 /*
  * One audio frame of the streaming player: ramp the master volume towards its target, service
- * the state machine on D_800E0E04 (5 = opening / 7 = restarting / 1 = running / 3 = shutting
+ * the state machine on D_800E0D80.unk84 (5 = opening / 7 = restarting / 1 = running / 3 = shutting
  * down), and, while running, append the acmds that DMA the decoded stream into DMEM, clear the
  * two output halves, program the envmixer and finally mix.  `nSamples` is how many samples the
  * caller wants this frame; `cmdList` is the audio command pointer, advanced in place.
@@ -198,80 +169,80 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
     s32 dmemL = 0x4E0;
     s32 dmemR = 0x650;
 
-    /* master volume slews towards D_800E0E16 two units at a time */
-    if (D_800E0E14 != D_800E0E16) {
-        diff = D_800E0E16 - D_800E0E14;
+    /* master volume slews towards D_800E0D80.unk96 two units at a time */
+    if (D_800E0D80.unk94 != D_800E0D80.unk96) {
+        diff = D_800E0D80.unk96 - D_800E0D80.unk94;
         if ((diff >= -2) && (diff < 3)) {
-            D_800E0E14 = D_800E0E14 + diff;
+            D_800E0D80.unk94 = D_800E0D80.unk94 + diff;
         } else if (diff >= 3) {
-            D_800E0E14 = D_800E0E14 + 2;
+            D_800E0D80.unk94 = D_800E0D80.unk94 + 2;
         } else {
-            D_800E0E14 = D_800E0E14 - 2;
+            D_800E0D80.unk94 = D_800E0D80.unk94 - 2;
         }
     }
 
-    if (D_800E0E04 == 5) {
+    if (D_800E0D80.unk84 == 5) {
         func_151F3D78();
-        if (D_800E0E18 == 0) {
-            D_800E0D84 = func_151F85C4(0, D_800E0DFC, D_800E0DE0);
-            if (D_800E0D84 == 0) {
-                D_800E0DE4 = 0;
-                D_800E0E10 = 0;
-                D_800E0E18 = 5;
+        if (D_800E0D80.unk98 == 0) {
+            D_800E0D80.decoder = func_151F85C4(0, D_800E0D80.read, D_800E0D80.streamSize);
+            if (D_800E0D80.decoder == 0) {
+                D_800E0D80.streamPos = 0;
+                D_800E0D80.unk90 = 0;
+                D_800E0D80.unk98 = 5;
                 func_151F3D78();
-                D_800E0E04 = 5;
+                D_800E0D80.unk84 = 5;
                 return 0;
             } else {
-                D_800E0E04 = 1;
-                D_800E0DA4 = 1;
-                D_800E0DE8 = 0;
-                D_800E0DEC = 0;
-                D_800E0DF0 = 0;
-                D_800E0DF8 = 0;
-                bzero(((StreamVoice *)&D_800E0D80)->unk74, 0x440); // matching: a no-op cast keeps the address in its own register
+                D_800E0D80.unk84 = 1;
+                D_800E0D80.unk24 = 1;
+                D_800E0D80.pcm = 0;
+                D_800E0D80.pcmCount = 0;
+                D_800E0D80.pcmPos = 0;
+                D_800E0D80.unk78 = 0;
+                bzero(D_800E0D80.unk74[0], 0x440);
             }
         } else {
-            D_800E0E18 = D_800E0E18 - 1;
+            D_800E0D80.unk98 = D_800E0D80.unk98 - 1;
         }
     }
 
-    if (D_800E0E04 == 7) {
+    if (D_800E0D80.unk84 == 7) {
         func_151F3D78();
-        if (D_800E0E18 == 0) {
-            D_800E0E04 = 1;
+        if (D_800E0D80.unk98 == 0) {
+            D_800E0D80.unk84 = 1;
         } else {
-            D_800E0E18 = D_800E0E18 - 1;
+            D_800E0D80.unk98 = D_800E0D80.unk98 - 1;
         }
     }
 
-    if (D_800E0E04 == 1) {
+    if (D_800E0D80.unk84 == 1) {
         /* out of decoded samples: pull the next block of decoded buffers from the decoder */
-        if (nSamples + D_800E0DF0 > D_800E0DEC) {
-            D_800E0DEC = D_800E0DEC - D_800E0DF0;
-            if ((D_800E0DEC != 0) && (D_800E0DE8 != 0)) {
-                buf = D_800E0DF0 * 2 + D_800E0DE8;
-                len = D_800E0DEC;
+        if (nSamples + D_800E0D80.pcmPos > D_800E0D80.pcmCount) {
+            D_800E0D80.pcmCount = D_800E0D80.pcmCount - D_800E0D80.pcmPos;
+            if ((D_800E0D80.pcmCount != 0) && (D_800E0D80.pcm != 0)) {
+                buf = D_800E0D80.pcmPos * 2 + D_800E0D80.pcm;
+                len = D_800E0D80.pcmCount;
             }
-            D_800E0DF0 = 0;
-            D_800E0DEC = 0;
-            if (func_151F86B0(D_800E0D84, &ptr, &count) != 0) {
-                D_800E0DE8 = ptr;
+            D_800E0D80.pcmPos = 0;
+            D_800E0D80.pcmCount = 0;
+            if (func_151F86B0(D_800E0D80.decoder, &ptr, &count) != 0) {
+                D_800E0D80.pcm = ptr;
                 for (i = 0; i < count; i++) {
                     {
                         Acmd *_a = (*cmdList)++;
                         _a->words.w0 = 0x08000000;
-                        _a->words.w1 = osVirtualToPhysical(D_800E0DF4[i]);
+                        _a->words.w1 = osVirtualToPhysical(D_800E0D80.unk74[i]);
                     }
                     {
                         Acmd *_a = (*cmdList)++;
-                        _a->words.w0 = 0x07000000 | (D_800E0DF8 & 0xFFFF);
+                        _a->words.w0 = 0x07000000 | (D_800E0D80.unk78 & 0xFFFF);
                         _a->words.w1 = osVirtualToPhysical(ptr);
                     }
                     ptr += 0x488;
                 }
-                D_800E0DF8 = (D_800E0DF8 - 0x24) & 0x1E;
-                D_800E0DEC = 0x240;
-                D_800E0E19 = (count == 2);
+                D_800E0D80.unk78 = (D_800E0D80.unk78 - 0x24) & 0x1E;
+                D_800E0D80.pcmCount = 0x240;
+                D_800E0D80.unk99 = (count == 2);
             } else {
                 /*
                  * Empty on purpose.  IDO emits the `b` at 0x151F326C (ROM 0x22071C) only for a
@@ -282,7 +253,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             }
         }
         func_151F3D78();
-        if (D_800E0E19 == 0) {
+        if (D_800E0D80.unk99 == 0) {
             dmemL = 0;
         }
         /* leftovers from the previous block, if any */
@@ -292,7 +263,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                 _a->words.w0 = 0x04000000 | (((len + len) & 0xFFF) << 12) | (dmemL & 0xFFF);
                 _a->words.w1 = osVirtualToPhysical(buf);
             }
-            if (D_800E0E19 != 0) {
+            if (D_800E0D80.unk99 != 0) {
                 buf += 0x488;
                 {
                     Acmd *_a = (*cmdList)++;
@@ -304,14 +275,14 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             dmemR += len + len;
             nSamples = nSamples - len;
         }
-        if ((nSamples > 0) && (D_800E0DE8 != 0)) {
-            buf = D_800E0DF0 * 2 + D_800E0DE8;
+        if ((nSamples > 0) && (D_800E0D80.pcm != 0)) {
+            buf = D_800E0D80.pcmPos * 2 + D_800E0D80.pcm;
             {
                 Acmd *_a = (*cmdList)++;
                 _a->words.w0 = 0x04000000 | (((nSamples + nSamples) & 0xFFF) << 12) | (dmemL & 0xFFF);
                 _a->words.w1 = osVirtualToPhysical(buf);
             }
-            if (D_800E0E19 != 0) {
+            if (D_800E0D80.unk99 != 0) {
                 buf += 0x488;
                 {
                     Acmd *_a = (*cmdList)++;
@@ -319,10 +290,10 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                     _a->words.w1 = osVirtualToPhysical(buf);
                 }
             }
-            D_800E0DF0 = D_800E0DF0 + nSamples;
+            D_800E0D80.pcmPos = D_800E0D80.pcmPos + nSamples;
         }
         func_151F39E4(&D_800E0D80);
-        if (D_800E0E19 == 0) {
+        if (D_800E0D80.unk99 == 0) {
             {
                 Acmd *_a = (*cmdList)++;
                 _a->words.w0 = 0x020004E0;
@@ -333,8 +304,8 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                 _a->words.w0 = 0x020007C0;
                 _a->words.w1 = 0x2E0;
             }
-            if (D_800E0DB2 > 0) {
-                if (D_800E0DD8 != 0) {
+            if (D_800E0D80.unk32 > 0) {
+                if (D_800E0D80.unk58 != 0) {
                     func_1001CF38((LowPass *)&D_800E0D80.unk30, 22020.0f);
                 }
                 {
@@ -342,58 +313,58 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                     _a->words.w0 = 0x0B000020;
                     _a->words.w1 = osVirtualToPhysical(D_800E0D80.unk38) & 0xFFFFFF;
                 }
-                if (D_800E0DD8 == 2) {
-                    D_800E0DD8 = 0;
+                if (D_800E0D80.unk58 == 2) {
+                    D_800E0D80.unk58 = 0;
                 }
                 {
                     Acmd *_a = (*cmdList)++;
-                    _a->words.w0 = 0x0E000000 | ((D_800E0DD8 & 0xFF) << 16);
+                    _a->words.w0 = 0x0E000000 | ((D_800E0D80.unk58 & 0xFF) << 16);
                     /* the outer mask is redundant but is in the ROM: two `and`s at 0x151F3620 */
-                    _a->words.w1 = (osVirtualToPhysical(D_800E0DDC) & 0xFFFFFF) & 0xFFFFFF;
+                    _a->words.w1 = (osVirtualToPhysical(D_800E0D80.unk5C) & 0xFFFFFF) & 0xFFFFFF;
                 }
-                D_800E0DD8 = 0;
+                D_800E0D80.unk58 = 0;
             }
-            if (D_800E0DA4 != 0) {
-                D_800E0DA4 = 0;
-                D_800E0D9C = (D_8002BC10[D_800E0D8C] * D_800E0D8E) >> 15;
-                D_800E0D9A = _getRate(D_800E0D90, D_800E0D9C, D_800E0DAC,
+            if (D_800E0D80.unk24 != 0) {
+                D_800E0D80.unk24 = 0;
+                D_800E0D80.em_ltgt = (D_8002BC10[D_800E0D80.em_pan] * D_800E0D80.em_volume) >> 15;
+                D_800E0D80.em_lratm = _getRate(D_800E0D80.em_cvolL, D_800E0D80.em_ltgt, D_800E0D80.em_segEnd,
                                       &D_800E0D80.em_lratl);
-                D_800E0DA2 = (D_8002BC10[127 - D_800E0D8C] * D_800E0D8E) >> 15;
-                D_800E0DA0 = _getRate(D_800E0D92, D_800E0DA2, D_800E0DAC,
+                D_800E0D80.em_rtgt = (D_8002BC10[127 - D_800E0D80.em_pan] * D_800E0D80.em_volume) >> 15;
+                D_800E0D80.em_rratm = _getRate(D_800E0D80.em_cvolR, D_800E0D80.em_rtgt, D_800E0D80.em_segEnd,
                                       &D_800E0D80.em_rratl);
                 {
                     Acmd *_a = (*cmdList)++;
-                    _a->words.w0 = 0x09060000 | (D_800E0D90 & 0xFFFF);
-                    _a->words.w1 = ((D_800E0D94 & 0xFFFF) << 16) | (D_800E0D96 & 0xFFFF);
+                    _a->words.w0 = 0x09060000 | (D_800E0D80.em_cvolL & 0xFFFF);
+                    _a->words.w1 = ((D_800E0D80.unk14 & 0xFFFF) << 16) | (D_800E0D80.unk16 & 0xFFFF);
                 }
                 {
                     Acmd *_a = (*cmdList)++;
-                    _a->words.w0 = 0x09040000 | (D_800E0DA2 & 0xFFFF);
-                    _a->words.w1 = ((D_800E0DA0 & 0xFFFF) << 16) | (D_800E0D9E & 0xFFFF);
+                    _a->words.w0 = 0x09040000 | (D_800E0D80.em_rtgt & 0xFFFF);
+                    _a->words.w1 = ((D_800E0D80.em_rratm & 0xFFFF) << 16) | (D_800E0D80.em_rratl & 0xFFFF);
                 }
                 {
                     Acmd *_a = (*cmdList)++;
-                    _a->words.w0 = 0x09000000 | (D_800E0D9C & 0xFFFF);
-                    _a->words.w1 = ((D_800E0D9A & 0xFFFF) << 16) | (D_800E0D98 & 0xFFFF);
+                    _a->words.w0 = 0x09000000 | (D_800E0D80.em_ltgt & 0xFFFF);
+                    _a->words.w1 = ((D_800E0D80.em_lratm & 0xFFFF) << 16) | (D_800E0D80.em_lratl & 0xFFFF);
                 }
                 {
                     Acmd *_a = (*cmdList)++;
-                    _a->words.w0 = 0x03010000 | (D_800E0D92 & 0xFFFF);
-                    _a->words.w1 = osVirtualToPhysical(D_800E0D88);
+                    _a->words.w0 = 0x03010000 | (D_800E0D80.em_cvolR & 0xFFFF);
+                    _a->words.w1 = osVirtualToPhysical(D_800E0D80.unk8);
                 }
             } else {
                 {
                     Acmd *_a = (*cmdList)++;
                     _a->words.w0 = 0x03000000;
-                    _a->words.w1 = osVirtualToPhysical(D_800E0D88);
+                    _a->words.w1 = osVirtualToPhysical(D_800E0D80.unk8);
                 }
             }
-            D_800E0DA8 = D_800E0DA8 + 0xB8;
-            if (D_800E0DA8 > D_800E0DAC) {
-                D_800E0DA8 = D_800E0DAC;
+            D_800E0D80.em_delta = D_800E0D80.em_delta + 0xB8;
+            if (D_800E0D80.em_delta > D_800E0D80.em_segEnd) {
+                D_800E0D80.em_delta = D_800E0D80.em_segEnd;
             }
         }
-    } else if ((D_800E0E04 == 3) && (level != 0x35)) {
+    } else if ((D_800E0D80.unk84 == 3) && (level != 0x35)) {
         if (D_800E0E2C != 0) {
             func_10004074(D_800E0E20);
             func_10004074(D_800E0E24);
@@ -404,7 +375,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             func_10004074(D_800E0E30);
             D_800E0E30 = NULL;
         }
-        D_800E0E04 = 0;
+        D_800E0D80.unk84 = 0;
         return 0;
     } else {
         return 0;
@@ -456,13 +427,13 @@ void func_151F39E4(StreamVoice *v) {
 }
 
 void func_151F3C1C(void (*callback)(s32, void *, s32)) {
-    D_800E0E00 = callback;
+    D_800E0D80.tagCallback = callback;
 }
 
 void func_151F3C34(read)
     Mp3ReadFn read;
 {
-    D_800E0DFC = read;
+    D_800E0D80.read = read;
 }
 
 /*
@@ -475,20 +446,20 @@ s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset) {
     ALDMAproc dma;
 
     if (offset != -1) {
-        D_800E0DE4 = offset;
+        D_800E0D80.streamPos = offset;
     }
-    if (D_800E0DE4 + len > D_800E0DE0) {
-        len = D_800E0DE0 - D_800E0DE4;
+    if (D_800E0D80.streamPos + len > D_800E0D80.streamSize) {
+        len = D_800E0D80.streamSize - D_800E0D80.streamPos;
     }
     dma  = ((StreamSynth *) n_syn)->dmaNew(&addr);
-    addr = dma(D_800E0D80.romAddr + D_800E0DE4, len, 0);
+    addr = dma(D_800E0D80.romAddr + D_800E0D80.streamPos, len, 0);
     if (addr == 0) {
         return 0;
     }
     addr += 0x80000000;
     osInvalDCache((void *) addr, len);
     bcopy((void *) addr, dst, len);
-    D_800E0DE4 += len;
+    D_800E0D80.streamPos += len;
     return len;
 }
 
@@ -499,5 +470,5 @@ void func_151F3D78(void) {
     ALDMAproc dma;
 
     dma = ((StreamSynth *) n_syn)->dmaNew(&addr);
-    dma(D_800E0D80.romAddr + D_800E0DE4, 0x810, 0);
+    dma(D_800E0D80.romAddr + D_800E0D80.streamPos, 0x810, 0);
 }

@@ -1753,7 +1753,7 @@ Mp3Decoder *func_151F85C4(s32 handle, Mp3ReadFn read, s32 arg2) {
 
 /* Decodes the next frame into the next outBuf slot and returns it through
  * outBlock / outChannels. A frame with the copyright bit set is followed by a
- * NUL-terminated tag string, handed to the D_800E0E00 callback. */
+ * NUL-terminated tag string, handed to the stream's tag callback (D_800E0D80.tagCallback). */
 s32 func_151F86B0(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels) {
     Mp3Decoder *dec;
     s32 ret;
@@ -1767,7 +1767,7 @@ s32 func_151F86B0(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels) {
         dec->outIndex = 0;
     }
     if (func_151F8088(dec, dec->seekPos) == 0) {
-        D_800E0E04 = 3;
+        D_800E0D80.unk84 = 3;
         return 0;
     }
     dec->seekPos = -1;
@@ -1785,8 +1785,8 @@ s32 func_151F86B0(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels) {
                 break;
             }
         } while (tag[i++]);
-        if (D_800E0E00 != NULL) {
-            D_800E0E00(0, tag, strlen(tag) + 1);
+        if (D_800E0D80.tagCallback != NULL) {
+            D_800E0D80.tagCallback(0, tag, strlen(tag) + 1);
         }
     }
 end:

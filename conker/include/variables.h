@@ -316,15 +316,7 @@ extern f32 * D_800DDE48; // hole x, percent of the view width
 extern f32 * D_800DDE4C; // hole y, percent of the view height
 
 
-/* 800E0000 */
-extern void (*D_800E0E00)(s32, void *, s32); // stream tag callback (set by func_151F3C1C; gets each MP3 frame's copyright tag)
-extern s32  D_800E0E04;
-extern StreamVoice D_800E0D80; // the streaming music player's voice
 
-// end of zero'd out section
-
-extern s32 *D_800E0E20; // Huffman table pointers, relocated by D_800E0E28
-extern void *D_800E0E28; // the Huffman table data
 extern s32  D_800E9D00;
 extern u8   D_800E9D10[]; // heap arena: from here to 0x80400000
 

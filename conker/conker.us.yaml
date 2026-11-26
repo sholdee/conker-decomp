@@ -1872,7 +1872,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800E0C30, name: game_215960}
       - {start: 0x255880, type: .bss, vram: 0x800E0C90, name: game_21C540}
       - {start: 0x255880, type: .bss, vram: 0x800E0D20, name: libultra/io/siacs2}
-      - {start: 0x255880, type: bss, vram: 0x800E0D30, name: bss_800E0D30}
+      - {start: 0x255880, type: .bss, vram: 0x800E0D30, name: libultra/audio/game_21FC90}
       - {start: 0x255880, type: .bss, vram: 0x800E0E30, name: game_221290}
 
   - name:  debugger

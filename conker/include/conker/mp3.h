@@ -35,6 +35,9 @@ extern u16 D_800427F4; /* the track last started */
 void func_15016170(ALHeap *arg0);
 
 /* libultra/audio/game_21FC90.c: the streaming music player (StreamVoice D_800E0D80) */
+extern StreamVoice D_800E0D80; /* the streaming music player's voice */
+extern s32 *D_800E0E20;        /* Huffman table pointers, relocated by D_800E0E28 */
+extern void *D_800E0E28;       /* the Huffman table data */
 void func_151F2960(s32 data, s32 size);
 void func_151F2BA8(void);
 void func_151F2BE8(void);

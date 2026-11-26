@@ -2270,43 +2270,54 @@ typedef struct RopeSpawn {
 /* The streaming music player's voice (D_800E0D80; set up by game_43620, run by
  * libultra/audio/game_21FC90). It carries its own copy of the libaudio envmixer parameter block
  * at the offsets N_PVoice uses for em_state onwards (pan at 0x0C, volume at 0x0E, cvolL/cvolR,
- * the two rate pairs, the two targets). The fields outside that block are Rare's. Several fields
- * are also addressed through their own symbols (D_800E0D84..D_800E0DFC) in game_21FC90. */
+ * the two rate pairs, the two targets), and from 0x30 a low-pass filter laid out as LowPass is up
+ * to its first state pointer (fc, fgain, the coefficient vector, first, fstate[0]). The fields
+ * outside those blocks are Rare's: the decoder, the stream's ROM window and read callback, the
+ * decoded buffers and the player state. */
 typedef struct StreamVoice {
-    /* 0x00 */ s32  romAddr;        // ROM address of the stream (read at romAddr + D_800E0DE4)
-    /* 0x04 */ u8   pad4[0x4];
+    /* 0x00 */ s32  romAddr;        // ROM address of the stream (read at romAddr + streamPos)
+    /* 0x04 */ struct Mp3Decoder *decoder;
     /* 0x08 */ void *unk8;          // 0x50-byte heap block
     /* 0x0C */ s16  em_pan;
     /* 0x0E */ s16  em_volume;
     /* 0x10 */ s16  em_cvolL;
     /* 0x12 */ s16  em_cvolR;
     /* 0x14 */ s16  unk14;
-    /* 0x16 */ u16  unk16;
+    /* 0x16 */ s16  unk16;
     /* 0x18 */ u16  em_lratl;
     /* 0x1A */ s16  em_lratm;
     /* 0x1C */ s16  em_ltgt;
     /* 0x1E */ u16  em_rratl;
     /* 0x20 */ s16  em_rratm;
     /* 0x22 */ s16  em_rtgt;
-    /* 0x24 */ u16  unk24;
+    /* 0x24 */ s16  unk24;          // nonzero: program the envmixer on the next frame
     /* 0x26 */ u8   pad26[0x2];
     /* 0x28 */ s32  em_delta;
     /* 0x2C */ s32  em_segEnd;
-    /* 0x30 */ u16  unk30;          // start of the lowpass state passed to func_1001CF38
-    /* 0x32 */ u16  unk32;
+    /* 0x30 */ s16  unk30;          // the low-pass filter (passed to func_1001CF38 as a LowPass): fc
+    /* 0x32 */ s16  unk32;          // fgain; the filter runs while it is > 0
     /* 0x34 */ u8   pad34[0x4];
-    /* 0x38 */ u8   unk38[0x24];    // DMEM-bound state block (its physical address goes in an acmd)
-    /* 0x5C */ void *unk5C;         // 8-byte heap block
-    /* 0x60 */ u8   pad60[0x14];
-    /* 0x74 */ void *unk74;         // 0x440-byte heap block, cleared on restart
-    /* 0x78 */ u8   pad78[0xC];
-    /* 0x84 */ s32  unk84;
+    /* 0x38 */ s16  unk38[16];      // the coefficient vector (its physical address goes in an acmd)
+    /* 0x58 */ s32  unk58;          // first: 2 after fc/fgain change, cleared once loaded
+    /* 0x5C */ void *unk5C;         // fstate: 8-byte heap block
+    /* 0x60 */ s32  streamSize;     // the stream's length in bytes
+    /* 0x64 */ s32  streamPos;      // the next byte to read
+    /* 0x68 */ u8  *pcm;            // the decoded buffers of the current block
+    /* 0x6C */ s32  pcmCount;       // samples in the current block
+    /* 0x70 */ s32  pcmPos;         // samples of the current block already queued
+    /* 0x74 */ void *unk74[1];      // 0x440-byte heap block, cleared on restart; the DMA source of
+                                    // channel i is unk74[i] (for a second channel: the word unk78)
+    /* 0x78 */ s32  unk78;          // the DMEM state slot, stepped by 0x24 per block
+    /* 0x7C */ s32 (*read)(s32 handle, void *dst, s32 size, s32 seekPos); // Mp3ReadFn
+    /* 0x80 */ void (*tagCallback)(s32, void *, s32); // gets each MP3 frame's copyright tag
+    /* 0x84 */ s32  unk84;          // player state: 1 running, 2/6 paused, 3 stopping, 4/5 opening, 7 resuming
     /* 0x88 */ s32  unk88;          // target volume
     /* 0x8C */ u8   pad8C[0x4];
-    /* 0x90 */ u32  unk90;
-    /* 0x94 */ s16  unk94;          // target pan
-    /* 0x96 */ s16  unk96;
-    /* 0x98 */ u8   pad98[0x2];
+    /* 0x90 */ u32  unk90;          // ramp length in samples
+    /* 0x94 */ s16  unk94;          // pan, slewed towards unk96
+    /* 0x96 */ s16  unk96;          // target pan
+    /* 0x98 */ u8   unk98;          // frames to wait before opening or resuming
+    /* 0x99 */ u8   unk99;          // nonzero: the stream is stereo
     /* 0x9A */ u8   unk9A;
     /* 0x9B */ u8   pad9B[0x5];
 } StreamVoice; // size 0xA0
