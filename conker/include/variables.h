@@ -409,8 +409,6 @@ extern TexCoord *D_800C6360[187]; // per model id: saved texture coordinates (fu
 extern AimPoint *gAimPoints; // aim points (gAimPointCount of them)
 extern s32 gAimPointCount;
 extern ObjPartsState D_800C6660[];
-extern u8  D_800C67F0;
-extern u8  D_800C67F1;
 extern s32 D_800C6860[];
 extern u8  D_800C68A0;
 extern u8  D_800C68A1;
