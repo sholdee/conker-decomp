@@ -1,6 +1,5 @@
 #include <ultra64.h>
 
-#define func_1505DADC func_1505DADC_header // matching: this file keeps its own declaration of func_1505DADC
 // matching: func_1506FB60 passes the side to these as an int, (cmd - 0x13) & 0xFF; hide the header's prototypes
 #define func_151C6A28 func_151C6A28_hdr
 #define func_151C62D0 func_151C62D0_hdr
@@ -10,13 +9,11 @@
 // matching: these two are called here with the command byte as an extra third argument
 #define func_150EEE00 func_150EEE00_hdr
 #define func_150EEF40 func_150EEF40_hdr
-#define func_1505DADC func_1505DADC_header // matching: this file keeps its own declarations of these
 #include "functions.h"
 #undef func_151942E8
 #undef func_151B5BA0
 #undef func_150EEE00
 #undef func_150EEF40
-#undef func_1505DADC
 void func_151942E8();
 void func_151B5BA0();
 void func_150EEE00();
@@ -26,8 +23,6 @@ void func_151C6A28(Actor *, s32, s32, s32);
 #undef func_151C62D0
 s32 func_151C62D0(Actor *, s32, s32, ModelAttachment *, s32, s32, s32);
 #include "variables.h"
-#undef func_1505DADC
-extern u8 func_1505DADC(Actor *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4); // matching: s32 pitch and halfCone: this caller does not narrow them
 
 extern s32 D_800D187C;
 
@@ -801,7 +796,7 @@ void func_1506C43C(void) {
 u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32 kind, f32 minHeight,
                   f32 scale, s32 pos, s32 flags, s32 arg10) {
     Actor *obj;
-    s16 aimAngle;
+    u16 aimAngle;
     s16 angle;
     s32 slot;
     s32 anim;
@@ -917,7 +912,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
         f32 targetY;
 
         aimAngle = rawAngle = func_1505A630(speed, yVelocity, 0);
-        targetIndex = func_1505DADC(obj, &aimAngle, (rawAngle >> 8) & 0xFF, 0xFF, 20);
+        targetIndex = func_1505DADC(obj, &aimAngle, rawAngle >> 8, 0xFF, 20);
         if (targetIndex != 0xFF) {
             targetY = movement_obj[targetIndex].ypos;
             dist = func_1505A6F8(D_800D154C, &movement_obj[targetIndex]);
