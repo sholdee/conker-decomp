@@ -36,7 +36,7 @@ s32 particle_getDustSidePos(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 s
         bone = &actor->ob_matrix_ptr[47];
     }
 
-    func_15143134(offset, pos, bone);
+    math_transformOffset(offset, pos, bone);
     if (ground == NULL) {
         return 1;
     }
@@ -178,7 +178,7 @@ s32 func_150CB7CC(QuadSprite *sprite) {
     return 1;
 }
 
-/* Spawns one particle_newModelParticle particle at (x, y, z), its velocity built by func_15143794 from `angle`. */
+/* Spawns one particle_newModelParticle particle at (x, y, z), its velocity built by math_dirFromBinAngles from `angle`. */
 s32 particle_spawnYawModelParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
                   s32 arg9, s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
     s32 pad; // matching: unused stack slot
@@ -203,7 +203,7 @@ s32 particle_spawnYawModelParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 
 
     random = func_150ADA20();
     fraction = func_150ADA68();
-    func_15143794(angle, (random % 36U) - 55, (fraction * 200.0f + 200.0f) * 0.1f, &desc.vel);
+    math_dirFromBinAngles(angle, (random % 36U) - 55, (fraction * 200.0f + 200.0f) * 0.1f, &desc.vel);
     desc.rotVel.x = (func_150ADA68() * 300.0f + -149.0f) * 0.1f;
     desc.rotVel.z = (func_150ADA68() * 300.0f + -149.0f) * 0.1f;
     desc.lifetime = (func_150ADA20() % 33U) + 32;
@@ -253,7 +253,7 @@ s32 particle_updateDustPuff(DustPuff *dust) {
 }
 
 /*
- * Spawns one particle_newOwnedSpriteParticle particle at (x, y, z), its velocity built by func_15143794 from
+ * Spawns one particle_newOwnedSpriteParticle particle at (x, y, z), its velocity built by math_dirFromBinAngles from
  * `angle`. It stores the damping factor that particle_dampSparkXZ applies each frame step.
  */
 s32 particle_spawnYawSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
@@ -292,7 +292,7 @@ s32 particle_spawnYawSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
 
     random = func_150ADA20();
     fraction = func_150ADA68();
-    func_15143794(angle, (random % 26U) - 25, ((fraction * 500.0f) + 1000.0f) * 0.01f, &desc.vel);
+    math_dirFromBinAngles(angle, (random % 26U) - 25, ((fraction * 500.0f) + 1000.0f) * 0.01f, &desc.vel);
     desc.flags = 0xE05;
     desc.gravity = 0.0f;
 

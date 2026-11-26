@@ -88,7 +88,7 @@ Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
         gDPSetPrimDepth(gfx++, 0x795A, 0);
     }
     cycleType = (sprite->params.cycleType == 2) ? G_CYC_2CYCLE : G_CYC_1CYCLE;
-    gfx = func_15142FBC(gfx,
+    gfx = math_gfxSetOtherMode(gfx,
                         cycleType | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                         gEffectRenderModes[sprite->params.renderMode].cycle1 | gEffectRenderModes[sprite->params.renderMode].cycle2 |
                             G_ZS_PRIM,

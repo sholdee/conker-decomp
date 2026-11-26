@@ -13,8 +13,8 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
 f32 weapon_getAngleDelta(f32 from, f32 to) {
     f32 delta;
 
-    from = func_15144BC8(from);
-    delta = func_15144BC8(func_15144BC8(to) - from);
+    from = math_wrapDegrees(from);
+    delta = math_wrapDegrees(math_wrapDegrees(to) - from);
     if (delta > 180.0f) {
         delta = -360.0f + delta;
     }
@@ -63,7 +63,7 @@ f32 weapon_getShellAimError(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32
         x -= mf[3][0];
         y -= mf[3][1];
         z -= mf[3][2];
-        pitch = func_150484A0(y, sqrtf(x * x + z * z)) * 57.29577637f;
+        pitch = math_atan2(y, sqrtf(x * x + z * z)) * 57.29577637f;
         if (pitch > 180.0f) {
             pitch -= 360.0f;
         }
@@ -102,7 +102,7 @@ f32 weapon_getShellAimError(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32
             result = dist - time;
         }
     } else {
-        result = (func_15048408(sqrtf(-2.0f * dy * gravity) * 0.006745362654f) * 57.29577637f - pitch) * 1000.0f;
+        result = (math_asinLookup(sqrtf(-2.0f * dy * gravity) * 0.006745362654f) * 57.29577637f - pitch) * 1000.0f;
     }
     return result;
 }
@@ -418,7 +418,7 @@ void weapon_updateTank(Actor *obj) {
                 bearing = weapon_getAngleToTarget(obj, target) * 0.01745329238f;
                 dirX = sinf(bearing) * cosf(obj->lean_angle * 0.01745329238f);
                 dirZ = cosf(bearing) * cosf(obj->vtilt * 0.01745329238f);
-                angle = func_150484A0(dirX * 1000.0f, dirZ * 1000.0f);
+                angle = math_atan2(dirX * 1000.0f, dirZ * 1000.0f);
                 aimOffset = obj->mv->unk12A * 400.0f;
                 obj->mv->gunYaw -= weapon_getAngleDelta(angle * 57.29577637f + obj->mv->unk12A * 10.0f, obj->mv->gunYaw) * 0.125f;
                 obj->mv->gunPitch += weapon_getShellAimError(obj, obj->mv->gunPitch - obj->vtilt, target->xpos, target->ypos, target->zpos, aimOffset) * 0.001000000047f;
@@ -550,7 +550,7 @@ void weapon_updateTank(Actor *obj) {
                             hitX = movement_obj[j].xpos - camera->eye.x;
                             hitZ = movement_obj[j].zpos - camera->eye.z;
                             if (sqrtf(hitX * hitX + hitZ * hitZ) + 200.0f < dist) {
-                                if (func_151452C4(&camera->eye, (Vec3f *)dir, (Vec3f *)&movement_obj[j].xpos, 150.0f, &nearPoint, &farPoint, &tNear, &tFar) && (tNear < dist)) {
+                                if (math_raySphere(&camera->eye, (Vec3f *)dir, (Vec3f *)&movement_obj[j].xpos, 150.0f, &nearPoint, &farPoint, &tNear, &tFar) && (tNear < dist)) {
                                     dist = tNear;
                                     hit = 2;
                                 }

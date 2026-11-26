@@ -87,7 +87,7 @@ Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
     gDPSetPrimColor(gfx++, 1, 0, effect->red, effect->green, effect->blue, 255);
     view_setScissor(gfx, arg2, 0, 0, 0, 3);
     state = 0;
-    gfx = func_15142FBC(gfx, 0xC00, 0x0F0A4004, &state);
+    gfx = math_gfxSetOtherMode(gfx, 0xC00, 0x0F0A4004, &state);
 
     viewWidth = gViews[effect->viewport].width;
     viewHeight = gViews[effect->viewport].height;
@@ -131,7 +131,7 @@ Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
     }
 
     gDPPipeSync(gfx++);
-    return func_15142FBC(gfx, 0x2C00, 0x0F0A4004, &state);
+    return math_gfxSetOtherMode(gfx, 0x2C00, 0x0F0A4004, &state);
 }
 
 /* Message handlers by ScreenTint.unk19 (none for 0); func_151CBB6C (game/Sight/SightHud/sighthud) takes the effect as

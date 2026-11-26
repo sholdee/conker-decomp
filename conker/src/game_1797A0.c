@@ -29,8 +29,8 @@ void particle_emitOnCircle(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 an
 
     for (i = 0; i < count; i++, angle += angleStep) {
         py = y;
-        dirX = func_151423D8(angle - 0x40);
-        dirZ = func_151423D8(angle);
+        dirX = math_cosBinAngleMasked(angle - 0x40);
+        dirZ = math_cosBinAngleMasked(angle);
         px = radius * dirX + x;
         pz = radius * dirZ + z;
         callback = D_8008AA00[kind];
@@ -117,8 +117,8 @@ void particle_emitOnRandomCircle(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s1
     for (i = 0; i < count; i++) {
         py = y;
         angle = func_150ADA20() % range + low;
-        dirX = func_151423D8(angle - 0x40);
-        dirZ = func_151423D8(angle);
+        dirX = math_cosBinAngleMasked(angle - 0x40);
+        dirZ = math_cosBinAngleMasked(angle);
         px = radius * dirX + x;
         pz = radius * dirZ + z;
         callback = D_8008AA00[kind];
@@ -149,8 +149,8 @@ void particle_emitOnRandomArc(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angl
     u8 angle;
     s16 i;
 
-    yawX = func_151423D8(yaw - 0x40);
-    yawZ = func_151423D8(yaw);
+    yawX = math_cosBinAngleMasked(yaw - 0x40);
+    yawZ = math_cosBinAngleMasked(yaw);
     if (angleB < angleA) {
         range = angleA - angleB + 1;
         low = angleB;
@@ -160,8 +160,8 @@ void particle_emitOnRandomArc(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angl
     }
     for (i = 0; i < count; i++) {
         angle = func_150ADA20() % range + low;
-        elevY = func_151423D8(angle - 0x40);
-        elevH = func_151423D8(angle);
+        elevY = math_cosBinAngleMasked(angle - 0x40);
+        elevH = math_cosBinAngleMasked(angle);
         px = radius * yawX * elevH + x;
         py = y - radius * elevY;
         pz = radius * yawZ * elevH + z;

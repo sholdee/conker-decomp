@@ -4,7 +4,7 @@
 
 /* Cutscene ("sequence") data is kept per scene slot (0/1) and per track (up to 30 tracks). */
 
-/* A channel keyframe: a timed value for one animated property (D_800C3778[scene][track][key]). */
+/* A channel keyframe: a timed value for one animated property (gSeqChannelKeys[scene][track][key]). */
 typedef struct {
     /* 0x0 */ f32 value;
     /* 0x4 */ u8 interp;
@@ -12,7 +12,7 @@ typedef struct {
     /* 0x6 */ s16 time;
 } SeqChannelKey; // size 0x8
 
-/* Arc-length data for a track's path (D_800C3A50[scene][track]), plus the cubic of the cached segment. */
+/* Arc-length data for a track's path (gSeqTrackPaths[scene][track]), plus the cubic of the cached segment. */
 typedef struct {
     /* 0x00 */ f32 length;          // total length of the path
     /* 0x04 */ f32 *keyDistance;    // distance along the path at each SeqPathKey
@@ -25,7 +25,7 @@ typedef struct {
     /* 0x3D */ u8 pad3D[3];
 } SeqTrackPath; // size 0x40
 
-/* Current animated values of a track (one SeqTrackState array per slot at D_800C3958). Which property
+/* Current animated values of a track (one SeqTrackState array per slot at gSeqTrackStates). Which property
    each unk field holds depends on the track's SeqTrackInfo type. */
 
 /* Cutscene file layout: a SeqFileEntry table whose entry 0 points at this header, followed by
@@ -46,20 +46,20 @@ typedef struct SeqFileEntry {
 
 /* This file's .bss, in address order (0x800BEAD0..0x800C3D60). It is defined before the headers
    declare it: an earlier extern changes the order (see init_50A0.c). */
-u64 *D_800BEAD0;
-OSScTask *D_800BEAD4;
-OSScTask D_800BEAD8[2];
+u64 *gAltUcodeData;
+OSScTask *gCurGfxTask;
+OSScTask gGfxTasks[2];
 s32 D_800BEB98;
-u64 *D_800BEB9C; // RSP ucode data, right after its text in D_800C1060
+u64 *gUcodeData; // RSP ucode data, right after its text in gUcodeText
 u8 D_800BEBA0;
 s32 D_800BEBA4;
 s32 D_800BEBA8[2]; /* not referenced */
-u64 D_800BEBB0[0x496];
-u64 D_800C1060[0x496]; // RSP ucode text buffer
-u8 D_800C3510[2];
-u8 D_800C3518[2][25];
-u8 D_800C354A[2];
-u8 D_800C3550[2][30];
+u64 gAltUcodeText[0x496];
+u64 gUcodeText[0x496]; // RSP ucode text buffer
+u8 gCutsceneSpawnedActorCounts[2];
+u8 gCutsceneSpawnedActors[2][25];
+u8 gCutsceneActivatedActorCounts[2];
+u8 gCutsceneActivatedActors[2][30];
 s16 D_800C358C[3];
 f32 D_800C3594;
 s16 D_800C3598[3];
@@ -68,8 +68,8 @@ f32 D_800C35A4;
 u8 D_800C35A8;
 u8 D_800C35A9;
 u8 D_800C35AA;
-s32 D_800C35B0[2]; // per scene: current time
-s32 D_800C35B8[2]; /* time at the previous update */
+s32 gCutsceneTimes[2]; // per scene: current time
+s32 gCutscenePrevTimes[2]; /* time at the previous update */
 u8 D_800C35C0[2];
 u8 D_800C35C2;
 u8 D_800C35C3;
@@ -77,19 +77,19 @@ u8 D_800C35C4;
 u8 D_800C35C5;
 u16 *D_800C35C8[2];
 u16 *D_800C35D0[2];
-u16 *D_800C35D8[2]; /* each track's event count */
+u16 *gSeqTrackEventCounts[2]; /* each track's event count */
 u8 **D_800C35E0[2]; // per scene: text lists
 u8 D_800C35E8[2]; // per scene: changes with each run of the scene
-u8 D_800C35EA[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
-SeqTrackInfo *D_800C35F0[2]; // per scene: what each track drives
+u8 gCutsceneStates[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
+SeqTrackInfo *gSeqTrackInfos[2]; // per scene: what each track drives
 u8 D_800C35F8;
 CamShot gCamShot; // scripted camera shot
 u8 D_800C3638;
-u8 D_800C363A[2]; /* track count */
-s32 D_800C3640[2]; /* end time */
-f32 D_800C3648; // added to both FOVs of every view
-f32 D_800C364C; // near-plane override when non-zero
-f32 D_800C3650; // far-plane override when non-zero
+u8 gSeqTrackCounts[2]; /* track count */
+s32 gCutsceneEndTimes[2]; /* end time */
+f32 gViewFovOffset; // added to both FOVs of every view
+f32 gNearPlaneOverride; // near-plane override when non-zero
+f32 gFarPlaneOverride; // far-plane override when non-zero
 u8 D_800C3654[2];
 u8 D_800C3656[2];
 u8 D_800C3658[2];
@@ -99,7 +99,7 @@ u8 D_800C365E[2];
 u8 D_800C3660[2];
 u8 D_800C3662;
 u8 D_800C3663;
-SeqFileEntry *D_800C3668[2];
+SeqFileEntry *gCutsceneFiles[2];
 u8 D_800C3670;
 u8 D_800C3671;
 u8 D_800C3672;
@@ -110,16 +110,16 @@ u8 D_800C3680;
 u8 D_800C3681;
 u8 D_800C3682;
 u8 D_800C3683;
-SeqEvent *D_800C3688[2][30]; // cutscene script event tracks per scene
-SeqChannelKey *D_800C3778[2][30];
-SeqPathKey *D_800C3868[2][30]; // per scene and track: path keyframes
-SeqTrackState *D_800C3958[2]; // per scene: the track states
-u8 *D_800C3960[2][30];
-SeqTrackPath *D_800C3A50[2];
+SeqEvent *gSeqEventTracks[2][30]; // cutscene script event tracks per scene
+SeqChannelKey *gSeqChannelKeys[2][30];
+SeqPathKey *gSeqPathKeys[2][30]; // per scene and track: path keyframes
+SeqTrackState *gSeqTrackStates[2]; // per scene: the track states
+u8 *gSeqActiveEvents[2][30];
+SeqTrackPath *gSeqTrackPaths[2];
 u8 D_800C3A58;
 s64 D_800C3A60[69];
-u8 D_800C3C88;
-u8 D_800C3C89;
+u8 gCutsceneSkipState;
+u8 gCutsceneSkipFadeTimer;
 s8 D_800C3C8A;
 u8 D_800C3C8B;
 u8 D_800C3C8C;
@@ -129,13 +129,13 @@ u8 D_800C3C90;
 s32 D_800C3C94;
 u8 D_800C3C98;
 u8 D_800C3C99;
-u16 D_800C3C9A;
+u16 gSeqEventQueueSize;
 u8 D_800C3C9C;
 u8 D_800C3C9D;
 s16 D_800C3C9E;
-SeqSubtitle D_800C3CA0[3];
-u8 D_800C3D48[8]; // not referenced, but func_150233E4 stops at its address: the end of D_800C3CA0
-struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
+SeqSubtitle gSubtitles[3];
+u8 D_800C3D48[8]; // not referenced, but cutscene_closeSubtitles stops at its address: the end of gSubtitles
+struct SeqQueueEntry *gSeqEventQueue; // dispatch queue, gSeqEventQueueSize entries (type in 50D80)
 
 #include "functions.h"
 #include "variables.h"
@@ -154,15 +154,15 @@ extern u64 D_800CBE10[];
 }
 
 /* Finish this frame's display list and send it to the scheduler as an RSP graphics task. */
-void func_1501C880(s32 unused, s32 swapBuffers) {
+void cutscene_sendGfxTask(s32 unused, s32 swapBuffers) {
     s32 capacity;
     Gfx **dlBase;
     s32 used;
 
     dlBase = gDisplayListBuffers;
     capacity = dlBase[1] - dlBase[0];
-    D_800BEAD4 = &D_800BEAD8[D_800BE9C0];
-    D_800BEAD4->next = 0;
+    gCurGfxTask = &gGfxTasks[D_800BE9C0];
+    gCurGfxTask->next = 0;
     used = gDisplayListHead - dlBase[D_800BE9C0];
     if ((used < 0) || (used > capacity)) {
         view_initFrameDisplayLists();
@@ -178,41 +178,41 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
         GFX_APPEND_NOPARAM(G_ENDDL);
     }
 
-    D_800BEAD4->list.t.data_ptr = (u64 *)dlBase[D_800BE9C0];
-    D_800BEAD4->list.t.data_size = (gDisplayListHead - dlBase[D_800BE9C0]) * sizeof(Gfx);
-    func_1501CC3C();
+    gCurGfxTask->list.t.data_ptr = (u64 *)dlBase[D_800BE9C0];
+    gCurGfxTask->list.t.data_size = (gDisplayListHead - dlBase[D_800BE9C0]) * sizeof(Gfx);
+    cutscene_loadMicrocodes();
 
-    D_800BEAD4->list.t.type = M_GFXTASK;
-    D_800BEAD4->list.t.flags = OS_TASK_LOADABLE;
-    D_800BEAD4->list.t.ucode_boot = (u64 *)D_100290D0;
-    D_800BEAD4->list.t.ucode_boot_size = D_100291A0 - D_100290D0;
+    gCurGfxTask->list.t.type = M_GFXTASK;
+    gCurGfxTask->list.t.flags = OS_TASK_LOADABLE;
+    gCurGfxTask->list.t.ucode_boot = (u64 *)D_100290D0;
+    gCurGfxTask->list.t.ucode_boot_size = D_100291A0 - D_100290D0;
     if (D_800BEBA0 != 0) {
-        D_800BEAD4->list.t.ucode = D_800C1060;
-        D_800BEAD4->list.t.ucode_data = D_800BEB9C;
+        gCurGfxTask->list.t.ucode = gUcodeText;
+        gCurGfxTask->list.t.ucode_data = gUcodeData;
     } else {
-        D_800BEAD4->list.t.ucode = D_800BEBB0;
-        D_800BEAD4->list.t.ucode_data = D_800BEAD0;
+        gCurGfxTask->list.t.ucode = gAltUcodeText;
+        gCurGfxTask->list.t.ucode_data = gAltUcodeData;
     }
-    D_800BEAD4->list.t.ucode_data_size = 0x800;
-    D_800BEAD4->list.t.dram_stack = D_800CBE10;
-    D_800BEAD4->list.t.dram_stack_size = 0x400;
-    D_800BEAD4->list.t.output_buff = (u64 *)gRdpOutputBuffer;
-    D_800BEAD4->list.t.output_buff_size = (u64 *)gRdpOutputBufferEnd;
-    D_800BEAD4->list.t.yield_data_ptr = D_8003A5E8;
-    D_800BEAD4->list.t.yield_data_size = 0xC00;
-    D_800BEAD4->flags = 0x23;
+    gCurGfxTask->list.t.ucode_data_size = 0x800;
+    gCurGfxTask->list.t.dram_stack = D_800CBE10;
+    gCurGfxTask->list.t.dram_stack_size = 0x400;
+    gCurGfxTask->list.t.output_buff = (u64 *)gRdpOutputBuffer;
+    gCurGfxTask->list.t.output_buff_size = (u64 *)gRdpOutputBufferEnd;
+    gCurGfxTask->list.t.yield_data_ptr = gGfxYieldBuffer;
+    gCurGfxTask->list.t.yield_data_size = 0xC00;
+    gCurGfxTask->flags = 0x23;
     if (swapBuffers != 0) {
-        D_800BEAD4->flags |= 0x40;
+        gCurGfxTask->flags |= 0x40;
     }
     if (D_800BE617 != 0) {
-        D_800BEAD4->flags |= (gScreenLayout + 1) << 16;
+        gCurGfxTask->flags |= (gScreenLayout + 1) << 16;
         D_800BE617 = 0;
     }
-    D_800BEAD4->msgQ = &gGameMesgQueue;
-    D_800BEAD4->msg = &gTaskDoneMsgs[D_800BE9C0];
-    D_800BEAD4->framebuffer = gFramebuffers[D_800BE9C0];
+    gCurGfxTask->msgQ = &gGameMesgQueue;
+    gCurGfxTask->msg = &gTaskDoneMsgs[D_800BE9C0];
+    gCurGfxTask->framebuffer = gFramebuffers[D_800BE9C0];
     osWritebackDCacheAll();
-    osSendMesg(&D_8003B1E8, D_800BEAD4, 1);
+    osSendMesg(&gSchedTaskQueue, gCurGfxTask, 1);
     if (swapBuffers != 0) {
         D_800BE9C0 ^= 1;
     }
@@ -229,10 +229,10 @@ typedef struct {
 
 extern u8 ucode_ROM_START[];
 
-static s8 D_80084070 = -1; // the ucode pair now loaded (-1: none yet)
-static s8 D_80084074 = -1; // its offset (0 or 4) into D_80084078 for D_800BEBB0's ucode (-1: none yet)
-/* Indexed by the graphics mode: entries 0-3 for D_800C1060, 4-7 for D_800BEBB0. */
-static UcodeRomEntry D_80084078[8] = {
+static s8 gLoadedUcode = -1; // the ucode pair now loaded (-1: none yet)
+static s8 D_80084074 = -1; // its offset (0 or 4) into gUcodeRomTable for gAltUcodeText's ucode (-1: none yet)
+/* Indexed by the graphics mode: entries 0-3 for gUcodeText, 4-7 for gAltUcodeText. */
+static UcodeRomEntry gUcodeRomTable[8] = {
     { 0x4560, 0x5A70, 0x10460, 0x10B20 },
     { 0x6F80, 0x84B0, 0x111E0, 0x118A0 },
     { 0x5A70, 0x6F80, 0x10B20, 0x111E0 },
@@ -244,9 +244,9 @@ static UcodeRomEntry D_80084078[8] = {
 };
 static s32 D_800840F8 = 0; /* not referenced */
 
-/* DMA the two RSP microcodes (D_800C1060 and D_800BEBB0, each text then data) for the current
+/* DMA the two RSP microcodes (gUcodeText and gAltUcodeText, each text then data) for the current
    graphics mode, unless they are already loaded. */
-void func_1501CC3C(void) {
+void cutscene_loadMicrocodes(void) {
     s32 ucode;
     s32 altOffset;
     UcodeRomEntry *alt;
@@ -261,65 +261,65 @@ void func_1501CC3C(void) {
     if (D_800BEB98 == 1) {
         ucode += 2;
     }
-    if ((ucode != D_80084070) || (altOffset != D_80084074)) {
-        rom_read(D_80084078[ucode].textStart + (s32)ucode_ROM_START, D_800C1060, D_80084078[ucode].textEnd - D_80084078[ucode].textStart, 1);
-        D_800BEB9C = (u64 *)((D_80084078[ucode].textEnd - D_80084078[ucode].textStart) + (u8 *)D_800C1060);
-        rom_read(D_80084078[ucode].dataStart + (s32)ucode_ROM_START, D_800BEB9C, D_80084078[ucode].dataEnd - D_80084078[ucode].dataStart, 1);
-        D_80084070 = ucode;
+    if ((ucode != gLoadedUcode) || (altOffset != D_80084074)) {
+        rom_read(gUcodeRomTable[ucode].textStart + (s32)ucode_ROM_START, gUcodeText, gUcodeRomTable[ucode].textEnd - gUcodeRomTable[ucode].textStart, 1);
+        gUcodeData = (u64 *)((gUcodeRomTable[ucode].textEnd - gUcodeRomTable[ucode].textStart) + (u8 *)gUcodeText);
+        rom_read(gUcodeRomTable[ucode].dataStart + (s32)ucode_ROM_START, gUcodeData, gUcodeRomTable[ucode].dataEnd - gUcodeRomTable[ucode].dataStart, 1);
+        gLoadedUcode = ucode;
         D_80084074 = altOffset;
-        alt = D_80084078 + (ucode + altOffset);
-        rom_read(alt->textStart + (s32)ucode_ROM_START, D_800BEBB0, alt->textEnd - alt->textStart, 1);
-        D_800BEAD0 = (u64 *)((alt->textEnd - alt->textStart) + (u8 *)D_800BEBB0);
-        rom_read(alt->dataStart + (s32)ucode_ROM_START, D_800BEAD0, alt->dataEnd - alt->dataStart, 1);
+        alt = gUcodeRomTable + (ucode + altOffset);
+        rom_read(alt->textStart + (s32)ucode_ROM_START, gAltUcodeText, alt->textEnd - alt->textStart, 1);
+        gAltUcodeData = (u64 *)((alt->textEnd - alt->textStart) + (u8 *)gAltUcodeText);
+        rom_read(alt->dataStart + (s32)ucode_ROM_START, gAltUcodeData, alt->dataEnd - alt->dataStart, 1);
     }
 }
 
-/* Mark every track's active-event table (D_800C3960) as empty. */
-void func_1501CDC0(s32 scene) {
+/* Mark every track's active-event table (gSeqActiveEvents) as empty. */
+void cutscene_clearActiveEvents(s32 scene) {
     s32 i;
     s32 j;
 
-    for (i = 0; i < D_800C363A[scene]; i++) {
+    for (i = 0; i < gSeqTrackCounts[scene]; i++) {
         for (j = 0; j < 16; j++) {
-            D_800C3960[scene][i][j] = 0xFF;
+            gSeqActiveEvents[scene][i][j] = 0xFF;
         }
     }
 }
 
 
-/* Work out the scene's end time D_800C3640[scene]: track 0's header length if set, else the latest
+/* Work out the scene's end time gCutsceneEndTimes[scene]: track 0's header length if set, else the latest
    header end time among tracks with events, else the time of the last channel key. */
-void func_1501CE54(s32 scene) {
+void cutscene_computeEndTime(s32 scene) {
     s32 found;
     s32 i;
     s16 length;
     u16 numKeys;
 
-    D_800C3640[scene] = 0;
-    if (D_800C363A[scene] != 0) {
-        if (D_800C35D8[scene][0] >= 4) {
-            length = D_800C3688[scene][0][2].value;
+    gCutsceneEndTimes[scene] = 0;
+    if (gSeqTrackCounts[scene] != 0) {
+        if (gSeqTrackEventCounts[scene][0] >= 4) {
+            length = gSeqEventTracks[scene][0][2].value;
             if (length != -9999) {
-                D_800C3640[scene] = length;
+                gCutsceneEndTimes[scene] = length;
                 return;
             }
         }
         found = 0;
-        for (i = 0; i < D_800C363A[scene]; i++) {
-            if (D_800C35C8[scene][i] != 0 && D_800C35D8[scene][i] != 0) {
-                if (D_800C3640[scene] < D_800C3688[scene][i][1].value) {
-                    D_800C3640[scene] = D_800C3688[scene][i][1].value;
+        for (i = 0; i < gSeqTrackCounts[scene]; i++) {
+            if (D_800C35C8[scene][i] != 0 && gSeqTrackEventCounts[scene][i] != 0) {
+                if (gCutsceneEndTimes[scene] < gSeqEventTracks[scene][i][1].value) {
+                    gCutsceneEndTimes[scene] = gSeqEventTracks[scene][i][1].value;
                     found = 1;
                 }
             }
         }
         if (found == 0) {
-            for (i = 0; i < D_800C363A[scene]; i++) {
+            for (i = 0; i < gSeqTrackCounts[scene]; i++) {
                 if (D_800C35C8[scene][i] != 0) {
                     numKeys = D_800C35D0[scene][i];
                     if (numKeys) {
-                        if (D_800C3640[scene] < D_800C3778[scene][i][numKeys - 1].time) {
-                            D_800C3640[scene] = D_800C3778[scene][i][numKeys - 1].time;
+                        if (gCutsceneEndTimes[scene] < gSeqChannelKeys[scene][i][numKeys - 1].time) {
+                            gCutsceneEndTimes[scene] = gSeqChannelKeys[scene][i][numKeys - 1].time;
                         }
                     }
                 }
@@ -331,7 +331,7 @@ void func_1501CE54(s32 scene) {
 /* Total event count of all tracks of the scene. */
 /* Total event count of all tracks of the scene. */
 /* Total event count of all tracks of the scene. */
-s32 func_1501CFF8(s32 scene) {
+s32 cutscene_countEvents(s32 scene) {
     s32 sum;
     s32 i;
     s32 count;
@@ -340,9 +340,9 @@ s32 func_1501CFF8(s32 scene) {
 
     sum = 0;
     i = 0;
-    if ((count = D_800C363A[scene]) > 0) {
+    if ((count = gSeqTrackCounts[scene]) > 0) {
         limit = count;
-        counts = D_800C35D8[scene];
+        counts = gSeqTrackEventCounts[scene];
     // matching: a goto loop; IDO unrolls the equivalent for and do-while loops
     loop:
         sum += *counts;
@@ -357,18 +357,18 @@ s32 func_1501CFF8(s32 scene) {
 
 
 /* Reset the per-scene cutscene state before a new script is loaded. */
-void func_1501D044(s32 scene) {
-    D_800C35B8[scene] = -100;
-    D_800C35B0[scene] = 0;
+void cutscene_resetScene(s32 scene) {
+    gCutscenePrevTimes[scene] = -100;
+    gCutsceneTimes[scene] = 0;
     D_800C35C0[scene] = 0;
     D_800C3C8E = 0;
-    D_800C363A[scene] = 0;
-    D_800C35EA[scene] = 0;
-    D_800C3D50 = NULL;
+    gSeqTrackCounts[scene] = 0;
+    gCutsceneStates[scene] = 0;
+    gSeqEventQueue = NULL;
     D_800C35F8 = 0xFF;
-    D_800C3648 = 0.0f;
-    D_800C364C = 0.0f;
-    D_800C3650 = 0.0f;
+    gViewFovOffset = 0.0f;
+    gNearPlaneOverride = 0.0f;
+    gFarPlaneOverride = 0.0f;
     D_800C3654[scene] = 0;
     D_800C3656[scene] = 0;
     D_800C3658[scene] = 1;
@@ -392,36 +392,36 @@ void func_1501D044(s32 scene) {
     D_800C3672 = 0;
     D_800C3C9D = 100;
     D_800C3C9E = -1;
-    func_150233BC();
+    cutscene_freeSubtitles();
     D_8008FD84[0] = 0;
     D_800C3670 = 0;
 }
 
-/* Load cutscene `cutscene` of map `map` into D_800C3668[scene]; returns the file (0 if missing). */
-SeqFileEntry *func_1501D1D4(s32 map, s32 cutscene, s32 scene) {
+/* Load cutscene `cutscene` of map `map` into gCutsceneFiles[scene]; returns the file (0 if missing). */
+SeqFileEntry *cutscene_loadFile(s32 map, s32 cutscene, s32 scene) {
     s32 size;
     u32 unused;
     SeqFileEntry *file;
 
     file = rom_loadPathTable(&unused, 0, &size, 3, 6, map, cutscene);
     if (file != NULL) {
-        D_800C3668[scene] = file;
+        gCutsceneFiles[scene] = file;
     } else {
-        D_800C3668[scene] = NULL;
+        gCutsceneFiles[scene] = NULL;
     }
 
     return file;
 }
 
 /* Flag cutscene `cutscene` of map `map` as played (unless D_800C3670 is set). */
-void func_1501D258(s32 map, s32 cutscene) {
+void cutscene_setPlayed(s32 map, s32 cutscene) {
     if (!D_800C3670) {
         D_800C3A60[map] |= (1LL << cutscene);
     }
 }
 
 /* Whether cutscene `cutscene` of map `map` has been played; always true while D_800C3670 is set. */
-s32 func_1501D2C4(s32 map, s32 cutscene) {
+s32 cutscene_isPlayed(s32 map, s32 cutscene) {
     if (D_800C3670 != 0) {
         return 1;
     }
@@ -431,13 +431,13 @@ s32 func_1501D2C4(s32 map, s32 cutscene) {
     return 0;
 }
 
-/* Cutscene start callbacks (func_1501D348's `callback`; 0: none). */
+/* Cutscene start callbacks (cutscene_start's `callback`; 0: none). */
 static void (*D_800840FC[])(s32, s32, s32, s32) = { NULL, func_15023870 };
 
 /* Start cutscene `cutscene` of map `map` in scene slot `scene`. If another map is loaded, switch
    maps first (game_requestLevelChange) and leave the request pending in D_800C35C4. Otherwise load the
    cutscene file, allocate and fill the per-track tables, and run the first frame. */
-void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackArg) {
+void cutscene_start(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackArg) {
     SeqFileHeader *hdr;
     SeqFileEntry *file;
     s32 state;
@@ -445,14 +445,14 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
     s32 k;
     s32 size;
 
-    state = D_800C35EA[scene];
+    state = gCutsceneStates[scene];
     if (state != 1 && D_800C35C4 == 0) {
         D_800C3C90 = callback;
         D_800C3C94 = callbackArg;
         if (map != level) {
             D_800C35C4 = cutscene + 1;
             game_requestLevelChange(1, map, 0, 0, 0);
-            if (D_800C35EA[scene] != 0) {
+            if (gCutsceneStates[scene] != 0) {
                 D_800C35C5 = 0;
                 return;
             }
@@ -464,9 +464,9 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
             D_800C35A8 = level;
             D_800C3C98 = cutscene;
         }
-        func_1501D044(scene);
-        if (func_1501D1D4(map, cutscene, scene) != 0) {
-            file = D_800C3668[scene];
+        cutscene_resetScene(scene);
+        if (cutscene_loadFile(map, cutscene, scene) != 0) {
+            file = gCutsceneFiles[scene];
             hdr = file[0].data;
             D_800C35C8[scene] = allocate_memory(hdr->numTracks * sizeof(u16), 1, 0, 0);
             k = 1;
@@ -484,42 +484,42 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
             if (size < hdr->numTracks) {
                 size = hdr->numTracks;
             }
-            D_800C35D8[scene] = allocate_memory(size * sizeof(u16), 1, 0, 0);
-            bzero(D_800C35D8[scene], size * sizeof(u16));
+            gSeqTrackEventCounts[scene] = allocate_memory(size * sizeof(u16), 1, 0, 0);
+            bzero(gSeqTrackEventCounts[scene], size * sizeof(u16));
             D_800C35E0[scene] = allocate_memory(hdr->numUnkLists * sizeof(s32 *), 1, 0, 0);
-            D_800C3A50[scene] = allocate_memory(hdr->numTracks * sizeof(SeqTrackPath), 1, 0, 0);
+            gSeqTrackPaths[scene] = allocate_memory(hdr->numTracks * sizeof(SeqTrackPath), 1, 0, 0);
             for (i = 0; i < hdr->numTracks; i++) {
                 if (D_800C35C8[scene][i] != 0) {
-                    D_800C3A50[scene][i].keyDistance = allocate_memory(D_800C35C8[scene][i] * sizeof(f32), 1, 0, 0);
-                    D_800C3A50[scene][i].arcLength = allocate_memory(101 * sizeof(f32), 1, 0, 0);
+                    gSeqTrackPaths[scene][i].keyDistance = allocate_memory(D_800C35C8[scene][i] * sizeof(f32), 1, 0, 0);
+                    gSeqTrackPaths[scene][i].arcLength = allocate_memory(101 * sizeof(f32), 1, 0, 0);
                 }
             }
-            D_800C3958[scene] = allocate_memory(hdr->numTracks * sizeof(SeqTrackState), 1, 0, 0);
+            gSeqTrackStates[scene] = allocate_memory(hdr->numTracks * sizeof(SeqTrackState), 1, 0, 0);
             for (i = 0; i < hdr->numTracks; i++) {
-                D_800C3960[scene][i] = allocate_memory(16, 1, 0, 0);
+                gSeqActiveEvents[scene][i] = allocate_memory(16, 1, 0, 0);
             }
             for (i = 0; i < hdr->numTracks; i++) {
-                D_800C35D8[scene][i] = 0;
+                gSeqTrackEventCounts[scene][i] = 0;
                 D_800C35D0[scene][i] = 0;
                 D_800C35C8[scene][i] = 0;
             }
-            D_800C363A[scene] = hdr->numTracks;
+            gSeqTrackCounts[scene] = hdr->numTracks;
             k = 1;
             for (i = 0; i < hdr->numTracks; i++) {
                 D_800C35C8[scene][i] = file[k].size >> 3;
-                D_800C3868[scene][i] = file[k].data;
+                gSeqPathKeys[scene][i] = file[k].data;
                 k++;
             }
-            D_800C35F0[scene] = file[k].data;
+            gSeqTrackInfos[scene] = file[k].data;
             k += hdr->numTracks;
             for (i = 0; i < hdr->numChannelLists; i++) {
                 D_800C35D0[scene][i] = file[k].size >> 3;
-                D_800C3778[scene][i] = file[k].data;
+                gSeqChannelKeys[scene][i] = file[k].data;
                 k++;
             }
             for (i = 0; i < hdr->numEventLists; i++) {
-                D_800C35D8[scene][i] = file[k].size >> 3;
-                D_800C3688[scene][i] = file[k].data;
+                gSeqTrackEventCounts[scene][i] = file[k].size >> 3;
+                gSeqEventTracks[scene][i] = file[k].data;
                 k++;
             }
             for (i = 0; i < hdr->numUnkLists; i++) {
@@ -529,31 +529,31 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
             if (callback != 0) {
                 D_800840FC[callback](map, cutscene, scene, callbackArg);
             }
-            D_800C3C9A = func_1501CFF8(scene);
-            D_800C3D50 = allocate_memory(D_800C3C9A * 12, 1, 0, 0);
-            D_800C35B0[scene] = 0;
-            func_1501CDC0(scene);
-            func_1501CE54(scene);
-            func_15022BA4(scene);
-            for (i = 0; i < D_800C363A[scene]; i++) {
-                func_15020388(i, scene);
+            gSeqEventQueueSize = cutscene_countEvents(scene);
+            gSeqEventQueue = allocate_memory(gSeqEventQueueSize * 12, 1, 0, 0);
+            gCutsceneTimes[scene] = 0;
+            cutscene_clearActiveEvents(scene);
+            cutscene_computeEndTime(scene);
+            cutscene_anchorPaths(scene);
+            for (i = 0; i < gSeqTrackCounts[scene]; i++) {
+                cutscene_measurePath(i, scene);
             }
             func_150238D0();
-            D_800C35EA[scene] = 1;
+            gCutsceneStates[scene] = 1;
             D_800C3638 = 1;
             func_15022234(scene);
             func_15022248(scene);
-            if (D_800C363A[scene] == 0) {
-                func_1501E81C(0, scene);
+            if (gSeqTrackCounts[scene] == 0) {
+                cutscene_finish(0, scene);
             }
-            func_150242F8(1, scene);
-            func_1501EC38(scene);
+            cutscene_dispatchEvents(1, scene);
+            cutscene_evalTracks(scene);
             func_15022848(scene);
-            func_15022754(scene);
-            func_15022528(scene);
-            func_15020EC4(scene);
+            cutscene_activateTrackActors(scene);
+            cutscene_applyObjectTracks(scene);
+            cutscene_applyTracks(scene);
             D_800DBFF4[0] = 4;
-            func_1501DAAC(scene);
+            cutscene_prescanEvents(scene);
         }
     }
 }
@@ -561,8 +561,8 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
 
 /* Scan the scene's scripts for type-5 events with values 0x1E, 0xE, 0x68 and 0x44 (setting the
    flags D_800C3C99, D_800C3C9C, D_800C35AA, D_800C35A9) and 0x77 (start time D_800C3C8E), and start
-   the screen fade (screen_startViewFade) to the D_80084110 colour named by the earliest type-1 value-1 event. */
-void func_1501DAAC(s32 scene) {
+   the screen fade (screen_startViewFade) to the gCutsceneFadeColours colour named by the earliest type-1 value-1 event. */
+void cutscene_prescanEvents(s32 scene) {
     s32 i;
     s32 best;
     SeqEvent *found;
@@ -576,86 +576,86 @@ void func_1501DAAC(s32 scene) {
     D_800C3C8E = 0;
 
     best = -1;
-    for (i = 0; i < D_800C363A[scene]; i++) {
-        events = D_800C3688[scene][i];
+    for (i = 0; i < gSeqTrackCounts[scene]; i++) {
+        events = gSeqEventTracks[scene][i];
         if (events != NULL) {
             found = NULL;
-            func_15023BB0(&events[3], 5, i, &found, 1, 0x1E, 0, 0, 0, 0, scene);
+            cutscene_findEvent(&events[3], 5, i, &found, 1, 0x1E, 0, 0, 0, 0, scene);
             if (found != NULL) {
                 D_800C3C99 = 1;
             }
 
             found = NULL;
-            func_15023BB0(&events[3], 5, i, &found, 1, 0xE, 0, 0, 0, 0, scene);
+            cutscene_findEvent(&events[3], 5, i, &found, 1, 0xE, 0, 0, 0, 0, scene);
             if (found != NULL) {
                 D_800C3C9C = 1;
             }
 
             found = NULL;
-            func_15023BB0(&events[3], 5, i, &found, 1, 0x68, 0, 0, 0, 0, scene);
+            cutscene_findEvent(&events[3], 5, i, &found, 1, 0x68, 0, 0, 0, 0, scene);
             if (found != NULL) {
                 D_800C35AA = 1;
             }
 
             found = NULL;
-            func_15023BB0(&events[3], 5, i, &found, 1, 0x44, 0, 0, 0, 0, scene);
+            cutscene_findEvent(&events[3], 5, i, &found, 1, 0x44, 0, 0, 0, 0, scene);
             if (found != NULL) {
                 D_800C35A9 = 1;
             }
 
             found = NULL;
-            score = func_15023BB0(&events[3], 5, i, &found, 1, 0x77, 0, 0, 0, 0, scene);
+            score = cutscene_findEvent(&events[3], 5, i, &found, 1, 0x77, 0, 0, 0, 0, scene);
             if (found != NULL) {
                 D_800C3C8E = score;
             }
 
             found = NULL;
-            score = func_15023BB0(&events[3], 5, i, &found, 1, 1, 1, 0, 0, 0, scene);
+            score = cutscene_findEvent(&events[3], 5, i, &found, 1, 1, 1, 0, 0, 0, scene);
             if (found != NULL) {
                 if ((best == -1) || (score < best)) {
                     best = score;
                     if (found->unk6 == 1) {
-                        screen_startViewFade(D_80084110[found->unk5].r, D_80084110[found->unk5].g, D_80084110[found->unk5].b, 0, 1, 0);
+                        screen_startViewFade(gCutsceneFadeColours[found->unk5].r, gCutsceneFadeColours[found->unk5].g, gCutsceneFadeColours[found->unk5].b, 0, 1, 0);
                     } else {
-                        screen_startViewFade(D_80084110[found->unk5].r, D_80084110[found->unk5].g, D_80084110[found->unk5].b, 0, 0, 0);
+                        screen_startViewFade(gCutsceneFadeColours[found->unk5].r, gCutsceneFadeColours[found->unk5].g, gCutsceneFadeColours[found->unk5].b, 0, 0, 0);
                     }
                 }
             }
         }
     }
 
-    D_800C35B0[scene] = D_800C3C8E;
+    gCutsceneTimes[scene] = D_800C3C8E;
 }
 
 /* Jump the scene to its end: advance the clock past the end time, update every track once, apply
    the result to the objects bound to tracks and finish the cutscene. */
-void func_1501DE18(s32 scene) {
+void cutscene_jumpToEnd(s32 scene) {
     s32 i;
     s32 count;
     Actor *obj;
 
-    D_800C35B0[scene] = D_800C3640[scene] + D_800BEA08;
-    func_150242F8(1, 0);
-    func_1501EC38(0);
-    func_150242F8(0, 0);
-    func_15020EC4(0);
+    gCutsceneTimes[scene] = gCutsceneEndTimes[scene] + D_800BEA08;
+    cutscene_dispatchEvents(1, 0);
+    cutscene_evalTracks(0);
+    cutscene_dispatchEvents(0, 0);
+    cutscene_applyTracks(0);
 
     // matching: the object count lives in its own register
     for (obj = movement_obj, i = 0, count = 25; i != count; i++, obj++) {
         if (obj->type) {
             dc_glbl_CharNum = i;
-            if (func_150229E4(obj)) {
-                func_1502178C(obj, scene, -1);
+            if (cutscene_isActorBound(obj)) {
+                cutscene_applyObjectTrack(obj, scene, -1);
             }
         }
     }
 
-    func_1501E81C(1, scene);
+    cutscene_finish(1, scene);
 }
 
 /* Skip the running cutscene: jump to its end (again while the next one chains on, D_800C3C99),
    then restore the screen fade and clear the objects' cutscene state. */
-void func_1501DF04(s32 scene) {
+void cutscene_skip(s32 scene) {
     Actor *obj;
     u8 chained;
     s32 sceneCopy;
@@ -669,13 +669,13 @@ void func_1501DF04(s32 scene) {
         actor_remove(obj, 0);
     }
     chained = D_800C3C99;
-    func_1501DE18(scene);
+    cutscene_jumpToEnd(scene);
     if (chained != 0) {
         if (D_800C35C4 == 0) {
             do {
                 chained = D_800C3C99;
                 // matching: the argument goes through a local copy
-                func_1501DE18(sceneCopy = scene);
+                cutscene_jumpToEnd(sceneCopy = scene);
             } while ((chained != 0) && (D_800C35C4 == 0));
         }
     }
@@ -695,7 +695,7 @@ void func_1501DF04(s32 scene) {
 
 /* Whether the running cutscene may be skipped now (button 0x20, or map-specific rules for maps
    0x1D and 0x21). */
-s32 func_1501E05C(s32 scene) {
+s32 cutscene_canSkip(s32 scene) {
     s32 map;
     s32 skipRequest;
 
@@ -717,7 +717,7 @@ s32 func_1501E05C(s32 scene) {
     }
 
     if (map == 0x21) {
-        if ((gButtonsPressed[0] & 0x1000) && (D_8000030C == 1) && (D_800C35B0[0] >= 301)) {
+        if ((gButtonsPressed[0] & 0x1000) && (D_8000030C == 1) && (gCutsceneTimes[0] >= 301)) {
             return 1;
         }
         return 0;
@@ -728,8 +728,8 @@ s32 func_1501E05C(s32 scene) {
             if (D_800D2E40 != 0) {
                 return 1;
             }
-            if (func_1501D2C4(map, D_800C35E8[scene]) != 0) {
-                if ((D_800C3C99 != 0) || ((D_800C35B0[scene] + 30) < D_800C3640[scene])) {
+            if (cutscene_isPlayed(map, D_800C35E8[scene]) != 0) {
+                if ((D_800C3C99 != 0) || ((gCutsceneTimes[scene] + 30) < gCutsceneEndTimes[scene])) {
                     return 1;
                 }
             }
@@ -738,52 +738,52 @@ s32 func_1501E05C(s32 scene) {
     return 0;
 }
 
-/* Cutscene skip state machine (D_800C3C88): 0 = waiting for a skip request (needs at least 91
-   ticks left), 1 = fading out for 30 ticks (D_800C3C89), 2 = skipping (func_1501DF04). */
-void func_1501E1B4(s32 scene) {
-    if (D_800C3C88 == 0) {
-        if (D_800C35EA[scene] != 1) {
+/* Cutscene skip state machine (gCutsceneSkipState): 0 = waiting for a skip request (needs at least 91
+   ticks left), 1 = fading out for 30 ticks (gCutsceneSkipFadeTimer), 2 = skipping (cutscene_skip). */
+void cutscene_updateSkip(s32 scene) {
+    if (gCutsceneSkipState == 0) {
+        if (gCutsceneStates[scene] != 1) {
             return;
         }
-        if (func_1501E05C(scene) == 0) {
+        if (cutscene_canSkip(scene) == 0) {
             return;
         }
         D_8008FD84[0] = 0;
-        if (D_800C3640[scene] - D_800C35B0[scene] < 91) {
+        if (gCutsceneEndTimes[scene] - gCutsceneTimes[scene] < 91) {
             return;
         }
-        D_800C3C88 = 1;
-        D_800C3C89 = 30;
+        gCutsceneSkipState = 1;
+        gCutsceneSkipFadeTimer = 30;
         screen_startViewFade(0, 0, 0, 0x1E, 1, 0);
         func_1000E17C();
         if ((func_151F2CDC() == 1) || (func_151F2CDC() == 2)) {
             func_151F2D6C(0, 0x2B02);
         }
-    } else if (D_800C3C88 == 1) {
-        if (D_800BEA08 < D_800C3C89) {
-            D_800C3C89 -= D_800BEA08;
+    } else if (gCutsceneSkipState == 1) {
+        if (D_800BEA08 < gCutsceneSkipFadeTimer) {
+            gCutsceneSkipFadeTimer -= D_800BEA08;
             return;
         }
-        D_800C3C89 = 0;
-        D_800C3C88 = 2;
-        func_1501DF04(scene);
-        D_800C3C88 = 0;
+        gCutsceneSkipFadeTimer = 0;
+        gCutsceneSkipState = 2;
+        cutscene_skip(scene);
+        gCutsceneSkipState = 0;
     }
 }
 
-/* At the scene's end time, finish it (func_1501E81C) unless D_800C3C8C holds it; if a chained
+/* At the scene's end time, finish it (cutscene_finish) unless D_800C3C8C holds it; if a chained
    scene started, run its first frame. */
-void func_1501E2F8(s32 scene) {
-    if ((D_800C35EA[scene] == 1) && (D_800C35B0[scene] >= D_800C3640[scene])) {
+void cutscene_checkEnd(s32 scene) {
+    if ((gCutsceneStates[scene] == 1) && (gCutsceneTimes[scene] >= gCutsceneEndTimes[scene])) {
         if (D_800C3C8C == 0) {
-            func_1501E81C(0, scene);
-            if (D_800C35EA[scene] == 1) {
-                func_1501E400(0);
-                func_150242F8(1, 0);
-                func_1501EC38(0);
-                func_150242F8(0, 0);
-                func_15020EC4(0);
-                func_1501E2F8(0);
+            cutscene_finish(0, scene);
+            if (gCutsceneStates[scene] == 1) {
+                cutscene_advanceTime(0);
+                cutscene_dispatchEvents(1, 0);
+                cutscene_evalTracks(0);
+                cutscene_dispatchEvents(0, 0);
+                cutscene_applyTracks(0);
+                cutscene_checkEnd(0);
             }
         } else {
             D_800C3C8C = 2;
@@ -791,78 +791,78 @@ void func_1501E2F8(s32 scene) {
     }
 }
 
-/* Advance the scene clock D_800C35B0 by this frame's ticks, clamped to the end time. */
-void func_1501E400(s32 scene) {
+/* Advance the scene clock gCutsceneTimes by this frame's ticks, clamped to the end time. */
+void cutscene_advanceTime(s32 scene) {
     if (D_800C3A58 != 0) {
         D_800C3A58 -= 1;
     }
-    D_800C35B8[scene] = D_800C35B0[scene];
-    if (D_800C35EA[scene] == 1) {
-        func_1501E1B4(scene);
+    gCutscenePrevTimes[scene] = gCutsceneTimes[scene];
+    if (gCutsceneStates[scene] == 1) {
+        cutscene_updateSkip(scene);
         if ((scene != 0) || (gPaused == 0)) {
-            D_800C35B0[scene] += D_800BEA08;
+            gCutsceneTimes[scene] += D_800BEA08;
         }
         if ((D_800C35C0[scene] == 0) &&
-            (D_800C3C8E == D_800C35B8[scene]) &&
-            (D_800C3C8E != D_800C35B0[scene])) {
-            D_800C35B8[scene] = -1;
+            (D_800C3C8E == gCutscenePrevTimes[scene]) &&
+            (D_800C3C8E != gCutsceneTimes[scene])) {
+            gCutscenePrevTimes[scene] = -1;
         }
         if (func_151F2CDC() == 1) {
-            func_15080228();
+            face_processMessages();
         }
-        if (D_800C35B0[scene] >= D_800C3640[scene]) {
-            D_800C35B0[scene] = D_800C3640[scene];
+        if (gCutsceneTimes[scene] >= gCutsceneEndTimes[scene]) {
+            gCutsceneTimes[scene] = gCutsceneEndTimes[scene];
         }
     }
 }
 
 
-/* Free everything func_1501D348 allocated for the scene, and the cutscene file itself. */
-void func_1501E540(s32 scene) {
+/* Free everything cutscene_start allocated for the scene, and the cutscene file itself. */
+void cutscene_freeScene(s32 scene) {
     s32 track;
     SeqFileHeader *hdr;
     u8 **active;
 
-    if (D_800C3668[scene] != NULL) {
-        hdr = D_800C3668[scene][0].data;
+    if (gCutsceneFiles[scene] != NULL) {
+        hdr = gCutsceneFiles[scene][0].data;
         for (track = 0; track < hdr->numTracks; track++) {
             if (D_800C35C8[scene][track] != 0) {
-                heap_free(D_800C3A50[scene][track].keyDistance);
-                heap_free(D_800C3A50[scene][track].arcLength);
+                heap_free(gSeqTrackPaths[scene][track].keyDistance);
+                heap_free(gSeqTrackPaths[scene][track].arcLength);
             }
         }
-        heap_free(D_800C3A50[scene]);
-        D_800C3A50[scene] = NULL;
-        heap_free(D_800C3958[scene]);
-        D_800C3958[scene] = NULL;
-        active = D_800C3960[scene];
+        heap_free(gSeqTrackPaths[scene]);
+        gSeqTrackPaths[scene] = NULL;
+        heap_free(gSeqTrackStates[scene]);
+        gSeqTrackStates[scene] = NULL;
+        active = gSeqActiveEvents[scene];
         for (track = 0; track < hdr->numTracks; track++) {
             heap_free(active[track]);
             active[track] = NULL;
         }
         heap_free(D_800C35C8[scene]);
         heap_free(D_800C35D0[scene]);
-        heap_free(D_800C35D8[scene]);
+        heap_free(gSeqTrackEventCounts[scene]);
         heap_free(D_800C35E0[scene]);
         D_800C35C8[scene] = NULL;
         D_800C35D0[scene] = NULL;
-        D_800C35D8[scene] = NULL;
+        gSeqTrackEventCounts[scene] = NULL;
         D_800C35E0[scene] = NULL;
-        heap_free(D_800C3D50);
-        D_800C3D50 = NULL;
-        heap_free(D_800C3668[scene]);
-        D_800C3668[scene] = NULL;
+        heap_free(gSeqEventQueue);
+        gSeqEventQueue = NULL;
+        heap_free(gCutsceneFiles[scene]);
+        gCutsceneFiles[scene] = NULL;
     }
 }
 
-/* For each object bound to a track: wrap its eyeCode counters at 10 and call func_1507EABC. */
+/* For each object bound to a track: wrap its eyeCode counters at 10 and call face_revertExpression. */
 void func_1501E73C(s32 scene) {
     s32 i;
     Actor *obj;
 
-    for (i = 0; i < D_800C363A[scene]; i++) {
-        if (D_800C35F0[scene][i].type == 2) {
-            obj = collision_findObjectById(D_800C35F0[scene][i].targetId);
+    for (i = 0; i < gSeqTrackCounts[scene]; i++) {
+        if (gSeqTrackInfos[scene][i].type == 2) {
+            obj = collision_findObjectById(gSeqTrackInfos[scene][i].targetId);
             if (obj == NULL) {
                 continue;
             }
@@ -874,18 +874,18 @@ void func_1501E73C(s32 scene) {
                 obj->eyeCode[1] = 0;
                 obj->eyeClosed[1] = 0;
             }
-            func_1507EABC(obj);
+            face_revertExpression(obj);
         }
     }
 }
 
 /* End the scene's cutscene: report it (effect_broadcastEvent), flag it played, release its data and restore
    the camera. If another cutscene is chained (D_800C35C2), start it instead. */
-void func_1501E81C(s32 skipped, s32 scene) {
+void cutscene_finish(s32 skipped, s32 scene) {
     Camera *player;
 
     player = camera_global_Cameras;
-    if (D_800C35EA[scene] != 0) {
+    if (gCutsceneStates[scene] != 0) {
         {
             u8 cutscene[1];
             s32 reason;
@@ -894,27 +894,27 @@ void func_1501E81C(s32 skipped, s32 scene) {
             reason = skipped ? 0xF : 0x10;
             effect_broadcastEvent((s32)cutscene, reason);
         }
-        D_800C35B8[scene] = -100;
-        D_800C35B0[scene] = D_800C3C8E;
-        func_1501D258(level, D_800C35E8[scene]);
-        D_800C35EA[scene] = 0;
+        gCutscenePrevTimes[scene] = -100;
+        gCutsceneTimes[scene] = D_800C3C8E;
+        cutscene_setPlayed(level, D_800C35E8[scene]);
+        gCutsceneStates[scene] = 0;
         D_800C3638 = 0;
         func_1501E73C(scene);
-        func_150233E4();
+        cutscene_closeSubtitles();
         D_800C3662 = 0;
         D_800C3683 = 0;
-        func_150235DC(scene);
-        func_1501EA18(scene);
-        func_1501E540(scene);
-        D_800C3648 = 0.0f;
-        D_800C364C = 0.0f;
-        D_800C3650 = 0.0f;
+        cutscene_releasePlayer(scene);
+        cutscene_restoreControl(scene);
+        cutscene_freeScene(scene);
+        gViewFovOffset = 0.0f;
+        gNearPlaneOverride = 0.0f;
+        gFarPlaneOverride = 0.0f;
         view_recordFovChange(0, player->FOVX, player->FOVY, 1.0f);
         if (D_800C35C2 != 0) {
             s32 savedMap;
             s32 map;
 
-            D_800C35EA[scene] = 2;
+            gCutsceneStates[scene] = 2;
             map = D_800C35C3;
             if (0x25 == D_800C35C3) {
                 savedMap = level;
@@ -922,7 +922,7 @@ void func_1501E81C(s32 skipped, s32 scene) {
                 map = 0x25;
             }
             D_800C3671 = 0;
-            func_1501D348(map, D_800C35C2 - 1, scene, D_800C3C90, D_800C3C94);
+            cutscene_start(map, D_800C35C2 - 1, scene, D_800C3C90, D_800C3C94);
             if (0x25 == D_800C35C3) {
                 level = savedMap;
             }
@@ -939,7 +939,7 @@ void func_1501E81C(s32 skipped, s32 scene) {
 
 
 /* Hand control back after the scene's cutscene: restore the player camera and object state. */
-void func_1501EA18(s32 scene) {
+void cutscene_restoreControl(s32 scene) {
     Camera *player;
     Actor *obj;
     s32 i;
@@ -973,11 +973,11 @@ void func_1501EA18(s32 scene) {
         }
     }
     if (D_800C365A[scene] == 0) {
-        func_150228E4(scene);
+        cutscene_removeSpawnedActors(scene);
     }
-    func_150227BC(scene);
+    cutscene_restoreInactive(scene);
     for (i = 0; i != 25; i++) {
-        if (movement_obj[i].type != 0 && func_150229E4(&movement_obj[i]) != 0) {
+        if (movement_obj[i].type != 0 && cutscene_isActorBound(&movement_obj[i]) != 0) {
             movement_obj[i].fogMode = 0;
             movement_obj[i].vtilt = 0.0f;
             movement_obj[i].lean_angle = 0.0f;
@@ -993,11 +993,11 @@ void func_1501EA18(s32 scene) {
     }
 }
 
-/* Evaluate every track of the scene at the current time D_800C35B0: start from the track's path
+/* Evaluate every track of the scene at the current time gCutsceneTimes: start from the track's path
    start and type defaults, then interpolate each of its 15 channels between the keys around the
-   current time (Catmull-Rom via func_150497E0, or linear) and store them in its SeqTrackState.
+   current time (Catmull-Rom via math_catmullRom, or linear) and store them in its SeqTrackState.
    Channel 10 is the position along the path in percent. */
-void func_1501EC38(s32 scene) {
+void cutscene_evalTracks(s32 scene) {
     s32 prevTime[15];
     s32 nextTime[15];
     s32 nextKey[15];
@@ -1022,60 +1022,60 @@ void func_1501EC38(s32 scene) {
     s32 next;
     SeqChannelKey *key;
 
-    // matching: indexing through &D_800C35EA[0] rather than the array changes register allocation
-    if ((&D_800C35EA[0])[scene] == 1) {
+    // matching: indexing through &gCutsceneStates[0] rather than the array changes register allocation
+    if ((&gCutsceneStates[0])[scene] == 1) {
         D_800C3638 = 0;
-        for (track = 0; track < D_800C363A[scene]; track++) {
+        for (track = 0; track < gSeqTrackCounts[scene]; track++) {
             if (D_800C35C8[scene][track] != 0) {
-                D_800C3958[scene][track].x = D_800C3868[scene][track]->x;
-                D_800C3958[scene][track].y = D_800C3868[scene][track]->y;
-                D_800C3958[scene][track].z = D_800C3868[scene][track]->z;
+                gSeqTrackStates[scene][track].x = gSeqPathKeys[scene][track]->x;
+                gSeqTrackStates[scene][track].y = gSeqPathKeys[scene][track]->y;
+                gSeqTrackStates[scene][track].z = gSeqPathKeys[scene][track]->z;
             } else {
-                D_800C3958[scene][track].x = 0.0f;
-                D_800C3958[scene][track].y = 0.0f;
-                D_800C3958[scene][track].z = 0.0f;
+                gSeqTrackStates[scene][track].x = 0.0f;
+                gSeqTrackStates[scene][track].y = 0.0f;
+                gSeqTrackStates[scene][track].z = 0.0f;
             }
-            if (D_800C35F0[scene][track].type == 4) {
-                D_800C3958[scene][track].unkC = 64.0f;
-                D_800C3958[scene][track].unk10 = 0.0f;
-                D_800C3958[scene][track].unk14 = 20.0f;
-                D_800C3958[scene][track].unk18 = 255.0f;
-                D_800C3958[scene][track].unk1C = 62.5f;
-                D_800C3958[scene][track].unk20 = 50.0f;
-                D_800C3958[scene][track].unk24 = 0.0f;
-                D_800C3958[scene][track].unk28 = 0.0f;
-                D_800C3958[scene][track].unk2C = 0.0f;
-                D_800C3958[scene][track].unk34 = 0.0f;
+            if (gSeqTrackInfos[scene][track].type == 4) {
+                gSeqTrackStates[scene][track].unkC = 64.0f;
+                gSeqTrackStates[scene][track].unk10 = 0.0f;
+                gSeqTrackStates[scene][track].unk14 = 20.0f;
+                gSeqTrackStates[scene][track].unk18 = 255.0f;
+                gSeqTrackStates[scene][track].unk1C = 62.5f;
+                gSeqTrackStates[scene][track].unk20 = 50.0f;
+                gSeqTrackStates[scene][track].unk24 = 0.0f;
+                gSeqTrackStates[scene][track].unk28 = 0.0f;
+                gSeqTrackStates[scene][track].unk2C = 0.0f;
+                gSeqTrackStates[scene][track].unk34 = 0.0f;
             } else {
-                D_800C3958[scene][track].unkC = 0.0f;
-                D_800C3958[scene][track].unk10 = D_800C35A4;
-                D_800C3958[scene][track].unk14 = 0.0f;
-                D_800C3958[scene][track].unk18 = -9999.0f;
-                D_800C3958[scene][track].unk1C = -9999.0f;
-                D_800C3958[scene][track].unk20 = -9999.0f;
-                D_800C3958[scene][track].unk24 = 0.0f;
-                D_800C3958[scene][track].unk28 = 0.0f;
-                D_800C3958[scene][track].unk2C = 0.0f;
-                D_800C3958[scene][track].unk3C = -9999.0f;
-                D_800C3958[scene][track].unk40 = -9999.0f;
-                D_800C3958[scene][track].unk30 = -9999.0f;
+                gSeqTrackStates[scene][track].unkC = 0.0f;
+                gSeqTrackStates[scene][track].unk10 = D_800C35A4;
+                gSeqTrackStates[scene][track].unk14 = 0.0f;
+                gSeqTrackStates[scene][track].unk18 = -9999.0f;
+                gSeqTrackStates[scene][track].unk1C = -9999.0f;
+                gSeqTrackStates[scene][track].unk20 = -9999.0f;
+                gSeqTrackStates[scene][track].unk24 = 0.0f;
+                gSeqTrackStates[scene][track].unk28 = 0.0f;
+                gSeqTrackStates[scene][track].unk2C = 0.0f;
+                gSeqTrackStates[scene][track].unk3C = -9999.0f;
+                gSeqTrackStates[scene][track].unk40 = -9999.0f;
+                gSeqTrackStates[scene][track].unk30 = -9999.0f;
             }
-            D_800C3958[scene][track].yOffset = 0.0f;
-            if (D_800C35F0[scene][track].type == 1) {
-                D_800C3958[scene][track].unk34 = -9999.0f;
-            } else if (D_800C35F0[scene][track].type == 2) {
-                D_800C3958[scene][track].unk34 = 255.0f;
-            } else if (D_800C35F0[scene][track].type == 5) {
-                D_800C3958[scene][track].unk18 = 32.0f;
-                D_800C3958[scene][track].unk1C = 32.0f;
-                D_800C3958[scene][track].unk34 = 1.0f;
-            } else if (D_800C35F0[scene][track].type == 3) {
-                D_800C3958[scene][track].unk18 = -9999.0f;
-                D_800C3958[scene][track].unk1C = -9999.0f;
-                D_800C3958[scene][track].unk20 = -9999.0f;
-                D_800C3958[scene][track].unk34 = 255.0f;
+            gSeqTrackStates[scene][track].yOffset = 0.0f;
+            if (gSeqTrackInfos[scene][track].type == 1) {
+                gSeqTrackStates[scene][track].unk34 = -9999.0f;
+            } else if (gSeqTrackInfos[scene][track].type == 2) {
+                gSeqTrackStates[scene][track].unk34 = 255.0f;
+            } else if (gSeqTrackInfos[scene][track].type == 5) {
+                gSeqTrackStates[scene][track].unk18 = 32.0f;
+                gSeqTrackStates[scene][track].unk1C = 32.0f;
+                gSeqTrackStates[scene][track].unk34 = 1.0f;
+            } else if (gSeqTrackInfos[scene][track].type == 3) {
+                gSeqTrackStates[scene][track].unk18 = -9999.0f;
+                gSeqTrackStates[scene][track].unk1C = -9999.0f;
+                gSeqTrackStates[scene][track].unk20 = -9999.0f;
+                gSeqTrackStates[scene][track].unk34 = 255.0f;
             }
-            if (D_800C3778[scene][track] != NULL) {
+            if (gSeqChannelKeys[scene][track] != NULL) {
                 for (j = 0; j < 15; j++) {
                     nextTime[j] = -9999;
                     prevTime[j] = -9999;
@@ -1086,10 +1086,10 @@ void func_1501EC38(s32 scene) {
                     lastValue[j] = -9999.0f;
                 }
                 for (j = 0; j < D_800C35D0[scene][track]; j++) {
-                    key = &D_800C3778[scene][track][j];
+                    key = &gSeqChannelKeys[scene][track][j];
                     channel = key->channel;
                     if (nextKey[channel] == -9999) {
-                        if (key->time >= D_800C35B0[scene]) {
+                        if (key->time >= gCutsceneTimes[scene]) {
                             nextKey[channel] = numKeys[channel];
                             nextTime[channel] = key->time;
                         } else {
@@ -1113,7 +1113,7 @@ void func_1501EC38(s32 scene) {
                     } else if (nextTime[j] == -9999) {
                         value[j] = lastValue[j];
                     } else {
-                        t = (f32)(D_800C35B0[scene] - prevTime[j]) / (nextTime[j] - prevTime[j]);
+                        t = (f32)(gCutsceneTimes[scene] - prevTime[j]) / (nextTime[j] - prevTime[j]);
                         mask = 6;
                         found = -1;
                         if (prevInterp[j] == 0) {
@@ -1137,7 +1137,7 @@ void func_1501EC38(s32 scene) {
                                 if (needed == 0) {
                                     break;
                                 }
-                                key = &D_800C3778[scene][track][m];
+                                key = &gSeqChannelKeys[scene][track][m];
                                 if (j == key->channel) {
                                     if (skip == start) {
                                         points[q++] = key->value;
@@ -1153,11 +1153,11 @@ void func_1501EC38(s32 scene) {
                             if (!(mask & 8)) {
                                 points[3] = points[2];
                             }
-                            value[j] = func_150497E0(points, 0, t);
+                            value[j] = math_catmullRom(points, 0, t);
                         } else {
                             n = 0;
                             for (k = 0; k < D_800C35D0[scene][track]; k++) {
-                                key = &D_800C3778[scene][track][k];
+                                key = &gSeqChannelKeys[scene][track][k];
                                 if (j == key->channel) {
                                     if (found == -1) {
                                         if (n == nextKey[j] - 1) {
@@ -1171,62 +1171,62 @@ void func_1501EC38(s32 scene) {
                                     }
                                 }
                             }
-                            value[j] = D_800C3778[scene][track][next].value - D_800C3778[scene][track][found].value;
+                            value[j] = gSeqChannelKeys[scene][track][next].value - gSeqChannelKeys[scene][track][found].value;
                             value[j] *= t;
-                            value[j] += D_800C3778[scene][track][found].value;
+                            value[j] += gSeqChannelKeys[scene][track][found].value;
                         }
                     }
                 }
                 if (value[10] == -9999.0f) {
                     value[10] = 0.0f;
                 }
-                if (D_800C3960[scene][track][0] != 0xFF) {
-                    func_1501FE68(track, value[10], &D_800C3958[scene][track].unk10, scene);
+                if (gSeqActiveEvents[scene][track][0] != 0xFF) {
+                    cutscene_getTrackHeading(track, value[10], &gSeqTrackStates[scene][track].unk10, scene);
                 } else if (value[7] != -9999.0f) {
-                    D_800C3958[scene][track].unk10 = value[7];
+                    gSeqTrackStates[scene][track].unk10 = value[7];
                 }
                 if (value[8] != -9999.0f) {
-                    D_800C3958[scene][track].unkC = value[8];
+                    gSeqTrackStates[scene][track].unkC = value[8];
                 }
                 if (value[6] != -9999.0f) {
-                    D_800C3958[scene][track].unk14 = value[6];
+                    gSeqTrackStates[scene][track].unk14 = value[6];
                 }
                 if (value[5] != -9999.0f) {
-                    D_800C3958[scene][track].unk18 = value[5];
+                    gSeqTrackStates[scene][track].unk18 = value[5];
                 }
                 if (value[4] != -9999.0f) {
-                    D_800C3958[scene][track].unk1C = value[4];
+                    gSeqTrackStates[scene][track].unk1C = value[4];
                 }
                 if (value[3] != -9999.0f) {
-                    D_800C3958[scene][track].unk20 = value[3];
+                    gSeqTrackStates[scene][track].unk20 = value[3];
                 }
                 if (value[1] != -9999.0f) {
-                    D_800C3958[scene][track].unk24 = value[1];
+                    gSeqTrackStates[scene][track].unk24 = value[1];
                 }
                 if (value[2] != -9999.0f) {
-                    D_800C3958[scene][track].unk28 = value[2];
+                    gSeqTrackStates[scene][track].unk28 = value[2];
                 }
                 if (value[0] != -9999.0f) {
-                    D_800C3958[scene][track].unk2C = value[0];
+                    gSeqTrackStates[scene][track].unk2C = value[0];
                 }
                 if (value[14] != -9999.0f) {
-                    D_800C3958[scene][track].unk30 = value[14];
+                    gSeqTrackStates[scene][track].unk30 = value[14];
                 }
                 if (value[9] != -9999.0f) {
-                    D_800C3958[scene][track].unk34 = value[9];
+                    gSeqTrackStates[scene][track].unk34 = value[9];
                 }
                 if (value[11] != -9999.0f) {
-                    D_800C3958[scene][track].yOffset = value[11];
+                    gSeqTrackStates[scene][track].yOffset = value[11];
                 }
                 if (value[13] != -9999.0f) {
-                    D_800C3958[scene][track].unk3C = value[13];
+                    gSeqTrackStates[scene][track].unk3C = value[13];
                 }
                 if (value[12] != -9999.0f) {
-                    D_800C3958[scene][track].unk40 = value[12];
+                    gSeqTrackStates[scene][track].unk40 = value[12];
                 }
-                func_1501FC8C(track, value[10], &D_800C3958[scene][track].x,
-                              &D_800C3958[scene][track].y,
-                              &D_800C3958[scene][track].z, scene);
+                cutscene_getTrackPos(track, value[10], &gSeqTrackStates[scene][track].x,
+                              &gSeqTrackStates[scene][track].y,
+                              &gSeqTrackStates[scene][track].z, scene);
             }
         }
         D_800C3638 = 1;
@@ -1236,7 +1236,7 @@ void func_1501EC38(s32 scene) {
 /* Find the path segment containing distance `dist` along track `track` and write two points to
    `out`: the ends of the arc-length sample on a curved segment, or the interpolated point twice on
    a linear one. Returns the arc-length sample index. */
-s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
+s32 cutscene_findPathSegment(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
     s32 key;
     s32 lo;
     s32 hi;
@@ -1251,7 +1251,7 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
     lo = 0;
     hi = D_800C35C8[scene][track] - 1;
     if (hi >= 0) {
-        distances = D_800C3A50[scene][track].keyDistance;
+        distances = gSeqTrackPaths[scene][track].keyDistance;
         do {
             key = (lo + hi) / 2;
             if (dist < distances[key]) {
@@ -1265,15 +1265,15 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
         } while (hi >= lo);
     }
     *segmentOut = key;
-    if (key != D_800C3A50[scene][track].segment) {
-        func_15020878(track, key, scene);
+    if (key != gSeqTrackPaths[scene][track].segment) {
+        cutscene_cacheSegment(track, key, scene);
     }
-    linear = D_800C3868[scene][track][key].linear;
-    func_1501FFE8((f32 *)points, D_800C3868[scene][track], key, D_800C35C8[scene][track]);
+    linear = gSeqPathKeys[scene][track][key].linear;
+    cutscene_getSegmentKeys((f32 *)points, gSeqPathKeys[scene][track], key, D_800C35C8[scene][track]);
     if (linear == 0) {
         hi = 100;
         lo = 0;
-        distances = D_800C3A50[scene][track].arcLength;
+        distances = gSeqTrackPaths[scene][track].arcLength;
         do {
             sample = (lo + hi) / 2;
             if (dist < distances[sample]) {
@@ -1288,14 +1288,14 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
         j = 0;
         for (i = 0; i < 2; i++) {
             t = (sample + i) * 0.01f;
-            ((Vec3f *)out)[j].x = ((D_800C3A50[scene][track].coef3[0] * t + D_800C3A50[scene][track].coef2[0]) * t + D_800C3A50[scene][track].coef1[0]) * t + D_800C3A50[scene][track].coef0[0];
-            ((Vec3f *)out)[j].y = ((D_800C3A50[scene][track].coef3[1] * t + D_800C3A50[scene][track].coef2[1]) * t + D_800C3A50[scene][track].coef1[1]) * t + D_800C3A50[scene][track].coef0[1];
-            ((Vec3f *)out)[j].z = ((D_800C3A50[scene][track].coef3[2] * t + D_800C3A50[scene][track].coef2[2]) * t + D_800C3A50[scene][track].coef1[2]) * t + D_800C3A50[scene][track].coef0[2];
+            ((Vec3f *)out)[j].x = ((gSeqTrackPaths[scene][track].coef3[0] * t + gSeqTrackPaths[scene][track].coef2[0]) * t + gSeqTrackPaths[scene][track].coef1[0]) * t + gSeqTrackPaths[scene][track].coef0[0];
+            ((Vec3f *)out)[j].y = ((gSeqTrackPaths[scene][track].coef3[1] * t + gSeqTrackPaths[scene][track].coef2[1]) * t + gSeqTrackPaths[scene][track].coef1[1]) * t + gSeqTrackPaths[scene][track].coef0[1];
+            ((Vec3f *)out)[j].z = ((gSeqTrackPaths[scene][track].coef3[2] * t + gSeqTrackPaths[scene][track].coef2[2]) * t + gSeqTrackPaths[scene][track].coef1[2]) * t + gSeqTrackPaths[scene][track].coef0[2];
             j ^= 1;
         }
     } else {
-        t = D_800C3A50[scene][track].keyDistance[key + 1] - D_800C3A50[scene][track].keyDistance[key];
-        dist = dist - D_800C3A50[scene][track].keyDistance[key];
+        t = gSeqTrackPaths[scene][track].keyDistance[key + 1] - gSeqTrackPaths[scene][track].keyDistance[key];
+        dist = dist - gSeqTrackPaths[scene][track].keyDistance[key];
         if (t != 0) {
             dist = dist / t;
         } else {
@@ -1313,7 +1313,7 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
 }
 
 /* Position of track `track` at `percent` (0-100) of its path length. */
-void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 scene) {
+void cutscene_getTrackPos(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 scene) {
     f32 dist;
     s32 segment;
     s32 sample;
@@ -1329,10 +1329,10 @@ void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 scene) {
         if (percent < 0.0f) {
             percent = 0.0f;
         }
-        dist = D_800C3A50[scene][track].length * percent * 0.009999999776f;
-        sample = func_1501F72C(track, dist, positions, scene, &segment);
-        if (D_800C3868[scene][track][segment].linear == 0) {
-            arc = D_800C3A50[scene][track].arcLength + sample;
+        dist = gSeqTrackPaths[scene][track].length * percent * 0.009999999776f;
+        sample = cutscene_findPathSegment(track, dist, positions, scene, &segment);
+        if (gSeqPathKeys[scene][track][segment].linear == 0) {
+            arc = gSeqTrackPaths[scene][track].arcLength + sample;
             percent = arc[1] - arc[0];
             covered = dist - arc[0];
             if (percent != 0) {
@@ -1352,7 +1352,7 @@ void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 scene) {
 }
 
 /* Heading in degrees of track `track`'s path at `percent` (0-100) of its length. */
-void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 scene) {
+void cutscene_getTrackHeading(s32 track, f32 percent, f32 *heading, s32 scene) {
     f32 dx;
     f32 positions[6];
     s32 segment[3];
@@ -1368,25 +1368,25 @@ void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 scene) {
             percent = 0.0f;
         }
 
-        dist = D_800C3A50[scene][track].length * percent * 0.009999999776f;
-        func_1501F72C(track, dist, positions, scene, segment);
+        dist = gSeqTrackPaths[scene][track].length * percent * 0.009999999776f;
+        cutscene_findPathSegment(track, dist, positions, scene, segment);
 
-        if (D_800C3868[scene][track][segment[0]].linear == 0) {
+        if (gSeqPathKeys[scene][track][segment[0]].linear == 0) {
             dx = positions[0] - positions[3];
             dz = positions[2] - positions[5];
         } else {
             // matching: the 12-float buffer starts 2 floats below a 10-float local (frame size)
-            func_1501FFE8(points - 2, D_800C3868[scene][track], segment[0], D_800C35C8[scene][track]);
+            cutscene_getSegmentKeys(points - 2, gSeqPathKeys[scene][track], segment[0], D_800C35C8[scene][track]);
             dx = points[4] - points[1];
             dz = points[6] - points[3];
         }
-        *heading = func_150484A0(dx, dz) * 57.29577637f;
+        *heading = math_atan2(dx, dz) * 57.29577637f;
     }
 }
 
 /* Copy the path keys around segment `key` (key-1 .. key+2) into out[0..3] as float points. A
    missing key before or after the segment is replaced by a copy of the nearest end point. */
-void func_1501FFE8(f32 *out, SeqPathKey *keys, s32 key, s32 numKeys) {
+void cutscene_getSegmentKeys(f32 *out, SeqPathKey *keys, s32 key, s32 numKeys) {
     s32 flags;
     s32 start;
     s32 count;
@@ -1429,7 +1429,7 @@ void func_1501FFE8(f32 *out, SeqPathKey *keys, s32 key, s32 numKeys) {
 }
 
 /* Measure track `track`'s path: the distance at each key and the total length. */
-void func_15020388(s32 track, s32 scene) {
+void cutscene_measurePath(s32 track, s32 scene) {
     s32 i;
     s32 j;
     f32 pts[4][3];
@@ -1448,13 +1448,13 @@ void func_15020388(s32 track, s32 scene) {
     u16 linear;
 
     if (D_800C35C8[scene][track] >= 2) {
-        D_800C3A50[scene][track].segment = 0xFF;
+        gSeqTrackPaths[scene][track].segment = 0xFF;
         len = 0.0f;
         cur = 0;
         for (i = 0; i < D_800C35C8[scene][track] - 1; i++) {
-            linear = D_800C3868[scene][track][i].linear;
-            func_1501FFE8(&pts[0][0], D_800C3868[scene][track], i, D_800C35C8[scene][track]);
-            D_800C3A50[scene][track].keyDistance[i] = len;
+            linear = gSeqPathKeys[scene][track][i].linear;
+            cutscene_getSegmentKeys(&pts[0][0], gSeqPathKeys[scene][track], i, D_800C35C8[scene][track]);
+            gSeqTrackPaths[scene][track].keyDistance[i] = len;
             if (linear == 0) {
                 for (j = 0; j < 3; j++) {
                     a[j] = -0.5f * pts[0][j] + 1.5f * pts[1][j] + -1.5f * pts[2][j] + 0.5f * pts[3][j];
@@ -1490,15 +1490,15 @@ void func_15020388(s32 track, s32 scene) {
                 len += sqrtf(dist * dist + (t * t + y * y));
             }
         }
-        D_800C3A50[scene][track].keyDistance[i] = len;
-        D_800C3A50[scene][track].length = len;
-        D_800C3A50[scene][track].segment = 0xFF;
+        gSeqTrackPaths[scene][track].keyDistance[i] = len;
+        gSeqTrackPaths[scene][track].length = len;
+        gSeqTrackPaths[scene][track].segment = 0xFF;
     }
 }
 
 
 /* Cache the cubic and the 101-sample arc-length table of segment `segment` of track `track`. */
-void func_15020878(s32 track, s32 segment, s32 scene) {
+void cutscene_cacheSegment(s32 track, s32 segment, s32 scene) {
     s32 i;
     s32 k;
     f32 points[12];
@@ -1519,21 +1519,21 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
         return;
     }
     j = 0;
-    total = D_800C3A50[scene][track].keyDistance[segment];
-    linear = D_800C3868[scene][track][segment].linear;
-    func_1501FFE8(points, D_800C3868[scene][track], segment, D_800C35C8[scene][track]);
+    total = gSeqTrackPaths[scene][track].keyDistance[segment];
+    linear = gSeqPathKeys[scene][track][segment].linear;
+    cutscene_getSegmentKeys(points, gSeqPathKeys[scene][track], segment, D_800C35C8[scene][track]);
     if (linear == 0) {
         for (i = 0; i < 3; i++) {
             a[i] = -0.5f * points[i] + 1.5f * points[i + 3] + -1.5f * points[i + 6] + points[i + 9] * 0.5f;
             b[i] = points[i] + -2.5f * points[i + 3] + (points[i + 6] + points[i + 6]) + points[i + 9] * -0.5f;
             c[i] = -0.5f * points[i] + points[i + 6] * 0.5f;
             d[i] = points[i + 3];
-            D_800C3A50[scene][track].coef0[i] = d[i];
-            D_800C3A50[scene][track].coef1[i] = c[i];
-            D_800C3A50[scene][track].coef2[i] = b[i];
-            D_800C3A50[scene][track].coef3[i] = a[i];
+            gSeqTrackPaths[scene][track].coef0[i] = d[i];
+            gSeqTrackPaths[scene][track].coef1[i] = c[i];
+            gSeqTrackPaths[scene][track].coef2[i] = b[i];
+            gSeqTrackPaths[scene][track].coef3[i] = a[i];
         }
-        D_800C3A50[scene][track].arcLength[0] = total;
+        gSeqTrackPaths[scene][track].arcLength[0] = total;
         for (i = 0; i != 3; i++) {
             pos[!j][i] = d[i];
         }
@@ -1554,27 +1554,27 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
             if (dx != 0.0f) {
                 total += sqrtf(dx);
             }
-            D_800C3A50[scene][track].arcLength[i] = total;
+            gSeqTrackPaths[scene][track].arcLength[i] = total;
             i++;
             j ^= 1;
         }
     } else {
-        total = D_800C3A50[scene][track].keyDistance[segment + 1] - total;
+        total = gSeqTrackPaths[scene][track].keyDistance[segment + 1] - total;
         for (k = 0; k < 101; k++) {
-            D_800C3A50[scene][track].arcLength[k] = k * total / 101.0f;
+            gSeqTrackPaths[scene][track].arcLength[k] = k * total / 101.0f;
         }
     }
-    D_800C3A50[scene][track].segment = segment;
+    gSeqTrackPaths[scene][track].segment = segment;
 }
 
-// matching: byte-offset form of &D_800C35F0[a][i]; plain indexing swaps two s-registers here
-#define ENT(a, i) ((SeqTrackInfo *)((u8 *)D_800C35F0[a] + (i) * 8))
-#define ELEM(a, i) (&D_800C3958[a][i])
+// matching: byte-offset form of &gSeqTrackInfos[a][i]; plain indexing swaps two s-registers here
+#define ENT(a, i) ((SeqTrackInfo *)((u8 *)gSeqTrackInfos[a] + (i) * 8))
+#define ELEM(a, i) (&gSeqTrackStates[a][i])
 
-/* Apply the scene's evaluated tracks: the camera track (type 1, the one chosen by func_15023264)
+/* Apply the scene's evaluated tracks: the camera track (type 1, the one chosen by cutscene_pickCameraTrack)
    drives the player camera through camera_queueMessage message 7, type 3 tracks drive actors, type 2
-   tracks objects (func_1502178C) and type 5 tracks sprite_queuePlayerBillboard. Non-camera tracks go first. */
-void func_15020EC4(s32 scene) {
+   tracks objects (cutscene_applyObjectTrack) and type 5 tracks sprite_queuePlayerBillboard. Non-camera tracks go first. */
+void cutscene_applyTracks(s32 scene) {
     s32 track;
     s32 pass;
     Camera *player;
@@ -1583,14 +1583,14 @@ void func_15020EC4(s32 scene) {
     f32 tilt3C;
     f32 tilt40;
 
-    // matching: indexing through &D_800C35EA[0] rather than the array changes register allocation
-    if ((&D_800C35EA[0])[scene] == 1) {
+    // matching: indexing through &gCutsceneStates[0] rather than the array changes register allocation
+    if ((&gCutsceneStates[0])[scene] == 1) {
         D_800C3638 = 0;
         if (D_800C35F8 == 0xFF) {
-            D_800C35F8 = func_15023264(scene, D_800C35B0[scene]);
+            D_800C35F8 = cutscene_pickCameraTrack(scene, gCutsceneTimes[scene]);
         }
         for (pass = 0; pass != 2; pass++) {
-            for (track = 0; track < D_800C363A[scene]; track++) {
+            for (track = 0; track < gSeqTrackCounts[scene]; track++) {
                 if (D_800C35D0[scene][track] == 0) {
                     continue;
                 }
@@ -1726,7 +1726,7 @@ void func_15020EC4(s32 scene) {
                     Actor *obj2;
 
                     obj2 = collision_findObjectById(ENT(scene, track)->targetId);
-                    func_1502178C(obj2, scene, track);
+                    cutscene_applyObjectTrack(obj2, scene, track);
                 } else if (ENT(scene, track)->type == 4) {
                     s32 arr[3];
 
@@ -1750,7 +1750,7 @@ void func_15020EC4(s32 scene) {
 
 /* Move object `target` to the state of the scene's object track bound to it (all tracks, or only
    `onlyTrack` unless it is -1): position, velocity, floor probe, scale, facing and alpha. */
-void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
+void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
     s32 track;
     f32 floorY;
     Actor *obj;
@@ -1761,31 +1761,31 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
     s32 start;
     s32 rescaled;
 
-    if (D_800C35EA[scene] == 1) {
+    if (gCutsceneStates[scene] == 1) {
         D_800C3638 = 0;
         if (onlyTrack != -1) {
             start = onlyTrack;
             end = onlyTrack + 1;
         } else {
             start = 0;
-            end = D_800C363A[scene];
+            end = gSeqTrackCounts[scene];
         }
         for (track = start; track < end; track++) {
             if (D_800C35C8[scene][track] == 0) {
                 continue;
             }
-            info = &D_800C35F0[scene][track];
+            info = &gSeqTrackInfos[scene][track];
             if (info->type == 2) {
                 obj = collision_findObjectById(info->targetId);
                 if (obj != NULL && obj == target) {
                     oldPos[0] = obj->xpos;
                     oldPos[1] = obj->ypos;
                     oldPos[2] = obj->zpos;
-                    obj->xpos = D_800C3958[scene][track].x;
-                    obj->ypos = D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset;
-                    obj->zpos = D_800C3958[scene][track].z;
+                    obj->xpos = gSeqTrackStates[scene][track].x;
+                    obj->ypos = gSeqTrackStates[scene][track].y + gSeqTrackStates[scene][track].yOffset;
+                    obj->zpos = gSeqTrackStates[scene][track].z;
                     obj->unk1CC = obj->ypos;
-                    if (D_800C3C88 == 0) {
+                    if (gCutsceneSkipState == 0) {
                         obj->speed = (obj->xpos - oldPos[0]) * (obj->xpos - oldPos[0]) + (obj->zpos - oldPos[2]) * (obj->zpos - oldPos[2]);
                         if (obj->speed) {
                             obj->speed = sqrtf(obj->speed) * 2.0f;
@@ -1815,21 +1815,21 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                             obj->unkB2 = 0;
                         }
                     }
-                    if (D_800C3958[scene][track].unk18 != -9999.0f) {
+                    if (gSeqTrackStates[scene][track].unk18 != -9999.0f) {
                         rescaled = 1;
-                        obj->scale_xz = D_800C3958[scene][track].unk18 * 0.009999999776f;
-                        obj->unk154 = D_800C3958[scene][track].unk18 * 0.009999999776f;
+                        obj->scale_xz = gSeqTrackStates[scene][track].unk18 * 0.009999999776f;
+                        obj->unk154 = gSeqTrackStates[scene][track].unk18 * 0.009999999776f;
                     }
-                    if (D_800C3958[scene][track].unk1C != -9999.0f) {
+                    if (gSeqTrackStates[scene][track].unk1C != -9999.0f) {
                         rescaled = 1;
-                        obj->scale_y = D_800C3958[scene][track].unk1C * 0.009999999776f;
-                        obj->unk158 = D_800C3958[scene][track].unk1C * 0.009999999776f;
+                        obj->scale_y = gSeqTrackStates[scene][track].unk1C * 0.009999999776f;
+                        obj->unk158 = gSeqTrackStates[scene][track].unk1C * 0.009999999776f;
                     }
                     if (rescaled) {
                         actor_setScale(obj, obj->scale_xz, obj->scale_y);
                     }
-                    obj->vtilt = D_800C3958[scene][track].unkC;
-                    angle = D_800C3958[scene][track].unk10 + 180.0f;
+                    obj->vtilt = gSeqTrackStates[scene][track].unkC;
+                    angle = gSeqTrackStates[scene][track].unk10 + 180.0f;
                     while (angle >= 360.0f) {
                         angle -= 360.0f;
                     }
@@ -1838,9 +1838,9 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                     }
                     obj->angle = obj->langle = obj->fangle = (s16)((u32)(angle * 182.0444489f) - 0x4000);
                     obj->theta = angle;
-                    obj->lean_angle = D_800C3958[scene][track].unk14;
-                    D_800C3958[scene][track].unk34 = (D_800C3958[scene][track].unk34 < 0.0f) ? 0.0f : (D_800C3958[scene][track].unk34 > 255.0f) ? 255.0f : D_800C3958[scene][track].unk34;
-                    actor_fadeCommand(obj, 1, D_800C3958[scene][track].unk34, 0, 0);
+                    obj->lean_angle = gSeqTrackStates[scene][track].unk14;
+                    gSeqTrackStates[scene][track].unk34 = (gSeqTrackStates[scene][track].unk34 < 0.0f) ? 0.0f : (gSeqTrackStates[scene][track].unk34 > 255.0f) ? 255.0f : gSeqTrackStates[scene][track].unk34;
+                    actor_fadeCommand(obj, 1, gSeqTrackStates[scene][track].unk34, 0, 0);
                     obj->old_xpos = obj->xpos;
                     obj->old_ypos = obj->ypos;
                     obj->old_zpos = obj->zpos;
@@ -1852,45 +1852,45 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
 }
 
 /* If object `objIndex` is bound to a track of `scene`, report where it should look: through the
-   track's active events in D_800C3960 (slot 2: another track's position, slot 1: this track's
+   track's active events in gSeqActiveEvents (slot 2: another track's position, slot 1: this track's
    unk24..unk2C or the player). Returns 1 when the out-angles were written, else 0. */
-s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s32 scene) {
+s32 cutscene_getLookTarget(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s32 scene) {
     s32 track;
     u8 *active;
     Camera *player;
     f32 none;
 
-    if (D_800C35EA[scene] != 1) {
+    if (gCutsceneStates[scene] != 1) {
         return 0;
     }
-    for (track = 0; track < D_800C363A[scene]; track++) {
+    for (track = 0; track < gSeqTrackCounts[scene]; track++) {
         if (D_800C35C8[scene][track] == 0) {
             continue;
         }
-        if (D_800C35F0[scene][track].type != 2 ||
-            movement_obj[objIndex].unique_id != D_800C35F0[scene][track].targetId) {
+        if (gSeqTrackInfos[scene][track].type != 2 ||
+            movement_obj[objIndex].unique_id != gSeqTrackInfos[scene][track].targetId) {
             continue;
         }
-        active = D_800C3960[scene][track];
+        active = gSeqActiveEvents[scene][track];
         if (active[2] != 0xFF) {
             SeqEvent *event;
             s32 other;
 
-            event = &D_800C3688[scene][track][active[2]];
+            event = &gSeqEventTracks[scene][track][active[2]];
             other = event->unk5;
-            target[0] = D_800C3958[scene][other].x;
-            target[1] = D_800C3958[scene][other].y + event->unk6;
-            target[2] = D_800C3958[scene][other].z;
+            target[0] = gSeqTrackStates[scene][other].x;
+            target[1] = gSeqTrackStates[scene][other].y + event->unk6;
+            target[2] = gSeqTrackStates[scene][other].z;
             return 0;
         }
         if (active[1] != 0xFF) {
             SeqEvent *event;
 
-            event = &D_800C3688[scene][track][active[1]];
+            event = &gSeqEventTracks[scene][track][active[1]];
             if (event->unk5 == 0) {
-                *outX = D_800C3958[scene][track].unk28;
-                *outY = D_800C3958[scene][track].unk24;
-                *outZ = D_800C3958[scene][track].unk2C;
+                *outX = gSeqTrackStates[scene][track].unk28;
+                *outY = gSeqTrackStates[scene][track].unk24;
+                *outZ = gSeqTrackStates[scene][track].unk2C;
                 return 1;
             }
             player = camera_global_Cameras;
@@ -1913,22 +1913,22 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
 s32 func_15022024(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
     s32 track;
 
-    if (D_800C35EA[scene] != 1) {
+    if (gCutsceneStates[scene] != 1) {
         return 0;
     }
-    for (track = 0; track < D_800C363A[scene]; track++) {
+    for (track = 0; track < gSeqTrackCounts[scene]; track++) {
         if (D_800C35C8[scene][track] != 0) {
-            if (D_800C35F0[scene][track].type == 2 && movement_obj[objIndex].unique_id == D_800C35F0[scene][track].targetId) {
+            if (gSeqTrackInfos[scene][track].type == 2 && movement_obj[objIndex].unique_id == gSeqTrackInfos[scene][track].targetId) {
                 outA[1] = 0.0f;
                 outB[1] = 0.0f;
                 outA[0] = 0.0f;
                 outB[0] = 0.0f;
-                if (D_800C3958[scene][track].unk3C != -9999.0f) {
-                    outB[0] = D_800C3958[scene][track].unk3C;
+                if (gSeqTrackStates[scene][track].unk3C != -9999.0f) {
+                    outB[0] = gSeqTrackStates[scene][track].unk3C;
                     outB[1] = outB[0];
                 }
-                if (D_800C3958[scene][track].unk40 != -9999.0f) {
-                    outA[0] = D_800C3958[scene][track].unk40;
+                if (gSeqTrackStates[scene][track].unk40 != -9999.0f) {
+                    outA[0] = gSeqTrackStates[scene][track].unk40;
                     outA[1] = outA[0];
                 }
                 return 1;
@@ -1957,45 +1957,45 @@ void func_150221E8(s16 x, s16 y, s16 z, f32 value) {
 }
 
 void func_15022234(s32 scene) {
-    D_800C3510[scene] = 0;
+    gCutsceneSpawnedActorCounts[scene] = 0;
 }
 
 void func_15022248(s32 scene) {
-    D_800C354A[scene] = 0;
+    gCutsceneActivatedActorCounts[scene] = 0;
 }
 
-/* Add `id` to the scene's D_800C3518 list unless it is already there. */
-void func_1502225C(s32 id, s32 scene) {
+/* Add `id` to the scene's gCutsceneSpawnedActors list unless it is already there. */
+void cutscene_addSpawnedActor(s32 id, s32 scene) {
     s32 i;
     s32 count;
     s32 limit;
     u8 *countPtr;
 
     i = 0;
-    countPtr = &D_800C3510[scene];
+    countPtr = &gCutsceneSpawnedActorCounts[scene];
     count = *countPtr;
     limit = count;
     // matching: a do-while over a copy of the count (the for loop form schedules differently)
     if (count > 0) {
         do {
-            if (id == D_800C3518[scene][i]) {
+            if (id == gCutsceneSpawnedActors[scene][i]) {
                 return;
             }
             i++;
         } while (i < limit);
     }
 
-    D_800C3518[scene][count] = id;
+    gCutsceneSpawnedActors[scene][count] = id;
     *countPtr = count + 1;
 }
 
 /* Reset the animation state of the object bound to the scene's track `track`. */
-void func_150222E0(s32 track, s32 scene) {
+void cutscene_resetTrackFace(s32 track, s32 scene) {
     Actor *obj;
     SeqTrackInfo *info;
 
     if (D_800C35C8[scene][track] != 0) {
-        info = &D_800C35F0[scene][track];
+        info = &gSeqTrackInfos[scene][track];
         if (info->type == 2) {
             obj = collision_findObjectById(info->targetId);
             if (obj != NULL) {
@@ -2008,7 +2008,7 @@ void func_150222E0(s32 track, s32 scene) {
                 obj->headYaw[1] = 0;
                 obj->headPitch[0] = 0;
                 obj->headPitch[1] = 0;
-                func_1507E7E4(obj, 0, 3, 0xFFFF, 0xA);
+                face_requestExpression(obj, 0, 3, 0xFFFF, 0xA);
                 obj->expressionPriority = 0;
             }
         }
@@ -2016,21 +2016,21 @@ void func_150222E0(s32 track, s32 scene) {
 }
 
 /* Make sure the object bound to the scene's track `track` exists: spawn it from its gSpawnRecords
-   slot if needed and add it to the scene's D_800C3518 list. */
-void func_15022398(s32 track, s32 scene) {
+   slot if needed and add it to the scene's gCutsceneSpawnedActors list. */
+void cutscene_spawnTrackActor(s32 track, s32 scene) {
     Actor *obj;
     s32 slot;
     s32 id;
 
     if (D_800C35C8[scene][track] != 0) {
-        if (D_800C35F0[scene][track].type == 2) {
-            id = D_800C35F0[scene][track].targetId;
+        if (gSeqTrackInfos[scene][track].type == 2) {
+            id = gSeqTrackInfos[scene][track].targetId;
             slot = collision_findSpawnById(id);
             if (slot != -1) {
                 obj = actor_findOnPath(slot);
                 if (obj != NULL) {
                     if (obj->drawtype == 3) {
-                        if (D_800C35F0 != &D_800C35F0[scene]) {
+                        if (gSeqTrackInfos != &gSeqTrackInfos[scene]) {
                             obj->drawtype = 4;
                         } else {
                             obj->drawtype = 0;
@@ -2045,7 +2045,7 @@ void func_15022398(s32 track, s32 scene) {
                         obj = actor_findOnPath(slot);
                         if (obj != NULL) {
                             actor_playAnim(obj, 0, 0.0f, 0.0f, 0.0f, 0.0f, 1);
-                            func_1502225C(obj - movement_obj, scene);
+                            cutscene_addSpawnedActor(obj - movement_obj, scene);
                         }
                     }
                 }
@@ -2054,65 +2054,65 @@ void func_15022398(s32 track, s32 scene) {
     }
 }
 
-/* Apply every object track of the scene to its object (func_1502178C). */
-void func_15022528(s32 scene) {
+/* Apply every object track of the scene to its object (cutscene_applyObjectTrack). */
+void cutscene_applyObjectTracks(s32 scene) {
     s32 track;
     Actor *obj;
 
-    for (track = 0; track < D_800C363A[scene]; track++) {
+    for (track = 0; track < gSeqTrackCounts[scene]; track++) {
         if (D_800C35D0[scene][track] == 0) {
             continue;
         }
         if (D_800C35C8[scene][track] == 0) {
             continue;
         }
-        if (D_800C35F0[scene][track].type == 2) {
-            obj = collision_findObjectById(D_800C35F0[scene][track].targetId);
+        if (gSeqTrackInfos[scene][track].type == 2) {
+            obj = collision_findObjectById(gSeqTrackInfos[scene][track].targetId);
             if (obj != NULL) {
-                func_1502178C(obj, scene, track);
+                cutscene_applyObjectTrack(obj, scene, track);
             }
         }
     }
 }
 
-/* Add `id` to the scene's D_800C3550 list unless it is already there. */
-void func_15022640(s32 id, s32 scene) {
+/* Add `id` to the scene's gCutsceneActivatedActors list unless it is already there. */
+void cutscene_addActivatedActor(s32 id, s32 scene) {
     s32 i;
     s32 count;
     s32 limit;
     u8 *countPtr;
 
     i = 0;
-    countPtr = &D_800C354A[scene];
+    countPtr = &gCutsceneActivatedActorCounts[scene];
     count = *countPtr;
     limit = count;
-    // matching: a do-while over a copy of the count, as in func_1502225C
+    // matching: a do-while over a copy of the count, as in cutscene_addSpawnedActor
     if (count > 0) {
         do {
-            if (id == D_800C3550[scene][i]) {
+            if (id == gCutsceneActivatedActors[scene][i]) {
                 return;
             }
             i++;
         } while (i < limit);
     }
 
-    D_800C3550[scene][count] = id;
+    gCutsceneActivatedActors[scene][count] = id;
     *countPtr = count + 1;
 }
 
 /* If the actor bound to the scene's track `track` is inactive, record its id
-   (func_15022640) and clear the flag. */
-void func_150226BC(s32 track, s32 scene) {
+   (cutscene_addActivatedActor) and clear the flag. */
+void cutscene_activateTrackActor(s32 track, s32 scene) {
     WorldObject *actor;
     SeqTrackInfo *info;
 
     if (D_800C35C8[scene][track] != 0) {
-        info = &D_800C35F0[scene][track];
+        info = &gSeqTrackInfos[scene][track];
         if (info->type == 3) {
             actor = gfx_findObjectById(info->targetId);
             if (actor != NULL) {
                 if (actor->inactive == 1) {
-                    func_15022640(actor->unique_id, scene);
+                    cutscene_addActivatedActor(actor->unique_id, scene);
                     actor->inactive = 0;
                 }
             }
@@ -2120,49 +2120,49 @@ void func_150226BC(s32 track, s32 scene) {
     }
 }
 
-void func_15022754(s32 scene) {
+void cutscene_activateTrackActors(s32 scene) {
     s32 track;
 
-    for (track = 0; track < D_800C363A[scene]; track++) {
-        func_150226BC(track, scene);
+    for (track = 0; track < gSeqTrackCounts[scene]; track++) {
+        cutscene_activateTrackActor(track, scene);
     }
 }
 
-/* Set inactive again on every actor recorded in the scene's D_800C3550 list. */
-void func_150227BC(s32 scene) {
+/* Set inactive again on every actor recorded in the scene's gCutsceneActivatedActors list. */
+void cutscene_restoreInactive(s32 scene) {
     s32 i;
     u8 *count;
 
-    count = &D_800C354A[scene];
+    count = &gCutsceneActivatedActorCounts[scene];
     for (i = 0; i < *count; i++) {
-        gfx_findObjectById(D_800C3550[scene][i])->inactive = 1;
+        gfx_findObjectById(gCutsceneActivatedActors[scene][i])->inactive = 1;
     }
 }
 
 void func_15022848(s32 scene) {
     s32 track;
 
-    if (D_800C35EA[scene] == 1) {
+    if (gCutsceneStates[scene] == 1) {
         D_800C3638 = 0;
-        for (track = 0; track < D_800C363A[scene]; track++) {
-            func_15022398(track, scene);
-            func_150222E0(track, scene);
+        for (track = 0; track < gSeqTrackCounts[scene]; track++) {
+            cutscene_spawnTrackActor(track, scene);
+            cutscene_resetTrackFace(track, scene);
         }
         D_800C3638 = 1;
     }
 }
 
-/* Call actor_remove on every live object in the scene's D_800C3518 list. */
-void func_150228E4(s32 scene) {
+/* Call actor_remove on every live object in the scene's gCutsceneSpawnedActors list. */
+void cutscene_removeSpawnedActors(s32 scene) {
     s32 i;
     s32 count;
     Actor *obj;
     u8 *countPtr;
 
-    countPtr = &D_800C3510[scene];
+    countPtr = &gCutsceneSpawnedActorCounts[scene];
     count = *countPtr;
     for (i = 0; i < count; i++) {
-        obj = &movement_obj[D_800C3518[scene][i]];
+        obj = &movement_obj[gCutsceneSpawnedActors[scene][i]];
         if (obj->type != 0) {
             actor_remove(obj, 0);
             count = *countPtr;
@@ -2181,7 +2181,7 @@ void func_15022998(Actor *obj) {
 
 /* Whether `obj` is bound to an object track of its scene (scene 1 when obj->unk5 is 4): 1 when
    bound itself, 2 when bound through its parent (obj->unk65). */
-s32 func_150229E4(Actor *obj) {
+s32 cutscene_isActorBound(Actor *obj) {
     s32 i;
     s32 scene;
     s32 parent;
@@ -2206,9 +2206,9 @@ s32 func_150229E4(Actor *obj) {
     } else {
         id = obj->unique_id;
     }
-    for (i = 0; i < D_800C363A[scene]; i++) {
+    for (i = 0; i < gSeqTrackCounts[scene]; i++) {
         if (D_800C35C8[scene][i] != 0) {
-            if (D_800C35F0[scene][i].type == 2 && id == D_800C35F0[scene][i].targetId) {
+            if (gSeqTrackInfos[scene][i].type == 2 && id == gSeqTrackInfos[scene][i].targetId) {
                 if (parent == 0) {
                     return 1;
                 }
@@ -2221,12 +2221,12 @@ s32 func_150229E4(Actor *obj) {
 }
 
 /* Whether actor `actorIndex` (db_Object_array[actorIndex].unk72) is bound to a track of the scene. */
-s32 func_15022B08(s32 actorIndex, s32 scene) {
+s32 cutscene_isActorIndexBound(s32 actorIndex, s32 scene) {
     s32 i;
 
-    for (i = 0; i < D_800C363A[scene]; i++) {
+    for (i = 0; i < gSeqTrackCounts[scene]; i++) {
         if (D_800C35C8[scene][i] != 0) {
-            if (D_800C35F0[scene][i].targetId == db_Object_array[actorIndex].unique_id) {
+            if (gSeqTrackInfos[scene][i].targetId == db_Object_array[actorIndex].unique_id) {
                 return 1;
             }
         }
@@ -2238,7 +2238,7 @@ s32 func_15022B08(s32 actorIndex, s32 scene) {
 /* Re-anchor the scene's paths. A type 6 track shifts every path key so that its own path starts at
    its object (unk2 0) or actor (unk2 1). A type 7 track instead rotates the paths about its first
    key to the anchor D_800C358C/D_800C3594 and adjusts the heading channel (7) to match. */
-void func_15022BA4(s32 scene) {
+void cutscene_anchorPaths(s32 scene) {
     s32 track;
     s32 j;
     s32 k;
@@ -2251,28 +2251,28 @@ void func_15022BA4(s32 scene) {
     f32 dz;
     SeqPathKey *key;
 
-    for (track = 0; track < D_800C363A[scene]; track++) {
+    for (track = 0; track < gSeqTrackCounts[scene]; track++) {
         if (D_800C35C8[scene][track] == 0) {
             continue;
         }
-        if (D_800C35F0[scene][track].type == 6) {
+        if (gSeqTrackInfos[scene][track].type == 6) {
             if (D_800C3663 == 0) {
-                key = D_800C3868[scene][track];
+                key = gSeqPathKeys[scene][track];
                 func_15022190(key->x, key->y, key->z, 0.0f);
             }
-            if (D_800C35F0[scene][track].targetId == 0) {
+            if (gSeqTrackInfos[scene][track].targetId == 0) {
                 Actor *obj;
-                obj = collision_findObjectById(D_800C35F0[scene][track].unk3);
+                obj = collision_findObjectById(gSeqTrackInfos[scene][track].unk3);
                 if (obj == NULL) {
                     return;
                 }
                 x = obj->xpos;
                 y = obj->ypos;
                 z = obj->zpos;
-            } else if (D_800C35F0[scene][track].targetId == 1) {
+            } else if (gSeqTrackInfos[scene][track].targetId == 1) {
                 WorldObject *obj;
                 // matching: the s8 id goes through the pointer variable before the call
-                obj = (WorldObject *)(s8)D_800C35F0[scene][track].unk3;
+                obj = (WorldObject *)(s8)gSeqTrackInfos[scene][track].unk3;
                 obj = gfx_findObjectById((s32)obj);
                 if (obj == NULL) {
                     return;
@@ -2283,19 +2283,19 @@ void func_15022BA4(s32 scene) {
             } else {
                 return;
             }
-            key = D_800C3868[scene][track];
+            key = gSeqPathKeys[scene][track];
             dx = x - key->x;
             dy = y - key->y;
             dz = z - key->z;
-            for (j = 0; j < D_800C363A[scene]; j++) {
+            for (j = 0; j < gSeqTrackCounts[scene]; j++) {
                 for (k = 0; k < D_800C35C8[scene][j]; k++) {
-                    D_800C3868[scene][j][k].x = D_800C3868[scene][j][k].x + dx;
-                    D_800C3868[scene][j][k].y = D_800C3868[scene][j][k].y + dy;
-                    D_800C3868[scene][j][k].z = D_800C3868[scene][j][k].z + dz;
+                    gSeqPathKeys[scene][j][k].x = gSeqPathKeys[scene][j][k].x + dx;
+                    gSeqPathKeys[scene][j][k].y = gSeqPathKeys[scene][j][k].y + dy;
+                    gSeqPathKeys[scene][j][k].z = gSeqPathKeys[scene][j][k].z + dz;
                 }
             }
             return;
-        } else if (D_800C35F0[scene][track].type == 7) {
+        } else if (gSeqTrackInfos[scene][track].type == 7) {
             f32 c;
             f32 s;
             f32 turn;
@@ -2308,19 +2308,19 @@ void func_15022BA4(s32 scene) {
 
             heading = 0.0f;
             for (j = 0; j < D_800C35D0[scene][track]; j++) {
-                chKey = &D_800C3778[scene][track][j];
+                chKey = &gSeqChannelKeys[scene][track][j];
                 if (chKey->channel == 7) {
                     heading = chKey->value;
                     break;
                 }
             }
             if (D_800C3663 == 0) {
-                key = D_800C3868[scene][track];
+                key = gSeqPathKeys[scene][track];
                 func_15022190(key->x, key->y, key->z, heading);
             }
             turn = D_800C3594 - heading;
             D_800C35A4 = turn;
-            key = D_800C3868[scene][track];
+            key = gSeqPathKeys[scene][track];
             radians = turn * 0.01745329238f;
             x = key->x;
             y = key->y;
@@ -2328,22 +2328,22 @@ void func_15022BA4(s32 scene) {
             c = cosf(radians);
             s = sinf(radians);
             dy = D_800C358C[1] - y;
-            for (j = 0; j < D_800C363A[scene]; j++) {
+            for (j = 0; j < gSeqTrackCounts[scene]; j++) {
                 for (k = 0, hasHeadingEvent = 0; k < D_800C35C8[scene][j]; k++) {
-                    rx = D_800C3868[scene][j][k].x - x;
-                    rz = D_800C3868[scene][j][k].z - z;
+                    rx = gSeqPathKeys[scene][j][k].x - x;
+                    rz = gSeqPathKeys[scene][j][k].z - z;
                     nx = rx * c + rz * s;
                     rz = -rx * s + rz * c;
-                    D_800C3868[scene][j][k].x = D_800C358C[0] + nx;
-                    D_800C3868[scene][j][k].y = D_800C3868[scene][j][k].y + dy;
-                    D_800C3868[scene][j][k].z = D_800C358C[2] + rz;
+                    gSeqPathKeys[scene][j][k].x = D_800C358C[0] + nx;
+                    gSeqPathKeys[scene][j][k].y = gSeqPathKeys[scene][j][k].y + dy;
+                    gSeqPathKeys[scene][j][k].z = D_800C358C[2] + rz;
                 }
-                if (D_800C35D8[scene][j] != 0 && D_800C3688[scene][j][4].type == 7) {
+                if (gSeqTrackEventCounts[scene][j] != 0 && gSeqEventTracks[scene][j][4].type == 7) {
                     hasHeadingEvent = 1;
                 }
                 if (hasHeadingEvent == 0) {
                     for (k = 0; k < D_800C35D0[scene][j]; k++) {
-                        chKey = &D_800C3778[scene][j][k];
+                        chKey = &gSeqChannelKeys[scene][j][k];
                         if (chKey->channel == 7) {
                             chKey->value = chKey->value + turn;
                         }
@@ -2357,7 +2357,7 @@ void func_15022BA4(s32 scene) {
 
 /* Pick the camera track: the value of the earliest type-3 event in any track, else the first
    type-1 track, else 0. */
-s32 func_15023264(s32 scene, s32 time) {
+s32 cutscene_pickCameraTrack(s32 scene, s32 time) {
     s32 track;
     s32 best;
     s32 result;
@@ -2368,11 +2368,11 @@ s32 func_15023264(s32 scene, s32 time) {
     result = -1;
     best = 99999;
 
-    for (track = 0; track < D_800C363A[scene]; track++) {
-        ptr = D_800C3688[scene][track];
+    for (track = 0; track < gSeqTrackCounts[scene]; track++) {
+        ptr = gSeqEventTracks[scene][track];
         if (ptr != NULL) {
             found = NULL;
-            score = func_15023BB0(&ptr[3], 3, track, &found, 0, 0, 0, 0, 0, 0, scene);
+            score = cutscene_findEvent(&ptr[3], 3, track, &found, 0, 0, 0, 0, 0, 0, scene);
             if (found != NULL) {
                 if (score < best) {
                     best = score;
@@ -2384,8 +2384,8 @@ s32 func_15023264(s32 scene, s32 time) {
 
     if (result == -1) {
         result = 0;
-        for (track = 0; track < D_800C363A[scene]; track++) {
-            if (D_800C35F0[scene][track].type == 1) {
+        for (track = 0; track < gSeqTrackCounts[scene]; track++) {
+            if (gSeqTrackInfos[scene][track].type == 1) {
                 result = track;
                 break;
             }
@@ -2396,19 +2396,19 @@ s32 func_15023264(s32 scene, s32 time) {
 }
 
 /* Free all subtitle slots. */
-void func_150233BC(void) {
-    bzero(D_800C3CA0, sizeof(D_800C3CA0));
+void cutscene_freeSubtitles(void) {
+    bzero(gSubtitles, sizeof(gSubtitles));
 }
 
 /* Close every open subtitle. */
-void func_150233E4(void) {
+void cutscene_closeSubtitles(void) {
     s32 i;
     s32 zero;
     SeqSubtitle *entry;
 
     i = 0;
     do {
-        entry = &D_800C3CA0[i];
+        entry = &gSubtitles[i];
         if (entry->active != 0) {
             text_removeBox(entry->handle);
             entry->handle = 0;
@@ -2417,11 +2417,11 @@ void func_150233E4(void) {
             entry->active = zero;
         }
         i++;
-    } while ((SeqSubtitle *)D_800C3D48 != &D_800C3CA0[i]);
+    } while ((SeqSubtitle *)D_800C3D48 != &gSubtitles[i]);
 }
 
 /* Release subtitle slot `sub`: close it now if `force`, else let an open one finish (text_closeBoxSkipPages). */
-void func_15023440(SeqSubtitle *sub, s32 force) {
+void cutscene_releaseSubtitle(SeqSubtitle *sub, s32 force) {
     SeqSubtitle *entry;
 
     entry = sub;
@@ -2437,7 +2437,7 @@ void func_15023440(SeqSubtitle *sub, s32 force) {
 }
 
 /* Find the subtitle slot of `track`, or claim a free one (stealing slot 0 when all are busy). */
-SeqSubtitle *func_150234A4(s32 track, s32 replaceOpen) {
+SeqSubtitle *cutscene_getSubtitleSlot(s32 track, s32 replaceOpen) {
     s32 i;
     SeqSubtitle *found;
     SeqSubtitle *slot;
@@ -2446,26 +2446,26 @@ SeqSubtitle *func_150234A4(s32 track, s32 replaceOpen) {
     found = NULL;
     slot = NULL;
     for (i = 0; i < 3; i++) {
-        if (D_800C3CA0[i].active == track) {
-            if (replaceOpen != 0 && D_800C3CA0[i].isOpen != 0) {
-                slot = D_800C3CA0;
-                func_15023440(slot, 1);
+        if (gSubtitles[i].active == track) {
+            if (replaceOpen != 0 && gSubtitles[i].isOpen != 0) {
+                slot = gSubtitles;
+                cutscene_releaseSubtitle(slot, 1);
             } else {
-                found = &D_800C3CA0[i];
+                found = &gSubtitles[i];
             }
             break;
         }
-        if (D_800C3CA0[i].active == 0) {
-            slot = &D_800C3CA0[i];
+        if (gSubtitles[i].active == 0) {
+            slot = &gSubtitles[i];
             if (replaceOpen != 0 && slot->isOpen != 0) {
-                func_15023440(slot, 1);
+                cutscene_releaseSubtitle(slot, 1);
             }
             break;
         }
     }
     if (i == 3) {
-        slot = D_800C3CA0;
-        func_15023440(slot, 1);
+        slot = gSubtitles;
+        cutscene_releaseSubtitle(slot, 1);
     }
     if (found != NULL) {
         return found;
@@ -2478,7 +2478,7 @@ SeqSubtitle *func_150234A4(s32 track, s32 replaceOpen) {
 
 /* Give object 1 back to normal control after a cutscene: stop it, drop it to the floor or leave it
    swimming, and clear its movement locks. */
-s32 func_150235DC(s32 scene) {
+s32 cutscene_releasePlayer(s32 scene) {
     Actor *obj;
     ActorCtl *ctl;
     s8 zero;
@@ -2503,7 +2503,7 @@ s32 func_150235DC(s32 scene) {
                 obj->ygrav = 0.0f;
                 if (((obj->unk118 - 50.0f) < obj->aim.y) || ((obj->mv->water_attribs & 1) != 0)) {
                     obj->unkB2 = 0;
-                    func_1508F060();
+                    hud_resetBubbles();
                 }
             } else {
                 obj->inwater = 0;
@@ -2539,7 +2539,7 @@ s32 func_150235DC(s32 scene) {
 
 /* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to actor_updateAll): run
    each live object's handler and apply the track of objects bound to one. */
-void func_1502378C(void) {
+void cutscene_updateActors(void) {
     s32 bound;
     s32 i;
     s32 limit;
@@ -2558,11 +2558,11 @@ void func_1502378C(void) {
         if (obj->type != 0) {
             dc_glbl_CharNum = i;
             func_15022998(obj);
-            func_1507E73C(obj);
-            bound = func_150229E4(obj);
+            face_update(obj);
+            bound = cutscene_isActorBound(obj);
             if (bound != 0) {
                 do { } while (0);
-                func_1502178C(obj, 0, -1);
+                cutscene_applyObjectTrack(obj, 0, -1);
                 func_150627D4(obj);
                 anim_updateIdleTimer(obj);
                 obj->unk2FF = one & 0xFFFFFFFF;

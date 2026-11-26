@@ -141,7 +141,7 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
     desc.alpha = arg5;
     desc.brightness = 0xFF;
     desc.pos = *pos;
-    desc.offset = D_800A5480;
+    desc.offset = gZeroVec3f;
     desc.vel = *vel;
     desc.scaleStart = 1;
     desc.gravity = gravity;
@@ -216,8 +216,8 @@ s32 particle_wobbleSteamSize(SteamParticle *particle, Vec3f *arg1) {
     }
     wobble->phaseX = wobble->phaseX + wobble->stepX * D_800BE9E4;
     wobble->phaseY = wobble->phaseY + wobble->stepY * D_800BE9E4;
-    particle->head.desc.width = wobble->amplitudeX * func_151423D8(wobble->phaseX - 0x40) + wobble->size;
-    particle->head.desc.height = wobble->amplitudeY * func_151423D8(wobble->phaseY - 0x40) + wobble->size;
+    particle->head.desc.width = wobble->amplitudeX * math_cosBinAngleMasked(wobble->phaseX - 0x40) + wobble->size;
+    particle->head.desc.height = wobble->amplitudeY * math_cosBinAngleMasked(wobble->phaseY - 0x40) + wobble->size;
     return 1;
 }
 
@@ -236,7 +236,7 @@ u8 particle_steamFloorHit(SteamParticle *particle, Vec3f *arg1) {
         point.x = particle->head.desc.pos.x;
         point.y = arg1->y;
         point.z = particle->head.desc.pos.z;
-        if (func_1514672C(&point) == 0) {
+        if (math_isInWorldBounds(&point) == 0) {
             return 0;
         }
         if (collision_probeFloorSurfABSet0Cached(&point, 0,
@@ -389,10 +389,10 @@ void particle_spawnKindEmitter(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos
     if (particle_spawnSurfaceQuadSprite(&desc, 0, 0, tri, pos->x, pos->y, pos->z, size, size,
                       func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                       arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
-        arg8 && func_15144E80(tri, &outA, &outB, &normal)) {
+        arg8 && math_getTriEdges(tri, &outA, &outB, &normal)) {
         down = D_800AB3E8;
-        func_15145128(&normal, &normal, NULL, NULL);
-        if (func_15144A74(&normal, &down) < -0.5f) {
+        math_vec3Normalize(&normal, &normal, NULL, NULL);
+        if (math_vec3Dot(&normal, &down) < -0.5f) {
             s32 pad; // matching: stack slot that places drip at the target offset
             DripData drip;
 
@@ -422,7 +422,7 @@ void particle_updateDripEffect(DripEffect *effect) {
     if (drip->timer < 0) {
         rand = func_150ADA68();
         lifeRand = func_150ADA20();
-        particle_spawnSteamParticle(&drip->pos, &D_800A5480, drip->kind, rand * 0.157f + -0.657f, (lifeRand % 41U) + 35,
+        particle_spawnSteamParticle(&drip->pos, &gZeroVec3f, drip->kind, rand * 0.157f + -0.657f, (lifeRand % 41U) + 35,
                       drip->unk14, drip->size, 0, 1.0f, 1.0f, drip->unk15, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);
         drip->timer = (func_150ADA20() % 111U) + 30;
     }
@@ -527,8 +527,8 @@ s32 particle_updateSteamEffect(SteamEffect *effect) {
     steam = &effect->steam;
     steam->phaseX = steam->phaseX + steam->stepX * D_800BE9E4;
     steam->phaseY = steam->phaseY + steam->stepY * D_800BE9E4;
-    effect->head.def.width = func_151423D8(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
-    effect->head.def.height = func_151423D8(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
+    effect->head.def.width = math_cosBinAngleMasked(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
+    effect->head.def.height = math_cosBinAngleMasked(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
 lbl: // matching: ends the basic block so the scaleY store is not moved into the next call's delay slot
     steam->spawnCredit += (0.15f + func_150ADA68() * 0.1f) * gFrameDelta;
     avgScale = (effect->head.def.width + effect->head.def.height) * 0.5f;
@@ -537,9 +537,9 @@ lbl: // matching: ends the basic block so the scaleY store is not moved into the
         do {
             angle = func_150ADA20() & 0xFF;
             dist = func_150ADA68() * radius;
-            c = func_151423D8(angle - 0x40);
+            c = math_cosBinAngleMasked(angle - 0x40);
             // matching: indexing the position as an array orders the add's operands like the target
-            pos[0] = func_151423D8(angle) * dist + ((f32 *)&effect->head.def.pos)[0];
+            pos[0] = math_cosBinAngleMasked(angle) * dist + ((f32 *)&effect->head.def.pos)[0];
             pos[1] = ((f32 *)&effect->head.def.pos)[1] + -3.5f;
             pos[2] = ((f32 *)&effect->head.def.pos)[2] + c * dist;
             {
@@ -763,7 +763,7 @@ s32 particle_updateSquashEffect(SquashEffect *effect) {
 
     squash = &effect->squash;
     squash->phase = squash->phase + squash->step * D_800BE9E4;
-    wave = func_151423D8(squash->phase - 0x40);
+    wave = math_cosBinAngleMasked(squash->phase - 0x40);
     effect->head.def.scale.x = squash->amplitudeX * wave + 1.0f;
     effect->head.def.scale.y = 1.3f - squash->amplitudeY * wave;
     return 1;
@@ -952,7 +952,7 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
         data.stepX = 0;
         data.stepY = 0;
         data.stepZ = 0;
-        data.amplitude = D_800A5480;
+        data.amplitude = gZeroVec3f;
     }
     gEffectKindColorFuncs[(u8)kind](&desc);
     desc.texture = 0x6C;
@@ -967,7 +967,7 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
     desc.alpha = arg8;
     desc.brightness = 0xFF;
     desc.pos = *(Vec3f *)pos;
-    desc.offset = D_800A5480;
+    desc.offset = gZeroVec3f;
     desc.vel = *(Vec3f *)vel;
     desc.gravity = gravity;
     desc.fadeStart = fadeFrames;
@@ -1011,12 +1011,12 @@ s32 particle_updateKindSprite(SteamParticle *particle, s32 arg1) {
         spin->angleY = spin->angleY + (spin->stepY * D_800BE9E4);
         spin->angleZ = spin->angleZ + (spin->stepZ * D_800BE9E4);
 
-        waveX = func_151423D8(spin->angleX - 0x40);
-        waveY = func_151423D8(spin->angleY - 0x40);
+        waveX = math_cosBinAngleMasked(spin->angleX - 0x40);
+        waveY = math_cosBinAngleMasked(spin->angleY - 0x40);
         {
             f32 waveZ;
 
-            waveZ = func_151423D8(spin->angleZ - 0x40);
+            waveZ = math_cosBinAngleMasked(spin->angleZ - 0x40);
             particle->head.desc.offset.x = spin->amplitude.x * waveX;
             particle->head.desc.offset.y = spin->amplitude.y * waveY;
             particle->head.desc.offset.z = spin->amplitude.z * waveZ;
@@ -1186,8 +1186,8 @@ void particle_spawnKindPlainSprite(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, 
     desc.height = size;
     desc.width = size;
     desc.pos = *pos;
-    desc.offset = D_800A5480;
-    desc.vel = D_800A5480;
+    desc.offset = gZeroVec3f;
+    desc.vel = gZeroVec3f;
     desc.fadeStart = 4;
     desc.fadeRate = 63;
     desc.scaleStart = 1;

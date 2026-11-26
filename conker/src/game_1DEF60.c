@@ -47,11 +47,11 @@ void particle_updateOwnerSideTask(Task151B1AB0 *task) {
         if (data->owner->ob_matrix_ptr != NULL) {
             {
                 Vec3f offset = {19.0f, 0.0f, 25.0f};
-                func_15143134(&offset, &emitPointA, &data->owner->ob_matrix_ptr[32]);
+                math_transformOffset(&offset, &emitPointA, &data->owner->ob_matrix_ptr[32]);
             }
             {
                 Vec3f offset = {19.0f, 0.0f, 25.0f};
-                func_15143134(&offset, &emitPointB, &data->owner->ob_matrix_ptr[25]);
+                math_transformOffset(&offset, &emitPointB, &data->owner->ob_matrix_ptr[25]);
             }
             zero = 0.0f;
             spawn.texture = 0x29;
@@ -91,12 +91,12 @@ void particle_updateOwnerSideTask(Task151B1AB0 *task) {
                     origin = (func_150ADA20() & 1) ? &emitPointA : &emitPointB;
                     baseAngle = (data->owner->langle >> 8) + 0x40;
                     angle = (func_150ADA20() % 100U) + baseAngle - 49;
-                    func_15143874(angle, 36.0f, &spawn.pos.x, &spawn.pos.z);
+                    math_dirFromBinAngleXZ(angle, 36.0f, &spawn.pos.x, &spawn.pos.z);
                     spawn.pos.y = zero; // matching: dead store steers the scheduler
                     spawn.pos.x += origin->x;
                     spawn.pos.y = origin->y;
                     spawn.pos.z += origin->z;
-                    func_15143874(angle, ((func_150ADA68() * 1497.0f) + 995.0f) * 0.009999999776f,
+                    math_dirFromBinAngleXZ(angle, ((func_150ADA68() * 1497.0f) + 995.0f) * 0.009999999776f,
                                   &spawn.vel.x, &spawn.vel.z);
                     spawn.vel.y = zero;
                 }

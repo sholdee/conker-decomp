@@ -737,7 +737,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
     if (fogOverride == 0) {
         gDPSetFogColor(gdl++, fogR, fogG, fogB, fogA);
     } else {
-        gDPSetFogColor(gdl++, D_800DD2E4[0], D_800DD2E4[1], D_800DD2E4[2], fogA);
+        gDPSetFogColor(gdl++, gFogColour[0], gFogColour[1], gFogColour[2], fogA);
     }
     gDPSetFogColor(gdl++, fogR, fogG, fogB, fogA);
     gDPSetPrimColor(gdl++, 0xF2, 0, primR, primG, primB, 0);
@@ -2304,7 +2304,7 @@ s32 attach_hookPlayOnce(ModelAttachment *att, Actor *owner) {
 s32 func_15033328(ModelAttachment *att, Actor *owner) {
     s32 delta;
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return 0;
     }
     if (owner->inwater == 0) {
@@ -2326,7 +2326,7 @@ s32 func_15033328(ModelAttachment *att, Actor *owner) {
 s32 func_150333A8(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return 0;
     }
     if (owner->inwater != 0) {
@@ -2454,7 +2454,7 @@ ModelAttachment *attach_attachInPlace(Actor *obj, Actor *target, s32 setId, s32 
         }
 
         guMtxL2F(boneMtx, (Mtx *)target->ob_matrix_ptr + bone);
-        func_15048B10(boneMtx, invBoneMtx);
+        math_mtxRigidInverse(boneMtx, invBoneMtx);
 
         scale = obj->scale_xz;
         func_150A9B0C(objMtx, obj->vtilt, obj->theta, obj->lean_angle, scale, obj->scale_y, scale);
@@ -2562,7 +2562,7 @@ s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
  * unless gFrameRateDivider is set. */
 s32 func_150339C8(ModelAttachment *att, Actor *owner) {
     attach_scrollTile(att, owner);
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         if (gFrameRateDivider != 0) {
             if (att->unk3C != 0) {
                 sound_stopByCallback(attach_soundCallback, att, (s32)owner);
@@ -2729,7 +2729,7 @@ void attach_swapOwners(s32 a, s32 b) {
 s32 func_15033F0C(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return 0;
     }
     unk = owner->mv;
@@ -2748,7 +2748,7 @@ s32 func_15033F0C(ModelAttachment *att, Actor *owner) {
 s32 func_15033F70(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return 0;
     }
     unk = owner->mv;

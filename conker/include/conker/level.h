@@ -68,7 +68,7 @@ typedef struct {
 /* game_30E90.c */
 typedef void (*ObjectFunc)();
 
-/* Defaults for objects of the second (grouped) list, indexed by model id (D_800A26C0). */
+/* Defaults for objects of the second (grouped) list, indexed by model id (gGroupedObjectDefaults). */
 typedef struct {
     /* 0x0 */ u8 unk4C;
     /* 0x1 */ u8 shadowSize;
@@ -91,7 +91,7 @@ typedef struct {
     /* 0x0C */ Gfx *displayList; // NULL: load model `modelId`; 1 or 2: use level model `modelId`
     /* 0x10 */ s32 modelId;
     /* 0x14 */ union {
-        u32 index;         // into D_80088C90 when below 0xFFFF
+        u32 index;         // into gObjectBehaviors when below 0xFFFF
         ObjectFunc func;   // otherwise the update function itself
     } behavior;
     /* 0x18 */ void *data;
@@ -117,48 +117,48 @@ typedef struct {
 
 /* game_2DDF0.c */
 /* (s32 arg0); declared without a prototype: game/Audio/LevelMusic/levelmusic.c calls it without the (unused) argument */
-void func_15000940();
+void level_initTintWaves();
 
 /* game_305D0.c */
-extern s32 *D_80082B20[]; // per level (LevelHeader.assetList): zero-terminated asset id list. The segment
+extern s32 *gLevelAssetLists[]; // per level (LevelHeader.assetList): zero-terminated asset id list. The segment
                           // starts here; init_1050 first DMAs its 16-byte header in (word 0: compressed data offset).
-extern const u16 D_80091D20[7762]; // per texture: compressed size
-extern Gfx *D_800B0E00[4]; // level display lists
-extern Vtx *D_800B0E10[4]; // level mesh vertices of the four level models (each display list follows its vertices)
-extern VtxColorGroup **D_800B0E30; // groups of each vertex color set
-extern u8 *D_800B0E34; // group count of each vertex color set
-extern u8 D_800B0E38;
-extern s32 D_800B0E40[4];
-extern LevelModelEntry *D_800B0E50; // the current level's models
-extern s32 D_800B0E58[7762]; // per texture: its address once loaded, or -1
-extern u16 D_800B87A0[7762]; // per texture: size
-extern s8 D_800BC448[7762]; // per texture: frames left before it is freed (0 = not loaded)
-void func_15003120(s32 index, s32 base, s32 list);
-void func_150031EC(s32 levelId);
-s32 func_150034B4(void);
-void func_15003570(void);
-void func_15003668(s32 unused);
-void func_150038A0(void);
-s32 func_1500390C(s32 addr);
+extern const u16 gTextureRomSizes[7762]; // per texture: compressed size
+extern Gfx *gLevelDisplayLists[4]; // level display lists
+extern Vtx *gLevelVertices[4]; // level mesh vertices of the four level models (each display list follows its vertices)
+extern VtxColorGroup **gVtxColorGroups; // groups of each vertex color set
+extern u8 *gVtxColorGroupCounts; // group count of each vertex color set
+extern u8 gVtxColorSetCount;
+extern s32 gLevelVertexCounts[4];
+extern LevelModelEntry *gLevelModels; // the current level's models
+extern s32 gTextureAddrs[7762]; // per texture: its address once loaded, or -1
+extern u16 gTextureSizes[7762]; // per texture: size
+extern s8 gTextureLifetimes[7762]; // per texture: frames left before it is freed (0 = not loaded)
+void level_rebaseVtxColorSet(s32 index, s32 base, s32 list);
+void level_loadModels(s32 levelId);
+s32 level_resetTextureTable(void);
+void level_readTextureSizes(void);
+void level_buildCollisionTris(s32 unused);
+void level_buildCollisionQuadTrees(void);
+s32 level_findTextureByAddr(s32 addr);
 void func_150039B0(s32 arg0);
-void func_150039BC(s32 addr);
+void level_setMeshTriMaterials(s32 addr);
 
 /* game_30E90.c */
-void func_150039E0(s32 levelId, s32 arg1);
+void level_spawnObjects(s32 levelId, s32 arg1);
 void func_15004574(void);
 void func_150045BC(void);
-void func_150045C4(s32 arg0);
-void func_150049A4(DlCommand *dl, s32 offset, s32 matrixOffset);
-void func_15004A4C(void);
-void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn);
-s32 func_15004BF0(s32 fromTop);
-void func_15004CE0(DlCommand *dl, u32 base);
+void level_prepareObjects(s32 arg0);
+void level_relocateDl(DlCommand *dl, s32 offset, s32 matrixOffset);
+void level_clearObjectBlocks(void);
+void level_setObjectCullRadius(WorldObject *obj, ObjectSpawn *spawn);
+s32 level_findFreeObjectId(s32 fromTop);
+void level_rebaseDlMatrices(DlCommand *dl, u32 base);
 
 /* game_360A0.c */
-s32 func_15008BF0(TriggerZone *zone);
+s32 level_spawnZoneSpray(TriggerZone *zone);
 
 /* game_3BA70.c */
-void func_1500E5C0(void);
+void level_resetSetupState(void);
 void func_1500E70C(s32 id);
 void func_1500E738(void);
 void func_1500E890(void);
@@ -300,20 +300,20 @@ void func_15012770(void);
 void func_15012780(void);
 
 /* game_40490.c */
-void func_15012FE0(void);
-void func_15013000(void);
-s32 func_150130B4(TriggerZone *obj);
+void level_resetScreenCopy(void);
+void level_spawnZones(void);
+s32 level_spawnPointGlowZone(TriggerZone *obj);
 s32 func_1501370C(TriggerZone *obj);
 s32 func_1501374C(TriggerZone *obj);
-s32 func_15013778(TriggerZone *obj);
+s32 level_spawnZoneBeam(TriggerZone *obj);
 s32 func_1501396C(TriggerZone *obj);
-s32 func_150139AC(TriggerZone *obj, s32 index);
+s32 level_spawnZoneAreaEffect(TriggerZone *obj, s32 index);
 s32 func_15013C38(TriggerZone *obj);
 s32 func_15013D38(TriggerZone *obj);
 s32 func_15013DE8(TriggerZone *obj);
 s32 func_15013F9C(TriggerZone *obj);
 s32 func_15013FC4(TriggerZone *obj);
-s32 func_15014004(TriggerZone *obj);
+s32 level_registerFlamethrowerZone(TriggerZone *obj);
 s32 func_15014040(TriggerZone *obj);
 s32 func_1501407C(TriggerZone *obj);
 s32 func_15014094(TriggerZone *obj);
@@ -323,7 +323,7 @@ s32 func_150142AC(TriggerZone *obj);
 s32 func_150142EC(TriggerZone *obj);
 s32 func_150144B8(TriggerZone *obj);
 s32 func_1501474C(TriggerZone *obj);
-s32 func_15014B60(TriggerZone *obj);
+s32 level_spawnDiscoBallZone(TriggerZone *obj);
 s32 func_15014F6C(TriggerZone *obj);
 s32 func_150150A4(void);
 s32 func_15015104(TriggerZone *obj);
@@ -332,20 +332,20 @@ s32 func_15015300(TriggerZone *obj);
 void func_15015354(TriggerZone *obj);
 s32 func_15015644(TriggerZone *obj);
 s32 func_150156F4(TriggerZone *obj);
-extern const s32 D_8009658C[5]; // defined after func_150130B4, which reads them: their .rodata follows its const local
+extern const s32 D_8009658C[5]; // defined after level_spawnPointGlowZone, which reads them: their .rodata follows its const local
 extern const s32 D_800965A0[5];
 extern const s32 D_800965B4[8];
-extern u16 *D_800BE570; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game/Screen/FrameImage/frameimage)
-extern u8 D_800BE574;
+extern u16 *gScreenCopy; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game/Screen/FrameImage/frameimage)
+extern u8 gScreenCopyAlpha;
 extern u8 D_800BE575;
 
 /* game_43D00.c */
-void func_15016850(void);
-void func_150169A0(s32 levelId);
-void func_15017114(s32 levelId);
-extern u8 D_800BE590;      // number of distinct spawn model types in D_800BE598
-extern u16 D_800BE598[8];  // the distinct spawn model types (< 0xBB) of the level
-extern s32 *D_800BE5A8[8]; // per spawn model type: data loaded by rom_loadPathTo
+void level_collectSpawnModelTypes(void);
+void level_loadSpawnTable(s32 levelId);
+void level_allocSpawnPaths(s32 levelId);
+extern u8 gSpawnModelTypeCount;      // number of distinct spawn model types in gSpawnModelTypes
+extern u16 gSpawnModelTypes[8];  // the distinct spawn model types (< 0xBB) of the level
+extern s32 *gSpawnModelData[8]; // per spawn model type: data loaded by rom_loadPathTo
 
 /* game_FDD70.c */
 void func_150D08C0(Camera *camera);
@@ -355,11 +355,11 @@ s32 func_150D11B4(BloodStrip *strip);
 void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
 
 /* game_22D750.c (data only, linked after game_137ED0) */
-extern ObjectBehavior D_80088C90[89];               // level-object behaviour handlers
-extern const GroupedObjectDefaults D_800A26C0[114];
+extern ObjectBehavior gObjectBehaviors[89];               // level-object behaviour handlers
+extern const GroupedObjectDefaults gGroupedObjectDefaults[114];
 
 /* game_15D6E0.c */
-void func_15130230(void *arg0, s32 arg1);
+void level_runHook(void *arg0, s32 arg1);
 
 /* game_1A6300.c */
 s32 func_15178E50(s32 arg0);

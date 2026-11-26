@@ -221,7 +221,7 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
         eye->y = eye->y + (lightPos.y - eye->y) * 0.3f;
         eye->z = eye->z + (lightPos.z - eye->z) * 0.3f;
     }
-    func_15048F90(&objPos, eye, &delta);
+    math_vec3Diff(&objPos, eye, &delta);
     gShadowLightDist = func_150AD930(&delta.x);
     if (gShadowLightDist < 200.0f) {
         f32 ratio;
@@ -311,8 +311,8 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
         D_800D368C = maxZ;
         do {
             f32 m = 1.0f;
-            guPerspectiveF(proj, &gShadowPerspNorms[slot], func_150484A0(1.0f, D_800D3684) * 57.29577637f,
-                           func_150484A0(1.0f, D_800D3680) * 57.29577637f, -D_800D368C, -D_800D3688, perspScale);
+            guPerspectiveF(proj, &gShadowPerspNorms[slot], math_atan2(1.0f, D_800D3684) * 57.29577637f,
+                           math_atan2(1.0f, D_800D3680) * 57.29577637f, -D_800D368C, -D_800D3688, perspScale);
             func_150A7A48(gShadowLightViewMtxs[slot], proj, proj);
             for (i = 0; i < 16; i++) {
                 v = ((f32 *)proj)[i];

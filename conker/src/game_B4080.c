@@ -33,7 +33,7 @@ f32 mp_nodeDistance(s32 a, s32 b) {
     if (a == 0xFF || b == 0xFF) {
         return 0.0f;
     }
-    nodes = D_800D2350;
+    nodes = gPathNodes;
     dx = nodes[a].x - nodes[b].x;
     dy = nodes[a].y - nodes[b].y;
     dz = nodes[a].z - nodes[b].z;
@@ -45,19 +45,19 @@ void func_15086C68(void) {
 
 /* Calls zone_findAt(3, 11, ...) at path node `index`. */
 TriggerZone *mp_findNodeZone(s32 index) {
-    s16 z = D_800D2350[index].z;
+    s16 z = gPathNodes[index].z;
 
-    return zone_findAt(3, 11, D_800D2350[index].x, D_800D2350[index].y, z);
+    return zone_findAt(3, 11, gPathNodes[index].x, gPathNodes[index].y, z);
 }
 
 /* Writes the position of path node `index` to *x, *y, *z; returns 0 if out of range. */
 s32 mp_getNodePos(s32 index, f32 *x, f32 *y, f32 *z) {
-    if (index < 0 || index >= D_80087290) {
+    if (index < 0 || index >= gPathNodeCount) {
         return 0;
     }
-    *x = D_800D2350[index].x;
-    *y = D_800D2350[index].y;
-    *z = D_800D2350[index].z;
+    *x = gPathNodes[index].x;
+    *y = gPathNodes[index].y;
+    *z = gPathNodes[index].z;
     return 1;
 }
 
@@ -67,8 +67,8 @@ s32 mp_findNodeById(id)
 {
     s32 i;
 
-    for (i = 0; i < D_80087290; i++) {
-        if (id == D_800D2350[i].unk7) {
+    for (i = 0; i < gPathNodeCount; i++) {
+        if (id == gPathNodes[i].unk7) {
             return i;
         }
     }
@@ -95,15 +95,15 @@ f32 mp_castWallRay(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
     f32 best;
     u8 link;
 
-    id = func_15085DA8(y);
+    id = path_getLayerAt(y);
     best = 100.0f;
-    for (i = 0; i < D_80087290; i++) {
-        n1 = &D_800D2350[i];
+    for (i = 0; i < gPathNodeCount; i++) {
+        n1 = &gPathNodes[i];
         if (n1->type == 1 && n1->layer == id) {
             for (j = 0; j < 5; j++) {
                 link = n1->links[j];
                 if (link != 0xFF && i < link) {
-                    n2 = &D_800D2350[link];
+                    n2 = &gPathNodes[link];
                     if (n2->type == 1) {
                         a = n2->z - n1->z;
                         b = -(f32)(n2->x - n1->x);
@@ -163,13 +163,13 @@ void mp_initRacers(s32 startId, s32 numRacers, s32 numSpare) {
     if (start == 0xFF) {
         return;
     }
-    startNode = &D_800D2350[start];
+    startNode = &gPathNodes[start];
     best = gRaceDirection * 0xFF;
     sel = 0xFF;
     for (i = 0; i < 5; i++) {
         idx = startNode->links[i];
         if (idx != 0xFF) {
-            node = &D_800D2350[idx];
+            node = &gPathNodes[idx];
             if (node->type == 0) {
                 if ((gRaceDirection == 0 && node->param >= best) || (gRaceDirection != 0 && node->param <= best)) {
                     best = node->param;
@@ -286,8 +286,8 @@ void mp_updateRacer(s32 index, s32 started, f32 lookahead) {
                 dz = zs[2] - zs[1];
                 len = sqrtf(dx * dx + dz * dz);
             }
-            f = func_150498A4(xs, 0, racer->segmentT, &dx);
-            g = func_150498A4(zs, 0, racer->segmentT, &dz);
+            f = math_catmullRomDeriv(xs, 0, racer->segmentT, &dx);
+            g = math_catmullRomDeriv(zs, 0, racer->segmentT, &dz);
             inv = -1.0f / sqrtf(dx * dx + dz * dz);
             dx *= inv;
             dz *= inv;
@@ -329,9 +329,9 @@ void mp_updateRacer(s32 index, s32 started, f32 lookahead) {
             bcopy(racer, &copy, sizeof(Racer));
             mp_advanceRacer(&copy, lookahead + lookahead);
             mp_getSplinePoints(&copy, xs, ys, zs);
-            gRaceTargetX = func_150497E0(xs, 0, copy.segmentT);
-            gRaceTargetY = func_150497E0(ys, 0, copy.segmentT);
-            gRaceTargetZ = func_150497E0(zs, 0, copy.segmentT);
+            gRaceTargetX = math_catmullRom(xs, 0, copy.segmentT);
+            gRaceTargetY = math_catmullRom(ys, 0, copy.segmentT);
+            gRaceTargetZ = math_catmullRom(zs, 0, copy.segmentT);
             if (index < gNumRacers) {
                 if (started == 0) {
                     f = movement_obj[0].theta * 0.01745;
@@ -356,12 +356,12 @@ void mp_updateRacer(s32 index, s32 started, f32 lookahead) {
         } else {
             racer->lateral = 0.0f;
             mp_getSplinePoints(racer, xs, ys, zs);
-            f = func_150497E0(xs, 0, racer->segmentT);
-            g = func_150497E0(zs, 0, racer->segmentT);
+            f = math_catmullRom(xs, 0, racer->segmentT);
+            g = math_catmullRom(zs, 0, racer->segmentT);
             racer->lateral = 1.0f;
             mp_getSplinePoints(racer, xs, ys, zs);
-            dx = func_150497E0(xs, 0, racer->segmentT) - f;
-            dz = func_150497E0(zs, 0, racer->segmentT) - g;
+            dx = math_catmullRom(xs, 0, racer->segmentT) - f;
+            dz = math_catmullRom(zs, 0, racer->segmentT) - g;
             dist = sqrtf(dx * dx + dz * dz);
             if (dist > 1.0f) {
                 dist = 1.0f / dist;
@@ -856,10 +856,10 @@ u8 mp_pickNextNode(u8 prev, u8 cur, s8 route) {
     } else {
         mode = 2;
     }
-    node = &D_800D2350[cur];
+    node = &gPathNodes[cur];
     for (i = 0; i < 5; i++) {
         if (node->links[i] != 0xFF && node->links[i] != prev) {
-            e = &D_800D2350[node->links[i]];
+            e = &gPathNodes[node->links[i]];
             if (e->type == 0) {
                 if (mode != e->param) {
                     if (best == 0xFF || e->param != 0) {
@@ -906,20 +906,20 @@ s32 mp_advanceRacer(Racer *racer, f32 step) {
         racer->nodes[3] = mp_pickNextNode(racer->nodes[1], racer->nodes[2], racer->route);
         dir = 1;
         if (gRaceDirection == 0) {
-            if (D_800D2350[racer->nodes[1]].param == 5) {
+            if (gPathNodes[racer->nodes[1]].param == 5) {
                 D_800D2390 = 1;
             }
-            if (D_800D2350[racer->nodes[1]].param == 6) {
+            if (gPathNodes[racer->nodes[1]].param == 6) {
                 D_800D2390 = 2;
             }
         } else {
-            if (D_800D2350[racer->nodes[1]].param == 7) {
+            if (gPathNodes[racer->nodes[1]].param == 7) {
                 D_800D2390 = 1;
             }
-            if (D_800D2350[racer->nodes[1]].param == 8) {
+            if (gPathNodes[racer->nodes[1]].param == 8) {
                 D_800D2390 = 2;
             }
-            if (D_800D2350[racer->nodes[1]].param == 9) {
+            if (gPathNodes[racer->nodes[1]].param == 9) {
                 D_800D2390 = 3;
             }
         }
@@ -997,12 +997,12 @@ void mp_placeAtStart(Actor *obj) {
             again = 0;
             i = 0;
             // matching: a byte cursor over the node (links at +9) and 0xFF in a variable keep the frame size
-            cursor = (u8 *)&D_800D2350[racer->nodes[1]];
+            cursor = (u8 *)&gPathNodes[racer->nodes[1]];
             do {
                 link = cursor[9];
                 i++;
                 if (none != link) {
-                    target = &D_800D2350[link];
+                    target = &gPathNodes[link];
                     if (target->type == 4) {
                         again = target->param;
                     }
@@ -1015,10 +1015,10 @@ void mp_placeAtStart(Actor *obj) {
         } while (again != 0);
         racer->segmentT = 0.0f;
         mp_getSplinePoints(racer, xs, ys, zs);
-        obj->xpos = func_150498A4(xs, 0, racer->segmentT, &x_derivative);
-        obj->ypos = func_150497E0(ys, 0, racer->segmentT);
-        obj->zpos = func_150498A4(zs, 0, racer->segmentT, &z_derivative);
-        angle = func_15144BC8((actor_getDirectionAngle(racer->dirZ, racer->dirX, 0) + 0x8000) * 0.005493164f);
+        obj->xpos = math_catmullRomDeriv(xs, 0, racer->segmentT, &x_derivative);
+        obj->ypos = math_catmullRom(ys, 0, racer->segmentT);
+        obj->zpos = math_catmullRomDeriv(zs, 0, racer->segmentT, &z_derivative);
+        angle = math_wrapDegrees((actor_getDirectionAngle(racer->dirZ, racer->dirX, 0) + 0x8000) * 0.005493164f);
         obj->theta = angle;
         rotation = (s16)(angle * 182.0444489f) - 0x4000;
         obj->langle = rotation;
@@ -1042,12 +1042,12 @@ void mp_getSplinePoints(Racer *racer, f32 *outX, f32 *outY, f32 *outZ) {
 
     for (i = 0; i < 4; i++) {
         if (racer->nodes[i] != 0xFF) {
-            node = &D_800D2350[racer->nodes[i]];
+            node = &gPathNodes[racer->nodes[i]];
             next = node;
             for (j = 0; j < 5; j++) {
                 id = node->links[j];
-                if (id != 0xFF && D_800D2350[id].type == 4) {
-                    next = &D_800D2350[id];
+                if (id != 0xFF && gPathNodes[id].type == 4) {
+                    next = &gPathNodes[id];
                     j = 5;
                 }
             }
@@ -1075,13 +1075,13 @@ u8 mp_findNeighbour(u8 node, u8 type, u8 exclude, u8 param) {
     PathNode *t;
 
     result = 0xFF;
-    if (node >= D_80087290) {
+    if (node >= gPathNodeCount) {
         return 0xFF;
     }
-    n = &D_800D2350[node];
+    n = &gPathNodes[node];
     for (i = 0; i < 5; i++) {
         if (n->links[i] != 0xFF && n->links[i] != exclude) {
-            t = &D_800D2350[n->links[i]];
+            t = &gPathNodes[n->links[i]];
             if (t->type == type || type == 0xFF) {
                 if (t->param == param) {
                     return n->links[i];
@@ -1125,20 +1125,20 @@ void mp_updateRaceOverCamera(Racer *racer, Actor *obj) {
     }
     cam = obj->CameraPtr;
     if (racer->state == 2) {
-        for (i = 0; i < D_80087290; i++) {
-            entry = &D_800D2350[i];
+        for (i = 0; i < gPathNodeCount; i++) {
+            entry = &gPathNodes[i];
             if (entry->type == 5 && entry->param == 2) {
                 racer->camNode = i;
                 racer->camNextNode = i;
                 for (j = 0; j < 5; j++) {
                     if (entry->links[j] != 0xFF) {
-                        other = &D_800D2350[entry->links[j]];
+                        other = &gPathNodes[entry->links[j]];
                         if ((!gRaceDirection && other->param == 3) || (gRaceDirection && other->param != 3)) {
                             racer->camNextNode = entry->links[j];
                         }
                     }
                 }
-                i = D_80087290;
+                i = gPathNodeCount;
             }
         }
         curNode = racer->camNextNode;
@@ -1146,7 +1146,7 @@ void mp_updateRaceOverCamera(Racer *racer, Actor *obj) {
         prevNode = racer->camNode;
         start = curNode;
         do {
-            entry = &D_800D2350[curNode];
+            entry = &gPathNodes[curNode];
             nextNode = mp_findNeighbour(curNode, 0xFF, prevNode, param);
             prevNode = curNode;
             curNode = nextNode;
@@ -1165,8 +1165,8 @@ void mp_updateRaceOverCamera(Racer *racer, Actor *obj) {
     p = &racer->cam;
     camNext = racer->camNextNode;
     nextNode = racer->camNode;
-    entry = &D_800D2350[nextNode];
-    other = &D_800D2350[camNext];
+    entry = &gPathNodes[nextNode];
+    other = &gPathNodes[camNext];
     dx = obj->xpos - other->x;
     dz = obj->zpos - other->z;
     distSq = dx * dx + dz * dz;
@@ -1243,11 +1243,11 @@ void mp_updateFlyThroughCamera(Racer *racer, Actor *obj, s32 leave) {
     }
     if (racer->camState == 0) {
         next = gRaceDirection + 1;
-        for (i = 0; i < D_80087290; i++) {
-            entry = &D_800D2350[i];
+        for (i = 0; i < gPathNodeCount; i++) {
+            entry = &gPathNodes[i];
             if (entry->type == 6 && entry->param == next) {
                 racer->camNodes[0] = i;
-                i = D_80087290;
+                i = gPathNodeCount;
             }
         }
         racer->camNodes[1] = mp_findNeighbour(racer->camNodes[0], 6, 0xFF, 0);
@@ -1298,12 +1298,12 @@ void mp_updateFlyThroughCamera(Racer *racer, Actor *obj, s32 leave) {
     }
     angle = racer->camT;
     p = &racer->cam;
-    p->eyeX = func_150497E0(xs, 0, angle);
-    p->eyeY = func_150497E0(ys, 0, angle);
-    p->eyeZ = func_150497E0(zs, 0, angle);
-    p->atX = func_150497E0(lxs, 0, angle);
-    p->atY = func_150497E0(lys, 0, angle);
-    p->atZ = func_150497E0(lzs, 0, angle);
+    p->eyeX = math_catmullRom(xs, 0, angle);
+    p->eyeY = math_catmullRom(ys, 0, angle);
+    p->eyeZ = math_catmullRom(zs, 0, angle);
+    p->atX = math_catmullRom(lxs, 0, angle);
+    p->atY = math_catmullRom(lys, 0, angle);
+    p->atZ = math_catmullRom(lzs, 0, angle);
     p->unk0 = 0;
     p->unk4 = 0;
     p->unk30 = 30.0f;

@@ -4,7 +4,7 @@
 #include "variables.h"
 
 /* asin(i / 256) scaled so that 65536 is pi/2, for i = 0..255. */
-static const u16 D_80098E00[256] = {
+static const u16 gAsinTable[256] = {
     0x0000, 0x00A2, 0x0145, 0x01E8, 0x028B, 0x032E, 0x03D1, 0x0474,
     0x0518, 0x05BB, 0x065E, 0x0701, 0x07A4, 0x0847, 0x08EA, 0x098E,
     0x0A31, 0x0AD4, 0x0B77, 0x0C1B, 0x0CBE, 0x0D62, 0x0E05, 0x0EA9,
@@ -40,21 +40,21 @@ static const u16 D_80098E00[256] = {
 };
 
 /* Arcsine of x in [-1, 1], in radians, from the 256-entry table. */
-f32 func_150487E0(f32 x) {
-    f32 angle = (D_80098E00[(s32)(fabsf(x) * 255.99998f)] * 1.5707964f) / 65536.0f;
+f32 math_asinTable(f32 x) {
+    f32 angle = (gAsinTable[(s32)(fabsf(x) * 255.99998f)] * 1.5707964f) / 65536.0f;
 
     return (x < 0.0f) ? -angle : angle;
 }
 
 /* Arcsine of x in 256ths of a turn (64 = pi/2); negative inputs give 255 - angle. */
-f32 func_15048864(f32 x) {
-    f32 angle = D_80098E00[(s32)(fabsf(x) * 255.99998f)] >> 10;
+f32 math_asinTableBin(f32 x) {
+    f32 angle = gAsinTable[(s32)(fabsf(x) * 255.99998f)] >> 10;
 
     return (x < 0.0f) ? (255.0f - angle) : angle;
 }
 
 /* Arcsine of x in [-1, 1], in radians, linearly interpolated between table entries. */
-f32 func_150488C8(f32 x) {
+f32 math_asinTableLerp(f32 x) {
     f32 scaled;
     f32 fraction;
     f32 lower;
@@ -64,10 +64,10 @@ f32 func_150488C8(f32 x) {
     scaled = fabsf(x) * 255.99998f;
     index = scaled;
     fraction = scaled - index;
-    lower = D_80098E00[index];
+    lower = gAsinTable[index];
 
     if (index < 255) {
-        upper = D_80098E00[index + 1];
+        upper = gAsinTable[index + 1];
     } else {
         upper = 65535.0f;
     }

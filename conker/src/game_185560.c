@@ -96,18 +96,18 @@ Gfx *effect_drawEffectActor(Gfx *gfx, EffectActor *actor, s16 arg2) {
             return gfx;
         }
     }
-    gfx = func_15142B7C(gfx, actor->tmpl.render.setGeometryMode, actor->tmpl.render.clearGeometryMode);
-    func_151441A4(&primR, &primG, &primB, &primA, actor->tmpl.color1.red, actor->tmpl.color1.green, actor->tmpl.color1.blue, actor->tmpl.color1.alpha,
+    gfx = math_gfxUpdateGeometryMode(gfx, actor->tmpl.render.setGeometryMode, actor->tmpl.render.clearGeometryMode);
+    math_pickPrimColour(&primR, &primG, &primB, &primA, actor->tmpl.color1.red, actor->tmpl.color1.green, actor->tmpl.color1.blue, actor->tmpl.color1.alpha,
                   actor->tmpl.color0.red, actor->tmpl.color0.green, actor->tmpl.color0.blue, actor->tmpl.color0.alpha, 255, actor->tmpl.render.primMode);
-    func_151442FC(&envR, &envG, &envB, &envA, actor->tmpl.color1.red, actor->tmpl.color1.green, actor->tmpl.color1.blue, actor->tmpl.color1.alpha,
+    math_pickEnvColour(&envR, &envG, &envB, &envA, actor->tmpl.color1.red, actor->tmpl.color1.green, actor->tmpl.color1.blue, actor->tmpl.color1.alpha,
                   actor->tmpl.color0.red, actor->tmpl.color0.green, actor->tmpl.color0.blue, actor->tmpl.color0.alpha, 255, actor->tmpl.render.envMode);
-    gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
-    gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
+    gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &update);
+    gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &update);
     gfx = particle_setCombineMode(gfx, ((u8 *)&actor->tmpl.render.unk10)[3] /* matching: reads the low byte */, &update);
-    gfx = func_15142FBC(gfx, actor->tmpl.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->tmpl.render.unk14 | actor->tmpl.render.unk18,
+    gfx = math_gfxSetOtherMode(gfx, actor->tmpl.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->tmpl.render.unk14 | actor->tmpl.render.unk18,
                         gEffectRenderModes[actor->tmpl.render.renderMode].unk0 | gEffectRenderModes[actor->tmpl.render.renderMode].unk4, &update);
     if (actor->tmpl.flags & 2) {
-        gfx = func_151462C8(gfx, &actor->attachment, actor->tmpl.attachMode, actor->tmpl.owner, actor->tmpl.ownerId, arg2,
+        gfx = math_emitPointLights(gfx, &actor->attachment, actor->tmpl.attachMode, actor->tmpl.owner, actor->tmpl.ownerId, arg2,
                             &actor->tmpl.position, (actor->tmpl.flags & 4) ? 1 : 0, 0);
     }
     gSPMatrix(gfx++, &actor->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD);

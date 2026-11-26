@@ -177,7 +177,7 @@ void effect_updatePropEmitter(PropEmitterEffect *effect) {
             points[1] = &D_800A0FFC[emitter->index].x;
             results[0] = &args.pos.x;
             results[1] = dir;
-            func_15145CD0(emitter->prop, points, results, 2);
+            math_transformObjectPointRefs(emitter->prop, points, results, 2);
             d = dir;
             d[0] -= args.pos.x;
             d[1] -= args.pos.y;

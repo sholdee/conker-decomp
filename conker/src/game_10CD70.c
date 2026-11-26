@@ -37,7 +37,7 @@ s32 effect_isMaterialZoneActive(s32 index) {
 
 /* Points slots 3 and 4 (zone_setDisabled/zone_setPosition) 200 units above actors 6 and 7, or
  * disables them when the actor is missing, then scrolls the texture of each of the three
- * materials in the D_800B0E00 display list that loads its image from segment 2 + i. */
+ * materials in the gLevelDisplayLists display list that loads its image from segment 2 + i. */
 void func_150DF920(s32 arg0) {
     Actor *obj;
     s32 i;
@@ -76,7 +76,7 @@ void func_150DF920(s32 arg0) {
         slot = 4;
     }
 
-    dl = (GfxCmd *)D_800B0E00[0];
+    dl = (GfxCmd *)gLevelDisplayLists[0];
 
     for (i = 0; i < 3; i++) {
         active = effect_isMaterialZoneActive(i);
@@ -326,7 +326,7 @@ void effect_attachBloodDrip(Actor *actor, u8 arg1, s32 arg2) {
     desc.ownerId = actor->unique_id;
     desc.bone = 0;
     desc.owner = actor;
-    desc.offset = D_800A5480;
+    desc.offset = gZeroVec3f;
     desc.lifetime = 300;
     desc.flags = 0x1B; /* FOLLOW_OWNER | ON_BONE | NO_PREVIOUS | STATIC */
     desc.emitter = 11; /* gBloodDripEmitters[11] = effect_spawnDripDrop */
@@ -355,7 +355,7 @@ void effect_spawnDripDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHea
     random_a = func_150ADA20();
     random_b = func_150ADA20();
     alpha_random = func_150ADA68();
-    func_15143794(random_a & 0xFF, random_b % 65U - 32, alpha_random * 5.87f, &velocity);
+    math_dirFromBinAngles(random_a & 0xFF, random_b % 65U - 32, alpha_random * 5.87f, &velocity);
     scale = func_150ADA68() * 0.16900001f + 0.186f;
     acceleration.x = 0.0f;
     acceleration.y = 0.0f;
@@ -418,7 +418,7 @@ void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     }
     src[0] = &D_800A0F70[slot];
     dst[0] = &start;
-    func_15145EA4(src, dst, actor->ob_matrix_ptr + D_80088988, 1);
+    math_transformOffsets(src, dst, actor->ob_matrix_ptr + D_80088988, 1);
     scale = 1.0f; // matching: IDO keeps the multiply by 1.0 only through a variable
     params.height = func_150ADA68() * scale + 2.0f;
     params.width = func_150ADA68() * 14.0f + 28.0f;

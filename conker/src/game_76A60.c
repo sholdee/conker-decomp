@@ -8,7 +8,7 @@
  * distance times speedGain, and *velocity approaches it at rate accelGain over timestep dt.
  * If the step would overshoot target, *value snaps to target and *velocity is cleared.
  */
-void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 speedGain, f32 accelGain, f32 dt) {
+void math_springTo(f32 *value, f32 target, f32 *velocity, f32 speedGain, f32 accelGain, f32 dt) {
     f32 desiredVelocity;
     f32 direction;
     f32 accel;
@@ -40,17 +40,17 @@ void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 speedGain, f32 acc
 }
 
 /**
- * Angle version of func_150495B0: springs the angle *angle (degrees) towards target along the
+ * Angle version of math_springTo: springs the angle *angle (degrees) towards target along the
  * shortest way round, then re-wraps it. The overshoot snap only applies within 10 degrees.
  */
-void func_15049688(f32 *angle, f32 target, f32 *velocity, f32 speedGain, f32 accelGain, f32 dt) {
+void math_springAngleTo(f32 *angle, f32 target, f32 *velocity, f32 speedGain, f32 accelGain, f32 dt) {
     f32 desiredVelocity;
     f32 distance;
     f32 direction;
     s32 isNear;
     f32 accel;
 
-    desiredVelocity = func_15048A70(*angle, target);
+    desiredVelocity = math_angleDiff(*angle, target);
     distance = fabsf(desiredVelocity);
     if (desiredVelocity < 0.0f) {
         direction = -1.0f;
@@ -63,11 +63,11 @@ void func_15049688(f32 *angle, f32 target, f32 *velocity, f32 speedGain, f32 acc
     *velocity += accel * dt;
     // matching: IDO materializes the flag (or/addiu) only for `isNear == 0`, not for `!isNear`
     isNear = distance < 10.0f;
-    if (isNear == 0 || ((func_15048A70(*angle + *velocity * dt, target) < 0.0f) ? -1.0f : 1.0f) == direction) {
+    if (isNear == 0 || ((math_angleDiff(*angle + *velocity * dt, target) < 0.0f) ? -1.0f : 1.0f) == direction) {
         *angle += *velocity * dt;
     } else {
         *angle = target;
         *velocity = 0;
     }
-    func_15048758(angle);
+    math_normalizeDegrees(angle);
 }

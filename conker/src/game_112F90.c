@@ -30,7 +30,7 @@ void func_150E5AE0(void) {
     if (D_80088A04 == 1) {
         D_800D9A10 += D_800BE9E4;
         if (D_800D9A10 >= 0x83) {
-            D_800D9A10 = -(func_151EF610() % 30);
+            D_800D9A10 = -(math_rand() % 30);
         }
         if (D_800D9A10 >= 0x1F) {
             if (D_800D9A14 < D_800D9A0C) {
@@ -46,16 +46,16 @@ void func_150E5AE0(void) {
         j = D_800D9A14 + 1;
         effect_scatterGroundHitsAhead(D_800D9A14);
         for (i = 0; i < n; i++, j -= 10) {
-            if ((j >= 10) || ((func_151EF610() % 11) - j == 0)) {
-                a = ((func_151EF610() % D_800D9A08) * 2) - D_800D9A08 + D_800D9A04;
-                b = ((func_151EF610() % D_800D9A08) * 2) - D_800D9A08 + D_800D9A04;
-                h2 = func_151EF610() % 200;
-                h1 = func_151EF610() % 200 + h2 - 100.0f;
+            if ((j >= 10) || ((math_rand() % 11) - j == 0)) {
+                a = ((math_rand() % D_800D9A08) * 2) - D_800D9A08 + D_800D9A04;
+                b = ((math_rand() % D_800D9A08) * 2) - D_800D9A08 + D_800D9A04;
+                h2 = math_rand() % 200;
+                h1 = math_rand() % 200 + h2 - 100.0f;
                 if (((b - 5.0f) < a) && (a < (b + 5.0f))) {
                     h1 += 150.0f;
                     h2 += 150.0f;
                 }
-                if (func_151EF610() % 2) {
+                if (math_rand() % 2) {
                     a += 180.0f;
                 } else {
                     b += 180.0f;

@@ -63,7 +63,7 @@ void beam_fireSlot(actor, slot)
     beam_spawnAimed(actor, slot, 0xFF, 1);
     bones = actor->ob_matrix_ptr;
     if (bones != NULL) {
-        func_15143134(&D_800A15F0[slot], &muzzle, &bones[D_800A1638[slot]]);
+        math_transformOffset(&D_800A15F0[slot], &muzzle, &bones[D_800A1638[slot]]);
         header.flags = 3;
         header.update = -1;
         header.lifetime = (func_150ADA20() % 3U) + 4;
@@ -110,7 +110,7 @@ AimedBeam *beam_spawnAimed(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     init.target = collision_findObjectById(0x12);
     init.targetId = 0x12;
     init.slot = slot;
-    init.direction = D_800A5480;
+    init.direction = gZeroVec3f;
     init.flags = 0;
     spawn.texture = 0x94;
     spawn.type = 7;
@@ -129,8 +129,8 @@ AimedBeam *beam_spawnAimed(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     spawn.scale.y = 0.0f;
     spawn.scale.z = 0.0f;
     spawn.width = 100.0f;
-    spawn.pos = D_800A5480;
-    spawn.rot = D_800A5480;
+    spawn.pos = gZeroVec3f;
+    spawn.rot = gZeroVec3f;
     spawn.flags = 0x046C0008;
     spawn.unk44 = 0xFF;
     spawn.unk45 = 0xFF;
@@ -222,23 +222,23 @@ s32 beam_updateAimed(AimedBeam *beam) {
     }
     link->flags &= ~1;
     if (actor->ob_matrix_ptr != NULL) {
-        func_15143134(&D_800A15F0[link->slot], &beam->head.def.pos, &actor->ob_matrix_ptr[D_800A1638[link->slot]]);
+        math_transformOffset(&D_800A15F0[link->slot], &beam->head.def.pos, &actor->ob_matrix_ptr[D_800A1638[link->slot]]);
         beam->head.def.rot.x = target->xpos;
         beam->head.def.rot.y = target->ypos;
         beam->head.def.rot.z = target->zpos;
         link->direction.x = beam->head.def.rot.x - beam->head.def.pos.x;
         link->direction.y = beam->head.def.rot.y - beam->head.def.pos.y;
         link->direction.z = beam->head.def.rot.z - beam->head.def.pos.z;
-        if (func_15145128(&link->direction, &link->direction, &link->distance, &link->inverse) != 0) {
+        if (math_vec3Normalize(&link->direction, &link->direction, &link->distance, &link->inverse) != 0) {
             link->flags |= 1;
         }
     }
     link->widthPhase += 0.1600000113f * gFrameDelta;
-    angle = func_15144B68(link->widthPhase);
+    angle = math_wrapRadians(link->widthPhase);
     link->widthPhase = angle;
     beam->head.def.width = sinf(angle) * 5.0f + 16.0f;
     link->alphaPhase += 0.1600000113f * gFrameDelta;
-    angle = func_15144B68(link->alphaPhase);
+    angle = math_wrapRadians(link->alphaPhase);
     link->alphaPhase = angle;
     beam->head.def.unk44 = sinf(angle) * 25.0f + 230.0f;
     if (link->flags & 1) {
@@ -392,7 +392,7 @@ s32 beam_updateSpark(Bolt *spark) {
             spark->def.end = beam->head.def.rot;
             spark->def.length = link->distance;
             spark->def.invLength = link->inverse;
-            func_15143134(&D_800A1620[slot], &spark->def.up, &actor->ob_matrix_ptr[D_800A1638[slot]]);
+            math_transformOffset(&D_800A1620[slot], &spark->def.up, &actor->ob_matrix_ptr[D_800A1638[slot]]);
             spark->def.up.x = spark->def.up.x - spark->def.start.x;
             spark->def.up.y = spark->def.up.y - spark->def.start.y;
             spark->def.up.z = spark->def.up.z - spark->def.start.z;
@@ -452,7 +452,7 @@ void beam_updateEmitter(BeamEmitter *emitter) {
                 part.width = func_150ADA68() * 10.0f + 22.0f;
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
-                func_15143794(yaw & 0xFF, pitch % 31U - 55, func_150ADA68() * 15.0f + 25.0f, &part.vel);
+                math_dirFromBinAngles(yaw & 0xFF, pitch % 31U - 55, func_150ADA68() * 15.0f + 25.0f, &part.vel);
                 part.gravity = (func_150ADA68() * 740.0f + -1761.0f) * 0.001000000047f;
                 part.color.alpha = func_150ADA20() % 101U + 155;
                 trail_spawnFallingTrail(&spawn, 0, &part, 0, emitter->base.header.owner, emitter->base.header.kind);
@@ -536,7 +536,7 @@ Glow *beam_spawnGlow(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u
     sprite.type = 10;
     sprite.handler = -1;
 
-    glow = func_151407D0(&sprite, 0x6C, &spawn, 0x1E, 0, 0, 0, -1, arg6, arg7);
+    glow = flare_spawnGlow(&sprite, 0x6C, &spawn, 0x1E, 0, 0, 0, -1, arg6, arg7);
     if (glow != NULL) {
         memcpy(&glow->link, &link, sizeof(link));
     }
@@ -621,12 +621,12 @@ void beam_unlinkEmitter(BeamEmitter *emitter) {
 
 void beam_destroyGlow(Glow *glow) {
     beam_unlinkGlow(glow);
-    func_151411A4(&glow->head);
+    flare_destroyGlowDefault(&glow->head);
 }
 
 void beam_freeGlow(Glow *glow) {
     beam_unlinkGlow(glow);
-    func_151411C4(&glow->head);
+    flare_freeGlowDefault(&glow->head);
 }
 
 /* Clears the beam's reference to this glow. */
@@ -690,7 +690,7 @@ Game1EF500Trail *beam_fireSlotProjectile(actor, slot, arg2, arg3)
     src[1] = &D_800A1658[slot];
     dst[0] = &muzzle;
     dst[1] = &dir;
-    func_15145EA4(src, dst, &actor->ob_matrix_ptr[D_800A1670[slot]], 2);
+    math_transformOffsets(src, dst, &actor->ob_matrix_ptr[D_800A1670[slot]], 2);
     dir.x -= muzzle.x;
     dir.y -= muzzle.y;
     dir.z -= muzzle.z;
@@ -860,8 +860,8 @@ void beam_spawnFollowParticle(Actor *actor) {
     spawn.pos.x = actor->xpos;
     spawn.pos.y = actor->ypos;
     spawn.pos.z = actor->zpos;
-    spawn.offset = D_800A5480;
-    spawn.vel = D_800A5480;
+    spawn.offset = gZeroVec3f;
+    spawn.vel = gZeroVec3f;
     spawn.fadeStart = 1;
     spawn.fadeRate = 0xFF;
     spawn.scaleStart = 1;
@@ -916,9 +916,9 @@ s32 beam_updateFollowParticle(AttachedSpriteParticle *particle, s32 arg1) {
     link->phase[0] += 0.2630000114f * gFrameDelta;
     link->phase[1] += 0.3030000031f * gFrameDelta;
     link->phase[2] += 0.25f * gFrameDelta;
-    link->phase[0] = func_15144B68(link->phase[0]);
-    link->phase[1] = func_15144B68(link->phase[1]);
-    link->phase[2] = func_15144B68(link->phase[2]);
+    link->phase[0] = math_wrapRadians(link->phase[0]);
+    link->phase[1] = math_wrapRadians(link->phase[1]);
+    link->phase[2] = math_wrapRadians(link->phase[2]);
     particle->head.desc.width = (sinf(link->phase[0]) * 243.0f) + 780.0f;
     particle->head.desc.height = (sinf(link->phase[1]) * 243.0f) + 780.0f;
     particle->head.desc.alpha = (sinf(link->phase[2]) * 50.0f) + 200.0f;
@@ -1142,7 +1142,7 @@ void beam_spawnMuzzleBurst(actor, slot, variant, arg3, arg4)
         }
         src[0] = &D_800A168C[kind][variant][slot];
         dst[0] = &muzzle;
-        func_15145EA4(src, dst, &actor->ob_matrix_ptr[D_800A180C[kind][slot]], 1);
+        math_transformOffsets(src, dst, &actor->ob_matrix_ptr[D_800A180C[kind][slot]], 1);
         hdr.flags = 3;
         hdr.update = -1;
         hdr.lifetime = (func_150ADA20() % 5U) + 4;

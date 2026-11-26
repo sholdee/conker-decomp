@@ -4,7 +4,7 @@
 
 /* Per-level hooks, indexed by the level's hook number (D_800B0DF0->unkF; 0 = none). The handlers take
  * different arguments, so the table has no prototype. */
-static void (*D_80089670[])() = {
+static void (*gLevelHooks[])() = {
     NULL, func_150C7770, func_150AE5B0, func_150C4BF0,
     func_150EB1C0, func_150BB700, func_150C7E00, func_150B67E0,
     func_15100330, func_150DF820, func_150C7350, camera_resetDistances,
@@ -16,8 +16,8 @@ static void (*D_80089670[])() = {
     func_150EC4B0, func_150E1800, func_150F52B0, func_150E1860,
 };
 
-void func_15130230(void *arg0, s32 arg1) {
+void level_runHook(void *arg0, s32 arg1) {
     if (D_800B0DF0->unkF) {
-        D_80089670[D_800B0DF0->unkF](arg0);
+        gLevelHooks[D_800B0DF0->unkF](arg0);
     }
 }

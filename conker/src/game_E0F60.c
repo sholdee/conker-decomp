@@ -13,7 +13,7 @@ void func_150B3AB0(Actor *obj, u8 arg1) {
     if ((obj != NULL) && (obj->ob_matrix_ptr != NULL)) {
         camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 6, 1);
         yaw = (obj->langle >> 8) + 0x40;
-        func_15143134(&D_8009FBC0, &pos, obj->ob_matrix_ptr + 25);
+        math_transformOffset(&D_8009FBC0, &pos, obj->ob_matrix_ptr + 25);
         // matching: *(u8 *)&arg1 re-reads arg1 from its stack slot at each use (plain or K&R arg1 stays in a register)
         particle_emitOnRandomArc(pos.x, pos.y, pos.z, 10.0f, yaw, 0, 0xFF,
                       (func_150ADA20() % 31U) + 40, 8, 0, 0.0f, 0, *(u8 *)&arg1);
@@ -38,10 +38,10 @@ s32 func_150B3C0C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     f32 horizSpeed;
     StreakParticleDesc desc;
 
-    yawCos = func_151423D8(yaw - 0x40);
-    yawSin = func_151423D8(yaw);
-    pitchCos = func_151423D8(pitch - 0x40);
-    horizSpeed = func_151423D8(pitch);
+    yawCos = math_cosBinAngleMasked(yaw - 0x40);
+    yawSin = math_cosBinAngleMasked(yaw);
+    pitchCos = math_cosBinAngleMasked(pitch - 0x40);
+    horizSpeed = math_cosBinAngleMasked(pitch);
     // matching: scaling in a separate statement; folding it into the call above reorders the float ops
     horizSpeed = 10.0f * horizSpeed;
     desc.pos.x = x;
@@ -53,8 +53,8 @@ s32 func_150B3C0C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     desc.headSpeed = (func_150ADA68() * 1.953000069f) + 3.736000061f;
     desc.tailSpeed = (func_150ADA68() * 0.9400000572f) + 2.22300005f;
-    func_151429E0(8, &desc.headColor.red, &desc.headColor.green, &desc.headColor.blue);
-    func_151429E0(8, &desc.tailColor.red, &desc.tailColor.green, &desc.tailColor.blue);
+    math_pickPaletteColour(8, &desc.headColor.red, &desc.headColor.green, &desc.headColor.blue);
+    math_pickPaletteColour(8, &desc.tailColor.red, &desc.tailColor.green, &desc.tailColor.blue);
     desc.headColor.alpha = 0xFF;
     desc.tailColor.alpha = 0xFF;
     desc.flags = 9;

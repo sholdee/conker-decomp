@@ -99,12 +99,12 @@ void func_150DE458(WorldObject *prop) {
     }
 }
 
-/* Sways the object: y bobs around 1130 and rotX / rotZ rock, each driven by func_15048A40 of its own
+/* Sways the object: y bobs around 1130 and rotX / rotZ rock, each driven by math_sinBinAngle of its own
  * phase (touch.i.a/b/c, in 1/8 steps of its angle); the phases advance 12, 16 and 24 per frame. */
 void func_150DE6D8(WorldObject *prop) {
-    prop->y = func_15048A40(prop->touch.i.a >> 3) * 10.19999981f + 1130.0f;
-    prop->t = func_15048A40(prop->touch.i.b >> 3) * 1.100000024f;
-    prop->v = func_15048A40(prop->touch.i.c >> 3) * 1.100000024f;
+    prop->y = math_sinBinAngle(prop->touch.i.a >> 3) * 10.19999981f + 1130.0f;
+    prop->t = math_sinBinAngle(prop->touch.i.b >> 3) * 1.100000024f;
+    prop->v = math_sinBinAngle(prop->touch.i.c >> 3) * 1.100000024f;
     prop->touch.i.a += D_800BE9E4 * 12;
     prop->touch.i.b += D_800BE9E4 * 16;
     prop->touch.i.c += D_800BE9E4 * 24;
@@ -160,12 +160,12 @@ void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
         textures = D_800A0D00;
         // matching: textures.ids[i] grows the frame by 8; the pointer-add form does not
         def.texture = *(textures.ids + (func_150ADA20() & 1));
-        func_1514470C(link->source, &def.pos);
-        func_1514470C(link->target, &target);
+        math_randomPointInZone(link->source, &def.pos);
+        math_randomPointInZone(link->target, &target);
         delta.x = target.x - def.pos.x;
         delta.y = target.y - def.pos.y;
         delta.z = target.z - def.pos.z;
-        func_15145128(&delta, &travel.velocity, &length, &unused);
+        math_vec3Normalize(&delta, &travel.velocity, &length, &unused);
         speed = func_150ADA68() * 30.0f + 25.0f;
         base = speed;
         if (def.texture == 0xBF) {
@@ -178,11 +178,11 @@ void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
         travel.forward.x = delta.x;
         travel.forward.y = 0.0f;
         travel.forward.z = delta.z;
-        func_15145128(&travel.forward, &travel.forward, NULL, NULL);
+        math_vec3Normalize(&travel.forward, &travel.forward, NULL, NULL);
         travel.side.x = -travel.forward.z;
         travel.side.y = 0.0f;
         travel.side.z = travel.forward.x;
-        def.rot = D_800A5480;
+        def.rot = gZeroVec3f;
         def.type = 0;
         def.renderModes = 0x3B03;
         def.lifetime = 300;
@@ -195,7 +195,7 @@ void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
         func_150ADA68();
         def.height = 706.0f;
         def.width = 706.0f;
-        def.rot = D_800A5480;
+        def.rot = gZeroVec3f;
         def.flags = 0x065C0000;
         def.unk44 = 0xFF;
         def.unk45 = 0xFF;

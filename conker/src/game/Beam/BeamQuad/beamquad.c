@@ -29,8 +29,8 @@ void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3) {
 
     if (owner != NULL && owner->ob_matrix_ptr != NULL) {
         mtx = &owner->ob_matrix_ptr[D_80088928[type]];
-        func_15143134(&D_80088910[type], &from, mtx);
-        func_15143134(&D_8008891C[type], &to, mtx);
+        math_transformOffset(&D_80088910[type], &from, mtx);
+        math_transformOffset(&D_8008891C[type], &to, mtx);
         vel.x = D_8008892C[type] * (to.x - from.x);
         vel.y = D_8008892C[type] * (to.y - from.y);
         vel.z = D_8008892C[type] * (to.z - from.z);
@@ -228,8 +228,8 @@ Vtx_t *beam_drawLinkedQuad(BeamQuad *effect, s16 bufferIndex) {
     }
     linked = &effect->u.linked;
     angle = *linked->angle * (256.0f / 360.0f);
-    sine = func_151423D8(angle);
-    cosine = func_151423D8(angle - 0x40);
+    sine = math_cosBinAngleMasked(angle);
+    cosine = math_cosBinAngleMasked(angle - 0x40);
     offsetX = *linked->halfWidth * sine;
     offsetZ = -*linked->halfWidth * cosine;
     vertices[0].ob[0] = linked->pos[0] + offsetX;

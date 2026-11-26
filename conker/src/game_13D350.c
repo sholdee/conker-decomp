@@ -1,12 +1,12 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c). */
-void *D_800DBE80;      // the current sky data (star field, tile formats or gradient texture)
-Vtx *D_800DBE88[4][2]; // per view, per framebuffer
-u8 D_800DBEA8[3];      // background colour
+void *gSkyData;      // the current sky data (star field, tile formats or gradient texture)
+Vtx *gSkyQuadVtx[4][2]; // per view, per framebuffer
+u8 gBackgroundColour[3];      // background colour
 u8 D_800DBEAB;
 u8 D_800DBEAC;
-Mtx *D_800DBEB0;       // sky projection matrices, 2 per view
+Mtx *gSkyMatrices;       // sky projection matrices, 2 per view
 
 #include "functions.h"
 #include "variables.h"
@@ -16,8 +16,8 @@ Mtx *D_800DBEB0;       // sky projection matrices, 2 per view
 
 
 
-/* A sky mode's draw routine (D_800891D8 is indexed by D_800B0DF0->unk8): camera position, angles and the sky
- * extent from func_151108C4. */
+/* A sky mode's draw routine (gSkyDrawFuncs is indexed by D_800B0DF0->unk8): camera position, angles and the sky
+ * extent from env_getSkyExtent. */
 typedef Gfx *(*SkyDrawFunc)(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
 /* The textures of each textured sky set (D_800B0DF0->unk9), five per set. */
@@ -28,15 +28,15 @@ static s32 D_8008916C[5] = { 0x1949, 0x1991, 0x1901, 0x19D9, 0x1A21 };
 static s32 D_80089180[5] = { 0x147B, 0x150B, 0x12CB, 0x159B, 0x15E3 };
 static s32 D_80089194[5] = { 0x135B, 0x13A3, 0x1313, 0x13EB, 0x1433 };
 static s32 D_800891A8[5] = { 0x1AB1, 0x1AF9, 0x1A69, 0x1B41, 0x1B89 };
-s32 *D_800891BC[] = { D_80089130, D_80089144, D_80089158, D_8008916C, D_80089180, D_800891A8, D_80089194 };
+s32 *gSkyTextureSets[] = { D_80089130, D_80089144, D_80089158, D_8008916C, D_80089180, D_800891A8, D_80089194 };
 
 /*
  * The draw routine of each sky mode (D_800B0DF0->unk8); most ignore some of the camera arguments.
- * The table comes before func_15111AF4: the address the last entry takes makes as1 treat that function's
+ * The table comes before env_drawSkybox: the address the last entry takes makes as1 treat that function's
  * entry label as address-taken, which its scheduling needs.
  */
-static SkyDrawFunc D_800891D8[] = {
-    func_151103C8, func_150F9AB0, func_150D1810, func_15110600, func_15111AF4,
+static SkyDrawFunc gSkyDrawFuncs[] = {
+    env_drawBackgroundFill, func_150F9AB0, env_drawSkyGradient, env_drawMapBackgroundFill, env_drawSkybox,
 };
 
 /* Per-format texture load tables (two formats), wrapped so they can be copied to the stack. */
@@ -60,7 +60,7 @@ typedef struct SkyFace {
     s16 z1;
 } SkyFace;
 
-static const SkyFace D_800A2DA0[6] = {
+static const SkyFace gSkyFaces[6] = {
     { 360, 360, -180, 180, -180, 180, -180, -180 },
     { 360, 360, -180, 180, -180, -180, -180, 180 },
     { 360, 360, -180, 180, 180, 180, -180, 180 },
@@ -70,8 +70,8 @@ static const SkyFace D_800A2DA0[6] = {
 };
 
 /* Draws the sky for the current view: clears the depth buffer, then (unless the view is covered) wraps the
- * camera angles into range and calls the current sky's draw routine if func_151108C4 says the sky shows. */
-Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
+ * camera angles into range and calls the current sky's draw routine if env_getSkyExtent says the sky shows. */
+Gfx *env_drawSky(Gfx *gfx, s32 arg1) {
     RenderView *view;
     f32 pitch;
     f32 yaw;
@@ -91,12 +91,12 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
         D_800D9B78[i][2] = 0;
     }
     gSPClearGeometryMode(gfx++, G_CULL_BOTH);
-    gfx = func_151106A8(gfx);
+    gfx = env_clearDepth(gfx);
     gDPPipeSync(gfx++);
     if (D_800BE635 != 0) {
-        gfx = func_15110544(gfx, 0, 0, gScreenWidth, gScreenHeight, 0, 0, 0);
+        gfx = env_fillRect(gfx, 0, 0, gScreenWidth, gScreenHeight, 0, 0, 0);
     }
-    if (D_800C35EA[0] == 1 && D_800C3681 != 0) {
+    if (gCutsceneStates[0] == 1 && D_800C3681 != 0) {
         return gfx;
     }
     pitch = 360.0f - (camera_global_Cameras[gCurrentView].CameraPitch + gCameraOffsets[gCurrentView].rot.x);
@@ -125,11 +125,11 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     z = camera_global_Cameras[gCurrentView].eye.z;
     if (D_800C3682 != 0) {
         view = &RENDER_VIEWS[gCurrentView];
-        return func_15110544(gfx, view->left, view->top, view->right - 1.0f, view->bottom, 0x16, 0x1C, 0x1B);
+        return env_fillRect(gfx, view->left, view->top, view->right - 1.0f, view->bottom, 0x16, 0x1C, 0x1B);
     }
-    visible = func_151108C4(x, y, z, pitch, yaw);
+    visible = env_getSkyExtent(x, y, z, pitch, yaw);
     if (visible != 0) {
-        gfx = D_800891D8[D_800B0DF0->unk8](gfx, x, y, z, pitch, yaw, roll, visible);
+        gfx = gSkyDrawFuncs[D_800B0DF0->unk8](gfx, x, y, z, pitch, yaw, roll, visible);
     }
     gfx = view_setScissor(gfx, gCurrentView, 0, 0, 0, 0);
     gSPSetGeometryMode(gfx++, G_CULL_BACK);
@@ -138,7 +138,7 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
 
 /* Builds the camera rotation matrix in mtx: yaw, then pitch, then roll (func_150A8050 makes a rotation from
  * three angles, func_150A7A48 multiplies). */
-void func_151102CC(MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
+void env_buildCameraRotation(MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
     MtxF rotation;
 
     func_150A8050(mtx, 0.0f, yaw, 0.0f);
@@ -149,19 +149,19 @@ void func_151102CC(MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
 }
 
 /* Builds view viewIndex's view-projection matrix in mtx from the camera angles. */
-void func_15110360(s32 viewIndex, MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
-    func_151102CC(mtx, pitch, yaw, roll);
+void env_buildViewProj(s32 viewIndex, MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
+    env_buildCameraRotation(mtx, pitch, yaw, roll);
     func_150A7A48(mtx, RENDER_VIEWS[viewIndex].projection, mtx);
 }
 
-/* Fills the current view with the background colour D_800DBEA8 and, on view 0 in split screen, draws the
+/* Fills the current view with the background colour gBackgroundColour and, on view 0 in split screen, draws the
  * black divider bars (only the horizontal one when gScreenLayout is 1). */
-Gfx *func_151103C8(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
+Gfx *env_drawBackgroundFill(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
     RenderView *view;
 
     view = &RENDER_VIEWS[gCurrentView];
-    gfx = func_15110544(gfx, view->left, view->top, view->right - 1.0f, view->bottom,
-                        D_800DBEA8[0], D_800DBEA8[1], D_800DBEA8[2]);
+    gfx = env_fillRect(gfx, view->left, view->top, view->right - 1.0f, view->bottom,
+                        gBackgroundColour[0], gBackgroundColour[1], gBackgroundColour[2]);
     if (gScreenLayout != 0) {
         if (gCurrentView == 0) {
             gDPPipeSync(gfx++);
@@ -177,7 +177,7 @@ Gfx *func_151103C8(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
 }
 
 /* Fills the rectangle (ulx, uly)-(lrx, lry) of the framebuffer with colour (r, g, b) in fill mode. */
-Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 b) {
+Gfx *env_fillRect(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 b) {
     s32 color;
 
     gDPPipeSync(gfx++);
@@ -189,13 +189,13 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
 }
 
 /* On maps 0x1B and 0x1E (and 0x31 while camera 0's unk3D4 has state 3) fills the whole drawable area with the
- * background colour D_800DBEA8. */
-Gfx *func_15110600(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
+ * background colour gBackgroundColour. */
+Gfx *env_drawMapBackgroundFill(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
     // unk78 is the high byte of Actor's u16 unk78
     if (level == 0x1B || level == 0x1E ||
         (level == 0x31 && camera_global_Cameras->mv->rt_context_b == 3)) {
-        gfx = func_15110544(gfx, 2, 0, gScreenWidth - 2, gScreenHeight,
-                            D_800DBEA8[0], D_800DBEA8[1], D_800DBEA8[2]);
+        gfx = env_fillRect(gfx, 2, 0, gScreenWidth - 2, gScreenHeight,
+                            gBackgroundColour[0], gBackgroundColour[1], gBackgroundColour[2]);
     }
     return gfx;
 }
@@ -203,7 +203,7 @@ Gfx *func_15110600(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
 
 /* On view 0, clears the depth buffer (fills it with the maximum depth) and switches back to the framebuffer;
  * in split screen also draws the black divider bars, and blacks out the whole screen while D_800BEAC2 is set. */
-Gfx *func_151106A8(Gfx *gfx) {
+Gfx *env_clearDepth(Gfx *gfx) {
     if (gCurrentView == 0) {
         gDPPipeSync(gfx++);
         gDPSetOtherMode(gfx++, 0x302C0F, 4);
@@ -232,8 +232,8 @@ Gfx *func_151106A8(Gfx *gfx) {
 
 
 /* Returns how much of the sky shows for the camera at (x, y, z) looking at (pitch, yaw) on the current map
- * level: 0 hides it, 320 (a full screen height) draws all of it; func_15110CFC turns it into a row count. */
-s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
+ * level: 0 hides it, 320 (a full screen height) draws all of it; env_drawSkyFace turns it into a row count. */
+s32 env_getSkyExtent(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
     s32 ret;
     s32 byHeight;
 
@@ -304,7 +304,7 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
         }
         break;
     case 0x13:
-        if (D_800C35EA[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1)) {
+        if (gCutsceneStates[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1)) {
             ret = 320;
         } else if (y < 1900.0f) {
             ret = 270;
@@ -341,7 +341,7 @@ extern u8 D_1673[];
  * (func_150A6210) and, on the side sets, rows past the sky extent `limit` are skipped; visible ones are queued
  * in *vtxBufPtr and drawn four at a time. The vertex/queue cursors are carried between faces through the
  * pointer arguments. quad is scratch (callers pass NULL). */
-Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4, u32 width, u32 height,
+Gfx *env_drawSkyFace(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4, u32 width, u32 height,
                    u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, MtxF mtx, s32 limit,
                    s32 *vtxCountPtr, s32 *vtxIdxPtr, SkyTile *queue, s32 *lastFormatPtr,
                    u8 *sizes, u8 *shifts, s16 *palOffsets, u8 *tlutCounts, u8 *tiles, s32 texSet) {
@@ -508,8 +508,8 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4,
                     nCols = width / tileW;
                     queue[vtxCount >> 2].texture = texAddr;
                     queue[vtxCount >> 2].format =
-                        // matching: index + base (not D_800DBE80[...]) sets IDO's addu operand order
-                        *((colIdx * nRows + rowIdx + texSet * nCols * nRows) + (u8 *)D_800DBE80);
+                        // matching: index + base (not gSkyData[...]) sets IDO's addu operand order
+                        *((colIdx * nRows + rowIdx + texSet * nCols * nRows) + (u8 *)gSkyData);
                     vtxCount += 4;
                     if (vtxCount == 16) {
                         s32 padB[2];
@@ -549,28 +549,28 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4,
 
 /* Switches the sky to `sky`: 1 frees the sky data and generates the star field; otherwise, while a textured sky
  * (mode 4) is showing a different one, unloads its textures and loads sky `sky`'s data. */
-void func_1511172C(s32 sky) {
+void env_setSky(s32 sky) {
     s32 i;
 
     if (sky == 1) {
         D_800B0DF0->unk8 = 1;
-        if (D_800DBE80 != NULL) {
-            void *data = D_800DBE80; // matching: the copy loads the pointer into v0 before the call
+        if (gSkyData != NULL) {
+            void *data = gSkyData; // matching: the copy loads the pointer into v0 before the call
 
             heap_free(data);
         }
-        func_15111858();
+        env_initStars();
         return;
     }
     if (sky != D_800B0DF0->unk9 && D_800B0DF0->unk8 == 4) {
         if (gExpansionPak != 0) {
             for (i = 0; i != 360; i++) {
-                texture_releaseId(D_800891BC[D_800B0DF0->unk9][0] + i);
+                texture_releaseId(gSkyTextureSets[D_800B0DF0->unk9][0] + i);
             }
         }
-        heap_free(D_800DBE80);
+        heap_free(gSkyData);
         D_800B0DF0->unk9 = sky;
-        rom_loadPathTo(&D_800DBE80, 2, 13, D_800B0DF0->unk9);
+        rom_loadPathTo(&gSkyData, 2, 13, D_800B0DF0->unk9);
     }
 }
 
@@ -586,14 +586,14 @@ typedef struct Star {
 
 #define NUM_STARS 8000
 
-/* Allocates the star field in D_800DBE80 and scatters NUM_STARS random stars over the sphere, latitudes kept
+/* Allocates the star field in gSkyData and scatters NUM_STARS random stars over the sphere, latitudes kept
  * within 89 degrees of the equator. */
-void func_15111858(void) {
+void env_initStars(void) {
     Star *stars;
     s32 i;
 
-    D_800DBE80 = allocate_memory(NUM_STARS * sizeof(Star), 1, 0, 0);
-    stars = D_800DBE80;
+    gSkyData = allocate_memory(NUM_STARS * sizeof(Star), 1, 0, 0);
+    stars = gSkyData;
     for (i = 0; i != NUM_STARS; i++) {
         f32 ringRadius;
         f32 longitude;
@@ -627,8 +627,8 @@ void func_15111858(void) {
 
 /* Draws the textured skybox (sky mode 4): sets up a tinted CI texture pipeline and the rotation-only view
  * matrix, then draws each face the camera can see (faces 0-3 by yaw, 4 and 5 by pitch) as a grid of 60x30
- * tiles via func_15110CFC, flushing the last partial batch of queued tiles at the end. */
-Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
+ * tiles via env_drawSkyFace, flushing the last partial batch of queued tiles at the end. */
+Gfx *env_drawSkybox(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
     s32 i;
     s32 end;
     s32 start;
@@ -666,8 +666,8 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
             yaw += 360.0f;
         }
     } else if (level == 0x3C ||
-               (level == 0x13 && D_800C35EA[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1))) {
-        gfx = func_15110544(gfx, RENDER_VIEWS[gCurrentView].left, RENDER_VIEWS[gCurrentView].top,
+               (level == 0x13 && gCutsceneStates[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1))) {
+        gfx = env_fillRect(gfx, RENDER_VIEWS[gCurrentView].left, RENDER_VIEWS[gCurrentView].top,
                             RENDER_VIEWS[gCurrentView].right - 1.0f, RENDER_VIEWS[gCurrentView].bottom, 0, 0, 0);
     }
     color[0] = D_800B0DF0->unk5;
@@ -690,15 +690,15 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
                G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD);
     gDPSetTileSize(gfx++, G_TX_RENDERTILE + 1, 0, 0, 61 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
     gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 256, G_TX_LOADTILE - 1, 0, 0, 0, 0, 0, 0, 0);
-    func_151102CC(rotation, pitch, yaw, roll);
+    env_buildCameraRotation(rotation, pitch, yaw, roll);
     func_150A7A48(rotation, RENDER_VIEWS[gCurrentView].projection, viewProj);
-    guMtxF2L(viewProj, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0]);
-    gSPMatrix(gfx++, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    guMtxF2L(viewProj, &gSkyMatrices[gCurrentView * 2 + D_800BE9C0]);
+    gSPMatrix(gfx++, &gSkyMatrices[gCurrentView * 2 + D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPPerspNormalize(gfx++, RENDER_VIEWS[gCurrentView].perspNorm);
-    texList = D_800891BC[D_800B0DF0->unk9];
+    texList = gSkyTextureSets[D_800B0DF0->unk9];
     vtxCount = 0;
-    vtx = D_800DBE88[gCurrentView][D_800BE9C0];
+    vtx = gSkyQuadVtx[gCurrentView][D_800BE9C0];
     vtxIdx = 0;
     lastFormat = -1;
     if (extent < 0) {
@@ -742,16 +742,16 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
                 }
                 break;
         }
-        if (D_800A2DA0[i].x0 == D_800A2DA0[i].x1) {
+        if (gSkyFaces[i].x0 == gSkyFaces[i].x1) {
             axis = 'x';
-        } else if (D_800A2DA0[i].y0 == D_800A2DA0[i].y1) {
+        } else if (gSkyFaces[i].y0 == gSkyFaces[i].y1) {
             axis = 'y';
         } else {
             axis = 'z';
         }
         texSet = (i == 5) ? 0 : i;
-        gfx = func_15110CFC(gfx, &vtx, texList[texSet], 0, 2, D_800A2DA0[i].width, D_800A2DA0[i].height, 60, 30,
-                            D_800A2DA0[i].x0, D_800A2DA0[i].y0, D_800A2DA0[i].z0, axis, rotation, extent, &vtxCount, &vtxIdx,
+        gfx = env_drawSkyFace(gfx, &vtx, texList[texSet], 0, 2, gSkyFaces[i].width, gSkyFaces[i].height, 60, 30,
+                            gSkyFaces[i].x0, gSkyFaces[i].y0, gSkyFaces[i].z0, axis, rotation, extent, &vtxCount, &vtxIdx,
                             queue, &lastFormat, sizes.v, shifts.v, palOffsets.v, tlutCounts.v, tiles.v, texSet);
     }
     if (vtxCount != 0) {

@@ -55,8 +55,8 @@ void blood_sprayFromBone(obj, type, sceneTag, arg3)
     if (obj != NULL && obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
         entry = &gBloodBonePoints[type];
         boneMtx = &obj->ob_matrix_ptr[entry->bone];
-        func_15143134(&entry->from, &from, boneMtx);
-        func_15143134(&entry->to, &to, boneMtx);
+        math_transformOffset(&entry->from, &from, boneMtx);
+        math_transformOffset(&entry->to, &to, boneMtx);
         blood_spray(&from, &to, ((func_150ADA68() * 170.0f) + 71.0f) * 0.01f, sceneTag, arg3);
     }
 }

@@ -29,25 +29,25 @@ u8 D_800D9E20;
 u8 D_800D9E21;                 // light count byte light_pickLights stored for player 0
 PointLight *gPickedLights[14];    // point lights light_pickLights picked this frame
 
-/* Loads the default near/far planes from D_800DD2F2/D_800DD2F4 and builds the matrix gView0Projection spanning
+/* Loads the default near/far planes from gFogNear/gFogFar and builds the matrix gView0Projection spanning
  * view 0 (+-halfWidth by +-halfHeight, depth 1..10000). */
 void view_initDefaultProjection(s32 arg0) {
-    gDefaultNear = D_800DD2F2;
-    gDefaultFar = D_800DD2F4;
+    gDefaultNear = gFogNear;
+    gDefaultFar = gFogFar;
     D_800D3670 = 100.0f - gDefaultFar;
     func_151EF954(&gView0Projection, -gViews->halfWidth, gViews->halfWidth, -gViews->halfHeight,
                   gViews->halfHeight, 1.0f, 10000.0f, 1.0f);
 }
 
-/* Widens a view's frustum FOVs by (fovXDelta, fovYDelta) plus the global D_800C3648, updates unk1C/unk20 and
- * rebuilds its projection. The near plane is D_800C364C, else `near`, else the default gDefaultNear. */
+/* Widens a view's frustum FOVs by (fovXDelta, fovYDelta) plus the global gViewFovOffset, updates unk1C/unk20 and
+ * rebuilds its projection. The near plane is gNearPlaneOverride, else `near`, else the default gDefaultNear. */
 void view_widenFov(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 near) {
     f32 nearPlane;
     f32 farPlane;
     f32 pad; // matching: keeps the stack frame size
 
-    gViews[viewIndex].frustumFovX = gViews[viewIndex].fovX + fovXDelta + D_800C3648;
-    gViews[viewIndex].frustumFovY = gViews[viewIndex].fovY + fovYDelta + D_800C3648;
+    gViews[viewIndex].frustumFovX = gViews[viewIndex].fovX + fovXDelta + gViewFovOffset;
+    gViews[viewIndex].frustumFovY = gViews[viewIndex].fovY + fovYDelta + gViewFovOffset;
     {
         f32 dist;
         f32 cosine;
@@ -65,15 +65,15 @@ void view_widenFov(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 n
         gViews[viewIndex].unk20 =
             (gViews[viewIndex].scaleY * dist) * gViews[viewIndex].pixelTanY * scale;
     }
-    if (D_800C364C != 0.0f) {
-        nearPlane = D_800C364C;
+    if (gNearPlaneOverride != 0.0f) {
+        nearPlane = gNearPlaneOverride;
     } else if (near != 0.0f) {
         nearPlane = near;
     } else {
         nearPlane = gDefaultNear;
     }
-    if (D_800C3650 != 0.0f) {
-        farPlane = D_800C3650;
+    if (gFarPlaneOverride != 0.0f) {
+        farPlane = gFarPlaneOverride;
     } else {
         farPlane = gDefaultFar;
     }
@@ -196,7 +196,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
     camera = &camera_global_Cameras[view];
     D_800BEBA0 = 1;
     skipWorld = FALSE;
-    if (D_800C35EA[0] == 1 && D_800C3662 != 0) {
+    if (gCutsceneStates[0] == 1 && D_800C3662 != 0) {
         skipWorld = TRUE;
     }
     if (D_800D18A0 & (1 << view)) {
@@ -241,18 +241,18 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                 gDPPipeSync(gfx++);
                 if (gMeshBuilt) {
                     if (level != 0x14 && level != 0x33 && level != 0x32) {
-                        gfx = func_150A5378(D_800B0E00[0], gfx, gViewMatrices[view], 0, 0, 1 << view);
+                        gfx = func_150A5378(gLevelDisplayLists[0], gfx, gViewMatrices[view], 0, 0, 1 << view);
                     } else {
-                        gSPDisplayList(gfx++, D_800B0E00[0]);
+                        gSPDisplayList(gfx++, gLevelDisplayLists[0]);
                     }
-                    if (D_800B0E00[1] != NULL) {
+                    if (gLevelDisplayLists[1] != NULL) {
                         gDPPipeSync(gfx++);
                         gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);
                         gfx = func_151733D8(gfx, 1);
                         if (level == 0x35) {
                             gfx = effect_setScrolledTileSizes(gfx);
                         }
-                        gSPDisplayList(gfx++, D_800B0E00[1]);
+                        gSPDisplayList(gfx++, gLevelDisplayLists[1]);
                     }
                     D_800BEBA0 = 0;
                     if (camera->HitsZBufferReadFlag && (camera->AvailableModes & 8)) {
@@ -260,22 +260,22 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                         gDPPipeSync(gfx++);
                     }
                 } else {
-                    gSPDisplayList(gfx++, D_800B0E00[0]);
+                    gSPDisplayList(gfx++, gLevelDisplayLists[0]);
                 }
             } else if (D_800BEAAA) {
-                gfx = func_150A50C0(D_800B0E00[0], gfx, gViewMatrices[view], 0, 0, 0);
+                gfx = func_150A50C0(gLevelDisplayLists[0], gfx, gViewMatrices[view], 0, 0, 0);
             } else {
-                gSPDisplayList(gfx++, D_800B0E00[0]);
+                gSPDisplayList(gfx++, gLevelDisplayLists[0]);
             }
         }
         gfx = light_reemitLights(gfx, D_800D9E10[view], D_800D9E20, D_800D9E21, &gViewAmbients[view][D_800BE9C0]);
-        if (D_800B0E00[2] != NULL) {
+        if (gLevelDisplayLists[2] != NULL) {
             gDPPipeSync(gfx++);
             gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);
-            gSPDisplayList(gfx++, D_800B0E00[2]);
+            gSPDisplayList(gfx++, gLevelDisplayLists[2]);
         }
     }
-    gfx = func_151742EC(gfx, view);
+    gfx = flare_runProbes(gfx, view);
     gDPPipeSync(gfx++);
     return gfx;
 }

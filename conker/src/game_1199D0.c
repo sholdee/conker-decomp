@@ -10,7 +10,7 @@ void particle_updateShapeEmitter(EmitterEffect *effect) {
     EmittedPoint point;
     f32 upper;
 
-    if (func_151464B8(effect->data.emitter.zone) == 0) {
+    if (math_isZoneHiddenFromViews(effect->data.emitter.zone) == 0) {
         emitter = &effect->data.emitter;
         emitter->accumulator += (9.04e-08f + func_150ADA68() * 9.87e-08f) * emitter->rate * gFrameDelta;
         if (emitter->accumulator > 1.0f) {
@@ -18,7 +18,7 @@ void particle_updateShapeEmitter(EmitterEffect *effect) {
             do {
                 EmitterEffect *spawned;
 
-                func_151432BC(emitter->shape, &point.x, &point.z, &upper, &point.y);
+                math_randomZoneFootprintPoint(emitter->shape, &point.x, &point.z, &upper, &point.y);
                 spawned = effect_newTimedEffect(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
                                                   sizeof(point), effect->base.header.owner, effect->base.header.kind);
                 if (spawned != NULL) {
@@ -220,9 +220,9 @@ void func_150ECC70(Camera *obj) {
         obj->AvailableModes &= ~0x80021200;
         obj->AvailableModes |= 8;
     }
-    func_150495B0(&D_80088AD0, D_80088ADC, &D_80088AE8, 4.0f, 6.0f, obj->SpringTime);
-    func_150495B0(&D_80088AD4, D_80088AE0, &D_80088AEC, 4.0f, 6.0f, obj->SpringTime);
-    func_150495B0(&D_80088AD8, D_80088AE4, &D_80088AF0, 4.0f, 6.0f, obj->SpringTime);
+    math_springTo(&D_80088AD0, D_80088ADC, &D_80088AE8, 4.0f, 6.0f, obj->SpringTime);
+    math_springTo(&D_80088AD4, D_80088AE0, &D_80088AEC, 4.0f, 6.0f, obj->SpringTime);
+    math_springTo(&D_80088AD8, D_80088AE4, &D_80088AF0, 4.0f, 6.0f, obj->SpringTime);
     script_command(1, 0x30F3, 0x12, (u8)D_80088AD0);
     script_command(1, 0x30F4, 0x12, (u8)D_80088AD4);
     script_command(1, 0x30F5, 0x12, (u8)D_80088AD8);

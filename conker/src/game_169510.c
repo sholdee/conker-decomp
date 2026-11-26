@@ -45,15 +45,15 @@ static s32 (*gQuadParticleUpdate1Funcs[])() = {
     particle_moveImpactStreak, effect_moveReleasedParticle, effect_swingParticleSize, func_1514B87C, particle_updateDriftQuad, func_150C308C, particle_updateRayBeam,
     weapon_updateProjectile, func_150AE35C, particle_updateGrowMotion, particle_updateBallisticMotion, sight_updateBeam, weapon_updateBulletParticle, trail_integrateScalarMotion,
     beam_updateAimed, beam_updateGlow, flamethrower_moveFlameLine, particle_updateJitterBallisticEased, particle_updateJitterBallistic, func_150E4174, particle_bobQuad,
-    effect_updateTrailPuff, func_15141928, particle_updateBoneBurstParticle, func_1519EF04, effect_moveTravelParticle, effect_updateBoneBeamParticle,
+    effect_updateTrailPuff, flare_glowOrbit, particle_updateBoneBurstParticle, cutscene_updateTrackParticle, effect_moveTravelParticle, effect_updateBoneBeamParticle,
 };
 static s32 (*gQuadParticleUpdate2Funcs[])() = {
-    NULL, func_150B95FC, particle_fadeTumbling, func_1514143C, particle_flickerSize, particle_growFlickerParticle, particle_shrinkFlickerParticle, beam_shrinkMotion,
+    NULL, func_150B95FC, particle_fadeTumbling, flare_moveGlowAttachment, particle_flickerSize, particle_growFlickerParticle, particle_shrinkFlickerParticle, beam_shrinkMotion,
     beam_shrinkMotionProgress, func_1518F1A0, beam_updateLinkedQuad, flamethrower_fadeJetLine, func_1518F384, particle_flickerChannelParticle, particle_growChannelParticle,
     particle_shrinkChannelParticle, particle_shrinkRisingChannelParticle, particle_fadeQuadParticleByLife, particle_fadeDrip, particle_shrinkSteamEffect, particle_updateSquashEffect, particle_fadeImpactStreak,
     particle_updateSpray, particle_updateDustPuff, particle_fadeInGrow, func_150C2FCC, blood_updateGrowingParticle, func_151B1478, func_1514AF74,
-    func_1514B8B0, particle_updateDriftQuad, func_151022AC, func_15141478, func_151415D4, flamethrower_fadeFlameLine, particle_updateJitterParticle,
-    particle_updateRelaunchedJitter, effect_updateBurstSpark, particle_swaySpark, trail_updateTrailGlow, particle_updateZoneEmitter, func_15141564, effect_updateBurstGlow,
+    func_1514B8B0, particle_updateDriftQuad, func_151022AC, flare_glowFlicker, flare_glowEnvelope, flamethrower_fadeFlameLine, particle_updateJitterParticle,
+    particle_updateRelaunchedJitter, effect_updateBurstSpark, particle_swaySpark, trail_updateTrailGlow, particle_updateZoneEmitter, flare_glowPulse, effect_updateBurstGlow,
     func_150FD514,
 };
 static s32 (*gQuadParticleExpireFuncs[])() = { NULL, particle_spawnBillboardOnExpire, particle_relaunchJitterParticle };
@@ -61,7 +61,7 @@ static s32 (*gQuadParticleExpireFuncs[])() = { NULL, particle_spawnBillboardOnEx
 /* Vertex functions of a particle (DefParticleHead.vertexFn), see particle_buildRotatedQuad. The prototype keeps the viewport an
  * s16; most entries take their own view of the particle. */
 static Vtx *(*gQuadParticleVertexFuncs[])(DefParticleHead *, s16) = {
-    particle_buildRotatedQuad, func_151408A4, particle_buildFlickerQuad, particle_buildBendingQuad, func_1514A6A0, particle_buildActorEmitterQuad, beam_fillMotionVerts,
+    particle_buildRotatedQuad, flare_buildGlowQuad, particle_buildFlickerQuad, particle_buildBendingQuad, func_1514A6A0, particle_buildActorEmitterQuad, beam_fillMotionVerts,
     beam_drawQuad, beam_drawLinkedQuad, flamethrower_buildJetLineQuad, particle_buildChannelQuad, particle_buildQuadParticleBillboard, particle_buildAxisQuad, particle_buildDripQuad,
     particle_buildSquashQuad, particle_buildImpactStreakQuad, effect_buildJointParticleQuad, particle_buildDriftQuad, particle_buildRayBeamQuad, particle_buildCentredAxisQuad, weapon_buildProjectileTail,
     func_150AE36C, effect_buildBoneBeamQuad, func_1513EE14, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, particle_buildBeamQuadFwd,
@@ -85,11 +85,11 @@ Gfx gQuadParticleEndDl[] = {
 static void (*gQuadSpriteDestroyFuncs[])(QuadSprite *) = { particle_destroyQuadSpriteDefault, particle_destroyQuadSpriteDefault };
 static void (*gQuadSpriteFreeFuncs[])(QuadSprite *) = { particle_freeQuadSpriteDefault, particle_freeQuadSpriteDefault };
 static void (*gQuadParticleDestroyFuncs[])() = {
-    particle_destroyQuadParticleDefault, particle_destroyRayBeam, particle_destroyBeamHitFx, func_151411E4, particle_destroyQuadParticleDefault, particle_destroyQuadParticleDefault, sight_freeBeam,
+    particle_destroyQuadParticleDefault, particle_destroyRayBeam, particle_destroyBeamHitFx, flare_destroyGlow, particle_destroyQuadParticleDefault, particle_destroyQuadParticleDefault, sight_freeBeam,
     beam_destroyAimed, effect_destroyBurstSpark, beam_destroyModelBeam, effect_destroyZoneEmitter, func_150FDCAC, particle_destroyQuadParticleDefault,
 };
 static void (*gQuadParticleFreeFuncs[])() = {
-    particle_freeQuadParticleDefault, particle_freeRayBeam, particle_freeBeamHitFx, func_15141250, particle_freeQuadParticleDefault, particle_freeQuadParticleDefault, func_151C95D8,
+    particle_freeQuadParticleDefault, particle_freeRayBeam, particle_freeBeamHitFx, flare_freeGlow, particle_freeQuadParticleDefault, particle_freeQuadParticleDefault, func_151C95D8,
     beam_freeAimed, effect_freeBurstSpark, beam_freeModelBeam, effect_freeZoneEmitter, func_150FDCD8, particle_freeQuadParticleDefault,
 };
 /* Event handler of a sprite (particle_onQuadSpriteEvent). */
@@ -97,7 +97,7 @@ static void (*gQuadSpriteEventFuncs[])(s32, s32, u8) = { func_1513CFD0 };
 /* Event handlers of a particle (ParticleDef.type, particle_onQuadParticleEvent); several take their own view of the particle and
  * of the event data. */
 static void (*gQuadParticleEventFuncs[])(DefParticleHead *, s32, u8) = {
-    func_1513E070, particle_onQuadParticleOwnerMsg, effect_boneBeamMessage, sight_handleBeamMessage, func_151416E8, beam_aimedMessage, effect_burstSparkMessage,
+    func_1513E070, particle_onQuadParticleOwnerMsg, effect_boneBeamMessage, sight_handleBeamMessage, flare_glowMessage, beam_aimedMessage, effect_burstSparkMessage,
     effect_burstSparkMessage, func_151C4AB0, func_150FDB0C, particle_onBoneBurstParticleEvent,
 };
 
@@ -488,12 +488,12 @@ Gfx *particle_drawQuadSprite(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
         blendMode = sprite->def.renderModes & 0xFF;
         combiner = (sprite->def.renderModes & 0xFFFF0000) >> 16;
         cullFlags = sprite->def.flags & 0x30;
-        gfx = func_151462C8(gfx, &sprite->link, 0, 0, 0, viewport, &sprite->pos, 2,
+        gfx = math_emitPointLights(gfx, &sprite->link, 0, 0, 0, viewport, &sprite->pos, 2,
                             (sprite->def.flags & 0x4000) ? sprite->def.unk1C : 0);
-        func_151441A4(&primR, &primG, &primB, &primA, sprite->def.rgba[0], sprite->def.rgba[1], sprite->def.rgba[2],
+        math_pickPrimColour(&primR, &primG, &primB, &primA, sprite->def.rgba[0], sprite->def.rgba[1], sprite->def.rgba[2],
                       sprite->def.rgba[3], 0xFF, 0xFF, 0xFF, sprite->def.unk10, sprite->def.unk11,
                       (sprite->def.flags & 0x100) ? sprite->def.unk16 : 3);
-        func_151442FC(&envR, &envG, &envB, &envA, sprite->def.rgba[0], sprite->def.rgba[1], sprite->def.rgba[2],
+        math_pickEnvColour(&envR, &envG, &envB, &envA, sprite->def.rgba[0], sprite->def.rgba[1], sprite->def.rgba[2],
                       sprite->def.rgba[3], 0xFF, 0xFF, 0xFF, sprite->def.unk10, sprite->def.unk11,
                       (sprite->def.flags & 0x200) ? sprite->def.unk17 : 4);
         geometry = 0;
@@ -503,15 +503,15 @@ Gfx *particle_drawQuadSprite(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
         if (cullFlags & 0x20) {
             geometry |= G_CULL_BACK;
         }
-        gfx = func_15142B7C(gfx, ((sprite->def.flags & 0x400) ? G_LIGHTING : 0) | geometry | G_ZBUFFER, G_CULL_BOTH);
+        gfx = math_gfxUpdateGeometryMode(gfx, ((sprite->def.flags & 0x400) ? G_LIGHTING : 0) | geometry | G_ZBUFFER, G_CULL_BOTH);
         if (sprite->def.texture != 0xFF) {
-            gfx = func_15142E24(gfx, &gEffectTextures[sprite->def.texture], sprite->def.frame, 2, 0, 0, sprite->def.texture,
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[sprite->def.texture], sprite->def.frame, 2, 0, 0, sprite->def.texture,
                                 0, 0, &needSync, (sprite->def.flags & 0x20000) ? 0x3E : 3);
         }
-        gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
-        gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
+        gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &needSync);
+        gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &needSync);
         gfx = particle_setCombineMode(gfx, combiner, &needSync);
-        gfx = func_15142FBC(gfx,
+        gfx = math_gfxSetOtherMode(gfx,
                             G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
                                 ((sprite->def.texture == 0xFF) ? 0 : (u32)gSpriteTlutMode /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
                                 G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
@@ -719,7 +719,7 @@ void *particle_spawnAxisQuadParticleNoModel(void *def, const void *colors, u8 up
 /*
  * Computes the two half-axes of a particle quad rotated by angle. With onSlope the quad lies on the
  * slope shadow_getTriSlopes returns (each axis keeps its length); otherwise it lies in the plane of the
- * basis func_15144E80 returns.
+ * basis math_getTriEdges returns.
  */
 s32 particle_computeQuadAxes(ParticleAxes *axes, s16 angle, f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface,
                    u8 onSlope) {
@@ -747,8 +747,8 @@ s32 particle_computeQuadAxes(ParticleAxes *axes, s16 angle, f32 width, f32 heigh
     f32 w;
 
     if (onSlope != 0) {
-        cosA = func_151423D8(angle - 0x40);
-        sinA = func_151423D8(angle);
+        cosA = math_cosBinAngleMasked(angle - 0x40);
+        sinA = math_cosBinAngleMasked(angle);
         widthSin = width * sinA;
         heightSin = height * sinA;
         if (shadow_getTriSlopes(triPtrs, surface->v, &slopeX, &slopeZ) == 0) {
@@ -803,15 +803,15 @@ s32 particle_computeQuadAxes(ParticleAxes *axes, s16 angle, f32 width, f32 heigh
             axes->v.z = k2 * t;
         }
     } else {
-        cosB = func_151423D8(angle - 0x40);
-        sinB = func_151423D8(angle);
-        if (func_15144E80(surface, &basisU, &basisV, &basisN) == 0) {
+        cosB = math_cosBinAngleMasked(angle - 0x40);
+        sinB = math_cosBinAngleMasked(angle);
+        if (math_getTriEdges(surface, &basisU, &basisV, &basisN) == 0) {
             return 0;
         }
-        if (func_15145128(&basisU, &basisU, &len, &unused2) == 0) {
+        if (math_vec3Normalize(&basisU, &basisU, &len, &unused2) == 0) {
             return 0;
         }
-        if (func_15145128(&basisV, &basisV, &len, &unused2) == 0) {
+        if (math_vec3Normalize(&basisV, &basisV, &len, &unused2) == 0) {
             return 0;
         }
         {
@@ -882,12 +882,12 @@ Gfx *particle_drawQuadParticle(Gfx *gfx, DefParticleHead *particle, s16 viewport
             }
             return gfx;
         }
-        gfx = func_151462C8(gfx, &particle->link, 0, 0, 0, viewport, &particle->def.pos, 2,
+        gfx = math_emitPointLights(gfx, &particle->link, 0, 0, 0, viewport, &particle->def.pos, 2,
                             (particle->def.flags & 0x4000000) ? particle->def.unk50 : 0);
-        func_151441A4(&primR, &primG, &primB, &primA, particle->def.rgba[0], particle->def.rgba[1],
+        math_pickPrimColour(&primR, &primG, &primB, &primA, particle->def.rgba[0], particle->def.rgba[1],
                       particle->def.rgba[2], particle->def.rgba[3], 0xFF, 0xFF, 0xFF, particle->def.unk44,
                       particle->def.unk45, (particle->def.flags & 0x40000) ? particle->def.unk46 : 4);
-        func_151442FC(&envR, &envG, &envB, &envA, particle->def.rgba[0], particle->def.rgba[1],
+        math_pickEnvColour(&envR, &envG, &envB, &envA, particle->def.rgba[0], particle->def.rgba[1],
                       particle->def.rgba[2], particle->def.rgba[3], 0xFF, 0xFF, 0xFF, particle->def.unk44,
                       particle->def.unk45, (particle->def.flags & 0x80000) ? particle->def.unk47 : 5);
         geometry = 0;
@@ -900,19 +900,19 @@ Gfx *particle_drawQuadParticle(Gfx *gfx, DefParticleHead *particle, s16 viewport
         if (particle->def.flags & 0x100000) {
             geometry |= G_LIGHTING;
         }
-        gfx = func_15142B7C(gfx, geometry | G_ZBUFFER, G_CULL_BOTH);
+        gfx = math_gfxUpdateGeometryMode(gfx, geometry | G_ZBUFFER, G_CULL_BOTH);
         if (particle->def.texture != 0xFF) {
             s32 clamp;
 
             clamp = (particle->def.flags & 0x200000) ? 0 : 2;
-            gfx = func_15142E24(gfx, &gEffectTextures[particle->def.texture], particle->def.frame, clamp, 0, 0,
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[particle->def.texture], particle->def.frame, clamp, 0, 0,
                                 particle->def.texture, 0, 0, &needSync,
                                 (particle->def.flags & 0x40000000) ? 0x3E : 3);
         }
-        gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
-        gfx = func_15142CF0(gfx, 0xF2, 0, primR, primG, primB, primA, &needSync);
+        gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &needSync);
+        gfx = math_gfxSetPrimColor(gfx, 0xF2, 0, primR, primG, primB, primA, &needSync);
         gfx = particle_setCombineMode(gfx, combiner, &needSync);
-        gfx = func_15142FBC(gfx,
+        gfx = math_gfxSetOtherMode(gfx,
                             G_PM_NPRIMITIVE | ((particle->def.flags & 0x20000000) ? G_CYC_2CYCLE : G_CYC_1CYCLE) |
                                 G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
                                 ((particle->def.texture == 0xFF) ? 0 : (u32)gSpriteTlutMode /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
@@ -1018,8 +1018,8 @@ void particle_layQuadSpriteFlat(QuadSprite *sprite, f32 x, f32 y, f32 z, f32 wid
     f32 p3;
     f32 u[1];
 
-    cosA[0] = func_151423D8(angle - 0x40);
-    sinA = func_151423D8(angle);
+    cosA[0] = math_cosBinAngleMasked(angle - 0x40);
+    sinA = math_cosBinAngleMasked(angle);
     widthSin = (&width)[0] * sinA;
     frontX = (&x)[0] + widthSin;
     lengthCos = cosA[0] * (&length)[0];
@@ -1049,7 +1049,7 @@ void func_1513E2A4(void) {
 
 /*
  * Places a sprite's quad (half-size width x height, rotated by angle) around (x, y, z): in the plane of
- * the basis func_15144E80 returns for surface, or with no surface on the slope from shadow_getTriSlopes.
+ * the basis math_getTriEdges returns for surface, or with no surface on the slope from shadow_getTriSlopes.
  */
 s32 particle_layQuadSpriteOnSurface(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
                   f32 height, u8 angle) {
@@ -1080,15 +1080,15 @@ s32 particle_layQuadSpriteOnSurface(QuadSprite *sprite, Vec3s **triPtrs, Collisi
     Vtx_t *v;
 
     vtx = &sprite->vtx[0].v;
-    cosA = func_151423D8(angle - 0x40);
-    sinA = func_151423D8(angle);
+    cosA = math_cosBinAngleMasked(angle - 0x40);
+    sinA = math_cosBinAngleMasked(angle);
     if (surface != NULL) {
         v = vtx;
-        if (func_15144E80(surface, &basisU, &basisV, NULL) == 0) {
+        if (math_getTriEdges(surface, &basisU, &basisV, NULL) == 0) {
             return 0;
         }
-        func_15145128(&basisU, &basisU, NULL, NULL);
-        func_15145128(&basisV, &basisV, NULL, NULL);
+        math_vec3Normalize(&basisU, &basisU, NULL, NULL);
+        math_vec3Normalize(&basisV, &basisV, NULL, NULL);
         {
             f32 pad; // matching: -g3 scope
 
@@ -1695,7 +1695,7 @@ Vtx *particle_buildBeamQuad(DefParticleHead *particle, u8 reversed, BeamScale *s
     } else {
         return NULL;
     }
-    camera = func_15144B34(viewport);
+    camera = math_getCameraPos(viewport);
     width = particle->def.width * scale->width;
     length = particle->def.height * scale->length;
     delta.x = particle->def.rot.x - particle->def.pos.x;

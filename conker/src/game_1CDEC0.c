@@ -12,7 +12,7 @@ void particle_startSparkEmitter(Actor *actor, s16 duration, u8 owner, s32 arg3) 
     if (actor != NULL) {
         emitter.x = actor->xpos;
         emitter.z = actor->zpos;
-        if (D_800C35EA[0] != 1) {
+        if (gCutsceneStates[0] != 1) {
             emitter.y = actor->floorY;
             emitter.accum = 0.0f;
             switch (collision_getSurfaceType(actor->floorMaterial)) {
@@ -66,10 +66,10 @@ s32 particle_spawnFastSpark(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 origi
     f32 speed;
 
     tilt = func_150ADA20() % 15U - 63;
-    sinTilt = func_151423D8(tilt);
-    cosTilt = func_151423D8(tilt - 64);
-    sinAngle = func_151423D8(angle);
-    cosAngle = func_151423D8(angle - 64);
+    sinTilt = math_cosBinAngleMasked(tilt);
+    cosTilt = math_cosBinAngleMasked(tilt - 64);
+    sinAngle = math_cosBinAngleMasked(angle);
+    cosAngle = math_cosBinAngleMasked(angle - 64);
     speed = func_150ADA68() * 503.0f + 801.0f;
     spark.velX = speed * sinTilt * cosAngle;
     spark.velY = -speed * cosTilt;

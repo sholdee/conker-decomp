@@ -532,7 +532,7 @@ void func_15195528(Actor *self, Actor *other, u8 *arg2) {
     } else {
         angle = func_150ADA68() * 360.0f;
     }
-    func_1514373C(angle * 0.01745329238f, 1.0f, &dir[0], &dir[2]);
+    math_dirFromAngleXZ(angle * 0.01745329238f, 1.0f, &dir[0], &dir[2]);
     dir[1] = 0.0f;
     dx = dir[0] * 20.0f;
     from.x = other->xpos + dx;

@@ -11,7 +11,7 @@ static const Vec3f D_800A1B8C = { 0.0f, 98.0f, 1198.0f };
 /*
  * While query 0x4003 holds and the actor is alive, measures how far the actor's position has progressed
  * along the segment from D_800A1B80 to D_800A1B8C (scaled by 0.75, clamped to [0, 1]) and passes values
- * derived from it to script_command; also sets unk374 and turns unk37C via func_15049688. Otherwise clears
+ * derived from it to script_command; also sets unk374 and turns unk37C via math_springAngleTo. Otherwise clears
  * the flags it set.
  */
 void func_150F6B00(Camera *actor) {
@@ -27,10 +27,10 @@ void func_150F6B00(Camera *actor) {
 
     if (script_query(1, 0x4003, 6, 0x2000) && actor->CharPtr->energy) {
         actor->AvailableModes |= 0xC0001000;
-        func_15048F90(&D_800A1B80, &actor->focus, &offset);
-        func_15048F90(&D_800A1B80, &D_800A1B8C, &direction);
+        math_vec3Diff(&D_800A1B80, &actor->focus, &offset);
+        math_vec3Diff(&D_800A1B80, &D_800A1B8C, &direction);
         inverseLength = 1.0f / func_150AD930(&direction.x);
-        func_1504917C(&direction, &normalized);
+        math_vec3Unit(&direction, &normalized);
         projection = func_150AD900(&normalized.x, &offset.x) * inverseLength * 0.75f;
         if (projection < 0.0f) {
             blend = 0.0f;
@@ -51,7 +51,7 @@ void func_150F6B00(Camera *actor) {
         }
         vertical = -20.0f;
         script_command(3, 0x4003, 3, (s32)lateral, (s32)vertical, (s32)LERP(-5530.0f, 1198.0f, blend)); // z of the segment ends
-        func_15049688(&actor->CameraAngle, func_15048FC8(&gLastBeamDir) - 180.0f, &actor->AutoBehindAngleVel, 8.0f, 10.0f, actor->SpringTime);
+        math_springAngleTo(&actor->CameraAngle, math_vec3Heading(&gLastBeamDir) - 180.0f, &actor->AutoBehindAngleVel, 8.0f, 10.0f, actor->SpringTime);
         actor->CameraAngleRad = actor->CameraAngle * 0.01745329238f; // degrees to radians
     } else {
         actor->AvailableModes &= 0x3FFFEFFF;

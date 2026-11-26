@@ -51,7 +51,7 @@ void sprite_updateTexQuad(TexturedQuad *quad) {
             }
         }
         if (quad->frameSpeed != 0) {
-            dead = func_1514401C(quad->texture, &quad->frameSpeed, &quad->frame, quad->animFlags);
+            dead = math_advanceFrameSeq(quad->texture, &quad->frameSpeed, &quad->frame, quad->animFlags);
         }
     }
     if (dead) {
@@ -74,18 +74,18 @@ Gfx *sprite_drawTexQuad(Gfx *gfx, TexturedQuad *quad, s32 view) {
     s16 envR, envG, envB, envA;
 
     needSync = TRUE;
-    func_151441A4(&primR, &primG, &primB, &primA, quad->color0[0], quad->color0[1], quad->color0[2],
+    math_pickPrimColour(&primR, &primG, &primB, &primA, quad->color0[0], quad->color0[1], quad->color0[2],
                   quad->color0[3], quad->color1[0], quad->color1[1], quad->color1[2], quad->color1[3],
                   quad->colorLevel, quad->primMode);
-    func_151442FC(&envR, &envG, &envB, &envA, quad->color0[0], quad->color0[1], quad->color0[2],
+    math_pickEnvColour(&envR, &envG, &envB, &envA, quad->color0[0], quad->color0[1], quad->color0[2],
                   quad->color0[3], quad->color1[0], quad->color1[1], quad->color1[2], quad->color1[3],
                   quad->colorLevel, quad->envMode);
-    gfx = func_15142B7C(gfx, quad->geometrySet, quad->geometryClear);
-    gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
-    gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
-    gfx = func_15142E24(gfx, &gEffectTextures[quad->texture], quad->frame, 0, 0, 0, quad->texture, 0, 0, &needSync, 3);
+    gfx = math_gfxUpdateGeometryMode(gfx, quad->geometrySet, quad->geometryClear);
+    gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &needSync);
+    gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &needSync);
+    gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[quad->texture], quad->frame, 0, 0, 0, quad->texture, 0, 0, &needSync, 3);
     gfx = particle_setCombineMode(gfx, quad->combiner, &needSync);
-    gfx = func_15142FBC(gfx,
+    gfx = math_gfxSetOtherMode(gfx,
                         G_PM_NPRIMITIVE | ((quad->flags & 2) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_PERSP |
                             G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE |
                             G_CD_NOISE | G_AD_NOISE,

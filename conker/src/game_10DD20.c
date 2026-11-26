@@ -17,7 +17,7 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
     if (obj == NULL) {
         return;
     }
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         sound_playActorUntracked(0x2BB, obj, 0x7FFF, 1000, 2000);
         sound_playActorUntracked(0x2BA, obj, 0x7FFF, 1000, 2000);
     }
@@ -108,6 +108,6 @@ void func_150E0BE0(Actor *obj) {
     obj->unkBC = obj->xpos - obj->old_xpos; // 0xBC is an f32 that structs.h still calls padBC
     obj->unk148 = obj->zpos - obj->old_zpos;
     if (func_150535F4(obj) == 0) {
-        func_1502178C(obj, 0, -1);
+        cutscene_applyObjectTrack(obj, 0, -1);
     }
 }

@@ -31,17 +31,17 @@ void func_1500FA64(void) {
     tmp.ends = D_80096320;
     tmp.id = 1;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y);
-    func_151ACBD4(&tmp, 0);
+    rope_create(&tmp, 0);
 
     tmp.ends = D_80096338;
     tmp.id = 2;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y);
-    func_151ACBD4(&tmp, 0);
+    rope_create(&tmp, 0);
 
     tmp.ends = D_80096350;
     tmp.id = 3;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y);
-    func_151ACBD4(&tmp, 0);
+    rope_create(&tmp, 0);
 
     tmp.ends = D_80096368;
     tmp.id = 4;
@@ -49,7 +49,7 @@ void func_1500FA64(void) {
     tmp.ends = D_80096380;
     tmp.id = 5;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y);
-    func_151ACBD4(&tmp, 0);
+    rope_create(&tmp, 0);
 
     func_1500F9D0(-0x6E7, -0x46A, 0x421, -0x648, 1);
     func_1500F9D0(-0xA71, 0x71B, 0x82B, -0x602, 2);

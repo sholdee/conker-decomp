@@ -159,7 +159,7 @@ void camera_placeAt(Camera *view, Actor *actor, Vec3f *eye) {
     camera_updatePlayerAngle(view);
 
     view->SpecialFlags |= 4;
-    if (level != 0x21 && D_800C35EA[0] != 1) {
+    if (level != 0x21 && gCutsceneStates[0] != 1) {
         camera_queueMessage(view, 5, NULL);
         gCamShot.yaw = view->CameraAngle;
         camera_queueMessage(view, 8, &gCamShot);

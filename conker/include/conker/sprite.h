@@ -44,7 +44,7 @@ typedef struct TexturedQuad {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 texture;          // index into gEffectTextures
     /* 0x11 */ u8 flags;            // 1: lifetime counts down, 2: two-cycle mode
-    /* 0x12 */ u8 animFlags;        // end-of-animation behaviour, see func_1514401C
+    /* 0x12 */ u8 animFlags;        // end-of-animation behaviour, see math_advanceFrameSeq
     /* 0x13 */ u8 pad13;
     /* 0x14 */ s16 lifetime;
     /* 0x16 */ u8 pad16[2];

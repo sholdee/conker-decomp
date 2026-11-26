@@ -42,7 +42,7 @@ void particle_spawnSpiral(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed
     delta.x = to->x - from->x;
     delta.y = to->y - from->y;
     delta.z = to->z - from->z;
-    if (func_15145128(&delta, &dir, &length, &invLength) != 0) {
+    if (math_vec3Normalize(&delta, &dir, &length, &invLength) != 0) {
         spiral.flags = (fadeNear ? SPIRAL_FADE_NEAR : 0) | (sound ? SPIRAL_SOUND : 0);
         spiral.timeLeft = length * invSpeed;
         spiral.center = *from;
@@ -115,7 +115,7 @@ s32 particle_moveSpiral(SpiralParticle *obj) {
     {
         f32 up;
         f32 side;
-        func_1514373C(spiral->phase, spiral->radius, &side, &up);
+        math_dirFromAngleXZ(spiral->phase, spiral->radius, &side, &up);
         spiral->phase += spiral->phaseRate * gFrameDelta;
         spiral->center.x += obj->vel.x * gFrameDelta;
         spiral->center.y += obj->vel.y * gFrameDelta;
@@ -141,11 +141,11 @@ s32 particle_updateSpiralFadeSound(SpiralParticle *obj) {
         Vec3f *camera;
         Vec3f delta;
 
-        camera = func_15144B34(0);
+        camera = math_getCameraPos(0);
         delta.x = obj->pos.x - camera->x;
         delta.y = obj->pos.y - camera->y;
         delta.z = obj->pos.z - camera->z;
-        dist = func_15143E64(&delta);
+        dist = math_vec3Length(&delta);
     }
     if (spiral->flags & SPIRAL_FADE_NEAR) {
         if (dist < 500.0f) {
@@ -215,16 +215,16 @@ void particle_updateCameraSpiralEmitter(CameraEmitter *emitter) {
     }
     data->pending += (0.05100000277f + func_150ADA68() * 0.153000012f) * gFrameDelta;
     if (data->pending > 1.0f) {
-        eye = func_15144B34(data->camera->CNumber);
+        eye = math_getCameraPos(data->camera->CNumber);
         /* degrees to 256-step binary angle */
         yaw = (data->camera->TrueCameraAngle + 180.0f) * 0.7111111283f;
         do {
-            func_15143874(yaw + 21, func_150ADA68() * 381.0f + 254.0f, &from.x, &from.z);
+            math_dirFromBinAngleXZ(yaw + 21, func_150ADA68() * 381.0f + 254.0f, &from.x, &from.z);
             from.y = func_150ADA68() * 212.0f + -133.0f;
             from.x += eye->x;
             from.y += eye->y;
             from.z += eye->z;
-            func_15143874(yaw - 21, func_150ADA68() * 381.0f + 254.0f, &to.x, &to.z);
+            math_dirFromBinAngleXZ(yaw - 21, func_150ADA68() * 381.0f + 254.0f, &to.x, &to.z);
             to.y = func_150ADA68() * 212.0f + -133.0f;
             to.x += eye->x;
             to.y += eye->y;

@@ -123,7 +123,7 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
     params.owner = owner;
     params.ownerId = owner->unique_id;
     params.unk41 = 1;
-    params.pos = D_800A5480;
+    params.pos = gZeroVec3f;
     params.fadeStart = 8;
     params.fadeRate = 0x1F;
     effect_newModelEffect(&params, 0, 1.0f, 0, 0, 0, arg1, arg2);
@@ -161,13 +161,13 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
 }
 
 /*
- * Effect update (gModelEffectUpdate2Funcs[3]): this frame's matrix is func_150A8050's for (0, func_15144AA8(0) + 25, 0),
+ * Effect update (gModelEffectUpdate2Funcs[3]): this frame's matrix is func_150A8050's for (0, math_getCameraYaw(0) + 25, 0),
  * placed 120 units above the owner and scaled by 0.551.
  */
 s32 func_151D6E60(ModelEffect *fx) {
     f32 scale;
 
-    func_150A8050(fx->mtx[D_800BE9C0], 0.0f, func_15144AA8(0) + 25.0f, 0.0f);
+    func_150A8050(fx->mtx[D_800BE9C0], 0.0f, math_getCameraYaw(0) + 25.0f, 0.0f);
 
     scale = 0.5509999990f;
     fx->mtx[D_800BE9C0][3][0] = fx->params.owner->xpos;

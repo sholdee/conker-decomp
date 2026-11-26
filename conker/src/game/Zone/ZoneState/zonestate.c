@@ -39,7 +39,7 @@ void zone_updateGlobal(s32 ticks) {
                               zones[i].data1);
                 zones[i].data3 = 0;
             }
-            if (D_800C35EA[0] == 1) {
+            if (gCutsceneStates[0] == 1) {
                 if (zone_isOutside(movement_obj, &zones[i], 0) == 0) {
                     zone_startSound(&zones[i]);
                 }
@@ -424,7 +424,7 @@ void zone_updateActor(Actor *actor) {
                     __osPiGetAccess();
                     osPiRawReadIo(func_150A1040(0xB0000054), &raw);
                     __osPiRelAccess();
-                    if (func_150A1040(raw) == 0x1090C2B && D_800C35EA[0] == 0 && actor->energy != 0) {
+                    if (func_150A1040(raw) == 0x1090C2B && gCutsceneStates[0] == 0 && actor->energy != 0) {
                         player_startWarp(actor, zones[i].subTypeData, zones[i].data1);
                         if (level != zones[i].subTypeData) {
                             actor->imune = 0xFF;
@@ -441,16 +441,16 @@ void zone_updateActor(Actor *actor) {
                     break;
                 case ZONE_TYPE_NEUTRAL:
                     if (zones[i].subTypeData == 5) {
-                        func_151AE06C(actor, &zones[i]);
+                        rope_touchZone(actor, &zones[i]);
                     }
                     break;
                 case ZONE_TYPE_CUTSCENE:
                     if (unk127 != 0xFF && !(prevBits & 1) && gFrontEndState == 0 && actor->energy != 0 &&
-                        D_800C35EA[0] == 0) {
+                        gCutsceneStates[0] == 0) {
                         if (zones[i].subTypeData == 0) {
                             zones[i].inactive = 1;
                         }
-                        func_1501D348(level, zones[i].data1, 0, 0, 0);
+                        cutscene_start(level, zones[i].data1, 0, 0, 0);
                         zones[i].data2++;
                     }
                     break;

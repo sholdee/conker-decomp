@@ -46,9 +46,9 @@ BeamObj *beam_spawnCastBeam(Actor *owner) {
             spawn.a = 0xFF;
             spawn.brightness = 0xFF;
             spawn.width = spawn.height = 1511.0f;
-            spawn.pos = D_800A5480;
-            spawn.offset = D_800A5480;
-            spawn.vel = D_800A5480;
+            spawn.pos = gZeroVec3f;
+            spawn.offset = gZeroVec3f;
+            spawn.vel = gZeroVec3f;
             spawn.fadeStart = 1;
             spawn.fadeRate = 0xFF;
             spawn.scaleStart = 1;
@@ -96,7 +96,7 @@ void beam_updateCastBeam(BeamObj *obj) {
         return;
     }
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         if (beam->ends[0] != NULL && beam->ends[1] != NULL) {
             beam->ends[0]->mode = 3;
             beam->ends[1]->mode = 3;
@@ -107,7 +107,7 @@ void beam_updateCastBeam(BeamObj *obj) {
     origin.x = owner->xpos;
     origin.y = owner->ypos + 46.0f;
     origin.z = owner->zpos;
-    func_15145740(owner, &gLastBeamDir, NULL, NULL, 0.0f);
+    math_getActorAim(owner, &gLastBeamDir, NULL, NULL, 0.0f);
 
     gLastBeamDir.x *= 0.001f;
     gLastBeamDir.y *= 0.001f;

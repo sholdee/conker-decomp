@@ -63,9 +63,9 @@ void camera_easeHeight(Camera *camera) {
             return;
         }
         if ((camera->Mode & 0x100) || cappedByCeiling) {
-            func_150495B0(&height, targetHeight, &camera->YVel, 5.0f, 9.0f, camera->SpringTime);
+            math_springTo(&height, targetHeight, &camera->YVel, 5.0f, 9.0f, camera->SpringTime);
         } else {
-            func_150495B0(&height, targetHeight, &camera->YVel, camera->AccelA,
+            math_springTo(&height, targetHeight, &camera->YVel, camera->AccelA,
                           camera->AccelB, camera->SpringTime);
         }
     }

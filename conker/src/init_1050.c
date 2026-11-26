@@ -46,7 +46,7 @@ void boot_entry(void) {
 void boot_idleThread(void *arg) {
     rom_init(); // create message queues
     osCreateThread(&gMainThread, 3, boot_mainThread, arg, &gMainThreadStackTop[0x80], 10);
-    if ((D_8002AC5C == 0) && (D_80000310 == 6105)) { // osCicId: CIC-NUS-6105
+    if ((gResetPending == 0) && (D_80000310 == 6105)) { // osCicId: CIC-NUS-6105
         osStartThread(&gMainThread);
     }
     osSetThreadPri(&gIdleThread, OS_PRIORITY_IDLE);
@@ -69,7 +69,7 @@ void boot_mainThread(void *arg) {
     s32 i;
     u32 framebufferSize;
 
-    func_10005218();
+    sched_startPreNmiThread();
     clearSize = 0x80400000 - (s32)D_80043B40;
     if (D_8000030C == 0) { // osResetType: cold reset
         bzero(D_80043B40, clearSize);
@@ -88,12 +88,12 @@ void boot_mainThread(void *arg) {
     osCreateViManager(OS_PRIORITY_VIMGR);
 
     romBase = (s32)&game_us_rzip_ROM_START;
-    rom_read(romBase, D_80082B20, 16, 1);
-    compressedRomAddr = (s32)D_80082B20[0] + romBase; // the segment header, not yet a list pointer
+    rom_read(romBase, gLevelAssetLists, 16, 1);
+    compressedRomAddr = (s32)gLevelAssetLists[0] + romBase; // the segment header, not yet a list pointer
     size = (u32)&debugger_us_ROM_START - compressedRomAddr;
     compressed = allocate_memory(size, 1, 2, 0);
     rom_read(compressedRomAddr, compressed, size, 1);
-    func_10006240(compressed, D_80082B20, D_8003809C);
+    func_10006240(compressed, gLevelAssetLists, D_8003809C);
     heap_free(compressed);
 
     D_800354F8 = (u8 *)ALIGN16(&D_80033330);

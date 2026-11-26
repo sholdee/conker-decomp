@@ -242,7 +242,7 @@ void func_1502C1A4(void) {
             visible = FALSE;
             if (obj->drawtype != 3 && id != 0xFF && obj->unk123 == 0 && (obj->unk66 & 0x10) != 0x10 &&
                 obj->shadow_size != 0 && obj->attach_char == 0 &&
-                (D_800C3638 == 0 || D_800C3656[0] != 0 || func_150229E4(obj) != 0) &&
+                (D_800C3638 == 0 || D_800C3656[0] != 0 || cutscene_isActorBound(obj) != 0) &&
                 (obj->unk88 == 0 || obj->unkCC >= -150)) {
                 for (i = 0; i <= gScreenLayout; i++) {
                     if (actor_getAlpha(obj, i) != 0) {
@@ -414,7 +414,7 @@ void actor_selectLod(s32 index, s16 player, s32 mode) {
     } else if (gIsMultiplayer != 0) {
         lod = 1;
     }
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         lod = 0;
     }
     if (maxLod < lod) {
@@ -445,7 +445,7 @@ Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     Actor *obj;
 
     start = gdl;
-    if (D_800C3638 != 0 && D_800C3656[0] == 0 && func_150229E4(&movement_obj[index]) == 0) {
+    if (D_800C3638 != 0 && D_800C3656[0] == 0 && cutscene_isActorBound(&movement_obj[index]) == 0) {
         return gdl;
     }
     obj = &movement_obj[index];
@@ -618,7 +618,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
                     if (levelFog == 0) {
                         gDPSetFogColor(gdl++, fogR, fogG, fogB, fogA);
                     } else {
-                        gDPSetFogColor(gdl++, D_800DD2E4[0], D_800DD2E4[1], D_800DD2E4[2], fogA);
+                        gDPSetFogColor(gdl++, gFogColour[0], gFogColour[1], gFogColour[2], fogA);
                     }
                     gDPSetPrimColor(gdl++, 0xF2, 0, primR, primG, primB, 0);
                     gDPSetEnvColor(gdl++, envR, envG, envB, alpha);
@@ -894,7 +894,7 @@ load:
             {
                 s16 scale;
 
-                if (D_800C35EA[0] != 1) {
+                if (gCutsceneStates[0] != 1) {
                     scale = obj->scale_y * obj->unkCC;
                 } else {
                     scale = 0;
@@ -1103,7 +1103,7 @@ void actor_updateCulling(s32 index) {
     }
     oldMask = obj->unk74;
     obj->unk74 |= 0xF;
-    if (D_800C3638 != 0 && D_800C3656[0] == 0 && func_150229E4(obj) == 0) {
+    if (D_800C3638 != 0 && D_800C3656[0] == 0 && cutscene_isActorBound(obj) == 0) {
         return;
     }
     if (obj->playernumber != 0xFF && !(gMatchState.playerMask & (1 << obj->playernumber))) {
@@ -1124,7 +1124,7 @@ void actor_updateCulling(s32 index) {
     yOffset = (gModelDefs[id]->bodyHeight + obj->unkCC) * obj->scale_y;
     obj->cull_radius_xz = width;
     range = obj->cullDistance;
-    if (D_800C35EA[0] == 1 && D_800C3660[0] == 0) {
+    if (gCutsceneStates[0] == 1 && D_800C3660[0] == 0) {
         range = 0;
     }
     maxDist = 0;
@@ -1161,7 +1161,7 @@ void actor_updateCulling(s32 index) {
             if (maxDist < dist) {
                 maxDist = dist;
             }
-            if ((obj->unk66 & 0x80) != 0x80 && dist <= cullDist && D_800C35EA[0] != 1) {
+            if ((obj->unk66 & 0x80) != 0x80 && dist <= cullDist && gCutsceneStates[0] != 1) {
                 inside = TRUE;
             }
         }
@@ -1178,7 +1178,7 @@ void actor_updateCulling(s32 index) {
                 actor_fadeCommand(obj, 9, 0, 0, i);
                 event = -1;
             }
-            if ((obj->noshove & 0x800000) && event != 8 && D_800C35EA[0] != 1 && func_1503F904(obj, i, oldMask) != 0) {
+            if ((obj->noshove & 0x800000) && event != 8 && gCutsceneStates[0] != 1 && func_1503F904(obj, i, oldMask) != 0) {
                 inside = TRUE;
             }
         } else {
@@ -1199,7 +1199,7 @@ void actor_updateCulling(s32 index) {
     if (obj->CameraPtr != NULL && (obj->CameraPtr->Mode == 0x10000 || obj->mv->SniperState != 0)) {
         obj->unk74 |= 1 << index;
     }
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         if (obj->unk2FC != 0) {
             obj->unk74 |= obj->unk2FC;
         }
@@ -1416,7 +1416,7 @@ void func_1502EEF4(s32 index) {
             movement_obj[index].eyeCode[i] = 1;
         }
     }
-    func_1507E3C0(&movement_obj[index]);
+    face_showEyeParts(&movement_obj[index]);
 }
 
 /* Binds the object's swappable textures to segments 6, 7 (unk6C slots), 10 and 11. */
@@ -1437,7 +1437,7 @@ Gfx *actor_bindSwapTextures(Gfx *gdl, s32 index) {
         } else {
             texIndex[i] = gModelDefs[id]->texture[i][obj->eyeCode[i]];
             if (obj->expression && !override) {
-                override = func_1507E908(obj, obj->expression);
+                override = face_getExpressionRecord(obj, obj->expression);
             }
             if (override != NULL) {
                 s32 overrideTex[2];
@@ -1711,7 +1711,7 @@ void actor_applyForcedLod(Actor *obj) {
     model = obj->modelIds[lod];
     collision_setObjectModel(obj - movement_obj, model, 0);
     obj->current_lod = lod;
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         D_800C3638 = 0;
     }
     if (oldAnims != gModelAnimTables[model]) {
@@ -1725,10 +1725,10 @@ void actor_applyForcedLod(Actor *obj) {
             actor_playAnim(obj, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         }
     }
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         D_800C3638 = 1;
     }
-    func_1507EABC(obj);
+    face_revertExpression(obj);
 }
 
 /* Refreshes the gModelUnloadTimers counter of the object's model id (2 in one special case, 3 by default,

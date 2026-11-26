@@ -94,7 +94,7 @@ void effect_updatePlayerMarker(PlayerMarker *marker) {
                 extraHeight = 0.0f;
             }
             marker->light->x = player->xpos;
-            marker->light->y = func_15048A40(marker->bobPhase) * 15.0f +
+            marker->light->y = math_sinBinAngle(marker->bobPhase) * 15.0f +
                                    (player->ypos + 160.0f + marker->heightOffset + extraHeight);
             marker->light->z = player->zpos;
         } else {
@@ -122,7 +122,7 @@ void effect_updatePlayerMarker(PlayerMarker *marker) {
         marker->bobPhase += D_800BE9E4 * 2;
         if (marker->light != NULL) {
             marker->light->x = player->xpos;
-            marker->light->y = func_15048A40(marker->bobPhase) * 15.0f + (player->ypos + 160.0f);
+            marker->light->y = math_sinBinAngle(marker->bobPhase) * 15.0f + (player->ypos + 160.0f);
             marker->light->z = player->zpos;
         } else {
             marker->light = light_createPointLight(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
@@ -150,8 +150,8 @@ Gfx *effect_drawPlayerMarker(Gfx *gfx, PlayerMarker *marker, s16 view) {
         }
         yaw = camera_global_Cameras[view].TrueCameraAngle;
         gfx = sprite_endDraw(gfx);
-        func_15043D90(&marker->mtx[D_800BE9C0], 0.0f, yaw, 0.0f, 2.25f, 2.25f, 2.25f, player->xpos,
-                      func_15048A40(marker->bobPhase) * 15.0f +
+        math_mtxRotScaleTrans(&marker->mtx[D_800BE9C0], 0.0f, yaw, 0.0f, 2.25f, 2.25f, 2.25f, player->xpos,
+                      math_sinBinAngle(marker->bobPhase) * 15.0f +
                           (player->ypos + 160.0f + extraHeight + marker->heightOffset),
                       player->zpos);
         gSPMatrix(gfx++, &marker->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

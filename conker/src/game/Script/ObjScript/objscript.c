@@ -859,17 +859,17 @@ void func_15077508(void) {
                 next = gCurrentActor->unk210;
             }
             if (next == 0xFF) {
-                next = func_15086098(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
+                next = path_getNextNode(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
                                      hasGoal, hasGoal2, &gCurrentActor->unk211, gCurrentActor->unk212);
             }
         } else if (current != 0xFF) {
             if (gScriptArg0 == 1) {
                 best = 0xFF;
-                node = &D_800D2350[current];
+                node = &gPathNodes[current];
                 if (gCurrentActor->unk210 != 0xFF) {
                     // matching: dead code standing in for something the original compiled away; it
                     // keeps IDO's branch on pad210 and its register assignment
-                    tmp = 0; for (i = 0, q = (u8 *)D_800D2350; i < 4; i++, q++) { tmp += q[9] == gCurrentActor->unk210; } tmp += (s32)node; tmp ^= (s32)node; tmp -= (s32)node; tmp |= (s32)node;
+                    tmp = 0; for (i = 0, q = (u8 *)gPathNodes; i < 4; i++, q++) { tmp += q[9] == gCurrentActor->unk210; } tmp += (s32)node; tmp ^= (s32)node; tmp -= (s32)node; tmp |= (s32)node;
                 }
                 bestRoll = 10.0f;
                 for (i = 0; i < 5; i++) {
@@ -887,13 +887,13 @@ void func_15077508(void) {
                     next = gCurrentActor->unk210;
                 }
             } else {
-                next = func_15086364(current, hasGoal, hasGoal2, &gCurrentActor->unk211, gCurrentActor->unk212);
+                next = path_search(current, hasGoal, hasGoal2, &gCurrentActor->unk211, gCurrentActor->unk212);
             }
         }
         if (next != 0xFF) {
             gCurrentActor->unk21E = 0;
             if (mp_getNodePos(next, &x, &y, &z)) {
-                UNK216(gCurrentActor) = D_800D2354;
+                UNK216(gCurrentActor) = gPathDistance;
                 gCurrentActor->unk210 = gCurrentActor->unk20F;
                 gCurrentActor->unk20F = next;
                 {
@@ -902,7 +902,7 @@ void func_15077508(void) {
                     f32 dz;
                     f32 dist;
 
-                    width = (f32)(u32)D_800D2350[next].unk8 + (f32)(u32)D_800D2350[next].unk8;
+                    width = (f32)(u32)gPathNodes[next].unk8 + (f32)(u32)gPathNodes[next].unk8;
                     dx = x - gCurrentActor->xpos;
                     dz = z - gCurrentActor->zpos;
                     dist = sqrtf(dx * dx + dz * dz);
@@ -1229,13 +1229,13 @@ void func_15078544(void) {
     offsetZ = ((((s8)gScriptArg2 << 4) | (gScriptArg3 & 0xF)) * 8);
     if (mode == 0) {
         facing = ((movement_obj[gCurrentActor->unk222].langle >> 8) & 0xFF) - 0x40;
-        sine = func_15048A40(facing);
-        cosine = func_150489B0(facing);
+        sine = math_sinBinAngle(facing);
+        cosine = math_cosBinAngle(facing);
     } else if (mode == 1) {
         sine = 0.0f;
         cosine = 1.0f;
     } else {
-        angle = func_150484A0(gCurrentActor->xpos - x, gCurrentActor->zpos - z);
+        angle = math_atan2(gCurrentActor->xpos - x, gCurrentActor->zpos - z);
         sine = sinf(angle);
         cosine = cosf(angle);
     }
@@ -1329,7 +1329,7 @@ s32 script_testProperty(s32 index) {
         // angle between the object's facing and the direction to it from the current object
         facing = movement_obj[index].langle >> 8;
         facing -= 0x40;
-        diff = (u8)(func_150484A0(movement_obj[index].xpos - gCurrentActor->xpos,
+        diff = (u8)(math_atan2(movement_obj[index].xpos - gCurrentActor->xpos,
                                   movement_obj[index].zpos - gCurrentActor->zpos) * 40.74366379f) - facing;
         value = (u8)diff;
         if (value > 0x80) {
@@ -1604,11 +1604,11 @@ void func_15079928(void) {
     if (timer == 0) {
         timer = 0xFFFF;
     }
-    func_1507E7E4(gCurrentActor, gScriptArg0, gScriptArg3, timer, 0);
+    face_requestExpression(gCurrentActor, gScriptArg0, gScriptArg3, timer, 0);
 }
 
 void func_15079988(void) {
-    func_1507EB4C(gCurrentActor, gScriptArg0);
+    face_setDefaultExpression(gCurrentActor, gScriptArg0);
 }
 
 void func_150799B4(void) {
@@ -2056,7 +2056,7 @@ void func_1507AA48(void) {
     case 4:
         // direction from waypoint arg0 to waypoint arg1, plus arg3 / 256 turns
         path = gSpawnPaths[gCurrentActor->listpos];
-        angle = (u16)(func_150484A0(path[gScriptArg1 + 1].x - path[gScriptArg0 + 1].x, path[gScriptArg1 + 1].z - path[gScriptArg0 + 1].z) * 10430.37793f) + (gScriptArg3 << 8);
+        angle = (u16)(math_atan2(path[gScriptArg1 + 1].x - path[gScriptArg0 + 1].x, path[gScriptArg1 + 1].z - path[gScriptArg0 + 1].z) * 10430.37793f) + (gScriptArg3 << 8);
         gCurrentActor->fangle = angle + 0x4000;
         break;
     case 5:

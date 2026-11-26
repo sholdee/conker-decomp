@@ -116,7 +116,7 @@ void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2) {
         desc.unk47 = 6;
         desc.unk48 = 0;
         desc.viewportMask = 0xFF;
-        state->effects[0] = func_151407D0(&params, 0x60, &desc, 0, 0, 0, 0, -1, arg1, arg2);
+        state->effects[0] = flare_spawnGlow(&params, 0x60, &desc, 0, 0, 0, 0, -1, arg1, arg2);
     }
     {
         GlowShape params;
@@ -176,7 +176,7 @@ void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2) {
         desc.scale.x = 1.0f;
         desc.scale.y = 1.0f;
         desc.scale.z = 1.0f;
-        state->effects[1] = func_151407D0(&params, 0x68, &desc, 0, 0x27, 0, 0, -1, arg1, arg2);
+        state->effects[1] = flare_spawnGlow(&params, 0x68, &desc, 0, 0x27, 0, 0, -1, arg1, arg2);
         if (state->effects[1] != NULL) {
             memcpy(&state->effects[1]->tail, &tail, sizeof(TrailGlowData));
         }
@@ -253,7 +253,7 @@ s32 trail_updateCharacterTrail(CharacterTrail *actor) {
         delta.x = actor->head.tmpl.pos.x - prevPos.x;
         delta.y = actor->head.tmpl.pos.y - prevPos.y;
         delta.z = actor->head.tmpl.pos.z - prevPos.z;
-        dist = func_15143E64(&delta);
+        dist = math_vec3Length(&delta);
         {
             CharacterTrailPoint *pt = &points[actor->head.end];
 
@@ -307,7 +307,7 @@ s32 trail_updateCharacterTrail(CharacterTrail *actor) {
                     const Vec3f *vel;
 
                     if (sprite_findActorMotion(owner, &vel) == 0) {
-                        vel = &D_800A5480;
+                        vel = &gZeroVec3f;
                     }
                     trail_throwSparks(&actor->head.tmpl.pos, vel, owner->theta, actor->head.header.owner, actor->head.header.kind);
                 }
@@ -355,9 +355,9 @@ s32 trail_trimCharacterTrail(CharacterTrail *actor) {
 
     state = actor->state;
     points = actor->points;
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         if (sprite_findActorMotion(state->owner, &vel) != 0) {
-            speed = func_15143E64(vel);
+            speed = math_vec3Length(vel);
         } else {
             speed = 0.0f;
         }
@@ -514,13 +514,13 @@ Gfx *trail_drawCharacterTrail(CharacterTrail *actor, Gfx *gfx, s16 view) {
             tv++;
         }
     }
-    eye = func_15144B34(view);
+    eye = math_getCameraPos(view);
     update = 1;
-    gfx = func_15142E24(gfx, &gEffectTextures[120], 0, 0, 0, 0, 0x78, 0, 0, &update, 0x3E);
-    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
-    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+    gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[120], 0, 0, 0, 0, 0x78, 0, 0, &update, 0x3E);
+    gfx = math_gfxSetEnvColor(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
+    gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
     gfx = particle_setCombineMode(gfx, 0x55, &update);
-    gfx = func_15142FBC(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &update);
+    gfx = math_gfxSetOtherMode(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &update);
     cur = actor->head.end - 1;
     if (cur < 0) {
         cur = actor->head.tmpl.itemCount - 1;
@@ -683,7 +683,7 @@ s32 trail_getCharacterTrailEnds(Vec3f *start, Vec3f *end, Actor *owner, ModelAtt
         modelPoints[1] = &D_800A09DC;
         out[0] = start;
         out[1] = end;
-        if (func_1514654C(owner, attachment, 0, modelPoints, out, 2) != 0) {
+        if (math_transformAttachmentOffsets(owner, attachment, 0, modelPoints, out, 2) != 0) {
             return 1;
         }
         return 0;
@@ -764,7 +764,7 @@ void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg
     spawn.b2 = 0xFF;
     spawn.brightness = 0xFF;
     spawn.pos = *pos;
-    spawn.offset = D_800A5480;
+    spawn.offset = gZeroVec3f;
     spawn.fadeStart = 10;
     spawn.fadeRate = 25;
     spawn.scaleStart = 1;
@@ -789,7 +789,7 @@ void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg
         spawn.width = spawn.height = func_150ADA68() * 233.0f + 199.0f;
         r1 = func_150ADA20();
         r2 = func_150ADA20();
-        func_15143794(r1 % 130U + yaw, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.vel);
+        math_dirFromBinAngles(r1 % 130U + yaw, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.vel);
         spawn.vel.x -= vel->x * scale;
         spawn.vel.z -= vel->z * scale;
         // matching: `+ -x` (a subtraction emits sub.s instead of add.s)
@@ -902,7 +902,7 @@ s32 trail_characterTrailSoundCallback(TrailSound *snd, s32 arg1, u32 *arg2, s32 
     snd->y = state->owner->ypos;
     snd->z = state->owner->zpos;
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         snd->volume = volume >> 1;
         *arg2 >>= 1;
     } else {

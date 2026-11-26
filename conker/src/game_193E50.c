@@ -46,9 +46,9 @@ void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
         fz = z;
         for (i = 0; i < 3; i++) {
             if (scale != 1.0f) {
-                func_15043D90(&obj->mtx[i], 0.0f, angle, 0.0f, scale, scale, scale, fx, fy, fz);
+                math_mtxRotScaleTrans(&obj->mtx[i], 0.0f, angle, 0.0f, scale, scale, scale, fx, fy, fz);
             } else {
-                func_15043E68(&obj->mtx[i], 0.0f, angle, 0.0f, fx, fy, fz);
+                math_mtxRotTrans(&obj->mtx[i], 0.0f, angle, 0.0f, fx, fy, fz);
             }
             angle += (func_150ADA20() & 0x3F) + 90;
         }

@@ -653,7 +653,7 @@ Actor *collision_createChildObject(Actor *parent, s32 arg1, s32 modelId, s32 arg
         obj->unk301 = 1;
     }
     obj->unk314 = func_1515D440();
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         blocked = 1;
     } else {
         blocked = 0;
@@ -1084,14 +1084,14 @@ void func_15084C30(Actor *obj) {
     }
 }
 
-/* Returns the index of modelId in D_800BE598, or 0. */
+/* Returns the index of modelId in gSpawnModelTypes, or 0. */
 s32 func_15084CB0(s32 modelId) {
     s32 ret;
     s32 i;
 
     ret = 0;
-    for (i = 0; i < D_800BE590; i++) {
-        if (modelId == D_800BE598[i]) {
+    for (i = 0; i < gSpawnModelTypeCount; i++) {
+        if (modelId == gSpawnModelTypes[i]) {
             ret = i;
             break;
         }

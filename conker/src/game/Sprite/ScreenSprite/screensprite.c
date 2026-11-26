@@ -117,7 +117,7 @@ Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     if ((sprite->info.flags & 0x10) && (viewport != sprite->info.viewport)) {
         return gfx;
     }
-    if ((sprite->info.flags & 0x40) && (D_800C35EA[0] == 1)) {
+    if ((sprite->info.flags & 0x40) && (gCutsceneStates[0] == 1)) {
         return gfx;
     }
     /* flag bits 11 and up: per viewport, skip unless screen_isIrisOpen and screen_getViewFadeAlpha allow it */
@@ -127,23 +127,23 @@ Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     }
     if (sprite->info.texture != 0xFF) {
         // matching: the pointer goes through an integer (IDO keeps the converted value in a temporary)
-        gfx = func_15142E24(gfx, (TextureDesc *)(s32)&gEffectTextures[sprite->info.texture], 0, (sprite->info.flags & 0x200) ? 0 : 2,
+        gfx = math_gfxLoadTextureFrame(gfx, (TextureDesc *)(s32)&gEffectTextures[sprite->info.texture], 0, (sprite->info.flags & 0x200) ? 0 : 2,
                             0, 0, sprite->info.texture, 0, 0, &update, (sprite->info.flags & 0x400) ? 0x3E : 3);
     }
-    gfx = func_15142B7C(gfx, sprite->info.unk28, sprite->info.unk2C);
-    func_151441A4(&primR, &primG, &primB, &primA,
+    gfx = math_gfxUpdateGeometryMode(gfx, sprite->info.unk28, sprite->info.unk2C);
+    math_pickPrimColour(&primR, &primG, &primB, &primA,
                   sprite->info.color2.red, sprite->info.color2.green, sprite->info.color2.blue, sprite->info.color2.alpha,
                   sprite->info.color1.red, sprite->info.color1.green, sprite->info.color1.blue, sprite->info.color1.alpha,
                   sprite->info.unk23, sprite->info.unk40);
-    func_151442FC(&envR, &envG, &envB, &envA,
+    math_pickEnvColour(&envR, &envG, &envB, &envA,
                   sprite->info.color2.red, sprite->info.color2.green, sprite->info.color2.blue, sprite->info.color2.alpha,
                   sprite->info.color1.red, sprite->info.color1.green, sprite->info.color1.blue, sprite->info.color1.alpha,
                   sprite->info.unk23, sprite->info.unk41);
-    gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
-    gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
+    gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &update);
+    gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &update);
     // matching: the draw reads only the low byte of unk34 (lbu at 0x37)
     gfx = particle_setCombineMode(gfx, ((u8 *)&sprite->info.unk34)[3], &update);
-    gfx = func_15142FBC(gfx, sprite->info.otherModeH | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT |
+    gfx = math_gfxSetOtherMode(gfx, sprite->info.otherModeH | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT |
                             sprite->info.unk38 | sprite->info.unk3C,
                         gEffectRenderModes[sprite->info.combineMode].unk0 | gEffectRenderModes[sprite->info.combineMode].unk4, &update);
     x = vp->centerX + sprite->info.x * vp->scaleX;

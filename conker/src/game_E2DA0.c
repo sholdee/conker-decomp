@@ -10,9 +10,9 @@ struct ObjBurstEffect {
 };
 
 
-/** Emits command 0x1A carrying object objIndex's facing angle (skipped when D_800C35EA == 1). */
+/** Emits command 0x1A carrying object objIndex's facing angle (skipped when gCutsceneStates == 1). */
 GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return cmd;
     }
     cmd->opcode = 0x1A;
@@ -240,7 +240,7 @@ static const Vec3f D_8009FC30 = { 0.0f, -205.0f, 0.0f };
 
 /** Transforms the fixed point D_8009FC30 by bone matrix 5 of obj into out. */
 void func_150B60E0(Actor *obj, Vec3f *out) {
-    func_15143134(&D_8009FC30, out, &obj->ob_matrix_ptr[5]);
+    math_transformOffset(&D_8009FC30, out, &obj->ob_matrix_ptr[5]);
 }
 
 
@@ -303,11 +303,11 @@ void effect_updateBoltRing(BoltRingEffect *effect) {
         end.y = emitter->y + emitter->ySize;
         do {
             angle = func_150ADA20();
-            func_1514373C((u32)angle, emitter->xSize, &start.x, &start.z); // matching: (u32) selects IDO's unsigned int-to-float sequence
+            math_dirFromAngleXZ((u32)angle, emitter->xSize, &start.x, &start.z); // matching: (u32) selects IDO's unsigned int-to-float sequence
             start.x += emitter->x;
             start.z += emitter->z;
             angle += func_150ADA20() % 129 + 64;
-            func_1514373C((u32)angle, emitter->xSize, &end.x, &end.z);
+            math_dirFromAngleXZ((u32)angle, emitter->xSize, &end.x, &end.z);
             end.x += emitter->x;
             end.z += emitter->z;
             beam_newBoltChain(&start, &end, 4, &config, spread, 1, effect->owner, effect->kind);
@@ -335,23 +335,23 @@ static const f32 D_8009FC78[] = { 47.0f, 130.0f, 130.0f };    /* width */
 static const s16 D_8009FC84[] = { 30, 70, 70 };               /* life */
 static const s32 D_8009FC8C[] = { 20, 50, 50 };               /* capacity */
 
-/** Spawns trail variant 0, 1 or 2 (variant 0 at a position from func_151423D8). */
+/** Spawns trail variant 0, 1 or 2 (variant 0 at a position from math_cosBinAngleMasked). */
 void func_150B648C(u8 variant) {
     TrailStateParams params;
     Vec3f pos;
 
     if (variant == 0) {
-        params.baseVel.x = func_151423D8(0xAA) * 10.0f;
+        params.baseVel.x = math_cosBinAngleMasked(0xAA) * 10.0f;
         params.baseVel.y = 3.0f;
-        params.baseVel.z = func_151423D8(0xEA) * 10.0f;
-        pos.x = 1005.0f - (func_151423D8(0xAA) * 150.0f);
+        params.baseVel.z = math_cosBinAngleMasked(0xEA) * 10.0f;
+        pos.x = 1005.0f - (math_cosBinAngleMasked(0xAA) * 150.0f);
         pos.y = 351.0f;
-        pos.z = -1706.0f - (func_151423D8(0xEA) * 150.0f);
+        pos.z = -1706.0f - (math_cosBinAngleMasked(0xEA) * 150.0f);
     } else if (variant == 1) {
-        func_15143794(-69, 28, 9.349999f, &params.baseVel);
+        math_dirFromBinAngles(-69, 28, 9.349999f, &params.baseVel);
         pos = D_8009FC3C[variant];
     } else {
-        func_15143794(24, 15, 9.349999f, &params.baseVel);
+        math_dirFromBinAngles(24, 15, 9.349999f, &params.baseVel);
         pos = D_8009FC3C[variant];
     }
 

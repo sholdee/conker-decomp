@@ -6,27 +6,27 @@
  * declarations before it (see init_50A0.c): after exactly these three headers it is the definition order. */
 static s8 D_8003A580;
 static u8 D_8003A581;
-static u8 D_8003A582; // graphics task state
+static u8 gSchedGfxState; // graphics task state
 static u8 D_8003A583;
 static u8 D_8003A584;
-static OSTimer D_8003A588; // audio start timer
+static OSTimer gSchedAudioTimer; // audio start timer
 static u8 D_8003A5A8[0x20]; // not referenced
-static OSScMsg D_8003A5C8; // pre-NMI message
-u64 D_8003A5E8[OS_YIELD_DATA_SIZE / sizeof(u64)]; // the graphics task's yield buffer
+static OSScMsg gSchedPreNmiMsg; // pre-NMI message
+u64 gGfxYieldBuffer[OS_YIELD_DATA_SIZE / sizeof(u64)]; // the graphics task's yield buffer
 
 #include "functions.h"
 #include "variables.h"
 
-static OSScTask *D_8002AC50 = NULL; // the current graphics task
-static OSScTask *D_8002AC54 = NULL; // the audio task (from the D_8003B200 queue)
-static OSScTask *D_8002AC58 = NULL; // the graphics task last started on the RSP
-u8 D_8002AC5C = FALSE;              // a reset (pre-NMI) is pending
+static OSScTask *gSchedGfxTask = NULL; // the current graphics task
+static OSScTask *gSchedAudioTask = NULL; // the audio task (from the gSchedAudioTaskQueue queue)
+static OSScTask *gSchedLastGfxTask = NULL; // the graphics task last started on the RSP
+u8 gResetPending = FALSE;              // a reset (pre-NMI) is pending
 u8 D_8002AC60 = TRUE;
 u16 D_8002AC64 = 800;
 s32 D_8002AC68 = -1; // not referenced
 static s8 D_8002AC6C = 0;
 
-/* Messages received on the scheduler's interrupt queue D_8003B218. */
+/* Messages received on the scheduler's interrupt queue gSchedInterruptQueue. */
 #define SCHED_MESG_RETRACE     0 /* VI retrace (osViSetEvent) */
 #define SCHED_MESG_RDP_DONE    1 /* OS_EVENT_DP */
 #define SCHED_MESG_SP_DONE     2 /* OS_EVENT_SP */
@@ -34,99 +34,99 @@ static s8 D_8002AC6C = 0;
 #define SCHED_MESG_CONT_READ   6 /* timer set in game_48FD0.c: start a controller read */
 
 /* Scheduler thread: dispatches VI retrace, RSP/RDP completion and timer messages. */
-void func_100049E0(void *arg) {
+void sched_threadMain(void *arg) {
     OSMesg msg;
     SchedulerClient *client;
     OSTime delay;
 
     D_8003A581 = 0;
-    D_8003A582 = 0;
+    gSchedGfxState = 0;
     D_8003A584 = 1;
     D_8003A583 = 0;
-    D_8003B240.type = OS_SC_RETRACE_MSG;
+    gSchedRetraceMsg.type = OS_SC_RETRACE_MSG;
     msg = NULL;
     arg = NULL; // matching: the thread argument is reused as a scratch variable (here and below)
-    D_8003A5C8.type = OS_SC_PRE_NMI_MSG;
+    gSchedPreNmiMsg.type = OS_SC_PRE_NMI_MSG;
     while (TRUE) {
-        osRecvMesg(&D_8003B218, &msg, OS_MESG_BLOCK);
+        osRecvMesg(&gSchedInterruptQueue, &msg, OS_MESG_BLOCK);
         switch ((s32)msg) {
         case SCHED_MESG_RETRACE:
-            for (client = D_8003B234; client != NULL; client = client->next) {
+            for (client = gSchedClients; client != NULL; client = client->next) {
                 if (!(client->flags & 1)) {
-                    osSendMesg(client->msgQ, &D_8003B240, OS_MESG_NOBLOCK);
+                    osSendMesg(client->msgQ, &gSchedRetraceMsg, OS_MESG_NOBLOCK);
                 }
             }
-            if ((D_8003B238 != 0xFF) && (D_8003B238 < 0xFF)) {
-                D_8003B238++;
+            if ((gSchedRetraceCount != 0xFF) && (gSchedRetraceCount < 0xFF)) {
+                gSchedRetraceCount++;
             }
             if (D_8003B23A != 0) {
                 D_8003B23A--;
             }
             arg = (void *)D_8003A581;
             if ((arg == NULL) && (D_8002AC6C == 0)) {
-                if (osRecvMesg(&D_8003B200, (OSMesg *)&D_8002AC54, OS_MESG_NOBLOCK) == 0) {
+                if (osRecvMesg(&gSchedAudioTaskQueue, (OSMesg *)&gSchedAudioTask, OS_MESG_NOBLOCK) == 0) {
                     delay = 200000;
-                    if ((D_8003A582 != 0) || !(osAiGetStatus() & AI_STATUS_FIFO_FULL)) {
+                    if ((gSchedGfxState != 0) || !(osAiGetStatus() & AI_STATUS_FIFO_FULL)) {
                         delay = 20000;
                     }
-                    osSetTimer(&D_8003A588, delay, 0, &D_8003B218, (OSMesg)SCHED_MESG_AUDIO_TIMER);
+                    osSetTimer(&gSchedAudioTimer, delay, 0, &gSchedInterruptQueue, (OSMesg)SCHED_MESG_AUDIO_TIMER);
                     D_8002AC6C = 1;
                 }
             }
             if (D_8003A581 == 0) {
-                func_10004DB0();
+                sched_updateGfxTask();
             }
             arg = NULL;
             break;
         case SCHED_MESG_SP_DONE:
-            if (D_8003A582 == 3) {
-                if (osSpTaskYielded(&D_8002AC50->list) == 1) {
-                    osSpTaskLoad(&D_8002AC54->list);
-                    osSpTaskStartGo(&D_8002AC54->list);
+            if (gSchedGfxState == 3) {
+                if (osSpTaskYielded(&gSchedGfxTask->list) == 1) {
+                    osSpTaskLoad(&gSchedAudioTask->list);
+                    osSpTaskStartGo(&gSchedAudioTask->list);
                     D_8003A581 = 1;
-                    D_8003A582 = 4;
+                    gSchedGfxState = 4;
                 } else {
-                    D_8003A582 = 1;
-                    osSpTaskLoad(&D_8002AC54->list);
-                    osSpTaskStartGo(&D_8002AC54->list);
+                    gSchedGfxState = 1;
+                    osSpTaskLoad(&gSchedAudioTask->list);
+                    osSpTaskStartGo(&gSchedAudioTask->list);
                     D_8003A581 = 1;
                     D_8003A583 = 0;
                 }
             } else if (D_8003A581 != 0) {
-                osSendMesg(D_8002AC54->msgQ, D_8002AC54->msg, OS_MESG_BLOCK);
+                osSendMesg(gSchedAudioTask->msgQ, gSchedAudioTask->msg, OS_MESG_BLOCK);
                 D_8003A581 = 0;
-                if (D_8003A582 == 4) {
-                    osSpTaskLoad(&D_8002AC50->list);
-                    osSpTaskStartGo(&D_8002AC50->list);
+                if (gSchedGfxState == 4) {
+                    osSpTaskLoad(&gSchedGfxTask->list);
+                    osSpTaskStartGo(&gSchedGfxTask->list);
                     D_8003A580 = 1;
-                    D_8003A582 = 1;
+                    gSchedGfxState = 1;
                 }
             } else {
                 D_8003A583 = 0;
                 if (D_8003A584 == 1) {
-                    func_10004FE0();
+                    sched_swapOrWait();
                 }
             }
             break;
         case SCHED_MESG_RDP_DONE:
             D_8003A584 = 1;
             if (D_8003A583 == 0) {
-                func_10004FE0();
+                sched_swapOrWait();
             }
             break;
         case SCHED_MESG_AUDIO_TIMER:
             D_8002AC6C = (s32)arg;
             if (D_8003A583 != 0) {
                 osSpTaskYield();
-                D_8003A582 = 3;
+                gSchedGfxState = 3;
             } else {
-                osSpTaskLoad(&D_8002AC54->list);
-                osSpTaskStartGo(&D_8002AC54->list);
+                osSpTaskLoad(&gSchedAudioTask->list);
+                osSpTaskStartGo(&gSchedAudioTask->list);
                 D_8003A581 = 1;
             }
             break;
         case SCHED_MESG_CONT_READ:
-            if (D_8002AC5C == 0) {
+            if (gResetPending == 0) {
                 osContStartReadData(&gSiMesgQueue);
             }
             break;
@@ -134,68 +134,68 @@ void func_100049E0(void *arg) {
     }
 }
 
-/* Advances the graphics task state machine (D_8003A582) on a retrace while no audio task runs. */
-void func_10004DB0(void) {
-    if (D_8003A582 == 0) {
-        if (osRecvMesg(&D_8003B1E8, (OSMesg *)&D_8002AC50, OS_MESG_NOBLOCK) == 0) {
-            if ((osViGetCurrentFramebuffer() != D_8002AC50->framebuffer) &&
-                (osViGetNextFramebuffer() != D_8002AC50->framebuffer) &&
-                ((D_8003B23A == 0) || (D_8003B238 >= D_8003B239))) {
-                if ((D_8003B238 != 0xFF) &&
-                    ((D_8003B238 >= D_8003B239) || (D_8003B23A == 0))) {
-                    D_8003B239 = D_8003B238;
+/* Advances the graphics task state machine (gSchedGfxState) on a retrace while no audio task runs. */
+void sched_updateGfxTask(void) {
+    if (gSchedGfxState == 0) {
+        if (osRecvMesg(&gSchedTaskQueue, (OSMesg *)&gSchedGfxTask, OS_MESG_NOBLOCK) == 0) {
+            if ((osViGetCurrentFramebuffer() != gSchedGfxTask->framebuffer) &&
+                (osViGetNextFramebuffer() != gSchedGfxTask->framebuffer) &&
+                ((D_8003B23A == 0) || (gSchedRetraceCount >= D_8003B239))) {
+                if ((gSchedRetraceCount != 0xFF) &&
+                    ((gSchedRetraceCount >= D_8003B239) || (D_8003B23A == 0))) {
+                    D_8003B239 = gSchedRetraceCount;
                 }
-                func_10004F00();
+                sched_startGfxTask();
                 return;
             }
-            D_8003A582 = 2;
+            gSchedGfxState = 2;
         }
-    } else if (D_8003A582 == 2) {
-        if ((D_8003B23A == 0) || (D_8003B238 >= D_8003B239)) {
-            func_10004F00();
+    } else if (gSchedGfxState == 2) {
+        if ((D_8003B23A == 0) || (gSchedRetraceCount >= D_8003B239)) {
+            sched_startGfxTask();
         }
-    } else if (D_8003A582 == 6) {
-        func_10004FE0();
+    } else if (gSchedGfxState == 6) {
+        sched_swapOrWait();
     }
 }
-/* Starts the current graphics task D_8002AC50 on the RSP unless a reset is pending. */
-void func_10004F00(void) {
-    if (D_8002AC5C == 0) {
-        osSpTaskLoad(&D_8002AC50->list);
-        osSpTaskStartGo(&D_8002AC50->list);
+/* Starts the current graphics task gSchedGfxTask on the RSP unless a reset is pending. */
+void sched_startGfxTask(void) {
+    if (gResetPending == 0) {
+        osSpTaskLoad(&gSchedGfxTask->list);
+        osSpTaskStartGo(&gSchedGfxTask->list);
         D_8003A580 = 0;
-        D_8002AC58 = D_8002AC50;
+        gSchedLastGfxTask = gSchedGfxTask;
         D_8003A583 = 1;
         D_8003A584 = 0;
-        if ((D_8003B238 == 255) ||
-            ((D_8003B238 >= 11) && ((D_8003B238 >= 21) || (D_800C35EA[0] != 1)))) {
-            D_8003B238 = 2;
+        if ((gSchedRetraceCount == 255) ||
+            ((gSchedRetraceCount >= 11) && ((gSchedRetraceCount >= 21) || (gCutsceneStates[0] != 1)))) {
+            gSchedRetraceCount = 2;
         }
-        D_800BE9E4 = D_8003B238;
-        D_8003B238 = 0;
-        D_8003A582 = 1;
-        osSendMesg(D_8003B230, &D_8003B240, OS_MESG_NOBLOCK);
+        D_800BE9E4 = gSchedRetraceCount;
+        gSchedRetraceCount = 0;
+        gSchedGfxState = 1;
+        osSendMesg(gSchedRetraceQueue, &gSchedRetraceMsg, OS_MESG_NOBLOCK);
     }
 }
 
 /* Swaps in the finished frame, or waits (state 6) until at least one retrace has passed. */
-void func_10004FE0(void) {
-    if (D_8003B238 <= 0) {
-        D_8003A582 = 6;
+void sched_swapOrWait(void) {
+    if (gSchedRetraceCount <= 0) {
+        gSchedGfxState = 6;
     } else {
-        func_10005020();
+        sched_finishGfxTask();
     }
 }
 
 /* Finishes the current graphics task: swaps its framebuffer if requested and notifies its owner. */
-void func_10005020(void) {
+void sched_finishGfxTask(void) {
     void *framebuffer;
 
-    D_8003A582 = 0;
-    framebuffer = D_8002AC50->framebuffer;
-    if ((D_8002AC50->flags & OS_SC_SWAPBUFFER) && (D_8002AC5C == 0)) {
+    gSchedGfxState = 0;
+    framebuffer = gSchedGfxTask->framebuffer;
+    if ((gSchedGfxTask->flags & OS_SC_SWAPBUFFER) && (gResetPending == 0)) {
         colourfb_drawScreenEffects((s32)framebuffer);
         osViSwapBuffer(framebuffer);
     }
-    osSendMesg(D_8002AC50->msgQ, D_8002AC50->msg, OS_MESG_BLOCK);
+    osSendMesg(gSchedGfxTask->msgQ, gSchedGfxTask->msg, OS_MESG_BLOCK);
 }

@@ -144,8 +144,8 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
         do {
             // matching: explicit mask; func_150ADA20 really returns a full word
             angle = func_150ADA20() & 0xFF;
-            sin = func_151423D8(angle - 0x40);
-            cos = func_151423D8(angle);
+            sin = math_cosBinAngleMasked(angle - 0x40);
+            cos = math_cosBinAngleMasked(angle);
             dist = func_150ADA68() * radius;
             size = func_150ADA68() * sizeRange + sizeBase;
             height = func_150ADA68() * heightRange + heightBase;
@@ -239,7 +239,7 @@ void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
         particle.maxHeight = 0.0f;
         do {
             angle = func_150ADA20();
-            func_15143874(angle & 0xFF, func_150ADA68() * 42.0f, &particle.pos.x, &particle.pos.z);
+            math_dirFromBinAngleXZ(angle & 0xFF, func_150ADA68() * 42.0f, &particle.pos.x, &particle.pos.z);
             particle.pos.x += pos->x;
             particle.pos.z += pos->z;
             particle.shrinkRate = (func_150ADA68() * 16.0f + 29.0f) * 0.001f;

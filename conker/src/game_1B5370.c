@@ -135,7 +135,7 @@ void effect_updateColorAnims(void) {
                 if (gColorAnims[i].timer.f <= gColorAnims[i].blend) {
                     gColorAnims[i].blend = gColorAnims[i].timer.f;
                     if (gColorAnims[i].timer.f == 1.0f) {
-                        if (!(func_151EF610() & 1)) {
+                        if (!(math_rand() & 1)) {
                             gColorAnims[i].timer.f = 0.0f;
                         } else {
                             gColorAnims[i].timer.f = 0.5f;
@@ -143,14 +143,14 @@ void effect_updateColorAnims(void) {
                         gColorAnims[i].state.i = 2;
                     } else {
                         gColorAnims[i].state.i = 1;
-                        gColorAnims[i].timer.i = func_151EF610() % 30 + 30;
+                        gColorAnims[i].timer.i = math_rand() % 30 + 30;
                     }
                 }
                 break;
             case 1: /* hold at half, then fade up to "to" or down to "from" */
                 gColorAnims[i].timer.i -= D_800BE9E4;
                 if (gColorAnims[i].timer.i <= 0) {
-                    gColorAnims[i].state.i = (func_151EF610() % 2) * 2;
+                    gColorAnims[i].state.i = (math_rand() % 2) * 2;
                     if (gColorAnims[i].state.i == 0) {
                         gColorAnims[i].timer.f = 1.0f;
                     } else {
@@ -164,10 +164,10 @@ void effect_updateColorAnims(void) {
                     gColorAnims[i].blend = gColorAnims[i].timer.f;
                     if (gColorAnims[i].timer.f == 0.0f) {
                         gColorAnims[i].state.i = 3;
-                        gColorAnims[i].timer.i = func_151EF610() % 30 + 30;
+                        gColorAnims[i].timer.i = math_rand() % 30 + 30;
                     } else {
                         gColorAnims[i].state.i = 1;
-                        gColorAnims[i].timer.i = func_151EF610() % 30 + 30;
+                        gColorAnims[i].timer.i = math_rand() % 30 + 30;
                     }
                 }
                 break;
@@ -175,7 +175,7 @@ void effect_updateColorAnims(void) {
                 gColorAnims[i].timer.i -= D_800BE9E4;
                 if (gColorAnims[i].timer.i <= 0) {
                     gColorAnims[i].state.i = 0;
-                    if (!(func_151EF610() & 1)) {
+                    if (!(math_rand() & 1)) {
                         gColorAnims[i].timer.f = 0.5f;
                     } else {
                         gColorAnims[i].timer.f = 1.0f;

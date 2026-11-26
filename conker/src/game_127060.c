@@ -66,8 +66,8 @@ void effect_spawnDelayedBurst(Actor *actor, u8 owner, s32 kind) {
             spawn.rgba[1] = 0xFF;
             spawn.rgba[2] = 0xFF;
             spawn.rgba[3] = 0xFF;
-            spawn.pos = D_800A5480;
-            spawn.rot = D_800A5480;
+            spawn.pos = gZeroVec3f;
+            spawn.rot = gZeroVec3f;
             spawn.scale.x = 1.0f;
             spawn.scale.y = 1.0f;
             spawn.scale.z = 1.0f;
@@ -135,8 +135,8 @@ void effect_spawnDelayedBurst(Actor *actor, u8 owner, s32 kind) {
             spawn.rgba[3] = 0xFF;
             spawn.width = 100.0f;
             spawn.height = 100.0f;
-            spawn.pos = D_800A5480;
-            spawn.rot = D_800A5480;
+            spawn.pos = gZeroVec3f;
+            spawn.rot = gZeroVec3f;
             spawn.scale.x = 1.0f;
             spawn.scale.y = 1.0f;
             spawn.scale.z = 1.0f;
@@ -148,7 +148,7 @@ void effect_spawnDelayedBurst(Actor *actor, u8 owner, s32 kind) {
             spawn.unk48 = 0;
             spawn.viewportMask = 0xFF;
             for (glow.index = 0; glow.index < 2; glow.index++) {
-                burst->glows[glow.index] = func_151407D0(&shape, 0x78, &spawn, 0, 0x2A, 0, 0, -1, owner, kind);
+                burst->glows[glow.index] = flare_spawnGlow(&shape, 0x78, &spawn, 0, 0x2A, 0, 0, -1, owner, kind);
                 if (burst->glows[glow.index] != NULL) {
                     memcpy(&burst->glows[glow.index]->data, &glow, sizeof(glow));
                 }
@@ -200,7 +200,7 @@ void effect_updateDelayedBurst(BurstEffect *effect) {
         results[1] = &positions[1];
         results[2] = &directions[0];
         results[3] = &directions[1];
-        func_15145EA4(offsets, results, actor->ob_matrix_ptr + 1, 4);
+        math_transformOffsets(offsets, results, actor->ob_matrix_ptr + 1, 4);
         for (i = 0; i < 2; i++) {
             if (burst->sparks[i] != NULL) {
                 spark = burst->sparks[i];
@@ -290,7 +290,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
     CollisionHit ground;
 
     if (actor->ob_matrix_ptr) {
-        func_15143134(&D_800A1CFC[point], &pos, &actor->ob_matrix_ptr[5]);
+        math_transformOffset(&D_800A1CFC[point], &pos, &actor->ob_matrix_ptr[5]);
         collision_initHitFromObject(&ground, actor);
         {
             SplashSpraySpec first;
@@ -374,7 +374,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             spawn.b = 0xFF;
             spawn.brightness = 0xFF;
             spawn.pos = pos;
-            spawn.offset = D_800A5480;
+            spawn.offset = gZeroVec3f;
             spawn.fadeStart = 1;
             spawn.fadeRate = 0xFF;
             spawn.scaleStart = 1;
@@ -388,7 +388,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             spawn.handlerSet = 0;
             spawn.viewMask = 0;
             spawn.views = 0xFF;
-            spawn.vel = D_800A5480;
+            spawn.vel = gZeroVec3f;
             spawn.timer = 300;
             spawn.width = 0.0f;
             spawn.height = 0.0f;
@@ -404,7 +404,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
 
 /* Data of the emitter effect started by effect_startLineEmitter and updated by effect_updateLineEmitter. */
 typedef struct {
-    /* 0x00 */ TriggerZone *from; /* endpoints, resolved with func_1514470C */
+    /* 0x00 */ TriggerZone *from; /* endpoints, resolved with math_randomPointInZone */
     /* 0x04 */ TriggerZone *to;
     /* 0x08 */ f32 pending; /* fractional count of spawns due */
 } LineEmitterData;
@@ -447,8 +447,8 @@ void effect_updateLineEmitter(LineEmitter *effect) {
     data = &effect->data;
     data->pending += (0.08000000566f + func_150ADA68() * 0.18f) * gFrameDelta;
     while (data->pending > 1.0f) {
-        func_1514470C(data->from, &from);
-        func_1514470C(data->to, &to);
+        math_randomPointInZone(data->from, &from);
+        math_randomPointInZone(data->to, &to);
         variants = &gSpiralVariantLists[1];
         i = func_150ADA20() % variants->count;
         duration = func_150ADA68() * 25.0f + 30.0f;
@@ -550,7 +550,7 @@ void func_150FAE18(s16 duration, u8 owner, s32 kind) {
         model.owner = 0;
         model.ownerId = 0;
         model.unk41 = 1;
-        model.pos = D_800A5480;
+        model.pos = gZeroVec3f;
         model.fadeStart = 10;
         model.fadeRate = 25;
         spawned = effect_newModelEffect(&model, 0, 1.0, 0, 0, 2, owner, kind);
@@ -701,7 +701,7 @@ void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
     destinations[1] = &origin;
     destinations[2] = &delta;
     mtx = actor->ob_matrix_ptr + 14;
-    func_15145EA4(sources, destinations, mtx, 3);
+    math_transformOffsets(sources, destinations, mtx, 3);
     delta.x -= origin.x;
     delta.y -= origin.y;
     delta.z -= origin.z;

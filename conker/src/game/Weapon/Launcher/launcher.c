@@ -29,7 +29,7 @@ Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 arg1, s32 arg2) {
         return NULL;
     }
 
-    func_15145740(obj, &target, &dir, NULL, 0.0f);
+    math_getActorAim(obj, &target, &dir, NULL, 0.0f);
     func_150FDF38(obj, ((u8 *)&arg1)[3], arg2, &muzzle, &launch);
 
     rand0 = func_150ADA68();
@@ -62,7 +62,7 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
             src[1] = &D_800A1F88;
             dst[0] = &muzzle;
             dst[1] = &launch;
-            func_15145EA4(src, dst, obj->ob_matrix_ptr + D_80088B80, 2);
+            math_transformOffsets(src, dst, obj->ob_matrix_ptr + D_80088B80, 2);
         } else {
             muzzle.x = obj->xpos;
             muzzle.y = obj->ypos + 56.0f;

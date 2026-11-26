@@ -131,8 +131,8 @@ void prop_slideWaypoints(WorldObject *obj) {
     moveX = 0;
     moveZ = 0;
     sound = 0;
-    if (D_800C35EA[0] == 1) {
-        if (func_15022B08(obj - db_Object_array, 0) != 0) {
+    if (gCutsceneStates[0] == 1) {
+        if (cutscene_isActorIndexBound(obj - db_Object_array, 0) != 0) {
             return;
         }
     }
@@ -300,7 +300,7 @@ void func_1511B51C(WorldObject *obj) {
         }
         angle += velocity;
         if (angle != 0.0f) {} // matching: no-op use of angle steers IDO's FP register choice
-        diff = func_15048A70(angle, target);
+        diff = math_angleDiff(angle, target);
         if (fabsf(diff) < fabsf(velocity)) {
             velocity = -velocity * restitution;
             if (fabsf(velocity) < maxSpeed * 0.05000000075f) {
@@ -332,7 +332,7 @@ void func_1511B51C(WorldObject *obj) {
         if (sound != 0 && openAngle != 0) {
             ratio = fabsf((angle - openAngle) / openAngle);
             effect_setColorAnimBlend(sound - 1, ratio);
-            func_15173C60(((1.0f - ratio) * 255.0f), sound - 1);
+            env_fadeLevelVtxColours(((1.0f - ratio) * 255.0f), sound - 1);
         }
     }
 }
@@ -473,7 +473,7 @@ void prop_projectTextureUnderRef(Game1483E0State *obj) {
 
 /* Turns the object to face the camera (yaw in degrees). */
 void prop_faceCamera(WorldObject *obj) {
-    obj->u = func_150484A0(obj->x - camera_global_Cameras->eye.x, obj->z - camera_global_Cameras->eye.z) * 57.29577637f;
+    obj->u = math_atan2(obj->x - camera_global_Cameras->eye.x, obj->z - camera_global_Cameras->eye.z) * 57.29577637f;
 }
 
 /* After a delay, lowers onto a player found beneath it and holds them at its position; rises back to rest otherwise. */
@@ -666,9 +666,9 @@ void prop_sway(WorldObject *obj) {
     obj->v = swayZ * 16.0f;
     WORK(obj)->w1511C548.phaseX += 0.07299999893f * gFrameDelta;
     WORK(obj)->w1511C548.phaseZ += 0.06499999762f * gFrameDelta;
-    WORK(obj)->w1511C548.phaseX = func_15144B68(WORK(obj)->w1511C548.phaseX);
+    WORK(obj)->w1511C548.phaseX = math_wrapRadians(WORK(obj)->w1511C548.phaseX);
     {
-        f32 wrapped = func_15144B68(WORK(obj)->w1511C548.phaseZ);
+        f32 wrapped = math_wrapRadians(WORK(obj)->w1511C548.phaseZ);
 
         WORK(obj)->w1511C548.phaseZ = wrapped;
     }
@@ -703,7 +703,7 @@ void func_1511C638(WorldObject *obj) {
             third->inactive = 0;
         }
         if (obj->moveData.word != 0xFF) {
-            func_15173C60(0, obj->moveData.word);
+            env_fadeLevelVtxColours(0, obj->moveData.word);
         }
     }
     if (D_800BE9B4 != 0) {
@@ -770,7 +770,7 @@ void func_1511C638(WorldObject *obj) {
                 mode = TASK_FLAG_ON;
             }
             if (obj->moveData.word != 0xFF) {
-                func_15173C60(WORK(obj)->w1511C638.fade, obj->moveData.word);
+                env_fadeLevelVtxColours(WORK(obj)->w1511C638.fade, obj->moveData.word);
             }
             if (mode == TASK_FLAG_ON) {
                 WORK(obj)->w1511C638.delay = 0;
@@ -908,7 +908,7 @@ void prop_animateWaveMesh(WorldObject *obj) {
     phase = wave->phase >> 8;
     scale = 0.8100000024f;
     for (i = 0; i < obj->numVertices; i++) {
-        height = func_150489B0(wave->phases[i] + phase);
+        height = math_cosBinAngle(wave->phases[i] + phase);
         y = (src->v.ob[1] + obj->y) + height * wave->amp;
         if (mode == 0) {
             z = src->v.ob[2] + obj->z;
@@ -935,13 +935,13 @@ void prop_animateWaveMesh(WorldObject *obj) {
     if (mode == 0) {
         halfSpeed = (u16)(wave->speed >> 1);
         shade = wave->speedPhaseOffset;
-        tmp = (func_150489B0((wave->phase >> 8) + shade) + 1.0f) * 0.5f * halfSpeed;
+        tmp = (math_cosBinAngle((wave->phase >> 8) + shade) + 1.0f) * 0.5f * halfSpeed;
         speed = halfSpeed + tmp;
     }
     wave->phase -= speed * D_800BE9E4;
     if (wave->pulseAlpha) {
         wave->alphaPhase += D_800BE9E4 * 2;
-        obj->alpha = (func_150489B0(wave->alphaPhase + wave->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
+        obj->alpha = (math_cosBinAngle(wave->alphaPhase + wave->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
     }
     if (uvRate != 0.0f) {
         sprite_rotateTexcoords(obj->vertices[D_800BE9C0], wave->uv, obj->numVertices, wave->uvAngle, uvArg4, uvArg5);
@@ -1027,8 +1027,8 @@ void func_1511D394(WorldObject *obj) {
         savedS = WORK(obj)->w1511D394.baseS;
     }
     wavePhase = ownerWave->phase;
-    sine = (func_150489B0(((wavePhase >> 8) & 0xFF) + phaseOffset) + 1.0f) * 0.5f;
-    cosine = (func_15048A40(((wavePhase >> 8) & 0xFF) + phaseOffset) + 0.5f) * 0.5f;
+    sine = (math_cosBinAngle(((wavePhase >> 8) & 0xFF) + phaseOffset) + 1.0f) * 0.5f;
+    cosine = (math_sinBinAngle(((wavePhase >> 8) & 0xFF) + phaseOffset) + 0.5f) * 0.5f;
     if (init) {
         WORK(obj)->w1511D394.level = sine;
         WORK(obj)->w1511D394.velocity = 0.0f;
@@ -1058,7 +1058,7 @@ void func_1511D394(WorldObject *obj) {
         obj->vertices[D_800BE9C0][i].v.tc[1] = obj->vertices[!D_800BE9C0][i].v.tc[1] + offsetT;
     }
     entry->alphaPhase += D_800BE9E4 * 2;
-    obj->alpha = (func_150489B0(entry->alphaPhase + entry->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
+    obj->alpha = (math_cosBinAngle(entry->alphaPhase + entry->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
 }
 
 /* Wobbles the mesh texture coordinates in a circle whose S/T amplitudes and speed come from the flags. */
@@ -1096,8 +1096,8 @@ void prop_wobbleTexture(Game1483E0WaveMesh *mesh) {
     parameters.amplitude_t = (mesh->flags >> 12) & 0xFFF;
     parameters.speed = (mesh->flags >> 24) & 0xFF;
     angle = mesh->phase >> 4;
-    cosine = func_15048A40(angle);
-    sine = func_150489B0(angle);
+    cosine = math_sinBinAngle(angle);
+    sine = math_cosBinAngle(angle);
     mesh->phase += parameters.speed * D_800BE9E4;
     s_delta = parameters.amplitude_s * sine;
     t_delta = parameters.amplitude_t * cosine;

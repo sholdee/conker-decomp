@@ -191,7 +191,7 @@ void actor_updateAll(void) {
                 }
             }
             if (obj->type != 0) {
-                func_1507E73C(obj);
+                face_update(obj);
                 func_1504AF10(obj, 0, 0);
                 if (i < D_8008FD8C && D_800D18A8 == 0) {
                     player_setStat(obj->playernumber, 5, obj->energy);
@@ -242,7 +242,7 @@ void func_1504ADD0(void) {
     Actor *obj;
     OSContPad noPad;
 
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         for (i = 0; i < 25; i++) {
             obj = &movement_obj[i];
             if (obj->type == 0) {
@@ -631,7 +631,7 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     angle = obj->mv->pissed_cycle * 0.024543693f; // pi / 128: pissed_cycle counts 256ths of a turn
     D_800CC2B4 = 16.0f;
     if (obj->mv->pissed_hangover != 0 && obj->mv->pissed_hangover == 0) { // never true, but compiled in
-        func_1507EB2C(obj);
+        face_resetDefaultExpression(obj);
         obj->mv->pissed_up = 0;
     }
     if (obj->mv->pissed_walk == 0) {
@@ -667,7 +667,7 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
             D_800CC2B2 /= 3;
         }
     }
-    if (D_800C35EA[0] == 0 && obj->mv->pissed_hangover == 0) {
+    if (gCutsceneStates[0] == 0 && obj->mv->pissed_hangover == 0) {
         obj->headEffectTimer = 30;
         obj->headEffect = 0;
     }
@@ -1794,7 +1794,7 @@ void actor_updatePlayer(Actor *actor) {
         if (actor->mv->ropeProgress > 1.0f) {
             actor->mv->ropeProgress = 1.0f;
         } else if (actor->mv->ropeProgress < 0.0f) {
-            func_151AE264(actor);
+            rope_release(actor);
             actor->ygrav = 5.0f;
         }
         actor->unk1CC = actor->ypos;
@@ -1843,7 +1843,7 @@ void actor_updatePlayer(Actor *actor) {
             actor->xpos += ((actor->mv->swing_xvel - actor->xpos) * 0.2f);
             actor->zpos += ((actor->mv->swing_zvel - actor->zpos) * 0.2f);
         }
-        func_1502178C(actor, 0, -1);
+        cutscene_applyObjectTrack(actor, 0, -1);
         actor_applyGravity(actor);
         actor_resolveCollisions(actor, dc_glbl_CharNum);
         if ((D_800CC26C != 0) && (actor->mv->pissed_up <= 0) && (actor->lifting == 0)) {
@@ -1934,7 +1934,7 @@ void actor_updatePlayer(Actor *actor) {
         func_15063168(actor);
     }
     actor->theta = (actor->langle + 0x4000) * 0.005493164f;
-    func_1502178C(actor, 0, -1);
+    cutscene_applyObjectTrack(actor, 0, -1);
     startX = actor->xpos;
     startZ = actor->zpos;
     if (!(actor->noshove & 0x8000)) {
@@ -2659,8 +2659,8 @@ f32 actor_slopeToAngles(Actor *actor, f32 slopeX, f32 slopeZ, f32 *pitch, f32 li
     sinYaw = func_150AD78C(yaw);
     localX = (slopeX * cosYaw) + (slopeZ * sinYaw);
     slopeZ = (-slopeX * sinYaw) + (slopeZ * cosYaw);
-    slopeX = func_150484A0(localX, 1.0f) * 57.29577637f;
-    slopeZ = func_150484A0(slopeZ, 1.0f) * 57.29577637f;
+    slopeX = math_atan2(localX, 1.0f) * 57.29577637f;
+    slopeZ = math_atan2(slopeZ, 1.0f) * 57.29577637f;
     if (slopeX >= 180.0f) {
         slopeX -= 360.0f;
     }
@@ -2796,7 +2796,7 @@ void func_15052590(Actor *obj) {
         particle_spawnBoneSpriteEmitter(dc_glbl_CharNum, 2, 0x3FC, 6, 0xFF, 0);
     }
 
-    if ((D_800C35EA[0] != 1) || ((D_800C3654[0] != 0) && (func_150229E4(obj) == 0))) {
+    if ((gCutsceneStates[0] != 1) || ((D_800C3654[0] != 0) && (cutscene_isActorBound(obj) == 0))) {
         actor_stepScale(obj);
         func_1504BB88(obj);
         obj->count2 = 10;
@@ -2825,7 +2825,7 @@ void func_15052590(Actor *obj) {
 
         func_15054F74(obj);
         if (func_150535F4(obj) == 0) {
-            func_1502178C(obj, 0, -1);
+            cutscene_applyObjectTrack(obj, 0, -1);
         }
     }
 }
@@ -2989,7 +2989,7 @@ void actor_updatePathFollower(Actor *obj) {
         obj->taskint[0] = 0;
     }
     if (((gIsMultiplayer != 0) && (dc_glbl_CharNum < D_8008FD90)) || (func_150535F4(obj) == 0)) {
-        func_1502178C(obj, 0, -1);
+        cutscene_applyObjectTrack(obj, 0, -1);
     }
 }
 
@@ -3410,7 +3410,7 @@ void func_150538CC(Actor *obj) {
         if (obj->speed != 0.0f) {
             obj->vtilt += 15.0f * D_800BE9E4;
             if (sound_isActorSound2Playing(obj) == 0) {
-                sound_playActorSound2((func_151EF610() % 2) + 0x22F, obj, 30000, 500, 1000);
+                sound_playActorSound2((math_rand() % 2) + 0x22F, obj, 30000, 500, 1000);
             }
         }
         break;
@@ -3424,7 +3424,7 @@ void func_150538CC(Actor *obj) {
     case 13:
     case 15:
     case 17:
-        obj->vtilt = -func_150484A0(obj->yspd, obj->speed) * 57.29577637f;
+        obj->vtilt = -math_atan2(obj->yspd, obj->speed) * 57.29577637f;
         switch (kind) {
         case 4:
         case 5:
@@ -3598,7 +3598,7 @@ void func_150538CC(Actor *obj) {
                 vec.x = D_800CC254 - obj->old_xpos;
                 vec.y = D_800CC258 - obj->old_ypos;
                 vec.z = D_800CC25C - obj->old_zpos;
-                if (func_15145128(&vec, &vec, NULL, NULL) != 0) {
+                if (math_vec3Normalize(&vec, &vec, NULL, NULL) != 0) {
                     func_150D728C(NULL, (Vec3f *)&obj->xpos, &vec, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
                 }
             }
@@ -3865,7 +3865,7 @@ void func_1505528C(Actor *obj) {
 
         hoverHeight = 25.0f;
         if ((obj->ygrav != 0.0f) && ((obj->yspd > 0.0f) || (obj->shad > hoverHeight))) {
-            obj->vtilt = -func_150484A0(obj->yspd, obj->speed) * 57.29577637f;
+            obj->vtilt = -math_atan2(obj->yspd, obj->speed) * 57.29577637f;
         }
         hit = collision_findHitSphereTarget(obj, 40.0f, 10.0f, &target, 0xF, 0x53);
         if (hit != 0) {
@@ -3885,7 +3885,7 @@ void func_1505528C(Actor *obj) {
         obj->vtilt += D_800BE9E4 * 16;
         break;
     case 0x88:
-        obj->vtilt = -func_150484A0(obj->yspd, obj->speed) * 57.29577637f;
+        obj->vtilt = -math_atan2(obj->yspd, obj->speed) * 57.29577637f;
         obj->doing_hit = 16;
         if (actor_testAttack(obj, dc_glbl_CharNum) != 0) {
             actor_remove(obj, 1);

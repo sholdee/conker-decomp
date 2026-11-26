@@ -14,7 +14,7 @@ typedef struct {
     f32 unk18;
 } EmitterExtra; /* size 0x1C */
 
-/* The particle object func_151407D0 returns, as func_150113E0 uses it. */
+/* The particle object flare_spawnGlow returns, as func_150113E0 uses it. */
 typedef struct {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ u8 pad110[0x60];
@@ -78,7 +78,7 @@ void func_150113E0(void) {
     params.scale = 1.0f;
     params.type = 0;
 
-    emitter = func_151407D0(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
+    emitter = flare_spawnGlow(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
         memcpy(&emitter->extra, &extra, sizeof(extra));
     }
@@ -89,7 +89,7 @@ void func_150113E0(void) {
     packet.rot.y = 72.0f;
     packet.pos.z = 2337.0f;
     packet.rot.z = 2220.0f;
-    emitter = func_151407D0(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
+    emitter = flare_spawnGlow(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
         memcpy(&emitter->extra, &extra, sizeof(extra));
     }
@@ -100,7 +100,7 @@ void func_150113E0(void) {
     packet.rot.z = 926.0f;
     packet.pos.x = -710.0f;
     packet.rot.x = -584.0f;
-    emitter = func_151407D0(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
+    emitter = flare_spawnGlow(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
         memcpy(&emitter->extra, &extra, sizeof(extra));
     }
@@ -111,7 +111,7 @@ void func_150113E0(void) {
     packet.rot.y = 47.0f;
     packet.pos.z = -339.0f;
     packet.rot.z = -208.0f;
-    emitter = func_151407D0(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
+    emitter = flare_spawnGlow(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
         memcpy(&emitter->extra, &extra, sizeof(extra));
     }
@@ -218,8 +218,8 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
             motion.unk2C = 160.0f;
             motion.unk30 = 95.0f;
             motion.unk34 = 207.5f;
-            packet.pos = D_800A5480;
-            packet.rot = D_800A5480;
+            packet.pos = gZeroVec3f;
+            packet.rot = gZeroVec3f;
             packet.scale.x = 1.0f;
             packet.scale.y = 1.0f;
             packet.scale.z = 1.0f;

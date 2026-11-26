@@ -680,7 +680,7 @@ void func_1514D9F4(Actor *obj) {
     void *handle;
 
     func_1514D978(obj);
-    handle = func_151ACA60(obj, 20.0f, 0);
+    handle = rope_createRider(obj, 20.0f, 0);
     effect_attach(handle, obj, 0x14);
 }
 
@@ -743,7 +743,7 @@ void func_1514DB58(Actor *obj) {
 
 void func_1514DB64(Actor *obj) {
     if (level == 20) {
-        func_151B2060(obj);
+        rope_spawnTie(obj);
     }
 }
 

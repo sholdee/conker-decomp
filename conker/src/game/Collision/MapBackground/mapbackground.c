@@ -25,9 +25,9 @@ void collision_initMapBackground(s32 arg0) {
     s32 *buf;
     Vtx *vtx;
 
-    D_800DBEA8[0] = D_800B0DF0->unk5;
-    D_800DBEA8[1] = D_800B0DF0->unk6;
-    D_800DBEA8[2] = D_800B0DF0->unk7;
+    gBackgroundColour[0] = D_800B0DF0->unk5;
+    gBackgroundColour[1] = D_800B0DF0->unk6;
+    gBackgroundColour[2] = D_800B0DF0->unk7;
     if (gIsMultiplayer != 0 && D_800B0DF0->unk8 == 4) {
         D_800B0DF0->unk8 = 2;
     }
@@ -35,24 +35,24 @@ void collision_initMapBackground(s32 arg0) {
         size = (gScreenLayout != 1) ? 0x130 : 0x1C0;
         for (i = 0; i <= gScreenLayout; i++) {
             vtx = allocate_memory(size * 32, 1, 2, 0); // two buffers of `size` Vtx
-            D_800DBE88[i][0] = vtx;
-            D_800DBE88[i][1] = D_800DBE88[i][0] + size;
+            gSkyQuadVtx[i][0] = vtx;
+            gSkyQuadVtx[i][1] = gSkyQuadVtx[i][0] + size;
         }
-        rom_loadPathTo(&D_800DBE80, 2, 0xD, D_800B0DF0->unk9);
+        rom_loadPathTo(&gSkyData, 2, 0xD, D_800B0DF0->unk9);
         if (gExpansionPak != 0) {
             for (i = 0; i < 360; i++) {
-                texture_getAddress(D_800891BC[D_800B0DF0->unk9][0] + i, 0, 0x3F, 0);
+                texture_getAddress(gSkyTextureSets[D_800B0DF0->unk9][0] + i, 0, 0x3F, 0);
             }
         }
-        D_800DBEB0 = allocate_memory((gScreenLayout + 1) * 0x80, 1, 2, 0);
+        gSkyMatrices = allocate_memory((gScreenLayout + 1) * 0x80, 1, 2, 0);
         if (level == 0x3C) {
             D_800DBEAB = 1;
         } else {
             D_800DBEAB = 0;
         }
     } else if (D_800B0DF0->unk8 == 2) {
-        D_800DBE80 = allocate_memory(0x1000, 1, 1, 0);
-        buf = D_800DBE80;
+        gSkyData = allocate_memory(0x1000, 1, 1, 0);
+        buf = gSkyData;
         switch (level) {
             case 0:
             case 41:
@@ -224,36 +224,36 @@ void collision_initMapBackground(s32 arg0) {
             buf[i * 4 + 1] = color;
             buf[i * 4 + 0] = color;
         }
-        D_800DBEB0 = allocate_memory((gScreenLayout + 1) * 0x80, 1, 1, 0);
+        gSkyMatrices = allocate_memory((gScreenLayout + 1) * 0x80, 1, 1, 0);
         for (i = 0; i <= gScreenLayout; i++) {
             vtx = allocate_memory(2 * 4 * sizeof(Vtx), 1, 1, 0);
-            D_800DBE88[i][0] = vtx;
-            D_800DBE88[i][1] = vtx + 4;
+            gSkyQuadVtx[i][0] = vtx;
+            gSkyQuadVtx[i][1] = vtx + 4;
             for (j = 0; j < 2; j++) {
-                D_800DBE88[i][j][0].v.ob[0] = -1750;
-                D_800DBE88[i][j][0].v.ob[1] = 1750;
-                D_800DBE88[i][j][0].v.ob[2] = -1000;
-                D_800DBE88[i][j][0].v.flag = 0;
-                D_800DBE88[i][j][0].v.tc[0] = 0x2000;
-                D_800DBE88[i][j][1].v.ob[0] = 1750;
-                D_800DBE88[i][j][1].v.ob[1] = 1750;
-                D_800DBE88[i][j][1].v.ob[2] = -1000;
-                D_800DBE88[i][j][1].v.flag = 0;
-                D_800DBE88[i][j][1].v.tc[0] = 0x2000;
-                D_800DBE88[i][j][2].v.ob[0] = 1750;
-                D_800DBE88[i][j][2].v.ob[1] = -1750;
-                D_800DBE88[i][j][2].v.ob[2] = -1000;
-                D_800DBE88[i][j][2].v.flag = 0;
-                D_800DBE88[i][j][2].v.tc[0] = 0x2000;
-                D_800DBE88[i][j][3].v.ob[0] = -1750;
-                D_800DBE88[i][j][3].v.ob[1] = -1750;
-                D_800DBE88[i][j][3].v.ob[2] = -1000;
-                D_800DBE88[i][j][3].v.flag = 0;
-                D_800DBE88[i][j][3].v.tc[0] = 0x2000;
+                gSkyQuadVtx[i][j][0].v.ob[0] = -1750;
+                gSkyQuadVtx[i][j][0].v.ob[1] = 1750;
+                gSkyQuadVtx[i][j][0].v.ob[2] = -1000;
+                gSkyQuadVtx[i][j][0].v.flag = 0;
+                gSkyQuadVtx[i][j][0].v.tc[0] = 0x2000;
+                gSkyQuadVtx[i][j][1].v.ob[0] = 1750;
+                gSkyQuadVtx[i][j][1].v.ob[1] = 1750;
+                gSkyQuadVtx[i][j][1].v.ob[2] = -1000;
+                gSkyQuadVtx[i][j][1].v.flag = 0;
+                gSkyQuadVtx[i][j][1].v.tc[0] = 0x2000;
+                gSkyQuadVtx[i][j][2].v.ob[0] = 1750;
+                gSkyQuadVtx[i][j][2].v.ob[1] = -1750;
+                gSkyQuadVtx[i][j][2].v.ob[2] = -1000;
+                gSkyQuadVtx[i][j][2].v.flag = 0;
+                gSkyQuadVtx[i][j][2].v.tc[0] = 0x2000;
+                gSkyQuadVtx[i][j][3].v.ob[0] = -1750;
+                gSkyQuadVtx[i][j][3].v.ob[1] = -1750;
+                gSkyQuadVtx[i][j][3].v.ob[2] = -1000;
+                gSkyQuadVtx[i][j][3].v.flag = 0;
+                gSkyQuadVtx[i][j][3].v.tc[0] = 0x2000;
             }
         }
     } else if (D_800B0DF0->unk8 == 1) {
-        func_15111858();
+        env_initStars();
     }
     if (gTaskDoneBits[0x14] & 1) {
         D_800DBEAC = 1;

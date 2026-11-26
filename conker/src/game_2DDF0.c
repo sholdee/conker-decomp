@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15000940(arg0)
+void level_initTintWaves(arg0)
     s32 arg0;
 {
     s32 i;

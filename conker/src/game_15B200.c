@@ -107,9 +107,9 @@ void camera_updateRail(Camera *camera) {
         rail->eyeEaseB = 40.0f;
         return;
     }
-    func_150495B0(&rail->eyeEaseA, 10.0f, &rail->eyeEaseAVel, 0.6f, 1.4f, camera->SpringTime);
-    func_150495B0(&rail->eyeEaseB, 10.0f, &rail->eyeEaseBVel, 0.6f, 1.4f, camera->SpringTime);
-    func_150495B0(&camera->eye.x, rail->eyeGoal.x, &camera->CurrentVelX, rail->eyeEaseA, rail->eyeEaseB, camera->SpringTime);
-    func_150495B0(&camera->eye.y, rail->eyeGoal.y, &camera->CurrentVelY, rail->eyeEaseA, rail->eyeEaseB, camera->SpringTime);
-    func_150495B0(&camera->eye.z, rail->eyeGoal.z, &camera->CurrentVelZ, rail->eyeEaseA, rail->eyeEaseB, camera->SpringTime);
+    math_springTo(&rail->eyeEaseA, 10.0f, &rail->eyeEaseAVel, 0.6f, 1.4f, camera->SpringTime);
+    math_springTo(&rail->eyeEaseB, 10.0f, &rail->eyeEaseBVel, 0.6f, 1.4f, camera->SpringTime);
+    math_springTo(&camera->eye.x, rail->eyeGoal.x, &camera->CurrentVelX, rail->eyeEaseA, rail->eyeEaseB, camera->SpringTime);
+    math_springTo(&camera->eye.y, rail->eyeGoal.y, &camera->CurrentVelY, rail->eyeEaseA, rail->eyeEaseB, camera->SpringTime);
+    math_springTo(&camera->eye.z, rail->eyeGoal.z, &camera->CurrentVelZ, rail->eyeEaseA, rail->eyeEaseB, camera->SpringTime);
 }

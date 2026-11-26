@@ -474,7 +474,7 @@ s32 func_1507D754(Actor *obj) {
                 spawned = gfx_findObjectById(1);
             }
             handle = event_getFirstLiveOwnedObject(obj);
-            if (handle != NULL && D_800C35EA[0] != 1) {
+            if (handle != NULL && gCutsceneStates[0] != 1) {
                 blood_spawnHitEffects(handle, 1, 1, 1, 1, 0, 0xFF, 1);
             }
         }
@@ -650,7 +650,7 @@ void func_1507DF10(Actor *obj, s32 part) {
     }
 }
 
-/* Looks up resource's position and facing via player_getSpawnPoint and calls func_1501D348(0x25, ...) from there. */
+/* Looks up resource's position and facing via player_getSpawnPoint and calls cutscene_start(0x25, ...) from there. */
 void func_1507DFE4(s32 resource, s32 arg1) {
     s32 savedMode;
     s16 pos[3];
@@ -663,7 +663,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
     s32 kind;
     s32 type;
 
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         player_getSpawnPoint(0, resource, 1, pos, &vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
         yaw = (angle - 64) * (360.0f / 256.0f) + 180.0f;
         if (type == 0) {
@@ -677,7 +677,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
         savedMode = level;
         level = 0x25;
         D_800C3671 = 1;
-        func_1501D348(0x25, kind, 0, 0, 0);
+        cutscene_start(0x25, kind, 0, 0, 0);
         D_800C3670 = 1;
         level = savedMode;
     }
@@ -722,7 +722,7 @@ void actor_getTrackPoint(Actor *obj, f32 *x, f32 *y, f32 *z) {
         } else if (obj->type == 0x1E) {
             bone += 3;
         }
-        func_15143134(&in, &out, bone);
+        math_transformOffset(&in, &out, bone);
         *x = out.x;
         *y = out.y;
         *z = out.z;

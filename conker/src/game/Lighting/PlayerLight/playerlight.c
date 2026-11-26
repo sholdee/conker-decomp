@@ -40,14 +40,14 @@ void light_easePlayerLight(s32 player) {
         }
         diff = pitch - gPlayerLightPitch[player];
         gPlayerLightPitch[player] += diff * rate;
-        diff = func_15048A70(gPlayerLightYaw[player], yaw);
+        diff = math_angleDiff(gPlayerLightYaw[player], yaw);
         gPlayerLightYaw[player] += rate * diff;
         if (gPlayerLightYaw[player] < 0.0f) {
             gPlayerLightYaw[player] += 360.0f;
         } else if (gPlayerLightYaw[player] >= 360.0f) {
             gPlayerLightYaw[player] -= 360.0f;
         }
-        diff = func_15048A70(gPlayerLightYaw[player], yaw);
+        diff = math_angleDiff(gPlayerLightYaw[player], yaw);
         if (fabsf(diff) > 90.0f) {
             gPlayerLightYaw[player] = yaw - ((diff < 0) ? -1 : 1) * 90.0f;
         }

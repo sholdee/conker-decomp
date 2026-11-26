@@ -288,7 +288,7 @@ f32 prop_springAngle(WorldObject *obj, f32 angle) {
             gfx_playObjectSound(obj, gPropSounds[obj->moveData.word >> 10].open, 24000, 200, 2500, 0);
         }
         angle += velocity * D_800BE9E4;
-        delta = func_15048A70(angle, target);
+        delta = math_angleDiff(angle, target);
         magnitude = fabsf(delta);
         if (delta > 0.0f) {
             velocity += magnitude * acceleration;

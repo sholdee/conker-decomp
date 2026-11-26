@@ -95,7 +95,7 @@ void weapon_getGunMuzzlePos(Actor *obj, s16 arg1, Vec3f *out) {
 
     src = &gGunMuzzleStart;
     dst = out;
-    func_15145EA4(&src, &dst, obj->ob_matrix_ptr[gGunMuzzleBone], 1);
+    math_transformOffsets(&src, &dst, obj->ob_matrix_ptr[gGunMuzzleBone], 1);
 }
 
 
@@ -154,7 +154,7 @@ void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32
     spawn.b2 = 0xFF;
     spawn.brightness = 0xFF;
     spawn.pos = *position;
-    spawn.offset = D_800A5480;
+    spawn.offset = gZeroVec3f;
     spawn.fadeStart = 7;
     spawn.fadeRate = 36;
     spawn.scaleStart = 1;
@@ -168,7 +168,7 @@ void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32
     spawn.viewMask = 0;
     spawn.views = 0xFF;
     spawn.scaleRate = 1.0f;
-    func_15145974(direction, &yaw, &pitch);
+    math_getHeadingElevation(direction, &yaw, &pitch);
     pitch = 0.0f;
     /* degrees to a 16-bit binary angle, then to 1/256 turns */
     baseYaw = yaw * 182.0444489f;
@@ -188,7 +188,7 @@ void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32
         spawn.width = spawn.height = func_150ADA68() * 155.0f + 75.0f;
         random0 = func_150ADA20();
         random1 = func_150ADA20();
-        func_15143794(random0 % 21U + baseYaw, random1 % 21U + basePitch, func_150ADA68() * 20.0f + 20.0f,
+        math_dirFromBinAngles(random0 % 21U + baseYaw, random1 % 21U + basePitch, func_150ADA68() * 20.0f + 20.0f,
                       &spawn.vel);
         spawn.gravity = func_150ADA68() * 0.6210000515f + -0.6570000052f;
         spawn.flags &= ~0xC0;

@@ -338,8 +338,8 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x20:
         obj->energy = cmd->a[0].w;
         if (D_800D3840 == 4) {
-            D_800D2456 = obj->energy;
-            D_800D2457 = D_800D2456;
+            gHudBlockCount = obj->energy;
+            gHudBlockTarget = gHudBlockCount;
         }
         break;
     case 0x1D:
@@ -385,15 +385,15 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x24:
         if (cmd->a[0].w == 0) {
-            func_1507EB2C(obj);
+            face_resetDefaultExpression(obj);
             obj->mv->pissed_up = 0;
             obj->mv->pissed_hangover = 0;
         } else {
             obj->mv->pissed_up = 1;
             if (cmd->a[0].w == 1) {
-                func_1507EB4C(obj, 0x15);
+                face_setDefaultExpression(obj, 0x15);
             } else if (cmd->a[0].w == 2) {
-                func_1507EB4C(obj, 0x2A);
+                face_setDefaultExpression(obj, 0x2A);
                 obj->mv->pissed_hangover = 0xFF;
             }
         }
@@ -608,7 +608,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->forced_lod = cmd->a[0].w;
         break;
     case 0x4A:
-        func_1507EB4C(obj, cmd->a[0].w);
+        face_setDefaultExpression(obj, cmd->a[0].w);
         break;
     case 0x4B: {
         s32 v;
@@ -766,7 +766,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
             cmd->a[4].w = lo ^ hi;
             cmd->a[5].w = hi;
         }
-        angle = func_15048AD0((f32)cmd->a[4].w, (f32)cmd->a[5].w);
+        angle = math_angleDiffInt((f32)cmd->a[4].w, (f32)cmd->a[5].w);
         angle = cmd->a[4].w + func_150ADA20() % angle;
         dist = cmd->a[2].w + func_150ADA20() % (cmd->a[3].w - cmd->a[2].w);
         obj->xpos = cmd->a[0].w + sinf(angle * 0.01745329238f) * -(f32)dist;
@@ -1175,12 +1175,12 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
             if (obj->unk20F == 0xFF) {
                 return 0xFF;
             }
-            return D_800D2350[obj->unk20F].unk7;
+            return gPathNodes[obj->unk20F].unk7;
         }
         if (obj->unk211 == 0xFF) {
             return 0xFF;
         }
-        return D_800D2350[obj->unk211].unk7;
+        return gPathNodes[obj->unk211].unk7;
     case 0xC8: {
         f32 x;
         f32 y;
@@ -1213,18 +1213,18 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return dist;
     }
     case 0xC9:
-        return func_15085DA8(obj->ypos);
+        return path_getLayerAt(obj->ypos);
     case 0xCA: {
         u8 b;
         b = 0xFF;
         if (obj->unk20F != 0xFF) {
-            return D_800D2350[obj->unk20F].unk7;
+            return gPathNodes[obj->unk20F].unk7;
         }
-        D_8008729C = obj->unk212[1];
-        ret = func_15086098(obj->xpos, obj->ypos, obj->zpos, 0, 0, &b, &b);
+        gPathNearerThanNode = obj->unk212[1];
+        ret = path_getNextNode(obj->xpos, obj->ypos, obj->zpos, 0, 0, &b, &b);
         obj->unk212[1] = ret;
         if (ret != 0xFF) {
-            return D_800D2350[ret].unk7;
+            return gPathNodes[ret].unk7;
         }
         return 0xFF;
     }
@@ -1275,7 +1275,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         u8 nodes[18];
 
         /* Resolve the cmd->a[0].w node ids in cmd->a[1..].w (dropping unknown ones), then pick one from the
-         * object position with func_15086098 / func_15086364. */
+         * object position with path_getNextNode / path_search. */
         n2 = 0;
         ret = cmd->a[0].w;
         count = 0;
@@ -1287,14 +1287,14 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         ret = -1;
         if (count != 0) {
-            found = func_15086098(obj->xpos, obj->ypos, obj->zpos, count, n2, nodes, (u8 *)&n2);
+            found = path_getNextNode(obj->xpos, obj->ypos, obj->zpos, count, n2, nodes, (u8 *)&n2);
             foundNode = found;
-            D_80087298 = 0xFF;
+            gPathGoalReached = 0xFF;
             if ((u8)found != 0xFF) {
-                func_15086364(foundNode, count, n2, nodes, (u8 *)&n2);
+                path_search(foundNode, count, n2, nodes, (u8 *)&n2);
             }
-            if (D_80087298 != 0xFF) {
-                ret = D_800D2350[D_80087298].unk7;
+            if (gPathGoalReached != 0xFF) {
+                ret = gPathNodes[gPathGoalReached].unk7;
             }
         }
         return ret;
@@ -1325,8 +1325,8 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         temp = actor_getDirectionAngle(other->xpos - obj->xpos, obj->zpos - other->zpos, 0) + 0x4000;
         a = temp * 0.0054931640625f;
         b = obj->theta;
-        a = func_15144BC8(a);
-        c = func_15144BC8(func_15144BC8(b) - a);
+        a = math_wrapDegrees(a);
+        c = math_wrapDegrees(math_wrapDegrees(b) - a);
         if (c > 180.0f) {
             c = -360.0f + c;
         }
@@ -1343,7 +1343,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         dx = other->xpos - obj->xpos;
         dz = other->zpos - obj->zpos;
         c = (u32)actor_getDirectionAngle(sqrtf(dx * dx + dz * dz), other->ypos - obj->ypos, 0) * 0.0054931640625f;
-        c = func_15144BC8(c);
+        c = math_wrapDegrees(c);
         if (c > 180.0f) {
             c = -360.0f + c;
         }

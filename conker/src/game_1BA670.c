@@ -265,7 +265,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                         slot->particle->head.def.pos.y = self->pos.y + slot->offset.y;
                         slot->particle->head.def.pos.z = self->pos.z + slot->offset.z;
                     } else {
-                        func_15143134(&info->points[k].pos, &slot->particle->head.def.pos,
+                        math_transformOffset(&info->points[k].pos, &slot->particle->head.def.pos,
                                       self->params.owner->ob_matrix_ptr + info->points[k].bone);
                     }
                     slot->timer -= D_800BE9E4;
@@ -375,10 +375,10 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                                     yaw = func_150ADA20() & 0xFF;
                                     pitch = func_150ADA20() & 0xFF;
                                     speed = func_150ADA68() * info->speed;
-                                    c1 = func_151423D8(pitch - 0x40);
-                                    c2 = func_151423D8(pitch);
-                                    c3 = func_151423D8(yaw - 0x40);
-                                    c4 = func_151423D8(yaw);
+                                    c1 = math_cosBinAngleMasked(pitch - 0x40);
+                                    c2 = math_cosBinAngleMasked(pitch);
+                                    c3 = math_cosBinAngleMasked(yaw - 0x40);
+                                    c4 = math_cosBinAngleMasked(yaw);
                                     freeSlot->offset.x = speed * c2 * c3;
                                     freeSlot->offset.y = -speed * c1;
                                     freeSlot->offset.z = speed * c2 * c4;
@@ -390,9 +390,9 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
 
                                     pitch = func_150ADA20() & 0xFF;
                                     speed = func_150ADA68() * info->speed;
-                                    freeSlot->offset.x = func_151423D8(pitch) * speed;
+                                    freeSlot->offset.x = math_cosBinAngleMasked(pitch) * speed;
                                     freeSlot->offset.y = func_150ADA68() * info->speedY;
-                                    freeSlot->offset.z = -func_151423D8(pitch - 0x40) * speed;
+                                    freeSlot->offset.z = -math_cosBinAngleMasked(pitch - 0x40) * speed;
                                 }
                                     break;
                                 }
@@ -403,7 +403,7 @@ void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
                                 s32 idx;
 
                                 idx = freeSlot - self->slots;
-                                func_15143134(&info->points[idx].pos, &freeSlot->particle->head.def.pos,
+                                math_transformOffset(&info->points[idx].pos, &freeSlot->particle->head.def.pos,
                                               self->params.owner->ob_matrix_ptr + info->points[idx].bone);
                             }
                             freeSlot->particle->head.def.rot = freeSlot->particle->head.def.pos;

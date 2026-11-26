@@ -93,7 +93,7 @@ void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5) 
 }
 
 /* Spawns a particle at pos moving in a random direction at a random speed, with randomized parameters.
- * func_151423D8 is cos() over a 256-step circle, so cos(a - 0x40) is sin(a). */
+ * math_cosBinAngleMasked is cos() over a 256-step circle, so cos(a - 0x40) is sin(a). */
 void func_151AEAB4(Vec3f *pos, u8 flag, u8 arg2) {
     u32 phase; // matching: passing yaw - 0x40 through a u32 temp is needed for identical bytes
     Vec3f velocity;
@@ -108,11 +108,11 @@ void func_151AEAB4(Vec3f *pos, u8 flag, u8 arg2) {
 
     yaw = func_150ADA20() & 0xFF; // matching: the redundant mask is needed for identical bytes
     pitch = (func_150ADA20() & 0x7F) - 0x3F;
-    yawCos = func_151423D8(yaw);
+    yawCos = math_cosBinAngleMasked(yaw);
     phase = yaw - 0x40;
-    yawSin = func_151423D8(phase);
-    pitchCos = func_151423D8(pitch);
-    pitchSin = func_151423D8(pitch - 0x40);
+    yawSin = math_cosBinAngleMasked(phase);
+    pitchCos = math_cosBinAngleMasked(pitch);
+    pitchSin = math_cosBinAngleMasked(pitch - 0x40);
     speed = (func_150ADA68() * 80.0f + 20.0f) * 0.1000000015f;
     horizontal = speed * pitchCos;
     velocity.x = horizontal * yawSin;
@@ -190,7 +190,7 @@ lbA:
     probe.y = obj->ypos + 100.0f;
     while (count != 0) {
         angle = func_150ADA20();
-        func_15143874((u8)angle, (func_150ADA68() * 59.0f) + 90.0f, &pos[0], &pos[2]);
+        math_dirFromBinAngleXZ((u8)angle, (func_150ADA68() * 59.0f) + 90.0f, &pos[0], &pos[2]);
 lbC:
         pos[0] += obj->xpos;
         pos[2] += obj->zpos;

@@ -119,14 +119,14 @@ void func_150B0D20(DDB60Effect *effect) {
         data->timer += (D_8009F860[emit] + func_150ADA68() * D_8009F868[emit]) * gFrameDelta;
         if (data->timer > 1.0f) {
             if (sprite_findActorMotion(owner, &refVel) == 0) {
-                refVel = &D_800A5480;
+                refVel = &gZeroVec3f;
             }
-            func_1514373C(owner->theta * 0.01745329238f, 1.0f, &forward[0], &forward[1]);
+            math_dirFromAngleXZ(owner->theta * 0.01745329238f, 1.0f, &forward[0], &forward[1]);
             right[0] = forward[1];
             right[1] = -forward[0];
             do {
                 func_150B0A60(owner, &movement_obj[idx], forward, right, &pos, &angle);
-                func_15143794(angle, (func_150ADA20() % 26) - 41, func_150ADA68() * 3.769999981f + 4.059999943f, &vel);
+                math_dirFromBinAngles(angle, (func_150ADA20() % 26) - 41, func_150ADA68() * 3.769999981f + 4.059999943f, &vel);
                 vel.x -= refVel->x * 0.9250000715f;
                 vel.z -= refVel->z * 0.9250000715f;
                 particle_spawnSteamParticle(&pos, &vel, 5, func_150ADA68() * 0.1780000031f + -0.4420000315f,

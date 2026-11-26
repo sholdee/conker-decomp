@@ -238,7 +238,7 @@ void camera_processMessages(Camera *cam) {
                     x = cam->CameraAngle; // matching: dead store steers register allocation
                 }
                 angle = cam->CameraAngle;
-                angle += func_15048A70(cam->CameraAngle, data->at.angles.yaw) / 1.0f;
+                angle += math_angleDiff(cam->CameraAngle, data->at.angles.yaw) / 1.0f;
                 angle *= 0.01745329238f;
                 pos.x = sinf(angle) * pos.z;
                 pos.z = cosf(angle) * pos.z;
@@ -257,8 +257,8 @@ void camera_processMessages(Camera *cam) {
                 cam->YawAngle = 0.0f;
                 cam->AddOnPitch = 0.0f;
             }
-            if (D_800C35EA[data->unk4] == 1) {
-                D_800C3648 = data->unk8;
+            if (gCutsceneStates[data->unk4] == 1) {
+                gViewFovOffset = data->unk8;
                 view_widenFov(cam->CNumber, cam->FOVX, cam->FOVY, 1.0f, 0.0f);
             }
             if (D_800DBFF4[0]) {

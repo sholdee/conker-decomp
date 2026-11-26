@@ -49,10 +49,10 @@ void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
         yaw = func_150ADA20() & 0xFF;
         pitch = -0x10 - (func_150ADA20() % 32U);
         speed = (func_150ADA68() * 10.0f) + 5.0f;
-        sinYaw = func_151423D8(yaw - 0x40);
-        cosYaw = func_151423D8(yaw);
-        sinPitch = func_151423D8(pitch - 0x40);
-        cosPitch = func_151423D8(pitch);
+        sinYaw = math_cosBinAngleMasked(yaw - 0x40);
+        cosYaw = math_cosBinAngleMasked(yaw);
+        sinPitch = math_cosBinAngleMasked(pitch - 0x40);
+        cosPitch = math_cosBinAngleMasked(pitch);
         spread = func_150ADA68() * 20.0f;
         sp.pos.x = (spread * sinYaw) + arg0;
         sp.pos.y = arg1;
@@ -84,8 +84,8 @@ void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     sp2.velY = (func_150ADA20() % 201U) + 0x12C;
     sp2.accelY = 0;
     sp2.life = 0x258;
-    func_151429E0(1, &sp2.primColor[0], &sp2.primColor[1], &sp2.primColor[2]);
-    func_151429E0(1, &sp2.envColor[0], &sp2.envColor[1], &sp2.envColor[2]);
+    math_pickPaletteColour(1, &sp2.primColor[0], &sp2.primColor[1], &sp2.primColor[2]);
+    math_pickPaletteColour(1, &sp2.envColor[0], &sp2.envColor[1], &sp2.envColor[2]);
     sp2.intensity = 0xFF;
     sp2.alpha = 0xFF;
     sp2.fadeStep = 0xA;

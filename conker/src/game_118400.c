@@ -20,7 +20,7 @@ s32 func_150EAF50(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
         bone = 0x1D;
     }
 
-    func_15142314(actor->ob_matrix_ptr, bone, pos);
+    math_getBoneTranslation(actor->ob_matrix_ptr, bone, pos);
     if (hit == NULL) {
         return 1;
     }

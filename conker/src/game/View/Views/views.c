@@ -502,8 +502,8 @@ void func_1501B0A0(s32 view, s32 layout) {
     tanY = sinf(halfFovY) / cosf(halfFovY);
     distX = gLayoutViewWidths[layout] / (2.0f * tanX);
     distY = gLayoutViewHeights[layout] / (2.0f * tanY);
-    x = func_150484A0(RENDER_VIEWS[view].halfWidth, distX) * 114.59155f - RENDER_VIEWS[layout].fovX;
-    y = func_150484A0(RENDER_VIEWS[view].halfHeight, distY) * 114.59155f - RENDER_VIEWS[layout].fovY;
+    x = math_atan2(RENDER_VIEWS[view].halfWidth, distX) * 114.59155f - RENDER_VIEWS[layout].fovX;
+    y = math_atan2(RENDER_VIEWS[view].halfHeight, distY) * 114.59155f - RENDER_VIEWS[layout].fovY;
     view_widenFov(view, x, y, 1.0f, 0.0f);
 }
 

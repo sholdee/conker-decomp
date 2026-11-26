@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/flare.h describes it. */
-u8 D_800DD2D0;
+u8 gScreenFlash;
 
 #include "functions.h"
 #include "variables.h"
@@ -13,10 +13,10 @@ u8 D_800DD2D0;
     _g->words.w1 = (u32)(b);        \
 }
 
-Gfx *func_15172F70(Gfx *arg0) {
+Gfx *flare_drawScreenFlash(Gfx *arg0) {
     u32 color;
 
-    color = D_800DD2D0;
+    color = gScreenFlash;
     if (color != 0) {
         WGFX15172F70(arg0++, 0xD9E0FFFE, 0);
         WGFX15172F70(arg0++, 0xD9FFFFFF, 0x00200004);

@@ -5,7 +5,7 @@
 
 // acos(x) for x in steps of 512 from 0 to 30720, steps of 32 from 30720 to 32736, and steps
 // of 8 from 32736 to 32760.
-static u16 D_80085EC0[61] = {
+static u16 gAcosTableCoarse[61] = {
     32768, 32442, 32116, 31789,
     31463, 31136,  30809, 30481,
     30153, 29824,  29495, 29164,
@@ -23,7 +23,7 @@ static u16 D_80085EC0[61] = {
     10542,  9848,   9105,  8300,
     7414 };
 
-static u16 D_80085F3C[64] = {
+static u16 gAcosTableMedium[64] = {
     7414, 7355, 7296, 7237,
     7176, 7116, 7055, 6993,
     6931, 6868, 6805, 6741,
@@ -41,18 +41,18 @@ static u16 D_80085F3C[64] = {
     2609, 2441, 2259, 2062,
     1844, 1597, 1304, 922 };
 
-static u16 D_80085FBC[4] = { 922, 798, 652, 461 };
+static u16 gAcosTableFine[4] = { 922, 798, 652, 461 };
 
 /*
  * Fixed-point arc cosine / arc sine. Inputs are s16 with 0x7FFF ~ 1.0; angles use 0x10000 = 2*pi,
- * so acos(0) = 0x8000. The float wrappers are func_15048360 / func_15048408 in game_75810.c.
+ * so acos(0) = 0x8000. The float wrappers are math_acosLookup / math_asinLookup in game_75810.c.
  */
 
 /**
  * Returns acos(x) for 0 <= x <= 0x7FFF by linear interpolation in three tables of increasing
  * resolution (acos gets steep near 1.0): step 512 below 30720, step 32 below 32736, step 8 above.
  */
-s32 func_150485E0(s32 x) {
+s32 math_acosFixedAbs(s32 x) {
     s32 index;
     s32 lo;
     s32 hi;
@@ -63,17 +63,17 @@ s32 func_150485E0(s32 x) {
     if (x >= 32736) {
         fracMask = 7;
         shift = 3;
-        table = D_80085FBC;
+        table = gAcosTableFine;
         x -= 32736;
     } else if (x >= 30720) {
         fracMask = 31;
         shift = 5;
-        table = D_80085F3C;
+        table = gAcosTableMedium;
         x -= 30720;
     } else {
         fracMask = 511;
         shift = 9;
-        table = D_80085EC0;
+        table = gAcosTableCoarse;
     }
 
     index = x >> shift;
@@ -84,7 +84,7 @@ s32 func_150485E0(s32 x) {
 }
 
 /** Returns acos(x) as a u16 angle (0x10000 = 2*pi), using acos(-x) = pi - acos(x). */
-u16 func_15048664(s16 x) {
+u16 math_acosFixed(s16 x) {
     s32 angle;
 
     if (x >= 0) {
@@ -93,7 +93,7 @@ u16 func_15048664(s16 x) {
         angle = -x;
     }
 
-    angle = func_150485E0(angle);
+    angle = math_acosFixedAbs(angle);
     if (x < 0) {
         angle = 0xFFFF - angle;
     }
@@ -101,7 +101,7 @@ u16 func_15048664(s16 x) {
 }
 
 /** Returns asin(x) as an s16 angle (0x8000 = pi/2), using asin(x) = pi/2 - acos(x). */
-s16 func_150486B8(s16 x) {
+s16 math_asinFixed(s16 x) {
     s32 angle;
 
     if (x >= 0) {
@@ -110,7 +110,7 @@ s16 func_150486B8(s16 x) {
         angle = -x;
     }
 
-    angle = func_150485E0(angle);
+    angle = math_acosFixedAbs(angle);
     if (x >= 0) {
         angle = 0x7FFF - angle;
     } else {

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c): per camera slot, the tint
- * channels texture_updateTint steps and waves (set up by func_15000940 from the tables below). */
+ * channels texture_updateTint steps and waves (set up by level_initTintWaves from the tables below). */
 u16 gTintWavePhases[4][3]; // wave phase (12 bits after >> 4)
 u8 gTintWaveSteps[4][3];  // wave phase step
 u8 gTintWaveAmps[4][3];  // wave amplitude
@@ -12,7 +12,7 @@ u8 gTintTargetOverrides[4][3];  // override target level ([0] != 0: use it for t
 #include "functions.h"
 #include "variables.h"
 
-/* Tint presets, chosen per level by func_15000940: an entry's three indices pick the phase step,
+/* Tint presets, chosen per level by level_initTintWaves: an entry's three indices pick the phase step,
  * amplitude and target level rows. */
 const u8 gTintPresets[7][3] = {
     { 0, 0, 0 }, { 0, 1, 1 }, { 0, 2, 2 }, { 0, 3, 3 }, { 0, 4, 4 }, { 0, 5, 5 }, { 0, 6, 6 },
@@ -31,7 +31,7 @@ extern u8 compressed_ROM_START[];
 
 
 
-/* Steps slot's tint channels toward their targets and applies a func_150489B0 wave to the prim/env colors. */
+/* Steps slot's tint channels toward their targets and applies a math_cosBinAngle wave to the prim/env colors. */
 void texture_updateTint(s32 slot) {
     f32 wave;
     s32 step;
@@ -67,7 +67,7 @@ void texture_updateTint(s32 slot) {
                 gTintLevels[slot][i] = cur;
             }
 
-            wave = gTintWaveAmps[slot][i] * func_150489B0(gTintWavePhases[slot][i] >> 4);
+            wave = gTintWaveAmps[slot][i] * math_cosBinAngle(gTintWavePhases[slot][i] >> 4);
             amount = (s32)wave + cur - 127;
             if (amount >= 0) {
                 D_800D9B68[slot][i] += amount;
@@ -204,8 +204,8 @@ typedef struct {
 
 /*
  * Returns the address of texture `index`, loading it on first use: its compressed bytes (size from
- * D_80091D20, located by texture_getRomAddress) are read from ROM and decompressed into a new buffer of the
- * size given by D_800B87A0. Returns 0x80000000 for an invalid index or a failed load. Also widens the
+ * gTextureRomSizes, located by texture_getRomAddress) are read from ROM and decompressed into a new buffer of the
+ * size given by gTextureSizes. Returns 0x80000000 for an invalid index or a failed load. Also widens the
  * gTexAgeFirst..gTexAgeLast range of indices to scan, raises the texture's lifetime (see texture_updateAging)
  * to at least `lifetime` and, when countUse is set, bumps its use count. sizeOut (optional) receives
  * the decompressed size.
@@ -227,10 +227,10 @@ s32 texture_getAddress(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
     if (index >= 0x1E52 || index < 0) {
         return 0x80000000;
     }
-    packedSize = D_80091D20[index];
+    packedSize = gTextureRomSizes[index];
     if (packedSize == 0) {
-        D_800B0E58[index] = 0x80000000;
-    } else if (D_800B0E58[index] == -1) {
+        gTextureAddrs[index] = 0x80000000;
+    } else if (gTextureAddrs[index] == -1) {
         gTexLoadCooldown = 5;
         if (lifetime == 0x3F) {
             lifetime = 0x3E;
@@ -252,24 +252,24 @@ s32 texture_getAddress(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
             return 0x80000000;
         }
         rom_read(romAddr, packed, (len + odd + 0xF) & ~0xF, 1);
-        len = D_800B87A0[index];
-        texture = (s32)heap_alloc(len, 1, 1, 0, 2); // the texture cache D_800B0E58 holds addresses as s32
+        len = gTextureSizes[index];
+        texture = (s32)heap_alloc(len, 1, 1, 0, 2); // the texture cache gTextureAddrs holds addresses as s32
         if (texture == 0) {
             heap_free(packed);
             return 0x80000000;
         }
         func_10006240(packed + odd, texture, D_8003809C);
         heap_free(packed);
-        D_800B0E58[index] = texture;
+        gTextureAddrs[index] = texture;
         gTexUseCounts[index] = 0;
     }
     if (sizeOut != NULL) {
-        len = D_800B87A0[index];
+        len = gTextureSizes[index];
         *sizeOut = len;
     }
-    len = D_800B0E58[index];
-    if (D_800BC448[index] < lifetime) {
-        D_800BC448[index] = lifetime;
+    len = gTextureAddrs[index];
+    if (gTextureLifetimes[index] < lifetime) {
+        gTextureLifetimes[index] = lifetime;
     }
     if (countUse != 0) {
         if (gTexUseCounts[index] < 255) {
@@ -288,7 +288,7 @@ s32 texture_getRomAddress(s32 index) {
 
     romAddr = (s32)compressed_ROM_START;
     for (i = 0; i < index; i++) {
-        romAddr += D_80091D20[i];
+        romAddr += gTextureRomSizes[i];
     }
 
     return romAddr;
@@ -324,16 +324,16 @@ void texture_updateAging(void) {
     }
     gTexLastFreed = -1;
     for (i = start; i <= end; i++) {
-        if (D_800BC448[i] != 0) {
-            if (D_800BC448[i] < 4) {
-                D_800BC448[i]--;
-                if (D_800BC448[i] == 0) {
+        if (gTextureLifetimes[i] != 0) {
+            if (gTextureLifetimes[i] < 4) {
+                gTextureLifetimes[i]--;
+                if (gTextureLifetimes[i] == 0) {
                     gTexLastFreed = i;
                     // matching: the empty compare counts as a loop use of -1, so IDO keeps -1 in a register
-                    heap_free((s16 *)D_800B0E58[i]);
+                    heap_free((s16 *)gTextureAddrs[i]);
                     if (i == -1) {
                     }
-                    D_800B0E58[i] = -1;
+                    gTextureAddrs[i] = -1;
                     continue; // matching: the extra loop block lowers the loop-limit temp's register priority
                 } else {
                     if (i < gTexAgeFirst) {
@@ -343,12 +343,12 @@ void texture_updateAging(void) {
                         gTexAgeLast = i;
                     }
                 }
-            } else if (D_800BC448[i] & 0x40) {
-                data = ((Entry1510D404 *)D_800B0E58[i])->data;
-                size = ((Entry1510D404 *)D_800B0E58[i])->size;
-                func_10006240(data + size, (Entry1510D404 *)D_800B0E58[i], D_8003809C);
+            } else if (gTextureLifetimes[i] & 0x40) {
+                data = ((Entry1510D404 *)gTextureAddrs[i])->data;
+                size = ((Entry1510D404 *)gTextureAddrs[i])->size;
+                func_10006240(data + size, (Entry1510D404 *)gTextureAddrs[i], D_8003809C);
                 heap_free(data);
-                D_800BC448[i] &= ~0x40;
+                gTextureLifetimes[i] &= ~0x40;
                 if (i < gTexAgeFirst) {
                     gTexAgeFirst = i;
                 }
@@ -363,7 +363,7 @@ void texture_updateAging(void) {
 
 /* Sets a loaded texture's lifetime, keeping its 0x40 flag; unloaded textures (lifetime 0) are left alone. */
 void texture_setLifetime(s32 index, s32 lifetime) {
-    s8 *state = &D_800BC448[index];
+    s8 *state = &gTextureLifetimes[index];
     s8 prev = *state;
 
     if (prev != 0) {

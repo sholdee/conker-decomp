@@ -109,8 +109,8 @@ void func_150C79BC(s32 view) {
         radius = func_150ADA20() % 900U;
         angle = func_150ADA20();
         // dx and dz now hold the spawn point itself
-        dx = func_150489B0(angle) * radius + -2418.0f; // matching: "- 2418.0f" emits sub.s instead of add.s
-        dz = func_15048A40(angle) * radius + 1775.0f;
+        dx = math_cosBinAngle(angle) * radius + -2418.0f; // matching: "- 2418.0f" emits sub.s instead of add.s
+        dz = math_sinBinAngle(angle) * radius + 1775.0f;
         texture = ((func_150ADA20() & 0xFFFF) * 2) * (1.0f / 65536.0f);
         particle_spawnSpinDebris(texture, dx, 1583, dz, 7, 1200, 37, 10, 30, 3, 8);
     }

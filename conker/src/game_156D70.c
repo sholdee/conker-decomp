@@ -51,8 +51,8 @@ void func_15129934(Camera *cam) {
         cam->unk27C.x = cam->unk288.x;
         cam->unk27C.y = cam->unk288.y;
         cam->unk27C.z = cam->unk288.z;
-        func_15048F90(&cam->unk27C, &cam->target, &dir);
-        func_1504917C(&dir, &dir);
+        math_vec3Diff(&cam->unk27C, &cam->target, &dir);
+        math_vec3Unit(&dir, &dir);
         dx = cam->target.x - cam->unk27C.x;
         dy = cam->target.y - cam->unk27C.y;
         dz = cam->target.z - cam->unk27C.z;
@@ -60,7 +60,7 @@ void func_15129934(Camera *cam) {
         if (dist < 0.0f) {
             dist = 0.0f;
         }
-        func_15049148(&dir, dist, &dir);
+        math_vec3Scale(&dir, dist, &dir);
         x = cam->unk27C.x + dir.x;
         if (cam->cmd.unk8 & 0xF) {
             y = cam->unk27C.y;
@@ -73,21 +73,21 @@ void func_15129934(Camera *cam) {
             cam->prevEye.x = x;
             cam->CurrentVelX = 0; // matching: int 0, not 0.0f (a float zero gets promoted to a register)
         } else {
-            func_150495B0(&cam->eye.x, x, &cam->CurrentVelX, 1.0f, 3.0f, cam->SpringTime);
+            math_springTo(&cam->eye.x, x, &cam->CurrentVelX, 1.0f, 3.0f, cam->SpringTime);
         }
         if (cam->Snap) {
             cam->eye.y = y;
             cam->prevEye.y = y;
             cam->CurrentVelY = 0;
         } else {
-            func_150495B0(&cam->eye.y, y, &cam->CurrentVelY, 1.0f, 2.0f, cam->SpringTime);
+            math_springTo(&cam->eye.y, y, &cam->CurrentVelY, 1.0f, 2.0f, cam->SpringTime);
         }
         if (cam->Snap) {
             cam->eye.z = z;
             cam->prevEye.z = z;
             cam->CurrentVelZ = 0;
         } else {
-            func_150495B0(&cam->eye.z, z, &cam->CurrentVelZ, 1.0f, 3.0f, cam->SpringTime);
+            math_springTo(&cam->eye.z, z, &cam->CurrentVelZ, 1.0f, 3.0f, cam->SpringTime);
         }
         camera_blendYaw(cam);
         if (cam->Snap || (cam->AvailableModes & 0x400000) ||

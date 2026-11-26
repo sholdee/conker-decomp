@@ -148,8 +148,8 @@ void particle_updatePoolEmitter(PoolEmitter *emitter) {
                 while (emitter->spawnAccum > 1.0f && self->freeHead != -1) {
                     slot = emitter->freeHead;
                     angle = func_150ADA20() & 0xFF; // matching: the redundant mask changes IDO's code for the call result
-                    sinA = func_151423D8(angle - 0x40);
-                    cosA = func_151423D8(angle);
+                    sinA = math_cosBinAngleMasked(angle - 0x40);
+                    cosA = math_cosBinAngleMasked(angle);
                     speed = func_150ADA68() * 33.0f + 40.0f;
                     spawn.r2 = 0x52;
                     spawn.g2 = 0x6B;

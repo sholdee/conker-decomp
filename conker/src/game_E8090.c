@@ -41,7 +41,7 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
         break;
     }
     // matching: an integer cast keeps ob_matrix_ptr out of a0 (a pointer argument is loaded straight into a0)
-    func_15142314((s32)obj->ob_matrix_ptr, joint, &pos);
+    math_getBoneTranslation((s32)obj->ob_matrix_ptr, joint, &pos);
     pos.y = obj->floorY;
     func_15143E94(5, 0x4022);
     effect_spawnQuadEffect(-1, pos.x, pos.y + 6.0f, pos.z, 25, 18, 0, *(u8 *)&arg2, 1);
@@ -94,8 +94,8 @@ s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     f32 cosPitch;
     f32 sinPitch;
 
-    cosYaw = func_151423D8(yaw - 0x40);
-    sinYaw = func_151423D8(yaw);
+    cosYaw = math_cosBinAngleMasked(yaw - 0x40);
+    sinYaw = math_cosBinAngleMasked(yaw);
     desc.texture = 0x29;
     desc.renderMode = 0xE03;
     desc.unk0 = 0x200005;
@@ -119,8 +119,8 @@ s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.pos.y = y;
     desc.pos.z = z;
     pitch = func_150ADA20() % 11U - 12;
-    cosPitch = func_151423D8(pitch - 0x40);
-    sinPitch = func_151423D8(pitch);
+    cosPitch = math_cosBinAngleMasked(pitch - 0x40);
+    sinPitch = math_cosBinAngleMasked(pitch);
     speed = func_150ADA68() * 11.0f + 15.0f;
     desc.flags = 0xE05;
     desc.vel.x = speed * sinPitch * cosYaw;
@@ -193,8 +193,8 @@ s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     ParticleSpawn piece;
     f32 scale;
 
-    cosYaw = func_151423D8(yaw - 0x40);
-    sinYaw = func_151423D8(yaw);
+    cosYaw = math_cosBinAngleMasked(yaw - 0x40);
+    sinYaw = math_cosBinAngleMasked(yaw);
 
     piece.flags = 0x9E8;
     piece.rot.x = 0.0f;
@@ -209,8 +209,8 @@ s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     piece.elasticity = 0.2f;
 
     pitch = func_150ADA20() % 13U - 52;
-    cosPitch = func_151423D8(pitch - 0x40);
-    sinPitch = func_151423D8(pitch);
+    cosPitch = math_cosBinAngleMasked(pitch - 0x40);
+    sinPitch = math_cosBinAngleMasked(pitch);
 
     speed = func_150ADA68() * 9.0f + 3.0f;
     piece.vel.x = speed * sinPitch * cosYaw;

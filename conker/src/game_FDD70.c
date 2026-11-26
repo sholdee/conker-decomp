@@ -48,9 +48,9 @@ void func_150D08C0(Camera *camera) {
         camera->AvailableModes &= ~0x80021000;
         camera->AvailableModes |= 8;
     }
-    func_150495B0(&D_800888C0, D_800888CC, &D_800888D8, 4.0f, 6.0f, camera->SpringTime);
-    func_150495B0(&D_800888C4, D_800888D0, &D_800888DC, 4.0f, 6.0f, camera->SpringTime);
-    func_150495B0(&D_800888C8, D_800888D4, &D_800888E0, 4.0f, 6.0f, camera->SpringTime);
+    math_springTo(&D_800888C0, D_800888CC, &D_800888D8, 4.0f, 6.0f, camera->SpringTime);
+    math_springTo(&D_800888C4, D_800888D0, &D_800888DC, 4.0f, 6.0f, camera->SpringTime);
+    math_springTo(&D_800888C8, D_800888D4, &D_800888E0, 4.0f, 6.0f, camera->SpringTime);
     script_command(1, 0x30F5, 0x12, (u8)D_800888C0);
     script_command(1, 0x30F4, 0x12, (u8)D_800888C4);
     script_command(1, 0x30F3, 0x12, (u8)D_800888C8);

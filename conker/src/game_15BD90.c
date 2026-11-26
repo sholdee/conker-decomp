@@ -63,7 +63,7 @@ void camera_runCommand(Camera *camera) {
             f32 dz;
 
             // Find the closest point to the camera on the path segments leaving its nearest node.
-            node = &D_800D2350[func_15085DF8(camera->eye.x, camera->eye.y, camera->eye.z, 7, 0)];
+            node = &gPathNodes[path_findNearestNode(camera->eye.x, camera->eye.y, camera->eye.z, 7, 0)];
             minDist = 1e14f;
             if (camera->Mode & 0x100) {
                 return;
@@ -71,19 +71,19 @@ void camera_runCommand(Camera *camera) {
             nodePos.x = node->x;
             nodePos.y = node->y;
             nodePos.z = node->z;
-            func_15048F90(&nodePos, &camera->eye, &toCamera);
+            math_vec3Diff(&nodePos, &camera->eye, &toCamera);
             for (i = 0; i < 5; i++) {
                 // matching: s32 link read back through (u8) adds a live range uopt needs for the frame layout
                 s32 link;
 
                 link = node->links[i];
                 if ((u8)link != 0xFF) {
-                    linkPos.x = D_800D2350[(u8)link].x;
-                    linkPos.y = D_800D2350[(u8)link].y;
-                    linkPos.z = D_800D2350[(u8)link].z;
-                    func_150491EC(&nodePos, &linkPos, &dir);
-                    func_15049148(&dir, func_150AD900(&dir.x, &toCamera.x), &offset);
-                    func_15048F20(&nodePos, &offset, &closest);
+                    linkPos.x = gPathNodes[(u8)link].x;
+                    linkPos.y = gPathNodes[(u8)link].y;
+                    linkPos.z = gPathNodes[(u8)link].z;
+                    math_dirTowards(&nodePos, &linkPos, &dir);
+                    math_vec3Scale(&dir, func_150AD900(&dir.x, &toCamera.x), &offset);
+                    math_vec3Add(&nodePos, &offset, &closest);
                     dx = camera->eye.x - closest.x;
                     dy = camera->eye.y - closest.y;
                     dz = camera->eye.z - closest.z;
@@ -138,8 +138,8 @@ void camera_runCommand(Camera *camera) {
                 camera->RailAccelBVel = 0.0f;
                 camera->RailAccelB = camera->RailAccelBTarget;
             } else {
-                func_150495B0(&camera->RailAccelA, camera->RailAccelATarget, &camera->RailAccelAVel, 1.5f, 2.0f, camera->SpringTime);
-                func_150495B0(&camera->RailAccelB, camera->RailAccelBTarget, &camera->RailAccelBVel, 1.5f, 2.0f, camera->SpringTime);
+                math_springTo(&camera->RailAccelA, camera->RailAccelATarget, &camera->RailAccelAVel, 1.5f, 2.0f, camera->SpringTime);
+                math_springTo(&camera->RailAccelB, camera->RailAccelBTarget, &camera->RailAccelBVel, 1.5f, 2.0f, camera->SpringTime);
             }
             if (!(camera->RailFlags & 0x10)) {
                 if (camera->Snap != 0) {
@@ -148,8 +148,8 @@ void camera_runCommand(Camera *camera) {
                     camera->eye.x = best.x;
                     camera->eye.z = best.z;
                 } else {
-                    func_150495B0(&camera->eye.x, best.x, &camera->RailWantedXVel, camera->RailAccelA, camera->RailAccelB, camera->SpringTime);
-                    func_150495B0(&camera->eye.z, best.z, &camera->RailWantedZVel, camera->RailAccelA, camera->RailAccelB, camera->SpringTime);
+                    math_springTo(&camera->eye.x, best.x, &camera->RailWantedXVel, camera->RailAccelA, camera->RailAccelB, camera->SpringTime);
+                    math_springTo(&camera->eye.z, best.z, &camera->RailWantedZVel, camera->RailAccelA, camera->RailAccelB, camera->SpringTime);
                 }
             }
             if (!(camera->RailFlags & 8)) {
@@ -157,7 +157,7 @@ void camera_runCommand(Camera *camera) {
                     camera->eye.y = best.y;
                     camera->RailWantedYVel = 0.0f;
                 } else {
-                    func_150495B0(&camera->eye.y, best.y, &camera->RailWantedYVel, camera->RailAccelA, camera->RailAccelB, camera->SpringTime);
+                    math_springTo(&camera->eye.y, best.y, &camera->RailWantedYVel, camera->RailAccelA, camera->RailAccelB, camera->SpringTime);
                 }
             }
             camera_updateAngles(camera);

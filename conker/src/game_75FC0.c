@@ -20,7 +20,7 @@ static const f32 D_80085FE4 = -1.570796013f;  /* -pi/2 */
 static const f32 D_80085FE8 = 0.866024971f;   /* cos(pi/6) */
 
 /* Builds the inverse of the rigid part (translation and rotation, no scale) of a transform. */
-void func_15048B10(MtxF mtx, MtxF out) {
+void math_mtxRigidInverse(MtxF mtx, MtxF out) {
     f32 x;
     f32 y;
     f32 z;
@@ -119,28 +119,28 @@ f32 func_15048C30(f32 x) {
 }
 
 /* out = a + b */
-void func_15048F20(Vec3f *a, Vec3f *b, Vec3f *out) {
+void math_vec3Add(Vec3f *a, Vec3f *b, Vec3f *out) {
     out->x = a->x + b->x;
     out->y = a->y + b->y;
     out->z = a->z + b->z;
 }
 
 /* out = a - b */
-void func_15048F58(Vec3f *a, Vec3f *b, Vec3f *out) {
+void math_vec3Sub(Vec3f *a, Vec3f *b, Vec3f *out) {
     out->x = a->x - b->x;
     out->y = a->y - b->y;
     out->z = a->z - b->z;
 }
 
 /* out = to - from */
-void func_15048F90(const Vec3f *from, const Vec3f *to, Vec3f *out) {
+void math_vec3Diff(const Vec3f *from, const Vec3f *to, Vec3f *out) {
     out->x = to->x - from->x;
     out->y = to->y - from->y;
     out->z = to->z - from->z;
 }
 
 /* Heading of a vector in the XZ plane, in degrees [0, 360). */
-f32 func_15048FC8(Vec3f *vec) {
+f32 math_vec3Heading(Vec3f *vec) {
     f32 len;
     f32 angle;
 
@@ -166,8 +166,8 @@ f32 func_15048FC8(Vec3f *vec) {
     return angle;
 }
 
-/* Heading of a vector in the XZ plane as an integer angle, from the func_15048864 lookup table. */
-s32 func_150490A8(Vec3f *vec) {
+/* Heading of a vector in the XZ plane as an integer angle, from the math_asinTableBin lookup table. */
+s32 math_vec3HeadingBin(Vec3f *vec) {
     f32 len;
     s32 angle;
 
@@ -178,7 +178,7 @@ s32 func_150490A8(Vec3f *vec) {
     }
 
     len = vec->x / len; // matching: IDO needs the ratio in the same f32 local as the length
-    angle = func_15048864(len);
+    angle = math_asinTableBin(len);
 
     if (vec->z > 0.0f) {
         if (angle < 64) {
@@ -191,14 +191,14 @@ s32 func_150490A8(Vec3f *vec) {
 }
 
 /* out = vec * scale */
-void func_15049148(Vec3f *vec, f32 scale, Vec3f *out) {
+void math_vec3Scale(Vec3f *vec, f32 scale, Vec3f *out) {
     out->x = vec->x * scale;
     out->y = vec->y * scale;
     out->z = vec->z * scale;
 }
 
 /* out = vec normalized (a zero vector stays zero) */
-void func_1504917C(Vec3f *vec, Vec3f *out) {
+void math_vec3Unit(Vec3f *vec, Vec3f *out) {
     f32 scale = func_150AD930(&vec->x);
 
     if (scale != 0.0f) {
@@ -210,9 +210,9 @@ void func_1504917C(Vec3f *vec, Vec3f *out) {
 }
 
 /* out = unit vector pointing from `from` to `to` */
-void func_150491EC(Vec3f *from, Vec3f *to, Vec3f *out) {
+void math_dirTowards(Vec3f *from, Vec3f *to, Vec3f *out) {
     out->x = to->x - from->x;
     out->y = to->y - from->y;
     out->z = to->z - from->z;
-    func_1504917C(out, out);
+    math_vec3Unit(out, out);
 }

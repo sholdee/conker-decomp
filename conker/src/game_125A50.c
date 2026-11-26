@@ -208,7 +208,7 @@ void func_150F892C(StageObj *obj) {
         Vec3f pos;
         side = (state->mirror & 1) ? -1 : 1;
         do {
-            func_15143874((func_150ADA20() % 126U - 220) * side, state->radius, &pos.x, &pos.z);
+            math_dirFromBinAngleXZ((func_150ADA20() % 126U - 220) * side, state->radius, &pos.x, &pos.z);
             pos.y = func_150ADA68() * 150.0f + 30.0f;
             pos.x += state->centerX;
             pos.z += state->centerZ;
@@ -253,7 +253,7 @@ void func_150F892C(StageObj *obj) {
 
             pieces = func_150ADA20() % 7U + 5;
             angle = (func_150ADA20() % 126U - 220) * side;
-            func_15143874(angle, state->radius, &spawn.pos.x, &spawn.pos.z);
+            math_dirFromBinAngleXZ(angle, state->radius, &spawn.pos.x, &spawn.pos.z);
             spawn.pos.y = func_150ADA68() * 150.0f + 30.0f;
             spawn.pos.x += state->centerX;
             spawn.pos.z += state->centerZ;
@@ -264,7 +264,7 @@ void func_150F892C(StageObj *obj) {
                 spawn.rot.x = func_150ADA68() * 360.0f;
                 spawn.rot.y = func_150ADA68() * 360.0f;
                 spawn.rot.z = func_150ADA68() * 360.0f;
-                func_15143794((func_150ADA20() & 0xF) + i, func_150ADA20() % 37U - 63,
+                math_dirFromBinAngles((func_150ADA20() & 0xF) + i, func_150ADA20() % 37U - 63,
                               func_150ADA68() * 8.0f + 10.0f, &spawn.vel);
                 spawn.rotVel.x = func_150ADA68() * 32.41f + -16.205f;
                 spawn.rotVel.z = func_150ADA68() * 32.41f + -16.205f;
@@ -294,7 +294,7 @@ void func_150F892C(StageObj *obj) {
         flare.r2 = 0xFF;
         flare.g2 = 0xFF;
         flare.b2 = 0xFF;
-        flare.offset = D_800A5480;
+        flare.offset = gZeroVec3f;
         flare.fadeStart = 8;
         flare.fadeRate = 0x1F;
         flare.scaleStart = 1;
@@ -315,7 +315,7 @@ void func_150F892C(StageObj *obj) {
 
             flares = func_150ADA20() % 13U + 7;
             angle = (func_150ADA20() % 126U - 220) * side;
-            func_15143874(angle, state->radius, &flare.pos.x, &flare.pos.z);
+            math_dirFromBinAngleXZ(angle, state->radius, &flare.pos.x, &flare.pos.z);
             flare.pos.y = func_150ADA68() * 150.0f + 30.0f;
             flare.pos.x += state->centerX;
             flare.pos.z += state->centerZ;
@@ -329,7 +329,7 @@ void func_150F892C(StageObj *obj) {
                 flare.flags &= ~0xC0;
                 flip = (func_150ADA20() & 1) ? 0x80 : 0;
                 flare.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flip;
-                func_15143794(func_150ADA20() % 9U + i, (func_150ADA20() & 7) - 16,
+                math_dirFromBinAngles(func_150ADA20() % 9U + i, (func_150ADA20() & 7) - 16,
                               func_150ADA68() * 10.0f + 6.0f, &flare.vel);
                 flare.gravity = func_150ADA68() * 0.268f + -0.3870000243f;
                 particle_newSpriteParticleWithFloor(&flare, 1, 0, 0, 0xFF, 1);
@@ -348,11 +348,11 @@ void func_150F892C(StageObj *obj) {
             s16 angle;
 
             angle = (func_150ADA20() % 126U - 220) * side;
-            func_15143874(angle, state->radius, &pos.x, &pos.z);
+            math_dirFromBinAngleXZ(angle, state->radius, &pos.x, &pos.z);
             pos.y = func_150ADA68() * 150.0f + 30.0f;
             pos.x += state->centerX;
             pos.z += state->centerZ;
-            func_15143794(func_150ADA20() % 9U + angle - 4, (func_150ADA20() & 7) - 16,
+            math_dirFromBinAngles(func_150ADA20() % 9U + angle - 4, (func_150ADA20() & 7) - 16,
                           func_150ADA68() * 6.0f + 4.0f, &vel);
             particle_spawnKindSprite(8, &pos.x, &vel.x, func_150ADA68() * 200.0f + 200.0f, 1.025439024f, 0.938816011f,
                           func_150ADA68() * 0.2070000172f + -0.1690000147f, func_150ADA20() % 21U + 35,
@@ -410,7 +410,7 @@ s32 arg2;
     src = &D_800A1C48;
     dst = &pos;
     mtx = obj->ob_matrix_ptr[D_80088B50];
-    func_15145EA4(&src, &dst, mtx, 1);
+    math_transformOffsets(&src, &dst, mtx, 1);
     one = 1.0f; // matching: IDO folds a literal "* 1.0f" away; the original multiplies by a variable
     motion.height = func_150ADA68() * one + 2.0f;
     motion.width = func_150ADA68() * 14.0f + 28.0f;

@@ -235,7 +235,7 @@ void anim_advance(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
     }
 
     if (obj != NULL) {
-        if (D_800C35EA[0] == 0) {
+        if (gCutsceneStates[0] == 0) {
             if (gFrameDelta < 2.0f) {
                 rate = gFrameDelta * rate;
             } else {
@@ -265,7 +265,7 @@ void anim_advance(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
 
     jumped = 0;
     if (obj != NULL) {
-        if ((D_800C35EA[mode] != 1) || (D_800C365E[mode] != 0)) {
+        if ((gCutsceneStates[mode] != 1) || (D_800C365E[mode] != 0)) {
             result = event_runTimedEvents(gCurrentActor, time, 0);
             if (result != 0.0f) {
                 time = result;
@@ -281,7 +281,7 @@ void anim_advance(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
                 obj->events = NULL;
                 anim->speed[0] = 0.0f;
             }
-            if (D_800C35EA[0] == 0) {
+            if (gCutsceneStates[0] == 0) {
                 anim->callback();
             }
             if (oldAnimId != anim->frameRom[0]) {
@@ -359,7 +359,7 @@ void anim_advanceObjects(s32 onlyType4) {
         if (obj->type == 0) continue;
         if (obj->task_attrib & 0x200) continue;
         if (onlyType4 && (obj->drawtype != 4)) continue;
-        if (D_800C3638 && (D_800C3654[0] == 0) && (func_150229E4(obj) == 0)) continue;
+        if (D_800C3638 && (D_800C3654[0] == 0) && (cutscene_isActorBound(obj) == 0)) continue;
         anim = obj->unk2D0;
         if ((anim != NULL) && obj->unk2FA) {
             anim_advance(anim, obj->speedup, obj, onlyType4);

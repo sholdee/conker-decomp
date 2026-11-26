@@ -6,18 +6,18 @@
 /*
  * This unit's .data and .bss, by their place between game_B7060's and game_BC510's: no function
  * here reads them. D_80087358 is read by the hand-written func_150ADAF0 (game_DAFA0.s);
- * D_80087380 and D_800D23C0 by the link-group functions at the end of game_B7060 (func_15017578
+ * gLinkGroupCount and gLinkGroups by the link-group functions at the end of game_B7060 (func_15017578
  * in game/Player/StatsInit/statsinit fills them).
  */
 u8 D_80087350[5] = { 0, 2, 4, 6, 8 }; /* not referenced */
-/* 40 bytes: D_80087380 follows at 0x80087380 */
+/* 40 bytes: gLinkGroupCount follows at 0x80087380 */
 u8 D_80087358[40] = {
     1, 4, 4, 4, 4, 4, 3, 3, 3, 4, 4, 4, 4, 4, 3, 2, 3, 3, 4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 1, 4, 4,
 };
-u32 D_80087380 = 0;  /* number of groups in D_800D23C0 */
-ObjGroup *D_800D23C0; /* the level's link groups */
+u32 gLinkGroupCount = 0;  /* number of groups in gLinkGroups */
+ObjGroup *gLinkGroups; /* the level's link groups */
 
-void func_1508EF80(Vec3f *arg0, Vec3f *arg1, f32 arg2, Vec3f *arg3) {
+void math_rotateAroundY(Vec3f *arg0, Vec3f *arg1, f32 arg2, Vec3f *arg3) {
     f32 dx;
     f32 dz;
     f32 ang;

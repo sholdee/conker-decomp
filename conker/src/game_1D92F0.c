@@ -164,8 +164,8 @@ s32 effect_spawnImpactSprayParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32
         s32 colorFlag;
 
         params = &gImpactSprays[gImpactSets[type].firstStyle];
-        sinYaw = func_151423D8(yaw);
-        cosYaw = func_151423D8(yaw - 0x40);
+        sinYaw = math_cosBinAngleMasked(yaw);
+        cosYaw = math_cosBinAngleMasked(yaw - 0x40);
         style.unk0 = 0;
         style.setGeometryMode = 1;
         style.clearGeometryMode = 0x160600;
@@ -200,8 +200,8 @@ s32 effect_spawnImpactSprayParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32
     part.alpha = random % (params->unk1 + 1) + params->unk0;
     random = func_150ADA20();
     pitch = random % (params->pitchRange + 1) + params->pitchBase;
-    sinPitch = func_151423D8(pitch);
-    cosPitch = func_151423D8(pitch - 0x40);
+    sinPitch = math_cosBinAngleMasked(pitch);
+    cosPitch = math_cosBinAngleMasked(pitch - 0x40);
     speed = func_150ADA68() * params->speedRange + params->speedBase;
     horizontal = speed * sinPitch;
     part.velocity.x = horizontal * cosYaw;

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-f32 func_150497E0(f32 *p, s32 i, f32 t) {
+f32 math_catmullRom(f32 *p, s32 i, f32 t) {
     /* Catmull-Rom segment through p[i..i+3] at parameter t */
     f32 a;
     f32 c;
@@ -19,7 +19,7 @@ f32 func_150497E0(f32 *p, s32 i, f32 t) {
 }
 
 
-f32 func_150498A4(f32 *p, s32 i, f32 t, f32 *deriv) {
+f32 math_catmullRomDeriv(f32 *p, s32 i, f32 t, f32 *deriv) {
     f32 b;
     f32 c;
     f32 r;

@@ -129,10 +129,10 @@ void particle_updateGatherEmitter(SphereEmitter *emitter) {
         do {
             angle1 = func_150ADA20() & 255;
             angle2 = func_150ADA20() & 255;
-            cos1 = func_151423D8(angle1 - 64);
-            sin1 = func_151423D8(angle1);
-            cos2 = func_151423D8(angle2 - 64);
-            sin2 = func_151423D8(angle2);
+            cos1 = math_cosBinAngleMasked(angle1 - 64);
+            sin1 = math_cosBinAngleMasked(angle1);
+            cos2 = math_cosBinAngleMasked(angle2 - 64);
+            sin2 = math_cosBinAngleMasked(angle2);
             dist = func_150ADA68() * params->radius;
             horiz = dist * sin2;
             tx = params->x + horiz * cos1;
@@ -321,10 +321,10 @@ void particle_updateHoverEmitter(SphereEmitter *emitter) {
         do {
             angle1 = func_150ADA20() & 255;
             angle2 = func_150ADA20() & 255;
-            cos1 = func_151423D8(angle1 - 64);
-            sin1 = func_151423D8(angle1);
-            cos2 = func_151423D8(angle2 - 64);
-            sin2 = func_151423D8(angle2);
+            cos1 = math_cosBinAngleMasked(angle1 - 64);
+            sin1 = math_cosBinAngleMasked(angle1);
+            cos2 = math_cosBinAngleMasked(angle2 - 64);
+            sin2 = math_cosBinAngleMasked(angle2);
             dist = func_150ADA68() * params->radius;
             x = params->x + dist * sin2 * cos1;
             y = params->y - dist * cos2;
@@ -485,10 +485,10 @@ void particle_updateSwellEmitter(SphereEmitter *emitter) {
         do {
             angle1 = func_150ADA20() & 255;
             angle2 = func_150ADA20() & 255;
-            cos1 = func_151423D8(angle1 - 64);
-            sin1 = func_151423D8(angle1);
-            cos2 = func_151423D8(angle2 - 64);
-            sin2 = func_151423D8(angle2);
+            cos1 = math_cosBinAngleMasked(angle1 - 64);
+            sin1 = math_cosBinAngleMasked(angle1);
+            cos2 = math_cosBinAngleMasked(angle2 - 64);
+            sin2 = math_cosBinAngleMasked(angle2);
             dist = func_150ADA68() * params->radius;
             x = params->x + dist * sin2 * cos1;
             y = params->y - dist * cos2;
@@ -711,7 +711,7 @@ void particle_getBurstVelAlongDir(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t
 
 /* BurstVelocityFunc: the yaw/pitch direction at speed * (1 - t). */
 void particle_getBurstVelAtYawPitch(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out) {
-    func_15143794(yaw, pitch, (1.0f - t) * speed, out);
+    math_dirFromBinAngles(yaw, pitch, (1.0f - t) * speed, out);
 }
 
 /* BillboardParticle colours picked at random by particle_spawnDragFadeBurst. */
@@ -756,7 +756,7 @@ void particle_spawnDragFadeBurst(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 s
         delay = func_150ADA20() % (delayRange + 1) + delayBase;
         a = func_150ADA20();
         b = func_150ADA20();
-        func_15143794(a & 0xFF, b & 0xFF, func_150ADA68() * spread, &offset);
+        math_dirFromBinAngles(a & 0xFF, b & 0xFF, func_150ADA68() * spread, &offset);
         velocityFunc(dir, yaw, pitch, speed, t, &vel);
         colors = D_8008F8E8;
         color = func_150ADA20() & 3;

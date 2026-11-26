@@ -102,7 +102,7 @@ void effect_updateRain(s32 player) {
                 gRainStateTimer = 0;
                 gRainSoundHandle = sound_play(0x6F, 200, 0x40, 0, 0x80);
             }
-        } else if (D_800C35EA[player] == 0) {
+        } else if (gCutsceneStates[player] == 0) {
             gRainStateTimer += D_800BE9E4;
         }
         break;
@@ -130,7 +130,7 @@ void effect_updateRain(s32 player) {
         } else if (gRainRequestedState == 0 || gRainStateTimer >= 120) {
             gRainState = 3;
             gRainStateTimer = gRainDropCount;
-        } else if (gRainRequestedState == 3 && D_800C35EA[player] == 0) {
+        } else if (gRainRequestedState == 3 && gCutsceneStates[player] == 0) {
             gRainStateTimer += D_800BE9E4;
         }
         break;
@@ -283,9 +283,9 @@ void effect_updateRainDrop(QuadFx *drop) {
     }
     drop->data.heading = heading;
     step = drop->data.speed * D_800BE9E4;
-    sn = func_15048A40(drop->data.heading >> 8);
+    sn = math_sinBinAngle(drop->data.heading >> 8);
     drop->data.x = drop->data.x + step * sn;
-    cs = func_150489B0(drop->data.heading >> 8);
+    cs = math_cosBinAngle(drop->data.heading >> 8);
     drop->data.y = drop->data.y - step * cs;
     wrapped = FALSE;
     cx = gRainCentre.x;

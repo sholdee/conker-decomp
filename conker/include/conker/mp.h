@@ -35,7 +35,7 @@ typedef struct MpGame {
     /* 0x0018 */ s32 seenMask;
     /* 0x001C */ s32 unk1C[16];
     /* 0x005C */ s32 unk5C[16];
-    /* 0x009C */ s32 layer[16]; /* height band, func_15085DA8 */
+    /* 0x009C */ s32 layer[16]; /* height band, path_getLayerAt */
     /* 0x00DC */ s32 unkDC[16];
     /* 0x011C */ s32 target[16];              /* player each one is after, -1 = none */
     /* 0x015C */ s32 unk15C[16];

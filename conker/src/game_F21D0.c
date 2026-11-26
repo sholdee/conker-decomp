@@ -15,7 +15,7 @@ EffectHeader *gLevelSprayEffects[4];
  */
 typedef union {
     struct {
-        /* 0x7C */ s32 phase; // drives the push of func_15048A40; plays sound 0xF each time it wraps 256
+        /* 0x7C */ s32 phase; // drives the push of math_sinBinAngle; plays sound 0xF each time it wraps 256
     } pendulum;
     struct {
         /* 0x7C */ struct ScrollState *state; // allocated on first use
@@ -26,7 +26,7 @@ typedef union {
 
 /*
  * Swings the object like a pendulum on rotX (degrees, spinX its velocity): a spring pulls it back toward
- * angle 0, a periodic push from func_15048A40(phase) (plus a constant one while flags bit 2 is set) drives
+ * angle 0, a periodic push from math_sinBinAngle(phase) (plus a constant one while flags bit 2 is set) drives
  * it, and 20% damping is applied every frame.
  */
 void prop_swingPendulum(WorldObject *pendulum) {
@@ -48,7 +48,7 @@ void prop_swingPendulum(WorldObject *pendulum) {
         func_10010F88(0xF, 0x55F0, 0, 0, 0, pendulum->x, pendulum->y, pendulum->z, 500, 1000);
     }
     WORK(pendulum)->pendulum.phase = phase;
-    push = func_15048A40(phase);
+    push = math_sinBinAngle(phase);
     velocity += push * 0.1f;
     if ((pendulum->object_status & 4) == 4) {
         velocity += 0.1f;
@@ -172,9 +172,9 @@ void prop_destroyLevelSprays(void) {
 }
 
 
-/* Returns whether D_800C35EA is 1 and D_800C35E8[0] is 0xB, 0xC or 0xD. */
+/* Returns whether gCutsceneStates is 1 and D_800C35E8[0] is 0xB, 0xC or 0xD. */
 s32 func_150C5280(void) {
-    if (D_800C35EA[0] == 1 && (D_800C35E8[0] == 0xB || D_800C35E8[0] == 0xC || D_800C35E8[0] == 0xD)) {
+    if (gCutsceneStates[0] == 1 && (D_800C35E8[0] == 0xB || D_800C35E8[0] == 0xC || D_800C35E8[0] == 0xD)) {
         return TRUE;
     }
     return FALSE;

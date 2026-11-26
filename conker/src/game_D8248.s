@@ -31,12 +31,12 @@ glabel func_150AAD98
     /* D8294 150AADE4 C7BD0070 */  lwc1       $f29, 0x70($sp)
     /* D8298 150AADE8 C7BE0074 */  lwc1       $f30, 0x74($sp)
     /* D829C 150AADEC C7BF0078 */  lwc1       $f31, 0x78($sp)
-    /* D82A0 150AADF0 3C01800D */  lui        $at, %hi(D_800CC22C)
-    /* D82A4 150AADF4 C420C22C */  lwc1       $f0, %lo(D_800CC22C)($at)
-    /* D82A8 150AADF8 3C01800D */  lui        $at, %hi(D_800CC230)
-    /* D82AC 150AADFC C421C230 */  lwc1       $f1, %lo(D_800CC230)($at)
-    /* D82B0 150AAE00 3C01800D */  lui        $at, %hi(D_800CC234)
-    /* D82B4 150AAE04 C422C234 */  lwc1       $f2, %lo(D_800CC234)($at)
+    /* D82A0 150AADF0 3C01800D */  lui        $at, %hi(gTestBoxHalfWidth)
+    /* D82A4 150AADF4 C420C22C */  lwc1       $f0, %lo(gTestBoxHalfWidth)($at)
+    /* D82A8 150AADF8 3C01800D */  lui        $at, %hi(gTestBoxHalfHeight)
+    /* D82AC 150AADFC C421C230 */  lwc1       $f1, %lo(gTestBoxHalfHeight)($at)
+    /* D82B0 150AAE00 3C01800D */  lui        $at, %hi(gTestBoxHalfDepth)
+    /* D82B4 150AAE04 C422C234 */  lwc1       $f2, %lo(gTestBoxHalfDepth)($at)
     /* D82B8 150AAE08 03E07825 */  or         $t7, $ra, $zero
     /* D82BC 150AAE0C 44809000 */  mtc1       $zero, $f18
     /* D82C0 150AAE10 4600B8C6 */  mov.s      $f3, $f23
@@ -180,10 +180,10 @@ glabel func_150AAD98
   .L150AB020:
     /* D84D0 150AB020 3C0638D1 */  lui        $a2, (0x38D1B717 >> 16)
     /* D84D4 150AB024 34C6B717 */  ori        $a2, $a2, (0x38D1B717 & 0xFFFF)
-    /* D84D8 150AB028 3C01800D */  lui        $at, %hi(D_800CC238)
-    /* D84DC 150AB02C C430C238 */  lwc1       $f16, %lo(D_800CC238)($at)
-    /* D84E0 150AB030 3C01800D */  lui        $at, %hi(D_800CC238 + 0x4)
-    /* D84E4 150AB034 C431C23C */  lwc1       $f17, %lo(D_800CC238 + 0x4)($at)
+    /* D84D8 150AB028 3C01800D */  lui        $at, %hi(gTestBoxHeightRatio)
+    /* D84DC 150AB02C C430C238 */  lwc1       $f16, %lo(gTestBoxHeightRatio)($at)
+    /* D84E0 150AB030 3C01800D */  lui        $at, %hi(gTestBoxHeightRatio + 0x4)
+    /* D84E4 150AB034 C431C23C */  lwc1       $f17, %lo(gTestBoxHeightRatio + 0x4)($at)
     /* D84E8 150AB038 4404A000 */  mfc1       $a0, $f20
     /* D84EC 150AB03C 4610A502 */  mul.s      $f20, $f20, $f16
     /* D84F0 150AB040 4405A800 */  mfc1       $a1, $f21

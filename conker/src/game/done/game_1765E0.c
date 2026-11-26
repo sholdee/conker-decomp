@@ -39,7 +39,7 @@ static void (*gTimedEffectTickFuncs[98])() = {
     effect_updatePuffTimer, particle_updateSparkEmitterEffect, particle_updateGatherEmitter, particle_updateHoverEmitter, particle_updateSwellEmitter, trail_updateBoneEmitter, particle_updateRegionEmitter,
     particle_updateRandomBurstEffect, trail_updateStartTask, trail_updateTrailPairTask, trail_updateRetryTask, trail_updateSurfaceSpawner, func_1515B21C, particle_retryDripEmitter,
     effect_updateSparkEmitterTask, particle_updateSourceEmission, particle_updateScreenBurst, trail_updateBurstEmitter, func_150C2C00, effect_updateJointEmitterTask, particle_updateSideEmitter,
-    particle_updateOwnerSideTask, func_151B2100, particle_updateDriftBurstEmitter, particle_updateBoneSideEmitter, effect_updateDiskEmitter, particle_updateSegmentEmitter, particle_updateMatrixSegmentEmitter,
+    particle_updateOwnerSideTask, rope_updateTie, particle_updateDriftBurstEmitter, particle_updateBoneSideEmitter, effect_updateDiskEmitter, particle_updateSegmentEmitter, particle_updateMatrixSegmentEmitter,
     particle_updatePointPairEmitter, particle_updateDustEmitter, light_updateColourCycle, effect_updatePropEmitter, particle_updateSmokeEmitter, trail_updateRandomPointEmitter, beam_updateEmitter,
     flamethrower_updateController, effect_updateOwnerSpark, beam_updateAreaEmitter, particle_updateAreaEmitter, particle_updateTwoSidedEmitter, particle_updateRandomEmitter, particle_updateRandomBurstEmitter,
     weapon_updateStreamEmitter, particle_updateWobbleStream, effect_spawnGroundFlashes, light_updateColourWave, func_150D1C30, screen_updateStrobe, screen_updateStrobeSpawner,
@@ -53,7 +53,7 @@ static void (*gTimedEffectTickFuncs[98])() = {
 };
 /* Draw callbacks (TimedEffect.drawCallback): return the advanced display list. */
 static Gfx *(*gTimedEffectDrawFuncs[6])() = {
-    func_151B2974, beam_drawWavyBeam, screen_drawStrobe, screen_drawFlash, trail_drawStripEffect, effect_drawTextBox,
+    rope_drawLine, beam_drawWavyBeam, screen_drawStrobe, screen_drawFlash, trail_drawStripEffect, effect_drawTextBox,
 };
 /* Destroy handlers, per callback set (TimedEffect.callbackSet). */
 static void (*gTimedEffectDestroyFuncs[74])() = {
@@ -81,13 +81,13 @@ static void (*gTimedEffectFreeFuncs[74])() = {
     effect_defaultFreeTimedEffect, effect_freeTimedHandler, effect_freeBoneBurst, beam_freeModelBeamEffect, effect_defaultFreeTimedEffect, trail_freeAnchoredEmitter, beam_freeCastBeam,
     func_150F97C0, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect,
     effect_defaultFreeTimedEffect, effect_freePulseEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect,
-    effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, trail_freeTracker, func_151BFBD0,
+    effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, trail_freeTracker, hud_freeCounter,
 };
 /* Message handlers, per callback set; optional. */
 static void (*gTimedEffectMessageFuncs[74])(TimedEffect *object, s32 msg, u8 msgType) = {
     NULL, trail_onBoneEmitterMessage, trail_onTaskEvent, func_1519E61C, trail_onTrailPairTaskEvent, trail_onRetryTaskMessage, trail_onSurfaceSpawnerEvent, NULL,
     particle_onDripRetryMsg, effect_emitterTaskMessage, NULL, NULL, NULL, NULL, NULL, effect_jointEmitterTaskMessage, particle_onSideEmitterMsg, particle_onOwnerSideTaskMsg,
-    func_151B2F04, func_151B2EC4, NULL, beam_wavyBeamMessage, func_151932E0, NULL, NULL, NULL, particle_onSegmentEmitterSwap, NULL,
+    rope_tieMessage, rope_lineMessage, NULL, beam_wavyBeamMessage, func_151932E0, NULL, NULL, NULL, particle_onSegmentEmitterSwap, NULL,
     func_1510A8CC, particle_onDustEmitterEvent, trail_onStreamTaskEvent, NULL, NULL, NULL, beam_areaEmitterMessage, effect_ownerSparkMessage, particle_onAreaEmitterEvent,
     particle_onTwoSidedEmitterMsg, NULL, effect_attachedEffectMessage, particle_onFollowEffectMsg, func_150D1F6C, particle_onSparkTrigger, effect_actorEmitterMessage, func_151A5F70,
     beam_boltRainMessage, beam_boltArcMessage, beam_sparkRegionMessage, beam_boltChainMessage, trail_onOwnedEffectMessage, effect_timedHandlerMessage, effect_boneBurstMessage,

@@ -232,7 +232,7 @@ f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered) {
             gEventParam = obj->events[obj->speccnt].parameter;
             gEventParamF = *(f32 *)&gEventParam;
             token = obj->unk2D0->frameRom[0];
-            if (D_800C35EA[0] == 0 || D_800C365E[0] != 0) {
+            if (gCutsceneStates[0] == 0 || D_800C365E[0] != 0) {
                 id = obj->events[obj->speccnt].id;
                 if (filtered) {
                     s32 i;
@@ -585,7 +585,7 @@ void event_jump(void) {
     obj = gCurrentActor;
     if (obj->type == 0x16) {
         if (obj->ypos == obj->floorY) {
-            gCurrentActor->yspd = (func_151EF610() % 8) + gEventParam;
+            gCurrentActor->yspd = (math_rand() % 8) + gEventParam;
             obj = gCurrentActor;
             if (obj->speed != 0.0f) {
                 obj->yspd = obj->yspd * (obj->speed / 40.0f);
@@ -959,7 +959,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
         dy = ty - obj->ypos;
         dz = tz - obj->zpos;
         hdist = sqrtf(dx * dx + dz * dz);
-        pitch = func_150484A0(dy, hdist) * 10430.378f; /* radians to s16 angle units */
+        pitch = math_atan2(dy, hdist) * 10430.378f; /* radians to s16 angle units */
         angle = actor_getDirectionAngle(dx, -dz, 0);
         actor_splitVelocity((s16)pitch, speed, 0.0f, &speed, &yVelocity, &dummy);
         yVelocity = -yVelocity;
@@ -1075,8 +1075,8 @@ void event_fireProjectile(void) {
             x -= mtxs[bone][3][0];
             y -= mtxs[bone][3][1];
             z -= mtxs[bone][3][2];
-            a = func_150484A0(x, z);
-            b = func_150484A0(y, sqrtf(x * x + z * z));
+            a = math_atan2(x, z);
+            b = math_atan2(y, sqrtf(x * x + z * z));
             a *= 57.295776f;
             b *= 57.295776f;
             if (a > 180.0f) {
@@ -1117,7 +1117,7 @@ void event_fireProjectile(void) {
         break;
     case 3:
         dist = 500.0f;
-        func_15145974(&movement_obj[0].mv->rayHit.dir, &heading, &elevation);
+        math_getHeadingElevation(&movement_obj[0].mv->rayHit.dir, &heading, &elevation);
         vec[0] = movement_obj[0].mv->rayHit.origin.x;
         vec[1] = movement_obj[0].mv->rayHit.origin.y;
         vec[2] = movement_obj[0].mv->rayHit.origin.z;
@@ -1209,7 +1209,7 @@ void func_1506D4F4(void) {
 }
 
 void func_1506D538(void) {
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         func_1507D4F8(dc_glbl_CharNum);
     }
 }
@@ -1219,7 +1219,7 @@ void event_resetBlink(void) {
 }
 
 /*
- * func_1507E7E4 with the two bytes of gEventParam's high half and its low half (0xFFFF = none)
+ * face_requestExpression with the two bytes of gEventParam's high half and its low half (0xFFFF = none)
  * scaled by 1 / unk2D0->unk10.
  */
 void func_1506D584(void) {
@@ -1240,7 +1240,7 @@ void func_1506D584(void) {
         if (value != 0xFFFF) {
             value = value / divisor;
         }
-        func_1507E7E4(obj, hi, lo, value, 0);
+        face_requestExpression(obj, hi, lo, value, 0);
     }
 }
 
@@ -1568,7 +1568,7 @@ void func_1506E2CC(void) {
 }
 /*
  * Resolves a sound command in place: bit 21 skips it while sound_isActorSound2Playing / sound_isActorSound1Playing /
- * func_151F2CDC (by `mode`) reports busy, ids >= 2000 come from the object's D_800BE5A8 table,
+ * func_151F2CDC (by `mode`) reports busy, ids >= 2000 come from the object's gSpawnModelData table,
  * the top byte is a play chance out of 256 and bits 16-20 a count of random variants.
  * Returns 0 if nothing should play.
  */
@@ -1602,7 +1602,7 @@ s32 event_resolveSoundCommand(Actor *obj, s32 *command, s32 mode) {
         }
     }
     if (id >= 2000) {
-        entry = D_800BE5A8[obj->unk288][id - 2000];
+        entry = gSpawnModelData[obj->unk288][id - 2000];
         if (entry == 0) {
             return 0;
         }
@@ -2388,7 +2388,7 @@ void func_15070300(s32 cmd) {
     randoms.height = (func_150ADA68() * 2.512f) + 3.5900002f;
     srcs[0] = &localPos;
     dsts[0] = &worldPos;
-    func_15145EA4(srcs, dsts, &gCurrentActor->ob_matrix_ptr[4], 1);
+    math_transformOffsets(srcs, dsts, &gCurrentActor->ob_matrix_ptr[4], 1);
     effect_spawnBoneBeamParticle(gCurrentActor, 4, &localPos, &vec74, &randoms,
                   (func_150ADA20() % 5U) + 5, (func_150ADA20() % 56U) + 200,
                   (func_150ADA68() * 510.0f) + 1296.0f,
@@ -2575,7 +2575,7 @@ void func_15070D24(s32 cmd) {
     fx.randoms.width = (func_150ADA68() * 101.0f) + 151.0f;
     fx.randoms.height = (func_150ADA68() * 4.0f) + 4.0f;
 
-    func_15143134(&fx.localPos, &fx.worldPos, &gCurrentActor->ob_matrix_ptr[1]);
+    math_transformOffset(&fx.localPos, &fx.worldPos, &gCurrentActor->ob_matrix_ptr[1]);
 
     effect_spawnBoneBeamParticle(gCurrentActor, 1, &fx.localPos, &fx.vec78, &fx.randoms,
                   (func_150ADA20() % 6U) + 5, (func_150ADA20() % 156U) + 100,
@@ -2612,7 +2612,7 @@ void func_15070F60(cmd)
     fx.randoms.width = (func_150ADA68() * 180.0f) + 150.0f;
     fx.randoms.height = func_150ADA68() * 2.0f + 2.5f;
 
-    func_15143134(&fx.localPos, &fx.worldPos, &gCurrentActor->ob_matrix_ptr[cmd ? 1 : 2]);
+    math_transformOffset(&fx.localPos, &fx.worldPos, &gCurrentActor->ob_matrix_ptr[cmd ? 1 : 2]);
 
     effect_spawnBoneBeamParticle(gCurrentActor, cmd ? 1 : 2, &fx.localPos, &fx.vec78, &fx.randoms,
                   (func_150ADA20() % 5U) + 5, (func_150ADA20() % 156U) + 100,
@@ -2782,7 +2782,7 @@ void func_150718E4(s32 cmd) {
     const u8 bones[4] = { 13, 16, 24, 27 };
 
     if (gCurrentActor->ob_matrix_ptr != NULL || (gCurrentActor->unk74 & 0xF) == 0xF) {
-        func_15143134(&D_800A5480, &pos, &gCurrentActor->ob_matrix_ptr[bones[func_150ADA20() & 3]]);
+        math_transformOffset(&gZeroVec3f, &pos, &gCurrentActor->ob_matrix_ptr[bones[func_150ADA20() & 3]]);
         pos.y = gCurrentActor->floorY + 20.0f;
         weapon_spawnImpactBurst(&pos, 0xFF, 1);
     }
@@ -2821,7 +2821,7 @@ void func_15071A64(s32 cmd) {
     if (!(func_150ADA20() & 1) && gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->unk74 & 0xF) != 0xF &&
         movement_obj[0].stunned != 0 && movement_obj[0].energy > 0) {
         collision_initHitFromObject(&hit.ground, gCurrentActor);
-        func_15143134(&D_80099BBC, &hit.pos, &gCurrentActor->ob_matrix_ptr[15]);
+        math_transformOffset(&D_80099BBC, &hit.pos, &gCurrentActor->ob_matrix_ptr[15]);
         particle_spawnSmallSplashAndDrops(&hit.pos.x, &hit.ground, 0, 0xFF, 1);
     }
 }
@@ -2831,7 +2831,7 @@ void func_15071B18(s32 cmd) {
     CollisionHit collision;
 
     if (gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->unk74 & 0xF) != 0xF) {
-        func_15143134(&D_80099BC8[func_150ADA20() % 3U], &point, &gCurrentActor->ob_matrix_ptr[7]);
+        math_transformOffset(&D_80099BC8[func_150ADA20() % 3U], &point, &gCurrentActor->ob_matrix_ptr[7]);
         collision_initHitFromObject(&collision, gCurrentActor);
         if (func_150ADA20() & 1) {
             if (func_150ADA20() & 1) {
@@ -2928,7 +2928,7 @@ void func_15071F54(void) {
 }
 
 void func_15071F80(void) {
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         gCurrentActor->speccnt++;
     }
 }
@@ -3195,7 +3195,7 @@ void event_setTaskInt0(void) {
 
 void func_150729D0(void) {
     gCurrentActor->mv->pissed_up = 1;
-    func_1507EB4C(gCurrentActor, 21);
+    face_setDefaultExpression(gCurrentActor, 21);
     func_1506B82C();
 }
 
@@ -3497,7 +3497,7 @@ void event_fireVolley(void) {
             dx = target->eye.x - obj->xpos;
             dy = target->eye.y - obj->ypos;
             dz = target->eye.z - obj->zpos;
-            angle = func_150484A0(dx, dz) * 57.295776f;
+            angle = math_atan2(dx, dz) * 57.295776f;
             yaw = angle;
             if (angle > 180.0f) {
                 yaw = angle - 360.0f;
@@ -3747,7 +3747,7 @@ void event_spawnThrownItem(void) {
                 }
                 if (!useDefault) {
                     slot = (s32)&player->ob_matrix_ptr[bone];
-                    func_15143134(NULL, (Vec3f *)&obj->xpos, slot); // xpos, ypos, zpos as one Vec3f
+                    math_transformOffset(NULL, (Vec3f *)&obj->xpos, slot); // xpos, ypos, zpos as one Vec3f
                     {
                         typedef s32 padA; // matching: a scope with a declaration steers as1 (-g3)
                         player = gCurrentActor;
@@ -4066,7 +4066,7 @@ void func_15074C80(Actor *self, Actor *other) {
     }
 
     if (other->type == 0x19) {
-        effect_spawnRotatedQuadEffect(256.0f - (func_150484A0(self->yspd, self->speed) * 40.743664f),
+        effect_spawnRotatedQuadEffect(256.0f - (math_atan2(self->yspd, self->speed) * 40.743664f),
                       0xC0 - (self->angle >> 8),
                       self->xpos,
                       self->ypos,

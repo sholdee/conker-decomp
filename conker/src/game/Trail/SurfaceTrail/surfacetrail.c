@@ -46,8 +46,8 @@ s32 func_1519EF90(config, side, out)
         u8 angle;
 
         angle = func_15143E08(actor);
-        dirX = func_151423D8(angle);
-        dirZ = func_151423D8(angle - 0x40);
+        dirX = math_cosBinAngleMasked(angle);
+        dirZ = math_cosBinAngleMasked(angle - 0x40);
     }
     if (side == TRAIL_SIDE_6) {
         dist = trails->sideOffset;
@@ -535,12 +535,12 @@ Gfx *trail_drawSurfaceTrail(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
                     }
                 } while (headFadeLeft != 0 && j != trail->head.end);
             }
-            gfx = func_15142E24(gfx, &gEffectTextures[57], 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
-            gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_15142C10(gfx, config->color[0], config->color[1], config->color[2], 0xFF, &update);
-            gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &update);
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[57], 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
+            gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x160600);
+            gfx = math_gfxSetEnvColor(gfx, config->color[0], config->color[1], config->color[2], 0xFF, &update);
+            gfx = math_gfxSetPrimColor(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &update);
             gfx = particle_setCombineMode(gfx, 7, &update);
-            gfx = func_15142FBC(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
+            gfx = math_gfxSetOtherMode(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
             if (trail->head.tmpl.flags & 2) {
                 /* still attached: start the strip at the live attach point */
                 i = trail->head.end - 1;

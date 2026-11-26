@@ -212,7 +212,7 @@ FlickerSprite *particle_spawnFlickerSprite(GameF3270Emitter *emitter) {
         Vec3f origin;
 
         origin = D_800887D0;
-        func_15143134(&origin, &pos, actor->ob_matrix_ptr);
+        math_transformOffset(&origin, &pos, actor->ob_matrix_ptr);
     } else {
         pos.x = actor->xpos;
         pos.y = actor->ypos;

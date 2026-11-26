@@ -75,13 +75,13 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
     state.unkB0 = arg15;
     if (altOrigin != NULL && target != NULL) {
         if (!hasTargetDir) {
-            if (!func_15145128(target, &targetDir, NULL, NULL)) {
+            if (!math_vec3Normalize(target, &targetDir, NULL, NULL)) {
                 return;
             }
             hasTargetDir = TRUE;
         }
     } else if (aim != NULL) {
-        if (!func_15145128(aim, &aimDir, NULL, NULL)) {
+        if (!math_vec3Normalize(aim, &aimDir, NULL, NULL)) {
             return;
         }
         hasAimDir = TRUE;
@@ -91,7 +91,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
                        arg17)) {
         return;
     }
-    if (!func_15146078(&state.hit.dir, &state.unk74, &state.unk80)) {
+    if (!math_buildPerpendicularBasis(&state.hit.dir, &state.unk74, &state.unk80)) {
         return;
     }
     state.unk64 = arg14;
@@ -108,7 +108,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
     spawn.elasticity = 1.0f;
     spawn.sizeY = 0.02000000142f;
     spawn.sizeXZ = 0.02000000142f;
-    func_15145974(&state.hit.dir, &spawn.rot.y, &spawn.rot.x);
+    math_getHeadingElevation(&state.hit.dir, &spawn.rot.y, &spawn.rot.x);
     spawn.scale.x = 1.0f;
     spawn.scale.y = 1.0f;
     spawn.scale.z = 1.0f;
@@ -117,7 +117,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
     spawn.vel.x = state.hit.dir.x * speed;
     spawn.vel.y = state.hit.dir.y * speed;
     spawn.vel.z = state.hit.dir.z * speed;
-    spawn.rotVel = D_800A5480;
+    spawn.rotVel = gZeroVec3f;
     spawn.gravity = 0.0f;
     spawn.flags = 0x120;
     spawn.lifetime = 300;
@@ -239,7 +239,7 @@ s8 effect_updateProjectile(ProjectileParticle *obj) {
             spawn.width = 0.0f;
             spawn.height = 0.0f;
             puffState.phaseSpeed = 0.4670000076f;
-            spawn.rot = D_800A5480;
+            spawn.rot = gZeroVec3f;
             spawn.scale.x = 1.0f;
             spawn.scale.y = 1.0f;
             spawn.scale.z = 1.0f;
@@ -283,7 +283,7 @@ s32 effect_updateTrailPuff(TrailPuff *obj) {
     size = (sinf(state->phase) * state->sizeAmplitude) + state->sizeBase;
     obj->head.def.height = size;
     obj->head.def.width = size;
-    state->phase = func_15144B68(state->phase + (state->phaseSpeed * gFrameDelta));
+    state->phase = math_wrapRadians(state->phase + (state->phaseSpeed * gFrameDelta));
     state->timeLeft -= gFrameDelta;
     if (state->timeLeft < 0.0f) {
         return 0;
@@ -336,7 +336,7 @@ void effect_spawnPuffFollower(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
     packet.spawn.vel.x = 0.0f;
     packet.spawn.vel.y = 0.0f;
     packet.spawn.vel.z = 0.0f;
-    packet.spawn.rotVel = D_800A5480;
+    packet.spawn.rotVel = gZeroVec3f;
     packet.spawn.gravity = 0.0f;
     packet.spawn.flags = 0x980;
     packet.spawn.lifetime = arg1;
@@ -386,7 +386,7 @@ s32 effect_updatePuffFollower(ProjectileParticle *obj) {
         delta.y = obj->pos.y - follow->trailPos.y;
         delta.z = obj->pos.z - follow->trailPos.z;
         follow->trailAge += gFrameDelta;
-        if (func_15145128(&delta, &dir, &dist, &unused) != 0) {
+        if (math_vec3Normalize(&delta, &dir, &dist, &unused) != 0) {
             Vec3f step;
             TrailPuff *puff;
             ParticleDef54 spawn;
@@ -400,7 +400,7 @@ s32 effect_updatePuffFollower(ProjectileParticle *obj) {
                 f32 ageStep;
 
                 ageStep = follow->trailAge / puffs;
-                func_15146078(&delta, &puffState.axisU, &puffState.axisV);
+                math_buildPerpendicularBasis(&delta, &puffState.axisU, &puffState.axisV);
                 puffState.phaseSpeed = 0.4630000293f;
                 puffState.sizeBase = 8.241000175f;
                 puffState.sizeAmplitude = 3.888999939f;
@@ -416,7 +416,7 @@ s32 effect_updatePuffFollower(ProjectileParticle *obj) {
                 spawn.rgba[3] = 0xFF;
                 spawn.height = 0.0f;
                 spawn.width = 0.0f;
-                spawn.rot = D_800A5480;
+                spawn.rot = gZeroVec3f;
                 spawn.scale.x = 1.0f;
                 spawn.scale.y = 1.0f;
                 spawn.scale.z = 1.0f;

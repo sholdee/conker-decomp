@@ -131,8 +131,8 @@ void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32
     template.unk34 = 0;
     for (i = 0; i < memberCount; i++) {
         angle = func_150ADA20() & 0xFF;
-        c = func_15048A40(angle);
-        s = func_150489B0(angle);
+        c = math_sinBinAngle(angle);
+        s = math_cosBinAngle(angle);
         r = (func_150ADA20() & 0xFFFF) * 50.0f * (1.0f / 65536.0f);
         px = x + r * c;
         pz = z + r * s;
@@ -207,7 +207,7 @@ void swarm_updateMember(SwarmMember *member) {
     vec.z = z - member->s.z;
     timer = member->s.steer & 0xF;
     if (timer == 0) {
-        heading = func_150490A8(&vec);
+        heading = math_vec3HeadingBin(&vec);
         heading += (s32)(func_150ADA20() & 0x1F) - 15;
         if (!fast) {
             timer = 10;
@@ -244,8 +244,8 @@ void swarm_updateMember(SwarmMember *member) {
         angle -= 0x100;
     }
     radius = swarm->speed;
-    velX = func_15048A40(angle) * radius;
-    c = -func_150489B0(angle);
+    velX = math_sinBinAngle(angle) * radius;
+    c = -math_cosBinAngle(angle);
     member->s.velX = velX;
     member->s.velZ = c * radius;
     member->s.angle = angle;
@@ -262,8 +262,8 @@ void swarm_updateMember(SwarmMember *member) {
     }
     gp = camera_global_Cameras;
     yaw = gp->TrueCameraAngle * (256.0f / 360.0f);
-    s = func_15048A40(yaw);
-    c = func_150489B0(yaw);
+    s = math_sinBinAngle(yaw);
+    c = math_cosBinAngle(yaw);
     v = member->s.velX * c - member->s.velZ * s;
     if (v >= 0) {
         member->s.unk34 = 0;

@@ -40,7 +40,7 @@ void particle_updateWobbleStream(Game1F1CD0Actor *actor) {
             sineY = sinf(phaseY);
             x = emission->stream.angleX + sineX * emission->stream.amplitudeX;
             y = emission->stream.angleY + sineY * emission->stream.amplitudeY;
-            func_151436B4(x, y, 5.0f, &direction);
+            math_dirFromAngles(x, y, 5.0f, &direction);
             randomX = func_150ADA68();
             randomY = func_150ADA68();
             weapon_spawnProjectile(&emission->stream.position, &direction, 0, NULL, 0, 0, emission->speed, emission->unk3C,
@@ -52,8 +52,8 @@ void particle_updateWobbleStream(Game1F1CD0Actor *actor) {
             time -= timeStep;
             emission->stream.remaining -= 1.0f;
         } while (emission->stream.remaining > 1.0f);
-        emission->stream.phaseX = func_15144B68(phaseX);
-        emission->stream.phaseY = func_15144B68(phaseY);
+        emission->stream.phaseX = math_wrapRadians(phaseX);
+        emission->stream.phaseY = math_wrapRadians(phaseY);
         emission->stream.time = time;
     }
 }

@@ -96,7 +96,7 @@ typedef struct {
     /* 0x8 */ s8 teamColor[4];
 } TeamSetup;
 
-/* Cue table row: func_1501D348(unk0, unk2 or unk3). */
+/* Cue table row: cutscene_start(unk0, unk2 or unk3). */
 struct Struct151E4314 {
     s16 unk0;
     s8 unk2;
@@ -339,12 +339,12 @@ void save_updatePauseMenu(void) {
     if (level == 0x22) {
         reducedMenu = 1;
     }
-    if ((D_800C35EA[0] != 1) || (level != 0x18) || (D_800C35E8[0] != 1)) {
+    if ((gCutsceneStates[0] != 1) || (level != 0x18) || (D_800C35E8[0] != 1)) {
         if (screen_areViewsCovered() != 0) {
             blocked = 1;
         }
     }
-    if ((D_800C35EA[0] == 1) && (D_800C3683 != 0)) {
+    if ((gCutsceneStates[0] == 1) && (D_800C3683 != 0)) {
         blocked = 1;
     }
     if (D_8008FEEC > 0) {
@@ -634,7 +634,7 @@ void save_updateMenuPages(void) {
     }
     if (D_8008FD80) {
         camera_global_Cameras->Mode = 0x80000;
-        func_1501D348(level, 1, 0, 0, 0);
+        cutscene_start(level, 1, 0, 0, 0);
         D_8008FD80 = 0;
         return;
     }
@@ -710,7 +710,7 @@ void save_updateMenuPages(void) {
         }
     }
     gMenuState->input = gMenuState->padInput[0];
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         D_8008FE24 = 0;
         if (D_800E0A90 < 0x546 && gMenuButtonsPressed[0] != 0) {
             D_8008FD84[0] = 1;
@@ -2612,8 +2612,8 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
                 selRow = row;
             }
             if (carousel) {
-                x = func_150497E0(xs, slot, scrollT);
-                y = func_150497E0(ys, slot, scrollT);
+                x = math_catmullRom(xs, slot, scrollT);
+                y = math_catmullRom(ys, slot, scrollT);
                 slot--;
                 if (slot < 0) {
                     slot += count;
@@ -2825,7 +2825,7 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
     }
 }
 
-/* State 5: skips one frame after the intro cue, then fades out into save_setupMatch on input (or unless D_800C35EA == 1). */
+/* State 5: skips one frame after the intro cue, then fades out into save_setupMatch on input (or unless gCutsceneStates == 1). */
 void func_151E4264(void) {
     if (D_8008FD80 != 0) {
         D_8008FD80 = 0;
@@ -2833,8 +2833,8 @@ void func_151E4264(void) {
     }
 
     func_151E530C();
-    if ((D_800E0B9A != 0) || (D_800C35EA[0] != 1)) {
-        if ((D_800C35EA[0] == 1) && (func_151F2CDC() == 1)) {
+    if ((D_800E0B9A != 0) || (gCutsceneStates[0] != 1)) {
+        if ((gCutsceneStates[0] == 1) && (func_151F2CDC() == 1)) {
             func_151F2D6C(0, 0x2DE0);
         }
         gFrontEndState = 7;
@@ -2857,7 +2857,7 @@ void func_151E4314(void) {
         } else {
             param = entry->unk2;
         }
-        func_1501D348(entry->unk0, param, 0, 0, 0);
+        cutscene_start(entry->unk0, param, 0, 0, 0);
         D_8008FD80 = 1;
         gFrontEndState = 5;
         D_8008FD8C = 1;
@@ -2897,7 +2897,7 @@ void save_updateResultsScreen(void) {
         } else if (gPlayerRanks[0] != 1) {
             param = D_800AB7BC[idx].unk3;
         }
-        func_1501D348(D_800AB7BC[idx].unk0, param, 0, 0, 0);
+        cutscene_start(D_800AB7BC[idx].unk0, param, 0, 0, 0);
         D_8008FD80 = 0;
     } else {
         if (gMenuState->selection != 11 && gMenuState->selection != 12) {
@@ -2924,8 +2924,8 @@ void save_updateResultsScreen(void) {
                         if (gRoster[i] >= 0) {
                             count = gPlayerRanks[i];
                             text_printAt(88, y, 0x81, "       : %s", gTextStrings[count + 0x5D]);
-                            func_150916B4(0x8A, y, D_800E0C18[i], 0x80);
-                            func_150916B4(0xBC, y, D_800E0C10[i], 0x80);
+                            hud_printRaceTime(0x8A, y, D_800E0C18[i], 0x80);
+                            hud_printRaceTime(0xBC, y, D_800E0C10[i], 0x80);
                             text_printAt(168, y, 0x80, "(");
                             text_printAt(214, y, 0x80, ")");
                             y += 0x12;
@@ -2972,7 +2972,7 @@ void save_updateResultsScreen(void) {
             text_printAt(213, 180, 1, "#", (gPauseCursor == 1) + 0xE);
             text_printAt(148, 180, 1, "#", 0x1A);
             if ((D_800E0B9A & 0x8000) || D_800E0A90 > 2400) {
-                if (D_800C35EA[0] == 1 && func_151F2CDC() == 1) {
+                if (gCutsceneStates[0] == 1 && func_151F2CDC() == 1) {
                     func_151F2D6C(0, 0x2DE0);
                 }
                 if (D_800E0A90 > 2400) {
@@ -4003,7 +4003,7 @@ void func_151E6C1C(s32 index) {
     if (scale > 0.0f) {
         path[0] = mp_findNodeById(homeNode);
         path[1] = mp_findNodeById(nodeTable[gMenuState->unk2B]);
-        node = &D_800D2350[path[1]];
+        node = &gPathNodes[path[1]];
         pathLen = 1;
         while (node != NULL) {
             cur = node;
@@ -4013,7 +4013,7 @@ void func_151E6C1C(s32 index) {
                 if (link != 0xFF && link != path[pathLen - 1]) {
                     pathLen++;
                     path[pathLen] = link;
-                    node = &D_800D2350[cur->links[i]];
+                    node = &gPathNodes[cur->links[i]];
                     i = 5;
                 }
             }
@@ -4041,12 +4041,12 @@ void func_151E6C1C(s32 index) {
             x[pathLen + 1] = x[pathLen] + (x[pathLen - 1] - x[pathLen]);
             y[pathLen + 1] = y[pathLen] + (y[pathLen - 1] - y[pathLen]);
             z[pathLen + 1] = z[pathLen] + (z[pathLen - 1] - z[pathLen]);
-            obj->eye.x = func_150497E0(x, seg, turnT);
-            obj->eye.y = func_150497E0(y, seg, turnT);
-            obj->eye.z = func_150497E0(z, seg, turnT);
-            obj->focus.x = func_150497E0(x, seg + 1, turnT);
-            obj->focus.y = func_150497E0(y, seg + 1, turnT);
-            UNK2AC_F32 = func_150497E0(z, seg + 1, turnT);
+            obj->eye.x = math_catmullRom(x, seg, turnT);
+            obj->eye.y = math_catmullRom(y, seg, turnT);
+            obj->eye.z = math_catmullRom(z, seg, turnT);
+            obj->focus.x = math_catmullRom(x, seg + 1, turnT);
+            obj->focus.y = math_catmullRom(y, seg + 1, turnT);
+            UNK2AC_F32 = math_catmullRom(z, seg + 1, turnT);
         } else {
             mp_getNodePos(path[0], &x[0], &y[0], &z[0]);
             mp_getNodePos(path[1], &x[1], &y[1], &z[1]);
@@ -4076,9 +4076,9 @@ void func_151E6C1C(s32 index) {
                 idx -= nodeCount;
             }
         }
-        obj->focus.x = func_150497E0(x, 0, turnT);
-        obj->focus.y = func_150497E0(y, 0, turnT);
-        UNK2AC_F32 = func_150497E0(z, 0, turnT);
+        obj->focus.x = math_catmullRom(x, 0, turnT);
+        obj->focus.y = math_catmullRom(y, 0, turnT);
+        UNK2AC_F32 = math_catmullRom(z, 0, turnT);
     }
 
     if (gMenuState->unk2A != 0) {
@@ -4400,7 +4400,7 @@ void func_151E82B8(void) {
 void func_151E83E8(void) {
     if (D_800E0A80 == 0) {
         D_800E0A80 = -1;
-        func_1501D348(0x1D, 6, 0, 0, 0);
+        cutscene_start(0x1D, 6, 0, 0, 0);
     }
     func_151E530C();
     if (screen_areViewsCovered() == 0) {

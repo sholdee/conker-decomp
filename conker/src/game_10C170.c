@@ -77,7 +77,7 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
         spawn.sizeY = 1.0f;
         spawn.sizeXZ = 1.0f;
         spawn.elasticity = 0.200000003f;
-        spawn.rot = D_800A5480;
+        spawn.rot = gZeroVec3f;
         spawn.scale.x = 1.0f;
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
@@ -231,7 +231,7 @@ void effect_spawnScatteredParticles(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s3
     emitter.growRate = 0.699999988f;
     particle_spawnChannelParticle(&emitter, 10, 0, 0, owner, kind);
     for (count = func_150ADA20() % 3U + 1; count > 0; count--) {
-        func_15143874(func_150ADA20() & 0xFF, 30.0f, &emitter.pos.x, &emitter.pos.z);
+        math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, 30.0f, &emitter.pos.x, &emitter.pos.z);
         emitter.pos.x += pos->x;
         emitter.pos.z += pos->z;
         scaleA = func_150ADA68() * 0.5f + 0.75f;

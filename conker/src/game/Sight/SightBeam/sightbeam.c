@@ -213,7 +213,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
             memcpy(objState, &state, sizeof(SightBeamState));
         }
         dir = spawn.scale;
-        if (func_15145128(&dir, &dir, &len, &inv) != 0 && hasEndEffects) {
+        if (math_vec3Normalize(&dir, &dir, &len, &inv) != 0 && hasEndEffects) {
             p0.x = start->x + dir.x * 20.0f;
             p0.y = start->y + dir.y * 20.0f;
             p0.z = start->z + dir.z * 20.0f;
@@ -272,11 +272,11 @@ void *sight_buildBeamQuad(SightBeamObject *obj, s16 view) {
     } else {
         return NULL;
     }
-    camera = func_15144B34(view);
+    camera = math_getCameraPos(view);
     dir.x = obj->head.def.rot.x - obj->head.def.pos.x;
     dir.y = obj->head.def.rot.y - obj->head.def.pos.y;
     dir.z = obj->head.def.rot.z - obj->head.def.pos.z;
-    func_15145548(&obj->head.def.pos, &dir, camera, &closest, 0);
+    math_closestPointOnSegment(&obj->head.def.pos, &dir, camera, &closest, 0);
     dx = closest.x - camera->x;
     dy = closest.y - camera->y;
     dz = closest.z - camera->z;
@@ -346,8 +346,8 @@ s32 sight_updateBeam(SightBeamObject *obj) {
     if (state->flags & 2) {
         state->angleS += state->speedS * gFrameDelta;
         state->angleT += state->speedT * gFrameDelta;
-        state->angleS = func_15144B68(state->angleS);
-        state->angleT = func_15144B68(state->angleT);
+        state->angleS = math_wrapRadians(state->angleS);
+        state->angleT = math_wrapRadians(state->angleT);
         state->texS = func_150AD78C(state->angleS) * state->radiusS + state->centerS;
         state->texT = func_150AD78C(state->angleT) * state->radiusT + state->centerT;
         midEffect = state->midEffect;
@@ -396,7 +396,7 @@ s32 sight_updateBeam(SightBeamObject *obj) {
     }
     if (state->flags & 8) {
         obj->head.def.unk44 = func_150AD78C(state->pulseAngle) * 112.5f + 142.5f;
-        state->pulseAngle = func_15144B68(state->pulseAngle + state->pulseSpeed * gFrameDelta);
+        state->pulseAngle = math_wrapRadians(state->pulseAngle + state->pulseSpeed * gFrameDelta);
     }
     return 1;
 }
@@ -504,10 +504,10 @@ s32 sight_doesBeamHitActor(Actor *actor, SightBeamObject *obj) {
     dir.z = endZ - start.z;
     {
         f32 invLength;
-        if (func_15145128(&dir, &dir, &length, &invLength) == 0) {
+        if (math_vec3Normalize(&dir, &dir, &length, &invLength) == 0) {
             return 0;
         }
-        if (func_151451F0(&start, &dir, &center, radius, length, &nearHit, &farHit, &nearT, &farT) != 0) {
+        if (math_raySphereWithin(&start, &dir, &center, radius, length, &nearHit, &farHit, &nearT, &farT) != 0) {
             return 1;
         }
     }
@@ -636,7 +636,7 @@ SightExtension *sight_spawnExtension(SightBeamObject *owner, Vec3f *start, Vec3f
     params.type = 0;
     desc.unk48 = zone;
     params.fadeRate = 9.999999975e-07f;
-    effect = func_151407D0(&params, 100, &desc, 0, 0, 0, 0, 1, arg8, arg9);
+    effect = flare_spawnGlow(&params, 100, &desc, 0, 0, 0, 0, 1, arg8, arg9);
     if (effect != NULL) {
         memcpy(&effect->owner, &ownerCopy, sizeof(ownerCopy));
     }
@@ -653,8 +653,8 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
     void *unused; // matching: reserves a stack slot
     SightEmitterAnim anim;
 
-    if (func_15144E80(triangle, &edge0, &edge1, &normal) != 0) {
-        func_15145974(&normal, &desc.rot.y, &desc.rot.x);
+    if (math_getTriEdges(triangle, &edge0, &edge1, &normal) != 0) {
+        math_getHeadingElevation(&normal, &desc.rot.y, &desc.rot.x);
         desc.radius = 1.0f;
         desc.elasticity = 1.0f;
         desc.scale.x = 1.0f;

@@ -52,8 +52,8 @@ s32 func_150AE2A0(struct Foo150AE280 *arg0) {
     arg0->unk170.unk8 += 0.065f * gFrameDelta;
     arg0->unk170.unkC += 0.0484f * gFrameDelta;
     temp_v0 = &arg0->unk170;
-    temp_v0->unk8 = func_15144B68(arg0->unk170.unk8);
-    temp_v0->unkC = func_15144B68(temp_v0->unkC);
+    temp_v0->unk8 = math_wrapRadians(arg0->unk170.unk8);
+    temp_v0->unkC = math_wrapRadians(temp_v0->unkC);
     arg0->unk20 = sinf(temp_v0->unk8) * 3.0860002f;
     arg0->unk28 = sinf(temp_v0->unkC) * 5.9140005f;
     return 1;
@@ -86,7 +86,7 @@ s16 *func_150AE36C(struct Foo150AE36C *arg0, s16 arg1) {
         return 0;
     }
 
-    func_15142914(mtx, arg0->unk160->unk18, arg0->unk160->unk1C, arg0->unk160->unk20, arg0->unk160->unk24, arg0->unk160->unk28, arg0->unk160->unk38, arg0->unk160->unk3C, arg0->unk160->unk40);
+    math_mtxFRotScaleXZ(mtx, arg0->unk160->unk18, arg0->unk160->unk1C, arg0->unk160->unk20, arg0->unk160->unk24, arg0->unk160->unk28, arg0->unk160->unk38, arg0->unk160->unk3C, arg0->unk160->unk40);
     func_150A7960(mtx, arg0->unk34, arg0->unk38, arg0->unk3C, &sp8C, &sp90, &sp94);
 
     temp_f2 = D_800DD1E8[arg1] * arg0->unk2C;

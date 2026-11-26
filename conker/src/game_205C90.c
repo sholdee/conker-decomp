@@ -145,12 +145,12 @@ void cont_applyRumbleFalloff(RumbleObj *obj, RumbleFalloff *falloff) {
     Vec3f *camera;
     f32 dist;
 
-    camera = func_15144B34(falloff->view);
+    camera = math_getCameraPos(falloff->view);
     delta.x = falloff->pos.x - camera->x;
     delta.y = falloff->pos.y - camera->y;
     delta.z = falloff->pos.z - camera->z;
 
-    dist = func_15143E64(&delta);
+    dist = math_vec3Length(&delta);
     if (dist < falloff->innerRadius) {
         scale = 1.0f;
     } else if (falloff->innerRadius + falloff->falloffRange < dist) {

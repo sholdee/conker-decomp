@@ -822,99 +822,99 @@ extern ActorEffectDef gActorEffects[20];
 extern const Args151420F8 D_800A5200;
 
 /* game_16F770.c */
-s32 func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line);
-s32 func_151422DC(s32 id, const char *name, s32 min, s32 max, s32 value, const char *file, s32 line);
+s32 math_debugTunableRange(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line);
+s32 math_debugTunable(s32 id, const char *name, s32 min, s32 max, s32 value, const char *file, s32 line);
 s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 /* (void *bones, s32 bone, Vec3f *out); declared without a prototype: game_1D6E80.c also passes the actor */
-void func_15142314();
-f32 func_151423D8(u8 angle);
-Actor *func_15142444(u8 uniqueId, Actor *self);
-void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 sx, f32 sy, f32 sz, f32 x,
+void math_getBoneTranslation();
+f32 math_cosBinAngleMasked(u8 angle);
+Actor *math_findActorById(u8 uniqueId, Actor *self);
+void math_mtxRotScaleAxes(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 sx, f32 sy, f32 sz, f32 x,
                    f32 y, f32 z);
-void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z, f32 atX, f32 atY,
+void math_mtxLookAtScale(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z, f32 atX, f32 atY,
                    f32 atZ);
-void func_15142838(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z);
-void func_15142914(MtxF mf, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z);
-void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b);
+void math_mtxRotScaleXZ(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z);
+void math_mtxFRotScaleXZ(MtxF mf, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z);
+void math_pickPaletteColour(u8 palette, u8 *r, u8 *g, u8 *b);
 s32 func_15142A5C(Actor *actor);
-f32 func_15142A80(f32 t);
-f32 func_15142AC0(f32 t);
-f32 func_15142B04(f32 t);
-f32 func_15142B44(f32 t);
-Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142E24(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s32 s, s32 t, s32 texture, u8 mode,
+f32 math_lagrangeWeight0(f32 t);
+f32 math_lagrangeWeight1(f32 t);
+f32 math_lagrangeWeight2(f32 t);
+f32 math_lagrangeWeight3(f32 t);
+Gfx *math_gfxUpdateGeometryMode(Gfx *gfx, s32 setBits, s32 clearBits);
+Gfx *math_gfxSetEnvColor(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *math_gfxSetPrimColor(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *math_gfxLoadTextureFrame(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s32 s, s32 t, s32 texture, u8 mode,
                    SpriteParams *sprite, u8 *needSync, s32 assetArg);
-Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
+Gfx *math_gfxSetOtherMode(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 s16 func_15143044(u8 arg0, s32 arg1);
-s32 func_1514306C(TextureDesc *desc, s32 texture, s32 frame, u8 mode);
-void func_15143134(const Vec3f *offset, Vec3f *out, void *mtx);
-void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
-void func_151436B4(f32 yaw, f32 pitch, f32 length, Vec3f *out);
-void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out); /* (yaw, pitch, length) -> vector */
+s32 math_getTextureFrameId(TextureDesc *desc, s32 texture, s32 frame, u8 mode);
+void math_transformOffset(const Vec3f *offset, Vec3f *out, void *mtx);
+void math_randomZoneFootprintPoint(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
+void math_dirFromAngles(f32 yaw, f32 pitch, f32 length, Vec3f *out);
+void math_dirFromAngleXZ(f32 angle, f32 length, f32 *x, f32 *z);
+void math_dirFromBinAngles(s16 yaw, s16 pitch, f32 length, Vec3f *out); /* (yaw, pitch, length) -> vector */
 void func_15143834(s16 yaw, s16 pitch, f32 length, Vec3f *out);
-void func_15143874(s16 angle, f32 length, f32 *x, f32 *z);
-TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key);
-void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);
-s32 func_15143DA8(s32 *value, s32 lo, s32 hi);
+void math_dirFromBinAngleXZ(s16 angle, f32 length, f32 *x, f32 *z);
+TriggerZone *math_findMatchingZone(s32 start, s32 end, u16 fields, TriggerZone *key);
+void math_clampRange(s32 *start, s32 *end, s32 lo, s32 hi);
+s32 math_clampInt(s32 *value, s32 lo, s32 hi);
 s32 func_15143E08(Actor *actor);
 s32 func_15143E24(Actor *actor);
-f32 func_15143E64(const Vec3f *v);
+f32 math_vec3Length(const Vec3f *v);
 u8 func_15143E94(s32 arg0, s32 arg1);
-s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags);
-void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1, u8 a1,
+s32 math_advanceFrameSeq(u8 id, u32 *speed, s32 *pos, u8 flags);
+void math_pickPrimColour(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1, u8 a1,
                    u8 weight, u8 mode);
-void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1, u8 a1,
+void math_pickEnvColour(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1, u8 a1,
                    u8 weight, u8 mode);
-s32 func_151444DC(s32 value, s32 hi, s32 lo);
-f32 func_15144528(f32 value, f32 hi, f32 lo);
-f32 func_15144598(TriggerZone *region);
-f32 func_1514462C(TriggerZone *region);
-void func_1514470C(TriggerZone *region, Vec3f *out);
-f32 func_15144A74(Vec3f *a, Vec3f *b); /* dot product */
+s32 math_wrapInt(s32 value, s32 hi, s32 lo);
+f32 math_wrapFloat(f32 value, f32 hi, f32 lo);
+f32 math_getZoneArea(TriggerZone *region);
+f32 math_getZoneVolume(TriggerZone *region);
+void math_randomPointInZone(TriggerZone *region, Vec3f *out);
+f32 math_vec3Dot(Vec3f *a, Vec3f *b); /* dot product */
 /* (s32 index); declared without a prototype: game/Weapon/Bullet/bullet.c passes a second argument */
-f32 func_15144AA8();
-Vec3f *func_15144B34(s32 index);
-f32 func_15144B68(f32 angle);
-f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
-s32 func_15144C2C(s16 value);
-f32 func_15144C8C(f32 a, f32 b);
+f32 math_getCameraYaw();
+Vec3f *math_getCameraPos(s32 index);
+f32 math_wrapRadians(f32 angle);
+f32 math_wrapDegrees(f32 angle); /* wraps an angle into [0, 360] degrees */
+s32 math_wrapByte(s16 value);
+f32 math_angleDistance(f32 a, f32 b);
 /* (f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDepth, u8 viewport); declared without a prototype:
- * func_151408A4 passes its s16 view without narrowing it */
-s32 func_15144CEC();
-s32 func_15144E80(CollisionTri *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal); /* triangle edges + normal */
-void func_151450B4(Vec3f *a, Vec3f *b, Vec3f *out);
-s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength); /* normalize */
-s32 func_151451F0(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, f32 maxDist, Vec3f *hitNear, Vec3f *hitFar,
+ * flare_buildGlowQuad passes its s16 view without narrowing it */
+s32 math_projectToScreen();
+s32 math_getTriEdges(CollisionTri *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal); /* triangle edges + normal */
+void math_vec3Cross(Vec3f *a, Vec3f *b, Vec3f *out);
+s32 math_vec3Normalize(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength); /* normalize */
+s32 math_raySphereWithin(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, f32 maxDist, Vec3f *hitNear, Vec3f *hitFar,
                   f32 *tNear, f32 *tFar);
-s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, Vec3f *hitNear, Vec3f *hitFar, f32 *tNear,
+s32 math_raySphere(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, Vec3f *hitNear, Vec3f *hitFar, f32 *tNear,
                   f32 *tFar);
-s32 func_151454BC(u8 index, f32 radius, Vec3f *point);
-void func_15145548(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t);
-s32 func_1514563C(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t);
-void func_15145740(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset);
-void func_15145974(Vec3f *v, f32 *heading, f32 *elevation);
-f32 func_15145A0C(f32 arg0, f32 scale, f32 arg2);
+s32 math_isNearCamera(u8 index, f32 radius, Vec3f *point);
+void math_closestPointOnSegment(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t);
+s32 math_closestPointOnLine(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t);
+void math_getActorAim(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset);
+void math_getHeadingElevation(Vec3f *v, f32 *heading, f32 *elevation);
+f32 math_circleHalfChord(f32 arg0, f32 scale, f32 arg2);
 void func_15145A50(Actor *actor);
-s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f *hitFar, f32 *radius, f32 *arg6,
+s32 math_rayActorEllipsoid(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f *hitFar, f32 *radius, f32 *arg6,
                   Vec3f *center);
-u8 func_15145C90(s32 index);
-void func_15145CD0(WorldObject *placement, const f32 **in, f32 **out, s32 count);
-void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count);
-void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count);
-s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v); /* two axes perpendicular to a direction */
-void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos, u8 flags,
+u8 math_isObjectHidden(s32 index);
+void math_transformObjectPointRefs(WorldObject *placement, const f32 **in, f32 **out, s32 count);
+void math_transformObjectPoints(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count);
+void math_transformOffsets(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count);
+s32 math_buildPerpendicularBasis(Vec3f *n, Vec3f *u, Vec3f *v); /* two axes perpendicular to a direction */
+void *math_emitPointLights(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos, u8 flags,
                     s32 arg8);
-u8 func_151464B8(ZoneNode *zone);
+u8 math_isZoneHiddenFromViews(ZoneNode *zone);
 void func_15146508(Actor *a, Actor *b);
-s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, const Vec3f **offsets, Vec3f **results,
+s32 math_transformAttachmentOffsets(Actor *actor, ModelAttachment *point, s32 index, const Vec3f **offsets, Vec3f **results,
                   s32 count);
-s32 func_1514672C(Vec3f *pos);
-void func_151467A4(f32 *timer, f32 maxTime, f32 *target, f32 lo, f32 mid, f32 hi, f32 rate, f32 *value);
-extern const Vec3f D_800A5480; /* zero vector */
-extern const f32 D_800A548C[102];
+s32 math_isInWorldBounds(Vec3f *pos);
+void math_randomDrift(f32 *timer, f32 maxTime, f32 *target, f32 lo, f32 mid, f32 hi, f32 rate, f32 *value);
+extern const Vec3f gZeroVec3f; /* zero vector */
+extern const f32 gUnitCircleTable[102];
 
 /* game_173D40.c */
 s32 func_15146890(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side);
@@ -1209,7 +1209,7 @@ extern s16 D_800DD206;
 extern s32 D_800DD208;
 extern s32 D_800DD20C;
 extern s32 D_800DD210;
-extern SpriteParams *D_800DD214; // compared by func_15142E24, but never set to its sprite
+extern SpriteParams *D_800DD214; // compared by math_gfxLoadTextureFrame, but never set to its sprite
 extern s32 D_800DD218;
 extern s32 D_800DD21C;
 extern s32 D_800DD220;

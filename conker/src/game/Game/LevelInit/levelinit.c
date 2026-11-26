@@ -43,14 +43,14 @@ void game_initLevelSubsystems(s32 levelId) {
     view_buildOrthoMatrices();
 
     func_151EF640(64);
-    func_151732E0(levelId);
+    env_initFog(levelId);
     aim_loadPoints(levelId);
-    func_150127B0();
+    env_initVtxColours();
 
     flamethrower_clearTexScrolls();
     func_15008BE0();
     effect_initQueue();
-    func_1500E5C0();
+    level_resetSetupState();
 
     if (D_800B0DF0->unkA) {
         gLevelSetupFuncs[D_800B0DF0->unkA]();
@@ -60,7 +60,7 @@ void game_initLevelSubsystems(s32 levelId) {
     light_loadParticleTextures();
     shadow_initLevelSettings(levelId);
     effect_resetRain();
-    func_15012FE0();
+    level_resetScreenCopy();
 
     func_151645C4(!(gTaskDoneBits[0x4] & 0x80));
 }

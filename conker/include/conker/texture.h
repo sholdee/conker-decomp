@@ -21,8 +21,8 @@ typedef struct UvWobble {
     /* 0x04 */ TexCoord *secondary; /* original UVs of the vertices in mesh 1 */
     /* 0x08 */ u8 primaryCount;
     /* 0x09 */ u8 secondaryCount;
-    /* 0x0A */ u8 primaryIndex;     /* first vertex in D_800B0E10[0] */
-    /* 0x0B */ u8 secondaryIndex;   /* first vertex in D_800B0E10[1] */
+    /* 0x0A */ u8 primaryIndex;     /* first vertex in gLevelVertices[0] */
+    /* 0x0B */ u8 secondaryIndex;   /* first vertex in gLevelVertices[1] */
     /* 0x0C */ u8 disabled;
     /* 0x0D */ u8 pad0D;
     /* 0x0E */ u16 phase;
@@ -75,7 +75,7 @@ Gfx *texture_emitBindings(Gfx *gfx, void *object);
 
 /* game/Texture/TextureTables/texturetables.c: the shared texture tables (a data-only unit). The TextureDesc entries are the ones the
  * texture table gEffectAnimTextures (game_1944C0.c) and the code use by name; D_80090150, D_8009016C, D_80090184
- * and D_800901C4 are the asset id lists of D_80082B20 (game_305D0.c); D_80090230 and D_80090244 are the
+ * and D_800901C4 are the asset id lists of gLevelAssetLists (game_305D0.c); D_80090230 and D_80090244 are the
  * two frame tables of gBounceRecordFrameTables and gTexAnimFrameTables. */
 extern s32 D_80090150[7];
 extern s32 D_8009016C[6];

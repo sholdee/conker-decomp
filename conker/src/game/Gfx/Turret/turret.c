@@ -36,8 +36,8 @@ void gfx_aimTurret(WorldObject *turret) {
         }
         speed = cfg->speedFar;
     } else {
-        yaw = func_150484A0(dx, dz);
-        pitch = func_150484A0(dy, sqrtf(dx * dx + dz * dz));
+        yaw = math_atan2(dx, dz);
+        pitch = math_atan2(dy, sqrtf(dx * dx + dz * dz));
         yaw *= 57.29577637f;
         pitch *= 57.29577637f;
         if (pitch < 0.0f) {
@@ -50,7 +50,7 @@ void gfx_aimTurret(WorldObject *turret) {
         } else if (yaw >= 360.0f) {
             yaw -= 360.0f;
         }
-        delta = func_15048A70(cfg->baseYaw, yaw);
+        delta = math_angleDiff(cfg->baseYaw, yaw);
         if (pitch > 180.0f) {
             pitch -= 360.0f;
         }
@@ -77,7 +77,7 @@ void gfx_aimTurret(WorldObject *turret) {
             pitch += 360.0f;
         }
     }
-    delta = func_15048A70(turret->u, yaw);
+    delta = math_angleDiff(turret->u, yaw);
     yaw = fabsf(delta);
     if (cfg->maxStep < yaw) {
         delta = ((delta < 0.0f) ? -1.0f : 1.0f) * cfg->maxStep;
@@ -91,7 +91,7 @@ void gfx_aimTurret(WorldObject *turret) {
     } else if (turret->u >= 360.0f) {
         turret->u -= 360.0f;
     }
-    delta = func_15048A70(turret->t, 360.0f - pitch);
+    delta = math_angleDiff(turret->t, 360.0f - pitch);
     turret->t += delta * speed;
     if (gTurretSoundTimer == 0 && fabsf(delta) > 4.0f) {
         gTurretSoundTimer = -1;

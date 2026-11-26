@@ -93,7 +93,7 @@ void particle_updateSparkEmitter(SparkEffect *obj) {
             if (motion.life > 0.0f) {
                 Vec3f point;
 
-                func_1514373C(emitter->angle, record[3], &point.x, &point.z);
+                math_dirFromAngleXZ(emitter->angle, record[3], &point.x, &point.z);
                 point.y = record[4];
                 func_150A7960(emitter->matrix, point.x, point.y, point.z, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
                 spawn.width = func_150ADA68() * 25.0f + 50.0f;
@@ -146,7 +146,7 @@ Vtx *particle_buildSparkBeamQuad(GameFFBA0Beam *beam, s16 index) {
         return NULL;
     }
     texture = beam->texture;
-    camera = func_15144B34(index);
+    camera = math_getCameraPos(index);
     delta.x = beam->head.def.rot.x - beam->head.def.pos.x;
     delta.y = beam->head.def.rot.y - beam->head.def.pos.y;
     delta.z = beam->head.def.rot.z - beam->head.def.pos.z;
@@ -205,8 +205,8 @@ s32 particle_swaySpark(RingSparkParticle *particle) {
 
     motion->phaseX += motion->phaseSpeedX * gFrameDelta;
     motion->phaseY += motion->phaseSpeedY * gFrameDelta;
-    motion->phaseX = func_15144B68(motion->phaseX);
-    motion->phaseY = func_15144B68(motion->phaseY);
+    motion->phaseX = math_wrapRadians(motion->phaseX);
+    motion->phaseY = math_wrapRadians(motion->phaseY);
     motion->posX = sinf(motion->phaseX) * motion->amplitudeX + motion->baseX;
     motion->posY = sinf(motion->phaseY) * motion->amplitudeY + motion->baseY;
     motion->life -= gFrameDelta;

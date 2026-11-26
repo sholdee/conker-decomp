@@ -9,28 +9,28 @@
 
 /* Endpoint callbacks (HoltenRopeEffect.startCallback / endCallback): s32 (rope, Vec3f *pos, u8 isStart),
  * each taking the rope as its own type's view; 0 ends the rope. */
-static s32 (*D_8008FAF0[])() = { func_151B3F28, func_151B2FA0 };
+static s32 (*gRopeEndpointCallbacks[])() = { rope_actorEndpoint, rope_tiedRopeEndpoint };
 
 /* Update callbacks (HoltenRopeEffect.updateCallback); 0 ends the rope. */
-static s32 (*D_8008FAF8[])(HoltenRopeEffect *) = {
-    func_151B3A7C, func_151B3CF0, func_151B3FDC, func_151B42A4, func_151B48DC, func_151B4B78,
+static s32 (*gRopeUpdateCallbacks[])(HoltenRopeEffect *) = {
+    rope_layStraight, rope_layHalfCircle, rope_layHalfEllipse, rope_swingHalfEllipse, rope_spaceAlongX, rope_spaceFixedX,
 };
 
 /* Draw styles (HoltenRopeEffect.drawStyle): s32 (rope, s32 *mode0, s32 *mode1, s32 *primR, s32 *primG, s32 *primB,
  * s32 *primA, s32 *envR, s32 *envG, s32 *envB, s32 *envA, s32 *cycleType, u8 *renderMode, u8 *unk13) returns the
  * draw settings of the rope's display list, nonzero if the rope should be drawn. */
-static s32 (*D_8008FB10[])() = { func_151B498C, func_151B4A14 };
+static s32 (*gRopeDrawStyles[])() = { rope_drawStyleWhite, rope_drawStyleTinted };
 
 /* Render setup and reset display lists of the ropes; the rope type's entry in the object type table
  * gObjectTypes points to them. */
-Gfx D_8008FB18[] = {
+Gfx gRopeRenderSetupDl[] = {
     gsDPPipeSync(),
     gsSPMatrix(&gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsDPSetConvert(0, 0, 0, 0, 0, 255),
     gsSPEndDisplayList(),
 };
-Gfx D_8008FB40[] = {
+Gfx gRopeRenderResetDl[] = {
     gsDPPipeSync(),
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
     gsDPPipeSync(),
@@ -40,11 +40,11 @@ Gfx D_8008FB40[] = {
 
 /* Message and cleanup handlers per rope type (HoltenRopeEffect.type); the cleanup handlers take the rope as
  * their type's view. */
-static void (*D_8008FB68[])(HoltenRopeEffect *, s32, u8) = { NULL, NULL };
-static void (*D_8008FB70[])() = { func_151B2950, NULL };
+static void (*gRopeTypeMsgHandlers[])(HoltenRopeEffect *, s32, u8) = { NULL, NULL };
+static void (*gRopeTypeCleanups[])() = { rope_unlinkTiedRope, NULL };
 
 /* Allocates a rope effect with `extraSize` bytes of type data and initializes it from `desc`. */
-HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4) {
+HoltenRopeEffect *rope_createEffect(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4) {
     HoltenRopeEffect *effect;
     f32 length;
     f32 halfAxesSq;
@@ -65,7 +65,7 @@ HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSiz
 }
 
 /* Per-frame update: counts down the lifetime, refreshes both endpoints and moves the points. */
-void func_151B3184(HoltenRopeEffect *effect) {
+void rope_updateEffect(HoltenRopeEffect *effect) {
     s32 callback;
     u8 finished;
 
@@ -79,13 +79,13 @@ void func_151B3184(HoltenRopeEffect *effect) {
     if (!finished) {
         callback = effect->startCallback;
         if (callback != -1) {
-            if (!D_8008FAF0[callback](effect, &effect->start, TRUE)) {
+            if (!gRopeEndpointCallbacks[callback](effect, &effect->start, TRUE)) {
                 finished = TRUE;
             }
         }
         callback = effect->endCallback;
         if (callback != -1) {
-            if (!D_8008FAF0[callback](effect, &effect->end, FALSE)) {
+            if (!gRopeEndpointCallbacks[callback](effect, &effect->end, FALSE)) {
                 finished = TRUE;
             }
         }
@@ -94,7 +94,7 @@ void func_151B3184(HoltenRopeEffect *effect) {
         } else {
             callback = effect->updateCallback;
             if (callback != -1) {
-                if (!D_8008FAF8[callback](effect)) {
+                if (!gRopeUpdateCallbacks[callback](effect)) {
                     finished = TRUE;
                 }
             }
@@ -114,7 +114,7 @@ extern struct {
  * Draws the rope for view `view` as a camera-facing strip: each point gets a vertex
  * pair offset by `halfWidth` along the side vector (segment x eye-to-point).
  */
-Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
+Gfx *rope_drawEffect(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
     s32 i;
     Vtx *vtx;
     Vec3f a;
@@ -164,16 +164,16 @@ Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
         {
             HoltenRopePoint *points;
 
-            if (!D_8008FB10[effect->drawStyle](effect, &mode0, &mode1, &primR, &primG, &primB, &primA, &envR, &envG, &envB, &envA, &cycleType, &renderMode, &unk13)) {
+            if (!gRopeDrawStyles[effect->drawStyle](effect, &mode0, &mode1, &primR, &primG, &primB, &primA, &envR, &envG, &envB, &envA, &cycleType, &renderMode, &unk13)) {
                 return gfx;
             }
             points = effect->points;
-            gfx = func_15142B7C(gfx, mode0, mode1);
-            gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
-            gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
+            gfx = math_gfxUpdateGeometryMode(gfx, mode0, mode1);
+            gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &needSync);
+            gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &needSync);
             gfx = particle_setCombineMode(gfx, unk13, &needSync);
-            gfx = func_15142E24(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &needSync, 3);
-            gfx = func_15142FBC(gfx, cycleType | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[renderMode].unk0 | gEffectRenderModes[renderMode].unk4, &needSync);
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &needSync, 3);
+            gfx = math_gfxSetOtherMode(gfx, cycleType | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[renderMode].unk0 | gEffectRenderModes[renderMode].unk4, &needSync);
             {
                 f32 pad3; // matching: a local here opens a -g3 scope that IDO will not schedule across
 
@@ -276,16 +276,16 @@ Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
     return gfx;
 }
 
-/* Calls the rope type's handler from D_8008FB68, if it has one. */
-void func_151B3A34(HoltenRopeEffect *effect, s32 arg1, u8 arg2) {
-    void (*handler)(HoltenRopeEffect *, s32, u8) = D_8008FB68[effect->type];
+/* Calls the rope type's handler from gRopeTypeMsgHandlers, if it has one. */
+void rope_effectMessage(HoltenRopeEffect *effect, s32 arg1, u8 arg2) {
+    void (*handler)(HoltenRopeEffect *, s32, u8) = gRopeTypeMsgHandlers[effect->type];
     if (handler != NULL) {
         handler(effect, arg1, arg2);
     }
 }
 
 /* Update callback: lays the points out in a straight line from start to end, at rest. */
-s32 func_151B3A7C(HoltenRopeEffect *effect) {
+s32 rope_layStraight(HoltenRopeEffect *effect) {
     s32 pad[4]; // matching: stack slots
     Vec3f pos;
     f32 dx;
@@ -315,7 +315,7 @@ s32 func_151B3A7C(HoltenRopeEffect *effect) {
  * Update callback: lays the points on a half circle whose diameter is the start-end segment,
  * in the vertical plane through both ends.
  */
-s32 func_151B3CF0(HoltenRopeEffect *effect) {
+s32 rope_layHalfCircle(HoltenRopeEffect *effect) {
     Vec3f delta;
     Vec3f mid;
     Vec3f relStart;
@@ -348,7 +348,7 @@ s32 func_151B3CF0(HoltenRopeEffect *effect) {
         dirX = delta.x * invDist;
         across = ((relEnd.z * dirZ) + (relEnd.x * dirX)) - ((relStart.z * dirZ) + (relStart.x * dirX));
         up = relEnd.y - relStart.y;
-        heading = func_150484A0(up, across);
+        heading = math_atan2(up, across);
         radius = sqrtf((across * across) + (up * up)) * 0.5f;
         angle = heading - 3.1415927f;
         for (i = 0; i < 10; i++, angle += 0.34906587f) { // 20 degrees
@@ -368,7 +368,7 @@ s32 func_151B3CF0(HoltenRopeEffect *effect) {
  * Endpoint callback for a rope hung from an actor: the start follows the actor
  * while it is still the one recorded at creation, the end hangs at a fixed point.
  */
-s32 func_151B3F28(HoltenRopeAttached *rope, Vec3f *pos, u8 isStart) {
+s32 rope_actorEndpoint(HoltenRopeAttached *rope, Vec3f *pos, u8 isStart) {
     s32 ret;
 
     ret = TRUE;
@@ -397,7 +397,7 @@ s32 func_151B3F28(HoltenRopeAttached *rope, Vec3f *pos, u8 isStart) {
  * Update callback: hangs the points on a half ellipse below the start-end chord whose arc
  * length is about `length`; falls back to a straight line when the ends are too far apart.
  */
-s32 func_151B3FDC(HoltenRopeEffect *effect) {
+s32 rope_layHalfEllipse(HoltenRopeEffect *effect) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -456,7 +456,7 @@ s32 func_151B3FDC(HoltenRopeEffect *effect) {
         chordY = up * inv;
         halfChordSq = chordSq * 0.25f;
         if (effect->axesSq < halfChordSq) {
-            return func_151B3A7C(effect);
+            return rope_layStraight(effect);
         }
         semiMinor = sqrtf(effect->axesSq - halfChordSq);
         angle = 0.0f;
@@ -478,11 +478,11 @@ s32 func_151B3FDC(HoltenRopeEffect *effect) {
 }
 
 /*
- * Update callback: the half ellipse of func_151B3FDC, but each point keeps part of its offset
+ * Update callback: the half ellipse of rope_layHalfEllipse, but each point keeps part of its offset
  * from last frame (most in the middle of the rope) and is integrated with a velocity, so the
  * rope swings. Points snap to the curve on a reset (flag 2) or while D_800DBFF4 is set.
  */
-s32 func_151B42A4(HoltenRopeEffect *effect) {
+s32 rope_swingHalfEllipse(HoltenRopeEffect *effect) {
     u8 ret;
     f32 dx;
     f32 dy;
@@ -555,7 +555,7 @@ s32 func_151B42A4(HoltenRopeEffect *effect) {
         chordY = up * inv;
         halfChordSq = chordSq * 0.25f;
         if (effect->axesSq < halfChordSq) {
-            ret = func_151B3A7C(effect);
+            ret = rope_layStraight(effect);
         } else {
             f32 angle;
 
@@ -580,7 +580,7 @@ s32 func_151B42A4(HoltenRopeEffect *effect) {
                     point->vel.z = 0.0f;
                 } else if (*(s32 *)D_800DBFF4 != 0) {
                     point->pos = target;
-                    point->vel = D_800A5480;
+                    point->vel = gZeroVec3f;
                 } else {
                     offsetX = (prev.x - target.x) * weight * effect->lagScale;
                     offsetY = (prev.y - target.y) * weight * effect->lagScale;
@@ -606,10 +606,10 @@ s32 func_151B42A4(HoltenRopeEffect *effect) {
 }
 
 /*
- * Places one end of a rope tied between two bones (called through func_151B2FA0). Returns 0 once
+ * Places one end of a rope tied between two bones (called through rope_tiedRopeEndpoint). Returns 0 once
  * either actor is gone; while either has no bone matrices yet, both ends are marked lost.
  */
-s32 func_151B47D8(HoltenRopeEffect *effect, RopeTieLink *anchors, Vec3f *pos, u8 isStart) {
+s32 rope_placeTiedEnd(HoltenRopeEffect *effect, RopeTieLink *anchors, Vec3f *pos, u8 isStart) {
     Actor *startTarget = anchors->start.target;
     Actor *endTarget = anchors->end.target;
 
@@ -621,13 +621,13 @@ s32 func_151B47D8(HoltenRopeEffect *effect, RopeTieLink *anchors, Vec3f *pos, u8
         return FALSE;
     }
     effect->flags &= ~(isStart ? ROPE_FLAG_NO_START : ROPE_FLAG_NO_END);
-    func_15143134(isStart ? &anchors->start.offset : &anchors->end.offset, pos,
+    math_transformOffset(isStart ? &anchors->start.offset : &anchors->end.offset, pos,
                   isStart ? &startTarget->ob_matrix_ptr[anchors->start.bone] : &endTarget->ob_matrix_ptr[anchors->end.bone]);
     return TRUE;
 }
 
 /* Update callback: spaces the points along x from start.x towards end.x, in tenths. */
-s32 func_151B48DC(HoltenRopeEffect *effect) {
+s32 rope_spaceAlongX(HoltenRopeEffect *effect) {
     f32 startX;
     f32 endX;
     f32 step;
@@ -650,7 +650,7 @@ s32 func_151B48DC(HoltenRopeEffect *effect) {
 }
 
 /* Draw style 0: white, one-cycle. */
-s32 func_151B498C(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1,
+s32 rope_drawStyleWhite(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1,
                    s32 *primR, s32 *primG, s32 *primB, s32 *primA,
                    s32 *envR, s32 *envG, s32 *envB, s32 *envA,
                    s32 *cycleType, u8 *renderMode, u8 *unk13) {
@@ -671,7 +671,7 @@ s32 func_151B498C(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1,
 }
 
 /* Draw style 1: two-cycle, tinted with the color source's color while bit 0 of its unkA4 is set; style 0 otherwise. */
-s32 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,
+s32 rope_drawStyleTinted(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,
                  s32 *primR, s32 *primG, s32 *primB, s32 *primA,
                  s32 *envR, s32 *envG, s32 *envB, s32 *envA,
                  s32 *cycleType, u8 *renderMode, u8 *unk13) {
@@ -702,13 +702,13 @@ s32 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,
         *renderMode = 5;
         *unk13 = 0x2F;
     } else {
-        ret = func_151B498C(&rope->effect, mode0, mode1, primR, primG, primB, primA, envR, envG, envB, envA, cycleType, renderMode, unk13);
+        ret = rope_drawStyleWhite(&rope->effect, mode0, mode1, primR, primG, primB, primA, envR, envG, envB, envA, cycleType, renderMode, unk13);
     }
     return ret;
 }
 
 /* Update callback: spaces the points 2000 units along x, from x = -1000. */
-s32 func_151B4B78(HoltenRopeEffect *effect) {
+s32 rope_spaceFixedX(HoltenRopeEffect *effect) {
     f32 x;
     s32 i;
 
@@ -725,22 +725,22 @@ s32 func_151B4B78(HoltenRopeEffect *effect) {
 }
 
 /* Frees the rope's vertex buffers and runs the rope type's cleanup handler, if any. */
-void func_151B4C1C(HoltenRopeEffect *effect) {
+void rope_freeEffect(HoltenRopeEffect *effect) {
     void (*handler)(HoltenRopeEffect *);
 
     particle_freeViewBuffers(effect->vtxBuffer);
-    handler = D_8008FB70[effect->type];
+    handler = gRopeTypeCleanups[effect->type];
     if (handler != NULL) {
         handler(effect);
     }
 }
 
 void func_151B4C6C(HoltenRopeEffect *effect) {
-    func_151B4C1C(effect);
+    rope_freeEffect(effect);
     effect_defaultFree(&effect->header);
 }
 
 void func_151B4C98(HoltenRopeEffect *effect) {
-    func_151B4C1C(effect);
+    rope_freeEffect(effect);
     effect_defaultFree(&effect->header);
 }

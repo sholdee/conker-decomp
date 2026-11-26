@@ -5,7 +5,7 @@
 /*
  * Called when the actor has moved from (prevX, prevZ): casts a ray from 80 units above it back towards
  * the previous position and, on a hit, spawns a burst of particles off the hit triangle (plus a
- * sprite when func_15145C90 accepts the hit object). First runs an anti-tamper checksum over the code
+ * sprite when math_isObjectHidden accepts the hit object). First runs an anti-tamper checksum over the code
  * from save_checkCodeTamper to save_spawnMenuCharacter (a mismatch breaks player 1's controller mapping). Nothing is spawned while zone_isInNeutralZone(2 or 1, position) reports anything.
  */
 void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
@@ -45,7 +45,7 @@ void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32
                           &hit.y, &hit.z, NULL, &hitObject, NULL, 0.0f) == 0) {
             return;
         }
-        if (func_15145C90(hitObject) != 0) {
+        if (math_isObjectHidden(hitObject) != 0) {
             sprite.texture = 6;
             sprite.unk7 = 0;
             sprite.flags = 0x9F01;

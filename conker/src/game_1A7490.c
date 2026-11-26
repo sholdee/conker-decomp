@@ -154,7 +154,7 @@ Gfx *particle_drawSpinDebris(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
         particle->viewFlags |= 1 << view;
     }
     gfx = particle_loadDebrisTexture(gfx, particle->texture);
-    func_15043D90(&particle->mtx[D_800BE9C0], particle->rotX, particle->rotY, particle->rotZ,
+    math_mtxRotScaleTrans(&particle->mtx[D_800BE9C0], particle->rotX, particle->rotY, particle->rotZ,
                   particle->scale, particle->scale, particle->scale, particle->x, particle->y, particle->z);
     gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     if (gDebrisPrimAlpha != particle->alpha) {
@@ -169,7 +169,7 @@ Gfx *particle_drawSpinDebris(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
         u8 needSync;
         needSync = 0;
         modeL = ((particle->header.type == 8) || (particle->header.type == 9)) ? 0x5049D8 : 0x504240;
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode |
+        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode |
                                      G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             modeL, &needSync);
     }

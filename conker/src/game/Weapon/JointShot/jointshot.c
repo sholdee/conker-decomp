@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Per-side (0, 1) tables: byte offset of the side's joint matrix in Actor.ob_matrix_ptr, and model-space points
- * that func_15145EA4 transforms by it. */
+ * that math_transformOffsets transforms by it. */
 static const s32 D_800AAB00[2] = { 0x240, 0x100 };
 static const Vec3f D_800AAB08[2] = { { 3.0f, -117.0f, 27.0f }, { -4.0f, -117.0f, 27.0f } };
 static const Vec3f D_800AAB20[2] = { { 3.0f, -200.0f, 27.0f }, { -4.0f, -200.0f, 27.0f } };
@@ -57,7 +57,7 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
     }
     particle_countShot(arg0);
     if (!arg2) {
-        func_15145740(arg0, &aim, &sp118, &spE4, 0.8110000491f);
+        math_getActorAim(arg0, &aim, &sp118, &spE4, 0.8110000491f);
     }
     joints = arg0->ob_matrix_ptr;
     if (joints != NULL) {
@@ -76,11 +76,11 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
         points[3] = &D_800AAB68[side];
         points[4] = &D_800AAB20[side];
         if (attachment != NULL) {
-            if (func_1514654C(arg0, attachment, 0, points, results, arg2 ? 5 : 4) == 0) {
+            if (math_transformAttachmentOffsets(arg0, attachment, 0, points, results, arg2 ? 5 : 4) == 0) {
                 return NULL;
             }
         } else {
-            func_15145EA4(points, results, matrix, arg2 ? 5 : 4);
+            math_transformOffsets(points, results, matrix, arg2 ? 5 : 4);
         }
         dir.x -= start.x;
         dir.y -= start.y;
@@ -159,7 +159,7 @@ void weapon_getSide1JointPos(Actor *arg0, s16 arg1, Vec3f *out) {
 void weapon_getJointPos(Actor *arg0, Vec3f *out, u8 side) {
     void *matrix = (u8 *)arg0->ob_matrix_ptr + D_800AAB00[side];
 
-    func_15143134(&D_800AAB08[side], out, matrix);
+    math_transformOffset(&D_800AAB08[side], out, matrix);
 }
 
 /* The object whose shot description func_151C6A28 copies. */
@@ -196,7 +196,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
                 results[0] = &origin;
                 results[1] = &start;
                 results[2] = &dir;
-                func_15145EA4(points, results, matrix, 3);
+                math_transformOffsets(points, results, matrix, 3);
                 // matching: six dead ifs (fewer fail) change uopt's register choice: arg0 stays on the stack
                 if (0) {} if (0) {} if (0) {} if (0) {} if (0) {} if (0) {}
                 dir.x -= start.x;
@@ -279,7 +279,7 @@ void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
     struct {
         u8 unk0;
     } state;
-    const Vec3f *origin = &D_800A5480;
+    const Vec3f *origin = &gZeroVec3f;
     SpawnedEffect *effect;
 
     state.unk0 = 0;

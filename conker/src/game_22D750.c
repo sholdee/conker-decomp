@@ -11,7 +11,7 @@
  */
 
 /* Per behaviour index of a placement (ObjectSpawn.behavior.index). */
-ObjectBehavior D_80088C90[89] = {
+ObjectBehavior gObjectBehaviors[89] = {
     /*  0 */ { NULL, NULL, 0 },
     /*  1 */ { prop_updateSinkingPlatform, func_15117D3C, 0 },
     /*  2 */ { prop_updateSinkingPlatform, NULL, 0 },
@@ -104,7 +104,7 @@ ObjectBehavior D_80088C90[89] = {
 };
 
 /* Per model id: the defaults of the objects of the second (grouped) placement list. */
-const GroupedObjectDefaults D_800A26C0[114] = {
+const GroupedObjectDefaults gGroupedObjectDefaults[114] = {
     /*   0 */ { 2, 27, 0, 0, 0, 0x01, 0x04, 0x0000 },
     /*   1 */ { 0, 0, 0, 0, 0, 0x11, 0x04, 0x0000 },
     /*   2 */ { 0, 0, 0, 0, 0, 0x01, 0x00, 0x0000 },

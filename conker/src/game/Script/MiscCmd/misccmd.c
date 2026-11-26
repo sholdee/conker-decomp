@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Five spring-eased script values (func_150495B0 / func_15049688). */
+/* Five spring-eased script values (math_springTo / math_springAngleTo). */
 static f32 D_800D2FC0[5]; // velocity
 static f32 D_800D2FD8[5]; // value
 static u8 D_800D2FEC[5];  // set by func_1509DF20
@@ -41,10 +41,10 @@ s32 script_miscCommand(s32 arg0, s32 cmd, ScriptCmd *args) {
         D_8008FDBC |= 0x80;
         break;
     case 2:
-        D_800D2450 = args->a[0].w;
+        gHudClockTime = args->a[0].w;
         break;
     case 3:
-        func_15093818(args->a[0].w);
+        hud_setClockEnabled(args->a[0].w);
         return 0;
     case 4:
         return mp_loadGame();
@@ -103,7 +103,7 @@ s32 script_miscCommand(s32 arg0, s32 cmd, ScriptCmd *args) {
         scale = 1.0f / 65536.0f;
         {
         Camera *cam = camera_global_Cameras;
-        func_150495B0(&D_800D2FD8[args->a[0].w], args->a[1].w * scale, &D_800D2FC0[args->a[0].w],
+        math_springTo(&D_800D2FD8[args->a[0].w], args->a[1].w * scale, &D_800D2FC0[args->a[0].w],
                       args->a[2].w * scale, args->a[3].w * scale, cam->SpringTime);
         return D_800D2FD8[args->a[0].w] * 65536.0f;
         }
@@ -112,7 +112,7 @@ s32 script_miscCommand(s32 arg0, s32 cmd, ScriptCmd *args) {
         scale = 1.0f / 65536.0f;
         {
         Camera *cam = camera_global_Cameras;
-        func_15049688(&D_800D2FD8[args->a[0].w], args->a[1].w * scale, &D_800D2FC0[args->a[0].w],
+        math_springAngleTo(&D_800D2FD8[args->a[0].w], args->a[1].w * scale, &D_800D2FC0[args->a[0].w],
                       args->a[2].w * scale, args->a[3].w * scale, cam->SpringTime);
         return D_800D2FD8[args->a[0].w] * 65536.0f;
         }

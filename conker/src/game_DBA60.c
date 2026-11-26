@@ -84,7 +84,7 @@ void func_150AE790(AttachedEffect *effect) {
     }
     bones = owner->ob_matrix_ptr;
     if (bones != NULL && link->owner->unique_id == link->ownerId) {
-        func_15142314(link->owner->ob_matrix_ptr, link->bone, &spawn.pos);
+        math_getBoneTranslation(link->owner->ob_matrix_ptr, link->bone, &spawn.pos);
         spawn.kind = 1;
         spawn.flags = 1;
         motion.texture = 0;
@@ -105,10 +105,10 @@ void func_150AE790(AttachedEffect *effect) {
         for (; count != 0; count--) {
             yaw = func_150ADA20() & 0xFF;
             pitch = func_150ADA20() % 51U;
-            sinYaw = func_151423D8(yaw);
-            cosYaw = func_151423D8(yaw - 0x40);
-            sinPitch = func_151423D8(pitch);
-            cosPitch = func_151423D8(pitch - 0x40);
+            sinYaw = math_cosBinAngleMasked(yaw);
+            cosYaw = math_cosBinAngleMasked(yaw - 0x40);
+            sinPitch = math_cosBinAngleMasked(pitch);
+            cosPitch = math_cosBinAngleMasked(pitch - 0x40);
             speed = func_150ADA68() * 0.5f + 18.79999924f;
             spawn.itemCount = 4;
             spawn.life = (func_150ADA20() & 0xF) + 35;

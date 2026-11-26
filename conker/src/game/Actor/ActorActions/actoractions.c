@@ -224,7 +224,7 @@ void actor_throwGrenade(Actor *arg0) {
 
     if (attach_find(arg0, packet.anim, 0) != NULL) {
         if (arg0->ob_matrix_ptr != NULL) {
-            func_15143134(NULL, &packet.position, &arg0->ob_matrix_ptr[4]);
+            math_transformOffset(NULL, &packet.position, &arg0->ob_matrix_ptr[4]);
         } else {
             packet.position.x = arg0->xpos;
             packet.position.y = arg0->ypos;
@@ -336,8 +336,8 @@ void actor_fireShot(Actor *arg0, s32 kind) {
         dx = ctl->rayHit.pos.x - pos[0];
         dy = ctl->rayHit.pos.y - pos[1];
         dz = ctl->rayHit.pos.z - pos[2];
-        pitch = func_150484A0(dy, sqrtf(dx * dx + dz * dz)) * 57.29577637f;
-        yaw = func_150484A0(dx, dz) * 57.29577637f;
+        pitch = math_atan2(dy, sqrtf(dx * dx + dz * dz)) * 57.29577637f;
+        yaw = math_atan2(dx, dz) * 57.29577637f;
     }
     actor_splitVelocity((s16)(pitch * 182.0444489f), dist, 0.0f, &velX, &velY, &velZ);
     velY = -velY;
@@ -1253,7 +1253,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 if (arg0->mv->pissed_up < 0x64) {
                     arg0->mv->pissed_walk = 0xAD;
                     arg0->mv->pissed_hangover = 0xC8;
-                    func_1507EB4C(arg0, 0x2A);
+                    face_setDefaultExpression(arg0, 0x2A);
                     speed = 1.3f;
                     arg0->norun = 0xFF;
                     arg0->count5 = 0xFF;
@@ -2461,7 +2461,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
 
             ok = 1;
             if (arg0->mv->cont_zone_ind != 0) {
-                angle = func_15048A70(zones[arg0->mv->cont_zone_ind].yaw, arg0->theta);
+                angle = math_angleDiff(zones[arg0->mv->cont_zone_ind].yaw, arg0->theta);
                 if ((zones[arg0->mv->cont_zone_ind].data1 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
                     ok = 0;
                 }
@@ -2529,7 +2529,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             arg0->mv->rt_context_b = 0;
             arg0->norun = 0xFF;
             arg0->count5 = 0;
-            func_1507EABC(arg0);
+            face_revertExpression(arg0);
         } else {
             s32 sounds[2] = { 0x39, 0x35 };
 
@@ -2537,7 +2537,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             if ((s8)arg0->unk284 == 0) {  // matching: read signed (lb); Actor declares u8
                 arg0->headEffectState = arg0->headEffectState + D_800BE9E4;
                 if (((func_150ADA20() % 120U) + 0xB4) < arg0->headEffectState) {
-                    func_1507E7E4(arg0, sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
+                    face_requestExpression(arg0, sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
                     arg0->headEffectState = 0;
                     arg0->unk284 = 1;
                 }

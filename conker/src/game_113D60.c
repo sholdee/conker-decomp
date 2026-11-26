@@ -49,7 +49,7 @@ void particle_startSourceEmission(Actor *actor, s32 arg1, TriggerZone *zone, u8 
     Game113D60Emission emission;
     Game113D60Effect *effect;
 
-    if ((actor != NULL) && ((D_800C35EA[0] != 1) || (D_800C35E8[0] != 9))) {
+    if ((actor != NULL) && ((gCutsceneStates[0] != 1) || (D_800C35E8[0] != 9))) {
         source = &D_800A1190[sourceIndex];
         if ((func_150ADA68() < source->chance) && (source->start != -1)) {
             if (source->end != -1) {
@@ -137,7 +137,7 @@ void particle_updateSourceEmission(Game113D60Effect *effect) {
         do {
             sineX = sinf(phaseX);
             sineY = sinf(phaseY);
-            func_151436B4(emission->stream.angleX + sineX * emission->stream.amplitudeX,
+            math_dirFromAngles(emission->stream.angleX + sineX * emission->stream.amplitudeX,
                           emission->stream.angleY + sineY * emission->stream.amplitudeY, 5.0f, &direction);
             randomX = func_150ADA68();
             randomY = func_150ADA68();
@@ -153,8 +153,8 @@ void particle_updateSourceEmission(Game113D60Effect *effect) {
             emission->stream.remaining -= 1.0f;
         } while (emission->stream.remaining > 1.0f);
         period = 6.283185482f;
-        emission->stream.phaseX = func_15144528(phaseX, period, 0.0f);
-        emission->stream.phaseY = func_15144528(phaseY, period, 0.0f);
+        emission->stream.phaseX = math_wrapFloat(phaseX, period, 0.0f);
+        emission->stream.phaseY = math_wrapFloat(phaseY, period, 0.0f);
         emission->stream.time = time;
     }
 }
@@ -190,7 +190,7 @@ TriggerZone *D_800D9A20[2];
 
 /* End callback: the position of one of the two entries of the D_800D9A20 table. */
 void func_150E6ED8(Vec3f *out) {
-    func_1514470C(D_800D9A20[func_150ADA20() & 1], out);
+    math_randomPointInZone(D_800D9A20[func_150ADA20() & 1], out);
 }
 
 static const Game113D60Segment D_800A1200[6] = {
@@ -237,8 +237,8 @@ void func_150E6FAC(Vec3f *out, Actor *actor) {
 
         radius = (func_150ADA68() * 100.0f) + 80.0f;
         angle = func_150ADA20() & 0xFF;
-        cosine = func_151423D8(angle - 0x40);
-        sine = func_151423D8(angle);
+        cosine = math_cosBinAngleMasked(angle - 0x40);
+        sine = math_cosBinAngleMasked(angle);
         bone = node->handle;
         out->x = actor->xpos + (bone->unk38.x * -80.0f) + (cosine * radius);
         out->y = actor->ypos + (bone->unk38.y * -80.0f) + 100.0f;
@@ -262,13 +262,13 @@ void func_150E70EC(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *e
     f32 dx;
     f32 dz;
 
-    emission->stream.angleX = func_150484A0(delta->x, delta->z);
+    emission->stream.angleX = math_atan2(delta->x, delta->z);
     emission->stream.amplitudeX = func_150ADA68() * 0.09000000358f;
     emission->stream.phaseX = func_150ADA68() * 6.283185482f;
     emission->stream.speedX = func_150ADA68() * 0.5f;
     dx = delta->x;
     dz = delta->z;
-    emission->stream.angleY = func_150484A0(sqrtf((dx * dx) + (dz * dz)), delta->y) - 1.570796371f;
+    emission->stream.angleY = math_atan2(sqrtf((dx * dx) + (dz * dz)), delta->y) - 1.570796371f;
     emission->stream.amplitudeY = func_150ADA68() * 0.0700000003f;
     emission->stream.phaseY = func_150ADA68() * 6.283185482f;
     emission->stream.speedY = func_150ADA68() * 0.5f;
@@ -276,7 +276,7 @@ void func_150E70EC(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *e
 
 /* Motion callback: aims the emission along `delta` with a fixed tilt and a random wobble. */
 void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
-    emission->stream.angleX = func_150484A0(delta->x, delta->z);
+    emission->stream.angleX = math_atan2(delta->x, delta->z);
     emission->stream.amplitudeX = 0.471238941f;
     emission->stream.phaseX = func_150ADA68() * 6.283185482f;
     emission->stream.speedX = func_150ADA68() * 0.200000003f;
@@ -492,10 +492,10 @@ TimedEffect *particle_startScreenBurst(s16 count, f32 rate, u8 owner, s32 kind) 
         step = 3.0f / (count - 1);
 
         for (i = 0; i < count; i++) {
-            points[i * 2] = (func_15142A80(t) * control[0].x) + (func_15142AC0(t) * control[1].x) +
-                          (func_15142B04(t) * control[2].x) + (func_15142B44(t) * control[3].x);
-            points[(i * 2) + 1] = (func_15142A80(t) * control[0].y) + (func_15142AC0(t) * control[1].y) +
-                          (func_15142B04(t) * control[2].y) + (func_15142B44(t) * control[3].y);
+            points[i * 2] = (math_lagrangeWeight0(t) * control[0].x) + (math_lagrangeWeight1(t) * control[1].x) +
+                          (math_lagrangeWeight2(t) * control[2].x) + (math_lagrangeWeight3(t) * control[3].x);
+            points[(i * 2) + 1] = (math_lagrangeWeight0(t) * control[0].y) + (math_lagrangeWeight1(t) * control[1].y) +
+                          (math_lagrangeWeight2(t) * control[2].y) + (math_lagrangeWeight3(t) * control[3].y);
             t += step;
         }
     }
@@ -800,7 +800,7 @@ typedef struct {
 } Game113D60Data8B1C;
 
 /* Spawns effect 0x34 at random points of the weighted regions within 1800 units of the
- * position func_15144B34 returns. */
+ * position math_getCameraPos returns. */
 void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
     Vec3f *center;
     Game113D60Spawner *spawner;
@@ -813,7 +813,7 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
     f32 dz;
 
     dataPtr = &data; // matching: using &data directly at each use does not match
-    center = func_15144B34(D_800BE9E8);
+    center = math_getCameraPos(D_800BE9E8);
     spawner = &effect->spawner;
     spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * gFrameDelta * D_800DCD90;
     if (spawner->accum > 1.0f) {
@@ -824,7 +824,7 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
                 pick -= node->area;
                 node = node->next;
             }
-            func_1514470C(node->region, &dataPtr->position);
+            math_randomPointInZone(node->region, &dataPtr->position);
             dx = data.position.x - center->x;
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;
@@ -909,7 +909,7 @@ void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
                 arg.r = 0xF;
                 arg.g = 0x11;
                 arg.b = 5;
-                func_151436B4(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 20.0f,
+                math_dirFromAngles(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 20.0f,
                               &arg.pos);
                 arg.pos.x += spawner->position.x;
                 arg.pos.y += spawner->position.y;
@@ -970,7 +970,7 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
     f32 dy;
     f32 dz;
 
-    center = func_15144B34(D_800BE9E8);
+    center = math_getCameraPos(D_800BE9E8);
     spawner = &effect->spawner;
     spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * gFrameDelta * D_800DCD90;
     if (spawner->accum > 1.0f) {
@@ -981,7 +981,7 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
                 pick -= node->area;
                 node = node->next;
             }
-            func_1514470C(node->region, &data.position);
+            math_randomPointInZone(node->region, &data.position);
             dx = data.position.x - center->x;
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;
@@ -1062,7 +1062,7 @@ void func_150E93DC(Game113D60PointSpawnerEffect *effect) {
                 arg.lifetime = (func_150ADA20() % 1) + 100;
                 arg.rotVel.x = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
                 arg.rotVel.z = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
-                func_151436B4(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 50.0f,
+                math_dirFromAngles(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 50.0f,
                               &arg.pos);
                 arg.pos.x += spawner->position.x;
                 arg.pos.y += spawner->position.y;

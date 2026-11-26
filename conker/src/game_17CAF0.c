@@ -11,7 +11,7 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
 /*
  * Most configs below store random ranges as base/range pairs: an integer field is
  * (func_150ADA20() % (range + 1)) + base and a float field is func_150ADA68() * range + base
- * (a random float). Angles are 256-step binary angles; func_151423D8 is their cosine.
+ * (a random float). Angles are 256-step binary angles; math_cosBinAngleMasked is their cosine.
  */
 
 /* Builds a cone basis from a triangle: the axes are two triangle edges, the direction is its normal,
@@ -19,8 +19,8 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
 void particle_initConeFromTri(TriangleSource *source, ConeBasis *cone) {
     cone->flags = 2;
     cone->spread = source->spread;
-    if (func_15144E80(&source->triangle, &cone->axis0, &cone->axis1, &cone->direction) != 0) {
-        if (func_15144A74(&cone->direction, &source->normal) < 0.0f) {
+    if (math_getTriEdges(&source->triangle, &cone->axis0, &cone->axis1, &cone->direction) != 0) {
+        if (math_vec3Dot(&cone->direction, &source->normal) < 0.0f) {
             cone->direction.x = -cone->direction.x;
             cone->direction.y = -cone->direction.y;
             cone->direction.z = -cone->direction.z;
@@ -31,7 +31,7 @@ void particle_initConeFromTri(TriangleSource *source, ConeBasis *cone) {
 /* Finishes whatever parts of the cone basis are still missing; returns 0 if a vector is degenerate. */
 s32 particle_completeConeBasis(ConeBasis *cone) {
     if (!(cone->flags & 1)) {
-        if (func_15145128(&cone->direction, &cone->direction, NULL, NULL) == 0) {
+        if (math_vec3Normalize(&cone->direction, &cone->direction, NULL, NULL) == 0) {
             return 0;
         }
         cone->direction.x *= 1000.0f;
@@ -40,16 +40,16 @@ s32 particle_completeConeBasis(ConeBasis *cone) {
         cone->flags |= 1;
     }
     if (!(cone->flags & 2)) {
-        if (func_15146078(&cone->direction, &cone->axis0, &cone->axis1) == 0) {
+        if (math_buildPerpendicularBasis(&cone->direction, &cone->axis0, &cone->axis1) == 0) {
             return 0;
         }
         cone->flags |= 2 | 4;
     }
     if (!(cone->flags & 4)) {
-        if (func_15145128(&cone->axis0, &cone->axis0, NULL, NULL) == 0) {
+        if (math_vec3Normalize(&cone->axis0, &cone->axis0, NULL, NULL) == 0) {
             return 0;
         }
-        if (func_15145128(&cone->axis1, &cone->axis1, NULL, NULL) == 0) {
+        if (math_vec3Normalize(&cone->axis1, &cone->axis1, NULL, NULL) == 0) {
             return 0;
         }
         cone->flags |= 4;
@@ -62,7 +62,7 @@ void particle_getRandomConeDir(ConeBasis *cone, f32 speed, Vec3f *out) {
     f32 second;
     f32 first;
 
-    func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * cone->spread, &first, &second);
+    math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * cone->spread, &first, &second);
     out->x = (((cone->axis0.x * first) + (cone->axis1.x * second)) + cone->direction.x) * speed;
     out->y = (((cone->axis0.y * first) + (cone->axis1.y * second)) + cone->direction.y) * speed;
     out->z = (((cone->axis0.z * first) + (cone->axis1.z * second)) + cone->direction.z) * speed;
@@ -84,7 +84,7 @@ void particle_spawnJetSpray(JetSpray *config, Vec3f *direction, Vec3f *axis0, Ve
     count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
-        func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * spread, &first, &second);
+        math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * spread, &first, &second);
         velocity[0] = ((axis0->x * first) + (axis1->x * second) + direction->x) * speed;
         velocity[1] = ((axis0->y * first) + (axis1->y * second) + direction->y) * speed;
         velocity[2] = ((axis0->z * first) + (axis1->z * second) + direction->z) * speed;
@@ -103,7 +103,7 @@ void particle_spawnDirectedJetSpray(DirectedJetSpray *emitter, u8 arg1, s32 arg2
     Vec3f axis0;
     Vec3f axis1;
 
-    if (func_15146078(&emitter->direction, &axis0, &axis1) != 0) {
+    if (math_buildPerpendicularBasis(&emitter->direction, &axis0, &axis1) != 0) {
         particle_spawnJetSpray(&emitter->spray, &emitter->direction, &axis0, &axis1, emitter->spread, arg1, arg2);
     }
 }
@@ -119,11 +119,11 @@ void particle_spawnSurfaceJetSpray(SurfaceJetSpray *emitter, u8 arg1, s32 arg2) 
     f32 normalLength;
     f32 normalInverse;
 
-    if (func_15144E80(&emitter->source.triangle, &axis0, &axis1, &normal) != 0) {
-        func_15145128(&axis0, &axis0, &length0, &inverse0);
-        func_15145128(&axis1, &axis1, &length1, &inverse1);
-        func_15145128(&normal, &normal, &normalLength, &normalInverse);
-        if (func_15144A74(&normal, &emitter->source.normal) < 0.0f) {
+    if (math_getTriEdges(&emitter->source.triangle, &axis0, &axis1, &normal) != 0) {
+        math_vec3Normalize(&axis0, &axis0, &length0, &inverse0);
+        math_vec3Normalize(&axis1, &axis1, &length1, &inverse1);
+        math_vec3Normalize(&normal, &normal, &normalLength, &normalInverse);
+        if (math_vec3Dot(&normal, &emitter->source.normal) < 0.0f) {
             normal.x = -normal.x;
             normal.y = -normal.y;
             normal.z = -normal.z;
@@ -187,7 +187,7 @@ void particle_spawnDropSprayAtAngles(AngleRange *angles, DropSpray *config, Coll
 
     count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
-        func_15143794((func_150ADA20() % (angles->yawRange + 1)) + angles->yawBase,
+        math_dirFromBinAngles((func_150ADA20() % (angles->yawRange + 1)) + angles->yawBase,
                       (func_150ADA20() % (angles->pitchRange + 1)) + angles->pitchBase,
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &velocity);
@@ -246,12 +246,12 @@ void particle_spawnDebrisScatter(DebrisScatter *config, AngleRange *angles, u8 a
         spawn.rot.x = func_150ADA68() * 360.0f;
         spawn.rot.y = func_150ADA68() * 360.0f;
         spawn.rot.z = func_150ADA68() * 360.0f;
-        func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel);
+        math_dirFromBinAngles(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel);
         spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
         spawn.lifetime = (func_150ADA20() % (config->lifetimeRange + 1)) + config->lifetimeBase;
-        func_15143794(yaw, pitch, config->radius, &spawn.pos);
+        math_dirFromBinAngles(yaw, pitch, config->radius, &spawn.pos);
         spawn.pos.x += config->origin.x;
         spawn.pos.y += config->origin.y;
         spawn.pos.z += config->origin.z;
@@ -321,8 +321,8 @@ void particle_spawnDebrisSpray(DebrisSpray *config, const s32 *variantIds, const
         while (count != 0) {
             yaw = (func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase;
             pitch = (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase;
-            func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel);
-            func_15143794(yaw, pitch, radius, &spawn.pos);
+            math_dirFromBinAngles(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel);
+            math_dirFromBinAngles(yaw, pitch, radius, &spawn.pos);
             spawn.pos.x += config->pos.x;
             spawn.pos.y += config->pos.y;
             spawn.pos.z += config->pos.z;
@@ -395,13 +395,13 @@ void particle_spawnDecalSpray(DecalSpray *config, u8 arg1, s32 arg2) {
     count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     hitTriangle = &triangle; // matching: IDO keeps the buffer address in a saved register only via a variable
     while (count != 0) {
-        func_15143794((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
+        math_dirFromBinAngles((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
                       (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase,
                       100.0f, &direction);
         if (func_150AC9C0(config->pos.x, config->pos.y, config->pos.z,
                           direction.x, direction.y, direction.z, NULL, hitTriangle,
                           &hit.x, &hit.y, &hit.z, &distance, &surface, 0, 0.0f) != 0
-            && func_15145C90(surface) != 0 && distance < config->maxDistance) {
+            && math_isObjectHidden(surface) != 0 && distance < config->maxDistance) {
             particle_spawnKindEmitter(config->kind, (func_150ADA68() * config->sizeRange) + config->sizeBase,
                           (func_150ADA20() % 156U) + 100, hitTriangle, &hit,
                           (func_150ADA20() % (config->unk2A + 1)) + config->unk28,
@@ -426,7 +426,7 @@ void particle_spawnPieceSpray(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
         rotation.x = func_150ADA68() * 360.0f;
         rotation.y = func_150ADA68() * 360.0f;
         rotation.z = func_150ADA68() * 360.0f;
-        func_15143794((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
+        math_dirFromBinAngles((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
                       (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase,
                       func_150ADA68() * config->directionRange + config->directionBase,
                       &direction);
@@ -491,11 +491,11 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 arg1, s32 arg2) {
     desc.unk46 = config->unk46;
     desc.unk47 = config->unk47;
     extra.unk10 = config->unk6C;
-    if (func_15144E80(&config->triangle, &axis0, &axis1, &normal) != 0) {
-        func_15145128(&axis0, &axis0, &length0, &inverse0);
-        func_15145128(&axis1, &axis1, &length1, &inverse1);
-        func_15145128(&normal, &normal, &normalLength, &normalInverse);
-        if (func_15144A74(&normal, &config->normal) < 0.0f) {
+    if (math_getTriEdges(&config->triangle, &axis0, &axis1, &normal) != 0) {
+        math_vec3Normalize(&axis0, &axis0, &length0, &inverse0);
+        math_vec3Normalize(&axis1, &axis1, &length1, &inverse1);
+        math_vec3Normalize(&normal, &normal, &normalLength, &normalInverse);
+        if (math_vec3Dot(&normal, &config->normal) < 0.0f) {
             normal.x = -normal.x;
             normal.y = -normal.y;
             normal.z = -normal.z;
@@ -506,7 +506,7 @@ void particle_spawnSurfaceBurst(SurfaceBurst *config, u8 arg1, s32 arg2) {
         normal.z *= 1000.0f;
         count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
         while (count != 0) {
-            func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * config->spread, &first, &second);
+            math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * config->spread, &first, &second);
             speed = (func_150ADA68() * config->speedRange) + config->speedBase;
             desc.lifetime = (func_150ADA68() * config->lifetimeRange) + config->lifetimeBase;
             desc.width = desc.height = (func_150ADA68() * config->scaleRange) + config->scaleBase;
@@ -550,11 +550,11 @@ void particle_spawnSurfacePuffSpray(SurfacePuffSpray *config, u8 arg1, s32 arg2)
     u32 rand;
 
     kind = arg1; // matching: IDO keeps arg1 in a saved register only through a copy
-    if (func_15144E80(&config->source.triangle, &axis0, &axis1, &normal) != 0) {
-        func_15145128(&axis0, &axis0, &length0, &inverse0);
-        func_15145128(&axis1, &axis1, &length1, &inverse1);
-        func_15145128(&normal, &normal, &normalLength, &normalInverse);
-        if (func_15144A74(&normal, &config->source.normal) < 0.0f) {
+    if (math_getTriEdges(&config->source.triangle, &axis0, &axis1, &normal) != 0) {
+        math_vec3Normalize(&axis0, &axis0, &length0, &inverse0);
+        math_vec3Normalize(&axis1, &axis1, &length1, &inverse1);
+        math_vec3Normalize(&normal, &normal, &normalLength, &normalInverse);
+        if (math_vec3Dot(&normal, &config->source.normal) < 0.0f) {
             normal.x = -normal.x;
             normal.y = -normal.y;
             normal.z = -normal.z;
@@ -574,7 +574,7 @@ void particle_spawnSurfacePuffSpray(SurfacePuffSpray *config, u8 arg1, s32 arg2)
         count = func_150ADA20() % (config->countRange + 1) + config->countBase;
         while (count != 0) {
             rand = func_150ADA20();
-            func_15143874(rand & 0xFF, func_150ADA68() * config->source.spread, &first, &second);
+            math_dirFromBinAngleXZ(rand & 0xFF, func_150ADA68() * config->source.spread, &first, &second);
             speed = func_150ADA68() * config->speedRange + config->speedBase;
             motion.alpha = func_150ADA20() % (config->alphaRange + 1) + config->alphaBase;
             spawn.itemCount = func_150ADA20() % (config->itemCountRange + 1) + config->itemCountBase;
@@ -594,7 +594,7 @@ void particle_spawnSurfacePuffSpray(SurfacePuffSpray *config, u8 arg1, s32 arg2)
 }
 
 /* Spawns a random number of particles at config->position, each moving at a random yaw (around y)
- * and pitch; func_151423D8 is the cosine of a 256-step angle. */
+ * and pitch; math_cosBinAngleMasked is the cosine of a 256-step angle. */
 void particle_spawnPuffSpray(PuffSpray *config, u8 arg1, s32 arg2) {
     EffectTemplate spawn;
     TrailMotion motion;
@@ -621,10 +621,10 @@ void particle_spawnPuffSpray(PuffSpray *config, u8 arg1, s32 arg2) {
     while (count != 0) {
         yaw = (func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase;
         pitch = (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase;
-        cosPitch = func_151423D8(pitch);
-        sinPitch = func_151423D8(pitch - 0x40);
-        cosYaw = func_151423D8(yaw);
-        sinYaw = func_151423D8(yaw - 0x40);
+        cosPitch = math_cosBinAngleMasked(pitch);
+        sinPitch = math_cosBinAngleMasked(pitch - 0x40);
+        cosYaw = math_cosBinAngleMasked(yaw);
+        sinYaw = math_cosBinAngleMasked(yaw - 0x40);
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
         motion.alpha = (func_150ADA20() % (config->alphaRange + 1)) + config->alphaBase;
         spawn.itemCount = (func_150ADA20() % (config->itemCountRange + 1)) + config->itemCountBase;
@@ -661,11 +661,11 @@ void particle_spawnSurfaceDebrisBurst(SurfaceDebrisBurst *config, const s32 *var
     f32 speed;
     f32 pad[2]; // matching: unused stack slots in the original frame
 
-    if (func_15144E80(&config->source.triangle, &axis0, &axis1, &normal) != 0) {
-        func_15145128(&axis0, &axis0, &length0, &inverse0);
-        func_15145128(&axis1, &axis1, &length1, &inverse1);
-        func_15145128(&normal, &normal, &normalLength, &normalInverse);
-        if (func_15144A74(&normal, &config->source.normal) < 0.0f) {
+    if (math_getTriEdges(&config->source.triangle, &axis0, &axis1, &normal) != 0) {
+        math_vec3Normalize(&axis0, &axis0, &length0, &inverse0);
+        math_vec3Normalize(&axis1, &axis1, &length1, &inverse1);
+        math_vec3Normalize(&normal, &normal, &normalLength, &normalInverse);
+        if (math_vec3Dot(&normal, &config->source.normal) < 0.0f) {
             normal.x = -normal.x;
             normal.y = -normal.y;
             normal.z = -normal.z;
@@ -700,7 +700,7 @@ void particle_spawnSurfaceDebrisBurst(SurfaceDebrisBurst *config, const s32 *var
         spawn.fadeRate = 21;
         while (count != 0) {
             speed = (func_150ADA68() * config->speedRange) + config->speedBase;
-            func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * config->source.spread, &first, &second);
+            math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * config->source.spread, &first, &second);
             spawn.vel.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
             spawn.vel.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
             spawn.vel.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
@@ -763,12 +763,12 @@ void particle_spawnDebrisBurst(DebrisBurst *config, const s32 *variantIds, const
         spawn.rot.x = func_150ADA68() * 360.0f;
         spawn.rot.y = func_150ADA68() * 360.0f;
         spawn.rot.z = func_150ADA68() * 360.0f;
-        func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel);
+        math_dirFromBinAngles(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel);
         spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
         spawn.lifetime = (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase;
-        func_15143794(yaw, pitch, radius, &spawn.pos);
+        math_dirFromBinAngles(yaw, pitch, radius, &spawn.pos);
         spawn.pos.x += config->pos.x;
         spawn.pos.y += config->pos.y;
         spawn.pos.z += config->pos.z;
@@ -827,7 +827,7 @@ void particle_spawnModelBurst(ModelBurst *config, u8 arg1, s32 arg2) {
         motion.rot.y = func_150ADA68() * 360.0f;
         motion.rot.z = func_150ADA68() * 360.0f;
         motion.scale = (func_150ADA68() * config->scaleRange) + config->scaleBase;
-        func_15143794((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
+        math_dirFromBinAngles((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
                       (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase,
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &motion.vel);
@@ -852,7 +852,7 @@ void particle_spawnDriftBurst(DriftBurst *config, u8 arg1, s32 arg2) {
     spawn.drag = config->drag;
     spawn.minVy = config->minVy;
     while (count != 0) {
-        func_15143794((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
+        math_dirFromBinAngles((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
                       (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase,
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &spawn.vel);
@@ -922,7 +922,7 @@ void particle_spawnTrailBurst(config, arg1, arg2)
         param.life = (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase;
         spawn.width = (func_150ADA68() * config->sizeRange) + config->sizeBase;
         spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
-        func_15143794((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
+        math_dirFromBinAngles((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
                       (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase,
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &spawn.vel);
@@ -974,10 +974,10 @@ void particle_spawnSimplePuffSpray(SimplePuffSpray *config, u8 arg1) {
     while (count != 0) {
         yaw = (func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase;
         pitch = (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase;
-        cosPitch = func_151423D8(pitch);
-        sinPitch = func_151423D8(pitch - 0x40);
-        cosYaw = func_151423D8(yaw);
-        sinYaw = func_151423D8(yaw - 0x40);
+        cosPitch = math_cosBinAngleMasked(pitch);
+        sinPitch = math_cosBinAngleMasked(pitch - 0x40);
+        cosYaw = math_cosBinAngleMasked(yaw);
+        sinYaw = math_cosBinAngleMasked(yaw - 0x40);
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
         spawn.itemCount = (func_150ADA20() % (config->itemCountRange + 1)) + config->itemCountBase;
         spawn.life = (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase;
@@ -1029,10 +1029,10 @@ void particle_spawnBillboardBurst(BillboardBurst *config, u8 arg1, s32 arg2) {
     while (count != 0) {
         yaw = func_150ADA20() % (config->angles.yawRange + 1) + config->angles.yawBase;
         pitch = func_150ADA20() % (config->angles.pitchRange + 1) + config->angles.pitchBase;
-        cosPitch = func_151423D8(pitch);
-        sinPitch = func_151423D8(pitch - 64);
-        cosYaw = func_151423D8(yaw);
-        sinYaw = func_151423D8(yaw - 64);
+        cosPitch = math_cosBinAngleMasked(pitch);
+        sinPitch = math_cosBinAngleMasked(pitch - 64);
+        cosYaw = math_cosBinAngleMasked(yaw);
+        sinYaw = math_cosBinAngleMasked(yaw - 64);
         speed = func_150ADA68() * config->speedRange + config->speedBase;
         packet.life = func_150ADA20() % (config->lifeRange + 1) + config->lifeBase;
         horizontal = speed * cosPitch;
@@ -1093,10 +1093,10 @@ void particle_spawnSpriteBurst(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) 
     while (count != 0) {
         yaw = (func_150ADA20() % (config->yawRange + 1)) + config->yawBase;
         pitch = (func_150ADA20() % (config->pitchRange + 1)) + config->pitchBase;
-        cosPitch = func_151423D8(pitch);
-        sinPitch = func_151423D8(pitch - 0x40);
-        cosYaw = func_151423D8(yaw);
-        sinYaw = func_151423D8(yaw - 0x40);
+        cosPitch = math_cosBinAngleMasked(pitch);
+        sinPitch = math_cosBinAngleMasked(pitch - 0x40);
+        cosYaw = math_cosBinAngleMasked(yaw);
+        sinYaw = math_cosBinAngleMasked(yaw - 0x40);
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
         spawn.timer = (func_150ADA20() % (config->timerRange + 1)) + config->timerBase;
         spawn.frameRate = (func_150ADA20() % (config->frameRateRange + 1)) + config->frameRateBase;
@@ -1145,11 +1145,11 @@ void particle_spawnStreakBurst(StreakBurst *config, u8 arg1) {
     while (count != 0) {
         yaw = (func_150ADA20() % (config->yawRange + 1)) + config->yawBase;
         pitch = (func_150ADA20() % (config->pitchRange + 1)) + config->pitchBase;
-        cosPitch = func_151423D8(pitch);
-        sinPitch = func_151423D8(pitch - 0x40);
-        cosYaw = func_151423D8(yaw);
+        cosPitch = math_cosBinAngleMasked(pitch);
+        sinPitch = math_cosBinAngleMasked(pitch - 0x40);
+        cosYaw = math_cosBinAngleMasked(yaw);
         horizontal = 10.0f * cosPitch;
-        sinYaw = func_151423D8(yaw - 0x40);
+        sinYaw = math_cosBinAngleMasked(yaw - 0x40);
         spawn.dir.x = horizontal * sinYaw;
         spawn.dir.y = -10.0f * sinPitch;
         spawn.dir.z = horizontal * cosYaw;
@@ -1200,7 +1200,7 @@ void particle_spawnSplashSprayAtAngles(AngleRange *angles, SplashSpray *config, 
 
     count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
-        func_15143794((func_150ADA20() % (angles->yawRange + 1)) + angles->yawBase,
+        math_dirFromBinAngles((func_150ADA20() % (angles->yawRange + 1)) + angles->yawBase,
                       (func_150ADA20() % (angles->pitchRange + 1)) + angles->pitchBase,
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &velocity);
@@ -1340,7 +1340,7 @@ void particle_spawnParticleBurst(ParticleBurst *config, u8 arg1, s32 arg2) {
 
     count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count > 0) {
-        func_15143794(func_150ADA20() & 0xFF,
+        math_dirFromBinAngles(func_150ADA20() & 0xFF,
                       (func_150ADA20() % (config->pitchRange + 1)) + config->pitchBase,
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &velocity);

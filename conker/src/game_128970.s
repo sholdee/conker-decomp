@@ -50,8 +50,8 @@ glabel func_150FB4C0
     /* 128A04 150FB554 C4AD0034 */  lwc1       $f13, 0x34($a1)
     /* 128A08 150FB558 C4AE0038 */  lwc1       $f14, 0x38($a1)
     /* 128A0C 150FB55C C4AF003C */  lwc1       $f15, 0x3C($a1)
-    /* 128A10 150FB560 3C10800E */  lui        $s0, %hi(D_800DBE80)
-    /* 128A14 150FB564 8E10BE80 */  lw         $s0, %lo(D_800DBE80)($s0)
+    /* 128A10 150FB560 3C10800E */  lui        $s0, %hi(gSkyData)
+    /* 128A14 150FB564 8E10BE80 */  lw         $s0, %lo(gSkyData)($s0)
     /* 128A18 150FB568 24111F40 */  addiu      $s1, $zero, 0x1F40
     /* 128A1C 150FB56C 24080008 */  addiu      $t0, $zero, 0x8
     /* 128A20 150FB570 01110018 */  mult       $t0, $s1

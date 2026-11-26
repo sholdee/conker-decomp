@@ -45,7 +45,7 @@ s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 origin
     position.x = x;
     position.y = y;
     position.z = z;
-    func_15143794(yaw, (func_150ADA20() % (config->pitchRange + 1)) + config->pitch,
+    math_dirFromBinAngles(yaw, (func_150ADA20() % (config->pitchRange + 1)) + config->pitch,
                   func_150ADA68() * config->speedRange + config->speed, &velocity);
     particle_spawnSteamParticle(&position, &velocity, emitter->unk8,
                   func_150ADA68() * config->unk20Range + config->unk20,

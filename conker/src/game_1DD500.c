@@ -30,7 +30,7 @@ s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     pos.y = y;
     pos.z = z;
     speed = func_150ADA68() * 5.3f + 4.4f;
-    func_15143794(yaw, pitch, speed, &dir);
+    math_dirFromBinAngles(yaw, pitch, speed, &dir);
     // matching: a literal 0.0f scale is folded away; IDO keeps the multiply for (0.68f - 0.68f)
     particle_spawnSplash(&pos, &dir, func_150ADA68() * (0.68f - 0.68f) + 0.68f, func_150ADA20() % 20 + 31,
                   func_150ADA20() % 101 + 155, func_150ADA68() * 2.33f + 6.7f,
@@ -51,7 +51,7 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
         if (profile != 99) {
             if (gBloodProfiles[profile].unkE != 2) {
                 shade = (actor->langle >> 8) + 0x40;
-                func_15143134(&D_800AA120, &impact.spray.pos, JOINT_MTX(actor, 6));
+                math_transformOffset(&D_800AA120, &impact.spray.pos, JOINT_MTX(actor, 6));
                 impact.spray.countBase = 10;
                 impact.spray.countRange = 20;
                 impact.angles.yawBase = shade - 0x68;
@@ -136,7 +136,7 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
         if (count != 0) {
             // matching: a do/while (--count != 0) loop schedules differently from this break form
             for (;;) {
-                func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 100.0f + 110.0f, &spot[0], &spot[2]);
+                math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * 100.0f + 110.0f, &spot[0], &spot[2]);
                 spot[0] += actor->xpos;
                 spot[2] += actor->zpos;
                 probe.x = spot[0];
@@ -350,7 +350,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
 
                 if (slot->particle != NULL) {
                     slot->particle->head.def.rot = slot->particle->head.def.pos;
-                    func_15143134(emitter->owner->character_type == 0x36 ? &D_800AA1DC[i].offset : &D_800AA12C[i].offset,
+                    math_transformOffset(emitter->owner->character_type == 0x36 ? &D_800AA1DC[i].offset : &D_800AA12C[i].offset,
                                   &slot->particle->head.def.pos,
                                   emitter->owner->character_type == 0x36 ? JOINT_MTX(emitter->owner, D_800AA1DC[i].joint)
                                                              : JOINT_MTX(emitter->owner, D_800AA12C[i].joint));
@@ -431,7 +431,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                         motion.phaseSpeedHeight = func_150ADA20() % 5 + 4;
                         // matching: "- 703.0f" emits sub.s; the original adds a negative constant
                         motion.gravity = (func_150ADA68() * 506.0f + -703.0f) * 0.001f;
-                        func_15143134(&D_800AA12C[index].offset, &desc.pos,
+                        math_transformOffset(&D_800AA12C[index].offset, &desc.pos,
                                       JOINT_MTX(emitter->owner, D_800AA12C[index].joint));
                         desc.rot = desc.pos;
                         particle = particle_newQuadParticleWhite(&desc, 0x11, 0, 0, 0x10, ((func_150ADA20() % 1) ? 1 : 0) | 2, 0x28,
@@ -610,8 +610,8 @@ s32 effect_swingParticleSize(Game1DD500Particle *arg0) {
 
     motion->phaseWidth += motion->phaseSpeedWidth * D_800BE9E4;
     motion->phaseHeight += motion->phaseSpeedHeight * D_800BE9E4;
-    swingW = func_151423D8(motion->phaseWidth - 0x40);
-    swingH = func_151423D8(motion->phaseHeight - 0x40);
+    swingW = math_cosBinAngleMasked(motion->phaseWidth - 0x40);
+    swingH = math_cosBinAngleMasked(motion->phaseHeight - 0x40);
     particle->head.def.width += (motion->baseWidth + motion->swingWidth * swingW - particle->head.def.width) * 0.5f;
     particle->head.def.height += (motion->baseHeight + motion->swingHeight * swingH - particle->head.def.height) * 0.5f;
     return 1;

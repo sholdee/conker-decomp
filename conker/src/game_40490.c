@@ -3,8 +3,8 @@
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init_50A0.c).
-u16 *D_800BE570; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game/Screen/FrameImage/frameimage)
-u8 D_800BE574;
+u16 *gScreenCopy; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game/Screen/FrameImage/frameimage)
+u8 gScreenCopyAlpha;
 u8 D_800BE575;
 
 #include "functions.h"
@@ -29,12 +29,12 @@ static s32 (*gZoneSpawnHandlers[26])(TriggerZone *) = {
     /* 14 */ NULL,
     /* 15 */ NULL,
     /* 16 */ NULL,
-    /* 17 */ func_150130B4,
+    /* 17 */ level_spawnPointGlowZone,
     /* 18 */ func_15014144,
     /* 19 */ func_150142EC,
     /* 20 */ func_150144B8,
     /* 21 */ func_1501474C,
-    /* 22 */ func_15014B60,
+    /* 22 */ level_spawnDiscoBallZone,
     /* 23 */ func_15014F6C,
     /* 24 */ NULL,
     /* 25 */ NULL,
@@ -76,14 +76,14 @@ typedef struct {
 
 
 
-void func_15012FE0(void) {
-    D_800BE570 = NULL;
-    D_800BE574 = 0;
+void level_resetScreenCopy(void) {
+    gScreenCopy = NULL;
+    gScreenCopyAlpha = 0;
     D_800BE575 = 0;
 }
 
 /** Runs the spawn handler of every level object, chosen by the object's type. */
-void func_15013000(void) {
+void level_spawnZones(void) {
     u32 i;
 
     D_800DCDC4 = NULL;
@@ -111,7 +111,7 @@ typedef struct {
 } Payload18_150130B4;
 
 /** Spawns the particle emitter a level object describes; data2 selects the kind of emitter. */
-s32 func_150130B4(TriggerZone *obj) {
+s32 level_spawnPointGlowZone(TriggerZone *obj) {
     GlowShape emit;
     ParticleDef spawn;
     s32 kind;
@@ -190,7 +190,7 @@ ground:
         extra[1] = 0.3249999881f;
         extra[2] = 0.0f;
         extra[3] = 0.05959999934f;
-        particle = func_151407D0(&emit, 0x70, &spawn, 0, 0x29, 0, 0, -1, 0xFF, 1);
+        particle = flare_spawnGlow(&emit, 0x70, &spawn, 0, 0x29, 0, 0, -1, 0xFF, 1);
         if (particle != NULL) {
             memcpy((u8 *)particle + 0x170, extra, sizeof(extra));
         }
@@ -203,7 +203,7 @@ ground:
         void *unused; // matching: the dead store of the result steers as1's scheduling
 
         emit.type = D_800965B4[kind - 1];
-        unused = func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+        unused = flare_spawnGlow(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     }
     case 9:
@@ -213,7 +213,7 @@ ground:
         void *unused; // matching: as above
 
         emit.type = D_800965B4[kind - 5];
-        unused = func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+        unused = flare_spawnGlow(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     }
     case 5:
@@ -222,7 +222,7 @@ ground:
         const s32 ids[3] = { 12, 13, 14 };
 
         emit.type = ids[kind - 5];
-        func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+        flare_spawnGlow(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     }
     case 13:
@@ -245,7 +245,7 @@ ground:
         extra.unk10 = extra.unk8->y;
         extra.unk14 = extra.unk8->z;
         emit.type = 0;
-        particle = func_151407D0(&emit, 0x78, &spawn, 0x25, 0, 0, 0, -1, 0xFF, 1);
+        particle = flare_spawnGlow(&emit, 0x78, &spawn, 0x25, 0, 0, 0, -1, 0xFF, 1);
         if (particle != NULL) {
             memcpy((u8 *)particle + 0x170, &extra, sizeof(extra));
         }
@@ -254,10 +254,10 @@ ground:
     case 19:
         emit.type = 0x11;
         spawn.flags &= ~2;
-        func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+        flare_spawnGlow(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     default:
-        func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+        flare_spawnGlow(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         break;
     }
     return 1;
@@ -277,7 +277,7 @@ static s32 (*D_80082EA0[11])(TriggerZone *zone) = {
     NULL,
     NULL,
     func_1501374C,
-    func_15013778,
+    level_spawnZoneBeam,
     NULL,
     sight_placeBeam,
     func_15013FC4,
@@ -313,7 +313,7 @@ typedef struct Game40490BeamPacket {
 } Game40490BeamPacket;
 
 /** Spawns a beam effect of twice the object's sizeY, pointing along its rotation. */
-s32 func_15013778(TriggerZone *obj) {
+s32 level_spawnZoneBeam(TriggerZone *obj) {
     TimedEffect *effect;
     Game40490BeamPacket packet;
     MtxF matrix;
@@ -351,12 +351,12 @@ s32 func_15013778(TriggerZone *obj) {
 }
 
 /* Handlers of the effect zones (ZONE_TYPE_EFFECT), chosen by TriggerZone.subTypeData. Declared without a
- * prototype: func_150139AC takes an extra argument and func_150150A4 none. */
+ * prototype: level_spawnZoneAreaEffect takes an extra argument and func_150150A4 none. */
 static s32 (*D_80082ECC[23])() = {
     NULL,
     NULL,
     NULL,
-    func_150139AC,
+    level_spawnZoneAreaEffect,
     beam_runZoneHandler,
     func_150156F4,
     func_150151D4,
@@ -375,7 +375,7 @@ static s32 (*D_80082ECC[23])() = {
     func_150142AC,
     func_15015644,
     NULL,
-    func_15008BF0,
+    level_spawnZoneSpray,
 };
 
 /** Runs the object's handler from D_80082ECC, chosen by unk17. */
@@ -391,7 +391,7 @@ s32 func_1501396C(TriggerZone *obj) {
 
 /** Spawns the area effect described by entry data1 of gAreaEffectDefs over the object's footprint. */
 // matching: index lives in the (unused) second argument register
-s32 func_150139AC(TriggerZone *obj, s32 index) {
+s32 level_spawnZoneAreaEffect(TriggerZone *obj, s32 index) {
     Struct150139ACLocal data;
     const Struct150139ACEntry *entry;
     TimedEffect *effect;
@@ -480,7 +480,7 @@ s32 func_15013C38(TriggerZone *obj) {
         return 1;
     }
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         if ((D_800C35E8[0] == 15) || (D_800C35E8[0] == 16) || (D_800C35E8[0] == 17)) {
             return 1;
         }
@@ -565,7 +565,7 @@ s32 func_15013F9C(TriggerZone *obj) {
 
 /* Handlers of func_15013FC4, chosen by the low byte of TriggerZone.data1. */
 static s32 (*D_80082F40[12])(TriggerZone *) = {
-    func_15014004,
+    level_registerFlamethrowerZone,
     NULL,
     NULL,
     func_1501407C,
@@ -591,7 +591,7 @@ s32 func_15013FC4(TriggerZone *obj) {
 }
 
 /** Registers the object in slot data2 (0-5) of gFlamethrowerZones. */
-s32 func_15014004(TriggerZone *obj) {
+s32 level_registerFlamethrowerZone(TriggerZone *obj) {
     s32 slot = obj->data2;
 
     if (slot < 0) {
@@ -637,7 +637,7 @@ s32 func_15014094(TriggerZone *obj) {
 
     obj->flags |= 4;
     data.unk0 = obj;
-    data.unk4 = func_15144598(obj);
+    data.unk4 = math_getZoneArea(obj);
     data.unk8 = 0.0f;
 
     collision_selectMap(0);
@@ -734,7 +734,7 @@ s32 func_150142EC(TriggerZone *obj) {
     c = (obj->data3 & 0xFFFF) * 0.001000000047f;
     d = ((obj->data3 >> 16) & 0xFFFF) * 0.001000000047f;
 
-    scale = func_1514462C(obj);
+    scale = math_getZoneVolume(obj);
 
     data.unk0 = obj;
     data.unk4 = (a * scale) * 1.271515948e-10f;
@@ -765,7 +765,7 @@ s32 func_150144B8(TriggerZone *obj) {
     }
     func_150A8050(scratch.matrix, obj->pitch, obj->yaw, 0.0f);
     func_150A7960(scratch.matrix, 0.0f, 100.0f, 0.0f, &scratch.direction.x, &scratch.direction.y, &scratch.direction.z);
-    func_15145974(&scratch.direction, &emitter.angleX, &emitter.angleY);
+    math_getHeadingElevation(&scratch.direction, &emitter.angleX, &emitter.angleY);
     emitter.angleX *= 0.017453292f;
     emitter.angleY *= 0.017453292f;
     emitter.minDelay = obj->data1 & 0xFF;
@@ -780,7 +780,7 @@ s32 func_150144B8(TriggerZone *obj) {
     emitter.speed = (obj->data2 >> 24) & 0xFF;
     emitter.unk30 = 1.0f / emitter.speed;
     emitter.unk34 = obj->ySize * emitter.unk30;
-    emitter.spread = func_150484A0(obj->xSize, obj->ySize);
+    emitter.spread = math_atan2(obj->xSize, obj->ySize);
     emitter.wobbleSpeed = ((obj->data2 >> 16) & 0xFF) * 0.00390625f * 0.7853982f;
     value = (u32)effect_newTimedEffect(300, -1, 0x2A, -1, 0, 0, sizeof(emitter), 0xFF, 0);
     if (value != 0) {
@@ -870,7 +870,7 @@ typedef struct Game4049014B60Packet {
 
 /** Creates six light_createWithEffect objects at the object's position, coloured from D_800A0938, and an effect
  * with a random rotation that owns them (they are freed again if no effect slot is free). */
-s32 func_15014B60(TriggerZone *obj) {
+s32 level_spawnDiscoBallZone(TriggerZone *obj) {
     Game4049014B60Packet packet;
     s32 i;
     TimedEffect *effect;
@@ -1145,7 +1145,7 @@ s32 func_15015644(TriggerZone *obj) {
     obj->inactive = 1;
 
     data.unk0 = obj;
-    data.unk4 = func_15144598(obj);
+    data.unk4 = math_getZoneArea(obj);
     collision_selectMap(0);
     data.zone = collision_findZoneLeaf(obj->x, obj->z);
     data.unkC = 0;
@@ -1158,7 +1158,7 @@ s32 func_15015644(TriggerZone *obj) {
 }
 
 /** Passes the object's two end points (its position, and sizeY along its rotation from there) to
- * func_151ACBD4, higher end first. In levels 0xB, 0x2C and 0x26 only objects with a large enough data1 do. */
+ * rope_create, higher end first. In levels 0xB, 0x2C and 0x26 only objects with a large enough data1 do. */
 s32 func_150156F4(TriggerZone *obj) {
     Vec3f points[2];
     MtxF mtx;
@@ -1196,7 +1196,7 @@ s32 func_150156F4(TriggerZone *obj) {
 
     payload.unk20 = 0;
     payload.length = fabsf(points[1].y - points[0].y);
-    func_151ACBD4(&payload, 0);
+    rope_create(&payload, 0);
 
     return 1;
 }

@@ -54,11 +54,11 @@ void camera_buildViewMatrix(Camera *camera) {
         camera->XZOffset = camera->XZOffsetTget;
         camera->YOffset = camera->YOffsetTget;
     } else if (camera->Mode == 0x100 || camera->CharContext != 0) {
-        func_150495B0(&camera->XZOffset, camera->XZOffsetTget, &camera->OffsetXZVel, 4.0f, 6.0f, camera->SpringTime);
-        func_150495B0(&camera->YOffset, camera->YOffsetTget, &camera->OffsetYVel, 4.0f, 6.0f, camera->SpringTime);
+        math_springTo(&camera->XZOffset, camera->XZOffsetTget, &camera->OffsetXZVel, 4.0f, 6.0f, camera->SpringTime);
+        math_springTo(&camera->YOffset, camera->YOffsetTget, &camera->OffsetYVel, 4.0f, 6.0f, camera->SpringTime);
     } else {
-        func_150495B0(&camera->XZOffset, camera->XZOffsetTget, &camera->OffsetXZVel, 0.75f, 1.1f, camera->SpringTime);
-        func_150495B0(&camera->YOffset, camera->YOffsetTget, &camera->OffsetYVel, 0.75f, 1.1f, camera->SpringTime);
+        math_springTo(&camera->XZOffset, camera->XZOffsetTget, &camera->OffsetXZVel, 0.75f, 1.1f, camera->SpringTime);
+        math_springTo(&camera->YOffset, camera->YOffsetTget, &camera->OffsetYVel, 0.75f, 1.1f, camera->SpringTime);
     }
     camera->savedTarget = camera->target;
     camera->savedEye = camera->eye;
@@ -91,7 +91,7 @@ void camera_buildViewMatrix(Camera *camera) {
         camera_updatePitch(camera);
         camera_updateAngles(camera);
     }
-    func_150491EC(&eye, &at, &dir);
+    math_dirTowards(&eye, &at, &dir);
     camera->mv->aimTarget = at;
     camera->mv->aimEye = eye;
     camera->mv->aimDir = dir;
@@ -144,9 +144,9 @@ void camera_buildViewMatrix(Camera *camera) {
         func_150A7DF0(&rotMtx, -camera->DeltaPitch * shakeScale, camera->DeltaYaw * shakeScale, camera->DeltaRoll * shakeScale);
         guMtxCatL(VIEW_MTX(camera->CNumber), &rotMtx, VIEW_MTX(camera->CNumber));
         if (camera->mv != NULL) {
-            yaw = func_15048FC8(&camera->mv->aimDir) - 180.0f;
+            yaw = math_vec3Heading(&camera->mv->aimDir) - 180.0f;
             func_150A8050(dirMtx,
-                          -func_150484A0(camera->mv->aimDir.y,
+                          -math_atan2(camera->mv->aimDir.y,
                                          sqrtf(camera->mv->aimDir.x * camera->mv->aimDir.x +
                                                camera->mv->aimDir.z * camera->mv->aimDir.z)) *
                                   57.2957764f - // 180/pi
@@ -181,7 +181,7 @@ void camera_buildViewMatrix(Camera *camera) {
                 stiffness = 4.0f;
                 damping = 8.0f;
             }
-            func_150495B0(&camera->Roll, swayTarget, &camera->RollVel, stiffness, damping, camera->SpringTime);
+            math_springTo(&camera->Roll, swayTarget, &camera->RollVel, stiffness, damping, camera->SpringTime);
         }
         func_1512D368(camera);
         if (camera->Mode != 0x8000) {
@@ -235,7 +235,7 @@ void camera_applyBreathing(Camera *camera) {
     if (camera->Snap != 0 || (camera->SpecialFlags & 4)) {
         camera->WaterEffectTargetAmp = amount;
     } else {
-        func_150495B0(&camera->WaterEffectTargetAmp, amount, &camera->WaterEffectVel, 0.2f, 0.400000006f, camera->SpringTime);
+        math_springTo(&camera->WaterEffectTargetAmp, amount, &camera->WaterEffectVel, 0.2f, 0.400000006f, camera->SpringTime);
     }
 
     guMtxIdentF(mf);

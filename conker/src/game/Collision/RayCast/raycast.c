@@ -156,13 +156,13 @@ s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear,
         unitDir.x = dir->x;
         unitDir.y = dir->y * yScale;
         unitDir.z = dir->z;
-        if (func_15145128(&unitDir, &unitDir, NULL, NULL) == 0) {
+        if (math_vec3Normalize(&unitDir, &unitDir, NULL, NULL) == 0) {
             return 0;
         }
         center.x = pos.x;
         center.y = pos.y * yScale;
         center.z = pos.z;
-        if (func_151452C4(&start, &unitDir, &center, obj->unkD2, outNear, outFar, outNearDist, outFarDist) == 0) {
+        if (math_raySphere(&start, &unitDir, &center, obj->unkD2, outNear, outFar, outNearDist, outFarDist) == 0) {
             return 0;
         }
         outNear->y *= yUnscale;
@@ -173,11 +173,11 @@ s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear,
             diff.x = outNear->x - origin->x;
             diff.y = outNear->y - origin->y;
             diff.z = outNear->z - origin->z;
-            *outNearDist = func_15143E64(&diff);
+            *outNearDist = math_vec3Length(&diff);
             diff.x = outFar->x - origin->x;
             diff.y = outFar->y - origin->y;
             diff.z = outFar->z - origin->z;
-            *outFarDist = func_15143E64(&diff);
+            *outFarDist = math_vec3Length(&diff);
         }
     }
     return 1;
@@ -294,7 +294,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
             sound = 0x27;
         }
     }
-    func_15145974(&hit->dir, &yaw, &pitch);
+    math_getHeadingElevation(&hit->dir, &yaw, &pitch);
     if (hit->hitType == 2) {
         if (obj->character_type == 0x94) {
             playImpact = 0;

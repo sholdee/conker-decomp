@@ -111,7 +111,7 @@ void weapon_emitBulletTrailParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz,
     random_a = func_150ADA20();
     random_b = func_150ADA20();
     random_f = func_150ADA68();
-    func_15143794(random_a & 0xFF, random_b % 65U - 32, random_f * 945.0f * 0.00999999977648f, &velocity);
+    math_dirFromBinAngles(random_a & 0xFF, random_b % 65U - 32, random_f * 945.0f * 0.00999999977648f, &velocity);
     push = (func_150ADA68() * 157.0f + 604.0f) * 0.00100000005f;
     acceleration.x = 0.0f;
     acceleration.y = 0.0f;
@@ -155,8 +155,8 @@ SpriteParticle *weapon_spawnBulletSprite(Bullet *bullet) {
     spawn.brightness = 0xFF;
     spawn.width = spawn.height = func_150ADA68() * 500.0f + 900.0f;
     spawn.pos = bullet->head.pos;
-    spawn.offset = D_800A5480;
-    spawn.vel = D_800A5480;
+    spawn.offset = gZeroVec3f;
+    spawn.vel = gZeroVec3f;
     spawn.fadeStart = 1;
     spawn.fadeRate = 0xFF;
     spawn.scaleStart = 1;

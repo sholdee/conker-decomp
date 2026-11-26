@@ -27,7 +27,7 @@ void weapon_spawnForwardProjectile(Actor *actor, u8 arg1, s32 arg2) {
     void *mtx;
 
     particle_countShot(actor);
-    func_15145740(actor, &direction, &axis0, &axis1, 0.8110000491f);
+    math_getActorAim(actor, &direction, &axis0, &axis1, 0.8110000491f);
     if (actor->ob_matrix_ptr != NULL) {
         const Vec3f *sources[3];
         Vec3f *destinations[3];
@@ -39,7 +39,7 @@ void weapon_spawnForwardProjectile(Actor *actor, u8 arg1, s32 arg2) {
         destinations[0] = &position;
         destinations[1] = &origin;
         destinations[2] = &delta;
-        func_15145EA4(sources, destinations, mtx, 3);
+        math_transformOffsets(sources, destinations, mtx, 3);
         delta.x -= origin.x;
         delta.y -= origin.y;
         delta.z -= origin.z;
@@ -84,7 +84,7 @@ void weapon_getForwardProjectileStart(Actor *actor, s16 arg1, Vec3f *out) {
     mtx = actor->ob_matrix_ptr[D_80088BA0];
     src = &D_800A2000;
     dst = out;
-    func_15145EA4(&src, &dst, mtx, 1);
+    math_transformOffsets(&src, &dst, mtx, 1);
 }
 
 /* Spawns a randomized effect (effect_spawnBoneBeamParticle) on bone `bone` of `actor` at `position`. */

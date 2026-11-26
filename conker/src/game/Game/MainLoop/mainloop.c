@@ -79,9 +79,9 @@ s32 game_processMessage(void) {
     D_8002AC64 = 800;
     switch (*message) {
     case 2:
-        func_1517E1AC();
-        if (D_800DC9F0 != 0) {
-            func_151412BC();
+        flare_sampleDepths();
+        if (gGlowCount != 0) {
+            flare_sampleGlowDepths();
         }
         D_800BEAA8--;
         if (D_800BE615 != 0 && D_800BEAA8 == 0) {
@@ -116,7 +116,7 @@ s32 game_processMessage(void) {
                         gDisplayListHead = func_15019464(gDisplayListHead, gCurrentView);
                     }
                     if (D_800BEBA0 == 0) {
-                        DL_LOAD_UCODE(D_800C1060, D_800BEB9C);
+                        DL_LOAD_UCODE(gUcodeText, gUcodeData);
                         DL_APPEND(0xD9C2F9FA, 0);        // gSPClearGeometryMode(0x3D0605)
                         DL_APPEND(0xD9FFFFFF, 0x220005); // gSPSetGeometryMode(G_ZBUFFER | G_SHADE | G_LIGHTING | G_SHADING_SMOOTH)
                         DL_APPEND(0xDA380003, &gIdentityMtx); // gSPMatrix(G_MTX_LOAD)
@@ -155,7 +155,7 @@ s32 game_processMessage(void) {
                                 gDisplayListHead = func_15019BB8(gDisplayListHead, gCurrentView);
                             }
                         }
-                        gDisplayListHead = func_151E84B0(gDisplayListHead);
+                        gDisplayListHead = hud_drawMain(gDisplayListHead);
                         gDisplayListHead = text_drawQueue(gDisplayListHead);
                     }
                     bone_collapseAllMaskedBones();
@@ -169,7 +169,7 @@ s32 game_processMessage(void) {
                     texture_updateAging();
                     gfx_freeHiddenObjectBlocks();
                     sprite_freeTypeTextures();
-                    func_1501C880(0, 1);
+                    cutscene_sendGfxTask(0, 1);
                     D_800BE9B4 = 0;
                     if (gPaused != 0) {
                         D_800BEAC2 = 2;
@@ -211,8 +211,8 @@ void func_15018DFC(void) {
     actor_updateVisibility();
     func_1501C870();
     if (gPaused == 0) {
-        if (D_800C35EA[0] == 1) {
-            func_1502378C();
+        if (gCutsceneStates[0] == 1) {
+            cutscene_updateActors();
         } else {
             actor_updateAll();
         }
@@ -296,7 +296,7 @@ s32 game_updateFrame(void) {
     script_runTasks(2);
     gAmbientPriority = 0;
     heap_expireBlocks();
-    func_1501E400(0);
+    cutscene_advanceTime(0);
     model_clearReflections();
     view_updateMatrices();
     collision_selectMap(0);
@@ -309,11 +309,11 @@ s32 game_updateFrame(void) {
     }
     collision_updateTriggers();
     func_15018DFC();
-    func_150242F8(1, 0);
-    func_1501EC38(0);
-    func_150242F8(0, 0);
-    func_15020EC4(0);
-    func_1501E2F8(0);
+    cutscene_dispatchEvents(1, 0);
+    cutscene_evalTracks(0);
+    cutscene_dispatchEvents(0, 0);
+    cutscene_applyTracks(0);
+    cutscene_checkEnd(0);
     if (D_800D23A9 != 0) {
         mp_updateRaceCameras();
     }
@@ -342,7 +342,7 @@ s32 game_updateFrame(void) {
     }
     gfx_updateObjectMatrices();
     trail_updateBoneTrails(1);
-    func_151738C4(level);
+    env_reapplyFog(level);
     func_1502C1A4();
     gfx_updateObjectShadows();
     if (D_800CC2B0 != 0) {
@@ -372,7 +372,7 @@ void func_15019414(void) {
     }
     anim_ageMorphCache();
     if (gIsMultiplayer == 0) {
-        func_1508F0A4();
+        hud_updateOverlay();
     }
 }
 
@@ -387,7 +387,7 @@ Gfx *func_15019464(Gfx *gfx, s16 player) {
     if (D_80084480 != 0) {
         return gfx;
     }
-    gfx = func_1510FEA0(gfx, level);
+    gfx = env_drawSky(gfx, level);
     if ((screen_isViewFadedOut(player) != 0) || (D_800D18A0 & (1 << player))) {
         return gfx;
     }
@@ -471,13 +471,13 @@ Gfx *func_150198FC(Gfx *gfx) {
         D_80082F90 = 0;
     }
     if (screen_isViewFadedOut(0) == 0) {
-        gfx = func_1517E28C(gfx, level);
-        gfx = func_15172F70(gfx);
+        gfx = flare_drawAll(gfx, level);
+        gfx = flare_drawScreenFlash(gfx);
         gfx = screen_drawLetterbox(gfx);
     }
     gfx = screen_drawTint(gfx);
     if ((gPaused == 0) && (gPauseRequested == 0)) {
-        gfx = func_1508FD38(gfx);
+        gfx = hud_drawOverlay(gfx);
     }
     gfx = effect_drawObjectGroup(gfx, 3, 0, 0);
     gfx = effect_drawObjectGroup(gfx, 3, 0, 1);
@@ -525,7 +525,7 @@ Gfx *func_15019E60(Gfx *gfx) {
     } else {
         gSPViewport(gfx++, &gViews[0].viewports[0]);
     }
-    return text_drawQueue(func_151E8620(view_setScissor(gfx, 0xFF, 0, 0, 0, 0)));
+    return text_drawQueue(hud_drawModeOverlay(view_setScissor(gfx, 0xFF, 0, 0, 0, 0)));
 }
 
 /*

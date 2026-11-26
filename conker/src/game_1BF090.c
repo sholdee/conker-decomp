@@ -68,9 +68,9 @@ void particle_updateDustEmitter(DustEmitter *effect) {
     data->accum += (data->rateBase + func_150ADA68() * data->rateRandom) * gFrameDelta;
     if (data->accum > 1.0f) {
         if (owner->ob_matrix_ptr != NULL) {
-            func_15143134(&data->offset, &position, (u8 *)owner->ob_matrix_ptr + data->matrixOffset);
+            math_transformOffset(&data->offset, &position, (u8 *)owner->ob_matrix_ptr + data->matrixOffset);
             if (data->unk60 > 0.0f) {
-                if (func_1514672C(&position) == 0) {
+                if (math_isInWorldBounds(&position) == 0) {
                     floorY = -9500.0f;
                 } else {
                     minY = -9500.0f;
@@ -209,7 +209,7 @@ u8 particle_landDust(DustParticle *particle, Vec3f *prevPos) {
         angleRandom = func_150ADA68();
         speedRandom = func_150ADA68();
         sizeRandom = func_150ADA68();
-        func_151436B4(angleRandom * 6.2831855f,
+        math_dirFromAngles(angleRandom * 6.2831855f,
                       (speedRandom * 1000.0f + -1207.0f) * 0.001f,
                       (sizeRandom * 3557.0f + 5336.0f) * 0.001f,
                       &velocity);

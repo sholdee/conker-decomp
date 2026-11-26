@@ -64,10 +64,10 @@ s32 particle_splashOnFloor(FloorParticle *particle) {
             yaw = func_150ADA20() & 0xFF;
             pitch = -0x20 - (func_150ADA20() & 0x1F);
             speed = (func_150ADA68() * 10.0f) + 5.0f;
-            sinYaw = func_151423D8(yaw - 0x40);
-            cosYaw = func_151423D8(yaw);
-            sinPitch = func_151423D8(pitch - 0x40);
-            cosPitch = func_151423D8(pitch);
+            sinYaw = math_cosBinAngleMasked(yaw - 0x40);
+            cosYaw = math_cosBinAngleMasked(yaw);
+            sinPitch = math_cosBinAngleMasked(pitch - 0x40);
+            cosPitch = math_cosBinAngleMasked(pitch);
             spawn.sizeY = spawn.sizeXZ = spawn.radius = size;
             spawn.vel.x = speed * cosPitch * sinYaw;
             spawn.vel.y = -speed * sinPitch;
@@ -108,8 +108,8 @@ s32 particle_splashOnFloor(FloorParticle *particle) {
         effect.velY = (func_150ADA20() % 201U) + 300;
         effect.accelY = 0;
         effect.life = 600;
-        func_151429E0(colour, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
-        func_151429E0(colour, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
+        math_pickPaletteColour(colour, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
+        math_pickPaletteColour(colour, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
         effect.intensity = 0xFF;
         scaled = particle->head.radius * 511.0f;
         if (scaled > 255.0f) {
@@ -230,9 +230,9 @@ void particle_spawnModelDroplets(f32 *pos, f32 radius, f32 size, s32 count, u16 
             spawn.rot.x = func_150ADA68() * 360.0f;
             spawn.rot.y = func_150ADA68() * 360.0f;
             spawn.rot.z = func_150ADA68() * 360.0f;
-            spawn.pos.x = pos[0] + func_151423D8(angle) * dist;
+            spawn.pos.x = pos[0] + math_cosBinAngleMasked(angle) * dist;
             spawn.pos.y = (pos[1] + radius) - (func_150ADA68() * 2.0f * radius);
-            spawn.pos.z = pos[2] - func_151423D8(angle - 0x40) * dist;
+            spawn.pos.z = pos[2] - math_cosBinAngleMasked(angle - 0x40) * dist;
             spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
             spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
             if (collision_probeFloorSurfABSet0Cached(&spawn.pos, 0, -10000.0f, &floor) != 0) {
@@ -253,9 +253,9 @@ void particle_spawnModelDroplets(f32 *pos, f32 radius, f32 size, s32 count, u16 
                     spawn.rot.x = func_150ADA68() * 360.0f;
                     spawn.rot.y = func_150ADA68() * 360.0f;
                     spawn.rot.z = func_150ADA68() * 360.0f;
-                    spawn.pos.x = func_151423D8(angle) * dist + x;
+                    spawn.pos.x = math_cosBinAngleMasked(angle) * dist + x;
                     spawn.pos.y = func_150ADA68() * 25.0f + y;
-                    spawn.pos.z = z - func_151423D8(angle - 0x40) * dist;
+                    spawn.pos.z = z - math_cosBinAngleMasked(angle - 0x40) * dist;
                     spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
                     spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
                     spawn.update2Fn = 3;

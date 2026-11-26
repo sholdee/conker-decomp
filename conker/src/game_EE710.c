@@ -32,7 +32,7 @@ void particle_spawnFootDust(Actor *actor, u8 foot) {
             break;
         }
         // matching: an integer cast keeps ob_matrix_ptr in v1 (a pointer argument is loaded straight into a0)
-        func_15142314((s32)actor->ob_matrix_ptr, bone, &footPos);
+        math_getBoneTranslation((s32)actor->ob_matrix_ptr, bone, &footPos);
         radius = size * 80.0f;
         particle_emitOnCircle(footPos.x, actor->floorY, footPos.z, radius, 0, 16, 16, 0, 0, radius * 4.0f, 0, 0xFF);
         effect_spawnQuadEffect(-1, footPos.x, (s32)actor->floorY + 2.0f, footPos.z, 11, 19, 0, 0xFF, 0);
@@ -64,8 +64,8 @@ void particle_spawnFootDust(Actor *actor, u8 foot) {
         while (count--) {
             angle = func_150ADA20_u8() & 0xFF; // matching: the redundant mask on the u8 result is in the original
             speed = (func_150ADA68() * 0.8999999762f + 0.1000000015f) * 18.0f * size;
-            cosA = func_151423D8(angle - 0x40);
-            sinA = func_151423D8(angle);
+            cosA = math_cosBinAngleMasked(angle - 0x40);
+            sinA = math_cosBinAngleMasked(angle);
             spawn.lifetime = (func_150ADA20_u8() & 0x1F) + 15;
             spawn.pos.x = (radius * cosA) + footPos.x;
             spawn.pos.y = actor->floorY + 2.0f;

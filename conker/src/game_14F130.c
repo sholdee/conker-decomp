@@ -24,11 +24,11 @@ void camera_easeYawBehind(Camera *camera, f32 yawOffset) {
         if (gIsMultiplayer) {
             camera->targetSpeed = 5.0f;
             camera->targetLimit = 8.0f;
-            func_150495B0(&camera->speed, 5.0f, &camera->speedVel, 1.0f, 2.0f, camera->SpringTime);
-            func_150495B0(&camera->limit, camera->targetLimit, &camera->limitVel, 1.0f, 2.0f, camera->SpringTime);
-            func_15049688(&camera->CameraAngle, camera->CharPtr->theta - 180.0f, &camera->AutoBehindAngleVel, camera->speed, camera->limit, camera->SpringTime);
+            math_springTo(&camera->speed, 5.0f, &camera->speedVel, 1.0f, 2.0f, camera->SpringTime);
+            math_springTo(&camera->limit, camera->targetLimit, &camera->limitVel, 1.0f, 2.0f, camera->SpringTime);
+            math_springAngleTo(&camera->CameraAngle, camera->CharPtr->theta - 180.0f, &camera->AutoBehindAngleVel, camera->speed, camera->limit, camera->SpringTime);
         } else {
-            func_15049688(&camera->CameraAngle, camera->CharPtr->theta - 180.0f, &camera->AutoBehindAngleVel, 5.0f, 8.0f, camera->SpringTime);
+            math_springAngleTo(&camera->CameraAngle, camera->CharPtr->theta - 180.0f, &camera->AutoBehindAngleVel, 5.0f, 8.0f, camera->SpringTime);
         }
         camera->CameraAngleRad = camera->CameraAngle * (3.1415927f / 180.0f);
     } else if (!camera->unk698) {
@@ -40,7 +40,7 @@ void camera_easeYawBehind(Camera *camera, f32 yawOffset) {
             camera->CharContext == 59 || camera->CharContext == 18) {
             angle -= camera->mv->pssd_waist_tilt * (360.0f / 65536);
         }
-        func_15048758(&angle);
+        math_normalizeDegrees(&angle);
         if (camera->Snap) {
             if (camera->mv->unk18C != 999.0f) { // 999.0f: "no saved yaw" sentinel
                 camera->CameraAngle = camera->mv->unk18C;
@@ -71,7 +71,7 @@ void camera_easeYawBehind(Camera *camera, f32 yawOffset) {
                 }
             }
             if (!gFrameRateDivider) {
-                func_15049688(&camera->CameraAngle, angle, &camera->AutoBehindAngleVel, speed, limit, camera->SpringTime);
+                math_springAngleTo(&camera->CameraAngle, angle, &camera->AutoBehindAngleVel, speed, limit, camera->SpringTime);
             }
         }
         camera->CameraAngleRad = camera->CameraAngle * (3.1415927f / 180.0f);

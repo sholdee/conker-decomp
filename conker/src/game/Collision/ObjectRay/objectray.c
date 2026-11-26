@@ -5,7 +5,7 @@
 
 /*
  * Casts a ray from (fromX, fromY, fromZ) to (toX, toY, toZ) against the first 25 objects and picks the
- * one func_15049440 scores lowest, skipping slot `skipIndex` and `source`'s own slot. If one is found,
+ * one math_isBoxInView scores lowest, skipping slot `skipIndex` and `source`'s own slot. If one is found,
  * spawns actor_runAttackAt effect `effect` at it and copies `source`'s unk76 to it.
  */
 s32 collision_castRayAtObjects(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex,
@@ -42,7 +42,7 @@ s32 collision_castRayAtObjects(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f
     obj = movement_obj;
     for (i = 0; i < 25; i++, obj++) {
         if (obj->type != 0 && i != skipIndex && obj->energy != 0 && !obj->imune && i != sourceIndex) {
-            hit = func_15049440(view, obj->xpos, obj->ypos + obj->unkD6, obj->zpos,
+            hit = math_isBoxInView(view, obj->xpos, obj->ypos + obj->unkD6, obj->zpos,
                                 obj->unkD2, obj->unkD4, 0.0f, length, 10.0f, 10.0f);
             if (hit != 0 && (best == -1 || hit < bestHit)) {
                 best = i;

@@ -5,7 +5,7 @@
 void func_150D1B40(AmbientPulse *arg0) {
     f32 *p = &arg0->red;
 
-    func_151467A4(&arg0->timer, 10.0f, &arg0->target, 86.0f, 170.0f, 255.0f, 0.2489f, p);
+    math_randomDrift(&arg0->timer, 10.0f, &arg0->target, 86.0f, 170.0f, 255.0f, 0.2489f, p);
     light_setAmbient(*p, gAmbientColour[1], gAmbientColour[2], 0);
 }
 

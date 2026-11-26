@@ -64,7 +64,7 @@ void particle_updateRegionEmitter(u8 *effect) {
     if (emitter->region->state == 1) {
         return;
     }
-    if (emitter->zone != NULL && func_151464B8(emitter->zone) != 0) {
+    if (emitter->zone != NULL && math_isZoneHiddenFromViews(emitter->zone) != 0) {
         return;
     }
     emitter->pending += emitter->scale * emitter->rate * gFrameDelta;
@@ -92,8 +92,8 @@ void particle_updateRegionEmitter(u8 *effect) {
                 f32 z;
 
                 angle = emitter->region->rotation * 0.7111111f;
-                cosine = func_151423D8(angle - 0x40);
-                sine = func_151423D8(angle);
+                cosine = math_cosBinAngleMasked(angle - 0x40);
+                sine = math_cosBinAngleMasked(angle);
                 x = func_150ADA68() * (2.0f * emitter->region->radiusX) + -emitter->region->radiusX;
                 z = func_150ADA68() * (2.0f * emitter->region->radiusZ) + -emitter->region->radiusZ;
                 particle.pos.x = emitter->region->x + (x * sine + z * cosine);
@@ -108,8 +108,8 @@ void particle_updateRegionEmitter(u8 *effect) {
                 f32 x;
 
                 angle = func_150ADA20() & 0xFF;
-                cosine = func_151423D8(angle - 0x40);
-                sine = func_151423D8(angle);
+                cosine = math_cosBinAngleMasked(angle - 0x40);
+                sine = math_cosBinAngleMasked(angle);
                 x = func_150ADA68() * emitter->region->radiusX;
                 particle.pos.x = emitter->region->x + x * sine;
                 particle.pos.z = emitter->region->z - x * cosine;
@@ -123,8 +123,8 @@ void particle_updateRegionEmitter(u8 *effect) {
                 f32 x;
 
                 angle = func_150ADA20() & 0xFF;
-                cosine = func_151423D8(angle - 0x40);
-                sine = func_151423D8(angle);
+                cosine = math_cosBinAngleMasked(angle - 0x40);
+                sine = math_cosBinAngleMasked(angle);
                 x = func_150ADA68() * emitter->region->radiusX;
                 particle.pos.x = emitter->region->x + x * sine;
                 particle.pos.z = emitter->region->z - x * cosine;

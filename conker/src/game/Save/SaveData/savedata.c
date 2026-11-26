@@ -226,7 +226,7 @@ void save_writeSlot(s32 saveSlot) {
     }
     gSaveSlots[saveSlot].eepromSlot = eepromSlot;
     gSaveSlots[saveSlot].sequence = sequence;
-    if (D_8002AC5C == 0) {
+    if (gResetPending == 0) {
         for (i = 0; i < 8; i++) { gEepromBuffer[i] = 0xFE; }
         osWritebackDCacheAll();
         func_151DD4E0(&gSiMesgQueue, (eepromSlot << 4) + 0x13, gEepromBuffer);
@@ -274,7 +274,7 @@ void save_writeSlot(s32 saveSlot) {
     for (i = 2; i < 0x80; i++) { sum += gEepromBuffer[i] << (i & 3); }
     *(u16 *)gEepromBuffer = sum;
     osWritebackDCacheAll();
-    if (D_8002AC5C == 0) {
+    if (gResetPending == 0) {
         ret = save_writeEeprom(&gSiMesgQueue, (eepromSlot << 4) + 4, gEepromBuffer, 0x80);
     }
 }
@@ -287,7 +287,7 @@ void save_eraseSlot(s32 saveSlot) {
 
     for (i = 0; i < 8; i++) { buffer[i] = 0xFF; }
     osWritebackDCacheAll();
-    if (D_8002AC5C == 0) {
+    if (gResetPending == 0) {
         for (i = 0; i < 4; i++) {
             if (saveSlot == gEepromFileSlots[i]) {
                 block = i * 16 + 4;
@@ -355,7 +355,7 @@ void save_writeModeSettings(void) {
     sum = 0xCC;
     for (i = 2; i < 0x68; i++) { sum += gModeSettingsRecord[i] << (i & 3); }
     *(u16 *)gModeSettingsRecord = sum;
-    if (D_8002AC5C == 0) {
+    if (gResetPending == 0) {
         ret = save_writeEeprom(&gSiMesgQueue, 0x44, gModeSettingsRecord, 0x70);
     }
 }
@@ -393,7 +393,7 @@ void save_writeSettings(void) {
     sum = 0xCC;
     for (i = 2; i < 0x1E; i++) { sum += gEepromBuffer[i] << (i & 3); }
     *(u16 *)gEepromBuffer = sum;
-    if (D_8002AC5C == 0) {
+    if (gResetPending == 0) {
         ret = save_writeEeprom(&gSiMesgQueue, 0, gEepromBuffer, 0x20);
     }
 }

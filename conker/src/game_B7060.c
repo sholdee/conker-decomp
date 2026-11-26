@@ -368,7 +368,7 @@ s32 mp_update(void) {
                 gMpGame->grenades[i] = obj->mv->numGrenades;
             }
             arr39C[i] = player_getStat(i, 4);
-            layers[i] = func_15085DA8(obj->ypos);
+            layers[i] = path_getLayerAt(obj->ypos);
             if (arr39C[i] == 0 || isNew || obj->unk2FD != 0) {
                 if (arr35C[i] == 0) {
                     if (obj->unk20F != 0xFF) {
@@ -541,7 +541,7 @@ void mp_floodFillPath(u8 id, PathSearch *s) {
 
     /* BUG (original game): the bit index should be id & 7, so ids 8 apart share a visited bit */
     s->visited[id >> 3] |= 1 << (id & 3);
-    node = &D_800D2350[id];
+    node = &gPathNodes[id];
     dx = node->x - s->x;
     dist = node->z - s->z;
     dist = (dx * dx) + (dist * dist);
@@ -611,9 +611,9 @@ void mp_assignZoneNodes(void) {
                     best = 0xFF;
                     if (!found) {
                         s.count = 0;
-                        layer = func_15085DA8(y);
+                        layer = path_getLayerAt(y);
                         found = 1;
-                        startNode = func_15085DF8(x, y, z, 0, layer);
+                        startNode = path_findNearestNode(x, y, z, 0, layer);
                         if (startNode != -1) {
                             s.x = x;
                             s.z = z;
@@ -623,7 +623,7 @@ void mp_assignZoneNodes(void) {
                         }
                     }
                     for (k = 0; k < s.count; k++) {
-                        node = &D_800D2350[s.ids[k]];
+                        node = &gPathNodes[s.ids[k]];
                         dx = node->x - obj->xpos;
                         d = node->z - obj->zpos;
                         d = dx * dx + d * d;
@@ -633,7 +633,7 @@ void mp_assignZoneNodes(void) {
                         }
                     }
                     if (best != 0xFF) {
-                        node = &D_800D2350[best];
+                        node = &gPathNodes[best];
                         if (zone[j] != -2) {
                             gMpGame->unk5C[j] = 1;
                         }
@@ -1270,9 +1270,9 @@ s32 mp_aimBot(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, 
         } else {
             curYaw = obj->theta - 90.0f;
         }
-        ang = func_15144BC8(ang);
-        curYaw = func_15144BC8(curYaw);
-        diff = func_15144BC8(curYaw - ang);
+        ang = math_wrapDegrees(ang);
+        curYaw = math_wrapDegrees(curYaw);
+        diff = math_wrapDegrees(curYaw - ang);
         if (diff > 180.0f) {
             diff = -360.0f + diff;
         }
@@ -1294,7 +1294,7 @@ s32 mp_aimBot(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, 
         while (curYaw > 180.0f) {
             curYaw -= 360.0f;
         }
-        V = func_15144BC8(curYaw - ang);
+        V = math_wrapDegrees(curYaw - ang);
         while (V > 180.0f) {
             V -= 360.0f;
         }
@@ -1326,7 +1326,7 @@ s32 mp_aimBot(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, 
             ptr = &obj->mv->unk90;
             obj->mv->aimYaw -= diff;
             obj->mv->aimPitch = ang;
-            func_15048758(&obj->mv->aimYaw);
+            math_normalizeDegrees(&obj->mv->aimYaw);
             obj->mv->aimYawTarget = obj->mv->aimYaw;
             obj->mv->aimPitchTarget = obj->mv->aimPitch;
             obj->mv->stick_x = 0;
@@ -2010,12 +2010,12 @@ s32 mp_findLinkedEntry(u16 type, u16 id, u16 kind) {
     u16 key;
 
     key = (type << 12) + id;
-    for (i = 0; i < D_80087380; i++) {
-        for (j = 0; j < D_800D23C0[i].count; j++) {
-            if (key == D_800D23C0[i].members[j]) {
-                for (k = 0; k < D_800D23C0[i].count; k++) {
-                    if (kind == (D_800D23C0[i].members[k] >> 12) && k != j) {
-                        return D_800D23C0[i].members[k] & 0xFFF;
+    for (i = 0; i < gLinkGroupCount; i++) {
+        for (j = 0; j < gLinkGroups[i].count; j++) {
+            if (key == gLinkGroups[i].members[j]) {
+                for (k = 0; k < gLinkGroups[i].count; k++) {
+                    if (kind == (gLinkGroups[i].members[k] >> 12) && k != j) {
+                        return gLinkGroups[i].members[k] & 0xFFF;
                     }
                 }
                 return -1;
@@ -2027,10 +2027,10 @@ s32 mp_findLinkedEntry(u16 type, u16 id, u16 kind) {
 
 /* Clears link group `index`. */
 void mp_clearLinkGroup(s32 index) {
-    if (index < D_80087380) {
-        D_800D23C0[index].count = 0;
-        D_800D23C0[index].unk4 = 0;
-        D_800D23C0[index].unk0 = 0;
+    if (index < gLinkGroupCount) {
+        gLinkGroups[index].count = 0;
+        gLinkGroups[index].unk4 = 0;
+        gLinkGroups[index].unk0 = 0;
     }
 }
 
@@ -2042,12 +2042,12 @@ void mp_fireLinkGroup(u16 type, u16 id) {
     u16 key;
 
     key = (type << 12) + id;
-    for (i = 0; i < D_80087380; i++) {
-        for (j = 0; j < D_800D23C0[i].count; j++) {
-            if (D_800D23C0[i].members[j] == key) {
-                for (j = 0; j < D_800D23C0[i].count; j++) {
-                    operand = D_800D23C0[i].members[j] & 0xFFF;
-                    switch (D_800D23C0[i].members[j] >> 12) {
+    for (i = 0; i < gLinkGroupCount; i++) {
+        for (j = 0; j < gLinkGroups[i].count; j++) {
+            if (gLinkGroups[i].members[j] == key) {
+                for (j = 0; j < gLinkGroups[i].count; j++) {
+                    operand = gLinkGroups[i].members[j] & 0xFFF;
+                    switch (gLinkGroups[i].members[j] >> 12) {
                     case 2:
                         gfx_removeObject(operand);
                         break;

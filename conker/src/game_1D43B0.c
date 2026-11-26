@@ -58,11 +58,11 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
     while (count--) {
         yaw = func_150ADA20() % (emitter->yawRange + 1) + emitter->yawBase;
         pitch = func_150ADA20() % (emitter->pitchRange + 1) + emitter->pitchBase;
-        /* func_151423D8 is a cosine, so cos(a - 64) is sin(a) */
-        sinYaw = func_151423D8(yaw - 64);
-        cosYaw = func_151423D8(yaw);
-        sinPitch = func_151423D8(pitch - 64);
-        cosPitch = func_151423D8(pitch);
+        /* math_cosBinAngleMasked is a cosine, so cos(a - 64) is sin(a) */
+        sinYaw = math_cosBinAngleMasked(yaw - 64);
+        cosYaw = math_cosBinAngleMasked(yaw);
+        sinPitch = math_cosBinAngleMasked(pitch - 64);
+        cosPitch = math_cosBinAngleMasked(pitch);
         dist = func_150ADA68() * emitter->radius;
         spawn.pos.x = emitter->pos.x + dist * cosPitch * sinYaw;
         spawn.pos.y = emitter->pos.y - dist * sinPitch;

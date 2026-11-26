@@ -36,56 +36,56 @@ typedef struct {
 } Struct151EDF4C;
 
 /* game_BC510.c */
-void func_1508F060(void);
-void func_1508F0A4(void);
-void func_1508F0D4(void);
-void func_1508F7BC(void);
-void func_1508F9C4(void);
-void func_1508F9F4(void);
-Gfx *func_1508FD38(Gfx *gfx);
-Gfx *func_150900F0(Gfx *gfx, s32 fixed);
-Gfx *func_15090630(Gfx *gfx);
-void func_1509093C(void);
-Gfx *func_150911F4(Gfx *gfx);
-Gfx *func_15091534(Gfx *gfx, s32 sheet, u8 *loaded);
-void func_150916B4(s32 x, s32 y, s32 frames, s32 style);
-Gfx *func_150918EC(Gfx *gfx);
-void func_15093818(s32 enable);
-void func_15093878(void);
-Gfx *func_150938BC(Gfx *gfx);
-Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large);
-extern const s16 D_8009DCB4[6]; /* the block stack's start [0..2] and target [3..5] position */
-extern Mtx D_800D23D0;          /* the HUD's projection matrix */
-extern f32 D_800D2410[6];       /* per block: its scale while it grows in */
-extern f32 D_800D2428[3];       /* the block stack's position */
-extern f32 D_800D2438[3];       /* the stack's wobble */
-extern s32 D_800D2444;          /* the stack's display timer */
-extern s32 D_800D2450;          /* the race time in frames */
-extern u16 D_800D2454;          /* perspNorm for D_800D23D0 */
-extern u8 D_800D2456;           /* blocks on the stack */
-extern u8 D_800D2457;           /* blocks it moves to */
-extern u8 D_800D2458;           /* the stack is shown */
-extern BlockDebris *D_800D245C; /* the debris list */
-extern Bubble D_800D2460[6];
+void hud_resetBubbles(void);
+void hud_updateOverlay(void);
+void hud_updateBlockStack(void);
+void hud_removeBlock(void);
+void hud_addBlock(void);
+void hud_updateBubbles(void);
+Gfx *hud_drawOverlay(Gfx *gfx);
+Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed);
+Gfx *hud_drawBubbles(Gfx *gfx);
+void hud_updateWaterSurface(void);
+Gfx *hud_drawWaterSurface(Gfx *gfx);
+Gfx *hud_loadIconSheet(Gfx *gfx, s32 sheet, u8 *loaded);
+void hud_printRaceTime(s32 x, s32 y, s32 frames, s32 style);
+Gfx *hud_drawMultiplayerHud(Gfx *gfx);
+void hud_setClockEnabled(s32 enable);
+void hud_loadClock(void);
+Gfx *hud_drawClock(Gfx *gfx);
+Gfx *hud_drawRadar(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large);
+extern const s16 gHudBlockStackPath[6]; /* the block stack's start [0..2] and target [3..5] position */
+extern Mtx gHudProjection;          /* the HUD's projection matrix */
+extern f32 gHudBlockScales[6];       /* per block: its scale while it grows in */
+extern f32 gHudBlockStackPos[3];       /* the block stack's position */
+extern f32 gHudBlockStackWobble[3];       /* the stack's wobble */
+extern s32 gHudBlockStackTimer;          /* the stack's display timer */
+extern s32 gHudClockTime;          /* the race time in frames */
+extern u16 gHudPerspNorm;          /* perspNorm for gHudProjection */
+extern u8 gHudBlockCount;           /* blocks on the stack */
+extern u8 gHudBlockTarget;           /* blocks it moves to */
+extern u8 gHudClockShown;           /* the stack is shown */
+extern BlockDebris *gHudBlockDebris; /* the debris list */
+extern Bubble gHudBubbles[6];
 extern s32 D_800D24C0;
-extern WaterStage D_800D24C8;
+extern WaterStage gHudWaterStage;
 extern Gfx *D_800D2588;         /* display list built by game_BC510 */
 
 /* game_1ED080.c */
-void func_151BFBD0(CounterEffect *effect);
+void hud_freeCounter(CounterEffect *effect);
 void func_151BFBFC(EffectHeader *obj, s32 arg1, u8 msg);
 
 /* game_215960.c */
-Gfx *func_151E84B0(Gfx *gfx);
-Gfx *func_151E8620(Gfx *gfx);
-Gfx *func_151E86E4(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
-Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha);
-Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh);
-Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh);
-Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live);
-Gfx *func_151EADFC(Gfx *gfx, s32 x, s32 y, s32 value);
-Gfx *func_151EB06C(Gfx *gfx);
-Gfx *func_151EB930(Gfx *gfx);
+Gfx *hud_drawMain(Gfx *gfx);
+Gfx *hud_drawModeOverlay(Gfx *gfx);
+Gfx *hud_texRectScaled(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
+Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha);
+Gfx *hud_drawScorePips(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh);
+Gfx *hud_drawTeamTotals(Gfx *gfx, s32 rowY, s32 refresh);
+Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live);
+Gfx *hud_drawNumber(Gfx *gfx, s32 x, s32 y, s32 value);
+Gfx *hud_drawSinglePlayerHud(Gfx *gfx);
+Gfx *hud_drawResults(Gfx *gfx);
 Gfx *func_151EB96C(Gfx *gfx);
 Gfx *func_151EBB50(Gfx *gfx);
 Gfx *func_151EC178(Gfx *gfx);
@@ -93,26 +93,26 @@ Gfx *func_151EC1F0(Gfx *gfx);
 Gfx *func_151EC3E8(Gfx *gfx);
 Gfx *func_151EC648(Gfx *gfx);
 Gfx *func_151ED09C(Gfx *gfx);
-Gfx *func_151ED1E0(Gfx *gfx);
-Gfx *func_151ED29C(Gfx *gfx, HudSprite *sprite, s32 *blockSizeOut);
-Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 rows, f32 scale, s32 frame);
-HudModel *func_151ED90C(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1);
-void func_151EDB58(HudModel *model);
-Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale);
+Gfx *hud_darkenScreen(Gfx *gfx);
+Gfx *hud_setupSpriteTiles(Gfx *gfx, HudSprite *sprite, s32 *blockSizeOut);
+Gfx *hud_drawSprite(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 rows, f32 scale, s32 frame);
+HudModel *hud_loadModel(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1);
+void hud_freeModel(HudModel *model);
+Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale);
 void func_151EDF4C(void);
-Gfx *func_151EE184(Gfx *gfx);
-Gfx *func_151EEBE8(Gfx *gfx, s32 index);
-void func_151EEFF0(void);
-extern Gfx *(*D_8008FFC0[13])(Gfx *);
-extern Gfx *(*D_8008FFF4[13])(Gfx *);
-extern Gfx D_80090028[];
+Gfx *hud_updateCodeEntry(Gfx *gfx);
+Gfx *hud_drawImagePanel(Gfx *gfx, s32 index);
+void hud_clearCodeFlags(void);
+extern Gfx *(*gHudModeOverlayDrawers[13])(Gfx *);
+extern Gfx *(*gHudModeDrawers[13])(Gfx *);
+extern Gfx gHudSpriteDl[];
 extern HudModel *D_80090058;
 extern HudModel *D_8009005C;
 extern HudSprite D_80090060;
 extern u8 D_8009006C[4];
 extern u8 D_80090070[3];
 extern s32 D_80090074[10];
-extern PlaceValueTable D_8009009C;
+extern PlaceValueTable gPlaceValues;
 extern Gfx D_80090110[];
 extern Gfx D_80090128[];
 extern Struct151EDF4C *D_80090138;

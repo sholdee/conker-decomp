@@ -514,7 +514,7 @@ s32 debugger_run(OSThread *thread) {
 
     result = 0;
     first = TRUE;
-    if (D_8002AC5C != 0) {
+    if (gResetPending != 0) {
         return 0;
     }
     gDebuggerFbIndex = 0;

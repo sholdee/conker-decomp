@@ -13,7 +13,7 @@ void particle_spawnBoneModelBurst(Actor *actor, u8 arg1, s32 arg2) {
         if (actor->ob_matrix_ptr == NULL) { // matching: the original reloads the field rather than testing bones
             return;
         }
-        func_15142314(bones, 10, &burst.position);
+        math_getBoneTranslation(bones, 10, &burst.position);
         burst.countBase = 8;
         burst.countRange = 7;
         burst.angles.yawBase = 0;

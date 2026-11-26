@@ -152,21 +152,21 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
                 vtx += (trail->head.tmpl.itemCount - 1) * 2;
             }
             update = 1;
-            cam = func_15144B34(arg2);
+            cam = math_getCameraPos(arg2);
             points = trail->points;
-            tex = func_1514306C(0, params->motion.texture, 0, 2);
+            tex = math_getTextureFrameId(0, params->motion.texture, 0, 2);
             if (tex != D_800DD1B0) {
                 gTrailTexture.addr = D_80091564[params->motion.texture];
                 gfx = sprite_loadTexture(gfx, &gTrailTexture, 0, 0, 0, 0, 2, 0x100, 0x100, (params->motion.flags & 0x80) ? 0x3E : 3);
                 D_800DD1B0 = tex;
             }
-            func_151441A4(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.primMode);
-            func_151442FC(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.envMode);
-            gfx = func_15142B7C(gfx, params->render.setGeometryMode, params->render.clearGeometryMode);
-            gfx = func_15142C10(gfx, primR, primG, primB, primA, &update);
-            gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &update);
+            math_pickPrimColour(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.primMode);
+            math_pickEnvColour(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.envMode);
+            gfx = math_gfxUpdateGeometryMode(gfx, params->render.setGeometryMode, params->render.clearGeometryMode);
+            gfx = math_gfxSetEnvColor(gfx, primR, primG, primB, primA, &update);
+            gfx = math_gfxSetPrimColor(gfx, 0, 0, envR, envG, envB, envA, &update);
             gfx = particle_setCombineMode(gfx, ((u8 *)&params->render.unk10)[3] /* matching: reads the low byte */, &update);
-            gfx = func_15142FBC(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, gEffectRenderModes[params->render.renderMode].unk0 | gEffectRenderModes[params->render.renderMode].unk4, &update);
+            gfx = math_gfxSetOtherMode(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, gEffectRenderModes[params->render.renderMode].unk0 | gEffectRenderModes[params->render.renderMode].unk4, &update);
             i = trail->head.end - 1;
             if (i < 0) {
                 i = trail->head.tmpl.itemCount - 1;
@@ -474,11 +474,11 @@ void trail_launchMotionTrail(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw,
     u8 tex;
     TrailRender render;
 
-    /* func_151423D8 is a 256-step periodic lookup; "Q" values are a quarter turn (0x40) back. */
-    pitchWave = func_151423D8(pitch);
-    pitchWaveQ = func_151423D8(pitch - 0x40);
-    yawWave = func_151423D8(yaw);
-    yawWaveQ = func_151423D8(yaw - 0x40);
+    /* math_cosBinAngleMasked is a 256-step periodic lookup; "Q" values are a quarter turn (0x40) back. */
+    pitchWave = math_cosBinAngleMasked(pitch);
+    pitchWaveQ = math_cosBinAngleMasked(pitch - 0x40);
+    yawWave = math_cosBinAngleMasked(yaw);
+    yawWaveQ = math_cosBinAngleMasked(yaw - 0x40);
 
     spawn.kind = 1;
     spawn.flags = 1;

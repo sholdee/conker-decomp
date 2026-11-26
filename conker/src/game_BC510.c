@@ -3,38 +3,38 @@
 
 /*
  * This file's .bss, defined before the headers declare it (see init_50A0.c). The ECTS build lays
- * out these globals in a rotated order (D_800D2890 comes first), but the 0x380 unreferenced bytes
+ * out these globals in a rotated order (gHudBlockStackWobbleVel comes first), but the 0x380 unreferenced bytes
  * still follow them: they were a static, which IDO places after the globals.
  */
-Mtx D_800D23D0;            // the HUD's projection matrix
-f32 D_800D2410[6];         // per block: its scale while it grows in
-f32 D_800D2428[3];         // the block stack's position
-f32 D_800D2438[3];         // the stack's wobble
-s32 D_800D2444;            // the stack's display timer
-Gfx *D_800D2448;           // the clock's display list
-Mtx *D_800D244C;           // the clock's matrices, one per frame buffer
-s32 D_800D2450;            // the race time in frames
-u16 D_800D2454;            // perspNorm for D_800D23D0
-u8 D_800D2456;             // blocks on the stack
-u8 D_800D2457;             // blocks it moves to
-u8 D_800D2458;             // the stack is shown
-BlockDebris *D_800D245C;   // the debris list
-Bubble D_800D2460[6];
+Mtx gHudProjection;            // the HUD's projection matrix
+f32 gHudBlockScales[6];         // per block: its scale while it grows in
+f32 gHudBlockStackPos[3];         // the block stack's position
+f32 gHudBlockStackWobble[3];         // the stack's wobble
+s32 gHudBlockStackTimer;            // the stack's display timer
+Gfx *gHudClockDl;           // the clock's display list
+Mtx *gHudClockMtx;           // the clock's matrices, one per frame buffer
+s32 gHudClockTime;            // the race time in frames
+u16 gHudPerspNorm;            // perspNorm for gHudProjection
+u8 gHudBlockCount;             // blocks on the stack
+u8 gHudBlockTarget;             // blocks it moves to
+u8 gHudClockShown;             // the stack is shown
+BlockDebris *gHudBlockDebris;   // the debris list
+Bubble gHudBubbles[6];
 s32 D_800D24C0;
-WaterStage D_800D24C8;
+WaterStage gHudWaterStage;
 Gfx *D_800D2588;           // display list built by game_BC510
-Mtx D_800D2590[6][2];      // per block: its matrix per frame buffer
-f32 D_800D2890[3];         // the stack's wobble velocity
+Mtx gHudBlockMtx[6][2];      // per block: its matrix per frame buffer
+f32 gHudBlockStackWobbleVel[3];         // the stack's wobble velocity
 static u8 D_800D28A0[0x380]; /* not referenced */
 
 #include "functions.h"
 #include "variables.h"
 
 /* This file's .rodata: the block positions and the stack's base, then the race time formats. */
-static const s16 D_8009DC90[6][3] = {
+static const s16 gHudBlockOffsets[6][3] = {
     { -83, 0, -166 }, { 83, 0, -166 }, { -83, 0, 0 }, { 83, 0, 0 }, { -83, 0, 166 }, { 83, 0, 166 },
 };
-const s16 D_8009DCB4[6] = { -1500, 580, -1668, -600, 580, -1668 }; // [0..2] start, [3..5] target
+const s16 gHudBlockStackPath[6] = { -1500, 580, -1668, -600, 580, -1668 }; // [0..2] start, [3..5] target
 
 typedef struct HudBars {
     u8 b[4];
@@ -57,24 +57,24 @@ static u8 D_800873C8[3] = { 0, 8, 16 };
 extern u8 D_D16[];
 
 /* Resets all bubbles to the idle state. */
-void func_1508F060(void) {
+void hud_resetBubbles(void) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        D_800D2460[i].state = 0;
+        gHudBubbles[i].state = 0;
     }
     D_800D24C0 = 0;
 }
 
 /* Per-frame update of the block stack, the bubbles and the water surface. */
-void func_1508F0A4(void) {
-    func_1508F0D4();
-    func_1508F9F4();
-    func_1509093C();
+void hud_updateOverlay(void) {
+    hud_updateBlockStack();
+    hud_updateBubbles();
+    hud_updateWaterSurface();
 }
 
 /* Moves the debris particles, adds/removes blocks to follow movement_obj[0].energy and moves the stack. */
-void func_1508F0D4(void) {
+void hud_updateBlockStack(void) {
     s32 timer;
     s32 i;
     s32 j;
@@ -87,8 +87,8 @@ void func_1508F0D4(void) {
     f32 cur;
     f32 inc;
 
-    link = &D_800D245C;
-    node = D_800D245C;
+    link = &gHudBlockDebris;
+    node = gHudBlockDebris;
     while (node != NULL) {
         node->vel.y -= 5.0f;
         node->pos.x += node->vel.x;
@@ -109,100 +109,100 @@ void func_1508F0D4(void) {
         node = node->next;
     }
 
-    if (movement_obj[0].energy < D_800D2457) {
+    if (movement_obj[0].energy < gHudBlockTarget) {
         // matching: an empty if here splits the block; IDO's layout of the branch below depends on it
         if (node != NULL) {
         }
-        D_800D2444 = 240;
-        while (movement_obj[0].energy != D_800D2457) {
-            D_800D2457--;
-            if (D_800D2428[0] == D_8009DCB4[3]) {
-                func_1508F7BC();
+        gHudBlockStackTimer = 240;
+        while (movement_obj[0].energy != gHudBlockTarget) {
+            gHudBlockTarget--;
+            if (gHudBlockStackPos[0] == gHudBlockStackPath[3]) {
+                hud_removeBlock();
             }
         }
         sound_play(0x1A6, 0x7FFF, 0x40, 0, 0);
-    } else if (D_800D2457 < movement_obj[0].energy) {
-        D_800D2444 = 240;
-        while (movement_obj[0].energy != D_800D2457) {
-            D_800D2457++;
-            if (D_800D2428[0] == D_8009DCB4[3]) {
-                func_1508F9C4();
+    } else if (gHudBlockTarget < movement_obj[0].energy) {
+        gHudBlockStackTimer = 240;
+        while (movement_obj[0].energy != gHudBlockTarget) {
+            gHudBlockTarget++;
+            if (gHudBlockStackPos[0] == gHudBlockStackPath[3]) {
+                hud_addBlock();
             }
         }
     }
-    if (D_800D2444 != 0) {
-        cur = D_800D2428[0];
-        target = D_8009DCB4[3];
+    if (gHudBlockStackTimer != 0) {
+        cur = gHudBlockStackPos[0];
+        target = gHudBlockStackPath[3];
         if (cur == target) {
-            D_800D2444 -= D_800BE9E4;
-            if (D_800D2444 <= 0) {
-                D_800D2444 = 0;
+            gHudBlockStackTimer -= D_800BE9E4;
+            if (gHudBlockStackTimer <= 0) {
+                gHudBlockStackTimer = 0;
             }
             for (j = 0; j < 4; j += 2) {
                 for (i = 0; i < D_800BE9E4; i++) {
-                    D_800D2890[j] += D_800D2438[j] * -0.1f;
-                    D_800D2890[j] *= 0.85f;
-                    D_800D2438[j] += D_800D2890[j] * D_800BE9E4;
+                    gHudBlockStackWobbleVel[j] += gHudBlockStackWobble[j] * -0.1f;
+                    gHudBlockStackWobbleVel[j] *= 0.85f;
+                    gHudBlockStackWobble[j] += gHudBlockStackWobbleVel[j] * D_800BE9E4;
                 }
             }
-        } else if (D_800D2457 < D_800D2456) {
-            count = D_800D2456 - D_800D2457;
-            D_800D2428[0] += 50.0f * D_800BE9E4;
-            if (target <= D_800D2428[0]) {
-                D_800D2428[0] = target;
+        } else if (gHudBlockTarget < gHudBlockCount) {
+            count = gHudBlockCount - gHudBlockTarget;
+            gHudBlockStackPos[0] += 50.0f * D_800BE9E4;
+            if (target <= gHudBlockStackPos[0]) {
+                gHudBlockStackPos[0] = target;
                 for (i = 0; i < count; i++) {
-                    func_1508F7BC();
+                    hud_removeBlock();
                 }
                 sound_play(0x1A6, 0x7FFF, 0x40, 0, 0);
             }
         } else {
-            count = D_800D2457 - D_800D2456;
-            D_800D2428[0] += 50.0f * D_800BE9E4;
-            if (target <= D_800D2428[0]) {
-                D_800D2428[0] = target;
+            count = gHudBlockTarget - gHudBlockCount;
+            gHudBlockStackPos[0] += 50.0f * D_800BE9E4;
+            if (target <= gHudBlockStackPos[0]) {
+                gHudBlockStackPos[0] = target;
                 for (i = 0; i < count; i++) {
-                    func_1508F9C4();
+                    hud_addBlock();
                 }
             }
         }
     } else {
-        cur = D_800D2428[0];
-        base = D_8009DCB4[0];
-        if (D_800D2428[0] != D_8009DCB4[0]) {
-            target = (D_8009DCB4[3] - D_800D2428[0]) * 0.1f;
+        cur = gHudBlockStackPos[0];
+        base = gHudBlockStackPath[0];
+        if (gHudBlockStackPos[0] != gHudBlockStackPath[0]) {
+            target = (gHudBlockStackPath[3] - gHudBlockStackPos[0]) * 0.1f;
             if (target < 0.01f) {
                 target = 0.01f;
             }
-            D_800D2428[0] -= target * D_800BE9E4;
-            if (D_800D2428[0] < base) {
-                D_800D2428[0] = base;
+            gHudBlockStackPos[0] -= target * D_800BE9E4;
+            if (gHudBlockStackPos[0] < base) {
+                gHudBlockStackPos[0] = base;
             }
         }
     }
     for (i = 0; i < 6; i++) {
-        if (D_800D2410[i] != 1.0f) {
+        if (gHudBlockScales[i] != 1.0f) {
             inc = D_800BE9E4 * 0.03f;
-            D_800D2410[i] += inc;
-            if (D_800D2410[i] > 1.0f) {
-                D_800D2410[i] = 1.0f;
+            gHudBlockScales[i] += inc;
+            if (gHudBlockScales[i] > 1.0f) {
+                gHudBlockScales[i] = 1.0f;
             }
         }
     }
 }
 
 /* Removes the top block and spawns a debris particle at its position. */
-void func_1508F7BC(void) {
+void hud_removeBlock(void) {
     MtxF mtx;
     f32 unused;
     BlockDebris *node;
 
-    D_800D2456 -= 1;
-    D_800D2890[0] = func_150ADA20() % 5U;
-    D_800D2890[2] = sqrtf(25.0f - D_800D2890[0] * D_800D2890[0]);
+    gHudBlockCount -= 1;
+    gHudBlockStackWobbleVel[0] = func_150ADA20() % 5U;
+    gHudBlockStackWobbleVel[2] = sqrtf(25.0f - gHudBlockStackWobbleVel[0] * gHudBlockStackWobbleVel[0]);
     node = allocate_memory(sizeof(*node), 1, 1, 0);
-    node->next = D_800D245C;
-    D_800D245C = node;
-    guMtxL2F(mtx, &D_800D2590[D_800D2456][D_800BE9C0 ^ 1]);
+    node->next = gHudBlockDebris;
+    gHudBlockDebris = node;
+    guMtxL2F(mtx, &gHudBlockMtx[gHudBlockCount][D_800BE9C0 ^ 1]);
     model_decomposeMatrix(mtx, &node->pos.x, &node->pos.y, &node->pos.z, &node->rot.x, &node->rot.y, &node->rot.z,
                   &unused, &unused, &unused);
     node->vel.x = (func_150ADA20() & 0xFU) + 10;
@@ -215,13 +215,13 @@ void func_1508F7BC(void) {
 }
 
 /* Adds a block on top; it grows in from zero scale. */
-void func_1508F9C4(void) {
-    D_800D2410[D_800D2456++] = 0.0f;
+void hud_addBlock(void) {
+    gHudBlockScales[gHudBlockCount++] = 0.0f;
 }
 
 
 /* Spawns and animates the bubbles while player 1 is in water (driven by its unkB2 counter). */
-void func_1508F9F4(void) {
+void hud_updateBubbles(void) {
     s32 i;
     s32 v;
     s32 spawn;
@@ -259,7 +259,7 @@ void func_1508F9F4(void) {
         spawn = 0;
     }
     for (i = 0; i < 6; i++) {
-        Bubble *p = &D_800D2460[i];
+        Bubble *p = &gHudBubbles[i];
         if (p->state == 2) {
             v = p->timer;
             v -= D_800BE9E4;
@@ -283,7 +283,7 @@ void func_1508F9F4(void) {
                 p->accel = 0;
                 p->angle = func_150ADA20();
                 p->radius = 0x500;
-                p->originX = 252 - ((s32)(p->radius * func_15048A40(p->angle)) >> 8);
+                p->originX = 252 - ((s32)(p->radius * math_sinBinAngle(p->angle)) >> 8);
                 p->phase = 0;
                 p->timer = duration;
             }
@@ -322,7 +322,7 @@ void func_1508F9F4(void) {
             p->size = size;
             p->angle += dt * 5;
             p->radius += dt * 30;
-            p->x = ((s32)(func_15048A40(p->angle) * p->radius) >> 8) + p->originX;
+            p->x = ((s32)(math_sinBinAngle(p->angle) * p->radius) >> 8) + p->originX;
             p->phase += D_800BE9E4 * 10;
         // matching: label steers block layout of case 2's exit
         lbl:
@@ -338,7 +338,7 @@ void func_1508F9F4(void) {
 
 /* Builds this level's overlay display list: blocks, water, bubbles and HUD. Returns the
  * original pointer (drops everything) if the frame's display list buffer would overflow. */
-Gfx *func_1508FD38(register Gfx *gfx) {
+Gfx *hud_drawOverlay(register Gfx *gfx) {
     Gfx *start;
     s32 i;
     s32 step;
@@ -349,10 +349,10 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     if (level == 0x1D) {
         return gfx;
     }
-    gSPPerspNormalize(gfx++, D_800D2454);
-    gSPMatrix(gfx++, &D_800D23D0, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPPerspNormalize(gfx++, gHudPerspNorm);
+    gSPMatrix(gfx++, &gHudProjection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     if (gIsMultiplayer != 0) {
-        gfx = func_150918EC(gfx);
+        gfx = hud_drawMultiplayerHud(gfx);
         // matching: the 0/1 flag variable; testing the comparison directly changes the code
         overflow = D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0] ? 1 : 0;
         if (overflow != 0) {
@@ -360,10 +360,10 @@ Gfx *func_1508FD38(register Gfx *gfx) {
         }
         return gfx;
     }
-    if (D_800D2458 != 0) {
-        gfx = func_150938BC(gfx);
+    if (gHudClockShown != 0) {
+        gfx = hud_drawClock(gfx);
     }
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return gfx;
     }
     if (D_8008CD00 != 0) {
@@ -377,17 +377,17 @@ Gfx *func_1508FD38(register Gfx *gfx) {
             // matching: one line; the loop body's line number steers as1's unrolled store order
             for (i = 0; i < 33; i++) scaled[i] = i;
         }
-        gfx = func_15093B58(gfx, step, scaled, 0x2C30, 1);
+        gfx = hud_drawRadar(gfx, step, scaled, 0x2C30, 1);
     }
-    if (D_800D2428[0] != D_8009DCB4[0]) {
-        gfx = func_150900F0(gfx, 0);
+    if (gHudBlockStackPos[0] != gHudBlockStackPath[0]) {
+        gfx = hud_drawBlocks(gfx, 0);
     } else if (D_800D2588 != NULL) {
         attach_releaseModel(0xB8);
         D_800D2588 = NULL;
     }
-    gfx = func_150911F4(gfx);
+    gfx = hud_drawWaterSurface(gfx);
     gfx = sprite_beginDraw(gfx);
-    gfx = func_15090630(gfx);
+    gfx = hud_drawBubbles(gfx);
     gfx = sprite_endDraw(gfx);
     overflow = D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0] ? 1 : 0;
     if (overflow != 0) {
@@ -397,9 +397,9 @@ Gfx *func_1508FD38(register Gfx *gfx) {
 }
 
 /* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws movement_obj[0].energy
- * blocks at full scale at a fixed spot near D_8009DCB4[3..5], after patching the block display
+ * blocks at full scale at a fixed spot near gHudBlockStackPath[3..5], after patching the block display
  * list's combiner and other-mode commands. */
-Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
+Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
     s32 i;
     s32 count;
     f32 x;
@@ -424,18 +424,18 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
         gDPSetCombine(gfx++, 0x127E24, 0xFFFFF9FC);
         gDPSetEnvColor(gfx++, 0, 0, 0, 0);
     } else {
-        gSPPerspNormalize(gfx++, D_800D2454);
-        gSPMatrix(gfx++, &D_800D23D0, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPPerspNormalize(gfx++, gHudPerspNorm);
+        gSPMatrix(gfx++, &gHudProjection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
         gDPSetOtherMode(gfx++, 0x08AC0F, 0x5041CC);
         gDPSetCombine(gfx++, 0x12D225, 0xFFA7FFFF);
         gDPSetEnvColor(gfx++, 255, 255, 255, D_8008FDCC);
     }
-    count = D_800D2456;
+    count = gHudBlockCount;
     dl = D_800D2588;
     if (fixed != 0) {
-        x = D_8009DCB4[3] - 54.0f;
-        y = D_8009DCB4[4] - 52.0f;
-        z = D_8009DCB4[5] - 344.7000122f;
+        x = gHudBlockStackPath[3] - 54.0f;
+        y = gHudBlockStackPath[4] - 52.0f;
+        z = gHudBlockStackPath[5] - 344.7000122f;
         count = movement_obj[0].energy;
         func_150A8050(base, 50.0f, -20.0f, -20.0f);
         scale = 1.0f;
@@ -456,28 +456,28 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
             } while (op != G_ENDDL);
         }
     } else {
-        x = D_800D2428[0];
-        y = D_800D2428[1];
-        z = D_800D2428[2];
-        func_150A8050(base, D_800D2438[0] + 50.0f, -20.0f, D_800D2438[2] + -20.0f);
+        x = gHudBlockStackPos[0];
+        y = gHudBlockStackPos[1];
+        z = gHudBlockStackPos[2];
+        func_150A8050(base, gHudBlockStackWobble[0] + 50.0f, -20.0f, gHudBlockStackWobble[2] + -20.0f);
     }
-    func_15043EC8(base, 1.0f, 1.0f, 1.0f, x, y, z);
+    math_mtxSetScaleTrans(base, 1.0f, 1.0f, 1.0f, x, y, z);
     for (i = 0; i < count; i++) {
         if (fixed == 0) {
-            scale = D_800D2410[i];
+            scale = gHudBlockScales[i];
         }
         func_150A7CB0(mtx, scale, scale, scale);
-        mtx[3][0] = D_8009DC90[i][0];
-        mtx[3][1] = D_8009DC90[i][1];
-        mtx[3][2] = D_8009DC90[i][2];
+        mtx[3][0] = gHudBlockOffsets[i][0];
+        mtx[3][1] = gHudBlockOffsets[i][1];
+        mtx[3][2] = gHudBlockOffsets[i][2];
         func_150A7A48(mtx, base, mtx);
-        guMtxF2L(mtx, &D_800D2590[i][D_800BE9C0]);
-        gSPMatrix(gfx++, &D_800D2590[i][D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        guMtxF2L(mtx, &gHudBlockMtx[i][D_800BE9C0]);
+        gSPMatrix(gfx++, &gHudBlockMtx[i][D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
         gSPDisplayList(gfx++, dl);
     }
     if (fixed == 0) {
-        for (node = D_800D245C; node != NULL; node = node->next) {
-            func_15043E68(&node->mtx[D_800BE9C0], node->rot.x, node->rot.y, node->rot.z, node->pos.x,
+        for (node = gHudBlockDebris; node != NULL; node = node->next) {
+            math_mtxRotTrans(&node->mtx[D_800BE9C0], node->rot.x, node->rot.y, node->rot.z, node->pos.x,
                           node->pos.y, node->pos.z);
             gSPMatrix(gfx++, &node->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
             gSPDisplayList(gfx++, dl);
@@ -505,7 +505,7 @@ typedef struct TexSprite {
 
 
 /* Draws the bubbles: rising ones (states 1 and 2) wobble, popping ones (state 3) flip randomly. */
-Gfx *func_15090630(Gfx *gfx) {
+Gfx *hud_drawBubbles(Gfx *gfx) {
     s32 i;
     TexSprite sprite;
     s32 first;
@@ -524,27 +524,27 @@ Gfx *func_15090630(Gfx *gfx) {
     gDPSetOtherMode(gfx++, 0x102C0F, 0x0C184244);
     first = TRUE;
     for (i = 0; i < 6; i++) {
-        if (D_800D2460[i].state == 1 || D_800D2460[i].state == 2) {
+        if (gHudBubbles[i].state == 1 || gHudBubbles[i].state == 2) {
             if (first) {
                 texture_getAddress(D_80091840.addr, &tex, 3, 0);
                 first = FALSE;
                 gfx = sprite_loadDescFrame(gfx, &D_800903D4, 0, &sprite, 0, 0, 0, 2, 3);
             }
-            wobble = func_15048A40(D_800D2460[i].phase);
-            x = D_800D2460[i].x;
-            y = D_800D2460[i].y;
-            sprite.w = D_800D2460[i].size * (0.2f * wobble + 1.0f);
-            sprite.h = D_800D2460[i].size * (-0.2f * wobble + 1.0f);
+            wobble = math_sinBinAngle(gHudBubbles[i].phase);
+            x = gHudBubbles[i].x;
+            y = gHudBubbles[i].y;
+            sprite.w = gHudBubbles[i].size * (0.2f * wobble + 1.0f);
+            sprite.h = gHudBubbles[i].size * (-0.2f * wobble + 1.0f);
             gfx = sprite_drawScreen(gfx, &sprite, x, y);
         }
     }
     first = TRUE;
     for (i = 0; i != 6; i++) {
         flags = 0;
-        if (D_800D2460[i].state == 3) {
-            size = D_800D2460[i].size;
-            x = D_800D2460[i].x;
-            y = D_800D2460[i].y;
+        if (gHudBubbles[i].state == 3) {
+            size = gHudBubbles[i].size;
+            x = gHudBubbles[i].x;
+            y = gHudBubbles[i].y;
             sprite.w = size;
             sprite.h = size;
             if ((u8)func_150ADA20() < 0x80U) {
@@ -559,12 +559,12 @@ Gfx *func_15090630(Gfx *gfx) {
                 gfx = sprite_loadDescFrame(gfx, &D_80091840, 0, &sprite, 0, 0, 0, 2, 3);
             }
             gfx = sprite_drawScreen(gfx, &sprite, x, y);
-            timer = D_800D2460[i].timer;
+            timer = gHudBubbles[i].timer;
             timer -= D_800BE9E4;
             if (timer < 0) {
                 timer = 0;
             }
-            D_800D2460[i].timer = timer;
+            gHudBubbles[i].timer = timer;
         }
     }
     return gfx;
@@ -572,7 +572,7 @@ Gfx *func_15090630(Gfx *gfx) {
 
 /* Animates the water surface mesh while player 1 is in water: blends its vertex positions,
  * tints its vertex colours and picks its textures by player 1's unkB2 counter. */
-void func_1509093C(void) {
+void hud_updateWaterSurface(void) {
     WaterVtx *dst;
     WaterBase *base;
     WaterBase *target;
@@ -605,54 +605,54 @@ void func_1509093C(void) {
         intensity = 0;
     }
     if (intensity > 90) {
-        if (D_800D24C8.alpha == 0) {
-            D_800D24C8.alpha = 255;
-            D_800D24C8.unk94 = 0.0f;
-            D_800D24C8.unk98 = 0.02f;
-            D_800D24C8.unkA0 = 0;
-            D_800D24C8.unkA4 = 3.2f;
-            D_800D24C8.unkA8 = 0;
-            D_800D24C8.unkAC = 0;
-            D_800D24C8.timer = (func_150ADA20() & 63) + 60;
+        if (gHudWaterStage.alpha == 0) {
+            gHudWaterStage.alpha = 255;
+            gHudWaterStage.unk94 = 0.0f;
+            gHudWaterStage.unk98 = 0.02f;
+            gHudWaterStage.unkA0 = 0;
+            gHudWaterStage.unkA4 = 3.2f;
+            gHudWaterStage.unkA8 = 0;
+            gHudWaterStage.unkAC = 0;
+            gHudWaterStage.timer = (func_150ADA20() & 63) + 60;
         }
     } else {
-        D_800D24C8.alpha = 0;
+        gHudWaterStage.alpha = 0;
         return;
     }
-    D_800D24C8.unk9C = (u32)movement_obj->unkB2 / 720.0f;
-    if (D_800D24C8.unk9C > 1.0f) {
-        D_800D24C8.unk9C = 1.0f;
+    gHudWaterStage.unk9C = (u32)movement_obj->unkB2 / 720.0f;
+    if (gHudWaterStage.unk9C > 1.0f) {
+        gHudWaterStage.unk9C = 1.0f;
     }
     if (intensity < 1441) {
-        D_800D24C8.unk94 += D_800D24C8.unk98 * D_800BE9E4;
-        lo = D_800D24C8.unk9C - 0.2f;
+        gHudWaterStage.unk94 += gHudWaterStage.unk98 * D_800BE9E4;
+        lo = gHudWaterStage.unk9C - 0.2f;
         if (lo < 0.0f) {
             lo = 0.0f;
         }
-        if (D_800D24C8.unk94 <= lo) {
-            D_800D24C8.unk94 = (lo + lo) - D_800D24C8.unk94;
-            D_800D24C8.unk98 = -D_800D24C8.unk98;
+        if (gHudWaterStage.unk94 <= lo) {
+            gHudWaterStage.unk94 = (lo + lo) - gHudWaterStage.unk94;
+            gHudWaterStage.unk98 = -gHudWaterStage.unk98;
         } else {
-            hi = D_800D24C8.unk9C + 0.2f;
+            hi = gHudWaterStage.unk9C + 0.2f;
             if (hi > 1.0f) {
                 hi = 1.0f;
             }
-            if (hi <= D_800D24C8.unk94) {
-                D_800D24C8.unk94 = (hi + hi) - D_800D24C8.unk94;
-                D_800D24C8.unk98 = -D_800D24C8.unk98;
+            if (hi <= gHudWaterStage.unk94) {
+                gHudWaterStage.unk94 = (hi + hi) - gHudWaterStage.unk94;
+                gHudWaterStage.unk98 = -gHudWaterStage.unk98;
             }
         }
     }
-    if (D_800D24C8.dl == 0) {
+    if (gHudWaterStage.dl == 0) {
         attach_loadModel(0xB9, &dlists, &numDLists, &vtxStart, &unkOut1, &unkOut2, &unkOut3);
-        D_800D24C8.dl = *dlists;
-        D_800D24C8.count = ((u32)dlists - (u32)vtxStart) >> 4;
-        D_800D24C8.vtx[0] = vtxStart;
-        D_800D24C8.vtx[1] = allocate_memory(D_800D24C8.count * sizeof(WaterVtx), 1, 2, 0);
-        bcopy(vtxStart, D_800D24C8.vtx[1], D_800D24C8.count * sizeof(WaterVtx));
-        D_800D24C8.shapes[0] = allocate_memory(D_800D24C8.count * sizeof(WaterBase), 1, 0, 0);
-        target = D_800D24C8.shapes[0];
-        for (i = 0; i < D_800D24C8.count; i++) {
+        gHudWaterStage.dl = *dlists;
+        gHudWaterStage.count = ((u32)dlists - (u32)vtxStart) >> 4;
+        gHudWaterStage.vtx[0] = vtxStart;
+        gHudWaterStage.vtx[1] = allocate_memory(gHudWaterStage.count * sizeof(WaterVtx), 1, 2, 0);
+        bcopy(vtxStart, gHudWaterStage.vtx[1], gHudWaterStage.count * sizeof(WaterVtx));
+        gHudWaterStage.shapes[0] = allocate_memory(gHudWaterStage.count * sizeof(WaterBase), 1, 0, 0);
+        target = gHudWaterStage.shapes[0];
+        for (i = 0; i < gHudWaterStage.count; i++) {
             target[i].ob[0] = vtxStart[i].ob[0];
             target[i].ob[1] = vtxStart[i].ob[1];
             target[i].ob[2] = vtxStart[i].ob[2];
@@ -663,46 +663,46 @@ void func_1509093C(void) {
         }
         /* shapes[0] is the rest shape copied above; the others are loaded */
         for (i = 1; i < 2; i++) {
-            rom_loadPathTo(&D_800D24C8.shapes[i], 2, 0x18, i - 1);
+            rom_loadPathTo(&gHudWaterStage.shapes[i], 2, 0x18, i - 1);
         }
     }
-    base = D_800D24C8.shapes[0];
-    dst = D_800D24C8.vtx[D_800BE9C0];
-    target = D_800D24C8.shapes[1];
-    blend = D_800D24C8.unk94;
-    for (i = 0; i < D_800D24C8.count; i++) {
+    base = gHudWaterStage.shapes[0];
+    dst = gHudWaterStage.vtx[D_800BE9C0];
+    target = gHudWaterStage.shapes[1];
+    blend = gHudWaterStage.unk94;
+    for (i = 0; i < gHudWaterStage.count; i++) {
         dst[i].ob[0] = base[i].ob[0] + ((f32)target[i].ob[0] - (f32)base[i].ob[0]) * blend;
         dst[i].ob[1] = base[i].ob[1] + ((f32)target[i].ob[1] - (f32)base[i].ob[1]) * blend;
         dst[i].ob[2] = base[i].ob[2] + ((f32)target[i].ob[2] - (f32)base[i].ob[2]) * blend;
     }
     if (intensity < 480) {
         tex = D_8009026C;
-        D_800D24C8.tex[3] = tex;
-        D_800D24C8.tex[2] = tex;
+        gHudWaterStage.tex[3] = tex;
+        gHudWaterStage.tex[2] = tex;
         tex = D_80090258;
-        D_800D24C8.tex[1] = tex;
-        D_800D24C8.tex[0] = tex;
+        gHudWaterStage.tex[1] = tex;
+        gHudWaterStage.tex[0] = tex;
     } else if (intensity < 960) {
         tex = D_80090270;
-        D_800D24C8.tex[3] = tex;
-        D_800D24C8.tex[2] = tex;
+        gHudWaterStage.tex[3] = tex;
+        gHudWaterStage.tex[2] = tex;
         tex = D_80090258;
-        D_800D24C8.tex[1] = tex;
-        D_800D24C8.tex[0] = tex;
+        gHudWaterStage.tex[1] = tex;
+        gHudWaterStage.tex[0] = tex;
     } else if (intensity < 1200) {
         tex = D_80090270;
-        D_800D24C8.tex[3] = tex;
-        D_800D24C8.tex[2] = tex;
+        gHudWaterStage.tex[3] = tex;
+        gHudWaterStage.tex[2] = tex;
         tex = D_80090264;
-        D_800D24C8.tex[1] = tex;
-        D_800D24C8.tex[0] = tex;
+        gHudWaterStage.tex[1] = tex;
+        gHudWaterStage.tex[0] = tex;
     } else {
         tex = D_80090270;
-        D_800D24C8.tex[3] = tex;
-        D_800D24C8.tex[2] = tex;
+        gHudWaterStage.tex[3] = tex;
+        gHudWaterStage.tex[2] = tex;
         tex = D_80090260;
-        D_800D24C8.tex[1] = tex;
-        D_800D24C8.tex[0] = tex;
+        gHudWaterStage.tex[1] = tex;
+        gHudWaterStage.tex[0] = tex;
     }
     fadeRaw = (intensity - 720) * 255;
     fade = fadeRaw / 480;
@@ -720,7 +720,7 @@ void func_1509093C(void) {
     // matching: the dead store, the do-while shape and the |= 0 no-ops steer uopt's register choice
     fade = 0;
     i = 0;
-    if (i < D_800D24C8.count) {
+    if (i < gHudWaterStage.count) {
         r |= 0;
         g |= 0;
         b |= 0;
@@ -739,95 +739,95 @@ void func_1509093C(void) {
                 dst[i].cn[2] = b2;
             }
             i++;
-        } while (i < D_800D24C8.count);
+        } while (i < gHudWaterStage.count);
     }
     dt = D_800BE9E4;
     if (fadeRaw > 0x2CE2E) {
-        D_800D24C8.unkAC = 0.0f;
+        gHudWaterStage.unkAC = 0.0f;
     } else if (fadeRaw > 0x1DF1E) {
-        if (fabsf(D_800D24C8.unkAC) < 0.6f) {
-            D_800D24C8.unkAC = 0.6f;
+        if (fabsf(gHudWaterStage.unkAC) < 0.6f) {
+            gHudWaterStage.unkAC = 0.6f;
         }
-    } else if (D_800D24C8.timer != 0) {
-        tmp = D_800D24C8.timer - D_800BE9E4;
+    } else if (gHudWaterStage.timer != 0) {
+        tmp = gHudWaterStage.timer - D_800BE9E4;
         if (tmp <= 0) {
             tmp = 0;
-            D_800D24C8.unkAC = 0.2f;
-            D_800D24C8.unkA8 = dt * D_800D24C8.unkAC;
+            gHudWaterStage.unkAC = 0.2f;
+            gHudWaterStage.unkA8 = dt * gHudWaterStage.unkAC;
         }
-        D_800D24C8.timer = tmp;
+        gHudWaterStage.timer = tmp;
     }
-    D_800D24C8.unkA8 += D_800D24C8.unkAC * dt;
-    if (D_800D24C8.unkA8 > 2.0f) {
-        D_800D24C8.unkA8 = 4.0f - D_800D24C8.unkA8;
-        D_800D24C8.unkAC = -D_800D24C8.unkAC;
-    } else if (D_800D24C8.unkA8 < -2.0f) {
-        D_800D24C8.unkA8 = -4.0f - D_800D24C8.unkA8;
-        D_800D24C8.unkAC = -D_800D24C8.unkAC;
-    } else if (D_800D24C8.timer == 0 && fadeRaw < 480 * 255 && D_800D24C8.unkA8 >= 0 && D_800D24C8.unkA8 < D_800D24C8.unkAC * dt) {
-        D_800D24C8.timer = (func_150ADA20() & 63) + 60;
-        D_800D24C8.unkA8 = 0.0f;
-        D_800D24C8.unkAC = 0.0f;
+    gHudWaterStage.unkA8 += gHudWaterStage.unkAC * dt;
+    if (gHudWaterStage.unkA8 > 2.0f) {
+        gHudWaterStage.unkA8 = 4.0f - gHudWaterStage.unkA8;
+        gHudWaterStage.unkAC = -gHudWaterStage.unkAC;
+    } else if (gHudWaterStage.unkA8 < -2.0f) {
+        gHudWaterStage.unkA8 = -4.0f - gHudWaterStage.unkA8;
+        gHudWaterStage.unkAC = -gHudWaterStage.unkAC;
+    } else if (gHudWaterStage.timer == 0 && fadeRaw < 480 * 255 && gHudWaterStage.unkA8 >= 0 && gHudWaterStage.unkA8 < gHudWaterStage.unkAC * dt) {
+        gHudWaterStage.timer = (func_150ADA20() & 63) + 60;
+        gHudWaterStage.unkA8 = 0.0f;
+        gHudWaterStage.unkAC = 0.0f;
     }
-    if (fadeRaw >= 720 * 255 && D_800D24C8.unkA0 > -22.0f) {
-        D_800D24C8.unkA4 -= 0.25f * D_800BE9E4;
-        D_800D24C8.unkA0 += D_800D24C8.unkA4;
+    if (fadeRaw >= 720 * 255 && gHudWaterStage.unkA0 > -22.0f) {
+        gHudWaterStage.unkA4 -= 0.25f * D_800BE9E4;
+        gHudWaterStage.unkA0 += gHudWaterStage.unkA4;
     }
 }
 
-/* Draws the water surface mesh animated by func_1509093C. */
-Gfx *func_150911F4(Gfx *gfx) {
+/* Draws the water surface mesh animated by hud_updateWaterSurface. */
+Gfx *hud_drawWaterSurface(Gfx *gfx) {
     s32 texBuf[6];
     f32 y;
     f32 x;
     s32 tex;
 
-    if (D_800D24C8.alpha == 0) {
+    if (gHudWaterStage.alpha == 0) {
         return gfx;
     }
     gSPDisplayList(gfx++, gObjectPassBeginDL);
     gSPSetGeometryMode(gfx++, G_CULL_BACK);
     gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     gSPClearGeometryMode(gfx++, G_LIGHTING | 0x400000);
-    if (D_800D24C8.alpha < 255) {
+    if (gHudWaterStage.alpha < 255) {
         gSPSegment(gfx++, 8, D_80083440);
     } else {
         gSPSegment(gfx++, 8, D_800835C0);
     }
-    y = -11.0f + D_800D24C8.unkA8;
-    x = -1.0f - D_800D24C8.unkA0;
-    func_15043D90(&D_800D24C8.mtx[D_800BE9C0], x, y, 0.0f,
+    y = -11.0f + gHudWaterStage.unkA8;
+    x = -1.0f - gHudWaterStage.unkA0;
+    math_mtxRotScaleTrans(&gHudWaterStage.mtx[D_800BE9C0], x, y, 0.0f,
                   4.05f, 4.05f, 4.05f, 667.0f, 152.0f, -1668.0f);
-    gSPMatrix(gfx++, &D_800D24C8.mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gHudWaterStage.mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gDPSetFogColor(gfx++, 0, 0, 0, 255);
     gDPSetPrimColor(gfx++, 0xF2, 0, 0, 0, 0, 0);
-    gDPSetEnvColor(gfx++, 0, 0, 0, D_800D24C8.alpha);
-    gSPSegment(gfx++, 3, &D_800D24C8.mtx[D_800BE9C0]);
-    gSPSegment(gfx++, 1, D_800D24C8.vtx[D_800BE9C0]);
-    if (D_800D24C8.tex[0]) {
-        tex = texture_getAddress(D_800D24C8.tex[0], texBuf, 3, 0);
+    gDPSetEnvColor(gfx++, 0, 0, 0, gHudWaterStage.alpha);
+    gSPSegment(gfx++, 3, &gHudWaterStage.mtx[D_800BE9C0]);
+    gSPSegment(gfx++, 1, gHudWaterStage.vtx[D_800BE9C0]);
+    if (gHudWaterStage.tex[0]) {
+        tex = texture_getAddress(gHudWaterStage.tex[0], texBuf, 3, 0);
         gSPSegment(gfx++, 6, tex);
     }
-    if (D_800D24C8.tex[1]) {
-        tex = texture_getAddress(D_800D24C8.tex[1], texBuf, 3, 0);
+    if (gHudWaterStage.tex[1]) {
+        tex = texture_getAddress(gHudWaterStage.tex[1], texBuf, 3, 0);
         gSPSegment(gfx++, 7, tex);
     }
-    if (D_800D24C8.tex[2]) {
-        tex = texture_getAddress(D_800D24C8.tex[2], texBuf, 3, 0);
+    if (gHudWaterStage.tex[2]) {
+        tex = texture_getAddress(gHudWaterStage.tex[2], texBuf, 3, 0);
         gSPSegment(gfx++, 10, tex);
     }
-    if (D_800D24C8.tex[3]) {
-        tex = texture_getAddress(D_800D24C8.tex[3], texBuf, 3, 0);
+    if (gHudWaterStage.tex[3]) {
+        tex = texture_getAddress(gHudWaterStage.tex[3], texBuf, 3, 0);
         gSPSegment(gfx++, 11, tex);
     }
-    gSPDisplayList(gfx++, D_800D24C8.dl);
+    gSPDisplayList(gfx++, gHudWaterStage.dl);
     gSPDisplayList(gfx++, gObjectPassEndDL);
     return gfx;
 }
 
 /* Loads HUD icon sheet D_D16 + `sheet` (a 64x64 CI4 texture with its palette after it).
  * Sets *loaded when the texture was available. */
-Gfx *func_15091534(Gfx *gfx, s32 sheet, u8 *loaded) {
+Gfx *hud_loadIconSheet(Gfx *gfx, s32 sheet, u8 *loaded) {
     s32 tex;
 
     *loaded = FALSE;
@@ -854,7 +854,7 @@ Gfx *func_15091534(Gfx *gfx, s32 sheet, u8 *loaded) {
 
 /* Prints a race time given in frames (60 per second) as minutes, seconds and hundredths,
  * capped at 99 minutes; a negative time prints the placeholder strings instead. */
-void func_150916B4(s32 x, s32 y, s32 frames, s32 style) {
+void hud_printRaceTime(s32 x, s32 y, s32 frames, s32 style) {
     s32 pad[2]; // matching: reserves the original frame size
     s32 seconds;
     s32 hundredths;
@@ -891,8 +891,8 @@ extern u8 D_D14[];
  * 0x002 an icon picked by player_getStat(i, 3), 0x400 score, 0x800 name, 0x004 held-item icons
  * (repeated per count) and bars from ActorCtl field 0x12C, 0x010 two rows of bars from
  * player_getStat(i, 4), grenade icons, 0x080 race time and lap, 0x1000 a map with player dots,
- * 0x020 the radar (func_15093B58). */
-Gfx *func_150918EC(Gfx *gfx) {
+ * 0x020 the radar (hud_drawRadar). */
+Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
     s32 i;
     s32 j;
     s32 x;
@@ -1079,7 +1079,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                         j = 0;
                         if (!texLoaded) {
                             texLoaded = 1;
-                            gfx = func_15091534(gfx, 0, &texOk);
+                            gfx = hud_loadIconSheet(gfx, 0, &texOk);
                         }
                         x = (vpRight - scaled[25]) * 4;
                         texT = D_800873B4[icon / 3] << 5;
@@ -1102,7 +1102,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                 }
                 if (D_8008FDC0 & 0x10) {
                     if (!texLoaded) {
-                        gfx = func_15091534(gfx, 0, &texOk);
+                        gfx = hud_loadIconSheet(gfx, 0, &texOk);
                     }
                     s = player_getStat(i, 4);
                     x = scaled[22] + vpLeft;
@@ -1181,7 +1181,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                 if (icon >= 0) {
                     if (!texLoaded) {
                         texLoaded = 1;
-                        gfx = func_15091534(gfx, 1, &texOk);
+                        gfx = hud_loadIconSheet(gfx, 1, &texOk);
                     }
                     x = vpRight - scaled[25];
                     texS = (icon % 3) * 25;
@@ -1281,14 +1281,14 @@ Gfx *func_150918EC(Gfx *gfx) {
             text_setColor(255, 255, 255, 255);
             if (gRacers[i].lastLapTime > 0) {
                 x = gViews[i].left;
-                func_150916B4(x + 23, rowY + 25, gRacers[i].lastLapTime, 0xC0);
+                hud_printRaceTime(x + 23, rowY + 25, gRacers[i].lastLapTime, 0xC0);
             }
             x = (s32)gViews[i].left + (vpWidth >> 1);
             icon = (s8)(gRacers[i].lap + 1); /* the current lap */
             if (icon <= lapCount) {
                 text_printAt(x, rowY, 0xC1, "%s", gTextStrings[8 + gPlayerRanks[i]]);
                 text_printAt((s32)gViews[i].left + 29, rowY + 14, 0xC1, "lap %d/%d", icon, lapCount);
-                func_150916B4(x, (s32)gViews[i].bottom - 12, gRacers[i].raceTime, 0xC0);
+                hud_printRaceTime(x, (s32)gViews[i].bottom - 12, gRacers[i].raceTime, 0xC0);
             }
         }
     }
@@ -1354,34 +1354,34 @@ Gfx *func_150918EC(Gfx *gfx) {
         }
     }
     if (gPauseRequested == 0 && (D_8008FDC0 & 0x20)) {
-        gfx = func_15093B58(gfx, step, scaled, 0x2C30, 0);
+        gfx = hud_drawRadar(gfx, step, scaled, 0x2C30, 0);
     }
     return gfx;
 }
 
-/* Turns the on-screen clock (func_150938BC) on or off, loading its model when turned on. */
-void func_15093818(s32 enable) {
-    if ((enable != 0) && (D_800D2458 == 0)) {
-        D_800D2458 = 1;
-        func_15093878();
+/* Turns the on-screen clock (hud_drawClock) on or off, loading its model when turned on. */
+void hud_setClockEnabled(s32 enable) {
+    if ((enable != 0) && (gHudClockShown == 0)) {
+        gHudClockShown = 1;
+        hud_loadClock();
         return;
     }
-    if ((enable == 0) && (D_800D2458 != 0)) {
-        D_800D2458 = 0;
+    if ((enable == 0) && (gHudClockShown != 0)) {
+        gHudClockShown = 0;
     }
 }
 
 /* Loads the clock model and allocates its two (double-buffered) matrices. */
-void func_15093878(void) {
-    D_800D2448 = attach_loadModelDl(0xBA);
-    D_800D244C = allocate_memory(2 * sizeof(Mtx), 1, 1, 0);
+void hud_loadClock(void) {
+    gHudClockDl = attach_loadModelDl(0xBA);
+    gHudClockMtx = allocate_memory(2 * sizeof(Mtx), 1, 1, 0);
 }
 
 extern u8 D_11AD[];
 
-/* Draws the clock: the four digits of D_800D2450 (frame count, 30 per second) as minutes and
+/* Draws the clock: the four digits of gHudClockTime (frame count, 30 per second) as minutes and
  * seconds go into segments 1-4 as digit textures from D_11AD, then the clock model. */
-Gfx *func_150938BC(Gfx *gfx) {
+Gfx *hud_drawClock(Gfx *gfx) {
     s32 x = 120;
     s32 y = 129;
     s32 z = -303;
@@ -1389,7 +1389,7 @@ Gfx *func_150938BC(Gfx *gfx) {
     s32 value;
     s32 tex;
 
-    value = (D_800D2450 / 30) % 60;
+    value = (gHudClockTime / 30) % 60;
     segment = 4;
     do {
         tex = texture_getAddress((s32)D_11AD + (value % 10), 0, 3, 0);
@@ -1398,23 +1398,23 @@ Gfx *func_150938BC(Gfx *gfx) {
         }
         gSPSegment(gfx++, segment, tex);
         if (segment == 3) {
-            value = (D_800D2450 / 30) / 60;
+            value = (gHudClockTime / 30) / 60;
         } else {
             value = value / 10;
         }
         segment--;
     } while (segment != 0);
 
-    func_150A7D00(&D_800D244C[D_800BE9C0], x, y, z);
-    gSPMatrix(gfx++, &D_800D244C[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPDisplayList(gfx++, D_800D2448);
+    func_150A7D00(&gHudClockMtx[D_800BE9C0], x, y, z);
+    gSPMatrix(gfx++, &gHudClockMtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPDisplayList(gfx++, gHudClockDl);
     return gfx;
 }
 
 /* Draws the radar: a disc around each local player (larger when `large`) with a dot for every
  * visible other character, rotated by the camera heading; a dot gets a bar above or below it when
- * the character is on a higher or lower floor (func_15085DA8). */
-Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
+ * the character is on a higher or lower floor (path_getLayerAt). */
+Gfx *hud_drawRadar(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
     f32 scale;
     f32 zoom;
     f32 sinv;
@@ -1512,7 +1512,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 px = obj->xpos; pz = obj->zpos;
 #line 20000
                 skip = -1;
-                floor = func_15085DA8(obj->ypos);
+                floor = path_getLayerAt(obj->ypos);
             } else {
                 cam2 = obj->CameraPtr;
                 obj = movement_obj;
@@ -1523,7 +1523,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 obj += skip;
                 px = obj->xpos;
                 pz = obj->zpos;
-                floor = func_15085DA8(obj->ypos);
+                floor = path_getLayerAt(obj->ypos);
             }
             for (j = 0; j != 25; j++) {
                 s32 color;
@@ -1572,7 +1572,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                                 yh = ry + dotSize;
                                 yl = ry - dotSize;
                                 gSPScisTextureRectangle(gfx++, xl, yl, xh, yh, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
-                                otherFloor = func_15085DA8(other->ypos);
+                                otherFloor = path_getLayerAt(other->ypos);
                                 if (floor != otherFloor) {
                                     gDPPipeSync(gfx++);
                                     gDPSetEnvColor(gfx++, 0, 0, 0, 255);

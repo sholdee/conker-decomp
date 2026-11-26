@@ -116,16 +116,16 @@ void screen_setFrameEcho(s32 arg0, s32 arg1) {
     if (arg1 == 0) {
         arg0 = 0;
     }
-    D_800BE574 = arg0;
+    gScreenCopyAlpha = arg0;
     if (arg0 != 0) {
         D_800BE575 = arg1;
     } else {
         D_800BE575 = 0;
     }
     if (arg0 == 0) {
-        if (D_800BE570 != NULL) {
-            heap_setTag((s32 *)(s32)D_800BE570, 3); // matching: the int round trip keeps the load in v0
-            D_800BE570 = NULL;
+        if (gScreenCopy != NULL) {
+            heap_setTag((s32 *)(s32)gScreenCopy, 3); // matching: the int round trip keeps the load in v0
+            gScreenCopy = NULL;
         }
     }
 }
@@ -134,22 +134,22 @@ Gfx *screen_drawFrameEcho(Gfx *gfx) {
     s32 alpha;
     u16 *img;
 
-    if ((D_800BE574 == 0 && level != 0x32 && level != 0x33) || gPaused != 0) {
+    if ((gScreenCopyAlpha == 0 && level != 0x32 && level != 0x33) || gPaused != 0) {
         return gfx;
     }
-    alpha = D_800BE574;
-    if (D_800BE574 != 0) {
+    alpha = gScreenCopyAlpha;
+    if (gScreenCopyAlpha != 0) {
         gDPPipeSync(gfx++);
-        img = D_800BE570;
+        img = gScreenCopy;
         if (img != NULL) {
             gfx = screen_drawImageAlpha(gfx, (u8 *)img, 0, alpha);
         } else {
-            D_800BE570 = allocate_memory(gScreenWidth * gScreenHeight * 2, 1, 3, 1);
-            if (D_800BE570 == NULL) {
+            gScreenCopy = allocate_memory(gScreenWidth * gScreenHeight * 2, 1, 3, 1);
+            if (gScreenCopy == NULL) {
                 return gfx;
             }
         }
-        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, D_800BE570);
+        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gScreenCopy);
         gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, gScreenWidth, gScreenHeight);
         gfx = screen_drawImage(gfx, gFramebuffers[D_800BE9C0], 0, 4);
         gDPSetOtherMode(gfx++, 0x82C3F, 0x552230);

@@ -106,10 +106,10 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         dstPoints[1] = &dir;
     }
     dstPoints[2] = &edgeB;
-    func_15145EA4(srcPoints, dstPoints, matrix, useTarget ? 3 : 2);
+    math_transformOffsets(srcPoints, dstPoints, matrix, useTarget ? 3 : 2);
     if (useTarget) {
         // matching: a declaration here opens a -g3 scope block (scheduling)
-        extern void func_151450B4(Vec3f *, Vec3f *, Vec3f *);
+        extern void math_vec3Cross(Vec3f *, Vec3f *, Vec3f *);
 
         linePoint = &target->mv->aimEye;
         edgeA.x -= origin.x;
@@ -118,7 +118,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         edgeB.x -= origin.x;
         edgeB.y -= origin.y;
         edgeB.z -= origin.z;
-        func_151450B4(&edgeA, &edgeB, &normal);
+        math_vec3Cross(&edgeA, &edgeB, &normal);
         dx = origin.x - linePoint->x;
         dy = origin.y - linePoint->y;
         dz = origin.z - linePoint->z;
@@ -299,7 +299,7 @@ void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj) {
 
     state = &obj->state;
     owner = state->owner;
-    if ((owner->type == 0) || (owner->character_type == 0xFF) || (owner->unique_id != state->ownerUniqueId) || (D_800C35EA[0] == 1)) {
+    if ((owner->type == 0) || (owner->character_type == 0xFF) || (owner->unique_id != state->ownerUniqueId) || (gCutsceneStates[0] == 1)) {
         obj->base.header.state = -1;
         return;
     }

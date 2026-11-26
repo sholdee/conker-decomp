@@ -53,7 +53,7 @@ void particle_spawnBoneGroundBurst(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     }
     collision_initHitFromObject(&ground, owner);
     def = &D_800A0640[index];
-    func_15143134(&def->offset, &pos, &owner->ob_matrix_ptr[def->bone]);
+    math_transformOffset(&def->offset, &pos, &owner->ob_matrix_ptr[def->bone]);
     {
         Vec3f ray;
 
@@ -234,7 +234,7 @@ s32 particle_spawnYawDampedSprite(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 a
 
     random = func_150ADA20();
     speed = (func_150ADA68() * 200.0f + 350.0f) * 0.1000000015f;
-    func_15143794(yaw, (random % 21U) - 25, speed, &spawn.vel);
+    math_dirFromBinAngles(yaw, (random % 21U) - 25, speed, &spawn.vel);
 
     spawn.gravity = 0.0f;
     spawn.flags = 0xE05;
@@ -302,7 +302,7 @@ s32 particle_spawnYawTumbler(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     random = func_150ADA20();
     speed = (func_150ADA68() * 200.0f + 300.0f) * 0.1000000015f;
-    func_15143794(yaw, (random % 44U) - 63, speed, &spawn.vel);
+    math_dirFromBinAngles(yaw, (random % 44U) - 63, speed, &spawn.vel);
 
     spawn.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
     spawn.rotVel.z = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;

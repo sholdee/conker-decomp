@@ -284,7 +284,7 @@ void beam_updateBoneSparks(BoneSparkEffect *effect) {
             srcs[1] = &D_800A1B0C;
             dsts[0] = &start;
             dsts[1] = &end;
-            func_15145EA4(srcs, dsts, &owner->ob_matrix_ptr[5], 2);
+            math_transformOffsets(srcs, dsts, &owner->ob_matrix_ptr[5], 2);
             spawn.texture = 0x6C;
             spawn.renderMode = 0x5103;
             spawn.unk0 = 0x200005;
@@ -296,7 +296,7 @@ void beam_updateBoneSparks(BoneSparkEffect *effect) {
             dx = end.x - start.x;
             dy = end.y - start.y;
             dz = end.z - start.z;
-            spawn.offset = D_800A5480;
+            spawn.offset = gZeroVec3f;
             spawn.flags = 0x84CE07;
             spawn.primColorMode = 8;
             spawn.envColorMode = 6;
@@ -376,7 +376,7 @@ void beam_updateModelBeam(ModelBeamEffect *effect) {
         srcs[1] = &D_800A1B24;
         dsts[0] = &start;
         dsts[1] = &end;
-        func_15145EA4(srcs, dsts, owner->ob_matrix_ptr, 2);
+        math_transformOffsets(srcs, dsts, owner->ob_matrix_ptr, 2);
         if (data->beam != NULL) {
             beam = data->beam;
             beam->part.flags |= 1;
@@ -466,12 +466,12 @@ void func_150F6478(DefParticleHead *obj) {
 
 void func_150F6484(DefParticleHead *obj) {
     func_150F6478(obj);
-    func_151411A4(obj);
+    flare_destroyGlowDefault(obj);
 }
 
 void func_150F64B0(DefParticleHead *obj) {
     func_150F6478(obj);
-    func_151411C4(obj);
+    flare_freeGlowDefault(obj);
 }
 
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
@@ -503,7 +503,7 @@ void beam_updateFlashBurst(FlashBurstEffect *effect) {
                 s32 rand2;
                 s32 rand3;
 
-                func_15143134(&D_800A1B30, &pos, owner->ob_matrix_ptr);
+                math_transformOffset(&D_800A1B30, &pos, owner->ob_matrix_ptr);
                 header.flags = 3;
                 header.update = -1;
                 header.lifetime = (func_150ADA20() % 9U) + 10;

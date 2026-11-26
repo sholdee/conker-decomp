@@ -32,7 +32,7 @@ dummy_label_927029:
     }
 }
 
-/* Clears the flag that script command 2 sets and the two 14-byte tables after it (as func_1500E5C0 does). */
+/* Clears the flag that script command 2 sets and the two 14-byte tables after it (as level_resetSetupState does). */
 void func_15010600(void) {
     s32 i;
 

@@ -7,7 +7,7 @@
 #pragma function sqrtf
 
 /* Builds an Mtx from a rotation (func_150A8050), per-axis scale and translation. */
-void func_15043D90(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY, f32 scaleZ, f32 x, f32 y, f32 z) {
+void math_mtxRotScaleTrans(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY, f32 scaleZ, f32 x, f32 y, f32 z) {
     MtxF mtx;
 
     func_150A8050(mtx, rotX, rotY, rotZ);
@@ -27,7 +27,7 @@ void func_15043D90(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY,
 }
 
 /* Builds an Mtx from a rotation (func_150A8050) and translation. */
-void func_15043E68(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
+void math_mtxRotTrans(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
     MtxF mtx;
 
     func_150A8050(mtx, rotX, rotY, rotZ);
@@ -38,7 +38,7 @@ void func_15043E68(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
 }
 
 /* Sets mtx's translation and scales its three basis rows by x, y and z. */
-void func_15043EC8(MtxF mtx, f32 x, f32 y, f32 z, f32 transX, f32 transY, f32 transZ) {
+void math_mtxSetScaleTrans(MtxF mtx, f32 x, f32 y, f32 z, f32 transX, f32 transY, f32 transZ) {
     mtx[3][0] = transX;
     mtx[3][1] = transY;
     mtx[3][2] = transZ;
@@ -54,7 +54,7 @@ void func_15043EC8(MtxF mtx, f32 x, f32 y, f32 z, f32 transX, f32 transY, f32 tr
 }
 
 /* Builds a rotate-scale matrix (func_150A9B0C) with translation x, y, z and a clean last column. */
-void func_15043F6C(MtxF mtx, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY, f32 scaleZ, f32 x, f32 y, f32 z) {
+void math_mtxFRotScaleTrans(MtxF mtx, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY, f32 scaleZ, f32 x, f32 y, f32 z) {
     func_150A9B0C(mtx, rotX, rotY, rotZ, scaleX, scaleY, scaleZ);
     mtx[3][0] = x;
     mtx[3][1] = y;
@@ -80,7 +80,7 @@ void math_mtxGetTranslation(Vec3f *out, Mtx *mtx) {
  * Builds a look-at orientation from eye, target and up: columns hold the right, up and look axes
  * (look is the negated eye->target direction, as in guLookAtF), and the translation row is the eye itself.
  */
-void func_150440A0(MtxF mtx, f32 eyeX, f32 eyeY, f32 eyeZ, f32 atX, f32 atY, f32 atZ, f32 upX, f32 upY, f32 upZ) {
+void math_mtxLookAt(MtxF mtx, f32 eyeX, f32 eyeY, f32 eyeZ, f32 atX, f32 atY, f32 atZ, f32 upX, f32 upY, f32 upZ) {
     f32 lookX;
     f32 lookY;
     f32 lookZ;

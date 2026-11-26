@@ -13,7 +13,7 @@ static const Vec3f D_800AA368 = { 27.0f, 42.0f, 0.0f };
 static const Vec3f D_800AA374 = { -27.0f, 42.0f, 0.0f };
 
 /* Spawns a RopeTie between `obj` and the object from collision_findObjectById(1). */
-void func_151B2060(Actor *obj) {
+void rope_spawnTie(Actor *obj) {
     RopeTie *effect;
     RopeTieData tie;
 
@@ -34,7 +34,7 @@ void func_151B2060(Actor *obj) {
 }
 
 /* Per-frame update: dies when either object is gone, and respawns the ropes when the state changes. */
-void func_151B2100(RopeTie *self) {
+void rope_updateTie(RopeTie *self) {
     RopeTieData *tie;
     Actor *obj0;
     Actor *obj1;
@@ -50,25 +50,25 @@ void func_151B2100(RopeTie *self) {
     }
 
     oldState = tie->state;
-    tie->state = func_151B22F4(self);
+    tie->state = rope_getTieState(self);
     if (tie->state != oldState) {
-        func_151B222C(self);
+        rope_killTieParts(self);
         if (tie->state == 1) {
-            func_151B2348(self);
+            rope_tieBetweenActors(self);
         }
 
         if ((tie->state == 2) || (tie->state == 0)) {
-            func_151B2690(self);
+            rope_tieFromActor(self);
         }
     }
 }
 
 void func_151B220C(RopeTie *self) {
-    func_151B222C(self);
+    rope_killTieParts(self);
 }
 
 /* Kills the ropes and the line this RopeTie owns. */
-void func_151B222C(RopeTie *self) {
+void rope_killTieParts(RopeTie *self) {
     u8 i;
     void *child;
     RopeTieData *tie = &self->tie;
@@ -96,7 +96,7 @@ void func_151B22C8(RopeTie *self) {
 }
 
 /* Returns 1 when obj1->unk65 holds obj0's 1-based index in movement_obj and obj1->unk5C is 1, else 2. */
-s32 func_151B22F4(RopeTie *self) {
+s32 rope_getTieState(RopeTie *self) {
     Actor *obj0 = self->tie.obj0;
 
     if (self->tie.obj1->attach_char == (obj0 - movement_obj) + 1) {
@@ -108,7 +108,7 @@ s32 func_151B22F4(RopeTie *self) {
 }
 
 /* State 1: hangs three ropes between bones of obj0 and obj1. */
-void func_151B2348(RopeTie *self) {
+void rope_tieBetweenActors(RopeTie *self) {
     Actor *obj1;
     Actor *obj0;
     RopeTieData *tie;
@@ -146,7 +146,7 @@ void func_151B2348(RopeTie *self) {
     desc.accelScale = -0.01999999955f;
     desc.lagScale = 0.7000000477f;
     tie = &self->tie;
-    tie->ropes[2] = (TiedRope *)func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    tie->ropes[2] = (TiedRope *)rope_createEffect(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
     if (tie->ropes[2] != NULL) {
         memcpy(&tie->ropes[2]->link, &link, sizeof(link));
     }
@@ -168,7 +168,7 @@ void func_151B2348(RopeTie *self) {
     desc.end.z = obj1->zpos;
     desc.drawStyle = 0;
     desc.length = 170.0f;
-    tie->ropes[1] = (TiedRope *)func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    tie->ropes[1] = (TiedRope *)rope_createEffect(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
     if (tie->ropes[1] != NULL) {
         memcpy(&tie->ropes[1]->link, &link, sizeof(link));
     }
@@ -189,14 +189,14 @@ void func_151B2348(RopeTie *self) {
     desc.end.y = obj1->ypos;
     desc.end.z = obj1->zpos;
     desc.drawStyle = 0;
-    tie->ropes[0] = (TiedRope *)func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    tie->ropes[0] = (TiedRope *)rope_createEffect(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
     if (tie->ropes[0] != NULL) {
         memcpy(&tie->ropes[0]->link, &link, sizeof(link));
     }
 }
 
 /* States 0 and 2: hangs two ropes and a line from obj0's bones. */
-void func_151B2690(RopeTie *self) {
+void rope_tieFromActor(RopeTie *self) {
     Actor *obj;
     RopeTieData *tie;
     HoltenRopeDesc desc;
@@ -234,7 +234,7 @@ void func_151B2690(RopeTie *self) {
     desc.lagScale = 0.7130000591f;
 
     tie = &self->tie;
-    tie->ropes[1] = (TiedRope *)func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    tie->ropes[1] = (TiedRope *)rope_createEffect(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
     if (tie->ropes[1] != NULL) {
         memcpy(&tie->ropes[1]->link, &link, sizeof(link));
     }
@@ -243,7 +243,7 @@ void func_151B2690(RopeTie *self) {
     link.start.offset = D_800AA32C;
     link.end.offset = D_800AA374;
     desc.drawStyle = 1;
-    tie->ropes[0] = (TiedRope *)func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    tie->ropes[0] = (TiedRope *)rope_createEffect(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
     if (tie->ropes[0] != NULL) {
         memcpy(&tie->ropes[0]->link, &link, sizeof(link));
     }
@@ -262,7 +262,7 @@ void func_151B2690(RopeTie *self) {
 }
 
 /* Rope teardown: clears the owner's reference to this rope. */
-void func_151B2950(TiedRope *self) {
+void rope_unlinkTiedRope(TiedRope *self) {
     RopeTie *owner;
 
     owner = self->link.owner;
@@ -277,7 +277,7 @@ extern struct {
 } gEffectRenderModes[];
 
 /* Draws the line as a camera-facing textured quad between its two bone-relative points. */
-Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
+Gfx *rope_drawLine(Gfx *gfx, RopeLine *self, s16 view) {
     RopeLineData *line;
     volatile u8 dead; // matching: IDO keeps the flag in its stack slot only when volatile
     u8 update;
@@ -309,16 +309,16 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
             return gfx;
         }
         boneMtx = &line->anchor.target->ob_matrix_ptr[line->anchor.bone];
-        func_15143134(&line->anchor.offset, &start, boneMtx);
-        func_15143134(&line->endOffset, &end, boneMtx);
+        math_transformOffset(&line->anchor.offset, &start, boneMtx);
+        math_transformOffset(&line->endOffset, &end, boneMtx);
         update = 1;
         camera = &camera_global_Cameras[view].eye.x;
-        gfx = func_15142B7C(gfx, 0x200005, 0x60600);
-        gfx = func_15142E24(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
-        gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
-        gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &update);
+        gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x60600);
+        gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
+        gfx = math_gfxSetEnvColor(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
+        gfx = math_gfxSetPrimColor(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = particle_setCombineMode(gfx, 0x2B, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[5].unk0 | gEffectRenderModes[5].unk4, &update);
+        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[5].unk0 | gEffectRenderModes[5].unk4, &update);
         // side = (end - start) x (midpoint - camera), scaled to halfWidth; texture is 30x30 texels (S10.5)
         dx = end.x - start.x;
         toCamX = ((dx * 0.5f) + start.x) - camera[0];
@@ -375,12 +375,12 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
 }
 
 /* Line event handler: lets effect_handleOwnerActorEvent retarget the anchor object. */
-void func_151B2EC4(RopeLine *self, s32 arg1, u8 event) {
+void rope_lineMessage(RopeLine *self, s32 arg1, u8 event) {
     effect_handleOwnerActorEvent(arg1, event, &self->line.anchor.target, &self->line.anchor.targetId, self);
 }
 
 /* RopeTie event handler: on event 0x2D, swaps obj0/obj1 for the other object of the pair. */
-void func_151B2F04(RopeTie *self, ActorSwapMsg *swap, u8 event) {
+void rope_tieMessage(RopeTie *self, ActorSwapMsg *swap, u8 event) {
     RopeTieData *tie = &self->tie;
 
     if (event == 0x2D) {
@@ -401,13 +401,13 @@ void func_151B2F04(RopeTie *self, ActorSwapMsg *swap, u8 event) {
     }
 }
 
-/* Rope event handler: passes the link to func_151B47D8. */
-s32 func_151B2FA0(TiedRope *self, Vec3f *pos, u8 isStart) {
-    return func_151B47D8(&self->effect, &self->link, pos, isStart);
+/* Rope event handler: passes the link to rope_placeTiedEnd. */
+s32 rope_tiedRopeEndpoint(TiedRope *self, Vec3f *pos, u8 isStart) {
+    return rope_placeTiedEnd(&self->effect, &self->link, pos, isStart);
 }
 
 /* Line teardown: clears the owner's reference to this line. */
-void func_151B2FD0(RopeLine *self) {
+void rope_unlinkLine(RopeLine *self) {
     RopeTie *owner = self->line.owner;
 
     if (owner != NULL) {
@@ -416,17 +416,17 @@ void func_151B2FD0(RopeLine *self) {
 }
 
 void func_151B2FE8(RopeLine *self) {
-    func_151B2FD0(self);
+    rope_unlinkLine(self);
     effect_defaultDestroyTimedEffect(&self->base);
 }
 
 void func_151B3014(RopeLine *self) {
-    func_151B2FD0(self);
+    rope_unlinkLine(self);
     effect_defaultFreeTimedEffect(&self->base);
 }
 
 /* Rope event handler: lets effect_handleOwnerActorEvent retarget both anchor objects. */
-void func_151B3040(TiedRope *self, s32 arg1, u8 event) {
+void rope_tiedRopeMessage(TiedRope *self, s32 arg1, u8 event) {
     RopeTieLink *link;
 
     link = &self->link;

@@ -283,8 +283,8 @@ s32 collision_checkPlayerInVolume(TriggerVolume *volume) {
     dx = movement_obj[0].xpos - volume->node.x;
     dy = (movement_obj[0].ypos - volume->node.y) + playerHalfHeight;
     dz = movement_obj[0].zpos - volume->node.z;
-    sinA = func_15048A40(volume->angle);
-    cosA = func_150489B0(volume->angle);
+    sinA = math_sinBinAngle(volume->angle);
+    cosA = math_cosBinAngle(volume->angle);
     dzRot = dz * cosA + dx * sinA;
     dx = dx * cosA - dz * sinA;
     if (fabsf(dy) < volume->height + playerHalfHeight && fabsf(dx) < volume->width + playerWidth &&
@@ -328,7 +328,7 @@ void func_15044DE8(void) {
     if (movement_obj[0].stunned || movement_obj[0].imune) {
         return;
     }
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         actor_hitScripted(&movement_obj[0], 4, movement_obj[0].langle, -1);
     }
 }
@@ -1191,7 +1191,7 @@ void collision_initHitFromObject(CollisionHit *hit, Actor *obj) {
         surface = obj->propNum - 1;
         hit->source = 2;
         hit->surface = &db_Object_array[surface];
-        if (func_15145C90(surface) != 0) {
+        if (math_isObjectHidden(surface) != 0) {
             flag = 1;
         } else {
             flag = 0;

@@ -5,7 +5,7 @@
 
 /* Zone handler D_80082ECC[...]: flags the zone and spawns a spray spanning its xSize, oriented by its pitch/yaw;
    data1 selects the spray style. */
-s32 func_15008BF0(TriggerZone *zone) {
+s32 level_spawnZoneSpray(TriggerZone *zone) {
     SprayDesc descriptor;
     f32 offsetZ;
     f32 offsetX;
@@ -29,7 +29,7 @@ s32 func_15008BF0(TriggerZone *zone) {
     descriptor.yawSpread = 20;
     descriptor.pitch = zone->pitch * (256.0f / 360.0f) - 64.0f;
     descriptor.pitchRange = 8;
-    func_15143874(descriptor.yaw - 64, zone->xSize, &offsetX, &offsetZ);
+    math_dirFromBinAngleXZ(descriptor.yaw - 64, zone->xSize, &offsetX, &offsetZ);
     descriptor.origin.x = zone->x - offsetX;
     descriptor.origin.y = zone->y;
     descriptor.origin.z = zone->z - offsetZ;

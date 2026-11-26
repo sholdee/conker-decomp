@@ -163,7 +163,7 @@ void camera_updateFloorHeights(Camera *arg0) {
             arg0->TargetRopeDisp = 0.0f;
         }
         arg0->TargetRopeDisp = (arg0->TargetRopeDisp < -300.0f) ? -300.0f : ((arg0->TargetRopeDisp > 300.0f) ? 300.0f : arg0->TargetRopeDisp);
-        func_150495B0(&arg0->RopeDisp, arg0->TargetRopeDisp, &arg0->RopeDispVel, 1.0f, 1.5f, arg0->SpringTime);
+        math_springTo(&arg0->RopeDisp, arg0->TargetRopeDisp, &arg0->RopeDispVel, 1.0f, 1.5f, arg0->SpringTime);
         arg0->unk354 = arg0->focus.y + arg0->RopeDisp + (targetHeight * 0.8500000238f);
         arg0->unk354 = (arg0->unk354 < arg0->CharPtr->floorY + arg0->height) ? arg0->CharPtr->floorY + arg0->height : arg0->unk354;
         arg0->unk354 = (arg0->unk354 < arg0->floorY + 50.0f) ? arg0->floorY + 50.0f : arg0->unk354;
@@ -246,7 +246,7 @@ void camera_checkOcclusion(Camera *arg0) {
     pos = arg0->eye;
     camera_getOcclusionOffset(arg0, &arg0->SideHitsRxz, &D_800DC1FC);
     if (fabsf(arg0->SideHitsRxz) > 3.0f) {
-        func_1508EF80(&pos, &arg0->target, arg0->SideHitsRxz, &pos);
+        math_rotateAroundY(&pos, &arg0->target, arg0->SideHitsRxz, &pos);
         {
         f32 rate1;
         f32 rate2;
@@ -257,9 +257,9 @@ void camera_checkOcclusion(Camera *arg0) {
             rate1 *= 1.2f;
             rate2 *= 1.2f;
         }
-        func_150495B0(&arg0->eye.x, pos.x, &arg0->HitVelX, rate1, rate2, arg0->SpringTime);
-        func_150495B0(&arg0->eye.y, pos.y, &arg0->HitVelY, rate1, rate2, arg0->SpringTime);
-        func_150495B0(&arg0->eye.z, pos.z, &arg0->HitVelZ, rate1, rate2, arg0->SpringTime);
+        math_springTo(&arg0->eye.x, pos.x, &arg0->HitVelX, rate1, rate2, arg0->SpringTime);
+        math_springTo(&arg0->eye.y, pos.y, &arg0->HitVelY, rate1, rate2, arg0->SpringTime);
+        math_springTo(&arg0->eye.z, pos.z, &arg0->HitVelZ, rate1, rate2, arg0->SpringTime);
         }
         arg0->SideHitsClear = 0;
     lbl:; // matching: the label keeps as1 from filling the branch delay slot below
@@ -563,8 +563,8 @@ void camera_collide(Camera *arg0) {
             arg0->unk958 = 0.0f;
             arg0->unk960 = arg0->unk950;
         } else {
-            func_150495B0(&arg0->unk95C, arg0->unk94C, &arg0->unk954, 4.0f, 6.0f, arg0->SpringTime);
-            func_150495B0(&arg0->unk960, arg0->unk950, &arg0->unk958, 4.0f, 6.0f, arg0->SpringTime);
+            math_springTo(&arg0->unk95C, arg0->unk94C, &arg0->unk954, 4.0f, 6.0f, arg0->SpringTime);
+            math_springTo(&arg0->unk960, arg0->unk950, &arg0->unk958, 4.0f, 6.0f, arg0->SpringTime);
         }
         probe.type = 0x2D;
         probe.CameraPtr = arg0;
@@ -674,7 +674,7 @@ void camera_blendYaw(Camera *arg0) {
         arg0->LockedCameraAngle = 999.0f;
         arg0->SpecialMove &= ~2;
     } else {
-        arg0->LockedCameraAngle += func_15048A70(arg0->LockedCameraAngle, arg0->CameraAngle) * arg0->LockedCamAngleK;
+        arg0->LockedCameraAngle += math_angleDiff(arg0->LockedCameraAngle, arg0->CameraAngle) * arg0->LockedCamAngleK;
     }
 }
 
@@ -705,27 +705,27 @@ void camera_keepOutsideCircle(Camera *arg0) {
             target.y = 0.0f;
             pos.y = 0.0f;
             arg0->avoidCenter.y = 0.0f;
-            func_150491EC(&arg0->avoidCenter, &pos, &offset);
-            outwardYaw = func_15048FC8(&offset) - 180.0f;
-            func_15048758(&outwardYaw);
-            func_150491EC(&target, &pos, &toPos);
-            func_15049148(&offset, arg0->avoidRadius, &offset);
+            math_dirTowards(&arg0->avoidCenter, &pos, &offset);
+            outwardYaw = math_vec3Heading(&offset) - 180.0f;
+            math_normalizeDegrees(&outwardYaw);
+            math_dirTowards(&target, &pos, &toPos);
+            math_vec3Scale(&offset, arg0->avoidRadius, &offset);
             pos.x = arg0->avoidCenter.x + offset.x;
             pos.y = 0.0f;
             pos.z = arg0->avoidCenter.z + offset.z;
             dz = sqrtf(SQ(target.x - pos.x) + SQ(target.z - pos.z));
-            func_15048F90(&pos, &target, &offset);
-            yaw = func_15048FC8(&offset);
-            func_15048758(&yaw);
+            math_vec3Diff(&pos, &target, &offset);
+            yaw = math_vec3Heading(&offset);
+            math_normalizeDegrees(&yaw);
             arg0->unk930 = yaw;
-            dx = func_15048A70(outwardYaw, yaw);
+            dx = math_angleDiff(outwardYaw, yaw);
             if (fabsf(dx) < 35.0f) {
                 if (dx <= 0.0f) {
                     dx = 5.0f;
                 } else {
                     dx = -5.0f;
                 }
-                func_1508EF80(&pos, &arg0->avoidCenter, dx, &pos);
+                math_rotateAroundY(&pos, &arg0->avoidCenter, dx, &pos);
             }
             D_800895B0 = dz;
             pos.y = arg0->eye.y;

@@ -32,7 +32,7 @@ void colourfb_drawScreenEffects(s32 arg0) {
                 continue;
             }
             visible = TRUE;
-            if ((effect->desc.flags & 2) && (D_800C35EA[0] == 1)) {
+            if ((effect->desc.flags & 2) && (gCutsceneStates[0] == 1)) {
                 visible = FALSE;
             }
             if ((effect->desc.flags & 8) && ((screen_isIrisOpen(0) == 0) || (screen_getViewFadeAlpha(0) != 0))) {
@@ -105,15 +105,15 @@ s32 colourfb_readTunables(ColourFrameBufferEffect *effect) {
 
     data = &effect->data;
     tunable = 0;
-    data->pos[0] = func_151422DC(tunable++, "pos s", -2000, 2000, 0,
+    data->pos[0] = math_debugTunable(tunable++, "pos s", -2000, 2000, 0,
                                 "../Effects/ColourFrameBuffer/colourframebuffer.c", 452) * 0.001000000047f;
-    data->pos[1] = func_151422DC(tunable++, "pos t", -2000, 2000, 0,
+    data->pos[1] = math_debugTunable(tunable++, "pos t", -2000, 2000, 0,
                                 "../Effects/ColourFrameBuffer/colourframebuffer.c", 457) * 0.001000000047f;
-    data->size[0] = func_151422DC(tunable++, "size s", 0, 2000, 500,
+    data->size[0] = math_debugTunable(tunable++, "size s", 0, 2000, 500,
                                  "../Effects/ColourFrameBuffer/colourframebuffer.c", 462) * 0.001000000047f;
-    data->size[1] = func_151422DC(tunable++, "size t", 0, 2000, 500,
+    data->size[1] = math_debugTunable(tunable++, "size t", 0, 2000, 500,
                                  "../Effects/ColourFrameBuffer/colourframebuffer.c", 467) * 0.001000000047f;
-    data->pixelation = func_151422DC(tunable, "pixelation", 0, 0x10000, 0x10000,
+    data->pixelation = math_debugTunable(tunable, "pixelation", 0, 0x10000, 0x10000,
                                      "../Effects/ColourFrameBuffer/colourframebuffer.c", 473);
     return 1;
 }

@@ -57,7 +57,7 @@ struct TexScroll {
     /* 0x14 */ u8 levelCount;
     /* 0x15 */ char pad15[0x3];
     /* 0x18 */ TexScrollRef *refs;
-    /* 0x1C */ s16 cmdIndex[2][5]; /* per main display list (D_800B0E00[0] / [1]), -1 = unused */
+    /* 0x1C */ s16 cmdIndex[2][5]; /* per main display list (gLevelDisplayLists[0] / [1]), -1 = unused */
     /* 0x30 */ u8 cmdCount[2][5];
 };
 
@@ -94,7 +94,7 @@ void flamethrower_clearTexScrolls(void) {
 }
 
 /*
- * Finds the `occurrence`-th G_SETTIMG in `dl` that loads texture D_800B0E58[texture] (any texture when
+ * Finds the `occurrence`-th G_SETTIMG in `dl` that loads texture gTextureAddrs[texture] (any texture when
  * `texture` is 0). Returns the index of the G_SETTILESIZE that follows it, or -1, and stores in *levels how
  * many (G_SETTILESIZE, G_SETTILE) pairs follow.
  */
@@ -114,7 +114,7 @@ s32 flamethrower_findTileSizeCmd(Gfx *dl, s32 texture, s32 occurrence, s32 *leve
         if (DL_OPCODE(dl[i]) == (s8)G_ENDDL) {
             return -1;
         }
-        if ((dl[i].words.w1 == D_800B0E58[texture] || texture == 0) && occurrence-- <= 0) {
+        if ((dl[i].words.w1 == gTextureAddrs[texture] || texture == 0) && occurrence-- <= 0) {
             break;
         }
     }
@@ -711,8 +711,8 @@ CharacterFlamethrowerActor *flamethrower_spawnJet(Actor *owner, s32 preset, u8 a
         jet.sound = 0;
     }
     matrix = &jet.owner->ob_matrix_ptr[jet.bone];
-    func_15143134(&jet.startOffset, &jet.start, matrix);
-    func_15143134(&jet.endOffset, &jet.end, matrix);
+    math_transformOffset(&jet.startOffset, &jet.start, matrix);
+    math_transformOffset(&jet.endOffset, &jet.end, matrix);
     spawn.kind = 3;
     spawn.pos.x = jet.start.x;
     spawn.pos.y = jet.start.y;
@@ -877,8 +877,8 @@ s32 flamethrower_emitJet(CharacterFlamethrowerActor *actor, s32 arg1) {
         jet->targetSpeed = gJetSpeedProcs[jet->speedFn](actor, arg1);
     }
     matrix = &jet->owner->ob_matrix_ptr[jet->bone];
-    func_15143134(&jet->startOffset, &actor->head.tmpl.pos, matrix);
-    func_15143134(&jet->endOffset, &end, matrix);
+    math_transformOffset(&jet->startOffset, &actor->head.tmpl.pos, matrix);
+    math_transformOffset(&jet->endOffset, &end, matrix);
     jet->emitAccum += jet->emitRate * gFrameDelta;
     if (jet->emitAccum > 1.0f) {
         do { // matching: a plain block here reorders the float rodata
@@ -1005,11 +1005,11 @@ Gfx *flamethrower_drawJet(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view)
                 tex.desc.height = D_800915B0.height;
                 tex.desc.fmt = D_800915B0.fmt;
                 tex.desc.siz = D_800915B0.siz;
-                gfx = func_15142E24(gfx, &tex.desc, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
-                gfx = func_15142C10(gfx, jet->shade, jet->shade, jet->shade, 0xFF, &flag);
-                gfx = func_15142B7C(gfx, 1, 0x160600);
+                gfx = math_gfxLoadTextureFrame(gfx, &tex.desc, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
+                gfx = math_gfxSetEnvColor(gfx, jet->shade, jet->shade, jet->shade, 0xFF, &flag);
+                gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x160600);
                 gfx = particle_setCombineMode(gfx, 0xB, &flag);
-                gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x5049D8, &flag);
+                gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x5049D8, &flag);
                 if (actor->head.tmpl.flags & 2) {
                     j = actor->head.end - 1;
                     if (j < 0) {
@@ -1159,9 +1159,9 @@ f32 func_151979F8(CharacterFlamethrowerActor *actor) {
     return 1.32f;
 }
 
-/* Returns the "power" tunable (func_151422C0) scaled by 0.01. */
+/* Returns the "power" tunable (math_debugTunableRange) scaled by 0.01. */
 f32 flamethrower_getPowerTunable(CharacterFlamethrowerActor *actor) {
-    return func_151422C0(10, "power", 1, 500, "../Effects/CharacterFlameThrower/characterflamethrower.c", 2252) * 0.01f;
+    return math_debugTunableRange(10, "power", 1, 500, "../Effects/CharacterFlameThrower/characterflamethrower.c", 2252) * 0.01f;
 }
 
 f32 func_15197A68(CharacterFlamethrowerActor *actor) {
@@ -1458,10 +1458,10 @@ void flamethrower_shedJetLines(CharacterFlamethrowerActor *actor, s32 index) {
         do {
             a = func_150ADA20() & 0xFF;
             b = func_150ADA20() & 0xFF;
-            sinA = func_151423D8(a - 0x40);
-            cosA = func_151423D8(a);
-            sinB = func_151423D8(b - 0x40);
-            cosB = func_151423D8(b);
+            sinA = math_cosBinAngleMasked(a - 0x40);
+            cosA = math_cosBinAngleMasked(a);
+            sinB = math_cosBinAngleMasked(b - 0x40);
+            cosB = math_cosBinAngleMasked(b);
             rad = next->size * 0.8000000119f;
             spawn.lifetime = (func_150ADA20() % (preset->lifeRange + 1)) + preset->lifeMin;
             rc = rad * cosB;
@@ -1745,10 +1745,10 @@ void flamethrower_scatterParticles(CharacterFlamethrowerActor *actor, Vec3f *end
         speed = (func_150ADA68() * preset->speedRange) + preset->speed;
         a = func_150ADA20() & 0xFF;
         b = func_150ADA20() & 0xFF;
-        sinA = func_151423D8(a - 0x40);
-        cosA = func_151423D8(a);
-        sinB = func_151423D8(b - 0x40);
-        cosB = func_151423D8(b);
+        sinA = math_cosBinAngleMasked(a - 0x40);
+        cosA = math_cosBinAngleMasked(a);
+        sinB = math_cosBinAngleMasked(b - 0x40);
+        cosB = math_cosBinAngleMasked(b);
         rad = preset->radius;
         px = end->x + (rad * cosB * sinA);
         py = end->y - (rad * sinB);
@@ -1810,10 +1810,10 @@ void flamethrower_emitSprites(CharacterFlamethrowerActor *actor, Vec3f *end) {
         angle1 = rnd & 255;
         rnd = func_150ADA20();
         angle2 = rnd & 255;
-        cosine1 = func_151423D8(angle1 - 64);
-        sine1 = func_151423D8(angle1);
-        cosine2 = func_151423D8(angle2 - 64);
-        sine2 = func_151423D8(angle2);
+        cosine1 = math_cosBinAngleMasked(angle1 - 64);
+        sine1 = math_cosBinAngleMasked(angle1);
+        cosine2 = math_cosBinAngleMasked(angle2 - 64);
+        sine2 = math_cosBinAngleMasked(angle2);
         x = end->x + preset->radius * sine2 * cosine1;
         y = end->y - preset->radius * cosine2;
         z = end->z + preset->radius * sine2 * sine1;
@@ -1962,7 +1962,7 @@ CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlam
     inputs[1] = &initial.seed.endOffset;
     outputs[0] = &initial.start;
     outputs[1] = &initial.end;
-    func_15145EA4(inputs, outputs, &owner->ob_matrix_ptr[initial.seed.bone], 2);
+    math_transformOffsets(inputs, outputs, &owner->ob_matrix_ptr[initial.seed.bone], 2);
     {
         s32 flag8;
         s32 flag4;
@@ -2173,13 +2173,13 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
         outputs[1] = &pos1;
         outputs[2] = &pos2;
         outputs[3] = &pos3;
-        func_15145EA4(inputs, outputs, &obj->ob_matrix_ptr[flame->seed.bone], 4);
+        math_transformOffsets(inputs, outputs, &obj->ob_matrix_ptr[flame->seed.bone], 4);
         flame->flags &= ~1;
     } else {
         Vec3f dir;
         Vec3f up;
 
-        func_15145740(obj, &dir, &up, 0, 0.0f);
+        math_getActorAim(obj, &dir, &up, 0, 0.0f);
         pos0.x = obj->xpos;
         pos0.y = obj->ypos + 33.0f;
         pos0.z = obj->zpos;
@@ -2305,9 +2305,9 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
                 delta.x -= spawn.pos.x;
                 delta.y -= spawn.pos.y;
                 delta.z -= spawn.pos.z;
-                if (func_15146078(&delta, &axisA, &axisB) != 0) {
+                if (math_buildPerpendicularBasis(&delta, &axisA, &axisB) != 0) {
                     speed = func_150ADA68() * flame->scatter.speedRange + flame->scatter.speedMin;
-                    func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * flame->scatter.spread, &s, &c);
+                    math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * flame->scatter.spread, &s, &c);
                     motion.velocity.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
                     motion.velocity.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
                     motion.velocity.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
@@ -2370,9 +2370,9 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
                 delta.x -= part.pos.x;
                 delta.y -= part.pos.y;
                 delta.z -= part.pos.z;
-                if (func_15146078(&delta, &axisA, &axisB) != 0) {
+                if (math_buildPerpendicularBasis(&delta, &axisA, &axisB) != 0) {
                     speed = func_150ADA68() * flame->emit.speedRange + flame->emit.speedMin;
-                    func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * flame->emit.spread, &s, &c);
+                    math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * flame->emit.spread, &s, &c);
                     part.vel.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
                     part.vel.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
                     part.vel.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
@@ -2484,7 +2484,7 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
             diff.x = p->pos.x - prev->x;
             diff.y = p->pos.y - prev->y;
             diff.z = p->pos.z - prev->z;
-            p->length = func_15143E64(&diff);
+            p->length = math_vec3Length(&diff);
             flame->length += p->length;
             if (maxLen < flame->length) {
                 if (p->length) {
@@ -2542,7 +2542,7 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
         f32 sum;
 
         flame->texOffset += flame->seed.texSpeed * gFrameDelta;
-        flame->texOffset = func_15144528(flame->texOffset, 16383.0f, -16384.0f);
+        flame->texOffset = math_wrapFloat(flame->texOffset, 16383.0f, -16384.0f);
         i = actor->head.end;
         sum = 0.0f;
         do {
@@ -2554,7 +2554,7 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
             }
             p = &points[i];
             sum += p->length;
-            p->texT = func_15144528(flame->texOffset + sum * flame->seed.texScale, 16383.0f, -16384.0f);
+            p->texT = math_wrapFloat(flame->texOffset + sum * flame->seed.texScale, 16383.0f, -16384.0f);
         } while (i != actor->head.start);
     }
     if (actor->head.count >= 3 && (!(flame->flags & 0x20) || !(flame->flags & 0x10)) && maxLen <= flame->length) {
@@ -2667,7 +2667,7 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
                     spawn.texture = 0x14;
                 }
                 spawn.lifetime = func_150ADA20() % (flame->line.lifeRange + 1) + flame->line.lifeMin;
-                func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, alpha, &vel);
+                math_dirFromBinAngles(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, alpha, &vel);
                 spawn.pos.x = pos.x + vel.x;
                 spawn.pos.y = pos.y + vel.y;
                 spawn.pos.z = pos.z + vel.z;
@@ -2773,12 +2773,12 @@ Gfx *flamethrower_drawFlame(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 vie
     if (vtx == NULL) {
         return gfx;
     }
-    camera = func_15144B34(view);
+    camera = math_getCameraPos(view);
     flag = 1;
-    gfx = func_15142E24(gfx, &gEffectTextures[107], 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
-    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+    gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[107], 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
+    gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
     gfx = particle_setCombineMode(gfx, 0x4C, &flag);
-    gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &flag);
+    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &flag);
     if (actor->head.tmpl.flags & 2) {
         index = actor->head.end;
         index--;
@@ -3154,7 +3154,7 @@ void *flamethrower_buildFlameLineQuad(SceneParticle *beam, s16 view) {
     } else {
         return NULL;
     }
-    pos = func_15144B34(view);
+    pos = math_getCameraPos(view);
     dir.x = beam->head.def.rot.x - beam->head.def.pos.x;
     dir.y = beam->head.def.rot.y - beam->head.def.pos.y;
     dir.z = beam->head.def.rot.z - beam->head.def.pos.z;
@@ -3164,7 +3164,7 @@ void *flamethrower_buildFlameLineQuad(SceneParticle *beam, s16 view) {
     dir.x = mid.x - beam->head.def.pos.x;
     dir.y = mid.y - beam->head.def.pos.y;
     dir.z = mid.z - beam->head.def.pos.z;
-    func_15145548(&beam->head.def.pos, &dir, pos, &closest, &t);
+    math_closestPointOnSegment(&beam->head.def.pos, &dir, pos, &closest, &t);
     dx = closest.x - pos->x;
     dy = closest.y - pos->y;
     dz = closest.z - pos->z;

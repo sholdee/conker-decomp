@@ -2,10 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-/* A sky draw routine (D_800891D8): draws the current view's sky quad (D_800DBE88) with the 4x256 RGBA32 gradient
- * texture D_800DBE80, rolled by `roll` and with its t window (rows top..bottom, chosen by level) scrolled by the
+/* A sky draw routine (gSkyDrawFuncs): draws the current view's sky quad (gSkyQuadVtx) with the 4x256 RGBA32 gradient
+ * texture gSkyData, rolled by `roll` and with its t window (rows top..bottom, chosen by level) scrolled by the
  * camera pitch. */
-Gfx *func_150D1810(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
+Gfx *env_drawSkyGradient(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
     MtxF rotation;
     MtxF viewProj;
     s32 top;
@@ -22,7 +22,7 @@ Gfx *func_150D1810(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
         top = -19;
         bottom = 101;
     }
-    tex.addr = (u32)D_800DBE80;
+    tex.addr = (u32)gSkyData;
     tex.width = 4;
     tex.height = 256;
     tex.fmt = G_IM_FMT_RGBA;
@@ -37,13 +37,13 @@ Gfx *func_150D1810(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     gfx = view_setScissor(gfx, gCurrentView, 0, 0, 0, 0); // takes the view index as s16
     gfx = view_setColorImage(gfx);
     gfx = sprite_loadTexture(gfx, &tex, 0, 0, 0, 0, G_TX_CLAMP, 256, 256, 3);
-    func_151102CC(rotation, 0.0f, 0.0f, roll);
+    env_buildCameraRotation(rotation, 0.0f, 0.0f, roll);
     func_150A7A48(rotation, gViews[gCurrentView].projection, viewProj);
-    guMtxF2L(viewProj, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0]);
-    gSPMatrix(gfx++, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    guMtxF2L(viewProj, &gSkyMatrices[gCurrentView * 2 + D_800BE9C0]);
+    gSPMatrix(gfx++, &gSkyMatrices[gCurrentView * 2 + D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPPerspNormalize(gfx++, gViews[gCurrentView].perspNorm);
-    vtx = D_800DBE88[gCurrentView][D_800BE9C0];
+    vtx = gSkyQuadVtx[gCurrentView][D_800BE9C0];
     vtx[0].v.tc[1] = vtx[1].v.tc[1] = ((top + 256) << 5) + tOffset;
     vtx[2].v.tc[1] = vtx[3].v.tc[1] = ((bottom + 511) << 5) + tOffset;
     gSPVertex(gfx++, vtx, 4, 0);

@@ -511,7 +511,7 @@ void anim_updateIdle(void) {
 
     speed = 1.0f;
     blend = 4.0f;
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return;
     }
     if (gCurrentActor->drawtype == 4) {
@@ -800,7 +800,7 @@ void anim_updateIdleTimer(Actor *actor) {
     if (countdown != 0) {
         actor->unk13A = countdown - 1;
     }
-    if (idle->active == TRUE && D_800C35EA[0] != 1) {
+    if (idle->active == TRUE && gCutsceneStates[0] != 1) {
         limit = 0xFFFF - D_800BE9E4;
         timer = idle->timer;
         if (timer < limit) {

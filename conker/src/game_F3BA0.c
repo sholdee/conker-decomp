@@ -242,7 +242,7 @@ FlickerSprite *effect_createFloorFlickerSprite(Watcher *watcher) {
     if (character->ob_matrix_ptr) {
         Vec3f origin = gWatcherRootOffset;
 
-        func_15143134(&origin, &pos, character->ob_matrix_ptr);
+        math_transformOffset(&origin, &pos, character->ob_matrix_ptr);
     } else {
         pos.x = character->xpos;
         pos.y = character->ypos;

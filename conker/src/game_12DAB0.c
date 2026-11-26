@@ -293,7 +293,7 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                     glowParams.offset0 = 0.5f;
                     glowParams.alpha1 = 0.3000000119f;
                     glowParams.fadeRate = 9.999999975e-07f;
-                    if ((state->glow = func_151407D0(&glowParams, 0x68, &glowDef, 0, 0, 0, 0, 0, argD, argE)) != NULL) {
+                    if ((state->glow = flare_spawnGlow(&glowParams, 0x68, &glowDef, 0, 0, 0, 0, 0, argD, argE)) != NULL) {
                         memcpy(state->glow + 0x170, &glowData, sizeof(ChildData));
                     }
                     {
@@ -451,14 +451,14 @@ void particle_destroyBeamLine(BeamLine *line) {
     RayBeamData *data = &line->link.beam->data;
 
     data->line = NULL;
-    func_151411A4(&line->head);
+    flare_destroyGlowDefault(&line->head);
 }
 
 void particle_freeBeamLine(BeamLine *line) {
     RayBeamData *data = &line->link.beam->data;
 
     data->line = NULL;
-    func_151411C4(&line->head);
+    flare_freeGlowDefault(&line->head);
 }
 
 void particle_destroyBeamEndFx(BeamEndFx *fx) {
@@ -504,9 +504,9 @@ s8 particle_updateRayBeam(RayBeam *beam) {
     } else {
         endIsHit = 1;
         bones = owner->boneMtx;
-        if (bones != NULL && (D_800C35EA[0] != 1 || (owner->unk74 & 0xF) != 0xF)) {
+        if (bones != NULL && (gCutsceneStates[0] != 1 || (owner->unk74 & 0xF) != 0xF)) {
             boneMtx = bones[data->bone];
-            func_15143134(&data->localStart, &beam->head.def.pos, boneMtx);
+            math_transformOffset(&data->localStart, &beam->head.def.pos, boneMtx);
             if (data->flags & 2) {
                 aim = owner->aim;
                 hitType = aim->targetType;
@@ -529,7 +529,7 @@ s8 particle_updateRayBeam(RayBeam *beam) {
                     beam->head.def.rot.z = beam->head.def.pos.z + dir.z;
                 }
             } else {
-                func_15143134(&data->localTarget, &target, boneMtx);
+                math_transformOffset(&data->localTarget, &target, boneMtx);
                 target.x = target.x - beam->head.def.pos.x;
                 target.y = target.y - beam->head.def.pos.y;
                 target.z = target.z - beam->head.def.pos.z;
@@ -540,7 +540,7 @@ s8 particle_updateRayBeam(RayBeam *beam) {
                     dir.y = beam->head.def.rot.y - beam->head.def.pos.y;
                     dir.z = beam->head.def.rot.z - beam->head.def.pos.z;
                     hit = 1;
-                    data->length = func_15143E64(&dir);
+                    data->length = math_vec3Length(&dir);
                 } else {
                     hit = 0;
                 }
@@ -689,7 +689,7 @@ Vtx *particle_buildRayBeamQuad(RayBeam *beam, s16 viewport) {
         } else {
             return NULL;
         }
-        eye = func_15144B34(viewport);
+        eye = math_getCameraPos(viewport);
         maxLen = 3508.0f;
         start = beam->head.def.pos;
         scale = data->length;
@@ -710,7 +710,7 @@ Vtx *particle_buildRayBeamQuad(RayBeam *beam, s16 viewport) {
             dir.z = end.z - start.z;
             drawLen = data->length;
         }
-        func_15145548(&start, &dir, eye, &closest, 0);
+        math_closestPointOnSegment(&start, &dir, eye, &closest, 0);
         dx = closest.x - eye->x;
         dy = closest.y - eye->y;
         dz = closest.z - eye->z;
@@ -813,12 +813,12 @@ Vtx *particle_buildCentredAxisQuad(Struct15101F50 *particle, s16 viewport) {
         return NULL;
     }
 
-    if (func_15144E80(&particle->surface, &axisU, &axisV, NULL) == 0) {
+    if (math_getTriEdges(&particle->surface, &axisU, &axisV, NULL) == 0) {
         return NULL;
     }
 
-    func_15145128(&axisU, &axisU, NULL, NULL);
-    func_15145128(&axisV, &axisV, NULL, NULL);
+    math_vec3Normalize(&axisU, &axisU, NULL, NULL);
+    math_vec3Normalize(&axisV, &axisV, NULL, NULL);
 
     axisU.x *= particle->head.def.width;
     axisU.y *= particle->head.def.width;
@@ -917,7 +917,7 @@ s32 func_151022AC(Owner151022AC *obj) {
 
     state = &obj->flicker;
     state->angle += state->rate * gFrameDelta;
-    state->angle = func_15144B68(state->angle);
+    state->angle = math_wrapRadians(state->angle);
     state->rotation += state->velocity * gFrameDelta;
     while (state->rotation > 32767.0f) {
         state->rotation -= 65536.0f;
@@ -987,8 +987,8 @@ s32 func_151025F4(Owner151025F4 *obj, s32 arg1) {
     wobble->offset[1] = wobble->amplitude[1] * sinY + wobble->base[1];
     wobble->phase[0] += wobble->speed[0] * gFrameDelta;
     wobble->phase[1] += wobble->speed[1] * gFrameDelta;
-    wobble->phase[0] = func_15144B68(wobble->phase[0]);
-    wobble->phase[1] = func_15144B68(wobble->phase[1]);
+    wobble->phase[0] = math_wrapRadians(wobble->phase[0]);
+    wobble->phase[1] = math_wrapRadians(wobble->phase[1]);
     return 1;
 }
 

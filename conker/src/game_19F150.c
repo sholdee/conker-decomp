@@ -198,7 +198,7 @@ Gfx *particle_drawFloorSprite(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
             gSPClearGeometryMode(gfx++, G_FOG | G_LOD);
         }
         // sic: passes the high byte of the s32 needSync
-        gfx = func_15142FBC(gfx, othermodeH | G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE |
+        gfx = math_gfxSetOtherMode(gfx, othermodeH | G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE |
                                      G_AD_DISABLE,
                             othermodeL, (u8 *)&needSync);
         if (!(particle->flags & 8)) {

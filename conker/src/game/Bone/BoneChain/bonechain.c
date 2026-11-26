@@ -215,11 +215,11 @@ void bone_updateChain(s32 objIndex) {
 
         toCamX = (cam->eye.x + cam->aim.offset.x) - obj->xpos;
         toCamZ = (cam->eye.z + cam->aim.offset.z) - obj->zpos;
-        angle = func_150484A0(toCamX, toCamZ) * 57.29577637f + 90.0f;
+        angle = math_atan2(toCamX, toCamZ) * 57.29577637f + 90.0f;
         if (angle >= 360.0f) {
             angle -= 360.0f;
         }
-        turn = func_15048A70(obj->angle * 0.0054931640625f, angle);
+        turn = math_angleDiff(obj->angle * 0.0054931640625f, angle);
         delta = fabsf(turn);
         if (delta < 90.0f) {
             if (delta < 0.5f) {
@@ -264,7 +264,7 @@ void bone_updateChain(s32 objIndex) {
         speed = obj->speed;
         speed = CLAMP(speed, 0.0f, 30.0f);
         bob = 60.0f - (speed + speed);
-        if (D_800C35EA[0] == 1 && D_800C3C9D < 100) {
+        if (gCutsceneStates[0] == 1 && D_800C3C9D < 100) {
             bob *= D_800C3C9D;
             bob *= 0.01f;
         }
@@ -377,7 +377,7 @@ void bone_updateChain(s32 objIndex) {
         link[0] *= inv;
         link[1] *= inv;
         link[2] *= inv;
-        angle = func_15048360(dirX * link[0] + dirY * link[1] + dirZ * link[2]) * 57.29577637f;
+        angle = math_acosLookup(dirX * link[0] + dirY * link[1] + dirZ * link[2]) * 57.29577637f;
         angle = fabsf(angle);
         if (gPaused == 0 && gFrameRateDivider == 0) {
             if (gChainBendLimits[prev] < angle) {
@@ -494,8 +494,8 @@ void bone_rebuildChainMatrices(s32 objIndex, s32 mode, f32 blend, BoneChain *cha
         if (eyeX == atX && eyeZ == atZ) {
             eyeX += 1.0f;
         }
-        func_150440A0(dst, eyeX, eyeY, eyeZ, atX, atY, atZ, up[0], up[1], up[2]);
-        func_15043EC8(dst, obj->scale_xz, obj->scale_y, obj->scale_xz, eyeX, eyeY, eyeZ);
+        math_mtxLookAt(dst, eyeX, eyeY, eyeZ, atX, atY, atZ, up[0], up[1], up[2]);
+        math_mtxSetScaleTrans(dst, obj->scale_xz, obj->scale_y, obj->scale_xz, eyeX, eyeY, eyeZ);
         boneOffset += sizeof(MtxF);
         i++;
         joint++;

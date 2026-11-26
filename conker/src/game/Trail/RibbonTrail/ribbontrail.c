@@ -135,7 +135,7 @@ s32 trail_followTarget(EffectObj *obj) {
     delta.x = obj->head.tmpl.pos.x - state->lastPos.x;
     delta.y = obj->head.tmpl.pos.y - state->lastPos.y;
     delta.z = obj->head.tmpl.pos.z - state->lastPos.z;
-    dist = func_15143E64(&delta);
+    dist = math_vec3Length(&delta);
     state->pending += dist * 0.003721999936f * gFrameDelta;
     state->targetTexS += dist * 4.409547806f;
     if (state->pending > 1.0f) {
@@ -237,13 +237,13 @@ Gfx *trail_drawFollowTrail(EffectObj *obj, Gfx *gfx, s16 view) {
         particle_getViewBuffer(obj->buffers, view, (obj->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             points = obj->items;
-            camera = func_15144B34(view);
+            camera = math_getCameraPos(view);
             flag = 1;
-            gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
-            gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
+            gfx = math_gfxSetEnvColor(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
             gfx = particle_setCombineMode(gfx, 0x4E, &flag);
-            gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &flag);
+            gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
+            gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &flag);
             if (obj->head.tmpl.flags & 2) {
                 index = obj->head.end - 1;
                 if (index < 0) {
@@ -506,7 +506,7 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32
     init.args = NULL;
     init.selector = selector;
     spawn.itemCount = 20;
-    spawn.pos = D_800A5480;
+    spawn.pos = gZeroVec3f;
     spawn.life = 300;
     spawn.flags = 20;
     spawn.kind = 16;
@@ -544,8 +544,8 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32
         particle.brightness = 0xFF;
         particle.width = particle.height = func_150ADA68() * 800.0f + 1700.0f;
         particle.pos = spawn.pos;
-        particle.offset = D_800A5480;
-        particle.vel = D_800A5480;
+        particle.offset = gZeroVec3f;
+        particle.vel = gZeroVec3f;
         particle.fadeStart = 1;
         particle.fadeRate = 0xFF;
         particle.scaleStart = 1;
@@ -653,7 +653,7 @@ s32 trail_moveRibbon(EffectObj *obj) {
         delta.x = obj->head.tmpl.pos.x - previous.x;
         delta.y = obj->head.tmpl.pos.y - previous.y;
         delta.z = obj->head.tmpl.pos.z - previous.z;
-        distance = func_15143E64(&delta);
+        distance = math_vec3Length(&delta);
         {
             RibbonEffectPoint *point = &points[obj->head.end];
 
@@ -784,12 +784,12 @@ Gfx *trail_drawRibbon(EffectObj *obj, Gfx *gfx, s16 view) {
     if (vtx == NULL) {
         return gfx;
     }
-    camera = func_15144B34(view);
+    camera = math_getCameraPos(view);
     flag = 1;
-    gfx = func_15142E24(gfx, &gEffectTextures[120], 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
-    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+    gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[120], 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
+    gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
     gfx = particle_setCombineMode(gfx, 0x56, &flag);
-    gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &flag);
+    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &flag);
     previous = obj->head.end - 1;
     if (previous < 0) {
         previous = obj->head.tmpl.itemCount - 1;

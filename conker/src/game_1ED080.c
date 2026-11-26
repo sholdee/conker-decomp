@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Destructor of a counter effect: frees its panel and digits, then the effect itself. */
-void func_151BFBD0(CounterEffect *effect) {
+void hud_freeCounter(CounterEffect *effect) {
     effect_freeStatCounterParts(effect);
     effect_defaultFreeTimedEffect(&effect->base);
 }

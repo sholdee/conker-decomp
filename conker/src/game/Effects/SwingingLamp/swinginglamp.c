@@ -123,8 +123,8 @@ s32 func_15108AB4(DynModel *model) {
 
     lamp->phaseX += 0.0857f * gFrameDelta;
     lamp->phaseZ += 0.0783f * gFrameDelta;
-    lamp->phaseX = func_15144B68(lamp->phaseX);
-    lamp->phaseZ = func_15144B68(lamp->phaseZ);
+    lamp->phaseX = math_wrapRadians(lamp->phaseX);
+    lamp->phaseZ = math_wrapRadians(lamp->phaseZ);
     lamp->swingX = sinf(lamp->phaseX) * 7.1050005f;
     lamp->swingZ = sinf(lamp->phaseZ) * 7.1050005f;
     func_15108B80(model);
@@ -150,8 +150,8 @@ void func_15108BC0(DynModel *model) {
 
     if (track == TRACK_NONE) {
         lamp->height = 226.0f;
-    } else if (D_800C35EA[0] == 1) {
-        SeqTrackState *state = &D_800C3958[0][track];
+    } else if (gCutsceneStates[0] == 1) {
+        SeqTrackState *state = &gSeqTrackStates[0][track];
 
         lamp->height = state->y;
     } else {
@@ -165,8 +165,8 @@ s32 func_15108C38(DynModel *model) {
 
     lamp->phaseX += 0.0857f * gFrameDelta;
     lamp->phaseZ += 0.0783f * gFrameDelta;
-    lamp->phaseX = func_15144B68(lamp->phaseX);
-    lamp->phaseZ = func_15144B68(lamp->phaseZ);
+    lamp->phaseX = math_wrapRadians(lamp->phaseX);
+    lamp->phaseZ = math_wrapRadians(lamp->phaseZ);
     lamp->swingX = sinf(lamp->phaseX) * 7.1050005f;
     lamp->swingZ = sinf(lamp->phaseZ) * 7.1050005f;
     func_15108B80(model);
@@ -326,7 +326,7 @@ s32 func_15109120(DynModel *model, s16 viewport) {
     mtx[2][1] *= 0.157f;
     mtx[2][2] *= 0.157f;
     guMtxF2L(mtx, &model->mtx[D_800BE9C0]);
-    camera = func_15144B34(viewport);
+    camera = math_getCameraPos(viewport);
     camX = camera->x;
     if (0.0001f < fabsf(camX) || 0.0001f < fabsf(camera->y)) {
         f32 camZ;

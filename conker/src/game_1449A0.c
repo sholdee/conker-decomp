@@ -37,9 +37,9 @@ f32 prop_bounceAngle(WorldObject *obj, f32 angle) {
         if (velocity == 0.0f && soundIndex != 0 && gPropSounds[soundIndex].open != 0) {
             gfx_playObjectSound(obj, gPropSounds[soundIndex].open, 24000, 200, 2500, 0);
         }
-        before = func_15048A70(angle, target);
+        before = math_angleDiff(angle, target);
         angle += velocity * D_800BE9E4;
-        after = func_15048A70(angle, target);
+        after = math_angleDiff(angle, target);
         if ((after <= 0.0f && before > 0.0f) || (after >= 0.0f && before < 0.0f)) {
             angle = target;
             velocity = -rebound * velocity;

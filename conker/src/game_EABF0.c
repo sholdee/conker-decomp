@@ -34,9 +34,9 @@ void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {
     if (actor != NULL) {
         if (actor->ob_matrix_ptr != NULL) {
             for (i = 0; i < 4; i++) {
-                func_15143134(&D_8009FF40[i], &points[i], actor->ob_matrix_ptr);
-                func_15143134(&D_8009FF70[i], &dirFrom[i], actor->ob_matrix_ptr);
-                func_15143134(&D_8009FFA0[i], &dirTo[i], actor->ob_matrix_ptr);
+                math_transformOffset(&D_8009FF40[i], &points[i], actor->ob_matrix_ptr);
+                math_transformOffset(&D_8009FF70[i], &dirFrom[i], actor->ob_matrix_ptr);
+                math_transformOffset(&D_8009FFA0[i], &dirTo[i], actor->ob_matrix_ptr);
             }
             dir[2].x = dirTo[2].x - dirFrom[2].x;
             dir[2].y = dirTo[2].y - dirFrom[2].y;

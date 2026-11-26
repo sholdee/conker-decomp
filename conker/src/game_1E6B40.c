@@ -111,8 +111,8 @@ void particle_updateFallingParticle(FallingParticle *particle) {
         particle->phase = phase;
         particle->size *= 0.99f;
         size = particle->size;
-        particle->width = (func_15048A40(phase) + 3.0f) * size * (1.0f / 3.0f);
-        particle->height = (func_150489B0(phase) + 3.0f) * size * (1.0f / 3.0f);
+        particle->width = (math_sinBinAngle(phase) + 3.0f) * size * (1.0f / 3.0f);
+        particle->height = (math_cosBinAngle(phase) + 3.0f) * size * (1.0f / 3.0f);
     } else {
         width = particle->width;
         minSize = particle->floorAndMinSize >> 16;

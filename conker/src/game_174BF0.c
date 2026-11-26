@@ -239,7 +239,7 @@ void *effect_newEffectObj(EffectTemplate *header, s32 dataSize, s32 itemSize, s3
     return obj;
 }
 
-/* Draws the object through func_151462C8 and then its drawKind handler; returns the advanced display list. */
+/* Draws the object through math_emitPointLights and then its drawKind handler; returns the advanced display list. */
 void *effect_drawEffectObj(void *gfx, EffectObj *obj, s16 arg2) {
     s32 material;
 
@@ -248,7 +248,7 @@ void *effect_drawEffectObj(void *gfx, EffectObj *obj, s16 arg2) {
     } else {
         material = 0;
     }
-    gfx = func_151462C8(gfx, &obj->head.model, 0, NULL, 0, arg2, &obj->head.modelPos, 2, material);
+    gfx = math_emitPointLights(gfx, &obj->head.model, 0, NULL, 0, arg2, &obj->head.modelPos, 2, material);
     if (obj->head.drawKind >= 19) {
         effect_destroyObject(&obj->head.header);
         return gfx;

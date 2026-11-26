@@ -34,7 +34,7 @@ void func_150CEF60(s32 arg0) {
 f32 func_150CF040(s32 arg0, s32 arg1) {
     arg0 += 1;
     arg1 -= 0x2C;
-    return func_150484A0(arg0, arg1) * 57.295776f;
+    return math_atan2(arg0, arg1) * 57.295776f;
 }
 
 void func_150CF080(s32 *arg0) {

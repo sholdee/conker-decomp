@@ -98,8 +98,8 @@ BoneBeamParticle *effect_spawnBoneBeamParticle(Actor *target, u8 bone, const Vec
     }
 
     beam.flags = 0;
-    beam.start = D_800A5480;
-    beam.end = D_800A5480;
+    beam.start = gZeroVec3f;
+    beam.end = gZeroVec3f;
     beam.bone = bone;
     beam.target = target;
     beam.node = node;
@@ -177,11 +177,11 @@ s32 effect_updateBoneBeamParticle(BoneBeamParticle *particle) {
         if (node == NULL) {
             return 0;
         }
-        if (func_1514654C(target, node, beam->bone, src, dst, 2) == 0) {
+        if (math_transformAttachmentOffsets(target, node, beam->bone, src, dst, 2) == 0) {
             return 0;
         }
     } else {
-        func_15145EA4(src, dst, (u8 *)target->ob_matrix_ptr + beam->boneOffset, 2);
+        math_transformOffsets(src, dst, (u8 *)target->ob_matrix_ptr + beam->boneOffset, 2);
     }
     beam->flags |= 1;
     return 1;
@@ -204,7 +204,7 @@ Vtx *effect_buildBoneBeamQuad(BoneBeamParticle *particle, s16 viewport) {
     u8 fresh;
     f32 scale;
 
-    camera = func_15144B34(viewport);
+    camera = math_getCameraPos(viewport);
     if (!(particle->beam.flags & 1)) {
         return NULL;
     }
@@ -226,7 +226,7 @@ Vtx *effect_buildBoneBeamQuad(BoneBeamParticle *particle, s16 viewport) {
     dir.x = mid.x - beam->start.x;
     dir.y = mid.y - beam->start.y;
     dir.z = mid.z - beam->start.z;
-    func_15145548(&beam->start, &dir, camera, &closest, &t);
+    math_closestPointOnSegment(&beam->start, &dir, camera, &closest, &t);
     dx = closest.x - camera->x;
     dy = closest.y - camera->y;
     dz = closest.z - camera->z;

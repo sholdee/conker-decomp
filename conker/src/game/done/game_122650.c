@@ -23,7 +23,7 @@ s32 effect_consumeZoneFlag(void) {
 void effect_updateSurfaceSound(s32 arg0) {
     if (((movement_obj[0].floorMaterial & 0X1F) == 3) || ((movement_obj[0].floorMaterial & 0x1F) == 4)) {
         if (D_800BE9E4 < gSurfaceSoundTimer){
-            if(D_800C35EA[0] != 1) {
+            if(gCutsceneStates[0] != 1) {
                 gSurfaceSoundTimer = (gSurfaceSoundTimer - D_800BE9E4);
             }
         } else {

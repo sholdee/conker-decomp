@@ -84,7 +84,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
             for (i = 0, slot = emitter->slots; i < kind->numMounts; i++, slot++) {
                 if (slot->drop != NULL) {
                     slot->drop->head.def.rot = slot->drop->head.def.pos;
-                    func_15143134(&kind->mounts[i].offset, &slot->drop->head.def.pos, emitter->link.actor->ob_matrix_ptr + kind->mounts[i].bone);
+                    math_transformOffset(&kind->mounts[i].offset, &slot->drop->head.def.pos, emitter->link.actor->ob_matrix_ptr + kind->mounts[i].bone);
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
                         DripParticle *falling = slot->drop;
@@ -169,7 +169,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
                         motion.wobble = newKind->wobble;
                         motion.phaseSpeed[0] = func_150ADA20() % 5U + 4;
                         motion.phaseSpeed[1] = func_150ADA20() % 5U + 4;
-                        func_15143134(&kind->mounts[index].offset, &def.pos, emitter->link.actor->ob_matrix_ptr + kind->mounts[index].bone);
+                        math_transformOffset(&kind->mounts[index].offset, &def.pos, emitter->link.actor->ob_matrix_ptr + kind->mounts[index].bone);
                         def.rot = def.pos;
                         if (emitter->link.actor->unk118 < def.pos.y - motion.baseSize.height - motion.wobble.height) {
                             /* the random flip bit is always 0 (% 1), but still advances the RNG */
@@ -221,8 +221,8 @@ s32 particle_wobbleDrip(DripParticle *drop) {
 
     motion->phase[0] += motion->phaseSpeed[0] * D_800BE9E4;
     motion->phase[1] += motion->phaseSpeed[1] * D_800BE9E4;
-    widthWave = func_151423D8(motion->phase[0] - 0x40);
-    heightWave = func_151423D8(motion->phase[1] - 0x40);
+    widthWave = math_cosBinAngleMasked(motion->phase[0] - 0x40);
+    heightWave = math_cosBinAngleMasked(motion->phase[1] - 0x40);
     p->head.def.width += (motion->baseSize.width + motion->wobble.width * widthWave - p->head.def.width) * 0.5f;
     p->head.def.height += (motion->baseSize.height + motion->wobble.height * heightWave - p->head.def.height) * 0.5f;
     return 1;
@@ -367,7 +367,7 @@ s8 particle_fallDrip(DripParticle *drop) {
         probe.x = drop->head.def.pos.x;
         probe.y = oldY - drop->head.def.height;
         probe.z = drop->head.def.pos.z;
-        if (func_1514672C(&probe) == 0) {
+        if (math_isInWorldBounds(&probe) == 0) {
             return 0;
         }
         if (collision_probeFloorSurfABSet0Cached(&probe, 0, drop->head.def.pos.y - drop->head.def.height, &motion->ground) != 0) {

@@ -10,7 +10,7 @@ s32 func_150106D0(TriggerZone *zone) {
     TimedEffect *effect;
 
     tmp.shape = zone;
-    tmp.rate = func_15144598(zone);
+    tmp.rate = math_getZoneArea(zone);
     tmp.accumulator = 0.0f;
 
     collision_selectMap(0);

@@ -129,7 +129,7 @@ void prop_createWaveDeformer(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 hea
                     deformer->vertexAngle[i] = headingAngle;
                 } else {
                     u8 vertexAngle; // matching: storing through a u8 local, not directly
-                    vertexAngle = func_150484A0(dx, dz) * 40.7436637878f; // radians to 256 per turn
+                    vertexAngle = math_atan2(dx, dz) * 40.7436637878f; // radians to 256 per turn
                     deformer->vertexAngle[i] = vertexAngle;
                 }
             }

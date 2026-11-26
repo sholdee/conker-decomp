@@ -32,12 +32,12 @@ RegionNode *func_1515F1B0(region)
     }
     node->region = region;
     if (region != NULL) {
-        node->volume = func_1514462C(region);
+        node->volume = math_getZoneVolume(region);
     } else {
         node->volume = 0.0f;
     }
     if (region != NULL) {
-        node->area = func_15144598(region);
+        node->area = math_getZoneArea(region);
     } else {
         node->area = 0.0f;
     }
@@ -154,7 +154,7 @@ void func_1515F850(Actor *obj, TriggerZone *zone) {
     targetG = (s * 71.0f) + 109.0f;
     targetB = (s * 26.0f) + 26.0f;
     D_800DCDA0 += 0.07100000232f * gFrameDelta;
-    D_800DCDA0 = func_15144B68(D_800DCDA0);
+    D_800DCDA0 = math_wrapRadians(D_800DCDA0);
     if (targetR != D_800DCD94) {
         D_800DCD94 += (targetR - D_800DCD94) * 0.5f;
         color[0] = (u32)D_800DCD94;

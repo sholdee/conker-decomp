@@ -161,10 +161,10 @@ void func_1511A6FC(WorldObject *obj) {
     prop_animateTexture(obj, &WORK(obj)->texIndices, &WORK(obj)->animState);
 }
 
-/* When D_800C35EA is 1 and func_15022B08 accepts this object's index, clears unk7C and unk18;
+/* When gCutsceneStates is 1 and cutscene_isActorIndexBound accepts this object's index, clears unk7C and unk18;
  * then runs prop_bob and advances the texture animation. */
 void func_1511A738(WorldObject *obj) {
-    if (D_800C35EA[0] == 1 && func_15022B08(obj - db_Object_array, 0) != 0) {
+    if (gCutsceneStates[0] == 1 && cutscene_isActorIndexBound(obj - db_Object_array, 0) != 0) {
         WORK(obj)->unk7C = 0;
         obj->yOffset = 0.0f;
     }

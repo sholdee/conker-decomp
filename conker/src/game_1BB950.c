@@ -56,7 +56,7 @@ void particle_pickPaletteTexture(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 
         *flip |= 1;
     }
     *texture = 0x16;
-    func_151429E0((func_150ADA20() & 1) ? 3 : 4, r, g, b);
+    math_pickPaletteColour((func_150ADA20() & 1) ? 3 : 4, r, g, b);
     *alpha = 200;
     *renderModes = 0x401;
 }
@@ -127,8 +127,8 @@ Vtx *particle_buildActorEmitterQuad(ActorEmitterParticle *p, s16 vp) {
         u8 angle256;
 
         angle256 = angle * 40.74366379f; // radians to 256ths of a turn
-        sinAngle = func_15048A40(angle256);
-        cosAngle = func_150489B0(angle256);
+        sinAngle = math_sinBinAngle(angle256);
+        cosAngle = math_cosBinAngle(angle256);
     }
     halfWidthCos = p->head.def.width * cosAngle;
     halfWidthSin = p->head.def.width * sinAngle;

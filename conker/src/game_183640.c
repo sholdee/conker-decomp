@@ -153,12 +153,12 @@ Gfx *particle_drawStreakParticle(Gfx *gfx, StreakParticle *particle, s16 viewInd
     if (cullFlags & 4) {
         geometryFlags |= G_CULL_BACK;
     }
-    gfx = func_15142B7C(gfx, geometryFlags | G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH,
+    gfx = math_gfxUpdateGeometryMode(gfx, geometryFlags | G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH,
                         G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD);
-    gfx = func_15142C10(gfx, 0, 0, 0, particle->alpha, &needSync);
-    gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &needSync);
+    gfx = math_gfxSetEnvColor(gfx, 0, 0, 0, particle->alpha, &needSync);
+    gfx = math_gfxSetPrimColor(gfx, 0, 0, 0, 0, 0, 0, &needSync);
     gfx = particle_setCombineMode(gfx, combiner, &needSync);
-    gfx = func_15142FBC(gfx, 0x82CA0, gEffectRenderModes[mode].cycle1 | gEffectRenderModes[mode].cycle2, &needSync);
+    gfx = math_gfxSetOtherMode(gfx, 0x82CA0, gEffectRenderModes[mode].cycle1 | gEffectRenderModes[mode].cycle2, &needSync);
     axis.x = p->headPos.x - p->tailPos.x;
     axis.y = p->headPos.y - p->tailPos.y;
     axis.z = p->headPos.z - p->tailPos.z;

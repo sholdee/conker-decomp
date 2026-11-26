@@ -143,21 +143,21 @@ Gfx *trail_drawFallingTrail(FallingTrail *trail, Gfx *gfx, s16 view) {
             update = 1;
             camPos = &camera_global_Cameras[view].eye.x;
             points = trail->points;
-            func_151441A4(&primR, &primG, &primB, &primA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
+            math_pickPrimColour(&primR, &primG, &primB, &primA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->primMode);
-            func_151442FC(&envR, &envG, &envB, &envA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
+            math_pickEnvColour(&envR, &envG, &envB, &envA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->envMode);
-            gfx = func_15142E24(gfx, &gEffectTextures[66], 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[66], 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
             gfx = particle_setCombineMode(gfx, data->unk21, &update);
-            gfx = func_15142B7C(gfx, data->setGeometryMode, data->clearGeometryMode);
-            gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
-            gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
+            gfx = math_gfxUpdateGeometryMode(gfx, data->setGeometryMode, data->clearGeometryMode);
+            gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &update);
+            gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &update);
             if (data->flags & TRAIL_BURST_TWO_CYCLE) {
                 cycleMode = G_CYC_2CYCLE;
             } else {
                 cycleMode = G_CYC_1CYCLE;
             }
-            gfx = func_15142FBC(gfx, cycleMode | G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE,
+            gfx = math_gfxSetOtherMode(gfx, cycleMode | G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE,
                                 gEffectRenderModes[data->renderMode].unk0 | gEffectRenderModes[data->renderMode].unk4, &update);
             i = trail->head.end - 1;
             i = (i < 0) ? trail->head.tmpl.itemCount - 1 : i;
@@ -427,7 +427,7 @@ void trail_updateBurstEmitter(TrailBurstEmitter *owner) {
         burst.unk39 = 0;
         yaw = func_150ADA20();
         pitch = func_150ADA20();
-        func_15143794(yaw & 0xFF, 64 - (pitch & 0x7F), emitter->origin->radius, &burst.pos);
+        math_dirFromBinAngles(yaw & 0xFF, 64 - (pitch & 0x7F), emitter->origin->radius, &burst.pos);
         burst.pos.x += emitter->origin->x;
         burst.pos.y += emitter->origin->y;
         burst.pos.z += emitter->origin->z;

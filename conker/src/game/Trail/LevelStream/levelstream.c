@@ -206,10 +206,10 @@ s32 trail_spawnStreamParticles(LevelStream *emitter) {
     particles = emitter->particles;
     data->swayPhaseX += data->swayRateX * gFrameDelta;
     data->swayPhaseZ += data->swayRateZ * gFrameDelta;
-    data->swayPhaseX = func_15144B68(data->swayPhaseX);
-    data->swayPhaseZ = func_15144B68(data->swayPhaseZ);
+    data->swayPhaseX = math_wrapRadians(data->swayPhaseX);
+    data->swayPhaseZ = math_wrapRadians(data->swayPhaseZ);
     data->widthPhase += data->widthRate * gFrameDelta;
-    data->widthPhase = func_15144B68(data->widthPhase);
+    data->widthPhase = math_wrapRadians(data->widthPhase);
     data->spawnCount += 0.2730129957f * gFrameDelta;
     data->tc += (10220.0f + func_150ADA68() * 9434.0f) * 0.01f * gFrameDelta;
     while (data->tc >= 16384.0f) {
@@ -339,11 +339,11 @@ Gfx *trail_drawStream(LevelStream *emitter, Gfx *gfx, s16 view) {
             data = emitter->data;
             particles = emitter->particles;
             update = 1;
-            gfx = func_15142E24(gfx, &gEffectTextures[gStreamTextures[data->textureIndex]], 0, 0, 0, 0, gStreamTextures[data->textureIndex], 0,
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[gStreamTextures[data->textureIndex]], 0, 0, 0, 0, gStreamTextures[data->textureIndex], 0,
                                 0, &update, 3);
             gfx = particle_setCombineMode(gfx, 0x4E, &update);
-            gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-            gfx = func_15142FBC(gfx,
+            gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
+            gfx = math_gfxSetOtherMode(gfx,
                                 gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                                 gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2, &update);
             /* While emitting, the ribbon starts at the emitter itself. */
@@ -597,7 +597,7 @@ void trail_updateRandomPointEmitter(Game1FBB80Object *object) {
                 packet.scale.x = (func_150ADA68() * 121.0f + 23.0f) * 0.001f;
                 packet.width = func_150ADA68() * 25.0f + 10.0f;
                 packet.height = func_150ADA68() * 60.0f + 60.0f;
-                func_151432BC(effect->shape, &packet.pos.x, &packet.pos.z, &upperHeight, &packet.pos.y);
+                math_randomZoneFootprintPoint(effect->shape, &packet.pos.x, &packet.pos.z, &upperHeight, &packet.pos.y);
                 if (collision_probeCeilingSet0Cached(&packet.pos, upperHeight, &effect->floor) != 0) {
                     packet.pos.y = effect->floor.height;
                     packet.unk44 = func_150ADA20() % 101U + 155;
@@ -744,7 +744,7 @@ s32 trail_followWaveTrail(WaveTrail *trail) {
         delta.x = trail->head.tmpl.pos.x - prev.x;
         delta.y = trail->head.tmpl.pos.y - prev.y;
         delta.z = trail->head.tmpl.pos.z - prev.z;
-        dist = func_15143E64(&delta);
+        dist = math_vec3Length(&delta);
         if (dist > 0.0001f) {
             WaveTrailPoint *newest;
 
@@ -952,8 +952,8 @@ Gfx *trail_drawWaveRibbon(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     }
     particle_getViewBuffer(ribbon->vtxBuffer, cameraIdx, (ribbon->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
     update = 1;
-    gfx = func_15142B7C(func_15142C10(gfx, 0xED, 0xD2, 0x85, 0xC8, &update), 0x200005, 0x1F0600);
-    gfx = func_15142FBC(particle_setCombineMode(gfx, 0x54, &update), gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1].cycle1 | gEffectRenderModes[1].cycle2, &update);
+    gfx = math_gfxUpdateGeometryMode(math_gfxSetEnvColor(gfx, 0xED, 0xD2, 0x85, 0xC8, &update), 0x200005, 0x1F0600);
+    gfx = math_gfxSetOtherMode(particle_setCombineMode(gfx, 0x54, &update), gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1].cycle1 | gEffectRenderModes[1].cycle2, &update);
     cur = ribbon->head.end - 1;
     if (cur < 0) {
         cur = ribbon->head.tmpl.itemCount - 1;
@@ -1053,8 +1053,8 @@ void trail_spawnNearCamera(Actor *obj, f32 probeY, f32 arg2) {
     player = obj->CameraPtr;
     if (player != NULL) {
         if (func_150ADA68() < 0.2220000178f) {
-            camPos = func_15144B34(player->CNumber);
-            yaw = func_15144AA8(player->CNumber);
+            camPos = math_getCameraPos(player->CNumber);
+            yaw = math_getCameraYaw(player->CNumber);
             angle = ((func_150ADA68() * 80.0f) + (yaw - 40.0f)) * 0.01745329238f;
             distance = func_150ADA68() * 2000.0f;
 
@@ -1135,10 +1135,10 @@ void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
                 u32 pitch;
 
                 piece.model = models[i];
-                func_15143134(&gBreakPiecePoints[i], &piece.pos, obj->ob_matrix_ptr);
+                math_transformOffset(&gBreakPiecePoints[i], &piece.pos, obj->ob_matrix_ptr);
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
-                func_15143794(yaw & 0xFF, (pitch % 25U) - 64, (func_150ADA68() * 11.44999981f) + 16.93000031f, &piece.vel);
+                math_dirFromBinAngles(yaw & 0xFF, (pitch % 25U) - 64, (func_150ADA68() * 11.44999981f) + 16.93000031f, &piece.vel);
                 piece.rotVel.x = (func_150ADA68() * 19.75200081f) + -9.876000404f;
                 piece.rotVel.z = (func_150ADA68() * 19.75200081f) + -9.876000404f;
                 piece.gravity = (func_150ADA68() * 0.5180000067f) + -1.539000034f;
@@ -1314,18 +1314,18 @@ Gfx *trail_drawStripEffect(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
         return gfx;
     }
     update = 1;
-    func_15143134(&gStripStartPoints[data->variant], &from, &owner->ob_matrix_ptr[2]);
-    func_15143134(&gStripEndPoint, &to, &owner->ob_matrix_ptr[gStripEndJoints[data->variant]]);
-    camPos = func_15144B34(cameraIdx);
-    gfx = func_15142B7C(gfx, 0x200005, 0x60600);
-    gfx = func_15142E24(gfx, &gEffectTextures[127], 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
+    math_transformOffset(&gStripStartPoints[data->variant], &from, &owner->ob_matrix_ptr[2]);
+    math_transformOffset(&gStripEndPoint, &to, &owner->ob_matrix_ptr[gStripEndJoints[data->variant]]);
+    camPos = math_getCameraPos(cameraIdx);
+    gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x60600);
+    gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[127], 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
     gfx = particle_setCombineMode(gfx, 0x3B, &update);
-    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, data->alpha, &update);
-    gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2, &update);
+    gfx = math_gfxSetEnvColor(gfx, 0xFF, 0xFF, 0xFF, data->alpha, &update);
+    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2, &update);
     diff.x = to.x - from.x;
     diff.y = to.y - from.y;
     diff.z = to.z - from.z;
-    dist = func_15143E64(&diff);
+    dist = math_vec3Length(&diff);
     midX = diff.x * 0.5f + from.x - camPos->x;
     midY = diff.y * 0.5f + from.y - camPos->y;
     midZ = diff.z * 0.5f + from.z - camPos->z;
@@ -1464,7 +1464,7 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             srcs[1] = &D_800AAF90;
             dsts[0] = &pos;
             dsts[1] = &dir;
-            func_15145EA4(srcs, dsts, &obj->ob_matrix_ptr[2], 2);
+            math_transformOffsets(srcs, dsts, &obj->ob_matrix_ptr[2], 2);
             dir.x -= pos.x;
             dir.y -= pos.y;
             dir.z -= pos.z;
@@ -1472,8 +1472,8 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
         collision_initHitFromObject(&floor, obj);
         shape.flags = 0;
         shape.direction = dir;
-        /* Start from the zero vector D_800A5480. */
-        shape.axis0 = shape.axis1 = D_800A5480;
+        /* Start from the zero vector gZeroVec3f. */
+        shape.axis0 = shape.axis1 = gZeroVec3f;
         {
             DropSpray emitA;
 
@@ -1548,7 +1548,7 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             spawn.alpha = 0;
             spawn.brightness = 0xFF;
             spawn.pos = pos;
-            spawn.offset = D_800A5480;
+            spawn.offset = gZeroVec3f;
             spawn.scaleStart = 1;
             spawn.flags = 0xC007;
             spawn.scaleRate = 1.0f;
@@ -1613,11 +1613,11 @@ void trail_spawnTrackerEffect(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
     data.trail = NULL;
 
     if (gTrackerPointProcs[pointFn](obj, &data.pos) == 0) {
-        data.pos = D_800A5480;
+        data.pos = gZeroVec3f;
     }
 
     data.prevPos = data.pos;
-    data.delta = D_800A5480;
+    data.delta = gZeroVec3f;
     data.dist = 0.0f;
     data.pointFn = pointFn;
 
@@ -1655,7 +1655,7 @@ s32 trail_getModelPoint(Actor *obj, Vec3f *out, u8 which) {
         return FALSE;
     }
     // matching: "| 0" keeps joints from being a plain copy, so IDO gives it v0 and which a3
-    func_15143134(&gTrackerModelPoints[which], out, (Mtx *)(joints | 0));
+    math_transformOffset(&gTrackerModelPoints[which], out, (Mtx *)(joints | 0));
     return TRUE;
 }
 
@@ -1684,7 +1684,7 @@ void trail_updateTrackerEffect(TrackerEffect *effect) {
     data->delta.x = data->pos.x - data->prevPos.x;
     data->delta.y = data->pos.y - data->prevPos.y;
     data->delta.z = data->pos.z - data->prevPos.z;
-    data->dist = func_15143E64(&data->delta);
+    data->dist = math_vec3Length(&data->delta);
 
     state = collision_getSurfaceType(owner->floorMaterial);
     if (data->dist > 300.0f || data->dist <= 0.0f || owner->shad != 0.0f || owner->inwater != 0 ||

@@ -132,15 +132,15 @@ void particle_updateSegmentEmitter(Effect1368C0 *effect) {
             local.y = segment[0].y + (segment[1].y - segment[0].y) * t;
             local.z = segment[0].z + (segment[1].z - segment[0].z) * t;
             matrix = &object->ob_matrix_ptr[9];
-            func_15143134(&local, &point, matrix);
-            func_15143134(&segment[0], &start, matrix);
-            func_15143134(&segment[1], &end, matrix);
-            func_15143134(&D_800A2520[i], &tip, matrix);
+            math_transformOffset(&local, &point, matrix);
+            math_transformOffset(&segment[0], &start, matrix);
+            math_transformOffset(&segment[1], &end, matrix);
+            math_transformOffset(&D_800A2520[i], &tip, matrix);
             t = func_150ADA68();
             dir.x = (tip.x - end.x) * t + end.x - start.x;
             dir.y = (tip.y - end.y) * t + end.y - start.y;
             dir.z = (tip.z - end.z) * t + end.z - start.z;
-            func_15145128(&dir, &dir, NULL, NULL);
+            math_vec3Normalize(&dir, &dir, NULL, NULL);
             gSegmentEmitFuncs[data->emitFunc](effect, &point, &start, &end, &tip, &dir);
             data->spawnAccum -= 1.0f;
         }
@@ -398,7 +398,7 @@ void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
             dir.x = (tip.x - end.x) * t + end.x - start.x;
             dir.y = (tip.y - end.y) * t + end.y - start.y;
             dir.z = (tip.z - end.z) * t + end.z - start.z;
-            func_15145128(&dir, &dir, NULL, NULL);
+            math_vec3Normalize(&dir, &dir, NULL, NULL);
             gSegmentEmitFuncs[data->emitFunc](effect, &point, &start, &end, &tip, &dir);
             data->spawnAccum -= 1.0f;
         }
@@ -459,10 +459,10 @@ void particle_updatePointPairEmitter(Effect1368C0 *effect) {
     data->spawnAccum += (data->spawnRate + func_150ADA68() * data->spawnRateRandom) * gFrameDelta;
     if (data->spawnAccum > 1.0f && object->ob_matrix_ptr != NULL) {
         matrix = &object->ob_matrix_ptr[9];
-        func_15143134(&D_800A2604, &points[0], matrix);
-        func_15143134(&D_800A2610, &points[1], matrix);
-        func_15143134(&D_800A261C, &dirs[0], matrix);
-        func_15143134(&D_800A2628, &dirs[1], matrix);
+        math_transformOffset(&D_800A2604, &points[0], matrix);
+        math_transformOffset(&D_800A2610, &points[1], matrix);
+        math_transformOffset(&D_800A261C, &dirs[0], matrix);
+        math_transformOffset(&D_800A2628, &dirs[1], matrix);
         dirs[0].x -= points[0].x;
         dirs[0].y -= points[0].y;
         dirs[0].z -= points[0].z;

@@ -28,7 +28,7 @@ void particle_easeBendTarget(void *arg) {
         dir.x = eased.x - p->head.def.pos.x;
         dir.y = eased.y - p->head.def.pos.y;
         dir.z = eased.z - p->head.def.pos.z;
-        if (func_15145128(&dir, &dir, &length, &invLength)) {
+        if (math_vec3Normalize(&dir, &dir, &length, &invLength)) {
             p->head.def.rot.x = p->head.def.pos.x + dir.x * 100.0f;
             p->head.def.rot.y = p->head.def.pos.y + dir.y * 100.0f;
             p->head.def.rot.z = p->head.def.pos.z + dir.z * 100.0f;

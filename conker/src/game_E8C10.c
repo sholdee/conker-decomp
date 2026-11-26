@@ -19,8 +19,8 @@ s32 func_150BB760(Actor *actor) {
     if (actor != NULL && actor->type != 0 && actor->ob_matrix_ptr != NULL) {
         width = actor->bodyRadius;
         height = actor->bodyHeight;
-        sine = func_151423D8(actor->angle >> 8);
-        cosine = func_151423D8((actor->angle >> 8) + 0x40);
+        sine = math_cosBinAngleMasked(actor->angle >> 8);
+        cosine = math_cosBinAngleMasked((actor->angle >> 8) + 0x40);
         offsetX = actor->speed * sine * 0.5f;
         offsetZ = actor->speed * cosine * 0.5f;
         particle.model = 1;
@@ -63,14 +63,14 @@ s32 func_150BB760(Actor *actor) {
             f32 size2;
 
             angle = func_150ADA20();
-            spreadSine = func_151423D8(angle);
-            spreadCosine = func_151423D8(angle - 0x40);
+            spreadSine = math_cosBinAngleMasked(angle);
+            spreadCosine = math_cosBinAngleMasked(angle - 0x40);
             distance = func_150ADA68() * width;
             spreadX = spreadSine * distance;
             spreadZ = -spreadCosine * distance;
             heading = (actor->angle >> 8) - (func_150ADA20() & 0x3F) - 0x20;
-            headingSine = func_151423D8(heading);
-            headingCosine = func_151423D8(heading - 0x40);
+            headingSine = math_cosBinAngleMasked(heading);
+            headingCosine = math_cosBinAngleMasked(heading - 0x40);
             speed = func_150ADA68() * 5.0f + 3.0f;
             velocityX = headingCosine * speed;
             velocityZ = headingSine * speed;
@@ -121,8 +121,8 @@ s32 func_150BBB5C(Actor *actor) {
         height = actor->bodyHeight;
         count1 = (func_150ADA20() & 3) + 6;
         count2 = (func_150ADA20() & 3) + 0xA;
-        sine = func_151423D8(actor->angle >> 8);
-        cosine = func_151423D8((actor->angle >> 8) + 0x40);
+        sine = math_cosBinAngleMasked(actor->angle >> 8);
+        cosine = math_cosBinAngleMasked((actor->angle >> 8) + 0x40);
         offsetX = actor->speed * sine * 0.5f;
         offsetZ = actor->speed * cosine * 0.5f;
         // matching: the no-op mask is needed; without it IDO emits different code here
@@ -184,14 +184,14 @@ s32 func_150BBB5C(Actor *actor) {
             f32 size2;
 
             angle = func_150ADA20();
-            spreadSine = func_151423D8(angle);
-            spreadCosine = func_151423D8(angle - 0x40);
+            spreadSine = math_cosBinAngleMasked(angle);
+            spreadCosine = math_cosBinAngleMasked(angle - 0x40);
             distance = func_150ADA68() * width;
             spreadX = spreadSine * distance;
             spreadZ = -spreadCosine * distance;
             heading = func_150ADA20();
-            headingSine = func_151423D8(heading);
-            headingCosine = func_151423D8(heading - 0x40);
+            headingSine = math_cosBinAngleMasked(heading);
+            headingCosine = math_cosBinAngleMasked(heading - 0x40);
             speed = func_150ADA68() * 4.0f + 2.0f;
             velocityX = headingCosine * speed;
             velocityZ = headingSine * speed;
@@ -226,8 +226,8 @@ s32 func_150BBB5C(Actor *actor) {
             distance = func_150ADA68() * width;
             speed = func_150ADA68() * 7.0f + 7.0f;
             angle = func_150ADA20() & 0xFF;
-            sine2 = func_151423D8(angle);
-            cosine2 = func_151423D8(angle - 0x40);
+            sine2 = math_cosBinAngleMasked(angle);
+            cosine2 = math_cosBinAngleMasked(angle - 0x40);
             pos.x = actor->xpos + sine2 * distance;
             pos.y = actor->ypos + func_150ADA68() * height + 5.0f;
             pos.z = actor->zpos - cosine2 * distance;
@@ -286,10 +286,10 @@ s32 func_150BBB5C(Actor *actor) {
             speed = actor->scale_y * (func_150ADA68() * 30.0f) + 10.0f;
             yaw = func_150ADA20() & 0x7F;
             pitch = -0x20 - (func_150ADA20() & 0x1F);
-            yawSine = func_151423D8(yaw);
-            yawCosine = func_151423D8(yaw - 0x40);
-            pitchSine = func_151423D8(pitch);
-            pitchCosine = func_151423D8(pitch - 0x40);
+            yawSine = math_cosBinAngleMasked(yaw);
+            yawCosine = math_cosBinAngleMasked(yaw - 0x40);
+            pitchSine = math_cosBinAngleMasked(pitch);
+            pitchCosine = math_cosBinAngleMasked(pitch - 0x40);
             horizontal = speed * pitchSine;
             particle.vel.x = horizontal * yawCosine + offsetX;
             particle.vel.y = -speed * pitchCosine;
@@ -361,14 +361,14 @@ s32 func_150BC488(Actor *actor) {
             f32 sizeB;
 
             angle = func_150ADA20();
-            spreadSine = func_151423D8(angle);
-            spreadCosine = func_151423D8(angle - 0x40);
+            spreadSine = math_cosBinAngleMasked(angle);
+            spreadCosine = math_cosBinAngleMasked(angle - 0x40);
             distance = func_150ADA68() * width;
             spreadX = spreadSine * distance;
             spreadZ = -spreadCosine * distance;
             heading = func_150ADA20();
-            headingSine = func_151423D8(heading);
-            headingCosine = func_151423D8(heading - 0x40);
+            headingSine = math_cosBinAngleMasked(heading);
+            headingCosine = math_cosBinAngleMasked(heading - 0x40);
             speed = func_150ADA68() * 4.0f + 4.0f;
             velocityX = headingCosine * speed;
             velocityZ = headingSine * speed;
@@ -405,8 +405,8 @@ s32 func_150BC488(Actor *actor) {
 
             speed = func_150ADA68() * 7.0f + 7.0f;
             angle = func_150ADA20() & 0xFF;
-            sine = func_151423D8(angle);
-            cosine = func_151423D8(angle - 0x40);
+            sine = math_cosBinAngleMasked(angle);
+            cosine = math_cosBinAngleMasked(angle - 0x40);
             position.x = actor->xpos;
             position.y = actor->ypos + func_150ADA68() * 5.0f;
             position.z = actor->zpos;
@@ -469,10 +469,10 @@ s32 func_150BC488(Actor *actor) {
                 speed = func_150ADA68() * 5.0f + 8.0f;
                 heading = func_150ADA20() & 0x7F;
                 pitch = 0x20 - (func_150ADA20() & 0x3F);
-                headingSine = func_151423D8(heading);
-                headingCosine = func_151423D8(heading - 0x40);
-                pitchSine = func_151423D8(pitch);
-                pitchCosine = func_151423D8(pitch - 0x40);
+                headingSine = math_cosBinAngleMasked(heading);
+                headingCosine = math_cosBinAngleMasked(heading - 0x40);
+                pitchSine = math_cosBinAngleMasked(pitch);
+                pitchCosine = math_cosBinAngleMasked(pitch - 0x40);
                 horizontal = speed * pitchSine;
                 particle.vel.x = horizontal * headingCosine;
                 particle.vel.y = -speed * pitchCosine;
@@ -542,8 +542,8 @@ s32 func_150BCBBC(Actor *actor) {
             f32 velocityZ;
 
             angle = func_150ADA20();
-            spreadSine = func_151423D8(angle);
-            spreadCosine = func_151423D8(angle - 0x40);
+            spreadSine = math_cosBinAngleMasked(angle);
+            spreadCosine = math_cosBinAngleMasked(angle - 0x40);
             distance = func_150ADA68() * width;
             spreadX = spreadSine * distance;
             spreadZ = -spreadCosine * distance;
@@ -555,8 +555,8 @@ s32 func_150BCBBC(Actor *actor) {
             } else {
                 heading = (u8)((actor->angle >> 8) + (s32)(8 - (func_150ADA20() & 0xF)) - 0x80);
             }
-            headingSine = func_151423D8(heading);
-            headingCosine = func_151423D8(heading - 0x40);
+            headingSine = math_cosBinAngleMasked(heading);
+            headingCosine = math_cosBinAngleMasked(heading - 0x40);
             speed = func_150ADA68() * 5.0f + 3.0f;
             velocityX = headingCosine * speed;
             velocityZ = headingSine * speed;
@@ -665,9 +665,9 @@ void func_150BD070(u8 arg0, s32 arg1) {
             // matching: the "+ -c" addends here must stay; writing "- c" changes the emitted code
             particle.rotVel.x = func_150ADA68() * 45.46600342f + -22.73300171f;
             particle.rotVel.z = func_150ADA68() * 45.46600342f + -22.73300171f;
-            func_1514470C(anchors[func_150ADA20() & 1], &particle.pos);
+            math_randomPointInZone(anchors[func_150ADA20() & 1], &particle.pos);
             rnd = func_150ADA20();
-            func_15143794(rnd % 31U - 84, func_150ADA20() % 26U - 45, func_150ADA68() * 21.80000114f + 30.2f, &particle.vel);
+            math_dirFromBinAngles(rnd % 31U - 84, func_150ADA20() % 26U - 45, func_150ADA68() * 21.80000114f + 30.2f, &particle.vel);
             particle.gravity = func_150ADA68() * 1.129000068f + -1.909f;
             particle_newModelParticleWithFloor(&particle, 3, 0xFF, 0, 0, arg0, arg1);
             count--;
@@ -698,7 +698,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
         spawn.fadeStart = 0x23;
         spawn.fadeRate = 7;
         spawn.scaleRate = 1.012537f;
-        spawn.offset = D_800A5480;
+        spawn.offset = gZeroVec3f;
         rnd = (func_150ADA20() & 1) ? 0x40 : 0;
         spawn.flags = ((func_150ADA20() & 1) ? 0x80 : 0) | 7 | rnd | 0x8000 | 0x4000 | 0x800 | 0x400 | 0x200 | 0x20000 | 0x800000;
         spawn.viewMask = 0;
@@ -718,9 +718,9 @@ void func_150BD070(u8 arg0, s32 arg1) {
             spawn.scaleStart = spawn.timer = func_150ADA20() % 31U + 30;
             spawn.alpha = func_150ADA20() % 101U + 155;
             spawn.width = spawn.height = func_150ADA68() * 755.0f + 1262.0f;
-            func_1514470C(anchors[func_150ADA20() & 1], &spawn.pos);
+            math_randomPointInZone(anchors[func_150ADA20() & 1], &spawn.pos);
             rnd = func_150ADA20();
-            func_15143794(rnd % 41U - 89, func_150ADA20() % 51U - 64, func_150ADA68() * 45.60000229f + 18.80000114f, &spawn.vel);
+            math_dirFromBinAngles(rnd % 41U - 89, func_150ADA20() % 51U - 64, func_150ADA68() * 45.60000229f + 18.80000114f, &spawn.vel);
             spawn.gravity = func_150ADA68() * 0.559f + -0.777f;
             spawned = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, arg0, arg1);
             if (spawned != NULL) {

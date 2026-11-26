@@ -41,7 +41,7 @@ s32 func_15011D60(TriggerZone *zone) {
     key.kind = 3;
     key.subTypeData = 0x15;
     key.data1 = tmp.set;
-    found = func_151438D8(0, gZoneCount, 0x11A0, &key);
+    found = math_findMatchingZone(0, gZoneCount, 0x11A0, &key);
     if (found != NULL) {
         tmp.centerX = found->x;
         tmp.centerZ = found->z;

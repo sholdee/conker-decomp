@@ -100,7 +100,7 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     ext.listener = 0;
     if (altOrigin != NULL && altDirection != NULL) {
         if (!useTarget) {
-            if (func_15145128(altDirection, &targetDir, NULL, NULL) != 0) {
+            if (math_vec3Normalize(altDirection, &targetDir, NULL, NULL) != 0) {
                 useTarget = TRUE;
             } else {
                 return NULL;
@@ -110,7 +110,7 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
         dir = &targetDir;
     } else {
         if (direction != NULL) {
-            if (func_15145128(direction, &sourceDir, NULL, NULL) != 0) {
+            if (math_vec3Normalize(direction, &sourceDir, NULL, NULL) != 0) {
                 useSource = TRUE;
             } else {
                 return NULL;
@@ -294,7 +294,7 @@ Vtx *weapon_buildProjectileTail(Game1EF500Trail *trail, s16 index) {
     }
     // matching: the loop wrapper gives IDO an extra block boundary that sets register and schedule order
     do { ext = &trail->trail; } while (0);
-    eye = func_15144B34(index);
+    eye = math_getCameraPos(index);
     start = trail->head.def.pos;
     end.x = trail->head.def.pos.x - ext->accel.x;
     end.y = trail->head.def.pos.y - ext->accel.y;

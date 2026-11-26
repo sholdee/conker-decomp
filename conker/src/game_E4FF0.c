@@ -34,9 +34,9 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
     if (obj != NULL) {
         if (obj->ob_matrix_ptr != NULL) {
             // matching: integer casts keep ob_matrix_ptr out of a0 (a pointer argument is loaded straight into a0)
-            func_15142314((s32)obj->ob_matrix_ptr, 4, &joints[0].x);
-            func_15142314((s32)obj->ob_matrix_ptr, 5, &joints[1].x);
-            func_15142314((s32)obj->ob_matrix_ptr, 0, &root.x);
+            math_getBoneTranslation((s32)obj->ob_matrix_ptr, 4, &joints[0].x);
+            math_getBoneTranslation((s32)obj->ob_matrix_ptr, 5, &joints[1].x);
+            math_getBoneTranslation((s32)obj->ob_matrix_ptr, 0, &root.x);
         } else {
             root.x = obj->xpos;
             root.y = obj->ypos;
@@ -48,8 +48,8 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             joints[1].y = root.y + 130.0f;
             joints[1].z = root.z;
         }
-        dirX = func_151423D8(obj->angle >> 8);
-        dirZ = func_151423D8((obj->angle >> 8) + 0x40);
+        dirX = math_cosBinAngleMasked(obj->angle >> 8);
+        dirZ = math_cosBinAngleMasked((obj->angle >> 8) + 0x40);
         velX = obj->speed * dirX;
         velZ = obj->speed * dirZ;
         {
@@ -62,9 +62,9 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
                 f32 dz;
 
                 mtx = &obj->ob_matrix_ptr[2];
-                func_15143134(&D_8009FD30, &center, mtx);
-                func_15143134(&D_8009FD3C, &bottom, mtx);
-                func_15143134(&D_8009FD48, &side, mtx);
+                math_transformOffset(&D_8009FD30, &center, mtx);
+                math_transformOffset(&D_8009FD3C, &bottom, mtx);
+                math_transformOffset(&D_8009FD48, &side, mtx);
                 height = fabsf(center.y - bottom.y);
                 dx = side.x - bottom.x;
                 dz = side.z - bottom.z;
@@ -153,10 +153,10 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             speed = (func_150ADA68() * 30.0f * obj->scale_y) + 10.0f;
             yaw = func_150ADA20() & 0x7F;
             pitch = -0x20 - (func_150ADA20() & 0x1F);
-            sinYaw = func_151423D8(yaw);
-            cosYaw = func_151423D8(yaw - 0x40);
-            sinPitch = func_151423D8(pitch);
-            cosPitch = func_151423D8(pitch - 0x40);
+            sinYaw = math_cosBinAngleMasked(yaw);
+            cosYaw = math_cosBinAngleMasked(yaw - 0x40);
+            sinPitch = math_cosBinAngleMasked(pitch);
+            cosPitch = math_cosBinAngleMasked(pitch - 0x40);
             horizontal = speed * sinPitch;
             chunk.pos = joints[i];
             chunk.vel.x = (horizontal * cosYaw) + velX;
@@ -230,7 +230,7 @@ void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4
     for (count = (func_150ADA20() % 26U) + 35; count > 0; count--) {
         yaw = func_150ADA20() & 0xFF;
         pitch = (func_150ADA20() % 61U) - 63;
-        func_15143794(yaw, pitch, *radius, &pos);
+        math_dirFromBinAngles(yaw, pitch, *radius, &pos);
         pos.y *= *yScale;
         pos.x += center->x;
         pos.y += center->y;
@@ -238,7 +238,7 @@ void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4
         rot.x = func_150ADA68() * 360.0f;
         rot.y = func_150ADA68() * 360.0f;
         rot.z = func_150ADA68() * 360.0f;
-        func_15143794(yaw, pitch, ((func_150ADA68() * 1221.0f) + 1806.0f) * 0.01f, &vel);
+        math_dirFromBinAngles(yaw, pitch, ((func_150ADA68() * 1221.0f) + 1806.0f) * 0.01f, &vel);
         // matching: random ranges are written `rand * range + min`; `- 1570.0f` would emit sub.s
         accel.x = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.01f;
         accel.y = 0.0f;
@@ -334,7 +334,7 @@ s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     spawn.offset.x = 0.0f;
     spawn.offset.y = 0.0f;
     spawn.offset.z = 0.0f;
-    func_15143874(angle, ((func_150ADA68() * 154.0f) + 205.0f) * 0.1f, &spawn.vel.x, &spawn.vel.z);
+    math_dirFromBinAngleXZ(angle, ((func_150ADA68() * 154.0f) + 205.0f) * 0.1f, &spawn.vel.x, &spawn.vel.z);
     spawn.vel.y = 0.0f;
     spawn.gravity = 0.0f;
     spawn.flags = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 0xE05) | 0x4000 | 0x8000;

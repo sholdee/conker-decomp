@@ -146,7 +146,7 @@ void particle_updateStyleParticle(StyleParticle *particle) {
 
 
 Gfx *particle_drawStyleParticle(Gfx *gfx, StyleParticle *particle, s32 arg2) {
-    SpriteParams sprite; // func_15142E24 points it at the texture, sprite_drawWorld draws it
+    SpriteParams sprite; // math_gfxLoadTextureFrame points it at the texture, sprite_drawWorld draws it
     s32 pad; // matching: unused stack slot in the original frame
     TextureDesc *texture;
     s32 synced;
@@ -164,7 +164,7 @@ Gfx *particle_drawStyleParticle(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     frame = particle->frame;
     frameIndex = frame++; // matching: the dead increment steers IDO's register choice here
     // matching: the pointer goes through an integer (IDO keeps the converted value in a temporary)
-    gfx = func_15142E24(gfx, (TextureDesc *)(s32)gEffectAnimTextures[particle->texture], frameIndex << 8, 2, 0x100, 0x100, 0, 6,
+    gfx = math_gfxLoadTextureFrame(gfx, (TextureDesc *)(s32)gEffectAnimTextures[particle->texture], frameIndex << 8, 2, 0x100, 0x100, 0, 6,
                         &sprite, (u8 *)&synced, 3);
     if (texture->fmt == 5) {
         cycles = 2;
@@ -187,7 +187,7 @@ Gfx *particle_drawStyleParticle(Gfx *gfx, StyleParticle *particle, s32 arg2) {
                               0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
         }
     }
-    gfx = func_15142FBC(gfx, cycleType | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT, 0x5049DC, (u8 *)&synced);
+    gfx = math_gfxSetOtherMode(gfx, cycleType | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT, 0x5049DC, (u8 *)&synced);
     sprite.x = particle->x;
     sprite.y = particle->y;
     sprite.z = particle->z;
@@ -394,8 +394,8 @@ void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
                     velZ = (toZ - fromZ) * 8.0f;
                     velocityY = velY;
                     angle = 0x40 - movement_obj[emitter->object].angle;
-                    velX -= movement_obj[emitter->object].speed * func_15048A40(angle) * 64.0f;
-                    velZ -= movement_obj[emitter->object].speed * func_150489B0(angle) * 64.0f;
+                    velX -= movement_obj[emitter->object].speed * math_sinBinAngle(angle) * 64.0f;
+                    velZ -= movement_obj[emitter->object].speed * math_cosBinAngle(angle) * 64.0f;
                     fixed.word = velX;
                     velXHigh = fixed.bytes[2];
                     velXLow = fixed.bytes[3];
@@ -427,14 +427,14 @@ void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
                 }
                 if (emitter->radiusXZ != 0) {
                     angle = func_150ADA20();
-                    s = func_15048A40(angle);
-                    c = func_150489B0(angle);
+                    s = math_sinBinAngle(angle);
+                    c = math_cosBinAngle(angle);
                     speed = (func_150ADA20() & 0xFFFF) * emitter->radiusXZ * (1.0f / 65536.0f);
                     x += speed * s;
                     z += speed * c;
                 }
                 if (emitter->radiusY != 0) {
-                    s = func_15048A40(func_150ADA20() & 0xFF);
+                    s = math_sinBinAngle(func_150ADA20() & 0xFF);
                     speed = (func_150ADA20() & 0xFFFF) * emitter->radiusY * (1.0f / 65536.0f);
                     y += (s32)(speed * s);
                 }
@@ -1028,11 +1028,11 @@ void particle_getRandomDirection(s32 flags, f32 *outX, f32 *outY, f32 *outZ) {
 
     mask = (flags & 0x40) ? 0x3F : 0x7F;
     angle = func_150ADA20() & mask;
-    *outY = func_150489B0(angle);
-    horizontal = func_15048A40(angle);
+    *outY = math_cosBinAngle(angle);
+    horizontal = math_sinBinAngle(angle);
     angle = func_150ADA20() & 0xFF;
-    yawB = func_150489B0(angle);
-    yawA = func_15048A40(angle);
+    yawB = math_cosBinAngle(angle);
+    yawA = math_sinBinAngle(angle);
     *outX = horizontal * yawA;
     *outZ = horizontal * yawB;
 }
@@ -1137,10 +1137,10 @@ void func_15170500(x, y, z, angle, isParticle, arg5, arg6)
     if (isParticle == 0) {
         angle = movement_obj[0].langle;
     }
-    tilt = func_151EF610() % 50;
-    dirX = func_150489B0(angle);
-    dirZ = -func_15048A40(angle);
-    spread = func_150489B0(tilt);
+    tilt = math_rand() % 50;
+    dirX = math_cosBinAngle(angle);
+    dirZ = -math_sinBinAngle(angle);
+    spread = math_cosBinAngle(tilt);
     dirX *= spread;
     dirZ *= spread;
     dirY = rise * spread;
@@ -1197,8 +1197,8 @@ s32 func_151707E0(StyleParticle *particle) {
 
     particle_moveStyleXZ(particle);
     if (particle->u.drift.unk2F != 0) {
-        particle_scaleStyleVelX(particle, (func_151EF610() % 32) + 230);
-        particle_scaleStyleVelZ(particle, (func_151EF610() % 32) + 230);
+        particle_scaleStyleVelX(particle, (math_rand() % 32) + 230);
+        particle_scaleStyleVelZ(particle, (math_rand() % 32) + 230);
         particle->velocityY = 0;
     } else {
         /* BUG (original game): the speed test squares the X velocity twice and ignores Z */
@@ -1206,8 +1206,8 @@ s32 func_151707E0(StyleParticle *particle) {
         alpha = particle->u.drift.velocityXHigh * 0x100; // matching: the original reuses alpha's local here
         alpha += particle->u.drift.velocityXLow;
         if (velocityX * velocityX + alpha * alpha > 2000) {
-            particle_scaleStyleVelX(particle, (func_151EF610() % 32) + 220);
-            particle_scaleStyleVelZ(particle, (func_151EF610() % 32) + 220);
+            particle_scaleStyleVelX(particle, (math_rand() % 32) + 220);
+            particle_scaleStyleVelZ(particle, (math_rand() % 32) + 220);
         }
         particle->velocityY = 0;
     }

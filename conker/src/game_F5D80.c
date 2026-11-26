@@ -128,8 +128,8 @@ void effect_updateRingEffect(RadialEffect *effect) {
             while (effect->pending > 1.0f) {
                 bias = camera_global_Cameras[gCurrentView].TrueCameraAngle * 0.7111111283f;
                 angle = (func_150ADA20() % 81U) + bias - 40;
-                cosine = func_151423D8(angle - 64);
-                sine = func_151423D8(angle);
+                cosine = math_cosBinAngleMasked(angle - 64);
+                sine = math_cosBinAngleMasked(angle);
                 emitPos[0] = effect->def.pos.x + cosine * effect->radius;
                 emitPos[1] = effect->def.pos.y;
                 emitPos[2] = effect->def.pos.z + sine * effect->radius;
@@ -173,11 +173,11 @@ Gfx *effect_drawRingEffect(Gfx *gdl, RadialEffect *effect, s32 arg2) {
 
     flag = 1;
     vtxCount = 0;
-    gdl = func_15142B7C(gdl, 0x200205, 0x70400);
-    gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
-    gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+    gdl = math_gfxUpdateGeometryMode(gdl, 0x200205, 0x70400);
+    gdl = math_gfxSetEnvColor(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+    gdl = math_gfxSetPrimColor(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = particle_setCombineMode(gdl, 0x21, &flag);
-    gdl = func_15142FBC(gdl, 0x1DACA0, gEffectRenderModes[14].unk0 | gEffectRenderModes[14].unk4, &flag);
+    gdl = math_gfxSetOtherMode(gdl, 0x1DACA0, gEffectRenderModes[14].unk0 | gEffectRenderModes[14].unk4, &flag);
     {
     s32 texAddr = texture_getAddress(*(s32 *)gEffectTextures[67].addr, &palOffset, 3, 0);
 
@@ -389,7 +389,7 @@ void effect_ringEmitDarkParticle(RadialEffect *effect, Vec3f *pos, u8 heading, f
     pitch = (func_150ADA20() % 11U) - 18;
     speed = func_150ADA68() * (effect->def.speed * 0.2430000156f) + effect->def.speed * 0.9610000253f;
 
-    func_15143794(heading, pitch, speed, &packet.vel);
+    math_dirFromBinAngles(heading, pitch, speed, &packet.vel);
     particle_newOwnedSpriteParticle(&packet, 1, 0, effect->header.owner, effect->header.kind);
 }
 
@@ -461,7 +461,7 @@ void effect_ringEmitBurst(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosi
     // matching: the original func_150ADA20 returned a full word; its spill is the
     // call-argument slot at sp+0x20, 0x14 below packet
     ((s32 *)&packet)[-5] = func_150ADA20();
-    func_15143794(heading, (((s32 *)&packet)[-5] % 26U) - 45,
+    math_dirFromBinAngles(heading, (((s32 *)&packet)[-5] % 26U) - 45,
                   (func_150ADA68() * 81.0f + 60.0f) * effect->def.speed * 0.009999999776f,
                   &packet.vel);
     packet.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
@@ -587,8 +587,8 @@ void effect_spawnImpactRing(Actor *actor) {
             u8 spark[3];
 
             heading = -0x40 - (actor->langle >> 8);
-            cosH = func_151423D8(heading);
-            sinH = func_151423D8(heading - 0x40);
+            cosH = math_cosBinAngleMasked(heading);
+            sinH = math_cosBinAngleMasked(heading - 0x40);
             size = extent = (func_150ADA68() * 96.0f + 352.0f) * 0.5f;
             fx.unk0 = 0x701;
             func_150ADA20();
@@ -701,7 +701,7 @@ s32 func_150CAA04(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     packet.pos.z = z;
 
     random = func_150ADA20();
-    func_15143794(heading, (random % 12U) - 21,
+    math_dirFromBinAngles(heading, (random % 12U) - 21,
                   (func_150ADA68() * 300.0f + 498.0f) * 0.1000000015f,
                   &packet.vel);
 
@@ -768,7 +768,7 @@ s32 func_150CADD0(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     // matching: the original func_150ADA20 returned a full word; its spill is the
     // call-argument slot at sp+0x20, 8 below packet
     ((s32 *)&packet)[-2] = func_150ADA20();
-    func_15143794(heading, (((s32 *)&packet)[-2] % 21U) - 40,
+    math_dirFromBinAngles(heading, (((s32 *)&packet)[-2] % 21U) - 40,
                   (func_150ADA68() * 204.0f + 500.0f) * 0.1000000015f,
                   &packet.vel);
 

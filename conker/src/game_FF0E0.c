@@ -37,7 +37,7 @@ struct FF0E0Object {
 
 /*
  * This file's .rodata front-end data: the six ray directions, the colours of the six children
- * (func_15014B60 of game_40490.c reads the first six), and the spin presets that game/Script/EffectCmd/effectcmd.c sends
+ * (level_spawnDiscoBallZone of game_40490.c reads the first six), and the spin presets that game/Script/EffectCmd/effectcmd.c sends
  * with message 0x32.
  */
 static const Vec3f D_800A08F0[6] = {
@@ -103,7 +103,7 @@ void func_150D1C30(FF0E0Object *obj) {
     }
 }
 /* Message handler: 0x32 sets the spin and intensity, 0x30/0x31 enable/disable the object when the
- * argument matches unk40, 0x4E resets the spin from D_800A5480, 0x4F passes the object to effect_destroyObject. */
+ * argument matches unk40, 0x4E resets the spin from gZeroVec3f, 0x4F passes the object to effect_destroyObject. */
 void func_150D1F6C(FF0E0Object *obj, s32 arg, u8 msg) {
     FF0E0State *state;
     FF0E0SpinMsg *msgData;
@@ -126,7 +126,7 @@ void func_150D1F6C(FF0E0Object *obj, s32 arg, u8 msg) {
             }
         }
     } else if (msg == 0x4E) {
-        obj->state.angularVelocity = D_800A5480;
+        obj->state.angularVelocity = gZeroVec3f;
     } else if (msg == 0x4F) {
         effect_destroyObject(&obj->base.header);
     }

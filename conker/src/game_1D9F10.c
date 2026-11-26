@@ -12,7 +12,7 @@
 static const s32 D_800A9270[] = { 0x2F, 0x4E };
 
 /** Creates the RopeRider link for obj; returns NULL if obj can't ride ropes or allocation fails. */
-RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize) {
+RopeRider *rope_createRider(Actor *obj, f32 radius, s32 extraSize) {
     RopeRider *rider;
 
     if (obj == NULL) {
@@ -22,7 +22,7 @@ RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize) {
     if (rider == NULL) {
         return NULL;
     }
-    if (func_151ACB38(obj, &rider->unk18) == 0) {
+    if (rope_canRide(obj, &rider->unk18) == 0) {
         effect_freeObject(&rider->header);
         return NULL;
     }
@@ -36,7 +36,7 @@ RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize) {
 }
 
 /** Returns TRUE (and sets *out to 1) if obj may ride ropes, i.e. its unique_id is 1. */
-s32 func_151ACB38(Actor *obj, u8 *out) {
+s32 rope_canRide(Actor *obj, u8 *out) {
     s32 ret = FALSE;
 
     if (obj->unique_id == 1) {
@@ -47,7 +47,7 @@ s32 func_151ACB38(Actor *obj, u8 *out) {
 }
 
 /** RopeRider update: moves the owner along its rope while it is riding one. */
-s32 func_151ACB60(RopeRider *rider) {
+s32 rope_updateRider(RopeRider *rider) {
     s32 result;
     Rope *rope = rider->owner->mv->ropePtr;
 
@@ -58,12 +58,12 @@ s32 func_151ACB60(RopeRider *rider) {
     }
 }
 
-void func_151ACB94(RopeRider *rider, s32 arg1, u8 arg2) {
+void rope_riderMessage(RopeRider *rider, s32 arg1, u8 arg2) {
     effect_handleOwnerActorEvent(arg1, arg2, &rider->owner, &rider->ownerId, rider);
 }
 
 /** Creates a rope from 0x24 bytes of spawn data: 20 nodes hanging from topY down to bottomY. */
-Rope *func_151ACBD4(void *spawn, s32 extraSize) {
+Rope *rope_create(void *spawn, s32 extraSize) {
     Rope *rope;
     TextureDesc *tex;
     s32 i;
@@ -175,7 +175,7 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
 }
 
 /** Rope update: applies the rider's swing and release impulses, then steps the node chain. */
-void func_151AD174(Rope *rope) {
+void rope_update(Rope *rope) {
     s32 angle;
     f32 force;
     s32 timer;
@@ -211,12 +211,12 @@ void func_151AD174(Rope *rope) {
         node = rope->rider->mv->ropeNode;
         angle = (rope->rider->mv->ropeSwingAngle + (rope->rider->angle >> 8)) & 0xFF;
         force = rope->rider->mv->ropeSwingForce * 1.899999976f;
-        rope->nodes[node].vel[0] += force * func_150489B0(angle);
-        rope->nodes[node].vel[2] -= force * func_15048A40(angle);
+        rope->nodes[node].vel[0] += force * math_cosBinAngle(angle);
+        rope->nodes[node].vel[2] -= force * math_sinBinAngle(angle);
         angle = rope->rider->angle >> 8;
         force = rope->rider->speed * 19.0f;
-        rope->nodes[node].vel[0] += force * func_150489B0(angle);
-        rope->nodes[node].vel[2] -= force * func_15048A40(angle);
+        rope->nodes[node].vel[0] += force * math_cosBinAngle(angle);
+        rope->nodes[node].vel[2] -= force * math_sinBinAngle(angle);
         rope->nodes[node].vel[1] -= 1000.0f;
         timer = rope->rider->mv->ropeSwingTimer - 1;
         if (timer <= 0) {
@@ -226,8 +226,8 @@ void func_151AD174(Rope *rope) {
         rope->rider->mv->ropeSwingTimer = timer;
     }
     if (rope->releaseForce != 0.0f) {
-        rope->nodes[rope->releaseNode].vel[0] -= rope->releaseForce * func_150489B0(rope->releaseAngle);
-        rope->nodes[rope->releaseNode].vel[2] += rope->releaseForce * func_15048A40(rope->releaseAngle);
+        rope->nodes[rope->releaseNode].vel[0] -= rope->releaseForce * math_cosBinAngle(rope->releaseAngle);
+        rope->nodes[rope->releaseNode].vel[2] += rope->releaseForce * math_sinBinAngle(rope->releaseAngle);
         rope->releaseForce *= 0.8999999762f;
     }
     for (i = 0; i < last + 1; i++) {
@@ -315,7 +315,7 @@ void func_151AD174(Rope *rope) {
 }
 
 /** Rope draw: builds this frame's vertex ring around each node and emits the textured strip. */
-Gfx *func_151AD92C(Gfx *dl, Rope *rope, s32 arg2) {
+Gfx *rope_draw(Gfx *dl, Rope *rope, s32 arg2) {
     s32 pad0; // matching: unused stack slot
     s32 i;
     s32 n;
@@ -422,30 +422,30 @@ Gfx *func_151AD92C(Gfx *dl, Rope *rope, s32 arg2) {
 }
 
 /** obj touched the rope zone `zone` (rope id: data1): grab it, or let go of the current rope and grab this one. */
-void func_151AE06C(Actor *obj, TriggerZone *zone) {
+void rope_touchZone(Actor *obj, TriggerZone *zone) {
     u8 canRide;
     u8 ropeId;
 
-    if (func_151ACB38(obj, &canRide) != 0) {
+    if (rope_canRide(obj, &canRide) != 0) {
         ropeId = zone->data1;
         if (obj->mv->rope == 0) {
-            func_151AE0E4(obj, ropeId);
+            rope_grab(obj, ropeId);
         } else if (obj->mv->rope != ropeId) {
-            func_151AE264(obj);
-            func_151AE0E4(obj, ropeId);
+            rope_release(obj);
+            rope_grab(obj, ropeId);
         }
     }
 }
 
 /** Grabs rope ropeId if it is free and obj is alive, not stunned and close to its grab node. */
-void func_151AE0E4(Actor *obj, u8 ropeId) {
+void rope_grab(Actor *obj, u8 ropeId) {
     Rope *rope;
     f32 pos[3];
     s32 i;
     s32 endNodes;
     f32 dist;
 
-    rope = func_151AE590(ropeId);
+    rope = rope_findById(ropeId);
     if (rope == NULL) {
         while (TRUE) {
         }
@@ -453,7 +453,7 @@ void func_151AE0E4(Actor *obj, u8 ropeId) {
     if (rope->regrabTimer != 0 || obj->energy == 0 || obj->stunned != 0) {
         return;
     }
-    func_151AE2BC(&obj->mv->ropeProgress, rope, obj->xpos, obj->ypos, obj->zpos);
+    rope_getHeightProgress(&obj->mv->ropeProgress, rope, obj->xpos, obj->ypos, obj->zpos);
     endNodes = 140.0f / rope->segmentLength;
     i = (rope->nodeCount - endNodes - 1) * obj->mv->ropeProgress;
     pos[0] = rope->nodes[i].pos[0];
@@ -472,7 +472,7 @@ void func_151AE0E4(Actor *obj, u8 ropeId) {
 }
 
 /** Lets go of the current rope, giving it a swing impulse from obj's horizontal speed. */
-void func_151AE264(Actor *obj) {
+void rope_release(Actor *obj) {
     f32 force = obj->speed * 0.8899999857f;
     Rope *rope = obj->mv->ropePtr;
 
@@ -486,7 +486,7 @@ void func_151AE264(Actor *obj) {
 }
 
 /** Sets *progress to how far up the rope height y is (0.0f bottom, 1.0f top). */
-void func_151AE2BC(f32 *progress, Rope *rope, f32 x, f32 y, f32 z) {
+void rope_getHeightProgress(f32 *progress, Rope *rope, f32 x, f32 y, f32 z) {
     s32 n;
     s32 i;
     f32 frac;
@@ -541,8 +541,8 @@ s32 func_151AE3A8(RopeRider *rider) {
     obj = rider->owner;
     rope = obj->mv->ropePtr;
     angle = func_15143E08(obj) - 0x80;
-    dirX = func_151423D8(angle - 0x40);
-    dirZ = func_151423D8(angle);
+    dirX = math_cosBinAngleMasked(angle - 0x40);
+    dirZ = math_cosBinAngleMasked(angle);
     ride = obj->mv;
     progress = ride->ropeProgress;
     radius = rider->radius;
@@ -579,7 +579,7 @@ s32 func_151AE3A8(RopeRider *rider) {
 }
 
 /** Finds the rope with the given id in either rope object list; NULL if there is none. */
-Rope *func_151AE590(u8 id) {
+Rope *rope_findById(u8 id) {
     u8 i;
     u8 j;
     Rope *rope;
@@ -601,7 +601,7 @@ Rope *func_151AE590(u8 id) {
 }
 
 /** Rope message handler: forgets a removed rider (0), or follows a rider swap (0x2D: {old, new}). */
-void func_151AE640(Rope *rope, Actor **objs, u8 msg) {
+void rope_message(Rope *rope, Actor **objs, u8 msg) {
     Actor *first;
 
     if (msg == 0) {

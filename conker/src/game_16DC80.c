@@ -11,7 +11,7 @@
  */
 
 /* matching: the depth terms of a RenderView's viewports[0], read as scalars (the Vp_t array access allocates
- * FP registers differently in func_151408A4). */
+ * FP registers differently in flare_buildGlowQuad). */
 typedef struct {
     /* 0x000 */ u8 pad0[0x44];
     /* 0x044 */ s16 vpScaleZ; /* viewports[0].vp.vscale[2] */
@@ -21,7 +21,7 @@ typedef struct {
 
 
 /* This file's .bss. */
-s32 D_800DC9F0; /* live glow count */
+s32 gGlowCount; /* live glow count */
 
 /* not referenced: two sets of five words */
 static const u32 D_800A51D0[10] = {
@@ -34,22 +34,22 @@ static const u32 D_800A51D0[10] = {
  * without a prototype (mixed signatures).
  */
 /* Visibility tests, indexed by GlowShape.handler: 0 hides the glow this frame. */
-static s32 (*D_80089F90[])() = { func_151028AC, sight_isExtensionOn, func_15141818 };
+static s32 (*gGlowVisibilityTests[])() = { func_151028AC, sight_isExtensionOn, func_15141818 };
 /* Destroy handlers, indexed by GlowShape.type. */
-static void (*D_80089F9C[])() = {
-    func_151411A4, particle_destroyBeamLine, func_151411A4, func_151411A4, func_151411A4, func_151411A4, func_151411A4,
-    func_151411A4, func_151411A4, func_151411A4, beam_destroyGlow, func_151411A4, func_151411A4, func_151411A4,
-    func_151411A4, effect_destroyBurstGlow, func_150F6484, func_151411A4,
+static void (*gGlowDestroyHandlers[])() = {
+    flare_destroyGlowDefault, particle_destroyBeamLine, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault,
+    flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault, beam_destroyGlow, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault,
+    flare_destroyGlowDefault, effect_destroyBurstGlow, func_150F6484, flare_destroyGlowDefault,
 };
 /* Free handlers, indexed by GlowShape.type. */
-static void (*D_80089FE4[])() = {
-    func_151411C4, particle_freeBeamLine, func_151411C4, func_151411C4, func_151411C4, func_151411C4, func_151411C4,
-    func_151411C4, func_151411C4, func_151411C4, beam_freeGlow, func_151411C4, func_151411C4, func_151411C4,
-    func_151411C4, effect_freeBurstGlow, func_150F64B0, func_151411C4,
+static void (*gGlowFreeHandlers[])() = {
+    flare_freeGlowDefault, particle_freeBeamLine, flare_freeGlowDefault, flare_freeGlowDefault, flare_freeGlowDefault, flare_freeGlowDefault, flare_freeGlowDefault,
+    flare_freeGlowDefault, flare_freeGlowDefault, flare_freeGlowDefault, beam_freeGlow, flare_freeGlowDefault, flare_freeGlowDefault, flare_freeGlowDefault,
+    flare_freeGlowDefault, effect_freeBurstGlow, func_150F64B0, flare_freeGlowDefault,
 };
 /* Message handlers, indexed by GlowShape.type. */
 typedef void (*GlowMsgFn)();
-static GlowMsgFn D_8008A02C[] = {
+static GlowMsgFn gGlowMsgHandlers[] = {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, beam_glowMessage, particle_onBoneGlowSwap, func_150D7420,
     func_150D74DC, func_150D758C, effect_burstGlowMessage, effect_burstGlowMessage, func_150FADC8,
 };
@@ -59,7 +59,7 @@ static IdList2 D_8008A074 = { { 0x1C, 0x56 } }; /* effect-object kinds */
  * Spawns a glow through particle_newQuadParticleWhite and copies paramSize bytes of params into it.
  * Returns the new glow, or NULL.
  */
-void *func_151407D0(void *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 handler,
+void *flare_spawnGlow(void *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 handler,
                     u8 arg8, s32 arg9) {
     GlowObj *obj;
 
@@ -76,7 +76,7 @@ void *func_151407D0(void *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8
         return NULL;
     }
     if (obj != NULL) {
-        D_800DC9F0++;
+        gGlowCount++;
     }
     return obj;
 }
@@ -85,7 +85,7 @@ void *func_151407D0(void *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8
  * Builds this frame's quad (4 vertices) for the glow in the given view and updates its visibility.
  * Returns the vertices, or NULL when the glow isn't drawn.
  */
-Vtx *func_151408A4(GlowObj *obj, s16 view) {
+Vtx *flare_buildGlowQuad(GlowObj *obj, s16 view) {
     Vtx *vtx;
     Vtx *quad;
     GlowParams *params;
@@ -119,17 +119,17 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
     s16 alpha;
 
     params = &obj->params;
-    if (params->shape.handler != -1 && D_80089F90[params->shape.handler](obj, view) == 0) {
+    if (params->shape.handler != -1 && gGlowVisibilityTests[params->shape.handler](obj, view) == 0) {
         return NULL;
     }
     params->shape.screenY[view] = -1;
     params->shape.screenX[view] = -1;
     if (obj->flags & 2) {
-        onScreen = func_15144CEC(obj->pos, screen, &projZ, &depth, &invDepth, view);
+        onScreen = math_projectToScreen(obj->pos, screen, &projZ, &depth, &invDepth, view);
         if (onScreen == 0 || screen[0] < VIEWS[view].left || VIEWS[view].right < screen[0] || screen[1] < VIEWS[view].top || VIEWS[view].bottom < screen[1]) {
             return NULL;
         }
-        camPos = func_15144B34(view);
+        camPos = math_getCameraPos(view);
         {
         f32 dz, dy, dx;
         f32 lenSq;
@@ -264,38 +264,38 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
     return NULL;
 }
 
-void func_151411A4(DefParticleHead *arg0) {
+void flare_destroyGlowDefault(DefParticleHead *arg0) {
     particle_destroyQuadParticleDefault(arg0);
 }
 
-void func_151411C4(DefParticleHead *arg0) {
+void flare_freeGlowDefault(DefParticleHead *arg0) {
     particle_freeQuadParticleDefault(arg0);
 }
 
-/* Destroys a glow: frees its attachment and runs its type's D_80089F9C handler. */
-void func_151411E4(GlowObj *obj) {
+/* Destroys a glow: frees its attachment and runs its type's gGlowDestroyHandlers handler. */
+void flare_destroyGlow(GlowObj *obj) {
     LensFlare **attach = &obj->params.shape.attach; // matching: the NULL test and the call load it separately
 
     if (*attach != NULL) {
-        func_1517E134(*attach);
+        flare_remove(*attach);
     }
-    D_800DC9F0--;
-    D_80089F9C[obj->params.shape.type](obj);
+    gGlowCount--;
+    gGlowDestroyHandlers[obj->params.shape.type](obj);
 }
 
-/* Destroys a glow: frees its attachment and runs its type's D_80089FE4 handler. */
-void func_15141250(GlowObj *obj) {
+/* Destroys a glow: frees its attachment and runs its type's gGlowFreeHandlers handler. */
+void flare_freeGlow(GlowObj *obj) {
     LensFlare **attach = &obj->params.shape.attach; // matching: the NULL test and the call load it separately
 
     if (*attach != NULL) {
-        func_1517E134(*attach);
+        flare_remove(*attach);
     }
-    D_800DC9F0--;
-    D_80089FE4[obj->params.shape.type](obj);
+    gGlowCount--;
+    gGlowFreeHandlers[obj->params.shape.type](obj);
 }
 
 /* Samples the z-buffer at each occlusion-tested glow's screen position, per view. */
-void func_151412BC(void) {
+void flare_sampleGlowDepths(void) {
     s32 p;
     u8 i;
     u8 j;
@@ -331,7 +331,7 @@ void func_151412BC(void) {
 }
 
 /* Moves the attachment, if any, to the glow's position. */
-void func_1514143C(GlowObj *obj) {
+void flare_moveGlowAttachment(GlowObj *obj) {
     GlowParams *params;
 
     if (obj->params.shape.attach != NULL) {
@@ -346,7 +346,7 @@ void func_1514143C(GlowObj *obj) {
 }
 
 /* Flicker: every random interval, picks a new random target scale; the scale eases towards it. */
-s32 func_15141478(GlowObj *obj) {
+s32 flare_glowFlicker(GlowObj *obj) {
     GlowFlicker *flicker;
     GlowParams *params;
 
@@ -366,7 +366,7 @@ s32 func_15141478(GlowObj *obj) {
 }
 
 /* Pulse: scale = base + amplitude * sin(phase), the phase advancing by speed per second. */
-s32 func_15141564(GlowObj *obj) {
+s32 flare_glowPulse(GlowObj *obj) {
     GlowPulse *pulse = &obj->params.anim.pulse;
     f32 *phase;
 
@@ -374,12 +374,12 @@ s32 func_15141564(GlowObj *obj) {
     obj->params.shape.scale = pulse->amplitude * sinf(pulse->phase) + (*pulse).base;
     phase = &pulse->phase;
     *phase = pulse->speed * gFrameDelta + *phase;
-    *phase = func_15144B68(*phase);
+    *phase = math_wrapRadians(*phase);
     return 1;
 }
 
 /* Envelope: a periodic cycle of the scale: base, ramp up, peak, ramp down. */
-s32 func_151415D4(GlowObj *obj) {
+s32 flare_glowEnvelope(GlowObj *obj) {
     GlowEnvelope *env = &obj->params.anim.envelope;
     f32 t;
 
@@ -402,14 +402,14 @@ s32 func_151415D4(GlowObj *obj) {
     return 1;
 }
 
-/* Message handler: forwards to the type's D_8008A02C handler, then handles messages 0x22/0x24/0x25 aimed at
+/* Message handler: forwards to the type's gGlowMsgHandlers handler, then handles messages 0x22/0x24/0x25 aimed at
    this glow's type. */
-void func_151416E8(GlowObj *obj, u8 *msg, u8 msgType) {
+void flare_glowMessage(GlowObj *obj, u8 *msg, u8 msgType) {
     GlowParams *params;
 
     // matching: volatile makes IDO reload the type and the callback for the call
-    if (((GlowMsgFn volatile *)D_8008A02C)[*(volatile u8 *)&obj->params.shape.type] != NULL) {
-        D_8008A02C[*(volatile u8 *)&obj->params.shape.type](obj, msg, msgType);
+    if (((GlowMsgFn volatile *)gGlowMsgHandlers)[*(volatile u8 *)&obj->params.shape.type] != NULL) {
+        gGlowMsgHandlers[*(volatile u8 *)&obj->params.shape.type](obj, msg, msgType);
     }
     params = &obj->params;
     switch (msgType) {
@@ -452,7 +452,7 @@ s32 func_15141818(s32 arg0, s32 arg1) {
  * Places the glow at the point (0, distance, 0) rotated by angles (x, z) about pivot, aimed away from the pivot
  * (spread scales the aim offset).
  */
-void func_1514182C(GlowObj *obj, f32 *pivot, f32 distance, f32 spread, f32 angleX, f32 angleZ) {
+void flare_placeGlowOnPivot(GlowObj *obj, f32 *pivot, f32 distance, f32 spread, f32 angleX, f32 angleZ) {
     f32 dx, dy, dz;
     MtxF mtx;
 
@@ -469,10 +469,10 @@ void func_1514182C(GlowObj *obj, f32 *pivot, f32 distance, f32 spread, f32 angle
     obj->aim[2] = obj->pos[2] + dz * 500.0f;
 }
 
-/* Orbit: places the glow around its pivot with func_1514182C. */
-s32 func_15141928(GlowObj *obj) {
+/* Orbit: places the glow around its pivot with flare_placeGlowOnPivot. */
+s32 flare_glowOrbit(GlowObj *obj) {
     f32 *angles = obj->params.anim.orbit.angles;
 
-    func_1514182C(obj, obj->params.anim.orbit.pivot, obj->params.anim.orbit.distance, obj->params.anim.orbit.spread, angles[0], angles[2]);
+    flare_placeGlowOnPivot(obj, obj->params.anim.orbit.pivot, obj->params.anim.orbit.distance, obj->params.anim.orbit.spread, angles[0], angles[2]);
     return 1;
 }

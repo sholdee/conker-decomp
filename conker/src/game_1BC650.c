@@ -256,7 +256,7 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
                     anchor = &gAnchorSets[set][func_150ADA20() % gAnchorCounts[set]];
                     size.unk0 = func_150ADA68() * params->tmpl.sizeXRange + params->tmpl.sizeX;
                     size.unk4 = func_150ADA68() * params->tmpl.sizeYRange + params->tmpl.sizeY;
-                    func_15143134(&anchor->offset, &pos, owner->ob_matrix_ptr + anchor->bone);
+                    math_transformOffset(&anchor->offset, &pos, owner->ob_matrix_ptr + anchor->bone);
                     frameRand = func_150ADA20();
                     if (func_150ADA20() & 1) {
                         kind = 0x13;
@@ -265,7 +265,7 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
                     }
                     sprite = particle_spawnJitterParticle(&pos, &size, -1,
                                            frameRand % (params->tmpl.unk21Range + 1) + params->tmpl.unk20,
-                                           &D_800A5480, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
+                                           &gZeroVec3f, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
                                            0, kind, 1, 1, 0xFF, 0, emitter->group.header.owner, emitter->group.header.kind);
                     if (sprite != NULL) {
                         desc.owner = owner;

@@ -59,17 +59,17 @@ void actor_clampToZoneSet(Actor *actor, s32 zoneSetId) {
             actor->zpos = -1200.0f;
         }
     }
-    if ((zoneSetId != 0) && (D_800D18B0 != NULL) && (actor->carried < 100)) {
+    if ((zoneSetId != 0) && (gCylinderSets != NULL) && (actor->carried < 100)) {
         bestDist = 1000000000.0f;
         i = 0;
-        while (zoneSetId != D_800D18B0[i].id) {
-            if (D_800D18B0[i].cylinders == NULL) {
+        while (zoneSetId != gCylinderSets[i].id) {
+            if (gCylinderSets[i].cylinders == NULL) {
                 return;
             }
             i++;
         }
-        segs = D_800D18B0[i].cylinders;
-        count = D_800D18B0[i].count;
+        segs = gCylinderSets[i].cylinders;
+        count = gCylinderSets[i].count;
         for (i = 0; i < count; i++) {
             seg = &segs[i];
             if (outsideAll || (seg->r & 0x8000)) {
@@ -428,7 +428,7 @@ void actor_updateChaseAi(Actor *actor) {
         actor->unk21C = 0;
         actor->unk23A = 0;
     }
-    if ((D_800C3638 != 0) && (func_150229E4(actor) != 0)) {
+    if ((D_800C3638 != 0) && (cutscene_isActorBound(actor) != 0)) {
         return;
     }
     if ((actor->mvmt_control & 0x1000) && (actor->shad < 0.200000003f)) {
@@ -660,7 +660,7 @@ void actor_updateChaseAi(Actor *actor) {
                                     lookY += actor->ypos;
                                     func_15047390(mtx, actor->xpos, actor->ypos, actor->zpos, lookX, lookY,
                                                   lookZ, 0.0f, 1.0f, 0);
-                                    if (func_15049440(mtx, movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 80.0f, 80.0f, 0.0f,
+                                    if (math_isBoxInView(mtx, movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 80.0f, 80.0f, 0.0f,
                                                       4000.0f, 320.0f, 320.0f) != 0) {
                                         spotted = 1;
                                     }
@@ -1020,7 +1020,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
     f32 *floorOut;
 
     actor->unk118 = -10000.0f;
-    func_1502178C(actor, 0, -1);
+    cutscene_applyObjectTrack(actor, 0, -1);
     if (actor->noshove & 0x8000) {
         if (actor->drawtype == 7) {
             actor->shad = 0.0f;
@@ -1586,9 +1586,9 @@ void actor_moveHorizontal(Actor *actor) {
             triangle.pts[i].y = actor->floorTri.v[i].y;
             triangle.pts[i].z = actor->floorTri.v[i].z;
         }
-        func_15049350(triangle);
-        if (D_800CC214 != 0.0f) {
-            vertical = (-D_800CC210 * x - D_800CC218 * z) / D_800CC214;
+        math_computeTriPlane(triangle);
+        if (gTriPlaneNormalY != 0.0f) {
+            vertical = (-gTriPlaneNormalX * x - gTriPlaneNormalZ * z) / gTriPlaneNormalY;
             if (vertical > 4.0f || actor->type != 1 || actor->mv->transport != 2) {
                 length = sqrtf(x * x + z * z + vertical * vertical);
                 if (length != 0.0f) {
@@ -1742,7 +1742,7 @@ f32 actor_getStickDeflection(OSContPad *pad) {
 
 /* Binary angle (0x10000 = full turn) of the direction (x, z); the third argument is unused. */
 u16 actor_getDirectionAngle(f32 x, f32 z, s32 unused) {
-    return (u16)(func_150484A0(-x, z) * 10430.37793f) + 16384;
+    return (u16)(math_atan2(-x, z) * 10430.37793f) + 16384;
 }
 
 /* Horizontal (xz) distance between two actors. */
@@ -2274,7 +2274,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         victim->mv->ladder = 0;
         victim->mv->unk6B = 0;
         if (victim->mv->rope != 0) {
-            func_151AE264(victim);
+            rope_release(victim);
         }
         victim->mv->side = 0;
         tmp = victim->attach_char;
@@ -2649,7 +2649,7 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
         attacker->doing_hit = 0;
         return 0;
     }
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return 0;
     }
     attackIdx = attacker->doing_hit - 1;
@@ -2764,7 +2764,7 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
                 ray.y = t - pos.y;
                 ray.z = rz - pos.z;
                 if (func_150AC9C0(pos.x, pos.y, pos.z, ray.x, ray.y, ray.z, NULL, NULL, &hitX, &hitY, &hitZ, &hitDist, 0, 0, 0.0f) != 0 &&
-                    hitDist < func_15143E64(&ray)) {
+                    hitDist < math_vec3Length(&ray)) {
                     continue;
                 }
             }
@@ -2803,7 +2803,7 @@ s32 actor_hitScripted(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
 
     dummy = &movement_obj[25];
     table = gDefaultHitReactions;
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return 0;
     }
     if ((flags & 0x20000) && (victim->imune != 0)) {
@@ -3355,7 +3355,7 @@ void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32
         } else {
             state->anim[0] &= 0xFFFF7FFF;
         }
-        if (D_800C35EA[0] == 1 && (state->anim[0] & 0x8000)) {
+        if (gCutsceneStates[0] == 1 && (state->anim[0] & 0x8000)) {
             state->frame[0] = arg9;
         }
     }
@@ -3371,7 +3371,7 @@ void actor_playAnim(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 
     AnimInstance *data;
 
     idx = actor->character_type;
-    if ((D_800C3638 != 0) && ((D_800C3654[0] == 0) || (func_150229E4(actor) != 0))) {
+    if ((D_800C3638 != 0) && ((D_800C3654[0] == 0) || (cutscene_isActorBound(actor) != 0))) {
         return;
     }
     if (actor->character_type == 0xFF) {
@@ -4083,7 +4083,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
         actor->mv->ladder = 0;
         actor->mv->ladderFromTop = 0;
         if (actor->mv->rope != 0) {
-            func_151AE264(actor);
+            rope_release(actor);
         }
         actor->mv->side = 0;
     } else if ((D_800CC288 & 0x8000) && (actor->mv->transport == 0)) {
@@ -4174,7 +4174,7 @@ void actor_runPlayerAction(Actor *actor, s32 buttons, s32 pressed, f32 height, s
     s32 idx;
 
     result = 0;
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return;
     }
     held = 0;
@@ -4818,7 +4818,7 @@ void actor_updateTypeAnims(void) {
 
             if (movement_obj[i].ob_matrix_ptr != NULL) {
                 for (j = 0; j < 4; j++) {
-                    weights[j] = (func_150489B0(D_800CC298.unkB[j]) + 1.0f) * 0.5f;
+                    weights[j] = (math_cosBinAngle(D_800CC298.unkB[j]) + 1.0f) * 0.5f;
                     D_800CC298.unkB[j] += step[j];
                 }
                 func_1501B660(&movement_obj[i], weights, 1);
@@ -4958,7 +4958,7 @@ s32 actor_isVisible(Actor *actor) {
     if (actor->playernumber != 0xFF) {
         return 1;
     }
-    if ((D_800C3638 != 0) && (func_150229E4(actor) != 0)) {
+    if ((D_800C3638 != 0) && (cutscene_isActorBound(actor) != 0)) {
         return 1;
     }
     sum = 0;

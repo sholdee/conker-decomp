@@ -107,7 +107,7 @@ void func_150EB614(WorldObject *obj) {
         velocity = WORK(obj)->swing.velocity;
         if (angle != target || velocity != 0.0f) {
             angle += velocity * D_800BE9E4;
-            delta = func_15048A70(angle, target);
+            delta = math_angleDiff(angle, target);
             magnitude = fabsf(delta);
             if (delta > 0.0f) {
                 velocity += magnitude * acceleration;
@@ -170,7 +170,7 @@ void func_150EB8C4(void) {
         spawn.sizeXZ = 1.0f;
         spawn.radius = 9.0f;
         spawn.elasticity = 0.4350000322f;
-        spawn.rot = D_800A5480;
+        spawn.rot = gZeroVec3f;
         spawn.rotVel.y = 0.0f;
         spawn.scale.x = 1.0f;
         spawn.scale.y = 1.0f;
@@ -200,7 +200,7 @@ void func_150EB8C4(void) {
             spawn.pos = D_800A14A8[i];
             yaw = func_150ADA20();
             pitch = func_150ADA20();
-            func_15143794(yaw % 26U + 45, (pitch & 0xF) - 25, func_150ADA68() * 30.0f + 15.0f, &spawn.vel);
+            math_dirFromBinAngles(yaw % 26U + 45, (pitch & 0xF) - 25, func_150ADA68() * 30.0f + 15.0f, &spawn.vel);
             spawn.rotVel.x = func_150ADA68() * 15.10800076f + -7.554000378f;
             spawn.rotVel.z = func_150ADA68() * 15.10800076f + -7.554000378f;
             spawn.gravity = func_150ADA68() * 0.6170000434f + -1.621000051f;

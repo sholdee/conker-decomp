@@ -4,7 +4,7 @@
 #include "variables.h"
 
 /* Resets this module's state: runs three sub-resets, then clears its flags, tables and pointers. */
-void func_1500E5C0(void) {
+void level_resetSetupState(void) {
     s32 i;
     s32 j;
 
@@ -110,8 +110,8 @@ void func_1500E890(void) {
 
 /* Starts two flamethrower_addTexScroll entries, spawns one trail_createSprayEmitter emitter and calls sound_addDynamicSound. */
 void func_1500E8C0(void) {
-    flamethrower_addTexScroll(D_800B0E00[0], D_800902E8, 0, -1, 0, 0, 0, -6);
-    flamethrower_addTexScroll(D_800B0E00[1], D_800902E8, 0, -1, 0, 1, 0, -6);
+    flamethrower_addTexScroll(gLevelDisplayLists[0], D_800902E8, 0, -1, 0, 0, 0, -6);
+    flamethrower_addTexScroll(gLevelDisplayLists[1], D_800902E8, 0, -1, 0, 1, 0, -6);
     {
         SprayDesc descriptor;
 
@@ -145,6 +145,6 @@ void func_1500E8C0(void) {
 }
 
 void func_1500EAA0(void) {
-    flamethrower_addTexScroll(D_800B0E00[0], D_80090320, 0, -1, 0, 0, 0, -8);
-    flamethrower_addTexScroll(D_800B0E00[1], D_80090320, 0, -1, 0, 1, 0, -8);
+    flamethrower_addTexScroll(gLevelDisplayLists[0], D_80090320, 0, -1, 0, 0, 0, -8);
+    flamethrower_addTexScroll(gLevelDisplayLists[1], D_80090320, 0, -1, 0, 1, 0, -8);
 }

@@ -77,7 +77,7 @@ void particle_updateSideEmitter(Effect1BFDD0 *effect) {
             desc.timer = (func_150ADA20() % 31U) + 20;
             desc.alpha = (func_150ADA20() % 156U) + 100;
             desc.width = desc.height = (func_150ADA68() * 150.0f) + 100.0f;
-            func_15143874(data->object->langle >> 8, side ? 20.0f : -20.0f, &desc.pos.x, &desc.pos.z);
+            math_dirFromBinAngleXZ(data->object->langle >> 8, side ? 20.0f : -20.0f, &desc.pos.x, &desc.pos.z);
             desc.pos.x += data->object->xpos;
             desc.pos.z += data->object->zpos;
             desc.pos.y = data->object->floorY + 20.0f;
@@ -180,9 +180,9 @@ void particle_updateBoneSideEmitter(Effect1BFDD0 *effect) {
                 desc.timer = (func_150ADA20() % 11U) + 30;
                 desc.alpha = (func_150ADA20() % 101U) + 100;
                 desc.width = desc.height = (func_150ADA68() * 150.0f) + 100.0f;
-                func_15143134(&offset, &desc.pos, data->object->ob_matrix_ptr + 1);
+                math_transformOffset(&offset, &desc.pos, data->object->ob_matrix_ptr + 1);
                 rand = func_150ADA20();
-                func_15143794(yaw, (rand % 28U) - 25, func_150ADA68() * 3998.0f * 0.001f, &desc.vel);
+                math_dirFromBinAngles(yaw, (rand % 28U) - 25, func_150ADA68() * 3998.0f * 0.001f, &desc.vel);
                 desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
                 if (func_150ADA20() & 1) {
                     desc.flags |= PARTICLE_FLIP_S;

@@ -14,7 +14,7 @@ const Vec3f D_800AAA90 = { -113.8288f, -14.082394f, 14.5422f };
 const Vec3f D_800AAA9C = { -124.648605f, -14.082394f, 14.5422f };
 const Vec3f D_800AAAA8 = { 7.3199987f, -14.082394f, 4.5422006f };
 
-/* Spawns a weapon_spawnProjectile effect along a segment at `obj`: offset along func_15145740's `dir` from its
+/* Spawns a weapon_spawnProjectile effect along a segment at `obj`: offset along math_getActorAim's `dir` from its
  * position, or, when it has ob_matrix_ptr, between two points of model part 0x46, plus weapon_spawnLightAt and
  * (half the time) func_151C5588 effects at the segment start. */
 void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
@@ -32,7 +32,7 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
     f32 randA;
 
     if (obj != NULL) {
-        func_15145740(obj, &dir, &unkB0, NULL, 0.0f);
+        math_getActorAim(obj, &dir, &unkB0, NULL, 0.0f);
         dir.x *= 0.001f;
         dir.y *= 0.001f;
         dir.z *= 0.001f;
@@ -45,7 +45,7 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
             if (part == NULL) {
                 return;
             }
-            if (func_1514654C(obj, part, 0, modelPoints, worldPoints, 2) == 0) {
+            if (math_transformAttachmentOffsets(obj, part, 0, modelPoints, worldPoints, 2) == 0) {
                 return;
             }
             weapon_spawnLightAt(&start, arg1, arg2);
@@ -149,7 +149,7 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
             ringCount = func_150ADA20() % 3U + 5;
             while (ringCount != 0) {
                 f = (func_150ADA68() * 33.0f + 60.0f) * 0.1f;
-                func_15143874(func_150ADA20() & 0xFF, f, &cosv, &sinv);
+                math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, f, &cosv, &sinv);
                 vel.x = basisB[0] * sinv + basisA[0] * cosv;
                 vel.y = basisB[1] * sinv + basisA[1] * cosv;
                 vel.z = basisB[2] * sinv + basisA[2] * cosv;
@@ -216,7 +216,7 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
             for (; count > 0; count--) {
                 randA = func_150ADA20();
                 randC = func_150ADA20();
-                func_15143794(randA & 0xFF, -(randC & 0x3F), func_150ADA68() * 7.0f + 2.0f, &spawn.vel);
+                math_dirFromBinAngles(randA & 0xFF, -(randC & 0x3F), func_150ADA68() * 7.0f + 2.0f, &spawn.vel);
                 f = func_150ADA68() * 117.0f;
                 spawn.flags &= ~0xC0;
                 spawn.gravity = (f + -197.0f) * 0.001f;

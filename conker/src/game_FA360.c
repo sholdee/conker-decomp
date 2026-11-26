@@ -89,7 +89,7 @@ s32 particle_updateDriftQuad(DriftQuad *effect) {
     if (drift->vel.y < 0.0f) {
         wave = sinf(drift->phase);
         pitch = drift->phaseScale * wave + 1.5707964f;
-        func_151436B4(drift->swayYaw, pitch, drift->swayLength, &effect->sway);
+        math_dirFromAngles(drift->swayYaw, pitch, drift->swayLength, &effect->sway);
         period = 6.2831855f;
         drift->swayLength += drift->swayLengthRate * gFrameDelta;
         drift->phase += drift->phaseSpeed * gFrameDelta;
@@ -202,7 +202,7 @@ void particle_updateDriftBurstEmitter(DriftBurstEmitter *emitter) {
             if (fabsf(diff) < 0.39269912f) {
                 r = func_150ADA68();
                 burst.pos.y = 1613.5835f * r + 2411.0085f + 500.0f;
-                func_1514373C(yaw, r * (10426.68 - 8400.0) + 8400.0, &burst.pos.x, &burst.pos.z);
+                math_dirFromAngleXZ(yaw, r * (10426.68 - 8400.0) + 8400.0, &burst.pos.x, &burst.pos.z);
                 burst.countBase = 15;
                 burst.countRange = 20;
                 /* 40.743664 = 256 / (2 * pi): radians to binary angle */

@@ -36,12 +36,12 @@ void *particle_spawnImpactStreak(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f
     impact.callback = callback;
     if (checkHit && func_150AC9C0(start->x, start->y, start->z, dir->x, dir->y, dir->z, &impact.unk10, &impact.tri,
                                   &impact.point.x, &impact.point.y, &impact.point.z, NULL, &hitObject, NULL, 0.0f) &&
-        func_15145C90(hitObject)) {
+        math_isObjectHidden(hitObject)) {
         impact.flags |= 1;
         offset.x = impact.point.x - info.pos.x;
         offset.y = impact.point.y - info.pos.y;
         offset.z = impact.point.z - info.pos.z;
-        if (func_15144A74(&offset, &impact.point) < 0.0f) {
+        if (math_vec3Dot(&offset, &impact.point) < 0.0f) {
             impact.side = -1.0f;
         } else {
             impact.side = 1.0f;
@@ -80,7 +80,7 @@ s8 particle_moveImpactStreak(Streak *streak) {
             offset.x = impact->point.x - streak->head.def.pos.x;
             offset.y = impact->point.y - streak->head.def.pos.y;
             offset.z = impact->point.z - streak->head.def.pos.z;
-            if (func_15144A74(&offset, &impact->point) < 0.0f) {
+            if (math_vec3Dot(&offset, &impact->point) < 0.0f) {
                 side = -1.0f;
             } else {
                 side = 1.0f;

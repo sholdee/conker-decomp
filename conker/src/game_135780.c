@@ -57,7 +57,7 @@ void particle_updateAreaEmitter(AreaEmitter *emitter) {
                 extra.frame0Time = extra.frame1Time * 0.5f;
                 desc.width = func_150ADA68() * 500.0f + 600.0f;
                 desc.height = desc.width * 0.5f;
-                func_1514373C(func_150ADA68() * 3.1415927f * 2.0f, data->area->radius, &desc.pos.x, &desc.pos.z);
+                math_dirFromAngleXZ(func_150ADA68() * 3.1415927f * 2.0f, data->area->radius, &desc.pos.x, &desc.pos.z);
                 desc.pos.x += data->area->x;
                 desc.pos.z += data->area->z;
                 desc.pos.y = data->area->y + data->area->height * func_150ADA68();

@@ -1,18 +1,18 @@
 #include <ultra64.h>
 
-// matching: func_150039E0 matches only with a u32 tag: the hoisted 1 it passes is shared with the 1U compare
+// matching: level_spawnObjects matches only with a u32 tag: the hoisted 1 it passes is shared with the 1U compare
 #define allocate_memory allocate_memory_functions_h
 #include "functions.h"
 #undef allocate_memory
 void *allocate_memory(s32 size, u32 tag, s32 align, s32 mode);
 #include "variables.h"
 
-static u16 D_800BE2A0; // objects whose preset radius is too small (func_15004AAC)
-static u16 D_800BE2A2; // objects whose radius was computed
-static u16 D_800BE2A4; // objects whose preset radius is large enough
+static u16 gCullRadiusTooSmallCount; // objects whose preset radius is too small (level_setObjectCullRadius)
+static u16 gCullRadiusComputedCount; // objects whose radius was computed
+static u16 gCullRadiusLargeEnoughCount; // objects whose preset radius is large enough
 
 /* Creates the level's objects (db_Object_array) from its two placement lists and allocates per-object buffers. */
-void func_150039E0(s32 levelId, s32 arg1) {
+void level_spawnObjects(s32 levelId, s32 arg1) {
     s32 i;
     s32 found;
     s32 id;
@@ -33,7 +33,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
     spawns = NULL;
     groupedSpawns = NULL;
     setStateBit2 = FALSE;
-    D_800BE2A0 = D_800BE2A2 = D_800BE2A4 = 0;
+    gCullRadiusTooSmallCount = gCullRadiusComputedCount = gCullRadiusLargeEnoughCount = 0;
     i = rom_loadPathTo(&spawns, 2, 0xB, levelId);
     gUngroupedObjectCount = i / sizeof(ObjectSpawn);
     gWorldObjectCount = gUngroupedObjectCount;
@@ -76,9 +76,9 @@ void func_150039E0(s32 levelId, s32 arg1) {
                 obj->state |= 4;
                 setStateBit2 = TRUE;
             }
-            obj->moveProc = D_80088C90[base[i].behavior.index].moveProc;
-            obj->onContact = D_80088C90[base[i].behavior.index].onContact;
-            obj->contactNonPlayers = D_80088C90[base[i].behavior.index].contactNonPlayers;
+            obj->moveProc = gObjectBehaviors[base[i].behavior.index].moveProc;
+            obj->onContact = gObjectBehaviors[base[i].behavior.index].onContact;
+            obj->contactNonPlayers = gObjectBehaviors[base[i].behavior.index].contactNonPlayers;
             if (base[i].behavior.index == 22) {
                 isBehavior22 = TRUE;
             }
@@ -129,17 +129,17 @@ void func_150039E0(s32 levelId, s32 arg1) {
                 obj->materials = model->materials;
             }
             if (i >= gUngroupedObjectCount) {
-                obj->unk4C = D_800A26C0[id].unk4C;
-                obj->shadowSize = D_800A26C0[id].shadowSize;
-                obj->cullRadiusXZ = D_800A26C0[id].cullRadiusXZ;
-                obj->cullRadiusY = D_800A26C0[id].cullRadiusY;
-                obj->object_status = D_800A26C0[id].flags;
-                obj->state = D_800A26C0[id].state & ~8;
-                obj->effectFlags = D_800A26C0[id].effectFlags;
+                obj->unk4C = gGroupedObjectDefaults[id].unk4C;
+                obj->shadowSize = gGroupedObjectDefaults[id].shadowSize;
+                obj->cullRadiusXZ = gGroupedObjectDefaults[id].cullRadiusXZ;
+                obj->cullRadiusY = gGroupedObjectDefaults[id].cullRadiusY;
+                obj->object_status = gGroupedObjectDefaults[id].flags;
+                obj->state = gGroupedObjectDefaults[id].state & ~8;
+                obj->effectFlags = gGroupedObjectDefaults[id].effectFlags;
                 if (setStateBit2) {
                     obj->state |= 4;
                 }
-                obj->drawDistance = D_800A26C0[id].drawDistance;
+                obj->drawDistance = gGroupedObjectDefaults[id].drawDistance;
                 obj->unique_id = base[i].id;
             } else {
                 obj->cullRadiusXZ = base[i].cullRadiusXZ;
@@ -151,7 +151,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
                 if (base[i].id != 0) {
                     obj->unique_id = base[i].id;
                 } else {
-                    obj->unique_id = func_15004BF0(TRUE);
+                    obj->unique_id = level_findFreeObjectId(TRUE);
                 }
             }
             if (id == 0x71) {
@@ -179,7 +179,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
                 }
                 if (!found) {
                     id = base[i].modelId;
-                    levelModel = D_800B0E50[id].model;
+                    levelModel = gLevelModels[id].model;
                     obj->numVertices = ((u32)levelModel->displayList - (u32)levelModel->vertices) / sizeof(Vtx);
                     obj->srcVertices = levelModel->vertices;
                     obj->materials = levelModel->materials;
@@ -212,16 +212,16 @@ void func_150039E0(s32 levelId, s32 arg1) {
             if (base[i].id != 0) {
                 obj->unique_id = base[i].id;
             } else {
-                obj->unique_id = func_15004BF0(TRUE);
+                obj->unique_id = level_findFreeObjectId(TRUE);
             }
         }
-        func_15004AAC(obj, &base[i]);
+        level_setObjectCullRadius(obj, &base[i]);
         if (obj->moveProc == NULL && !isBehavior22) {
             obj->viewFlags |= 0x20;
         }
         if (!found) {
             texture_resolveDl(obj->displayList, 0, 1, 0x3F, 0);
-            func_15004CE0((DlCommand *)obj->displayList, (u32)model);
+            level_rebaseDlMatrices((DlCommand *)obj->displayList, (u32)model);
         }
     }
     for (i = 0; i < gWorldObjectCount; i++) {
@@ -259,7 +259,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
     }
     for (i = gUngroupedObjectCount; i < gWorldObjectCount; i++) {
         if (db_Object_array[i].unique_id == 0) {
-            db_Object_array[i].unique_id = func_15004BF0(FALSE);
+            db_Object_array[i].unique_id = level_findFreeObjectId(FALSE);
         }
     }
 }
@@ -281,7 +281,7 @@ void func_150045BC(void) {
  * state bit 0, transforms its vertices into its per-frame copies), then probes the floor under objects
  * with view flag 0x20.
  */
-void func_150045C4(s32 arg0) {
+void level_prepareObjects(s32 arg0) {
     s32 i;
     WorldObject *obj;
     MtxF mtx;
@@ -293,7 +293,7 @@ void func_150045C4(s32 arg0) {
     f32 y;
     f32 z;
 
-    func_15004A4C();
+    level_clearObjectBlocks();
     guMtxIdentF(D_800DBF08[0]);
     guMtxIdentF(D_800DBF08[1]);
     for (i = 0; i < gWorldObjectCount; i++) {
@@ -343,7 +343,7 @@ void func_150045C4(s32 arg0) {
  * Relocates a display list: adds `offset` to the address of each G_VTX (and G_DL) command and
  * `matrixOffset` to the address of each G_MOVEMEM of a matrix.
  */
-void func_150049A4(DlCommand *dl, s32 offset, s32 matrixOffset) {
+void level_relocateDl(DlCommand *dl, s32 offset, s32 matrixOffset) {
     s32 i;
     DlCommand *p;
     s8 cmd;
@@ -375,7 +375,7 @@ void func_150049A4(DlCommand *dl, s32 offset, s32 matrixOffset) {
 }
 
 /* Clears every object's handle and release delay. */
-void func_15004A4C(void) {
+void level_clearObjectBlocks(void) {
     s32 i;
 
     for (i = 0; i < gWorldObjectCount; i++) {
@@ -387,9 +387,9 @@ void func_15004A4C(void) {
 
 /*
  * Sets the object's bounding radius (cullRadiusXZ, cullRadiusY) from its farthest scaled vertex if it has none,
- * and counts in D_800BE2A0/2/4 whether a preset radius is too small, was computed, or is large enough.
+ * and counts in gCullRadiusTooSmallCount/2/4 whether a preset radius is too small, was computed, or is large enough.
  */
-void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn) {
+void level_setObjectCullRadius(WorldObject *obj, ObjectSpawn *spawn) {
     s32 i;
     f32 x;
     f32 y;
@@ -428,13 +428,13 @@ void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn) {
             radius = root;
             obj->cullRadiusXZ = radius;
             obj->cullRadiusY = radius;
-            D_800BE2A2++;
+            gCullRadiusComputedCount++;
         } else {
             radius = root;
             if (obj->cullRadiusXZ < radius || obj->cullRadiusY < radius) {
-                D_800BE2A0++;
+                gCullRadiusTooSmallCount++;
             } else {
-                D_800BE2A4++;
+                gCullRadiusLargeEnoughCount++;
             }
         }
     }
@@ -444,7 +444,7 @@ void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn) {
  * Returns an object id that no object uses yet. With `fromTop` 0, counts up from 1 over the grouped
  * objects (0xFF if all are taken); otherwise counts down from 0xFF - gUngroupedObjectCount over all objects.
  */
-s32 func_15004BF0(s32 fromTop) {
+s32 level_findFreeObjectId(s32 fromTop) {
     s32 i;
     s32 id;
 
@@ -478,7 +478,7 @@ s32 func_15004BF0(s32 fromTop) {
     return id;
 }
 /* Rebases the segment-relative (below 0x80000000) matrix addresses of a display list's G_MOVEMEMs by `base`. */
-void func_15004CE0(DlCommand *dl, u32 base) {
+void level_rebaseDlMatrices(DlCommand *dl, u32 base) {
     s32 i = 0;
     DlCommand *p = dl;
     s8 cmd;

@@ -547,7 +547,7 @@ static const PartDef D_8009D900[1] = {
     { 0x82, 14, 0, 1, 0, 0, 0, 0, { 0x0000, 0x0000, 0x0000 }, 0, 0 },
 };
 
-/* The expression actions of model 0 (func_1507E9F8). */
+/* The expression actions of model 0 (face_getActionTable). */
 const u8 gModel0ExpressionActions[5] = { 5, 6, 7, 10, 11 };
 
 /*

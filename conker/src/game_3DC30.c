@@ -62,6 +62,6 @@ void func_150109D0(void) {
 
     tmp.id = 1;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y); 
-    func_151ACBD4(&tmp, 0);
+    rope_create(&tmp, 0);
     func_150E8854();
 }

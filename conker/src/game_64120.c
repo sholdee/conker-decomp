@@ -141,7 +141,7 @@ void aim_initState(Actor *obj) {
 
 /*
  * Aim update for the current object (dc_glbl_CharNum): the first pass (gAimPass == 0) turns bone 7, later passes
- * bone 12. The listed object types, and every type while D_800C35EA == 1, skip the first pass.
+ * bone 12. The listed object types, and every type while gCutsceneStates == 1, skip the first pass.
  */
 void func_15036CE8(void) {
     Actor *obj;
@@ -179,7 +179,7 @@ void func_15036CE8(void) {
             }
             break;
     }
-    if (D_800C35EA[0] == 1 && gAimPass == 0) {
+    if (gCutsceneStates[0] == 1 && gAimPass == 0) {
         gAimPass = 1;
         return;
     }
@@ -714,7 +714,7 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
     gAimLookPoint[0] = -99999.0f;
     gAimLookPoint[1] = -99999.0f;
     gAimLookPoint[2] = -99999.0f;
-    if (D_800C35EA[0] == 1 || D_800C35EA[1] == 1) {
+    if (gCutsceneStates[0] == 1 || gCutsceneStates[1] == 1) {
         return;
     }
     obj = &movement_obj[objIndex];
@@ -889,7 +889,7 @@ s32 aim_findNearestObject(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 ran
     found = -1;
     allowSameId = 1;
     excludedId = -1;
-    if (D_800C35EA[0] == 1 || D_800C35EA[1] == 1) {
+    if (gCutsceneStates[0] == 1 || gCutsceneStates[1] == 1) {
         out[0] = -99999.0f;
         out[1] = -99999.0f;
         out[2] = -99999.0f;
@@ -976,20 +976,20 @@ s32 aim_findNearestObject(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 ran
 void aim_directionToAngles(f32 *yaw, f32 *pitch, f32 x, f32 y, f32 z, s32 axisMode) {
     switch (axisMode) {
     case 0:
-        *yaw = func_150484A0(x, z);
-        *pitch = func_150484A0(y, sqrtf(x * x + z * z));
+        *yaw = math_atan2(x, z);
+        *pitch = math_atan2(y, sqrtf(x * x + z * z));
         break;
     case 1:
-        *yaw = func_150484A0(-z, x);
-        *pitch = func_150484A0(y, sqrtf(x * x + z * z));
+        *yaw = math_atan2(-z, x);
+        *pitch = math_atan2(y, sqrtf(x * x + z * z));
         break;
     case 2:
-        *yaw = func_150484A0(z, -x);
-        *pitch = func_150484A0(y, sqrtf(x * x + z * z));
+        *yaw = math_atan2(z, -x);
+        *pitch = math_atan2(y, sqrtf(x * x + z * z));
         break;
     case 3:
-        *yaw = func_150484A0(z, -y);
-        *pitch = func_150484A0(-x, sqrtf(y * y + z * z));
+        *yaw = math_atan2(z, -y);
+        *pitch = math_atan2(-x, sqrtf(y * y + z * z));
         break;
     }
     *yaw *= 57.295776f;
@@ -1073,7 +1073,7 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
     if (gAimPass == 0) {
         obj->unk2CA = 0;
     }
-    hasOverride = func_15021DB8(&yaw, &pitch, &roll, target, objIndex, 0);
+    hasOverride = cutscene_getLookTarget(&yaw, &pitch, &roll, target, objIndex, 0);
     if (hasOverride) {
         overrideAngles[0] = yaw;
         overrideAngles[1] = pitch;
@@ -1237,7 +1237,7 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
         ratePitch = gAimRates[rateIdx][1];
         maxYaw = gAimRates[rateIdx][2];
         maxPitch = gAimRates[rateIdx][3];
-        if (D_800C35EA[0] == 1) {
+        if (gCutsceneStates[0] == 1) {
             rateYaw = 1.0f;
             ratePitch = 1.0f;
             maxYaw = 5.0f;
@@ -1353,11 +1353,11 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
                 mtxB[j][i] = result[j][i] * localY;
             }
         }
-        func_15049CB8(mtxB, qB);
-        func_15049CB8(mtxA, qA);
-        func_15049C40(qB, qA);
-        func_15049EDC(qB, qA, blendT, qOut);
-        func_1504A140(qOut, result);
+        math_mtxToQuat(mtxB, qB);
+        math_mtxToQuat(mtxA, qA);
+        math_quatAlign(qB, qA);
+        math_quatSlerp(qB, qA, blendT, qOut);
+        math_quatToMtx(qOut, result);
     } else {
         scale[0] = 1.0f;
         scale[1] = 1.0f;
@@ -1871,13 +1871,13 @@ void aim_turnHead(Actor *obj) {
             } else {
                 scale = 1.0f;
             }
-            sinV = func_15048A40(phase0);
-            cosV = func_150489B0(phase0);
+            sinV = math_sinBinAngle(phase0);
+            cosV = math_cosBinAngle(phase0);
             amp = 11.0f * scale;
             obj->unk284 = sinV * amp;
             obj->unk285 = cosV * amp;
-            sinV = func_15048A40(phase1);
-            cosV = func_150489B0(phase1);
+            sinV = math_sinBinAngle(phase1);
+            cosV = math_cosBinAngle(phase1);
             obj->unk286 = sinV * amp;
             obj->unk287 = cosV * amp;
         } else if (obj->headEffect == 1) {
@@ -1998,8 +1998,8 @@ void aim_turnHead(Actor *obj) {
                     localX = delta[0] * mtx[0][0] + delta[1] * mtx[0][1] + delta[2] * mtx[0][2];
                     localY = delta[0] * mtx[1][0] + delta[1] * mtx[1][1] + delta[2] * mtx[1][2];
                     localZ = delta[0] * mtx[2][0] + delta[1] * mtx[2][1] + delta[2] * mtx[2][2];
-                    yaw[0] = func_150484A0(localX, localZ);
-                    pitch[0] = func_150484A0(localY, sqrtf(localX * localX + localZ * localZ));
+                    yaw[0] = math_atan2(localX, localZ);
+                    pitch[0] = math_atan2(localY, sqrtf(localX * localX + localZ * localZ));
                     yaw[0] *= 57.29577637f;
                     pitch[0] *= 57.29577637f;
                     if (yaw[0] > 180.0f) {

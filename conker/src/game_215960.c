@@ -2,35 +2,35 @@
 #include "structs.h"
 
 /* .bss, linked at 0x800E0C30..0x800E0C90 in this order. */
-static s16 D_800E0C30; /* alpha of the single-player HUD (fades in) */
-static Mtx D_800E0C38; /* the HUD's orthographic projection */
+static s16 gSinglePlayerHudAlpha; /* alpha of the single-player HUD (fades in) */
+static Mtx gHudOrthoMtx; /* the HUD's orthographic projection */
 static s16 D_800E0C78;
-static u8 *D_800E0C7C; /* text entry buffer (0x1A8 bytes) */
-static s8 D_800E0C80;  /* text entry cursor column */
-static s8 D_800E0C81;  /* text entry cursor row */
+static u8 *gCodeEntryText; /* text entry buffer (0x1A8 bytes) */
+static s8 gCodeEntryColumn;  /* text entry cursor column */
+static s8 gCodeEntryRow;  /* text entry cursor row */
 static s8 D_800E0C82;
 static s8 D_800E0C83;
 static s8 D_800E0C84;
 static u8 D_800E0C85; /* not referenced */
-static u8 D_800E0C88[4]; /* alpha of each player slot */
+static u8 gHudSlotAlphas[4]; /* alpha of each player slot */
 
 #include "functions.h"
 #include "variables.h"
 
-/* Per-mode (gFrontEndState) overlay drawers, called by func_151E8620. */
-Gfx *(*D_8008FFC0[13])(Gfx *) = {
-    func_151EB06C, NULL, NULL, func_151EC3E8, NULL, NULL, func_151EB930,
+/* Per-mode (gFrontEndState) overlay drawers, called by hud_drawModeOverlay. */
+Gfx *(*gHudModeOverlayDrawers[13])(Gfx *) = {
+    hud_drawSinglePlayerHud, NULL, NULL, func_151EC3E8, NULL, NULL, hud_drawResults,
     NULL, NULL, NULL, NULL, func_151EBB50, NULL,
 };
 
-/* Per-mode (gFrontEndState) HUD drawers, called by func_151E84B0. */
-Gfx *(*D_8008FFF4[13])(Gfx *) = {
+/* Per-mode (gFrontEndState) HUD drawers, called by hud_drawMain. */
+Gfx *(*gHudModeDrawers[13])(Gfx *) = {
     NULL, func_151EC178, func_151EC1F0, NULL, func_151ED09C, NULL, NULL,
     NULL, func_151EB96C, NULL, NULL, NULL, NULL,
 };
 
 /* Render state for the HUD sprites: textured, white environment color. */
-Gfx D_80090028[] = {
+Gfx gHudSpriteDl[] = {
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsDPPipeSync(),
     gsDPSetEnvColor(0xFF, 0xFF, 0xFF, 0xFF),
@@ -48,14 +48,14 @@ extern u8 D_887;
 #define TEXTURE_NOT_LOADED ((s32)0x80000000)
 
 /* Draws the HUD overlay: shared HUD, the per-mode overlay, and a blinking warning message. */
-Gfx *func_151E84B0(Gfx *gfx) {
+Gfx *hud_drawMain(Gfx *gfx) {
     s32 message;
 
     D_8003C8E0 = 0x9000001;
     message = 0;
-    gfx = func_151ED1E0(gfx);
-    if (D_8008FFF4[gFrontEndState] != NULL) {
-        gfx = D_8008FFF4[gFrontEndState](gfx);
+    gfx = hud_darkenScreen(gfx);
+    if (gHudModeDrawers[gFrontEndState] != NULL) {
+        gfx = gHudModeDrawers[gFrontEndState](gfx);
     }
 
     if (D_80000300 != 0) {
@@ -89,7 +89,7 @@ Gfx *func_151E84B0(Gfx *gfx) {
 
 
 /* Draws the per-mode overlay; if it overran the display list buffer, discards what it wrote. */
-Gfx *func_151E8620(Gfx *gfx) {
+Gfx *hud_drawModeOverlay(Gfx *gfx) {
     s32 overflow;
     Gfx *start;
     s32 mode;
@@ -97,8 +97,8 @@ Gfx *func_151E8620(Gfx *gfx) {
     mode = gFrontEndState;
     start = gfx;
     D_8003C8E0 = 0x9000000;
-    if (D_8008FFC0[mode] != NULL) {
-        gfx = D_8008FFC0[mode](gfx);
+    if (gHudModeOverlayDrawers[mode] != NULL) {
+        gfx = gHudModeOverlayDrawers[mode](gfx);
     }
     if (gFrontEndState != 0) {
         D_80090058 = NULL;
@@ -117,7 +117,7 @@ Gfx *func_151E8620(Gfx *gfx) {
 }
 
 /* Emits a scissored texture rectangle, scaled by the current screen scale factors. */
-Gfx *func_151E86E4(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy) {
+Gfx *hud_texRectScaled(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy) {
     f32 yScale;
 
     if (D_8008FE1C != 1.0f) {
@@ -146,7 +146,7 @@ u8 D_8009006C[4] = { 1, 8, 15, 21 };
 u8 D_80090070[3] = { 0, 8, 16 };
 
 /* Draws the multiplayer score HUD: team scores, target and team icons, and arrows. */
-Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
+Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
     s32 zero; // matching: indexing D_800E0BCC through a zero variable keeps &D_800E0BCC in a register
     s32 x;
     s32 y;
@@ -175,7 +175,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
 
     flags = 0;
     D_8008FDBC &= ~0x10;
-    gSPDisplayList(gfx++, D_80090028);
+    gSPDisplayList(gfx++, gHudSpriteDl);
     gDPSetCombine(gfx++, 0x12FE25, 0xFFFFF3F9);
     if (gScreenLayout == 0) {
         y = 0x320;
@@ -255,7 +255,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
                 u8 *color = (u8 *)D_800ABA90 + (i << 2); // matching: shift form, not D_800ABA90[i]
                 gDPSetEnvColor(gfx++, color[0], color[1], color[2], alpha);
             }
-            gfx = func_151E86E4(gfx, (x + 3) << 2, y, (x + 10) << 2, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
+            gfx = hud_texRectScaled(gfx, (x + 3) << 2, y, (x + 10) << 2, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
             digitX = (x + 10) << 2;
             place = 10000;
             do {
@@ -264,7 +264,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
                     started = 1;
                     s = D_8009006C[digit & 3] << 5;
                     t = D_80090070[digit >> 2] << 5;
-                    gfx = func_151E86E4(gfx, digitX, y, digitX + 0x14, y + 0x1C, 0, s, t, 0x400, 0x400);
+                    gfx = hud_texRectScaled(gfx, digitX, y, digitX + 0x14, y + 0x1C, 0, s, t, 0x400, 0x400);
                     digitX += 0x18;
                 }
                 score -= digit * place;
@@ -277,7 +277,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
         }
     }
     if (D_8008FDC0 & 1) {
-        gfx = func_151E966C(gfx, y, team, 0, 1);
+        gfx = hud_drawScorePips(gfx, y, team, 0, 1);
     }
     if (nearTarget || (team != -1)) {
         if (D_8008FDC0 & 0x4000) {
@@ -300,11 +300,11 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
             gDPSetOtherMode(gfx++, 0x00AC3F, 0x504244);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             if (nearTarget) {
-                gfx = func_151E86E4(gfx, 0x238, 0xC, 0x268, 0x48, 0, 0x640, 0x660, 0x400, 0x400);
+                gfx = hud_texRectScaled(gfx, 0x238, 0xC, 0x268, 0x48, 0, 0x640, 0x660, 0x400, 0x400);
             }
             if (team != -1) {
                 if (D_8008FDC0 & 0x4000) {
-                    gfx = func_151E86E4(gfx, 0x220, 0xC, 0x250, 0x48, 0, 0x600, 0x540, 0x400, 0x400);
+                    gfx = hud_texRectScaled(gfx, 0x220, 0xC, 0x250, 0x48, 0, 0x600, 0x540, 0x400, 0x400);
                 } else {
                     rowOffset = 0;
                     if (D_8008FDC0 & 1) {
@@ -313,7 +313,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
                         t = 0x26;
                         rowOffset = 0xB;
                     }
-                    gfx = func_151E86E4(gfx, 0x238, (rowOffset + 3) << 2, 0x268, (rowOffset + 0xE) << 2, 0, 0x640, t << 5, 0x400, 0x400);
+                    gfx = hud_texRectScaled(gfx, 0x238, (rowOffset + 3) << 2, 0x268, (rowOffset + 0xE) << 2, 0, 0x640, t << 5, 0x400, 0x400);
                 }
             }
         }
@@ -341,19 +341,19 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
             if (flags & 1) {
                 x = y - 0x10U; // matching: unsigned subtract steers IDO register allocation
-                gfx = func_151E86E4(gfx, 0xA0, x, 0xE0, x + 0x40, 0, 0, 0x200, 0x400, 0x400);
+                gfx = hud_texRectScaled(gfx, 0xA0, x, 0xE0, x + 0x40, 0, 0, 0x200, 0x400, 0x400);
             }
             if (flags & 2) {
                 s32 yy = y - 0x10U;
-                gfx = func_151E86E4(gfx, 0x3B0, yy, 0x3F0, yy + 0x40, 0, 0x200, 0x200, 0x400, 0x400);
+                gfx = hud_texRectScaled(gfx, 0x3B0, yy, 0x3F0, yy + 0x40, 0, 0x200, 0x200, 0x400, 0x400);
             }
             if (flags & 4) {
-                gfx = func_151E86E4(gfx, 0x250, 0xC, 0x280, 0x48, 0, 0, 0x200, 0x400, 0x400);
+                gfx = hud_texRectScaled(gfx, 0x250, 0xC, 0x280, 0x48, 0, 0, 0x200, 0x400, 0x400);
             }
         }
     }
     if (D_8008FDC0 & 0x6340) {
-        gfx = func_151E9D18(gfx, y, 1);
+        gfx = hud_drawTeamTotals(gfx, y, 1);
     }
     return gfx;
 }
@@ -361,7 +361,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
 
 
 /* Draws each team's row of score pips; teams with no active player get a separate icon. */
-Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh) {
+Gfx *hud_drawScorePips(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh) {
     s8 inactiveTeams;
     s32 image;
     s32 i;
@@ -423,7 +423,7 @@ Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh
                     gDPPipeSync(gfx++);
                     gDPSetEnvColor(gfx++, 0x40, 0x40, 0x40, 0x40);
                 }
-                gfx = func_151E86E4(gfx, pipX << 2, y, (pipX + 7) << 2, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
+                gfx = hud_texRectScaled(gfx, pipX << 2, y, (pipX + 7) << 2, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
                 pipX += 8;
             }
         }
@@ -454,7 +454,7 @@ Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh
                     const u8 *color = D_800ABA90[i];
                     gDPSetEnvColor(gfx++, color[0], color[1], color[2], 0xFF);
                 }
-                gfx = func_151E86E4(gfx, (x - 8) << 2, y - 0x18, (x + 8) << 2, y + 0x28, 0, 0x600, 0x280, 0x400, 0x400);
+                gfx = hud_texRectScaled(gfx, (x - 8) << 2, y - 0x18, (x + 8) << 2, y + 0x28, 0, 0x600, 0x280, 0x400, 0x400);
             }
             x += spacing;
         }
@@ -470,7 +470,7 @@ extern u8 D_888;
 
 
 /* Draws the two team icons with each team's total score beside them. */
-Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
+Gfx *hud_drawTeamTotals(Gfx *gfx, s32 rowY, s32 refresh) {
     s32 tex;
     s32 iconT;
     s32 image;
@@ -552,8 +552,8 @@ Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
         team1Total = D_800E0AA0[1];
     }
 
-    gfx = func_151E86E4(gfx, 0x108, y, 0x148, y + 0x40, 0, leftIconS, iconT, 0x400, 0x400);
-    gfx = func_151E86E4(gfx, 0x318, y, 0x358, y + 0x40, 0, 0, iconT + rightIconT, 0x400, 0x400);
+    gfx = hud_texRectScaled(gfx, 0x108, y, 0x148, y + 0x40, 0, leftIconS, iconT, 0x400, 0x400);
+    gfx = hud_texRectScaled(gfx, 0x318, y, 0x358, y + 0x40, 0, 0, iconT + rightIconT, 0x400, 0x400);
     text_setColor(0xC0, 0xC0, 0xC0, 0xFF);
     text_printAt(0x4F, (y >> 2) + 1, 0x80, " %d", team1Total);
     text_printAt(0xD3, (y >> 2) + 1, 0x80, " %d", team0Total);
@@ -561,7 +561,7 @@ Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
 }
 
 /* Draws the per-player results table (name, team score, percentage and stat columns). */
-Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
+Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
     s32 image;
     s32 y;
     s32 i;
@@ -602,7 +602,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
         for (i = 0; i < 4; i++) {
             if (gRoster[i] >= 0) {
                 icon = gRoster[i] & 3;
-                gfx = func_151E86E4(gfx, 0x120, (y - 2) << 2, 0x160, (y + 0xE) << 2, 0,
+                gfx = hud_texRectScaled(gfx, 0x120, (y - 2) << 2, 0x160, (y + 0xE) << 2, 0,
                                     (icon & 1) << 9, (icon >> 1) << 9, 0x400, 0x400);
                 y += 0x12;
             }
@@ -663,7 +663,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                 x = (xbase - 0x28) << 2;
                 if (D_8008FDC0 & 1) {
                     iconY = (y - 0x11) << 2;
-                    gfx = func_151E86E4(gfx, x + 0x1D4, iconY, x + 0x214, iconY + 0x40, 0, 0x200, 0, 0x400, 0x400);
+                    gfx = hud_texRectScaled(gfx, x + 0x1D4, iconY, x + 0x214, iconY + 0x40, 0, 0x200, 0, 0x400, 0x400);
                     x += 0x78;
                 }
                 iconY = (y - 0x11) << 2;
@@ -671,7 +671,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                 if (gMenuState->selection == 1) {
                     x -= 0x78;
                 }
-                gfx = func_151E86E4(gfx, x + 0x164, iconY, x + 0x1A4, iconY + 0x3C, 0, 0, 0x200, 0x400, 0x400);
+                gfx = hud_texRectScaled(gfx, x + 0x164, iconY, x + 0x1A4, iconY + 0x3C, 0, 0, 0x200, 0x400, 0x400);
                 if (gMenuState->selection == 1) {
                     x += 0x78;
                 }
@@ -688,12 +688,12 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                 gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 5, 0, G_TX_CLAMP, 5, 0);
                 gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0x7C, 0x7C);
                 iconBottom = iconY + 0x40;
-                gfx = func_151E86E4(gfx, x, iconY, x + 0x40, iconBottom, 0, 0x200, 0, 0x400, 0x400);
+                gfx = hud_texRectScaled(gfx, x, iconY, x + 0x40, iconBottom, 0, 0x200, 0, 0x400, 0x400);
                 x += 0x74;
-                gfx = func_151E86E4(gfx, x, iconY, x + 0x40, iconBottom, 0, 0, 0, 0x400, 0x400);
+                gfx = hud_texRectScaled(gfx, x, iconY, x + 0x40, iconBottom, 0, 0, 0, 0x400, 0x400);
                 if (gMenuState->selection != 1) {
                     x += 0x4C;
-                    gfx = func_151E86E4(gfx, x, iconY, x + 0x80, iconBottom, 0, 0, 0x200, 0x400, 0x400);
+                    gfx = hud_texRectScaled(gfx, x, iconY, x + 0x80, iconBottom, 0, 0, 0x200, 0x400, 0x400);
                 }
                 gDPPipeSync(gfx++);
                 image = texture_getAddress((s32)&D_843, 0, 3, 0);
@@ -713,7 +713,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             text_setColor(D_800ABA90[team][0], D_800ABA90[team][1], D_800ABA90[team][2], alpha);
             percent = 0;
             icon = gRoster[i] & 3;
-            gfx = func_151E86E4(gfx, (xbase + 8) << 2, (y - 2) << 2, (xbase + 0x18) << 2, (y + 0xE) << 2, 0,
+            gfx = hud_texRectScaled(gfx, (xbase + 8) << 2, (y - 2) << 2, (xbase + 0x18) << 2, (y + 0xE) << 2, 0,
                                 (icon & 1) << 9, (icon >> 1) << 9, 0x400, 0x400);
             if (live != 0) {
                 total = movement_obj[i].mv->shotsfired;
@@ -757,13 +757,13 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
         }
     }
     if (D_8008FDC0 & 0x6340) {
-        gSPDisplayList(gfx++, D_80090028);
+        gSPDisplayList(gfx++, gHudSpriteDl);
         gDPSetCombine(gfx++, 0x12FE25, 0xFFFFF3F9);
-        gfx = func_151E9D18(gfx, 0x320, refreshScores);
+        gfx = hud_drawTeamTotals(gfx, 0x320, refreshScores);
     }
     if (live != 0) {
         if (D_8008FDC0 & 1) {
-            gfx = func_151E966C(gfx, 0x320, -1, 1, refreshScores);
+            gfx = hud_drawScorePips(gfx, 0x320, -1, 1, refreshScores);
         }
     }
     return gfx;
@@ -773,17 +773,17 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
 s32 D_80090074[10] = {
     0x8B2, 0x890, 0x8AB, 0x8A8, 0x882, 0x881, 0x8A2, 0x8A1, 0x880, 0x88F,
 };
-PlaceValueTable D_8009009C = { { 1, 10, 100, 1000, 10000, 100000, 1000000 } };
+PlaceValueTable gPlaceValues = { { 1, 10, 100, 1000, 10000, 100000, 1000000 } };
 
 /* Draws a number of up to seven digits, one 32x32 digit texture per place, without leading zeros. */
-Gfx *func_151EADFC(Gfx *gfx, s32 x, s32 y, s32 value) {
+Gfx *hud_drawNumber(Gfx *gfx, s32 x, s32 y, s32 value) {
     s32 i;
     s32 digit;
     s32 started;
     s32 image;
     PlaceValueTable places;
 
-    places = D_8009009C;
+    places = gPlaceValues;
 
     x <<= 2; y <<= 2;
     if (value >= 10000000) {
@@ -808,7 +808,7 @@ Gfx *func_151EADFC(Gfx *gfx, s32 x, s32 y, s32 value) {
                 gDPPipeSync(gfx++);
                 gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 5, 0, G_TX_CLAMP, 5, 0);
                 gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0x7C, 0x7C);
-                gfx = func_151E86E4(gfx, x, y, x + 0x80, y + 0x80, 0, 0, 0, 0x400, 0x400);
+                gfx = hud_texRectScaled(gfx, x, y, x + 0x80, y + 0x80, 0, 0, 0, 0x400, 0x400);
             }
             x += 0x60;
         }
@@ -833,7 +833,7 @@ extern u8 D_891;
 
 
 /* Draws the single-player HUD (counters and models) after preloading its textures; fades it in. */
-Gfx *func_151EB06C(Gfx *gfx) {
+Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
     s32 show;
     s32 value;
     s32 x;
@@ -845,15 +845,15 @@ Gfx *func_151EB06C(Gfx *gfx) {
     show = (gTaskDoneBits[0x19] & 4) || (gCurrentSaveSlot < 0);
     if (gIsMultiplayer && !gPaused && !gPauseRequested) {
         if (!func_151E564C() || gMenuState->selection == 1) {
-            gfx = func_151E89A0(gfx, 0, 0xFF);
+            gfx = hud_drawTeamScores(gfx, 0, 0xFF);
         }
     } else {
         D_800E0C78 = 0;
     }
     if (!gPaused || D_8008FEF0) {
         if (D_80090058 != NULL) {
-            func_151EDB58(D_80090058);
-            func_151EDB58(D_8009005C);
+            hud_freeModel(D_80090058);
+            hud_freeModel(D_8009005C);
             D_80090058 = NULL;
         }
         D_8008FDCC = 0;
@@ -863,7 +863,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
     if (D_800B0DF0->unk8 == 4 && D_800900B8 == 0) {
         if (level == 0x13) {
             s32 id;
-            id = D_800891BC[D_800B0DF0->unk9][2];
+            id = gSkyTextureSets[D_800B0DF0->unk9][2];
             for (i = 0; i < 0x48; i++, id++) {
                 if (id != (s32)&D_1647 && id != (s32)&D_1648 && id != (s32)(&D_1648 + 1) &&
                     id != (s32)&D_1653 && id != (s32)&D_1654 && id != (s32)(&D_1654 + 1)) {
@@ -875,7 +875,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
             start = 0;
         }
         for (i = start; i < 0x168; i++) {
-            texture_releaseId(D_800891BC[D_800B0DF0->unk9][2] + i);
+            texture_releaseId(gSkyTextureSets[D_800B0DF0->unk9][2] + i);
         }
     }
     if (D_800900B8 < 5) {
@@ -886,7 +886,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
     if (D_8008FDCC >= 0x100) {
         D_8008FDCC = 0xFF;
     }
-    gSPDisplayList(gfx++, D_80090028);
+    gSPDisplayList(gfx++, gHudSpriteDl);
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
     D_80090060.texId = &D_891;
     {
@@ -922,7 +922,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
                     value = 0;
                 }
             }
-            if (D_800C35EA[0] == 1 && D_800C3C9E != -1) {
+            if (gCutsceneStates[0] == 1 && D_800C3C9E != -1) {
                 if (D_800C3C9E == 0) {
                     value = 0;
                 } else {
@@ -934,17 +934,17 @@ Gfx *func_151EB06C(Gfx *gfx) {
             } else {
                 hasValue = 0;
             }
-            gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x3C, 3, 1, 1.0f, 0);
+            gfx = hud_drawSprite(gfx, &D_80090060, 0x94, 0x3C, 3, 1, 1.0f, 0);
             if (D_80090058 == NULL) {
-                D_80090058 = func_151ED90C(0xA4, 0x17, 0, 1.0f);
-                D_8009005C = func_151ED90C(0xA2, 8, 0, 1.0f);
+                D_80090058 = hud_loadModel(0xA4, 0x17, 0, 1.0f);
+                D_8009005C = hud_loadModel(0xA2, 8, 0, 1.0f);
             }
             gSPSetGeometryMode(gfx++, 0x220404);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
-            gfx = func_150900F0(gfx, 1);
+            gfx = hud_drawBlocks(gfx, 1);
             halfWidth = gViews[0].width * 0.5f;
-            func_151EF954(&D_800E0C38, -halfWidth, halfWidth, -(gViews[0].height * 0.5f), gViews[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
-            D_800E0C30 = D_8008FDCC;
+            func_151EF954(&gHudOrthoMtx, -halfWidth, halfWidth, -(gViews[0].height * 0.5f), gViews[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
+            gSinglePlayerHudAlpha = D_8008FDCC;
             if (D_80090058 != NULL) {
                 i = 10;
                 if (hasValue) {
@@ -953,13 +953,13 @@ Gfx *func_151EB06C(Gfx *gfx) {
                         x -= 0x10;
                         i *= 10;
                     }
-                    gfx = func_151EDBDC(gfx, D_80090058, x + -10.0f, -83.0f, 0.2699999809f);
+                    gfx = hud_drawModel(gfx, D_80090058, x + -10.0f, -83.0f, 0.2699999809f);
                 }
             }
             if (D_8009005C != NULL && show) {
-                gfx = func_151EDBDC(gfx, D_8009005C, 70.0f, 80.0f, 0.3000000119f);
+                gfx = hud_drawModel(gfx, D_8009005C, 70.0f, 80.0f, 0.3000000119f);
             }
-            gSPDisplayList(gfx++, D_80090028);
+            gSPDisplayList(gfx++, gHudSpriteDl);
             gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
             if (show) {
                 s32 count;
@@ -971,17 +971,17 @@ Gfx *func_151EB06C(Gfx *gfx) {
                     count = 99;
                 }
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
-                gfx = func_151EADFC(gfx, 0xEC, 0x1E, count);
+                gfx = hud_drawNumber(gfx, 0xEC, 0x1E, count);
             }
             if (hasValue) {
                 s32 pad4; // matching: stack slot
                 gDPPipeSync(gfx++);
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
                 D_80090060.texId = &D_7F6;
-                gfx = func_151EADFC(func_151ED430(gfx, &D_80090060, x + 0xA5, 0xAA, 1, 1, 1.0f, 0), x + 0xAD, 0x9B, value);
+                gfx = hud_drawNumber(hud_drawSprite(gfx, &D_80090060, x + 0xA5, 0xAA, 1, 1, 1.0f, 0), x + 0xAD, 0x9B, value);
             }
         } else {
-            gfx = func_151EA15C(func_151ED430(gfx, &D_80090060, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, D_8008FDCC, 1);
+            gfx = hud_drawResultsTable(hud_drawSprite(gfx, &D_80090060, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, D_8008FDCC, 1);
         }
     }
     return gfx;
@@ -989,9 +989,9 @@ Gfx *func_151EB06C(Gfx *gfx) {
 
 
 /* Draws the results table while it is faded in. */
-Gfx *func_151EB930(Gfx *gfx) {
+Gfx *hud_drawResults(Gfx *gfx) {
     if (D_8008FDCC != 0) {
-        gfx = func_151EA15C(gfx, 0x6A, D_8008FDCC, 0);
+        gfx = hud_drawResultsTable(gfx, 0x6A, D_8008FDCC, 0);
     }
     return gfx;
 }
@@ -1080,7 +1080,7 @@ Gfx *func_151EBB50(Gfx *gfx) {
     if (D_80000300 == 0) {
         return gfx;
     }
-    gSPDisplayList(gfx++, D_80090028);
+    gSPDisplayList(gfx++, gHudSpriteDl);
     if (D_800E0A90 < 0xF0) {
         alpha = 0xFF - ((D_800E0A90 - 0xB4) << 3);
         if (alpha < 0) {
@@ -1114,10 +1114,10 @@ Gfx *func_151EBB50(Gfx *gfx) {
         }
         gDPPipeSync(gfx++);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha >> 2);
-        gfx = func_151ED430(gfx, &D_800917F8, 0x92, 0x67, 5, 6, 1.0f, 0);
+        gfx = hud_drawSprite(gfx, &D_800917F8, 0x92, 0x67, 5, 6, 1.0f, 0);
         gDPPipeSync(gfx++);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
-        gfx = func_151ED430(gfx, &D_800917EC, 0x92, 0x1C, 2, 1, 1.0f, 0);
+        gfx = hud_drawSprite(gfx, &D_800917EC, 0x92, 0x1C, 2, 1, 1.0f, 0);
         text_setColor(0xFF, 0xFF, 0xFF, alpha);
         text_printAt(0x94, 0x9D, 1, (char *)gTextStrings[0x81]);
         text_printAt(0x94, 0xAA, 1, (char *)gTextStrings[0x82]);
@@ -1139,7 +1139,7 @@ Gfx *func_151EBB50(Gfx *gfx) {
         D_80090060.texId = &D_89C;
         D_80090060.width = 0x10;
         D_80090060.height = 0x10;
-        gfx = func_151ED430(gfx, &D_80090060, 0xC7, 0xB0, 1, 1, 1.0f, 0);
+        gfx = hud_drawSprite(gfx, &D_80090060, 0xC7, 0xB0, 1, 1, 1.0f, 0);
         D_80090060.width = 0x20;
         D_80090060.height = 0x20;
     } else {
@@ -1163,7 +1163,7 @@ Gfx *func_151EBB50(Gfx *gfx) {
         D_80090060.texId = &D_85D;
         D_80090060.width = 0x40;
         D_80090060.height = 0x40;
-        gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x69, 3, 1, 1.0f, 0);
+        gfx = hud_drawSprite(gfx, &D_80090060, 0x94, 0x69, 3, 1, 1.0f, 0);
         D_80090060.width = 0x20;
         D_80090060.height = 0x20;
         D_80090060.fmt = 0;
@@ -1196,7 +1196,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
         return gfx;
     }
 
-    gSPDisplayList(gfx++, D_80090028);
+    gSPDisplayList(gfx++, gHudSpriteDl);
     temp = D_800E0A90; // matching: temp is reused for 0x1AC below
     alpha = temp;
     if (alpha >= 0x12D) {
@@ -1215,14 +1215,14 @@ Gfx *func_151EC1F0(Gfx *gfx) {
 
     if (alpha != 0) {
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
-        gfx = func_151ED430(gfx, &D_800917F8, 0x92, 0x63, 5, 6, 1.0f, 0);
+        gfx = hud_drawSprite(gfx, &D_800917F8, 0x92, 0x63, 5, 6, 1.0f, 0);
     }
 
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
-    gfx = func_151ED430(gfx, &D_80091804, 0x92, 0xCB, 5, 2, 1.0f, 0);
+    gfx = hud_drawSprite(gfx, &D_80091804, 0x92, 0xCB, 5, 2, 1.0f, 0);
     gDPSetCombine(gfx++, 0xFFD3FF, 0xFFA6FF7F);
     gDPSetEnvColor(gfx++, 0x20, 0xFF, 0x20, D_800E0B97);
-    gfx = func_151ED430(gfx, &D_80091810, 0x92, 0xCB, 5, 2, 1.0f, 0);
+    gfx = hud_drawSprite(gfx, &D_80091810, 0x92, 0xCB, 5, 2, 1.0f, 0);
     gfx = sprite_endDraw(gfx);
 
     alpha = 0x1EA - gDemoInputIndex;
@@ -1240,13 +1240,13 @@ Gfx *func_151EC1F0(Gfx *gfx) {
 }
 
 
-/* Draws the fading image picked by gMenuState->unk2C (or the func_151EC648 / func_151EE184 screens). */
+/* Draws the fading image picked by gMenuState->unk2C (or the func_151EC648 / hud_updateCodeEntry screens). */
 Gfx *func_151EC3E8(Gfx *gfx) {
     static void *D_800900BC[6] = { (void *)0x88C, (void *)0x7F3, (void *)0x7CA, (void *)0x7E1, (void *)0x7DE, (void *)0x7DB };
     static u8 D_800900D4 = 0;
     s32 alpha;
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         D_800900D4 = 0;
         return gfx;
     }
@@ -1255,13 +1255,13 @@ Gfx *func_151EC3E8(Gfx *gfx) {
         alpha = 0xFF;
     }
     D_800900D4 = alpha;
-    gSPDisplayList(gfx++, D_80090028);
+    gSPDisplayList(gfx++, gHudSpriteDl);
     if (gMenuState->menu == 1) {
         return func_151EC648(gfx);
     }
     if (gMenuState->menu == 0) {
         if (gMenuState->unk2C == 1 && D_8008FEF8 != 0) {
-            gfx = func_151EE184(gfx);
+            gfx = hud_updateCodeEntry(gfx);
         } else {
             alpha = (gMenuState->unk0 - 0.5f) * 512.0f;
             if (alpha < 0) {
@@ -1282,12 +1282,12 @@ Gfx *func_151EC3E8(Gfx *gfx) {
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
             D_80090060.texId = D_800900BC[gMenuState->unk2C];
-            gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
+            gfx = hud_drawSprite(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
         }
         if (gMenuState->unk8 >= 0.5f) {
             if (gMenuState->unk2C >= 3) {
                 if (gSaveSlots[gMenuState->unk2C - 3].sequence != -1) {
-                    gfx = func_151EEBE8(gfx, gSaveSlots[gMenuState->unk2C - 3].unkC);
+                    gfx = hud_drawImagePanel(gfx, gSaveSlots[gMenuState->unk2C - 3].unkC);
                 }
             }
         }
@@ -1372,7 +1372,7 @@ Gfx *func_151EC648(Gfx *gfx) {
                 }
             }
             D_80090060.texId = *image;
-            gfx = func_151ED430(gfx, &D_80090060, 0x94, y, diff, v, scale, 0);
+            gfx = hud_drawSprite(gfx, &D_80090060, 0x94, y, diff, v, scale, 0);
             state = gMenuState;
             progress = state->unk8;
         }
@@ -1382,16 +1382,16 @@ Gfx *func_151EC648(Gfx *gfx) {
             gDPPipeSync(gfx++);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             D_80090060.texId = &D_88C;
-            gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
+            gfx = hud_drawSprite(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
             state = gMenuState;
         }
     }
     switch (state->prevPage) {
     case 0:
-        D_800E0C88[0] = 0;
-        D_800E0C88[1] = 0xFF;
-        D_800E0C88[2] = 0xFF;
-        D_800E0C88[3] = 0xFF;
+        gHudSlotAlphas[0] = 0;
+        gHudSlotAlphas[1] = 0xFF;
+        gHudSlotAlphas[2] = 0xFF;
+        gHudSlotAlphas[3] = 0xFF;
         if (state->unk8 >= 0.5f && state->unk2C == 4) {
             listAlpha = (gMenuBrightness * gMenuPageFade) >> 8;
             if (listAlpha >= 0xFE) {
@@ -1414,7 +1414,7 @@ Gfx *func_151EC648(Gfx *gfx) {
                     mid = (diff >> 1) + prev;
                     sc = diff / 32.0f;
                     D_80090060.texId = D_800900FC[j];
-                    gfx = func_151ED430(gfx, &D_80090060, 0x53, mid, 2, 1, sc, -1);
+                    gfx = hud_drawSprite(gfx, &D_80090060, 0x53, mid, 2, 1, sc, -1);
                     if (D_8008FDE8 == 0.0f && i == 5 && gPauseCursor == 0) {
                         v = (gTotalTicks * 2) & 0x7F;
                         if (v >= 0x40) {
@@ -1426,7 +1426,7 @@ Gfx *func_151EC648(Gfx *gfx) {
                         }
                         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, v);
                         D_80090060.texId = D_800900FC[j] + 2;
-                        gfx = func_151ED430(gfx, &D_80090060, 0x53, mid, 2, 1, sc, -1);
+                        gfx = hud_drawSprite(gfx, &D_80090060, 0x53, mid, 2, 1, sc, -1);
                     }
                 }
                 j++;
@@ -1473,7 +1473,7 @@ Gfx *func_151EC648(Gfx *gfx) {
             }
             if (slot != 0 && gMenuCharacters[0] != 0) {
                 slotObj = &gMenuCharacters[slot];
-                if (D_800E0C88[slot] != 0xFF) {
+                if (gHudSlotAlphas[slot] != 0xFF) {
                     if (*slotObj == 0 && mid != -1) {
                         save_spawnMenuCharacter(slot, gPlayerCharacters[mid]);
                     }
@@ -1482,23 +1482,23 @@ Gfx *func_151EC648(Gfx *gfx) {
                     *slotObj = 0;
                 }
             }
-            alpha = D_800E0C88[slot];
+            alpha = gHudSlotAlphas[slot];
             alpha += dir * (D_800BE9E4 << 3);
             if (alpha >= 0x100) {
                 alpha = 0xFF;
             } else if (alpha < 0) {
                 alpha = 0;
             }
-            D_800E0C88[slot] = alpha;
+            gHudSlotAlphas[slot] = alpha;
             gDPPipeSync(gfx++);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, gMenuPageFade);
             D_80090060.texId = &D_89C + 2;
             y = 0x8C - (s32)(alpha * 0.1428571492f);
-            gfx = func_151ED430(gfx, &D_80090060, x, y, 1, 1, 1.0f, 0);
+            gfx = hud_drawSprite(gfx, &D_80090060, x, y, 1, 1, 1.0f, 0);
             if (alpha > 0) {
                 gDPPipeSync(gfx++);
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, pulse);
-                gfx = func_151ED430(gfx, &D_80090060, x, y, 1, 1, 1.0f, 1);
+                gfx = hud_drawSprite(gfx, &D_80090060, x, y, 1, 1, 1.0f, 1);
             }
             if (alpha > 0) {
                 gDPPipeSync(gfx++);
@@ -1508,7 +1508,7 @@ Gfx *func_151EC648(Gfx *gfx) {
                 }
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
                 D_80090060.texId = &D_87B;
-                gfx = func_151ED430(gfx, &D_80090060, x, 0x82, 1, 1, 1.0f, 0);
+                gfx = hud_drawSprite(gfx, &D_80090060, x, 0x82, 1, 1, 1.0f, 0);
             }
             text_setColor(0xFF, 0xFF, 0xFF, gMenuPageFade);
             text_printAt(x, 0x41, 0x80, "#", slot + 1);
@@ -1523,7 +1523,7 @@ Gfx *func_151EC648(Gfx *gfx) {
     } // matching: the break must follow the block, not end it
         break;
     case 3:
-        gfx = func_151EA15C(gfx, 0x6A, 0xFF, 0);
+        gfx = hud_drawResultsTable(gfx, 0x6A, 0xFF, 0);
         break;
     }
     return gfx;
@@ -1534,22 +1534,22 @@ Gfx *func_151EC648(Gfx *gfx) {
 Gfx *func_151ED09C(Gfx *gfx) {
     s32 alpha;
 
-    gSPDisplayList(gfx++, D_80090028);
+    gSPDisplayList(gfx++, gHudSpriteDl);
     alpha = D_800E0A90 << 2;
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
-    gfx = func_151ED430(gfx, &D_8009181C, 0x92, 0x6C, 8, 3, 1.0f, 0);
+    gfx = hud_drawSprite(gfx, &D_8009181C, 0x92, 0x6C, 8, 3, 1.0f, 0);
     gDPPipeSync(gfx++);
     gDPSetCombine(gfx++, 0xFFD3FF, 0xFFA6FF7F);
     gDPSetEnvColor(gfx++, 0xFF, 0x80, 0x20, (D_800E0B97 * (alpha + 1)) >> 8);
-    gfx = func_151ED430(gfx, &D_80091828, 0x92, 0x6C, 8, 3, 1.0f, 0);
+    gfx = hud_drawSprite(gfx, &D_80091828, 0x92, 0x6C, 8, 3, 1.0f, 0);
     return sprite_endDraw(gfx);
 }
 
 /* Darkens the whole screen with a black rectangle of alpha D_800E0B96. */
-Gfx *func_151ED1E0(Gfx *gfx) {
+Gfx *hud_darkenScreen(Gfx *gfx) {
     if (D_800E0B96 == 0) {
         return gfx;
     }
@@ -1563,7 +1563,7 @@ Gfx *func_151ED1E0(Gfx *gfx) {
 
 
 /* Sets up the load and render tiles for a sprite; stores its LoadBlock texel count in *blockSizeOut. */
-Gfx *func_151ED29C(Gfx *gfx, HudSprite *sprite, s32 *blockSizeOut) {
+Gfx *hud_setupSpriteTiles(Gfx *gfx, HudSprite *sprite, s32 *blockSizeOut) {
     s32 masks;
     s32 maskt;
     s32 i;
@@ -1593,7 +1593,7 @@ Gfx *func_151ED29C(Gfx *gfx, HudSprite *sprite, s32 *blockSizeOut) {
  * Draws a sprite as a columns x rows grid of tiles centred on (x, y), streaming its texture in 4KB
  * loads. A negative frame keeps the horizontal scale at 1.
  */
-Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 rows, f32 scale, s32 frame) {
+Gfx *hud_drawSprite(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 rows, f32 scale, s32 frame) {
     s32 column;
     s32 row;
     s32 width;
@@ -1609,7 +1609,7 @@ Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 r
     f32 scaleX;
 
     midTexture = 0;
-    gfx = func_151ED29C(gfx, sprite, &blockSize);
+    gfx = hud_setupSpriteTiles(gfx, sprite, &blockSize);
     if (frame < 0) {
         scaleX = 1.0f;
         frame = 0;
@@ -1660,7 +1660,7 @@ Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 r
  * Loads a HUD model and makes patched copies of its display lists (SetOtherMode rewritten,
  * SetCombine turned into a no-op). Returns NULL on failure.
  */
-HudModel *func_151ED90C(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1) {
+HudModel *hud_loadModel(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1) {
     HudModel *model;
     f32 (*mtx1)[4];
     f32 (*mtx2)[4];
@@ -1732,7 +1732,7 @@ HudModel *func_151ED90C(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1) 
 
 
 /* Frees a HUD model and its display list copies. */
-void func_151EDB58(HudModel *model) {
+void hud_freeModel(HudModel *model) {
     s32 i;
 
     if (model != NULL) {
@@ -1757,7 +1757,7 @@ extern u8 D_507;
 extern u8 D_508;
 
 /* Draws a HUD model at (x, y) with the given scale; the D_80090058 model also blinks. */
-Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
+Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     s32 tex;
     Gfx *start;
     s32 image;
@@ -1780,13 +1780,13 @@ Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     anim_updateInstance(model->anim);
 
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, &D_800E0C38, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gHudOrthoMtx, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPDisplayList(gfx++, D_80090110);
     gDPSetCombine(gfx++, 0x12FE25, 0xFFFFFBFD);
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-    gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_800E0C30);
+    gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, gSinglePlayerHudAlpha);
     gDPSetFogColor(gfx++, 0, 0, 0, 0xFF);
     gSPSegment(gfx++, 3, model->anim->partMtx[D_800BE9C0]);
     gSPSegment(gfx++, 1, model->segment1Base);
@@ -1834,9 +1834,9 @@ void func_151EDF4C(void) {
     Vtx *vtx;
 
     D_80090138 = NULL;
-    D_800E0C7C = allocate_memory(0x1A8, 1, 0, 0);
-    if (D_800E0C7C != NULL) {
-        D_80090138 = (Struct151EDF4C *)(D_800E0C7C + 0x40);
+    gCodeEntryText = allocate_memory(0x1A8, 1, 0, 0);
+    if (gCodeEntryText != NULL) {
+        D_80090138 = (Struct151EDF4C *)(gCodeEntryText + 0x40);
         for (i = 0x1C5, j = 0; i < 0x1E3; i++, j++) {
             data = rom_loadPathTable(0, 1, 0, 2, 9, i);
             D_80090138[j].data = data;
@@ -1869,22 +1869,22 @@ void func_151EDF4C(void) {
                 dl++;
             } while (cmd != 0xDF);
         }
-        D_800E0C80 = 0;
-        D_800E0C81 = 0;
+        gCodeEntryColumn = 0;
+        gCodeEntryRow = 0;
         D_800E0C82 = 0;
         D_800E0C83 = 0;
-        D_800E0C7C[0] = 0;
-        D_800E0C7C[0x20] = 0;
+        gCodeEntryText[0] = 0;
+        gCodeEntryText[0x20] = 0;
         D_800E0C84 = 0;
     }
 }
 
 /*
- * Text entry on a 3D letter grid (cursor D_800E0C81 row, D_800E0C80 column, text in D_800E0C7C):
+ * Text entry on a 3D letter grid (cursor gCodeEntryRow row, gCodeEntryColumn column, text in gCodeEntryText):
  * moves the cursor, types letters, and on enter matches the text against the code strings
  * 0x90..0xA2 (sets a D_800E9D00 flag) and the word strings 0xA3..0xC7, then plays a response.
  */
-Gfx *func_151EE184(Gfx *gfx) {
+Gfx *hud_updateCodeEntry(Gfx *gfx) {
     s32 sfx;
     s32 cursorMoved;
     s32 rowLength;
@@ -1911,47 +1911,47 @@ Gfx *func_151EE184(Gfx *gfx) {
     cursorMoved = 0;
     if (gMenuState->input & 1) {
         cursorMoved = 1;
-        D_800E0C81--;
+        gCodeEntryRow--;
     }
     if (gMenuState->input & 2) {
-        D_800E0C81++;
-        if (D_800E0C81 == 4 && D_800E0C80 >= 5) {
-            D_800E0C80 = 4;
+        gCodeEntryRow++;
+        if (gCodeEntryRow == 4 && gCodeEntryColumn >= 5) {
+            gCodeEntryColumn = 4;
         }
         cursorMoved = 1;
     }
-    if (D_800E0C81 < 0) {
-        D_800E0C81 = 5;
+    if (gCodeEntryRow < 0) {
+        gCodeEntryRow = 5;
     }
-    if (D_800E0C81 >= 6) {
-        D_800E0C81 = 0;
+    if (gCodeEntryRow >= 6) {
+        gCodeEntryRow = 0;
     }
     if (gMenuState->input & 8) {
-        D_800E0C80++;
+        gCodeEntryColumn++;
         cursorMoved = 1;
     }
     if (gMenuState->input & 4) {
-        D_800E0C80--;
+        gCodeEntryColumn--;
         cursorMoved = 1;
     }
-    if (D_800E0C81 == 4) {
+    if (gCodeEntryRow == 4) {
         rowLength = 5;
-    } else if (D_800E0C81 == 5) {
+    } else if (gCodeEntryRow == 5) {
         rowLength = 1;
     } else {
         rowLength = 6;
     }
-    if (D_800E0C80 < 0) {
-        D_800E0C80 = rowLength - 1;
+    if (gCodeEntryColumn < 0) {
+        gCodeEntryColumn = rowLength - 1;
     }
-    if (D_800E0C80 >= rowLength) {
-        D_800E0C80 = 0;
+    if (gCodeEntryColumn >= rowLength) {
+        gCodeEntryColumn = 0;
     }
     if (cursorMoved) {
         sound_play(0x62D, 0x4650, 0x40, 0, 0);
     }
-    selectedKey = D_800E0C81 * 6 + D_800E0C80;
-    if (D_800E0C81 == 5) {
+    selectedKey = gCodeEntryRow * 6 + gCodeEntryColumn;
+    if (gCodeEntryRow == 5) {
         selectedKey--;
     }
     mtx = allocate_memory(0x80, 4, 2, 0);
@@ -1970,24 +1970,24 @@ Gfx *func_151EE184(Gfx *gfx) {
         i = selectedKey + 'A';
 
         sound_play(0x500, 0x7D00, 0x40, 0, 0);
-        if (D_800E0C81 == 5) {
+        if (gCodeEntryRow == 5) {
             i = ' ';
-        } else if (D_800E0C81 == 4) {
-            if (D_800E0C80 == 0) {
+        } else if (gCodeEntryRow == 4) {
+            if (gCodeEntryColumn == 0) {
                 if (D_800E0C83 > 0) {
                     D_800E0C83--;
                 }
                 i = 0;
-                D_800E0C7C[D_800E0C83] = 0;
-            } else if (D_800E0C80 == 1) {
+                gCodeEntryText[D_800E0C83] = 0;
+            } else if (gCodeEntryColumn == 1) {
                 i = '.';
-            } else if (D_800E0C80 == 4) {
+            } else if (gCodeEntryColumn == 4) {
                 matchMask = 0xFFC3FFFE;
                 for (i = 0x90; i < 0xA3; i++) {
                     str = gTextStrings[i];
                     temp = i - 0x90;
                     if (temp < D_800E0C83) {
-                        typed = D_800E0C7C[temp];
+                        typed = gCodeEntryText[temp];
                     } else {
                         typed = ' ';
                     }
@@ -2018,7 +2018,7 @@ Gfx *func_151EE184(Gfx *gfx) {
                 } else {
                     cheatType = 0x11;
                     for (i = 0xA3; i < 0xC8 && sfx == 0; i++) {
-                        str = D_800E0C7C;
+                        str = gCodeEntryText;
                         while (str != NULL && (word = gTextStrings[i]) != NULL) {
                             j = 0;
                             while (word[j] == *str && *str != 0 && word[j] != 0) {
@@ -2043,10 +2043,10 @@ Gfx *func_151EE184(Gfx *gfx) {
                     if (sfx == 0) {
                         sfx = (func_150ADA20() & 1) + 0xC5;
                         i = 0;
-                        while (D_800E0C7C[i + 0x20] && D_800E0C7C[i] && D_800E0C7C[i + 0x20] == D_800E0C7C[i]) {
+                        while (gCodeEntryText[i + 0x20] && gCodeEntryText[i] && gCodeEntryText[i + 0x20] == gCodeEntryText[i]) {
                             i++;
                         }
-                        if (D_800E0C7C[i + 0x20] == 0 && D_800E0C7C[i] == 0) {
+                        if (gCodeEntryText[i + 0x20] == 0 && gCodeEntryText[i] == 0) {
                             D_800E0C84++;
                             if (D_800E0C84 == 1) {
                                 sfx = 0xC7;
@@ -2059,10 +2059,10 @@ Gfx *func_151EE184(Gfx *gfx) {
                     lbl2:; // matching: an empty label here ends a basic block for IDO's scheduler
                     }
                 }
-                for (i = 0; D_800E0C7C[i] != 0; i++) {
-                    D_800E0C7C[i + 0x20] = D_800E0C7C[i];
+                for (i = 0; gCodeEntryText[i] != 0; i++) {
+                    gCodeEntryText[i + 0x20] = gCodeEntryText[i];
                 }
-                D_800E0C7C[i + 0x20] = 0;
+                gCodeEntryText[i + 0x20] = 0;
                 i = 0;
                 if (sfx != 0) {
                     mp3_startTrack(sfx, 0x7D00, 0x40);
@@ -2076,24 +2076,24 @@ Gfx *func_151EE184(Gfx *gfx) {
                     obj->unk21C = 0;
                 }
                 D_800E0C83 = 0;
-                D_800E0C7C[D_800E0C83] = 0;
+                gCodeEntryText[D_800E0C83] = 0;
             } else {
                 i -= 2;
             }
         }
         if (i > 0) {
-            D_800E0C7C[D_800E0C83] = i;
+            gCodeEntryText[D_800E0C83] = i;
             if (D_800E0C83 < 19) {
                 D_800E0C83++;
             }
-            D_800E0C7C[D_800E0C83] = 0;
+            gCodeEntryText[D_800E0C83] = 0;
         }
     }
-    func_15043E68(mtx, -30.0f, -10.0f, 0.0f, -115.0f, 10.0f, -530.0f);
+    math_mtxRotTrans(mtx, -30.0f, -10.0f, 0.0f, -115.0f, 10.0f, -530.0f);
     func_150A7D00(mtx + 1, 0.0f, 0.0f, -(f32)D_800E0C82);
-    guPerspective(&D_800E0C38, &perspNorm, 50.0f, 60.6f, 53.0f, 20000.0f, 1.0f);
+    guPerspective(&gHudOrthoMtx, &perspNorm, 50.0f, 60.6f, 53.0f, 20000.0f, 1.0f);
     gSPPerspNormalize(gfx++, perspNorm);
-    gSPMatrix(gfx++, &D_800E0C38, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gHudOrthoMtx, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
     gSPMatrix(gfx++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
@@ -2111,12 +2111,12 @@ Gfx *func_151EE184(Gfx *gfx) {
         }
     }
     text_setColor(0xFF, 0xB1, 0x1E, gMenuPageFade);
-    text_measureString(D_800E0C7C, &width, &height, &unused);
+    text_measureString(gCodeEntryText, &width, &height, &unused);
     i = 0x4B - (width >> 1);
     if (i < 10) {
         i = 10;
     }
-    text_printAt(i, 0xB4, 0x80, (char *)D_800E0C7C);
+    text_printAt(i, 0xB4, 0x80, (char *)gCodeEntryText);
     if ((gTotalTicks & 0x1F) >= 10) {
         width = i + width + 2;
         text_setColor(0xFF, 0xFF, 0xFF, 0xFF);
@@ -2126,7 +2126,7 @@ Gfx *func_151EE184(Gfx *gfx) {
 }
 
 /* Draws a framed panel showing image `index` of table 0x1D (the texture id is cached in D_8009013C). */
-Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
+Gfx *hud_drawImagePanel(Gfx *gfx, s32 index) {
     s32 image;
 
     gDPPipeSync(gfx++);
@@ -2141,8 +2141,8 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
         gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 12, 0, G_TX_RENDERTILE, 0, G_TX_MIRROR, 5, 0, G_TX_CLAMP, 6, 0);
         gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0xBC, 0x7C);
         gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
-        gfx = func_151E86E4(gfx, 0x190, 0x100, 0x250, 0x200, 0, 0, 0, 0x400, 0x400);
-        gfx = func_151E86E4(gfx, 0x250, 0x100, 0x310, 0x200, 0, 0x5E0, 0, -0x400, 0x400);
+        gfx = hud_texRectScaled(gfx, 0x190, 0x100, 0x250, 0x200, 0, 0, 0, 0x400, 0x400);
+        gfx = hud_texRectScaled(gfx, 0x250, 0x100, 0x310, 0x200, 0, 0x5E0, 0, -0x400, 0x400);
     }
 
     gDPPipeSync(gfx++);
@@ -2155,8 +2155,8 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
         gDPPipeSync(gfx++);
         gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 5, 0, G_TX_CLAMP, 5, 0);
         gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0x7C, 0x7C);
-        gfx = func_151E86E4(gfx, 0x250, 0xBC, 0x290, 0xFC, 0, 0, 0, 0x400, 0x400);
-        gfx = func_151E86E4(gfx, 0x180, 0xBC, 0x1D0, 0xFC, 0, 0x200, 0x200, 0x400, 0x400);
+        gfx = hud_texRectScaled(gfx, 0x250, 0xBC, 0x290, 0xFC, 0, 0, 0, 0x400, 0x400);
+        gfx = hud_texRectScaled(gfx, 0x180, 0xBC, 0x1D0, 0xFC, 0, 0x200, 0x200, 0x400, 0x400);
     }
 
     if (D_800E0C85 != index + 1) {
@@ -2176,13 +2176,13 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
 
     if (D_8009013C.texId != NULL) {
         gDPPipeSync(gfx++);
-        gfx = func_151ED430(gfx, &D_8009013C, 0x94, 0x60, 1, 2, 1.0f, 0);
+        gfx = hud_drawSprite(gfx, &D_8009013C, 0x94, 0x60, 1, 2, 1.0f, 0);
     }
     return gfx;
 }
 
-/* Clears the code flags set by func_151EE184. */
-void func_151EEFF0(void) {
+/* Clears the code flags set by hud_updateCodeEntry. */
+void hud_clearCodeFlags(void) {
     D_800E9D00 = 0;
 }
 

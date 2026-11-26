@@ -125,7 +125,7 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  35 */ { effect_updateTimedEffect, NULL, effect_drawTimedEffect, NULL, gTimedEffectRenderSetupDl, NULL, NULL, effect_handleTimedEffectMessage, NULL, gTimedEffectRenderResetDl, effect_destroyTimedEffect, effect_freeTimedEffect, 1 },
     /*  36 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  37 */ { particle_updatePoolEmitter, NULL, NULL, NULL, NULL, NULL, NULL, particle_onPoolEmitterEvent, NULL, NULL, particle_destroyPoolEmitter, particle_freePoolEmitter, -1 },
-    /*  38 */ { func_1519EA04, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
+    /*  38 */ { cutscene_updateTimer, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  39 */ { effect_updateHomingEffect, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  40 */ { blood_updateDrip, NULL, blood_clearDripStatic, NULL, NULL, NULL, NULL, blood_handleDripMessage, NULL, NULL, blood_destroyDrip, blood_freeDrip, 0 },
     /*  41 */ { blood_updateStrip, NULL, NULL, NULL, NULL, NULL, NULL, blood_handleStripMessage, NULL, NULL, blood_destroyStrip, blood_freeStrip, -1 },
@@ -134,11 +134,11 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  44 */ { particle_updateStreakParticle, NULL, particle_drawStreakParticle, NULL, gStreakParticleSetupDl, NULL, NULL, NULL, NULL, NULL, particle_destroyStreakParticle, particle_freeStreakParticle, 1 },
     /*  45 */ { beam_updateLightning, NULL, beam_drawLightning, NULL, gLightningRenderSetupDl, NULL, NULL, beam_lightningMessage, NULL, gLightningRenderTeardownDl, beam_destroyLightning, beam_freeLightning, 1 },
     /*  46 */ { effect_updateCharacterWatcher, NULL, NULL, NULL, NULL, NULL, NULL, effect_characterWatcherMessage, NULL, NULL, effect_destroyCharacterWatcher, effect_freeCharacterWatcher, -1 },
-    /*  47 */ { NULL, func_151AD174, func_151AD92C, NULL, NULL, NULL, NULL, func_151AE640, NULL, NULL, NULL, NULL, 1 },
-    /*  48 */ { NULL, func_151ACB60, NULL, NULL, NULL, NULL, NULL, func_151ACB94, NULL, NULL, NULL, NULL, -1 },
+    /*  47 */ { NULL, rope_update, rope_draw, NULL, NULL, NULL, NULL, rope_message, NULL, NULL, NULL, NULL, 1 },
+    /*  48 */ { NULL, rope_updateRider, NULL, NULL, NULL, NULL, NULL, rope_riderMessage, NULL, NULL, NULL, NULL, -1 },
     /*  49 */ { effect_updateRingEffect, NULL, effect_drawRingEffect, NULL, gRingRenderSetupDl, NULL, NULL, NULL, NULL, gRingRenderResetDl, NULL, NULL, 1 },
     /*  50 */ { sprite_updateActorTracker, NULL, NULL, NULL, NULL, NULL, NULL, sprite_actorTrackerMessage, NULL, NULL, sprite_destroyActorTracker, sprite_freeActorTracker, -1 },
-    /*  51 */ { func_151B3184, NULL, func_151B32C8, NULL, D_8008FB18, NULL, NULL, func_151B3A34, NULL, D_8008FB40, func_151B4C6C, func_151B4C98, 1 },
+    /*  51 */ { rope_updateEffect, NULL, rope_drawEffect, NULL, gRopeRenderSetupDl, NULL, NULL, rope_effectMessage, NULL, gRopeRenderResetDl, func_151B4C6C, func_151B4C98, 1 },
     /*  52 */ { colourfb_updateScreenEffect, NULL, NULL, NULL, NULL, NULL, NULL, colourfb_dispatchMessage, NULL, NULL, NULL, NULL, -1 },
     /*  53 */ { light_updateEffect, NULL, NULL, NULL, NULL, NULL, NULL, light_handleEffectEvent, NULL, NULL, func_15161804, func_15161860, -1 },
     /*  54 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
@@ -165,7 +165,7 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  75 */ { shadow_updateBlob, NULL, shadow_drawBlob, NULL, gBlobShadowSetupDl, NULL, NULL, NULL, func_1510E634, NULL, NULL, NULL, 1 },
     /*  76 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
     /*  77 */ { effect_updateEffectObj, NULL, effect_drawEffectObj, NULL, gEffectObjRenderSetupDl, NULL, NULL, effect_handleEffectObjMessage, NULL, gEffectObjRenderResetDl, effect_destroyEffectObj, effect_freeEffectObj, 1 },
-    /*  78 */ { NULL, func_151AD174, func_151AD92C, NULL, NULL, NULL, NULL, func_151AE640, NULL, NULL, NULL, NULL, 1 },
+    /*  78 */ { NULL, rope_update, rope_draw, NULL, NULL, NULL, NULL, rope_message, NULL, NULL, NULL, NULL, 1 },
     /*  79 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  80 */ { effect_updatePlayerMarker, NULL, effect_drawPlayerMarker, NULL, NULL, NULL, NULL, effect_playerMarkerMessage, NULL, gPlayerMarkerRenderTeardownDl, effect_freePlayerMarker, effect_freePlayerMarker, 0 },
     /*  81 */ { text_updateBox, NULL, text_drawBox, NULL, gSpriteRenderDl, NULL, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, -1 },
@@ -557,7 +557,7 @@ Gfx *effect_drawSpriteFx(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     update.unk0 = 1;
     frame = fx->frame;
     anim = fx->anim;
-    gfx = func_15142E24(gdl, anim, frame << 8, 2, 0x100, 0x100,
+    gfx = math_gfxLoadTextureFrame(gdl, anim, frame << 8, 2, 0x100, 0x100,
                         ((s32 *)anim->addr)[frame >> 8], 5, &params, (u8 *)&update, 3);
     params.x = fx->x;
     params.y = fx->y;
@@ -572,7 +572,7 @@ Gfx *effect_drawSpriteFx(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     } else if (fx->fadeStep == 0xFF) {
         renderMode = 9;
     }
-    gfx = func_15142FBC(gfx, 0x2C00, gEffectRenderModes[renderMode].unk0 | gEffectRenderModes[renderMode].unk4 | 4, (u8 *)&update);
+    gfx = math_gfxSetOtherMode(gfx, 0x2C00, gEffectRenderModes[renderMode].unk0 | gEffectRenderModes[renderMode].unk4 | 4, (u8 *)&update);
     return sprite_drawWorld(gfx, &params);
 }
 /* Spawns a particle (type 0x42 when `altType` is set, else 5) from the 0x38-byte template at `src`. */
@@ -735,7 +735,7 @@ Gfx *effect_drawBillboard(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         } else {
             texture = ((s32 *)anim->addr)[p->tmpl.frame >> 8];
         }
-        gfx = func_15142E24(gfx, anim, p->tmpl.frame << 8, 2, 0x100, 0x100, texture, 5, &params, &update, 3);
+        gfx = math_gfxLoadTextureFrame(gfx, anim, p->tmpl.frame << 8, 2, 0x100, 0x100, texture, 5, &params, &update, 3);
     }
     view = viewIndex;
     params.x = p->tmpl.x;
@@ -773,31 +773,31 @@ Gfx *effect_drawBillboard(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
 
         renderMode = p->tmpl.unk4 & 0xFF;
         combineMode = (p->tmpl.unk4 & 0xFFFF0000) >> 16;
-        gfx = func_15142B7C(gfx, 5, 0);
+        gfx = math_gfxUpdateGeometryMode(gfx, 5, 0);
         gfx = particle_setCombineMode(gfx, combineMode, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((p->tmpl.flags & BILLBOARD_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | ((p->tmpl.flags & BILLBOARD_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             gEffectRenderModes[renderMode].unk0 | gEffectRenderModes[renderMode].unk4 | 4, &update);
     } else if (p->tmpl.anim->fmt != 5) {
         gfx = particle_setCombineMode(gfx, 0xD, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4 | 4, &update);
     } else if (p->tmpl.anim->fmt == 3) {
         gfx = particle_setCombineMode(gfx, 0xE, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4 | 4, &update);
     } else if (p->tmpl.flags & 0x10) {
         gfx = particle_setCombineMode(gfx, 0xD, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             gEffectRenderModes[0x12].unk0 | gEffectRenderModes[0x12].unk4 | 4, &update);
     } else {
         gfx = particle_setCombineMode(gfx, 0xF, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_2CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_2CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             gEffectRenderModes[0x11].unk0 | gEffectRenderModes[0x11].unk4 | 4, &update);
     }
     c0 = p->tmpl.primG;
     c1 = p->tmpl.primB;
     c2 = p->tmpl.primA;
-    gfx = func_15142CF0(gfx, 1, 0, p->tmpl.primR, c0, c1, c2, &update);
+    gfx = math_gfxSetPrimColor(gfx, 1, 0, p->tmpl.primR, c0, c1, c2, &update);
     if (p->tmpl.flags & BILLBOARD_ENV_COLOR) {
         c0 = p->tmpl.envR;
         c1 = p->tmpl.envG;
@@ -819,7 +819,7 @@ Gfx *effect_drawBillboard(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
             c2 = 0;
         }
     }
-    gfx = func_15142C10(gfx, c0, c1, c2, 0, &update);
+    gfx = math_gfxSetEnvColor(gfx, c0, c1, c2, 0, &update);
     return sprite_drawWorld(gfx, &params);
 }
 
@@ -1101,7 +1101,7 @@ Gfx *effect_drawModelFx(Gfx *gfx, ModelFx *fx, s32 arg2) {
     s32 renderMode;
     u8 update;
 
-    func_15043D90(&fx->mtx[D_800BE9C0], fx->data.rotation[0], fx->data.rotation[1], fx->data.rotation[2],
+    math_mtxRotScaleTrans(&fx->mtx[D_800BE9C0], fx->data.rotation[0], fx->data.rotation[1], fx->data.rotation[2],
                   fx->data.scale[0], fx->data.scale[1], fx->data.scale[2], fx->data.position[0], fx->data.position[1], fx->data.position[2]);
 
     gDPPipeSync(gfx++);
@@ -1122,7 +1122,7 @@ Gfx *effect_drawModelFx(Gfx *gfx, ModelFx *fx, s32 arg2) {
     }
 
     update = 0;
-    gfx = func_15142FBC(gfx, 0x8ACA0, renderMode, &update);
+    gfx = math_gfxSetOtherMode(gfx, 0x8ACA0, renderMode, &update);
 
     if (fx->data.combineMode == 1) {
         gDPSetCombine(gfx++, 0x123824, 0xFF73FFFF);
@@ -1227,12 +1227,12 @@ void effect_broadcastEvent(s32 event, u8 eventType) {
     effect_sendEventToTypeRange(0, OBJ_TYPE_COUNT, event, eventType);
 }
 
-/* Sends an event to every object of types [first, last) (clamped by func_15143D18). */
+/* Sends an event to every object of types [first, last) (clamped by math_clampRange). */
 void effect_sendEventToTypeRange(s32 first, s32 last, s32 event, u8 eventType) {
     s32 type;
     EffectHeader *node;
 
-    func_15143D18(&first, &last, 2, OBJ_TYPE_COUNT);
+    math_clampRange(&first, &last, 2, OBJ_TYPE_COUNT);
     for (type = first; type < last; type++) {
         s32 list;
         for (list = 0; list != 2; list++) {

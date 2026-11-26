@@ -185,7 +185,7 @@ glabel func_150AB1F0
     /* D893C 150AB48C 3C01800D */  lui        $at, %hi(gProbeHeight)
     /* D8940 150AB490 C42EBDD8 */  lwc1       $f14, %lo(gProbeHeight)($at)
     /* D8944 150AB494 46037380 */  add.s      $f14, $f14, $f3
-    /* D8948 150AB498 0D4124B3 */  jal        func_150492CC
+    /* D8948 150AB498 0D4124B3 */  jal        math_setTestBox
     /* D894C 150AB49C 00000000 */   nop
     /* D8950 150AB4A0 0942AD50 */  j          func_150AB540
     /* D8954 150AB4A4 00000000 */   nop
@@ -226,7 +226,7 @@ glabel func_150AB1F0
     /* D89DC 150AB52C 00000000 */  nop
     /* D89E0 150AB530 3C01800D */  lui        $at, %hi(gProbeHeight)
     /* D89E4 150AB534 C42EBDD8 */  lwc1       $f14, %lo(gProbeHeight)($at)
-    /* D89E8 150AB538 0D4124B3 */  jal        func_150492CC
+    /* D89E8 150AB538 0D4124B3 */  jal        math_setTestBox
     /* D89EC 150AB53C 00000000 */   nop
   glabel func_150AB540
     /* D89F0 150AB540 8FA601C8 */  lw         $a2, 0x1C8($sp)
@@ -268,12 +268,12 @@ glabel func_150AB1F0
     /* D8A78 150AB5C8 8CE80020 */  lw         $t0, 0x20($a3)
     /* D8A7C 150AB5CC AFA8004C */  sw         $t0, 0x4C($sp)
     /* D8A80 150AB5D0 AFA80050 */  sw         $t0, 0x50($sp)
-    /* D8A84 150AB5D4 3C08800D */  lui        $t0, %hi(D_800CC22C)
-    /* D8A88 150AB5D8 8D08C22C */  lw         $t0, %lo(D_800CC22C)($t0)
-    /* D8A8C 150AB5DC 3C09800D */  lui        $t1, %hi(D_800CC230)
-    /* D8A90 150AB5E0 8D29C230 */  lw         $t1, %lo(D_800CC230)($t1)
-    /* D8A94 150AB5E4 3C0A800D */  lui        $t2, %hi(D_800CC234)
-    /* D8A98 150AB5E8 8D4AC234 */  lw         $t2, %lo(D_800CC234)($t2)
+    /* D8A84 150AB5D4 3C08800D */  lui        $t0, %hi(gTestBoxHalfWidth)
+    /* D8A88 150AB5D8 8D08C22C */  lw         $t0, %lo(gTestBoxHalfWidth)($t0)
+    /* D8A8C 150AB5DC 3C09800D */  lui        $t1, %hi(gTestBoxHalfHeight)
+    /* D8A90 150AB5E0 8D29C230 */  lw         $t1, %lo(gTestBoxHalfHeight)($t1)
+    /* D8A94 150AB5E4 3C0A800D */  lui        $t2, %hi(gTestBoxHalfDepth)
+    /* D8A98 150AB5E8 8D4AC234 */  lw         $t2, %lo(gTestBoxHalfDepth)($t2)
     /* D8A9C 150AB5EC AFA80058 */  sw         $t0, 0x58($sp)
     /* D8AA0 150AB5F0 AFA9005C */  sw         $t1, 0x5C($sp)
     /* D8AA4 150AB5F4 AFAA0060 */  sw         $t2, 0x60($sp)
@@ -598,15 +598,15 @@ glabel func_150AB1F0
     /* D8F50 150ABAA0 8FAA0144 */   lw        $t2, 0x144($sp)
     /* D8F54 150ABAA4 A12A0275 */  sb         $t2, 0x275($t1)
   glabel func_150ABAA8
-    /* D8F58 150ABAA8 3C01800D */  lui        $at, %hi(D_800CC210)
-    /* D8F5C 150ABAAC C433C210 */  lwc1       $f19, %lo(D_800CC210)($at)
-    /* D8F60 150ABAB0 3C01800D */  lui        $at, %hi(D_800CC214)
-    /* D8F64 150ABAB4 C434C214 */  lwc1       $f20, %lo(D_800CC214)($at)
-    /* D8F68 150ABAB8 3C01800D */  lui        $at, %hi(D_800CC218)
-    /* D8F6C 150ABABC C435C218 */  lwc1       $f21, %lo(D_800CC218)($at)
+    /* D8F58 150ABAA8 3C01800D */  lui        $at, %hi(gTriPlaneNormalX)
+    /* D8F5C 150ABAAC C433C210 */  lwc1       $f19, %lo(gTriPlaneNormalX)($at)
+    /* D8F60 150ABAB0 3C01800D */  lui        $at, %hi(gTriPlaneNormalY)
+    /* D8F64 150ABAB4 C434C214 */  lwc1       $f20, %lo(gTriPlaneNormalY)($at)
+    /* D8F68 150ABAB8 3C01800D */  lui        $at, %hi(gTriPlaneNormalZ)
+    /* D8F6C 150ABABC C435C218 */  lwc1       $f21, %lo(gTriPlaneNormalZ)($at)
     /* D8F70 150ABAC0 461398C2 */  mul.s      $f3, $f19, $f19
-    /* D8F74 150ABAC4 3C01800D */  lui        $at, %hi(D_800CC21C)
-    /* D8F78 150ABAC8 C436C21C */  lwc1       $f22, %lo(D_800CC21C)($at)
+    /* D8F74 150ABAC4 3C01800D */  lui        $at, %hi(gTriPlaneDist)
+    /* D8F78 150ABAC8 C436C21C */  lwc1       $f22, %lo(gTriPlaneDist)($at)
     /* D8F7C 150ABACC 4614A102 */  mul.s      $f4, $f20, $f20
     /* D8F80 150ABAD0 460418C0 */  add.s      $f3, $f3, $f4
     /* D8F84 150ABAD4 4615A902 */  mul.s      $f4, $f21, $f21
@@ -1304,15 +1304,15 @@ glabel func_150AC480
     /* D9990 150AC4E0 00000000 */   nop
     /* D9994 150AC4E4 1440FC82 */  bnez       $v0, func_150AB6F0
     /* D9998 150AC4E8 00000000 */   nop
-    /* D999C 150AC4EC 3C01800D */  lui        $at, %hi(D_800CC210)
-    /* D99A0 150AC4F0 C433C210 */  lwc1       $f19, %lo(D_800CC210)($at)
-    /* D99A4 150AC4F4 3C01800D */  lui        $at, %hi(D_800CC214)
-    /* D99A8 150AC4F8 C434C214 */  lwc1       $f20, %lo(D_800CC214)($at)
-    /* D99AC 150AC4FC 3C01800D */  lui        $at, %hi(D_800CC218)
-    /* D99B0 150AC500 C435C218 */  lwc1       $f21, %lo(D_800CC218)($at)
+    /* D999C 150AC4EC 3C01800D */  lui        $at, %hi(gTriPlaneNormalX)
+    /* D99A0 150AC4F0 C433C210 */  lwc1       $f19, %lo(gTriPlaneNormalX)($at)
+    /* D99A4 150AC4F4 3C01800D */  lui        $at, %hi(gTriPlaneNormalY)
+    /* D99A8 150AC4F8 C434C214 */  lwc1       $f20, %lo(gTriPlaneNormalY)($at)
+    /* D99AC 150AC4FC 3C01800D */  lui        $at, %hi(gTriPlaneNormalZ)
+    /* D99B0 150AC500 C435C218 */  lwc1       $f21, %lo(gTriPlaneNormalZ)($at)
     /* D99B4 150AC504 46139802 */  mul.s      $f0, $f19, $f19
-    /* D99B8 150AC508 3C01800D */  lui        $at, %hi(D_800CC21C)
-    /* D99BC 150AC50C C436C21C */  lwc1       $f22, %lo(D_800CC21C)($at)
+    /* D99B8 150AC508 3C01800D */  lui        $at, %hi(gTriPlaneDist)
+    /* D99BC 150AC50C C436C21C */  lwc1       $f22, %lo(gTriPlaneDist)($at)
     /* D99C0 150AC510 4614A042 */  mul.s      $f1, $f20, $f20
     /* D99C4 150AC514 46010000 */  add.s      $f0, $f0, $f1
     /* D99C8 150AC518 4615A842 */  mul.s      $f1, $f21, $f21
@@ -1590,7 +1590,7 @@ glabel func_150AC480
     /* D9DB8 150AC908 E42BBD90 */  swc1       $f11, %lo(D_800CBD90)($at)
     /* D9DBC 150AC90C 3C013F80 */  lui        $at, (0x3F800000 >> 16)
     /* D9DC0 150AC910 44816000 */  mtc1       $at, $f12
-    /* D9DC4 150AC914 0D412128 */  jal        func_150484A0
+    /* D9DC4 150AC914 0D412128 */  jal        math_atan2
     /* D9DC8 150AC918 46003B86 */   mov.s     $f14, $f7
     /* D9DCC 150AC91C 3C01800A */  lui        $at, %hi(D_8009F700)
     /* D9DD0 150AC920 C421F700 */  lwc1       $f1, %lo(D_8009F700)($at)

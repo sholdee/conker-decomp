@@ -6,8 +6,8 @@
    a prototype: func_15146508 passes the two actors after the message as well. */
 void effect_broadcastEvent();
 
-/* This file's .data: nine palettes of four RGB colours (func_151429E0). */
-static u8 D_8008A160[9 * 12] = {
+/* This file's .data: nine palettes of four RGB colours (math_pickPaletteColour). */
+static u8 gColourPalettes[9 * 12] = {
     0x83, 0x94, 0xAA, 0x50, 0x5E, 0x76, 0x28, 0x34, 0x40, 0x1A, 0x24, 0x30,
     0xFF, 0xFF, 0xDE, 0xCA, 0xAA, 0x7A, 0xE9, 0xD4, 0x9F, 0xD5, 0xBC, 0x8A,
     0xFF, 0xFF, 0x00, 0xF0, 0xDC, 0x00, 0xFF, 0xDC, 0x14, 0xF5, 0xEB, 0x0A,
@@ -19,7 +19,7 @@ static u8 D_8008A160[9 * 12] = {
     0xFF, 0xFF, 0xFF, 0xFA, 0xFA, 0xFA, 0xE6, 0xE6, 0xE6, 0xC8, 0xC8, 0xC8,
 };
 
-/* This file's .bss: the debug breadcrumbs of func_15143134. */
+/* This file's .bss: the debug breadcrumbs of math_transformOffset. */
 static s32 D_800DCA00;   /* the step reached */
 static void *D_800DCA04; /* the matrix */
 static f32 D_800DCA08;   /* the offset */
@@ -27,12 +27,12 @@ static f32 D_800DCA0C;
 static f32 D_800DCA10;
 
 /* Debug tunable stub: returns the midpoint of min and max (the name and source location are unused). */
-s32 func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line) {
+s32 math_debugTunableRange(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line) {
     return (max + min) >> 1;
 }
 
 /* Debug tunable stub: returns the default value unchanged. */
-s32 func_151422DC(s32 id, const char *name, s32 min, s32 max, s32 value, const char *file, s32 line) {
+s32 math_debugTunable(s32 id, const char *name, s32 min, s32 max, s32 value, const char *file, s32 line) {
     return value;
 }
 
@@ -48,7 +48,7 @@ typedef union {
 } MtxView;
 
 /* Copies the translation of bone matrix bones[bone] to out (fixed-point when D_800C3E90 is set). */
-void func_15142314(bones, bone, out)
+void math_getBoneTranslation(bones, bone, out)
     void *bones;
     s32 bone;
     Vec3f *out;
@@ -74,7 +74,7 @@ void func_15142314(bones, bone, out)
 }
 
 /* Cosine of a binary angle (256 steps per turn), from the quarter-wave table gCosTable. */
-f32 func_151423D8(u8 angle) {
+f32 math_cosBinAngleMasked(u8 angle) {
     s32 index;
     s32 a = angle;
     u16 quadrant;
@@ -92,7 +92,7 @@ f32 func_151423D8(u8 angle) {
 }
 
 /* Resolves an actor unique id (0xFF: `self`) to an actor with a model (ob_matrix_ptr), or NULL. */
-Actor *func_15142444(u8 uniqueId, Actor *self) {
+Actor *math_findActorById(u8 uniqueId, Actor *self) {
     s32 id;
     Actor *actor;
 
@@ -122,7 +122,7 @@ Actor *func_15142444(u8 uniqueId, Actor *self) {
  * Builds out = scale * rotation * translation: func_150A8050 makes the rotation, rows 0/2 are scaled
  * by scaleXZ and row 1 by scaleY, columns by (sx, sy, sz).
  */
-void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 sx, f32 sy, f32 sz,
+void math_mtxRotScaleAxes(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 sx, f32 sy, f32 sz,
                    f32 x, f32 y, f32 z) {
     MtxF mf;
 
@@ -143,7 +143,7 @@ void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 ro
 }
 
 /* Builds a matrix at (x, y, z) whose forward axis points at (atX, atY, atZ), scaled per axis. */
-void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z,
+void math_mtxLookAtScale(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z,
                    f32 atX, f32 atY, f32 atZ) {
     MtxF mf;
     f32 inv;
@@ -187,7 +187,7 @@ void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f3
 }
 
 /* Builds a rotation matrix at (x, y, z), rows 0/2 scaled by scaleXZ and row 1 by scaleY. */
-void func_15142838(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
+void math_mtxRotScaleXZ(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
     MtxF mf;
 
     func_150A8050(mf, rotX, rotY, rotZ);
@@ -206,8 +206,8 @@ void func_15142838(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 ro
     guMtxF2L(mf, out);
 }
 
-/* Float version of func_15142838. */
-void func_15142914(MtxF mf, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
+/* Float version of math_mtxRotScaleXZ. */
+void math_mtxFRotScaleXZ(MtxF mf, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
     func_150A8050(mf, rotX, rotY, rotZ);
     mf[3][0] = x;
     mf[3][1] = y;
@@ -224,10 +224,10 @@ void func_15142914(MtxF mf, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rot
 }
 
 /* Picks one of the four RGB colours of palette `palette` at random. */
-void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b) {
+void math_pickPaletteColour(u8 palette, u8 *r, u8 *g, u8 *b) {
     u8 *color;
 
-    color = &D_8008A160[(func_150ADA20() & 3) * 3 + palette * 12];
+    color = &gColourPalettes[(func_150ADA20() & 3) * 3 + palette * 12];
     *r = color[0];
     *g = color[1];
     *b = color[2];
@@ -249,10 +249,10 @@ s32 func_15142A5C(Actor *actor) {
 }
 
 /* The zero vector. */
-const Vec3f D_800A5480 = { 0.0f, 0.0f, 0.0f };
+const Vec3f gZeroVec3f = { 0.0f, 0.0f, 0.0f };
 
-/* Falloff curve sampled at 100 steps, read by func_15145A0C; close to sqrt(1 - (i / 100)^2). */
-const f32 D_800A548C[102] = {
+/* Falloff curve sampled at 100 steps, read by math_circleHalfChord; close to sqrt(1 - (i / 100)^2). */
+const f32 gUnitCircleTable[102] = {
     1.0f, 0.99995f, 0.9998f, 0.99955f, 0.9992f, 0.998749f, 0.998198f, 0.997547f,
     0.996795f, 0.995942f, 0.994987f, 0.993932f, 0.992774f, 0.991514f, 0.990152f, 0.988686f,
     0.987117f, 0.985444f, 0.983667f, 0.981784f, 0.979796f, 0.977701f, 0.9755f, 0.973191f,
@@ -269,20 +269,20 @@ const f32 D_800A548C[102] = {
 };
 
 /* Cubic Lagrange interpolation weights for samples at -1, 0, 1, 2 (t in [0, 1]). */
-f32 func_15142A80(f32 t) {
+f32 math_lagrangeWeight0(f32 t) {
     return ((1.0f - t) * (t - 2.0f) * t) * (1.0f / 6.0f);
 }
-f32 func_15142AC0(f32 t) {
+f32 math_lagrangeWeight1(f32 t) {
     return ((t + 1.0f) * (t - 1.0f) * (t - 2.0f)) * 0.5f;
 }
-f32 func_15142B04(f32 t) {
+f32 math_lagrangeWeight2(f32 t) {
     return ((2.0f - t) * (t + 1.0f) * t) * 0.5f;
 }
-f32 func_15142B44(f32 t) {
+f32 math_lagrangeWeight3(f32 t) {
     return ((t + 1.0f) * (t - 1.0f) * t) * (1.0f / 6.0f);
 }
 /* Emits geometry-mode changes, skipping bits already in the cached state. */
-Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits) {
+Gfx *math_gfxUpdateGeometryMode(Gfx *gfx, s32 setBits, s32 clearBits) {
     if (~D_800DD200 & clearBits) {
         gSPClearGeometryMode(gfx++, clearBits);
         D_800DD200 |= clearBits;
@@ -297,7 +297,7 @@ Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits) {
 }
 
 /* Sets the env colour unless it is already current; emits a pipe sync first if *needSync is 1. */
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
+Gfx *math_gfxSetEnvColor(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
     if ((r != D_800DD1C8) || (g != D_800DD1CA) || (b != D_800DD1CC) || (a != D_800DD1CE)) {
         if (*needSync == 1) {
             gDPPipeSync(gfx++);
@@ -316,7 +316,7 @@ Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
 }
 
 /* Sets the prim colour unless it is already current; emits a pipe sync first if *needSync is 1. */
-Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
+Gfx *math_gfxSetPrimColor(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
     if ((minLevel != D_800DD204) || (lodFrac != D_800DD206) || (r != D_800DD1C0) ||
         (g != D_800DD1C2) || (b != D_800DD1C4) || (a != D_800DD1C6)) {
         if (*needSync == 1) {
@@ -337,13 +337,13 @@ Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32
     return gfx;
 }
 
-/* Loads frame `frame >> 16` of `desc` through sprite_loadDescFrameAt unless the same texture (func_1514306C of
+/* Loads frame `frame >> 16` of `desc` through sprite_loadDescFrameAt unless the same texture (math_getTextureFrameId of
  * `texture` and `mode`) is already loaded with the same clamp mode and origin (cached state). */
-Gfx *func_15142E24(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s32 s, s32 t, s32 texture, u8 mode,
+Gfx *math_gfxLoadTextureFrame(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s32 s, s32 t, s32 texture, u8 mode,
                    SpriteParams *sprite, u8 *needSync, s32 assetArg) {
     s32 id;
 
-    id = func_1514306C(desc, texture, frame >> 16, mode);
+    id = math_getTextureFrameId(desc, texture, frame >> 16, mode);
     if ((id != D_800DD1B0) || (cm != D_800DD208) || (s != D_800DD20C) || (t != D_800DD210) ||
         (sprite != D_800DD214)) {
         if (*needSync == 1) {
@@ -364,7 +364,7 @@ Gfx *func_15142E24(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s32 s, s32 t,
 }
 
 /* Sets the other-mode words unless already current; emits a pipe sync first if *needSync is 1. */
-Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync) {
+Gfx *math_gfxSetOtherMode(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync) {
     if ((modeH != D_800DD218) || (modeL != D_800DD21C)) {
         if (*needSync == 1) {
             gDPPipeSync(gfx++);
@@ -385,9 +385,9 @@ s16 func_15143044(u8 arg0, s32 arg1) {
 }
 
 
-/* The asset id of frame `frame` that func_15142E24 compares with the cached one: by `mode`, a fixed texture, the
+/* The asset id of frame `frame` that math_gfxLoadTextureFrame compares with the cached one: by `mode`, a fixed texture, the
  * id `texture` itself or from D_80091564, frame of `desc`, or (the default) frame of gEffectTextures[texture]. */
-s32 func_1514306C(TextureDesc *desc, s32 texture, s32 frame, u8 mode) {
+s32 math_getTextureFrameId(TextureDesc *desc, s32 texture, s32 frame, u8 mode) {
     s32 ret;
 
     switch (mode) {
@@ -424,7 +424,7 @@ s32 func_1514306C(TextureDesc *desc, s32 texture, s32 frame, u8 mode) {
  * Transforms `offset` by mtx into out (just mtx's translation when offset is NULL or zero).
  * D_800DCA00 records the progress through the function (a debug breadcrumb).
  */
-void func_15143134(const Vec3f *offset, Vec3f *out, void *mtx) {
+void math_transformOffset(const Vec3f *offset, Vec3f *out, void *mtx) {
     MtxF mf;
 
     D_800DCA00 = 1;
@@ -449,14 +449,14 @@ void func_15143134(const Vec3f *offset, Vec3f *out, void *mtx) {
         }
     } else {
         D_800DCA00 = 7;
-        func_15142314(mtx, 0, out);
+        math_getBoneTranslation(mtx, 0, out);
         D_800DCA00 = 8;
     }
     D_800DCA00 = 0;
 }
 
 /* Picks a random (x, z) in the region's footprint, with the region's top and bottom heights. */
-void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
+void math_randomZoneFootprintPoint(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
     switch (ZONE_AREA_TYPE(region)) {
     default:
         *x = region->x;
@@ -474,8 +474,8 @@ void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             f32 offsetZ;
 
             angle = region->yaw * (256.0f / 360.0f);
-            sine = func_151423D8(angle - 0x40);
-            cosine = func_151423D8(angle);
+            sine = math_cosBinAngleMasked(angle - 0x40);
+            cosine = math_cosBinAngleMasked(angle);
             offsetX = func_150ADA68() * (2.0f * region->xSize) + -region->xSize;
             offsetZ = func_150ADA68() * (2.0f * region->zSize) + -region->zSize;
             *x = region->x + (offsetX * cosine + offsetZ * sine);
@@ -493,8 +493,8 @@ void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             f32 radius;
 
             angle = func_150ADA20() & 0xFF;
-            sine = func_151423D8(angle - 0x40);
-            cosine = func_151423D8(angle);
+            sine = math_cosBinAngleMasked(angle - 0x40);
+            cosine = math_cosBinAngleMasked(angle);
             radius = func_150ADA68() * region->xSize;
             *x = region->x + radius * cosine;
             *z = region->z - radius * sine;
@@ -511,8 +511,8 @@ void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             f32 radius;
 
             angle = func_150ADA20() & 0xFF;
-            sine = func_151423D8(angle - 0x40);
-            cosine = func_151423D8(angle);
+            sine = math_cosBinAngleMasked(angle - 0x40);
+            cosine = math_cosBinAngleMasked(angle);
             radius = func_150ADA68() * region->xSize;
             *x = region->x + radius * cosine;
             *z = region->z - radius * sine;
@@ -524,7 +524,7 @@ void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
 }
 
 /* Direction (yaw, pitch in radians) scaled by length, into out[3]. */
-void func_151436B4(f32 yaw, f32 pitch, f32 length, Vec3f *out) {
+void math_dirFromAngles(f32 yaw, f32 pitch, f32 length, Vec3f *out) {
     f32 cosYaw;
     f32 sinYaw;
     f32 cosPitch;
@@ -542,7 +542,7 @@ void func_151436B4(f32 yaw, f32 pitch, f32 length, Vec3f *out) {
 }
 
 /* Planar direction (angle in radians) scaled by length. */
-void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z) {
+void math_dirFromAngleXZ(f32 angle, f32 length, f32 *x, f32 *z) {
     f32 c;
     f32 s;
 
@@ -552,8 +552,8 @@ void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z) {
     *z = length * c;
 }
 
-/* Binary-angle (256 per turn) version of func_151436B4. */
-void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out) {
+/* Binary-angle (256 per turn) version of math_dirFromAngles. */
+void math_dirFromBinAngles(s16 yaw, s16 pitch, f32 length, Vec3f *out) {
     f32 cosYaw;
     f32 sinYaw;
     f32 cosPitch;
@@ -562,12 +562,12 @@ void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out) {
     u8 quarterPitch;
     f32 horizontal;
 
-    cosYaw = func_151423D8(yaw);
+    cosYaw = math_cosBinAngleMasked(yaw);
     quarterYaw = yaw - 0x40;
-    sinYaw = func_151423D8(quarterYaw);
-    cosPitch = func_151423D8(pitch);
+    sinYaw = math_cosBinAngleMasked(quarterYaw);
+    cosPitch = math_cosBinAngleMasked(pitch);
     quarterPitch = pitch - 0x40;
-    sinPitch = func_151423D8(quarterPitch);
+    sinPitch = math_cosBinAngleMasked(quarterPitch);
     horizontal = length * cosPitch;
     out->x = horizontal * sinYaw;
     out->y = -length * sinPitch;
@@ -575,18 +575,18 @@ void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out) {
 }
 
 void func_15143834(s16 yaw, s16 pitch, f32 length, Vec3f *out) {
-    func_15143794(yaw, pitch, length, out);
+    math_dirFromBinAngles(yaw, pitch, length, out);
 }
 
-/* Binary-angle version of func_1514373C. */
-void func_15143874(s16 angle, f32 length, f32 *x, f32 *z) {
+/* Binary-angle version of math_dirFromAngleXZ. */
+void math_dirFromBinAngleXZ(s16 angle, f32 length, f32 *x, f32 *z) {
     f32 c;
     f32 s;
     u8 quarter;
 
-    c = func_151423D8(angle);
+    c = math_cosBinAngleMasked(angle);
     quarter = angle - 0x40;
-    s = func_151423D8(quarter);
+    s = math_cosBinAngleMasked(quarter);
     *x = length * s;
     *z = length * c;
 }
@@ -595,7 +595,7 @@ void func_15143874(s16 angle, f32 length, f32 *x, f32 *z) {
  * Searches zones[start..end) for a record equal to `key` in the fields selected by `fields`.
  * With bit 0x1000 every selected field must match, otherwise any one of them; the last hit wins.
  */
-TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
+TriggerZone *math_findMatchingZone(s32 start, s32 end, u16 fields, TriggerZone *key) {
     s32 i;
     TriggerZone *result;
     u16 checked;
@@ -605,7 +605,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
     if (key == NULL) {
         return NULL;
     }
-    func_15143D18(&start, &end, 0, gZoneCount);
+    math_clampRange(&start, &end, 0, gZoneCount);
     for (i = start; i < end; i++) {
         checked = 0;
         matched = 0;
@@ -710,7 +710,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
     return result;
 }
 /* Orders the bounds lo/hi, then orders *start/*end and clamps them into [lo, hi]. XOR swaps. */
-void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi) {
+void math_clampRange(s32 *start, s32 *end, s32 lo, s32 hi) {
     s32 t;
     s32 t2;
 
@@ -736,7 +736,7 @@ void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi) {
 }
 
 /* Clamps *value into [lo, hi] (bounds in either order); returns 1 if raised, 2 if lowered, else 0. */
-s32 func_15143DA8(s32 *value, s32 lo, s32 hi) {
+s32 math_clampInt(s32 *value, s32 lo, s32 hi) {
     s32 t;
     s32 t2;
 
@@ -771,7 +771,7 @@ s32 func_15143E24(Actor *actor) {
     return (s16)(actor->langle >> 8);
 }
 /* Length of a vector. */
-f32 func_15143E64(const Vec3f *v) {
+f32 math_vec3Length(const Vec3f *v) {
     f32 x = v->x;
     f32 y = v->y;
     f32 z = v->z;
@@ -832,7 +832,7 @@ start:
  * Advances a 16.16 position through sequence `id` (gEffectTextures[id].frameCount steps long) by speed * D_800BE9E4.
  * Past either end it stops (1), clamps (2/0x10), bounces (4) or wraps; returns 1 when it stopped.
  */
-s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags) {
+s32 math_advanceFrameSeq(u8 id, u32 *speed, s32 *pos, u8 flags) {
     s32 max;
     s32 ret;
     s32 n;
@@ -871,7 +871,7 @@ s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags) {
     return ret;
 }
 /* Colour-combiner style blend: picks the output RGBA from colour 0, colour 1 and `weight` per `mode`. */
-void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1, u8 a1, u8 weight, u8 mode) {
+void math_pickPrimColour(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1, u8 a1, u8 weight, u8 mode) {
     switch (mode) {
     case 2:
         *outR = r1;
@@ -906,8 +906,8 @@ void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 
         return;
     }
 }
-/* Second-cycle variant of func_151441A4. */
-void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1, u8 a1, u8 weight, u8 mode) {
+/* Second-cycle variant of math_pickPrimColour. */
+void math_pickEnvColour(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1, u8 a1, u8 weight, u8 mode) {
     switch (mode) {
     case 2:
     case 3:
@@ -985,7 +985,7 @@ void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 
     }
 }
 /* Wraps value into [lo, hi] (integer steps of hi - lo + 1). */
-s32 func_151444DC(s32 value, s32 hi, s32 lo) {
+s32 math_wrapInt(s32 value, s32 hi, s32 lo) {
     s32 range;
     if (hi < value) {
         range = hi - lo + 1;
@@ -1003,7 +1003,7 @@ s32 func_151444DC(s32 value, s32 hi, s32 lo) {
 }
 
 /* Wraps value into [lo, hi]. */
-f32 func_15144528(f32 value, f32 hi, f32 lo) {
+f32 math_wrapFloat(f32 value, f32 hi, f32 lo) {
     f32 range;
 
     if (hi < value) {
@@ -1022,7 +1022,7 @@ f32 func_15144528(f32 value, f32 hi, f32 lo) {
 }
 
 /* Footprint area of a region: 2rx * 2rz for a box, pi r^2 for the round shapes. */
-f32 func_15144598(TriggerZone *region) {
+f32 math_getZoneArea(TriggerZone *region) {
     f32 area;
     s16 radius;
 
@@ -1043,7 +1043,7 @@ f32 func_15144598(TriggerZone *region) {
 }
 
 /* Volume of a region: box rx * h * rz, cylinder pi r^2 h, sphere (pi / 3) r^3. */
-f32 func_1514462C(TriggerZone *region) {
+f32 math_getZoneVolume(TriggerZone *region) {
     f32 volume;
     f32 radius;
 
@@ -1066,7 +1066,7 @@ f32 func_1514462C(TriggerZone *region) {
 }
 
 /* Picks a random point inside the region into out[3], applying its tilt for boxes and cylinders. */
-void func_1514470C(TriggerZone *region, Vec3f *out) {
+void math_randomPointInZone(TriggerZone *region, Vec3f *out) {
     f32 radiusZ;
     f32 height;
     f32 radiusX;
@@ -1124,9 +1124,9 @@ void func_1514470C(TriggerZone *region, Vec3f *out) {
 
             radius = func_150ADA68() * radiusX;
             angle = func_150ADA20() & 0xFF;
-            x = func_151423D8(angle - 0x40) * radius;
+            x = math_cosBinAngleMasked(angle - 0x40) * radius;
             y = func_150ADA68() * height;
-            z = func_151423D8(angle) * radius;
+            z = math_cosBinAngleMasked(angle) * radius;
             savedX = x;
             mixed = y * sinPitch + z * cosPitch;
             x = x * cosYaw + mixed * sinYaw;
@@ -1140,7 +1140,7 @@ void func_1514470C(TriggerZone *region, Vec3f *out) {
         {
             Vec3f offset;
 
-            func_151436B4(func_150ADA68() * 6.2831855f, func_150ADA68() * 6.2831855f,
+            math_dirFromAngles(func_150ADA68() * 6.2831855f, func_150ADA68() * 6.2831855f,
                           func_150ADA68() * radiusX, &offset);
             out->x = region->x + offset.x;
             out->y = region->y + offset.y;
@@ -1150,12 +1150,12 @@ void func_1514470C(TriggerZone *region, Vec3f *out) {
     }
 }
 /* Dot product. */
-f32 func_15144A74(Vec3f *a, Vec3f *b) {
+f32 math_vec3Dot(Vec3f *a, Vec3f *b) {
     return a->x * b->x + a->y * b->y + a->z * b->z;
 }
 
 /* camera_global_Cameras[index].TrueCameraAngle wrapped into [0, 360] degrees. */
-f32 func_15144AA8(index)
+f32 math_getCameraYaw(index)
     s32 index;
 {
     f32 v = camera_global_Cameras[index].TrueCameraAngle;
@@ -1173,12 +1173,12 @@ f32 func_15144AA8(index)
 }
 
 /* Position (unk2F8) of camera_global_Cameras[index]. */
-Vec3f *func_15144B34(s32 index) {
+Vec3f *math_getCameraPos(s32 index) {
     return &camera_global_Cameras[index].eye;
 }
 
 /* Wraps an angle into [0, 2 pi] radians. */
-f32 func_15144B68(f32 angle) {
+f32 math_wrapRadians(f32 angle) {
     f32 v = angle;
     if (6.2831855f < v) {
         do {
@@ -1194,7 +1194,7 @@ f32 func_15144B68(f32 angle) {
 }
 
 /* Wraps an angle into [0, 360] degrees. */
-f32 func_15144BC8(f32 angle) {
+f32 math_wrapDegrees(f32 angle) {
     f32 v = angle;
     if (360.0f < v) {
         do {
@@ -1210,7 +1210,7 @@ f32 func_15144BC8(f32 angle) {
 }
 
 /* Wraps a value into [0, 255] in steps of 255. */
-s32 func_15144C2C(s16 value) {
+s32 math_wrapByte(s16 value) {
     s16 v = value;
 
     while (v >= 256) {
@@ -1224,11 +1224,11 @@ s32 func_15144C2C(s16 value) {
 }
 
 /* Unsigned angular distance between two angles in radians, in [0, pi]. */
-f32 func_15144C8C(f32 a, f32 b) {
+f32 math_angleDistance(f32 a, f32 b) {
     f32 diff;
 
-    a = func_15144B68(a);
-    diff = fabsf(a - func_15144B68(b));
+    a = math_wrapRadians(a);
+    diff = fabsf(a - math_wrapRadians(b));
     if (3.1415927f < diff) {
         diff = 6.2831855f - diff;
     }
@@ -1240,7 +1240,7 @@ f32 func_15144C8C(f32 a, f32 b) {
  * Returns 0 when the depth is outside (gDefaultNear, 6000). The optional outputs get the projection's
  * remaining terms and 1 / depth.
  */
-s32 func_15144CEC(pos, screen, outA, outDepth, outInvDepth, viewport)
+s32 math_projectToScreen(pos, screen, outA, outDepth, outInvDepth, viewport)
     f32 *pos;
     f32 *screen;
     f32 *outA;
@@ -1284,7 +1284,7 @@ s32 func_15144CEC(pos, screen, outA, outDepth, outInvDepth, viewport)
  * Edge vectors of a triangle: normal = (v0 - v1) x (v2 - v1), binormal = edge x normal, edge = v0 - v1.
  * Returns 0 for a degenerate triangle (two equal vertices). `normal` may be NULL.
  */
-s32 func_15144E80(CollisionTri *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal) {
+s32 math_getTriEdges(CollisionTri *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal) {
     f32 c[3];
     f32 b[3];
     f32 a[3];
@@ -1323,21 +1323,21 @@ s32 func_15144E80(CollisionTri *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *nor
     edge1.y = c[1] - b[1];
     edge1.z = c[2] - b[2];
 
-    func_151450B4(&edge0, &edge1, normal);
-    func_151450B4(&edge0, normal, binormal);
+    math_vec3Cross(&edge0, &edge1, normal);
+    math_vec3Cross(&edge0, normal, binormal);
     *edgeOut = edge0;
     return 1;
 }
 
 /* Cross product out = a x b. */
-void func_151450B4(Vec3f *a, Vec3f *b, Vec3f *out) {
+void math_vec3Cross(Vec3f *a, Vec3f *b, Vec3f *out) {
     out->x = a->y * b->z - a->z * b->y;
     out->y = a->z * b->x - a->x * b->z;
     out->z = a->x * b->y - a->y * b->x;
 }
 
 /* Normalizes v into out; returns 0 for a zero vector. length and invLength are optional outputs. */
-s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength) {
+s32 math_vec3Normalize(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength) {
     f32 sq;
     f32 invBuf;
 
@@ -1360,12 +1360,12 @@ s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength) {
     return 1;
 }
 
-/* Ray/sphere test (see func_151452C4) that also requires the hit to be closer than maxDist. */
-s32 func_151451F0(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, f32 maxDist, Vec3f *hitNear,
+/* Ray/sphere test (see math_raySphere) that also requires the hit to be closer than maxDist. */
+s32 math_raySphereWithin(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, f32 maxDist, Vec3f *hitNear,
                   Vec3f *hitFar, f32 *tNear, f32 *tFar) {
     f32 t;
 
-    if (func_151452C4(origin, dir, center, radius, hitNear, hitFar, tNear, tFar) != 0) {
+    if (math_raySphere(origin, dir, center, radius, hitNear, hitFar, tNear, tFar) != 0) {
         t = *tNear;
         if (t < 0.0f) {
             if (*tFar < 0.0f) {
@@ -1389,7 +1389,7 @@ s32 func_151451F0(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, f32 maxD
  * Intersects the ray origin + t * dir (dir normalized) with a sphere. Writes both intersection points
  * and their t; returns 0 on a miss or when the near point is behind the origin.
  */
-s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, Vec3f *hitNear,
+s32 math_raySphere(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, Vec3f *hitNear,
                   Vec3f *hitFar, f32 *tNear, f32 *tFar) {
     f32 dx;
     f32 dy;
@@ -1434,7 +1434,7 @@ s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, Vec3f *h
         diff.x = hitNear->x - origin->x;
         diff.y = hitNear->y - origin->y;
         diff.z = hitNear->z - origin->z;
-        if (func_15144A74(&diff, dir) < 0.0f) {
+        if (math_vec3Dot(&diff, dir) < 0.0f) {
             return 0;
         }
         return 1;
@@ -1442,13 +1442,13 @@ s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, Vec3f *h
 }
 
 /* Whether point lies within radius of camera_global_Cameras[index]'s position (unk2F8). */
-s32 func_151454BC(u8 index, f32 radius, Vec3f *point) {
+s32 math_isNearCamera(u8 index, f32 radius, Vec3f *point) {
     f32 dx;
     f32 dy;
     f32 dz;
     Vec3f *pos;
 
-    pos = func_15144B34(index);
+    pos = math_getCameraPos(index);
     dx = point->x - pos->x;
     dy = point->y - pos->y;
     dz = point->z - pos->z;
@@ -1460,13 +1460,13 @@ s32 func_151454BC(u8 index, f32 radius, Vec3f *point) {
 }
 
 /* Closest point to `point` on the segment start .. start + dir, into out (t optional). */
-void func_15145548(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t) {
+void math_closestPointOnSegment(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t) {
     f32 tBuf;
 
     if (t == NULL) {
         t = &tBuf;
     }
-    if (func_1514563C(start, dir, point, out, t) != 0) {
+    if (math_closestPointOnLine(start, dir, point, out, t) != 0) {
         if (*t < 0.0f) {
             *out = *start;
         } else if (1.0f < *t) {
@@ -1480,7 +1480,7 @@ void func_15145548(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t) {
 }
 
 /* Closest point to `point` on the line start + t * dir, into out; returns 0 when dir is zero. */
-s32 func_1514563C(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t) {
+s32 math_closestPointOnLine(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t) {
     f32 tBuf[1];
     f32 denom;
     f32 dot0;
@@ -1508,7 +1508,7 @@ s32 func_1514563C(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t) {
  * 2000 units along its yaw/pitch to target and, optionally, unit-1000 direction vectors for the
  * pitch and for the pitch plus pitchOffset (radians).
  */
-void func_15145740(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset) {
+void math_getActorAim(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset) {
     s16 yaw;
     s16 pitch;
     volatile f32 angle;
@@ -1562,16 +1562,16 @@ void func_15145740(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f3
     }
 }
 
-/* Heading (and optionally elevation, from -90) in degrees of a vector; func_150484A0 is atan2. */
-void func_15145974(Vec3f *v, f32 *heading, f32 *elevation) {
-    *heading = func_150484A0(v->x, v->z) * 57.29577637f;
+/* Heading (and optionally elevation, from -90) in degrees of a vector; math_atan2 is atan2. */
+void math_getHeadingElevation(Vec3f *v, f32 *heading, f32 *elevation) {
+    *heading = math_atan2(v->x, v->z) * 57.29577637f;
     if (elevation != NULL) {
-        *elevation = (func_150484A0(sqrtf(v->x * v->x + v->z * v->z), v->y) * 57.29577637f) - 90.0f;
+        *elevation = (math_atan2(sqrtf(v->x * v->x + v->z * v->z), v->y) * 57.29577637f) - 90.0f;
     }
 }
 
-f32 func_15145A0C(f32 arg0, f32 scale, f32 arg2) {
-    return D_800A548C[(s32)(arg0 * arg2 * 100.0f)] * scale;
+f32 math_circleHalfChord(f32 arg0, f32 scale, f32 arg2) {
+    return gUnitCircleTable[(s32)(arg0 * arg2 * 100.0f)] * scale;
 }
 
 void func_15145A50(Actor *actor) {
@@ -1593,7 +1593,7 @@ void func_15145A50(Actor *actor) {
  * Ray (start, dir) against the actor's collision ellipsoid (centre/radius from sprite_getActorBounds, y squashed
  * by unkDC); writes the near and far hits, unsquashed by unkE0. Returns 0 on a miss.
  */
-s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f *hitFar,
+s32 math_rayActorEllipsoid(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f *hitFar,
                   f32 *radius, f32 *arg6, Vec3f *center) {
     Vec3f centerBuf;
     f32 radiusBuf;
@@ -1635,13 +1635,13 @@ s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f 
     d.z = dir->z;
     {
     f32 invLength;
-    if (func_15145128(&d, &d, &length, &invLength) == 0) {
+    if (math_vec3Normalize(&d, &d, &length, &invLength) == 0) {
         return 0;
     }
     c.x = center->x;
     c.y = center->y * squash;
     c.z = center->z;
-    if (func_151451F0(&s, &d, &c, *radius, length, hitNear, hitFar, &tNear, &tFar) == 0) {
+    if (math_raySphereWithin(&s, &d, &c, *radius, length, hitNear, hitFar, &tNear, &tFar) == 0) {
         return 0;
     }
     hitNear->y *= unsquash;
@@ -1652,7 +1652,7 @@ s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f 
 }
 
 /* Whether entry `index` of db_Object_array has viewFlags bit 0x80 (hidden) (true for a negative index). */
-u8 func_15145C90(s32 index) {
+u8 math_isObjectHidden(s32 index) {
     if (index < 0) {
         return 1;
     } else {
@@ -1661,7 +1661,7 @@ u8 func_15145C90(s32 index) {
 }
 
 /* Transforms `count` points (given by pointer) by the object's rotation and position. */
-void func_15145CD0(WorldObject *placement, const f32 **in, f32 **out, s32 count) {
+void math_transformObjectPointRefs(WorldObject *placement, const f32 **in, f32 **out, s32 count) {
     MtxF mf;
     const f32 **src;
     f32 **dst;
@@ -1688,7 +1688,7 @@ void func_15145CD0(WorldObject *placement, const f32 **in, f32 **out, s32 count)
 }
 
 /* Transforms the `count` points in[] by the object's rotation and position into out[]. */
-void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count) {
+void math_transformObjectPoints(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count) {
     MtxF mf;
     s32 i;
 
@@ -1702,8 +1702,8 @@ void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count) {
     }
 }
 
-/* Array version of func_15143134: mfs each offsets[i] by mtx into results[i]. */
-void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count) {
+/* Array version of math_transformOffset: mfs each offsets[i] by mtx into results[i]. */
+void math_transformOffsets(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count) {
     const Vec3f *input;
     MtxF mf;
     Vec3f *output;
@@ -1721,7 +1721,7 @@ void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count)
                     output = *outputs;
                     func_150A7960(mf, input->x, input->y, input->z, &output->x, &output->y, &output->z);
                 } else {
-                    func_15142314(mtx, 0, *outputs);
+                    math_getBoneTranslation(mtx, 0, *outputs);
                 }
                 count--;
                 inputs++;
@@ -1739,7 +1739,7 @@ void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count)
                     output = *outputs;
                     func_150A7960(mtx, input->x, input->y, input->z, &output->x, &output->y, &output->z);
                 } else {
-                    func_15142314(mtx, 0, *outputs);
+                    math_getBoneTranslation(mtx, 0, *outputs);
                 }
                 count--;
                 inputs++;
@@ -1752,7 +1752,7 @@ void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count)
  * Builds two unit vectors u, v perpendicular to n (axis-aligned when n lies along an axis).
  * Returns 0 for a zero n.
  */
-s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v) {
+s32 math_buildPerpendicularBasis(Vec3f *n, Vec3f *u, Vec3f *v) {
     u8 count;
     u8 axis;
     u8 zeroAxis;
@@ -1827,17 +1827,17 @@ s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v) {
     ((f32 *)u)[i] = 1.0;
     ((f32 *)u)[j] = 1.0;
     ((f32 *)u)[k] = -((f32 *)n)[i] - (((f32 *)n)[j] / ((f32 *)n)[k]);
-    func_151450B4(u, n, v);
-    func_151450B4(v, n, u);
-    func_15145128(u, u, &len, &invLen);
-    func_15145128(v, v, &len, &invLen);
+    math_vec3Cross(u, n, v);
+    math_vec3Cross(v, n, u);
+    math_vec3Normalize(u, u, &len, &invLen);
+    math_vec3Normalize(v, v, &len, &invLen);
     return 1;
 }
 /*
  * Draws `slot` of a model: with the owning actor's own textures (mode 1, falling back to the shared
  * ones in mode 2 when the actor is gone or has none), or plainly through light_pickLights.
  */
-void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos,
+void *math_emitPointLights(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos,
                     u8 flags, s32 arg8) {
     PointLightGfx *tex;
     Ambient *unk18;
@@ -1878,7 +1878,7 @@ void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 unique
 }
 
 /* Whether no view (0 .. gScreenLayout) can see the zone. */
-u8 func_151464B8(ZoneNode *zone) {
+u8 math_isZoneHiddenFromViews(ZoneNode *zone) {
     s32 i;
     s16 mask;
     s32 ret;
@@ -1908,7 +1908,7 @@ void func_15146508(Actor *a, Actor *b) {
  * matrix, a parent attachment's matrix, a fixed matrix, or else one of the actor's bones. Returns 0
  * if it is unavailable.
  */
-s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, const Vec3f **offsets, Vec3f **results,
+s32 math_transformAttachmentOffsets(Actor *actor, ModelAttachment *point, s32 index, const Vec3f **offsets, Vec3f **results,
                   s32 count) {
     s32 i;
     Mtx *mtx;
@@ -1943,7 +1943,7 @@ s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, const Vec3f *
     } else if (point->mtx != NULL) {
         mtx = point->mtx + D_800BE9C0;
     } else {
-        func_15145EA4(offsets, results, &actor->ob_matrix_ptr[point->bone], count);
+        math_transformOffsets(offsets, results, &actor->ob_matrix_ptr[point->bone], count);
         return 1;
     }
     if (mtx != NULL) {
@@ -1959,7 +1959,7 @@ s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, const Vec3f *
 }
 
 /* Whether a position lies inside the world bounds (|x|, |z| <= 19500 and -9500 <= y <= 19500). */
-s32 func_1514672C(Vec3f *pos) {
+s32 math_isInWorldBounds(Vec3f *pos) {
     f32 limit;
     f32 y;
 
@@ -1974,7 +1974,7 @@ s32 func_1514672C(Vec3f *pos) {
  * Random drift: when the timer runs out it restarts at a random time below maxTime and picks a new
  * target in [lo, mid) (3 in 4) or [mid, hi); value then eases towards the target by rate.
  */
-void func_151467A4(f32 *timer, f32 maxTime, f32 *target, f32 lo, f32 mid, f32 hi, f32 rate, f32 *value) {
+void math_randomDrift(f32 *timer, f32 maxTime, f32 *target, f32 lo, f32 mid, f32 hi, f32 rate, f32 *value) {
     *timer = *timer - gFrameDelta;
     if (*timer < 0.0f) {
         *timer = func_150ADA68() * maxTime;

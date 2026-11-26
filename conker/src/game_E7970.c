@@ -48,7 +48,7 @@ void particle_updateOwnerEmitter(EffectE7970 *effect) {
             growth.y = 0.0f;
             do {
                 randomYaw = func_150ADA20();
-                func_15143794((randomYaw % 127U) + heading - 63, (func_150ADA20() % 31U) - 50, radius, &spawnPos);
+                math_dirFromBinAngles((randomYaw % 127U) + heading - 63, (func_150ADA20() % 31U) - 50, radius, &spawnPos);
                 spawnPos.y *= owner->unkF0;
                 spawnPos.x += ownerPos.x;
                 spawnPos.y += ownerPos.y;

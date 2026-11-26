@@ -15,13 +15,13 @@ void boot_runGame(void) {
     gTaskDoneMsgs[0].type = OS_SC_DONE_MSG;
     gTaskDoneMsgs[1].type = OS_SC_DONE_MSG;
     D_800BE617 = 0;
-    func_100050A0(&gGameMesgQueue);
-    func_15003570();
+    sched_init(&gGameMesgQueue);
+    level_readTextureSizes();
     D_800BEAAB = 0;
     audio_init();
     music_init();
     func_15016588();
-    func_151EEFF0();
+    hud_clearCodeFlags();
     D_800BEAA8 = 0;
     cont_initSiQueue();
     cont_init();
@@ -56,7 +56,7 @@ void boot_runGame(void) {
             case 4:
                 break;
         }
-        func_100051E8();
+        sched_sendRetraceMsg();
         D_800BE9E8 = 0;
         game_mainLoop();
     }

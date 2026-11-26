@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-void func_15049C40(f32 *arg0, f32 *arg1) {
+void math_quatAlign(f32 *arg0, f32 *arg1) {
     f32 d;
 
     d = (arg0[0] * arg1[0]) + (arg0[1] * arg1[1]) + (arg0[2] * arg1[2]) + (arg0[3] * arg1[3]);
@@ -18,7 +18,7 @@ void func_15049C40(f32 *arg0, f32 *arg1) {
 /* The calls to sqrtf in this file are real calls (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
 #pragma function sqrtf
 
-void func_15049CB8(MtxF m, f32 *q) {
+void math_mtxToQuat(MtxF m, f32 *q) {
     f32 tr;
     f32 s;
     s32 i;
@@ -57,7 +57,7 @@ void func_15049CB8(MtxF m, f32 *q) {
     }
 }
 
-void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out) {
+void math_quatSlerp(f32 *a, f32 *b, f32 t, f32 *out) {
     f32 cosom;
     f32 omega;
     f32 ang0;
@@ -74,9 +74,9 @@ void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out) {
         out[2] = scale0 * a[2] - b[2] * t;
         out[3] = scale0 * a[3] - b[3] * t;
     } else if (cosom <= 0.99999f) {
-        extern f32 func_15048360(f32); // matching: a declaration here opens a -g3 scope block
+        extern f32 math_acosLookup(f32); // matching: a declaration here opens a -g3 scope block
 
-        omega = func_15048360(cosom);
+        omega = math_acosLookup(cosom);
         ang0 = (1.0f - t) * omega;
         ang1 = t * omega;
         sinom = sinf(omega);
@@ -95,7 +95,7 @@ void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out) {
     }
 }
 
-void func_1504A140(f32 *q, MtxF m) {
+void math_quatToMtx(f32 *q, MtxF m) {
     f32 s;
     f32 a, b, c;
     f32 wx, wy, wz;

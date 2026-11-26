@@ -297,8 +297,8 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
         part.sizeY = 0.75f;
         func_150ADA68();
         part.gravity = accel;
-        func_15143134(&D_800AA590, &part.pos, mtx);
-        func_15143134(&D_800AA59C, &part.vel, mtx);
+        math_transformOffset(&D_800AA590, &part.pos, mtx);
+        math_transformOffset(&D_800AA59C, &part.vel, mtx);
         part.vel.x = part.vel.x - part.pos.x;
         part.vel.y = part.vel.y - part.pos.y;
         part.vel.z = part.vel.z - part.pos.z;
@@ -318,8 +318,8 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
         part.sizeY = 0.5f;
         func_150ADA68();
         part.gravity = accel;
-        func_15143134(&D_800AA5A8, &part.pos, mtx);
-        func_15143134(&D_800AA5B4[func_150ADA20() & 1], &part.vel, mtx);
+        math_transformOffset(&D_800AA5A8, &part.pos, mtx);
+        math_transformOffset(&D_800AA5B4[func_150ADA20() & 1], &part.vel, mtx);
         part.vel.x = part.vel.x - part.pos.x;
         part.vel.y = part.vel.y - part.pos.y;
         part.vel.z = part.vel.z - part.pos.z;
@@ -339,8 +339,8 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
                 part.sizeXZ = part.sizeY = D_800AA62C[i];
                 func_150ADA68();
                 part.gravity = accel;
-                func_15143134(&D_800AA5CC[i], &part.pos, mtx);
-                func_15143134(&D_800AA5FC[i], &part.vel, mtx);
+                math_transformOffset(&D_800AA5CC[i], &part.pos, mtx);
+                math_transformOffset(&D_800AA5FC[i], &part.vel, mtx);
                 part.vel.x = part.vel.x - part.pos.x;
                 part.vel.y = part.vel.y - part.pos.y;
                 part.vel.z = part.vel.z - part.pos.z;
@@ -355,7 +355,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
         }
 
         part.model = 0x2B;
-        func_15143134(&D_800AA63C, &part.pos, mtx);
+        math_transformOffset(&D_800AA63C, &part.pos, mtx);
         part.sizeXZ = part.sizeY = 0.551f;
         for (j = 0; j != 2; j++) {
             if (func_150ADA20() & 1) {
@@ -363,7 +363,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
                 part.lifetime = (func_150ADA20() % 36U) + 30;
                 func_150ADA68();
                 part.gravity = accel;
-                func_15143134(&D_800AA648[j], &part.vel, mtx);
+                math_transformOffset(&D_800AA648[j], &part.vel, mtx);
                 part.vel.x = part.vel.x - part.pos.x;
                 part.vel.y = part.vel.y - part.pos.y;
                 part.vel.z = part.vel.z - part.pos.z;
@@ -388,8 +388,8 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
                 part.sizeXZ = part.sizeY = D_800AA708[k];
                 func_150ADA68();
                 part.gravity = accel;
-                func_15143134(&D_800AA678[k], &part.pos, mtx);
-                func_15143134(&D_800AA6A8[k], &part.vel, mtx);
+                math_transformOffset(&D_800AA678[k], &part.pos, mtx);
+                math_transformOffset(&D_800AA6A8[k], &part.vel, mtx);
                 part.vel.x = part.vel.x - part.pos.x;
                 part.vel.y = part.vel.y - part.pos.y;
                 part.vel.z = part.vel.z - part.pos.z;
@@ -562,10 +562,10 @@ void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg
         func_151BBEE4(from, arg3, arg4);
         if (func_150AC9C0(from->x, from->y, from->z, delta.x, delta.y, delta.z, 0, &surf, &hit.x, &hit.y, &hit.z, NULL,
                           &hitInfo, 0, 0.0f) != 0) {
-            if (func_15145C90(hitInfo) != 0) {
+            if (math_isObjectHidden(hitInfo) != 0) {
                 func_151BBFBC(&surf, &hit, arg3 & 0xFF, arg4);
             }
-            if (func_15144E80(&surf, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
+            if (math_getTriEdges(&surf, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
                 func_151C0644(&hit, arg3, arg4);
             }
             fx.source.normal.x = -delta.x;
@@ -689,7 +689,7 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
             hit.y = floor.height;
             hit.z = probe.z;
             func_151BBFBC(&floor.tri, &hit, arg3, arg4);
-            if (func_15144E80(&floor.tri, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
+            if (math_getTriEdges(&floor.tri, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
                 func_151C0644(&hit, arg3, arg4);
             }
         }
@@ -873,7 +873,7 @@ void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     random_a = func_150ADA20();
     random_b = func_150ADA20();
     fraction_a = func_150ADA68();
-    func_15143794(random_a & 0xFF, random_b % 65U - 32, fraction_a * 1680.0f * 0.01f, &velocity);
+    math_dirFromBinAngles(random_a & 0xFF, random_b % 65U - 32, fraction_a * 1680.0f * 0.01f, &velocity);
     scale = (func_150ADA68() * 202.0f + 208.0f) * 0.001f;
     offset.x = 0.0f;
     offset.y = 0.0f;
@@ -991,7 +991,7 @@ s32 effect_followRibbonTrail(RibbonTrail *trail) {
     delta.x = trail->head.tmpl.pos.x - data->lastPos.x;
     delta.y = trail->head.tmpl.pos.y - data->lastPos.y;
     delta.z = trail->head.tmpl.pos.z - data->lastPos.z;
-    dist = func_15143E64(&delta);
+    dist = math_vec3Length(&delta);
     data->pending += dist * 0.04870799929f * gFrameDelta;
     data->texU += dist * 9.708835602f;
     if (data->pending > 1.0f) {
@@ -1085,13 +1085,13 @@ Gfx *effect_drawRibbonTrail(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
         particle_getViewBuffer(trail->buffers, viewport, (trail->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             points = trail->points;
-            camPos = func_15144B34(viewport);
+            camPos = math_getCameraPos(viewport);
             dirty = 1;
-            gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &dirty, 3);
-            gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &dirty);
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &dirty, 3);
+            gfx = math_gfxSetEnvColor(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &dirty);
             gfx = particle_setCombineMode(gfx, 0x4E, &dirty);
-            gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &dirty);
+            gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
+            gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &dirty);
             if (trail->head.tmpl.flags & 2) {
                 /* ribbon starts at the live position */
                 i = trail->head.end - 1;
@@ -1472,8 +1472,8 @@ void effect_spawnBoneBurst(Actor *actor, u8 arg1, s32 arg2) {
             spark.alphaBase = 160.0f;
             spark.alphaRange = 95.0f;
             spark.alphaTarget = 207.5f;
-            sparkEffect.pos = D_800A5480;
-            sparkEffect.rot = D_800A5480;
+            sparkEffect.pos = gZeroVec3f;
+            sparkEffect.rot = gZeroVec3f;
             sparkEffect.scale.x = 1.0f;
             sparkEffect.scale.y = 1.0f;
             sparkEffect.scale.z = 1.0f;
@@ -1542,8 +1542,8 @@ void effect_spawnBoneBurst(Actor *actor, u8 arg1, s32 arg2) {
             glowEffect.rgba[3] = 0xFF;
             glowEffect.width = 100.0f;
             glowEffect.height = 100.0f;
-            glowEffect.pos = D_800A5480;
-            glowEffect.rot = D_800A5480;
+            glowEffect.pos = gZeroVec3f;
+            glowEffect.rot = gZeroVec3f;
             glowEffect.scale.x = 1.0f;
             glowEffect.scale.y = 1.0f;
             glowEffect.scale.z = 1.0f;
@@ -1555,7 +1555,7 @@ void effect_spawnBoneBurst(Actor *actor, u8 arg1, s32 arg2) {
             glowEffect.unk48 = 0;
             glowEffect.viewportMask = 0xFF;
             for (glow.index = 0; glow.index < 2; glow.index++) {
-                data->glows[glow.index] = func_151407D0(&shape, 0x78, &glowEffect, 0, 0x2A, 0, 0, -1, arg1, arg2);
+                data->glows[glow.index] = flare_spawnGlow(&shape, 0x78, &glowEffect, 0, 0x2A, 0, 0, -1, arg1, arg2);
                 if (data->glows[glow.index] != NULL) {
                     memcpy(&data->glows[glow.index]->data, &glow, sizeof(glow));
                 }
@@ -1604,7 +1604,7 @@ void effect_updateBoneBurst(BurstEffect *effect) {
         dsts[1] = &starts[1];
         dsts[2] = &ends[0];
         dsts[3] = &ends[1];
-        func_15145EA4(srcs, dsts, owner->ob_matrix_ptr + 1, 4);
+        math_transformOffsets(srcs, dsts, owner->ob_matrix_ptr + 1, 4);
         for (i = 0; i < 2; i++) {
             if (data->sparks[i] != NULL) {
                 spark = data->sparks[i];
@@ -1850,14 +1850,14 @@ void effect_unlinkBurstGlow(BurstGlow *glow) {
     }
 }
 
-/* Teardown of a burst glow: clears its slot in the burst, then runs the particle teardown func_151411A4. */
+/* Teardown of a burst glow: clears its slot in the burst, then runs the particle teardown flare_destroyGlowDefault. */
 void effect_destroyBurstGlow(BurstGlow *glow) {
     effect_unlinkBurstGlow(glow);
-    func_151411A4(&glow->head);
+    flare_destroyGlowDefault(&glow->head);
 }
 
-/* Teardown of a burst glow: clears its slot in the burst, then runs the particle teardown func_151411C4. */
+/* Teardown of a burst glow: clears its slot in the burst, then runs the particle teardown flare_freeGlowDefault. */
 void effect_freeBurstGlow(BurstGlow *glow) {
     effect_unlinkBurstGlow(glow);
-    func_151411C4(&glow->head);
+    flare_freeGlowDefault(&glow->head);
 }

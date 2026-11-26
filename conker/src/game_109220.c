@@ -303,11 +303,11 @@ s32 effect_updateFallingStream(StreamActor *actor) {
                 while (state->splashCount > 1.0f) {
                     speed = func_150ADA68() * state->splashSpeedRange + state->splashSpeedBase;
                     angle = func_150ADA20();
-                    sine1 = func_151423D8(angle);
-                    cosine1 = func_151423D8(angle - 0x40);
+                    sine1 = math_cosBinAngleMasked(angle);
+                    cosine1 = math_cosBinAngleMasked(angle - 0x40);
                     angle2 = (func_150ADA20() % (state->splashPitchRange + 1)) + state->splashPitchBase;
-                    sine2 = func_151423D8(angle2);
-                    cosine2 = func_151423D8(angle2 - 0x40);
+                    sine2 = math_cosBinAngleMasked(angle2);
+                    cosine2 = math_cosBinAngleMasked(angle2 - 0x40);
                     radius = func_150ADA68() * state->splashRadius;
                     pos.x = rec->pos.x + radius * cosine1;
                     pos.y = state->floor;
@@ -359,11 +359,11 @@ s32 effect_updateFallingStream(StreamActor *actor) {
                     do {
                         speed = func_150ADA68() * state->dropSpeedRange + state->dropSpeedBase;
                         angle = func_150ADA20();
-                        sine1 = func_151423D8(angle);
-                        cosine1 = func_151423D8(angle - 0x40);
+                        sine1 = math_cosBinAngleMasked(angle);
+                        cosine1 = math_cosBinAngleMasked(angle - 0x40);
                         angle2 = (func_150ADA20() % (state->dropPitchRange + 1)) + state->dropPitchBase;
-                        sine2 = func_151423D8(angle2);
-                        cosine2 = func_151423D8(angle2 - 0x40);
+                        sine2 = math_cosBinAngleMasked(angle2);
+                        cosine2 = math_cosBinAngleMasked(angle2 - 0x40);
                         radius = func_150ADA68() * state->dropRadius;
                         packet.x = rec->pos.x + radius * cosine1;
                         packet.z = rec->pos.z + radius * sine1;
@@ -515,8 +515,8 @@ s32 effect_updateFallingStreamTrail(StreamActor *actor) {
             stepScale = gFrameDelta * inverse;
             x = state->x;
             z = state->z;
-            dx = func_151423D8(state->angleX - 0x40) * state->swayX + actor->head.tmpl.pos.x - state->x;
-            dz = func_151423D8(state->angleZ - 0x40) * state->swayZ + actor->head.tmpl.pos.z - state->z;
+            dx = math_cosBinAngleMasked(state->angleX - 0x40) * state->swayX + actor->head.tmpl.pos.x - state->x;
+            dz = math_cosBinAngleMasked(state->angleZ - 0x40) * state->swayZ + actor->head.tmpl.pos.z - state->z;
             if (state->count > 1.0f) {
                 stepX = dx * inverse;
                 stepZ = dz * inverse;
@@ -544,11 +544,11 @@ s32 effect_updateFallingStreamTrail(StreamActor *actor) {
                         do {
                             speed = func_150ADA68() * state->speedRange + state->speedBase;
                             yaw = func_150ADA20();
-                            sinYaw = func_151423D8(yaw);
-                            cosYaw = func_151423D8(yaw - 0x40);
+                            sinYaw = math_cosBinAngleMasked(yaw);
+                            cosYaw = math_cosBinAngleMasked(yaw - 0x40);
                             pitch = (func_150ADA20() % (state->pitchRange + 1)) + state->pitchBase;
-                            sinPitch = func_151423D8(pitch);
-                            cosPitch = func_151423D8(pitch - 0x40);
+                            sinPitch = math_cosBinAngleMasked(pitch);
+                            cosPitch = math_cosBinAngleMasked(pitch - 0x40);
                             packet.x = actor->head.tmpl.pos.x + state->radius * cosYaw;
                             packet.z = actor->head.tmpl.pos.z + state->radius * sinYaw;
                             packet.velX = speed * sinPitch * cosYaw;
@@ -571,7 +571,7 @@ s32 effect_updateFallingStreamTrail(StreamActor *actor) {
                     records[actor->head.end].pos.z = z;
                     records[actor->head.end].velocityY = state->velocityY;
                     state->widthAngle += func_150ADA20() % (state->widthAngleRange + 1);
-                    records[actor->head.end].width = func_151423D8(state->widthAngle - 0x40) * state->widthRange + state->widthBase;
+                    records[actor->head.end].width = math_cosBinAngleMasked(state->widthAngle - 0x40) * state->widthRange + state->widthBase;
                     records[actor->head.end].alpha = state->alpha;
                     records[actor->head.end].texCoord = state->texCoord;
                     state->texCoord += state->texCoordStep + (func_150ADA20() % (state->texCoordStepRange + 1));
@@ -683,11 +683,11 @@ Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
                 tcAxis[0] = 0;
                 tcAxis[1] = 1;
             }
-            gfx = func_15142E24(gfx, gEffectTextures + state->trailTexture, 0, 0, 0, 0, state->trailTexture, 0, 0, &update, 3);
-            gfx = func_15142C10(gfx, state->unk28, state->unk28, state->unk28, 0xFF, &update);
+            gfx = math_gfxLoadTextureFrame(gfx, gEffectTextures + state->trailTexture, 0, 0, 0, 0, state->trailTexture, 0, 0, &update, 3);
+            gfx = math_gfxSetEnvColor(gfx, state->unk28, state->unk28, state->unk28, 0xFF, &update);
             gfx = particle_setCombineMode(gfx, unk42High, &update);
-            gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[mode].unk0 | gEffectRenderModes[mode].unk4, &update);
+            gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x160600);
+            gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[mode].unk0 | gEffectRenderModes[mode].unk4, &update);
             if (actor->head.tmpl.flags & 2) {
                 /* still emitting: the ribbon starts at the actor itself (i is left unset, as in the original) */
                 j = actor->head.end - 1;

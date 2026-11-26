@@ -69,7 +69,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         hitSurface = *surface;
         hit = 1;
     }
-    solid = func_15145C90(surfaceId);
+    solid = math_isObjectHidden(surfaceId);
     if ((func_150ADA20() & 1) || !solid) {
         big = 1;
     } else {
@@ -149,7 +149,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         ParticleSpawn p;
 
         p.pos = *pos;
-        func_15145974(dir, &p.rot.y, &p.rot.x);
+        math_getHeadingElevation(dir, &p.rot.y, &p.rot.x);
         p.radius = 1.0f;
         p.elasticity = 1.0f;
         p.sizeY = 0.6499999762f;
@@ -180,7 +180,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
             f32 unkOut2;
             f32 speed;
 
-            if (func_15145128(dir, &unitDir, &unkOut1, &unkOut2)) {
+            if (math_vec3Normalize(dir, &unitDir, &unkOut1, &unkOut2)) {
                 speed = func_150ADA68() * 12.0f + 3.0f;
                 p.lifetime = (func_150ADA20() % 11U) + 30;
                 p.vel.x = -unitDir.x * speed;
@@ -228,7 +228,7 @@ s32 particle_settleWobble(WobbleParticle *particle) {
 
     if (wobble->timer > 0) {
         wobble->phase += wobble->phaseSpeed * gFrameDelta;
-        wobble->phase = func_15144B68(wobble->phase);
+        wobble->phase = math_wrapRadians(wobble->phase);
         particle->unk20.y = particle->unk50.y + sinf(wobble->phase) * wobble->amplitude;
         wobble->timer -= D_800BE9E4;
     } else {
@@ -241,7 +241,7 @@ s32 particle_settleWobble(WobbleParticle *particle) {
    matrices use their origin raised by yOffset. */
 void particle_getBonePoint(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bone, f32 yOffset) {
     if (obj->ob_matrix_ptr != NULL) {
-        func_15143134(localPos, out, &obj->ob_matrix_ptr[bone]);
+        math_transformOffset(localPos, out, &obj->ob_matrix_ptr[bone]);
     } else {
         out->x = obj->xpos;
         out->y = obj->ypos + yOffset;
@@ -308,7 +308,7 @@ void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionT
     s16 height;
 
     if (dir != NULL) {
-        angle = func_150484A0(dir->x, dir->z) * 10430.37793f;
+        angle = math_atan2(dir->x, dir->z) * 10430.37793f;
         angle = (angle - 0x4000) | 1;
         point.x = pos->x + (dir->x * -90.0f);
         point.y = pos->y + (dir->y * -90.0f);
@@ -330,7 +330,7 @@ void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s3
     u16 angle;
 
     if (dir != NULL) {
-        yaw = func_150484A0(dir->x, dir->z);
+        yaw = math_atan2(dir->x, dir->z);
         angle = ((u16)(yaw * 10430.37793f) - 0x4000) | 1;
     } else {
         angle = 0;
@@ -469,7 +469,7 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
         diff.x = emitter->pos.x - prev.x;
         diff.y = emitter->pos.y - prev.y;
         diff.z = emitter->pos.z - prev.z;
-        if (func_15143E64(&diff) > 5.0f) {
+        if (math_vec3Length(&diff) > 5.0f) {
             return;
         }
         emitter->spawnTimer += (0.200000003f + func_150ADA68() * 0.2090000063f) * gFrameDelta;
@@ -625,7 +625,7 @@ s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit
     blood_spawnActorImpact(victim, from, to, dir, arg7, arg8);
 
     if (!alreadyDead) {
-        angle = func_150484A0(dir->x, dir->z) * 10430.37793f;
+        angle = math_atan2(dir->x, dir->z) * 10430.37793f;
         actor_hitScripted(victim, flags | 0x80000, (angle - 0x4000) | 1,
                       (attacker != NULL) ? (attacker - movement_obj) : -1);
     }
@@ -641,7 +641,7 @@ void particle_countShot(Actor *obj) {
 }
 
 /* If obj's mv is in state 2 (or bot is set): intersects the line through mv->aimEye along
-   unk31C->unk130 with the plane through ref (arg9, or arg1 without it) whose normal func_151450B4 derives
+   unk31C->unk130 with the plane through ref (arg9, or arg1 without it) whose normal math_vec3Cross derives
    from arg2..arg4. The point and the line direction go to pointBuf/dirBuf and *outPoint/*outDir point at
    them; otherwise both are NULL. */
 void func_151D5174(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg4, Vec3f *pointBuf, Vec3f *dirBuf, Vec3f **outPoint, Vec3f **outDir, Vec3f *arg9) {
@@ -656,8 +656,8 @@ void func_151D5174(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg
     if (obj->ob_matrix_ptr != NULL) {
         if (obj->mv != NULL && (obj->mv->AimState == 2 || obj->mv->bot != 0)) {
             origin = &obj->mv->aimEye;
-            func_151450B4(arg2, arg3, &temp);
-            func_151450B4(&temp, arg4, &normal);
+            math_vec3Cross(arg2, arg3, &temp);
+            math_vec3Cross(&temp, arg4, &normal);
             if (arg9 != NULL) {
                 dx = arg9->x - origin->x;
                 dy = arg9->y - origin->y;
@@ -805,7 +805,7 @@ void particle_spawnBoneSegmentParticle(Actor *obj, const Vec3f *from, const Vec3
             srcs[1] = to;
             dsts[0] = &start;
             dsts[1] = &dir;
-            func_15145EA4(srcs, dsts, mtx, 2);
+            math_transformOffsets(srcs, dsts, mtx, 2);
             dir.x -= start.x;
             dir.y -= start.y;
             dir.z -= start.z;
@@ -848,7 +848,7 @@ void func_151D57F8(Actor *obj, u8 slot) {
         delta.x = obj->mv->rayHit.pos.x - pos.x;
         delta.y = obj->mv->rayHit.pos.y - pos.y;
         delta.z = obj->mv->rayHit.pos.z - pos.z;
-        if (func_15145128(&delta, &delta, &len, NULL) != 0) {
+        if (math_vec3Normalize(&delta, &delta, &len, NULL) != 0) {
             collision_castRay(obj, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z,
                           &obj->mv->rayHit, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
         }
@@ -862,11 +862,11 @@ void particle_getGunAxes(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, V
     const Vec3f *src;
     Vec3f *dst;
 
-    func_15145740(obj, forward, axis1, axis2, 0.8110000491f);
+    math_getActorAim(obj, forward, axis1, axis2, 0.8110000491f);
     if (obj->ob_matrix_ptr != NULL) {
         dst = out;
         src = localPos;
-        func_15145EA4(&src, &dst, obj->ob_matrix_ptr + bone, 1);
+        math_transformOffsets(&src, &dst, obj->ob_matrix_ptr + bone, 1);
     } else {
         f32 dz;
         f32 dx;
@@ -890,7 +890,7 @@ void particle_getGunAxes(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, V
 }
 
 
-/* Runs func_151452C4(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter
+/* Runs math_raySphere(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter
    is not -1, only for those gObjectFilters[filter] accepts). Returns a mask with bit i cleared for each
    object i it reports. */
 s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg) {
@@ -921,7 +921,7 @@ s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg)
         center.x = obj->xpos;
         center.y = obj->ypos + obj->unkD6;
         center.z = obj->zpos;
-        if (func_151452C4(p0, p1, &center, radius + radius, &out0, &out1, &outF0, &outF1)) {
+        if (math_raySphere(p0, p1, &center, radius + radius, &out0, &out1, &outF0, &outF1)) {
             mask &= ~(1 << i);
         }
     }

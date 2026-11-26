@@ -44,6 +44,6 @@ extern f32 D_800A08C0;
 void effect_updateAmbientPulse(AmbientPulse *arg0) {
     f32 *p = &arg0->red;
 
-    func_151467A4(&arg0->timer, 10.0f, &arg0->target, 50.0f, 100.0f, 123.0f, D_800A08C0, p);
+    math_randomDrift(&arg0->timer, 10.0f, &arg0->target, 50.0f, 100.0f, 123.0f, D_800A08C0, p);
     light_setAmbient(*p, gAmbientColour[1], gAmbientColour[2], 0);
 }

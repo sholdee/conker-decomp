@@ -68,7 +68,7 @@ void camera_enterAim(Camera *camera) {
         aim->pitch = 0.0f;
     }
     camera_setAimDistance(camera);
-    func_15048758(&aim->targetYaw);
+    math_normalizeDegrees(&aim->targetYaw);
     if (aim->useOverride) {
         aim->targetPitch = aim->overridePitch;
         aim->pitch = aim->overridePitch;
@@ -202,7 +202,7 @@ void camera_updateAim(Camera *camera) {
         do {
             if (aim->unk4D) {
                 // matching: the original compares the yaw error and does nothing with the result
-                if (fabsf(func_15048A70(camera->CameraAngle, aim->targetYaw)) < 0.009999999776f) {
+                if (fabsf(math_angleDiff(camera->CameraAngle, aim->targetYaw)) < 0.009999999776f) {
                 }
             } else {
                 camera->mv->AimState = 1;
@@ -217,12 +217,12 @@ void camera_updateAim(Camera *camera) {
             // matching: the redundant & 0xFF uses up one ugen temp, which fixes the t-register rotation
             if (passed || (aim->useOverride & 0xFF)) {
                 if (camera->blocked) {
-                    func_15049688(&camera->CameraAngle, aim->targetYaw, &aim->yawVel, 10.0f, 18.0f, camera->SpringTime);
+                    math_springAngleTo(&camera->CameraAngle, aim->targetYaw, &aim->yawVel, 10.0f, 18.0f, camera->SpringTime);
                 } else {
-                    func_15049688(&camera->CameraAngle, aim->targetYaw, &aim->yawVel, 5.0f, 9.0f, camera->SpringTime);
+                    math_springAngleTo(&camera->CameraAngle, aim->targetYaw, &aim->yawVel, 5.0f, 9.0f, camera->SpringTime);
                 }
-                func_150495B0(&camera->XZOffset, camera->XZOffsetTget, &camera->OffsetXZVel, 5.0f, 9.0f, camera->SpringTime);
-                func_150495B0(&camera->YOffset, camera->YOffsetTget, &camera->OffsetYVel, 5.0f, 9.0f, camera->SpringTime);
+                math_springTo(&camera->XZOffset, camera->XZOffsetTget, &camera->OffsetXZVel, 5.0f, 9.0f, camera->SpringTime);
+                math_springTo(&camera->YOffset, camera->YOffsetTget, &camera->OffsetYVel, 5.0f, 9.0f, camera->SpringTime);
                 camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
             }
         } while (0);
@@ -307,7 +307,7 @@ void camera_updateAim(Camera *camera) {
                 aim->targetPitch += sinPitch;
                 camera->LastGunRecoil = (camera->CharPtr->mv->gunRecoil >> 8) * 1.098632812f;
             }
-            func_15048758(&aim->targetYaw);
+            math_normalizeDegrees(&aim->targetYaw);
             if (zone == 0x34) {
                 aim->targetPitch = (aim->targetPitch < -5.0f) ? -5.0f : ((aim->targetPitch > 15.0f) ? 15.0f : aim->targetPitch);
             } else if (zone == 0x12) {
@@ -326,13 +326,13 @@ void camera_updateAim(Camera *camera) {
                 camera->XZOffset = camera->XZOffsetTget;
                 camera->YOffset = camera->YOffsetTget;
             } else if (zone || inMap42Zone1A) {
-                func_15049688(&camera->CameraAngle, aim->targetYaw, &aim->yawVel, 3.91f, 8.210000038f, camera->SpringTime);
-                func_15049688(&aim->pitch, aim->targetPitch, &aim->pitchVel, 3.91f, 8.210000038f, camera->SpringTime);
-                func_150495B0(&camera->XZOffset, camera->XZOffsetTget, &camera->OffsetXZVel, 3.91f, 8.210000038f, camera->SpringTime);
-                func_150495B0(&camera->YOffset, camera->YOffsetTget, &camera->OffsetYVel, 3.91f, 8.210000038f, camera->SpringTime);
+                math_springAngleTo(&camera->CameraAngle, aim->targetYaw, &aim->yawVel, 3.91f, 8.210000038f, camera->SpringTime);
+                math_springAngleTo(&aim->pitch, aim->targetPitch, &aim->pitchVel, 3.91f, 8.210000038f, camera->SpringTime);
+                math_springTo(&camera->XZOffset, camera->XZOffsetTget, &camera->OffsetXZVel, 3.91f, 8.210000038f, camera->SpringTime);
+                math_springTo(&camera->YOffset, camera->YOffsetTget, &camera->OffsetYVel, 3.91f, 8.210000038f, camera->SpringTime);
             } else {
-                func_15049688(&camera->CameraAngle, aim->targetYaw, &aim->yawVel, 4.3f, 7.300000191f, camera->SpringTime);
-                func_15049688(&aim->pitch, aim->targetPitch, &aim->pitchVel, 4.3f, 7.300000191f, camera->SpringTime);
+                math_springAngleTo(&camera->CameraAngle, aim->targetYaw, &aim->yawVel, 4.3f, 7.300000191f, camera->SpringTime);
+                math_springAngleTo(&aim->pitch, aim->targetPitch, &aim->pitchVel, 4.3f, 7.300000191f, camera->SpringTime);
             }
         }
         camera->mv->aimYaw = camera->CameraAngle;
@@ -359,7 +359,7 @@ void camera_updateAim(Camera *camera) {
         }
         camera_leaveAim(camera);
     } else if (camera->DoingAim == 3) {
-        yawDelta = fabsf(func_15048A70(camera->CameraAngle, aim->savedYaw));
+        yawDelta = fabsf(math_angleDiff(camera->CameraAngle, aim->savedYaw));
         camera->Tightness = camera->savedTightness[1];
         if (camera->AimTimeOuts != 0) {
             camera->AimTimeOuts -= D_800BE9E4;
@@ -387,7 +387,7 @@ void camera_updateAim(Camera *camera) {
             camera->mv->AimState = 0;
             camera->DoingAim = 0;
         } else {
-            func_15049688(&camera->CameraAngle, aim->savedYaw, &aim->yawVel, 5.0f, 9.0f, camera->SpringTime);
+            math_springAngleTo(&camera->CameraAngle, aim->savedYaw, &aim->yawVel, 5.0f, 9.0f, camera->SpringTime);
         }
     }
     camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
@@ -409,18 +409,18 @@ void camera_updateAim(Camera *camera) {
             aim->offset.z = offsetZ;
             aim->offsetXVel = 0.0f;
         } else {
-            func_150495B0(&aim->offset.x, offsetX, &aim->offsetXVel, 4.0f, 9.0f, camera->SpringTime);
-            func_150495B0(&aim->offset.z, offsetZ, &aim->offsetZVel, 4.0f, 9.0f, camera->SpringTime);
+            math_springTo(&aim->offset.x, offsetX, &aim->offsetXVel, 4.0f, 9.0f, camera->SpringTime);
+            math_springTo(&aim->offset.z, offsetZ, &aim->offsetZVel, 4.0f, 9.0f, camera->SpringTime);
         }
     } else {
-        func_150495B0(&aim->offset.x, 0.0f, &aim->offsetXVel, 4.0f, 9.0f, camera->SpringTime);
-        func_150495B0(&aim->offset.z, 0.0f, &aim->offsetZVel, 4.0f, 9.0f, camera->SpringTime);
+        math_springTo(&aim->offset.x, 0.0f, &aim->offsetXVel, 4.0f, 9.0f, camera->SpringTime);
+        math_springTo(&aim->offset.z, 0.0f, &aim->offsetZVel, 4.0f, 9.0f, camera->SpringTime);
     }
     camera->mv->aimTarget.x += aim->offset.x;
     camera->mv->aimTarget.z += aim->offset.z;
     camera->mv->aimEye.x += aim->offset.x;
     camera->mv->aimEye.z += aim->offset.z;
-    func_150491EC(&camera->mv->aimEye, &camera->mv->aimTarget,
+    math_dirTowards(&camera->mv->aimEye, &camera->mv->aimTarget,
                   &camera->mv->aimDir);
     camera_updateFollow(camera);
     camera_easeHeight(camera);

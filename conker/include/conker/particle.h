@@ -105,7 +105,7 @@ typedef struct Rgb8 {
 void particle_resetStyleEmitterTimers(void);
 
 /* game_39750.c */
-/* An area effect of func_150139AC (game_40490.c): the particles spawned over a zone. */
+/* An area effect of level_spawnZoneAreaEffect (game_40490.c): the particles spawned over a zone. */
 typedef struct Struct150139ACEntry {
     f32 unk0;
     f32 unk4;
@@ -922,7 +922,7 @@ extern TriggerZone *D_800D9A20[2]; /* end points of source 1; func_15014040 regi
 /* game_116D40.c */
 /* Spawner state at +0x28 of a burst emitter. */
 typedef struct {
-    /* 0x00 */ TriggerZone *source; // where func_1514470C places each burst
+    /* 0x00 */ TriggerZone *source; // where math_randomPointInZone places each burst
     /* 0x04 */ f32 rateBase;    // bursts per unit of gFrameDelta
     /* 0x08 */ f32 rateRange;
     /* 0x0C */ f32 scaleBase;   // size scale passed to particle_spawnImpactBurst
@@ -1144,7 +1144,7 @@ typedef struct {
     /* 0x24 */ u8 *particleA;       /* particle_newOwnedSpriteParticle particle */
     /* 0x28 */ u8 *subParticle;     /* particle_newQuadParticleNoModel particle */
     /* 0x2C */ LightEffect *flash;    /* light_createWithEffect */
-    /* 0x30 */ u8 *glow;            /* func_151407D0 glow */
+    /* 0x30 */ u8 *glow;            /* flare_spawnGlow glow */
     /* 0x34 */ u8 *particleB;       /* particle_newOwnedSpriteParticle particle */
     /* 0x38 */ f32 unk38;
     /* 0x3C */ f32 unk3C;
@@ -2176,7 +2176,7 @@ void particle_spawnGroundChunks(f32 size, s32 x, s32 y, s32 z, s32 count);
 Gfx *particle_endSpinDebrisDraw(Gfx *gfx, s32 arg1, s16 player);
 
 /* game_1B74A0.c */
-/* The object func_151407D0 spawns for particle_spawnBoneGlow. head.def.pos / rot are the world-space attach
+/* The object flare_spawnGlow spawns for particle_spawnBoneGlow. head.def.pos / rot are the world-space attach
  * points, updated by particle_followBoneGlow. */
 typedef struct BoneGlow {
     /* 0x000 */ DefParticleHead head;

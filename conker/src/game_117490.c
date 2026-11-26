@@ -145,7 +145,7 @@ f32 effect_stepOscillator(OscillatorObject *obj) {
     FrameOscillator *oscillator = &obj->oscillator;
     f32 value;
 
-    value = func_151423D8((oscillator->phase >> 16) - 0x40) * oscillator->amplitude + oscillator->base;
+    value = math_cosBinAngleMasked((oscillator->phase >> 16) - 0x40) * oscillator->amplitude + oscillator->base;
     oscillator->phase += oscillator->phaseStep * D_800BE9E4;
     return value;
 }

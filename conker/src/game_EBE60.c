@@ -24,7 +24,7 @@ s32 func_150BE9B0(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
         bone = 0x10;
         break;
     }
-    func_15142314(actor->ob_matrix_ptr, bone, pos);
+    math_getBoneTranslation(actor->ob_matrix_ptr, bone, pos);
     if (hit == NULL) {
         return 1;
     }
@@ -82,7 +82,7 @@ s32 func_150BEC30(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
         bone = 0x10;
         break;
     }
-    func_15142314(actor->ob_matrix_ptr, bone, pos);
+    math_getBoneTranslation(actor->ob_matrix_ptr, bone, pos);
     if (hit == NULL) {
         return 1;
     }

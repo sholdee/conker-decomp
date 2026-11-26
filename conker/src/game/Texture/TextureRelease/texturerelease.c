@@ -22,7 +22,7 @@ void texture_releaseList(s16 *list) {
 
 /* Drops one reference to id; when the last one goes, records id in the [gTexAgeFirst, gTexAgeLast] range and calls texture_setLifetime(id, 3). */
 void texture_releaseId(s32 id) {
-    if (D_800BC448[id] != 0 && gTexUseCounts[id] != 0 && --gTexUseCounts[id] == 0) {
+    if (gTextureLifetimes[id] != 0 && gTexUseCounts[id] != 0 && --gTexUseCounts[id] == 0) {
         if (id < gTexAgeFirst) {
             gTexAgeFirst = id;
         }

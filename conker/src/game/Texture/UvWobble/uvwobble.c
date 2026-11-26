@@ -12,7 +12,7 @@ u8 gUvWobbleCount;                  // number of registered UV wobbles
 #define GFX_OP(g) (*(s8 *)(g))
 
 /*
- * Finds the vertices that `dl` draws with texture `tex` (its `skip`-th G_SETTIMG of D_800B0E58[tex]):
+ * Finds the vertices that `dl` draws with texture `tex` (its `skip`-th G_SETTIMG of gTextureAddrs[tex]):
  * stores the first one in *outVtx and returns how many there are (0 if the texture is never loaded).
  * Opcodes 0x10-0x1F are Conker's four-triangle command (12 five-bit indices).
  */
@@ -43,7 +43,7 @@ s32 texture_findTexVerts(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip) {
             if (op == (s8)G_ENDDL) {
                 return 0;
             }
-            if (op == (s8)G_SETTIMG && dl->words.w1 == D_800B0E58[tex] && skip-- <= 0) {
+            if (op == (s8)G_SETTIMG && dl->words.w1 == gTextureAddrs[tex] && skip-- <= 0) {
                 state++;
                 dl++;
                 continue;
@@ -177,10 +177,10 @@ UvWobble *texture_addUvWobble(s32 tex, s32 disabled, s32 rate, s32 amplitude) {
     wob->rate = rate;
     wob->amplitude = amplitude;
 
-    count = texture_findTexVerts(D_800B0E00[0], tex, &vtx, 0);
+    count = texture_findTexVerts(gLevelDisplayLists[0], tex, &vtx, 0);
     if (count != 0) {
         wob->primaryCount = count;
-        wob->primaryIndex = vtx - D_800B0E10[0];
+        wob->primaryIndex = vtx - gLevelVertices[0];
         wob->primary = allocate_memory(count * sizeof(TexCoord), 1, 0, 0);
         for (i = 0; i < count; i++) {
             wob->primary[i].s = vtx[i].v.tc[0];
@@ -188,10 +188,10 @@ UvWobble *texture_addUvWobble(s32 tex, s32 disabled, s32 rate, s32 amplitude) {
         }
     }
 
-    count = texture_findTexVerts(D_800B0E00[1], D_800917B8, &vtx, 0);
+    count = texture_findTexVerts(gLevelDisplayLists[1], D_800917B8, &vtx, 0);
     if (count != 0) {
         wob->secondaryCount = count;
-        wob->secondaryIndex = vtx - D_800B0E10[1];
+        wob->secondaryIndex = vtx - gLevelVertices[1];
         wob->secondary = allocate_memory(count * sizeof(TexCoord), 1, 0, 0);
         for (i = 0; i < count; i++) {
             wob->secondary[i].s = vtx[i].v.tc[0];
@@ -220,7 +220,7 @@ void texture_updateUvWobbles(void) {
                 f32 cs;
 
                 wob->phase += wob->rate * D_800BE9E4;
-                vtx = D_800B0E10[0]; // matching: &D_800B0E10[0][index] schedules differently
+                vtx = gLevelVertices[0]; // matching: &gLevelVertices[0][index] schedules differently
                 vtx += wob->primaryIndex;
                 angle = wob->phase * 9.587380191e-05f; /* 2pi / 0x10000 */
                 sn = sinf(angle);
@@ -234,7 +234,7 @@ void texture_updateUvWobbles(void) {
             }
             /* Mesh 1 reuses mesh 0's offsets (unset if it has no mesh-0 vertices). */
             if (wob->secondary != NULL) {
-                vtx = D_800B0E10[1];
+                vtx = gLevelVertices[1];
                 vtx += wob->secondaryIndex;
                 for (j = 0; j < wob->secondaryCount; j++) {
                     vtx[j].v.tc[0] = wob->secondary[j].s + offS;

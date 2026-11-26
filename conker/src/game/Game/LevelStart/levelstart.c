@@ -78,7 +78,7 @@ void game_loadLevel(void) {
     gRumbleSuppressed = 0;
     func_1500E738();
     particle_resetModelList();
-    D_800DC9F0 = 0;
+    gGlowCount = 0;
     gPendingTrailPairTask = NULL;
     effect_clearHomingEffects();
     gReleaseRawBanksPending = 1;
@@ -102,7 +102,7 @@ void game_loadLevel(void) {
         boot_clearFramebuffers(0, 0, 0);
     }
     if ((gIsMultiplayer == 0) && !(gTaskDoneBits[0x18] & 1)) {
-        D_800D2457 = D_800D2456 = 3;
+        gHudBlockTarget = gHudBlockCount = 3;
         player_setStat(0, 5, 3);
     }
     collision_setFloorReach(level);
@@ -112,7 +112,7 @@ void game_loadLevel(void) {
     zone_loadObjects(level);
     text_resetContextText();
     view_allocViews(D_800BE9E8, 1);
-    func_15012F90();
+    env_clearAttachModelRefs();
     screen_resetEffects();
     collision_clearUvWobbles();
     func_15012780();
@@ -122,18 +122,18 @@ void game_loadLevel(void) {
     func_15004F00();
     model_allocBonePools();
     func_15017868();
-    func_151732E0(level);
+    env_initFog(level);
     func_1502AAF0();
     func_1502AAF8(level);
-    func_150031EC(level);
-    func_150039E0(level, 1);
+    level_loadModels(level);
+    level_spawnObjects(level, 1);
     func_15004574();
     prop_clearLinks();
-    func_15003668(level);
-    func_150038A0();
+    level_buildCollisionTris(level);
+    level_buildCollisionQuadTrees();
     func_150039B0(level);
     func_15017578(level);
-    func_150045C4(level);
+    level_prepareObjects(level);
     func_15008248(level);
     music_startLevelMusic();
     sound_initLevel(level);
@@ -143,7 +143,7 @@ void game_loadLevel(void) {
     effect_clearObjectLists(1);
     effect_runResetCallbacks(1);
     player_loadSpawnPoints(level);
-    func_150169A0(level);
+    level_loadSpawnTable(level);
     camera_initViews(level, resource);
     actor_setDefaultSizes();
     func_150006E0(level);
@@ -159,11 +159,11 @@ void game_loadLevel(void) {
         save_clearMenuCharacters();
     }
     game_initLevelSubsystems(level);
-    func_15009150(level);
-    func_15085B70(level);
+    flare_resetFlares(level);
+    path_load(level);
     anim_clearMorphCache();
     func_1501B640(0);
-    func_15080200();
+    face_resetScripted();
     D_800BE9E4 = 2;
     func_15015910();
     func_15004F10();
@@ -181,7 +181,7 @@ void game_loadLevel(void) {
     D_800D2E43 = 1;
     script_runTasks(4);
     script_runTasks(1);
-    func_15013000();
+    level_spawnZones();
     if (slot != 0) {
         func_1507DFE4(resource, slot - 1);
     }
@@ -189,7 +189,7 @@ void game_loadLevel(void) {
     if ((D_800E0B99 != 0) || (D_800DDE38 == 2)) {
         s32 enabled = 1;
 
-        if ((D_800C35EA[0] == 1) || (D_800DDE38 == 1)) {
+        if ((gCutsceneStates[0] == 1) || (D_800DDE38 == 1)) {
             enabled = 0;
         }
         if (enabled) {
@@ -201,7 +201,7 @@ void game_loadLevel(void) {
         D_800E0B99 = 0;
     }
     func_15017640();
-    func_1501CC3C();
+    cutscene_loadMicrocodes();
     for (i = 0; i < 25; i++) {
         if ((movement_obj[i].type != 0) && (movement_obj[i].playernumber != 0xFF)) {
             zone_updateActor(&movement_obj[i]);
@@ -221,21 +221,21 @@ void func_150081E4(void) {
 
     D_800D3668 = NULL;
     gTriggerNodes = NULL;
-    D_800DDD64 = NULL;
+    gLensFlares = NULL;
 
     for (i = 0; i < 2; i++)
     {
         gBoneTrailLists[i] = NULL;
     }
 
-    D_800D245C = 0;
-    D_800D24C8.dl = NULL;
+    gHudBlockDebris = 0;
+    gHudWaterStage.dl = NULL;
 }
 
 
 void func_15008230(void) {
     D_800C35C4 = 0;
-    D_800C3C88 = 0;
+    gCutsceneSkipState = 0;
 }
 
 void func_15008248(s32 arg0) {
@@ -244,14 +244,14 @@ void func_15008248(s32 arg0) {
     D_800C3638 = 0;
     D_800C3671 = 0;
     D_800C3670 = 0;
-    func_1501D044(0);
-    func_1501D044(1);
+    cutscene_resetScene(0);
+    cutscene_resetScene(1);
     D_800C3663 = 0;
 
     for (i = 0; i < 3; i++)
     {
-        D_800C3CA0[i].active = 0;
-        D_800C3CA0[i].isOpen = 0;
+        gSubtitles[i].active = 0;
+        gSubtitles[i].isOpen = 0;
     }
 
     D_800C3681 = 0;
@@ -264,9 +264,9 @@ void func_150082CC(void) {
 
     if (D_800C35C4 != 0) {
         if (D_800C35C5 == 0) {
-            D_800C35EA[0] = 2;
+            gCutsceneStates[0] = 2;
         }
         D_800C35C4 = 0;
-        func_1501D348(level, tmp, 0, D_800C3C90, D_800C3C94);
+        cutscene_start(level, tmp, 0, D_800C3C90, D_800C3C94);
     }
 }

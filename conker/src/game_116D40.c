@@ -85,7 +85,7 @@ void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 a
         piece.alpha = (func_150ADA20() % 76U) + 180;
         yaw = func_150ADA20();
         pitch = func_150ADA20();
-        func_15143794(yaw & 0xFF, -(pitch % 65U), ((func_150ADA68() * 2031.0f) + 1641.0f) * 0.01f, &piece.vel);
+        math_dirFromBinAngles(yaw & 0xFF, -(pitch % 65U), ((func_150ADA68() * 2031.0f) + 1641.0f) * 0.01f, &piece.vel);
         piece.sizeXZ = piece.sizeY = ((func_150ADA68() * 3047.0f) + 1016.0f) * 0.0001f * scale;
         // matching: `+ -206.0f` (add.s of a negative constant); `- 206.0f` emits sub.s
         piece.gravity = ((func_150ADA68() * 99.0f) + -206.0f) * 0.01f;
@@ -120,10 +120,10 @@ void particle_updateRandomBurstEmitter(RandomBurstEmitter *emitter) {
     spawner->spawnAccum += (spawner->rateBase + func_150ADA68() * spawner->rateRange) * gFrameDelta;
     while (spawner->spawnAccum > 1.0f) {
         scale = func_150ADA68() * spawner->scaleRange + spawner->scaleBase;
-        func_1514470C(spawner->source, &pos);
+        math_randomPointInZone(spawner->source, &pos);
         yaw = func_150ADA20();
         pitch = func_150ADA20();
-        func_15143794(yaw & 0xFF, 0x40 - (pitch % 129U), func_150ADA68() * 600.0f * 0.01f, &dir);
+        math_dirFromBinAngles(yaw & 0xFF, 0x40 - (pitch % 129U), func_150ADA68() * 600.0f * 0.01f, &dir);
         particle_spawnImpactBurst(&pos, &dir, scale, emitter->base.header.owner, emitter->base.header.kind);
         spawner->spawnAccum -= 1.0f;
     }

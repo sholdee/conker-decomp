@@ -13,7 +13,7 @@ BoneGlow *particle_spawnBoneGlow(ParticleDef *spawn, GlowShape *params, EmitterA
     BoneGlow *emitter;
 
     params->type = 0xB;
-    emitter = func_151407D0(params, 0x80, spawn, arg3, arg4, arg5, arg6, -1, 0xFF, 1);
+    emitter = flare_spawnGlow(params, 0x80, spawn, arg3, arg4, arg5, arg6, -1, 0xFF, 1);
     if (emitter != NULL) {
         EmitterAttach *dst = &emitter->attach;
 

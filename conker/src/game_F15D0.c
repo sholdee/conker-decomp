@@ -77,9 +77,9 @@ void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
             spawn.b2 = 0;
             spawn.alpha = 0xFF;
             spawn.brightness = 0xFF;
-            spawn.pos = D_800A5480;
-            spawn.offset = D_800A5480;
-            spawn.vel = D_800A5480;
+            spawn.pos = gZeroVec3f;
+            spawn.offset = gZeroVec3f;
+            spawn.vel = gZeroVec3f;
             spawn.scaleStart = 1;
             spawn.gravity = 0.0f;
             spawn.scaleRate = 1.0f;
@@ -177,7 +177,7 @@ void effect_updatePulseEffect(PulseEffect *effect) {
         offset.z = D_800A0378[i].z * t;
         offsetPtr = &offset;
         posPtr = &pos;
-        if (func_1514654C(owner, attachment, D_800A03A8[i], &offsetPtr, &posPtr, 1) == 0) {
+        if (math_transformAttachmentOffsets(owner, attachment, D_800A03A8[i], &offsetPtr, &posPtr, 1) == 0) {
             pos.x = owner->xpos;
             pos.y = owner->ypos + 800.0f;
             pos.z = owner->zpos;
@@ -196,7 +196,7 @@ void effect_updatePulseEffect(PulseEffect *effect) {
         offset.x = D_800A0350[i].x * t;
         offset.y = D_800A0350[i].y * t;
         offset.z = D_800A0350[i].z * t;
-        func_15143134(&offset, &pos, owner->ob_matrix_ptr + D_800A0374[i]);
+        math_transformOffset(&offset, &pos, owner->ob_matrix_ptr + D_800A0374[i]);
     }
     if (data->particle != NULL) {
         data->particle->head.desc.drawFunc = -1;
@@ -216,12 +216,12 @@ void effect_updatePulseEffect(PulseEffect *effect) {
     data->unk10 += (0.1300000101f + func_150ADA68() * 0.2f) * gFrameDelta;
     if (data->unk10 > 1.0f) {
         if (sprite_findActorMotion(owner, &wind) == 0) {
-            wind = &D_800A5480;
+            wind = &gZeroVec3f;
         }
         do {
             rand1 = func_150ADA20();
             rand0 = func_150ADA20();
-            func_15143794(rand1 & 0xFF, (rand0 % 25U) - 0x40, func_150ADA68() * 2.597000122f + 4.870000362f, &vel);
+            math_dirFromBinAngles(rand1 & 0xFF, (rand0 % 25U) - 0x40, func_150ADA68() * 2.597000122f + 4.870000362f, &vel);
             vel.x -= wind->x * 0.6f;
             vel.z -= wind->z * 0.6f;
             randF0 = func_150ADA68();

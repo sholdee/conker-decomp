@@ -234,12 +234,12 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
     }
 }
 
-/* Advances the oscillator at 0x70 (func_15144B68 wraps the phase) and writes its value to unk10. */
+/* Advances the oscillator at 0x70 (math_wrapRadians wraps the phase) and writes its value to unk10. */
 s32 func_150AFBF4(Obj150AFBF4 *obj) {
     TimeOscillator *osc = &obj->osc;
 
     osc->phase = osc->phase + osc->rate * gFrameDelta;
-    osc->phase = func_15144B68(osc->phase);
+    osc->phase = math_wrapRadians(osc->phase);
     obj->unk10 = sinf(osc->phase) * osc->amplitude + osc->base;
     return 1;
 }
@@ -344,17 +344,17 @@ void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
     dir.x = to->x - from->x;
     dir.y = to->y - from->y;
     dir.z = to->z - from->z;
-    if (func_15145128(&dir, &dir, &length, &invLength) != 0) {
+    if (math_vec3Normalize(&dir, &dir, &length, &invLength) != 0) {
         packet.elasticity = packet.radius = 1.0f;
         packet.sizeXZ = packet.sizeY = 0.7f;
         packet.pos = *from;
         packet.vel.x = dir.x * 80.0f;
         packet.vel.y = dir.y * 80.0f;
         packet.vel.z = dir.z * 80.0f;
-        func_15145974(&packet.vel, &packet.rot.y, &packet.rot.x);
+        math_getHeadingElevation(&packet.vel, &packet.rot.y, &packet.rot.x);
         packet.scale.z = packet.scale.y = packet.scale.x = 1.0f;
         packet.rot.z = 0.0f;
-        packet.rotVel = D_800A5480;
+        packet.rotVel = gZeroVec3f;
         packet.flags = 0x19A0;
         packet.lifetime = 300;
         packet.model = 210;

@@ -406,7 +406,7 @@ void collision_writeLeafTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triLis
     prev = -1;
     count = triList[0];
 
-    func_150492CC(maxX - minX, 32000.0f, maxZ - minZ);
+    math_setTestBox(maxX - minX, 32000.0f, maxZ - minZ);
 
     for (i = 1; i <= count; i++) {
         index = triList[i];
@@ -424,7 +424,7 @@ void collision_writeLeafTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triLis
             }
         }
 
-        if (func_15049260(pos) == 0) {
+        if (math_testTriBox(pos) == 0) {
             delta = index - prev;
             if (prev == -1) {
                 collision_quadPutHalf(index | 0x8000);
@@ -463,7 +463,7 @@ int collision_collectBoxTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, 
     lowBits = (1 << (gScreenLayout + 1)) - 1;
     highBits = -(1 << (gScreenLayout + 1));
 
-    func_150492CC(maxX - minX, 32000.0f, maxZ - minZ);
+    math_setTestBox(maxX - minX, 32000.0f, maxZ - minZ);
 
     total = triList[0] + 1;
     count = 0;
@@ -489,7 +489,7 @@ int collision_collectBoxTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, 
             }
         }
 
-        result = func_15049260(pos);
+        result = math_testTriBox(pos);
         if (result == 0) {
             count++;
             out[count] = index;

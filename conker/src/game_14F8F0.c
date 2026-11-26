@@ -93,15 +93,15 @@ lbl: // matching: the unused label starts a new basic block before the orbit rot
                 accel *= 2.0f;
                 maxSpeed *= 2.0f;
             }
-            func_150495B0(&camera->eye.x, goalX, &camera->CurrentVelX, accel, maxSpeed, camera->SpringTime);
-            func_150495B0(&camera->eye.y, goalY, &camera->CurrentVelY, accel, maxSpeed, camera->SpringTime);
-            func_150495B0(&camera->eye.z, goalZ, &camera->CurrentVelZ, accel, maxSpeed, camera->SpringTime);
+            math_springTo(&camera->eye.x, goalX, &camera->CurrentVelX, accel, maxSpeed, camera->SpringTime);
+            math_springTo(&camera->eye.y, goalY, &camera->CurrentVelY, accel, maxSpeed, camera->SpringTime);
+            math_springTo(&camera->eye.z, goalZ, &camera->CurrentVelZ, accel, maxSpeed, camera->SpringTime);
         }
     }
     if ((camera->CharPtr->unk102 == 0) && !(camera->CameraButtons & R_TRIG)) {
         if (sqrtf(SQ(camera->eye.x - camera->target.x) + SQ(camera->eye.y - camera->target.y) + SQ(camera->eye.z - camera->target.z)) < 120.0f) {
             Vec3f dir;
-            func_150491EC(&camera->target, &camera->eye, &dir);
+            math_dirTowards(&camera->target, &camera->eye, &dir);
             camera->eye.x = camera->target.x + 120.0f * dir.x;
             camera->eye.y = camera->target.y + 120.0f * dir.y;
             camera->eye.z = camera->target.z + 120.0f * dir.z;

@@ -50,11 +50,11 @@ void camera_turnHeadingToPoint(Camera *arg0) {
             arg0->AutoRotateAngleVel = 0.0f;
             arg0->CameraAngle = heading;
         } else if (arg0->AvailableModes & 0x40000000) {
-            func_15049688(&arg0->CameraAngle, heading, &arg0->AutoRotateAngleVel, 3.0f, 6.0f, arg0->SpringTime);
+            math_springAngleTo(&arg0->CameraAngle, heading, &arg0->AutoRotateAngleVel, 3.0f, 6.0f, arg0->SpringTime);
         } else if (arg0->AvailableModes & 0x4000000) {
-            func_15049688(&arg0->CameraAngle, heading, &arg0->AutoRotateAngleVel, 3.0f, 6.0f, arg0->SpringTime);
+            math_springAngleTo(&arg0->CameraAngle, heading, &arg0->AutoRotateAngleVel, 3.0f, 6.0f, arg0->SpringTime);
         } else {
-            func_15049688(&arg0->CameraAngle, heading, &arg0->AutoRotateAngleVel, 1.5f, 2.0f, arg0->SpringTime);
+            math_springAngleTo(&arg0->CameraAngle, heading, &arg0->AutoRotateAngleVel, 1.5f, 2.0f, arg0->SpringTime);
         }
         arg0->CameraAngleRad = arg0->CameraAngle * 0.01745329238f;
     }

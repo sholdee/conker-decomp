@@ -41,8 +41,8 @@ void func_1515AF90(s16 player) {
 
             angle = (roll % 41U) + yaw - 20;
             distance = func_150ADA68() * 1903.0f + 107.0f;
-            cosine = func_151423D8(angle);
-            sine = func_151423D8(angle - 0x40);
+            cosine = math_cosBinAngleMasked(angle);
+            sine = math_cosBinAngleMasked(angle - 0x40);
             effect.position.x = eye->x - distance * sine;
             effect.position.z = eye->z - distance * cosine;
         }

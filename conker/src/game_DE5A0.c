@@ -75,7 +75,7 @@ void func_150B12FC(Actor *obj) {
     obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
     actor_updatePhysics(obj);
     if (func_150535F4(obj) == 0) {
-        func_1502178C(obj, 0, -1);
+        cutscene_applyObjectTrack(obj, 0, -1);
     }
 }
 
@@ -147,7 +147,7 @@ void func_150B1484(Actor *obj) {
         func_15052760(obj, prevAngle);
     }
     if (func_150535F4(obj) == 0) {
-        func_1502178C(obj, 0, -1);
+        cutscene_applyObjectTrack(obj, 0, -1);
     }
 }
 
@@ -237,13 +237,13 @@ void func_150B19E0(Actor *obj) {
     actor_updatePhysics(obj);
     actor_checkGrab(obj);
     actor_playAnim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
-    func_1502178C(obj, 0, -1);
+    cutscene_applyObjectTrack(obj, 0, -1);
     if (obj->carried != 0 && (u8)func_150ADA20() < 40U) {
         random = func_150ADA20() % 40U;
         radius = obj->scale_xz * random;
         angle = func_150ADA20();
-        sine = func_150489B0(angle);
-        cosine = func_15048A40(angle);
+        sine = math_cosBinAngle(angle);
+        cosine = math_sinBinAngle(angle);
         particle.frame = 0;
         particle.frameStep = 0;
         particle.anim = gEffectAnimTextures[37];
@@ -254,8 +254,8 @@ void func_150B19E0(Actor *obj) {
         particle.unk4 = collision_findMeshFloorNear(particle.x, particle.y, particle.z, 0);
         angle = movement_obj[0].angle >> 8;
         speed = movement_obj[0].speed * 64.0f;
-        particle.velX = func_150489B0(angle) * speed;
-        particle.velZ = func_15048A40(angle) * -speed;
+        particle.velX = math_cosBinAngle(angle) * speed;
+        particle.velZ = math_sinBinAngle(angle) * -speed;
         particle.unk1A = -30;
         particle.callback = 7;
         particle.velY = 0;

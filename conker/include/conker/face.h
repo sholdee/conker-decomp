@@ -24,28 +24,28 @@ typedef struct {
 } ExpressionRecord; // size 0xA
 
 /* game_AB760.c */
-void func_1507E2B0(Actor *actor);
-void func_1507E3C0(Actor *actor);
-void func_1507E500(Actor *actor, s32 index, s32 morphDuration);
-void func_1507E5C8(Actor *actor, s32 morphDuration);
-s32 func_1507E6B8(Actor *actor);
-void func_1507E73C(Actor *actor);
-void func_1507E7E4(Actor *actor, u8 index, u8 priority, u16 timer, s32 morphDuration);
-ExpressionRecord *func_1507E908(Actor *actor, s32 index);
-s32 func_1507E968(Actor *actor);
+void face_updateBlink(Actor *actor);
+void face_showEyeParts(Actor *actor);
+void face_setExpression(Actor *actor, s32 index, s32 morphDuration);
+void face_applyExpression(Actor *actor, s32 morphDuration);
+s32 face_canBlink(Actor *actor);
+void face_update(Actor *actor);
+void face_requestExpression(Actor *actor, u8 index, u8 priority, u16 timer, s32 morphDuration);
+ExpressionRecord *face_getExpressionRecord(Actor *actor, s32 index);
+s32 face_getExpressionCount(Actor *actor);
 void func_1507E9E8(Actor *actor, s32 index);
-const u8 *func_1507E9F8(Actor *actor, s32 *count);
-void func_1507EA44(Actor *actor, s32 action, s32 param);
-void func_1507EABC(Actor *actor);
-void func_1507EB2C(Actor *actor);
-void func_1507EB4C(Actor *actor, s32 expression);
-extern BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (collision_loadCylinderSets loads, actor_clampToZoneSet uses)
+const u8 *face_getActionTable(Actor *actor, s32 *count);
+void face_startAction(Actor *actor, s32 action, s32 param);
+void face_revertExpression(Actor *actor);
+void face_resetDefaultExpression(Actor *actor);
+void face_setDefaultExpression(Actor *actor, s32 expression);
+extern BoundCylinderSet *gCylinderSets; // per-level actor-confining cylinder sets (collision_loadCylinderSets loads, actor_clampToZoneSet uses)
 
 /* game_AD6B0.c */
-void func_15080200(void);
-void func_15080228(void);
-void func_15080348(Actor *actor);
-void func_15080430(Actor *actor, s32 expression, s32 morphDuration);
-extern u8 D_800D18D0; // the object whose expression the messages set (index into movement_obj)
+void face_resetScripted(void);
+void face_processMessages(void);
+void face_updateScripted(Actor *actor);
+void face_applyScriptedExpression(Actor *actor, s32 expression, s32 morphDuration);
+extern u8 gExpressionTarget; // the object whose expression the messages set (index into movement_obj)
 
 #endif

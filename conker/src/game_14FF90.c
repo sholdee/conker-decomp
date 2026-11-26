@@ -38,7 +38,7 @@ void camera_updateAll(void) {
         camera = &camera_global_Cameras[i];
         if (player_getStat(i, 0) || (i == 0)) {
             camera->SpringTime = dt;
-            if ((gPaused == 0) || (D_800C35EA[0] != 0) || (gPoseCommandRunning != 0)) {
+            if ((gPaused == 0) || (gCutsceneStates[0] != 0) || (gPoseCommandRunning != 0)) {
                 camera_popMode(camera, CAMERA_MODE_PAUSE);
                 camera_update(camera);
             } else {
@@ -105,7 +105,7 @@ void camera_update(Camera *camera) {
         if ((camera->AvailableModes & 0x08000000) && !(camera->AvailableModes & 0x400)) {
             camera_runCommand(camera);
         }
-        func_15130230(camera, level);
+        level_runHook(camera, level);
         camera_moveFocus(camera);
         func_15125C40(camera);
         func_15128680(camera);
@@ -158,8 +158,8 @@ void camera_updatePlayerAngle(Camera *camera) {
     if ((camera->cmdRunning != 0) && ((camera->cmd.type == 10) || (camera->cmd.type == 14))) {
         Vec3f delta;
 
-        func_15048F90(&camera->pivotPos, &camera->focus, &delta);
-        camera->CharRelAngle = camera->CameraAngle - func_15048FC8(&delta);
+        math_vec3Diff(&camera->pivotPos, &camera->focus, &delta);
+        camera->CharRelAngle = camera->CameraAngle - math_vec3Heading(&delta);
     } else {
         angle = camera->CharPtr->theta - camera->CameraAngle - 180.0f;
 
@@ -227,8 +227,8 @@ void camera_updateAimTrigger(Camera *camera) {
     camera->mv->AimState = camera->DoingAim;
 
     if ((camera->DoingAim != 0) || (camera->DoingAim == 3)) {
-        func_150495B0(&camera->aim.offset.x, 0.0f, &camera->aim.offsetXVel, 4.0f, 9.0f, camera->SpringTime);
-        func_150495B0(&camera->aim.offset.z, 0.0f, &camera->aim.offsetZVel, 4.0f, 9.0f, camera->SpringTime);
+        math_springTo(&camera->aim.offset.x, 0.0f, &camera->aim.offsetXVel, 4.0f, 9.0f, camera->SpringTime);
+        math_springTo(&camera->aim.offset.z, 0.0f, &camera->aim.offsetZVel, 4.0f, 9.0f, camera->SpringTime);
     }
 
     if ((camera->Mode != 0x100) && (camera->DoingAim != 0)) {
@@ -416,13 +416,13 @@ void camera_updateFollow(Camera *camera) {
                         camera->ZoomCounter = 20;
                         camera->IdealTripodMagnitude = 300.0f;
                         camera->height = 150.0f;
-                        func_15049688(&camera->CameraAngle, camera->CharPtr->theta - 180.0f, &camera->AlignBehindAngleVel, 1.5f, 2.0f,
+                        math_springAngleTo(&camera->CameraAngle, camera->CharPtr->theta - 180.0f, &camera->AlignBehindAngleVel, 1.5f, 2.0f,
                                       camera->SpringTime);
                         if (!(camera->PadPtr->button & D_CBUTTONS)) {
                             camera->DoingAlignBehind = 0;
                         }
                     } else {
-                        func_15049688(&camera->CameraAngle, camera->CharPtr->theta - 180.0f, &camera->AlignBehindAngleVel, 2.0f, 4.0f,
+                        math_springAngleTo(&camera->CameraAngle, camera->CharPtr->theta - 180.0f, &camera->AlignBehindAngleVel, 2.0f, 4.0f,
                                       camera->SpringTime);
                     }
                     camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
@@ -460,7 +460,7 @@ void camera_updateFollow(Camera *camera) {
         }
         if ((camera->mv->ladder != 0) && (camera->SpecialFlags & 0x40)) {
             angle = camera->CharPtr->theta + 180.0f;
-            func_15049688(&camera->CameraAngle, angle, &camera->LadderAngleVel, 2.0f, 4.0f, camera->SpringTime);
+            math_springAngleTo(&camera->CameraAngle, angle, &camera->LadderAngleVel, 2.0f, 4.0f, camera->SpringTime);
             camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
             angle = camera->CameraAngleRad;
             camera->IdealTripodMagnitude = 530.0f;
@@ -506,10 +506,10 @@ void camera_updateFollow(Camera *camera) {
                     v2.x = tri.v[2].x;
                     v2.y = tri.v[2].y;
                     v2.z = tri.v[2].z;
-                    func_15048F90(&v0, &v1, &edge1);
-                    func_15048F90(&v0, &v2, &edge2);
+                    math_vec3Diff(&v0, &v1, &edge1);
+                    math_vec3Diff(&v0, &v2, &edge2);
                     func_150AD8B0(&edge2.x, &edge1.x, &normal.x);
-                    func_1504917C(&normal, &normal);
+                    math_vec3Unit(&normal, &normal);
                     if (0.3253220021724701f < func_150AD900(&dir.x, &normal.x)) {
                         if (func_150AC9C0(camera->focus.x - backX, camera->focus.y + 140.0f, camera->focus.z - backZ, backX,
                                           0.0f, backZ, 0, &tri2, &hit2[0], &hit2[1], &hit2[2], &dist2, 0, 0,
@@ -581,8 +581,8 @@ void camera_updateFollow(Camera *camera) {
                         camera->unk974 = 6.0f;
                         camera->unk978 = 8.0f;
                     }
-                    func_150495B0(&camera->unk964, camera->unk974, &camera->unk984, 1.0f, 2.0f, camera->SpringTime);
-                    func_150495B0(&camera->unk968, camera->unk978, &camera->unk988, 1.0f, 2.0f, camera->SpringTime);
+                    math_springTo(&camera->unk964, camera->unk974, &camera->unk984, 1.0f, 2.0f, camera->SpringTime);
+                    math_springTo(&camera->unk968, camera->unk978, &camera->unk988, 1.0f, 2.0f, camera->SpringTime);
                     camera->AccelA = camera->unk964;
                     camera->AccelB = camera->unk968;
                 } else if ((camera->CharPtr->unk102 != 0) || (camera->LockedBehind != 0) ||
@@ -599,18 +599,18 @@ void camera_updateFollow(Camera *camera) {
                 if (gFrameRateDivider == 0) {
                     if (camera->blocked != 0) {
                         if ((camera->DoingAim != 0) || (gIsMultiplayer != 0)) {
-                            func_150495B0(&camera->TripodMagnitude, camera->IdealTripodMagnitude, &camera->XZVel, 8.0f, 10.0f, camera->SpringTime);
+                            math_springTo(&camera->TripodMagnitude, camera->IdealTripodMagnitude, &camera->XZVel, 8.0f, 10.0f, camera->SpringTime);
                         } else {
-                            func_150495B0(&camera->TripodMagnitude, camera->IdealTripodMagnitude, &camera->XZVel, 6.0f, 8.0f, camera->SpringTime);
+                            math_springTo(&camera->TripodMagnitude, camera->IdealTripodMagnitude, &camera->XZVel, 6.0f, 8.0f, camera->SpringTime);
                         }
                     } else {
-                        func_150495B0(&camera->TripodMagnitude, camera->IdealTripodMagnitude, &camera->XZVel, camera->AccelA,
+                        math_springTo(&camera->TripodMagnitude, camera->IdealTripodMagnitude, &camera->XZVel, camera->AccelA,
                                       camera->AccelB, camera->SpringTime);
                     }
                 } else if ((D_800895B0 == 0.0f) && ((camera->TonyHitsClear != 0) || (camera->CharPtr->unk102 != 0))) {
-                    func_150495B0(&camera->TripodMagnitude, 200.0f, &camera->XZVel, 4.0f, 8.0f, camera->SpringTime);
+                    math_springTo(&camera->TripodMagnitude, 200.0f, &camera->XZVel, 4.0f, 8.0f, camera->SpringTime);
                 } else {
-                    func_150495B0(&camera->TripodMagnitude, 200.0f, &camera->XZVel, 0.5f, 1.0f, camera->SpringTime);
+                    math_springTo(&camera->TripodMagnitude, 200.0f, &camera->XZVel, 0.5f, 1.0f, camera->SpringTime);
                 }
             }
             camera->eye.x = camera->TripodMagnitude * sinf(angle) + camera->target.x;
@@ -662,7 +662,7 @@ void camera_updateFocus(Camera *camera) {
             camera->CharTrackingSpeed = camera->CharTrackingSpeedTarget;
             camera->CharTrackingSpeedVel = 0;
         } else {
-            func_150495B0(&camera->CharTrackingSpeed, camera->CharTrackingSpeedTarget, &camera->CharTrackingSpeedVel,
+            math_springTo(&camera->CharTrackingSpeed, camera->CharTrackingSpeedTarget, &camera->CharTrackingSpeedVel,
                           camera->AccelA * 0.25f, camera->AccelB * 0.25f, camera->SpringTime);
         }
         if (camera->InterestCharIndex) {
@@ -696,7 +696,7 @@ void camera_updateFocus(Camera *camera) {
                 camera->sideOffset = camera->sideOffsetTarget;
                 camera->sideOffsetVel = 0;
             } else {
-                func_150495B0(&camera->sideOffset, camera->sideOffsetTarget, &camera->sideOffsetVel, 4.0f, 6.0f, camera->SpringTime);
+                math_springTo(&camera->sideOffset, camera->sideOffsetTarget, &camera->sideOffsetVel, 4.0f, 6.0f, camera->SpringTime);
             }
             sideX = camera->sideOffset * sinf(camera->CameraAngleRad - 1.5707963705062866f);
             sideZ = camera->sideOffset * cosf(camera->CameraAngleRad - 1.5707963705062866f);
@@ -799,7 +799,7 @@ void camera_getTargetHeight(Camera *camera, f32 *outY) {
             f32 x;
 
             actor_getTrackPoint(camera->CharPtr, &x, &y, &z);
-            func_150495B0(&camera->target.y, y, &camera->LOSYVel, 4.0f, 8.0f, camera->SpringTime);
+            math_springTo(&camera->target.y, y, &camera->LOSYVel, 4.0f, 8.0f, camera->SpringTime);
             return;
         }
         {
@@ -864,7 +864,7 @@ void camera_getTargetHeight(Camera *camera, f32 *outY) {
                 accel += accel;
                 maxSpeed += maxSpeed;
             }
-            func_150495B0(&camera->target.y, goalY, &camera->LOSYVel, accel, maxSpeed, camera->SpringTime);
+            math_springTo(&camera->target.y, goalY, &camera->LOSYVel, accel, maxSpeed, camera->SpringTime);
         }
     }
 }
@@ -883,7 +883,7 @@ void camera_updatePitch(Camera *camera) {
     } else {
         dist = dz;
     }
-    dx = func_150484A0(camera->eye.y - camera->target.y, dist) * 57.2957763671875f;
+    dx = math_atan2(camera->eye.y - camera->target.y, dist) * 57.2957763671875f;
     camera->CameraPitch = dx;
     if (dx > 180.0f) {
         camera->CameraPitch -= 360.0f;
@@ -902,7 +902,7 @@ void camera_updateYaw(Camera *camera) {
     delta.y = 0.0f;
     delta.z = camera->target.z - camera->eye.z;
 
-    camera->CameraAngle = func_15048FC8(&delta);
+    camera->CameraAngle = math_vec3Heading(&delta);
     camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
 }
 
@@ -1027,7 +1027,7 @@ void func_15125690(Camera *camera, s32 frames) {
 
 /* Camera sway: while armed (mode 0x80000, or status bit 8 outside mode 0x40000) swayPhase advances by
    a random 0/2/4 degrees per frame, wrapping at 2 pi; otherwise it decays. The resulting swayAmount
-   orbits eye and target around each other (func_1508EF80). */
+   orbits eye and target around each other (math_rotateAroundY). */
 void camera_updateSway(Camera *camera) {
     f32 twoPi;
     f32 amount;
@@ -1050,15 +1050,15 @@ void camera_updateSway(Camera *camera) {
             eyeScale = 1.0f;
             targetScale = 20.0f;
         }
-        func_1508EF80(&camera->eye, &camera->target, amount * eyeScale, &camera->eye);
-        func_1508EF80(&camera->target, &camera->eye, amount * targetScale,
+        math_rotateAroundY(&camera->eye, &camera->target, amount * eyeScale, &camera->eye);
+        math_rotateAroundY(&camera->target, &camera->eye, amount * targetScale,
                       &camera->target);
     } else if (camera->DrunkRoll != 0.0f) {
         camera->DrunkRoll -= camera->DrunkRoll * 0.08f;
         camera->Roll += ((sinf(camera->DrunkRoll) * 4.0f) - camera->Roll) * 0.04f;
         amount = camera->Roll * 0.05f;
-        func_1508EF80(&camera->eye, &camera->target, amount, &camera->eye);
-        func_1508EF80(&camera->target, &camera->eye, amount * 20.0f, &camera->target);
+        math_rotateAroundY(&camera->eye, &camera->target, amount, &camera->eye);
+        math_rotateAroundY(&camera->target, &camera->eye, amount * 20.0f, &camera->target);
     }
 }
 
@@ -1315,7 +1315,7 @@ void camera_getAimEye(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY,
         if (useObjectPos == 0) {
             boneMtx = obj->ob_matrix_ptr;
             boneMtx += bone;
-            func_15143134(&localPos, &worldPos, boneMtx);
+            math_transformOffset(&localPos, &worldPos, boneMtx);
             *outX = worldPos.x;
             *outY = worldPos.y;
             *outZ = worldPos.z;
@@ -1385,7 +1385,7 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
         } else {
             angle = camera->CharPtr->theta - 90.0f;
         }
-        func_15048758(&angle);
+        math_normalizeDegrees(&angle);
         yawRad = angle * DEG2RAD;
         camera_popMode(camera, CAMERA_MODE_AIM);
         ext->SniperState = 2;
@@ -1490,7 +1490,7 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
         }
         ext->aimYawTarget -= yawDelta;
         ext->aimPitchTarget += pitchDelta;
-        func_15048758(&ext->aimYawTarget);
+        math_normalizeDegrees(&ext->aimYawTarget);
         if ((zone == 0x1F) || (zone == 0x29)) {
             ext->aimPitchTarget = (ext->aimPitchTarget < -80.0f) ? -80.0f
                                 : ((ext->aimPitchTarget > 30.0f) ? 30.0f : ext->aimPitchTarget);
@@ -1501,8 +1501,8 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
             ext->aimPitchTarget = (ext->aimPitchTarget < -80.0f) ? -80.0f
                                 : ((ext->aimPitchTarget > 80.0f) ? 80.0f : ext->aimPitchTarget);
         }
-        func_15049688(&ext->aimYaw, ext->aimYawTarget, &ext->aimYawVel, 6.0f, 8.0f, camera->SpringTime);
-        func_15049688(&ext->aimPitch, ext->aimPitchTarget, &ext->aimPitchVel, 6.0f, 8.0f, camera->SpringTime);
+        math_springAngleTo(&ext->aimYaw, ext->aimYawTarget, &ext->aimYawVel, 6.0f, 8.0f, camera->SpringTime);
+        math_springAngleTo(&ext->aimPitch, ext->aimPitchTarget, &ext->aimPitchVel, 6.0f, 8.0f, camera->SpringTime);
         if ((zone != 0x16) && (zone != 0xC) && ((zone != 0x29) || (zone != 0x1F) || (gIsMultiplayer != 0)) &&
             ((buttons & (U_CBUTTONS | D_CBUTTONS)) != (U_CBUTTONS | D_CBUTTONS))) {
             if ((buttons & U_CBUTTONS) && (maxZoom < camera->TgetFOVX) && (zone != 0xC)) {
@@ -1546,7 +1546,7 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
         ext->aimTarget = camera->target;
         ext->aimEye = camera->eye;
         ext->aimDir = dir;
-        func_15048F90(&ext->aimEye, &ext->aimTarget, &ext->aimDir);
+        math_vec3Diff(&ext->aimEye, &ext->aimTarget, &ext->aimDir);
         gViews[camera->CNumber].perspScale = (-0.94f * zoomRatio) + 1.0f;
         view_widenFov(camera->CNumber, camera->FOVX, camera->FOVY, gViews[camera->CNumber].perspScale,
                       (71.0f * zoomRatio) + 54.0f);
@@ -1734,7 +1734,7 @@ s32 camera_updateObjectAim(Actor *obj, OSContPad *contPad) {
         }
         ext->aimYawTarget -= contPad->stick_x * 0.025f;
         ext->aimPitchTarget += contPad->stick_y * 0.025f;
-        func_15048758(&ext->aimYawTarget);
+        math_normalizeDegrees(&ext->aimYawTarget);
         if ((zone == 0x1F) || (zone == 0x29)) {
             ext->aimPitchTarget = (ext->aimPitchTarget < -20.0f) ? -20.0f
                                 : ((ext->aimPitchTarget > 80.0f) ? 80.0f : ext->aimPitchTarget);
@@ -1742,8 +1742,8 @@ s32 camera_updateObjectAim(Actor *obj, OSContPad *contPad) {
             ext->aimPitchTarget = (ext->aimPitchTarget < -80.0f) ? -80.0f
                                 : ((ext->aimPitchTarget > 80.0f) ? 80.0f : ext->aimPitchTarget);
         }
-        func_15049688(&ext->aimYaw, ext->aimYawTarget, &ext->aimYawVel, 6.0f, 8.0f, dt);
-        func_15049688(&ext->aimPitch, ext->aimPitchTarget, &ext->aimPitchVel, 6.0f, 8.0f, dt);
+        math_springAngleTo(&ext->aimYaw, ext->aimYawTarget, &ext->aimYawVel, 6.0f, 8.0f, dt);
+        math_springAngleTo(&ext->aimPitch, ext->aimPitchTarget, &ext->aimPitchVel, 6.0f, 8.0f, dt);
         dir.x = 1.0f;
         rotated = cosf(ext->aimPitch * -DEG2RAD) * dir.x;
         dir.y = sinf(ext->aimPitch * -DEG2RAD) * dir.x;
@@ -1863,14 +1863,14 @@ s32 camera_updateTransition(Camera *camera) {
         camera->target.y = tr->startTarget.y + (tr->endTarget.y - tr->startTarget.y) * tr->progress;
         camera->target.z = tr->startTarget.z + (tr->endTarget.z - tr->startTarget.z) * tr->progress;
         if (camera->Mode != 0x40) {
-            camera->CameraAngle = func_15048720(tr->progress, tr->startYaw, tr->endYaw);
+            camera->CameraAngle = math_lerpAngle(tr->progress, tr->startYaw, tr->endYaw);
             camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
         }
         gCameraTransitionDist = tr->startDistance + (tr->endDistance - tr->startDistance) * tr->progress;
         gCameraTransitionHeight = camera->transition.LerpHeightStarting +
                      (camera->transition.LerpHeightTarget - camera->transition.LerpHeightStarting) * tr->progress;
-        camera->YawAngle = func_15048720(tr->progress, 0.0f, tr->endYawAngle);
-        camera->APitchAngle = func_15048720(tr->progress, 0.0f, tr->endAPitchAngle);
+        camera->YawAngle = math_lerpAngle(tr->progress, 0.0f, tr->endYawAngle);
+        camera->APitchAngle = math_lerpAngle(tr->progress, 0.0f, tr->endAPitchAngle);
         if (done) {
             camera->transition.endYaw = 999.0f;
             camera->transition.duration = 0;

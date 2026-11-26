@@ -13,10 +13,10 @@ void camera_followYaw(Camera *camera) {
     f32 angle;
 
     if (camera->Motion != 4) {
-        func_15048F90(&camera->eye, &camera->prevTarget, &toPrevTarget);
-        func_15048F90(&camera->eye, &camera->target, &toTarget);
-        prevAngle = func_15048FC8(&toPrevTarget);
-        angle = func_15048FC8(&toTarget);
+        math_vec3Diff(&camera->eye, &camera->prevTarget, &toPrevTarget);
+        math_vec3Diff(&camera->eye, &camera->target, &toTarget);
+        prevAngle = math_vec3Heading(&toPrevTarget);
+        angle = math_vec3Heading(&toTarget);
         if (camera->CharMoved == 0) {
             camera->PredictSpeedTarget = 0.0f;
         } else if ((camera->AvailableModes & 0x100000) || ((camera->CharRelAngle > 180.0f) && (camera->CharRelAngle < 270.0f))) {
@@ -24,8 +24,8 @@ void camera_followYaw(Camera *camera) {
         } else {
             camera->PredictSpeedTarget = 0.5f;
         }
-        func_150495B0(&camera->PredictSpeed, camera->PredictSpeedTarget, &camera->PredictSpeedVel, 1.0f, 2.0f, camera->SpringTime);
-        camera->CameraAngle += func_15048A70(prevAngle, angle) * camera->PredictSpeed;
+        math_springTo(&camera->PredictSpeed, camera->PredictSpeedTarget, &camera->PredictSpeedVel, 1.0f, 2.0f, camera->SpringTime);
+        camera->CameraAngle += math_angleDiff(prevAngle, angle) * camera->PredictSpeed;
         camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
     }
 

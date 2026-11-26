@@ -49,11 +49,11 @@ void effect_updateActorEmitter(ActorEmitter *emitter) {
         collision_initHitFromObject(&ground, actor);
         while (state->spawnCredit > 1.0f) {
             yaw = func_150ADA20() & 0xFF;
-            func_15143794(yaw, (func_150ADA20() % 76U) - 64, radius, &pos);
+            math_dirFromBinAngles(yaw, (func_150ADA20() % 76U) - 64, radius, &pos);
             pos.x += center.x;
             pos.y += center.y;
             pos.z += center.z;
-            func_15143794(yaw, (func_150ADA20() % 54U) - 56, (func_150ADA68() * 1.4430001f) + 2.2680001f, &vel);
+            math_dirFromBinAngles(yaw, (func_150ADA20() % 54U) - 56, (func_150ADA68() * 1.4430001f) + 2.2680001f, &vel);
             particle_spawnSteamParticle(&pos, &vel, 5, (func_150ADA68() * 0.286f) + -0.78700006f, (func_150ADA20() % 21U) + 30,
                           (func_150ADA20() % 156U) + 100, (func_150ADA68() * 50.0f) + 48.0f, 1, 1.0f, 1.0f, 0,
                           &ground, 1, 0, emitter->base.header.owner, emitter->base.header.kind);

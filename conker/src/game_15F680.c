@@ -36,7 +36,7 @@ static s32 (*gModelParticleUpdateFuncs[])() = {
     particle_moveBallistic, light_updateLampParticle, weapon_updateBullet, func_150AE2A0,
     particle_settleWobble, particle_moveBallisticFloor, particle_bobModelParticle, particle_updateGrowFade,
     effect_updateSway, particle_updateFallingDebris, particle_updateSwell, effect_updateProjectile,
-    effect_updatePuffFollower, func_1519ED24, particle_moveSpiral, func_151C7038,
+    effect_updatePuffFollower, cutscene_updateTrackEffect, particle_moveSpiral, func_151C7038,
     func_150C5310,
 };
 static s32 (*gModelParticleUpdate2Funcs[])() = {
@@ -117,7 +117,7 @@ void particle_updateModelParticle(ModelParticle *particle) {
     }
 
     if (!dead && !(particle->flags & 0x80000)) {
-        dead = func_1514672C(&particle->pos) == 0;
+        dead = math_isInWorldBounds(&particle->pos) == 0;
     }
 
     if (dead) {
@@ -328,7 +328,7 @@ void particle_buildModelParticleMatrix(ModelParticle *particle) {
 
     if (particle->flags & 0x400) {
         zone = particle->unk6C;
-        if (zone != NULL && func_151464B8(zone) != 0) {
+        if (zone != NULL && math_isZoneHiddenFromViews(zone) != 0) {
             return;
         }
     }
@@ -379,14 +379,14 @@ Gfx *particle_drawModelParticle(Gfx *gfx, ModelParticle *arg1, s16 arg2) {
             gfx = gModelParticleDrawFuncs[particle->drawFn](gfx, particle, arg2);
         }
     }
-    gfx = func_15142C10(gfx, 0, 0, 0, particle->alpha, &state);
-    gfx = func_15142B7C(gfx,
+    gfx = math_gfxSetEnvColor(gfx, 0, 0, 0, particle->alpha, &state);
+    gfx = math_gfxUpdateGeometryMode(gfx,
                         ((particle->flags & 0x800) ? G_LIGHTING : 0) | ((particle->flags & 0x1000) ? 0x400000 : 0) |
                             G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH,
                         ((particle->flags & 0x800) ? 0 : G_LIGHTING) | ((particle->flags & 0x1000) ? 0 : 0x400000) |
                             G_CULL_BOTH | G_FOG | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     if (particle->flags & 0x800) {
-        gfx = func_151462C8(gfx, &particle->link, particle->unk7A, particle->owner, particle->ownerId, arg2,
+        gfx = math_emitPointLights(gfx, &particle->link, particle->unk7A, particle->owner, particle->ownerId, arg2,
                             &particle->pos, (particle->flags & 0x1000) ? 1 : 0, particle->floor.material);
     }
     gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -492,7 +492,7 @@ s32 particle_movePhysics(ModelParticle *particle) {
                         particle->hitFlags |= 0x10;
                         particle->speed = speed;
                         particle->invSpeed = 1.0f / speed;
-                        particle->squashAngle = func_150484A0(probe.xpos - particle->pos.x,
+                        particle->squashAngle = math_atan2(probe.xpos - particle->pos.x,
                                                               probe.zpos - particle->pos.z) *
                                                 40.74366379f; // 256 / (2 * pi): radians to a byte angle
                     }
@@ -532,7 +532,7 @@ s32 particle_updateSquash(ModelParticle *particle) {
     }
     particle->squashPhase += (s32)(576.0f * particle->invSpeed) * D_800BE9E4;
     if (particle->squashPhase < 0x80) {
-        amplitude = func_151423D8(particle->squashPhase - 0x40);
+        amplitude = math_cosBinAngleMasked(particle->squashPhase - 0x40);
         amplitude = (1.0f - particle->elasticity) * (1.0f - particle->invSpeed) * amplitude;
         if (particle->hitFlags & 8) {
             particle->scale.x *= 1.0f + amplitude;
@@ -541,8 +541,8 @@ s32 particle_updateSquash(ModelParticle *particle) {
             particle->pos.y = particle->squashOrigin.y - amplitude * particle->radius;
         }
         if (particle->hitFlags & 0x10) {
-            cosine = func_151423D8(particle->squashAngle - 0x40);
-            sine = func_151423D8(particle->squashAngle);
+            cosine = math_cosBinAngleMasked(particle->squashAngle - 0x40);
+            sine = math_cosBinAngleMasked(particle->squashAngle);
             particle->scale.x *= 1.0f - amplitude;
             particle->scale.y *= 1.0f + amplitude;
             particle->scale.z *= 1.0f - amplitude;
@@ -562,7 +562,7 @@ s32 particle_updateSquash(ModelParticle *particle) {
 
 /* Matrix handler: rotation, per-axis scale times size, and translation. */
 s32 particle_buildScaledMatrix(Mtx *mtx, ModelParticle *particle) {
-    func_151424F4(mtx, particle->sizeXZ, particle->sizeY, particle->rot.x, particle->rot.y, particle->rot.z,
+    math_mtxRotScaleAxes(mtx, particle->sizeXZ, particle->sizeY, particle->rot.x, particle->rot.y, particle->rot.z,
                   particle->scale.x, particle->scale.y, particle->scale.z, particle->pos.x, particle->pos.y,
                   particle->pos.z);
     return 1;
@@ -621,7 +621,7 @@ s32 particle_loadModel(s32 model, ParticleNode *node, ModelParticle *particle) {
 
 /* Matrix handler: rotation scaled by size only, and translation. */
 s32 particle_buildUniformMatrix(Mtx *mtx, ModelParticle *particle) {
-    func_15142838(mtx, particle->sizeXZ, particle->sizeY, particle->rot.x, particle->rot.y, particle->rot.z,
+    math_mtxRotScaleXZ(mtx, particle->sizeXZ, particle->sizeY, particle->rot.x, particle->rot.y, particle->rot.z,
                   particle->pos.x, particle->pos.y, particle->pos.z);
     return 1;
 }

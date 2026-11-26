@@ -344,7 +344,7 @@ s32 func_15159184(Actor *chr, u8 mode) {
     s32 ret;
 
     if ((mode == 2) || (mode == 3)) {
-        if (D_800C35EA[0] != 1) {
+        if (gCutsceneStates[0] != 1) {
             ret = 0;
         } else if ((chr->unk118 - 75.0f) < chr->ypos) {
             ret = 1;
@@ -561,7 +561,7 @@ u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
             pos.x = particle->head.desc.pos.x + particle->head.desc.offset.x;
             pos.y = arg1->unk4;
             pos.z = particle->head.desc.pos.z + particle->head.desc.offset.z;
-            if (func_1514672C(&pos) == 0) {
+            if (math_isInWorldBounds(&pos) == 0) {
                 return 0;
             }
             found = collision_probeCeilingSurfABSet0Cached(&pos, 0, particle->head.desc.pos.y, &particle->head.floor);
@@ -592,8 +592,8 @@ s32 func_151596BC(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     alive = 1;
     rise->widthPhase += rise->widthPhaseStep * D_800BE9E4;
     rise->heightPhase += rise->heightPhaseStep * D_800BE9E4;
-    sin0 = func_151423D8(rise->widthPhase - 0x40);
-    sin1 = func_151423D8(rise->heightPhase - 0x40);
+    sin0 = math_cosBinAngleMasked(rise->widthPhase - 0x40);
+    sin1 = math_cosBinAngleMasked(rise->heightPhase - 0x40);
     particle->head.desc.width = rise->baseSize + (rise->widthWobble * sin0);
     particle->head.desc.height = rise->baseSize + (rise->heightWobble * sin1);
 
@@ -604,8 +604,8 @@ s32 func_151596BC(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
         sway = particle->head.desc.vel.y * rise->swayPerSpeed;
         rise->swayPhaseX += rise->swayPhaseStepX * D_800BE9E4;
         rise->swayPhaseZ += rise->swayPhaseStepZ * D_800BE9E4;
-        sin0 = func_151423D8(rise->swayPhaseX - 0x40);
-        sin1 = func_151423D8(rise->swayPhaseZ - 0x40);
+        sin0 = math_cosBinAngleMasked(rise->swayPhaseX - 0x40);
+        sin1 = math_cosBinAngleMasked(rise->swayPhaseZ - 0x40);
         particle->head.desc.offset.x = (rise->swayX * sin0) * sway;
         particle->head.desc.offset.z = (rise->swayZ * sin1) * sway;
     }
@@ -729,7 +729,7 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
     EffectMotionParticle *particle;
 
     emitter = &obj->emitter;
-    if (func_151454BC(D_800BE9E8, 3000.0f, &emitter->position)) {
+    if (math_isNearCamera(D_800BE9E8, 3000.0f, &emitter->position)) {
         emitter->pending += (emitter->rate + (func_150ADA68() * emitter->rateRandom)) * gFrameDelta;
         if (emitter->pending > 1.0f) {
             ParticleDesc6C spawn;
@@ -837,14 +837,14 @@ s32 func_1515A11C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     osc = &particle->motion.oscillate;
     osc->widthPhase += osc->widthPhaseStep * D_800BE9E4;
     osc->heightPhase += osc->heightPhaseStep * D_800BE9E4;
-    sin0 = func_151423D8(osc->widthPhase - 0x40);
-    sin1 = func_151423D8(osc->heightPhase - 0x40);
+    sin0 = math_cosBinAngleMasked(osc->widthPhase - 0x40);
+    sin1 = math_cosBinAngleMasked(osc->heightPhase - 0x40);
     particle->head.desc.width = osc->baseSize + (osc->widthWobble * sin0);
     particle->head.desc.height = osc->baseSize + (osc->heightWobble * sin1);
     if ((osc && osc) && osc) { // matching: these dead tests of osc steer IDO's schedule of the angle update
     }
     osc->angle += osc->angleSpeed * gFrameDelta;
-    osc->angle = func_15144B68(osc->angle);
+    osc->angle = math_wrapRadians(osc->angle);
     sin0 = sinf(osc->angle);
     particle->head.desc.offset.x = osc->direction.x * sin0;
     particle->head.desc.offset.y = osc->direction.y * sin0;
@@ -925,7 +925,7 @@ EffectMotionParticle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 d
         } else {
             hit.flags = 0;
         }
-        if (func_1514672C(pos)) {
+        if (math_isInWorldBounds(pos)) {
             if (collision_probeCeilingSurfABSet0Cached(pos, 0, 19500.0f, &hit)) {
                 ground = &hit;
                 drift.groundHeight = hit.height;
@@ -949,10 +949,10 @@ s32 func_1515A60C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     s32 i;
 
     drift = &particle->motion.drift;
-    particle->head.desc.width = (func_151423D8(drift->widthPhase - 0x40) * drift->widthWobble) + drift->baseSize;
-    particle->head.desc.height = (func_151423D8(drift->heightPhase - 0x40) * drift->heightWobble) + drift->baseSize;
-    particle->head.desc.offset.x = func_151423D8(drift->swayPhaseX - 0x40) * drift->swayX;
-    particle->head.desc.offset.z = func_151423D8(drift->swayPhaseZ - 0x40) * drift->swayZ;
+    particle->head.desc.width = (math_cosBinAngleMasked(drift->widthPhase - 0x40) * drift->widthWobble) + drift->baseSize;
+    particle->head.desc.height = (math_cosBinAngleMasked(drift->heightPhase - 0x40) * drift->heightWobble) + drift->baseSize;
+    particle->head.desc.offset.x = math_cosBinAngleMasked(drift->swayPhaseX - 0x40) * drift->swayX;
+    particle->head.desc.offset.z = math_cosBinAngleMasked(drift->swayPhaseZ - 0x40) * drift->swayZ;
 
     drift->widthPhase += drift->widthPhaseStep * D_800BE9E4;
     drift->heightPhase += drift->heightPhaseStep * D_800BE9E4;
@@ -983,7 +983,7 @@ u8 func_1515A78C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     pos.y = arg1->unk4;
     pos.z = particle->head.desc.pos.z + particle->head.desc.offset.z;
     if (drift->groundHeight == GROUND_UNKNOWN) {
-        if (func_1514672C(&pos) == 0) {
+        if (math_isInWorldBounds(&pos) == 0) {
             return 0;
         }
         if (collision_probeCeilingSurfABSet0Cached(&pos, 0, particle->head.desc.pos.y, &particle->head.floor) != 0) {

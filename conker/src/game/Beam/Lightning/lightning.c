@@ -90,7 +90,7 @@ void beam_updateLightning(Bolt *bolt) {
             dir.y = bolt->def.end.y - bolt->def.start.y;
             dir.z = bolt->def.end.z - bolt->def.start.z;
             up = bolt->def.up;
-            func_151450B4(&dir, &up, &side);
+            math_vec3Cross(&dir, &up, &side);
             {
                 s32 i;
 
@@ -148,20 +148,20 @@ Gfx *beam_drawLightning(Gfx *gdl, Bolt *bolt, s16 view) {
     if (bolt->def.flags & BOLT_ACTIVE) {
         particle_getViewBuffer(bolt->vtxBuf, view, bolt->vtxBufSize, &vtx, NULL);
         if (vtx != NULL) {
-            camera = func_15144B34(view);
+            camera = math_getCameraPos(view);
             changed = 1;
             last = bolt->def.numPoints - 1;
             j = 0;
             i = 1;
-            gdl = func_15142E24(gdl, &gEffectTextures[44], 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
-            gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
-            gdl = func_15142C10(gdl, bolt->def.color.r, bolt->def.color.g, bolt->def.color.b, bolt->def.color.a, &changed);
+            gdl = math_gfxLoadTextureFrame(gdl, &gEffectTextures[44], 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
+            gdl = math_gfxUpdateGeometryMode(gdl, 0x200005, 0x1F0600);
+            gdl = math_gfxSetEnvColor(gdl, bolt->def.color.r, bolt->def.color.g, bolt->def.color.b, bolt->def.color.a, &changed);
             gdl = particle_setCombineMode(gdl, 0x19, &changed);
-            gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &changed);
+            gdl = math_gfxSetOtherMode(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &changed);
             dir.x = bolt->points[0].world.x - bolt->points[last].world.x;
             dir.y = bolt->points[0].world.y - bolt->points[last].world.y;
             dir.z = bolt->points[0].world.z - bolt->points[last].world.z;
-            func_15145548(&bolt->points[last].world, &dir, camera, &closest, &parameter);
+            math_closestPointOnSegment(&bolt->points[last].world, &dir, camera, &closest, &parameter);
             dx = camera->x - closest.x;
             dy = camera->y - closest.y;
             dz = camera->z - closest.z;
@@ -404,14 +404,14 @@ s32 beam_followBoneLightning(Bolt *bolt) {
         return 0;
     }
     if (owner->ob_matrix_ptr != NULL) {
-        func_15143134(&link->boneOffset, &bolt->def.start, &owner->ob_matrix_ptr[link->bone]);
+        math_transformOffset(&link->boneOffset, &bolt->def.start, &owner->ob_matrix_ptr[link->bone]);
         if (!(link->linkFlags & 1)) {
             dx = bolt->def.start.x - (owner->xpos + link->targetOffset.x);
             dy = bolt->def.start.y - (owner->ypos + link->targetOffset.y);
             dz = bolt->def.start.z - (owner->zpos + link->targetOffset.z);
             if (func_150AC9C0(bolt->def.start.x, bolt->def.start.y, bolt->def.start.z, dx, dy, dz, 0, 0,
                               &bolt->def.end.x, &bolt->def.end.y, &bolt->def.end.z, 0, &hit, 0, 0.0f)) {
-                if (func_15145C90(hit)) {
+                if (math_isObjectHidden(hit)) {
                     link->linkFlags |= 1;
                 } else {
                     bolt->def.flags &= ~BOLT_ACTIVE;
@@ -425,12 +425,12 @@ s32 beam_followBoneLightning(Bolt *bolt) {
         dir.x = bolt->def.end.x - bolt->def.start.x;
         dir.y = bolt->def.end.y - bolt->def.start.y;
         dir.z = bolt->def.end.z - bolt->def.start.z;
-        bolt->def.length = func_15143E64(&dir);
+        bolt->def.length = math_vec3Length(&dir);
         // matching: the unused labels split IDO's basic blocks (length is reloaded; removing any one mismatches)
         if (bolt->def.length != 0.0f) {
         lbl0:
             bolt->def.invLength = 1.0f / bolt->def.length;
-            func_15146078(&dir, &unused, &bolt->def.up);
+            math_buildPerpendicularBasis(&dir, &unused, &bolt->def.up);
             bolt->def.flags |= BOLT_ACTIVE;
         lbl1:
             return 1;

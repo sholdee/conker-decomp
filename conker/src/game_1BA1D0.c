@@ -21,7 +21,7 @@ void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2) {
             return;
         }
         for (i = 0; i < count; i++) {
-            func_1514373C(func_150ADA68() * 3.141592741f + 3.141592741f, 114.0f, &ring[i].x, &ring[i].z);
+            math_dirFromAngleXZ(func_150ADA68() * 3.141592741f + 3.141592741f, 114.0f, &ring[i].x, &ring[i].z);
             ring[i].x += 111.0f;
             ring[i].y = -90.0f;
         }
@@ -29,7 +29,7 @@ void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2) {
         ring[count].x = 111.0f;
         ring[count].y = -90.0f;
         ring[count].z = 0.0f;
-        func_15145DB4(placement, ring, points, count + 1);
+        math_transformObjectPoints(placement, ring, points, count + 1);
         spawn.texture = 0x6C;
         spawn.renderMode = 0x5103;
         spawn.unk0 = 0x200005;

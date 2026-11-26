@@ -38,10 +38,10 @@ u8 gContReadDone = 1;                 // a controller read has finished: cont_st
 static u8 gEepromProbeResult = 3;          // the EEPROM probe result (2: a 16K EEPROM); 3 until the first probe
 
 /* After each controller read (cont_readPads sets gContReadDone), arms a one-shot timer of
-   25 * osClockRate / 1000000 ticks that posts message 6 to D_8003B218. */
+   25 * osClockRate / 1000000 ticks that posts message 6 to gSchedInterruptQueue. */
 void cont_startReadTimer(void) {
     if (gContReadDone) {
-        osSetTimer(&gContReadTimer, 25ULL * osClockRate / 1000000ULL, 0, &D_8003B218, (OSMesg)6);
+        osSetTimer(&gContReadTimer, 25ULL * osClockRate / 1000000ULL, 0, &gSchedInterruptQueue, (OSMesg)6);
         gContReadDone = 0;
     }
 }

@@ -104,13 +104,13 @@ s32 func_1517B500(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
 
     diff = 41 - pos->height;
     if (diff == 0) {
-        pos->height -= (func_151EF610() % 8) - 4;
+        pos->height -= (math_rand() % 8) - 4;
     } else if (diff < 0) {
-        rnd = func_151EF610();
-        pos->height -= ((func_151EF610() % -diff) >> 1) + (rnd % 8) - 4;
+        rnd = math_rand();
+        pos->height -= ((math_rand() % -diff) >> 1) + (rnd % 8) - 4;
     } else {
-        rnd = func_151EF610();
-        pos->height += ((func_151EF610() % diff) >> 1) + (rnd % 8) - 4;
+        rnd = math_rand();
+        pos->height += ((math_rand() % diff) >> 1) + (rnd % 8) - 4;
     }
 
     vtx->v.ob[0] = pos->x;
@@ -465,11 +465,11 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                 y = 1 << i;
                 if (y & gSpritePingPongTypes) {
                     if (y & gSpriteRandomFlipTypes) {
-                        step = func_151EF610() % 10;
+                        step = math_rand() % 10;
                         if (step == 0) {
-                            gSpritePingPongDirs[i] |= func_151EF610() % 16;
+                            gSpritePingPongDirs[i] |= math_rand() % 16;
                         } else if (step == 1) {
-                            gSpritePingPongDirs[i] &= func_151EF610() % 16;
+                            gSpritePingPongDirs[i] &= math_rand() % 16;
                         } else {
                             step = D_800BE9E4 << 5;
                         }
@@ -508,7 +508,7 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
         }
     }
     /* occasionally spawn a particle at a random sprite showing frame 0 */
-    i = (u32) func_151EF610() % gSpriteMaxPerFrame;
+    i = (u32) math_rand() % gSpriteMaxPerFrame;
     if ((u32) i < gSpriteVtxCount) {
         i *= 4;
         j = VTX(i).v.flag;

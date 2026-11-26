@@ -98,7 +98,7 @@ void effect_updateBoneFollower(BoneFollower *follower) {
         return;
     }
 
-    func_15143134(&follower->offset, &position, &actor->ob_matrix_ptr[follower->bone]);
+    math_transformOffset(&follower->offset, &position, &actor->ob_matrix_ptr[follower->bone]);
 
     if (follower->flags & 1) {
         follower->timer -= D_800BE9E4;

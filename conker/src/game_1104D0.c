@@ -301,7 +301,7 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
 
             rnd = func_150ADA68();
             randAngle = func_150ADA20();
-            func_15143874(randAngle & 0xFF, func_150ADA68() * 129.0f, &offsetX, &offsetZ);
+            math_dirFromBinAngleXZ(randAngle & 0xFF, func_150ADA68() * 129.0f, &offsetX, &offsetZ);
             point.x = rnd * step.x + prevPos.x + offsetX;
             point.y = rnd * step.y + prevPos.y + 200.0f;
             point.z = rnd * step.z + prevPos.z + offsetZ;
@@ -311,13 +311,13 @@ void effect_updateHomingEffect(HomingEffect *arg0) {
             end.y = effect->ground.height;
         }
         {
-            extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *); // matching: -g3 block marker, as above
+            extern s32 math_vec3Normalize(Vec3f *, Vec3f *, f32 *, f32 *); // matching: -g3 block marker, as above
 
             dir.x = end.x - from.x;
             dir.y = end.y - from.y;
             dir.z = end.z - from.z;
         }
-        if (func_15145128(&dir, &dir, &length, &unusedOut) != 0) {
+        if (math_vec3Normalize(&dir, &dir, &length, &unusedOut) != 0) {
             move = func_150ADA68() * gFrameDelta;
             scale = 190.0f * move;
             from.x += dir.x * scale;
@@ -395,7 +395,7 @@ void func_150E4010(Obj4010 *obj) {
     state = &obj->state;
     if (state->unkA4 != 0) {
         actor_runAttackAt(state->x, state->y, state->z, state->unkA4 | 0x60000, -1,
-                      ((u16)(func_150484A0(state->unk60, state->unk64) * 10430.378f /* 0x10000 / 2pi */) - 0x4000) | 1, 0, 0);
+                      ((u16)(math_atan2(state->unk60, state->unk64) * 10430.378f /* 0x10000 / 2pi */) - 0x4000) | 1, 0, 0);
     }
 }
 

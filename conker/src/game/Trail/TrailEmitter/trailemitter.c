@@ -139,8 +139,8 @@ void trail_updateEmitter(TrailEmitter *emitter) {
                 point = i;
                 if (point) {} // matching: a second use keeps the copy of i in its own register
                 angle = func_150ADA20() % (emitter->params.angleRange + 1);
-                sinA = func_151423D8(angle);
-                cosA = func_151423D8(angle - 0x40);
+                sinA = math_cosBinAngleMasked(angle);
+                cosA = math_cosBinAngleMasked(angle - 0x40);
                 speed = func_150ADA68() * emitter->params.speedRange + emitter->params.speedMin;
                 emitter->timers[i] = func_150ADA20() % 23U + 5;
                 render.unk0 = 0;

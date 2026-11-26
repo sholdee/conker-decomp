@@ -49,7 +49,7 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
     SprayTrail *trail;
     SprayTrailParams *params;
 
-    if ((emitter->zone != NULL) && (func_151464B8(emitter->zone) != 0)) {
+    if ((emitter->zone != NULL) && (math_isZoneHiddenFromViews(emitter->zone) != 0)) {
         return;
     }
     i = gScreenLayout; // matching: dead store makes uopt color the loop bound before the timer reload
@@ -113,10 +113,10 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
                 yaw = emitter->desc.yaw - (func_150ADA20() % ((emitter->desc.yawSpread * 2) + 1)) - -emitter->desc.yawSpread;
                 pitch = (func_150ADA20() % (emitter->desc.pitchRange + 1)) + emitter->desc.pitch;
                 speed = (func_150ADA68() * emitter->desc.speedRange) + emitter->desc.speed;
-                sinYaw = func_151423D8(yaw);
-                cosYaw = func_151423D8(yaw - 0x40);
-                sinPitch = func_151423D8(pitch);
-                cosPitch = func_151423D8(pitch - 0x40);
+                sinYaw = math_cosBinAngleMasked(yaw);
+                cosYaw = math_cosBinAngleMasked(yaw - 0x40);
+                sinPitch = math_cosBinAngleMasked(pitch);
+                cosPitch = math_cosBinAngleMasked(pitch - 0x40);
                 motion.velocity.x = (speed * sinPitch) * cosYaw;
                 motion.velocity.y = -speed * cosPitch;
                 motion.velocity.z = (speed * sinPitch) * sinYaw;

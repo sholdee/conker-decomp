@@ -163,7 +163,7 @@ s32 effect_updateHopSprite(HopSprite *hopper) {
                 spawn.texture = gKindParticleTexturePickers[2]();
                 rand = func_150ADA20();
                 phase = (func_150ADA68() * 2) + 2.5f; // matching: the hop phase's register holds the dust speed
-                func_15143874((rand % 65U) - 160, phase, &dust.vel.x, &dust.vel.y);
+                math_dirFromBinAngleXZ((rand % 65U) - 160, phase, &dust.vel.x, &dust.vel.y);
                 dust.gravity = (func_150ADA68() * 0.333f) + 0.404f;
                 spawn.halfWidth = spawn.halfHeight = (func_150ADA68() * 1.79f) + 1.6999999f;
                 spawn.timer = (func_150ADA20() % 26U) + 30;

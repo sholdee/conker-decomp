@@ -5,7 +5,7 @@
 /* Data of the swinging-light effect, stored at LightEffect.data by light_spawnLampParticle. */
 typedef struct {
     /* 0x0 */ LampParticle *lamp;
-    /* 0x4 */ DefParticleHead *beam;      // NULL if func_151407D0 failed
+    /* 0x4 */ DefParticleHead *beam;      // NULL if flare_spawnGlow failed
     /* 0x8 */ f32 invScale;    // 1 / D_800AA528[kind]
 } SwingingLight;
 
@@ -158,7 +158,7 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
                     desc.unk47 = 6;
                     desc.unk48 = spawn.unk5C;
                     desc.viewportMask = 255;
-                    state->beam = func_151407D0(&params.shape, sizeof(params), &desc, 0, 0, 0, 0, -1, arg2, arg3);
+                    state->beam = flare_spawnGlow(&params.shape, sizeof(params), &desc, 0, 0, 0, 0, -1, arg2, arg3);
                 }
             }
         }
@@ -170,7 +170,7 @@ s32 light_updateLampParticle(LampParticle *particle) {
     LampSwing *swing = &particle->swing;
 
     swing->phase += swing->speed * gFrameDelta;
-    swing->phase = func_15144B68(swing->phase);
+    swing->phase = math_wrapRadians(swing->phase);
     swing->out = sinf(swing->phase) * swing->amp;
     if (swing->timer > 0.0f) {
         swing->timer -= gFrameDelta;

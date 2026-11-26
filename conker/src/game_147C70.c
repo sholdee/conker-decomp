@@ -144,7 +144,7 @@ void prop_updateRippleMesh(WorldObject *mesh) {
         if (ripple->phase < prevPhase || (ripple->phase > 128 && prevPhase <= 128)) {
             ripple->amplitude *= factor;
         }
-        ripple->wave = func_15048A40(ripple->phase);
+        ripple->wave = math_sinBinAngle(ripple->phase);
         ripple->wave = ripple->amplitude * ripple->wave;
         if (ripple->amplitude <= 3.0f) {
             ripple->wave = 0.0f;
@@ -171,8 +171,8 @@ void prop_updateRippleMesh(WorldObject *mesh) {
                 angle = -angle;
             }
             /* u8-angle trig lookups (cosine / sine, judging by the X/Z circle they trace) */
-            offsetX = func_15048A40(angle) * wobbleSize;
-            offsetZ = func_150489B0(angle) * wobbleSize;
+            offsetX = math_sinBinAngle(angle) * wobbleSize;
+            offsetZ = math_cosBinAngle(angle) * wobbleSize;
             if (ripple->active) {
                 offsetY = heights[i] * falloffs[i];
             }

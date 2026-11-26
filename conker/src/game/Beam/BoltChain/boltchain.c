@@ -68,8 +68,8 @@ BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
         spawn.b2 = desc->color.blue;
         spawn.alpha = desc->color.alpha;
         spawn.brightness = 0xFF;
-        spawn.offset = D_800A5480;
-        spawn.vel = D_800A5480;
+        spawn.offset = gZeroVec3f;
+        spawn.vel = gZeroVec3f;
         spawn.fadeStart = 1;
         spawn.fadeRate = 0xFF;
         spawn.scaleStart = 1;
@@ -185,7 +185,7 @@ void beam_sampleBolt(BoltObj *bolt) {
         out->tangent.x = bolt->desc.ctrl[0].x * d0 + bolt->desc.ctrl[1].x * d1 + bolt->desc.ctrl[2].x * d2 + bolt->desc.ctrl[3].x * d3;
         out->tangent.y = bolt->desc.ctrl[0].y * d0 + bolt->desc.ctrl[1].y * d1 + bolt->desc.ctrl[2].y * d2 + bolt->desc.ctrl[3].y * d3;
         out->tangent.z = bolt->desc.ctrl[0].z * d0 + bolt->desc.ctrl[1].z * d1 + bolt->desc.ctrl[2].z * d2 + bolt->desc.ctrl[3].z * d3;
-        if (func_15146078(&out->tangent, &out->normal, &out->binormal) == 0) {
+        if (math_buildPerpendicularBasis(&out->tangent, &out->normal, &out->binormal) == 0) {
             out->normal.x = 0.0f;
             out->normal.y = 0.0f;
             out->normal.z = 0.0f;
@@ -256,7 +256,7 @@ void beam_jitterBolt(BoltObj *bolt) {
         BoltSample *sample = &samples[j];
         f32 offset1;
         f32 offset0;
-        func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * bolt->desc.jitter, &offset0, &offset1);
+        math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * bolt->desc.jitter, &offset0, &offset1);
         point->x = sample->normal.x * offset0 + sample->binormal.x * offset1 + sample->pos.x;
         point->y = sample->normal.y * offset0 + sample->binormal.y * offset1 + sample->pos.y;
         point->z = sample->normal.z * offset0 + sample->binormal.z * offset1 + sample->pos.z;
@@ -284,14 +284,14 @@ Gfx *beam_drawBolt(Gfx *gdl, BoltObj *bolt, s16 view) {
     if (vtx == NULL) {
         return gdl;
     }
-    camera = func_15144B34(view);
+    camera = math_getCameraPos(view);
     flag = 1;
     points = beam_getBoltJoints(bolt);
-    gdl = func_15142E24(gdl, &gEffectTextures[44], 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
-    gdl = func_15142C10(gdl, bolt->desc.color.red, bolt->desc.color.green, bolt->desc.color.blue, bolt->desc.color.alpha, &flag);
-    gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
+    gdl = math_gfxLoadTextureFrame(gdl, &gEffectTextures[44], 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
+    gdl = math_gfxSetEnvColor(gdl, bolt->desc.color.red, bolt->desc.color.green, bolt->desc.color.blue, bolt->desc.color.alpha, &flag);
+    gdl = math_gfxUpdateGeometryMode(gdl, 0x200005, 0x1F0600);
     gdl = particle_setCombineMode(gdl, 0x44, &flag);
-    gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &flag);
+    gdl = math_gfxSetOtherMode(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &flag);
     delta.x = points[1].x - points[0].x;
     delta.y = points[1].y - points[0].y;
     delta.z = points[1].z - points[0].z;
@@ -499,13 +499,13 @@ void beam_updateBoltChain(BoltChainObj *obj) {
         desc.rejitterRange = config->rejitterRange;
         desc.ctrl[0] = chain->points[chain->index];
         desc.ctrl[3] = chain->points[chain->index + 1];
-        func_15143794(func_150ADA20() & 0xFF,
+        math_dirFromBinAngles(func_150ADA20() & 0xFF,
             func_150ADA20() % (config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40,
             func_150ADA68() * config->bendRange + config->bendBase, &offset);
         desc.ctrl[1].x = desc.ctrl[0].x + offset.x;
         desc.ctrl[1].y = desc.ctrl[0].y + offset.y;
         desc.ctrl[1].z = desc.ctrl[0].z + offset.z;
-        func_15143794(func_150ADA20() & 0xFF,
+        math_dirFromBinAngles(func_150ADA20() & 0xFF,
             func_150ADA20() % (config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40,
             func_150ADA68() * config->bendRange + config->bendBase, &offset);
         desc.ctrl[2].x = desc.ctrl[3].x + offset.x;
@@ -671,7 +671,7 @@ void beam_getBoundsPoint(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *ce
     f32 unused;
 
     sprite_getActorBodyBounds(actor, &center, &radius, &unused);
-    func_15143794(yaw, pitch, radius, out);
+    math_dirFromBinAngles(yaw, pitch, radius, out);
     out->y *= actor->unkF0;
     out->x += center.x;
     out->y += center.y;
@@ -707,7 +707,7 @@ void func_15107B78(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4) {
 
     if (actor->ob_matrix_ptr != NULL) {
         sprite_getActorBodyBounds(actor, &center, &radius, &unused);
-        func_15143794(yaw, pitch, radius, &pos);
+        math_dirFromBinAngles(yaw, pitch, radius, &pos);
         pos.y *= actor->unkF0;
         pos.x += center.x;
         pos.y += center.y;
@@ -757,7 +757,7 @@ BoltObj *beam_spawnBoneBolt(Actor *actor, u8 bone, const Vec3f *localPos, s16 ya
     desc.kind = 3;
 
     beam_transformBoneLocal(actor, bone, localPos, &desc.ctrl[0]);
-    func_15143794(yaw, pitch, 1.0f, &dir);
+    math_dirFromBinAngles(yaw, pitch, 1.0f, &dir);
     collision_castRay(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, dir.x, dir.y, dir.z, &hit, 300.0f, 0, 1, 1, -1, 0, 0);
 
     if (hit.hitType == 0) {
@@ -802,7 +802,7 @@ s32 beam_followBoneBolt(BoltObj *bolt, u8 *moved) {
 
 /* Transforms localPos by the actor's bone matrix (64 bytes each, at ob_matrix_ptr). */
 void beam_transformBoneLocal(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f *out) {
-    func_15143134(localPos, out, &actor->ob_matrix_ptr[bone]);
+    math_transformOffset(localPos, out, &actor->ob_matrix_ptr[bone]);
 }
 
 /* gBoltMsgHandlers handler for kind 3. */

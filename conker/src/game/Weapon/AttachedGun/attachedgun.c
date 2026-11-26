@@ -116,7 +116,7 @@ void weapon_getAttachmentPos(Actor *obj, s16 setId, Vec3f *out) {
         } else {
             src = &D_800A2050;
             dst = out;
-            func_1514654C(obj, attachment, 0, &src, &dst, 1);
+            math_transformAttachmentOffsets(obj, attachment, 0, &src, &dst, 1);
         }
     }
 }
@@ -178,9 +178,9 @@ ModelAttachment *weapon_getGunAttachment(Actor *obj) {
     return attach_find(obj, 0x82, 0);
 }
 
-/* Fills `direction`, `axis0` and `axis1` for `obj` through func_15145740. */
+/* Fills `direction`, `axis0` and `axis1` for `obj` through math_getActorAim. */
 void weapon_getShotAxes(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
-    func_15145740(obj, direction, axis0, axis1, 0.8110000491f);
+    math_getActorAim(obj, direction, axis0, axis1, 0.8110000491f);
 }
 
 /*
@@ -311,7 +311,7 @@ u8 weapon_getGunMuzzlePoints(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *
     dst[1] = hit;
     dst[2] = normal;
     dst[3] = endpoint;
-    if (func_1514654C(obj, gun, 0, src, dst, 10)) {
+    if (math_transformAttachmentOffsets(obj, gun, 0, src, dst, 10)) {
         normal->x -= hit->x;
         normal->y -= hit->y;
         normal->z -= hit->z;

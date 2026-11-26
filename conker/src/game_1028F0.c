@@ -51,9 +51,9 @@ void particle_updateFollowEffect(FollowEffect *effect) {
         data->spawnAccum += (3.000000238f + func_150ADA68() * (f32)1) * gFrameDelta;
         if (data->spawnAccum > 1.0f) {
             if (sprite_findActorMotion(owner, &refVel) == 0) {
-                refVel = &D_800A5480;
+                refVel = &gZeroVec3f;
             }
-            func_1514373C(owner->theta * 0.01745329238f, 1.0f, &sinYaw, &cosYaw);
+            math_dirFromAngleXZ(owner->theta * 0.01745329238f, 1.0f, &sinYaw, &cosYaw);
             rightX = cosYaw;
             rightZ = -sinYaw;
             spawn.texture = 40;
@@ -200,7 +200,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
     if ((obj->unk74 & 0xF) == 0xF) {
         return;
     }
-    moving = func_15145128(&vel, &vel, &ignored0, &ignored1) ? 1 : 0; // matching: != 0 and a plain store differ
+    moving = math_vec3Normalize(&vel, &vel, &ignored0, &ignored1) ? 1 : 0; // matching: != 0 and a plain store differ
     if (moving) {
         typedef s32 ScopeBarrier1; // matching: -g3 scope pins the 0.0f register setup at block entry
 
@@ -216,7 +216,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
         useDefaultBasis = 1;
         if (hit) {
             useDefaultBasis = 0;
-            if (func_15144E80((CollisionTri *)hitTri, &tangentU, &tangentV, &normal)) {
+            if (math_getTriEdges((CollisionTri *)hitTri, &tangentU, &tangentV, &normal)) {
                 f32 ignored2;
                 f32 ignored3;
                 f32 ignored4;
@@ -224,10 +224,10 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
                 f32 ignored6;
                 f32 ignored7;
 
-                func_15145128(&tangentU, &tangentU, &ignored2, &ignored3);
-                func_15145128(&tangentV, &tangentV, &ignored4, &ignored5);
-                func_15145128(&normal, &normal, &ignored6, &ignored7);
-                if (func_15144A74(&normal, &vel) > 0.0f) {
+                math_vec3Normalize(&tangentU, &tangentU, &ignored2, &ignored3);
+                math_vec3Normalize(&tangentV, &tangentV, &ignored4, &ignored5);
+                math_vec3Normalize(&normal, &normal, &ignored6, &ignored7);
+                if (math_vec3Dot(&normal, &vel) > 0.0f) {
                     normal.x = -normal.x;
                     normal.y = -normal.y;
                     normal.z = -normal.z;
@@ -241,7 +241,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
                 normal.x = -vel.x;
                 normal.y = -vel.y;
                 normal.z = -vel.z;
-                func_15146078(&normal, &tangentU, &tangentV);
+                math_buildPerpendicularBasis(&normal, &tangentU, &tangentV);
             } else {
                 normal.x = 0.0f;
                 normal.y = 1.0f;
@@ -298,7 +298,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
             for (i = 0; i < 3; i++) {
                 scale = func_150ADA68() * 0.01319999993f + 0.02979999967f;
                 randAngle = func_150ADA20();
-                func_15143874((u8)randAngle, func_150ADA68() * 759.0f, &offsetU, &offsetV);
+                math_dirFromBinAngleXZ((u8)randAngle, func_150ADA68() * 759.0f, &offsetU, &offsetV);
                 piece.vel.x = (tangentU.x * offsetU + tangentV.x * offsetV + normal.x) * scale;
                 piece.vel.y = (tangentU.y * offsetU + tangentV.y * offsetV + normal.y) * scale;
                 piece.vel.z = (tangentU.z * offsetU + tangentV.z * offsetV + normal.z) * scale;
@@ -317,7 +317,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
             for (j = 2; j < gBloodModelCounts[type]; j++) {
                 scale = func_150ADA68() * 0.01999999955f + 0.005200000014f;
                 randAngle = func_150ADA20();
-                func_15143874((u8)randAngle, func_150ADA68() * 723.0f, &offsetU2, &offsetV2);
+                math_dirFromBinAngleXZ((u8)randAngle, func_150ADA68() * 723.0f, &offsetU2, &offsetV2);
                 piece.vel.x = (tangentU.x * offsetU2 + tangentV.x * offsetV2 + normal.x) * scale;
                 piece.vel.y = (tangentU.y * offsetU2 + tangentV.y * offsetV2 + normal.y) * scale;
                 piece.vel.z = (tangentU.z * offsetU2 + tangentV.z * offsetV2 + normal.z) * scale;
@@ -473,7 +473,7 @@ void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
         spawn.width = spawn.height = func_150ADA68() * 207.0f + 238.0f;
         r1 = func_150ADA20();
         r2 = func_150ADA20();
-        func_15143794(r1 & 0xFF, r2 % 36U - 25, func_150ADA68() * 30.0f + 25.0f, &spawn.vel);
+        math_dirFromBinAngles(r1 & 0xFF, r2 % 36U - 25, func_150ADA68() * 30.0f + 25.0f, &spawn.vel);
         spawn.gravity = func_150ADA68() * (f32)0; // matching: keeps the multiply that a 0.0f literal folds away
         spawn.flags &= ~0xC0;
         r1 = (func_150ADA20() & 1) ? 0x80 : 0;
@@ -512,7 +512,7 @@ void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
         growSpawn.b = 0xFF;
         growSpawn.brightness = 0xFF;
         particle_getPointAboveObj(obj, &growSpawn.pos);
-        growSpawn.offset = D_800A5480;
+        growSpawn.offset = gZeroVec3f;
         growSpawn.fadeStart = 1;
         growSpawn.fadeRate = 0xFF;
         growSpawn.scaleStart = 1;
@@ -528,7 +528,7 @@ void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
         growSpawn.handlerSet = 9;
         growSpawn.viewMask = 0;
         growSpawn.views = 0xFF;
-        growSpawn.vel = D_800A5480;
+        growSpawn.vel = gZeroVec3f;
         growSpawn.timer = 300;
         growSpawn.height = 0.0f;
         growSpawn.width = 0.0f;

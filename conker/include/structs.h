@@ -34,7 +34,7 @@ typedef struct Vec3f {
 } Vec3f; // size 0xC
 
 /* A triangle's three vertex positions, passed by value to the triangle tests of game_76710.c
- * (func_15049260, func_15049350). */
+ * (math_testTriBox, math_computeTriPlane). */
 typedef struct Tri3f {
     /* 0x00 */ Vec3f pts[3];
 } Tri3f; // size 0x24
@@ -232,21 +232,21 @@ typedef struct LevelMusic {
 /* The current level's settings resource, D_800B0DF0 (loaded by func_15000F04 in game/Collision/MapBackground/mapbackground). The
  * one-byte callback fields index handler tables; 0 means none. */
 typedef struct LevelHeader {
-    /* 0x00 */ u16 unk0;            // fog (D_8008CC70.farPlane), gDefaultFar
-    /* 0x02 */ u16 unk2;            // fog (D_8008CC70.nearPlane), gDefaultNear, RenderView.unk67C
+    /* 0x00 */ u16 unk0;            // fog (gFogPresets.farPlane), gDefaultFar
+    /* 0x02 */ u16 unk2;            // fog (gFogPresets.nearPlane), gDefaultNear, RenderView.unk67C
     /* 0x04 */ u8  unk4;
-    /* 0x05 */ u8  unk5;            // background colour (D_800DBEA8)
+    /* 0x05 */ u8  unk5;            // background colour (gBackgroundColour)
     /* 0x06 */ u8  unk6;
     /* 0x07 */ u8  unk7;
-    /* 0x08 */ u8  unk8;            // sky mode (D_800891D8); 4 = textured sky
-    /* 0x09 */ u8  unk9;            // sky texture set (D_800891BC)
+    /* 0x08 */ u8  unk8;            // sky mode (gSkyDrawFuncs); 4 = textured sky
+    /* 0x09 */ u8  unk9;            // sky texture set (gSkyTextureSets)
     /* 0x0A */ u8  unkA;            // callback, gLevelSetupFuncs
     /* 0x0B */ u8  updateCallback;  // gLevelUpdateHooks
     /* 0x0C */ u8  drawCallback1;   // gLevelDrawHooks1
     /* 0x0D */ u8  drawCallback2;   // gLevelDrawHooks2
     /* 0x0E */ u8  unkE;            // callback, gLevelCameraSetups
-    /* 0x0F */ u8  unkF;            // callback, D_80089670
-    /* 0x10 */ u8  unk10;           // sun position, index into D_8008CFFC
+    /* 0x0F */ u8  unkF;            // callback, gLevelHooks
+    /* 0x10 */ u8  unk10;           // sun position, index into gSunPositions
     /* 0x11 */ s8  unk11;           // game/Game/LevelStart/levelstart adds it to 0xEB
     /* 0x12 */ u8  unk12;
     /* 0x13 */ u8  unk13;           // landing step (game/Actor/ActorMotion/actormotion)
@@ -264,16 +264,16 @@ typedef struct LevelHeader {
     /* 0x2A */ u8  flags;           // bit 0 checked by init/Audio/MixSelector/mixselector
     /* 0x2B */ u8  ucode;           // game_49D30
     /* 0x2C */ LevelMusic music;
-    /* 0x3A */ s16 unk3A;           // fog (D_8008CC70.unk4..unkA)
+    /* 0x3A */ s16 unk3A;           // fog (gFogPresets.unk4..unkA)
     /* 0x3C */ s16 unk3C;
     /* 0x3E */ s16 unk3E;           // nonzero: level fog on objects
     /* 0x40 */ s16 unk40;
     /* 0x42 */ u8  fogColour[4];
-    /* 0x46 */ s8  fogPreset;       // fog preset (func_151733E4), -1 = none
+    /* 0x46 */ s8  fogPreset;       // fog preset (env_blendFog), -1 = none
     /* 0x47 */ u8  pad47[2];
     /* 0x49 */ u8  unk49;           // callback, gLevelPreUpdateFuncs
     /* 0x4A */ u8  unk4A;           // callback, gLevelPostUpdateFuncs
-    /* 0x4B */ u8  assetList;       // index into D_80082B20, 0 = none
+    /* 0x4B */ u8  assetList;       // index into gLevelAssetLists, 0 = none
 } LevelHeader; // size 0x4C
 
 /* The level settings resource as returned by rom_loadPathTable (table 21, collision_loadMapSettings): the
@@ -580,7 +580,7 @@ typedef struct {
     /* 0x095 */ u8  ladder;
     /* 0x096 */ u8  unk96;
     /* 0x097 */ u8  ladderFromTop;   // the ladder was grabbed from its top (game/Zone/ZoneState/zonestate.c)
-    /* 0x098 */ u8  rope;            // rope index (func_151AE590), 0 = none
+    /* 0x098 */ u8  rope;            // rope index (rope_findById), 0 = none
     /* 0x099 */ u8  pad99[3];
     /* 0x09C */ struct Rope *ropePtr;     // rope being ridden, or NULL
     /* 0x0A0 */ f32 ropeProgress;      // 0..1 along the rope
@@ -746,7 +746,7 @@ typedef struct TextBoxConfig {
     /* 0x28 */ u8 r;
     /* 0x29 */ u8 g;
     /* 0x2A */ u8 b;
-    /* 0x2B */ u8 unk2B;            /* box is removed unless D_800C35EA == 1 */
+    /* 0x2B */ u8 unk2B;            /* box is removed unless gCutsceneStates == 1 */
     /* 0x2C */ void (*callback)(struct TextBoxConfig *config, s32 page, s32 state);
 } TextBoxConfig;
 
@@ -830,7 +830,7 @@ typedef struct AnimHeader {
     /* 0xC */ u32 reactionsSize;                      // byte size of reactions
 } AnimHeader; // size 0x10
 
-/* A path keyframe: a point the track's actor moves through (D_800C3868[scene][track][key]). */
+/* A path keyframe: a point the track's actor moves through (gSeqPathKeys[scene][track][key]). */
 typedef struct {
     /* 0x0 */ s16 x;
     /* 0x2 */ s16 y;
@@ -838,7 +838,7 @@ typedef struct {
     /* 0x6 */ u16 linear;  // nonzero: straight segment to the next key, else Catmull-Rom curve
 } SeqPathKey; // size 0x8
 
-/* What a scene track drives (D_800C35F0[scene][track]). */
+/* What a scene track drives (gSeqTrackInfos[scene][track]). */
 typedef struct SeqTrackInfo {
     /* 0x0 */ u16 type;     // 1 = camera, 2 = an object (collision_findObjectById), 3 = an actor (gfx_findObjectById)
     /* 0x2 */ u8 targetId;  // object / actor id for types 2 and 3
@@ -1161,7 +1161,7 @@ struct Actor {
     /* 0x1D2 */ u16 pad1D2;
     /* 0x1D4 */ MtxF *ob_matrix_ptr;   // this frame's bone matrices, in the pool gBonePools: MtxF while they are
                                        // built, then Mtx (fixed point) once actor_flushBoneMatrices converts them and sets
-                                       // D_800C3E90. func_15143134 and func_15145EA4 read either form.
+                                       // D_800C3E90. math_transformOffset and math_transformOffsets read either form.
     /* 0x1D8 */ MtxF *prevBones; // last frame's copy (platforms)
     /* 0x1DC */ u8  unk1DC;
     /* 0x1DD */ u8  unk1DD[3];
@@ -1316,7 +1316,7 @@ struct Actor {
 
 /*
  * A world object: one 0xA0-byte entry of the level's object array db_Object_array (gWorldObjectCount entries),
- * built by func_150039E0 (game_30E90.c) from the level's placement lists. Owner type 1 for effects and trails.
+ * built by level_spawnObjects (game_30E90.c) from the level's placement lists. Owner type 1 for effects and trails.
  * original: db_Object_struct (rom_debug_struct.c)
  */
 typedef struct Shadow Shadow; // blob shadow under an object, see game/Shadow/BlobShadow/blobshadow.c
@@ -1369,10 +1369,10 @@ struct WorldObject {
     /* 0x4D */ u8 shadowSize;         // blob shadow radius in 4-unit steps, times xScale (game/Shadow/BlobShadow/blobshadow.c)
     /* 0x4E */ u8 attach;            // < 3: own transform, 3: none, 101..124: rides actor movement_obj[attach - 100]
     /* 0x4F */ u8 object_status;
-    /* 0x50 */ u16 cullRadiusXZ;     // bounding radius: view culling width and placement scatter, see func_15004AAC
+    /* 0x50 */ u16 cullRadiusXZ;     // bounding radius: view culling width and placement scatter, see level_setObjectCullRadius
     /* 0x52 */ u16 cullRadiusY;      // view culling height
     /* 0x54 */ u16 modelId;          // | 0x8000 for objects without a loaded model
-    /* 0x56 */ u16 numTris;          // collision triangles, see func_15003668
+    /* 0x56 */ u16 numTris;          // collision triangles, see level_buildCollisionTris
     /* 0x58 */ u16 firstTri;
     /* 0x5A */ s16 moveX;            // translation this frame
     /* 0x5C */ s16 moveY;
@@ -1404,7 +1404,7 @@ struct WorldObject {
         } f;                         // float view (not named by the debugger)
         struct {
             /* 0x7C */ s32 unk7C;
-            /* 0x80 */ void *tri;    // floor probe results, see func_150045C4
+            /* 0x80 */ void *tri;    // floor probe results, see level_prepareObjects
             /* 0x84 */ f32 y;
         } floor;
     } touch;                         // per-behaviour scratch state
@@ -1758,7 +1758,7 @@ struct Camera {
     /* 0x7BC */ f32 CentreBias;
     /* 0x7C0 */ f32 CentreBiasTarget;
     /* 0x7C4 */ f32 CentreBiasVel;                    /* not accessed by US code */
-    /* 0x7C8 */ f32 AutoBehindAngleVel;               /* velocity of CameraAngle while func_15049688 eases it (game_14F130.c, game_123FB0.c) */
+    /* 0x7C8 */ f32 AutoBehindAngleVel;               /* velocity of CameraAngle while math_springAngleTo eases it (game_14F130.c, game_123FB0.c) */
     /* 0x7CC */ s32 DelayOneFrame;
     /* 0x7D0 */ f32 OffsetXZVel;
     /* 0x7D4 */ f32 OffsetYVel;
@@ -1842,7 +1842,7 @@ struct Camera {
     /* 0x960 */ f32 unk960;
     /* 0x964 */ f32 unk964;
     /* 0x968 */ f32 unk968;
-    /* 0x96C */ f32 speed;                            /* yaw easing speed and limit for func_15049688 (game_14F130.c) */
+    /* 0x96C */ f32 speed;                            /* yaw easing speed and limit for math_springAngleTo (game_14F130.c) */
     /* 0x970 */ f32 limit;
     /* 0x974 */ f32 unk974;
     /* 0x978 */ f32 unk978;
@@ -1881,7 +1881,7 @@ typedef struct AimPointDef {
     /* 0x14 */ f32 unk14;
 } AimPointDef; // size 0x18
 
-/* A cutscene subtitle slot, D_800C3CA0[3] (see func_150234A4). 0x04..0x33 is the TextBoxConfig passed to text_createBox. */
+/* A cutscene subtitle slot, gSubtitles[3] (see cutscene_getSubtitleSlot). 0x04..0x33 is the TextBoxConfig passed to text_createBox. */
 typedef struct {
     /* 0x00 */ s16 active; /* owning track + 1, 0 = free */
     /* 0x02 */ u8 pad2[2];
@@ -1997,8 +1997,8 @@ typedef struct BloodProfile {
  * gCamShot is the shared one that cutscenes and TriggerZones fill in. */
 typedef struct CamShot {
     /* 0x00 */ s32 mode;     /* type 7: 0 or 2 = look at at.focus; otherwise aim by at.angles */
-    /* 0x04 */ s32 unk4;     /* index into D_800C35EA (cutscene scene) */
-    /* 0x08 */ f32 unk8;     /* copied to D_800C3648, the FOV offset, when that scene is active */
+    /* 0x04 */ s32 unk4;     /* index into gCutsceneStates (cutscene scene) */
+    /* 0x08 */ f32 unk8;     /* copied to gViewFovOffset, the FOV offset, when that scene is active */
     /* 0x0C */ f32 yaw;      /* types 8 and 10: the end yaw; 999.0f = behind the player */
     /* 0x10 */ s32 duration; /* type 10: transition length */
     /* 0x14 */ Vec3f eye;
@@ -2192,7 +2192,7 @@ typedef struct TexAnimState {
     /* 0x16 */ u8  pad16[2];
 } TexAnimState; // size 0x18
 
-/* One rising bubble sprite (drawn by func_15090630); D_800D2460[6]. */
+/* One rising bubble sprite (drawn by hud_drawBubbles); gHudBubbles[6]. */
 typedef struct Bubble {
     /* 0x0 */ s16 x;
     /* 0x2 */ s16 y;
@@ -2219,7 +2219,7 @@ typedef struct WaterBase {
     /* 0x6 */ u8  cn[4];
 } WaterBase; // size 0xA
 
-/* D_800D24C8: the animated water surface (game_BC510.c). */
+/* gHudWaterStage: the animated water surface (game_BC510.c). */
 typedef struct WaterStage {
     /* 0x00 */ Mtx mtx[2];
     /* 0x80 */ Gfx *dl;
@@ -2260,7 +2260,7 @@ typedef struct RopeEnds {
     /* 0x0C */ Vec3f bottom;
 } RopeEnds; /* size 0x18 */
 
-/* Spawn data of a rope; func_151ACBD4 (game_1D9F10.c) copies it into the new Rope from its id field on. */
+/* Spawn data of a rope; rope_create (game_1D9F10.c) copies it into the new Rope from its id field on. */
 typedef struct RopeSpawn {
     /* 0x00 */ s8 id;
     /* 0x01 */ u8 pad1[3];
@@ -2524,7 +2524,7 @@ typedef struct LightFlash {
 /* A fixed point transformed by a matrix each frame (func_151643F8). */
 typedef struct LightTransformed {
     /* 0x00 */ Vec3f position;
-    /* 0x0C */ struct WorldObject *placement; // its rotation and position transform the point (func_15145CD0)
+    /* 0x0C */ struct WorldObject *placement; // its rotation and position transform the point (math_transformObjectPointRefs)
 } LightTransformed; // size 0x10
 
 /* A light swinging about a pivot with an object's rotation (func_151644A8). */
@@ -2547,7 +2547,7 @@ struct GroundFlash {
 
 /* LightEffect.data: one payload per kind of light effect. */
 typedef union LightEffectData {
-    s32 index;            // func_15161A68: entry of D_800C3958[0]
+    s32 index;            // func_15161A68: entry of gSeqTrackStates[0]
     void *object;         // a plain pointer payload (e.g. the lamp DynModel of game/Effects/SwingingLamp/swinginglamp.c)
     WorldObject *mount;   // func_151606A8: the light hangs below this object
     LightPulse pulse;
@@ -2626,7 +2626,7 @@ typedef struct LightEffectHeader {
     /* 0x5 */ u8  pad5;
 } LightEffectHeader; // size 0x6
 
-/* Per-track state of a running cutscene; D_800C3958[scene] points at one per track. */
+/* Per-track state of a running cutscene; gSeqTrackStates[scene] points at one per track. */
 typedef struct SeqTrackState {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 y;
@@ -2710,8 +2710,8 @@ typedef struct {
 
   // size 0x28
 
-/* A debris particle of game_BC510.c's block stack (a block knocked off the top, func_1508F7BC), in the list
- * D_800D245C; func_1508F0D4 moves it and frees it when its timer runs out. */
+/* A debris particle of game_BC510.c's block stack (a block knocked off the top, hud_removeBlock), in the list
+ * gHudBlockDebris; hud_updateBlockStack moves it and frees it when its timer runs out. */
 struct BlockDebris {
     /* 0x00 */ Mtx mtx[2];                 /* double-buffered by D_800BE9C0 */
     /* 0x80 */ struct BlockDebris *next;
@@ -2741,7 +2741,7 @@ typedef struct AllocatorFreeBlock {
     /* 0x10 */ struct AllocatorFreeBlock *prevFree;
 } AllocatorFreeBlock;
 
-/* A group of linked level entries, D_800D23C0[0..D_80087380) (loaded by func_15017578 in game/Player/StatsInit/statsinit).
+/* A group of linked level entries, gLinkGroups[0..gLinkGroupCount) (loaded by func_15017578 in game/Player/StatsInit/statsinit).
  * Each member is (kind << 12 | index); kind 2 is an object, indexing db_Object_array. */
 typedef struct ObjGroup {
     /* 0x00 */ s16 unk0;
@@ -2829,7 +2829,7 @@ typedef struct WaveDeformer {
     /* 0x28 */ u8 *vertexAngle;   // mode 2 only; byte angle (256 per turn)
 } WaveDeformer; // size 0x2C
 
-/* A lens flare (game_1AB530); D_800DDD64 heads the list. */
+/* A lens flare (game_1AB530); gLensFlares heads the list. */
 typedef struct LensFlare {
     /* 0x00 */ f32 pos[3];
     /* 0x0C */ f32 screenX;
@@ -2838,8 +2838,8 @@ typedef struct LensFlare {
     /* 0x20 */ f32 minFacing;
     /* 0x24 */ struct LensFlare *next;
     /* 0x28 */ s16 brightness;
-    /* 0x2A */ u16 zbufSample; /* z-buffer value under (screenX, screenY), read by func_1517E1AC */
-    /* 0x2C */ u16 depth;      /* the flare's own z-buffer depth, from func_1517EC1C */
+    /* 0x2A */ u16 zbufSample; /* z-buffer value under (screenX, screenY), read by flare_sampleDepths */
+    /* 0x2C */ u16 depth;      /* the flare's own z-buffer depth, from flare_getDepth */
     /* 0x2E */ u8 flags;
     /* 0x2F */ u8 type;
     /* 0x30 */ u8 alpha;
@@ -2954,7 +2954,7 @@ typedef struct {
     /* 0x8 */ u16 r;
 } BoundCylinder; /* size 0xA */
 
-/* One entry of the per-level cylinder-set table D_800D18B0 (terminated by cylinders == NULL). */
+/* One entry of the per-level cylinder-set table gCylinderSets (terminated by cylinders == NULL). */
 typedef struct {
     /* 0x0 */ BoundCylinder *cylinders; /* file offset until collision_loadCylinderSets relocates it */
     /* 0x4 */ u16 count;
@@ -3032,7 +3032,7 @@ typedef struct PropSounds {
     /* 0xA */ s16 arriveLead; /* movers: how early (in units of the move rate) to play `arrive` */
 } PropSounds; /* size 0xC */
 
-/* Per-behaviour handlers of level objects (D_80088C90, indexed by the placement's behaviour index).
+/* Per-behaviour handlers of level objects (gObjectBehaviors, indexed by the placement's behaviour index).
  * The handlers are declared without a prototype: (WorldObject *obj) and (WorldObject *obj, Actor *actor),
  * but some handlers take their own view of the object or other parameters. */
 typedef struct ObjectBehavior {
@@ -3055,7 +3055,7 @@ typedef struct ModeSettings {
     /* 0x9 */ u8 unk9; /* -> gSettings[6] */
 } ModeSettings; /* size 0xA */
 
-/* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format.
+/* A HUD image drawn by hud_drawSprite: a texture id (split into 4KB chunks of consecutive ids) and its format.
  * The record of a TextureDesc (pad4 is frameCount 1 and pad5), declared for the HUD code: that code stores the
  * addresses of link-time symbols here (&D_891 compiles to a lui/addiu pair with relocations, not to a constant),
  * while the texture code reads TextureDesc.addr as an integer (s32 id tables, compares with 0x10000000). One
@@ -3188,12 +3188,12 @@ typedef struct Racer {
     /* 0x4C */ CamParams cam;
 } Racer; /* size 0x84 */
 
-/* A node of the level's path graph (loaded by func_15085B70), 0x10 bytes. */
+/* A node of the level's path graph (loaded by path_load), 0x10 bytes. */
 typedef struct PathNode {
     /* 0x0 */ s16 x;
     /* 0x2 */ s16 y;
     /* 0x4 */ s16 z;
-    /* 0x6 */ u8 layer; /* height band, see func_15085DA8 */
+    /* 0x6 */ u8 layer; /* height band, see path_getLayerAt */
     /* 0x7 */ u8 unk7;  /* id looked up by mp_findNodeById */
     /* 0x8 */ u8 unk8;
     /* 0x9 */ u8 links[5]; /* neighbouring nodes, 0xFF = none */
@@ -3252,7 +3252,7 @@ typedef struct {
     /* 0x08 */ const f32 *scales;
 } VariantList;
 
-/* One 8-byte cutscene script event (D_800C3688[scene][track][i]). Each track starts with a
+/* One 8-byte cutscene script event (gSeqEventTracks[scene][track][i]). Each track starts with a
    4-event header whose value is the start time (see game_50D80.c). */
 typedef struct {
     /* 0x0 */ s8 type;
@@ -3335,9 +3335,9 @@ typedef struct AttachModelHeader {
     /* 0x18 */ u8 data[1];      // vertex data, up to the display list table
 } AttachModelHeader;
 
-/* A model asset as returned by rom_loadPathTable (level models: table 4, D_800B0E50; object models: table 3; dynamic
+/* A model asset as returned by rom_loadPathTable (level models: table 4, gLevelModels; object models: table 3; dynamic
  * models in game_168A90): a header, the vertices, then the display list. A level model's pointer fields hold
- * offsets from the asset's start until func_150031EC rebases them. */
+ * offsets from the asset's start until level_loadModels rebases them. */
 typedef struct ModelAsset {
     /* 0x00 */ Gfx *displayList; // also marks the end of the vertices
     /* 0x04 */ s32 unk4;
@@ -3347,12 +3347,12 @@ typedef struct ModelAsset {
     /* 0x14 */ s32 unk14;
     /* 0x18 */ s32 unk18;
     /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 rangeList;    // offset of its VtxColorGroup list, rebased by func_15003120
+    /* 0x20 */ s32 rangeList;    // offset of its VtxColorGroup list, rebased by level_rebaseVtxColorSet
     /* 0x24 */ s32 unk24;
     /* 0x28 */ Vtx vertices[1];
 } ModelAsset;
 
-/* One loaded level model (D_800B0E50[id]). */
+/* One loaded level model (gLevelModels[id]). */
 typedef struct LevelModelEntry {
     /* 0x0 */ ModelAsset *model;
     /* 0x4 */ s32 loaded;

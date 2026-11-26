@@ -40,7 +40,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
         {
             s32 pad; // matching: stack slot
 
-            func_151436B4(angle * 0.01745329238f, 0.0f, 39.0f, &offset);
+            math_dirFromAngles(angle * 0.01745329238f, 0.0f, 39.0f, &offset);
             extra.pos.x = pos->x + offset.x;
             extra.pos.y = (pos->y + offset.y) - 40.0f;
             extra.pos.z = pos->z + offset.z;
@@ -182,7 +182,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                 diff.x = objPos.x - params->pos.x;
                 diff.y = objPos.y - params->pos.y;
                 diff.z = objPos.z - params->pos.z;
-                dist = func_15143E64(&diff);
+                dist = math_vec3Length(&diff);
                 if (dist - radius < range) {
                     s32 mode;
                     s32 kind; // matching: switching on arg0->unk48 directly changes the frame size
@@ -429,13 +429,13 @@ void effect_showStatCounter(u8 owner, s32 kind) {
             panelConfig.fadeStart = 1;
             panelConfig.fadeRate = 0xFF;
             panelConfig.pos.x = 300.0f;
-            if (D_800D2458) {
+            if (gHudClockShown) {
                 panelConfig.pos.y = 32.0f;
             } else {
                 panelConfig.pos.y = 79.0f;
             }
             panelConfig.pos.z = 0.0f;
-            panelExtra.unk0 = D_800A5480;
+            panelExtra.unk0 = gZeroVec3f;
             panelExtra.unkC = 0.3010000288f;
             panelExtra.unk10 = 0.3010000288f;
             display->panel = effect_newModelEffect(&panelConfig, 0, 1.0f, 0, 0, 0x14, owner, kind);
@@ -447,7 +447,7 @@ void effect_showStatCounter(u8 owner, s32 kind) {
                 u8 i;
 
                 digitArg.x = -500.0f;
-                if (D_800D2458) {
+                if (gHudClockShown) {
                     digitArg.y = -15.0f;
                 } else {
                     digitArg.y = -62.0f;
@@ -497,7 +497,7 @@ void effect_showStatCounter(u8 owner, s32 kind) {
     }
 }
 
-/* Update of effect_showStatCounter's counter. It waits until D_800C35EA != 1, screen_isIrisOpen(0) != 0, screen_getViewFadeAlpha(0) == 0
+/* Update of effect_showStatCounter's counter. It waits until gCutsceneStates != 1, screen_isIrisOpen(0) != 0, screen_getViewFadeAlpha(0) == 0
  * and D_800BE9B4 == 0; then, as its 110-unit timer runs down by gFrameDelta, it slides in over the first 20.57
  * units, holds, slides out over the last 20.57 and ends the effect. */
 void effect_updateStatCounter(CounterEffect *effect) {
@@ -511,7 +511,7 @@ void effect_updateStatCounter(CounterEffect *effect) {
         return;
     }
     if (!(display->flags & 1)) {
-        if (D_800C35EA[0] == 1) {
+        if (gCutsceneStates[0] == 1) {
             return;
         }
         if (screen_isIrisOpen(0) == 0) {
@@ -531,7 +531,7 @@ void effect_updateStatCounter(CounterEffect *effect) {
     }
     if (display->panel != NULL) {
         display->panel->params.pos.x = slide * -85.0f + 150.0f;
-        if (D_800D2458 != 0) {
+        if (gHudClockShown != 0) {
             display->panel->params.pos.y = 32.0f;
         } else {
             display->panel->params.pos.y = 79.0f;
@@ -540,7 +540,7 @@ void effect_updateStatCounter(CounterEffect *effect) {
     if (display->digits[0] != NULL) {
         // matching: the no-op / 1.0f is needed; without it IDO emits shorter code
         display->digits[0]->x = ((slide * -85.0f + 150.0f) / 1.0f + 48.0f) - 12.0f;
-        if (D_800D2458 != 0) {
+        if (gHudClockShown != 0) {
             display->digits[0]->y = -15.0f;
         } else {
             display->digits[0]->y = -62.0f;
@@ -548,7 +548,7 @@ void effect_updateStatCounter(CounterEffect *effect) {
     }
     if (display->digits[1] != NULL) {
         display->digits[1]->x = ((slide * -85.0f + 150.0f) / 1.0f + 48.0f) + 12.0f;
-        if (D_800D2458 != 0) {
+        if (gHudClockShown != 0) {
             display->digits[1]->y = -15.0f;
         } else {
             display->digits[1]->y = -62.0f;

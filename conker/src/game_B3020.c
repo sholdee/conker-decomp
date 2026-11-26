@@ -3,20 +3,20 @@
 
 /* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
  * it first sees each name (see init_50A0.c). */
-PathNode *D_800D2350; // the level path graph nodes (func_15085B70)
-s32 D_800D2354;       // distance to the node found by func_15085DF8, route length of func_15086364
-static u8 D_800D2358;      /* number of used height bands */
-static f32 D_800D2360[7];  /* upper y bound of each used band */
-static u8 D_800D237C[6];   /* layer index of each used band */
+PathNode *gPathNodes; // the level path graph nodes (path_load)
+s32 gPathDistance;       // distance to the node found by path_findNearestNode, route length of path_search
+static u8 gPathBandCount;      /* number of used height bands */
+static f32 gPathBandTops[7];  /* upper y bound of each used band */
+static u8 gPathBandLayers[6];   /* layer index of each used band */
 
 #include "functions.h"
 #include "variables.h"
 
 /* This file's .data. */
-s16 D_80087290 = 0;     /* node count */
+s16 gPathNodeCount = 0;     /* node count */
 static s16 D_80087294 = 0; /* unk2 of the path graph resource */
-u8 D_80087298 = 0xFF;   /* goal node reached by the last search, 0xFF if none */
-u8 D_8008729C = 0xFF;   /* a node the next func_15085DF8 result must be nearer than, 0xFF if none */
+u8 gPathGoalReached = 0xFF;   /* goal node reached by the last search, 0xFF if none */
+u8 gPathNearerThanNode = 0xFF;   /* a node the next path_findNearestNode result must be nearer than, 0xFF if none */
 
 /* Path graph resource: a node count and an unknown halfword, then the nodes. */
 typedef struct PathGraph {
@@ -26,27 +26,27 @@ typedef struct PathGraph {
 } PathGraph;
 
 /* Loads path graph resource `id` and splits the height bands. */
-void func_15085B70(s32 id) {
+void path_load(s32 id) {
     PathGraph *graph;
 
     graph = rom_loadPath(NULL, 2, 25, id);
     if (graph == NULL) {
-        D_80087290 = 0;
+        gPathNodeCount = 0;
         D_80087294 = 0;
-        D_800D2350 = NULL;
+        gPathNodes = NULL;
     } else {
-        D_80087290 = graph->count;
+        gPathNodeCount = graph->count;
         D_80087294 = graph->unk2;
-        D_800D2350 = graph->nodes;
+        gPathNodes = graph->nodes;
     }
-    func_15085BE8();
+    path_splitBands();
 }
 
 /*
- * Groups the nodes by layer, records the used layers in D_800D237C and the y value separating
- * each pair of adjacent bands in D_800D2360. Returns whether any two bands overlap in y.
+ * Groups the nodes by layer, records the used layers in gPathBandLayers and the y value separating
+ * each pair of adjacent bands in gPathBandTops. Returns whether any two bands overlap in y.
  */
-s32 func_15085BE8(void) {
+s32 path_splitBands(void) {
     s32 i;
     s32 overlap;
     s32 layer;
@@ -61,9 +61,9 @@ s32 func_15085BE8(void) {
         minY[i] = 10000.0f;
         maxY[i] = -10000.0f;
     }
-    for (i = 0; i < D_80087290; i++) {
-        layer = D_800D2350[i].layer;
-        y = D_800D2350[i].y;
+    for (i = 0; i < gPathNodeCount; i++) {
+        layer = gPathNodes[i].layer;
+        y = gPathNodes[i].y;
         if (y < minY[layer]) {
             minY[layer] = y;
         }
@@ -71,42 +71,42 @@ s32 func_15085BE8(void) {
             maxY[layer] = y;
         }
     }
-    D_800D2358 = 0;
+    gPathBandCount = 0;
     for (i = 0; i < 6; i++) {
         if (minY[i] <= maxY[i]) {
-            D_800D237C[D_800D2358] = i;
-            D_800D2358++;
+            gPathBandLayers[gPathBandCount] = i;
+            gPathBandCount++;
         }
     }
-    for (i = 0; i < D_800D2358 - 1; i++) {
-        lo = D_800D237C[i];
-        hi = D_800D237C[i + 1];
-        D_800D2360[i] = (maxY[lo] + minY[hi]) * 0.5f;
+    for (i = 0; i < gPathBandCount - 1; i++) {
+        lo = gPathBandLayers[i];
+        hi = gPathBandLayers[i + 1];
+        gPathBandTops[i] = (maxY[lo] + minY[hi]) * 0.5f;
         if (maxY[lo] > minY[hi]) {
             overlap = TRUE;
         }
     }
-    D_800D2360[i] = 100000.0f;
+    gPathBandTops[i] = 100000.0f;
     return overlap;
 }
 
 /* Returns the layer of the height band containing `y`. */
-u8 func_15085DA8(f32 y) {
+u8 path_getLayerAt(f32 y) {
     s32 i = 0;
 
-    while (D_800D2360[i] <= y) {
+    while (gPathBandTops[i] <= y) {
         i++;
     }
-    return D_800D237C[i];
+    return gPathBandLayers[i];
 }
 
 /*
  * Returns the node nearest to (x, y, z) whose layer is `layer` and type is `type` (-1 matches any),
- * or 0xFF. D_8008729C, if set, names a node the result must be nearer than (it is then cleared).
+ * or 0xFF. gPathNearerThanNode, if set, names a node the result must be nearer than (it is then cleared).
  * With type 0 a node only counts when mp_castWallRay is negative for its offset. Stores the
- * distance in D_800D2354.
+ * distance in gPathDistance.
  */
-s32 func_15085DF8(f32 x, f32 y, f32 z, s8 type, s8 layer) {
+s32 path_findNearestNode(f32 x, f32 y, f32 z, s8 type, s8 layer) {
     PathNode *node;
     f32 bestDistSq;
     f32 distSq;
@@ -122,19 +122,19 @@ s32 func_15085DF8(f32 x, f32 y, f32 z, s8 type, s8 layer) {
     if (type == 0) {
         checkSight = TRUE;
     }
-    if (D_8008729C != 0xFF) {
-        node = &D_800D2350[D_8008729C];
+    if (gPathNearerThanNode != 0xFF) {
+        node = &gPathNodes[gPathNearerThanNode];
         dx = node->x - x;
         dy = node->y - y;
         dz = node->z - z;
         if (!checkSight || (checkSight && mp_castWallRay(x, y, z, dx, dz) < 0.0f)) {
             bestDistSq = dx * dx + dy * dy + dz * dz + 10.0f;
         }
-        D_8008729C = 0xFF;
+        gPathNearerThanNode = 0xFF;
     }
     found = 0xFF;
-    for (i = 0; i < D_80087290; i++) {
-        node = &D_800D2350[i];
+    for (i = 0; i < gPathNodeCount; i++) {
+        node = &gPathNodes[i];
         if ((layer == node->layer || layer == -1) && (type == node->type || type == -1)) {
             dx = node->x - x;
             dy = node->y - y;
@@ -146,16 +146,16 @@ s32 func_15085DF8(f32 x, f32 y, f32 z, s8 type, s8 layer) {
             }
         }
     }
-    D_800D2354 = sqrtf(bestDistSq);
+    gPathDistance = sqrtf(bestDistSq);
     return found;
 }
 
 /*
  * Returns the path node to head for from (x, y, z): the nearest node, or the next node of the
- * route from it towards `goals` (func_15086364) when the point is inside the node's zone, the
+ * route from it towards `goals` (path_search) when the point is inside the node's zone, the
  * node is large, or the point lies along the link to that next node.
  */
-s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
+s32 path_getNextNode(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
     s32 nearest;
     TriggerZone *zone;
     PathNode *node;
@@ -175,16 +175,16 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoi
     f32 distSq;
 
     result = 0xFF;
-    nearest = func_15085DF8(x, y, z, 0, func_15085DA8(y));
+    nearest = path_findNearestNode(x, y, z, 0, path_getLayerAt(y));
     if (nGoals > 0 && nearest != 0xFF) {
         zone = mp_findNodeZone(nearest);
         if (zone != NULL && zone_containsPoint(zone, x, y, z)) {
-            result = func_15086364(nearest, nGoals, nAvoid, goals, avoid);
+            result = path_search(nearest, nGoals, nAvoid, goals, avoid);
         } else {
-            node = &D_800D2350[nearest];
+            node = &gPathNodes[nearest];
             size = node->unk8 * 2.0f;
             if (size * size > 100000000.0f) {
-                result = func_15086364(nearest, nGoals, nAvoid, goals, avoid);
+                result = path_search(nearest, nGoals, nAvoid, goals, avoid);
             } else {
                 /* Find the link whose line (in xz) passes closest to the point, ahead of the node. */
                 bestDistSq = 100000000.0f;
@@ -195,7 +195,7 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoi
                     n = links[9];
                     i = (i + 1) | 0; // matching: the no-op | keeps IDO's slti loop test
                     if (n != 0xFF) {
-                        other = (PathNode *)((u8 *)D_800D2350 + n * sizeof(PathNode)); // matching: byte offset, not &D_800D2350[n]
+                        other = (PathNode *)((u8 *)gPathNodes + n * sizeof(PathNode)); // matching: byte offset, not &gPathNodes[n]
                         dx = other->x - node->x;
                         dz = other->z - node->z;
                         invLen = 1.0f / sqrtf(dx * dx + dz * dz);
@@ -216,7 +216,7 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoi
                     links++;
                 } while (i < 5);
                 if (best != 0xFF) {
-                    n = func_15086364(nearest, nGoals, nAvoid, goals, avoid);
+                    n = path_search(nearest, nGoals, nAvoid, goals, avoid);
                     if (n == best) {
                         result = n;
                     }
@@ -234,9 +234,9 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoi
  * Shortest-path search over the path graph from `start` to the nearest of the `nGoals` nodes in
  * `goals`; entering one of the `nAvoid` nodes in `avoid` costs an extra 5000. Returns the next node
  * to move to (skipping ahead over a run of nodes that have a zone, see mp_findNodeZone), `start`
- * itself if it is a goal, or 0xFF. Stores the route length in D_800D2354.
+ * itself if it is a goal, or 0xFF. Stores the route length in gPathDistance.
  */
-s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
+s32 path_search(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
     s32 i;
     s32 j;
     s32 k;
@@ -265,12 +265,12 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
     u8 path[64]; /* route, goal first */
     u8 hasZone[64];
 
-    D_80087298 = 0xFF;
-    D_800D2354 = 0;
+    gPathGoalReached = 0xFF;
+    gPathDistance = 0;
     if (nGoals <= 0) {
         return 0xFF;
     }
-    if (start < 0 || start >= D_80087290) {
+    if (start < 0 || start >= gPathNodeCount) {
         return 0xFF;
     }
     /* `found` is first "start is not a goal". */
@@ -282,15 +282,15 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
     }
     count = 0;
     if (!found) {
-        D_80087298 = start;
+        gPathGoalReached = start;
         return start;
     }
-    for (i = 0; i < D_80087290; i++) {
+    for (i = 0; i < gPathNodeCount; i++) {
         dist[i] = 1000000;
     }
 
     /* Seed the open list with the neighbours of start. */
-    node = &D_800D2350[start];
+    node = &gPathNodes[start];
     for (i = 0; i < 5; i++) {
         link = node->links[i];
         if (link != 0xFF) {
@@ -300,7 +300,7 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
                     penalty = 5000;
                 }
             }
-            other = &D_800D2350[link];
+            other = &gPathNodes[link];
             openList[count] = link;
             prev[node->links[i]] = start;
             dx = node->x - other->x;
@@ -338,7 +338,7 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
             }
             if (found) {
                 /* Walk back from the goal to start. */
-                D_80087298 = i;
+                gPathGoalReached = i;
                 n = i;
                 if (&path[pathLen] == NULL) {} // matching: code-less &path use in this loop sets uopt's register order for path in the tail
                 while (n != start) {
@@ -350,7 +350,7 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
             } else {
                 /* Relax the neighbours of the visited node. */
                 curDist = dist[i];
-                node = &D_800D2350[i];
+                node = &gPathNodes[i];
                 cur = i;
                 for (i = 0; i < 5; i++) {
                     n = node->links[i];
@@ -361,7 +361,7 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
                                 penalty = 5000;
                             }
                         }
-                        other = &D_800D2350[n];
+                        other = &gPathNodes[n];
                         dx = node->x - other->x;
                         dy = node->y - other->y;
                         dz = node->z - other->z;
@@ -430,6 +430,6 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
         }
         pathLen = i;
     }
-    D_800D2354 = total;
+    gPathDistance = total;
     return result;
 }

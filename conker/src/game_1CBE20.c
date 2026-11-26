@@ -5,7 +5,7 @@
 
 
 /* Starts a timer effect that expires after `duration` frames of D_800BE9E4. */
-EvTimer *func_1519E970(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 arg5,
+EvTimer *cutscene_startTimer(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 arg5,
                        s32 arg6) {
     EvTimer *timer = effect_newObject(0x26, arg6, sizeof(EvTimer), 1, arg5, 1);
 
@@ -22,8 +22,8 @@ EvTimer *func_1519E970(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 
     return timer;
 }
 
-/* Per-frame update of a func_1519E970 timer: frees it (unlinking its owner) once its time runs out. */
-void func_1519EA04(EvTimer *timer) {
+/* Per-frame update of a cutscene_startTimer timer: frees it (unlinking its owner) once its time runs out. */
+void cutscene_updateTimer(EvTimer *timer) {
     if (timer->flags & 1) {
         s32 expired = FALSE;
 
@@ -42,7 +42,7 @@ void func_1519EA04(EvTimer *timer) {
 }
 
 /* Spawns a particle_spawnDebrisBurst effect at pos (cutscene event; the caller passes an id < 0xE9 and a scale). */
-void func_1519EA78(Vec3f *pos, u16 id, f32 scale, u8 arg3, s32 arg4) {
+void cutscene_spawnDebrisBurst(Vec3f *pos, u16 id, f32 scale, u8 arg3, s32 arg4) {
     DebrisBurst def;
     s32 idArg;
     f32 scaleArg;
@@ -68,8 +68,8 @@ void func_1519EA78(Vec3f *pos, u16 id, f32 scale, u8 arg3, s32 arg4) {
     particle_spawnDebrisBurst(&def, &idArg, &scaleArg, 1, 0.0f, 0, arg3, arg4);
 }
 
-/* Spawns a particle_newModelParticleWithFloor effect that follows a cutscene track (updated by func_1519ED24). */
-void func_1519EB8C(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4) {
+/* Spawns a particle_newModelParticleWithFloor effect that follows a cutscene track (updated by cutscene_updateTrackEffect). */
+void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4) {
     struct {
         SeqTrackState *track;
         ParticleSpawn spawn;
@@ -90,8 +90,8 @@ void func_1519EB8C(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4
     packet.spawn.pos.x = track->x;
     packet.spawn.pos.y = track->y;
     packet.spawn.pos.z = track->z;
-    packet.spawn.vel = D_800A5480;
-    packet.spawn.rotVel = D_800A5480;
+    packet.spawn.vel = gZeroVec3f;
+    packet.spawn.rotVel = gZeroVec3f;
     packet.spawn.gravity = 0.0f;
     packet.spawn.flags = 0x980;
     packet.spawn.lifetime = duration;
@@ -119,8 +119,8 @@ void func_1519EB8C(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4
     }
 }
 
-/* Per-frame update of a func_1519EB8C effect: copies its track's current values into it. */
-s32 func_1519ED24(TrackPhysicsParticle *obj) {
+/* Per-frame update of a cutscene_spawnTrackEffect effect: copies its track's current values into it. */
+s32 cutscene_updateTrackEffect(TrackPhysicsParticle *obj) {
     SeqTrackState *track = obj->track;
 
     obj->unk18 = track->unk18 * 0.1f;
@@ -134,8 +134,8 @@ s32 func_1519ED24(TrackPhysicsParticle *obj) {
     return 1;
 }
 
-/* Spawns a particle that follows a cutscene track (updated by func_1519EF04). */
-void func_1519ED84(SeqTrackState *track, s32 texture, s16 lifetime, u8 arg3, s32 arg4) {
+/* Spawns a particle that follows a cutscene track (updated by cutscene_updateTrackParticle). */
+void cutscene_spawnTrackParticle(SeqTrackState *track, s32 texture, s16 lifetime, u8 arg3, s32 arg4) {
     ParticleDef def;
     SeqTrackState *trackArg;
     TrackParticle *particle;
@@ -179,8 +179,8 @@ void func_1519ED84(SeqTrackState *track, s32 texture, s16 lifetime, u8 arg3, s32
     }
 }
 
-/* Per-frame update of a func_1519ED84 particle: copies its track's current values into it. */
-s32 func_1519EF04(TrackParticle *particle) {
+/* Per-frame update of a cutscene_spawnTrackParticle particle: copies its track's current values into it. */
+s32 cutscene_updateTrackParticle(TrackParticle *particle) {
     SeqTrackState *track = particle->track;
 
     particle->head.def.width = track->unk18 * 10.0f;

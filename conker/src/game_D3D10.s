@@ -85,19 +85,19 @@ glabel func_150A6860
     /* D3E24 150A6974 00139A02 */  srl        $s3, $s3, 8
     /* D3E28 150A6978 12600007 */  beqz       $s3, .L150A6998
     /* D3E2C 150A697C 0014A202 */   srl       $s4, $s4, 8
-    /* D3E30 150A6980 0D412290 */  jal        func_15048A40
+    /* D3E30 150A6980 0D412290 */  jal        math_sinBinAngle
     /* D3E34 150A6984 02602025 */   or        $a0, $s3, $zero
     /* D3E38 150A6988 46000506 */  mov.s      $f20, $f0
-    /* D3E3C 150A698C 0D41226C */  jal        func_150489B0
+    /* D3E3C 150A698C 0D41226C */  jal        math_cosBinAngle
     /* D3E40 150A6990 02602025 */   or        $a0, $s3, $zero
     /* D3E44 150A6994 46000546 */  mov.s      $f21, $f0
   .L150A6998:
     /* D3E48 150A6998 12800007 */  beqz       $s4, .L150A69B8
     /* D3E4C 150A699C 00000000 */   nop
-    /* D3E50 150A69A0 0D412290 */  jal        func_15048A40
+    /* D3E50 150A69A0 0D412290 */  jal        math_sinBinAngle
     /* D3E54 150A69A4 02802025 */   or        $a0, $s4, $zero
     /* D3E58 150A69A8 46000586 */  mov.s      $f22, $f0
-    /* D3E5C 150A69AC 0D41226C */  jal        func_150489B0
+    /* D3E5C 150A69AC 0D41226C */  jal        math_cosBinAngle
     /* D3E60 150A69B0 02802025 */   or        $a0, $s4, $zero
     /* D3E64 150A69B4 460005C6 */  mov.s      $f23, $f0
   .L150A69B8:

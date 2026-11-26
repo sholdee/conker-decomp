@@ -43,7 +43,7 @@ Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 ar
         }
 
         if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
-            state->area = func_15144598(state->def.anchor);
+            state->area = math_getZoneArea(state->def.anchor);
         } else {
             state->area = (state->def.radius * state->def.radius) * 3.14159265f;
         }
@@ -82,7 +82,7 @@ void beam_updateAreaEmitter(Emitter *emitter) {
     }
 
     if ((state->def.flags & EMITTER_ZONED) && (state->zone != 0)) {
-        if (func_151464B8(state->zone) != 0) {
+        if (math_isZoneHiddenFromViews(state->zone) != 0) {
             return;
         }
     }
@@ -119,7 +119,7 @@ void beam_updateAreaEmitter(Emitter *emitter) {
 
 /* Picks a random point of the anchor object's area; *top is its height. */
 void beam_pickAnchorPoint(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
-    func_151432BC(emitter->state.def.anchor, &pos->x, &pos->z, top, bottom);
+    math_randomZoneFootprintPoint(emitter->state.def.anchor, &pos->x, &pos->z, top, bottom);
     pos->y = *top;
 }
 
@@ -128,7 +128,7 @@ void beam_pickRadiusPoint(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
     EmitterDef *def;
 
     def = &emitter->state.def;
-    func_15143874(func_150ADA20() & 0xFF, def->radius * func_150ADA68(), &pos->x, &pos->z);
+    math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, def->radius * func_150ADA68(), &pos->x, &pos->z);
     pos->x += def->pos.x;
     pos->z += def->pos.z;
     pos->y = def->pos.y;
@@ -474,7 +474,7 @@ void beam_spawnAtGroundPoints(Vec3f *center, f32 minY, f32 radius, CollisionHit 
     for (; count > 0; count--) {
         angle = func_150ADA68();
         dist = func_150ADA68();
-        func_1514373C((angle + angle) * 3.14159265f, dist * radius, &probe.x, &probe.z);
+        math_dirFromAngleXZ((angle + angle) * 3.14159265f, dist * radius, &probe.x, &probe.z);
         probe.x += center->x;
         probe.z += center->z;
 

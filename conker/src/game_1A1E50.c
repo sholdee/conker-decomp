@@ -69,7 +69,7 @@ void effect_updateLevel(s32 arg0, s32 arg1) {
     u8 temp;
 
     func_15165F70();
-    flamethrower_updateTexScrolls(D_800B0E00[0], D_800B0E00[1]);
+    flamethrower_updateTexScrolls(gLevelDisplayLists[0], gLevelDisplayLists[1]);
     texture_updateUvWobbles();
     temp = D_800B0DF0->updateCallback;
     if (temp != 0) {

@@ -81,7 +81,7 @@ void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
     BoneBurstParticle *spawned;
 
     state = &emitter->state;
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return;
     }
     target = state->target;
@@ -117,11 +117,11 @@ void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
                     src[1] = &D_800A195C;
                     dst[0] = &def.pos;
                     dst[1] = &dir;
-                    func_15145EA4(src, dst, target->ob_matrix_ptr + 15, 2);
+                    math_transformOffsets(src, dst, target->ob_matrix_ptr + 15, 2);
                     dir.x -= def.pos.x;
                     dir.y -= def.pos.y;
                     dir.z -= def.pos.z;
-                    if (!func_15146078(&dir, &particle.axisU, &particle.axisV)) {
+                    if (!math_buildPerpendicularBasis(&dir, &particle.axisU, &particle.axisV)) {
                         return;
                     }
                     def.unk44 = particle.fadeFrom;
@@ -137,7 +137,7 @@ void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
                     def.rgba[3] = 0xFF;
                     def.height = 0.0f;
                     def.width = 0.0f;
-                    def.rot = D_800A5480;
+                    def.rot = gZeroVec3f;
                     def.scale.x = 1.0f;
                     def.scale.y = 1.0f;
                     def.scale.z = 1.0f;
@@ -185,7 +185,7 @@ s32 particle_updateBoneBurstParticle(BoneBurstParticle *particle) {
         return 0;
     }
 
-    func_15143134(&D_800A1950, &particle->head.def.pos, target->ob_matrix_ptr + 15);
+    math_transformOffset(&D_800A1950, &particle->head.def.pos, target->ob_matrix_ptr + 15);
 
     size = sqrtf(state->age) * state->growth;
     particle->head.def.height = size;

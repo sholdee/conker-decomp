@@ -252,7 +252,7 @@ Gfx *particle_drawSpriteParticle(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
     } else {
         pos = p->head.desc.pos;
     }
-    if (func_15144CEC(&pos, screen, &depth, &w, &scale, viewIdx)) {
+    if (math_projectToScreen(&pos, screen, &depth, &w, &scale, viewIdx)) {
         RenderView *view;
         TextureDesc *tex;
         f32 texW;
@@ -335,11 +335,11 @@ Gfx *particle_drawSpriteParticle(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
                 particle_getSpriteColors(&primR, &primG, &primB, &primA, &envR, &envG, &envB, &envA, p);
             }
             gfx = particle_setCombineMode(gfx, shade, &needSync);
-            gfx = func_15142B7C(gfx, p->head.desc.unk0, p->head.desc.unk4 | 0x10000 | 0x100000);
-            gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
-            gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
-            gfx = func_15142E24(gfx, &gEffectTextures[p->head.desc.texture], p->head.desc.frame, 2, 0, 0, p->head.desc.texture, 0, 0, &needSync, (p->head.desc.flags & 0x800000) ? 0x3E : 3);
-            gfx = func_15142FBC(gfx, ((p->head.desc.flags & 0x100) ? 0x100000 : 0) | gSpriteTlutMode | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[mode].unk0 | gEffectRenderModes[mode].unk4 | 4, &needSync);
+            gfx = math_gfxUpdateGeometryMode(gfx, p->head.desc.unk0, p->head.desc.unk4 | 0x10000 | 0x100000);
+            gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &needSync);
+            gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &needSync);
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[p->head.desc.texture], p->head.desc.frame, 2, 0, 0, p->head.desc.texture, 0, 0, &needSync, (p->head.desc.flags & 0x800000) ? 0x3E : 3);
+            gfx = math_gfxSetOtherMode(gfx, ((p->head.desc.flags & 0x100) ? 0x100000 : 0) | gSpriteTlutMode | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[mode].unk0 | gEffectRenderModes[mode].unk4 | 4, &needSync);
             gSPScisTextureRectangle(gfx++, (s32)ulx, (s32)uly, (s32)lrx, (s32)lry, 0, s, t, dsdx, dtdy);
         }
     }
@@ -526,8 +526,8 @@ s32 particle_hideSpriteDraw(s32 arg0, s32 arg1) {
 
 /* Moves the particle's x/z offset around an ellipse with radii amplitude[0..1] as phase advances. */
 void particle_wobbleSpriteOffset(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseStep) {
-    head->desc.offset.x = amplitude[0] * func_151423D8(phase[0] - 0x40);
-    head->desc.offset.z = amplitude[1] * func_151423D8(phase[1] - 0x40);
+    head->desc.offset.x = amplitude[0] * math_cosBinAngleMasked(phase[0] - 0x40);
+    head->desc.offset.z = amplitude[1] * math_cosBinAngleMasked(phase[1] - 0x40);
     phase[0] += phaseStep[0] * D_800BE9E4;
     phase[1] += phaseStep[1] * D_800BE9E4;
 }
@@ -582,7 +582,7 @@ s32 particle_checkSpriteFloor(SpriteParticle *p, Vec3f *prevPos, ParticleBounce 
         probe.x = p->head.desc.pos.x;
         probe.y = prevPos->y;
         probe.z = p->head.desc.pos.z;
-        if (func_1514672C(&probe) == 0) {
+        if (math_isInWorldBounds(&probe) == 0) {
             return FALSE;
         }
         if (collision_probeFloorSurfABSet0Cached(&probe, 0, p->head.desc.pos.y - p->head.desc.height * 0.06000000238f, &p->head.floor) != 0) {
@@ -649,8 +649,8 @@ void particle_onSpriteEvent(SpriteParticle *p, s32 arg1, u8 arg2) {
 void particle_wobblePair(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX, f32 *outY) {
     phase[0] += phaseStep[0] * D_800BE9E4;
     phase[1] += phaseStep[1] * D_800BE9E4;
-    *outX = amplitude[0] * func_151423D8(phase[0] - 0x40) + base;
-    *outY = amplitude[1] * func_151423D8(phase[1] - 0x40) + base;
+    *outX = amplitude[0] * math_cosBinAngleMasked(phase[0] - 0x40) + base;
+    *outY = amplitude[1] * math_cosBinAngleMasked(phase[1] - 0x40) + base;
 }
 
 /* The three particle object types (see particle_newSpriteParticleWithFloor). */
@@ -719,7 +719,7 @@ SpriteParticle *particle_spawnFlash(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
     desc.b = 0xFF;
     desc.brightness = 0xFF;
     desc.pos = *pos;
-    desc.offset = D_800A5480;
+    desc.offset = gZeroVec3f;
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.scaleStart = 1;
@@ -736,7 +736,7 @@ SpriteParticle *particle_spawnFlash(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
     desc.handlerSet = 0;
     desc.viewMask = NULL;
     desc.views = 0xFF;
-    desc.vel = D_800A5480;
+    desc.vel = gZeroVec3f;
     desc.timer = 300;
     desc.width = 0.0f;
     desc.height = 0.0f;

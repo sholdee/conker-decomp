@@ -115,7 +115,7 @@ s32 script_updatePoseCommand(s32 slot) {
 void script_updatePoseCommands(void) {
     s32 i;
 
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         for (i = 0; i < 3; i++) {
             if (gPoseCommands[i].state != 0 && script_updatePoseCommand(i) != 0) {
                 break;
@@ -359,7 +359,7 @@ s32 script_cameraQuery(s32 actorIndex, s32 query, s32 *args) {
         facing.x = sinf(angle);
         facing.y = 0.0f;
         facing.z = cosf(angle);
-        func_15048F90(&actor->eye, (Vec3f *)&target->xpos, &toTarget);
+        math_vec3Diff(&actor->eye, (Vec3f *)&target->xpos, &toTarget);
         toTarget.y = 0.0f;
         if (func_150AD900(&facing.x, &toTarget.x) >= 0.0f) {
             side = -1;
@@ -382,8 +382,8 @@ void func_15097798(s32 actorIndex) {
 
     actor = &camera_global_Cameras[actorIndex];
     if (gPoseCommandRunning != 0) {
-        func_15048F90(&actor->focus, &actor->eye, &dir);
-        func_1504917C(&dir, &dir);
+        math_vec3Diff(&actor->focus, &actor->eye, &dir);
+        math_vec3Unit(&dir, &dir);
 
         actor->focus.x += dir.x * -2.5f * D_800D2E30[actorIndex];
         actor->focus.y += dir.y * -2.0f * D_800D2E30[actorIndex];

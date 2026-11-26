@@ -43,8 +43,8 @@ void camera_updateAngleOffsets(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
         camera->Tightness = 0;
     }
     if ((gPoseCommandRunning != 0) || ((camera->DoingAim != 0) && (camera->DoingAim != 3)) || (camera->mv->death_State != 0)) {
-        func_150495B0(&camera->YawAngle, 0.0f, &camera->CentYawAngleVel, 6.0f, 9.0f, camera->SpringTime);
-        func_150495B0(&camera->APitchAngle, 0.0f, &camera->CentPitchAngleVel, 1.5f, 2.5f, camera->SpringTime);
+        math_springTo(&camera->YawAngle, 0.0f, &camera->CentYawAngleVel, 6.0f, 9.0f, camera->SpringTime);
+        math_springTo(&camera->APitchAngle, 0.0f, &camera->CentPitchAngleVel, 1.5f, 2.5f, camera->SpringTime);
         return;
     }
     unk3A8Scale = gCameraAngleOffsetPresets[camera->Tightness].unk3A8Scale;
@@ -87,7 +87,7 @@ void camera_updateAngleOffsets(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
         camera->APitchAngle = target;
         camera->CentPitchAngleVel = 0.0f;
     } else {
-        func_150495B0(&camera->APitchAngle, target, &camera->CentPitchAngleVel, 1.5f, 2.5f, camera->SpringTime);
+        math_springTo(&camera->APitchAngle, target, &camera->CentPitchAngleVel, 1.5f, 2.5f, camera->SpringTime);
     }
     foldedAngle = camera->CharRelAngle;
     while (foldedAngle > 180.0f) {
@@ -105,9 +105,9 @@ void camera_updateAngleOffsets(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
         camera->YawAngle = target;
         camera->CentYawAngleVel = 0.0f;
     } else if (camera->Mode & 0x100) {
-        func_150495B0(&camera->YawAngle, target, &camera->CentYawAngleVel, 6.0f, 9.0f, camera->SpringTime);
+        math_springTo(&camera->YawAngle, target, &camera->CentYawAngleVel, 6.0f, 9.0f, camera->SpringTime);
     } else {
-        func_150495B0(&camera->YawAngle, target, &camera->CentYawAngleVel, 1.5f, 2.5f, camera->SpringTime);
+        math_springTo(&camera->YawAngle, target, &camera->CentYawAngleVel, 1.5f, 2.5f, camera->SpringTime);
     }
     camera->Tightness = savedPresetIndex;
 }

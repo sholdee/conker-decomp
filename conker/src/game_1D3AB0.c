@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Spins the emitter and, while func_151464B8 allows it, throws particles from random points of its region. */
+/* Spins the emitter and, while math_isZoneHiddenFromViews allows it, throws particles from random points of its region. */
 s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
     ZoneEmitterState *state;
 
@@ -11,10 +11,10 @@ s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
         mp_addZone(obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 500.0f);
     }
     state->angle += state->angleSpeed * gFrameDelta;
-    state->angle = func_15144528(state->angle, 2048.0f, 0.0f);
+    state->angle = math_wrapFloat(state->angle, 2048.0f, 0.0f);
     state->phase += state->phaseSpeed * D_800BE9E4;
-    state->alpha = func_151423D8(state->phase - 0x40) * 63.0f + 192.0f;
-    if (func_151464B8(obj->head.def.unk48) == 0) {
+    state->alpha = math_cosBinAngleMasked(state->phase - 0x40) * 63.0f + 192.0f;
+    if (math_isZoneHiddenFromViews(obj->head.def.unk48) == 0) {
         state->pending += (0.3930000067f + func_150ADA68() * 0.4370000064f) * gFrameDelta;
         if (state->pending > 1.0f) {
             ParticleDesc spawn;
@@ -47,7 +47,7 @@ s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
             spawn.drawFunc = -1;
             spawn.handlerSet = 0;
             do {
-                func_15143874((u8)func_150ADA20(), state->region->xSize * func_150ADA68(), &spawn.pos.x,
+                math_dirFromBinAngleXZ((u8)func_150ADA20(), state->region->xSize * func_150ADA68(), &spawn.pos.x,
                               &spawn.pos.z);
                 spawn.pos.x += state->region->x;
                 spawn.pos.y = state->region->y;
@@ -55,7 +55,7 @@ s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
                 spawn.timer = (func_150ADA20() & 0xF) + 25;
                 spawn.alpha = func_150ADA20() % 101U + 100;
                 spawn.width = spawn.height = func_150ADA68() * 205.0f + 98.0f;
-                func_15143794((u8)func_150ADA20(), func_150ADA20() % 35U - 64, func_150ADA68() * 10.0f + 10.0f,
+                math_dirFromBinAngles((u8)func_150ADA20(), func_150ADA20() % 35U - 64, func_150ADA68() * 10.0f + 10.0f,
                               &spawn.vel);
                 // matching: `+ -x` (a subtraction emits sub.s instead of add.s)
                 spawn.gravity = func_150ADA68() * 0.2840000093f + -0.9100000262f;

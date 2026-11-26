@@ -9,7 +9,7 @@
  */
 
 /* Cosine of a u8 binary angle, built from the quarter-wave table by symmetry. */
-f32 func_150489B0(u8 angle) {
+f32 math_cosBinAngle(u8 angle) {
     f32 value;
 
     if (angle > 64) {
@@ -30,12 +30,12 @@ f32 func_150489B0(u8 angle) {
 }
 
 /* Sine of a u8 binary angle: sin(a) = cos(a - quarter turn). */
-f32 func_15048A40(u8 angle) {
-    return func_150489B0(angle - 64);
+f32 math_sinBinAngle(u8 angle) {
+    return math_cosBinAngle(angle - 64);
 }
 
 /* Signed difference target - current in degrees, wrapped to take the short way round. */
-f32 func_15048A70(f32 current, f32 target) {
+f32 math_angleDiff(f32 current, f32 target) {
     f32 diff = current - target;
 
     if (diff > 180.0f) {
@@ -46,8 +46,8 @@ f32 func_15048A70(f32 current, f32 target) {
     return target - current;
 }
 
-/* Integer-degree version of func_15048A70. */
-s32 func_15048AD0(s32 current, s32 target) {
+/* Integer-degree version of math_angleDiff. */
+s32 math_angleDiffInt(s32 current, s32 target) {
     s32 diff = current - target;
 
     if (diff > 180) {

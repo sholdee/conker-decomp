@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The area effects of func_150139AC (game_40490.c), indexed by the zone's data1. */
+/* The area effects of level_spawnZoneAreaEffect (game_40490.c), indexed by the zone's data1. */
 const Struct150139ACEntry gAreaEffectDefs[6] = {
     { 6.50000004e-07f, 2.180000067f, 1.230000019f, 1.610000014f, 4.829999924f,
       252, 50,
@@ -52,13 +52,13 @@ void particle_resetModelList(void) {
 void *memcpy(void *, const void *, u32);
 
 /*
- * Spawns func_1514462C(region) * density * 2e-6 particles at random points of the region,
+ * Spawns math_getZoneVolume(region) * density * 2e-6 particles at random points of the region,
  * each with a random type from a fixed list.
  */
 void particle_spawnAreaParticles(TriggerZone *region, f32 density) {
     f32 count;
 
-    count = func_1514462C(region) * density * 1.999999995e-06f;
+    count = math_getZoneVolume(region) * density * 1.999999995e-06f;
     if (count > 1.0f) {
         f32 inv65535;
         ParticleSpawn part;
@@ -145,11 +145,11 @@ typedef struct {
     /* 0x18 */ u8 pad18[4];
 } Particle15130280Extra; /* 0x1C bytes are copied */
 
-/* Spawns func_1514462C(region) * density * 2e-6 particle_newSpriteParticleWithFloor particles of random size. */
+/* Spawns math_getZoneVolume(region) * density * 2e-6 particle_newSpriteParticleWithFloor particles of random size. */
 void particle_spawnAreaSprites(TriggerZone *region, f32 density) {
     f32 count;
 
-    count = func_1514462C(region) * density * 1.999999995e-06f;
+    count = math_getZoneVolume(region) * density * 1.999999995e-06f;
     if (count > 1.0f) {
         f32 minFrac;
         f32 fracRange;
@@ -259,12 +259,12 @@ typedef struct {
     /* 0x18 */ f32 unk18;
 } Particle1513D2F0Extra; /* size 0x1C */
 
-/* Spawns func_1514462C(region) * density * 2e-7 particle_newQuadParticle particles using gWhiteVtxColors. */
+/* Spawns math_getZoneVolume(region) * density * 2e-7 particle_newQuadParticle particles using gWhiteVtxColors. */
 void particle_spawnAreaQuads(TriggerZone *region, f32 density) {
     f32 count;
     s32 pad; // matching: stack slot
 
-    count = func_1514462C(region) * density * 2.000000023e-07f;
+    count = math_getZoneVolume(region) * density * 2.000000023e-07f;
     if (count > 1.0f) {
         f32 inv65535;
         f32 range; // matching: reused for the distance to the nearer bound
@@ -337,7 +337,7 @@ void particle_spawnAreaQuads(TriggerZone *region, f32 density) {
 void func_1500D3AC(TriggerZone *region, f32 density) {
     f32 count;
 
-    count = func_1514462C(region) * density * 2.000000023e-07f;
+    count = math_getZoneVolume(region) * density * 2.000000023e-07f;
     if (count > 1.0f) {
         f32 inv65535;
         ParticleSpawn part;
@@ -406,7 +406,7 @@ void func_1500D3AC(TriggerZone *region, f32 density) {
 void func_1500D8C8(TriggerZone *region, f32 density) {
     f32 count;
 
-    count = func_1514462C(region) * density * 1.999999995e-06f;
+    count = math_getZoneVolume(region) * density * 1.999999995e-06f;
     if (count > 1.0f) {
         f32 inv65535;
         ParticleSpawn part;
@@ -482,7 +482,7 @@ void func_1500D8C8(TriggerZone *region, f32 density) {
 void func_1500DE88(TriggerZone *region, f32 density) {
     f32 count;
 
-    count = func_1514462C(region) * density * 1.999999995e-06f;
+    count = math_getZoneVolume(region) * density * 1.999999995e-06f;
     if (count > 1.0f) {
         f32 minFrac;
         f32 fracRange;

@@ -20,11 +20,11 @@ void func_15169C70(Debris *debris) {
     debris->y += debris->velY * dt;
     if (debris->flags & 1) {
         debris->phase += D_800BE9E4 * 8;
-        debris->scale = (func_15048A40(debris->phase) * 0.400000006f + 1.0f) * debris->baseScale;
+        debris->scale = (math_sinBinAngle(debris->phase) * 0.400000006f + 1.0f) * debris->baseScale;
     }
     if (debris->flags & 2) {
-        debris->rotY = func_150484A0(debris->velX, debris->velZ) * 57.29577637f;
-        debris->rotX = func_150484A0(-debris->velY, sqrtf(debris->velX * debris->velX +
+        debris->rotY = math_atan2(debris->velX, debris->velZ) * 57.29577637f;
+        debris->rotX = math_atan2(-debris->velY, sqrtf(debris->velX * debris->velX +
                                                            debris->velZ * debris->velZ)) *
                        57.29577637f;
     }

@@ -90,7 +90,7 @@ typedef struct {
     /* 0x4 */ f32 targetScale;
 } TrailGlowData;
 
-/* A glow returned by func_151407D0. */
+/* A glow returned by flare_spawnGlow. */
 typedef struct TrailGlow {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ GlowShape shape;          /* shape.scale eases toward tail.targetScale (trail_updateTrailGlow) */
@@ -1044,7 +1044,7 @@ LevelStream *trail_findStream(s32 id);
 
 /* Data of the random-point emitter (a TimedEffect's data). */
 typedef struct Game1FBB80Effect {
-    /* 0x00 */ TriggerZone *shape; /* the zone whose area the packets start in (func_151432BC) */
+    /* 0x00 */ TriggerZone *shape; /* the zone whose area the packets start in (math_randomZoneFootprintPoint) */
     /* 0x04 */ f32 rate;
     /* 0x08 */ f32 accumulator;
     /* 0x0C */ ZoneNode *zone;     /* the emitter's zone: it emits only while a view can see it */

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-s32 func_151EF610(void) {
+s32 math_rand(void) {
     static u32 D_80091970 = 174823885;
     u32 x;
 

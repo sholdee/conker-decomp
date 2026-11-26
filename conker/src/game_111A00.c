@@ -64,7 +64,7 @@ void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16
     }
     entry = &D_800A1070[material];
     if (entry->particleType != 0) {
-        count = func_151EF610() % entry->countRange + entry->minCount + 1;
+        count = math_rand() % entry->countRange + entry->minCount + 1;
         if (size != 1) {
             lifetime = 30;
         }
@@ -80,7 +80,7 @@ void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16
     if (entry->debrisType != 0) {
         effect_sprayDebris(x, y, z, entry->debrisType | flag, size, tri, slot);
     }
-    if (size != 0 && func_151EF610() % 100 < entry->chance) {
+    if (size != 0 && math_rand() % 100 < entry->chance) {
         {
             Vec3f pos;
             s32 pad; // matching: keeps pos at its original stack offset
@@ -148,8 +148,8 @@ void effect_spawnGroundImpactsUnder(WorldObject *obj) {
             x = obj->x;
             z = obj->z;
             if (obj->cullRadiusXZ != 0) {
-                x += (func_151EF610() % obj->cullRadiusXZ) * 2 - obj->cullRadiusXZ;
-                z += (func_151EF610() % obj->cullRadiusXZ) * 2 - obj->cullRadiusXZ;
+                x += (math_rand() % obj->cullRadiusXZ) * 2 - obj->cullRadiusXZ;
+                z += (math_rand() % obj->cullRadiusXZ) * 2 - obj->cullRadiusXZ;
             }
             found = func_150A43E0(x, z, 1, &idx);
             if (found) {
@@ -235,7 +235,7 @@ void func_150E4CBC(Struct150E4CBC *fx) {
     fx->timer += D_800BE9E4;
 }
 
-/* Computes the plane of a triangle; the (unnormalised) normal lands in D_800CC210..D_800CC218. */
+/* Computes the plane of a triangle; the (unnormalised) normal lands in gTriPlaneNormalX..gTriPlaneNormalZ. */
 
 /*
  * Sprays debris particles of `kind` from (x, y, z). With a hit triangle `tri` the spray follows the
@@ -283,10 +283,10 @@ void effect_sprayDebris(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 
             plane.pts[i].y = tri[i][1];
             plane.pts[i].z = tri[i][2];
         }
-        func_15049350(plane);
-        dirX = -D_800CC210;
-        dirY = -D_800CC214;
-        dirZ = -D_800CC218;
+        math_computeTriPlane(plane);
+        dirX = -gTriPlaneNormalX;
+        dirY = -gTriPlaneNormalY;
+        dirZ = -gTriPlaneNormalZ;
         len = sqrtf(dirX * dirX + dirY * dirY + dirZ * dirZ);
         if (len < 9.999999747e-05f) {
             return;
@@ -295,7 +295,7 @@ void effect_sprayDebris(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 
         dirY /= len;
         dirZ /= len;
         if (slot != 0xFF && fabsf(dirY) < 0.8999999762f) {
-            func_150440A0(mtx, 0.0f, 0.0f, 0.0f, dirX, dirY, dirZ, 0.0f, 1.0f, 0.0f);
+            math_mtxLookAt(mtx, 0.0f, 0.0f, 0.0f, dirX, dirY, dirZ, 0.0f, 1.0f, 0.0f);
             func_150A7960(mtx, 0.0f, 0.0f, 1.0f, &gAimImpacts[slot].normal[0], &gAimImpacts[slot].normal[1], &gAimImpacts[slot].normal[2]);
         } else {
             noSurface = 1;
@@ -337,7 +337,7 @@ void effect_sprayDebris(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 
             big = 1;
             spawn.accelY = -373;
             count = 12;
-            baseSpeed *= 0.5f * (func_151EF610() % 3 + 1);
+            baseSpeed *= 0.5f * (math_rand() % 3 + 1);
         } else if (size == 0) {
             spawn.accelY = -218;
             count = 12;
@@ -347,26 +347,26 @@ void effect_sprayDebris(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 
         }
         while (count-- && ok) {
             speed = func_150ADA68() * 957.0f + baseSpeed;
-            angle = func_151EF610() % 256;
+            angle = math_rand() % 256;
             if (big) {
                 speed += speed;
             }
             if (noSurface) {
-                dirX = func_15048A40(angle);
+                dirX = math_sinBinAngle(angle);
                 dirY = 1.0f;
-                dirZ = func_150489B0(angle);
+                dirZ = math_cosBinAngle(angle);
             } else {
-                spread = func_15048A40(angle);
-                func_150A7960(mtx, spread * 0.5f, func_150489B0(angle) * 0.5f, 1.0f, &dirX, &dirY, &dirZ);
+                spread = math_sinBinAngle(angle);
+                func_150A7960(mtx, spread * 0.5f, math_cosBinAngle(angle) * 0.5f, 1.0f, &dirX, &dirY, &dirZ);
             }
             vx = 0.3149999976f * dirX;
             vy = dirY;
             vz = 0.3149999976f * dirZ;
-            spawn.life = func_151EF610() % 2 + 386;
+            spawn.life = math_rand() % 2 + 386;
             spawn.velX = speed * vx;
             spawn.velY = speed * vy;
             spawn.velZ = speed * vz;
-            func_151EF610();
+            math_rand();
             spawn.fadeStep = 10;
             spawn.width = func_150ADA68() * rangeScale + minScale;
             spawn.height = func_150ADA68() * rangeScale + minScale;
@@ -374,7 +374,7 @@ void effect_sprayDebris(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 
                 ok = 0;
             }
         }
-        if ((kind == 4 || kind == 9 || kind == 5) && func_151EF610() % 5 == 0) {
+        if ((kind == 4 || kind == 9 || kind == 5) && math_rand() % 5 == 0) {
             effect_launchDebrisChunk(x, y, z, dirX, dirY, dirZ, kind, size);
         }
     }
@@ -391,13 +391,13 @@ void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ,
     bzero(&chunk, sizeof(chunk));
 
     if (dirY != 0.0f) {
-        pitch = func_150484A0(dirX, dirY) * 57.29577637f; // radians to degrees
+        pitch = math_atan2(dirX, dirY) * 57.29577637f; // radians to degrees
     } else {
         pitch = 90.0f;
     }
 
     if (dirZ != 0.0f) {
-        yaw = func_150484A0(dirX, dirZ) * 57.29577637f;
+        yaw = math_atan2(dirX, dirZ) * 57.29577637f;
     } else {
         yaw = 90.0f;
     }
@@ -426,7 +426,7 @@ void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ,
         chunk.elasticity = 0.3000000119f;
     }
 
-    chunk.lifetime = func_151EF610() % 60 + 60;
+    chunk.lifetime = math_rand() % 60 + 60;
     chunk.flags = 0x29E9;
 
     rand = func_150ADA68();
@@ -505,19 +505,19 @@ s32 effect_bounceOffTriangle(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, 
                 tri.pts[i].y = verts[i][1];
                 tri.pts[i].z = verts[i][2];
             }
-            func_15049350(tri);
-            normal.x = -D_800CC210;
-            normal.y = -D_800CC214;
-            normal.z = -D_800CC218;
+            math_computeTriPlane(tri);
+            normal.x = -gTriPlaneNormalX;
+            normal.y = -gTriPlaneNormalY;
+            normal.z = -gTriPlaneNormalZ;
             len = func_150AD930(&normal.x);
             if (len > 9.999999747e-06f) {
-                func_15049148(&normal, 1.0f / len, &unit);
+                math_vec3Scale(&normal, 1.0f / len, &unit);
                 vel.x = obj->velX;
                 vel.y = obj->velY;
                 vel.z = obj->velZ;
                 dot = func_150AD900(&unit.x, &vel.x);
-                func_15049148(&unit, 2.0f * dot, &normal);
-                func_15048F58(&vel, &normal, &normal);
+                math_vec3Scale(&unit, 2.0f * dot, &normal);
+                math_vec3Sub(&vel, &normal, &normal);
                 obj->velX = obj->bounce * normal.x * 0.8000000119f;
                 obj->velY = obj->bounce * normal.y;
                 obj->velZ = obj->bounce * normal.z * 0.8000000119f;

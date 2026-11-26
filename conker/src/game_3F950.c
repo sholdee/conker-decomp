@@ -26,10 +26,10 @@ void func_150124A0(void) {
         for (i = 0; i < 10; i++) {
             yaw = gPipeSpots[row].yaw + func_150ADA20() % 13U - 0x86;
             pitch = (func_150ADA20() & 0xF) - 10;
-            yawCos = func_151423D8(yaw - 0x40);
-            yawSin = func_151423D8(yaw);
-            pitchCos = func_151423D8(pitch - 0x40);
-            radius = func_151423D8(pitch);
+            yawCos = math_cosBinAngleMasked(yaw - 0x40);
+            yawSin = math_cosBinAngleMasked(yaw);
+            pitchCos = math_cosBinAngleMasked(pitch - 0x40);
+            radius = math_cosBinAngleMasked(pitch);
             radius = 10.0f * radius;
             dirX = radius * yawCos;
             dirY = -10.0f * pitchCos;

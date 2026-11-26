@@ -622,7 +622,7 @@ void prop_swingDoor(WorldObject *prop, s32 arg1) {
             }
         }
         angle += speed;
-        remaining = func_15048A70(angle, target);
+        remaining = math_angleDiff(angle, target);
         if (fabsf(remaining) < fabsf(speed)) {
             speed = -speed * bounce;
             if (fabsf(speed) < 1.0f) {
@@ -665,7 +665,7 @@ void prop_swingDoor(WorldObject *prop, s32 arg1) {
     }
     WORK(prop)->swing.speed = speed;
     if (D_800BE9B4 != 0 || angle != prop->u) {
-        if (D_800C35EA[0] == 1 && func_15022B08(prop - db_Object_array, 0) != 0) {
+        if (gCutsceneStates[0] == 1 && cutscene_isActorIndexBound(prop - db_Object_array, 0) != 0) {
             angle = prop->u;
         } else {
             prop->u = angle;
@@ -678,9 +678,9 @@ void prop_swingDoor(WorldObject *prop, s32 arg1) {
         if (index != 0) {
             scale = 1.0f - fabsf((fabsf(angle) - (openAngle < 0 ? -openAngle : openAngle)) / openAngle);
             effect_setColorAnimBlend(index - 1, scale);
-            func_15173C60(scale * 255.0f, index - 1);
+            env_fadeLevelVtxColours(scale * 255.0f, index - 1);
             if (level == 1 && index - 1 == 0) {
-                func_15173C90(scale * 255.0f, 0, 0xF8);
+                env_fadePropVtxColours(scale * 255.0f, 0, 0xF8);
             }
         }
     }
@@ -737,7 +737,7 @@ void prop_swingFlap(WorldObject *prop) {
             }
         }
         angle += speed;
-        remaining = func_15048A70(angle, target);
+        remaining = math_angleDiff(angle, target);
         if (fabsf(remaining) < fabsf(speed)) {
             speed = -speed * bounce;
             if (fabsf(speed) < WORK(prop)->swing.accel * 133.3333435f) {
@@ -778,7 +778,7 @@ void prop_swingFlap(WorldObject *prop) {
         if (index != 0 && openAngle != 0) {
             scale = 1.0f - fabsf((angle - openAngle) / openAngle);
             effect_setColorAnimBlend(index - 1, scale);
-            func_15173C60(scale * 255.0f, index - 1);
+            env_fadeLevelVtxColours(scale * 255.0f, index - 1);
         }
     }
 }
@@ -939,11 +939,11 @@ void prop_initSwayGroups(WorldObject *prop) {
         }
         if (sumX != 0 || sumZ != 0) {
             vtx = vertices;
-            angle = (u8)(s32)(func_150484A0(sumX, sumZ) * 40.74366379f); /* radians to 1/256 turns */
+            angle = (u8)(s32)(math_atan2(sumX, sumZ) * 40.74366379f); /* radians to 1/256 turns */
             if (group < angle) {
                 back = -angle;
-                sinA = func_15048A40(back);
-                cosA = func_150489B0(back);
+                sinA = math_sinBinAngle(back);
+                cosA = math_cosBinAngle(back);
                 for (i = 0; i < prop->numVertices; i++) {
                     if (group == vtx->flag) {
                         temp = vtx->x;
@@ -1008,26 +1008,26 @@ void prop_swayVertexGroups(WorldObject *prop) {
             }
         }
     } else {
-        WORK(prop)->sway.phase += (0.01953125f + 0.00390625f * (func_151EF610() % 6)) * gFrameDelta;
-        WORK(prop)->sway.timer -= func_151EF610() % 3;
+        WORK(prop)->sway.phase += (0.01953125f + 0.00390625f * (math_rand() % 6)) * gFrameDelta;
+        WORK(prop)->sway.timer -= math_rand() % 3;
         if (WORK(prop)->sway.timer < 20) {
             WORK(prop)->sway.timer = 236;
         }
     }
     for (i = 0; i < 4; i++) {
         if (WORK(prop)->sway.timer >= 0x400) {
-            rot[i][0] = func_15048A40(WORK(prop)->sway.phase);
-            rot[i][1] = func_150489B0(WORK(prop)->sway.phase);
+            rot[i][0] = math_sinBinAngle(WORK(prop)->sway.phase);
+            rot[i][1] = math_cosBinAngle(WORK(prop)->sway.phase);
         } else {
             angle = WORK(prop)->sway.phase * 6.283185482f - 0.3926990926f * i;
             if (angle <= 0.0f) {
                 angle = 5.0f;
             } else {
-                sine = func_15048A40(WORK(prop)->sway.timer >> 1);
+                sine = math_sinBinAngle(WORK(prop)->sway.timer >> 1);
                 angle = sinf(angle) * (2.0f * sine) + 5.0f;
             }
-            rot[i][0] = func_15048A40(angle);
-            rot[i][1] = func_150489B0(angle);
+            rot[i][0] = math_sinBinAngle(angle);
+            rot[i][1] = math_cosBinAngle(angle);
         }
     }
     if (WORK(prop)->sway.timer != 0x420) {
@@ -1048,8 +1048,8 @@ void prop_swayVertexGroups(WorldObject *prop) {
     }
     for (i = 0; i < prop->numVertices; i++) {
         if (vtx->flag != 0) {
-            sine = func_15048A40(vtx->flag + yaw);
-            cosine = func_150489B0(vtx->flag + yaw);
+            sine = math_sinBinAngle(vtx->flag + yaw);
+            cosine = math_cosBinAngle(vtx->flag + yaw);
             bend = rot[vtx->flag >> 8];
             bendSin = bend[0];
             bendCos = bend[1];

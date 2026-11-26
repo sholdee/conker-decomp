@@ -187,8 +187,8 @@ onFloor: // matching: an unused label splits the block, so the call setup stays 
         corner[0][2] = -100.0f;
         if (angle != 0) {
             tmp = corner[0][0];
-            sinYaw = func_15048A40(angle);
-            cosYaw = func_150489B0(angle);
+            sinYaw = math_sinBinAngle(angle);
+            cosYaw = math_cosBinAngle(angle);
             corner[0][0] = corner[0][2] * sinYaw + corner[0][0] * cosYaw;
             corner[0][2] = corner[0][2] * cosYaw - tmp * sinYaw;
         }

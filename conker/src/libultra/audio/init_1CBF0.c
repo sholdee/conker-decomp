@@ -12,7 +12,7 @@ void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
         arg1 = arg0 - 200.0f;
     }
 
-    sp24 = func_150484A0(arg1 * 3.1415927f, arg0);
+    sp24 = math_atan2(arg1 * 3.1415927f, arg0);
     sp20 = sp24 * sp24;
     sp1C = (sp24 * 1.4142137f) / arg2;
     arg3[0] = sp20 / (1.0f + sp20 + sp1C);

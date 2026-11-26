@@ -14,8 +14,8 @@ void func_150C29F0(Struct150C29F0 *emitter) {
     f32 radius;
 
     angle = func_150ADA20() & 0xFF;
-    cosine = func_151423D8(angle - 0x40);
-    sine = func_151423D8(angle);
+    cosine = math_cosBinAngleMasked(angle - 0x40);
+    sine = math_cosBinAngleMasked(angle);
     pos = &emitter->unk28;
     radius = func_150ADA68() * pos->radius;
     particle.maxC = 0x6231; particle.minC = 0x1A4D; // matching: one source line (-g3 line numbers steer as1 scheduling)
@@ -65,7 +65,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
     if (*timer > 1.0f) {
         if (1) { // matching: the extra block makes IDO give emitter $s3 and pos $s2
             // matching: the camera position read as f32[3]; through Vec3f fields IDO emits other code
-            pos = (f32 *)func_15144B34(gCurrentView);
+            pos = (f32 *)math_getCameraPos(gCurrentView);
             distSq = (pos[2] * pos[2]) + (pos[0] * pos[0]);
             if (2500000.0f < distSq) {
                 particle.maxC = 0x6231;
@@ -86,8 +86,8 @@ void func_150C2C00(Struct150C29F0 *emitter) {
                 particle.growRate = 0.7f;
                 do {
                     angle = (func_150ADA68() * 5.8659425f) + 0.957204f;
-                    if (func_15144C8C(func_150484A0(pos[0], pos[2]), angle) < 0.4f) {
-                        func_1514373C(angle, (func_150ADA68() * 1278.0f) + 3900.0f, &particle.pos.x, &particle.pos.z);
+                    if (math_angleDistance(math_atan2(pos[0], pos[2]), angle) < 0.4f) {
+                        math_dirFromAngleXZ(angle, (func_150ADA68() * 1278.0f) + 3900.0f, &particle.pos.x, &particle.pos.z);
                         scaleA = ((func_150ADA68() * 1991.0f) + 1985.0f) * 0.001f;
                         scaleB = ((func_150ADA68() * 1493.0f) + 3000.0f) * 0.001f;
                         particle.maxA = 22.6f * scaleA;
@@ -130,13 +130,13 @@ s32 func_150C308C(ChannelParticle *particle) {
 
     triggered = FALSE;
     if (particle->head.def.lifetime >= 6) {
-        pos = func_15144B34(gCurrentView);
+        pos = math_getCameraPos(gCurrentView);
         value = pos->x * pos->x + pos->z * pos->z;
         if (value < 2500000.0f) {
             triggered = TRUE;
         } else {
-            value = func_150484A0(pos->x, pos->z);
-            if (0.4f < func_15144C8C(value, particle->extra)) {
+            value = math_atan2(pos->x, pos->z);
+            if (0.4f < math_angleDistance(value, particle->extra)) {
                 triggered = TRUE;
             }
         }

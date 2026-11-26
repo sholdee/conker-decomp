@@ -4,27 +4,27 @@
 #define NUM_TEXTURES 7762
 
 /* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
- * it first sees each name, and the static D_800B0E20 lies between D_800B0E10 and D_800B0E30. */
-Gfx *D_800B0E00[4];
-Vtx *D_800B0E10[4];
+ * it first sees each name, and the static D_800B0E20 lies between gLevelVertices and gVtxColorGroups. */
+Gfx *gLevelDisplayLists[4];
+Vtx *gLevelVertices[4];
 static s32 D_800B0E20[4]; // model unk8 of the four level models
-VtxColorGroup **D_800B0E30;
-u8 *D_800B0E34;
-u8 D_800B0E38;
-s32 D_800B0E40[4];
-LevelModelEntry *D_800B0E50;
-s32 D_800B0E58[NUM_TEXTURES];
-u16 D_800B87A0[NUM_TEXTURES];
-s8 D_800BC448[NUM_TEXTURES];
+VtxColorGroup **gVtxColorGroups;
+u8 *gVtxColorGroupCounts;
+u8 gVtxColorSetCount;
+s32 gLevelVertexCounts[4];
+LevelModelEntry *gLevelModels;
+s32 gTextureAddrs[NUM_TEXTURES];
+u16 gTextureSizes[NUM_TEXTURES];
+s8 gTextureLifetimes[NUM_TEXTURES];
 
 #include "functions.h"
 #include "variables.h"
 
 /* Per level (LevelHeader.assetList, 0 = none): a zero-terminated list of asset ids to load. */
-s32 *D_80082B20[] = { NULL, D_8009016C, D_80090184, D_800901C4, D_80090150 };
+s32 *gLevelAssetLists[] = { NULL, D_8009016C, D_80090184, D_800901C4, D_80090150 };
 
 /* Per texture: the size of its compressed data in ROM. */
-const u16 D_80091D20[NUM_TEXTURES] = {
+const u16 gTextureRomSizes[NUM_TEXTURES] = {
       137,  2202,    97,    96,   100,    98,    94,  2299,  2372,   549,   533,   522,
       522,   560,   526,   555,   549,   542,   531,   536,   538,   533,   515,   525,
       532,   538,   551,   544,   547,   542,   545,   542,   548,   522,   527,  1899,
@@ -679,25 +679,25 @@ const u16 D_80091D20[NUM_TEXTURES] = {
  * Rebases vertex color set `index`: its zero-terminated group list (at offset `list` in `base`) and the
  * groups' pointers are offsets from `base` as loaded. Stores the group count.
  */
-void func_15003120(s32 index, s32 base, s32 list) {
+void level_rebaseVtxColorSet(s32 index, s32 base, s32 list) {
     s32 i;
 
-    D_800B0E30[index] = (VtxColorGroup *)list;
-    D_800B0E34[index] = 0;
+    gVtxColorGroups[index] = (VtxColorGroup *)list;
+    gVtxColorGroupCounts[index] = 0;
     if (list == 0) {
         return;
     }
-    D_800B0E30[index] = (VtxColorGroup *)((u8 *)D_800B0E30[index] + base);
-    for (i = 0; D_800B0E30[index][i].colors != NULL; i++) {
-        D_800B0E30[index][i].colors = (Color24 *)((u8 *)D_800B0E30[index][i].colors + base);
-        D_800B0E30[index][i].vertexIndices = (u16 *)((u8 *)D_800B0E30[index][i].vertexIndices + base);
+    gVtxColorGroups[index] = (VtxColorGroup *)((u8 *)gVtxColorGroups[index] + base);
+    for (i = 0; gVtxColorGroups[index][i].colors != NULL; i++) {
+        gVtxColorGroups[index][i].colors = (Color24 *)((u8 *)gVtxColorGroups[index][i].colors + base);
+        gVtxColorGroups[index][i].vertexIndices = (u16 *)((u8 *)gVtxColorGroups[index][i].vertexIndices + base);
     }
-    D_800B0E34[index] = i;
+    gVtxColorGroupCounts[index] = i;
 }
 
 
 /* Loads level `levelId`'s models, rebases them and sets up the first four as the level's display lists. */
-void func_150031EC(s32 levelId) {
+void level_loadModels(s32 levelId) {
     LevelModelEntry *models;
     ModelAsset *model;
     s32 count;
@@ -712,19 +712,19 @@ void func_150031EC(s32 levelId) {
         levelId = 0;
     }
     models = rom_loadPathTable(&loaded, 0, &count, 2, 4, levelId);
-    D_800B0E50 = models;
+    gLevelModels = models;
     for (k = 1; k < 4; k++) {
-        D_800B0E00[k] = 0;
-        D_800B0E10[k] = NULL;
-        D_800B0E40[k] = 0;
+        gLevelDisplayLists[k] = 0;
+        gLevelVertices[k] = NULL;
+        gLevelVertexCounts[k] = 0;
     }
-    func_150034B4();
+    level_resetTextureTable();
     if (loaded) {
-        D_800B0E30 = allocate_memory(count * 4, 1, 0, 0);
-        D_800B0E34 = allocate_memory(count, 1, 0, 0);
-        bzero(D_800B0E34, count);
-        bzero(D_800B0E30, count);
-        D_800B0E38 = count;
+        gVtxColorGroups = allocate_memory(count * 4, 1, 0, 0);
+        gVtxColorGroupCounts = allocate_memory(count, 1, 0, 0);
+        bzero(gVtxColorGroupCounts, count);
+        bzero(gVtxColorGroups, count);
+        gVtxColorSetCount = count;
         for (i = 0; i < count; i++) {
             model = models[i].model;
             if (model != NULL && models[i].loaded) {
@@ -737,38 +737,38 @@ void func_150031EC(s32 levelId) {
                 if (model->materials != NULL) {
                     model->materials = (s32 *)((u8 *)model->materials + (s32)model);
                 }
-                func_15003120(i, (s32)model, model->rangeList);
+                level_rebaseVtxColorSet(i, (s32)model, model->rangeList);
                 if (i < 4) {
-                    D_800B0E00[i] = model->displayList;
-                    D_800B0E10[i] = model->vertices;
-                    D_800B0E40[i] = (u32)((s32)D_800B0E00[i] - (s32)D_800B0E10[i]) / sizeof(Vtx); // the display list follows the vertices
+                    gLevelDisplayLists[i] = model->displayList;
+                    gLevelVertices[i] = model->vertices;
+                    gLevelVertexCounts[i] = (u32)((s32)gLevelDisplayLists[i] - (s32)gLevelVertices[i]) / sizeof(Vtx); // the display list follows the vertices
                     D_800B0E20[i] = model->unk8;
                     if (i == 0) {
-                        func_150039BC((s32)model->materials);
+                        level_setMeshTriMaterials((s32)model->materials);
                     }
-                    func_150049A4((DlCommand *)D_800B0E00[i], (s32)D_800B0E10[i] + 0xFF000000, (s32)model);
-                    texture_resolveDl(D_800B0E00[i], 0, 1, 63, NULL);
+                    level_relocateDl((DlCommand *)gLevelDisplayLists[i], (s32)gLevelVertices[i] + 0xFF000000, (s32)model);
+                    texture_resolveDl(gLevelDisplayLists[i], 0, 1, 63, NULL);
                 } else {
-                    func_150049A4((DlCommand *)model->displayList, 0, (s32)model);
+                    level_relocateDl((DlCommand *)model->displayList, 0, (s32)model);
                 }
             }
         }
     }
     if (D_800B0DF0->assetList != 0) {
         j = 0;
-        while ((id = D_80082B20[D_800B0DF0->assetList][j++]) != 0) {
+        while ((id = gLevelAssetLists[D_800B0DF0->assetList][j++]) != 0) {
             texture_getAddress(id, &size, 62, 0);
         }
     }
 }
 
 /* Marks every texture unloaded and resets the requested texture id range. */
-s32 func_150034B4(void) {
+s32 level_resetTextureTable(void) {
     s32 i;
 
     for (i = 0; i < NUM_TEXTURES; i++) {
-        D_800B0E58[i] = -1;
-        D_800BC448[i] = 0;
+        gTextureAddrs[i] = -1;
+        gTextureLifetimes[i] = 0;
     }
 
     gTexAgeFirst = 0xFFFF;
@@ -784,7 +784,7 @@ s32 func_150034B4(void) {
 extern u8 compressed_ROM_START[];
 
 /* Reads each texture's decompressed size from the 4-byte header of its compressed data in ROM. */
-void func_15003570(void) {
+void level_readTextureSizes(void) {
     u32 romAddr;
     s32 odd;
     u8 *buf;
@@ -799,13 +799,13 @@ void func_15003570(void) {
             romAddr--;
             odd = 1;
         } else {
-            odd = D_80091D20[i] * 0; // matching: a use here ranks the size-table IV above the store IV
+            odd = gTextureRomSizes[i] * 0; // matching: a use here ranks the size-table IV above the store IV
         }
         rom_read(romAddr, buf, 16, 1);
         header = odd + buf; // matching: operand order fixes the addu operand order
         size = (header[0] << 24) + (header[1] << 16) + (header[2] << 8) + header[3];
-        D_800B87A0[i] = size;
-        romAddr += D_80091D20[i] + odd;
+        gTextureSizes[i] = size;
+        romAddr += gTextureRomSizes[i] + odd;
     }
 
     heap_free(buf);
@@ -816,7 +816,7 @@ void func_15003570(void) {
  * Builds the collision triangle tables of the three maps: map 0 from level display list 0, map 1
  * from display list 3 and map 2 from the db_Object_array objects, recording each object's triangle range.
  */
-void func_15003668(s32 unused) {
+void level_buildCollisionTris(s32 unused) {
     s32 firstTri;
     s32 size;
     s32 i;
@@ -826,15 +826,15 @@ void func_15003668(s32 unused) {
     D_800D2C68 = 0;
 
     collision_beginMapTris(0);
-    collision_addDlTriCount(D_800B0E00[0]);
+    collision_addDlTriCount(gLevelDisplayLists[0]);
     collision_allocMapTriTables();
-    collision_addDlTris(D_800B0E00[0]);
+    collision_addDlTris(gLevelDisplayLists[0]);
     collision_endMapTris(0);
 
     collision_beginMapTris(1);
-    collision_addDlTriCount(D_800B0E00[3]);
+    collision_addDlTriCount(gLevelDisplayLists[3]);
     collision_allocMapTriTables();
-    collision_addDlTris(D_800B0E00[3]);
+    collision_addDlTris(gLevelDisplayLists[3]);
     collision_endMapTris(1);
 
     collision_beginMapTris(2);
@@ -873,7 +873,7 @@ void func_15003668(s32 unused) {
 }
 
 /* Builds the quadtrees of the three collision maps (map 2 gets a single leaf). */
-void func_150038A0(void) {
+void level_buildCollisionQuadTrees(void) {
     collision_allocQuadTree();
     collision_buildQuadTree(0, &D_800DBE2A, &D_800DBE2C);
     collision_buildQuadTree(1, NULL, NULL);
@@ -884,11 +884,11 @@ void func_150038A0(void) {
 }
 
 /* Returns the id of the texture loaded at `addr`, or -1. */
-s32 func_1500390C(s32 addr) {
+s32 level_findTextureByAddr(s32 addr) {
     s32 i;
 
     for (i = 0; i < NUM_TEXTURES; i++) {
-        if (addr == D_800B0E58[i]) {
+        if (addr == gTextureAddrs[i]) {
             return i;
         }
     }
@@ -899,7 +899,7 @@ void func_150039B0(s32 arg0) {
 }
 
 /* Sets gMeshTriMaterials to `addr` + 8 (past the material block's header), or to NULL when `addr` is 0. */
-void func_150039BC(s32 addr) {
+void level_setMeshTriMaterials(s32 addr) {
     gMeshTriMaterials = (u32 *)addr;
     if (gMeshTriMaterials != NULL) {
         gMeshTriMaterials += 2;

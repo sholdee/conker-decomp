@@ -191,8 +191,8 @@ void func_150F2230(Actor *actor, s32 arg1, s32 arg2) {
         offset.x = 0.0f;
         offset.y = 0.0f;
         offset.z = 0.0f;
-        func_15143874(func_150ADA20() & 0xFF, 100.0f, &offset.x, &offset.z);
-        func_15143134(&offset, &pos, &actor->ob_matrix_ptr[19]);
+        math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, 100.0f, &offset.x, &offset.z);
+        math_transformOffset(&offset, &pos, &actor->ob_matrix_ptr[19]);
         weapon_spawnImpactBurst(&pos, arg1, arg2);
     }
 }

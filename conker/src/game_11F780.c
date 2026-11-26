@@ -31,7 +31,7 @@ s32 func_150F22D0(Vec3f *out, Actor *owner, u8 slot) {
     default:
         return 0;
     }
-    func_15143134(&D_800A1920, out, &owner->ob_matrix_ptr[bone]);
+    math_transformOffset(&D_800A1920, out, &owner->ob_matrix_ptr[bone]);
     return 1;
 }
 
@@ -85,8 +85,8 @@ s32 effect_updateSway(SwayObject *obj) {
 
     obj->rotX = sway->amplitudeX * sinf(sway->phaseX);
     obj->rotZ = sway->amplitudeZ * sinf(sway->phaseZ);
-    sway->phaseX = func_15144B68(sway->phaseX + sway->speedX * gFrameDelta);
-    sway->phaseZ = func_15144B68(sway->phaseZ + sway->speedZ * gFrameDelta);
+    sway->phaseX = math_wrapRadians(sway->phaseX + sway->speedX * gFrameDelta);
+    sway->phaseZ = math_wrapRadians(sway->phaseZ + sway->speedZ * gFrameDelta);
     return 1;
 }
 
@@ -96,8 +96,8 @@ s32 effect_updateModelSway(DynModel *model) {
 
     block->rotX = block->sway.amplitudeX * sinf(block->sway.phaseX);
     block->rotZ = block->sway.amplitudeZ * sinf(block->sway.phaseZ);
-    block->sway.phaseX = func_15144B68(block->sway.phaseX + block->sway.speedX * gFrameDelta);
-    block->sway.phaseZ = func_15144B68(block->sway.phaseZ + block->sway.speedZ * gFrameDelta);
+    block->sway.phaseX = math_wrapRadians(block->sway.phaseX + block->sway.speedX * gFrameDelta);
+    block->sway.phaseZ = math_wrapRadians(block->sway.phaseZ + block->sway.speedZ * gFrameDelta);
     return 1;
 }
 

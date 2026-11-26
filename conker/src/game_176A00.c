@@ -239,8 +239,8 @@ s32 particle_spawnBillboardOnExpire(ChannelParticle *particle) {
     effect.velY = (func_150ADA20() % 201U) + 100;
     effect.accelY = (func_150ADA20() % 5U) + 3;
     effect.life = 600;
-    func_151429E0(3, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
-    func_151429E0(4, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
+    math_pickPaletteColour(3, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
+    math_pickPaletteColour(4, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
     effect.intensity = 0xFF;
     effect.alpha = (func_150ADA20() % 65U) + 92;
     effect.fadeStep = (func_150ADA20() % 3U) + 1;

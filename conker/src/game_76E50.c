@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-void func_150499A0(MtxF m, MtxF out) {
+void math_mtxAffineInverse(MtxF m, MtxF out) {
     f32 det;
 
     det = 0.0f;

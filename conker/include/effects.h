@@ -304,7 +304,7 @@ typedef struct ParticleSpawn78 {
     /* 0x76 */ u8 pad76[2];
 } ParticleSpawn78;
 
-/* Point lights attached to a sprite or particle, applied through func_151462C8 (light_pickLights and
+/* Point lights attached to a sprite or particle, applied through math_emitPointLights (light_pickLights and
  * light_reemitLights). */
 typedef struct ModelLink {
     /* 0x00 */ s32 model;                  /* light_pickLights's maxLights; 0 = no lights */
@@ -559,7 +559,7 @@ typedef struct EffectTemplate {
     /* 0x14 */ s8 unk14;      /* index into gEffectObjShapeFuncs, -1: none */
     /* 0x15 */ u8 itemCount;  /* number of items allocated after the user data */
     /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 material; /* func_151462C8's surface material, with flags 0x20 */
+    /* 0x18 */ s32 material; /* math_emitPointLights's surface material, with flags 0x20 */
 } EffectTemplate; /* size 0x1C */
 
 /* Spawn parameters of a screen effect, copied to ScreenEffect.desc by colourfb_createScreenEffect (game/Effects/ColourFrameBuffer/colourframebuffer.c). */
@@ -613,7 +613,7 @@ typedef struct BloodDrip {
 
 /* Glow animations (GlowParams.anim); GlowParams.type selects the handler (game_16DC80.c). */
 
-/* func_15141478: random flicker */
+/* flare_glowFlicker: random flicker */
 typedef struct GlowFlicker {
     /* 0x00 */ f32 base;
     /* 0x04 */ f32 low;
@@ -624,7 +624,7 @@ typedef struct GlowFlicker {
     /* 0x18 */ f32 rate;
 } GlowFlicker; /* size 0x1C */
 
-/* func_15141564: sine pulse */
+/* flare_glowPulse: sine pulse */
 typedef struct GlowPulse {
     /* 0x00 */ f32 base;
     /* 0x04 */ f32 amplitude;
@@ -632,7 +632,7 @@ typedef struct GlowPulse {
     /* 0x0C */ f32 speed;
 } GlowPulse; /* size 0x10 */
 
-/* func_151415D4: periodic rise / hold / fall */
+/* flare_glowEnvelope: periodic rise / hold / fall */
 typedef struct GlowEnvelope {
     /* 0x00 */ f32 peak;
     /* 0x04 */ f32 base;
@@ -645,7 +645,7 @@ typedef struct GlowEnvelope {
     /* 0x20 */ f32 rampRate;
 } GlowEnvelope; /* size 0x24 */
 
-/* func_15141928: placed around a pivot */
+/* flare_glowOrbit: placed around a pivot */
 typedef struct GlowOrbit {
     /* 0x00 */ f32 distance;
     /* 0x04 */ f32 spread;
@@ -653,7 +653,7 @@ typedef struct GlowOrbit {
     /* 0x0C */ f32 pivot[3];
 } GlowOrbit; /* size 0x18 */
 
-/* Shape of a glow sprite (game_16DC80.c): the part of GlowParams every caller of func_151407D0 fills in. */
+/* Shape of a glow sprite (game_16DC80.c): the part of GlowParams every caller of flare_spawnGlow fills in. */
 typedef struct GlowShape {
     /* 0x00 */ f32 width1;   /* width, height and offset when facing the viewer (intensity 1)... */
     /* 0x04 */ f32 height1;
@@ -666,16 +666,16 @@ typedef struct GlowShape {
     /* 0x20 */ f32 fadeRate; /* intensity lost per unit of distance */
     /* 0x24 */ s32 screenX[4]; /* per view, -1 when off screen */
     /* 0x34 */ s32 screenY[4];
-    /* 0x44 */ LensFlare *attach; /* follows the glow's position and takes its alpha; freed with func_1517E134 */
+    /* 0x44 */ LensFlare *attach; /* follows the glow's position and takes its alpha; freed with flare_remove */
     /* 0x48 */ f32 scale;
     /* 0x4C */ u16 zbufSample[4]; /* z-buffer value at the glow's screen position, per view */
     /* 0x54 */ u8 visibility[4];  /* per view, eases towards 0xFF (visible) or 0 */
-    /* 0x58 */ u8 type;           /* index into the D_80089F9C/D_80089FE4/D_8008A02C handler tables */
-    /* 0x59 */ s8 handler;        /* index into D_80089F90, or -1 */
+    /* 0x58 */ u8 type;           /* index into the gGlowDestroyHandlers/gGlowFreeHandlers/gGlowMsgHandlers handler tables */
+    /* 0x59 */ s8 handler;        /* index into gGlowVisibilityTests, or -1 */
     /* 0x5A */ u8 pad5A[2];
 } GlowShape; /* size 0x5C */
 
-/* Glow parameters: func_151407D0 (game_16DC80.c) copies paramSize bytes of them into the glow at +0x110. */
+/* Glow parameters: flare_spawnGlow (game_16DC80.c) copies paramSize bytes of them into the glow at +0x110. */
 typedef struct GlowParams {
     /* 0x00 */ GlowShape shape;
     /* 0x5C */ u8 pad5C[4];
@@ -1044,8 +1044,8 @@ typedef struct TrailRender {
     /* 0x10 */ s32 unk10;             /* its low byte is particle_setCombineMode's argument */
     /* 0x14 */ s32 unk14;             /* ORed into the other-mode high word */
     /* 0x18 */ s32 unk18;             /* ORed into the other-mode high word */
-    /* 0x1C */ s8 primMode;           /* mode of func_151441A4 (prim color) */
-    /* 0x1D */ s8 envMode;            /* mode of func_151442FC (env color) */
+    /* 0x1C */ s8 primMode;           /* mode of math_pickPrimColour (prim color) */
+    /* 0x1D */ s8 envMode;            /* mode of math_pickEnvColour (env color) */
     /* 0x1E */ u8 pad1E[2];
 } TrailRender; /* size 0x20 */
 
@@ -1808,7 +1808,7 @@ typedef struct TrailMotion {
     /* 0x14 */ f32 unk14;
     /* 0x18 */ u8 flags;
     /* 0x19 */ u8 texture;          /* index into D_80091564 */
-    /* 0x1A */ u8 shade;            /* passed with alpha to func_151441A4 / func_151442FC */
+    /* 0x1A */ u8 shade;            /* passed with alpha to math_pickPrimColour / math_pickEnvColour */
     /* 0x1B */ u8 alpha;            /* faded by trail_fadeKind2Trail */
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ s16 unk1E;
@@ -2033,7 +2033,7 @@ typedef struct EffectActor {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ EffectActorTemplate tmpl;
     /* 0x58 */ Mtx mtx[2]; /* double-buffered by D_800BE9C0 */
-    /* 0xD8 */ ModelLink attachment; /* lights drawn through func_151462C8 */
+    /* 0xD8 */ ModelLink attachment; /* lights drawn through math_emitPointLights */
     /* 0xF8 */ union {
         TumbleMotion motion; /* effect_moveEffectActor / effect_buildEffectActorRotScaleMtx */
         f32 size;
@@ -2076,7 +2076,7 @@ typedef struct ModelBurst {
     /* 0x74 */ s16 fadeRate;
 } ModelBurst; /* size 0x78 */
 
-/* A particle object made by particle_newQuadParticle / func_151407D0 (game_169510.c), 0x110 bytes; callers keep their own
+/* A particle object made by particle_newQuadParticle / flare_spawnGlow (game_169510.c), 0x110 bytes; callers keep their own
  * data after it (game_169510.c: DefParticleMotion). Its ParticleDef copy is at 0x18. */
 typedef struct DefParticleHead {
     /* 0x000 */ EffectHeader header;    /* header.owner / kind as passed to the spawner */
@@ -2097,7 +2097,7 @@ typedef struct DefParticleHead {
 } DefParticleHead; /* size 0x110 */
 
 /* Burst effect (effect_spawnDelayedBurst in game_127060.c, effect_spawnBoneBurst in game_1E73B0.c): an effect object that
- * keeps two sparks (particle_newQuadParticle beams) and two glows (func_151407D0) on its owner actor. */
+ * keeps two sparks (particle_newQuadParticle beams) and two glows (flare_spawnGlow) on its owner actor. */
 struct BurstSpark;
 struct BurstGlow;
 
@@ -2258,8 +2258,8 @@ typedef struct EffectObjHead {
     /* 0x30 */ u8 updateKind2;        /* index into gEffectObjUpdate2Funcs, 0: none (trails clear it to stop emitting) */
     /* 0x31 */ u8 drawKind;           /* index into gEffectObjDrawFuncs, 0: none */
     /* 0x32 */ u8 pad32[2];
-    /* 0x34 */ ModelLink model;       /* drawn through func_151462C8 */
-    /* 0x54 */ Vec3f modelPos;        /* func_151462C8's position; trails keep their tail point here */
+    /* 0x34 */ ModelLink model;       /* drawn through math_emitPointLights */
+    /* 0x54 */ Vec3f modelPos;        /* math_emitPointLights's position; trails keep their tail point here */
 } EffectObjHead; /* size 0x60 */
 
 /* The object effect_newEffectObj (game_174BF0.c) makes, in its generic view: EffectObjHead plus the per-handler block.
@@ -2358,7 +2358,7 @@ typedef struct WaveTrail {
 } WaveTrail;
 
 /* Head of the data of a particle stream (TimedEffect data at 0x28): every tick it emits `rate` particles from
- * position, aimed along func_151436B4 angles that wobble as sines (particle_updateWobbleStream, game_1F1CD0.c;
+ * position, aimed along math_dirFromAngles angles that wobble as sines (particle_updateWobbleStream, game_1F1CD0.c;
  * particle_updateSourceEmission, game_113D60.c). */
 typedef struct ParticleStream {
     /* 0x00 */ f32 angleX;        /* centre direction */
@@ -3043,7 +3043,7 @@ typedef struct ZoneRectEffect {
 
 /* State a DDB60Effect keeps at +0x28: func_150B0C58 (game_DDF10.c) fills it, func_150B0D20 updates it each frame.
  * (Effect-subsystem only, but here rather than conker/effect.h: one more type in a header that init_50A0.c sees
- * moves func_100052A0's static D_8003BC20 to the start of that file's .bss.) */
+ * moves sched_preNmiThread's static D_8003BC20 to the start of that file's .bss.) */
 typedef struct DDB60EffectData {
     /* 0x00 */ struct Actor *owner;
     /* 0x04 */ u8 ownerId; // owner->unique_id when attached; a mismatch means the slot was reused
@@ -3193,7 +3193,7 @@ typedef struct {
     /* 0x00 */ Camera *player;
     /* 0x04 */ f32 unk4;
     /* 0x08 */ f32 unk8;
-    /* 0x0C */ u8 flags; /* 1: bouncing, 2: colour flash, 4: value from D_800C3958[sourceIndex] */
+    /* 0x0C */ u8 flags; /* 1: bouncing, 2: colour flash, 4: value from gSeqTrackStates[sourceIndex] */
     /* 0x0D */ u8 kind;  /* index into the D_8008FC10 message handlers */
     /* 0x0E */ u8 side;
     /* 0x0F */ u8 padF;
@@ -3257,7 +3257,7 @@ typedef struct QuadFx {
 } QuadFx; /* size 0xB8 */
 
 /* An entry of the render-mode table gEffectRenderModes: the blender words of the two cycles, OR'd together for
- * func_15142FBC. */
+ * math_gfxSetOtherMode. */
 typedef struct RenderModePair {
     /* 0x0 */ s32 cycle1;
     /* 0x4 */ s32 cycle2;

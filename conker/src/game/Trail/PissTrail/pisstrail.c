@@ -13,12 +13,12 @@ void trail_getPissAnchor(Actor *actor, Vec3f *out) {
     out->z = actor->zpos;
 }
 
-/* Trail launch vector from the actor (func_15145740's offset direction). */
+/* Trail launch vector from the actor (math_getActorAim's offset direction). */
 void trail_getPissLaunchDir(Actor *actor, Vec3f *out) {
     Vec3f target;
     Vec3f dir;
 
-    func_15145740(actor, &target, &dir, out, gIsMultiplayer ? 0.8400000334f : 1.15200007f);
+    math_getActorAim(actor, &target, &dir, out, gIsMultiplayer ? 0.8400000334f : 1.15200007f);
 }
 
 /* Spawns a trail object that follows the actor. */
@@ -46,7 +46,7 @@ void trail_spawnPissTrail(Actor *actor) {
         trail_getPissLaunchDir(actor, &data.lastVel);
 
         data.speedScale = 0.01724099927f;
-        variant = func_151EF610() % 2;
+        variant = math_rand() % 2;
         data.sound = func_10010F88(variant + 0x1B6, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 5000);
         data.pending = 0.0f;
         data.time = 0.0f;
@@ -301,7 +301,7 @@ s32 trail_tracePissTrail(PissTrail *trail) {
             delta.x = cur->pos.x - prev->pos.x;
             delta.y = cur->pos.y - prev->pos.y;
             delta.z = cur->pos.z - prev->pos.z;
-            len = func_15143E64(&delta);
+            len = math_vec3Length(&delta);
             totalLen += len;
             cur->len = len;
             if (maxLen < totalLen) {
@@ -373,7 +373,7 @@ s32 trail_tracePissTrail(PissTrail *trail) {
                             target->scriptCmd = NULL;
                         } else {
                             ownerIndex = owner - movement_obj;
-                            actor_hitScripted(target, 0xE0036, ((u16)(func_150484A0(dir[0], dir[2]) * 10430.37793f) - 0x4000) | 1, ownerIndex);
+                            actor_hitScripted(target, 0xE0036, ((u16)(math_atan2(dir[0], dir[2]) * 10430.37793f) - 0x4000) | 1, ownerIndex);
                         }
                     }
                     /* the hit ends the trail here */
@@ -399,7 +399,7 @@ s32 trail_tracePissTrail(PissTrail *trail) {
     }
     if (count >= 2) {
         data->texScroll += -395.0f * gFrameDelta;
-        data->texScroll = func_15144528(data->texScroll, 16383.0f, -16384.0f);
+        data->texScroll = math_wrapFloat(data->texScroll, 16383.0f, -16384.0f);
         texPos = 0.0f;
         j = trail->head.end;
         // matching: a do-while or plain break here changes the frame size (-g3)
@@ -412,7 +412,7 @@ s32 trail_tracePissTrail(PissTrail *trail) {
             }
             cur2 = &points[j];
             texPos += cur2->len;
-            cur2->texture = func_15144528(data->texScroll + texPos * 29.02999878f, 16383.0f, -16384.0f);
+            cur2->texture = math_wrapFloat(data->texScroll + texPos * 29.02999878f, 16383.0f, -16384.0f);
             if (j != trail->head.start) {
                 continue;
             }
@@ -477,12 +477,12 @@ Gfx *trail_drawPissTrail(PissTrail *trail, Gfx *gfx, s16 view) {
     if (vtx == NULL) {
         return gfx;
     }
-    camera = func_15144B34(view);
+    camera = math_getCameraPos(view);
     flag = 1;
-    gfx = func_15142E24(gfx, &gEffectTextures[146], 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
-    gfx = func_15142B7C(gfx, 0x220005, 0x1D0600);
+    gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[146], 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
+    gfx = math_gfxUpdateGeometryMode(gfx, 0x220005, 0x1D0600);
     gfx = particle_setCombineMode(gfx, 0x4E, &flag);
-    gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &flag);
+    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &flag);
     if (trail->head.tmpl.flags & 2) {
         index = trail->head.end - 1;
         if (index < 0) {
@@ -728,7 +728,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                 spawn.offset.z = 0.0f;
                 spawn.scaleRate = 1.038234949f;
                 spawn.pos = hit->pos;
-                spawn.vel = D_800A5480;
+                spawn.vel = gZeroVec3f;
                 do {
                     sub.phase[0] = func_150ADA20();
                     sub.phase[1] = (s16)func_150ADA20(); // matching: the s16 cast gives IDO's extra move
@@ -783,7 +783,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                     cone.direction.x = -dir[0];
                     cone.direction.y = -dir[1];
                     cone.direction.z = -dir[2];
-                    cone.axis0 = cone.axis1 = D_800A5480;
+                    cone.axis0 = cone.axis1 = gZeroVec3f;
                     cone.spread = 300.0f;
                     do {
                         particle_spawnSplashSpray(&cone, &emit, &origin, trail->head.header.owner, trail->head.header.kind);

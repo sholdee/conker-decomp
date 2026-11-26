@@ -118,7 +118,7 @@ void func_150BF21C(WorldObject *obj) {
     height = BOB_WORK(obj)->height;
     bob = 0.0f;
     rate = 0.05f;
-    if (D_800C35EA[0] == 0) {
+    if (gCutsceneStates[0] == 0) {
         paused = FALSE;
     } else if (D_800C35E8[0] == 1) {
         paused = FALSE;
@@ -189,7 +189,7 @@ void func_150BF21C(WorldObject *obj) {
         height = 0.0f;
     }
     func_150A7DA0(translate, 0.0f, height, 0.0f);
-    func_15043F6C(model, obj->t, obj->u, obj->v, obj->xScale, obj->yScale, obj->zScale, obj->x, obj->y, obj->z);
+    math_mtxFRotScaleTrans(model, obj->t, obj->u, obj->v, obj->xScale, obj->yScale, obj->zScale, obj->x, obj->y, obj->z);
     func_150A7A48(translate, model, translate);
     dst = obj->vertices[D_800BE9C0];
     src = obj->srcVertices;
@@ -222,7 +222,7 @@ void func_150BF760(WorldObject *obj) {
     s32 slot;
     f32 progress = 0.0f;
 
-    if (D_800C35EA[0] != 1 || D_800C35E8[0] == 1) {
+    if (gCutsceneStates[0] != 1 || D_800C35E8[0] == 1) {
         func_1511B51C(obj);
         if (SCROLL_WORK(&obj[1])->texScroll == NULL) {
             SCROLL_WORK(&obj[1])->texScroll = flamethrower_addObjectTexScroll(obj, D_800902B8, 1, -1, 0, 0, -8);
@@ -352,12 +352,12 @@ void prop_updateSinkingPlatform(WorldObject *platform) {
     } else if (state == TASK_FLAG_GOING_ON) {
         WORK(platform)->unk80 += D_800BE9E4;
         if (WORK(platform)->unk80 < 0) {
-            platform->t = ((func_151EF610() % 5) - 2.0f) * 0.125f;
-            platform->v = ((func_151EF610() % 5) - 2.0f) * 0.125f;
+            platform->t = ((math_rand() % 5) - 2.0f) * 0.125f;
+            platform->v = ((math_rand() % 5) - 2.0f) * 0.125f;
         } else {
             if (WORK(platform)->unk80 < 40) {
-                platform->t = ((func_151EF610() % 5) - 2.0f) / 12.0f;
-                platform->v = ((func_151EF610() % 5) - 2.0f) / 12.0f;
+                platform->t = ((math_rand() % 5) - 2.0f) / 12.0f;
+                platform->v = ((math_rand() % 5) - 2.0f) / 12.0f;
             } else {
                 platform->v = 0.0f;
                 platform->t = 0.0f;

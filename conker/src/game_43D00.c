@@ -3,28 +3,28 @@
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init_50A0.c).
-u8 D_800BE590;      // number of distinct spawn model types in D_800BE598
-u16 D_800BE598[8];  // the distinct spawn model types (< 0xBB) of the level
-s32 *D_800BE5A8[8]; // per spawn model type: data loaded by rom_loadPathTo
+u8 gSpawnModelTypeCount;      // number of distinct spawn model types in gSpawnModelTypes
+u16 gSpawnModelTypes[8];  // the distinct spawn model types (< 0xBB) of the level
+s32 *gSpawnModelData[8]; // per spawn model type: data loaded by rom_loadPathTo
 
 #include "functions.h"
 #include "variables.h"
 
 /* Collects the distinct spawn-table model types (< 0xBB) and the data rom_loadPathTo loads for each. */
-void func_15016850(void) {
+void level_collectSpawnModelTypes(void) {
     s32 i;
     s32 j;
     s32 found;
     s32 *data;
     s32 id;
 
-    D_800BE590 = 0;
+    gSpawnModelTypeCount = 0;
     data = NULL;
     for (i = 0; i < gSpawnRecordCount; i++) {
         id = gSpawnRecords[i].type;
         found = 0;
-        for (j = 0; j < D_800BE590; j++) {
-            if (id == D_800BE598[j]) {
+        for (j = 0; j < gSpawnModelTypeCount; j++) {
+            if (id == gSpawnModelTypes[j]) {
                 found = 1;
                 break;
             }
@@ -36,9 +36,9 @@ void func_15016850(void) {
             rom_loadPathTo(&data, 2, 0x12, id);
         }
         if (data != NULL) {
-            D_800BE5A8[D_800BE590] = data;
-            D_800BE598[D_800BE590] = id;
-            D_800BE590++;
+            gSpawnModelData[gSpawnModelTypeCount] = data;
+            gSpawnModelTypes[gSpawnModelTypeCount] = id;
+            gSpawnModelTypeCount++;
         }
     }
 }
@@ -49,7 +49,7 @@ extern u8 compressed_ROM_START[];
 
 /* Loads the spawn table for `levelId` (base entries from ROM plus the level's own), then fills in one
  * entry per player slot (the first D_8008FD8C) from the type player_getStat reports and the slot's object. */
-void func_150169A0(s32 levelId) {
+void level_loadSpawnTable(s32 levelId) {
     s32 j;
     u8 *romEnd;
     u8 *romStart;
@@ -82,7 +82,7 @@ void func_150169A0(s32 levelId) {
     gSpawnRecordCount = size / sizeof(SpawnRecord);
     gSpawnFirstCount = gSpawnRecordCount;
     gSpawnRecordCount += rom_loadPathInto(&gSpawnRecords[gSpawnRecordCount], 0, 2, 0xE, levelId) / sizeof(SpawnRecord);
-    func_15017114(levelId);
+    level_allocSpawnPaths(levelId);
     count = gSpawnRecordCount;
     gSpawnInUse = allocate_memory(count, 1, 0, 0);
     size = count * sizeof(s16);
@@ -225,7 +225,7 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
         }
         gSpawnRecords[i].unk2 = 1;
     }
-    func_15016850();
+    level_collectSpawnModelTypes();
     for (j = 0; j < gSpawnRecordCount; j++) {
         if (gSpawnRecords[j].unique_id == 0) {
             gSpawnRecords[j].unique_id = collision_getFreeUniqueId();
@@ -244,7 +244,7 @@ typedef struct {
 
 /* Allocates one path per spawn entry: an empty two-point path for each player slot, and the level's own
  * paths for the level-specific spawn entries. */
-void func_15017114(s32 levelId) {
+void level_allocSpawnPaths(s32 levelId) {
     s16 count;
     PathTableEntry *table;
     s32 i;

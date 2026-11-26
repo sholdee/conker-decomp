@@ -160,7 +160,7 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
             if (func_150AC9C0(x, y, z, move.x, move.y, move.z, NULL, &triangle, &hit.x, &hit.y, &hit.z,
                               NULL, &hitObject, NULL, 0.0f) != 0) {
                 // matching: a switch, not an if; the if form swaps the $s0/$s1 homes of particle and probe
-                switch (func_15145C90(hitObject)) {
+                switch (math_isObjectHidden(hitObject)) {
                 case 0:
                     break;
                 default:
@@ -341,8 +341,8 @@ s32 particle_updateKickable(ModelParticle *particle) {
                  (particle->pos.z - playerPos.z) * (particle->pos.z - playerPos.z);
         if (distSq < ((particle->radius * particle->radius) + 2500.0f)) {
             if ((D_80088730->speed > 15.0f) && (func_150ADA20() & 1)) {
-                dirX = func_151423D8(D_80088730->angle >> 8);
-                dirZ = func_151423D8((D_80088730->angle >> 8) + 0x40);
+                dirX = math_cosBinAngleMasked(D_80088730->angle >> 8);
+                dirZ = math_cosBinAngleMasked((D_80088730->angle >> 8) + 0x40);
                 particle->updateFn = 1;
                 particle->flags |= 0x7D;
                 particle->floorHitFn = 1;
@@ -473,7 +473,7 @@ s32 particle_updateKickable(ModelParticle *particle) {
 
 /* Matrix callback: scale by size and scale, place at pos, and face the particle's rot point. */
 s32 particle_buildLookAtMatrix(Mtx *mtx, ModelParticle *particle) {
-    func_15142600(mtx, particle->sizeXZ, particle->sizeY, particle->scale.x,
+    math_mtxLookAtScale(mtx, particle->sizeXZ, particle->sizeY, particle->scale.x,
                   particle->scale.y, particle->scale.z, particle->pos.x, particle->pos.y,
                   particle->pos.z, particle->rot.x, particle->rot.y, particle->rot.z);
     return 1;

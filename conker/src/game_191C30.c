@@ -57,7 +57,7 @@ void camera_stopWobble(CamWobble *wobble) {
 /* Advances wave i (half: its CamWobbleHalves) and adds its displacement to the player's camera offset. */
 #define WOBBLE_WAVE(i, axis, half, prevHalf)                                                      \
     if (wobble->def.speed[i] != 0.0f) {                                                           \
-        wobble->phase[i] = func_15144B68(wobble->def.speed[i] * gFrameDelta + wobble->phase[i]);   \
+        wobble->phase[i] = math_wrapRadians(wobble->def.speed[i] * gFrameDelta + wobble->phase[i]);   \
         half.v[(i) % 3] = wobble->phase[i] < 3.1415927f;                                          \
         if ((wobble->def.flags & CAM_WOBBLE_STOPPING) && (prevHalf.v[(i) % 3] != half.v[(i) % 3])) { \
             wobble->def.speed[i] = 0.0f;                                                          \
@@ -433,11 +433,11 @@ f32 camera_getFalloffScale(CamWobble *wobble, Vec3f *origin, f32 radius, f32 fad
     Vec3f *playerPos;
     f32 dist;
 
-    playerPos = func_15144B34(wobble->def.playerIndex);
+    playerPos = math_getCameraPos(wobble->def.playerIndex);
     delta.x = origin->x - playerPos->x;
     delta.y = origin->y - playerPos->y;
     delta.z = origin->z - playerPos->z;
-    dist = func_15143E64(&delta);
+    dist = math_vec3Length(&delta);
     if (dist < radius) {
         scale = 1.0f;
     } else if (radius + fadeRange < dist) {

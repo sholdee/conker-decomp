@@ -43,7 +43,7 @@ StripObj *beam_newStrip(StripDesc *desc, s32 payloadSize) {
         diff.x = strip->p0.x - strip->p1.x;
         diff.y = strip->p0.y - strip->p1.y;
         diff.z = strip->p0.z - strip->p1.z;
-        strip->length = func_15143E64(&diff);
+        strip->length = math_vec3Length(&diff);
     }
     strip->unk10 = 1;
     strip->unk14 = 0;
@@ -122,7 +122,7 @@ void beam_updateStrip(StripObj *strip) {
             diff.y = strip->p0.y - strip->p1.y;
             diff.z = strip->p0.z - strip->p1.z;
             if (diff.x != prev.x || diff.y != prev.y || diff.z != prev.z) {
-                strip->length = func_15143E64(&diff);
+                strip->length = math_vec3Length(&diff);
             }
         }
         if (remove) {
@@ -156,18 +156,18 @@ Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view) {
         update = TRUE;
         vtx = strip->quad[D_800BE9C0];
         eye = &camera_global_Cameras[view].eye;
-        gfx = func_15142B7C(gfx, 1, 0x600);
-        gfx = func_15142E24(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
+        gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x600);
+        gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         if (camera_global_Cameras[view].SpecialFlags & 1) {
-            gfx = func_15142C10(gfx, D_800D9B78[view][0], D_800D9B78[view][1], D_800D9B78[view][2], 0xFF, &update);
-            gfx = func_15142CF0(gfx, 0xF2, 0, D_800D9B68[view][0], D_800D9B68[view][1], D_800D9B68[view][2], 0xFF, &update);
+            gfx = math_gfxSetEnvColor(gfx, D_800D9B78[view][0], D_800D9B78[view][1], D_800D9B78[view][2], 0xFF, &update);
+            gfx = math_gfxSetPrimColor(gfx, 0xF2, 0, D_800D9B68[view][0], D_800D9B68[view][1], D_800D9B68[view][2], 0xFF, &update);
             gfx = particle_setCombineMode(gfx, 30, &update);
         } else {
-            gfx = func_15142C10(gfx, 0, 0, 0, 0, &update);
-            gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &update);
+            gfx = math_gfxSetEnvColor(gfx, 0, 0, 0, 0, &update);
+            gfx = math_gfxSetPrimColor(gfx, 0, 0, 0, 0, 0, 0, &update);
             gfx = particle_setCombineMode(gfx, 19, &update);
         }
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &update);
+        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &update);
 
         scale = strip->p1.z;
         dir.x = strip->p1.x - strip->p0.x;
@@ -256,7 +256,7 @@ s32 beam_stripFollowTargetBone(StripObj *strip) {
         strip->p1.z = target->obj->zpos;
     } else {
         // matching: byte offset; &bones[target->bone] swaps the addu operands
-        func_15143134(&target->offset, &strip->p1, (u8 *)bones + target->bone * sizeof(MtxF));
+        math_transformOffset(&target->offset, &strip->p1, (u8 *)bones + target->bone * sizeof(MtxF));
     }
     return 1;
 }

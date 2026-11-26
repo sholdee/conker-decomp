@@ -47,7 +47,7 @@ s32 trail_sampleTrackerTrail(TrackerTrail *actor) {
             newest->texture = state->texture;
             newest->alpha = 255;
             state->texture += newest->length * 21.85000038f;
-            state->texture = func_15144528(state->texture, 8192.0f, 0.0f);
+            state->texture = math_wrapFloat(state->texture, 8192.0f, 0.0f);
             if (speed) {
                 newest->normal.x = -motion->delta.z * newest->invSpeed;
                 newest->normal.z = motion->delta.x * newest->invSpeed;
@@ -254,10 +254,10 @@ Gfx *trail_drawTrackerTrail(TrackerTrail *actor, Gfx *gfx, s16 arg2) {
         return gfx;
     }
     flag = 1;
-    gfx = func_15142E24(gfx, &gEffectTextures[188], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3);
-    gfx = func_15142B7C(gfx, 0x220005, 0x1D0600);
+    gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[188], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3);
+    gfx = math_gfxUpdateGeometryMode(gfx, 0x220005, 0x1D0600);
     gfx = particle_setCombineMode(gfx, 0x4C, &flag);
-    gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &flag);
+    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &flag);
     previous = actor->head.end - 1;
     if (previous < 0) {
         previous = actor->head.tmpl.itemCount - 1;

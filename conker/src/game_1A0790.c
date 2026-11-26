@@ -1,20 +1,20 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/env.h describes it. */
-s8 D_800DD2E0;
-u8 D_800DD2E4[4];
+s8 gHasLevelFogPreset;
+u8 gFogColour[4];
 u16 D_800DD2E8;
 u16 D_800DD2EA;
 u16 D_800DD2EC;
 u16 D_800DD2EE;
-s16 D_800DD2F0;
-s16 D_800DD2F2;
-s16 D_800DD2F4;
+s16 gFogBlend;
+s16 gFogNear;
+s16 gFogFar;
 
 #include "functions.h"
 #include "variables.h"
 
-/* One entry of the fog preset table D_8008CC70[0]. */
+/* One entry of the fog preset table gFogPresets[0]. */
 typedef struct {
     u8 colour[4];
     u16 unk4;
@@ -25,8 +25,8 @@ typedef struct {
     s16 farPlane; /* -1: use the level header's unk0 (gDefaultFar) */
 } FogPreset;
 
-/* The fog presets; func_151732E0 fills preset 0 from the level header. */
-static FogPreset D_8008CC70[9] = {
+/* The fog presets; env_initFog fills preset 0 from the level header. */
+static FogPreset gFogPresets[9] = {
     { { 0x00, 0x00, 0x00, 0x00 }, 0, 0, 0, 0, 0, 0 },
     { { 0x08, 0x07, 0x25, 0x00 }, 821, 943, 1041, 948, 100, 17602 },
     { { 0xFF, 0x34, 0x00, 0x00 }, 935, 943, 1075, 948, 100, 17602 },
@@ -39,26 +39,26 @@ static FogPreset D_8008CC70[9] = {
 };
 
 /* Copies the level header's fog settings into preset 0 and applies the level's fog preset. */
-void func_151732E0(s32 arg0) {
+void env_initFog(s32 arg0) {
     if (D_800B0DF0->unk3C == D_800B0DF0->unk40 && D_800B0DF0->unk3C == 0) {
         D_800B0DF0->unk40 = 100;
     }
-    D_8008CC70[0].colour[0] = D_800B0DF0->fogColour[0];
-    D_8008CC70[0].colour[1] = D_800B0DF0->fogColour[1];
-    D_8008CC70[0].colour[2] = D_800B0DF0->fogColour[2];
-    D_8008CC70[0].colour[3] = D_800B0DF0->fogColour[3];
-    D_8008CC70[0].unk4 = D_800B0DF0->unk3A;
-    D_8008CC70[0].unk6 = D_800B0DF0->unk3C;
-    D_8008CC70[0].unk8 = D_800B0DF0->unk3E;
-    D_8008CC70[0].unkA = D_800B0DF0->unk40;
-    D_8008CC70[0].nearPlane = D_800B0DF0->unk2;
-    D_8008CC70[0].farPlane = D_800B0DF0->unk0;
+    gFogPresets[0].colour[0] = D_800B0DF0->fogColour[0];
+    gFogPresets[0].colour[1] = D_800B0DF0->fogColour[1];
+    gFogPresets[0].colour[2] = D_800B0DF0->fogColour[2];
+    gFogPresets[0].colour[3] = D_800B0DF0->fogColour[3];
+    gFogPresets[0].unk4 = D_800B0DF0->unk3A;
+    gFogPresets[0].unk6 = D_800B0DF0->unk3C;
+    gFogPresets[0].unk8 = D_800B0DF0->unk3E;
+    gFogPresets[0].unkA = D_800B0DF0->unk40;
+    gFogPresets[0].nearPlane = D_800B0DF0->unk2;
+    gFogPresets[0].farPlane = D_800B0DF0->unk0;
     if (D_800B0DF0->fogPreset != -1) {
-        D_800DD2E0 = 1;
-        func_151733E4(D_800B0DF0->fogPreset, D_800B0DF0->fogPreset, arg0, 0, -1);
+        gHasLevelFogPreset = 1;
+        env_blendFog(D_800B0DF0->fogPreset, D_800B0DF0->fogPreset, arg0, 0, -1);
     } else {
-        D_800DD2E0 = 0;
-        func_151733E4(0, 0, arg0, 0, -1);
+        gHasLevelFogPreset = 0;
+        env_blendFog(0, 0, arg0, 0, -1);
     }
 }
 
@@ -73,9 +73,9 @@ Gfx *func_151733D8(Gfx *gfx, s32 arg1) {
 
 /*
  * Blends fog presets `from` and `to` by `blend`/4096 into preset `dest`, or into the active fog
- * globals (D_800DD2E4...) when `dest` is -1. Indices 0x7C-0x7F are aliases resolved first.
+ * globals (gFogColour...) when `dest` is -1. Indices 0x7C-0x7F are aliases resolved first.
  */
-void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
+void env_blendFog(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
     s32 i;
     s32 *index;
     s32 fromByte;
@@ -91,17 +91,17 @@ void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
     s16 *outE;
     FogPreset *preset;
 
-    D_800DD2F0 = blend;
+    gFogBlend = blend;
     if (dest == -1) {
-        outColour = D_800DD2E4;
+        outColour = gFogColour;
         out4 = &D_800DD2EC;
         out6 = &D_800DD2EE;
         out8 = &D_800DD2E8;
         outA = &D_800DD2EA;
-        outC = &D_800DD2F2;
-        outE = &D_800DD2F4;
+        outC = &gFogNear;
+        outE = &gFogFar;
     } else {
-        preset = &D_8008CC70[dest];
+        preset = &gFogPresets[dest];
         outColour = preset->colour;
         out4 = &preset->unk4;
         out6 = &preset->unk6;
@@ -124,7 +124,7 @@ void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
             *index = 2;
             break;
         case 0x7E:
-            *index = func_15173994(arg2);
+            *index = env_getLevelFogPreset(arg2);
             break;
         case 0x7F:
             *index = 2;
@@ -132,40 +132,40 @@ void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
         }
     }
     for (i = 0; i < 4; i++) {
-        fromByte = D_8008CC70[from].colour[i];
-        toByte = D_8008CC70[to].colour[i];
+        fromByte = gFogPresets[from].colour[i];
+        toByte = gFogPresets[to].colour[i];
         outColour[i] = (toByte - fromByte) * blend / 4096 + fromByte;
     }
-    *out4 = (D_8008CC70[to].unk4 - D_8008CC70[from].unk4) * blend / 4096 + D_8008CC70[from].unk4;
-    *out6 = (D_8008CC70[to].unk6 - D_8008CC70[from].unk6) * blend / 4096 + D_8008CC70[from].unk6;
-    *out8 = (D_8008CC70[to].unk8 - D_8008CC70[from].unk8) * blend / 4096 + D_8008CC70[from].unk8;
-    *outA = (D_8008CC70[to].unkA - D_8008CC70[from].unkA) * blend / 4096 + D_8008CC70[from].unkA;
-    fromValue = (D_8008CC70[from].nearPlane == -1) ? D_800B0DF0->unk2 : D_8008CC70[from].nearPlane;
-    toValue = (D_8008CC70[to].nearPlane == -1) ? D_800B0DF0->unk2 : D_8008CC70[to].nearPlane;
+    *out4 = (gFogPresets[to].unk4 - gFogPresets[from].unk4) * blend / 4096 + gFogPresets[from].unk4;
+    *out6 = (gFogPresets[to].unk6 - gFogPresets[from].unk6) * blend / 4096 + gFogPresets[from].unk6;
+    *out8 = (gFogPresets[to].unk8 - gFogPresets[from].unk8) * blend / 4096 + gFogPresets[from].unk8;
+    *outA = (gFogPresets[to].unkA - gFogPresets[from].unkA) * blend / 4096 + gFogPresets[from].unkA;
+    fromValue = (gFogPresets[from].nearPlane == -1) ? D_800B0DF0->unk2 : gFogPresets[from].nearPlane;
+    toValue = (gFogPresets[to].nearPlane == -1) ? D_800B0DF0->unk2 : gFogPresets[to].nearPlane;
     *outC = (toValue - fromValue) * blend / 4096 + fromValue;
-    fromValue = (D_8008CC70[from].farPlane == -1) ? D_800B0DF0->unk0 : D_8008CC70[from].farPlane;
-    toValue = (D_8008CC70[to].farPlane == -1) ? D_800B0DF0->unk0 : D_8008CC70[to].farPlane;
+    fromValue = (gFogPresets[from].farPlane == -1) ? D_800B0DF0->unk0 : gFogPresets[from].farPlane;
+    toValue = (gFogPresets[to].farPlane == -1) ? D_800B0DF0->unk0 : gFogPresets[to].farPlane;
     *outE = (toValue - fromValue) * blend / 4096 + fromValue;
 }
 
 /* With no level fog preset, re-applies preset 6 (if camera_global_Cameras->SpecialFlags bit 0 is set) or preset 0. */
-void func_151738C4(s32 arg0) {
+void env_reapplyFog(s32 arg0) {
     if (D_800B0DF0->fogPreset == -1) {
         if (camera_global_Cameras->SpecialFlags & 1) {
-            func_151733E4(6, 6, arg0, 0, -1);
-            D_800DBEA8[0] = D_800DD2E4[0];
-            D_800DBEA8[1] = D_800DD2E4[1];
-            D_800DBEA8[2] = D_800DD2E4[2];
+            env_blendFog(6, 6, arg0, 0, -1);
+            gBackgroundColour[0] = gFogColour[0];
+            gBackgroundColour[1] = gFogColour[1];
+            gBackgroundColour[2] = gFogColour[2];
         } else {
-            func_151733E4(0, 0, arg0, 0, -1);
-            D_800DBEA8[0] = D_800B0DF0->unk5;
-            D_800DBEA8[1] = D_800B0DF0->unk6;
-            D_800DBEA8[2] = D_800B0DF0->unk7;
+            env_blendFog(0, 0, arg0, 0, -1);
+            gBackgroundColour[0] = D_800B0DF0->unk5;
+            gBackgroundColour[1] = D_800B0DF0->unk6;
+            gBackgroundColour[2] = D_800B0DF0->unk7;
         }
     }
 }
 
 /* Returns the level's fog preset index (-1 for none). */
-s8 func_15173994(s32 arg0) {
+s8 env_getLevelFogPreset(s32 arg0) {
     return D_800B0DF0->fogPreset;
 }

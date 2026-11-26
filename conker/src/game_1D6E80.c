@@ -396,10 +396,10 @@ PulseFx *effect_spawnTaskPulse(Actor *actor, ActorTask *task) {
 s32 effect_restartTaskPulse(PulseFx *fx) {
     fx->payload.phase = 0;
     if (func_150ADA20() & 1) {
-        func_10010F88(10, 0x55F0, (func_151EF610() % 1200) - 600, 0, 0, fx->strip.posA.x, fx->strip.posA.y, fx->strip.posA.z, 500, 2500);
+        func_10010F88(10, 0x55F0, (math_rand() % 1200) - 600, 0, 0, fx->strip.posA.x, fx->strip.posA.y, fx->strip.posA.z, 500, 2500);
         return 1;
     }
-    func_10010F88(11, 0x55F0, (func_151EF610() % 1200) - 600, 0, 0, fx->strip.posA.x, fx->strip.posA.y, fx->strip.posA.z, 500, 2500);
+    func_10010F88(11, 0x55F0, (math_rand() % 1200) - 600, 0, 0, fx->strip.posA.x, fx->strip.posA.y, fx->strip.posA.z, 500, 2500);
     return 1;
 }
 
@@ -487,7 +487,7 @@ f32 effect_stepTaskPulse(PulseFx *fx) {
     f32 value;
 
     pulse = &fx->payload;
-    value = (func_151423D8((pulse->phase >> 16) - 0x40) * pulse->amplitude) + pulse->base;
+    value = (math_cosBinAngleMasked((pulse->phase >> 16) - 0x40) * pulse->amplitude) + pulse->base;
     pulse->phase += pulse->phaseStep * D_800BE9E4;
     return value;
 }
@@ -547,7 +547,7 @@ s32 effect_isTaskPulseAlive(PulseFx *fx) {
 /* The points of the actor's matrices that func_151AABC4 can drop effects from. */
 static const u8 D_800A8F70[] = { 5, 10, 19, 23 };
 
-/* Finds point D_800A8F70[index] of the actor's ob_matrix_ptr (func_15142314) and spawns two effects on the ground below it. */
+/* Finds point D_800A8F70[index] of the actor's ob_matrix_ptr (math_getBoneTranslation) and spawns two effects on the ground below it. */
 void func_151AABC4(Actor *actor, u8 index) {
     Vec3f pos;
     CollisionHit floor;
@@ -558,7 +558,7 @@ void func_151AABC4(Actor *actor, u8 index) {
 
     if ((actor != NULL) && (actor->ob_matrix_ptr != NULL)) {
         color = particle_getContextEffectKind();
-        func_15142314(actor->ob_matrix_ptr, D_800A8F70[index], &pos, actor);
+        math_getBoneTranslation(actor->ob_matrix_ptr, D_800A8F70[index], &pos, actor);
         collision_initHitFromObject(&floor, actor);
         y = pos.y + 50.0f;
         probe.x = pos.x;
@@ -990,10 +990,10 @@ void effect_updateSparkEmitterTask(EmitterTask *task) {
             do {
                 yaw = func_150ADA20() & 0xFF;
                 pitch = (func_150ADA20() % 46U) - 0x3F;
-                sinP = func_151423D8(pitch);
-                cosP = func_151423D8(pitch - 0x40);
-                sinY = func_151423D8(yaw);
-                cosY = func_151423D8(yaw - 0x40);
+                sinP = math_cosBinAngleMasked(pitch);
+                cosP = math_cosBinAngleMasked(pitch - 0x40);
+                sinY = math_cosBinAngleMasked(yaw);
+                cosY = math_cosBinAngleMasked(yaw - 0x40);
                 speed = (func_150ADA68() * 713.0f + 500.0f) * 0.009999999776f;
                 pos.x = emitter->actor->xpos + 30.0f * sinP * cosY;
                 pos.y = emitter->actor->ypos - 75.0f * cosP;

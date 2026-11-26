@@ -103,7 +103,7 @@ void effect_sprayFromArea(u8 index) {
             randInt = func_150ADA20();
             angle = range[0] + randInt % (range[1] + 1);
             desc.angles.yawBase = angle - 40;
-            func_15143874(angle, area->xSize, &desc.spray.pos.x, &desc.spray.pos.z);
+            math_dirFromBinAngleXZ(angle, area->xSize, &desc.spray.pos.x, &desc.spray.pos.z);
             desc.spray.pos.x += area->x;
             desc.spray.pos.z += area->z;
             desc.spray.pos.y = func_150ADA68() * area->ySize + area->y;
@@ -226,7 +226,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     def.width = 0.0f;
     def.height = 1500.0f;
     def.pos = pos;
-    def.rot = D_800A5480;
+    def.rot = gZeroVec3f;
     def.scale.x = 1.0f;
     def.scale.y = 0.0f;
     def.scale.z = 1.0f;
@@ -257,7 +257,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
             extern const VtxColor gWhiteVtxColors[4];
 
             if (onGround) {
-                extern const Vec3f D_800A5480;
+                extern const Vec3f gZeroVec3f;
 
                 groundDef.texture = 3;
                 groundDef.type = 0;
@@ -275,7 +275,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
                 groundDef.pos.x = pos.x;
                 groundDef.pos.y = pos.y + 5.0f;
                 groundDef.pos.z = pos.z;
-                groundDef.rot = D_800A5480;
+                groundDef.rot = gZeroVec3f;
                 groundDef.scale.x = 1.0f;
                 groundDef.scale.y = 1.0f;
                 groundDef.scale.z = 1.0f;
@@ -354,11 +354,11 @@ s32 func_150FD514(Actor150FD514 *particle) {
     }
     particle->head.def.unk44 = sinf(ext->pulsePhase) * 57.0f + 198.0f;
     ext->pulsePhase += 0.28500003f * gFrameDelta;
-    ext->pulsePhase = func_15144B68(ext->pulsePhase);
+    ext->pulsePhase = math_wrapRadians(ext->pulsePhase);
     ext->texPhase0 += 0.10700001f * gFrameDelta;
     ext->texPhase1 += -0.086f * gFrameDelta;
-    ext->texPhase0 = func_15144B68(ext->texPhase0);
-    ext->texPhase1 = func_15144B68(ext->texPhase1);
+    ext->texPhase0 = math_wrapRadians(ext->texPhase0);
+    ext->texPhase1 = math_wrapRadians(ext->texPhase1);
     ext->texS0 = func_150AD78C(ext->texPhase0) * 1666.0f + -4633.0f;
     ext->texS1 = func_150AD78C(ext->texPhase1) * 1192.0f + 1242.0f;
     if (ext->groundParticle != NULL) {

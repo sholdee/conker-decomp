@@ -91,7 +91,7 @@ void func_150C3230(Actor *obj) {
             target = NULL;
         }
 
-        if ((gIsMultiplayer == 0) && (D_800C35EA[0] == 0) && (obj->attach_char == 0)) {
+        if ((gIsMultiplayer == 0) && (gCutsceneStates[0] == 0) && (obj->attach_char == 0)) {
             obj->taskint[0] = 0;
         }
 

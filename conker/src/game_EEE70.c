@@ -16,7 +16,7 @@ s32 func_150C19C0(Vec3f *pos, Actor *actor, u8 side) {
         break;
     }
 
-    func_15142314(actor->ob_matrix_ptr, bone, pos);
+    math_getBoneTranslation(actor->ob_matrix_ptr, bone, pos);
     return 1;
 }
 
@@ -82,8 +82,8 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
         // matching: masking the already-u8 random byte keeps IDO's andi/move pair
         angle = func_150ADA20_u8() & 0xFF;
         speed = (0.1f + func_150ADA68() * 0.9f) * 9.0f * scale;
-        cosine = func_151423D8(angle - 0x40);
-        sine = func_151423D8(angle);
+        cosine = math_cosBinAngleMasked(angle - 0x40);
+        sine = math_cosBinAngleMasked(angle);
         spawn.lifetime = (func_150ADA20_u8() & 15) + 30;
         spawn.pos.x = radius * cosine + pos.x;
         spawn.pos.y = actor->floorY + 2.0f;
@@ -123,8 +123,8 @@ s32 func_150C1E34(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32 fromY,
     effect.velY = 150;
     effect.accelY = 20;
     effect.life = 600;
-    func_151429E0(0, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
-    func_151429E0(0, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
+    math_pickPaletteColour(0, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
+    math_pickPaletteColour(0, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
     effect.intensity = 255;
     effect.alpha = 255;
     effect.fadeStep = (func_150ADA20_u8() & 15) + 12;

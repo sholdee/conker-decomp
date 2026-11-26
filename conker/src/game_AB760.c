@@ -6,7 +6,7 @@
  * game/Collision/CylinderSets/cylindersets.c loads the table and game/Actor/ActorMotion/actormotion.c reads it. It lies between the .bss of game/Actor/KillRespawn/killrespawn and
  * of game_AC030 on its own 16-byte line, so this unit is the one that defines it.
  */
-BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (collision_loadCylinderSets loads, actor_clampToZoneSet uses)
+BoundCylinderSet *gCylinderSets; // per-level actor-confining cylinder sets (collision_loadCylinderSets loads, actor_clampToZoneSet uses)
 
 #include "functions.h"
 #include "variables.h"
@@ -27,8 +27,8 @@ typedef struct {
 
 
 /* Advances eye blinking: random open periods of 10-149 frames, closed for one frame. */
-void func_1507E2B0(Actor *actor) {
-    if ((actor->character_type != 0x2B) && (D_800C35EA[0] != 1)) {
+void face_updateBlink(Actor *actor) {
+    if ((actor->character_type != 0x2B) && (gCutsceneStates[0] != 1)) {
         if ((actor->playernumber != 0xFF) && (actor->mv->death_State != 0)) {
             actor->eyeClosed[0] = 1;
             actor->eyeClosed[1] = 1;
@@ -59,7 +59,7 @@ void func_1507E2B0(Actor *actor) {
 }
 
 /* Models 0xF, 0x46 and 0x4C (Lady Cog per the other decomp): shows one eye part per eye. */
-void func_1507E3C0(Actor *actor) {
+void face_showEyeParts(Actor *actor) {
     s32 i;
     s32 eyePart[2];
     u8 model;
@@ -100,35 +100,35 @@ void func_1507E3C0(Actor *actor) {
 }
 
 /* Switches to expression `index`, stopping the previous expression's action. */
-void func_1507E500(Actor *actor, s32 index, s32 morphDuration) {
+void face_setExpression(Actor *actor, s32 index, s32 morphDuration) {
     ExpressionRecord *previous;
     const u8 *actions;
 
-    if (index < func_1507E968(actor)) {
-        previous = func_1507E908(actor, actor->expression);
+    if (index < face_getExpressionCount(actor)) {
+        previous = face_getExpressionRecord(actor, actor->expression);
         if (previous->action != 0) {
-            actions = func_1507E9F8(actor, NULL);
+            actions = face_getActionTable(actor, NULL);
             if (actions != NULL) {
                 attach_removeSet(actor, actions[previous->action - 1]);
             }
         }
         actor->expression = index;
-        func_1507E5C8(actor, morphDuration);
+        face_applyExpression(actor, morphDuration);
         if (morphDuration != 0) {
             actor->morphDuration = morphDuration;
         } else {
-            actor->morphDuration = func_1507E908(actor, index)->morphDuration;
+            actor->morphDuration = face_getExpressionRecord(actor, index)->morphDuration;
         }
     }
 }
 
 /* Applies the current expression record: its action, eye codes and the 0x68/0x69 selectors. */
-void func_1507E5C8(Actor *actor, s32 morphDuration) {
+void face_applyExpression(Actor *actor, s32 morphDuration) {
     ExpressionRecord *record;
 
-    record = func_1507E908(actor, actor->expression);
+    record = face_getExpressionRecord(actor, actor->expression);
     if (record != NULL) {
-        func_1507EA44(actor, record->action, record->actionParam);
+        face_startAction(actor, record->action, record->actionParam);
         if (actor->unk134 != record->unk2) {
             actor->unk134 = record->unk2;
             if (morphDuration == 0) {
@@ -153,7 +153,7 @@ void func_1507E5C8(Actor *actor, s32 morphDuration) {
 }
 
 /* Whether the actor blinks: it must be alive and showing its default expression (or a blinking one). */
-s32 func_1507E6B8(Actor *actor) {
+s32 face_canBlink(Actor *actor) {
     s32 model;
     s32 expression;
 
@@ -176,7 +176,7 @@ s32 func_1507E6B8(Actor *actor) {
 }
 
 /* Per-frame expression update: counts down the expression timer, blinks, and reverts on timeout. */
-void func_1507E73C(Actor *actor) {
+void face_update(Actor *actor) {
     s32 timer;
 
     if (actor->drawtype != 2) {
@@ -193,11 +193,11 @@ void func_1507E73C(Actor *actor) {
                 }
             }
         }
-        if (func_1507E6B8(actor)) {
-            func_1507E2B0(actor);
+        if (face_canBlink(actor)) {
+            face_updateBlink(actor);
         }
         if ((actor->expressionTimer == 0) && (actor->expression != actor->defaultExpression)) {
-            func_1507EABC(actor);
+            face_revertExpression(actor);
         }
     }
 }
@@ -207,7 +207,7 @@ void func_1507E73C(Actor *actor) {
  * the current one if priority is 3, the actor shows its default or the same expression, the current
  * one has timed out, or the new priority is higher.
  */
-void func_1507E7E4(Actor *actor, u8 index, u8 priority, u16 timer, s32 morphDuration) {
+void face_requestExpression(Actor *actor, u8 index, u8 priority, u16 timer, s32 morphDuration) {
     ExpressionRecord *previous;
     const u8 *actions;
 
@@ -216,10 +216,10 @@ void func_1507E7E4(Actor *actor, u8 index, u8 priority, u16 timer, s32 morphDura
         ((priority == 3) || (actor->expression == actor->defaultExpression) ||
          (actor->expression == index) || (actor->expressionTimer == 0) ||
          (actor->expressionPriority < priority)) &&
-        (index < func_1507E968(actor))) {
-        previous = func_1507E908(actor, actor->expression);
+        (index < face_getExpressionCount(actor))) {
+        previous = face_getExpressionRecord(actor, actor->expression);
         if (previous->action != 0) {
-            actions = func_1507E9F8(actor, NULL);
+            actions = face_getActionTable(actor, NULL);
             if (actions != NULL) {
                 attach_removeSet(actor, actions[previous->action - 1]);
             }
@@ -227,12 +227,12 @@ void func_1507E7E4(Actor *actor, u8 index, u8 priority, u16 timer, s32 morphDura
         actor->expression = index;
         actor->expressionTimer = timer;
         actor->expressionPriority = priority;
-        func_1507E5C8(actor, morphDuration);
+        face_applyExpression(actor, morphDuration);
     }
 }
 
 /* Returns the actor's expression record `index`, or NULL if its model has no table. */
-ExpressionRecord *func_1507E908(Actor *actor, s32 index) {
+ExpressionRecord *face_getExpressionRecord(Actor *actor, s32 index) {
     ExpressionTableHeader *header;
     ExpressionRecord *records;
 
@@ -248,7 +248,7 @@ ExpressionRecord *func_1507E908(Actor *actor, s32 index) {
 }
 
 /* Returns the number of expressions of the actor's model (model 0x96 uses its own table). */
-s32 func_1507E968(Actor *actor) {
+s32 face_getExpressionCount(Actor *actor) {
     ExpressionTableHeader *header;
     s32 model;
     s32 id;
@@ -271,7 +271,7 @@ void func_1507E9E8(Actor *actor, s32 index) {
 }
 
 /* Returns the table of expression action ids (only model 0 has one) and its length. */
-const u8 *func_1507E9F8(Actor *actor, s32 *count) {
+const u8 *face_getActionTable(Actor *actor, s32 *count) {
     if (collision_getModelId(actor) == 0) {
         if (count != NULL) {
             *count = 5;
@@ -285,11 +285,11 @@ const u8 *func_1507E9F8(Actor *actor, s32 *count) {
 }
 
 /* Starts expression action `action` (1-based) with `param` thousandths. */
-void func_1507EA44(Actor *actor, s32 action, s32 param) {
+void face_startAction(Actor *actor, s32 action, s32 param) {
     const u8 *actions;
 
     if (action != 0) {
-        actions = func_1507E9F8(actor, NULL);
+        actions = face_getActionTable(actor, NULL);
         if (actions != NULL) {
             collision_createPartSet(actor, actions[action - 1], param * 0.001f, 0);
         }
@@ -297,8 +297,8 @@ void func_1507EA44(Actor *actor, s32 action, s32 param) {
 }
 
 /* Reverts to the default expression and clears expression-set eye codes. */
-void func_1507EABC(Actor *actor) {
-    func_1507E7E4(actor, actor->defaultExpression, 3, 0xFFFF, 10);
+void face_revertExpression(Actor *actor) {
+    face_requestExpression(actor, actor->defaultExpression, 3, 0xFFFF, 10);
     actor->expressionPriority = 0;
     actor->expressionTimer = 0;
     if (actor->eyeCode[0] >= 10) {
@@ -312,14 +312,14 @@ void func_1507EABC(Actor *actor) {
 }
 
 /* Resets the default expression to 0. */
-void func_1507EB2C(Actor *actor) {
-    func_1507EB4C(actor, 0);
+void face_resetDefaultExpression(Actor *actor) {
+    face_setDefaultExpression(actor, 0);
 }
 
 /* Sets the default expression and switches to it. */
-void func_1507EB4C(Actor *actor, s32 expression) {
+void face_setDefaultExpression(Actor *actor, s32 expression) {
     if (expression != actor->defaultExpression) {
         actor->defaultExpression = expression;
-        func_1507EABC(actor);
+        face_revertExpression(actor);
     }
 }

@@ -48,11 +48,11 @@ void camera_updateManualOrbit(Camera *camera) {
             orbit->counter = 20;
             return;
         }
-        func_1508EF80(&camera->eye, &camera->focus,
+        math_rotateAroundY(&camera->eye, &camera->focus,
                       (orbit->orbitSpeed * gFrameDelta) / 2.5f, &camera->eye);
     } else if (orbit->orbitSpeed != 0.0f) {
         orbit->orbitSpeed -= orbit->orbitSpeed * 0.2f * gFrameDelta;
-        func_1508EF80(&camera->eye, &camera->focus,
+        math_rotateAroundY(&camera->eye, &camera->focus,
                       (orbit->orbitSpeed * gFrameDelta) / 2.5f, &camera->eye);
     }
 }

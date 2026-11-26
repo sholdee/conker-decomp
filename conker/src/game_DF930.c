@@ -21,7 +21,7 @@ void particle_spawnObjGroundBurst(Actor *obj, s32 arg1, s32 arg2) {
 
 /*
  * Spawns one streak particle at (x, y, z) heading along `yaw` (binary angle) with a random pitch,
- * random speeds, random colours and lifetime. func_151423D8 is cos, so cos(a - 64) is sin(a).
+ * random speeds, random colours and lifetime. math_cosBinAngleMasked is cos, so cos(a - 64) is sin(a).
  */
 s32 particle_spawnYawStreak(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 arg10, s32 arg11,
@@ -33,11 +33,11 @@ s32 particle_spawnYawStreak(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     f32 cosYaw;
     f32 sinPitch;
 
-    sinYaw = func_151423D8(yaw - 64);
-    cosYaw = func_151423D8(yaw);
+    sinYaw = math_cosBinAngleMasked(yaw - 64);
+    cosYaw = math_cosBinAngleMasked(yaw);
     pitch = (func_150ADA20() % 21U) - 30;
-    sinPitch = func_151423D8(pitch - 64);
-    horizontal = func_151423D8(pitch);
+    sinPitch = math_cosBinAngleMasked(pitch - 64);
+    horizontal = math_cosBinAngleMasked(pitch);
     horizontal = 10.0f * horizontal; // matching: a separate statement steers IDO's scheduling of the product
     desc.pos.x = x;
     desc.pos.y = y;
@@ -48,8 +48,8 @@ s32 particle_spawnYawStreak(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     desc.headSpeed = (func_150ADA68() * 0.8590000272f) + 3.608000278f;
     desc.tailSpeed = (func_150ADA68() * 0.3090000153f) + 2.371000051f;
-    func_151429E0(8, &desc.headColor.red, &desc.headColor.green, &desc.headColor.blue);
-    func_151429E0(8, &desc.tailColor.red, &desc.tailColor.green, &desc.tailColor.blue);
+    math_pickPaletteColour(8, &desc.headColor.red, &desc.headColor.green, &desc.headColor.blue);
+    math_pickPaletteColour(8, &desc.tailColor.red, &desc.tailColor.green, &desc.tailColor.blue);
     desc.headColor.alpha = 255;
     desc.tailColor.alpha = 255;
     desc.flags = 9;

@@ -33,7 +33,7 @@ s32 particle_getSpraySidePos(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 
         bone = &actor->ob_matrix_ptr[25];
     }
 
-    func_15143134(offset, pos, bone);
+    math_transformOffset(offset, pos, bone);
     if (ground == NULL) {
         return 1;
     }
@@ -231,7 +231,7 @@ s32 particle_spawnYawSpraySpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg
     desc.pos.z = z;
 
     roll = func_150ADA20();
-    func_15143794(yaw, (roll % 21U) - 20, (func_150ADA68() * 301.0f + 500.0f) * 0.01f, &desc.vel);
+    math_dirFromBinAngles(yaw, (roll % 21U) - 20, (func_150ADA68() * 301.0f + 500.0f) * 0.01f, &desc.vel);
 
     desc.flags = 0xE05;
     desc.gravity = 0.0f;

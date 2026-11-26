@@ -157,11 +157,11 @@ s32 prop_getApproachSpeed(s32 x, s32 z, s32 *unused, Actor *other) {
     delta.x = otherX - x;
     delta.z = otherZ - z;
 
-    bearing = func_150490A8(&delta);
+    bearing = math_vec3HeadingBin(&delta);
     angle = other->angle;
     angle = 0x40 - (angle >> 8);
     angle -= bearing;
-    cosine = func_15048A40(angle);
+    cosine = math_sinBinAngle(angle);
     result = other->speed * cosine;
     return result;
 }

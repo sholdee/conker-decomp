@@ -319,10 +319,10 @@ void effect_spawnDustRing(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 siz
         for (i = 0; i < count; i++) {
             a = angle >> 8;
             angle |= 0; // matching: makes `a` a real variable instead of a CSE temp (one fewer uopt temp slot)
-            sn = func_15048A40(a);
+            sn = math_sinBinAngle(a);
             // matching: these no-ops swap s0/s1 to the target's allocation
             a |= 0; a |= 0; a |= 0; a |= 0; a |= 0; a |= 0; a |= 0; a |= 0; a |= 0;
-            cs = func_150489B0(a);
+            cs = math_cosBinAngle(a);
             pz = radius * cs + z;
             velZ = 200.0f * cs;
             velZHigh = velZ >> 8;

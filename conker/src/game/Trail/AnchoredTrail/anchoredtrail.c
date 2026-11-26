@@ -66,7 +66,7 @@ void trail_updateAnchoredEmitter(AnchoredTrailEmitter *emitter) {
             step.x = anchor->pos.x - prevPos.x;
             step.y = anchor->pos.y - prevPos.y;
             step.z = anchor->pos.z - prevPos.z;
-            if (func_15143E64(&step) < anchor->maxStep) {
+            if (math_vec3Length(&step) < anchor->maxStep) {
                 if (anchor->trail == NULL) {
                     trail_spawnAnchoredTrail(emitter);
                 }
@@ -173,7 +173,7 @@ s32 trail_updateBoneAnchor(AnchoredTrailEmitter *emitter) {
         anchor->flags &= ~1;
         return 1;
     }
-    func_15143134(&gTrailBoneAnchors[link->bone], &anchor->pos, &actor->ob_matrix_ptr[gTrailBoneMatrices[link->bone]]);
+    math_transformOffset(&gTrailBoneAnchors[link->bone], &anchor->pos, &actor->ob_matrix_ptr[gTrailBoneMatrices[link->bone]]);
     anchor->flags |= 1;
     if (link->condition != -1) {
         return gAnchorConditionProcs[link->condition](emitter);
@@ -416,7 +416,7 @@ s32 trail_shapeAnchoredTrail(AnchoredTrail *trail) {
             delta.x = point->pos.x - newerPos->x;
             delta.y = point->pos.y - newerPos->y;
             delta.z = point->pos.z - newerPos->z;
-            length = func_15143E64(&delta);
+            length = math_vec3Length(&delta);
             totalLength += length;
             point->length = length;
             if (totalLength > 80.0f) {
@@ -442,7 +442,7 @@ s32 trail_shapeAnchoredTrail(AnchoredTrail *trail) {
     }
     if (trail->head.count >= 2) {
         data->texPhase += -41.0f * gFrameDelta;
-        data->texPhase = func_15144528(data->texPhase, 16383.0f, -16384.0f);
+        data->texPhase = math_wrapFloat(data->texPhase, 16383.0f, -16384.0f);
         distance = 0;
         j = trail->head.end;
         do {
@@ -452,7 +452,7 @@ s32 trail_shapeAnchoredTrail(AnchoredTrail *trail) {
             }
             texPoint = &points[j];
             distance += texPoint->length;
-            texPoint->texU = func_15144528(data->texPhase + distance * 46.87999725f, 16383.0f, -16384.0f);
+            texPoint->texU = math_wrapFloat(data->texPhase + distance * 46.87999725f, 16383.0f, -16384.0f);
         } while (j != trail->head.start);
     }
     if (trail->head.count >= 2) {
@@ -525,10 +525,10 @@ Gfx *trail_drawAnchoredTrail(AnchoredTrail *trail, Gfx *gfx, s16 view) {
         return gfx;
     }
     needSync = 1;
-    gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &needSync, 0x3E);
-    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+    gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &needSync, 0x3E);
+    gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
     gfx = particle_setCombineMode(gfx, 0x4C, &needSync);
-    gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1].unk0 | gEffectRenderModes[1].unk4, &needSync);
+    gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1].unk0 | gEffectRenderModes[1].unk4, &needSync);
     if (trail->head.tmpl.flags & 2) {
         i = trail->head.end - 1;
         if (i < 0) {

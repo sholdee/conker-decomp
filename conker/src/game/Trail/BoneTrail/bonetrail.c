@@ -312,12 +312,12 @@ Gfx *trail_drawBoneTrail(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
                     }
                 } while (remaining != 0 && idx != effect->head.end);
             }
-            gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &stateFlag, 3);
-            gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &stateFlag);
-            gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &stateFlag);
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &stateFlag, 3);
+            gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x160600);
+            gfx = math_gfxSetEnvColor(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &stateFlag);
+            gfx = math_gfxSetPrimColor(gfx, 0, 0, 0, 0, 0, 0, &stateFlag);
             gfx = particle_setCombineMode(gfx, 6, &stateFlag);
-            gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &stateFlag);
+            gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &stateFlag);
             if (effect->head.tmpl.flags & TRAIL_EFFECT_ATTACHED) {
                 nextIdx = effect->head.end - 1;
                 if (nextIdx < 0) {
@@ -638,7 +638,7 @@ void trail_updateBoneEmitter(BoneEmitterTask *task) {
     emitter->pending += emitter->rate * gFrameDelta;
     if (emitter->pending > 1.0f) {
         angle = (emitter->owner->angle >> 8) - 0x40;
-        func_15143134(&emitter->offset, &pos, &emitter->owner->ob_matrix_ptr[emitter->bone]);
+        math_transformOffset(&emitter->offset, &pos, &emitter->owner->ob_matrix_ptr[emitter->bone]);
 
         spawn.countBase = emitter->pending;
         spawn.countRange = 0;
@@ -747,7 +747,7 @@ s32 trail_getBoneAttachPoint(BoneTrailParams *params, Vec3f *out) {
         return 0;
     }
     // matching: a byte offset; &bones[params->bone] scales the index differently
-    func_15143134(&params->offset, out, (u8 *)bones + params->bone * sizeof(Mtx));
+    math_transformOffset(&params->offset, out, (u8 *)bones + params->bone * sizeof(Mtx));
     return 1;
 }
 
