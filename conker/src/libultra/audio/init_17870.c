@@ -1,5 +1,13 @@
 #include <ultra64.h>
 
+/* This file's .bss, defined before functions.h: its externs would change the order. */
+u8 D_800428C0;
+u8 D_800428C1;
+u8 D_800428C2;
+u8 D_800428C4[2]; /* per bus */
+u8 D_800428C6[2]; /* per bus */
+static u8 D_800428C8[2]; /* per bus: the mode last set */
+
 #include "functions.h"
 #include "variables.h"
 
@@ -7,20 +15,20 @@
 void func_10017870(u8 arg0) {
     s32 i;
 
-    D_800428C0 = (u8)0;
-    D_800428C1 = (u8)0;
-    D_800428C2 = (u8)0;
+    D_800428C0 = 0;
+    D_800428C1 = 0;
+    D_800428C2 = 0;
 
     switch (arg0) {
 
         case 1:
-            D_800428C1 = (u8)1;
+            D_800428C1 = 1;
             break;
         case 3:
-            D_800428C2 = (u8)1;
+            D_800428C2 = 1;
             break;
         case 4:
-            D_800428C0 = (u8)1;
+            D_800428C0 = 1;
             break;
     }
 

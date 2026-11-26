@@ -298,6 +298,8 @@ segments:
       - {start: 0x2D4B0, type: bss, vram: 0x8003E380, name: bss_8003E380}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042810, name: libultra/audio/n_csplayer}
       - {start: 0x2D4B0, type: bss, vram: 0x80042850, name: bss_80042850}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800428C0, name: libultra/audio/init_17870}
+      - {start: 0x2D4B0, type: bss, vram: 0x800428D0, name: bss_800428D0}
       # libultra objects that link their own .bss. A list-form bss entry has no ROM: splat takes its vram
       # from the first field as if it were a ROM offset, and in init_data vram = 0x80000000 + offset.
       - [0x428E0, .bss, libultra/os/initialize]

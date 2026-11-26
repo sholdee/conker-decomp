@@ -95,6 +95,11 @@ void func_10012020(void);
 /* libultra/audio/init_17870.c */
 void func_10017870(u8 arg0);
 void func_10017944(s32 arg0, u32 arg1);
+extern u8 D_800428C0;
+extern u8 D_800428C1;
+extern u8 D_800428C2;
+extern u8 D_800428C4[2];
+extern u8 D_800428C6[2];
 
 /* init_20000.c */
 extern s16 D_8002BC10[128]; /* n_eqpower: equal-power pan curve */
