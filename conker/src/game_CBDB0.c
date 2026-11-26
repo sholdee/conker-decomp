@@ -59,15 +59,15 @@ s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
         return 1;
     case 3:
         /* 16.16 fixed-point operands; 0x78000000 means "unchanged" */
-        if ((f32)cmd[2] != 2013265920.0f) {
+        if (cmd[2] != 2013265920.0f) {
         unused_label: // matching: a label ends the block, so as1 won't pull the 65536.0f load into a bc1tl slot
-            WORK(obj)[0].f = (f32)cmd[2] / 65536.0f;
+            WORK(obj)[0].f = cmd[2] / 65536.0f;
         }
-        if ((f32)cmd[3] != 2013265920.0f) {
-            WORK(obj)[1].f = (f32)cmd[3] / 65536.0f;
+        if (cmd[3] != 2013265920.0f) {
+            WORK(obj)[1].f = cmd[3] / 65536.0f;
         }
-        if ((f32)cmd[4] != 2013265920.0f) {
-            WORK(obj)[2].f = (f32)cmd[4] / 65536.0f;
+        if (cmd[4] != 2013265920.0f) {
+            WORK(obj)[2].f = cmd[4] / 65536.0f;
         }
         return 1;
     case 4:
