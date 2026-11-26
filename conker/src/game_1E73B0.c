@@ -739,8 +739,8 @@ void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
                   (rnd2 % 205) + 299, 1, 1, 0, 0, 0, (u8)arg2, 0);
 }
 
-extern u8 D_800AA760;
-extern u8 D_800AA76C;
+extern const Vec3f D_800AA760;
+extern const Vec3f D_800AA76C;
 
 /* Spawns the func_15160CDC effect (tables D_800AA760/D_800AA76C) on `obj`. */
 void func_151BC074(Actor *obj) {
@@ -751,11 +751,6 @@ void func_151BC074(Actor *obj) {
 }
 
 
-/* Objects returned by func_15134908 hold the owner reference at this offset. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x40];
-    /* 0x40 */ ActorRef ref;
-} Fx15134908;
 
 /* Data block of the object returned by func_15147A80. */
 typedef struct {
@@ -778,7 +773,7 @@ typedef struct {
  * each with a reference back to its owner.
  */
 void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
-    Fx15134908 *fx1;
+    BloodTrail *fx1;
 
     if ((D_80082FA0 < 2) && (D_8008FD8C < 5)) {
         BloodTrailDesc desc;
@@ -798,7 +793,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         ref.uniqueId = obj->unique_id;
         fx1 = func_15134908(&desc, 8, arg1, arg2);
         if (fx1 != NULL) {
-            memcpy(&fx1->ref, &ref, sizeof(ref));
+            memcpy(fx1 + 1, &ref, sizeof(ref)); /* the owner reference, in the 8 extra bytes after the trail */
         }
     }
     {
