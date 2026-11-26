@@ -162,8 +162,8 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
     s32 useDefaultBasis;
     // matching: only 12 bytes, although func_150AC9C0 writes a whole CollisionTri (18 bytes) here
     f32 hitTri[3];
-    s32 ignored0;
-    s32 ignored1;
+    f32 ignored0;
+    f32 ignored1;
     s32 hitSurface;
     s32 type;
     f32 dist;
@@ -217,12 +217,12 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
         if (hit) {
             useDefaultBasis = 0;
             if (func_15144E80((CollisionTri *)hitTri, &tangentU, &tangentV, &normal)) {
-                s32 ignored2;
-                s32 ignored3;
-                s32 ignored4;
-                s32 ignored5;
-                s32 ignored6;
-                s32 ignored7;
+                f32 ignored2;
+                f32 ignored3;
+                f32 ignored4;
+                f32 ignored5;
+                f32 ignored6;
+                f32 ignored7;
 
                 func_15145128(&tangentU, &tangentU, &ignored2, &ignored3);
                 func_15145128(&tangentV, &tangentV, &ignored4, &ignored5);

@@ -224,8 +224,8 @@ QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, CollisionTri *sur
 }
 
 /* As func_1513C650, without a model or stored position. */
-QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width, f32 height,
-                         u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
+QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
+                         f32 height, u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
     QuadSprite *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
 
     if (sprite == NULL) {
@@ -240,8 +240,8 @@ QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, CollisionTri *sur
 }
 
 /* As func_1513C73C; arg1 is unused and the default colours are used. */
-QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
-                         f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE) {
+QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z,
+                         f32 width, f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE) {
     QuadSprite *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argD, argE);
 
     if (sprite == NULL) {
@@ -609,8 +609,8 @@ void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
 void *func_1513D668(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle,
                     f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface, u8 argB, s32 motionSize, u8 argD,
                     s32 argE) {
-    return func_1513D594(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, triPtrs, surface, 0, 0,
-                         argB, motionSize, argD, argE);
+    return func_1513D594(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, triPtrs, surface, 0,
+                         0, argB, motionSize, argD, argE);
 }
 
 /*
@@ -950,7 +950,8 @@ void func_1513E2A4(void) {
  * Places a sprite's quad (half-size width x height, rotated by angle) around (x, y, z): in the plane of
  * the basis func_15144E80 returns for surface, or with no surface on the slope from func_1510E388.
  */
-s32 func_1513E2AC(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width, f32 height, u8 angle) {
+s32 func_1513E2AC(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
+                  f32 height, u8 angle) {
     Vtx_t *vtx;
     f32 cosA;
     f32 sinA;

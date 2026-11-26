@@ -1334,12 +1334,12 @@ QuadSprite *func_1513C4EC(void *def, void *colors, u8 updateFn, u8 expireFn, f32
                           u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF);
 QuadSprite *func_1513C5B0(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
                           u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD);
-QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width, f32 height,
-                          u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF);
-QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width, f32 height,
-                          u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD);
-QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
-                          f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE);
+QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
+                          f32 height, u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF);
+QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
+                          f32 height, u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD);
+QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z,
+                          f32 width, f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE);
 void func_1513C8D4(QuadSprite *sprite);
 void func_1513C900(QuadSprite *sprite);
 void func_1513C92C(QuadSprite *sprite);
@@ -1362,7 +1362,8 @@ void *func_1513D4B8(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
 void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize, u8 arg7,
                     s32 arg8);
 void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
-                    f32 height, Vec3s **triPtrs, CollisionTri *surface, s32 model, s32 argC, u8 argD, s32 motionSize, u8 argF, s32 arg10);
+                    f32 height, Vec3s **triPtrs, CollisionTri *surface, s32 model, s32 argC, u8 argD, s32 motionSize,
+                    u8 argF, s32 arg10);
 void *func_1513D668(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
                     f32 height, Vec3s **triPtrs, CollisionTri *surface, u8 argB, s32 motionSize, u8 argD, s32 argE);
 s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface,
@@ -1374,7 +1375,8 @@ void func_1513E084(DefParticleHead *particle, ActorMsg *msg, u8 eventId);
 void func_1513E134(void);
 void func_1513E13C(QuadSprite *sprite, f32 x, f32 y, f32 z, f32 width, f32 length, u8 angle);
 void func_1513E2A4(void);
-s32 func_1513E2AC(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width, f32 height, u8 angle);
+s32 func_1513E2AC(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
+                  f32 height, u8 angle);
 s32 func_1513E6E8(DefParticleHead *particle);
 Vtx *func_1513E83C(DefParticleHead *particle, s16 viewport);
 Vtx *func_1513EAD8(DefParticleHead *particle, s32 reversed, s32 viewport);
@@ -2549,7 +2551,8 @@ void func_151A5660(u8 *effect);
 void func_151A5CAC(TimedEffect *arg0);
 void func_151A5CEC(TimedEffect *arg0);
 void func_151A5D2C(u16 soundHandle);
-QuadSprite *func_151A5D58(f32 size, u8 arg1, CollisionTri *surface, f32 *pos, s16 duration, u8 arg5, u8 arg6, u8 arg7, s32 arg8);
+QuadSprite *func_151A5D58(f32 size, u8 arg1, CollisionTri *surface, Vec3f *pos, s16 duration, u8 arg5, u8 arg6,
+                          u8 arg7, s32 arg8);
 
 /* game_1D3AB0.c */
 /* State at 0x110 of the particle emitter over a TriggerZone (func_151A6600, func_151A6AB8). */
