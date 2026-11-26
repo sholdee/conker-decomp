@@ -280,7 +280,7 @@ void func_150120B0(s32 arg0);
 void func_1501214C(Actor *arg0);
 
 /* game_3F670.c */
-void func_150121C0(s32 arg0);
+void func_150121C0(LightEffect *effect);
 
 /* game_3FBD0.c */
 u8 func_15012720(void);

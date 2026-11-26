@@ -267,13 +267,13 @@ s32 func_1500B714(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri
     y = (VTX(tri, 0, 1) + VTX(tri, 1, 1) + VTX(tri, 2, 1)) / 3;
     z = (VTX(tri, 0, 2) + VTX(tri, 1, 2) + VTX(tri, 2, 2)) / 3;
 
-    index = func_1500AF08(index, slot, subtype, (s16)x, (s16)y, (s16)z, 0x80, kind, index);
+    index = func_1500AF08(index, slot, subtype, x, y, z, 0x80, kind, index);
 
-    if ((f32)(u16)amount > 62.5f) {
+    if ((u16)amount > 62.5f) {
         clamped = 62;
     }
 
-    func_1000FA64(0x4D, (s16)x, (s16)y, (s16)z, 0x8000, clamped, clamped >> 3, 0, 0, 0, 0, 0);
+    func_1000FA64(0x4D, x, y, z, 0x8000, clamped, clamped >> 3, 0, 0, 0, 0, 0);
     return index;
 }
 /** Like func_1500B1F4 without scale jitter, then sets the slot's frame count to 87. */

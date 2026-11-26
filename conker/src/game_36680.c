@@ -176,9 +176,9 @@ void func_150097A4(PointLight *light, s32 id) {
 }
 
 void func_150097CC(PointLight *light, s32 id) {
-    s32 effect = (s32)func_151615F8(light, 0, 2, 14, 255, 1);
+    LightEffect *effect = func_151615F8(light, 0, 2, 14, 255, 1);
 
-    if (effect != 0) {
+    if (effect != NULL) {
         func_150121C0(effect);
     }
 }
@@ -484,7 +484,7 @@ void func_1500A8C8(PointLight *light, s32 id) {
 }
 
 void func_1500A904(PointLight *light, s32 id) {
-    func_151615F8(light, 1, (u8)(id - 80), 14, 255, 1);
+    func_151615F8(light, 1, id - 80, 14, 255, 1);
 }
 
 /* The light callbacks by id (func_1500A94C). */
@@ -542,15 +542,15 @@ void func_1500A990(s32 unused) {
     params[4] = 30.0f;
     params[5] = 50.0f;
 
-    fraction = (u32)(osGetCount() * func_150ADA20()) & 0xFFFF;
+    fraction = (osGetCount() * func_150ADA20()) & 0xFFFF;
     fraction *= 1.5259022e-05f; // 1/65535
     params[6] = (fraction + fraction) * 3.1415927f;
 
-    fraction = (u32)(osGetCount() * func_150ADA20()) & 0xFFFF;
+    fraction = (osGetCount() * func_150ADA20()) & 0xFFFF;
     fraction *= 1.5259022e-05f;
     params[7] = (fraction + fraction) * 3.1415927f;
 
-    fraction = (u32)(osGetCount() * func_150ADA20()) & 0xFFFF;
+    fraction = (osGetCount() * func_150ADA20()) & 0xFFFF;
     fraction *= 1.5259022e-05f;
 
     params[8] = (fraction + fraction) * 3.1415927f;

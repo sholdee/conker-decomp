@@ -4,11 +4,11 @@
 
 static const Vec3f D_80096550 = { -21.0f, 1631.0f, -1535.0f };
 
-void func_150121C0(s32 arg0) {
+void func_150121C0(LightEffect *effect) {
     ModelParticle *ret;
     s32 i;
     struct {
-        s32 saved; // matching: kept below the spawn template on the stack
+        LightEffect *saved; // matching: kept below the spawn template on the stack
         ParticleSpawn78 payload;
     } stack;
 
@@ -35,7 +35,7 @@ void func_150121C0(s32 arg0) {
     stack.payload.flags = 0xC0500;
     stack.payload.lifetime = 0x12C;
     stack.payload.model = 0x21;
-    stack.saved = arg0;
+    stack.saved = effect;
     stack.payload.variant = 0;
 
     func_1510F800(0);
