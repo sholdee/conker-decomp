@@ -1555,8 +1555,8 @@ void func_1514F8F8(JetSpray *config, Vec3f *direction, Vec3f *axis0, Vec3f *axis
 void func_1514FB98(DirectedJetSpray *emitter, u8 arg1, s32 arg2);
 void func_1514FBFC(SurfaceJetSpray *emitter, u8 arg1, s32 arg2);
 void func_1514FCE8(JetSpraySpec *config, u8 arg1, s32 arg2);
-void func_1514FEFC(TriangleSource *source, DropSpray *config, s32 arg2, u8 arg3, s32 arg4);
-void func_1514FF44(ConeBasis *cone, DropSpray *config, s32 arg2, u8 arg3, s32 arg4);
+void func_1514FEFC(TriangleSource *source, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
+void func_1514FF44(ConeBasis *cone, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
 void func_15150178(AngleRange *angles, DropSpray *config, s32 arg2, u8 arg3, s32 arg4);
 void func_15150400(DebrisScatter *config, AngleRange *angles, u8 arg2, s32 arg3);
 void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32 variantCount, void *extraData,
@@ -1578,8 +1578,8 @@ void func_15152F70(SimplePuffSpray *config, u8 arg1);
 void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2);
 void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3);
 void func_151539B4(StreakBurst *config, u8 arg1);
-void func_15153C84(TriangleSource *source, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4);
-void func_15153CCC(ConeBasis *cone, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4);
+void func_15153C84(TriangleSource *source, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
+void func_15153CCC(ConeBasis *cone, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
 void func_15153F18(AngleRange *angles, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4);
 void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 arg5, s32 arg6);
 s32 func_1515452C(Object15132A4C *object);

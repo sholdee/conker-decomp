@@ -1,9 +1,5 @@
 #include <ultra64.h>
-#define func_15153C84 func_15153C84_header // matching: this file keeps its own declarations of these
-#define func_15153CCC func_15153CCC_header
 #include "functions.h"
-#undef func_15153C84
-#undef func_15153CCC
 #include "variables.h"
 
 /* Defined in game_15D730.c as void func_15131958(Vec3f *vel, f32 drag). This file was compiled with a
@@ -687,15 +683,6 @@ s32 func_150DA628(TrailSpark *particle, s32 arg1) {
     return 1;
 }
 
-typedef struct {
-    u8 unk0[0x24];
-} ImpactOrigin;
-
-// matching: a pointer where the definition has s32 (arg 3)
-extern void func_15153CCC(ConeBasis *, SplashSpray *, ImpactOrigin *, u8, s32);
-// matching: a pointer where the definition has s32 (arg 3)
-extern void func_15153C84(TriangleSource *, SplashSpray *, ImpactOrigin *, u8, s32);
-
 /* Spawns the impact effects of a trail segment hitting something (hit from func_15081690). */
 void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir) {
     PissTrailData *data;
@@ -766,7 +753,7 @@ void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir) {
             data->impactAccum += (0.06000000238f + func_150ADA68() * 0.06000000238f) * D_800BE9A4;
             if (data->impactAccum > 1.0f) {
                 SplashSpray emit;
-                ImpactOrigin origin;
+                CollisionHit origin;
 
                 func_150472C0(&origin, hit);
                 emit.pos = hit->pos;

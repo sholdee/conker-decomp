@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_1514FF44 func_1514FF44_header // matching: this file keeps its own declaration of func_1514FF44
 #include "functions.h"
-#undef func_1514FF44
 #include "variables.h"
 
 extern f32 D_800D9860;
@@ -519,8 +517,6 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
 
 extern f32 D_800AAF84[3];
 extern f32 D_800AAF90[3];
-// matching: a CollisionHit * third argument (the definition takes s32)
-extern void func_1514FF44(ConeBasis *, DropSpray *, CollisionHit *, u8, s32);
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
  * 5-10 more particles that each carry a func_151CEAAC effect. */
 void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {

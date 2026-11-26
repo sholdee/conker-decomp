@@ -148,15 +148,15 @@ void func_1514FCE8(JetSpraySpec *config, u8 arg1, s32 arg2) {
     }
 }
 
-void func_1514FEFC(TriangleSource *source, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_1514FEFC(TriangleSource *source, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
     ConeBasis cone;
 
     func_1514F640(source, &cone);
-    func_1514FF44(&cone, config, arg2, arg3, arg4);
+    func_1514FF44(&cone, config, ground, arg3, arg4);
 }
 
 /* Spawns a random number of particles, each moving in a random direction inside the cone. */
-void func_1514FF44(ConeBasis *cone, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_1514FF44(ConeBasis *cone, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -169,7 +169,7 @@ void func_1514FF44(ConeBasis *cone, DropSpray *config, s32 arg2, u8 arg3, s32 ar
                           (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase,
                           (func_150ADA20() % (u32)(config->unk25 + 1)) + config->unk24,
                           (func_150ADA68() * config->sizeRange) + config->sizeBase,
-                          func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, arg2, config->wobbles,
+                          func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, ground, config->wobbles,
                           func_150ADA68() < config->bounceChance, arg3, arg4);
             count--;
         }
@@ -1155,16 +1155,16 @@ void func_151539B4(StreakBurst *config, u8 arg1) {
     }
 }
 
-void func_15153C84(TriangleSource *source, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15153C84(TriangleSource *source, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
     ConeBasis cone;
 
     func_1514F640(source, &cone);
-    func_15153CCC(&cone, config, arg2, arg3, arg4);
+    func_15153CCC(&cone, config, ground, arg3, arg4);
 }
 
 /* Spawns a random number of particles (func_151DA6F8), each moving in a random direction inside the
  * cone. */
-void func_15153CCC(ConeBasis *cone, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15153CCC(ConeBasis *cone, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -1178,7 +1178,7 @@ void func_15153CCC(ConeBasis *cone, SplashSpray *config, s32 arg2, u8 arg3, s32 
                           (func_150ADA20() % (u32)(config->unk32 + 1)) + config->unk30,
                           (func_150ADA68() * config->scaleRange) + config->scaleBase,
                           (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase,
-                          func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->kind, arg2,
+                          func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->kind, ground,
                           config->unk3C, config->unk3E, config->unk40, arg3, arg4);
             count--;
         }
