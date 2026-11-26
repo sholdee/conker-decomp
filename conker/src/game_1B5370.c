@@ -35,9 +35,9 @@ enum ColorAnimType {
     COLOR_ANIM_RANDOM   /* random fades between from, half and to */
 };
 
-extern ColorAnim D_800DF700[COLOR_ANIM_MAX];
-extern s32 D_800DF7B4; /* slots in use */
-extern u8 D_800A7390[8]; /* type 2: frames to wait after each flash */
+static ColorAnim D_800DF700[COLOR_ANIM_MAX];
+static s32 D_800DF7B4; /* slots in use */
+static const u8 D_800A7390[8] = { 60, 6, 100, 6, 40, 55, 6, 90 }; /* type 2: frames to wait after each flash */
 
 
 /* Allocates a colour animation slot; returns its index, or -1 when all are in use. */
