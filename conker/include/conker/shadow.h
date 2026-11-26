@@ -61,7 +61,7 @@ s32 func_15185D5C(ClipVtx *v);
 s32 func_15185D84(ClipVtx *v);
 s32 func_15185DAC(ClipVtx *v);
 ClipVtx *func_15185DD4(ClipVtx *in, s32 count, s32 plane, ClipVtx *out);
-s32 func_15185F24(ShadowVtx *in, s32 count, s32 maxVerts, Vtx_t *out, s32 *quadEnd, s32 split);
+s32 func_15185F24(ShadowVtx *in, s32 count, s32 maxVerts, Vtx *out, s32 *quadEnd, s32 split);
 s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx *end);
 Gfx *func_15186794(Gfx *gfx, s32 view);
 void func_151872B0(s32 levelId);
