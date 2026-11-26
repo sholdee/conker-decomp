@@ -6,7 +6,7 @@ extern f32 fabsf(f32);
 #pragma intrinsic (fabsf)
 
 
-void func_10019B50(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 vol) {
+void func_10019B50(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 vol) {
     N_ALSoundState *state;
     s16 tmp;
     seqp->chanState[chan].vol = vol;
@@ -18,7 +18,7 @@ void func_10019B50(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 vol) {
     }
 }
 
-void func_10019C28(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 pan) {
+void func_10019C28(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 pan) {
     N_ALSoundState *state;
     u8 tmp;
     seqp->chanState[chan].pan = pan;
@@ -30,17 +30,17 @@ void func_10019C28(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 pan) {
     }
 }
 
-void func_10019CD0(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 priority) {
+void func_10019CD0(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 priority) {
     seqp->chanState[chan].priority = priority;
 }
 
-void func_10019CFC(N_ALCSPlayer *seqp, s32 arg1, s32 arg2, s32 arg3) {
+void func_10019CFC(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     if (seqp->msgQueue != 0) {
         osSendMesg(seqp->msgQueue, (arg3 & 7) | 0x10 | ((seqp->node.samplesLeft << 5) & -0x100), 0);
     }
 }
 
-void func_10019D6C(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_10019D6C(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk8 = arg3;
 }
 
@@ -65,17 +65,17 @@ void func_10019D98(N_ALCSPlayer *seqp, u8 chan) {
     }
 }
 
-void func_10019ED8(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_10019ED8(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk14 = arg3;
     func_10019D98(seqp, chan);
 }
 
-void func_10019F38(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_10019F38(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk15 = arg3;
     func_10019D98(seqp, chan);
 }
 
-void func_10019F98(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_10019F98(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     N_ALSoundState *state;
     seqp->chanState[chan].unk16 = arg3;
     for (state = seqp->vAllocHead; state != NULL; state = state->voice.node.next) {
@@ -85,7 +85,7 @@ void func_10019F98(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     }
 }
 
-void func_1001A030(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_1001A030(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     N_ALSoundState *state;
 
     seqp->chanState[chan].sustain = arg3;
@@ -116,7 +116,7 @@ void func_1001A030(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     }
 }
 
-void func_1001A224(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_1001A224(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     N_ALSoundState *state;
 
     seqp->chanState[chan].fxmix = (seqp->chanState[chan].fxmix & 0x7F) | (arg3 << 7);
@@ -127,24 +127,24 @@ void func_1001A224(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     }
 }
 
-void func_1001A2F8(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_1001A2F8(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     arg3 = arg3 & 0x7F;
     seqp->chanState[chan].fxmix = (seqp->chanState[chan].fxmix & 0x80) | arg3;
-    func_1001A224(seqp, arg1, chan, seqp->chanState[chan].fxmix >> 7);
+    func_1001A224(seqp, event, chan, seqp->chanState[chan].fxmix >> 7);
 }
 
-void func_1001A39C(N_ALCSPlayer *seqp, s32 arg1, s32 chan, u32 arg3) {
-    if (arg3 < n_syn->maxAuxBusses) {
+void func_1001A39C(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
+    if ((u32)arg3 < n_syn->maxAuxBusses) {
         seqp->chanState[chan].unkB = arg3;
     }
 }
 
-void func_1001A3E0(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_1001A3E0(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->mpegBank = arg3;
 }
 
 /* Plays sound mpegBank * 100 + arg3. */
-void func_1001A3FC(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_1001A3FC(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     func_1001263C(seqp->mpegBank * 100 + arg3, 0x7FFF, 0x40);
 }
 
@@ -158,7 +158,7 @@ void func_1001A45C(N_ALCSPlayer *seqp, u8 chan) {
         }
     }
 }
-void func_1001A508(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_1001A508(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     f32 delta;
 
     if (seqp->chanState[chan].unkF == 0) {
@@ -178,11 +178,11 @@ void func_1001A508(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     }
     return;
 call_block:
-    *((u8 *)arg1 + 0x9) = 0xFE;
-    func_1001A704(seqp, arg1, chan, arg3);
+    event->msg.midi.byte1 = 0xFE;
+    func_1001A704(seqp, event, chan, arg3);
 }
 
-void func_1001A704(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_1001A704(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     u8 sp2F;
     u8 sp2E;
     s32 sp28;
@@ -224,7 +224,7 @@ void func_1001A704(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     sp2F = sp28 + sp2F;
     seqp->chanState[chan].unkD = sp2F;
     if (sp2F != sp2E) {
-        n_alEvtqPostEvent(&seqp->evtq, arg1, seqp->uspt * 100 * sp1C, 2);
+        n_alEvtqPostEvent(&seqp->evtq, event, seqp->uspt * 100 * sp1C, 2);
     }
     if (sp2F != 0) {
         seqp->chanMask |= (1 << chan);
@@ -234,11 +234,11 @@ void func_1001A704(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     func_1001A45C(seqp, chan);
 }
 
-void func_1001A9DC(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_1001A9DC(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unkF = arg3;
 }
 
-void func_1001AA08(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+void func_1001AA08(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
     seqp->chanState[chan].unkD = arg3;
     seqp->chanState[chan].unkE = arg3;
     if (arg3 == 0) {
@@ -248,3 +248,40 @@ void func_1001AA08(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     }
     func_1001A45C(seqp, chan);
 }
+
+/* The controller-change handlers (see n_seqp.h). */
+CSPCtrlHandler D_8002BA50[0x5D + 4] = {
+    /* 0x00 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 0x07 */ func_10019B50, /* volume */
+    /* 0x08 */ NULL, NULL,
+    /* 0x0A */ func_10019C28, /* pan */
+    /* 0x0B */ NULL, NULL, NULL, NULL, NULL,
+    /* 0x10 */ func_10019CD0, /* priority */
+    /* 0x11 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 0x19 */ NULL,
+    /* 0x1A */ func_1001A3FC,
+    /* 0x1B */ func_1001A3E0,
+    /* 0x1C */ NULL, NULL,
+    /* 0x1E */ func_10019CFC,
+    /* 0x1F */ NULL,
+    /* 0x20 */ func_10019D6C,
+    /* 0x21 */ func_10019ED8,
+    /* 0x22 */ func_10019F38,
+    /* 0x23 */ func_10019F98,
+    /* 0x24 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 0x2C */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 0x34 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 0x3C */ NULL, NULL, NULL, NULL,
+    /* 0x40 */ func_1001A030, /* sustain */
+    /* 0x41 */ func_1001A224,
+    /* 0x42 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 0x4A */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 0x52 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 0x5A */ NULL,
+    /* 0x5B */ func_1001A2F8, /* fx mix */
+    /* 0x5C */ func_1001A39C,
+    /* 0x5D */ func_1001A508, /* controller 0xFF */
+    /* 0x5E */ func_1001A704, /* controller 0xFE */
+    /* 0x5F */ func_1001A9DC, /* controller 0xFD */
+    /* 0x60 */ func_1001AA08  /* controller 0xFC */
+};

@@ -452,7 +452,7 @@ void    func_10018C60(N_ALCSPlayer *seqp);                              /* code_
 void    func_10018CB0(N_ALCSPlayer *seqp, ALCSeq *seq);                 /* code_18CB0.c */
 void    func_10018D00(N_ALCSPlayer *seqp, s16 vol);                     /* init_18D00.c */
 void    func_10018D50(N_ALCSPlayer *seqp);                              /* init_18D50.c */
-void    func_1001A704(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3); /* init_19B50.c */
+void    func_1001A704(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 value); /* init_19B50.c */
 void    func_1001CA90(N_ALVoice *v, f32 pitch);                         /* n_synsetpitch2.c */
 f32     func_1001CEA4(s32 arg0);                                        /* init_1CBF0.c */
 void   *func_1001D9B0(s16 bus);                                         /* init_1D900.c: the bus's effect */

@@ -71,9 +71,6 @@ typedef struct {
 /* Conker's initOsc takes a 7th argument */
 typedef ALMicroTime (*CSPOscInit)(void **oscState, f32 *initVal, u8 oscType,
                                   u8 oscRate, u8 oscDepth, u8 oscDelay, u8 arg6);
-typedef void (*CSPCtrlHandler)(N_ALCSPlayer *seqp, N_ALEvent *event, u8 chan, u8 value);
-
-extern CSPCtrlHandler D_8002BA50[];     /* MIDI controller handlers */
 static ALMicroTime    D_80042810[16];   /* per-channel note-off delta */
 
 
