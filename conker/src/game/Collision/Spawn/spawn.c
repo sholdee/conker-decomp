@@ -294,7 +294,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     }
     if (obj->playernumber != 0xFF) {
         obj->energy = player_getStat(obj->playernumber, 4);
-        obj->unkB2 = D_800D2132;
+        obj->underwaterTime = D_800D2132;
         func_150829D8(obj);
         func_15083384(obj, player_getStat(idx, 1));
     }

@@ -638,7 +638,7 @@ typedef struct {
     /* 0x1A2 */ u16 gunRecoil;       // >> 8 = recoil pitch kick (Camera.LastGunRecoil, walk lean)
     /* 0x1A4 */ u16 gunRecoilVel;    // added to gunRecoil each tick while firing
     /* 0x1A6 */ u16 unk1A6;
-    /* 0x1A8 */ u8  unk1A8;
+    /* 0x1A8 */ u8  skippedTime;
     /* 0x1A9 */ u8  unk1A9;
     /* 0x1AA */ s16 shotsfired;
     /* 0x1AC */ u8  on_fire;
@@ -1047,7 +1047,7 @@ struct Actor {
     /* 0x0AF */ u8  padAF;
     /* 0x0B0 */ s8  unkB0;
     /* 0x0B1 */ u8  padB1;
-    /* 0x0B2 */ u16 unkB2;  // (oxygen?)
+    /* 0x0B2 */ u16 underwaterTime;  // time the head has been under water (drowning past 1560)
     /* 0x0B4 */ f32 lastEventTime; // animation time of the last timed event (event_runTimedEvents)
     /* 0x0B8 */ f32 vtilt;
     /* 0x0BC */ f32 unkBC;
@@ -1093,8 +1093,8 @@ struct Actor {
     /* 0x111 */ u8  pad111;
     /* 0x112 */ u16 unk112;
     /* 0x114 */ f32 unk114;
-    /* 0x118 */ f32 unk118;
-    /* 0x11C */ f32 unk11C;
+    /* 0x118 */ f32 waterHeight;      // water surface height under the actor; -10000 when there is none
+    /* 0x11C */ f32 prevWaterHeight;  // waterHeight of the previous frame
     /* 0x120 */ s16 unk120;
     /* 0x122 */ u8  unk122;
     /* 0x123 */ u8  unk123;
@@ -1286,7 +1286,7 @@ struct Actor {
     /* 0x2CB */ s8  unk2CB;
     /* 0x2CC */ s32 unk2CC;
     /* 0x2D0 */ AnimInstance *unk2D0;
-    /* 0x2D4 */ EffectHeader *unk2D4;
+    /* 0x2D4 */ EffectHeader *blobShadow;
     /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for event_launchPlayer, set by script command 0x22;
                                  // [0]/[1] are also a fade timer/rate (func_150DFDD0, game/Effects/PulseEffect/pulseeffect)
     /* 0x2E4 */ s32 taskint[3]; // per-type state; game/Effects/EmitterSpawner/emitterspawner saves [0]/[1] as commands 0xE/0x68;

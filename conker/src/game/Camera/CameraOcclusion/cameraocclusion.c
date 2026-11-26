@@ -128,7 +128,7 @@ void camera_updateFloorHeights(Camera *arg0) {
     }
     if (!(arg0->AvailableModes & 0x10000000) && (arg0->Mode != 0x80)) {
         if ((arg0->SpecialFlags & 1) && (flag4E != 0)) {
-            arg0->floorY = arg0->CharPtr->unk118;
+            arg0->floorY = arg0->CharPtr->waterHeight;
         }
         if (arg0->Mode == 0x80) {
             if (arg0->eye.y < arg0->unk354 + 30.0f) {

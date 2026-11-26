@@ -1800,7 +1800,7 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                     obj->unkCC = 0;
                     rescaled = 0;
                     D_800D35DC = (target - movement_obj) + 1;
-                    collision_findFloorInRange(&obj->floorTriVerts, obj->floorTri.v, &floorY, &obj->unk118, &obj->floorMaterial, &obj->floorType,
+                    collision_findFloorInRange(&obj->floorTriVerts, obj->floorTri.v, &floorY, &obj->waterHeight, &obj->floorMaterial, &obj->floorType,
                                   obj->xpos, obj->ypos, obj->zpos, obj->ypos, 0, obj,
                                   -10000.0f, target->ypos);
                     ((u8 *)&D_800D35E0)[-4] = 0;
@@ -1808,11 +1808,11 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                     obj->doing_hit = 0;
                     obj->shad = obj->ypos - obj->floorY;
                     if (obj->type == 1) {
-                        if (obj->unk118 != -10000.0f && obj->ypos < obj->unk118) {
+                        if (obj->waterHeight != -10000.0f && obj->ypos < obj->waterHeight) {
                             obj->inwater = 1;
                         } else {
                             obj->inwater = 0;
-                            obj->unkB2 = 0;
+                            obj->underwaterTime = 0;
                         }
                     }
                     if (gSeqTrackStates[scene][track].unk18 != -9999.0f) {
@@ -2497,17 +2497,17 @@ s32 cutscene_releasePlayer(s32 scene) {
             obj->unkCC = 0;
             obj->doing_hit = 0;
 
-            if ((-10000.0f != obj->unk118) && (obj->ypos < obj->unk118)) {
+            if ((-10000.0f != obj->waterHeight) && (obj->ypos < obj->waterHeight)) {
                 obj->inwater = 1;
                 obj->yspd = 0.0f;
                 obj->ygrav = 0.0f;
-                if (((obj->unk118 - 50.0f) < obj->aim.y) || ((obj->mv->water_attribs & 1) != 0)) {
-                    obj->unkB2 = 0;
+                if (((obj->waterHeight - 50.0f) < obj->aim.y) || ((obj->mv->water_attribs & 1) != 0)) {
+                    obj->underwaterTime = 0;
                     hud_resetBubbles();
                 }
             } else {
                 obj->inwater = 0;
-                obj->unkB2 = 0;
+                obj->underwaterTime = 0;
                 obj->yspd = -4.0f;
                 obj->ypos = obj->floorY;
                 obj->unk1CC = obj->floorY;

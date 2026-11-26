@@ -220,7 +220,7 @@ void hud_addBlock(void) {
 }
 
 
-/* Spawns and animates the bubbles while player 1 is in water (driven by its unkB2 counter). */
+/* Spawns and animates the bubbles while player 1 is in water (driven by its underwaterTime counter). */
 void hud_updateBubbles(void) {
     s32 i;
     s32 v;
@@ -241,7 +241,7 @@ void hud_updateBubbles(void) {
         D_800D24C0 = air;
     }
     if (movement_obj[0].inwater) {
-        air = movement_obj[0].unkB2;
+        air = movement_obj[0].underwaterTime;
     } else {
         air = 0;
     }
@@ -571,7 +571,7 @@ Gfx *hud_drawBubbles(Gfx *gfx) {
 }
 
 /* Animates the water surface mesh while player 1 is in water: blends its vertex positions,
- * tints its vertex colours and picks its textures by player 1's unkB2 counter. */
+ * tints its vertex colours and picks its textures by player 1's underwaterTime counter. */
 void hud_updateWaterSurface(void) {
     WaterVtx *dst;
     WaterBase *base;
@@ -600,7 +600,7 @@ void hud_updateWaterSurface(void) {
     s32 b;
 
     if (movement_obj->inwater) {
-        intensity = movement_obj->unkB2;
+        intensity = movement_obj->underwaterTime;
     } else {
         intensity = 0;
     }
@@ -619,7 +619,7 @@ void hud_updateWaterSurface(void) {
         gHudWaterStage.alpha = 0;
         return;
     }
-    gHudWaterStage.unk9C = (u32)movement_obj->unkB2 / 720.0f;
+    gHudWaterStage.unk9C = (u32)movement_obj->underwaterTime / 720.0f;
     if (gHudWaterStage.unk9C > 1.0f) {
         gHudWaterStage.unk9C = 1.0f;
     }

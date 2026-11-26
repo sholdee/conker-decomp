@@ -2300,7 +2300,7 @@ s32 attach_hookPlayOnce(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-/* Hook: removes the attachment after 30 ticks with its owner out of water and unk118 < unk180. */
+/* Hook: removes the attachment after 30 ticks with its owner out of water and waterHeight < unk180. */
 s32 func_15033328(ModelAttachment *att, Actor *owner) {
     s32 delta;
 
@@ -2308,7 +2308,7 @@ s32 func_15033328(ModelAttachment *att, Actor *owner) {
         return 0;
     }
     if (owner->inwater == 0) {
-        if (owner->unk118 < owner->floorY) {
+        if (owner->waterHeight < owner->floorY) {
             delta = D_800BE9E4;
             if (delta < att->unk38) {
                 att->unk38 -= delta;
@@ -2322,7 +2322,7 @@ s32 func_15033328(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-/* Hook: hides the attachment while the owner is below unk118 + 300; removes it in water. */
+/* Hook: hides the attachment while the owner is below waterHeight + 300; removes it in water. */
 s32 func_150333A8(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
@@ -2336,7 +2336,7 @@ s32 func_150333A8(ModelAttachment *att, Actor *owner) {
         }
         return 1;
     }
-    if ((owner->unk118 != -10000.0f) && (owner->ypos < owner->unk118 + 300.0f)) {
+    if ((owner->waterHeight != -10000.0f) && (owner->ypos < owner->waterHeight + 300.0f)) {
         att->alpha = 0;
     } else {
         att->alpha = 0xFF;

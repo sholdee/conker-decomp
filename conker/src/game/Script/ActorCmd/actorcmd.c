@@ -1405,7 +1405,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xD6:
         return save_checkMatchOver();
     case 0xD7:
-        if ((obj->unk1CC - obj->ypos) > 600.0f && obj->unk118 == -10000.0f) {
+        if ((obj->unk1CC - obj->ypos) > 600.0f && obj->waterHeight == -10000.0f) {
             return 1;
         }
         return 0;

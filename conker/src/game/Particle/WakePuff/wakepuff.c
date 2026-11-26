@@ -20,7 +20,7 @@ void particle_spawnWakePuff(s32 objIndex, s32 spread, s32 growth, s32 growthRang
     BillboardTemplate template;
 
     obj = &movement_obj[objIndex];
-    if ((obj->inwater == 0) && (-10000.0f == obj->unk118)) {
+    if ((obj->inwater == 0) && (-10000.0f == obj->waterHeight)) {
         y = obj->ypos + 5.0f;
         angle = obj->theta * 0.01745329238f;
         x = obj->xpos;

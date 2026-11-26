@@ -149,14 +149,14 @@ void func_15056150(Actor *actor) {
     }
 }
 
-/* Moves the actor with the change in unk118 since last frame, scaled by its height above it. */
+/* Moves the actor with the change in waterHeight since last frame, scaled by its height above it. */
 void func_15056258(Actor *actor) {
     f32 delta;
     f32 heightFactor;
 
-    delta = actor->unk118 - actor->unk11C;
-    actor->unk11C = actor->unk118;
-    heightFactor = 2.0f * (actor->ypos - ((actor->unk118 - 60.0f) - 170.0f));
+    delta = actor->waterHeight - actor->prevWaterHeight;
+    actor->prevWaterHeight = actor->waterHeight;
+    heightFactor = 2.0f * (actor->ypos - ((actor->waterHeight - 60.0f) - 170.0f));
     if (!(heightFactor < 0.0f) && !(fabsf(delta) > 30.0f)) {
         if (heightFactor > 300.0f) {
             heightFactor = 300.0f;
@@ -950,7 +950,7 @@ void actor_updateStunned(Actor *actor, f32 decel) {
         if (yVel < 60.0f) {
             actor->yspd = yVel * 0.8999999762f;
         }
-        if ((actor->unk118 - 60.0f) + 40.0f < actor->ypos) {
+        if ((actor->waterHeight - 60.0f) + 40.0f < actor->ypos) {
             actor->count3 = 0;
             actor->count5 = 0;
             actor->inwater = 0;
@@ -1019,7 +1019,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
     s32 flags;
     f32 *floorOut;
 
-    actor->unk118 = -10000.0f;
+    actor->waterHeight = -10000.0f;
     cutscene_applyObjectTrack(actor, 0, -1);
     if (actor->noshove & 0x8000) {
         if (actor->drawtype == 7) {
@@ -1042,7 +1042,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
     if (!fastFloor ||
         !func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &groundY)) {
         if (actor->noshove & 8) {
-            floorOut = &actor->unk118;
+            floorOut = &actor->waterHeight;
         } else {
             floorOut = NULL;
         }
@@ -1050,7 +1050,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
                       actor->xpos, actor->ypos, actor->zpos, prevY, 0, actor, -10000.0f,
                       actor->ypos, actor->noshove & 0x04000000);
     } else if (actor->noshove & 8) {
-        actor->unk118 = collision_getPropSurfaceHeight(actor->xpos, actor->ypos, actor->zpos);
+        actor->waterHeight = collision_getPropSurfaceHeight(actor->xpos, actor->ypos, actor->zpos);
     }
     flags = actor->noshove;
     if ((actor->lifting != 0) && (actor->character_type != 0x9A)) {
@@ -1114,7 +1114,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
             }
             if (!(actor->noshove & 2) ||
                 !func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &groundY)) {
-                collision_findFloorEx(&actor->floorTriVerts, actor->floorTri.v, &groundY, &actor->unk118, &actor->floorMaterial,
+                collision_findFloorEx(&actor->floorTriVerts, actor->floorTri.v, &groundY, &actor->waterHeight, &actor->floorMaterial,
                               &actor->floorType, actor->xpos, actor->ypos, actor->zpos, prevY, 0,
                               actor, -10000.0f, actor->ypos, actor->noshove & 0x04000000);
             }
@@ -1153,7 +1153,7 @@ void func_15058EA4(Actor *actor, f32 maxY, f32 gravityAbove, f32 minY, f32 gravi
     }
 }
 
-/* Floats the actor on the water surface (unk118 + 9); `depth` in [0, 1) sets how low it sits. */
+/* Floats the actor on the water surface (waterHeight + 9); `depth` in [0, 1) sets how low it sits. */
 void actor_floatOnWater(Actor *actor, f32 depth, f32 arg2) {
     f32 tmp; // matching: one variable for the damping, offset and sink limit (IDO allocates it as one)
     f32 surfaceY;
@@ -1165,8 +1165,8 @@ void actor_floatOnWater(Actor *actor, f32 depth, f32 arg2) {
         depth -= 0.5f;
     }
     if (arg2) {} // matching: a use of the unused arg2 keeps it out of its stack slot
-    surfaceY = actor->unk118 + 9.0f;
-    if ((actor->ypos < (actor->unk118 + 9.0f)) || (actor->inwater >= 100)) {
+    surfaceY = actor->waterHeight + 9.0f;
+    if ((actor->ypos < (actor->waterHeight + 9.0f)) || (actor->inwater >= 100)) {
         if (actor->inwater == 0) {
             actor->ypos = surfaceY;
             actor->inwater = 100;
@@ -1822,7 +1822,7 @@ void actor_landPlayer(Actor *actor, f32 floorY) {
             dist = 0.0f;
         }
         actor->shad = dist;
-        dist = actor->ypos - (actor->unk118 - 34.0f);
+        dist = actor->ypos - (actor->waterHeight - 34.0f);
         if (dist < 70.0f && actor->yspd < 18.0f) {
             if (actor->yspd > -25.0f) {
                 actor->mv->transport_surface = 2;
@@ -3722,7 +3722,7 @@ void actor_clearSlot(Actor *actor) {
     actor->unk38 = -10000;
     actor->scale_xz = one;
     actor->scale_y = one;
-    actor->unk118 = initial;
+    actor->waterHeight = initial;
     actor->floorY = initial;
     actor->ygrav = 3.3f;
     actor->unk1DC = 0xFF;
@@ -3799,7 +3799,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
             rate = 2.0f;
             anim = 0;
             if ((D_800CC288 & 0x8000) && ((level != 0x29) || (actor->mv->pissed_up <= 0)) &&
-                (((actor->unk118 - 60.0f) - 30.0f) < actor->ypos)) {
+                (((actor->waterHeight - 60.0f) - 30.0f) < actor->ypos)) {
                 func_15052408(actor);
                 actor->mv->prop = 0;
                 rate = 0.0f;
@@ -3829,7 +3829,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
                 if (anim != 0x32) {
                     rate = 9.0f;
                     actor->count5 = 0;
-                    if ((actor->unk118 - 60.0f) < actor->ypos) {
+                    if ((actor->waterHeight - 60.0f) < actor->ypos) {
                         speed = 1.200000048f;
                         anim = 0x22;
                         actor->wantspeed = 15.0f;
@@ -3845,7 +3845,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
             rate = 10.0f;
             speed = 1.200000048f;
             anim = 0xD1;
-            if ((actor->unk118 - actor->ypos) < 70.0f) {
+            if ((actor->waterHeight - actor->ypos) < 70.0f) {
                 anim = 0xCC;
                 speed = 0.8999999762f;
             }
@@ -4089,7 +4089,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
     } else if ((D_800CC288 & 0x8000) && (actor->mv->transport == 0)) {
         if ((actor->animseq.uh != 0x3B) && (actor->animseq.uh != 0x3C) && (actor->unk137 == 0) && (actor->lifting == 0) &&
             (actor->mv->ladder == 0) && (actor->mv->prop == 0) && (height > 55.0f)) {
-            if ((actor->unk118 != -10000.0f) && ((actor->unk118 - actor->floorY) > 100.0f)) {
+            if ((actor->waterHeight != -10000.0f) && ((actor->waterHeight - actor->floorY) > 100.0f)) {
                 actor->ygrav = 6.0f;
                 actor->count3 = 1;
                 actor->norun = 0x78;
@@ -4468,8 +4468,8 @@ void actor_remove(Actor *actor, s32 mode) {
     if (actor->prevBones != NULL) {
         heap_free(actor->prevBones);
     }
-    if (actor->unk2D4 != NULL) {
-        effect_destroyObject(actor->unk2D4);
+    if (actor->blobShadow != NULL) {
+        effect_destroyObject(actor->blobShadow);
     }
     if (actor->unk304[0] != 0) {
         s32 i;
@@ -5057,13 +5057,13 @@ void actor_swapSlots(Actor *a, Actor *b) {
     camera_global_Cameras[OBJ_INDEX(b)].mv = b->mv;
     b->mv->SniperState = 0;
     attach_swapOwners(b->unique_id, a->unique_id);
-    if (b->unk2D4 != NULL) {
-        effect_destroyObject(b->unk2D4);
-        b->unk2D4 = NULL;
+    if (b->blobShadow != NULL) {
+        effect_destroyObject(b->blobShadow);
+        b->blobShadow = NULL;
     }
-    if (a->unk2D4 != NULL) {
-        effect_destroyObject(a->unk2D4);
-        a->unk2D4 = NULL;
+    if (a->blobShadow != NULL) {
+        effect_destroyObject(a->blobShadow);
+        a->blobShadow = NULL;
     }
     actor_resetFade(b);
     for (i = 0; i < 25; i++) {

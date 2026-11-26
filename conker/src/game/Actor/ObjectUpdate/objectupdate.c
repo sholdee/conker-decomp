@@ -222,7 +222,7 @@ void actor_updateObjects(void) {
     D_800C3E70 = 0;
 }
 
-/* Creates the unk2D4 effect for objects visible to some player and frees it for the rest. */
+/* Creates the blobShadow effect for objects visible to some player and frees it for the rest. */
 void func_1502C1A4(void) {
     Actor *obj;
     s32 visible;
@@ -251,7 +251,7 @@ void func_1502C1A4(void) {
                 }
             }
             if (visible) {
-                if (obj->unk2D4 == NULL) {
+                if (obj->blobShadow == NULL) {
                     variant = 0;
                     if (obj->character_type == 0x4D) {
                         variant = 2;
@@ -259,15 +259,15 @@ void func_1502C1A4(void) {
                     } else {
                         variantFlag = 0;
                     }
-                    obj->unk2D4 = (EffectHeader *)shadow_createBlob(0, obj, variant, 0, variantFlag);
+                    obj->blobShadow = (EffectHeader *)shadow_createBlob(0, obj, variant, 0, variantFlag);
                     // matching: the label ends the block so as1 can't move the store into the branch delay slot
                 created:;
                 }
             } else {
-                effect = obj->unk2D4;
+                effect = obj->blobShadow;
                 if (effect != NULL) {
                     effect_destroyObject(effect);
-                    obj->unk2D4 = NULL;
+                    obj->blobShadow = NULL;
                 }
             }
         }

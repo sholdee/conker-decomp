@@ -939,13 +939,13 @@ s32 camera_updateFixed(Camera *camera) {
     return 0;
 }
 
-/* Whether the player is in water far (over 300 units) from unk118; 0 when closer than 100. */
+/* Whether the player is in water far (over 300 units) from waterHeight; 0 when closer than 100. */
 s32 camera_isInDeepWater(Camera *camera) {
     Actor *player = camera->CharPtr;
     s32 depth;
 
     if (player->inwater == 1) {
-        depth = fabsf(player->ypos - player->unk118);
+        depth = fabsf(player->ypos - player->waterHeight);
         if (depth < 100) {
             return 0;
         }

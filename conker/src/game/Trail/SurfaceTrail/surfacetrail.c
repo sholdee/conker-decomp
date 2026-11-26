@@ -56,10 +56,10 @@ s32 func_1519EF90(config, side, out)
     }
     out->x = actor->xpos + (dist * dirX);
     out->z = actor->zpos - (dist * dirZ);
-    if (actor->unk118 < -9500.0f) {
+    if (actor->waterHeight < -9500.0f) {
         out->y = actor->ypos;
     } else {
-        out->y = actor->unk118;
+        out->y = actor->waterHeight;
     }
     return 1;
 }
@@ -419,10 +419,10 @@ s32 trail_followSurfaceTrail(SurfaceTrail *trail) {
                 Vec3f probe;
 
                 probe.x = point->x;
-                if (actor->unk118 < -9500.0f) {
+                if (actor->waterHeight < -9500.0f) {
                     probe.y = actor->ypos + 100.0f;
                 } else {
-                    probe.y = actor->unk118 + 100.0f;
+                    probe.y = actor->waterHeight + 100.0f;
                 }
                 probe.z = point->z;
                 if (fabsf(probe.x) > 20000.0f || fabsf(probe.z) > 20000.0f) {

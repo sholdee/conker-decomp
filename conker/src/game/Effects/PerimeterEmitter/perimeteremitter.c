@@ -14,7 +14,7 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
 /*
  * Picks a random spawn point on a 248-unit perimeter around owner: 122 units along the back edge
  * (-31.5 along forward), or 63 units along either side (61 out along right). Writes the point to outPos
- * (y taken from player->unk118) and a matching s16 yaw to outAngle.
+ * (y taken from player->waterHeight) and a matching s16 yaw to outAngle.
  */
 void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f *outPos, s16 *outAngle) {
     f32 along;
@@ -44,7 +44,7 @@ void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f 
         outPos->z = forward[1] * sideLength * spread + right[1] * side;
     }
     outPos->x += owner->xpos;
-    outPos->y += player->unk118;
+    outPos->y += player->waterHeight;
     outPos->z += owner->zpos;
 }
 

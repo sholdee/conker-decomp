@@ -339,9 +339,9 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
     if (obj->mv->unk22 > 100) {
         stickY = 80;
     }
-    delta = (obj->ypos - ((obj->unk118 - 60.0f) - 170.0f)) * 2.0f;
+    delta = (obj->ypos - ((obj->waterHeight - 60.0f) - 170.0f)) * 2.0f;
     if ((obj->mv->water_attribs & 1) || obj->mv->unk21 != 0) {
-        obj->unkB2 = 0;
+        obj->underwaterTime = 0;
         if (delta < 400.0f) {
             // matching: loading 8.0f into step first gives the target's mul.s operand order
             step = 8.0f;
@@ -357,11 +357,11 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
     }
     if (obj->inwater == 1) {
         obj->unk1CC = obj->ypos;
-        if (obj->unk118 == -10000.0f) {
+        if (obj->waterHeight == -10000.0f) {
             func_15052408(obj);
             return 0.0f;
         }
-        if (stickY != 0 || ((obj->unk118 - 60.0f) - 175.0f) < obj->ypos) {
+        if (stickY != 0 || ((obj->waterHeight - 60.0f) - 175.0f) < obj->ypos) {
             targetPitch = stickY * 2.25f;
         } else {
             targetPitch = obj->vtilt;
@@ -383,21 +383,21 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
         obj->ygrav = 0.0f;
         obj->yspd = 0.0f;
     }
-    if (obj->inwater != 1 || obj->shad >= 10.0f || obj->ypos < (obj->unk118 - 60.0f) + 20.0f) {
+    if (obj->inwater != 1 || obj->shad >= 10.0f || obj->ypos < (obj->waterHeight - 60.0f) + 20.0f) {
         if (obj->inwater == 1) {
-            if ((obj->unk118 - 50.0f < obj->aim.y || (obj->mv->water_attribs & 1)) && obj->energy != 0) {
-                if (obj->unkB2 > 30) {
-                    if (obj->unkB2 > 1500) {
+            if ((obj->waterHeight - 50.0f < obj->aim.y || (obj->mv->water_attribs & 1)) && obj->energy != 0) {
+                if (obj->underwaterTime > 30) {
+                    if (obj->underwaterTime > 1500) {
                         actor_playSound(0x1A7, obj);
-                    } else if (obj->unkB2 > 720) {
+                    } else if (obj->underwaterTime > 720) {
                         actor_playSound(0x168, obj);
                     }
                 }
-                obj->unkB2 = 0;
+                obj->underwaterTime = 0;
             } else {
-                obj->unkB2 += D_800BE9E4;
-                if (obj->unkB2 > 1560 || (obj->energy == 0 && obj->mv->death_State == 0)) {
-                    obj->unkB2 -= 60;
+                obj->underwaterTime += D_800BE9E4;
+                if (obj->underwaterTime > 1560 || (obj->energy == 0 && obj->mv->death_State == 0)) {
+                    obj->underwaterTime -= 60;
                     if (obj->energy >= 2) {
                         if (obj->energy == 4) {
                             actor_playSound(0x499, obj);
@@ -412,8 +412,8 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
                             actor_kill(obj, 3);
                         }
                     }
-                } else if (obj->unkB2 > 1440 && obj->unkB2 < 1500) {
-                    obj->unkB2 += 120;
+                } else if (obj->underwaterTime > 1440 && obj->underwaterTime < 1500) {
+                    obj->underwaterTime += 120;
                     if (obj->energy < 4) {
                         actor_playSound(0x499, obj);
                     }
@@ -423,7 +423,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
                 obj->ygrav = 0.0f;
                 obj->yspd = 0.0f;
             }
-            if (((obj->unk118 - 60.0f) - 175.0f) < obj->ypos && obj->animseq.uh != 0x28) {
+            if (((obj->waterHeight - 60.0f) - 175.0f) < obj->ypos && obj->animseq.uh != 0x28) {
                 if (obj->mv->water_up < 2.5f) {
                     obj->mv->water_up += 0.05f;
                 }
@@ -431,13 +431,13 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
                 obj->mv->water_up = 0.0f;
             }
             obj->ypos += obj->mv->water_up * D_800D1550;
-            excess = obj->ypos - ((obj->unk118 - 60.0f) + 14.0f);
+            excess = obj->ypos - ((obj->waterHeight - 60.0f) + 14.0f);
             if (excess > 0.0f) {
                 excess *= 0.65f;
                 obj->ypos -= excess;
                 obj->mv->water_up = 0.0f;
             }
-            if (((obj->unk118 - 60.0f) - 75.0f) < obj->ypos) {
+            if (((obj->waterHeight - 60.0f) - 75.0f) < obj->ypos) {
                 targetPitch -= 30.0f;
             }
         }
@@ -486,7 +486,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
     }
     if (obj->mv->ladder != 0) {
         obj->ypos = obj->old_ypos;
-        belowLevel = obj->unk118 != -10000.0f && obj->ypos < obj->unk118 - 60.0f;
+        belowLevel = obj->waterHeight != -10000.0f && obj->ypos < obj->waterHeight - 60.0f;
         if (!belowLevel) {
             obj->inwater = 0;
         }
@@ -755,7 +755,7 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
                 } else if (ext->chasing > 0 && vel >= 5.0f) {
                     anim = 0xDF;
                     speed = vel / 12.0f;
-                } else if (obj->unk118 != -10000.0f && obj->ypos < obj->unk118 &&
+                } else if (obj->waterHeight != -10000.0f && obj->ypos < obj->waterHeight &&
                            obj->speed >= 1.0f && ext->transport == 0) {
                     speed = vel / 18.0f + 0.2000000030f;
                     anim = 0x8B;
@@ -834,25 +834,25 @@ s32 func_1504C8BC(Actor *obj) {
         return 1;
     }
     if (obj->ob_matrix_ptr != NULL || level == 0x33 || obj->type == 0x25) {
-        ext->unk1A8 = 0;
+        ext->skippedTime = 0;
         return 1;
     }
     if ((obj->playernumber & 1) == D_800CC2B8) {
-        if (ext->unk1A8 != 0) {
+        if (ext->skippedTime != 0) {
             D_800CC2BA = D_800BE9E4;
-            D_800BE9E4 += obj->mv->unk1A8;
+            D_800BE9E4 += obj->mv->skippedTime;
             gFrameDelta = D_800BE9E4 * 0.5f;
             if (gFrameDelta != 0.0f) {
                 gFrameDeltaInv = 1.0f / gFrameDelta;
             } else {
                 gFrameDeltaInv = 0.0f;
             }
-            obj->mv->unk1A8 = 0;
+            obj->mv->skippedTime = 0;
             return 2;
         }
         return 1;
     }
-    ext->unk1A8 += D_800BE9E4;
+    ext->skippedTime += D_800BE9E4;
     return 0;
 }
 
@@ -1355,11 +1355,11 @@ void actor_updatePlayer(Actor *actor) {
     if (actor->mv->unk6B != 0) {
         func_15052260(actor);
     }
-    surfaceDelta = actor->unk118 - actor->unk11C;
+    surfaceDelta = actor->waterHeight - actor->prevWaterHeight;
     if (fabsf(surfaceDelta) > 30.0f) {
         surfaceDelta = 0.0f;
     }
-    actor->unk11C = actor->unk118;
+    actor->prevWaterHeight = actor->waterHeight;
     if (actor->mv->bot == 0) {
         actor->mv->buttons = gCurrentPad->button;
         actor->mv->pressedButtons = D_800CC288;
@@ -1420,7 +1420,7 @@ void actor_updatePlayer(Actor *actor) {
                 moveSpeed = swimSpeed;
                 moveAngle = actor->angle;
                 if (!(gCurrentPad->button & 0x4000)) {
-                    if ((actor->mv->unk22 <= 0) && (((actor->unk118 - 60.0f) - 30.0f) < actor->ypos)) {
+                    if ((actor->mv->unk22 <= 0) && (((actor->waterHeight - 60.0f) - 30.0f) < actor->ypos)) {
                         actor->mv->unk21 = 1;
                         actor->norun = 0xC;
                     }
@@ -1430,7 +1430,7 @@ void actor_updatePlayer(Actor *actor) {
                     if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100) && !(actor->mv->water_attribs & 1)) {
                         actor->mv->unk21 = 0;
                         actor->mv->unk22 = 0x76;
-                        if (((actor->unk118 - 60.0f) - 30.0f) < actor->ypos) {
+                        if (((actor->waterHeight - 60.0f) - 30.0f) < actor->ypos) {
                             actor->vtilt = 20.0f;
                         }
                         actor_playSound(0x66F, actor);
@@ -1810,7 +1810,7 @@ void actor_updatePlayer(Actor *actor) {
             climbIndex = (actor->mv->ladder & ~0x80) - 1;
             climbSpeed = gCurrentPad->stick_y;
             climbSpot = &zones[climbIndex];
-            if ((actor->inwater != 0) && (actor->ypos < actor->unk118)) {
+            if ((actor->inwater != 0) && (actor->ypos < actor->waterHeight)) {
                 actor->mv->unk96 = 8;
             }
             if (actor->mv->unk96 != 0) {
@@ -1944,10 +1944,10 @@ void actor_updatePlayer(Actor *actor) {
         } else {
             probeTop = actor->old_ypos;
         }
-        if ((actor->unk118 != -10000.0f) || ((actor->noshove & 2) == 0) || ((func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &floorY) == 0))) {
-            collision_findFloorEx(&actor->floorTriVerts, actor->floorTri.v, &floorY, &actor->unk118, &actor->floorMaterial, &actor->floorType, actor->xpos, actor->ypos, actor->zpos, probeTop, 0, actor, -10000.0f, actor->ypos, actor->noshove & 0x04000000);
-            if (actor->unk118 < actor->unk120) {
-                actor->unk118 = actor->unk120;
+        if ((actor->waterHeight != -10000.0f) || ((actor->noshove & 2) == 0) || ((func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &floorY) == 0))) {
+            collision_findFloorEx(&actor->floorTriVerts, actor->floorTri.v, &floorY, &actor->waterHeight, &actor->floorMaterial, &actor->floorType, actor->xpos, actor->ypos, actor->zpos, probeTop, 0, actor, -10000.0f, actor->ypos, actor->noshove & 0x04000000);
+            if (actor->waterHeight < actor->unk120) {
+                actor->waterHeight = actor->unk120;
             }
         }
         if (actor->ypos < floorY) {
@@ -1971,10 +1971,10 @@ void actor_updatePlayer(Actor *actor) {
         if ((startX != actor->xpos) || (startZ != actor->zpos)) {
             scratch = -10000.0f;
             actor->mvmt_control |= 0x10000;
-            if ((scratch != actor->unk118) || (floorY != scratch) || !(actor->noshove & 2) || (func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &floorY) == 0)) {
-                collision_findFloorEx(&actor->floorTriVerts, actor->floorTri.v, &floorY, &actor->unk118, &actor->floorMaterial, &actor->floorType, actor->xpos, actor->ypos, actor->zpos, probeTop, 0, actor, scratch, actor->ypos, actor->noshove & 0x04000000);
-                if (actor->unk118 < actor->unk120) {
-                    actor->unk118 = actor->unk120;
+            if ((scratch != actor->waterHeight) || (floorY != scratch) || !(actor->noshove & 2) || (func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &floorY) == 0)) {
+                collision_findFloorEx(&actor->floorTriVerts, actor->floorTri.v, &floorY, &actor->waterHeight, &actor->floorMaterial, &actor->floorType, actor->xpos, actor->ypos, actor->zpos, probeTop, 0, actor, scratch, actor->ypos, actor->noshove & 0x04000000);
+                if (actor->waterHeight < actor->unk120) {
+                    actor->waterHeight = actor->unk120;
                 }
             }
             heading = actor_getDirectionAngle(actor->xpos - startX, startZ - actor->zpos, 0);
@@ -2044,7 +2044,7 @@ void actor_updatePlayer(Actor *actor) {
             if (actor->ygrav < 1.0f) {
                 actor->ygrav = 5.0f;
             }
-            if ((floorY + 45.0f) < actor->unk118) {
+            if ((floorY + 45.0f) < actor->waterHeight) {
                 actor->mv->transport_surface = 1;
                 snapRange = 0.0f;
             }
@@ -2194,7 +2194,7 @@ void actor_updatePlayer(Actor *actor) {
             }
         }
         if (actor->yspd < 5.0f) {
-            if ((actor->unk118 != -10000.0f) && (actor->ypos < (actor->unk118 - 60.0f)) && (actor->inwater != 1)) {
+            if ((actor->waterHeight != -10000.0f) && (actor->ypos < (actor->waterHeight - 60.0f)) && (actor->inwater != 1)) {
                 splashSpeed = 4.0f;
                 actor->mv->save_done = 0;
                 actor->mv->prop = 0;
@@ -2208,7 +2208,7 @@ void actor_updatePlayer(Actor *actor) {
                 actor->mv->unk22 = 0;
                 if (D_800BE9B4 == 0) {
                     actor->mv->unk21 = 1;
-                    actor->unkB2 = 0;
+                    actor->underwaterTime = 0;
                 }
                 if ((actor->mv->water_attribs & 1) && (gIsMultiplayer == 0)) {
                     collision_createPartSet(actor, 0x38, 0.0f, 0);
@@ -2295,7 +2295,7 @@ void actor_updatePlayer(Actor *actor) {
         }
     }
     if (((actor->unk1CC - actor->ypos) > 600.0f) && (actor->mv->death_State == 0)) {
-        if ((actor->mv->weapon_status != 1) && (actor->mv->weapon_status != 3) && (actor->unk118 == -10000.0f)) {
+        if ((actor->mv->weapon_status != 1) && (actor->mv->weapon_status != 3) && (actor->waterHeight == -10000.0f)) {
             if ((actor->animseq.uh != 0x101) && (actor->inwater == 0)) {
                 if (actor->animseq.uh != 0xCF) {
                     sound = 0x2007E5;
@@ -2630,7 +2630,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
     } else {
         f32 depth;
 
-        depth = (actor->unk118 - 30.0f) - actor->ypos;
+        depth = (actor->waterHeight - 30.0f) - actor->ypos;
         depth += actor->speed * 6.0f;
         if (depth > 250.0f) {
             depth = 2.5f;
@@ -2687,7 +2687,7 @@ f32 actor_slopeToAngles(Actor *actor, f32 slopeX, f32 slopeZ, f32 *pitch, f32 li
 /*
  * While mv->unk6B < 4, moves the actor toward the s16 target position in its mv block
  * (all the way, or 40% per call in modes 1 and 3); otherwise clears the mode once unk28 runs out.
- * Ends the mode and sets inwater when the actor drops below unk118.
+ * Ends the mode and sets inwater when the actor drops below waterHeight.
  */
 void func_15052260(Actor *actor) {
     ActorCtl *ctrl = actor->mv;
@@ -2715,7 +2715,7 @@ void func_15052260(Actor *actor) {
         actor_applyGravity(actor);
     }
     actor->ygrav = 6.199999809f;
-    if (actor->ypos < actor->unk118) {
+    if (actor->ypos < actor->waterHeight) {
         actor->ygrav = 0.0f;
         actor->yspd = 0.0f;
         actor->mv->unk6B = 0;
@@ -2724,9 +2724,9 @@ void func_15052260(Actor *actor) {
     }
 }
 
-/* Clears inwater, unkB2 and mv->ladder, sets gravity 4, speed 15; a living actor also gets norun 6. */
+/* Clears inwater, underwaterTime and mv->ladder, sets gravity 4, speed 15; a living actor also gets norun 6. */
 void func_15052408(Actor *actor) {
-    actor->unkB2 = 0;
+    actor->underwaterTime = 0;
     actor->mv->ladder = 0;
     if (actor->energy != 0) {
         actor->count3 = 0;
@@ -3361,9 +3361,9 @@ void func_150538CC(Actor *obj) {
             obj->unk103 = 1;
             obj->speed = 0.0f;
         }
-        obj->unkB2++;
-        obj->unkB2 &= 1;
-        if (obj->unkB2 != 0) {
+        obj->underwaterTime++;
+        obj->underwaterTime &= 1;
+        if (obj->underwaterTime != 0) {
             obj->count5++;
         }
         if ((gMatchResult != 0) || (gFrontEndState != 0)) {
@@ -3900,7 +3900,7 @@ void func_1505528C(Actor *obj) {
     prevY = obj->ypos;
     prevZ = obj->zpos;
     actor_updateFloorAndWalls(obj, obj->old_ypos);
-    if ((obj->unk118 != -10000.0f) && (obj->ypos <= obj->unk118) && (obj->unk118 <= obj->old_ypos)) {
+    if ((obj->waterHeight != -10000.0f) && (obj->ypos <= obj->waterHeight) && (obj->waterHeight <= obj->old_ypos)) {
         obj->speed *= 0.1000000015f;
         obj->taskint[0] = 2;
         obj->ygrav = 0.0f;
@@ -3942,7 +3942,7 @@ void func_1505528C(Actor *obj) {
             }
             obj->xpos = obj->old_xpos + ((obj->xpos - obj->old_xpos) * t);
             obj->zpos = obj->old_zpos + ((obj->zpos - obj->old_zpos) * t);
-        } else if (obj->ypos < obj->unk118) {
+        } else if (obj->ypos < obj->waterHeight) {
             obj->ygrav = 0.0f;
             obj->yspd = 0.0f;
             obj->speed = 0.0f;
@@ -3954,7 +3954,7 @@ void func_1505528C(Actor *obj) {
     obj->theta = (obj->angle + 0x4000) * 0.005493164f;
     if ((hitFlags != 0) && (kind == 0x35)) {
         sound_playActorUntracked(0x360, obj, 0x4E20, 500, 2500);
-        if (obj->unk118 < obj->ypos) {
+        if (obj->waterHeight < obj->ypos) {
             Vec3f pos;
 
             pos.x = obj->xpos;

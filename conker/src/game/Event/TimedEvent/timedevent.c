@@ -280,7 +280,7 @@ void func_1506B070(void) {
 }
 
 void func_1506B078(void) {
-    f32 speed = (gCurrentActor->ypos - (gCurrentActor->unk118 - 150.0f)) * 0.005f;
+    f32 speed = (gCurrentActor->ypos - (gCurrentActor->waterHeight - 150.0f)) * 0.005f;
 
     if (speed < 0.0f) {
         speed = 1.0f;
@@ -450,7 +450,7 @@ void event_pickPissedWalk(s32 count) {
 void func_1506B740(void) {
     u8 roll = func_150ADA20() & 0xFF;
 
-    if (gCurrentActor->unk118 != -10000.0f && gCurrentActor->ypos < gCurrentActor->unk118) {
+    if (gCurrentActor->waterHeight != -10000.0f && gCurrentActor->ypos < gCurrentActor->waterHeight) {
         gCurrentActor->mv->pissed_walk = 720;
     } else {
         if (gCurrentActor->animseq.uh == 0xA7) {
@@ -633,7 +633,7 @@ void func_1506BEDC(void) {
 }
 
 void func_1506BF1C(void) {
-    if (gCurrentActor->unk118 <= gCurrentActor->ypos) {
+    if (gCurrentActor->waterHeight <= gCurrentActor->ypos) {
         event_playSoundCommand();
     }
 }
@@ -687,7 +687,7 @@ void event_playSoundCommand(void) {
         type = collision_getSurfaceType(gCurrentActor->floorMaterial);
         if (type == 0xC && gCurrentActor->unkCC > -17.0f) {
             sound = sound_pickVariant(0x9C, 2);
-        } else if (gCurrentActor->unk118 != -10000.0f && gCurrentActor->ypos <= gCurrentActor->unk118) {
+        } else if (gCurrentActor->waterHeight != -10000.0f && gCurrentActor->ypos <= gCurrentActor->waterHeight) {
             sound = sound_pickEffectVariant(8, NULL, sound);
             type = 8;
         } else {
@@ -1248,10 +1248,10 @@ void func_1506D6B4(void) {
     Actor *obj = gCurrentActor;
     s32 sel;
 
-    if (obj->unk118 == -10000.0f) {
+    if (obj->waterHeight == -10000.0f) {
         return;
     }
-    if (obj->unk118 < obj->aim.y) {
+    if (obj->waterHeight < obj->aim.y) {
         return;
     }
     if (obj->energy >= 2) {
@@ -1360,7 +1360,7 @@ void func_1506DC10(void) {
     s32 id;
     s32 roll;
 
-    if (gCurrentActor->unk118 - 60.0f < gCurrentActor->ypos || gCurrentActor->unk118 == -10000.0f) {
+    if (gCurrentActor->waterHeight - 60.0f < gCurrentActor->ypos || gCurrentActor->waterHeight == -10000.0f) {
         roll = func_150ADA20() & 3;
         if (roll >= 2) {
             id = roll + 0x612;

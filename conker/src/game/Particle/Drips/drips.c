@@ -171,7 +171,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
                         motion.phaseSpeed[1] = func_150ADA20() % 5U + 4;
                         math_transformOffset(&kind->mounts[index].offset, &def.pos, emitter->link.actor->ob_matrix_ptr + kind->mounts[index].bone);
                         def.rot = def.pos;
-                        if (emitter->link.actor->unk118 < def.pos.y - motion.baseSize.height - motion.wobble.height) {
+                        if (emitter->link.actor->waterHeight < def.pos.y - motion.baseSize.height - motion.wobble.height) {
                             /* the random flip bit is always 0 (% 1), but still advances the RNG */
                             drop = particle_newQuadParticleWhite(&def, 12, 0, 0, 13,
                                                  ((func_150ADA20() % 1) ? 1 : 0) | (D_800AB404[emitter->kind] ? 0 : 2),

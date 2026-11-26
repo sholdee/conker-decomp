@@ -103,7 +103,7 @@ void func_150F34F4(Actor *actor) {
             }
             actor->yspd = 23.0f;
         }
-        if (actor->ypos < actor->unk118) {
+        if (actor->ypos < actor->waterHeight) {
             actor->unk102 = 1;
             actor->unk86 = 1;
             actor->yspd = -6.0f;
@@ -157,7 +157,7 @@ void func_150F34F4(Actor *actor) {
     actor->wantspeed = 0.0f;
     speed = 0.0f;
     accel = 1.3f;
-    if (actor->ypos < actor->unk118) {
+    if (actor->ypos < actor->waterHeight) {
         if (actor->unk86 == 0) {
             actor->unk86 = 1;
             actor->speed = 0.0f;

@@ -692,12 +692,12 @@ void zone_applyEffect(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits)
         }
         *timer += D_800BE9E4;
         if (*timer >= 31) {
-            if (actor->unkB2 > 1440) {
-                actor->unkB2 = 1200;
-            } else if (actor->unkB2 < 241) {
-                actor->unkB2 = 90;
+            if (actor->underwaterTime > 1440) {
+                actor->underwaterTime = 1200;
+            } else if (actor->underwaterTime < 241) {
+                actor->underwaterTime = 90;
             } else {
-                actor->unkB2 -= 240;
+                actor->underwaterTime -= 240;
             }
             *timer = 0;
         }

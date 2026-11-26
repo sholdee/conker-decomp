@@ -365,7 +365,7 @@ void func_1507D4F8(s32 slot) {
     if (player_getStat(slot, 3) != 0) {
         player_setStat(slot, 5, D_8008726C);
         obj = &movement_obj[slot];
-        obj->unkB2 = 0;
+        obj->underwaterTime = 0;
 
         if (gIsMultiplayer != 0) {
             if (gMatchResult == 0) {

@@ -381,7 +381,7 @@ Gfx *model_drawReflections(Gfx *gfx, s32 player) {
 }
 
 /*
- * Queues a reflection in the horizontal plane y = unk118 for every moving object of kind 0 or 1
+ * Queues a reflection in the horizontal plane y = waterHeight for every moving object of kind 0 or 1
  * that is above that plane while unk180 lies below it, when the gap is larger than the height from
  * actor_computeSize.
  */
@@ -395,11 +395,11 @@ void func_15036148(void) {
     if (!(camera_global_Cameras->SpecialFlags & 1)) {
         for (i = 0; i < 25; i++) {
             if (movement_obj[i].type != 0 && (movement_obj[i].drawtype == 0 || movement_obj[i].drawtype == 1)) {
-                if (movement_obj[i].unk118 != -10000.0f && movement_obj[i].unk118 < movement_obj[i].ypos &&
-                    movement_obj[i].floorY < movement_obj[i].unk118 && movement_obj[i].shad > 5.0f) {
+                if (movement_obj[i].waterHeight != -10000.0f && movement_obj[i].waterHeight < movement_obj[i].ypos &&
+                    movement_obj[i].floorY < movement_obj[i].waterHeight && movement_obj[i].shad > 5.0f) {
                     actor_computeSize(&movement_obj[i], &height, &unusedA, &unusedB);
-                    if (height < movement_obj[i].unk118 - movement_obj[i].floorY) {
-                        model_queueReflection(1, i, movement_obj[i].xpos, movement_obj[i].unk118,
+                    if (height < movement_obj[i].waterHeight - movement_obj[i].floorY) {
+                        model_queueReflection(1, i, movement_obj[i].xpos, movement_obj[i].waterHeight,
                                       movement_obj[i].zpos, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
                     }
                 }

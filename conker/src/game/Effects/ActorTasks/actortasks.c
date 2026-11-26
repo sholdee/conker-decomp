@@ -69,8 +69,8 @@ void func_151A99D0(ActorTask *task) {
         Vec3f pos;
 
         pos.x = actor->xpos;
-        if (-9500.0f < actor->unk118) {
-            pos.y = actor->unk118 + 100.0f;
+        if (-9500.0f < actor->waterHeight) {
+            pos.y = actor->waterHeight + 100.0f;
         } else {
             pos.y = actor->ypos + 150.0f;
         }
@@ -91,8 +91,8 @@ void func_151A9AA4(ActorTask *task) {
         CollisionHit *hit;
 
         pos.x = actor->xpos;
-        if (-9500.0f < actor->unk118) {
-            pos.y = actor->unk118 + 100.0f;
+        if (-9500.0f < actor->waterHeight) {
+            pos.y = actor->waterHeight + 100.0f;
         } else {
             pos.y = actor->ypos + 150.0f;
         }
@@ -116,8 +116,8 @@ void func_151A9BA0(ActorTask *task) {
         CollisionHit *hit;
 
         pos.x = actor->xpos;
-        if (-9500.0f < actor->unk118) {
-            pos.y = actor->unk118 + 100.0f;
+        if (-9500.0f < actor->waterHeight) {
+            pos.y = actor->waterHeight + 100.0f;
         } else {
             pos.y = actor->ypos + 150.0f;
         }
@@ -142,8 +142,8 @@ void func_151A9CA0(ActorTask *task) {
         return;
     }
     pos.x = actor->xpos;
-    if (-9500.0f < actor->unk118) {
-        pos.y = actor->unk118 + 100.0f;
+    if (-9500.0f < actor->waterHeight) {
+        pos.y = actor->waterHeight + 100.0f;
     } else {
         pos.y = actor->ypos + 150.0f;
     }
@@ -166,8 +166,8 @@ void func_151A9DC0(ActorTask *task) {
         CollisionHit *hit;
 
         pos.x = actor->xpos;
-        if (-9500.0f < actor->unk118) {
-            pos.y = actor->unk118 + 100.0f;
+        if (-9500.0f < actor->waterHeight) {
+            pos.y = actor->waterHeight + 100.0f;
         } else {
             pos.y = actor->ypos + 150.0f;
         }
@@ -190,8 +190,8 @@ void func_151A9EC0(ActorTask *task) {
         CollisionHit *hit;
 
         pos.x = actor->xpos;
-        if (-9500.0f < actor->unk118) {
-            pos.y = actor->unk118 + 100.0f;
+        if (-9500.0f < actor->waterHeight) {
+            pos.y = actor->waterHeight + 100.0f;
         } else {
             pos.y = actor->ypos + 150.0f;
         }
@@ -215,8 +215,8 @@ void func_151A9FC8(ActorTask *task) {
         Vec3f pos;
 
         pos.x = actor->xpos;
-        if (-9500.0f < actor->unk118) {
-            pos.y = actor->unk118 + 100.0f;
+        if (-9500.0f < actor->waterHeight) {
+            pos.y = actor->waterHeight + 100.0f;
         } else {
             pos.y = actor->ypos + 150.0f;
         }
@@ -236,8 +236,8 @@ void func_151AA09C(ActorTask *task) {
         Vec3f pos;
 
         pos.x = actor->xpos;
-        if (-9500.0f < actor->unk118) {
-            pos.y = actor->unk118 + 100.0f;
+        if (-9500.0f < actor->waterHeight) {
+            pos.y = actor->waterHeight + 100.0f;
         } else {
             pos.y = actor->ypos + 150.0f;
         }
@@ -326,7 +326,7 @@ struct Task151AA30C {
     /* 0x1C */ Actor *actor;
 };
 
-/* Spawns one falling particle at (x, y, z) when that point is not above the task actor's unk118. */
+/* Spawns one falling particle at (x, y, z) when that point is not above the task actor's waterHeight. */
 void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
     Vec3f pos;
     Vec3f vel;
@@ -334,7 +334,7 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
     CollisionHit *ground;
 
     actor = task->actor;
-    if (actor->unk118 < y) {
+    if (actor->waterHeight < y) {
         return;
     }
     if (effect_getWatcherFloorHit(actor, &ground) == 0) {
@@ -640,8 +640,8 @@ void effect_keepTaskFlicker(ActorTask *task) {
         return;
     }
     pos.x = actor->xpos;
-    if (-9500.0f < actor->unk118) {
-        pos.y = actor->unk118 + 100.0f;
+    if (-9500.0f < actor->waterHeight) {
+        pos.y = actor->waterHeight + 100.0f;
     } else {
         pos.y = actor->ypos + 150.0f;
     }
@@ -721,8 +721,8 @@ void func_151AB1C4(ActorTask *task) {
         CollisionHit *hit;
 
         pos.x = actor->xpos;
-        if (-9500.0f < actor->unk118) {
-            pos.y = actor->unk118 + 100.0f;
+        if (-9500.0f < actor->waterHeight) {
+            pos.y = actor->waterHeight + 100.0f;
         } else {
             pos.y = actor->ypos + 150.0f;
         }
@@ -746,7 +746,7 @@ LoopSoundFx *effect_spawnTaskLoopSound(Actor *actor, ActorTask *task) {
     payload.owner = task;
     payload.soundHandle = 0;
     payload.keepAlive = 1;
-    payload.unk8 = actor->unk118;
+    payload.unk8 = actor->waterHeight;
     desc.target[0] = 0;
     desc.target[1] = 0;
     desc.ownerId = actor->unique_id;

@@ -316,9 +316,9 @@ s32 func_15159084(Actor *chr, u8 mode) {
     if ((mode == 2) || (mode == 3)) {
         ret = 0;
     } else {
-        if ((-10000.0f == chr->unk118) && ((flags & 0xA) == 0)) {
+        if ((-10000.0f == chr->waterHeight) && ((flags & 0xA) == 0)) {
             ret = 1;
-        } else if ((chr->unk118 < chr->ypos) || (chr->unk137 != 0)) { /* byte 0x137 */
+        } else if ((chr->waterHeight < chr->ypos) || (chr->unk137 != 0)) { /* byte 0x137 */
             ret = 1;
         } else {
             ret = 0;
@@ -332,7 +332,7 @@ s32 func_15159120(Actor *chr, u8 mode) {
 
     if ((mode == 2) || (mode == 3)) {
         ret = 1;
-    } else if (chr->floorY < (chr->unk118 - 35.0f)) {
+    } else if (chr->floorY < (chr->waterHeight - 35.0f)) {
         ret = 1;
     } else {
         ret = 0;
@@ -346,12 +346,12 @@ s32 func_15159184(Actor *chr, u8 mode) {
     if ((mode == 2) || (mode == 3)) {
         if (gCutsceneStates[0] != 1) {
             ret = 0;
-        } else if ((chr->unk118 - 75.0f) < chr->ypos) {
+        } else if ((chr->waterHeight - 75.0f) < chr->ypos) {
             ret = 1;
         } else {
             ret = 0;
         }
-    } else if ((chr->unk118 - 75.0f) < chr->ypos) {
+    } else if ((chr->waterHeight - 75.0f) < chr->ypos) {
         ret = 1;
     } else {
         ret = 0;
