@@ -627,6 +627,7 @@ void func_150F2994(Camera *actor, s32 flag);
 void func_150F51A0(s32 arg0, s32 arg1);
 s32 func_150F51BC(void);
 void func_150F51E8(s32 arg0);
+extern u8 D_80088B40; // set by func_150F51A0, read and cleared by func_150F51BC
 
 /* game_1227F0.c */
 void func_150F5340(void);

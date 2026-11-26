@@ -2,8 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
+u8 D_80088B40 = 0;
+static u8 D_80088B44 = 0;
 
-extern u8 D_80088B44;
 extern s32 D_800CC454;
 
 void func_150F51A0(s32 arg0, s32 arg1) {
