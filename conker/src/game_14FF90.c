@@ -9,9 +9,6 @@
 #define DEG2RAD 0.01745329238474369f
 
 extern f32 D_800DC000;
-extern f32 D_800C3614;
-extern f32 D_800C3618;
-extern f32 D_800C361C;
 /* Camera distance presets, indexed by Camera.DistIndex: { tripod magnitude, height }. */
 const f32 D_800A34B0[4][2] = {
     { 267.0f, 100.0f },
@@ -1101,8 +1098,8 @@ void func_15125A6C(Camera *camera) {
     f32 radius;
     f32 sideRadius;
     f32 yaw;
-    f32 angle;
-    f32 sideAngle;
+    f32 height;
+    f32 pitch;
 
     zone = camera->CharContext;
     if (zone == 0x2A) {
@@ -1116,14 +1113,13 @@ void func_15125A6C(Camera *camera) {
         gCamShot.unk4 = 0;
         radius = 138.0f;
         sideRadius = 46.0f;
-        angle = yaw * DEG2RAD;
-        sideAngle = (yaw - 90.0f) * DEG2RAD;
-        // matching: the position fields go through their own symbols (gCamShot.eye.x.. moves code)
-        D_800C3614 = (camera->CharPtr->xpos + (radius * sinf(angle))) + (sinf(sideAngle) * sideRadius);
-        D_800C3618 = camera->CharPtr->ypos + 96.0f;
-        D_800C361C = (camera->CharPtr->zpos + (radius * cosf(angle))) + (cosf(sideAngle) * sideRadius);
+        height = 96.0f;
+        pitch = -180.0f;
+        gCamShot.eye.x = (camera->CharPtr->xpos + (radius * sinf(yaw * DEG2RAD))) + (sinf((yaw - 90.0f) * DEG2RAD) * sideRadius);
+        gCamShot.eye.y = camera->CharPtr->ypos + height;
+        gCamShot.eye.z = (camera->CharPtr->zpos + (radius * cosf(yaw * DEG2RAD))) + (cosf((yaw - 90.0f) * DEG2RAD) * sideRadius);
         gCamShot.at.angles.sway = 0.0f;
-        D_800C3620.y = -180.0f;
+        gCamShot.at.angles.pitch = pitch;
         gCamShot.unk8 = 0.0f;
         gCamShot.at.angles.yaw = yaw - 180.0f;
         D_800C365C[0] = 0;
