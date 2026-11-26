@@ -398,7 +398,7 @@ void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
         func_1518D1C0(other, 11, 0, 1, 0xFF, 1, D_800A8244);
     }
     func_1504715C(&ground, other);
-    func_1514B364(&other->xpos, &ground, 0xFF, 1);
+    func_1514B364((Vec3f *)&other->xpos, &ground, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
 }
 
 void func_15194E54(Actor *self, Actor *other, u8 *arg2) {
@@ -530,9 +530,9 @@ void func_151951E0(Actor *obj) {
 // Calls func_15137610 on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.
 void func_15195528(Actor *self, Actor *other, u8 *arg2) {
     f32 angle;
-    f32 from[3];
-    f32 to[3];
-    f32 dir[3];
+    Vec3f from;
+    Vec3f to;
+    f32 dir[3]; // matching: an f32[3] (a Vec3f changes IDO's schedule); passed as a Vec3f below
     f32 dx;
     f32 dz;
 
@@ -546,14 +546,14 @@ void func_15195528(Actor *self, Actor *other, u8 *arg2) {
     func_1514373C(angle * 0.01745329238f, 1.0f, &dir[0], &dir[2]);
     dir[1] = 0.0f;
     dx = dir[0] * 20.0f;
-    from[0] = other->xpos + dx;
-    from[1] = other->ypos + 50.0f;
+    from.x = other->xpos + dx;
+    from.y = other->ypos + 50.0f;
     dz = dir[2] * 20.0f;
-    from[2] = other->zpos + dz;
-    to[0] = other->xpos - dx;
-    to[1] = other->ypos + 50.0f;
-    to[2] = other->zpos - dz;
-    func_15137610(other, from, to, dir, 0xFF, 1);
+    from.z = other->zpos + dz;
+    to.x = other->xpos - dx;
+    to.y = other->ypos + 50.0f;
+    to.z = other->zpos - dz;
+    func_15137610(other, &from, &to, (Vec3f *)dir, 0xFF, 1);
 }
 
 void func_15195650(Actor *self, Actor *other, u8 *arg2) {
