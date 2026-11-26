@@ -2,7 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800A7170[];
+/* Brightness of a grounded swarm actor, by bits 5-6 of its surface flags. */
+static const u8 D_800A7170[4] = { 0x00, 0x2A, 0x54, 0x7F };
 
 /* Spawns `count` swarm actors of type 10 around (x, y, z), heading roughly away from player `player`. */
 void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
@@ -21,7 +22,7 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
     u32 surfaceFlags;
     s32 surface;
 
-    height = (f32)y;
+    height = y;
     diff.x = x - camera_global_Cameras[player].eye.x;
     diff.y = height - camera_global_Cameras[player].eye.y;
     diff.z = z - camera_global_Cameras[player].eye.z;
@@ -105,8 +106,8 @@ void func_15174FA4(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 ar
         if (actor == NULL) return;
         radius = spread >> 1;
         height = spawnY;
-        actorX = (func_150ADA20() % (u32)spread) + spawnX - radius;
-        actorZ = (func_150ADA20() % (u32)spread) + z - radius;
+        actorX = (func_150ADA20() % spread) + spawnX - radius;
+        actorZ = (func_150ADA20() % spread) + z - radius;
         actor->group = group;
         actor->x = actorX;
         actor->y = height;
@@ -209,7 +210,7 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
         if (state == 0) {
             actorY = actor->groundHeight;
         } else if (heightRange != 0) {
-            actorY += func_150ADA20() % (u32)heightRange;
+            actorY += func_150ADA20() % heightRange;
         }
         actor->group = group;
         actor->flags = flags;
@@ -394,7 +395,7 @@ void func_15175958(SwarmActor *actor) {
     if (actor->flags & 4) {
         s32 tooClose;
 
-        dist = func_150AD960((s32)actor->x, (s32)actor->z, actor->originX, actor->originZ);
+        dist = func_150AD960(actor->x, actor->z, actor->originX, actor->originZ);
         tooClose = ((actor->flags & 0x10) && dist < actor->minRadius) ? TRUE : FALSE;
         if (actor->maxRadius < dist || tooClose) {
             vec.x = actor->originX - actor->x;
@@ -589,7 +590,7 @@ void func_1517685C(SwarmActor *actor) {
         D_800DDF68[actor->modelIndex] = 1;
         switch (actor->state) {
         case 0:
-            if (func_150AD960((s32)movement_obj->xpos, (s32)movement_obj->zpos, (s32)actor->x, (s32)actor->z) < 400) {
+            if (func_150AD960(movement_obj->xpos, movement_obj->zpos, actor->x, actor->z) < 400) {
                 actor->state = 1;
                 actor->pitchStep = -1 - (s32)(func_150ADA20() & 3);
                 actor->pitch = -8.0f;
@@ -695,8 +696,7 @@ void func_15176B84(SwarmActor *actor) {
 
     switch (actor->state) {
         case 0:
-            if (func_150AD960((s32)movement_obj[0].xpos, (s32)movement_obj[0].zpos, (s32)actor->x,
-                              (s32)actor->z) < 200) {
+            if (func_150AD960(movement_obj[0].xpos, movement_obj[0].zpos, actor->x, actor->z) < 200) {
                 actor->state = 2;
                 actor->targetY = (f32)(func_150ADA20() % actor->heightRange) + actor->originY;
                 actor->vertices = D_800DDE80[actor->modelIndex].unk8;
