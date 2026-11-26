@@ -72,7 +72,7 @@ s32 func_150C8730(ModelAttachment *att, Actor *actor);
 void func_150D82B0(s32 arg0);
 s32 func_150D82BC(ModelAttachment *att, Actor *actor);
 s32 func_150D83D8(ModelAttachment *att, Actor *actor);
-s16 *func_150D8590(s16 *cmd, s32 arg1);
+GameCommand *func_150D8590(GameCommand *cmd, s32 arg1);
 void func_150D85AC(Actor *actor);
 s32 func_150D88AC(struct S150D88AC *arg0);
 

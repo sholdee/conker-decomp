@@ -96,10 +96,10 @@ s32 func_150D83D8(ModelAttachment *att, Actor *actor) {
 }
 
 /* Writes the two-halfword command { 0x42, 0 } and returns the position after it. */
-s16 *func_150D8590(s16 *cmd, s32 arg1) {
-    cmd[0] = 0x42;
-    cmd[1] = 0;
-    return cmd + 2;
+GameCommand *func_150D8590(GameCommand *cmd, s32 arg1) {
+    cmd->opcode = 0x42;
+    cmd->value = 0;
+    return cmd + 1;
 }
 
 

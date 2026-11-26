@@ -13,7 +13,7 @@ typedef struct PartDef {
     /* 0x05 */ u8 unk5;
     /* 0x06 */ u8 unk6;
     /* 0x07 */ u8 unk7;
-    /* 0x08 */ u8 data[6];
+    /* 0x08 */ u16 data[3]; // the attachment's ownerStates
     /* 0x0E */ u8 unkE;
     /* 0x0F */ u8 unkF;
 } PartDef;

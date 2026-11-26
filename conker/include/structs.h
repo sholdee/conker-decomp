@@ -2660,7 +2660,7 @@ typedef struct EffectModelSlot {
     /* 0x04 */ Vtx *unk4;          // two vertex buffers (swarm flap frames, wave deformation)
     /* 0x08 */ Vtx *unk8;
     /* 0x0C */ Gfx *displayList;
-    /* 0x10 */ void *unk10;
+    /* 0x10 */ s16 *unk10;         // texture ids used by the display list (func_1510CE60's usedOut)
 } EffectModelSlot; // size 0x14
 
 /* A camera's message ring buffer, D_800DC2B0[camera index] (game_15AA10; allocated in game_32740).
