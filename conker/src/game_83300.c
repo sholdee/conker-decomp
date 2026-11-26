@@ -2,16 +2,13 @@
 
 // matching: the shared headers declare these with parameter types that would change the code here
 // (extra narrowing in callers) or the variable type; hide those declarations and declare them below.
-#define func_1000F91C func_1000F91C_hdr
 #define func_10010E78 func_10010E78_hdr
 #define func_151E5FF4 func_151E5FF4_hdr
 #define func_1506AD30 func_1506AD30_hdr
 #include "functions.h"
-#undef func_1000F91C
 #undef func_10010E78
 #undef func_151E5FF4
 #undef func_1506AD30
-void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 f32 func_1506AD30(Actor *, f32, s32, s32); /* one call passes a fourth argument */
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
 #include "variables.h"
@@ -4355,8 +4352,8 @@ void func_15060778(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s
         }
         if ((func_1001147C(handle) == sound) & 0x7FFF) {
             if (flags & 4) {
-                func_1000F91C(handle, (u16)(rate + channel * 50), (s16)(actor->listpos * 10 + volume), channel & 0xFF, 0,
-                              (s32)actor->xpos, (s32)actor->ypos, (s32)actor->zpos, minDist, maxDist);
+                func_1000F91C(handle, rate + channel * 50, actor->listpos * 10 + volume, channel, 0,
+                              actor->xpos, actor->ypos, actor->zpos, minDist, maxDist);
             } else {
                 func_1000F85C(handle, 0x10, volume);
                 func_1000F85C(handle, 8, rate + channel * 50);
