@@ -101,7 +101,14 @@ typedef struct TextureChoices {
     /* 0x0 */ s32 texture[4];
 } TextureChoices; /* size 0x10 */
 
-/* matching: the first 0x64 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
+/* Older revisions of the spawn descriptors. Some callers hold a shorter descriptor on the stack than the callee
+ * copies: the fields at its end were added later (ParticleDesc drawFunc..maxSize, ParticleSpawn.sound,
+ * ParticleDef unk48..fadeRate, PuffSpray.unk84, TrailMotion unk1C/unk1E, EffectTemplate.material,
+ * BloodTrailDesc unk18/callback, SpriteParams.tex), and these callers were built against the older layout.
+ * The callee still copies (or writes) the full size. A full type on the stack changes their frame, so they
+ * keep these views, and the IDO warning 709 at the call is the cost: no cast hides it. */
+
+/* matching: ParticleDesc before drawFunc (0x64 bytes); see above. */
 typedef struct ParticleDesc64 {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
@@ -137,7 +144,7 @@ typedef struct ParticleDesc64 {
     /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
 } ParticleDesc64;
 
-/* matching: the first 0x68 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
+/* matching: ParticleDesc before minSize (0x68 bytes); see ParticleDesc64. */
 typedef struct ParticleDesc68 {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
@@ -177,7 +184,7 @@ typedef struct ParticleDesc68 {
     /* 0x67 */ u8 pad67;
 } ParticleDesc68;
 
-/* matching: the first 0x6C bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
+/* matching: ParticleDesc before maxSize (0x6C bytes); see ParticleDesc64. */
 typedef struct ParticleDesc6C {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
@@ -259,7 +266,7 @@ typedef struct ParticleSpawn {
     /* 0x78 */ s32 sound;
 } ParticleSpawn; /* size 0x7C */
 
-/* matching: the first 0x78 bytes of ParticleSpawn; a full ParticleSpawn on the stack changes the frame. */
+/* matching: ParticleSpawn before sound (0x78 bytes; func_1513264C copies 0x7C); see ParticleDesc64. */
 typedef struct ParticleSpawn78 {
     /* 0x00 */ f32 radius;
     /* 0x04 */ f32 elasticity;
@@ -440,7 +447,7 @@ typedef struct ParticleDef {
     /* 0x56 */ s16 fadeRate;
 } ParticleDef; /* size 0x58 */
 
-/* matching: the first 0x48 bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
+/* matching: ParticleDef before unk48 (0x48 bytes); see ParticleDesc64. */
 typedef struct ParticleDef48 {
     /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
     /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
@@ -462,7 +469,7 @@ typedef struct ParticleDef48 {
     /* 0x47 */ u8 unk47;
 } ParticleDef48;
 
-/* matching: the first 0x4C bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
+/* matching: ParticleDef before viewportMask (0x4C bytes); see ParticleDesc64. */
 typedef struct ParticleDef4C {
     /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
     /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
@@ -485,7 +492,7 @@ typedef struct ParticleDef4C {
     /* 0x48 */ ZoneNode *unk48; /* func_1510FD20 zone of the spawn point, or NULL */
 } ParticleDef4C;
 
-/* matching: the first 0x54 bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
+/* matching: ParticleDef before fadeStart (0x54 bytes); see ParticleDesc64. */
 typedef struct ParticleDef54 {
     /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
     /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
@@ -1077,7 +1084,7 @@ typedef struct PuffSpray {
     /* 0x84 */ s32 unk84;           /* EffectTemplate.material */
 } PuffSpray; /* size 0x88 */
 
-/* matching: the first 0x84 bytes of PuffSpray; a full PuffSpray on the stack changes the frame. */
+/* matching: PuffSpray before unk84 (0x84 bytes; func_15151A38 reads unk84); see ParticleDesc64. */
 typedef struct PuffSpray84 {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 sizeBase;
@@ -1810,8 +1817,7 @@ typedef struct ScatterPreset {
     /* 0x22 */ s16 itemCountRange;
 } ScatterPreset; /* size 0x24 */
 
-/* matching: the first 0x1C bytes of TrailMotion (callers that never set unk1C/unk1E; func_15147DA0 copies
- * past its end); a full TrailMotion on the stack changes the frame. */
+/* matching: TrailMotion before unk1C/unk1E (0x1C bytes; func_15147DA0 copies 0x20); see ParticleDesc64. */
 typedef struct TrailMotion1C {
     /* 0x00 */ f32 halfWidth;
     /* 0x04 */ Vec3f velocity;
@@ -1836,8 +1842,7 @@ typedef struct TrailParams {
     /* 0x28 */ TrailRender render;
 } TrailParams; /* size 0x48 */
 
-/* matching: the first 0x18 bytes of EffectTemplate (func_15147DA0's first argument); a full EffectTemplate
- * on the stack changes the frame. */
+/* matching: EffectTemplate before material (0x18 bytes; func_15147A80 copies 0x1C); see ParticleDesc64. */
 typedef struct EffectTemplate18 {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 life;
@@ -1883,7 +1888,7 @@ typedef struct BloodTrail {
     /* 0x3C */ f32 accumulator;
 } BloodTrail; /* size 0x40 */
 
-/* matching: the first 0x18 bytes of BloodTrailDesc; a full BloodTrailDesc on the stack changes the frame. */
+/* matching: BloodTrailDesc before unk18/callback (0x18 bytes; func_15134908 copies 0x1C); see ParticleDesc64. */
 typedef struct BloodTrailDesc18 {
     /* 0x00 */ f32 *x;
     /* 0x04 */ f32 *y;
