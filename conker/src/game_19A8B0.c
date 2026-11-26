@@ -1110,7 +1110,15 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type,
 
 /* Spawns a single particle (isParticle) or an emitter heading off along `angle`, which
  * defaults to object 0's facing angle. */
-void func_15170500(s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 arg6) {
+void func_15170500(x, y, z, angle, isParticle, arg5, arg6)
+    s16 x;
+    s16 y;
+    s16 z;
+    s32 angle;
+    s32 isParticle;
+    u8 arg5;
+    s32 arg6;
+{
     f32 dirX;
     f32 rise;
     f32 dirZ;

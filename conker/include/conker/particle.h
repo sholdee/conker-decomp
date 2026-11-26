@@ -2023,7 +2023,9 @@ void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3);
 void func_15170034(s32 flags, f32 *outX, f32 *outY, f32 *outZ);
 /* void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
    s32 arg9) is declared in the files that call it: game_19E040.c passes an s32 style. */
-void func_15170500(s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 arg6);
+/* (s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 arg6); declared without a prototype: game_1A89B0.c
+ * passes the coordinates without narrowing them */
+void func_15170500();
 s32 func_151707E0(StyleParticle *particle);
 void func_151709B4(s32 x, s32 y, s32 z, s32 count, f32 speed, u8 arg5, s32 arg6);
 

@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_15170500 func_15170500_header // matching: this file keeps its own declaration of func_15170500
 #include "functions.h"
-#undef func_15170500
 #include "variables.h"
 
 typedef struct {
@@ -188,8 +186,6 @@ extern Game1A89B0AnimRef D_8008CF00[][8];
 extern u32 D_800DDC40[15]; /* distance to the nearest sprite this frame */
 extern Game1A89B0TexSize D_800DDB80[];
 extern s32 math_distance3D(s32, s32, s32);
-// matching: s32 where the definition has s16 (args 1-3), u8 (arg 6)
-extern void func_15170500(s32, s32, s32, s32, s32, s32, s32);
 
 extern struct { s16 x; s16 y; s16 z; } D_800DD470; /* set by func_1517E05C; x == 0 means unset */
 
