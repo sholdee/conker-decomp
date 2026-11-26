@@ -9,11 +9,9 @@ s8 D_800BE3DF;
 u8 D_800BE3E0;
 u32 D_800BE3E4; // saved clock (seconds)
 
-#define func_151DD3A0 func_151DD3A0_header
 // matching: the callers here keep the value left in v0 by func_151DCEF0, which returns nothing
 #define func_151DCEF0 func_151DCEF0_header
 #include "functions.h"
-#undef func_151DD3A0
 #undef func_151DCEF0
 s32 func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* timed write */
 
@@ -46,8 +44,9 @@ extern u8 D_800BE2F0[0x70];
 extern u8 D_800BE35A[];
 
 /* EEPROM access (game_20A3A0.c, game_20A850.c) */
-// matching: func_151DD3A0 returns s32, but this file must see it return void
-extern void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* read */
+/* Defined in game_20A850.c as s32 func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size) (read).
+   This file was compiled with a view that returns nothing. */
+void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size);
 
 /* Resets the saved game state (func_15017790, every D_800C3A60 entry and the values saved with them). */
 void func_150064E0(void) {
