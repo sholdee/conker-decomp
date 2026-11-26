@@ -403,7 +403,7 @@ s8 func_15191520(DripParticle *drop) {
             probe.y = motion->ground.height;
             if (motion->ground.source == 3) {
                 func_151DBCBC(motion->kind, drop->head.def.width * drop->head.def.height * 0.25f, drop->head.def.unk44,
-                              (s32)&motion->ground.tri, &probe, drop->head.header.owner, drop->head.header.kind);
+                              &motion->ground.tri, &probe, drop->head.header.owner, drop->head.header.kind);
             } else if (func_150ADA20() & 1) {
                 func_151D9B8C(motion->kind, drop->head.def.width * drop->head.def.height * 0.150000006f, drop->head.def.unk44,
                               &motion->ground.tri, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,

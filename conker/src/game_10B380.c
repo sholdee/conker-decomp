@@ -65,8 +65,8 @@ s32 func_150DDF88(TrapEffect *obj) {
     return func_150DBD70(obj->kind);
 }
 
-/* Spawns a sprite (texture 0x1D or 0x1E, random size 10-80) at the source's current point, at height y. */
-s32 func_150DDFAC(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+/* Spawns a sprite (texture 0x1D or 0x1E, random size 10-80) at the source's current point, at the given height. */
+s32 func_150DDFAC(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     EffectSpawnState *state;
     EffectSpawnPoint *points;
     SpriteDef def;
@@ -105,13 +105,13 @@ s32 func_150DDFAC(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C(&def, 5, 0, arg5, points[source->head.start].x, y, points[source->head.start].z, size, size,
+    func_1513C73C(&def, 5, 0, surface, points[source->head.start].x, height, points[source->head.start].z, size, size,
                   rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
     return 1;
 }
 
-/* Spawns a sprite (texture 0x1B or 0x1C, random size 10-20) at the source's current point, at height y. */
-s32 func_150DE12C(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+/* Spawns a sprite (texture 0x1B or 0x1C, random size 10-20) at the source's current point, at the given height. */
+s32 func_150DE12C(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     EffectSpawnState *state;
     EffectSpawnPoint *points;
     SpriteDef def;
@@ -150,7 +150,7 @@ s32 func_150DE12C(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C(&def, 5, 0, arg5, points[source->head.start].x, y, points[source->head.start].z, size, size,
+    func_1513C73C(&def, 5, 0, surface, points[source->head.start].x, height, points[source->head.start].z, size, size,
                   rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
     return 1;
 }

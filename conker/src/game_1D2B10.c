@@ -207,7 +207,7 @@ void func_151A5D2C(u16 soundHandle) {
  * Spawns an effect via func_1513C650 at pos, scaled by size on both axes, living duration + 20 frames.
  * Returns NULL if duration <= 0, so the duration == -1 cases below are unreachable (the original has them).
  */
-QuadSprite *func_151A5D58(f32 size, u8 arg1, s32 arg2, f32 *pos, s16 duration, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
+QuadSprite *func_151A5D58(f32 size, u8 arg1, CollisionTri *surface, f32 *pos, s16 duration, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
     SpriteDef2C params;
 
     if (duration <= 0) {
@@ -239,7 +239,7 @@ QuadSprite *func_151A5D58(f32 size, u8 arg1, s32 arg2, f32 *pos, s16 duration, u
     params.unk16 = 0;
     params.unk17 = 6;
     params.viewportMask = 0xFF;
-    return func_1513C650(&params, 0, 0, arg2, pos[0], pos[1], pos[2], size, size,
+    return func_1513C650(&params, 0, 0, surface, pos[0], pos[1], pos[2], size, size,
                          func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                          arg5 ? 3 : 0, arg5 ? 0xFF : 0, 0, arg7, arg8);
 }

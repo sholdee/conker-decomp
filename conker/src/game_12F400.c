@@ -7,7 +7,7 @@ struct Struct15101F50 {
     /* 0x00 */ DefParticleHead head;
     /* 0x110 */ u8 flags;
     /* 0x111 */ u8 unk111;
-    /* 0x112 */ u8 unk112[0xC];
+    /* 0x112 */ CollisionTri surface;
 };
 
 /* Fills the viewport's vertex buffer with a quad centred on pos, half-axes axisU * width and axisV * height. */
@@ -35,7 +35,7 @@ Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
         return NULL;
     }
 
-    if (func_15144E80(particle->unk112, &axisU, &axisV, NULL) == 0) {
+    if (func_15144E80(&particle->surface, &axisU, &axisV, NULL) == 0) {
         return NULL;
     }
 

@@ -758,7 +758,7 @@ u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
                 pos.y = particle->head.floor.height;
                 if (particle->head.floor.source == 3) {
                     func_151DBCBC(func_151D8E20(), particle->motion.rise.baseSize * 0.200000003f, 0xFF,
-                                  (s32)&particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
+                                  &particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
                 }
                 alive = 0;
             }
@@ -1188,7 +1188,7 @@ u8 func_1515A78C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
         if (func_150ADA68() < 0.200000003f) {
             if (particle->head.floor.source == 3) {
                 func_151DBCBC(func_151D8E20(), drift->baseSize * 0.200000003f, particle->head.desc.alpha,
-                              (s32)&particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
+                              &particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
             }
         }
     }

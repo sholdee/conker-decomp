@@ -740,7 +740,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         debris.fadeStart = 0x20;
         debris.fadeRate = 7;
         ext = &trail->trail;
-        func_1513C650(&debris, 0, 0, (s32)&ext->path.tri, ext->path.pos.x, ext->path.pos.y, ext->path.pos.z,
+        func_1513C650(&debris, 0, 0, &ext->path.tri, ext->path.pos.x, ext->path.pos.y, ext->path.pos.z,
                       scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < sparkChance) {

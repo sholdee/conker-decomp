@@ -331,7 +331,7 @@ s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
 }
 
 /* Same as func_1518C57C, plus a func_151D8E20() effect (arg5) at the hit point. */
-s32 func_1518C69C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5) {
+s32 func_1518C69C(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY, CollisionTri *surface) {
     QuadFxData fx;
     TrailParams *params;
     MotionTrailPoint *points;
@@ -361,7 +361,7 @@ s32 func_1518C69C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s3
         pos[1] = hitY;
         pos[2] = points[trail->head.start].pos.z;
         kind = func_151D8E20();
-        func_151DBCBC(kind, func_150ADA68() * 40.0f + 100.0f, 0xFF, arg5, pos, trail->head.header.owner, trail->head.header.kind);
+        func_151DBCBC(kind, func_150ADA68() * 40.0f + 100.0f, 0xFF, surface, pos, trail->head.header.owner, trail->head.header.kind);
     }
     return 1;
 }

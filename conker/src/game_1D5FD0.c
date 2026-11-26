@@ -258,7 +258,7 @@ void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
 
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
-    func_1513C650(&spawn, 1, 0, (s32)&emitter->state.ground.tri, pos->x, pos->y, pos->z,
+    func_1513C650(&spawn, 1, 0, &emitter->state.ground.tri, pos->x, pos->y, pos->z,
                   size, size, rand1 & 0xFF,
                   (rand2 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
                   emitter->base.header.owner, emitter->base.header.kind);

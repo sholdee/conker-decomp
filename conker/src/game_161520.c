@@ -1087,7 +1087,8 @@ void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
 }
 
 /* Spawns a blood particle of the given size with one of the four D_80089BAC textures. */
-GrowingBloodParticle *func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5, Vec3f *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10) {
+GrowingBloodParticle *func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, CollisionTri *surface,
+                                    Vec3f *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10) {
     GrowingBloodParticle *particle;
     ParticleDef desc;
     f32 extra;
@@ -1142,7 +1143,7 @@ GrowingBloodParticle *func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 l
     random0 = func_150ADA20();
     random1 = func_150ADA20();
     value = func_150ADA20();
-    particle = func_1513D594(&desc, 0, 0, 0x1A, 0, (random1 & 1) + (random0 & 1), value & 0xFF, 500.0f, 500.0f, 0, arg5, argB, argC, 0, 4, arg9, arg10);
+    particle = func_1513D594(&desc, 0, 0, 0x1A, 0, (random1 & 1) + (random0 & 1), value & 0xFF, 500.0f, 500.0f, NULL, surface, argB, argC, 0, 4, arg9, arg10);
     if (particle != NULL) {
         memcpy(&particle->growth, &extra, sizeof(extra));
     }
@@ -1188,7 +1189,8 @@ struct LocalDef15136918 {
 };
 
 /* Spawns a func_1513C73C particle (type 0xD) of the given size at position. */
-void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, s32 arg5, f32 *position, u8 arg7, s32 arg8) {
+void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, CollisionTri *surface, f32 *position, u8 arg7,
+                   s32 arg8) {
     struct LocalDef15136918 desc;
     f64 pad; // matching: an unused 8-byte stack slot
 
@@ -1212,7 +1214,7 @@ void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, s32 arg5,
         desc.unk0 = 0x301;
         desc.unk4 = lifetime + 32;
     }
-    func_1513C73C(&desc, 0xD, 0, arg5, position[0], position[1], position[2], size, size, arg4, 0, 0, arg7, arg8);
+    func_1513C73C(&desc, 0xD, 0, surface, position[0], position[1], position[2], size, size, arg4, 0, 0, arg7, arg8);
 }
 
 /* Particle callback: fades rgba[0] out over the last 32 frames. */
@@ -1588,7 +1590,7 @@ void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
                           ((func_150ADA68() * 106.0f) + 75.0f) * 9.999999747e-06f,
                           (func_150ADA20() % 101U) + 155,
                           (func_150ADA20() % 101U) + 100,
-                          (func_150ADA20() % 56U) + 203, (s32)&hit.tri,
+                          (func_150ADA20() % 56U) + 203, &hit.tri,
                           &probe, 1, 1, arg1, arg2);
             if (func_150ADA20() & 1) {
                 spawn = func_151B5BF0;

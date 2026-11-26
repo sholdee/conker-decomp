@@ -575,7 +575,7 @@ void func_151AABC4(Actor *actor, u8 index) {
             hit.x = pos.x;
             hit.y = floor.height;
             hit.z = pos.z;
-            func_151DBCBC(color, 40.0f, 150, (s32)&floor.tri, &hit, 0xFF, 1);
+            func_151DBCBC(color, 40.0f, 150, &floor.tri, &hit, 0xFF, 1);
             {
                 SplashSpraySpec c;
 
@@ -692,7 +692,7 @@ void func_151AADF8(ActorTask *task) {
         part.renderModes = 0x440001;
         part.unk16 = 0;
         part.unk17 = 6;
-        fx->flicker = (FlickerSprite *)func_1513C73C(&part, 7, 1, (s32)&task->watcher.hit.tri, pos.x, pos.y, pos.z,
+        fx->flicker = (FlickerSprite *)func_1513C73C(&part, 7, 1, &task->watcher.hit.tri, pos.x, pos.y, pos.z,
                                                  size, size, func_150ADA20() & 0xFF,
                                                  (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
         if (fx->flicker != NULL) {

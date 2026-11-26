@@ -23,7 +23,7 @@ struct BoneBeamParticle {
 
 /* Spawns a func_1513C650 effect of the given size on a surface (none for some materials on maps 0x36 and 0x26);
  * a duration of -1 means a fixed 300 frames without the timed flag. */
-QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
+QuadSprite *func_15102920(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
                          s32 surfaceFlags, u8 arg8, s32 arg9) {
     QuadSprite *result;
     SpriteDef arg;
@@ -74,7 +74,7 @@ QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 dura
         argB = 0;
         argC = 0;
     }
-    result = func_1513C650(&arg, 0, 0, arg2, position->x, position->y, position->z, size, size,
+    result = func_1513C650(&arg, 0, 0, surface, position->x, position->y, position->z, size, size,
                            func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0,
                            arg8, arg9);
     return result;

@@ -720,7 +720,7 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2);
 void func_150D6388(Vec3f *pos, u8 arg1, s32 arg2);
 void func_150D6434(Vec3f *pos, u8 arg1, s32 arg2);
 void func_150D64E8(Struct150D64E8 *info, f32 *outValue);
-void func_150D65F0(f32 *pos, s32 *arg1, u8 arg2, s32 arg3);
+void func_150D65F0(CollisionTri *surface, Vec3f *pos, u8 arg2, s32 arg3);
 void func_150D66A4(u8 arg0, u8 arg1, s32 arg2);
 void func_150D6730(Actor *obj, u8 arg1, s32 arg2);
 void func_150D6C98(Actor *obj, Vec3f *out);
@@ -736,7 +736,8 @@ typedef struct {
     /* 0x01 */ u8 pad1[3];
     /* 0x04 */ Vec3f point;
     /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14[5];
+    /* 0x14 */ CollisionTri tri; /* the triangle hit */
+    /* 0x26 */ u8 pad26[2];
     /* 0x28 */ f32 side; /* side of the surface the streak starts on (+1 / -1) */
     /* 0x2C */ s8 callback; /* index into D_80088A10, -1 for none */
     /* 0x2D */ u8 pad2D[3];
@@ -843,7 +844,8 @@ typedef struct {
 typedef struct {
     /* 0x00 */ f32 floorY;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ u8 unk8[0x14];
+    /* 0x08 */ CollisionTri floorTri; /* never filled: the splash spawns with it as its surface */
+    /* 0x1A */ u8 pad1A[2];
 } Game113D60DebrisExtra;
 
 typedef struct {
@@ -1335,11 +1337,11 @@ QuadSprite *func_1513C4EC(void *def, void *colors, u8 updateFn, u8 expireFn, f32
                           u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF);
 QuadSprite *func_1513C5B0(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
                           u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD);
-QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width, f32 height,
                           u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF);
-QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width, f32 height,
                           u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD);
-QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, s32 arg4, f32 x, f32 y, f32 z, f32 width,
+QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
                           f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE);
 void func_1513C8D4(QuadSprite *sprite);
 void func_1513C900(QuadSprite *sprite);
@@ -1363,10 +1365,11 @@ void *func_1513D4B8(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
 void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize, u8 arg7,
                     s32 arg8);
 void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
-                    f32 height, s32 arg9, s32 argA, s32 model, s32 argC, u8 argD, s32 motionSize, u8 argF, s32 arg10);
+                    f32 height, Vec3s **triPtrs, CollisionTri *surface, s32 model, s32 argC, u8 argD, s32 motionSize, u8 argF, s32 arg10);
 void *func_1513D668(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
-                    f32 height, s32 arg9, s32 argA, u8 argB, s32 motionSize, u8 argD, s32 argE);
-s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, s32 arg4, s32 arg5, u8 onSlope);
+                    f32 height, Vec3s **triPtrs, CollisionTri *surface, u8 argB, s32 motionSize, u8 argD, s32 argE);
+s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface,
+                   u8 onSlope);
 Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport);
 void func_1513DF9C(DefParticleHead *particle, s32 arg1, u8 arg2);
 void func_1513E070(s32 arg0, s32 arg1, s32 arg2);
@@ -1374,7 +1377,7 @@ void func_1513E084(DefParticleHead *particle, ActorMsg *msg, u8 eventId);
 void func_1513E134(void);
 void func_1513E13C(QuadSprite *sprite, f32 x, f32 y, f32 z, f32 width, f32 length, u8 angle);
 void func_1513E2A4(void);
-s32 func_1513E2AC(s32 sprite, s32 arg1, s32 surface, f32 x, f32 y, f32 z, f32 width, f32 height, u8 angle);
+s32 func_1513E2AC(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width, f32 height, u8 angle);
 s32 func_1513E6E8(DefParticleHead *particle);
 Vtx *func_1513E83C(DefParticleHead *particle, s16 viewport);
 Vtx *func_1513EAD8(DefParticleHead *particle, s32 reversed, s32 viewport);
@@ -2549,7 +2552,7 @@ void func_151A5660(u8 *effect);
 void func_151A5CAC(TimedEffect *arg0);
 void func_151A5CEC(TimedEffect *arg0);
 void func_151A5D2C(u16 soundHandle);
-QuadSprite *func_151A5D58(f32 size, u8 arg1, s32 arg2, f32 *pos, s16 duration, u8 arg5, u8 arg6, u8 arg7, s32 arg8);
+QuadSprite *func_151A5D58(f32 size, u8 arg1, CollisionTri *surface, f32 *pos, s16 duration, u8 arg5, u8 arg6, u8 arg7, s32 arg8);
 
 /* game_1D3AB0.c */
 /* State at 0x110 of the particle emitter over a TriggerZone (func_151A6600, func_151A6AB8). */
@@ -2637,7 +2640,7 @@ typedef struct {
     /* 0x100 */ Vtx *buffers[1];
 } QuadParticle;
 
-s32 func_151AC550(SampleTrail *state, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5);
+s32 func_151AC550(SampleTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 s32 func_151AC61C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 yaw,
                   s32 baseYaw, f32 radius, s32 kind, f32 arg12, EmitterOwner *owner, u8 arg14);
 Vtx *func_151AC810(QuadParticle *particle, s16 view);
@@ -3184,15 +3187,16 @@ u8 func_151D9B34(void);
 void func_151D9B8C(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8, u8 arg9,
                    s32 argA);
 void func_151D9EB0(DripEffect *effect);
-void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6);
-s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, Vec3f *pos, s32 arg7, s32 arg8);
+void func_151D9FC0(u8 kind, f32 size, u8 arg2, CollisionTri *surface, Vec3f *pos, u8 arg5, s32 arg6);
+s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, CollisionTri *surface, Vec3f *pos, s32 arg7,
+                  s32 arg8);
 s32 func_151DA368(SteamEffect *effect);
 s32 func_151DA6A8(SteamEffect *effect);
 Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
                       f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, s32 argC, s16 argD, s16 argE, s32 argF,
                       u8 arg10, s32 arg11);
-s32 func_151DA938(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 arg5);
-s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 arg5);
+s32 func_151DA938(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, CollisionTri *surface);
+s32 func_151DAA88(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, CollisionTri *surface);
 void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);
 s32 func_151DADA0(SquashEffect *effect);
 Vtx *func_151DAE28(DefParticleHead *effect, s16 view);
@@ -3211,7 +3215,7 @@ void func_151DB4CC(ParticleDesc *desc);
 s32 func_151DB97C(SteamParticle *particle, s32 arg1);
 void func_151DBAA8(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4);
 void func_151DBBD4(Vec3f *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4);
-void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s32 arg6);
+void func_151DBCBC(u8 kind, f32 size, s16 arg2, CollisionTri *surface, void *pos, u8 arg5, s32 arg6);
 void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, CollisionTri *tri, u8 arg6, u8 arg7,
                    u8 arg8, s32 arg9);
 void func_151DC034(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5, s32 arg6);

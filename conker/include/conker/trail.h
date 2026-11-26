@@ -871,7 +871,7 @@ void func_1518BD60(TrailEmitter *emitter);
 s32 func_1518C0B8(MotionTrail *trail);
 s32 func_1518C540(MotionTrail *trail);
 s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY);
-s32 func_1518C69C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5);
+s32 func_1518C69C(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY, CollisionTri *surface);
 void func_1518C850(TrailEmitter *emitter, s32 data, u8 type);
 
 /* game_1CA420.c */

@@ -413,8 +413,8 @@ typedef struct PipeKinds {
 
 extern PipeKinds D_80088700;
 
-/* Spawns a random particle and a trail at the actor's current point, at height `y`. */
-s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+/* Spawns a random particle and a trail at the actor's current point, at the given height. */
+s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     PipeExplodeState *state;
     PipeExplodeParticle particle;
     f32 size;
@@ -449,9 +449,9 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
         rand1 = func_150ADA20();
         rand2 = func_150ADA20();
 
-        func_1513C73C(&particle, 1, 0, arg5,
+        func_1513C73C(&particle, 1, 0, surface,
                       particle.points[actor->head.start].x,
-                      y,
+                      height,
                       particle.points[actor->head.start].z,
                       size, size,
                       rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0,
@@ -474,7 +474,7 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
     motion.flags = 8;
     motion.alpha = state->alpha;
     pos.pos.x = particle.points[actor->head.start].x;
-    pos.pos.y = y;
+    pos.pos.y = height;
     pos.pos.z = particle.points[actor->head.start].z;
     pos.itemCount = actor->head.tmpl.itemCount;
     pos.life = 60;

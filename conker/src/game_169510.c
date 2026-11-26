@@ -202,8 +202,8 @@ QuadSprite *func_1513C5B0(void *def, void *colors, u8 updateFn, u8 expireFn, f32
 }
 
 /* Spawns a sprite oriented by func_1513E2AC, with the default colours. */
-QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
-                         u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
+QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
+                         f32 height, u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
     QuadSprite *sprite;
     Vec3f pos;
 
@@ -216,7 +216,7 @@ QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, 
         return NULL;
     }
 
-    if (func_1513E2AC(sprite, 0, arg3, x, y, z, width, height, angle) == 0) {
+    if (func_1513E2AC(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
         func_1516972C(sprite);
         return NULL;
     }
@@ -224,7 +224,7 @@ QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, 
 }
 
 /* As func_1513C650, without a model or stored position. */
-QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width, f32 height,
                          u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
     QuadSprite *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
 
@@ -232,7 +232,7 @@ QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, 
         return NULL;
     }
 
-    if (func_1513E2AC(sprite, 0, arg3, x, y, z, width, height, angle) == 0) {
+    if (func_1513E2AC(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
         func_1516972C(sprite);
         return NULL;
     }
@@ -240,14 +240,14 @@ QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, 
 }
 
 /* As func_1513C73C; arg1 is unused and the default colours are used. */
-QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, s32 arg4, f32 x, f32 y, f32 z, f32 width,
+QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
                          f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE) {
     QuadSprite *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argD, argE);
 
     if (sprite == NULL) {
         return NULL;
     }
-    if (func_1513E2AC(sprite, 0, arg4, x, y, z, width, height, angle) == 0) {
+    if (func_1513E2AC(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
         func_1516972C(sprite);
         return NULL;
     }
@@ -587,7 +587,8 @@ void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 verte
 
 /* Spawns a particle whose quad is spanned by two axes from func_1513D6FC (vertex function 12). */
 void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
-                  f32 height, s32 arg9, s32 argA, s32 model, s32 argC, u8 argD, s32 motionSize, u8 argF, s32 arg10) {
+                    f32 height, Vec3s **triPtrs, CollisionTri *surface, s32 model, s32 argC, u8 argD,
+                    s32 motionSize, u8 argF, s32 arg10) {
     DefParticleHead *particle;
 
     if (colors == 0) {
@@ -596,7 +597,7 @@ void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
     particle = func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, 12, flip, model, argC,
                              motionSize + sizeof(PARTICLE_MOTION(particle)->axes), argF, arg10);
     if ((particle != NULL) &&
-        (func_1513D6FC(&PARTICLE_MOTION(particle)->axes, angle, width, height, arg9, argA, argD) == 0)) {
+        (func_1513D6FC(&PARTICLE_MOTION(particle)->axes, angle, width, height, triPtrs, surface, argD) == 0)) {
         func_1516972C(particle);
         return NULL;
     }
@@ -604,9 +605,10 @@ void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
 }
 
 void *func_1513D668(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle,
-                    f32 width, f32 height, s32 arg9, s32 argA, u8 argB, s32 motionSize, u8 argD, s32 argE) {
-    return func_1513D594(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, arg9, argA, 0, 0, argB,
-                         motionSize, argD, argE);
+                    f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface, u8 argB, s32 motionSize, u8 argD,
+                    s32 argE) {
+    return func_1513D594(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, triPtrs, surface, 0, 0,
+                         argB, motionSize, argD, argE);
 }
 
 /*
@@ -614,7 +616,8 @@ void *func_1513D668(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
  * slope func_1510E388 returns (each axis keeps its length); otherwise it lies in the plane of the
  * basis func_15144E80 returns.
  */
-s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, s32 arg4, s32 arg5, u8 onSlope) {
+s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface,
+                   u8 onSlope) {
     f32 slopeX;
     f32 slopeZ;
     f32 cosA;
@@ -643,7 +646,7 @@ s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, s32 arg4
         sinA = func_151423D8(angle);
         widthSin = width * sinA;
         heightSin = height * sinA;
-        if (func_1510E388((Vec3s **)arg4, (Vec3s *)arg5, &slopeX, &slopeZ) == 0) {
+        if (func_1510E388(triPtrs, surface->v, &slopeX, &slopeZ) == 0) {
             return 0;
         }
         {
@@ -697,7 +700,7 @@ s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, s32 arg4
     } else {
         cosB = func_151423D8(angle - 0x40);
         sinB = func_151423D8(angle);
-        if (func_15144E80(arg5, &basisU, &basisV, &basisN) == 0) {
+        if (func_15144E80(surface, &basisU, &basisV, &basisN) == 0) {
             return 0;
         }
         if (func_15145128(&basisU, &basisU, &len, &unused2) == 0) {
@@ -945,7 +948,7 @@ void func_1513E2A4(void) {
  * Places a sprite's quad (half-size width x height, rotated by angle) around (x, y, z): in the plane of
  * the basis func_15144E80 returns for surface, or with no surface on the slope from func_1510E388.
  */
-s32 func_1513E2AC(s32 sprite, s32 arg1, s32 surface, f32 x, f32 y, f32 z, f32 width, f32 height, u8 angle) {
+s32 func_1513E2AC(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width, f32 height, u8 angle) {
     Vtx_t *vtx;
     f32 cosA;
     f32 sinA;
@@ -972,10 +975,10 @@ s32 func_1513E2AC(s32 sprite, s32 arg1, s32 surface, f32 x, f32 y, f32 z, f32 wi
     f32 unused;
     Vtx_t *v;
 
-    vtx = &((QuadSprite *)sprite)->vtx[0].v;
+    vtx = &sprite->vtx[0].v;
     cosA = func_151423D8(angle - 0x40);
     sinA = func_151423D8(angle);
-    if (surface != 0) {
+    if (surface != NULL) {
         v = vtx;
         if (func_15144E80(surface, &basisU, &basisV, NULL) == 0) {
             return 0;
@@ -1010,7 +1013,7 @@ s32 func_1513E2AC(s32 sprite, s32 arg1, s32 surface, f32 x, f32 y, f32 z, f32 wi
         v[3].ob[2] = z - uz - vz;
         return 1;
     }
-    if (func_1510E388((Vec3s **)arg1, (Vec3s *)surface, &slopeX, &slopeZ) == 0) {
+    if (func_1510E388(triPtrs, surface->v, &slopeX, &slopeZ) == 0) {
         return 0;
     }
     heightSin = height * sinA;

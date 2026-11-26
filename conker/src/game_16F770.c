@@ -1283,18 +1283,11 @@ s32 func_15144CEC(pos, screen, outA, outDepth, outInvDepth, viewport)
     return 1;
 }
 
-/* A triangle as three s16 vertices. */
-struct Tri15144E80 {
-    s16 v0[3];
-    s16 v1[3];
-    s16 v2[3];
-};
-
 /*
  * Edge vectors of a triangle: normal = (v0 - v1) x (v2 - v1), binormal = edge x normal, edge = v0 - v1.
  * Returns 0 for a degenerate triangle (two equal vertices). `normal` may be NULL.
  */
-s32 func_15144E80(Tri15144E80 *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal) {
+s32 func_15144E80(CollisionTri *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal) {
     f32 c[3];
     f32 b[3];
     f32 a[3];
@@ -1306,15 +1299,15 @@ s32 func_15144E80(Tri15144E80 *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *norm
         normal = &normalBuf;
     }
 
-    a[0] = tri->v0[0];
-    a[1] = tri->v0[1];
-    a[2] = tri->v0[2];
-    b[0] = tri->v1[0];
-    b[1] = tri->v1[1];
-    b[2] = tri->v1[2];
-    c[0] = tri->v2[0];
-    c[1] = tri->v2[1];
-    c[2] = tri->v2[2];
+    a[0] = tri->v[0].x;
+    a[1] = tri->v[0].y;
+    a[2] = tri->v[0].z;
+    b[0] = tri->v[1].x;
+    b[1] = tri->v[1].y;
+    b[2] = tri->v[1].z;
+    c[0] = tri->v[2].x;
+    c[1] = tri->v[2].y;
+    c[2] = tri->v[2].z;
 
     if ((a[0] == b[0]) && (a[1] == b[1]) && (a[2] == b[2])) {
         return 0;

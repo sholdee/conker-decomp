@@ -293,7 +293,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
             rand1 = func_150ADA20();
             rand2 = func_150ADA20();
             // matching: IDO needs the redundant `& 0xFF` on the u8 argument (the bytes change without it)
-            sprite = (FlickerSprite *)func_1513C73C(&def, 9, 3, (s32)&watcher->watcher.hit.tri,
+            sprite = (FlickerSprite *)func_1513C73C(&def, 9, 3, &watcher->watcher.hit.tri,
                                                     probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
                                                     (rand2 & 1) * 2 + (rand1 & 1), 0x20, watcher->watcher.header.owner,
                                                     watcher->watcher.header.kind);

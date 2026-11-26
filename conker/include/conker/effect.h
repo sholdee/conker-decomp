@@ -483,8 +483,8 @@ typedef struct TrapEffect TrapEffect;
 typedef struct EffectSpawnSource EffectSpawnSource;
 void func_150DDED0(TrapTrigger *trap);
 s32 func_150DDF88(TrapEffect *obj);
-s32 func_150DDFAC(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5);
-s32 func_150DE12C(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5);
+s32 func_150DDFAC(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
+s32 func_150DE12C(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 s32 func_150DE2A4(QuadSprite *sprite);
 void func_150DE2C4(BillboardParticle *particle);
 
@@ -748,7 +748,7 @@ s32 func_151028AC(Owner1510281C *owner, s16 key);
 
 /* game_12FDD0.c */
 typedef struct BoneBeamParticle BoneBeamParticle;
-QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
+QuadSprite *func_15102920(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
                           s32 surfaceFlags, u8 arg8, s32 arg9);
 BoneBeamParticle *func_15102B38(Actor *target, u8 bone, Vec3f *start, Vec3f *end, ParticleSize *size, s16 lifetime,
                                 u8 alpha, f32 flashSize, Vec3f *flashPos, u8 viewMask, s32 extraSize, s16 node,
@@ -806,7 +806,6 @@ void func_15142180(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB);
 extern const Args151420F8 D_800A5200;
 
 /* game_16F770.c */
-typedef struct Tri15144E80 Tri15144E80;
 s32 func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line);
 s32 func_151422DC(s32 id, const char *name, s32 min, s32 max, s32 value, const char *file, s32 line);
 s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -869,7 +868,7 @@ f32 func_15144C8C(f32 a, f32 b);
 /* (f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDepth, u8 viewport); declared without a prototype:
  * func_151408A4 passes its s16 view without narrowing it */
 s32 func_15144CEC();
-s32 func_15144E80(Tri15144E80 *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal); /* triangle edges + normal */
+s32 func_15144E80(CollisionTri *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal); /* triangle edges + normal */
 void func_151450B4(Vec3f *a, Vec3f *b, Vec3f *out);
 s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength); /* normalize */
 s32 func_151451F0(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, f32 maxDist, Vec3f *hitNear, Vec3f *hitFar,
@@ -1416,7 +1415,7 @@ void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 arg4);
 s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 argA,
                   s32 type, s32 argC, FxSpawnPayload *payload, u8 argE);
 s32 func_151AC3CC(FxEmitter *emitter);
-s32 func_151AC408(FxEmitter *emitter, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5);
+s32 func_151AC408(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 
 /* game_1DBB60.c */
 void func_151AE6B0(CharacterWatcher *task);

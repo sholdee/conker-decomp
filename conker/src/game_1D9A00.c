@@ -8,17 +8,17 @@ SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 l
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
-/* Calls func_151DBCBC at the current sample's (x, z) with height y, then sets the payload's
+/* Calls func_151DBCBC at the current sample's (x, z) at the given height, then sets the payload's
  * unk20 to 4. */
-s32 func_151AC550(SampleTrail *state, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+s32 func_151AC550(SampleTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     EffectPayload *payload = state->payload;
     EffectSample *samples = state->samples;
     Vec3f position;
 
     position.x = samples[state->head.start].x;
-    position.y = y;
+    position.y = height;
     position.z = samples[state->head.start].z;
-    func_151DBCBC(func_151D8E20(), payload->unk0 * 7.0f, payload->unk1B, arg5, &position,
+    func_151DBCBC(func_151D8E20(), payload->unk0 * 7.0f, payload->unk1B, surface, &position,
                   state->head.header.owner, state->head.header.kind);
     payload->unk20 = 4;
     return 1;

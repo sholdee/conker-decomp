@@ -135,7 +135,7 @@ s32 func_150B963C(ModelParticle *particle) {
                     def.unk50 = particle->floor.material;
                     spawned = func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), func_150ADA20() & 0xFF,
-                                            500.0f, 500.0f, 0, (s32)&particle->floor.tri, particle->unk14C,
+                                            500.0f, 500.0f, NULL, &particle->floor.tri, particle->unk14C,
                                             particle->unk168, 0, 8, particle->header.owner, particle->header.kind);
                     if (spawned != 0) {
                         /* the 8-byte extra block after the particle and its motion axes (0x110 + 0x18); 4 bytes past extra are copied too */

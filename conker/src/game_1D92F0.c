@@ -221,9 +221,9 @@ s32 func_151AC3CC(FxEmitter *emitter) {
     return 1;
 }
 
-/* Spawns a burst at the emitter's current point (with height `y`): randomly one of two
+/* Spawns a burst at the emitter's current point (at the given height): randomly one of two
  * effects, scaled from the emitter's data. */
-s32 func_151AC408(FxEmitter *emitter, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+s32 func_151AC408(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     FxEmitterData *data = emitter->data;
     FxEmitterPoint *points = emitter->points;
     Vec3f pos;
@@ -231,12 +231,12 @@ s32 func_151AC408(FxEmitter *emitter, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 a
     s32 life;
 
     pos.x = points[emitter->head.start].x;
-    pos.y = y;
+    pos.y = height;
     pos.z = points[emitter->head.start].z;
     kind = func_151D8E20();
     if (func_150ADA20() & 1) {
         life = func_150ADA20() % 41 + 80;
-        func_151D9B8C(kind, data->scale * 6.0f, data->alpha, arg5, &pos, life, 1, 1, 0, emitter->head.header.owner,
+        func_151D9B8C(kind, data->scale * 6.0f, data->alpha, surface, &pos, life, 1, 1, 0, emitter->head.header.owner,
                       emitter->head.header.kind);
     } else {
         func_151DAB58(kind, data->scale * 1.5f, data->alpha, &pos, 1, emitter->head.header.owner, emitter->head.header.kind);

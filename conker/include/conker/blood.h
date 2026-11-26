@@ -198,10 +198,11 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
 s32 func_15135BF8(BloodSplat *splat);
 void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4);
 void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3);
-GrowingBloodParticle *func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5, Vec3f *arg6, u8 arg7, u8 arg8,
-                  u8 arg9, s32 arg10);
+GrowingBloodParticle *func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, CollisionTri *surface,
+                                    Vec3f *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10);
 s32 func_151368A8(GrowingBloodParticle *particle);
-void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, s32 arg5, f32 *position, u8 arg7, s32 arg8);
+void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, CollisionTri *surface, f32 *position, u8 arg7,
+                   s32 arg8);
 s32 func_15136A1C(DefParticleHead *particle);
 void func_15136A50(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 arg4, s32 arg5);
 void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6);

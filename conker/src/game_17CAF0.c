@@ -19,7 +19,7 @@ SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 l
 void func_1514F640(TriangleSource *source, ConeBasis *cone) {
     cone->flags = 2;
     cone->spread = source->spread;
-    if (func_15144E80(source->triangle.v, &cone->axis0, &cone->axis1, &cone->direction) != 0) {
+    if (func_15144E80(&source->triangle, &cone->axis0, &cone->axis1, &cone->direction) != 0) {
         if (func_15144A74(&cone->direction, &source->normal) < 0.0f) {
             cone->direction.x = -cone->direction.x;
             cone->direction.y = -cone->direction.y;
@@ -119,7 +119,7 @@ void func_1514FBFC(SurfaceJetSpray *emitter, u8 arg1, s32 arg2) {
     f32 normalLength;
     f32 normalInverse;
 
-    if (func_15144E80(emitter->source.triangle.v, &axis0, &axis1, &normal) != 0) {
+    if (func_15144E80(&emitter->source.triangle, &axis0, &axis1, &normal) != 0) {
         func_15145128(&axis0, &axis0, &length0, &inverse0);
         func_15145128(&axis1, &axis1, &length1, &inverse1);
         func_15145128(&normal, &normal, &normalLength, &normalInverse);
@@ -491,7 +491,7 @@ void func_151511FC(SurfaceBurst *config, u8 arg1, s32 arg2) {
     desc.unk46 = config->unk46;
     desc.unk47 = config->unk47;
     extra.unk10 = config->unk6C;
-    if (func_15144E80(config->triangle.v, &axis0, &axis1, &normal) != 0) {
+    if (func_15144E80(&config->triangle, &axis0, &axis1, &normal) != 0) {
         func_15145128(&axis0, &axis0, &length0, &inverse0);
         func_15145128(&axis1, &axis1, &length1, &inverse1);
         func_15145128(&normal, &normal, &normalLength, &normalInverse);
@@ -550,7 +550,7 @@ void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
     u32 rand;
 
     kind = arg1; // matching: IDO keeps arg1 in a saved register only through a copy
-    if (func_15144E80(config->source.triangle.v, &axis0, &axis1, &normal) != 0) {
+    if (func_15144E80(&config->source.triangle, &axis0, &axis1, &normal) != 0) {
         func_15145128(&axis0, &axis0, &length0, &inverse0);
         func_15145128(&axis1, &axis1, &length1, &inverse1);
         func_15145128(&normal, &normal, &normalLength, &normalInverse);
@@ -661,7 +661,7 @@ void func_15151D6C(SurfaceDebrisBurst *config, s32 *variantIds, f32 *variantScal
     f32 speed;
     f32 pad[2]; // matching: unused stack slots in the original frame
 
-    if (func_15144E80(config->source.triangle.v, &axis0, &axis1, &normal) != 0) {
+    if (func_15144E80(&config->source.triangle, &axis0, &axis1, &normal) != 0) {
         func_15145128(&axis0, &axis0, &length0, &inverse0);
         func_15145128(&axis1, &axis1, &length1, &inverse1);
         func_15145128(&normal, &normal, &normalLength, &normalInverse);

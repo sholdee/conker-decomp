@@ -522,7 +522,7 @@ void func_150E7C9C(Game113D60BurstEffect *effect) {
 
 /* Spawns a func_1513C650 effect of the given size at `position`, lasting `duration` frames
  * (-1: a fixed 300 frames without the timed flag). */
-void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind) {
     s32 pad; // matching: unused stack slot
     SpriteDef arg;
@@ -553,7 +553,7 @@ void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u
         argB = 0;
         argC = 0;
     }
-    func_1513C650(&arg, 0, 0, arg2, position->x, position->y, position->z, size, size, func_150ADA20() & 0xFF,
+    func_1513C650(&arg, 0, 0, surface, position->x, position->y, position->z, size, size, func_150ADA20() & 0xFF,
                   (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0, owner, kind);
 }
 
@@ -1091,7 +1091,7 @@ s32 func_150E971C(Game113D60Debris *debris) {
             splash.fadeStart = 20;
             splash.fadeRate = 12;
 
-            func_1513C73C(&splash, 0, 0, (s32)extra->unk8, debris->position.x, extra->floorY + 5.0f,
+            func_1513C73C(&splash, 0, 0, &extra->floorTri, debris->position.x, extra->floorY + 5.0f,
                           debris->position.z, size, size, func_150ADA20() & 0xFF, 0, 0, debris->base.header.owner,
                           debris->base.header.kind);
         }
