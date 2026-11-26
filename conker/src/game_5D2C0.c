@@ -1,10 +1,6 @@
 #include <ultra64.h>
-#define func_1515E544 func_1515E544_header
 #include "functions.h"
 #include "variables.h"
-#undef func_1515E544
-// matching: func_1515E544 takes u8 counts; this file passes them as s32
-extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
 
 extern s32 D_800902BC[];
 

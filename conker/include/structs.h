@@ -1261,7 +1261,7 @@ struct Actor {
     /* 0x301 */ u8  unk301;
     /* 0x302 */ u8  unk302;
     /* 0x303 */ u8  unk303;
-    /* 0x304 */ s32 unk304[4]; // one per view
+    /* 0x304 */ struct PointLightGfx *unk304[4]; // one per view
     /* 0x314 */ u8 (*unk314)[8]; // one per frame buffer
     /* 0x318 */ Camera *CameraPtr;
     /* 0x31C */ ActorCtl *mv;
@@ -2058,7 +2058,7 @@ typedef struct PointLight {
 } PointLight;
 
 /* A point light as the microcode reads it (0x30 bytes, loaded with G_MV_LIGHT). */
-typedef struct {
+typedef struct PointLightGfx {
     /* 0x00 */ u8 col[3];
     /* 0x03 */ u8 pad3;
     /* 0x04 */ u8 colc[3];
