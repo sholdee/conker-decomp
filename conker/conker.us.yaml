@@ -249,8 +249,7 @@ segments:
       - [0x2BF80, .rodata, init_2070]
       - [0x2C080, .rodata, init_2E50]
       - [0x2C0A0, .rodata, init_49E0]
-      - [0x2C0C0, rodata]
-      - [0x2C120, rodata]
+      - [0x2C0C0, .rodata, init_6380] # the inflate tables of init_6240..init_709C
       - [0x2C1B0, .rodata, init_71D0]
       - [0x2C200, .rodata, init_A420]
       - [0x2C220, .rodata, init_B1B0]

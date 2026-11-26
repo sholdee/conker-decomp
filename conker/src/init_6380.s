@@ -417,3 +417,38 @@ glabel func_10006828
   .L10006924:
     /* 6924 10006924 03E00008 */  jr         $ra
     /* 6928 10006928 24020001 */   addiu     $v0, $zero, 0x1
+
+.section .rodata
+
+/* The tables of the inflate code (init_6240.s to init_709C.s), as in gzip's inflate.c */
+
+/* mask_bits: mask_bits[n] = (1 << n) - 1 */
+glabel D_8002C0C0
+    /* 2C0C0 8002C0C0 */ .short 0x0000, 0x0001, 0x0003, 0x0007, 0x000F, 0x001F, 0x003F, 0x007F
+    /* 2C0D0 8002C0D0 */ .short 0x00FF, 0x01FF, 0x03FF, 0x07FF, 0x0FFF, 0x1FFF, 0x3FFF, 0x7FFF
+    /* 2C0E0 8002C0E0 */ .short 0xFFFF
+
+/* cplens: copy lengths for the literal/length codes 257..285 */
+glabel D_8002C0E2
+    /* 2C0E2 8002C0E2 */ .short 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31
+    /* 2C102 8002C102 */ .short 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 0, 0
+
+/* cpdist: copy offsets for the distance codes 0..29 */
+glabel D_8002C120
+    /* 2C120 8002C120 */ .short 1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193
+    /* 2C140 8002C140 */ .short 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577
+
+/* border: the order of the bit length code lengths */
+glabel D_8002C15C
+    /* 2C15C 8002C15C */ .byte 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
+
+/* cplext: extra bits for the literal/length codes 257..285 (99 = invalid) */
+glabel D_8002C16F
+    /* 2C16F 8002C16F */ .byte 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2
+    /* 2C17F 8002C17F */ .byte 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0, 99, 99
+
+/* cpdext: extra bits for the distance codes */
+glabel D_8002C18E
+    /* 2C18E 8002C18E */ .byte 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6
+    /* 2C19E 8002C19E */ .byte 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13
+    /* 2C1AC 8002C1AC */ .byte 0, 0, 0, 0 /* pad to 16 bytes */
