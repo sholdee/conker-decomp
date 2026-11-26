@@ -1036,7 +1036,7 @@ void func_1501EC38(s32 scene) {
                     } else if (nextTime[j] == -9999) {
                         value[j] = lastValue[j];
                     } else {
-                        t = (f32)(D_800C35B0[scene] - prevTime[j]) / (f32)(nextTime[j] - prevTime[j]);
+                        t = (f32)(D_800C35B0[scene] - prevTime[j]) / (nextTime[j] - prevTime[j]);
                         mask = 6;
                         found = -1;
                         if (prevInterp[j] == 0) {
@@ -1210,7 +1210,7 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
         } while (hi >= lo);
         j = 0;
         for (i = 0; i < 2; i++) {
-            t = (f32)(sample + i) * 0.01f;
+            t = (sample + i) * 0.01f;
             ((Vec3f *)out)[j].x = ((D_800C3A50[scene][track].coef3[0] * t + D_800C3A50[scene][track].coef2[0]) * t + D_800C3A50[scene][track].coef1[0]) * t + D_800C3A50[scene][track].coef0[0];
             ((Vec3f *)out)[j].y = ((D_800C3A50[scene][track].coef3[1] * t + D_800C3A50[scene][track].coef2[1]) * t + D_800C3A50[scene][track].coef1[1]) * t + D_800C3A50[scene][track].coef0[1];
             ((Vec3f *)out)[j].z = ((D_800C3A50[scene][track].coef3[2] * t + D_800C3A50[scene][track].coef2[2]) * t + D_800C3A50[scene][track].coef1[2]) * t + D_800C3A50[scene][track].coef0[2];
@@ -1484,7 +1484,7 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
     } else {
         total = D_800C3A50[scene][track].keyDistance[segment + 1] - total;
         for (k = 0; k < 101; k++) {
-            D_800C3A50[scene][track].arcLength[k] = (f32)k * total / 101.0f;
+            D_800C3A50[scene][track].arcLength[k] = k * total / 101.0f;
         }
     }
     D_800C3A50[scene][track].segment = segment;
@@ -1806,7 +1806,7 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
             event = &D_800C3688[scene][track][active[2]];
             other = event->unk5;
             target[0] = D_800C3958[scene][other].x;
-            target[1] = D_800C3958[scene][other].y + (f32)event->unk6;
+            target[1] = D_800C3958[scene][other].y + event->unk6;
             target[2] = D_800C3958[scene][other].z;
             return 0;
         }
@@ -1822,7 +1822,7 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
             }
             player = camera_global_Cameras;
             target[0] = player->eye.x;
-            target[1] = player->eye.y + (f32)event->unk6;
+            target[1] = player->eye.y + event->unk6;
             target[2] = player->eye.z;
             return 0;
         }
