@@ -258,7 +258,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
             case 0xA6:
                 D_800CBD5B = 1;
                 D_800CBD5C += D_800BE9E4 * 8;
-                flash = (cosf((f32)D_800CBD5C * 0.02454369329f) + 1.0f) * 0.5f;
+                flash = (cosf(D_800CBD5C * 0.02454369329f) + 1.0f) * 0.5f;
                 break;
             case 0xA7:
                 D_800CBD5D = 1;
@@ -408,8 +408,8 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 if (D_800CBD5D != 0) {
                     gy += wave;
                 }
-                x += (f32)D_80085994[font][c].x * D_800380A0 * sx;
-                y += ((f32)D_80085994[font][c].y - gy) * D_800380A4 * sy;
+                x += D_80085994[font][c].x * D_800380A0 * sx;
+                y += (D_80085994[font][c].y - gy) * D_800380A4 * sy;
                 ix = scaleX;
                 iy = scaleY;
                 if (D_800BE628[D_80082FA4].left <= x + w * D_800380A0 && x < D_800BE628[D_80082FA4].right &&
@@ -424,13 +424,13 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                     gDPLoadBlock(gfx++, 1, 0, 0, ((((w + 7) & 0xFFF8) * (h + 1) + 1) >> 1) - 1, 0);
                     yi = y;
                     gSPScisTextureRectangle(gfx++,
-                        (s32)(x * 4), yi * 4,
-                        (s32)(x * 4 + (f32)((w * ix) / 4096) * 4),
+                        (x * 4), yi * 4,
+                        (x * 4 + (f32)((w * ix) / 4096) * 4),
                         ((s32)(f32)((h * iy) / 4096) + yi) * 4,
-                        3, 0, ((-(s32)((y - (f32)yi) * 32.0f) * 4096) + 0x20000) / iy, dsdx, dtdy);
+                        3, 0, ((-(s32)((y - yi) * 32.0f) * 4096) + 0x20000) / iy, dsdx, dtdy);
                 }
-                y -= ((f32)D_80085994[font][c].y - gy) * D_800380A4 * sx;
-                x += (f32)(D_80085994[font][c].w - 1) * D_800380A0 * sy;
+                y -= (D_80085994[font][c].y - gy) * D_800380A4 * sx;
+                x += (D_80085994[font][c].w - 1) * D_800380A0 * sy;
                 }
             }
             i++;

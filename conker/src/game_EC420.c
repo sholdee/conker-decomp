@@ -14,7 +14,7 @@ void func_150BEF7C(s32 arg0) {
     timer = arg0 & 0xFFFF;
     z = 0x17C;
     for (i = 0; i < 2; i++) {
-        func_1516D99C(0x1FDB, 0x25, (s16)z, 0xD,
+        func_1516D99C(0x1FDB, 0x25, z, 0xD,
             0, 0x50, 0x8F, 0, 0, 0, 0, 0,
             8, 0xC8, 0xA, 0, 0, 0, 0, 0,
             0x28, 0x28, 4, 0, 0, 0, 0, 0x555,
@@ -308,7 +308,7 @@ void func_150BFA7C(WorldObject *platform) {
     if (WORK(platform)->home == 0) {
         WORK(platform)->home = platform->y | 0x80000000;
     }
-    top = (s16)(WORK(platform)->home & 0xFFFF);
+    top = (WORK(platform)->home & 0xFFFF);
     lowered = top - 0x50;
     bottom = lowered - travel;
     if (kind == 1) {
@@ -344,12 +344,12 @@ void func_150BFA7C(WorldObject *platform) {
     } else if (state == TASK_FLAG_GOING_ON) {
         WORK(platform)->unk80 += D_800BE9E4;
         if (WORK(platform)->unk80 < 0) {
-            platform->t = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
-            platform->v = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
+            platform->t = ((func_151EF610() % 5) - 2.0f) * 0.125f;
+            platform->v = ((func_151EF610() % 5) - 2.0f) * 0.125f;
         } else {
             if (WORK(platform)->unk80 < 40) {
-                platform->t = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
-                platform->v = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
+                platform->t = ((func_151EF610() % 5) - 2.0f) / 12.0f;
+                platform->v = ((func_151EF610() % 5) - 2.0f) / 12.0f;
             } else {
                 platform->v = 0.0f;
                 platform->t = 0.0f;
@@ -387,8 +387,8 @@ void func_150BFA7C(WorldObject *platform) {
                 if (kind == 2) {
                     platform->inactive = 1;
                     platform[1].inactive = 1;
-                    func_1508EE0C(2, (u16)(platform - db_Object_array));
-                    func_1508EE0C(2, (u16)(&platform[1] - db_Object_array));
+                    func_1508EE0C(2, (platform - db_Object_array));
+                    func_1508EE0C(2, (&platform[1] - db_Object_array));
                 }
             }
         }

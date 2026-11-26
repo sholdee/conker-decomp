@@ -45,8 +45,8 @@ void func_151827D0(void) {
             for (sample = 1; sample < 39; sample++) {
                 left = D_800DDE60[chain][sample - 1].pos - D_800DDE60[chain][sample].pos;
                 right = D_800DDE60[chain][sample + 1].pos - D_800DDE60[chain][sample].pos;
-                D_800DDE60[chain][sample].accel = (f32)(left + right) + force;
-                D_800DDE60[chain][sample].accel += (f32)pushes[sample];
+                D_800DDE60[chain][sample].accel = (left + right) + force;
+                D_800DDE60[chain][sample].accel += pushes[sample];
                 D_800DDE60[chain][sample].vel += D_800DDE60[chain][sample].accel;
                 D_800DDE60[chain][sample].vel *= damping;
                 if (fabsf(D_800DDE60[chain][sample].vel) < 1.0f) {
@@ -116,7 +116,7 @@ void func_15182C5C(WorldObject *prop) {
         frac = samplePos - sample;
         weighted[0] = D_800DDE60[chain][sample].pos * (1.0f - frac);
         weighted[1] = D_800DDE60[chain][next].pos * frac;
-        lift = (s32)(weighted[0] + weighted[1]);
+        lift = (weighted[0] + weighted[1]);
         lift >>= 4; // matching: folding the shift into the line above reschedules it
         func_150A7960(mtx, prop->srcVertices[i].v.ob[0], prop->srcVertices[i].v.ob[1] + lift, prop->srcVertices[i].v.ob[2],
                       &x, &y, &z);
@@ -130,7 +130,7 @@ void func_15182C5C(WorldObject *prop) {
 f32 func_15182F58(s32 dist, s32 chain) {
     f32 pos;
 
-    pos = D_8008D050[D_800DDE54[chain]].scale * (f32)(dist * 40);
+    pos = D_8008D050[D_800DDE54[chain]].scale * (dist * 40);
     if (pos < 0.0f) {
         pos = 0.0f;
     } else if (pos > 39.0f) {

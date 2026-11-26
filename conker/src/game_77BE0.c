@@ -53,7 +53,7 @@ void func_1504A730(void) {
         obj->unk300 = 0;
         obj->mvmt_control &= 0xFFEE5FFF;
         dc_glbl_CharNum = i;
-        if (obj->ypos <= (f32)obj->unk38) {
+        if (obj->ypos <= obj->unk38) {
             if (obj->playernumber == 0xFF) {
                 func_15060F28(obj, 0);
                 continue;

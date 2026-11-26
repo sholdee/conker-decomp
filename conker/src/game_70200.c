@@ -143,7 +143,7 @@ void func_15042ECC(u8 *format, s32 *argumentWords) {
                         f32 *number = (f32 *)argumentWords[argumentIndex++];
                         f32 value = *number;
 
-                        func_151EFF94(out, D_80085CC0, "", "", (f64)value);
+                        func_151EFF94(out, D_80085CC0, "", "", value);
                         while (*out != 0) {
                             out++;
                         }

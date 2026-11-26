@@ -5,7 +5,7 @@
 
 
 void func_15008E00(void) {
-    D_800DDE50 = (u8)0;
+    D_800DDE50 = 0;
 }
 
 void func_15008E10(s32 arg0) {

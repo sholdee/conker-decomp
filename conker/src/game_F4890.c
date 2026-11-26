@@ -29,7 +29,7 @@ s32 func_150C73E0(ModelAttachment *light, Actor *owner) {
     }
 
     if (light->unk38 < 60) {
-        brightness = (u32)(func_150ADA20() & 1) * ((light->unk38 / 60.0f) / 4.0f);
+        brightness = (func_150ADA20() & 1) * ((light->unk38 / 60.0f) / 4.0f);
     } else if (light->unk38 < 300) {
         progress = (light->unk38 - 60) / 240.0f;
         brightness = (progress * 0.75f) + 0.25f;

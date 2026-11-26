@@ -73,15 +73,15 @@ void func_150538CC(Actor *obj) {
     Actor *target;
 
     done = 0;
-    kind = (u16)obj->headEffectState;
-    sweep = (s8)obj->unk284;
+    kind = obj->headEffectState;
+    sweep = obj->unk284;
     hitFlags = 0;
-    if (((kind == 2) || (kind == 18)) && (u16)obj->headEffectTimer) {
-        if (D_800BE9E4 < (u16)obj->headEffectTimer) {
-            obj->headEffectTimer = (u16)obj->headEffectTimer - D_800BE9E4;
+    if (((kind == 2) || (kind == 18)) && obj->headEffectTimer) {
+        if (D_800BE9E4 < obj->headEffectTimer) {
+            obj->headEffectTimer = obj->headEffectTimer - D_800BE9E4;
         } else {
             // matching: dead leftover; keeps the target's dead `move a0,v0` (as1 drops the subu, not the copy)
-            left = (u16)obj->headEffectTimer - D_800BE9E4;
+            left = obj->headEffectTimer - D_800BE9E4;
             if (left + left) {
             }
             obj->headEffectTimer = 0;
@@ -184,8 +184,8 @@ void func_150538CC(Actor *obj) {
             obj->count4 = 40;
         }
         obj->fangle = func_1505A630(movement_obj[obj->unk126].xpos - obj->xpos, obj->zpos - movement_obj[obj->unk126].zpos, 0);
-        if ((u8)(((s32)(obj->fangle - obj->angle) >> 8) + obj->count4) < (obj->count4 * 2)) {
-            climb = ((movement_obj[obj->unk126].ypos + (s16)obj->unk224) - obj->ypos) * 0.1800000072f;
+        if ((u8)(((obj->fangle - obj->angle) >> 8) + obj->count4) < (obj->count4 * 2)) {
+            climb = ((movement_obj[obj->unk126].ypos + obj->unk224) - obj->ypos) * 0.1800000072f;
             ownerDist = func_1505A72C(&movement_obj[obj->unk126], obj);
             func_15059B54(obj, 0x300);
             if ((obj->unk102 != 0) && (ownerDist < (obj->speed * 16.0f))) {
@@ -649,7 +649,7 @@ void func_1505528C(Actor *obj) {
     s32 timer;
     Actor *target;
 
-    kind = (u16)obj->headEffectState;
+    kind = obj->headEffectState;
     hitFlags = 0;
     hoverHeight = 0.0f;
 

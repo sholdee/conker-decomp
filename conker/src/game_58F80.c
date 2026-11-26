@@ -329,7 +329,7 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
     sprite.scaleX = w;
     sprite.scaleY = h;
     sprite.x = movement_obj[index].xpos;
-    sprite.y = movement_obj[index].ypos + (f32)(size / 2);
+    sprite.y = movement_obj[index].ypos + (size / 2);
     sprite.z = movement_obj[index].zpos;
     gdl = func_15095760(gdl, &sprite);
     gSPDisplayList(gdl++, D_80087408);
@@ -608,7 +608,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
         if (D_800D9900 != 0) {
             lightFlags |= 8;
         }
-        gdl = func_1515D914(gdl, player, (s32)obj->xpos, (s32)obj->ypos, (s32)obj->zpos,
+        gdl = func_1515D914(gdl, player, obj->xpos, obj->ypos, obj->zpos,
                             obj->floorMaterial, obj->unk304[player], obj->unk301, &obj->unk314[D_800BE9C0],
                             &obj->unk302, 2, obj->unk1DD, lightFlags, D_800D9E28);
     }
@@ -707,8 +707,8 @@ void func_1502D630(obj, colour, player)
         last = 0.001000000047f;
     }
     step = (first - last) * 0.001000000047f;
-    near = (f32)(u32)D_800DD2E8 * step + last;
-    far = (f32)(u32)D_800DD2EC * step + last;
+    near = D_800DD2E8 * step + last;
+    far = D_800DD2EC * step + last;
     func_150A7A00(D_800D2CA8[player], obj->xpos, obj->ypos, obj->zpos, &x, &y, &z, &w);
     w = (w != 0.0f) ? 1.0f / w : 0.001000000047f;
     if (w < 0) { // matching: integer zeros here; 0.0f literals share the 1.0f register differently
@@ -870,7 +870,7 @@ load:
     animated:
         if (D_800C4ED0[id] < 2 || obj->unk2D0 != NULL) {
             count = func_1502DB20(id);
-            if ((u32)(D_800C3E7C << 6) < (u32)(D_800C3E88 + (count << 6) - D_800C3E8C)) {
+            if ((D_800C3E7C << 6) < (D_800C3E88 + (count << 6) - D_800C3E8C)) {
                 obj->ob_matrix_ptr = NULL;
                 return;
             }
@@ -1110,7 +1110,7 @@ void func_1502E4C4(s32 index) {
     if (D_800C3638 != 0 && D_800C3656[0] == 0 && func_150229E4(obj) == 0) {
         return;
     }
-    if (obj->playernumber != 0xFF && !((u16)D_800D2340 & (1 << obj->playernumber))) {
+    if (obj->playernumber != 0xFF && !(D_800D2340 & (1 << obj->playernumber))) {
         return;
     }
     if ((obj->unk101 & 1) == 1) {
@@ -1123,8 +1123,8 @@ void func_1502E4C4(s32 index) {
         obj->unk74 = movement_obj[obj->attach_char - 1].unk74;
         return;
     }
-    width = (u32)D_800D1C90[id]->bodyRadius * obj->scale_xz;
-    height = (u32)D_800D1C90[id]->bodyRadius * obj->scale_y;
+    width = D_800D1C90[id]->bodyRadius * obj->scale_xz;
+    height = D_800D1C90[id]->bodyRadius * obj->scale_y;
     yOffset = (D_800D1C90[id]->bodyHeight + obj->unkCC) * obj->scale_y;
     obj->cull_radius_xz = width;
     range = obj->cullDistance;
@@ -1140,7 +1140,7 @@ void func_1502E4C4(s32 index) {
         } else if (D_800D1C90[id]->cullDistance == 1) {
             cullDist = 0.0f;
         } else {
-            cullDist = (u32)D_800D1C90[id]->cullDistance * obj->scale_xz;
+            cullDist = D_800D1C90[id]->cullDistance * obj->scale_xz;
         }
     }
     for (i = 0; i <= D_80082FA0; i++) {

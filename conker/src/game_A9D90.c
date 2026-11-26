@@ -461,7 +461,7 @@ s32 func_1507D754(Actor *obj) {
         func_15145A50(obj);
         if (D_800BE616 != 0) {
             func_1507CD64(obj, 6);
-            spawned = func_151149AC((u8)(obj->playernumber + 11));
+            spawned = func_151149AC((obj->playernumber + 11));
         } else {
             if (level == 0x23) {
                 spawned = func_151149AC(1);
@@ -652,7 +652,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
 
     if (D_800C35EA[0] != 1) {
         func_15084D70(0, resource, 1, pos, &vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
-        yaw = (f32)(angle - 64) * (360.0f / 256.0f) + 180.0f;
+        yaw = (angle - 64) * (360.0f / 256.0f) + 180.0f;
         if (type == 0) {
             kind = 1;
         } else if (type == 1) {

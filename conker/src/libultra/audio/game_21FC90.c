@@ -160,15 +160,15 @@ void func_151F2D6C(s32 arg0, s32 arg1) {
 
 void func_151F2DFC(s32 arg0, s32 arg1) {
     if (arg0 >= 0x80) {
-        arg0 = (u16)0x7F;
+        arg0 = 0x7F;
     } else {
         if (arg0 < 0) {
-            arg0 = (u16)0;
+            arg0 = 0;
         }
     }
     D_800E0E16 = arg0;
     if (arg1 != 0) {
-        D_800E0E14 = (s16) D_800E0E16;
+        D_800E0E14 =  D_800E0E16;
     }
 }
 

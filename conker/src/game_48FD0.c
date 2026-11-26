@@ -130,7 +130,7 @@ void func_1501C010(u8 player, u8 strength) {
         onTime = 0.0f;
         offTime = 99.0f;
     } else {
-        scaled = ((f32)strength - 1.0f) * (1.0f / 6.0f) * 5.0f;
+        scaled = (strength - 1.0f) * (1.0f / 6.0f) * 5.0f;
         onTime = scaled + 2.0f;
         offTime = 7.0f - scaled;
     }

@@ -299,7 +299,7 @@ void func_15030468(void) {
                             guMtxL2F(boneMtx, parentMtx);
                         }
                     } else {
-                        boneMtx = (f32 (*)[4])((Mtx *)owner->ob_matrix_ptr + att->bone);
+                        boneMtx = (f32 (*)[4])(owner->ob_matrix_ptr + att->bone);
                     }
                     if (att->mtx != NULL) {
                         mtx = att->mtx;
@@ -651,7 +651,7 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
     alpha = att->alpha;
     v = func_1506196C(owner, view);
     if (v != 0xFF) {
-        alpha = (s32)((u32)v * alpha) >> 8;
+        alpha = (s32)(v * alpha) >> 8;
     }
     if (alpha < 0xFF) {
         gSPSegment(gdl++, 8, D_80082FC0);
@@ -700,7 +700,7 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
                 gdl = func_1515E544(gdl, owner->unk304[view], owner->unk301, owner->unk302,
                                     &owner->unk314[D_800BE9C0]);
             } else {
-                gdl = func_1515D914(gdl, view, (s32)owner->xpos, (s32)owner->ypos, (s32)owner->zpos,
+                gdl = func_1515D914(gdl, view, owner->xpos, owner->ypos, owner->zpos,
                                     owner->floorMaterial, owner->unk304[view], owner->unk301,
                                     &owner->unk314[D_800BE9C0], &owner->unk302, 2,
                                     owner->unk1DD, v, D_800D9E28);

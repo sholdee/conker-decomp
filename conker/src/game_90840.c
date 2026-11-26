@@ -2535,13 +2535,13 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
 
             arg0->headEffectTimer = 0x64;
             if ((s8)arg0->unk284 == 0) {  // matching: read signed (lb); Actor declares u8
-                arg0->headEffectState = (u16)arg0->headEffectState + D_800BE9E4;
-                if (((func_150ADA20() % 120U) + 0xB4) < (u16)arg0->headEffectState) {
+                arg0->headEffectState = arg0->headEffectState + D_800BE9E4;
+                if (((func_150ADA20() % 120U) + 0xB4) < arg0->headEffectState) {
                     func_1507E7E4(arg0, sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
                     arg0->headEffectState = 0;
                     arg0->unk284 = 1;
                 }
-            } else if (((s8)arg0->unk284 != 0) && (arg0->expression == arg0->defaultExpression)) {
+            } else if ((arg0->unk284 != 0) && (arg0->expression == arg0->defaultExpression)) {
                 arg0->unk284 = 0;
             }
             arg0->norun = 0xA;

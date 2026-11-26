@@ -285,7 +285,7 @@ void func_150562FC(Actor *actor) {
     } else {
         lerp = 0.8000000119f;
     }
-    offsetX = (u32)actor->unk10F;
+    offsetX = actor->unk10F;
     func_150599C8(actor, 0x10, movement_obj[hostIdx].langle + (actor->unk13E << 8));
     if (movement_obj[hostIdx].ob_matrix_ptr != NULL) {
         heightOffset = actor->unk10C / 100;
@@ -327,7 +327,7 @@ void func_150562FC(Actor *actor) {
     {
         f32 rate;
 
-        rate = (u32)anims[animIdx].sub[variant].speed;
+        rate = anims[animIdx].sub[variant].speed;
     split: // matching: block boundary moves the u32->f32 convert's register (f16 instead of f0)
         rate = rate / 100.0f;
         func_1505E650(actor, anims[animIdx].sub[variant].anim, rate, animArg, 0.0, 0, 0);
@@ -623,7 +623,7 @@ void func_15056B08(Actor *actor) {
                 }
             }
         }
-        if (((u16)actor->unk22E == 0) && (state != 4) && (state != 7) &&
+        if ((actor->unk22E == 0) && (state != 4) && (state != 7) &&
             (((alertKind == 0) && (actor->unk235 != 0)) ||
              ((alertKind == 1) && (actor->unk233 != 0) && !(actor->task_attrib & 4)))) {
             u8 spotted;
@@ -873,7 +873,7 @@ void func_15056B08(Actor *actor) {
         f32 a;
         f32 lim;
 
-        a = (u32)func_1505A630(sqrtf(distSqXZ), ty, 0) * 0.005493164f;
+        a = func_1505A630(sqrtf(distSqXZ), ty, 0) * 0.005493164f;
         if (a > 180.0f) {
             a -= 360.0f;
         }
@@ -898,7 +898,7 @@ void func_1505841C(Actor *actor, f32 idleRate) {
     s32 flags;
 
     flags = actor->intel_animspd;
-    rate = (f32)(((flags & 0x1F) << 8) + actor->unk249) * 0.0003906250058f;
+    rate = (((flags & 0x1F) << 8) + actor->unk249) * 0.0003906250058f;
     if (!(flags & 0x80)) {
         speed = actor->speed;
         if ((speed <= 1.0f) || ((actor->unk22C & 0x10) && (actor->shad == 0.0f))) {
@@ -914,12 +914,12 @@ void func_1505841C(Actor *actor, f32 idleRate) {
         }
     }
     if (actor->unk223 == 0xD) {
-        rate = (f32)(actor->unk250 & 0x7F) * 0.1000000015f;
+        rate = (actor->unk250 & 0x7F) * 0.1000000015f;
     }
     if (flags == 0xFF) {
         rate = 0.0f;
     }
-    func_1505E650(actor, actor->intel_animseq, rate, (f32)actor->unk1D0, 0.0f, 0.0f, 0);
+    func_1505E650(actor, actor->intel_animseq, rate, actor->unk1D0, 0.0f, 0.0f, 0);
     if (actor->intel_animspd == 0xFF) {
         fade = D_800418B0[D_800419A0][0];
         if (fade >= 0.0f) {
@@ -940,7 +940,7 @@ void func_150585F0(Actor *actor, f32 decel) {
     u16 angle;
     s32 owner;
 
-    decel = (f32)(u32)actor->unk109 * 0.1000000015f;
+    decel = actor->unk109 * 0.1000000015f;
     func_1505A3A8(0.0f, actor, 1.0f, decel, 0);
     if (actor->unk1CC < 100000.0f) {
         actor->unk1CC = actor->ypos;
@@ -1032,7 +1032,7 @@ void func_15058898(Actor *actor, f32 prevY) {
         return;
     }
     if (actor->noshove & 0x200000) {
-        actor->floorY = (s16)actor->unk224;
+        actor->floorY = actor->unk224;
         return;
     }
     fastFloor = actor->noshove & 2;
@@ -1127,7 +1127,7 @@ void func_15058898(Actor *actor, f32 prevY) {
 
         if (1) { // matching: the extra block makes IDO pick v0 for fallScript
             if ((fallScript != 0) && (actor->stunned == 0) &&
-                (groundY < (actor->floorY - (f32)(actor->unk256 * 8)))) {
+                (groundY < (actor->floorY - (actor->unk256 * 8)))) {
                 actor->yspd = 0.0f;
                 actor->ygrav = 0.0f;
                 actor->speed = 0.0f;
@@ -1614,7 +1614,7 @@ void func_1505A184(u16 angle, f32 speed, f32 pitch, f32 *outX, f32 *outZ, f32 *o
     pitch = pitch * 0.01745329238f;
     *outY = func_150AD78C(pitch) * -speed;
     speed = func_150AD780(pitch) * speed;
-    yaw = (f32)angle * 9.587380191e-05f;
+    yaw = angle * 9.587380191e-05f;
     sinYaw = func_150AD780(yaw);
     cosYaw = func_150AD78C(yaw);
     *outX = sinYaw * speed;
@@ -1739,7 +1739,7 @@ f32 func_1505A5CC(OSContPad *pad) {
 
 /* Binary angle (0x10000 = full turn) of the direction (x, z); the third argument is unused. */
 u16 func_1505A630(f32 x, f32 z, s32 unused) {
-    return ((u16) (u32) (func_150484A0(-x, z) * 10430.37793f)) + 16384;
+    return ((u16)  (func_150484A0(-x, z) * 10430.37793f)) + 16384;
 }
 
 /* Horizontal (xz) distance between two actors. */
@@ -1775,7 +1775,7 @@ void func_1505A770(Actor *actor) {
 
     if ((actor->shad != 0.0f) || (velocity = actor->yspd, velocity > 0.0f)) {
         decrement = actor->ygrav * 0.1f;
-        count = (s32)(D_800D1550 / 0.1f);
+        count = (D_800D1550 / 0.1f);
         for (i = 0; i < count; i++) {
             actor->yspd -= decrement;
             actor->ypos += actor->yspd * 0.05f;
@@ -1865,7 +1865,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                 actor->mv->prop = 0;
             }
             actor->unk100 &= 0xFD;
-            if ((((u32)actor->floorMaterial >> 12) & 0xF) == 1) {
+            if (((actor->floorMaterial >> 12) & 0xF) == 1) {
                 if (level == 0x14) {
                     func_1513783C(actor, 0xFF, 1);
                     func_1507CD64(actor, 8);
@@ -2135,7 +2135,7 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
 
     prevHeight = actor->shad;
     if (!(actor->noshove & 0x8000)) {
-        if (actor->unk252 != 0 && (f32)(actor->unk253 * 8) < actor->unk1CC - actor->ypos &&
+        if (actor->unk252 != 0 && (actor->unk253 * 8) < actor->unk1CC - actor->ypos &&
             actor->stunned == 0) {
             animKind = actor->unk252;
             actor->stunned = 0xFE;
@@ -2175,7 +2175,7 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
                         if ((actor->noshove & 0x800) && prevHeight != 0.0f &&
                             actor->yspd < -4.0f * gravity * D_800D1550) {
                             sound = actor->unk2CC;
-                            factor = (f32)actor->unk2CB * 0.009999999776f;
+                            factor = actor->unk2CB * 0.009999999776f;
                             actor->yspd = (0.0f - actor->yspd) * factor;
                             if (sound != 0 && actor->yspd > 5.0f) {
                                 D_800D1580 = sound;
@@ -2191,7 +2191,7 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
                                    actor->yspd > -1.5f * actor->ygrav * D_800D1550) {
                             actor->yspd = 0.0f;
                         } else {
-                            factor = (f32)actor->unk2CB * 0.009999999776f;
+                            factor = actor->unk2CB * 0.009999999776f;
                             actor->yspd = (0.0f - actor->yspd) * factor;
                         }
                         actor->speed *= 0.8999999762f;
@@ -2672,13 +2672,13 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
         y = attacker->ypos;
     } else {
         hit = (HitReaction *)((u8 *)hits + attackIdx * sizeof(HitReaction));
-        dist = (u32)hit->unkA;
+        dist = hit->unkA;
         dist *= attacker->scale_xz / 0.125f;
         func_1505A184((hit->unk9 << 8) + attacker->langle, dist, 0.0f, &x, &z, &y);
         x += attacker->xpos;
         y += attacker->ypos;
         z += attacker->zpos;
-        radius = (u32)hit->unkE;
+        radius = hit->unkE;
         radius = attacker->scale_xz * 4.0f * radius;
     }
     dist = hit->unkC;
@@ -3111,7 +3111,7 @@ u8 func_1505DADC(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone)
             (other->noshove & 0x40) && (i != skipIdx) && (other->unk2FA != 0)) {
             dist = func_1505DF10(actor, i, &angle, &distXZ, &dy, 0);
             if (((dist < best) || ((other->stunned == 0) && (bestStunned != 0))) &&
-                ((u8)(((s32)(angle - actor->langle) >> 8) + halfCone) < (halfCone * 2)) &&
+                ((u8)(((angle - actor->langle) >> 8) + halfCone) < (halfCone * 2)) &&
                 ((u8)(((u8)(func_1505A630(sqrtf(distXZ), -dy, 0) >> 8) - pitch) + 0x10) < 0x20)) {
                 if ((func_150AC9C0(actor->xpos, actor->ypos + 80.0f, actor->zpos,
                                    movement_obj[i].xpos - actor->xpos,
@@ -3321,11 +3321,11 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, 
                 func_10004514(romAddr, state->header, size, 1);
             }
         }
-        state->numFrames = (u32)state->header[3];
+        state->numFrames = state->header[3];
         if (state->header[3] == 0xFF && actor != NULL) {
             switch (actor->character_type) {
             case 0x92:
-                state->numFrames = (u32)D_80099420[actor->animseq.uh - 20];
+                state->numFrames = D_80099420[actor->animseq.uh - 20];
                 break;
             case 0xB7:
             case 0xB8:
@@ -3594,7 +3594,7 @@ void func_1505E874(s32 sourceIdx, Actor *actor) {
             actor->unk10B |= 1;
         }
         actor->unk10C = stunTime * 100;
-        animSpeed = (u32)table[anim].sub[actor->stunnednum].speed;
+        animSpeed = table[anim].sub[actor->stunnednum].speed;
         animSpeed = animSpeed / 100.0f;
         anim = table[anim].sub[actor->stunnednum].anim;
         if (anim != 0) {
@@ -4142,7 +4142,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                     actor->ygrav = 1.0f;
                     if (actor->animseq.uh != 0xE9) {
                         func_100109D0(actor);
-                        func_1000FA64(0x61E, (s16)(s32)actor->xpos, (s16)(s32)actor->ypos, (s16)(s32)actor->zpos,
+                        func_1000FA64(0x61E, actor->xpos, actor->ypos, actor->zpos,
                                       0x7FFF, 0x1F4, 0xC8, (SoundRecordCallback)func_1000EFB4, actor, (s32)D_80099428, 0, 0);
                         func_151C6EA0(actor, 0xFF, 1);
                     }
@@ -4302,7 +4302,7 @@ void func_15060778(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s
     if (flags & 8) {
         channel = 0;
     } else {
-        channel = ((u32)actor->floorMaterial >> 3) & 0x30;
+        channel = (actor->floorMaterial >> 3) & 0x30;
     }
     switch (flags & 3) {
     case 1:
@@ -4333,7 +4333,7 @@ void func_15060778(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s
         handle = func_10010E78(handle, sound, rate + channel * 50, volume, channel, 0, actor->xpos,
                                actor->ypos, actor->zpos, minDist, maxDist);
     } else {
-        handle = func_10010BE8(handle, sound, (u16)(rate + channel * 50), 0x40, volume, channel, 1);
+        handle = func_10010BE8(handle, sound, (rate + channel * 50), 0x40, volume, channel, 1);
     }
     if (slot != NULL) {
         *slot = handle;
@@ -4406,7 +4406,7 @@ void func_15060BE0(Actor *actor) {
         if ((actor->ob_matrix_ptr != 0) && (D_800C3E90 == 0)) {
             info = D_800D1C90[actor->character_type];
             bone = (f32 (*)[4])((u8 *)actor->ob_matrix_ptr + (info->headBone << 6)); /* 4x4 float matrices */
-            height = (f32)info->headHeight * actor->scale_y;
+            height = info->headHeight * actor->scale_y;
             if (height) {
                 upX = bone[1][0];
                 upY = bone[1][1];
@@ -4424,15 +4424,15 @@ void func_15060BE0(Actor *actor) {
                 offX = offY;
             }
             done = TRUE;
-            actor->unk1BC[0] = (s16)(s32)(bone[3][0] + offX);
-            actor->unk1BC[1] = (s16)(s32)(bone[3][1] + offY);
-            actor->unk1BC[2] = (s16)(s32)(bone[3][2] + offZ);
+            actor->unk1BC[0] = (bone[3][0] + offX);
+            actor->unk1BC[1] = (bone[3][1] + offY);
+            actor->unk1BC[2] = (bone[3][2] + offZ);
         }
     }
     if (done == FALSE) {
-        actor->unk1BC[0] = (s16)(s32)actor->xpos;
-        actor->unk1BC[1] = (s16)(s32)actor->ypos;
-        actor->unk1BC[2] = (s16)(s32)actor->zpos;
+        actor->unk1BC[0] = actor->xpos;
+        actor->unk1BC[1] = actor->ypos;
+        actor->unk1BC[2] = actor->zpos;
     }
 }
 /* Detaches every actor carried by (unk65 pointing at) this one. */
@@ -4573,7 +4573,7 @@ void func_150611E8(Actor *actor, s32 pathIdx) {
         if (pts[closest + 1].param == 0) {
             speed = 8.0f;
         } else {
-            speed = (u32)pts[closest + 1].param;
+            speed = pts[closest + 1].param;
         }
         scale = speed * 0.0025f;
         if (scale > 1.0f) {
@@ -4918,7 +4918,7 @@ void func_15061B4C(void) {
             } else {
                 D_800CC298.unk10 = 0;
             }
-            scale = (u32)D_800CC298.unk10 * 0.003921568859f;
+            scale = D_800CC298.unk10 * 0.003921568859f;
             func_1501B660(&movement_obj[i], &scale, 0);
         } else if (id == 0x8A) {
             s32 delta;
@@ -4982,7 +4982,7 @@ s32 func_150623F4(Actor *actor) {
     s32 id;
     u8 *p;
 
-    scale = (actor->listpos_ptr != NULL) ? (f32)actor->listpos_ptr->unk2A : 0.0f;
+    scale = (actor->listpos_ptr != NULL) ? actor->listpos_ptr->unk2A : 0.0f;
     if (scale == 0.0f) {
         return 1;
     }
@@ -5164,12 +5164,12 @@ void func_15062BDC(Actor *actor, f32 xzScale, f32 yScale) {
     actor->scale_y = yScale;
     if (actor->character_type != 255) {
         info = D_800D1C90[actor->character_type];
-        actor->unkD2 = (s32) (info->unk20 * actor->scale_xz);
-        actor->unkD4 = (s32) (info->unk22 * actor->scale_y);
-        actor->unkD6 = (s32) (info->unk24 * actor->scale_y);
-        actor->bodyRadius = (s32) (info->unk1A * actor->scale_xz);
-        actor->bodyHeight = (s32) (info->unk1C * actor->scale_y);
-        actor->bodyOffsetY = (s32) (info->unk1E * actor->scale_y);
+        actor->unkD2 =  (info->unk20 * actor->scale_xz);
+        actor->unkD4 =  (info->unk22 * actor->scale_y);
+        actor->unkD6 =  (info->unk24 * actor->scale_y);
+        actor->bodyRadius =  (info->unk1A * actor->scale_xz);
+        actor->bodyHeight =  (info->unk1C * actor->scale_y);
+        actor->bodyOffsetY =  (info->unk1E * actor->scale_y);
         func_15062AC4(actor);
         func_15062B84(actor);
     }

@@ -132,7 +132,7 @@ void func_150D85AC(Actor *actor) {
                     pos.z = probe.z;
                     randomScale = func_150ADA68();
                     random.value = func_150ADA20();
-                    func_150E7FEC(randomScale * 109.0f + 140.0f, (u8)((random.value % 86U) + 170),
+                    func_150E7FEC(randomScale * 109.0f + 140.0f, ((random.value % 86U) + 170),
                                   &ground.tri, &pos, (func_150ADA20() % 251U) + 500, 0, 1, 0, 0, 0, 255, 0);
                 }
                 func_150E83AC(&pos, (func_150ADA20() % 62U) + 120, 255, 1);

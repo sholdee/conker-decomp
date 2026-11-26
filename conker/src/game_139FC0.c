@@ -114,7 +114,7 @@ s32 func_1510CE60(Gfx *dl, s32 strict, u32 countUse, s32 lifetime, s16 **usedOut
         gfx = &dl[i];
         if (GFX_OPCODE(&dl[i]) == (s8)G_SETTIMG) {
             dram = gfx->words.w1;
-            if ((strict == 0 || !(dram & 0xFF000000)) && (u32)(dram & 0xFF000000) < 0x06000000) {
+            if ((strict == 0 || !(dram & 0xFF000000)) && (dram & 0xFF000000) < 0x06000000) {
                 flags = dram >> 22;
                 seg = dram & 0x0F000000;
                 dram &= 0xF03FFFFF;
@@ -240,7 +240,7 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
             func_10004074(packed);
             return 0x80000000;
         }
-        func_10006240(packed + odd, (Entry1510D404 *)texture, D_8003809C);
+        func_10006240(packed + odd, texture, D_8003809C);
         func_10004074(packed);
         D_800B0E58[index] = texture;
         D_800D9F68[index] = 0;
@@ -329,7 +329,7 @@ void func_1510D404(void) {
                 data = ((Entry1510D404 *)D_800B0E58[i])->data;
                 size = ((Entry1510D404 *)D_800B0E58[i])->size;
                 func_10006240(data + size, (Entry1510D404 *)D_800B0E58[i], D_8003809C);
-                func_10004074((s16 *)data);
+                func_10004074(data);
                 D_800BC448[i] &= ~0x40;
                 if (i < D_800D9F58) {
                     D_800D9F58 = i;
