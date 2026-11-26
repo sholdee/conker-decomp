@@ -181,27 +181,9 @@ typedef struct {
     u8  pad8[0x4];
 } N_ALUnknownEvent1;
 
+/* Rare's sound player event: the sound-state record (SndState, src/libultra/audio/init_15550.c). */
 typedef struct {
-    /* 0x00 */  ALLink              node;
-    /* 0x08 */  u8                  pad8[0x4];
-    /* 0x0C */  s32                 unkC;
-    /* 0x10 */  N_ALVoice          *unk10;
-    /* 0x14 */  u8                  pad14[0x1C];
-    /* 0x30 */  f32                 unk30;
-    /* 0x34 */  u8                  pad34[0x4];
-    /* 0x38 */  s32                *unk38;
-    /* 0x3C */  s32                 unk3C;
-    /* 0x40 */  s32                 unk40;
-    /* 0x44 */  u8                  pad44[0x8];
-    /* 0x4C */  s16                 unk4C;
-    /* 0x4E */  s8                  unk4E;
-    /* 0x4F */  u8                  pad4F[0x4];
-    /* 0x53 */  u8                  unk53;
-    /* 0x54 */  u8                  unk54;
-} N_ALUnknownStruct1;
-
-typedef struct {
-    N_ALUnknownStruct1 *unk0;
+    struct SndState *unk0;
     u8  pad4[0x8];
 } N_ALUnknownEvent2;
 

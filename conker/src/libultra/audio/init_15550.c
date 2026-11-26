@@ -1,9 +1,7 @@
 #include <n_libaudio.h>
 
 
-void func_10017298(N_ALUnknownStruct1 *arg0);
-void func_10016F80(ALEventQueue *evtq, N_ALUnknownStruct1 *state, u16 typeMask);
-s32  func_10015878(N_ALSndPlayer *sp);
+ALMicroTime func_10015878(void *node);
 
 void func_10015550(N_ALCSPlayer *csp, s32 arg1) {
     N_ALEvent event;
@@ -32,14 +30,7 @@ typedef struct {
 
 /* In the raw .bss: the player and the volume-table pointer. */
 extern SndPlayer D_80042850;
-extern u16 *D_800428B8;
-
-/* This file's .data. */
-static N_ALUnknownStruct1 *D_8002BA20 = NULL; /* allocated sound states: head */
-static N_ALUnknownStruct1 *D_8002BA24 = NULL; /* allocated sound states: tail */
-static N_ALUnknownStruct1 *D_8002BA28 = NULL; /* free sound states */
-static N_ALSndPlayer *D_8002BA2C = &D_80042850.sndp;
-static s16 D_8002BA30 = 0; /* number of sounds playing */
+extern s16 *D_800428B8;
 
 #ifndef MIN
 #define MIN(a,b) (((a)<(b))?(a):(b))
@@ -48,9 +39,8 @@ static s16 D_8002BA30 = 0; /* number of sounds playing */
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #endif
 
-/* The sound-state record.  N_ALUnknownStruct1 in n_libaudio.h models the same object
- * but pads over most of what _n_handleEvent touches; every offset below is proven by a
- * load or store in the ROM.  0x10 really is an N_ALVoice: every n_alSyn* call in here
+/* The sound-state record.  Every offset below is proven by a load or store in the
+ * ROM.  0x10 really is an N_ALVoice: every n_alSyn* call in here
  * is passed `state + 0x10`, and `state + 0x2C` is that voice's fxBus.  include/structs.h repeats this
  * layout (with field names) for game code, which cannot include n_libaudio.h. */
 typedef struct SndState {
@@ -84,10 +74,19 @@ typedef struct {
     /* 0x00 */ u16       type;
     /* 0x04 */ SndState *state;
     /* 0x08 */ union { s32 i; f32 f; } arg;
-    /* 0x0C */ s32       arg2;
+    /* 0x0C */ ALBank   *bank;
 } SndEvent;
 
+/* This file's .data. */
+static SndState *D_8002BA20 = NULL; /* allocated sound states: head */
+static SndState *D_8002BA24 = NULL; /* allocated sound states: tail */
+static SndState *D_8002BA28 = NULL; /* free sound states */
+static N_ALSndPlayer *D_8002BA2C = &D_80042850.sndp;
+static s16 D_8002BA30 = 0; /* number of sounds playing */
+
 void _n_handleEvent(SndEvent *event);
+void func_10017298(SndState *arg0);
+void func_10016F80(ALEventQueue *evtq, SndState *state, u16 typeMask);
 
 void func_100155A0(SndPlayerConfig *c) {
     u32 i;
@@ -99,7 +98,7 @@ void func_100155A0(SndPlayerConfig *c) {
     D_8002BA2C->drvr = n_syn;
     D_8002BA2C->frameTime = 16000;
 
-    ptr = alHeapAlloc(c->heap, c->maxSounds, sizeof(N_ALUnknownStruct1));
+    ptr = alHeapAlloc(c->heap, c->maxSounds, sizeof(SndState));
     D_8002BA2C->sndState = ptr;
     ((SndPlayer *)D_8002BA2C)->unk54 = c->waveRom;
 
@@ -114,7 +113,7 @@ void func_100155A0(SndPlayerConfig *c) {
      * not shared.  The second operand really is &arr[i] - 1 and not &arr[i - 1]
      * -- golden scales i by 0x58 and THEN subtracts 0x58. */
     for (i = 1; i < c->maxSounds; i++) {
-        N_ALUnknownStruct1 *arr = D_8002BA2C->sndState;
+        SndState *arr = D_8002BA2C->sndState;
         {
             ALLink *ln = (ALLink *)&arr[i];
             ALLink *lst = (ALLink *)(&arr[i] - 1);
@@ -142,11 +141,11 @@ void func_100155A0(SndPlayerConfig *c) {
     D_8002BA2C->nextDelta = n_alEvtqNextEvent(&D_8002BA2C->evtq, &D_8002BA2C->nextEvent);
 }
 
-s32 func_10015878(N_ALSndPlayer *sp) {
+ALMicroTime func_10015878(void *node) {
     N_ALSndPlayer *alsp;
     N_ALEvent event;
 
-    alsp = sp;
+    alsp = node;
     do {
         switch (alsp->nextEvent.type) {
         case 32:
@@ -164,15 +163,15 @@ s32 func_10015878(N_ALSndPlayer *sp) {
     return alsp->nextDelta;
 }
 
-void     func_10016E90(N_ALUnknownStruct1 *arg0);
+void     func_10016E90(SndState *arg0);
 void     func_10016F00(SndState *state);
-SndState *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6,
+SndState *func_10017438(ALBank *bank, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6,
                          SndState **arg7);
 
 /* Volume actually sent to the synth: the sound's own sample volume, scaled by the
    envelope segment volume, the client volume and the channel volume. */
 #define SND_VOL                                                                  \
-    (((s16)D_800428B8[keyMap->keyMin & 0x1F] *                                   \
+    ((D_800428B8[keyMap->keyMin & 0x1F] *                                   \
       (state->unk46 * state->unk44 * snd->sampleVolume / 0x3F01)) / 0x7FFF)
 
 /* Drain one event out of the sound player's queue.  Every arm works on the sound-state
@@ -220,7 +219,7 @@ void _n_handleEvent(SndEvent *event) {
                 }
                 n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)event, 0x8235, 2);
             } else {
-                func_10016E90((N_ALUnknownStruct1 *)state);
+                func_10016E90(state);
             }
         } else {
             switch (event->type) {
@@ -281,14 +280,14 @@ void _n_handleEvent(SndEvent *event) {
                             state->retries--;
                             n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)event, 0x8235, 2);
                         } else {
-                            func_10016E90((N_ALUnknownStruct1 *)state);
+                            func_10016E90(state);
                         }
                         return;
                     }
                     state->unk53 |= 4;
                     state->unk46 = snd->envelope->attackVolume;
                     state->unk51 = vc.fxBus;
-                    delta = (s32)((f32)snd->envelope->attackTime / state->pitch / state->ratio);
+                    delta = snd->envelope->attackTime / state->pitch / state->ratio;
                     state->segEnd = D_8002BA2C->curTime + delta;
                     if (SND_VOL <= 0) {
                         vol = 0;
@@ -314,8 +313,8 @@ void _n_handleEvent(SndEvent *event) {
                             } else {
                                 vol = SND_VOL - 1;
                             }
-                            delta = (s32)((f32)snd->envelope->decayTime / state->ratio /
-                                          state->pitch);
+                            delta = snd->envelope->decayTime / state->ratio /
+                                          state->pitch;
                             state->segEnd = D_8002BA2C->curTime + delta;
                             n_alSynSetVol(&state->voice, vol, delta);
                             evt.type = 2;
@@ -327,8 +326,8 @@ void _n_handleEvent(SndEvent *event) {
                         } else {
                             evt.type = 0x40;
                             evt.state = state;
-                            delta = (s32)((f32)snd->envelope->attackTime / state->pitch /
-                                          state->ratio);
+                            delta = snd->envelope->attackTime / state->pitch /
+                                          state->ratio;
                             n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&evt, delta, 2);
                         }
                     }
@@ -341,8 +340,7 @@ void _n_handleEvent(SndEvent *event) {
                         switch (state->unk54) {
                             case 1:
                                 if (1) {
-                                    func_10016F80(&D_8002BA2C->evtq,
-                                                  (N_ALUnknownStruct1 *)state, 0x40);
+                                    func_10016F80(&D_8002BA2C->evtq, state, 0x40);
                                 } else {
                                     func_10002088(
                                         "snd %d has been freed too early - %d\n\n\n\n\n",
@@ -351,8 +349,8 @@ void _n_handleEvent(SndEvent *event) {
                                         "-2 sound has been freed too early - %d\n\n\n\n\n",
                                         state->unk54);
                                 }
-                                delta = (s32)((f32)snd->envelope->releaseTime / state->ratio /
-                                              state->pitch);
+                                delta = snd->envelope->releaseTime / state->ratio /
+                                              state->pitch;
                                 n_alSynSetVol(&state->voice, 0, delta);
                                 if (delta != 0) {
                                     evt.type = 0x80;
@@ -361,12 +359,12 @@ void _n_handleEvent(SndEvent *event) {
                                                       delta, 2);
                                     state->unk54 = 2;
                                 } else {
-                                    func_10016E90((N_ALUnknownStruct1 *)state);
+                                    func_10016E90(state);
                                 }
                                 break;
                             case 4:
                             case 5:
-                                func_10016E90((N_ALUnknownStruct1 *)state);
+                                func_10016E90(state);
                                 break;
                             default:
                                 break;
@@ -436,8 +434,8 @@ void _n_handleEvent(SndEvent *event) {
                 case 0x800:
                     keyMap = snd->keyMap;
                     if (state->unk54 == 1) {
-                        delta = (s32)((f32)snd->envelope->releaseTime / state->ratio /
-                                      state->pitch);
+                        delta = snd->envelope->releaseTime / state->ratio /
+                                      state->pitch;
                         if (SND_VOL <= 0) {
                             vol = 0;
                         } else {
@@ -456,8 +454,8 @@ void _n_handleEvent(SndEvent *event) {
                         } else {
                             vol = SND_VOL - 1;
                         }
-                        delta = (s32)((f32)snd->envelope->decayTime / state->ratio /
-                                      state->pitch);
+                        delta = snd->envelope->decayTime / state->ratio /
+                                      state->pitch;
                         state->segEnd = D_8002BA2C->curTime + delta;
                         n_alSynSetVol(&state->voice, vol, delta);
                         evt.type = 2;
@@ -470,12 +468,12 @@ void _n_handleEvent(SndEvent *event) {
                     break;
 
                 case 0x80:
-                    func_10016E90((N_ALUnknownStruct1 *)state);
+                    func_10016E90(state);
                     break;
 
                 case 0x200:
                     if (state->unk53 & 0x10) {
-                        func_10017438(event->arg2, event->arg.i, state->unk44, state->unk4F,
+                        func_10017438(event->bank, event->arg.i, state->unk44, state->unk4F,
                                       state->pitch, state->unk50, state->unk51, state->owner);
                     }
                     break;
@@ -499,10 +497,10 @@ void _n_handleEvent(SndEvent *event) {
     } while ((done == 0) && (state != NULL) && (typeMask == 0));
 }
 
-void func_10016E90(N_ALUnknownStruct1 *arg0) {
+void func_10016E90(SndState *arg0) {
     if ((arg0->unk53 & 4) != 0) {
-        n_alSynStopVoice(&arg0->unk10);
-        n_alSynFreeVoice(&arg0->unk10);
+        n_alSynStopVoice(&arg0->voice);
+        n_alSynFreeVoice(&arg0->voice);
     }
     func_10017298(arg0);
     func_10016F80(&D_8002BA2C->evtq, arg0, 0xFFFF);
@@ -510,35 +508,27 @@ void func_10016E90(N_ALUnknownStruct1 *arg0) {
 
 /* Posts a pitch event (type 16) for `state`: its requested pitch times the key map's detune ratio. */
 void func_10016F00(SndState *state) {
-    N_ALEvent event;
+    SndEvent event;
     f32 res;
 
     res = alCents2Ratio(state->snd->keyMap->detune) * state->pitch;
 
     event.type = 16;
-    event.msg.vol.voice = (N_ALVoice *)state; // the event carries the state, not a voice
-    event.msg.vol.delta = *(s32*)&res;
+    event.state = state;
+    event.arg.i = *(s32 *)&res; // matching: the float goes through memory as a word
 
-    n_alEvtqPostEvent(&D_8002BA2C->evtq, &event, 33333, 2);
+    n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&event, 33333, 2);
 }
-
-/* The sound player's view of a queued N_ALEvent (libultra's ALSndpEvent).  The
- * type is tested as a BIT MASK here, so it is read unsigned -- golden uses lhu
- * on a field N_ALEvent declares s16. */
-typedef struct {
-    /* 0x00 */ u16                 type;
-    /* 0x04 */ N_ALUnknownStruct1 *state;
-} SndpEvent;
 
 /* libultra's static _removeEvents(), with a type mask added: unlink every
  * pending event belonging to `state` whose type matches, and put its list item
  * back on the queue's free list. */
-void func_10016F80(ALEventQueue *evtq, N_ALUnknownStruct1 *state, u16 typeMask) {
+void func_10016F80(ALEventQueue *evtq, SndState *state, u16 typeMask) {
     ALLink            *thisNode;
     ALLink            *nextNode;
     N_ALEventListItem *thisItem;
     N_ALEventListItem *nextItem;
-    SndpEvent         *evt;
+    SndEvent          *evt;
     s32                mask;
 
     mask = osSetIntMask(1);
@@ -548,7 +538,7 @@ void func_10016F80(ALEventQueue *evtq, N_ALUnknownStruct1 *state, u16 typeMask) 
         nextNode = thisNode->next;
         thisItem = (N_ALEventListItem *)thisNode;
         nextItem = (N_ALEventListItem *)nextNode;
-        evt = (SndpEvent *)&thisItem->evt;
+        evt = (SndEvent *)&thisItem->evt;
         if ((evt->state == state) && (evt->type & typeMask)) {
             if (nextItem) {
                 nextItem->delta += thisItem->delta;
@@ -579,99 +569,100 @@ void func_10016F80(ALEventQueue *evtq, N_ALUnknownStruct1 *state, u16 typeMask) 
 }
 
 
-N_ALUnknownStruct1 *func_10017100(s32 arg0, s16 arg1) {
-    N_ALUnknownStruct1 *sp24;
+SndState *func_10017100(ALBank *bank, s16 arg1) {
+    SndState *sp24;
     u32 mask;
-    N_ALUnknownStruct1 *sp1C;
+    SndState *sp1C;
 
     mask = osSetIntMask(1);
     sp24 = D_8002BA28;
     if (sp24 != 0) {
-        D_8002BA28 = sp24->node.next;
+        D_8002BA28 = sp24->next;
         sp1C = sp24;
-        if (sp1C->node.next) {
-            sp1C->node.next->prev = sp1C->node.prev;
+        if (sp1C->next) {
+            sp1C->next->prev = sp1C->prev;
         }
-        if (sp1C->node.prev) {
-            sp1C->node.prev->next = sp1C->node.next;
+        if (sp1C->prev) {
+            sp1C->prev->next = sp1C->next;
         }
         if (D_8002BA20) {
-            sp24->node.next = D_8002BA20;
-            sp24->node.prev = NULL;
-            D_8002BA20->node.prev = sp24;
+            sp24->next = D_8002BA20;
+            sp24->prev = NULL;
+            D_8002BA20->prev = sp24;
             D_8002BA20 = sp24;
         } else {
-            sp24->node.prev = 0;
-            sp24->node.next = sp24->node.prev;
+            sp24->prev = 0;
+            sp24->next = sp24->prev;
             D_8002BA20 = sp24;
             D_8002BA24 = sp24;
         }
         osSetIntMask(mask);
-        sp24->unkC = 0;
+        sp24->snd = NULL;
         sp24->unk4C = arg1;
-        sp24->unk3C = arg0;
-        sp24->unk4E = 64;
+        sp24->bank = bank;
+        sp24->priority = 64;
         sp24->unk54 = 5;
-        sp24->unk40 = 2;
+        sp24->retries = 2;
         sp24->unk53 = 0;
-        sp24->unk38 = 0;
-        sp24->unk30 = 1.0f;
+        sp24->owner = NULL;
+        sp24->ratio = 1.0f;
     } else {
         osSetIntMask(mask);
     }
     return sp24;
 }
 
-void func_10017298(N_ALUnknownStruct1 *arg0) {
-    N_ALUnknownStruct1 *sp4;
+void func_10017298(SndState *arg0) {
+    SndState *sp4;
 
     if (D_8002BA20 == arg0) {
-        D_8002BA20 = arg0->node.next;
+        D_8002BA20 = arg0->next;
     }
     if (D_8002BA24 == arg0) {
-        D_8002BA24 = arg0->node.prev;
+        D_8002BA24 = arg0->prev;
     }
 
     sp4 = arg0;
-    if (sp4->node.next) {
-        sp4->node.next->prev = sp4->node.prev;
+    if (sp4->next) {
+        sp4->next->prev = sp4->prev;
     }
 
-    if (sp4->node.prev) {
-        sp4->node.prev->next = sp4->node.next;
+    if (sp4->prev) {
+        sp4->prev->next = sp4->next;
     }
 
     if (D_8002BA28) {
-        arg0->node.next = D_8002BA28;
-        arg0->node.prev = NULL;
-        D_8002BA28->node.prev = arg0;
+        arg0->next = D_8002BA28;
+        arg0->prev = NULL;
+        D_8002BA28->prev = arg0;
         D_8002BA28 = arg0;
     } else {
-        arg0->node.prev = NULL;
-        arg0->node.next = arg0->node.prev;
+        arg0->prev = NULL;
+        arg0->next = arg0->prev;
         D_8002BA28 = arg0;
     }
     if (arg0->unk53 & 4) {
         D_8002BA30 -= 1;
     }
     arg0->unk54 = 0;
-    if (arg0->unk38) {
-        if (*arg0->unk38 == (s32)arg0) {
-            *arg0->unk38 = 0;
+    if (arg0->owner) {
+        if (*arg0->owner == arg0) {
+            *arg0->owner = NULL;
         }
-        arg0->unk38 = NULL;
+        arg0->owner = NULL;
     }
 }
 
-s32 func_100173C4(N_ALUnknownEvent2 *arg0) {
+/* The play state of the sound that `handle` (a SndState owner slot) refers to, or 0. */
+s32 func_100173C4(SndState **handle) {
     s32 ret;
     s32 mask;
 
     ret = 0;
-    if (arg0->unk0) {
+    if (*handle) {
         mask = __osDisableInt();
-        if (arg0->unk0) {
-            ret = arg0->unk0->unk54;
+        if (*handle) {
+            ret = (*handle)->unk54;
         }
         __osRestoreInt(mask);
     }
@@ -689,7 +680,7 @@ s32 func_100173C4(N_ALUnknownEvent2 *arg0) {
  * register forcers.  The retry loop is the same story: arg1 is reset to 0 on
  * every pass, so the `arg1 != 0 && state != NULL` back-edge can never be
  * taken. */
-SndState *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, SndState **arg7) {
+SndState *func_10017438(ALBank *bank, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, SndState **arg7) {
     SndState *state;
     SndState *result;
     s16 count;
@@ -700,11 +691,11 @@ SndState *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5
     count = 0;
     if (arg1 != 0) {
         do {
-            state = (SndState *)func_10017100(arg0, arg1 - 1);
+            state = func_10017100(bank, arg1 - 1);
             if (state != NULL) {
                 D_8002BA2C->target = (s32)state;
                 event.type = 0x4000;
-                event.msg.unknown1.unk0 = (N_ALUnknownStruct1 *)state;
+                event.msg.unknown1.unk0 = state;
                 state->unk4F = arg3;
                 state->unk44 = arg2;
                 state->pitch = arg4;
@@ -730,7 +721,7 @@ SndState *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5
 }
 
 
-void func_10017594(N_ALUnknownStruct1 *arg0) {
+void func_10017594(SndState *arg0) {
     N_ALEvent event;
 
     if (arg0) {
@@ -744,7 +735,7 @@ void func_10017594(N_ALUnknownStruct1 *arg0) {
 void func_10017604(u8 arg0) {
     s32 mask;
     N_ALEvent event;
-    N_ALUnknownStruct1 *ptr;
+    SndState *ptr;
 
     mask = osSetIntMask(1);
     ptr = D_8002BA20;
@@ -755,7 +746,7 @@ void func_10017604(u8 arg0) {
             event.msg.unknown1.unk0->unk53 &= -0x11;
             n_alEvtqPostEvent(&D_8002BA2C->evtq, &event, 0, 2);
         }
-        ptr = ptr->node.next;
+        ptr = ptr->next;
     }
     osSetIntMask(mask);
 }
@@ -793,30 +784,30 @@ void func_100176EC(void) {
     func_10017604(3);
 }
 
-void func_10017714(s32 arg0, s16 type, s32 arg2) {
-    N_ALEvent event;
+void func_10017714(SndState *state, s16 type, s32 arg) {
+    SndEvent event;
 
-    if (arg0 != 0) {
+    if (state != NULL) {
         event.type = type;
-        event.msg.vol.voice = arg0;
-        event.msg.vol.delta = arg2;
-        n_alEvtqPostEvent(&D_8002BA2C->evtq, &event, 0, 2);
+        event.state = state;
+        event.arg.i = arg;
+        n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&event, 0, 2);
     }
 }
 
 void func_10017780(u8 arg0, u16 arg1) {
     s32 mask;
-    N_ALUnknownStruct1 *ptr;
+    SndState *ptr;
     s32 count;
     N_ALEvent event;
 
     mask = osSetIntMask(1);
     ptr = D_8002BA20;
     D_800428B8[arg0] = arg1;
-    for (count = 0; ptr != 0; count++, ptr = ptr->node.next) {
-        // N_ALUnknownStruct1.unkC (declared s32 in the header) is SndState.snd; the low 5 bits of its
+    for (count = 0; ptr != 0; count++, ptr = ptr->next) {
+        // The low 5 bits of the sound's
         // key map's keyMin select the sound's group, which indexes D_800428B8.
-        if ((ptr->unkC != 0) && ((((ALSound *)ptr->unkC)->keyMap->keyMin & 0x1F) == arg0)) {
+        if ((ptr->snd != NULL) && ((ptr->snd->keyMap->keyMin & 0x1F) == arg0)) {
             event.type = 0x800;
             event.msg.unknown1.unk0 = ptr;
             n_alEvtqPostEvent(&D_8002BA2C->evtq, &event, 0, 2);
