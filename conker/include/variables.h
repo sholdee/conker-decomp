@@ -447,8 +447,6 @@ extern f32 * D_800DDE44; // closure, percent
 extern f32 * D_800DDE48; // hole x, percent of the view width
 extern f32 * D_800DDE4C; // hole y, percent of the view height
 
-extern u8 D_800DF0E0;
-extern u8 D_800DF0E1;
 extern MtxS16 *D_800DF7C0; // bone matrices drawn by func_1502C974 mode 4
 extern u8 D_800DF7C4; // alpha scale for func_1502C974 mode 4
 extern BoneTrail *D_800DF7C8[2]; // [0]: Actor owners, [1]: world object owners
