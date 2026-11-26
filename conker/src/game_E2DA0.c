@@ -236,7 +236,7 @@ void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
     func_151602C0(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
 }
 
-extern Vec3f D_8009FC30;
+static const Vec3f D_8009FC30 = { 0.0f, -205.0f, 0.0f };
 
 /** Transforms the fixed point D_8009FC30 by bone matrix 5 of obj into out. */
 void func_150B60E0(Actor *obj, Vec3f *out) {
@@ -324,12 +324,16 @@ void func_150B6450(EffectHeader *effect, s32 arg1, u8 msg) {
 }
 
 /* Per-variant trail settings used by func_150B648C. */
-extern Vec3f D_8009FC3C[];   /* emitter position (variants 1 and 2) */
-extern f32 D_8009FC60[];      /* gravity */
-extern f32 D_8009FC6C[];      /* widthGrowth */
-extern f32 D_8009FC78[];      /* width */
-extern s16 D_8009FC84[];      /* life */
-extern s16 D_8009FC8E[][2];   /* capacity */
+static const Vec3f D_8009FC3C[] = { /* emitter position (variants 1 and 2) */
+    { 0.0f, 0.0f, 0.0f },
+    { 2325.0f, 2915.0f, 904.0f },
+    { -1815.0f, 1412.0f, -3192.0f },
+};
+static const f32 D_8009FC60[] = { -3.71f, -1.302f, -1.302f }; /* gravity */
+static const f32 D_8009FC6C[] = { 1.84f, 1.5430001f, 1.5430001f }; /* widthGrowth */
+static const f32 D_8009FC78[] = { 47.0f, 130.0f, 130.0f };    /* width */
+static const s16 D_8009FC84[] = { 30, 70, 70 };               /* life */
+static const s32 D_8009FC8C[] = { 20, 50, 50 };               /* capacity */
 
 /** Spawns trail variant 0, 1 or 2 (variant 0 at a position from func_151423D8). */
 void func_150B648C(u8 variant) {
@@ -370,7 +374,7 @@ void func_150B648C(u8 variant) {
     params.width = D_8009FC78[variant];
     params.life = D_8009FC84[variant];
     params.burstRate = 0.3f;
-    func_150B3F5C(&params, &pos, D_8009FC8E[variant][0]);
+    func_150B3F5C(&params, &pos, D_8009FC8C[variant]);
 }
 
 typedef struct {

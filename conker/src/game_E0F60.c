@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern Vec3f D_8009FBC0; // a point in bone space
+static const Vec3f D_8009FBC0 = { 58.0f, -30.0f, 0.0f }; // a point in bone space
 
 /* Spawns an effect at bone 25 of obj, plus a camera event (type 1, 12-27 long) and a func_151D3FF4 at the same point. */
 void func_150B3AB0(Actor *obj, u8 arg1) {
