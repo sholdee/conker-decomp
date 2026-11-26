@@ -781,7 +781,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     s32 anim;
     s32 count;
     s32 i;
-    f32 *mtx;
+    MtxF *mtx;
     f32 x;
     f32 y;
     f32 z;
@@ -816,15 +816,14 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
         obj->ypos = D_800D154C->ypos + 50.0f;
         obj->zpos = D_800D154C->zpos;
     } else {
-        mtx = (f32 *)D_800D154C->ob_matrix_ptr;
+        mtx = D_800D154C->ob_matrix_ptr;
         if (D_800C3E90) {
-            // matching: byte arithmetic for bone D_80099AD8[kind][3] (Mtx * indexing mismatches)
-            guMtxL2F(mf, (Mtx *)((u8 *)mtx + (D_80099AD8[kind][3] << 6)));
-            mtx = (f32 *)mf;
+            guMtxL2F(mf, (Mtx *)&mtx[D_80099AD8[kind][3]]);
+            mtx = &mf;
         } else {
-            mtx = (f32 *)((u8 *)mtx + (D_80099AD8[kind][3] << 6));
+            mtx = &mtx[D_80099AD8[kind][3]];
         }
-        func_150A7960(mtx, D_80099AD8[kind][0], D_80099AD8[kind][1], D_80099AD8[kind][2], &x, &y, &z);
+        func_150A7960(*mtx, D_80099AD8[kind][0], D_80099AD8[kind][1], D_80099AD8[kind][2], &x, &y, &z);
         obj->xpos = x;
         obj->ypos = y;
         obj->zpos = z;
@@ -1023,7 +1022,7 @@ void func_1506CE6C(void) {
     f32 yVelocity;
     f32 scale;
     f32 unused;
-    f32 (*mtxs)[16];
+    MtxF *mtxs;
     f32 x;
     f32 y;
     f32 z;
@@ -1050,11 +1049,11 @@ void func_1506CE6C(void) {
     }
     if (bone != -1) {
         if (D_800D154C->ob_matrix_ptr != NULL) {
-            mtxs = (f32 (*)[16])D_800D154C->ob_matrix_ptr;
+            mtxs = D_800D154C->ob_matrix_ptr;
             func_150A7960(mtxs[bone], 0.0f, 0.0f, 1.0f, &x, &y, &z);
-            x -= mtxs[bone][12];
-            y -= mtxs[bone][13];
-            z -= mtxs[bone][14];
+            x -= mtxs[bone][3][0];
+            y -= mtxs[bone][3][1];
+            z -= mtxs[bone][3][2];
             a = func_150484A0(x, z);
             b = func_150484A0(y, sqrtf(x * x + z * z));
             a *= 57.295776f;
@@ -1483,7 +1482,7 @@ void func_1506E0EC(void) {
         height = D_800D154C->floorY;
         for (i = 0; i < 4; i++) {
             y = 0.0f;
-            func_150A7960((f32 *)D_800D154C->ob_matrix_ptr, x, 0.0f, z, &x, &y, &z);
+            func_150A7960(*D_800D154C->ob_matrix_ptr, x, 0.0f, z, &x, &y, &z);
             vertices[i][0] = x;
             vertices[i][1] = height;
             vertices[i][2] = z;
@@ -1501,7 +1500,7 @@ void func_1506E0EC(void) {
         }
         posX = D_800D154C->xpos;
         posZ = D_800D154C->zpos;
-        func_151700D8(vertices[0], posX, posZ, 4, D_800D154C->scale_xz, 0, 4, 4, 0xFF, 0);
+        func_151700D8(vertices, posX, posZ, 4, D_800D154C->scale_xz, 0, 4, 4, 0xFF, 0);
     }
 }
 
@@ -1526,7 +1525,7 @@ void func_1506E2CC(void) {
         z = halfX;
         for (i = 0; i < 4; i++) {
             y = 0.0f;
-            func_150A7960((f32 *)D_800D154C->ob_matrix_ptr, x, y, z, &x, &y, &z);
+            func_150A7960(*D_800D154C->ob_matrix_ptr, x, y, z, &x, &y, &z);
             verts[i][0] = x;
             verts[i][1] = height;
             verts[i][2] = z;
@@ -1543,7 +1542,7 @@ void func_1506E2CC(void) {
         }
         posX = D_800D154C->xpos;
         posZ = D_800D154C->zpos;
-        func_151700D8((f32 *)verts, posX, posZ, 5, D_800D154C->scale_xz * 0.5f, 0, 4, 4, 0xFF, 0);
+        func_151700D8(verts, posX, posZ, 5, D_800D154C->scale_xz * 0.5f, 0, 4, 4, 0xFF, 0);
     }
 }
 /*
@@ -3392,7 +3391,7 @@ void func_150730D0(void) {
  */
 Actor *func_15073118(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, f32 yawOffset, f32 speed,
                      f32 yVelocity, f32 gravity, s32 unk83) {
-    Mtx *mtx;
+    MtxF *mtx;
     MtxF mf;
     Actor *obj;
     f32 x;
@@ -3406,12 +3405,12 @@ Actor *func_15073118(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 
     obj->speed = speed;
     obj->count5 = unk83;
     if (parent->ob_matrix_ptr != NULL && bone != -1) {
-        mtx = (Mtx *)parent->ob_matrix_ptr + bone;
+        mtx = &parent->ob_matrix_ptr[bone];
         if (D_800C3E90 != 0) {
-            guMtxL2F(mf, mtx);
-            mtx = (Mtx *)mf;
+            guMtxL2F(mf, (Mtx *)mtx);
+            mtx = &mf;
         }
-        func_150A7960((f32 *)mtx, offX, offY, offZ, &x, &y, &z);
+        func_150A7960(*mtx, offX, offY, offZ, &x, &y, &z);
     } else {
         x = parent->xpos;
         y = parent->ypos;
