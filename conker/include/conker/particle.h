@@ -3165,8 +3165,8 @@ void func_151D9B8C(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos, s16 lifeti
                    s32 argA);
 void func_151D9EB0(DripEffect *effect);
 void func_151D9FC0(u8 kind, f32 size, u8 arg2, CollisionTri *surface, Vec3f *pos, u8 arg5, s32 arg6);
-s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, CollisionTri *surface, Vec3f *pos, s32 arg7,
-                  s32 arg8);
+SteamEffect *func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, CollisionTri *surface, Vec3f *pos,
+                          s32 arg7, s32 arg8);
 s32 func_151DA368(SteamEffect *effect);
 s32 func_151DA6A8(SteamEffect *effect);
 Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,

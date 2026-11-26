@@ -96,7 +96,7 @@ u8 func_151D8FE0(void) {
 #define SPIN_FLAG_DRAG 2 /* scale the velocity by `drag` every frame */
 
 /* Spawns a wobbling sprite particle of effect kind `kind`; lifetime -99 means it never times out. */
-SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                         f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE,
                         s32 argF) {
     SteamParticle *particle;
@@ -415,9 +415,9 @@ void func_151D9FC0(u8 kind, f32 size, u8 arg2, CollisionTri *surface, Vec3f *pos
 }
 
 /* Starts a steam effect of kind `kind` at `pos` (lifetime -1: untimed, shrinking by `shrink` otherwise). */
-s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, CollisionTri *surface, Vec3f *pos, s32 arg7,
-                  s32 arg8) {
-    s32 effect;
+SteamEffect *func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, CollisionTri *surface, Vec3f *pos,
+                          s32 arg7, s32 arg8) {
+    SteamEffect *effect;
     ParticleDef desc;
     SteamData steam;
     s32 rand3;
@@ -484,8 +484,8 @@ s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, Collisio
     rand3 = func_150ADA20();
     effect = func_1513D668(&desc, 0, 14, 19, 0, (rand2 & 1) + (rand1 & 1), rand3 & 0xFF, 500.0f, 500.0f, NULL,
                            surface, 0, sizeof(steam), 0xFF, 0);
-    if (effect != 0) {
-        memcpy(&((SteamEffect *)effect)->steam, &steam, sizeof(steam));
+    if (effect != NULL) {
+        memcpy(&effect->steam, &steam, sizeof(steam));
     }
     return effect;
 }
