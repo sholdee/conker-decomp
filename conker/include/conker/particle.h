@@ -2645,7 +2645,7 @@ s32 func_151ACA20(QuadParticle *particle);
 /* game_1DBD40.c */
 void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6);
 void func_151AE984(f32 *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5);
-void func_151AEAB4(f32 *pos, s32 flag, u8 arg2);
+void func_151AEAB4(f32 *pos, u8 flag, u8 arg2);
 
 /* game_1DC720.c */
 void *func_151AF270(Actor *actor, u8 arg1, s32 arg2);
