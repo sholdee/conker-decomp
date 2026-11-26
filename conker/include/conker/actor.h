@@ -112,7 +112,7 @@ extern u8 D_800C3E90;
 /* game_77BE0.c */
 void func_1504A730(void);
 void func_1504ADD0(void);
-s32 func_1504AEF4(s32 arg0, s32 arg1);
+s32 func_1504AEF4(s32 arg0, s32 *arg1);
 void func_1504AF10(Actor *obj, s32 force, s32 release);
 f32 func_1504B0FC(Actor *obj, f32 arg1);
 void func_1504BA38(Actor *obj);
@@ -126,18 +126,32 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2);
 void func_1504C854(Actor *obj);
 s32 func_1504C8BC(Actor *obj);
 void func_1504C9E4(Actor *obj, s8 target, u8 mode);
+extern s32 D_80086000;
+extern void (*D_80086014[])(Actor *); // per-type update handlers
+extern s32 D_800CC250;
+extern f32 D_800CC254; // object position saved at the hit test (x, y, z)
+extern f32 D_800CC258;
+extern f32 D_800CC25C;
+extern s32 D_800CC260;
+extern s16 D_800CC264; // frame speed in percent
+extern s32 D_800CC268;
+extern u8 D_800CC26C;
+extern u8 D_800CC26D;
+extern u8 D_800CC26E;
+extern f32 D_800CC270; // attacker position saved at the hit (x, z, y)
+extern f32 D_800CC274;
+extern f32 D_800CC278;
+extern u8 D_800CC27C; // floor material class of the object being updated
+extern u16 D_800CC27E;
 extern const f32 D_800990C0[8];
 extern const f32 D_800990E0[8];
-extern const f32 D_80099100[8];
-extern const f32 D_80099120[8];
-extern const Struct80099140 D_80099140[20];
 extern const u16 D_8009917C[16];
 extern const u16 D_8009919C[6];
 
 /* game_7F710.c */
 void func_15052260(Actor *actor);
 void func_15052408(Actor *actor);
-void func_15052458(s32 unused);
+void func_15052458(Actor *unused);
 void func_15052464(Actor *actor);
 void func_15052490(Actor *actor, u16 angle, f32 amount, f32 scale);
 void func_1505250C(Actor *actor, s32 unused);
@@ -168,7 +182,7 @@ void func_1505371C(Actor *obj);
 void func_15053750(Actor *obj);
 void func_15053894(Actor *obj);
 void func_150538CC(Actor *obj);
-void func_150548D8(s32 arg0);
+void func_150548D8(Actor *obj);
 void func_150548E4(Actor *obj);
 void func_15054A0C(Actor *obj);
 void func_15054A5C(Actor *obj, Actor *other);

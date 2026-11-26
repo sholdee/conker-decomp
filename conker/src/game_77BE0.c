@@ -1,16 +1,35 @@
 #include <ultra64.h>
 
+// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// the order it first sees each name, and that order also depends on how many types and variables are
+// declared before it (see init_50A0.c).
+s32 D_800CC250;
+f32 D_800CC254; // object position saved at the hit test (x, y, z)
+f32 D_800CC258;
+f32 D_800CC25C;
+s32 D_800CC260;
+s16 D_800CC264; // frame speed in percent (100 = one step)
+s32 D_800CC268;
+u8 D_800CC26C;
+u8 D_800CC26D;
+u8 D_800CC26E;
+f32 D_800CC270; // attacker position saved at the hit (x, z, y)
+f32 D_800CC274;
+f32 D_800CC278;
+u8 D_800CC27C; // floor material class of the object being updated
+u16 D_800CC27E;
+
 #include "functions.h"
 #include "variables.h"
 
 /* Per-mode tables indexed by D_800CC27C (D_800990C0 and D_800990E0 are read by game_79F10.c). */
 const f32 D_800990C0[8] = { 0.0f, 0.6000000238f, 0.1800000072f, 0.3000000119f, 0.0f, 2.0f, 2.0f, 4.0f };
 const f32 D_800990E0[8] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-const f32 D_80099100[8] = { 0.75f, 0.75f, 0.75f, 0.75f, 0.75f, 0.75f, 0.75f, 0.75f };
-const f32 D_80099120[8] = { 0.0f, 0.75f, 0.75f, 1.0f, 1.25f, 0.5f, 0.5f, 0.5f };
+static const f32 D_80099100[8] = { 0.75f, 0.75f, 0.75f, 0.75f, 0.75f, 0.75f, 0.75f, 0.75f };
+static const f32 D_80099120[8] = { 0.0f, 0.75f, 0.75f, 1.0f, 1.25f, 0.5f, 0.5f, 0.5f };
 
 /* Indexed by floor material (func_1504BA38). */
-const Struct80099140 D_80099140[20] = {
+static const Struct80099140 D_80099140[20] = {
     { 0, 0, 0 },     { 0, 0, 0 },     { 0, 0, 0 },     { 0, 0, 0 },     { 0, 0, 0 },
     { 0, 0, 0 },     { 0, 0, 0 },     { 45, -5, 50 },  { 0, 0, 0 },     { 0, 0, 0 },
     { -6, 0, 90 },   { -6, 0, 90 },   { 44, -6, 40 },  { 0, 0, 0 },     { -100, 0, 0 },
@@ -25,6 +44,27 @@ const u16 D_8009917C[16] = {
 
 /* Sound ids (read by game_80B80.c). */
 const u16 D_8009919C[6] = { 0x2B1, 0x2B5, 0x2B6, 0x2B7, 0x2BD, 0x2BE };
+
+s32 D_80086000 = 0; /* cleared by game_43760.c */
+
+/* Level callbacks run for each object, before and after its update (indexed by the level header's unk49, unk4A). */
+static void (*D_80086004[])(Actor *) = { NULL, func_150D1410 };
+static void (*D_8008600C[])(Actor *) = { NULL, func_150D146C };
+
+/* Per-type update handlers, indexed by the object's type (also run by game_49D30.c). */
+void (*D_80086014[])(Actor *) = {
+    NULL, func_1504CB98, func_15052590, func_15053894,
+    func_150538CC, func_150548D8, func_15052458, func_150B12FC,
+    func_1505371C, func_150B1484, func_150B19E0, func_150B17DC,
+    func_150528C8, func_150536E8, NULL, func_15052EF0,
+    func_150B10F0, func_15052590, func_150548E4, func_150C3994,
+    func_150C3994, func_150F34F4, NULL, NULL,
+    func_150C3574, func_15052464, func_150E0BE0, func_15054A0C,
+    func_15054A94, NULL, func_150ED748, func_150CE740,
+    func_150D7928, func_1505528C, NULL, func_150EEDA8,
+    func_150BDB70, func_150EEC84, func_150C3230, func_15055B64,
+    func_150D13A0, func_15055D48, func_15055BF8,
+};
 
 
 void func_1504A730(void) {
@@ -121,7 +161,7 @@ void func_1504A730(void) {
                 }
             }
             if (D_800B0DF0->unk49 != 0) {
-                D_80086004[D_800B0DF0->unk49]((s32)obj);
+                D_80086004[D_800B0DF0->unk49](obj);
             }
             if (!(obj->task_attrib & 0x200)) {
                 if (D_80086014[obj->type] != NULL) {
@@ -150,7 +190,7 @@ void func_1504A730(void) {
                 obj->unk300 = 1;
             }
             if (D_800B0DF0->unk4A != 0) {
-                D_8008600C[D_800B0DF0->unk4A]((s32)obj);
+                D_8008600C[D_800B0DF0->unk4A](obj);
             }
         }
     }
@@ -206,7 +246,7 @@ void func_1504ADD0(void) {
     }
 }
 
-s32 func_1504AEF4(s32 arg0, s32 arg1) {
+s32 func_1504AEF4(s32 arg0, s32 *arg1) {
     if (arg0 == 0) {
         return 0;
     }
@@ -222,7 +262,7 @@ void func_1504AF10(Actor *obj, s32 force, s32 release) {
     if (obj->unk92 && (force || !(obj->unk92 >> 15))) {
         id = obj->unk92 & 0x7FFF;
         if ((type = (obj->unk92 >> 12) & 7) == 0) {
-            type = func_1504AEF4(id, (s32)&index);
+            type = func_1504AEF4(id, &index);
             if (type != 0) {
                 obj->unk92 = (type << 12) | index;
             }

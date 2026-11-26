@@ -415,7 +415,7 @@ void func_150538CC(Actor *obj) {
     obj->unk103 = 1;
 }
 
-void func_150548D8(s32 arg0) {
+void func_150548D8(Actor *obj) {
 }
 
 void func_150548E4(Actor *obj) {

@@ -78,10 +78,6 @@ extern FontGlyph *D_80085994[];
 extern Gfx D_800859A0[]; // shared display list (2D/sprite render setup)
 
 
-extern s32 D_80086000;
-extern void (*D_80086004[])(s32);
-extern void (*D_8008600C[])(s32);
-extern void (*D_80086014[])(Actor *);
 extern u8 * D_80086CAC[];
 extern s16 D_80087290; /* node count */
 extern u8 D_80087298; /* goal node reached by the last search, 0xFF if none */
@@ -414,22 +410,6 @@ extern Actor *D_800CBD78; // text queue: anchor actor for the next text
 extern s16 D_800CBD7C;
 
 extern f32 D_800CBD80;
-
-extern s32 D_800CC250;
-
-extern f32 D_800CC254;
-extern f32 D_800CC258;
-extern f32 D_800CC25C;
-extern s32 D_800CC260;
-extern s16 D_800CC264;
-extern s32 D_800CC268;
-extern u8 D_800CC26C;
-extern u8 D_800CC26D;
-extern u8  D_800CC26E;
-extern f32 D_800CC270; // attacker position saved at the hit (x, z, y)
-extern f32 D_800CC274;
-extern f32 D_800CC278;
-extern u8  D_800CC27C;
 
 extern f32 D_800CC2C0;
 extern f32 D_800CC2C4;

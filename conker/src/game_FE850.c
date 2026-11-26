@@ -20,7 +20,7 @@ struct Obj150D13A0 {
     f32 unk148;
 };
 
-void func_150D13A0(s32 arg0) {
+void func_150D13A0(Actor *arg0) {
     struct Obj150D13A0 *temp = (struct Obj150D13A0 *)arg0;
 
     temp->unkB8 = temp->unkB8 + temp->unkBC;
@@ -28,15 +28,15 @@ void func_150D13A0(s32 arg0) {
     temp->unk3C = temp->unk3C * D_800A08B4;
     temp->unkC4 = temp->unkC4 + temp->unk148;
     temp->unk148 = temp->unk148 * D_800A08B8;
-    func_15059C84((Actor *)arg0);
+    func_15059C84(arg0);
 }
 
-void func_150D1410(s32 arg0) {
+void func_150D1410(Actor *arg0) {
     WorldObject *temp;
 
     temp = func_151149AC(0xF9);
     if (temp != 0) {
-        if (((arg0 - (s32)&movement_obj[0]) / 0x32C) == 0) {
+        if ((arg0 - movement_obj) == 0) {
             temp->inactive = 1;
         } else {
             temp->inactive = 0;
@@ -44,7 +44,7 @@ void func_150D1410(s32 arg0) {
     }
 }
 
-void func_150D146C(s32 arg0) {
+void func_150D146C(Actor *arg0) {
     WorldObject *temp;
 
     temp = func_151149AC(0xF9);

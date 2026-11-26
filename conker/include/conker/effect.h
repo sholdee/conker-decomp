@@ -440,9 +440,9 @@ void func_150D0730(s32 arg0);
 
 /* game_FE850.c */
 typedef struct Obj150D149C Obj150D149C;
-void func_150D13A0(s32 arg0);
-void func_150D1410(s32 arg0);
-void func_150D146C(s32 arg0);
+void func_150D13A0(Actor *arg0);
+void func_150D1410(Actor *arg0);
+void func_150D146C(Actor *arg0);
 void func_150D149C(Obj150D149C *arg0);
 
 /* game_FF0E0.c */
