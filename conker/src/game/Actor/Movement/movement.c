@@ -176,7 +176,7 @@ void actor_updateAll(void) {
             gActorTimeStep = obj->speedup * step;
             gActorStepPercent = gActorTimeStep * 100.0f;
             {
-                // matching: a -g3 scope here keeps the lbu after the sh above and lets the lui hoist
+                /* matching: a -g3 scope (with this redeclaration) keeps the lbu after the sh above and lets the lui hoist */
                 extern u8 gFloorMaterialClass;
                 if (gFloorMaterialClass >= 6) {
                     gFloorMaterialClass = 0;
@@ -909,10 +909,6 @@ void func_1504CA60(Actor *actor) {
     actor->count2 = 1;
 }
 
-// matching: second names for D_800CC280/D_800CC2BC (aliases in undefined_syms.us.txt). As separate
-// symbols IDO neither shares their %hi nor reuses loads across them; a few uses need that.
-extern s32 D_800cc280;
-extern s32 D_800cc2bc;
 // matching: a declaration-only block scope (no storage). IDO opens a lexical block for it, which changes
 // register allocation/scheduling of the surrounding statements; no storage-free idiomatic form matches.
 #define BLK typedef s32 blk_t

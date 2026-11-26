@@ -126,6 +126,7 @@ int _Printf(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
 
 #define LDSIGN(x) (((unsigned short *)&(x))[0] & 0x8000)
 
+/* libultra/libc/xlitob.c (libultra's char is unsigned): its SDK header xstdio.h is not on the game's include path */
 void _Litob(_Pft *px, unsigned char code);
 
 void _Putfld(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac) {

@@ -15,7 +15,7 @@ void actor_updateSizes(void) {
     }
 }
 
-/* actor_computeSize: the original has compiled-out debug code after the size selection (ra and
+/* matching: actor_computeSize: the original has compiled-out debug code after the size selection (ra and
  * $f20 are saved and a1-a3 homed although no call survives). The dbg* names below are
  * stand-ins that are never referenced by the emitted code; the dead blocks only steer
  * uopt's live-range splitting (height: split, in $f18 across the selection; depth: $f20;
@@ -24,6 +24,7 @@ void dbg3(f32, f32, f32);
 void dbgp(f32 *);
 void dbgu();
 extern f32 dbgx[];
+
 /* Computes an object's height, width and depth (each output may be NULL): fixed sizes for
  * special states and object ids, otherwise its unkE6/unkE4, scaled by scale_y/scale_xz. */
 void actor_computeSize(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {

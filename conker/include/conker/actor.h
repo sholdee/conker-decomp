@@ -194,6 +194,10 @@ extern f32 gWaistTiltDamping;
 extern u8 gActorUpdateParity;
 extern u16 D_800CC2BA; // frame step of the actor being updated
 extern s32 D_800CC2BC;
+/* matching: second names for D_800CC280 and D_800CC2BC (aliases in undefined_syms.us.txt), used by the later functions of
+ * game/Actor/Movement/movement.c: as separate symbols IDO neither shares their %hi nor reuses loads across them */
+extern s32 D_800cc280;
+extern s32 D_800cc2bc;
 extern f32 gHitPointX;
 extern f32 gHitPointY;
 extern f32 gHitPointZ;
