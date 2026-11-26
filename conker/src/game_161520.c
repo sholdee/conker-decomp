@@ -390,11 +390,12 @@ void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 #define BLOOD_TRAIL_SKIP_FRAME 0x02 /* don't emit on the next update */
 #define BLOOD_TRAIL_CALLBACK   0x04
 
-/* Spawns a BloodTrail effect from desc, starting at the current position. */
-BloodTrail *func_15134908(BloodTrailDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
+/* Spawns a BloodTrail effect from desc, starting at the current position. Returns the BloodTrail, followed
+ * by extraSize bytes of the caller's data (the caller's own type). */
+void *func_15134908(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
     BloodTrail *trail;
 
-    trail = func_15167A68(0x2A, arg3, arg1 + 0x40, 1, arg2, 1);
+    trail = func_15167A68(0x2A, arg3, extraSize + 0x40, 1, arg2, 1);
     if (trail == NULL) {
         return NULL;
     }

@@ -167,7 +167,7 @@ void func_1513472C(BloodDrip *drip);
 void func_1513477C(BloodDrip *drip);
 void func_151347CC(void *arg0, ActorMsg *msg, u8 message);
 void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3);
-BloodTrail *func_15134908(BloodTrailDesc *desc, s32 arg1, u8 arg2, s32 arg3);
+void *func_15134908(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3); /* a BloodTrail, then extraSize bytes */
 void func_151349D0(BloodTrail *trail);
 void func_15134C98(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId);
 void func_15134CD4(f32 arg0, f32 arg1, s32 arg2, s32 arg3);
