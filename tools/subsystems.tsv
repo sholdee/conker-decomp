@@ -37,7 +37,7 @@ src/game/done/game_33460.c	camera	per-level camera preset hook
 src/game/done/game_334C0.c	camera	per-level camera hook with zone-dependent heights
 src/game/done/game_33620.c	camera	per-level camera preset hook
 src/game_38050.c	light	split off in the per-file pass; level particle and sprite setup (header group in light.h)
-src/game_3F950.c	view	split from game_3F820.c (two .rodata units in the ROM); level setup (header group in view.h)
+src/game_3F950.c	level	per-level setup helper
 src/game_44A90.c	player	player stat limits and globals init
 src/game_45880.s	zone	hand-written asm (subsystem from its header group)
 src/game_63A20.c	model	actor quad vertices (pinned billboard) placement and draw
@@ -88,7 +88,7 @@ src/game_DAE50.s	collision	hand-written asm (subsystem from its header group)
 src/game_DAFA0.s	collision	hand-written asm (subsystem from its header group)
 src/game_DB730.s	collision	hand-written asm (subsystem from its header group)
 src/game_DE5A0.c	actor	object hover/pairing behaviour (moves to height, sits on other actor)
-src/game_DF260.s	actor	hand-written asm (subsystem from its header group)
+src/game_DF260.s	colourfb	greyscale screen effect (hand-written asm)
 src/game_E2DA0.c	effect	particle bursts at tracked objects, bolt rings, facing command
 src/game_E3C90.c	camera	per-level camera setup from game-flag queries
 src/game_E8BB0.c	camera	per-level camera flag hook
@@ -98,7 +98,7 @@ src/game/done/game_F20A0.c	camera	per-level camera flag hook
 src/game_F4800.c	camera	per-level camera flag hook
 src/game_F4C20.c	camera	per-level camera flag hook
 src/game_F52B0.c	camera	per-level camera flags and range from flag queries
-src/game_FBBF0.c	screen	split from game_FB600.c; same subsystem
+src/game_FBBF0.c	actor	mount control
 src/game/done/game_FC3C0.c	camera	per-level camera preset hook
 src/game_FDB00.c	camera	per-level camera hook
 src/game_FE850.c	effect	spin-decay object with colour pulse
