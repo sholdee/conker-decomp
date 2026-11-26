@@ -53,6 +53,8 @@ s32 func_1507FFD8(Actor *actor);
 extern u8 D_800D18C0;
 
 /* game_1A8060.c */
+extern const VtxMorphGroup D_800A7230[2]; // vertex morph groups
+extern VtxMorphFrame **D_800DD460[2]; // cached keyframes: [group][part][frame]
 void func_1517ABB0(void);
 s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex);
 

@@ -211,7 +211,6 @@ extern f32 D_8009F6C0; // 0.01745329238474369f
 // in game_18D770.c
 
 
-extern VtxMorphGroup D_800A7230[2]; // vertex morph groups
 extern u16 D_800AB140[];
 extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
 
@@ -403,7 +402,6 @@ extern u8   D_800DD406;
 extern WaveDeformer *D_800DD410[2]; // D_800DD418 of them in use
 extern u8   D_800DD418;
 extern s16  D_800DD444; // state timer
-extern VtxMorphFrame **D_800DD460[2]; // [group][part][frame]
 extern s32  D_800DD478[15 * 26]; // per texture type: 26 frame addresses (game_1A89B0)
 
 extern ParticleTexFile D_800DDA90[15];
