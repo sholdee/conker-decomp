@@ -3,6 +3,8 @@
 #include "functions.h"
 #include "variables.h"
 
+static u16 *D_800BE2B0[4]; // per camera: a row buffer of D_800BE620 u16 (HitsZBufferHoriDataPtr)
+
 /**
  * Loads the resource's data and allocates and initialises the D_80082FA0 + 1 view (Camera) states.
  */
