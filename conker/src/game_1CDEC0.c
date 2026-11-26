@@ -48,7 +48,8 @@ void func_151A0AF8(SparkEmitterEffect *effect) {
     }
 }
 
-extern u8 D_8008F8D0[];
+/* Grey level of the sparks, by variant. */
+static u8 D_8008F8D0[] = { 128, 128 };
 
 /*
  * Particle kind 4 spawn callback (D_8008AA00): a fast spark thrown out in a random

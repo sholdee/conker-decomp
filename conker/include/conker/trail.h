@@ -899,6 +899,7 @@ s32 func_1518C69C(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY, CollisionTr
 void func_1518C850(TrailEmitter *emitter, s32 data, u8 type);
 
 /* game_1CA420.c */
+extern TrailTask *D_800E0920;
 void func_1519CF70(u8 specIndex);
 void func_1519CFA0(MatrixTrail *trail);
 void func_1519CFD0(MatrixTrail *trail);

@@ -1228,7 +1228,7 @@ segments:
       - [0x234310, rodata]
       - [0x234320, rodata]
       - {start: 0x234330, type: .data, name: game_1C2C60, linker_section_order: .rodata}
-      - [0x234390, rodata]
+      - {start: 0x234390, type: .data, name: game_1CDEC0, linker_section_order: .rodata}
       - [0x2343A0, rodata]
       - [0x2343C0, rodata]
       - [0x2343D0, rodata]
@@ -1653,13 +1653,10 @@ segments:
       - [0x24CD18, .rodata, game_1C1150]
       - [0x24D1CC, rodata]
       - [0x24D1D0, .rodata, game_1C2C60]
-      - [0x24D640, rodata]
+      - [0x24D640, .rodata, game_1CA420]
       - [0x24D780, .rodata, game_1CBE20]
-      - [0x24D79C, rodata]
       - [0x24D7A0, .rodata, game_1CC440]
-      - [0x24D7C4, rodata]
       - [0x24D7D0, .rodata, game_1CDEC0]
-      - [0x24D7DC, rodata]
       - [0x24D7E0, .rodata, game_1CE2F0]
       - [0x24D7FC, .rodata, game_1D0600]
       - [0x24D808, rodata]
@@ -1919,6 +1916,8 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DD450, name: game_1A7490}
       - {start: 0x255880, type: .bss, vram: 0x800DD460, name: game_1A8060}
       - {start: 0x255880, type: bss, vram: 0x800DD470, name: bss_800DD470}
+      - {start: 0x255880, type: .bss, vram: 0x800E0920, name: game_1CA420}
+      - {start: 0x255880, type: bss, vram: 0x800E0930, name: bss_800E0930}
       - {start: 0x255880, type: .bss, vram: 0x800E0BA0, name: game_20AE20}
       - {start: 0x255880, type: bss, vram: 0x800E0C00, name: bss_800E0C00}
       - {start: 0x255880, type: .bss, vram: 0x800E0D20, name: libultra/io/siacs2}
