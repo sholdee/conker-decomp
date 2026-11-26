@@ -1061,7 +1061,7 @@ segments:
       - [0x22A970, .data, libultra/gu/sinf]
       - [0x22A980, .data, game/done/game_75A90]
       - [0x22AA90, .data, game_75FC0]
-      - [0x22AAB0, rodata]
+      - [0x22AAB0, .data, game_770F0]
       - [0x22AAC0, rodata]
       - {start: 0x22AB80, type: .data, name: game_83300, linker_section_order: .rodata}
       - {start: 0x22ABC0, type: .data, name: game_90840, linker_section_order: .rodata}
@@ -1334,11 +1334,8 @@ segments:
       - [0x23DAE0, .rodata, game_75FC0]
       - [0x23DB40, .rodata, game_76710]
       - [0x23DB50, .rodata, game_770F0]
-      - [0x23DB5C, rodata]
       - [0x23DB60, .rodata, game_77760]
-      - [0x23DB6C, rodata]
       - [0x23DB70, .rodata, game_77AD0]
-      - [0x23DB78, rodata]
       - [0x23DB80, .rodata, game_77BE0]
       - [0x23DCC4, .rodata, game_79F10]
       - [0x23DDFC, .rodata, game_7F710]

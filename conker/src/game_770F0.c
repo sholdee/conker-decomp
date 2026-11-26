@@ -18,9 +18,6 @@ void func_15049C40(f32 *arg0, f32 *arg1) {
 /* The calls to sqrtf in this file are real calls (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
 #pragma function sqrtf
 
-typedef struct { s32 v[3]; } Nxt3;
-extern Nxt3 D_80085FF0;
-
 void func_15049CB8(MtxF m, f32 *q) {
     f32 tr;
     f32 s;
@@ -39,7 +36,7 @@ void func_15049CB8(MtxF m, f32 *q) {
         q[2] = (m[2][0] - m[0][2]) * s;
         q[3] = (m[0][1] - m[1][0]) * s;
     } else {
-        Nxt3 nxt = D_80085FF0;
+        s32 nxt[3] = { 1, 2, 0 };
         f32 t;
 
         i = 0;
@@ -49,8 +46,8 @@ void func_15049CB8(MtxF m, f32 *q) {
         if (m[i][i] < m[2][2]) {
             i = 2;
         }
-        j = nxt.v[i];
-        k = nxt.v[j];
+        j = nxt[i];
+        k = nxt[j];
         s = sqrtf(m[i][i] - m[j][j] - m[k][k] + 1.0f);
         q[i + 1] = s * 0.5f;
         t = 0.5f / s;
