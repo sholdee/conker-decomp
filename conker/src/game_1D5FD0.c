@@ -427,7 +427,8 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     }
 }
 
-extern void (*D_8008FA60[])(Vec3f *, CollisionHit *, s32, u8, s32);
+/* The spawn functions; `data` is passed through from func_151A9834 (func_151DBBD4 reads a u8 kind there). */
+extern void (*D_8008FA60[])(Vec3f *, CollisionHit *, void *, u8, s32);
 
 /*
  * Calls spawn function D_8008FA60[spawnFunc] at `count` random points within radius of center
@@ -435,7 +436,7 @@ extern void (*D_8008FA60[])(Vec3f *, CollisionHit *, s32, u8, s32);
  * NULL uses a local one.
  */
 void func_151A9834(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit,
-                   s32 count, u8 spawnFunc, s32 arg6, u8 arg7, s32 arg8) {
+                   s32 count, u8 spawnFunc, void *arg6, u8 arg7, s32 arg8) {
     CollisionHit localHit;
     Vec3f probe;
     Vec3f spawnPos;

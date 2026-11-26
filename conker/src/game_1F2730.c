@@ -256,7 +256,7 @@ void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *e
 /* Spawns a func_15130280 particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag
  * bit 0 clear. Returns the particle, or NULL. */
 SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
-                        u8 altUnk62, s32 arg8, u8 arg9, s32 argA) {
+                        u8 altUnk62, CollisionHit *arg8, u8 arg9, s32 argA) {
     ParticleDesc spawn;
     f32 unkA8;
     SpriteParticle *particle;

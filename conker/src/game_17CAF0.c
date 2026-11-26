@@ -1341,7 +1341,7 @@ void func_15154684(ParticleBurst *config, u8 arg1, s32 arg2) {
                       (s16)((func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &velocity);
-        func_151C5F44(config->pos, &velocity.x,
+        func_151C5F44(config->pos, &velocity,
                       (func_150ADA68() * config->gravityRange) + config->gravityBase,
                       config->unk20,
                       (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase,

@@ -938,7 +938,7 @@ void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType);
 void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos, f32 bottom, f32 radius, s16 lifetime,
                    u8 arg7, s32 arg8);
 void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround);
-void func_151A9834(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit, s32 count, u8 spawnFunc, s32 arg6,
+void func_151A9834(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit, s32 count, u8 spawnFunc, void *arg6,
                    u8 arg7, s32 arg8);
 extern const ParticleSettings D_800A8DF0;
 extern const ParticleSettings D_800A8E1C;
