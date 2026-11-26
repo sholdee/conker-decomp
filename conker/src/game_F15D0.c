@@ -47,7 +47,7 @@ void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
         data.unk14 = 0x54;
         data.flags = 1;
     }
-    effect = (PulseEffect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
+    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
                                      0x40, sizeof(EffectData), arg2, arg3); /* arg6 is the data size; its prototype is wrong */
     if (effect != NULL) {
         state = &effect->data;

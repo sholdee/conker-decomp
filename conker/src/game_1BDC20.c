@@ -230,7 +230,7 @@ void func_15190898(DripEmitter *emitter) {
                 hasTimer = 0;
                 timer = 300;
             }
-            task = (DripRetryTask *)func_151491F4(timer, -1, 13, hasTimer, 8, sizeof(ActorLink), 0xFF, 0);
+            task = func_151491F4(timer, -1, 13, hasTimer, 8, sizeof(ActorLink), 0xFF, 0);
             if (task != NULL) {
                 memcpy(&task->link, &emitter->link, sizeof(ActorLink));
             }

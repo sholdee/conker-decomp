@@ -160,7 +160,7 @@ s32 func_151A37C0(BoneTrailEffect *effect) {
         func_151A4E9C(effect);
         memcpy(&retry, state, sizeof(BoneTrailParams));
         {
-            TrailRetryTask *task = (TrailRetryTask *)func_151491F4(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->head.header.owner, 0);
+            TrailRetryTask *task = func_151491F4(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->head.header.owner, 0);
             if (task != NULL) {
                 memcpy(&task->trail, &retry, sizeof(BoneTrailParams));
             }
@@ -604,7 +604,7 @@ void func_151A499C(Actor *owner, u8 arg1) {
     emitter.offset.y = 0.0f;
     emitter.offset.z = 0.0f;
     emitter.rate = 0.7220000029f;
-    task = (BoneEmitterTask *)func_151491F4(300, -1, 5, 0, 1, sizeof(BoneEmitter), arg1, 0);
+    task = func_151491F4(300, -1, 5, 0, 1, sizeof(BoneEmitter), arg1, 0);
     if (task != NULL) {
         memcpy(&task->emitter, &emitter, sizeof(BoneEmitter));
     }

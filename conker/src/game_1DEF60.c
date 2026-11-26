@@ -22,7 +22,7 @@ void func_151B1AB0(Actor *owner) {
         data.ownerUnk3B = owner->unique_id;
         data.timer = 0.0f;
 
-        task = (Task151B1AB0 *)func_151491F4(0x3C, -1, 0x15, 1, 0x11, 0xC, 0xFF, 1);
+        task = func_151491F4(0x3C, -1, 0x15, 1, 0x11, 0xC, 0xFF, 1);
         if (task != NULL) {
             memcpy(&task->data, &data, sizeof(data));
         }

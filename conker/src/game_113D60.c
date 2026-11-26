@@ -85,7 +85,7 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
                 emission.duration = source->duration;
                 emission.durationRange = source->durationRange;
                 emission.color = source->color;
-                effect = (Game113D60Effect *)func_151491F4(func_150ADA68() * 70.0f + 30.0f, -1, 15, 1, 11,
+                effect = func_151491F4(func_150ADA68() * 70.0f + 30.0f, -1, 15, 1, 11,
                                                            sizeof(Game113D60Emission), 0xFF, 1);
                 if (effect != NULL) {
                     memcpy(&effect->emission, &emission, sizeof(Game113D60Emission));

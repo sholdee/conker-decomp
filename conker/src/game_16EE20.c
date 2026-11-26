@@ -235,7 +235,7 @@ void func_15141E38(Actor *actor, s32 handler) {
         info.handler = handler;
         info.owner = actor;
         info.ownerId = actor->unique_id;
-        effect = (TimedHandlerEffect *)func_15149130(D_8008A0B4[handler].duration, -1, -1, -1, 1, 50, 0xC, 0xFF, 1);
+        effect = func_15149130(D_8008A0B4[handler].duration, -1, -1, -1, 1, 50, 0xC, 0xFF, 1);
         if (effect != NULL) {
             memcpy(&effect->info, &info, sizeof(info));
             func_1514EC1C(effect, actor, ATTACH_TIMED_EFFECT);

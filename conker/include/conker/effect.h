@@ -933,10 +933,11 @@ void func_15147D1C(EffectObj *obj, s32 arg1, u8 arg2);
 void func_15147D64(s32 arg0, u8 arg1);
 
 /* game/done/game_1765E0.c */
-TimedEffect *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags, u8 callbackSet,
-                           s32 dataSize, u8 owner, s32 list);
-TimedEffect *func_151491F4(s16 timer, s8 expireCallback, s8 tickCallback, u8 flags, u8 callbackSet, s32 dataSize,
-                           u8 owner, s32 list);
+/* Both return a TimedEffect followed by dataSize bytes of its kind's data (the kind's own type). */
+void *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags, u8 callbackSet,
+                    s32 dataSize, u8 owner, s32 list);
+void *func_151491F4(s16 timer, s8 expireCallback, s8 tickCallback, u8 flags, u8 callbackSet, s32 dataSize,
+                    u8 owner, s32 list);
 void func_15149264(TimedEffect *object);
 void func_15149318(TimedEffect *object);
 void func_1514933C(TimedEffect *object);

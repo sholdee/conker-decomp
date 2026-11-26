@@ -25,7 +25,7 @@ void func_151B2060(Actor *obj) {
         bzero(tie.ropes, sizeof(tie.ropes));
         tie.line = NULL;
 
-        effect = (RopeTie *)func_151491F4(300, -1, 0x16, 0, 0x12, 0x20, 0xFF, 1);
+        effect = func_151491F4(300, -1, 0x16, 0, 0x12, 0x20, 0xFF, 1);
         if (effect != NULL) {
             memcpy(&effect->tie, &tie, sizeof(tie));
         }
@@ -254,7 +254,7 @@ void func_151B2690(RopeTie *self) {
     lineData.endOffset = D_800AA374;
     lineData.halfWidth = 5.0f;
     lineData.owner = self;
-    tie->line = (RopeLine *)func_15149130(300, -1, -1, 0, 0, 0x13, sizeof(RopeLineData), 0xFF, 1);
+    tie->line = func_15149130(300, -1, -1, 0, 0, 0x13, sizeof(RopeLineData), 0xFF, 1);
     if (tie->line != NULL) {
         memcpy(&tie->line->line, &lineData, sizeof(lineData));
     }

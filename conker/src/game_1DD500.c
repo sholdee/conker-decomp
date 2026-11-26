@@ -295,7 +295,7 @@ Game1DD500Task *func_151B09BC(Actor *actor, Actor *other, s16 lifetime, u8 arg3,
             emitter.slots[i].next = NULL;
         }
     }
-    task = (Game1DD500Task *)func_151491F4(life, -1, 0x13, timed, 0xF, sizeof(emitter), arg3, arg4);
+    task = func_151491F4(life, -1, 0x13, timed, 0xF, sizeof(emitter), arg3, arg4);
     if (task != NULL) {
         memcpy(&task->emitter, &emitter, sizeof(emitter));
     }

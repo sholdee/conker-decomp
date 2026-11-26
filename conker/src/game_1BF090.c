@@ -37,7 +37,7 @@ DustEmitter *func_15191BE0(Actor *owner, Vec3f *offset, u8 bone, f32 rateBase, f
     data.unk60 = unk60;
     data.kind = kind;
 
-    effect = (DustEmitter *)func_15149130((duration == -1) ? 300 : duration, -1, 0x1D, -1,
+    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x1D, -1,
                                           (duration == -1) ? 0 : 1, 0x1D, sizeof(data), arg16,
                                           arg17);
     if (effect != NULL) {

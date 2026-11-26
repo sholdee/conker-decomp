@@ -26,7 +26,7 @@ void func_15192920(Actor *object) {
     data.objectId = object->unique_id;
     data.spawnAccum = 0.0f;
 
-    effect = (Effect1BFDD0 *)func_151491F4(0x23, -1, 0x14, 1, 0x10, 0xC, 0xFF, 1);
+    effect = func_151491F4(0x23, -1, 0x14, 1, 0x10, 0xC, 0xFF, 1);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -113,7 +113,7 @@ Effect1BFDD0 *func_15192D48(Actor *object, s16 type, u8 arg2, s32 arg3) {
     data.objectId = object->unique_id;
     data.spawnAccum = 0.0f;
 
-    effect = (Effect1BFDD0 *)func_151491F4(type, -1, 0x18, 1, 0x16, 0xC, arg2, arg3);
+    effect = func_151491F4(type, -1, 0x18, 1, 0x16, 0xC, arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

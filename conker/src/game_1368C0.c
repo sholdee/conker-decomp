@@ -62,7 +62,7 @@ TimedEffect *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc
     data.object = object;
     data.objectId = object->unique_id;
 
-    effect = (Effect1368C0 *)func_15149130(lifetime, -1, 0x1A, -1, timed, 0x1A,
+    effect = func_15149130(lifetime, -1, 0x1A, -1, timed, 0x1A,
                                            (extraSize + sizeof(data)), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
@@ -324,7 +324,7 @@ TimedEffect *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f
     data.emitFunc = emitFunc;
     data.unk0 = arg0;
 
-    effect = (Effect1368C0 *)func_15149130(lifetime, -1, 0x1B, -1, timed, 0x1B,
+    effect = func_15149130(lifetime, -1, 0x1B, -1, timed, 0x1B,
                                            (extraSize + sizeof(data)), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
@@ -404,7 +404,7 @@ TimedEffect *func_1510A344(Actor *object, s16 duration, u8 owner, s32 kind) {
     data.spawnRate = 0.2040000111f;
     data.spawnRateRandom = 0.8220000267f;
 
-    effect = (Effect1368C0 *)func_15149130(duration, -1, 0x1C, -1, TRUE, 0x1C, sizeof(data), owner, kind);
+    effect = func_15149130(duration, -1, 0x1C, -1, TRUE, 0x1C, sizeof(data), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

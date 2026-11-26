@@ -252,7 +252,7 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
         state.otherUniqueId = 0xFF;
     }
 
-    obj = (TwoSidedEmitter *)func_15149130(300, -1, 0x27, -1, 0, 0x25, 0x20, 0xFF, 1);
+    obj = func_15149130(300, -1, 0x27, -1, 0, 0x25, 0x20, 0xFF, 1);
     if (obj != NULL) {
         dest = &obj->state;
         memcpy(dest, &state, sizeof(state));

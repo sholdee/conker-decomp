@@ -37,7 +37,7 @@ struct TrapEffect {
 
 /* Trap trigger callback: spawns a timed effect (timer 100) whose kind follows the trap's tag (0xFB-0xFE). */
 void func_150DDED0(TrapTrigger *trap) {
-    TrapEffect *obj = (TrapEffect *)func_151491F4(100, 2, -1, 1, 0, 1, 0xFF, 0);
+    TrapEffect *obj = func_151491F4(100, 2, -1, 1, 0, 1, 0xFF, 0);
 
     if (obj != NULL) {
         switch (trap->tag) {

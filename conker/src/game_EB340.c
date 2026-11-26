@@ -10,7 +10,7 @@ void func_150BDE90(Camera *owner, u8 arg1, s32 arg2) {
     spawn.owner = owner;
     spawn.timer = 0;
 
-    obj = (EB340Obj *)func_15149130(300, -1, 0x4F, -1, 0, 60, 8, arg1, arg2);
+    obj = func_15149130(300, -1, 0x4F, -1, 0, 60, 8, arg1, arg2);
     if (obj != NULL) {
         memcpy(&obj->spawn, &spawn, sizeof(spawn));
     }

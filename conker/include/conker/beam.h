@@ -801,7 +801,7 @@ void func_150F64B0(DefParticleHead *obj);
 void func_150F64DC(FlashBurstEffect *effect);
 void func_150F6850(FlashBurstEffect *effect, s32 arg1, u8 arg2);
 void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3);
-void func_150F695C(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32 time, BloodStrip *strip);
+void func_150F695C(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
 
 /* game_124260.c */
 void func_150F6DB0(Actor *owner);

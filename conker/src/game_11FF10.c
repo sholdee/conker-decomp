@@ -67,7 +67,7 @@ void func_150F2C8C(Actor *target) {
     state.timer = 0.0f;
     state.count = 0;
 
-    emitter = (BoneBurstEmitter *)func_15149130(300, -1, 0x5C, -1, 0, 0x44, 0x10, 0xFF, 1);
+    emitter = func_15149130(300, -1, 0x5C, -1, 0, 0x44, 0x10, 0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->state, &state, sizeof(state));
     }

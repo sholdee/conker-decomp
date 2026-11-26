@@ -20,7 +20,7 @@ void func_1500EF20(void) {
     tmp.z = D_80096224;
     tmp.y = D_80096228;
     tmp.radius = 400.0f;
-    temp_v0 = (Effect1500EF20 *)func_151491F4((s16) ((func_150ADA20() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = func_151491F4((s16) ((func_150ADA20() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
@@ -28,13 +28,13 @@ void func_1500EF20(void) {
     tmp.x = D_8009622C;
     tmp.z = D_80096230;
     tmp.y = D_80096234;
-    temp_v0 = (Effect1500EF20 *)func_151491F4((s16) ((func_150ADA20() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = func_151491F4((s16) ((func_150ADA20() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
 
     tmp.z = D_80096238;
-    temp_v0 = (Effect1500EF20 *)func_151491F4((s16) ((func_150ADA20() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = func_151491F4((s16) ((func_150ADA20() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
@@ -42,7 +42,7 @@ void func_1500EF20(void) {
     tmp.x = D_8009623C;
     tmp.z = D_80096240;
     tmp.y = D_80096244;
-    temp_v0 = (Effect1500EF20 *)func_151491F4((s16) ((func_150ADA20() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = func_151491F4((s16) ((func_150ADA20() % 0x33U) + 0x19), 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }

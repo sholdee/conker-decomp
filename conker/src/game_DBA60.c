@@ -194,7 +194,7 @@ void func_150AEB9C(Actor *actor) {
         }
         for (i = 0; i < D_800886E0[idx].count; i++) {
             AttachedEffect *effect;
-            effect = (AttachedEffect *)func_151491F4(D_800886E0[idx].defs[i].objectId, 0, -1, 1, 0x27, 8, 0xFF, 0);
+            effect = func_151491F4(D_800886E0[idx].defs[i].objectId, 0, -1, 1, 0x27, 8, 0xFF, 0);
             if (effect == NULL) {
                 break;
             } else { // matching: the else-block and its `list` local steer as1's delay-slot fill

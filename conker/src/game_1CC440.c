@@ -343,7 +343,7 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
         sides = config->owner->trails.sides;
         link.owner = config->owner;
         link.side = trail->head.tmpl.kind;
-        spawner = (TrailSpawner *)func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0);
+        spawner = func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0);
         if (spawner != NULL) {
             memcpy(&spawner->link, &link, sizeof(SurfaceTrailLink));
         }

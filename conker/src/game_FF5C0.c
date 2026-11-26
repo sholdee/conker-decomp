@@ -19,7 +19,7 @@ void func_150D2110(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 dark
     data.litAlpha = litAlpha;
     data.darkAlpha = darkAlpha;
 
-    effect = (StrobeEffect *)func_15149130(duration, -1, 0x2F, 2, 1, 0x26, sizeof(data), owner, kind);
+    effect = func_15149130(duration, -1, 0x2F, 2, 1, 0x26, sizeof(data), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

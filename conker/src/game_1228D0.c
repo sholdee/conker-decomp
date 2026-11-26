@@ -574,23 +574,23 @@ void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 // s16 (arg 5), and with a void return. The definition is SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel,
 // u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,
 // CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE, s32 argF).
-void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
+void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, s32, s32);
 /* BloodStrip emit callback: one func_151D9014 blood particle, larger than func_15137E60's. 60% of
  * them get a ground probe under the strip's owner; the rest get none (height -10000). */
-void func_150F695C(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32 time, BloodStrip *strip) {
-    f32 start[3];
-    f32 end[3];
-    f32 velocity[3];
+void func_150F695C(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
+    Vec3f start;
+    Vec3f end;
+    Vec3f velocity;
     f32 arg3;
     s16 arg4;
-    s8 arg5;
+    u8 arg5;
     f32 arg6;
     CollisionHit ground;
     u8 probeGround;
     s32 flag;
     f32 random;
 
-    func_15137F30(pointA, pointB, velocityA, velocityB, time, strip, start, end, velocity, &arg3,
+    func_15137F30(pointA, pointB, velocityA, velocityB, time, strip, &start, &end, &velocity, &arg3,
                   &arg4, &arg5, &arg6);
     random = func_150ADA68();
     arg6 *= 1.0f + (random + random);
@@ -609,6 +609,6 @@ void func_150F695C(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32
     } else {
         flag = 0;
     }
-    func_151D9014(start, velocity, 1, arg3, arg4, (u8)arg5, arg6, probeGround, 1.8f, 1.8f, 1,
-                  (s32)&ground, 1, flag, strip->header.owner, strip->header.kind);
+    func_151D9014(&start, &velocity, 1, arg3, arg4, arg5, arg6, probeGround, 1.8f, 1.8f, 1,
+                  &ground, 1, flag, strip->header.owner, strip->header.kind);
 }

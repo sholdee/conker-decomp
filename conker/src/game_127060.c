@@ -21,7 +21,7 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
     data.sparks[1] = NULL;
     data.glows[0] = NULL;
     data.glows[1] = NULL;
-    effect = (BurstEffect *)func_15149130(70, -1, 0x4D, -1, 1, 0x33, sizeof(data), owner, kind);
+    effect = func_15149130(70, -1, 0x4D, -1, 1, 0x33, sizeof(data), owner, kind);
     if (effect != NULL) {
         burst = &effect->data;
         memcpy(burst, &data, sizeof(data));
@@ -423,7 +423,7 @@ void func_150FAA40(u8 owner, s32 kind) {
         data.to = &zones[34];
         data.pending = 0.0f;
 
-        effect = (LineEmitter *)func_15149130(300, -1, 0x57, -1, 0, 0x46, sizeof(data), owner, kind);
+        effect = func_15149130(300, -1, 0x57, -1, 0, 0x46, sizeof(data), owner, kind);
         if (effect != NULL) {
             D_80088B60 = 1;
         }

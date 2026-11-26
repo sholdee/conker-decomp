@@ -254,7 +254,7 @@ s32 func_1519D454(MatrixTrail *trail) {
         taskData.owner = data->owner;
         taskData.ownerId = data->owner->unique_id;
         taskData.unk8 = data->specIndex;
-        task = (TrailTask *)func_151491F4(trail->head.tmpl.life, -1, 8, (trail->head.tmpl.flags & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
+        task = func_151491F4(trail->head.tmpl.life, -1, 8, (trail->head.tmpl.flags & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
         if (task != NULL) {
             memcpy(&task->data, &taskData, sizeof(TrailTaskData));
             if (func_1514ED3C(data->owner->attachments, trail, NULL) != 0) {
@@ -660,7 +660,7 @@ void func_1519E6BC(Actor *owner) {
         taskData.unk8 = 0;
         taskData.owner = owner;
         taskData.ownerId = owner->unique_id;
-        D_800E0920 = (TrailTask *)func_151491F4(300, -1, 9, 0, 4, 0xC, 0xFF, 0);
+        D_800E0920 = func_151491F4(300, -1, 9, 0, 4, 0xC, 0xFF, 0);
         if (D_800E0920 != NULL) {
             memcpy(&D_800E0920->data, &taskData, sizeof(TrailTaskData));
         }
