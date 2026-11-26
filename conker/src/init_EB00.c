@@ -40,9 +40,36 @@ typedef struct {
 extern SoundQueueEntry D_80041F10[16];
 extern SoundSpatialRecord D_80041F68[];
 extern SoundRecord dynamicSounds[];
-extern SoundVariant D_8002C240[][5];
-extern f32 D_8002C400;
-extern f32 D_8002C404;
+
+// The variants of each effect (func_10011EB8), indexed [effect][variant].
+static const SoundVariant D_8002C240[20][5] = {
+    { { 0x000, 0 }, { 0x000, 0 }, { 0x000, 0 }, { 0x000, 0 }, { 0x000, 0 } },
+    { { 0x25A, 4 }, { 0x254, 4 }, { 0x258, 2 }, { 0x253, 1 }, { 0x2AB, 4 } },
+    { { 0x248, 4 }, { 0x24C, 4 }, { 0x250, 2 }, { 0x252, 1 }, { 0x2AB, 4 } },
+    { { 0x270, 4 }, { 0x26A, 4 }, { 0x26E, 2 }, { 0x269, 1 }, { 0x2AB, 4 } },
+    { { 0x29C, 4 }, { 0x296, 4 }, { 0x29A, 2 }, { 0x295, 1 }, { 0x2AB, 4 } },
+    { { 0x23D, 4 }, { 0x241, 4 }, { 0x245, 2 }, { 0x247, 1 }, { 0x2AB, 4 } },
+    { { 0x265, 4 }, { 0x25F, 4 }, { 0x263, 2 }, { 0x25E, 1 }, { 0x2AB, 4 } },
+    { { 0x2A7, 4 }, { 0x2A1, 4 }, { 0x2A5, 2 }, { 0x2A0, 1 }, { 0x2AB, 4 } },
+    { { 0x248, 4 }, { 0x24C, 4 }, { 0x250, 2 }, { 0x252, 1 }, { 0x2AB, 4 } },
+    { { 0x27B, 4 }, { 0x275, 4 }, { 0x279, 2 }, { 0x274, 1 }, { 0x2AB, 4 } },
+    { { 0x286, 4 }, { 0x280, 4 }, { 0x284, 2 }, { 0x27F, 1 }, { 0x2AB, 4 } },
+    { { 0x286, 4 }, { 0x280, 4 }, { 0x284, 2 }, { 0x27F, 1 }, { 0x2AB, 4 } },
+    { { 0x09E, 1 }, { 0x09E, 1 }, { 0x09E, 1 }, { 0x09E, 1 }, { 0x2AB, 4 } },
+    { { 0x25A, 4 }, { 0x254, 4 }, { 0x258, 2 }, { 0x253, 1 }, { 0x2AB, 4 } },
+    { { 0x000, 0 }, { 0x000, 0 }, { 0x000, 0 }, { 0x000, 0 }, { 0x000, 0 } },
+    { { 0x291, 4 }, { 0x28B, 4 }, { 0x28F, 2 }, { 0x28A, 1 }, { 0x2AB, 4 } },
+    { { 0x09F, 0 }, { 0x09F, 0 }, { 0x09F, 0 }, { 0x09F, 0 }, { 0x2AB, 4 } },
+    { { 0x291, 4 }, { 0x28B, 4 }, { 0x28F, 2 }, { 0x28A, 1 }, { 0x2AB, 4 } },
+    { { 0x0A0, 0 }, { 0x0A0, 0 }, { 0x0A0, 0 }, { 0x0A0, 0 }, { 0x2AB, 4 } },
+    { { 0x286, 4 }, { 0x280, 4 }, { 0x284, 2 }, { 0x27F, 1 }, { 0x2AB, 4 } },
+};
+
+// Not referenced.
+static const s16 D_8002C3D0[2][10] = {
+    { 0, 10000, 7500, 11000, 9000, 11000, 22000, 16384, 9000, 11000 },
+    { 9000, 9000, 16382, 9000, 9000, 9000, 9000, 9000, 0, 0 },
+};
 
 void func_10017780(u8 arg0, u16 arg1);
 SndState *func_10017438(s32, s16, u16, u8, f32, u8, u8, SndState **);
@@ -262,10 +289,10 @@ void func_1000F248(s32 mode) {
     func_1000F1A8();
     if (mode == 4) {
         D_80041F54 = 0;
-        D_80041F58 = D_8002C3F8; // 0.01f
+        D_80041F58 = 0.01f;
     } else {
         D_80041F54 = 23000;
-        D_80041F58 = D_8002C3FC; // 0.1f
+        D_80041F58 = 0.1f;
     }
 
     if (mode == 0x35) {
@@ -1241,7 +1268,7 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                             if (rate >= 367) {
                                 ratio = 2.0f;
                             } else {
-                                unclampedRatio = D_8002C400 / (f32)(367 - rate);
+                                unclampedRatio = 367.0f / (f32)(367 - rate);
                                 ratio = unclampedRatio;
                                 if (unclampedRatio > 2.0f) {
                                     ratio = 2.0f;
@@ -1251,7 +1278,7 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                             }
                             pitch.value *= ratio;
                             pitchDelta = pitch.value - record->pitch;
-                            pitch.value = record->pitch + pitchDelta * D_8002C404;
+                            pitch.value = record->pitch + pitchDelta * 0.3f;
                         }
                         start = pitch.bits; // matching: the f32 bits go through the dead param
                         if (pitch.value != record->pitch) {

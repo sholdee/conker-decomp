@@ -6,8 +6,6 @@
 
 /* defined */
 
-extern f32 D_8002C3F8;
-extern f32 D_8002C3FC;
 
 // 0x0002C820
 extern f32 D_8002C820;
