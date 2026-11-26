@@ -147,7 +147,7 @@ Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
             gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
             gfx = func_1513F4E4(gfx, unk13, &needSync);
-            gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &needSync, 3);
+            gfx = func_15142E24(gfx, &D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &needSync, 3);
             gfx = func_15142FBC(gfx, cycleType | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4, &needSync);
             {
                 f32 pad3; // matching: a local here opens a -g3 scope that IDO will not schedule across

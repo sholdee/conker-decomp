@@ -262,7 +262,7 @@ lbl1:
                     }
                 } while (count != 0 && k != trail->head.end);
             }
-            gfx = func_15142E24(gfx, (s32)D_80091238, 0, 0, 0, 0, 0x92, 0, 0, &update, 3);
+            gfx = func_15142E24(gfx, &D_80091238, 0, 0, 0, 0, 0x92, 0, 0, &update, 3);
             gfx = func_15142B7C(gfx, 1, 0x160600);
             gfx = func_1513F4E4(gfx, 0x4D, &update);
             gfx = func_15142C10(gfx, state->shade, state->shade, state->shade, 0xFF, &update);

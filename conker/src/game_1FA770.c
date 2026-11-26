@@ -340,7 +340,7 @@ Gfx *func_151CDE20(LevelStream *emitter, Gfx *gfx, s16 view) {
             data = emitter->data;
             particles = emitter->particles;
             update = 1;
-            gfx = func_15142E24(gfx, (s32)&D_80090B60[D_800AAEE0[data->textureIndex]], 0, 0, 0, 0, D_800AAEE0[data->textureIndex], 0,
+            gfx = func_15142E24(gfx, &D_80090B60[D_800AAEE0[data->textureIndex]], 0, 0, 0, 0, D_800AAEE0[data->textureIndex], 0,
                                 0, &update, 3);
             gfx = func_1513F4E4(gfx, 0x4E, &update);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);

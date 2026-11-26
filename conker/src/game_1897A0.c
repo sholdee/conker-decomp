@@ -93,7 +93,7 @@ s32 func_1515C534(FallingTrail *trail) {
     return 1;
 }
 
-extern u8 D_80090E78[];
+extern EffectTexture D_80090E78; /* an entry of the effect texture table D_80090B60 */
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -147,7 +147,7 @@ Gfx *func_1515C6F4(FallingTrail *trail, Gfx *gfx, s16 view) {
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->primMode);
             func_151442FC(&envR, &envG, &envB, &envA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->envMode);
-            gfx = func_15142E24(gfx, D_80090E78, 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
+            gfx = func_15142E24(gfx, &D_80090E78, 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
             gfx = func_1513F4E4(gfx, data->unk21, &update);
             gfx = func_15142B7C(gfx, data->setGeometryMode, data->clearGeometryMode);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);

@@ -461,7 +461,7 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
     return 1;
 }
 
-extern u8 D_80090E0C[];
+extern EffectTexture D_80090E0C; /* an entry of the effect texture table D_80090B60 */
 
 /*
  * Draws the trail as a strip three vertices wide (outer edge, centre line, outer edge), from the newest
@@ -536,7 +536,7 @@ Gfx *func_1519FE6C(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
                     }
                 } while (headFadeLeft != 0 && j != trail->head.end);
             }
-            gfx = func_15142E24(gfx, (s32)D_80090E0C, 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
+            gfx = func_15142E24(gfx, &D_80090E0C, 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
             gfx = func_15142B7C(gfx, 1, 0x160600);
             gfx = func_15142C10(gfx, config->color[0], config->color[1], config->color[2], 0xFF, &update);
             gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &update);

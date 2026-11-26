@@ -199,7 +199,7 @@ Gfx *func_151BCA90(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
             points = trail->points;
             camPos = func_15144B34(viewport);
             dirty = 1;
-            gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &dirty, 3);
+            gfx = func_15142E24(gfx, &D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &dirty, 3);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &dirty);
             gfx = func_1513F4E4(gfx, 0x4E, &dirty);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);

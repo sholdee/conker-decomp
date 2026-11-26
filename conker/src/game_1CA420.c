@@ -418,7 +418,7 @@ Gfx *func_1519D9F4(MatrixTrail *trail, Gfx *gfx, s16 view) {
                     }
                 } while (count != 0 && k != trail->head.end);
             }
-            gfx = func_15142E24(gfx, D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
+            gfx = func_15142E24(gfx, &D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
             gfx = func_15142C10(gfx, data->brightness, data->brightness, data->brightness, 0xFF, &update);
             gfx = func_1513F4E4(gfx, 6, &update);
             gfx = func_15142B7C(gfx, 1, 0x160600);

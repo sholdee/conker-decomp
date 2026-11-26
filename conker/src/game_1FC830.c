@@ -339,7 +339,7 @@ void func_151D0128(StripEffect *effect) {
 extern Vec3f D_800AAF5C[];
 extern Vec3f D_800AAF74;
 extern u8 D_800AAF80[];
-extern u8 D_80091154[];
+extern EffectTexture D_80091154; /* an entry of the effect texture table D_80090B60 */
 
 /* Draws the strip effect: six camera-facing quads joining two of the owner's model points, pinched
  * in the middle when the points are far apart. */
@@ -394,7 +394,7 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     func_15143134(&D_800AAF74, &to, (Mtx *)owner->ob_matrix_ptr + D_800AAF80[data->variant]);
     camPos = func_15144B34(cameraIdx);
     gfx = func_15142B7C(gfx, 0x200005, 0x60600);
-    gfx = func_15142E24(gfx, (s32)D_80091154, 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
+    gfx = func_15142E24(gfx, &D_80091154, 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
     gfx = func_1513F4E4(gfx, 0x3B, &update);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, data->alpha, &update);
     gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].cycle1 | D_800A4AC8[3].cycle2, &update);

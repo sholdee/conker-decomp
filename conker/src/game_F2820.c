@@ -137,7 +137,7 @@ Gfx *func_150C56A4(Gfx *gfx, StripObj *strip, s16 view) {
         vtx = strip->quad[D_800BE9C0];
         eye = &camera_global_Cameras[view].eye;
         gfx = func_15142B7C(gfx, 1, 0x600);
-        gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
+        gfx = func_15142E24(gfx, &D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         if (camera_global_Cameras[view].SpecialFlags & 1) {
             gfx = func_15142C10(gfx, D_800D9B78[view][0], D_800D9B78[view][1], D_800D9B78[view][2], 0xFF, &update);
             gfx = func_15142CF0(gfx, 0xF2, 0, D_800D9B68[view][0], D_800D9B68[view][1], D_800D9B68[view][2], 0xFF, &update);

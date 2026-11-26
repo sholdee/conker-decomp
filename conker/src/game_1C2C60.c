@@ -649,7 +649,7 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     CharacterFlamethrowerJet jet;
     CharacterFlamethrowerActor *actor;
     s32 matrix;
-    CharacterFlamethrowerJetTemplate *entry;
+    const CharacterFlamethrowerJetTemplate *entry;
     CharacterFlamethrowerJet *state;
 
     if (owner == NULL) {
@@ -955,10 +955,10 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
 }
 
 
-/* A TextureDesc whose frame table is the single address in front of it. */
+/* An EffectTexture whose frame table is the single address in front of it. */
 typedef struct OneFrameTextureDesc {
-    /* 0x0 */ u32 frame; // the texture's address
-    /* 0x4 */ TextureDesc desc; // desc.addr points at frame
+    /* 0x0 */ s32 frame; // the texture's address
+    /* 0x4 */ EffectTexture desc; // desc.frames points at frame
 } OneFrameTextureDesc; /* size 0x10 */
 
 extern Texture D_800915B0;
@@ -995,13 +995,13 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
                 OneFrameTextureDesc tex;
 
                 tex.frame = D_800915B0.addr;
-                tex.desc.addr = (u32)&tex.frame;
-                tex.desc.frames = D_800915B0.frames;
+                tex.desc.frames = &tex.frame;
+                tex.desc.frameCount = D_800915B0.frames;
                 tex.desc.width = D_800915B0.width;
                 tex.desc.height = D_800915B0.height;
-                tex.desc.fmt = D_800915B0.fmt;
-                tex.desc.siz = D_800915B0.siz;
-                gfx = (Gfx *)func_15142E24((s32)gfx, (s32)&tex.desc, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
+                tex.desc.format = D_800915B0.fmt;
+                tex.desc.paletteSize = D_800915B0.siz;
+                gfx = func_15142E24(gfx, &tex.desc, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
                 gfx = func_15142C10(gfx, jet->shade, jet->shade, jet->shade, 0xFF, &flag);
                 gfx = func_15142B7C(gfx, 1, 0x160600);
                 gfx = func_1513F4E4(gfx, 0xB, &flag);
@@ -1380,7 +1380,7 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
     JetPoint *points;
     JetPoint *cur;
     JetPoint *next;
-    JetChildPreset *preset;
+    const JetChildPreset *preset;
     s32 i;
     SceneParticle *ret;
     u8 a;
@@ -1725,7 +1725,7 @@ void func_15198D7C(CharacterFlamethrowerActor *actor) {
 void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     TrailRender style;
     CharacterFlamethrowerJet *jet;
-    ScatterPreset *preset;
+    const ScatterPreset *preset;
     EffectTemplate18 spawn;
     TrailMotion motion;
     f32 px;
@@ -1796,7 +1796,7 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
     u8 angle1;
     u8 angle2;
     u32 rnd;
-    JetSpritePreset *preset;
+    const JetSpritePreset *preset;
     CharacterFlamethrowerJet *jet;
 
     jet = actor->state;
@@ -2838,7 +2838,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
 }
 
 
-extern u8 D_80091064[];
+extern EffectTexture D_80091064; /* an entry of the effect texture table D_80090B60 */
 extern s32 D_800A4AC8[][2];
 
 /* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */
@@ -2904,7 +2904,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     }
     camera = (Vec3f *)func_15144B34(view);
     flag = 1;
-    gfx = (Gfx *)func_15142E24((s32)gfx, (s32)D_80091064, 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
+    gfx = func_15142E24(gfx, &D_80091064, 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x4C, &flag);
     gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);

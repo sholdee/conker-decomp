@@ -829,11 +829,11 @@ f32 func_15142B44(f32 t);
 Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
+Gfx *func_15142E24(Gfx *gfx, EffectTexture *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
                    u8 *needSync, s32 argA);
 Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 s16 func_15143044(u8 arg0, s32 arg1);
-s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode);
+s32 func_1514306C(EffectTexture *arg0, s32 arg1, s32 arg2, u8 mode);
 void func_15143134(const Vec3f *offset, Vec3f *out, void *mtx);
 void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out);

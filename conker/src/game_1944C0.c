@@ -381,7 +381,7 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     update.unk0 = 1;
     frame = fx->frame;
     anim = fx->anim;
-    gfx = func_15142E24(gdl, (s32)anim, frame << 8, 2, 0x100, 0x100,
+    gfx = func_15142E24(gdl, anim, frame << 8, 2, 0x100, 0x100,
                         anim->frames[frame >> 8], 5, (s32)&params, (u8 *)&update, 3);
     params.x = fx->x;
     params.y = fx->y;
@@ -561,7 +561,7 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         } else {
             texture = anim->frames[p->tmpl.frame >> 8];
         }
-        gfx = func_15142E24(gfx, (s32)anim, p->tmpl.frame << 8, 2, 0x100, 0x100, texture, 5, (s32)&params, &update, 3);
+        gfx = func_15142E24(gfx, anim, p->tmpl.frame << 8, 2, 0x100, 0x100, texture, 5, (s32)&params, &update, 3);
     }
     view = viewIndex;
     params.x = p->tmpl.x;
