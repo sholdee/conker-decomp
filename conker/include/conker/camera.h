@@ -471,6 +471,7 @@ void func_1512E4B0(Camera *camera);
 
 /* game_15BAA0.c */
 Gfx *func_1512E5F0(Gfx *gfx, Camera *camera);
+extern ZDecode D_80089630[8];
 
 /* game_15BD90.c */
 void func_1512E8E0(Camera *camera);

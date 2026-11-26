@@ -80,7 +80,6 @@ extern FontGlyph *D_80085994[];
 
 extern u64 D_800885B0;
 extern s32 * D_800891BC[];
-extern ZDecode D_80089630[8]; // z-buffer decompression table
 
 extern EffectHeader *D_800DCE50[2][OBJ_TYPE_COUNT]; /* object lists: [list][type] heads a doubly linked list (game_1944C0.c) */
 

@@ -2,7 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A3730; // pi; matching: the 3.141592741f literal changes the bytes
+// matching: pi read from a const struct; as a plain literal (or a one-element array) IDO gives the
+// function a larger frame (or another schedule)
+static const struct {
+    f32 pi;
+} D_800A3730 = { 3.141592741f };
 
 /*
  * Aims `camera` at object 0 (object 1 when camera->CNumber == 3): unk2BC..unk2C4 become the object's
@@ -27,7 +31,7 @@ void func_1512E4B0(Camera *camera) {
 
     heading = -*(s16 *)&obj->taskint[0]; // matching: the high half of taskint[0]
     heading += obj->theta * 10.0f;
-    radians = (heading * D_800A3730) / 1800.0f;
+    radians = (heading * D_800A3730.pi) / 1800.0f;
 
     camera->eye.x = camera->target.x - sinf(radians) * 60.0f;
     camera->eye.y = camera->target.y;
