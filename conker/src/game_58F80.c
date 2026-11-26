@@ -1,4 +1,20 @@
 #include <ultra64.h>
+
+/*
+ * .bss, linked at 0x800C3E70..0x800C3EE0 in this order. Defined before conker/actor.h declares them:
+ * IDO lays out .bss in first-declaration order, and an extern there would count.
+ */
+static u8 D_800C3E70;  // cleared at the end of func_1502BEE4
+static s32 D_800C3E74; // a bit for each character that some object stands on
+u8 dc_glbl_CharNum;
+u16 D_800C3E7A;
+u16 D_800C3E7C;
+u8 *D_800C3E80[2];
+u8 *D_800C3E88;
+u8 *D_800C3E8C;
+u8 D_800C3E90;
+static Mtx D_800C3E98; // the modelview matrix of the object being drawn
+
 #include "functions.h"
 #include "variables.h"
 
@@ -7,11 +23,24 @@ typedef struct {
     u8 pad1[0xF];
 } D_800C666FEntry;
 
-extern u8 D_800C3E70;
-extern s32 D_800C3E74;
 extern D_800C666FEntry D_800C666F[];
-extern Mtx D_800C3E98;
-extern u8 D_C3E98[];
+
+Gfx D_80084160[] = {
+    gsDPPipeSync(),
+    gsSPMatrix(OS_K0_TO_PHYSICAL(&D_80089470), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPSetGeometryMode(G_SHADE | G_LIGHTING | G_SHADING_SMOOTH | 0x400000),
+    gsSPClearGeometryMode(G_FOG | G_LOD),
+    gsDPSetConvert(0, 0, 0, 0, 0, 255),
+    gsSPEndDisplayList(),
+};
+Gfx D_80084190[] = {
+    gsDPPipeSync(),
+    gsSPClearGeometryMode(G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_LOD | 0x400000),
+    gsDPSetEnvColor(0, 0, 0, 0),
+    gsDPSetPrimColor(0, 0, 0, 0, 0, 255),
+    gsSPEndDisplayList(),
+};
+
 extern u8 *D_8008422C[];
 extern s32 D_80088554;
 extern s32 D_80088558;
@@ -617,7 +646,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
                 }
             } else {
                 func_151EFE88(&D_800C3E98);
-                gSPMatrix(gdl++, D_C3E98, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                gSPMatrix(gdl++, OS_K0_TO_PHYSICAL(&D_800C3E98), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
                 gSPDisplayList(gdl++, D_800C4488[id][i]);
             }
         }

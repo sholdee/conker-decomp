@@ -72,8 +72,6 @@ extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 // 0x80044B20 + 253952 = 0x80082B20
 
 /* 80080000 */
-extern u8 D_80084160[];
-extern u8 D_80084190[];
 extern Vtx  D_80084300[5];
 extern void (*D_800844B0[])(s32 arg0);
 extern s32  D_800848B0;
@@ -392,15 +390,6 @@ extern u8 D_800C3C9D;
 extern s16 D_800C3C9E;
 extern SeqSubtitle D_800C3CA0[3];
 extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
-extern u8  dc_glbl_CharNum;
-extern u16 D_800C3E7A; // bone matrices used this frame
-extern u16 D_800C3E7C; // bone-matrix pool size, in 0x40-byte matrices
-/* The bone-matrix pool of each frame buffer. Bones are built in it as MtxF; func_1502E474 converts them in
-   place to Mtx for drawing. The cursors move in bytes. */
-extern u8 *D_800C3E80[2];
-extern u8 *D_800C3E88; // bone-matrix pool cursor
-extern u8 *D_800C3E8C; // bone-matrix pool start
-extern u8 D_800C3E90;
 extern ModelAttachment *D_800C3EE0; // head of the model attachment list
 extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is the template D_80084300
 extern s32 D_800C3FC4;

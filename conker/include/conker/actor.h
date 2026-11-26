@@ -97,6 +97,17 @@ void func_1502F948(Actor *obj);
 Gfx *func_1502F9FC(Gfx *gdl, s32 index);
 void func_1502FBE8(Actor *obj);
 void func_1502FD70(Actor *arg0);
+extern Gfx D_80084160[]; // opens a pass: modelview matrix D_80089470, lit smooth shading
+extern Gfx D_80084190[]; // closes a pass: clears the lighting modes and the prim/env colours
+extern u8 dc_glbl_CharNum;
+extern u16 D_800C3E7A; // bone matrices used this frame
+extern u16 D_800C3E7C; // bone-matrix pool size, in 0x40-byte matrices
+/* The bone-matrix pool of each frame buffer. Bones are built in it as MtxF; func_1502E474 converts them in
+   place to Mtx for drawing. The cursors move in bytes. */
+extern u8 *D_800C3E80[2];
+extern u8 *D_800C3E88; // bone-matrix pool cursor
+extern u8 *D_800C3E8C; // bone-matrix pool start
+extern u8 D_800C3E90;
 
 /* game_77BE0.c */
 void func_1504A730(void);
