@@ -420,30 +420,6 @@ extern f32 * D_800DDE4C; // hole y, percent of the view height
 
 
 /* 800E0000 */
-extern s16 D_800E0A80;
-extern u8 D_800E0A8C;
-extern s32 D_800E0A90;
-extern u8 D_800E0A94; /* menu brightness, scales the page alpha */
-extern u8 D_800E0A95; /* current page's fade level, 0-0xFF */
-extern u8 D_800E0A97;
-extern s16 D_800E0AA0[];
-extern s8 D_800E0AC0[];
-extern s16 D_800E0AD0[16];
-extern MenuState D_800E0AF0; // the instance D_8008FDD4 points at
-extern u8 **D_800E0B88; // bank 2 text strings (80)
-extern u8 D_800E0B8C;
-extern s8 D_800E0B90[];
-extern u8   D_800E0B94;
-extern u8 D_800E0B95;
-extern u8 D_800E0B96;
-extern u8 D_800E0B97;
-extern u8 D_800E0B98;
-extern u8 D_800E0B99;
-extern s16 D_800E0B9A;
-extern s8 D_800E0C00[]; /* team of each D_8008FE44 entry */
-extern s16 D_800E0C10[];
-extern s32 D_800E0C18[];
-extern s8   D_800E0C20;
 extern void (*D_800E0E00)(s32, void *, s32); // stream tag callback (set by func_151F3C1C; gets each MP3 frame's copyright tag)
 extern s32  D_800E0E04;
 extern StreamVoice D_800E0D80; // the streaming music player's voice

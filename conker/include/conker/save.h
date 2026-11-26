@@ -183,6 +183,19 @@ extern s8 D_8008FF80[6];
 extern u8 D_8008FF88[8];
 extern f32 D_8008FF90[8];
 extern u8 D_8008FFB0[2][6];
+extern s16 D_800E0A80;
+extern s32 D_800E0A90;
+extern u8 D_800E0A94; /* menu brightness, scales the page alpha */
+extern u8 D_800E0A95; /* current page's fade level, 0-0xFF */
+extern s16 D_800E0AA0[4];
+extern s8 D_800E0AC0[16];
+extern s16 D_800E0AD0[16];
+extern s8 D_800E0B90[4];
+extern u8 D_800E0B94;
+extern u8 D_800E0B95;
+extern u8 D_800E0B96;
+extern u8 D_800E0B97;
+extern u8 D_800E0B99;
 extern Actor *D_800E0BA0[4]; /* characters spawned by func_151E7F60 */
 extern s8 D_800E0BB0;
 extern s8 D_800E0BB1;
@@ -198,5 +211,9 @@ extern s32 D_800E0BD4;
 extern u8 **D_800E0BD8; // text strings of the current language ([8 + n]: player names)
 extern u8 D_800E0BDC;
 extern s8 D_800E0BE0[0x1C];
+extern s8 D_800E0C00[16]; /* team of each D_8008FE44 entry */
+extern s16 D_800E0C10[4];
+extern s32 D_800E0C18[2];
+extern s8 D_800E0C20;
 
 #endif

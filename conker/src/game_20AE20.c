@@ -7,9 +7,42 @@
  */
 
 /*
- * .bss, linked at 0x800E0BA0..0x800E0C00 in this order. Defined before variables.h declares them:
- * IDO lays out .bss in first-declaration order, and an extern there would count.
+ * .bss, linked at 0x800E0A80..0x800E0C30 in this order. Defined before conker/save.h declares them:
+ * IDO lays out .bss in first-declaration order, and an extern there would count. None is static,
+ * though some are used only here: IDO places statics after all the globals.
  */
+s16 D_800E0A80;
+s16 D_800E0A82;
+s8 D_800E0A84;
+s8 D_800E0A85;
+s8 D_800E0A86;
+void (*D_800E0A88)(void);
+u8 D_800E0A8C;
+s32 D_800E0A90;
+u8 D_800E0A94; /* menu brightness, scales the page alpha */
+u8 D_800E0A95; /* current page's fade level, 0-0xFF */
+s8 D_800E0A96; /* page to switch to once faded out; -1: none */
+u8 D_800E0A97;
+u8 D_800E0A98;
+s8 D_800E0A99;
+s16 D_800E0AA0[4];
+u8 D_800E0AA8;
+s8 D_800E0AA9;
+s8 D_800E0AAA;
+s8 D_800E0AB0[16];
+s8 D_800E0AC0[16];
+s16 D_800E0AD0[16];
+MenuState D_800E0AF0; // the instance D_8008FDD4 points at
+u8 **D_800E0B88; // bank 2 text strings (80)
+u8 D_800E0B8C;
+s8 D_800E0B90[4];
+u8 D_800E0B94;
+u8 D_800E0B95;
+u8 D_800E0B96;
+u8 D_800E0B97;
+u8 D_800E0B98;
+u8 D_800E0B99;
+s16 D_800E0B9A;
 Actor *D_800E0BA0[4]; /* characters spawned by func_151E7F60 */
 s8 D_800E0BB0;
 s8 D_800E0BB1;
@@ -30,6 +63,10 @@ u8 D_800E0BDC;
  */
 // matching: defined here, not extern; IDO then knows the copy loop's stores can't alias the source
 s8 D_800E0BE0[0x1C];
+s8 D_800E0C00[16]; /* team of each D_8008FE44 entry */
+s16 D_800E0C10[4];
+s32 D_800E0C18[2];
+s8 D_800E0C20;
 
 #include "functions.h"
 #include "variables.h"
@@ -269,11 +306,7 @@ void func_151DDBA0(void) {
 
 /* ---- formerly game_20B0D0.c ---- */
 
-extern void (*D_800E0A88)(void);
 
-extern s8 D_800E0A85;
-extern u8 D_800E0A98;
-extern s8 D_800E0A99;
 
 
 /*
@@ -568,7 +601,6 @@ void func_151DE8E8(void) {
 #define MENU_CLEFT  0x40 /* C-left */
 #define MENU_CRIGHT 0x80 /* C-right */
 
-extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
 
 s8 D_8008FEF8 = 0;
 
@@ -2177,10 +2209,6 @@ s32 func_151E24F0(s32 *out) {
     return 0;
 }
 
-extern s8 D_800E0AB0[];
-extern u8 D_800E0AA8;
-extern s8 D_800E0AA9;
-extern s8 D_800E0AAA;
 
 /* Sets up a match from the current mode's table entry: roster, teams, rules flags and per-player kinds. */
 void func_151E2834(void) {
@@ -2450,8 +2478,6 @@ void func_151E327C(void) {
     func_151E7EF8();
 }
 
-extern s16 D_800E0A82;
-extern s8 D_800E0A84;
 
 /*
  * Draws the option menu (D_800E0BE0 values described by D_800AB64C) for the options in optionMask,
@@ -2985,7 +3011,6 @@ void func_151E43DC(void) {
     }
 }
 
-extern s8 D_800E0A86;
 
 /* End of round: picks the results screen state and cue from the mode entry (unk7) and the ranks. */
 void func_151E4BD8(void) {
