@@ -12,5 +12,5 @@ void func_15005D60(Camera *arg0) {
     arg0->AvailableModes |= 0x4000;
 }
 
-void func_15005DA0(s32 arg0) {
+void func_15005DA0(Camera *arg0) {
 }

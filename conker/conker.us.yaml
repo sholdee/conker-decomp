@@ -1024,7 +1024,8 @@ segments:
     subalign: 4
     subsegments:
       - [0x2275E0, .data, game_305D0]
-      - [0x227600, data]
+      - [0x227600, .data, game/done/game_32F10]
+      - [0x227670, .data, game_33990]
       - [0x227690, .data, game_35D20]
       - [0x2276A0, .data, game_36680]
       - [0x227840, .data, game_38050]
@@ -1245,7 +1246,6 @@ segments:
       - [0x23A490, .rodata, game_30E90]
       - [0x23A4A0, .rodata, game_32740]
       - [0x23A4C0, .rodata, game_33990]
-      - [0x23A4E8, rodata]
       - [0x23A4F0, .rodata, game/entrypoint]
       - [0x23A504, rodata]
       - [0x23A510, .rodata, game_34F20]
@@ -2116,9 +2116,8 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800B0E00, name: game_305D0}
       - {start: 0x255880, type: .bss, vram: 0x800BE2A0, name: game_30E90}
       - {start: 0x255880, type: .bss, vram: 0x800BE2B0, name: game_32740}
-      - {start: 0x255880, type: bss, vram: 0x800BE2C0, name: bss_800BE2C0}
-      - {start: 0x255880, type: .bss, vram: 0x800BE3D8, name: game_33990}
-      - {start: 0x255880, type: bss, vram: 0x800BE3E8, name: bss_800BE3E8}
+      - {start: 0x255880, type: .bss, vram: 0x800BE2C0, name: game_33660}
+      - {start: 0x255880, type: .bss, vram: 0x800BE2F0, name: game_33990}
       - {start: 0x255880, type: .bss, vram: 0x800BE430, name: game_38050}
       - {start: 0x255880, type: .bss, vram: 0x800BE4E0, name: game_3D2E0}
       - {start: 0x255880, type: .bss, vram: 0x800BE4F0, name: game/done/game_3E460}

@@ -19,5 +19,5 @@ void func_15005C80(Camera *arg0) {
     arg0->IdealTripodMagnitude = 370.0f;
 }
 
-void func_15005CF0(s32 arg0) {
+void func_15005CF0(Camera *arg0) {
 }

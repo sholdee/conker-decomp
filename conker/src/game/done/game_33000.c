@@ -4,5 +4,5 @@
 #include "variables.h"
 
 
-void func_15005B50(s32 arg0) {
+void func_15005B50(Camera *arg0) {
 }

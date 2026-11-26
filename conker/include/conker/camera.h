@@ -173,22 +173,22 @@ void func_15005A60(Camera *arg0, s32 arg1);
 
 /* game/done/game_32F60.c */
 void func_15005AB0(Camera *arg0);
-void func_15005AF0(s32 arg0);
+void func_15005AF0(Camera *arg0);
 
 /* game/done/game_32FB0.c */
-void func_15005B00(s32 arg0);
+void func_15005B00(Camera *arg0);
 
 /* game/done/game_32FC0.c */
 void func_15005B10(Camera *arg0);
 
 /* game/done/game_33000.c */
-void func_15005B50(s32 arg0);
+void func_15005B50(Camera *arg0);
 
 /* game/done/game_33010.c */
-void func_15005B60(s32 arg0);
+void func_15005B60(Camera *arg0);
 
 /* game/done/game_33020.c */
-void func_15005B70(s32 arg0);
+void func_15005B70(Camera *arg0);
 
 /* game/done/game_33080.c */
 void func_15005BD0(Camera *arg0);
@@ -198,14 +198,14 @@ void func_15005C30(Camera *arg0);
 
 /* game/done/game_33130.c */
 void func_15005C80(Camera *arg0);
-void func_15005CF0(s32 arg0);
+void func_15005CF0(Camera *arg0);
 
 /* game/done/game_331B0.c */
 void func_15005D00(Camera *arg0);
 
 /* game/done/game_33210.c */
 void func_15005D60(Camera *arg0);
-void func_15005DA0(s32 arg0);
+void func_15005DA0(Camera *arg0);
 
 /* game/done/game_33260.c */
 void func_15005DB0(Camera *arg0);
@@ -227,7 +227,7 @@ void func_15005F20(Camera *arg0);
 void func_15005F60(Camera *arg0);
 
 /* game/done/game_33450.c */
-void func_15005FA0(s32 arg0);
+void func_15005FA0(Camera *arg0);
 
 /* game/done/game_33460.c */
 void func_15005FB0(Camera *arg0);

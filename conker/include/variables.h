@@ -112,10 +112,6 @@ extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 // 0x80044B20 + 253952 = 0x80082B20
 
 /* 80080000 */
-extern void (*D_80082B40[])(Camera *);
-extern s8   D_80082BB4; // pending EEPROM request (game_33990)
-extern ModeSettings *D_80082BBC; // saved settings, one record per multiplayer mode
-extern u8   D_80082BC0;
 extern u8 D_80084160[];
 extern u8 D_80084190[];
 extern Vtx  D_80084300[5];
@@ -335,7 +331,6 @@ extern ModeEntry D_800AB68C[]; // multiplayer game-mode table
 extern s32 D_800AB754[];
 extern LevelHeader *D_800B0DF0;
 
-extern u8 * D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
 extern u8 D_800BE580[]; /* bit set over text ids */
 extern u8 D_800BE590;
 extern u16 D_800BE598[];
@@ -353,14 +348,6 @@ extern u8 D_800BE9EB;
 extern s32 level;
 
 
-extern OSMesg  D_800BE2D0;
-extern u8   D_800BE358[0x80]; // EEPROM/mempak transfer buffer; [0..1] is a u16 checksum
-extern s8   D_800BE3D9;
-extern s8   D_800BE3DA;
-extern s8   D_800BE3DB;
-extern s32  D_800BE3E8;
-extern s8   D_800BE3EC; // its save-slot argument
-extern SaveSlotInfo D_800BE3F8[3]; // the three save slots
 
 extern OSPfs D_800BE760[MAXCONTROLLERS]; // rumble pak per controller channel
 extern OSMesgQueue D_800BE900;
