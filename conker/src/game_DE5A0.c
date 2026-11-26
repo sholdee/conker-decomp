@@ -246,7 +246,7 @@ void func_150B19E0(Actor *obj) {
         cosine = func_15048A40(angle);
         particle.frame = 0;
         particle.frameStep = 0;
-        particle.anim = D_8008CA4C[37];
+        particle.anim = gEffectAnimTextures[37];
         particle.x = obj->xpos + sine * radius;
         particle.y = obj->ypos;
         particle.z = obj->zpos + cosine * radius;
@@ -271,6 +271,6 @@ void func_150B19E0(Actor *obj) {
         particle.primB = 0;
         particle.primA = 0xFF;
         particle.flags = 0;
-        func_15167D84(&particle, 0, 0, -1, 0xFF, 0);
+        effect_spawnBillboard(&particle, 0, 0, -1, 0xFF, 0);
     }
 }

@@ -9,7 +9,7 @@ typedef struct Game1DD500Profile {
     /* 0x0F */ u8 padF;
 } Game1DD500Profile; // size 0x10
 
-/* Impact point in the space of joint 6 (func_151B01B8). */
+/* Impact point in the space of joint 6 (effect_spawnJointImpact). */
 static const Vec3f D_800AA120 = { 0.0f, -12.0f, 96.0f };
 
 /* Joint matrix of an actor, as an Mtx. */
@@ -39,7 +39,7 @@ s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 }
 
 /* Spawns an impact effect at joint 6 of actor, styled by the profile of other. */
-void func_151B01B8(Actor *actor, Actor *other) {
+void effect_spawnJointImpact(Actor *actor, Actor *other) {
     SplashSpraySpec impact;
     u8 shade;
     CollisionHit ground;
@@ -86,7 +86,7 @@ void func_151B01B8(Actor *actor, Actor *other) {
 }
 
 /* Big landing burst at actor: an impact effect, 12-17 splats scattered on the ground around it, and a mark under it. */
-void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
+void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
     SplashSpraySpec impact;
     CollisionHit ground;
     s32 count;
@@ -235,7 +235,7 @@ struct Game1DD500Task {
 void *memcpy(void *, const void *, u32);
 
 /* Starts an emitter task on actor (lifetime 300 when -1), first telling older ones on it to end. */
-Game1DD500Task *func_151B09BC(Actor *actor, Actor *other, s16 lifetime, u8 arg3, s32 arg4) {
+Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lifetime, u8 arg3, s32 arg4) {
     Game1DD500Task *task;
     Game1DD500Emitter emitter;
     s32 profile;
@@ -260,7 +260,7 @@ Game1DD500Task *func_151B09BC(Actor *actor, Actor *other, s16 lifetime, u8 arg3,
     }
     msg.actor = actor;
     msg.uniqueId = actor->unique_id;
-    func_151494E0((s32)&msg, 0x13);
+    effect_sendEventToTimedEffects((s32)&msg, 0x13);
     timed = FALSE;
     if (lifetime == -1) {
         life = 300;
@@ -281,7 +281,7 @@ Game1DD500Task *func_151B09BC(Actor *actor, Actor *other, s16 lifetime, u8 arg3,
             emitter.slots[i].next = NULL;
         }
     }
-    task = func_151491F4(life, -1, 0x13, timed, 0xF, sizeof(emitter), arg3, arg4);
+    task = effect_newTimedEffectNoDraw(life, -1, 0x13, timed, 0xF, sizeof(emitter), arg3, arg4);
     if (task != NULL) {
         memcpy(&task->emitter, &emitter, sizeof(emitter));
     }
@@ -326,7 +326,7 @@ static const Game1DD500Mount D_800AA1DC[11] = {
 };
 
 /* Emitter task update: carries attached particles with the owner's joints, releases expired ones and spawns new ones. */
-void func_151B0B88(Game1DD500Task *task) {
+void effect_updateJointEmitterTask(Game1DD500Task *task) {
     Game1DD500Emitter *emitter = &task->emitter;
     u8 failed; // matching: ending the task directly in the check reorders the whole function
 
@@ -450,7 +450,7 @@ void func_151B0B88(Game1DD500Task *task) {
                 }
             }
         } else if (emitter->count != 0) {
-            func_151B1918(task);
+            effect_freeJointEmitterParticles(task);
         }
     }
     if (failed) {
@@ -460,7 +460,7 @@ void func_151B0B88(Game1DD500Task *task) {
 
 /* Moves a released particle under drag and gravity; with checkGround set, a particle that reaches
  * the ground leaves a splat there and the function returns 0 (otherwise 1). */
-s32 func_151B118C(Game1DD500Particle *particle) {
+s32 effect_moveReleasedParticle(Game1DD500Particle *particle) {
     f32 dx;
     f32 dz;
     f32 dy;
@@ -529,7 +529,7 @@ s32 func_151B1478(Game1DD500Particle *particle) {
 
 /* Writes a particle's quad for view into that view's vertex buffer, facing the camera and tilted
  * by the particle's sideways motion. Returns the vertices, or NULL when there is no buffer. */
-Vtx *func_151B14AC(Game1DD500Particle *particle, s16 view) {
+Vtx *effect_buildJointParticleQuad(Game1DD500Particle *particle, s16 view) {
     Vtx *quad;
     Vtx *ret;
     f32 sine;
@@ -602,7 +602,7 @@ Vtx *func_151B14AC(Game1DD500Particle *particle, s16 view) {
 }
 
 /* Swings a particle's width and height around their base sizes, each on its own phase. */
-s32 func_151B1828(Game1DD500Particle *arg0) {
+s32 effect_swingParticleSize(Game1DD500Particle *arg0) {
     Game1DD500Particle *particle = arg0; // matching: the copy of the argument sets the stack frame size
     Game1DD500Motion *motion = &arg0->motion;
     f32 swingW;
@@ -618,7 +618,7 @@ s32 func_151B1828(Game1DD500Particle *arg0) {
 }
 
 /* Frees every attached particle and resets the emitter. */
-void func_151B1918(Game1DD500Task *task) {
+void effect_freeJointEmitterParticles(Game1DD500Task *task) {
     Game1DD500Emitter *emitter;
     s32 i;
 
@@ -629,7 +629,7 @@ void func_151B1918(Game1DD500Task *task) {
         Game1DD500Slot *slot = &emitter->slots[i];
 
         if (slot->particle != NULL) {
-            func_1516972C(&slot->particle->head.header);
+            effect_destroyObject(&slot->particle->head.header);
         }
         slot->particle = NULL;
         slot->timer = 0;
@@ -639,7 +639,7 @@ void func_151B1918(Game1DD500Task *task) {
 
 /* Emitter message handler: ends the task when its owner goes away (messages 0 and 0x13) and
  * follows the owner through an identity swap (0x2D). */
-void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
+void effect_jointEmitterTaskMessage(Game1DD500Task *task, void *msg, u8 type) {
     Game1DD500Emitter *emitter = &task->emitter;
     ActorRef *actorMsg = msg;
     ActorSwapMsg *swap = msg;
@@ -647,7 +647,7 @@ void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
 
     if (type == 0 || type == 0x13) {
         if (owner == actorMsg->actor || actorMsg->uniqueId == emitter->ownerId) {
-            func_1516972C(&task->base.header);
+            effect_destroyObject(&task->base.header);
         }
     } else if (type == 0x2D) {
         if (emitter->owner == swap->actorA) {
@@ -660,14 +660,14 @@ void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
     }
 }
 
-/* Task handler: frees the attached particles, then passes the task on to func_1514933C. */
-void func_151B1A58(Game1DD500Task *task) {
-    func_151B1918(task);
-    func_1514933C(&task->base);
+/* Task handler: frees the attached particles, then passes the task on to effect_defaultDestroyTimedEffect. */
+void effect_destroyJointEmitterTask(Game1DD500Task *task) {
+    effect_freeJointEmitterParticles(task);
+    effect_defaultDestroyTimedEffect(&task->base);
 }
 
-/* Task handler: frees the attached particles, then passes the task on to func_15149368. */
-void func_151B1A84(Game1DD500Task *task) {
-    func_151B1918(task);
-    func_15149368(&task->base);
+/* Task handler: frees the attached particles, then passes the task on to effect_defaultFreeTimedEffect. */
+void effect_freeJointEmitterTask(Game1DD500Task *task) {
+    effect_freeJointEmitterParticles(task);
+    effect_defaultFreeTimedEffect(&task->base);
 }

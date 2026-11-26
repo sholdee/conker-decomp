@@ -68,7 +68,7 @@ void trail_spawnPissTrail(Actor *actor) {
         spawn.unk14 = 5;
         spawn.material = 0;
 
-        trail = func_15147A80(&spawn, sizeof(PissTrailData), sizeof(PissTrailPoint), 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
+        trail = effect_newEffectObj(&spawn, sizeof(PissTrailData), sizeof(PissTrailPoint), 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
         if (trail != NULL) {
             memcpy(trail->data, &data, sizeof(PissTrailData));
         }
@@ -628,12 +628,12 @@ void trail_stopPissSound(PissTrail *trail) {
 
 void trail_destroyPissTrail(PissTrail *trail) {
     trail_stopPissSound(trail);
-    func_151478F4(trail);
+    effect_defaultDestroyEffectObj(trail);
 }
 
 void trail_freePissTrail(PissTrail *trail) {
     trail_stopPissSound(trail);
-    func_15147928(trail);
+    effect_defaultFreeEffectObj(trail);
 }
 
 /* Trail message handler: 0x44 sets the speed scale, 0 removes the trail, 0x2D swaps owners. */
@@ -651,7 +651,7 @@ void trail_onPissTrailMessage(PissTrail *trail, TrailMessage *msg, u8 type) {
     } else if (type == 0) {
         owner = msg->owner;
         if ((owner == data->owner) || (data->ownerId == msg->x4.ownerId)) {
-            func_1516972C(&trail->head.header);
+            effect_destroyObject(&trail->head.header);
         }
     } else if (type == 0x2D) {
         if (data->owner == msg->owner) {
@@ -671,7 +671,7 @@ void trail_setPissSpeedScale(Actor *actor, f32 speedScale) {
     msg.owner = actor;
     msg.x4.ownerId = actor->unique_id;
     msg.x8.speedScale = speedScale;
-    func_15147D64((s32)&msg, 0x44);
+    effect_sendEventToEffectObjs((s32)&msg, 0x44);
 }
 
 s32 func_150DA628(SpriteParticle *particle, s32 arg1) {

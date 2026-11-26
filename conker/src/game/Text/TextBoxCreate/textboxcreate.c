@@ -45,7 +45,7 @@ TextBox *text_createBox(u32 msgIndex, s32 objIndex, s32 arg2,
     s32 height;
     s32 advance;
 
-    box = func_15167A68(OBJTYPE_TEXTBOX, 0, sizeof(TextBox), 0, owner, 2);
+    box = effect_newObject(OBJTYPE_TEXTBOX, 0, sizeof(TextBox), 0, owner, 2);
     if (box != NULL) {
         if (suppliedConfig == NULL) {
         // matching: unused label adds a block so IDO doesn't hoist &width/&height/&advance into s-regs

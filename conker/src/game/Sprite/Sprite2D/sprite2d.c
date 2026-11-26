@@ -7,7 +7,7 @@
 Sprite2D *sprite_newSprite2D(Sprite2DParams *params, s32 arg1) {
     Sprite2D *sprite;
 
-    sprite = func_15167A68(0x5E, 0, sizeof(Sprite2D), 0, arg1, 1);
+    sprite = effect_newObject(0x5E, 0, sizeof(Sprite2D), 0, arg1, 1);
     if (sprite != NULL) {
         bcopy(params, &sprite->params, sizeof(sprite->params));
     }
@@ -27,7 +27,7 @@ void sprite_updateSprite2D(Sprite2D *sprite) {
 
     behavior = sprite->params.behavior;
     if (behavior != 0) {
-        D_8008CA20[behavior](sprite);
+        gObjectCallbacks[behavior](sprite);
     }
 
     frame = sprite->params.frame;
@@ -44,7 +44,7 @@ void sprite_updateSprite2D(Sprite2D *sprite) {
     if (lifetime != 0) {
         lifetime -= D_800BE9E4;
         if (lifetime <= 0) {
-            func_1516972C(&sprite->header);
+            effect_destroyObject(&sprite->header);
             return;
         }
         sprite->params.timer = lifetime;

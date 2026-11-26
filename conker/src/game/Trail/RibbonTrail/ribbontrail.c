@@ -49,7 +49,7 @@ void trail_spawnFollowTrail(Actor *target, u8 arg1, s32 arg2) {
     state.distance = 0.0f;
     spawn.kind = 13;
 
-    obj = func_15147A80(&spawn, 0x30, sizeof(TargetTrailPoint), 11, 11, 11, 0, 0, 0, arg1, arg2);
+    obj = effect_newEffectObj(&spawn, 0x30, sizeof(TargetTrailPoint), 11, 11, 11, 0, 0, 0, arg1, arg2);
     if (obj != NULL) {
         memcpy(obj->userData, &state, sizeof(state));
     }
@@ -511,7 +511,7 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32
     spawn.flags = 20;
     spawn.kind = 16;
     spawn.unk14 = 2;
-    obj = func_15147A80(&spawn, argsSize + 0x10, sizeof(RibbonEffectPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
+    obj = effect_newEffectObj(&spawn, argsSize + 0x10, sizeof(RibbonEffectPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
     if (obj != NULL) {
         state = obj->userData;
         memcpy(state, &init, sizeof(init));
@@ -519,7 +519,7 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32
         ((s32 *)state)[1] = (s32)((s32 *)state + 4);
         memcpy((void *)((s32 *)state)[1], args, argsSize);
         if (gRibbonSourceProcs[selector](obj, &obj->head.tmpl.pos) == 0) {
-            func_1516972C(&obj->head.header);
+            effect_destroyObject(&obj->head.header);
             return NULL;
         }
         {
@@ -917,7 +917,7 @@ void trail_onActorRibbonMessage(EffectObj *obj, void *msg, u8 msgType) {
         Actor *target = named->target;
 
         if (target == ref->target || named->targetUnk3B == ref->targetUnk3B) {
-            func_1516972C(&obj->head.header);
+            effect_destroyObject(&obj->head.header);
         }
     }
 }

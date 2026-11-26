@@ -25,12 +25,12 @@ dummy_label_15010880:
     tmp.source = &base[72];
     tmp.target = &base[73];
 
-    temp_v0 = func_15149130(0x12C, -1, 0x5E, -1, 0, 0,  0xC, 0xFF, 1);
+    temp_v0 = effect_newTimedEffect(0x12C, -1, 0x5E, -1, 0, 0,  0xC, 0xFF, 1);
     if (temp_v0 != NULL) {
         memcpy(temp_v0 + 1, &tmp, sizeof(tmp));
     }
     if (gTaskDoneBits[0x12] & 0x40) {
-        func_15149130(5, 9, -1, -1, 1, 0, NULL, 0xFF, 1);
+        effect_newTimedEffect(5, 9, -1, -1, 1, 0, NULL, 0xFF, 1);
     }
 }
 // NON-MATCHING: ops in wrong order
@@ -45,12 +45,12 @@ dummy_label_15010880:
 //     tmp.unk4 = *((s32*) &zones) + 0xEA0;
 //     tmp.unk8 = *((s32*) &zones) + 0xED4;
 
-//     temp_v0 = func_15149130(300, -1, 94, -1, 0, 0, 12, 255, 1);
+//     temp_v0 = effect_newTimedEffect(300, -1, 94, -1, 0, 0, 12, 255, 1);
 //     if (temp_v0 != NULL) {
 //         memcpy(&temp_v0->unk28, &tmp, 12); // memcpy
 //     }
 //     if ((gTaskDoneBits[0x12] & 0x40) != 0) {
-//         func_15149130(5, 9, -1, -1, 1, 0, 0, 255, 1);
+//         effect_newTimedEffect(5, 9, -1, -1, 1, 0, 0, 255, 1);
 //     }
 // }
 

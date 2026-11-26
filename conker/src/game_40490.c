@@ -339,7 +339,7 @@ s32 func_15013778(TriggerZone *obj) {
         packet.direction[0] *= inverse;
         packet.direction[1] *= inverse;
         packet.direction[2] *= inverse;
-        effect = func_15149130(300, -1, 0x19, -1, 0, 0x17, sizeof(packet), 0xFF, 0);
+        effect = effect_newTimedEffect(300, -1, 0x19, -1, 0, 0x17, sizeof(packet), 0xFF, 0);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x28, &packet, sizeof(packet));
         }
@@ -455,7 +455,7 @@ s32 func_150139AC(TriggerZone *obj, s32 index) {
         data.unk44 = 0;
     }
 
-    effect = func_151491F4(300, -1, 6, 0, 10, sizeof(data), 0xFF, 0);
+    effect = effect_newTimedEffectNoDraw(300, -1, 6, 0, 10, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
@@ -644,7 +644,7 @@ s32 func_15014094(TriggerZone *obj) {
     data.zone = collision_findZoneLeaf(obj->x, obj->z);
     data.unk2C = 0;
 
-    effect = func_15149130(300, -1, 0x21, -1, 0, 0, sizeof(data), 0xFF, 1);
+    effect = effect_newTimedEffect(300, -1, 0x21, -1, 0, 0, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
@@ -683,14 +683,14 @@ s32 func_15014220(TriggerZone *obj) {
     data.unk4 = obj;
     data.unk0 = 0.0f;
 
-    effect = func_15149130(300, -1, 0x26, -1, 0, 0x24, sizeof(data), 0xFF, 0);
+    effect = effect_newTimedEffect(300, -1, 0x26, -1, 0, 0x24, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
     return 1;
 }
 
-/** Registers the object in slot (low byte of data1, 0-2) of D_800D9AA0. */
+/** Registers the object in slot (low byte of data1, 0-2) of gSprayAreas. */
 s32 func_150142AC(TriggerZone *obj) {
     s32 slot;
 
@@ -699,7 +699,7 @@ s32 func_150142AC(TriggerZone *obj) {
     if ((slot < 0) || (slot >= 3)) {
         return 1;
     }
-    D_800D9AA0[slot] = obj;
+    gSprayAreas[slot] = obj;
     return 1;
 }
 
@@ -743,7 +743,7 @@ s32 func_150142EC(TriggerZone *obj) {
     data.unk10 = d;
     data.unk14 = 0.0f;
 
-    effect = func_15149130(300, -1, 0x29, -1, 0, 0, sizeof(data), 0xFF, 0);
+    effect = effect_newTimedEffect(300, -1, 0x29, -1, 0, 0, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
@@ -782,7 +782,7 @@ s32 func_150144B8(TriggerZone *obj) {
     emitter.unk34 = obj->ySize * emitter.unk30;
     emitter.spread = func_150484A0(obj->xSize, obj->ySize);
     emitter.wobbleSpeed = ((obj->data2 >> 16) & 0xFF) * 0.00390625f * 0.7853982f;
-    value = (u32)func_15149130(300, -1, 0x2A, -1, 0, 0, sizeof(emitter), 0xFF, 0);
+    value = (u32)effect_newTimedEffect(300, -1, 0x2A, -1, 0, 0, sizeof(emitter), 0xFF, 0);
     if (value != 0) {
         memcpy((void *)(value + 0x28U), &emitter, sizeof(emitter));
     }
@@ -849,7 +849,7 @@ s32 func_1501474C(TriggerZone *obj) {
     packet.bytes[1] = (obj->data1 >> 8) & 0xFF;
     packet.bytes[2] = (obj->data1 >> 16) & 0xFF;
     packet.bytes[3] = (obj->data1 >> 24) & 0xFF;
-    effect = func_15149130(300, -1, 0x2C, -1, 0, 0, sizeof(packet), 0xFF, 0);
+    effect = effect_newTimedEffect(300, -1, 0x2C, -1, 0, 0, sizeof(packet), 0xFF, 0);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &packet, sizeof(packet));
     }
@@ -910,14 +910,14 @@ s32 func_15014B60(TriggerZone *obj) {
         count = (level == 0x40) ? 0 : D_800A0938[i][2]; // matching: blue reuses count's register
         packet.effects[i] = light_createWithEffect(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
     }
-    effect = func_15149130(300, -1, 0x2E, -1, 0, 0x29, sizeof(packet), 0xFF, 0);
+    effect = effect_newTimedEffect(300, -1, 0x2E, -1, 0, 0x29, sizeof(packet), 0xFF, 0);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &packet, sizeof(packet));
         return 1;
     }
     for (i = 0; i < 6; i++) {
         if (packet.effects[i] != NULL) {
-            func_1516972C(packet.effects[i]);
+            effect_destroyObject(packet.effects[i]);
         }
     }
     return 1;
@@ -951,7 +951,7 @@ s32 func_15014F6C(TriggerZone *obj) {
     data.mtx[3][1] = obj->y;
     data.mtx[3][2] = obj->z;
 
-    effect = func_15149130(300, -1, 0x31, -1, 0, 0x2A, sizeof(data), 0xFF, 0);
+    effect = effect_newTimedEffect(300, -1, 0x31, -1, 0, 0x2A, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
@@ -990,7 +990,7 @@ s32 func_15015104(TriggerZone *obj) {
     data.flags = bit2 | bit1;
     data.actor = NULL;
 
-    effect = func_15149130(300, -1, -1, -1, 0, 0x2C, sizeof(data), 0xFF, 0);
+    effect = effect_newTimedEffect(300, -1, -1, -1, 0, 0x2C, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -1036,7 +1036,7 @@ s32 func_150151D4(TriggerZone *obj) {
     collision_selectMap(0);
     data.zone = collision_findZoneLeaf(obj->x, obj->z);
 
-    effect = func_15149130(300, -1, 0x3C, -1, 0, 0x2D, sizeof(data), 0xFF, 0);
+    effect = effect_newTimedEffect(300, -1, 0x3C, -1, 0, 0x2D, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
@@ -1126,7 +1126,7 @@ void func_15015354(TriggerZone *obj) {
     data.node = collision_findZoneLeaf(obj->x, obj->z);
     data.actor = NULL;
 
-    effect = func_15149130(300, -1, 0x3D, -1, 0, 0x2E, sizeof(data), 0xFF, 0);
+    effect = effect_newTimedEffect(300, -1, 0x3D, -1, 0, 0x2E, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -1150,7 +1150,7 @@ s32 func_15015644(TriggerZone *obj) {
     data.zone = collision_findZoneLeaf(obj->x, obj->z);
     data.unkC = 0;
 
-    effect = func_15149130(300, -1, 0x44, -1, 0, 0x2F, sizeof(data), 0xFF, 0);
+    effect = effect_newTimedEffect(300, -1, 0x44, -1, 0, 0x2F, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }

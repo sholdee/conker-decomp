@@ -177,7 +177,7 @@ void func_151A11E4(SphereEmitter *emitter) {
             data.velSubX = (u8)(s32)(vx * 256.0f);
             data.velSubY = (u8)(s32)(horiz * 256.0f);
             data.velSubZ = (u8)(s32)(dist * 256.0f);
-            particle = func_15167D84(&packet, 0, sizeof(data), -1, emitter->base.header.owner, emitter->base.header.kind);
+            particle = effect_spawnBillboard(&packet, 0, sizeof(data), -1, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(particle + 1, &data, sizeof(data));
             }
@@ -243,7 +243,7 @@ typedef struct {
     /* 0x1E */ s16 unk1E;
 } EffectData151A18DC;
 
-/* Creates a type 3 func_151491F4 effect from the spawner's settings. */
+/* Creates a type 3 effect_newTimedEffectNoDraw effect from the spawner's settings. */
 void func_151A18DC(EffectSpawner *spawner) {
     s32 pad; // matching: unused stack slot
     EffectData151A18DC data;
@@ -258,7 +258,7 @@ void func_151A18DC(EffectSpawner *spawner) {
     data.unk1C = spawner->unk42;
     data.unk1E = spawner->unk44;
 
-    effect = func_151491F4(spawner->unk3C, -1, 3, 1, 0, 0x20, spawner->unkC, spawner->unk1);
+    effect = effect_newTimedEffectNoDraw(spawner->unk3C, -1, 3, 1, 0, 0x20, spawner->unkC, spawner->unk1);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
@@ -354,7 +354,7 @@ void func_151A1998(SphereEmitter *emitter) {
             packet.subX = (s32)(x * 256.0f) & 0xFF;
             packet.subY = (s32)(y * 256.0f) & 0xFF;
             packet.subZ = (s32)(z * 256.0f) & 0xFF;
-            particle = func_15167D84(&packet, 0, sizeof(data), -1, emitter->base.header.owner, emitter->base.header.kind);
+            particle = effect_spawnBillboard(&packet, 0, sizeof(data), -1, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(particle + 1, &data, sizeof(data));
             }
@@ -398,7 +398,7 @@ typedef struct {
     /* 0x22 */ s16 unk22;
 } EffectData151A1EE8;
 
-/* Creates a type 4 func_151491F4 effect from the spawner's settings. */
+/* Creates a type 4 effect_newTimedEffectNoDraw effect from the spawner's settings. */
 void func_151A1EE8(EffectSpawner *spawner) {
     s32 pad; // matching: unused stack slot
     EffectData151A1EE8 data;
@@ -415,7 +415,7 @@ void func_151A1EE8(EffectSpawner *spawner) {
     data.unk20 = spawner->unk46;
     data.unk22 = spawner->unk48;
 
-    effect = func_151491F4(spawner->unk3C, -1, 4, 1, 0, 0x24, spawner->unkC, spawner->unk1);
+    effect = effect_newTimedEffectNoDraw(spawner->unk3C, -1, 4, 1, 0, 0x24, spawner->unkC, spawner->unk1);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
@@ -523,7 +523,7 @@ void func_151A1FB4(SphereEmitter *emitter) {
             packet.subX = (s32)(x * 256.0f) & 0xFF;
             packet.subY = (s32)(y * 256.0f) & 0xFF;
             packet.subZ = (s32)(z * 256.0f) & 0xFF;
-            particle = func_15167D84(&packet, 0, sizeof(data), -1, emitter->base.header.owner, emitter->base.header.kind);
+            particle = effect_spawnBillboard(&packet, 0, sizeof(data), -1, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(particle + 1, &data, sizeof(data));
             }

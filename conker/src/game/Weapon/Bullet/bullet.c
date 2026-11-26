@@ -413,10 +413,10 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             }
         } else {
             if (state.trail != NULL) {
-                func_1516972C(state.trail);
+                effect_destroyObject(state.trail);
             }
             if (state.follow != NULL) {
-                func_1516972C(&state.follow->header);
+                effect_destroyObject(&state.follow->header);
             }
         }
         if (shooter->ob_matrix_ptr != NULL && (shooter->unk74 & 0xF) != 0xF) {
@@ -437,10 +437,10 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 out[0] = &outA;
                 out[1] = &outB;
                 func_15145EA4(in, out, &shooter->ob_matrix_ptr[9], 2);
-                func_15102B38(shooter, 9, &a, &c, &scale, func_150ADA20() % 3 + 8,
+                effect_spawnBoneBeamParticle(shooter, 9, &a, &c, &scale, func_150ADA20() % 3 + 8,
                               func_150ADA20() % 56 + 200, func_150ADA68() * 204.0f + 601.0f,
                               &outA, 0xFF, 0, -1, fxOwner, fxList);
-                func_15103254(func_150ADA20() % 3 + 8, func_150ADA20() % 56 + 200,
+                effect_spawnFlashParticle(func_150ADA20() % 3 + 8, func_150ADA20() % 56 + 200,
                               func_150ADA68() * 204.0f + 601.0f, &outB, 0xFF, fxOwner, fxList);
                 func_151C1860(&outB, fxOwner, fxList);
             }
@@ -509,7 +509,7 @@ s32 weapon_updateBullet(Bullet *bullet) {
         if (state->passTimer > 0.0f) {
             state->passTimer -= gFrameDelta;
             if (state->passTimer <= 0.0f) {
-                func_151ABE40(&state->passPos, &state->pass, 2, bullet->head.header.owner, bullet->head.header.kind);
+                effect_spawnImpact(&state->passPos, &state->pass, 2, bullet->head.header.owner, bullet->head.header.kind);
             }
         }
     }
@@ -543,10 +543,10 @@ void weapon_releaseBullet(Bullet *bullet) {
 
     state = &bullet->state;
     if (state->trail != NULL) {
-        func_1516972C(state->trail);
+        effect_destroyObject(state->trail);
     }
     if (state->follow != NULL) {
-        func_1516972C(&state->follow->header);
+        effect_destroyObject(&state->follow->header);
     }
     if (state->unk88 != NULL) {
         // matching: the pointer temp gets its own stack slot, which the frame size needs
@@ -555,7 +555,7 @@ void weapon_releaseBullet(Bullet *bullet) {
         *flag = 0;
     }
     if (state->unk8C != NULL) {
-        func_1516972C(state->unk8C);
+        effect_destroyObject(state->unk8C);
     }
     sound_stopByCallback((SoundRecordCallback)weapon_bulletSoundCallback, bullet, 0);
 }

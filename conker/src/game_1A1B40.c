@@ -39,7 +39,7 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
         if (growthRange != 0) {
             growth += func_150ADA20_u8() % (u32)growthRange;
         }
-        template.anim = D_8008CA4C[0];
+        template.anim = gEffectAnimTextures[0];
         template.unk4 = growth;
         template.unk8 = fadeRate;
         template.frame = 0;
@@ -63,11 +63,11 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
         template.primB = 0xFF;
         template.primA = 0xFF;
         template.flags = 0;
-        func_15167D84(&template, 0, 0, -1, owner, list);
+        effect_spawnBillboard(&template, 0, 0, -1, owner, list);
     }
 }
 
-/* Particle callback 5 (D_8008C9C8[5]): fades the puff out while it grows (height 8/7 as fast as width). */
+/* Particle callback 5 (gParticleCallbacks[5]): fades the puff out while it grows (height 8/7 as fast as width). */
 void func_15174920(PuffParticle *particle) {
     s32 alpha = particle->primA;
 

@@ -58,7 +58,7 @@ void light_spawnSwingingLamps(PointLight *light) {
         desc.unk20 = 0x20;
         desc.kind = 1;
 
-        model = func_1513B5E0(&desc, 1, sizeof(LampData), 0xFF, 1);
+        model = effect_newDynModel(&desc, 1, sizeof(LampData), 0xFF, 1);
         if (model != NULL) {
             memcpy(LAMP_DATA(model), &lamp, sizeof(LampData));
             {
@@ -110,7 +110,7 @@ void light_spawnSwingingLamps(PointLight *light) {
         desc.unk20 = 0x20;
         desc.kind = 1;
 
-        model2 = func_1513B5E0(&desc, 1, sizeof(LampData), 0xFF, 1);
+        model2 = effect_newDynModel(&desc, 1, sizeof(LampData), 0xFF, 1);
         if (model2 != NULL) {
             memcpy(LAMP_DATA(model2), &lamp, sizeof(LampData));
         }
@@ -259,7 +259,7 @@ void light_setLampTrack(s32 track, s32 duration, u8 sceneTag) {
     msg.track = track;
     msg.duration = duration;
     msg.sceneTag = sceneTag;
-    func_15169260(target.ids, 2, (s32)&msg, 0x1D);
+    effect_sendEventToTypes(target.ids, 2, (s32)&msg, 0x1D);
 }
 
 /* Message handler: 0x1D sets the track to follow, 0x1E toggles the light. */
@@ -289,7 +289,7 @@ void light_toggleLamp(void) {
     IdList2 target;
 
     target = D_80088C58;
-    func_15169260(target.ids, 2, 0, 0x1E);
+    effect_sendEventToTypes(target.ids, 2, 0, 0x1E);
 }
 
 /*

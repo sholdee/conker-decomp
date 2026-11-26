@@ -12,7 +12,7 @@ static const u8 D_800A1548[2] = { 2, 4 };
 
 /* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
  * weapon_spawnProjectile effect from the muzzle towards the jittered hit point (or along the aim on a miss), a
- * light_createWithEffect flash at the muzzle and a func_15102B38 beam on the muzzle's bone. */
+ * light_createWithEffect flash at the muzzle and a effect_spawnBoneBeamParticle beam on the muzzle's bone. */
 Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     Game1EF500Trail *tracer;
     Vec3f aimStart;
@@ -103,7 +103,7 @@ Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 a
     randInt2 = func_150ADA20();
     randInt = func_150ADA20();
     randA = func_150ADA68() * 1077.0f + 4000.0f;
-    func_15102B38(actor, D_800A1548[slot], &D_800A1518[slot], &D_800A1530[slot], &beamSize, (randInt2 % 6U) + 6,
+    effect_spawnBoneBeamParticle(actor, D_800A1548[slot], &D_800A1518[slot], &D_800A1530[slot], &beamSize, (randInt2 % 6U) + 6,
                   (randInt % 52U) + 193, randA, &muzzle, 255, 0, -1, arg2, arg3);
     return tracer;
 }

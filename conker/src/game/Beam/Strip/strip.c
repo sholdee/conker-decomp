@@ -32,7 +32,7 @@ static void (*gStripMsgHandlers[])(StripObj *, ActorMsg *, u8) = { NULL, beam_st
 StripObj *beam_newStrip(StripDesc *desc, s32 payloadSize) {
     StripObj *strip;
 
-    strip = func_15167A68(0x46, 0, payloadSize + 0xC8, 1, 0xFF, 1);
+    strip = effect_newObject(0x46, 0, payloadSize + 0xC8, 1, 0xFF, 1);
     if (strip == NULL) {
         return NULL;
     }
@@ -50,14 +50,14 @@ StripObj *beam_newStrip(StripDesc *desc, s32 payloadSize) {
     return strip;
 }
 
-/** Destroy handler: hands the strip to func_15169804. */
+/** Destroy handler: hands the strip to effect_defaultDestroy. */
 void beam_destroyStripDefault(StripObj *strip) {
-    func_15169804(&strip->header);
+    effect_defaultDestroy(&strip->header);
 }
 
-/** Free handler: hands the strip to func_15169824. */
+/** Free handler: hands the strip to effect_defaultFree. */
 void beam_freeStripDefault(StripObj *strip) {
-    func_15169824(&strip->header);
+    effect_defaultFree(&strip->header);
 }
 
 /** Calls the gStripDestroyHandlers handler for the strip kind, or the first one when it is out of range. */
@@ -86,13 +86,13 @@ void beam_freeStrip(StripObj *strip) {
 
 /** Detaches the strip from its target character, then destroys it (beam_destroyStripDefault). */
 void beam_destroyStripDetach(StripObj *strip) {
-    func_1514EDF0(strip, strip->target.obj);
+    effect_detachHandle(strip, strip->target.obj);
     beam_destroyStripDefault(strip);
 }
 
 /** Detaches the strip from its target character, then frees it (beam_freeStripDefault). */
 void beam_freeStripDetach(StripObj *strip) {
-    func_1514EDF0(strip, strip->target.obj);
+    effect_detachHandle(strip, strip->target.obj);
     beam_freeStripDefault(strip);
 }
 
@@ -126,7 +126,7 @@ void beam_updateStrip(StripObj *strip) {
             }
         }
         if (remove) {
-            func_1516972C(&strip->header);
+            effect_destroyObject(&strip->header);
         }
     }
 }
@@ -263,12 +263,12 @@ s32 beam_stripFollowTargetBone(StripObj *strip) {
 
 /** Sends message 1 to `obj`'s type-0x15 attachments (its strips). */
 void func_150C5C74(Actor *obj) {
-    func_1514D3B0(obj, 0x15, 1, 0);
+    effect_sendAttachmentMessage(obj, 0x15, 1, 0);
 }
 
 /** Sends message 2 to `obj`'s type-0x15 attachments (its strips). */
 void func_150C5C9C(Actor *obj) {
-    func_1514D3B0(obj, 0x15, 2, 0);
+    effect_sendAttachmentMessage(obj, 0x15, 2, 0);
 }
 
 /** Forwards a message to the gStripMsgHandlers handler for the strip kind, if there is one. */
@@ -289,7 +289,7 @@ void beam_stripTargetMessage(StripObj *strip, ActorMsg *data, u8 msg) {
 
     if (msg == 0) {
         if (data->ref.actor == target->obj || data->ref.uniqueId == target->uniqueId) {
-            func_1516972C(&strip->header);
+            effect_destroyObject(&strip->header);
         }
     } else if (msg == 0x2D) {
         if (target->obj == data->swap.actorA) {

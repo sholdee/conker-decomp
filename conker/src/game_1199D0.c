@@ -19,7 +19,7 @@ void func_150EC520(EmitterEffect *effect) {
                 EmitterEffect *spawned;
 
                 func_151432BC(emitter->shape, &point.x, &point.z, &upper, &point.y);
-                spawned = func_15149130(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
+                spawned = effect_newTimedEffect(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
                                                   sizeof(point), effect->base.header.owner, effect->base.header.kind);
                 if (spawned != NULL) {
                     memcpy(&spawned->data, &point, sizeof(point));
@@ -110,16 +110,16 @@ void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8
     data.g = g;
     data.b = b;
 
-    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x5D, -1, (duration == -1) ? FALSE : TRUE,
+    effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x5D, -1, (duration == -1) ? FALSE : TRUE,
                                      0x45, sizeof(data), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
 }
 
-/* Effect callback for the fog flash effect: hands func_15169850 the owner reference. */
+/* Effect callback for the fog flash effect: hands effect_handleOwnerActorEvent the owner reference. */
 void func_150ECB4C(EmitterEffect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &effect->data.fog.owner, &effect->data.fog.ownerId, effect);
+    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.fog.owner, &effect->data.fog.ownerId, effect);
 }
 
 /* Fog flash effect: re-flashes the owner's fog each frame, and ends once the owner is gone. */

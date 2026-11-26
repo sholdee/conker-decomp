@@ -59,7 +59,7 @@ RumbleObj *func_151D8868(RumbleParams *params, s32 dataSize, u8 arg2, s32 arg3) 
             }
         }
     }
-    obj = func_15167A68(0x3F, arg3, dataSize + sizeof(RumbleObj), 1, arg2, 1);
+    obj = effect_newObject(0x3F, arg3, dataSize + sizeof(RumbleObj), 1, arg2, 1);
     if (obj == NULL) {
         return NULL;
     }
@@ -105,7 +105,7 @@ void func_151D8A24(RumbleObj *obj) {
     }
 
     if (expired) {
-        func_1516972C(obj);
+        effect_destroyObject(obj);
     }
 }
 
@@ -120,16 +120,16 @@ void func_151D8B24(RumbleObj *obj) {
     }
 }
 
-/* Destroy hook: stops the rumble, then the default destroy (func_15169804). */
+/* Destroy hook: stops the rumble, then the default destroy (effect_defaultDestroy). */
 void func_151D8B88(RumbleObj *obj) {
     func_151D8B24(obj);
-    func_15169804(obj);
+    effect_defaultDestroy(obj);
 }
 
-/* Free hook: stops the rumble, then the default free (func_15169824). */
+/* Free hook: stops the rumble, then the default free (effect_defaultFree). */
 void func_151D8BB4(RumbleObj *obj) {
     func_151D8B24(obj);
-    func_15169824(obj);
+    effect_defaultFree(obj);
 }
 
 
@@ -165,9 +165,9 @@ void func_151D8C00(RumbleObj *obj, RumbleFalloff *falloff) {
 /* Message handler: messages 0x58 and 0x47 release the object. */
 void func_151D8D5C(RumbleObj *obj, s32 data, u8 message) {
     if (message == 0x58) {
-        func_1516972C(obj);
+        effect_destroyObject(obj);
     } else if (message == 0x47) {
-        func_1516972C(obj);
+        effect_destroyObject(obj);
     }
 }
 
@@ -175,7 +175,7 @@ static const s32 D_800AB300[1] = { 0x3F }; /* object kinds to message: rumble ob
 
 /* Sends `message` with `data` to every rumble object. */
 void func_151D8DB4(s32 data, u8 message) {
-    func_15169260(D_800AB300, 1, data, message);
+    effect_sendEventToTypes(D_800AB300, 1, data, message);
 }
 
 

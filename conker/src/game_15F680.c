@@ -32,11 +32,11 @@ typedef void (*ParticleEventFn)(ModelParticle *particle, void *data, u8 event);
 /* This file's .data: the particle handler tables. */
 static s32 (*D_800898B0[])() = {
     NULL, func_15132DDC, func_150CBE88, func_150CCCB4,
-    func_150CB008, func_151B5E94, func_151B6254, func_150CA07C,
+    func_150CB008, func_151B5E94, func_151B6254, effect_moveBurstParticle,
     func_151337C0, light_updateLampParticle, weapon_updateBullet, func_150AE2A0,
     func_151D3D50, func_15133894, func_151B8B40, func_1515452C,
-    func_150F23E0, func_150E971C, func_15154A88, func_150F78B4,
-    func_150F81BC, func_1519ED24, func_150F48D0, func_151C7038,
+    effect_updateSway, func_150E971C, func_15154A88, effect_updateProjectile,
+    effect_updatePuffFollower, func_1519ED24, func_150F48D0, func_151C7038,
     func_150C5310,
 };
 static s32 (*D_80089914[])() = {
@@ -44,7 +44,7 @@ static s32 (*D_80089914[])() = {
     func_1518B1D8, func_151A73EC, func_150C7670, func_150F4A38,
 };
 static ParticleFloorHitFn D_80089934[] = {
-    NULL, func_150B89E0, func_150BCFB8, func_150E5810,
+    NULL, func_150B89E0, effect_bounceOnGround, effect_bounceOffTriangle,
     func_151A743C, pipeexplode_onChunkFloorHit, func_151339D4, func_15133A50,
     func_151389A8, func_15139578, func_15133B98, func_15133D20,
     func_15133C58, func_150C01DC, func_150C0648,
@@ -124,7 +124,7 @@ void func_151321D0(ModelParticle *particle) {
         if (particle->destroyFn != 0) {
             D_8008997C[particle->destroyFn](particle);
         }
-        func_1516972C(&particle->header);
+        effect_destroyObject(&particle->header);
     }
 }
 
@@ -182,12 +182,12 @@ void func_15132444(ModelParticle *particle) {
 
 void func_15132570(ModelParticle *particle) {
     func_15132444(particle);
-    func_15169804(&particle->header);
+    effect_defaultDestroy(&particle->header);
 }
 
 void func_1513259C(ModelParticle *particle) {
     func_15132444(particle);
-    func_15169824(&particle->header);
+    effect_defaultFree(&particle->header);
 }
 
 /* Free the light buffers func_1513264C allocated into link.handles[0..gScreenLayout] and link.sharedHandle. */
@@ -217,7 +217,7 @@ void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floo
     if (D_800DC63C > 300) {
         return NULL;
     }
-    particle = func_15167A68((spawn->flags & 0x4000) ? 0x48 : 0x19, arg6, extraSize + 0x170, 1, arg5,
+    particle = effect_newObject((spawn->flags & 0x4000) ? 0x48 : 0x19, arg6, extraSize + 0x170, 1, arg5,
                              (spawn->flags & 0x400000) ? 2 : 1);
     if (particle == NULL) {
         return NULL;
@@ -225,7 +225,7 @@ void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floo
     if (D_800DC468[spawn->model] == 0) {
         node = allocate_memory(sizeof(ParticleNode), 1, 2, (spawn->flags & 0x400000) ? 2 : 1);
         if (node == NULL) {
-            func_15168A9C(&particle->header);
+            effect_unlinkObject(&particle->header);
             func_10004074(particle);
             return NULL;
         }
@@ -250,7 +250,7 @@ void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floo
                 node->keepLoaded = FALSE;
             }
         } else {
-            func_15168A9C(&particle->header);
+            effect_unlinkObject(&particle->header);
             func_10004074(particle);
             func_10004074(node);
             return NULL;
@@ -268,7 +268,7 @@ void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floo
             }
         }
         if (tries <= 0) {
-            func_15168A9C(&particle->header);
+            effect_unlinkObject(&particle->header);
             func_10004074(particle);
             return NULL;
         }
@@ -340,7 +340,7 @@ void func_15132A88(ModelParticle *particle) {
 
     result = D_8008998C[particle->matrixFn](&particle->mtx[D_800BE9C0], particle);
     if (result == -1) {
-        func_1516972C(&particle->header);
+        effect_destroyObject(&particle->header);
         return;
     }
 
@@ -615,7 +615,7 @@ s32 func_151336A8(s32 model, ParticleNode *node, ModelParticle *particle) {
         return FALSE;
     }
     texture_resolveDl(*node->resource, 0, 1, 0x3E, &D_800DC640[model]);
-    func_15168E54(*node->resource, (s32)node->resource);
+    effect_relocateDisplayList(*node->resource, (s32)node->resource);
     return TRUE;
 }
 
@@ -782,17 +782,17 @@ void func_15133DE8(ModelParticle *particle, ActorRef *data, u8 event) {
     if (event == 0) {
         obj = data->actor;
         if (obj == particle->owner || particle->ownerId == data->uniqueId) {
-            func_1516972C(&particle->header);
+            effect_destroyObject(&particle->header);
         }
     }
 }
 
-/* Call func_15169260 for both particle object kinds (0x19 and 0x48, see func_1513264C). */
+/* Call effect_sendEventToTypes for both particle object kinds (0x19 and 0x48, see func_1513264C). */
 
 void func_15133E3C(s32 arg0, u8 arg1) {
     const s32 kinds[2] = { 0x19, 0x48 };
 
-    func_15169260(kinds, ARRAY_COUNT(kinds), arg0, arg1);
+    effect_sendEventToTypes(kinds, ARRAY_COUNT(kinds), arg0, arg1);
 }
 
 /* A texture to bind to a segment: gEffectTextures index, segment number, and texture_getAddress's third argument. */

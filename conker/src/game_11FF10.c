@@ -65,7 +65,7 @@ void func_150F2C8C(Actor *target) {
     state.timer = 0.0f;
     state.count = 0;
 
-    emitter = func_15149130(300, -1, 0x5C, -1, 0, 0x44, 0x10, 0xFF, 1);
+    emitter = effect_newTimedEffect(300, -1, 0x5C, -1, 0, 0x44, 0x10, 0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->state, &state, sizeof(state));
     }
@@ -162,14 +162,14 @@ void func_150F2D14(BoneBurstEmitter *emitter) {
     }
 }
 
-/* Hands the emitter's target pointer and id to func_15169850. */
+/* Hands the emitter's target pointer and id to effect_handleOwnerActorEvent. */
 void func_150F3194(BoneBurstEmitter *emitter, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &emitter->state.target, &emitter->state.targetId, emitter);
+    effect_handleOwnerActorEvent(arg1, arg2, &emitter->state.target, &emitter->state.targetId, emitter);
 }
 
-/* Hands the particle's target pointer and id to func_15169850. */
+/* Hands the particle's target pointer and id to effect_handleOwnerActorEvent. */
 void func_150F31D4(BoneBurstParticle *particle, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &particle->state.target, &particle->state.targetId, particle);
+    effect_handleOwnerActorEvent(arg1, arg2, &particle->state.target, &particle->state.targetId, particle);
 }
 
 /* Particle update: follows the target's bone 15, grows and fades with age. Returns 0 when it should die. */

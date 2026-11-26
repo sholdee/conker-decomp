@@ -126,7 +126,7 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
     params.pos = D_800A5480;
     params.fadeStart = 8;
     params.fadeRate = 0x1F;
-    func_15157010(&params, 0, 1.0f, 0, 0, 0, arg1, arg2);
+    effect_newModelEffect(&params, 0, 1.0f, 0, 0, 0, arg1, arg2);
     {
         AmountTextStyle style;
         u8 str[4] = "500";
@@ -153,7 +153,7 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
         } else {
             style.amount = 0;
         }
-        textObj = func_150CFF10(0x63, str, 150, sizeof(AmountTextStyle), 3, 1, arg1, arg2);
+        textObj = effect_newTextBox(0x63, str, 150, sizeof(AmountTextStyle), 3, 1, arg1, arg2);
         if (textObj != NULL) {
             memcpy(textObj->text.style, &style, sizeof(AmountTextStyle));
         }
@@ -161,7 +161,7 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
 }
 
 /*
- * Effect update (D_8008ADA0[3]): this frame's matrix is func_150A8050's for (0, func_15144AA8(0) + 25, 0),
+ * Effect update (gModelEffectUpdate2Funcs[3]): this frame's matrix is func_150A8050's for (0, func_15144AA8(0) + 25, 0),
  * placed 120 units above the owner and scaled by 0.551.
  */
 s32 func_151D6E60(ModelEffect *fx) {
@@ -188,7 +188,7 @@ s32 func_151D6E60(ModelEffect *fx) {
 }
 
 /*
- * Text box update for style 3 (D_800888A0[3]): removes the box (returns 0) once its owner is gone or
+ * Text box update for style 3 (gTextBoxUpdateFuncs[3]): removes the box (returns 0) once its owner is gone or
  * replaced, otherwise prints the amount, fading out over the last fadeStart frames.
  */
 s32 text_updateAmount(TextObj *obj) {
@@ -221,15 +221,15 @@ s32 text_updateAmount(TextObj *obj) {
     // matching: no return value here, so the caller gets what the void text_print left in v0
 }
 
-/* Text box message handler for style 3 (D_800888B0[1]): keeps the owner reference up to date. */
+/* Text box message handler for style 3 (gTextBoxMessageFuncs[1]): keeps the owner reference up to date. */
 void text_handleAmountMessage(TextObj *obj, u8 *payload, u8 type) {
     AmountTextStyle *style = obj->text.style;
 
-    func_15169850((s32)payload, type, &style->owner, &style->ownerId, obj);
+    effect_handleOwnerActorEvent((s32)payload, type, &style->owner, &style->ownerId, obj);
 }
 
 /*
- * Effect pre-draw (D_8008ADBC[1]): binds segment 8 to D_80083740 while the effect's alpha is below 0xFF
+ * Effect pre-draw (gModelEffectPreDrawFuncs[1]): binds segment 8 to D_80083740 while the effect's alpha is below 0xFF
  * (else D_800838C0), then texture 0xC3 to segments 6 and 7.
  */
 Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {

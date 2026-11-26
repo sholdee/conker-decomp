@@ -6,7 +6,7 @@
 /* Spawns a tint effect with extraSize bytes of the caller's data after it (SightOwnedEffect); returns NULL if the
  * allocation fails. */
 void *screen_spawnTintEffect(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19, s32 extraSize) {
-    struct ScreenTint *effect = func_15167A68(0x5A, 0, extraSize + sizeof(struct ScreenTint), 0, 0xFF, 1);
+    struct ScreenTint *effect = effect_newObject(0x5A, 0, extraSize + sizeof(struct ScreenTint), 0, 0xFF, 1);
 
     if (effect == NULL) {
         return NULL;
@@ -32,7 +32,7 @@ void screen_updateTintEffect(struct ScreenTint *effect) {
     if (timer != 0) {
         timer -= D_800BE9E4;
         if (timer <= 0) {
-            func_1516972C(&effect->header);
+            effect_destroyObject(&effect->header);
             return;
         }
         effect->timer = timer;
@@ -147,9 +147,9 @@ void func_151A55D4(struct ScreenTint *effect, void *arg1, u8 arg2) {
     }
 }
 
-/* Forwards a message to the effect objects of kind 90 (func_15169260). */
+/* Forwards a message to the effect objects of kind 90 (effect_sendEventToTypes). */
 void func_151A561C(s32 arg0, u8 arg1) {
     const s32 ids[1] = { 90 };
 
-    func_15169260(ids, 1, arg0, arg1);
+    effect_sendEventToTypes(ids, 1, arg0, arg1);
 }

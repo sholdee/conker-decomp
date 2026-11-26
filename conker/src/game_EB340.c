@@ -3,14 +3,14 @@
 #include "variables.h"
 
 /* Creates the spawner object for `owner`, with its spawn timer at 0. */
-void func_150BDE90(Camera *owner, u8 arg1, s32 arg2) {
+void effect_newEmitterSpawner(Camera *owner, u8 arg1, s32 arg2) {
     EB340Spawn spawn;
     EB340Obj *obj;
 
     spawn.owner = owner;
     spawn.timer = 0;
 
-    obj = func_15149130(300, -1, 0x4F, -1, 0, 60, 8, arg1, arg2);
+    obj = effect_newTimedEffect(300, -1, 0x4F, -1, 0, 60, 8, arg1, arg2);
     if (obj != NULL) {
         memcpy(&obj->spawn, &spawn, sizeof(spawn));
     }
@@ -18,7 +18,7 @@ void func_150BDE90(Camera *owner, u8 arg1, s32 arg2) {
 
 /* Spawner update: when the timer runs out, spawns one emitter near the owner and
  * restarts the timer at a random 25..175. */
-void func_150BDF0C(EB340Obj *obj) {
+void effect_updateEmitterSpawner(EB340Obj *obj) {
     EB340Spawn *spawn;
     ScreenSpriteInfo emitter;
     void *effect;

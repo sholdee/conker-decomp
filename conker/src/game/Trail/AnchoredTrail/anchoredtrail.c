@@ -4,7 +4,7 @@
 
 /*
  * Bone trails: an emitter object (a TimedEffect made by trail_createAnchoredEmitter) follows a point on an actor's
- * bone and drags a trail object (made by func_15147A80) behind it. The trail keeps a ring buffer of
+ * bone and drags a trail object (made by effect_newEffectObj) behind it. The trail keeps a ring buffer of
  * points that it renders as a textured ribbon.
  */
 
@@ -36,7 +36,7 @@ TimedEffect *trail_createAnchoredEmitter(s16 arg0, u8 arg1, u8 anchorType, f32 m
     anchor.pos.z = 0.0f;
     anchor.maxStep = maxStep;
 
-    emitter = func_15149130(arg0, -1, 0x42, -1, arg1, 0x36, (extraSize + sizeof(TrailAnchor)), arg5, arg6);
+    emitter = effect_newTimedEffect(arg0, -1, 0x42, -1, arg1, 0x36, (extraSize + sizeof(TrailAnchor)), arg5, arg6);
     if (emitter != NULL) {
         memcpy(&((AnchoredTrailEmitter *)emitter)->anchor, &anchor, sizeof(TrailAnchor));
     }
@@ -95,12 +95,12 @@ void trail_releaseAnchoredEmitter(AnchoredTrailEmitter *emitter) {
 
 void trail_destroyAnchoredEmitter(AnchoredTrailEmitter *emitter) {
     trail_releaseAnchoredEmitter(emitter);
-    func_1514933C(&emitter->base);
+    effect_defaultDestroyTimedEffect(&emitter->base);
 }
 
 void trail_freeAnchoredEmitter(AnchoredTrailEmitter *emitter) {
     trail_releaseAnchoredEmitter(emitter);
-    func_15149368(&emitter->base);
+    effect_defaultFreeTimedEffect(&emitter->base);
 }
 
 /* Broadcasts message 0x3D ({actor, unique_id}): the actor is going away. */
@@ -109,7 +109,7 @@ void trail_broadcastActorGone(Actor *actor) {
 
     msg.actor = actor;
     msg.uniqueId = actor->unique_id;
-    func_151494E0((s32)&msg, 0x3D);
+    effect_sendEventToTimedEffects((s32)&msg, 0x3D);
 }
 
 /* Attaches a trail to `bone` of `actor`; `condition` picks an extra gAnchorConditionProcs check (-1 for none). */
@@ -137,11 +137,11 @@ void trail_onBoneAnchorMessage(AnchoredTrailEmitter *emitter, TrailBoneLink *msg
     if (msgType == 0x3D) {
         link = &(*pEmitter)->link;
         if ((msg->actor == link->actor) || (((TrailBoneLink *)*(s32 *)&msg)->actorId == link->actorId)) {
-            func_1516972C(&(*pEmitter)->base.header);
+            effect_destroyObject(&(*pEmitter)->base.header);
         }
     } else {
         link = &(*pEmitter)->link;
-        func_15149514((s32)msg, msgType, &link->actor, &link->actorId, *pEmitter);
+        effect_handleTimedEffectOwnerEvent((s32)msg, msgType, &link->actor, &link->actorId, *pEmitter);
     }
 }
 
@@ -253,7 +253,7 @@ void trail_spawnAnchoredTrail(AnchoredTrailEmitter *emitter) {
     header.unk14 = 4;
     header.material = 0;
 
-    trail = func_15147A80(&header, 0x20, sizeof(AnchoredTrailData), 0xD, 0x10, 0x10, 0, 0, 0, emitter->base.header.owner, emitter->base.header.kind);
+    trail = effect_newEffectObj(&header, 0x20, sizeof(AnchoredTrailData), 0xD, 0x10, 0x10, 0, 0, 0, emitter->base.header.owner, emitter->base.header.kind);
     if (trail != NULL) {
         memcpy(trail->data, &data, sizeof(AnchoredTrailData));
         emitter->anchor.trail = trail;
@@ -653,10 +653,10 @@ void trail_detachFromEmitter(AnchoredTrail *trail) {
 
 void trail_destroyAnchoredTrail(AnchoredTrail *trail) {
     trail_detachFromEmitter(trail);
-    func_151478F4(trail);
+    effect_defaultDestroyEffectObj(trail);
 }
 
 void trail_freeAnchoredTrail(AnchoredTrail *trail) {
     trail_detachFromEmitter(trail);
-    func_15147928(trail);
+    effect_defaultFreeEffectObj(trail);
 }

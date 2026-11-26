@@ -12,18 +12,18 @@ s32 func_150FC930(Actor *obj, s32 arg1, s32 arg2) {
     return TRUE;
 }
 
-/* Destroys the effect's child object, if any (func_1516972C). */
+/* Destroys the effect's child object, if any (effect_destroyObject). */
 void func_150FC974(Effect_129DE0 *effect) {
     // matching: IDO copies the arg to $a1 and reloads child for the call only through a pointer to the field
     EffectHeader **slot = &effect->child;
 
     if (*slot != NULL) {
-        func_1516972C(*slot);
+        effect_destroyObject(*slot);
     }
 }
 
-/* D_8008A688 callback: func_150FC974, then func_1514933C on the effect. */
+/* gTimedEffectDestroyFuncs callback: func_150FC974, then effect_defaultDestroyTimedEffect on the effect. */
 void func_150FC9A4(Effect_129DE0 *effect) {
     func_150FC974(effect);
-    func_1514933C(&effect->base);
+    effect_defaultDestroyTimedEffect(&effect->base);
 }

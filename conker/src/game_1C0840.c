@@ -7,7 +7,7 @@
  * below it, clearing pos.unk8, when it has none), then rearms the emitter's cooldown to 100..227.
  */
 // matching: volatile keeps `emitter` in its stack slot (reloaded after each call) instead of $s0
-void func_15193390(ObjectEmitter *volatile emitter) {
+void effect_dropFallingObject(ObjectEmitter *volatile emitter) {
     u8 pad[8]; // matching: the frame needs 8 more bytes
     QuadFxData spawn;
     EmitterPos *pos;
@@ -35,10 +35,10 @@ void func_15193390(ObjectEmitter *volatile emitter) {
     spawn.flags = 0x4880;
     spawn.unkA4 = 0x80;
 
-    func_1516865C(&spawn, 0xFF, 0xFF, 0xFF, 0x80);
+    effect_initQuadFxTemplate(&spawn, 0xFF, 0xFF, 0xFF, 0x80);
     // matching: one load of the volatile `emitter` serves both arguments
     pos = (EmitterPos *)emitter;
-    func_15168800(&spawn, ((ObjectEmitter *)pos)->base.header.owner, ((ObjectEmitter *)pos)->base.header.kind);
+    effect_spawnQuadFx(&spawn, ((ObjectEmitter *)pos)->base.header.owner, ((ObjectEmitter *)pos)->base.header.kind);
     emitter->base.header.state = (func_150ADA20() & 0x7F) + 100;
 }
 
@@ -69,7 +69,7 @@ struct FallingObject {
  * a speed that ramps up to 20; once it drops below floorY it sets unk98 to -1, first spawning a
  * func_151DBCBC effect at the landing point when unkB3 is 1.
  */
-void func_151934B4(FallingObject *obj) {
+void effect_updateFallingObject(FallingObject *obj) {
     f32 pos[4]; // matching: a 4th (unused) slot keeps pos at its original stack offset
 
     if (obj->unkA4 < obj->unk96) {

@@ -28,20 +28,20 @@ ActorEmitterProcess *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 kill
     }
     if (killExisting) {
         for (i = 0; i < 2; i++) {
-            D_800DD190++;
-            emitter = (ActorEmitterProcess *)D_800DCE50[i][0x21];
+            gObjectWalkDepth++;
+            emitter = (ActorEmitterProcess *)gObjectLists[i][0x21];
             while (emitter != NULL) {
-                D_800DD198[D_800DD190] = emitter->header.next;
+                gObjectWalkNext[gObjectWalkDepth] = emitter->header.next;
                 if (owner == emitter->params.owner || emitter->params.ownerId == owner->unique_id) {
-                    func_1516972C(&emitter->header);
+                    effect_destroyObject(&emitter->header);
                 }
-                emitter = D_800DD198[D_800DD190];
+                emitter = gObjectWalkNext[gObjectWalkDepth];
             }
             {
-                // matching: the block-scope redeclaration makes IDO rematerialize &D_800DD190
-                extern s8 D_800DD190;
+                // matching: the block-scope redeclaration makes IDO rematerialize &gObjectWalkDepth
+                extern s8 gObjectWalkDepth;
 
-                D_800DD190--;
+                gObjectWalkDepth--;
             }
         }
     }
@@ -429,7 +429,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
         done = 1;
     }
     if (done) {
-        func_1516972C(&self->header);
+        effect_destroyObject(&self->header);
     }
 }
 
@@ -458,7 +458,7 @@ void func_1518E308(ActorEmitterProcess *emitter) {
     emitter->accum = 0.0f;
     for (i = 0; i < 100; i++, slot++) {
         if (slot->particle != NULL) {
-            func_1516972C(&slot->particle->head.header);
+            effect_destroyObject(&slot->particle->head.header);
         }
     }
     bzero(emitter->slots, sizeof(emitter->slots));
@@ -479,7 +479,7 @@ ActorEmitterProcess *func_1518E3C4(ActorEmitterParams *params, u8 arg1) {
     if (params->owner->character_type == 150) {
         return NULL;
     }
-    emitter = func_15167A68(0x21, 1, 0x9EC, 1, arg1, 1);
+    emitter = effect_newObject(0x21, 1, 0x9EC, 1, arg1, 1);
     if (emitter == NULL) {
         return NULL;
     }

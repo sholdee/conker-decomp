@@ -18,7 +18,7 @@ u8 gFrameDeltaHistoryCount; // the number of filled slots of gFrameDeltaHistory
 #include "variables.h"
 
 /* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
-void func_15169040(s32 event, u8 eventType);
+void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Game main loop: runs frames until game_processMessage says to stop. */
 void game_mainLoop(void) {
@@ -109,7 +109,7 @@ s32 game_processMessage(void) {
                 if (gPaused != 0 || game_updateFrame() != 0) {
                     gDisplayListHead = view_setColorImage(gDisplayListHead);
                     light_clearPlayerMasks();
-                    func_15167310();
+                    effect_preDrawObjects();
                     for (i = 0; i <= gScreenLayout; i++) {
                         gCurrentView = gViewPlayers[i];
                         func_15018F80(gCurrentView);
@@ -222,21 +222,21 @@ void func_15018DFC(void) {
     actor_updatePlayerStates();
 }
 
-/* Draws group 0 of player's display lists (func_151674F8), then func_15174AA4 for the level. */
+/* Draws group 0 of player's display lists (effect_drawObjectGroup), then effect_drawLevelHook1 for the level. */
 Gfx *func_15018E88(Gfx *gfx, s16 player) {
     if (gIsMultiplayer == 0) {
         sprite_drawLevelSprites(&gfx, 1);
     }
-    gfx = func_151674F8(gfx, 0, player, 0);
-    gfx = func_151674F8(gfx, 0, player, 1);
-    return func_15174AA4(gfx, level, player);
+    gfx = effect_drawObjectGroup(gfx, 0, player, 0);
+    gfx = effect_drawObjectGroup(gfx, 0, player, 1);
+    return effect_drawLevelHook1(gfx, level, player);
 }
 
-/* Counterpart of func_15018E88: func_15174B48, then group 1 of player's display lists. */
+/* Counterpart of func_15018E88: effect_drawLevelHook2, then group 1 of player's display lists. */
 Gfx *func_15018F08(Gfx *gfx, s16 player) {
-    gfx = func_15174B48(gfx, level, player);
-    gfx = func_151674F8(gfx, 1, player, 0);
-    gfx = func_151674F8(gfx, 1, player, 1);
+    gfx = effect_drawLevelHook2(gfx, level, player);
+    gfx = effect_drawObjectGroup(gfx, 1, player, 0);
+    gfx = effect_drawObjectGroup(gfx, 1, player, 1);
 
     sprite_drawLevelSprites(&gfx, 2);
 
@@ -262,7 +262,7 @@ void game_beginFrame(void) {
     D_800BE728 = func_1501BBB8();
     game_updateFrameTiming();
     if ((gPauseRequested != 0) && (gPaused == 0)) {
-        func_15169040(0, 0x47);
+        effect_broadcastEvent(0, 0x47);
     }
     func_1501C1B0();
     func_1501BB20();
@@ -328,13 +328,13 @@ s32 game_updateFrame(void) {
         sprite_setViewMtx(player);
     }
     gfx_buildDrawLists(0);
-    func_151749F8(level, 0);
+    effect_updateLevel(level, 0);
     func_1501C860();
     func_1511FC20(D_800BE9C0);
     trail_updateBoneTrails(0);
     if (gPaused == 0) {
-        func_1516706C();
-        func_151671E8();
+        effect_runFrameHooks();
+        effect_preUpdateObjects();
     }
     actor_updateObjects();
     if (gIsMultiplayer == 0) {
@@ -350,7 +350,7 @@ s32 game_updateFrame(void) {
     }
     if (gPaused == 0) {
         swarm_updateModelSlots();
-        func_151670C0();
+        effect_updateObjects();
         func_15177A94();
     }
     if (gPaused == 0) {
@@ -368,7 +368,7 @@ s32 game_updateFrame(void) {
 
 void func_15019414(void) {
     if (gPaused == 0) {
-        func_15167010();
+        effect_runTypeGlobalHooks();
     }
     func_1517ABB0();
     if (gIsMultiplayer == 0) {
@@ -418,8 +418,8 @@ Gfx *game_drawMainPass(Gfx *gfx, s16 player) {
     if (D_800BE575 == 2) {
         gfx = screen_drawFrameEcho(gfx);
     }
-    gfx = func_151674F8(gfx, 6, player, 0);
-    gfx = func_151674F8(gfx, 6, player, 1);
+    gfx = effect_drawObjectGroup(gfx, 6, player, 0);
+    gfx = effect_drawObjectGroup(gfx, 6, player, 1);
     gfx = shadow_drawRealTime(gfx, player);
     gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
     gfx = actor_drawPass(gfx, 1, player);
@@ -437,8 +437,8 @@ Gfx *game_drawMainPass(Gfx *gfx, s16 player) {
     gfx = trail_drawBoneTrails(gfx, 0, player);
     gfx = trail_drawBoneTrails(gfx, 1, player);
     gfx = actor_drawPass(gfx, 2, player);
-    gfx = func_151674F8(gfx, 2, player, 0);
-    return func_151674F8(gfx, 2, player, 1);
+    gfx = effect_drawObjectGroup(gfx, 2, player, 0);
+    return effect_drawObjectGroup(gfx, 2, player, 1);
 }
 
 /* Full-screen pass drawn once after every player's main pass. */
@@ -479,8 +479,8 @@ Gfx *func_150198FC(Gfx *gfx) {
     if ((gPaused == 0) && (gPauseRequested == 0)) {
         gfx = func_1508FD38(gfx);
     }
-    gfx = func_151674F8(gfx, 3, 0, 0);
-    gfx = func_151674F8(gfx, 3, 0, 1);
+    gfx = effect_drawObjectGroup(gfx, 3, 0, 0);
+    gfx = effect_drawObjectGroup(gfx, 3, 0, 1);
     return sprite_endDraw(gfx);
 }
 
@@ -494,8 +494,8 @@ Gfx *func_15019BB8(Gfx *gfx, s32 player) {
     if ((D_800D18A0 & (1 << player)) || (D_800D18A2 & (1 << player))) {
         gfx = func_1507DB6C(gfx, player);
     }
-    gfx = func_151674F8(gfx, 4, player, 0);
-    return func_151674F8(gfx, 4, player, 1);
+    gfx = effect_drawObjectGroup(gfx, 4, player, 0);
+    return effect_drawObjectGroup(gfx, 4, player, 1);
 }
 
 /* D_800DC2A0 is one Mtx array per framebuffer, indexed by player. */
@@ -510,8 +510,8 @@ Gfx *func_15019CC8(Gfx *gfx, s32 player) {
     if (level == 0x1D) {
         gfx = actor_drawPass(gfx, 6, player);
     }
-    gfx = func_151674F8(gfx, 5, 0, 0);
-    gfx = func_151674F8(gfx, 5, 0, 1);
+    gfx = effect_drawObjectGroup(gfx, 5, 0, 0);
+    gfx = effect_drawObjectGroup(gfx, 5, 0, 1);
     gSPMatrix(gfx++, &gViews[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
     gSPMatrix(gfx++, FRAME_MTX(D_800BE9C0, player), G_MTX_PROJECTION);
     return gfx;

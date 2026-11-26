@@ -87,7 +87,7 @@ void weapon_getForwardProjectileStart(Actor *actor, s16 arg1, Vec3f *out) {
     func_15145EA4(&src, &dst, mtx, 1);
 }
 
-/* Spawns a randomized effect (func_15102B38) on bone `bone` of `actor` at `position`. */
+/* Spawns a randomized effect (effect_spawnBoneBeamParticle) on bone `bone` of `actor` at `position`. */
 void weapon_spawnBoneBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, Vec3f *position, u8 arg5, s32 arg6) {
     ParticleSize motion;
     s32 pad; // matching: unused stack slot between motion and random
@@ -97,6 +97,6 @@ void weapon_spawnBoneBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f
     motion.width = func_150ADA68() * 5.9f + 14.1f;
     random[0] = func_150ADA20();
     random[1] = func_150ADA20();
-    func_15102B38(actor, bone, start, end, &motion, (random[0] & 3) + 6, 0xFF, func_150ADA68() * 270.0f + 359.0f,
+    effect_spawnBoneBeamParticle(actor, bone, start, end, &motion, (random[0] & 3) + 6, 0xFF, func_150ADA68() * 270.0f + 359.0f,
                   position, 0xFF, 0, -1, arg5, arg6);
 }

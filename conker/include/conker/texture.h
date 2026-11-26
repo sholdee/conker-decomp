@@ -74,9 +74,9 @@ void texture_addBinding(void *object, s32 texture, s32 palette, s32 textureSegme
 Gfx *texture_emitBindings(Gfx *gfx, void *object);
 
 /* game/Texture/TextureTables/texturetables.c: the shared texture tables (a data-only unit). The TextureDesc entries are the ones the
- * texture table D_8008CA4C (game_1944C0.c) and the code use by name; D_80090150, D_8009016C, D_80090184
+ * texture table gEffectAnimTextures (game_1944C0.c) and the code use by name; D_80090150, D_8009016C, D_80090184
  * and D_800901C4 are the asset id lists of D_80082B20 (game_305D0.c); D_80090230 and D_80090244 are the
- * two frame tables of D_80088810 and D_80088900. */
+ * two frame tables of gBounceRecordFrameTables and gTexAnimFrameTables. */
 extern s32 D_80090150[7];
 extern s32 D_8009016C[6];
 extern s32 D_80090184[16];

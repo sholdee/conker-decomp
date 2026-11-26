@@ -70,7 +70,7 @@ typedef struct Vec3i {
 
 // size 0x44
 
-/* Actor effect D_8008A0B4[handler] (game_16EE20.c): its handler runs once, or every frame while it is
+/* Actor effect gActorEffects[handler] (game_16EE20.c): its handler runs once, or every frame while it is
  * attached to the actor as a timed effect of `duration` frames. */
 typedef struct ActorEffectDef {
     /* 0x0 */ void (*handler)(); /* (actor, side, timer); declared without a prototype: the game_173D40.c
@@ -173,36 +173,36 @@ typedef struct {
     s32 unkCC; // used
 } struct42;
 
-#define OBJ_TYPE_COUNT 104 /* object types: D_8008B4A8 entries, lists per D_800DCE50 row */
+#define OBJ_TYPE_COUNT 104 /* object types: gObjectTypes entries, lists per gObjectLists row */
 
-/* Common head of every object in the object lists D_800DCE50[list][type] (game_1944C0.c): effects, particles,
- * sprites, timed effects. func_15167A68 allocates one and links it in (func_15168A4C); func_1516972C destroys it
- * (the type's destroy hook, by default a move to type 1) and func_1516979C frees it. */
+/* Common head of every object in the object lists gObjectLists[list][type] (game_1944C0.c): effects, particles,
+ * sprites, timed effects. effect_newObject allocates one and links it in (effect_linkObject); effect_destroyObject destroys it
+ * (the type's destroy hook, by default a move to type 1) and effect_freeObject frees it. */
 typedef struct EffectHeader {
-    /* 0x00 */ u8 type;     /* index into D_8008B4A8 (ObjType); 1 = pending free */
+    /* 0x00 */ u8 type;     /* index into gObjectTypes (ObjType); 1 = pending free */
     /* 0x01 */ u8 kind;     /* the object list (0 or 1) it is linked into */
     /* 0x02 */ u8 pad2[2];
     /* 0x04 */ struct EffectHeader *prev;
     /* 0x08 */ struct EffectHeader *next;
-    /* 0x0C */ u8 owner;    /* events 0xF / 0x10 naming this id destroy the object (func_1516968C) */
+    /* 0x0C */ u8 owner;    /* events 0xF / 0x10 naming this id destroy the object (effect_handleOwnerEvent) */
     /* 0x0D */ u8 flags;    /* TimedEffect: bit 0 = state counts down, bit 1 = allocated as type 95 (else 35) */
     /* 0x0E */ s16 state;   /* -1 frees the object; a TimedEffect's timer (it expires below 0) */
 } EffectHeader; /* size 0x10 */
 
-/* Timed effect object (type 35, or 95 with flag 2), allocated by func_15149130 with dataSize bytes of
+/* Timed effect object (type 35, or 95 with flag 2), allocated by effect_newTimedEffect with dataSize bytes of
  * per-effect data after it; game_1765E0.c runs its callbacks. */
 typedef struct TimedEffect {
     /* 0x00 */ EffectHeader header;
-    /* 0x10 */ s8 expireCallback; /* D_8008A4C0 index, run once the timer goes negative; -1 = none */
-    /* 0x11 */ s8 tickCallback;   /* D_8008A4E8 index, run every frame; -1 = none */
-    /* 0x12 */ s8 drawCallback;   /* D_8008A670 index; -1 = none */
-    /* 0x13 */ u8 callbackSet;    /* index into D_8008A688 / D_8008A7B0 / D_8008A8D8 (74 sets) */
+    /* 0x10 */ s8 expireCallback; /* gTimedEffectExpireFuncs index, run once the timer goes negative; -1 = none */
+    /* 0x11 */ s8 tickCallback;   /* gTimedEffectTickFuncs index, run every frame; -1 = none */
+    /* 0x12 */ s8 drawCallback;   /* gTimedEffectDrawFuncs index; -1 = none */
+    /* 0x13 */ u8 callbackSet;    /* index into gTimedEffectDestroyFuncs / gTimedEffectFreeFuncs / gTimedEffectMessageFuncs (74 sets) */
     /* 0x14 */ Vtx *buffers[4];   /* per-view vertex buffers (func_151D5D60), released by func_151D5E30 */
     /* 0x24 */ u8 pad24[4];
 } TimedEffect; /* size 0x28; the effect's data follows */
 
-/* Position data of an object emitter (a TimedEffect from func_151491F4 whose expire callback
- * func_15193390, game_1C0840.c, spawns object type 0x45 there). */
+/* Position data of an object emitter (a TimedEffect from effect_newTimedEffectNoDraw whose expire callback
+ * effect_dropFallingObject, game_1C0840.c, spawns object type 0x45 there). */
 typedef struct EmitterPos {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
@@ -241,9 +241,9 @@ typedef struct LevelHeader {
     /* 0x08 */ u8  unk8;            // sky mode (D_800891D8); 4 = textured sky
     /* 0x09 */ u8  unk9;            // sky texture set (D_800891BC)
     /* 0x0A */ u8  unkA;            // callback, gLevelSetupFuncs
-    /* 0x0B */ u8  updateCallback;  // D_8008CD04
-    /* 0x0C */ u8  drawCallback1;   // D_8008CD74
-    /* 0x0D */ u8  drawCallback2;   // D_8008CD7C
+    /* 0x0B */ u8  updateCallback;  // gLevelUpdateHooks
+    /* 0x0C */ u8  drawCallback1;   // gLevelDrawHooks1
+    /* 0x0D */ u8  drawCallback2;   // gLevelDrawHooks2
     /* 0x0E */ u8  unkE;            // callback, D_80082B40
     /* 0x0F */ u8  unkF;            // callback, D_80089670
     /* 0x10 */ u8  unk10;           // sun position, index into D_8008CFFC
@@ -318,7 +318,7 @@ typedef struct ObjPartsState {
 } ObjPartsState;
 
 /*
- * Object type descriptor, D_8008B4A8[type] (game_1944C0). Each type's handlers take that type's own object
+ * Object type descriptor, gObjectTypes[type] (game_1944C0). Each type's handlers take that type's own object
  * struct, so the one-argument handlers (unk0, unk4, unkC, destroy, free: the object) are declared without a
  * prototype. draw, drawBegin, drawEnd and handleEvent keep theirs: their calls pass an s16 view or a u8
  * event type, and the calls only match with those parameter types in scope.
@@ -899,21 +899,21 @@ typedef struct ModelAttachment {
     /* 0x58 */ struct ModelAttachment *prev;
 } ModelAttachment; // size 0x5C
 
-/* Node of the attachment list an actor keeps at 0x2F4 (game_179F30.c: func_1514EC1C attaches,
- * func_1514ECE0 finds by type, func_1514ED3C finds by handle). */
+/* Node of the attachment list an actor keeps at 0x2F4 (game_179F30.c: effect_attach attaches,
+ * effect_findAttachmentByType finds by type, effect_findAttachmentByHandle finds by handle). */
 typedef struct Attachment {
-    /* 0x00 */ EffectHeader header;         // object-list node (func_15167A68)
+    /* 0x00 */ EffectHeader header;         // object-list node (effect_newObject)
     /* 0x10 */ void *handle;                // the attached thing; what it is depends on `type`
     /* 0x14 */ struct Attachment *next;
     /* 0x18 */ struct Attachment *prev;
-    /* 0x1C */ s16 type;                    // index into D_8008ABE8
+    /* 0x1C */ s16 type;                    // index into gAttachmentTypes
 } Attachment;
 
 /* Attachment types form a tree (first child / next sibling), so a message sent to a type
- * also reaches attachments of its subtypes. D_8008ABE8 holds one per type. */
+ * also reaches attachments of its subtypes. gAttachmentTypes holds one per type. */
 typedef struct AttachmentType {
-    /* 0x0 */ s16 messageHandler;           // index into D_8008AB64, or -1
-    /* 0x2 */ s16 destroyHandler;           // index into D_8008AB58, or -1
+    /* 0x0 */ s16 messageHandler;           // index into gAttachMessageFuncs, or -1
+    /* 0x2 */ s16 destroyHandler;           // index into gAttachDestroyFuncs, or -1
     /* 0x4 */ s16 firstChild;               // -1 terminates
     /* 0x6 */ s16 nextSibling;              // -1 terminates
 } AttachmentType;
@@ -1939,7 +1939,7 @@ typedef struct SpriteParams {
     /* 0x10 */ Texture *tex;
 } SpriteParams; /* size 0x14 */
 
-/* An entry of the texture tables: the effect texture table gEffectTextures, the entries that D_8008CA4C points
+/* An entry of the texture tables: the effect texture table gEffectTextures, the entries that gEffectAnimTextures points
  * at, and single entries such as D_800903D4. sprite_setSharedTexture (game/Sprite/SpriteDraw/spritedraw.c) converts one into a Texture. */
 typedef struct TextureDesc {
     /* 0x0 */ u32 addr;     // below 0x10000000: the asset id (sprite_drawImage steps it through the tiles of a big
@@ -2508,7 +2508,7 @@ typedef struct LightTrack {
     /* 0xD */ u8 handler;  // gLightTrackEventHandlers event handler index
 } LightTrack; // size 0x10
 
-/* Radius follows the value read by func_15188010 (func_151638E0). */
+/* Radius follows the value read by effect_getColorAnimBlend (func_151638E0). */
 typedef struct LightFollow {
     /* 0x0 */ s32 source;
     /* 0x4 */ f32 base;
@@ -2586,7 +2586,7 @@ typedef union LightEffectData {
         /* 0x2C */ u8 pad2C[4];
         /* 0x30 */ u8 objectId; // WorldObject id (gfx_findObjectById) flagged by the cycle callbacks
     } objectCycle;    // func_15009990
-    struct GroundFlash groundFlash; // func_150EAE24
+    struct GroundFlash groundFlash; // effect_updateGroundFlash
 } LightEffectData;
 
 /* LightEffect.flags */
@@ -2594,7 +2594,7 @@ typedef union LightEffectData {
 #define LIGHT_EFFECT_OWNS_LIGHT 2 // the light is freed with the effect (light_createWithEffect)
 
 /*
- * A light effect instance (object type 53, allocated by light_createEffect with func_15167A68): a 0x18-byte
+ * A light effect instance (object type 53, allocated by light_createEffect with effect_newObject): a 0x18-byte
  * header, then a payload of the requested size. The first 0xD bytes (type to owner) are the object-list
  * head of EffectHeader; 0xD-0xF differ from it. The allocation is 0x18 + payload size, so
  * sizeof(LightEffect) is not used.
@@ -2753,13 +2753,13 @@ typedef struct ObjGroup {
 /* One of the 10 bouncing cursors in D_800BE4E0 (created by func_1500FE30 in game_3D2E0, stepped in
  * game_F5800). */
 typedef struct BounceRecord {
-    /* 0x0 */ u8  table;        // which D_80088810 table to draw from (0 or 1)
+    /* 0x0 */ u8  table;        // which gBounceRecordFrameTables table to draw from (0 or 1)
     /* 0x1 */ u8  pad1;
     /* 0x2 */ s8  dir;          // +1 / -1, flips when pos bounces off either end
     /* 0x3 */ u8  pad3;
     /* 0x4 */ s16 pos;          // bounces within [0, 0x500); pos >> 8 picks the table entry
     /* 0x6 */ s16 speed;        // eased towards targetSpeed each tick
-    /* 0x8 */ s16 targetSpeed;  // re-randomised by func_150C851C
+    /* 0x8 */ s16 targetSpeed;  // re-randomised by effect_randomizeBounceRecordSpeeds
 } BounceRecord; // size 0xA
 
 /* One loaded effect model, gEffectModelSlots[slot] (game/Swarm/ModelSlots/modelslots loads and frees them). */
@@ -3358,7 +3358,7 @@ typedef struct LevelModelEntry {
     /* 0x4 */ s32 loaded;
 } LevelModelEntry;
 
-/* Small s32 id tables in rodata (effect-object kinds for func_15169260, texture ids, ...) that functions copy
+/* Small s32 id tables in rodata (effect-object kinds for effect_sendEventToTypes, texture ids, ...) that functions copy
  * whole onto their stack: the original code used initialized local arrays, whose data the rodata provides. */
 typedef struct IdList1 {
     /* 0x0 */ s32 ids[1];

@@ -141,7 +141,7 @@ struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in
 #include "variables.h"
 
 /* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
-void func_15169040(s32 event, u8 eventType);
+void effect_broadcastEvent(s32 event, u8 eventType);
 
 extern u64 D_800CBE10[];
 
@@ -879,7 +879,7 @@ void func_1501E73C(s32 scene) {
     }
 }
 
-/* End the scene's cutscene: report it (func_15169040), flag it played, release its data and restore
+/* End the scene's cutscene: report it (effect_broadcastEvent), flag it played, release its data and restore
    the camera. If another cutscene is chained (D_800C35C2), start it instead. */
 void func_1501E81C(s32 skipped, s32 scene) {
     Camera *player;
@@ -892,7 +892,7 @@ void func_1501E81C(s32 skipped, s32 scene) {
 
             cutscene[0] = D_800C35E8[scene];
             reason = skipped ? 0xF : 0x10;
-            func_15169040((s32)cutscene, reason);
+            effect_broadcastEvent((s32)cutscene, reason);
         }
         D_800C35B8[scene] = -100;
         D_800C35B0[scene] = D_800C3C8E;

@@ -3,11 +3,11 @@
 #include "variables.h"
 
 /* This file's .data: the update functions and message handlers of the text box styles (TextLines.updateFn, .msgFn). */
-static s32 (*D_800888A0[])(TextObj *) = { func_150D01A0, func_150D032C, func_150D0534, text_updateAmount };
-static void (*D_800888B0[])(TextObj *, u8 *, u8) = { NULL, text_handleAmountMessage };
+static s32 (*gTextBoxUpdateFuncs[])(TextObj *) = { effect_updateFadeTextBox, effect_updatePromptTextBox, effect_updateSlowFadeTextBox, text_updateAmount };
+static void (*gTextBoxMessageFuncs[])(TextObj *, u8 *, u8) = { NULL, text_handleAmountMessage };
 
 /* Returns the end of the line at str: its 0xBD line break or the string's terminating 0. */
-u8 *func_150CFD20(u8 *str) {
+u8 *effect_findLineEnd(u8 *str) {
     while (*str != 0xBD && *str != 0) {
         str++;
     }
@@ -15,7 +15,7 @@ u8 *func_150CFD20(u8 *str) {
 }
 
 /* Returns the end (terminating 0) of str. */
-u8 *func_150CFD5C(u8 *str) {
+u8 *effect_findStringEnd(u8 *str) {
     while (*str != 0) {
         str++;
     }
@@ -23,24 +23,24 @@ u8 *func_150CFD5C(u8 *str) {
 }
 
 /* Returns the length of the line at str and stores its end in *lineEnd. */
-s32 func_150CFD84(u8 *str, u8 **lineEnd) {
+s32 effect_getLineLength(u8 *str, u8 **lineEnd) {
     u8 *end;
 
-    end = func_150CFD20(str);
+    end = effect_findLineEnd(str);
     *lineEnd = end;
     return end - str;
 }
 
 /* Returns the length of the longest line in str. */
-s32 func_150CFDB8(u8 *str) {
+s32 effect_getLongestLineLength(u8 *str) {
     s32 longest;
     u8 *end;
     u8 *lineEnd;
 
     longest = 0;
-    end = func_150CFD5C(str);
+    end = effect_findStringEnd(str);
     while (str < end) {
-        s32 len = func_150CFD84(str, &lineEnd);
+        s32 len = effect_getLineLength(str, &lineEnd);
         if (longest < len) {
             longest = len;
         }
@@ -50,7 +50,7 @@ s32 func_150CFDB8(u8 *str) {
 }
 
 /* Copies the current line into lines[page]. */
-void func_150CFE3C(TextObj *obj) {
+void effect_copyTextLine(TextObj *obj) {
     TextLines *text = &obj->text;
 
     memcpy(text->lines[text->page], text->line, text->lineLen);
@@ -58,20 +58,20 @@ void func_150CFE3C(TextObj *obj) {
 }
 
 /* Moves on to the next line, if there is one. */
-void func_150CFE98(TextObj *obj) {
+void effect_nextTextLine(TextObj *obj) {
     TextLines *text = &obj->text;
 
     if (*text->lineEnd != 0) {
         text->line = text->lineEnd + 1;
-        text->lineLen = func_150CFD84(text->lineEnd + 1, &text->lineEnd);
+        text->lineLen = effect_getLineLength(text->lineEnd + 1, &text->lineEnd);
         text->page ^= 1;
-        func_150CFE3C(obj);
+        effect_copyTextLine(obj);
         text->flags |= 1;
     }
 }
 
 /* Creates a text box object for str, with styleSize bytes of style state (left zeroed). */
-TextObj *func_150CFF10(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn, u8 msgFn, u8 arg6, s32 arg7) {
+TextObj *effect_newTextBox(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn, u8 msgFn, u8 arg6, s32 arg7) {
     TextLines init;
     TextObj *obj;
     s32 lineSize;
@@ -84,14 +84,14 @@ TextObj *func_150CFF10(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn,
     init.str = str;
     init.line = str;
     init.id = id;
-    init.lineLen = func_150CFD84(str, &init.lineEnd);
+    init.lineLen = effect_getLineLength(str, &init.lineEnd);
     init.lines[0] = NULL;
     init.lines[1] = NULL;
     init.style = NULL;
 
-    lineSize = func_150CFDB8(str) + 1;
+    lineSize = effect_getLongestLineLength(str) + 1;
 
-    obj = func_15149130(duration, -1, -1, 5, 3, 0x47, (sizeof(TextLines) + styleSize + lineSize * 2), arg6, arg7);
+    obj = effect_newTimedEffect(duration, -1, -1, 5, 3, 0x47, (sizeof(TextLines) + styleSize + lineSize * 2), arg6, arg7);
     if (obj != NULL) {
         text = &obj->text;
         memcpy(text, &init, sizeof(TextLines));
@@ -100,16 +100,16 @@ TextObj *func_150CFF10(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn,
         text->lines[1] = text->lines[0] + lineSize;
         *text->lines[0] = 0;
         *text->lines[1] = 0;
-        func_150CFE3C(obj);
+        effect_copyTextLine(obj);
     }
     return obj;
 }
 
 /* Text box update: runs the style's update function, removing the box when it returns 0. */
-s32 func_150D0034(s32 arg0, TextObj *obj, s32 arg2) {
+s32 effect_drawTextBox(s32 arg0, TextObj *obj, s32 arg2) {
     TextLines *text = &obj->text;
 
-    if ((text->updateFn != -1) && (D_800888A0[text->updateFn](obj) == 0)) {
+    if ((text->updateFn != -1) && (gTextBoxUpdateFuncs[text->updateFn](obj) == 0)) {
         obj->base.header.state = -1;
         return arg0;
     }
@@ -119,15 +119,15 @@ s32 func_150D0034(s32 arg0, TextObj *obj, s32 arg2) {
 
 /* Text box message handler: message 0x51 with this box's id advances the line; the style's
    handler gets every other message. */
-void func_150D00C0(TextObj *obj, u8 *payload, u8 type) {
+void effect_textBoxMessage(TextObj *obj, u8 *payload, u8 type) {
     void (*handler)(TextObj *, u8 *, u8);
 
     if (type == 0x51) {
         if (obj->text.id == *payload) {
-            func_150CFE98(obj);
+            effect_nextTextLine(obj);
         }
     } else {
-        handler = D_800888B0[obj->text.msgFn];
+        handler = gTextBoxMessageFuncs[obj->text.msgFn];
         if (handler != NULL) {
             handler(obj, payload, type);
         }
@@ -141,19 +141,19 @@ typedef struct {
 } CrossfadeStyle;
 
 /* Creates a text box that crossfades between lines (style 0). */
-void func_150D0134(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
+void effect_newFadeTextBox(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
     CrossfadeStyle style;
     TextObj *obj;
 
     style.fadeTimer = 0;
-    obj = func_150CFF10(id, str, duration, 8, 0, 0, arg3, arg4);
+    obj = effect_newTextBox(id, str, duration, 8, 0, 0, arg3, arg4);
     if (obj != NULL) {
         memcpy(obj->text.style, &style.fadeTimer, sizeof(style.fadeTimer));
     }
 }
 
 /* Style 0 update: draws the current line fading in over 8 frames and the previous one fading out. */
-s32 func_150D01A0(TextObj *obj) {
+s32 effect_updateFadeTextBox(TextObj *obj) {
     s8 *fadeTimer;
     u8 alpha;
     u8 fade;
@@ -191,20 +191,20 @@ typedef struct {
 } TypewriterStyle;
 
 /* Creates a text box that types out each line behind a "C:> " prompt (style 1). */
-void func_150D02B4(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
+void effect_newPromptTextBox(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
     TextObj *obj;
     TypewriterStyle style;
 
     style.shown = 0;
     style.progress = 0.0f;
-    obj = func_150CFF10(id, str, duration, 8, 1, 0, arg3, arg4);
+    obj = effect_newTextBox(id, str, duration, 8, 1, 0, arg3, arg4);
     if (obj != NULL) {
         memcpy(obj->text.style, &style, sizeof(style));
     }
 }
 
 /* Style 1 update: types out the current line and draws it after the prompt, with a cursor. */
-s32 func_150D032C(TextObj *obj) {
+s32 effect_updatePromptTextBox(TextObj *obj) {
     TextLines *text;
     TypewriterStyle *style;
     u8 buf[0x50];
@@ -240,19 +240,19 @@ s32 func_150D032C(TextObj *obj) {
 }
 
 /* Creates a text box that crossfades between lines more slowly, in white (style 2). */
-void func_150D04C4(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
+void effect_newSlowFadeTextBox(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
     CrossfadeStyle style;
     TextObj *obj;
 
     style.fadeTimer = 0;
-    obj = func_150CFF10(id, str, duration, 8, 2, 0, arg3, arg4);
+    obj = effect_newTextBox(id, str, duration, 8, 2, 0, arg3, arg4);
     if (obj != NULL) {
         memcpy(obj->text.style, &style.fadeTimer, sizeof(style.fadeTimer));
     }
 }
 
-/* Style 2 update: like func_150D01A0 but white and over 20 frames. */
-s32 func_150D0534(TextObj *obj) {
+/* Style 2 update: like effect_updateFadeTextBox but white and over 20 frames. */
+s32 effect_updateSlowFadeTextBox(TextObj *obj) {
     s8 *fadeTimer;
     u8 alpha;
     u8 fade;

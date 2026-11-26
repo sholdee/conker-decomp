@@ -97,7 +97,7 @@ s32 func_150BB760(Actor *actor) {
     }
 }
 
-/* Actor id 0x20: func_1516865C/func_15168800 request, then bursts of 0x29E9 particles,
+/* Actor id 0x20: effect_initQuadFxTemplate/effect_spawnQuadFx request, then bursts of 0x29E9 particles,
  * func_151DA6F8 effects and two 0x39E8 particles, then func_10010F88. */
 s32 func_150BBB5C(Actor *actor) {
     ParticleSpawn particle;
@@ -140,8 +140,8 @@ s32 func_150BBB5C(Actor *actor) {
         request.flags = 0x34;
         request.dropFlags = alpha;
         request.speed = 0;
-        func_1516865C(&request, 0xFF, 0xFF, 0xFF, 0xFF);
-        func_15168800(&request, 0xFF, 0);
+        effect_initQuadFxTemplate(&request, 0xFF, 0xFF, 0xFF, 0xFF);
+        effect_spawnQuadFx(&request, 0xFF, 0);
         particle.model = 1;
         particle.lifetime = 0x78;
         particle.flags = 0x29E9;
@@ -599,7 +599,7 @@ struct Obj150BCFB8 {
 };
 
 /* Ground-hit callback: comes to rest when falling slowly, otherwise bounces, scaling all motion by obj->bounce. */
-s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 floorY) {
+s32 effect_bounceOnGround(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 floorY) {
     obj->unk3C = obj->unk10 * 1.1f + floorY;
     if (-2.0f < obj->vel.y) {
         obj->vel.x = 0.0f;

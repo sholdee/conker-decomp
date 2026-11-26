@@ -7,7 +7,7 @@ static const Vec3f D_800A05E0 = { 7.0f, 0.0f, 0.0f };
 static const Vec3f D_800A05EC = { -7.0f, 0.0f, 0.0f };
 
 /* This file's .bss. */
-struct Queue *D_800D98E0; /* the effect FIFO queue (allocated by func_15008BB0) */
+struct Queue *D_800D98E0; /* the effect FIFO queue (allocated by effect_allocQueue) */
 
 
 /*
@@ -149,8 +149,8 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
                                  500.0f, 500.0f, NULL, &ground.tri, 1, 8, 0xFF, 0);
         if (particle != NULL) {
             memcpy(&particle->growth, &growth, sizeof(growth));
-            if (func_1518ABD0(D_800D98E0, particle, 2) == 0) {
-                func_1516972C(&particle->header);
+            if (effect_pushQueue(D_800D98E0, particle, 2) == 0) {
+                effect_destroyObject(&particle->header);
             }
         }
         roll = (func_150ADA20() & 0xF) + 10;

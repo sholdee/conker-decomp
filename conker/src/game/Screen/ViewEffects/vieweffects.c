@@ -942,7 +942,7 @@ void screen_spawnFlash(r, g, b, alpha, duration, view, owner, kind)
         data.view = view;
         data.alphaStep = alpha / duration;
 
-        effect = func_15149130(duration, -1, 0x39, 3, 1, 0, sizeof(FlashData), owner, kind);
+        effect = effect_newTimedEffect(duration, -1, 0x39, 3, 1, 0, sizeof(FlashData), owner, kind);
         if (effect != NULL) {
             memcpy(&effect->data, &data, sizeof(FlashData));
         }

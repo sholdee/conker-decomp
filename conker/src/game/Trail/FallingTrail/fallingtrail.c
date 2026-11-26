@@ -8,7 +8,7 @@ FallingTrail *trail_spawnFallingTrail(EffectTemplate *header, s32 extraSize, Tra
     FallingTrail *trail;
 
     header->kind = 10;
-    trail = func_15147A80(header, extraSize + 0x40, sizeof(FallingTrailPoint), 8, 8, 8, 0, 0, hit, arg4, arg5);
+    trail = effect_newEffectObj(header, extraSize + 0x40, sizeof(FallingTrailPoint), 8, 8, 8, 0, 0, hit, arg4, arg5);
     if (trail == NULL) {
         return NULL;
     }
@@ -324,7 +324,7 @@ LevelEffect *trail_spawnLevelEffect(TriggerZone *obj) {
     }
     data.owner = obj;
     data.unk4 = 0.0f;
-    value = (s32)func_151491F4(300, -1, 17, 0, 13, 12, 255, 1);
+    value = (s32)effect_newTimedEffectNoDraw(300, -1, 17, 0, 13, 12, 255, 1);
     if (value != 0) {
         memcpy(&((LevelEffect *)value)->data, &data, sizeof(data));
     }

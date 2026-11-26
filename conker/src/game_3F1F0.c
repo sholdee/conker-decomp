@@ -49,7 +49,7 @@ s32 func_15011D60(TriggerZone *zone) {
     } else {
         tmp.radius = 10.0f;
     }
-    effect = func_15149130(0x12C, -1, -1, -1, 0, 0x38, sizeof(tmp), 0xFF, 1);
+    effect = effect_newTimedEffect(0x12C, -1, -1, -1, 0, 0x38, sizeof(tmp), 0xFF, 1);
     if (effect != NULL) {
         memcpy(effect + 1, &tmp, sizeof(tmp));
     }

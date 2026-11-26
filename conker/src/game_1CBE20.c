@@ -7,7 +7,7 @@
 /* Starts a timer effect that expires after `duration` frames of D_800BE9E4. */
 EvTimer *func_1519E970(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 arg5,
                        s32 arg6) {
-    EvTimer *timer = func_15167A68(0x26, arg6, sizeof(EvTimer), 1, arg5, 1);
+    EvTimer *timer = effect_newObject(0x26, arg6, sizeof(EvTimer), 1, arg5, 1);
 
     if (timer == NULL) {
         return NULL;
@@ -36,7 +36,7 @@ void func_1519EA04(EvTimer *timer) {
                 EvTimerOwner *owner = timer->owner;
                 owner->timer = NULL;
             }
-            func_1516972C(&timer->header);
+            effect_destroyObject(&timer->header);
         }
     }
 }

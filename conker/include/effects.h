@@ -547,16 +547,16 @@ typedef struct DebrisEmitter {
     /* 0x58 */ s16 landPuffLifeRange;
 } DebrisEmitter; /* size 0x5C */
 
-/* Spawn header of an effect object, copied into EffectObj.header by func_15147A80 (game_174BF0.c);
- * the template of trails, streams and other func_15147A80 effects. */
+/* Spawn header of an effect object, copied into EffectObj.header by effect_newEffectObj (game_174BF0.c);
+ * the template of trails, streams and other effect_newEffectObj effects. */
 typedef struct EffectTemplate {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 life;
     /* 0x0E */ u16 flags;     /* bit 0: life counts down; 0x10: run unk14's handler; 0x20: pass material to the draw;
                                * 0x40: allocate as type 0x4D (else 0x22); trails: 2 attached (the strip starts
                                * at pos), 4 pos is valid, 8 fading */
-    /* 0x10 */ s32 kind;      /* index into D_8008A2F0 / D_8008A340 / D_8008A390 */
-    /* 0x14 */ s8 unk14;      /* index into D_8008A284, -1: none */
+    /* 0x10 */ s32 kind;      /* index into gEffectObjDestroyFuncs / gEffectObjFreeFuncs / gEffectObjMessageFuncs */
+    /* 0x14 */ s8 unk14;      /* index into gEffectObjShapeFuncs, -1: none */
     /* 0x15 */ u8 itemCount;  /* number of items allocated after the user data */
     /* 0x16 */ u8 pad16[2];
     /* 0x18 */ s32 material; /* func_151462C8's surface material, with flags 0x20 */
@@ -753,7 +753,7 @@ typedef struct ScreenSpriteInfo {
 #define BILLBOARD_CUSTOM_MODE   0x100  /* render/combine modes come from unk4 */
 #define BILLBOARD_2CYCLE        0x200
 
-/* Spawn template of a billboard particle (type 5 / 0x42): func_15167D84 (game_1944C0.c) copies it to
+/* Spawn template of a billboard particle (type 5 / 0x42): effect_spawnBillboard (game_1944C0.c) copies it to
  * the particle at +0x10. */
 typedef struct BillboardTemplate {
     /* 0x00 */ TextureDesc *anim;
@@ -771,7 +771,7 @@ typedef struct BillboardTemplate {
     /* 0x1C */ u8 subX;        /* fractional (1/256) parts of x, z, y */
     /* 0x1D */ u8 subZ;
     /* 0x1E */ u8 subY;
-    /* 0x1F */ s8 callback;    /* index into D_8008C9C8, -1 = none */
+    /* 0x1F */ s8 callback;    /* index into gParticleCallbacks, -1 = none */
     /* 0x20 */ s16 velY;
     /* 0x22 */ s16 accelY;
     /* 0x24 */ s16 width;      /* < 0: scaled by the viewing angle */
@@ -791,12 +791,12 @@ typedef struct BillboardTemplate {
     /* 0x36 */ u8 pad36[2];
 } BillboardTemplate; /* size 0x38 */
 
-/* Type 5 / 0x42 object: a moving, animated billboard particle (created by func_15167D84 in game_1944C0.c).
+/* Type 5 / 0x42 object: a moving, animated billboard particle (created by effect_spawnBillboard in game_1944C0.c).
  * A spawner's extra data follows it (particle + 1). */
 typedef struct BillboardParticle {
     /* 0x00 */ EffectHeader link;
     /* 0x10 */ BillboardTemplate tmpl;
-    /* 0x48 */ s8 onDeath;      /* index into D_8008CA20, -1 = none */
+    /* 0x48 */ s8 onDeath;      /* index into gObjectCallbacks, -1 = none */
     /* 0x49 */ u8 pad49[7];
 } BillboardParticle; /* size 0x50 */
 
@@ -1264,7 +1264,7 @@ typedef struct DecalSpray {
     /* 0x2D */ u8 pad2D[3];
 } DecalSpray; /* size 0x30 */
 
-/* func_15150F90 (game_17CAF0.c): countBase + rand % (countRange + 1) randomly rotated pieces (func_1518A3C0)
+/* func_15150F90 (game_17CAF0.c): countBase + rand % (countRange + 1) randomly rotated pieces (effect_spawnTumblingPiece)
  * flying out of pos. */
 typedef struct PieceSpray {
     /* 0x00 */ s32 countBase;
@@ -1334,13 +1334,13 @@ typedef struct StreakBurst {
     /* 0x47 */ u8 pad47;
 } StreakBurst; /* size 0x48 */
 
-/* func_15157010 (game_1844C0.c): spawn parameters of a model effect, copied into the effect. */
+/* effect_newModelEffect (game_1844C0.c): spawn parameters of a model effect, copied into the effect. */
 typedef struct EffectParams {
     /* 0x00 */ u8 flags;
-    /* 0x01 */ s8 updateFunc;      /* index into D_8008AD90, -1 = none */
-    /* 0x02 */ s8 updateFunc2;     /* index into D_8008ADA0, -1 = none */
-    /* 0x03 */ s8 preDrawFunc;     /* index into D_8008ADBC, -1 = none */
-    /* 0x04 */ s8 postDrawFunc;    /* index into D_8008ADCC, -1 = none */
+    /* 0x01 */ s8 updateFunc;      /* index into gModelEffectUpdateFuncs, -1 = none */
+    /* 0x02 */ s8 updateFunc2;     /* index into gModelEffectUpdate2Funcs, -1 = none */
+    /* 0x03 */ s8 preDrawFunc;     /* index into gModelEffectPreDrawFuncs, -1 = none */
+    /* 0x04 */ s8 postDrawFunc;    /* index into gModelEffectPostDrawFuncs, -1 = none */
     /* 0x05 */ u8 pad5;
     /* 0x06 */ s16 lifetime;
     /* 0x08 */ s32 model;
@@ -1350,7 +1350,7 @@ typedef struct EffectParams {
     /* 0x34 */ Color8 color1;
     /* 0x38 */ u8 unk38;
     /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ struct Actor *owner; /* see func_15169850 */
+    /* 0x3C */ struct Actor *owner; /* see effect_handleOwnerActorEvent */
     /* 0x40 */ u8 ownerId;
     /* 0x41 */ u8 unk41;
     /* 0x42 */ u8 pad42[2];
@@ -1360,7 +1360,7 @@ typedef struct EffectParams {
     /* 0x56 */ s16 fadeRate;
 } EffectParams; /* size 0x58 */
 
-/* func_15153298 (game_17CAF0.c): spawns countBase + rand % (countRange + 1) billboards (func_15167D84) at
+/* func_15153298 (game_17CAF0.c): spawns countBase + rand % (countRange + 1) billboards (effect_spawnBillboard) at
  * position, each moving at a random yaw/pitch and speed. Each *Base/*Range pair is one BillboardTemplate field. */
 typedef struct BillboardBurst {
     /* 0x00 */ Vec3f position;
@@ -1388,8 +1388,8 @@ typedef struct BillboardBurst {
     /* 0x3E */ u8 pad3E[2];
 } BillboardBurst; /* size 0x40 */
 
-/* Motion extension of a model effect: func_15157898 (game_1844C0.c) copies it to ModelEffect.extra, and the
- * D_8008AD90 / D_8008ADA0 update callbacks integrate it. */
+/* Motion extension of a model effect: effect_newMovingModelEffect (game_1844C0.c) copies it to ModelEffect.extra, and the
+ * gModelEffectUpdateFuncs / gModelEffectUpdate2Funcs update callbacks integrate it. */
 typedef struct EffectMotion {
     /* 0x00 */ Vec3f rot;          /* degrees */
     /* 0x0C */ f32 scale;
@@ -1411,7 +1411,7 @@ typedef union EffectExtra {
 } EffectExtra; /* size 0x38 */
 
 
-/* Model effect object (types 0x36 / 0x4C / 0x5B), made by func_15157010 / func_15157898 (game_1844C0.c). */
+/* Model effect object (types 0x36 / 0x4C / 0x5B), made by effect_newModelEffect / effect_newMovingModelEffect (game_1844C0.c). */
 typedef struct ModelEffect {
     /* 0x00 */ EffectHeader header;
     /* 0x010 */ EffectParams params;
@@ -1424,7 +1424,7 @@ typedef struct ModelEffect {
     /* 0x07C */ MtxF mtx[2]; /* per frame */
     /* 0x0FC */ ModelLink attach;
     /* 0x11C */ u8 pad11C[4];
-    /* 0x120 */ EffectExtra extra; /* optional extension (func_15157898) */
+    /* 0x120 */ EffectExtra extra; /* optional extension (effect_newMovingModelEffect) */
 } ModelEffect; /* size 0x120 + the optional extension */
 
 /* func_15134DAC (game/Effects/Blood/blood.c): spawn parameters of a blood strip (object type 0x29), copied to the strip
@@ -1771,7 +1771,7 @@ typedef struct AnchorEmitterParams {
 } AnchorEmitterParams; /* size 0x5C */
 
 /* Object type 0x3E (game_1FFF60.c): watches an actor and owns a list of BoneFollowers. Users that need more
- * data ask func_151D2F00 for extra bytes after it (AnchorEmitter). */
+ * data ask effect_newFollowerGroup for extra bytes after it (AnchorEmitter). */
 typedef struct ActorFollowerGroup {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ struct Actor *actor;
@@ -1779,11 +1779,11 @@ typedef struct ActorFollowerGroup {
     /* 0x15 */ u8 pad15;
     /* 0x16 */ s16 timer;
     /* 0x18 */ u8 flags;            // bit 0: timer counts down; bit 1: actor is trackable (has bone matrices, (unk74 & 0xF) != 0xF)
-    /* 0x19 */ s8 updateFn;         // index into D_8008FC4C, -1 for none
-    /* 0x1A */ s8 trackFn;          // index into D_8008FC50, called when bit 1 of flags sets
-    /* 0x1B */ s8 untrackFn;        // index into D_8008FC54, called when bit 1 of flags clears
-    /* 0x1C */ s8 expireFn;         // index into D_8008FC58, -1 for none
-    /* 0x1D */ u8 kind;             // index into D_8008FC5C and D_8008FC64
+    /* 0x19 */ s8 updateFn;         // index into gFollowerGroupUpdateFuncs, -1 for none
+    /* 0x1A */ s8 trackFn;          // index into gFollowerGroupTrackFuncs, called when bit 1 of flags sets
+    /* 0x1B */ s8 untrackFn;        // index into gFollowerGroupUntrackFuncs, called when bit 1 of flags clears
+    /* 0x1C */ s8 expireFn;         // index into gFollowerGroupExpireFuncs, -1 for none
+    /* 0x1D */ u8 kind;             // index into gFollowerGroupDestroyFuncs and gFollowerGroupMessageFuncs
     /* 0x1E */ u8 pad1E[2];
     /* 0x20 */ s16 count;
     /* 0x22 */ u8 pad22[2];
@@ -1857,7 +1857,7 @@ typedef struct TrailParams {
     /* 0x28 */ TrailRender render;
 } TrailParams; /* size 0x48 */
 
-/* matching: EffectTemplate before material (0x18 bytes; func_15147A80 copies 0x1C); see ParticleDesc64. */
+/* matching: EffectTemplate before material (0x18 bytes; effect_newEffectObj copies 0x1C); see ParticleDesc64. */
 typedef struct EffectTemplate18 {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 life;
@@ -1969,11 +1969,11 @@ typedef struct TrailStateParams {
     /* 0x3C */ f32 burstRate;
 } TrailStateParams; /* size 0x40 */
 
-/* func_150C88D0 (game_F5D80.c): spawn parameters of an expanding ring effect (copied into RadialEffect.def). */
+/* effect_newRingEffect (game_F5D80.c): spawn parameters of an expanding ring effect (copied into RadialEffect.def). */
 typedef struct RadialEffectDef {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ u8 flags;            /* bit 0: expires when remaining runs out */
-    /* 0x0D */ s8 checkCallback;    /* index into D_80088860, -1 = none */
+    /* 0x0D */ s8 checkCallback;    /* index into gRingCheckFuncs, -1 = none */
     /* 0x0E */ u8 padE[2];
     /* 0x10 */ f32 speed;           /* radius growth per tick */
     /* 0x14 */ s32 count;           /* ring segments */
@@ -1984,20 +1984,20 @@ typedef struct RadialEffectDef {
     /* 0x22 */ u8 pad22[2];
     /* 0x24 */ f32 shrinkRate;
     /* 0x28 */ f32 emitRate;        /* emissions per unit of circumference per tick */
-    /* 0x2C */ s8 emitCallback;     /* index into D_80088858, -1 = none */
-    /* 0x2D */ s8 updateCallback;   /* index into D_80088864, -1 = none */
+    /* 0x2C */ s8 emitCallback;     /* index into gRingEmitFuncs, -1 = none */
+    /* 0x2D */ s8 updateCallback;   /* index into gRingUpdateFuncs, -1 = none */
     /* 0x2E */ u8 pad2E[2];
 } RadialEffectDef; /* size 0x30 */
 
-/* func_151580B0 (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
- * at +0x10. Like EffectParams, but the actor draws one display list from D_8008AFB8. */
+/* effect_newEffectActor (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
+ * at +0x10. Like EffectParams, but the actor draws one display list from gEffectActorDisplayLists. */
 typedef struct EffectActorTemplate {
     /* 0x00 */ u8 flags;            /* 1: lifetime counts down, 2: attached to owner, 4: attach option */
     /* 0x01 */ u8 unk01;
-    /* 0x02 */ s8 updateCallback;   /* index into D_8008AE00, -1 = none */
-    /* 0x03 */ s8 drawCallback;     /* index into D_8008AE0C, -1 = none */
+    /* 0x02 */ s8 updateCallback;   /* index into gEffectActorUpdateFuncs, -1 = none */
+    /* 0x03 */ s8 drawCallback;     /* index into gEffectActorMatrixFuncs, -1 = none */
     /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 displayList;      /* index into D_8008AFB8 */
+    /* 0x06 */ u8 displayList;      /* index into gEffectActorDisplayLists */
     /* 0x07 */ u8 pad07;
     /* 0x08 */ TrailRender render;
     /* 0x28 */ Color8 color0;
@@ -2009,7 +2009,7 @@ typedef struct EffectActorTemplate {
     /* 0x38 */ Vec3f position;
 } EffectActorTemplate; /* size 0x44 */
 
-/* EffectMotion without the flags: the motion block of the effect actors of func_151580B0 (game_185560.c),
+/* EffectMotion without the flags: the motion block of the effect actors of effect_newEffectActor (game_185560.c),
  * always integrated. */
 typedef struct TumbleMotion {
     /* 0x00 */ Vec3f rot;          /* degrees */
@@ -2020,14 +2020,14 @@ typedef struct TumbleMotion {
     /* 0x2C */ f32 drag;
 } TumbleMotion; /* size 0x30 */
 
-/* Alpha fade-out read by func_15158AFC once the lifetime drops below duration. */
+/* Alpha fade-out read by effect_fadeEffectActor once the lifetime drops below duration. */
 typedef struct EffectFade {
     /* 0x00 */ s16 duration;
     /* 0x04 */ s32 alphaPerTick;
 } EffectFade; /* size 0x8 */
 
-/* Effect actor (object type 0x37, or 0x55 when large) allocated by func_151580B0 (game_185560.c) through
- * func_15167A68. Bytes 0x10..0x53 are copied from its template; the type-specific data follows the
+/* Effect actor (object type 0x37, or 0x55 when large) allocated by effect_newEffectActor (game_185560.c) through
+ * effect_newObject. Bytes 0x10..0x53 are copied from its template; the type-specific data follows the
  * 0xF8-byte head. */
 typedef struct EffectActor {
     /* 0x00 */ EffectHeader header;
@@ -2035,18 +2035,18 @@ typedef struct EffectActor {
     /* 0x58 */ Mtx mtx[2]; /* double-buffered by D_800BE9C0 */
     /* 0xD8 */ ModelLink attachment; /* lights drawn through func_151462C8 */
     /* 0xF8 */ union {
-        TumbleMotion motion; /* func_15158684 / func_1515858C */
+        TumbleMotion motion; /* effect_moveEffectActor / effect_buildEffectActorRotScaleMtx */
         f32 size;
-        EffectFade fade;     /* func_15158AFC */
+        EffectFade fade;     /* effect_fadeEffectActor */
         struct {
             /* 0xF8 */ EffectFade fade;
             /* 0x100 */ TumbleMotion motion;
-        } piece;             /* tumbling piece of func_1518A3C0 (game_1B7870.c) */
+        } piece;             /* tumbling piece of effect_spawnTumblingPiece (game_1B7870.c) */
     } data;
 } EffectActor; /* size 0xF8 + the type-specific data */
 
 /* func_15152520 (game_17CAF0.c): spawns countBase + rand % (countRange + 1) tumbling model effects
- * (func_15157898) at position, each launched at a random yaw/pitch and speed with a random spin. */
+ * (effect_newMovingModelEffect) at position, each launched at a random yaw/pitch and speed with a random spin. */
 typedef struct ModelBurst {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
@@ -2061,8 +2061,8 @@ typedef struct ModelBurst {
     /* 0x32 */ s16 lifetimeRange;
     /* 0x34 */ s32 model;           /* EffectParams.model */
     /* 0x38 */ s32 unk38;           /* EffectParams.unkC */
-    /* 0x3C */ s32 unk3C;           /* func_15157898's 3rd argument (func_1503F5B8's 3rd) */
-    /* 0x40 */ f32 unk40;           /* base and range of func_15157898's 4th argument */
+    /* 0x3C */ s32 unk3C;           /* effect_newMovingModelEffect's 3rd argument (func_1503F5B8's 3rd) */
+    /* 0x40 */ f32 unk40;           /* base and range of effect_newMovingModelEffect's 4th argument */
     /* 0x44 */ f32 unk44;
     /* 0x48 */ f32 scaleBase;
     /* 0x4C */ f32 scaleRange;
@@ -2096,7 +2096,7 @@ typedef struct DefParticleHead {
     /* 0x100 */ Vtx *vtxBuffers[4];  /* per viewport, refreshed from vtxTemplate */
 } DefParticleHead; /* size 0x110 */
 
-/* Burst effect (func_150F9BB0 in game_127060.c, func_151BD828 in game_1E73B0.c): an effect object that
+/* Burst effect (effect_spawnDelayedBurst in game_127060.c, effect_spawnBoneBurst in game_1E73B0.c): an effect object that
  * keeps two sparks (func_1513D2F0 beams) and two glows (func_151407D0) on its owner actor. */
 struct BurstSpark;
 struct BurstGlow;
@@ -2244,7 +2244,7 @@ typedef struct QuadSprite {
     /* 0xA4 */ Vec3f pos;
 } QuadSprite; /* size 0xB0 */
 
-/* Head (first 0x60 bytes) of the object func_15147A80 (game_174BF0.c) makes from an EffectTemplate: trails,
+/* Head (first 0x60 bytes) of the object effect_newEffectObj (game_174BF0.c) makes from an EffectTemplate: trails,
  * ribbons, sprays and splashes. The rest is per handler, so each user declares its own object as
  * {EffectObjHead obj; 0x24-byte block at 0x60; u8 unk84[0x10]; items * at 0x94; user data * at 0x98}: the user
  * data (dataSize bytes) and then the items (tmpl.itemCount of itemSize bytes) follow the object in memory. */
@@ -2254,20 +2254,20 @@ typedef struct EffectObjHead {
     /* 0x2C */ s8 count;              /* items in use */
     /* 0x2D */ s8 start;              /* oldest item */
     /* 0x2E */ s8 end;                /* one past the newest item */
-    /* 0x2F */ u8 updateKind;         /* index into D_8008A200, 0: none */
-    /* 0x30 */ u8 updateKind2;        /* index into D_8008A23C, 0: none (trails clear it to stop emitting) */
-    /* 0x31 */ u8 drawKind;           /* index into D_8008A2A4, 0: none */
+    /* 0x2F */ u8 updateKind;         /* index into gEffectObjUpdateFuncs, 0: none */
+    /* 0x30 */ u8 updateKind2;        /* index into gEffectObjUpdate2Funcs, 0: none (trails clear it to stop emitting) */
+    /* 0x31 */ u8 drawKind;           /* index into gEffectObjDrawFuncs, 0: none */
     /* 0x32 */ u8 pad32[2];
     /* 0x34 */ ModelLink model;       /* drawn through func_151462C8 */
     /* 0x54 */ Vec3f modelPos;        /* func_151462C8's position; trails keep their tail point here */
 } EffectObjHead; /* size 0x60 */
 
-/* The object func_15147A80 (game_174BF0.c) makes, in its generic view: EffectObjHead plus the per-handler block.
+/* The object effect_newEffectObj (game_174BF0.c) makes, in its generic view: EffectObjHead plus the per-handler block.
  * It is followed in memory by its user data (dataSize bytes) and then its items (a ring buffer); users with
  * typed items declare their own view (TrackerTrail, WaveTrail, MotionTrail, ...). */
 typedef struct EffectObj {
     /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ CollisionHit collision; /* a copy of func_15147A80's hit (flags 0 without one) */
+    /* 0x60 */ CollisionHit collision; /* a copy of effect_newEffectObj's hit (flags 0 without one) */
     /* 0x84 */ u8 buffers[0x10];  /* per-view vertex buffers (func_151D5D60), released by func_151D5E30 */
     /* 0x94 */ void *items;       /* ring buffer of head.tmpl.itemCount items */
     /* 0x98 */ void *userData;
@@ -2305,7 +2305,7 @@ typedef struct TrackerTrailData {
     /* 0x1C */ f32 ownerScale;    /* the tracker owner's scale_xz */
 } TrackerTrailData; /* size 0x20 */
 
-/* The ribbon trail of a tracker effect (func_15147A80 object, kind 19). */
+/* The ribbon trail of a tracker effect (effect_newEffectObj object, kind 19). */
 typedef struct TrackerTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
@@ -2471,7 +2471,7 @@ typedef struct Sprite2DParams {
     /* 0x2A */ s16 scaleY;
     /* 0x2C */ u16 width;
     /* 0x2E */ u16 height;
-    /* 0x30 */ s8 behavior;       /* index into D_8008CA20, 0 = none */
+    /* 0x30 */ s8 behavior;       /* index into gObjectCallbacks, 0 = none */
     /* 0x31 */ u8 frameCount;
     /* 0x32 */ u8 red;
     /* 0x33 */ u8 green;
@@ -2667,7 +2667,7 @@ typedef struct SpriteParticle {
         struct {
             f32 drag;
             u8 pad4[4];
-            ActorRef owner;     /* the particle moves with it (func_151BD79C, game_1E73B0.c) */
+            ActorRef owner;     /* the particle moves with it (effect_updateBloodStripParticle, game_1E73B0.c) */
         } dragOwner;
         ParticlePulse pulse;
         ParticleFlash flash;
@@ -2761,9 +2761,9 @@ typedef struct ActorEmitterProcess {
 } ActorEmitterProcess;
 
 /*
- * Character watcher (object type 0x2E, func_15158BD0 in game_185560.c; attached to the character as
+ * Character watcher (object type 0x2E, effect_newCharacterWatcher in game_185560.c; attached to the character as
  * attachment 0x13): tracks a character's state (five small fields packed by game_185560.c's STATE_BITS)
- * and runs the actions of D_8008B02C[mode] when it changes as described by D_800A6200. The creator's
+ * and runs the actions of gWatcherModeActions[mode] when it changes as described by gWatcherStateRules. The creator's
  * extra data (e.g. the effects the watcher keeps alive) follows at 0x58.
  */
 typedef struct CharacterWatcher {
@@ -2772,13 +2772,13 @@ typedef struct CharacterWatcher {
     /* 0x14 */ s32 unk14;
     /* 0x18 */ Actor *character;
     /* 0x1C */ u8 characterId;
-    /* 0x1D */ u8 mode; /* from func_15159370 */
+    /* 0x1D */ u8 mode; /* from effect_pickWatcherMode */
     /* 0x1E */ u8 pad1E[2];
     /* 0x20 */ Vec3f lastPosition;
     /* 0x2C */ u8 state0; /* func_15159084 */
     /* 0x2D */ u8 state1; /* func_15159120 */
     /* 0x2E */ u8 state2; /* func_15159184 */
-    /* 0x2F */ u8 moveState; /* func_15159230 */
+    /* 0x2F */ u8 moveState; /* effect_getWatcherMoveState */
     /* 0x30 */ u8 surfaceState; /* func_151592B8 */
     /* 0x31 */ u8 flags; /* 1: run state-change actions */
     /* 0x32 */ u8 pad32[2];
@@ -2828,12 +2828,12 @@ typedef struct WatcherEmitter {
 #define DYNMODEL_FLAG_LIFETIME      1
 #define DYNMODEL_FLAG_VIEWPORT_MASK 2
 
-/* Spawn descriptor of a DynModel (func_1513B5E0, game_168A90.c: a model whose vertices are copied into
+/* Spawn descriptor of a DynModel (effect_newDynModel, game_168A90.c: a model whose vertices are copied into
  * per-frame, per-viewport buffers); copied verbatim into DynModel.desc. */
 typedef struct DynModelDesc {
     /* 0x00 */ u8 flags;       // DYNMODEL_FLAG_*
-    /* 0x01 */ s8 updateFunc;  // index into D_80089C18, -1 for none
-    /* 0x02 */ s8 drawFunc;    // index into D_80089C28, -1 for none
+    /* 0x01 */ s8 updateFunc;  // index into gDynModelUpdateFuncs, -1 for none
+    /* 0x02 */ s8 drawFunc;    // index into gDynModelDrawFuncs, -1 for none
     /* 0x03 */ u8 pad3;
     /* 0x04 */ s16 lifetime;   // counts down while DYNMODEL_FLAG_LIFETIME is set
     /* 0x06 */ u8 pad6[2];
@@ -2849,14 +2849,14 @@ typedef struct DynModelDesc {
     /* 0x26 */ u8 pad26[0xA];
     /* 0x30 */ s32 unk30;      // model asset, passed to rom_loadPathTable
     /* 0x34 */ s32 unk34;
-    /* 0x38 */ u8 kind;        // selects the D_80089C44 / D_80089C54 handlers
+    /* 0x38 */ u8 kind;        // selects the gDynModelDestroyFuncs / gDynModelFreeFuncs handlers
     /* 0x39 */ u8 viewportMask; // viewports drawn in when DYNMODEL_FLAG_VIEWPORT_MASK is set
     /* 0x3A */ u8 pad3A[2];
 } DynModelDesc; /* size 0x3C */
 
 /*
  * A model whose vertices are copied into per-frame, per-viewport buffers so they can be modified each frame
- * (func_1513B5E0, game_168A90.c). The buffers follow the header, then `userDataSize` bytes of user data.
+ * (effect_newDynModel, game_168A90.c). The buffers follow the header, then `userDataSize` bytes of user data.
  */
 typedef struct DynModel {
     /* 0x00 */ EffectHeader header;
@@ -2955,14 +2955,14 @@ typedef struct ActorLink {
     /* 0xA */ u8 kind;              /* D_8008FA70 index */
 } ActorLink; /* size 0xC */
 
-/* Tick data of timed effect 0x46 (func_150B6110, game_E2DA0.c): bolts around a trigger zone. */
+/* Tick data of timed effect 0x46 (effect_updateBoltRing, game_E2DA0.c): bolts around a trigger zone. */
 typedef struct BoltRingData {
     /* 0x00 */ struct TriggerZone *emitter;
     /* 0x04 */ f32 spawnAccum;
     /* 0x08 */ u8 emitterState;
 } BoltRingData;
 
-/* The 12-byte record at +0x28 that func_150E02C0 also hands to func_15149514 as
+/* The 12-byte record at +0x28 that effect_boltEmitterMessage also hands to effect_handleTimedEffectOwnerEvent as
  * (arg0 + 0x28, arg0 + 0x2C): the source actor (with its unique_id, to detect a reused slot)
  * plus three independent countdowns. */
 typedef struct BoltSource {
@@ -2982,13 +2982,13 @@ typedef struct FlashBurstData {
     /* 0x06 */ s16 timer; /* frames until the next burst */
 } FlashBurstData;
 
-/* Timed effect 0x55 (func_15149130, spawned by func_15011A78), updated by beam_updateFlashBurst. */
+/* Timed effect 0x55 (effect_newTimedEffect, spawned by func_15011A78), updated by beam_updateFlashBurst. */
 typedef struct FlashBurstEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ FlashBurstData data;
 } FlashBurstEffect; /* size 0x30 */
 
-/* Data of the effect spawned by func_151001B4 for an actor. */
+/* Data of the effect spawned by effect_spawnOwnerEffect for an actor. */
 typedef struct OwnerEffectData {
     /* 0x00 */ struct Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
@@ -2996,7 +2996,7 @@ typedef struct OwnerEffectData {
     /* 0x06 */ s16 timer;  /* counts down by D_800BE9E4 while the owner has a camera */
 } OwnerEffectData; /* size 0x8 */
 
-/* Timed effect 0x4E (func_15149130), spawned by func_151001B4 (game_12D630.c) and updated by func_151002BC. */
+/* Timed effect 0x4E (effect_newTimedEffect), spawned by effect_spawnOwnerEffect (game_12D630.c) and updated by effect_updateOwnerEffect. */
 typedef struct OwnerEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ OwnerEffectData data;
@@ -3010,8 +3010,8 @@ typedef struct ShapeEmitter {
     /* 0x0C */ f32 accumulator;
 } ShapeEmitter;
 
-/* Zone effects: timed effects (object type 35 or 95, D_800A5770) that game_40490.c makes for a TriggerZone,
- * with the zone first in their data. func_151A6BD8 (game_1D3FC0.c) finds the ZoneEffect of a zone (callbackSet
+/* Zone effects: timed effects (object type 35 or 95, gTimedEffectTypes) that game_40490.c makes for a TriggerZone,
+ * with the zone first in their data. effect_findZoneEffect (game_1D3FC0.c) finds the ZoneEffect of a zone (callbackSet
  * 0x2C) and beam_findZoneRectEffect (game/Beam/BoltRain/boltrain.c) its ZoneRectEffect (callbackSet 0x2E). */
 typedef struct ZoneEffectData {     /* filled by func_15015104 */
     /* 0x00 */ TriggerZone *zone;
@@ -3071,18 +3071,18 @@ typedef struct TextLines {
     /* 0x16 */ u8 pad16[2];
     /* 0x18 */ u8 *lines[2]; // NUL-terminated copies of lines, each as long as the longest line
     /* 0x20 */ void *style; // the display style's own state, which follows this struct
-    /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
-    /* 0x25 */ u8 msgFn; // index into D_800888B0
+    /* 0x24 */ s8 updateFn; // index into gTextBoxUpdateFuncs, or -1
+    /* 0x25 */ u8 msgFn; // index into gTextBoxMessageFuncs
     /* 0x26 */ u8 pad26[2];
 } TextLines; /* size 0x28 */
 
-/* Text box object created by func_150CFF10 (game_FD1D0.c); its display style's state follows. */
+/* Text box object created by effect_newTextBox (game_FD1D0.c); its display style's state follows. */
 typedef struct TextObj {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ TextLines text;
 } TextObj;
 
-/* Emitter state at +0x28 of func_150DE7C0's object. */
+/* Emitter state at +0x28 of effect_updateZonePairEmitter's object. */
 typedef struct ZonePairEmitter {
     /* 0x00 */ s16 timer; // frames until the next particle
     /* 0x02 */ u8 pad2[2];
@@ -3222,14 +3222,14 @@ typedef struct {
 
 /*
  * Template / payload of a type 0xE QuadFx object (game_1944C0.c): a textured quad pair animated through an
- * TextureDesc. func_1516865C fills a template's vertices, func_15168800 copies it into a new object.
- * The fields between the animation fields belong to the callback (D_8008C9C8); their names come from the
+ * TextureDesc. effect_initQuadFxTemplate fills a template's vertices, effect_spawnQuadFx copies it into a new object.
+ * The fields between the animation fields belong to the callback (gParticleCallbacks); their names come from the
  * rain drops of game_1A6360.c.
  */
 typedef struct QuadFxData {
     /* 0x00 */ Vtx vtx[8];
     /* 0x80 */ s32 dropFlags;   /* rain: 1: hidden until it first wraps, 2: remove when it next wraps */
-    /* 0x84 */ s16 slot;        /* rain: index in D_800DD440 */
+    /* 0x84 */ s16 slot;        /* rain: index in gRainDrops */
     /* 0x86 */ s16 unk86;
     /* 0x88 */ s16 frame;       /* 8.8 fixed point; -1 = finished */
     /* 0x8A */ s16 frameStep;   /* 8.8 fixed point */
@@ -3243,9 +3243,9 @@ typedef struct QuadFxData {
     /* 0x9A */ u8 pad9A[2];
     /* 0x9C */ s16 unk9C;
     /* 0x9E */ u16 heading;     /* rain: binary angle, high byte indexes the sin/cos tables */
-    /* 0xA0 */ u8 animIndex;    /* index into D_8008CA4C */
+    /* 0xA0 */ u8 animIndex;    /* index into gEffectAnimTextures */
     /* 0xA1 */ u8 speed;        /* rain: fall speed */
-    /* 0xA2 */ s8 callback;     /* index into D_8008C9C8, -1 = none */
+    /* 0xA2 */ s8 callback;     /* index into gParticleCallbacks, -1 = none */
     /* 0xA3 */ u8 unkA3;
     /* 0xA4 */ u8 unkA4;        /* rain: alpha */
 } QuadFxData; /* size 0xA8 */

@@ -58,10 +58,10 @@ void sprite_updateTexQuad(TexturedQuad *quad) {
         func = quad->destroyFunc;
         if (func != -1) {
             if (gTexQuadDestroyFuncs[func](quad) != 0) {
-                func_1516972C(&quad->header);
+                effect_destroyObject(&quad->header);
             }
         } else {
-            func_1516972C(&quad->header);
+            effect_destroyObject(&quad->header);
         }
     }
 }
@@ -106,7 +106,7 @@ ActorTracker *sprite_newActorTracker(ActorTrackerDesc *desc, s32 extraSize, u8 o
     if (desc->actor == NULL) {
         return NULL;
     }
-    tracker = func_15167A68(0x32, list, extraSize + 0x50, 1, owner, 1);
+    tracker = effect_newObject(0x32, list, extraSize + 0x50, 1, owner, 1);
     if (tracker == NULL) {
         return NULL;
     }
@@ -129,14 +129,14 @@ ActorTracker *sprite_newActorTracker(ActorTrackerDesc *desc, s32 extraSize, u8 o
 
 /* Destroy handler: detaches the tracker from its actor, then destroys it. */
 void sprite_destroyActorTracker(ActorTracker *tracker) {
-    func_1514EDF0(tracker, tracker->desc.actor);
-    func_15169804(&tracker->header);
+    effect_detachHandle(tracker, tracker->desc.actor);
+    effect_defaultDestroy(&tracker->header);
 }
 
 /* Free handler: detaches the tracker from its actor, then frees it. */
 void sprite_freeActorTracker(ActorTracker *tracker) {
-    func_1514EDF0(tracker, tracker->desc.actor);
-    func_15169824(&tracker->header);
+    effect_detachHandle(tracker, tracker->desc.actor);
+    effect_defaultFree(&tracker->header);
 }
 
 /*
@@ -168,13 +168,13 @@ void sprite_updateActorTracker(ActorTracker *tracker) {
         tracker->motion.z = (tracker->prevPos.z - tracker->pos.z) * gFrameDeltaInv;
     }
     if (dead) {
-        func_1516972C(&tracker->header);
+        effect_destroyObject(&tracker->header);
     }
 }
 
-/* Actor-event handler: dies with its actor and follows actor swaps (see func_15169850). */
+/* Actor-event handler: dies with its actor and follows actor swaps (see effect_handleOwnerActorEvent). */
 void sprite_actorTrackerMessage(ActorTracker *tracker, s32 event, u8 eventType) {
-    func_15169850(event, eventType, &tracker->desc.actor, &tracker->desc.actorId, tracker);
+    effect_handleOwnerActorEvent(event, eventType, &tracker->desc.actor, &tracker->desc.actorId, tracker);
 }
 
 /* Finds `actor`'s tracker attachment (type 0x16); on success stores a pointer to its motion in *motion. */
@@ -185,7 +185,7 @@ s32 sprite_findActorMotion(Actor *actor, const Vec3f **motion) {
     if (actor == NULL) {
         return FALSE;
     }
-    if (func_1514ECE0(actor->attachments, 0x16, &node)) {
+    if (effect_findAttachmentByType(actor->attachments, 0x16, &node)) {
         tracker = node->handle;
         *motion = &tracker->motion;
         return TRUE;
@@ -199,7 +199,7 @@ void sprite_resetActorTrackers(void) {
     ActorTracker *tracker;
 
     for (list = 0; list < 2; list++) {
-        for (tracker = (ActorTracker *)D_800DCE50[list][0x32]; tracker != NULL; tracker = (ActorTracker *)tracker->header.next) {
+        for (tracker = (ActorTracker *)gObjectLists[list][0x32]; tracker != NULL; tracker = (ActorTracker *)tracker->header.next) {
             tracker->unk44 = 0;
             tracker->unk48 = -1;
         }

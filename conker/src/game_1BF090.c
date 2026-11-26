@@ -39,7 +39,7 @@ DustEmitter *func_15191BE0(Actor *owner, const Vec3f *offset, u8 bone, f32 rateB
     data.unk60 = unk60;
     data.kind = kind;
 
-    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x1D, -1,
+    effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x1D, -1,
                                           (duration == -1) ? 0 : 1, 0x1D, sizeof(data), arg16,
                                           arg17);
     if (effect != NULL) {
@@ -290,7 +290,7 @@ DustEmitter *func_151925C4(Actor *obj, s16 duration, u8 arg2, s32 arg3) {
     return effect;
 }
 
-/* Effect callback for the dust emitter: hands func_15169850 the owner reference. */
+/* Effect callback for the dust emitter: hands effect_handleOwnerActorEvent the owner reference. */
 void func_1519277C(DustEmitter *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }

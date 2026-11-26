@@ -24,7 +24,7 @@ struct ActorEmitter {
 
 /* Emitter update: removes itself once its actor is gone or replaced, otherwise emits particles
    from a sphere around the actor's center at a random rate. */
-void func_150CF140(ActorEmitter *emitter) {
+void effect_updateActorEmitter(ActorEmitter *emitter) {
     ActorEmitterState *state;
     Actor *actor;
     Vec3f center;
@@ -63,14 +63,14 @@ void func_150CF140(ActorEmitter *emitter) {
 }
 
 /* Emitter message handler: dies with its actor and follows it through a swap. */
-void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
+void effect_actorEmitterMessage(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
     ActorEmitterState *state = &emitter->state;
     Actor *actorA;
 
     if (type == 0) {
         actorA = msg->ref.actor; // matching: loaded before the state field, via a named local
         if ((actorA == state->actor) || (msg->ref.uniqueId == state->actorId)) {
-            func_1516972C(&emitter->base.header);
+            effect_destroyObject(&emitter->base.header);
         }
     } else if (type == 0x2D) {
         if (state->actor == msg->swap.actorA) {

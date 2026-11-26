@@ -1481,7 +1481,7 @@ void func_15079390(void) {
     s32 param1 = gScriptArg1;
     s32 param2 = gScriptArg2;
 
-    func_1514D3B0(gCurrentActor, param0, param1, param2);
+    effect_sendAttachmentMessage(gCurrentActor, param0, param1, param2);
 }
 
 /* Places waypoint arg0 at a random point up to 550 units from object 0, clamped to +-1200. */

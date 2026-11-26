@@ -32,7 +32,7 @@ Gfx *attach_loadModelDl(s32 arg0) {
         }
         // the table pointer is passed as one display list here
         texture_resolveDl((Gfx *)ret->dlists, 0, 1, 0x3E, &gAttachModelTexIds[arg0]);
-        func_15168E54((Gfx *)ret->dlists, (s32)ret);
+        effect_relocateDisplayList((Gfx *)ret->dlists, (s32)ret);
         gAttachModelHeaders[arg0] = ret;
     } else {
         ret = gAttachModelHeaders[arg0];

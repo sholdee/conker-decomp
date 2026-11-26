@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_150DEC90(s32 arg0) {
-    func_15179008(0);
-    D_800DD444 = 0;
+void effect_levelUpdateRain(s32 arg0) {
+    effect_updateRain(0);
+    gRainStateTimer = 0;
 }

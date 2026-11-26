@@ -33,19 +33,19 @@ typedef union {
 /* Sprite update (QuadSprite.updateFn; 0 = none) and expire (QuadSprite.expireFn) callbacks; an update returning 0
  * expires the sprite, an expire callback returning nonzero keeps it. */
 static s32 (*D_80089C70[])() = {
-    NULL, func_1513416C, func_150B961C, func_150BA35C, func_150AEDD8, func_150DE2A4, func_150BB450, func_151AB090,
-    func_150C5E0C, func_150C673C, func_150CB7CC, func_151AFBD4, func_150CA9D0, func_15136A1C,
+    NULL, func_1513416C, func_150B961C, func_150BA35C, func_150AEDD8, func_150DE2A4, effect_updateFadeQuadSprite, effect_updateTaskFlicker,
+    func_150C5E0C, effect_updateFlickerSprite, func_150CB7CC, func_151AFBD4, func_150CA9D0, func_15136A1C,
 };
-static s32 (*D_80089CA8[])() = { NULL, func_151AB180, func_150C5EFC, func_150C682C };
+static s32 (*D_80089CA8[])() = { NULL, effect_detachTaskFlicker, func_150C5EFC, effect_expireFlickerSprite };
 
 /* Particle update (DefParticleHead.updateFn1, updateFn2; 0 = none) and expire callbacks, as for sprites. */
 static s32 (*D_80089CB8[])() = {
     NULL, func_1513E6E8, func_1518A094, func_150B9560, func_150BA37C, func_1514A4EC, func_1514A594, beam_updateMotionPull,
     beam_updateMotion, beam_updateQuad, flamethrower_moveJetLine, func_151AC9EC, func_15190F9C, func_15191520, func_151DA368,
-    func_150E6230, func_151B118C, func_151B1828, func_1514B87C, func_150CD17C, func_150C308C, func_15101378,
+    func_150E6230, effect_moveReleasedParticle, effect_swingParticleSize, func_1514B87C, func_150CD17C, func_150C308C, func_15101378,
     weapon_updateProjectile, func_150AE35C, func_1513F6E8, func_1513F728, sight_updateBeam, weapon_updateBulletParticle, trail_integrateScalarMotion,
     beam_updateAimed, beam_updateGlow, flamethrower_moveFlameLine, func_1514C258, func_1514C288, func_150E4174, func_151B8CFC,
-    func_150F7E20, func_15141928, func_150F3214, func_1519EF04, func_150DEACC, func_15102D90,
+    effect_updateTrailPuff, func_15141928, func_150F3214, func_1519EF04, effect_moveTravelParticle, effect_updateBoneBeamParticle,
 };
 static s32 (*D_80089D60[])() = {
     NULL, func_150B95FC, func_150BA424, func_1514143C, func_1514A19C, func_1514A380, func_1514A498, beam_shrinkMotion,
@@ -53,7 +53,7 @@ static s32 (*D_80089D60[])() = {
     func_15149BF4, func_15149C58, func_151ACA20, func_1519187C, func_151DA6A8, func_151DADA0, func_150E679C,
     func_151AFC08, func_150CBA30, func_150CC638, func_150C2FCC, func_151368A8, func_151B1478, func_1514AF74,
     func_1514B8B0, func_150CD17C, func_151022AC, func_15141478, func_151415D4, flamethrower_fadeFlameLine, func_1514BE00,
-    func_1514BF7C, func_151BE210, func_150D317C, trail_updateTrailGlow, func_151A6600, func_15141564, func_151BE6CC,
+    func_1514BF7C, effect_updateBurstSpark, func_150D317C, trail_updateTrailGlow, func_151A6600, func_15141564, effect_updateBurstGlow,
     func_150FD514,
 };
 static s32 (*D_80089E10[])() = { NULL, func_15149EC4, func_1514C2B8 };
@@ -63,9 +63,9 @@ static s32 (*D_80089E10[])() = { NULL, func_15149EC4, func_1514C2B8 };
 static Vtx *(*D_80089E1C[])(DefParticleHead *, s16) = {
     func_1513E83C, func_151408A4, func_15149FD0, func_1513F114, func_1514A6A0, func_1518E73C, beam_fillMotionVerts,
     beam_drawQuad, beam_drawLinkedQuad, flamethrower_buildJetLineQuad, func_15149D18, func_151AC810, func_1513F4B0, func_1519108C,
-    func_151DAE28, func_150E63A0, func_151B14AC, func_150CD59C, func_151019C4, func_15101F50, weapon_buildProjectileTail,
-    func_150AE36C, func_15102EB8, func_1513EE14, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, func_1513FA2C,
-    func_1513FA70, func_151BE4B8, func_15140190, func_150D2D6C, func_151A6350, func_150F7F58, func_1513EDB4,
+    func_151DAE28, func_150E63A0, effect_buildJointParticleQuad, func_150CD59C, func_151019C4, func_15101F50, weapon_buildProjectileTail,
+    func_150AE36C, effect_buildBoneBeamQuad, func_1513EE14, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, func_1513FA2C,
+    func_1513FA70, effect_buildBurstSparkVtx, func_15140190, func_150D2D6C, func_151A6350, func_150F7F58, func_1513EDB4,
     func_1513EDE4, func_150FDBA0, func_150F337C, func_150DEB58,
 };
 
@@ -86,19 +86,19 @@ static void (*D_80089EE8[])(QuadSprite *) = { func_1513C8D4, func_1513C8D4 };
 static void (*D_80089EF0[])(QuadSprite *) = { func_1513C900, func_1513C900 };
 static void (*D_80089EF8[])() = {
     func_1513CA6C, func_15101090, func_151011E8, func_151411E4, func_1513CA6C, func_1513CA6C, sight_freeBeam,
-    beam_destroyAimed, func_151BE674, beam_destroyModelBeam, func_151A6B10, func_150FDCAC, func_1513CA6C,
+    beam_destroyAimed, effect_destroyBurstSpark, beam_destroyModelBeam, effect_destroyZoneEmitter, func_150FDCAC, func_1513CA6C,
 };
 static void (*D_80089F2C[])() = {
     func_1513CAA0, func_15101148, func_15101210, func_15141250, func_1513CAA0, func_1513CAA0, func_151C95D8,
-    beam_freeAimed, func_151BE6A0, beam_freeModelBeam, func_151A6B3C, func_150FDCD8, func_1513CAA0,
+    beam_freeAimed, effect_freeBurstSpark, beam_freeModelBeam, effect_freeZoneEmitter, func_150FDCD8, func_1513CAA0,
 };
 /* Event handler of a sprite (func_1513CF9C). */
 static void (*D_80089F60[])(s32, s32, u8) = { func_1513CFD0 };
 /* Event handlers of a particle (ParticleDef.type, func_1513DF9C); several take their own view of the particle and
  * of the event data. */
 static void (*D_80089F64[])(DefParticleHead *, s32, u8) = {
-    func_1513E070, func_1513E084, func_15102D50, sight_handleBeamMessage, func_151416E8, beam_aimedMessage, func_151BE604,
-    func_151BE604, func_151C4AB0, func_150FDB0C, func_150F31D4,
+    func_1513E070, func_1513E084, effect_boneBeamMessage, sight_handleBeamMessage, func_151416E8, beam_aimedMessage, effect_burstSparkMessage,
+    effect_burstSparkMessage, func_151C4AB0, func_150FDB0C, func_150F31D4,
 };
 
 /* Per-frame update of a sprite: lifetime, fading and texture animation. */
@@ -186,10 +186,10 @@ void func_1513C060(QuadSprite *sprite) {
     if (expired) {
         if (sprite->expireFn != 0) {
             if (D_80089CA8[sprite->expireFn](sprite) != 0) {
-                func_1516972C(&sprite->header);
+                effect_destroyObject(&sprite->header);
             }
         } else {
-            func_1516972C(&sprite->header);
+            effect_destroyObject(&sprite->header);
         }
     }
 }
@@ -217,7 +217,7 @@ QuadSprite *func_1513C350(void *def, const void *colors, u8 updateFn, u8 expireF
     } else {
         kind = 0x1B;
     }
-    sprite = func_15167A68(kind, argA, extraSize + sizeof(QuadSprite), 1, arg9, 1);
+    sprite = effect_newObject(kind, argA, extraSize + sizeof(QuadSprite), 1, arg9, 1);
     if (sprite == NULL) {
         return NULL;
     }
@@ -292,7 +292,7 @@ QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, CollisionTri *sur
     }
 
     if (func_1513E2AC(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
-        func_1516972C(&sprite->header);
+        effect_destroyObject(&sprite->header);
         return NULL;
     }
     return sprite;
@@ -308,7 +308,7 @@ QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, CollisionTri *sur
     }
 
     if (func_1513E2AC(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
-        func_1516972C(&sprite->header);
+        effect_destroyObject(&sprite->header);
         return NULL;
     }
     return sprite;
@@ -323,7 +323,7 @@ QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, Collisi
         return NULL;
     }
     if (func_1513E2AC(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
-        func_1516972C(&sprite->header);
+        effect_destroyObject(&sprite->header);
         return NULL;
     }
     return sprite;
@@ -331,12 +331,12 @@ QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, Collisi
 
 void func_1513C8D4(QuadSprite *sprite) {
     func_1513C92C(sprite);
-    func_15169804(&sprite->header);
+    effect_defaultDestroy(&sprite->header);
 }
 
 void func_1513C900(QuadSprite *sprite) {
     func_1513C92C(sprite);
-    func_15169824(&sprite->header);
+    effect_defaultFree(&sprite->header);
 }
 
 /* Releases a sprite's light buffers. */
@@ -384,13 +384,13 @@ void func_1513CA48(DefParticleHead *particle) {
 void func_1513CA6C(DefParticleHead *particle) {
     func_1513CA48(particle);
     func_1513CAD4(particle);
-    func_15169804(&particle->header);
+    effect_defaultDestroy(&particle->header);
 }
 
 void func_1513CAA0(DefParticleHead *particle) {
     func_1513CA48(particle);
     func_1513CAD4(particle);
-    func_15169824(&particle->header);
+    effect_defaultFree(&particle->header);
 }
 
 /* Releases a particle's light buffers. */
@@ -621,7 +621,7 @@ void func_1513CFE4(DefParticleHead *particle) {
         }
     }
     if (expired) {
-        func_1516972C(&particle->header);
+        effect_destroyObject(&particle->header);
     }
 }
 
@@ -641,7 +641,7 @@ void *func_1513D2F0(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u
     } else {
         kind = 0x1C;
     }
-    particle = func_15167A68(kind, argB, motionSize + sizeof(DefParticleHead), 1, argA,
+    particle = effect_newObject(kind, argB, motionSize + sizeof(DefParticleHead), 1, argA,
                              (flags & 0x80000000U) ? 2 : 1);
     if (particle == NULL) {
         return NULL;
@@ -703,7 +703,7 @@ void *func_1513D594(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u
                              motionSize + sizeof(PARTICLE_MOTION(particle)->axes), argF, arg10);
     if ((particle != NULL) &&
         (func_1513D6FC(&PARTICLE_MOTION(particle)->axes, angle, width, height, triPtrs, surface, argD) == 0)) {
-        func_1516972C(&particle->header);
+        effect_destroyObject(&particle->header);
         return NULL;
     }
     return particle;
@@ -984,7 +984,7 @@ void func_1513E084(DefParticleHead *particle, ActorMsg *msg, u8 eventId) {
 
     if (eventId == 0x1A) {
         if ((link->actor == msg->ref.actor) || (link->uniqueId == msg->ref.uniqueId)) {
-            func_1516972C(&particle->header);
+            effect_destroyObject(&particle->header);
         }
     } else if (eventId == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -1888,16 +1888,16 @@ Vtx *func_15140190(DefParticleHead *particle, s16 viewport) {
     return result;
 }
 
-/* The object list types of the glow sprites (game_16DC80) and of the effect objects, for func_15169260. */
+/* The object list types of the glow sprites (game_16DC80) and of the effect objects, for effect_sendEventToTypes. */
 const s32 D_800A5168[4] = { 0x1C, 0x49, 0x56, 0x62 };
 static const s32 D_800A5178[3] = { 0x1B, 0x61, 0x4A };
 
 void func_151403A8(s32 arg0, u8 arg1) {
-    func_15169260(D_800A5168, 4, arg0, arg1);
+    effect_sendEventToTypes(D_800A5168, 4, arg0, arg1);
 }
 
 void func_151403DC(s32 arg0, u8 arg1) {
-    func_15169260(D_800A5178, 3, arg0, arg1);
+    effect_sendEventToTypes(D_800A5178, 3, arg0, arg1);
 }
 
 /* Quad centred on def.pos with half-axes axisU * width and axisV * height. */
@@ -1948,7 +1948,7 @@ Vtx *func_15140410(DefParticleHead *particle, Vec3f *axisU, Vec3f *axisV, s16 vi
 /* Sort key: texture, then animation frame, so that particles sharing a texture load draw together. */
 #define PARTICLE_SORT_KEY(p) (((p)->def.texture << 8) + ((p)->def.frame >> 16))
 
-/* List callback: insertion-sorts draw list D_800DCE50[group][list] by PARTICLE_SORT_KEY. */
+/* List callback: insertion-sorts draw list gObjectLists[group][list] by PARTICLE_SORT_KEY. */
 s32 func_151406AC(s32 arg0, s32 list, s32 group, s16 phase) {
     DefParticleHead head;
     DefParticleHead **slot;
@@ -1962,7 +1962,7 @@ s32 func_151406AC(s32 arg0, s32 list, s32 group, s16 phase) {
     if (phase != 0) {
         return arg0;
     }
-    slot = (DefParticleHead **)&D_800DCE50[group][list];
+    slot = (DefParticleHead **)&gObjectLists[group][list];
     node = *slot;
     head.def.texture = 0;
     head.def.frame = 0;

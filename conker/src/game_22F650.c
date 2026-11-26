@@ -11,8 +11,8 @@
  * slot lists and the attachment type tree.
  */
 
-/* Spawn-callback slot lists (indices into D_8008AA70 of game_179F30), one per level slot, indexed
-   by the object's unique slot (see func_1514D15C). */
+/* Spawn-callback slot lists (indices into gAttachSpawnFuncs of game_179F30), one per level slot, indexed
+   by the object's unique slot (see effect_spawnAttachments). */
 static const u8 D_800A5E60[] = { 0 };
 static const u8 D_800A5E64[] = { 1, 2, 8, 11 };
 static const u8 D_800A5E68[] = { 3, 7, 7, 7, 7, 4, 5, 6, 9 };
@@ -36,15 +36,15 @@ static const u8 D_800A5EB4[] = { 40 };
 static const u8 D_800A5EB8[] = { 44 };
 static const u8 D_800A5EBC[] = { 57 };
 
-/* Spawn callback by level slot and by object id slot; 0 is none (see func_1514D15C). */
-const u8 D_800A5EC0[24] = { 0 };
-const u8 D_800A5ED8[28] = {
+/* Spawn callback by level slot and by object id slot; 0 is none (see effect_spawnAttachments). */
+const u8 gAttachSpawnSlotsByLevel[24] = { 0 };
+const u8 gAttachSpawnSlotsById[28] = {
     0x0A, 0x0D, 0x11, 0x12, 0x13, 0x14, 0x16, 0x1C, 0x1D, 0x1E, 0x24, 0x26, 0x27, 0x29,
     0x2A, 0x2B, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
 };
 
-/* Attachment types, one per D_8008ABE8 entry: message handler, destroy handler (indices into
-   D_8008AB64 and D_8008AB58 of game_179F30, -1 none), first child and next sibling (-1 none). */
+/* Attachment types, one per gAttachmentTypes entry: message handler, destroy handler (indices into
+   gAttachMessageFuncs and gAttachDestroyFuncs of game_179F30, -1 none), first child and next sibling (-1 none). */
 static const AttachmentType D_800A5EF4 = { 7, 0, -1, -1 }; /* type 27 */
 static const AttachmentType D_800A5EFC = { 7, 0, -1, 27 }; /* type 26 */
 static const AttachmentType D_800A5F04 = { 6, 0, -1, 26 }; /* type 25 */
@@ -75,7 +75,7 @@ static const AttachmentType D_800A5FC4 = { 1, 0, 2, 11 }; /* type 1 */
 static const AttachmentType D_800A5FCC = { 0, -1, 1, -1 }; /* type 0 */
 
 /* The slot list of each level slot. */
-const u8 *D_8008AB90[] = {
+const u8 *gAttachSpawnSlotLists[] = {
     D_800A5E64, D_800A5E68, D_800A5E74, D_800A5E60, D_800A5E78, D_800A5E7C,
     D_800A5E80, D_800A5E84, D_800A5E88, D_800A5E8C, D_800A5E90, D_800A5E94,
     D_800A5E98, D_800A5E9C, D_800A5EA0, D_800A5EA4, D_800A5EA8, D_800A5EAC,
@@ -83,7 +83,7 @@ const u8 *D_8008AB90[] = {
 };
 
 /* The attachment type tree, by type. */
-const AttachmentType *D_8008ABE8[] = {
+const AttachmentType *gAttachmentTypes[] = {
     &D_800A5FCC, &D_800A5FC4, &D_800A5FBC, &D_800A5FAC, &D_800A5FA4, &D_800A5FB4,
     &D_800A5F9C, &D_800A5F94, &D_800A5F2C, &D_800A5F34, &D_800A5F3C, &D_800A5F4C,
     &D_800A5F7C, &D_800A5F84, &D_800A5F8C, &D_800A5F74, &D_800A5F54, &D_800A5F5C,

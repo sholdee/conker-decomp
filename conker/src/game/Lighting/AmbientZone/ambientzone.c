@@ -57,7 +57,7 @@ typedef void (*ZoneHandler)(Actor *obj, TriggerZone *zone);
  * through its own view. */
 static void (*D_8008B090[12])() = {
     func_1515F2B8, func_1515F2E8, func_1515FB70, func_150AF2E0, func_151A6B68, func_1515FB94,
-    func_1515FC60, func_1515FC34, func_1515FBC4, func_150F884C, NULL,          func_150F51A0,
+    func_1515FC60, func_1515FC34, func_1515FBC4, func_150F884C, NULL,          effect_setZoneFlag,
 };
 
 /* Runs zone handler zone->data1 for `obj`. */

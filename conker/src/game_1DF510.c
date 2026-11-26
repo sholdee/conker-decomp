@@ -26,7 +26,7 @@ void func_151B2060(Actor *obj) {
         bzero(tie.ropes, sizeof(tie.ropes));
         tie.line = NULL;
 
-        effect = func_151491F4(300, -1, 0x16, 0, 0x12, 0x20, 0xFF, 1);
+        effect = effect_newTimedEffectNoDraw(300, -1, 0x16, 0, 0x12, 0x20, 0xFF, 1);
         if (effect != NULL) {
             memcpy(&effect->tie, &tie, sizeof(tie));
         }
@@ -76,23 +76,23 @@ void func_151B222C(RopeTie *self) {
     for (i = 0; i < 3; i++) {
         child = tie->ropes[i];
         if (child != NULL) {
-            func_1516972C(child);
+            effect_destroyObject(child);
         }
     }
     child = tie->line;
     if (child != NULL) {
-        func_1516972C(child);
+        effect_destroyObject(child);
     }
 }
 
 void func_151B229C(RopeTie *self) {
     func_151B220C(self);
-    func_1514933C(&self->base);
+    effect_defaultDestroyTimedEffect(&self->base);
 }
 
 void func_151B22C8(RopeTie *self) {
     func_151B220C(self);
-    func_15149368(&self->base);
+    effect_defaultFreeTimedEffect(&self->base);
 }
 
 /* Returns 1 when obj1->unk65 holds obj0's 1-based index in movement_obj and obj1->unk5C is 1, else 2. */
@@ -255,7 +255,7 @@ void func_151B2690(RopeTie *self) {
     lineData.endOffset = D_800AA374;
     lineData.halfWidth = 5.0f;
     lineData.owner = self;
-    tie->line = func_15149130(300, -1, -1, 0, 0, 0x13, sizeof(RopeLineData), 0xFF, 1);
+    tie->line = effect_newTimedEffect(300, -1, -1, 0, 0, 0x13, sizeof(RopeLineData), 0xFF, 1);
     if (tie->line != NULL) {
         memcpy(&tie->line->line, &lineData, sizeof(lineData));
     }
@@ -374,9 +374,9 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
     return gfx;
 }
 
-/* Line event handler: lets func_15169850 retarget the anchor object. */
+/* Line event handler: lets effect_handleOwnerActorEvent retarget the anchor object. */
 void func_151B2EC4(RopeLine *self, s32 arg1, u8 event) {
-    func_15169850(arg1, event, &self->line.anchor.target, &self->line.anchor.targetId, self);
+    effect_handleOwnerActorEvent(arg1, event, &self->line.anchor.target, &self->line.anchor.targetId, self);
 }
 
 /* RopeTie event handler: on event 0x2D, swaps obj0/obj1 for the other object of the pair. */
@@ -417,19 +417,19 @@ void func_151B2FD0(RopeLine *self) {
 
 void func_151B2FE8(RopeLine *self) {
     func_151B2FD0(self);
-    func_1514933C(&self->base);
+    effect_defaultDestroyTimedEffect(&self->base);
 }
 
 void func_151B3014(RopeLine *self) {
     func_151B2FD0(self);
-    func_15149368(&self->base);
+    effect_defaultFreeTimedEffect(&self->base);
 }
 
-/* Rope event handler: lets func_15169850 retarget both anchor objects. */
+/* Rope event handler: lets effect_handleOwnerActorEvent retarget both anchor objects. */
 void func_151B3040(TiedRope *self, s32 arg1, u8 event) {
     RopeTieLink *link;
 
     link = &self->link;
-    func_15169850(arg1, event, &link->start.target, &link->start.targetId, self);
-    func_15169850(arg1, event, &link->end.target, &link->end.targetId, self);
+    effect_handleOwnerActorEvent(arg1, event, &link->start.target, &link->start.targetId, self);
+    effect_handleOwnerActorEvent(arg1, event, &link->end.target, &link->end.targetId, self);
 }

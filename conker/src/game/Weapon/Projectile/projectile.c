@@ -177,7 +177,7 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
             failed = TRUE;
         }
         if (failed) {
-            func_1516972C(&result->head.header);
+            effect_destroyObject(&result->head.header);
             return NULL;
         }
     }
@@ -389,7 +389,7 @@ void weapon_onProjectileExpire(Game1EF500Trail *trail) {
     Vec3i header2;
 
     ext = &trail->trail;
-    func_15102920((func_150ADA68() * 30.0f) + 8.0f, 0xFF, &ext->path.tri, &ext->path.pos,
+    effect_spawnSurfaceSprite((func_150ADA68() * 30.0f) + 8.0f, 0xFF, &ext->path.tri, &ext->path.pos,
                   (func_150ADA20() % 46U) + 25, 1, 1, ext->path.material, trail->head.header.owner, trail->head.header.kind);
     if (func_150ADA68() < 0.253000021f * D_800DCA24) {
         header.flags = 3;
@@ -958,7 +958,7 @@ void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
         data.unk3C = emitter->unk30;
         data.unk40 = emitter->unk34;
 
-        effect = func_15149130((func_150ADA20() % (emitter->lifeRange + 1)) + emitter->minLife,
+        effect = effect_newTimedEffect((func_150ADA20() % (emitter->lifeRange + 1)) + emitter->minLife,
                                -1, 0x2B, -1, 1, 0, sizeof(data), owner->base.header.owner, owner->base.header.kind);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x28, &data, sizeof(data));

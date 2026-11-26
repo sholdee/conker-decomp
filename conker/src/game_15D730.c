@@ -48,7 +48,7 @@ void *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataS
         break;
     }
 
-    particle = func_15167A68(type, arg5, dataSize + 0xA8, 1, arg4, 1);
+    particle = effect_newObject(type, arg5, dataSize + 0xA8, 1, arg4, 1);
     if (particle == NULL) {
         return NULL;
     }
@@ -78,7 +78,7 @@ static s32 (*D_80089760[])() = {
     func_151596BC, func_151DB97C, func_151AFEA4, func_150CBCE0,
     func_150CC8D4, func_150CAC28, func_151316DC, func_151025F4,
     func_1515A11C, func_15192308, func_15192358, func_1519257C,
-    func_1513170C, func_151A2960, func_151045F4, func_151BD79C,
+    func_1513170C, func_151A2960, func_151045F4, effect_updateBloodStripParticle,
     func_1515A60C, func_1515A78C, func_150AF6E4, func_151B8BE0,
     func_15108658, func_150E8824, func_151316AC, func_151319A4,
     func_15131AFC, func_15131B3C, func_150D6CC4, func_150D6F0C,
@@ -188,7 +188,7 @@ void func_151303EC(SpriteParticle *p) {
         if (p->head.desc.deathFunc != -1) {
             D_80089800[p->head.desc.deathFunc](p);
         }
-        func_1516972C(&p->head.header);
+        effect_destroyObject(&p->head.header);
     }
 }
 
@@ -477,11 +477,11 @@ s32 func_1513170C(SpriteParticle *p, Vec3f *prevPos) {
 }
 
 void func_1513173C(DescParticleHead *p) {
-    func_15169804(&p->header);
+    effect_defaultDestroy(&p->header);
 }
 
 void func_1513175C(DescParticleHead *p) {
-    func_15169824(&p->header);
+    effect_defaultFree(&p->header);
 }
 
 static void (*D_80089814[])() = {
@@ -630,7 +630,7 @@ s32 func_15131B7C(SpriteParticle *p, Vec3f *prevPos, f32 *hit, ParticleBounce *b
 
 static void (*D_80089878[])() = {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    func_151BE558, func_150D6E60, func_150D7068, beam_followParticleMessage, NULL, NULL, NULL,
+    effect_ownedParticleMessage, func_150D6E60, func_150D7068, beam_followParticleMessage, NULL, NULL, NULL,
 };
 
 /* Calls the particle's D_80089878 handler, if it has one. */
@@ -656,12 +656,12 @@ void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX
 /* The three particle object types (see func_15130280). */
 static const IdList3 D_800A37F0 = { { 0x2B, 0x47, 0x52 } };
 
-/* Calls func_15169260 with the three particle object types. */
+/* Calls effect_sendEventToTypes with the three particle object types. */
 void func_15131D4C(s32 arg0, u8 arg1) {
     IdList3 types;
 
     types = D_800A37F0;
-    func_15169260(types.ids, 3, arg0, arg1);
+    effect_sendEventToTypes(types.ids, 3, arg0, arg1);
 }
 
 /* Particle update func: pulses the particle's width and height (p->data.pulse). */

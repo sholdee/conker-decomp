@@ -23,16 +23,16 @@ static void (*gLevelSetupFuncs[])(void) = {
 
 /* Resets game globals, then runs the subsystem init routines for the given level. */
 void game_initLevelSubsystems(s32 levelId) {
-    D_800DD190 = -1;
-    bzero(D_800DD198, 24);
+    gObjectWalkDepth = -1;
+    bzero(gObjectWalkNext, 24);
     D_800DD404 = 0xFF;
-    D_800DD405 = 0;
-    D_800DD406 = 0;
+    gLevelTexFrame = 0;
+    gLevelTexFrameTime = 0;
     D_800E0930 = 0;
     D_800E0934 = NULL;
     gProjectileHitCallback = 0;
     D_8008CD00 = 0;
-    D_80088B60 = 0;
+    gLineEmitterStarted = 0;
     D_800BE4E0 = NULL;
     {
         // matching: IDO schedules the store differently without the block-scoped temp
@@ -49,7 +49,7 @@ void game_initLevelSubsystems(s32 levelId) {
 
     flamethrower_clearTexScrolls();
     func_15008BE0();
-    func_15008B90();
+    effect_initQueue();
     func_1500E5C0();
 
     if (D_800B0DF0->unkA) {
@@ -59,7 +59,7 @@ void game_initLevelSubsystems(s32 levelId) {
     light_buildLevelParticles();
     light_loadParticleTextures();
     shadow_initLevelSettings(levelId);
-    func_15178EB0();
+    effect_resetRain();
     func_15012FE0();
 
     func_151645C4(!(gTaskDoneBits[0x4] & 0x80));

@@ -2,17 +2,17 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Spawn callbacks by slot (see func_1514D15C); slot 0 is empty. */
-static void (*D_8008AA70[])(Actor *) = {
+/* Spawn callbacks by slot (see effect_spawnAttachments); slot 0 is empty. */
+static void (*gAttachSpawnFuncs[])(Actor *) = {
     NULL,           func_1514E00C, func_1514E194, func_1514E31C, func_1514E5B8, func_1514E668,
     func_1514E508,  func_1514E718, func_1514E7C8, func_1514E824, func_1514D9F4, func_1514D96C,
     func_1514D64C,  func_1514DB58, func_1514DE50, func_1514DFD0, func_1514D564, func_1514DA38,
-    func_1514DAA4,  func_1514DB18, func_1514DB64, func_1514DE88, func_1514DB98,
+    func_1514DAA4,  effect_attachCharacterWatcher, func_1514DB64, func_1514DE88, func_1514DB98,
 };
 
 /* Spawn callbacks by object id; entry 0 runs for every object first. */
-static void (*D_8008AACC[])(Actor *) = {
-    func_1514EE70, func_1514DD2C, func_1514DD4C, func_1514DD6C, func_1514DD8C, func_1514EECC,
+static void (*gAttachSpawnFuncsById[])(Actor *) = {
+    effect_attachActorTracker, func_1514DD2C, func_1514DD4C, func_1514DD6C, func_1514DD8C, func_1514EECC,
     func_1514F110, func_150F0938, func_1514DDAC, func_1514DDCC, func_1514DDEC, func_1514DE38,
     func_1514DE44, func_1514F308, func_1514DE0C, func_1514DC84, func_1514F3CC, func_1514DE2C,
     func_1514DC98, func_1514DC38, func_1514DBB8, func_1514F44C, func_15010538, func_1514F4A8,
@@ -22,10 +22,10 @@ static void (*D_8008AACC[])(Actor *) = {
 
 /* Attachment type handlers (AttachmentType.destroyHandler, .messageHandler). Declared without a
    prototype: the handlers take the attachment's handle as what it is. */
-static void (*D_8008AB58[])() = { func_1514E830, func_1514E850, func_1514E87C };
-static s32 (*D_8008AB64[])() = {
-    func_1514E89C, func_1514E920, func_1514E9DC, func_1514E9FC,
-    func_1514EA1C, func_1514EB6C, func_1514F130, func_1514EB8C,
+static void (*gAttachDestroyFuncs[])() = { effect_releaseAttachedObject, func_1514E850, effect_releaseAttachedPointLight };
+static s32 (*gAttachMessageFuncs[])() = {
+    effect_handleToggleMessage, effect_handleGlowToggleMessage, func_1514E9DC, func_1514E9FC,
+    effect_handleEmitterTableMessage, func_1514EB6C, effect_handleLightMessage, func_1514EB8C,
 };
 
 /* Emitter offsets. */
@@ -39,7 +39,7 @@ static const Vec3f D_800A58C4 = { 0.0f, 31.0f, 73.0f };
  * one chosen by level (*globalSlot, flag 2) and, inside that, one chosen by its unique_id
  * (*uniqueSlot, flag 1). Returns the OR of the flags that were set.
  */
-s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
+s32 effect_findAttachSpawnSlots(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
     u8 found = 0;
 
     switch (obj->character_type) {
@@ -393,10 +393,10 @@ s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
 }
 
 /**
- * Runs the spawn callbacks for `obj` (see func_1514CA80), after freeing whatever is still
+ * Runs the spawn callbacks for `obj` (see effect_findAttachSpawnSlots), after freeing whatever is still
  * queued for its slot. Does nothing if the object already has attachments.
  */
-s32 func_1514D15C(Actor *obj) {
+s32 effect_spawnAttachments(Actor *obj) {
     s32 uniqueSlot;
     s32 globalSlot;
     s32 idSlot;
@@ -415,58 +415,58 @@ s32 func_1514D15C(Actor *obj) {
     }
 
     do {
-        queued = func_15155FD4(slot);
+        queued = effect_findPlayerMarker(slot);
         if (queued != NULL) {
-            func_1516972C(&queued->header);
+            effect_destroyObject(&queued->header);
         }
     } while (queued != NULL);
 
     if (slot == 0 && gIsMultiplayer == 0) {
-        func_15155780(slot, 0xFF);
+        effect_newPlayerMarker(slot, 0xFF);
     }
 
-    D_8008AACC[0](obj);
+    gAttachSpawnFuncsById[0](obj);
     // matching: the zero test must be on the s32 result, not on the u8 copy
-    found = func_1514CA80(obj, &uniqueSlot, &globalSlot, &idSlot);
+    found = effect_findAttachSpawnSlots(obj, &uniqueSlot, &globalSlot, &idSlot);
     flags = found;
     if (found == 0) {
         return 0;
     }
 
     if (flags & 4) {
-        handler = D_800A5ED8[idSlot];
+        handler = gAttachSpawnSlotsById[idSlot];
         if (handler != 0) {
-            D_8008AA70[handler](obj);
+            gAttachSpawnFuncs[handler](obj);
         }
     }
 
     if (flags & 2) {
-        handler = D_800A5EC0[globalSlot];
+        handler = gAttachSpawnSlotsByLevel[globalSlot];
         if (handler != 0) {
-            D_8008AA70[handler](obj);
+            gAttachSpawnFuncs[handler](obj);
         }
     }
 
     if ((flags & 2) && (flags & 1)) {
-        if (D_8008AA70[D_8008AB90[globalSlot][uniqueSlot]] != NULL) {
-            D_8008AA70[D_8008AB90[globalSlot][uniqueSlot]](obj);
+        if (gAttachSpawnFuncs[gAttachSpawnSlotLists[globalSlot][uniqueSlot]] != NULL) {
+            gAttachSpawnFuncs[gAttachSpawnSlotLists[globalSlot][uniqueSlot]](obj);
         }
     }
     return 1;
 }
 
 /** Frees every attachment of `owner`, letting each attachment type release its handle first. */
-s32 func_1514D310(Actor *owner) {
+s32 effect_freeAttachments(Actor *owner) {
     Attachment *node;
     Attachment *next;
 
     node = owner->attachments;
     while (node != NULL) {
         next = node->next;
-        if (D_8008ABE8[node->type]->destroyHandler != -1) {
-            D_8008AB58[D_8008ABE8[node->type]->destroyHandler](node->handle);
+        if (gAttachmentTypes[node->type]->destroyHandler != -1) {
+            gAttachDestroyFuncs[gAttachmentTypes[node->type]->destroyHandler](node->handle);
         }
-        func_1516972C(&node->header);
+        effect_destroyObject(&node->header);
         node = next;
     }
     return 1;
@@ -476,15 +476,15 @@ s32 func_1514D310(Actor *owner) {
  * Sends message `msg` (with `arg`) to every attachment of `owner` whose type is `type` or one
  * of its subtypes. Returns the result of the last handler called, as 0 or 1.
  */
-s32 func_1514D3B0(Actor *owner, s16 type, s32 msg, s32 arg) {
+s32 effect_sendAttachmentMessage(Actor *owner, s16 type, s32 msg, s32 arg) {
     Attachment *node;
     s32 result;
 
     result = 0;
     for (node = owner->attachments; node != NULL; node = node->next) {
-        if (type == node->type || func_1514D4B8(D_8008ABE8[type]->firstChild, node->type)) {
-            if (D_8008ABE8[node->type]->messageHandler != -1) {
-                if (D_8008AB64[D_8008ABE8[node->type]->messageHandler](node->handle, msg, arg)) {
+        if (type == node->type || effect_isAttachTypeInTree(gAttachmentTypes[type]->firstChild, node->type)) {
+            if (gAttachmentTypes[node->type]->messageHandler != -1) {
+                if (gAttachMessageFuncs[gAttachmentTypes[node->type]->messageHandler](node->handle, msg, arg)) {
                     result = 1;
                 } else {
                     result = 0;
@@ -496,17 +496,17 @@ s32 func_1514D3B0(Actor *owner, s16 type, s32 msg, s32 arg) {
 }
 
 /** Returns whether attachment type `type` occurs in the type subtree rooted at `root` or its siblings. */
-s32 func_1514D4B8(s16 root, s16 type) {
+s32 effect_isAttachTypeInTree(s16 root, s16 type) {
     if (root == -1) {
         return 0;
     }
     if (root == type) {
         return 1;
     }
-    if (func_1514D4B8(D_8008ABE8[root]->nextSibling, type)) {
+    if (effect_isAttachTypeInTree(gAttachmentTypes[root]->nextSibling, type)) {
         return 1;
     }
-    if (func_1514D4B8(D_8008ABE8[root]->firstChild, type)) {
+    if (effect_isAttachTypeInTree(gAttachmentTypes[root]->firstChild, type)) {
         return 1;
     }
     return 0;
@@ -536,7 +536,7 @@ void func_1514D564(Actor *obj) {
     spawned = beam_newStrip(&desc, sizeof(payload));
     if (spawned != NULL) {
         memcpy(&spawned->target, &payload, sizeof(payload));
-        func_1514EC1C(spawned, obj, 0x15);
+        effect_attach(spawned, obj, 0x15);
     }
 }
 
@@ -591,7 +591,7 @@ void func_1514D64C(Actor *obj) {
     attach.p1.z = 75.0f;
     emitter.scale = 1.0f;
 
-    func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 9);
+    effect_attach(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 9);
 
     spawn.texture = 3;
     spawn.frame = 0;
@@ -639,14 +639,14 @@ void func_1514D64C(Actor *obj) {
     attach.p1.z = -140.0f;
     emitter.scale = 1.0f;
 
-    func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 0xA);
+    effect_attach(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 0xA);
     light_createAttached(obj, 5, &attach.p0, 2, 300, 40, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
 }
 
 void func_1514D96C(Actor *obj) {
 }
 
-/** Attaches a func_15158BD0 object (type 0x13) with a zeroed 0x20-byte payload. */
+/** Attaches a effect_newCharacterWatcher object (type 0x13) with a zeroed 0x20-byte payload. */
 void func_1514D978(Actor *obj) {
     struct {
         s32 unk0;
@@ -669,10 +669,10 @@ void func_1514D978(Actor *obj) {
     payload.unk1C = 0;
     payload.unk10 = 12.0f;
 
-    handle = func_15158BD0(obj, 1, sizeof(payload));
+    handle = effect_newCharacterWatcher(obj, 1, sizeof(payload));
     if (handle != NULL) {
         memcpy((u8 *)handle + 0x58, &payload, sizeof(payload));
-        func_1514EC1C(handle, obj, 0x13);
+        effect_attach(handle, obj, 0x13);
     }
 }
 
@@ -681,10 +681,10 @@ void func_1514D9F4(Actor *obj) {
 
     func_1514D978(obj);
     handle = func_151ACA60(obj, 20.0f, 0);
-    func_1514EC1C(handle, obj, 0x14);
+    effect_attach(handle, obj, 0x14);
 }
 
-/** Attaches a func_15158BD0 object (type 0x13) with a zeroed 0x1C-byte payload. */
+/** Attaches a effect_newCharacterWatcher object (type 0x13) with a zeroed 0x1C-byte payload. */
 void func_1514DA38(Actor *obj) {
     void *handle;
     struct {
@@ -703,14 +703,14 @@ void func_1514DA38(Actor *obj) {
     payload.unk4 = 0;
     payload.unk8 = 0;
     payload.unkC = 0;
-    handle = func_15158BD0(obj, 1, sizeof(payload));
+    handle = effect_newCharacterWatcher(obj, 1, sizeof(payload));
     if (handle != NULL) {
         memcpy((u8 *)handle + 0x58, &payload, sizeof(payload));
-        func_1514EC1C(handle, obj, 0x13);
+        effect_attach(handle, obj, 0x13);
     }
 }
 
-/** Sets bit 1 of obj->unk94 and attaches a func_15158BD0 object (type 0x13) with an 8-byte payload. */
+/** Sets bit 1 of obj->unk94 and attaches a effect_newCharacterWatcher object (type 0x13) with an 8-byte payload. */
 void func_1514DAA4(Actor *obj) {
     void *handle;
     s32 payload[2];
@@ -720,21 +720,21 @@ void func_1514DAA4(Actor *obj) {
     payload[1] = 0;
     {
         // matching: a declaration here opens a scope block, which changes how as1 schedules the argument setup
-        extern CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize);
+        extern CharacterWatcher *effect_newCharacterWatcher(Actor *chr, u8 enableActions, s32 extraSize);
 
-        if ((handle = func_15158BD0(obj, 1, sizeof(payload))) != NULL) {
+        if ((handle = effect_newCharacterWatcher(obj, 1, sizeof(payload))) != NULL) {
             memcpy((u8 *)handle + 0x58, payload, sizeof(payload));
-            func_1514EC1C(handle, obj, 0x13);
+            effect_attach(handle, obj, 0x13);
         }
     }
 }
 
-/** Attaches a func_15158BD0 object (type 0x13) without payload. */
-void func_1514DB18(Actor *obj) {
-    void *handle = func_15158BD0(obj, 1, 0);
+/** Attaches a effect_newCharacterWatcher object (type 0x13) without payload. */
+void effect_attachCharacterWatcher(Actor *obj) {
+    void *handle = effect_newCharacterWatcher(obj, 1, 0);
 
     if (handle != NULL) {
-        func_1514EC1C(handle, obj, 0x13);
+        effect_attach(handle, obj, 0x13);
     }
 }
 
@@ -844,7 +844,7 @@ void func_1514DE94(Actor *obj) {
     if (D_800BE9B4 == 0) {
         part->unk38 = 2400;
     }
-    func_1514EC1C(light_createAttached(obj, 0, &D_800A58C4, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
+    effect_attach(light_createAttached(obj, 0, &D_800A58C4, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
 }
 
 /** Links `obj` to the object whose unique_id is 9 (unk65 holds that object's slot + 1). */
@@ -903,7 +903,7 @@ void func_1514E00C(Actor *obj) {
     attach.p1.z = 559.0f;
     emitter.scale = 1.0f;
 
-    func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
+    effect_attach(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
     trail_attachToBone(obj, 5, -1, 0xFF, 1);
 }
 
@@ -957,7 +957,7 @@ void func_1514E194(Actor *obj) {
     attach.p1.z = 559.0f;
     emitter.scale = 1.0f;
 
-    func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
+    effect_attach(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
     trail_attachToBone(obj, 5, -1, 0xFF, 1);
 }
 
@@ -1011,7 +1011,7 @@ void func_1514E31C(Actor *obj) {
     attach.p1.z = 600.0f;
     emitter.scale = 1.0f;
 
-    func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 3, 0, 0), obj, 7);
+    effect_attach(func_15189FF0(&spawn, &emitter, &attach, 2, 3, 0, 0), obj, 7);
 
     {
         Vec3f offset;
@@ -1029,10 +1029,10 @@ void func_1514E508(Actor *obj) {
     s32 pos;
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 0");
-    func_1514EC1C(handle, obj, 0xD);
+    effect_attach(handle, obj, 0xD);
     pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = light_createPointLight(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
-    func_1514EC1C(handle, obj, 0x18);
+    effect_attach(handle, obj, 0x18);
 }
 
 void func_1514E5B8(Actor *obj) {
@@ -1040,10 +1040,10 @@ void func_1514E5B8(Actor *obj) {
     s32 pos;
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect -1");
-    func_1514EC1C(handle, obj, 0xD);
+    effect_attach(handle, obj, 0xD);
     pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = light_createPointLight(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
-    func_1514EC1C(handle, obj, 0x18);
+    effect_attach(handle, obj, 0x18);
 }
 
 void func_1514E668(Actor *obj) {
@@ -1051,10 +1051,10 @@ void func_1514E668(Actor *obj) {
     s32 pos;
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 1");
-    func_1514EC1C(handle, obj, 0xD);
+    effect_attach(handle, obj, 0xD);
     pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = light_createPointLight(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
-    func_1514EC1C(handle, obj, 0x18);
+    effect_attach(handle, obj, 0x18);
 }
 
 void func_1514E718(Actor *obj) {
@@ -1062,17 +1062,17 @@ void func_1514E718(Actor *obj) {
     s32 pos;
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 2");
-    func_1514EC1C(handle, obj, 0xE);
+    effect_attach(handle, obj, 0xE);
     pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = light_createPointLight(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
-    func_1514EC1C(handle, obj, 0x18);
+    effect_attach(handle, obj, 0x18);
 }
 
 void func_1514E7C8(Actor *obj) {
     void *handle;
 
     handle = func_1518D1C0(obj, 7, 0, 1, 0xFF, 1, "Charactereffect 3");
-    func_1514EC1C(handle, obj, 0xF);
+    effect_attach(handle, obj, 0xF);
 }
 
 /* Emitter offsets of func_1514EECC and func_1514F194. */
@@ -1085,21 +1085,21 @@ static const Vec3f D_800A5964 = { 0.0f, 74.0f, -161.0f };
 void func_1514E824(Actor *obj) {
 }
 
-/* Attachment destroy handlers (D_8008AB58 entries): release an attachment's handle. */
-void func_1514E830(EffectHeader *handle) {
-    func_1516972C(handle);
+/* Attachment destroy handlers (gAttachDestroyFuncs entries): release an attachment's handle. */
+void effect_releaseAttachedObject(EffectHeader *handle) {
+    effect_destroyObject(handle);
 }
 
 void func_1514E850(void *handle) {
     func_1518E308(handle);
-    func_1516972C(handle);
+    effect_destroyObject(handle);
 }
 
-void func_1514E87C(void *handle) {
+void effect_releaseAttachedPointLight(void *handle) {
     light_freePointLight(handle);
 }
 
-/* Attachment message handlers (D_8008AB64 entries). Each returns 1 if it handled `msg`. */
+/* Attachment message handlers (gAttachMessageFuncs entries). Each returns 1 if it handled `msg`. */
 
 struct ToggleTarget {
     /* 0x000 */ u8 pad0[0x10];
@@ -1109,7 +1109,7 @@ struct ToggleTarget {
 };
 
 /** Messages 0, 1 and 2 toggle, set and clear bit 0 of the handle's flags. */
-s32 func_1514E89C(ToggleTarget *target, s32 msg, s32 arg) {
+s32 effect_handleToggleMessage(ToggleTarget *target, s32 msg, s32 arg) {
     s32 flags;
 
     switch (msg) {
@@ -1133,8 +1133,8 @@ s32 func_1514E89C(ToggleTarget *target, s32 msg, s32 arg) {
     return 1;
 }
 
-/** Like func_1514E89C, but clearing bit 0 also hides the glow's attached lens flare. */
-s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
+/** Like effect_handleToggleMessage, but clearing bit 0 also hides the glow's attached lens flare. */
+s32 effect_handleGlowToggleMessage(s32 handle, s32 msg, s32 arg) {
     // matching: with an s32 parameter IDO keeps &target->unk110 in its own register
     ToggleTarget *target = (ToggleTarget *)handle;
     GlowShape *emitter;
@@ -1166,21 +1166,21 @@ s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
         target->flags |= 1;
         break;
     default:
-        return func_1514E89C(target, msg, arg);
+        return effect_handleToggleMessage(target, msg, arg);
     }
     return 1;
 }
 
 s32 func_1514E9DC(s32 handle, s32 msg, s32 arg) {
-    return func_1514E920(handle, msg, arg);
+    return effect_handleGlowToggleMessage(handle, msg, arg);
 }
 
 s32 func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg) {
-    return func_1514E89C(target, msg, arg);
+    return effect_handleToggleMessage(target, msg, arg);
 }
 
 /** Messages 3..12 switch the emitter between table 2 and tables 3, 5 and 6. */
-s32 func_1514EA1C(ActorEmitterProcess *target, s32 msg, s32 arg) {
+s32 effect_handleEmitterTableMessage(ActorEmitterProcess *target, s32 msg, s32 arg) {
     switch (msg) {
     case 3:
         if (target->params.table == 2) {
@@ -1225,13 +1225,13 @@ s32 func_1514EA1C(ActorEmitterProcess *target, s32 msg, s32 arg) {
         func_1518E37C(target, 2);
         break;
     default:
-        return func_1514E89C((ToggleTarget *)target, msg, arg);
+        return effect_handleToggleMessage((ToggleTarget *)target, msg, arg);
     }
     return 1;
 }
 
 s32 func_1514EB6C(ToggleTarget *target, s32 msg, s32 arg) {
-    return func_1514E89C(target, msg, arg);
+    return effect_handleToggleMessage(target, msg, arg);
 }
 
 s32 func_1514EB8C(s32 handle, s32 msg, s32 arg) {
@@ -1239,10 +1239,10 @@ s32 func_1514EB8C(s32 handle, s32 msg, s32 arg) {
 }
 
 /** Allocates an unlinked attachment node for `handle` with `extraSize` bytes of payload. */
-Attachment *func_1514EBA4(void *handle, s16 type, s32 extraSize) {
+Attachment *effect_newAttachment(void *handle, s16 type, s32 extraSize) {
     Attachment *node;
 
-    node = func_15167A68(0x24, 1, extraSize + 0x20, 1, 0xFF, 1);
+    node = effect_newObject(0x24, 1, extraSize + 0x20, 1, 0xFF, 1);
     if (node == NULL) {
         return NULL;
     }
@@ -1257,13 +1257,13 @@ Attachment *func_1514EBA4(void *handle, s16 type, s32 extraSize) {
  * Attaches `handle` to `owner` as an attachment of `type` (pushed at the head of its list).
  * If no node can be allocated, the handle is released instead. Returns the node or NULL.
  */
-Attachment *func_1514EC1C(void *handle, Actor *owner, s16 type) {
+Attachment *effect_attach(void *handle, Actor *owner, s16 type) {
     Attachment *result;
     Attachment *node;
 
     result = NULL;
     if (handle != NULL) {
-        node = func_1514EBA4(handle, type, 0);
+        node = effect_newAttachment(handle, type, 0);
         result = node;
         if (node != NULL) {
             node->next = owner->attachments;
@@ -1272,17 +1272,17 @@ Attachment *func_1514EC1C(void *handle, Actor *owner, s16 type) {
             if (node->next != NULL) {
                 node->next->prev = node;
             }
-        } else if (D_8008ABE8[type]->destroyHandler != -1) {
-            D_8008AB58[D_8008ABE8[type]->destroyHandler](handle);
+        } else if (gAttachmentTypes[type]->destroyHandler != -1) {
+            gAttachDestroyFuncs[gAttachmentTypes[type]->destroyHandler](handle);
         } else {
-            func_1516972C(handle);
+            effect_destroyObject(handle);
         }
     }
     return result;
 }
 
 /** Finds the first attachment of `type` in the list starting at `list`; stores it (or NULL) in *out. */
-s32 func_1514ECE0(Attachment *list, s16 type, Attachment **out) {
+s32 effect_findAttachmentByType(Attachment *list, s16 type, Attachment **out) {
     s32 found;
     Attachment *node;
     Attachment *next;
@@ -1307,7 +1307,7 @@ s32 func_1514ECE0(Attachment *list, s16 type, Attachment **out) {
 }
 
 /** Finds the first attachment holding `handle` in the list starting at `list`; stores it (or NULL) in *out. */
-s32 func_1514ED3C(Attachment *list, void *handle, Attachment **out) {
+s32 effect_findAttachmentByHandle(Attachment *list, void *handle, Attachment **out) {
     s32 found = FALSE;
     Attachment *node = list;
     Attachment *next;
@@ -1329,7 +1329,7 @@ s32 func_1514ED3C(Attachment *list, void *handle, Attachment **out) {
 }
 
 /** Unlinks `node` from `owner`'s attachment list and frees it. Returns the node's handle. */
-void *func_1514ED8C(Attachment *node, Actor *owner) {
+void *effect_removeAttachment(Attachment *node, Actor *owner) {
     void *handle;
 
     if (node == owner->attachments) {
@@ -1342,12 +1342,12 @@ void *func_1514ED8C(Attachment *node, Actor *owner) {
         node->prev->next = node->next;
     }
     handle = node->handle;
-    func_1516972C(&node->header);
+    effect_destroyObject(&node->header);
     return handle;
 }
 
 /** Removes (without releasing the handle) every attachment of `owner` that holds `handle`. */
-void func_1514EDF0(void *handle, Actor *owner) {
+void effect_detachHandle(void *handle, Actor *owner) {
     Attachment *node;
     s32 ret;
     Attachment *match;
@@ -1357,17 +1357,17 @@ void func_1514EDF0(void *handle, Actor *owner) {
     match = NULL;
     do {
         // matching: test the s32 result, loop on the u8 copy
-        ret = func_1514ED3C(node, handle, &match);
+        ret = effect_findAttachmentByHandle(node, handle, &match);
         found = ret;
         if (ret) {
             node = match->next;
-            func_1514ED8C(match, owner);
+            effect_removeAttachment(match, owner);
         }
     } while (found);
 }
 
 /** Attaches a sprite_newActorTracker object for `obj` (type 0x16). */
-void func_1514EE70(Actor *obj) {
+void effect_attachActorTracker(Actor *obj) {
     ActorTrackerDesc desc;
     ActorTracker *handle;
 
@@ -1376,7 +1376,7 @@ void func_1514EE70(Actor *obj) {
     desc.flags = 0;
     desc.lifetime = 300;
     handle = sprite_newActorTracker(&desc, 0, 0xFF, 1);
-    func_1514EC1C(handle, obj, 0x16);
+    effect_attach(handle, obj, 0x16);
 }
 
 
@@ -1384,7 +1384,7 @@ void func_1514EECC(Actor *obj) {
     void *handle;
 
     handle = light_createAttached(obj, 1, &D_800A5934, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
-    func_1514EC1C(handle, obj, 0x19);
+    effect_attach(handle, obj, 0x19);
     {
         ParticleDef spawn;
         GlowShape emitter;
@@ -1453,7 +1453,7 @@ void func_1514F110(Actor *obj) {
 }
 
 /* Attachment message handler for a light effect (e.g. light_createAttached's): 13 turns the light on, 14 off. */
-s32 func_1514F130(LightEffect *target, s32 msg, s32 arg) {
+s32 effect_handleLightMessage(LightEffect *target, s32 msg, s32 arg) {
     switch (msg) {
     case 13:
         target->light->disabled = 0;
@@ -1462,7 +1462,7 @@ s32 func_1514F130(LightEffect *target, s32 msg, s32 arg) {
         target->light->disabled = 1;
         break;
     default:
-        return func_1514E89C((ToggleTarget *)target, msg, arg);
+        return effect_handleToggleMessage((ToggleTarget *)target, msg, arg);
     }
     return 1;
 }
@@ -1476,12 +1476,12 @@ void func_1514F194(Actor *obj) {
     if (gIsMultiplayer == 0) {
         func_151BC074(obj);
     }
-    func_151BD2F8(obj, 0xFF, 1);
+    effect_spawnBloodStrips(obj, 0xFF, 1);
     func_151B9F00(obj, 0xFF, 1);
     light_createAttached(obj, 1, &D_800A5958, 2, 300, 12, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
     handle = light_createAttached(obj, 1, &D_800A5964, 2, 300, 15, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
     if (handle != NULL) {
-        func_1514EC1C(handle, obj, 0x19);
+        effect_attach(handle, obj, 0x19);
     }
 }
 
@@ -1506,7 +1506,7 @@ void func_1514F3CC(Actor *obj) {
     payload.unk8 = 0.0f;
 
     // the seventh argument is the payload size
-    spawned = func_15149130(300, -1, 0x3A, -1, 0, 0x2B, sizeof(payload), 0xFF, 1);
+    spawned = effect_newTimedEffect(300, -1, 0x3A, -1, 0, 0x2B, sizeof(payload), 0xFF, 1);
     if (spawned != NULL) {
         memcpy((u8 *)spawned + 0x28, &payload, sizeof(payload));
     }
@@ -1516,7 +1516,7 @@ void func_1514F44C(Actor *obj) {
     void *handle;
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect frontend fire imp");
-    func_1514EC1C(handle, obj, 0xD);
+    effect_attach(handle, obj, 0xD);
 }
 
 void func_1514F4A8(Actor *obj) {
@@ -1536,7 +1536,7 @@ void func_1514F538(Actor *obj) {
 }
 
 void func_1514F568(Actor *obj) {
-    func_150C4120(obj, -1, 0xFF, 1);
+    effect_spawnPulseEffect(obj, -1, 0xFF, 1);
 }
 
 void func_1514F590(Actor *obj) {

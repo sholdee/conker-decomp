@@ -142,7 +142,7 @@ typedef struct {
     ActorRef owner;
 } OwnedEffect28;
 
-/* BloodStrip spawned by func_151BD2F8, with two bytes of extra data. */
+/* BloodStrip spawned by effect_spawnBloodStrips, with two bytes of extra data. */
 typedef struct {
     BloodStrip strip;
     u8 pad7C[4];

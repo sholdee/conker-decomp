@@ -1347,11 +1347,11 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 if (level == 0x31) {
                     arg0->mv->swing_xvel = zones[12].x;
                     arg0->mv->swing_zvel = zones[12].z;
-                    func_150DBD70(5);
+                    effect_createFallingStream(5);
                 } else {
                     arg0->mv->swing_xvel = zones[2].x;
                     arg0->mv->swing_zvel = zones[2].z;
-                    func_150DBD70(0);
+                    effect_createFallingStream(0);
                 }
                 arg0->angle = 0xC000;
                 speed = 1.049999952f;

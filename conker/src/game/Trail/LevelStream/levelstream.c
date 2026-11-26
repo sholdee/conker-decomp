@@ -6,7 +6,7 @@
 extern RenderModePair D_800A4AC8[];
 extern CollisionHit D_800D9860; /* the floor under the last spawn point */
 
-/* Events posted through func_151494E0 with a stream id as the payload. */
+/* Events posted through effect_sendEventToTimedEffects with a stream id as the payload. */
 #define STREAM_EVENT_START 0x17 /* create the stream's emitter */
 #define STREAM_EVENT_STOP  0x18 /* stop emitting; the particles still fall */
 #define STREAM_EVENT_ENDED 0x23 /* the emitter was destroyed */
@@ -28,7 +28,7 @@ StreamTask *trail_createStreamTask(TriggerZone *source, u8 arg1, s32 arg2) {
     spawner.emitter = NULL;
     spawner.textureIndex = source->data2;
 
-    task = func_15149130(0x12C, -1, -1, -1, 0, 0x1E, 0x10, arg1, arg2);
+    task = effect_newTimedEffect(0x12C, -1, -1, -1, 0, 0x1E, 0x10, arg1, arg2);
     if (task != NULL) {
         memcpy(&task->spawner, &spawner, sizeof(spawner));
     }
@@ -41,7 +41,7 @@ void trail_startStream(s32 id) {
 
     if (id >= 0 && id < 4) {
         payload = id;
-        func_151494E0((s32)&payload, STREAM_EVENT_START);
+        effect_sendEventToTimedEffects((s32)&payload, STREAM_EVENT_START);
     }
 }
 
@@ -51,7 +51,7 @@ void trail_stopStream(s32 id) {
 
     if (id >= 0 && id < 4) {
         payload = id;
-        func_151494E0((s32)&payload, STREAM_EVENT_STOP);
+        effect_sendEventToTimedEffects((s32)&payload, STREAM_EVENT_STOP);
     }
 }
 
@@ -126,7 +126,7 @@ LevelStream *func_151CD4C0(source, textureIndex, id, arg3, arg4)
     data.textureIndex = textureIndex;
     template.material = 0;
     template.unk14 = 7;
-    emitter = func_15147A80(&template, sizeof(StreamData), sizeof(StreamParticle), 9, 9, 9, 0, 0, 0, arg3, arg4);
+    emitter = effect_newEffectObj(&template, sizeof(StreamData), sizeof(StreamParticle), 9, 9, 9, 0, 0, 0, arg3, arg4);
     if (emitter != NULL) {
         memcpy(emitter->data, &data, sizeof(data));
     }
@@ -453,8 +453,8 @@ void trail_destroyStreamEmitter(LevelStream *emitter) {
 
     data = emitter->data;
     payload = data->id;
-    func_151494E0((s32)&payload, STREAM_EVENT_ENDED);
-    func_151478F4(emitter);
+    effect_sendEventToTimedEffects((s32)&payload, STREAM_EVENT_ENDED);
+    effect_defaultDestroyEffectObj(emitter);
 }
 
 void trail_freeStreamEmitter(LevelStream *emitter) {
@@ -463,8 +463,8 @@ void trail_freeStreamEmitter(LevelStream *emitter) {
 
     data = emitter->data;
     payload = data->id;
-    func_151494E0((s32)&payload, STREAM_EVENT_ENDED);
-    func_15147928(emitter);
+    effect_sendEventToTimedEffects((s32)&payload, STREAM_EVENT_ENDED);
+    effect_defaultFreeEffectObj(emitter);
 }
 
 
@@ -532,7 +532,7 @@ LevelStream *trail_findStream(s32 id) {
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            emitter = (LevelStream *)D_800DCE50[j][D_800A5760[i]];
+            emitter = (LevelStream *)gObjectLists[j][gEffectObjTypes[i]];
             while (emitter != NULL) {
                 if (emitter->head.tmpl.kind == STREAM_KIND) {
                     StreamData *data = emitter->data;
@@ -667,7 +667,7 @@ WaveTrail *trail_spawnWaveTrail(Actor *owner, DescParticleHead *anchor, u8 arg2,
         spawn.pos.z = 0.0f;
     }
 
-    trail = func_15147A80(&spawn, 40, 40, 0, 15, 15, 0, 0, 0, arg3, arg4);
+    trail = effect_newEffectObj(&spawn, 40, 40, 0, 15, 15, 0, 0, 0, arg3, arg4);
     if (trail != NULL) {
         memcpy(trail->data, &info, sizeof(info));
     }
@@ -1017,13 +1017,13 @@ Gfx *trail_drawWaveRibbon(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     return gfx;
 }
 
-/* Message handler of a following actor: lets func_15169850 update or end the link to its owner. */
+/* Message handler of a following actor: lets effect_handleOwnerActorEvent update or end the link to its owner. */
 void trail_onFollowerMessage(TrackerTrail *actor, s32 arg1, u8 arg2) {
     TrackerTrailData *data = actor->state;
 
     if (data->owner != NULL) {
         // the owner pointer and the byte after it are handled like an actor reference
-        func_15169850(arg1, arg2, (Actor **)&data->owner, (u8 *)&data->texture, actor);
+        effect_handleOwnerActorEvent(arg1, arg2, (Actor **)&data->owner, (u8 *)&data->texture, actor);
     }
 }
 
@@ -1067,7 +1067,7 @@ void trail_spawnNearCamera(Actor *obj, f32 probeY, f32 arg2) {
                 data.pos = spawnPos;
                 data.unkC = 0.0f;
 
-                effect = func_15149130((func_150ADA20() % 131U) + 51, -1, 0x20, -1, 1, 0,
+                effect = effect_newTimedEffect((func_150ADA20() % 131U) + 51, -1, 0x20, -1, 1, 0,
                                                        sizeof(data), 0xFF, 1);
                 if (effect != NULL) {
                     memcpy(&effect->data, &data, sizeof(data));
@@ -1229,7 +1229,7 @@ void trail_notifyFollowersGone(Actor *obj) {
 
     msg.actor = obj;
     msg.uniqueId = obj->unique_id;
-    func_151494E0((s32)&msg, 0x18);
+    effect_sendEventToTimedEffects((s32)&msg, 0x18);
 }
 
 /* Spawns a strip effect of the given variant on the object. */
@@ -1244,7 +1244,7 @@ void trail_spawnStripEffect(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
     data.alpha = (func_150ADA20() % 56U) + 200;
     data.ownerUnk84 = obj->animseq.uh;
 
-    effect = func_15149130(300, -1, 0x61, 4, 0, 0x31, sizeof(data), arg2, arg3);
+    effect = effect_newTimedEffect(300, -1, 0x61, 4, 0, 0x31, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -1428,7 +1428,7 @@ void trail_onOwnedEffectMessage(OwnedEffect *effect, void *msg, u8 type) {
         Actor *obj = gone->actor;
 
         if (obj == ref->actor || gone->uniqueId == ref->uniqueId) {
-            func_1516972C(&effect->base.header);
+            effect_destroyObject(&effect->base.header);
         }
     } else if (type == 0x2D) {
         ActorSwapMsg *swap = msg;
@@ -1584,7 +1584,7 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
 void trail_freeCarriedEffect(CarrierParticle *particle) {
     if (particle->effect != NULL) {
         // matching: a volatile read makes IDO reload the pointer for the call, as the original does
-        func_1516972C(*(EffectHeader *volatile *)&particle->effect);
+        effect_destroyObject(*(EffectHeader *volatile *)&particle->effect);
     }
 }
 
@@ -1621,7 +1621,7 @@ void trail_spawnTrackerEffect(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
     data.dist = 0.0f;
     data.pointFn = pointFn;
 
-    effect = func_15149130(300, -1, 0x5F, -1, 0, 0x48, sizeof(data), arg2, arg3);
+    effect = effect_newTimedEffect(300, -1, 0x5F, -1, 0, 0x48, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -1699,9 +1699,9 @@ void trail_updateTrackerEffect(TrackerEffect *effect) {
     }
 }
 
-/* Message handler of the tracker effect: lets func_15169850 update or end the link to its owner. */
+/* Message handler of the tracker effect: lets effect_handleOwnerActorEvent update or end the link to its owner. */
 void trail_onTrackerMessage(TrackerEffect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Tracker teardown: lets go of the trail. */
@@ -1711,12 +1711,12 @@ void trail_releaseTracker(TrackerEffect *effect) {
 
 void trail_destroyTracker(TrackerEffect *effect) {
     trail_releaseTracker(effect);
-    func_1514933C(&effect->base);
+    effect_defaultDestroyTimedEffect(&effect->base);
 }
 
 void trail_freeTracker(TrackerEffect *effect) {
     trail_releaseTracker(effect);
-    func_15149368(&effect->base);
+    effect_defaultFreeTimedEffect(&effect->base);
 }
 
 /* Lets go of the tracker's trail, which then fades out on its own. */
@@ -1774,7 +1774,7 @@ void trail_spawnTrackerTrail(TrackerEffect *effect) {
     req.spawn.kind = 19;
     req.spawn.unk14 = 6;
     req.spawn.material = 0;
-    trail = func_15147A80(&req.spawn, sizeof(TrackerTrailData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->base.header.owner, effect->base.header.kind);
+    trail = effect_newEffectObj(&req.spawn, sizeof(TrackerTrailData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->base.header.owner, effect->base.header.kind);
     if (trail != NULL) {
         memcpy(trail->state, &req.data, sizeof(TrackerTrailData));
         data->trail = trail;

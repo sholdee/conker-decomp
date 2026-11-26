@@ -18,7 +18,7 @@ void func_150C7020(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
         return;
     }
 
-    func_1516962C(0x29, owner, 0x12);
+    effect_sendActorEventToType(0x29, owner, 0x12);
 
     desc.ownerId = owner->unique_id;
     desc.owner = owner;

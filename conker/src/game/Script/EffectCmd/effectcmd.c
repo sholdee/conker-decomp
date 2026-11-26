@@ -281,7 +281,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             func_150FAD28();
             break;
         case 48:
-            func_150FAA40(0xFF, 1);
+            effect_startLineEmitter(0xFF, 1);
             break;
         case 47:
             obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
@@ -308,7 +308,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             func_150E0300();
             break;
         case 37:
-            func_151557FC(CMD_OBJECT_ID(cmd->arg), 120, cmd->a[0].w);
+            effect_showPlayerMarker(CMD_OBJECT_ID(cmd->arg), 120, cmd->a[0].w);
             break;
         case 36:
             {
@@ -316,7 +316,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
 
                 target = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
                 if (target != NULL) {
-                    func_1514EC1C(beam_spawnCastBeam(target), target, 27);
+                    effect_attach(beam_spawnCastBeam(target), target, 27);
                 }
             }
             break;
@@ -379,7 +379,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             }
             break;
         case 20:
-            func_150E1060(cmd->arg.b.lo, 0xFF, 1);
+            effect_spawnPropEmitter(cmd->arg.b.lo, 0xFF, 1);
             break;
         case 18:
             trail_startStream(cmd->arg.w);
@@ -390,7 +390,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             break;
         case 0:
             obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
-            func_150B53D0(obj, cmd->a[0].h.lo, 0xFF, 1);
+            effect_spawnOwnerSpark(obj, cmd->a[0].h.lo, 0xFF, 1);
             break;
         case 1:
             func_150BEF7C(cmd->arg.w);
@@ -399,10 +399,10 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             D_800D9920 = 1;
             break;
         case 3:
-            func_15178EFC(cmd->arg.w);
+            effect_requestRainState(cmd->arg.w);
             break;
         case 4:
-            ret = func_150E3208(cmd->arg.w, cmd->a[0].w, cmd->a[1].w, cmd->a[2].w, cmd->a[3].w,
+            ret = effect_startHomingToPoint(cmd->arg.w, cmd->a[0].w, cmd->a[1].w, cmd->a[2].w, cmd->a[3].w,
                                 cmd->a[4].w, cmd->a[5].w, cmd->a[6].w);
             if (ret != 0) {
                 ret = (ret << 6) | 0xE000 | 4;
@@ -411,7 +411,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
         case 5:
             obj = actor_findOnPath(CMD_OBJECT_ID(cmd->a[2]));
             if (obj != NULL) {
-                ret = func_150E32D0(cmd->arg.w, cmd->a[0].w, cmd->a[1].w, obj, cmd->a[3].w, cmd->a[5].w);
+                ret = effect_startHomingOnActor(cmd->arg.w, cmd->a[0].w, cmd->a[1].w, obj, cmd->a[3].w, cmd->a[5].w);
                 if (ret != 0) {
                     s32 pad; // matching: -g3 block keeps the handle store in the branch delay slot
                     ret = (ret << 6) | 0xE000 | 4;
@@ -419,7 +419,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             }
             break;
         case 6:
-            ret = func_150E3414(cmd->arg.w, cmd->a[0].w, cmd->a[1].w, cmd->a[2].w, cmd->a[3].w,
+            ret = effect_startHomingWithSound(cmd->arg.w, cmd->a[0].w, cmd->a[1].w, cmd->a[2].w, cmd->a[3].w,
                                 cmd->a[4].w, movement_obj, cmd->a[5].w, cmd->a[6].w);
             if (ret != 0) {
                 ret = (ret << 6) | 0xE000 | 4;
@@ -434,7 +434,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
                     pos.x = cmd->a[0].w;
                     pos.y = cmd->a[1].w;
                     pos.z = cmd->a[2].w;
-                    func_150DECC0(&pos, 0xFF, 1);
+                    effect_spawnExplosion(&pos, 0xFF, 1);
                 } else {
                     func_150E81A8(cmd->arg.w & 0xFF, 0xFF, 1);
                 }
@@ -472,7 +472,7 @@ s32 script_endEffect(s32 cmdId, ScriptCmd *cmd) {
             func_150EB8C4();
             break;
         case 39:
-            func_150F9720(cmd->arg.b.lo);
+            effect_jumpStagesToEnd(cmd->arg.b.lo);
             break;
         case 38:
             light_sendEvent(41, 24, 0);
@@ -495,7 +495,7 @@ s32 script_endEffect(s32 cmdId, ScriptCmd *cmd) {
         case 4:
         case 5:
         case 6:
-            func_150E35DC(cmdId >> 6);
+            effect_stopHomingEffect(cmdId >> 6);
             break;
         case 8:
             func_150B3DD0();
@@ -571,7 +571,7 @@ s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
             if (phase == 2) {
                 u8 buf2[4];
                 buf2[0] = cmd->a[0].w;
-                func_151494E0((s32)buf2, 52);
+                effect_sendEventToTimedEffects((s32)buf2, 52);
             }
             break;
         case 29:
@@ -582,7 +582,7 @@ s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
                 msg.unk5 = cmd->a[2].w;
                 msg.unk6 = cmd->a[3].w;
                 msg.unk7 = cmd->a[4].w;
-                func_1516944C(53, (s32)&msg, 51);
+                effect_sendEventToType(53, (s32)&msg, 51);
             }
             break;
         case 28:
@@ -591,7 +591,7 @@ s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
                 if (idx < 0 || idx >= 3) {
                     return 1;
                 }
-                func_151494E0((s32)&D_800A0960[idx], 50);
+                effect_sendEventToTimedEffects((s32)&D_800A0960[idx], 50);
             }
             break;
         case 11:
@@ -657,7 +657,7 @@ s32 script_effectQuery(s32 cmdId, s32 phase, s32 arg2) {
                 /* Done once no node of type 2 is left in the watched lists. */
                 for (i = 0; i < 2; i++) {
                     for (j = 0; j < 3; j++) {
-                        node = (Node1509DBBC *)D_800DCE50[i][D_800A6060[j]];
+                        node = (Node1509DBBC *)gObjectLists[i][gModelEffectTypes[j]];
                         while (node != NULL) {
                             Node1509DBBC *next;
 
@@ -678,7 +678,7 @@ s32 script_effectQuery(s32 cmdId, s32 phase, s32 arg2) {
             if (phase == 0 || phase == 1) {
                 handle = cmdId >> 6;
                 if (handle != 0) {
-                    func_150E36BC(handle, &hi, &result, &lo);
+                    effect_getHomingEffectPos(handle, &hi, &result, &lo);
                     if (phase == 0) {
                         result = (hi << 16) | (lo & 0xFFFF);
                     }

@@ -4,14 +4,14 @@
 
 
 
-/* Effect object header from func_15149130; effect-specific data starts at 0x28. */
+/* Effect object header from effect_newTimedEffect; effect-specific data starts at 0x28. */
 struct PointEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Vec3f pos;
 };
 
 /* The explosion's 15 spawned effects: offsets from pos, rotation weights and speeds, and the kind (0-2,
- * an index into D_80088960 / D_8008896C) of each. */
+ * an index into gExplosionRiseSpeeds / gExplosionRiseSpeedRanges) of each. */
 static const Vec3f D_800A0D60[15] = {
     { -29.022f, -20.655f, -14.009f },
     { -51.612f, -23.07f, -212.214f },
@@ -51,17 +51,17 @@ static const f32 D_800A0EC8[15] = {
 };
 
 /* Base and random range of the upward speed of each kind. */
-static f32 D_80088960[3] = { 28.0f, 23.0f, 15.0f };
-static f32 D_8008896C[3] = { 4.0f, 5.0f, 4.0f };
+static f32 gExplosionRiseSpeeds[3] = { 28.0f, 23.0f, 15.0f };
+static f32 gExplosionRiseSpeedRanges[3] = { 4.0f, 5.0f, 4.0f };
 
 void *memcpy(void *, const void *, u32);
 
 /*
- * Explosion at pos: 15 spawned effects (offsets from D_800A0D60), followed by func_15165F80,
+ * Explosion at pos: 15 spawned effects (offsets from D_800A0D60), followed by effect_spawnQuadEffect,
  * func_151D5404/5334/5514/3FF4 and func_151541B8 effects, a burst of 3-6 debris aimed
  * around the camera yaw, and a short-lived PointEffect at pos.
  */
-void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
+void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
     s32 yaw;
     s32 i;
     ParticleSpawn spawn;
@@ -107,7 +107,7 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
             spawn.pos.x = D_800A0D60[i].x + pos->x;
             spawn.pos.y = D_800A0D60[i].y + pos->y;
             spawn.pos.z = D_800A0D60[i].z + pos->z;
-            spawn.vel.y = D_80088960[idx] + func_150ADA68() * D_8008896C[idx];
+            spawn.vel.y = gExplosionRiseSpeeds[idx] + func_150ADA68() * gExplosionRiseSpeedRanges[idx];
             spawn.rotVel.x = D_800A0E8C[i] * D_800A0E50[i] * 0.01900000125f;
             spawn.rotVel.z = D_800A0E8C[i] * D_800A0E14[i] * 0.01900000125f;
             spawn.gravity = func_150ADA68() * 0.2080000043f + -1.032000065f;
@@ -121,7 +121,7 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
             func_1513264C(&spawn, 3, 0xFF, 0, 0, *(u8 *)&owner, kind);
         }
     }
-    func_15165F80(-1, pos->x, pos->y, pos->z, 30, 50, 0, *(u8 *)&owner, kind);
+    effect_spawnQuadEffect(-1, pos->x, pos->y, pos->z, 30, 50, 0, *(u8 *)&owner, kind);
     func_151D5404(pos, 506.0f, 1013.0f, 0.0009871668881f, 15, 20, *(u8 *)&owner, kind);
     func_151D5334(pos, 506.0f, 1013.0f, 0.0009871668881f, 5, *(u8 *)&owner, kind);
     func_151D5514(pos, *(u8 *)&owner, kind);
@@ -159,7 +159,7 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
         Vec3f effectPos;
 
         effectPos = *pos;
-        effect = func_15149130(15, 8, -1, -1, 1, 0, sizeof(effectPos), *(u8 *)&owner, kind);
+        effect = effect_newTimedEffect(15, 8, -1, -1, 1, 0, sizeof(effectPos), *(u8 *)&owner, kind);
         if (effect != NULL) {
             memcpy(&((PointEffect *)effect)->pos, &effectPos, sizeof(effectPos));
         }
@@ -170,7 +170,7 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
  * Effect update: drops the effect's position onto the ground below it (if any), spawns a
  * point effect (func_150E83AC) there and scatters 3-5 beam_spawnAtGroundPoints spawns around it.
  */
-void func_150DF334(PointEffect *effect) {
+void effect_dropPointEffect(PointEffect *effect) {
     Vec3f *pos;
     CollisionHit hit;
     u8 onGround;
@@ -198,7 +198,7 @@ void func_150DF334(PointEffect *effect) {
 }
 
 /* Spawns a particle at pos, then 1-3 more scattered within 30 units of it. */
-void func_150DF4B8(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s32 kind) {
+void effect_spawnScatteredParticles(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s32 kind) {
     ParticleEmitterDesc emitter;
     f32 scaleA;
     f32 scaleB;

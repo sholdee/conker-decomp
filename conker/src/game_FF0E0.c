@@ -103,7 +103,7 @@ void func_150D1C30(FF0E0Object *obj) {
     }
 }
 /* Message handler: 0x32 sets the spin and intensity, 0x30/0x31 enable/disable the object when the
- * argument matches unk40, 0x4E resets the spin from D_800A5480, 0x4F passes the object to func_1516972C. */
+ * argument matches unk40, 0x4E resets the spin from D_800A5480, 0x4F passes the object to effect_destroyObject. */
 void func_150D1F6C(FF0E0Object *obj, s32 arg, u8 msg) {
     FF0E0State *state;
     FF0E0SpinMsg *msgData;
@@ -128,11 +128,11 @@ void func_150D1F6C(FF0E0Object *obj, s32 arg, u8 msg) {
     } else if (msg == 0x4E) {
         obj->state.angularVelocity = D_800A5480;
     } else if (msg == 0x4F) {
-        func_1516972C(&obj->base.header);
+        effect_destroyObject(&obj->base.header);
     }
 }
 
-/* Passes every child to func_1516972C. */
+/* Passes every child to effect_destroyObject. */
 void func_150D2054(FF0E0Object *obj) {
     FF0E0State *state;
     FF0E0Child *child;
@@ -142,17 +142,17 @@ void func_150D2054(FF0E0Object *obj) {
     for (i = 0; i < 6; i++) {
         child = state->children[i];
         if (child != NULL) {
-            func_1516972C(&child->header);
+            effect_destroyObject(&child->header);
         }
     }
 }
 
 void func_150D20B0(FF0E0Object *obj) {
     func_150D2054(obj);
-    func_15149368(&obj->base);
+    effect_defaultFreeTimedEffect(&obj->base);
 }
 
 void func_150D20DC(FF0E0Object *obj) {
     func_150D2054(obj);
-    func_1514933C(&obj->base);
+    effect_defaultDestroyTimedEffect(&obj->base);
 }

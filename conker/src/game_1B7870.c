@@ -2,15 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The two display lists (indices into D_8008AFB8) that a piece picks from, and the alternative pair. */
-static s32 D_8008D5B0[2] = { 0, 1 };
-static s32 D_8008D5B8[2] = { 2, 3 };
+/* The two display lists (indices into gEffectActorDisplayLists) that a piece picks from, and the alternative pair. */
+static s32 gTumblePieceDls[2] = { 0, 1 };
+static s32 gTumblePieceAltDls[2] = { 2, 3 };
 
 /*
  * Spawns a tumbling piece at position with the given motion; it fades out over its last 12 frames.
- * altDisplayList picks the display list table (D_8008D5B8 instead of D_8008D5B0).
+ * altDisplayList picks the display list table (gTumblePieceAltDls instead of gTumblePieceDls).
  */
-EffectActor *func_1518A3C0(Vec3f *position, Vec3f *angle, f32 scale, Vec3f *velocity, Vec3f *angularVelocity,
+EffectActor *effect_spawnTumblingPiece(Vec3f *position, Vec3f *angle, f32 scale, Vec3f *velocity, Vec3f *angularVelocity,
                            f32 gravity, f32 damping, u8 flags, s16 lifetime, u8 altDisplayList, s32 extraSize,
                            u8 arg11, s32 arg12) {
     EffectActor *actor;
@@ -30,9 +30,9 @@ EffectActor *func_1518A3C0(Vec3f *position, Vec3f *angle, f32 scale, Vec3f *velo
     template.lifetime = lifetime;
 
     if (altDisplayList) {
-        template.displayList = D_8008D5B8[func_150ADA20() & 1];
+        template.displayList = gTumblePieceAltDls[func_150ADA20() & 1];
     } else {
-        template.displayList = D_8008D5B0[func_150ADA20() & 1];
+        template.displayList = gTumblePieceDls[func_150ADA20() & 1];
     }
 
     template.render.setGeometryMode = 0x220205;
@@ -61,7 +61,7 @@ EffectActor *func_1518A3C0(Vec3f *position, Vec3f *angle, f32 scale, Vec3f *velo
     fade.duration = 12;
     fade.alphaPerTick = 21;
 
-    actor = func_151580B0(&template, 3, 255, 1, extraSize + 0x38, arg11, arg12);
+    actor = effect_newEffectActor(&template, 3, 255, 1, extraSize + 0x38, arg11, arg12);
     if (actor == NULL) {
         return NULL;
     }
@@ -74,10 +74,10 @@ EffectActor *func_1518A3C0(Vec3f *position, Vec3f *angle, f32 scale, Vec3f *velo
  * Update callback: fades the actor out, applies gravity and per-frame damping to the velocity,
  * moves the position with the average velocity over the step and spins the angle.
  */
-s32 func_1518A5F4(EffectActor *actor) {
+s32 effect_updateTumblingPiece(EffectActor *actor) {
     TumbleMotion *motion = &actor->data.piece.motion;
 
-    func_15158AFC(actor);
+    effect_fadeEffectActor(actor);
 
     {
         Vec3f prevVel;
@@ -110,7 +110,7 @@ s32 func_1518A5F4(EffectActor *actor) {
 }
 
 /* Draw callback: builds the actor's model matrix from its angle, scale and position. */
-s32 func_1518A914(Mtx *mtx, EffectActor *actor) {
+s32 effect_buildTumblingPieceMtx(Mtx *mtx, EffectActor *actor) {
     TumbleMotion *motion = &actor->data.piece.motion;
     MtxF mf;
 

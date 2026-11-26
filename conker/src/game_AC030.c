@@ -353,7 +353,7 @@ void func_1507EFD0(void) {
         func_1507EB80(candidates, &count, seq);
     } else if (gCurrentActor->energy < 2) {
         func_1507EB80(candidates, &count, 0);
-    } else if (func_1515942C(&movement_obj[dc_glbl_CharNum], 0, 0, -1, -1, -1) != 0) {
+    } else if (effect_matchWatcherState(&movement_obj[dc_glbl_CharNum], 0, 0, -1, -1, -1) != 0) {
         func_1507EB80(candidates, &count, 0);
     } else if (idle->timer >= func_1507F4C0(idle->phase)) {
         func_1507EEF4();
@@ -832,10 +832,10 @@ void func_1507FF94(Actor *actor) {
     event.actor = actor;
     event.uniqueId = actor->unique_id;
     func_15191B8C((s32)&event, 0xD);
-    func_151494E0((s32)&event, 0xD);
+    effect_sendEventToTimedEffects((s32)&event, 0xD);
 }
 
-/* A node of the D_800DCE50 per-type object lists. */
+/* A node of the gObjectLists per-type object lists. */
 typedef struct ListObject {
     /* 0x00 */ u8 pad0[8];
     /* 0x08 */ struct ListObject *next;
@@ -877,7 +877,7 @@ s32 func_1507FFD8(Actor *actor) {
         types = D_80086C50;
         for (i = 0; i < 3; i++) {
             type = types.type[i];
-            obj = (ListObject *)D_800DCE50[0][type]; // the lists are indexed flat: type runs over both rows
+            obj = (ListObject *)gObjectLists[0][type]; // the lists are indexed flat: type runs over both rows
             while (obj != NULL) {
                 x = obj->x;
                 y = obj->y;

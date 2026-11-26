@@ -3,19 +3,19 @@
 #include "variables.h"
 
 /*
- * Split from game_185560.c at func_15158BD0 (16-aligned): game_185560's .rodata (the 1/255 literal at
+ * Split from game_185560.c at effect_newCharacterWatcher (16-aligned): game_185560's .rodata (the 1/255 literal at
  * 0x24AB30) ends padded where these vertices start, and its .data (the identity matrix of
- * func_15158920) ends padded at 0x22F920, where these display lists start.
+ * effect_buildEffectActorScaleMtx) ends padded at 0x22F920, where these display lists start.
  */
 
 /* Creates a watcher for chr; returns NULL when chr is NULL or has no watchable mode. */
-CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
+CharacterWatcher *effect_newCharacterWatcher(Actor *chr, u8 enableActions, s32 extraSize) {
     CharacterWatcher *watcher;
 
     if (chr == NULL) {
         return NULL;
     }
-    watcher = func_15167A68(0x2E, 0, extraSize + 0x58, 1, 0xFF, 1);
+    watcher = effect_newObject(0x2E, 0, extraSize + 0x58, 1, 0xFF, 1);
     if (watcher == NULL) {
         return NULL;
     }
@@ -35,22 +35,22 @@ CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
     }
     watcher->unk10 = 1;
     watcher->unk14 = 0;
-    if (func_15159370(chr, &watcher->mode) == 0) {
-        func_1516979C(&watcher->header);
+    if (effect_pickWatcherMode(chr, &watcher->mode) == 0) {
+        effect_freeObject(&watcher->header);
         return NULL;
     }
     watcher->hit.flags = 0;
     return watcher;
 }
 
-void func_15158CD4(CharacterWatcher *watcher) {
-    func_1514EDF0(watcher, watcher->character);
-    func_15169804(&watcher->header);
+void effect_destroyCharacterWatcher(CharacterWatcher *watcher) {
+    effect_detachHandle(watcher, watcher->character);
+    effect_defaultDestroy(&watcher->header);
 }
 
-void func_15158D00(CharacterWatcher *watcher) {
-    func_1514EDF0(watcher, watcher->character);
-    func_15169824(&watcher->header);
+void effect_freeCharacterWatcher(CharacterWatcher *watcher) {
+    effect_detachHandle(watcher, watcher->character);
+    effect_defaultFree(&watcher->header);
 }
 
 /* A state-change rule: both masks are unions of STATE_BITS values. */
@@ -64,7 +64,7 @@ struct StateRule {
     ((1 << (a)) | (1 << ((b) + 3)) | (1 << ((c) + 6)) | (1 << ((d) + 9)) |     \
      (1 << ((e) + 13)))
 
-/* Vertices of the effect display lists (D_8008AE60.., drawn through D_8008AFB8). */
+/* Vertices of the effect display lists (D_8008AE60.., drawn through gEffectActorDisplayLists). */
 static const Vtx D_800A6080[5] = {
     { { { 0, -127, -255 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0x00, 0xFF } } },
     { { { 0, 25, 0 }, 0, { 0, 0 }, { 0xC8, 0xC8, 0x00, 0xFF } } },
@@ -100,7 +100,7 @@ static const Vtx D_800A61C0[4] = {
     { { { 0, 0, 255 }, 0, { 0, 0 }, { 0xFC, 0x52, 0x05, 0xFF } } },
 };
 
-/* The effect actor display lists (EffectActorTemplate.displayList, drawn by func_151582C8 of game_185560). */
+/* The effect actor display lists (EffectActorTemplate.displayList, drawn by effect_drawEffectActor of game_185560). */
 static Gfx D_8008AE60[] = {
     gsDPPipeSync(),
     gsSPVertex(D_800A6080, 5, 0),
@@ -154,10 +154,10 @@ static Gfx D_8008AF80[] = {
     gsSP1Triangle(2, 3, 0, 0),
     gsSPEndDisplayList(),
 };
-Gfx *D_8008AFB8[] = { D_8008AE60, D_8008AEA8, D_8008AF38, D_8008AF80, D_8008AEE0, NULL };
+Gfx *gEffectActorDisplayLists[] = { D_8008AE60, D_8008AEA8, D_8008AF38, D_8008AF80, D_8008AEE0, NULL };
 
-/* Transition rules of func_15158D2C, one per action slot of D_8008B02C. */
-static const StateRule D_800A6200[28] = {
+/* Transition rules of effect_updateCharacterWatcher, one per action slot of gWatcherModeActions. */
+static const StateRule gWatcherStateRules[28] = {
     { 0x21FFA, 0x3FFC9 },
     { 0x3FFFF, 0x3FFC9 },
     { 0x21FFA, 0x3FFD1 },
@@ -188,7 +188,7 @@ static const StateRule D_800A6200[28] = {
     { 0x3FFD1, 0x3FFEF },
 };
 
-/* Per-mode action tables (D_8008B02C): an index into D_8008AFD0 per StateRule, -1 = none. */
+/* Per-mode action tables (gWatcherModeActions): an index into gWatcherActions per StateRule, -1 = none. */
 static const s8 D_800A62E0[28] = {
     0, 8, 1, -1, 2, 3, 4, 5, 6, 7, 9, 10, -1, -1,
     -1, -1, -1, -1, -1, 13, -1, -1, 11, 12, 14, 15, 16, 21,
@@ -212,18 +212,18 @@ static const s8 D_800A6350[28] = {
 
 /* Character-watcher actions (indices of the action tables). Declared without a prototype: each takes
    its own task view of the watcher. */
-static void (*D_8008AFD0[])() = {
+static void (*gWatcherActions[])() = {
     func_151A99D0, func_151A9AA4, func_151A9BA0, func_151A9CA0, func_151A9DC0, func_151A9EC0,
     func_151A9FC8, func_151AA09C, func_151AA170, func_151AA17C, func_151AA1D0, func_151AA1F0,
-    func_151AA210, func_151AAABC, func_151AADF8, func_151AB1C4, func_151AB828, func_150C5DC0,
-    func_150C5F40, func_150C66F0, func_150C6870, func_151AB854, func_151AE6B0,
+    func_151AA210, effect_refreshTaskEffects, effect_keepTaskFlicker, func_151AB1C4, func_151AB828, func_150C5DC0,
+    func_150C5F40, effect_keepWatcherFloorSprite, effect_keepWatcherEmitter, func_151AB854, func_151AE6B0,
 };
 
 /* The action table of each watcher mode. */
-static const s8 *D_8008B02C[] = { D_800A62E0, D_800A62FC, D_800A6318, D_800A6334, D_800A6350 };
+static const s8 *gWatcherModeActions[] = { D_800A62E0, D_800A62FC, D_800A6318, D_800A6334, D_800A6350 };
 
 /* Update: recomputes the character's state and fires every rule matching the old -> new transition. */
-void func_15158D2C(CharacterWatcher *watcher) {
+void effect_updateCharacterWatcher(CharacterWatcher *watcher) {
     s32 oldBits;
     s8 action;
     u8 oldState0;
@@ -257,7 +257,7 @@ void func_15158D2C(CharacterWatcher *watcher) {
         watcher->state2 = 0;
     }
 
-    watcher->moveState = func_15159230(watcher->character, &watcher->lastPosition, watcher->moveState);
+    watcher->moveState = effect_getWatcherMoveState(watcher->character, &watcher->lastPosition, watcher->moveState);
     watcher->lastPosition.x = watcher->character->xpos;
     watcher->lastPosition.y = watcher->character->ypos;
     watcher->lastPosition.z = watcher->character->zpos;
@@ -267,12 +267,12 @@ void func_15158D2C(CharacterWatcher *watcher) {
         newBits = STATE_BITS(watcher->state0, watcher->state1, watcher->state2, watcher->moveState,
                              watcher->surfaceState);
         for (i = 0; i < 28; i++) {
-            action = D_8008B02C[watcher->mode][i];
+            action = gWatcherModeActions[watcher->mode][i];
             if (action != -1) {
                 oldBits = STATE_BITS(oldState0, oldState1, oldState2, oldMoveState, oldSurfaceState);
-                if ((D_800A6200[i].from | oldBits) == D_800A6200[i].from) {
-                    if ((D_800A6200[i].to | newBits) == D_800A6200[i].to) {
-                        D_8008AFD0[action](watcher);
+                if ((gWatcherStateRules[i].from | oldBits) == gWatcherStateRules[i].from) {
+                    if ((gWatcherStateRules[i].to | newBits) == gWatcherStateRules[i].to) {
+                        gWatcherActions[action](watcher);
                     }
                 }
             }
@@ -281,13 +281,13 @@ void func_15158D2C(CharacterWatcher *watcher) {
 }
 
 /* Message handler: frees the watcher when its character goes away (0), follows swaps (0x2D). */
-void func_15158FA4(void *self, ActorMsg *msg, u8 msgId) {
+void effect_characterWatcherMessage(void *self, ActorMsg *msg, u8 msgId) {
     CharacterWatcher *watcher = self;
     Actor *first;
 
     if (msgId == 0) {
         if ((msg->ref.actor == watcher->character) || (msg->ref.uniqueId == watcher->characterId)) {
-            func_1516972C(self);
+            effect_destroyObject(self);
         }
     } else if (msgId == 0x2D) {
         first = msg->swap.actorA;
@@ -360,7 +360,7 @@ s32 func_15159184(Actor *chr, u8 mode) {
 }
 
 /* Returns 0 if chr has not moved since lastPosition, 1 if it started moving, 2 if it kept moving. */
-s32 func_15159230(Actor *chr, Vec3f *lastPosition, u8 prevState) {
+s32 effect_getWatcherMoveState(Actor *chr, Vec3f *lastPosition, u8 prevState) {
     s32 ret;
 
     if ((chr->xpos != lastPosition->x) || (chr->ypos != lastPosition->y) ||
@@ -407,7 +407,7 @@ s32 func_151592B8(Actor *chr, u8 mode) {
 }
 
 /* Picks the watcher mode for chr; returns 0 if nothing applies. */
-s32 func_15159370(Actor *chr, u8 *mode) {
+s32 effect_pickWatcherMode(Actor *chr, u8 *mode) {
     s32 ret;
 
     ret = 0;
@@ -446,7 +446,7 @@ s32 func_15159370(Actor *chr, u8 *mode) {
  * Returns whether chr's watcher state matches the given field values (-1 matches anything).
  * chr's watcher is its type-0x13 attachment.
  */
-u8 func_1515942C(Actor *chr, s16 state0, s16 state1, s16 state2, s16 moveState, s16 surfaceState) {
+u8 effect_matchWatcherState(Actor *chr, s16 state0, s16 state1, s16 state2, s16 moveState, s16 surfaceState) {
     CharacterWatcher *watcher;
     Attachment *node;
     u8 ret;
@@ -459,7 +459,7 @@ u8 func_1515942C(Actor *chr, s16 state0, s16 state1, s16 state2, s16 moveState, 
     s32 have;
 
     ret = 0;
-    if (func_1514ECE0(chr->attachments, 0x13, &node) == 0) {
+    if (effect_findAttachmentByType(chr->attachments, 0x13, &node) == 0) {
         return 0;
     }
     watcher = node->handle; // attachment type 0x13 holds the character's watcher
@@ -705,7 +705,7 @@ void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, EffectHead
     func_15159890(&pos, &velocity, obj->owner, obj->kind);
 }
 
-/* Emitter data at 0x28 of the func_15159C08 emitter. */
+/* Emitter data at 0x28 of the effect_updateDiskEmitter emitter. */
 typedef struct {
     /* 0x00 */ Vec3f position;
     /* 0x0C */ Vec3f velocity;
@@ -724,7 +724,7 @@ struct DiskEmitterObject {
 };
 
 /* Emitter update: spawns oscillating particles at random points of a rotated disk. */
-void func_15159C08(DiskEmitterObject *obj) {
+void effect_updateDiskEmitter(DiskEmitterObject *obj) {
     DiskEmitter *emitter;
     EffectMotionParticle *particle;
 
@@ -1006,11 +1006,11 @@ u8 func_1515A78C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
 }
 
 /* Returns the address of chr's watcher floor hit through *out; 0 if chr has no watcher. */
-s32 func_1515A920(Actor *chr, CollisionHit **out) {
+s32 effect_getWatcherFloorHit(Actor *chr, CollisionHit **out) {
     Attachment *node;
     CharacterWatcher *watcher;
 
-    if (func_1514ECE0(chr->attachments, 0x13, &node) == 0) {
+    if (effect_findAttachmentByType(chr->attachments, 0x13, &node) == 0) {
         return 0;
     }
     watcher = node->handle;
@@ -1018,7 +1018,7 @@ s32 func_1515A920(Actor *chr, CollisionHit **out) {
     return 1;
 }
 
-/* Settings an emitter (func_1515AB88) spawns its rising particles with. */
+/* Settings an emitter (effect_updateRiseEmitter) spawns its rising particles with. */
 typedef struct {
     /* 0x00 */ f32 rate;
     /* 0x04 */ f32 rateRandom;
@@ -1100,7 +1100,7 @@ void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
     }
 }
 
-/* Emitter data at 0x28 of the func_1515AB88 emitter. */
+/* Emitter data at 0x28 of the effect_updateRiseEmitter emitter. */
 typedef struct {
     /* 0x00 */ f32 pending; /* particles owed; one is spawned per whole unit */
     /* 0x04 */ Vec3f position;
@@ -1124,7 +1124,7 @@ void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
     emitter.position = *pos;
     emitter.ceiling = ceiling;
     emitter.settings = data->settings;
-    obj = func_15149130(func_150ADA20() % (data->types.range + 1) + data->types.base,
+    obj = effect_newTimedEffect(func_150ADA20() % (data->types.range + 1) + data->types.base,
                                              -1, 0x3F, -1, 1, 0, sizeof(RiseEmitter), spawner->base.header.owner,
                                              spawner->base.header.kind);
     if (obj != NULL) {
@@ -1133,7 +1133,7 @@ void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
 }
 
 /* Emitter update: spawns rising particles (func_151596BC family) at the emitter's position. */
-void func_1515AB88(RiseEmitterObject *obj) {
+void effect_updateRiseEmitter(RiseEmitterObject *obj) {
     RiseEmitter *emitter;
 
     emitter = &obj->emitter;

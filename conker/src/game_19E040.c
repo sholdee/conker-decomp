@@ -2,15 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One piece of the func_15170F4C burst. */
+/* One piece of the effect_throwBurstPieces burst. */
 struct ModelBurstPiece {
     /* 0x00 */ u16 modelId;
     /* 0x04 */ f32 offset[3];
     /* 0x10 */ f32 rotation[3];
 };
 
-/* Start offsets of the six burst models of func_15170B90. */
-const f32 D_800A6E90[6][3] = {
+/* Start offsets of the six burst models of effect_spawnModelBurst. */
+const f32 gModelBurstOffsets[6][3] = {
     { 37.2f, -15.0f, -46.8f },
     { -19.6f, 49.8f, -47.1f },
     { 13.8f, 59.7f, 30.0f },
@@ -19,8 +19,8 @@ const f32 D_800A6E90[6][3] = {
     { -48.2f, -16.0f, 30.4f },
 };
 
-/* The six pieces func_15170F4C throws out of the actor (model, start offset, rotation). */
-const ModelBurstPiece D_800A6ED8[6] = {
+/* The six pieces effect_throwBurstPieces throws out of the actor (model, start offset, rotation). */
+const ModelBurstPiece gBurstPieces[6] = {
     { 338, { -6.0f, 84.0f, 89.0f }, { -40.0f, 0.0f, 0.0f } },
     { 338, { 89.0f, 75.0f, -57.0f }, { -40.0f, 120.0f, 0.0f } },
     { 338, { -79.0f, 59.0f, -57.0f }, { -40.0f, 240.0f, 0.0f } },
@@ -35,7 +35,7 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, s32 style, f32 scale, s32 type
                    s32 arg9);
 
 /* Spawns six models bursting up and out of the actor, plus a ring of dust particles around its feet. */
-void func_15170B90(WorldObject *actor, s32 modelId, s32 kind, s32 mode, u8 owner, s32 list) {
+void effect_spawnModelBurst(WorldObject *actor, s32 modelId, s32 kind, s32 mode, u8 owner, s32 list) {
     s32 i;
     ModelFxData fx;
     f32 x;
@@ -77,13 +77,13 @@ void func_15170B90(WorldObject *actor, s32 modelId, s32 kind, s32 mode, u8 owner
             id = modelId;
         }
         displayList = attach_loadModelDl(id);
-        fx.position[0] = D_800A6E90[i][0] + x;
-        fx.position[1] = D_800A6E90[i][1] + y;
-        fx.position[2] = D_800A6E90[i][2] + z;
+        fx.position[0] = gModelBurstOffsets[i][0] + x;
+        fx.position[1] = gModelBurstOffsets[i][1] + y;
+        fx.position[2] = gModelBurstOffsets[i][2] + z;
         fx.modelId = id;
-        fx.velocity[0] = D_800A6E90[i][0] * 0.08f;
-        fx.velocity[1] = fabsf(D_800A6E90[i][1]) * 0.08f + 7.0f;
-        fx.velocity[2] = D_800A6E90[i][2] * 0.08f;
+        fx.velocity[0] = gModelBurstOffsets[i][0] * 0.08f;
+        fx.velocity[1] = fabsf(gModelBurstOffsets[i][1]) * 0.08f + 7.0f;
+        fx.velocity[2] = gModelBurstOffsets[i][2] * 0.08f;
         r = func_150ADA20();
         fx.velocity[0] += (r >> 16) * (1.0f / 16384);
         r = func_150ADA20();
@@ -94,26 +94,26 @@ void func_15170B90(WorldObject *actor, s32 modelId, s32 kind, s32 mode, u8 owner
         fx.spin[1] = ((s32)func_150ADA20() >> 16) * (1.25f / 16384);
         fx.spin[2] = ((s32)func_150ADA20() >> 16) * (1.25f / 16384);
         fx.displayList = displayList;
-        func_15168BE4(&fx, owner, list);
+        effect_spawnModelFx(&fx, owner, list);
     }
-    func_151718F0(x, y - 80.0f, z, 70.0f, 500, 300.0f / 65536, 0, 10, owner, list);
+    effect_spawnDustRing(x, y - 80.0f, z, 70.0f, 500, 300.0f / 65536, 0, 10, owner, list);
     actor->inactive = 1;
 }
 
 /* Plays the scene-specific burst (scenes 2 and 16) at the actor. */
-void func_15170EC4(WorldObject *actor, u8 owner, s32 list) {
+void effect_spawnLevelModelBurst(WorldObject *actor, u8 owner, s32 list) {
     switch (level) {
     case 2:
-        func_15170B90(actor, 1, 1, 1, owner, list);
+        effect_spawnModelBurst(actor, 1, 1, 1, owner, list);
         break;
     case 16:
-        func_15170B90(actor, 0xA9, 8, 0, owner, list);
+        effect_spawnModelBurst(actor, 0xA9, 8, 0, owner, list);
         break;
     }
 }
 
-/* Spawns the six D_800A6ED8 pieces flying out of the actor. */
-void func_15170F4C(WorldObject *actor, u8 owner, s32 list) {
+/* Spawns the six gBurstPieces pieces flying out of the actor. */
+void effect_throwBurstPieces(WorldObject *actor, u8 owner, s32 list) {
     s32 i;
     ModelFxData fx;
     const ModelBurstPiece *piece;
@@ -124,7 +124,7 @@ void func_15170F4C(WorldObject *actor, u8 owner, s32 list) {
     void *displayList;
 
     count = 6; // matching: IDO emits the target's loop only with the bound in a variable
-    piece = D_800A6ED8;
+    piece = gBurstPieces;
     fx.renderMode = 2;
     fx.combineMode = 1;
     fx.kind = 6;
@@ -163,7 +163,7 @@ void func_15170F4C(WorldObject *actor, u8 owner, s32 list) {
         fx.spin[1] = func_150ADA68() * 4.0f - 2.0f;
         fx.spin[2] = func_150ADA68() * 10.0f - 5.0f;
         fx.displayList = displayList;
-        func_15168BE4(&fx, owner, list);
+        effect_spawnModelFx(&fx, owner, list);
         piece++;
     }
     actor->inactive = 1;
@@ -182,7 +182,7 @@ void func_151711C4(Actor *obj) {
  * with a random drift and spin and a random scale between minScale and maxScale; they bounce
  * off the floor with `bounce` (friction is -0.75 x bounce).
  */
-void func_15171200(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed, f32 minScale, f32 maxScale,
+void effect_scatterModels(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed, f32 minScale, f32 maxScale,
                    f32 radius, s32 kind, s32 life, f32 bounce, u8 owner, s32 list) {
     s32 i;
     ModelFxData fx;
@@ -234,7 +234,7 @@ void func_15171200(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed, f32 m
         scaleZ = (func_150ADA20() & 0xFFFF) * (1.0f / 65536) * scaleRange + minScale;
         fx.floorOffset = (fx.scale[1] + fx.scale[0] + scaleZ) * 6.666667f + 20.0f;
         fx.scale[2] = scaleZ;
-        func_15168BE4(&fx, owner, list);
+        effect_spawnModelFx(&fx, owner, list);
     }
 }
 
@@ -289,7 +289,7 @@ void func_151717FC(WorldObject *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 of
  * Spawns `count` dust particles evenly spaced on a circle of `radius` around (x, y, z), each moving
  * outward at 200 units (8.8 fixed point) with a random size of baseSize + rand * sizeScale.
  */
-void func_151718F0(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 sizeScale, s32 color, s32 count,
+void effect_spawnDustRing(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 sizeScale, s32 color, s32 count,
                    u8 owner, s32 list) {
     s32 i;
     s32 angle;

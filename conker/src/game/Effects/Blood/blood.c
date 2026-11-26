@@ -183,7 +183,7 @@ void *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
     Actor *owner;
     u8 flags;
 
-    drip = func_15167A68(0x28, arg3, arg1 + 0x58, 1, arg2, 1);
+    drip = effect_newObject(0x28, arg3, arg1 + 0x58, 1, arg2, 1);
     if (drip == NULL) {
         return NULL;
     }
@@ -192,7 +192,7 @@ void *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
     if (flags & BLOOD_DRIP_ON_BONE) {
         owner = drip->desc.owner;
         if ((owner->type == 0) || (owner->unique_id != drip->desc.ownerId)) {
-            func_1516972C(&drip->header);
+            effect_destroyObject(&drip->header);
             return NULL;
         }
         if ((owner->ob_matrix_ptr != 0) && ((owner->unk74 & 0xF) != 0xF)) {
@@ -212,18 +212,18 @@ void *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
 /* Drop emitters of a drip (BloodDripDesc.emitter): called with the drop position, the path moved and the drip.
  * The prototype keeps the f32 arguments unpromoted; several emitters take their own view of the emitter object. */
 static void (*D_80089A70[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    func_151348F0, trail_emitBurst, func_151AA30C, func_151AB3A4, func_150C60D8, func_150C6A08,
-    func_151AE890, func_150EA5CC, func_151B4E4C, func_151B50A4, func_151AF338, func_150E03F8,
+    func_151348F0, trail_emitBurst, func_151AA30C, func_151AB3A4, func_150C60D8, effect_spawnRisingParticle,
+    func_151AE890, effect_spawnDriftParticle, func_151B4E4C, func_151B50A4, func_151AF338, effect_spawnDripDrop,
 };
 /* Drip callbacks (BloodDripDesc.callback): 0 kills the drip. */
-static s32 (*D_80089AA0[])() = { func_151AB6B8, func_150C63EC, func_150C6D1C };
+static s32 (*D_80089AA0[])() = { effect_updateLoopSound, func_150C63EC, effect_isWatcherEmitterAlive };
 /* Teardown handlers of a drip (BloodDripDesc.unk2D). */
 static void (*D_80089AAC[10])() = {
-    func_151346EC, func_151AB788, func_150C6410, func_150C6D40, func_151346EC,
+    func_151346EC, effect_destroyLoopSound, func_150C6410, effect_destroyWatcherEmitter, func_151346EC,
     func_151346EC, func_151346EC, func_151346EC, func_151346EC, func_151346EC,
 };
 static void (*D_80089AD4[10])() = {
-    func_1513470C, func_151AB7D8, func_150C6438, func_150C6D68, func_1513470C,
+    func_1513470C, effect_freeLoopSound, func_150C6438, effect_freeWatcherEmitter, func_1513470C,
     func_1513470C, func_1513470C, func_1513470C, func_1513470C, func_1513470C,
 };
 
@@ -261,7 +261,7 @@ void func_151342BC(BloodDrip *drip) {
         if (flags & BLOOD_DRIP_ON_BONE) {
             if ((drip->desc.owner->type == 0) || (drip->desc.owner->type == 8) ||
                 (drip->desc.owner->unique_id != drip->desc.ownerId)) {
-                func_1516972C(&drip->header);
+                effect_destroyObject(&drip->header);
                 return;
             }
             bones = drip->desc.owner->ob_matrix_ptr;
@@ -319,7 +319,7 @@ void func_151342BC(BloodDrip *drip) {
         }
     }
     if (dead) {
-        func_1516972C(&drip->header);
+        effect_destroyObject(&drip->header);
     }
 }
 
@@ -330,11 +330,11 @@ s32 func_151346D0(s32 arg0, BloodDrip *drip, s32 arg2) {
 }
 
 void func_151346EC(EffectHeader *effect) {
-    func_15169804(effect);
+    effect_defaultDestroy(effect);
 }
 
 void func_1513470C(EffectHeader *effect) {
-    func_15169824(effect);
+    effect_defaultFree(effect);
 }
 
 /* Calls the D_80089AAC handler selected by drip->desc.unk2D (0 when out of range). */
@@ -380,17 +380,17 @@ void func_151347CC(void *arg0, ActorMsg *msg, u8 message) {
 
     if ((message == 0) || (message == 3)) {
         if ((msg->ref.actor == effect->owner) || (msg->ref.uniqueId == effect->ownerId)) {
-            func_1516972C(&effect->header);
+            effect_destroyObject(&effect->header);
         }
     } else if (message == 0x11) {
         if (effect->unk3D == 5) {
             if ((msg->ref.actor == effect->owner) || (msg->ref.uniqueId == effect->ownerId)) {
-                func_1516972C(&effect->header);
+                effect_destroyObject(&effect->header);
             }
         }
     } else if (message == 0x16) {
         if ((Actor *)msg == effect->owner) {
-            func_1516972C(&effect->header);
+            effect_destroyObject(&effect->header);
         }
     } else if (message == 0x2D) {
         actorA = msg->swap.actorA;
@@ -417,7 +417,7 @@ void func_151348F0(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *em
 void *func_15134908(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
     BloodTrail *trail;
 
-    trail = func_15167A68(0x2A, arg3, extraSize + 0x40, 1, arg2, 1);
+    trail = effect_newObject(0x2A, arg3, extraSize + 0x40, 1, arg2, 1);
     if (trail == NULL) {
         return NULL;
     }
@@ -453,7 +453,7 @@ void func_151349D0(BloodTrail *trail) {
     position[2] = *trail->z;
     if (trail->flags & BLOOD_TRAIL_CALLBACK) {
         if ((trail->callback != -1) && (D_80089B18[trail->callback](trail) == 0)) {
-            func_1516972C(&trail->header);
+            effect_destroyObject(&trail->header);
             return;
         }
     }
@@ -495,7 +495,7 @@ void func_151349D0(BloodTrail *trail) {
     if (trail->flags & BLOOD_TRAIL_LIFETIME) {
         trail->lifetime -= D_800BE9E4;
         if (trail->lifetime < 0) {
-            func_1516972C(&trail->header);
+            effect_destroyObject(&trail->header);
         }
     }
 }
@@ -539,7 +539,7 @@ s32 func_15134CEC(Struct15134CEC *particle) {
 void *func_15134DAC(BloodStripDesc *desc, s32 extraSize) {
     BloodStrip *strip;
 
-    strip = func_15167A68(0x29, 0, extraSize + 0x80, 1, 0xFF, 1);
+    strip = effect_newObject(0x29, 0, extraSize + 0x80, 1, 0xFF, 1);
     if (strip == NULL) {
         return NULL;
     }
@@ -556,14 +556,14 @@ void *func_15134DAC(BloodStripDesc *desc, s32 extraSize) {
 /* Callbacks of a strip: sample (0 kills it), emit, rate and update (0 kills it). The emit table has a prototype
  * for its f32 argument. */
 static s32 (*D_80089B1C[])() = {
-    func_15135658, func_151AA5A4, func_150EA10C, func_151938E4, func_151BD42C, func_15137E10, func_150D11B4,
+    func_15135658, effect_restartTaskPulse, effect_resetOscillator, func_151938E4, effect_resetBloodStripAge, func_15137E10, func_150D11B4,
 };
 static void (*D_80089B38[])(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32, BloodStrip *) = {
-    func_151AA6D8, func_150C71C0, func_150EA11C, func_151938FC, func_151BD43C,
+    func_151AA6D8, func_150C71C0, effect_spawnSegmentParticle, func_151938FC, effect_emitBloodStripParticle,
     func_15137E60, weapon_emitBloodStripParticle, func_150D1204, beam_emitBloodParticle,
 };
-static f32 (*D_80089B5C[])() = { func_15135670, func_151AAA4C, func_150EA490, func_151BD750 };
-static s32 (*D_80089B6C[])() = { func_151AABA0 };
+static f32 (*D_80089B5C[])() = { func_15135670, effect_stepTaskPulse, effect_stepOscillator, effect_getBloodStripRate };
+static s32 (*D_80089B6C[])() = { effect_isTaskPulseAlive };
 
 /* Per-frame update of a BloodStrip. */
 void func_15134E48(BloodStrip *arg0) {
@@ -666,16 +666,16 @@ void func_15134E48(BloodStrip *arg0) {
         }
     }
     if (kill) {
-        func_1516972C(&strip->header);
+        effect_destroyObject(&strip->header);
     }
 }
 
 void func_151352EC(EffectHeader *effect) {
-    func_15169804(effect);
+    effect_defaultDestroy(effect);
 }
 
 void func_1513530C(EffectHeader *effect) {
-    func_15169824(effect);
+    effect_defaultFree(effect);
 }
 
 /* Destroy and free handlers per strip mode. */
@@ -761,7 +761,7 @@ void func_15135480(BloodStrip *strip, ActorMsg *msg, u8 message) {
     default:
         if (message == 0) {
             if ((s32)msg->ref.actor == ((owner = (s32)strip->owner) | 0) || strip->ownerId == msg->ref.uniqueId) { // matching: as above
-                func_1516972C(&strip->header);
+                effect_destroyObject(&strip->header);
             }
         }
         break;
@@ -772,7 +772,7 @@ void func_15135480(BloodStrip *strip, ActorMsg *msg, u8 message) {
 void func_1513555C(BloodStrip *strip, ActorMsg *msg, u8 message) {
     if (message == 0 || message == 0x12) {
         if (strip->owner == msg->ref.actor || strip->ownerId == msg->ref.uniqueId) {
-            func_1516972C(&strip->header);
+            effect_destroyObject(&strip->header);
         }
     }
 }
@@ -782,7 +782,7 @@ void func_151355B8(BloodStrip *strip, ActorMsg *msg, u8 message) {
     switch (message) {
     case 0:
         if (strip->owner == msg->ref.actor || strip->ownerId == msg->ref.uniqueId) {
-            func_1516972C(&strip->header);
+            effect_destroyObject(&strip->header);
         }
         break;
     case 3:

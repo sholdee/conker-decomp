@@ -23,7 +23,7 @@ void func_1518CA80(BillboardSpawn *effect, u8 mode)
     template.primA = effect->alpha;
     template.fadeStep = effect->fadeStep;
     template.frame = 0;
-    template.anim = D_8008CA4C[0];
+    template.anim = gEffectAnimTextures[0];
     template.frameStep = 0x100;
 
     if (mode == 1) {
@@ -55,7 +55,7 @@ void func_1518CA80(BillboardSpawn *effect, u8 mode)
     template.unk2B = effect->onExpire;
     template.unk1A = 0;
     template.unk8 = 0;
-    func_15167D84(&template, 0, 0, -1, 0xFF, 1);
+    effect_spawnBillboard(&template, 0, 0, -1, 0xFF, 1);
 }
 
 /*
@@ -64,7 +64,7 @@ void func_1518CA80(BillboardSpawn *effect, u8 mode)
  */
 static void (*D_8008D5D0[])() = { NULL, func_151927C0 };
 
-/* Particle callback 9 (D_8008C9C8[9]): grows the particle each frame and runs its expiry hook at life 0. */
+/* Particle callback 9 (gParticleCallbacks[9]): grows the particle each frame and runs its expiry hook at life 0. */
 void func_1518CCA8(GrowingParticle *particle)
 {
     s32 steps;

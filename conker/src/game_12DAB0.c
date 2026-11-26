@@ -364,19 +364,19 @@ void func_15101090(RayBeam *beam) {
         sound_stop(data->unk90);
     }
     if (data->hitFx != NULL) {
-        func_1516972C(&data->hitFx->head.header);
+        effect_destroyObject(&data->hitFx->head.header);
     }
     if (data->endPoint != NULL) {
-        func_1516972C(data->endPoint);
+        effect_destroyObject(data->endPoint);
     }
     if (data->startFx != NULL) {
-        func_1516972C(&data->startFx->head.header);
+        effect_destroyObject(&data->startFx->head.header);
     }
     if (data->line != NULL) {
-        func_1516972C(&data->line->head.header);
+        effect_destroyObject(&data->line->head.header);
     }
     if (data->endFx != NULL) {
-        func_1516972C(&data->endFx->head.header);
+        effect_destroyObject(&data->endFx->head.header);
     }
     func_1513CA6C(&beam->head);
 }
@@ -386,19 +386,19 @@ void func_15101148(RayBeam *beam) {
     RayBeamData *data = &beam->data;
 
     if (data->hitFx != NULL) {
-        func_1516979C(&data->hitFx->head.header);
+        effect_freeObject(&data->hitFx->head.header);
     }
     if (data->endPoint != NULL) {
-        func_1516979C(data->endPoint);
+        effect_freeObject(data->endPoint);
     }
     if (data->startFx != NULL) {
-        func_1516979C(&data->startFx->head.header);
+        effect_freeObject(&data->startFx->head.header);
     }
     if (data->line != NULL) {
-        func_1516979C(&data->line->head.header);
+        effect_freeObject(&data->line->head.header);
     }
     if (data->endFx != NULL) {
-        func_1516979C(&data->endFx->head.header);
+        effect_freeObject(&data->endFx->head.header);
     }
     func_1513CAA0(&beam->head);
 }

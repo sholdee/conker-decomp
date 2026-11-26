@@ -534,7 +534,7 @@ s32 func_1000BC28(s32 state, u8 channel, s32 arg2, s32 arg3) {
         volume = 1;
     }
     if (volume != state) {
-        func_150C851C(volume - 1);
+        effect_randomizeBounceRecordSpeeds(volume - 1);
         state = volume;
     }
     return state;
@@ -704,11 +704,11 @@ s32 func_1000C350(s32 state, u8 channel, f32 x, f32 y, f32 z) {
             music_setVolume(35, 25000);
         } else if (D_800C35E8[0] == 3) {
             music_setVolume(35, 250);
-            func_15178EFC(2);
+            effect_requestRainState(2);
         } else if (D_800C35E8[0] == 6) {
             func_1000886C(channel, 30, 1);
             func_1000886C(channel, 1, 0x40);
-            func_15178EFC(2);
+            effect_requestRainState(2);
         } else {
             music_setVolume(35, 25000);
         }

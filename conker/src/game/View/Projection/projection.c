@@ -212,19 +212,19 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
     if (!skipWorld) {
         switch (level) {
         case 0x14:
-            gfx = func_150C8600(gfx);
+            gfx = effect_bindBounceRecordFrames(gfx);
             break;
         case 0x1A:
             gfx = func_15100464(gfx);
             break;
         case 0x13:
-            gfx = func_150DFBD0(gfx);
+            gfx = effect_bindMaterialTextures(gfx);
             break;
         case 0x35:
-            gfx = func_150CF5E8(gfx);
+            gfx = effect_setScrolledTileSizes(gfx);
             break;
         case 0x33:
-            gfx = func_150D765C(gfx);
+            gfx = effect_bindAnimatedTextures(gfx);
             break;
         }
     }
@@ -250,7 +250,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                         gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);
                         gfx = func_151733D8(gfx, 1);
                         if (level == 0x35) {
-                            gfx = func_150CF5E8(gfx);
+                            gfx = effect_setScrolledTileSizes(gfx);
                         }
                         gSPDisplayList(gfx++, D_800B0E00[1]);
                     }

@@ -10,7 +10,7 @@ Gfx gTracerRenderSetupDl[] = {
     gsSPEndDisplayList(),
 };
 
-/* Aim-impact slots: where a shot from an owner at a given angle lands (func_150E4550 fills them). */
+/* Aim-impact slots: where a shot from an owner at a given angle lands (effect_spawnMaterialImpact fills them). */
 AimImpact gAimImpacts[4];
 
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
@@ -23,7 +23,7 @@ void beam_spawnTracer(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, 
     s32 sMax;
     s32 tMax;
 
-    effect = func_15167A68(0xB, 0, 0x100, 1, 0xFF, 1);
+    effect = effect_newObject(0xB, 0, 0x100, 1, 0xFF, 1);
     if (effect != NULL) {
         effect->lifetime = lifetime;
         effect->x = x0;
@@ -50,7 +50,7 @@ void beam_spawnTracer(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, 
         effect->mode = mode;
         if (effect->mode != 0) {
             if (owner == NULL) {
-                func_1516979C(&effect->header);
+                effect_freeObject(&effect->header);
                 return;
             }
             effect->onTime = onTime;
@@ -70,8 +70,8 @@ void beam_spawnTracer(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, 
             effect->ownerTag = -1;
         }
         for (i = 0; i < 2; i++) {
-            sMax = D_8008CA4C[effect->texture]->width - 1;
-            tMax = D_8008CA4C[effect->texture]->height - 1;
+            sMax = gEffectAnimTextures[effect->texture]->width - 1;
+            tMax = gEffectAnimTextures[effect->texture]->height - 1;
             effect->quads[i][2].tc[0] = 0x2000;
             effect->quads[i][2].tc[1] = 0x2000;
             effect->quads[i][2].flag = 0;
@@ -129,7 +129,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
     dist = 0.0f;
     effect->lifetime -= D_800BE9E4;
     if (effect->lifetime < 0 || (effect->owner != NULL && effect->ownerTag != -1 && effect->owner->animseq.uh != effect->ownerTag)) {
-        func_1516972C(&effect->header);
+        effect_destroyObject(&effect->header);
         return;
     }
     if (effect->mode != 0) {
@@ -220,7 +220,7 @@ void beam_updateTracer(Game10EF60Effect *effect) {
                     beam_spawnTracer(0, effect->x, effect->y, effect->z, effect->target_x, effect->target_y, effect->target_z, speed, stopDist, 15.0f, 820.0f, 75, texture, 0, 0, 0, effect->owner, 0, 0, 0, impact, effect->unkFE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                 }
             } else {
-                func_1516972C(&effect->header);
+                effect_destroyObject(&effect->header);
                 return;
             }
         }
@@ -272,9 +272,9 @@ void beam_updateTracer(Game10EF60Effect *effect) {
             len = sqrtf((effect->target_x - effect->x) * (effect->target_x - effect->x) + (effect->target_y - effect->y) * (effect->target_y - effect->y) + (effect->target_z - effect->z) * (effect->target_z - effect->z));
             if (len < effect->stopDist || dist < len) {
                 if (effect->impactEffect != 0) {
-                    func_150E4550(effect->target_x, effect->target_y, effect->target_z, 1, effect->impactEffect, 0, 0xFF);
+                    effect_spawnMaterialImpact(effect->target_x, effect->target_y, effect->target_z, 1, effect->impactEffect, 0, 0xFF);
                 }
-                func_1516972C(&effect->header);
+                effect_destroyObject(&effect->header);
                 return;
             }
             if (len < effect->length) {
@@ -358,7 +358,7 @@ Gfx *beam_drawTracer(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
                 effect->quads[D_800BE9C0][i].ob[j] = corners[i][j];
             }
         }
-        gfx = sprite_loadDescFrame(gfx, D_8008CA4C[effect->texture], 0, &texState, 0, 0, 0, 2, 3);
+        gfx = sprite_loadDescFrame(gfx, gEffectAnimTextures[effect->texture], 0, &texState, 0, 0, 0, 2, 3);
         flag = 0;
         gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x504A50, &flag);
         gSPVertex(gfx++, effect->quads[D_800BE9C0], 4, 0);

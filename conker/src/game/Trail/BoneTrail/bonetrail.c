@@ -69,7 +69,7 @@ BoneTrailEffect *trail_createBoneTrailEffect(BoneTrailParams *params, u8 arg1) {
     }
 
     info.kind = 8;
-    effect = func_15147A80(&info, sizeof(BoneTrailState), 24, 6, 6, 6, 0, 0, 0, arg1, 0);
+    effect = effect_newEffectObj(&info, sizeof(BoneTrailState), 24, 6, 6, 6, 0, 0, 0, arg1, 0);
     if (effect != NULL) {
         memcpy(effect->state, &state, sizeof(BoneTrailState));
     }
@@ -160,7 +160,7 @@ s32 trail_followBoneTrail(BoneTrailEffect *effect) {
         trail_detachBoneTrail(effect);
         memcpy(&retry, state, sizeof(BoneTrailParams));
         {
-            TrailRetryTask *task = func_151491F4(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->head.header.owner, 0);
+            TrailRetryTask *task = effect_newTimedEffectNoDraw(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->head.header.owner, 0);
             if (task != NULL) {
                 memcpy(&task->trail, &retry, sizeof(BoneTrailParams));
             }
@@ -604,7 +604,7 @@ void trail_startBoneEmitter(Actor *owner, u8 arg1) {
     emitter.offset.y = 0.0f;
     emitter.offset.z = 0.0f;
     emitter.rate = 0.7220000029f;
-    task = func_151491F4(300, -1, 5, 0, 1, sizeof(BoneEmitter), arg1, 0);
+    task = effect_newTimedEffectNoDraw(300, -1, 5, 0, 1, sizeof(BoneEmitter), arg1, 0);
     if (task != NULL) {
         memcpy(&task->emitter, &emitter, sizeof(BoneEmitter));
     }
@@ -719,7 +719,7 @@ void trail_onBoneEmitterMessage(BoneEmitterTask *task, ActorMsg *msg, u8 type) {
 
     if (type == 0) {
         if ((msg->ref.actor == emitter->owner) || (msg->ref.uniqueId == emitter->ownerId)) {
-            func_1516972C(&task->base.header);
+            effect_destroyObject(&task->base.header);
         }
     } else if (type == 0x2D) {
         if (emitter->owner == msg->swap.actorA) {
@@ -793,7 +793,7 @@ void trail_onRetryTaskMessage(TrailRetryTask *task, ActorMsg *msg, u8 type) {
 
     if (type == 0) {
         if (msg->ref.actor == trail->owner || msg->ref.uniqueId == trail->ownerId) {
-            func_1516972C(&task->base.header);
+            effect_destroyObject(&task->base.header);
         }
     }
 }

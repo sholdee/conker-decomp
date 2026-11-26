@@ -82,7 +82,7 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
     }
 }
 
-/* Muzzle effect (func_15102B38) at `muzzle` for objects with bone matrices, hidden from the
+/* Muzzle effect (effect_spawnBoneBeamParticle) at `muzzle` for objects with bone matrices, hidden from the
  * camera of obj's mv target while that has SniperState set. */
 void func_150FE0B8(obj, muzzle, arg2, arg3)
     Actor *obj;
@@ -108,7 +108,7 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
 
         random0 = func_150ADA20();
         random1 = func_150ADA20();
-        func_15102B38(obj, D_80088B80, &D_800A1F70, &D_800A1F7C, &params, (random0 % 5U) + 6, (random1 % 101U) + 155,
+        effect_spawnBoneBeamParticle(obj, D_80088B80, &D_800A1F70, &D_800A1F7C, &params, (random0 % 5U) + 6, (random1 % 101U) + 155,
                       func_150ADA68() * 199.0f + 501.0f, muzzle, cameraMask, 0, -1, arg2, arg3);
     }
 }

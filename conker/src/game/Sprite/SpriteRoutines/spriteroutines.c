@@ -52,7 +52,7 @@ void func_150B6C90(void) {
     s32 i;
 
     if (D_800D9894 != NULL) {
-        func_1516972C(D_800D9894);
+        effect_destroyObject(D_800D9894);
     }
     D_800D9894 = screen_spawnTintEffect(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
     gSpriteQueuedCmd = 3;
@@ -80,12 +80,12 @@ void sprite_freeAll(void) {
     s32 i;
 
     if (D_800D9894 != NULL) {
-        func_1516972C(D_800D9894);
+        effect_destroyObject(D_800D9894);
         D_800D9894 = NULL;
     }
     for (i = 0; i < 10; i++) {
         if (gSpriteSlots[i] != NULL) {
-            func_1516972C(&gSpriteSlots[i]->header);
+            effect_destroyObject(&gSpriteSlots[i]->header);
             gSpriteSlots[i] = NULL;
         }
     }
@@ -308,7 +308,7 @@ void func_150B7484(void) {
     desc.scaleX = 0x51;
     desc.scaleY = 0x51;
     if (gSpriteSlots[0] != NULL) {
-        func_1516972C(&gSpriteSlots[0]->header);
+        effect_destroyObject(&gSpriteSlots[0]->header);
     }
     gSpriteSlots[0] = sprite_newSprite2DDefault(&desc);
     gSpriteQueuedCmd = 3;
@@ -319,7 +319,7 @@ void func_150B7560(void) {
     Sprite2DParams desc;
 
     if (gSpriteSlots[0] != NULL) {
-        func_1516972C(&gSpriteSlots[0]->header);
+        effect_destroyObject(&gSpriteSlots[0]->header);
         gSpriteSlots[0] = NULL;
     }
     desc.frameSpeed = 0x4D;
@@ -345,7 +345,7 @@ void func_150B7560(void) {
     desc.x = 60.0f;
     desc.y = 60.0f;
     if (gSpriteSlots[3] != NULL) {
-        func_1516972C(&gSpriteSlots[3]->header);
+        effect_destroyObject(&gSpriteSlots[3]->header);
     }
     gSpriteSlots[3] = sprite_newSprite2DDefault(&desc);
     gSpriteQueuedCmd = 3;
@@ -390,7 +390,7 @@ void sprite_spawnGrowing(s32 x, s32 slot) {
     desc.scaleX = 0x51;
     desc.scaleY = 0x51;
     if (gSpriteSlots[slot] != NULL) {
-        func_1516972C(&gSpriteSlots[slot]->header);
+        effect_destroyObject(&gSpriteSlots[slot]->header);
     }
     gSpriteSlots[slot] = sprite_newSprite2DDefault(&desc);
 }
@@ -401,7 +401,7 @@ void func_150B77A8(void) {
     Sprite2DParams desc;
 
     if (gSpriteSlots[1] != NULL) {
-        func_1516972C(&gSpriteSlots[1]->header);
+        effect_destroyObject(&gSpriteSlots[1]->header);
         gSpriteSlots[1] = NULL;
     }
 
@@ -429,7 +429,7 @@ void func_150B77A8(void) {
     desc.scaleX = 0x1000;
     desc.scaleY = 0x1000;
     if (gSpriteSlots[4] != NULL) {
-        func_1516972C(&gSpriteSlots[4]->header);
+        effect_destroyObject(&gSpriteSlots[4]->header);
     }
     gSpriteSlots[4] = sprite_newSprite2DDefault(&desc);
 
@@ -443,7 +443,7 @@ void func_150B77A8(void) {
     desc.texture = &D_800918E8;
     desc.cycleType = 1;
     if (gSpriteSlots[8] != NULL) {
-        func_1516972C(&gSpriteSlots[8]->header);
+        effect_destroyObject(&gSpriteSlots[8]->header);
     }
     gSpriteSlots[8] = sprite_newSprite2DDefault(&desc);
     gSpriteQueuedCmd = 3;
@@ -456,7 +456,7 @@ void func_150B791C(void) {
     Sprite2DParams desc;
 
     if (gSpriteSlots[2] != NULL) {
-        func_1516972C(&gSpriteSlots[2]->header);
+        effect_destroyObject(&gSpriteSlots[2]->header);
         gSpriteSlots[2] = NULL;
     }
     desc.x = 230.0f;
@@ -486,7 +486,7 @@ void func_150B791C(void) {
     desc.scaleX = 0x1000;
     desc.scaleY = 0x1000;
     if (gSpriteSlots[5] != NULL) {
-        func_1516972C(&gSpriteSlots[5]->header);
+        effect_destroyObject(&gSpriteSlots[5]->header);
     }
     gSpriteSlots[5] = sprite_newSprite2DDefault(&desc);
     desc.frame = 0x100;
@@ -495,7 +495,7 @@ void func_150B791C(void) {
     desc.data.scroll.y = desc.y;
     desc.alpha = 0xFF;
     if (gSpriteSlots[6] != NULL) {
-        func_1516972C(&gSpriteSlots[5]->header); /* sic: frees slot 5, not 6 */
+        effect_destroyObject(&gSpriteSlots[5]->header); /* sic: frees slot 5, not 6 */
     }
     gSpriteSlots[6] = sprite_newSprite2DDefault(&desc);
     desc.frame = 0x200;
@@ -504,7 +504,7 @@ void func_150B791C(void) {
     desc.data.scroll.y = desc.y;
     desc.alpha = 0x80;
     if (gSpriteSlots[7] != NULL) {
-        func_1516972C(&gSpriteSlots[5]->header); /* sic */
+        effect_destroyObject(&gSpriteSlots[5]->header); /* sic */
     }
     gSpriteSlots[7] = sprite_newSprite2DDefault(&desc);
     desc.timer = 0;
@@ -519,7 +519,7 @@ void func_150B791C(void) {
     desc.x = 230.0f;
     desc.y = 170.0f;
     if (gSpriteSlots[9] != NULL) {
-        func_1516972C(&gSpriteSlots[9]->header);
+        effect_destroyObject(&gSpriteSlots[9]->header);
     }
     gSpriteSlots[9] = sprite_newSprite2DDefault(&desc);
     gSpriteQueuedCmd = 3;

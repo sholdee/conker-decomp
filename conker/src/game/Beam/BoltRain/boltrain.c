@@ -51,12 +51,12 @@ void beam_onPropArrival(WorldObject *prop) {
             msg.count = 9;
             msg.list = list;
         }
-        func_151494E0((s32)&msg, 0x35);
+        effect_sendEventToTimedEffects((s32)&msg, 0x35);
     } else if (prop->unique_id == 0xF6) {
         Msg35 msg;
 
         msg.player = player;
-        func_151494E0((s32)&msg.player, 0x38);
+        effect_sendEventToTimedEffects((s32)&msg.player, 0x38);
     }
 }
 
@@ -154,8 +154,8 @@ void beam_updateBoltArc(BoltArcObj *obj) {
     state->region->inactive = 0;
     state->timer -= D_800BE9E4;
     if (state->timer < 0) {
-        func_151494E0(0, 0x39);
-        func_151494E0(0, 0x4B);
+        effect_sendEventToTimedEffects(0, 0x39);
+        effect_sendEventToTimedEffects(0, 0x4B);
     }
     if (func_151464B8(state->zone) != 0) {
         return;
@@ -200,10 +200,10 @@ void beam_updateBoltArc(BoltArcObj *obj) {
     }
 }
 
-/* Message handler: on 0x4B, calls func_1516972C on the object. */
+/* Message handler: on 0x4B, calls effect_destroyObject on the object. */
 void func_1510550C(EffectHeader *obj, s32 arg1, u8 msg) {
     if (msg == 0x4B) {
-        func_1516972C(obj);
+        effect_destroyObject(obj);
     }
 }
 
@@ -223,7 +223,7 @@ typedef struct { f32 v[1]; } F32x1;
 static const S32x1 D_800A23A4 = { { 0x85 } };
 static const F32x1 D_800A23A8 = { { 0.1f } };
 
-/* Spawns the effects of an impact: a func_15102920 effect, weapon_spawnImpactBurst by chance and, except on
+/* Spawns the effects of an impact: a effect_spawnSurfaceSprite effect, weapon_spawnImpactBurst by chance and, except on
  * surface type 9, sometimes debris flying back along the impact direction. */
 void beam_spawnImpactEffects(ImpactObj *obj) {
     ImpactHit *hit;
@@ -242,7 +242,7 @@ void beam_spawnImpactEffects(ImpactObj *obj) {
     fraction = func_150ADA68();
     random = func_150ADA20();
     lifetime = func_150ADA20() % 81U + 50;
-    func_15102920(fraction * 25.0f + 15.0f, random % 56U + 200, &hit->triangle, &hit->position,
+    effect_spawnSurfaceSprite(fraction * 25.0f + 15.0f, random % 56U + 200, &hit->triangle, &hit->position,
                   lifetime, 1, 1, hit->surfaceFlags, obj->base.header.owner, obj->base.header.kind);
     surfaceFlags = hit->surfaceFlags;
     if ((surfaceFlags & 0x1F) == 9) {
@@ -356,7 +356,7 @@ void func_15105BC8(SparkObj *obj) {
 }
 
 /* Returns the ZoneRectEffect (callbackSet 0x2E) of `zone` in either object list, searching the two
- * object types listed in D_800A5770, or NULL. */
+ * object types listed in gTimedEffectTypes, or NULL. */
 ZoneRectEffect *beam_findZoneRectEffect(TriggerZone *zone) {
     u8 i;
     u8 list;
@@ -364,7 +364,7 @@ ZoneRectEffect *beam_findZoneRectEffect(TriggerZone *zone) {
 
     for (i = 0; i < 2; i++) {
         for (list = 0; list < 2; list++) {
-            for (obj = (ZoneRectEffect *)D_800DCE50[list][D_800A5770[i]]; obj != NULL;
+            for (obj = (ZoneRectEffect *)gObjectLists[list][gTimedEffectTypes[i]]; obj != NULL;
                  obj = (ZoneRectEffect *)obj->base.header.next) {
                 if (obj->base.callbackSet == 0x2E && zone == obj->data.zone) {
                     return obj;

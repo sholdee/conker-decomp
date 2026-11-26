@@ -10,7 +10,7 @@ struct QueueNode {
     void *value;
     QueueNode *older;     /* towards the tail */
     QueueNode *newer;     /* towards the head */
-    u8 releaseFunc;       /* index into D_8008D5C0, 0 = none */
+    u8 releaseFunc;       /* index into gQueueReleaseFuncs, 0 = none */
 };
 
 struct Queue {
@@ -25,11 +25,11 @@ struct Queue {
 };
 
 /* Release callbacks; declared without a prototype, as each takes its own value type. */
-static void (*D_8008D5C0[])() = { NULL, func_150BB408, func_150CBF5C };
+static void (*gQueueReleaseFuncs[])() = { NULL, effect_startDecalFade, func_150CBF5C };
 
 
 /* Ticks the queue timer; once it has expired, drops the oldest node each call. */
-void func_1518AA10(Queue *arg) {
+void effect_updateQueue(Queue *arg) {
     Queue *queue;
     QueueNode *node;
 
@@ -45,9 +45,9 @@ void func_1518AA10(Queue *arg) {
                 queue->tail = node->newer;
             }
             if (node->releaseFunc != 0) {
-                D_8008D5C0[node->releaseFunc](node->value);
+                gQueueReleaseFuncs[node->releaseFunc](node->value);
             }
-            func_1516972C(&node->header);
+            effect_destroyObject(&node->header);
             queue->count--;
         } else if (queue->flags & 1) {
             queue->timer -= D_800BE9E4;
@@ -56,10 +56,10 @@ void func_1518AA10(Queue *arg) {
 }
 
 /* Allocates an empty queue. */
-Queue *func_1518AADC(s32 capacity, s16 lifetime, u8 flags) {
+Queue *effect_newQueue(s32 capacity, s16 lifetime, u8 flags) {
     Queue *queue;
 
-    queue = func_15167A68(0x1D, 0, sizeof(Queue), 1, 0xFF, 1);
+    queue = effect_newObject(0x1D, 0, sizeof(Queue), 1, 0xFF, 1);
     if (queue == NULL) {
         return NULL;
     }
@@ -74,10 +74,10 @@ Queue *func_1518AADC(s32 capacity, s16 lifetime, u8 flags) {
 }
 
 /* Allocates an unlinked queue node. */
-QueueNode *func_1518AB60(void *value, u8 releaseFunc) {
+QueueNode *effect_newQueueNode(void *value, u8 releaseFunc) {
     QueueNode *node;
 
-    node = func_15167A68(0x1E, 0, sizeof(QueueNode), 1, 0xFF, 1);
+    node = effect_newObject(0x1E, 0, sizeof(QueueNode), 1, 0xFF, 1);
     if (node == NULL) {
         return NULL;
     }
@@ -92,20 +92,20 @@ QueueNode *func_1518AB60(void *value, u8 releaseFunc) {
  * Pushes a value at the head of the queue, dropping the oldest node when over capacity.
  * Returns 0 (after releasing the value) if it could not be queued.
  */
-s32 func_1518ABD0(Queue *queue, void *value, u8 releaseFunc) {
+s32 effect_pushQueue(Queue *queue, void *value, u8 releaseFunc) {
     QueueNode *node;
 
     if (queue == NULL) {
         if (releaseFunc != 0) {
-            D_8008D5C0[releaseFunc](value);
+            gQueueReleaseFuncs[releaseFunc](value);
         }
         return 0;
     }
 
-    node = func_1518AB60(value, releaseFunc);
+    node = effect_newQueueNode(value, releaseFunc);
     if (node == NULL) {
         if (releaseFunc != 0) {
-            D_8008D5C0[releaseFunc](value);
+            gQueueReleaseFuncs[releaseFunc](value);
         }
         return 0;
     }
@@ -132,9 +132,9 @@ s32 func_1518ABD0(Queue *queue, void *value, u8 releaseFunc) {
             queue->tail = node->newer;
         }
         if (node->releaseFunc != 0) {
-            D_8008D5C0[node->releaseFunc](node->value);
+            gQueueReleaseFuncs[node->releaseFunc](node->value);
         }
-        func_1516972C(&node->header);
+        effect_destroyObject(&node->header);
     }
 
     return 1;

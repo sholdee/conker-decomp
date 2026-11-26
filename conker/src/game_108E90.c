@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-/* The timer task func_151491F4 creates; func_150DBC60 is its tick callback. */
+/* The timer task effect_newTimedEffectNoDraw creates; effect_updatePuffTimer is its tick callback. */
 struct PuffTimer {
     u8 pad0[0xC];
     u8 sceneTag;
@@ -11,8 +11,8 @@ struct PuffTimer {
 
 
 /* Sequence event 0x35 on `owner`: type 0 starts jet preset 1 with a puff, a 30-frame timer that keeps
- * puffing (func_150DBC60) and a particle burst, all at a fixed world position; type 1 starts preset 2. */
-void func_150DB9E0(Actor *owner, s32 type, u8 sceneTag) {
+ * puffing (effect_updatePuffTimer) and a particle burst, all at a fixed world position; type 1 starts preset 2. */
+void effect_startPuffJets(Actor *owner, s32 type, u8 sceneTag) {
     SimplePuffSpray puff;
     BillboardBurst burst;
 
@@ -52,7 +52,7 @@ void func_150DB9E0(Actor *owner, s32 type, u8 sceneTag) {
             puff.growthRange = 0.0f;
             func_15152F70(&puff, sceneTag);
 
-            func_151491F4(30, -1, 0, 1, 0, 0, sceneTag, 0);
+            effect_newTimedEffectNoDraw(30, -1, 0, 1, 0, 0, sceneTag, 0);
 
             burst.position.x = 177.9017487f;
             burst.position.y = -13.38824844f;
@@ -90,8 +90,8 @@ void func_150DB9E0(Actor *owner, s32 type, u8 sceneTag) {
     }
 }
 
-/* Tick callback of the timer func_150DB9E0 starts: emits a smaller puff at the same position. */
-void func_150DBC60(PuffTimer *timer) {
+/* Tick callback of the timer effect_startPuffJets starts: emits a smaller puff at the same position. */
+void effect_updatePuffTimer(PuffTimer *timer) {
     SimplePuffSpray puff;
 
     puff.pos.x = 177.9017487f;

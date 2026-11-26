@@ -29,7 +29,7 @@ CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     if (player->CharPtr != NULL && player->CharPtr->mv != NULL && player->CharPtr->mv->AimState != 0) {
         return NULL;
     }
-    wobble = func_15167A68(0x39, arg3, extraSize + sizeof(CamWobble), 1, arg2, 1);
+    wobble = effect_newObject(0x39, arg3, extraSize + sizeof(CamWobble), 1, arg2, 1);
     if (wobble == NULL) {
         return NULL;
     }
@@ -110,7 +110,7 @@ void func_1516489C(CamWobble *wobble) {
         finished = 1;
     }
     if (finished) {
-        func_1516972C(&wobble->header);
+        effect_destroyObject(&wobble->header);
     }
 }
 

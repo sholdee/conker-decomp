@@ -350,10 +350,10 @@ void trail_detachTrackerTrail(TrackerTrail *actor) {
 
 void trail_destroyTrackerTrail(TrackerTrail *actor) {
     trail_detachTrackerTrail(actor);
-    func_151478F4(actor);
+    effect_defaultDestroyEffectObj(actor);
 }
 
 void trail_freeTrackerTrail(TrackerTrail *actor) {
     trail_detachTrackerTrail(actor);
-    func_15147928(actor);
+    effect_defaultFreeEffectObj(actor);
 }

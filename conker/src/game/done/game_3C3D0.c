@@ -20,7 +20,7 @@ void func_1500EF20(void) {
     tmp.z = -1770.0f;
     tmp.y = -1278.0f;
     tmp.radius = 400.0f;
-    temp_v0 = func_151491F4((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = effect_newTimedEffectNoDraw((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
@@ -28,13 +28,13 @@ void func_1500EF20(void) {
     tmp.x = 7207.0f;
     tmp.z = -1412.0f;
     tmp.y = -1733.0f;
-    temp_v0 = func_151491F4((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = effect_newTimedEffectNoDraw((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
 
     tmp.z = 1412.0f;
-    temp_v0 = func_151491F4((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = effect_newTimedEffectNoDraw((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
@@ -42,7 +42,7 @@ void func_1500EF20(void) {
     tmp.x = 9776.0f;
     tmp.z = 1770.0f;
     tmp.y = -1278.0f;
-    temp_v0 = func_151491F4((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = effect_newTimedEffectNoDraw((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }

@@ -7,11 +7,11 @@
 #define POS_LIMIT 0x500
 
 /* This file's .data. */
-static TextureFrameTables D_80088810 = { { D_80090230, D_80090244 } };
+static TextureFrameTables gBounceRecordFrameTables = { { D_80090230, D_80090244 } };
 
 
 /* Ease every record's speed towards its target, then advance pos, bouncing at 0 and POS_LIMIT. */
-void func_150C8350(void) {
+void effect_updateBounceRecords(void) {
     s32 i;
     s32 target;
     s32 diff;
@@ -59,15 +59,15 @@ void func_150C8350(void) {
     }
 }
 
-/* Advances the records (func_150C8350) when arg0 is 0. */
-void func_150C84F4(s32 arg0) {
+/* Advances the records (effect_updateBounceRecords) when arg0 is 0. */
+void effect_levelUpdateBounceRecords(s32 arg0) {
     if (arg0 == 0) {
-        func_150C8350();
+        effect_updateBounceRecords();
     }
 }
 
 /* Gives every record a random target speed: scale * 300 / 256 plus 0 .. scale * 50 / 256 + 49. */
-void func_150C851C(s32 scale) {
+void effect_randomizeBounceRecordSpeeds(s32 scale) {
     s32 i;
     s32 speed;
     s32 minSpeed;
@@ -87,13 +87,13 @@ void func_150C851C(s32 scale) {
 
 
 /* Binds record i's current frame (pos >> 8, clamped to 0-4) from its table to segment i + 1. */
-Gfx *func_150C8600(Gfx *gdl) {
+Gfx *effect_bindBounceRecordFrames(Gfx *gdl) {
     s32 i;
     s32 segment;
     s32 frame;
     s32 size;
     s32 addr;
-    TextureFrameTables tables = D_80088810;
+    TextureFrameTables tables = gBounceRecordFrameTables;
 
     for (i = 0; i < RECORD_COUNT; i++) {
         frame = D_800BE4E0[i].pos >> 8;

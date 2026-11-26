@@ -38,8 +38,8 @@ glabel func_150A6860
     /* D3D74 150A68C4 922900A0 */   lbu       $t1, 0xA0($s1)
     /* D3D78 150A68C8 86280088 */  lh         $t0, 0x88($s1)
     /* D3D7C 150A68CC 00094880 */  sll        $t1, $t1, 2
-    /* D3D80 150A68D0 3C0A8009 */  lui        $t2, %hi(D_8008CA4C)
-    /* D3D84 150A68D4 254ACA4C */  addiu      $t2, $t2, %lo(D_8008CA4C)
+    /* D3D80 150A68D0 3C0A8009 */  lui        $t2, %hi(gEffectAnimTextures)
+    /* D3D84 150A68D4 254ACA4C */  addiu      $t2, $t2, %lo(gEffectAnimTextures)
     /* D3D88 150A68D8 012A4821 */  addu       $t1, $t1, $t2
     /* D3D8C 150A68DC 8D290000 */  lw         $t1, 0x0($t1)
     /* D3D90 150A68E0 00084202 */  srl        $t0, $t0, 8

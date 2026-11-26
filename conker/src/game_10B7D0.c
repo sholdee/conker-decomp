@@ -110,7 +110,7 @@ void func_150DE6D8(WorldObject *prop) {
     prop->touch.i.c += D_800BE9E4 * 24;
 }
 
-/* State func_150DE7C0 stores after each particle it spawns. */
+/* State effect_updateZonePairEmitter stores after each particle it spawns. */
 typedef struct {
     /* 0x00 */ Vec3f velocity;
     /* 0x0C */ f32 timeLeft; // until the particle reaches the target
@@ -118,7 +118,7 @@ typedef struct {
     /* 0x1C */ Vec3f forward; // unit vector from source to target, flattened onto the XZ plane
 } ParticleTravel;
 
-/* A particle spawned by func_1513D2F0, with func_150DE7C0's state at 0x110. */
+/* A particle spawned by func_1513D2F0, with effect_updateZonePairEmitter's state at 0x110. */
 struct TravelParticle {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ ParticleTravel travel;
@@ -129,7 +129,7 @@ struct TexturePair {
 };
 
 
-/* Timed effect of func_150DE7C0: particles that travel between two zones. */
+/* Timed effect of effect_updateZonePairEmitter: particles that travel between two zones. */
 struct ZonePairEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ZonePairEmitter link;
@@ -141,7 +141,7 @@ const TexturePair D_800A0D00 = { { 0xBE, 0xBF } };
 
 /* Every 200-400 frames, spawns a particle (texture 0xBE or 0xBF) at the link's source position that
  * travels to its target position at a random speed of 25-55 (0xBF ones at 0.18 of that). */
-void func_150DE7C0(ZonePairEffect *emitter) {
+void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
     ZonePairEmitter *link;
     Vec3f target;
     Vec3f delta;
@@ -219,7 +219,7 @@ void func_150DE7C0(ZonePairEffect *emitter) {
 }
 
 /* Moves the particle along its travel velocity; returns 0 once its travel time has run out. */
-s32 func_150DEACC(TravelParticle *particle) {
+s32 effect_moveTravelParticle(TravelParticle *particle) {
     particle->head.def.pos.x += particle->travel.velocity.x * gFrameDelta;
     particle->head.def.pos.y += particle->travel.velocity.y * gFrameDelta;
     particle->head.def.pos.z += particle->travel.velocity.z * gFrameDelta;

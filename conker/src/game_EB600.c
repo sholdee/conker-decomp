@@ -4,16 +4,16 @@
 
 /* Spawner message handler: destroys the spawner when its owner (event 0x21), or the
  * object whose +0x318 points at its owner (event 0), sends the message. */
-void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
+void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event) {
     if (event == 0x21) {
         if (obj->spawn.owner == msg[0]) {
-            func_1516972C(&obj->base.header);
+            effect_destroyObject(&obj->base.header);
         }
     } else if (event == 0) {
         Actor *sender = msg[0];
 
         if (sender->CameraPtr == obj->spawn.owner) {
-            func_1516972C(&obj->base.header);
+            effect_destroyObject(&obj->base.header);
         }
     }
 }
@@ -62,7 +62,7 @@ const f32 D_800A0068[1] = { 0.128f };
  * Moves the object along from -> to. param holds two 2.14 fixed-point halves: the speed (high), which decays
  * by 12.8% per frame, and the progress from `from` to `to` (low, 0..1), which it is added to.
  */
-void func_150BE2E8(WorldObject *mover) {
+void effect_updatePathMover(WorldObject *mover) {
     f32 fromZ;
     f32 fromY;
     f32 fromX;

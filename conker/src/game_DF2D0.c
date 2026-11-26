@@ -28,7 +28,7 @@ void func_150B1EE0(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
     data.pos = *pos;
     data.accum = 0.0f;
 
-    effect = func_15149130(func_150ADA20() % 133U + 69, -1, 0x49, -1, 1, 0, sizeof(data),
+    effect = effect_newTimedEffect(func_150ADA20() % 133U + 69, -1, 0x49, -1, 1, 0, sizeof(data),
                            spawner->owner, spawner->kind);
     if (effect != NULL) {
         memcpy(&((PointEmitter *)effect)->data, &data, sizeof(data));

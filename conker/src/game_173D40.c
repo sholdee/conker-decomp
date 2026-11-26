@@ -120,7 +120,7 @@ void func_15146BF8(s32 actor, s32 side, s32 strength, u8 alt) {
             func_15141F78(alt != 0 ? 0xC : 0xB, &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
-                func_15142180(2, &pos, hit.material, 1.0f, 1.0f);
+                effect_spawnSplashSpray(2, &pos, hit.material, 1.0f, 1.0f);
             }
         }
     }
@@ -154,7 +154,7 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             kind = func_151D8E20();
             if (strength >= 71) {
-                func_15142180(kind, &pos, hit.material, 1.0f, 1.0f);
+                effect_spawnSplashSpray(kind, &pos, hit.material, 1.0f, 1.0f);
             }
 
             spot.x = pos.x;
@@ -258,7 +258,7 @@ void func_15147318(s32 actor, s32 side, s32 strength) {
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             if (strength >= 115) {
-                func_15142180(0, &pos, hit.material, 1.0f, 1.0f);
+                effect_spawnSplashSpray(0, &pos, hit.material, 1.0f, 1.0f);
             }
             func_15141F78(D_8008FD04[0](), &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
@@ -277,7 +277,7 @@ void func_15147478(s32 actor, s32 side, s32 strength) {
             func_15141F78(D_8008FD04[6](), &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
-                func_15142180(6, &pos, hit.material, 1.0f, 1.0f);
+                effect_spawnSplashSpray(6, &pos, hit.material, 1.0f, 1.0f);
             }
         }
     }
@@ -294,7 +294,7 @@ void func_151475D8(s32 actor, s32 side, s32 strength) {
             func_15141F78(D_8008FD04[11](), &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
-                func_15142180(0xB, &pos, hit.material, 1.0f, 1.0f);
+                effect_spawnSplashSpray(0xB, &pos, hit.material, 1.0f, 1.0f);
             }
         }
     }

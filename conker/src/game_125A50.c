@@ -101,7 +101,7 @@ void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
     }
 }
 
-/* A message passed to func_151494E0 and received by func_150F887C. */
+/* A message passed to effect_sendEventToTimedEffects and received by effect_stageMessage. */
 struct StageMsg {
     /* 0x00 */ TriggerZone *zone; /* 0x3F: the StageState.zone to run */
     /* 0x04 */ u8 set;            /* 0x42: the StageState.set to finish */
@@ -112,7 +112,7 @@ void func_150F884C(Actor *obj, TriggerZone *zone) {
     StageMsg msg;
 
     msg.zone = zone;
-    func_151494E0((s32)&msg, 0x3F);
+    effect_sendEventToTimedEffects((s32)&msg, 0x3F);
 }
 
 struct StageObj {
@@ -125,7 +125,7 @@ struct StageObj {
 };
 
 /* Message handler: 0x42 jumps to the last stage, 0x3F runs func_150F892C. */
-void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
+void effect_stageMessage(StageObj *obj, StageMsg *msg, u8 type) {
     StageState *state = &obj->stage;
 
     if (type == 0x42) {
@@ -364,14 +364,14 @@ void func_150F892C(StageObj *obj) {
 
 
 /* Broadcasts message 0x42 (jump to the last stage) for both StageState ids of pair `index`. */
-void func_150F9720(u8 index) {
+void effect_jumpStagesToEnd(u8 index) {
     StageMsg msg;
 
     msg.zone = NULL;
     msg.set = D_800A1C40[index][0];
-    func_151494E0((s32)&msg, 0x42);
+    effect_sendEventToTimedEffects((s32)&msg, 0x42);
     msg.set = D_800A1C40[index][1];
-    func_151494E0((s32)&msg, 0x42);
+    effect_sendEventToTimedEffects((s32)&msg, 0x42);
 }
 
 void func_150F9788(TimedEffect *arg0) {
@@ -379,12 +379,12 @@ void func_150F9788(TimedEffect *arg0) {
 
 void func_150F9794(TimedEffect *arg0) {
     func_150F9788(arg0);
-    func_1514933C(arg0);
+    effect_defaultDestroyTimedEffect(arg0);
 }
 
 void func_150F97C0(TimedEffect *arg0) {
     func_150F9788(arg0);
-    func_15149368(arg0);
+    effect_defaultFreeTimedEffect(arg0);
 }
 
 static u8 D_80088B50 = 23; /* the bone of func_150F97EC's effect */
@@ -416,7 +416,7 @@ s32 arg2;
     motion.width = func_150ADA68() * 14.0f + 28.0f;
     random0 = func_150ADA20();
     random1 = func_150ADA20();
-    func_15102B38(obj, D_80088B50, &D_800A1C48, &D_800A1C54, &motion, (random0 % 3U) + 4, (random1 % 156U) + 100,
+    effect_spawnBoneBeamParticle(obj, D_80088B50, &D_800A1C48, &D_800A1C54, &motion, (random0 % 3U) + 4, (random1 % 156U) + 100,
                   func_150ADA68() * 300.0f + 400.0f, &pos, 0xFF, 0, -1, arg1, arg2);
 }
 

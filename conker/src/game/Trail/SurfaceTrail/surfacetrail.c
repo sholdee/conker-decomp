@@ -64,7 +64,7 @@ s32 func_1519EF90(config, side, out)
     return 1;
 }
 
-/* Clears the owner's reference to this trail, then hands it to func_151478F4. */
+/* Clears the owner's reference to this trail, then hands it to effect_defaultDestroyEffectObj. */
 void trail_destroySurfaceTrail(SurfaceTrail *trail) {
     SurfaceTrailConfig *config = trail->config;
     TrailSide *sides;
@@ -78,10 +78,10 @@ void trail_destroySurfaceTrail(SurfaceTrail *trail) {
             sides[1].trail = NULL;
         }
     }
-    func_151478F4(trail);
+    effect_defaultDestroyEffectObj(trail);
 }
 
-/* Clears the owner's reference to this trail, then hands it to func_15147928. */
+/* Clears the owner's reference to this trail, then hands it to effect_defaultFreeEffectObj. */
 void trail_freeSurfaceTrail(SurfaceTrail *trail) {
     SurfaceTrailConfig *config = trail->config;
     TrailSide *sides;
@@ -95,7 +95,7 @@ void trail_freeSurfaceTrail(SurfaceTrail *trail) {
             sides[1].trail = NULL;
         }
     }
-    func_15147928(trail);
+    effect_defaultFreeEffectObj(trail);
 }
 
 /* Creates the trail for `side` behind the owner's actor. */
@@ -148,7 +148,7 @@ SurfaceTrail *func_1519F1C8(owner, side)
     config.color[0] = D_800AB414[colorIndex].r;
     config.color[1] = D_800AB414[colorIndex].g;
     config.color[2] = D_800AB414[colorIndex].b;
-    trail = func_15147A80(&header, sizeof(SurfaceTrailConfig), sizeof(SurfaceTrailPoint), 5, 5, 5, 0, 0, &owner->watcher.hit, 0xFF, 1);
+    trail = effect_newEffectObj(&header, sizeof(SurfaceTrailConfig), sizeof(SurfaceTrailPoint), 5, 5, 5, 0, 0, &owner->watcher.hit, 0xFF, 1);
     if (trail != NULL) {
         memcpy(trail->config, &config, sizeof(SurfaceTrailConfig));
     }
@@ -179,11 +179,11 @@ void func_1519F400(owner)
     }
     if (sides[0].spawner != NULL) {
         trail_unlinkSurfaceSpawner(sides[0].spawner);
-        func_1516972C(&sides[0].spawner->base.header);
+        effect_destroyObject(&sides[0].spawner->base.header);
     }
     if (sides[1].spawner != NULL) {
         trail_unlinkSurfaceSpawner(sides[1].spawner);
-        func_1516972C(&sides[1].spawner->base.header);
+        effect_destroyObject(&sides[1].spawner->base.header);
     }
 }
 
@@ -343,7 +343,7 @@ s32 trail_followSurfaceTrail(SurfaceTrail *trail) {
         sides = config->owner->trails.sides;
         link.owner = config->owner;
         link.side = trail->head.tmpl.kind;
-        spawner = func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0);
+        spawner = effect_newTimedEffectNoDraw(300, -1, 11, 0, 6, 8, 0xFF, 0);
         if (spawner != NULL) {
             memcpy(&spawner->link, &link, sizeof(SurfaceTrailLink));
         }
@@ -776,7 +776,7 @@ void trail_onSurfaceSpawnerEvent(TrailSpawner *spawner, ActorRef *event, u8 type
     if (type == 0) {
         if (actor == event->actor || event->uniqueId == actor->unique_id) {
             trail_unlinkSurfaceSpawner(spawner);
-            func_1516972C(&spawner->base.header);
+            effect_destroyObject(&spawner->base.header);
         }
     }
 }

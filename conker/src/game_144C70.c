@@ -677,7 +677,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
         }
         if (index != 0) {
             scale = 1.0f - fabsf((fabsf(angle) - (openAngle < 0 ? -openAngle : openAngle)) / openAngle);
-            func_1518804C(index - 1, scale);
+            effect_setColorAnimBlend(index - 1, scale);
             func_15173C60(scale * 255.0f, index - 1);
             if (level == 1 && index - 1 == 0) {
                 func_15173C90(scale * 255.0f, 0, 0xF8);
@@ -777,7 +777,7 @@ void func_15118F24(WorldObject *prop) {
         index = (prop->moveData.word >> 24) & 0xFF;
         if (index != 0 && openAngle != 0) {
             scale = 1.0f - fabsf((angle - openAngle) / openAngle);
-            func_1518804C(index - 1, scale);
+            effect_setColorAnimBlend(index - 1, scale);
             func_15173C60(scale * 255.0f, index - 1);
         }
     }

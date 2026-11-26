@@ -27,7 +27,7 @@ static const s16 D_800A6E30[6][7] = {
     { 0, 50, -30, 0, -260, 390, 127 },
 };
 
-/* Render setup and teardown of the style particles (object types 18 and 103 of D_8008B4A8). */
+/* Render setup and teardown of the style particles (object types 18 and 103 of gObjectTypes). */
 Gfx D_8008CB70[] = {
     gsSPDisplayList(gSpriteRenderDl),
     gsDPSetCombineLERP(PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0,
@@ -71,7 +71,7 @@ void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
 {
     StyleParticle *particle;
 
-    particle = func_15167A68(isAlt != 0 ? 0x67 : 0x12, unk1, sizeof(StyleParticle), 0, unkC, 1);
+    particle = effect_newObject(isAlt != 0 ? 0x67 : 0x12, unk1, sizeof(StyleParticle), 0, unkC, 1);
     if (particle != NULL) {
         particle->x = x;
         particle->y = y;
@@ -133,7 +133,7 @@ void func_1516D678(StyleParticle *particle) {
         if (link != NULL) {
             link->node.lifetime = 0;
         }
-        func_1516972C(particle);
+        effect_destroyObject(particle);
     } else {
         /* y is 8.8 fixed point with its fraction in yFraction */
         value = particle->y;
@@ -160,11 +160,11 @@ Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
 
     synced = FALSE;
     D_800D2DAB = 0;
-    texture = D_8008CA4C[particle->texture];
+    texture = gEffectAnimTextures[particle->texture];
     frame = particle->frame;
     frameIndex = frame++; // matching: the dead increment steers IDO's register choice here
     // matching: the pointer goes through an integer (IDO keeps the converted value in a temporary)
-    gfx = func_15142E24(gfx, (TextureDesc *)(s32)D_8008CA4C[particle->texture], frameIndex << 8, 2, 0x100, 0x100, 0, 6,
+    gfx = func_15142E24(gfx, (TextureDesc *)(s32)gEffectAnimTextures[particle->texture], frameIndex << 8, 2, 0x100, 0x100, 0, 6,
                         &sprite, (u8 *)&synced, 3);
     if (texture->fmt == 5) {
         cycles = 2;
@@ -230,7 +230,7 @@ void func_1516D99C(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
 {
     SpriteEmitter *emitter;
 
-    emitter = func_15167A68(isAlt != 0 ? 0x66 : 0x11, unk1, sizeof(SpriteEmitter), 0, unkC, 1);
+    emitter = effect_newObject(isAlt != 0 ? 0x66 : 0x11, unk1, sizeof(SpriteEmitter), 0, unkC, 1);
     if (emitter != NULL) {
         emitter->x = x;
         emitter->y = y;
@@ -512,7 +512,7 @@ void func_1516DB90(SpriteEmitter *arg0) {
         if (i > 0) {
             emitter->timer = i;
         } else {
-            func_1516972C(emitter);
+            effect_destroyObject(emitter);
         }
     }
 }

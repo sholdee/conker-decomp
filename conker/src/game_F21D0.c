@@ -159,13 +159,13 @@ void func_150C4E9C(WorldObject *obj) {
 
 // the four objects func_1500F40C spawns with func_1500F290
 
-/* Destroys the four objects in D_800D98D0 (func_1516972C) and clears their slots. */
+/* Destroys the four objects in D_800D98D0 (effect_destroyObject) and clears their slots. */
 void func_150C522C(void) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
         if (D_800D98D0[i] != NULL) {
-            func_1516972C(D_800D98D0[i]);
+            effect_destroyObject(D_800D98D0[i]);
         }
         D_800D98D0[i] = NULL;
     }

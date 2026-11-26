@@ -176,7 +176,7 @@ typedef struct {
     /* 0x14 */ u16 soundHandle;
 } EffectSoundState;
 
-/* Releases the effect's sound (if any), then hands the effect to func_1514933C. */
+/* Releases the effect's sound (if any), then hands the effect to effect_defaultDestroyTimedEffect. */
 void func_151A5CAC(TimedEffect *arg0) {
     EffectSoundState *state = (EffectSoundState *)((u8 *)arg0 + 0x58);
 
@@ -184,10 +184,10 @@ void func_151A5CAC(TimedEffect *arg0) {
     if (*(u16 *)((u8 *)arg0 + 0x6C) != 0) {
         func_151A5D2C(state->soundHandle);
     }
-    func_1514933C(arg0);
+    effect_defaultDestroyTimedEffect(arg0);
 }
 
-/* Releases the effect's sound (if any), then hands the effect to func_15149368. */
+/* Releases the effect's sound (if any), then hands the effect to effect_defaultFreeTimedEffect. */
 void func_151A5CEC(TimedEffect *arg0) {
     EffectSoundState *state = (EffectSoundState *)((u8 *)arg0 + 0x58);
 
@@ -195,7 +195,7 @@ void func_151A5CEC(TimedEffect *arg0) {
     if (*(u16 *)((u8 *)arg0 + 0x6C) != 0) {
         func_151A5D2C(state->soundHandle);
     }
-    func_15149368(arg0);
+    effect_defaultFreeTimedEffect(arg0);
 }
 
 /* Releases a sound handle. */

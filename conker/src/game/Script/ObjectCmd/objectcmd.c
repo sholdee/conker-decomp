@@ -101,7 +101,7 @@ s32 script_worldObjectCommand(s32 id, s32 op, s32 *cmd) {
         WORK(obj)[0].i = cmd[3];
         return 1;
     case 9:
-        func_150E4928(obj);
+        effect_spawnGroundImpactsUnder(obj);
         break;
     case 10:
         obj->moveProc = D_80088C90[cmd[2]].moveProc;

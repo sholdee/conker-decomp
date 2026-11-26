@@ -12,7 +12,7 @@ static Vtx D_8008B3E0[] = {
     {{{    0,  34,   0 }, 0, { 0, 0 }, { 0, 0, 0, 0 }}},
 };
 
-/* Render setup of object type 0xD (its entry in the object type table D_8008B4A8). */
+/* Render setup of object type 0xD (its entry in the object type table gObjectTypes). */
 Gfx D_8008B440[] = {
     gsSPSetGeometryMode(G_CULL_BACK),
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
@@ -32,7 +32,7 @@ void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
     f32 fy;
     f32 fz;
 
-    obj = func_15167A68(0xD, arg5, sizeof(PuffQuadEffect), 1, arg4, 1);
+    obj = effect_newObject(0xD, arg5, sizeof(PuffQuadEffect), 1, arg4, 1);
     if (obj != NULL) {
         obj->timer = 10;
         obj->x = x;
@@ -71,7 +71,7 @@ void func_15166B50(void *self) {
         f32 size = 4000.0f; // matching: a named local keeps the constant loaded once for both uses
         BillboardTemplate spawn;
 
-        spawn.anim = D_8008CA4C[0];
+        spawn.anim = gEffectAnimTextures[0];
         spawn.unk4 = 0;
         spawn.unk8 = 4;
         spawn.frame = 0;
@@ -98,10 +98,10 @@ void func_15166B50(void *self) {
             spawn.x = x;
             spawn.y = y;
             spawn.z = z;
-            func_15167D84(&spawn, 0, 0, -1, obj->header.owner, obj->header.kind);
+            effect_spawnBillboard(&spawn, 0, 0, -1, obj->header.owner, obj->header.kind);
         }
     } else if (obj->timer == 0) {
-        func_1516972C(&obj->header);
+        effect_destroyObject(&obj->header);
     }
 }
 

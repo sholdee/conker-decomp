@@ -39,7 +39,7 @@ void func_150D278C(s16 *record, MtxF matrix, u8 unkC, s32 unk1) {
         emitter.color[1] = colors[i][1];
         emitter.color[2] = colors[i][2];
     }
-    object = func_15149130(func_150ADA20_u8() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), unkC, unk1);
+    object = effect_newTimedEffect(func_150ADA20_u8() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), unkC, unk1);
     if (object != NULL) {
         memcpy(&((SparkEffect *)object)->data, &emitter, sizeof(emitter));
     }

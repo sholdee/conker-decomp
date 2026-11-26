@@ -26,7 +26,7 @@ static Gfx D_8008CDF0[] = {
 
 static Gfx D_8008CE60[9];
 
-/* Render setups of the object types (drawBeginDL in D_8008B4A8): types 8 and 9 draw in the z-buffered
+/* Render setups of the object types (drawBeginDL in gObjectTypes): types 8 and 9 draw in the z-buffered
  * translucent mode, types 12 and 89 without the z-buffer. */
 Gfx D_8008CE20[] = {
     gsDPPipeSync(),
@@ -58,7 +58,7 @@ void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkA
     SpinDebrisParticle *particle;
     s32 rnd;
 
-    particle = func_15167A68(type, 0, sizeof(SpinDebrisParticle), 1, 0xFF, 1);
+    particle = effect_newObject(type, 0, sizeof(SpinDebrisParticle), 1, 0xFF, 1);
     if (particle != NULL) {
         particle->x = x;
         particle->y = y;
@@ -128,7 +128,7 @@ void func_1517A1EC(SpinDebrisParticle *particle) {
     particle->timer = timer;
     if (particle->alpha == 0 ||
         (particle->viewFlags && (particle->viewFlags >> 4) == (particle->viewFlags & 0xF))) {
-        func_1516972C(&particle->header);
+        effect_destroyObject(&particle->header);
     }
 }
 
@@ -187,7 +187,7 @@ void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
 
     range = size;
     if (range != 0) {
-        particle = func_15167A68(9, 0, sizeof(SpinDebrisParticle), 1, 0xFF, 1);
+        particle = effect_newObject(9, 0, sizeof(SpinDebrisParticle), 1, 0xFF, 1);
         if (particle != NULL) {
             collision_findFloor(0, 0, &groundY, 0, 0, 0, x, y, z, y, 0, 0);
             particle->y = particle->groundY = groundY + 3.0f;
@@ -251,7 +251,7 @@ void func_1517A84C(SpinDebrisParticle *particle) {
             particle->timer = timer;
             particle->alpha = (timer << 8) / 60;
         } else {
-            func_1516972C(&particle->header);
+            effect_destroyObject(&particle->header);
         }
     }
 }

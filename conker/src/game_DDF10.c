@@ -62,15 +62,15 @@ void func_150B0C58(Actor *owner, u8 arg1, s32 arg2) {
     data.ownerId = owner->unique_id;
     data.timer = 0.0f;
 
-    effect = func_15149130(300, -1, 0x58, -1, 0, 0x43, sizeof(data), arg1, arg2);
+    effect = effect_newTimedEffect(300, -1, 0x58, -1, 0, 0x43, sizeof(data), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
 }
 
-/* Effect callback: hands func_15169850 the owner reference. */
+/* Effect callback: hands effect_handleOwnerActorEvent the owner reference. */
 void func_150B0CE0(DDB60Effect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Emit-rate base and random range per emitter. */

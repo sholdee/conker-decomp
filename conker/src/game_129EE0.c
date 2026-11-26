@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c). */
-TriggerZone *D_800D9AA0[3]; // the three areas func_150FCBC0 sprays from (func_150142AC registers them)
+TriggerZone *gSprayAreas[3]; // the three areas effect_sprayFromArea sprays from (func_150142AC registers them)
 
 #include "functions.h"
 #include "variables.h"
@@ -21,15 +21,15 @@ static const VtxColor D_800A1EEC[4] = {
 void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
 
-/* Spawns the effect at each of the three D_800D9AA0 spots, starts three positioned sounds,
+/* Spawns the effect at each of the three gSprayAreas spots, starts three positioned sounds,
  * then calls func_15164F0C for each of the gScreenLayout + 1 entries and func_151D8868 once. */
 void func_150FCA30(void) {
     s32 i;
     RumbleParams params;
 
-    func_150FCBC0(0);
-    func_150FCBC0(1);
-    func_150FCBC0(2);
+    effect_sprayFromArea(0);
+    effect_sprayFromArea(1);
+    effect_sprayFromArea(2);
 
     // sound_addDynamicSound(sound, x, y, z, volume, farDistance, nearDistance, callback, owner, key, flags, cents)
     sound_addDynamicSound(0x2B8, -2038, 1560, -2631, 28000, 9000, 7000, sound_delayedPlayCallback, (void *)45, 0, 0, 0);
@@ -49,8 +49,8 @@ void func_150FCA30(void) {
 }
 
 
-/* Spawns an effect in the middle of area D_800D9AA0[index] and 3-4 particle bursts at random angles around it. */
-void func_150FCBC0(u8 index) {
+/* Spawns an effect in the middle of area gSprayAreas[index] and 3-4 particle bursts at random angles around it. */
+void effect_sprayFromArea(u8 index) {
     TriggerZone *area;
     Vec3f pos;
     const s16 *range;
@@ -63,7 +63,7 @@ void func_150FCBC0(u8 index) {
     if (index >= 3) {
         return;
     }
-    area = D_800D9AA0[index];
+    area = gSprayAreas[index];
     if (area == NULL) {
         return;
     }
@@ -118,7 +118,7 @@ f32 func_150FCF1C(void *arg0) {
     TriggerZone *area;
     Vec3f pos;
 
-    area = D_800D9AA0[0];
+    area = gSprayAreas[0];
     if (area == NULL) {
         return 1.0f;
     }
@@ -144,7 +144,7 @@ typedef struct {
     /* 0x18 */ f32 texS1;       /* S texture coordinate of corners 1 and 2 */
     /* 0x1C */ f32 texPhase0;
     /* 0x20 */ f32 texPhase1;
-    /* 0x24 */ LightEffect *light; /* from light_createJitterAt, released with func_1516972C */
+    /* 0x24 */ LightEffect *light; /* from light_createJitterAt, released with effect_destroyObject */
     /* 0x28 */ Actor150FD514 *groundParticle;
     /* 0x2C */ f32 emitCounter;
     /* 0x30 */ CollisionHit ground;
@@ -419,10 +419,10 @@ void func_150FDC2C(Actor150FD514 *actor) {
     Ext150FCFD4 *ext = &actor->ext;
 
     if (ext->light != NULL) {
-        func_1516972C(ext->light);
+        effect_destroyObject(ext->light);
     }
     if (ext->groundParticle != NULL) {
-        func_1516972C(&ext->groundParticle->head.header);
+        effect_destroyObject(&ext->groundParticle->head.header);
     }
     if (ext->soundHandle != 0) {
         sound_stop(ext->soundHandle);

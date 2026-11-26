@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-struct Queue *D_80088750 = NULL; /* ground decals (func_150BABE0); game/View/ViewOrtho/viewortho.c makes it at level setup */
+struct Queue *gGroundDecalQueue = NULL; /* ground decals (func_150BABE0); game/View/ViewOrtho/viewortho.c makes it at level setup */
 
 /* matching: the joint owner is passed as s32; a pointer parameter changes register allocation */
 
@@ -44,7 +44,7 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
     func_15142314((s32)obj->ob_matrix_ptr, joint, &pos);
     pos.y = obj->floorY;
     func_15143E94(5, 0x4022);
-    func_15165F80(-1, pos.x, pos.y + 6.0f, pos.z, 25, 18, 0, *(u8 *)&arg2, 1);
+    effect_spawnQuadEffect(-1, pos.x, pos.y + 6.0f, pos.z, 25, 18, 0, *(u8 *)&arg2, 1);
     func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 50.0f + 40.0f, yaw + 60, yaw - 60,
                   func_150ADA20() % 11U + 30, 5, 0, 0.0f, 0, *(u8 *)&arg2);
     collision_initHitFromObject(&ground, obj);
@@ -72,8 +72,8 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
         desc.renderModes = 0x170002;
         decal = func_1513C73C(&desc, 0, 0, &ground.tri, pos.x, ground.height, pos.z, size, size,
                               func_150ADA20() & 0xFF, (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), 4, *(u8 *)&arg2, 0);
-        if (decal != NULL && func_1518ABD0(D_80088750, decal, 1) == 0) {
-            func_1516972C(&decal->header);
+        if (decal != NULL && effect_pushQueue(gGroundDecalQueue, decal, 1) == 0) {
+            effect_destroyObject(&decal->header);
         }
     }
     func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 40.0f + 60.0f, yaw + 60, yaw - 60,
@@ -161,7 +161,7 @@ s32 func_150BB260(SparkParticle *particle, s32 arg1) {
 }
 
 /* Init callback: 50 frames of life, fading out over all of them at 5 alpha per frame. */
-void func_150BB408(FadeQuadSprite *sprite) {
+void effect_startDecalFade(FadeQuadSprite *sprite) {
     sprite->quad.def.flags |= 1;
     sprite->fadeStart = sprite->quad.def.lifetime = 50;
     sprite->fadeStep = 5;
@@ -169,7 +169,7 @@ void func_150BB408(FadeQuadSprite *sprite) {
 }
 
 /* Update callback: once life drops below fadeStart, caps alpha at life * fadeStep. */
-s32 func_150BB450(FadeQuadSprite *sprite) {
+s32 effect_updateFadeQuadSprite(FadeQuadSprite *sprite) {
     s16 alpha;
 
     if (sprite->quad.def.lifetime < sprite->fadeStart) {

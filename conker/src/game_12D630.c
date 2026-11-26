@@ -2,17 +2,17 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Sends message 0x48 (func_151494E0) for `owner`; effects it owns destroy themselves on it. */
-void func_15100180(Actor *owner) {
+/* Sends message 0x48 (effect_sendEventToTimedEffects) for `owner`; effects it owns destroy themselves on it. */
+void effect_sendOwnerGone(Actor *owner) {
     ActorRef msg;
 
     msg.actor = owner;
     msg.uniqueId = owner->unique_id;
-    func_151494E0((s32)&msg, 0x48);
+    effect_sendEventToTimedEffects((s32)&msg, 0x48);
 }
 
-/* Spawns the owner effect (func_15149130) on `owner`. */
-void func_151001B4(Actor *owner) {
+/* Spawns the owner effect (effect_newTimedEffect) on `owner`. */
+void effect_spawnOwnerEffect(Actor *owner) {
     OwnerEffectData data;
     TimedEffect *effect;
 
@@ -20,7 +20,7 @@ void func_151001B4(Actor *owner) {
     data.ownerId = owner->unique_id;
     data.timer = 0;
 
-    effect = func_15149130(300, -1, 0x4E, -1, 0, 0x3B, sizeof(data), 0xFF, 1);
+    effect = effect_newTimedEffect(300, -1, 0x4E, -1, 0, 0x3B, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
         memcpy(&((OwnerEffect *)effect)->data, &data, sizeof(data));
     }
@@ -28,22 +28,22 @@ void func_151001B4(Actor *owner) {
 
 /* Message handler: destroys the effect when its owner is reported gone (0x48); other messages
  * go to the default handler. */
-void func_15100230(OwnerEffect *effect, ActorRef *msg, u8 msgId) {
+void effect_ownerEffectMessage(OwnerEffect *effect, ActorRef *msg, u8 msgId) {
     OwnerEffectData *data = &effect->data;
 
     if (msgId == 0x48) {
         // matching: the punned read of msg makes IDO load it a second time for the id compare
         if (msg->actor == data->owner || data->ownerId == ((ActorRef *)*(s32 *)&msg)->uniqueId) {
-            func_1516972C(&effect->base.header);
+            effect_destroyObject(&effect->base.header);
         }
     } else {
-        func_15149514((s32)msg, msgId, &data->owner, &data->ownerId, effect);
+        effect_handleTimedEffectOwnerEvent((s32)msg, msgId, &data->owner, &data->ownerId, effect);
     }
 }
 
 /* Per-frame update: frees the effect once its owner is gone, otherwise counts its timer down
  * while the owner has a camera. */
-void func_151002BC(OwnerEffect *effect) {
+void effect_updateOwnerEffect(OwnerEffect *effect) {
     OwnerEffectData *data = &effect->data;
     Actor *owner = data->owner;
 

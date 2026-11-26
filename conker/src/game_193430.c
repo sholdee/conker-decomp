@@ -4,7 +4,7 @@
 
 /* Render setup display list of the quad effects; the effect type's entry in the object type table
  * D_8008B4D4 points to it. */
-Gfx D_8008B3A0[] = {
+Gfx gQuadEffectRenderSetupDl[] = {
     gsSPClearGeometryMode(G_CULL_BOTH),
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsDPPipeSync(),
@@ -26,16 +26,16 @@ static const struct {
     f32 degToRad;
 } D_800A6C94 = { 0.01745329238f };
 
-static s16 D_800DCE40; // frame offset of the next texture frame (func_151668B8)
+static s16 gQuadEffectTexFrame; // frame offset of the next texture frame (effect_beginQuadEffectDraw)
 
 
 /* Spawns a quad effect at (x, y, z); direction is in degrees, or -1 for a quad lying flat at height y. */
-void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, u8 arg7, s32 arg8) {
+void effect_spawnQuadEffect(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, u8 arg7, s32 arg8) {
     s32 i;
     QuadEffect *effect;
     f32 angle;
 
-    effect = func_15167A68(4, arg8, sizeof(QuadEffect), 1, arg7, 1);
+    effect = effect_newObject(4, arg8, sizeof(QuadEffect), 1, arg7, 1);
     if (effect != NULL) {
         if (direction == -1) {
             for (i = 0; i < 2; i++) {
@@ -80,12 +80,12 @@ void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life,
 }
 
 /* Spawns a mode-2 quad effect at (x, y, z), rotated by angleA and angleB. */
-void func_15166118(s32 angleA, s32 angleB, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg7, u8 arg8,
+void effect_spawnRotatedQuadEffect(s32 angleA, s32 angleB, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg7, u8 arg8,
                    s32 arg9) {
     s32 i;
     QuadEffect *effect;
 
-    effect = func_15167A68(4, arg9, sizeof(QuadEffect), 1, arg8, 1);
+    effect = effect_newObject(4, arg9, sizeof(QuadEffect), 1, arg8, 1);
     if (effect != NULL) {
         effect->mode = 2;
         for (i = 0; i < 2; i++) {
@@ -114,14 +114,14 @@ void func_15166118(s32 angleA, s32 angleB, s32 x, s32 y, s32 z, s32 growthRate, 
 }
 
 /* Per-frame update: grows the quad and frees the effect when its life runs out. */
-void func_15166204(QuadEffect *effect) {
+void effect_updateQuadEffect(QuadEffect *effect) {
     s32 life;
 
     life = effect->life;
     effect->size = effect->size + effect->growthRate * D_800BE9E4;
     life -= D_800BE9E4;
     if (life <= 0) {
-        func_1516972C(&effect->header);
+        effect_destroyObject(&effect->header);
         return;
     }
     effect->life = life;
@@ -129,7 +129,7 @@ void func_15166204(QuadEffect *effect) {
 
 
 /* Draws the effect: rebuilds this frame's quad vertices and fades alpha out over the effect's life. */
-Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
+Gfx *effect_drawQuadEffect(Gfx *gdl, QuadEffect *effect, s32 arg2) {
     s32 mode;
     s32 x;
     s32 y;
@@ -237,17 +237,17 @@ Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
 extern s32 D_800A4AC8[][2];
 
 /* Loads the next frame of texture D_800903F4 (advancing 0x80 per call, wrapping at 0x500) and sets a render mode. */
-Gfx *func_151668B8(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
+Gfx *effect_beginQuadEffectDraw(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
     u8 needSync;
     s16 frame;
 
-    frame = D_800DCE40;
+    frame = gQuadEffectTexFrame;
     D_800DD228 = &D_800903F4;
-    D_800DCE40 = frame + 0x80;
+    gQuadEffectTexFrame = frame + 0x80;
     needSync = TRUE;
     D_800DD220 = frame;
-    if (D_800DCE40 >= 0x500) {
-        D_800DCE40 = 0;
+    if (gQuadEffectTexFrame >= 0x500) {
+        gQuadEffectTexFrame = 0;
     }
     D_800DD224 = 1;
     return func_15142FBC(sprite_loadDescFrame(gdl, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3),

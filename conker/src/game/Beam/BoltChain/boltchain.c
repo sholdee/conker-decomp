@@ -34,7 +34,7 @@ BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
 
     segments = desc->segments;
     points = desc->segments + 2;
-    bolt = func_15167A68(0x40, arg3, segments * sizeof(BoltSample) + points * sizeof(Vec3f) + extraSize + sizeof(BoltObj), 1, arg2, 1);
+    bolt = effect_newObject(0x40, arg3, segments * sizeof(BoltSample) + points * sizeof(Vec3f) + extraSize + sizeof(BoltObj), 1, arg2, 1);
     if (bolt == NULL) {
         return NULL;
     }
@@ -106,14 +106,14 @@ void beam_updateBolt(BoltObj *bolt) {
     if (bolt->desc.updateKind != -1) {
         update = gBoltUpdateHandlers[bolt->desc.updateKind];
         if (update != NULL && !update(bolt, &moved)) {
-            func_1516972C(&bolt->header);
+            effect_destroyObject(&bolt->header);
         }
     }
 
     if (bolt->desc.flags & 1) {
         bolt->desc.life -= D_800BE9E4;
         if (bolt->desc.life < 0) {
-            func_1516972C(&bolt->header);
+            effect_destroyObject(&bolt->header);
         }
     }
 
@@ -395,25 +395,25 @@ void beam_releaseBolt(BoltObj *bolt) {
     }
     flare = bolt->flares[0];
     if (flare != NULL) {
-        func_1516972C(&flare->header);
+        effect_destroyObject(&flare->header);
     }
     flare = bolt->flares[1];
     if (flare != NULL) {
-        func_1516972C(&flare->header);
+        effect_destroyObject(&flare->header);
     }
     func_151D5E30(bolt->vtxBuf);
 }
 
-/* Destroys the bolt's resources, then hands it to func_15169804. */
+/* Destroys the bolt's resources, then hands it to effect_defaultDestroy. */
 void beam_destroyBolt(BoltObj *bolt) {
     beam_releaseBolt(bolt);
-    func_15169804(&bolt->header);
+    effect_defaultDestroy(&bolt->header);
 }
 
-/* Destroys the bolt's resources, then hands it to func_15169824. */
+/* Destroys the bolt's resources, then hands it to effect_defaultFree. */
 void beam_freeBolt(BoltObj *bolt) {
     beam_releaseBolt(bolt);
-    func_15169824(&bolt->header);
+    effect_defaultFree(&bolt->header);
 }
 
 /* Dispatches to the bolt kind's handler in gBoltMsgHandlers. */
@@ -436,7 +436,7 @@ BoltChainObj *beam_newBoltChain(Vec3f *start, Vec3f *end, s32 depth, BoltChainCo
     chain.config = *config;
     chain.kind = kind;
 
-    obj = func_15149130(0, -1, 0x3E, -1, 0, 0x30, (chain.count * sizeof(Vec3f) + 0x48), arg6, arg7);
+    obj = effect_newTimedEffect(0, -1, 0x3E, -1, 0, 0x30, (chain.count * sizeof(Vec3f) + 0x48), arg6, arg7);
     if (obj != NULL) {
         data = &obj->chain;
         memcpy(data, &chain, sizeof(BoltChain));
@@ -537,18 +537,18 @@ void beam_unlinkChainBolt(BoltObj *bolt) {
 void beam_killChainLink(BoltChainObj *obj) {
     // matching: volatile makes IDO load the link twice, as the original does
     if (*(BoltObj *volatile *)&obj->chain.link != NULL) {
-        func_1516972C(*(EffectHeader *volatile *)&obj->chain.link);
+        effect_destroyObject(*(EffectHeader *volatile *)&obj->chain.link);
     }
 }
 
 void beam_destroyBoltChain(BoltChainObj *obj) {
     beam_killChainLink(obj);
-    func_1514933C(&obj->base);
+    effect_defaultDestroyTimedEffect(&obj->base);
 }
 
 void beam_freeBoltChain(BoltChainObj *obj) {
     beam_killChainLink(obj);
-    func_15149368(&obj->base);
+    effect_defaultFreeTimedEffect(&obj->base);
 }
 
 /* Dispatches to the chain kind's handler in gBoltChainMsgHandlers. */
@@ -640,7 +640,7 @@ BoltObj *beam_spawnBoundsBolt(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 se
 
 /* gBoltMsgHandlers handler for kind 2. */
 void beam_boundsBoltMessage(BoltObj *bolt, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, bolt->userData, (u8 *)bolt->userData + 4, bolt);
+    effect_handleOwnerActorEvent(arg1, arg2, bolt->userData, (u8 *)bolt->userData + 4, bolt);
 }
 
 /* updateKind 0: keeps a kind-2 bolt's start on its owner; returns 0 once the owner is gone. */
@@ -807,5 +807,5 @@ void beam_transformBoneLocal(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f
 
 /* gBoltMsgHandlers handler for kind 3. */
 void beam_boneBoltMessage(BoltObj *bolt, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, bolt->userData, (u8 *)bolt->userData + 4, bolt);
+    effect_handleOwnerActorEvent(arg1, arg2, bolt->userData, (u8 *)bolt->userData + 4, bolt);
 }

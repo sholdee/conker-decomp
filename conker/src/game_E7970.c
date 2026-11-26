@@ -11,7 +11,7 @@ void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2) {
     data.ownerId = owner->unique_id;
     data.spawnAccum = 0.0f;
 
-    effect = func_15149130((func_150ADA20() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, 0xC, arg1, arg2);
+    effect = effect_newTimedEffect((func_150ADA20() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, 0xC, arg1, arg2);
     if (effect != NULL) {
         memcpy(&((EffectE7970 *)effect)->data, &data, sizeof(data));
     }
@@ -62,7 +62,7 @@ void func_150BA55C(EffectE7970 *effect) {
                 velocity.z = (spawnPos.z - ownerPos.z) * speed;
                 growth.x = (func_150ADA68() * 18.64500046f) + -9.322500229f;
                 growth.z = (func_150ADA68() * 18.64500046f) + -9.322500229f;
-                func_1518A3C0(&spawnPos, &angles, ((func_150ADA68() * 0.08000000566f) + 0.1000000015f) * size, &velocity, &growth,
+                effect_spawnTumblingPiece(&spawnPos, &angles, ((func_150ADA68() * 0.08000000566f) + 0.1000000015f) * size, &velocity, &growth,
                               (func_150ADA68() * 0.324000001f) + -0.5630000234f, 0.9448540211f, 7, (func_150ADA20() % 41U) + 60, 0, 0,
                               effect->base.header.owner, effect->base.header.kind);
                 data->spawnAccum -= 1.0f;
@@ -72,6 +72,6 @@ void func_150BA55C(EffectE7970 *effect) {
 }
 
 void func_150BA8F0(EffectE7970 *effect, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+    effect_handleTimedEffectOwnerEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 

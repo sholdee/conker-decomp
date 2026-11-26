@@ -31,7 +31,7 @@ typedef struct ShadowVtx {
 } ShadowVtx; /* size 0x14 */
 
 /* game/Shadow/BlobShadow/blobshadow.c */
-extern Gfx gBlobShadowSetupDl[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx gBlobShadowSetupDl[]; /* render setup (object type table gObjectTypes) */
 Shadow *shadow_createBlob(s32 ownerType, void *owner, s32 texture, s32 createFlags, s32 flags);
 void shadow_updateBlob(Shadow *shadow);
 Gfx *shadow_drawBlob(Gfx *gfx, Shadow *shadow, s16 view);

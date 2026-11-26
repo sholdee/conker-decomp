@@ -18,12 +18,12 @@ RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize) {
     if (obj == NULL) {
         return NULL;
     }
-    rider = func_15167A68(0x30, 0, extraSize + 0x30, 1, 0xFF, 1);
+    rider = effect_newObject(0x30, 0, extraSize + 0x30, 1, 0xFF, 1);
     if (rider == NULL) {
         return NULL;
     }
     if (func_151ACB38(obj, &rider->unk18) == 0) {
-        func_1516979C(&rider->header);
+        effect_freeObject(&rider->header);
         return NULL;
     }
     rider->owner = obj;
@@ -59,7 +59,7 @@ s32 func_151ACB60(RopeRider *rider) {
 }
 
 void func_151ACB94(RopeRider *rider, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &rider->owner, &rider->ownerId, rider);
+    effect_handleOwnerActorEvent(arg1, arg2, &rider->owner, &rider->ownerId, rider);
 }
 
 /** Creates a rope from 0x24 bytes of spawn data: 20 nodes hanging from topY down to bottomY. */
@@ -86,7 +86,7 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     s32 texS2;
     s32 texS3;
 
-    rope = func_15167A68((level == 0x2C) ? 0x4E : 0x2F, 0, extraSize + 0x58, 1, 0xFF, 1);
+    rope = effect_newObject((level == 0x2C) ? 0x4E : 0x2F, 0, extraSize + 0x58, 1, 0xFF, 1);
     if (rope == NULL) {
         return NULL;
     }
@@ -586,7 +586,7 @@ Rope *func_151AE590(u8 id) {
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            rope = (Rope *)D_800DCE50[j][D_800A9270[i]];
+            rope = (Rope *)gObjectLists[j][D_800A9270[i]];
             while (rope != NULL) {
                 Rope *next = (Rope *)rope->header.next;
 

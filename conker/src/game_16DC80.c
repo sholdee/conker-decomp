@@ -39,19 +39,19 @@ static s32 (*D_80089F90[])() = { func_151028AC, sight_isExtensionOn, func_151418
 static void (*D_80089F9C[])() = {
     func_151411A4, func_151012D8, func_151411A4, func_151411A4, func_151411A4, func_151411A4, func_151411A4,
     func_151411A4, func_151411A4, func_151411A4, beam_destroyGlow, func_151411A4, func_151411A4, func_151411A4,
-    func_151411A4, func_151BE7F8, func_150F6484, func_151411A4,
+    func_151411A4, effect_destroyBurstGlow, func_150F6484, func_151411A4,
 };
 /* Free handlers, indexed by GlowShape.type. */
 static void (*D_80089FE4[])() = {
     func_151411C4, func_15101300, func_151411C4, func_151411C4, func_151411C4, func_151411C4, func_151411C4,
     func_151411C4, func_151411C4, func_151411C4, beam_freeGlow, func_151411C4, func_151411C4, func_151411C4,
-    func_151411C4, func_151BE824, func_150F64B0, func_151411C4,
+    func_151411C4, effect_freeBurstGlow, func_150F64B0, func_151411C4,
 };
 /* Message handlers, indexed by GlowShape.type. */
 typedef void (*GlowMsgFn)();
 static GlowMsgFn D_8008A02C[] = {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, beam_glowMessage, func_1518A360, func_150D7420,
-    func_150D74DC, func_150D758C, func_151BE788, func_151BE788, func_150FADC8,
+    func_150D74DC, func_150D758C, effect_burstGlowMessage, effect_burstGlowMessage, func_150FADC8,
 };
 static IdList2 D_8008A074 = { { 0x1C, 0x56 } }; /* effect-object kinds */
 
@@ -305,7 +305,7 @@ void func_151412BC(void) {
 
     for (p = 0; p < 2; p++) {
         for (i = 0; i < 4; i++) {
-            obj = (GlowObj *)D_800DCE50[p][D_800A5168[i]];
+            obj = (GlowObj *)gObjectLists[p][D_800A5168[i]];
             while (obj != NULL) {
                 if (obj->flags & 0x2000) {
                     obj->params.shape.zbufSample[3] = 0;
@@ -419,7 +419,7 @@ void func_151416E8(GlowObj *obj, u8 *msg, u8 msgType) {
             if (*msg == (*params).shape.type) {
                 switch (msgType) {
                     case 0x22:
-                        func_1516972C(&obj->header);
+                        effect_destroyObject(&obj->header);
                         break;
                     case 0x24:
                         params->shape.handler = -1;
@@ -434,14 +434,14 @@ void func_151416E8(GlowObj *obj, u8 *msg, u8 msgType) {
 }
 
 
-/* Sends func_15169260 the one-byte payload arg0, addressed with the two words of D_8008A074. */
+/* Sends effect_sendEventToTypes the one-byte payload arg0, addressed with the two words of D_8008A074. */
 void func_151417C4(u8 arg0, u8 arg1) {
     u8 payload[1];
     IdList2 data;
 
     data = D_8008A074;
     payload[0] = arg0;
-    func_15169260(data.ids, 2, (s32)payload, arg1);
+    effect_sendEventToTypes(data.ids, 2, (s32)payload, arg1);
 }
 
 s32 func_15141818(s32 arg0, s32 arg1) {

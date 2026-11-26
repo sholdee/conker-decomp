@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The bolt object type's render setup and teardown display lists (object type table D_8008B4A8). */
+/* The bolt object type's render setup and teardown display lists (object type table gObjectTypes). */
 Gfx gLightningRenderSetupDl[] = {
     gsDPPipeSync(),
     gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
@@ -22,7 +22,7 @@ Gfx gLightningRenderTeardownDl[] = {
 Bolt *beam_newLightning(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     Bolt *bolt;
 
-    bolt = func_15167A68(0x2D, arg3, def->numPoints * sizeof(BoltPoint) + extraSize + sizeof(Bolt) - sizeof(BoltPoint), 1, arg2, 1);
+    bolt = effect_newObject(0x2D, arg3, def->numPoints * sizeof(BoltPoint) + extraSize + sizeof(Bolt) - sizeof(BoltPoint), 1, arg2, 1);
     if (bolt == NULL) {
         return NULL;
     }
@@ -113,7 +113,7 @@ void beam_updateLightning(Bolt *bolt) {
     }
 
     if (done) {
-        func_1516972C(&bolt->header);
+        effect_destroyObject(&bolt->header);
     }
 }
 
@@ -288,12 +288,12 @@ void beam_destroyLightning(Bolt *bolt) {
         gLightningDestroyHooks[self->def.type](bolt);
     }
     beam_freeLightningVtx(bolt);
-    func_15169804(&bolt->header);
+    effect_defaultDestroy(&bolt->header);
 }
 
 static void (*gLightningFreeHooks[])(Bolt *) = { NULL, beam_freeSpark, NULL };
 
-/* Like beam_destroyLightning, through the gLightningFreeHooks hooks and func_15169824. */
+/* Like beam_destroyLightning, through the gLightningFreeHooks hooks and effect_defaultFree. */
 void beam_freeLightning(Bolt *bolt) {
     Bolt *self = bolt; // matching: the copy lets IDO read type from a0 before homing bolt
 
@@ -301,7 +301,7 @@ void beam_freeLightning(Bolt *bolt) {
         gLightningFreeHooks[self->def.type](bolt);
     }
     beam_freeLightningVtx(bolt);
-    func_15169824(&bolt->header);
+    effect_defaultFree(&bolt->header);
 }
 
 /*
@@ -474,7 +474,7 @@ void beam_boneLightningMessage(Bolt *bolt, s32 arg, u8 msgType) {
     if (msgType == 0) {
         actor = msg->ref.actor;
         if ((actor == link->owner) || (link->ownerId == msg->ref.uniqueId)) {
-            func_1516972C(&bolt->header);
+            effect_destroyObject(&bolt->header);
         }
     } else if (msgType == 0x2D) {
         if (link->owner == msg->swap.actorA) {

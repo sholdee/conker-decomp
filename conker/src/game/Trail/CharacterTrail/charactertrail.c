@@ -46,7 +46,7 @@ void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2) {
         end.y = 500.0f;
     }
     // matching: one local holds the actor and then its state (a separate actor local adds a stack slot)
-    state = func_15147A80(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
+    state = effect_newEffectObj(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
     if (state == NULL) {
         return;
     }
@@ -648,7 +648,7 @@ void trail_onCharacterTrailMessage(CharacterTrail *actor, ActorMsg *msg, u8 id) 
     if (id == 0 || id == 0x2E || id == 3) {
         obj = msg->ref.actor;
         if (obj == state->owner || msg->ref.uniqueId == state->ownerId) {
-            func_1516972C(&actor->head.header);
+            effect_destroyObject(&actor->head.header);
         }
     } else if (id == 0x2D) {
         if (state->owner == msg->swap.actorA) {
@@ -700,12 +700,12 @@ s32 trail_getCharacterTrailEnds(Vec3f *start, Vec3f *end, Actor *owner, ModelAtt
 
 void trail_destroyCharacterTrail(CharacterTrail *actor) {
     trail_stopCharacterTrailFx(actor);
-    func_151478F4(actor);
+    effect_defaultDestroyEffectObj(actor);
 }
 
 void trail_freeCharacterTrail(CharacterTrail *actor) {
     trail_stopCharacterTrailFx(actor);
-    func_15147928(actor);
+    effect_defaultFreeEffectObj(actor);
 }
 
 /* Stops the trail's three sounds and destroys its particle emitters. */
@@ -719,10 +719,10 @@ void trail_stopCharacterTrailFx(CharacterTrail *actor) {
     sound_stopByCallback((SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5B4);
     sound_stopByCallback((SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5BC);
     if (state->effects[0] != NULL) {
-        func_1516972C(&state->effects[0]->head.header);
+        effect_destroyObject(&state->effects[0]->head.header);
     }
     if (state->effects[1] != NULL) {
-        func_1516972C(&state->effects[1]->head.header);
+        effect_destroyObject(&state->effects[1]->head.header);
     }
 }
 

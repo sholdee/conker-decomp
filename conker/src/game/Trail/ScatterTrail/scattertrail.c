@@ -13,29 +13,29 @@
 void func_150B3DD0(void) {
     u8 msg[4];
 
-    func_15147D64(0, 5);
+    effect_sendEventToEffectObjs(0, 5);
     msg[0] = 0;
-    func_151494E0((s32)msg, 0x18);
+    effect_sendEventToTimedEffects((s32)msg, 0x18);
     msg[0] = 2;
-    func_151494E0((s32)msg, 0x18);
+    effect_sendEventToTimedEffects((s32)msg, 0x18);
     msg[0] = 4;
-    func_151494E0((s32)msg, 0x18);
+    effect_sendEventToTimedEffects((s32)msg, 0x18);
     msg[0] = 1;
-    func_151494E0((s32)msg, 0x18);
+    effect_sendEventToTimedEffects((s32)msg, 0x18);
     msg[0] = 3;
-    func_151494E0((s32)msg, 0x18);
+    effect_sendEventToTimedEffects((s32)msg, 0x18);
     msg[0] = 5;
-    func_151494E0((s32)msg, 0x18);
+    effect_sendEventToTimedEffects((s32)msg, 0x18);
 }
 
 void trail_destroyScatterTrail(ScatterTrail *trail) {
     func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
-    func_151478F4(trail);
+    effect_defaultDestroyEffectObj(trail);
 }
 
 void trail_freeScatterTrail(ScatterTrail *trail) {
     func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
-    func_15147928(trail);
+    effect_defaultFreeEffectObj(trail);
 }
 
 /* Spawns a trail at pos with the settings in params. Returns the new trail, or NULL. */
@@ -57,7 +57,7 @@ ScatterTrail *trail_spawnScatterTrail(TrailStateParams *params, Vec3f *pos, s16 
     spawn.pos = *pos;
     spawn.kind = 9;
 
-    trail = func_15147A80(&spawn, sizeof(ScatterTrailState), sizeof(ScatterTrailPoint), 7, 7, 7, 0, 0, 0, 0xFF, 1);
+    trail = effect_newEffectObj(&spawn, sizeof(ScatterTrailState), sizeof(ScatterTrailPoint), 7, 7, 7, 0, 0, 0, 0xFF, 1);
     if (trail != NULL) {
         sound_addDynamicSound(0x221, pos->x, pos->y, pos->z, 25000, 4000, 600, func_1000EF40, 0, 0, 8,
                       func_150ADA20() & 0x40);

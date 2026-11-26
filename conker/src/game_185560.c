@@ -3,24 +3,24 @@
 #include "variables.h"
 
 /* The effect actor type's render setup and teardown display lists (object type table). */
-Gfx D_8008ADD0[] = {
+Gfx gEffectActorRenderSetupDl[] = {
     gsDPPipeSync(),
     gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
-Gfx D_8008ADF0[] = {
+Gfx gEffectActorRenderTeardownDl[] = {
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
     gsSPEndDisplayList(),
 };
 
 /* Allocates an effect actor of extraSize type-specific bytes from a 0x44-byte template. */
-EffectActor *func_151580B0(EffectActorTemplate *template, s32 attachment, s32 arg2, u8 large, s32 extraSize, u8 arg5,
+EffectActor *effect_newEffectActor(EffectActorTemplate *template, s32 attachment, s32 arg2, u8 large, s32 extraSize, u8 arg5,
                            s32 arg6) {
     EffectActor *actor;
     s32 i;
 
-    actor = func_15167A68(large ? 0x55 : 0x37, arg6, extraSize + 0xF8, 1, arg5, 1);
+    actor = effect_newObject(large ? 0x55 : 0x37, arg6, extraSize + 0xF8, 1, arg5, 1);
     if (actor == NULL) {
         return NULL;
     }
@@ -42,15 +42,15 @@ EffectActor *func_151580B0(EffectActorTemplate *template, s32 attachment, s32 ar
     return actor;
 }
 
-EffectActor *func_151581D8(EffectActorTemplate *template, u8 large, s32 extraSize, u8 arg3, s32 arg4) {
-    return func_151580B0(template, 0, 0, large, extraSize, arg3, arg4);
+EffectActor *effect_newUnattachedEffectActor(EffectActorTemplate *template, u8 large, s32 extraSize, u8 arg3, s32 arg4) {
+    return effect_newEffectActor(template, 0, 0, large, extraSize, arg3, arg4);
 }
 
 /* Update callbacks (EffectActorTemplate.updateCallback): each returns 0 when the actor is done. */
-static s32 (*D_8008AE00[])(EffectActor *) = { func_15158684, func_1518A5F4, func_15158AFC };
+static s32 (*gEffectActorUpdateFuncs[])(EffectActor *) = { effect_moveEffectActor, effect_updateTumblingPiece, effect_fadeEffectActor };
 
 /* Per-frame update: counts down the lifetime, runs the update callback, frees the actor when done. */
-void func_15158224(EffectActor *actor) {
+void effect_updateEffectActor(EffectActor *actor) {
     s32 callback;
     u8 expired;
 
@@ -64,13 +64,13 @@ void func_15158224(EffectActor *actor) {
     if (expired == 0) {
         callback = actor->tmpl.updateCallback;
         if (callback != -1) {
-            if (D_8008AE00[callback](actor) == 0) {
+            if (gEffectActorUpdateFuncs[callback](actor) == 0) {
                 expired = 1;
             }
         }
     }
     if (expired) {
-        func_1516972C(&actor->header);
+        effect_destroyObject(&actor->header);
     }
 }
 
@@ -80,11 +80,11 @@ typedef struct {
 } RenderPreset;
 
 /* Matrix callbacks: build the actor's matrix for this frame. */
-static s32 (*D_8008AE0C[])(Mtx *, EffectActor *) = { func_1515858C, func_1518A914, func_15158920 };
+static s32 (*gEffectActorMatrixFuncs[])(Mtx *, EffectActor *) = { effect_buildEffectActorRotScaleMtx, effect_buildTumblingPieceMtx, effect_buildEffectActorScaleMtx };
 extern RenderPreset D_800A4AC8[];
 
 /* Draws an effect actor: sets its render state and colors, then its matrix and display list. */
-Gfx *func_151582C8(Gfx *gfx, EffectActor *actor, s16 arg2) {
+Gfx *effect_drawEffectActor(Gfx *gfx, EffectActor *actor, s16 arg2) {
     s32 pad; // matching: IDO's frame has an unused slot here
     s16 primR, primG, primB, primA;
     s16 envR, envG, envB, envA;
@@ -92,7 +92,7 @@ Gfx *func_151582C8(Gfx *gfx, EffectActor *actor, s16 arg2) {
 
     update = 1;
     if (actor->tmpl.drawCallback != -1) {
-        if (D_8008AE0C[actor->tmpl.drawCallback](&actor->mtx[D_800BE9C0], actor) == 0) {
+        if (gEffectActorMatrixFuncs[actor->tmpl.drawCallback](&actor->mtx[D_800BE9C0], actor) == 0) {
             return gfx;
         }
     }
@@ -111,12 +111,12 @@ Gfx *func_151582C8(Gfx *gfx, EffectActor *actor, s16 arg2) {
                             &actor->tmpl.position, (actor->tmpl.flags & 4) ? 1 : 0, 0);
     }
     gSPMatrix(gfx++, &actor->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD);
-    gSPDisplayList(gfx++, D_8008AFB8[actor->tmpl.displayList]);
+    gSPDisplayList(gfx++, gEffectActorDisplayLists[actor->tmpl.displayList]);
     return gfx;
 }
 
 /* Draw callback: rotates by data.motion.rot, scales uniformly and translates to the actor's position. */
-s32 func_1515858C(Mtx *mtx, EffectActor *actor) {
+s32 effect_buildEffectActorRotScaleMtx(Mtx *mtx, EffectActor *actor) {
     TumbleMotion *motion = &actor->data.motion;
     MtxF mf;
 
@@ -138,7 +138,7 @@ s32 func_1515858C(Mtx *mtx, EffectActor *actor) {
 }
 
 /* Update callback: damps horizontal velocity, applies gravity and integrates position and angle. */
-s32 func_15158684(EffectActor *actor) {
+s32 effect_moveEffectActor(EffectActor *actor) {
     TumbleMotion *motion;
     Vec3f prevVelocity;
     s32 i;
@@ -174,7 +174,7 @@ typedef struct {
 } MtxFBox;
 
 /* Draw callback: an identity matrix scaled by data.size / 255 and translated to the actor's position. */
-s32 func_15158920(Mtx *mtx, EffectActor *actor) {
+s32 effect_buildEffectActorScaleMtx(Mtx *mtx, EffectActor *actor) {
     f32 scale;
     s32 pad; // matching: IDO's frame has an unused slot here
     MtxFBox mf = { {
@@ -201,8 +201,8 @@ s32 func_15158920(Mtx *mtx, EffectActor *actor) {
     return 1;
 }
 
-/* Releases the attachment's light buffers allocated by func_151580B0. */
-void func_15158A20(EffectActor *actor) {
+/* Releases the attachment's light buffers allocated by effect_newEffectActor. */
+void effect_freeEffectActorLights(EffectActor *actor) {
     s32 i;
 
     void *handle; // matching: copied after each NULL test so IDO keeps the load in v0
@@ -219,18 +219,18 @@ void func_15158A20(EffectActor *actor) {
     }
 }
 
-void func_15158AA4(EffectActor *actor) {
-    func_15158A20(actor);
-    func_15169804(&actor->header);
+void effect_destroyEffectActor(EffectActor *actor) {
+    effect_freeEffectActorLights(actor);
+    effect_defaultDestroy(&actor->header);
 }
 
-void func_15158AD0(EffectActor *actor) {
-    func_15158A20(actor);
-    func_15169824(&actor->header);
+void effect_freeEffectActor(EffectActor *actor) {
+    effect_freeEffectActorLights(actor);
+    effect_defaultFree(&actor->header);
 }
 
 /* Update callback: once the lifetime drops below data.fade.duration, fades alpha out with it. */
-s32 func_15158AFC(EffectActor *actor) {
+s32 effect_fadeEffectActor(EffectActor *actor) {
     s32 alpha;
 
     if (actor->tmpl.lifetime < actor->data.fade.duration) {
@@ -243,7 +243,7 @@ s32 func_15158AFC(EffectActor *actor) {
 }
 
 /* Message handler: follows owner swaps (0x2D) and drops the owner when it goes away (0). */
-void func_15158B3C(EffectActor *actor, ActorMsg *msg, u8 msgId) {
+void effect_effectActorMessage(EffectActor *actor, ActorMsg *msg, u8 msgId) {
     Actor *first;
 
     if (msgId == 0x2D) {

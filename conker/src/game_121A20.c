@@ -20,7 +20,7 @@ VariantList D_80088B20[2] = {
 };
 
 /* Conditions of the camera emitters (CameraEmitterData.condition). */
-static s32 (*D_80088B38[])() = { func_150F51BC };
+static s32 (*D_80088B38[])() = { effect_consumeZoneFlag };
 
 /* Flags of SpiralState. */
 #define SPIRAL_FADE_NEAR 1 /* fade out as the camera gets close */
@@ -168,7 +168,7 @@ s32 func_150F4A38(SpiralParticle *obj) {
 }
 
 /* Event handler: event 0x4E clears unk71 and sets SPIRAL_FADE_NEAR | SPIRAL_MUTED, 0x4F calls
- * func_1516972C. */
+ * effect_destroyObject. */
 void func_150F4CFC(SpiralParticle *obj, s32 arg1, u8 event) {
     SpiralState *spiral;
     spiral = &obj->spiral;
@@ -176,7 +176,7 @@ void func_150F4CFC(SpiralParticle *obj, s32 arg1, u8 event) {
         obj->unk71 = 0;
         spiral->flags |= SPIRAL_FADE_NEAR | SPIRAL_MUTED;
     } else if (event == 0x4F) {
-        func_1516972C(&obj->header);
+        effect_destroyObject(&obj->header);
     }
 }
 
@@ -190,7 +190,7 @@ void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind
     data.condition = condition;
     data.variants = variants;
 
-    emitter = func_15149130(300, -1, 0x56, -1, 0, 0, sizeof(data), owner, kind);
+    emitter = effect_newTimedEffect(300, -1, 0x56, -1, 0, 0, sizeof(data), owner, kind);
     if (emitter != NULL) {
         memcpy(&emitter->data, &data, sizeof(data));
     }

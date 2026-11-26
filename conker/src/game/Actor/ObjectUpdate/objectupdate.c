@@ -266,7 +266,7 @@ void func_1502C1A4(void) {
             } else {
                 effect = obj->unk2D4;
                 if (effect != NULL) {
-                    func_1516972C(effect);
+                    effect_destroyObject(effect);
                     obj->unk2D4 = NULL;
                 }
             }
@@ -319,7 +319,7 @@ Gfx *actor_drawSprite(Gfx *gdl, s32 index) {
     gDPPipeSync(gdl++);
     if (gdl != NULL) { // matching: the empty test changes the register choice of the spilled temps
     }
-    gdl = sprite_loadDescFrame(gdl, D_8008CA4C[tex], scroll, &sprite, 0, 0, 0, 2, 3);
+    gdl = sprite_loadDescFrame(gdl, gEffectAnimTextures[tex], scroll, &sprite, 0, 0, 0, 2, 3);
     sprite.flip = 0;
     sprite.alpha = alpha;
     sprite.scaleX = w;
@@ -342,7 +342,7 @@ void actor_scrollSpriteTexture(s32 index) {
         scroll = movement_obj[index].texScroll;
         speed = movement_obj[index].texScrollSpeed;
         if (movement_obj[index].unk7 != 0) {
-            period = D_8008CA4C[actor_getSpriteTexture(index)]->frameCount << 8;
+            period = gEffectAnimTextures[actor_getSpriteTexture(index)]->frameCount << 8;
             scroll += speed;
             if (scroll >= period) {
                 scroll -= period;

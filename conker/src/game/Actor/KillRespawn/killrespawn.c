@@ -11,7 +11,7 @@ u8 D_800D18A9;
 #include "variables.h"
 
 /* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
-void func_15169040(s32 event, u8 eventType);
+void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Puts obj into state 2 with the given timer. */
 void func_1507C8E0(Actor *obj, s32 timer) {
@@ -158,7 +158,7 @@ void actor_kill(Actor *obj, s32 cause) {
     }
     msg.actor = obj;
     msg.uniqueId = obj->unique_id;
-    func_15169040((s32)&msg, 3);
+    effect_broadcastEvent((s32)&msg, 3);
     D_800D18A9 = 0;
 lbl2: // matching: unused label splits the basic block; as1 then hoists the reload of cause above this store
     sound = -1;

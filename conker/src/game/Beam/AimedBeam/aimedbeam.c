@@ -186,7 +186,7 @@ AimedBeam *beam_spawnAimed(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
         }
         emitterLink.beam = beam;
         emitterLink.accum = 0.0f;
-        emitter = func_15149130(300, -1, 0x22, -1, 0, 0x20, sizeof(EmitterLink), arg2, arg3);
+        emitter = effect_newTimedEffect(300, -1, 0x22, -1, 0, 0x20, sizeof(EmitterLink), arg2, arg3);
         link->emitter = emitter;
         if (emitter != NULL) {
             memcpy(&emitter->link, &emitterLink, sizeof(emitterLink));
@@ -271,7 +271,7 @@ s32 func_150EF784(Actor *actor, s32 arg1, s32 arg2) {
     return FALSE;
 }
 
-/* Releases a beam's sparks, emitter, glow and flash (func_1516972C), then the beam itself. */
+/* Releases a beam's sparks, emitter, glow and flash (effect_destroyObject), then the beam itself. */
 void beam_destroyAimed(AimedBeam *beam) {
     s32 i;
     void *part;
@@ -280,25 +280,25 @@ void beam_destroyAimed(AimedBeam *beam) {
     for (i = 0; i < 2; i++) {
         part = link->sparks[i];
         if (part != NULL) {
-            func_1516972C(part);
+            effect_destroyObject(part);
         }
     }
     part = link->emitter;
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = link->glow;
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = link->flash;
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     func_1513CA6C(&beam->head);
 }
 
-/* Like beam_destroyAimed, through the func_1516979C / func_1513CAA0 variants. */
+/* Like beam_destroyAimed, through the effect_freeObject / func_1513CAA0 variants. */
 void beam_freeAimed(AimedBeam *beam) {
     s32 i;
     void *part;
@@ -307,20 +307,20 @@ void beam_freeAimed(AimedBeam *beam) {
     for (i = 0; i < 2; i++) {
         part = link->sparks[i];
         if (part != NULL) {
-            func_1516979C(part);
+            effect_freeObject(part);
         }
     }
     part = link->emitter;
     if (part != NULL) {
-        func_1516979C(part);
+        effect_freeObject(part);
     }
     part = link->glow;
     if (part != NULL) {
-        func_1516979C(part);
+        effect_freeObject(part);
     }
     part = link->flash;
     if (part != NULL) {
-        func_1516979C(part);
+        effect_freeObject(part);
     }
     func_1513CAA0(&beam->head);
 }
@@ -341,7 +341,7 @@ void beam_aimedMessage(AimedBeam *beam, BeamMsg *msg, u8 type) {
         actorId = link->actorId;
         msgActorId = msg->ref.uniqueId;
         if (actor == msgActor || actorId == msgActorId) {
-            func_1516972C(&beam->head.header);
+            effect_destroyObject(&beam->head.header);
         }
     } else if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -365,7 +365,7 @@ void beam_aimedMessage(AimedBeam *beam, BeamMsg *msg, u8 type) {
     } else if (type == 0x43) {
         if (link->actor == msg->ref.actor || link->actorId == msg->ref.uniqueId) {
             if (link->slot == msg->ref.slot) {
-                func_1516972C(&beam->head.header);
+                effect_destroyObject(&beam->head.header);
             }
         }
     }
@@ -604,12 +604,12 @@ void beam_unlinkSpark(Bolt *spark) {
 
 void beam_destroyEmitter(BeamEmitter *emitter) {
     beam_unlinkEmitter(emitter);
-    func_1514933C(&emitter->base);
+    effect_defaultDestroyTimedEffect(&emitter->base);
 }
 
 void beam_freeEmitter(BeamEmitter *emitter) {
     beam_unlinkEmitter(emitter);
-    func_15149368(&emitter->base);
+    effect_defaultFreeTimedEffect(&emitter->base);
 }
 
 /* Clears the beam's reference to this emitter. */
@@ -654,7 +654,7 @@ void beam_unlinkFlash(LightEffect *flash) {
 }
 
 /* Fires a projectile (weapon_spawnProjectile) from slot `slot` of `actor` once actor->taskint[2]
- * reaches 90, with a spark burst and a func_15102B38 effect at the muzzle. */
+ * reaches 90, with a spark burst and a effect_spawnBoneBeamParticle effect at the muzzle. */
 Game1EF500Trail *beam_fireSlotProjectile(actor, slot, arg2, arg3)
     Actor *actor;
     u8 slot;
@@ -718,7 +718,7 @@ Game1EF500Trail *beam_fireSlotProjectile(actor, slot, arg2, arg3)
     randA = func_150ADA20();
     randB = func_150ADA20();
     rand0 = func_150ADA68() * 2000.0f + 2000.0f;
-    func_15102B38(actor, D_800A1670[slot], &D_800A1640[slot], &D_800A1658[slot], &params,
+    effect_spawnBoneBeamParticle(actor, D_800A1670[slot], &D_800A1640[slot], &D_800A1658[slot], &params,
                   (randA % 3U) + 8, (randB % 1U) + 0xFF, rand0, &muzzle, 0xFF, 0, -1, arg2, arg3);
     return ret;
 }
@@ -733,7 +733,7 @@ void beam_sparkMessage(Bolt *spark, s32 data, u8 type) {
     if (type == 0) {
         msgActor = msg->ref.actor;
         if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
-            func_1516972C(&spark->header);
+            effect_destroyObject(&spark->header);
         }
     } else if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -754,7 +754,7 @@ void beam_glowMessage(Glow *glow, ActorMsg *msg, u8 type) {
     if (type == 0) {
         msgActor = msg->ref.actor;
         if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
-            func_1516972C(&glow->head.header);
+            effect_destroyObject(&glow->head.header);
         }
     } else if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -947,7 +947,7 @@ void beam_followParticleMessage(AttachedSpriteParticle *particle, s32 data, u8 t
     } else if (type == 0 || type == 0x43) {
         msgActor = msg->ref.actor;
         if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
-            func_1516972C(&particle->head.header);
+            effect_destroyObject(&particle->head.header);
         }
     }
 }
@@ -964,7 +964,7 @@ void beam_attachTrailEmitter(Actor *actor) {
     link.lastPos.y = actor->ypos;
     link.lastPos.z = actor->zpos;
 
-    emitter = func_15149130(300, -1, 0x4C, -1, 0, 0x3A, sizeof(ActorTrailLink),
+    emitter = effect_newTimedEffect(300, -1, 0x4C, -1, 0, 0x3A, sizeof(ActorTrailLink),
                                             0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->link, &link, sizeof(link));
@@ -1065,7 +1065,7 @@ void beam_updateTrailEmitter(ActorTrailEmitter *emitter) {
 }
 
 /* Message handler of an actor's trail emitter: released by message 0x43 for its actor,
- * other messages go to the generic func_15149514. */
+ * other messages go to the generic effect_handleTimedEffectOwnerEvent. */
 void beam_trailEmitterMessage(ActorTrailEmitter *emitter, s32 data, u8 type) {
     ActorTrailEmitter **self = &emitter; // matching: address-taken args stay in their stack slots
     ActorMsg **msg = (ActorMsg **)&data;
@@ -1076,11 +1076,11 @@ void beam_trailEmitterMessage(ActorTrailEmitter *emitter, s32 data, u8 type) {
         msgActor = ((ActorMsg *)data)->ref.actor;
         link = &(*self)->link;
         if ((msgActor == link->actor) || (link->actorId == (*msg)->ref.uniqueId)) {
-            func_1516972C(&(*self)->base.header);
+            effect_destroyObject(&(*self)->base.header);
         }
     } else {
         link = &(*self)->link;
-        func_15149514(data, type, &link->actor, &link->actorId, *self);
+        effect_handleTimedEffectOwnerEvent(data, type, &link->actor, &link->actorId, *self);
     }
 }
 
@@ -1092,12 +1092,12 @@ void beam_actorBoundMessage(ActorBound *self, ActorMsg *msg, u8 type) {
     if (type == 0x43) {
         msgActor = msg->ref.actor;
         if ((ref->actor == msgActor) || (msg->ref.uniqueId == ref->uniqueId)) {
-            func_1516972C(&self->header);
+            effect_destroyObject(&self->header);
         }
     }
 }
 
-/* Spark burst and func_15102B38 effect at slot `slot` of `actor`, muzzle variant
+/* Spark burst and effect_spawnBoneBeamParticle effect at slot `slot` of `actor`, muzzle variant
  * `variant` (0-3); actors with id 0x23 use the second table set. */
 void beam_spawnMuzzleBurst(actor, slot, variant, arg3, arg4)
     Actor *actor;
@@ -1157,7 +1157,7 @@ void beam_spawnMuzzleBurst(actor, slot, variant, arg3, arg4)
         randA = func_150ADA20();
         randB = func_150ADA20();
         rand0 = func_150ADA68() * 1877.0f + 2414.0f;
-        func_15102B38(actor, D_800A180C[kind][slot], &D_800A168C[kind][variant][slot],
+        effect_spawnBoneBeamParticle(actor, D_800A180C[kind][slot], &D_800A168C[kind][variant][slot],
                       &D_800A174C[kind][variant][slot], &params, (randA % 6U) + 8, (randB % 1U) + 0xFF,
                       rand0, &muzzle, 0xFF, 0, -1, arg3, arg4);
     }

@@ -60,7 +60,7 @@ void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32
         r = g = b = 0xFF;
         break;
     }
-    template.anim = D_8008CA4C[animIndex];
+    template.anim = gEffectAnimTextures[animIndex];
     template.unk4 = (minSize << 16) | (floorY & 0xFFFF);
     template.unk8 = kind;
     template.frame = 0;
@@ -84,11 +84,11 @@ void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32
     template.primR = r;
     template.primG = g;
     template.primB = b;
-    func_15167D84(&template, 0, 0, -1, owner, list);
+    effect_spawnBillboard(&template, 0, 0, -1, owner, list);
 }
 
 /*
- * Particle callback 0 (D_8008C9C8[0]) for func_151B9690's particles. Kind 1 pulses in size while the base
+ * Particle callback 0 (gParticleCallbacks[0]) for func_151B9690's particles. Kind 1 pulses in size while the base
  * size decays; other kinds shrink towards their minimum size. On reaching the floor the particle dies
  * (kind 0 may leave a splash and play a sound); while falling just above it, it fades out.
  */
@@ -154,7 +154,7 @@ void func_151B9BF0(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 velY, s16 v
                    s32 list) {
     FallingEmitter *emitter;
 
-    emitter = func_15167A68(7, list, sizeof(FallingEmitter), 0, owner, 1);
+    emitter = effect_newObject(7, list, sizeof(FallingEmitter), 0, owner, 1);
     if (emitter != NULL) {
         emitter->animIndex = animIndex;
         emitter->kind = kind;
@@ -213,7 +213,7 @@ void func_151B9CB0(FallingEmitter *emitter) {
     timer = emitter->timer;
     timer -= D_800BE9E4;
     if (timer < 0) {
-        func_1516972C(&emitter->header);
+        effect_destroyObject(&emitter->header);
     } else {
         emitter->timer = timer;
     }

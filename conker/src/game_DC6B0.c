@@ -261,19 +261,19 @@ typedef struct Node150AFDB0 {
     /* 0x3F */ u8 unk3F;
 } Node150AFDB0;
 
-/* Releases (func_1516972C) every node of object list 0 of type 17 whose unk3F is dc_glbl_CharNum. Each
- * node's successor is saved on the D_800DD198 iteration stack first, so releasing it is safe. */
+/* Releases (effect_destroyObject) every node of object list 0 of type 17 whose unk3F is dc_glbl_CharNum. Each
+ * node's successor is saved on the gObjectWalkNext iteration stack first, so releasing it is safe. */
 void func_150AFDB0(void) {
     Node150AFDB0 *node;
 
-    D_800DD190++;
-    for (node = (Node150AFDB0 *)D_800DCE50[0][17]; node != NULL; node = D_800DD198[D_800DD190]) {
-        D_800DD198[D_800DD190] = node->header.next;
+    gObjectWalkDepth++;
+    for (node = (Node150AFDB0 *)gObjectLists[0][17]; node != NULL; node = gObjectWalkNext[gObjectWalkDepth]) {
+        gObjectWalkNext[gObjectWalkDepth] = node->header.next;
         if (node->unk3F == dc_glbl_CharNum) {
-            func_1516972C(&node->header);
+            effect_destroyObject(&node->header);
         }
     }
-    D_800DD190--;
+    gObjectWalkDepth--;
 }
 
 /* Fires a tracer along the -z axis of bone 3 (bone 2 if `altBone`) of gCurrentActor, from 20 to
@@ -313,10 +313,10 @@ void func_150AFE64(s32 altBone) {
     }
 }
 
-/* Runs func_150AF200 on objects 0xE2/0xE1 (after func_15179008(0)) when level is 6, else on 0xDF/0xDE. */
+/* Runs func_150AF200 on objects 0xE2/0xE1 (after effect_updateRain(0)) when level is 6, else on 0xDF/0xDE. */
 void func_150B003C(s32 arg0) {
     if (level == 6) {
-        func_15179008(0);
+        effect_updateRain(0);
         func_150AF200(0xE2, 0xE1);
         return;
     }
@@ -391,7 +391,7 @@ void func_150B02C0(GameDC6B0Projectile *projectile) {
     EffectObj **trail = &projectile->trail;
 
     if (*trail != NULL) {
-        func_1516972C(*trail);
+        effect_destroyObject(*trail);
     }
 }
 

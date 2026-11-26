@@ -21,7 +21,7 @@ s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *ar
         for (i = 0; i < *numDLists; i++) {
             (*dlists)[i] = (Gfx *)((u8 *)(*dlists)[i] + (s32)header);
             texture_resolveDl((*dlists)[i], 0, 1, 0x3E, &gAttachModelTexIds[model]);
-            func_15168E54((*dlists)[i], (s32)header);
+            effect_relocateDisplayList((*dlists)[i], (s32)header);
         }
         gAttachModelHeaders[model] = header;
     } else {
@@ -852,7 +852,7 @@ void attach_applyOwnerEffects(ModelAttachment *att, Actor *owner) {
 
     switch (model) {
     case 0x37:
-        func_151001B4(owner);
+        effect_spawnOwnerEffect(owner);
         break;
     case 0x5A:
         unk = owner->mv;
@@ -874,7 +874,7 @@ void attach_applyOwnerEffects(ModelAttachment *att, Actor *owner) {
         func_150D5440(owner, 0xFF, 1);
         break;
     case 0x3D:
-        func_151BD828(owner, 0xFF, 1);
+        effect_spawnBoneBurst(owner, 0xFF, 1);
         break;
     case 0x1D:
         trail_attachToBone(owner, 0, 2, 0xFF, 1);
@@ -925,7 +925,7 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
         case 0x4C:
             sound_stopByCallback(attach_soundCallback, att, (s32)owner);
             if (att->model == 0x37) {
-                func_15100180(owner);
+                effect_sendOwnerGone(owner);
             }
             break;
         case 0x49:
@@ -936,11 +936,11 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
         case 0x5D:
             ref5D.actor = owner;
             ref5D.uniqueId = owner->unique_id;
-            func_15147D64((s32)(ref = &ref5D), 0x2E);
-            func_151494E0((s32)ref, 0x2F);
+            effect_sendEventToEffectObjs((s32)(ref = &ref5D), 0x2E);
+            effect_sendEventToTimedEffects((s32)ref, 0x2F);
             break;
         case 0x3D:
-            func_151BD7F4(owner);
+            effect_sendBurstOwnerGone(owner);
             break;
         case 0x1A:
         case 0x1B:

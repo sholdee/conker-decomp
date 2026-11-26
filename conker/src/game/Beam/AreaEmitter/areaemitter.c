@@ -20,7 +20,7 @@ Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 ar
     init.ground.source = 0;
     init.ground.surface = 0;
 
-    emitter = func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (extraSize + sizeof(EmitterState)), arg3, arg4);
+    emitter = effect_newTimedEffect((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (extraSize + sizeof(EmitterState)), arg3, arg4);
     if (emitter != NULL) {
         state = &emitter->state;
         memcpy(state, &init, sizeof(EmitterState));
@@ -446,7 +446,7 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
 }
 
 /* The spawn functions; `data` is passed through from beam_spawnAtGroundPoints (func_151DBBD4 reads a u8 kind there). */
-static void (*gGroundSpawnFuncs[])(Vec3f *, CollisionHit *, void *, u8, s32) = { func_151DBBD4, func_150DF4B8 };
+static void (*gGroundSpawnFuncs[])(Vec3f *, CollisionHit *, void *, u8, s32) = { func_151DBBD4, effect_spawnScatteredParticles };
 
 /*
  * Calls spawn function gGroundSpawnFuncs[spawnFunc] at `count` random points within radius of center

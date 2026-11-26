@@ -50,7 +50,7 @@ void attach_spawnBonePointEffects(Actor *actor, s32 point, s32 arg2) {
 
     if (actor->ob_matrix_ptr != NULL) {
         attach_getBonePoint(&pos, actor, point);
-        func_151875E0(pos.x, pos.y, pos.z, 30, 15, 7, 0.1000000015f, 0.02999999933f);
-        func_15165F80(-1, pos.x, actor->floorY + 4.0f, pos.z, 4, 50, 0, 255, 0);
+        effect_spawnFadeBurst(pos.x, pos.y, pos.z, 30, 15, 7, 0.1000000015f, 0.02999999933f);
+        effect_spawnQuadEffect(-1, pos.x, actor->floorY + 4.0f, pos.z, 4, 50, 0, 255, 0);
     }
 }

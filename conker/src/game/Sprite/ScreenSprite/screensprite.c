@@ -40,10 +40,10 @@ Gfx gScreenSpriteTeardownDl[] = {
 s32 (*gScreenSpriteUpdates[15])() = {
     NULL,          func_15134CEC, func_1515B994, func_15135BF8, func_151CB510,
     sight_updateSidePanel, func_150AFBF4, func_151CBBE0, func_151CBC60, sight_updateCrossBar,
-    func_150BE1C4, sight_updateScopeStrip, func_150CF800, func_150CFC60, func_150FB2E0,
+    func_150BE1C4, sight_updateScopeStrip, effect_updateHopSprite, effect_updateBounceSprite, effect_updateFadeInSprite,
 };
 void (*gScreenSpriteMsgHandlers[11])(ScreenSprite *, s32, u8) = {
-    NULL, func_1515B62C, NULL, NULL, NULL, NULL, NULL, sight_handleSpriteMessage, func_150CFBEC, NULL, NULL,
+    NULL, func_1515B62C, NULL, NULL, NULL, NULL, NULL, sight_handleSpriteMessage, effect_hopSpriteMessage, NULL, NULL,
 };
 
 /* The two sprite lists sprite_overlapsScreenSprite searches. */
@@ -80,7 +80,7 @@ void sprite_updateScreenSprite(ScreenSprite *sprite) {
         }
     }
     if (finished) {
-        func_1516972C(&sprite->header);
+        effect_destroyObject(&sprite->header);
     }
 }
 
@@ -208,7 +208,7 @@ void *sprite_newScreenSprite(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 k
             return NULL;
         }
     }
-    sprite = func_15167A68((info->flags & 0x20) ? 0x57 : 0x5D, arg6, arg4 + 0x70, 1, arg5, 1);
+    sprite = effect_newObject((info->flags & 0x20) ? 0x57 : 0x5D, arg6, arg4 + 0x70, 1, arg5, 1);
     if (sprite == NULL) {
         return NULL;
     }
@@ -245,7 +245,7 @@ s32 sprite_overlapsScreenSprite(f32 *center, f32 *halfSize, s32 *kinds, s32 kind
         lists = gScreenSpriteLists;
         i &= 0; // matching: `i = 0` here (or a for loop) changes the loop's branch shape
         do {
-            sprite = (ScreenSprite *)D_800DCE50[table][lists.id[i]];
+            sprite = (ScreenSprite *)gObjectLists[table][lists.id[i]];
             while (sprite != NULL) {
                 next = (ScreenSprite *)sprite->header.next;
                 k = kindCount;
@@ -280,5 +280,5 @@ void func_1515572C(s32 arg0, u8 arg1) {
     IdList2 pair;
 
     pair = D_800A6038;
-    func_15169260(pair.ids, 2, arg0, arg1);
+    effect_sendEventToTypes(pair.ids, 2, arg0, arg1);
 }

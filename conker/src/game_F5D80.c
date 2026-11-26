@@ -14,7 +14,7 @@ struct RadialEffect {
     f32 radius;          /* 0x44 */
     f32 step;            /* 0x48: angle between segments */
     s16 duration;        /* 0x4C: initial def.remaining */
-    f32 pending;         /* 0x50: emissions owed, see func_150C8A68 */
+    f32 pending;         /* 0x50: emissions owed, see effect_updateRingEffect */
     Vtx *vtx[2];         /* 0x54: double-buffered by D_800BE9C0 */
     u8 pad5C[0x304];
     RadialDir *dirs;     /* 0x360 */
@@ -33,37 +33,37 @@ typedef struct {
 } RingProfile;
 
 /* This file's .rodata front-end data: the ring's cross-section profile. */
-static const RingPoint D_800A0500[5] = {
+static const RingPoint gRingProfilePoints[5] = {
     { 0.0f, 0.0f }, { -1.0f, 3.0f }, { -3.0f, 5.0f }, { -8.0f, 5.0f }, { -18.0f, 0.0f },
 };
 
 /* This file's .data. */
-static RingProfile D_80088820 = { sizeof(D_800A0500) / sizeof(D_800A0500[0]), D_800A0500 };
+static RingProfile gRingProfile = { sizeof(gRingProfilePoints) / sizeof(gRingProfilePoints[0]), gRingProfilePoints };
 /* The display lists that open and close the ring effect's pass (in the effect type table at 0x8008BE98). */
-Gfx D_80088828[] = {
+Gfx gRingRenderSetupDl[] = {
     gsDPPipeSync(),
     gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
-Gfx D_80088848[] = {
+Gfx gRingRenderResetDl[] = {
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
     gsSPEndDisplayList(),
 };
 /* The callbacks that RadialEffectDef's emitCallback, checkCallback and updateCallback index. */
-static void (*D_80088858[])(RadialEffect *, Vec3f *, u8, f32, f32) = { func_150C99B4, func_150C9DC4 };
-static s32 (*D_80088860[])(RadialEffect *) = { NULL };
-static void (*D_80088864[])(RadialEffect *, f32) = { func_150C9BDC };
+static void (*gRingEmitFuncs[])(RadialEffect *, Vec3f *, u8, f32, f32) = { effect_ringEmitDarkParticle, effect_ringEmitBurst };
+static s32 (*gRingCheckFuncs[])(RadialEffect *) = { NULL };
+static void (*gRingUpdateFuncs[])(RadialEffect *, f32) = { effect_ringHitActors };
 
 /*
  * Allocates a ring effect from def. Behind the header: dirs[count], two vertex buffers of
  * (count + 1) * 5 Vtx each, then extraSize bytes at unk364.
  */
-RadialEffect *func_150C88D0(RadialEffectDef *def, s32 extraSize, u8 arg2, s32 arg3) {
+RadialEffect *effect_newRingEffect(RadialEffectDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     RadialEffect *effect;
     s32 i;
 
-    effect = func_15167A68(0x31, arg3, (s32)((Vtx (*)[2])((u8 *)extraSize + def->count * 8 + 0x408) + def->count * 5), 1, arg2, 1);
+    effect = effect_newObject(0x31, arg3, (s32)((Vtx (*)[2])((u8 *)extraSize + def->count * 8 + 0x408) + def->count * 5), 1, arg2, 1);
     if (effect == NULL) {
         return NULL;
     }
@@ -91,7 +91,7 @@ RadialEffect *func_150C88D0(RadialEffectDef *def, s32 extraSize, u8 arg2, s32 ar
 }
 
 /* Per-tick update of an expanding ring: ages it, grows its radius and emits along its edge. */
-void func_150C8A68(RadialEffect *effect) {
+void effect_updateRingEffect(RadialEffect *effect) {
     s32 pad; // matching: unused stack slot
     u8 expired;
     f32 oldRadius;
@@ -134,21 +134,21 @@ void func_150C8A68(RadialEffect *effect) {
                 emitPos[1] = effect->def.pos.y;
                 emitPos[2] = effect->def.pos.z + sine * effect->radius;
                 if (emitPos[2] * emitPos[2] + emitPos[0] * emitPos[0] < 10894295.0f) {
-                    D_80088858[effect->def.emitCallback](effect, (Vec3f *)emitPos, angle, cosine, sine);
+                    gRingEmitFuncs[effect->def.emitCallback](effect, (Vec3f *)emitPos, angle, cosine, sine);
                 }
                 effect->pending -= 1.0f;
             }
         }
         if (effect->def.updateCallback != -1) {
-            D_80088864[effect->def.updateCallback](effect, oldRadius);
+            gRingUpdateFuncs[effect->def.updateCallback](effect, oldRadius);
         }
-        if (effect->def.checkCallback != -1 && D_80088860[effect->def.checkCallback](effect) == 0) {
+        if (effect->def.checkCallback != -1 && gRingCheckFuncs[effect->def.checkCallback](effect) == 0) {
             expired = 1;
         }
     }
     if (expired) {
 
-        func_1516972C(&effect->header);
+        effect_destroyObject(&effect->header);
     }
 }
 
@@ -156,9 +156,9 @@ extern struct { s32 unk0; s32 unk4; } D_800A4AC8[];
 
 /*
  * Draws a ring effect as a strip of quads: for every segment direction, the ring profile
- * D_80088820 is swept out at the current radius into this frame's vertex buffer.
+ * gRingProfile is swept out at the current radius into this frame's vertex buffer.
  */
-Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
+Gfx *effect_drawRingEffect(Gfx *gdl, RadialEffect *effect, s32 arg2) {
     RadialEffect *first; // matching: a second, stack-homed copy of effect
 
     first = effect;
@@ -228,15 +228,15 @@ Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
                 } else {
                     inRange = 0;
                 }
-                for (pt = 0; pt < D_80088820.count; pt++) {
+                for (pt = 0; pt < gRingProfile.count; pt++) {
                     f32 dist;
                     f32 y;
                     f32 pad; // matching: unused local keeps the frame layout
                     f32 x;
                     f32 z;
 
-                    dist = (D_80088820.pts + pt)->r * effect->size;
-                    y = (D_80088820.pts + pt)->y * effect->size;
+                    dist = (gRingProfile.pts + pt)->r * effect->size;
+                    y = (gRingProfile.pts + pt)->y * effect->size;
                     // matching: x and z are built in two steps
                     x = centerX;
                     x += dist * dirX;
@@ -286,15 +286,15 @@ Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
                 } else {
                     inRange = 0;
                 }
-                for (; pt < D_80088820.count; pt++) {
+                for (; pt < gRingProfile.count; pt++) {
                     f32 dist;
                     f32 y;
                     f32 pad; // matching: unused local keeps the frame layout
                     f32 x;
                     f32 z;
 
-                    dist = (D_80088820.pts + pt)->r * effect->size;
-                    y = (D_80088820.pts + pt)->y * effect->size;
+                    dist = (gRingProfile.pts + pt)->r * effect->size;
+                    y = (gRingProfile.pts + pt)->y * effect->size;
                     // matching: x and z are built in two steps
                     x = centerX;
                     x += dist * dirX;
@@ -322,11 +322,11 @@ Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
             }
             {
                 s32 pad; // matching: frame padding
-                stripLen = D_80088820.count * 2;
+                stripLen = gRingProfile.count * 2;
                 gSPVertex(gdl++, &effect->vtx[D_800BE9C0][vtxCount - stripLen], stripLen, 0);
-                for (pt = 0; pt < D_80088820.count - 1; pt++) {
-                    gSP1Triangle(gdl++, pt, pt + 1, pt + D_80088820.count + 1, 0);
-                    gSP1Triangle(gdl++, pt, pt + D_80088820.count + 1, pt + D_80088820.count, 0);
+                for (pt = 0; pt < gRingProfile.count - 1; pt++) {
+                    gSP1Triangle(gdl++, pt, pt + 1, pt + gRingProfile.count + 1, 0);
+                    gSP1Triangle(gdl++, pt, pt + gRingProfile.count + 1, pt + gRingProfile.count, 0);
                 }
             }
         }
@@ -344,7 +344,7 @@ struct ParticleObject {
 };
 
 /* Ring emit callback 0: spawns a dark particle at pos, moving along heading. */
-void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
+void effect_ringEmitDarkParticle(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
     ParticleDesc packet;
     s32 pad; // matching: unused stack slot
     s16 pitch;
@@ -394,7 +394,7 @@ void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
 }
 
 /* Ring update callback: hits actors that lie up to 250 units inside the ring edge. */
-void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
+void effect_ringHitActors(RadialEffect *effect, f32 oldRadius) {
     s32 i;
     Actor *actor;
     f32 dx;
@@ -436,7 +436,7 @@ struct BurstParticle {
 };
 
 /* Ring emit callback 1: spawns a tumbling burst object at pos (the colour from func_150CCD90 goes unused). */
-void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
+void effect_ringEmitBurst(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
     ParticleSpawn packet;
     f32 r;
     f32 g;
@@ -490,7 +490,7 @@ void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
 
 
 /* Integrates a burst particle's position (with gravity) and rotation over one frame. */
-s32 func_150CA07C(BurstParticle *particle) {
+s32 effect_moveBurstParticle(BurstParticle *particle) {
     particle->p.pos.x += particle->p.vel.x * gFrameDelta;
     particle->p.pos.y += (particle->p.vel.y * gFrameDelta) + (particle->p.gravity * gFrameDelta * gFrameDelta * 0.5f);
     particle->p.pos.z += particle->p.vel.z * gFrameDelta;
@@ -517,7 +517,7 @@ typedef struct {
  * Impact effect at the actor: finds the floor below it, spawns an expanding ring there and,
  * when the floor was found, four func_1513C5B0 quads around the impact point plus particles.
  */
-void func_150CA150(Actor *actor) {
+void effect_spawnImpactRing(Actor *actor) {
     Vec3f pos;
     f32 r, g, b;
     u8 red, green, blue;
@@ -572,7 +572,7 @@ void func_150CA150(Actor *actor) {
             def.emitCallback = 1;
             def.updateCallback = 0;
             def.emitRate = 7.999999798e-05f;
-            func_150C88D0(&def, 0, 0xFF, 1);
+            effect_newRingEffect(&def, 0, 0xFF, 1);
         }
         if (onGround) {
             Fx_150CA150 fx;
@@ -800,7 +800,7 @@ s32 func_150CADD0(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     return 1;
 }
 
-/* Same per-frame integration as func_150CA07C. */
+/* Same per-frame integration as effect_moveBurstParticle. */
 s32 func_150CB008(BurstParticle *particle) {
     particle->p.pos.x += particle->p.vel.x * gFrameDelta;
     particle->p.pos.y += (particle->p.vel.y * gFrameDelta) + (particle->p.gravity * gFrameDelta * gFrameDelta * 0.5f);

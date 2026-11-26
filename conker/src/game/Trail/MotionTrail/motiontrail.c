@@ -11,7 +11,7 @@ void *trail_createMotionTrail(EffectTemplate *spawn, TrailMotion *motion, s32 ex
     TrailParams *params;
 
     spawn->kind = 1;
-    trail = func_15147A80(spawn, extraSize + sizeof(TrailParams), sizeof(MotionTrailPoint), 1, 0, 1, arg9, arg10,
+    trail = effect_newEffectObj(spawn, extraSize + sizeof(TrailParams), sizeof(MotionTrailPoint), 1, 0, 1, arg9, arg10,
                           hit, arg13, arg14);
     if (trail == NULL) {
         return NULL;
@@ -39,7 +39,7 @@ static TrailFunc gMotionTrailStateProcs[6] = {
 };
 static TrailFunc gMotionTrailUpdateProcs[13] = {
     NULL,          trail_fadeEmittedTrail, func_150AED9C, trail_fadeMotionTrail, func_150C251C, trail_fadeKind2Trail, trail_fadeIn,
-    func_150B378C, func_151AC3CC, func_151AADBC, trail_landSprayTrail, func_150BDB3C, func_1514B844,
+    func_150B378C, func_151AC3CC, effect_fadeTrailByLife, trail_landSprayTrail, func_150BDB3C, func_1514B844,
 };
 /* Finish handlers (TrailParams.finishFn); there are none. */
 static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
@@ -530,7 +530,7 @@ s32 trail_fadeIn(MotionTrail *trail) {
     return 1;
 }
 
-/* Hands the trail to func_151478F4. */
+/* Hands the trail to effect_defaultDestroyEffectObj. */
 void trail_destroyEffectObj(EffectObj *obj) {
-    func_151478F4(obj);
+    effect_defaultDestroyEffectObj(obj);
 }

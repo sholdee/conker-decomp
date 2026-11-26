@@ -31,7 +31,7 @@ BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
         return NULL;
     }
 
-    func_1516962C(40, actor, 22);
+    effect_sendActorEventToType(40, actor, 22);
 
     desc.target[0] = 0;
     desc.target[1] = 0;

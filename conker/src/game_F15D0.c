@@ -8,7 +8,7 @@ SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
-/* Data of the effect spawned by func_150C4120 (at +0x28 of the effect object). */
+/* Data of the effect spawned by effect_spawnPulseEffect (at +0x28 of the effect object). */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;       /* owner->unique_id at spawn; a mismatch means the owner died */
@@ -28,7 +28,7 @@ struct PulseEffect {
 
 /* Spawns an effect that follows `owner` (lifetime `duration`, -1 for the default 300) together with
  * a pulsing particle. */
-void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
+void effect_spawnPulseEffect(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     EffectData data;
     PulseEffect *effect;
     EffectData *state;
@@ -47,7 +47,7 @@ void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
         data.unk14 = 0x54;
         data.flags = 1;
     }
-    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
+    effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
                                      0x40, sizeof(EffectData), arg2, arg3); /* arg6 is the data size; its prototype is wrong */
     if (effect != NULL) {
         state = &effect->data;
@@ -119,9 +119,9 @@ const Vec3f D_800A0378[4] = {
 };
 const u8 D_800A03A8[4] = { 1, 2, 3, 4 };
 
-/* Per-frame update of the func_150C4120 effect: keeps its particle at a point on the owner and emits
+/* Per-frame update of the effect_spawnPulseEffect effect: keeps its particle at a point on the owner and emits
  * smaller particles from there. Frees the effect once the owner is gone. */
-void func_150C44A4(PulseEffect *effect) {
+void effect_updatePulseEffect(PulseEffect *effect) {
     Actor *owner;
     EffectData *data;
     Vec3f pos;
@@ -237,27 +237,27 @@ void func_150C44A4(PulseEffect *effect) {
 }
 
 /* Frees the effect's particle, if it has one. */
-void func_150C4AD8(PulseEffect *effect) {
+void effect_freePulseParticle(PulseEffect *effect) {
     // matching: the s32 read keeps IDO from merging the test and the argument into one load
     if (*(s32 *)&effect->data.particle != 0) {
-        func_1516972C(&effect->data.particle->head.header);
+        effect_destroyObject(&effect->data.particle->head.header);
     }
 }
 
-/* Frees the effect's particle, then calls func_1514933C on the effect. */
-void func_150C4B08(PulseEffect *effect) {
-    func_150C4AD8(effect);
-    func_1514933C(&effect->base);
+/* Frees the effect's particle, then calls effect_defaultDestroyTimedEffect on the effect. */
+void effect_destroyPulseEffect(PulseEffect *effect) {
+    effect_freePulseParticle(effect);
+    effect_defaultDestroyTimedEffect(&effect->base);
 }
 
-/* Frees the effect's particle, then calls func_15149368 on the effect. */
-void func_150C4B34(PulseEffect *effect) {
-    func_150C4AD8(effect);
-    func_15149368(&effect->base);
+/* Frees the effect's particle, then calls effect_defaultFreeTimedEffect on the effect. */
+void effect_freePulseEffect(PulseEffect *effect) {
+    effect_freePulseParticle(effect);
+    effect_defaultFreeTimedEffect(&effect->base);
 }
 
-/* Event handler: events 0x55/0x56 clear/set flag 2 (pausing the effect), others go to func_15149514. */
-void func_150C4B60(PulseEffect *effect, s32 arg1, u8 event) {
+/* Event handler: events 0x55/0x56 clear/set flag 2 (pausing the effect), others go to effect_handleTimedEffectOwnerEvent. */
+void effect_pulseEffectMessage(PulseEffect *effect, s32 arg1, u8 event) {
     EffectData *data = &effect->data;
 
     if (event == 0x55) {
@@ -265,6 +265,6 @@ void func_150C4B60(PulseEffect *effect, s32 arg1, u8 event) {
     } else if (event == 0x56) {
         data->flags |= 2;
     } else {
-        func_15149514(arg1, event, &data->owner, &data->ownerId, effect);
+        effect_handleTimedEffectOwnerEvent(arg1, event, &data->owner, &data->ownerId, effect);
     }
 }

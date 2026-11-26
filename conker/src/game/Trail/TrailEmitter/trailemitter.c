@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* While a list is walked, the next node is saved in D_800DD198[depth] (depth D_800DD190). */
+/* While a list is walked, the next node is saved in gObjectWalkNext[depth] (depth gObjectWalkDepth). */
 
 #define OBJ_TYPE_TRAIL_EMITTER 0x1F
 
@@ -17,7 +17,7 @@ TrailEmitter *trail_getActorEmitter(Actor *actor, u8 owner, s32 list) {
         return NULL;
     }
     for (i = 0; i < 2; i++) {
-        heads = D_800DCE50[i];
+        heads = gObjectLists[i];
         for (emitter = (TrailEmitter *)heads[OBJ_TYPE_TRAIL_EMITTER]; emitter != NULL;
              emitter = (TrailEmitter *)emitter->link.next) {
             if (emitter->params.owner == actor || emitter->params.ownerId == actor->unique_id) {
@@ -68,21 +68,21 @@ void trail_destroyAllEmitters(Actor *actor) {
 
     if (actor != NULL) {
         for (i = 0; i < 2; i++) {
-            D_800DD190++;
-            for (emitter = (TrailEmitter *)D_800DCE50[i][OBJ_TYPE_TRAIL_EMITTER]; emitter != NULL;
-                 emitter = D_800DD198[D_800DD190]) {
-                D_800DD198[D_800DD190] = emitter->link.next;
+            gObjectWalkDepth++;
+            for (emitter = (TrailEmitter *)gObjectLists[i][OBJ_TYPE_TRAIL_EMITTER]; emitter != NULL;
+                 emitter = gObjectWalkNext[gObjectWalkDepth]) {
+                gObjectWalkNext[gObjectWalkDepth] = emitter->link.next;
                 emitter->params.owner = actor;
                 // the owner test always passes: every emitter is destroyed
                 if (actor != NULL || emitter->params.ownerId == actor->unique_id) {
-                    func_1516972C(&emitter->link);
+                    effect_destroyObject(&emitter->link);
                 }
             }
             {
                 // matching: a slotless block-scope decl moves the -g3 line so the decrement fills the bnel slot
-                extern s8 D_800DD190;
+                extern s8 gObjectWalkDepth;
 
-                D_800DD190--;
+                gObjectWalkDepth--;
             }
         }
     }
@@ -92,7 +92,7 @@ void trail_destroyAllEmitters(Actor *actor) {
 TrailEmitter *trail_spawnEmitter(TrailEmitterParams *params, u8 owner, s32 list) {
     TrailEmitter *emitter;
 
-    emitter = func_15167A68(OBJ_TYPE_TRAIL_EMITTER, list, sizeof(TrailEmitter), 1, owner, 1);
+    emitter = effect_newObject(OBJ_TYPE_TRAIL_EMITTER, list, sizeof(TrailEmitter), 1, owner, 1);
     if (emitter == NULL) {
         return NULL;
     }
@@ -324,8 +324,8 @@ s32 trail_spawnHitPuff(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hit
     fx.flags = 0xC;
     fx.speed = 0;
     fx.floorY = hitY;
-    func_1516865C(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
-    func_15168800(&fx, trail->head.header.owner, trail->head.header.kind);
+    effect_initQuadFxTemplate(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
+    effect_spawnQuadFx(&fx, trail->head.header.owner, trail->head.header.kind);
     params->state = 4;
     return 1;
 }
@@ -350,8 +350,8 @@ s32 trail_spawnHitPuffAndEffect(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hit
     fx.flags = 0xC;
     fx.speed = 0;
     fx.floorY = hitY;
-    func_1516865C(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
-    func_15168800(&fx, trail->head.header.owner, trail->head.header.kind);
+    effect_initQuadFxTemplate(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
+    effect_spawnQuadFx(&fx, trail->head.header.owner, trail->head.header.kind);
     params->state = 4;
     {
         u8 kind;
@@ -390,7 +390,7 @@ void trail_onEmitterMessage(TrailEmitter *emitter, s32 data, u8 type) {
     } else if (type == 0) {
         actor = msg->ref.actor;
         if (actor == emitter->params.owner || msg->ref.uniqueId == emitter->params.ownerId) {
-            func_1516972C(&emitter->link);
+            effect_destroyObject(&emitter->link);
         }
     }
 }

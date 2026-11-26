@@ -102,7 +102,7 @@ void beam_updateSpriteFade(Sprite2D *sprite) {
 }
 
 void func_150F568C(s32 arg0) {
-    func_15179008(0);
+    effect_updateRain(0);
 }
 
 
@@ -244,7 +244,7 @@ void beam_spawnBoneSparks(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     data.ownerId = owner->unique_id;
     data.accum = 0.0f;
 
-    effect = func_15149130(arg1, -1, 0x51, -1, 1, 0x3E, sizeof(data), arg2, arg3);
+    effect = effect_newTimedEffect(arg1, -1, 0x51, -1, 1, 0x3E, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -345,10 +345,10 @@ void beam_updateBoneSparks(BoneSparkEffect *effect) {
     }
 }
 
-/* Effect callback for the spark effect: hands func_15149514 the effect's owner reference
+/* Effect callback for the spark effect: hands effect_handleTimedEffectOwnerEvent the effect's owner reference
  * (pointer and id). */
 void beam_boneSparksMessage(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+    effect_handleTimedEffectOwnerEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Beam effect: while the owner lives and has a model (and unk94 bit 1 is clear), stretches the
@@ -416,27 +416,27 @@ void beam_releaseModelBeamParts(ModelBeamEffect *effect) {
     ModelBeamData *data = &effect->data;
 
     if (data->beam != NULL) {
-        func_1516972C(&data->beam->head.header);
+        effect_destroyObject(&data->beam->head.header);
     }
     if (data->flash != NULL) {
-        func_1516972C(data->flash);
+        effect_destroyObject(data->flash);
     }
 }
 
 /* Beam effect destructors: free the beam and flash, then the effect. */
 void beam_destroyModelBeamEffect(ModelBeamEffect *effect) {
     beam_releaseModelBeamParts(effect);
-    func_1514933C(&effect->base);
+    effect_defaultDestroyTimedEffect(&effect->base);
 }
 
 void beam_freeModelBeamEffect(ModelBeamEffect *effect) {
     beam_releaseModelBeamParts(effect);
-    func_15149368(&effect->base);
+    effect_defaultFreeTimedEffect(&effect->base);
 }
 
-/* Effect callback for the beam effect: hands func_15169850 the owner reference. */
+/* Effect callback for the beam effect: hands effect_handleOwnerActorEvent the owner reference. */
 void beam_modelBeamMessage(ModelBeamEffect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Clears the beam effect's reference to this beam. */
@@ -533,9 +533,9 @@ void beam_updateFlashBurst(FlashBurstEffect *effect) {
     }
 }
 
-/* Effect callback for the burst effect: hands func_15169850 the owner reference. */
+/* Effect callback for the burst effect: hands effect_handleOwnerActorEvent the owner reference. */
 void beam_flashBurstMessage(FlashBurstEffect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Creates a func_15134DAC object attached to `owner`. */

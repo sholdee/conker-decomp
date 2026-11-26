@@ -32,8 +32,8 @@ struct FadeBurstEffect {
     s16 duration;        /* 0xAA */
 }; /* size 0xB0 */
 
-/* The burst effect type's render setup display list (object type table D_8008B4A8). */
-Gfx D_8008D4F0[] = {
+/* The burst effect type's render setup display list (object type table gObjectTypes). */
+Gfx gFadeBurstRenderSetupDl[] = {
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
     gsDPPipeSync(),
     gsDPSetCombineLERP(PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0),
@@ -43,14 +43,14 @@ Gfx D_8008D4F0[] = {
 };
 
 /* Its render teardown display list. */
-Gfx D_8008D520[] = {
+Gfx gFadeBurstRenderTeardownDl[] = {
     gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsDPPipeSync(),
     gsSPEndDisplayList(),
 };
 
 /* One burst piece: a thin pyramid along the x axis, its tip faded. */
-static Vtx D_8008D538[] = {
+static Vtx gFadeBurstPieceVtx[] = {
     { { { -625, 0, 0 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0x10 } } },
     { { { 625, 31, 0 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
     { { { 625, -31, 31 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
@@ -58,15 +58,15 @@ static Vtx D_8008D538[] = {
 };
 
 /* Spawns a burst effect at (x, y, z) with 12 pieces in three rings of four. */
-void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJitter, f32 scaleYZ, f32 scaleX) {
+void effect_spawnFadeBurst(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJitter, f32 scaleYZ, f32 scaleX) {
     FadeBurstEffect *burst;
     s32 i;
 
-    burst = func_15167A68(6, 0, sizeof(FadeBurstEffect), 1, 0xFF, 1);
+    burst = effect_newObject(6, 0, sizeof(FadeBurstEffect), 1, 0xFF, 1);
     if (burst != NULL) {
         burst->pieces = allocate_memory(BURST_NUM_PIECES * sizeof(FadeBurstPiece), 1, 2, 1);
         if (burst->pieces == NULL) {
-            func_1516972C(&burst->header);
+            effect_destroyObject(&burst->header);
             return;
         }
         burst->x = x;
@@ -106,12 +106,12 @@ void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJit
 }
 
 /* Per-frame update: advances the burst timer and slides each piece outwards, slowing as it ages. */
-void func_15187978(FadeBurstEffect *burst) {
+void effect_updateFadeBurst(FadeBurstEffect *burst) {
     s32 i;
 
     if (burst->timer < 0) {
         func_10004074(burst->pieces);
-        func_1516972C(&burst->header);
+        effect_destroyObject(&burst->header);
         return;
     }
     burst->timer += D_800BE9E4;
@@ -132,7 +132,7 @@ void func_15187978(FadeBurstEffect *burst) {
 }
 
 /* Draws the 12 burst pieces, each fading out over its own duration. */
-Gfx *func_15187A98(Gfx *gdl, FadeBurstEffect *burst, s32 arg2) {
+Gfx *effect_drawFadeBurst(Gfx *gdl, FadeBurstEffect *burst, s32 arg2) {
     s32 i;
     s32 alpha;
     MtxF mtx;
@@ -172,7 +172,7 @@ Gfx *func_15187A98(Gfx *gdl, FadeBurstEffect *burst, s32 arg2) {
                 s32 pad;
                 mtxCmd = gdl++; mtxCmd->words.w0 = _SHIFTL(G_MTX, 24, 8) | _SHIFTL((sizeof(Mtx) - 1) / 8, 19, 5) | _SHIFTL((G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW) ^ G_MTX_PUSH, 0, 8); mtxCmd->words.w1 = (u32)&burst->pieces[i].mtx[D_800BE9C0];
             }
-            gSPVertex(gdl++, D_8008D538, 4, 0);
+            gSPVertex(gdl++, gFadeBurstPieceVtx, 4, 0);
             gSP1Triangle(gdl++, 0, 1, 2, 0);
             gSP1Triangle(gdl++, 0, 1, 3, 0);
             gSP1Triangle(gdl++, 0, 2, 3, 0);

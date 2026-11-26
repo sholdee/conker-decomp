@@ -9,7 +9,7 @@ void trail_createSprayEmitter(SprayDesc *desc, u8 arg1) {
     SprayEmitter *emitter;
     s32 flag;
 
-    emitter = func_15167A68(0x1A, 1, sizeof(SprayEmitter), 1, 0xFF, 1);
+    emitter = effect_newObject(0x1A, 1, sizeof(SprayEmitter), 1, 0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->desc, desc, sizeof(SprayDesc));
         collision_selectMap(0);

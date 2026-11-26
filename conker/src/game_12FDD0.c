@@ -3,8 +3,8 @@
 #include "variables.h"
 #include "libc/string.h"
 
-/* This file's .data: the four textures func_15103254 picks one of. */
-static s32 D_80088BD0[4] = { 0x60, 0x61, 0x62, 0x63 };
+/* This file's .data: the four textures effect_spawnFlashParticle picks one of. */
+static s32 gFlashTextures[4] = { 0x60, 0x61, 0x62, 0x63 };
 
 /* Per-particle data of a beam attached to an actor's bone, stored at BoneBeamParticle.beam. */
 typedef struct {
@@ -26,7 +26,7 @@ struct BoneBeamParticle {
 
 /* Spawns a func_1513C650 effect of the given size on a surface (none for some materials on maps 0x36 and 0x26);
  * a duration of -1 means a fixed 300 frames without the timed flag. */
-QuadSprite *func_15102920(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
+QuadSprite *effect_spawnSurfaceSprite(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
                          s32 surfaceFlags, u8 arg8, s32 arg9) {
     QuadSprite *result;
     SpriteDef arg;
@@ -85,7 +85,7 @@ QuadSprite *func_15102920(f32 size, u8 arg1, CollisionTri *surface, Vec3f *posit
 
 /* Spawns a beam particle from `start` to `end`, attached to bone `bone` of `target` (or to its model node `node`),
  * plus a flash at `flashPos`. */
-BoneBeamParticle *func_15102B38(Actor *target, u8 bone, const Vec3f *start, const Vec3f *end, ParticleSize *size, s16 lifetime,
+BoneBeamParticle *effect_spawnBoneBeamParticle(Actor *target, u8 bone, const Vec3f *start, const Vec3f *end, ParticleSize *size, s16 lifetime,
                   u8 alpha, f32 flashSize, Vec3f *flashPos, u8 viewMask, s32 extraSize, s16 node, u8 arg12,
                   s32 arg13) {
     BoneBeamParticle *particle;
@@ -140,18 +140,18 @@ BoneBeamParticle *func_15102B38(Actor *target, u8 bone, const Vec3f *start, cons
         memcpy(&particle->beam, &beam, sizeof(BoneBeamData));
     }
 
-    func_15103254(lifetime, alpha, flashSize, flashPos, viewMask, arg12, arg13);
+    effect_spawnFlashParticle(lifetime, alpha, flashSize, flashPos, viewMask, arg12, arg13);
     return particle;
 }
 
-/* Particle type handler: hands the beam's target pointer and id to func_15169850. */
-void func_15102D50(BoneBeamParticle *particle, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &particle->beam.target, &particle->beam.targetId, particle);
+/* Particle type handler: hands the beam's target pointer and id to effect_handleOwnerActorEvent. */
+void effect_boneBeamMessage(BoneBeamParticle *particle, s32 arg1, u8 arg2) {
+    effect_handleOwnerActorEvent(arg1, arg2, &particle->beam.target, &particle->beam.targetId, particle);
 }
 
 /* Beam update: moves the beam's end points with its target's bone or model node.
  * Returns 0 when the beam should die (target gone or node missing). */
-s32 func_15102D90(BoneBeamParticle *particle) {
+s32 effect_updateBoneBeamParticle(BoneBeamParticle *particle) {
     Actor *target;
     BoneBeamData *beam;
     const Vec3f *src[2];
@@ -189,7 +189,7 @@ s32 func_15102D90(BoneBeamParticle *particle) {
 
 /* Vertex function: builds the beam's quad for `viewport`, from its start to def.height of the way to its end,
  * def.width wide and facing the viewport's camera. */
-Vtx *func_15102EB8(BoneBeamParticle *particle, s16 viewport) {
+Vtx *effect_buildBoneBeamQuad(BoneBeamParticle *particle, s16 viewport) {
     Vec3f *camera;
     Vec3f mid;
     Vec3f dir;
@@ -267,12 +267,12 @@ Vtx *func_15102EB8(BoneBeamParticle *particle, s16 viewport) {
 }
 
 /* Spawns a flash particle of the given size at `pos`, with one of four random textures and random flips. */
-void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6) {
+void effect_spawnFlashParticle(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6) {
     s32 index;
     ParticleDesc desc;
 
     index = func_150ADA20() & 3;
-    desc.texture = D_80088BD0[index];
+    desc.texture = gFlashTextures[index];
     desc.renderMode = 0x2203;
     desc.unk0 = 0x200005;
     desc.unk4 = 0x20000;

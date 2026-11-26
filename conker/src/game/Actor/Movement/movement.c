@@ -85,7 +85,7 @@ void (*gActorUpdateHandlers[])(Actor *) = {
     func_15054A94, NULL, weapon_updateTank, func_150CE740,
     func_150D7928, func_1505528C, NULL, func_150EEDA8,
     actor_updateFollower, weapon_releaseTankCamera, func_150C3230, func_15055B64,
-    func_150D13A0, func_15055D48, func_15055BF8,
+    effect_spinDownActor, func_15055D48, func_15055BF8,
 };
 
 

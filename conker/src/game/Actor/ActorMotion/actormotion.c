@@ -2325,10 +2325,10 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
         msg.a = attacker;
         msg.b = attacker->unique_id;
-        func_15169070(0, 0x68, (s32)&msg, 2);
+        effect_sendEventToTypeRange(0, 0x68, (s32)&msg, 2);
         msg.a = victim;
         msg.b = victim->unique_id;
-        func_15169070(0, 0x68, (s32)&msg, 2);
+        effect_sendEventToTypeRange(0, 0x68, (s32)&msg, 2);
     }
     if (base[index].unk4 != 0) {
         gEventParam = base[index].unk4;
@@ -4421,8 +4421,8 @@ void actor_releaseCarried(Actor *actor) {
 
 /* Removes the actor: releases its resources and attachments, then clears its slot. */
 void actor_remove(Actor *actor, s32 mode) {
-    func_1514D310(actor);
-    func_151695F0(actor, 0);
+    effect_freeAttachments(actor);
+    effect_broadcastActorEvent(actor, 0);
     if ((actor->drawtype != 2) && (actor->drawtype != 3)) {
         collision_freeObjectModels(actor);
         actor_releaseCarriedNonPlayers(actor, mode);
@@ -4469,7 +4469,7 @@ void actor_remove(Actor *actor, s32 mode) {
         func_10004074(actor->prevBones);
     }
     if (actor->unk2D4 != NULL) {
-        func_1516972C(actor->unk2D4);
+        effect_destroyObject(actor->unk2D4);
     }
     if (actor->unk304[0] != 0) {
         s32 i;
@@ -5058,11 +5058,11 @@ void actor_swapSlots(Actor *a, Actor *b) {
     b->mv->SniperState = 0;
     attach_swapOwners(b->unique_id, a->unique_id);
     if (b->unk2D4 != NULL) {
-        func_1516972C(b->unk2D4);
+        effect_destroyObject(b->unk2D4);
         b->unk2D4 = NULL;
     }
     if (a->unk2D4 != NULL) {
-        func_1516972C(a->unk2D4);
+        effect_destroyObject(a->unk2D4);
         a->unk2D4 = NULL;
     }
     actor_resetFade(b);
@@ -5261,7 +5261,7 @@ void actor_scrollVertexTexCoords(Actor *actor, s32 group, s32 arg2, s32 wrapS, s
     }
 }
 
-/* Calls func_15194FF4 for every other player touching the actor this frame (D_800CC268 mask). */
+/* Calls effect_setOnFire for every other player touching the actor this frame (D_800CC268 mask). */
 void func_15063168(Actor *actor) {
     s32 i;
     s32 self;
@@ -5282,7 +5282,7 @@ void func_15063168(Actor *actor) {
         if (movement->on_fire != 0) {
             continue;
         }
-        func_15194FF4(actor, &movement_obj[i], 1);
+        effect_setOnFire(actor, &movement_obj[i], 1);
     }
 }
 

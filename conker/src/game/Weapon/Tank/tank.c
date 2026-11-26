@@ -392,9 +392,9 @@ void weapon_updateTank(Actor *obj) {
                 reversing = 0;
             }
             if (reversing) {
-                func_1514D3B0(obj, 25, 13, 0);
+                effect_sendAttachmentMessage(obj, 25, 13, 0);
             } else {
-                func_1514D3B0(obj, 25, 14, 0);
+                effect_sendAttachmentMessage(obj, 25, 14, 0);
             }
             reversing = reversing ? 12 : 15;
             obj->eyeCode[0] = reversing + 10;

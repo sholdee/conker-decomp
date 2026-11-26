@@ -5,7 +5,7 @@
 /* Spawns a flash particle, a burst of 12-18 drops, the func_151D3F14 effect and a white screen
  * flash at `pos`. */
 void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind) {
-    func_15103254(func_150ADA20() % 5U + 12, func_150ADA20() % 56U + 200, func_150ADA68() * 600.0f + 1700.0f,
+    effect_spawnFlashParticle(func_150ADA20() % 5U + 12, func_150ADA20() % 56U + 200, func_150ADA68() * 600.0f + 1700.0f,
                   pos, 0xFF, owner, kind);
     {
         DropSpraySpec drops;
@@ -39,7 +39,7 @@ void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind) {
 }
 
 /* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by func_151DC97C
- * (D_8008A4E8[0x5B]), preceded by a func_151DC6A0 burst when `burst` is set. */
+ * (gTimedEffectTickFuncs[0x5B]), preceded by a func_151DC6A0 burst when `burst` is set. */
 void func_151DC8BC(pos, duration, burst, randomColors, owner, kind)
     Vec3f *pos;
     s32 duration;
@@ -59,7 +59,7 @@ void func_151DC8BC(pos, duration, burst, randomColors, owner, kind)
     data.accum = 0.0f;
     data.randomColors = randomColors;
 
-    emitter = func_15149130(duration, -1, 0x5B, -1, 1, 0, sizeof(data), owner, kind);
+    emitter = effect_newTimedEffect(duration, -1, 0x5B, -1, 1, 0, sizeof(data), owner, kind);
     if (emitter != NULL) {
         memcpy(&emitter->data, &data, sizeof(data));
     }

@@ -27,7 +27,7 @@ void func_151A0A10(Actor *actor, s16 duration, u8 owner, s32 arg3) {
                 emitter.variant = 0;
                 break;
             }
-            effect = func_151491F4(duration, -1, 1, 1, 0, sizeof(PointSparkEmitter), owner, arg3);
+            effect = effect_newTimedEffectNoDraw(duration, -1, 1, 1, 0, sizeof(PointSparkEmitter), owner, arg3);
             if (effect != NULL) {
                 memcpy(&((SparkEmitterEffect *)effect)->emitter, &emitter, sizeof(PointSparkEmitter));
             }
@@ -105,6 +105,6 @@ s32 func_151A0C0C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
         break;
     }
     spark.life = 200;
-    func_15167D84(&spark, 0, 0, -1, owner, 1);
+    effect_spawnBillboard(&spark, 0, 0, -1, owner, 1);
     return 1;
 }

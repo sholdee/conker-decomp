@@ -327,7 +327,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     if (level == 29) {
         obj->unk66 &= ~0x20;
     }
-    func_1514D15C(obj);
+    effect_spawnAttachments(obj);
     model = collision_getModelId(obj);
     found = 0;
     for (i = 0; i < 2; i++) {

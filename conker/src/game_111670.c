@@ -2,11 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Integer world position chosen by func_150E41C0 as the centre of func_150E42F8's scatter. */
-static Vec3s D_800D99F0;
+/* Integer world position chosen by effect_pickGroundHitCentre as the centre of effect_scatterGroundHits's scatter. */
+static Vec3s gGroundHitCentre;
 
-/* Stores the point 500 units ahead of camera_global_Cameras (along its pitch 0x398 and yaw 0x3A0) in D_800D99F0. */
-void func_150E41C0(void) {
+/* Stores the point 500 units ahead of camera_global_Cameras (along its pitch 0x398 and yaw 0x3A0) in gGroundHitCentre. */
+void effect_pickGroundHitCentre(void) {
     s32 x;
     s32 y;
     s32 z;
@@ -32,14 +32,14 @@ void func_150E41C0(void) {
     x += dx * c + dz * s;
     z += dz * c - dx * s;
     y += dy;
-    D_800D99F0.x = x;
-    D_800D99F0.y = y;
-    D_800D99F0.z = z;
+    gGroundHitCentre.x = x;
+    gGroundHitCentre.y = y;
+    gGroundHitCentre.z = z;
 }
 
 
-/* Drops `count` random ground hits within 500 units of D_800D99F0 and spawns each surface's effect. */
-void func_150E42F8(s32 count) {
+/* Drops `count` random ground hits within 500 units of gGroundHitCentre and spawns each surface's effect. */
+void effect_scatterGroundHits(s32 count) {
     s32 x;
     s32 y;
     s32 z;
@@ -53,8 +53,8 @@ void func_150E42F8(s32 count) {
 
     surface = 0;
     noHit = -10000.0f;
-    centerX = D_800D99F0.x;
-    centerZ = D_800D99F0.z;
+    centerX = gGroundHitCentre.x;
+    centerZ = gGroundHitCentre.z;
     for (i = 0; i < count; i++) {
         y = 10000;
         x = func_150ADA20_u8() % 500 + centerX;
@@ -65,7 +65,7 @@ void func_150E42F8(s32 count) {
             if (idx >= 0 && idx < gCurMapTriCount) {
                 material = collision_getSurfaceType(gMeshTriMaterials[idx]);
                 if (material != 0) {
-                    func_150E4550(x, y, z, 0, material, (s16 **)surface, 0xFF);
+                    effect_spawnMaterialImpact(x, y, z, 0, material, (s16 **)surface, 0xFF);
                 }
             }
         }
@@ -73,7 +73,7 @@ void func_150E42F8(s32 count) {
 }
 
 /* Scatters one ground effect per 30 units of `amount` in front of camera_global_Cameras. */
-void func_150E4514(s32 amount) {
-    func_150E41C0();
-    func_150E42F8(amount / 30);
+void effect_scatterGroundHitsAhead(s32 amount) {
+    effect_pickGroundHitCentre();
+    effect_scatterGroundHits(amount / 30);
 }

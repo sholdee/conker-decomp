@@ -461,7 +461,7 @@ typedef struct JetPoint {
     /* 0x22 */ u8 pad22[0x2];
 } JetPoint;
 
-/* Effect object created by func_15147A80: a ring buffer of points plus a kind-specific state block. */
+/* Effect object created by effect_newEffectObj: a ring buffer of points plus a kind-specific state block. */
 struct CharacterFlamethrowerActor {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
@@ -574,7 +574,7 @@ void (*gJetSoundUpdateProcs[])(void *) = { (void (*)(void *))flamethrower_moveJe
 void (*gJetSoundStopProcs[])(void *) = { (void (*)(void *))flamethrower_stopJetSound };
 void (*D_8008F89C[])(void *) = { (void (*)(void *))func_15198D7C };
 
-/* Runs a jet's destroy callbacks, then func_151478F4. */
+/* Runs a jet's destroy callbacks, then effect_defaultDestroyEffectObj. */
 void flamethrower_destroyJet(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
 
@@ -585,10 +585,10 @@ void flamethrower_destroyJet(CharacterFlamethrowerActor *actor) {
     if (jet->destroyFn != -1) {
         gJetDestroyProcs[jet->destroyFn](actor);
     }
-    func_151478F4(actor);
+    effect_defaultDestroyEffectObj(actor);
 }
 
-/* Runs a jet's destroy callbacks, then func_15147928. */
+/* Runs a jet's destroy callbacks, then effect_defaultFreeEffectObj. */
 void flamethrower_freeJet(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
 
@@ -599,7 +599,7 @@ void flamethrower_freeJet(CharacterFlamethrowerActor *actor) {
     if (jet->destroyFn != -1) {
         gJetDestroyProcs[jet->destroyFn](actor);
     }
-    func_15147928(actor);
+    effect_defaultFreeEffectObj(actor);
 }
 
 /* Preset in gJetChildPresets for the child particles a jet point spawns (flamethrower_shedJetLines). */
@@ -718,7 +718,7 @@ CharacterFlamethrowerActor *flamethrower_spawnJet(Actor *owner, s32 preset, u8 a
     spawn.pos.y = jet.start.y;
     spawn.pos.z = jet.start.z;
     jet.timeCarry = 0.0f;
-    actor = func_15147A80(&spawn, sizeof(CharacterFlamethrowerJet), sizeof(JetPoint), 2, 2, 2, 0, 0, 0, arg2, arg3);
+    actor = effect_newEffectObj(&spawn, sizeof(CharacterFlamethrowerJet), sizeof(JetPoint), 2, 2, 2, 0, 0, 0, arg2, arg3);
     if (actor != NULL) {
         state = actor->state;
         memcpy(actor->state, &jet, sizeof(CharacterFlamethrowerJet));
@@ -1175,7 +1175,7 @@ void flamethrower_stopJets(Actor *owner) {
     if (owner != NULL) {
         ref.actor = owner;
         ref.uniqueId = owner->unique_id;
-        func_15147D64((s32)&ref, 8);
+        effect_sendEventToEffectObjs((s32)&ref, 8);
     }
 }
 
@@ -1591,7 +1591,7 @@ s32 flamethrower_hitObjects(CharacterFlamethrowerActor *actor) {
 
 /*
  * Jet update callback, active while the owner's mv->unk58 is 1: the swarm actors of types 0x15-0x17 that
- * a point touches are hit (func_15168B10 message 0x18), get model 5 and go into state 4.
+ * a point touches are hit (effect_setObjectType message 0x18), get model 5 and go into state 4.
  */
 s32 flamethrower_burnSwarm(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet = actor->state;
@@ -1624,13 +1624,13 @@ s32 flamethrower_burnSwarm(CharacterFlamethrowerActor *actor) {
     if (&points) { // matching: address-taken points stays in its stack slot
     }
     for (i = 0; i < 3; i++) {
-        head = (SwarmActor *)D_800DCE50[0][lists[i]]; // flat index over both rows
+        head = (SwarmActor *)gObjectLists[0][lists[i]]; // flat index over both rows
         if (head != NULL) {
             node = head;
             j = actor->head.end;
-            D_800DD190++;
+            gObjectWalkDepth++;
             while (node != NULL) {
-                D_800DD198[D_800DD190] = node->header.next;
+                gObjectWalkNext[gObjectWalkDepth] = node->header.next;
                 nx = node->x;
                 ny = node->y;
                 nz = node->z;
@@ -1646,7 +1646,7 @@ s32 flamethrower_burnSwarm(CharacterFlamethrowerActor *actor) {
                     dz = pos.z - nz;
                     if (dx * dx + dy * dy + dz * dz < r * r + 900.0f) {
                         swarm_loadModel(5);
-                        func_15168B10(&node->header, 0x18);
+                        effect_setObjectType(&node->header, 0x18);
                         node->modelIndex = 5;
                         node->vertices = gEffectModelSlots[5].unk8;
                         node->flags = 9;
@@ -1657,9 +1657,9 @@ s32 flamethrower_burnSwarm(CharacterFlamethrowerActor *actor) {
                         node->state = 4;
                     }
                 }
-                node = D_800DD198[D_800DD190];
+                node = gObjectWalkNext[gObjectWalkDepth];
             }
-            D_800DD190--;
+            gObjectWalkDepth--;
         }
     }
     return 1;
@@ -1766,7 +1766,7 @@ void flamethrower_scatterParticles(CharacterFlamethrowerActor *actor, Vec3f *end
 }
 
 
-/* Emits spriteAccum sprites (func_15167D84) flying from the actor towards random points around `end`. */
+/* Emits spriteAccum sprites (effect_spawnBillboard) flying from the actor towards random points around `end`. */
 void flamethrower_emitSprites(CharacterFlamethrowerActor *actor, Vec3f *end) {
     f32 speed;
     BillboardTemplate packet;
@@ -1823,7 +1823,7 @@ void flamethrower_emitSprites(CharacterFlamethrowerActor *actor, Vec3f *end) {
         packet.accelY = func_150ADA20() % (preset->acceleration_range + 1) + preset->acceleration;
         packet.fadeStep = func_150ADA20() % (preset->fade_range + 1) + preset->fade;
         packet.width = packet.height = func_150ADA20() % (preset->size_range + 1) + preset->size;
-        func_15167D84(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind);
+        effect_spawnBillboard(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind);
         jet->spriteAccum -= 1.0f;
     } while (jet->spriteAccum > 1.0f);
 }
@@ -1990,7 +1990,7 @@ CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlam
         initial.flags = flag32 | flag2 | flag4 | flag8;
         initial.sparkTimer = 0;
         initial.timer151 = 0;
-        result = func_15147A80(&spawn, extraSize + 0x158, sizeof(FlamePoint), 0xC,
+        result = effect_newEffectObj(&spawn, extraSize + 0x158, sizeof(FlamePoint), 0xC,
                                0xC, 0xC, 0, 0, 0, arg2, arg3);
         if (result != NULL) {
             state = result->state;
@@ -2021,7 +2021,7 @@ void flamethrower_stopFlames(Actor *owner) {
     if (owner != NULL) {
         ref.actor = owner;
         ref.uniqueId = owner->unique_id;
-        func_15147D64((s32)&ref, 0x26);
+        effect_sendEventToEffectObjs((s32)&ref, 0x26);
     }
 }
 
@@ -2032,7 +2032,7 @@ void flamethrower_onFlameMessage(CharacterFlamethrowerActor *actor, ActorMsg *ms
 
     if (kind == 0 || kind == 2 || kind == 0x26) {
         if (msg->ref.actor == ref->actor || msg->ref.uniqueId == ref->uniqueId) {
-            func_1516972C(&actor->head.header);
+            effect_destroyObject(&actor->head.header);
         }
     } else if (kind == 0x2D) {
         if (ref->actor == msg->swap.actorA) {
@@ -2046,16 +2046,16 @@ void flamethrower_onFlameMessage(CharacterFlamethrowerActor *actor, ActorMsg *ms
 }
 
 
-/* Flame destroy: callbacks, then func_151478F4. */
+/* Flame destroy: callbacks, then effect_defaultDestroyEffectObj. */
 void flamethrower_destroyFlame(CharacterFlamethrowerActor *actor) {
     flamethrower_releaseFlame(actor);
-    func_151478F4(actor);
+    effect_defaultDestroyEffectObj(actor);
 }
 
-/* Flame destroy: callbacks, then func_15147928. */
+/* Flame destroy: callbacks, then effect_defaultFreeEffectObj. */
 void flamethrower_freeFlame(CharacterFlamethrowerActor *actor) {
     flamethrower_releaseFlame(actor);
-    func_15147928(actor);
+    effect_defaultFreeEffectObj(actor);
 }
 
 
@@ -2073,7 +2073,7 @@ void flamethrower_releaseFlame(CharacterFlamethrowerActor *actor) {
     }
     light = flame->light;
     if (light != NULL) {
-        func_1516972C(light);
+        effect_destroyObject(light);
     }
 }
 

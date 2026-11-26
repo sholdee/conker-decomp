@@ -121,7 +121,7 @@ void weapon_getAttachmentPos(Actor *obj, s16 setId, Vec3f *out) {
     }
 }
 
-/* Like weapon_fireAttachedGun, but spawns its shot through func_150F7470. */
+/* Like weapon_fireAttachedGun, but spawns its shot through effect_spawnProjectile. */
 void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f position;
     Vec3f endpoint;
@@ -161,7 +161,7 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
         }
 
         randomWord = func_150ADA20();
-        func_150F7470(&position, &direction, value0, value1, hasValue1, NULL, 54.00000381f, 0.01851851679f, 300.0f,
+        effect_spawnProjectile(&position, &direction, value0, value1, hasValue1, NULL, 54.00000381f, 0.01851851679f, 300.0f,
                       obj, 1, 1, 1, 0, 0x1A, 1, (randomWord % 5U) + 807, 0, arg1, arg2);
 
         if (valid) {

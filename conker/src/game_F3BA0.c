@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /*
- * Two effects that character-watcher actions (D_8008AFD0) keep alive around a character:
+ * Two effects that character-watcher actions (gWatcherActions) keep alive around a character:
  * a flickering sprite on the floor below it, and an emitter of particles that rise from it
  * to the surface above. Each frame the action sets the effect's keepAlive flag; the effect's
  * own update clears it and dies once a frame passes without it.
@@ -25,7 +25,7 @@ struct Watcher {
 
 void *memcpy(void *, const void *, u32);
 
-static Vec3f D_800887E0 = { 0.0f, 0.0f, 0.0f }; /* the point below the character's root */
+static Vec3f gWatcherRootOffset = { 0.0f, 0.0f, 0.0f }; /* the point below the character's root */
 /*
  * Heights above the character: where the ceiling ray-cast starts, and the ceiling used when it hits
  * nothing. They are loaded from .rodata (a 5000.0f literal would be built with lui); IDO 5.3 puts a
@@ -37,13 +37,13 @@ const struct CeilingProbe {
 } D_800A0450 = { 5000.0f, 5000.0f };
 
 /* Watcher action: keeps the floor sprite alive, creating it on first use. */
-void func_150C66F0(Watcher *watcher) {
+void effect_keepWatcherFloorSprite(Watcher *watcher) {
     if (watcher->effects.sprite != NULL) {
         SpriteFlicker *flicker = &watcher->effects.sprite->flicker;
 
         flicker->keepAlive = 1;
     } else {
-        watcher->effects.sprite = func_150C6D90(watcher);
+        watcher->effects.sprite = effect_createFloorFlickerSprite(watcher);
     }
 }
 
@@ -51,7 +51,7 @@ void func_150C66F0(Watcher *watcher) {
  * Sprite update: eases the animation speed toward the flicker target, re-picking the target
  * at random intervals. Returns whether the watcher refreshed keepAlive since the last call.
  */
-s32 func_150C673C(FlickerSprite *sprite) {
+s32 effect_updateFlickerSprite(FlickerSprite *sprite) {
     s8 alive;
     SpriteFlicker *flicker;
 
@@ -71,7 +71,7 @@ s32 func_150C673C(FlickerSprite *sprite) {
 }
 
 /* Sprite expiry: detaches the sprite from its watcher and clears its handlers. */
-s32 func_150C682C(FlickerSprite *sprite) {
+s32 effect_expireFlickerSprite(FlickerSprite *sprite) {
     WatcherEffects *effects = &((Watcher *)sprite->flicker.owner)->effects;
 
     effects->sprite = NULL;
@@ -82,7 +82,7 @@ s32 func_150C682C(FlickerSprite *sprite) {
 }
 
 /* Watcher action: keeps the rising-particle emitter alive, creating it on first use. */
-void func_150C6870(Watcher *watcher) {
+void effect_keepWatcherEmitter(Watcher *watcher) {
     Actor *character = watcher->watcher.character;
 
     if (watcher->effects.emitter != NULL) {
@@ -90,7 +90,7 @@ void func_150C6870(Watcher *watcher) {
 
         link->keepAlive = 1;
     } else {
-        watcher->effects.emitter = func_150C68C4(character, watcher);
+        watcher->effects.emitter = effect_attachRisingEmitter(character, watcher);
     }
 }
 
@@ -98,7 +98,7 @@ void func_150C6870(Watcher *watcher) {
  * Attaches an emitter to the character; its particles rise to the surface found above the
  * character (or 5000 units up when there is none).
  */
-WatcherEmitter *func_150C68C4(Actor *character, Watcher *watcher) {
+WatcherEmitter *effect_attachRisingEmitter(Actor *character, Watcher *watcher) {
     BloodDripDesc desc;
     WatcherEmitterLink link;
     WatcherEmitter *emitter;
@@ -140,7 +140,7 @@ WatcherEmitter *func_150C68C4(Actor *character, Watcher *watcher) {
 }
 
 /* WatcherEmitter func 5: spawns one rising particle at (x, y, z), drifting against the emitter's motion. */
-void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, WatcherEmitter *emitter) {
+void effect_spawnRisingParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, WatcherEmitter *emitter) {
     ParticleDesc desc;
     RiseParticle *particle;
     RiseMotion motion;
@@ -202,7 +202,7 @@ void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, WatcherEmitter *
 }
 
 /* WatcherEmitter callback 2: returns whether the watcher refreshed keepAlive since the last call. */
-s32 func_150C6D1C(WatcherEmitter *emitter) {
+s32 effect_isWatcherEmitterAlive(WatcherEmitter *emitter) {
     s32 alive = 1;
 
     if (!emitter->link.keepAlive) {
@@ -213,7 +213,7 @@ s32 func_150C6D1C(WatcherEmitter *emitter) {
 }
 
 /* WatcherEmitter teardown (D_80089AAC[3]): detaches the emitter from its watcher. */
-void func_150C6D40(WatcherEmitter *emitter) {
+void effect_destroyWatcherEmitter(WatcherEmitter *emitter) {
     WatcherEffects *effects = &((Watcher *)emitter->link.owner)->effects;
 
     effects->emitter = NULL;
@@ -221,7 +221,7 @@ void func_150C6D40(WatcherEmitter *emitter) {
 }
 
 /* WatcherEmitter teardown (D_80089AD4[3]): detaches the emitter from its watcher. */
-void func_150C6D68(WatcherEmitter *emitter) {
+void effect_freeWatcherEmitter(WatcherEmitter *emitter) {
     WatcherEffects *effects = &((Watcher *)emitter->link.owner)->effects;
 
     effects->emitter = NULL;
@@ -232,7 +232,7 @@ void func_150C6D68(WatcherEmitter *emitter) {
  * Creates the flickering sprite on the floor below the character (at its first bone when it
  * has a skeleton), colored by func_151D8E20(). Returns NULL when there is no floor within 200 units.
  */
-FlickerSprite *func_150C6D90(Watcher *watcher) {
+FlickerSprite *effect_createFloorFlickerSprite(Watcher *watcher) {
     FlickerSprite *sprite;
     Vec3f pos;
     Actor *character;
@@ -240,7 +240,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
     sprite = NULL;
     character = watcher->watcher.character;
     if (character->ob_matrix_ptr) {
-        Vec3f origin = D_800887E0;
+        Vec3f origin = gWatcherRootOffset;
 
         func_15143134(&origin, &pos, character->ob_matrix_ptr);
     } else {

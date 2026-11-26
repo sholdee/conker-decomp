@@ -9,10 +9,10 @@ static const Vec3f D_800A1CE4 = { 30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CF0 = { -30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CFC[3] = { { -31.0f, -6.0f, 24.0f }, { 31.0f, -6.0f, 24.0f }, { 1.0f, -51.0f, 53.0f } };
 
-u8 D_80088B60 = 0;
+u8 gLineEmitterStarted = 0;
 
 /* Spawns the burst effect on actor: two sparks and two glows that follow its second matrix. */
-void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
+void effect_spawnDelayedBurst(Actor *actor, u8 owner, s32 kind) {
     BurstEffect *effect;
     BurstData data;
     BurstData *burst;
@@ -23,7 +23,7 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
     data.sparks[1] = NULL;
     data.glows[0] = NULL;
     data.glows[1] = NULL;
-    effect = func_15149130(70, -1, 0x4D, -1, 1, 0x33, sizeof(data), owner, kind);
+    effect = effect_newTimedEffect(70, -1, 0x4D, -1, 1, 0x33, sizeof(data), owner, kind);
     if (effect != NULL) {
         burst = &effect->data;
         memcpy(burst, &data, sizeof(data));
@@ -172,7 +172,7 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
  * Burst effect update: ends when the owner is gone, keeps the sparks and glows on the owner's
  * second matrix (hiding them while it has none), and shows them once the effect is 10 frames old.
  */
-void func_150FA1B8(BurstEffect *effect) {
+void effect_updateDelayedBurst(BurstEffect *effect) {
     Actor *actor;
     BurstData *burst;
 
@@ -402,32 +402,32 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
     }
 }
 
-/* Data of the emitter effect started by func_150FAA40 and updated by func_150FAAEC. */
+/* Data of the emitter effect started by effect_startLineEmitter and updated by effect_updateLineEmitter. */
 typedef struct {
     /* 0x00 */ TriggerZone *from; /* endpoints, resolved with func_1514470C */
     /* 0x04 */ TriggerZone *to;
     /* 0x08 */ f32 pending; /* fractional count of spawns due */
 } LineEmitterData;
 
-/* Timed effect of func_150FAAEC. */
+/* Timed effect of effect_updateLineEmitter. */
 struct LineEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ LineEmitterData data;
 };
 
 /* Starts the (single) emitter effect between zones records 35 and 34. */
-void func_150FAA40(u8 owner, s32 kind) {
+void effect_startLineEmitter(u8 owner, s32 kind) {
     LineEmitterData data;
     LineEmitter *effect;
 
-    if (D_80088B60 == 0) {
+    if (gLineEmitterStarted == 0) {
         data.from = &zones[35];
         data.to = &zones[34];
         data.pending = 0.0f;
 
-        effect = func_15149130(300, -1, 0x57, -1, 0, 0x46, sizeof(data), owner, kind);
+        effect = effect_newTimedEffect(300, -1, 0x57, -1, 0, 0x46, sizeof(data), owner, kind);
         if (effect != NULL) {
-            D_80088B60 = 1;
+            gLineEmitterStarted = 1;
         }
         if (effect != NULL) { // matching: a second test; one merged if mismatches
             memcpy(&effect->data, &data, sizeof(data));
@@ -436,7 +436,7 @@ void func_150FAA40(u8 owner, s32 kind) {
 }
 
 /* Emitter update: spawns func_150F4570 effects between the two endpoints, 0.08-0.26 per frame (times gFrameDelta). */
-void func_150FAAEC(LineEmitter *effect) {
+void effect_updateLineEmitter(LineEmitter *effect) {
     LineEmitterData *data;
     Vec3f from;
     Vec3f to;
@@ -460,27 +460,27 @@ void func_150FAAEC(LineEmitter *effect) {
     }
 }
 
-/* Event handler: events 0x4E and 0x4F call func_1516972C on the object. */
+/* Event handler: events 0x4E and 0x4F call effect_destroyObject on the object. */
 void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event) {
     if ((event == 0x4E) || (event == 0x4F)) {
-        func_1516972C(obj);
+        effect_destroyObject(obj);
     }
 }
 
-/* Calls light_setGroupDisabled for 8 and 0xB, then func_151494E0 with zones record 25 (0x30) and 0x4D. */
+/* Calls light_setGroupDisabled for 8 and 0xB, then effect_sendEventToTimedEffects with zones record 25 (0x30) and 0x4D. */
 void func_150FAD28(void) {
     light_setGroupDisabled(8, 0);
     light_setGroupDisabled(0xB, 1);
-    func_151494E0((s32)&zones[25], 0x30);
-    func_151494E0(0, 0x4D);
+    effect_sendEventToTimedEffects((s32)&zones[25], 0x30);
+    effect_sendEventToTimedEffects(0, 0x4D);
 }
 
-/* Counterpart of func_150FAD28: light_setGroupDisabled for 8 and 7, func_151494E0 with record 25 (0x31) and 0x4C. */
+/* Counterpart of func_150FAD28: light_setGroupDisabled for 8 and 7, effect_sendEventToTimedEffects with record 25 (0x31) and 0x4C. */
 void func_150FAD78(void) {
     light_setGroupDisabled(8, 1);
     light_setGroupDisabled(7, 0);
-    func_151494E0((s32)&zones[25], 0x31);
-    func_151494E0(0, 0x4C);
+    effect_sendEventToTimedEffects((s32)&zones[25], 0x31);
+    effect_sendEventToTimedEffects(0, 0x4C);
 }
 
 struct Obj150FADC8 {
@@ -497,7 +497,7 @@ void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event) {
     }
 }
 
-/* Objects created by func_15157010 / sprite_newScreenSprite; this caller stores a tag in each. */
+/* Objects created by effect_newModelEffect / sprite_newScreenSprite; this caller stores a tag in each. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x120];
     /* 0x120 */ s16 tag;
@@ -509,7 +509,7 @@ typedef struct {
 } TaggedSprite;
 
 /*
- * Spawns a func_15157010 object and a row of 8 sprite_newScreenSprite sprites (the first with kind 0xCE,
+ * Spawns a effect_newModelEffect object and a row of 8 sprite_newScreenSprite sprites (the first with kind 0xCE,
  * the rest 0xC5/0xC4), each tagged with duration in its data.
  */
 void func_150FAE18(s16 duration, u8 owner, s32 kind) {
@@ -553,7 +553,7 @@ void func_150FAE18(s16 duration, u8 owner, s32 kind) {
         model.pos = D_800A5480;
         model.fadeStart = 10;
         model.fadeRate = 25;
-        spawned = func_15157010(&model, 0, 1.0, 0, 0, 2, owner, kind);
+        spawned = effect_newModelEffect(&model, 0, 1.0, 0, 0, 2, owner, kind);
         if (spawned != NULL) {
             memcpy(&((TaggedModel *)spawned)->tag, &tag, sizeof(tag));
         }
@@ -617,16 +617,16 @@ s32 func_150FB188(ModelEffect *fx) {
     xform[2] = 0.0f;
     xform[3] = 0.3f;
     xform[4] = 0.3f;
-    func_15157DEC(fx, xform);
+    effect_setModelEffectRootXform(fx, xform);
     return 1;
 }
 
-/* Passes func_151D710C's result, with the same remaining arguments, to func_15157F80. */
+/* Passes func_151D710C's result, with the same remaining arguments, to effect_preDrawModelEffectOrtho. */
 Gfx *func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
-    return func_15157F80(func_151D710C(gfx, fx, view, needSync, proceed), fx, view, needSync, proceed);
+    return effect_preDrawModelEffectOrtho(func_151D710C(gfx, fx, view, needSync, proceed), fx, view, needSync, proceed);
 }
 
-/* Layout of Effect (game_1844C0.c), as far as func_150FB29C uses it. */
+/* Layout of Effect (game_1844C0.c), as far as effect_updateFadeInEffect uses it. */
 struct FadeInEffect {
     /* 0x000 */ u8 pad0[0x16];
     /* 0x016 */ s16 lifetime;  /* EffectParams.lifetime, counts down */
@@ -643,7 +643,7 @@ struct FadeInEffect {
  * Fades `alpha` in: while `timer` (counting down from `duration`) is within its first `fadeLength`
  * ticks, alpha ramps up by `fadeRate` per elapsed tick; after that it is fully opaque.
  */
-void func_150FB240(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeRate) {
+void effect_fadeInAlpha(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeRate) {
     if (duration - fadeLength < timer) {
         *alpha = (duration - timer) * fadeRate;
     } else {
@@ -651,13 +651,13 @@ void func_150FB240(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeR
     }
 }
 
-/* D_8008AD90 effect update callback: fades the effect's alpha in over its first fadeStart ticks. */
-s32 func_150FB29C(FadeInEffect *effect) {
-    func_150FB240(&effect->alpha, effect->lifetime, effect->duration, effect->fadeStart, effect->fadeRate);
+/* gModelEffectUpdateFuncs effect update callback: fades the effect's alpha in over its first fadeStart ticks. */
+s32 effect_updateFadeInEffect(FadeInEffect *effect) {
+    effect_fadeInAlpha(&effect->alpha, effect->lifetime, effect->duration, effect->fadeStart, effect->fadeRate);
     return 1;
 }
 
-/* Layout of ScreenSprite (game/Sprite/ScreenSprite/screensprite.c), as far as func_150FB2E0 uses it. */
+/* Layout of ScreenSprite (game/Sprite/ScreenSprite/screensprite.c), as far as effect_updateFadeInSprite uses it. */
 struct FadeInSprite {
     /* 0x00 */ u8 pad0[0x22];
     /* 0x22 */ s16 timer;     /* ScreenSpriteInfo.timer, counts down */
@@ -671,8 +671,8 @@ struct FadeInSprite {
 };
 
 /* gScreenSpriteUpdates sprite callback: fades the sprite's alpha in over its first fadeStart ticks. */
-s32 func_150FB2E0(FadeInSprite *sprite) {
-    func_150FB240(&sprite->alpha, sprite->timer, sprite->duration, sprite->fadeStart, sprite->fadeRate);
+s32 effect_updateFadeInSprite(FadeInSprite *sprite) {
+    effect_fadeInAlpha(&sprite->alpha, sprite->timer, sprite->duration, sprite->fadeStart, sprite->fadeRate);
     return 1;
 }
 

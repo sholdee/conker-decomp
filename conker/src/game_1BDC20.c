@@ -12,7 +12,7 @@ DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
     ref.actor = link->actor;
     ref.uniqueId = link->actor->unique_id;
     func_15191B8C(&ref, 0xE);
-    emitter = func_15167A68(0x20, list, extraSize + sizeof(DripEmitter), 1, owner, 1);
+    emitter = effect_newObject(0x20, list, extraSize + sizeof(DripEmitter), 1, owner, 1);
     if (emitter == NULL) {
         return NULL;
     }
@@ -26,16 +26,16 @@ DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
     return emitter;
 }
 
-/* Type 0x20 handler: releases the drops, then func_15169804. */
+/* Type 0x20 handler: releases the drops, then effect_defaultDestroy. */
 void func_15190840(DripEmitter *emitter) {
     func_15191400(emitter);
-    func_15169804(&emitter->header);
+    effect_defaultDestroy(&emitter->header);
 }
 
-/* Type 0x20 handler: releases the drops, then func_15169824. */
+/* Type 0x20 handler: releases the drops, then effect_defaultFree. */
 void func_1519086C(DripEmitter *emitter) {
     func_15191400(emitter);
-    func_15169824(&emitter->header);
+    effect_defaultFree(&emitter->header);
 }
 
 /*
@@ -201,14 +201,14 @@ void func_15190898(DripEmitter *emitter) {
                 hasTimer = 0;
                 timer = 300;
             }
-            task = func_151491F4(timer, -1, 13, hasTimer, 8, sizeof(ActorLink), 0xFF, 0);
+            task = effect_newTimedEffectNoDraw(timer, -1, 13, hasTimer, 8, sizeof(ActorLink), 0xFF, 0);
             if (task != NULL) {
                 memcpy(&task->link, &emitter->link, sizeof(ActorLink));
             }
         }
     }
     if (done) {
-        func_1516972C(&emitter->header);
+        effect_destroyObject(&emitter->header);
     }
 }
 
@@ -429,7 +429,7 @@ void func_151918BC(DripRetryTask *task) {
         func_15190770(link, 0, task->base.header.owner, task->base.header.kind);
     }
     if (done) {
-        func_1516972C(&task->base.header);
+        effect_destroyObject(&task->base.header);
     }
 }
 
@@ -454,12 +454,12 @@ void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg) {
         }
         if (ref->uniqueId == emitter->link.actorId) {
         hit:
-            func_1516972C(&emitter->header);
+            effect_destroyObject(&emitter->header);
         }
     } else if (msg == 0x4E) {
-        func_1516972C(&emitter->header);
+        effect_destroyObject(&emitter->header);
     } else {
-        func_15169850((s32)ref, msg, &emitter->link.actor, &emitter->link.actorId, emitter);
+        effect_handleOwnerActorEvent((s32)ref, msg, &emitter->link.actor, &emitter->link.actorId, emitter);
     }
 }
 
@@ -475,10 +475,10 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
         }
         if (ref->uniqueId == link->actorId) {
         hit:
-            func_1516972C(&task->base.header);
+            effect_destroyObject(&task->base.header);
         }
     } else if (msg == 0x4E) {
-        func_1516972C(&task->base.header);
+        effect_destroyObject(&task->base.header);
     } else if (msg == 0xD) {
         if (ref->actor == link->actor) {
             goto hit2;
@@ -491,18 +491,18 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
         task->base.header.state = 100;
     skip:;
     } else {
-        func_15169850((s32)ref, msg, &link->actor, &link->actorId, task);
+        effect_handleOwnerActorEvent((s32)ref, msg, &link->actor, &link->actorId, task);
     }
 }
 
 
-/* Sends msg about ref's actor through func_151494E0 and to every object of type 0x20. */
+/* Sends msg about ref's actor through effect_sendEventToTimedEffects and to every object of type 0x20. */
 void func_15191B8C(ref, msg)
     ActorRef *ref;
     u8 msg;
 {
     const s32 types[1] = { 0x20 };
 
-    func_151494E0((s32)ref, msg);
-    func_15169260(types, 1, (s32)ref, msg);
+    effect_sendEventToTimedEffects((s32)ref, msg);
+    effect_sendEventToTypes(types, 1, (s32)ref, msg);
 }

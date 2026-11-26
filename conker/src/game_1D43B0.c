@@ -134,7 +134,7 @@ s32 func_151A73EC(BloodDebrisParticle *particle) {
 
     if (particle->head.lifetime < 32) {
         if (data->trail != NULL) {
-            func_1516972C(&data->trail->trail.header);
+            effect_destroyObject(&data->trail->trail.header);
             data->trail = NULL;
         }
     }
@@ -152,7 +152,7 @@ s32 func_151A743C(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY
     data = &particle->debris;
     particle->head.pos.y = particle->head.radius + floorY;
     if (data->trail != NULL) {
-        func_1516972C(&data->trail->trail.header);
+        effect_destroyObject(&data->trail->trail.header);
         data->trail = NULL;
     }
     if (data->stopSpeed < particle->head.vel.y) {
@@ -276,7 +276,7 @@ void func_151A7908(BloodDebrisParticle *particle) {
     DebrisData *data = &particle->debris;
 
     if (data->trail != NULL) {
-        func_1516972C(&data->trail->trail.header);
+        effect_destroyObject(&data->trail->trail.header);
         data->trail = NULL;
     }
 }

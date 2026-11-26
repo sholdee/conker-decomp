@@ -667,7 +667,7 @@ typedef struct {
     s32 types[8];
 } AimNodeTypes;
 
-/* Entries of the D_800DCE50 per-type lists. */
+/* Entries of the gObjectLists per-type lists. */
 typedef struct AimNode {
     /* 0x00 */ u8 pad0[8];
     /* 0x08 */ struct AimNode *next;
@@ -688,7 +688,7 @@ static AimNodeTypes D_800843E0 = { { 0x0A, 0x15, 0x16, 0x17, 0x13, 0x14, 0x19, 0
 /*
  * Picks the point object objIndex should aim bone `bone` at, writing it to out (or -99999 when there is none):
  * its camera's target, a fixed target mode, the held object for anim 0x81, the nearest other object,
- * the nearest AimPoint, or the nearest node from the D_800DCE50 lists, each within +-range degrees.
+ * the nearest AimPoint, or the nearest node from the gObjectLists lists, each within +-range degrees.
  */
 void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 preferId, s32 axisMode) {
     Actor *obj;
@@ -810,7 +810,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         for (list = 0; list < 2; list++) {
             for (i = 0; i < 8; i++) {
                 type = types.types[i];
-                node = (AimNode *)D_800DCE50[list][type];
+                node = (AimNode *)gObjectLists[list][type];
                 while (node != NULL) {
                     if (type == 25 || type == 72) {
                         extern s32 gAimPointCount; // matching: this redeclaration shifts IDO's scheduling of the loop

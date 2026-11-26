@@ -3,21 +3,21 @@
 #include "variables.h"
 
 
-/* Effect callback: hands func_15169850 the emitter's target reference. */
+/* Effect callback: hands effect_handleOwnerActorEvent the emitter's target reference. */
 void func_150C09B0(PoolEmitter *emitter, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &emitter->desc.target, &emitter->desc.targetId, emitter);
+    effect_handleOwnerActorEvent(arg1, arg2, &emitter->desc.target, &emitter->desc.targetId, emitter);
 }
 
 /* Emitter destructors: free the live particles, then the emitter. */
 void func_150C09F0(PoolEmitter *emitter) {
     func_150C0A48(emitter);
-    func_15169804(&emitter->header);
+    effect_defaultDestroy(&emitter->header);
 }
 
 
 void func_150C0A1C(PoolEmitter *emitter) {
     func_150C0A48(emitter);
-    func_15169824(&emitter->header);
+    effect_defaultFree(&emitter->header);
 }
 
 /* Frees every live particle of the emitter. */
@@ -25,7 +25,7 @@ void func_150C0A48(PoolEmitter *emitter) {
     s16 i;
 
     for (i = emitter->activeHead; i != -1; i = emitter->slots[i].next) {
-        func_1516972C(&emitter->slots[i].particle->head.header);
+        effect_destroyObject(&emitter->slots[i].particle->head.header);
     }
 }
 
@@ -45,7 +45,7 @@ PoolEmitter *func_150C0AC0(PoolEmitterDesc *desc, s32 arg1, s32 arg2) {
         }
     }
 
-    emitter = func_15167A68(0x25, arg2, size, 1, (u8)arg1, 1);
+    emitter = effect_newObject(0x25, arg2, size, 1, (u8)arg1, 1);
     if (emitter == NULL) {
         return NULL;
     }
@@ -192,7 +192,7 @@ void func_150C0C38(PoolEmitter *emitter) {
         }
     }
     if (kill) {
-        func_1516972C(&emitter->header);
+        effect_destroyObject(&emitter->header);
     }
 }
 

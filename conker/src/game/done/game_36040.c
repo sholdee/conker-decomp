@@ -4,12 +4,12 @@
 #include "variables.h"
 
 
-void func_15008B90(void) {
-    func_15008BB0();
+void effect_initQueue(void) {
+    effect_allocQueue();
 }
 
-void func_15008BB0(void) {
-    D_800D98E0 = func_1518AADC(12, 1000, 1);
+void effect_allocQueue(void) {
+    D_800D98E0 = effect_newQueue(12, 1000, 1);
 }
 
 void func_15008BE0(void) {

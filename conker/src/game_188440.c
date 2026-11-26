@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Data copied into a func_151491F4 particle at offset 0x28 by func_1515AF90. */
+/* Data copied into a effect_newTimedEffectNoDraw particle at offset 0x28 by func_1515AF90. */
 typedef struct {
     /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 unkC;
@@ -12,7 +12,7 @@ typedef struct {
 
 
 /*
- * With a 1-in-16 chance, spawns a particle (func_151491F4) 107-2010 units from the player's camera,
+ * With a 1-in-16 chance, spawns a particle (effect_newTimedEffectNoDraw) 107-2010 units from the player's camera,
  * at an angle within 20 units of its yaw (unk380, converted from degrees). The spot needs a floor
  * above the eye; the particle sits on the floor at most 250 units below the eye (else at that depth).
  */
@@ -78,7 +78,7 @@ void func_1515AF90(s16 player) {
         effect.unkC = (func_150ADA68() * 0.0f + 195.0f) * 0.001000000047f;
         effect.unk10 = 0.0f;
         if (valid) {
-            particle = func_151491F4((func_150ADA20() % 61U) + 5, -1, 12, 1, 7, 0x18, 0xFF, 0);
+            particle = effect_newTimedEffectNoDraw((func_150ADA20() % 61U) + 5, -1, 12, 1, 7, 0x18, 0xFF, 0);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0x28, &effect, sizeof(effect));
             }
@@ -183,7 +183,7 @@ void func_1515B5F4(s16 player) {
 void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type) {
     if (type == MSG_REMOVE_PLAYER_SPRITES) {
         if (sprite->data.player == payload[0]) {
-            func_1516972C(&sprite->header);
+            effect_destroyObject(&sprite->header);
         }
     }
 }

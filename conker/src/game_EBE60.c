@@ -56,7 +56,7 @@ void func_150BEACC(s32 actor, s32 side, s32 strength) {
             func_15141F78(0xB, &hit, strength * (1.0f / 85.0f) * 3.177f,
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 76) {
-                func_15142180(2, &pos, hit.material, 3.232f, 2.436f);
+                effect_spawnSplashSpray(2, &pos, hit.material, 3.232f, 2.436f);
             }
         }
     }
@@ -113,7 +113,7 @@ void func_150BED4C(s32 actor, s32 side, s32 strength) {
             func_15141F78(0xB, &hit, strength * (1.0f / 85.0f) * 2,
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 76) {
-                func_15142180(2, &pos, hit.material, 3.232f, 2.436f);
+                effect_spawnSplashSpray(2, &pos, hit.material, 3.232f, 2.436f);
             }
         }
     }

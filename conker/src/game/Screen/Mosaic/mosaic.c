@@ -175,7 +175,7 @@ void screen_handleMosaicMessage(MosaicEffect *effect, ActorMsg *msg, u8 type) {
     } else if (type == 0) {
         object = msg->ref.actor;
         if (object == mosaic->owner || msg->ref.uniqueId == mosaic->ownerId) {
-            func_1516972C(&effect->header);
+            effect_destroyObject(&effect->header);
         }
     }
 }

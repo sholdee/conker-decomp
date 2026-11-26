@@ -8,7 +8,7 @@ struct ObjectPair {
 };
 
 /* Message 0x2D: swap the trigger's target between the two objects in the message. */
-void func_151906E0(PeriodicObject *self, ObjectPair *pair, u8 msg) {
+void effect_periodicTriggerMessage(PeriodicObject *self, ObjectPair *pair, u8 msg) {
     PeriodicTrigger *trigger = &self->trigger;
     Actor *a;
 
@@ -28,6 +28,6 @@ void func_1519072C(Actor *self) {
 
     ref.actor = self;
     ref.uniqueId = self->unique_id;
-    func_151D343C((s32)&ref, 0x2A);
+    effect_sendEventToFollowerGroups((s32)&ref, 0x2A);
     func_1518F45C((s32)&ref, 0x49);
 }

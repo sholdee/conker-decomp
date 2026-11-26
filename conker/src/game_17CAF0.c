@@ -411,7 +411,7 @@ void func_15150D1C(DecalSpray *config, u8 arg1, s32 arg2) {
     }
 }
 
-/* Spawns a random number of randomly rotated pieces (func_1518A3C0) flying out of config->pos. */
+/* Spawns a random number of randomly rotated pieces (effect_spawnTumblingPiece) flying out of config->pos. */
 void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
     Vec3f jitter;
     f32 width;
@@ -432,7 +432,7 @@ void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
                       &direction);
         jitter.x = func_150ADA68() * width - config->jitter;
         jitter.z = func_150ADA68() * width - config->jitter;
-        func_1518A3C0(&config->pos, &rotation,
+        effect_spawnTumblingPiece(&config->pos, &rotation,
                       func_150ADA68() * config->speedRange + config->speedBase,
                       &direction, &jitter,
                       func_150ADA68() * config->sizeRange + config->sizeBase,
@@ -835,7 +835,7 @@ void func_15152520(ModelBurst *config, u8 arg1, s32 arg2) {
         motion.rotVel.y = (func_150ADA68() * config->rotVelRange.y) + config->rotVelBase.y;
         motion.rotVel.z = (func_150ADA68() * config->rotVelRange.z) + config->rotVelBase.z;
         motion.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
-        func_15157898(&params, &motion, config->unk3C, (func_150ADA68() * config->unk44) + config->unk40, 0, 0, 0, arg1, arg2);
+        effect_newMovingModelEffect(&params, &motion, config->unk3C, (func_150ADA68() * config->unk44) + config->unk40, 0, 0, 0, arg1, arg2);
         count--;
     }
 }
@@ -993,7 +993,7 @@ void func_15152F70(SimplePuffSpray *config, u8 arg1) {
 }
 
 
-/* Spawns a random number of particles (func_15167D84) at config->position, each moving at a random
+/* Spawns a random number of particles (effect_spawnBillboard) at config->position, each moving at a random
  * yaw and pitch. Positions are integer units plus a 1/256 fraction. */
 void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2) {
     BillboardTemplate packet;
@@ -1043,7 +1043,7 @@ void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2) {
         packet.fadeStep = func_150ADA20() % (config->fadeRange + 1) + config->fadeBase;
         packet.width = func_150ADA20() % (config->widthRange + 1) + config->widthBase;
         packet.height = func_150ADA20() % (config->heightRange + 1) + config->heightBase;
-        func_15167D84(&packet, 0, 0, -1, arg1, arg2);
+        effect_spawnBillboard(&packet, 0, 0, -1, arg1, arg2);
         count--;
     }
 }

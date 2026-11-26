@@ -168,7 +168,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
             } else {
                 trailCameraMask = ~(1 << target->CameraPtr->CNumber) & 0xFF;
             }
-            func_15102B38(obj, (obj->character_type == 0x23) ? D_800A1E34[side] : D_800A1DD0[side], (obj->character_type == 0x23) ? &D_800A1E38[side] : &D_800A1DD4[side],
+            effect_spawnBoneBeamParticle(obj, (obj->character_type == 0x23) ? D_800A1E34[side] : D_800A1DD0[side], (obj->character_type == 0x23) ? &D_800A1E38[side] : &D_800A1DD4[side],
                           (obj->character_type == 0x23) ? &D_800A1E50[side] : &D_800A1DEC[side], &trailParams,
                           (func_150ADA20() % 3U) + 4, (func_150ADA20() % 101U) + 155, (func_150ADA68() * 1012.0f) + 1497.0f, &origin,
                           trailCameraMask, 0, -1, arg4, arg5);
@@ -262,7 +262,7 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
         state.otherUniqueId = 0xFF;
     }
 
-    obj = func_15149130(300, -1, 0x27, -1, 0, 0x25, 0x20, 0xFF, 1);
+    obj = effect_newTimedEffect(300, -1, 0x27, -1, 0, 0x25, 0x20, 0xFF, 1);
     if (obj != NULL) {
         dest = &obj->state;
         memcpy(dest, &state, sizeof(state));
@@ -349,10 +349,10 @@ void func_150FC818(TwoSidedEmitter *obj, ActorMsg *msg, u8 msgType) {
         msgObj = msg->ref.actor;
         owner = state->owner;
         if ((owner == msgObj) || (state->ownerUniqueId == msg->ref.uniqueId)) {
-            func_1516972C(&obj->base.header);
+            effect_destroyObject(&obj->base.header);
         } else if (state->other != NULL) {
             if ((msgObj == state->other) || (state->otherUniqueId == msg->ref.uniqueId)) {
-                func_1516972C(&obj->base.header);
+                effect_destroyObject(&obj->base.header);
             }
         }
     } else if (msgType == 0x2D) {

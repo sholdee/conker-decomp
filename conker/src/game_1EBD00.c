@@ -78,7 +78,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
         params.color1.blue = 0xFF;
         params.color1.alpha = 0xFF;
         params.mask = zone;
-        fx = func_15157010(&params, 0, 1.0f, 3, 0xFF, 0x18, 0xFF, 1);
+        fx = effect_newModelEffect(&params, 0, 1.0f, 3, 0xFF, 0x18, 0xFF, 1);
         if (fx != NULL) {
             // copies the whole 0x18-byte extension (extraSize above); a 0x18-byte Extra151BE850 grows the frame
             memcpy((u8 *)fx + 0x120, &extra, 0x18);
@@ -122,7 +122,7 @@ s32 func_151BEB20(struct S151BEB20 *arg0) {
     return 1;
 }
 
-/* Pre-draw callback (D_8008ADBC[0]): adds nothing and lets the model draw. */
+/* Pre-draw callback (gModelEffectPreDrawFuncs[0]): adds nothing and lets the model draw. */
 Gfx *func_151BEC94(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
     *proceed = TRUE;
     return gfx;
@@ -157,7 +157,7 @@ struct S151BECB8 {
 
 /*
  * Proximity check: for every active object whose bounding radius comes within 43 units of
- * params.pos, plays sound 0x511 and runs func_151BF340/func_151BF0C8/func_151BEEE0.
+ * params.pos, plays sound 0x511 and runs effect_showStatCounter/func_151BF0C8/func_151BEEE0.
  * Returns 0 if any object was in range, else 1.
  */
 s32 func_151BECB8(S151BECB8 *arg0) {
@@ -190,7 +190,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                     player_setStat(obj->playernumber, 3, params->unk10);
                     untouched = 0;
                     sound_play(0x511, 0x7D00, 0x40, 0, 0);
-                    func_151BF340(arg0->unkC, arg0->unk1);
+                    effect_showStatCounter(arg0->unkC, arg0->unk1);
                     func_151BF0C8(&params->pos);
                     kind = arg0->unk48;
                     switch (kind) {
@@ -365,14 +365,14 @@ void func_151BF0C8(Vec3f *pos) {
 }
 
 /* Shows the value of player_getStat(0, 3) (less one, capped at 99) as a two-digit counter that slides in. */
-void func_151BF340(u8 owner, s32 kind) {
+void effect_showStatCounter(u8 owner, s32 kind) {
     CounterDisplay init;
     CounterEffect *effect;
     s32 count;
     s32 digits[2];
     CounterDisplay *display;
 
-    func_151494E0(0, 0x57);
+    effect_sendEventToTimedEffects(0, 0x57);
     count = player_getStat(0, 3);
     if (count != 0) {
         count--;
@@ -387,7 +387,7 @@ void func_151BF340(u8 owner, s32 kind) {
     init.timer = 110.0f;
     init.plateau = sinf(1.905000091f);
     init.flags = 0;
-    effect = func_15149130(300, -1, 0x60, -1, 0, 0x49, sizeof(CounterDisplay), owner, kind);
+    effect = effect_newTimedEffect(300, -1, 0x60, -1, 0, 0x49, sizeof(CounterDisplay), owner, kind);
     if (effect != NULL) {
         display = &effect->display;
         memcpy(display, &init, sizeof(init));
@@ -438,7 +438,7 @@ void func_151BF340(u8 owner, s32 kind) {
             panelExtra.unk0 = D_800A5480;
             panelExtra.unkC = 0.3010000288f;
             panelExtra.unk10 = 0.3010000288f;
-            display->panel = func_15157010(&panelConfig, 0, 1.0f, 0, 0, 0x14, owner, kind);
+            display->panel = effect_newModelEffect(&panelConfig, 0, 1.0f, 0, 0, 0x14, owner, kind);
             if (display->panel != NULL) {
                 memcpy(&display->panel->extra, &panelExtra, sizeof(panelExtra));
             }
@@ -497,10 +497,10 @@ void func_151BF340(u8 owner, s32 kind) {
     }
 }
 
-/* Update of func_151BF340's counter. It waits until D_800C35EA != 1, screen_isIrisOpen(0) != 0, screen_getViewFadeAlpha(0) == 0
+/* Update of effect_showStatCounter's counter. It waits until D_800C35EA != 1, screen_isIrisOpen(0) != 0, screen_getViewFadeAlpha(0) == 0
  * and D_800BE9B4 == 0; then, as its 110-unit timer runs down by gFrameDelta, it slides in over the first 20.57
  * units, holds, slides out over the last 20.57 and ends the effect. */
-void func_151BF81C(CounterEffect *effect) {
+void effect_updateStatCounter(CounterEffect *effect) {
     f32 slide;
     CounterDisplay *display;
 
@@ -562,22 +562,22 @@ void func_151BF81C(CounterEffect *effect) {
 }
 
 /* Frees the counter's panel and digits. */
-void func_151BFB2C(CounterEffect *effect) {
+void effect_freeStatCounterParts(CounterEffect *effect) {
     u8 i;
     CounterDisplay *display = &effect->display;
 
     if (display->panel != NULL) {
-        func_1516972C(&display->panel->header);
+        effect_destroyObject(&display->panel->header);
     }
     for (i = 0; i < 2; i++) {
         if (display->digits[i] != NULL) {
-            func_1516972C(&display->digits[i]->header);
+            effect_destroyObject(&display->digits[i]->header);
         }
     }
 }
 
-/* Destructor of func_151BF340's counter effect. */
-void func_151BFBA4(CounterEffect *effect) {
-    func_151BFB2C(effect);
-    func_1514933C(&effect->base);
+/* Destructor of effect_showStatCounter's counter effect. */
+void effect_destroyStatCounter(CounterEffect *effect) {
+    effect_freeStatCounterParts(effect);
+    effect_defaultDestroyTimedEffect(&effect->base);
 }

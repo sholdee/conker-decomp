@@ -20,10 +20,10 @@ void colourfb_drawScreenEffects(s32 arg0) {
     u8 visible;
 
     for (list = 0; list < 2; list++) {
-        effect = (ScreenEffect *)D_800DCE50[list][OBJ_TYPE_SCREEN_EFFECT];
-        D_800DD190++;
-        for (; effect != NULL; effect = D_800DD198[D_800DD190]) {
-            D_800DD198[D_800DD190] = effect->next;
+        effect = (ScreenEffect *)gObjectLists[list][OBJ_TYPE_SCREEN_EFFECT];
+        gObjectWalkDepth++;
+        for (; effect != NULL; effect = gObjectWalkNext[gObjectWalkDepth]) {
+            gObjectWalkNext[gObjectWalkDepth] = effect->next;
             if (effect->desc.flags & 4) {
                 effect->desc.flags &= ~4;
                 continue;
@@ -44,9 +44,9 @@ void colourfb_drawScreenEffects(s32 arg0) {
         }
         {
             // matching: only a block-scope redeclaration (not a plain block or -= 1) schedules the decrement's lui first
-            extern s8 D_800DD190;
+            extern s8 gObjectWalkDepth;
 
-            D_800DD190--;
+            gObjectWalkDepth--;
         }
     }
 }
@@ -55,7 +55,7 @@ void colourfb_drawScreenEffects(s32 arg0) {
 ScreenEffect *colourfb_createScreenEffect(EffectDesc *desc, s32 dataSize, u8 owner, s32 list) {
     ScreenEffect *effect;
 
-    effect = func_15167A68(OBJ_TYPE_SCREEN_EFFECT, list, dataSize + sizeof(ScreenEffect), 1, owner, 1);
+    effect = effect_newObject(OBJ_TYPE_SCREEN_EFFECT, list, dataSize + sizeof(ScreenEffect), 1, owner, 1);
     if (effect == NULL) {
         return NULL;
     }
@@ -84,7 +84,7 @@ void colourfb_updateScreenEffect(ScreenEffect *effect) {
         }
     }
     if (finished) {
-        func_1516972C(effect);
+        effect_destroyObject(effect);
     }
 }
 
@@ -125,5 +125,5 @@ void colourfb_broadcastMessage(data, event)
 {
     const s32 kinds[1] = { OBJ_TYPE_SCREEN_EFFECT };
 
-    func_15169260(kinds, 1, data, event);
+    effect_sendEventToTypes(kinds, 1, data, event);
 }

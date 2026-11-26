@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_1944C0.c as void func_15169040(s32 event, u8 eventType). This file was compiled without
+/* Defined in game_1944C0.c as void effect_broadcastEvent(s32 event, u8 eventType). This file was compiled without
    a prototype: func_15146508 passes the two actors after the message as well. */
-void func_15169040();
+void effect_broadcastEvent();
 
 /* This file's .data: nine palettes of four RGB colours (func_151429E0). */
 static u8 D_8008A160[9 * 12] = {
@@ -1892,7 +1892,7 @@ u8 func_151464B8(ZoneNode *zone) {
     return ret;
 }
 
-/* Broadcasts message 45 (0x2D, an actor swap; see func_151419D0) for actors a and b. */
+/* Broadcasts message 45 (0x2D, an actor swap; see effect_timedHandlerMessage) for actors a and b. */
 void func_15146508(Actor *a, Actor *b) {
     ActorSwapMsg msg;
 
@@ -1900,7 +1900,7 @@ void func_15146508(Actor *a, Actor *b) {
     msg.actorB = b;
     msg.idA = a->unique_id;
     msg.idB = b->unique_id;
-    func_15169040(&msg, 45, a, b);
+    effect_broadcastEvent(&msg, 45, a, b);
 }
 
 /*

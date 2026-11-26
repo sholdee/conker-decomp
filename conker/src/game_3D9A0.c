@@ -7,7 +7,7 @@
 void func_150104F0(void) {
     WorldObject *temp_v0;
 
-    D_800D9950[0] = (D_800D9950[1] = (D_800D9950[2] = 0));
+    gMaterialGlowLevels[0] = (gMaterialGlowLevels[1] = (gMaterialGlowLevels[2] = 0));
     temp_v0 = gfx_findObjectById(0xF6);
     temp_v0->touch.f.a = 2.0f;
     D_80088980 = 0;
@@ -26,7 +26,7 @@ dummy_label_927029:
     tmp.boltTimer = 0;
     tmp.timer2 = 0;
 
-    effect = func_15149130(300, -1, 80, -1, 0, 61, 12, 255, 1);
+    effect = effect_newTimedEffect(300, -1, 80, -1, 0, 61, 12, 255, 1);
     if (effect != NULL) {
         memcpy(effect + 1, &tmp, sizeof(tmp));
     }

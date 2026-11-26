@@ -27,7 +27,7 @@ s32 func_151B8BE0(SteamParticle *particle, Vec3f *prevPos) {
     return func_151D9450(particle, prevPos);
 }
 
-/* Effect update (D_8008AD90): bobs the effect up and down while it spins about X and Z. */
+/* Effect update (gModelEffectUpdateFuncs): bobs the effect up and down while it spins about X and Z. */
 s32 func_151B8C54(BobEffect *effect) {
     EffectBob *bob = &effect->bob;
 

@@ -156,7 +156,7 @@ static EventHandler *gTimedEventProcs[] = {
     func_1506D4EC, event_stopHeadEffect, func_1506D4F4, func_1506D538,
     func_15074870, func_1506D950, func_1506D74C, event_setYGravityTenths,
     func_1507490C, event_dropHeldObject, func_1506D934, func_1506D950,
-    func_15155F3C, func_1506D958, func_150748F4, event_setImmune,
+    effect_rearmPlayerMarker, func_1506D958, func_150748F4, event_setImmune,
     func_1506DA94, event_startChasing, func_1506DB30, event_setBreakStun,
     event_setSpeed, event_setTaskInt2, event_setIntelHitRoute, func_1506DBA0,
     func_1506DC10, func_1506DBD4, func_15073D34, event_setTaskInt1,
@@ -1010,7 +1010,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
     switch (kind) {
     case 1:
         actor_runHitHandler(obj, 1, NULL);
-        func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
+        effect_attach(effect_newCharacterWatcher(obj, 1, 0), obj, 0x13);
         break;
     case 15:
         actor_runHitHandler(obj, 13, NULL);
@@ -1025,7 +1025,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
         break;
     case 0:
         actor_runHitHandler(obj, 8, NULL);
-        func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
+        effect_attach(effect_newCharacterWatcher(obj, 1, 0), obj, 0x13);
         break;
     }
     return (u8 *)obj;
@@ -1431,13 +1431,13 @@ void func_1506DE84(void) {
     switch (gEventParam) {
     case 0:
         if (gCurrentActor->shad == 0.0f) {
-            func_151875E0(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
+            effect_spawnFadeBurst(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
                           30, 30, 7, 0.1f, 0.1f);
         }
         return;
     case 1:
         if ((func_150ADA20() & 0xFF) < 0x40U) { // 1 in 4
-            func_151875E0(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
+            effect_spawnFadeBurst(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
                           10, 20, 7, 0.03f, 0.02f);
             gEventParam = 262;
             func_1506BA4C(300, 1800);
@@ -1507,7 +1507,7 @@ void func_1506E0EC(void) {
             vertices[i][0] = x;
             vertices[i][1] = height;
             vertices[i][2] = z;
-            func_151875E0(x, y, z, 30, 20, 7, 0.13f, 0.1f);
+            effect_spawnFadeBurst(x, y, z, 30, 20, 7, 0.13f, 0.1f);
             if (i == 0) {
                 z = depth;
                 x = -width;
@@ -2225,7 +2225,7 @@ void func_1506FF24(s32 cmd) {
 }
 
 void func_1506FF50(s32 cmd) {
-    func_151AB930(gCurrentActor);
+    effect_spawnSparkEmitterTask(gCurrentActor);
 }
 
 void func_1506FF78(s32 cmd) {
@@ -2241,12 +2241,12 @@ void func_1506FFE0(s32 cmd) {
 }
 
 void func_15070014(s32 cmd) {
-    func_150CA150(gCurrentActor);
+    effect_spawnImpactRing(gCurrentActor);
 }
 
 void func_1507003C(s32 cmd) {
-    func_151B01B8(gCurrentActor, 0);
-    func_151B09BC(gCurrentActor, 0, 0x3E8, 0xFF, 0);
+    effect_spawnJointImpact(gCurrentActor, 0);
+    effect_startJointEmitterTask(gCurrentActor, 0, 0x3E8, 0xFF, 0);
 }
 
 void func_15070084(s32 cmd) {
@@ -2254,7 +2254,7 @@ void func_15070084(s32 cmd) {
 }
 
 void func_150700B4(s32 cmd) {
-    func_151B03B8(gCurrentActor, 0xFF, 1);
+    effect_spawnLandingBurst(gCurrentActor, 0xFF, 1);
 }
 
 void func_150700E4(s32 cmd) {
@@ -2308,7 +2308,7 @@ void func_15070224(s32 cmd) {
 }
 
 
-/* Objects 0x77 / 0x28: fires (weapon_fireBullet, else event_fireProjectile), then spawns effect func_15102B38 at bone 4. */
+/* Objects 0x77 / 0x28: fires (weapon_fireBullet, else event_fireProjectile), then spawns effect effect_spawnBoneBeamParticle at bone 4. */
 void func_15070300(s32 cmd) {
     u8 flag;
     Actor *obj;
@@ -2389,7 +2389,7 @@ void func_15070300(s32 cmd) {
     srcs[0] = &localPos;
     dsts[0] = &worldPos;
     func_15145EA4(srcs, dsts, &gCurrentActor->ob_matrix_ptr[4], 1);
-    func_15102B38(gCurrentActor, 4, &localPos, &vec74, &randoms,
+    effect_spawnBoneBeamParticle(gCurrentActor, 4, &localPos, &vec74, &randoms,
                   (func_150ADA20() % 5U) + 5, (func_150ADA20() % 56U) + 200,
                   (func_150ADA68() * 510.0f) + 1296.0f,
                   &worldPos, 0xFF, 0, -1, 0xFF, 1);
@@ -2577,7 +2577,7 @@ void func_15070D24(s32 cmd) {
 
     func_15143134(&fx.localPos, &fx.worldPos, &gCurrentActor->ob_matrix_ptr[1]);
 
-    func_15102B38(gCurrentActor, 1, &fx.localPos, &fx.vec78, &fx.randoms,
+    effect_spawnBoneBeamParticle(gCurrentActor, 1, &fx.localPos, &fx.vec78, &fx.randoms,
                   (func_150ADA20() % 6U) + 5, (func_150ADA20() % 156U) + 100,
                   (func_150ADA68() * 2496.0f) + 3496.0f,
                   &fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
@@ -2614,7 +2614,7 @@ void func_15070F60(cmd)
 
     func_15143134(&fx.localPos, &fx.worldPos, &gCurrentActor->ob_matrix_ptr[cmd ? 1 : 2]);
 
-    func_15102B38(gCurrentActor, cmd ? 1 : 2, &fx.localPos, &fx.vec78, &fx.randoms,
+    effect_spawnBoneBeamParticle(gCurrentActor, cmd ? 1 : 2, &fx.localPos, &fx.vec78, &fx.randoms,
                   (func_150ADA20() % 5U) + 5, (func_150ADA20() % 156U) + 100,
                   (func_150ADA68() * 4000.0f) + 4000.0f,
                   &fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
@@ -2760,12 +2760,12 @@ void func_150717E0(s32 cmd) {
         ref.actor = obj;
         ref.uniqueId = obj->unique_id;
         func_15131D4C((s32)&ref, 0x43);
-        func_151494E0((s32)&ref, 0x43);
+        effect_sendEventToTimedEffects((s32)&ref, 0x43);
     }
 }
 
 void func_15071830(s32 cmd) {
-    func_150F9BB0(gCurrentActor, 0xFF, 1);
+    effect_spawnDelayedBurst(gCurrentActor, 0xFF, 1);
 }
 
 void func_15071860(s32 cmd) {
@@ -2894,11 +2894,11 @@ void event_runChildAnimCommand(void) {
 }
 
 void func_15071DC8(void) {
-    func_15141A7C(gCurrentActor, gEventParam);
+    effect_runActorEffects(gCurrentActor, gEventParam);
 }
 
 void func_15071DF4(void) {
-    func_15192800(gCurrentActor, gEventParam);
+    effect_runSurfaceHandler(gCurrentActor, gEventParam);
 }
 
 void event_setIntelAccel(void) {
@@ -3462,7 +3462,7 @@ Actor *event_spawnAnimProjectile(Actor *parent, s32 bone, s32 anim, f32 offX, f3
         obj->unk301 = 1;
     }
     obj->unk314 = func_1515D440();
-    func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
+    effect_attach(effect_newCharacterWatcher(obj, 1, 0), obj, 0x13);
     return obj;
 }
 
@@ -4066,7 +4066,7 @@ void func_15074C80(Actor *self, Actor *other) {
     }
 
     if (other->type == 0x19) {
-        func_15166118(256.0f - (func_150484A0(self->yspd, self->speed) * 40.743664f),
+        effect_spawnRotatedQuadEffect(256.0f - (func_150484A0(self->yspd, self->speed) * 40.743664f),
                       0xC0 - (self->angle >> 8),
                       self->xpos,
                       self->ypos,

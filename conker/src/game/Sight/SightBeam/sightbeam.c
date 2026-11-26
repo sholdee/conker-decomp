@@ -138,22 +138,22 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
         if (state.emitter0[0] == NULL || state.emitter0[1] == NULL || state.emitter0[2] == NULL ||
             state.emitter1[0] == NULL || state.emitter1[1] == NULL || state.emitter1[2] == NULL) {
             if (state.emitter0[0] != NULL) {
-                func_1516972C(&state.emitter0[0]->head.header);
+                effect_destroyObject(&state.emitter0[0]->head.header);
             }
             if (state.emitter0[1] != NULL) {
-                func_1516972C(&state.emitter0[1]->head.header);
+                effect_destroyObject(&state.emitter0[1]->head.header);
             }
             if (state.emitter0[2] != NULL) {
-                func_1516972C(&state.emitter0[2]->head.header);
+                effect_destroyObject(&state.emitter0[2]->head.header);
             }
             if (state.emitter1[0] != NULL) {
-                func_1516972C(&state.emitter1[0]->head.header);
+                effect_destroyObject(&state.emitter1[0]->head.header);
             }
             if (state.emitter1[1] != NULL) {
-                func_1516972C(&state.emitter1[1]->head.header);
+                effect_destroyObject(&state.emitter1[1]->head.header);
             }
             if (state.emitter1[2] != NULL) {
-                func_1516972C(&state.emitter1[2]->head.header);
+                effect_destroyObject(&state.emitter1[2]->head.header);
             }
             return NULL;
         }
@@ -589,7 +589,7 @@ void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
     }
     func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 2000, 2200);
     sound_addDynamicSound(0x2F6, obj->head.def.rot.x, obj->head.def.rot.y, obj->head.def.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)sound_delayedPlayCallback, (void *)5, 0, 0, func_150ADA20() % 500U);
-    func_1516972C(&obj->head.header);
+    effect_destroyObject(&obj->head.header);
 }
 
 /* Spawns a beam extension effect from `start` to `end`, owned by beam object `owner`. */
@@ -746,42 +746,42 @@ void sight_freeBeam(SightBeamObject *obj) {
 
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
-        func_1516972C(state->midEffect);
+        effect_destroyObject(state->midEffect);
         sound_stopByCallback((SoundRecordCallback)func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
     part = ((SightBeamObject *)state)->state.endEffect0;
     state = &((SightBeamObject *)state)->state;
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->endEffect1;
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter0[0];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter0[1];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter0[2];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter1[0];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter1[1];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter1[2];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     func_1513CA6C(&obj->head);
 }
@@ -794,42 +794,42 @@ void func_151C95D8(SightBeamObject *obj) {
 
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
-        func_1516972C(state->midEffect);
+        effect_destroyObject(state->midEffect);
         sound_stopByCallback((SoundRecordCallback)func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
     part = ((SightBeamObject *)state)->state.endEffect0;
     state = &((SightBeamObject *)state)->state;
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->endEffect1;
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter0[0];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter0[1];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter0[2];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter1[0];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter1[1];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter1[2];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     func_1513CAA0(&obj->head);
 }
@@ -904,7 +904,7 @@ void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
     }
 }
 
-/* Spawns func_151ABE40's effect (type 2) just above the actor's floor height. */
+/* Spawns effect_spawnImpact's effect (type 2) just above the actor's floor height. */
 void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f pos;
     CollisionHit collision;
@@ -913,7 +913,7 @@ void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
     pos.y = actor->floorY + 2.0f;
     pos.z = actor->zpos;
     collision_initHitFromObject(&collision, actor);
-    func_151ABE40(&pos, &collision, 2, arg1, arg2);
+    effect_spawnImpact(&pos, &collision, 2, arg1, arg2);
 }
 
 /* Light effect update: turns the light off while its status block's unk6F is set. */

@@ -5,7 +5,7 @@
 /*
  * A falling stream: a ring buffer of points that fall under gravity and, where they reach the
  * floor, splash (splash and drop particles plus flat ripple sprites) and play a sound. The stream
- * is drawn as a textured ribbon of its records (func_150DCEA0 updates it, func_150DD640 draws it).
+ * is drawn as a textured ribbon of its records (effect_updateFallingStreamTrail updates it, effect_drawFallingStream draws it).
  */
 
 void *memcpy(void *, const void *, u32);
@@ -15,7 +15,7 @@ void *memcpy(void *, const void *, u32);
  * that need character 6, whose unk84 picks the floor height) and copies its tuning into the actor's
  * state. Returns the actor, or 0 on failure.
  */
-s32 func_150DBD70(u8 kind) {
+s32 effect_createFallingStream(u8 kind) {
     EffectTemplate spawn;
     StreamState state;
     StreamActor *actor;
@@ -254,7 +254,7 @@ s32 func_150DBD70(u8 kind) {
     }
     spawn.kind = 5;
     state.sound = 440;
-    actor = func_15147A80(&spawn, 0x120, sizeof(StreamPoint), 4, 4, 4, 0, 0, 0, 0xFF, 1);
+    actor = effect_newEffectObj(&spawn, 0x120, sizeof(StreamPoint), 4, 4, 4, 0, 0, 0, 0xFF, 1);
     if (actor != NULL) {
         memcpy(actor->state, &state, sizeof(StreamState));
     }
@@ -267,7 +267,7 @@ s32 func_150DBD70(u8 kind) {
  * up the alpha of the four oldest records, plays the splash sound now and then, and tracks the oldest record's
  * position in endPos. Always returns 1.
  */
-s32 func_150DC558(StreamActor *actor) {
+s32 effect_updateFallingStream(StreamActor *actor) {
     StreamState *state;
     StreamPoint *records;
     s32 index;
@@ -373,7 +373,7 @@ s32 func_150DC558(StreamActor *actor) {
                         packet.accelY = (func_150ADA20() % (state->dropAccelRange + 1)) + state->dropAccelBase;
                         packet.fadeStep = (func_150ADA20() % (state->dropFadeRange + 1)) + state->dropFadeBase;
                         packet.width = packet.height = func_150ADA68() * state->dropSizeRange + state->dropSizeBase;
-                        if (func_15167D84(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind) == NULL) {
+                        if (effect_spawnBillboard(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind) == NULL) {
                             ok = 0;
                         }
                         state->dropCount -= 1.0f;
@@ -479,7 +479,7 @@ s32 func_150DC558(StreamActor *actor) {
  * state->count (spawning particles at the actor on the way), and when state->timer runs out fades the
  * newest records and deactivates the trail. Always returns 1.
  */
-s32 func_150DCEA0(StreamActor *actor) {
+s32 effect_updateFallingStreamTrail(StreamActor *actor) {
     StreamState *state;
     StreamPoint *records;
     u8 pitch;
@@ -557,7 +557,7 @@ s32 func_150DCEA0(StreamActor *actor) {
                             packet.accelY = func_150ADA68() * state->accelRange + state->accelBase;
                             packet.fadeStep = (func_150ADA20() % (state->fadeRange + 1)) + state->fadeBase;
                             packet.width = packet.height = func_150ADA68() * state->sizeRange + state->sizeBase;
-                            if (func_15167D84(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind) == NULL) {
+                            if (effect_spawnBillboard(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind) == NULL) {
                                 spawned = FALSE;
                             }
                             state->spawnCount -= 1.0f;
@@ -648,7 +648,7 @@ extern Mode150DD640 D_800A4AC8[];
  * spread sideways by the view's camera sin/cos and the record's width, with the texture running along the
  * ribbon (S, or T when state->unk60 == 2).
  */
-Gfx *func_150DD640(StreamActor *actor, Gfx *gfx, s16 view) {
+Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
     Vtx *vtx;
     f32 cosYaw;
     Vec3f older;

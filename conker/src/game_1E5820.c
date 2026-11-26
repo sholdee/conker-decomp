@@ -14,23 +14,23 @@ struct Effect1E5820 {
 };
 
 /* Destroys the object owned by this effect, if any. */
-void func_151B8370(Effect1E5820 *effect) {
+void effect_destroyRibbonParticle(Effect1E5820 *effect) {
     EffectUserData1E5820 *userData = effect->userData;
     EffectHeader *child = userData->child;
 
     if (child != NULL) {
-        func_1516972C(child);
+        effect_destroyObject(child);
     }
 }
 
-/* Effect kind handler (D_8008A2F0): destroys the owned object, then runs the generic handler. */
-void func_151B83A0(Effect1E5820 *effect) {
-    func_151B8370(effect);
-    func_151478F4(effect);
+/* Effect kind handler (gEffectObjDestroyFuncs): destroys the owned object, then runs the generic handler. */
+void effect_destroyRibbon(Effect1E5820 *effect) {
+    effect_destroyRibbonParticle(effect);
+    effect_defaultDestroyEffectObj(effect);
 }
 
-/* Effect kind handler (D_8008A340): destroys the owned object, then runs the generic handler. */
-void func_151B83CC(Effect1E5820 *effect) {
-    func_151B8370(effect);
-    func_15147928(effect);
+/* Effect kind handler (gEffectObjFreeFuncs): destroys the owned object, then runs the generic handler. */
+void effect_freeRibbon(Effect1E5820 *effect) {
+    effect_destroyRibbonParticle(effect);
+    effect_defaultFreeEffectObj(effect);
 }

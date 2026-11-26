@@ -72,6 +72,6 @@ void func_151A6AB8(ZoneEmitter *obj) {
     obj->state.region->inactive = 1;
     sound_stopByCallback(func_1000EF40, obj->state.region, 0);
     if (obj->state.unk10 != NULL) {
-        func_1516972C(obj->state.unk10);
+        effect_destroyObject(obj->state.unk10);
     }
 }

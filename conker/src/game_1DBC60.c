@@ -17,7 +17,7 @@ void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 arg3, s32 arg4) {
         return NULL;
     }
 
-    func_1516962C(0x28, actor, 0x11);
+    effect_sendActorEventToType(0x28, actor, 0x11);
     desc.target[0] = 0;
     desc.target[1] = 0;
     desc.ownerId = actor->unique_id;
@@ -241,7 +241,7 @@ void *func_151AF270(Actor *actor, u8 arg1, s32 arg2) {
     if (actor == NULL) {
         return NULL;
     }
-    func_1516962C(40, actor, 22);
+    effect_sendActorEventToType(40, actor, 22);
     desc.target[0] = 0;
     desc.target[1] = 0;
     desc.ownerId = actor->unique_id;

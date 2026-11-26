@@ -12,7 +12,7 @@ SpawnPoint *gSpawnPoints;  // the level's spawn point table
 #include "variables.h"
 
 /* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
-void func_15169040(s32 event, u8 eventType);
+void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Defined in game/Event/TimedEvent/timedevent.c. Not in event.h: game/Actor/ActorMotion/actormotion.c calls it with a fourth argument. */
 f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered);
@@ -196,7 +196,7 @@ u8 player_getSpawnIndex(Actor *obj) {
 }
 
 /* Moves obj to spawn point `spawnIndex` (see player_getSpawnPoint): sets its position and angles,
- * clears its motion, places its camera and passes {obj, unique_id} to func_15169040. */
+ * clears its motion, places its camera and passes {obj, unique_id} to effect_broadcastEvent. */
 void player_moveToSpawn(Actor *obj, s32 spawnIndex, s32 unused) {
     s16 pos[3];
     Vec3f cameraEye;
@@ -256,5 +256,5 @@ void player_moveToSpawn(Actor *obj, s32 spawnIndex, s32 unused) {
     }
     event.actor = obj;
     event.uniqueId = obj->unique_id;
-    func_15169040((s32)&event, 4);
+    effect_broadcastEvent((s32)&event, 4);
 }

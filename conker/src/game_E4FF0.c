@@ -243,7 +243,7 @@ void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4
         accel.x = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.01f;
         accel.y = 0.0f;
         accel.z = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.01f;
-        func_1518A3C0(&pos, &rot, ((func_150ADA68() * 104.0f) + 78.0f) * 0.001f, &vel, &accel,
+        effect_spawnTumblingPiece(&pos, &rot, ((func_150ADA68() * 104.0f) + 78.0f) * 0.001f, &vel, &accel,
                       ((func_150ADA68() * 633.0f) + -1064.0f) * 0.001f, 0.9425339699f, 1,
                       (func_150ADA20() % 51U) + 75, 0, 0, 0xFF, 1);
     }

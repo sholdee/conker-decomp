@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15103690(s32 arg0) {
+void effect_levelUpdateSoundCooldowns(s32 arg0) {
     sound_updateCooldowns();
 }
 

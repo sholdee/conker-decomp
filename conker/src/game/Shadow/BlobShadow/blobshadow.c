@@ -52,7 +52,7 @@ Shadow *shadow_createBlob(s32 ownerType, void *owner, s32 texture, s32 createFla
         size = 0x13A;
     }
 
-    shadow = func_15167A68(0x4B, 0, size, 1, 0xFF, 1);
+    shadow = effect_newObject(0x4B, 0, size, 1, 0xFF, 1);
     if (shadow != NULL) {
         for (i = 0; i < 2; i++) {
             shadow->vtx[i][0].v.flag = 0;

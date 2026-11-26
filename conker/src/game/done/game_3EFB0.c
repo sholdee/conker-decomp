@@ -5,7 +5,7 @@
 
 
 void func_15011B00(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    ObjectEmitter *emitter = func_151491F4((func_150ADA20() & 0x7F) + 10, 1, -1, 1, 0, 10, 255, 0);
+    ObjectEmitter *emitter = effect_newTimedEffectNoDraw((func_150ADA20() & 0x7F) + 10, 1, -1, 1, 0, 10, 255, 0);
     if (emitter != NULL) {
         emitter->pos.x = arg0;
         emitter->pos.y = arg1;

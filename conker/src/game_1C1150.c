@@ -199,8 +199,8 @@ void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
 }
 
 void func_15194794(Actor *self, Actor *other, u8 *arg2) {
-    func_151B01B8(self, other);
-    func_151B09BC(self, other, 1000, 0xFF, 0);
+    effect_spawnJointImpact(self, other);
+    effect_startJointEmitterTask(self, other, 1000, 0xFF, 0);
     switch (other->character_type) {
     case 0:
     case 1:
@@ -377,11 +377,11 @@ void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
 }
 
 void func_15194D80(Actor *self, Actor *other, u8 *arg2) {
-    func_15194FF4(self, other, FALSE);
+    effect_setOnFire(self, other, FALSE);
 }
 
 void func_15194DA4(Actor *self, Actor *other, u8 *arg2) {
-    func_15194FF4(self, other, TRUE);
+    effect_setOnFire(self, other, TRUE);
 }
 
 void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
@@ -429,7 +429,7 @@ void func_15194F48(Actor *self, Actor *other, u8 *arg2) {
     actor_kill(other, 6);
 }
 
-void func_15194FF4(self, other, arg2)
+void effect_setOnFire(self, other, arg2)
 Actor *self;
 Actor *other;
 u8 arg2;
@@ -546,8 +546,8 @@ void func_15195528(Actor *self, Actor *other, u8 *arg2) {
 }
 
 void func_15195650(Actor *self, Actor *other, u8 *arg2) {
-    func_151B01B8(self, other);
-    func_151B09BC(self, other, 1000, 0xFF, 0);
+    effect_spawnJointImpact(self, other);
+    effect_startJointEmitterTask(self, other, 1000, 0xFF, 0);
 }
 
 void func_15195698(Actor *self, Actor *other, u8 *arg2) {

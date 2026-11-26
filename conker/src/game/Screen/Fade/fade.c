@@ -8,7 +8,7 @@
 void screen_spawnFade(s32 mode, Actor *owner, Actor *source) {
     FadeEffect *effect;
 
-    effect = func_15167A68(100, 0, 0x20, 0, 0xFF, 1);
+    effect = effect_newObject(100, 0, 0x20, 0, 0xFF, 1);
     if (effect != NULL) {
         effect->timer = 15;
         effect->state = 0;
@@ -96,7 +96,7 @@ void screen_updateFade(FadeEffect *effect) {
         alpha = effect->alpha;
         alpha -= D_800BEA08 * 10;
         if (alpha <= 0) {
-            func_1516972C(&effect->header);
+            effect_destroyObject(&effect->header);
             screen_setFrameEcho(0, 0);
         } else {
             screen_setFrameEcho((alpha * 210) >> 8, 2);

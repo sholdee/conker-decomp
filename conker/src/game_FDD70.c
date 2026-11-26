@@ -67,10 +67,10 @@ void func_150D0E90(s32 arg0) {
     s32 propIndex;
     s32 i;
 
-    D_80088890 += D_800BE9E4 * 40;
-    D_80088894 += D_800BE9E4 * -66;
-    D_80088898 += D_800BE9E4 * -8;
-    D_8008889C += D_800BE9E4 * 92;
+    gTile0ScrollS += D_800BE9E4 * 40;
+    gTile0ScrollT += D_800BE9E4 * -66;
+    gTile1ScrollS += D_800BE9E4 * -8;
+    gTile1ScrollT += D_800BE9E4 * 92;
 
     if (movement_obj->mv->death_State == 0) {
         for (i = 0; i < 3; i++) {

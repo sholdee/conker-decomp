@@ -331,7 +331,7 @@ void func_1511B51C(WorldObject *obj) {
         sound = (obj->moveData.word >> 24) & 0xFF;
         if (sound != 0 && openAngle != 0) {
             ratio = fabsf((angle - openAngle) / openAngle);
-            func_1518804C(sound - 1, ratio);
+            effect_setColorAnimBlend(sound - 1, ratio);
             func_15173C60(((1.0f - ratio) * 255.0f), sound - 1);
         }
     }
@@ -399,7 +399,7 @@ void func_1511BA24(WorldObject *obj) {
     f32 intensity;
 
     intensity = 0.0f;
-    func_15188010(obj->moveData.word, &intensity);
+    effect_getColorAnimBlend(obj->moveData.word, &intensity);
     obj->alpha = intensity * 255.0f;
     if (obj->alpha == 0) {
         obj->alpha = 1;
@@ -498,7 +498,7 @@ void func_1511BEBC(WorldObject *obj) {
     f32 dist;
     void (*onTrigger)(WorldObject *);
 
-    onTrigger = func_150DDED0;
+    onTrigger = effect_onTrapTriggered;
     func_1511BE5C(obj);
     mode = obj->task_flag & TASK_FLAG_STATE;
     flag4 = obj->task_flag & TASK_FLAG_LOCKED;
@@ -728,7 +728,7 @@ void func_1511C638(WorldObject *obj) {
             if (WORK(obj)->w1511C638.fade == 0) {
                 switch (next->moveData.word & 0xFF) {
                 case 1:
-                    func_15170F4C(next, 0xFF, 0);
+                    effect_throwBurstPieces(next, 0xFF, 0);
                     sound_play(0x2BE, 0x7FFF, 64, 0, 0);
                     break;
                 case 0: {

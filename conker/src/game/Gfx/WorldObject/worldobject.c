@@ -297,7 +297,7 @@ Gfx *gfx_drawObject(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance
     gSPMatrix(gfx++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPClearGeometryMode(gfx++, G_TEXTURE_GEN_LINEAR);
     if (obj->effectFlags & 0x200) {
-        gfx = func_150CF5E8(gfx);
+        gfx = effect_setScrolledTileSizes(gfx);
     }
     if ((obj->state & 2) == 2) {
         gfx = func_150A50C0(obj->displayList, gfx, gViewMatrices[view], 0, 0, (s32)obj->vertices[D_800BE9C0] + 0xFF000000);
@@ -345,7 +345,7 @@ void gfx_updateObjectShadows(void) {
                 obj->shadow = shadow_createBlob(1, obj, 0, 1, 0);
             }
         } else if (obj->shadow != NULL) {
-            func_1516972C(obj->shadow);
+            effect_destroyObject(obj->shadow);
             obj->shadow = NULL;
         }
     }
@@ -604,7 +604,7 @@ void gfx_removeObject(u32 index) {
 
     if (index < gWorldObjectCount) {
         if (db_Object_array[index].shadow != NULL) {
-            func_1516972C(db_Object_array[index].shadow);
+            effect_destroyObject(db_Object_array[index].shadow);
             db_Object_array[index].shadow = NULL;
         }
         db_Object_array[index].state |= 8;

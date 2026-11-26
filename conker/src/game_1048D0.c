@@ -98,20 +98,20 @@ void func_150D758C(TintedObject *obj, u8 *state, u8 msg) {
     }
 }
 
-static u16 D_800D9910; /* texture animation clock; the high byte is the frame */
+static u16 gTexAnimClock; /* texture animation clock; the high byte is the frame */
 
 /* Advances the texture animation clock by this frame's tick count (unless arg0 is set). */
-void func_150D7630(s32 arg0) {
+void effect_advanceTexAnimClock(s32 arg0) {
     if (arg0 == 0) {
-        D_800D9910 += D_800BE9E4 << 6;
+        gTexAnimClock += D_800BE9E4 << 6;
     }
 }
 
-static TextureFrameTables D_80088900 = { D_80090230, D_80090244 };
+static TextureFrameTables gTexAnimFrameTables = { D_80090230, D_80090244 };
 
 /* Binds six animated textures to segments 2-7, texture i showing frame (clock + 13 * i) % 5;
  * the last two come from the second frame table. */
-Gfx *func_150D765C(Gfx *gdl) {
+Gfx *effect_bindAnimatedTextures(Gfx *gdl) {
     s32 i;
     s32 segment;
     s32 frame;
@@ -119,10 +119,10 @@ Gfx *func_150D765C(Gfx *gdl) {
     s32 table;
     s32 frameIndex;
     s32 addr;
-    TextureFrameTables tables = D_80088900;
+    TextureFrameTables tables = gTexAnimFrameTables;
 
     table = 0;
-    frame = D_800D9910 >> 8;
+    frame = gTexAnimClock >> 8;
     for (i = 0; i < 6; i++) {
         if (i >= 4) {
             table = 1;

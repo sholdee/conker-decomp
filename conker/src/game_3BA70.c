@@ -12,7 +12,7 @@ void func_1500E5C0(void) {
     func_15008A10();
     func_15012770();
     for (i = 0; i < 20; i++) {
-        D_800E0950[i] = 0;
+        gAnchorRefCounts[i] = 0;
     }
     D_800D9921 = 0;
     D_800D9920 = 0;
@@ -33,11 +33,11 @@ void func_1500E5C0(void) {
     }
     D_80088870 = NULL;
     bzero(D_800BE500, sizeof(D_800BE500));
-    D_800D9950[0] = D_800D9950[1] = D_800D9950[2] = 0;
+    gMaterialGlowLevels[0] = gMaterialGlowLevels[1] = gMaterialGlowLevels[2] = 0;
     D_80088980 = 0;
-    D_800D9AA0[0] = NULL;
-    D_800D9AA0[1] = NULL;
-    D_800D9AA0[2] = NULL;
+    gSprayAreas[0] = NULL;
+    gSprayAreas[1] = NULL;
+    gSprayAreas[2] = NULL;
     D_800BE4F0 = NULL;
     D_80088B40 = 0;
 }

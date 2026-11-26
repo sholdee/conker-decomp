@@ -28,7 +28,7 @@ void *func_1500F290(f32 x, f32 y, f32 z) {
 void func_1500F378(s32 x, s32 y, s32 z, s32 floorY) {
     ObjectEmitter *emitter;
 
-    emitter = func_151491F4((func_150ADA20() & 0x7F) + 0xA, 1, -1, 1, 0, 0xA, 0xFF, 0);
+    emitter = effect_newTimedEffectNoDraw((func_150ADA20() & 0x7F) + 0xA, 1, -1, 1, 0, 0xA, 0xFF, 0);
     if (emitter != NULL) {
         emitter->pos.x = x;
         emitter->pos.y = y;

@@ -175,7 +175,7 @@ typedef struct {
     s16 onTime;
     s16 offTime;
     s16 timer;      // drawn while positive
-    s16 texture;    // index into D_8008CA4C
+    s16 texture;    // index into gEffectAnimTextures
     u8 ownerId;     // owner's unique_id when attached
     u8 drawn;
     Actor *owner;
@@ -241,7 +241,7 @@ typedef struct {
     /* 0x04 */ f32 accum;              /* particles owed, spawned one per 1.0 */
 } EmitterLink; /* 0x8 */
 
-/* A beam's emitter (created by func_15149130), carrying its EmitterLink at +0x28. */
+/* A beam's emitter (created by effect_newTimedEffect), carrying its EmitterLink at +0x28. */
 typedef struct BeamEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterLink link;
@@ -289,7 +289,7 @@ typedef struct {
     } link;
 } AttachedSpriteParticle;
 
-/* State an actor's trail emitter (created by func_15149130) carries at +0x28. */
+/* State an actor's trail emitter (created by effect_newTimedEffect) carries at +0x28. */
 typedef struct {
     /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;
@@ -371,7 +371,7 @@ typedef struct {
     /* 0x74 */ u8 flags;
 } BeamState;
 
-/* A beam object allocated by func_15149130. */
+/* A beam object allocated by effect_newTimedEffect. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ BeamState beam;
@@ -714,7 +714,7 @@ void beam_spawnBoneTracerEx(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f
 s32 func_150E2F90(s32 a0, s32 a1, s16 a2);
 void beam_tracerSwapMessage(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg);
 extern Gfx gTracerRenderSetupDl[];         /* tracer render setup display list */
-extern AimImpact gAimImpacts[4];  /* aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none) */
+extern AimImpact gAimImpacts[4];  /* aim-impact slots (effect_spawnMaterialImpact / effect_sprayDebris index them; 0xFF = none) */
 
 /* game/Beam/AimedBeam/aimedbeam.c */
 /* (Actor *actor, u8 slot); declared without a prototype: game/Event/TimedEvent/timedevent.c passes a third argument */
@@ -867,8 +867,8 @@ s32 beam_shrinkMotion(Game1BBFC0Beam *beam);
 s32 beam_shrinkMotionProgress(Game1BBFC0Beam *beam);
 
 /* game/Beam/Lightning/lightning.c */
-extern Gfx gLightningRenderSetupDl[]; /* render setup (object type table D_8008B4A8) */
-extern Gfx gLightningRenderTeardownDl[]; /* render teardown (object type table D_8008B4A8) */
+extern Gfx gLightningRenderSetupDl[]; /* render setup (object type table gObjectTypes) */
+extern Gfx gLightningRenderTeardownDl[]; /* render teardown (object type table gObjectTypes) */
 Bolt *beam_newLightning(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3);
 void beam_updateLightning(Bolt *bolt);
 Gfx *beam_drawLightning(Gfx *gdl, Bolt *bolt, s16 view);

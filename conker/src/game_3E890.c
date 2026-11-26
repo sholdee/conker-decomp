@@ -172,7 +172,7 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
     data.id = owner->unique_id;
     data.effect = NULL;
     data.light = NULL;
-    object = func_15149130(300, -1, 0x54, -1, 0, 0x34, sizeof(Controller), arg1, arg2);
+    object = effect_newTimedEffect(300, -1, 0x54, -1, 0, 0x34, sizeof(Controller), arg1, arg2);
     if (object != NULL) {
         controller = &object->controller;
         memcpy(controller, &data, sizeof(data));
@@ -255,7 +255,7 @@ void func_15011A78(Actor *owner, u8 arg1, s32 arg2) {
     data.ownerId = owner->unique_id;
     data.timer = 0;
 
-    effect = func_15149130(300, -1, 0x55, -1, 0, 0x42, sizeof(FlashBurstData), arg1, arg2);
+    effect = effect_newTimedEffect(300, -1, 0x55, -1, 0, 0x42, sizeof(FlashBurstData), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

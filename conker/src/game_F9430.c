@@ -36,7 +36,7 @@ static const GroundBurstDef D_800A0640[] = {
 void *memcpy(void *, void *, s32);
 
 /* Spawns a burst at a bone-relative point of owner, dropped onto the ground below: a growing
-   ground-coloured particle, two func_1514C678 effects, a func_150C88D0 effect and a func_151D5404 effect. */
+   ground-coloured particle, two func_1514C678 effects, a effect_newRingEffect effect and a func_151D5404 effect. */
 void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     Vec3f pos;
     const GroundBurstDef *def;
@@ -154,7 +154,7 @@ lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above 
                 fx.emitCallback = -1;
                 fx.updateCallback = -1;
                 fx.emitRate = 0.0f;
-                func_150C88D0(&fx, 0, 0xFF, 1);
+                effect_newRingEffect(&fx, 0, 0xFF, 1);
             }
         }
         {

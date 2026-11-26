@@ -163,5 +163,5 @@ void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, SegmentEmi
     params.fadeStart = 25;
     params.fadeRate = 10;
     motion.flags = 0xF;
-    func_15157898(&params, &motion, 0, (func_150ADA68() * 1814.0f) * 0.001000000047f, 0, 0, 0, emitter->unkC, emitter->unk1);
+    effect_newMovingModelEffect(&params, &motion, 0, (func_150ADA68() * 1814.0f) * 0.001000000047f, 0, 0, 0, emitter->unkC, emitter->unk1);
 }

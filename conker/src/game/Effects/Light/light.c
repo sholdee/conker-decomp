@@ -18,7 +18,7 @@ static s32 (*gLightEffectUpdates[])() = {
     func_151607A4, light_followActor, light_updateBeam, light_updateLampParticleLight,
     light_updateLampLight, func_15161A68, func_15161F2C, light_updateColourCycleEffect,
     light_updateCycle, light_updateLightning, light_updateTracking, light_updateOneShotPulse,
-    func_151638E0, light_updateObjectPulse, light_updateActorFlicker, func_150EAE24,
+    func_151638E0, light_updateObjectPulse, light_updateActorFlicker, effect_updateGroundFlash,
     func_1516429C, func_151643F8, func_150F25A0, func_151644A8,
 };
 
@@ -34,7 +34,7 @@ static void (*gLightEffectEventHandlers[])() = {
     NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, func_151635A8,
     NULL, NULL, NULL, func_151639D0,
-    func_15163A18, func_15190400, NULL, func_1516434C,
+    func_15163A18, effect_handleAnchorLightEvent, NULL, func_1516434C,
     NULL, NULL,
 };
 
@@ -53,7 +53,7 @@ static void (*gLightEffectDestroyHandlers[])(LightEffect *) = {
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
     func_151617C4, beam_destroyFlash, flamethrower_destroyFlameLight, func_151617C4,
-    func_151617C4, func_15190464, func_151617C4, func_151617C4,
+    func_151617C4, effect_destroyAnchorLight, func_151617C4, func_151617C4,
     func_151617C4, func_151617C4,
 };
 static void (*gLightEffectFreeHandlers[])(LightEffect *) = {
@@ -110,7 +110,7 @@ LightEffect *light_createWithEffect(LightEffectHeader *header, Vec3i *position, 
 
 /* Allocates an effect instance (0x18-byte header plus `size` bytes of payload) for a light. */
 LightEffect *light_createEffect(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4) {
-    LightEffect *effect = func_15167A68(53, arg4, size + 0x18, 1, arg3, 1);
+    LightEffect *effect = effect_newObject(53, arg4, size + 0x18, 1, arg3, 1);
 
     if (effect == NULL) {
         return NULL;
@@ -135,7 +135,7 @@ void light_updateEffect(LightEffect *effect) {
         done = TRUE;
     }
     if (done) {
-        func_1516972C(effect);
+        effect_destroyObject(effect);
     }
 }
 
@@ -175,7 +175,7 @@ void light_handleEffectEvent(void *arg0, u8 *message, u8 event) {
             effect->light->disabled = 0;
             break;
         case 0x22:
-            func_1516972C(effect);
+            effect_destroyObject(effect);
             return;
         }
         break;
@@ -642,35 +642,35 @@ void light_sendEvent(u8 lightType, u8 event, void *arg2) {
     message.lightType = lightType;
     message.arg = arg2;
 
-    func_1516944C(53, (s32)&message, event);
+    effect_sendEventToType(53, (s32)&message, event);
 }
 
 void func_15161714(LightEffect *effect) {
-    func_1514EDF0(effect, effect->data.actorRef.actor);
+    effect_detachHandle(effect, effect->data.actorRef.actor);
     func_151617C4(effect);
 }
 
 void func_15161740(LightEffect *effect) {
-    func_1514EDF0(effect, effect->data.actorRef.actor);
+    effect_detachHandle(effect, effect->data.actorRef.actor);
     func_151617E4(effect);
 }
 
 void func_1516176C(LightEffect *effect) {
-    func_1514EDF0(effect, effect->data.actorRef.actor);
+    effect_detachHandle(effect, effect->data.actorRef.actor);
     func_151617C4(effect);
 }
 
 void func_15161798(LightEffect *effect) {
-    func_1514EDF0(effect, effect->data.actorRef.actor);
+    effect_detachHandle(effect, effect->data.actorRef.actor);
     func_151617E4(effect);
 }
 
 void func_151617C4(LightEffect *effect) {
-    func_15169804(effect);
+    effect_defaultDestroy(effect);
 }
 
 void func_151617E4(LightEffect *effect) {
-    func_15169824(effect);
+    effect_defaultFree(effect);
 }
 
 /* Frees the effect's light if it owns one, then runs the type's handler from gLightEffectDestroyHandlers. */
@@ -846,7 +846,7 @@ void light_handleActorEvent(LightEffect *effect, ActorEvent *event, u8 eventId) 
 
     if (eventId == 0) {
         if (event->actor == ref->actor || event->u4.actorId == ref->actorId) {
-            func_1516972C(effect);
+            effect_destroyObject(effect);
         // matching: this label ends a basic block, letting IDO copy the handler load into the branch delay slot
         trailing_label:
             ;
@@ -908,7 +908,7 @@ void light_startColourCycle(s32 arg0) {
     pulse.amplitude.x = 37.5f;
     pulse.speed = 0.07609999925f;
 
-    object = func_15149130(300, -1, 30, -1, 0, 0, sizeof(pulse), 0xFF, 1);
+    object = effect_newTimedEffect(300, -1, 30, -1, 0, 0, sizeof(pulse), 0xFF, 1);
     if (object != NULL) {
         memcpy(&object->pulse, &pulse, sizeof(pulse));
     }
@@ -1369,8 +1369,8 @@ s32 func_151638E0(LightEffect *effect) {
     f32 value;
 
     follow = &effect->data.follow;
-    func_15187FC0(follow->source, unused);
-    func_15188010(follow->source, &value);
+    effect_getColorAnimColor(follow->source, unused);
+    effect_getColorAnimBlend(follow->source, &value);
     effect->light->radius = follow->base + (follow->scale * value);
     return 1;
 }
@@ -1516,7 +1516,7 @@ void func_15163FEC(LightEffect *effect, ActorEvent *event, u8 eventId) {
         Actor *actor = event->actor;
 
         if (actor == attach->actor || event->u4.actorId == attach->actorId) {
-            func_1516972C(effect);
+            effect_destroyObject(effect);
         }
     } else if (eventId == 0x2D) {
         if (attach->actor == event->actor) {
@@ -1549,7 +1549,7 @@ void func_151640C0(LightEffect *effect, ActorEvent *event, u8 eventId) {
         actorId = ref->actorId;
         otherId = other->actorId;
         if (actor == otherActor || actorId == otherId || actor->unique_id == otherId) {
-            func_1516972C(effect);
+            effect_destroyObject(effect);
         }
     }
 }
@@ -1562,7 +1562,7 @@ void light_handleBeamEvent(LightEffect *effect, ActorEvent *event, u8 eventId) {
         Actor *actor = event->actor;
 
         if (actor == beam->actor || event->u4.actorId == beam->actorId) {
-            func_1516972C(effect);
+            effect_destroyObject(effect);
         }
     } else if (eventId == 0x2D) {
         if (beam->actor == event->actor) {

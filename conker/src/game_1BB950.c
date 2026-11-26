@@ -12,19 +12,19 @@ extern char D_800A749C[];
 /* Drops the emitter's particles and detaches it from its owner. */
 void func_1518E4A0(ActorEmitterProcess *emitter) {
     func_1518E308(emitter);
-    func_1514EDF0(emitter, emitter->params.owner);
+    effect_detachHandle(emitter, emitter->params.owner);
 }
 
 /* Destroy handler of an emitter process. */
 void func_1518E4CC(ActorEmitterProcess *emitter) {
     func_1518E4A0(emitter);
-    func_15169804(&emitter->header);
+    effect_defaultDestroy(&emitter->header);
 }
 
 /* Free handler of an emitter process. */
 void func_1518E4F8(ActorEmitterProcess *emitter) {
     func_1518E4A0(emitter);
-    func_15169824(&emitter->header);
+    effect_defaultFree(&emitter->header);
 }
 
 /* Particle spawn callback: texture 0x13 or 0x14 at random, opaque black. */

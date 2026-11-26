@@ -22,7 +22,7 @@ static s32 (*D_8008FAF8[])(HoltenRopeEffect *) = {
 static s32 (*D_8008FB10[])() = { func_151B498C, func_151B4A14 };
 
 /* Render setup and reset display lists of the ropes; the rope type's entry in the object type table
- * D_8008B4A8 points to them. */
+ * gObjectTypes points to them. */
 Gfx D_8008FB18[] = {
     gsDPPipeSync(),
     gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
@@ -49,7 +49,7 @@ HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSiz
     f32 length;
     f32 halfAxesSq;
 
-    effect = func_15167A68(0x33, arg4, extraSize + sizeof(HoltenRopeEffect), 1, arg3, 1);
+    effect = effect_newObject(0x33, arg4, extraSize + sizeof(HoltenRopeEffect), 1, arg3, 1);
     if (effect == NULL) {
         return NULL;
     }
@@ -101,7 +101,7 @@ void func_151B3184(HoltenRopeEffect *effect) {
         }
     }
     if (finished) {
-        func_1516972C(&effect->header);
+        effect_destroyObject(&effect->header);
     }
 }
 
@@ -737,10 +737,10 @@ void func_151B4C1C(HoltenRopeEffect *effect) {
 
 void func_151B4C6C(HoltenRopeEffect *effect) {
     func_151B4C1C(effect);
-    func_15169824(&effect->header);
+    effect_defaultFree(&effect->header);
 }
 
 void func_151B4C98(HoltenRopeEffect *effect) {
     func_151B4C1C(effect);
-    func_15169824(&effect->header);
+    effect_defaultFree(&effect->header);
 }

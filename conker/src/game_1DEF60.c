@@ -22,7 +22,7 @@ void func_151B1AB0(Actor *owner) {
         data.ownerUnk3B = owner->unique_id;
         data.timer = 0.0f;
 
-        task = func_151491F4(0x3C, -1, 0x15, 1, 0x11, 0xC, 0xFF, 1);
+        task = effect_newTimedEffectNoDraw(0x3C, -1, 0x15, 1, 0x11, 0xC, 0xFF, 1);
         if (task != NULL) {
             memcpy(&task->data, &data, sizeof(data));
         }
@@ -140,7 +140,7 @@ void func_151B1FAC(Task151B1AB0 *task, ActorMsg *msg, u8 kind) {
         Actor *owner = msg->ref.actor;
 
         if (owner == data->owner || msg->ref.uniqueId == data->ownerUnk3B) {
-            func_1516972C(&task->base.header);
+            effect_destroyObject(&task->base.header);
         }
     }
 }

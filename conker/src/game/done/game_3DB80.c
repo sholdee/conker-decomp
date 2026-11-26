@@ -19,7 +19,7 @@ s32 func_150106D0(TriggerZone *zone) {
     if (tmp.zone == NULL) {
         return 1;
     } else {
-        effect = func_15149130(300, -1, 89, -1, 0, 0, 16, 255, 0);
+        effect = effect_newTimedEffect(300, -1, 89, -1, 0, 0, 16, 255, 0);
         if (effect != NULL) {
             memcpy(effect + 1, &tmp, sizeof(tmp));
         }

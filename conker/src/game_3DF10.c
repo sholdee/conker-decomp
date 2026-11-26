@@ -131,7 +131,7 @@ void func_15010A60(void) {
         }
 
         if (D_80096498[i] != 0) {
-            ent = func_1513B5E0(&desc, 0, 0x2C, 0xFF, 1);
+            ent = effect_newDynModel(&desc, 0, 0x2C, 0xFF, 1);
             if (ent != NULL) {
                 memcpy(DYNMODEL_USERDATA(ent), &tail, sizeof(tail));
             }

@@ -4,7 +4,7 @@
 #include "variables.h"
 #include <libc/stddef.h>
 
-/* User data of the model spawned by func_1513BAE8. */
+/* User data of the model spawned by effect_spawnWarpModel. */
 typedef struct {
     /* 0x00 */ f32 scrollS;
     /* 0x04 */ f32 scrollT;
@@ -19,7 +19,7 @@ typedef struct {
 } VtxRange;
 
 /* Render setup and reset display lists of these models; their entry in the object type table points to them. */
-Gfx D_80089BC0[] = {
+Gfx gDynModelRenderSetupDl[] = {
     gsDPPipeSync(),
     gsDPSetTextureFilter(G_TF_BILERP),
     gsDPSetTexturePersp(G_TP_PERSP),
@@ -30,24 +30,24 @@ Gfx D_80089BC0[] = {
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
-Gfx D_80089C08[] = {
+Gfx gDynModelRenderResetDl[] = {
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
     gsSPEndDisplayList(),
 };
 
 /* Update callbacks (DynModelDesc.updateFunc): 0 frees the model. */
-static s32 (*D_80089C18[])(DynModel *) = { func_15108AB4, func_15108C38, func_1513BEB0, func_150F2480 };
-/* Draw callbacks (DynModelDesc.drawFunc): 0 skips the draw. func_15108D24 and func_150F2518 take the viewport as
+static s32 (*gDynModelUpdateFuncs[])(DynModel *) = { func_15108AB4, func_15108C38, effect_updateWarpModel, effect_updateModelSway };
+/* Draw callbacks (DynModelDesc.drawFunc): 0 skips the draw. func_15108D24 and effect_buildSwayMatrix take the viewport as
  * an s32. */
-static s32 (*D_80089C28[])(DynModel *, s16) = {
-    func_1513B968, func_15108D24, func_1513BAD4, func_151BA084, func_15109120, func_1513BBFC, func_150F2518,
+static s32 (*gDynModelDrawFuncs[])(DynModel *, s16) = {
+    func_1513B968, func_15108D24, func_1513BAD4, func_151BA084, func_15109120, effect_warpModelTexCoords, effect_buildSwayMatrix,
 };
 /* Destroy and free handlers per model kind. */
-static void (*D_80089C44[])(DynModel *) = { func_1513B9A8, func_1513B9A8, func_1513B9A8, func_1513B9A8 };
-static void (*D_80089C54[])(DynModel *) = { func_1513B9DC, func_1513B9DC, func_1513B9DC, func_1513B9DC };
+static void (*gDynModelDestroyFuncs[])(DynModel *) = { effect_defaultDestroyDynModel, effect_defaultDestroyDynModel, effect_defaultDestroyDynModel, effect_defaultDestroyDynModel };
+static void (*gDynModelFreeFuncs[])(DynModel *) = { effect_defaultFreeDynModel, effect_defaultFreeDynModel, effect_defaultFreeDynModel, effect_defaultFreeDynModel };
 
-/* Centres of the nine vertex groups of the warping model (func_1513BBFC). */
-static const Vec3f D_800A49C0[9] = {
+/* Centres of the nine vertex groups of the warping model (effect_warpModelTexCoords). */
+static const Vec3f gWarpModelGroupCentres[9] = {
     { -2098.139f, 1487.8055f, -2924.709f },
     { -4264.652f, 1487.8055f, -1274.1654f },
     { -3964.0457f, 1487.8055f, 1661.5109f },
@@ -59,12 +59,12 @@ static const Vec3f D_800A49C0[9] = {
     { -26.41471f, 1261.8988f, -402.8878f },
 };
 /* The vertices of each group. */
-static const VtxRange D_800A4A2C[9] = {
+static const VtxRange gWarpModelGroupVertices[9] = {
     { 0, 12 }, { 12, 16 }, { 28, 16 }, { 44, 16 }, { 60, 16 }, { 76, 16 }, { 92, 16 }, { 108, 16 }, { 124, 16 },
 };
 
 /* Loads the descriptor's model and allocates a DynModel holding copies of its vertices. */
-DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4) {
+DynModel *effect_newDynModel(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4) {
     DynModel *obj;
     ModelAsset *asset;
     s32 buffersSize;
@@ -85,7 +85,7 @@ DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, 
         } else {
             type = 0x38;
         }
-        obj = func_15167A68(type, arg4, userDataSize + buffersSize + offsetof(DynModel, buffers), 2, arg3, 1);
+        obj = effect_newObject(type, arg4, userDataSize + buffersSize + offsetof(DynModel, buffers), 2, arg3, 1);
         if (obj == NULL) {
             return NULL;
         }
@@ -107,7 +107,7 @@ DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, 
 }
 
 /* Per-frame update: counts down the lifetime, runs the update callback, frees when done. */
-void func_1513B798(DynModel *obj) {
+void effect_updateDynModel(DynModel *obj) {
     s32 func;
     u8 done = FALSE;
 
@@ -120,18 +120,18 @@ void func_1513B798(DynModel *obj) {
     if (!done) {
         func = obj->desc.updateFunc;
         if (func != -1) {
-            if (D_80089C18[func](obj) == 0) {
+            if (gDynModelUpdateFuncs[func](obj) == 0) {
                 done = TRUE;
             }
         }
     }
     if (done) {
-        func_1516972C(&obj->header);
+        effect_destroyObject(&obj->header);
     }
 }
 
 /* Draws the model in one viewport, after the draw callback (if any) has updated it. */
-Gfx *func_1513B83C(Gfx *gfx, DynModel *obj, s16 viewport) {
+Gfx *effect_drawDynModel(Gfx *gfx, DynModel *obj, s16 viewport) {
     s32 func;
 
     if ((obj->desc.flags & DYNMODEL_FLAG_VIEWPORT_MASK) && !(obj->desc.viewportMask & (1 << viewport))) {
@@ -140,7 +140,7 @@ Gfx *func_1513B83C(Gfx *gfx, DynModel *obj, s16 viewport) {
 
     func = obj->desc.drawFunc;
     if (func != -1) {
-        if (D_80089C28[func](obj, viewport) == 0) {
+        if (gDynModelDrawFuncs[func](obj, viewport) == 0) {
             return gfx;
         }
     }
@@ -157,31 +157,31 @@ s32 func_1513B968(DynModel *obj, s16 viewport) {
     return 1;
 }
 
-void func_1513B9A8(DynModel *obj) {
+void effect_defaultDestroyDynModel(DynModel *obj) {
     func_100043B4(obj->asset, 4);
-    func_15169804(&obj->header);
+    effect_defaultDestroy(&obj->header);
 }
 
-void func_1513B9DC(DynModel *obj) {
+void effect_defaultFreeDynModel(DynModel *obj) {
     func_100043B4(obj->asset, 4);
-    func_15169824(&obj->header);
+    effect_defaultFree(&obj->header);
 }
 
-void func_1513BA10(DynModel *obj) {
-    D_80089C44[obj->desc.kind](obj);
+void effect_destroyDynModel(DynModel *obj) {
+    gDynModelDestroyFuncs[obj->desc.kind](obj);
 }
 
-void func_1513BA44(DynModel *obj) {
-    D_80089C54[obj->desc.kind](obj);
+void effect_freeDynModel(DynModel *obj) {
+    gDynModelFreeFuncs[obj->desc.kind](obj);
 }
 
-void func_1513BA78(DynModel *obj, s32 arg1, u8 arg2) {
+void effect_dynModelMessage(DynModel *obj, s32 arg1, u8 arg2) {
     switch (obj->desc.kind) {
     case 1:
         light_handleLampMessage(obj, arg1, arg2);
         break;
     case 2:
-        func_151BA468(obj, arg1, arg2);
+        effect_ownerModelMessage(obj, arg1, arg2);
         break;
     }
 }
@@ -190,8 +190,8 @@ s32 func_1513BAD4(DynModel *obj, s16 viewport) {
     return 0;
 }
 
-/* Spawns the scrolling, warping texture model (update func_1513BEB0, draw func_1513BBFC). */
-DynModel *func_1513BAE8(void) {
+/* Spawns the scrolling, warping texture model (update effect_updateWarpModel, draw effect_warpModelTexCoords). */
+DynModel *effect_spawnWarpModel(void) {
     DynModel *obj;
     DynModelDesc desc;
     TexWarpState state;
@@ -218,10 +218,10 @@ DynModel *func_1513BAE8(void) {
     desc.unk20 = 0x20;
     desc.kind = 3;
 
-    obj = func_1513B5E0(&desc, 1, sizeof(TexWarpState), 0xFF, 1);
+    obj = effect_newDynModel(&desc, 1, sizeof(TexWarpState), 0xFF, 1);
     if (obj != NULL) {
         if (obj->buffersSize != 0x1180) {
-            func_1516972C(&obj->header);
+            effect_destroyObject(&obj->header);
         } else {
             memcpy(obj->buffers + obj->buffersSize, &state, sizeof(TexWarpState));
         }
@@ -230,7 +230,7 @@ DynModel *func_1513BAE8(void) {
 }
 
 /* Draw callback: recomputes each vertex group's texture coordinates relative to the viewport position. */
-s32 func_1513BBFC(DynModel *obj, s16 viewport) {
+s32 effect_warpModelTexCoords(DynModel *obj, s16 viewport) {
     TexWarpState *state;
     f32 scaleS;
     f32 scaleT;
@@ -253,8 +253,8 @@ s32 func_1513BBFC(DynModel *obj, s16 viewport) {
         f32 dx;
         f32 dz;
 
-        dx = D_800A49C0[k].x - viewPos->x;
-        dz = D_800A49C0[k].z - viewPos->z;
+        dx = gWarpModelGroupCentres[k].x - viewPos->x;
+        dz = gWarpModelGroupCentres[k].z - viewPos->z;
         if (dx != 0.0f || dz != 0.0f) {
             f32 invLen;
 
@@ -265,7 +265,7 @@ s32 func_1513BBFC(DynModel *obj, s16 viewport) {
             dirX = 1.0f;
             dirZ = 0.0f;
         }
-        for (j = D_800A4A2C[k].start; j < D_800A4A2C[k].start + D_800A4A2C[k].count; j++) {
+        for (j = gWarpModelGroupVertices[k].start; j < gWarpModelGroupVertices[k].start + gWarpModelGroupVertices[k].count; j++) {
             Vtx *vtx;
             f32 x;
             f32 y;
@@ -278,9 +278,9 @@ s32 func_1513BBFC(DynModel *obj, s16 viewport) {
             x = vtx->v.ob[0];
             y = vtx->v.ob[1];
             z = vtx->v.ob[2];
-            ex = x - D_800A49C0[k].x;
-            ey = y - D_800A49C0[k].y;
-            ez = z - D_800A49C0[k].z;
+            ex = x - gWarpModelGroupCentres[k].x;
+            ey = y - gWarpModelGroupCentres[k].y;
+            ez = z - gWarpModelGroupCentres[k].z;
             vtx->v.tc[0] = (ex * dirX + ez * dirZ) * scaleS - offsetS;
             vtx->v.tc[1] = ey * scaleT - offsetT;
         }
@@ -289,7 +289,7 @@ s32 func_1513BBFC(DynModel *obj, s16 viewport) {
 }
 
 /* Update callback: advances the texture scroll and warp phases, wrapping the scroll to [0, 4096). */
-s32 func_1513BEB0(DynModel *obj) {
+s32 effect_updateWarpModel(DynModel *obj) {
     TexWarpState *state;
 
     state = (TexWarpState *)(obj->buffers + obj->buffersSize);

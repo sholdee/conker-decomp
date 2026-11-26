@@ -2,22 +2,22 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Data of the effect func_150E1060 spawns and func_150E114C updates. */
+/* Data of the effect effect_spawnPropEmitter spawns and effect_updatePropEmitter updates. */
 typedef struct {
-    /* 0x00 */ u8 index; // 0 or 1: row of D_800A0FE0, D_800A0FE4 and D_800A0FFC
+    /* 0x00 */ u8 index; // 0 or 1: row of gEmitterPropIds, D_800A0FE4 and D_800A0FFC
     /* 0x04 */ WorldObject *prop;
     /* 0x08 */ ZoneNode *zone; // collision_findZoneLeaf at the prop's x/z
     /* 0x0C */ f32 accum; // particles owed; one is emitted per whole unit
 } PropEmitter;
 
-/* Timed effect of func_150E114C. */
+/* Timed effect of effect_updatePropEmitter. */
 struct PropEmitterEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ PropEmitter emitter;
 };
 
 /* The two emitter props. */
-static const u8 D_800A0FE0[2] = { 0xF7, 0xF6 };
+static const u8 gEmitterPropIds[2] = { 0xF7, 0xF6 };
 
 
 /* Sets camera distances when camera->CharContext is 9 (else when unk2C is 8), and flag bits in unk84
@@ -82,8 +82,8 @@ void func_150E0D90(Camera *camera) {
     }
 }
 
-/* Spawns the emitter effect for prop D_800A0FE0[index] (index 0 or 1); returns it, or NULL. */
-TimedEffect *func_150E1060(u8 index, u8 owner, s32 kind) {
+/* Spawns the emitter effect for prop gEmitterPropIds[index] (index 0 or 1); returns it, or NULL. */
+TimedEffect *effect_spawnPropEmitter(u8 index, u8 owner, s32 kind) {
     TimedEffect *effect;
     PropEmitter emitter;
 
@@ -96,7 +96,7 @@ TimedEffect *func_150E1060(u8 index, u8 owner, s32 kind) {
     }
 
     emitter.index = index;
-    emitter.prop = gfx_findObjectById(D_800A0FE0[index]);
+    emitter.prop = gfx_findObjectById(gEmitterPropIds[index]);
     if (emitter.prop == NULL) {
         return NULL;
     }
@@ -105,7 +105,7 @@ TimedEffect *func_150E1060(u8 index, u8 owner, s32 kind) {
     emitter.zone = collision_findZoneLeaf(emitter.prop->x, emitter.prop->z);
     emitter.accum = 0.0f;
 
-    effect = func_15149130(300, -1, 0x1F, -1, 0, 0x1F, sizeof(emitter), owner, kind);
+    effect = effect_newTimedEffect(300, -1, 0x1F, -1, 0, 0x1F, sizeof(emitter), owner, kind);
     if (effect != NULL) {
         memcpy(&((PropEmitterEffect *)effect)->emitter, &emitter, sizeof(emitter));
     }
@@ -118,7 +118,7 @@ static const Vec3f D_800A0FFC[2] = { { -25.56817f, 28.21346f, 536.2602f }, { 22.
 
 /* Emitter effect update: accumulates a random rate and, while the emitter's zone has one of the
  * low gScreenLayout + 1 bits set, emits one particle per whole unit along D_800A0FE4 -> D_800A0FFC. */
-void func_150E114C(PropEmitterEffect *effect) {
+void effect_updatePropEmitter(PropEmitterEffect *effect) {
     PropEmitter *emitter;
     s32 i;
     s16 mask;

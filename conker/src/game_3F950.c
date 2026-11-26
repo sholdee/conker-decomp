@@ -49,7 +49,7 @@ void func_150124A0(void) {
     timer[0] = 0x14;
     timer[1] = 0x32;
     timer[2] = 0;
-    result = func_151491F4(0x12C, -1, 7, 0, 0, 6, 0xFF, 0);
+    result = effect_newTimedEffectNoDraw(0x12C, -1, 7, 0, 0, 6, 0xFF, 0);
     if (result != NULL) {
         memcpy(result + 1, timer, sizeof(timer));
     }

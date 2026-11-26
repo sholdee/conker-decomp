@@ -40,7 +40,7 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
         motion.width = ((func_150ADA68() * 220.0f) + 320.0f) * 0.1000000015f;
         random0 = func_150ADA20();
         random1 = func_150ADA20();
-        func_15102B38(obj, gGunMuzzleBone, &gGunMuzzleStart, &D_800A213C, &motion,
+        effect_spawnBoneBeamParticle(obj, gGunMuzzleBone, &gGunMuzzleStart, &D_800A213C, &motion,
                       (random0 % 3U) + 4, (random1 & 0x7F) + 0x80,
                       (func_150ADA68() * 450.0f) + 780.0f, &position, 0xFF,
                       0, -1, arg3, arg4);

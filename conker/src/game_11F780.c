@@ -80,7 +80,7 @@ typedef struct {
 } SwayBlock;
 
 /* Steps the object's sway and stores the resulting X/Z rotation. */
-s32 func_150F23E0(SwayObject *obj) {
+s32 effect_updateSway(SwayObject *obj) {
     Sway *sway = &obj->sway;
 
     obj->rotX = sway->amplitudeX * sinf(sway->phaseX);
@@ -90,8 +90,8 @@ s32 func_150F23E0(SwayObject *obj) {
     return 1;
 }
 
-/* Same as func_150F23E0 for the model's embedded SwayBlock. */
-s32 func_150F2480(DynModel *model) {
+/* Same as effect_updateSway for the model's embedded SwayBlock. */
+s32 effect_updateModelSway(DynModel *model) {
     SwayBlock *block = (SwayBlock *)&model->buffers[model->buffersSize];
 
     block->rotX = block->sway.amplitudeX * sinf(block->sway.phaseX);
@@ -102,7 +102,7 @@ s32 func_150F2480(DynModel *model) {
 }
 
 /* Builds the model's matrix for this frame from its SwayBlock rotation and position. */
-s32 func_150F2518(DynModel *model, s32 arg1) {
+s32 effect_buildSwayMatrix(DynModel *model, s32 arg1) {
     MtxF mtx;
     SwayBlock *block;
 

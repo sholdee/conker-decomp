@@ -15,7 +15,7 @@ void func_150D5440(Actor *obj, u8 arg1, s32 arg2) {
     data.ownerId = obj->unique_id;
     data.spawnAccum = 0.0f;
 
-    effect = func_15149130(300, -1, 0x38, -1, 0, 0x28, sizeof(data), arg1, arg2);
+    effect = effect_newTimedEffect(300, -1, 0x38, -1, 0, 0x28, sizeof(data), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -125,7 +125,7 @@ void func_150D596C(FollowEffect *effect, ActorMsg *msg, u8 type) {
     if (type == 0 || type == 0x2F || type == 3) {
         object = msg->ref.actor;
         if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
-            func_1516972C(&effect->base.header);
+            effect_destroyObject(&effect->base.header);
         }
     } else if (type == 0x2D) {
         if (data->owner == msg->swap.actorA) {
@@ -138,14 +138,14 @@ void func_150D596C(FollowEffect *effect, ActorMsg *msg, u8 type) {
     }
 }
 
-/* FollowEffect callback; forwards to func_1514933C. */
+/* FollowEffect callback; forwards to effect_defaultDestroyTimedEffect. */
 void func_150D5A2C(TimedEffect *effect) {
-    func_1514933C(effect);
+    effect_defaultDestroyTimedEffect(effect);
 }
 
-/* FollowEffect callback; forwards to func_15149368. */
+/* FollowEffect callback; forwards to effect_defaultFreeTimedEffect. */
 void func_150D5A4C(TimedEffect *effect) {
-    func_15149368(effect);
+    effect_defaultFreeTimedEffect(effect);
 }
 
 
@@ -599,7 +599,7 @@ void func_150D6E60(FollowParticle *particle, ActorMsg *msg, u8 type) {
     } else if (type == 0) {
         object = msg->ref.actor;
         if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
-            func_1516972C(&particle->head.header);
+            effect_destroyObject(&particle->head.header);
         }
     }
 }
@@ -652,7 +652,7 @@ void func_150D7068(FollowParticle *particle, ActorMsg *msg, u8 type) {
     } else if (type == 0) {
         object = msg->ref.actor;
         if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
-            func_1516972C(&particle->head.header);
+            effect_destroyObject(&particle->head.header);
         }
     }
 }

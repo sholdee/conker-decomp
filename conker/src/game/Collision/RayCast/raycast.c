@@ -299,7 +299,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
         if (obj->character_type == 0x94) {
             playImpact = 0;
             func_150B5C38(&hit->pos, 0xFF, 1);
-            func_150B6754(0xFF, 1);
+            effect_flashViewLightBlue(0xFF, 1);
         }
     } else if (hit->hitType == 3) {
         if (gIsMultiplayer == 0) {

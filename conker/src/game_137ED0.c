@@ -20,7 +20,7 @@ typedef struct {
 #define CLOCK_WORK(obj) ((ClockWork *)&(obj)->touch)
 
 void func_1510AA20(s32 arg0) {
-    func_15179008(0);
+    effect_updateRain(0);
 }
 
 /*

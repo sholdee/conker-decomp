@@ -28,7 +28,7 @@ void func_150CEF60(s32 arg0) {
                   (76.0f - cx) * s - (241.0f - cy) * c.c + cx,
                   (76.0f - cx) * c.c + (241.0f - cy) * s + cy,
                   z);
-    func_151749A0(5, 3);
+    effect_advanceLevelTexFrame(5, 3);
 }
 
 f32 func_150CF040(s32 arg0, s32 arg1) {

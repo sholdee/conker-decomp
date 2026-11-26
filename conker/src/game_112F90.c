@@ -44,7 +44,7 @@ void func_150E5AE0(void) {
         }
         n = (D_800D9A14 + 10) / 10;
         j = D_800D9A14 + 1;
-        func_150E4514(D_800D9A14);
+        effect_scatterGroundHitsAhead(D_800D9A14);
         for (i = 0; i < n; i++, j -= 10) {
             if ((j >= 10) || ((func_151EF610() % 11) - j == 0)) {
                 a = ((func_151EF610() % D_800D9A08) * 2) - D_800D9A08 + D_800D9A04;

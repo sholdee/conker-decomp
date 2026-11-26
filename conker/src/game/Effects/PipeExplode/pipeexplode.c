@@ -161,9 +161,9 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
         const PipeIds idsB = { { 1, 3, 5 } };
 
         idBuf[0] = idsA.id[pipe];
-        func_151494E0((s32)idBuf, 0x17);
+        effect_sendEventToTimedEffects((s32)idBuf, 0x17);
         idBuf[0] = idsB.id[pipe];
-        func_151494E0((s32)idBuf, 0x17);
+        effect_sendEventToTimedEffects((s32)idBuf, 0x17);
     }
     trail_spawnScatterTrail(&argsD, &origin, 20);
     func_10010F88(0xE7, 0x7FFF, 0, 2, 0, gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, 1000, 3000);

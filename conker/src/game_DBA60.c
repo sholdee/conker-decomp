@@ -145,7 +145,7 @@ void func_150AE790(AttachedEffect *effect) {
         emission.velZ = 0;
         emission.accelY = 0;
         emission.velY = 0;
-        emission.anim = D_8008CA4C[50];
+        emission.anim = gEffectAnimTextures[50];
         emission.x = spawn.pos.x;
         emission.y = spawn.pos.y;
         emission.z = spawn.pos.z;
@@ -153,7 +153,7 @@ void func_150AE790(AttachedEffect *effect) {
         emission.flags = 0;
         emission.unk2B = 0;
         emission.unk8 = 0;
-        func_15167D84(&emission, 0, 0, -1, effect->base.header.owner, effect->base.header.kind);
+        effect_spawnBillboard(&emission, 0, 0, -1, effect->base.header.owner, effect->base.header.kind);
     }
 }
 /* One effect to attach: the object to spawn and the bone it follows. */
@@ -198,12 +198,12 @@ void func_150AEB9C(Actor *actor) {
             sum <<= 1;
         }
         if (sum != 0xB4E42D60) {
-            D_800DCE50[0][35] = NULL;
-            D_800DCE50[1][35] = NULL;
+            gObjectLists[0][35] = NULL;
+            gObjectLists[1][35] = NULL;
         }
         for (i = 0; i < D_800886E0[idx].count; i++) {
             AttachedEffect *effect;
-            effect = func_151491F4(D_800886E0[idx].defs[i].objectId, 0, -1, 1, 0x27, 8, 0xFF, 0);
+            effect = effect_newTimedEffectNoDraw(D_800886E0[idx].defs[i].objectId, 0, -1, 1, 0x27, 8, 0xFF, 0);
             if (effect == NULL) {
                 break;
             } else { // matching: the else-block and its `list` local steer as1's delay-slot fill
@@ -231,9 +231,9 @@ void func_150AECCC(struct42 *arg0) {
     }
 }
 
-/* Particle callback 11 (D_8008C9C8[11]): grows the billboard square by tmpl.unk4 per elapsed frame up to the
+/* Particle callback 11 (gParticleCallbacks[11]): grows the billboard square by tmpl.unk4 per elapsed frame up to the
    size tmpl.unk1A, then starts its fade (fadeStep 70). */
-void func_150AED4C(BillboardParticle *p) {
+void effect_growBillboard(BillboardParticle *p) {
     p->tmpl.width += p->tmpl.unk4 * D_800BE9E4;
     if (p->tmpl.unk1A < p->tmpl.width) {
         p->tmpl.fadeStep = 70;
@@ -279,7 +279,7 @@ s32 func_150AEDD8(QuadSprite *sprite) {
 
 /* Message handler for an AttachedEffect: on 0x2D, re-links the effect from one actor of a pair to the
    other; on 0, destroys the effect if the given actor (or id) is its owner. */
-void func_150AEDF8(AttachedEffect *effect, ActorMsg *msg, u8 type) {
+void effect_attachedEffectMessage(AttachedEffect *effect, ActorMsg *msg, u8 type) {
     OwnerLink *link = &effect->link;
 
     if (type == 0x2D) {
@@ -296,7 +296,7 @@ void func_150AEDF8(AttachedEffect *effect, ActorMsg *msg, u8 type) {
         Actor *obj = msg->ref.actor;
 
         if (obj == link->owner || msg->ref.uniqueId == link->ownerId) {
-            func_1516972C(&effect->base.header);
+            effect_destroyObject(&effect->base.header);
         }
     }
 }

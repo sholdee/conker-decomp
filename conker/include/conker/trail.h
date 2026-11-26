@@ -84,7 +84,7 @@ typedef struct ScatterTrail {
     /* 0x98 */ ScatterTrailState *state;
 } ScatterTrail;
 
-/* Written by func_15147A80's caller into a glow at 0x170 (GlowParams.anim's place), read by trail_updateTrailGlow. */
+/* Written by effect_newEffectObj's caller into a glow at 0x170 (GlowParams.anim's place), read by trail_updateTrailGlow. */
 typedef struct {
     /* 0x0 */ s16 timer;
     /* 0x4 */ f32 targetScale;
@@ -116,7 +116,7 @@ typedef struct {
     f32 width;
 } CharacterTrailPoint;
 
-/* The actor returned by func_15147A80. */
+/* The actor returned by effect_newEffectObj. */
 typedef struct CharacterTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
@@ -182,7 +182,7 @@ typedef struct PissTrail {
     /* 0x98 */ PissTrailData *data;
 } PissTrail;
 
-/* Message broadcast to trails by func_15147D64. */
+/* Message broadcast to trails by effect_sendEventToEffectObjs. */
 typedef struct TrailMessage {
     Actor *owner;
     union {
@@ -209,7 +209,7 @@ typedef struct StreamPoint {
     /* 0x17 */ u8 pad17;
 } StreamPoint; // size 0x18
 
-/* Per-stream tuning, copied into the actor's state by func_150DBD70. */
+/* Per-stream tuning, copied into the actor's state by effect_createFallingStream. */
 typedef struct StreamState {
     /* 0x00 */ f32 swayX;
     /* 0x04 */ u8 angleX;
@@ -315,7 +315,7 @@ typedef struct StreamState {
     /* 0x11A */ u8 pad11A[2];
 } StreamState; // size 0x11C
 
-/* A falling stream (game_109220.c): the object func_15147A80 returns. */
+/* A falling stream (game_109220.c): the object effect_newEffectObj returns. */
 struct StreamActor {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
@@ -330,7 +330,7 @@ typedef struct FallingTrailPoint {
     /* 0x0C */ f32 velY;
 } FallingTrailPoint; /* size 0x10 */
 
-/* A trail object made by func_15147A80: a ring buffer of points falling under gravity. */
+/* A trail object made by effect_newEffectObj: a ring buffer of points falling under gravity. */
 typedef struct FallingTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
@@ -467,7 +467,7 @@ typedef struct MatrixTrailPoint {
     /* 0x22 */ u8 pad22[2];
 } MatrixTrailPoint;
 
-/* A trail object made by func_15147A80, following a matrix of its owner. */
+/* A trail object made by effect_newEffectObj, following a matrix of its owner. */
 typedef struct MatrixTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
@@ -476,7 +476,7 @@ typedef struct MatrixTrail {
     /* 0x98 */ MatrixTrailData *data;
 } MatrixTrail;
 
-/* Data of a trail task (func_151491F4), at TrailTask::data. */
+/* Data of a trail task (effect_newTimedEffectNoDraw), at TrailTask::data. */
 typedef struct TrailTaskData {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
@@ -488,7 +488,7 @@ typedef struct TrailTask {
     /* 0x28 */ TrailTaskData data;
 } TrailTask;
 
-/* Event payloads the handlers below get (see func_15147D64). */
+/* Event payloads the handlers below get (see effect_sendEventToEffectObjs). */
 typedef union TrailEvent {
     ActorRef object;    /* events 0 and 7: trails of this owner stop */
     u8 specIndex;       /* event 6: trails of this kind stop (trail_stopMatrixTrailsOfKind) */
@@ -505,7 +505,7 @@ typedef struct TrailSet {
     /* 0x10 */ f32 sideOffset;    /* distance of each trail from the actor's centre line */
 } TrailSet;
 
-/* A character watcher (func_15158BD0) whose extra data is the character's two surface trails. */
+/* A character watcher (effect_newCharacterWatcher) whose extra data is the character's two surface trails. */
 typedef struct SurfaceTrailOwner {
     /* 0x00 */ CharacterWatcher watcher; /* watcher.hit: the floor the trails are laid on */
     /* 0x58 */ TrailSet trails;
@@ -628,7 +628,7 @@ typedef struct {
     /* 0x16 */ u8 pad16[2];
 } BoneTrailPoint;
 
-/* Effect object created by func_15147A80 for a trail. points[] is a ring buffer. */
+/* Effect object created by effect_newEffectObj for a trail. points[] is a ring buffer. */
 typedef struct BoneTrailEffect {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
@@ -654,7 +654,7 @@ typedef struct BoneEmitterTask {
     /* 0x28 */ BoneEmitter emitter;
 } BoneEmitterTask;
 
-/* A func_151491F4 task that retries creating a trail until its owner can carry it. */
+/* A effect_newTimedEffectNoDraw task that retries creating a trail until its owner can carry it. */
 typedef struct TrailRetryTask {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoneTrailParams trail;
@@ -692,7 +692,7 @@ typedef struct {
     Actor *owner;
 } RibbonInfo;
 
-/* Trail actor (func_15147A80, see game/Trail/PissTrail/pisstrail.c) drawn as a ribbon through its ring buffer of points. */
+/* Trail actor (effect_newEffectObj, see game/Trail/PissTrail/pisstrail.c) drawn as a ribbon through its ring buffer of points. */
 typedef struct RibbonActor {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];

@@ -15,7 +15,7 @@ struct Msg151419D0 {
 
 /* The block at 0x28 of the receiving object. */
 typedef struct {
-    /* 0x00 */ s32 handler; /* index into D_8008A0B4 (EffectInfo.handler) */
+    /* 0x00 */ s32 handler; /* index into gActorEffects (EffectInfo.handler) */
     /* 0x04 */ s32 owner;   /* the owner actor */
     /* 0x08 */ u8 ownerId;  /* owner->unique_id */
 } Link151419D0;
@@ -26,28 +26,28 @@ struct LinkedObject151419D0 {
     /* 0x28 */ Link151419D0 link;
 };
 
-/* Calls func_1514EDF0 with the object and its owner (link.owner). */
-void func_15141970(LinkedObject151419D0 *obj) {
-    func_1514EDF0(obj, (Actor *)obj->link.owner);
+/* Calls effect_detachHandle with the object and its owner (link.owner). */
+void effect_detachTimedHandler(LinkedObject151419D0 *obj) {
+    effect_detachHandle(obj, (Actor *)obj->link.owner);
 }
 
-void func_15141990(void *arg0) {
-    func_15141970(arg0);
+void effect_destroyTimedHandler(void *arg0) {
+    effect_detachTimedHandler(arg0);
 }
 
-void func_151419B0(void *arg0) {
-    func_15141970(arg0);
+void effect_freeTimedHandler(void *arg0) {
+    effect_detachTimedHandler(arg0);
 }
 
 /* Message handler: message 0 destroys the object if it refers to it; 0x2D re-links it. */
-void func_151419D0(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 msgType) {
+void effect_timedHandlerMessage(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 msgType) {
     Link151419D0 *link = &obj->link;
     s32 first;
 
     if (msgType == 0) {
         first = msg->unk0;
         if ((first == link->owner) || (msg->unk4.b == link->ownerId)) {
-            func_1516972C(&obj->base.header);
+            effect_destroyObject(&obj->base.header);
         }
     } else if (msgType == 0x2D) {
         if (link->owner == msg->unk0) {
@@ -60,14 +60,14 @@ void func_151419D0(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 msgType) {
     }
 }
 
-/* Payload copied into an attached effect (see func_15141E38). */
+/* Payload copied into an attached effect (see effect_attachActorEffect). */
 typedef struct {
-    /* 0x00 */ s32 handler;    /* index into D_8008A0B4 */
+    /* 0x00 */ s32 handler;    /* index into gActorEffects */
     /* 0x04 */ Actor *owner;
     /* 0x08 */ u8 ownerId;     /* owner->unique_id */
 } EffectInfo;
 
-/* Timed effect that runs handler D_8008A0B4[info.handler] on its owner while it lasts (func_15141E38); listed
+/* Timed effect that runs handler gActorEffects[info.handler] on its owner while it lasts (effect_attachActorEffect); listed
  * on the owner as ATTACH_TIMED_EFFECT. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
@@ -80,13 +80,13 @@ typedef struct {
 /* This file's .data. */
 
 /* The probe visible callbacks of game_1A11B0.c (probe, r, g, b); the only entry is empty. */
-void (*D_8008A080[1])(void *probe, s32 r, s32 g, s32 b) = { NULL };
+void (*gProbeVisibleCallbacks[1])(void *probe, s32 r, s32 g, s32 b) = { NULL };
 
 /*
- * Per effect selector (func_15141C0C): maps the floor material's effect kind and the actor to an index into
- * D_8008A0B4, or -1. Declared without a prototype: some selectors take the actor as an s32. 11: none.
+ * Per effect selector (effect_getActorEffectSelector): maps the floor material's effect kind and the actor to an index into
+ * gActorEffects, or -1. Declared without a prototype: some selectors take the actor as an s32. 11: none.
  */
-static s32 (*D_8008A084[12])() = {
+static s32 (*gActorEffectSelectors[12])() = {
     func_15146970, func_150C1A2C, func_150D8A20, func_150BAA00, func_150B2480, func_150CB1E0, func_151AF6C0,
     func_150EB030, func_150F237C, func_150BEAA8, func_150BED28, NULL,
 };
@@ -95,7 +95,7 @@ static s32 (*D_8008A084[12])() = {
  * The actor effects: the handler and the duration of its timed effect (-1: runs once). Only this file uses it,
  * but it stays global: one declaration fewer in the headers changes the .bss order of game/View/Views/views.c.
  */
-ActorEffectDef D_8008A0B4[20] = {
+ActorEffectDef gActorEffects[20] = {
     { func_15146BB8, 130 }, { func_15146BD8, 130 }, { func_15146A98, 85 },  { func_15146D60, 85 },
     { func_15146E84, 80 },  { func_15147040, -1 },  { func_15147318, 130 }, { func_150C1A40, -1 },
     { attach_spawnBonePointEffects, -1 },  { func_150BAA14, -1 },  { func_150B2494, -1 },  { func_150CB1F4, -1 },
@@ -105,20 +105,20 @@ ActorEffectDef D_8008A0B4[20] = {
 
 
 /* Runs the actor's model-specific effect selector, then every attached timed effect's handler. */
-void func_15141A7C(Actor *actor, s32 arg1) {
+void effect_runActorEffects(Actor *actor, s32 arg1) {
     s32 selector;
     s32 handler;
 
     if (gIsMultiplayer == 0) {
-        selector = func_15141C0C(actor);
-        if (D_8008A084[selector] != 0) {
-            handler = D_8008A084[selector](func_15141CC0(collision_getSurfaceType(actor->floorMaterial)), actor);
+        selector = effect_getActorEffectSelector(actor);
+        if (gActorEffectSelectors[selector] != 0) {
+            handler = gActorEffectSelectors[selector](effect_getSurfaceEffectVariant(collision_getSurfaceType(actor->floorMaterial)), actor);
             if (handler != -1) {
-                if (D_8008A0B4[handler].handler != NULL) {
-                    if (D_8008A0B4[handler].duration > 0) {
-                        func_15141E38(actor, handler);
+                if (gActorEffects[handler].handler != NULL) {
+                    if (gActorEffects[handler].duration > 0) {
+                        effect_attachActorEffect(actor, handler);
                     } else {
-                        D_8008A0B4[handler].handler(actor, arg1, 0);
+                        gActorEffects[handler].handler(actor, arg1, 0);
                     }
                 }
             }
@@ -126,23 +126,23 @@ void func_15141A7C(Actor *actor, s32 arg1) {
         {
         Attachment *node;
         node = actor->attachments;
-        if (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0) {
+        if (effect_findAttachmentByType(node, ATTACH_TIMED_EFFECT, &node) != 0) {
             do {
                 TimedHandlerEffect *effect;
                 effect = node->handle;
-                if (D_8008A0B4[effect->info.handler].handler != NULL) {
+                if (gActorEffects[effect->info.handler].handler != NULL) {
                     // matching: the u32 view makes IDO reload the index instead of reusing it
-                    D_8008A0B4[*(u32 *)&effect->info.handler].handler(actor, arg1, effect->base.header.state);
+                    gActorEffects[*(u32 *)&effect->info.handler].handler(actor, arg1, effect->base.header.state);
                 }
                 node = node->next;
-            } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);
+            } while (effect_findAttachmentByType(node, ATTACH_TIMED_EFFECT, &node) != 0);
         }
         }
     }
 }
 
 /* Maps an actor's model id to its effect selector index (11: none). */
-s32 func_15141C0C(Actor *actor) {
+s32 effect_getActorEffectSelector(Actor *actor) {
     switch (actor->character_type) {
     case 121:
         return 10;
@@ -179,7 +179,7 @@ s32 func_15141C0C(Actor *actor) {
     }
 }
 /* Picks an effect variant from the current world (level) and the given type. */
-s32 func_15141CC0(u32 type) {
+s32 effect_getSurfaceEffectVariant(u32 type) {
     if (level == 0x2F) {
         return 6;
     }
@@ -221,13 +221,13 @@ s32 func_15141CC0(u32 type) {
 }
 
 /* Attaches timed effect `handler` to the actor when both indices are valid and it has a duration. */
-void func_15141DA4(void *actor, s32 selector, s32 handler) {
+void effect_tryAttachActorEffect(void *actor, s32 selector, s32 handler) {
     if ((selector < 12) && (selector >= 0) &&
         (handler < 20) && (handler >= 0) &&
         (gIsMultiplayer == 0) &&
-        (D_8008A084[selector] != 0) && (handler != -1)) {
-        if ((D_8008A0B4[handler].handler != NULL) && (D_8008A0B4[handler].duration > 0)) {
-            func_15141E38(actor, handler);
+        (gActorEffectSelectors[selector] != 0) && (handler != -1)) {
+        if ((gActorEffects[handler].handler != NULL) && (gActorEffects[handler].duration > 0)) {
+            effect_attachActorEffect(actor, handler);
         }
     }
 }
@@ -235,23 +235,23 @@ void func_15141DA4(void *actor, s32 selector, s32 handler) {
 void *memcpy(void *, const void *, u32);
 
 /* Restarts the actor's timed effect `handler`, or creates and attaches it if it has none. */
-void func_15141E38(Actor *actor, s32 handler) {
+void effect_attachActorEffect(Actor *actor, s32 handler) {
     Attachment *found;
     Attachment *node;
     s32 pad; // matching: unused stack slot (keeps `info` at sp+0x40)
 
     found = NULL;
     node = actor->attachments;
-    if (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0) {
+    if (effect_findAttachmentByType(node, ATTACH_TIMED_EFFECT, &node) != 0) {
         do {
             TimedHandlerEffect *effect;
             effect = node->handle;
             if (handler == effect->info.handler) {
                 found = node;
-                effect->base.header.state = D_8008A0B4[handler].duration;
+                effect->base.header.state = gActorEffects[handler].duration;
             }
             node = node->next;
-        } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);
+        } while (effect_findAttachmentByType(node, ATTACH_TIMED_EFFECT, &node) != 0);
     }
     if (found == NULL) {
         TimedHandlerEffect *effect;
@@ -259,10 +259,10 @@ void func_15141E38(Actor *actor, s32 handler) {
         info.handler = handler;
         info.owner = actor;
         info.ownerId = actor->unique_id;
-        effect = func_15149130(D_8008A0B4[handler].duration, -1, -1, -1, 1, 50, 0xC, 0xFF, 1);
+        effect = effect_newTimedEffect(gActorEffects[handler].duration, -1, -1, -1, 1, 50, 0xC, 0xFF, 1);
         if (effect != NULL) {
             memcpy(&effect->info, &info, sizeof(info));
-            func_1514EC1C(effect, actor, ATTACH_TIMED_EFFECT);
+            effect_attach(effect, actor, ATTACH_TIMED_EFFECT);
         }
     }
 }
@@ -326,7 +326,7 @@ s32 func_151420F8(Actor *actor) {
 }
 
 /* Spawns the func_15153F18 effect of the given kind at `pos`. */
-void func_15142180(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB) {
+void effect_spawnSplashSpray(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB) {
     SplashSpraySpec params;
 
     params.spray.pos = *pos;

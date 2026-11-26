@@ -3,7 +3,7 @@
 #include "variables.h"
 
 void func_15190490(LightEffect *obj) {
-    func_15190454(obj);
+    effect_unlinkAnchorLight(obj);
     func_151617E4(obj);
 }
 
@@ -12,10 +12,10 @@ void func_151904BC(AnchorEmitter *emitter) {
     AnchorEmitterParams *params = &emitter->params;
 
     if (params->child != NULL) {
-        func_1516972C(params->child);
+        effect_destroyObject(params->child);
     }
     sound_stopByCallback(func_1518E298, emitter, (s32)emitter->group.actor);
-    func_151D2B4C(params->tmpl.anchorSet);
+    effect_releaseAnchorSet(params->tmpl.anchorSet);
 }
 
 /* Sends event 0x2A about `actor` to every object of type 0x3E. */
@@ -24,5 +24,5 @@ void func_15190518(Actor *actor) {
 
     event.actor = actor;
     event.uniqueId = actor->unique_id;
-    func_1516944C(0x3E, (s32)&event, 0x2A);
+    effect_sendEventToType(0x3E, (s32)&event, 0x2A);
 }

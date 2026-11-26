@@ -18,7 +18,7 @@ void view_buildOrthoMatrices(void) {
         half = 0.5f;
         do {
             func_151EF954(
-                &D_800DCC10[i],
+                &gViewOrthoMtxs[i],
                 -(temp_f0 = gViews[i].width * half),
                 temp_f0,
                 -(temp_f2 = gViews[i].height * half),
@@ -32,5 +32,5 @@ void view_buildOrthoMatrices(void) {
 }
 
 void func_15012470(void) {
-    D_80088750 = func_1518AADC(4, 300, 0);
+    gGroundDecalQueue = effect_newQueue(4, 300, 0);
 }

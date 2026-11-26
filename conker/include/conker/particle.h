@@ -323,7 +323,7 @@ typedef struct {
     /* 0x8 */ f32 spawnAccum;
 } EffectE7970Data; // size 0xC
 
-/* Effect slot as returned by func_15149130 (a TimedEffect); the effect data lives at 0x28. */
+/* Effect slot as returned by effect_newTimedEffect (a TimedEffect); the effect data lives at 0x28. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EffectE7970Data data;
@@ -584,7 +584,7 @@ typedef struct {
     f32 rate;    /* 0..1, set by func_150CDB6C */
 } BurstTimer;
 
-/* Timed effect driven by func_150CD7F8 (a D_8008A4E8 tick callback); D_80088870 points at one. */
+/* Timed effect driven by func_150CD7F8 (a gTimedEffectTickFuncs tick callback); D_80088870 points at one. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ BurstTimer timer;
@@ -630,7 +630,7 @@ typedef struct RingSparkEmitter {
     u8 color[3];
 } RingSparkEmitter; // size 0x60
 
-/* Timed effect (func_15149130) of this file, with an emitter trigger or a spark emitter (func_150D278C) as data. */
+/* Timed effect (effect_newTimedEffect) of this file, with an emitter trigger or a spark emitter (func_150D278C) as data. */
 typedef struct SparkEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ union {
@@ -930,7 +930,7 @@ typedef struct {
     /* 0x14 */ f32 spawnAccum;
 } BurstSpawner;
 
-/* Timed effect driven by func_150E9E34 (a D_8008A4E8 tick callback). */
+/* Timed effect driven by func_150E9E34 (a gTimedEffectTickFuncs tick callback). */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ BurstSpawner spawner;
@@ -965,7 +965,7 @@ typedef struct {
     /* 0x09 */ u8 rate;
 } FogFlashData;
 
-/* An effect (a TimedEffect with per-effect data at 0x28), as created by func_15149130. */
+/* An effect (a TimedEffect with per-effect data at 0x28), as created by effect_newTimedEffect. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ union {
@@ -1077,7 +1077,7 @@ typedef struct {
     /* 0x0A */ u8 padA[2];
 } CameraEmitterData;
 
-/* The emitter effect object created by func_15149130. */
+/* The emitter effect object created by effect_newTimedEffect. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ CameraEmitterData data;
@@ -1306,8 +1306,8 @@ void func_1510A870(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType);
 void func_1510A8CC(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType);
 
 /* game_15D730.c */
-extern Gfx D_80089700[]; /* render setup (object type table D_8008B4A8) */
-extern Gfx D_80089730[]; /* render teardown (object type table D_8008B4A8) */
+extern Gfx D_80089700[]; /* render setup (object type table gObjectTypes) */
+extern Gfx D_80089730[]; /* render teardown (object type table gObjectTypes) */
 /* Each returns a SpriteParticle followed by dataSize bytes of its kind's data (the kind's own type). */
 void *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5);
 void *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
@@ -1383,8 +1383,8 @@ Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 Gfx *func_15133FD8(Gfx *gfx, ModelParticle *particle, s16 arg2);
 
 /* game_169510.c */
-extern Gfx D_80089EB8[]; /* render setup (object type table D_8008B4A8) */
-extern Gfx D_80089ED8[]; /* render teardown (object type table D_8008B4A8) */
+extern Gfx D_80089EB8[]; /* render setup (object type table gObjectTypes) */
+extern Gfx D_80089ED8[]; /* render teardown (object type table gObjectTypes) */
 /* Source of the four vertex colours given to func_151400D0. */
 typedef struct {
     s16 r, g, b, a;
@@ -1655,7 +1655,7 @@ s32 func_15154A88(Object15132A4C *object);
 
 /* game_183640.c */
 extern BurstPoint D_800DCA30[3][10]; /* random burst points around each pipe (func_150124A0 fills them) */
-extern Gfx D_8008AD40[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008AD40[]; /* render setup (object type table gObjectTypes) */
 /*
  * A streak particle: a camera-facing triangle from its tail point to a
  * width-wide edge at its head. Head and tail move with separate velocities.
@@ -1805,7 +1805,7 @@ void func_1515BA80(s16 player);
 void func_1515BAAC(s16 player);
 
 /* game_193E50.c */
-extern Gfx D_8008B440[]; /* object type 0xD render setup (object type table D_8008B4A8) */
+extern Gfx D_8008B440[]; /* object type 0xD render setup (object type table gObjectTypes) */
 /* Object type 0xD: a puff of three quads, each on its own matrix with a different yaw. */
 typedef struct {
     EffectHeader header;
@@ -1905,14 +1905,14 @@ struct StyleParticle; /* game_19A8B0.c */
 s32 func_1516A648(struct StyleParticle *particle);
 
 /* game_19A8B0.c */
-extern Gfx D_8008CB70[]; /* render setup (object type table D_8008B4A8) */
-extern Gfx D_8008CB90[]; /* render teardown (object type table D_8008B4A8) */
+extern Gfx D_8008CB70[]; /* render setup (object type table gObjectTypes) */
+extern Gfx D_8008CB90[]; /* render teardown (object type table gObjectTypes) */
 extern u8 D_800DD2A0[4]; /* per style object: intensity, raised to 0xFF over time (func_1516D400) */
 /* A 0x34-byte sprite particle, spawned by func_1516D4E8 and updated every frame by the
  * handler that D_8008CBA0 holds for its kind. The bytes from 0x26 on depend on the kind. */
 typedef struct StyleParticle {
     /* 0x00 */ u8 type;  /* EffectHeader.type: 0x12, or 0x67 */
-    /* 0x01 */ u8 list;  /* EffectHeader byte 1: the object list (func_15167A68) */
+    /* 0x01 */ u8 list;  /* EffectHeader byte 1: the object list (effect_newObject) */
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 owner; /* EffectHeader.owner */
     /* 0x0D */ u8 padD;
@@ -1922,7 +1922,7 @@ typedef struct StyleParticle {
     /* 0x14 */ s16 scaleX;
     /* 0x16 */ s16 scaleY;
     /* 0x18 */ s16 velocityY;
-    /* 0x1A */ u8 texture; /* index into D_8008CA4C */
+    /* 0x1A */ u8 texture; /* index into gEffectAnimTextures */
     /* 0x1B */ u8 frame;
     /* 0x1C */ u8 r;
     /* 0x1D */ u8 g;
@@ -1986,7 +1986,7 @@ typedef struct StyleParticle {
  * its bytes are the template that func_1516D4E8 gets for each particle it spawns. */
 typedef struct SpriteEmitter {
     /* 0x00 */ u8 type; /* EffectHeader.type: 0x11, or 0x66 for an emitter whose particles are 0x67s */
-    /* 0x01 */ u8 list; /* EffectHeader byte 1: the object list (func_15167A68) */
+    /* 0x01 */ u8 list; /* EffectHeader byte 1: the object list (effect_newObject) */
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 owner; /* EffectHeader.owner */
     /* 0x0D */ u8 padD;
@@ -2084,8 +2084,8 @@ s32 func_151707E0(StyleParticle *particle);
 void func_151709B4(s32 x, s32 y, s32 z, s32 count, f32 speed, u8 arg5, s32 arg6);
 
 /* game_19F150.c */
-extern Gfx D_8008CC30[]; /* render setup (object type table D_8008B4A8) */
-extern Gfx D_8008CC58[]; /* render teardown (object type table D_8008B4A8) */
+extern Gfx D_8008CC30[]; /* render setup (object type table gObjectTypes) */
+extern Gfx D_8008CC58[]; /* render teardown (object type table gObjectTypes) */
 /* A textured sprite particle: one quad, drawn by func_151720C4. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
@@ -2094,7 +2094,7 @@ typedef struct {
     /* 0x52 */ s16 animFrame; // 8.8 fixed point frame index
     /* 0x54 */ s16 animSpeed;
     /* 0x56 */ u16 color;     // RGBA5551
-    /* 0x58 */ u8 animIndex;  // index into D_8008CA4C
+    /* 0x58 */ u8 animIndex;  // index into gEffectAnimTextures
     /* 0x59 */ u8 flags;      // 1: cloud blend, 2: flat quad, 4: play animation once, 8: texture-only combine
 } Particle19F150;
 
@@ -2131,10 +2131,10 @@ void func_15174920(PuffParticle *particle);
 void func_15179DB0(u8 slot);
 
 /* game_1A7490.c */
-extern Gfx D_8008CE20[]; /* render setup of object types 8 and 9 (object type table D_8008B4A8) */
-extern Gfx D_8008CE40[]; /* render setup of object types 12 and 89 (object type table D_8008B4A8) */
+extern Gfx D_8008CE20[]; /* render setup of object types 8 and 9 (object type table gObjectTypes) */
+extern Gfx D_8008CE40[]; /* render setup of object types 12 and 89 (object type table gObjectTypes) */
 /*
- * Small spinning, fading debris particles. They are allocated with func_15167A68 (0xB8 bytes) and driven by
+ * Small spinning, fading debris particles. They are allocated with effect_newObject (0xB8 bytes) and driven by
  * the object-type handler table in .rodata (D_8008B648 etc.): an update callback (func_1517A1EC or
  * func_1517A84C), the draw callback func_1517A3A0 and the begin-draw hook func_1517A958.
  */
@@ -2333,7 +2333,7 @@ typedef struct {
     /* 0x110 */ SpriteWobble wobble;
 } EffectSprite;
 
-/* Particle created by func_151D2BA4 from an EmitterParticleDesc. */
+/* Particle created by effect_spawnBoneFollower from an EmitterParticleDesc. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x2C];
     /* 0x2C */ JitterParticle *sprite; /* made by func_1514B8E4 */
@@ -2408,7 +2408,7 @@ typedef struct DripSlot {
     /* 0x8 */ struct DripSlot *next;
 } DripSlot;
 
-/* A func_151491F4 task that keeps the link of an emitter that could not be created yet. */
+/* A effect_newTimedEffectNoDraw task that keeps the link of an emitter that could not be created yet. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ActorLink link;
@@ -2569,7 +2569,7 @@ s32 func_151938E4(SegmentEmitter *emitter);
 void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, SegmentEmitter *emitter);
 
 /* game_1CDEC0.c */
-/* Data of the spark emitter effect, stored at 0x28 in the effect object from func_151491F4. */
+/* Data of the spark emitter effect, stored at 0x28 in the effect object from effect_newTimedEffectNoDraw. */
 typedef struct {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 y;
@@ -2611,7 +2611,7 @@ typedef struct {
     /* 0x28 */ EmitterParams params;
 } SphereEmitter;
 
-/* Object that spawns a func_151491F4 effect, passing on its settings from 0x28. */
+/* Object that spawns a effect_newTimedEffectNoDraw effect, passing on its settings from 0x28. */
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -2724,7 +2724,7 @@ typedef struct {
     /* 0x20 */ u8 unk20;
 } EffectPayload;
 
-/* A func_15147A80 effect object (EffectObj) whose items are EffectSamples and whose user data is an
+/* A effect_newEffectObj effect object (EffectObj) whose items are EffectSamples and whose user data is an
  * EffectPayload. */
 typedef struct {
     /* 0x00 */ EffectObjHead head;
@@ -3088,7 +3088,7 @@ typedef struct {
     /* 0x128 */ SteamData steam;
 } SteamEffect;
 
-/* Data of a func_15149130 effect that drops a func_151D9014 particle whenever its timer runs out. */
+/* Data of a effect_newTimedEffect effect that drops a func_151D9014 particle whenever its timer runs out. */
 typedef struct {
     s16 timer;
     f32 size;
@@ -3230,7 +3230,7 @@ typedef struct {
     /* 0x11 */ u8 pad11[3];
 } ColorEmitterData; /* 0x14 */
 
-/* Effect created by func_15149130 (only the fields used here). */
+/* Effect created by effect_newTimedEffect (only the fields used here). */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ColorEmitterData data;

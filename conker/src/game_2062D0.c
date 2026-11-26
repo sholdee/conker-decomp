@@ -402,7 +402,7 @@ void func_151D9B8C(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos, s16 lifeti
             drip.unk14 = arg2;
             drip.unk15 = arg7;
             drip.kind = kind;
-            effect = func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x4A, -1, (lifetime == -1) ? 0 : 1, 0,
+            effect = effect_newTimedEffect((lifetime == -1) ? 300 : lifetime, -1, 0x4A, -1, (lifetime == -1) ? 0 : 1, 0,
                                    sizeof(drip), arg9, argA);
             if (effect != NULL) {
                 memcpy(&((DripEffect *)effect)->drip, &drip, sizeof(drip));

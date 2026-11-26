@@ -11,14 +11,14 @@ typedef struct {
     /* 0x0C */ f32 unkCAccum;  /* fractional count of func_15107B78 particles still to spawn */
 } OwnerSparkData; /* size 0x10 */
 
-/* A TimedEffect effect, as created by func_15149130, carrying OwnerSparkData at 0x28. */
+/* A TimedEffect effect, as created by effect_newTimedEffect, carrying OwnerSparkData at 0x28. */
 struct OwnerSparkEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ OwnerSparkData data;
 };
 
 /* Spawns a spark effect attached to `owner`; a duration of -1 means 300 frames, not looping. */
-OwnerSparkEffect *func_150B53D0(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
+OwnerSparkEffect *effect_spawnOwnerSpark(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     OwnerSparkEffect *effect;
     OwnerSparkData data;
 
@@ -32,17 +32,17 @@ OwnerSparkEffect *func_150B53D0(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     data.unkCAccum = 0.0f;
 
     // matching: `duration != -1` compiles to sltu/xori; IDO only emits this branchy form for ?:
-    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x24, -1,
+    effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x24, -1,
                                                (duration == -1) ? 0 : 1, 0x23, 0x10, arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
-        func_151D2AB0(6);
+        effect_acquireAnchorSet(6);
     }
     return effect;
 }
 
 /* Per-frame update of a spark effect: ends it once the owner is gone, else spawns sparks around it. */
-void func_150B54A8(OwnerSparkEffect *effect) {
+void effect_updateOwnerSpark(OwnerSparkEffect *effect) {
     OwnerSparkData *data;
     Actor *owner;
 
@@ -74,30 +74,30 @@ void func_150B54A8(OwnerSparkEffect *effect) {
     }
 }
 
-void func_150B57C4(OwnerSparkEffect *effect) {
-    func_151D2B4C(6);
+void effect_releaseOwnerSparkAnchors(OwnerSparkEffect *effect) {
+    effect_releaseAnchorSet(6);
 }
 
-void func_150B57E8(OwnerSparkEffect *effect) {
-    func_150B57C4(effect);
-    func_1514933C(&effect->base);
+void effect_destroyOwnerSpark(OwnerSparkEffect *effect) {
+    effect_releaseOwnerSparkAnchors(effect);
+    effect_defaultDestroyTimedEffect(&effect->base);
 }
 
-void func_150B5814(OwnerSparkEffect *effect) {
-    func_150B57C4(effect);
-    func_15149368(&effect->base);
+void effect_freeOwnerSpark(OwnerSparkEffect *effect) {
+    effect_releaseOwnerSparkAnchors(effect);
+    effect_defaultFreeTimedEffect(&effect->base);
 }
 
 /* Event handler of a spark effect: event 0 destroys it when it concerns its owner, event 0x2D swaps
  * its owner. */
-void func_150B5840(OwnerSparkEffect *effect, ActorMsg *event, u8 eventId) {
+void effect_ownerSparkMessage(OwnerSparkEffect *effect, ActorMsg *event, u8 eventId) {
     OwnerSparkData *data = &effect->data;
     Actor *obj;
 
     if (eventId == 0) {
         obj = event->ref.actor; // matching: loading the pointer first puts it in v1 ahead of data->owner
         if ((obj == data->owner) || (event->ref.uniqueId == data->ownerId)) {
-            func_1516972C(&effect->base.header);
+            effect_destroyObject(&effect->base.header);
         }
     } else if (eventId == 0x2D) {
         if (data->owner == event->swap.actorA) {

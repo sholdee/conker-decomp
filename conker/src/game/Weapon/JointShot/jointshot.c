@@ -213,7 +213,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
                 ShotHolder *holder;
                 RayHit *src;
 
-                if (func_1514ECE0(arg0->attachments, 0x1B, &entry) != 0) {
+                if (effect_findAttachmentByType(arg0->attachments, 0x1B, &entry) != 0) {
                     source = entry->handle;
                     holder = &source->holder;
                     if (source->flags & 1) {
@@ -238,7 +238,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
 
                                 shot = *src;
                                 shot.origin = end;
-                                func_150F7470(&origin, NULL, NULL, NULL, 0, &shot, 54.00000381f, 0.01851851679f, 500.0f, arg0, 0,
+                                effect_spawnProjectile(&origin, NULL, NULL, NULL, 0, &shot, 54.00000381f, 0.01851851679f, 500.0f, arg0, 0,
                                               (src->hitType >= 2) ? 0 : 1, 1, 0, 0x1A, -1, 0, 1, arg2, arg3);
                             }
                         }
@@ -249,7 +249,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
     }
 }
 
-/* Spawns a func_15102B38 effect at `pos` between this side's D_800AAB08/D_800AAB20 points, with random
+/* Spawns a effect_spawnBoneBeamParticle effect at `pos` between this side's D_800AAB08/D_800AAB20 points, with random
  * size, count and angle. */
 void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5) {
     ParticleSize values;
@@ -262,7 +262,7 @@ void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, 
     random0 = func_150ADA20();
     random1 = func_150ADA20();
     angle = func_150ADA68();
-    func_15102B38(arg0, (u32)D_800AAB00[side] >> 6, &D_800AAB08[side], &D_800AAB20[side], &values,
+    effect_spawnBoneBeamParticle(arg0, (u32)D_800AAB00[side] >> 6, &D_800AAB08[side], &D_800AAB20[side], &values,
                   (random0 % 4U) + 6, (random1 % 1U) + 255, (angle * 270.0f) + 359.0f, pos, 255, 0, arg3, arg4,
                   arg5);
 }

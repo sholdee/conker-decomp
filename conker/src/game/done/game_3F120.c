@@ -5,9 +5,9 @@
 
 
 void func_15011C70(void) {
-    D_800D9AA0[0] = 0;
-    D_800D9AA0[1] = 0;
-    D_800D9AA0[2] = 0;
+    gSprayAreas[0] = 0;
+    gSprayAreas[1] = 0;
+    gSprayAreas[2] = 0;
     sound_clearCooldowns();
 }
 

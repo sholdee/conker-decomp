@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
-void func_15169040(s32 event, u8 eventType);
+void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Defined in game/Actor/Movement/movement.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
 void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
@@ -609,7 +609,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     beam_spawnEmitterPreset(5, 1, 0, &point2, -10000.0f, 100.0f, -1, sceneTag, 1);
                     break;
                 case 2:
-                    func_151494E0(0, event->unk5 ? 0x2B : 0x2C);
+                    effect_sendEventToTimedEffects(0, event->unk5 ? 0x2B : 0x2C);
                     break;
                 case 3:
                     if (event->unk5) {
@@ -660,13 +660,13 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_150F5340();
                     break;
                 case 15:
-                    func_150FAA40(0xFF, 1);
+                    effect_startLineEmitter(0xFF, 1);
                     break;
                 case 16:
-                    func_15169040(0, 0x4E);
+                    effect_broadcastEvent(0, 0x4E);
                     break;
                 case 17:
-                    func_15169040(0, 0x4F);
+                    effect_broadcastEvent(0, 0x4F);
                     break;
                 case 18:
                     trail_stopStream(event->unk5);
@@ -681,7 +681,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     }
                     break;
                 case 21:
-                    func_151494E0(0, event->unk5 != 0 ? 0x55 : 0x56);
+                    effect_sendEventToTimedEffects(0, event->unk5 != 0 ? 0x55 : 0x56);
                     break;
                 case 22:
                     if (obj != NULL) {
@@ -735,7 +735,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
                 ref.actor = obj;
                 ref.uniqueId = obj->unique_id;
-                func_15147D64((s32)&ref, 7);
+                effect_sendEventToEffectObjs((s32)&ref, 7);
             }
         } else if (event->value == 0x30) {
             u8 v;
@@ -761,7 +761,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         v = 0xC;
                         break;
                 }
-                func_1514D3B0(obj, 0xD, v, 0);
+                effect_sendAttachmentMessage(obj, 0xD, v, 0);
             }
         } else if (event->value == 0x46) {
             if (event->unk4 != 0) {
@@ -866,7 +866,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->value == 0x54) {
             D_800C3660[scene] = ~event->unk4;
         } else if (event->value == 0x55) {
-            func_150C851C(event->unk4);
+            effect_randomizeBounceRecordSpeeds(event->unk4);
         } else if (event->value == 0x59) {
             D_800C3C8B = 1;
         } else if (event->value == 0x5A) {
@@ -1165,7 +1165,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->value == 0xC) {
             SpriteFxTemplate sp;
 
-            sp.anim = D_8008CA4C[1];
+            sp.anim = gEffectAnimTextures[1];
             sp.frame = 0;
             sp.frameStep = 0x100;
             sp.x = pos[0];
@@ -1175,7 +1175,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             sp.scaleY = 0x5DC;
             sp.fadeStep = -10;
             sp.callback = 0;
-            func_15167AD8(&sp, sceneTag, 1);
+            effect_spawnSpriteFx(&sp, sceneTag, 1);
         } else if (event->value == 0x19) {
             s32 duration;
             SeqEvent *found;
@@ -1278,7 +1278,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
             trail_spawnActorBoneTrail(obj, sceneTag);
         } else if (event->value == 0x20) {
-            func_15165F80(-1, pos[0], pos[1], pos[2], 0x14, 0x14, 1, sceneTag, 1);
+            effect_spawnQuadEffect(-1, pos[0], pos[1], pos[2], 0x14, 0x14, 1, sceneTag, 1);
         } else if (event->value == 6) {
         } else if (event->value == 7) {
             func_150B2494(obj, 9, -1);
@@ -1310,10 +1310,10 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     case 0x12:
                     case 0x15:
                         val[0] = event->unk6;
-                        func_151494E0((s32)val, 0x51);
+                        effect_sendEventToTimedEffects((s32)val, 0x51);
                         break;
                     case 0x13:
-                        func_150CFC38((event->unk6 * 0.009999999776f * 300.0f) - 150.0f);
+                        effect_sendHopMessage((event->unk6 * 0.009999999776f * 300.0f) - 150.0f);
                         break;
                 }
             }
@@ -1374,7 +1374,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         break;
                     }
                     case 10:
-                        func_150F802C(&D_800C3958[scene][track].x, duration, sceneTag, 1);
+                        effect_spawnPuffFollower(&D_800C3958[scene][track].x, duration, sceneTag, 1);
                         break;
                     case 11: {
                         s16 data[2];
@@ -1383,7 +1383,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         func_150AF738(duration, sceneTag, 1);
                         data[0] = 0;
                         data[1] = 0;
-                        p = func_15149130(duration, -1, 0x4B, -1, 1, 0, 4, sceneTag, 1);
+                        p = effect_newTimedEffect(duration, -1, 0x4B, -1, 1, 0, 4, sceneTag, 1);
                         if (p != NULL) {
                             memcpy((u8 *)p + 0x28, data, 4);
                         }
@@ -1410,7 +1410,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                             half = duration * 0.5f;
                             obj->unk2D8[0] = half;
                             obj->unk2D8[1] = 1.0f / half;
-                            func_150C4120(obj, duration, sceneTag, 1);
+                            effect_spawnPulseEffect(obj, duration, sceneTag, 1);
                         }
                         break;
                     case 16:
@@ -1419,19 +1419,19 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         }
                         break;
                     case 17:
-                        func_150D0134(event->unk6, D_800C35E0[scene][event->unk6], duration, sceneTag, 1);
+                        effect_newFadeTextBox(event->unk6, D_800C35E0[scene][event->unk6], duration, sceneTag, 1);
                         break;
                     case 18:
-                        func_150D02B4(event->unk6, D_800C35E0[scene][event->unk6], duration, sceneTag, 1);
+                        effect_newPromptTextBox(event->unk6, D_800C35E0[scene][event->unk6], duration, sceneTag, 1);
                         break;
                     case 19:
-                        func_150CF680(duration, sceneTag, 1);
+                        effect_spawnHopSprite(duration, sceneTag, 1);
                         break;
                     case 20:
                         func_151925C4(obj, duration, sceneTag, 1);
                         break;
                     case 21:
-                        func_150D04C4(event->unk6, D_800C35E0[scene][event->unk6], duration, sceneTag, 1);
+                        effect_newSlowFadeTextBox(event->unk6, D_800C35E0[scene][event->unk6], duration, sceneTag, 1);
                         break;
                     case 22: {
                         u16 id;
@@ -1486,7 +1486,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         to[0] = D_800C3958[scene][track].x;
                         to[1] = D_800C3958[scene][track].y;
                         to[2] = D_800C3958[scene][track].z;
-                        func_150E3340(from, to, &D_800C3958[scene][track].x, duration);
+                        effect_startFollowingHoming(from, to, &D_800C3958[scene][track].x, duration);
                         break;
                     }
                     case 26: {
@@ -1523,10 +1523,10 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             SeqEvent *found;
 
             if (event->unk5 == 1) {
-                func_151B09BC(obj, 0, 1000, sceneTag, 0);
+                effect_startJointEmitterTask(obj, 0, 1000, sceneTag, 0);
             } else if (event->unk4 == 0) {
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_151B09BC(obj, 0, duration, sceneTag, 0);
+                effect_startJointEmitterTask(obj, 0, duration, sceneTag, 0);
             }
         } else if (event->value == 0x4C) {
             s32 duration;
@@ -1631,7 +1631,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 }
                 node = obj->attachments;
                 while (node != NULL) {
-                    if (node->type == kind || func_1514D4B8(D_8008ABE8[kind]->firstChild, node->type) != 0) {
+                    if (node->type == kind || effect_isAttachTypeInTree(gAttachmentTypes[kind]->firstChild, node->type) != 0) {
                         ((EvTimerOwner *)node->handle)->timer =
                             func_1519E970(duration, node->handle, 0, &D_800C3958[scene][track].unk30,
                                           &D_800C3958[scene][track].unk20, sceneTag, 0);
@@ -1895,7 +1895,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     sp.x = state->x;
                     sp.y = state->y + 50.0f;
                     sp.z = state->z;
-                    func_15170B90(&sp, 1, 1, 2, sceneTag, 0);
+                    effect_spawnModelBurst(&sp, 1, 1, 2, sceneTag, 0);
                     break;
                 }
                 case 21:
@@ -2055,7 +2055,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             s32 type;
 
             type = (event->unk4 >= 2) ? 1 : event->unk4;
-            func_150DB9E0(obj, type, sceneTag);
+            effect_startPuffJets(obj, type, sceneTag);
         } else if (event->value == 0x26) {
             SeqEvent *found;
             s32 t;
@@ -2112,7 +2112,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x29) {
             if (actor != NULL) {
-                func_15170EC4(actor, sceneTag, 0);
+                effect_spawnLevelModelBurst(actor, sceneTag, 0);
             } else if (obj != NULL) {
                 func_151711C4(obj);
             }
@@ -2384,14 +2384,14 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->value == 0x56) {
             if (event->unk4 == 0) {
                 if (skipping == 0) {
-                    func_15178EFC(3);
+                    effect_requestRainState(3);
                 }
             } else if (skipping != 0) {
-                func_15178EFC(2);
+                effect_requestRainState(2);
             } else if (event->unk5 == 0) {
-                func_15178EFC(0);
+                effect_requestRainState(0);
             } else {
-                func_15178EFC(1);
+                effect_requestRainState(1);
             }
         } else if (event->value == 0x76) {
             s32 mode;
@@ -2426,10 +2426,10 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             SeqEvent *found;
 
             if (event->unk4 == 0) {
-                func_151557FC(0, func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime, 0.0f);
+                effect_showPlayerMarker(0, func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime, 0.0f);
             } else if (skipping != 0) {
                 dc_glbl_CharNum = 0;
-                func_15155F90();
+                effect_keepPlayerMarkerShown();
             }
         }
     } else {

@@ -88,7 +88,7 @@ void func_150E68B0(Actor *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex) {
                 emission.duration = source->duration;
                 emission.durationRange = source->durationRange;
                 emission.color = source->color;
-                effect = func_151491F4(func_150ADA68() * 70.0f + 30.0f, -1, 15, 1, 11,
+                effect = effect_newTimedEffectNoDraw(func_150ADA68() * 70.0f + 30.0f, -1, 15, 1, 11,
                                                            sizeof(Game113D60Emission), 0xFF, 1);
                 if (effect != NULL) {
                     memcpy(&effect->emission, &emission, sizeof(Game113D60Emission));
@@ -232,7 +232,7 @@ void func_150E6FAC(Vec3f *out, Actor *actor) {
     s16 angle;
     f32 cosine;
 
-    if (func_1514ECE0(actor->attachments, 0x16, &node) != 0) {
+    if (effect_findAttachmentByType(actor->attachments, 0x16, &node) != 0) {
         Bone150E6FAC *bone;
 
         radius = (func_150ADA68() * 100.0f) + 80.0f;
@@ -474,7 +474,7 @@ TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
     head.count = count;
     head.next = 0;
 
-    obj = func_151491F4(300, -1, 16, 1, 12, (count * sizeof(Vec2f)) + 0x10, owner, kind);
+    obj = effect_newTimedEffectNoDraw(300, -1, 16, 1, 12, (count * sizeof(Vec2f)) + 0x10, owner, kind);
     if (obj != NULL) {
         memcpy(&((Game113D60BurstEffect *)obj)->burst.head, &head, sizeof(head));
 
@@ -647,7 +647,7 @@ void func_150E83AC(const Vec3f *position, s16 duration, u8 owner, s32 kind) {
     data.position = *position;
     data.unkC = 0.0f;
 
-    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x28, -1, (duration == -1) ? 0 : 1, 0, sizeof(data),
+    effect = effect_newTimedEffect((duration == -1) ? 300 : duration, -1, 0x28, -1, (duration == -1) ? 0 : 1, 0, sizeof(data),
                            owner, kind);
     if (effect != NULL) {
         memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
@@ -732,7 +732,7 @@ void func_150E8854(void) {
 
     timer = 10.0f;
 
-    effect = func_15149130(300, -1, 0x35, -1, 0, 0, sizeof(timer), 0xFF, 1);
+    effect = effect_newTimedEffect(300, -1, 0x35, -1, 0, 0, sizeof(timer), 0xFF, 1);
     if (effect != NULL) {
         memcpy(((Game113D60AnyEffect *)effect)->data, &timer, sizeof(timer));
     }
@@ -747,13 +747,13 @@ void func_150E88C0(Game113D60TimerEffect *effect) {
     }
 }
 
-/* Fires a pair of effect objects through func_15169260 plus an event, effects 0x33 and 0x36 when the
+/* Fires a pair of effect objects through effect_sendEventToTypes plus an event, effects 0x33 and 0x36 when the
  * D_800DCDC4 region list exists, and two sounds. */
 void func_150E8930() {
     s32 ids[2] = { 0x19, 0x48 };
     RumbleParams event;
 
-    func_15169260(ids, 2, 0, 0x1B);
+    effect_sendEventToTypes(ids, 2, 0, 0x1B);
     func_15164F0C(0, D_800BE9E8, NULL, 0xFF, 1);
     event.flags = 1;
     event.duration = (func_150ADA20() % 21) + 20;
@@ -786,7 +786,7 @@ void func_150E8A80(void) {
     data.unk4 = 3.199999981e-07f;
     data.unk8 = 0.0f;
 
-    effect = func_15149130((func_150ADA20() % 41) + 30, -1, 0x33, -1, 1, 0, sizeof(data), 0xFF, 1);
+    effect = effect_newTimedEffect((func_150ADA20() % 41) + 30, -1, 0x33, -1, 1, 0, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
         memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
     }
@@ -834,7 +834,7 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
                 data.unk0C = 0.3171199858f;
                 data.unk10 = 1.046509981f;
                 data.unk14 = 0.0f;
-                child = func_15149130((func_150ADA20() % 13) + 5, -1, 0x34, -1, 1, 0, sizeof(data),
+                child = effect_newTimedEffect((func_150ADA20() % 13) + 5, -1, 0x34, -1, 1, 0, sizeof(data),
                                       effect->base.header.owner, effect->base.header.kind);
                 if (child != NULL) {
                     memcpy(((Game113D60AnyEffect *)child)->data, dataPtr, sizeof(data));
@@ -940,7 +940,7 @@ void func_150E90DC(void) {
     data.unk4 = 1.500000053e-07f;
     data.unk8 = 0.0f;
 
-    effect = func_15149130((func_150ADA20() % 26) + 5, -1, 0x36, -1, 1, 0, sizeof(data), 0xFF, 1);
+    effect = effect_newTimedEffect((func_150ADA20() % 26) + 5, -1, 0x36, -1, 1, 0, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
         memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
     }
@@ -996,7 +996,7 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
                 data.unk34 = 0;
                 data.unk35 = 0;
                 data.unk38 = 0;
-                child = func_15149130((func_150ADA20() % 13) + 5, -1, 0x37, -1, 1, 0, sizeof(data),
+                child = effect_newTimedEffect((func_150ADA20() % 13) + 5, -1, 0x37, -1, 1, 0, sizeof(data),
                                       effect->base.header.owner, effect->base.header.kind);
                 if (child != NULL) {
                     memcpy(((Game113D60AnyEffect *)child)->data, &data, sizeof(data));

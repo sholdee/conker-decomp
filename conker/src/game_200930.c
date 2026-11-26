@@ -218,7 +218,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
         }
     }
     if (hit && solid) {
-        func_15102920(func_150ADA68() * 20.0f + 15.0f, 255, &hitSurface, &hitPos, 300, 1, 1, 0, arg4, arg5);
+        effect_spawnSurfaceSprite(func_150ADA68() * 20.0f + 15.0f, 255, &hitSurface, &hitPos, 300, 1, 1, 0, arg4, arg5);
     }
 }
 
@@ -407,7 +407,7 @@ void func_151D4668(Actor *obj) {
 
     handle.actor = obj;
     handle.uniqueId = obj->unique_id;
-    func_151494E0((s32)&handle, 0x3C);
+    effect_sendEventToTimedEffects((s32)&handle, 0x3C);
 }
 
 /* Creates an effect that follows the point D_8008FC70[posFunc] computes on obj. */
@@ -439,7 +439,7 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
         }
     }
 
-    effect = func_15149130(arg2, -1, 0x41, -1, 1, 0x35, 0x20, arg3, arg4);
+    effect = effect_newTimedEffect(arg2, -1, 0x41, -1, 1, 0x35, 0x20, arg3, arg4);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &emitter, sizeof(ObjEmitter));
     }
@@ -548,7 +548,7 @@ void func_151D4C38(ObjEmitterEffect *effect, ActorRef *handle, u8 msg) {
     emitter = &effect->emitter;
     if (msg == 0x3C) {
         if ((handle->actor == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
-            func_1516972C(&effect->base.header);
+            effect_destroyObject(&effect->base.header);
         }
     } else if (msg == 4) {
         if ((handle->actor == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
@@ -557,7 +557,7 @@ void func_151D4C38(ObjEmitterEffect *effect, ActorRef *handle, u8 msg) {
     block_151D4C38: // matching: an empty labelled statement keeps the flag store out of the branch delay slot
         ;
     } else {
-        func_15149514((s32)handle, msg, &emitter->obj, &emitter->uniqueId, effect);
+        effect_handleTimedEffectOwnerEvent((s32)handle, msg, &emitter->obj, &emitter->uniqueId, effect);
     }
 }
 

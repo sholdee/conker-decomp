@@ -5,16 +5,16 @@
 #define OBJ_TYPE_PLAYER_MARKER 0x50
 
 /* The marker type's render teardown display list (object type table): reloads the identity modelview. */
-Gfx D_8008AD30[] = {
+Gfx gPlayerMarkerRenderTeardownDl[] = {
     gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPEndDisplayList(),
 };
 
 /* Allocates a marker object (object list 0) for player `playerId`. */
-PlayerMarker *func_15155780(s32 playerId, s32 owner) {
+PlayerMarker *effect_newPlayerMarker(s32 playerId, s32 owner) {
     PlayerMarker *marker;
 
-    marker = func_15167A68(OBJ_TYPE_PLAYER_MARKER, 0, sizeof(PlayerMarker), 1, owner, 1);
+    marker = effect_newObject(OBJ_TYPE_PLAYER_MARKER, 0, sizeof(PlayerMarker), 1, owner, 1);
     if (marker == NULL) {
         return marker;
     }
@@ -27,12 +27,12 @@ PlayerMarker *func_15155780(s32 playerId, s32 owner) {
 }
 
 /* Finds or creates player `playerId`'s marker and shows it for `duration` frames, `heightOffset` higher. */
-void func_151557FC(s32 playerId, s32 duration, f32 heightOffset) {
+void effect_showPlayerMarker(s32 playerId, s32 duration, f32 heightOffset) {
     PlayerMarker *marker;
 
-    marker = func_15155FD4(playerId);
+    marker = effect_findPlayerMarker(playerId);
     if (marker == NULL) {
-        marker = func_15155780(playerId, 0xFF);
+        marker = effect_newPlayerMarker(playerId, 0xFF);
     }
     if (marker != NULL) {
         marker->heightOffset = heightOffset;
@@ -49,10 +49,10 @@ void func_151557FC(s32 playerId, s32 duration, f32 heightOffset) {
 /*
  * Per-frame update. State 0 waits until the player's mv->context_b allows a marker and the player is out of
  * water, then plays sound 0x1EB and shows it for 120 frames (state 1). State 2 (finished) waits for unk75 to
- * drop to 0 before re-arming. State 3 is a timed marker set by func_151557FC. While shown, the light follows
+ * drop to 0 before re-arming. State 3 is a timed marker set by effect_showPlayerMarker. While shown, the light follows
  * the player and bobs; otherwise it is freed.
  */
-void func_1515589C(PlayerMarker *marker) {
+void effect_updatePlayerMarker(PlayerMarker *marker) {
     s32 playerId;
     Actor *player;
     s32 timer;
@@ -132,7 +132,7 @@ void func_1515589C(PlayerMarker *marker) {
 }
 
 /* Draws the marker sprite (2.25x scale, rotated by camera_global_Cameras[view].TrueCameraAngle) while the marker is shown. */
-Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
+Gfx *effect_drawPlayerMarker(Gfx *gfx, PlayerMarker *marker, s16 view) {
     s32 state;
     s32 playerId;
     f32 yaw;
@@ -164,19 +164,19 @@ Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
 
 
 /* Destroy handler: frees the light, then the object. */
-void func_15155EF8(PlayerMarker *arg0) {
+void effect_freePlayerMarker(PlayerMarker *arg0) {
     PlayerMarker *marker = arg0; // matching: IDO keeps the object in a1 only through a copy of the parameter
 
     if (marker->light != NULL) {
         light_freePointLight(marker->light);
     }
-    func_15169804(&marker->header);
+    effect_defaultDestroy(&marker->header);
     attach_releaseModel(0xA6);
 }
 
 /* For the current player: re-arms a finished marker (state 2 -> 0) or ends a timed one (state 3 -> 2). */
-void func_15155F3C(void) {
-    PlayerMarker *marker = func_15155FD4(dc_glbl_CharNum);
+void effect_rearmPlayerMarker(void) {
+    PlayerMarker *marker = effect_findPlayerMarker(dc_glbl_CharNum);
 
     if (marker != NULL) {
         if (marker->state == 2) {
@@ -188,8 +188,8 @@ void func_15155F3C(void) {
 }
 
 /* Turns the current player's timed marker (state 3) into a normal shown one (state 1). */
-void func_15155F90(void) {
-    PlayerMarker *marker = func_15155FD4(dc_glbl_CharNum);
+void effect_keepPlayerMarkerShown(void) {
+    PlayerMarker *marker = effect_findPlayerMarker(dc_glbl_CharNum);
 
     if ((marker != NULL) && (marker->state == 3)) {
         marker->state = 1;
@@ -197,12 +197,12 @@ void func_15155F90(void) {
 }
 
 /* Returns player `playerId`'s marker object from either object list, or NULL. */
-PlayerMarker *func_15155FD4(s32 playerId) {
+PlayerMarker *effect_findPlayerMarker(s32 playerId) {
     s32 list;
     PlayerMarker *marker;
 
     for (list = 0; list < 2; list++) {
-        for (marker = (PlayerMarker *)D_800DCE50[list][OBJ_TYPE_PLAYER_MARKER]; marker != NULL; marker = (PlayerMarker *)marker->header.next) {
+        for (marker = (PlayerMarker *)gObjectLists[list][OBJ_TYPE_PLAYER_MARKER]; marker != NULL; marker = (PlayerMarker *)marker->header.next) {
             if (playerId == marker->playerId) {
                 return marker;
             }
@@ -215,12 +215,12 @@ PlayerMarker *func_15155FD4(s32 playerId) {
  * Event handler. `actors` is the event payload: event type 0 (actors[0] is gone) destroys the marker of that
  * player; type 0x2D (actors[0] and actors[1] swap) moves the marker to the other player.
  */
-void func_15156028(PlayerMarker *marker, Actor **actors, u8 eventType) {
+void effect_playerMarkerMessage(PlayerMarker *marker, Actor **actors, u8 eventType) {
     if (eventType == 0) {
         s32 player = actors[0] - movement_obj;
 
         if ((player >= 0) && (player < 25) && (player == marker->playerId)) {
-            func_1516972C(&marker->header);
+            effect_destroyObject(&marker->header);
         }
     } else if (eventType == 0x2D) {
         s32 from = actors[0] - movement_obj;

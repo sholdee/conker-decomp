@@ -17,7 +17,7 @@ WavyBeamEffect *beam_spawnWavyBeam(s16 duration, u8 arg1, s32 arg2) {
     data.fadeMax = 0.9f;
     data.fadeScale = 1.0f / data.fadeEnd;
 
-    effect = func_15149130(duration, -1, -1, 1, 1, 0x15, sizeof(data), arg1, arg2);
+    effect = effect_newTimedEffect(duration, -1, -1, 1, 1, 0x15, sizeof(data), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -199,7 +199,7 @@ void beam_wavyBeamMessage(WavyBeamEffect *effect, void *msg, u8 type) {
         Actor *actor = gone->actor;
 
         if (actor == data->first || actor == data->second || gone->uniqueId == data->firstId || gone->uniqueId == data->secondId) {
-            func_1516972C(&effect->base.header);
+            effect_destroyObject(&effect->base.header);
         }
     }
 }

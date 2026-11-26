@@ -5,7 +5,7 @@
 
 
 /* Dust at one of actor's feet (foot 0 or 1: bone 13 or 17), on the ground height floorY: a func_1514C2F0
- * ring and a func_15165F80 quad under the foot, then 5-12 particles thrown outwards, sized by the actor's
+ * ring and a effect_spawnQuadEffect quad under the foot, then 5-12 particles thrown outwards, sized by the actor's
  * mean scale. */
 void func_150C1260(Actor *actor, u8 foot) {
     Vec3f footPos;
@@ -35,7 +35,7 @@ void func_150C1260(Actor *actor, u8 foot) {
         func_15142314((s32)actor->ob_matrix_ptr, bone, &footPos);
         radius = size * 80.0f;
         func_1514C2F0(footPos.x, actor->floorY, footPos.z, radius, 0, 16, 16, 0, 0, radius * 4.0f, 0, 0xFF);
-        func_15165F80(-1, footPos.x, (s32)actor->floorY + 2.0f, footPos.z, 11, 19, 0, 0xFF, 0);
+        effect_spawnQuadEffect(-1, footPos.x, (s32)actor->floorY + 2.0f, footPos.z, 11, 19, 0, 0xFF, 0);
         spawn.model = 5;
         spawn.flags = 0x29E8;
         spawn.variant = 0;

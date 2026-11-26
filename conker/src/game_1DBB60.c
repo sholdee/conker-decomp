@@ -21,7 +21,7 @@ void func_151AE6B0(CharacterWatcher *task) {
         hit = &task->hit;
         if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->hit.height;
-            func_151ABE40(&pos, hit, 5, task->header.owner, task->header.kind);
+            effect_spawnImpact(&pos, hit, 5, task->header.owner, task->header.kind);
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }

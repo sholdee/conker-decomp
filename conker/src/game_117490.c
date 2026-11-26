@@ -62,13 +62,13 @@ OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 }
 
 /* Restarts the object's oscillator from phase 0. */
-s32 func_150EA10C(OscillatorObject *obj) {
+s32 effect_resetOscillator(OscillatorObject *obj) {
     obj->oscillator.phase = 0;
     return 1;
 }
 
 /* Spawns a particle on the segment `from`->`to`, `t` of the way along, drifting that way. */
-void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA11C_arg5 *arg5) {
+void effect_spawnSegmentParticle(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA11C_arg5 *arg5) {
     ParticleDesc desc;
     u8 *particle;
     RiseMotion extra;
@@ -141,7 +141,7 @@ void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA1
 }
 
 /* Returns the oscillator's current value and advances its phase by this frame's step. */
-f32 func_150EA490(OscillatorObject *obj) {
+f32 effect_stepOscillator(OscillatorObject *obj) {
     FrameOscillator *oscillator = &obj->oscillator;
     f32 value;
 
@@ -177,7 +177,7 @@ void *func_150EA500(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
 }
 
 /* Spawns a particle at (x, y, z) drifting against the velocity (vx, vy, vz). */
-void func_150EA5CC(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
+void effect_spawnDriftParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     ParticleDesc desc;
     u8 *particle;
     RiseMotion extra;

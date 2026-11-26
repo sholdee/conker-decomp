@@ -9,7 +9,7 @@ void func_150102D0(void) {
     flamethrower_addTexScroll(D_800B0E00[1], D_800902E8, 0, -1, 0, 1, 0, -6);
     flamethrower_addTexScroll(D_800B0E00[0], D_800902EC, 0, -1, 0, 0, 0, -3);
     flamethrower_addTexScroll(D_800B0E00[1], D_800902EC, 0, -1, 0, 1, 0, -3);
-    func_15149130(300, -1, 59, -1, 0, 0, 0, 255, 1);
+    effect_newTimedEffect(300, -1, 59, -1, 0, 0, 0, 255, 1);
 }
 
 void func_150103E0(void) {

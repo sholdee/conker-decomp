@@ -80,7 +80,7 @@ void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *out
 }
 
 /*
- * Spawns a func_15102B38 effect for `obj` between its bone points D_800A1FC8 and D_800A1FE0, from `position`;
+ * Spawns a effect_spawnBoneBeamParticle effect for `obj` between its bone points D_800A1FC8 and D_800A1FE0, from `position`;
  * when the object has bone matrices and unk74's low nibble isn't 0xF.
  */
 void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
@@ -103,7 +103,7 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
 
             random0 = func_150ADA20_u8();
             random1 = func_150ADA20_u8();
-            func_15102B38(obj, D_80088B94, &D_800A1FC8, &D_800A1FE0, &motion,
+            effect_spawnBoneBeamParticle(obj, D_80088B94, &D_800A1FC8, &D_800A1FE0, &motion,
                           (random0 % 3U) + 4, (random1 % 56U) + 200,
                           func_150ADA68() * 301.0f + 500.0f, position, mask,
                           0, -1, arg2, arg3);

@@ -80,7 +80,7 @@ void game_loadLevel(void) {
     func_1500C2A0();
     D_800DC9F0 = 0;
     gPendingTrailPairTask = NULL;
-    func_15008840();
+    effect_clearHomingEffects();
     gReleaseRawBanksPending = 1;
     resource = gPlayerSpawnPoints[0];
     slot = func_1507E114(&resource);
@@ -90,7 +90,7 @@ void game_loadLevel(void) {
     gPrevLevel = level;
     level = gNextLevel;
     light_reset();
-    func_15187F90();
+    effect_clearColorAnims();
     gFrameDeltaHistoryNext = 0;
     gFrameDeltaHistoryCount = 0;
     gFrameRateDivider = 0;
@@ -140,8 +140,8 @@ void game_loadLevel(void) {
     mp3_stopForLevel(level);
     audio_clearMixSelectors();
     func_1501BB20();
-    func_15008870(1);
-    func_15008930(1);
+    effect_clearObjectLists(1);
+    effect_runResetCallbacks(1);
     player_loadSpawnPoints(level);
     func_150169A0(level);
     func_15005290(level, resource);
@@ -209,7 +209,7 @@ void game_loadLevel(void) {
     }
     if ((D_800D18A8 != 0) && (level != 0x22)) {
         D_800D18A8 = 0;
-        func_151BF340(0xFF, 1);
+        effect_showStatCounter(0xFF, 1);
     }
     script_autoSave();
     gNextLevel = level;

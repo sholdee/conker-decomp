@@ -9,7 +9,7 @@ SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity,
                              u8 argE, s32 argF);
 
 /* Model-space points: weapon_fireSegmentShot transforms D_800AAA90 and D_800AAAA8 through model part 0x46 into
- * world space; func_151C5588 passes D_800AAA90 and D_800AAA9C to func_15102B38. */
+ * world space; func_151C5588 passes D_800AAA90 and D_800AAA9C to effect_spawnBoneBeamParticle. */
 const Vec3f D_800AAA90 = { -113.8288f, -14.082394f, 14.5422f };
 const Vec3f D_800AAA9C = { -124.648605f, -14.082394f, 14.5422f };
 const Vec3f D_800AAAA8 = { 7.3199987f, -14.082394f, 4.5422006f };
@@ -82,7 +82,7 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-/* Spawns a func_15102B38 effect at `pos` on `obj` with randomized scale and parameters. */
+/* Spawns a effect_spawnBoneBeamParticle effect at `pos` on `obj` with randomized scale and parameters. */
 void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
     ParticleSize scale;
     f32 angle;
@@ -93,7 +93,7 @@ void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
     rand[0] = func_150ADA20();
     rand[1] = func_150ADA20();
     angle = func_150ADA68();
-    func_15102B38(obj, 0, &D_800AAA90, &D_800AAA9C, &scale, (rand[0] & 3) + 6, 0xFF,
+    effect_spawnBoneBeamParticle(obj, 0, &D_800AAA90, &D_800AAA9C, &scale, (rand[0] & 3) + 6, 0xFF,
                   angle * 270.0f + 359.0f, pos, 0xFF, 0, arg2, arg3, arg4);
 }
 

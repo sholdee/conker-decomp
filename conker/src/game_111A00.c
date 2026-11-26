@@ -6,10 +6,10 @@
 
 /* Per-material impact effects, indexed by the material id from collision_getSurfaceType. */
 typedef struct Struct800A1070 {
-    /* 0x00 */ u16 objectType;   // object spawned through func_15168800 (0 = none)
+    /* 0x00 */ u16 objectType;   // object spawned through effect_spawnQuadFx (0 = none)
     /* 0x02 */ u16 particleType; // particle burst type (0 = none)
     /* 0x04 */ u8 chance;        // percent chance of the weapon_spawnImpactBurst effect
-    /* 0x05 */ u8 debrisType;    // func_150E4E04 debris kind (0 = none)
+    /* 0x05 */ u8 debrisType;    // effect_sprayDebris debris kind (0 = none)
     /* 0x06 */ u8 minCount;      // particle count = minCount + 1 + rand % countRange
     /* 0x07 */ u8 countRange;
 } Struct800A1070;
@@ -44,12 +44,12 @@ static const u16 D_800A1110[][2] = { { 128, 96 }, { 256, 256 }, { 384, 384 } };
 static const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
 
 /*
- * Spawns the impact effects of `material` at (x, y, z): a particle burst, debris (func_150E4E04),
+ * Spawns the impact effects of `material` at (x, y, z): a particle burst, debris (effect_sprayDebris),
  * a random weapon_spawnImpactBurst effect and an object. `size` indexes D_800A111C/D_800A1110, `tri` is the
  * hit triangle (three vertex pointers) or NULL, and `slot` indexes gAimImpacts (0xFF = none).
- * Bit 0x8000 of `material` is forwarded to func_150E4E04.
+ * Bit 0x8000 of `material` is forwarded to effect_sprayDebris.
  */
-void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 slot) {
+void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 slot) {
     const Struct800A1070 *entry;
     s32 lifetime;
     s32 flag;
@@ -78,7 +78,7 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
         }
     }
     if (entry->debrisType != 0) {
-        func_150E4E04(x, y, z, entry->debrisType | flag, size, tri, slot);
+        effect_sprayDebris(x, y, z, entry->debrisType | flag, size, tri, slot);
     }
     if (size != 0 && func_151EF610() % 100 < entry->chance) {
         {
@@ -109,8 +109,8 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
         obj.unk92 = 1;
         obj.unk94 = 1;
         obj.unkA4 = 0xFF;
-        func_1516865C(&obj, 0xB4, 0xB4, 0xB4, 0xFF);
-        func_15168800(&obj, 0xFF, 0);
+        effect_initQuadFxTemplate(&obj, 0xB4, 0xB4, 0xB4, 0xFF);
+        effect_spawnQuadFx(&obj, 0xFF, 0);
     }
 }
 
@@ -118,7 +118,7 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
  * Probes the ground below `obj` (up to 5 random points within its radius), then spawns the hit
  * surface's impact effects there, passing the hit triangle transformed by obj's matrix.
  */
-void func_150E4928(WorldObject *obj) {
+void effect_spawnGroundImpactsUnder(WorldObject *obj) {
     u16 idx;
     s32 i;
     s32 found;
@@ -195,7 +195,7 @@ void func_150E4928(WorldObject *obj) {
                 }
                 tri = (s32 *)verts;
             }
-            func_150E4550(x, height, z, 1, collision_getSurfaceType(material), (s16 **)tri, 0);
+            effect_spawnMaterialImpact(x, height, z, 1, collision_getSurfaceType(material), (s16 **)tri, 0);
         }
     }
 }
@@ -240,9 +240,9 @@ void func_150E4CBC(Struct150E4CBC *fx) {
 /*
  * Sprays debris particles of `kind` from (x, y, z). With a hit triangle `tri` the spray follows the
  * surface normal (also stored in gAimImpacts[slot]); otherwise it goes straight up. Bit 0x8000 of
- * `kind` suppresses the particles. Kinds 4, 5 and 9 sometimes add a func_150E5558 chunk.
+ * `kind` suppresses the particles. Kinds 4, 5 and 9 sometimes add a effect_launchDebrisChunk chunk.
  */
-void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot) {
+void effect_sprayDebris(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot) {
     f32 minScale;
     f32 rangeScale;
     s32 ok;
@@ -370,18 +370,18 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
             spawn.fadeStep = 10;
             spawn.width = func_150ADA68() * rangeScale + minScale;
             spawn.height = func_150ADA68() * rangeScale + minScale;
-            if (!func_15167D84(&spawn, 0, 0, -1, 0xFF, 0)) {
+            if (!effect_spawnBillboard(&spawn, 0, 0, -1, 0xFF, 0)) {
                 ok = 0;
             }
         }
         if ((kind == 4 || kind == 9 || kind == 5) && func_151EF610() % 5 == 0) {
-            func_150E5558(x, y, z, dirX, dirY, dirZ, kind, size);
+            effect_launchDebrisChunk(x, y, z, dirX, dirY, dirZ, kind, size);
         }
     }
 }
 
 /* Launches a chunk of debris `kind` from (x, y, z), flying along (dirX, -dirY, dirZ) and oriented to match. */
-void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size) {
+void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size) {
     ParticleSpawn chunk;
     f32 pitch;
     f32 yaw;
@@ -481,7 +481,7 @@ struct Struct150E5810 {
  * Ground-collision callback (from a handler table). A slow fall comes to rest; otherwise the velocity is
  * reflected off the hit triangle `verts` (or just flipped vertically without one) and damped by bounce.
  */
-s32 func_150E5810(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s16 (*verts)[3]) {
+s32 effect_bounceOffTriangle(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s16 (*verts)[3]) {
     Tri3f tri;
     s32 i;
     f32 len;

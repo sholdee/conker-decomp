@@ -33,7 +33,7 @@ typedef struct {
     /* 0x08 */ f32 z;
     /* 0x0C */ u8 state; // 0 free, 3 queued, else frame buffer index + 1 it was sampled in
     /* 0x10 */ ProbeData data;
-    /* 0x34 */ s8 callback; // index into D_8008A080, -1 for none
+    /* 0x34 */ s8 callback; // index into gProbeVisibleCallbacks, -1 for none
     /* 0x38 */ s32 unk38;
 } Probe;
 
@@ -90,7 +90,7 @@ Gfx *func_151742EC(Gfx *gfx, s32 view) {
                 b = (D_800DD328[i][0] << 2) & 0xF8;
                 D_800DD340 = color;
                 if (callback != 0xFFFFFFFF) { // matching: != -1 compiles differently
-                    D_8008A080[callback](probe, r, g, b);
+                    gProbeVisibleCallbacks[callback](probe, r, g, b);
                 }
             }
             probe->state = 0;

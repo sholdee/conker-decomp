@@ -52,7 +52,7 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     radius = scale * 70.0f;
     func_1514C2F0(pos.x, actor->floorY, pos.z, radius, startAngle,
                   (side == 1) ? 16 : -16, 8, 0, 0, radius * 4.04f, 0, 255);
-    func_15165F80(-1, pos.x, (s32)actor->floorY + 2.0f, pos.z, 8, 21, 0, 255, 0);
+    effect_spawnQuadEffect(-1, pos.x, (s32)actor->floorY + 2.0f, pos.z, 8, 21, 0, 255, 0);
     spawn.model = 5;
     spawn.flags = 0x29E9;
     spawn.variant = 0;

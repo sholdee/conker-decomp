@@ -40,8 +40,8 @@ s32 func_151AC61C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
 
     emitter = owner;
     scale = 1.0f;
-    entry = &D_800A9020[kind].emitter;
-    config = &D_800A9180[*entry];
+    entry = &gImpactSets[kind].emitter;
+    config = &gImpactEmitterConfigs[*entry];
     position.x = x;
     position.y = y;
     position.z = z;

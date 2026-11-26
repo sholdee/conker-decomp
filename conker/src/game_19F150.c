@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Render setup and teardown of the sprite particles (object types 15 and 67 of D_8008B4A8). */
+/* Render setup and teardown of the sprite particles (object types 15 and 67 of gObjectTypes). */
 Gfx D_8008CC30[] = {
     gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPClearGeometryMode(G_CULL_BOTH | G_FOG | G_LOD),
@@ -19,7 +19,7 @@ Gfx D_8008CC58[] = {
 /* Allocates a particle and initialises its animation state. */
 Particle19F150 *func_15171CA0(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 arg6,
                               s32 arg7) {
-    Particle19F150 *particle = func_15167A68(arg5 == 0 ? 0xF : 0x43, arg7, sizeof(Particle19F150), 1, arg6, 1);
+    Particle19F150 *particle = effect_newObject(arg5 == 0 ? 0xF : 0x43, arg7, sizeof(Particle19F150), 1, arg6, 1);
 
     if (particle == NULL) {
         return NULL;
@@ -48,8 +48,8 @@ void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f
     particle = func_15171CA0(lifetime, color, animIndex, flags, animSpeed, arg11, arg12, arg13);
     if (particle != NULL) {
         if (!(flags & 2)) {
-            if (func_15172B20(particle->vtx, x, y, z, angle, dist, size, D_8008CA4C[particle->animIndex]->width) == 0) {
-                func_1516972C(&particle->header);
+            if (func_15172B20(particle->vtx, x, y, z, angle, dist, size, gEffectAnimTextures[particle->animIndex]->width) == 0) {
+                effect_destroyObject(&particle->header);
             }
         } else {
             particle->vtx[0].v.ob[0] = particle->vtx[3].v.ob[0] = x - size;
@@ -58,9 +58,9 @@ void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f
             particle->vtx[0].v.ob[2] = particle->vtx[1].v.ob[2] = z - size;
             particle->vtx[2].v.ob[2] = particle->vtx[3].v.ob[2] = size + z;
             particle->vtx[0].v.tc[0] = particle->vtx[3].v.tc[0] = 0x2000;
-            particle->vtx[1].v.tc[0] = particle->vtx[2].v.tc[0] = (D_8008CA4C[animIndex]->width + 0x100) << 5;
+            particle->vtx[1].v.tc[0] = particle->vtx[2].v.tc[0] = (gEffectAnimTextures[animIndex]->width + 0x100) << 5;
             particle->vtx[0].v.tc[1] = particle->vtx[1].v.tc[1] = 0x2000;
-            particle->vtx[2].v.tc[1] = particle->vtx[3].v.tc[1] = (D_8008CA4C[animIndex]->height + 0x100) << 5;
+            particle->vtx[2].v.tc[1] = particle->vtx[3].v.tc[1] = (gEffectAnimTextures[animIndex]->height + 0x100) << 5;
         }
     }
 }
@@ -72,8 +72,8 @@ void func_15171F04(f32 x, f32 y, f32 z, void *tri, s16 lifetime, u16 color, u8 a
 
     particle = func_15171CA0(lifetime, color, animIndex, flags, animSpeed, arg10, arg11, arg12);
     if (particle != NULL) {
-        if (func_151725FC(particle->vtx, tri, x, y, z, 0.0f, size, D_8008CA4C[particle->animIndex]->width) == 0) {
-            func_1516972C(&particle->header);
+        if (func_151725FC(particle->vtx, tri, x, y, z, 0.0f, size, gEffectAnimTextures[particle->animIndex]->width) == 0) {
+            effect_destroyObject(&particle->header);
         }
     }
 }
@@ -87,7 +87,7 @@ void func_15171FC0(Particle19F150 *particle) {
     if (lifetime < -1) {
         particle->lifetime = lifetime + 1;
         if (particle->lifetime == -1) {
-            func_1516972C(&particle->header);
+            effect_destroyObject(&particle->header);
         }
         return;
     }
@@ -110,7 +110,7 @@ void func_15171FC0(Particle19F150 *particle) {
     }
 
     particle->animFrame += particle->animSpeed;
-    frameCount = D_8008CA4C[particle->animIndex]->frameCount;
+    frameCount = gEffectAnimTextures[particle->animIndex]->frameCount;
     if (particle->animFrame / 256 < frameCount) {
         return;
     }
@@ -147,7 +147,7 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
 
     needSync = 1;
     if (particle->lifetime >= 2) {
-        anim = D_8008CA4C[particle->animIndex];
+        anim = gEffectAnimTextures[particle->animIndex];
         frame = particle->animFrame >> 8;
         frames = (u32 *)anim->addr;
         tex = (s32)frames;

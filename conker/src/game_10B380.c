@@ -23,15 +23,15 @@ struct EffectSpawnSource {
     /* 0x98 */ EffectSpawnState *state;
 };
 
-/* Timed effect spawned by a trap trigger (func_150DDED0). */
+/* Timed effect spawned by a trap trigger (effect_onTrapTriggered). */
 struct TrapEffect {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ u8 kind;      /* func_150DBD70 selector */
+    /* 0x28 */ u8 kind;      /* effect_createFallingStream selector */
 };
 
 /* Trap trigger callback: spawns a timed effect (timer 100) whose kind follows the trap's unique_id (0xFB-0xFE). */
-void func_150DDED0(WorldObject *trap) {
-    TrapEffect *obj = func_151491F4(100, 2, -1, 1, 0, 1, 0xFF, 0);
+void effect_onTrapTriggered(WorldObject *trap) {
+    TrapEffect *obj = effect_newTimedEffectNoDraw(100, 2, -1, 1, 0, 1, 0xFF, 0);
 
     if (obj != NULL) {
         switch (trap->unique_id) {
@@ -48,15 +48,15 @@ void func_150DDED0(WorldObject *trap) {
             obj->kind = 3;
             break;
         default:
-            func_1516972C(&obj->base.header);
+            effect_destroyObject(&obj->base.header);
             break;
         }
     }
 }
 
-/* Runs func_150DBD70 for the object's kind. */
-s32 func_150DDF88(TrapEffect *obj) {
-    return func_150DBD70(obj->kind);
+/* Runs effect_createFallingStream for the object's kind. */
+s32 effect_startTrapStream(TrapEffect *obj) {
+    return effect_createFallingStream(obj->kind);
 }
 
 /* Spawns a sprite (texture 0x1D or 0x1E, random size 10-80) at the source's current point, at the given height. */
@@ -160,7 +160,7 @@ s32 func_150DE2A4(QuadSprite *sprite) {
 }
 
 /* Particle callback 12: shrinks the particle and kills it once it is under 10 units wide or high. */
-void func_150DE2C4(BillboardParticle *particle) {
+void effect_shrinkBillboard(BillboardParticle *particle) {
     particle->tmpl.width -= 26;
     particle->tmpl.height -= 26;
     if (particle->tmpl.width < 10 || particle->tmpl.height < 10) {

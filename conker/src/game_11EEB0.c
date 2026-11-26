@@ -150,7 +150,7 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
 }
 
 /* Random sound 0x6C-0x6E for actor `index` once it is far enough from the origin, at most every
- * 128-255 ticks (D_800D98F0 counts down); func_100114D0 derives the pan from its height. */
+ * 128-255 ticks (gRandomSoundTimer counts down); func_100114D0 derives the pan from its height. */
 void func_150F20F0(s32 index) {
     f32 x;
     f32 z;
@@ -166,17 +166,17 @@ void func_150F20F0(s32 index) {
     z *= z;
     /* squares the already-squared terms: the test is on x^4 + z^4 */
     x = (x * x) + (z * z);
-    if (D_800D98F0 != 0) {
-        if (D_800BE9E4 < D_800D98F0) {
-            D_800D98F0 -= D_800BE9E4;
+    if (gRandomSoundTimer != 0) {
+        if (D_800BE9E4 < gRandomSoundTimer) {
+            gRandomSoundTimer -= D_800BE9E4;
         } else {
-            D_800D98F0 = 0;
+            gRandomSoundTimer = 0;
         }
     } else if (x > 6760000.0f) {
         // matching: indexes movement_obj again rather than reading through `actor`
         func_100114D0(0, movement_obj[index].ypos, 0, 0x7FFF, 20000, 19000, &pan, &out2, &out3);
         pan += 0x80;
-        D_800D98F0 = (func_150ADA20() & 0x7F) + 0x80;
+        gRandomSoundTimer = (func_150ADA20() & 0x7F) + 0x80;
         sound_play((func_150ADA20() % 3U) + 0x6C, 24000, pan, 0, 0);
     }
 }

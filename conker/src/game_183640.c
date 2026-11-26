@@ -31,7 +31,7 @@ StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, 
             break;
     }
 
-    newParticle = func_15167A68(id, arg4, extraSize + sizeof(StreakParticle), 1, owner, 1);
+    newParticle = effect_newObject(id, arg4, extraSize + sizeof(StreakParticle), 1, owner, 1);
     if (newParticle == NULL) {
         return NULL;
     }
@@ -111,7 +111,7 @@ void func_151563B8(StreakParticle *arg0) {
         }
     }
     if (expired) {
-        func_1516972C(&particle->header);
+        effect_destroyObject(&particle->header);
     }
 }
 
@@ -373,10 +373,10 @@ void func_15156F94(StreakParticle *particle) {
 
 void func_15156FB8(StreakParticle *particle) {
     func_15156F94(particle);
-    func_15169804(&particle->header);
+    effect_defaultDestroy(&particle->header);
 }
 
 void func_15156FE4(StreakParticle *particle) {
     func_15156F94(particle);
-    func_15169824(&particle->header);
+    effect_defaultFree(&particle->header);
 }

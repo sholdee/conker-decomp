@@ -21,7 +21,7 @@ GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {
 }
 
 /** Randomly spawns particle bursts at the tracked object; ends the effect once that object is gone. */
-void func_150B5950(ObjBurstEffect *effect) {
+void effect_updateObjBurst(ObjBurstEffect *effect) {
     Vec3f *posp;
     Vec3f pos;
     Actor *obj;
@@ -258,7 +258,7 @@ struct BoltRingEffect {
  * While the emitter is not in state 1, spawns bolts between random points on the rim of its
  * cylinder at a randomized rate; sends message 0x4A (see func_150B6450) when it enters state 1.
  */
-void func_150B6110(BoltRingEffect *effect) {
+void effect_updateBoltRing(BoltRingEffect *effect) {
     BoltRingData *data;
     TriggerZone *emitter;
     u8 prevState;
@@ -269,7 +269,7 @@ void func_150B6110(BoltRingEffect *effect) {
     effect->data.emitterState = emitter->inactive;
     if (emitter->inactive == 1) {
         if (effect->data.emitterState != prevState) {
-            func_151494E0(0, 0x4A);
+            effect_sendEventToTimedEffects(0, 0x4A);
         }
         return;
     }
@@ -316,10 +316,10 @@ void func_150B6110(BoltRingEffect *effect) {
     }
 }
 
-/** Message handler: on message 0x4A, releases the effect object via func_1516972C. */
+/** Message handler: on message 0x4A, releases the effect object via effect_destroyObject. */
 void func_150B6450(EffectHeader *effect, s32 arg1, u8 msg) {
     if (msg == 0x4A) {
-        func_1516972C(effect);
+        effect_destroyObject(effect);
     }
 }
 
@@ -417,7 +417,7 @@ s32 func_150B66DC(Arg150B66DC *ctx) {
 }
 
 /** Flashes view 0 light blue (0xCC, 0xCC, 0xFF) at a random alpha 200-255 for 15-25 frames. */
-void func_150B6754(u8 owner, s32 kind) {
+void effect_flashViewLightBlue(u8 owner, s32 kind) {
     u32 rand2;
     u32 rand1;
 

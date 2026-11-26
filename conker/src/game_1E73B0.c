@@ -47,7 +47,7 @@ void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
     desc.unk1C = 0x80;
     desc.unk20 = 0x20;
     desc.kind = 2;
-    effect = func_1513B5E0(&desc, 1, 8, arg1, arg2);
+    effect = effect_newDynModel(&desc, 1, 8, arg1, arg2);
     if (effect != NULL) {
         memcpy(DYNMODEL_USERDATA(effect), &ref, sizeof(ref));
     }
@@ -81,7 +81,7 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
     ref = DYNMODEL_USERDATA(effect);
     owner = ref->actor;
     if (owner->type == 0 || owner->unique_id != ref->uniqueId) {
-        func_1516972C(&effect->header);
+        effect_destroyObject(&effect->header);
     }
     model = owner->ob_matrix_ptr;
     if (model == NULL) {
@@ -149,13 +149,13 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
 }
 
 /* Message handler: removes the effect with its owner, and follows the owner when two objects swap. */
-void func_151BA468(DynModel *effect, ActorMsg *msg, u8 msgType) {
+void effect_ownerModelMessage(DynModel *effect, ActorMsg *msg, u8 msgType) {
     ActorRef *ref = DYNMODEL_USERDATA(effect);
     Actor *owner = ref->actor;
 
     if (msgType == 0) {
         if ((owner == msg->ref.actor) || (msg->ref.uniqueId == owner->unique_id)) {
-            func_1516972C(&effect->header);
+            effect_destroyObject(&effect->header);
         }
     } else if (msgType == 0x2D) {
         if (ref->actor == msg->swap.actorA) {
@@ -541,7 +541,7 @@ end:
  * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the
  * shot and, where it hits a surface, impact effects there.
  */
-void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
+void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
     CollisionTri surf;
     Vec3f hit;
     Vec3f delta;
@@ -630,7 +630,7 @@ void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
  * Impact effect halfway between `a` and `b`: a burst there, a ground impact on the floor below it,
  * and a shower of debris.
  */
-void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
+void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
     Vec3f center;
     JetSpraySpec burst;
     CollisionHit floor;
@@ -767,7 +767,7 @@ void func_151BC074(Actor *obj) {
 
 
 
-/* Data block of the object returned by func_15147A80. */
+/* Data block of the object returned by effect_newEffectObj. */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
@@ -830,7 +830,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         data.unk18 = 0.0f;
         data.unk20 = -16384.0f;
         data.unk1C = -16384.0f;
-        fx2 = func_15147A80(&desc, 40, 20, 10, 10, 10, 0, 0, 0, arg1, arg2);
+        fx2 = effect_newEffectObj(&desc, 40, 20, 10, 10, 10, 0, 0, 0, arg1, arg2);
         if (fx2 != NULL) {
             memcpy(fx2->data, &data, sizeof(data));
         }
@@ -907,7 +907,7 @@ void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
 
     if (msgId == 0) {
         if (actor == msg->ref.actor || owner->uniqueId == msg->ref.uniqueId) {
-            func_1516972C(&effect->header);
+            effect_destroyObject(&effect->header);
         }
     } else if (msgId == 0x2D) {
         if (owner->actor == msg->swap.actorA) {
@@ -921,7 +921,7 @@ void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
 }
 
 /* Ages the trail: drops expired points and fades the last ones. Returns 0 once a finished trail is empty. */
-s32 func_151BC64C(RibbonTrail *trail) {
+s32 effect_ageRibbonTrail(RibbonTrail *trail) {
     RibbonTrailPoint *points;
     RibbonTrailPoint *point;
     s32 i;
@@ -968,7 +968,7 @@ s32 func_151BC64C(RibbonTrail *trail) {
 }
 
 /* Follows the owner and emits trail points evenly along the distance it moved. */
-s32 func_151BC794(RibbonTrail *trail) {
+s32 effect_followRibbonTrail(RibbonTrail *trail) {
     RibbonTrailData *data;
     RibbonTrailPoint *points;
     Actor *owner;
@@ -1056,7 +1056,7 @@ extern struct {
 } D_800A4AC8[];
 
 /* Draws the trail as a camera-facing ribbon, two vertices per point. */
-Gfx *func_151BCA90(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
+Gfx *effect_drawRibbonTrail(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
     Vtx *vtx;
     RibbonTrailPoint *points;
     Vec3f *camPos;
@@ -1220,7 +1220,7 @@ Gfx *func_151BCA90(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
 }
 
 /* Message handler: message 0 for its owner finishes the trail; 0x2D makes it follow the owner through a swap. */
-void func_151BD21C(RibbonTrail *trail, ActorMsg *msg, u8 msgId) {
+void effect_ribbonTrailMessage(RibbonTrail *trail, ActorMsg *msg, u8 msgId) {
     ActorRef *owner;
     Actor *actor;
     Actor *actorA;
@@ -1262,7 +1262,7 @@ s32 func_151BD2BC(OwnedEffect28 *effect) {
 }
 
 /* Spawns two mirrored blood strips on bone 1 of actor. */
-void func_151BD2F8(Actor *actor, s32 arg1, s32 arg2) {
+void effect_spawnBloodStrips(Actor *actor, s32 arg1, s32 arg2) {
     BloodStripDesc desc;
     struct {
         s16 value;
@@ -1287,9 +1287,9 @@ void func_151BD2F8(Actor *actor, s32 arg1, s32 arg2) {
     desc.duration = 50;
     desc.pause = 100;
     desc.lifetime = 300;
-    desc.sampleCallback = 4; /* func_151BD42C */
-    desc.emitCallback = 4;   /* func_151BD43C */
-    desc.rateCallback = 3;   /* func_151BD750 */
+    desc.sampleCallback = 4; /* effect_resetBloodStripAge */
+    desc.emitCallback = 4;   /* effect_emitBloodStripParticle */
+    desc.rateCallback = 3;   /* effect_getBloodStripRate */
     desc.rate = 0.3006100059f;
     desc.mode = 5;
     desc.updateCallback = -1;
@@ -1311,13 +1311,13 @@ void func_151BD2F8(Actor *actor, s32 arg1, s32 arg2) {
 }
 
 /* BloodStrip sample callback: restarts the sample age. */
-s32 func_151BD42C(AgedBloodStrip *strip) {
+s32 effect_resetBloodStripAge(AgedBloodStrip *strip) {
     strip->sampleAge = 0;
     return 1;
 }
 
 /* BloodStrip emit callback: spawns one blood droplet at pointA moving towards pointB. */
-void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 time,
+void effect_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 time,
                    BloodStrip *strip) {
     SpriteParticle *particle; /* with data.dragOwner */
     Actor *owner;
@@ -1386,7 +1386,7 @@ void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 t
 
 
 /* BloodStrip rate callback: the rate grows with the time since the last sample. */
-f32 func_151BD750(AgedBloodStrip *strip) {
+f32 effect_getBloodStripRate(AgedBloodStrip *strip) {
     f32 rate;
 
     // matching: `1.0f + 1.0f` keeps the multiply by 2 (a 2.0f literal becomes an add); 40 * 0.001f folds
@@ -1397,7 +1397,7 @@ f32 func_151BD750(AgedBloodStrip *strip) {
 }
 
 /* Particle update: keeps the droplet moving with its owner, then runs the standard update. */
-void func_151BD79C(SpriteParticle *particle, Vec3f *prevPos) {
+void effect_updateBloodStripParticle(SpriteParticle *particle, Vec3f *prevPos) {
     Actor *owner = particle->data.dragOwner.owner.actor;
 
     if (owner->type != 0 && owner->character_type != 0xFF) {
@@ -1409,16 +1409,16 @@ void func_151BD79C(SpriteParticle *particle, Vec3f *prevPos) {
 }
 
 /* Broadcasts message 0x3B for actor. */
-void func_151BD7F4(Actor *actor) {
+void effect_sendBurstOwnerGone(Actor *actor) {
     ActorRef ref;
 
     ref.actor = actor;
     ref.uniqueId = actor->unique_id;
-    func_151494E0((s32)&ref, 0x3B);
+    effect_sendEventToTimedEffects((s32)&ref, 0x3B);
 }
 
 /* Spawns the burst effect on actor: two sparks and two glows that the effect keeps on the actor. */
-void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
+void effect_spawnBoneBurst(Actor *actor, u8 arg1, s32 arg2) {
     BurstEffect *effect;
     BurstData burst;
     BurstData *data;
@@ -1429,7 +1429,7 @@ void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
     burst.sparks[1] = NULL;
     burst.glows[0] = NULL;
     burst.glows[1] = NULL;
-    effect = func_15149130(300, -1, 0x40, -1, 0, 0x33, sizeof(BurstData), arg1, arg2);
+    effect = effect_newTimedEffect(300, -1, 0x40, -1, 0, 0x33, sizeof(BurstData), arg1, arg2);
     if (effect != NULL) {
         data = &effect->data;
         memcpy(data, &burst, sizeof(burst));
@@ -1572,7 +1572,7 @@ static const Vec3f D_800AA790 = { 45.0f, -58.0f, -300.0f };
 static const Vec3f D_800AA79C = { -45.0f, -58.0f, -300.0f };
 
 /* Per-frame update of the burst: keeps the sparks and glows on bone 1 of the owner. */
-void func_151BDD8C(BurstEffect *effect) {
+void effect_updateBoneBurst(BurstEffect *effect) {
     BurstData *data;
     Actor *owner;
     Vec3f starts[2];
@@ -1659,8 +1659,8 @@ void func_151BDD8C(BurstEffect *effect) {
     }
 }
 
-/* Message handler of the burst: message 0x3B (func_151BD7F4) for its owner frees it; the rest go to func_15169850. */
-void func_151BE0AC(s32 effect, s32 msg, u8 msgId) {
+/* Message handler of the burst: message 0x3B (effect_sendBurstOwnerGone) for its owner frees it; the rest go to effect_handleOwnerActorEvent. */
+void effect_boneBurstMessage(s32 effect, s32 msg, u8 msgId) {
     // matching: the original reads its parameters through this pointer; typed parameters
     // with the same body let IDO merge the two loads of msg
     s32 *args = &effect;
@@ -1670,49 +1670,49 @@ void func_151BE0AC(s32 effect, s32 msg, u8 msgId) {
         owner = args[0] + 0x28; /* &((BurstEffect *)effect)->data.owner */
         if (((ActorRef *)msg)->actor == ((ActorRef *)owner)->actor ||
             ((ActorRef *)owner)->uniqueId == ((ActorRef *)args[1])->uniqueId) {
-            func_1516972C((EffectHeader *)args[0]);
+            effect_destroyObject((EffectHeader *)args[0]);
         }
     } else {
         owner = args[0] + 0x28;
-        func_15169850(msg, msgId, owner, owner + 4, args[0]);
+        effect_handleOwnerActorEvent(msg, msgId, owner, owner + 4, args[0]);
     }
 }
 
 /* Frees the burst's sparks and glows. */
-void func_151BE138(BurstEffect *effect) {
+void effect_freeBurstParts(BurstEffect *effect) {
     BurstData *data = &effect->data;
 
     if (data->sparks[0] != NULL) {
-        func_1516972C(&data->sparks[0]->head.header);
+        effect_destroyObject(&data->sparks[0]->head.header);
     }
     if (data->sparks[1] != NULL) {
-        func_1516972C(&data->sparks[1]->head.header);
+        effect_destroyObject(&data->sparks[1]->head.header);
     }
     if (data->glows[0] != NULL) {
-        func_1516972C(&data->glows[0]->head.header);
+        effect_destroyObject(&data->glows[0]->head.header);
     }
     if (data->glows[1] != NULL) {
-        func_1516972C(&data->glows[1]->head.header);
+        effect_destroyObject(&data->glows[1]->head.header);
     }
 }
 
-void func_151BE1B8(BurstEffect *effect) {
-    func_151BE138(effect);
-    func_1514933C(&effect->base);
+void effect_destroyBoneBurst(BurstEffect *effect) {
+    effect_freeBurstParts(effect);
+    effect_defaultDestroyTimedEffect(&effect->base);
 }
 
-void func_151BE1E4(BurstEffect *effect) {
-    func_151BE138(effect);
-    func_15149368(&effect->base);
+void effect_freeBoneBurst(BurstEffect *effect) {
+    effect_freeBurstParts(effect);
+    effect_defaultFreeTimedEffect(&effect->base);
 }
 
 /*
- * Callbacks of the burst effect's sparks and glows (spawned by func_151BD828 above), and the
+ * Callbacks of the burst effect's sparks and glows (spawned by effect_spawnBoneBurst above), and the
  * message handler of a particle that follows an owner actor.
  */
 
 /* Per-frame update of a burst spark: flickers its width, height and alpha towards random targets. */
-s32 func_151BE210(BurstSpark *spark) {
+s32 effect_updateBurstSpark(BurstSpark *spark) {
     BurstSparkData *data = &spark->data;
 
     data->widthTimer -= gFrameDelta;
@@ -1744,13 +1744,13 @@ s32 func_151BE210(BurstSpark *spark) {
 }
 
 /* Builds a burst spark's beam vertices; frees the spark once its owner is gone, and draws nothing while it is hidden. */
-Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport) {
+Vtx *effect_buildBurstSparkVtx(BurstSpark *spark, s16 viewport) {
     BurstSparkData *data = &spark->data;
     Actor *owner = data->owner;
     BeamScale scale;
 
     if (owner->unique_id != data->ownerId || owner->type == 0) {
-        func_1516972C(&spark->head.header);
+        effect_destroyObject(&spark->head.header);
         return NULL;
     }
     if (!(data->flags & 1)) {
@@ -1769,7 +1769,7 @@ struct OwnedParticle {
 };
 
 /* Message handler: 0x2D makes the particle follow its owner through a swap; message 0 for its owner frees it. */
-void func_151BE558(OwnedParticle *particle, ActorMsg *msg, u8 msgId) {
+void effect_ownedParticleMessage(OwnedParticle *particle, ActorMsg *msg, u8 msgId) {
     ActorRef *owner = &particle->owner;
 
     if (msgId == 0x2D) {
@@ -1786,18 +1786,18 @@ void func_151BE558(OwnedParticle *particle, ActorMsg *msg, u8 msgId) {
         Actor *actor = msg->ref.actor;
 
         if (actor == owner->actor || msg->ref.uniqueId == owner->uniqueId) {
-            func_1516972C(&particle->header);
+            effect_destroyObject(&particle->header);
         }
     }
 }
 
 /* Message handler of a burst spark: passes the message on with the spark's owner reference. */
-void func_151BE604(BurstSpark *spark, s32 msg, u8 msgId) {
-    func_15169850(msg, msgId, &spark->data.owner, &spark->data.ownerId, spark);
+void effect_burstSparkMessage(BurstSpark *spark, s32 msg, u8 msgId) {
+    effect_handleOwnerActorEvent(msg, msgId, &spark->data.owner, &spark->data.ownerId, spark);
 }
 
 /* Clears the spark's slot in its burst effect. */
-void func_151BE644(BurstSpark *spark) {
+void effect_unlinkBurstSpark(BurstSpark *spark) {
     BurstSparkData *data = &spark->data;
 
     if (data->burst != NULL) {
@@ -1808,19 +1808,19 @@ void func_151BE644(BurstSpark *spark) {
 }
 
 /* Teardown of a burst spark: clears its slot in the burst, then runs the particle teardown func_1513CA6C. */
-void func_151BE674(BurstSpark *spark) {
-    func_151BE644(spark);
+void effect_destroyBurstSpark(BurstSpark *spark) {
+    effect_unlinkBurstSpark(spark);
     func_1513CA6C(&spark->head);
 }
 
 /* Teardown of a burst spark: clears its slot in the burst, then runs the particle teardown func_1513CAA0. */
-void func_151BE6A0(BurstSpark *spark) {
-    func_151BE644(spark);
+void effect_freeBurstSpark(BurstSpark *spark) {
+    effect_unlinkBurstSpark(spark);
     func_1513CAA0(&spark->head);
 }
 
 /* Per-frame update of a burst glow: switches it to a random texture every 3-10 frames and eases its scale. */
-s32 func_151BE6CC(BurstGlow *glow) {
+s32 effect_updateBurstGlow(BurstGlow *glow) {
     s32 pad; // matching: unused stack slot above textures
     const s32 textures[4] = { 0x60, 0x61, 0x62, 0x63 };
     GlowShape *shape = &glow->shape;
@@ -1835,12 +1835,12 @@ s32 func_151BE6CC(BurstGlow *glow) {
 }
 
 /* Message handler of a burst glow: passes the message on with the glow's owner reference. */
-void func_151BE788(BurstGlow *glow, s32 msg, u8 msgId) {
-    func_15169850(msg, msgId, &glow->data.owner, &glow->data.ownerId, glow);
+void effect_burstGlowMessage(BurstGlow *glow, s32 msg, u8 msgId) {
+    effect_handleOwnerActorEvent(msg, msgId, &glow->data.owner, &glow->data.ownerId, glow);
 }
 
 /* Clears the glow's slot in its burst effect. */
-void func_151BE7C8(BurstGlow *glow) {
+void effect_unlinkBurstGlow(BurstGlow *glow) {
     BurstGlowData *data = &glow->data;
 
     if (data->burst != NULL) {
@@ -1851,13 +1851,13 @@ void func_151BE7C8(BurstGlow *glow) {
 }
 
 /* Teardown of a burst glow: clears its slot in the burst, then runs the particle teardown func_151411A4. */
-void func_151BE7F8(BurstGlow *glow) {
-    func_151BE7C8(glow);
+void effect_destroyBurstGlow(BurstGlow *glow) {
+    effect_unlinkBurstGlow(glow);
     func_151411A4(&glow->head);
 }
 
 /* Teardown of a burst glow: clears its slot in the burst, then runs the particle teardown func_151411C4. */
-void func_151BE824(BurstGlow *glow) {
-    func_151BE7C8(glow);
+void effect_freeBurstGlow(BurstGlow *glow) {
+    effect_unlinkBurstGlow(glow);
     func_151411C4(&glow->head);
 }

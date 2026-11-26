@@ -16,7 +16,7 @@ struct ActorTask;
  * clears it and dies once it is no longer refreshed, and its destructor clears the owner's pointer.
  */
 
-/* Payload at +0x80 of the effect spawned by func_151AA48C: a value oscillating around `base`. */
+/* Payload at +0x80 of the effect spawned by effect_spawnTaskPulse: a value oscillating around `base`. */
 typedef struct {
     /* 0x00 */ struct ActorTask *owner;
     /* 0x04 */ u8 keepAlive;
@@ -33,7 +33,7 @@ struct PulseFx {
     /* 0x80 */ PulseFxPayload payload;
 };
 
-/* Payload at +0x58 of the effect spawned by func_151AB2C4: holds a looping sound. */
+/* Payload at +0x58 of the effect spawned by effect_spawnTaskLoopSound: holds a looping sound. */
 typedef struct {
     /* 0x00 */ struct ActorTask *owner;
     /* 0x04 */ u8 keepAlive;
@@ -77,7 +77,7 @@ void func_151A99D0(ActorTask *task) {
         pos.z = actor->zpos;
         if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
             pos.y = task->watcher.hit.height;
-            func_151ABE40(&pos, &task->watcher.hit, 3, task->watcher.header.owner, task->watcher.header.kind);
+            effect_spawnImpact(&pos, &task->watcher.hit, 3, task->watcher.header.owner, task->watcher.header.kind);
         }
     }
 }
@@ -100,7 +100,7 @@ void func_151A9AA4(ActorTask *task) {
         hit = &task->watcher.hit;
         if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
-            func_151ABE40(&pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
+            effect_spawnImpact(&pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -125,7 +125,7 @@ void func_151A9BA0(ActorTask *task) {
         hit = &task->watcher.hit;
         if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
-            func_151ABE40(&pos, hit, 1, task->watcher.header.owner, task->watcher.header.kind);
+            effect_spawnImpact(&pos, hit, 1, task->watcher.header.owner, task->watcher.header.kind);
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -150,7 +150,7 @@ void func_151A9CA0(ActorTask *task) {
     pos.z = actor->zpos;
     if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
         pos.y = task->watcher.hit.height;
-        func_151ABE40(&pos, &task->watcher.hit, 1, task->watcher.header.owner, task->watcher.header.kind);
+        effect_spawnImpact(&pos, &task->watcher.hit, 1, task->watcher.header.owner, task->watcher.header.kind);
         sound_playOnActor(0, 8, 0x6978, 0, 0, actor);
     }
     func_151AA264(actor, &task->watcher.hit);
@@ -175,7 +175,7 @@ void func_151A9DC0(ActorTask *task) {
         hit = &task->watcher.hit;
         if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
-            func_151ABE40(&pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
+            effect_spawnImpact(&pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -199,7 +199,7 @@ void func_151A9EC0(ActorTask *task) {
         hit = &task->watcher.hit;
         if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
-            func_151ABE40(&pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
+            effect_spawnImpact(&pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
             sound_playOnActor(0, 8, 0x6978, 0, 0, actor);
         }
     }
@@ -223,7 +223,7 @@ void func_151A9FC8(ActorTask *task) {
         pos.z = actor->zpos;
         if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
             pos.y = task->watcher.hit.height;
-            func_151ABE40(&pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
+            effect_spawnImpact(&pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
         }
     }
 }
@@ -244,7 +244,7 @@ void func_151AA09C(ActorTask *task) {
         pos.z = actor->zpos;
         if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
             pos.y = task->watcher.hit.height;
-            func_151ABE40(&pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
+            effect_spawnImpact(&pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
         }
     }
 }
@@ -258,7 +258,7 @@ typedef struct {
     /* 0x04 */ u8 characterId;
 } Msg151AA17C;
 
-/* Sends message 10 ({unk18, unk1C}) through func_15147D64 and func_151494E0, then trail_startSurfaceTrails. */
+/* Sends message 10 ({unk18, unk1C}) through effect_sendEventToEffectObjs and effect_sendEventToTimedEffects, then trail_startSurfaceTrails. */
 void func_151AA17C(SurfaceTrailOwner *owner) {
     s32 word;
     Msg151AA17C msg;
@@ -268,8 +268,8 @@ void func_151AA17C(SurfaceTrailOwner *owner) {
     msg.character = (Actor *)word;
     msg.characterId = owner->watcher.characterId;
     word = (s32)&msg;
-    func_15147D64(word, 10);
-    func_151494E0(word, 10);
+    effect_sendEventToEffectObjs(word, 10);
+    effect_sendEventToTimedEffects(word, 10);
     trail_startSurfaceTrails(owner);
 }
 
@@ -291,8 +291,8 @@ void func_151AA210(SurfaceTrailOwner *owner) {
     msg.character = (Actor *)word;
     msg.characterId = owner->watcher.characterId;
     word = (s32)&msg;
-    func_15147D64(word, 10);
-    func_151494E0(word, 10);
+    effect_sendEventToEffectObjs(word, 10);
+    effect_sendEventToTimedEffects(word, 10);
     trail_startSurfaceTrails(owner);
 }
 
@@ -337,7 +337,7 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
     if (actor->unk118 < y) {
         return;
     }
-    if (func_1515A920(actor, &ground) == 0) {
+    if (effect_getWatcherFloorHit(actor, &ground) == 0) {
         ground = NULL;
     }
     vel.x = 0.0f;
@@ -352,7 +352,7 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
 }
 
 /* Spawns the pulse effect owned by `task`. */
-PulseFx *func_151AA48C(Actor *actor, ActorTask *task) {
+PulseFx *effect_spawnTaskPulse(Actor *actor, ActorTask *task) {
     BloodStripDesc desc;
     PulseFx *fx;
     PulseFxPayload payload;
@@ -393,7 +393,7 @@ PulseFx *func_151AA48C(Actor *actor, ActorTask *task) {
 }
 
 /* PulseFx callback: restarts the pulse and plays sound 10 or 11 (at random) at the effect. */
-s32 func_151AA5A4(PulseFx *fx) {
+s32 effect_restartTaskPulse(PulseFx *fx) {
     fx->payload.phase = 0;
     if (func_150ADA20() & 1) {
         func_10010F88(10, 0x55F0, (func_151EF610() % 1200) - 600, 0, 0, fx->strip.posA.x, fx->strip.posA.y, fx->strip.posA.z, 500, 2500);
@@ -482,7 +482,7 @@ void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D
 }
 
 /* PulseFx update: returns the current oscillation value and advances the phase. */
-f32 func_151AAA4C(PulseFx *fx) {
+f32 effect_stepTaskPulse(PulseFx *fx) {
     PulseFxPayload *pulse;
     f32 value;
 
@@ -493,7 +493,7 @@ f32 func_151AAA4C(PulseFx *fx) {
 }
 
 /* Refreshes the task's pulse and loop-sound effects, spawning whichever is missing. */
-void func_151AAABC(ActorTask *task) {
+void effect_refreshTaskEffects(ActorTask *task) {
     Actor *actor;
     ActorTaskFx *fx;
 
@@ -505,7 +505,7 @@ void func_151AAABC(ActorTask *task) {
         pulse = &fx->pulse->payload;
         pulse->keepAlive = 1;
     } else {
-        fx->pulse = func_151AA48C(actor, task);
+        fx->pulse = effect_spawnTaskPulse(actor, task);
     }
     if (fx->sound != NULL) {
         LoopSoundFxPayload *sound;
@@ -513,7 +513,7 @@ void func_151AAABC(ActorTask *task) {
         sound = &fx->sound->payload;
         sound->keepAlive = 1;
     } else {
-        fx->sound = func_151AB2C4(actor, task);
+        fx->sound = effect_spawnTaskLoopSound(actor, task);
     }
 }
 
@@ -534,7 +534,7 @@ void func_151AAB78(PulseFx *fx) {
 }
 
 /* PulseFx keep-alive poll: TRUE if the owner refreshed it since the last call. */
-s32 func_151AABA0(PulseFx *fx) {
+s32 effect_isTaskPulseAlive(PulseFx *fx) {
     s32 alive = TRUE;
 
     if (fx->payload.keepAlive == 0) {
@@ -603,7 +603,7 @@ void func_151AABC4(Actor *actor, u8 index) {
 }
 
 /* Trail update handler (gMotionTrailUpdateProcs): caps the trail's alpha at its remaining life * 16 (at most 255). */
-s32 func_151AADBC(MotionTrail *trail) {
+s32 effect_fadeTrailByLife(MotionTrail *trail) {
     TrailParams *params;
     s32 limit;
 
@@ -620,7 +620,7 @@ s32 func_151AADBC(MotionTrail *trail) {
 
 
 /* Keeps the task's flicker effect alive, or spawns it on the ground under the actor. */
-void func_151AADF8(ActorTask *task) {
+void effect_keepTaskFlicker(ActorTask *task) {
     Actor *actor;
     ActorTaskFx *fx;
     SpriteFlicker *keep;
@@ -684,7 +684,7 @@ void func_151AADF8(ActorTask *task) {
 
 
 /* FlickerSprite update: eases the sprite's animation speed toward a target re-rolled after a random delay. */
-s32 func_151AB090(FlickerSprite *fx) {
+s32 effect_updateTaskFlicker(FlickerSprite *fx) {
     s8 alive = TRUE;
     SpriteFlicker *flicker = &fx->flicker;
 
@@ -702,7 +702,7 @@ s32 func_151AB090(FlickerSprite *fx) {
 }
 
 /* FlickerSprite destructor: detaches from the owner task. */
-s32 func_151AB180(FlickerSprite *fx) {
+s32 effect_detachTaskFlicker(FlickerSprite *fx) {
     ActorTaskFx *ownerFx = &((ActorTask *)fx->flicker.owner)->fx;
 
     ownerFx->flicker = NULL;
@@ -730,7 +730,7 @@ void func_151AB1C4(ActorTask *task) {
         hit = &task->watcher.hit;
         if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, hit) != 0) {
             pos.y = task->watcher.hit.height;
-            func_151ABE40(&pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
+            effect_spawnImpact(&pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
             sound_playOnActor(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -738,7 +738,7 @@ void func_151AB1C4(ActorTask *task) {
 }
 
 /* Spawns the looping-sound effect owned by `task`. */
-LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task) {
+LoopSoundFx *effect_spawnTaskLoopSound(Actor *actor, ActorTask *task) {
     BloodDripDesc desc;
     LoopSoundFxPayload payload;
     LoopSoundFx *fx;
@@ -845,7 +845,7 @@ void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *o
 }
 
 /* LoopSoundFx update: keeps sound 0x355 playing while camera_global_Cameras->SpecialFlags bit 0 is set. */
-s32 func_151AB6B8(LoopSoundFx *fx) {
+s32 effect_updateLoopSound(LoopSoundFx *fx) {
     u8 alive;
     LoopSoundFxPayload *sound;
 
@@ -865,7 +865,7 @@ s32 func_151AB6B8(LoopSoundFx *fx) {
 }
 
 /* LoopSoundFx destructor (variant 1): stops the sound and detaches from the owner task. */
-void func_151AB788(LoopSoundFx *fx) {
+void effect_destroyLoopSound(LoopSoundFx *fx) {
     LoopSoundFxPayload *sound = &fx->payload;
     ActorTaskFx *ownerFx = &sound->owner->fx;
 
@@ -877,7 +877,7 @@ void func_151AB788(LoopSoundFx *fx) {
 }
 
 /* LoopSoundFx destructor (variant 2): stops the sound and detaches from the owner task. */
-void func_151AB7D8(LoopSoundFx *fx) {
+void effect_freeLoopSound(LoopSoundFx *fx) {
     LoopSoundFxPayload *sound = &fx->payload;
     ActorTaskFx *ownerFx = &sound->owner->fx;
 
@@ -888,9 +888,9 @@ void func_151AB7D8(LoopSoundFx *fx) {
     func_1513470C(&fx->header);
 }
 
-/* func_15141DA4(actor, 0, 4). */
+/* effect_tryAttachActorEffect(actor, 0, 4). */
 void func_151AB828(ActorTask *task) {
-    func_15141DA4(task->watcher.character, 0, 4);
+    effect_tryAttachActorEffect(task->watcher.character, 0, 4);
 }
 
 /* For actors of kind 0-4 or 150: spawns a func_15190770 effect on the actor. */
@@ -922,7 +922,7 @@ void func_151AB854(ActorTask *task) {
 void func_151AB920(Actor *actor, s32 arg1) {
 }
 
-/* Payload at +0x28 of the spark emitter task spawned by func_151AB930. */
+/* Payload at +0x28 of the spark emitter task spawned by effect_spawnSparkEmitterTask. */
 typedef struct {
     /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;
@@ -940,7 +940,7 @@ struct EmitterTask {
 };
 
 /* Spawns a spark emitter task that follows `actor`. */
-void func_151AB930(Actor *actor) {
+void effect_spawnSparkEmitterTask(Actor *actor) {
     TimedEffect *task;
     EmitterPayload payload;
 
@@ -951,14 +951,14 @@ void func_151AB930(Actor *actor) {
     payload.rate = 0.400000006f;
     payload.rateRandom = 3.0f;
     payload.color = func_151D8E20();
-    task = func_151491F4(0x3C, -1, 0xE, 1, 9, sizeof(payload), 0xFF, 0);
+    task = effect_newTimedEffectNoDraw(0x3C, -1, 0xE, 1, 9, sizeof(payload), 0xFF, 0);
     if (task != NULL) {
         memcpy(&((EmitterTask *)task)->payload, &payload, sizeof(payload));
     }
 }
 
 /* Spark emitter update: emits sparks around the actor, or ends the task once the actor is gone. */
-void func_151AB9C8(EmitterTask *task) {
+void effect_updateSparkEmitterTask(EmitterTask *task) {
     EmitterPayload *emitter;
     u8 dead;
     CollisionHit floor;
@@ -1023,12 +1023,12 @@ void func_151AB9C8(EmitterTask *task) {
  * Message handler for a task whose payload (at +0x28, as in EmitterTask) names an actor:
  * message 0 ends the task when it concerns that actor; message 0x2D swaps actor A and B.
  */
-void func_151ABD54(EmitterTask *task, ActorMsg *msg, u8 msgId) {
+void effect_emitterTaskMessage(EmitterTask *task, ActorMsg *msg, u8 msgId) {
     EmitterPayload *payload = &task->payload;
 
     if (msgId == 0) {
         if ((msg->ref.actor == payload->actor) || (msg->ref.uniqueId == payload->actorId)) {
-            func_1516972C(&task->base.header);
+            effect_destroyObject(&task->base.header);
         }
     } else if (msgId == 0x2D) {
         if (payload->actor == msg->swap.actorA) {
@@ -1046,12 +1046,12 @@ typedef struct {
     /* 0x04 */ s8 actorId;
 } Msg151ABE00;
 
-/* Broadcasts message 0x20 ({actor, unique_id}) via func_1516944C. */
+/* Broadcasts message 0x20 ({actor, unique_id}) via effect_sendEventToType. */
 void func_151ABE00(Actor *actor) {
     Msg151ABE00 msg;
 
     msg.actor = actor;
     msg.actorId = actor->unique_id;
 
-    func_1516944C(0x20, (s32)&msg, 12);
+    effect_sendEventToType(0x20, (s32)&msg, 12);
 }

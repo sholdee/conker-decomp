@@ -28,7 +28,7 @@ void swarm_spawnAwayFromPlayer(s32 count, s32 group, s32 x, s32 y, s32 z, s32 pl
     diff.z = z - camera_global_Cameras[player].eye.z;
     angle = func_15048FC8(&diff);
     for (i = 0; i < count; i++) {
-        actor = func_15167A68(10, 0, 0xF8, 1, 0xFF, 1);
+        actor = effect_newObject(10, 0, 0xF8, 1, 0xFF, 1);
         if (actor == NULL) return;
         onGround = flags & 1;
         actorX = (func_150ADA20() & 0x7F) + x - 63;
@@ -102,7 +102,7 @@ void swarm_spawnScattered(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread,
     spawnY = y;
     if (airborne == 0) collision_selectMap(0);
     for (i = 0; i < count; i++) {
-        actor = func_15167A68(0x13, 0, 0xF8, 1, 0xFF, 1);
+        actor = effect_newObject(0x13, 0, 0xF8, 1, 0xFF, 1);
         if (actor == NULL) return;
         radius = spread >> 1;
         height = spawnY;
@@ -125,7 +125,7 @@ void swarm_spawnScattered(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread,
         actor->modelIndex = 7;
         samples = func_150A3A70(actorX, actorZ);
         if (samples == 0) {
-            func_1516979C(&actor->header);
+            effect_freeObject(&actor->header);
         } else {
             lowest = D_800D3300[0].height;
             for (j = 1; j < samples; j++) {
@@ -193,7 +193,7 @@ void swarm_spawnRing(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
         } else {
             variant = 0;
         }
-        actor = func_15167A68(baseType + variant, 0, 0xF8, 1, 0xFF, 1);
+        actor = effect_newObject(baseType + variant, 0, 0xF8, 1, 0xFF, 1);
         if (actor == NULL) return;
         ringWidth = maxRadius - minRadius;
         onGround = spawnFlags & 1;
@@ -317,14 +317,14 @@ void swarm_updateFlight(SwarmActor *actor) {
     u16 sound;
 
     if (gEffectModelSlots[actor->modelIndex].resource == NULL || gEffectModelSecondDls[actor->modelIndex] == NULL) {
-        func_1516972C(&actor->header);
+        effect_destroyObject(&actor->header);
         return;
     }
     alpha = actor->alpha;
     if ((actor->modelIndex == 8 || actor->modelIndex == 9) && level == 6 && D_800C35EA[0] != 0 && D_800C35E8[0] == 0xF) {
         actor->flags &= ~8;
         if (D_800C35EA[0] == 0 || D_800C35E8[0] != 0xF) {
-            func_1516972C(&actor->header);
+            effect_destroyObject(&actor->header);
             return;
         }
         /* flag 0x200: spiral down around (-3478, 3858); pitchStep, yawStep and rollStep then
@@ -350,7 +350,7 @@ void swarm_updateFlight(SwarmActor *actor) {
         }
     } else {
         if (alpha == 0) {
-            func_1516972C(&actor->header);
+            effect_destroyObject(&actor->header);
             return;
         }
         alpha -= D_800BE9E4 * 4;
@@ -526,7 +526,7 @@ void swarm_updateFlight(SwarmActor *actor) {
         actor->z = actor->rollStep * sinPitch + 3858.0f;
         actor->y -= 100.0f / (actor->rollStep - 60.0f + 4.0f);
         if (actor->y < -3100.0f || D_800C35EA[0] == 0 || D_800C35E8[0] != 0xF) {
-            func_1516972C(&actor->header);
+            effect_destroyObject(&actor->header);
             return;
         }
     } else {
@@ -554,7 +554,7 @@ void swarm_updateFlight(SwarmActor *actor) {
         func_1510AEE0(gViewMatrices[0], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
         (gMatchState.mode != 1 ||
          func_1510AEE0(gViewMatrices[1], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
-        func_1516972C(&actor->header);
+        effect_destroyObject(&actor->header);
     }
 }
 
@@ -632,7 +632,7 @@ void swarm_updatePercher(SwarmActor *actor) {
             return;
         }
     } else {
-        func_1516972C(&actor->header);
+        effect_destroyObject(&actor->header);
     }
 }
 
@@ -643,7 +643,7 @@ void swarm_updateHoverer(SwarmActor *actor) {
     s32 alpha;
 
     if ((gEffectModelSlots[actor->modelIndex].resource == NULL) || (gEffectModelSecondDls[actor->modelIndex] == NULL)) {
-        func_1516972C(&actor->header);
+        effect_destroyObject(&actor->header);
         return;
     }
 
@@ -660,7 +660,7 @@ void swarm_updateHoverer(SwarmActor *actor) {
         }
     } else {
         if (alpha == 0) {
-            func_1516972C(&actor->header);
+            effect_destroyObject(&actor->header);
             return;
         }
         alpha -= D_800BE9E4 * 4;
@@ -687,7 +687,7 @@ void swarm_updateHoverer(SwarmActor *actor) {
             break;
         case 4:
             if (actor->y < actor->groundHeight) {
-                func_1516972C(&actor->header);
+                effect_destroyObject(&actor->header);
                 return;
             }
             break;

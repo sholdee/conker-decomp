@@ -5,26 +5,26 @@
 extern u8 (*D_8008FCD0[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game/Beam/AimedBeam/aimedbeam has its own view) */
 
 /* This file's .data: the texture scroll offsets; >> 7 gives the 10.2 fixed-point tile coordinate. */
-s32 D_80088890 = 0;
-s32 D_80088894 = 0;
-s32 D_80088898 = 0;
-s32 D_8008889C = 0;
+s32 gTile0ScrollS = 0;
+s32 gTile0ScrollT = 0;
+s32 gTile1ScrollS = 0;
+s32 gTile1ScrollT = 0;
 
 void func_150CF530(s32 arg0) {
     trail_spawnNearCamera(&movement_obj[0], movement_obj[0].ypos + 300.0f, -10000.0f);
 }
 
 /* Advances the texture scroll offsets by the frames elapsed. */
-void func_150CF578(s32 arg0) {
-    D_80088890 += D_800BE9E4 * 26;
-    D_80088894 -= D_800BE9E4 * 28;
-    D_80088898 -= D_800BE9E4 * 28;
+void effect_scrollTileTextures(s32 arg0) {
+    gTile0ScrollS += D_800BE9E4 * 26;
+    gTile0ScrollT -= D_800BE9E4 * 28;
+    gTile1ScrollS -= D_800BE9E4 * 28;
 }
 
 /* Sets the scrolled tile sizes of tiles 0 and 1. */
-Gfx *func_150CF5E8(Gfx *gfx) {
-    gDPSetTileSize(gfx++, 0, D_80088890 >> 7, D_80088894 >> 7, 0x47E, 0x47E);
-    gDPSetTileSize(gfx++, 1, D_80088898 >> 7, D_8008889C >> 7, 0x47E, 0x47E);
+Gfx *effect_setScrolledTileSizes(Gfx *gfx) {
+    gDPSetTileSize(gfx++, 0, gTile0ScrollS >> 7, gTile0ScrollT >> 7, 0x47E, 0x47E);
+    gDPSetTileSize(gfx++, 1, gTile1ScrollS >> 7, gTile1ScrollT >> 7, 0x47E, 0x47E);
     return gfx;
 }
 
@@ -60,7 +60,7 @@ struct HopSprite {
 };
 
 /* Spawns the hopping particle, waiting off screen at (-300, 72). */
-void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
+void effect_spawnHopSprite(s16 unk12, u8 unkC, s32 unk1) {
     ScreenSpriteInfo spawn;
     HopMotion hop;
     HopSprite *particle;
@@ -112,7 +112,7 @@ void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
 
 /* Hopping particle update: follows the hop arc and, on landing, kicks up 2 to 5 bouncing
    dust particles. */
-s32 func_150CF800(HopSprite *hopper) {
+s32 effect_updateHopSprite(HopSprite *hopper) {
     f32 phase;
     ScreenSpriteInfo spawn;
     BounceMotion dust;
@@ -192,7 +192,7 @@ s32 func_150CF800(HopSprite *hopper) {
 }
 
 /* Hopping particle message handler: message 0x52 starts a hop to the x given in the payload. */
-void func_150CFBEC(HopSprite *hopper, f32 *targetX, u8 type) {
+void effect_hopSpriteMessage(HopSprite *hopper, f32 *targetX, u8 type) {
     HopMotion *hop = &hopper->motion.hop;
 
     if (type == 0x52) {
@@ -204,14 +204,14 @@ void func_150CFBEC(HopSprite *hopper, f32 *targetX, u8 type) {
 }
 
 /* Sends message 0x52: hop to targetX. */
-void func_150CFC38(f32 targetX) {
+void effect_sendHopMessage(f32 targetX) {
     f32 payload = targetX;
 
     func_1515572C((s32)&payload, 0x52);
 }
 
 /* Bouncing particle update: integrates the motion and bounces off the floor, damped. */
-s32 func_150CFC60(HopSprite *particle) {
+s32 effect_updateBounceSprite(HopSprite *particle) {
     BounceMotion *m = &particle->motion.bounce;
 
     particle->pos.x += m->vel.x * gFrameDelta;

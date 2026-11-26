@@ -48,7 +48,7 @@ void text_updateBox(TextBox *box) {
     skip = box->config->flags & TEXTBOX_SKIP_ANIM;
     if (box->config->unk2B != 0 && D_800C35EA[0] != 1) {
         box->config->numPages = 0;
-        func_1516972C(box);
+        effect_destroyObject(box);
         return;
     }
     box->x = box->anchorX;
@@ -244,7 +244,7 @@ void text_updateBox(TextBox *box) {
             movement_obj[box->config->objIndex].unk1E3 = 0;
             player->cmdState.unk0 = 0;
             box->config->numPages = 0;
-            func_1516972C(box);
+            effect_destroyObject(box);
         }
         break;
     }
@@ -662,7 +662,7 @@ void func_1516D2D8(void) {
 void text_removeBox(TextBox *box) {
     if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
         box->config->numPages = 0;
-        func_1516972C(box);
+        effect_destroyObject(box);
         box->state = 0;
     }
 }

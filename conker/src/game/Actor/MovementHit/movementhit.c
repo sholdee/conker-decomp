@@ -42,15 +42,15 @@ static Vec3f D_800D1560;
 static Vec3f D_800D1570;
 
 void func_1506A6FC(Actor *obj, s32 arg1) {
-    func_150E0348(obj, 0xFF, 1);
+    effect_attachBloodDrip(obj, 0xFF, 1);
 }
 
 void func_1506A724(Actor *obj, s32 arg1) {
-    func_151BB61C(obj, &D_800D1560, &D_800D1570, 0xFF, 1);
+    effect_spawnShotImpact(obj, &D_800D1560, &D_800D1570, 0xFF, 1);
 }
 
 void func_1506A760(Actor *obj, s32 arg1) {
-    func_151BBA9C(obj, &D_800D1560.x, &D_800D1570.x, 0xFF, 1);
+    effect_spawnMidpointImpact(obj, &D_800D1560.x, &D_800D1570.x, 0xFF, 1);
 }
 
 void func_1506A79C(Actor *obj, s32 arg1) {
@@ -125,7 +125,7 @@ void func_1506AA48(Actor *obj, Pair1506AA48 *arg) {
     data.ref.uniqueId = obj->unique_id;
     data.value = *arg;
 
-    effect = func_15149130(10, 7, 35, -1, 1, 33, sizeof(data), 0xFF, 1);
+    effect = effect_newTimedEffect(10, 7, 35, -1, 1, 33, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
         memcpy(effect + 1, &data, sizeof(data)); // the data follows the TimedEffect
     }

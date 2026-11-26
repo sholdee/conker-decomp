@@ -29,7 +29,7 @@ struct struct_EAB10 {
 };
 
 /* Spawns this frame's share of flashes, each sliding from one line to the other along the ground. */
-void func_150EAB10(struct_EAB10 *actor) {
+void effect_spawnGroundFlashes(struct_EAB10 *actor) {
     s32 pad; // matching: unused stack slots that keep the frame layout
     struct GroundFlash flash;
     LightEffectHeader header;
@@ -101,7 +101,7 @@ void func_150EAB10(struct_EAB10 *actor) {
 
 
 /* Slides the flash along the ground and keeps its light on the ground; returns 0 once it expires. */
-s32 func_150EAE24(LightEffect *obj) {
+s32 effect_updateGroundFlash(LightEffect *obj) {
     struct GroundFlash *flash;
     Vec3f probe;
 

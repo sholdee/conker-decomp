@@ -8,7 +8,7 @@ void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, co
                     f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10,
                     s32 arg11);
 
-/* What func_151D2F00 (game_1FFF60.c) copies to ActorFollowerGroup.actor: the group's fields 0x10-0x1F. */
+/* What effect_newFollowerGroup (game_1FFF60.c) copies to ActorFollowerGroup.actor: the group's fields 0x10-0x1F. */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
@@ -23,7 +23,7 @@ typedef struct {
     /* 0x0E */ u8 padE[2];
 } FollowerGroupDesc;
 
-/* One entry of a bone anchor set (D_800E0990). */
+/* One entry of a bone anchor set (gAnchorSets). */
 typedef struct BoneAnchor {
     /* 0x00 */ u8 bone;
     /* 0x04 */ Vec3f offset;
@@ -67,8 +67,8 @@ static const AnchorEmitterTemplate *D_8008D630[] = {
     D_800A7938, D_800A7988, D_800A79D8, D_800A7A28, D_800A7A78,
 };
 /* Emitter update and finish callbacks (AnchorEmitterParams.updateFunc, unk59Func); the callbacks take the emitter as
-   their own view (func_151905BC and func_151906C4, game_1BDA00.c), so the tables have no prototype. */
-static s32 (*D_8008D67C[])() = { func_151905BC };
+   their own view (effect_updateBurnDamage and func_151906C4, game_1BDA00.c), so the tables have no prototype. */
+static s32 (*D_8008D67C[])() = { effect_updateBurnDamage };
 static void (*D_8008D680[])() = { func_151906C4 };
 
 /* Moves three sprite values toward random targets that are re-rolled on timers. */
@@ -124,19 +124,19 @@ extern const IdList1 D_800A74D4;
 void func_1518F45C(s32 arg0, u8 arg1) {
     IdList1 desc = D_800A74D4;
 
-    func_15169260(desc.ids, 1, arg0, arg1);
+    effect_sendEventToTypes(desc.ids, 1, arg0, arg1);
 }
 
 /* Message handler of the actor emitter process (type 0x21): message 0x49 names an actor; the emitter dies with it. */
 void func_1518F49C(ActorEmitterProcess *self, ActorRef *other, u8 arg2) {
-    func_15169850((s32)other, arg2, &self->params.owner, &self->params.ownerId, self);
+    effect_handleOwnerActorEvent((s32)other, arg2, &self->params.owner, &self->params.ownerId, self);
     if (arg2 == 0x49) {
         Actor *selfActor = self->params.owner;
         Actor *otherActor = other->actor;
         u8 selfTag = self->params.ownerId;
         u8 otherTag = other->uniqueId;
         if (selfActor == otherActor || selfTag == otherTag) {
-            func_1516972C(&self->header);
+            effect_destroyObject(&self->header);
         }
     }
 }
@@ -187,7 +187,7 @@ AnchorEmitter *func_1518F5D0(Actor *owner, const AnchorEmitterTemplate *tmpl, s1
     desc.expireFn = 0;
     desc.kind = 1;
 
-    emitter = func_151D2F00(&desc, arg7 + 0x60, arg8, arg9);
+    emitter = effect_newFollowerGroup(&desc, arg7 + 0x60, arg8, arg9);
     if (emitter != NULL) {
         dest = &emitter->params;
         memcpy(dest, &params, sizeof(AnchorEmitterParams));
@@ -196,7 +196,7 @@ AnchorEmitter *func_1518F5D0(Actor *owner, const AnchorEmitterTemplate *tmpl, s1
         } else {
             dest->child = NULL;
         }
-        func_151D2AB0(dest->tmpl.anchorSet);
+        effect_acquireAnchorSet(dest->tmpl.anchorSet);
         sound_addDynamicSound(0x4D, owner->xpos, owner->ypos, owner->zpos, 15000, 2000, 800,
                       func_1518E298, emitter, (s32)owner, 0, 0);
     }
@@ -253,7 +253,7 @@ void func_1518F8E0(AnchorEmitter *emitter) {
             do {
                 if (emitter->group.count < params->tmpl.maxCount) {
                     set = params->tmpl.anchorSet;
-                    anchor = &D_800E0990[set][func_150ADA20() % D_800E0968[set]];
+                    anchor = &gAnchorSets[set][func_150ADA20() % gAnchorCounts[set]];
                     size.unk0 = func_150ADA68() * params->tmpl.sizeXRange + params->tmpl.sizeX;
                     size.unk4 = func_150ADA68() * params->tmpl.sizeYRange + params->tmpl.sizeY;
                     func_15143134(&anchor->offset, &pos, owner->ob_matrix_ptr + anchor->bone);
@@ -282,7 +282,7 @@ void func_1518F8E0(AnchorEmitter *emitter) {
                         desc.unk1A = 0;
                         desc.parent = emitter;
                         desc.sprite = sprite;
-                        func_151D2BA4(&desc, &pos, 0, emitter->group.header.owner, emitter->group.header.kind);
+                        effect_spawnBoneFollower(&desc, &pos, 0, emitter->group.header.owner, emitter->group.header.kind);
                     }
                 }
                 params->accum -= 1.0f;
@@ -322,7 +322,7 @@ void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
 
     sprite = particle->sprite;
     if (particle->parent == NULL) {
-        func_1516972C(&sprite->head.header);
+        effect_destroyObject(&sprite->head.header);
         return;
     }
     parent = particle->parent;

@@ -274,7 +274,7 @@ void func_150C3D5C(Actor *obj) {
         ((s32 *)&func_10004074)[1] = 0;
     }
 
-    func_15171200(3, 0xCB, obj->xpos, obj->ypos, obj->zpos, 10.0f, 1.0f,
+    effect_scatterModels(3, 0xCB, obj->xpos, obj->ypos, obj->zpos, 10.0f, 1.0f,
                   2.0f, 60.0f, 3, 0x3C, -0.7f, 0xFF, 0);
     func_151709B4(obj->xpos, obj->ypos + 20.0f,
                   obj->zpos, 0xA, 2000.0f, 0xFF, 0);
