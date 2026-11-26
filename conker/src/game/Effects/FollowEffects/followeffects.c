@@ -737,9 +737,7 @@ void effect_spawnImpactLight(Vec3f *pos, u8 arg1, s32 arg2) {
     light_createWithEffect(&header, &header2, (math_random() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
-// matching: this file was compiled with s32 parameters where the definition (game/Particle/EmissionSource/emissionsource.c) has u8 and s16,
-// so its calls do not narrow them. The definition is (f32 size, u8 arg1, s32 arg2, Vec3f *position,
-// s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 owner, s32 kind).
+/* matching: compiled with s32 where emissionsource.c's definition has u8 and s16 (args 2, 5-11), so the calls do not narrow */
 void particle_spawnImpactMark(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 /* Spawns a randomised particle_spawnImpactMark effect on surface `surf` at `pos`. */
 void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
