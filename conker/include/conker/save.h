@@ -166,6 +166,7 @@ extern s8 D_8008FE9C[8];
 extern u32 D_8008FEA4[8];
 extern s8 D_8008FEC4[32];
 extern s8 D_8008FEE4[8]; /* per team preset: row of D_800AB74C */
+extern const u8 D_800AB62C[10][3]; /* team colours (RGB) */
 extern s8 D_8008FEEC;
 extern s8 D_8008FEF0;
 extern s8 D_8008FEF8;

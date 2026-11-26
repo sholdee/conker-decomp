@@ -34,6 +34,137 @@ s8 D_800E0BE0[0x1C];
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * .rodata front-end data, linked at 0x800AB570 in this order (before the format strings of the functions).
+ */
+/* A character of the menu scenes (func_151E7F60). */
+typedef struct {
+    f32 unk0; /* scale */
+    s8 unk4; /* y offset */
+    u8 unk5; /* spawn type */
+    u8 unk6;
+    u8 pad7;
+} Entry151E7F60;
+
+/* Team layout of a mode (D_800AB710[ModeEntry.unk5]) */
+typedef struct {
+    /* 0x0 */ s8 teamCount;
+    /* 0x1 */ s8 minSlots;    /* bounds on teamCount * team size, with fewer than 3 players */
+    /* 0x2 */ s8 maxSlots;
+    /* 0x3 */ s8 teamMax;     /* players allowed per team */
+    /* 0x4 */ s8 minSlots3;   /* the same, with 3 or more players */
+    /* 0x5 */ s8 maxSlots3;
+    /* 0x6 */ s8 teamMax3;
+    /* 0x7 */ s8 unk7;        /* if nonzero: team 1's size, and the cap of teams 1-3 */
+    /* 0x8 */ s8 teamColor[4];
+} TeamSetup;
+
+/* Cue table row: func_1501D348(unk0, unk2 or unk3). */
+struct Struct151E4314 {
+    s16 unk0;
+    s8 unk2;
+    s8 unk3;
+};
+
+/* menu 1: maps the stop unk2C to its menu 1 order (func_151E50C8) */
+static const u8 D_800AB570[10] = { 0, 5, 3, 1, 4, 6, 2, 7, 8, 9 };
+static const Entry151E7F60 D_800AB57C[22] = {
+    { 0.07f, 0, 128, 4 },
+    { 0.08f, 0, 176, 37 },
+    { 0.07f, 0, 117, 3 },
+    { 0.08f, 0, 177, 38 },
+    { 0.07f, 0, 59, 1 },
+    { 0.07f, 0, 152, 2 },
+    { 0.07f, 0, 136, 11 },
+    { 0.055f, 0, 144, 12 },
+    { 0.055f, 0, 144, 13 },
+    { 0.055f, 0, 144, 14 },
+    { 0.046f, -1, 83, 9 },
+    { 0.07f, 0, 156, 24 },
+    { 0.055f, 3, 155, 35 },
+    { 0.055f, 3, 154, 36 },
+    { 0.055f, 0, 144, 15 },
+    { 0.07f, 0, 0, 0 },
+    { 0.07f, 0, 150, 16 },
+    { 0.07f, 0, 157, 32 },
+    { 0.07f, 0, 159, 33 },
+    { 0.07f, 0, 160, 34 },
+    { 0.07f, 0, 178, 39 },
+    { 0.07f, 0, 180, 40 },
+};
+/* team colours (RGB) */
+const u8 D_800AB62C[10][3] = {
+    { 0xFF, 0x37, 0x37 },
+    { 0x20, 0x55, 0xFF },
+    { 0x78, 0xFF, 0x16 },
+    { 0xFF, 0xB1, 0x1E },
+    { 0xFF, 0xFF, 0xFF },
+    { 0x40, 0x40, 0xFF },
+    { 0xFF, 0xFF, 0xFF },
+    { 0xFF, 0xFF, 0xFF },
+    { 0xFF, 0xFF, 0xFF },
+    { 0xFF, 0xFF, 0xFF },
+};
+/* option descriptors of func_151E3344 (indexed by descOff) */
+static const s8 D_800AB64C[64] = {
+    2, 3, 4, 5, 6, 127, -53, 123, -61, 125, -64, 126, 10, 126, -55, 122,
+    -54, 126, 13, 14, 15, -1, -19, 21, 22, 25, 23, 24, 26, 27, 127, 2,
+    28, 4, 29, 9, 124, -56, 127, 31, 32, 33, -6, 35, 36, 37, 38, 39,
+    -57, 127, -65, 122, -62, 43, 44, -1, -17, -1, -16, -63, 127, 0, 0, 0,
+};
+/* multiplayer game-mode table */
+static const ModeEntry D_800AB68C[13] = {
+    { 22, 26, 0, 0, 0, 0, 1, 0 },
+    { 22, 36, 1, -8, 1, 1, 8, 0 },
+    { 22, 63, 3, 4, 5, 5, 9, 0 },
+    { 43, 45, 4, -1, -1, -1, 3, 0 },
+    { 47, 52, 4, -2, -1, -1, 3, 0 },
+    { 45, 48, 4, -3, -1, -1, 3, 0 },
+    { 41, 26, 4, -4, -1, -1, 1, 0 },
+    { 39, 63, 4, -5, -1, -1, 3, 0 },
+    { 22, 43, 5, 2, 3, 4, 4, 0 },
+    { 43, 45, 6, 3, 2, 3, 4, 0 },
+    { 45, 48, 7, 3, 4, 2, 4, 0 },
+    { 35, 51, 8, -6, -1, -2, 11, 0 },
+    { 37, 51, 9, -6, -1, -2, 11, 0 },
+};
+static const TeamSetup D_800AB710[5] = {
+    { 4, 0, 8, 2, 0, 4, 1, 0, { 0, 1, 2, 3 } },
+    { 2, 4, 8, 2, 4, 4, 2, 0, { 0, 1, -1, -1 } },
+    { 2, 0, 12, 8, 0, 12, 8, 2, { 9, 5, -1, -1 } },
+    { 2, 0, 12, 8, 0, 4, 2, 0, { 4, 5, -1, -1 } },
+    { 2, 0, 12, 8, 0, 8, 2, 2, { 7, 8, -1, -1 } },
+};
+/* team size limits per player count (row: D_8008FEE4) */
+static const s8 D_800AB74C[2][4] = {
+    { 10, 8, 4, 4 },
+    { 8, 4, 4, 4 },
+};
+/* per mode: option mask and flags */
+static const s32 D_800AB754[10] = { 0x3001C, 0x3404C, 0x36008, 0x7000C, 0x3004C, 0x50008, 0x3000C, 0x70008, 0x10084, 0x10084 };
+/* per mode: D_8008FDC0 */
+static const s16 D_800AB77C[10] = { 0x15, 0xC14, 0x1C, 0x4014, 0xC14, 0x54, 0x114, 0xA014, 0x94, 0x94 };
+/* per mode: D_8008FDBC */
+static const s16 D_800AB790[10] = { 0x100, 0x0, 0xB, 0x300, 0x0, 0x21, 0x0, 0x0, 0x100, 0x140 };
+/* cue per mode (ModeEntry.unk6), menu 0 */
+static const struct Struct151E4314 D_800AB7A4[6] = {
+    { 26, 1, 1 },
+    { 36, 1, 1 },
+    { 45, 1, 3 },
+    { 43, 1, 2 },
+    { 48, 3, 4 },
+    { 63, 1, 3 },
+};
+/* cue per mode, menu 1 */
+static const struct Struct151E4314 D_800AB7BC[6] = {
+    { 26, 2, 3 },
+    { 36, 2, 2 },
+    { 48, 1, 5 },
+    { 45, 2, 4 },
+    { 43, 4, 3 },
+    { 63, 2, 4 },
+};
+
 /* .data, linked at 0x8008FD70..0x8008FFC0. IDO keeps the definition order, function statics included. */
 s8 D_8008FD70 = 0;
 u8 D_8008FD74 = 8;
@@ -144,16 +275,6 @@ extern s8 D_800E0A85;
 extern u8 D_800E0A98;
 extern s8 D_800E0A99;
 
-extern char D_800AB7D4[];
-extern char D_800AB7DC[];
-extern char D_800AB7E0[];
-extern char D_800AB7E4[];
-extern char D_800AB7E8[];
-extern char D_800AB7EC[];
-extern char D_800AB7F0[];
-extern char D_800AB7F4[];
-extern char D_800AB7F8[];
-extern char D_800AB7FC[];
 
 /*
  * Pause menu, run every frame: opens on START from an allowed controller, advances the play-time
@@ -225,7 +346,7 @@ void func_151DDC20(void) {
         }
         seconds = D_8008FD78 / 60;
         func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
-        func_15042D94(135, timerY, 0x80, D_800AB7D4, seconds / 60, seconds % 60);
+        func_15042D94(135, timerY, 0x80, "%d:%02d", seconds / 60, seconds % 60);
     }
     if (D_8008FEF0 > 0) {
         D_8008FEF0--;
@@ -274,18 +395,18 @@ void func_151DDC20(void) {
         if (reducedMenu != 0) {
             textY = menuY + 115;
             D_8008FE2C = 0;
-            func_15042D94(148, textY, 1, D_800AB7DC, 0xD);
+            func_15042D94(148, textY, 1, "#", 0xD);
         } else {
             textY = menuY + 115;
-            func_15042D94(148, textY, 1, D_800AB7E0, 0x1A);
+            func_15042D94(148, textY, 1, "#", 0x1A);
             if (D_8008FE2C < numOptions) {
-                func_15042D94(213, textY, 1, D_800AB7E4, (D_8008FE2C == 0) + 0xC);
+                func_15042D94(213, textY, 1, "#", (D_8008FE2C == 0) + 0xC);
             }
             func_150432FC(148, menuY + 85);
             if (numOptions == D_8008FE2C) {
-                func_15042E3C(D_800AB7E8, 0x32);
+                func_15042E3C("#", 0x32);
             } else if (numOptions < D_8008FE2C) {
-                func_15042E3C(D_800AB7EC, 0x33);
+                func_15042E3C("#", 0x33);
             }
         }
         func_150432FC(83, textY);
@@ -294,11 +415,11 @@ void func_151DDC20(void) {
                 i = 1;
                 if (numOptions == 3) {
                     func_150432FC(83, menuY + 99);
-                    func_15042E3C(D_800AB7F0, (D_8008FE2C == 1) + 0x21);
+                    func_15042E3C("#", (D_8008FE2C == 1) + 0x21);
                     i = 2;
                     func_150432FC(83, menuY + 130);
                 }
-                func_15042E3C(D_800AB7F4, (i == D_8008FE2C) + 0xE);
+                func_15042E3C("#", (i == D_8008FE2C) + 0xE);
             }
             if (D_800E0B9A & START_BUTTON) {
                 D_8008FEF0 = 5;
@@ -317,8 +438,8 @@ void func_151DDC20(void) {
                 sfx = 0x500; /* confirm */
             }
         } else {
-            func_15042D94(108, textY, 1, D_800AB7F8, D_8008FD98 + 0x1F);
-            func_15042D94(188, textY, 1, D_800AB7FC, 0x1E - D_8008FD98);
+            func_15042D94(108, textY, 1, "#", D_8008FD98 + 0x1F);
+            func_15042D94(188, textY, 1, "#", 0x1E - D_8008FD98);
             if (D_800E0B9A & A_BUTTON) {
                 if (D_8008FD98 != 0) {
                     D_800E0B94 = 7;
@@ -447,7 +568,6 @@ void func_151DE8E8(void) {
 #define MENU_CLEFT  0x40 /* C-left */
 #define MENU_CRIGHT 0x80 /* C-right */
 
-extern char D_800AB850[];
 extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
 
 s8 D_8008FEF8 = 0;
@@ -681,7 +801,6 @@ void func_151DE8F0(void) {
     }
 }
 
-extern char D_800AB800[];
 
 /* Menu page for unk2C == 1: fades in and out, toggling D_8008FEF8 and object 9's animation (0xE/0xF) each fade-out. */
 void func_151DF1BC(void) {
@@ -762,7 +881,7 @@ void func_151DF1BC(void) {
         D_8008FDD4->input &= ~MENU_BACK;
         if (D_8008FEF8 != 0) { // matching: redundant re-test; IDO reloads D_8008FEF8 here
             func_1504332C(0xFF, 0, 0, alpha);
-            func_15042D94(0x94, 0x14, 0x81, D_800AB800, 0x10);
+            func_15042D94(0x94, 0x14, 0x81, "#", 0x10);
         }
         D_800BE9EC = 0;
         if (D_800E9D00 & 0x400000) {
@@ -774,8 +893,8 @@ void func_151DF1BC(void) {
     }
 }
 
-extern s8 D_800AB804[];
-extern char D_800AB810[];
+/* per row of the func_151DF574 list: its number of entries */
+static const s8 D_800AB804[9] = { 4, 9, 10, 9, 5, 10, 5, 14, 5 };
 
 s8 D_8008FF00 = 0;
 u8 D_8008FF04 = 0;
@@ -968,7 +1087,7 @@ void func_151DF574(void) {
         sfx = 0;
     }
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-    func_15042D94(0x94, 0x4D, 0x81, D_800AB810, D_8008FF00 + 0x42);
+    func_15042D94(0x94, 0x4D, 0x81, "#", D_8008FF00 + 0x42);
     for (j = 0, i = 0; i < count; i++) {
         while (!((1 << j) & mask)) {
             j++;
@@ -1066,15 +1185,6 @@ draw_rows: // matching: unused label splits the basic block for as1
 }
 
 /* Saved-record slot (D_800BE3F8[]); see game_33990.c */
-extern char D_800AB814[];
-extern char D_800AB818[];
-extern char D_800AB828[];
-extern char D_800AB82C[];
-extern char D_800AB830[];
-extern char D_800AB834[];
-extern char D_800AB838[];
-extern char D_800AB83C[];
-extern char D_800AB840[];
 
 /* Menu page for unk2C == 3..5: shows saved record slot unk2C - 3 (score, h:m:s time) with play/erase options. */
 void func_151DFF38(void) {
@@ -1117,7 +1227,7 @@ void func_151DFF38(void) {
             func_150432BC(0.75f);
             y = 2;
         }
-        func_15042D94(0x70, y + 0x33, 0, D_800AB814, score);
+        func_15042D94(0x70, y + 0x33, 0, "%d", score);
         func_150432BC(1.0f);
         {
             u32 time;
@@ -1126,25 +1236,25 @@ void func_151DFF38(void) {
             time = entry->playTime;
             seconds = time % 60;
             time /= 60;
-            func_15042D94(0xA4, 0x33, 0, D_800AB818, time / 60, time % 60, seconds);
+            func_15042D94(0xA4, 0x33, 0, "%d:%02d:%02d", time / 60, time % 60, seconds);
         }
     }
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
     if (entry->sequence >= 0) {
-        func_15042D94(0x94, 0xAF, 1, D_800AB828, 0x1A);
+        func_15042D94(0x94, 0xAF, 1, "#", 0x1A);
         func_150432FC(0x58, 0xAF);
         if (D_8008FE2C < 2) {
-            func_15042E3C(D_800AB82C, (D_8008FE2C == 0) + 0x16);
+            func_15042E3C("#", (D_8008FE2C == 0) + 0x16);
         } else {
-            func_15042D94(0x94, 0x91, 1, D_800AB830, 0x19);
+            func_15042D94(0x94, 0x91, 1, "#", 0x19);
         }
     } else {
-        func_15042D94(0x94, 0x6E, 1, D_800AB834, 0x31);
+        func_15042D94(0x94, 0x6E, 1, "#", 0x31);
     }
     func_150432FC(0xD0, 0xAF);
     if (D_8008FE2C < 2) {
         if (entry->sequence >= 0) {
-            func_15042E3C(D_800AB838, (D_8008FE2C != 0) + 0x18);
+            func_15042E3C("#", (D_8008FE2C != 0) + 0x18);
         }
         if (D_8008FE2C == 0) {
             if (D_8008FDD4->input & MENU_ACCEPT) {
@@ -1164,8 +1274,8 @@ void func_151DFF38(void) {
             sfx = 0x500;
         }
     } else {
-        func_15042D94(0x6C, 0xAF, 1, D_800AB83C, (D_8008FE2C == 3) + 0x1F);
-        func_15042D94(0xBC, 0xAF, 1, D_800AB840, (D_8008FE2C == 2) + 0x1D);
+        func_15042D94(0x6C, 0xAF, 1, "#", (D_8008FE2C == 3) + 0x1F);
+        func_15042D94(0xBC, 0xAF, 1, "#", (D_8008FE2C == 2) + 0x1D);
         if (D_8008FDD4->input & MENU_ACCEPT) {
             if (D_8008FE2C == 3) {
                 D_8008FE2C = 0;
@@ -1192,9 +1302,6 @@ void func_151DFF38(void) {
     }
 }
 
-extern char D_800AB844[];
-extern char D_800AB848[];
-extern char D_800AB84C[];
 
 /* Mode-select page: up/down picks a game mode of category unk2C; accept opens its setup (page 4). */
 void func_151E0424(void) {
@@ -1253,9 +1360,9 @@ void func_151E0424(void) {
             func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
         }
         func_1504332C(0xFF, 0xFF, 0xFF, titleAlpha);
-        func_15042D94(0x94, 0x7E, 1, D_800AB844, 0x1A);
+        func_15042D94(0x94, 0x7E, 1, "#", 0x1A);
         func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-        func_15042D94(0xD5, 0x7E, 1, D_800AB848, (D_8008FE2C == 1) + 0x1B);
+        func_15042D94(0xD5, 0x7E, 1, "#", (D_8008FE2C == 1) + 0x1B);
         if ((alpha == 0xFF) && (D_8008FE2C == 0)) {
             if ((modeCount != 5) || ((modeCount == 5) && (D_8008FDE8 == 0.0f))) { // matching: redundant == 5 test
                 flags = D_8008FDD4->input;
@@ -1293,7 +1400,7 @@ void func_151E0424(void) {
                 if ((i == cursor) && (D_8008FE2C == 0)) {
                     value++;
                 }
-                func_15042E3C(D_800AB84C, value);
+                func_15042E3C("#", value);
                 x += 28;
             }
         } else {
@@ -1342,7 +1449,7 @@ void func_151E09DC(void) {
     s32 alpha;
 
     func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
-    func_15042D94(0x94, 0x7E, 1, D_800AB850, 0x1A);
+    func_15042D94(0x94, 0x7E, 1, "#", 0x1A);
     func_15042D78(0x81);
 
     options = D_800AB754[D_800AB68C[D_8008FDD4->selection].mode];
@@ -1378,7 +1485,6 @@ void func_151E09DC(void) {
     D_8008FDD4->input &= ~MENU_BACK;
 }
 
-extern char D_800AB854[];
 
 /*
  * Player-join page: controllers 2-4 press Start to join or leave (D_8008FE44 lists the players).
@@ -1463,7 +1569,7 @@ void func_151E0B70(void) {
         if (D_800E0BA0[0] == NULL) {
             func_151E7F60(0, D_800E0B90[0]);
         }
-        func_15042D94(0x94, 0x9B, 1, D_800AB854, 0x1A);
+        func_15042D94(0x94, 0x9B, 1, "#", 0x1A);
         D_800E0B8C = 1;
     }
     for (i = 1; i < 4; i++) {
@@ -1549,15 +1655,11 @@ void func_151E0B70(void) {
     D_8008FDD4->input &= ~MENU_BACK;
 }
 
-extern s8 D_800AB74C[][4];
-extern char D_800AB858[];
-extern char D_800AB85C[];
-extern char D_800AB860[];
 
 /* Computer-player page: up/right and down/left change the number of CPU players D_8008FDA0 (list entries of -2). */
 void func_151E1214(void) {
     s32 alpha;
-    s8 *limits;
+    const s8 *limits;
     s32 limit;
     s32 i;
     s32 x;
@@ -1625,15 +1727,15 @@ void func_151E1214(void) {
             D_800E0A88 = func_151E4314;
         }
     }
-    func_15042D94(0x94, 0x55, 1, D_800AB858, 0x1A);
+    func_15042D94(0x94, 0x55, 1, "#", 0x1A);
     x = 161 - D_8008FE40 * 13 - D_8008FDA0 * 10;
     for (i = 0; i < limit; i++) {
         func_150432FC(x, 0x82);
         if (D_8008FE44[i] >= 0) {
-            func_15042E3C(D_800AB85C, D_8008FE44[i] + 1);
+            func_15042E3C("#", D_8008FE44[i] + 1);
             x += 26;
         } else {
-            func_15042E3C(D_800AB860, 5);
+            func_15042E3C("#", 5);
             x += 20;
         }
     }
@@ -1645,33 +1747,6 @@ void func_151E1214(void) {
 
 Offs4 D_8008FF34 = { { -12, -12, -12, -12 } }; /* per-team x jitter for stacked names */
 s8 D_8008FF38[4] = { 0, 2, 3, 4 }; /* indexed from 1 through D_8008FF37 */
-/* Team layout of a mode (D_800AB710[ModeEntry.unk5]) */
-typedef struct {
-    /* 0x0 */ s8 teamCount;
-    /* 0x1 */ s8 minSlots;    /* bounds on teamCount * team size, with fewer than 3 players */
-    /* 0x2 */ s8 maxSlots;
-    /* 0x3 */ s8 teamMax;     /* players allowed per team */
-    /* 0x4 */ s8 minSlots3;   /* the same, with 3 or more players */
-    /* 0x5 */ s8 maxSlots3;
-    /* 0x6 */ s8 teamMax3;
-    /* 0x7 */ s8 unk7;        /* if nonzero: team 1's size, and the cap of teams 1-3 */
-    /* 0x8 */ s8 teamColor[4];
-} TeamSetup;
-
-extern TeamSetup D_800AB710[];
-extern char D_800AB864[];
-extern char D_800AB868[];
-extern char D_800AB86C[];
-extern char D_800AB870[];
-extern char D_800AB874[];
-extern char D_800AB878[];
-extern char D_800AB87C[];
-extern char D_800AB880[];
-extern char D_800AB884[];
-extern char D_800AB88C[];
-extern char D_800AB890[];
-extern char D_800AB894[];
-extern char D_800AB898[];
 
 /*
  * Team page: left/right moves each player between the D_800E0BB0 teams, up/down sets the extra
@@ -1679,7 +1754,7 @@ extern char D_800AB898[];
  */
 void func_151E1744(void) {
     s32 alpha;
-    TeamSetup *setup;
+    const TeamSetup *setup;
     s32 i;
     s8 special;
     s8 minSlots;
@@ -1871,7 +1946,7 @@ void func_151E1744(void) {
     D_8008FDD4->input &= ~MENU_BACK;
     func_1504332C(0xFF, 0xFF, 0, alpha);
     func_150432FC(0x94, ((D_800E0BB0 == 4) << 5) + 0x78);
-    func_15042E3C(D_800AB864, 0x1A);
+    func_15042E3C("#", 0x1A);
     for (i = 0; i < D_800E0BB0; i++) {
         x = teamX[i];
         old = D_800E0BC8[i] * 3;
@@ -1879,18 +1954,18 @@ void func_151E1744(void) {
         func_1504332C(D_800AB62C[0][old], D_800AB62C[0][old + 1], D_800AB62C[0][old + 2], alpha);
         func_150432FC(x, 0x50);
         if (D_800E0BC8[i] == 4) {
-            func_15042E3C(D_800AB868, 9);
+            func_15042E3C("#", 9);
         } else if (D_800E0BC8[i] == 5) {
-            func_15042E3C(D_800AB86C, 8);
+            func_15042E3C("#", 8);
         } else if (D_800E0BC8[i] == 7) {
-            func_15042E3C(D_800AB870, 0xA);
+            func_15042E3C("#", 0xA);
         } else if (D_800E0BC8[i] == 8) {
-            func_15042E3C(D_800AB874, 0xB);
+            func_15042E3C("#", 0xB);
         } else if (D_800E0BC8[i] == 9) {
-            func_15042E3C(D_800AB878, 0x34);
+            func_15042E3C("#", 0x34);
         } else {
             old = (D_800E0BC8[i] < 4) ? 0x59 : 0x4C;
-            func_15042E3C(D_800AB87C, D_800E0BC8[i] + old);
+            func_15042E3C("#", D_800E0BC8[i] + old);
         }
     }
     hasExtra = func_151E24F0(extra);
@@ -1908,21 +1983,21 @@ void func_151E1744(void) {
         }
         func_150432FC(x, y);
         if (D_8008FE44[i] >= 0) {
-            func_15042E3C(D_800AB880, D_8008FE44[i] + 1);
+            func_15042E3C("#", D_8008FE44[i] + 1);
             if (hasExtra != 0) {
-                func_15042E3C(D_800AB884, extra[i] + 1);
+                func_15042E3C("    :%d", extra[i] + 1);
             }
         } else {
-            func_15042E3C(D_800AB88C, 5);
+            func_15042E3C("#", 5);
         }
     }
     if (sfx != 0) {
         func_10010F30(sfx, sfx == 0x4FF ? 0x4650 : 0x7D00, 0x40, 0, 0);
     }
     if (D_800E0BB0 == 2) {
-        func_15042D94(0x94, 0xB4, 0x81, D_800AB890, 0x3A);
-        func_15042D94(0x7B, 0xB4, 0x81, D_800AB894, 0x3B);
-        func_15042D94(0xAD, 0xB4, 0x81, D_800AB898, 0x3C);
+        func_15042D94(0x94, 0xB4, 0x81, "#", 0x3A);
+        func_15042D94(0x7B, 0xB4, 0x81, "#", 0x3B);
+        func_15042D94(0xAD, 0xB4, 0x81, "#", 0x3C);
     }
 }
 
@@ -2024,14 +2099,6 @@ void func_151E2404(void) {
 
 /* ---- formerly game_20F9A0.c ---- */
 
-/* Cue table row: func_1501D348(unk0, unk2 or unk3). */
-struct Struct151E4314 {
-    s16 unk0;
-    s8 unk2;
-    s8 unk3;
-};
-
-extern struct Struct151E4314 D_800AB7A4[];
 
 /*
  * For modes whose entry has unk8 == 8: finds connected controllers (D_800BE740) that are not yet in the
@@ -2110,17 +2177,6 @@ s32 func_151E24F0(s32 *out) {
     return 0;
 }
 
-typedef struct {
-    f32 unk0;
-    s8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 pad7;
-} Entry151E7F60;
-
-extern Entry151E7F60 D_800AB57C[];
-extern s16 D_800AB77C[];
-extern s16 D_800AB790[];
 extern s8 D_800E0AB0[];
 extern u8 D_800E0AA8;
 extern s8 D_800E0AA9;
@@ -2135,7 +2191,7 @@ void func_151E2834(void) {
     s32 usedTeams;
     s32 playerMask;
     s32 v;
-    ModeEntry *entry;
+    const ModeEntry *entry;
 
     entry = &D_800AB68C[D_8008FDD4->selection];
     if (D_800E0BE0[3] < 3) {
@@ -2394,20 +2450,8 @@ void func_151E327C(void) {
     func_151E7EF8();
 }
 
-extern s8 D_800AB64C[];
 extern s16 D_800E0A82;
 extern s8 D_800E0A84;
-extern char D_800AB89C[];
-extern char D_800AB8A0[];
-extern char D_800AB8A4[];
-extern char D_800AB8A8[];
-extern char D_800AB8AC[];
-extern char D_800AB8B0[];
-extern char D_800AB8B4[];
-extern char D_800AB8B8[];
-extern char D_800AB8BC[];
-extern char D_800AB8C4[];
-extern char D_800AB8C8[];
 
 /*
  * Draws the option menu (D_800E0BE0 values described by D_800AB64C) for the options in optionMask,
@@ -2559,7 +2603,7 @@ void func_151E3344(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fa
                 func_15042E3C((char *)D_800E0BD8[D_800AB64C[descOff]]);
             } else if (D_800AB64C[descOff] < -1) {
                 func_150432FC(x, y + 9);
-                func_15042E3C(D_800AB89C, -D_800AB64C[descOff]);
+                func_15042E3C("#", -D_800AB64C[descOff]);
                 func_150432FC(x, y + 22);
             }
             if (i == D_8008FE34 && D_8008FE38 <= 0.0f) {
@@ -2574,7 +2618,7 @@ void func_151E3344(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fa
             }
             if (kind < 0) {
                 if (kind < -1) {
-                    func_15042E3C(D_800AB8A0, value - kind);
+                    func_15042E3C("#", value - kind);
                 }
             } else {
                 switch (kind) {
@@ -2582,28 +2626,28 @@ void func_151E3344(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fa
                         func_15042E3C((char *)D_800E0BD8[value != 0]);
                         break;
                     case 0x7E:
-                        func_15042E3C(D_800AB8A4, value);
+                        func_15042E3C("%d", value);
                         break;
                     case 0x7A:
                         if (value == 0) {
-                            func_15042E3C(D_800AB8A8, D_800E0BD8[0x73]);
+                            func_15042E3C("%s", D_800E0BD8[0x73]);
                         } else {
-                            func_15042E3C(D_800AB8AC, value);
+                            func_15042E3C("%d", value);
                         }
                         break;
                     case 0x7B:
                         if (D_800E0BE0[3] >= 3) {
-                            func_15042E3C(D_800AB8B0, D_800E0BD8[45]);
+                            func_15042E3C("%s", D_800E0BD8[45]);
                         } else {
-                            func_15042E3C(D_800AB8B4, value);
+                            func_15042E3C("%d", value);
                         }
                         break;
                     case 0x7C:
-                        func_15042E3C(D_800AB8B8, value * 1000);
+                        func_15042E3C("%d", value * 1000);
                         break;
                     case 0x7D:
                         if (value >= 3) {
-                            func_15042E3C(D_800AB8BC, value, D_800E0BD8[0x72]);
+                            func_15042E3C("%d %s", value, D_800E0BD8[0x72]);
                         } else {
                             func_15042E3C((char *)D_800E0BD8[0x73]);
                         }
@@ -2743,8 +2787,8 @@ void func_151E3344(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fa
         arrowY = (f32)(D_8008FDE4 * 34 + 70) + D_8008FDE8 * ((selRow - D_8008FDE4) * 34);
         arrowX += 20.0f * sinf(D_8008FDE8 * 3.141499996f);
         func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-        func_15042D94(arrowX + 148, arrowY, 1, D_800AB8C4, 0x1A);
-        func_15042D94(148 - arrowX, arrowY, 1, D_800AB8C8, 0x1A);
+        func_15042D94(arrowX + 148, arrowY, 1, "#", 0x1A);
+        func_15042D94(148 - arrowX, arrowY, 1, "#", 0x1A);
         if (selRow != D_8008FDE4) {
             D_8008FDE8 += 0.1000000015f * D_800BE9E4;
             if (D_8008FDE8 >= 1.0f) {
@@ -2775,7 +2819,7 @@ void func_151E4264(void) {
 
 /* Plays the mode's intro cue (entry unk6) and waits in state 5, or sets up the match directly. */
 void func_151E4314(void) {
-    struct Struct151E4314 *entry;
+    const struct Struct151E4314 *entry;
     s32 cueIdx;
     s32 param;
 
@@ -2796,20 +2840,6 @@ void func_151E4314(void) {
         func_151E2834();
     }
 }
-extern char D_800AB8CC[];
-extern char D_800AB8D0[];
-extern char D_800AB8D4[];
-extern char D_800AB8E0[];
-extern char D_800AB8E4[];
-extern char D_800AB8E8[];
-extern char D_800AB8EC[];
-extern char D_800AB8F0[];
-extern char D_800AB8F4[];
-extern char D_800AB8F8[];
-extern char D_800AB8FC[];
-extern char D_800AB900[];
-extern char D_800AB904[];
-extern struct Struct151E4314 D_800AB7BC[];
 
 /* State 6: results screen; plays the outcome cue, draws ranks and the continue/quit choice. */
 void func_151E43DC(void) {
@@ -2854,8 +2884,8 @@ void func_151E43DC(void) {
             }
             D_800E0BDC = 0xFF - D_8008FDCC;
             func_1504332C(0xFF, 0xFF, 0, D_8008FDCC);
-            func_15042D94(148, 20, 0x81, D_800AB8CC, 0x4B);
-            func_15042E3C(D_800AB8D0);
+            func_15042D94(148, 20, 0x81, "#", 0x4B);
+            func_15042E3C(" ");
             func_1504332C(0xFF, 0xFF, 0xFF, (u8)D_8008FDCC);
             func_150432FC(148, 50);
             if (D_8008FD80 == 4) {
@@ -2867,11 +2897,11 @@ void func_151E43DC(void) {
                     for (i = 0; i < D_8008FD88; i++) {
                         if (D_8008FE44[i] >= 0) {
                             count = D_800E0AC0[i];
-                            func_15042D94(88, y, 0x81, D_800AB8D4, D_800E0BD8[count + 0x5D]);
+                            func_15042D94(88, y, 0x81, "       : %s", D_800E0BD8[count + 0x5D]);
                             func_150916B4(0x8A, y, D_800E0C18[i], 0x80);
                             func_150916B4(0xBC, y, D_800E0C10[i], 0x80);
-                            func_15042D94(168, y, 0x80, D_800AB8E0);
-                            func_15042D94(214, y, 0x80, D_800AB8E4);
+                            func_15042D94(168, y, 0x80, "(");
+                            func_15042D94(214, y, 0x80, ")");
                             y += 0x12;
                         }
                     }
@@ -2891,16 +2921,16 @@ void func_151E43DC(void) {
                 }
                 n = n >= 2;
                 if (n) {
-                    func_15042D94(148, 50, 0x81, D_800AB8E8, 0x58);
+                    func_15042D94(148, 50, 0x81, "#", 0x58);
                 } else if (count == 1) {
-                    func_15042D94(118, 50, 0x81, D_800AB8EC, 0x52);
+                    func_15042D94(118, 50, 0x81, "#", 0x52);
                     count = (D_800E0AC0[D_800E0C00[0]] == 1) ? 0x56 : 0x57;
-                    func_15042D94(178, 50, 0x81, D_800AB8F0, count);
+                    func_15042D94(178, 50, 0x81, "#", count);
                 } else {
                     for (i = 0; i < 4; i++) {
                         if (D_800E0AC0[i] == 1) {
-                            func_15042D94(113 - ((D_800E0BC8[i] == 4) ? -12 : 0), 50, 0x81, D_800AB8F4, D_800E0BC8[i] + 0x4C);
-                            func_15042D94(((D_800E0BC8[i] == 4) ? 21 : 0) + 183, 50, 0x81, D_800AB8F8, 0x56);
+                            func_15042D94(113 - ((D_800E0BC8[i] == 4) ? -12 : 0), 50, 0x81, "#", D_800E0BC8[i] + 0x4C);
+                            func_15042D94(((D_800E0BC8[i] == 4) ? 21 : 0) + 183, 50, 0x81, "#", 0x56);
                             i = 4; // matching: ends the loop; `break` schedules differently
                         }
                     }
@@ -2912,9 +2942,9 @@ void func_151E43DC(void) {
                 func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
             }
             D_8008FF3C = cur;
-            func_15042D94(83, 180, 1, D_800AB8FC, (D_8008FE2C == 0) + 0x21);
-            func_15042D94(213, 180, 1, D_800AB900, (D_8008FE2C == 1) + 0xE);
-            func_15042D94(148, 180, 1, D_800AB904, 0x1A);
+            func_15042D94(83, 180, 1, "#", (D_8008FE2C == 0) + 0x21);
+            func_15042D94(213, 180, 1, "#", (D_8008FE2C == 1) + 0xE);
+            func_15042D94(148, 180, 1, "#", 0x1A);
             if ((D_800E0B9A & 0x8000) || D_800E0A90 > 2400) {
                 if (D_800C35EA[0] == 1 && func_151F2CDC() == 1) {
                     func_151F2D6C(0, 0x2DE0);
@@ -3096,7 +3126,6 @@ void func_151E5034(void) {
     D_8008FDD4->unk8 = 0.0f;
 }
 
-extern u8 D_800AB570[];
 
 /* Menu init: default option values, text bank reset, D_8008FDD4 state, then state 11. */
 void func_151E50C8(void) {
@@ -3774,8 +3803,24 @@ s8 D_8008FF80[6] = { 30, 100, 80, 60, 60, 60 };
 u8 D_8008FF88[8] = { 17, 18, 19, 20, 21, 22, 23, 24 };
 f32 D_8008FF90[8] = { 0.012f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f };
 u8 D_8008FFB0[2][6] = { { 1, 0xFF, 4, 6, 8, 3 }, { 0xFF, 0xFF, 0xFF, 0xFF, 9, 5 } };
-extern Snd151E6C1C D_800AB908[];
-extern Snd151E6C1C D_800AB920[];
+static const Snd151E6C1C D_800AB908[6] = {
+    { 40, 41 },
+    { 38, 39 },
+    { 38, 39 },
+    { 38, 39 },
+    { 38, 39 },
+    { 38, 39 },
+};
+static const Snd151E6C1C D_800AB920[8] = {
+    { 41, 40 },
+    { 42, 43 },
+    { 42, 43 },
+    { 42, 43 },
+    { 42, 43 },
+    { 42, 43 },
+    { 42, 43 },
+    { 42, 43 },
+};
 
 #define UNK2AC_F32 (*(f32 *)&obj->focus.z) // an f32; structs.h declares Camera.unk2AC as s32
 
@@ -3802,7 +3847,7 @@ void func_151E6C1C(s32 index) {
     f32 z[16];
     s8 path[16];
     u8 *nodeTable;
-    Snd151E6C1C *sounds;
+    const Snd151E6C1C *sounds;
     WorldObject *r;
     WorldObject *r2;
     PathNode *node;
@@ -4208,7 +4253,12 @@ typedef struct {
     u8 pad7;
 } Pos151E7F60;
 
-extern Pos151E7F60 D_800AB940[];
+static const Pos151E7F60 D_800AB940[4] = {
+    { -30, -5, -52, 201 },
+    { -9, -5, -52, 192 },
+    { 11, -5, -52, 192 },
+    { 32, -5, -52, 179 },
+};
 
 /* Spawns the character D_800AB57C[charIdx] into slot slotIdx (replacing any previous one) at its D_800AB940 position. */
 void func_151E7F60(s32 slotIdx, s32 charIdx) {

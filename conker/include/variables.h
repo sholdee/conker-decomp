@@ -207,9 +207,6 @@ extern f32 D_8009F6C0; // 0.01745329238474369f
 
 /* 800B0000 */
 
-extern u8 D_800AB62C[][3]; // team colours (RGB)
-extern ModeEntry D_800AB68C[]; // multiplayer game-mode table
-extern s32 D_800AB754[];
 extern LevelHeader *D_800B0DF0;
 
 extern s32 D_800BE5D0;

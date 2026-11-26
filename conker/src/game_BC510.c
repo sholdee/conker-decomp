@@ -1540,7 +1540,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 s32 xh;
                 s32 yh;
                 Actor *other;
-                u8 *rgb;
+                const u8 *rgb;
 
                 if (j == i || j == skip) {
                     continue;
