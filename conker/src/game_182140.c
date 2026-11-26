@@ -12,11 +12,36 @@ typedef struct {
     s32 id[2];
 } SpriteListIds;
 
+extern CombineMode D_800A4AC8[];
+
+/* The render setup and reset display lists of the sprite object type (the object type table
+   D_8008B4D4 points to them). */
+Gfx D_8008AC70[] = {
+    gsDPPipeSync(),
+    gsDPSetAlphaCompare(G_AC_NONE),
+    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsSPEndDisplayList(),
+};
+Gfx D_8008AC98[] = {
+    gsDPPipeSync(),
+    gsDPSetTexturePersp(G_TP_PERSP),
+    gsDPSetDepthSource(G_ZS_PIXEL),
+    gsDPSetAlphaCompare(G_AC_NONE),
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPEndDisplayList(),
+};
+
+/* Defined in asm (0x22F788): the update callbacks mix return types and the message handlers take a u8
+   message id, so neither table has one C type that all its entries share. */
 extern s32 (*D_8008ACC8[])(ScreenSprite *);
 extern void (*D_8008AD04[])(ScreenSprite *, s32, u8);
-extern CombineMode D_800A4AC8[];
-extern SpriteListIds D_800A6030;
-extern IdList2 D_800A6038;
+
+/* The two sprite lists func_151555AC searches. */
+static const SpriteListIds D_800A6030 = { 93, 87 };
+
+/* The same two lists, for func_1515572C. */
+static const IdList2 D_800A6038 = { 93, 87 };
 
 /* Per-frame update of a sprite: runs its timer, its update callback and its fade-out; frees it when done. */
 void func_15154C90(ScreenSprite *sprite) {
