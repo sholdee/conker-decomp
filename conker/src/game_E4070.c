@@ -54,7 +54,7 @@ void func_150B6C90(void) {
     if (D_800D9894 != NULL) {
         func_1516972C(D_800D9894);
     }
-    D_800D9894 = (EffectHeader *)func_151A4FD0(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
+    D_800D9894 = func_151A4FD0(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
     D_800D9890 = 3;
     for (i = 0; i < 10; i++) {
         D_800D9898[i] = NULL;

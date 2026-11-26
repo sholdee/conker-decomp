@@ -30,11 +30,10 @@ typedef struct {
     Camera *player;
 } SightPanelMsg;
 
-/* Effect spawned by func_151CCE94; +0x20 holds the owning player. */
+/* Effect spawned by func_151CCE94: a func_151A4FD0 screen tint with the owning player as its extra data. */
 typedef struct {
-    EffectHeader header;
-    u8 pad10[0x10];
-    Camera *player;
+    /* 0x00 */ struct ScreenTint tint;
+    /* 0x20 */ Camera *player;
 } SightOwnedEffect;
 
 /* State of the lens effect (func_151CB110), stored at +0x18 of its object. */

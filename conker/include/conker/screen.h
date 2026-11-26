@@ -114,7 +114,7 @@ typedef struct {
 } FlashEffect;
 
 /* Full-screen tint effect: redraws a viewport's framebuffer modulated by a pulsing prim colour. */
-struct Obj151A4FD0 {
+struct ScreenTint {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 timer;       /* frames left; 0 = unlimited */
     /* 0x14 */ u8 type;         /* index into D_8008F900 */
@@ -202,12 +202,12 @@ void func_15182748(FlashEffect *effect);
 Gfx *func_15182768(Gfx *gfx, FlashEffect *effect, s16 view);
 
 /* game_1D2480.c */
-struct Obj151A4FD0 *func_151A4FD0(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19,
-                                  s32 extraSize);
-void func_151A5070(struct Obj151A4FD0 *effect);
-void func_151A5130(void *arg0, struct Obj151A4FD0 *effect, s16 arg2);
-Gfx *func_151A5170(Gfx *gfx, struct Obj151A4FD0 *effect, s32 arg2);
-void func_151A55D4(struct Obj151A4FD0 *effect, void *arg1, u8 arg2);
+/* returns the struct ScreenTint, followed by extraSize bytes of the caller's data */
+void *func_151A4FD0(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19, s32 extraSize);
+void func_151A5070(struct ScreenTint *effect);
+void func_151A5130(void *arg0, struct ScreenTint *effect, s16 arg2);
+Gfx *func_151A5170(Gfx *gfx, struct ScreenTint *effect, s32 arg2);
+void func_151A55D4(struct ScreenTint *effect, void *arg1, u8 arg2);
 void func_151A561C(s32 arg0, u8 arg1);
 
 /* game_1FFB70.c */

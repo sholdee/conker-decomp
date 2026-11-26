@@ -728,12 +728,12 @@ void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (effect->player == *msg) {
-            func_1516972C(&effect->header);
+            func_1516972C(&effect->tint.header);
         }
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->CameraPtr == effect->player) {
-            func_1516972C(&effect->header);
+            func_1516972C(&effect->tint.header);
         }
     }
 }
@@ -1111,7 +1111,7 @@ void func_151CCE94(Camera *player) {
 
     if (D_800BE616 != 0) {
         owner = player;
-        effect = (SightOwnedEffect *)func_151A4FD0(0, 0, 0, 0xFF, 0, player->CNumber, 1, 4);
+        effect = func_151A4FD0(0, 0, 0, 0xFF, 0, player->CNumber, 1, 4);
         if (effect != NULL) {
             memcpy(&effect->player, &owner, sizeof(owner));
         }
