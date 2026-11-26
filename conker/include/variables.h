@@ -371,9 +371,6 @@ extern u8  D_800DBFF6;
 extern u8  D_800DBFF7;
 
 extern f32 D_800DC004; // camera transition height (see func_15128030)
-extern Mtx  *D_800DC2A0[2]; // per framebuffer: one view matrix per view
-extern CamMsgQueue *D_800DC2B0; // one per camera
-extern ViewEnvelope D_800DC2C0[4]; // per-view camera wobble envelope (game_15ABA0.c)
 extern u8 D_800DCA20;
 extern f32 D_800DCA24;
 extern u8 D_800DCA28;

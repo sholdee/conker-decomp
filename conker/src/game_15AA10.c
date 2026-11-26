@@ -1,4 +1,9 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss. */
+CamMsgQueue *D_800DC2B0; // one per camera (allocated by game_32740.c)
+
 #include "functions.h"
 #include "variables.h"
 

@@ -124,8 +124,6 @@ void func_15096D08(void) {
     }
 }
 
-extern s32 D_800DC310[][0x1A];
-
 /*
  * Applies script command `command` with arguments args[2..] to actor `actorIndex`.
  * Fixed-point arguments are 16.16. Returns 1 for some commands, else 0.
@@ -254,7 +252,7 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
             func_1512D748(actor, args[2], args[3]);
             return 1;
         }
-        if (D_800DC310[actorIndex][0] == 5) {
+        if (D_800DC2C0[actorIndex].stage == 5) {
             func_1512D748(actor, args[2], args[3]);
             return 1;
         }

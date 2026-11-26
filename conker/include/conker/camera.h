@@ -430,6 +430,7 @@ void func_1512D238(void);
 void func_1512D2E4(Camera *camera, s32 index);
 void func_1512D2F8(Camera *camera);
 void func_1512D368(Camera *camera);
+extern Mtx *D_800DC2A0[2];
 
 /* game/done/game_15A830.c */
 void func_1512D380(Camera *camera);
@@ -442,11 +443,13 @@ void func_1512D560(Camera *camera, s32 type, void *arg);
 CamMsg *func_1512D604(); /* (Camera *camera): the definition has a second, scratch parameter */
 void func_1512D66C(Camera *camera);
 s32 func_1512D6B0(Camera *camera);
+extern CamMsgQueue *D_800DC2B0;
 
 /* game_15ABA0.c */
 void func_1512D6F0(Camera *view);
 void func_1512D748(Camera *view, s32 presetIndex, s32 mode);
 void func_1512D980(Camera *view);
+extern ViewEnvelope D_800DC2C0[4];
 
 /* game_15B200.c */
 void func_1512DD50(Camera *camera);

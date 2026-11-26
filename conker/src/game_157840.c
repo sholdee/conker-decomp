@@ -317,7 +317,7 @@ void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
     mid = (halfWidth * 3) / 4;
 
     for (i = start; i < halfWidth; i++) {
-        if (D_800BE628[arg0->CNumber].left < (f32)(screenX - i)) {
+        if (D_800BE628[arg0->CNumber].left < screenX - i) {
             {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
             zcode = arg0->HitsZBufferHoriDataPtr[screenX - i];
@@ -331,7 +331,7 @@ void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
         }
     }
     for (i = start; i < halfWidth; i++) {
-        if ((f32)(screenX + i) < D_800BE628[arg0->CNumber].right) {
+        if (screenX + i < D_800BE628[arg0->CNumber].right) {
             {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
             zcode = arg0->HitsZBufferHoriDataPtr[screenX + i];
