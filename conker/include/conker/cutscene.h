@@ -145,6 +145,9 @@ void cutscene_releaseSubtitle(SeqSubtitle *sub, s32 force);
 SeqSubtitle *cutscene_getSubtitleSlot(s32 track, s32 replaceOpen);
 s32 cutscene_releasePlayer(s32 scene);
 void cutscene_updateActors(void);
+/* Defined outside the C files; sequence.c uses them: */
+extern u64 D_800CBE10[0x400 / sizeof(u64)]; /* RSP dram stack of the graphics tasks (bss_800CBE10, a .bss slice of conker.us.yaml) */
+extern u8 ucode_ROM_START[];                 /* ROM start of the RSP microcodes (linker-defined, undefined_syms.us.txt) */
 
 /* game/Cutscene/StartCallback/startcallback.c */
 void cutscene_startCallback1(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
