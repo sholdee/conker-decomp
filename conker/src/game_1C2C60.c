@@ -1776,7 +1776,7 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
         motion.velocity.x = (px - actor->head.tmpl.pos.x) * speed;
         motion.velocity.y = (py - actor->head.tmpl.pos.y) * speed;
         motion.velocity.z = (pz - actor->head.tmpl.pos.z) * speed;
-        func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
+        func_15147DA0((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
         jet->scatterAccum -= 1.0f;
     } while (jet->scatterAccum > 1.0f);
 }
@@ -2330,7 +2330,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
                     motion.velocity.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
                     motion.gravity = func_150ADA68() * flame->scatter.unk38 + flame->scatter.unk34;
                     motion.alpha = func_150ADA68() * flame->scatter.unk3E + flame->scatter.unk3C;
-                    func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
+                    func_15147DA0((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
                 }
                 flame->scatterAccum -= 1.0f;
             } while (flame->scatterAccum > 1.0f);

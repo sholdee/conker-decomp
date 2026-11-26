@@ -125,7 +125,7 @@ void func_15147A30(EffectObj *obj) {
 /* Allocates an effect object with dataSize bytes of user data and header->itemCount items of itemSize bytes.
  * Returns it as void *: each caller keeps it in its own view of the object. */
 void *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
-                    s32 drawKind, s32 arg6, s32 arg7, EffectObjUnk60 *arg8, u8 arg9, s32 argA) {
+                    s32 drawKind, s32 arg6, s32 arg7, CollisionHit *hit, u8 arg9, s32 argA) {
     EffectObj *obj;
     u8 type;
     s32 itemsSize;
@@ -153,10 +153,10 @@ void *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 upda
     obj->head.updateKind2 = updateKind2;
     obj->head.drawKind = drawKind;
 
-    if (arg8 != NULL) {
-        obj->unk60 = *arg8;
+    if (hit != NULL) {
+        obj->collision = *hit;
     } else {
-        obj->unk60.unk1C = 0;
+        obj->collision.flags = 0;
     }
 
     obj->head.model.model = arg6;

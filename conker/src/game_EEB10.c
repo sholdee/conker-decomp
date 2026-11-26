@@ -14,7 +14,8 @@ void func_150C1660(f32 x, f32 y, f32 z, u8 arg3) {
 s32 func_150C16C0(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY,
                   f32 originZ, s32 angle, s32 baseAngle, f32 radius, s32 arg11, f32 arg12,
                   s32 arg13, u8 arg14) {
-    EffectTemplate20 spawn;
+    u8 pad[4]; // matching: frame size
+    EffectTemplate spawn;
     TrailMotion motion;
     TrailRender render;
     s32 count;

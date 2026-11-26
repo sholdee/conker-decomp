@@ -148,7 +148,7 @@ SurfaceTrail *func_1519F1C8(owner, side)
     config.color[0] = D_800AB414[colorIndex].r;
     config.color[1] = D_800AB414[colorIndex].g;
     config.color[2] = D_800AB414[colorIndex].b;
-    trail = func_15147A80(&header, sizeof(SurfaceTrailConfig), sizeof(SurfaceTrailPoint), 5, 5, 5, 0, 0, owner->unk34, 0xFF, 1);
+    trail = func_15147A80(&header, sizeof(SurfaceTrailConfig), sizeof(SurfaceTrailPoint), 5, 5, 5, 0, 0, &owner->hit, 0xFF, 1);
     if (trail != NULL) {
         memcpy(trail->config, &config, sizeof(SurfaceTrailConfig));
     }

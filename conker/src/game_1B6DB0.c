@@ -41,7 +41,8 @@ void func_15189A00(SprayEmitter *emitter) {
     f32 dy;
     f32 dz;
     s32 player;
-    EffectTemplate20 spawn;
+    u8 pad[4]; // matching: frame size
+    EffectTemplate spawn;
     TrailMotion motion;
     f32 floorY;
     TrailRender render;

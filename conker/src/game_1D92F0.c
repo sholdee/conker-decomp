@@ -178,7 +178,7 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     spawn.life = random % (params->unk1A + 1) + params->unk18;
     part.halfWidth = func_150ADA68() * params->unk20 + params->unk1C;
     part.gravity = func_150ADA68() * params->unk28 + params->unk24;
-    func_15147DA0(&spawn, &part, 0, 1, 8, 0, firstFlag, secondFlag, 0, 0, 0, &style, (s32)payload->hit, argE, payload->unk4);
+    func_15147DA0(&spawn, &part, 0, 1, 8, 0, firstFlag, secondFlag, 0, 0, 0, &style, payload->hit, argE, payload->unk4);
     return 1;
 }
 

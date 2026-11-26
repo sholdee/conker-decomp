@@ -1946,19 +1946,6 @@ typedef struct EffectTemplate18 {
     /* 0x16 */ u8 pad16[2];
 } EffectTemplate18;
 
-/* matching: EffectTemplate plus 4 bytes; the stack frame needs the larger size. */
-typedef struct EffectTemplate20 {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 life;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 kind;
-    /* 0x14 */ s8 unk14;
-    /* 0x15 */ u8 itemCount;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ void *unk18;
-    /* 0x1C */ u8 pad1C[4];
-} EffectTemplate20;
-
 /* func_15134908 (game_161520.c): spawn parameters of a blood trail; copied verbatim into the effect. */
 typedef struct BloodTrailDesc {
     /* 0x00 */ f32 *x;              /* followed point */
@@ -2425,25 +2412,12 @@ typedef struct EffectObjHead {
     /* 0x54 */ Vec3f modelPos;        /* func_151462C8's position; trails keep their tail point here */
 } EffectObjHead; /* size 0x60 */
 
-typedef struct EffectObjUnk60 {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ void *unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 pad1D[3];
-    /* 0x20 */ s32 unk20;
-} EffectObjUnk60; /* size 0x24 */
-
 /* The object func_15147A80 (game_174BF0.c) makes, in its generic view: EffectObjHead plus the per-handler block.
  * It is followed in memory by its user data (dataSize bytes) and then its items (a ring buffer); users with
  * typed items declare their own view (TrackerTrail, WaveTrail, MotionTrail, ...). */
 typedef struct EffectObj {
     /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ EffectObjUnk60 unk60;
+    /* 0x60 */ CollisionHit collision; /* a copy of func_15147A80's hit (flags 0 without one) */
     /* 0x84 */ u8 buffers[0x10];  /* per-view vertex buffers (func_151D5D60), released by func_151D5E30 */
     /* 0x94 */ void *items;       /* ring buffer of head.tmpl.itemCount items */
     /* 0x98 */ void *userData;
@@ -2598,7 +2572,7 @@ typedef struct SprayDesc {
     /* 0x3A */ s16 unk1BRange;
     /* 0x3C */ f32 gravity;
     /* 0x40 */ f32 gravityRange;
-    /* 0x44 */ s16 unkC; /* EffectTemplate20.unkC */
+    /* 0x44 */ s16 unkC; /* EffectTemplate.life */
     /* 0x46 */ s16 unkCRange;
     /* 0x48 */ s32 pointCount;
     /* 0x4C */ s32 pointCountRange;

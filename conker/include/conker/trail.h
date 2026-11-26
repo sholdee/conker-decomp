@@ -487,7 +487,7 @@ typedef struct SurfaceTrailOwner {
     /* 0x18 */ Actor *actor;
     /* 0x1C */ u8 actorId; /* actor->unique_id this owner belongs to */
     /* 0x1D */ u8 pad1D[0x17];
-    /* 0x34 */ u8 unk34[0x24];
+    /* 0x34 */ CollisionHit hit;
     /* 0x58 */ TrailSet trails;
 } SurfaceTrailOwner;
 
@@ -818,7 +818,8 @@ s32 func_150DCEA0(Game10A350Actor *actor);
 Gfx *func_150DD640(Game10A350Actor *actor, Gfx *gfx, s16 view);
 
 /* game_175250.c */
-MotionTrail *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render, s32 arg12, u8 arg13, s32 arg14);
+/* Returns the new MotionTrail; callers whose params extend TrailParams (extraSize) keep it in their own view. */
+void *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render, CollisionHit *hit, u8 arg13, s32 arg14);
 s8 func_15147EB8(MotionTrail *trail);
 Gfx *func_1514803C(MotionTrail *trail, Gfx *gfx, s16 arg2);
 s32 func_151488C4(MotionTrail *trail);
@@ -831,7 +832,7 @@ s32 func_151490C8(MotionTrail *trail);
 void func_15149104(EffectObj *obj);
 
 /* game_1897A0.c */
-FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, void *arg3, u8 arg4, s32 arg5);
+FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, CollisionHit *hit, u8 arg4, s32 arg5);
 s32 func_1515C388(FallingTrail *trail);
 s32 func_1515C534(FallingTrail *trail);
 Gfx *func_1515C6F4(FallingTrail *trail, Gfx *gfx, s16 view);

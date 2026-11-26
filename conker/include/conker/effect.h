@@ -926,7 +926,7 @@ void func_151479E0(EffectObj *obj);
 void func_15147A30(EffectObj *obj);
 /* Returns the new object; each caller keeps it in its own view (TrackerTrail, MotionTrail, ...). */
 void *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
-                    s32 drawKind, s32 arg6, s32 arg7, EffectObjUnk60 *arg8, u8 arg9, s32 argA);
+                    s32 drawKind, s32 arg6, s32 arg7, CollisionHit *hit, u8 arg9, s32 argA);
 void *func_15147C4C(void *gfx, EffectObj *obj, s16 arg2);
 void func_15147D1C(EffectObj *obj, s32 arg1, u8 arg2);
 void func_15147D64(s32 arg0, u8 arg1);

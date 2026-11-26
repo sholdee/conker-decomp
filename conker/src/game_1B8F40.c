@@ -165,7 +165,7 @@ void func_1518BD60(TrailEmitter *emitter) {
                 motion.flags = emitter->params.flags | 8;
                 motion.shade = 0xFF - ((u8)((u32)emitter->params.owner->floorMaterial >> 5) << 6);
                 motion.alpha = 0xFF;
-                trail = func_15147DA0(&spawn, &motion, spawn.itemCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
+                trail = func_15147DA0((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, &motion, spawn.itemCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
                                       0, &render, 0, emitter->link.owner, emitter->link.kind);
                 if (trail != NULL) {
                     link = &((EmitterTrailParams *)trail->params)->link;
