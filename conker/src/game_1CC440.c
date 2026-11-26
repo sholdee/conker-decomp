@@ -166,7 +166,9 @@ void func_1519F3B8(SurfaceTrailOwner *owner) {
 }
 
 /* Lets go of both trails and deletes any pending spawners. */
-void func_1519F400(SurfaceTrailOwner *owner) {
+void func_1519F400(owner)
+    SurfaceTrailOwner *owner;
+{
     TrailSide *sides = owner->trails.sides;
 
     if (sides[0].trail != NULL) {

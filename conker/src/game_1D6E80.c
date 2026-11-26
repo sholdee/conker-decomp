@@ -1,9 +1,5 @@
 #include <ultra64.h>
-#define func_1519F400 func_1519F400_header
 #include "functions.h"
-#undef func_1519F400
-// matching: func_151AA1D0 and func_151AA1F0 call it with no argument (the owner is still in a0)
-void func_1519F400();
 #include "variables.h"
 
 // func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and

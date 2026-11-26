@@ -913,7 +913,9 @@ void func_1519E948(TimedEffect *task);
 void func_1519F108(SurfaceTrail *trail);
 void func_1519F168(SurfaceTrail *trail);
 void func_1519F3B8(SurfaceTrailOwner *owner);
-void func_1519F400(SurfaceTrailOwner *owner);
+/* (SurfaceTrailOwner *owner); declared without a prototype: func_151AA1D0 and func_151AA1F0 pass no argument
+   (the owner is still in a0) */
+void func_1519F400();
 void func_1519F48C(SurfaceTrail *trail);
 s32 func_1519F4F0(SurfaceTrail *trail);
 s32 func_1519F7F0(SurfaceTrail *trail);
