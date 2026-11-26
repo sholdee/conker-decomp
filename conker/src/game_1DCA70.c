@@ -12,7 +12,7 @@ static const Vec3f D_800AA0FC = { 19.0f, 0.0f, 25.0f };
  * (bone 32 or 25) into `pos`.
  * If `ground` is non-NULL, also probes the ground below that point into it.
  */
-s32 func_151AF5C0(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 side) {
+s32 particle_getSpraySidePos(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 side) {
     Vec3f probe;
     const Vec3f *offset;
     MtxF *bone;
@@ -49,7 +49,7 @@ s32 func_151AF6C0(s32 arg0, s32 arg1) {
     return 12;
 }
 
-/* One corner colour passed to func_1513D668. */
+/* One corner colour passed to particle_spawnAxisQuadParticleNoModel. */
 typedef struct {
     s16 r;
     s16 g;
@@ -60,9 +60,9 @@ typedef struct {
 
 /*
  * Spawns a spray particle on the ground below the emission point on the actor's `side`, plus a
- * func_1514C678 puff there. The colour is tinted by func_150CCD90 when level is 20.
+ * particle_emitOnRandomCircle puff there. The colour is tinted by particle_getDepthTint when level is 20.
  */
-void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
+void particle_spawnSideSpray(Actor *actor, s32 side, s32 arg2) {
     Vec3f pos;
     CollisionHit ground;
     f32 fr;
@@ -84,11 +84,11 @@ void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     if (actor->ob_matrix_ptr == NULL) {
         return;
     }
-    if (func_151AF5C0(&pos, actor, &ground, side) == 0) {
+    if (particle_getSpraySidePos(&pos, actor, &ground, side) == 0) {
         return;
     }
     if (level == 20) {
-        func_150CCD90(pos.z, &fr, &fg, &fb);
+        particle_getDepthTint(pos.z, &fr, &fg, &fb);
         r = fr;
         g = fg;
         b = fb;
@@ -142,13 +142,13 @@ void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     growth.growRate = (((func_150ADA68() * 40.0f) + 51.0f) * desc.width) * 0.001f;
     desc.unk46 = 0;
     desc.unk47 = 6;
-    particle = func_1513D668(&desc, colors, 0, 0x16, 0, 0, (actor->langle >> 8) - ((side == 1) ? -10 : 10),
+    particle = particle_spawnAxisQuadParticleNoModel(&desc, colors, 0, 0x16, 0, 0, (actor->langle >> 8) - ((side == 1) ? -10 : 10),
                              500.0f, 500.0f, NULL, &ground.tri, 1, 8, 0xFF, 0);
     if (particle != NULL) {
         memcpy(&particle->growth, &growth, sizeof(growth));
     }
     roll = (func_150ADA20() % 11U) + 5;
-    func_1514C678(pos.x, pos.y, pos.z, (func_150ADA68() * 17.0f) + 29.0f,
+    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (func_150ADA68() * 17.0f) + 29.0f,
                   0, 0xFF, roll, 16, 0, 0.0f, NULL, 0xFF);
 }
 
@@ -166,14 +166,14 @@ s32 func_151AFBD4(QuadSprite *sprite) {
 }
 
 /*
- * Update for the func_151AF6D4 spray: once flag 1 is set fades it out over the last 32 frames
+ * Update for the particle_spawnSideSpray spray: once flag 1 is set fades it out over the last 32 frames
  * of its timer, and grows it until the timer reaches growth.growEndTimer.
  */
 /*
- * Update for the func_151AF6D4 spray: once flag 1 is set, fades it out over the last 32 frames
+ * Update for the particle_spawnSideSpray spray: once flag 1 is set, fades it out over the last 32 frames
  * of its life and grows it until life drops to growth.growEndTimer.
  */
-s32 func_151AFC08(SprayParticle *spray) {
+s32 particle_updateSpray(SprayParticle *spray) {
     ParticleDef *desc;
     SprayGrowth *growth;
 
@@ -197,7 +197,7 @@ s32 func_151AFC08(SprayParticle *spray) {
 }
 
 /* Spawns one spark at (x, y, z), thrown in a random direction around `yaw`. */
-s32 func_151AFC88(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
+s32 particle_spawnYawSpraySpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
     SparkParticle *spark;
@@ -252,7 +252,7 @@ s32 func_151AFC88(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     desc.fadeRate = 17;
     desc.scaleStart = 25;
 
-    spark = func_15130374(&desc, 1, 4, arg14, 1);
+    spark = particle_newOwnedSpriteParticle(&desc, 1, 4, arg14, 1);
     if (spark != NULL) {
         memcpy(&spark->damping, &damping, sizeof(damping));
     }
@@ -260,7 +260,7 @@ s32 func_151AFC88(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 }
 
 /* Damps the spark's desc.vel.x and desc.vel.z by its damping factor once per elapsed frame. */
-s32 func_151AFEA4(SparkParticle *spark, s32 arg1) {
+s32 particle_dampSprayXZ(SparkParticle *spark, s32 arg1) {
     f32 *damping;
     s32 frames;
 

@@ -77,7 +77,7 @@ s32 effect_expireFlickerSprite(FlickerSprite *sprite) {
     effects->sprite = NULL;
     sprite->quad.def.flags |= 2;
     sprite->flicker.owner = NULL;
-    func_1513F6C0(&sprite->quad, 0, 0);
+    particle_setQuadSpriteFuncs(&sprite->quad, 0, 0);
     return 0;
 }
 
@@ -195,7 +195,7 @@ void effect_spawnRisingParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Wat
     motion.swayX = (func_150ADA68() * 0.1f + 0.08f) * motion.baseSize;
     motion.swayZ = (func_150ADA68() * 0.1f + 0.08f) * motion.baseSize;
     desc.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
-    particle = func_151303BC(&desc, 2, sizeof(RiseMotion));
+    particle = particle_newSpriteParticle(&desc, 2, sizeof(RiseMotion));
     if (particle != NULL) {
         memcpy(&particle->motion, &motion, sizeof(RiseMotion));
     }
@@ -230,7 +230,7 @@ void effect_freeWatcherEmitter(WatcherEmitter *emitter) {
 
 /*
  * Creates the flickering sprite on the floor below the character (at its first bone when it
- * has a skeleton), colored by func_151D8E20(). Returns NULL when there is no floor within 200 units.
+ * has a skeleton), colored by particle_getContextEffectKind(). Returns NULL when there is no floor within 200 units.
  */
 FlickerSprite *effect_createFloorFlickerSprite(Watcher *watcher) {
     FlickerSprite *sprite;
@@ -263,7 +263,7 @@ FlickerSprite *effect_createFloorFlickerSprite(Watcher *watcher) {
             s32 rand1;
             s32 rand0;
 
-            color = func_151D8E20();
+            color = particle_getContextEffectKind();
             probe.y = watcher->watcher.hit.height;
             size = func_150ADA68() * 100.0f + 200.0f;
             flicker.owner = &watcher->watcher;
@@ -282,9 +282,9 @@ FlickerSprite *effect_createFloorFlickerSprite(Watcher *watcher) {
             def.unk10 = 150;
             def.frame = 0;
             def.unk11 = 0xFF;
-            def.rgba[0] = D_800AB414[color].r;
-            def.rgba[1] = D_800AB414[color].g;
-            def.rgba[2] = D_800AB414[color].b;
+            def.rgba[0] = gKindColors[color].r;
+            def.rgba[1] = gKindColors[color].g;
+            def.rgba[2] = gKindColors[color].b;
             def.rgba[3] = 0xFF;
             def.renderModes = 0x440001;
             def.unk16 = 0;
@@ -293,7 +293,7 @@ FlickerSprite *effect_createFloorFlickerSprite(Watcher *watcher) {
             rand1 = func_150ADA20();
             rand2 = func_150ADA20();
             // matching: IDO needs the redundant `& 0xFF` on the u8 argument (the bytes change without it)
-            sprite = (FlickerSprite *)func_1513C73C(&def, 9, 3, &watcher->watcher.hit.tri,
+            sprite = (FlickerSprite *)particle_spawnSurfaceQuadSpriteNoModel(&def, 9, 3, &watcher->watcher.hit.tri,
                                                     probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
                                                     (rand2 & 1) * 2 + (rand1 & 1), 0x20, watcher->watcher.header.owner,
                                                     watcher->watcher.header.kind);

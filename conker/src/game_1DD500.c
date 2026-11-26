@@ -32,7 +32,7 @@ s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     speed = func_150ADA68() * 5.3f + 4.4f;
     func_15143794(yaw, pitch, speed, &dir);
     // matching: a literal 0.0f scale is folded away; IDO keeps the multiply for (0.68f - 0.68f)
-    func_151DA6F8(&pos, &dir, func_150ADA68() * (0.68f - 0.68f) + 0.68f, func_150ADA20() % 20 + 31,
+    particle_spawnSplash(&pos, &dir, func_150ADA68() * (0.68f - 0.68f) + 0.68f, func_150ADA20() % 20 + 31,
                   func_150ADA20() % 101 + 155, func_150ADA68() * 2.33f + 6.7f,
                   (func_150ADA20() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, argE, 1);
     return 1;
@@ -79,7 +79,7 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
                 impact.spray.unk3C = 16;
                 impact.spray.unk3E = 15;
                 impact.spray.unk40 = 0;
-                func_15153F18(&impact.angles, &impact.spray, &ground, 0xFF, 1);
+                particle_spawnSplashSprayAtAngles(&impact.angles, &impact.spray, &ground, 0xFF, 1);
             }
         }
     }
@@ -124,7 +124,7 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
         impact.spray.speedBase = 18.0f;
         impact.spray.speedRange = 11.8f;
         impact.spray.unk38 = 0.5f;
-        func_15153F18(&impact.angles, &impact.spray, &ground, 0xFF, 1);
+        particle_spawnSplashSprayAtAngles(&impact.angles, &impact.spray, &ground, 0xFF, 1);
 
         count = func_150ADA20() % 6 + 12;
         scatterGround.material = 0;
@@ -148,10 +148,10 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
                 spot[1] += 10.0f;
                 // matching: (f32)100 is not CSE'd with the 100.0f above, which would tie up an FP register
                 if (func_150ADA20() & 1) {
-                    func_151D9B8C(0, func_150ADA68() * 4.5f + 15.0f, func_150ADA68() * (f32)100 + 155.0f,
+                    particle_spawnKindEmitter(0, func_150ADA68() * 4.5f + 15.0f, func_150ADA68() * (f32)100 + 155.0f,
                                   &scatterGround.tri, (Vec3f *)spot, 100, 0, 1, 0, arg1, arg2);
                 } else {
-                    func_151DAB58(0, func_150ADA68() * 5.9f + 6.1f, func_150ADA68() * (f32)100 + 155.0f,
+                    particle_spawnSquash(0, func_150ADA68() * 5.9f + 6.1f, func_150ADA68() * (f32)100 + 155.0f,
                                   (Vec3f *)spot, 1, arg1, arg2);
                 }
                 if (--count == 0) {
@@ -203,7 +203,7 @@ typedef struct Game1DD500Motion {
     /* 0x26 */ u8 pad26[2];
 } Game1DD500Motion; // size 0x28
 
-/* Particle object created by func_1513D524: head.def.rot holds the previous position, head.def.unk44 the alpha. */
+/* Particle object created by particle_newQuadParticleWhite: head.def.rot holds the previous position, head.def.unk44 the alpha. */
 struct Game1DD500Particle {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Game1DD500Motion motion;
@@ -361,7 +361,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                         velocity->x = (slot->particle->head.def.pos.x - slot->particle->head.def.rot.x) * gFrameDeltaInv;
                         velocity->y = 0.0f;
                         velocity->z = (slot->particle->head.def.pos.z - slot->particle->head.def.rot.z) * gFrameDeltaInv;
-                        func_1513F680(&slot->particle->head, 0x10, 0x1B, 0, 0x10);
+                        particle_setQuadParticleFuncs(&slot->particle->head, 0x10, 0x1B, 0, 0x10);
                         slot->particle->head.def.flags |= 1;
                         slot->particle = NULL;
                         emitter->count--;
@@ -388,7 +388,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                     Game1DD500Motion motion;
 
                     last->next = head;
-                    desc.texture = D_800AB310[emitter->profileFlag];
+                    desc.texture = gKindSpriteTextures[emitter->profileFlag];
                     desc.renderModes = 0x1001;
                     desc.lifetime = func_150ADA20() % 51 + 52;
                     desc.frame = 0;
@@ -434,7 +434,7 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                         func_15143134(&D_800AA12C[index].offset, &desc.pos,
                                       JOINT_MTX(emitter->owner, D_800AA12C[index].joint));
                         desc.rot = desc.pos;
-                        particle = func_1513D524(&desc, 0x11, 0, 0, 0x10, ((func_150ADA20() % 1) ? 1 : 0) | 2, 0x28,
+                        particle = particle_newQuadParticleWhite(&desc, 0x11, 0, 0, 0x10, ((func_150ADA20() % 1) ? 1 : 0) | 2, 0x28,
                                                  task->base.header.owner, task->base.header.kind);
                         head->particle = particle;
                         if (particle != NULL) {
@@ -503,10 +503,10 @@ s32 effect_moveReleasedParticle(Game1DD500Particle *particle) {
             splat.z = probe.z;
             size = ((motion->baseWidth + motion->swingWidth * 0.5f) + (motion->baseHeight + motion->swingHeight * 0.5f)) * 0.5f;
             if (func_150ADA20() & 1) {
-                func_151D9B8C(motion->unk25, size * 1.7f, particle->head.def.unk44, &particle->head.ground.tri, &splat, 100, 0, 1, 0,
+                particle_spawnKindEmitter(motion->unk25, size * 1.7f, particle->head.def.unk44, &particle->head.ground.tri, &splat, 100, 0, 1, 0,
                               particle->head.header.owner, particle->head.header.kind);
             } else {
-                func_151DAB58(motion->unk25, size * 0.68f, particle->head.def.unk44, &splat, 1, particle->head.header.owner, particle->head.header.kind);
+                particle_spawnSquash(motion->unk25, size * 0.68f, particle->head.def.unk44, &splat, 1, particle->head.header.owner, particle->head.header.kind);
             }
             alive = FALSE;
         }
@@ -543,7 +543,7 @@ Vtx *effect_buildJointParticleQuad(Game1DD500Particle *particle, s16 view) {
     f32 t;
     u8 fresh;
 
-    func_151D5D60(particle->head.vtxBuffers, view, 0x40, &quad, &fresh);
+    particle_getViewBuffer(particle->head.vtxBuffers, view, 0x40, &quad, &fresh);
     ret = quad; // matching: quad is address-taken; returning it directly reloads it
     if (quad != NULL) {
         if (fresh) {

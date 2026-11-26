@@ -213,7 +213,7 @@ void func_150C3574(Actor *obj) {
 void func_150C3994(Actor *obj) {
     if (obj->type == 0x14) {
         if (obj->taskint[0] == 0) {
-            func_151B9BF0(0x2F, 1, obj->xpos, obj->ypos + 30.0f, obj->zpos, 0x7D0, 0x3E8, 0x190, 0xC8, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);
+            particle_newFallingEmitter(0x2F, 1, obj->xpos, obj->ypos + 30.0f, obj->zpos, 0x7D0, 0x3E8, 0x190, 0xC8, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);
         } else {
             trail_startActorAfterimage(obj, 0x64, 0);
         }
@@ -227,7 +227,7 @@ void func_150C3994(Actor *obj) {
     if (obj->count5 == 0) {
         obj->unk148 = 70.0f;
         if (obj->taskint[0] == 0) {
-            func_151B9BF0(0x2F, 1, obj->xpos, obj->ypos + 30.0f, obj->zpos, 0x898, 0x500, 0x320, 0x2BC, 0xC00, 0xC00, 0x14, 1, 0, 0xFF, 0);
+            particle_newFallingEmitter(0x2F, 1, obj->xpos, obj->ypos + 30.0f, obj->zpos, 0x898, 0x500, 0x320, 0x2BC, 0xC00, 0xC00, 0x14, 1, 0, 0xFF, 0);
             trail_spawnKind2Ring(obj->xpos, obj->ypos + 30.0f, obj->zpos, 0xFF);
             actor_runHitHandler(obj, 6, NULL);
         } else {
@@ -261,7 +261,7 @@ s32 func_150C3D48(s32 value) {
 void func_150C3D5C(Actor *obj) {
     Struct150C3D5CLocals locals;
 
-    func_151B9BF0(0x2F, 1, obj->xpos, obj->ypos,
+    particle_newFallingEmitter(0x2F, 1, obj->xpos, obj->ypos,
                   obj->zpos, 0x578, 0x500, 0x320, 0x4B0, 0x200, 0x200,
                   0x1E, 1, 0, 0xFF, 0);
 
@@ -276,9 +276,9 @@ void func_150C3D5C(Actor *obj) {
 
     effect_scatterModels(3, 0xCB, obj->xpos, obj->ypos, obj->zpos, 10.0f, 1.0f,
                   2.0f, 60.0f, 3, 0x3C, -0.7f, 0xFF, 0);
-    func_151709B4(obj->xpos, obj->ypos + 20.0f,
+    particle_spawnStyleBurst(obj->xpos, obj->ypos + 20.0f,
                   obj->zpos, 0xA, 2000.0f, 0xFF, 0);
-    func_1516D99C(obj->xpos, obj->ypos,
+    particle_newSpriteEmitter(obj->xpos, obj->ypos,
                   obj->zpos, 0xD, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0,
                   0, 0xFF, 0, 0, 0, 0x14, 0x14, 2, 0, 0, 0, 0, 0x51, 0x51,
                   0x51, 0x51, 0xA, 1, 0, 0xFF, 0xA, 0x578, 0x190, 1, 1, 0, 1,

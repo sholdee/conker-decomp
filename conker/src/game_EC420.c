@@ -22,7 +22,7 @@ void func_150BEF7C(s32 arg0) {
     timer = arg0 & 0xFFFF;
     z = 0x17C;
     for (i = 0; i < 2; i++) {
-        func_1516D99C(0x1FDB, 0x25, z, 0xD,
+        particle_newSpriteEmitter(0x1FDB, 0x25, z, 0xD,
             0, 0x50, 0x8F, 0, 0, 0, 0, 0,
             8, 0xC8, 0xA, 0, 0, 0, 0, 0,
             0x28, 0x28, 4, 0, 0, 0, 0, 0x555,
@@ -366,7 +366,7 @@ void func_150BFA7C(WorldObject *platform) {
                 if (kind == 0) {
                     step = ((platform->y - bottom + 0x10) * step) / travel;
                     if (WORK(platform)->unk84 == 0) {
-                        func_1518CD20(platform, 0xFF, 0);
+                        particle_spawnPlacementRing(platform, 0xFF, 0);
                         WORK(platform)->unk84 = 1;
                     }
                 }
@@ -387,7 +387,7 @@ void func_150BFA7C(WorldObject *platform) {
                 WORK(&platform[1])->home |= 0x80000000;
                 WORK(&platform[1])->unk80 = 0;
                 if (kind == 4 && state != TASK_FLAG_ON) {
-                    func_1518CD20(platform, 0xFF, 0);
+                    particle_spawnPlacementRing(platform, 0xFF, 0);
                 }
                 state = TASK_FLAG_ON;
                 platform->v = 0.0f;
@@ -465,7 +465,7 @@ void func_150BFFE0(Actor *obj) {
     spawn.envColorMode = 6;
     spawn.unk64 = 1;
     spawn.extra = 0.8775510192f;
-    func_15153634(&spawn, 0xFF, 0xFF, 1);
+    particle_spawnSpriteBurst(&spawn, 0xFF, 0xFF, 1);
 }
 
 /* Piece handler: two particle bursts 20 units above `y` at the piece's position. */
@@ -496,7 +496,7 @@ s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
     burst.scaleBase = 0.8000000119f;
     burst.scaleRange = 1.200000048f;
     burst.spin = 15.29900074f;
-    func_15152190(&burst, ids, scales, 1, 0.0f, 1, piece->unkC, piece->unk1);
+    particle_spawnDebrisBurst(&burst, ids, scales, 1, 0.0f, 1, piece->unkC, piece->unk1);
     }
     {
     SpriteBurst spawn;
@@ -543,7 +543,7 @@ s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
     spawn.envColorMode = 6;
     spawn.unk64 = 1;
     spawn.extra = 0.8977670074f;
-    func_15153634(&spawn, 0xFF, piece->unkC, piece->unk1);
+    particle_spawnSpriteBurst(&spawn, 0xFF, piece->unkC, piece->unk1);
     }
     return 0;
 }
@@ -593,11 +593,11 @@ void func_150C04C0(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5
     angles.yawRange = 0xFF;
     angles.pitchBase = -0x32;
     angles.pitchRange = 0x23;
-    func_15150400(&config, &angles, arg4, arg5);
+    particle_spawnDebrisScatter(&config, &angles, arg4, arg5);
 }
 
 /* Floor handler: with probability burstChance, bursts into smaller pieces and particles 20 units above
- * the floor; otherwise falls back to func_15133B98. */
+ * the floor; otherwise falls back to particle_floorBounceSettle. */
 s32 func_150C0648(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
     u8 flags;
 
@@ -645,7 +645,7 @@ s32 func_150C0648(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionT
             angles.yawRange = 0xFF;
             angles.pitchBase = -0x2A;
             angles.pitchRange = 0x19;
-            func_15150400(&config, &angles, piece->unkC, piece->unk1);
+            particle_spawnDebrisScatter(&config, &angles, piece->unkC, piece->unk1);
             {
             SpriteBurst spawn;
             f32 spawnY;
@@ -695,10 +695,10 @@ s32 func_150C0648(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionT
             spawn.envColorMode = 6;
             spawn.unk64 = 1;
             spawn.extra = 0.9535999894f;
-            func_15153634(&spawn, 0xFF, piece->unkC, piece->unk1);
+            particle_spawnSpriteBurst(&spawn, 0xFF, piece->unkC, piece->unk1);
             }
         }
         return 0;
     }
-    return func_15133B98((ModelParticle *)piece, x, y, z, floorHeight, surface);
+    return particle_floorBounceSettle((ModelParticle *)piece, x, y, z, floorHeight, surface);
 }

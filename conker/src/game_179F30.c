@@ -17,7 +17,7 @@ static void (*gAttachSpawnFuncsById[])(Actor *) = {
     func_1514DE44, func_1514F308, func_1514DE0C, func_1514DC84, func_1514F3CC, func_1514DE2C,
     func_1514DC98, func_1514DC38, func_1514DBB8, func_1514F44C, func_15010538, func_1514F4A8,
     func_1514F4D8, func_1514F508, func_1514F568, func_1514F590, func_150B0C34, func_1514F5CC,
-    func_150F2C8C, func_1501214C, func_1514DC5C, func_1514F538, func_1514D978,
+    particle_spawnBoneBurstEmitter, func_1501214C, func_1514DC5C, func_1514F538, func_1514D978,
 };
 
 /* Attachment type handlers (AttachmentType.destroyHandler, .messageHandler). Declared without a
@@ -591,7 +591,7 @@ void func_1514D64C(Actor *obj) {
     attach.p1.z = 75.0f;
     emitter.scale = 1.0f;
 
-    effect_attach(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 9);
+    effect_attach(particle_spawnBoneGlow(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 9);
 
     spawn.texture = 3;
     spawn.frame = 0;
@@ -639,7 +639,7 @@ void func_1514D64C(Actor *obj) {
     attach.p1.z = -140.0f;
     emitter.scale = 1.0f;
 
-    effect_attach(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 0xA);
+    effect_attach(particle_spawnBoneGlow(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 0xA);
     light_createAttached(obj, 5, &attach.p0, 2, 300, 40, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
 }
 
@@ -903,7 +903,7 @@ void func_1514E00C(Actor *obj) {
     attach.p1.z = 559.0f;
     emitter.scale = 1.0f;
 
-    effect_attach(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
+    effect_attach(particle_spawnBoneGlow(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
     trail_attachToBone(obj, 5, -1, 0xFF, 1);
 }
 
@@ -957,7 +957,7 @@ void func_1514E194(Actor *obj) {
     attach.p1.z = 559.0f;
     emitter.scale = 1.0f;
 
-    effect_attach(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
+    effect_attach(particle_spawnBoneGlow(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
     trail_attachToBone(obj, 5, -1, 0xFF, 1);
 }
 
@@ -1011,7 +1011,7 @@ void func_1514E31C(Actor *obj) {
     attach.p1.z = 600.0f;
     emitter.scale = 1.0f;
 
-    effect_attach(func_15189FF0(&spawn, &emitter, &attach, 2, 3, 0, 0), obj, 7);
+    effect_attach(particle_spawnBoneGlow(&spawn, &emitter, &attach, 2, 3, 0, 0), obj, 7);
 
     {
         Vec3f offset;
@@ -1028,7 +1028,7 @@ void func_1514E508(Actor *obj) {
     void *handle;
     s32 pos;
 
-    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 0");
+    handle = particle_startActorEmitter(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 0");
     effect_attach(handle, obj, 0xD);
     pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = light_createPointLight(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
@@ -1039,7 +1039,7 @@ void func_1514E5B8(Actor *obj) {
     void *handle;
     s32 pos;
 
-    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect -1");
+    handle = particle_startActorEmitter(obj, 5, 0, 1, 0xFF, 1, "Charactereffect -1");
     effect_attach(handle, obj, 0xD);
     pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = light_createPointLight(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
@@ -1050,7 +1050,7 @@ void func_1514E668(Actor *obj) {
     void *handle;
     s32 pos;
 
-    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 1");
+    handle = particle_startActorEmitter(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 1");
     effect_attach(handle, obj, 0xD);
     pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = light_createPointLight(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
@@ -1061,7 +1061,7 @@ void func_1514E718(Actor *obj) {
     void *handle;
     s32 pos;
 
-    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 2");
+    handle = particle_startActorEmitter(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 2");
     effect_attach(handle, obj, 0xE);
     pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = light_createPointLight(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
@@ -1071,7 +1071,7 @@ void func_1514E718(Actor *obj) {
 void func_1514E7C8(Actor *obj) {
     void *handle;
 
-    handle = func_1518D1C0(obj, 7, 0, 1, 0xFF, 1, "Charactereffect 3");
+    handle = particle_startActorEmitter(obj, 7, 0, 1, 0xFF, 1, "Charactereffect 3");
     effect_attach(handle, obj, 0xF);
 }
 
@@ -1091,7 +1091,7 @@ void effect_releaseAttachedObject(EffectHeader *handle) {
 }
 
 void func_1514E850(void *handle) {
-    func_1518E308(handle);
+    particle_freeActorEmitterParticles(handle);
     effect_destroyObject(handle);
 }
 
@@ -1105,7 +1105,7 @@ struct ToggleTarget {
     /* 0x000 */ u8 pad0[0x10];
     /* 0x010 */ s32 flags;
     /* 0x014 */ u8 pad14[0xFC];
-    /* 0x110 */ GlowShape emitter;    // for objects spawned by func_15189FF0
+    /* 0x110 */ GlowShape emitter;    // for objects spawned by particle_spawnBoneGlow
 };
 
 /** Messages 0, 1 and 2 toggle, set and clear bit 0 of the handle's flags. */
@@ -1184,45 +1184,45 @@ s32 effect_handleEmitterTableMessage(ActorEmitterProcess *target, s32 msg, s32 a
     switch (msg) {
     case 3:
         if (target->params.table == 2) {
-            func_1518E37C(target, 3);
+            particle_setActorEmitterTable(target, 3);
         } else {
-            func_1518E37C(target, 2);
+            particle_setActorEmitterTable(target, 2);
         }
         break;
     case 4:
-        func_1518E37C(target, 3);
+        particle_setActorEmitterTable(target, 3);
         break;
     case 5:
-        func_1518E37C(target, 2);
+        particle_setActorEmitterTable(target, 2);
         break;
     case 6:
         if (target->params.table == 2) {
-            func_1518E37C(target, 5);
+            particle_setActorEmitterTable(target, 5);
         } else {
-            func_1518E37C(target, 2);
+            particle_setActorEmitterTable(target, 2);
         }
         break;
     case 7:
-        func_1518E37C(target, 5);
+        particle_setActorEmitterTable(target, 5);
         break;
     case 8:
-        func_1518E37C(target, 2);
+        particle_setActorEmitterTable(target, 2);
         break;
     case 9:
         if (target->params.table == 2) {
-            func_1518E37C(target, 6);
+            particle_setActorEmitterTable(target, 6);
         } else {
-            func_1518E37C(target, 2);
+            particle_setActorEmitterTable(target, 2);
         }
         break;
     case 10:
-        func_1518E37C(target, 6);
+        particle_setActorEmitterTable(target, 6);
         break;
     case 11:
-        func_1518E37C(target, 2);
+        particle_setActorEmitterTable(target, 2);
         break;
     case 12:
-        func_1518E37C(target, 2);
+        particle_setActorEmitterTable(target, 2);
         break;
     default:
         return effect_handleToggleMessage((ToggleTarget *)target, msg, arg);
@@ -1444,7 +1444,7 @@ void func_1514EECC(Actor *obj) {
         emitter.scale = 1.0f;
         attach.handler = 3;
 
-        func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0);
+        particle_spawnBoneGlow(&spawn, &emitter, &attach, 2, 0, 0, 0);
     }
 }
 
@@ -1515,7 +1515,7 @@ void func_1514F3CC(Actor *obj) {
 void func_1514F44C(Actor *obj) {
     void *handle;
 
-    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect frontend fire imp");
+    handle = particle_startActorEmitter(obj, 5, 0, 1, 0xFF, 1, "Charactereffect frontend fire imp");
     effect_attach(handle, obj, 0xD);
 }
 
@@ -1555,5 +1555,5 @@ void func_1514F5CC(Actor *obj) {
     desc.slotCount = 20;
     desc.timer = 300;
     desc.flags = 4;
-    func_150C0AC0(&desc, 0xFF, 1);
+    particle_newPoolEmitter(&desc, 0xFF, 1);
 }

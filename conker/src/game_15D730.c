@@ -4,14 +4,14 @@
 
 /* Defined below. Not in particle.h: game/Trail/PissTrail/pisstrail.c and game_200930.c call it with a third
    argument. */
-void func_15131958(Vec3f *vel, f32 drag);
+void particle_applyDrag(Vec3f *vel, f32 drag);
 
 #include "libc/string.h"
 
 /* This file's .data: the particle render setup and reset display lists (the particle object types point to
  * them), then the handler tables. The handlers of a table take different particle types, so the tables are
  * declared without a prototype. */
-Gfx D_80089700[] = {
+Gfx gSpriteParticleSetupDl[] = {
     gsDPPipeSync(),
     gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
@@ -19,7 +19,7 @@ Gfx D_80089700[] = {
     gsDPSetBlendColor(0, 0, 0, 0x20),
     gsSPEndDisplayList(),
 };
-Gfx D_80089730[] = {
+Gfx gSpriteParticleResetDl[] = {
     gsDPPipeSync(),
     gsDPSetAlphaCompare(G_AC_NONE),
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
@@ -29,7 +29,7 @@ Gfx D_80089730[] = {
 };
 
 /* Allocates a particle of the given kind with dataSize bytes of per-particle data and copies desc into it. */
-void *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5) {
+void *particle_newSpriteParticleWithFloor(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5) {
     SpriteParticle *particle;
     s32 type;
 
@@ -64,32 +64,32 @@ void *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataS
     return particle;
 }
 
-void *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4) {
-    return func_15130280(desc, kind, NULL, dataSize, arg3, arg4);
+void *particle_newOwnedSpriteParticle(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4) {
+    return particle_newSpriteParticleWithFloor(desc, kind, NULL, dataSize, arg3, arg4);
 }
 
-void *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
-    return func_15130374(desc, kind, dataSize, 0xFF, 0);
+void *particle_newSpriteParticle(ParticleDesc *desc, u8 kind, s32 dataSize) {
+    return particle_newOwnedSpriteParticle(desc, kind, dataSize, 0xFF, 0);
 }
 
 /* Update functions, indexed by ParticleDesc.updateFunc (0 kills the particle). */
-static s32 (*D_80089760[])() = {
+static s32 (*gSpriteUpdateFuncs[])() = {
     trail_updateBurstParticle, func_151A4900, func_150BB260, func_15159594,
-    func_151596BC, func_151DB97C, func_151AFEA4, func_150CBCE0,
-    func_150CC8D4, func_150CAC28, func_151316DC, func_151025F4,
-    func_1515A11C, func_15192308, func_15192358, func_1519257C,
-    func_1513170C, func_151A2960, func_151045F4, effect_updateBloodStripParticle,
-    func_1515A60C, func_1515A78C, func_150AF6E4, func_151B8BE0,
-    func_15108658, func_150E8824, func_151316AC, func_151319A4,
-    func_15131AFC, func_15131B3C, func_150D6CC4, func_150D6F0C,
-    func_151D4D04, func_151D93F4, func_151D9450, func_151D9534,
-    func_150DA628, beam_updateFollowParticle, func_15131D9C, func_15131DEC,
+    func_151596BC, particle_updateKindSprite, particle_dampSprayXZ, particle_dampSparkXZ,
+    particle_dampYawSpriteXZ, func_150CAC28, particle_updateDragXZ, func_151025F4,
+    func_1515A11C, particle_pulseDust, particle_landDust, particle_updateDustParticle,
+    particle_updateDrag, particle_updateDragFade, func_151045F4, effect_updateBloodStripParticle,
+    func_1515A60C, func_1515A78C, particle_wobbleSmoke, particle_bobSteamParticle,
+    particle_updateAreaFlash, func_150E8824, particle_updateDragY, particle_updateFloorBounce,
+    particle_updateDragFloorBounce, particle_updateDragXZFloorBounce, particle_updateFollowDrift, particle_updateFollowGrow,
+    particle_updatePointPuff, particle_updateSteamParticle, particle_wobbleSteamSize, particle_steamFloorHit,
+    func_150DA628, beam_updateFollowParticle, particle_updatePulse, particle_updateFlash,
 };
 /* Death functions, indexed by ParticleDesc.deathFunc. */
-static void (*D_80089800[])() = { func_150C1198 };
+static void (*gSpriteDeathFuncs[])() = { particle_releasePoolSlot };
 
 /* Per-frame particle update: lifetime, motion, fade, scaling, animation and the update/death callbacks. */
-void func_151303EC(SpriteParticle *p) {
+void particle_updateSpriteParticle(SpriteParticle *p) {
     s32 pad; // matching: unused stack slot
     Vec3f prevPos;
     u8 dead;
@@ -180,13 +180,13 @@ void func_151303EC(SpriteParticle *p) {
         }
     }
     if (p->head.desc.updateFunc != -1 && !dead) {
-        if (D_80089760[p->head.desc.updateFunc](p, &prevPos) == 0) {
+        if (gSpriteUpdateFuncs[p->head.desc.updateFunc](p, &prevPos) == 0) {
             dead = TRUE;
         }
     }
     if (dead) {
         if (p->head.desc.deathFunc != -1) {
-            D_80089800[p->head.desc.deathFunc](p);
+            gSpriteDeathFuncs[p->head.desc.deathFunc](p);
         }
         effect_destroyObject(&p->head.header);
     }
@@ -198,13 +198,13 @@ typedef struct ParticleRenderMode {
 } ParticleRenderMode;
 
 /* Draw functions, indexed by ParticleDesc.drawFunc. */
-static s32 (*D_80089804[])() = {
-    func_1510281C, func_15102884, func_15104620, func_15131814,
+static s32 (*gSpriteDrawFuncs[])() = {
+    func_1510281C, func_15102884, func_15104620, particle_hideSpriteDraw,
 };
-extern ParticleRenderMode D_800A4AC8[];
+extern ParticleRenderMode gEffectRenderModes[];
 
 /* Draws a particle as a screen-space textured rectangle in the given view. */
-Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
+Gfx *particle_drawSpriteParticle(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
     s32 pad; // matching: unused stack slot
     Vec3f pos;
     u8 needSync;
@@ -236,7 +236,7 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
     mode = p->head.desc.renderMode & 0xFF;
     shade = (p->head.desc.renderMode & 0xFF00) >> 8;
     if (p->head.desc.flags & PARTICLE_DRAW_FUNC) {
-        if (p->head.desc.drawFunc != -1 && D_80089804[p->head.desc.drawFunc](p, viewIdx) == 0) {
+        if (p->head.desc.drawFunc != -1 && gSpriteDrawFuncs[p->head.desc.drawFunc](p, viewIdx) == 0) {
             return gfx;
         }
     }
@@ -325,21 +325,21 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
             if (p->head.desc.flags & PARTICLE_LIT) {
                 u8 color[4];
 
-                func_1513137C(&primR, &primG, &primB, &primA, p);
+                particle_getSpritePrimColor(&primR, &primG, &primB, &primA, p);
                 light_getLitColourAt(viewIdx, pos.x, pos.y, pos.z, 0xFF, color, NULL, NULL);
                 envR = color[0];
                 envG = color[1];
                 envB = color[2];
                 envA = p->head.desc.alpha;
             } else {
-                func_1513164C(&primR, &primG, &primB, &primA, &envR, &envG, &envB, &envA, p);
+                particle_getSpriteColors(&primR, &primG, &primB, &primA, &envR, &envG, &envB, &envA, p);
             }
-            gfx = func_1513F4E4(gfx, shade, &needSync);
+            gfx = particle_setCombineMode(gfx, shade, &needSync);
             gfx = func_15142B7C(gfx, p->head.desc.unk0, p->head.desc.unk4 | 0x10000 | 0x100000);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
             gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
             gfx = func_15142E24(gfx, &gEffectTextures[p->head.desc.texture], p->head.desc.frame, 2, 0, 0, p->head.desc.texture, 0, 0, &needSync, (p->head.desc.flags & 0x800000) ? 0x3E : 3);
-            gfx = func_15142FBC(gfx, ((p->head.desc.flags & 0x100) ? 0x100000 : 0) | gSpriteTlutMode | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4 | 4, &needSync);
+            gfx = func_15142FBC(gfx, ((p->head.desc.flags & 0x100) ? 0x100000 : 0) | gSpriteTlutMode | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[mode].unk0 | gEffectRenderModes[mode].unk4 | 4, &needSync);
             gSPScisTextureRectangle(gfx++, (s32)ulx, (s32)uly, (s32)lrx, (s32)lry, 0, s, t, dsdx, dtdy);
         }
     }
@@ -348,7 +348,7 @@ end: // matching: unused label; without it IDO returns gfx without the t2 copy
 }
 
 /* Picks a particle's primitive color for its primColorMode. */
-void func_1513137C(s16 *r, s16 *g, s16 *b, s16 *a, SpriteParticle *p) {
+void particle_getSpritePrimColor(s16 *r, s16 *g, s16 *b, s16 *a, SpriteParticle *p) {
     switch (p->head.desc.primColorMode) {
     case 1:
         *r = *g = *b = 0;
@@ -396,7 +396,7 @@ void func_1513137C(s16 *r, s16 *g, s16 *b, s16 *a, SpriteParticle *p) {
 }
 
 /* Picks a particle's environment color for its envColorMode. */
-void func_15131514(s16 *r, s16 *g, s16 *b, s16 *a, SpriteParticle *p) {
+void particle_getSpriteEnvColor(s16 *r, s16 *g, s16 *b, s16 *a, SpriteParticle *p) {
     u8 intensity;
 
     switch (p->head.desc.envColorMode) {
@@ -453,45 +453,45 @@ void func_15131514(s16 *r, s16 *g, s16 *b, s16 *a, SpriteParticle *p) {
 }
 
 /* Picks both of a particle's colors. */
-void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s16 *envG, s16 *envB, s16 *envA, SpriteParticle *p) {
-    func_15131514(envR, envG, envB, envA, p);
-    func_1513137C(primR, primG, primB, primA, p);
+void particle_getSpriteColors(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s16 *envG, s16 *envB, s16 *envA, SpriteParticle *p) {
+    particle_getSpriteEnvColor(envR, envG, envB, envA, p);
+    particle_getSpritePrimColor(primR, primG, primB, primA, p);
 }
 
 /* Particle update func: applies p->data.drag to the vertical velocity. */
-s32 func_151316AC(SpriteParticle *p, Vec3f *prevPos) {
-    func_151318E8(&p->head.desc.vel, p->data.drag);
+s32 particle_updateDragY(SpriteParticle *p, Vec3f *prevPos) {
+    particle_applyDragY(&p->head.desc.vel, p->data.drag);
     return TRUE;
 }
 
 /* Particle update func: applies p->data.drag to the horizontal velocity. */
-s32 func_151316DC(SpriteParticle *p, Vec3f *prevPos) {
-    func_15131918(&p->head.desc.vel, p->data.drag);
+s32 particle_updateDragXZ(SpriteParticle *p, Vec3f *prevPos) {
+    particle_applyDragXZ(&p->head.desc.vel, p->data.drag);
     return TRUE;
 }
 
 /* Particle update func: applies p->data.drag to the whole velocity. */
-s32 func_1513170C(SpriteParticle *p, Vec3f *prevPos) {
-    func_15131958(&p->head.desc.vel, p->data.drag);
+s32 particle_updateDrag(SpriteParticle *p, Vec3f *prevPos) {
+    particle_applyDrag(&p->head.desc.vel, p->data.drag);
     return TRUE;
 }
 
-void func_1513173C(DescParticleHead *p) {
+void particle_destroySpriteDefault(DescParticleHead *p) {
     effect_defaultDestroy(&p->header);
 }
 
-void func_1513175C(DescParticleHead *p) {
+void particle_freeSpriteDefault(DescParticleHead *p) {
     effect_defaultFree(&p->header);
 }
 
-static void (*D_80089814[])() = {
-    func_1513173C, func_15101288, func_1513173C, func_1513173C,
-    func_1513173C, func_15101328, func_1513173C, func_1513173C,
-    func_1513173C, func_1513173C, func_1513173C, trail_destroyCarrierParticle,
+static void (*gSpriteDestroyFuncs[])() = {
+    particle_destroySpriteDefault, particle_destroyBeamStartFx, particle_destroySpriteDefault, particle_destroySpriteDefault,
+    particle_destroySpriteDefault, particle_destroyBeamEndFx, particle_destroySpriteDefault, particle_destroySpriteDefault,
+    particle_destroySpriteDefault, particle_destroySpriteDefault, particle_destroySpriteDefault, trail_destroyCarrierParticle,
 };
 
-/* Calls the particle's D_80089814 handler (set 0 without PARTICLE_HANDLERS). */
-void func_1513177C(SpriteParticle *p) {
+/* Calls the particle's gSpriteDestroyFuncs handler (set 0 without PARTICLE_HANDLERS). */
+void particle_destroySpriteParticle(SpriteParticle *p) {
     s32 set;
 
     if (p->head.desc.flags & PARTICLE_HANDLERS) {
@@ -499,17 +499,17 @@ void func_1513177C(SpriteParticle *p) {
     } else {
         set = 0;
     }
-    D_80089814[set](p);
+    gSpriteDestroyFuncs[set](p);
 }
 
-static s32 (*D_80089844[])() = {
-    func_1513175C, func_151012B0, func_1513175C, func_1513175C,
-    func_1513175C, func_15101350, func_1513175C, func_1513175C,
-    func_1513175C, func_1513175C, func_1513175C, trail_freeCarrierParticle,
+static s32 (*gSpriteFreeFuncs[])() = {
+    particle_freeSpriteDefault, particle_freeBeamStartFx, particle_freeSpriteDefault, particle_freeSpriteDefault,
+    particle_freeSpriteDefault, particle_freeBeamEndFx, particle_freeSpriteDefault, particle_freeSpriteDefault,
+    particle_freeSpriteDefault, particle_freeSpriteDefault, particle_freeSpriteDefault, trail_freeCarrierParticle,
 };
 
-/* Calls the particle's D_80089844 handler (set 0 without PARTICLE_HANDLERS). */
-s32 func_151317C8(SpriteParticle *p) {
+/* Calls the particle's gSpriteFreeFuncs handler (set 0 without PARTICLE_HANDLERS). */
+s32 particle_freeSpriteParticle(SpriteParticle *p) {
     s32 set;
 
     if (p->head.desc.flags & PARTICLE_HANDLERS) {
@@ -517,15 +517,15 @@ s32 func_151317C8(SpriteParticle *p) {
     } else {
         set = 0;
     }
-    return D_80089844[set](p);
+    return gSpriteFreeFuncs[set](p);
 }
 
-s32 func_15131814(s32 arg0, s32 arg1) {
+s32 particle_hideSpriteDraw(s32 arg0, s32 arg1) {
     return 0;
 }
 
 /* Moves the particle's x/z offset around an ellipse with radii amplitude[0..1] as phase advances. */
-void func_15131828(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseStep) {
+void particle_wobbleSpriteOffset(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseStep) {
     head->desc.offset.x = amplitude[0] * func_151423D8(phase[0] - 0x40);
     head->desc.offset.z = amplitude[1] * func_151423D8(phase[1] - 0x40);
     phase[0] += phaseStep[0] * D_800BE9E4;
@@ -533,7 +533,7 @@ void func_15131828(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseS
 }
 
 /* Scales vel->y by drag once per elapsed tick. */
-void func_151318E8(Vec3f *vel, f32 drag) {
+void particle_applyDragY(Vec3f *vel, f32 drag) {
     s32 i;
 
     for (i = D_800BE9E4; i > 0; i--) {
@@ -542,7 +542,7 @@ void func_151318E8(Vec3f *vel, f32 drag) {
 }
 
 /* Scales vel->x and vel->z by drag once per elapsed tick. */
-void func_15131918(Vec3f *vel, f32 drag) {
+void particle_applyDragXZ(Vec3f *vel, f32 drag) {
     s32 i;
 
     for (i = D_800BE9E4; i > 0; i--) {
@@ -552,7 +552,7 @@ void func_15131918(Vec3f *vel, f32 drag) {
 }
 
 /* Scales all of vel by drag once per elapsed tick. */
-void func_15131958(Vec3f *vel, f32 drag) {
+void particle_applyDrag(Vec3f *vel, f32 drag) {
     s32 i;
 
     for (i = D_800BE9E4; i > 0; i--) {
@@ -563,22 +563,22 @@ void func_15131958(Vec3f *vel, f32 drag) {
 }
 
 /* Particle update func: floor collision using p->data.bounce. */
-s32 func_151319A4(SpriteParticle *p, Vec3f *prevPos) {
-    return func_151319C4(p, prevPos, &p->data.bounce);
+s32 particle_updateFloorBounce(SpriteParticle *p, Vec3f *prevPos) {
+    return particle_checkSpriteFloor(p, prevPos, &p->data.bounce);
 }
 
-static s32 (*D_80089874[])(SpriteParticle *, Vec3f *, f32 *, ParticleBounce *) = { func_15131B7C };
+static s32 (*gSpriteFloorHitFuncs[])(SpriteParticle *, Vec3f *, f32 *, ParticleBounce *) = { particle_bounceOffFloor };
 
 /*
  * When a falling particle reaches the floor below it, calls its hit func with the floor point.
  * Returns FALSE if the particle should die.
  */
-s32 func_151319C4(SpriteParticle *p, Vec3f *prevPos, ParticleBounce *bounce) {
+s32 particle_checkSpriteFloor(SpriteParticle *p, Vec3f *prevPos, ParticleBounce *bounce) {
     u8 alive;
     Vec3f probe;
 
     alive = TRUE;
-    if ((bounce->flags & 1) && bounce->hitFunc != -1 && D_80089874[bounce->hitFunc] != NULL && p->head.desc.pos.y < prevPos->y) {
+    if ((bounce->flags & 1) && bounce->hitFunc != -1 && gSpriteFloorHitFuncs[bounce->hitFunc] != NULL && p->head.desc.pos.y < prevPos->y) {
         probe.x = p->head.desc.pos.x;
         probe.y = prevPos->y;
         probe.z = p->head.desc.pos.z;
@@ -591,28 +591,28 @@ s32 func_151319C4(SpriteParticle *p, Vec3f *prevPos, ParticleBounce *bounce) {
             hit[0] = probe.x;
             hit[1] = p->head.floor.height;
             hit[2] = probe.z;
-            alive = D_80089874[bounce->hitFunc](p, prevPos, hit, bounce);
+            alive = gSpriteFloorHitFuncs[bounce->hitFunc](p, prevPos, hit, bounce);
         }
     }
     return alive;
 }
 
 /* Particle update func: drag on the whole velocity, then floor collision. */
-s32 func_15131AFC(SpriteParticle *p, Vec3f *prevPos) {
-    func_15131958(&p->head.desc.vel, p->data.dragBounce.drag);
-    return func_151319C4(p, prevPos, &p->data.dragBounce.bounce);
+s32 particle_updateDragFloorBounce(SpriteParticle *p, Vec3f *prevPos) {
+    particle_applyDrag(&p->head.desc.vel, p->data.dragBounce.drag);
+    return particle_checkSpriteFloor(p, prevPos, &p->data.dragBounce.bounce);
 }
 
 /* Particle update func: drag on the horizontal velocity, then floor collision. */
-s32 func_15131B3C(SpriteParticle *p, Vec3f *prevPos) {
-    func_15131918(&p->head.desc.vel, p->data.dragBounce.drag);
-    return func_151319C4(p, prevPos, &p->data.dragBounce.bounce);
+s32 particle_updateDragXZFloorBounce(SpriteParticle *p, Vec3f *prevPos) {
+    particle_applyDragXZ(&p->head.desc.vel, p->data.dragBounce.drag);
+    return particle_checkSpriteFloor(p, prevPos, &p->data.dragBounce.bounce);
 }
 
 
 /* Floor hit func: bounces the particle off the floor, and stops it once the bounce is small. */
 // matching: hit is indexed as f32[3]; vertex access swaps IDO's add.s operands
-s32 func_15131B7C(SpriteParticle *p, Vec3f *prevPos, f32 *hit, ParticleBounce *bounce) {
+s32 particle_bounceOffFloor(SpriteParticle *p, Vec3f *prevPos, f32 *hit, ParticleBounce *bounce) {
     p->head.desc.pos.y = p->head.desc.height * 0.06000000238f + hit[1];
     p->head.desc.vel.x *= bounce->restitution;
     p->head.desc.vel.y *= -bounce->restitution;
@@ -628,17 +628,17 @@ s32 func_15131B7C(SpriteParticle *p, Vec3f *prevPos, f32 *hit, ParticleBounce *b
     return TRUE;
 }
 
-static void (*D_80089878[])() = {
+static void (*gSpriteEventFuncs[])() = {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    effect_ownedParticleMessage, func_150D6E60, func_150D7068, beam_followParticleMessage, NULL, NULL, NULL,
+    effect_ownedParticleMessage, particle_onFollowDriftMsg, particle_onFollowGrowMsg, beam_followParticleMessage, NULL, NULL, NULL,
 };
 
-/* Calls the particle's D_80089878 handler, if it has one. */
-void func_15131C2C(SpriteParticle *p, s32 arg1, u8 arg2) {
+/* Calls the particle's gSpriteEventFuncs handler, if it has one. */
+void particle_onSpriteEvent(SpriteParticle *p, s32 arg1, u8 arg2) {
     void (*handler)(SpriteParticle *, s32, u8);
 
     if (p->head.desc.flags & PARTICLE_HANDLERS) {
-        handler = D_80089878[p->head.desc.handlerSet];
+        handler = gSpriteEventFuncs[p->head.desc.handlerSet];
         if (handler != NULL) {
             handler(p, arg1, arg2);
         }
@@ -646,32 +646,32 @@ void func_15131C2C(SpriteParticle *p, s32 arg1, u8 arg2) {
 }
 
 /* Advances phase[0..1] and sets *outX/*outY to base plus amplitude[i] times the phase's wave value. */
-void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX, f32 *outY) {
+void particle_wobblePair(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX, f32 *outY) {
     phase[0] += phaseStep[0] * D_800BE9E4;
     phase[1] += phaseStep[1] * D_800BE9E4;
     *outX = amplitude[0] * func_151423D8(phase[0] - 0x40) + base;
     *outY = amplitude[1] * func_151423D8(phase[1] - 0x40) + base;
 }
 
-/* The three particle object types (see func_15130280). */
-static const IdList3 D_800A37F0 = { { 0x2B, 0x47, 0x52 } };
+/* The three particle object types (see particle_newSpriteParticleWithFloor). */
+static const IdList3 gSpriteParticleTypes = { { 0x2B, 0x47, 0x52 } };
 
 /* Calls effect_sendEventToTypes with the three particle object types. */
-void func_15131D4C(s32 arg0, u8 arg1) {
+void particle_broadcastToSprites(s32 arg0, u8 arg1) {
     IdList3 types;
 
-    types = D_800A37F0;
+    types = gSpriteParticleTypes;
     effect_sendEventToTypes(types.ids, 3, arg0, arg1);
 }
 
 /* Particle update func: pulses the particle's width and height (p->data.pulse). */
-s32 func_15131D9C(SpriteParticle *p, Vec3f *prevPos) {
-    func_15131C84(p->data.pulse.phase, p->data.pulse.phaseStep, p->data.pulse.baseSize, p->data.pulse.amplitude, &p->head.desc.width, &p->head.desc.height);
+s32 particle_updatePulse(SpriteParticle *p, Vec3f *prevPos) {
+    particle_wobblePair(p->data.pulse.phase, p->data.pulse.phaseStep, p->data.pulse.baseSize, p->data.pulse.amplitude, &p->head.desc.width, &p->head.desc.height);
     return TRUE;
 }
 
 /* Particle update func: grows the particle with sqrt(time) and fades it quadratically; dies after duration. */
-s32 func_15131DEC(SpriteParticle *p, Vec3f *prevPos) {
+s32 particle_updateFlash(SpriteParticle *p, Vec3f *prevPos) {
     f32 elapsed;
     f32 size;
 
@@ -689,8 +689,8 @@ s32 func_15131DEC(SpriteParticle *p, Vec3f *prevPos) {
     return TRUE;
 }
 
-/* Spawns a flash particle (see func_15131DEC) at pos. */
-SpriteParticle *func_15131EE4(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
+/* Spawns a flash particle (see particle_updateFlash) at pos. */
+SpriteParticle *particle_spawnFlash(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
     ParticleDesc desc;
     ParticleFlash flash;
     SpriteParticle *particle;
@@ -742,7 +742,7 @@ SpriteParticle *func_15131EE4(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
     desc.height = 0.0f;
     desc.gravity = 0.0f;
 
-    particle = func_15130280(&desc, 1, NULL, sizeof(flash), arg2, arg3);
+    particle = particle_newSpriteParticleWithFloor(&desc, 1, NULL, sizeof(flash), arg2, arg3);
     if (particle != NULL) {
         memcpy(&particle->data.flash, &flash, sizeof(flash));
     }

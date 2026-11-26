@@ -831,7 +831,7 @@ void func_1507FF94(Actor *actor) {
 
     event.actor = actor;
     event.uniqueId = actor->unique_id;
-    func_15191B8C((s32)&event, 0xD);
+    particle_sendDripMsg((s32)&event, 0xD);
     effect_sendEventToTimedEffects((s32)&event, 0xD);
 }
 

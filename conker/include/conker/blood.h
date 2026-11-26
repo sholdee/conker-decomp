@@ -54,7 +54,7 @@ typedef struct {
     /* 0x128 */ f32 growth;
 } GrowingBloodParticle;
 
-/* A bouncing chunk thrown by func_1513264C / func_15132A4C (from a ParticleSpawn desc at +0x10). */
+/* A bouncing chunk thrown by particle_newModelParticleWithFloor / particle_newModelParticle (from a ParticleSpawn desc at +0x10). */
 typedef struct {
     u8 pad0;
     u8 unk1;

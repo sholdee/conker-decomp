@@ -33,8 +33,8 @@ typedef struct {
     u8 pad5[3];
 } ChildData;
 
-/* This unit's .rodata front-end data: the effect tables of func_151026BC. Per effect kind: the two points
- * (vec1, vec2) given to func_15100600, and its arg3. */
+/* This unit's .rodata front-end data: the effect tables of particle_startObjRayBeam. Per effect kind: the two points
+ * (vec1, vec2) given to particle_spawnRayBeam, and its arg3. */
 static const Vec3f D_800A21A0[7] = {
     { 0.0f, 36.0f, 76.0f },  { -6.0f, -25.0f, 119.0f }, { 0.0f, 66.0f, 74.0f },  { -6.0f, -25.0f, 119.0f },
     { 0.0f, -79.0f, 49.0f }, { 7.0f, -54.0f, 57.0f },   { 9.0f, -51.0f, 65.0f },
@@ -47,10 +47,10 @@ static const u8 D_800A2248[7] = { 12, 0, 12, 9, 9, 9, 9 };
 
 /*
  * Spawns an effect on owner: a main particle carrying an EffectParticleState plus five children (a particle,
- * a flash, a glow and two func_15130374 particles) that keep a pointer back to it. lifetime -1 means
+ * a flash, a glow and two particle_newOwnedSpriteParticle particles) that keep a pointer back to it. lifetime -1 means
  * endless. Returns the main particle, or NULL.
  */
-EffectParticle *func_15100600(Actor *owner, const Vec3f *vec1, const Vec3f *vec2, u8 arg3, s16 lifetime, u8 r,
+EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec3f *vec2, u8 arg3, s16 lifetime, u8 r,
                               u8 g, u8 b, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE) {
     EffectParticle *particle;
     ParticleDef def;
@@ -128,7 +128,7 @@ EffectParticle *func_15100600(Actor *owner, const Vec3f *vec1, const Vec3f *vec2
     def.unk45 = 0xFF;
     def.unk46 = 0;
     def.unk47 = 6;
-    particle = func_1513D4B8(&def, &D_800A4AA0, 0x15, 0x1F, 0, 0x12, 0, sizeof(EffectParticleState), argD, argE);
+    particle = particle_newQuadParticleNoModel(&def, &gWhiteVtxColors, 0x15, 0x1F, 0, 0x12, 0, sizeof(EffectParticleState), argD, argE);
     if (particle != NULL) {
         state = &particle->state;
         memcpy(state, &data, sizeof(EffectParticleState));
@@ -171,7 +171,7 @@ EffectParticle *func_15100600(Actor *owner, const Vec3f *vec1, const Vec3f *vec2
                 subDef.unk45 = 0xFF;
                 subDef.unk46 = 0;
                 subDef.unk47 = 6;
-                if ((state->subParticle = func_1513D4B8(&subDef, &D_800A4AA0, 0, 0, 0, 0x13, 0, sizeof(SubParticleData),
+                if ((state->subParticle = particle_newQuadParticleNoModel(&subDef, &gWhiteVtxColors, 0, 0, 0, 0x13, 0, sizeof(SubParticleData),
                                                    argD, argE)) != NULL) {
                     memcpy(state->subParticle + 0x110, &subData, sizeof(SubParticleData));
                 }
@@ -241,7 +241,7 @@ EffectParticle *func_15100600(Actor *owner, const Vec3f *vec1, const Vec3f *vec2
                 descA.deathFunc = -1;
                 descA.drawFunc = 0;
                 descA.handlerSet = 1;
-                if ((state->particleA = func_15130374(&descA, 1, sizeof(ParticleAData), argD, argE)) != NULL) {
+                if ((state->particleA = particle_newOwnedSpriteParticle(&descA, 1, sizeof(ParticleAData), argD, argE)) != NULL) {
                     memcpy(state->particleA + 0xA8, &particleAData, sizeof(ParticleAData));
                 }
                 {
@@ -344,7 +344,7 @@ EffectParticle *func_15100600(Actor *owner, const Vec3f *vec1, const Vec3f *vec2
                         descB.deathFunc = -1;
                         descB.drawFunc = 1;
                         descB.handlerSet = 5;
-                        if ((state->particleB = func_15130374(&descB, 1, sizeof(ChildData), argD, argE)) != NULL) {
+                        if ((state->particleB = particle_newOwnedSpriteParticle(&descB, 1, sizeof(ChildData), argD, argE)) != NULL) {
                             memcpy(state->particleB + 0xA8, &particleBData, sizeof(ChildData));
                         }
                     }
@@ -356,7 +356,7 @@ EffectParticle *func_15100600(Actor *owner, const Vec3f *vec1, const Vec3f *vec2
 }
 
 /* Releases the beam's child objects, then destroys it. */
-void func_15101090(RayBeam *beam) {
+void particle_destroyRayBeam(RayBeam *beam) {
     RayBeamData *data = &beam->data;
 
     // matching: tested as u16 but passed as s16, so IDO reuses the lhu without an andi
@@ -378,11 +378,11 @@ void func_15101090(RayBeam *beam) {
     if (data->endFx != NULL) {
         effect_destroyObject(&data->endFx->head.header);
     }
-    func_1513CA6C(&beam->head);
+    particle_destroyQuadParticleDefault(&beam->head);
 }
 
-/* Counterpart of func_15101090 for the beam's child objects and func_1513CAA0. */
-void func_15101148(RayBeam *beam) {
+/* Counterpart of particle_destroyRayBeam for the beam's child objects and particle_freeQuadParticleDefault. */
+void particle_freeRayBeam(RayBeam *beam) {
     RayBeamData *data = &beam->data;
 
     if (data->hitFx != NULL) {
@@ -400,79 +400,79 @@ void func_15101148(RayBeam *beam) {
     if (data->endFx != NULL) {
         effect_freeObject(&data->endFx->head.header);
     }
-    func_1513CAA0(&beam->head);
+    particle_freeQuadParticleDefault(&beam->head);
 }
 
 /* The functions below detach a child object from its beam before handing it on. */
 
-void func_151011E8(BeamHitFx *fx) {
+void particle_destroyBeamHitFx(BeamHitFx *fx) {
     RayBeamData *data = &fx->data.beam->data;
 
     data->hitFx = NULL;
-    func_1513CA6C(&fx->head);
+    particle_destroyQuadParticleDefault(&fx->head);
 }
 
-void func_15101210(BeamHitFx *fx) {
+void particle_freeBeamHitFx(BeamHitFx *fx) {
     RayBeamData *data = &fx->data.beam->data;
 
     data->hitFx = NULL;
-    func_1513CAA0(&fx->head);
+    particle_freeQuadParticleDefault(&fx->head);
 }
 
-void func_15101238(LightEffect *endPoint) {
+void particle_destroyBeamEndPoint(LightEffect *endPoint) {
     RayBeamData *data = &((RayBeam *)endPoint->data.object)->data;
 
     data->endPoint = NULL;
     func_151617C4(endPoint);
 }
 
-void func_15101260(LightEffect *endPoint) {
+void particle_freeBeamEndPoint(LightEffect *endPoint) {
     RayBeamData *data = &((RayBeam *)endPoint->data.object)->data;
 
     data->endPoint = NULL;
     func_151617E4(endPoint);
 }
 
-void func_15101288(BeamStartFx *fx) {
+void particle_destroyBeamStartFx(BeamStartFx *fx) {
     RayBeamData *data = &fx->link.beam->data;
 
     data->startFx = NULL;
-    func_1513173C(&fx->head);
+    particle_destroySpriteDefault(&fx->head);
 }
 
-void func_151012B0(BeamStartFx *fx) {
+void particle_freeBeamStartFx(BeamStartFx *fx) {
     RayBeamData *data = &fx->link.beam->data;
 
     data->startFx = NULL;
-    func_1513175C(&fx->head);
+    particle_freeSpriteDefault(&fx->head);
 }
 
-void func_151012D8(BeamLine *line) {
+void particle_destroyBeamLine(BeamLine *line) {
     RayBeamData *data = &line->link.beam->data;
 
     data->line = NULL;
     func_151411A4(&line->head);
 }
 
-void func_15101300(BeamLine *line) {
+void particle_freeBeamLine(BeamLine *line) {
     RayBeamData *data = &line->link.beam->data;
 
     data->line = NULL;
     func_151411C4(&line->head);
 }
 
-void func_15101328(BeamEndFx *fx) {
+void particle_destroyBeamEndFx(BeamEndFx *fx) {
     RayBeamData *data = &fx->link.beam->data;
 
     data->endFx = NULL;
-    func_1513173C(&fx->head);
+    particle_destroySpriteDefault(&fx->head);
 }
 
-void func_15101350(BeamEndFx *fx) {
+void particle_freeBeamEndFx(BeamEndFx *fx) {
     RayBeamData *data = &fx->link.beam->data;
 
     data->endFx = NULL;
-    func_1513175C(&fx->head);
+    particle_freeSpriteDefault(&fx->head);
 }
 
 /*
@@ -480,7 +480,7 @@ void func_15101350(BeamEndFx *fx) {
  * collision along the beam, then moves or hides the child objects to match.
  * Returns 0 when the owner is gone.
  */
-s8 func_15101378(RayBeam *beam) {
+s8 particle_updateRayBeam(RayBeam *beam) {
     s8 result;
     BeamOwnerAim *aim;
     BeamOwner *owner;
@@ -656,7 +656,7 @@ s8 func_15101378(RayBeam *beam) {
  * end, offset sideways by the beam's width (facing the eye point), with a scrolling texture.
  * Returns the vertices, or NULL when the beam is not drawn.
  */
-Vtx *func_151019C4(RayBeam *beam, s16 viewport) {
+Vtx *particle_buildRayBeamQuad(RayBeam *beam, s16 viewport) {
     RayBeamData *data = &beam->data;
     Vtx *vtx;
     Vtx *result;
@@ -679,7 +679,7 @@ Vtx *func_151019C4(RayBeam *beam, s16 viewport) {
         return NULL;
     }
     if (data->flags & 1) {
-        func_151D5D60(beam->head.vtxBuffers, viewport, sizeof(beam->head.vtxTemplate), &vtx, &isNew);
+        particle_getViewBuffer(beam->head.vtxBuffers, viewport, sizeof(beam->head.vtxTemplate), &vtx, &isNew);
         result = vtx;
         if (vtx != NULL) {
             if (isNew) {
@@ -789,7 +789,7 @@ struct Struct15101F50 {
 };
 
 /* Fills the viewport's vertex buffer with a quad centred on pos, half-axes axisU * width and axisV * height. */
-Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
+Vtx *particle_buildCentredAxisQuad(Struct15101F50 *particle, s16 viewport) {
     s32 pad; // matching: unused stack slot in the original frame
     Vtx *vtx;
     Vtx *ret;
@@ -797,7 +797,7 @@ Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
     Vec3f axisV;
     u8 isNew;
 
-    func_151D5D60(particle->head.vtxBuffers, viewport, sizeof(particle->head.vtxTemplate), &vtx, &isNew);
+    particle_getViewBuffer(particle->head.vtxBuffers, viewport, sizeof(particle->head.vtxTemplate), &vtx, &isNew);
     ret = vtx; // matching: the result is returned from its own stack copy, not by reloading vtx
     // matching: an early `if (vtx == NULL) return NULL;` lays out the branches differently
     if (vtx != NULL) {
@@ -993,7 +993,7 @@ s32 func_151025F4(Owner151025F4 *obj, s32 arg1) {
 }
 
 /* Starts effect `kind` on obj, using the effect tables for its parameters; picks one of two styles by object id. */
-EffectParticle *func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
+EffectParticle *particle_startObjRayBeam(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
     s32 unk5;
     s32 unk6;
 
@@ -1026,17 +1026,17 @@ EffectParticle *func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s
             break;
     }
     // matching: the int 20 is converted separately; 20.0f would share one register with the other 20.0f
-    return func_15100600(obj, &D_800A21A0[kind], &D_800A21F4[kind], D_800A2248[kind], arg1, unk5, unk6, 0,
+    return particle_spawnRayBeam(obj, &D_800A21A0[kind], &D_800A21F4[kind], D_800A2248[kind], arg1, unk5, unk6, 0,
                          20.0f, 20, 4.0f, 0.08f, arg3, arg4, arg5);
 }
 
-/* Sends message 0x1A for `actor` (stops the effect started by func_151026BC). */
-void func_151027E8(Actor *actor) {
+/* Sends message 0x1A for `actor` (stops the effect started by particle_startObjRayBeam). */
+void particle_stopObjEffect(Actor *actor) {
     ActorRef msg;
 
     msg.actor = actor;
     msg.uniqueId = actor->unique_id;
-    func_151403A8((s32)&msg, 0x1A);
+    particle_broadcastToQuadParticles((s32)&msg, 0x1A);
 }
 
 

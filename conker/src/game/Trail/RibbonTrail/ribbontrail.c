@@ -204,7 +204,7 @@ s32 trail_followTarget(EffectObj *obj) {
 extern struct {
     s32 unk0;
     s32 unk4;
-} D_800A4AC8[];
+} gEffectRenderModes[];
 
 /* Draws the trail as a camera-facing strip 20 units wide, from the newest point to the oldest.
  * While flags & 2 is set the strip starts at the effect position itself. */
@@ -234,16 +234,16 @@ Gfx *trail_drawFollowTrail(EffectObj *obj, Gfx *gfx, s16 view) {
     f32 scale;
 
     if (obj->head.count >= 2) {
-        func_151D5D60(obj->buffers, view, (obj->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(obj->buffers, view, (obj->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             points = obj->items;
             camera = func_15144B34(view);
             flag = 1;
             gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
-            gfx = func_1513F4E4(gfx, 0x4E, &flag);
+            gfx = particle_setCombineMode(gfx, 0x4E, &flag);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
+            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &flag);
             if (obj->head.tmpl.flags & 2) {
                 index = obj->head.end - 1;
                 if (index < 0) {
@@ -464,7 +464,7 @@ void trail_spawnParticleAtTarget(Actor *target, u8 arg1, s32 arg2) {
     spawn.vel.x = 0.0f;
     spawn.vel.y = 0.0f;
     spawn.vel.z = 0.0f;
-    func_15130280(&spawn, 1, 0, 0, arg1, arg2);
+    particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, arg1, arg2);
 }
 
 /* Particle a ribbon effect drags along (see trail_moveRibbon). */
@@ -570,7 +570,7 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32
         particle.handlerSet = 0;
         particle.viewMask = 0;
         particle.views = 0xFF;
-        state->linked = func_15130280(&particle, 1, 0, 0, arg3, arg4);
+        state->linked = particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, arg3, arg4);
         }
     }
     return obj;
@@ -780,7 +780,7 @@ Gfx *trail_drawRibbon(EffectObj *obj, Gfx *gfx, s16 view) {
         return gfx;
     }
     points = obj->items;
-    func_151D5D60(obj->buffers, view, (obj->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), &vtx, NULL);
+    particle_getViewBuffer(obj->buffers, view, (obj->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
@@ -788,8 +788,8 @@ Gfx *trail_drawRibbon(EffectObj *obj, Gfx *gfx, s16 view) {
     flag = 1;
     gfx = func_15142E24(gfx, &gEffectTextures[120], 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-    gfx = func_1513F4E4(gfx, 0x56, &flag);
-    gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
+    gfx = particle_setCombineMode(gfx, 0x56, &flag);
+    gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &flag);
     previous = obj->head.end - 1;
     if (previous < 0) {
         previous = obj->head.tmpl.itemCount - 1;

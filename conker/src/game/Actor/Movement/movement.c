@@ -1991,7 +1991,7 @@ void actor_updatePlayer(Actor *actor) {
                     if (actor->mv->camjolt <= 0) {
                         if ((actor->energy == 1) || ((moveDelta >= 0x5E01) && (moveDelta < 0xA200))) {
                             actor->energy = 0;
-                            func_150D5A6C(actor, 0xFF, 1);
+                            particle_spawnBreakup(actor, 0xFF, 1);
                             actor_kill(actor, 8);
                         } else if (actor->energy != 0) {
                             if (gIsMultiplayer == 0) {
@@ -2051,7 +2051,7 @@ void actor_updatePlayer(Actor *actor) {
         } else if (physics == 2) {
             if (floorY == -10000.0f) {
                 actor->energy = 0;
-                func_150D5A6C(actor, 0xFF, 1);
+                particle_spawnBreakup(actor, 0xFF, 1);
                 actor_kill(actor, 8);
             }
             if (actor->mv->unk50 <= 0) {
@@ -2792,8 +2792,8 @@ void func_15052590(Actor *obj) {
     flags = obj->task_attrib;
     if (flags & 0x80) {
         obj->task_attrib = flags & ~0x80;
-        func_150AFC68(dc_glbl_CharNum, 3, 0x3FC, 6, 0xFF, 0);
-        func_150AFC68(dc_glbl_CharNum, 2, 0x3FC, 6, 0xFF, 0);
+        particle_spawnBoneSpriteEmitter(dc_glbl_CharNum, 3, 0x3FC, 6, 0xFF, 0);
+        particle_spawnBoneSpriteEmitter(dc_glbl_CharNum, 2, 0x3FC, 6, 0xFF, 0);
     }
 
     if ((D_800C35EA[0] != 1) || ((D_800C3654[0] != 0) && (func_150229E4(obj) == 0))) {
@@ -3502,7 +3502,7 @@ void func_150538CC(Actor *obj) {
 
                     sfx = func_150ADA20() % 9U;
                     actor_playPlayerSound((sfx < 2) ? sfx + 0x18 : sfx + 0x29, obj, 30000, 0, 500, 1500, 5);
-                    func_15174690(dc_glbl_CharNum, 0, 0x14, 0, 0x199, 4, 0xAA, 0xFF, 0);
+                    particle_spawnWakePuff(dc_glbl_CharNum, 0, 0x14, 0, 0x199, 4, 0xAA, 0xFF, 0);
                 }
             }
         }
@@ -3649,7 +3649,7 @@ void func_15054A0C(Actor *obj) {
 
 void func_15054A5C(Actor *obj, Actor *other) {
     other->mv->weapon_status = 0;
-    func_151027E8(other);
+    particle_stopObjEffect(other);
     actor_remove(obj, 0);
 }
 
@@ -3770,12 +3770,12 @@ void func_15054A94(Actor *obj) {
     if (other->animseq.uh == 0x10A && otherAnim->unk3C <= 0 && ready &&
         (state->buttons & 0x2000)) {
         if (obj->taskint[1] == 0) {
-            func_151026BC(other, -1, 3, 1, 0xFF, 1);
+            particle_startObjRayBeam(other, -1, 3, 1, 0xFF, 1);
             obj->taskint[1] = 1;
         }
     } else if (obj->taskint[1] == 1) {
         obj->taskint[1] = 0;
-        func_151027E8(other);
+        particle_stopObjEffect(other);
     }
 }
 
@@ -3960,7 +3960,7 @@ void func_1505528C(Actor *obj) {
             pos.x = obj->xpos;
             pos.y = obj->ypos + 20.0f;
             pos.z = obj->zpos;
-            func_151DCDE0(&pos, 0xFF, 1);
+            particle_spawnSmallDebrisBurst(&pos, 0xFF, 1);
         }
         actor_remove(obj, 1);
         return;

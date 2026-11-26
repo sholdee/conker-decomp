@@ -41,12 +41,12 @@ void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {
             dir[2].x = dirTo[2].x - dirFrom[2].x;
             dir[2].y = dirTo[2].y - dirFrom[2].y;
             dir[2].z = dirTo[2].z - dirFrom[2].z;
-            func_1514C470(points[2].x, points[2].y, points[2].z, points[3].x, points[3].y, points[3].z,
+            particle_emitOnLine(points[2].x, points[2].y, points[2].z, points[3].x, points[3].y, points[3].z,
                           func_150ADA68() * 6.0f + 14.0f, 13, 0, 0.0f, &dir[2], arg1);
             dir[3].x = dirTo[3].x - dirFrom[3].x;
             dir[3].y = dirTo[3].y - dirFrom[3].y;
             dir[3].z = dirTo[3].z - dirFrom[3].z;
-            func_1514C470(points[3].x, points[3].y, points[3].z, points[0].x, points[0].y, points[0].z,
+            particle_emitOnLine(points[3].x, points[3].y, points[3].z, points[0].x, points[0].y, points[0].z,
                           func_150ADA68() * 6.0f + 14.0f, 13, 0, 0.0f, &dir[3], arg1);
         }
     }

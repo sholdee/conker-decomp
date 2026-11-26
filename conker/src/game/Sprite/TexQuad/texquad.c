@@ -24,7 +24,7 @@ Gfx gTexQuadResetDl[] = {
 static s32 (*gTexQuadUpdateFuncs[])(TexturedQuad *) = { NULL };
 static s32 (*gTexQuadDestroyFuncs[])(TexturedQuad *) = { NULL };
 
-extern RenderModePair D_800A4AC8[];
+extern RenderModePair gEffectRenderModes[];
 
 void *memcpy(void *, const void *, u32);
 
@@ -84,12 +84,12 @@ Gfx *sprite_drawTexQuad(Gfx *gfx, TexturedQuad *quad, s32 view) {
     gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
     gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
     gfx = func_15142E24(gfx, &gEffectTextures[quad->texture], quad->frame, 0, 0, 0, quad->texture, 0, 0, &needSync, 3);
-    gfx = func_1513F4E4(gfx, quad->combiner, &needSync);
+    gfx = particle_setCombineMode(gfx, quad->combiner, &needSync);
     gfx = func_15142FBC(gfx,
                         G_PM_NPRIMITIVE | ((quad->flags & 2) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_PERSP |
                             G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE |
                             G_CD_NOISE | G_AD_NOISE,
-                        D_800A4AC8[quad->renderMode].cycle1 | D_800A4AC8[quad->renderMode].cycle2, &needSync);
+                        gEffectRenderModes[quad->renderMode].cycle1 | gEffectRenderModes[quad->renderMode].cycle2, &needSync);
     gSPVertex(gfx++, quad->vtx, 4, 0);
     gSP1Triangle(gfx++, 0, 1, 2, 0);
     gSP1Triangle(gfx++, 0, 2, 3, 0);

@@ -29,5 +29,5 @@ void func_1519072C(Actor *self) {
     ref.actor = self;
     ref.uniqueId = self->unique_id;
     effect_sendEventToFollowerGroups((s32)&ref, 0x2A);
-    func_1518F45C((s32)&ref, 0x49);
+    particle_broadcastToActorEmitters((s32)&ref, 0x49);
 }

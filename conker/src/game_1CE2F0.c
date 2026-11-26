@@ -58,7 +58,7 @@ void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
 }
 
 /*
- * Extra data of the particles spawned by func_151A11E4, read by its callback func_151A175C.
+ * Extra data of the particles spawned by particle_updateGatherEmitter, read by its callback particle_updateGatherParticle.
  * The *Start/*End fields are values of BillboardParticle.life, which counts down.
  */
 typedef struct {
@@ -83,7 +83,7 @@ typedef struct {
 
 
 /* Spawns particles at random points in a sphere around the emitter; each drifts back to the centre. */
-void func_151A11E4(SphereEmitter *emitter) {
+void particle_updateGatherEmitter(SphereEmitter *emitter) {
     EmitterParams *params;
     BillboardTemplate packet;
     ConvergeParticleData data;
@@ -188,8 +188,8 @@ void func_151A11E4(SphereEmitter *emitter) {
     }
 }
 
-/* Callback 0x10 (func_151A11E4's particles): fade in and grow, drift, then fade out and shrink. */
-void func_151A175C(BillboardParticle *particle) {
+/* Callback 0x10 (particle_updateGatherEmitter's particles): fade in and grow, drift, then fade out and shrink. */
+void particle_updateGatherParticle(BillboardParticle *particle) {
     ConvergeParticleData *data = (ConvergeParticleData *)(particle + 1);
 
     if (particle->tmpl.life > data->fadeInEnd) {
@@ -231,7 +231,7 @@ void func_151A175C(BillboardParticle *particle) {
     }
 }
 
-/* Data copied to 0x28 of the effect created by func_151A18DC. */
+/* Data copied to 0x28 of the effect created by particle_startGatherEmitter. */
 typedef struct {
     /* 0x00 */ Words3 unk0;
     /* 0x0C */ f32 unkC;
@@ -244,7 +244,7 @@ typedef struct {
 } EffectData151A18DC;
 
 /* Creates a type 3 effect_newTimedEffectNoDraw effect from the spawner's settings. */
-void func_151A18DC(EffectSpawner *spawner) {
+void particle_startGatherEmitter(EffectSpawner *spawner) {
     s32 pad; // matching: unused stack slot
     EffectData151A18DC data;
     TimedEffect *effect;
@@ -264,7 +264,7 @@ void func_151A18DC(EffectSpawner *spawner) {
     }
 }
 
-/* Extra data of the particles spawned by func_151A1998, read by its callback func_151A1E34. */
+/* Extra data of the particles spawned by particle_updateHoverEmitter, read by its callback particle_updateHoverParticle. */
 typedef struct {
     /* 0x00 */ s16 fadeInStep;
     /* 0x02 */ s16 fadeInStart;
@@ -279,7 +279,7 @@ typedef struct {
 } PuffParticleData;
 
 /* Spawns particles at random points in a sphere around the emitter; they stay where they are. */
-void func_151A1998(SphereEmitter *emitter) {
+void particle_updateHoverEmitter(SphereEmitter *emitter) {
     EmitterParams *params;
     BillboardTemplate packet;
     PuffParticleData data;
@@ -363,8 +363,8 @@ void func_151A1998(SphereEmitter *emitter) {
     }
 }
 
-/* Callback 0x11 (func_151A1998's particles): fade in and grow, then fade out and shrink. */
-void func_151A1E34(BillboardParticle *particle) {
+/* Callback 0x11 (particle_updateHoverEmitter's particles): fade in and grow, then fade out and shrink. */
+void particle_updateHoverParticle(BillboardParticle *particle) {
     s16 life;
     PuffParticleData *data;
 
@@ -384,7 +384,7 @@ void func_151A1E34(BillboardParticle *particle) {
     }
 }
 
-/* Data copied to 0x28 of the effect created by func_151A1EE8. */
+/* Data copied to 0x28 of the effect created by particle_startHoverEmitter. */
 typedef struct {
     /* 0x00 */ Words3 unk0;
     /* 0x0C */ f32 unkC;
@@ -399,7 +399,7 @@ typedef struct {
 } EffectData151A1EE8;
 
 /* Creates a type 4 effect_newTimedEffectNoDraw effect from the spawner's settings. */
-void func_151A1EE8(EffectSpawner *spawner) {
+void particle_startHoverEmitter(EffectSpawner *spawner) {
     s32 pad; // matching: unused stack slot
     EffectData151A1EE8 data;
     TimedEffect *effect;
@@ -422,8 +422,8 @@ void func_151A1EE8(EffectSpawner *spawner) {
 }
 
 /*
- * Extra data of the particles spawned by func_151A1FB4, read by its callbacks func_151A24A8 and
- * func_151A25E0. The *Start/*End fields are values of BillboardParticle.life, which counts down.
+ * Extra data of the particles spawned by particle_updateSwellEmitter, read by its callbacks particle_updateSwellParticle and
+ * particle_updateSwellTint. The *Start/*End fields are values of BillboardParticle.life, which counts down.
  */
 typedef struct {
     /* 0x00 */ s16 fadeInStep;
@@ -443,7 +443,7 @@ typedef struct {
 } SmokeParticleData;
 
 /* Spawns particles at random points in a sphere around the emitter; they grow, tint and accelerate. */
-void func_151A1FB4(SphereEmitter *emitter) {
+void particle_updateSwellEmitter(SphereEmitter *emitter) {
     EmitterParams *params;
     BillboardTemplate packet;
     SmokeParticleData data;
@@ -532,8 +532,8 @@ void func_151A1FB4(SphereEmitter *emitter) {
     }
 }
 
-/* Callback 0x12 (func_151A1FB4's particles): fade in, grow, fade out, swell; switches to 0x13 to tint. */
-void func_151A24A8(BillboardParticle *particle) {
+/* Callback 0x12 (particle_updateSwellEmitter's particles): fade in, grow, fade out, swell; switches to 0x13 to tint. */
+void particle_updateSwellParticle(BillboardParticle *particle) {
     SmokeParticleData *data = (SmokeParticleData *)(particle + 1);
 
     if (particle->tmpl.life > data->fadeInEnd) {
@@ -563,8 +563,8 @@ void func_151A24A8(BillboardParticle *particle) {
     }
 }
 
-/* Callback 0x13: func_151A24A8 after the switch, with the env colour following life. */
-void func_151A25E0(BillboardParticle *particle) {
+/* Callback 0x13: particle_updateSwellParticle after the switch, with the env colour following life. */
+void particle_updateSwellTint(BillboardParticle *particle) {
     SmokeParticleData *data = (SmokeParticleData *)(particle + 1);
 
     if (particle->tmpl.life > data->fadeInEnd) {
@@ -589,7 +589,7 @@ void func_151A25E0(BillboardParticle *particle) {
     particle->tmpl.envR = particle->tmpl.envG = particle->tmpl.envB = particle->tmpl.life * data->tintStep;
 }
 
-/* func_151A26EC's per-particle data, before it is copied into the particle. */
+/* particle_spawnDragFadeSprite's per-particle data, before it is copied into the particle. */
 typedef struct {
     /* 0x0 */ f32 drag;
     /* 0x4 */ FadeEvent fade;
@@ -597,10 +597,10 @@ typedef struct {
 
 /* Fade event handlers (FadeEvent.eventFunc), called with the particle and its event time; declared
    without a prototype as the handlers take only the particle. */
-static void (*D_8008F8E0[])() = { func_151A2F0C, func_151A3150 };
+static void (*gDragFadeEventFuncs[])() = { particle_spawnTrailBurstAtSprite, func_151A3150 };
 
-/* Spawns one func_15130374 particle (texture 39, update func 0x11) at pos/offset with velocity vel. */
-s32 func_151A26EC(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, f32 size,
+/* Spawns one particle_newOwnedSpriteParticle particle (texture 39, update func 0x11) at pos/offset with velocity vel. */
+s32 particle_spawnDragFadeSprite(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, f32 size,
                   s16 timer, u8 alpha, s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc,
                   u8 r, u8 g, u8 b, u8 argF, s32 arg10) {
     ParticleData151A26EC data;
@@ -653,7 +653,7 @@ s32 func_151A26EC(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, 
     desc.deathFunc = -1;
     desc.drawFunc = -1;
     desc.handlerSet = 2;
-    particle = func_15130374(&desc, 1, 0x10, argF, arg10);
+    particle = particle_newOwnedSpriteParticle(&desc, 1, 0x10, argF, arg10);
     if (particle != NULL) {
         // matching: the target copies 8 bytes from data.drag, overlapping the second copy
         memcpy(&particle->data.dragFade.drag, &data.drag, 8);
@@ -662,8 +662,8 @@ s32 func_151A26EC(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, 
     return 0;
 }
 
-/* Update func 0x11 (func_151A26EC's particles): dim out, run the one-shot event, then apply drag. */
-s32 func_151A2960(SpriteParticle *particle, Vec3f *prevPos) {
+/* Update func 0x11 (particle_spawnDragFadeSprite's particles): dim out, run the one-shot event, then apply drag. */
+s32 particle_updateDragFade(SpriteParticle *particle, Vec3f *prevPos) {
     FadeEvent *fade;
 
     fade = &particle->data.dragFade.fade;
@@ -672,27 +672,27 @@ s32 func_151A2960(SpriteParticle *particle, Vec3f *prevPos) {
     }
     if (gIsMultiplayer == 0 && fade->eventTime != -1 && fade->eventFunc != -1 &&
         fade->eventTime >= particle->head.desc.timer) {
-        D_8008F8E0[fade->eventFunc](particle, fade->eventTime);
+        gDragFadeEventFuncs[fade->eventFunc](particle, fade->eventTime);
         fade->eventTime = -1;
     }
-    return func_1513170C(particle, prevPos);
+    return particle_updateDrag(particle, prevPos);
 }
 
 /* Bursts `count` particles from pos moving at yaw/pitch with a speed that falls off over the burst. */
-void func_151A2A14(Vec3f *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope, s32 count,
+void particle_burstAtYawPitch(Vec3f *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope, s32 count,
                    f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange,
                    s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg18,
                    s32 arg19) {
-    func_151A2C24(pos, NULL, yaw, pitch, speed, sizeBase, sizeSlope, count, spread, drag, gravityBase,
+    particle_spawnDragFadeBurst(pos, NULL, yaw, pitch, speed, sizeBase, sizeSlope, count, spread, drag, gravityBase,
                   gravityRange, delayBase, delayRange, alphaBase, alphaRange, fadeStart, fadeOutStart, eventFunc,
                   arg18, arg19, 1);
 }
 
 /* Bursts `count` particles from pos moving along dir, scaled down over the burst. */
-void func_151A2AD4(Vec3f *pos, f32 *dir, f32 sizeBase, f32 sizeSlope, s32 count, f32 spread, f32 drag,
+void particle_burstAlongDir(Vec3f *pos, f32 *dir, f32 sizeBase, f32 sizeSlope, s32 count, f32 spread, f32 drag,
                    f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange, s16 alphaBase,
                    s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg16, s32 arg17) {
-    func_151A2C24(pos, dir, 0, 0, 0.0f, sizeBase, sizeSlope, count, spread, drag, gravityBase, gravityRange,
+    particle_spawnDragFadeBurst(pos, dir, 0, 0, 0.0f, sizeBase, sizeSlope, count, spread, drag, gravityBase, gravityRange,
                   delayBase, delayRange, alphaBase, alphaRange, fadeStart, fadeOutStart, eventFunc, arg16, arg17,
                   0);
 }
@@ -701,7 +701,7 @@ void func_151A2AD4(Vec3f *pos, f32 *dir, f32 sizeBase, f32 sizeSlope, s32 count,
 typedef void (*BurstVelocityFunc)(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out);
 
 /* BurstVelocityFunc: dir scaled by 1 - t. */
-void func_151A2B84(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out) {
+void particle_getBurstVelAlongDir(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out) {
     f32 scale = 1.0f - t;
 
     out->x = dir[0] * scale;
@@ -710,19 +710,19 @@ void func_151A2B84(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out) {
 }
 
 /* BurstVelocityFunc: the yaw/pitch direction at speed * (1 - t). */
-void func_151A2BD0(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out) {
+void particle_getBurstVelAtYawPitch(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out) {
     func_15143794(yaw, pitch, (1.0f - t) * speed, out);
 }
 
-/* BillboardParticle colours picked at random by func_151A2C24. */
+/* BillboardParticle colours picked at random by particle_spawnDragFadeBurst. */
 typedef struct {
     u8 rgb[4][3];
 } BurstColors;
 
 static BurstColors D_8008F8E8 = { { { 0, 0, 0 }, { 89, 0, 0 }, { 255, 255, 255 }, { 128, 128, 128 } } };
 
-/* Spawns `count` func_151A26EC particles around pos; size and speed change linearly over the burst. */
-void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
+/* Spawns `count` particle_spawnDragFadeSprite particles around pos; size and speed change linearly over the burst. */
+void particle_spawnDragFadeBurst(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
                    s32 count, f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase,
                    s16 delayRange, s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart,
                    s8 eventFunc, u8 arg13, s32 arg14, u8 useAngles) {
@@ -737,9 +737,9 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
     BurstColors colors;
 
     if (!useAngles) {
-        velocityFunc = func_151A2B84;
+        velocityFunc = particle_getBurstVelAlongDir;
     } else {
-        velocityFunc = func_151A2BD0;
+        velocityFunc = particle_getBurstVelAtYawPitch;
     }
     if (fadeStart < fadeOutStart) {
         minFade = fadeStart;
@@ -767,7 +767,7 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
         } else {
             b = -1;
         }
-        func_151A26EC(pos, &offset, &vel, drag, rand * gravityRange + gravityBase,
+        particle_spawnDragFadeSprite(pos, &offset, &vel, drag, rand * gravityRange + gravityBase,
                       sizeSlope * t + sizeBase, delay + minFade, a % (u32)(alphaRange + 1) + alphaBase,
                       fadeStart, fadeOutStart, b, eventFunc, colors.rgb[color][0], colors.rgb[color][1],
                       colors.rgb[color][2], arg13, arg14);
@@ -776,8 +776,8 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
     }
 }
 
-/* D_8008F8E0[0]: a func_15152B38 burst at the particle's position, sized by the particle. */
-void func_151A2F0C(SpriteParticle *particle) {
+/* gDragFadeEventFuncs[0]: a particle_spawnTrailBurst burst at the particle's position, sized by the particle. */
+void particle_spawnTrailBurstAtSprite(SpriteParticle *particle) {
     TrailBurst config;
 
     config.countBase = 8;
@@ -838,10 +838,10 @@ void func_151A2F0C(SpriteParticle *particle) {
     config.unk72 = -1;
     config.unk73 = -1;
 
-    func_15152B38(&config, particle->head.header.owner, particle->head.header.kind);
+    particle_spawnTrailBurst(&config, particle->head.header.owner, particle->head.header.kind);
 }
 
-/* D_8008F8E0[1]: a func_15152B38 burst at the particle's position, sized by the particle. */
+/* gDragFadeEventFuncs[1]: a particle_spawnTrailBurst burst at the particle's position, sized by the particle. */
 void func_151A3150(SpriteParticle *particle) {
     TrailBurst config;
 
@@ -903,5 +903,5 @@ void func_151A3150(SpriteParticle *particle) {
     config.unk72 = -1;
     config.unk73 = -1;
 
-    func_15152B38(&config, particle->head.header.owner, particle->head.header.kind);
+    particle_spawnTrailBurst(&config, particle->head.header.owner, particle->head.header.kind);
 }

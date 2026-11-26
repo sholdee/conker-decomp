@@ -149,17 +149,17 @@ static const u8 D_800A14D8[4] = { 0xA8, 0xA9, 0xAA, 0xAB };
 
 /*
  * Plays a fixed burst of effects: func_15164F0C, a func_150E83AC effect at D_800A149C lasting
- * 120-181 frames, the func_151D5514/func_151D3FF4/func_151541B8 trio at D_800A1490, and four
- * func_1513264C debris pieces thrown from the D_800A14A8 points at random yaw/pitch/speed.
+ * 120-181 frames, the particle_spawnBlastSpray/particle_spawnLightFlash/particle_spawnGrowFade trio at D_800A1490, and four
+ * particle_newModelParticleWithFloor debris pieces thrown from the D_800A14A8 points at random yaw/pitch/speed.
  */
 void func_150EB8C4(void) {
     ParticleSpawn spawn;
 
     func_15164F0C(2, D_800BE9E8, NULL, 0xFF, 1);
     func_150E83AC(&D_800A149C, func_150ADA20() % 62U + 120, 0xFF, 1);
-    func_151D5514(&D_800A1490, 0xFF, 1);
-    func_151D3FF4(&D_800A1490, 0xFF, 1);
-    func_151541B8(&D_800A1490, func_150ADA68() * 4.0f + 12.0f, 1.640999913f,
+    particle_spawnBlastSpray(&D_800A1490, 0xFF, 1);
+    particle_spawnLightFlash(&D_800A1490, 0xFF, 1);
+    particle_spawnGrowFade(&D_800A1490, func_150ADA68() * 4.0f + 12.0f, 1.640999913f,
                   func_150ADA20() % 56U + 200, 0.0f, 0xFF, 1);
     {
         u8 i;
@@ -206,7 +206,7 @@ void func_150EB8C4(void) {
             spawn.gravity = func_150ADA68() * 0.6170000434f + -1.621000051f;
             spawn.lifetime = func_150ADA20() % 51U + 50;
             spawn.model = D_800A14D8[i];
-            func_1513264C(&spawn, 3, 0xFF, 0, 0, 0xFF, 1);
+            particle_newModelParticleWithFloor(&spawn, 3, 0xFF, 0, 0, 0xFF, 1);
         }
     }
 }
@@ -214,7 +214,7 @@ void func_150EB8C4(void) {
 
 /*
  * Effect burst at a gate cylinder: a func_150E83AC effect lasting 300-400 frames, a rumble
- * (type 1, 15-35 long), func_15164F0C, and the func_151D3FF4/func_151D5514/func_151541B8 trio at
+ * (type 1, 15-35 long), func_15164F0C, and the particle_spawnLightFlash/particle_spawnBlastSpray/particle_spawnGrowFade trio at
  * the cylinder's base and again half its height up.
  */
 void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind) {
@@ -239,10 +239,10 @@ void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind) {
     func_15164F0C(0, 0, NULL, owner, kind);
     growth = 1.640999913f; // matching: a local (not a literal) is loaded once into a saved FP register
     for (i = 0; i < 2; i++) {
-        func_151D3FF4(&position, owner, kind);
-        func_151D5514(&position, owner, kind);
+        particle_spawnLightFlash(&position, owner, kind);
+        particle_spawnBlastSpray(&position, owner, kind);
         random = func_150ADA68();
-        func_151541B8(&position, random * 4.0f + 12.0f, growth,
+        particle_spawnGrowFade(&position, random * 4.0f + 12.0f, growth,
                       func_150ADA20() % 56U + 200, 0.0f, owner, kind);
         position.y += step;
     }

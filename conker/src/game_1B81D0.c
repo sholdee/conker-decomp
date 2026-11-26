@@ -7,10 +7,10 @@
 
 /*
  * Particle callback: once the particle is below its floor height, spawns 4-7 splash droplets and
- * a func_1518CA80 effect there (colour 1 for model 4, else 0) and returns 0. Returns 1 while the
+ * a particle_spawnGrowingBillboard effect there (colour 1 for model 4, else 0) and returns 0. Returns 1 while the
  * particle is still above its floor.
  */
-s32 func_1518AD20(FloorParticle *particle) {
+s32 particle_splashOnFloor(FloorParticle *particle) {
     f32 *floorY; // matching: IDO keeps &particle->floorY live in a register only via this pointer
 
     floorY = &particle->floorY;
@@ -82,7 +82,7 @@ s32 func_1518AD20(FloorParticle *particle) {
             } else {
                 spawn.update2Fn = 4;
             }
-            droplet = func_15132A4C(&spawn, 3, 0xFF, sizeof(f32), particle->head.header.owner, particle->head.header.kind);
+            droplet = particle_newModelParticle(&spawn, 3, 0xFF, sizeof(f32), particle->head.header.owner, particle->head.header.kind);
             if (droplet != NULL) {
                 droplet->floorY = *floorY;
             }
@@ -119,14 +119,14 @@ s32 func_1518AD20(FloorParticle *particle) {
         }
         effect.fadeStep = 10;
         effect.onExpire = 0;
-        func_1518CA80(&effect, 1);
+        particle_spawnGrowingBillboard(&effect, 1);
         return 0;
     }
     return 1;
 }
 
 /* Returns 0 once the particle is below its floor height, 1 while it is above. */
-s32 func_1518B1AC(FloorParticle *particle) {
+s32 particle_dieBelowFloor(FloorParticle *particle) {
     if (particle->head.pos.y < particle->floorY) {
         return 0;
     }
@@ -137,7 +137,7 @@ s32 func_1518B1AC(FloorParticle *particle) {
  * Fades the particle in by height above its floor: alpha = min(lifetime * 4, height / 2, 255).
  * Returns 0 once it is below the floor, 1 otherwise.
  */
-s32 func_1518B1D8(FloorParticle *particle) {
+s32 particle_fadeInAboveFloor(FloorParticle *particle) {
     f32 height;
     s32 lifetimeAlpha;
     s32 alpha;
@@ -168,17 +168,17 @@ s32 func_1518B1D8(FloorParticle *particle) {
     return 1;
 }
 
-/* func_1518B2A8 with model 4. */
-void func_1518B264(f32 *pos, f32 radius, f32 size, s32 count, u8 arg4) {
-    func_1518B2A8(pos, radius, size, count, 4, 0xFF, arg4);
+/* particle_spawnModelDroplets with model 4. */
+void particle_spawnDroplets(f32 *pos, f32 radius, f32 size, s32 count, u8 arg4) {
+    particle_spawnModelDroplets(pos, radius, size, count, 4, 0xFF, arg4);
 }
 
 /*
  * Spawns up to count droplets of the given model at random points within radius of pos. A droplet
  * is spawned only where collision_probeFloorSurfABSet0Cached finds a floor below the point, together with 1-4 smaller ones
- * above it; every droplet remembers that floor height (see func_1518AD20). arg5 is unused.
+ * above it; every droplet remembers that floor height (see particle_splashOnFloor). arg5 is unused.
  */
-void func_1518B2A8(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
+void particle_spawnModelDroplets(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
     ParticleSpawn spawn;
     CollisionHit floor;
     u8 angle;
@@ -237,7 +237,7 @@ void func_1518B2A8(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg
             spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
             if (collision_probeFloorSurfABSet0Cached(&spawn.pos, 0, -10000.0f, &floor) != 0) {
                 spawn.update2Fn = 2;
-                droplet = func_15132A4C(&spawn, 3, 0xFF, sizeof(f32), arg6, 0);
+                droplet = particle_newModelParticle(&spawn, 3, 0xFF, sizeof(f32), arg6, 0);
                 if (droplet != NULL) {
                     droplet->floorY = floor.height;
                 }
@@ -259,7 +259,7 @@ void func_1518B2A8(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg
                     spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
                     spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
                     spawn.update2Fn = 3;
-                    droplet = func_15132A4C(&spawn, 3, 0xFF, sizeof(f32), arg6, 0);
+                    droplet = particle_newModelParticle(&spawn, 3, 0xFF, sizeof(f32), arg6, 0);
                     if (droplet != NULL) {
                         droplet->floorY = floor.height;
                     }

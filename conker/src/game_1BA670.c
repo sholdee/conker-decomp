@@ -5,19 +5,19 @@
 /*
  * This file's .data. The emitter tables by ActorEmitterParams.table; the tables are in game_232150.c.
  */
-static EmitterTable *D_8008D5E0[] = {
+static EmitterTable *gActorEmitterTables[] = {
     &D_8008F780, &D_8008F78C, &D_8008F7A4, &D_8008F7B0, &D_8008F7D4, &D_8008F7BC, &D_8008F7C8, &D_8008F798,
     &D_8008F7E0, &D_8008F7EC, &D_8008F7F8, &D_8008F804, &D_8008F810, &D_8008F81C, &D_8008F828, &D_8008F834,
 };
 /* Particle spawn callbacks, by ParticleTemplate.spawnCb (game_1BB950.c). */
-static void (*D_8008D620[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, u16 *) = { func_1518E524, func_1518E5D8 };
+static void (*gActorEmitterSpawnFuncs[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, u16 *) = { particle_pickBlackTexture, particle_pickPaletteTexture };
 /* Lifetime callbacks, by ActorEmitterParams.expireCb (game_1BB950.c). */
-static s32 (*D_8008D628[])(ActorEmitterProcess *) = { func_1518E66C, func_1518E6D4 };
+static s32 (*gActorEmitterExpireFuncs[])(ActorEmitterProcess *) = { func_1518E66C, func_1518E6D4 };
 
 void *memcpy(void *, const void *, u32);
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
-ActorEmitterProcess *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
+ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
                        void *arg6) {
     ActorEmitterParams params;
     s32 i;
@@ -53,109 +53,109 @@ ActorEmitterProcess *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 kill
         params.flags = owner->energy ? 1 : 0;
         params.expireCb = 1;
         params.table = 7;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 11:
         params.lifetime = 75;
         params.flags = owner->energy ? 1 : 0;
         params.expireCb = 0;
         params.table = 1;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 12:
         params.lifetime = 75;
         params.flags = owner->energy ? 1 : 0;
         params.expireCb = 1;
         params.table = 7;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 1:
         params.lifetime = 500;
         params.flags = 1;
         params.expireCb = 0;
         params.table = 1;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 2:
         params.lifetime = 3000;
         params.flags = 1;
         params.expireCb = 1;
         params.table = 7;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 3:
         params.lifetime = 200;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 8;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 4:
         params.lifetime = 200;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 9;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 5:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 2;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 6:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 3;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 7:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 4;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 8:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 5;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 9:
         params.lifetime = 3000;
         params.flags = 0;
         params.expireCb = -1;
         params.table = 6;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 13:
         params.lifetime = lifetime;
         params.flags = (lifetime == 999) ? 0 : 1;
         params.expireCb = -1;
         params.table = 10;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 14:
         params.lifetime = lifetime;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 11;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 15:
         params.lifetime = lifetime;
         params.flags = (lifetime == 999) ? 0 : 1;
         params.expireCb = -1;
         params.table = 12;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 16:
         params.lifetime = lifetime;
         params.flags = (lifetime == 999) ? 0 : 1;
         params.expireCb = -1;
         params.table = 13;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 17:
         params.lifetime = 300;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 14;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     case 18:
         params.lifetime = lifetime;
         params.flags = 1;
         params.expireCb = -1;
         params.table = 15;
-        return func_1518E3C4(&params, arg4);
+        return particle_newActorEmitter(&params, arg4);
     }
     return NULL;
 }
@@ -164,7 +164,7 @@ ActorEmitterProcess *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 kill
  * Per-frame emitter update: follows the owner (or its bones), releases particles whose slot timer ran out
  * and spawns new ones at the info's rate. Dies with its owner or when its lifetime callback says so.
  */
-void func_1518D6E0(ActorEmitterProcess *emitter) {
+void particle_updateActorEmitter(ActorEmitterProcess *emitter) {
     ActorEmitterProcess *self;
     s8 done;
 
@@ -172,7 +172,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
     done = 0;
     if (!(self->flags & 1)) {
         if (self->count != 0) {
-            func_1518E308(self);
+            particle_freeActorEmitterParticles(self);
             self->state = 1;
         }
         return;
@@ -200,7 +200,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
             self->params.lifetime -= D_800BE9E4;
             if (self->params.lifetime < 0) {
                 if (self->params.expireCb != -1) {
-                    done = D_8008D628[self->params.expireCb](self);
+                    done = gActorEmitterExpireFuncs[self->params.expireCb](self);
                 } else {
                     done = 1;
                 }
@@ -209,14 +209,14 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
         freeSlot = NULL;
         if (self->params.owner->unk74 & (1 << gCurrentView)) {
             if (!(self->state & 1)) {
-                func_1518E308(self);
+                particle_freeActorEmitterParticles(self);
                 self->state |= 1;
             }
         } else {
             reset = 0;
             numFree = 0;
             prevFree = NULL;
-            table = D_8008D5E0[self->params.table];
+            table = gActorEmitterTables[self->params.table];
             if (self->params.owner->ob_matrix_ptr != NULL && (self->params.owner->unk74 & 0xF) != 0xF) {
                 attach = 4;
                 row = &table->infos[self->params.owner->current_lod * (table->n + 2)];
@@ -241,7 +241,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
                 attach = 2;
             }
             if (!(self->state & 8) && (self->state != attach || info->mode != self->infoMode)) {
-                func_1518E308(self);
+                particle_freeActorEmitterParticles(self);
                 reset = 1;
                 self->accum = info->maxCount;
             }
@@ -286,7 +286,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
                             data->vel.z = -10.0f;
                         }
                         data->vel.y = 0.0f;
-                        func_1513F680(&slot->particle->head, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D,
+                        particle_setQuadParticleFuncs(&slot->particle->head, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D,
                                       data->tmpl->unk3E);
                         slot->particle->head.def.lifetime =
                             func_150ADA20() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
@@ -354,9 +354,9 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
                             prevFree = freeSlot;
                             freeSlot = freeSlot->next;
                         }
-                        D_8008D620[tmpl->spawnCb](&spawn.texture, &spawnFlag, &spawn.rgba[0], &spawn.rgba[1],
+                        gActorEmitterSpawnFuncs[tmpl->spawnCb](&spawn.texture, &spawnFlag, &spawn.rgba[0], &spawn.rgba[1],
                                                   &spawn.rgba[2], &spawn.rgba[3], &spawn.renderModes);
-                        freeSlot->particle = func_1513D524(&spawn, tmpl->unk38, tmpl->unk39, 0, tmpl->unk3A,
+                        freeSlot->particle = particle_newQuadParticleWhite(&spawn, tmpl->unk38, tmpl->unk39, 0, tmpl->unk3A,
                                                            spawnFlag, sizeof(ActorEmitterParticleData), 0xFF, 0);
                         if (freeSlot->particle != NULL) {
                             memcpy(&freeSlot->particle->data, &data, sizeof(ActorEmitterParticleData));
@@ -434,7 +434,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
 }
 
 /* Sound record callback: moves the sound to its object (callback_param2); stops it when the object is gone. */
-s32 func_1518E298(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound) {
+s32 particle_followEmitterSound(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound) {
     Actor *target;
 
     target = record->callback_param2.obj;
@@ -449,7 +449,7 @@ s32 func_1518E298(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
 }
 
 /* Frees every particle the emitter holds and clears its slots. */
-void func_1518E308(ActorEmitterProcess *emitter) {
+void particle_freeActorEmitterParticles(ActorEmitterProcess *emitter) {
     ActorEmitterSlot *slot;
     s32 i;
 
@@ -465,15 +465,15 @@ void func_1518E308(ActorEmitterProcess *emitter) {
 }
 
 /* Switches the emitter to another EmitterTable, dropping its particles. */
-void func_1518E37C(ActorEmitterProcess *emitter, u8 table) {
+void particle_setActorEmitterTable(ActorEmitterProcess *emitter, u8 table) {
     if (emitter->params.table != table) {
-        func_1518E308(emitter);
+        particle_freeActorEmitterParticles(emitter);
         emitter->params.table = table;
     }
 }
 
 /* Starts an emitter process with the given params. */
-ActorEmitterProcess *func_1518E3C4(ActorEmitterParams *params, u8 arg1) {
+ActorEmitterProcess *particle_newActorEmitter(ActorEmitterParams *params, u8 arg1) {
     ActorEmitterProcess *emitter;
 
     if (params->owner->character_type == 150) {

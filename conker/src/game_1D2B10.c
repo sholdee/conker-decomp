@@ -48,7 +48,7 @@ typedef struct {
  * Per-frame update of a particle emitter effect: accumulates rate * scale * gFrameDelta and spawns one
  * particle per whole unit at a random point of the emitter's region, optionally snapped to the ground.
  */
-void func_151A5660(u8 *effect) {
+void particle_updateRegionEmitter(u8 *effect) {
     RegionEmitterState *emitter;
     ParticleEmitterDesc particle;
     f32 low;
@@ -164,7 +164,7 @@ void func_151A5660(u8 *effect) {
             particle.shrinkRate = func_150ADA68() * emitter->unk40Range + emitter->unk40Base;
             particle.growRate = func_150ADA68() * emitter->unk44Range + emitter->unk44Base;
             particle.unk2C = func_150ADA20() % (emitter->unk2CRange + 1) + emitter->unk2CBase;
-            func_15149550(&particle, 10, 0, 0, effect[0xC], effect[1]);
+            particle_spawnChannelParticle(&particle, 10, 0, 0, effect[0xC], effect[1]);
             emitter->pending -= 1.0f;
         } while (emitter->pending > 1.0f);
     }
@@ -177,37 +177,37 @@ typedef struct {
 } EffectSoundState;
 
 /* Releases the effect's sound (if any), then hands the effect to effect_defaultDestroyTimedEffect. */
-void func_151A5CAC(TimedEffect *arg0) {
+void particle_destroyRegionEmitter(TimedEffect *arg0) {
     EffectSoundState *state = (EffectSoundState *)((u8 *)arg0 + 0x58);
 
     // matching: the test reads through arg0 and the call through state, so IDO loads the handle twice
     if (*(u16 *)((u8 *)arg0 + 0x6C) != 0) {
-        func_151A5D2C(state->soundHandle);
+        particle_stopEffectSound(state->soundHandle);
     }
     effect_defaultDestroyTimedEffect(arg0);
 }
 
 /* Releases the effect's sound (if any), then hands the effect to effect_defaultFreeTimedEffect. */
-void func_151A5CEC(TimedEffect *arg0) {
+void particle_freeRegionEmitter(TimedEffect *arg0) {
     EffectSoundState *state = (EffectSoundState *)((u8 *)arg0 + 0x58);
 
     // matching: the test reads through arg0 and the call through state, so IDO loads the handle twice
     if (*(u16 *)((u8 *)arg0 + 0x6C) != 0) {
-        func_151A5D2C(state->soundHandle);
+        particle_stopEffectSound(state->soundHandle);
     }
     effect_defaultFreeTimedEffect(arg0);
 }
 
 /* Releases a sound handle. */
-void func_151A5D2C(u16 soundHandle) {
+void particle_stopEffectSound(u16 soundHandle) {
     sound_stop(soundHandle);
 }
 
 /*
- * Spawns an effect via func_1513C650 at pos, scaled by size on both axes, living duration + 20 frames.
+ * Spawns an effect via particle_spawnSurfaceQuadSprite at pos, scaled by size on both axes, living duration + 20 frames.
  * Returns NULL if duration <= 0, so the duration == -1 cases below are unreachable (the original has them).
  */
-QuadSprite *func_151A5D58(f32 size, u8 arg1, CollisionTri *surface, Vec3f *pos, s16 duration, u8 arg5, u8 arg6,
+QuadSprite *particle_spawnSurfaceMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *pos, s16 duration, u8 arg5, u8 arg6,
                           u8 arg7, s32 arg8) {
     SpriteDef2C params;
 
@@ -240,7 +240,7 @@ QuadSprite *func_151A5D58(f32 size, u8 arg1, CollisionTri *surface, Vec3f *pos, 
     params.unk16 = 0;
     params.unk17 = 6;
     params.viewportMask = 0xFF;
-    return func_1513C650(&params, 0, 0, surface, pos->x, pos->y, pos->z, size, size,
+    return particle_spawnSurfaceQuadSprite(&params, 0, 0, surface, pos->x, pos->y, pos->z, size, size,
                          func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                          arg5 ? 3 : 0, arg5 ? 0xFF : 0, 0, arg7, arg8);
 }
@@ -378,7 +378,7 @@ void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 
     spawn.scale.x = 1.0f;
     spawn.scale.y = 1.0f;
     spawn.scale.z = 1.0f;
-    effect = func_1513D2F0(&spawn, &D_800A4AA0, 0, 0x28, 0, 0x20, 0, 0, 0, sizeof(init), arg4, arg5);
+    effect = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x28, 0, 0x20, 0, 0, 0, sizeof(init), arg4, arg5);
     if (effect != NULL) {
         state = &effect->state;
         memcpy(state, &init, sizeof(init));
@@ -423,7 +423,7 @@ struct Game1D2B10QuadOwner {
 
 /* Writes the 4 vertices of a vertical quad rotated by table angle `index` into the owner's vertex
  * buffer `index` (initialised from the template the first time) and returns them, or NULL. */
-Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index) {
+Game1D2B10QuadVertex *particle_buildYawedVerticalQuad(Game1D2B10QuadOwner *owner, s16 index) {
     Game1D2B10QuadVertex *vertices;
     Game1D2B10QuadVertex *result;
     f32 dz;
@@ -433,7 +433,7 @@ Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index) {
     s32 pad; // matching: unused stack slot in the original frame
     u8 isNew;
 
-    func_151D5D60(owner->buffers, index, 0x40, &vertices, &isNew);
+    particle_getViewBuffer(owner->buffers, index, 0x40, &vertices, &isNew);
     result = vertices;
     if (vertices != NULL) {
         if (isNew) {

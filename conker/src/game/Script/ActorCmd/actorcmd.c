@@ -827,7 +827,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
             break;
         }
         case 4:
-            func_15193660(obj, 0xFF, 1);
+            particle_spawnBoneModelBurst(obj, 0xFF, 1);
             func_151937F4(obj, 0xFF, 1);
             text_spawnAmount(obj, 0xFF, 1);
             break;

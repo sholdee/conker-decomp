@@ -3,13 +3,13 @@
 #include "variables.h"
 
 void effect_destroyZoneEmitter(ZoneEmitter *obj) {
-    func_151A6AB8(obj);
-    func_1513CA6C(&obj->head);
+    particle_shutZoneEmitter(obj);
+    particle_destroyQuadParticleDefault(&obj->head);
 }
 
 void effect_freeZoneEmitter(ZoneEmitter *obj) {
-    func_151A6AB8(obj);
-    func_1513CAA0(&obj->head);
+    particle_shutZoneEmitter(obj);
+    particle_freeQuadParticleDefault(&obj->head);
 }
 
 /* TriggerZone handler: sends message 0x60034 to `target` with its facing angle and the index of the actor

@@ -3,22 +3,22 @@
 #include "variables.h"
 
 /* Sets unk40 to the point 100 units above the particle's position. */
-void func_1514BF50(JitterParticle *p) {
+void particle_resetBendTarget(JitterParticle *p) {
     p->head.def.rot.x = p->head.def.pos.x;
     p->head.def.rot.y = p->head.def.pos.y + 100.0f;
     p->head.def.rot.z = p->head.def.pos.z;
 }
 
 /* Eases the particle toward random wobble targets kept in its state at + 0x110. */
-void func_1514BF7C(JitterParticle *p) {
-    func_1514BC08(p, &p->jitter);
+void particle_updateRelaunchedJitter(JitterParticle *p) {
+    particle_updateJitter(p, &p->jitter);
 }
 
 /*
  * Advances the particle one frame: applies drag once per elapsed tick and gravity to the
  * velocity, then moves the position by the average of the old and new velocity.
  */
-void func_1514BF9C(JitterParticle *p) {
+void particle_moveJitterBallistic(JitterParticle *p) {
     ParticleJitter *motion;
     Vec3f oldVel;
     s32 ticks;
@@ -45,22 +45,22 @@ void func_1514BF9C(JitterParticle *p) {
     }
 }
 
-/* Update callback: ballistic motion, then func_1514BE20. */
-s32 func_1514C258(JitterParticle *p) {
-    func_1514BF9C(p);
-    func_1514BE20(p);
+/* Update callback: ballistic motion, then particle_easeBendTarget. */
+s32 particle_updateJitterBallisticEased(JitterParticle *p) {
+    particle_moveJitterBallistic(p);
+    particle_easeBendTarget(p);
     return 1;
 }
 
 /* Update callback: ballistic motion, then re-aims unk40 above the new position. */
-s32 func_1514C288(JitterParticle *p) {
-    func_1514BF9C(p);
-    func_1514BF50(p);
+s32 particle_updateJitterBallistic(JitterParticle *p) {
+    particle_moveJitterBallistic(p);
+    particle_resetBendTarget(p);
     return 1;
 }
 
 /* Resets the particle: life from relaunch.lifetime, gravity from relaunch.gravity, sets flag 0x08000000. */
-s32 func_1514C2B8(JitterParticle *p) {
+s32 particle_relaunchJitterParticle(JitterParticle *p) {
     p->head.expireFn = 0;
     p->head.updateFn2 = 36;
     p->head.def.lifetime = p->relaunch.lifetime;

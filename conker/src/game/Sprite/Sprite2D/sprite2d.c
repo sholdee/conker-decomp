@@ -55,7 +55,7 @@ typedef struct {
     s32 cycle1;
     s32 cycle2;
 } Game196DB0RenderMode;
-extern Game196DB0RenderMode D_800A4AC8[];
+extern Game196DB0RenderMode gEffectRenderModes[];
 
 /* Draws the sprite as a scaled textured rectangle. */
 Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
@@ -70,7 +70,7 @@ Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
         return gfx;
     }
     update = TRUE;
-    gfx = func_1513F4E4(gfx, sprite->params.unk37, &update);
+    gfx = particle_setCombineMode(gfx, sprite->params.unk37, &update);
     gDPSetPrimColor(gfx++, 1, 0, sprite->params.red, sprite->params.green, sprite->params.blue,
                     sprite->params.alpha);
     if (sprite->params.flags & 1) {
@@ -90,7 +90,7 @@ Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
     cycleType = (sprite->params.cycleType == 2) ? G_CYC_2CYCLE : G_CYC_1CYCLE;
     gfx = func_15142FBC(gfx,
                         cycleType | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                        D_800A4AC8[sprite->params.renderMode].cycle1 | D_800A4AC8[sprite->params.renderMode].cycle2 |
+                        gEffectRenderModes[sprite->params.renderMode].cycle1 | gEffectRenderModes[sprite->params.renderMode].cycle2 |
                             G_ZS_PRIM,
                         &update);
     return sprite_drawImage(gfx, sprite->params.texture, sprite->params.scaleX, sprite->params.scaleY, sprite->params.x,

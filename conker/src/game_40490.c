@@ -389,7 +389,7 @@ s32 func_1501396C(TriggerZone *obj) {
     return 1;
 }
 
-/** Spawns the area effect described by entry data1 of D_80095FA0 over the object's footprint. */
+/** Spawns the area effect described by entry data1 of gAreaEffectDefs over the object's footprint. */
 // matching: index lives in the (unused) second argument register
 s32 func_150139AC(TriggerZone *obj, s32 index) {
     Struct150139ACLocal data;
@@ -419,7 +419,7 @@ s32 func_150139AC(TriggerZone *obj, s32 index) {
         break;
     }
 
-    entry = &D_80095FA0[index];
+    entry = &gAreaEffectDefs[index];
     data.unk14 = entry->unk4;
     data.unk18 = entry->unk8;
     data.unk1C = entry->unkC;
@@ -464,7 +464,7 @@ s32 func_150139AC(TriggerZone *obj, s32 index) {
 
 /* Area effects of func_15013C38, chosen by TriggerZone.data1, with the density data2 / 1000. */
 static void (*D_80082F28[6])(TriggerZone *, f32) = {
-    func_1500C2F0, func_1500C8D0, func_1500CE4C, func_1500D3AC, func_1500D8C8, func_1500DE88,
+    particle_spawnAreaParticles, particle_spawnAreaSprites, particle_spawnAreaQuads, func_1500D3AC, func_1500D8C8, func_1500DE88,
 };
 
 /** Runs the object's handler from D_80082F28 (chosen by data1) with data2 / 1000 as argument. */
@@ -554,7 +554,7 @@ s32 func_15013DE8(TriggerZone *obj) {
     params.maxB = 57.96900177f * scaleY; params.minB = 42.7140007f * scaleY; // matching: on one line, as1 keeps these stores in this order
     params.altB = 118.7630005f * scaleY;
 
-    func_15149550(&params, 10, 1, obj->data1 ? 2 : 1, 0xFF, 1);
+    particle_spawnChannelParticle(&params, 10, 1, obj->data1 ? 2 : 1, 0xFF, 1);
     return 1;
 }
 

@@ -2,18 +2,18 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Random burst points around each pipe: func_150124A0 (game_3F950) fills them, func_15156B54 uses them. */
-BurstPoint D_800DCA30[3][10];
+/* Random burst points around each pipe: func_150124A0 (game_3F950) fills them, particle_updateRandomBurstEffect uses them. */
+BurstPoint gPipeBurstPoints[3][10];
 
 /* The streak particle type's render setup display list (object type table). */
-Gfx D_8008AD40[] = {
+Gfx gStreakParticleSetupDl[] = {
     gsDPPipeSync(),
     gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPEndDisplayList(),
 };
 
 /* Allocates a streak particle (kind 0 or 1) with extraSize trailing bytes and fills it from desc. */
-StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, u8 owner, s32 arg4) {
+StreakParticle *particle_newOwnedStreakParticle(StreakParticleDesc *desc, u8 kind, s32 extraSize, u8 owner, s32 arg4) {
     StreakParticle *newParticle;
     StreakParticle *particle;
     s32 id;
@@ -74,13 +74,13 @@ StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, 
     return particle;
 }
 
-/* func_15156190 with owner 0xFF and arg4 0. */
-void func_15156388(StreakParticleDesc *desc, u8 kind, s32 extraSize) {
-    func_15156190(desc, kind, extraSize, 0xFF, 0);
+/* particle_newOwnedStreakParticle with owner 0xFF and arg4 0. */
+void particle_newStreakParticle(StreakParticleDesc *desc, u8 kind, s32 extraSize) {
+    particle_newOwnedStreakParticle(desc, kind, extraSize, 0xFF, 0);
 }
 
 /* Per-frame update: count down the lifetime, move head and tail, fade out; frees the particle when expired. */
-void func_151563B8(StreakParticle *arg0) {
+void particle_updateStreakParticle(StreakParticle *arg0) {
     StreakParticle *particle;
     u8 expired;
     s16 fadedAlpha;
@@ -115,10 +115,10 @@ void func_151563B8(StreakParticle *arg0) {
     }
 }
 
-extern RenderModePair D_800A4AC8[];
+extern RenderModePair gEffectRenderModes[];
 
 /* Draws a streak particle for one view as a single triangle facing that view's eye. */
-Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
+Gfx *particle_drawStreakParticle(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
     StreakParticle *p;
     Vec3f axis;
     Vec3f toEye;
@@ -136,7 +136,7 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
 
     // matching: the p alias orders IDO's spill slots (expression ids follow first use)
     p = particle;
-    func_151D5D60(particle->vtxBuffers, viewIndex, sizeof(particle->vtxTemplate), &vtx, &fresh);
+    particle_getViewBuffer(particle->vtxBuffers, viewIndex, sizeof(particle->vtxTemplate), &vtx, &fresh);
     if (fresh) {
         memcpy(particle->vtxBuffers[viewIndex], particle->vtxTemplate, sizeof(particle->vtxTemplate));
         memcpy(particle->vtxBuffers[viewIndex] + 3, particle->vtxTemplate, sizeof(particle->vtxTemplate));
@@ -157,8 +157,8 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
                         G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD);
     gfx = func_15142C10(gfx, 0, 0, 0, particle->alpha, &needSync);
     gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &needSync);
-    gfx = func_1513F4E4(gfx, combiner, &needSync);
-    gfx = func_15142FBC(gfx, 0x82CA0, D_800A4AC8[mode].cycle1 | D_800A4AC8[mode].cycle2, &needSync);
+    gfx = particle_setCombineMode(gfx, combiner, &needSync);
+    gfx = func_15142FBC(gfx, 0x82CA0, gEffectRenderModes[mode].cycle1 | gEffectRenderModes[mode].cycle2, &needSync);
     axis.x = p->headPos.x - p->tailPos.x;
     axis.y = p->headPos.y - p->tailPos.y;
     axis.z = p->headPos.z - p->tailPos.z;
@@ -194,7 +194,7 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
 }
 
 /* Spawns the streak burst and the particle described by desc. */
-void func_151568F8(desc, owner)
+void particle_spawnStreakBurstEffect(desc, owner)
     StreakBurstEffectDesc *desc;
     u8 owner;
 {
@@ -231,7 +231,7 @@ void func_151568F8(desc, owner)
     burst.fadeStart = desc->fadeStart;
     burst.fadeRate = desc->fadeRate;
     burst.kind = desc->kind;
-    func_151539B4(&burst, owner);
+    particle_spawnStreakBurst(&burst, owner);
 
     particle.texture = desc->particleTexture;
     particle.renderMode = desc->particleRenderMode;
@@ -264,12 +264,12 @@ void func_151568F8(desc, owner)
     particle.vel.y = 0.0f;
     particle.vel.z = 0.0f;
     particle.gravity = 0.0f;
-    func_15130374(&particle, desc->particleKind, 0, owner, 0);
+    particle_newOwnedSpriteParticle(&particle, desc->particleKind, 0, owner, 0);
 }
 
-/* When the timer runs out, sets off a burst (func_15156D24 and light_createWithEffect) at a random table point
+/* When the timer runs out, sets off a burst (particle_spawnPipeBurst and light_createWithEffect) at a random table point
  * that has no zero coordinate, then restarts the timer at a random interval. */
-void func_15156B54(RandomBurstEffect *effect) {
+void particle_updateRandomBurstEffect(RandomBurstEffect *effect) {
     RandomTimer *timer;
     u32 row;
     u32 col;
@@ -280,15 +280,15 @@ void func_15156B54(RandomBurstEffect *effect) {
     if (effect->timer.value < 0) {
         row = func_150ADA20() % 3U;
         col = func_150ADA20() % 10U;
-        if (D_800DCA30[row][col].pos.x != 0.0f && D_800DCA30[row][col].pos.y != 0.0f && D_800DCA30[row][col].pos.z != 0.0f) {
-            func_15156D24(&D_800DCA30[row][col].pos.x, effect->base.header.owner);
+        if (gPipeBurstPoints[row][col].pos.x != 0.0f && gPipeBurstPoints[row][col].pos.y != 0.0f && gPipeBurstPoints[row][col].pos.z != 0.0f) {
+            particle_spawnPipeBurst(&gPipeBurstPoints[row][col].pos.x, effect->base.header.owner);
             header.flags = 3;
             header.update = -1;
             header.lifetime = (func_150ADA20() % 11U) + 5;
             header.lightType = 0;
-            intPos.x = D_800DCA30[row][col].pos.x;
-            intPos.y = D_800DCA30[row][col].pos.y;
-            intPos.z = D_800DCA30[row][col].pos.z;
+            intPos.x = gPipeBurstPoints[row][col].pos.x;
+            intPos.y = gPipeBurstPoints[row][col].pos.y;
+            intPos.z = gPipeBurstPoints[row][col].pos.z;
             light_createWithEffect(&header, &intPos, (func_150ADA20() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
                           effect->base.header.owner, effect->base.header.kind);
         }
@@ -297,8 +297,8 @@ void func_15156B54(RandomBurstEffect *effect) {
     }
 }
 
-/* Spawns the burst effect used by func_15156B54 at pos (3 floats), with randomised particle size and flags. */
-void func_15156D24(f32 *pos, u8 owner) {
+/* Spawns the burst effect used by particle_updateRandomBurstEffect at pos (3 floats), with randomised particle size and flags. */
+void particle_spawnPipeBurst(f32 *pos, u8 owner) {
     StreakBurstEffectDesc desc;
 
     memcpy(&desc.pos, pos, sizeof(desc.pos));
@@ -363,20 +363,20 @@ void func_15156D24(f32 *pos, u8 owner) {
     desc.particleDeathFunc = -1;
     desc.particleKind = 1;
     desc.unk89 = 1;
-    func_151568F8(&desc, owner);
+    particle_spawnStreakBurstEffect(&desc, owner);
 }
 
 /* Frees a streak particle's per-view vertex buffers. */
-void func_15156F94(StreakParticle *particle) {
-    func_151D5E30(particle->vtxBuffers);
+void particle_freeStreakVtxBuffers(StreakParticle *particle) {
+    particle_freeViewBuffers(particle->vtxBuffers);
 }
 
-void func_15156FB8(StreakParticle *particle) {
-    func_15156F94(particle);
+void particle_destroyStreakParticle(StreakParticle *particle) {
+    particle_freeStreakVtxBuffers(particle);
     effect_defaultDestroy(&particle->header);
 }
 
-void func_15156FE4(StreakParticle *particle) {
-    func_15156F94(particle);
+void particle_freeStreakParticle(StreakParticle *particle) {
+    particle_freeStreakVtxBuffers(particle);
     effect_defaultFree(&particle->header);
 }

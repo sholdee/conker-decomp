@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Spawns a flash particle, a burst of 12-18 drops, the func_151D3F14 effect and a white screen
+/* Spawns a flash particle, a burst of 12-18 drops, the particle_spawnShortLightFlash effect and a white screen
  * flash at `pos`. */
-void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind) {
+void particle_spawnFlashBurst(Vec3f *pos, u8 owner, s32 kind) {
     effect_spawnFlashParticle(func_150ADA20() % 5U + 12, func_150ADA20() % 56U + 200, func_150ADA68() * 600.0f + 1700.0f,
                   pos, 0xFF, owner, kind);
     {
@@ -32,15 +32,15 @@ void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind) {
         drops.spray.sizeRange = 390.0f;
         drops.spray.unk34 = 0.6f;
         drops.spray.bounceChance = 1.0f;
-        func_15150178(&drops.angles, &drops.spray, 0, owner, kind);
+        particle_spawnDropSprayAtAngles(&drops.angles, &drops.spray, 0, owner, kind);
     }
-    func_151D3F14(pos, owner, kind);
+    particle_spawnShortLightFlash(pos, owner, kind);
     screen_spawnFlash(0xFF, 0xFF, 0xFF, func_150ADA20() % 51U + 150, func_150ADA20() % 5U + 8, 0, owner, kind);
 }
 
-/* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by func_151DC97C
- * (gTimedEffectTickFuncs[0x5B]), preceded by a func_151DC6A0 burst when `burst` is set. */
-void func_151DC8BC(pos, duration, burst, randomColors, owner, kind)
+/* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by particle_updateColorEmitter
+ * (gTimedEffectTickFuncs[0x5B]), preceded by a particle_spawnFlashBurst burst when `burst` is set. */
+void particle_startColorEmitter(pos, duration, burst, randomColors, owner, kind)
     Vec3f *pos;
     s32 duration;
     u8 burst;
@@ -52,7 +52,7 @@ void func_151DC8BC(pos, duration, burst, randomColors, owner, kind)
     ColorEmitter *emitter;
 
     if (burst) {
-        func_151DC6A0(pos, owner, kind);
+        particle_spawnFlashBurst(pos, owner, kind);
     }
 
     data.pos = *pos;
@@ -65,9 +65,9 @@ void func_151DC8BC(pos, duration, burst, randomColors, owner, kind)
     }
 }
 
-/* Update function of the func_151DC8BC emitter: emits particles at its position at a random rate
+/* Update function of the particle_startColorEmitter emitter: emits particles at its position at a random rate
  * of (0.136 to 0.257) * gFrameDelta per frame, in a fixed colour or one of three random colour pairs. */
-void func_151DC97C(ColorEmitter *emitter) {
+void particle_updateColorEmitter(ColorEmitter *emitter) {
     ColorEmitterData *data;
 
     data = &emitter->data;
@@ -138,7 +138,7 @@ void func_151DC97C(ColorEmitter *emitter) {
                 desc.g2 = colors2[colorIndex][1];
                 desc.b2 = colors2[colorIndex][2];
             }
-            particle = func_15130280(&desc, 0, 0, sizeof(extra), emitter->base.header.owner, emitter->base.header.kind);
+            particle = particle_newSpriteParticleWithFloor(&desc, 0, 0, sizeof(extra), emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->data.wobble, &extra, sizeof(extra));
             }

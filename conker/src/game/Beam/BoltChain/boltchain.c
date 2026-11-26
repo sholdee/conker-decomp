@@ -90,7 +90,7 @@ BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
         for (i = 0; i < 2; i++) {
             spawn.pos = desc->ctrl[(i == 0) ? 0 : 3];
             spawn.flags = (func_150ADA20() ? 0x40 : 0) | (func_150ADA20() ? 0x80 : 0);
-            bolt->flares[i] = func_15130280(&spawn, 0, 0, 0, arg2, arg3);
+            bolt->flares[i] = particle_newSpriteParticleWithFloor(&spawn, 0, 0, 0, arg2, arg3);
         }
     }
     return bolt;
@@ -263,7 +263,7 @@ void beam_jitterBolt(BoltObj *bolt) {
     }
 }
 
-extern s32 D_800A4AC8[][2];
+extern s32 gEffectRenderModes[][2];
 
 /* Draws the bolt as a camera-facing strip: three vertices (one side, centre, other side) per joint point. */
 Gfx *beam_drawBolt(Gfx *gdl, BoltObj *bolt, s16 view) {
@@ -280,7 +280,7 @@ Gfx *beam_drawBolt(Gfx *gdl, BoltObj *bolt, s16 view) {
     Vec3f previous;
 
     if (0) { gdl = gdl; } // matching: dead IR resets uopt alias state so the first strip reloads vtx
-    func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, &vtx, NULL);
+    particle_getViewBuffer(bolt->vtxBuf, view, bolt->vtxBufSize, &vtx, NULL);
     if (vtx == NULL) {
         return gdl;
     }
@@ -290,8 +290,8 @@ Gfx *beam_drawBolt(Gfx *gdl, BoltObj *bolt, s16 view) {
     gdl = func_15142E24(gdl, &gEffectTextures[44], 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
     gdl = func_15142C10(gdl, bolt->desc.color.red, bolt->desc.color.green, bolt->desc.color.blue, bolt->desc.color.alpha, &flag);
     gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
-    gdl = func_1513F4E4(gdl, 0x44, &flag);
-    gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[1][0] | D_800A4AC8[1][1], &flag);
+    gdl = particle_setCombineMode(gdl, 0x44, &flag);
+    gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &flag);
     delta.x = points[1].x - points[0].x;
     delta.y = points[1].y - points[0].y;
     delta.z = points[1].z - points[0].z;
@@ -401,7 +401,7 @@ void beam_releaseBolt(BoltObj *bolt) {
     if (flare != NULL) {
         effect_destroyObject(&flare->header);
     }
-    func_151D5E30(bolt->vtxBuf);
+    particle_freeViewBuffers(bolt->vtxBuf);
 }
 
 /* Destroys the bolt's resources, then hands it to effect_defaultDestroy. */

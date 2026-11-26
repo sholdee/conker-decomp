@@ -125,7 +125,7 @@ void func_15010A60(void) {
         sp[3] = rnd * 0.1100000069f + 0.05000000075f;
         tail.unk0C = sp[3];
 
-        result = func_15132A4C(&part, 3, 0xFF, 0x18, 0xFF, 1);
+        result = particle_newModelParticle(&part, 3, 0xFF, 0x18, 0xFF, 1);
         if (result != NULL) {
             memcpy(result + 1, sp, sizeof(sp));
         }

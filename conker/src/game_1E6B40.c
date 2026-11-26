@@ -11,7 +11,7 @@
  * moving outwards at `speed` (+- speedRange / 2) and upwards at `velY` (+- velYRange / 2), falling to
  * the floor at the spawn height.
  */
-void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32 angle, s16 angleSpread,
+void particle_spawnFallingParticle(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32 angle, s16 angleSpread,
                    s16 velY, s16 velYRange, s16 speed, s16 speedRange, s16 radius, s16 minSize, s16 size,
                    u8 owner, s32 list) {
     BillboardTemplate template;
@@ -71,7 +71,7 @@ void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32
     template.velX = outSpeed * sine;
     template.velZ = outSpeed * cosine;
     template.unk1A = size;
-    template.callback = 0; /* func_151B9964 */
+    template.callback = 0; /* particle_updateFallingParticle */
     template.velY = upSpeed;
     template.accelY = -160;
     template.width = size;
@@ -88,11 +88,11 @@ void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32
 }
 
 /*
- * Particle callback 0 (gParticleCallbacks[0]) for func_151B9690's particles. Kind 1 pulses in size while the base
+ * Particle callback 0 (gParticleCallbacks[0]) for particle_spawnFallingParticle's particles. Kind 1 pulses in size while the base
  * size decays; other kinds shrink towards their minimum size. On reaching the floor the particle dies
  * (kind 0 may leave a splash and play a sound); while falling just above it, it fades out.
  */
-void func_151B9964(FallingParticle *particle) {
+void particle_updateFallingParticle(FallingParticle *particle) {
     s32 width;
     s32 unused; // matching: unused stack slot of the target's frame
     s32 minSize;
@@ -132,7 +132,7 @@ void func_151B9964(FallingParticle *particle) {
         if (kind == 0) {
             // matching: the target masks the u8 random value again
             if ((func_150ADA20_u8() & 0xFF) < 64) {
-                func_15171D4C(particle->x, floorY, particle->z, 10, 0, 19, 0.0f, 0, 50, 15, 0x100, 0,
+                particle_spawnFloorSprite(particle->x, floorY, particle->z, 10, 0, 19, 0.0f, 0, 50, 15, 0x100, 0,
                               particle->owner, particle->list);
             }
             if ((func_150ADA20_u8() & 0xFF) < 15) {
@@ -148,8 +148,8 @@ void func_151B9964(FallingParticle *particle) {
     }
 }
 
-/* Creates a particle emitter (see func_151B9CB0); the parameters are its fields. */
-void func_151B9BF0(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 velY, s16 velYRange, s16 speed,
+/* Creates a particle emitter (see particle_updateFallingEmitter); the parameters are its fields. */
+void particle_newFallingEmitter(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 velY, s16 velYRange, s16 speed,
                    s16 speedRange, s16 minSize, s16 size, s16 count, s16 timer, f32 *followPos, u8 owner,
                    s32 list) {
     FallingEmitter *emitter;
@@ -177,7 +177,7 @@ void func_151B9BF0(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 velY, s16 v
  * Type 7 update (D_8008B614): each frame emits `count` particles and 4 faster, higher ones in a full
  * circle around the emitter, then counts the timer down and destroys the emitter when it runs out.
  */
-void func_151B9CB0(FallingEmitter *emitter) {
+void particle_updateFallingEmitter(FallingEmitter *emitter) {
     f32 *followPos;
     FallingEmitter *self; // matching: the target reloads count through a second copy of `emitter`
     s16 x;
@@ -199,12 +199,12 @@ void func_151B9CB0(FallingEmitter *emitter) {
     }
 
     for (i = 0; i < self->count; i++) {
-        func_151B9690(emitter->animIndex, emitter->kind, x, y, z, -80, 0.0f, 360, emitter->velY,
+        particle_spawnFallingParticle(emitter->animIndex, emitter->kind, x, y, z, -80, 0.0f, 360, emitter->velY,
                       emitter->velYRange, emitter->speed, emitter->speedRange, 15, emitter->minSize,
                       emitter->size, emitter->header.owner, emitter->header.kind);
     }
     for (i = 0; i < 4; i++) {
-        func_151B9690(emitter->animIndex, emitter->kind, x, y, z, -80, 0.0f, 360,
+        particle_spawnFallingParticle(emitter->animIndex, emitter->kind, x, y, z, -80, 0.0f, 360,
                       (emitter->velY * 3) / 2, emitter->velYRange * 2, emitter->speed,
                       emitter->speedRange, 15, emitter->minSize, emitter->size, emitter->header.owner, emitter->header.kind);
     }

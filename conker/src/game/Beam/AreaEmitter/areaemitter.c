@@ -54,7 +54,7 @@ Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 ar
 /* Spawn hooks (EmitterDef.spawn), called once per particle at a point of the area; the last two take their
    own views of the emitter. */
 static void (*gEmitterSpawnHooks[])(Emitter *, Vec3f *, f32, u8) = {
-    beam_spawnSpriteParticle, func_151A9634, func_1515AA84, func_150B1EE0,
+    beam_spawnSpriteParticle, func_151A9634, func_1515AA84, particle_spawnPointEmitter,
 };
 /* Update hooks (EmitterDef.update); a hook that returns 0 ends the emitter. */
 static s32 (*gEmitterUpdateHooks[])(Emitter *) = { NULL };
@@ -213,7 +213,7 @@ typedef struct {
 } SpriteChoices;
 
 
-/* Spawn descriptor passed to func_1513C650. */
+/* Spawn descriptor passed to particle_spawnSurfaceQuadSprite. */
 typedef struct {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s16 lifetime;
@@ -266,7 +266,7 @@ void beam_spawnSpriteParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround
 
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
-    func_1513C650(&spawn, 1, 0, &emitter->state.ground.tri, pos->x, pos->y, pos->z,
+    particle_spawnSurfaceQuadSprite(&spawn, 1, 0, &emitter->state.ground.tri, pos->x, pos->y, pos->z,
                   size, size, rand1 & 0xFF,
                   (rand2 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
                   emitter->base.header.owner, emitter->base.header.kind);
@@ -402,7 +402,7 @@ void beam_spawnEmitterPreset(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos
 // (game_177B50.c), so its call does not narrow them. The definition is (Vec3f *pos, Struct1514B8E4Size *scale,
 // s16 life, u8 arg3, Vec3f *velocity, f32 gravity, f32 drag, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB,
 // u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11), returning void *.
-u8 *func_1514B8E4(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
+u8 *particle_spawnJitterParticle(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawn hook 1: launches one particle at pos with values drawn from the emitter's ParticleSettings. */
@@ -435,7 +435,7 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
         kind = choice; // matching: the extra copy shapes IDO's register use
     }
     flags = (settings->flags & 2) ? 0 : 2;
-    particle = func_1514B8E4(pos, vec,
+    particle = particle_spawnJitterParticle(pos, vec,
         (s16)(rand1 % (settings->life.range + 1) + settings->life.base),
         (rand2 % (settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
         0, 0.0f, 1.0f, 1.0f, 0x21, 0x23, 2, kind, flags,
@@ -445,8 +445,8 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     }
 }
 
-/* The spawn functions; `data` is passed through from beam_spawnAtGroundPoints (func_151DBBD4 reads a u8 kind there). */
-static void (*gGroundSpawnFuncs[])(Vec3f *, CollisionHit *, void *, u8, s32) = { func_151DBBD4, effect_spawnScatteredParticles };
+/* The spawn functions; `data` is passed through from beam_spawnAtGroundPoints (particle_spawnKindEmitterAbove reads a u8 kind there). */
+static void (*gGroundSpawnFuncs[])(Vec3f *, CollisionHit *, void *, u8, s32) = { particle_spawnKindEmitterAbove, effect_spawnScatteredParticles };
 
 /*
  * Calls spawn function gGroundSpawnFuncs[spawnFunc] at `count` random points within radius of center

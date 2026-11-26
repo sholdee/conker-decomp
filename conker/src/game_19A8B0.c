@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-u8 D_800DD2A0[4];
+u8 gStyleEmitterTimers[4];
 
 /* not referenced */
 static const u8 D_800A6DF0[16] = {
@@ -17,8 +17,8 @@ static const u8 D_800A6E0C[12][3] = {
     { 0x5A, 0x5A, 0x5A }, { 0x5A, 0x5A, 0x5A }, { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x00 },
 };
 
-/* Emission segments of func_1516DB90 by emitter->x: from (x, y, z), to (x, y, z), random z mask. */
-static const s16 D_800A6E30[6][7] = {
+/* Emission segments of particle_updateSpriteEmitter by emitter->x: from (x, y, z), to (x, y, z), random z mask. */
+static const s16 gSpriteEmitterSegments[6][7] = {
     { 0, 0, 34, 0, 0, 96, 0 },
     { 0, 0, 190, 0, 0, 0, 0 },
     { 0, 10, 20, 0, 10, 120, 0 },
@@ -28,14 +28,14 @@ static const s16 D_800A6E30[6][7] = {
 };
 
 /* Render setup and teardown of the style particles (object types 18 and 103 of gObjectTypes). */
-Gfx D_8008CB70[] = {
+Gfx gStyleParticleSetupDl[] = {
     gsSPDisplayList(gSpriteRenderDl),
     gsDPSetCombineLERP(PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0,
                        PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0),
     gsDPSetRenderMode(G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2),
     gsSPEndDisplayList(),
 };
-Gfx D_8008CB90[] = {
+Gfx gStyleParticleEndDl[] = {
     gsSPDisplayList(gSpriteEndDl),
     gsSPEndDisplayList(),
 };
@@ -45,23 +45,23 @@ struct StyleTable {
     u8 v[11];
 };
 
-void func_1516D400(void) {
+void particle_tickStyleEmitterTimers(void) {
     s32 i;
     s32 intensity;
 
     for (i = 0; i < 4; i++) {
-        if (D_800DD2A0[i] < 0xFF) {
-            intensity = D_800DD2A0[i] + D_800BE9A0;
+        if (gStyleEmitterTimers[i] < 0xFF) {
+            intensity = gStyleEmitterTimers[i] + D_800BE9A0;
             if (intensity > 0xFF) {
                 intensity = 0xFF;
             }
-            D_800DD2A0[i] = intensity;
+            gStyleEmitterTimers[i] = intensity;
         }
     }
 }
 
 // matching: only a K&R definition makes IDO narrow the u8/s16 args by reloading them from the stack
-void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, kind, velocityXHigh,
+void particle_newStyleParticle(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, kind, velocityXHigh,
     velocityXLow, velocityZHigh, velocityZLow, xFraction, zFraction, unk2C, unk2D, unk2E, unk2F, scaleX, scaleY,
     lifetime, velocityY, isAlt, linkArg, unkC, unk1)
     s16 x; s16 y; s16 z; u8 texture; u8 frame; u8 r; u8 g; u8 b; u8 alpha; u8 envR; u8 envG; u8 envB;
@@ -111,12 +111,12 @@ void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
 
 /* Update handlers by StyleParticle.kind (1 frees the particle), declared without a prototype: two of them
  * take other particle types. */
-static s32 (*D_8008CBA0[])() = {
+static s32 (*gStyleUpdateFuncs[])() = {
     func_1516E8CC, func_1516ECAC, func_1516F024, func_1516F9C4, func_1516FBCC,
     func_1516FD50, func_151707E0, func_1516A648, func_150BF0F4,
 };
 
-void func_1516D678(StyleParticle *particle) {
+void particle_updateStyleParticle(StyleParticle *particle) {
     s32 value;
     TriggerVolume *link;
 
@@ -128,7 +128,7 @@ void func_1516D678(StyleParticle *particle) {
         }
         particle->lifetime = value;
     }
-    if (D_8008CBA0[particle->kind](particle) == 1) {
+    if (gStyleUpdateFuncs[particle->kind](particle) == 1) {
         link = particle->link;
         if (link != NULL) {
             link->node.lifetime = 0;
@@ -145,7 +145,7 @@ void func_1516D678(StyleParticle *particle) {
 }
 
 
-Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
+Gfx *particle_drawStyleParticle(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     SpriteParams sprite; // func_15142E24 points it at the texture, sprite_drawWorld draws it
     s32 pad; // matching: unused stack slot in the original frame
     TextureDesc *texture;
@@ -214,7 +214,7 @@ Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
 }
 
 // matching: only a K&R definition makes IDO narrow the u8/s16 args by reloading them from the stack
-void func_1516D99C(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, kind, velocityXHigh,
+void particle_newSpriteEmitter(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, kind, velocityXHigh,
     velocityXLow, velocityZHigh, velocityZLow, unk32, unk33, unk34, unk35, unk36, unk37,
     velocityXHighRandom, velocityXLowRandom, velocityZHighRandom, velocityZLowRandom, scaleX, scaleY,
     scaleXRandom, scaleYRandom, timer, radiusXZ, radiusY, object, particleLifetime, velocityY,
@@ -289,7 +289,7 @@ void func_1516D99C(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
 
 
 
-void func_1516DB90(SpriteEmitter *arg0) {
+void particle_updateSpriteEmitter(SpriteEmitter *arg0) {
     SpriteEmitter *emitter; // matching: IDO keeps this copy of the argument in its own register
     s32 i;
     s16 scaleX;
@@ -378,14 +378,14 @@ void func_1516DB90(SpriteEmitter *arg0) {
                     if (movement_obj[emitter->object].ob_matrix_ptr == NULL) {
                         continue;
                     }
-                    fromX = D_800A6E30[emitter->x][0];
-                    fromY = D_800A6E30[emitter->x][1];
-                    fromZ = D_800A6E30[emitter->x][2];
-                    toX = D_800A6E30[emitter->x][3];
-                    toY = D_800A6E30[emitter->x][4];
-                    toZ = D_800A6E30[emitter->x][5];
-                    if (D_800A6E30[emitter->x][6] != 0) {
-                        toZ += func_150ADA20() & D_800A6E30[emitter->x][6];
+                    fromX = gSpriteEmitterSegments[emitter->x][0];
+                    fromY = gSpriteEmitterSegments[emitter->x][1];
+                    fromZ = gSpriteEmitterSegments[emitter->x][2];
+                    toX = gSpriteEmitterSegments[emitter->x][3];
+                    toY = gSpriteEmitterSegments[emitter->x][4];
+                    toZ = gSpriteEmitterSegments[emitter->x][5];
+                    if (gSpriteEmitterSegments[emitter->x][6] != 0) {
+                        toZ += func_150ADA20() & gSpriteEmitterSegments[emitter->x][6];
                     }
                     func_150A7960(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
                     func_150A7960(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
@@ -407,7 +407,7 @@ void func_1516DB90(SpriteEmitter *arg0) {
                     z = fromZ;
                 }
                 if (emitter->flags & 8) {
-                    func_15170034(emitter->flags, &velX, &velY, &velZ);
+                    particle_getRandomDirection(emitter->flags, &velX, &velY, &velZ);
                     speed = emitter->speed * 16;
                     offset = (u32)emitter->startOffset;
                     y += offset * velY;
@@ -498,7 +498,7 @@ void func_1516DB90(SpriteEmitter *arg0) {
                 r = emitter->r;
                 g = emitter->g;
                 b = emitter->b;
-                func_1516D4E8(x, y, z, emitter->texture, emitter->frame, r, g, b, emitter->alpha, envR, envG, envB,
+                particle_newStyleParticle(x, y, z, emitter->texture, emitter->frame, r, g, b, emitter->alpha, envR, envG, envB,
                               emitter->kind, velXHigh, velXLow, velZHigh, velZLow, unk32, unk33, unk34, unk35,
                               emitter->unk36, emitter->unk37, scaleX, scaleY, emitter->particleLifetime, velocityY,
                               isAlt, emitter->particleLink, emitter->owner, emitter->list);
@@ -518,8 +518,8 @@ void func_1516DB90(SpriteEmitter *arg0) {
 }
 
 /* Emitter that follows the f32 position vector at `position` (flags 0x20). */
-void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4) {
-    func_1516D99C((u32)position >> 16, (u32)position & 0xFFFF, 0, texture,
+void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4) {
+    particle_newSpriteEmitter((u32)position >> 16, (u32)position & 0xFFFF, 0, texture,
         0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,
         8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, duration,
         0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1,
@@ -638,7 +638,7 @@ void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3) {
     if (id != 0x3A) {
         return;
     }
-    func_1516D99C(5, 0, 0, 4,
+    particle_newSpriteEmitter(5, 0, 0, 4,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 8,
         0, 0, 0, 0, 0, 0, 0, 0x124,
@@ -647,10 +647,10 @@ void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3) {
         0, 5, 0, arg2, arg3);
 }
 
-void func_1516EED4(s32 object, s32 threshold, u8 arg2, s32 arg3) {
-    if (object < 4 && D_800DD2A0[object] >= threshold) {
-        D_800DD2A0[object] = 0;
-        func_1516D99C(0, 0, 0, 4,
+void particle_spawnThrottledEmitter(s32 object, s32 threshold, u8 arg2, s32 arg3) {
+    if (object < 4 && gStyleEmitterTimers[object] >= threshold) {
+        gStyleEmitterTimers[object] = 0;
+        particle_newSpriteEmitter(0, 0, 0, 4,
             0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
             2, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0x200,
@@ -700,7 +700,7 @@ s32 func_1516F024(StyleParticle *particle) {
         return 1;
     }
 
-    func_1516F864(particle);
+    particle_moveStyleXZ(particle);
     alpha = particle->scaleX;
     alpha += D_800BE9E4 * growth.v[style];
     particle->scaleY = alpha;
@@ -708,13 +708,13 @@ s32 func_1516F024(StyleParticle *particle) {
     if (style == 3) {
         particle->velocityY = 100;
     }
-    func_1516F94C(particle, damping.v[style]);
+    particle_scaleStyleVelXZ(particle, damping.v[style]);
     return 0;
 }
 
 
 void func_1516F1C0(s32 object, s32 duration, u8 arg2, s32 arg3) {
-    func_1516D99C(2, 0, 0, 0x2D,
+    particle_newSpriteEmitter(2, 0, 0, 0x2D,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 1,
         0, 0, 0, 0, 0, 0, 0, 0x50,
@@ -731,14 +731,14 @@ void func_1516F2F8(object, duration, particleLifetime, speed, arg4, arg5)
     u8 arg4;
     s32 arg5;
 {
-    func_1516D99C(3, 0, 0, 0x2B,
+    particle_newSpriteEmitter(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 2,
         0, 0, 0, 0, 0, 0, 0, 0x50,
         0x50, 0, 0, duration, 4, 4, object, 0x10,
         0, 0, 0x81, 4, 0, 1, 0, 0,
         0, 1, 0, arg4, arg5);
-    func_1516D99C(3, 0, 0, 0x2B,
+    particle_newSpriteEmitter(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 3,
         0, 0, 0, 0, 0, 0, 0, 0x50,
@@ -756,14 +756,14 @@ void func_1516F548(
     s32 scaleRandom, s32 radius, s32 style0, s32 style1,
     s32 arg12, s32 arg13, s32 arg14, u8 arg15,
     s32 arg16) {
-    func_1516D99C(x, y, z, 0xD,
+    particle_newSpriteEmitter(x, y, z, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
         2, (u8)velocityXHigh, 0, (u8)velocityZHigh, 0, 0, 0, style0,
         0, 0, 0, 0, 0, 0, 0, (s16)((scale << 12) / 4096),
         (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
         (s16)velocityY, 0xC8, 1, 0, 0, 1, 0, 0,
         0, 0, 0, arg15, arg16);
-    func_1516D99C(x, y, z, 0xD,
+    particle_newSpriteEmitter(x, y, z, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
         2, (u8)velocityXHigh, 0, (u8)velocityZHigh, 0, 0, 0, style1,
         0, 0, 0, 0, 0, 0, 0, (s16)((scale << 12) / 4096),
@@ -775,7 +775,7 @@ void func_1516F548(
 }
 
 /* x and z are 8.8 fixed point with their fractions in u.drift; the velocities are 8.8 too. */
-void func_1516F864(StyleParticle *particle) {
+void particle_moveStyleXZ(StyleParticle *particle) {
     s32 x;
     s32 velocity;
     s32 z;
@@ -803,7 +803,7 @@ void func_1516F864(StyleParticle *particle) {
 }
 
 /* Scales the X velocity by factor / 256. */
-void func_1516F8EC(StyleParticle *particle, s32 factor) {
+void particle_scaleStyleVelX(StyleParticle *particle, s32 factor) {
     s32 velocity;
 
     velocity = particle->u.drift.velocityXHigh << 8;
@@ -814,7 +814,7 @@ void func_1516F8EC(StyleParticle *particle, s32 factor) {
 }
 
 /* Scales the Z velocity by factor / 256. */
-void func_1516F91C(StyleParticle *particle, s32 factor) {
+void particle_scaleStyleVelZ(StyleParticle *particle, s32 factor) {
     s32 velocity;
 
     velocity = particle->u.drift.velocityZHigh << 8;
@@ -824,15 +824,15 @@ void func_1516F91C(StyleParticle *particle, s32 factor) {
     particle->u.drift.velocityZLow = velocity & 0xFF;
 }
 
-void func_1516F94C(StyleParticle *particle, s32 factor) {
-    func_1516F8EC(particle, factor);
-    func_1516F91C(particle, factor);
+void particle_scaleStyleVelXZ(StyleParticle *particle, s32 factor) {
+    particle_scaleStyleVelX(particle, factor);
+    particle_scaleStyleVelZ(particle, factor);
 }
 
-void func_1516F984(StyleParticle *particle, s32 factor) {
+void particle_scaleStyleVel(StyleParticle *particle, s32 factor) {
     s32 velocity;
 
-    func_1516F94C(particle, factor);
+    particle_scaleStyleVelXZ(particle, factor);
     velocity = particle->velocityY;
     velocity = velocity * factor;
     particle->velocityY = velocity >> 8;
@@ -872,13 +872,13 @@ s32 func_1516F9C4(StyleParticle *particle) {
         return 1;
     }
 
-    func_1516F864(particle);
-    func_1516F984(particle, 0xF0);
+    particle_moveStyleXZ(particle);
+    particle_scaleStyleVel(particle, 0xF0);
     return 0;
 }
 
 void func_1516FA88(s16 x, s16 y, s16 z, s32 isAlt, u8 arg4, s32 arg5) {
-    func_1516D99C(x, y, z, 0x1B,
+    particle_newSpriteEmitter(x, y, z, 0x1B,
         0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0xFF, 0xFF,
         3, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0x400,
@@ -977,7 +977,7 @@ s32 func_1516FD50(StyleParticle *particle) {
         return 1;
     }
 
-    func_1516F864(particle);
+    particle_moveStyleXZ(particle);
     particle->velocityY = particle->velocityY + (s8)particle->u.drift.unk2C;
     return 0;
 }
@@ -993,7 +993,7 @@ void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3) {
 
     velocityXHigh = 0;
     if (movement_obj[object].type == 1) {
-        /* follow the object's bone, D_800A6E30 row 4 */
+        /* follow the object's bone, gSpriteEmitterSegments row 4 */
         posHigh = 4;
         posLow = 0;
         bone = 0x19;
@@ -1011,7 +1011,7 @@ void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3) {
             bone = 0x1B;
             velocityXHigh = 8;
         }
-        func_1516D99C(posHigh, posLow, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, velocityXHigh, 0, 0, 0, 0, 0, 0, 0, 0,
+        particle_newSpriteEmitter(posHigh, posLow, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, velocityXHigh, 0, 0, 0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0xAA, 0xAA, 0xAA, 0xAA, (u16)duration, 0x1E, 0, (u8)object, 0x1E, 0x168,
                       0x18, (u16)flags, 4, 0, 1, 0, 0, 0, bone, 0, arg2, arg3);
     }
@@ -1019,7 +1019,7 @@ void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3) {
 
 
 /* A random unit direction vector; flags & 0x40 halves the range of its first angle. */
-void func_15170034(s32 flags, f32 *outX, f32 *outY, f32 *outZ) {
+void particle_getRandomDirection(s32 flags, f32 *outX, f32 *outY, f32 *outZ) {
     s32 mask;
     f32 yawA;
     f32 yawB;
@@ -1099,7 +1099,7 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type,
             lifetime = (func_150ADA20() & 0x1F) + 0xF;
             size = (func_150ADA20() % sizeRandom) + sizeMin;
             velocityY = (func_150ADA20() % velocityYRandom) + velocityYMin;
-            func_1516D4E8(px, py, pz, 0xD, 0,
+            particle_newStyleParticle(px, py, pz, 0xD, 0,
                 color[0], color[1], color[2], 0, 0, 0, 0, 2,
                 (u8)((velocityX >> 8) & 0xFF), (u8)(velocityX & 0xFF), (u8)((velocityZ >> 8) & 0xFF), (u8)(velocityZ & 0xFF),
                 0, 0, particleStyle, 0, 0, 0,
@@ -1149,14 +1149,14 @@ void func_15170500(x, y, z, angle, isParticle, arg5, arg6)
         velocityX = dirX * 256.0f;
         velocityZ = dirZ * 256.0f;
         velocityY = dirY * 256.0f;
-        func_1516D4E8(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
+        particle_newStyleParticle(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
             velocityX >> 8, velocityX & 0xFF, velocityZ >> 8, velocityZ & 0xFF, 0, 0, 0, 0, 0, 1, 0x200, 0x166, 0xFF,
             velocityY - 50, 0, 0, arg5, arg6);
     } else {
         velocityX = dirX * 256.0f;
         velocityZ = dirZ * 256.0f;
         velocityY = dirY * 256.0f;
-        func_1516D99C(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
+        particle_newSpriteEmitter(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
             velocityX >> 8, velocityX & 0xFF, velocityZ >> 8, velocityZ & 0xFF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x200, 0x166,
             0, 0, 0x14, 0, 0, 0xFF, 0xFF, velocityY - 50, 0xC8, 9, 1, 0, 1, 0x32, 0x14, 0, 0, 0,
             arg5, arg6);
@@ -1195,10 +1195,10 @@ s32 func_151707E0(StyleParticle *particle) {
         return 1;
     }
 
-    func_1516F864(particle);
+    particle_moveStyleXZ(particle);
     if (particle->u.drift.unk2F != 0) {
-        func_1516F8EC(particle, (func_151EF610() % 32) + 230);
-        func_1516F91C(particle, (func_151EF610() % 32) + 230);
+        particle_scaleStyleVelX(particle, (func_151EF610() % 32) + 230);
+        particle_scaleStyleVelZ(particle, (func_151EF610() % 32) + 230);
         particle->velocityY = 0;
     } else {
         /* BUG (original game): the speed test squares the X velocity twice and ignores Z */
@@ -1206,16 +1206,16 @@ s32 func_151707E0(StyleParticle *particle) {
         alpha = particle->u.drift.velocityXHigh * 0x100; // matching: the original reuses alpha's local here
         alpha += particle->u.drift.velocityXLow;
         if (velocityX * velocityX + alpha * alpha > 2000) {
-            func_1516F8EC(particle, (func_151EF610() % 32) + 220);
-            func_1516F91C(particle, (func_151EF610() % 32) + 220);
+            particle_scaleStyleVelX(particle, (func_151EF610() % 32) + 220);
+            particle_scaleStyleVelZ(particle, (func_151EF610() % 32) + 220);
         }
         particle->velocityY = 0;
     }
     return 0;
 }
 
-/* Spawns `count` particles flying off at `speed` in random directions from func_15170034. */
-void func_151709B4(s32 x, s32 y, s32 z, s32 count, f32 speed, u8 arg5, s32 arg6) {
+/* Spawns `count` particles flying off at `speed` in random directions from particle_getRandomDirection. */
+void particle_spawnStyleBurst(s32 x, s32 y, s32 z, s32 count, f32 speed, u8 arg5, s32 arg6) {
     s32 i;
     f32 dirX;
     f32 dirY;
@@ -1226,14 +1226,14 @@ void func_151709B4(s32 x, s32 y, s32 z, s32 count, f32 speed, u8 arg5, s32 arg6)
     s32 pad[2]; // matching: unused stack slots in the original frame
 
     for (i = 0; i < count; i++) {
-        func_15170034(0x40, &dirX, &dirY, &dirZ);
+        particle_getRandomDirection(0x40, &dirX, &dirY, &dirZ);
         dirX *= speed;
         dirY *= speed + speed;
         dirZ *= speed;
         velocityX = dirX;
         velocityZ = dirZ;
         velocityY = dirY;
-        func_1516D4E8(x, y, z, 0x2F, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 7,
+        particle_newStyleParticle(x, y, z, 0x2F, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 7,
             velocityX >> 8, velocityX & 0xFF, velocityZ >> 8, velocityZ & 0xFF, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0x28,
             velocityY, 0, 0, arg5, arg6);
     }

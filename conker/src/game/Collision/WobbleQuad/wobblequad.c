@@ -75,7 +75,7 @@ s16 *func_150AE36C(struct Foo150AE36C *arg0, s16 arg1) {
     MtxF mtx;
     u8 sp43;
 
-    func_151D5D60(arg0->unk100, arg1, 0x40, &var_v0, &sp43);
+    particle_getViewBuffer(arg0->unk100, arg1, 0x40, &var_v0, &sp43);
     ret = var_v0;
     if (var_v0) {
         if (sp43) {

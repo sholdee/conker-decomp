@@ -45,7 +45,7 @@ void func_150C29F0(Struct150C29F0 *emitter) {
     particle.maxB = 57.969f * scaleB;
     particle.minB = 42.714f * scaleB;
     particle.altB = 118.763f * scaleB;
-    func_15149550(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
+    particle_spawnChannelParticle(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
     emitter->base.header.state = (func_150ADA20() % 51U) + 25;
 }
 void *memcpy(void *, const void *, u32);
@@ -98,7 +98,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
                         particle.life = (func_150ADA20() % 151U) + 50;
                         particle.scale = (func_150ADA68() * 500.0f) * 0.001f;
                         particle.unk2C = (func_150ADA20() % 156U) + 100;
-                        created = func_15149550(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
+                        created = particle_spawnChannelParticle(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
                         if (created != NULL) {
                             memcpy(&created->extra, &angle, sizeof(angle));
                         }

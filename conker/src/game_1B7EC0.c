@@ -25,7 +25,7 @@ struct Queue {
 };
 
 /* Release callbacks; declared without a prototype, as each takes its own value type. */
-static void (*gQueueReleaseFuncs[])() = { NULL, effect_startDecalFade, func_150CBF5C };
+static void (*gQueueReleaseFuncs[])() = { NULL, effect_startDecalFade, particle_startDustFadeOut };
 
 
 /* Ticks the queue timer; once it has expired, drops the oldest node each call. */

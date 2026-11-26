@@ -1543,7 +1543,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             }
                             arg0->count5 = 8;
                             if ((arg0->animseq.uh != 0x7C) && (arg0->animseq.uh != 0x20D) && (arg0->animseq.uh != 0x238)) {
-                                func_151D4668(arg0);
+                                particle_detachObjEmitters(arg0);
                                 sound_addDynamicSound(0x2CF, arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996C0, 0, 0); // matching: the (s32) casts on these tables steer IDO; a plain pointer reschedules
                                 if (((arg0->character_type == 0x3BU) || (arg0->character_type == 0x80)) && !(func_150ADA20() & 3)) {
                                     s32 sound;
@@ -1576,7 +1576,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             anim = func_15063E84(arg0, 0x7D, 1, 0, pressedButtons);
                         }
                         if (endEffect != 0) {
-                            func_151D4D58(arg0);
+                            particle_attachTwinEmitters(arg0);
                         }
                     }
                 }
@@ -1625,7 +1625,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         blend = 0.0f;
                         arg0->count5 = 8;
                         if ((arg0->animseq.uh != 0x1E0) && (arg0->animseq.uh != 0x253) && (arg0->animseq.uh != 0x254)) {
-                            func_151D4668(arg0);
+                            particle_detachObjEmitters(arg0);
                             sound_addDynamicSound(0x2CF, arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996C8, 0, 0);
                             if (((arg0->character_type == 0x3BU) || (arg0->character_type == 0x80)) && !(func_150ADA20() & 3)) {
                                 s32 sound;
@@ -1653,7 +1653,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         arg0->mv->gunRecoilVel = 0;
                     }
                     if (endEffect != 0) {
-                        func_151D469C(arg0, 5, 0x78, 0xFF, 1);
+                        particle_attachPointEmitter(arg0, 5, 0x78, 0xFF, 1);
                     }
                 }
             }
@@ -2589,7 +2589,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     obj->scriptCmd = NULL;
                     arg0->mv->shotCount = 1;
                     if ((animGrab != obj->animseq.uh) || ((D_800C3A58 != 0) && (animSpecial != 0))) {
-                        func_150FC438(obj, arg0, 0, animGrab);
+                        particle_spawnTwoSidedEmitter(obj, arg0, 0, animGrab);
                         sound_stopActorSound1(obj);
                         if ((arg0->character_type == 0x80) && !(func_150ADA20() & 3)) {
                             sound_addDynamicSound(sound_pickVariant(0x57C, 6), arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996D0, 0, 0);

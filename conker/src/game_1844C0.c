@@ -22,7 +22,7 @@ Gfx gModelEffectRenderTeardownDl[] = {
 
 /* Update callbacks (EffectParams.updateFunc, .updateFunc2, the third set): each returns 0 when the effect
    is done. Declared without a prototype where the entries take their own effect views. */
-s32 (*gModelEffectUpdateFuncs[])() = { effect_moveModelEffect, func_151BECB8, func_151B8C54, effect_updateFadeInEffect };
+s32 (*gModelEffectUpdateFuncs[])() = { effect_moveModelEffect, func_151BECB8, particle_bobEffect, effect_updateFadeInEffect };
 s32 (*gModelEffectUpdate2Funcs[])(ModelEffect *) = { effect_resetModelEffectRoot, effect_setModelEffectRootRotScale };
 s32 (*D_8008ADA8[])() = { func_151BEB20, func_151D6E60, func_150FB188, effect_setModelEffectRootFromExtra, func_150C52CC };
 
@@ -156,7 +156,7 @@ void effect_updateModelEffect(ModelEffect *fx) {
     }
 }
 
-extern RenderModePair D_800A4AC8[];
+extern RenderModePair gEffectRenderModes[];
 
 /*
  * Draw handler for `view`: runs the pre-draw callback (which may cancel the draw), honours the view
@@ -190,11 +190,11 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
                   fx->params.color1.alpha, 0xFF, fx->params.render.envMode);
     gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
     gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
-    gfx = func_1513F4E4(gfx, ((u8 *)&fx->params.render.unk10)[3] /* matching: reads the low byte */, &needSync);
+    gfx = particle_setCombineMode(gfx, ((u8 *)&fx->params.render.unk10)[3] /* matching: reads the low byte */, &needSync);
     gfx = func_15142FBC(gfx,
                         fx->params.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | fx->params.render.unk14 |
                             fx->params.render.unk18,
-                        D_800A4AC8[fx->params.render.renderMode].cycle1 | D_800A4AC8[fx->params.render.renderMode].cycle2, &needSync);
+                        gEffectRenderModes[fx->params.render.renderMode].cycle1 | gEffectRenderModes[fx->params.render.renderMode].cycle2, &needSync);
     if (fx->params.flags & 2) {
         gfx = func_151462C8(gfx, &fx->attach, fx->params.unk41, fx->params.owner, fx->params.ownerId, view,
                             &fx->params.pos, (fx->params.flags & 4) ? 1 : 0, 0);

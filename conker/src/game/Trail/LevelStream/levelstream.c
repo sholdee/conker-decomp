@@ -3,7 +3,7 @@
 #include "variables.h"
 #include "libc/string.h"
 
-extern RenderModePair D_800A4AC8[];
+extern RenderModePair gEffectRenderModes[];
 extern CollisionHit D_800D9860; /* the floor under the last spawn point */
 
 /* Events posted through effect_sendEventToTimedEffects with a stream id as the payload. */
@@ -334,18 +334,18 @@ Gfx *trail_drawStream(LevelStream *emitter, Gfx *gfx, s16 view) {
     f32 offsetX;
 
     if (emitter->head.count >= 2) {
-        func_151D5D60(emitter->buffers, view, (emitter->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(emitter->buffers, view, (emitter->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             data = emitter->data;
             particles = emitter->particles;
             update = 1;
             gfx = func_15142E24(gfx, &gEffectTextures[gStreamTextures[data->textureIndex]], 0, 0, 0, 0, gStreamTextures[data->textureIndex], 0,
                                 0, &update, 3);
-            gfx = func_1513F4E4(gfx, 0x4E, &update);
+            gfx = particle_setCombineMode(gfx, 0x4E, &update);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
             gfx = func_15142FBC(gfx,
                                 gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                                D_800A4AC8[3].cycle1 | D_800A4AC8[3].cycle2, &update);
+                                gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2, &update);
             /* While emitting, the ribbon starts at the emitter itself. */
             if (emitter->head.tmpl.flags & EMITTER_FLAG_EMITTING) {
                 next = emitter->head.end - 1;
@@ -601,7 +601,7 @@ void trail_updateRandomPointEmitter(Game1FBB80Object *object) {
                 if (collision_probeCeilingSet0Cached(&packet.pos, upperHeight, &effect->floor) != 0) {
                     packet.pos.y = effect->floor.height;
                     packet.unk44 = func_150ADA20() % 101U + 155;
-                    func_1513D2F0(&packet, &D_800A4AA0, 0x1C, 0, 0, 0x22, 0, 0, 0, 0, object->base.header.owner, object->base.header.kind);
+                    particle_newQuadParticle(&packet, &gWhiteVtxColors, 0x1C, 0, 0, 0x22, 0, 0, 0, 0, object->base.header.owner, object->base.header.kind);
                 }
                 effect->accumulator -= 1.0f;
             } while (effect->accumulator > 1.0f);
@@ -950,10 +950,10 @@ Gfx *trail_drawWaveRibbon(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     if (info->owner != NULL && info->owner->ob_matrix_ptr == NULL) {
         return gfx;
     }
-    func_151D5D60(ribbon->vtxBuffer, cameraIdx, (ribbon->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+    particle_getViewBuffer(ribbon->vtxBuffer, cameraIdx, (ribbon->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
     update = 1;
     gfx = func_15142B7C(func_15142C10(gfx, 0xED, 0xD2, 0x85, 0xC8, &update), 0x200005, 0x1F0600);
-    gfx = func_15142FBC(func_1513F4E4(gfx, 0x54, &update), gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].cycle1 | D_800A4AC8[1].cycle2, &update);
+    gfx = func_15142FBC(particle_setCombineMode(gfx, 0x54, &update), gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1].cycle1 | gEffectRenderModes[1].cycle2, &update);
     cur = ribbon->head.end - 1;
     if (cur < 0) {
         cur = ribbon->head.tmpl.itemCount - 1;
@@ -1143,7 +1143,7 @@ void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
                 piece.rotVel.z = (func_150ADA68() * 19.75200081f) + -9.876000404f;
                 piece.gravity = (func_150ADA68() * 0.5180000067f) + -1.539000034f;
                 piece.lifetime = (func_150ADA20() % 101U) + 100;
-                func_15132A4C(&piece, 3, 0xFF, 0, arg1, arg2);
+                particle_newModelParticle(&piece, 3, 0xFF, 0, arg1, arg2);
             }
         }
         {
@@ -1191,7 +1191,7 @@ void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
             cfg.render.envMode = 7;
             cfg.unk80 = 10;
             cfg.unk82 = 25;
-            func_15151A38(&cfg, arg1, arg2);
+            particle_spawnPuffSpray(&cfg, arg1, arg2);
         }
         {
             DecalSpray cfg2;
@@ -1209,7 +1209,7 @@ void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
             cfg2.unk28 = 120;
             cfg2.unk2A = 120;
             cfg2.kind = 2;
-            func_15150D1C(&cfg2, arg1, arg2);
+            particle_spawnDecalSpray(&cfg2, arg1, arg2);
         }
         {
             CollisionHit floor;
@@ -1309,7 +1309,7 @@ Gfx *trail_drawStripEffect(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     if (owner->ob_matrix_ptr == NULL) {
         return gfx;
     }
-    func_151D5D60(effect->base.buffers, cameraIdx, 0x1C0, &vtx, NULL);
+    particle_getViewBuffer(effect->base.buffers, cameraIdx, 0x1C0, &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
@@ -1319,9 +1319,9 @@ Gfx *trail_drawStripEffect(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     camPos = func_15144B34(cameraIdx);
     gfx = func_15142B7C(gfx, 0x200005, 0x60600);
     gfx = func_15142E24(gfx, &gEffectTextures[127], 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
-    gfx = func_1513F4E4(gfx, 0x3B, &update);
+    gfx = particle_setCombineMode(gfx, 0x3B, &update);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, data->alpha, &update);
-    gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].cycle1 | D_800A4AC8[3].cycle2, &update);
+    gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2, &update);
     diff.x = to.x - from.x;
     diff.y = to.y - from.y;
     diff.z = to.z - from.z;
@@ -1496,7 +1496,7 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             emitA.wobbles = 1;
             emitA.bounceChance = 0.0f;
             shape.spread = 750.0f;
-            func_1514FF44(&shape, &emitA, &floor, arg1, arg2);
+            particle_spawnDropSpray(&shape, &emitA, &floor, arg1, arg2);
         }
         {
             SplashSpray emitB;
@@ -1522,9 +1522,9 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             emitB.unk40 = 0;
             emitB.kind = 2;
             shape.spread = 750.0f;
-            func_15153CCC(&shape, &emitB, &floor, arg1, arg2);
+            particle_spawnSplashSpray(&shape, &emitB, &floor, arg1, arg2);
         }
-        if (func_1514F6E8(&shape) != 0) {
+        if (particle_completeConeBasis(&shape) != 0) {
             s32 count;
             ParticleDesc spawn;
             CarrierParticle *particle;
@@ -1568,9 +1568,9 @@ void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
             spawn.width = 0.0f;
             spawn.maxSize = 10000.0f;
             while (count != 0) {
-                func_1514F808(&shape, (func_150ADA68() * 0.03999999911f) + 0.04999999702f, &spawn.vel);
+                particle_getRandomConeDir(&shape, (func_150ADA68() * 0.03999999911f) + 0.04999999702f, &spawn.vel);
                 spawn.gravity = (func_150ADA68() * 1.340000033f) + -2.328999996f;
-                particle = func_15130280(&spawn, 1, 0, 4, arg1, arg2);
+                particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, arg1, arg2);
                 if (particle != NULL) {
                     particle->effect = trail_spawnWaveTrail(NULL, &particle->head, 0, arg1, arg2);
                 }
@@ -1588,16 +1588,16 @@ void trail_freeCarriedEffect(CarrierParticle *particle) {
     }
 }
 
-/* Particle handler: frees the attached effect, then runs func_1513173C. */
+/* Particle handler: frees the attached effect, then runs particle_destroySpriteDefault. */
 void trail_destroyCarrierParticle(CarrierParticle *particle) {
     trail_freeCarriedEffect(particle);
-    func_1513173C(&particle->head);
+    particle_destroySpriteDefault(&particle->head);
 }
 
-/* Particle handler: frees the attached effect, then runs func_1513175C. */
+/* Particle handler: frees the attached effect, then runs particle_freeSpriteDefault. */
 void trail_freeCarrierParticle(CarrierParticle *particle) {
     trail_freeCarriedEffect(particle);
-    func_1513175C(&particle->head);
+    particle_freeSpriteDefault(&particle->head);
 }
 
 /* Point functions: each writes a point of the object to out and returns whether it has one. */

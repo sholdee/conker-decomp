@@ -69,7 +69,7 @@ void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
         sp.rot.z = func_150ADA68() * 360.0f;
         sp.rotVel.x = 25.0f - (func_150ADA68() * 50.0f);
         sp.rotVel.y = 25.0f - (func_150ADA68() * 50.0f);
-        func_15132A4C(&sp, 3, 0xFF, 0, arg3, arg4);
+        particle_newModelParticle(&sp, 3, 0xFF, 0, arg3, arg4);
     }
 
     sp2.pos.x = arg0;
@@ -90,5 +90,5 @@ void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     sp2.alpha = 0xFF;
     sp2.fadeStep = 0xA;
     sp2.onExpire = 0;
-    func_1518CA80(&sp2, 1);
+    particle_spawnGrowingBillboard(&sp2, 1);
 }

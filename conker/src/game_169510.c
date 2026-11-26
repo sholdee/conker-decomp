@@ -5,8 +5,8 @@
 
 /* Per-behaviour state that follows a particle (a DefParticleHead). */
 typedef union {
-    ParticleAxes axes;  /* func_1513D6FC, func_1513F4B0 */
-    ActorRef owner;     /* func_1513E084 */
+    ParticleAxes axes;  /* particle_computeQuadAxes, particle_buildAxisQuad */
+    ActorRef owner;     /* particle_onQuadParticleOwnerMsg */
     struct {
         f32 unk0;
         f32 unk4;
@@ -14,17 +14,17 @@ typedef union {
         Vec3f rotVel;
         Vec3f scaleVel;
         f32 gravity;
-    } drift;            /* func_1513E6E8 */
+    } drift;            /* particle_updateDriftMotion */
     struct {
         u8 pad0[0x18];
         f32 rate;
-    } grow;             /* func_1513F6E8 */
+    } grow;             /* particle_updateGrowMotion */
     struct {
         Vec3f vel;
         f32 gravity;
         f32 drag;
         Vec3f rotVel;
-    } ballistic;        /* func_1513F728 */
+    } ballistic;        /* particle_updateBallisticMotion */
 } DefParticleMotion;
 
 #define PARTICLE_MOTION(particle) ((DefParticleMotion *)((particle) + 1))
@@ -32,77 +32,77 @@ typedef union {
 
 /* Sprite update (QuadSprite.updateFn; 0 = none) and expire (QuadSprite.expireFn) callbacks; an update returning 0
  * expires the sprite, an expire callback returning nonzero keeps it. */
-static s32 (*D_80089C70[])() = {
+static s32 (*gQuadSpriteUpdateFuncs[])() = {
     NULL, func_1513416C, func_150B961C, func_150BA35C, func_150AEDD8, func_150DE2A4, effect_updateFadeQuadSprite, effect_updateTaskFlicker,
-    func_150C5E0C, effect_updateFlickerSprite, func_150CB7CC, func_151AFBD4, func_150CA9D0, func_15136A1C,
+    particle_updateFlickerSprite, effect_updateFlickerSprite, func_150CB7CC, func_151AFBD4, func_150CA9D0, func_15136A1C,
 };
-static s32 (*D_80089CA8[])() = { NULL, effect_detachTaskFlicker, func_150C5EFC, effect_expireFlickerSprite };
+static s32 (*gQuadSpriteExpireFuncs[])() = { NULL, effect_detachTaskFlicker, particle_detachFlickerSprite, effect_expireFlickerSprite };
 
 /* Particle update (DefParticleHead.updateFn1, updateFn2; 0 = none) and expire callbacks, as for sprites. */
-static s32 (*D_80089CB8[])() = {
-    NULL, func_1513E6E8, func_1518A094, func_150B9560, func_150BA37C, func_1514A4EC, func_1514A594, beam_updateMotionPull,
-    beam_updateMotion, beam_updateQuad, flamethrower_moveJetLine, func_151AC9EC, func_15190F9C, func_15191520, func_151DA368,
-    func_150E6230, effect_moveReleasedParticle, effect_swingParticleSize, func_1514B87C, func_150CD17C, func_150C308C, func_15101378,
-    weapon_updateProjectile, func_150AE35C, func_1513F6E8, func_1513F728, sight_updateBeam, weapon_updateBulletParticle, trail_integrateScalarMotion,
-    beam_updateAimed, beam_updateGlow, flamethrower_moveFlameLine, func_1514C258, func_1514C288, func_150E4174, func_151B8CFC,
-    effect_updateTrailPuff, func_15141928, func_150F3214, func_1519EF04, effect_moveTravelParticle, effect_updateBoneBeamParticle,
+static s32 (*gQuadParticleUpdate1Funcs[])() = {
+    NULL, particle_updateDriftMotion, particle_followBoneGlow, particle_fallAndGrow, particle_moveTumbling, particle_moveFlickerParticle, particle_moveFlickerTrail, beam_updateMotionPull,
+    beam_updateMotion, beam_updateQuad, flamethrower_moveJetLine, particle_growQuadParticle, particle_wobbleDrip, particle_fallDrip, particle_updateSteamEffect,
+    particle_moveImpactStreak, effect_moveReleasedParticle, effect_swingParticleSize, func_1514B87C, particle_updateDriftQuad, func_150C308C, particle_updateRayBeam,
+    weapon_updateProjectile, func_150AE35C, particle_updateGrowMotion, particle_updateBallisticMotion, sight_updateBeam, weapon_updateBulletParticle, trail_integrateScalarMotion,
+    beam_updateAimed, beam_updateGlow, flamethrower_moveFlameLine, particle_updateJitterBallisticEased, particle_updateJitterBallistic, func_150E4174, particle_bobQuad,
+    effect_updateTrailPuff, func_15141928, particle_updateBoneBurstParticle, func_1519EF04, effect_moveTravelParticle, effect_updateBoneBeamParticle,
 };
-static s32 (*D_80089D60[])() = {
-    NULL, func_150B95FC, func_150BA424, func_1514143C, func_1514A19C, func_1514A380, func_1514A498, beam_shrinkMotion,
-    beam_shrinkMotionProgress, func_1518F1A0, beam_updateLinkedQuad, flamethrower_fadeJetLine, func_1518F384, func_15149838, func_15149A94,
-    func_15149BF4, func_15149C58, func_151ACA20, func_1519187C, func_151DA6A8, func_151DADA0, func_150E679C,
-    func_151AFC08, func_150CBA30, func_150CC638, func_150C2FCC, func_151368A8, func_151B1478, func_1514AF74,
-    func_1514B8B0, func_150CD17C, func_151022AC, func_15141478, func_151415D4, flamethrower_fadeFlameLine, func_1514BE00,
-    func_1514BF7C, effect_updateBurstSpark, func_150D317C, trail_updateTrailGlow, func_151A6600, func_15141564, effect_updateBurstGlow,
+static s32 (*gQuadParticleUpdate2Funcs[])() = {
+    NULL, func_150B95FC, particle_fadeTumbling, func_1514143C, particle_flickerSize, particle_growFlickerParticle, particle_shrinkFlickerParticle, beam_shrinkMotion,
+    beam_shrinkMotionProgress, func_1518F1A0, beam_updateLinkedQuad, flamethrower_fadeJetLine, func_1518F384, particle_flickerChannelParticle, particle_growChannelParticle,
+    particle_shrinkChannelParticle, particle_shrinkRisingChannelParticle, particle_fadeQuadParticleByLife, particle_fadeDrip, particle_shrinkSteamEffect, particle_updateSquashEffect, particle_fadeImpactStreak,
+    particle_updateSpray, particle_updateDustPuff, particle_fadeInGrow, func_150C2FCC, func_151368A8, func_151B1478, func_1514AF74,
+    func_1514B8B0, particle_updateDriftQuad, func_151022AC, func_15141478, func_151415D4, flamethrower_fadeFlameLine, particle_updateJitterParticle,
+    particle_updateRelaunchedJitter, effect_updateBurstSpark, particle_swaySpark, trail_updateTrailGlow, particle_updateZoneEmitter, func_15141564, effect_updateBurstGlow,
     func_150FD514,
 };
-static s32 (*D_80089E10[])() = { NULL, func_15149EC4, func_1514C2B8 };
+static s32 (*gQuadParticleExpireFuncs[])() = { NULL, particle_spawnBillboardOnExpire, particle_relaunchJitterParticle };
 
-/* Vertex functions of a particle (DefParticleHead.vertexFn), see func_1513E83C. The prototype keeps the viewport an
+/* Vertex functions of a particle (DefParticleHead.vertexFn), see particle_buildRotatedQuad. The prototype keeps the viewport an
  * s16; most entries take their own view of the particle. */
-static Vtx *(*D_80089E1C[])(DefParticleHead *, s16) = {
-    func_1513E83C, func_151408A4, func_15149FD0, func_1513F114, func_1514A6A0, func_1518E73C, beam_fillMotionVerts,
-    beam_drawQuad, beam_drawLinkedQuad, flamethrower_buildJetLineQuad, func_15149D18, func_151AC810, func_1513F4B0, func_1519108C,
-    func_151DAE28, func_150E63A0, effect_buildJointParticleQuad, func_150CD59C, func_151019C4, func_15101F50, weapon_buildProjectileTail,
-    func_150AE36C, effect_buildBoneBeamQuad, func_1513EE14, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, func_1513FA2C,
-    func_1513FA70, effect_buildBurstSparkVtx, func_15140190, func_150D2D6C, func_151A6350, func_150F7F58, func_1513EDB4,
-    func_1513EDE4, func_150FDBA0, func_150F337C, func_150DEB58,
+static Vtx *(*gQuadParticleVertexFuncs[])(DefParticleHead *, s16) = {
+    particle_buildRotatedQuad, func_151408A4, particle_buildFlickerQuad, particle_buildBendingQuad, func_1514A6A0, particle_buildActorEmitterQuad, beam_fillMotionVerts,
+    beam_drawQuad, beam_drawLinkedQuad, flamethrower_buildJetLineQuad, particle_buildChannelQuad, particle_buildQuadParticleBillboard, particle_buildAxisQuad, particle_buildDripQuad,
+    particle_buildSquashQuad, particle_buildImpactStreakQuad, effect_buildJointParticleQuad, particle_buildDriftQuad, particle_buildRayBeamQuad, particle_buildCentredAxisQuad, weapon_buildProjectileTail,
+    func_150AE36C, effect_buildBoneBeamQuad, func_1513EE14, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, particle_buildBeamQuadFwd,
+    particle_buildBeamQuadRev, effect_buildBurstSparkVtx, func_15140190, particle_buildSparkBeamQuad, particle_buildYawedVerticalQuad, func_150F7F58, particle_buildUprightQuadFwd,
+    particle_buildUprightQuadRev, func_150FDBA0, particle_buildBoneBurstQuad, func_150DEB58,
 };
 
 /* Render setup and reset display lists of the particles; their entry in the object type table points to them. */
-Gfx D_80089EB8[] = {
+Gfx gQuadParticleSetupDl[] = {
     gsDPPipeSync(),
     gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
-Gfx D_80089ED8[] = {
+Gfx gQuadParticleEndDl[] = {
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
     gsSPEndDisplayList(),
 };
 
 /* Destroy and free handlers of a sprite (SpriteDef.unk7) and of a particle (ParticleDef.type). */
-static void (*D_80089EE8[])(QuadSprite *) = { func_1513C8D4, func_1513C8D4 };
-static void (*D_80089EF0[])(QuadSprite *) = { func_1513C900, func_1513C900 };
-static void (*D_80089EF8[])() = {
-    func_1513CA6C, func_15101090, func_151011E8, func_151411E4, func_1513CA6C, func_1513CA6C, sight_freeBeam,
-    beam_destroyAimed, effect_destroyBurstSpark, beam_destroyModelBeam, effect_destroyZoneEmitter, func_150FDCAC, func_1513CA6C,
+static void (*gQuadSpriteDestroyFuncs[])(QuadSprite *) = { particle_destroyQuadSpriteDefault, particle_destroyQuadSpriteDefault };
+static void (*gQuadSpriteFreeFuncs[])(QuadSprite *) = { particle_freeQuadSpriteDefault, particle_freeQuadSpriteDefault };
+static void (*gQuadParticleDestroyFuncs[])() = {
+    particle_destroyQuadParticleDefault, particle_destroyRayBeam, particle_destroyBeamHitFx, func_151411E4, particle_destroyQuadParticleDefault, particle_destroyQuadParticleDefault, sight_freeBeam,
+    beam_destroyAimed, effect_destroyBurstSpark, beam_destroyModelBeam, effect_destroyZoneEmitter, func_150FDCAC, particle_destroyQuadParticleDefault,
 };
-static void (*D_80089F2C[])() = {
-    func_1513CAA0, func_15101148, func_15101210, func_15141250, func_1513CAA0, func_1513CAA0, func_151C95D8,
-    beam_freeAimed, effect_freeBurstSpark, beam_freeModelBeam, effect_freeZoneEmitter, func_150FDCD8, func_1513CAA0,
+static void (*gQuadParticleFreeFuncs[])() = {
+    particle_freeQuadParticleDefault, particle_freeRayBeam, particle_freeBeamHitFx, func_15141250, particle_freeQuadParticleDefault, particle_freeQuadParticleDefault, func_151C95D8,
+    beam_freeAimed, effect_freeBurstSpark, beam_freeModelBeam, effect_freeZoneEmitter, func_150FDCD8, particle_freeQuadParticleDefault,
 };
-/* Event handler of a sprite (func_1513CF9C). */
-static void (*D_80089F60[])(s32, s32, u8) = { func_1513CFD0 };
-/* Event handlers of a particle (ParticleDef.type, func_1513DF9C); several take their own view of the particle and
+/* Event handler of a sprite (particle_onQuadSpriteEvent). */
+static void (*gQuadSpriteEventFuncs[])(s32, s32, u8) = { func_1513CFD0 };
+/* Event handlers of a particle (ParticleDef.type, particle_onQuadParticleEvent); several take their own view of the particle and
  * of the event data. */
-static void (*D_80089F64[])(DefParticleHead *, s32, u8) = {
-    func_1513E070, func_1513E084, effect_boneBeamMessage, sight_handleBeamMessage, func_151416E8, beam_aimedMessage, effect_burstSparkMessage,
-    effect_burstSparkMessage, func_151C4AB0, func_150FDB0C, func_150F31D4,
+static void (*gQuadParticleEventFuncs[])(DefParticleHead *, s32, u8) = {
+    func_1513E070, particle_onQuadParticleOwnerMsg, effect_boneBeamMessage, sight_handleBeamMessage, func_151416E8, beam_aimedMessage, effect_burstSparkMessage,
+    effect_burstSparkMessage, func_151C4AB0, func_150FDB0C, particle_onBoneBurstParticleEvent,
 };
 
 /* Per-frame update of a sprite: lifetime, fading and texture animation. */
-void func_1513C060(QuadSprite *sprite) {
+void particle_updateQuadSprite(QuadSprite *sprite) {
     s32 speed;
     s8 expired;
     s32 numFrames;
@@ -121,7 +121,7 @@ void func_1513C060(QuadSprite *sprite) {
         }
     }
     if (sprite->updateFn != 0) {
-        if (D_80089C70[sprite->updateFn](sprite) == 0) {
+        if (gQuadSpriteUpdateFuncs[sprite->updateFn](sprite) == 0) {
             expired = TRUE;
         }
     }
@@ -185,7 +185,7 @@ void func_1513C060(QuadSprite *sprite) {
 
     if (expired) {
         if (sprite->expireFn != 0) {
-            if (D_80089CA8[sprite->expireFn](sprite) != 0) {
+            if (gQuadSpriteExpireFuncs[sprite->expireFn](sprite) != 0) {
                 effect_destroyObject(&sprite->header);
             }
         } else {
@@ -195,7 +195,7 @@ void func_1513C060(QuadSprite *sprite) {
 }
 
 /* The default vertex colours of a sprite or particle: opaque white. */
-const VtxColor D_800A4AA0[4] = {
+const VtxColor gWhiteVtxColors[4] = {
     { 0xFF, 0xFF, 0xFF, 0xFF, 0 },
     { 0xFF, 0xFF, 0xFF, 0xFF, 0 },
     { 0xFF, 0xFF, 0xFF, 0xFF, 0 },
@@ -203,14 +203,14 @@ const VtxColor D_800A4AA0[4] = {
 };
 
 /* Allocates a sprite from a template; extraSize bytes follow it. */
-QuadSprite *func_1513C350(void *def, const void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6,
+QuadSprite *particle_newQuadSprite(void *def, const void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6,
                          Vec3f *pos, s32 extraSize, u8 arg9, s32 argA) {
     QuadSprite *sprite;
     u8 kind;
     s32 i;
 
     if (colors == NULL) {
-        colors = &D_800A4AA0;
+        colors = &gWhiteVtxColors;
     }
     if (((SpriteDef *)def)->flags & 0x40000) {
         kind = 0x4A;
@@ -222,8 +222,8 @@ QuadSprite *func_1513C350(void *def, const void *colors, u8 updateFn, u8 expireF
         return NULL;
     }
     memcpy(&sprite->def, def, sizeof(SpriteDef));
-    func_1513FFF4(sprite->vtx, sprite->def.texture, flip);
-    func_151400D0(sprite->vtx, colors);
+    particle_setQuadTexCoords(sprite->vtx, sprite->def.texture, flip);
+    particle_setQuadColors(sprite->vtx, colors);
     sprite->updateFn = updateFn;
     sprite->expireFn = expireFn;
     sprite->link.model = model;
@@ -248,7 +248,7 @@ QuadSprite *func_1513C350(void *def, const void *colors, u8 updateFn, u8 expireF
 }
 
 /* Spawns a flat (xz-plane) sprite at (x, y, z). */
-QuadSprite *func_1513C4EC(void *def, const void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
+QuadSprite *particle_spawnFlatQuadSprite(void *def, const void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
                          u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
     QuadSprite *sprite;
     Vec3f pos;
@@ -256,28 +256,28 @@ QuadSprite *func_1513C4EC(void *def, const void *colors, u8 updateFn, u8 expireF
     pos.x = x;
     pos.y = y;
     pos.z = z;
-    sprite = func_1513C350(def, colors, updateFn, expireFn, flip, model, arg6, &pos, extraSize, argE, argF);
+    sprite = particle_newQuadSprite(def, colors, updateFn, expireFn, flip, model, arg6, &pos, extraSize, argE, argF);
     if (sprite == NULL) {
         return NULL;
     }
-    func_1513E13C(sprite, x, y, z, width, length, angle);
+    particle_layQuadSpriteFlat(sprite, x, y, z, width, length, angle);
     return sprite;
 }
 
 /* Spawns a flat (xz-plane) sprite without a model or stored position. */
-QuadSprite *func_1513C5B0(void *def, const void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width,
+QuadSprite *particle_spawnFlatQuadSpriteNoModel(void *def, const void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width,
                          f32 length, u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
-    QuadSprite *sprite = func_1513C350(def, colors, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
+    QuadSprite *sprite = particle_newQuadSprite(def, colors, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
 
     if (sprite == NULL) {
         return NULL;
     }
-    func_1513E13C(sprite, x, y, z, width, length, angle);
+    particle_layQuadSpriteFlat(sprite, x, y, z, width, length, angle);
     return sprite;
 }
 
-/* Spawns a sprite oriented by func_1513E2AC, with the default colours. */
-QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
+/* Spawns a sprite oriented by particle_layQuadSpriteOnSurface, with the default colours. */
+QuadSprite *particle_spawnSurfaceQuadSprite(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
                          f32 height, u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
     QuadSprite *sprite;
     Vec3f pos;
@@ -286,61 +286,61 @@ QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, CollisionTri *sur
     pos.y = y;
     pos.z = z;
 
-    sprite = func_1513C350(def, 0, updateFn, expireFn, flip, model, arg6, &pos, extraSize, argE, argF);
+    sprite = particle_newQuadSprite(def, 0, updateFn, expireFn, flip, model, arg6, &pos, extraSize, argE, argF);
     if (sprite == NULL) {
         return NULL;
     }
 
-    if (func_1513E2AC(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
+    if (particle_layQuadSpriteOnSurface(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
         effect_destroyObject(&sprite->header);
         return NULL;
     }
     return sprite;
 }
 
-/* As func_1513C650, without a model or stored position. */
-QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
+/* As particle_spawnSurfaceQuadSprite, without a model or stored position. */
+QuadSprite *particle_spawnSurfaceQuadSpriteNoModel(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
                          f32 height, u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
-    QuadSprite *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
+    QuadSprite *sprite = particle_newQuadSprite(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
 
     if (sprite == NULL) {
         return NULL;
     }
 
-    if (func_1513E2AC(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
+    if (particle_layQuadSpriteOnSurface(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
         effect_destroyObject(&sprite->header);
         return NULL;
     }
     return sprite;
 }
 
-/* As func_1513C73C; arg1 is unused and the default colours are used. */
+/* As particle_spawnSurfaceQuadSpriteNoModel; arg1 is unused and the default colours are used. */
 QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z,
                          f32 width, f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE) {
-    QuadSprite *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argD, argE);
+    QuadSprite *sprite = particle_newQuadSprite(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argD, argE);
 
     if (sprite == NULL) {
         return NULL;
     }
-    if (func_1513E2AC(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
+    if (particle_layQuadSpriteOnSurface(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
         effect_destroyObject(&sprite->header);
         return NULL;
     }
     return sprite;
 }
 
-void func_1513C8D4(QuadSprite *sprite) {
-    func_1513C92C(sprite);
+void particle_destroyQuadSpriteDefault(QuadSprite *sprite) {
+    particle_freeQuadSpriteLights(sprite);
     effect_defaultDestroy(&sprite->header);
 }
 
-void func_1513C900(QuadSprite *sprite) {
-    func_1513C92C(sprite);
+void particle_freeQuadSpriteDefault(QuadSprite *sprite) {
+    particle_freeQuadSpriteLights(sprite);
     effect_defaultFree(&sprite->header);
 }
 
 /* Releases a sprite's light buffers. */
-void func_1513C92C(QuadSprite *sprite) {
+void particle_freeQuadSpriteLights(QuadSprite *sprite) {
     s32 i;
 
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
@@ -354,7 +354,7 @@ void func_1513C92C(QuadSprite *sprite) {
     }
 }
 
-void func_1513C9B0(QuadSprite *sprite) {
+void particle_destroyQuadSprite(QuadSprite *sprite) {
     s32 index;
 
     if (sprite->def.flags & 0x1000) {
@@ -362,10 +362,10 @@ void func_1513C9B0(QuadSprite *sprite) {
     } else {
         index = 0;
     }
-    D_80089EE8[index](sprite);
+    gQuadSpriteDestroyFuncs[index](sprite);
 }
 
-void func_1513C9FC(QuadSprite *sprite) {
+void particle_freeQuadSprite(QuadSprite *sprite) {
     s32 index;
 
     if (sprite->def.flags & 0x1000) {
@@ -373,28 +373,28 @@ void func_1513C9FC(QuadSprite *sprite) {
     } else {
         index = 0;
     }
-    D_80089EF0[index](sprite);
+    gQuadSpriteFreeFuncs[index](sprite);
 }
 
 /* Frees a particle's per-viewport vertex buffers. */
-void func_1513CA48(DefParticleHead *particle) {
-    func_151D5E30(particle->vtxBuffers);
+void particle_freeQuadVtxBuffers(DefParticleHead *particle) {
+    particle_freeViewBuffers(particle->vtxBuffers);
 }
 
-void func_1513CA6C(DefParticleHead *particle) {
-    func_1513CA48(particle);
-    func_1513CAD4(particle);
+void particle_destroyQuadParticleDefault(DefParticleHead *particle) {
+    particle_freeQuadVtxBuffers(particle);
+    particle_freeQuadParticleLights(particle);
     effect_defaultDestroy(&particle->header);
 }
 
-void func_1513CAA0(DefParticleHead *particle) {
-    func_1513CA48(particle);
-    func_1513CAD4(particle);
+void particle_freeQuadParticleDefault(DefParticleHead *particle) {
+    particle_freeQuadVtxBuffers(particle);
+    particle_freeQuadParticleLights(particle);
     effect_defaultFree(&particle->header);
 }
 
 /* Releases a particle's light buffers. */
-void func_1513CAD4(DefParticleHead *arg0) {
+void particle_freeQuadParticleLights(DefParticleHead *arg0) {
     s32 i;
 
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
@@ -408,7 +408,7 @@ void func_1513CAD4(DefParticleHead *arg0) {
     }
 }
 
-void func_1513CB58(DefParticleHead *particle) {
+void particle_destroyQuadParticle(DefParticleHead *particle) {
     s32 index;
 
     if (particle->def.flags & 0x400000) {
@@ -416,10 +416,10 @@ void func_1513CB58(DefParticleHead *particle) {
     } else {
         index = 0;
     }
-    D_80089EF8[index](particle);
+    gQuadParticleDestroyFuncs[index](particle);
 }
 
-void func_1513CBA4(DefParticleHead *particle) {
+void particle_freeQuadParticle(DefParticleHead *particle) {
     s32 index;
 
     if (particle->def.flags & 0x400000) {
@@ -427,12 +427,12 @@ void func_1513CBA4(DefParticleHead *particle) {
     } else {
         index = 0;
     }
-    D_80089F2C[index](particle);
+    gQuadParticleFreeFuncs[index](particle);
 }
 
 /* The render modes of the effects (the blender words of the two cycles), indexed by the low byte of a render mode
  * field; most effect files read it with their own view. */
-const RenderModePair D_800A4AC8[28] = {
+const RenderModePair gEffectRenderModes[28] = {
 { 0x004049D8, 0x001049D8 },
 { 0x004049D8, 0x001049D8 },
 { 0x00404DD8, 0x00404DD8 },
@@ -464,7 +464,7 @@ const RenderModePair D_800A4AC8[28] = {
 };
 
 /* Draws a sprite's quad (and attached model) for one viewport. */
-Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
+Gfx *particle_drawQuadSprite(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
     s32 geometry;
     u8 needSync;
     u8 blendMode;
@@ -510,12 +510,12 @@ Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
         }
         gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
         gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
-        gfx = func_1513F4E4(gfx, combiner, &needSync);
+        gfx = particle_setCombineMode(gfx, combiner, &needSync);
         gfx = func_15142FBC(gfx,
                             G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
                                 ((sprite->def.texture == 0xFF) ? 0 : (u32)gSpriteTlutMode /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
                                 G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            D_800A4AC8[blendMode].cycle1 | D_800A4AC8[blendMode].cycle2, &needSync);
+                            gEffectRenderModes[blendMode].cycle1 | gEffectRenderModes[blendMode].cycle2, &needSync);
 
         gSPVertex(gfx++, sprite->vtx, 4, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
@@ -524,8 +524,8 @@ Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
     return gfx;
 }
 
-void func_1513CF9C(s32 arg0, s32 arg1, u8 arg2) {
-    D_80089F60[0](arg0, arg1, arg2);
+void particle_onQuadSpriteEvent(s32 arg0, s32 arg1, u8 arg2) {
+    gQuadSpriteEventFuncs[0](arg0, arg1, arg2);
 }
 
 void func_1513CFD0(s32 arg0, s32 arg1, u8 arg2) {
@@ -533,7 +533,7 @@ void func_1513CFD0(s32 arg0, s32 arg1, u8 arg2) {
 
 
 /* Per-frame update of a particle: lifetime, fading and texture animation. */
-void func_1513CFE4(DefParticleHead *particle) {
+void particle_updateQuadParticle(DefParticleHead *particle) {
     s32 speed;
     s8 expired;
     s32 numFrames;
@@ -552,12 +552,12 @@ void func_1513CFE4(DefParticleHead *particle) {
         }
     }
     if (particle->updateFn1 != 0) {
-        if (D_80089CB8[particle->updateFn1](particle) == 0) {
+        if (gQuadParticleUpdate1Funcs[particle->updateFn1](particle) == 0) {
             expired = TRUE;
         }
     }
     if (particle->updateFn2 != 0) {
-        if (D_80089D60[particle->updateFn2](particle) == 0) {
+        if (gQuadParticleUpdate2Funcs[particle->updateFn2](particle) == 0) {
             expired = TRUE;
         }
     }
@@ -615,7 +615,7 @@ void func_1513CFE4(DefParticleHead *particle) {
 
     if (expired) {
         if (particle->expireFn != 0) {
-            if (D_80089E10[particle->expireFn](particle) != 0) {
+            if (gQuadParticleExpireFuncs[particle->expireFn](particle) != 0) {
                 expired = FALSE;
             }
         }
@@ -626,7 +626,7 @@ void func_1513CFE4(DefParticleHead *particle) {
 }
 
 /* Allocates a particle from a template; motionSize extra bytes follow it for its behaviour state. */
-void *func_1513D2F0(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
+void *particle_newQuadParticle(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
                     s32 arg8, s32 motionSize, u8 argA, s32 argB) {
     DefParticleHead *particle;
     s32 flags;
@@ -653,8 +653,8 @@ void *func_1513D2F0(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u
     particle->vertexFn = vertexFn;
     particle->unk74 = 0;
     bzero(particle->vtxBuffers, sizeof(particle->vtxBuffers));
-    func_1513FFF4(particle->vtxTemplate, particle->def.texture, flip);
-    func_151400D0(particle->vtxTemplate, colors);
+    particle_setQuadTexCoords(particle->vtxTemplate, particle->def.texture, flip);
+    particle_setQuadColors(particle->vtxTemplate, colors);
     particle->active = 1;
     particle->unk14 = 0;
     particle->ground.height = -10000.0f;
@@ -679,40 +679,40 @@ void *func_1513D2F0(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u
     return particle;
 }
 
-void *func_1513D4B8(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip,
+void *particle_newQuadParticleNoModel(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip,
                     s32 motionSize, u8 arg8, s32 arg9) {
-    return func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg8, arg9);
+    return particle_newQuadParticle(def, colors, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg8, arg9);
 }
 
-/* As func_1513D4B8 with the default colours. */
-void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize,
+/* As particle_newQuadParticleNoModel with the default colours. */
+void *particle_newQuadParticleWhite(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize,
                     u8 arg7, s32 arg8) {
-    return func_1513D2F0(def, &D_800A4AA0, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg7, arg8);
+    return particle_newQuadParticle(def, &gWhiteVtxColors, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg7, arg8);
 }
 
-/* Spawns a particle whose quad is spanned by two axes from func_1513D6FC (vertex function 12). */
-void *func_1513D594(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
+/* Spawns a particle whose quad is spanned by two axes from particle_computeQuadAxes (vertex function 12). */
+void *particle_spawnAxisQuadParticle(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
                     f32 height, Vec3s **triPtrs, CollisionTri *surface, s32 model, s32 argC, u8 argD,
                     s32 motionSize, u8 argF, s32 arg10) {
     DefParticleHead *particle;
 
     if (colors == 0) {
-        colors = &D_800A4AA0;
+        colors = &gWhiteVtxColors;
     }
-    particle = func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, 12, flip, model, argC,
+    particle = particle_newQuadParticle(def, colors, updateFn1, updateFn2, expireFn, 12, flip, model, argC,
                              motionSize + sizeof(PARTICLE_MOTION(particle)->axes), argF, arg10);
     if ((particle != NULL) &&
-        (func_1513D6FC(&PARTICLE_MOTION(particle)->axes, angle, width, height, triPtrs, surface, argD) == 0)) {
+        (particle_computeQuadAxes(&PARTICLE_MOTION(particle)->axes, angle, width, height, triPtrs, surface, argD) == 0)) {
         effect_destroyObject(&particle->header);
         return NULL;
     }
     return particle;
 }
 
-void *func_1513D668(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle,
+void *particle_spawnAxisQuadParticleNoModel(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle,
                     f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface, u8 argB, s32 motionSize, u8 argD,
                     s32 argE) {
-    return func_1513D594(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, triPtrs, surface, 0,
+    return particle_spawnAxisQuadParticle(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, triPtrs, surface, 0,
                          0, argB, motionSize, argD, argE);
 }
 
@@ -721,7 +721,7 @@ void *func_1513D668(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u
  * slope shadow_getTriSlopes returns (each axis keeps its length); otherwise it lies in the plane of the
  * basis func_15144E80 returns.
  */
-s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface,
+s32 particle_computeQuadAxes(ParticleAxes *axes, s16 angle, f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface,
                    u8 onSlope) {
     f32 slopeX;
     f32 slopeZ;
@@ -836,7 +836,7 @@ end: // matching: an unused label keeps the final return 1 in its own basic bloc
 
 
 /* Draws a particle's quad (and attached model) for one viewport. */
-Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
+Gfx *particle_drawQuadParticle(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
     s32 pad; // matching: unused stack slot
     u8 needSync;
     s16 primR;
@@ -874,7 +874,7 @@ Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
             }
             return gfx;
         }
-        vtx = D_80089E1C[particle->vertexFn](particle, viewport);
+        vtx = gQuadParticleVertexFuncs[particle->vertexFn](particle, viewport);
         if (vtx == NULL) {
             if (particle->vtxBuffers[viewport]) {
                 func_100043B4((void *)(s32)particle->vtxBuffers[viewport], 2);
@@ -911,13 +911,13 @@ Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
         }
         gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
         gfx = func_15142CF0(gfx, 0xF2, 0, primR, primG, primB, primA, &needSync);
-        gfx = func_1513F4E4(gfx, combiner, &needSync);
+        gfx = particle_setCombineMode(gfx, combiner, &needSync);
         gfx = func_15142FBC(gfx,
                             G_PM_NPRIMITIVE | ((particle->def.flags & 0x20000000) ? G_CYC_2CYCLE : G_CYC_1CYCLE) |
                                 G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
                                 ((particle->def.texture == 0xFF) ? 0 : (u32)gSpriteTlutMode /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
                                 G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            D_800A4AC8[blendMode].cycle1 | D_800A4AC8[blendMode].cycle2, &needSync);
+                            gEffectRenderModes[blendMode].cycle1 | gEffectRenderModes[blendMode].cycle2, &needSync);
         gSPVertex(gfx++, vtx, 4, 0);
         gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     }
@@ -925,8 +925,8 @@ Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
 }
 
 
-/* Dispatches to the D_80089F64 handler for the particle's type. */
-void func_1513DF9C(DefParticleHead *particle, s32 arg1, u8 arg2) {
+/* Dispatches to the gQuadParticleEventFuncs handler for the particle's type. */
+void particle_onQuadParticleEvent(DefParticleHead *particle, s32 arg1, u8 arg2) {
     s32 index;
 
     if (!(particle->def.flags & 0x400000)) {
@@ -972,14 +972,14 @@ void func_1513DF9C(DefParticleHead *particle, s32 arg1, u8 arg2) {
                 break;
         }
     }
-    D_80089F64[index](particle, arg1, arg2);
+    gQuadParticleEventFuncs[index](particle, arg1, arg2);
 }
 
 void func_1513E070(DefParticleHead *particle, s32 arg1, u8 arg2) {
 }
 
 /* Message handler: frees the particle when its owner goes away (0x1A), or retargets it on an actor swap (0x2D). */
-void func_1513E084(DefParticleHead *particle, ActorMsg *msg, u8 eventId) {
+void particle_onQuadParticleOwnerMsg(DefParticleHead *particle, ActorMsg *msg, u8 eventId) {
     ActorRef *link = &PARTICLE_MOTION(particle)->owner;
 
     if (eventId == 0x1A) {
@@ -1001,7 +1001,7 @@ void func_1513E134(void) {
 }
 
 /* Lays a sprite's quad flat in the xz plane around (x, y, z), rotated by angle. */
-void func_1513E13C(QuadSprite *sprite, f32 x, f32 y, f32 z, f32 width, f32 length, u8 angle) {
+void particle_layQuadSpriteFlat(QuadSprite *sprite, f32 x, f32 y, f32 z, f32 width, f32 length, u8 angle) {
     // matching: permuter-found shape; the one-element arrays, (&param)[0] reads, unused p0..p3 and the
     // empty if steer IDO's stack and register allocation (each plain form was tried and mismatches)
     f32 sinA;
@@ -1051,7 +1051,7 @@ void func_1513E2A4(void) {
  * Places a sprite's quad (half-size width x height, rotated by angle) around (x, y, z): in the plane of
  * the basis func_15144E80 returns for surface, or with no surface on the slope from shadow_getTriSlopes.
  */
-s32 func_1513E2AC(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
+s32 particle_layQuadSpriteOnSurface(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
                   f32 height, u8 angle) {
     Vtx_t *vtx;
     f32 cosA;
@@ -1162,7 +1162,7 @@ s32 func_1513E2AC(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f3
 }
 
 /* Moves, rotates and scales a particle by its drift velocities times the frame time, with optional gravity. */
-s32 func_1513E6E8(DefParticleHead *particle) {
+s32 particle_updateDriftMotion(DefParticleHead *particle) {
     DefParticleMotion *motion;
 
     motion = PARTICLE_MOTION(particle);
@@ -1189,12 +1189,12 @@ s32 func_1513E6E8(DefParticleHead *particle) {
 }
 
 /*
- * Vertex functions (D_80089E1C): each fetches the particle's vertex buffer for a viewport (refilled
+ * Vertex functions (gQuadParticleVertexFuncs): each fetches the particle's vertex buffer for a viewport (refilled
  * from vtxTemplate when new), writes the quad's corner positions and returns it, or NULL.
  */
 
 /* Quad of width x height, rotated by def.rot, scaled by def.scale and placed at def.pos. */
-Vtx *func_1513E83C(DefParticleHead *particle, s16 viewport) {
+Vtx *particle_buildRotatedQuad(DefParticleHead *particle, s16 viewport) {
     MtxF mtx;
     s32 pad; // matching: unused stack slot
     Vtx *vertices;
@@ -1203,7 +1203,7 @@ Vtx *func_1513E83C(DefParticleHead *particle, s16 viewport) {
     u8 fresh;
     s16 i;
 
-    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
+    particle_getViewBuffer(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh != 0) {
@@ -1255,7 +1255,7 @@ Vtx *func_1513E83C(DefParticleHead *particle, s16 viewport) {
  * Upright quad of width x height facing the viewport's camera (D_800DD1D8 / D_800DD1E8 hold its
  * direction), scaled vertically by def.scale.y; reversed mirrors the corner order.
  */
-Vtx *func_1513EAD8(particle, reversed, viewport)
+Vtx *particle_buildUprightQuad(particle, reversed, viewport)
     DefParticleHead *particle;
     u8 reversed;
     s16 viewport;
@@ -1266,7 +1266,7 @@ Vtx *func_1513EAD8(particle, reversed, viewport)
     f32 heightDelta, heightScale, offsetZ, offsetX;
     u8 fresh;
 
-    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
+    particle_getViewBuffer(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh != 0) {
@@ -1320,12 +1320,12 @@ Vtx *func_1513EAD8(particle, reversed, viewport)
     return result;
 }
 
-Vtx *func_1513EDB4(void *particle, s16 viewport) {
-    return func_1513EAD8(particle, FALSE, viewport);
+Vtx *particle_buildUprightQuadFwd(void *particle, s16 viewport) {
+    return particle_buildUprightQuad(particle, FALSE, viewport);
 }
 
-Vtx *func_1513EDE4(void *particle, s16 viewport) {
-    return func_1513EAD8(particle, TRUE, viewport);
+Vtx *particle_buildUprightQuadRev(void *particle, s16 viewport) {
+    return particle_buildUprightQuad(particle, TRUE, viewport);
 }
 
 /* Quad of width x height, rotated by def.rot and placed at def.pos (unrolled form of func_15140190). */
@@ -1337,7 +1337,7 @@ Vtx *func_1513EE14(DefParticleHead *particle, s16 viewport) {
     f32 out[4][3];
     u8 fresh;
 
-    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
+    particle_getViewBuffer(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh != 0) {
@@ -1389,7 +1389,7 @@ Vtx *func_1513EE14(DefParticleHead *particle, s16 viewport) {
  * Camera-facing upright quad that bends towards the point def.rot: the bend angle grows with the
  * square root of that point's sideways offset (scaled by def.scale.x), capped at 90 degrees.
  */
-Vtx *func_1513F114(DefParticleHead *particle, s16 viewport) {
+Vtx *particle_buildBendingQuad(DefParticleHead *particle, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
     f32 sinDir;
@@ -1409,7 +1409,7 @@ Vtx *func_1513F114(DefParticleHead *particle, s16 viewport) {
     f32 angle;
     u8 fresh;
 
-    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
+    particle_getViewBuffer(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh != 0) {
@@ -1467,17 +1467,17 @@ Vtx *func_1513F114(DefParticleHead *particle, s16 viewport) {
 }
 
 /* Quad spanned by the two axes in motion.axes (vertex function 12). */
-void func_1513F4B0(DefParticleHead *head, s16 viewport) {
+void particle_buildAxisQuad(DefParticleHead *head, s16 viewport) {
     DefParticleHead *particle = head;
 
-    func_15140410(particle, &PARTICLE_MOTION(particle)->axes.u, &PARTICLE_MOTION(particle)->axes.v, viewport);
+    particle_buildQuadFromAxes(particle, &PARTICLE_MOTION(particle)->axes.u, &PARTICLE_MOTION(particle)->axes.v, viewport);
 }
 
 /*
  * Combiner modes: each 16-byte entry holds the a, b, c, d inputs of cycle 0 colour, cycle 0 alpha,
  * cycle 1 colour and cycle 1 alpha, in that order.
  */
-static const u8 D_800A4BA8[92][16] = {
+static const u8 gCombineModes[92][16] = {
     { 1, 31, 5, 3, 1, 7, 5, 3, 1, 31, 5, 3, 1, 7, 5, 3 },
     { 1, 3, 5, 31, 1, 3, 5, 7, 1, 3, 5, 31, 1, 3, 5, 7 },
     { 1, 31, 5, 3, 1, 7, 5, 3, 1, 31, 5, 3, 1, 7, 5, 3 },
@@ -1573,7 +1573,7 @@ static const u8 D_800A4BA8[92][16] = {
 };
 
 /* Sets the colour combiner to mode combiner unless it is already current. */
-Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync) {
+Gfx *particle_setCombineMode(Gfx *gfx, u8 combiner, u8 *needSync) {
     s32 key;
     const u8 *mode;
 
@@ -1583,7 +1583,7 @@ Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync) {
             gDPPipeSync(gfx++);
             *needSync = FALSE;
         }
-        mode = D_800A4BA8[combiner];
+        mode = gCombineModes[combiner];
         gDPSetCombine(gfx++,
                       GCCc0w0(mode[0], mode[2], mode[4], mode[6]) | GCCc1w0(mode[8], mode[10]),
                       GCCc0w1(mode[1], mode[3], mode[5], mode[7]) |
@@ -1594,7 +1594,7 @@ Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync) {
 }
 
 /* Sets a particle's update, expiry and vertex function indices. */
-void func_1513F680(DefParticleHead *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn) {
+void particle_setQuadParticleFuncs(DefParticleHead *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn) {
     particle->updateFn1 = updateFn1;
     particle->updateFn2 = updateFn2;
     particle->expireFn = expireFn;
@@ -1602,13 +1602,13 @@ void func_1513F680(DefParticleHead *particle, u8 updateFn1, u8 updateFn2, u8 exp
 }
 
 /* Sets a sprite's update and expiry function indices. */
-void func_1513F6C0(QuadSprite *sprite, u8 updateFn, u8 expireFn) {
+void particle_setQuadSpriteFuncs(QuadSprite *sprite, u8 updateFn, u8 expireFn) {
     sprite->updateFn = updateFn;
     sprite->expireFn = expireFn;
 }
 
 /* Grows a particle's width and height by motion.grow.rate times the frame time. */
-s32 func_1513F6E8(DefParticleHead *particle) {
+s32 particle_updateGrowMotion(DefParticleHead *particle) {
     f32 rate = PARTICLE_MOTION(particle)->grow.rate;
 
     particle->def.width += rate * gFrameDelta;
@@ -1620,7 +1620,7 @@ s32 func_1513F6E8(DefParticleHead *particle) {
  * Ballistic motion: applies drag once per elapsed tick and gravity, then moves the particle by the
  * average of its old and new velocity; also spins it by motion.ballistic.rotVel.
  */
-s32 func_1513F728(DefParticleHead *particle) {
+s32 particle_updateBallisticMotion(DefParticleHead *particle) {
     DefParticleMotion *motion;
     Vec3f oldVel;
     s32 i;
@@ -1651,27 +1651,27 @@ s32 func_1513F728(DefParticleHead *particle) {
     return 1;
 }
 
-void func_1513FA2C(DefParticleHead *particle, s16 viewport) {
+void particle_buildBeamQuadFwd(DefParticleHead *particle, s16 viewport) {
     BeamScale scale;
 
     scale.width = 1.0f;
     scale.length = 1.0f;
-    func_1513FAB4(particle, FALSE, &scale, viewport);
+    particle_buildBeamQuad(particle, FALSE, &scale, viewport);
 }
 
-void func_1513FA70(DefParticleHead *particle, s16 viewport) {
+void particle_buildBeamQuadRev(DefParticleHead *particle, s16 viewport) {
     BeamScale scale;
 
     scale.width = 1.0f;
     scale.length = 1.0f;
-    func_1513FAB4(particle, TRUE, &scale, viewport);
+    particle_buildBeamQuad(particle, TRUE, &scale, viewport);
 }
 
 /*
  * Beam from def.pos towards def.rot (its length scaled by def.height * scale->length), def.width *
  * scale->width wide and turned to face the viewport's camera; reversed rotates the corner order.
  */
-Vtx *func_1513FAB4(DefParticleHead *particle, u8 reversed, BeamScale *scale, s16 viewport) {
+Vtx *particle_buildBeamQuad(DefParticleHead *particle, u8 reversed, BeamScale *scale, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
     Vec3f *camera;
@@ -1685,7 +1685,7 @@ Vtx *func_1513FAB4(DefParticleHead *particle, u8 reversed, BeamScale *scale, s16
     f32 width;
     u8 fresh;
 
-    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
+    particle_getViewBuffer(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh != 0) {
@@ -1775,7 +1775,7 @@ Vtx *func_1513FAB4(DefParticleHead *particle, u8 reversed, BeamScale *scale, s16
 }
 
 /* Sets the texture coordinates of a quad to cover the whole texture, mirrored per the flip bits. */
-void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip) {
+void particle_setQuadTexCoords(Vtx *vtx, u8 texture, u8 flip) {
     TextureDesc *tex;
     u16 maxS;
     u16 maxT;
@@ -1821,7 +1821,7 @@ void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip) {
 }
 
 /* Copies four vertex colours into a quad. */
-void func_151400D0(Vtx *vtx, const VtxColor *colors) {
+void particle_setQuadColors(Vtx *vtx, const VtxColor *colors) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
@@ -1845,7 +1845,7 @@ Vtx *func_15140190(DefParticleHead *particle, s16 viewport) {
     u8 i;
     u8 fresh;
 
-    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
+    particle_getViewBuffer(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh != 0) {
@@ -1889,19 +1889,19 @@ Vtx *func_15140190(DefParticleHead *particle, s16 viewport) {
 }
 
 /* The object list types of the glow sprites (game_16DC80) and of the effect objects, for effect_sendEventToTypes. */
-const s32 D_800A5168[4] = { 0x1C, 0x49, 0x56, 0x62 };
-static const s32 D_800A5178[3] = { 0x1B, 0x61, 0x4A };
+const s32 gQuadParticleTypes[4] = { 0x1C, 0x49, 0x56, 0x62 };
+static const s32 gQuadSpriteTypes[3] = { 0x1B, 0x61, 0x4A };
 
-void func_151403A8(s32 arg0, u8 arg1) {
-    effect_sendEventToTypes(D_800A5168, 4, arg0, arg1);
+void particle_broadcastToQuadParticles(s32 arg0, u8 arg1) {
+    effect_sendEventToTypes(gQuadParticleTypes, 4, arg0, arg1);
 }
 
-void func_151403DC(s32 arg0, u8 arg1) {
-    effect_sendEventToTypes(D_800A5178, 3, arg0, arg1);
+void particle_broadcastToQuadSprites(s32 arg0, u8 arg1) {
+    effect_sendEventToTypes(gQuadSpriteTypes, 3, arg0, arg1);
 }
 
 /* Quad centred on def.pos with half-axes axisU * width and axisV * height. */
-Vtx *func_15140410(DefParticleHead *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport) {
+Vtx *particle_buildQuadFromAxes(DefParticleHead *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
     f32 ux, uy, uz, vx, vy, vz;
@@ -1909,7 +1909,7 @@ Vtx *func_15140410(DefParticleHead *particle, Vec3f *axisU, Vec3f *axisV, s16 vi
     {
         u8 fresh;
 
-        func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
+        particle_getViewBuffer(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
         result = vertices;
         if (vertices != NULL) {
             if (fresh != 0) {
@@ -1949,7 +1949,7 @@ Vtx *func_15140410(DefParticleHead *particle, Vec3f *axisU, Vec3f *axisV, s16 vi
 #define PARTICLE_SORT_KEY(p) (((p)->def.texture << 8) + ((p)->def.frame >> 16))
 
 /* List callback: insertion-sorts draw list gObjectLists[group][list] by PARTICLE_SORT_KEY. */
-s32 func_151406AC(s32 arg0, s32 list, s32 group, s16 phase) {
+s32 particle_sortDrawList(s32 arg0, s32 list, s32 group, s16 phase) {
     DefParticleHead head;
     DefParticleHead **slot;
     DefParticleHead *cur;

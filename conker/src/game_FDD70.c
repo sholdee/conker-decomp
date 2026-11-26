@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151DB5D0 (game_2062D0.c) is declared in each file that calls it: game/Effects/Blood/blood.c was compiled with a
+// particle_spawnKindSprite (game_2062D0.c) is declared in each file that calls it: game/Effects/Blood/blood.c was compiled with a
 // different view of it.
-SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
+SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
                              u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
 /* This file's .data: the current values, targets and easing velocities of three channels. */
@@ -132,7 +132,7 @@ s32 func_150D11B4(BloodStrip *strip) {
 }
 
 /* BloodStrip emit callback 7: moves both strip points `time` along their velocities and emits one
- * func_151DB5D0 particle at A, heading from A to B scaled by the strip's power. */
+ * particle_spawnKindSprite particle at A, heading from A to B scaled by the strip's power. */
 void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
     Vec3f start;
     f32 endX;
@@ -160,7 +160,7 @@ void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *veloci
     random1 = func_150ADA68();
     randomInt = func_150ADA20();
 
-    func_151DB5D0(0, &start.x, &velocity.x, random0 * 61.0f + 60.0f, 1.03571403f, 0.9704080224f,
+    particle_spawnKindSprite(0, &start.x, &velocity.x, random0 * 61.0f + 60.0f, 1.03571403f, 0.9704080224f,
                   random1 * 0.1570000052f + -0.08000000566f, (randomInt & 0xF) + 35,
                   func_150ADA20() % 156U + 100, 30, 8, 0, strip->header.owner, strip->header.kind);
 }

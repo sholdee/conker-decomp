@@ -47,7 +47,7 @@ BulletParticle *weapon_spawnBulletParticle(Bullet *bullet) {
     spawn.def.fadeStart = 50;
     spawn.def.fadeRate = 5;
 
-    particle = func_1513D2F0(&spawn.def, gBulletParticleColors, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, bullet->head.header.owner,
+    particle = particle_newQuadParticle(&spawn.def, gBulletParticleColors, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, bullet->head.header.owner,
                              bullet->head.header.kind);
     if (particle != NULL) {
         memcpy(&particle->bullet, &spawn.owner, sizeof(spawn.owner));
@@ -73,7 +73,7 @@ s32 weapon_updateBulletParticle(BulletParticle *particle) {
 
 /* Draws the particle with the default particle drawer. */
 void weapon_drawBulletParticle(BulletParticle *particle, s16 viewport) {
-    func_1513FA70(&particle->head, viewport);
+    particle_buildBeamQuadRev(&particle->head, viewport);
 }
 
 /* Starts a BloodTrail effect (emitter 3) that tracks the bullet's position. */
@@ -123,7 +123,7 @@ void weapon_emitBulletTrailParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz,
     random_c = func_150ADA68();
     random_a = func_150ADA20();
     random_b = func_150ADA20();
-    func_151A26EC(&position, &acceleration, &velocity, 1.0f, (random_f * 157.0f + -151.0f) * 0.00100000005f,
+    particle_spawnDragFadeSprite(&position, &acceleration, &velocity, 1.0f, (random_f * 157.0f + -151.0f) * 0.00100000005f,
                   random_c * 55.0f + 75.0f, random_a % 26U + 25, random_b % 101U + 100, 10, 25, 0, -1, 0, 0, 0,
                   effect->owner, effect->kind);
 }
@@ -172,5 +172,5 @@ SpriteParticle *weapon_spawnBulletSprite(Bullet *bullet) {
     spawn.handlerSet = 0;
     spawn.viewMask = 0;
     spawn.views = 0xFF;
-    return func_15130280(&spawn, 1, 0, 0, bullet->head.header.owner, bullet->head.header.kind);
+    return particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, bullet->head.header.owner, bullet->head.header.kind);
 }

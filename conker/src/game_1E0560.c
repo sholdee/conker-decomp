@@ -108,7 +108,7 @@ void func_151B3184(HoltenRopeEffect *effect) {
 extern struct {
     s32 unk0;
     s32 unk4;
-} D_800A4AC8[];
+} gEffectRenderModes[];
 
 /*
  * Draws the rope for view `view` as a camera-facing strip: each point gets a vertex
@@ -142,7 +142,7 @@ Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
     if (effect->flags & ROPE_FLAG_RESET) {
         return gfx;
     }
-    func_151D5D60(effect->vtxBuffer, view, 25 * sizeof(Vtx), &vtx, NULL);
+    particle_getViewBuffer(effect->vtxBuffer, view, 25 * sizeof(Vtx), &vtx, NULL);
     if (vtx != NULL) {
         u8 needSync;
         s32 mode0;
@@ -171,9 +171,9 @@ Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
             gfx = func_15142B7C(gfx, mode0, mode1);
             gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
-            gfx = func_1513F4E4(gfx, unk13, &needSync);
+            gfx = particle_setCombineMode(gfx, unk13, &needSync);
             gfx = func_15142E24(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &needSync, 3);
-            gfx = func_15142FBC(gfx, cycleType | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4, &needSync);
+            gfx = func_15142FBC(gfx, cycleType | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[renderMode].unk0 | gEffectRenderModes[renderMode].unk4, &needSync);
             {
                 f32 pad3; // matching: a local here opens a -g3 scope that IDO will not schedule across
 
@@ -728,7 +728,7 @@ s32 func_151B4B78(HoltenRopeEffect *effect) {
 void func_151B4C1C(HoltenRopeEffect *effect) {
     void (*handler)(HoltenRopeEffect *);
 
-    func_151D5E30(effect->vtxBuffer);
+    particle_freeViewBuffers(effect->vtxBuffer);
     handler = D_8008FB70[effect->type];
     if (handler != NULL) {
         handler(effect);

@@ -45,7 +45,7 @@ static s32 (*gLightAttachCallbacks[])() = { func_15163CD0, func_150B66DC, func_1
 /* Destroy and free handlers per LightEffect.lightType (func_15161804, func_15161860) */
 static void (*gLightEffectDestroyHandlers[])(LightEffect *) = {
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
-    func_151617C4, func_151617C4, func_151617C4, func_15101238,
+    func_151617C4, func_151617C4, func_151617C4, particle_destroyBeamEndPoint,
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
     func_15161714, func_1516176C, func_151617C4, func_151617C4,
@@ -58,7 +58,7 @@ static void (*gLightEffectDestroyHandlers[])(LightEffect *) = {
 };
 static void (*gLightEffectFreeHandlers[])(LightEffect *) = {
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
-    func_151617E4, func_151617E4, func_151617E4, func_15101260,
+    func_151617E4, func_151617E4, func_151617E4, particle_freeBeamEndPoint,
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
     func_15161740, func_15161798, func_151617E4, func_151617E4,
@@ -66,7 +66,7 @@ static void (*gLightEffectFreeHandlers[])(LightEffect *) = {
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
     func_151617E4, beam_freeFlash, flamethrower_freeFlameLight, func_151617E4,
-    func_151617E4, func_15190490, func_151617E4, func_151617E4,
+    func_151617E4, particle_freeAnchorEmitterSprite, func_151617E4, func_151617E4,
     func_151617E4, func_151617E4,
 };
 
@@ -1148,7 +1148,7 @@ void func_15162EF8(LightEffect *effect) {
         object->touch.i.a |= 1;
     }
     message[0] = effect->lightType - 21;
-    func_151403A8((s32)&message, 36);
+    particle_broadcastToQuadParticles((s32)&message, 36);
 }
 
 /* Cycle callback: clears bit 0 of touch.i.a on the payload's object and sends event 37. */
@@ -1161,7 +1161,7 @@ void func_15162F50(LightEffect *effect) {
         object->touch.i.a &= ~1;
     }
     message[0] = effect->lightType - 21;
-    func_151403A8((s32)&message, 37);
+    particle_broadcastToQuadParticles((s32)&message, 37);
 }
 
 /* Creates a lightning effect; `kind` (0-2) picks its timings from tables. */

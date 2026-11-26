@@ -315,7 +315,7 @@ s32 effect_updateFallingStream(StreamActor *actor) {
                     vel.x = speed * sine2 * cosine1;
                     vel.y = -speed * cosine2;
                     vel.z = speed * sine2 * sine1;
-                    func_151DA6F8(&pos, &vel, func_150ADA68() * state->splashSizeRange + state->splashSizeBase,
+                    particle_spawnSplash(&pos, &vel, func_150ADA68() * state->splashSizeRange + state->splashSizeBase,
                                   state->splashLifetime, (state->trailTexture == 0x18) ? 0x7D : 0xFF,
                                   func_150ADA68() * state->splashScaleRange + state->splashScaleBase,
                                   func_150ADA20() % (state->splashCountRange + 1) + state->splashCountBase, 1,
@@ -413,7 +413,7 @@ s32 effect_updateFallingStream(StreamActor *actor) {
                             ring.texture = 0x1E;
                             break;
                         }
-                        if (func_1513C5B0(&ring, NULL, 5, 0, rec->pos.x, state->ringY, rec->pos.z, scale, scale,
+                        if (particle_spawnFlatQuadSpriteNoModel(&ring, NULL, 5, 0, rec->pos.x, state->ringY, rec->pos.z, scale, scale,
                                           func_150ADA20() & 0xFF, (func_150ADA20() & 1) + (func_150ADA20() & 1), 0, 0xFF, 0) == NULL) {
                             ok = 0;
                         }
@@ -633,7 +633,7 @@ typedef struct {
     s32 unk4;
 } Mode150DD640;
 
-extern Mode150DD640 D_800A4AC8[];
+extern Mode150DD640 gEffectRenderModes[];
 
 // matching: the original branches on the axis index around two identical stores
 #define SET_TEXCOORD(vtx, axis, value) \
@@ -667,7 +667,7 @@ Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
     StreamPoint *records;
 
     if (actor->head.count >= 2) {
-        func_151D5D60(actor->vtxBuf, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(actor->vtxBuf, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             state = actor->state;
             records = actor->records;
@@ -685,9 +685,9 @@ Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
             }
             gfx = func_15142E24(gfx, gEffectTextures + state->trailTexture, 0, 0, 0, 0, state->trailTexture, 0, 0, &update, 3);
             gfx = func_15142C10(gfx, state->unk28, state->unk28, state->unk28, 0xFF, &update);
-            gfx = func_1513F4E4(gfx, unk42High, &update);
+            gfx = particle_setCombineMode(gfx, unk42High, &update);
             gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &update);
+            gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[mode].unk0 | gEffectRenderModes[mode].unk4, &update);
             if (actor->head.tmpl.flags & 2) {
                 /* still emitting: the ribbon starts at the actor itself (i is left unset, as in the original) */
                 j = actor->head.end - 1;

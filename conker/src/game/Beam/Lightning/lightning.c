@@ -117,7 +117,7 @@ void beam_updateLightning(Bolt *bolt) {
     }
 }
 
-extern s32 D_800A4AC8[][2];
+extern s32 gEffectRenderModes[][2];
 
 /*
  * Draws the bolt as one camera-facing quad (two triangles) per segment, def.width wide, with
@@ -146,7 +146,7 @@ Gfx *beam_drawLightning(Gfx *gdl, Bolt *bolt, s16 view) {
     Vec3f *to;
 
     if (bolt->def.flags & BOLT_ACTIVE) {
-        func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, &vtx, NULL);
+        particle_getViewBuffer(bolt->vtxBuf, view, bolt->vtxBufSize, &vtx, NULL);
         if (vtx != NULL) {
             camera = func_15144B34(view);
             changed = 1;
@@ -156,8 +156,8 @@ Gfx *beam_drawLightning(Gfx *gdl, Bolt *bolt, s16 view) {
             gdl = func_15142E24(gdl, &gEffectTextures[44], 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
             gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
             gdl = func_15142C10(gdl, bolt->def.color.r, bolt->def.color.g, bolt->def.color.b, bolt->def.color.a, &changed);
-            gdl = func_1513F4E4(gdl, 0x19, &changed);
-            gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &changed);
+            gdl = particle_setCombineMode(gdl, 0x19, &changed);
+            gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &changed);
             dir.x = bolt->points[0].world.x - bolt->points[last].world.x;
             dir.y = bolt->points[0].world.y - bolt->points[last].world.y;
             dir.z = bolt->points[0].world.z - bolt->points[last].world.z;
@@ -274,7 +274,7 @@ void beam_displaceLightning(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth)
 
 /* Frees the bolt's vertex buffers. */
 void beam_freeLightningVtx(Bolt *bolt) {
-    func_151D5E30(bolt->vtxBuf);
+    particle_freeViewBuffers(bolt->vtxBuf);
 }
 
 /* Destroy and free hooks, by bolt type. */

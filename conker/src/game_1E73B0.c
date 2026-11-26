@@ -253,7 +253,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     } else {
         burst.spray.eventFunc = 0;
     }
-    func_1514FCE8(&burst, arg1, arg2);
+    particle_spawnJetSprayBursts(&burst, arg1, arg2);
     if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
         collision_initHitFromObject(&floor, obj);
         mtx = &obj->ob_matrix_ptr[1];
@@ -309,7 +309,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
         part.rot.x += 109.0f;
         part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
         part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-        func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+        particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
 
         speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
         part.lifetime = (func_150ADA20() % 36U) + 30;
@@ -329,7 +329,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
         part.rot = objPos;
         part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
         part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-        func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+        particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
 
         part.model = 0x29;
         for (i = 0; i != 4; i++) {
@@ -350,7 +350,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
                 part.rot = objPos;
                 part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
                 part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-                func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+                particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
         }
 
@@ -376,7 +376,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
                 part.rot.z += D_800AA660[j].z;
                 part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
                 part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-                func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+                particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
         }
 
@@ -402,7 +402,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
                 part.rot.z += D_800AA6D8[k].z;
                 part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
                 part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-                func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
+                particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
         }
     }
@@ -595,7 +595,7 @@ void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg
             fx.spray.fadeStart = 12;
             fx.spray.fadeOutStart = 20;
             fx.spray.eventFunc = 0;
-            func_1514FBFC(&fx, arg3, arg4);
+            particle_spawnSurfaceJetSpray(&fx, arg3, arg4);
             {
                 const s32 variantIds[9] = { 4, 4, 7, 8, 24, 25, 29, 30, 32 };
                 const f32 variantScales[9] = { 1.0f, 1.0f, 0.150000006f, 0.150000006f, 1.0f, 1.0f, 0.09700000286f,
@@ -619,7 +619,7 @@ void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg
                 desc.scaleBase = 0.499f;
                 desc.scaleRange = 0.7010000348f;
                 desc.spin = 21.502f;
-                func_15151D6C(&desc, variantIds, variantScales, 9, arg3, arg4);
+                particle_spawnSurfaceDebrisBurst(&desc, variantIds, variantScales, 9, arg3, arg4);
             }
         }
     }
@@ -679,7 +679,7 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         } else {
             burst.spray.eventFunc = 0;
         }
-        func_1514FCE8(&burst, arg3, arg4);
+        particle_spawnJetSprayBursts(&burst, arg3, arg4);
         collision_initHitFromObject(&floor, obj);
         probe.x = center.x;
         probe.y = center.y + 100.0f;
@@ -714,7 +714,7 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
             debris.scaleBase = 0.2480000108f;
             debris.scaleRange = 0.09900000691f;
             debris.spin = 22.85900116f;
-            func_15152190(&debris, variantIds, variantScales, 3, 0.0f, 1, arg3, arg4);
+            particle_spawnDebrisBurst(&debris, variantIds, variantScales, 3, 0.0f, 1, arg3, arg4);
         }
     }
 }
@@ -855,7 +855,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 /* Drip emitter callback (D_80089A70[39]): spawns one particle at (x, y, z), flung in a random
- * direction and pushed against the drip's movement (dx, dy, dz). The func_151A26EC arguments
+ * direction and pushed against the drip's movement (dx, dy, dz). The particle_spawnDragFadeSprite arguments
  * after velocity are drag, gravity, size, timer, alpha, fade timings and an (r, g, b) of (203, 0, 0). */
 void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
     Vec3f position;
@@ -885,7 +885,7 @@ void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     fraction_b = func_150ADA68();
     random_a = func_150ADA20();
     random_b = func_150ADA20();
-    func_151A26EC(&position, &offset, &velocity, 1.0f, (fraction_a * 1049.0f + -1022.0f) * 0.001f,
+    particle_spawnDragFadeSprite(&position, &offset, &velocity, 1.0f, (fraction_a * 1049.0f + -1022.0f) * 0.001f,
                   fraction_b * 124.0f + 202.0f, (random_a & 0xF) + 20, random_b % 201U + 55, 15, 15, 0, -1,
                   203, 0, 0, effect->owner, effect->kind);
 }
@@ -1053,7 +1053,7 @@ s32 effect_followRibbonTrail(RibbonTrail *trail) {
 extern struct {
     s32 unk0;
     s32 unk4;
-} D_800A4AC8[];
+} gEffectRenderModes[];
 
 /* Draws the trail as a camera-facing ribbon, two vertices per point. */
 Gfx *effect_drawRibbonTrail(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
@@ -1082,16 +1082,16 @@ Gfx *effect_drawRibbonTrail(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
     f32 scale;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->buffers, viewport, (trail->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(trail->buffers, viewport, (trail->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             points = trail->points;
             camPos = func_15144B34(viewport);
             dirty = 1;
             gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &dirty, 3);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &dirty);
-            gfx = func_1513F4E4(gfx, 0x4E, &dirty);
+            gfx = particle_setCombineMode(gfx, 0x4E, &dirty);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &dirty);
+            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &dirty);
             if (trail->head.tmpl.flags & 2) {
                 /* ribbon starts at the live position */
                 i = trail->head.end - 1;
@@ -1376,7 +1376,7 @@ void effect_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Ve
         desc.offset.x = strip->owner->xpos;
         desc.offset.y = strip->owner->ypos;
         desc.offset.z = strip->owner->zpos;
-        particle = func_15130374(&desc, 1, 0x10, strip->header.owner, strip->header.kind);
+        particle = particle_newOwnedSpriteParticle(&desc, 1, 0x10, strip->header.owner, strip->header.kind);
         if (particle != NULL) {
             memcpy(&particle->data.dragOwner.drag, &drag, sizeof(drag));
             memcpy(&particle->data.dragOwner.owner, &ownerRef, sizeof(ownerRef));
@@ -1405,7 +1405,7 @@ void effect_updateBloodStripParticle(SpriteParticle *particle, Vec3f *prevPos) {
         particle->head.desc.offset.y = owner->ypos;
         particle->head.desc.offset.z = owner->zpos;
     }
-    func_1513170C(particle, prevPos);
+    particle_updateDrag(particle, prevPos);
 }
 
 /* Broadcasts message 0x3B for actor. */
@@ -1484,7 +1484,7 @@ void effect_spawnBoneBurst(Actor *actor, u8 arg1, s32 arg2) {
             sparkEffect.unk47 = 7;
             sparkEffect.unk48 = 0;
             for (spark.index = 0; spark.index < 2; spark.index++) {
-                data->sparks[spark.index] = func_1513D2F0(&sparkEffect, &D_800A4AA0, 0, 0x25, 0, 0x1D,
+                data->sparks[spark.index] = particle_newQuadParticle(&sparkEffect, &gWhiteVtxColors, 0, 0x25, 0, 0x1D,
                     ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), arg1, arg2);
                 if (data->sparks[spark.index] != NULL) {
                     memcpy(&data->sparks[spark.index]->data, &spark, sizeof(spark));
@@ -1758,10 +1758,10 @@ Vtx *effect_buildBurstSparkVtx(BurstSpark *spark, s16 viewport) {
     }
     scale.width = data->beamWidth * data->scale;
     scale.length = data->beamLength * data->scale;
-    return func_1513FAB4(&spark->head, FALSE, &scale, viewport);
+    return particle_buildBeamQuad(&spark->head, FALSE, &scale, viewport);
 }
 
-/* A func_15130280 particle (game_15D730.c's Particle) whose caller-sized data (at 0xA8) holds its owner at +8. */
+/* A particle_newSpriteParticleWithFloor particle (game_15D730.c's Particle) whose caller-sized data (at 0xA8) holds its owner at +8. */
 struct OwnedParticle {
     EffectHeader header;
     u8 pad10[0xA0];
@@ -1807,16 +1807,16 @@ void effect_unlinkBurstSpark(BurstSpark *spark) {
     }
 }
 
-/* Teardown of a burst spark: clears its slot in the burst, then runs the particle teardown func_1513CA6C. */
+/* Teardown of a burst spark: clears its slot in the burst, then runs the particle teardown particle_destroyQuadParticleDefault. */
 void effect_destroyBurstSpark(BurstSpark *spark) {
     effect_unlinkBurstSpark(spark);
-    func_1513CA6C(&spark->head);
+    particle_destroyQuadParticleDefault(&spark->head);
 }
 
-/* Teardown of a burst spark: clears its slot in the burst, then runs the particle teardown func_1513CAA0. */
+/* Teardown of a burst spark: clears its slot in the burst, then runs the particle teardown particle_freeQuadParticleDefault. */
 void effect_freeBurstSpark(BurstSpark *spark) {
     effect_unlinkBurstSpark(spark);
-    func_1513CAA0(&spark->head);
+    particle_freeQuadParticleDefault(&spark->head);
 }
 
 /* Per-frame update of a burst glow: switches it to a random texture every 3-10 frames and eases its scale. */

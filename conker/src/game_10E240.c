@@ -198,7 +198,7 @@ void effect_updatePropEmitter(PropEmitterEffect *effect) {
             args.vel.x = dir[0] * speed;
             args.vel.y = dir[1] * speed;
             args.vel.z = dir[2] * speed;
-            particle = func_15130374(&args, 1, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
+            particle = particle_newOwnedSpriteParticle(&args, 1, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
             }

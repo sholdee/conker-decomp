@@ -55,7 +55,7 @@ void func_150121C0(LightEffect *effect) {
     stack.payload.fadeStart = 1;
     stack.payload.fadeRate = 0xFF;
 
-    ret = func_15132A4C(&stack.payload, 0, 0, 4, 0xFF, 1);
+    ret = particle_newModelParticle(&stack.payload, 0, 0, 4, 0xFF, 1);
     if (ret != NULL) {
         memcpy(ret + 1, &stack.saved, sizeof(stack.saved));
         for (i = 0; i < 2; i = (i + 1) & 0xFF) {

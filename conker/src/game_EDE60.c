@@ -4,24 +4,24 @@
 
 
 /* Effect callback: hands effect_handleOwnerActorEvent the emitter's target reference. */
-void func_150C09B0(PoolEmitter *emitter, s32 arg1, u8 arg2) {
+void particle_onPoolEmitterEvent(PoolEmitter *emitter, s32 arg1, u8 arg2) {
     effect_handleOwnerActorEvent(arg1, arg2, &emitter->desc.target, &emitter->desc.targetId, emitter);
 }
 
 /* Emitter destructors: free the live particles, then the emitter. */
-void func_150C09F0(PoolEmitter *emitter) {
-    func_150C0A48(emitter);
+void particle_destroyPoolEmitter(PoolEmitter *emitter) {
+    particle_freePoolParticles(emitter);
     effect_defaultDestroy(&emitter->header);
 }
 
 
-void func_150C0A1C(PoolEmitter *emitter) {
-    func_150C0A48(emitter);
+void particle_freePoolEmitter(PoolEmitter *emitter) {
+    particle_freePoolParticles(emitter);
     effect_defaultFree(&emitter->header);
 }
 
 /* Frees every live particle of the emitter. */
-void func_150C0A48(PoolEmitter *emitter) {
+void particle_freePoolParticles(PoolEmitter *emitter) {
     s16 i;
 
     for (i = emitter->activeHead; i != -1; i = emitter->slots[i].next) {
@@ -30,7 +30,7 @@ void func_150C0A48(PoolEmitter *emitter) {
 }
 
 /* Allocates an emitter from desc with desc->slotCount particle slots, all initially free. */
-PoolEmitter *func_150C0AC0(PoolEmitterDesc *desc, s32 arg1, s32 arg2) {
+PoolEmitter *particle_newPoolEmitter(PoolEmitterDesc *desc, s32 arg1, s32 arg2) {
     PoolEmitter *emitter;
     s32 size;
     s16 i;
@@ -72,7 +72,7 @@ PoolEmitter *func_150C0AC0(PoolEmitterDesc *desc, s32 arg1, s32 arg2) {
 }
 
 /* Emitter update: follows its target and, while the target moves, spawns particles around it. */
-void func_150C0C38(PoolEmitter *emitter) {
+void particle_updatePoolEmitter(PoolEmitter *emitter) {
     PoolEmitter *self; // matching: IDO's register/stack allocation needs this copy of the parameter
     u8 kill;
     Vec3f pos;
@@ -168,7 +168,7 @@ void func_150C0C38(PoolEmitter *emitter) {
                     spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | bit;
                     spawn.timer = spawn.scaleStart = func_150ADA20() % 22U + 70;
                     spawn.scaleRate = 1.035226941f;
-                    emitter->slots[slot].particle = func_15130280(&spawn, 1, 0, 4, emitter->header.owner, emitter->header.kind);
+                    emitter->slots[slot].particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, emitter->header.owner, emitter->header.kind);
                     if (emitter->slots[slot].particle != NULL) {
                         memcpy(&emitter->slots[slot].particle->owner, &owner, sizeof(owner));
                         emitter->freeHead = emitter->slots[slot].next;
@@ -197,7 +197,7 @@ void func_150C0C38(PoolEmitter *emitter) {
 }
 
 /* Particle destructor hook: moves the particle's slot from its emitter's active chain to the free chain. */
-void func_150C1198(PoolParticle *particle) {
+void particle_releasePoolSlot(PoolParticle *particle) {
     PoolEmitter *emitter;
     s32 found;
     s16 prev;

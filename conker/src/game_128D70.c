@@ -12,7 +12,7 @@ typedef struct {
     /* 0x04 */ Camera *camera;
 } CameraArg_150FB8C0;
 
-/* Per side (0, 1): the bone and the bone-space points of func_150FB8C0's effect, for most objects... */
+/* Per side (0, 1): the bone and the bone-space points of particle_spawnSideEffect's effect, for most objects... */
 static const u8 D_800A1DD0[2] = { 5, 7 };
 static const Vec3f D_800A1DD4[2] = { { 13.0f, 0.0f, 200.0f }, { -13.0f, 0.0f, 200.0f } };
 static const Vec3f D_800A1DEC[2] = { { 13.0f, 0.0f, 300.0f }, { -13.0f, 0.0f, 300.0f } };
@@ -29,7 +29,7 @@ static const Vec3f D_800A1E80[2] = { { 0.0f, 50.0f, 220.0f }, { 0.0f, 50.0f, 220
  * ob_matrix_ptr matrices; when the target found by event_getFirstLiveOwnedObject has unk197 set, the effect is aimed at the point
  * where the target's line meets the plane through the transformed points. Also spawns occasional sparks
  * and trails, and a camera effect for the target's camera. */
-void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, s32 arg5) {
+void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, s32 arg5) {
     Actor *target;
     u8 useTarget;
     Vec3f origin;
@@ -234,9 +234,9 @@ void func_150FC368(Game1EF500Trail *trail) {
     weapon_spawnHitEffects(trail, 1.0f, 1.0f, 0.6f, 0.0f, 0xFF, 0xFF, cameraMask);
 }
 
-/* Spawns an emitter object that follows `owner` (see func_150FC614); when `other` has a camera, also
+/* Spawns an emitter object that follows `owner` (see particle_updateTwoSidedEmitter); when `other` has a camera, also
  * creates an effect for that camera. */
-void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
+void particle_spawnTwoSidedEmitter(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
     TwoSidedEmitterState state;
     TwoSidedEmitter *obj;
     TwoSidedEmitterState *dest;
@@ -291,8 +291,8 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
 
 
 /* Per-frame update of an emitter: destroys it once its owner is gone or changed, otherwise fires
- * func_150FB8C0 from alternating sides whenever the spawn timer runs out. */
-void func_150FC614(TwoSidedEmitter *obj) {
+ * particle_spawnSideEffect from alternating sides whenever the spawn timer runs out. */
+void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj) {
     TwoSidedEmitterState *state;
     Actor *owner;
     RumbleParams spark;
@@ -310,7 +310,7 @@ void func_150FC614(TwoSidedEmitter *obj) {
 
     state->spawnTimer -= gFrameDelta;
     while (state->spawnTimer < 0.0f) {
-        func_150FB8C0(owner, state->side, -state->spawnTimer, state->unkD, obj->base.header.owner, obj->base.header.kind);
+        particle_spawnSideEffect(owner, state->side, -state->spawnTimer, state->unkD, obj->base.header.owner, obj->base.header.kind);
         state->side ^= 1;
         if (state->other != NULL) {
             if (state->other->mv != NULL) {
@@ -339,7 +339,7 @@ void func_150FC614(TwoSidedEmitter *obj) {
 
 /* Message handler: type 0 destroys the emitter when it names the owner or the other object, type 0x2D
  * swaps two objects, retargeting the emitter's owner or other object. */
-void func_150FC818(TwoSidedEmitter *obj, ActorMsg *msg, u8 msgType) {
+void particle_onTwoSidedEmitterMsg(TwoSidedEmitter *obj, ActorMsg *msg, u8 msgType) {
     TwoSidedEmitterState *state = &obj->state;
     Actor *msgObj;
     Actor *msgObjA;

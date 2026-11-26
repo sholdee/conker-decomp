@@ -29,7 +29,7 @@ typedef struct {
     /* 0x10 */ f32 trailAge;
 } FollowState;
 
-/* An object spawned by func_1513264C. */
+/* An object spawned by particle_newModelParticleWithFloor. */
 struct ProjectileParticle {
     /* 0x000 */ u8 pad0;
     /* 0x001 */ u8 unk1;
@@ -144,15 +144,15 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
     } else {
         spawn.sound = 0;
     }
-    obj = func_1513264C(&spawn, 0, 0, 0, 0xB4, arg18, arg19);
+    obj = particle_newModelParticleWithFloor(&spawn, 0, 0, 0, 0xB4, arg18, arg19);
     if (obj != NULL) {
         memcpy(&obj->state.projectile, &state, sizeof(state));
     }
 }
 
-/* Per-object state of a puff spawned by func_1513D2F0 (updated by effect_updateTrailPuff). */
+/* Per-object state of a puff spawned by particle_newQuadParticle (updated by effect_updateTrailPuff). */
 typedef struct {
-    /* 0x00 */ Vec3f axisU; /* quad axes for func_15140410 (vertex function func_150F7F58) */
+    /* 0x00 */ Vec3f axisU; /* quad axes for particle_buildQuadFromAxes (vertex function func_150F7F58) */
     /* 0x0C */ Vec3f axisV;
     /* 0x18 */ f32 timeLeft;
     /* 0x1C */ f32 phase;
@@ -161,7 +161,7 @@ typedef struct {
     /* 0x28 */ f32 sizeAmplitude;
 } PuffState;
 
-/* A puff a projectile leaves along its path (spawned by func_1513D2F0). */
+/* A puff a projectile leaves along its path (spawned by particle_newQuadParticle). */
 struct TrailPuff {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ PuffState state;
@@ -251,13 +251,13 @@ s8 effect_updateProjectile(ProjectileParticle *obj) {
             spawn.viewportMask = 0xFF;
             spawn.unk50 = 0;
             do {
-                const VtxColor *colors = D_800A4AA0;
+                const VtxColor *colors = gWhiteVtxColors;
 
                 puffState.phase = 4.712388992f;
                 puffState.timeLeft = 27.0f - state->trailAge;
                 spawn.pos = state->trailPos;
                 spawn.unk44 = puffState.timeLeft * 6.481481552f;
-                puff = func_1513D2F0(&spawn, colors, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
+                puff = particle_newQuadParticle(&spawn, colors, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
                 if (puff != NULL) {
                     memcpy(&puff->state, &puffState, sizeof(puffState));
                 }
@@ -293,7 +293,7 @@ s32 effect_updateTrailPuff(TrailPuff *obj) {
 
 /* Quad spanned by the puff's two axes (vertex function). */
 void func_150F7F58(TrailPuff *obj, s16 arg1) {
-    func_15140410(&obj->head, &obj->state.axisU, &obj->state.axisV, arg1);
+    particle_buildQuadFromAxes(&obj->head, &obj->state.axisU, &obj->state.axisV, arg1);
 }
 
 /* Impact effect at `pos`. */
@@ -303,8 +303,8 @@ void func_150F7F8C(Vec3f *pos, u8 arg1, s32 arg2) {
 
     random0 = func_150ADA68();
     random1 = func_150ADA68();
-    func_151541B8(pos, random0 * 3.0f + 9.0f, 0.5119050145f, random1 * 70.0f + 70.0f, 0.0f, arg1, arg2);
-    func_151D3F14(pos, arg1, arg2);
+    particle_spawnGrowFade(pos, random0 * 3.0f + 9.0f, 0.5119050145f, random1 * 70.0f + 70.0f, 0.0f, arg1, arg2);
+    particle_spawnShortLightFlash(pos, arg1, arg2);
 }
 
 /* Spawns an effect that follows `target` (a position followed by three more floats), trailing puffs behind it. */
@@ -358,7 +358,7 @@ void effect_spawnPuffFollower(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
     packet.spawn.fadeStart = 1;
     packet.spawn.fadeRate = 0xFF;
     packet.spawn.sound = 0;
-    obj = func_1513264C(&packet.spawn, 3, 0xFF, 0, 0xB4, arg2, arg3);
+    obj = particle_newModelParticleWithFloor(&packet.spawn, 3, 0xFF, 0, 0xB4, arg2, arg3);
     if (obj != NULL) {
         memcpy(&obj->state.follow, &packet.follow, sizeof(packet.follow));
     }
@@ -428,13 +428,13 @@ s32 effect_updatePuffFollower(ProjectileParticle *obj) {
                 spawn.viewportMask = 0xFF;
                 spawn.unk50 = 0;
                 do {
-                    const VtxColor *colors = D_800A4AA0;
+                    const VtxColor *colors = gWhiteVtxColors;
 
                     puffState.phase = 4.712388992f;
                     puffState.timeLeft = 27.0f - follow->trailAge;
                     spawn.pos = follow->trailPos;
                     spawn.unk44 = puffState.timeLeft * 6.481481552f;
-                    puff = func_1513D2F0(&spawn, colors, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
+                    puff = particle_newQuadParticle(&spawn, colors, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
                     if (puff != NULL) {
                         memcpy(&puff->state, &puffState, sizeof(puffState));
                     }

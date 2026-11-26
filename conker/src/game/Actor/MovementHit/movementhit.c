@@ -63,7 +63,7 @@ void func_1506A79C(Actor *obj, s32 arg1) {
     delta.x = D_800D1570.x - D_800D1560.x;
     delta.y = D_800D1570.y - D_800D1560.y;
     delta.z = D_800D1570.z - D_800D1560.z;
-    func_151D3480(&pos, &delta, 0, 0, 0xFF, 1);
+    particle_spawnHitImpact(&pos, &delta, 0, 0, 0xFF, 1);
 }
 
 void func_1506A83C(Actor *obj, s32 arg1) {
@@ -105,7 +105,7 @@ void func_1506A968(Actor *obj, s32 arg1) {
     delta.x = D_800D1570.x - D_800D1560.x;
     delta.y = D_800D1570.y - D_800D1560.y;
     delta.z = D_800D1570.z - D_800D1560.z;
-    func_151D3480(&pos, &delta, 0, 1, 0xFF, 1);
+    particle_spawnHitImpact(&pos, &delta, 0, 1, 0xFF, 1);
 }
 
 void func_1506AA08(Actor *obj, s32 arg1) {

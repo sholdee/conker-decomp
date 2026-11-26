@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_1514B8E4 (game_177B50.c) is declared in each file that calls it: game/Beam/AreaEmitter/areaemitter.c was compiled with a
+// particle_spawnJitterParticle (game_177B50.c) is declared in each file that calls it: game/Beam/AreaEmitter/areaemitter.c was compiled with a
 // different view of it.
-void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, const Vec3f *velocity, f32 gravity, f32 drag,
+void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, const Vec3f *velocity, f32 gravity, f32 drag,
                     f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10,
                     s32 arg11);
 
@@ -60,8 +60,8 @@ extern const AnchorEmitterTemplate D_800A74D8[], D_800A7528[], D_800A7578[], D_8
 extern const AnchorEmitterTemplate D_800A7708[], D_800A7758[], D_800A77A8[], D_800A77F8[], D_800A7848[], D_800A7898[], D_800A78E8[];
 extern const AnchorEmitterTemplate D_800A7938[], D_800A7988[], D_800A79D8[], D_800A7A28[], D_800A7A78[];
 
-/* This file's .data. The emitter templates by kind (func_1518FDC4), then variant. */
-static const AnchorEmitterTemplate *D_8008D630[] = {
+/* This file's .data. The emitter templates by kind (particle_getEmitterKindForObj), then variant. */
+static const AnchorEmitterTemplate *gAnchorEmitterTemplates[] = {
     D_800A74D8, D_800A7528, D_800A7578, D_800A75C8, D_800A7618, D_800A7668, D_800A76B8,
     D_800A7708, D_800A7758, D_800A77A8, D_800A77F8, D_800A7848, D_800A7898, D_800A78E8,
     D_800A7938, D_800A7988, D_800A79D8, D_800A7A28, D_800A7A78,
@@ -117,18 +117,18 @@ s32 func_1518F384(EffectSprite *sprite) {
     return 1;
 }
 
-// { 0x21 }: the template of func_1518F45C's local. It lies in the front-end .rodata of the unit that
+// { 0x21 }: the template of particle_broadcastToActorEmitters's local. It lies in the front-end .rodata of the unit that
 // began at game_1BA670 (before game_1BA670's literals), so this file cannot own it.
 extern const IdList1 D_800A74D4;
 
-void func_1518F45C(s32 arg0, u8 arg1) {
+void particle_broadcastToActorEmitters(s32 arg0, u8 arg1) {
     IdList1 desc = D_800A74D4;
 
     effect_sendEventToTypes(desc.ids, 1, arg0, arg1);
 }
 
 /* Message handler of the actor emitter process (type 0x21): message 0x49 names an actor; the emitter dies with it. */
-void func_1518F49C(ActorEmitterProcess *self, ActorRef *other, u8 arg2) {
+void particle_onActorEmitterMsg(ActorEmitterProcess *self, ActorRef *other, u8 arg2) {
     effect_handleOwnerActorEvent((s32)other, arg2, &self->params.owner, &self->params.ownerId, self);
     if (arg2 == 0x49) {
         Actor *selfActor = self->params.owner;
@@ -142,7 +142,7 @@ void func_1518F49C(ActorEmitterProcess *self, ActorRef *other, u8 arg2) {
 }
 
 /* Creates emitter `index` of the kind matching `owner`'s object id, with arg7 bytes of the caller's data after it. */
-void *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind, u8 unk5A, s32 arg7,
+void *particle_startAnchorEmitter(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind, u8 unk5A, s32 arg7,
                     u8 arg8, s32 arg9) {
     u8 pad[4]; // matching: unused stack slot
     u8 kind;
@@ -150,15 +150,15 @@ void *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk5
     if (owner == NULL) {
         return NULL;
     }
-    if (func_1518FDC4(owner, &kind, index) == 0) {
+    if (particle_getEmitterKindForObj(owner, &kind, index) == 0) {
         return NULL;
     }
-    return func_1518F5D0(owner, &D_8008D630[kind][index], duration, updateFunc, unk59Func,
+    return particle_newAnchorEmitter(owner, &gAnchorEmitterTemplates[kind][index], duration, updateFunc, unk59Func,
                          childKind, unk5A, arg7, arg8, arg9);
 }
 
 /* Creates an emitter attached to `owner` from `tmpl`; duration -1 means none (uses 300). */
-AnchorEmitter *func_1518F5D0(Actor *owner, const AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
+AnchorEmitter *particle_newAnchorEmitter(Actor *owner, const AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
                        s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
     FollowerGroupDesc desc;
     u8 pad[4]; // matching: unused stack slot
@@ -192,31 +192,31 @@ AnchorEmitter *func_1518F5D0(Actor *owner, const AnchorEmitterTemplate *tmpl, s1
         dest = &emitter->params;
         memcpy(dest, &params, sizeof(AnchorEmitterParams));
         if (childKind != -1) {
-            dest->child = func_1519021C(emitter, owner, childKind, duration, arg8, arg9);
+            dest->child = particle_spawnAnchorEmitterSprite(emitter, owner, childKind, duration, arg8, arg9);
         } else {
             dest->child = NULL;
         }
         effect_acquireAnchorSet(dest->tmpl.anchorSet);
         sound_addDynamicSound(0x4D, owner->xpos, owner->ypos, owner->zpos, 15000, 2000, 800,
-                      func_1518E298, emitter, (s32)owner, 0, 0);
+                      particle_followEmitterSound, emitter, (s32)owner, 0, 0);
     }
     return emitter;
 }
 
 /* Accumulates the emission rate, spawns particles, then runs the emitter's update callback. */
-s32 func_1518F7C4(AnchorEmitter *emitter) {
+s32 particle_updateAnchorEmitter(AnchorEmitter *emitter) {
     AnchorEmitterParams *params;
 
     params = &emitter->params;
     params->accum += (params->tmpl.rate + func_150ADA68() * params->tmpl.rateRange) * gFrameDelta;
-    func_1518F8E0(emitter);
+    particle_emitAtRandomAnchor(emitter);
     if (params->updateFunc != -1) {
         return D_8008D67C[params->updateFunc](emitter);
     }
     return 1;
 }
 
-void func_1518F858(AnchorEmitter *emitter) {
+void particle_runAnchorEmitterExpire(AnchorEmitter *emitter) {
     AnchorEmitterParams *params = &emitter->params;
 
     if (emitter->params.unk59Func != -1) {
@@ -225,16 +225,16 @@ void func_1518F858(AnchorEmitter *emitter) {
 }
 
 /* Emits a random-sized burst of particles. */
-void func_1518F89C(AnchorEmitter *emitter) {
+void particle_emitAnchorBurst(AnchorEmitter *emitter) {
     AnchorEmitterParams *params;
 
     params = &emitter->params;
     params->accum = func_150ADA68() * params->tmpl.burstRange + params->tmpl.burstBase;
-    func_1518F8E0(emitter);
+    particle_emitAtRandomAnchor(emitter);
 }
 
 /* Spawns one particle at a random bone anchor of the owner per whole unit in `accum`. */
-void func_1518F8E0(AnchorEmitter *emitter) {
+void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
     AnchorEmitterParams *params;
     Actor *owner;
     Struct1514B8E4Size size;
@@ -263,7 +263,7 @@ void func_1518F8E0(AnchorEmitter *emitter) {
                     } else {
                         kind = 0x14;
                     }
-                    sprite = func_1514B8E4(&pos, &size, -1,
+                    sprite = particle_spawnJitterParticle(&pos, &size, -1,
                                            frameRand % (params->tmpl.unk21Range + 1) + params->tmpl.unk20,
                                            &D_800A5480, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
                                            0, kind, 1, 1, 0xFF, 0, emitter->group.header.owner, emitter->group.header.kind);
@@ -295,26 +295,26 @@ void func_1518F8E0(AnchorEmitter *emitter) {
     }
 }
 
-s32 func_1518FC04(EmitterParticle *particle, Vec3f *target) {
+s32 particle_followAnchorEased(EmitterParticle *particle, Vec3f *target) {
     JitterParticle *sprite;
 
     sprite = particle->sprite;
     sprite->head.def.pos = *target;
-    func_1514BE20(sprite);
+    particle_easeBendTarget(sprite);
     return 1;
 }
 
-s32 func_1518FC44(EmitterParticle *particle, Vec3f *target) {
+s32 particle_followAnchor(EmitterParticle *particle, Vec3f *target) {
     JitterParticle *sprite;
 
     sprite = particle->sprite;
     sprite->head.def.pos = *target;
-    func_1514BF50(sprite);
+    particle_resetBendTarget(sprite);
     return 1;
 }
 
 /* Launches the particle's sprite from its position toward `dest`, or frees it if it has no emitter. */
-void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
+void particle_launchAnchorParticle(EmitterParticle *particle, Vec3f *dest) {
     JitterParticle *sprite;
     ParticleJitter *motion;
     AnchorEmitterParams *params;
@@ -346,7 +346,7 @@ void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
 }
 
 /* Maps an object id to its emitter kind; only variant 0 exists. Returns 0 for unknown ids. */
-s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant) {
+s32 particle_getEmitterKindForObj(Actor *obj, u8 *kind, u8 variant) {
     switch (obj->character_type) {
     case 0x87:
     case 0xB0:
@@ -503,7 +503,7 @@ extern u8 D_800A7B0C;
 extern u8 D_800A7B10;
 
 /* Returns the per-object-id data block (all empty in this build), setting *found. */
-u8 *func_1519003C(Actor *obj, s32 *found) {
+u8 *particle_getObjEmitterData(Actor *obj, s32 *found) {
     u8 *data;
 
     switch (obj->character_type) {
@@ -603,7 +603,7 @@ u8 *func_1519003C(Actor *obj, s32 *found) {
 }
 
 /* Creates the child sprite of an emitter, colored from the D_800A67C0/6760/6820 tables. */
-LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
+LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
     ChildDesc desc;
     Vec3i pos;
     LightEffect *child;

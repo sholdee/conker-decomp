@@ -18,13 +18,13 @@ typedef struct {
     /* 0x24 */ Vec3f end;
 } BoneBeamData; /* size 0x30 */
 
-/* A particle spawned by func_1513D2F0 (a DefParticleHead followed by its data). */
+/* A particle spawned by particle_newQuadParticle (a DefParticleHead followed by its data). */
 struct BoneBeamParticle {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ BoneBeamData beam;
 };
 
-/* Spawns a func_1513C650 effect of the given size on a surface (none for some materials on maps 0x36 and 0x26);
+/* Spawns a particle_spawnSurfaceQuadSprite effect of the given size on a surface (none for some materials on maps 0x36 and 0x26);
  * a duration of -1 means a fixed 300 frames without the timed flag. */
 QuadSprite *effect_spawnSurfaceSprite(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
                          s32 surfaceFlags, u8 arg8, s32 arg9) {
@@ -77,7 +77,7 @@ QuadSprite *effect_spawnSurfaceSprite(f32 size, u8 arg1, CollisionTri *surface, 
         argB = 0;
         argC = 0;
     }
-    result = func_1513C650(&arg, 0, 0, surface, position->x, position->y, position->z, size, size,
+    result = particle_spawnSurfaceQuadSprite(&arg, 0, 0, surface, position->x, position->y, position->z, size, size,
                            func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0,
                            arg8, arg9);
     return result;
@@ -134,7 +134,7 @@ BoneBeamParticle *effect_spawnBoneBeamParticle(Actor *target, u8 bone, const Vec
         flip = 0;
     }
 
-    particle = func_1513D2F0(&def, &D_800A4AA0, 0x29, 0, 0, 0x16, flip + 1, 0, 0,
+    particle = particle_newQuadParticle(&def, &gWhiteVtxColors, 0x29, 0, 0, 0x16, flip + 1, 0, 0,
                                   extraSize + sizeof(BoneBeamData), arg12, arg13);
     if (particle != NULL) {
         memcpy(&particle->beam, &beam, sizeof(BoneBeamData));
@@ -208,7 +208,7 @@ Vtx *effect_buildBoneBeamQuad(BoneBeamParticle *particle, s16 viewport) {
     if (!(particle->beam.flags & 1)) {
         return NULL;
     }
-    func_151D5D60(particle->head.vtxBuffers, viewport, 0x40, &vtx, &fresh);
+    particle_getViewBuffer(particle->head.vtxBuffers, viewport, 0x40, &vtx, &fresh);
     result = vtx;
     beam = &particle->beam;
     // matching: an early return for NULL reorders the blocks; the original tests vtx != NULL first
@@ -313,5 +313,5 @@ void effect_spawnFlashParticle(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 
     desc.drawFunc = -1;
     desc.handlerSet = 0;
     desc.views = views;
-    func_15130374(&desc, 1, 0, arg5, arg6);
+    particle_newOwnedSpriteParticle(&desc, 1, 0, arg5, arg6);
 }

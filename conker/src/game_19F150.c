@@ -3,21 +3,21 @@
 #include "variables.h"
 
 /* Render setup and teardown of the sprite particles (object types 15 and 67 of gObjectTypes). */
-Gfx D_8008CC30[] = {
+Gfx gFloorSpriteSetupDl[] = {
     gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPClearGeometryMode(G_CULL_BOTH | G_FOG | G_LOD),
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsDPPipeSync(),
     gsSPEndDisplayList(),
 };
-Gfx D_8008CC58[] = {
+Gfx gFloorSpriteEndDl[] = {
     gsSPSetGeometryMode(G_CULL_BACK),
     gsDPPipeSync(),
     gsSPEndDisplayList(),
 };
 
 /* Allocates a particle and initialises its animation state. */
-Particle19F150 *func_15171CA0(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 arg6,
+Particle19F150 *particle_newFloorSprite(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 arg6,
                               s32 arg7) {
     Particle19F150 *particle = effect_newObject(arg5 == 0 ? 0xF : 0x43, arg7, sizeof(Particle19F150), 1, arg6, 1);
 
@@ -41,14 +41,14 @@ Particle19F150 *func_15171CA0(s16 lifetime, u16 color, u8 animIndex, s32 flags, 
  * Spawns a sprite particle at (x, y, z). Normally the quad is laid on the floor below a point `dist` away along
  * `angle`; with flags & 2 it is a flat horizontal square of half-size `size`.
  */
-void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f32 angle, s32 dist, s32 size,
+void particle_spawnFloorSprite(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f32 angle, s32 dist, s32 size,
                    s32 flags, s32 animSpeed, s32 arg11, u8 arg12, s32 arg13) {
     Particle19F150 *particle;
 
-    particle = func_15171CA0(lifetime, color, animIndex, flags, animSpeed, arg11, arg12, arg13);
+    particle = particle_newFloorSprite(lifetime, color, animIndex, flags, animSpeed, arg11, arg12, arg13);
     if (particle != NULL) {
         if (!(flags & 2)) {
-            if (func_15172B20(particle->vtx, x, y, z, angle, dist, size, gEffectAnimTextures[particle->animIndex]->width) == 0) {
+            if (particle_layQuadOnFloor(particle->vtx, x, y, z, angle, dist, size, gEffectAnimTextures[particle->animIndex]->width) == 0) {
                 effect_destroyObject(&particle->header);
             }
         } else {
@@ -66,20 +66,20 @@ void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f
 }
 
 /* Spawns a sprite particle laid on collision triangle `tri` at (x, y, z). */
-void func_15171F04(f32 x, f32 y, f32 z, void *tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
+void particle_spawnTriSprite(f32 x, f32 y, f32 z, void *tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
                    s32 animSpeed, s32 arg10, u8 arg11, s32 arg12) {
     Particle19F150 *particle;
 
-    particle = func_15171CA0(lifetime, color, animIndex, flags, animSpeed, arg10, arg11, arg12);
+    particle = particle_newFloorSprite(lifetime, color, animIndex, flags, animSpeed, arg10, arg11, arg12);
     if (particle != NULL) {
-        if (func_151725FC(particle->vtx, tri, x, y, z, 0.0f, size, gEffectAnimTextures[particle->animIndex]->width) == 0) {
+        if (particle_layQuadOnTri(particle->vtx, tri, x, y, z, 0.0f, size, gEffectAnimTextures[particle->animIndex]->width) == 0) {
             effect_destroyObject(&particle->header);
         }
     }
 }
 
 /* Per-frame update: counts the lifetime down by the frame delta and advances the animation. */
-void func_15171FC0(Particle19F150 *particle) {
+void particle_updateFloorSprite(Particle19F150 *particle) {
     s32 lifetime;
     s32 frameCount;
 
@@ -127,7 +127,7 @@ void func_15171FC0(Particle19F150 *particle) {
  * Draws a sprite particle (once its lifetime is >= 2), setting the texture, cycle type, render mode, combiner and
  * primitive colour only when they differ from the cached state in D_800DD1B4..D_800DD1C6.
  */
-Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
+Gfx *particle_drawFloorSprite(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
     s32 r;
     s32 g;
     s32 b;
@@ -279,15 +279,15 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
 }
 
 /* Quad corner texture coordinates (S10.5) for 64-, 32- and 16-texel-wide textures. */
-static const s16 D_800A6FD0[4][2] = { { 64 << 5, 0 }, { 0, 0 }, { 0, 64 << 5 }, { 64 << 5, 64 << 5 } };
-static const s16 D_800A6FE0[4][2] = { { 32 << 5, 0 }, { 0, 0 }, { 0, 32 << 5 }, { 32 << 5, 32 << 5 } };
-static const s16 D_800A6FF0[4][2] = { { 16 << 5, 0 }, { 0, 0 }, { 0, 16 << 5 }, { 16 << 5, 16 << 5 } };
+static const s16 gQuadTexCoords64[4][2] = { { 64 << 5, 0 }, { 0, 0 }, { 0, 64 << 5 }, { 64 << 5, 64 << 5 } };
+static const s16 gQuadTexCoords32[4][2] = { { 32 << 5, 0 }, { 0, 0 }, { 0, 32 << 5 }, { 32 << 5, 32 << 5 } };
+static const s16 gQuadTexCoords16[4][2] = { { 16 << 5, 0 }, { 0, 0 }, { 0, 16 << 5 }, { 16 << 5, 16 << 5 } };
 
 /*
  * Fills `vtx` with a quad of half-size `size` lying on the slope of collision triangle `tri`, centred on (x, y, z),
  * with its texture coordinates (for a texture `width` texels wide) rotated by `angle` degrees.
  */
-s32 func_151725FC(Vtx *vtx, void *tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width) {
+s32 particle_layQuadOnTri(Vtx *vtx, void *tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width) {
     f32 lenA;
     f32 lenB;
     f32 minLenSq;
@@ -361,13 +361,13 @@ s32 func_151725FC(Vtx *vtx, void *tri, f32 x, f32 y, f32 z, f32 angle, s32 size,
     sinT = sinf(theta);
     if (width == 0x10) {
         centerT = centerS = 256.0f;
-        cornerUV = D_800A6FF0;
+        cornerUV = gQuadTexCoords16;
     } else if (width == 0x20) {
         centerT = centerS = 512.0f;
-        cornerUV = D_800A6FE0;
+        cornerUV = gQuadTexCoords32;
     } else {
         centerT = centerS = 1024.0f;
-        cornerUV = D_800A6FD0;
+        cornerUV = gQuadTexCoords64;
     }
     for (i = 0; i < 4; i++) {
         vtx[i].v.tc[0] = ((cornerUV[i][0] - centerS) * cosT - (cornerUV[i][1] - centerT) * sinT) + centerS + 8192.0f;
@@ -384,9 +384,9 @@ s32 func_151725FC(Vtx *vtx, void *tri, f32 x, f32 y, f32 z, f32 angle, s32 size,
 
 /*
  * Finds the floor below the point `dist` away from (x, z) along `angle` degrees and lays a quad of half-size `size`
- * on it (see func_151725FC). Returns 0 when there is no floor.
+ * on it (see particle_layQuadOnTri). Returns 0 when there is no floor.
  */
-s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, u8 width) {
+s32 particle_layQuadOnFloor(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, u8 width) {
     struct FloorHit {
         void *tri;
         f32 floorY;
@@ -408,5 +408,5 @@ s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, 
     if (floor.floorY == -10000.0f) {
         return 0;
     }
-    return func_151725FC(vtx, floor.tri, x, floor.floorY, z, angle, size, width);
+    return particle_layQuadOnTri(vtx, floor.tri, x, floor.floorY, z, angle, size, width);
 }

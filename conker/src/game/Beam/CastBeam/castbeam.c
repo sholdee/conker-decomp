@@ -70,12 +70,12 @@ BeamObj *beam_spawnCastBeam(Actor *owner) {
             spawn.gravity = 0.0f;
             spawn.scaleRate = 1.0f;
             spawn.maxSize = 20.0f;
-            beam->ends[0] = func_15130280(&spawn, 1, 0, 0, obj->base.header.owner, obj->base.header.kind);
+            beam->ends[0] = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, obj->base.header.owner, obj->base.header.kind);
             spawn.r2 = 0xFF;
             spawn.g2 = 0;
             spawn.b2 = 0;
             spawn.alpha = 0xFF;
-            beam->ends[1] = func_15130280(&spawn, 1, 0, 0, obj->base.header.owner, obj->base.header.kind);
+            beam->ends[1] = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, obj->base.header.owner, obj->base.header.kind);
         }
     }
     return obj;

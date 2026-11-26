@@ -5,7 +5,7 @@
 void *memcpy(void *, const void *, u32);
 
 /* Emitter effect: while its owner is alive, spawns effect 0x5A at random points on its shape. */
-void func_150EC520(EmitterEffect *effect) {
+void particle_updateShapeEmitter(EmitterEffect *effect) {
     ShapeEmitter *emitter;
     EmittedPoint point;
     f32 upper;
@@ -31,7 +31,7 @@ void func_150EC520(EmitterEffect *effect) {
 }
 
 /* Particle source effect: emits particles from its position at a random rate. */
-void func_150EC6B0(EmitterEffect *effect) {
+void particle_updateSourceEmitter(EmitterEffect *effect) {
     ParticleSourceData *source;
 
     source = &effect->data.source;
@@ -87,7 +87,7 @@ void func_150EC6B0(EmitterEffect *effect) {
             spawn.alpha = func_150ADA20() % 101U + 100;
             spawn.timer = func_150ADA20() % 51U + 80;
             spawn.width = spawn.height = func_150ADA68() * 80.0f + 92.0f;
-            particle = func_15130280(&spawn, 0, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
+            particle = particle_newSpriteParticleWithFloor(&spawn, 0, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->data.wobble, &data, sizeof(data));
             }
@@ -98,7 +98,7 @@ void func_150EC6B0(EmitterEffect *effect) {
 
 /* Attaches a fog flash effect to obj: flashes it with fog colour (r, g, b, a) each frame,
  * for duration frames or, when duration is -1, until obj goes away. */
-void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8 owner, s32 kind) {
+void particle_attachFogFlash(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8 owner, s32 kind) {
     FogFlashData data;
     EmitterEffect *effect;
 
@@ -118,12 +118,12 @@ void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8
 }
 
 /* Effect callback for the fog flash effect: hands effect_handleOwnerActorEvent the owner reference. */
-void func_150ECB4C(EmitterEffect *effect, s32 arg1, u8 arg2) {
+void particle_onFogFlashEvent(EmitterEffect *effect, s32 arg1, u8 arg2) {
     effect_handleOwnerActorEvent(arg1, arg2, &effect->data.fog.owner, &effect->data.fog.ownerId, effect);
 }
 
 /* Fog flash effect: re-flashes the owner's fog each frame, and ends once the owner is gone. */
-void func_150ECB8C(EmitterEffect *effect) {
+void particle_updateFogFlash(EmitterEffect *effect) {
     FogFlashData *fog = &effect->data.fog;
     Actor *owner = fog->owner;
 
@@ -137,7 +137,7 @@ void func_150ECB8C(EmitterEffect *effect) {
 /* Runs func_151C9AC0 on obj and flashes it green. */
 void func_150ECC00(Actor *obj, u8 owner, s32 kind) {
     func_151C9AC0(obj, owner, kind);
-    func_150ECA68(obj, 0, 0xFF, 0, 0xFF, 4, -1, owner, kind);
+    particle_attachFogFlash(obj, 0, 0xFF, 0, 0xFF, 4, -1, owner, kind);
 }
 
 /* Current colour (r, g, b), its target and its easing velocity. */

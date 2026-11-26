@@ -14,7 +14,7 @@ typedef struct TrackerTrailPoint {
 } TrackerTrailPoint; /* size 0x28 */
 
 void *memcpy(void *, const void *, u32);
-extern s32 D_800A4AC8[][2];
+extern s32 gEffectRenderModes[][2];
 
 /* Appends the owner's position to the trail and recomputes the previous sample's normal. */
 s32 trail_sampleTrackerTrail(TrackerTrail *actor) {
@@ -249,15 +249,15 @@ Gfx *trail_drawTrackerTrail(TrackerTrail *actor, Gfx *gfx, s16 arg2) {
     }
     state = actor->state;
     points = actor->points;
-    func_151D5D60(actor->unk84, arg2, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+    particle_getViewBuffer(actor->unk84, arg2, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
     flag = 1;
     gfx = func_15142E24(gfx, &gEffectTextures[188], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x220005, 0x1D0600);
-    gfx = func_1513F4E4(gfx, 0x4C, &flag);
-    gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[1][0] | D_800A4AC8[1][1], &flag);
+    gfx = particle_setCombineMode(gfx, 0x4C, &flag);
+    gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &flag);
     previous = actor->head.end - 1;
     if (previous < 0) {
         previous = actor->head.tmpl.itemCount - 1;

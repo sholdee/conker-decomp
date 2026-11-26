@@ -3,14 +3,14 @@
 #include "variables.h"
 
 /*
- * Collision handlers of the pooled physics particles (game_15F680.c's D_80089934 / D_80089974 tables).
+ * Collision handlers of the pooled physics particles (game_15F680.c's gModelParticleFloorFuncs / gModelParticleWallFuncs tables).
  * The particles are ModelParticles (effects.h). CollisionProbe (game_15F680.c's query) and AxisParticle
  * (the particle system of game_169510.c) are in conker/particle.h.
  */
 
-Actor *D_80088720 = NULL;                  /* object 1, followed by func_150B963C */
+Actor *D_80088720 = NULL;                  /* object 1, followed by particle_updateKickable */
 Vec3f D_80088724 = { 0.0f, 0.0f, 0.0f };   /* its position, 50 above */
-Actor *D_80088730 = NULL;                  /* object 1, pushing func_150B9560's particles */
+Actor *D_80088730 = NULL;                  /* object 1, pushing particle_fallAndGrow's particles */
 static s32 D_80088734[2] = { 0x9C, 0x9D }; /* shatter sounds, one at random */
 static s32 D_8008873C = 0xA1;              /* wall-hit sound */
 static s32 D_80088740 = 0x69;              /* landing sound of the falling/growing particles */
@@ -18,7 +18,7 @@ void *memcpy(void *, const void *, u32);
 
 /* Floor hit: above speed 30 the particle shatters into dust and is destroyed; above 15 it bounces;
  * otherwise it comes to rest, pointing its matrix 200 units along its current facing. */
-s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, void *surface) {
+s32 particle_floorShatter(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, void *surface) {
     particle->pos.y = particle->radius + floorHeight;
     if (particle->speed > 15.0f) {
         if (particle->speed > 30.0f) {
@@ -55,7 +55,7 @@ s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight,
             extra[0] = ((func_150ADA68() * 80.0f) + 50.0f) * 1e-05f;
             def.unk50 = particle->floor.material;
             // matching: the spawned particle reuses the surface parameter; a new local takes another stack slot
-            surface = func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
+            surface = particle_spawnAxisQuadParticle(&def, &gWhiteVtxColors, 0x18, 0, 0,
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
                                             func_150ADA20() & 0xFF, 500.0f, 500.0f, NULL, surface,
                                             particle->link.model, particle->link.unk1C, 0, 8, particle->header.owner,
@@ -111,7 +111,7 @@ s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight,
                 burst.unk80 = 10;
                 burst.unk82 = 25;
                 burst.unk84 = particle->floor.material;
-                func_15151A38(&burst, particle->header.owner, particle->header.kind);
+                particle_spawnPuffSpray(&burst, particle->header.owner, particle->header.kind);
             }
             func_10010F88(D_80088734[func_150ADA20() & 1], 32000, 0, 0, 0, particle->pos.x, floorHeight + 25.0f,
                           particle->pos.z, 1000, 4000);
@@ -141,7 +141,7 @@ s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight,
 
 /* Wall hit (x, y, z: the position before the move): a hard hit casts a ray along the move, puffs dust
  * off the surface it finds and destroys the particle; a soft one stops it against the wall. */
-s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, f32 z) {
+s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, f32 z) {
     f32 impactSpeed = particle->speed - fabsf(particle->vel.y); /* speed less the vertical part */
 
     if (impactSpeed > 6.0f) {
@@ -191,7 +191,7 @@ s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, 
                     def.scale.z = 0.0f;
                     extra = (func_150ADA68() * 80.0f + 50.0f) * 1e-05f;
                     def.unk50 = particle->floor.material;
-                    spawned = func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
+                    spawned = particle_spawnAxisQuadParticle(&def, &gWhiteVtxColors, 0x18, 0, 0,
                                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
                                                             func_150ADA20() & 0xFF, 500.0f, 500.0f, NULL,
                                                             &triangle, particle->link.model, particle->link.unk1C, 0,
@@ -249,7 +249,7 @@ s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, 
                     burst.unk9C = 10;
                     burst.unk9E = 25;
                     burst.unkA0 = particle->floor.material;
-                    func_15151670(&burst, particle->header.owner, particle->header.kind);
+                    particle_spawnSurfacePuffSpray(&burst, particle->header.owner, particle->header.kind);
                 }
             }
         }
@@ -276,7 +276,7 @@ s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, 
 
 /* Falls (speed growing by 0.3 per frame-time) until lifetime 80; from 115 on grows by 1.35x a frame,
  * below 65 the height grows instead. */
-s32 func_150B9560(FallGrowParticle *particle) {
+s32 particle_fallAndGrow(FallGrowParticle *particle) {
     f32 *speed = &particle->fallSpeed;
     f32 scale;
 
@@ -322,7 +322,7 @@ s32 func_150B961C(QuadSprite *sprite) {
  * the floor below and a burst, plays a sound and ends (returns 0). Else its rot (look-at) point
  * eases toward 50 above object 1 (D_80088720 / D_80088724).
  */
-s32 func_150B963C(ModelParticle *particle) {
+s32 particle_updateKickable(ModelParticle *particle) {
     f32 distSq;
     Vec3f playerPos;
     f32 dirX;
@@ -396,7 +396,7 @@ s32 func_150B963C(ModelParticle *particle) {
                     def.scale.z = 0.0f;
                     extra = ((func_150ADA68() * 80.0f) + 50.0f) * 1e-05f;
                     def.unk50 = particle->floor.material;
-                    spawned = func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
+                    spawned = particle_spawnAxisQuadParticle(&def, &gWhiteVtxColors, 0x18, 0, 0,
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), func_150ADA20() & 0xFF,
                                             500.0f, 500.0f, NULL, &particle->floor.tri, particle->link.model,
                                             particle->link.unk1C, 0, 8, particle->header.owner, particle->header.kind);
@@ -451,7 +451,7 @@ s32 func_150B963C(ModelParticle *particle) {
                 burst.unk80 = 10;
                 burst.unk82 = 25;
                 burst.unk84 = particle->floor.material;
-                func_15151A38(&burst, particle->header.owner, particle->header.kind);
+                particle_spawnPuffSpray(&burst, particle->header.owner, particle->header.kind);
             }
             func_10010F88(D_80088740, 25000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);
             return 0;
@@ -472,7 +472,7 @@ s32 func_150B963C(ModelParticle *particle) {
 }
 
 /* Matrix callback: scale by size and scale, place at pos, and face the particle's rot point. */
-s32 func_150B9D14(Mtx *mtx, ModelParticle *particle) {
+s32 particle_buildLookAtMatrix(Mtx *mtx, ModelParticle *particle) {
     func_15142600(mtx, particle->sizeXZ, particle->sizeY, particle->scale.x,
                   particle->scale.y, particle->scale.z, particle->pos.x, particle->pos.y,
                   particle->pos.z, particle->rot.x, particle->rot.y, particle->rot.z);
@@ -481,7 +481,7 @@ s32 func_150B9D14(Mtx *mtx, ModelParticle *particle) {
 
 /* When unk98 is -1, spawns a flat sprite (updated by func_150B961C) at (unk9C, unkA6 + 2, unkA0),
  * unkA2 wide and long, with a random angle and flip. */
-void func_150B9D8C(Obj150B9D8C *obj) {
+void particle_spawnFlatMark(Obj150B9D8C *obj) {
     SpriteDef2C def;
     s32 randFlipHi;
     s32 randFlipLo;
@@ -505,7 +505,7 @@ void func_150B9D8C(Obj150B9D8C *obj) {
         randFlipLo = func_150ADA20();
         randFlipHi = func_150ADA20();
 
-        func_1513C4EC(&def, 0, 2, 0, obj->unk9C, obj->unkA6 + 2, obj->unkA0, obj->unkA2, obj->unkA2,
+        particle_spawnFlatQuadSprite(&def, 0, 2, 0, obj->unk9C, obj->unkA6 + 2, obj->unkA0, obj->unkA2, obj->unkA2,
                       randAngle & 0xFF, ((randFlipHi & 1) << 1) + (randFlipLo & 1), 3, 0xFF, 0, obj->owner,
                       obj->list);
     }

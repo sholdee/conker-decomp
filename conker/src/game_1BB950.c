@@ -10,25 +10,25 @@ extern char D_800A7460[];
 extern char D_800A749C[];
 
 /* Drops the emitter's particles and detaches it from its owner. */
-void func_1518E4A0(ActorEmitterProcess *emitter) {
-    func_1518E308(emitter);
+void particle_detachActorEmitter(ActorEmitterProcess *emitter) {
+    particle_freeActorEmitterParticles(emitter);
     effect_detachHandle(emitter, emitter->params.owner);
 }
 
 /* Destroy handler of an emitter process. */
-void func_1518E4CC(ActorEmitterProcess *emitter) {
-    func_1518E4A0(emitter);
+void particle_destroyActorEmitter(ActorEmitterProcess *emitter) {
+    particle_detachActorEmitter(emitter);
     effect_defaultDestroy(&emitter->header);
 }
 
 /* Free handler of an emitter process. */
-void func_1518E4F8(ActorEmitterProcess *emitter) {
-    func_1518E4A0(emitter);
+void particle_freeActorEmitter(ActorEmitterProcess *emitter) {
+    particle_detachActorEmitter(emitter);
     effect_defaultFree(&emitter->header);
 }
 
 /* Particle spawn callback: texture 0x13 or 0x14 at random, opaque black. */
-void func_1518E524(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, u16 *renderModes) {
+void particle_pickBlackTexture(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, u16 *renderModes) {
     *flip = 2;
     if (func_150ADA20() & 1) {
         *flip |= 1;
@@ -51,7 +51,7 @@ void func_1518E524(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, u16 *r
 }
 
 /* Particle spawn callback: texture 0x16 tinted with palette 3 or 4 at random. */
-void func_1518E5D8(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, u16 *renderModes) {
+void particle_pickPaletteTexture(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, u16 *renderModes) {
     if (func_150ADA20() & 1) {
         *flip |= 1;
     }
@@ -63,7 +63,7 @@ void func_1518E5D8(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, u16 *r
 
 /* Expire callback: starts a kind 3 emitter on the owner and keeps this one alive for 128 more frames. */
 s32 func_1518E66C(ActorEmitterProcess *emitter) {
-    func_1518D1C0(emitter->params.owner, 3, 0, 0, emitter->header.owner, emitter->header.kind, D_800A7460);
+    particle_startActorEmitter(emitter->params.owner, 3, 0, 0, emitter->header.owner, emitter->header.kind, D_800A7460);
     emitter->params.lifetime = 128;
     emitter->params.expireCb = -1;
     return 0;
@@ -71,7 +71,7 @@ s32 func_1518E66C(ActorEmitterProcess *emitter) {
 
 /* Expire callback: starts a kind 4 emitter on the owner and keeps this one alive for 128 more frames. */
 s32 func_1518E6D4(ActorEmitterProcess *emitter) {
-    func_1518D1C0(emitter->params.owner, 4, 0, 0, emitter->header.owner, emitter->header.kind, D_800A749C);
+    particle_startActorEmitter(emitter->params.owner, 4, 0, 0, emitter->header.owner, emitter->header.kind, D_800A749C);
     emitter->params.lifetime = 128;
     emitter->params.expireCb = -1;
     return 0;
@@ -80,7 +80,7 @@ s32 func_1518E6D4(ActorEmitterProcess *emitter) {
  * Vertex function: builds the particle's quad in its vertex buffer for viewport vp, tilted by how fast
  * it moves sideways on screen (D_800DD1E8 / D_800DD1D8 are the viewport's view direction).
  */
-Vtx *func_1518E73C(ActorEmitterParticle *p, s16 vp) {
+Vtx *particle_buildActorEmitterQuad(ActorEmitterParticle *p, s16 vp) {
     Vtx *vtx;
     Vtx *ret;
     f32 halfWidthCos;
@@ -97,7 +97,7 @@ Vtx *func_1518E73C(ActorEmitterParticle *p, s16 vp) {
     s32 negative;
     u8 fresh;
 
-    func_151D5D60(p->head.vtxBuffers, vp, 4 * sizeof(Vtx), &vtx, &fresh);
+    particle_getViewBuffer(p->head.vtxBuffers, vp, 4 * sizeof(Vtx), &vtx, &fresh);
     ret = vtx;
     // matching: IDO lays out the branches as in the target only with the NULL return in the else
     if (vtx != NULL) {

@@ -92,13 +92,13 @@ s32 func_150BB760(Actor *actor) {
             particle.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
             particle.lifetime = (func_150ADA20() & 0x1F) + 0x3C;
             particle.elasticity = func_150ADA68() * 0.2f + 0.25f;
-            func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0);
+            particle_newModelParticle(&particle, 3, 0xFF, 0, 0xFF, 0);
         }
     }
 }
 
 /* Actor id 0x20: effect_initQuadFxTemplate/effect_spawnQuadFx request, then bursts of 0x29E9 particles,
- * func_151DA6F8 effects and two 0x39E8 particles, then func_10010F88. */
+ * particle_spawnSplash effects and two 0x39E8 particles, then func_10010F88. */
 s32 func_150BBB5C(Actor *actor) {
     ParticleSpawn particle;
     s8 i;
@@ -211,7 +211,7 @@ s32 func_150BBB5C(Actor *actor) {
             particle.vel.z = offsetZ + velocityZ;
             particle.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
             particle.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
-            func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0);
+            particle_newModelParticle(&particle, 3, 0xFF, 0, 0xFF, 0);
             count1--;
         }
         while (count2 > 0) {
@@ -234,7 +234,7 @@ s32 func_150BBB5C(Actor *actor) {
             dir.x = cosine2 * speed + offsetX;
             dir.y = func_150ADA68() * 9.0f + 15.0f;
             dir.z = sine2 * speed + offsetZ;
-            func_151DA6F8(&pos, &dir, 1.6f, (func_150ADA20() & 7) + 0x19, (func_150ADA20() & 0x7F) + 0x80,
+            particle_spawnSplash(&pos, &dir, 1.6f, (func_150ADA20() & 7) + 0x19, (func_150ADA20() & 0x7F) + 0x80,
                           func_150ADA68() * 0.2f * width + 13.0f, (func_150ADA20() & 3) + 2, 0,
                           1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
             count2--;
@@ -296,7 +296,7 @@ s32 func_150BBB5C(Actor *actor) {
             particle.vel.z = horizontal * yawSine + offsetZ;
             particle.rotVel.x = 30.0f - func_150ADA68() * 60.0f;
             particle.rotVel.y = 30.0f - func_150ADA68() * 60.0f;
-            func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0);
+            particle_newModelParticle(&particle, 3, 0xFF, 0, 0xFF, 0);
         }
         func_10010F88(0xAA, 0x6590, 0, 0, 0, actor->xpos, actor->ypos,
                       actor->zpos, 0xC8, 0x7D0);
@@ -390,7 +390,7 @@ s32 func_150BC488(Actor *actor) {
             particle.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
             particle.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
             particle.lifetime = (func_150ADA20() & 0x3F) + 0x64;
-            if (func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0) == NULL) {
+            if (particle_newModelParticle(&particle, 3, 0xFF, 0, 0xFF, 0) == NULL) {
                 ok = 0;
             }
             count--;
@@ -413,7 +413,7 @@ s32 func_150BC488(Actor *actor) {
             velocity.x = cosine * speed;
             velocity.y = 0.0f;
             velocity.z = sine * speed;
-            func_151DA6F8(&position, &velocity, 1.6f, (func_150ADA20() & 7) + 0x19,
+            particle_spawnSplash(&position, &velocity, 1.6f, (func_150ADA20() & 7) + 0x19,
                           (func_150ADA20() & 0x7F) + 0x80,
                           func_150ADA68() * 0.2f * width + 5.0f, (func_150ADA20() & 1) + 2, 0,
                           1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
@@ -479,7 +479,7 @@ s32 func_150BC488(Actor *actor) {
                 particle.vel.z = horizontal * headingSine;
                 particle.rotVel.x = 30.0f - func_150ADA68() * 60.0f;
                 particle.rotVel.y = 30.0f - func_150ADA68() * 60.0f;
-                func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0);
+                particle_newModelParticle(&particle, 3, 0xFF, 0, 0xFF, 0);
             }
         }
     }
@@ -574,7 +574,7 @@ s32 func_150BCBBC(Actor *actor) {
             particle.vel.z = velocityZ;
             particle.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
             particle.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
-            if (func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0) == NULL) {
+            if (particle_newModelParticle(&particle, 3, 0xFF, 0, 0xFF, 0) == NULL) {
                 ok = 0;
             }
             count--;
@@ -669,7 +669,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
             rnd = func_150ADA20();
             func_15143794(rnd % 31U - 84, func_150ADA20() % 26U - 45, func_150ADA68() * 21.80000114f + 30.2f, &particle.vel);
             particle.gravity = func_150ADA68() * 1.129000068f + -1.909f;
-            func_1513264C(&particle, 3, 0xFF, 0, 0, arg0, arg1);
+            particle_newModelParticleWithFloor(&particle, 3, 0xFF, 0, 0, arg0, arg1);
             count--;
         }
     }
@@ -722,7 +722,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
             rnd = func_150ADA20();
             func_15143794(rnd % 41U - 89, func_150ADA20() % 51U - 64, func_150ADA68() * 45.60000229f + 18.80000114f, &spawn.vel);
             spawn.gravity = func_150ADA68() * 0.559f + -0.777f;
-            spawned = func_15130280(&spawn, 1, 0, 4, arg0, arg1);
+            spawned = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, arg0, arg1);
             if (spawned != NULL) {
                 memcpy(&spawned->data.drag, &scale, sizeof(scale));
             }
@@ -731,11 +731,11 @@ void func_150BD070(u8 arg0, s32 arg1) {
         pos.x = anchors[0]->x;
         pos.y = anchors[0]->y;
         pos.z = anchors[0]->z;
-        func_151D5334(&pos, 0.0f, 1000.0f, 0.001f, 5, arg0, arg1);
+        particle_startPlayerCameraWobbles(&pos, 0.0f, 1000.0f, 0.001f, 5, arg0, arg1);
         pos2.x = anchors[0]->x;
         pos2.y = anchors[0]->y;
         pos2.z = anchors[0]->z;
-        func_151D5404(&pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, arg1);
+        particle_startPlayerRumbles(&pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, arg1);
     }
 }
 

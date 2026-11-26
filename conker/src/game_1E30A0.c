@@ -5,7 +5,7 @@
 
 /* Spawns a pulsing particle of the given size at pos (fading out over 0x100 >> fadeShift frames at the end
  * of its lifetime). Also checksums collision_loadMapSettings's code as an anti-tamper check. */
-PulseParticle *func_151B5BF0(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rotVel, f32 gravity,
+PulseParticle *particle_spawnSoundPulse(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rotVel, f32 gravity,
                         s16 lifetime, u8 alpha, s32 unused, f32 elasticity, u8 fadeShift, u8 arg11, u8 arg12,
                         s32 arg13) {
     PulseParticle *particle;
@@ -85,7 +85,7 @@ PulseParticle *func_151B5BF0(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f
     spawn.ownerId = 0;
     spawn.fadeStart = fadeTime;
     spawn.fadeRate = 255 / fadeTime;
-    particle = func_15132A4C(&spawn, 3, 255, sizeof(Pulse), arg12, arg13);
+    particle = particle_newModelParticle(&spawn, 3, 255, sizeof(Pulse), arg12, arg13);
     if (particle != NULL) {
         memcpy(&particle->pulse, &pulse, sizeof(Pulse));
     }
@@ -97,7 +97,7 @@ void func_151B5E8C(void) {
 
 /* Update of the pulsing particle: advances the phase, playing a sound and restarting each time it passes
  * 29.9; for the first 4 pi the size wobbles by 5% of the base size. */
-void func_151B5E94(PulseParticle *particle) {
+void particle_updateSoundPulse(PulseParticle *particle) {
     f32 size;
     Pulse *pulse;
 
@@ -118,11 +118,11 @@ void func_151B5E94(PulseParticle *particle) {
         particle->head.sizeY = size;
         particle->head.sizeXZ = size;
     }
-    func_15133894(&particle->head);
+    particle_moveBallisticFloor(&particle->head);
 }
 
 /* Stops the object's sound, if one is playing. */
-void func_151B5FCC(SoundOwner *obj) {
+void particle_stopPulseSound(SoundOwner *obj) {
     if (obj->sound != 0) {
         sound_stop(obj->sound);
         obj->sound = 0;

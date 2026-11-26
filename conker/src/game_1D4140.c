@@ -40,11 +40,11 @@ void func_151A6C90(Actor *obj, u8 arg1, s32 arg2) {
         emitter.dir.z = 0.0f;
 
         func_151A6F00(&emitter, 0, arg1, arg2);
-        func_151D5334(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
-        func_151D3FF4(&pos, arg1, arg2);
-        func_151D5514(&pos, arg1, arg2);
-        func_151541B8(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
+        particle_startPlayerCameraWobbles(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
+        particle_spawnLightFlash(&pos, arg1, arg2);
+        particle_spawnBlastSpray(&pos, arg1, arg2);
+        particle_spawnGrowFade(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
                       func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
-        func_151D5404(&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 255, 0);
+        particle_startPlayerRumbles(&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 255, 0);
     }
 }

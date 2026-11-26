@@ -1076,7 +1076,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
             actor->mvmt_control |= 0x10000;
             if (actor->unk24E != 0) {
                 if (actor->character_type == 0xC) {
-                    func_150B9ED0(actor, x, z, 0xFF, 0);
+                    particle_spawnMoveHitBurst(actor, x, z, 0xFF, 0);
                 }
                 actor->intelwalk = actor->unk24E;
                 actor->unk24E = 0;
@@ -1965,7 +1965,7 @@ void actor_landPlayer(Actor *actor, f32 floorY) {
                 actor->yspd = -4.0f;
                 actor->unk1CC = floorY;
                 if (killed == 0) {
-                    func_15174690(dc_glbl_CharNum, 0, 0x1F, 0, 0x199, 4, 0xAA, 0xFF, 0);
+                    particle_spawnWakePuff(dc_glbl_CharNum, 0, 0x1F, 0, 0x199, 4, 0xAA, 0xFF, 0);
                 } else {
                     actor_kill(actor, 8);
                 }
@@ -2154,7 +2154,7 @@ void actor_landNonPlayer(Actor *actor, f32 floorY) {
             actor->mvmt_control |= 0x8000;
             step = D_800B0DF0->unk13;
             if (step != 0 && prevHeight != 0.0f) {
-                func_15174690(dc_glbl_CharNum, 0, 0x1000 / step, 0, 0x199, 4, 0xAA, 0xFF, 0);
+                particle_spawnWakePuff(dc_glbl_CharNum, 0, 0x1000 / step, 0, 0x199, 4, 0xAA, 0xFF, 0);
             }
             actor->ypos = floorY;
             actor->shad = 0.0f;

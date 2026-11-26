@@ -1327,7 +1327,7 @@ void func_1506DA94(void) {
             gCurrentActor->count5 = 0;
         }
     }
-    func_15174690(dc_glbl_CharNum, 0, 24, 0, 409, 4, 170, 0xFF, 0);
+    particle_spawnWakePuff(dc_glbl_CharNum, 0, 24, 0, 409, 4, 170, 0xFF, 0);
 }
 
 void func_1506DB30(void) {
@@ -1415,14 +1415,14 @@ void func_1506DDB8(void) {
 
 void func_1506DDC0(void) {
     if (func_15178E50(level) != 0) {
-        func_1516EED4(dc_glbl_CharNum, gEventParam, 0xFF, 0);
+        particle_spawnThrottledEmitter(dc_glbl_CharNum, gEventParam, 0xFF, 0);
     }
 }
 
 void func_1506DE04(void) {
     s32 i;
     for (i = 0; i < 2; i++) {
-        func_15174690(dc_glbl_CharNum, 10, 18, 12, 409, 4, 170, 0xFF, 0);
+        particle_spawnWakePuff(dc_glbl_CharNum, 10, 18, 12, 409, 4, 170, 0xFF, 0);
     }
 }
 
@@ -1477,7 +1477,7 @@ void func_1506DE84(void) {
         func_1516F2F8(dc_glbl_CharNum, 18, 12, 0, 0xFF, 0);
         return;
     case 13:
-        func_150AFDB0();
+        particle_freeCharSpriteEmitters();
         break;
     }
 }
@@ -1909,23 +1909,23 @@ void func_1506F004(s32 cmd) {
 }
 
 void func_1506F02C(s32 cmd) {
-    func_150BA4C0(gCurrentActor, 0xFF, 0);
+    particle_attachOwnerEmitter(gCurrentActor, 0xFF, 0);
 }
 
 void func_1506F05C(s32 cmd) {
-    func_151925C4(gCurrentActor, 50, 0xFF, 1);
+    particle_startObjDustEmitter(gCurrentActor, 50, 0xFF, 1);
 }
 
 void func_1506F090(s32 cmd) {
-    func_151925C4(gCurrentActor, -1, 0xFF, 1);
+    particle_startObjDustEmitter(gCurrentActor, -1, 0xFF, 1);
 }
 
 void func_1506F0C4(s32 cmd) {
-    func_150C1260(gCurrentActor, 0);
+    particle_spawnFootDust(gCurrentActor, 0);
 }
 
 void func_1506F0F0(s32 cmd) {
-    func_150C1260(gCurrentActor, 1);
+    particle_spawnFootDust(gCurrentActor, 1);
 }
 
 void func_1506F11C(s32 cmd) {
@@ -2161,11 +2161,11 @@ void func_1506FB60(s32 cmd) {
 }
 
 void func_1506FBE8(s32 cmd) {
-    func_151A0A10(gCurrentActor, 0x46, 0xFF, 0);
+    particle_startSparkEmitter(gCurrentActor, 0x46, 0xFF, 0);
 }
 
 void func_1506FC1C(s32 cmd) {
-    func_151A0A10(gCurrentActor, 0x28, 0xFF, 0);
+    particle_startSparkEmitter(gCurrentActor, 0x28, 0xFF, 0);
 }
 
 void event_cancelTrailPair(s32 cmd) {
@@ -2229,15 +2229,15 @@ void func_1506FF50(s32 cmd) {
 }
 
 void func_1506FF78(s32 cmd) {
-    func_150CBF80(gCurrentActor, 0, 1, 0xFF);
+    particle_spawnBoneGroundBurst(gCurrentActor, 0, 1, 0xFF);
 }
 
 void func_1506FFAC(s32 cmd) {
-    func_150CBF80(gCurrentActor, 1, 1, 0xFF);
+    particle_spawnBoneGroundBurst(gCurrentActor, 1, 1, 0xFF);
 }
 
 void func_1506FFE0(s32 cmd) {
-    func_150CBF80(gCurrentActor, 2, 1, 0xFF);
+    particle_spawnBoneGroundBurst(gCurrentActor, 2, 1, 0xFF);
 }
 
 void func_15070014(s32 cmd) {
@@ -2258,7 +2258,7 @@ void func_150700B4(s32 cmd) {
 }
 
 void func_150700E4(s32 cmd) {
-    func_15193660(gCurrentActor, 0xFF, 1);
+    particle_spawnBoneModelBurst(gCurrentActor, 0xFF, 1);
 }
 
 void func_15070114(s32 cmd) {
@@ -2629,8 +2629,8 @@ void func_15070F60(cmd)
     fx.header2.z = fx.worldPos.z;
 
     light_createWithEffect(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
-    func_151D5404(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
-    func_151D5334(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
+    particle_startPlayerRumbles(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
+    particle_startPlayerCameraWobbles(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
 }
 void func_15071230(s32 cmd) {
     func_15070F60(0);
@@ -2641,7 +2641,7 @@ void func_15071254(s32 cmd) {
 }
 
 void func_15071278(s32 cmd) {
-    func_150FC438(gCurrentActor, 0, 1, gCurrentActor->animseq.ub[1]);
+    particle_spawnTwoSidedEmitter(gCurrentActor, 0, 1, gCurrentActor->animseq.ub[1]);
 }
 
 void func_150712AC(s32 cmd) {
@@ -2689,22 +2689,22 @@ void func_150714AC(s32 cmd) {
 }
 
 void func_150714E8(s32 cmd) {
-    func_151D5714(gCurrentActor, &D_800A2148, &D_800A2154, gGunMuzzleBone, 1.0f, 0xFF, 1);
+    particle_spawnBoneSegmentParticle(gCurrentActor, &D_800A2148, &D_800A2154, gGunMuzzleBone, 1.0f, 0xFF, 1);
 }
 
 void func_15071544(s32 cmd) {
-    func_151D4668(gCurrentActor);
-    func_151D469C(gCurrentActor, 4, 0x78, 0xFF, 1);
+    particle_detachObjEmitters(gCurrentActor);
+    particle_attachPointEmitter(gCurrentActor, 4, 0x78, 0xFF, 1);
 }
 
 void func_1507158C(s32 cmd) {
-    func_151D4668(gCurrentActor);
-    func_151D469C(gCurrentActor, 2, 0x78, 0xFF, 1);
+    particle_detachObjEmitters(gCurrentActor);
+    particle_attachPointEmitter(gCurrentActor, 2, 0x78, 0xFF, 1);
 }
 
 void func_150715D4(s32 cmd) {
-    func_151D4668(gCurrentActor);
-    func_151D469C(gCurrentActor, 3, 0x78, 0xFF, 1);
+    particle_detachObjEmitters(gCurrentActor);
+    particle_attachPointEmitter(gCurrentActor, 3, 0x78, 0xFF, 1);
 }
 
 void func_1507161C(s32 cmd) {
@@ -2739,7 +2739,7 @@ void func_150716EC(s32 cmd) {
     pos.x = obj->xpos;
     pos.y = obj->ypos;
     pos.z = obj->zpos;
-    func_151D5404(&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 0xFF, 0);
+    particle_startPlayerRumbles(&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 0xFF, 0);
 }
 
 void func_15071764(s32 cmd) {
@@ -2759,7 +2759,7 @@ void func_150717E0(s32 cmd) {
     if (obj != NULL) {
         ref.actor = obj;
         ref.uniqueId = obj->unique_id;
-        func_15131D4C((s32)&ref, 0x43);
+        particle_broadcastToSprites((s32)&ref, 0x43);
         effect_sendEventToTimedEffects((s32)&ref, 0x43);
     }
 }
@@ -2773,7 +2773,7 @@ void func_15071860(s32 cmd) {
 }
 
 void func_15071888(s32 cmd) {
-    func_151D5714(gCurrentActor, &D_800A1FB0, &D_800A1FBC, D_80088B90, 0.7f, 0xFF, 1);
+    particle_spawnBoneSegmentParticle(gCurrentActor, &D_800A1FB0, &D_800A1FBC, D_80088B90, 0.7f, 0xFF, 1);
 }
 
 /* Spawns effect weapon_spawnImpactBurst at one of four random bones. */
@@ -2795,7 +2795,7 @@ const Vec3f D_80099BC8[3] = {
     { -62.0f, 11.0f, 114.0f },
 };
 
-/* Debris model ids and their scales (func_15152190). */
+/* Debris model ids and their scales (particle_spawnDebrisBurst). */
 const s32 gDebrisModelIds[6] = { 0x39, 0x11, 0x12, 0x13, 0x14, 0x15 };
 const f32 gDebrisModelScales[6] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -2822,7 +2822,7 @@ void func_15071A64(s32 cmd) {
         movement_obj[0].stunned != 0 && movement_obj[0].energy > 0) {
         collision_initHitFromObject(&hit.ground, gCurrentActor);
         func_15143134(&D_80099BBC, &hit.pos, &gCurrentActor->ob_matrix_ptr[15]);
-        func_151DC484(&hit.pos.x, &hit.ground, 0, 0xFF, 1);
+        particle_spawnSmallSplashAndDrops(&hit.pos.x, &hit.ground, 0, 0xFF, 1);
     }
 }
 
@@ -2835,9 +2835,9 @@ void func_15071B18(s32 cmd) {
         collision_initHitFromObject(&collision, gCurrentActor);
         if (func_150ADA20() & 1) {
             if (func_150ADA20() & 1) {
-                func_151DC260(&point.x, &collision, 0, 0xFF, 1);
+                particle_spawnSplashAndDrops(&point.x, &collision, 0, 0xFF, 1);
             } else {
-                func_151DC484(&point.x, &collision, 0, 0xFF, 1);
+                particle_spawnSmallSplashAndDrops(&point.x, &collision, 0, 0xFF, 1);
             }
         }
         if (func_150ADA20() & 1) {
@@ -2859,7 +2859,7 @@ void func_15071B18(s32 cmd) {
             config.scaleBase = 0.096f;
             config.scaleRange = 0.07f;
             config.spin = 21.892f;
-            func_15152190(&config, gDebrisModelIds, gDebrisModelScales,
+            particle_spawnDebrisBurst(&config, gDebrisModelIds, gDebrisModelScales,
                           6, 25.0f, 0, 0xFF, 1);
         }
     }
@@ -4085,7 +4085,7 @@ void func_15074DEC(Actor *self, Actor *other, u8 *result) {
 
 void func_15074E04(Actor *self, Actor *other, u8 *result) {
     func_1516FE1C(other - movement_obj, 180, 0xFF, 0);
-    func_1518D1C0(other, 11, 0, 1, 0xFF, 0, "mvmt_imp_set_up_smoke");
+    particle_startActorEmitter(other, 11, 0, 1, 0xFF, 0, "mvmt_imp_set_up_smoke");
 }
 
 void func_15074E80(Actor *self, Actor *other, u8 *result) {

@@ -215,8 +215,8 @@ static const s8 D_800A6350[28] = {
 static void (*gWatcherActions[])() = {
     func_151A99D0, func_151A9AA4, func_151A9BA0, func_151A9CA0, func_151A9DC0, func_151A9EC0,
     func_151A9FC8, func_151AA09C, func_151AA170, func_151AA17C, func_151AA1D0, func_151AA1F0,
-    func_151AA210, effect_refreshTaskEffects, effect_keepTaskFlicker, func_151AB1C4, func_151AB828, func_150C5DC0,
-    func_150C5F40, effect_keepWatcherFloorSprite, effect_keepWatcherEmitter, func_151AB854, func_151AE6B0,
+    func_151AA210, effect_refreshTaskEffects, effect_keepTaskFlicker, func_151AB1C4, func_151AB828, particle_keepFlickerSprite,
+    particle_keepWatcherEmitter, effect_keepWatcherFloorSprite, effect_keepWatcherEmitter, func_151AB854, func_151AE6B0,
 };
 
 /* The action table of each watcher mode. */
@@ -532,7 +532,7 @@ typedef struct {
 
 #define GROUND_UNKNOWN -99999.8984375f
 
-/* Particle object created by func_151303BC / func_15130280 from a ParticleDesc6C. */
+/* Particle object created by particle_newSpriteParticle / particle_newSpriteParticleWithFloor from a ParticleDesc6C. */
 struct EffectMotionParticle {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ union {
@@ -568,7 +568,7 @@ u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
             if (found != 0) {
                 pos.y = particle->head.floor.height;
                 if (particle->head.floor.source == 3) {
-                    func_151DBCBC(func_151D8E20(), particle->motion.rise.baseSize * 0.200000003f, 0xFF,
+                    particle_spawnKindMark(particle_getContextEffectKind(), particle->motion.rise.baseSize * 0.200000003f, 0xFF,
                                   &particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
                 }
                 alive = 0;
@@ -684,7 +684,7 @@ EffectMotionParticle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 a
     rise.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
     spawn.gravity = ((func_150ADA68() * 254.0f) + 108.0f) * 0.001000000047f;
 
-    particle = func_151303BC(&spawn, 2, sizeof(RiseMotion));
+    particle = particle_newSpriteParticle(&spawn, 2, sizeof(RiseMotion));
     if (particle != NULL) {
         memcpy(&particle->motion, &rise, sizeof(RiseMotion));
     }
@@ -816,7 +816,7 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
                     oscillate.heightPhaseStep = (func_150ADA20() % 5U) + 4;
                     oscillate.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * oscillate.baseSize;
                     oscillate.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * oscillate.baseSize;
-                    particle = func_151303BC(&spawn, 2, sizeof(OscillateMotion));
+                    particle = particle_newSpriteParticle(&spawn, 2, sizeof(OscillateMotion));
                     if (particle != NULL) {
                         memcpy(&particle->motion, &oscillate, sizeof(OscillateMotion));
                     }
@@ -936,7 +936,7 @@ EffectMotionParticle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 d
             drift.groundHeight = 10000.0f;
         }
     }
-    particle = func_15130280(&spawn, 2, ground, sizeof(ParticleDriftMotion), arg9, argA);
+    particle = particle_newSpriteParticleWithFloor(&spawn, 2, ground, sizeof(ParticleDriftMotion), arg9, argA);
     if (particle != NULL) {
         memcpy(&particle->motion, &drift, sizeof(ParticleDriftMotion));
     }
@@ -997,7 +997,7 @@ u8 func_1515A78C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     if (alive == 0) {
         if (func_150ADA68() < 0.200000003f) {
             if (particle->head.floor.source == 3) {
-                func_151DBCBC(func_151D8E20(), drift->baseSize * 0.200000003f, particle->head.desc.alpha,
+                particle_spawnKindMark(particle_getContextEffectKind(), drift->baseSize * 0.200000003f, particle->head.desc.alpha,
                               &particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
             }
         }
@@ -1200,7 +1200,7 @@ void effect_updateRiseEmitter(RiseEmitterObject *obj) {
             flipX = (func_150ADA20() & 1) ? 0x40 : 0;
             flipY = (func_150ADA20() & 1) ? 0x80 : 0;
             spawn.flags = flipY | 6 | flipX | 0x8000 | 0x4000 | 0x2000 | 0x1000;
-            particle = func_15130280(&spawn, 2, NULL, sizeof(RiseMotion), obj->base.header.owner, obj->base.header.kind);
+            particle = particle_newSpriteParticleWithFloor(&spawn, 2, NULL, sizeof(RiseMotion), obj->base.header.owner, obj->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->motion, &rise, sizeof(RiseMotion));
             }

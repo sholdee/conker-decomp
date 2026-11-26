@@ -58,7 +58,7 @@ void *memcpy(void *, const void *, u32);
 
 /*
  * Explosion at pos: 15 spawned effects (offsets from D_800A0D60), followed by effect_spawnQuadEffect,
- * func_151D5404/5334/5514/3FF4 and func_151541B8 effects, a burst of 3-6 debris aimed
+ * particle_startPlayerRumbles/5334/5514/3FF4 and particle_spawnGrowFade effects, a burst of 3-6 debris aimed
  * around the camera yaw, and a short-lived PointEffect at pos.
  */
 void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
@@ -118,15 +118,15 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
                 spawn.model = 0xC5;
             }
             // matching: *(u8 *)&owner re-reads owner from its stack slot at every use (a K&R u8 gets CSE'd)
-            func_1513264C(&spawn, 3, 0xFF, 0, 0, *(u8 *)&owner, kind);
+            particle_newModelParticleWithFloor(&spawn, 3, 0xFF, 0, 0, *(u8 *)&owner, kind);
         }
     }
     effect_spawnQuadEffect(-1, pos->x, pos->y, pos->z, 30, 50, 0, *(u8 *)&owner, kind);
-    func_151D5404(pos, 506.0f, 1013.0f, 0.0009871668881f, 15, 20, *(u8 *)&owner, kind);
-    func_151D5334(pos, 506.0f, 1013.0f, 0.0009871668881f, 5, *(u8 *)&owner, kind);
-    func_151D5514(pos, *(u8 *)&owner, kind);
-    func_151D3FF4(pos, *(u8 *)&owner, kind);
-    func_151541B8(pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
+    particle_startPlayerRumbles(pos, 506.0f, 1013.0f, 0.0009871668881f, 15, 20, *(u8 *)&owner, kind);
+    particle_startPlayerCameraWobbles(pos, 506.0f, 1013.0f, 0.0009871668881f, 5, *(u8 *)&owner, kind);
+    particle_spawnBlastSpray(pos, *(u8 *)&owner, kind);
+    particle_spawnLightFlash(pos, *(u8 *)&owner, kind);
+    particle_spawnGrowFade(pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
                   func_150ADA20() % 56U + 200, 0.0f, *(u8 *)&owner, kind);
     debris.count = (func_150ADA20() & 3) + 3;
     debris.lifetime = 190;
@@ -229,7 +229,7 @@ void effect_spawnScatteredParticles(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s3
     emitter.maxHeight = 10000.0f;
     emitter.shrinkRate = 0.0450000018f;
     emitter.growRate = 0.699999988f;
-    func_15149550(&emitter, 10, 0, 0, owner, kind);
+    particle_spawnChannelParticle(&emitter, 10, 0, 0, owner, kind);
     for (count = func_150ADA20() % 3U + 1; count > 0; count--) {
         func_15143874(func_150ADA20() & 0xFF, 30.0f, &emitter.pos.x, &emitter.pos.z);
         emitter.pos.x += pos->x;
@@ -244,6 +244,6 @@ void effect_spawnScatteredParticles(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s3
         emitter.life = func_150ADA20() % 151U + 150;
         emitter.unk2C = func_150ADA20() % 156U + 100;
         emitter.unk2F = 0;
-        func_15149550(&emitter, 10, 0, 0, owner, kind);
+        particle_spawnChannelParticle(&emitter, 10, 0, 0, owner, kind);
     }
 }

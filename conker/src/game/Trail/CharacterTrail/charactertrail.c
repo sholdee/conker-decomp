@@ -446,7 +446,7 @@ typedef struct {
 extern struct {
     s32 unk0;
     s32 unk4;
-} D_800A4AC8[];
+} gEffectRenderModes[];
 
 /*
  * Draws the trail as a camera-facing ribbon: each point gets an edge, centre and edge vertex, offset
@@ -498,7 +498,7 @@ Gfx *trail_drawCharacterTrail(CharacterTrail *actor, Gfx *gfx, s16 view) {
     if (owner->ob_matrix_ptr == NULL || (owner->unk74 & 0xF) == 0xF) {
         return gfx;
     }
-    func_151D5D60(actor->vtxBufs, view, (actor->head.tmpl.itemCount * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), &vtx, &fresh);
+    particle_getViewBuffer(actor->vtxBufs, view, (actor->head.tmpl.itemCount * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), &vtx, &fresh);
     if (fresh != 0) {
         tv = (TrailVtx *)actor->vtxBufs[view];
         for (i = 0; i < actor->head.tmpl.itemCount * 2 + 10; i++) {
@@ -519,8 +519,8 @@ Gfx *trail_drawCharacterTrail(CharacterTrail *actor, Gfx *gfx, s16 view) {
     gfx = func_15142E24(gfx, &gEffectTextures[120], 0, 0, 0, 0, 0x78, 0, 0, &update, 0x3E);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-    gfx = func_1513F4E4(gfx, 0x55, &update);
-    gfx = func_15142FBC(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
+    gfx = particle_setCombineMode(gfx, 0x55, &update);
+    gfx = func_15142FBC(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &update);
     cur = actor->head.end - 1;
     if (cur < 0) {
         cur = actor->head.tmpl.itemCount - 1;
@@ -798,7 +798,7 @@ void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg
         r1 = (func_150ADA20() & 1) ? 0x80 : 0;
         r2 = (func_150ADA20() & 1) ? 0x40 : 0;
         spawn.flags |= r2 | r1;
-        func_15130280(&spawn, 1, 0, 0, arg3, arg4);
+        particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, arg3, arg4);
         count--;
     } while (count > 0);
 }

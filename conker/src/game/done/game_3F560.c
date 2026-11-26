@@ -24,7 +24,7 @@ void func_150120B0(s32 arg0) {
     }
 }
 
-/* Attaches a drip emitter (func_15190770) to the actor, except in level 24. */
+/* Attaches a drip emitter (particle_newDripEmitter) to the actor, except in level 24. */
 void func_1501214C(Actor *arg0) {
     ActorLink tmp;
 
@@ -35,6 +35,6 @@ void func_1501214C(Actor *arg0) {
         tmp.flags = 0;
         tmp.unk9 = 0;
         tmp.kind = 2;
-        func_15190770(&tmp, 0, 255, 1);
+        particle_newDripEmitter(&tmp, 0, 255, 1);
     }
 }

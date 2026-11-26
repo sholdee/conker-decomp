@@ -5,13 +5,13 @@
 void *memcpy(void *, const void *, u32);
 
 /* Destroys the emitter already on link->actor, then creates one with extraSize bytes of extra data. */
-DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
+DripEmitter *particle_newDripEmitter(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
     DripEmitter *emitter;
     ActorRef ref;
 
     ref.actor = link->actor;
     ref.uniqueId = link->actor->unique_id;
-    func_15191B8C(&ref, 0xE);
+    particle_sendDripMsg(&ref, 0xE);
     emitter = effect_newObject(0x20, list, extraSize + sizeof(DripEmitter), 1, owner, 1);
     if (emitter == NULL) {
         return NULL;
@@ -22,19 +22,19 @@ DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
     emitter->dropCount = 0;
     emitter->spawnAccum = 0.0f;
     bzero(emitter->slotStorage, sizeof(emitter->slotStorage));
-    emitter->kind = func_151D8E20();
+    emitter->kind = particle_getContextEffectKind();
     return emitter;
 }
 
 /* Type 0x20 handler: releases the drops, then effect_defaultDestroy. */
-void func_15190840(DripEmitter *emitter) {
-    func_15191400(emitter);
+void particle_destroyDripEmitter(DripEmitter *emitter) {
+    particle_releaseDrips(emitter);
     effect_defaultDestroy(&emitter->header);
 }
 
 /* Type 0x20 handler: releases the drops, then effect_defaultFree. */
-void func_1519086C(DripEmitter *emitter) {
-    func_15191400(emitter);
+void particle_freeDripEmitter(DripEmitter *emitter) {
+    particle_releaseDrips(emitter);
     effect_defaultFree(&emitter->header);
 }
 
@@ -43,7 +43,7 @@ void func_1519086C(DripEmitter *emitter) {
  * then hangs new drops on random free mounts at the kind's rate. Destroys itself when its actor is gone or
  * its timer runs out; when the actor has no bone matrices it hands its link to a retry task instead.
  */
-void func_15190898(DripEmitter *emitter) {
+void particle_updateDripEmitter(DripEmitter *emitter) {
     DripEmitter *self; // matching: stack copy of emitter, read back by the spawn loop test
     volatile u8 done; // matching: done is re-read from its stack slot after every store
     EmitterKind *kind;
@@ -96,7 +96,7 @@ void func_15190898(DripEmitter *emitter) {
                         fall->vel.y = 0.0f;
                         fall->vel.x = dx;
                         fall->vel.z = dz;
-                        func_1513F680(&slot->drop->head, 13, 18, 0, 13);
+                        particle_setQuadParticleFuncs(&slot->drop->head, 13, 18, 0, 13);
                         isFree = 1;
                         slot->drop->head.def.lifetime = func_150ADA20() % (dropKind->lifeRange + 1) + dropKind->lifeMin;
                         slot->drop->head.def.flags |= 1;
@@ -136,7 +136,7 @@ void func_15190898(DripEmitter *emitter) {
                     motion.dropKind = kind->dropKind;
                     collision_initHitFromObject(&motion.ground, emitter->link.actor);
                     motion.kind = emitter->kind;
-                    def.texture = D_800AB310[emitter->kind];
+                    def.texture = gKindSpriteTextures[emitter->kind];
                     def.renderModes = 0x1001;
                     def.lifetime = 300;
                     def.frame = 0;
@@ -173,7 +173,7 @@ void func_15190898(DripEmitter *emitter) {
                         def.rot = def.pos;
                         if (emitter->link.actor->unk118 < def.pos.y - motion.baseSize.height - motion.wobble.height) {
                             /* the random flip bit is always 0 (% 1), but still advances the RNG */
-                            drop = func_1513D524(&def, 12, 0, 0, 13,
+                            drop = particle_newQuadParticleWhite(&def, 12, 0, 0, 13,
                                                  ((func_150ADA20() % 1) ? 1 : 0) | (D_800AB404[emitter->kind] ? 0 : 2),
                                                  sizeof(DripMotion), 0xFF, 0);
                             head->drop = drop;
@@ -213,7 +213,7 @@ void func_15190898(DripEmitter *emitter) {
 }
 
 /* Wobbles a drop's width and height around its base size. */
-s32 func_15190F9C(DripParticle *drop) {
+s32 particle_wobbleDrip(DripParticle *drop) {
     DripParticle *p = drop; // matching: the param copy steers register allocation
     DripMotion *motion = &drop->motion;
     f32 widthWave;
@@ -232,7 +232,7 @@ s32 func_15190F9C(DripParticle *drop) {
  * Vertex function: builds the drop's quad in its vertex buffer for viewport vp, tilted by how fast it
  * moves sideways on screen (D_800DD1E8 / D_800DD1D8 are the viewport's view direction).
  */
-Vtx *func_1519108C(DripParticle *drop, s16 vp) {
+Vtx *particle_buildDripQuad(DripParticle *drop, s16 vp) {
     Vtx *vtx;
     Vtx *ret;
     f32 halfWidthCos;
@@ -247,7 +247,7 @@ Vtx *func_1519108C(DripParticle *drop, s16 vp) {
     f32 angle;
     u8 fresh;
 
-    func_151D5D60(drop->head.vtxBuffers, vp, 0x40, &vtx, &fresh);
+    particle_getViewBuffer(drop->head.vtxBuffers, vp, 0x40, &vtx, &fresh);
     ret = vtx;
     if (vtx) {
         if (fresh) {
@@ -306,7 +306,7 @@ Vtx *func_1519108C(DripParticle *drop, s16 vp) {
 }
 
 /* Lets go of every drop the emitter still holds and clears its slots. */
-void func_15191400(DripEmitter *emitter) {
+void particle_releaseDrips(DripEmitter *emitter) {
     s32 i;
     DripSlot *slot;
     DripMotion *motion;
@@ -322,7 +322,7 @@ void func_15191400(DripEmitter *emitter) {
             motion->vel.x = 0.0f;
             motion->vel.y = 0.0f;
             motion->vel.z = 0.0f;
-            func_1513F680(&slot->drop->head, 13, 18, 0, 13);
+            particle_setQuadParticleFuncs(&slot->drop->head, 13, 18, 0, 13);
             slot->drop->head.def.lifetime = func_150ADA20() % (dropKind->lifeRange + 1) + dropKind->lifeMin;
             slot->drop->head.def.flags |= 1;
         }
@@ -331,7 +331,7 @@ void func_15191400(DripEmitter *emitter) {
 }
 
 /* Update of a falling drop: moves it under drag and gravity; on reaching the ground it splashes and dies. */
-s8 func_15191520(DripParticle *drop) {
+s8 particle_fallDrip(DripParticle *drop) {
     f32 dx;
     f32 dz;
     f32 dy;
@@ -373,14 +373,14 @@ s8 func_15191520(DripParticle *drop) {
         if (collision_probeFloorSurfABSet0Cached(&probe, 0, drop->head.def.pos.y - drop->head.def.height, &motion->ground) != 0) {
             probe.y = motion->ground.height;
             if (motion->ground.source == 3) {
-                func_151DBCBC(motion->kind, drop->head.def.width * drop->head.def.height * 0.25f, drop->head.def.unk44,
+                particle_spawnKindMark(motion->kind, drop->head.def.width * drop->head.def.height * 0.25f, drop->head.def.unk44,
                               &motion->ground.tri, &probe, drop->head.header.owner, drop->head.header.kind);
             } else if (func_150ADA20() & 1) {
-                func_151D9B8C(motion->kind, drop->head.def.width * drop->head.def.height * 0.150000006f, drop->head.def.unk44,
+                particle_spawnKindEmitter(motion->kind, drop->head.def.width * drop->head.def.height * 0.150000006f, drop->head.def.unk44,
                               &motion->ground.tri, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,
                               drop->head.header.owner, drop->head.header.kind);
             } else {
-                func_151DAB58(motion->kind, drop->head.def.width * drop->head.def.height * 0.05000000075f, drop->head.def.unk44,
+                particle_spawnSquash(motion->kind, drop->head.def.width * drop->head.def.height * 0.05000000075f, drop->head.def.unk44,
                               &probe, 1, drop->head.header.owner, drop->head.header.kind);
             }
             alive = 0;
@@ -390,7 +390,7 @@ s8 func_15191520(DripParticle *drop) {
 }
 
 /* Fades a drop's alpha out over the last fadeStart frames of its lifetime. */
-s32 func_1519187C(DripParticle *drop) {
+s32 particle_fadeDrip(DripParticle *drop) {
     s16 lifetime;
     s32 alpha;
 
@@ -405,7 +405,7 @@ s32 func_1519187C(DripParticle *drop) {
 }
 
 /* Retries creating the emitter until its actor has bone matrices; gives up when the actor is gone. */
-void func_151918BC(DripRetryTask *task) {
+void particle_retryDripEmitter(DripRetryTask *task) {
     Actor *actor;
     ActorLink *link;
     u8 done;
@@ -426,7 +426,7 @@ void func_151918BC(DripRetryTask *task) {
             link->timer = 300;
         }
         done = 1;
-        func_15190770(link, 0, task->base.header.owner, task->base.header.kind);
+        particle_newDripEmitter(link, 0, task->base.header.owner, task->base.header.kind);
     }
     if (done) {
         effect_destroyObject(&task->base.header);
@@ -435,7 +435,7 @@ void func_151918BC(DripRetryTask *task) {
 
 /* Message handler of the emitter: 0xD starts its timer, 0xC / 0xE / 0x50 / 0x4E destroy it. */
 /* Message handler of the emitter: 0xD starts its timer, 0xC / 0xE / 0x50 / 0x4E destroy it. */
-void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg) {
+void particle_onDripEmitterMsg(DripEmitter *emitter, ActorRef *ref, u8 msg) {
     if (msg == 0xD) {
         // matching: each test is its own if so IDO reloads ref for the second one (|| loads it once)
         if (ref->actor == emitter->link.actor) {
@@ -463,13 +463,13 @@ void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg) {
     }
 }
 
-/* Message handler of the retry task, as func_15191980. */
-void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
+/* Message handler of the retry task, as particle_onDripEmitterMsg. */
+void particle_onDripRetryMsg(DripRetryTask *task, ActorRef *ref, u8 msg) {
     ActorLink *link;
 
     link = &task->link;
     if (msg == 0xC || msg == 0xE || msg == 0x50) {
-        // matching: separate ifs, as in func_15191980
+        // matching: separate ifs, as in particle_onDripEmitterMsg
         if (ref->actor == link->actor) {
             goto hit;
         }
@@ -497,7 +497,7 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
 
 
 /* Sends msg about ref's actor through effect_sendEventToTimedEffects and to every object of type 0x20. */
-void func_15191B8C(ref, msg)
+void particle_sendDripMsg(ref, msg)
     ActorRef *ref;
     u8 msg;
 {

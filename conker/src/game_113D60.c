@@ -31,7 +31,7 @@ static Game113D60StartCallback D_80088A20[] = { func_150E6E34, func_150E6ED8, fu
 static Game113D60EndCallback D_80088A2C[] = { func_150E6FAC, func_150E70CC };
 static Game113D60MotionCallback D_80088A34[] = { func_150E70EC, func_150E71E4 };
 
-/* The emission sources (func_150E68B0's sourceIndex). */
+/* The emission sources (particle_startSourceEmission's sourceIndex). */
 static const Game113D60Source D_800A1190[] = {
     { 1.0f, -1, -1, -1, 0, 300, 0, 0 },
     { 0.1f, 0, 0, 0, 0, 120, 60, 0 },
@@ -41,7 +41,7 @@ static const Game113D60Source D_800A1190[] = {
 
 /* Randomly starts an emission of the source effect `sourceIndex` from one of the start
  * points towards `actor`. */
-void func_150E68B0(Actor *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex) {
+void particle_startSourceEmission(Actor *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex) {
     const Game113D60Source *source;
     Vec3f end;
     Vec3f start;
@@ -100,7 +100,7 @@ void func_150E68B0(Actor *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex) {
 
 
 /* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
-void func_150E6B84(Game113D60Effect *effect) {
+void particle_updateSourceEmission(Game113D60Effect *effect) {
     Game113D60Emission *emission;
     f32 inverse;
     f32 time;
@@ -143,7 +143,7 @@ void func_150E6B84(Game113D60Effect *effect) {
             randomY = func_150ADA68();
             randomColor = func_150ADA20();
             randomDuration = func_150ADA20();
-            func_150E5FD0(&emission->stream.position, &direction, emission->scale, (randomX * 300.0f + 100.0f) * factor,
+            particle_spawnImpactStreak(&emission->stream.position, &direction, emission->scale, (randomX * 300.0f + 100.0f) * factor,
                           (randomY * 700.0f + 300.0f) * factor, effect->base.header.owner, effect->base.header.kind,
                           emission->color, randomColor % 86 + 170,
                           randomDuration % (emission->durationRange + 1) + emission->duration, -1);
@@ -309,13 +309,13 @@ void func_150E7290(arg0, owner, kind)
             random = func_150ADA20();
             flip2 = (func_150ADA20() & 1) ? 2 : 0;
             flip4 = (func_150ADA20() & 1) ? 4 : 0;
-            func_150E75A0(&position, ((randomSize * 150.0f) + 200.0f) * 0.1f, (random % 201) + 500,
+            particle_spawnScreenSprite(&position, ((randomSize * 150.0f) + 200.0f) * 0.1f, (random % 201) + 500,
                           (u8)(flip4 | flip2) | 9, (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, ids, 2, owner,
                           kind);
         } else {
             randomSize = func_150ADA68();
             flip4 = func_150ADA20(); // matching: a separate variable here does not match
-            func_150E76D0(((randomSize * 100.0f) + 150.0f) * 0.1f, (flip4 % 201) + 500, 9,
+            particle_spawnScreenEdgeSprite(((randomSize * 100.0f) + 150.0f) * 0.1f, (flip4 % 201) + 500, 9,
                           (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, ids, 2, owner, kind);
         }
         sound_play(0x360, 0x7FFF, 0, 0, 0);
@@ -330,7 +330,7 @@ void func_150E7290(arg0, owner, kind)
 }
 
 /* Spawns a sprite_newScreenSprite effect of the given size at `position`. */
-void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
+void particle_spawnScreenSprite(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
                    s32 idCount, u8 owner, s32 kind) {
     s32 pad; // matching: unused stack slot
     ScreenSpriteInfo arg;
@@ -367,8 +367,8 @@ void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 
     sprite_newScreenSprite(&arg, 0, ids, idCount, 0, owner, kind);
 }
 
-/* Like func_150E75A0, but placed at a random screen edge. */
-void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
+/* Like particle_spawnScreenSprite, but placed at a random screen edge. */
+void particle_spawnScreenEdgeSprite(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
                    u8 owner, s32 kind) {
     s32 pad; // matching: unused stack slot
     ScreenSpriteInfo arg;
@@ -444,9 +444,9 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
     sprite_newScreenSprite(&arg, 0, ids, idCount, 0, owner, kind);
 }
 
-/* Creates a burst effect (updated by func_150E7C9C) whose `count` points lie on a random
+/* Creates a burst effect (updated by particle_updateScreenBurst) whose `count` points lie on a random
  * curve across the screen. */
-TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
+TimedEffect *particle_startScreenBurst(s16 count, f32 rate, u8 owner, s32 kind) {
     TimedEffect *obj;
     Game113D60BurstHead head;
     RumbleParams event;
@@ -503,7 +503,7 @@ TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
 }
 
 /* Spawns the burst's next points, `rate` per frame, and ends the effect after the last one. */
-void func_150E7C9C(Game113D60BurstEffect *effect) {
+void particle_updateScreenBurst(Game113D60BurstEffect *effect) {
     s32 pad[2]; // matching: unused stack slots
     Vec2f position;
     f32 randomSize;
@@ -519,7 +519,7 @@ void func_150E7C9C(Game113D60BurstEffect *effect) {
         randomSize = func_150ADA68();
         flip4 = (func_150ADA20() & 1) ? 4 : 0;
         flip2 = (func_150ADA20() & 1) ? 2 : 0;
-        func_150E75A0(&position, (randomSize * 12.0f) + 30.0f, 300, flip2 | flip4,
+        particle_spawnScreenSprite(&position, (randomSize * 12.0f) + 30.0f, 300, flip2 | flip4,
                       (func_150ADA68() * 25.0f) + 100.0f, 0xFF, 1, 0xFF, NULL, 0, effect->base.header.owner,
                       effect->base.header.kind);
         sound_play(0x360, 0x7FFF, (position.x * 0.4315068424f) + 64.0f, 0, 0);
@@ -531,7 +531,7 @@ void func_150E7C9C(Game113D60BurstEffect *effect) {
     }
 }
 
-/* Spawns a func_1513C650 effect of the given size at `position`, lasting `duration` frames
+/* Spawns a particle_spawnSurfaceQuadSprite effect of the given size at `position`, lasting `duration` frames
  * (-1: a fixed 300 frames without the timed flag). */
 void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind) {
@@ -564,7 +564,7 @@ void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s1
         argB = 0;
         argC = 0;
     }
-    func_1513C650(&arg, 0, 0, surface, position->x, position->y, position->z, size, size, func_150ADA20() & 0xFF,
+    particle_spawnSurfaceQuadSprite(&arg, 0, 0, surface, position->x, position->y, position->z, size, size, func_150ADA20() & 0xFF,
                   (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0, owner, kind);
 }
 
@@ -580,7 +580,7 @@ static const Vec3f D_800A1290[8] = {
     { 610.0f, -452.0f, 5605.0f },
 };
 
-/* For points 4-7 of the D_800A1290 table: spawns the func_151D3FF4 and func_1514FCE8 effects
+/* For points 4-7 of the D_800A1290 table: spawns the particle_spawnLightFlash and particle_spawnJetSprayBursts effects
  * 200 units above the point, plus an event. */
 void func_150E81A8(index, owner, kind)
     u8 index;
@@ -594,7 +594,7 @@ void func_150E81A8(index, owner, kind)
     if (index == 4 || index == 5 || index == 6 || index == 7) {
         position = D_800A1290[index];
         position.y += 200.0f;
-        func_151D3FF4(&position, owner, kind);
+        particle_spawnLightFlash(&position, owner, kind);
 
         arg.angles.yawBase = 0;
         arg.angles.yawRange = 0xFF;
@@ -623,7 +623,7 @@ void func_150E81A8(index, owner, kind)
         arg.spray.fadeOutStart = 20;
         arg.spray.eventFunc = 0;
 
-        func_1514FCE8(&arg, owner, kind);
+        particle_spawnJetSprayBursts(&arg, owner, kind);
 
         event.flags = 1;
         event.duration = (func_150ADA20() % 11) + 30;
@@ -655,7 +655,7 @@ void func_150E83AC(const Vec3f *position, s16 duration, u8 owner, s32 kind) {
 }
 
 /* Spawns a random number of particles per frame at the effect's position. */
-void func_150E8470(Game113D60EmitterEffect *effect) {
+void particle_updateRandomEmitter(Game113D60EmitterEffect *effect) {
     Game113D60Emitter *emitter;
 
     emitter = &effect->emitter;
@@ -710,7 +710,7 @@ void func_150E8470(Game113D60EmitterEffect *effect) {
             arg.alpha = func_150ADA20() % 156 + 100;
             arg.timer = func_150ADA20() % 34 + 141;
             arg.width = arg.height = func_150ADA68() * 71.0f + 80.0f;
-            particle = func_15130280(&arg, 1, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
+            particle = particle_newSpriteParticleWithFloor(&arg, 1, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->extra, &extra, sizeof(extra));
             }
@@ -719,9 +719,9 @@ void func_150E8470(Game113D60EmitterEffect *effect) {
     }
 }
 
-/* Update callback of the particles func_150E8470 spawns. */
+/* Update callback of the particles particle_updateRandomEmitter spawns. */
 s32 func_150E8824(Game113D60Particle *particle, s32 arg1) {
-    func_15131828(&particle->head, particle->extra.amplitude, particle->extra.phase, particle->extra.phaseStep);
+    particle_wobbleSpriteOffset(&particle->head, particle->extra.amplitude, particle->extra.phase, particle->extra.phaseStep);
     return 1;
 }
 
@@ -845,7 +845,7 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
     }
 }
 
-/* Spawns func_15130374 particles within 20 units of the spawner's position. */
+/* Spawns particle_newOwnedSpriteParticle particles within 20 units of the spawner's position. */
 void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
     Game113D60PointSpawner *spawner;
     TimedEffect *particle;
@@ -915,7 +915,7 @@ void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
                 arg.pos.y += spawner->position.y;
                 arg.pos.z += spawner->position.z;
                 arg.vel.y = ((func_150ADA68() * 471.0f) + -1242.0f) * 0.009999999776f;
-                particle = func_15130374(&arg, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
+                particle = particle_newOwnedSpriteParticle(&arg, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
                 if (particle != NULL) {
                     memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
                 }
@@ -1011,7 +1011,7 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
 static const u8 D_800A12F0[1] = { 7 };
 static const f32 D_800A12F4[1] = { 0.1f };
 
-/* Spawns func_15132A4C debris particles (updated by func_150E971C) within 50 units of the
+/* Spawns particle_newModelParticle debris particles (updated by particle_updateFallingDebris) within 50 units of the
  * spawner's position. */
 void func_150E93DC(Game113D60PointSpawnerEffect *effect) {
     Game113D60PointSpawner *spawner;
@@ -1068,7 +1068,7 @@ void func_150E93DC(Game113D60PointSpawnerEffect *effect) {
                 arg.pos.y += spawner->position.y;
                 arg.pos.z += spawner->position.z;
                 arg.updateFn = 8;
-                debris = func_15132A4C(&arg, 3, 0xFF, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
+                debris = particle_newModelParticle(&arg, 3, 0xFF, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
                 if (debris != NULL) {
                     memcpy(&debris->extra, &extra, sizeof(extra));
                 }
@@ -1079,12 +1079,12 @@ void func_150E93DC(Game113D60PointSpawnerEffect *effect) {
 }
 
 /* Update callback of the debris particles: when a particle falls below its floor height it
- * ends (returns 0), spawning a func_1513C73C splash first if its type is 0xA. */
-s32 func_150E971C(Game113D60Debris *debris) {
+ * ends (returns 0), spawning a particle_spawnSurfaceQuadSpriteNoModel splash first if its type is 0xA. */
+s32 particle_updateFallingDebris(Game113D60Debris *debris) {
     Game113D60DebrisExtra *extra;
     SpriteDef splash;
 
-    func_151337C0(&debris->base);
+    particle_moveBallistic(&debris->base);
     extra = &debris->extra;
     if (debris->base.pos.y < extra->floorY) {
         if ((extra->unk4 & 0x1F) == 0xA) {
@@ -1110,7 +1110,7 @@ s32 func_150E971C(Game113D60Debris *debris) {
             splash.fadeStart = 20;
             splash.fadeRate = 12;
 
-            func_1513C73C(&splash, 0, 0, &extra->floorTri, debris->base.pos.x, extra->floorY + 5.0f,
+            particle_spawnSurfaceQuadSpriteNoModel(&splash, 0, 0, &extra->floorTri, debris->base.pos.x, extra->floorY + 5.0f,
                           debris->base.pos.z, size, size, func_150ADA20() & 0xFF, 0, 0, debris->base.header.owner,
                           debris->base.header.kind);
         }

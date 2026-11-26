@@ -6,24 +6,24 @@ s32 func_150B2480(s32 arg0, s32 arg1) {
     return 10;
 }
 
-/* Spawns an effect burst at the object's x/z and unk180 height (func_1514C678, func_151D5404, func_151D3FF4). */
-void func_150B2494(Actor *obj, s32 arg1, s32 arg2) {
+/* Spawns an effect burst at the object's x/z and unk180 height (particle_emitOnRandomCircle, particle_startPlayerRumbles, particle_spawnLightFlash). */
+void particle_spawnObjGroundBurst(Actor *obj, s32 arg1, s32 arg2) {
     Vec3f position;
 
     position.x = obj->xpos;
     position.y = obj->floorY;
     position.z = obj->zpos;
-    func_1514C678(position.x, position.y, position.z, 135.0f, 0, 255,
+    particle_emitOnRandomCircle(position.x, position.y, position.z, 135.0f, 0, 255,
                   (func_150ADA20() % 15U) + 27, 7, 0, 0.0f, 0, 255);
-    func_151D5404(&position, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 255, 0);
-    func_151D3FF4(&position, 255, 0);
+    particle_startPlayerRumbles(&position, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 255, 0);
+    particle_spawnLightFlash(&position, 255, 0);
 }
 
 /*
  * Spawns one streak particle at (x, y, z) heading along `yaw` (binary angle) with a random pitch,
  * random speeds, random colours and lifetime. func_151423D8 is cos, so cos(a - 64) is sin(a).
  */
-s32 func_150B2570(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
+s32 particle_spawnYawStreak(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 owner) {
     f32 horizontal;
@@ -60,6 +60,6 @@ s32 func_150B2570(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     desc.alpha = 255;
     desc.fadeStart = 8;
     desc.fadeRate = 31;
-    func_15156190(&desc, 1, 0, owner, 1);
+    particle_newOwnedStreakParticle(&desc, 1, 0, owner, 1);
     return 1;
 }

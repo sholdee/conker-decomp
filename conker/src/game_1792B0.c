@@ -3,6 +3,6 @@
 #include "variables.h"
 
 /* Eases the particle toward random wobble targets kept in its state at + 0x110. */
-void func_1514BE00(JitterParticle *p) {
-    func_1514BC08(p, &p->jitter);
+void particle_updateJitterParticle(JitterParticle *p) {
+    particle_updateJitter(p, &p->jitter);
 }

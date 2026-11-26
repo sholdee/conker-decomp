@@ -3,19 +3,19 @@
 #include "variables.h"
 
 /*
- * Two object-attached particle emitters (effects 0x23 and the caller-chosen type of func_15192D48):
+ * Two object-attached particle emitters (effects 0x23 and the caller-chosen type of particle_attachBoneSideEmitter):
  * their spawners, per-frame updates and message handlers. Each effect is a TimedEffect whose data at
  * 0x28 is a FixedEmitterData.
  */
 
-/* Live particle returned by func_15130374; its caller-sized data starts at 0xA8. */
+/* Live particle returned by particle_newOwnedSpriteParticle; its caller-sized data starts at 0xA8. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 drag; /* read by update func 10 (func_151316DC) */
+    /* 0xA8 */ f32 drag; /* read by update func 10 (particle_updateDragXZ) */
 } Particle1BFDD0;
 
 /* Attaches effect 0x23 to the object. */
-void func_15192920(Actor *object) {
+void particle_attachSideEmitter(Actor *object) {
     Effect1BFDD0 *effect;
     FixedEmitterData data;
 
@@ -34,7 +34,7 @@ void func_15192920(Actor *object) {
 
 /* Effect 0x23 update: emits 0.31-0.91 particles per gFrameDelta tick, 20 units to either side of the object,
  * moving against the direction sprite_findActorMotion returns. */
-void func_151929A4(Effect1BFDD0 *effect) {
+void particle_updateSideEmitter(Effect1BFDD0 *effect) {
     FixedEmitterData *data;
     ParticleDesc desc;
     u8 side;
@@ -91,7 +91,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
             desc.vel.x = dir->x * speed;
             desc.vel.y = dir->y * speed;
             desc.vel.z = dir->z * speed;
-            particle = func_15130374(&desc, 1, sizeof(f32), effect->base.header.owner, effect->base.header.kind);
+            particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(f32), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->drag, &drag, sizeof(drag));
             }
@@ -101,7 +101,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
 }
 
 /* Attaches an effect of the given type to the object; returns the effect or NULL. */
-Effect1BFDD0 *func_15192D48(Actor *object, s16 type, u8 arg2, s32 arg3) {
+Effect1BFDD0 *particle_attachBoneSideEmitter(Actor *object, s16 type, u8 arg2, s32 arg3) {
     Effect1BFDD0 *effect;
     FixedEmitterData data;
 
@@ -120,9 +120,9 @@ Effect1BFDD0 *func_15192D48(Actor *object, s16 type, u8 arg2, s32 arg3) {
     return effect;
 }
 
-/* Update of func_15192D48's effect: emits 0.79-1.99 particles per gFrameDelta tick from bone 1 of the
+/* Update of particle_attachBoneSideEmitter's effect: emits 0.79-1.99 particles per gFrameDelta tick from bone 1 of the
  * object, flung out to either side. */
-void func_15192DF0(Effect1BFDD0 *effect) {
+void particle_updateBoneSideEmitter(Effect1BFDD0 *effect) {
     FixedEmitterData *data;
     ParticleDesc desc;
     s16 facing;
@@ -190,7 +190,7 @@ void func_15192DF0(Effect1BFDD0 *effect) {
                 if (func_150ADA20() & 1) {
                     desc.flags |= PARTICLE_FLIP_T;
                 }
-                particle = func_15130374(&desc, 1, sizeof(f32), effect->base.header.owner, effect->base.header.kind);
+                particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(f32), effect->base.header.owner, effect->base.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->drag, &drag, sizeof(drag));
                 }
@@ -202,7 +202,7 @@ void func_15192DF0(Effect1BFDD0 *effect) {
 
 /* Message handler: message 0x2D moves the effect to the other object of a swap; message 0 ends the
  * effect when it names the effect's object. */
-void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
+void particle_onSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     FixedEmitterData *data = &effect->data;
     ActorSwapMsg *swap = msg;
     ActorRef *removal = msg;
@@ -226,7 +226,7 @@ void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     }
 }
 
-/* Message handler of func_15192D48's effect: the same as func_15193234. */
+/* Message handler of particle_attachBoneSideEmitter's effect: the same as particle_onSideEmitterMsg. */
 void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     FixedEmitterData *data = &effect->data;
     ActorSwapMsg *swap = msg;

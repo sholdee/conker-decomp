@@ -31,7 +31,7 @@ void func_1500E5C0(void) {
         entries[2] = NULL;
         entries[3] = NULL;
     }
-    D_80088870 = NULL;
+    gDriftBurstEmitter = NULL;
     bzero(D_800BE500, sizeof(D_800BE500));
     gMaterialGlowLevels[0] = gMaterialGlowLevels[1] = gMaterialGlowLevels[2] = 0;
     D_80088980 = 0;

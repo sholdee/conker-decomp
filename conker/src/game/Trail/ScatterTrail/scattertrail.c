@@ -224,7 +224,7 @@ Gfx *trail_drawScatterTrail(ScatterTrail *trail, Gfx *gfx, s16 camIdx) {
     f32 nextScale;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->vtxBuf, camIdx, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(trail->vtxBuf, camIdx, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             cam = &camera_global_Cameras[camIdx].eye.x;
             state = trail->state;
@@ -264,7 +264,7 @@ lbl1:
             }
             gfx = func_15142E24(gfx, &gEffectTextures[146], 0, 0, 0, 0, 0x92, 0, 0, &update, 3);
             gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_1513F4E4(gfx, 0x4D, &update);
+            gfx = particle_setCombineMode(gfx, 0x4D, &update);
             gfx = func_15142C10(gfx, state->shade, state->shade, state->shade, 0xFF, &update);
             gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
             if (trail->head.tmpl.flags & TRAIL_ATTACHED) {

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Spins the emitter and, while func_151464B8 allows it, throws particles from random points of its region. */
-s32 func_151A6600(ZoneEmitter *obj) {
+s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
     ZoneEmitterState *state;
 
     state = &obj->state;
@@ -59,7 +59,7 @@ s32 func_151A6600(ZoneEmitter *obj) {
                               &spawn.vel);
                 // matching: `+ -x` (a subtraction emits sub.s instead of add.s)
                 spawn.gravity = func_150ADA68() * 0.2840000093f + -0.9100000262f;
-                func_15130280(&spawn, 1, 0, 0, obj->head.header.owner, obj->head.header.kind);
+                particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, obj->head.header.owner, obj->head.header.kind);
                 state->pending -= 1.0f;
             } while (state->pending > 1.0f);
         }
@@ -68,7 +68,7 @@ s32 func_151A6600(ZoneEmitter *obj) {
 }
 
 /* Shuts the emitter down: marks its region off, calls sound_stopByCallback with func_1000EF40 on it, and frees unk10. */
-void func_151A6AB8(ZoneEmitter *obj) {
+void particle_shutZoneEmitter(ZoneEmitter *obj) {
     obj->state.region->inactive = 1;
     sound_stopByCallback(func_1000EF40, obj->state.region, 0);
     if (obj->state.unk10 != NULL) {

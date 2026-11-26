@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 (*D_8008FCD0[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game/Beam/AimedBeam/aimedbeam has its own view) */
+extern u8 (*gKindParticleTexturePickers[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game/Beam/AimedBeam/aimedbeam has its own view) */
 
 /* This file's .data: the texture scroll offsets; >> 7 gives the 10.2 fixed-point tile coordinate. */
 s32 gTile0ScrollS = 0;
@@ -160,7 +160,7 @@ s32 effect_updateHopSprite(HopSprite *hopper) {
             spawn.viewport = gScreenLayout;
             for (; count > 0; count--) {
                 spawn.color1.alpha = (func_150ADA20() % 101U) + 155;
-                spawn.texture = D_8008FCD0[2]();
+                spawn.texture = gKindParticleTexturePickers[2]();
                 rand = func_150ADA20();
                 phase = (func_150ADA68() * 2) + 2.5f; // matching: the hop phase's register holds the dust speed
                 func_15143874((rand % 65U) - 160, phase, &dust.vel.x, &dust.vel.y);

@@ -48,10 +48,10 @@ void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
         return;
     }
     if (arg1) {
-        func_151DC484(&pos, &ground, type, arg2, arg3);
+        particle_spawnSmallSplashAndDrops(&pos, &ground, type, arg2, arg3);
         return;
     }
-    func_151DC260(&pos, &ground, type, arg2, arg3);
+    particle_spawnSplashAndDrops(&pos, &ground, type, arg2, arg3);
 }
 
 void func_151942B0(Actor *self, Actor *other, u8 *arg2) {
@@ -73,7 +73,7 @@ void func_15194320(Actor *self, Actor *other, u8 *arg2) {
     case 2:
     case 3:
     case 4:
-        func_1518D1C0(other, 10, 0, 1, 0xFF, 1, "effects_impact_lavaboulder");
+        particle_startActorEmitter(other, 10, 0, 1, 0xFF, 1, "effects_impact_lavaboulder");
         break;
     }
 }
@@ -85,7 +85,7 @@ void func_15194394(Actor *self, Actor *other, u8 *arg2) {
     case 2:
     case 3:
     case 4:
-        func_1518D1C0(other, 12, 0, 1, 0xFF, 1, "effects_impact_fireimp");
+        particle_startActorEmitter(other, 12, 0, 1, 0xFF, 1, "effects_impact_fireimp");
         break;
     }
 }
@@ -135,7 +135,7 @@ void func_15194408(Actor *self, Actor *other) {
     burst.spray.speedBase = 13.0f;
     burst.spray.speedRange = 8.0f;
     burst.spray.unk38 = 0.3f;
-    func_15153F18(&burst.angles, &burst.spray, &ground, 0xFF, 1);
+    particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 0xFF, 1);
 }
 
 void func_15194588(Actor *self, Actor *other, u8 *arg2) {
@@ -191,7 +191,7 @@ void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
                 } else {
                     burst.spray.kind = 0;
                 }
-                func_15153F18(&burst.angles, &burst.spray, &ground, 0xFF, 1);
+                particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 0xFF, 1);
                 func_151B4CD0(other, 0xFF, 1);
             }
         }
@@ -255,7 +255,7 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
         burst.spray.speedBase = 5.0f;
         burst.spray.speedRange = 25.10000038f;
         burst.spray.unk38 = 0.5f;
-        func_15153F18(&burst.angles, &burst.spray, &ground, 0xFF, 1);
+        particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 0xFF, 1);
         params.flags = 1;
         params.duration = (func_150ADA20() % 11U) + 20;
         params.strength = 8;
@@ -390,10 +390,10 @@ void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     if (gIsMultiplayer != 0) {
         func_15194DA4(self, other, arg2);
     } else {
-        func_1518D1C0(other, 11, 0, 1, 0xFF, 1, "effects_impact_lava");
+        particle_startActorEmitter(other, 11, 0, 1, 0xFF, 1, "effects_impact_lava");
     }
     collision_initHitFromObject(&ground, other);
-    func_1514B364((Vec3f *)&other->xpos, &ground, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
+    particle_spawnGroundCluster((Vec3f *)&other->xpos, &ground, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
 }
 
 void func_15194E54(Actor *self, Actor *other, u8 *arg2) {
@@ -437,7 +437,7 @@ u8 arg2;
     PeriodicObject *spawned;
     PeriodicTrigger trigger;
 
-    func_15190518(other);
+    particle_sendActorGoneToEmitters(other);
     switch (other->character_type) {
     case 0x00: case 0x01: case 0x02: case 0x03: case 0x04: case 0x11: case 0x14: case 0x16:
     case 0x3B: case 0x50: case 0x53: case 0x58: case 0x5A: case 0x5F: case 0x70: case 0x74:
@@ -452,7 +452,7 @@ u8 arg2;
             } else {
                 trigger.target = self;
             }
-            spawned = func_1518F51C(other, 0, 250, arg2 ? 0 : -1, arg2 ? 0 : -1, 8, arg2 ? 1 : 0, arg2 ? 12 : 0, 0xFF, 1);
+            spawned = particle_startAnchorEmitter(other, 0, 250, arg2 ? 0 : -1, arg2 ? 0 : -1, 8, arg2 ? 1 : 0, arg2 ? 12 : 0, 0xFF, 1);
             if (spawned != NULL && arg2 != 0) {
                 memcpy(&spawned->trigger, &trigger, sizeof(trigger));
                 {
@@ -464,7 +464,7 @@ u8 arg2;
                 }
             }
         } else {
-            func_1518F51C(other, 0, 300, -1, -1, 8, 0, 0, 0xFF, 1);
+            particle_startAnchorEmitter(other, 0, 300, -1, -1, 8, 0, 0, 0xFF, 1);
         }
         break;
     }

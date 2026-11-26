@@ -111,7 +111,7 @@ SurfaceTrail *func_1519F1C8(owner, side)
     u32 sideWord; // matching: a widened copy of side, narrowed again for func_1519EF90 (andi)
 
     actor = owner->watcher.character;
-    colorIndex = func_151D8E20();
+    colorIndex = particle_getContextEffectKind();
     config.owner = owner;
     header.flags = 0x42;
     header.life = 300;
@@ -145,9 +145,9 @@ SurfaceTrail *func_1519F1C8(owner, side)
         config.emitPos = header.pos;
         header.flags |= 4;
     }
-    config.color[0] = D_800AB414[colorIndex].r;
-    config.color[1] = D_800AB414[colorIndex].g;
-    config.color[2] = D_800AB414[colorIndex].b;
+    config.color[0] = gKindColors[colorIndex].r;
+    config.color[1] = gKindColors[colorIndex].g;
+    config.color[2] = gKindColors[colorIndex].b;
     trail = effect_newEffectObj(&header, sizeof(SurfaceTrailConfig), sizeof(SurfaceTrailPoint), 5, 5, 5, 0, 0, &owner->watcher.hit, 0xFF, 1);
     if (trail != NULL) {
         memcpy(trail->config, &config, sizeof(SurfaceTrailConfig));
@@ -496,7 +496,7 @@ Gfx *trail_drawSurfaceTrail(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
     s32 k;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->vtxBuf, arg2, (trail->head.tmpl.itemCount * 3 + 18) * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(trail->vtxBuf, arg2, (trail->head.tmpl.itemCount * 3 + 18) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             config = trail->config;
             points = trail->points;
@@ -539,7 +539,7 @@ Gfx *trail_drawSurfaceTrail(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
             gfx = func_15142B7C(gfx, 1, 0x160600);
             gfx = func_15142C10(gfx, config->color[0], config->color[1], config->color[2], 0xFF, &update);
             gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &update);
-            gfx = func_1513F4E4(gfx, 7, &update);
+            gfx = particle_setCombineMode(gfx, 7, &update);
             gfx = func_15142FBC(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
             if (trail->head.tmpl.flags & 2) {
                 /* still attached: start the strip at the live attach point */

@@ -3,12 +3,12 @@
 #include "variables.h"
 #include "libc/string.h"
 
-extern u8 (*D_8008FCD0[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game/Beam/AimedBeam/aimedbeam has its own view) */
+extern u8 (*gKindParticleTexturePickers[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game/Beam/AimedBeam/aimedbeam has its own view) */
 
 
-/* Spawns a dust emitter effect (func_15191D54) on `owner`'s bone; it emits dust particles at `offset`
+/* Spawns a dust emitter effect (particle_updateDustEmitter) on `owner`'s bone; it emits dust particles at `offset`
  * in the bone's space at a randomised rate. Returns the effect, or NULL without an owner. */
-DustEmitter *func_15191BE0(Actor *owner, const Vec3f *offset, u8 bone, f32 rateBase, f32 rateRandom,
+DustEmitter *particle_spawnDustEmitter(Actor *owner, const Vec3f *offset, u8 bone, f32 rateBase, f32 rateRandom,
                           s16 duration, f32 gravityBase, f32 gravityRandom, s16 lifetimeBase,
                           s16 lifetimeRandom, u8 alphaBase, u8 alphaRandom, f32 sizeBase, f32 sizeRandom,
                           f32 unk60, u8 kind, u8 arg16, s32 arg17) {
@@ -49,8 +49,8 @@ DustEmitter *func_15191BE0(Actor *owner, const Vec3f *offset, u8 bone, f32 rateB
 }
 
 /* Dust emitter effect update: frees the effect once its owner is gone, otherwise accumulates the
- * emission rate and spawns one dust particle (func_1519203C) per whole unit at the emitter's bone. */
-void func_15191D54(DustEmitter *effect) {
+ * emission rate and spawns one dust particle (particle_spawnDustParticle) per whole unit at the emitter's bone. */
+void particle_updateDustEmitter(DustEmitter *effect) {
     Actor *owner;
     DustEmitterData *data;
     Vec3f position;
@@ -88,7 +88,7 @@ void func_15191D54(DustEmitter *effect) {
                 velocity.x = 0.0f;
                 velocity.y = 0.0f;
                 velocity.z = 0.0f;
-                func_1519203C(&position, &velocity,
+                particle_spawnDustParticle(&position, &velocity,
                               func_150ADA68() * data->gravityRandom + data->gravityBase,
                               func_150ADA20() % (data->lifetimeRandom + 1) + data->lifetimeBase,
                               func_150ADA20() % (data->alphaRandom + 1) + data->alphaBase, 0xFF,
@@ -105,8 +105,8 @@ void func_15191D54(DustEmitter *effect) {
 }
 
 /* Spawns a dust particle at `position` that pulses in size and splashes when it falls below floorY
- * (update func 0xF, func_1519257C). */
-DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 lifetime, u8 alpha,
+ * (update func 0xF, particle_updateDustParticle). */
+DustParticle *particle_spawnDustParticle(Vec3f *position, Vec3f *velocity, f32 gravity, s16 lifetime, u8 alpha,
                             u8 brightness, f32 size, s32 unused, f32 floorY, CollisionTri *floor, u8 kind,
                             u8 arg11, s32 arg12) {
     DustParticle *particle;
@@ -160,7 +160,7 @@ DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 l
     desc.handlerSet = 3;
     dust.phase[0] = func_150ADA20() & 0xFF;
     dust.phase[1] = func_150ADA20() & 0xFF;
-    desc.texture = D_8008FCD0[kind]();
+    desc.texture = gKindParticleTexturePickers[kind]();
     desc.height = size;
     desc.width = size;
     dust.baseSize = size;
@@ -171,7 +171,7 @@ DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 l
     dust.floorY = floorY;
     dust.floor = *floor;
     dust.kind = kind;
-    particle = func_15130374(&desc, 1, sizeof(DustData), arg11, arg12);
+    particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(DustData), arg11, arg12);
     if (particle != NULL) {
         memcpy(&particle->dust, &dust, sizeof(DustData));
     }
@@ -179,14 +179,14 @@ DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 l
 }
 
 /* Particle update: pulses the dust particle's width and height around its base size. */
-u8 func_15192308(DustParticle *particle, Vec3f *prevPos) {
-    func_15131C84(particle->dust.phase, particle->dust.phaseStep, particle->dust.baseSize,
+u8 particle_pulseDust(DustParticle *particle, Vec3f *prevPos) {
+    particle_wobblePair(particle->dust.phase, particle->dust.phaseStep, particle->dust.baseSize,
                   particle->dust.amplitude, &particle->head.desc.width, &particle->head.desc.height);
     return TRUE;
 }
 
 /* Particle update: once the dust particle falls below its floor, splash there and stop. */
-u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
+u8 particle_landDust(DustParticle *particle, Vec3f *prevPos) {
     u8 alive;
     DustData *dust;
     Vec3f position;
@@ -204,7 +204,7 @@ u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
         position.x = particle->head.desc.pos.x;
         position.y = dust->floorY + 2.0f;
         position.z = particle->head.desc.pos.z;
-        func_151D9B8C(dust->kind, dust->baseSize * 0.08308f, particle->head.desc.alpha, &dust->floor,
+        particle_spawnKindEmitter(dust->kind, dust->baseSize * 0.08308f, particle->head.desc.alpha, &dust->floor,
                       &position, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
         angleRandom = func_150ADA68();
         speedRandom = func_150ADA68();
@@ -216,7 +216,7 @@ u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
         sizeRandom = func_150ADA68();
         durationRandom = func_150ADA20();
         countRandom = func_150ADA20();
-        func_151DA6F8(&position, &velocity, sizeRandom * 0.20600002f + 0.20600002f,
+        particle_spawnSplash(&position, &velocity, sizeRandom * 0.20600002f + 0.20600002f,
                       durationRandom % 21U + 35, particle->head.desc.alpha,
                       dust->baseSize * 0.02495f, countRandom % 7U + 5, 0,
                       1.0f, 1.0f, 1, dust->kind, 0, 0x10, 0xF, 0,
@@ -225,18 +225,18 @@ u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
     return alive;
 }
 
-/* Dust particle update func (D_80089760): pulse, then land on the floor. */
-u8 func_1519257C(DustParticle *particle, Vec3f *prevPos) {
+/* Dust particle update func (gSpriteUpdateFuncs): pulse, then land on the floor. */
+u8 particle_updateDustParticle(DustParticle *particle, Vec3f *prevPos) {
     u8 alive;
 
-    alive = func_15192308(particle, prevPos);
+    alive = particle_pulseDust(particle, prevPos);
     if (alive) {
-        alive = func_15192358(particle, prevPos);
+        alive = particle_landDust(particle, prevPos);
     }
     return alive;
 }
 
-/* This file's .rodata front-end data: the dust emitter presets, indexed by kind (see func_151925C4). */
+/* This file's .rodata front-end data: the dust emitter presets, indexed by kind (see particle_startObjDustEmitter). */
 static const Vec3f D_800A8030[] = {
     { 0.0f, -6.0f, 9.0f }, { 0.0f, 12.0f, 30.0f }, { 0.0f, -12.0f, 24.0f }, { 0.0f, 0.0f, -91.0f },
 };
@@ -252,9 +252,9 @@ static const f32 D_800A80C4[] = { 146.0f, 206.7f, 146.0f, 176.2f };
 static const f32 D_800A80D4[] = { 0.011000001f, 0.006f, 0.011000001f, 0.011000001f };
 static const u8 D_800A80E4[] = { 4, 4, 4, 2 };
 
-/* Spawns the dust emitter preset that suits obj's id (func_15191BE0) for `duration` frames, -1 for
+/* Spawns the dust emitter preset that suits obj's id (particle_spawnDustEmitter) for `duration` frames, -1 for
  * the default. Returns the effect, or NULL when obj is NULL or has no preset. */
-DustEmitter *func_151925C4(Actor *obj, s16 duration, u8 arg2, s32 arg3) {
+DustEmitter *particle_startObjDustEmitter(Actor *obj, s16 duration, u8 arg2, s32 arg3) {
     s32 kind;
     DustEmitter *effect;
 
@@ -282,7 +282,7 @@ DustEmitter *func_151925C4(Actor *obj, s16 duration, u8 arg2, s32 arg3) {
         break;
     }
     if (kind != -1) {
-        effect = func_15191BE0(obj, &D_800A8030[kind], D_800A8060[kind], D_800A8064[kind], D_800A8074[kind],
+        effect = particle_spawnDustEmitter(obj, &D_800A8030[kind], D_800A8060[kind], D_800A8064[kind], D_800A8074[kind],
                                duration, D_800A8084[kind], D_800A8094[kind], D_800A80A4[kind],
                                D_800A80AC[kind], 100, 155, D_800A80B4[kind], D_800A80C4[kind],
                                D_800A80D4[kind], D_800A80E4[kind], arg2, arg3);
@@ -291,6 +291,6 @@ DustEmitter *func_151925C4(Actor *obj, s16 duration, u8 arg2, s32 arg3) {
 }
 
 /* Effect callback for the dust emitter: hands effect_handleOwnerActorEvent the owner reference. */
-void func_1519277C(DustEmitter *effect, s32 arg1, u8 arg2) {
+void particle_onDustEmitterEvent(DustEmitter *effect, s32 arg1, u8 arg2) {
     effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }

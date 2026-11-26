@@ -71,7 +71,7 @@ void effect_sprayFromArea(u8 index) {
     pos.y = area->y + area->ySize * 0.5f;
     pos.z = area->z;
     randFrac = func_150ADA68();
-    func_151541B8(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, func_150ADA20() % 56U + 200, 2.6090002f, 0xFF, 1);
+    particle_spawnGrowFade(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, func_150ADA20() % 56U + 200, 2.6090002f, 0xFF, 1);
     count = (func_150ADA20() & 1) + 3;
     if (count > 0) {
         range = D_800A1EE0[index];
@@ -107,7 +107,7 @@ void effect_sprayFromArea(u8 index) {
             desc.spray.pos.x += area->x;
             desc.spray.pos.z += area->z;
             desc.spray.pos.y = func_150ADA68() * area->ySize + area->y;
-            func_1514FCE8(&desc, 0xFF, 1);
+            particle_spawnJetSprayBursts(&desc, 0xFF, 1);
             count--;
         } while (count > 0);
     }
@@ -239,7 +239,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     def.unk50 = 0;
     def.fadeStart = 1;
     def.fadeRate = 0xFF;
-    particle = func_1513D2F0(&def, D_800A1EEC, 0, 0x2B, 0, 0x24, 0, 0, 0, 0x5C, arg1, arg2);
+    particle = particle_newQuadParticle(&def, D_800A1EEC, 0, 0x2B, 0, 0x24, 0, 0, 0, 0x5C, arg1, arg2);
     if (particle != NULL) {
         dst = &particle->ext;
         memcpy(dst, &ext, sizeof(ext));
@@ -254,7 +254,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
         // matching: this block and its redundant extern declarations are -g3 scope barriers that keep the
         // light store and the onGround test ahead of the ground particle's constants (plain if mismatches)
         {
-            extern const VtxColor D_800A4AA0[4];
+            extern const VtxColor gWhiteVtxColors[4];
 
             if (onGround) {
                 extern const Vec3f D_800A5480;
@@ -288,7 +288,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
                 groundDef.unk50 = 0;
                 groundDef.fadeStart = 1;
                 groundDef.fadeRate = 0xFF;
-                dst->groundParticle = func_1513D594(&groundDef, &D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, &ground.tri, 0, 0, 0, 0, arg1, arg2);
+                dst->groundParticle = particle_spawnAxisQuadParticle(&groundDef, &gWhiteVtxColors, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, &ground.tri, 0, 0, 0, 0, arg1, arg2);
             }
         }
     }
@@ -340,8 +340,8 @@ s32 func_150FD514(Actor150FD514 *particle) {
                 func_10010F88(0x69D, 32000, 0, 0, 0, particle->head.def.pos.x, particle->head.def.pos.y, particle->head.def.pos.z, 500, 3000);
             }
             ext->burstDone = 1;
-            func_151D5404(&particle->head.def.pos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, particle->head.header.owner, particle->head.header.kind);
-            func_151D5334(&particle->head.def.pos, 506.0f, 1013.0f, 0.0009871669f, 5, particle->head.header.owner, particle->head.header.kind);
+            particle_startPlayerRumbles(&particle->head.def.pos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, particle->head.header.owner, particle->head.header.kind);
+            particle_startPlayerCameraWobbles(&particle->head.def.pos, 506.0f, 1013.0f, 0.0009871669f, 5, particle->head.header.owner, particle->head.header.kind);
             if (ext->onGround & 1) {
                 groundPos.x = particle->head.def.pos.x;
                 groundPos.y = ext->ground.height;
@@ -404,7 +404,7 @@ void func_150FDB0C(Actor150FD514 *actor, ActorMsg *msg, u8 eventId) {
 Vtx *func_150FDBA0(Actor150FD514 *actor, s16 viewport) {
     Vtx *vertices;
 
-    vertices = func_1513EDE4(actor, viewport);
+    vertices = particle_buildUprightQuadRev(actor, viewport);
     if (vertices != NULL) {
         vertices[0].v.tc[0] = actor->ext.texS0;
         vertices[1].v.tc[0] = actor->ext.texS1;
@@ -432,14 +432,14 @@ void func_150FDC2C(Actor150FD514 *actor) {
     }
 }
 
-/* Releases the ext resources, then hands the particle to func_1513CA6C. */
+/* Releases the ext resources, then hands the particle to particle_destroyQuadParticleDefault. */
 void func_150FDCAC(Actor150FD514 *actor) {
     func_150FDC2C(actor);
-    func_1513CA6C(&actor->head);
+    particle_destroyQuadParticleDefault(&actor->head);
 }
 
-/* Releases the ext resources, then hands the particle to func_1513CAA0. */
+/* Releases the ext resources, then hands the particle to particle_freeQuadParticleDefault. */
 void func_150FDCD8(Actor150FD514 *actor) {
     func_150FDC2C(actor);
-    func_1513CAA0(&actor->head);
+    particle_freeQuadParticleDefault(&actor->head);
 }

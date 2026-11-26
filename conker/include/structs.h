@@ -197,7 +197,7 @@ typedef struct TimedEffect {
     /* 0x11 */ s8 tickCallback;   /* gTimedEffectTickFuncs index, run every frame; -1 = none */
     /* 0x12 */ s8 drawCallback;   /* gTimedEffectDrawFuncs index; -1 = none */
     /* 0x13 */ u8 callbackSet;    /* index into gTimedEffectDestroyFuncs / gTimedEffectFreeFuncs / gTimedEffectMessageFuncs (74 sets) */
-    /* 0x14 */ Vtx *buffers[4];   /* per-view vertex buffers (func_151D5D60), released by func_151D5E30 */
+    /* 0x14 */ Vtx *buffers[4];   /* per-view vertex buffers (particle_getViewBuffer), released by particle_freeViewBuffers */
     /* 0x24 */ u8 pad24[4];
 } TimedEffect; /* size 0x28; the effect's data follows */
 
@@ -1988,7 +1988,7 @@ typedef struct ParticleTexFile {
 /* Per-model blood settings, indexed by func_15134070's profile index (the table D_800A3FD8, game/Effects/Blood/blood.c). */
 typedef struct BloodProfile {
     /* 0x0 */ Vec3f offset; // where blood comes from, relative to the actor's bone 12
-    /* 0xC */ u16 chunkModel; // model of the gore chunk thrown off the actor (func_1513264C)
+    /* 0xC */ u16 chunkModel; // model of the gore chunk thrown off the actor (particle_newModelParticleWithFloor)
     /* 0xE */ u8 unkE; // 2: no blood (sprays and drips are skipped)
     /* 0xF */ u8 padF;
 } BloodProfile; /* size 0x10 */
@@ -2238,7 +2238,7 @@ typedef struct WaterStage {
     /* 0xBB */ u8  count;
 } WaterStage; // size 0xC0
 
-/* One loaded particle model, shared by every live particle that uses it (D_800DC468 counts them). */
+/* One loaded particle model, shared by every live particle that uses it (gParticleModelUseCounts counts them). */
 typedef struct ParticleNode {
     /* 0x0 */ Gfx **resource; // the model resource; its first word points to the display list
     /* 0x4 */ struct ParticleNode *next;
@@ -2349,7 +2349,7 @@ typedef struct ViewClip {
     /* 0x4 */ f32 far;
 } ViewClip;
 
-/* The two half-axes that span a particle quad (func_1513D6FC, game_169510.c). */
+/* The two half-axes that span a particle quad (particle_computeQuadAxes, game_169510.c). */
 typedef struct ParticleAxes {
     /* 0x00 */ Vec3f u;
     /* 0x0C */ Vec3f v;
@@ -2575,7 +2575,7 @@ typedef union LightEffectData {
     struct {
         /* 0x00 */ LightActorRef ref;
         /* 0x08 */ LightJitter jitter;
-        /* 0x28 */ void *user; // e.g. the AnchorEmitter of func_1519021C
+        /* 0x28 */ void *user; // e.g. the AnchorEmitter of particle_spawnAnchorEmitterSprite
     } actorJitter;    // light_updateActorFlicker
     struct {
         /* 0x00 */ LightTrack track;
@@ -3009,7 +3009,7 @@ typedef struct PipeSpot {
     /* 0xC */ u8 yaw;
 } PipeSpot; /* size 0x10 */
 
-/* A random burst point (D_800DCA30): a wall hit traced out from a pipe; all zero when the trace missed. */
+/* A random burst point (gPipeBurstPoints): a wall hit traced out from a pipe; all zero when the trace missed. */
 typedef struct BurstPoint {
     /* 0x0 */ Vec3f pos;
     /* 0xC */ s32 unkC;

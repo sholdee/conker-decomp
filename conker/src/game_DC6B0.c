@@ -4,7 +4,7 @@
 
 /* Defined in game_15D730.c. Not in particle.h: game/Trail/PissTrail/pisstrail.c and game_200930.c call it with a third
    argument. */
-void func_15131958(Vec3f *vel, f32 drag);
+void particle_applyDrag(Vec3f *vel, f32 drag);
 
 /* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls actor_hitScripted on
  * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while movement_obj[0].stunned is set. */
@@ -37,7 +37,7 @@ void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
 
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of gFrameDelta and spawns one
  * randomly sized particle at the emitter's position for each whole one. */
-void func_150AF328(SmokeEmitter *emitter) {
+void particle_updateSmokeEmitter(SmokeEmitter *emitter) {
     SmokeEmitterData *data;
 
     data = &emitter->data;
@@ -93,7 +93,7 @@ void func_150AF328(SmokeEmitter *emitter) {
             spawn.alpha = func_150ADA20() % 101U + 100;
             spawn.timer = func_150ADA20() % 51U + 80;
             spawn.width = spawn.height = func_150ADA68() * 71.0f + 80.0f;
-            particle = func_15130280(&spawn, 0, 0, 0x10, emitter->base.header.owner, emitter->base.header.kind);
+            particle = particle_newSpriteParticleWithFloor(&spawn, 0, 0, 0x10, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->data.wobble, &wobble, sizeof(wobble));
             }
@@ -102,13 +102,13 @@ void func_150AF328(SmokeEmitter *emitter) {
     }
 }
 
-/* Update for func_150AF328's particles: wobbles the offset and applies drag to the velocity. */
-s32 func_150AF6E4(SpriteParticle *particle, s32 arg1) {
+/* Update for particle_updateSmokeEmitter's particles: wobbles the offset and applies drag to the velocity. */
+s32 particle_wobbleSmoke(SpriteParticle *particle, s32 arg1) {
     WobbleData *wobble;
 
     wobble = &particle->data.wobble;
-    func_15131828(&particle->head, wobble->amplitude, wobble->phase, wobble->phaseStep);
-    func_15131958(&particle->head.desc.vel, wobble->drag);
+    particle_wobbleSpriteOffset(&particle->head, wobble->amplitude, wobble->phase, wobble->phaseStep);
+    particle_applyDrag(&particle->head.desc.vel, wobble->drag);
     return 1;
 }
 
@@ -143,7 +143,7 @@ typedef struct {
 
 /* Counts down the source's two timers and, when each expires, spawns a moving puff sprite or a
  * static spark sprite (lifetime capped at the source's maxLifetime) and restarts it randomly. */
-void func_150AF7C4(GameDC6B0SmokeSource *source) {
+void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
     GameDC6B0SmokeSprite *sprite;
     ScreenSpriteInfo puff;
     GameDC6B0SmokeMotion motion;
@@ -244,9 +244,9 @@ s32 func_150AFBF4(Obj150AFBF4 *obj) {
     return 1;
 }
 
-/* Spawns a func_1516D99C particle emitter (texture 0xD, kind 4) on `object`'s `bone`. */
-void func_150AFC68(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 arg4, s32 arg5) {
-    func_1516D99C(1, 0, 0, 0xD,                 /* x, y, z, texture */
+/* Spawns a particle_newSpriteEmitter particle emitter (texture 0xD, kind 4) on `object`'s `bone`. */
+void particle_spawnBoneSpriteEmitter(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 arg4, s32 arg5) {
+    particle_newSpriteEmitter(1, 0, 0, 0xD,                 /* x, y, z, texture */
         0, 0, 0, 0, 0, 0, 0, 0,                 /* frame, rgba, env rgb */
         4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,        /* kind, velocity x/z high/low, unk32..34 */
         0xFF, 0, 1, 0, 0, 0, 0, 0xAA,           /* unk35..37, velocity randoms, scaleX */
@@ -263,7 +263,7 @@ typedef struct Node150AFDB0 {
 
 /* Releases (effect_destroyObject) every node of object list 0 of type 17 whose unk3F is dc_glbl_CharNum. Each
  * node's successor is saved on the gObjectWalkNext iteration stack first, so releasing it is safe. */
-void func_150AFDB0(void) {
+void particle_freeCharSpriteEmitters(void) {
     Node150AFDB0 *node;
 
     gObjectWalkDepth++;
@@ -331,7 +331,7 @@ typedef struct GameDC6B0TrailArgs {
 
 /* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
  * the two points coincide. */
-void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
+void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
     ParticleSpawn packet;
     Vec3f dir;
     f32 length;
@@ -376,7 +376,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
         packet.fadeRate = 0xFF;
         packet.sound = 0;
         packet.gravity = 0.0f;
-        projectile = func_1513264C(&packet, 3, 0xFF, 0, 4, arg2, arg3);
+        projectile = particle_newModelParticleWithFloor(&packet, 3, 0xFF, 0, 4, arg2, arg3);
         if (projectile != NULL) {
             trail = &projectile->trail;
             memcpy(trail, &trailArgs.unk4, sizeof(trailArgs.unk4));
@@ -387,7 +387,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
 }
 
 /* Releases the projectile's ribbon trail, if any. */
-void func_150B02C0(GameDC6B0Projectile *projectile) {
+void particle_freeProjectileTrail(GameDC6B0Projectile *projectile) {
     EffectObj **trail = &projectile->trail;
 
     if (*trail != NULL) {
@@ -395,24 +395,24 @@ void func_150B02C0(GameDC6B0Projectile *projectile) {
     }
 }
 
-/* Releases the trail, then func_15132570. */
-void func_150B02F0(GameDC6B0Projectile *projectile) {
-    func_150B02C0(projectile);
-    func_15132570(&projectile->head);
+/* Releases the trail, then particle_destroyModelParticleDefault. */
+void particle_destroyTrailProjectile(GameDC6B0Projectile *projectile) {
+    particle_freeProjectileTrail(projectile);
+    particle_destroyModelParticleDefault(&projectile->head);
 }
 
-/* Releases the trail, then func_1513259C. */
-void func_150B031C(GameDC6B0Projectile *projectile) {
-    func_150B02C0(projectile);
-    func_1513259C(&projectile->head);
+/* Releases the trail, then particle_freeModelParticleDefault. */
+void particle_freeTrailProjectile(GameDC6B0Projectile *projectile) {
+    particle_freeProjectileTrail(projectile);
+    particle_freeModelParticleDefault(&projectile->head);
 }
 
-/* The debris variants of func_150B0348's burst and their scales. */
+/* The debris variants of particle_spawnObjDebrisBurst's burst and their scales. */
 static const s32 D_8009F790[] = { 6, 6, 6, 82, 82 };
 static const f32 D_8009F7A4[] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f };
 
 /* Spawns a particle burst and a burst of debris (5 variants) 30 units above obj. */
-void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
+void particle_spawnObjDebrisBurst(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
 
     pos.x = obj->xpos;
@@ -463,7 +463,7 @@ void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
         burst.envColorMode = 6;
         burst.unk64 = 1;
         burst.extra = 0.938608f;
-        func_15153634(&burst, 0xFF, arg1, arg2);
+        particle_spawnSpriteBurst(&burst, 0xFF, arg1, arg2);
     }
     {
         DebrisBurst debris;
@@ -484,7 +484,7 @@ void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
         debris.scaleBase = 0.302000016f;
         debris.scaleRange = 0.3180000186f;
         debris.spin = 9.687f;
-        func_15152190(&debris, D_8009F790, D_8009F7A4, 5, 65.0f, 0, arg1, arg2);
+        particle_spawnDebrisBurst(&debris, D_8009F790, D_8009F7A4, 5, 65.0f, 0, arg1, arg2);
     }
 }
 

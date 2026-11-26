@@ -118,7 +118,7 @@ typedef struct {
     /* 0x1C */ Vec3f forward; // unit vector from source to target, flattened onto the XZ plane
 } ParticleTravel;
 
-/* A particle spawned by func_1513D2F0, with effect_updateZonePairEmitter's state at 0x110. */
+/* A particle spawned by particle_newQuadParticle, with effect_updateZonePairEmitter's state at 0x110. */
 struct TravelParticle {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ ParticleTravel travel;
@@ -209,7 +209,7 @@ void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
         def.scale.x = 1.0f;
         def.scale.y = 1.0f;
         def.scale.z = 1.0f;
-        particle = func_1513D2F0(&def, &D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, emitter->base.header.owner,
+        particle = particle_newQuadParticle(&def, &gWhiteVtxColors, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, emitter->base.header.owner,
                                  emitter->base.header.kind);
         if (particle != NULL) {
             memcpy(&particle->travel, &travel, sizeof(travel));
@@ -230,13 +230,13 @@ s32 effect_moveTravelParticle(TravelParticle *particle) {
     return 1;
 }
 
-/* Calls func_15140410 with the particle's side / forward axes, unless camera_global_Cameras[gScreenLayout].CameraPitch is
+/* Calls particle_buildQuadFromAxes with the particle's side / forward axes, unless camera_global_Cameras[gScreenLayout].CameraPitch is
  * below 5. */
 Vtx *func_150DEB58(TravelParticle *particle, s16 arg1) {
     if (camera_global_Cameras[gScreenLayout].CameraPitch < 5.0f) {
         return NULL;
     }
-    return func_15140410(&particle->head, &particle->travel.side, &particle->travel.forward, arg1);
+    return particle_buildQuadFromAxes(&particle->head, &particle->travel.side, &particle->travel.forward, arg1);
 }
 
 /* An s32 table entry read through its low byte (the symbols point at byte 3 of each word). */

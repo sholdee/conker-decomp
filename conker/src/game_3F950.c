@@ -36,13 +36,13 @@ void func_150124A0(void) {
             dirZ = radius * yawSin;
             if (func_150AC9C0(0.0f, 300.0f, 0.0f, dirX, dirY, dirZ, NULL, NULL,
                               &hit.x, &hit.y, &hit.z, NULL, NULL, NULL, 0.0f) == 0) {
-                D_800DCA30[row][i].pos.x = 0.0f;
-                D_800DCA30[row][i].pos.y = 0.0f;
-                D_800DCA30[row][i].pos.z = 0.0f;
+                gPipeBurstPoints[row][i].pos.x = 0.0f;
+                gPipeBurstPoints[row][i].pos.y = 0.0f;
+                gPipeBurstPoints[row][i].pos.z = 0.0f;
             } else {
-                D_800DCA30[row][i].pos.x = hit.x * 0.97f;
-                D_800DCA30[row][i].pos.y = (hit.y - 300.0f) * 0.97f + 300.0f;
-                D_800DCA30[row][i].pos.z = hit.z * 0.97f;
+                gPipeBurstPoints[row][i].pos.x = hit.x * 0.97f;
+                gPipeBurstPoints[row][i].pos.y = (hit.y - 300.0f) * 0.97f + 300.0f;
+                gPipeBurstPoints[row][i].pos.z = hit.z * 0.97f;
             }
         }
     }

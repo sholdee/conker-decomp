@@ -3,20 +3,20 @@
 #include "variables.h"
 
 /* While params[0] bit 0 is set, spawns a spark emitter after each random delay. */
-void func_150D26F0(SparkEffect *obj) {
+void particle_updateSparkSpawner(SparkEffect *obj) {
     EmitterTrigger *trigger = &obj->data.trigger;
 
     if (trigger->params[0] & 1) {
         trigger->countdown -= D_800BE9E4;
         if (trigger->countdown < 0) {
-            func_150D278C(trigger->record, trigger->matrix, obj->base.header.owner, obj->base.header.kind);
+            particle_spawnSparkEmitter(trigger->record, trigger->matrix, obj->base.header.owner, obj->base.header.kind);
             trigger->countdown = func_150ADA20_u8() % (u32)(trigger->delayRange + 1) + trigger->minDelay;
         }
     }
 }
 
 /* Spawns a spark emitter object with a random spin, rate and color. */
-void func_150D278C(s16 *record, MtxF matrix, u8 unkC, s32 unk1) {
+void particle_spawnSparkEmitter(s16 *record, MtxF matrix, u8 unkC, s32 unk1) {
     RingSparkEmitter emitter;
     TimedEffect *object;
 
@@ -49,7 +49,7 @@ void func_150D278C(s16 *record, MtxF matrix, u8 unkC, s32 unk1) {
  * Accumulates the emitter's spawn rate and, for each whole spark due, spawns one on a circle around
  * the emitter's record (rotating by angleStep) with a random sway; sparks fade out 22 time units in.
  */
-void func_150D2924(SparkEffect *obj) {
+void particle_updateSparkEmitter(SparkEffect *obj) {
     RingSparkEmitter *emitter;
     s16 *record;
 
@@ -105,7 +105,7 @@ void func_150D2924(SparkEffect *obj) {
                 motion.phaseSpeedX = (func_150ADA68() * 80.0f + 50.0f) * 0.001f;
                 motion.phaseSpeedY = (func_150ADA68() * 80.0f + 50.0f) * 0.001f;
                 spawn.unk44 = motion.fadeScale * motion.life;
-                spark = func_1513D2F0(&spawn, &D_800A4AA0, 0, 0x26, 0, 0x1F, 0, 0, 0, 0x30, obj->base.header.owner, obj->base.header.kind);
+                spark = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x26, 0, 0x1F, 0, 0, 0, 0x30, obj->base.header.owner, obj->base.header.kind);
                 if (spark != NULL) {
                     memcpy(&((RingSparkParticle *)spark)->motion, &motion, sizeof(motion));
                 }
@@ -121,7 +121,7 @@ void func_150D2924(SparkEffect *obj) {
  * Builds the beam's camera-facing quad (start to end, `width` to each side) in this frame's
  * vertex buffer, filling a fresh buffer from the template first. Returns the vertices, or NULL.
  */
-Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index) {
+Vtx *particle_buildSparkBeamQuad(GameFFBA0Beam *beam, s16 index) {
     Vtx *vertices;
     Vtx *result;
     Vec3f *camera;
@@ -134,7 +134,7 @@ Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index) {
     f32 *texture;
     u8 fresh;
 
-    func_151D5D60(beam->head.vtxBuffers, index, sizeof(beam->head.vtxTemplate), &vertices, &fresh);
+    particle_getViewBuffer(beam->head.vtxBuffers, index, sizeof(beam->head.vtxTemplate), &vertices, &fresh);
     result = vertices;
     // matching: an early `if (vertices == NULL) return NULL;` lays the blocks out differently
     if (vertices != NULL) {
@@ -200,7 +200,7 @@ Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index) {
 }
 
 /* Sways a spark around its base position and fades it out; returns 0 once its life runs out. */
-s32 func_150D317C(RingSparkParticle *particle) {
+s32 particle_swaySpark(RingSparkParticle *particle) {
     SparkMotion *motion = &particle->motion;
 
     motion->phaseX += motion->phaseSpeedX * gFrameDelta;
@@ -218,10 +218,10 @@ s32 func_150D317C(RingSparkParticle *particle) {
 }
 
 /* On event 0x34 carrying this trigger's id, spawns a spark emitter immediately. */
-void func_150D32FC(SparkEffect *obj, u8 *msg, u8 event) {
+void particle_onSparkTrigger(SparkEffect *obj, u8 *msg, u8 event) {
     EmitterTrigger *trigger = &obj->data.trigger;
 
     if (event == 0x34 && msg[0] == trigger->params[1]) {
-        func_150D278C(trigger->record, trigger->matrix, obj->base.header.owner, obj->base.header.kind);
+        particle_spawnSparkEmitter(trigger->record, trigger->matrix, obj->base.header.owner, obj->base.header.kind);
     }
 }

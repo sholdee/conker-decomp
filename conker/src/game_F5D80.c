@@ -152,7 +152,7 @@ void effect_updateRingEffect(RadialEffect *effect) {
     }
 }
 
-extern struct { s32 unk0; s32 unk4; } D_800A4AC8[];
+extern struct { s32 unk0; s32 unk4; } gEffectRenderModes[];
 
 /*
  * Draws a ring effect as a strip of quads: for every segment direction, the ring profile
@@ -176,8 +176,8 @@ Gfx *effect_drawRingEffect(Gfx *gdl, RadialEffect *effect, s32 arg2) {
     gdl = func_15142B7C(gdl, 0x200205, 0x70400);
     gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
-    gdl = func_1513F4E4(gdl, 0x21, &flag);
-    gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4AC8[14].unk0 | D_800A4AC8[14].unk4, &flag);
+    gdl = particle_setCombineMode(gdl, 0x21, &flag);
+    gdl = func_15142FBC(gdl, 0x1DACA0, gEffectRenderModes[14].unk0 | gEffectRenderModes[14].unk4, &flag);
     {
     s32 texAddr = texture_getAddress(*(s32 *)gEffectTextures[67].addr, &palOffset, 3, 0);
 
@@ -253,7 +253,7 @@ Gfx *effect_drawRingEffect(Gfx *gdl, RadialEffect *effect, s32 arg2) {
                         f32 g;
                         f32 b;
 
-                        func_150CCD90(z, &r, &g, &b);
+                        particle_getDepthTint(z, &r, &g, &b);
                         vtxBase[vtxCount].v.cn[0] = r;
                         vtxBase[vtxCount].v.cn[1] = g;
                         vtxBase[vtxCount].v.cn[2] = b;
@@ -311,7 +311,7 @@ Gfx *effect_drawRingEffect(Gfx *gdl, RadialEffect *effect, s32 arg2) {
                         f32 g;
                         f32 b;
 
-                        func_150CCD90(z, &r, &g, &b);
+                        particle_getDepthTint(z, &r, &g, &b);
                         vtxBase[vtxCount].v.cn[0] = r;
                         vtxBase[vtxCount].v.cn[1] = g;
                         vtxBase[vtxCount].v.cn[2] = b;
@@ -335,7 +335,7 @@ Gfx *effect_drawRingEffect(Gfx *gdl, RadialEffect *effect, s32 arg2) {
     return gdl;
 }
 
-/* Object spawned by func_15130374 from a ParticleDesc packet. */
+/* Object spawned by particle_newOwnedSpriteParticle from a ParticleDesc packet. */
 struct ParticleObject {
     u8 pad0[0x10];
     ParticleDesc p;   /* 0x10 */
@@ -390,7 +390,7 @@ void effect_ringEmitDarkParticle(RadialEffect *effect, Vec3f *pos, u8 heading, f
     speed = func_150ADA68() * (effect->def.speed * 0.2430000156f) + effect->def.speed * 0.9610000253f;
 
     func_15143794(heading, pitch, speed, &packet.vel);
-    func_15130374(&packet, 1, 0, effect->header.owner, effect->header.kind);
+    particle_newOwnedSpriteParticle(&packet, 1, 0, effect->header.owner, effect->header.kind);
 }
 
 /* Ring update callback: hits actors that lie up to 250 units inside the ring edge. */
@@ -429,20 +429,20 @@ void effect_ringHitActors(RadialEffect *effect, f32 oldRadius) {
     }
 }
 
-/* Object spawned by func_15132A4C from a ParticleSpawn. */
+/* Object spawned by particle_newModelParticle from a ParticleSpawn. */
 struct BurstParticle {
     u8 pad0[0x10];
     ParticleSpawn p; /* 0x10 */
 };
 
-/* Ring emit callback 1: spawns a tumbling burst object at pos (the colour from func_150CCD90 goes unused). */
+/* Ring emit callback 1: spawns a tumbling burst object at pos (the colour from particle_getDepthTint goes unused). */
 void effect_ringEmitBurst(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
     ParticleSpawn packet;
     f32 r;
     f32 g;
     f32 b;
 
-    func_150CCD90(pos->z, &r, &g, &b);
+    particle_getDepthTint(pos->z, &r, &g, &b);
     {
         typedef s32 T; // matching: a scope with a declaration orders the struct copy
         packet.pos = *pos;
@@ -485,7 +485,7 @@ void effect_ringEmitBurst(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosi
     packet.ownerId = 0;
     packet.fadeStart = 0x20;
     packet.fadeRate = 7;
-    func_15132A4C(&packet, 3, 0xFF, 0, effect->header.owner, effect->header.kind);
+    particle_newModelParticle(&packet, 3, 0xFF, 0, effect->header.owner, effect->header.kind);
 }
 
 
@@ -515,7 +515,7 @@ typedef struct {
 
 /*
  * Impact effect at the actor: finds the floor below it, spawns an expanding ring there and,
- * when the floor was found, four func_1513C5B0 quads around the impact point plus particles.
+ * when the floor was found, four particle_spawnFlatQuadSpriteNoModel quads around the impact point plus particles.
  */
 void effect_spawnImpactRing(Actor *actor) {
     Vec3f pos;
@@ -550,11 +550,11 @@ void effect_spawnImpactRing(Actor *actor) {
         if (sum != 0x79844C6B) {
             gBonePoolSize = 0;
         }
-        func_150CCD90(pos.z, &r, &g, &b);
+        particle_getDepthTint(pos.z, &r, &g, &b);
         red = r;
         green = g;
         blue = b;
-        func_151D5404(&pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
+        particle_startPlayerRumbles(&pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
         {
             RadialEffectDef def;
             u8 padB[0x14]; // matching: frame padding
@@ -626,19 +626,19 @@ void effect_spawnImpactRing(Actor *actor) {
             colors[2][2] = blue;
             colors[3][2] = blue;
             // matching: the corner offsets are written as (+/-1.0f * extent)
-            func_1513C5B0(&fx, colors, 0xC, 0, extent * cosH + pos.x - extent * sinH, pos.y + 10.0f, extent * cosH + pos.z + extent * sinH, size, size, heading, 0, 0, 0xFF, 0);
+            particle_spawnFlatQuadSpriteNoModel(&fx, colors, 0xC, 0, extent * cosH + pos.x - extent * sinH, pos.y + 10.0f, extent * cosH + pos.z + extent * sinH, size, size, heading, 0, 0, 0xFF, 0);
             fx.unk6 = 0x52;
-            func_1513C5B0(&fx, colors, 0xC, 0, extent * cosH + pos.x - (-1.0f * extent) * sinH, pos.y + 10.0f, (-1.0f * extent) * cosH + pos.z + extent * sinH, size, size, heading, 0, 0, 0xFF, 0);
+            particle_spawnFlatQuadSpriteNoModel(&fx, colors, 0xC, 0, extent * cosH + pos.x - (-1.0f * extent) * sinH, pos.y + 10.0f, (-1.0f * extent) * cosH + pos.z + extent * sinH, size, size, heading, 0, 0, 0xFF, 0);
             fx.unk6 = 0x53;
-            func_1513C5B0(&fx, colors, 0xC, 0, (-1.0f * extent) * cosH + pos.x - extent * sinH, pos.y + 10.0f, extent * cosH + pos.z + (-1.0f * extent) * sinH, size, size, heading, 0, 0, 0xFF, 0);
+            particle_spawnFlatQuadSpriteNoModel(&fx, colors, 0xC, 0, (-1.0f * extent) * cosH + pos.x - extent * sinH, pos.y + 10.0f, extent * cosH + pos.z + (-1.0f * extent) * sinH, size, size, heading, 0, 0, 0xFF, 0);
             fx.unk6 = 0x54;
-            func_1513C5B0(&fx, colors, 0xC, 0, (-1.0f * extent) * cosH + pos.x - (-1.0f * extent) * sinH, pos.y + 10.0f, (-1.0f * extent) * cosH + pos.z + (-1.0f * extent) * sinH, size, size, heading, 0, 0, 0xFF, 0);
+            particle_spawnFlatQuadSpriteNoModel(&fx, colors, 0xC, 0, (-1.0f * extent) * cosH + pos.x - (-1.0f * extent) * sinH, pos.y + 10.0f, (-1.0f * extent) * cosH + pos.z + (-1.0f * extent) * sinH, size, size, heading, 0, 0, 0xFF, 0);
             func_150CA930(&pos);
             randomArg = func_150ADA20() % 21U + 10;
             spark[0] = red;
             spark[1] = green;
             spark[2] = blue;
-            func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 81.0f + 150.0f, 0, 0xFF, randomArg, 0x14, 0, 0.0f, spark, 0xFF);
+            particle_emitOnRandomCircle(pos.x, pos.y, pos.z, func_150ADA68() * 81.0f + 150.0f, 0, 0xFF, randomArg, 0x14, 0, 0.0f, spark, 0xFF);
         }
     }
 }
@@ -648,7 +648,7 @@ void func_150CA930(Vec3f *pos) {
     s16 randomArg;
 
     randomArg = (func_150ADA20() % 21U) + 10;
-    func_1514C678(pos->x, pos->y, pos->z, (func_150ADA68() * 59.0f) + 170.0f,
+    particle_emitOnRandomCircle(pos->x, pos->y, pos->z, (func_150ADA68() * 59.0f) + 170.0f,
                   0, 0xFF, randomArg, 0x13, 0, 0.0f, NULL, 0xFF);
 }
 
@@ -722,7 +722,7 @@ s32 func_150CAA04(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     packet.fadeRate = 10;
     packet.scaleStart = 0x20;
 
-    obj = func_15130374(&packet, 1, 4, arg14, 1);
+    obj = particle_newOwnedSpriteParticle(&packet, 1, 4, arg14, 1);
     if (obj != NULL) {
         memcpy(&obj->damping, &damping, sizeof(f32));
     }
@@ -796,7 +796,7 @@ s32 func_150CADD0(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     packet.fadeStart = 0x20;
     packet.fadeRate = 7;
 
-    func_15132A4C(&packet, 3, 0xFF, 0, arg14, 0);
+    particle_newModelParticle(&packet, 3, 0xFF, 0, arg14, 0);
     return 1;
 }
 

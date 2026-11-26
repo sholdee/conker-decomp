@@ -21,7 +21,7 @@ void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
     f32 radiusSquared;
     u8 fresh;
 
-    func_151D5D60(beam->buffers, cam, 0x40, &vertices, &fresh);
+    particle_getViewBuffer(beam->buffers, cam, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
@@ -157,7 +157,7 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
             particle.minB = 42.714f * height;
             particle.altB = 118.763f * height;
             particle.life = func_150ADA20() % (lifeRange + 1) + lifeBase;
-            func_15149550(&particle, 10, 0, 0, 0xFF, 1);
+            particle_spawnChannelParticle(&particle, 10, 0, 0, 0xFF, 1);
             count--;
         } while (count != 0);
     }
@@ -195,7 +195,7 @@ void func_1514AD9C(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.life = func_150ADA20() % 17U + 16;
     particle.scale = (func_150ADA68() * 347.0f + 50.0f) * 0.001f;
     particle.unk2C = func_150ADA20() % 156U + 100;
-    func_15149550(&particle, 10, 0, 0, arg1, arg2);
+    particle_spawnChannelParticle(&particle, 10, 0, 0, arg1, arg2);
 }
 
 /*
@@ -254,7 +254,7 @@ void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
             particle.life = func_150ADA20() % 31U + 20;
             particle.scale = func_150ADA68() * 497.0f * 0.001f;
             particle.unk2C = func_150ADA20() % 156U + 100;
-            func_15149550(&particle, 10, 0, 0, arg1, arg2);
+            particle_spawnChannelParticle(&particle, 10, 0, 0, arg1, arg2);
             count -= 1.0f;
         } while (count > 1.0f);
     }
@@ -262,7 +262,7 @@ void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
 
 
 /* If collision_probeFloorSurfABSet0Cached finds ground within 200 units of `position`, spawns a cluster of effects there. */
-void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
+void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
     Vec3f pos;
 
     pos = *position;
@@ -331,7 +331,7 @@ void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
         spawn.unk72 = -1;
         spawn.unk73 = -1;
         spawn.pos = pos;
-        func_15152B38(&spawn, arg2, arg3);
+        particle_spawnTrailBurst(&spawn, arg2, arg3);
     }
     {
         SimplePuffSpray emit;
@@ -363,7 +363,7 @@ void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
         emit.handlers[5] = 0;
         emit.blue = 0xFF;
         emit.alpha = func_150ADA20() % 101U + 155;
-        func_15152F70(&emit, 0xFF);
+        particle_spawnSimplePuffSpray(&emit, 0xFF);
     }
     func_1514B034(&pos, arg2, arg3);
 
@@ -403,7 +403,7 @@ void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
         randB = func_150ADA20();
         randC = func_150ADA20();
         sum = (randB & 1) + (randA & 1);
-        func_1513D668(&desc, 0, 18, 29, 0, sum, (u8)randC,
+        particle_spawnAxisQuadParticleNoModel(&desc, 0, 18, 29, 0, sum, (u8)randC,
                       100.0f, 100.0f, NULL, &ground->tri, 0, 0, arg2, arg3);
     }
 }
@@ -436,10 +436,10 @@ s32 func_1514B8B0(Particle177B50 *p) {
 }
 
 /*
- * Spawns a particle at `pos` through func_1513D2F0 and stores its initial func_1514BC08 state.
+ * Spawns a particle at `pos` through particle_newQuadParticle and stores its initial particle_updateJitter state.
  * A `life` of -1 means 300 frames without the timed-life flag.
  */
-void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, const Vec3f *velocity,
+void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, const Vec3f *velocity,
                     f32 gravity, f32 drag, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags,
                     s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11) {
     void *particle;
@@ -507,7 +507,7 @@ void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, co
     } else {
         flag = 0;
     }
-    particle = func_1513D2F0(&desc, &D_800A4AA0, arg8, arg9, argA, 28, flag | 2, 0, 0, argF + 80, arg10, arg11);
+    particle = particle_newQuadParticle(&desc, &gWhiteVtxColors, arg8, arg9, argA, 28, flag | 2, 0, 0, argF + 80, arg10, arg11);
     if (particle != NULL) {
         memcpy((u8 *)particle + 0x110, &state, sizeof(state));
     }
@@ -518,7 +518,7 @@ void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, co
  * Eases def.width, def.height and def.frameSpeed toward random targets, picking a new target for each when its
  * countdown timer (decremented by the frame delta) runs out.
  */
-s32 func_1514BC08(JitterParticle *p, ParticleJitter *w) {
+s32 particle_updateJitter(JitterParticle *p, ParticleJitter *w) {
     w->widthTimer -= gFrameDelta;
     if (w->widthTimer < 0.0f) {
         w->widthTimer = func_150ADA68() * 4.0f;

@@ -2,15 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The variant ids and scales of the debris that func_151D22B0 sprays (func_1515080C). */
+/* The variant ids and scales of the debris that func_151D22B0 sprays (particle_spawnDebrisSpray). */
 static const s32 D_800AB0B0[12] = { 0x3F, 0x40, 0x40, 0x41, 0x42, 0x42, 0x42, 0x42, 0x43, 0x43, 0x02, 0x03 };
 static const f32 D_800AB0E0[12] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-/* The variant id and scale of its debris burst (func_15152190). */
+/* The variant id and scale of its debris burst (particle_spawnDebrisBurst). */
 static const s32 D_800AB110[1] = { 0x39 };
 static const f32 D_800AB114[1] = { 1.0f };
 
-/* Plays sound 0xAA at the actor and spawns three particle effects (via func_1515080C, func_15152190
- * and func_15151A38) at its origin. */
+/* Plays sound 0xAA at the actor and spawns three particle effects (via particle_spawnDebrisSpray, particle_spawnDebrisBurst
+ * and particle_spawnPuffSpray) at its origin. */
 void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f origin;
     f32 extent1;
@@ -44,7 +44,7 @@ void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
             params.spin = 20.24800110f;
             params.floorHitChance = 1.0f;
             params.floorHitFn = 11;
-            func_1515080C(&params, D_800AB0B0, D_800AB0E0, 12, 0, 0, 0, 1, -1, &surface, 20.0f, 0, 0, arg1, arg2);
+            particle_spawnDebrisSpray(&params, D_800AB0B0, D_800AB0E0, 12, 0, 0, 0, 1, -1, &surface, 20.0f, 0, 0, arg1, arg2);
         }
         {
             DebrisBurst params;
@@ -64,7 +64,7 @@ void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
             params.scaleBase = 0.1070000082f;
             params.scaleRange = 0.3000000119f;
             params.spin = 19.23800087f;
-            func_15152190(&params, D_800AB110, D_800AB114, 1, 0.0f, 0, arg1, arg2);
+            particle_spawnDebrisBurst(&params, D_800AB110, D_800AB114, 1, 0.0f, 0, arg1, arg2);
         }
         {
             PuffSpray params;
@@ -110,7 +110,7 @@ void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
             params.render.envMode = 7;
             params.unk80 = 12;
             params.unk82 = 21;
-            func_15151A38(&params, arg1, arg2);
+            particle_spawnPuffSpray(&params, arg1, arg2);
         }
     }
 }

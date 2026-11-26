@@ -11,7 +11,7 @@
  *   game/Effects/PipeExplode/pipeexplode.c
  */
 
-/* The chunk object func_15132A4C creates; pipeexplode_onChunkFloorHit is its floor-hit callback. */
+/* The chunk object particle_newModelParticle creates; pipeexplode_onChunkFloorHit is its floor-hit callback. */
 typedef struct PipeChunk {
     /* 0x000 */ ModelParticle head;
     /* 0x170 */ f32 minBounceVelY; // a hit with vel.y above this stops the chunk

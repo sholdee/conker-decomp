@@ -4,7 +4,7 @@
 
 
 /* Copies obj's position into pos (using unk180 as the height when set); with a hit buffer, also probes the ground below. */
-s32 func_150BA930(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3) {
+s32 particle_getObjGroundPos(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3) {
     Vec3f probe;
 
     pos->x = obj->xpos;
@@ -30,7 +30,7 @@ s32 func_150BAA00(s32 arg0, s32 arg1) {
 }
 
 /* Spawns effects at obj; when the ground probe hits, also a burst aimed by camera_global_Cameras[gCurrentView].TrueCameraAngle (degrees). */
-void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
+void particle_spawnObjEffects(Actor *obj, s32 arg1, s32 arg2) {
     Vec3f pos;
     CollisionHit hit;
     s32 angle;
@@ -41,15 +41,15 @@ void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
         return;
     }
 
-    onGround = func_150BA930(&pos, obj, &hit, (u8)arg1);
-    func_151D5404(&pos, 1307.0f, 2000.0f, 0.0005f, 0xC, 0xF, 0xFF, 0);
+    onGround = particle_getObjGroundPos(&pos, obj, &hit, (u8)arg1);
+    particle_startPlayerRumbles(&pos, 1307.0f, 2000.0f, 0.0005f, 0xC, 0xF, 0xFF, 0);
     func_15143E94(5, 0x4022);
 
     if (onGround) {
         angle = camera_global_Cameras[gCurrentView].TrueCameraAngle * 0.7111111283f;
         effect_spawnQuadEffect(-1, pos.x, pos.y + 6.0f, pos.z,
                       0x19, 0x12, 0, 0xFF, 1);
-        func_1514C678(pos.x, pos.y, pos.z,
+        particle_emitOnRandomCircle(pos.x, pos.y, pos.z,
                       (func_150ADA68() * 50.0f) + 40.0f, angle + 60, angle - 60,
                       (func_150ADA20() % 11U) + 30, 5, 0, 0.0f, 0, 0xFF);
     }

@@ -43,7 +43,7 @@ static const u8 D_800A180C[2][2] = { { 0x16, 0x1A }, { 0x09, 0x06 } };
 
 /* The texture id pickers by effect kind (game_2062D0.c, where each takes no argument). This file was
  * compiled with a view that passes the actor and the slot (as a u8, by prototype) to the kind 12 picker. */
-extern u8 (*D_8008FCD0[])(Actor *actor, u8 slot);
+extern u8 (*gKindParticleTexturePickers[])(Actor *actor, u8 slot);
 
 /* Fires beam slot `slot` (0 or 1) of `actor`: spawns its beam, a spark burst and an effect
  * at the muzzle. */
@@ -86,7 +86,7 @@ void beam_releaseSlot(actor, slot)
     msg.actor = actor;
     msg.uniqueId = actor->unique_id;
     msg.slot = slot;
-    func_151403A8((s32)&msg, 0x43);
+    particle_broadcastToQuadParticles((s32)&msg, 0x43);
 }
 
 
@@ -141,7 +141,7 @@ AimedBeam *beam_spawnAimed(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     spawn.unk50 = 0;
     spawn.fadeStart = 1;
     spawn.fadeRate = 0xFF;
-    beam = func_1513D2F0(&spawn, &D_800A4AA0, 0x1D, 0, 0, 0x1C, 0, 0, 0, 0x44, arg2, arg3);
+    beam = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x1D, 0, 0, 0x1C, 0, 0, 0, 0x44, arg2, arg3);
     if (beam != NULL) {
         link = &beam->link;
         memcpy(link, &init, sizeof(init));
@@ -295,10 +295,10 @@ void beam_destroyAimed(AimedBeam *beam) {
     if (part != NULL) {
         effect_destroyObject(part);
     }
-    func_1513CA6C(&beam->head);
+    particle_destroyQuadParticleDefault(&beam->head);
 }
 
-/* Like beam_destroyAimed, through the effect_freeObject / func_1513CAA0 variants. */
+/* Like beam_destroyAimed, through the effect_freeObject / particle_freeQuadParticleDefault variants. */
 void beam_freeAimed(AimedBeam *beam) {
     s32 i;
     void *part;
@@ -322,7 +322,7 @@ void beam_freeAimed(AimedBeam *beam) {
     if (part != NULL) {
         effect_freeObject(part);
     }
-    func_1513CAA0(&beam->head);
+    particle_freeQuadParticleDefault(&beam->head);
 }
 
 /* Message handler of a beam: releases it when its actor goes away (types 0 and 0x43)
@@ -478,7 +478,7 @@ Glow *beam_spawnGlow(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u
     link.slot = slot;
     link.beam = beam;
 
-    spawn.texture = D_8008FCD0[12](actor, slot);
+    spawn.texture = gKindParticleTexturePickers[12](actor, slot);
     spawn.type = 3;
     spawn.renderModes = 0x2203;
     spawn.lifetime = 300;
@@ -772,7 +772,7 @@ void func_150F0938(Actor *actor) {
     light_createAttached(actor, 2, &D_800A1680, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
-/* Spawns a particle effect (func_15152B38) at `pos`; beam_fireSlot uses it at the muzzle. */
+/* Spawns a particle effect (particle_spawnTrailBurst) at `pos`; beam_fireSlot uses it at the muzzle. */
 void beam_spawnMuzzleParticles(Vec3f *pos) {
     TrailBurst packet;
 
@@ -828,7 +828,7 @@ void beam_spawnMuzzleParticles(Vec3f *pos) {
     packet.unk39 = 0;
     packet.unk72 = -1;
     packet.unk73 = -1;
-    func_15152B38(&packet, 0xFF, 1, pos);
+    particle_spawnTrailBurst(&packet, 0xFF, 1, pos);
 }
 
 /* Spawns a particle that follows `actor` (see beam_updateFollowParticle). */
@@ -893,7 +893,7 @@ void beam_spawnFollowParticle(Actor *actor) {
     link.phase[0] = func_150ADA68() * 2.0f * 3.141592741f;
     link.phase[1] = func_150ADA68() * 2.0f * 3.141592741f;
     link.phase[2] = func_150ADA68() * 2.0f * 3.141592741f;
-    particle = func_15130280(&spawn, 1, 0, 0x14, 0xFF, 1);
+    particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0x14, 0xFF, 1);
     if (particle != NULL) {
         memcpy(&particle->link.actor, &link, sizeof(link));
     }
@@ -1055,7 +1055,7 @@ void beam_updateTrailEmitter(ActorTrailEmitter *emitter) {
             spawn.alpha = (func_150ADA20() % 71U) + 80;
             spawn.timer = (func_150ADA20() % 31U) + 60;
             spawn.width = spawn.height = func_150ADA68() * 514.0f + 404.0f;
-            particle = func_15130280(&spawn, 1, 0, 0x10, emitter->base.header.owner, emitter->base.header.kind);
+            particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0x10, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->link.trail, &ext, sizeof(ext));
             }

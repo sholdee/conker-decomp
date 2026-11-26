@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Spawns a streak particle from start along dir; when checkHit is set, records where its path hits a surface. */
-void *func_150E5FD0(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6, u8 checkHit, u8 arg8,
+void *particle_spawnImpactStreak(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6, u8 checkHit, u8 arg8,
                     s16 life, s8 callback) {
     void *streak;
     ParticleDef info;
@@ -57,7 +57,7 @@ void *func_150E5FD0(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f32 arg4, u8 a
     } else {
         randomBit0 = 0;
     }
-    streak = func_1513D524(&info, 15, 21, 0, 15, randomBit0 | randomBit1, 0x30, arg5, arg6);
+    streak = particle_newQuadParticleWhite(&info, 15, 21, 0, 15, randomBit0 | randomBit1, 0x30, arg5, arg6);
     if (streak != NULL) {
         memcpy(&((Streak *)streak)->impact, &impact, sizeof(impact));
     }
@@ -65,10 +65,10 @@ void *func_150E5FD0(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f32 arg4, u8 a
 }
 
 /* Impact callbacks, indexed by StreakImpact.callback. */
-static s32 (*D_80088A10[])(Streak *) = { func_150E67D0 };
+static s32 (*gStreakImpactFuncs[])(Streak *) = { particle_spawnStreakImpact };
 
 /* Moves the streak along its direction; runs its impact callback once it crosses the surface it was aimed at. */
-s8 func_150E6230(Streak *streak) {
+s8 particle_moveImpactStreak(Streak *streak) {
     s8 ret = 1;
 
     {
@@ -86,7 +86,7 @@ s8 func_150E6230(Streak *streak) {
                 side = 1.0f;
             }
             if (side != impact->side) {
-                ret = (impact->callback != -1) ? D_80088A10[impact->callback](streak) : 0;
+                ret = (impact->callback != -1) ? gStreakImpactFuncs[impact->callback](streak) : 0;
             }
         }
     }
@@ -110,7 +110,7 @@ typedef struct {
 
 
 /* Builds the streak's camera-facing quad (4 vertices) for view index viewIdx; returns NULL without a buffer. */
-void *func_150E63A0(Streak *streak, s16 viewIdx) {
+void *particle_buildImpactStreakQuad(Streak *streak, s16 viewIdx) {
     Vec3f start;
     Vec3f end;
     Vec3f *eye;
@@ -127,7 +127,7 @@ void *func_150E63A0(Streak *streak, s16 viewIdx) {
     u8 fresh;
     s32 pad3; // matching: unused stack slot (frame layout)
 
-    func_151D5D60(streak->head.vtxBuffers, viewIdx, 0x40, &vertices, &fresh);
+    particle_getViewBuffer(streak->head.vtxBuffers, viewIdx, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
@@ -192,7 +192,7 @@ void *func_150E63A0(Streak *streak, s16 viewIdx) {
 }
 
 /* Fades the streak out over its last 8 ticks. */
-s32 func_150E679C(Streak *streak) {
+s32 particle_fadeImpactStreak(Streak *streak) {
     s32 timer = streak->head.def.lifetime;
 
     if (timer < 8) {
@@ -205,7 +205,7 @@ s32 func_150E679C(Streak *streak) {
     return 1;
 }
 
-/* Spawn description passed to func_1513C73C. */
+/* Spawn description passed to particle_spawnSurfaceQuadSpriteNoModel. */
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s16 unk4;
@@ -226,7 +226,7 @@ typedef struct {
 } ImpactSpawnInfo; /* size 0x30 */
 
 /* Impact callback: spawns an effect at the streak's recorded hit point. */
-s32 func_150E67D0(Streak *streak) {
+s32 particle_spawnStreakImpact(Streak *streak) {
     ImpactSpawnInfo info;
     StreakImpact *impact;
 
@@ -244,7 +244,7 @@ s32 func_150E67D0(Streak *streak) {
     info.unk18 = 0x130001;
 
     impact = &streak->impact;
-    func_1513C73C(&info, 0, 0, &impact->tri, impact->point.x, impact->point.y, impact->point.z, 50.0f,
+    particle_spawnSurfaceQuadSpriteNoModel(&info, 0, 0, &impact->tri, impact->point.x, impact->point.y, impact->point.z, 50.0f,
                   50.0f, func_150ADA20() & 0xFF, 0, 0, streak->head.header.owner, streak->head.header.kind);
     return 0;
 }

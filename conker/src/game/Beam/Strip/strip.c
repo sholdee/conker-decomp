@@ -131,7 +131,7 @@ void beam_updateStrip(StripObj *strip) {
     }
 }
 
-extern s32 D_800A4AC8[][2];
+extern s32 gEffectRenderModes[][2];
 
 /** Draws the strip for viewport `view` as a quad from p0 to p1 widened sideways to face the camera. */
 Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view) {
@@ -161,13 +161,13 @@ Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view) {
         if (camera_global_Cameras[view].SpecialFlags & 1) {
             gfx = func_15142C10(gfx, D_800D9B78[view][0], D_800D9B78[view][1], D_800D9B78[view][2], 0xFF, &update);
             gfx = func_15142CF0(gfx, 0xF2, 0, D_800D9B68[view][0], D_800D9B68[view][1], D_800D9B68[view][2], 0xFF, &update);
-            gfx = func_1513F4E4(gfx, 30, &update);
+            gfx = particle_setCombineMode(gfx, 30, &update);
         } else {
             gfx = func_15142C10(gfx, 0, 0, 0, 0, &update);
             gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &update);
-            gfx = func_1513F4E4(gfx, 19, &update);
+            gfx = particle_setCombineMode(gfx, 19, &update);
         }
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1][0] | D_800A4AC8[1][1], &update);
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &update);
 
         scale = strip->p1.z;
         dir.x = strip->p1.x - strip->p0.x;

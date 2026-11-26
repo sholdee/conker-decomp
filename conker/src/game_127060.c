@@ -78,7 +78,7 @@ void effect_spawnDelayedBurst(Actor *actor, u8 owner, s32 kind) {
             spawn.unk47 = 7;
             spawn.unk48 = 0;
             for (spark.index = 0; spark.index < 2; spark.index++) {
-                burst->sparks[spark.index] = func_1513D2F0(&spawn, &D_800A4AA0, 0, 0x25, 0, 0x1D, ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), owner, kind);
+                burst->sparks[spark.index] = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x25, 0, 0x1D, ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), owner, kind);
                 if (burst->sparks[spark.index] != NULL) {
                     memcpy(&burst->sparks[spark.index]->data, &spark, sizeof(spark));
                 }
@@ -274,7 +274,7 @@ void func_150FA468(TimedEffect *effect, s32 arg1, u8 event) {
     }
 }
 
-/* A particle created by func_15130280; this caller's data lives at 0xA8. */
+/* A particle created by particle_newSpriteParticleWithFloor; this caller's data lives at 0xA8. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 data[5];
@@ -282,8 +282,8 @@ typedef struct {
 
 
 /*
- * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two func_15153F18 /
- * func_15150178 bursts, a particle with a random rise, and weapon_spawnImpactBurst at the point.
+ * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two particle_spawnSplashSprayAtAngles /
+ * particle_spawnDropSprayAtAngles bursts, a particle with a random rise, and weapon_spawnImpactBurst at the point.
  */
 void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
     Vec3f pos;
@@ -319,7 +319,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             first.spray.speedBase = 12.0f;
             first.spray.speedRange = 13.90000057f;
             first.spray.unk38 = 1.0f;
-            func_15153F18(&first.angles, &first.spray, &ground, owner, kind);
+            particle_spawnSplashSprayAtAngles(&first.angles, &first.spray, &ground, owner, kind);
         }
         {
             DropSpraySpec second;
@@ -346,7 +346,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             second.spray.sizeRange = 104.0f;
             second.spray.unk34 = 1.0f;
             second.spray.bounceChance = 0.3f;
-            func_15150178(&second.angles, &second.spray, &ground, owner, kind);
+            particle_spawnDropSprayAtAngles(&second.angles, &second.spray, &ground, owner, kind);
         }
         {
             ParticleDesc spawn;
@@ -393,7 +393,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             spawn.width = 0.0f;
             spawn.height = 0.0f;
             spawn.gravity = 0.0f;
-            particle = func_15130280(&spawn, 1, 0, sizeof(data), owner, kind);
+            particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(data), owner, kind);
             if (particle != NULL) {
                 memcpy(particle->data, data, sizeof(data));
             }
@@ -435,7 +435,7 @@ void effect_startLineEmitter(u8 owner, s32 kind) {
     }
 }
 
-/* Emitter update: spawns func_150F4570 effects between the two endpoints, 0.08-0.26 per frame (times gFrameDelta). */
+/* Emitter update: spawns particle_spawnSpiral effects between the two endpoints, 0.08-0.26 per frame (times gFrameDelta). */
 void effect_updateLineEmitter(LineEmitter *effect) {
     LineEmitterData *data;
     Vec3f from;
@@ -449,11 +449,11 @@ void effect_updateLineEmitter(LineEmitter *effect) {
     while (data->pending > 1.0f) {
         func_1514470C(data->from, &from);
         func_1514470C(data->to, &to);
-        variants = &D_80088B20[1];
+        variants = &gSpiralVariantLists[1];
         i = func_150ADA20() % variants->count;
         duration = func_150ADA68() * 25.0f + 30.0f;
         // matching: the "* 1" is kept; a plain random + 1.0f schedules differently
-        func_150F4570(&from, &to, variants->ids[i], duration, 1.0f / duration,
+        particle_spawnSpiral(&from, &to, variants->ids[i], duration, 1.0f / duration,
                       variants->scales[i] * (func_150ADA68() * 1 + 1), 1, func_150ADA20() % 3 + 750,
                       effect->base.header.owner, effect->base.header.kind);
         data->pending -= 1.0f;
@@ -676,7 +676,7 @@ s32 effect_updateFadeInSprite(FadeInSprite *sprite) {
     return 1;
 }
 
-/* Spawns the weapon_spawnBoneBeam / func_151D4408 effects on bone 14 of `actor`: point0 goes to `position`,
+/* Spawns the weapon_spawnBoneBeam / particle_spawnBoneDirParticle effects on bone 14 of `actor`: point0 goes to `position`,
  * point2 to `origin` and point3 to `origin + delta`, all in world space. */
 void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f position;
@@ -710,5 +710,5 @@ void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
 
         weapon_spawnBoneBeam(actor, bone, &point0, &point1, &position, arg1, arg2);
     }
-    func_151D4408(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
+    particle_spawnBoneDirParticle(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
 }

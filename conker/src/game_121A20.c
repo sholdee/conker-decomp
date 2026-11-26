@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Spawn-variant tables, reached through D_80088B20 (VariantList: count, ids, scales). */
+/* Spawn-variant tables, reached through gSpiralVariantLists (VariantList: count, ids, scales). */
 const s16 D_800A19F0[3] = { 9, 10, 11 };
 const f32 D_800A19F8[3] = { 1.0f, 1.0f, 1.0f };
 const s16 D_800A1A04[16] = {
@@ -14,7 +14,7 @@ const f32 D_800A1A24[16] = {
 };
 
 /* Spawn variants of the camera emitters (CameraEmitterData.variants); game_127060 uses entry 1. */
-VariantList D_80088B20[2] = {
+VariantList gSpiralVariantLists[2] = {
     { 3, D_800A19F0, D_800A19F8 },
     { 16, D_800A1A04, D_800A1A24 },
 };
@@ -29,7 +29,7 @@ static s32 (*D_80088B38[])() = { effect_consumeZoneFlag };
 
 /* Spawns an effect that spirals from `from` to `to` at `speed` (invSpeed = 1 / speed), playing
  * `sound` near the camera when it is non-zero. */
-void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 scale, u8 fadeNear, s32 sound,
+void particle_spawnSpiral(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 scale, u8 fadeNear, s32 sound,
                    u8 owner, s32 kind) {
     ParticleSpawn spawn;
     Vec3f dir;
@@ -95,7 +95,7 @@ void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 s
         spawn.fadeStart = 1;
         spawn.fadeRate = 255;
         spawn.sound = sound;
-        obj = func_1513264C(&spawn, 3, 0xFF, 0, sizeof(spiral), owner, kind);
+        obj = particle_newModelParticleWithFloor(&spawn, 3, 0xFF, 0, sizeof(spiral), owner, kind);
         if (obj != NULL) {
             memcpy(&obj->spiral, &spiral, sizeof(spiral));
         }
@@ -104,7 +104,7 @@ void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 s
 
 /* Update: moves the spiral centre along the object's velocity and puts the object on the
  * circle around it; returns 0 once the travel time is up. */
-s32 func_150F48D0(SpiralParticle *obj) {
+s32 particle_moveSpiral(SpiralParticle *obj) {
     SpiralState *spiral;
 
     spiral = &obj->spiral;
@@ -132,7 +132,7 @@ s32 func_150F48D0(SpiralParticle *obj) {
 
 /* Fades the object out near the camera and keeps its positional sound playing (started
  * within 200 units of the camera), as its SPIRAL_* flags ask; always returns 1. */
-s32 func_150F4A38(SpiralParticle *obj) {
+s32 particle_updateSpiralFadeSound(SpiralParticle *obj) {
     SpiralState *spiral;
     f32 dist;
 
@@ -169,7 +169,7 @@ s32 func_150F4A38(SpiralParticle *obj) {
 
 /* Event handler: event 0x4E clears unk71 and sets SPIRAL_FADE_NEAR | SPIRAL_MUTED, 0x4F calls
  * effect_destroyObject. */
-void func_150F4CFC(SpiralParticle *obj, s32 arg1, u8 event) {
+void particle_onSpiralEvent(SpiralParticle *obj, s32 arg1, u8 event) {
     SpiralState *spiral;
     spiral = &obj->spiral;
     if (event == 0x4E) {
@@ -180,8 +180,8 @@ void func_150F4CFC(SpiralParticle *obj, s32 arg1, u8 event) {
     }
 }
 
-/* Starts an emitter that spawns spirals around `camera` (see func_150F4DEC). */
-void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind) {
+/* Starts an emitter that spawns spirals around `camera` (see particle_updateCameraSpiralEmitter). */
+void particle_startCameraSpiralEmitter(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind) {
     CameraEmitterData data;
     CameraEmitter *emitter;
 
@@ -199,7 +199,7 @@ void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind
 /* Emitter update: while its condition callback (if any) holds, spawns 0.05-0.20 spirals per frame
  * (times gFrameDelta) around the camera, each between two random points on either side of
  * its view direction. */
-void func_150F4DEC(CameraEmitter *emitter) {
+void particle_updateCameraSpiralEmitter(CameraEmitter *emitter) {
     CameraEmitterData *data;
     Vec3f *eye;
     s32 yaw;
@@ -236,10 +236,10 @@ void func_150F4DEC(CameraEmitter *emitter) {
                 from = to;
                 to = tmp;
             }
-            variants = &D_80088B20[data->variants];
+            variants = &gSpiralVariantLists[data->variants];
             i = func_150ADA20() % variants->count;
             speed = func_150ADA68() * 10.0f + 5.0f;
-            func_150F4570(&from, &to, variants->ids[i], speed, 1.0f / speed,
+            particle_spawnSpiral(&from, &to, variants->ids[i], speed, 1.0f / speed,
                           variants->scales[i] * (func_150ADA68() * 0.07500000298f + 0.07500000298f), FALSE, 0,
                           emitter->base.header.owner, emitter->base.header.kind);
             data->pending -= 1.0f;

@@ -55,7 +55,7 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     i = (func_150ADA20() & 1) + 1;
     while (i--) {
         yawSin = (func_150ADA68() * 73.0f) + 31.0f;
-        func_1514C858(gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, yawSin, gPipeSpots[pipe].yaw + 0x40, 0, 0xFF, (func_150ADA20() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
+        particle_emitOnRandomArc(gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, yawSin, gPipeSpots[pipe].yaw + 0x40, 0, 0xFF, (func_150ADA20() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
     }
     argsB.countBase = 30;
     argsB.countRange = 15;
@@ -87,10 +87,10 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     argsB.tailSpeedRange = 3.419999838f;
     argsB.widthBase = 4.139999866f;
     argsB.widthRange = 4.859999657f;
-    func_151539B4(&argsB, arg1);
+    particle_spawnStreakBurst(&argsB, arg1);
     {
     // matching: a declaration here opens a -g3 lexical block, which steers as1's scheduling
-    extern void func_15152F70(SimplePuffSpray *, u8);
+    extern void particle_spawnSimplePuffSpray(SimplePuffSpray *, u8);
 
     argsC.pos = gPipeSpots[pipe].pos;
     argsC.countBase = 15;
@@ -119,7 +119,7 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     argsC.sizeRange = 30.0f;
     argsC.growthBase = 1.5f;
     argsC.growthRange = 1.0f;
-    func_15152F70(&argsC, arg1);
+    particle_spawnSimplePuffSpray(&argsC, arg1);
     }
     argsC.countBase = 10;
     argsC.countRange = 6;
@@ -127,7 +127,7 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     argsC.lifeRange = 0;
     argsC.red = 9;
     argsC.handlers[3] = 5;
-    func_15152F70(&argsC, arg1);
+    particle_spawnSimplePuffSpray(&argsC, arg1);
     yawSin = func_151423D8(gPipeSpots[pipe].yaw);
     yawCos = func_151423D8(gPipeSpots[pipe].yaw - 0x40);
     origin.x = gPipeSpots[pipe].pos.x - 150.0f * yawCos;
@@ -240,7 +240,7 @@ s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.fadeRate = 0xFF;
     spawn.sizeY = pitchSin;
 
-    func_15132A4C(&spawn, 3, 0xFF, 0, argE, 0);
+    particle_newModelParticle(&spawn, 3, 0xFF, 0, argE, 0);
     return 1;
 }
 
@@ -341,7 +341,7 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.fadeRate = 7;
     spawn.sizeY = pitchSin;
 
-    chunk = func_15132A4C(&spawn, 3, 0xFF, 4, argE, 0);
+    chunk = particle_newModelParticle(&spawn, 3, 0xFF, 4, argE, 0);
     if (chunk != NULL) {
         memcpy(&chunk->minBounceVelY, &minBounceVelY, sizeof(f32));
     }
@@ -389,7 +389,7 @@ s32 func_150B378C(PipeExplodeActor *actor) {
     return 1;
 }
 
-/* Particle request for func_1513C73C. */
+/* Particle request for particle_spawnSurfaceQuadSpriteNoModel. */
 typedef struct PipeExplodeParticle {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ s16 unk04;
@@ -452,7 +452,7 @@ s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, Coll
         rand1 = func_150ADA20();
         rand2 = func_150ADA20();
 
-        func_1513C73C(&particle, 1, 0, surface,
+        particle_spawnSurfaceQuadSpriteNoModel(&particle, 1, 0, surface,
                       particle.points[actor->head.start].x,
                       height,
                       particle.points[actor->head.start].z,

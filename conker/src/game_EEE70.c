@@ -50,7 +50,7 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     func_150C19C0(&pos, actor, side);
     startAngle = (actor->angle >> 8) + 0x40;
     radius = scale * 70.0f;
-    func_1514C2F0(pos.x, actor->floorY, pos.z, radius, startAngle,
+    particle_emitOnCircle(pos.x, actor->floorY, pos.z, radius, startAngle,
                   (side == 1) ? 16 : -16, 8, 0, 0, radius * 4.04f, 0, 255);
     effect_spawnQuadEffect(-1, pos.x, (s32)actor->floorY + 2.0f, pos.z, 8, 21, 0, 255, 0);
     spawn.model = 5;
@@ -97,7 +97,7 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
         spawn.rot.z = func_150ADA68() * 360.0f;
         spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
         spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
-        particle = func_15132A4C(&spawn, 3, 255, sizeof(f32), 255, 0);
+        particle = particle_newModelParticle(&spawn, 3, 255, sizeof(f32), 255, 0);
         if (particle != NULL) {
             particle->floorY = actor->floorY;
         }
@@ -129,6 +129,6 @@ s32 func_150C1E34(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32 fromY,
     effect.alpha = 255;
     effect.fadeStep = (func_150ADA20_u8() & 15) + 12;
     effect.onExpire = 1;
-    func_1518CA80(&effect, 1);
+    particle_spawnGrowingBillboard(&effect, 1);
     return 1;
 }

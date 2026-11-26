@@ -7,9 +7,9 @@
 /*
  * Spawns a white, growing and fading puff (particle callback 5) 10 units behind object `objIndex`, unless it is in water.
  * `spread` randomises x/z by up to that much; `growth` (+ up to `growthRange` at random) and
- * `fadeRate` drive func_15174920.
+ * `fadeRate` drive particle_updateWakePuff.
  */
-void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 size, s32 fadeRate, s32 velY,
+void particle_spawnWakePuff(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 size, s32 fadeRate, s32 velY,
                    u8 owner, s32 list) {
     f32 angle;
     f32 x;
@@ -68,7 +68,7 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
 }
 
 /* Particle callback 5 (gParticleCallbacks[5]): fades the puff out while it grows (height 8/7 as fast as width). */
-void func_15174920(PuffParticle *particle) {
+void particle_updateWakePuff(PuffParticle *particle) {
     s32 alpha = particle->primA;
 
     if (alpha > 200) {

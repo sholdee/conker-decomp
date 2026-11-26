@@ -70,7 +70,7 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
             launch = muzzle;
         }
         func_151D3E6C(obj, &muzzle, &launch, (level == 0x2B) ? 0x28 : 0x1E);
-        func_151D3F14(&muzzle, arg1, arg2);
+        particle_spawnShortLightFlash(&muzzle, arg1, arg2);
         func_150FE0B8(obj, &muzzle, arg1, arg2);
         weapon_rumbleLauncher(obj);
         if (muzzleOut != NULL) {
@@ -115,7 +115,7 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
 
 /* Handler: writes the world position of obj's muzzle point to `out`. */
 void weapon_getLauncherMuzzlePos(Actor *obj, s16 arg1, Vec3f *out) {
-    func_151D3E04(obj, out, &D_800A1F70, D_80088B80, 0.0f);
+    particle_getBonePoint(obj, out, &D_800A1F70, D_80088B80, 0.0f);
 }
 
 /* Sends a func_151D8868 event (type 1, random duration 15-23) to the camera of obj. */

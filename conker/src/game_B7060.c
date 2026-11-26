@@ -1710,7 +1710,7 @@ s32 func_1508DC24(void) {
                     if (other->character_type != 0x6E) {
                         continue;
                     }
-                    func_151027E8(other);
+                    particle_stopObjEffect(other);
                     actor_remove(other, 0);
                     break;
                 }

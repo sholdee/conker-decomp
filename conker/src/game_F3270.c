@@ -5,18 +5,18 @@
 void *memcpy(void *, const void *, u32);
 
 /* Keeps the emitter's particle alive, spawning it if it doesn't exist yet. */
-void func_150C5DC0(GameF3270Emitter *emitter) {
+void particle_keepFlickerSprite(GameF3270Emitter *emitter) {
     if (emitter->children.particle != NULL) {
         SpriteFlicker *flicker = &emitter->children.particle->flicker;
 
         flicker->keepAlive = TRUE;
     } else {
-        emitter->children.particle = func_150C6460(emitter);
+        emitter->children.particle = particle_spawnFlickerSprite(emitter);
     }
 }
 
 /* Particle update: eases unk24 toward a target re-rolled at random intervals. Returns whether it stays alive. */
-s8 func_150C5E0C(FlickerSprite *particle) {
+s8 particle_updateFlickerSprite(FlickerSprite *particle) {
     s8 alive;
     SpriteFlicker *flicker;
 
@@ -36,18 +36,18 @@ s8 func_150C5E0C(FlickerSprite *particle) {
 }
 
 /* Particle destructor: detaches it from its emitter. */
-s32 func_150C5EFC(FlickerSprite *particle) {
+s32 particle_detachFlickerSprite(FlickerSprite *particle) {
     GameF3270Children *children = &((GameF3270Emitter *)particle->flicker.owner)->children;
 
     children->particle = NULL;
     particle->quad.def.flags |= 2;
     particle->flicker.owner = NULL;
-    func_1513F6C0(&particle->quad, 0, 0);
+    particle_setQuadSpriteFuncs(&particle->quad, 0, 0);
     return 0;
 }
 
 /* Keeps the emitter's linked object alive, spawning it if it doesn't exist yet. */
-void func_150C5F40(GameF3270Emitter *emitter) {
+void particle_keepWatcherEmitter(GameF3270Emitter *emitter) {
     Actor *actor = emitter->watcher.character;
 
     if (emitter->children.linked != NULL) {
@@ -55,13 +55,13 @@ void func_150C5F40(GameF3270Emitter *emitter) {
 
         link->keepAlive = TRUE;
     } else {
-        emitter->children.linked = func_150C5F94(actor, emitter);
+        emitter->children.linked = particle_spawnWatcherEmitter(actor, emitter);
     }
 }
 
 
 /* Spawns the emitter's linked object, recording the surface height above the actor. */
-WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
+WatcherEmitter *particle_spawnWatcherEmitter(Actor *actor, GameF3270Emitter *emitter) {
     BloodDripDesc desc;
     WatcherEmitterLink link;
     WatcherEmitter *obj;
@@ -103,7 +103,7 @@ WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
 }
 
 /* Spawns one randomised particle at (x, y, z), moving against (vx, vz) at a fifth of its speed. */
-void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, WatcherEmitter *source) {
+void particle_spawnWatcherParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, WatcherEmitter *source) {
     ParticleDesc burst;
     RiseParticle *spawned;
     RiseMotion motion;
@@ -165,7 +165,7 @@ void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, WatcherEmitter *
     motion.swayX = (func_150ADA68() * 0.1f + 0.08f) * motion.baseSize;
     motion.swayZ = (func_150ADA68() * 0.1f + 0.08f) * motion.baseSize;
     burst.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
-    spawned = func_151303BC(&burst, 2, 40);
+    spawned = particle_newSpriteParticle(&burst, 2, 40);
     if (spawned != NULL) {
         memcpy(&spawned->motion, &motion, sizeof(motion));
     }
@@ -201,7 +201,7 @@ void func_150C6438(WatcherEmitter *obj) {
 static Vec3f D_800887D0 = { 0.0f, 0.0f, 0.0f }; /* the point below the actor's root */
 
 /* Spawns the emitter's particle on the surface below the actor, if there is one within 200 units. */
-FlickerSprite *func_150C6460(GameF3270Emitter *emitter) {
+FlickerSprite *particle_spawnFlickerSprite(GameF3270Emitter *emitter) {
     FlickerSprite *particle;
     Vec3f pos;
     Actor *actor;
@@ -233,7 +233,7 @@ FlickerSprite *func_150C6460(GameF3270Emitter *emitter) {
             s32 rand1;
             s32 rand0;
 
-            colorIndex = func_151D8E20();
+            colorIndex = particle_getContextEffectKind();
             probe.y = emitter->watcher.hit.height;
             size = func_150ADA68() * 50.0f + 100.0f;
             flicker.owner = &emitter->watcher;
@@ -252,9 +252,9 @@ FlickerSprite *func_150C6460(GameF3270Emitter *emitter) {
             desc.unk10 = 150;
             desc.frame = 0;
             desc.unk11 = 0xFF;
-            desc.rgba[0] = D_800AB414[colorIndex].r;
-            desc.rgba[1] = D_800AB414[colorIndex].g;
-            desc.rgba[2] = D_800AB414[colorIndex].b;
+            desc.rgba[0] = gKindColors[colorIndex].r;
+            desc.rgba[1] = gKindColors[colorIndex].g;
+            desc.rgba[2] = gKindColors[colorIndex].b;
             desc.rgba[3] = 0xFF;
             desc.renderModes = 0x440001;
             desc.unk16 = 0;
@@ -263,7 +263,7 @@ FlickerSprite *func_150C6460(GameF3270Emitter *emitter) {
             rand1 = func_150ADA20();
             rand2 = func_150ADA20();
             // matching: the explicit & 0xFF on rand0 (a (u8) cast emits no andi)
-            particle = (FlickerSprite *)func_1513C73C(
+            particle = (FlickerSprite *)particle_spawnSurfaceQuadSpriteNoModel(
                 &desc, 8, 2, &emitter->watcher.hit.tri, probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
                 (rand2 & 1) * 2 + (rand1 & 1), 32, emitter->watcher.header.owner, emitter->watcher.header.kind);
             if (particle != NULL) {

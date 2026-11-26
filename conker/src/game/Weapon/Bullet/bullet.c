@@ -52,7 +52,7 @@ void weapon_spawnAirHit(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s3
         fx.direction.z = -dir->z;
         weapon_initImpactSpray(&fx.spray, &fx.spread);
         fx.spray.pos = *pos;
-        func_1514FB98(&fx, fxOwner, fxList);
+        particle_spawnDirectedJetSpray(&fx, fxOwner, fxList);
     }
 }
 
@@ -85,7 +85,7 @@ void weapon_spawnSurfaceHit(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 wi
             fx.source.triangle = *surface;
             fx.spray.pos = *pos;
             weapon_initImpactSpray(&fx.spray, &fx.source.spread);
-            func_1514FBFC(&fx, fxOwner, fxList);
+            particle_spawnSurfaceJetSpray(&fx, fxOwner, fxList);
         } else {
             DirectedJetSpray fx;
 
@@ -94,7 +94,7 @@ void weapon_spawnSurfaceHit(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 wi
             fx.direction.z = -dir->z;
             weapon_initImpactSpray(&fx.spray, &fx.spread);
             fx.spray.pos = *pos;
-            func_1514FB98(&fx, fxOwner, fxList);
+            particle_spawnDirectedJetSpray(&fx, fxOwner, fxList);
         }
     }
 }
@@ -139,7 +139,7 @@ void weapon_spawnObjectHit(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwn
         fx.spray.fadeStart = 12;
         fx.spray.fadeOutStart = 20;
         fx.spray.eventFunc = 0;
-        func_1514FCE8(&fx, fxOwner, fxList);
+        particle_spawnJetSprayBursts(&fx, fxOwner, fxList);
     }
 
     if (withParticles && hitObj != NULL) {
@@ -214,15 +214,15 @@ void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList) {
 
     rand.f = func_150ADA68();
     shade = func_150ADA20();
-    func_151541B8(pos, rand.f * 4.0f + 14.0f, 1.182089925f, shade % 56 + 200, 0.0f, fxOwner, fxList);
+    particle_spawnGrowFade(pos, rand.f * 4.0f + 14.0f, 1.182089925f, shade % 56 + 200, 0.0f, fxOwner, fxList);
 }
 
 void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList) {
-    func_151D5334(pos, 800.0f, 2000.0f, 0.0005f, 5, fxOwner, fxList);
+    particle_startPlayerCameraWobbles(pos, 800.0f, 2000.0f, 0.0005f, 5, fxOwner, fxList);
 }
 
 void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList) {
-    func_151D5404(pos, 800.0f, 2000.0f, 0.0005f, 15, 20, fxOwner, fxList);
+    particle_startPlayerRumbles(pos, 800.0f, 2000.0f, 0.0005f, 15, 20, fxOwner, fxList);
 }
 
 void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
@@ -388,7 +388,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         desc.ownerId = 0;
         desc.fadeStart = 1;
         desc.fadeRate = 255;
-        obj = func_15132A4C(&desc, 3, 0xFF, sizeof(BulletState), fxOwner, fxList);
+        obj = particle_newModelParticle(&desc, 3, 0xFF, sizeof(BulletState), fxOwner, fxList);
         if (obj != NULL) {
             bulletState = &((Bullet *)obj)->state;
             memcpy(bulletState, &state, sizeof(BulletState));
@@ -562,12 +562,12 @@ void weapon_releaseBullet(Bullet *bullet) {
 
 void func_151C15FC(Bullet *bullet) {
     weapon_releaseBullet(bullet);
-    func_15132570(&bullet->head);
+    particle_destroyModelParticleDefault(&bullet->head);
 }
 
 void func_151C1628(Bullet *bullet) {
     weapon_releaseBullet(bullet);
-    func_1513259C(&bullet->head);
+    particle_freeModelParticleDefault(&bullet->head);
 }
 
 /* Impact sound/decal for a bullet hit, chosen by impactType. */

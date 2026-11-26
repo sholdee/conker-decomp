@@ -375,7 +375,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
                 values[0] = D_8009F0D0[0];
                 obj = collision_findObjectById(cmd->arg.b.lo);
                 // matching: the no-op ternary orders the argument moves
-                func_1518F51C(obj ? obj : obj, values[cmd->a[0].w], cmd->a[1].h.lo, -1, -1, -1, 0, 0, 0xFF, 1);
+                particle_startAnchorEmitter(obj ? obj : obj, values[cmd->a[0].w], cmd->a[1].h.lo, -1, -1, -1, 0, 0, 0xFF, 1);
             }
             break;
         case 20:
@@ -455,7 +455,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             break;
         case 32:
             obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
-            func_150D5A6C(obj, 0xFF, 1);
+            particle_spawnBreakup(obj, 0xFF, 1);
             break;
     }
     return ret;
@@ -543,9 +543,9 @@ s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
 
         case 50:
             if (phase == 2) {
-                func_151403A8(0, 83);
+                particle_broadcastToQuadParticles(0, 83);
             } else if (phase == 3) {
-                func_151403A8(0, 84);
+                particle_broadcastToQuadParticles(0, 84);
             }
             break;
         case 45:
@@ -564,7 +564,7 @@ s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
             if (phase == 5) {
                 u8 buf[8];
                 buf[0] = cmd->a[0].w;
-                func_151403A8((s32)buf, 54);
+                particle_broadcastToQuadParticles((s32)buf, 54);
             }
             // fallthrough
         case 30:

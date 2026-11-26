@@ -8,7 +8,7 @@
  * sprite when func_15145C90 accepts the hit object). First runs an anti-tamper checksum over the code
  * from save_checkCodeTamper to save_spawnMenuCharacter (a mismatch breaks player 1's controller mapping). Nothing is spawned while zone_isInNeutralZone(2 or 1, position) reports anything.
  */
-void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
+void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
     s32 pad[3]; // matching: unused locals of the original; the frame is 16 bytes larger than the named ones need
     u32 addr;
     u32 end;
@@ -63,7 +63,7 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
             sprite.unk17 = 7;
             sprite.fadeStart = 25;
             sprite.fadeRate = 10;
-            func_1513C650(&sprite, 0, 0, &triangle, hit.x, hit.y, hit.z,
+            particle_spawnSurfaceQuadSprite(&sprite, 0, 0, &triangle, hit.x, hit.y, hit.z,
                           (func_150ADA68() * 20.0f) + 40.0f, (func_150ADA68() * 20.0f) + 40.0f, func_150ADA20() & 0xFF,
                           ((func_150ADA20() & 1) * 2) + (func_150ADA20() & 1), 3, 0xFF, 0, arg3, arg4);
         }
@@ -97,7 +97,7 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
         burst.speedRange = 0.0235f;
         burst.unk6C = 0.940404f;
         burst.spin = 1.084000111f;
-        func_151511FC(&burst, arg3, arg4);
+        particle_spawnSurfaceBurst(&burst, arg3, arg4);
     }
 }
 
@@ -112,7 +112,7 @@ s32 func_150BA35C(QuadSprite *sprite) {
 }
 
 /* Moves the particle by its velocity and spins it, under gravity of -0.6 per frame. */
-s32 func_150BA37C(TumblingParticle *particle) {
+s32 particle_moveTumbling(TumblingParticle *particle) {
     particle->motion.vel.y += -0.6f * gFrameDelta;
     particle->head.def.pos.x += particle->motion.vel.x * gFrameDelta;
     particle->head.def.pos.y += particle->motion.vel.y * gFrameDelta;
@@ -126,7 +126,7 @@ s32 func_150BA37C(TumblingParticle *particle) {
  * Fades the particle with whichever is smaller of 16 * lifetime and 4 * its height above
  * motion.minY (capped at 255). Returns 0 (expire) once it falls below minY.
  */
-s32 func_150BA424(TumblingParticle *particle) {
+s32 particle_fadeTumbling(TumblingParticle *particle) {
     f32 height = particle->head.def.pos.y - particle->motion.minY;
     s32 lifeAlpha;
     s32 heightAlpha;

@@ -618,7 +618,7 @@ static EmitterIdList D_8008F750[] = { { 7, D_8008F728 }, { 1, D_8008F730 }, { 6,
 static EmitterIdList D_8008F768[] = { { 10, D_8008F73C } };
 static EmitterIdList D_8008F770[] = { { 2, D_8008F748 } };
 static EmitterIdList D_8008F778[] = { { 1, D_8008F74C } };
-/* The emitter tables, by game_1BA670.c's D_8008D5E0. */
+/* The emitter tables, by game_1BA670.c's gActorEmitterTables. */
 EmitterTable D_8008F780 = { D_8008F2C0, 0, NULL };
 EmitterTable D_8008F78C = { D_8008F2F0, 3, D_8008F750 };
 EmitterTable D_8008F798 = { D_8008F368, 3, D_8008F750 };

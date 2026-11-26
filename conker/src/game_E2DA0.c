@@ -48,7 +48,7 @@ void effect_updateObjBurst(ObjBurstEffect *effect) {
     }
 }
 
-/** Spawns a func_15152B38 effect at pos, plus the func_150B5E34 and func_150B6000 particles. */
+/** Spawns a particle_spawnTrailBurst effect at pos, plus the func_150B5E34 and func_150B6000 particles. */
 void func_150B5A3C(Vec3f *pos, u8 owner, s32 kind) {
     TrailBurst spawn;
 
@@ -105,7 +105,7 @@ void func_150B5A3C(Vec3f *pos, u8 owner, s32 kind) {
     spawn.unk72 = -1;
     spawn.unk73 = -1;
 
-    func_15152B38(&spawn, owner, kind);
+    particle_spawnTrailBurst(&spawn, owner, kind);
     func_150B5E34(pos, owner, kind);
     func_150B6000(pos, owner, kind);
 }
@@ -167,12 +167,12 @@ void func_150B5C38(Vec3f *pos, u8 owner, s32 kind) {
     spawn.unk72 = -1;
     spawn.unk73 = -1;
 
-    func_15152B38(&spawn, owner, kind);
+    particle_spawnTrailBurst(&spawn, owner, kind);
     func_150B5E34(pos, owner, kind);
     func_150B6000(pos, owner, kind);
 }
 
-/** Spawns one func_15130280 particle at pos with some randomized fields and flags. */
+/** Spawns one particle_newSpriteParticleWithFloor particle at pos with some randomized fields and flags. */
 void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     ParticleDesc spawn;
     s32 flag80;
@@ -216,7 +216,7 @@ void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     spawn.deathFunc = -1;
     spawn.drawFunc = -1;
     spawn.handlerSet = 4;
-    func_15130280(&spawn, 1, 0, 0, owner, kind);
+    particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, owner, kind);
 }
 
 /** Spawns a light_createWithEffect effect at pos (as integer coordinates) with randomized parameters. */

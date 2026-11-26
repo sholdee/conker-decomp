@@ -262,7 +262,7 @@ void text_updateBox(TextBox *box) {
 extern struct {
     u32 cycle1;
     u32 cycle2;
-} D_800A4AC8[];
+} gEffectRenderModes[];
 
 /* Draws a text box: shadow, body, tail (or thought-bubble circles), then the text via text_drawBoxText.
  * Returns gfx unchanged if the display list would overflow. */
@@ -306,7 +306,7 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     gDPPipeSync(gfx++);
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
                       TEXEL0, 0);
-    gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, D_800A4AC8[25].cycle1 | D_800A4AC8[25].cycle2 | G_ZS_PRIM);
+    gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, gEffectRenderModes[25].cycle1 | gEffectRenderModes[25].cycle2 | G_ZS_PRIM);
     if (box->config->flags & TEXTBOX_BUBBLES) {
         sprite.alpha = box->bubbleAlpha[0] * 64.0f / 255.0f;
         sprite.alpha = (sprite.alpha * fade) >> 8;
@@ -387,7 +387,7 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     gDPPipeSync(gfx++);
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
                       TEXEL0, 0);
-    gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, D_800A4AC8[25].cycle1 | D_800A4AC8[25].cycle2 | G_ZS_PRIM);
+    gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, gEffectRenderModes[25].cycle1 | gEffectRenderModes[25].cycle2 | G_ZS_PRIM);
     if (box->angle > 0.0f && box->angle < 3.1415927f) {
         sprite.flip &= ~SPRITE_FLIP_Y;
     } else {

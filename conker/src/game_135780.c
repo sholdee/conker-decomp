@@ -6,7 +6,7 @@
 
 /* Emitter update: accumulates 0.03..0.04 particles per unit of gFrameDelta and, while enabled,
  * spawns one at a random point of the emitter's area for each whole one. */
-void func_151082D0(AreaEmitter *emitter) {
+void particle_updateAreaEmitter(AreaEmitter *emitter) {
     AreaEmitterData *data;
 
     data = &emitter->data;
@@ -63,7 +63,7 @@ void func_151082D0(AreaEmitter *emitter) {
                 desc.pos.y = data->area->y + data->area->height * func_150ADA68();
                 desc.flags = ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) | PARTICLE_DRAW_FUNC | PARTICLE_HANDLERS;
                 desc.alpha = (func_150ADA20() & 0x7F) + 0x80;
-                particle = func_15130280(&desc, 2, 0, sizeof(extra), emitter->base.header.owner, emitter->base.header.kind);
+                particle = particle_newSpriteParticleWithFloor(&desc, 2, 0, sizeof(extra), emitter->base.header.owner, emitter->base.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->data, &extra, sizeof(extra));
                 }
@@ -77,10 +77,10 @@ void func_151082D0(AreaEmitter *emitter) {
     }
 }
 
-/* Update of func_151082D0's particles: picks the animation frame from the time since birth and
+/* Update of particle_updateAreaEmitter's particles: picks the animation frame from the time since birth and
  * until death, randomly starts an 11-unit flash (drawn with draw function 3), and kills the
  * particle when its life runs out. Returns 0 to kill it. */
-s32 func_15108658(AreaFlashParticle *particle, s32 arg1) {
+s32 particle_updateAreaFlash(AreaFlashParticle *particle, s32 arg1) {
     FlashParticleData *data = &particle->data;
     f32 elapsed = data->lifetime - data->life;
 
@@ -117,8 +117,8 @@ s32 func_15108658(AreaFlashParticle *particle, s32 arg1) {
     return 1;
 }
 
-/* Event handler of the func_151082D0 emitter: event 0x2B enables spawning, 0x2C disables it. */
-void func_151087FC(AreaEmitter *emitter, s32 arg1, u8 event) {
+/* Event handler of the particle_updateAreaEmitter emitter: event 0x2B enables spawning, 0x2C disables it. */
+void particle_onAreaEmitterEvent(AreaEmitter *emitter, s32 arg1, u8 event) {
     AreaEmitterData *data = &emitter->data;
 
     if (event == 0x2B) {

@@ -39,7 +39,7 @@ void func_15108120(Actor *obj, u8 arg1, s32 arg2) {
         debris.gravityBase = -0.8000000119f;
         debris.gravityRange = 0.3440000117f;
         debris.spin = 26.41100121f;
-        func_15152190(&debris, D_800A2430, D_800A2434, 1, 40.0f, 0, arg1, arg2);
+        particle_spawnDebrisBurst(&debris, D_800A2430, D_800A2434, 1, 40.0f, 0, arg1, arg2);
     }
     func_15136C3C(obj, 1, 1, 1, 0, 0, arg1, arg2);
 }

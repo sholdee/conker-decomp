@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
+// particle_spawnSteamParticle (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
-SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
@@ -129,7 +129,7 @@ void func_150B0D20(DDB60Effect *effect) {
                 func_15143794(angle, (func_150ADA20() % 26) - 41, func_150ADA68() * 3.769999981f + 4.059999943f, &vel);
                 vel.x -= refVel->x * 0.9250000715f;
                 vel.z -= refVel->z * 0.9250000715f;
-                func_151D9014(&pos, &vel, 5, func_150ADA68() * 0.1780000031f + -0.4420000315f,
+                particle_spawnSteamParticle(&pos, &vel, 5, func_150ADA68() * 0.1780000031f + -0.4420000315f,
                               (func_150ADA20() % 21) + 20, (func_150ADA20() % 101) + 155,
                               func_150ADA68() * 50.0f + 80.0f, func_150ADA68() < 0.04400000349f, 1.399999976f,
                               1.399999976f, 1, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);

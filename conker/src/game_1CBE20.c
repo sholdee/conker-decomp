@@ -41,7 +41,7 @@ void func_1519EA04(EvTimer *timer) {
     }
 }
 
-/* Spawns a func_15152190 effect at pos (cutscene event; the caller passes an id < 0xE9 and a scale). */
+/* Spawns a particle_spawnDebrisBurst effect at pos (cutscene event; the caller passes an id < 0xE9 and a scale). */
 void func_1519EA78(Vec3f *pos, u16 id, f32 scale, u8 arg3, s32 arg4) {
     DebrisBurst def;
     s32 idArg;
@@ -65,10 +65,10 @@ void func_1519EA78(Vec3f *pos, u16 id, f32 scale, u8 arg3, s32 arg4) {
     def.spin = 26.18200111f;
     idArg = id;
     scaleArg = scale;
-    func_15152190(&def, &idArg, &scaleArg, 1, 0.0f, 0, arg3, arg4);
+    particle_spawnDebrisBurst(&def, &idArg, &scaleArg, 1, 0.0f, 0, arg3, arg4);
 }
 
-/* Spawns a func_1513264C effect that follows a cutscene track (updated by func_1519ED24). */
+/* Spawns a particle_newModelParticleWithFloor effect that follows a cutscene track (updated by func_1519ED24). */
 void func_1519EB8C(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4) {
     struct {
         SeqTrackState *track;
@@ -113,7 +113,7 @@ void func_1519EB8C(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4
     packet.spawn.fadeStart = 1;
     packet.spawn.fadeRate = 0xFF;
     packet.spawn.sound = 0;
-    obj = func_1513264C(&packet.spawn, 3, 0xFF, 0, 4, arg3, arg4);
+    obj = particle_newModelParticleWithFloor(&packet.spawn, 3, 0xFF, 0, 4, arg3, arg4);
     if (obj != NULL) {
         memcpy(&obj->track, &packet.track, sizeof(packet.track));
     }
@@ -173,7 +173,7 @@ void func_1519ED84(SeqTrackState *track, s32 texture, s16 lifetime, u8 arg3, s32
     def.fadeStart = 1;
     def.fadeRate = 0xFF;
 
-    particle = func_1513D2F0(&def, &D_800A4AA0, 0x27, 0, 0, 0x17, 0, 3, 0xFF, 4, arg3, arg4);
+    particle = particle_newQuadParticle(&def, &gWhiteVtxColors, 0x27, 0, 0, 0x17, 0, 3, 0xFF, 4, arg3, arg4);
     if (particle != NULL) {
         memcpy(&particle->track, &trackArg, sizeof(trackArg));
     }

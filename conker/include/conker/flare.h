@@ -28,7 +28,7 @@ typedef struct GlowObj {
     /* 0x05C */ u8 alpha;
     /* 0x05D */ u8 pad5D[0x63];
     /* 0x0C0 */ Vtx vtxTemplate[4];
-    /* 0x100 */ Vtx *vtxBuf[4]; /* per view, double-buffered (func_151D5D60) */
+    /* 0x100 */ Vtx *vtxBuf[4]; /* per view, double-buffered (particle_getViewBuffer) */
     /* 0x110 */ GlowParams params;
 } GlowObj;
 

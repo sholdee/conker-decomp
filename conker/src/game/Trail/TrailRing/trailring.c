@@ -4,7 +4,7 @@
 
 /* Spawns a ring of 25 kind-2 particles (trail_spawnKind2Trail) of radius 80 around (x, y, z). */
 void trail_spawnKind2Ring(f32 x, f32 y, f32 z, u8 arg3) {
-    func_1514C2F0(x, y, z, 80.0f, 0, 3, 25, 2, 0, 0.0f, 0, arg3);
+    particle_emitOnCircle(x, y, z, 80.0f, 0, 3, 25, 2, 0, 0.0f, 0, arg3);
 }
 
 /*

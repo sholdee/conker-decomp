@@ -4,10 +4,10 @@
 
 
 /*
- * Spawns a growing billboard particle (callback 9, func_1518CCA8) from `effect`. With mode 1 the
+ * Spawns a growing billboard particle (callback 9, particle_updateGrowingBillboard) from `effect`. With mode 1 the
  * position comes from the float x/y/z, otherwise from the integer + fraction fields.
  */
-void func_1518CA80(BillboardSpawn *effect, u8 mode)
+void particle_spawnGrowingBillboard(BillboardSpawn *effect, u8 mode)
 {
     BillboardTemplate template;
     u8 intensity;
@@ -59,13 +59,13 @@ void func_1518CA80(BillboardSpawn *effect, u8 mode)
 }
 
 /*
- * This file's .data: the billboard expiry hooks, by the low nibble of onExpire. Hook 1 is func_151927C0
+ * This file's .data: the billboard expiry hooks, by the low nibble of onExpire. Hook 1 is particle_renewBillboard
  * (game_1BFC70.c), which takes the particle as its own BillboardParticle view, so the table has no prototype.
  */
-static void (*D_8008D5D0[])() = { NULL, func_151927C0 };
+static void (*gBillboardExpireFuncs[])() = { NULL, particle_renewBillboard };
 
 /* Particle callback 9 (gParticleCallbacks[9]): grows the particle each frame and runs its expiry hook at life 0. */
-void func_1518CCA8(GrowingParticle *particle)
+void particle_updateGrowingBillboard(GrowingParticle *particle)
 {
     s32 steps;
     s32 hook;
@@ -76,7 +76,7 @@ void func_1518CCA8(GrowingParticle *particle)
     if (particle->life == 0) {
         hook = particle->onExpire & 0xF;
         if (hook != 0) {
-            D_8008D5D0[hook](particle);
+            gBillboardExpireFuncs[hook](particle);
         }
     }
 }

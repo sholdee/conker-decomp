@@ -2,10 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-s16 D_800DD450; /* primitive alpha last set in the display list; -1 = unknown */
+s16 gDebrisPrimAlpha; /* primitive alpha last set in the display list; -1 = unknown */
 
 /* The debris quad: a hexagon of six vertices fanned into four triangles. */
-static Vtx D_8008CD90[6] = {
+static Vtx gSpinDebrisVerts[6] = {
     { { { 7, 4, 0 }, 0, { 0x2412, 0x209F }, { 0xFE, 0xFE, 0xFE, 0xFF } } },
     { { { -7, 4, 0 }, 0, { 0x2008, 0x208E }, { 0xFE, 0xFE, 0xFE, 0xFF } } },
     { { { 0, 1, 3 }, 0, { 0x2210, 0x1FAB }, { 0xFE, 0xFE, 0xFE, 0xFF } } },
@@ -14,9 +14,9 @@ static Vtx D_8008CD90[6] = {
     { { { 0, 21, 4 }, 0, { 0x21FA, 0x25DE }, { 0xFE, 0xFE, 0xFE, 0xFF } } },
 };
 
-/* The particle drawn by func_1517A3A0. */
-static Gfx D_8008CDF0[] = {
-    gsSPVertex(D_8008CD90, 6, 0),
+/* The particle drawn by particle_drawSpinDebris. */
+static Gfx gSpinDebrisDl[] = {
+    gsSPVertex(gSpinDebrisVerts, 6, 0),
     gsSP1Triangle(0, 1, 2, 0),
     gsSP1Triangle(0, 3, 1, 0),
     gsSP1Triangle(4, 1, 3, 0),
@@ -53,7 +53,7 @@ static Gfx D_8008CE60[9] = {
 };
 
 /* Spawns one particle of object type `type` at (x, y, z) with random horizontal speed and spin. */
-void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkAC, u8 speedRange,
+void particle_spawnSpinDebris(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkAC, u8 speedRange,
                    u8 spinRange, u8 dragRange, s32 type) {
     SpinDebrisParticle *particle;
     s32 rnd;
@@ -88,9 +88,9 @@ void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkA
     }
 }
 
-/* Update callback for particles from func_15179FE0: move, spin, slow down, then fade out once the timer runs
+/* Update callback for particles from particle_spawnSpinDebris: move, spin, slow down, then fade out once the timer runs
  * out. Frees the particle when it is invisible or has left every view it was drawn in. */
-void func_1517A1EC(SpinDebrisParticle *particle) {
+void particle_updateSpinDebris(SpinDebrisParticle *particle) {
     s32 timer;
 
     particle->x += particle->velX;
@@ -132,7 +132,7 @@ void func_1517A1EC(SpinDebrisParticle *particle) {
     }
 }
 
-/* Identity hook used by func_1517A958 for object types 0xC and 0x59. */
+/* Identity hook used by particle_beginSpinDebrisDraw for object types 0xC and 0x59. */
 Gfx *func_1517A394(Gfx *gfx) {
     return gfx;
 }
@@ -140,8 +140,8 @@ Gfx *func_1517A394(Gfx *gfx) {
 #define D_800D35E4 ((&D_800D35E8)[-1])
 
 /* Draw callback: culls the particle against view `view` (types 0xC and 0x59 are never culled), then emits its
- * texture, matrix, primitive alpha and render mode, and the shared particle display list D_8008CDF0. */
-Gfx *func_1517A3A0(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
+ * texture, matrix, primitive alpha and render mode, and the shared particle display list gSpinDebrisDl. */
+Gfx *particle_drawSpinDebris(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
     if (particle->header.type != 0xC && particle->header.type != 0x59 &&
         func_1510AEE0(gViewMatrices[view], particle->x, particle->y, particle->z, gDefaultNear, gDefaultFar,
                       D_800D35E0, D_800D35E4, NULL, NULL) != 0) {
@@ -153,14 +153,14 @@ Gfx *func_1517A3A0(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
     if (particle->header.type != 9) {
         particle->viewFlags |= 1 << view;
     }
-    gfx = func_1517A9A8(gfx, particle->texture);
+    gfx = particle_loadDebrisTexture(gfx, particle->texture);
     func_15043D90(&particle->mtx[D_800BE9C0], particle->rotX, particle->rotY, particle->rotZ,
                   particle->scale, particle->scale, particle->scale, particle->x, particle->y, particle->z);
     gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    if (D_800DD450 != particle->alpha) {
+    if (gDebrisPrimAlpha != particle->alpha) {
         gDPPipeSync(gfx++);
         gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, particle->alpha);
-        // matching: D_800DD450 spelled via its neighbour so IDO does not CSE its address with the read above
+        // matching: gDebrisPrimAlpha spelled via its neighbour so IDO does not CSE its address with the read above
         ((s16 *)D_800DD460)[-8] = particle->alpha;
     }
     {
@@ -173,12 +173,12 @@ Gfx *func_1517A3A0(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
                                      G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             modeL, &needSync);
     }
-    gSPDisplayList(gfx++, D_8008CDF0);
+    gSPDisplayList(gfx++, gSpinDebrisDl);
     return gfx;
 }
 
 /* Spawns one ground debris chunk (object type 9) of size `size` at (x, z), resting on the ground below y. */
-void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
+void particle_spawnGroundChunk(f32 size, u8 texture, s16 x, s16 y, s16 z) {
     SpinDebrisParticle *particle;
     s32 range;
     f32 groundY;
@@ -213,9 +213,9 @@ void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
     }
 }
 
-/* Update callback for func_1517A644 chunks: fly up, fall back to the ground, then lie flat and fade out over
+/* Update callback for particle_spawnGroundChunk chunks: fly up, fall back to the ground, then lie flat and fade out over
  * 60 frames before being freed. */
-void func_1517A84C(SpinDebrisParticle *particle) {
+void particle_updateGroundChunk(SpinDebrisParticle *particle) {
     s32 timer;
     s32 velY;
     s32 groundY;
@@ -257,8 +257,8 @@ void func_1517A84C(SpinDebrisParticle *particle) {
 }
 
 /* Begin-draw hook: forgets the cached primitive alpha so the first particle drawn sets it again. */
-Gfx *func_1517A958(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
-    D_800DD450 = -1;
+Gfx *particle_beginSpinDebrisDraw(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
+    gDebrisPrimAlpha = -1;
     if ((type == 0xC) || (type == 0x59)) {
         gfx = func_1517A394(gfx);
     }
@@ -267,7 +267,7 @@ Gfx *func_1517A958(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
 
 
 /* Loads particle texture `texture` unless it is already the current one. */
-Gfx *func_1517A9A8(Gfx *gfx, s32 texture) {
+Gfx *particle_loadDebrisTexture(Gfx *gfx, s32 texture) {
     SpriteParams texState; // filled in by sprite_loadDescFrame; unused here
 
     if (texture != D_800DD1B0) {
@@ -279,7 +279,7 @@ Gfx *func_1517A9A8(Gfx *gfx, s32 texture) {
 }
 
 /* Spawns `count` ground debris chunks scattered around (x, y, z) when `size` is at least 12. */
-void func_1517AA20(f32 size, s32 x, s32 y, s32 z, s32 count) {
+void particle_spawnGroundChunks(f32 size, s32 x, s32 y, s32 z, s32 count) {
     s32 offsetX;
     s32 offsetZ;
     s32 i;
@@ -295,12 +295,12 @@ void func_1517AA20(f32 size, s32 x, s32 y, s32 z, s32 count) {
             offsetX -= 32;
             offsetZ -= 32;
             chunkSize = ((func_150ADA20() % range) >> 4) + size;
-            func_1517A644(chunkSize, func_150ADA20() & 1, x + offsetX, y, z + offsetZ);
+            particle_spawnGroundChunk(chunkSize, func_150ADA20() & 1, x + offsetX, y, z + offsetZ);
         }
     }
 }
 
 /* Draw callback for another object type in the same table; forwards to view_emitRspSetup. */
-Gfx *func_1517AB7C(Gfx *gfx, s32 arg1, s16 player) {
+Gfx *particle_endSpinDebrisDraw(Gfx *gfx, s32 arg1, s16 player) {
     return view_emitRspSetup(gfx, player);
 }

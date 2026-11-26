@@ -6,7 +6,7 @@
  * Computes an RGB tint (0-255 per channel) from a z coordinate: white for z > 0, fading to
  * (172, 142, 82) at z = -1463.2, then on towards (122, 100, 83) over the next ~1970 units.
  */
-void func_150CCD90(f32 z, f32 *r, f32 *g, f32 *b) {
+void particle_getDepthTint(f32 z, f32 *r, f32 *g, f32 *b) {
     f32 t;
 
     if (z > 0.0f) {

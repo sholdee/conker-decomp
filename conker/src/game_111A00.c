@@ -70,11 +70,11 @@ void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16
         }
         count = D_800A111C[size] * count;
         if (entry->particleType == 0x13) {
-            func_15171D4C(x, y, z, 30, 0, 0x13, 0.0f, 0, count, 0xF, 0x55, 0, 0xFF, 0);
+            particle_spawnFloorSprite(x, y, z, 30, 0, 0x13, 0.0f, 0, count, 0xF, 0x55, 0, 0xFF, 0);
         } else if (tri != NULL) {
-            func_15171F04(x, y, z, tri, lifetime, 0xB5AD, entry->particleType, count, 0, 0, 0, 0xFF, 0);
+            particle_spawnTriSprite(x, y, z, tri, lifetime, 0xB5AD, entry->particleType, count, 0, 0, 0, 0xFF, 0);
         } else {
-            func_15171D4C(x, y, z, lifetime, 0xB5AD, entry->particleType, 0.0f, 0, count, 0, 0, 0, 0xFF, 0);
+            particle_spawnFloorSprite(x, y, z, lifetime, 0xB5AD, entry->particleType, 0.0f, 0, count, 0, 0, 0, 0xFF, 0);
         }
     }
     if (entry->debrisType != 0) {
@@ -457,7 +457,7 @@ void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ,
     chunk.fadeStart = 0x20;
     chunk.fadeRate = 7;
 
-    func_15132A4C(&chunk, 3, 0xFF, 0, 0xFF, 0);
+    particle_newModelParticle(&chunk, 3, 0xFF, 0, 0xFF, 0);
 }
 
 struct Struct150E5810 {

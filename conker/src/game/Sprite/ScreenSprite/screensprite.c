@@ -12,7 +12,7 @@ typedef struct {
     s32 id[2];
 } SpriteListIds;
 
-extern CombineMode D_800A4AC8[];
+extern CombineMode gEffectRenderModes[];
 
 /* The render setup and reset display lists of the sprite object type (the object type table
    D_8008B4D4 points to them). */
@@ -142,10 +142,10 @@ Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
     gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
     // matching: the draw reads only the low byte of unk34 (lbu at 0x37)
-    gfx = func_1513F4E4(gfx, ((u8 *)&sprite->info.unk34)[3], &update);
+    gfx = particle_setCombineMode(gfx, ((u8 *)&sprite->info.unk34)[3], &update);
     gfx = func_15142FBC(gfx, sprite->info.otherModeH | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT |
                             sprite->info.unk38 | sprite->info.unk3C,
-                        D_800A4AC8[sprite->info.combineMode].unk0 | D_800A4AC8[sprite->info.combineMode].unk4, &update);
+                        gEffectRenderModes[sprite->info.combineMode].unk0 | gEffectRenderModes[sprite->info.combineMode].unk4, &update);
     x = vp->centerX + sprite->info.x * vp->scaleX;
     y = vp->centerY + sprite->info.y * vp->scaleY;
     while (0) {}  // matching: block boundary; without it IDO keeps vp in a different register

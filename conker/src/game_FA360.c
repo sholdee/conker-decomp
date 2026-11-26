@@ -8,11 +8,11 @@ typedef struct {
 } BurstYaws;
 
 /* This file's .data. */
-DriftBurstEmitter *D_80088870 = NULL; /* the burst emitter whose rate func_150CDB6C sets */
-static BurstYaws D_80088874 = { { 0.19999999f, 1.3f, 2.3f, 3.3999999f, 5.4f } };
+DriftBurstEmitter *gDriftBurstEmitter = NULL; /* the burst emitter whose rate particle_setDriftBurstRate sets */
+static BurstYaws gDriftBurstYaws = { { 0.19999999f, 1.3f, 2.3f, 3.3999999f, 5.4f } };
 
 /* Spawns a tumbling, swaying quad that drifts down from spawn->pos. */
-DriftQuad *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
+DriftQuad *particle_spawnDriftQuad(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     DriftQuad *effect;
     ParticleDef packet;
     QuadDriftMotion drift;
@@ -54,7 +54,7 @@ DriftQuad *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     drift.phaseSpeed = func_150ADA68() * 1210.0f * 0.0001f;
     drift.phaseScale = (func_150ADA68() * 12960.0f + 15241.0f) * 0.0001f;
 
-    effect = func_1513D524(&packet, 0x13, 0x1E, 0, 0x11, 0, 0x40, arg1, arg2);
+    effect = particle_newQuadParticleWhite(&packet, 0x13, 0x1E, 0, 0x11, 0, 0x40, arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->drift, &drift, sizeof(drift));
     }
@@ -62,7 +62,7 @@ DriftQuad *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
 }
 
 /* Per-frame update of a drifting quad: integrates velocity with gravity and drag, sways it while falling. */
-s32 func_150CD17C(DriftQuad *effect) {
+s32 particle_updateDriftQuad(DriftQuad *effect) {
     QuadDriftMotion *drift;
     s32 i;
     f32 wave;
@@ -107,7 +107,7 @@ s32 func_150CD17C(DriftQuad *effect) {
 }
 
 /* Draw: fills this frame's vertex buffer with the quad, rotated by dir and placed at pos (plus sway while falling). */
-Vtx_t *func_150CD59C(DriftQuad *effect, s16 bufferIndex) {
+Vtx_t *particle_buildDriftQuad(DriftQuad *effect, s16 bufferIndex) {
     s32 pad; // matching: unused stack slot
     Vtx_t *vertices;
     Vtx_t *result;
@@ -116,7 +116,7 @@ Vtx_t *func_150CD59C(DriftQuad *effect, s16 bufferIndex) {
     u8 i;
     u8 fresh;
 
-    func_151D5D60(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
+    particle_getViewBuffer(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
     result = vertices;
     // matching: an early `return NULL` reorders the blocks; the else form keeps IDO's layout
     if (vertices != NULL) {
@@ -167,9 +167,9 @@ Vtx_t *func_150CD59C(DriftQuad *effect, s16 bufferIndex) {
 
 /*
  * Emitter update: accumulates rate over time and, for each whole unit, spawns a burst at a random distance
- * along one of the D_80088874 yaws, but only if that yaw is within pi/8 of the current camera's heading.
+ * along one of the gDriftBurstYaws yaws, but only if that yaw is within pi/8 of the current camera's heading.
  */
-void func_150CD7F8(DriftBurstEmitter *emitter) {
+void particle_updateDriftBurstEmitter(DriftBurstEmitter *emitter) {
     BurstTimer *timer = &emitter->timer;
     DriftBurst burst;
     BurstYaws yaws;
@@ -187,7 +187,7 @@ void func_150CD7F8(DriftBurstEmitter *emitter) {
         burst.drag = 0.992233f;
         burst.minVy = -10.1175995f;
         do {
-            yaws = D_80088874;
+            yaws = gDriftBurstYaws;
             index = func_150ADA20() % 5U;
             yaw = yaws.yaw[index] + func_150ADA68() * 0.59999996f;
             heading = camera_global_Cameras[gCurrentView].TrueCameraAngle - 180.0f;
@@ -218,7 +218,7 @@ void func_150CD7F8(DriftBurstEmitter *emitter) {
                 burst.speedRange = 25.2f;
                 burst.gravityBase = -1.108f;
                 burst.gravityRange = 0.201f;
-                func_15152874(&burst, emitter->base.header.owner, emitter->base.header.kind);
+                particle_spawnDriftBurst(&burst, emitter->base.header.owner, emitter->base.header.kind);
             }
             timer->pending -= 1.0f;
         } while (timer->pending > 1.0f);
@@ -226,11 +226,11 @@ void func_150CD7F8(DriftBurstEmitter *emitter) {
 }
 
 /* Sets the burst emitter's rate from a 0..255 intensity. */
-void func_150CDB6C(s32 intensity) {
+void particle_setDriftBurstRate(s32 intensity) {
     BurstTimer *timer;
 
-    if (intensity >= 0 && intensity < 256 && D_80088870 != NULL) {
-        timer = &D_80088870->timer;
+    if (intensity >= 0 && intensity < 256 && gDriftBurstEmitter != NULL) {
+        timer = &gDriftBurstEmitter->timer;
         timer->rate = intensity * (1.0f / 255.0f);
     }
 }

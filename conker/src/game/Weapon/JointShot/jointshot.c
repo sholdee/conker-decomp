@@ -55,7 +55,7 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
     if (func_15142A5C(arg0) != 0) {
         return NULL;
     }
-    func_151D5148(arg0);
+    particle_countShot(arg0);
     if (!arg2) {
         func_15145740(arg0, &aim, &sp118, &spE4, 0.8110000491f);
     }
@@ -126,10 +126,10 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
     }
     if ((arg0->ob_matrix_ptr != NULL) && ((arg0->unk74 & 0xF) != 0xF)) {
         if (arg2 || ((gScreenLayout < 2) && (func_150ADA20() & 1))) {
-            func_151D3F14(&origin, arg5, arg6);
+            particle_spawnShortLightFlash(&origin, arg5, arg6);
         }
         if ((arg2 || (gScreenLayout < 2)) && (func_150ADA20() & 1)) {
-            func_151D4408(&start, &dir, matrix, arg0, 1.0f, arg5, arg6);
+            particle_spawnBoneDirParticle(&start, &dir, matrix, arg0, 1.0f, arg5, arg6);
         }
         mask = 1;
         for (i = D_800DCA20; i > 0; i--) {
@@ -174,7 +174,7 @@ typedef struct {
     /* 0x9C */ u8 flags;
 } ShotSource;
 
-/* Emits this side's effects (func_151D3F14, func_151D4408, weapon_spawnJointBeam) from its joint points, then fires a
+/* Emits this side's effects (particle_spawnShortLightFlash, particle_spawnBoneDirParticle, weapon_spawnJointBeam) from its joint points, then fires a
  * copy of the shot described by the owner's 0x1B entry, its end pushed 10% beyond its start. */
 void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
     Vec3f origin;
@@ -183,7 +183,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
     void *matrix;
 
     if ((arg0 != NULL) && (side < 2) && (func_15142A5C(arg0) == 0)) {
-        func_151D5148(arg0);
+        particle_countShot(arg0);
         if (arg0->ob_matrix_ptr != NULL) {
             {
                 const Vec3f *points[3];
@@ -203,8 +203,8 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
                 dir.y -= start.y;
                 dir.z -= start.z;
             }
-            func_151D3F14(&origin, arg2, arg3);
-            func_151D4408(&start, &dir, matrix, arg0, 1.0f, arg2, arg3);
+            particle_spawnShortLightFlash(&origin, arg2, arg3);
+            particle_spawnBoneDirParticle(&start, &dir, matrix, arg0, 1.0f, arg2, arg3);
             weapon_spawnJointBeam(arg0, side, &origin, -1, arg2, arg3);
             {
                 ShotSource *source;
@@ -267,7 +267,7 @@ void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, 
                   arg5);
 }
 
-/* An object spawned by func_1513264C (only the field used here). */
+/* An object spawned by particle_newModelParticleWithFloor (only the field used here). */
 typedef struct {
     /* 0x000 */ u8 pad0[0x170];
     /* 0x170 */ u8 unk170; /* start of the per-type state block */
@@ -317,7 +317,7 @@ void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
     spawn.fadeRate = 0xFF;
     spawn.sound = 0;
 
-    effect = func_1513264C(&spawn, 3, 0xFF, 0, 1, arg1, arg2);
+    effect = particle_newModelParticleWithFloor(&spawn, 3, 0xFF, 0, 1, arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->unk170, &state, sizeof(state));
     }

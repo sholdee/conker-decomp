@@ -4,7 +4,7 @@
 #include "libc/math.h"
 
 /* Spawns a particle burst at bone 10 of `actor`. */
-void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
+void particle_spawnBoneModelBurst(Actor *actor, u8 arg1, s32 arg2) {
     ModelBurst burst;
     MtxF *bones;
 
@@ -50,7 +50,7 @@ void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
         burst.motionFlags = 0xF;
         burst.fadeStart = 25;
         burst.fadeRate = 10;
-        func_15152520(&burst, arg1, arg2);
+        particle_spawnModelBurst(&burst, arg1, arg2);
     }
 }
 
@@ -92,7 +92,7 @@ s32 func_151938E4(SegmentEmitter *emitter) {
  * Spawns one particle on the segment `from` -> `to`, at fraction `t` along it, moving with velocity
  * (to - from) * emitter->scale. Skipped while the owner is in water or moving slower than 8.1.
  */
-void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, SegmentEmitter *emitter) {
+void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, SegmentEmitter *emitter) {
     EffectParams params;
     EffectMotion motion;
     const Vec3f *ownerMotion;

@@ -871,7 +871,7 @@ void attach_applyOwnerEffects(ModelAttachment *att, Actor *owner) {
         break;
     case 0x5D:
         trail_spawnCharacterTrail(owner, 0xFF, 1);
-        func_150D5440(owner, 0xFF, 1);
+        particle_attachFollowEffect(owner, 0xFF, 1);
         break;
     case 0x3D:
         effect_spawnBoneBurst(owner, 0xFF, 1);
@@ -947,7 +947,7 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
         case 0x5F:
         case 0x65:
         case 0x66:
-            func_151D4668(owner);
+            particle_detachObjEmitters(owner);
             break;
         case 0x1D:
         case 0x82:
@@ -962,8 +962,8 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
         case 0x16:
         case 0x63:
         case 0x89:
-            func_151027E8(owner);
-            func_151D4668(owner);
+            particle_stopObjEffect(owner);
+            particle_detachObjEmitters(owner);
             break;
         }
     }
@@ -2508,8 +2508,8 @@ s32 attach_hookToggleTexture(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-/* Hook: starts func_151026BC effect `kind` while the owner is in the set's trigger state (and
- * mv allows it), and stops it with func_151027E8 when that no longer holds. */
+/* Hook: starts particle_startObjRayBeam effect `kind` while the owner is in the set's trigger state (and
+ * mv allows it), and stops it with particle_stopObjEffect when that no longer holds. */
 s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
     u8 kind;
     s32 triggered;
@@ -2545,7 +2545,7 @@ s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
                 if ((unk->buttons & 0x2000) == 0x2000) {
                     if (unk->ReloadTimer == 0) {
                         att->unk38 = 1;
-                        func_151026BC(owner, -1, kind, 1, 0xFF, 1);
+                        particle_startObjRayBeam(owner, -1, kind, 1, 0xFF, 1);
                     }
                 }
             }
@@ -2553,7 +2553,7 @@ s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
     } else if (!triggered || (unk = owner->mv, (unk->buttons & 0x2000) == 0) ||
                ((unk->SniperState == 0) && (kind != 6))) {
         att->unk38 = 0;
-        func_151027E8(owner);
+        particle_stopObjEffect(owner);
     }
     return 0;
 }

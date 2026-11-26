@@ -16,7 +16,7 @@ extern EmitterCallback D_8008AA00[];
  * around (x, y, z), starting at `startAngle` and stepping by `angleStep` (256 = full turn).
  * Stops early if the kind's callback returns 0.
  */
-void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count,
+void particle_emitOnCircle(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count,
                    u8 kind, s32 arg8, f32 arg9, void *data, u8 arg11) {
     f32 dirX;
     f32 dirZ;
@@ -46,7 +46,7 @@ void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep,
  * Spawns particles of `kind` along the line from (x0, y0, z0) to (x1, y1, z1), `count`
  * points including both ends. Stops early if the kind's callback returns 0.
  */
-void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8 kind,
+void particle_emitOnLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8 kind,
                    s32 arg8, f32 arg9, void *data, u8 arg11) {
     f32 px;
     f32 py;
@@ -94,7 +94,7 @@ void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8
  * each at a random angle between `angleA` and `angleB` inclusive.
  * Stops early if the kind's callback returns 0.
  */
-void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s16 angleB, s16 count, u8 kind,
+void particle_emitOnRandomCircle(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s16 angleB, s16 count, u8 kind,
                    s32 arg8, f32 arg9, void *data, u8 arg11) {
     f32 dirX;
     f32 dirZ;
@@ -135,7 +135,7 @@ void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s16 angleB, s16 
  * plane facing `yaw`, each at a random elevation between `angleA` and `angleB` inclusive.
  * Stops early if the kind's callback returns 0.
  */
-void func_1514C858(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angleA, s16 angleB, s16 count,
+void particle_emitOnRandomArc(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angleA, s16 angleB, s16 count,
                    u8 kind, s32 arg9, f32 arg10, void *data, u8 arg12) {
     f32 yawX;
     f32 yawZ;

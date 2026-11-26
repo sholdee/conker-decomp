@@ -86,7 +86,7 @@ void func_1515AF90(s16 player) {
     }
 }
 
-/* Effect update: accumulates rate * gFrameDelta and spawns one func_151303BC particle per whole unit. */
+/* Effect update: accumulates rate * gFrameDelta and spawns one particle_newSpriteParticle particle per whole unit. */
 void func_1515B21C(EmitterObject *obj) {
     RiseEmitterState *emitter;
     void *particle;
@@ -160,7 +160,7 @@ void func_1515B21C(EmitterObject *obj) {
             extra.swayZ = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.baseSize;
             desc.gravity = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001000000047f;
 
-            particle = func_151303BC(&desc, 2, 0x28);
+            particle = particle_newSpriteParticle(&desc, 2, 0x28);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
             }
@@ -234,7 +234,7 @@ void func_1515B674(s16 player) {
         data.stretch = ((func_150ADA68() * 301.0f) + 94.0f) * 0.009999999776f;
         info.x = (func_150ADA68() * 200.0f) + -100.0f;
         info.y = (func_150ADA68() * 148.0f) + -100.0f;
-        info.texture = D_8008FD04[func_151D8E20()]();
+        info.texture = D_8008FD04[particle_getContextEffectKind()]();
         info.timer = (func_150ADA20() % 51U) + 50;
         info.color1.alpha = (func_150ADA20() % 101U) + 100;
         if (func_150ADA20() & 1) {

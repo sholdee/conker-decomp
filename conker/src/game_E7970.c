@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Spawns an effect attached to `owner`. */
-void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2) {
+void particle_attachOwnerEmitter(Actor *owner, u8 arg1, s32 arg2) {
     EffectE7970Data data;
     TimedEffect *effect;
 
@@ -18,7 +18,7 @@ void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2) {
 }
 
 /* Per-frame update: kills the effect once its owner is gone, otherwise emits particles around the owner at a random rate. */
-void func_150BA55C(EffectE7970 *effect) {
+void particle_updateOwnerEmitter(EffectE7970 *effect) {
     Actor *owner;
     EffectE7970Data *data;
     s32 heading;

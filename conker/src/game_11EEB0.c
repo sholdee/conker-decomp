@@ -86,7 +86,7 @@ void func_150F1CB0(Actor *actor) {
     }
 }
 
-/* Burst of effects at `actor` (func_151D5404 and friends, sound 0x2B6/0x2BE, two particle
+/* Burst of effects at `actor` (particle_startPlayerRumbles and friends, sound 0x2B6/0x2BE, two particle
  * sprays scaled by the actor's size). */
 void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f pos;
@@ -99,12 +99,12 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
     pos.y = actor->ypos + 20.0f;
     pos.z = actor->zpos;
     scale = (actor->scale_xz + actor->scale_y) * 0.5f;
-    func_151D5404(&pos, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg1, arg2);
-    func_151D5334(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
-    func_151D5514(&pos, arg1, arg2);
+    particle_startPlayerRumbles(&pos, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg1, arg2);
+    particle_startPlayerCameraWobbles(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
+    particle_spawnBlastSpray(&pos, arg1, arg2);
     func_10010F88((func_150ADA20() & 8) + 0x2B6, 0x7FFF, 0, 0, 0, pos.x, pos.y, pos.z, 4000, 6000);
-    func_151D3FF4(&pos, arg1, arg2);
-    func_151541B8(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
+    particle_spawnLightFlash(&pos, arg1, arg2);
+    particle_spawnGrowFade(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
                   func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
     {
         DebrisSpray a;
@@ -128,7 +128,7 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
         a.spin = 8.990000725f;
         a.floorHitChance = 0.0f;
         a.floorHitFn = 12;
-        func_1515080C(&a, D_800A18C0, D_800A18CC, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, arg1, arg2);
+        particle_spawnDebrisSpray(&a, D_800A18C0, D_800A18CC, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, arg1, arg2);
         b.countBase = 5;
         b.countRange = 3;
         b.pos = pos;
@@ -145,7 +145,7 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
         b.scaleBase = 0.503000021f;
         b.scaleRange = 0.2560000122f;
         b.spin = 13.93300056f;
-        func_15152190(&b, D_800A18D8, D_800A18E0, 2, 0.0f, 0, arg1, arg2);
+        particle_spawnDebrisBurst(&b, D_800A18D8, D_800A18E0, 2, 0.0f, 0, arg1, arg2);
     }
 }
 

@@ -681,7 +681,7 @@ void zone_applyEffect(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits)
         break;
     case 3:
         if (unk127 != 0xFF) {
-            func_150E68B0(actor, unk127, zone, ((TriggerZoneBytes *)zone)->data1Byte3);
+            particle_startSourceEmission(actor, unk127, zone, ((TriggerZoneBytes *)zone)->data1Byte3);
         }
         break;
     case 6: {

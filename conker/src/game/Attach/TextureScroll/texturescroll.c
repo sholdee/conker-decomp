@@ -181,7 +181,7 @@ void attach_spawnFootImpact(Actor *actor) {
             burst.envColorMode = 6;
             burst.unk64 = 1;
             burst.extra = 0.9054819942f;
-            func_15153634(&burst, 255, 255, 1);
+            particle_spawnSpriteBurst(&burst, 255, 255, 1);
         }
     }
 }

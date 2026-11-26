@@ -81,7 +81,7 @@ typedef struct {
 
 /* Matrix callbacks: build the actor's matrix for this frame. */
 static s32 (*gEffectActorMatrixFuncs[])(Mtx *, EffectActor *) = { effect_buildEffectActorRotScaleMtx, effect_buildTumblingPieceMtx, effect_buildEffectActorScaleMtx };
-extern RenderPreset D_800A4AC8[];
+extern RenderPreset gEffectRenderModes[];
 
 /* Draws an effect actor: sets its render state and colors, then its matrix and display list. */
 Gfx *effect_drawEffectActor(Gfx *gfx, EffectActor *actor, s16 arg2) {
@@ -103,9 +103,9 @@ Gfx *effect_drawEffectActor(Gfx *gfx, EffectActor *actor, s16 arg2) {
                   actor->tmpl.color0.red, actor->tmpl.color0.green, actor->tmpl.color0.blue, actor->tmpl.color0.alpha, 255, actor->tmpl.render.envMode);
     gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
     gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
-    gfx = func_1513F4E4(gfx, ((u8 *)&actor->tmpl.render.unk10)[3] /* matching: reads the low byte */, &update);
+    gfx = particle_setCombineMode(gfx, ((u8 *)&actor->tmpl.render.unk10)[3] /* matching: reads the low byte */, &update);
     gfx = func_15142FBC(gfx, actor->tmpl.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->tmpl.render.unk14 | actor->tmpl.render.unk18,
-                        D_800A4AC8[actor->tmpl.render.renderMode].unk0 | D_800A4AC8[actor->tmpl.render.renderMode].unk4, &update);
+                        gEffectRenderModes[actor->tmpl.render.renderMode].unk0 | gEffectRenderModes[actor->tmpl.render.renderMode].unk4, &update);
     if (actor->tmpl.flags & 2) {
         gfx = func_151462C8(gfx, &actor->attachment, actor->tmpl.attachMode, actor->tmpl.owner, actor->tmpl.ownerId, arg2,
                             &actor->tmpl.position, (actor->tmpl.flags & 4) ? 1 : 0, 0);

@@ -335,7 +335,7 @@ void beam_updateBoneSparks(BoneSparkEffect *effect) {
                 spawn.pos.z = spawn.vel.z * t + start.z;
                 flipX = (func_150ADA20() & 1) ? 0x80 : 0;
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
-                spark = func_15130280(&spawn, 1, 0, 4, effect->base.header.owner, effect->base.header.kind);
+                spark = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, effect->base.header.owner, effect->base.header.kind);
                 if (spark != NULL) {
                     memcpy(&spark->data.drag, &scale, sizeof(scale));
                 }
@@ -453,12 +453,12 @@ void beam_unlinkModelBeam(ModelBeam *beam) {
 /* Beam destructors: unlink the beam from its effect, then free it. */
 void beam_destroyModelBeam(ModelBeam *beam) {
     beam_unlinkModelBeam(beam);
-    func_1513CA6C(&beam->head);
+    particle_destroyQuadParticleDefault(&beam->head);
 }
 
 void beam_freeModelBeam(ModelBeam *beam) {
     beam_unlinkModelBeam(beam);
-    func_1513CAA0(&beam->head);
+    particle_freeQuadParticleDefault(&beam->head);
 }
 
 void func_150F6478(DefParticleHead *obj) {
@@ -567,11 +567,11 @@ void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 }
 
 // matching: this file was compiled with s32 where the definition (game_2062D0.c) has u8 (args 3, 6, 11, 15) and
-// s16 (arg 5), and with a void return. The definition is SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel,
+// s16 (arg 5), and with a void return. The definition is SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel,
 // u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,
 // CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE, s32 argF).
-void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, s32, s32);
-/* BloodStrip emit callback: one func_151D9014 blood particle, larger than func_15137E60's. 60% of
+void particle_spawnSteamParticle(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, s32, s32);
+/* BloodStrip emit callback: one particle_spawnSteamParticle blood particle, larger than func_15137E60's. 60% of
  * them get a ground probe under the strip's owner; the rest get none (height -10000). */
 void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
     Vec3f start;
@@ -605,6 +605,6 @@ void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3
     } else {
         flag = 0;
     }
-    func_151D9014(&start, &velocity, 1, arg3, arg4, arg5, arg6, probeGround, 1.8f, 1.8f, 1,
+    particle_spawnSteamParticle(&start, &velocity, 1, arg3, arg4, arg5, arg6, probeGround, 1.8f, 1.8f, 1,
                   &ground, 1, flag, strip->header.owner, strip->header.kind);
 }

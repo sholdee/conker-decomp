@@ -4,10 +4,10 @@
 
 /* Defined in game_15D730.c. Not in particle.h: game/Trail/PissTrail/pisstrail.c and game_200930.c call it with a third
    argument. */
-void func_15131958(Vec3f *vel, f32 drag);
+void particle_applyDrag(Vec3f *vel, f32 drag);
 
-/* Attaches a FollowEffect (func_150D54C8) to obj. */
-void func_150D5440(Actor *obj, u8 arg1, s32 arg2) {
+/* Attaches a FollowEffect (particle_updateFollowEffect) to obj. */
+void particle_attachFollowEffect(Actor *obj, u8 arg1, s32 arg2) {
     FollowEffectData data;
     FollowEffect *effect;
 
@@ -25,7 +25,7 @@ void func_150D5440(Actor *obj, u8 arg1, s32 arg2) {
  * FollowEffect update: while the owner is low (unk28 < 8) on a type-0xE surface, emits
  * particles on both sides of it at a rate of 3-4 per second (scaled by gFrameDelta).
  */
-void func_150D54C8(FollowEffect *effect) {
+void particle_updateFollowEffect(FollowEffect *effect) {
     Actor *owner;
     FollowEffectData *data;
     ParticleDesc spawn;
@@ -110,7 +110,7 @@ void func_150D54C8(FollowEffect *effect) {
                 spawn.flags &= ~0xC0;
                 right = (func_150ADA20() & 1) ? 0x80 : 0; // matching: reuses the u8 local for the 0x80 flag
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | right;
-                func_15130280(&spawn, 1, 0, 0, effect->base.header.owner, effect->base.header.kind);
+                particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, effect->base.header.owner, effect->base.header.kind);
                 data->spawnAccum -= 1.0f;
             } while (data->spawnAccum > 1.0f);
         }
@@ -118,7 +118,7 @@ void func_150D54C8(FollowEffect *effect) {
 }
 
 /* FollowEffect message handler: dies with its owner and follows it through message 0x2D. */
-void func_150D596C(FollowEffect *effect, ActorMsg *msg, u8 type) {
+void particle_onFollowEffectMsg(FollowEffect *effect, ActorMsg *msg, u8 type) {
     FollowEffectData *data = &effect->data;
     Actor *object;
 
@@ -154,7 +154,7 @@ void func_150D5A4C(TimedEffect *effect) {
  * D_800A3F14[type] - 2 type-specific ones) flying off the surface obj's last move hit,
  * plus impact and dust effects.
  */
-void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
+void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
     Vec3f vel;
     Vec3f hitPos;
@@ -310,7 +310,7 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
                 piece.gravity = func_150ADA68() * 0.6480000019f + -1.397000074f;
                 piece.lifetime = func_150ADA20() % 21U + 30;
                 piece.model = firstModels[i];
-                func_15132A4C(&piece, 0, 0, 0, arg1, arg2);
+                particle_newModelParticle(&piece, 0, 0, 0, arg1, arg2);
             }
             piece.fadeStart = 12;
             piece.fadeRate = 21;
@@ -329,7 +329,7 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
                 piece.gravity = func_150ADA68() * 0.6260000467f + -1.089000106f;
                 piece.lifetime = func_150ADA20() % 41U + 40;
                 piece.model = D_80089A20[type][j];
-                func_15132A4C(&piece, 0, 0, 0, arg1, arg2);
+                particle_newModelParticle(&piece, 0, 0, 0, arg1, arg2);
             }
         }
         if (obj->CameraPtr != NULL && gScreenLayout <= 0) {
@@ -347,17 +347,17 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-/* Spawns a func_151541B8 effect at pos with a random size and a 200-255 fourth argument. */
+/* Spawns a particle_spawnGrowFade effect at pos with a random size and a 200-255 fourth argument. */
 void func_150D6388(Vec3f *pos, u8 arg1, s32 arg2) {
     u32 randInt;
     f32 randFrac;
 
     randFrac = func_150ADA68();
     randInt = func_150ADA20();
-    func_151541B8(pos, randFrac * 4.0f + 15.0f, 1.374570012f, randInt % 56 + 200, 0.0f, arg1, arg2);
+    particle_spawnGrowFade(pos, randFrac * 4.0f + 15.0f, 1.374570012f, randInt % 56 + 200, 0.0f, arg1, arg2);
 }
 
-/* Spawns a func_15154884 effect at pos with randomized parameters. */
+/* Spawns a particle_spawnSwell effect at pos with randomized parameters. */
 void func_150D6434(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 rand3;
     f32 rand2;
@@ -366,7 +366,7 @@ void func_150D6434(Vec3f *pos, u8 arg1, s32 arg2) {
     rand1 = func_150ADA68();
     rand2 = func_150ADA68();
     rand3 = func_150ADA68();
-    func_15154884(pos, rand1 * 3.0f + 8.0f, rand2 * 0.4030000269f + 1.305000067f, rand3 * 50.0f + 100.0f, arg1, arg2);
+    particle_spawnSwell(pos, rand1 * 3.0f + 8.0f, rand2 * 0.4030000269f + 1.305000067f, rand3 * 50.0f + 100.0f, arg1, arg2);
 }
 
 /* Fills in fixed settings; unk50 is -1 when gScreenLayout >= 2 or D_8008FD8C >= 8, else 0. */
@@ -400,7 +400,7 @@ void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
     }
 }
 
-/* Impact effect on a type-0xE surface hit at pos (func_151A5D58 with randomized parameters). */
+/* Impact effect on a type-0xE surface hit at pos (particle_spawnSurfaceMark with randomized parameters). */
 void func_150D65F0(CollisionTri *surface, Vec3f *pos, u8 arg2, s32 arg3) {
     u32 rand3;
     u32 rand2;
@@ -409,7 +409,7 @@ void func_150D65F0(CollisionTri *surface, Vec3f *pos, u8 arg2, s32 arg3) {
     rand1 = func_150ADA68();
     rand2 = func_150ADA20();
     rand3 = func_150ADA20();
-    func_151A5D58(rand1 * 100.0f + 150.0f, rand2 % 71 + 130, surface, pos, rand3 % 31 + 50, 0, 1, arg2, arg3);
+    particle_spawnSurfaceMark(rand1 * 100.0f + 150.0f, rand2 % 71 + 130, surface, pos, rand3 % 31 + 50, 0, 1, arg2, arg3);
 }
 
 /* Calls screen_spawnFlash for camera arg0 with 0xFF, 0xFF, 0xFF, a random 200-255 and a random 25-30. */
@@ -423,7 +423,7 @@ void func_150D66A4(u8 arg0, u8 arg1, s32 arg2) {
 }
 
 /* Spawns 15-25 drift particles and one grow particle that follow obj. */
-void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
+void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
     s32 count;
     ParticleDesc spawn;
     FollowDriftData drift;
@@ -451,7 +451,7 @@ void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
     spawn.g = 0x4B;
     spawn.b = 0x4B;
     spawn.brightness = 0xFF;
-    func_150D6C98(obj, &spawn.pos);
+    particle_getPointAboveObj(obj, &spawn.pos);
     spawn.fadeStart = 15;
     spawn.fadeRate = 17;
     spawn.flags = 0x84DE01;
@@ -479,7 +479,7 @@ void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
         r1 = (func_150ADA20() & 1) ? 0x80 : 0;
         r2 = (func_150ADA20() & 1) ? 0x40 : 0;
         spawn.flags |= r2 | r1;
-        particle = func_15130280(&spawn, 1, 0, 0xC, arg1, arg2);
+        particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0xC, arg1, arg2);
         if (particle != NULL) {
             memcpy(&particle->data.drift, &drift, sizeof(drift));
         }
@@ -511,7 +511,7 @@ void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
         growSpawn.g = 0xFF;
         growSpawn.b = 0xFF;
         growSpawn.brightness = 0xFF;
-        func_150D6C98(obj, &growSpawn.pos);
+        particle_getPointAboveObj(obj, &growSpawn.pos);
         growSpawn.offset = D_800A5480;
         growSpawn.fadeStart = 1;
         growSpawn.fadeRate = 0xFF;
@@ -533,7 +533,7 @@ void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
         growSpawn.height = 0.0f;
         growSpawn.width = 0.0f;
         growSpawn.gravity = 0.0f;
-        particle = func_15130280(&growSpawn, 1, 0, 0x1C, arg1, arg2);
+        particle = particle_newSpriteParticleWithFloor(&growSpawn, 1, 0, 0x1C, arg1, arg2);
         if (particle != NULL) {
             memcpy(&particle->data.grow, &grow, sizeof(grow));
         }
@@ -541,14 +541,14 @@ void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 /* Writes the point 60 units above obj's position to out. */
-void func_150D6C98(Actor *obj, Vec3f *out) {
+void particle_getPointAboveObj(Actor *obj, Vec3f *out) {
     out->x = obj->xpos;
     out->y = obj->ypos + 60.0f;
     out->z = obj->zpos;
 }
 
 /* Drift particle update: follows the owner and integrates offset/velocity; returns 0 to kill. */
-s32 func_150D6CC4(FollowParticle *particle, s32 arg1) {
+s32 particle_updateFollowDrift(FollowParticle *particle, s32 arg1) {
     FollowDriftData *data;
     Actor *owner;
 
@@ -557,7 +557,7 @@ s32 func_150D6CC4(FollowParticle *particle, s32 arg1) {
     if (owner->type == 0 || owner->unique_id != data->ownerId) {
         return 0;
     }
-    func_150D6C98(owner, &particle->head.desc.pos);
+    particle_getPointAboveObj(owner, &particle->head.desc.pos);
     {
         Vec3f prevVel = particle->head.desc.vel;
         f32 accelX;
@@ -565,7 +565,7 @@ s32 func_150D6CC4(FollowParticle *particle, s32 arg1) {
         f32 accelZ;
 
         particle->head.desc.vel.y += particle->head.desc.gravity * gFrameDelta;
-        func_15131958(&particle->head.desc.vel, data->drag);
+        particle_applyDrag(&particle->head.desc.vel, data->drag);
         accelX = (particle->head.desc.vel.x - prevVel.x) * gFrameDeltaInv;
         accelY = (particle->head.desc.vel.y - prevVel.y) * gFrameDeltaInv;
         accelZ = (particle->head.desc.vel.z - prevVel.z) * gFrameDeltaInv;
@@ -580,7 +580,7 @@ s32 func_150D6CC4(FollowParticle *particle, s32 arg1) {
 }
 
 /* Drift particle message handler: dies with its owner and follows it through message 0x2D. */
-void func_150D6E60(FollowParticle *particle, ActorMsg *msg, u8 type) {
+void particle_onFollowDriftMsg(FollowParticle *particle, ActorMsg *msg, u8 type) {
     FollowDriftData *data = &particle->data.drift;
     Actor *object;
 
@@ -605,7 +605,7 @@ void func_150D6E60(FollowParticle *particle, ActorMsg *msg, u8 type) {
 }
 
 /* Grow particle update: follows the owner, grows and fades; returns 0 once its lifetime is over. */
-s32 func_150D6F0C(FollowParticle *particle, s32 arg1) {
+s32 particle_updateFollowGrow(FollowParticle *particle, s32 arg1) {
     GrowParticleData *data;
     Actor *owner;
     f32 size;
@@ -617,7 +617,7 @@ s32 func_150D6F0C(FollowParticle *particle, s32 arg1) {
         return 0;
     }
 
-    func_150D6C98(owner, &particle->head.desc.pos);
+    particle_getPointAboveObj(owner, &particle->head.desc.pos);
 
     size = sqrtf(data->time) * data->growth;
     particle->head.desc.height = size;
@@ -633,7 +633,7 @@ s32 func_150D6F0C(FollowParticle *particle, s32 arg1) {
 }
 
 /* Grow particle message handler: dies with its owner and follows it through message 0x2D. */
-void func_150D7068(FollowParticle *particle, ActorMsg *msg, u8 type) {
+void particle_onFollowGrowMsg(FollowParticle *particle, ActorMsg *msg, u8 type) {
     GrowParticleData *data = &particle->data.grow;
     Actor *object;
 

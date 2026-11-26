@@ -34,14 +34,14 @@ typedef struct {
     /* 0x2C */ f32 chance;
 } FxSprayParams; // size 0x30
 
-/* Passed through func_1514C678 to the spawn callbacks (e.g. effect_spawnImpactSprayParticle). */
+/* Passed through particle_emitOnRandomCircle to the spawn callbacks (e.g. effect_spawnImpactSprayParticle). */
 struct FxSpawnPayload {
     /* 0x00 */ CollisionHit *hit;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ u8 kind;
 };
 
-/* The impact types' effect selections (effect_spawnImpact, effect_spawnImpactSprayParticle, func_151AC61C). */
+/* The impact types' effect selections (effect_spawnImpact, effect_spawnImpactSprayParticle, particle_spawnYawSteam). */
 const FxImpactSet gImpactSets[] = {
     { 0, 0, 0, 0, 0 },
     { 1, 1, 1, 1, 0 },
@@ -78,7 +78,7 @@ static const FxSpawnRange gImpactSecondEffects[] = {
     { 5.0f, 15, 10 },
 };
 
-/* The particle parameters of the impact emitters (FxImpactSet.emitter, func_151AC61C in game_1D9A00.c). */
+/* The particle parameters of the impact emitters (FxImpactSet.emitter, particle_spawnYawSteam in game_1D9A00.c). */
 const EmitterConfig gImpactEmitterConfigs[] = {
     { 10, 25, -63, 50, 5.19f, 9.849999f, 40, 30, 100, 155, 49.0f, 105.5f, -1.0780001f, 0.49400002f, 1.0f },
     { 10, 25, -48, 4, 7.0699997f, 3.9099998f, 50, 20, 100, 100, 39.5f, 65.0f, -0.57000005f, 0.07f, 0.4f },
@@ -98,7 +98,7 @@ void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 ar
     const FxImpactSet *set;
     u8 kind;
 
-    kind = func_151D8E20();
+    kind = particle_getContextEffectKind();
     if (hit == NULL) {
         return;
     }
@@ -112,7 +112,7 @@ void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 ar
         {
             const FxSpawnRange *spawn = &gImpactFirstEffects[set->first];
 
-            func_1514C678(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
+            particle_emitOnRandomCircle(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
                           func_150ADA20() % (spawn->range + 1) + spawn->base, 11, type, 0.0f,
                           &payload, arg3);
         }
@@ -126,7 +126,7 @@ void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 ar
         {
             const FxSpawnRange *spawn = &gImpactSecondEffects[set->second];
 
-            func_1514C678(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
+            particle_emitOnRandomCircle(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
                           func_150ADA20() % (spawn->range + 1) + spawn->base, 12, type, 0.0f,
                           &payload, arg3);
         }
@@ -134,7 +134,7 @@ void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 ar
     if (set->impact != -1 && (hit->flags & 1)) {
         const FxImpactEntry *impact = &gImpactGroundEffects[set->impact];
 
-        func_151DBE80(kind, impact->unk0, impact->unk8, impact->unk4, pos, &hit->tri, 150, 0, arg3, arg4);
+        particle_startKindEffect(kind, impact->unk0, impact->unk8, impact->unk4, pos, &hit->tri, 150, 0, arg3, arg4);
     }
 }
 
@@ -181,7 +181,7 @@ s32 effect_spawnImpactSprayParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32
         part.unk14 = y;
         spawn.pos.x = x;
         spawn.pos.z = z;
-        part.texture = D_800AB3F4[payload->kind];
+        part.texture = gKindSplashTextures[payload->kind];
         part.shade = 255;
         colorFlag = D_800AB404[payload->kind] ? 0x20 : 0;
         part.flags = colorFlag | 8;
@@ -269,13 +269,13 @@ s32 func_151AC408(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 height, Collision
     pos.x = points[emitter->head.start].x;
     pos.y = height;
     pos.z = points[emitter->head.start].z;
-    kind = func_151D8E20();
+    kind = particle_getContextEffectKind();
     if (func_150ADA20() & 1) {
         life = func_150ADA20() % 41 + 80;
-        func_151D9B8C(kind, data->scale * 6.0f, data->alpha, surface, &pos, life, 1, 1, 0, emitter->head.header.owner,
+        particle_spawnKindEmitter(kind, data->scale * 6.0f, data->alpha, surface, &pos, life, 1, 1, 0, emitter->head.header.owner,
                       emitter->head.header.kind);
     } else {
-        func_151DAB58(kind, data->scale * 1.5f, data->alpha, &pos, 1, emitter->head.header.owner, emitter->head.header.kind);
+        particle_spawnSquash(kind, data->scale * 1.5f, data->alpha, &pos, 1, emitter->head.header.owner, emitter->head.header.kind);
     }
     data->unk20 = 4;
     return 1;

@@ -15,7 +15,7 @@ struct Queue *D_800D98E0; /* the effect FIFO queue (allocated by effect_allocQue
  * (bone 40 or 47) into `pos`.
  * If `ground` is non-NULL, also probes the ground below that point into it.
  */
-s32 func_150CB0E0(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 side) {
+s32 particle_getDustSidePos(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 side) {
     Vec3f probe;
     const Vec3f *offset;
     MtxF *bone;
@@ -52,7 +52,7 @@ s32 func_150CB1E0(s32 arg0, s32 arg1) {
     return 0xB;
 }
 
-/* One corner colour passed to func_1513D668. */
+/* One corner colour passed to particle_spawnAxisQuadParticleNoModel. */
 typedef struct {
     s16 r;
     s16 g;
@@ -61,8 +61,8 @@ typedef struct {
     s16 unk8;
 } DustColor;
 
-/* Spawns a dust puff (tinted by func_150CCD90) on the ground below the actor's bone on `side`. */
-void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
+/* Spawns a dust puff (tinted by particle_getDepthTint) on the ground below the actor's bone on `side`. */
+void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
     Vec3f pos;
     CollisionHit ground;
     f32 fr;
@@ -79,12 +79,12 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
     if (actor->ob_matrix_ptr == NULL) {
         return;
     }
-    if (func_150CB0E0(&pos, actor, &ground, side) == 0) {
+    if (particle_getDustSidePos(&pos, actor, &ground, side) == 0) {
         return;
     }
     func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
-    func_151D5404(&pos, 1502.0f, 3000.0f, 1.0f / 3000.0f, 12, 15, 0xFF, 0);
-    func_150CCD90(pos.z, &fr, &fg, &fb);
+    particle_startPlayerRumbles(&pos, 1502.0f, 3000.0f, 1.0f / 3000.0f, 12, 15, 0xFF, 0);
+    particle_getDepthTint(pos.z, &fr, &fg, &fb);
     r = fr;
     g = fg;
     b = fb;
@@ -145,7 +145,7 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
         desc.unk46 = 0;
         desc.unk47 = 6;
         angleOffset = (side == 1) ? -8 : 8;
-        particle = func_1513D668(&desc, colors, 0, 0x17, 0, 0, (actor->langle >> 8) - angleOffset,
+        particle = particle_spawnAxisQuadParticleNoModel(&desc, colors, 0, 0x17, 0, 0, (actor->langle >> 8) - angleOffset,
                                  500.0f, 500.0f, NULL, &ground.tri, 1, 8, 0xFF, 0);
         if (particle != NULL) {
             memcpy(&particle->growth, &growth, sizeof(growth));
@@ -154,13 +154,13 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
             }
         }
         roll = (func_150ADA20() & 0xF) + 10;
-        func_1514C678(pos.x, pos.y, pos.z, (func_150ADA68() * 59.0f) + 80.0f,
+        particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (func_150ADA68() * 59.0f) + 80.0f,
                       0, 0xFF, roll, 14, 0, 0.0f, NULL, 0xFF);
         roll2 = (func_150ADA20() & 0xF) + 5;
         rgb.r = r;
         rgb.g = g;
         rgb.b = b;
-        func_1514C678(pos.x, pos.y, pos.z, (func_150ADA68() * 59.0f) + 70.0f,
+        particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (func_150ADA68() * 59.0f) + 70.0f,
                       0, 0xFF, roll2, 15, 0, 0.0f, &rgb, 0xFF);
     }
 }
@@ -178,8 +178,8 @@ s32 func_150CB7CC(QuadSprite *sprite) {
     return 1;
 }
 
-/* Spawns one func_15132A4C particle at (x, y, z), its velocity built by func_15143794 from `angle`. */
-s32 func_150CB800(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
+/* Spawns one particle_newModelParticle particle at (x, y, z), its velocity built by func_15143794 from `angle`. */
+s32 particle_spawnYawModelParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
                   s32 arg9, s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
     s32 pad; // matching: unused stack slot
     ParticleSpawn desc;
@@ -226,15 +226,15 @@ s32 func_150CB800(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.ownerId = 0;
     desc.fadeStart = 32;
     desc.fadeRate = 7;
-    func_15132A4C(&desc, 3, 0xFF, 0, arg14, 0);
+    particle_newModelParticle(&desc, 3, 0xFF, 0, arg14, 0);
     return 1;
 }
 
 /*
- * Update for the func_150CB1F4 dust: grows it while growTime lasts, and once flag 1 is set
+ * Update for the particle_spawnSideDust dust: grows it while growTime lasts, and once flag 1 is set
  * fades it out over the last 32 frames of its timer.
  */
-s32 func_150CBA30(DustPuff *dust) {
+s32 particle_updateDustPuff(DustPuff *dust) {
     dust->growth.growTime -= D_800BE9E4;
     if (dust->growth.growTime > 0) {
         f32 grow = dust->growth.growRate * gFrameDelta;
@@ -253,10 +253,10 @@ s32 func_150CBA30(DustPuff *dust) {
 }
 
 /*
- * Spawns one func_15130374 particle at (x, y, z), its velocity built by func_15143794 from
- * `angle`. It stores the damping factor that func_150CBCE0 applies each frame step.
+ * Spawns one particle_newOwnedSpriteParticle particle at (x, y, z), its velocity built by func_15143794 from
+ * `angle`. It stores the damping factor that particle_dampSparkXZ applies each frame step.
  */
-s32 func_150CBABC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
+s32 particle_spawnYawSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
                   s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     SparkParticle *particle;
     ParticleDesc desc;
@@ -312,7 +312,7 @@ s32 func_150CBABC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.scaleRate = 1.02f;
     damping = 0.962000072f;
 
-    particle = func_15130374(&desc, 1, sizeof(damping), argE, 1);
+    particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(damping), argE, 1);
     if (particle != NULL) {
         memcpy(&particle->damping, &damping, sizeof(damping));
     }
@@ -320,7 +320,7 @@ s32 func_150CBABC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 }
 
 /* Multiplies desc.vel.x and desc.vel.z by the particle's damping once per frame step. */
-s32 func_150CBCE0(SparkParticle *particle, s32 arg1) {
+s32 particle_dampSparkXZ(SparkParticle *particle, s32 arg1) {
     s32 i;
     f32 *damping;
 
@@ -333,7 +333,7 @@ s32 func_150CBCE0(SparkParticle *particle, s32 arg1) {
 }
 
 /* Advances the particle one frame step under constant vertical acceleration. */
-s32 func_150CBE88(BallisticParticle *particle) {
+s32 particle_moveBallisticConstAccel(BallisticParticle *particle) {
     particle->pos[0] += particle->vel[0] * gFrameDelta;
     particle->pos[1] += (particle->vel[1] * gFrameDelta) + (((particle->gravity * gFrameDelta) * gFrameDelta) * 0.5f);
     particle->pos[2] += particle->vel[2] * gFrameDelta;
@@ -344,8 +344,8 @@ s32 func_150CBE88(BallisticParticle *particle) {
     return 1;
 }
 
-/* Sets flag 1 and a 32-frame timer (the fade-out func_150CBA30 runs on its dust). */
-void func_150CBF5C(FadeoutParticle *particle) {
+/* Sets flag 1 and a 32-frame timer (the fade-out particle_updateDustPuff runs on its dust). */
+void particle_startDustFadeOut(FadeoutParticle *particle) {
     particle->flags |= 1;
     particle->timer = 32;
 }

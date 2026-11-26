@@ -77,7 +77,7 @@ void game_loadLevel(void) {
     func_100014C4(value);
     D_800E0A00 = 0;
     func_1500E738();
-    func_1500C2A0();
+    particle_resetModelList();
     D_800DC9F0 = 0;
     gPendingTrailPairTask = NULL;
     effect_clearHomingEffects();

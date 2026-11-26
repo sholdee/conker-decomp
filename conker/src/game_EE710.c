@@ -4,10 +4,10 @@
 
 
 
-/* Dust at one of actor's feet (foot 0 or 1: bone 13 or 17), on the ground height floorY: a func_1514C2F0
+/* Dust at one of actor's feet (foot 0 or 1: bone 13 or 17), on the ground height floorY: a particle_emitOnCircle
  * ring and a effect_spawnQuadEffect quad under the foot, then 5-12 particles thrown outwards, sized by the actor's
  * mean scale. */
-void func_150C1260(Actor *actor, u8 foot) {
+void particle_spawnFootDust(Actor *actor, u8 foot) {
     Vec3f footPos;
     s32 bone;
     f32 size;
@@ -34,7 +34,7 @@ void func_150C1260(Actor *actor, u8 foot) {
         // matching: an integer cast keeps ob_matrix_ptr in v1 (a pointer argument is loaded straight into a0)
         func_15142314((s32)actor->ob_matrix_ptr, bone, &footPos);
         radius = size * 80.0f;
-        func_1514C2F0(footPos.x, actor->floorY, footPos.z, radius, 0, 16, 16, 0, 0, radius * 4.0f, 0, 0xFF);
+        particle_emitOnCircle(footPos.x, actor->floorY, footPos.z, radius, 0, 16, 16, 0, 0, radius * 4.0f, 0, 0xFF);
         effect_spawnQuadEffect(-1, footPos.x, (s32)actor->floorY + 2.0f, footPos.z, 11, 19, 0, 0xFF, 0);
         spawn.model = 5;
         spawn.flags = 0x29E8;
@@ -82,7 +82,7 @@ void func_150C1260(Actor *actor, u8 foot) {
             spawn.rot.z = func_150ADA68() * 360.0f;
             spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
             spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
-            particle = func_15132A4C(&spawn, 3, 0xFF, 4, 0xFF, 0);
+            particle = particle_newModelParticle(&spawn, 3, 0xFF, 4, 0xFF, 0);
             if (particle != NULL) {
                 particle->floorY = actor->floorY;
             }

@@ -90,7 +90,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             collision_initHitFromObject(&ground, obj);
             if (collision_probeFloorSurfABSet0Cached(&probe, 0, center.y - 2000.0f, &ground) != 0) {
                 probe.y = ground.height;
-                func_1514C678(probe.x, probe.y + 31.0f, probe.z, radius, 0, 0xFF,
+                particle_emitOnRandomCircle(probe.x, probe.y + 31.0f, probe.z, radius, 0, 0xFF,
                               (func_150ADA20() % 11U) + 30, 25, 0, 0, 0, arg1);
             }
         }
@@ -164,7 +164,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             chunk.vel.z = (horizontal * sinYaw) + velZ;
             chunk.rotVel.x = 30.0f - (func_150ADA68() * 60.0f);
             chunk.rotVel.y = 30.0f - (func_150ADA68() * 60.0f);
-            func_15132A4C(&chunk, 3, 2, 0, arg1, 0);
+            particle_newModelParticle(&chunk, 3, 2, 0, arg1, 0);
             scale = ((obj->scale_xz + obj->scale_y) * 0.5f) / 0.96f;
             burst.pos = joints[i];
             burst.countBase = 4;
@@ -209,7 +209,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             burst.unk80 = 10;
             burst.unk82 = 25;
             burst.unk84 = obj->floorMaterial;
-            func_15151A38(&burst, arg1, arg2);
+            particle_spawnPuffSpray(&burst, arg1, arg2);
         }
     }
 }
@@ -249,7 +249,7 @@ void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4
     }
 }
 
-/* Live particle returned by func_15130374; its extra data (dataSize bytes) starts at 0xA8. */
+/* Live particle returned by particle_newOwnedSpriteParticle; its extra data (dataSize bytes) starts at 0xA8. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 extra;
@@ -296,7 +296,7 @@ void func_150B85C0(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
     spawn.drawFunc = -1;
     spawn.handlerSet = 0;
     spawn.scaleRate = 1.009518027f;
-    func_15130374(&spawn, 1, 0, arg3, arg4);
+    particle_newOwnedSpriteParticle(&spawn, 1, 0, arg3, arg4);
 }
 
 void *memcpy(void *, const void *, u32);
@@ -346,7 +346,7 @@ s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     spawn.drawFunc = -1;
     spawn.handlerSet = 0;
     spawn.scaleRate = 1.033332944f;
-    particle = func_15130374(&spawn, 1, sizeof(extra), argE, 1);
+    particle = particle_newOwnedSpriteParticle(&spawn, 1, sizeof(extra), argE, 1);
     if (particle != NULL) {
         memcpy(&particle->extra, &extra, sizeof(extra));
     }

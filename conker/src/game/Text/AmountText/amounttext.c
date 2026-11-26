@@ -12,16 +12,16 @@ typedef struct {
     /* 0x0E */ s16 fadeRate;
 } AmountTextStyle;
 
-/* Called when `character` touches a pulse object (game_1483E0.c): spawns func_150D6730's particles on it
+/* Called when `character` touches a pulse object (game_1483E0.c): spawns particle_spawnFollowDrift's particles on it
    while level is 0x32 or 0x33. */
 void func_151D6970(Actor *character, void *obj) {
     if ((level == 0x32) || (level == 0x33)) {
-        func_150D6730(character, 0xFF, 1);
+        particle_spawnFollowDrift(character, 0xFF, 1);
     }
 }
 
 
-/* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */
+/* Spawns the particle_spawnSplashSprayAtAngles and particle_spawnDropSprayAtAngles bursts at `pickup`, on the ground under `player`. */
 void func_151D69B4(WorldObject *pickup, Actor *player) {
     CollisionHit ground;
     SplashSpraySpec first;
@@ -53,7 +53,7 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
     first.spray.speedBase = 17.0f;
     first.spray.speedRange = 3.5f;
     first.spray.unk38 = 0.400000006f;
-    func_15153F18(&first.angles, &first.spray, &ground, 0xFF, 1);
+    particle_spawnSplashSprayAtAngles(&first.angles, &first.spray, &ground, 0xFF, 1);
     {
         DropSpraySpec second;
 
@@ -81,7 +81,7 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
         second.spray.gravityRange = 0.8140000105f;
         second.spray.sizeBase = 44.0f;
         second.spray.sizeRange = 88.0f;
-        func_15150178(&second.angles, &second.spray, &ground, 0xFF, 1);
+        particle_spawnDropSprayAtAngles(&second.angles, &second.spray, &ground, 0xFF, 1);
     }
 }
 
@@ -239,7 +239,7 @@ Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *procee
         gSPSegment(gfx++, 8, D_800838C0);
     }
 
-    gfx = func_15133EEC(func_15133EEC(gfx, 0xC3, 6, 3), 0xC3, 7, 3);
+    gfx = particle_bindSegmentTexture(particle_bindSegmentTexture(gfx, 0xC3, 6, 3), 0xC3, 7, 3);
     *proceed = 1;
     return gfx;
 }

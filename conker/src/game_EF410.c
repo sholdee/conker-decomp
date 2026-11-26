@@ -3,9 +3,9 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
+// particle_spawnSteamParticle (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
-SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
@@ -56,7 +56,7 @@ void func_150C1F60(u8 arg0) {
     params.render.envMode = 7;
     params.unk80 = 0xC;
     params.unk82 = 0x15;
-    func_15151A38(&params, arg0, 1);
+    particle_spawnPuffSpray(&params, arg0, 1);
     params.speedBase = 100.0f;
     params.speedRange = 57.5f;
     params.sizeBase = 55.6f;
@@ -73,7 +73,7 @@ void func_150C1F60(u8 arg0) {
     params.lifeRange = 0x15;
     params.growthBase = 0.46f;
     params.growthRange = 1.0f;
-    func_15151A38(&params, arg0, 1);
+    particle_spawnPuffSpray(&params, arg0, 1);
     {
     DropSpraySpec params2;
     params2.spray.pos = params.pos;
@@ -98,7 +98,7 @@ void func_150C1F60(u8 arg0) {
     params2.spray.gravityRange = 0.89400005f;
     params2.spray.sizeBase = 1152.0f;
     params2.spray.sizeRange = 848.0f;
-    func_15150178(&params2.angles, &params2.spray, 0, arg0, 1);
+    particle_spawnDropSprayAtAngles(&params2.angles, &params2.spray, 0, arg0, 1);
 }
 }
 
@@ -149,18 +149,18 @@ void func_150C2290(u8 arg0) {
     params.render.envMode = 7;
     params.unk80 = 0xC;
     params.unk82 = 0x15;
-    func_15151A38(&params, arg0, 1);
+    particle_spawnPuffSpray(&params, arg0, 1);
 }
 
 void func_150C2424(u8 arg0) {
-    func_1514C470(8500.0f, -490.0f, -328.0f, 8500.0f, -490.0f, 328.0f,
+    particle_emitOnLine(8500.0f, -490.0f, -328.0f, 8500.0f, -490.0f, 328.0f,
                   (func_150ADA68() * 8.0f) + 8.0f, 1, 0, 0.0f, 0, arg0);
-    func_1514C470(8843.0f, -560.0f, -580.0f, 8117.0f, -560.0f, -580.0f,
+    particle_emitOnLine(8843.0f, -560.0f, -580.0f, 8117.0f, -560.0f, -580.0f,
                   (func_150ADA68() * 3.0f) + 4.0f, 3, 0, 0.0f, 0, arg0);
 }
 
 /* Trail update handler (gMotionTrailUpdateProcs): sets the trail's alpha from its remaining life (as trail_fadeKind2Trail). */
-s32 func_150C251C(MotionTrail *trail) {
+s32 particle_fadeMotionTrailByLife(MotionTrail *trail) {
     TrailParams *params = trail->params;
     s32 alpha = trail->head.tmpl.life << 3;
 
@@ -221,7 +221,7 @@ s32 func_150C2558(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     params.render.envMode = 7;
     params.unk80 = 0xC;
     params.unk82 = 0x15;
-    func_15151A38(&params, argE, 1);
+    particle_spawnPuffSpray(&params, argE, 1);
     return 1;
 }
 
@@ -252,7 +252,7 @@ s32 func_150C2700(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     params.spray.gravityBase = -2.328f;
     params.spray.gravityRange = 1.6630001f;
     params.spray.sizeBase = 1655.0f;
-    func_15150178(&params.angles, &params.spray, 0, argE, 1);
+    particle_spawnDropSprayAtAngles(&params.angles, &params.spray, 0, argE, 1);
     return 1;
 }
 
@@ -292,7 +292,7 @@ void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
     rand3 = func_150ADA68();
-    func_151D9014(&pos, &vel, 6, rand0 * 0.27f + -0.31f,
+    particle_spawnSteamParticle(&pos, &vel, 6, rand0 * 0.27f + -0.31f,
                     (rand1 & 0xF) + 25, (rand2 % 101) + 155,
                     rand3 * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,
                     emitter->base.header.owner, emitter->base.header.kind);

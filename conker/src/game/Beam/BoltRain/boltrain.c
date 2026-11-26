@@ -217,7 +217,7 @@ void beam_boltArcMessage(BoltArcObj *obj, s32 *arg1, u8 msg) {
     }
 }
 
-/* One-entry variant lists for func_15151D6C, copied from rodata. */
+/* One-entry variant lists for particle_spawnSurfaceDebrisBurst, copied from rodata. */
 typedef struct { s32 v[1]; } S32x1;
 typedef struct { f32 v[1]; } F32x1;
 static const S32x1 D_800A23A4 = { { 0x85 } };
@@ -273,7 +273,7 @@ void beam_spawnImpactEffects(ImpactObj *obj) {
             debris.desc.scaleBase = 0.06000000238f;
             debris.desc.scaleRange = 0.1420000046f;
             debris.desc.spin = 25.77700043f;
-            func_15151D6C(&debris.desc, debris.variantIds.v, debris.variantScales.v, 1, obj->base.header.owner,
+            particle_spawnSurfaceDebrisBurst(&debris.desc, debris.variantIds.v, debris.variantScales.v, 1, obj->base.header.owner,
                           obj->base.header.kind);
         }
     }

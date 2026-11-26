@@ -118,7 +118,7 @@ void effect_updateEffectObj(EffectObj *obj) {
 }
 
 void effect_releaseEffectObjBuffers(EffectObj *obj) {
-    func_151D5E30(obj->buffers);
+    particle_freeViewBuffers(obj->buffers);
 }
 
 /* Frees the object's buffers, then hands it to effect_defaultDestroy. obj is any view of a effect_newEffectObj object. */

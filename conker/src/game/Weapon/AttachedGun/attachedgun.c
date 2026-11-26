@@ -52,7 +52,7 @@ void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2) {
 
     gun = weapon_getGunAttachment(obj);
     if (gun != NULL) {
-        func_151D5148(obj);
+        particle_countShot(obj);
         weapon_getShotAxes(obj, &direction, &axis0, &axis1);
 
         if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
@@ -88,9 +88,9 @@ void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2) {
                       ((u8 *)&arg1)[3], arg2);
 
         if (valid) {
-            func_151D3F14(&position, ((u8 *)&arg1)[3], arg2);
+            particle_spawnShortLightFlash(&position, ((u8 *)&arg1)[3], arg2);
             /* byte 2 of an attachment is the owner bone it follows */
-            func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
+            particle_spawnBoneDirParticle(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
                           ((u8 *)&arg1)[3], arg2);
             weapon_spawnMuzzleFlashes(&position, points, ((u8 *)&arg1)[3], arg2);
         }
@@ -142,7 +142,7 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
 
     gun = weapon_getGunAttachment(obj);
     if (gun != NULL) {
-        func_151D5148(obj);
+        particle_countShot(obj);
         weapon_getShotAxes(obj, &direction, &axis0, &axis1);
 
         if (obj->ob_matrix_ptr != NULL) {
@@ -165,8 +165,8 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
                       obj, 1, 1, 1, 0, 0x1A, 1, (randomWord % 5U) + 807, 0, arg1, arg2);
 
         if (valid) {
-            func_151D3F14(&position, arg1, arg2);
-            func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
+            particle_spawnShortLightFlash(&position, arg1, arg2);
+            particle_spawnBoneDirParticle(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
                           arg1, arg2);
             weapon_spawnMuzzleFlashes(&position, points, arg1, arg2);
         }
@@ -275,7 +275,7 @@ void weapon_spawnMuzzleFlashes(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3
         spawn.unk28 = points[i];
         spawn.unk44 = (func_150ADA20() % 156U) + 100;
         variant = (func_150ADA20() & 1) ? 2 : 0;
-        func_1513D2F0(&spawn, &D_800A4AA0, 0, 0, 0, 0x1B, variant + 1, 0, 0, 0, arg2, arg3);
+        particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0, 0, 0x1B, variant + 1, 0, 0, 0, arg2, arg3);
     }
 }
 

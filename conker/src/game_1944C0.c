@@ -94,44 +94,44 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*   4 */ { effect_updateQuadEffect, NULL, effect_drawQuadEffect, NULL, gQuadEffectRenderSetupDl, effect_beginQuadEffectDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*   5 */ { effect_updateBillboard, NULL, effect_drawBillboard, NULL, gSpriteRenderDl, func_15169668, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*   6 */ { effect_updateFadeBurst, NULL, effect_drawFadeBurst, NULL, gFadeBurstRenderSetupDl, NULL, NULL, NULL, NULL, gFadeBurstRenderTeardownDl, NULL, NULL, 1 },
-    /*   7 */ { func_151B9CB0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
-    /*   8 */ { func_1517A1EC, NULL, func_1517A3A0, NULL, D_8008CE20, func_1517A958, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*   9 */ { func_1517A84C, NULL, func_1517A3A0, NULL, D_8008CE20, func_1517A958, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*   7 */ { particle_updateFallingEmitter, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
+    /*   8 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, D_8008CE20, particle_beginSpinDebrisDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*   9 */ { particle_updateGroundChunk, NULL, particle_drawSpinDebris, NULL, D_8008CE20, particle_beginSpinDebrisDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  10 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  11 */ { beam_updateTracer, NULL, beam_drawTracer, NULL, gTracerRenderSetupDl, NULL, NULL, beam_tracerSwapMessage, func_150E2F90, NULL, NULL, NULL, 1 },
-    /*  12 */ { func_1517A1EC, NULL, func_1517A3A0, NULL, D_8008CE40, func_1517A958, NULL, NULL, func_1517AB7C, gSpriteEndDl, NULL, NULL, 1 },
+    /*  12 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, D_8008CE40, particle_beginSpinDebrisDraw, NULL, NULL, particle_endSpinDebrisDraw, gSpriteEndDl, NULL, NULL, 1 },
     /*  13 */ { func_15166B50, NULL, func_15166D68, NULL, D_8008B440, func_15166F6C, NULL, NULL, func_15166FD8, NULL, NULL, NULL, 1 },
     /*  14 */ { effect_updateQuadFx, NULL, func_150A6860, NULL, gQuadFxRenderSetupDl, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  15 */ { func_15171FC0, NULL, func_151720C4, NULL, D_8008CC30, NULL, NULL, NULL, NULL, D_8008CC58, NULL, NULL, 0 },
+    /*  15 */ { particle_updateFloorSprite, NULL, particle_drawFloorSprite, NULL, gFloorSpriteSetupDl, NULL, NULL, NULL, NULL, gFloorSpriteEndDl, NULL, NULL, 0 },
     /*  16 */ { effect_updateModelFx, NULL, effect_drawModelFx, NULL, NULL, NULL, NULL, NULL, NULL, gModelFxRenderTeardownDl, NULL, NULL, 0 },
-    /*  17 */ { func_1516DB90, NULL, NULL, NULL, NULL, NULL, func_1516D400, NULL, NULL, NULL, NULL, NULL, 0 },
-    /*  18 */ { func_1516D678, NULL, func_1516D738, NULL, D_8008CB70, NULL, NULL, NULL, NULL, D_8008CB90, NULL, NULL, 1 },
+    /*  17 */ { particle_updateSpriteEmitter, NULL, NULL, NULL, NULL, NULL, particle_tickStyleEmitterTimers, NULL, NULL, NULL, NULL, NULL, 0 },
+    /*  18 */ { particle_updateStyleParticle, NULL, particle_drawStyleParticle, NULL, gStyleParticleSetupDl, NULL, NULL, NULL, NULL, gStyleParticleEndDl, NULL, NULL, 1 },
     /*  19 */ { swarm_updatePercher, NULL, swarm_drawActor, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  20 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  21 */ { swarm_updateHoverer, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  22 */ { swarm_updateHoverer, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  23 */ { swarm_updateHoverer, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
     /*  24 */ { swarm_updateHoverer, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  25 */ { func_151321D0, NULL, func_15132B80, func_15132A88, NULL, NULL, NULL, func_15133588, NULL, NULL, func_151323AC, func_151323F8, 1 },
+    /*  25 */ { particle_updateModelParticle, NULL, particle_drawModelParticle, particle_buildModelParticleMatrix, NULL, NULL, NULL, particle_onModelParticleEvent, NULL, NULL, particle_destroyModelParticle, particle_freeModelParticle, 1 },
     /*  26 */ { trail_updateSprayEmitter, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /*  27 */ { func_1513C060, NULL, func_1513CBF0, NULL, D_80089EB8, NULL, NULL, func_1513CF9C, NULL, D_80089ED8, func_1513C9B0, func_1513C9FC, 1 },
-    /*  28 */ { func_1513CFE4, NULL, func_1513DB00, NULL, D_80089EB8, func_151406AC, NULL, func_1513DF9C, NULL, D_80089ED8, func_1513CB58, func_1513CBA4, 1 },
+    /*  27 */ { particle_updateQuadSprite, NULL, particle_drawQuadSprite, NULL, gQuadParticleSetupDl, NULL, NULL, particle_onQuadSpriteEvent, NULL, gQuadParticleEndDl, particle_destroyQuadSprite, particle_freeQuadSprite, 1 },
+    /*  28 */ { particle_updateQuadParticle, NULL, particle_drawQuadParticle, NULL, gQuadParticleSetupDl, particle_sortDrawList, NULL, particle_onQuadParticleEvent, NULL, gQuadParticleEndDl, particle_destroyQuadParticle, particle_freeQuadParticle, 1 },
     /*  29 */ { effect_updateQueue, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  30 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  31 */ { trail_updateEmitter, NULL, NULL, NULL, NULL, NULL, NULL, trail_onEmitterMessage, NULL, NULL, NULL, NULL, -1 },
-    /*  32 */ { func_15190898, NULL, NULL, NULL, NULL, NULL, NULL, func_15191980, NULL, NULL, func_15190840, func_1519086C, -1 },
-    /*  33 */ { func_1518D6E0, NULL, NULL, NULL, NULL, NULL, NULL, func_1518F49C, NULL, NULL, func_1518E4CC, func_1518E4F8, 0 },
+    /*  32 */ { particle_updateDripEmitter, NULL, NULL, NULL, NULL, NULL, NULL, particle_onDripEmitterMsg, NULL, NULL, particle_destroyDripEmitter, particle_freeDripEmitter, -1 },
+    /*  33 */ { particle_updateActorEmitter, NULL, NULL, NULL, NULL, NULL, NULL, particle_onActorEmitterMsg, NULL, NULL, particle_destroyActorEmitter, particle_freeActorEmitter, 0 },
     /*  34 */ { effect_updateEffectObj, NULL, effect_drawEffectObj, NULL, gEffectObjRenderSetupDl, NULL, NULL, effect_handleEffectObjMessage, NULL, gEffectObjRenderResetDl, effect_destroyEffectObj, effect_freeEffectObj, 1 },
     /*  35 */ { effect_updateTimedEffect, NULL, effect_drawTimedEffect, NULL, gTimedEffectRenderSetupDl, NULL, NULL, effect_handleTimedEffectMessage, NULL, gTimedEffectRenderResetDl, effect_destroyTimedEffect, effect_freeTimedEffect, 1 },
     /*  36 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /*  37 */ { func_150C0C38, NULL, NULL, NULL, NULL, NULL, NULL, func_150C09B0, NULL, NULL, func_150C09F0, func_150C0A1C, -1 },
+    /*  37 */ { particle_updatePoolEmitter, NULL, NULL, NULL, NULL, NULL, NULL, particle_onPoolEmitterEvent, NULL, NULL, particle_destroyPoolEmitter, particle_freePoolEmitter, -1 },
     /*  38 */ { func_1519EA04, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  39 */ { effect_updateHomingEffect, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  40 */ { func_151342BC, NULL, func_151346D0, NULL, NULL, NULL, NULL, func_151347CC, NULL, NULL, func_1513472C, func_1513477C, 0 },
     /*  41 */ { func_15134E48, NULL, NULL, NULL, NULL, NULL, NULL, func_15135480, NULL, NULL, func_1513532C, func_151353A8, -1 },
     /*  42 */ { func_151349D0, NULL, NULL, NULL, NULL, NULL, NULL, func_15134C98, NULL, NULL, NULL, NULL, -1 },
-    /*  43 */ { func_151303EC, NULL, func_15130A9C, NULL, D_80089700, NULL, NULL, func_15131C2C, NULL, D_80089730, func_1513177C, func_151317C8, 1 },
-    /*  44 */ { func_151563B8, NULL, func_151564F8, NULL, D_8008AD40, NULL, NULL, NULL, NULL, NULL, func_15156FB8, func_15156FE4, 1 },
+    /*  43 */ { particle_updateSpriteParticle, NULL, particle_drawSpriteParticle, NULL, gSpriteParticleSetupDl, NULL, NULL, particle_onSpriteEvent, NULL, gSpriteParticleResetDl, particle_destroySpriteParticle, particle_freeSpriteParticle, 1 },
+    /*  44 */ { particle_updateStreakParticle, NULL, particle_drawStreakParticle, NULL, gStreakParticleSetupDl, NULL, NULL, NULL, NULL, NULL, particle_destroyStreakParticle, particle_freeStreakParticle, 1 },
     /*  45 */ { beam_updateLightning, NULL, beam_drawLightning, NULL, gLightningRenderSetupDl, NULL, NULL, beam_lightningMessage, NULL, gLightningRenderTeardownDl, beam_destroyLightning, beam_freeLightning, 1 },
     /*  46 */ { effect_updateCharacterWatcher, NULL, NULL, NULL, NULL, NULL, NULL, effect_characterWatcherMessage, NULL, NULL, effect_destroyCharacterWatcher, effect_freeCharacterWatcher, -1 },
     /*  47 */ { NULL, func_151AD174, func_151AD92C, NULL, NULL, NULL, NULL, func_151AE640, NULL, NULL, NULL, NULL, 1 },
@@ -154,14 +154,14 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  64 */ { beam_updateBolt, NULL, beam_drawBolt, NULL, gBoltRenderSetupDl, NULL, NULL, beam_boltMessage, NULL, gBoltRenderTeardownDl, beam_destroyBolt, beam_freeBolt, 1 },
     /*  65 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  66 */ { effect_updateBillboard, NULL, effect_drawBillboard, NULL, gSpriteRenderDl, func_15169668, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
-    /*  67 */ { func_15171FC0, NULL, func_151720C4, NULL, D_8008CC30, NULL, NULL, NULL, NULL, D_8008CC58, NULL, NULL, 0 },
+    /*  67 */ { particle_updateFloorSprite, NULL, particle_drawFloorSprite, NULL, gFloorSpriteSetupDl, NULL, NULL, NULL, NULL, gFloorSpriteEndDl, NULL, NULL, 0 },
     /*  68 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  69 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  70 */ { beam_updateStrip, NULL, beam_drawStrip, NULL, gStripRenderSetupDl, NULL, NULL, beam_stripMessage, NULL, gStripRenderResetDl, beam_destroyStrip, beam_freeStrip, 1 },
-    /*  71 */ { func_151303EC, NULL, func_15130A9C, NULL, D_80089700, NULL, NULL, func_15131C2C, NULL, D_80089730, func_1513177C, func_151317C8, 1 },
-    /*  72 */ { func_151321D0, NULL, func_15132B80, func_15132A88, NULL, NULL, NULL, func_15133588, NULL, NULL, func_151323AC, func_151323F8, 1 },
-    /*  73 */ { func_1513CFE4, NULL, func_1513DB00, NULL, D_80089EB8, NULL, NULL, func_1513DF9C, NULL, D_80089ED8, func_1513CB58, func_1513CBA4, 1 },
-    /*  74 */ { func_1513C060, NULL, func_1513CBF0, NULL, D_80089EB8, NULL, NULL, func_1513CF9C, NULL, D_80089ED8, func_1513C9B0, func_1513C9FC, 1 },
+    /*  71 */ { particle_updateSpriteParticle, NULL, particle_drawSpriteParticle, NULL, gSpriteParticleSetupDl, NULL, NULL, particle_onSpriteEvent, NULL, gSpriteParticleResetDl, particle_destroySpriteParticle, particle_freeSpriteParticle, 1 },
+    /*  72 */ { particle_updateModelParticle, NULL, particle_drawModelParticle, particle_buildModelParticleMatrix, NULL, NULL, NULL, particle_onModelParticleEvent, NULL, NULL, particle_destroyModelParticle, particle_freeModelParticle, 1 },
+    /*  73 */ { particle_updateQuadParticle, NULL, particle_drawQuadParticle, NULL, gQuadParticleSetupDl, NULL, NULL, particle_onQuadParticleEvent, NULL, gQuadParticleEndDl, particle_destroyQuadParticle, particle_freeQuadParticle, 1 },
+    /*  74 */ { particle_updateQuadSprite, NULL, particle_drawQuadSprite, NULL, gQuadParticleSetupDl, NULL, NULL, particle_onQuadSpriteEvent, NULL, gQuadParticleEndDl, particle_destroyQuadSprite, particle_freeQuadSprite, 1 },
     /*  75 */ { shadow_updateBlob, NULL, shadow_drawBlob, NULL, gBlobShadowSetupDl, NULL, NULL, NULL, func_1510E634, NULL, NULL, NULL, 1 },
     /*  76 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
     /*  77 */ { effect_updateEffectObj, NULL, effect_drawEffectObj, NULL, gEffectObjRenderSetupDl, NULL, NULL, effect_handleEffectObjMessage, NULL, gEffectObjRenderResetDl, effect_destroyEffectObj, effect_freeEffectObj, 1 },
@@ -169,14 +169,14 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  79 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  80 */ { effect_updatePlayerMarker, NULL, effect_drawPlayerMarker, NULL, NULL, NULL, NULL, effect_playerMarkerMessage, NULL, gPlayerMarkerRenderTeardownDl, effect_freePlayerMarker, effect_freePlayerMarker, 0 },
     /*  81 */ { text_updateBox, NULL, text_drawBox, NULL, gSpriteRenderDl, NULL, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, -1 },
-    /*  82 */ { func_151303EC, NULL, func_15130A9C, NULL, D_80089700, NULL, NULL, func_15131C2C, NULL, D_80089730, func_1513177C, func_151317C8, 1 },
-    /*  83 */ { func_151563B8, NULL, func_151564F8, NULL, D_8008AD40, NULL, NULL, NULL, NULL, NULL, func_15156FB8, func_15156FE4, 1 },
+    /*  82 */ { particle_updateSpriteParticle, NULL, particle_drawSpriteParticle, NULL, gSpriteParticleSetupDl, NULL, NULL, particle_onSpriteEvent, NULL, gSpriteParticleResetDl, particle_destroySpriteParticle, particle_freeSpriteParticle, 1 },
+    /*  83 */ { particle_updateStreakParticle, NULL, particle_drawStreakParticle, NULL, gStreakParticleSetupDl, NULL, NULL, NULL, NULL, NULL, particle_destroyStreakParticle, particle_freeStreakParticle, 1 },
     /*  84 */ { effect_updateDynModel, NULL, effect_drawDynModel, NULL, gDynModelRenderSetupDl, NULL, NULL, effect_dynModelMessage, NULL, gDynModelRenderResetDl, effect_destroyDynModel, effect_freeDynModel, 1 },
     /*  85 */ { effect_updateEffectActor, NULL, effect_drawEffectActor, NULL, gEffectActorRenderSetupDl, NULL, NULL, effect_effectActorMessage, NULL, gEffectActorRenderTeardownDl, effect_destroyEffectActor, effect_freeEffectActor, 1 },
-    /*  86 */ { func_1513CFE4, NULL, func_1513DB00, NULL, D_80089EB8, func_151406AC, NULL, func_1513DF9C, NULL, D_80089ED8, func_1513CB58, func_1513CBA4, 1 },
+    /*  86 */ { particle_updateQuadParticle, NULL, particle_drawQuadParticle, NULL, gQuadParticleSetupDl, particle_sortDrawList, NULL, particle_onQuadParticleEvent, NULL, gQuadParticleEndDl, particle_destroyQuadParticle, particle_freeQuadParticle, 1 },
     /*  87 */ { sprite_updateScreenSprite, NULL, sprite_drawScreenSprite, NULL, gScreenSpriteSetupDl, NULL, NULL, sprite_screenSpriteMessage, NULL, gScreenSpriteTeardownDl, NULL, NULL, 1 },
     /*  88 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /*  89 */ { func_1517A1EC, NULL, func_1517A3A0, NULL, D_8008CE40, func_1517A958, NULL, NULL, func_1517AB7C, NULL, NULL, NULL, 1 },
+    /*  89 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, D_8008CE40, particle_beginSpinDebrisDraw, NULL, NULL, particle_endSpinDebrisDraw, NULL, NULL, NULL, 1 },
     /*  90 */ { screen_updateTintEffect, NULL, func_151A5130, NULL, gSpriteRenderDl, NULL, NULL, func_151A55D4, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*  91 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
     /*  92 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
@@ -189,18 +189,18 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  99 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /* 100 */ { NULL, screen_updateFade, screen_drawFade, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /* 101 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /* 102 */ { func_1516DB90, NULL, NULL, NULL, NULL, NULL, func_1516D400, NULL, NULL, NULL, NULL, NULL, 0 },
-    /* 103 */ { func_1516D678, NULL, func_1516D738, NULL, D_8008CB70, NULL, NULL, NULL, NULL, D_8008CB90, NULL, NULL, 1 },
+    /* 102 */ { particle_updateSpriteEmitter, NULL, NULL, NULL, NULL, NULL, particle_tickStyleEmitterTimers, NULL, NULL, NULL, NULL, NULL, 0 },
+    /* 103 */ { particle_updateStyleParticle, NULL, particle_drawStyleParticle, NULL, gStyleParticleSetupDl, NULL, NULL, NULL, NULL, gStyleParticleEndDl, NULL, NULL, 1 },
 };
 
 /* Particle callbacks (BillboardTemplate.callback, QuadFx), declared without a prototype: each takes its
  * own particle type. */
 static void (*gParticleCallbacks[])() = {
-    func_151B9964, effect_updateRainDrop, effect_billboardDelayFade, NULL,
-    NULL, func_15174920, swarm_updateMember, func_1516A3F4,
-    NULL, func_1518CCA8, func_150AECCC, effect_growBillboard,
+    particle_updateFallingParticle, effect_updateRainDrop, effect_billboardDelayFade, NULL,
+    NULL, particle_updateWakePuff, swarm_updateMember, func_1516A3F4,
+    NULL, particle_updateGrowingBillboard, func_150AECCC, effect_growBillboard,
     effect_shrinkBillboard, func_150E4CBC, effect_updateRainSplash, effect_updateFallingObject,
-    func_151A175C, func_151A1E34, func_151A24A8, func_151A25E0,
+    particle_updateGatherParticle, particle_updateHoverParticle, particle_updateSwellParticle, particle_updateSwellTint,
     func_151A77C0, func_151A787C,
 };
 
@@ -539,7 +539,7 @@ typedef struct {
     s32 unk0;
     s32 unk4;
 } RenderModeEntry;
-extern RenderModeEntry D_800A4AC8[];
+extern RenderModeEntry gEffectRenderModes[];
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -572,7 +572,7 @@ Gfx *effect_drawSpriteFx(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     } else if (fx->fadeStep == 0xFF) {
         renderMode = 9;
     }
-    gfx = func_15142FBC(gfx, 0x2C00, D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, (u8 *)&update);
+    gfx = func_15142FBC(gfx, 0x2C00, gEffectRenderModes[renderMode].unk0 | gEffectRenderModes[renderMode].unk4 | 4, (u8 *)&update);
     return sprite_drawWorld(gfx, &params);
 }
 /* Spawns a particle (type 0x42 when `altType` is set, else 5) from the 0x38-byte template at `src`. */
@@ -774,25 +774,25 @@ Gfx *effect_drawBillboard(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         renderMode = p->tmpl.unk4 & 0xFF;
         combineMode = (p->tmpl.unk4 & 0xFFFF0000) >> 16;
         gfx = func_15142B7C(gfx, 5, 0);
-        gfx = func_1513F4E4(gfx, combineMode, &update);
+        gfx = particle_setCombineMode(gfx, combineMode, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((p->tmpl.flags & BILLBOARD_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, &update);
+                            gEffectRenderModes[renderMode].unk0 | gEffectRenderModes[renderMode].unk4 | 4, &update);
     } else if (p->tmpl.anim->fmt != 5) {
-        gfx = func_1513F4E4(gfx, 0xD, &update);
+        gfx = particle_setCombineMode(gfx, 0xD, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
+                            gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4 | 4, &update);
     } else if (p->tmpl.anim->fmt == 3) {
-        gfx = func_1513F4E4(gfx, 0xE, &update);
+        gfx = particle_setCombineMode(gfx, 0xE, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
+                            gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4 | 4, &update);
     } else if (p->tmpl.flags & 0x10) {
-        gfx = func_1513F4E4(gfx, 0xD, &update);
+        gfx = particle_setCombineMode(gfx, 0xD, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            D_800A4AC8[0x12].unk0 | D_800A4AC8[0x12].unk4 | 4, &update);
+                            gEffectRenderModes[0x12].unk0 | gEffectRenderModes[0x12].unk4 | 4, &update);
     } else {
-        gfx = func_1513F4E4(gfx, 0xF, &update);
+        gfx = particle_setCombineMode(gfx, 0xF, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_2CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            D_800A4AC8[0x11].unk0 | D_800A4AC8[0x11].unk4 | 4, &update);
+                            gEffectRenderModes[0x11].unk0 | gEffectRenderModes[0x11].unk4 | 4, &update);
     }
     c0 = p->tmpl.primG;
     c1 = p->tmpl.primB;

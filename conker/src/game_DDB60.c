@@ -12,8 +12,8 @@ static const f32 D_8009F81C[] = { 1.0f };
 
 /*
  * Spawns effects at actor's position, aimed by func_15143E24(other): actor id 0xA6 gets weapon_spawnImpactBurst
- * 50 units above it and one func_15152190 burst; any other actor gets a different burst plus two
- * func_15153F18 passes (unk3C = 0, then 1) using the collision_initHitFromObject info for actor.
+ * 50 units above it and one particle_spawnDebrisBurst burst; any other actor gets a different burst plus two
+ * particle_spawnSplashSprayAtAngles passes (unk3C = 0, then 1) using the collision_initHitFromObject info for actor.
  */
 void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
     Vec3f pos;
@@ -49,7 +49,7 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
         burst.scaleBase = 0.7070000172f;
         burst.scaleRange = 0.5070000291f;
         burst.spin = 26.41100121f;
-        func_15152190(&burst, D_8009F810, D_8009F814, 1, 0.0f, 0, arg2, arg3);
+        particle_spawnDebrisBurst(&burst, D_8009F810, D_8009F814, 1, 0.0f, 0, arg2, arg3);
     } else {
         {
             DebrisBurst burst;
@@ -70,7 +70,7 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
             burst.scaleBase = 0.04900000244f;
             burst.scaleRange = 0.1020000055f;
             burst.spin = 26.41100121f;
-            func_15152190(&burst, D_8009F818, D_8009F81C, 1, 0.0f, 0, arg2, arg3);
+            particle_spawnDebrisBurst(&burst, D_8009F818, D_8009F81C, 1, 0.0f, 0, arg2, arg3);
         }
         {
             SplashSpraySpec spray;
@@ -99,9 +99,9 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
             spray.spray.speedBase = 15.10000038f;
             spray.spray.speedRange = 20.80000114f;
             spray.spray.unk38 = 0.5f;
-            func_15153F18(&spray.angles, &spray.spray, &floor, arg2, arg3);
+            particle_spawnSplashSprayAtAngles(&spray.angles, &spray.spray, &floor, arg2, arg3);
             spray.spray.kind = 1;
-            func_15153F18(&spray.angles, &spray.spray, &floor, arg2, arg3);
+            particle_spawnSplashSprayAtAngles(&spray.angles, &spray.spray, &floor, arg2, arg3);
         }
     }
 }

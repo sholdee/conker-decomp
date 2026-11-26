@@ -46,7 +46,7 @@ void func_1500FFCC(void) {
         timer.pending = 0.0f;
         timer.rate = 0.0f;
         emitter = effect_newTimedEffect(0x12C, -1, 0x17, -1, 0, 0x14, sizeof(BurstTimer), 0xFF, 1);
-        if ((D_80088870 = emitter) != NULL) {
+        if ((gDriftBurstEmitter = emitter) != NULL) {
             memcpy(&emitter->timer, &timer, sizeof(timer));
         }
     }

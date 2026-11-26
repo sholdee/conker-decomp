@@ -104,8 +104,8 @@ GameCommand *func_150BE438(GameCommand *cmd, s32 id) {
 }
 
 
-/* Spawns the burst of effects at `obj`'s centre: one func_1515080C, one func_15152190
- * and three func_15153F18 particle sets (kinds 0, 2 and 10). */
+/* Spawns the burst of effects at `obj`'s centre: one particle_spawnDebrisSpray, one particle_spawnDebrisBurst
+ * and three particle_spawnSplashSprayAtAngles particle sets (kinds 0, 2 and 10). */
 void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
     f32 radius;
@@ -137,7 +137,7 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
         primary.spin = 14.09800053f;
         primary.floorHitChance = 1.0f;
         primary.floorHitFn = 0xB;
-        func_1515080C(&primary, D_800A0010, D_800A0038, 10, 0, 0, 0, 1, -1, &ground, 55.0f, 0, 0, arg1, arg2);
+        particle_spawnDebrisSpray(&primary, D_800A0010, D_800A0038, 10, 0, 0, 0, 1, -1, &ground, 55.0f, 0, 0, arg1, arg2);
         secondary.countBase = 0x11;
         secondary.countRange = 9;
         secondary.pos = pos;
@@ -154,7 +154,7 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
         secondary.scaleBase = 0.151000008f;
         secondary.scaleRange = 0.1590000093f;
         secondary.spin = 29.78700066f;
-        func_15152190(&secondary, D_800A0060, D_800A0064, 1, 10.0f, 0, arg1, arg2);
+        particle_spawnDebrisBurst(&secondary, D_800A0060, D_800A0064, 1, 10.0f, 0, arg1, arg2);
         {
             SplashSpraySpec particles;
 
@@ -182,11 +182,11 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
             particles.spray.unk40 = 0;
             particles.spray.unk38 = 0.5f;
             particles.spray.kind = 0;
-            func_15153F18(&particles.angles, &particles.spray, &ground, arg1, arg2);
+            particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, arg1, arg2);
             particles.spray.kind = 2;
-            func_15153F18(&particles.angles, &particles.spray, &ground, arg1, arg2);
+            particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, arg1, arg2);
             particles.spray.kind = 10;
-            func_15153F18(&particles.angles, &particles.spray, &ground, arg1, arg2);
+            particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, arg1, arg2);
         }
     }
 }

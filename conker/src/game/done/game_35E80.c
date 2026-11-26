@@ -4,11 +4,11 @@
 #include "variables.h"
 
 
-void func_150089D0(void) {
+void particle_resetStyleEmitterTimers(void) {
     u8 tmp = -1;
-    D_800DD2A0[0] = tmp;
+    gStyleEmitterTimers[0] = tmp;
     if (0) {};
-    D_800DD2A0[1] = tmp;
-    D_800DD2A0[2] = tmp;
-    D_800DD2A0[3] = tmp;
+    gStyleEmitterTimers[1] = tmp;
+    gStyleEmitterTimers[2] = tmp;
+    gStyleEmitterTimers[3] = tmp;
 }

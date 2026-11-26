@@ -37,26 +37,26 @@ static const u32 D_800A51D0[10] = {
 static s32 (*D_80089F90[])() = { func_151028AC, sight_isExtensionOn, func_15141818 };
 /* Destroy handlers, indexed by GlowShape.type. */
 static void (*D_80089F9C[])() = {
-    func_151411A4, func_151012D8, func_151411A4, func_151411A4, func_151411A4, func_151411A4, func_151411A4,
+    func_151411A4, particle_destroyBeamLine, func_151411A4, func_151411A4, func_151411A4, func_151411A4, func_151411A4,
     func_151411A4, func_151411A4, func_151411A4, beam_destroyGlow, func_151411A4, func_151411A4, func_151411A4,
     func_151411A4, effect_destroyBurstGlow, func_150F6484, func_151411A4,
 };
 /* Free handlers, indexed by GlowShape.type. */
 static void (*D_80089FE4[])() = {
-    func_151411C4, func_15101300, func_151411C4, func_151411C4, func_151411C4, func_151411C4, func_151411C4,
+    func_151411C4, particle_freeBeamLine, func_151411C4, func_151411C4, func_151411C4, func_151411C4, func_151411C4,
     func_151411C4, func_151411C4, func_151411C4, beam_freeGlow, func_151411C4, func_151411C4, func_151411C4,
     func_151411C4, effect_freeBurstGlow, func_150F64B0, func_151411C4,
 };
 /* Message handlers, indexed by GlowShape.type. */
 typedef void (*GlowMsgFn)();
 static GlowMsgFn D_8008A02C[] = {
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, beam_glowMessage, func_1518A360, func_150D7420,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, beam_glowMessage, particle_onBoneGlowSwap, func_150D7420,
     func_150D74DC, func_150D758C, effect_burstGlowMessage, effect_burstGlowMessage, func_150FADC8,
 };
 static IdList2 D_8008A074 = { { 0x1C, 0x56 } }; /* effect-object kinds */
 
 /*
- * Spawns a glow through func_1513D524 and copies paramSize bytes of params into it.
+ * Spawns a glow through particle_newQuadParticleWhite and copies paramSize bytes of params into it.
  * Returns the new glow, or NULL.
  */
 void *func_151407D0(void *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 handler,
@@ -65,7 +65,7 @@ void *func_151407D0(void *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8
 
     spawn->type = 3;
     spawn->flags |= 0x40400000;
-    obj = func_1513D524(spawn, arg3, arg4, arg5, 1, arg6, paramSize, arg8, arg9);
+    obj = particle_newQuadParticleWhite(spawn, arg3, arg4, arg5, 1, arg6, paramSize, arg8, arg9);
     if (obj != NULL) {
         GlowParams *dst = &obj->params;
 
@@ -141,7 +141,7 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
         s16 glowDepth;
         u16 zraw;
 
-        func_151D5D60(obj->vtxBuf, view, sizeof(obj->vtxTemplate), &vtx, &fresh);
+        particle_getViewBuffer(obj->vtxBuf, view, sizeof(obj->vtxTemplate), &vtx, &fresh);
         quad = vtx;
         if (vtx != NULL) {
             if (fresh) {
@@ -265,11 +265,11 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
 }
 
 void func_151411A4(DefParticleHead *arg0) {
-    func_1513CA6C(arg0);
+    particle_destroyQuadParticleDefault(arg0);
 }
 
 void func_151411C4(DefParticleHead *arg0) {
-    func_1513CAA0(arg0);
+    particle_freeQuadParticleDefault(arg0);
 }
 
 /* Destroys a glow: frees its attachment and runs its type's D_80089F9C handler. */
@@ -305,7 +305,7 @@ void func_151412BC(void) {
 
     for (p = 0; p < 2; p++) {
         for (i = 0; i < 4; i++) {
-            obj = (GlowObj *)gObjectLists[p][D_800A5168[i]];
+            obj = (GlowObj *)gObjectLists[p][gQuadParticleTypes[i]];
             while (obj != NULL) {
                 if (obj->flags & 0x2000) {
                     obj->params.shape.zbufSample[3] = 0;

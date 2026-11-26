@@ -37,7 +37,7 @@ void func_150D7120(Vec3f *pos, u8 fxOwner, s32 fxList) {
     fx.spray.fadeOutStart = 20;
     fx.spray.eventFunc = 0;
 
-    func_1514FCE8(&fx, fxOwner, fxList);
+    particle_spawnJetSprayBursts(&fx, fxOwner, fxList);
 }
 
 /* Hit effects at pos plus impact particles thrown back along -dir, off surface if there is one. */
@@ -55,13 +55,13 @@ void func_150D728C(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 fxOwner, s3
         surfaceFx.source.triangle = *surface;
         surfaceFx.spray.pos = *pos;
         weapon_initImpactSpray(&surfaceFx.spray, &surfaceFx.source.spread);
-        func_1514FBFC(&surfaceFx, fxOwner, fxList);
+        particle_spawnSurfaceJetSpray(&surfaceFx, fxOwner, fxList);
     } else {
         fx.direction.x = -dir->x;
         fx.direction.y = -dir->y;
         fx.direction.z = -dir->z;
         weapon_initImpactSpray(&fx.spray, &fx.spread);
         fx.spray.pos = *pos;
-        func_1514FB98(&fx, fxOwner, fxList);
+        particle_spawnDirectedJetSpray(&fx, fxOwner, fxList);
     }
 }

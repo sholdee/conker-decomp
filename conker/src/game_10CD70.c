@@ -367,7 +367,7 @@ void effect_spawnDripDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHea
     size_random = func_150ADA68();
     random_a = func_150ADA20();
     random_b = func_150ADA20();
-    func_151A26EC(&position, &acceleration, &velocity, 0.986891f, alpha_random * 0.23f + -0.337f,
+    particle_spawnDragFadeSprite(&position, &acceleration, &velocity, 0.986891f, alpha_random * 0.23f + -0.337f,
                   size_random * 200.0f + 150.0f, random_a % 26U + 40, random_b % 201U + 55, 30, 20, 0, -1,
                   52, 53, 52, effect->owner, effect->kind);
 }

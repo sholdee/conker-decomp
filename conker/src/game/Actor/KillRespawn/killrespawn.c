@@ -270,7 +270,7 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     if (slot == 0 && level == 4) {
         r = func_150ADA20();
         f = func_150ADA68();
-        func_150E7994(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
+        particle_startScreenBurst(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
     }
 }
 
@@ -416,7 +416,7 @@ s32 func_1507D754(Actor *obj) {
 
     switch (obj->character_type) {
     case 0x7F:
-        func_150B0348(obj, 0xFF, 1);
+        particle_spawnObjDebrisBurst(obj, 0xFF, 1);
         break;
     case 0x10:
     case 0x38:

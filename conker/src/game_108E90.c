@@ -50,7 +50,7 @@ void effect_startPuffJets(Actor *owner, s32 type, u8 sceneTag) {
             puff.speedRange = 8.0f;
             puff.growthBase = 0.3199999928f;
             puff.growthRange = 0.0f;
-            func_15152F70(&puff, sceneTag);
+            particle_spawnSimplePuffSpray(&puff, sceneTag);
 
             effect_newTimedEffectNoDraw(30, -1, 0, 1, 0, 0, sceneTag, 0);
 
@@ -81,7 +81,7 @@ void effect_startPuffJets(Actor *owner, s32 type, u8 sceneTag) {
             burst.anim = &D_80090514;
             burst.color = 255;
             burst.alpha = 255;
-            func_15153298(&burst, sceneTag, 1);
+            particle_spawnBillboardBurst(&burst, sceneTag, 1);
             break;
         case 1:
             flamethrower_spawnJet(owner, 2, sceneTag, 0);
@@ -123,5 +123,5 @@ void effect_updatePuffTimer(PuffTimer *timer) {
     puff.speedRange = 5.0f;
     puff.growthBase = 0.3199999928f;
     puff.growthRange = 0.0f;
-    func_15152F70(&puff, timer->sceneTag);
+    particle_spawnSimplePuffSpray(&puff, timer->sceneTag);
 }

@@ -45,7 +45,7 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
     pos.y = obj->floorY;
     func_15143E94(5, 0x4022);
     effect_spawnQuadEffect(-1, pos.x, pos.y + 6.0f, pos.z, 25, 18, 0, *(u8 *)&arg2, 1);
-    func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 50.0f + 40.0f, yaw + 60, yaw - 60,
+    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, func_150ADA68() * 50.0f + 40.0f, yaw + 60, yaw - 60,
                   func_150ADA20() % 11U + 30, 5, 0, 0.0f, 0, *(u8 *)&arg2);
     collision_initHitFromObject(&ground, obj);
     probe.x = pos.x;
@@ -70,13 +70,13 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
         desc.viewportMask = 0xFF;
         desc.unk1C = 0;
         desc.renderModes = 0x170002;
-        decal = func_1513C73C(&desc, 0, 0, &ground.tri, pos.x, ground.height, pos.z, size, size,
+        decal = particle_spawnSurfaceQuadSpriteNoModel(&desc, 0, 0, &ground.tri, pos.x, ground.height, pos.z, size, size,
                               func_150ADA20() & 0xFF, (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), 4, *(u8 *)&arg2, 0);
         if (decal != NULL && effect_pushQueue(gGroundDecalQueue, decal, 1) == 0) {
             effect_destroyObject(&decal->header);
         }
     }
-    func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 40.0f + 60.0f, yaw + 60, yaw - 60,
+    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, func_150ADA68() * 40.0f + 60.0f, yaw + 60, yaw - 60,
                   func_150ADA20() % 7U + 6, 6, 0, 0.0f, 0, *(u8 *)&arg2);
 }
 
@@ -140,7 +140,7 @@ s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.scaleStart = 1;
     desc.scaleRate = 1.02f;
     damping = 0.95f;
-    particle = func_15130374(&desc, 0, sizeof(damping), argE, 1);
+    particle = particle_newOwnedSpriteParticle(&desc, 0, sizeof(damping), argE, 1);
     if (particle != NULL) {
         memcpy(&particle->damping, &damping, sizeof(damping));
     }
@@ -165,7 +165,7 @@ void effect_startDecalFade(FadeQuadSprite *sprite) {
     sprite->quad.def.flags |= 1;
     sprite->fadeStart = sprite->quad.def.lifetime = 50;
     sprite->fadeStep = 5;
-    func_1513F6C0(&sprite->quad, 6, sprite->quad.expireFn);
+    particle_setQuadSpriteFuncs(&sprite->quad, 6, sprite->quad.expireFn);
 }
 
 /* Update callback: once life drops below fadeStart, caps alpha at life * fadeStep. */
@@ -246,6 +246,6 @@ s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     piece.fadeRate = 0xFF;
     piece.sizeY = scale;
 
-    func_15132A4C(&piece, 3, 0xFF, 0, arg14, 0);
+    particle_newModelParticle(&piece, 3, 0xFF, 0, arg14, 0);
     return 1;
 }

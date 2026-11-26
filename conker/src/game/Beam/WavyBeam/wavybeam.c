@@ -26,7 +26,7 @@ WavyBeamEffect *beam_spawnWavyBeam(s16 duration, u8 arg1, s32 arg2) {
 
 static const u8 gWavyBeamFirstBone = 1; // first's bone
 static const u8 gWavyBeamSecondBone = 1; // second's bone
-extern s32 D_800A4AC8[][2];
+extern s32 gEffectRenderModes[][2];
 static const Vec3f gWavyBeamStart = { -3.0f, 11.0f, -4.0f };  // beam start, in first's bone space
 static const Vec3f gWavyBeamEnd = { 0.0f, -5.0f, -7.0f };   // beam end, in second's bone space
 
@@ -78,8 +78,8 @@ Gfx *beam_drawWavyBeam(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx) {
         gdl = func_15142E24(gdl, &gEffectTextures[86], 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
         gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
         gdl = func_15142CF0(gdl, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
-        gdl = func_1513F4E4(gdl, 0x2E, &flag);
-        gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[5][0] | D_800A4AC8[5][1], &flag);
+        gdl = particle_setCombineMode(gdl, 0x2E, &flag);
+        gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[5][0] | gEffectRenderModes[5][1], &flag);
         dir.x = end.x - start.x;
         dir.y = end.y - start.y;
         dir.z = end.z - start.z;

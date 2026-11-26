@@ -2,23 +2,23 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_15D730.c as void func_15131958(Vec3f *vel, f32 drag). This file was compiled with a
+/* Defined in game_15D730.c as void particle_applyDrag(Vec3f *vel, f32 drag). This file was compiled with a
    view that takes a third argument. */
-void func_15131958(void *vel, f32 drag, void *arg2);
+void particle_applyDrag(void *vel, f32 drag, void *arg2);
 
-/* The point functions of func_151D469C's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is
+/* The point functions of particle_attachPointEmitter's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is
  * their second argument). */
-static void (*D_8008FC70[])(Actor *obj, s16 arg1, Vec3f *out) = {
+static void (*gEmitterPointFuncs[])(Actor *obj, s16 arg1, Vec3f *out) = {
     weapon_getSide0JointPos, weapon_getSide1JointPos, func_150FE794, weapon_getLauncherMuzzlePos, weapon_getGunMuzzlePos, weapon_getForwardProjectileStart, weapon_getAttachmentPos,
 };
-/* The guns' muzzle points and the bones they are on, for func_151D5A18 (by gun). */
-const Vec3f *D_8008FC8C[] = { &gGunMuzzleStart, &D_800A19E0 };
-u8 *D_8008FC94[] = { &gGunMuzzleBone, &D_80088B10 };
+/* The guns' muzzle points and the bones they are on, for particle_getGunAxes (by gun). */
+const Vec3f *gGunMuzzlePoints[] = { &gGunMuzzleStart, &D_800A19E0 };
+u8 *gGunMuzzleBones[] = { &gGunMuzzleBone, &D_80088B10 };
 
 void *memcpy(void *, const void *, u32);
 
 /* Spawns the impact effects (sound, sparks, debris, decal) of a hit at pos travelling along dir. */
-void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5) {
+void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5) {
     Vec3f hitPos;
     CollisionTri hitSurface;
     u8 hit;
@@ -143,7 +143,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
         sparks.unk39 = 0;
         sparks.unk72 = -1;
         sparks.unk73 = -1;
-        func_15152B38(&sparks, arg4, arg5);
+        particle_spawnTrailBurst(&sparks, arg4, arg5);
     }
     if (particleType != 0 && gScreenLayout < 2) {
         ParticleSpawn p;
@@ -192,7 +192,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
                 p.gravity = (func_150ADA68() * 449.0f + -744.0f) * 0.001000000047f;
                 p.flags = 0x39E8;
                 p.updateFn = 8;
-                func_15132A4C(&p, 3, 255, 0, arg4, arg5);
+                particle_newModelParticle(&p, 3, 255, 0, arg4, arg5);
             }
         } else {
             BobMotion wobble;
@@ -211,7 +211,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
             p.flags = 0x3980;
             p.updateFn = 12;
             p.gravity = 0;
-            obj = func_15132A4C(&p, 3, 255, sizeof(BobMotion), arg4, arg5);
+            obj = particle_newModelParticle(&p, 3, 255, sizeof(BobMotion), arg4, arg5);
             if (obj != NULL) {
                 memcpy((u8 *)obj + 0x170, &wobble, sizeof(BobMotion));
             }
@@ -223,7 +223,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
 }
 
 /* Particle update: bob unk20.y around unk50.y while the wobble timer runs, then settle on unk50. */
-s32 func_151D3D50(WobbleParticle *particle) {
+s32 particle_settleWobble(WobbleParticle *particle) {
     BobMotion *wobble = &particle->wobble;
 
     if (wobble->timer > 0) {
@@ -239,7 +239,7 @@ s32 func_151D3D50(WobbleParticle *particle) {
 
 /* Writes the world position of a point attached to bone `bone` of obj to out; objects without bone
    matrices use their origin raised by yOffset. */
-void func_151D3E04(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bone, f32 yOffset) {
+void particle_getBonePoint(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bone, f32 yOffset) {
     if (obj->ob_matrix_ptr != NULL) {
         func_15143134(localPos, out, &obj->ob_matrix_ptr[bone]);
     } else {
@@ -267,7 +267,7 @@ void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
     }
 }
 
-void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnShortLightFlash(Vec3f *pos, u8 arg1, s32 arg2) {
     LightEffectHeader header;
     Vec3i header2;
 
@@ -283,7 +283,7 @@ void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2) {
     light_createWithEffect(&header, &header2, (func_150ADA20() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
 }
 
-void func_151D3FF4(const Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnLightFlash(const Vec3f *pos, u8 arg1, s32 arg2) {
     LightEffectHeader header;
     Vec3i header2;
 
@@ -350,7 +350,7 @@ struct S151D4408Temps {
 };
 
 /* Spawns one particle at pos flying along dir, oriented by matrix mtx and attached to owner. */
-void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6) {
+void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6) {
     ParticleSpawn p;
     struct S151D4408Temps unused;
     f32 speed;
@@ -398,11 +398,11 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     p.ownerId = owner->unique_id;
     p.fadeStart = 6;
     p.fadeRate = 42;
-    func_15132A4C(&p, 3, 255, 0, arg5, arg6);
+    particle_newModelParticle(&p, 3, 255, 0, arg5, arg6);
 }
 
-/* Sends message 0x3C (handled by func_151D4C38) for obj's attached effects. */
-void func_151D4668(Actor *obj) {
+/* Sends message 0x3C (handled by particle_onPointEmitterMsg) for obj's attached effects. */
+void particle_detachObjEmitters(Actor *obj) {
     ActorRef handle;
 
     handle.actor = obj;
@@ -410,8 +410,8 @@ void func_151D4668(Actor *obj) {
     effect_sendEventToTimedEffects((s32)&handle, 0x3C);
 }
 
-/* Creates an effect that follows the point D_8008FC70[posFunc] computes on obj. */
-void func_151D469C(obj, posFunc, arg2, arg3, arg4)
+/* Creates an effect that follows the point gEmitterPointFuncs[posFunc] computes on obj. */
+void particle_attachPointEmitter(obj, posFunc, arg2, arg3, arg4)
     Actor *obj;
     u8 posFunc;
     s16 arg2;
@@ -434,7 +434,7 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
 
     if (obj->ob_matrix_ptr != NULL) {
         if ((obj->unk74 & 0xF) != 0xF) {
-            D_8008FC70[posFunc](obj, emitter.unk6, &emitter.pos);
+            gEmitterPointFuncs[posFunc](obj, emitter.unk6, &emitter.pos);
             emitter.flags |= 1;
         }
     }
@@ -446,7 +446,7 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
 }
 
 /* Effect update: tracks the emitter's point on its object and spawns smoke puffs along the path it moved. */
-void func_151D4794(ObjEmitterEffect *effect) {
+void particle_updatePointSmoke(ObjEmitterEffect *effect) {
     ObjEmitter *emitter;
     u8 wasValid;
     Vec3f prev;
@@ -462,7 +462,7 @@ void func_151D4794(ObjEmitterEffect *effect) {
         return;
     }
     if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
-        D_8008FC70[emitter->posFunc](obj, emitter->unk6, &emitter->pos);
+        gEmitterPointFuncs[emitter->posFunc](obj, emitter->unk6, &emitter->pos);
         emitter->flags |= 1;
     }
     if (wasValid) {
@@ -530,7 +530,7 @@ void func_151D4794(ObjEmitterEffect *effect) {
                 spawn.alpha = func_150ADA20() % 61U + 60;
                 spawn.timer = func_150ADA20() % 11U + 70;
                 spawn.width = spawn.height = func_150ADA68() * 40.0f + 40.0f;
-                ret = func_15130280(&spawn, 1, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
+                ret = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
                 if (ret != NULL) {
                     memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
                 }
@@ -540,9 +540,9 @@ void func_151D4794(ObjEmitterEffect *effect) {
     }
 }
 
-/* Effect message handler: 0x3C (see func_151D4668) destroys the effect when it belongs to the given
+/* Effect message handler: 0x3C (see particle_detachObjEmitters) destroys the effect when it belongs to the given
    object; 4 marks its tracked point as invalid. */
-void func_151D4C38(ObjEmitterEffect *effect, ActorRef *handle, u8 msg) {
+void particle_onPointEmitterMsg(ObjEmitterEffect *effect, ActorRef *handle, u8 msg) {
     ObjEmitter *emitter;
 
     emitter = &effect->emitter;
@@ -562,19 +562,19 @@ void func_151D4C38(ObjEmitterEffect *effect, ActorRef *handle, u8 msg) {
 }
 
 /* Puff update callback. */
-s32 func_151D4D04(SpriteParticle *puff, s32 arg1) {
+s32 particle_updatePointPuff(SpriteParticle *puff, s32 arg1) {
     WobbleData *extra;
 
     extra = &puff->data.wobble;
-    func_15131828(&puff->head, extra->amplitude, extra->phase, extra->phaseStep);
-    func_15131958(&puff->head.desc.vel, extra->drag, extra);
+    particle_wobbleSpriteOffset(&puff->head, extra->amplitude, extra->phase, extra->phaseStep);
+    particle_applyDrag(&puff->head.desc.vel, extra->drag, extra);
     return 1;
 }
 
 /* Attaches two emitters (point functions 0 and 1) to obj. */
-void func_151D4D58(Actor *obj) {
-    func_151D469C(obj, 0, 80, 255, 1);
-    func_151D469C(obj, 1, 80, 255, 1);
+void particle_attachTwinEmitters(Actor *obj) {
+    particle_attachPointEmitter(obj, 0, 80, 255, 1);
+    particle_attachPointEmitter(obj, 1, 80, 255, 1);
 }
 
 
@@ -633,7 +633,7 @@ s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit
 }
 
 /* Counts down mv->gun_before_reload and counts up mv->shotsfired. */
-void func_151D5148(Actor *obj) {
+void particle_countShot(Actor *obj) {
     if (obj->mv->gun_before_reload > 0) {
         obj->mv->gun_before_reload--;
     }
@@ -694,7 +694,7 @@ typedef struct {
 } Params151D5334;
 
 /* Calls func_15164F0C once for each i in 0..gScreenLayout with the same parameters. */
-void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
+void particle_startPlayerCameraWobbles(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
     s32 i;
     Params151D5334 params;
 
@@ -709,7 +709,7 @@ void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s
     }
 }
 
-/* User data of the effects func_151D5404 creates. */
+/* User data of the effects particle_startPlayerRumbles creates. */
 typedef struct {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 unkC;
@@ -720,7 +720,7 @@ typedef struct {
 } Params151D5404;
 
 /* Creates one func_151D8868 effect for each i in 0..gScreenLayout, with unk2 random in [base, base + range]. */
-void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7) {
+void particle_startPlayerRumbles(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7) {
     Params151D5404 params;
     RumbleParams header;
     void *effect;
@@ -745,7 +745,7 @@ void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range
     }
 }
 
-void func_151D5514(const Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnBlastSpray(const Vec3f *pos, u8 arg1, s32 arg2) {
     JetSpraySpec spawn;
 
     spawn.angles.yawBase = 0;
@@ -774,24 +774,24 @@ void func_151D5514(const Vec3f *pos, u8 arg1, s32 arg2) {
     spawn.spray.fadeStart = 12;
     spawn.spray.fadeOutStart = 20;
     spawn.spray.eventFunc = 0;
-    func_1514FCE8(&spawn, arg1, arg2);
+    particle_spawnJetSprayBursts(&spawn, arg1, arg2);
 }
 
-/* Combined effect at pos: func_151D5514, func_151D3FF4 and func_151541B8. */
-void func_151D5648(Vec3f *pos, u8 arg1, s32 arg2) {
+/* Combined effect at pos: particle_spawnBlastSpray, particle_spawnLightFlash and particle_spawnGrowFade. */
+void particle_spawnBlast(Vec3f *pos, u8 arg1, s32 arg2) {
     u32 randU;
     f32 randF;
 
-    func_151D5514(pos, arg1, arg2);
-    func_151D3FF4(pos, arg1, arg2);
+    particle_spawnBlastSpray(pos, arg1, arg2);
+    particle_spawnLightFlash(pos, arg1, arg2);
     randF = func_150ADA68();
     randU = func_150ADA20();
-    func_151541B8(pos, randF * 4.0f + 12.0f, 1.640999913f,
+    particle_spawnGrowFade(pos, randF * 4.0f + 12.0f, 1.640999913f,
                   (randU % 56U) + 200, 0.0f, arg1, arg2);
 }
 
-/* Spawns a func_151D4408 particle on bone `bone` of obj, from local point from towards local point to. */
-void func_151D5714(Actor *obj, const Vec3f *from, const Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
+/* Spawns a particle_spawnBoneDirParticle particle on bone `bone` of obj, from local point from towards local point to. */
+void particle_spawnBoneSegmentParticle(Actor *obj, const Vec3f *from, const Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
     Vec3f start;
     Vec3f dir;
     MtxF *mtx;
@@ -810,8 +810,8 @@ void func_151D5714(Actor *obj, const Vec3f *from, const Vec3f *to, u8 bone, f32 
             dir.y -= start.y;
             dir.z -= start.z;
             { // matching: a block holding a declaration changes how as1 schedules the call setup
-void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
-                func_151D4408(&start, &dir, mtx, obj, scale, arg5, arg6);
+void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
+                particle_spawnBoneDirParticle(&start, &dir, mtx, obj, scale, arg5, arg6);
             }
         }
     }
@@ -829,7 +829,7 @@ void func_151D57F8(Actor *obj, u8 slot) {
     Vec3f *origin;
     Vec3f *dir;
 
-    func_151D5A18(obj, &pos, &forward, &axis1, &axis2, D_8008FC8C[slot], *D_8008FC94[slot]);
+    particle_getGunAxes(obj, &pos, &forward, &axis1, &axis2, gGunMuzzlePoints[slot], *gGunMuzzleBones[slot]);
     func_151D5174(obj, &pos, &forward, &axis1, &axis2, &pointBuf, &dirBuf, &origin, &dir, NULL);
     obj->mv->rayHit.hitType = 1;
     if (origin == NULL) {
@@ -858,7 +858,7 @@ void func_151D57F8(Actor *obj, u8 slot) {
 
 /* Computes obj's axes (forward, axis1, axis2) and the world position of localPos on bone `bone`;
    objects without bone matrices use a point 34 units out and 49 up from their origin. */
-void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, const Vec3f *localPos, u8 bone) {
+void particle_getGunAxes(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, const Vec3f *localPos, u8 bone) {
     const Vec3f *src;
     Vec3f *dst;
 
@@ -932,7 +932,7 @@ s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg)
    (2 * size bytes) on first use; *allocated (optional) is set when it was allocated now. The buffers hold
    vertices of several types, so slots points to an array of buffer pointers of any type and out to a
    pointer of any type. */
-void func_151D5D60(void *slots, s16 index, s32 size, void *out, u8 *allocated) {
+void particle_getViewBuffer(void *slots, s16 index, s32 size, void *out, u8 *allocated) {
     u8 dummy;
 
     if (allocated == NULL) {
@@ -950,8 +950,8 @@ void func_151D5D60(void *slots, s16 index, s32 size, void *out, u8 *allocated) {
     *(void **)out = (u8 *)((void **)slots)[index] + ((D_800BE9C0 != 0) ? 0 : size);
 }
 
-/* Releases the four buffers of a func_151D5D60 slot array. */
-void func_151D5E30(void *slots) {
+/* Releases the four buffers of a particle_getViewBuffer slot array. */
+void particle_freeViewBuffers(void *slots) {
     u8 i;
 
     for (i = 0; i < 4; i++) {

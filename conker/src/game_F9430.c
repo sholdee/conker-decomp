@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One entry of the D_800A0640 table: where on the owner's skeleton func_150CBF80 spawns, and its random ranges. */
+/* One entry of the D_800A0640 table: where on the owner's skeleton particle_spawnBoneGroundBurst spawns, and its random ranges. */
 typedef struct {
     /* 0x00 */ u8 type;
     /* 0x01 */ u8 bone;
@@ -18,7 +18,7 @@ typedef struct {
     /* 0x28 */ s16 yawOffset;
 } GroundBurstDef;
 
-/* Per-corner colour passed to func_1513D668. */
+/* Per-corner colour passed to particle_spawnAxisQuadParticleNoModel. */
 typedef struct {
     /* 0x0 */ s16 r;
     /* 0x2 */ s16 g;
@@ -36,8 +36,8 @@ static const GroundBurstDef D_800A0640[] = {
 void *memcpy(void *, void *, s32);
 
 /* Spawns a burst at a bone-relative point of owner, dropped onto the ground below: a growing
-   ground-coloured particle, two func_1514C678 effects, a effect_newRingEffect effect and a func_151D5404 effect. */
-void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
+   ground-coloured particle, two particle_emitOnRandomCircle effects, a effect_newRingEffect effect and a particle_startPlayerRumbles effect. */
+void particle_spawnBoneGroundBurst(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     Vec3f pos;
     const GroundBurstDef *def;
     f32 fr;
@@ -66,7 +66,7 @@ void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     }
     pos.y = ground.height;
 lbl: // matching: unused label ends the basic block so the pos.y store stays out of the jal delay slot
-    func_150CCD90(pos.z, &fr, &fg, &fb);
+    particle_getDepthTint(pos.z, &fr, &fg, &fb);
     r = fr;
     g = fg;
     b = fb;
@@ -123,7 +123,7 @@ lbl: // matching: unused label ends the basic block so the pos.y store stays out
         spawn.unk47 = 6;
         extra.growDelay = (spawn.lifetime - (func_150ADA20() % (def->growDelayRange + 1))) - def->growDelayMin;
         extra.growRate = ((func_150ADA68() * def->growRateRange) + def->growRateMin) * spawn.width;
-        particle = func_1513D668(&spawn, colors, 0, 0x18, 0, 0, (owner->langle >> 8) + def->yawOffset,
+        particle = particle_spawnAxisQuadParticleNoModel(&spawn, colors, 0, 0x18, 0, 0, (owner->langle >> 8) + def->yawOffset,
                                  500.0f, 500.0f, NULL, &ground.tri, 1, 8, arg3, arg2);
         if (particle != NULL) {
             memcpy(&particle->extra, &extra, sizeof(extra));
@@ -133,7 +133,7 @@ lbl: // matching: unused label ends the basic block so the pos.y store stays out
             f32 d;
 
             rnd = (func_150ADA20() % 1U) + 41; // matching: a degenerate random range; the call and divu are in the ROM
-            func_1514C678(pos.x, pos.y, pos.z, (func_150ADA68() * 50.0f) + 80.0f,
+            particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (func_150ADA68() * 50.0f) + 80.0f,
                           0, 0xFF, rnd, 0x11, 0, 0.0f, NULL, arg3);
             d = 13.90000057f;
 lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above the 13.9f load
@@ -164,15 +164,15 @@ lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above 
             rgb.r = r;
             rgb.g = g;
             rgb.b = b;
-            func_1514C678(pos.x, pos.y, pos.z, (func_150ADA68() * 70.0f) + 70.0f,
+            particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (func_150ADA68() * 70.0f) + 70.0f,
                           0, 0xFF, rnd, 0x12, 0, 0.0f, &rgb, arg3);
         }
-        func_151D5404(&pos, 500.0f, 5000.0f, 0.0002f, 12, 15, 0xFF, 0);
+        particle_startPlayerRumbles(&pos, 500.0f, 5000.0f, 0.0002f, 12, 15, 0xFF, 0);
     }
 }
 
 /* Particle update: fades in over its first 32 ticks, then grows once past its delay. */
-s32 func_150CC638(GrowParticle *p) {
+s32 particle_fadeInGrow(GrowParticle *p) {
     GrowParticleExtra *extra;
 
     if (p->flags & 1) {
@@ -194,8 +194,8 @@ s32 func_150CC638(GrowParticle *p) {
     return 1;
 }
 
-/* Spawns a particle at (x, y, z) flung along yaw with a random pitch; it shrinks by 0.901 per tick (func_150CC8D4). */
-s32 func_150CC6B8(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
+/* Spawns a particle at (x, y, z) flung along yaw with a random pitch; it shrinks by 0.901 per tick (particle_dampYawSpriteXZ). */
+s32 particle_spawnYawDampedSprite(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
     TimedEffect *particle;
@@ -255,7 +255,7 @@ s32 func_150CC6B8(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.fadeRate = 25;
     spawn.scaleStart = 27;
 
-    particle = func_15130374(&spawn, 1, 4, arg14, 1);
+    particle = particle_newOwnedSpriteParticle(&spawn, 1, 4, arg14, 1);
     if (particle != NULL) {
         memcpy((u8 *)particle + 0xA8, &decay, sizeof(decay));
     }
@@ -264,7 +264,7 @@ s32 func_150CC6B8(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 }
 
 /* Particle update: scales unk58 and unk60 by the decay factor once per elapsed tick. */
-s32 func_150CC8D4(DecayParticle *p, s32 arg1) {
+s32 particle_dampYawSpriteXZ(DecayParticle *p, s32 arg1) {
     f32 *decay;
     s32 i;
 
@@ -277,7 +277,7 @@ s32 func_150CC8D4(DecayParticle *p, s32 arg1) {
 }
 
 /* Spawns a tumbling particle at (x, y, z), flung along yaw with a random upward pitch and spin. */
-s32 func_150CCA7C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
+s32 particle_spawnYawTumbler(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
     s32 pad; // matching: unused stack slot
@@ -328,12 +328,12 @@ s32 func_150CCA7C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.fadeStart = 0x20;
     spawn.fadeRate = 7;
 
-    func_15132A4C(&spawn, 3, 0xFF, 0, arg14, 0);
+    particle_newModelParticle(&spawn, 3, 0xFF, 0, arg14, 0);
     return 1;
 }
 
 /* Integrates a tumbling particle's position (with gravity) and rotation over one frame step. */
-s32 func_150CCCB4(TumbleParticle *p) {
+s32 particle_moveTumbler(TumbleParticle *p) {
     p->position[0] += p->velocity[0] * gFrameDelta;
     p->position[1] += p->velocity[1] * gFrameDelta + p->gravity * gFrameDelta * gFrameDelta * 0.5f;
     p->position[2] += p->velocity[2] * gFrameDelta;

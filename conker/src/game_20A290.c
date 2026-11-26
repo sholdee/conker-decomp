@@ -6,7 +6,7 @@
 static const s32 D_800AB550[1] = { 0x10 };
 static const f32 D_800AB554[1] = { 1.0f };
 
-void func_151DCDE0(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnSmallDebrisBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     DebrisBurst config;
     f32 temp_fv0 = 0.2f;
 
@@ -26,5 +26,5 @@ void func_151DCDE0(Vec3f *pos, u8 arg1, s32 arg2) {
     config.gravityBase = -0.693f;
     config.gravityRange = 0.30400002f;
     config.spin = 25.714f;
-    func_15152190(&config, D_800AB550, D_800AB554, 1, 26.0f, 0, arg1, arg2);
+    particle_spawnDebrisBurst(&config, D_800AB550, D_800AB554, 1, 26.0f, 0, arg1, arg2);
 }

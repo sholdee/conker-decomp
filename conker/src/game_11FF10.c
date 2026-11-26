@@ -54,8 +54,8 @@ void func_150F2A60(s32 arg0) {
     }
 }
 
-/* Spawns an emitter object that follows `target` (see func_150F2D14). */
-void func_150F2C8C(Actor *target) {
+/* Spawns an emitter object that follows `target` (see particle_updateBoneBurstEmitter). */
+void particle_spawnBoneBurstEmitter(Actor *target) {
     BoneBurstState state;
     BoneBurstEmitter *emitter;
 
@@ -73,7 +73,7 @@ void func_150F2C8C(Actor *target) {
 
 /* Emitter update: while the target lives, emits a burst of 3 particles from its bone 15 each time its unk222
  * changes to a nonzero value. */
-void func_150F2D14(BoneBurstEmitter *emitter) {
+void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
     BoneBurstState *state;
     Actor *target;
     ParticleDef def;
@@ -150,7 +150,7 @@ void func_150F2D14(BoneBurstEmitter *emitter) {
                     def.unk50 = 0;
                     def.fadeStart = 1;
                     def.fadeRate = 0xFF;
-                    spawned = func_1513D2F0(&def, &D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, emitter->base.header.owner, emitter->base.header.kind);
+                    spawned = particle_newQuadParticle(&def, &gWhiteVtxColors, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, emitter->base.header.owner, emitter->base.header.kind);
                     if (spawned != NULL) {
                         memcpy(&spawned->state, &particle, sizeof(particle));
                     }
@@ -163,17 +163,17 @@ void func_150F2D14(BoneBurstEmitter *emitter) {
 }
 
 /* Hands the emitter's target pointer and id to effect_handleOwnerActorEvent. */
-void func_150F3194(BoneBurstEmitter *emitter, s32 arg1, u8 arg2) {
+void particle_onBoneBurstEmitterEvent(BoneBurstEmitter *emitter, s32 arg1, u8 arg2) {
     effect_handleOwnerActorEvent(arg1, arg2, &emitter->state.target, &emitter->state.targetId, emitter);
 }
 
 /* Hands the particle's target pointer and id to effect_handleOwnerActorEvent. */
-void func_150F31D4(BoneBurstParticle *particle, s32 arg1, u8 arg2) {
+void particle_onBoneBurstParticleEvent(BoneBurstParticle *particle, s32 arg1, u8 arg2) {
     effect_handleOwnerActorEvent(arg1, arg2, &particle->state.target, &particle->state.targetId, particle);
 }
 
 /* Particle update: follows the target's bone 15, grows and fades with age. Returns 0 when it should die. */
-s32 func_150F3214(BoneBurstParticle *particle) {
+s32 particle_updateBoneBurstParticle(BoneBurstParticle *particle) {
     ParticleState *state;
     Actor *target;
     f32 size;
@@ -201,8 +201,8 @@ s32 func_150F3214(BoneBurstParticle *particle) {
 }
 
 /* Draws the particle as a quad spanned by its axes. */
-void func_150F337C(BoneBurstParticle *particle, s16 viewport) {
-    func_15140410(&particle->head, &particle->state.axisU, &particle->state.axisV, viewport);
+void particle_buildBoneBurstQuad(BoneBurstParticle *particle, s16 viewport) {
+    particle_buildQuadFromAxes(&particle->head, &particle->state.axisU, &particle->state.axisV, viewport);
 }
 
 /* Sets bit 0 of obj->flags unless camera_global_Cameras->eye.z is below -2000. */

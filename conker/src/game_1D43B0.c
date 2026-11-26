@@ -103,7 +103,7 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
         spawn.gravity = func_150ADA68() * emitter->gravityRange + emitter->gravityBase;
         spawn.rotVel.x = func_150ADA68() * emitter->spinRange + emitter->spinBase;
         spawn.rotVel.z = func_150ADA68() * emitter->spinRange + emitter->spinBase;
-        particle = func_15132A4C(&spawn, 0, 0, sizeof(DebrisData), arg2, arg3);
+        particle = particle_newModelParticle(&spawn, 0, 0, sizeof(DebrisData), arg2, arg3);
         if (particle != NULL) {
             BloodTrailDesc18 trailDesc;
             DebrisData *data;
@@ -229,7 +229,7 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBloodTrail
     rand.size = func_150ADA68();
     rand.timer = func_150ADA20();
     // matching: `+ -600.0f` (add.s); `- 600.0f` would emit sub.s
-    func_151A26EC(&pos, &offset, &vel, 1.0f, (rand.gravity * 591.0f + -600.0f) * 0.001000000047f,
+    particle_spawnDragFadeSprite(&pos, &offset, &vel, 1.0f, (rand.gravity * 591.0f + -600.0f) * 0.001000000047f,
                   (rand.size * 500.0f + 400.0f) * size, rand.timer % 21 + 15, func_150ADA20() % 101 + 100,
                   15, 20, 0, -1, 86, 39, 0, trail->trail.header.owner, trail->trail.header.kind);
 }

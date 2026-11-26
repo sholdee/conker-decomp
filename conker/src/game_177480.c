@@ -6,14 +6,14 @@
 #define EFFECT_HEIGHT_GROWN 8
 
 /* Fills the next vertex quad of buffer `index`: a billboard of the effect's width and height at pos. */
-Vtx *func_15149FD0(FlickerParticle *effect, s16 index) {
+Vtx *particle_buildFlickerQuad(FlickerParticle *effect, s16 index) {
     Vtx *vtx;
     Vtx *ret;
     f32 offsetZ;
     f32 offsetX;
     u8 fresh;
 
-    func_151D5D60(effect->head.vtxBuffers, index, sizeof(effect->head.vtxTemplate), &vtx, &fresh);
+    particle_getViewBuffer(effect->head.vtxBuffers, index, sizeof(effect->head.vtxTemplate), &vtx, &fresh);
     ret = vtx;
     // matching: an early `if (vtx == NULL) return NULL;` reorders the branches
     if (vtx) {
@@ -43,7 +43,7 @@ Vtx *func_15149FD0(FlickerParticle *effect, s16 index) {
 }
 
 /* Flickers width, height and unk24 towards random targets that are re-rolled on timers. */
-s32 func_1514A19C(FlickerParticle *effect) {
+s32 particle_flickerSize(FlickerParticle *effect) {
     FlickerParams *params;
 
     params = &effect->params;
@@ -75,8 +75,8 @@ s32 func_1514A19C(FlickerParticle *effect) {
     return 1;
 }
 
-/* Grows width and height towards their targets; once both are within 95%, calls func_1513F680(..., 4, ...). */
-s32 func_1514A380(FlickerParticle *effect) {
+/* Grows width and height towards their targets; once both are within 95%, calls particle_setQuadParticleFuncs(..., 4, ...). */
+s32 particle_growFlickerParticle(FlickerParticle *effect) {
     FlickerParams *params;
     s32 done;
 
@@ -99,13 +99,13 @@ s32 func_1514A380(FlickerParticle *effect) {
         }
     }
     if (done) {
-        func_1513F680(&effect->head, effect->head.updateFn1, 4, effect->head.expireFn, effect->head.vertexFn);
+        particle_setQuadParticleFuncs(&effect->head, effect->head.updateFn1, 4, effect->head.expireFn, effect->head.vertexFn);
     }
     return 1;
 }
 
 /* Shrinks width and height by shrinkRate; while lifetime < fadeStart, sets the alpha (unk44) to lifetime * fadeRate. */
-s32 func_1514A498(FlickerParticle *effect) {
+s32 particle_shrinkFlickerParticle(FlickerParticle *effect) {
     effect->head.def.height -= effect->head.def.height * effect->params.shrinkRate;
     effect->head.def.width -= effect->head.def.width * effect->params.shrinkRate;
     if (effect->head.def.lifetime < effect->params.fadeStart) {
@@ -115,7 +115,7 @@ s32 func_1514A498(FlickerParticle *effect) {
 }
 
 /* Integrates velocity (damped x/z, gravity on y) into pos, remembering the previous pos. */
-s32 func_1514A4EC(FlickerParticle *effect) {
+s32 particle_moveFlickerParticle(FlickerParticle *effect) {
     f32 damping;
 
     damping = effect->params.damping;
@@ -131,8 +131,8 @@ s32 func_1514A4EC(FlickerParticle *effect) {
     return 1;
 }
 
-/* Like func_1514A4EC, but moves prevPos along with pos and then pulls it towards pos by trailFactor. */
-s32 func_1514A594(FlickerParticle *effect) {
+/* Like particle_moveFlickerParticle, but moves prevPos along with pos and then pulls it towards pos by trailFactor. */
+s32 particle_moveFlickerTrail(FlickerParticle *effect) {
     f32 dx;
     f32 dy;
     f32 dz;

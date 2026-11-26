@@ -74,7 +74,7 @@ void effect_randomizeBounceRecordSpeeds(s32 scale) {
     s32 range;
 
     if (D_800BE4E0 != NULL) {
-        func_150CDB6C(scale);
+        particle_setDriftBurstRate(scale);
         range = ((scale * 50) >> 8) + 50;
         minSpeed = (scale * 300) >> 8;
         for (i = 0; i < RECORD_COUNT; i++) {

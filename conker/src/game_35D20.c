@@ -6,8 +6,8 @@
 typedef void (*ResetFunc)(void);
 
 /* One-entry reset callback tables for modes 1 and 2. */
-static ResetFunc gEffectResetFuncsMode1[] = { func_150089D0 };
-static ResetFunc gEffectResetFuncsMode2[] = { func_150089D0 };
+static ResetFunc gEffectResetFuncsMode1[] = { particle_resetStyleEmitterTimers };
+static ResetFunc gEffectResetFuncsMode2[] = { particle_resetStyleEmitterTimers };
 
 /* Empties the object lists of both groups: mode 1 clears types 0-100, mode 2 types 101-103, any other mode all. */
 void effect_clearObjectLists(s32 mode) {

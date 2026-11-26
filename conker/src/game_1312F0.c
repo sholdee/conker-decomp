@@ -20,7 +20,7 @@ void func_15103E40(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u
     }
 
     hitGround = FALSE;
-    func_151D3FF4(pos, arg5, arg6);
+    particle_spawnLightFlash(pos, arg5, arg6);
 
     top.x = pos->x;
     top.y = pos->y + 100.0f;
@@ -37,9 +37,9 @@ void func_15103E40(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u
     }
 
     func_150E83AC(hitGround ? &impact : pos, func_150ADA20() % 62U + 120, arg5, arg6);
-    func_151D5404(pos, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg5, arg6);
-    func_151D5334(pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg5, arg6);
-    func_151D5514(pos, arg5, arg6);
+    particle_startPlayerRumbles(pos, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg5, arg6);
+    particle_startPlayerCameraWobbles(pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg5, arg6);
+    particle_spawnBlastSpray(pos, arg5, arg6);
 
     if (variant != 0) {
         if (variant == 2) {
@@ -53,5 +53,5 @@ void func_15103E40(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u
     }
 
     func_15055A2C(0, pos->x, pos->y, pos->z, 1);
-    func_151541B8(pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f, func_150ADA20() % 56U + 200, 0.0f, arg5, arg6);
+    particle_spawnGrowFade(pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f, func_150ADA20() % 56U + 200, 0.0f, arg5, arg6);
 }

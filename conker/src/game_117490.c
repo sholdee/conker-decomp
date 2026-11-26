@@ -134,7 +134,7 @@ void effect_spawnSegmentParticle(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32
     extra.swayZ = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
     desc.gravity = (func_150ADA68() * 70.0f + 73.0f) * 0.001f;
 
-    particle = func_151303BC(&desc, 2, 0x28);
+    particle = particle_newSpriteParticle(&desc, 2, 0x28);
     if (particle != NULL) {
         memcpy(particle + 0xA8, &extra, sizeof(extra));
     }
@@ -242,7 +242,7 @@ void effect_spawnDriftParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     extra.swayZ = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
     desc.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
 
-    particle = func_151303BC(&desc, 2, 0x28);
+    particle = particle_newSpriteParticle(&desc, 2, 0x28);
     if (particle != NULL) {
         memcpy(particle + 0xA8, &extra, sizeof(extra));
     }

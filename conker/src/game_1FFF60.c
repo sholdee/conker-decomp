@@ -42,13 +42,13 @@ struct BoneFollower {
  * AnchorEmitter in game_1BC650.c). The message table keeps the prototype of its call, which passes the
  * type as a u8; its entry still takes the AnchorEmitter view (warning 709).
  */
-static s32 (*gBoneFollowerUpdateFuncs[])() = { func_1518FC04, func_1518FC44 }; /* BoneFollower.updateFn */
-static void (*gBoneFollowerExpireFuncs[])() = { func_1518FC84 };               /* BoneFollower.expireFn */
-static s32 (*gFollowerGroupUpdateFuncs[])() = { func_1518F7C4 };                /* ActorFollowerGroup.updateFn */
-static void (*gFollowerGroupTrackFuncs[])() = { func_1518F89C };               /* ActorFollowerGroup.trackFn */
+static s32 (*gBoneFollowerUpdateFuncs[])() = { particle_followAnchorEased, particle_followAnchor }; /* BoneFollower.updateFn */
+static void (*gBoneFollowerExpireFuncs[])() = { particle_launchAnchorParticle };               /* BoneFollower.expireFn */
+static s32 (*gFollowerGroupUpdateFuncs[])() = { particle_updateAnchorEmitter };                /* ActorFollowerGroup.updateFn */
+static void (*gFollowerGroupTrackFuncs[])() = { particle_emitAnchorBurst };               /* ActorFollowerGroup.trackFn */
 static void (*gFollowerGroupUntrackFuncs[])() = { effect_clearGroupFollowers };               /* ActorFollowerGroup.untrackFn */
-static void (*gFollowerGroupExpireFuncs[])() = { func_1518F858 };               /* ActorFollowerGroup.expireFn */
-static void (*gFollowerGroupDestroyFuncs[])() = { NULL, func_151904BC };         /* per kind, before the followers go */
+static void (*gFollowerGroupExpireFuncs[])() = { particle_runAnchorEmitterExpire };               /* ActorFollowerGroup.expireFn */
+static void (*gFollowerGroupDestroyFuncs[])() = { NULL, particle_destroyAnchorEmitter };         /* per kind, before the followers go */
 static void (*gFollowerGroupMessageFuncs[])(ActorFollowerGroup *, ActorMsg *, u8) = { NULL, effect_anchorEmitterMessage }; /* per kind, after a message */
 
 

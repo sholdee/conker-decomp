@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
+// particle_spawnSteamParticle (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
-SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
@@ -72,7 +72,7 @@ void func_151B4E4C(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip 
     func_151B4EA4(&position, dirX, dirY, dirZ, emitter->payload[0], emitter->header.owner);
 }
 
-/* Spawns a randomized func_151D9014 particle at `position`, moving against (dirX, dirY, dirZ). */
+/* Spawns a randomized particle_spawnSteamParticle particle at `position`, moving against (dirX, dirY, dirZ). */
 void func_151B4EA4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5) {
     f32 speed;
     Vec3f velocity;
@@ -92,7 +92,7 @@ void func_151B4EA4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 ar
     randB = func_150ADA20();
     fracB = func_150ADA68();
     coin = func_150ADA20() & 1;
-    func_151D9014(position, &velocity, arg4, fracA * 0.497f + -1.0f, randA % 31 + 20, randB % 101 + 155,
+    particle_spawnSteamParticle(position, &velocity, arg4, fracA * 0.497f + -1.0f, randA % 31 + 20, randB % 101 + 155,
                   fracB * 152.0f + 109.0f, coin, 1.7f, 1.7f, 0, 0, 1, 0, arg5, 1);
 }
 
@@ -133,7 +133,7 @@ void func_151B50A4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip 
     func_151B50F4(&position, dirX, dirY, dirZ, emitter->header.owner);
 }
 
-/* Spawns a randomized func_151D9014 particle at `position`, moving against (dirX, dirY, dirZ). */
+/* Spawns a randomized particle_spawnSteamParticle particle at `position`, moving against (dirX, dirY, dirZ). */
 void func_151B50F4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4) {
     f32 speed;
     Vec3f velocity;
@@ -157,6 +157,6 @@ void func_151B50F4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4) {
     randA = func_150ADA20();
     randB = func_150ADA20();
     scaledB = func_150ADA68() * 202.0f + 142.0f;
-    func_151D9014(position, &velocity, 0, fracA * 0.126f + -0.702f, (randA & 0xF) + 10, randB % 45 + 137, scaledB,
+    particle_spawnSteamParticle(position, &velocity, 0, fracA * 0.126f + -0.702f, (randA & 0xF) + 10, randB % 45 + 137, scaledB,
                   coin, 1.7f, 1.7f, 0, 0, 1, 0, arg4, 1);
 }

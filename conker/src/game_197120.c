@@ -56,7 +56,7 @@ void func_15169C70(Debris *debris) {
         if (debris->kind == 3) {
             effect_scatterModels(2, 0xCB, debris->x, debris->y, debris->z, 6.0f, 0.5f, 1.0f, 60.0f, 5, 60,
                           -0.6999999881f, debris->header.owner, debris->header.kind);
-            func_151709B4(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
+            particle_spawnStyleBurst(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
                           debris->header.owner, debris->header.kind);
             attach_releaseModel(debris->sound);
             effect_destroyObject(&debris->header);
@@ -100,7 +100,7 @@ void func_15169C70(Debris *debris) {
                     debris->spinX = (f32)((s32)func_150ADA20() >> 16) * 0.000152587890625f + 40.0f;
                 }
             } else if (debris->kind == 5) {
-                func_151709B4(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
+                particle_spawnStyleBurst(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
                               debris->header.owner, debris->header.kind);
             }
         }
@@ -175,7 +175,7 @@ void func_1516A538(SplashFx *fx) {
         texture = func_150ADA20() % 3;
         intensity = fx->unk25;
         angle = func_150ADA20() % 360;
-        func_15171D4C(fx->x, fx->y - 10, fx->z, 100, 0, texture + 0x20, angle, 0,
+        particle_spawnFloorSprite(fx->x, fx->y - 10, fx->z, 100, 0, texture + 0x20, angle, 0,
                       (intensity * 25) / 255 + 25, 0, 0x100, 0, fx->owner, fx->list);
     }
 }
@@ -208,7 +208,7 @@ s32 func_1516A648(StyleParticle *particle) {
     }
 
     particle->velocityY -= 300;
-    func_1516F864(particle);
+    particle_moveStyleXZ(particle);
     floorY = collision_findMeshFloorNear(particle->x, particle->y, particle->z, 0) + 10;
     particle->u.bounce.floorHi = floorY >> 8;
     // matching: the redundant mask steers IDO's scratch registers for the code that follows
@@ -216,7 +216,7 @@ s32 func_1516A648(StyleParticle *particle) {
     if (particle->y < floorY) {
         particle->y = floorY;
         particle->velocityY *= -0.5f;
-        func_1516F94C(particle, 230);
+        particle_scaleStyleVelXZ(particle, 230);
     }
     return 0;
 }

@@ -148,7 +148,7 @@ s32 trail_landSprayTrail(SprayTrail *trail) {
             splashPos.x = points[trail->head.start].pos.x;
             splashPos.y = params->floorY;
             splashPos.z = points[trail->head.start].pos.z;
-            func_151DBCBC(func_151D8E20(), params->base.motion.halfWidth * 6.0f, params->base.motion.alpha, 0,
+            particle_spawnKindMark(particle_getContextEffectKind(), params->base.motion.halfWidth * 6.0f, params->base.motion.alpha, 0,
                           &splashPos, trail->head.header.owner, trail->head.header.kind);
         }
         params->base.state = 4;

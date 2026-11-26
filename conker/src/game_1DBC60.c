@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
+// particle_spawnSteamParticle (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
-SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
@@ -88,7 +88,7 @@ void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5) 
     rand2 = func_150ADA20();
     shade = func_150ADA68() * 219.0f + 77.0f;
     // matching: the rodata holds -1.045f, so this is an add of a negative literal, not a sub
-    func_151D9014(pos, &velocity, 0, rand0 * 0.6020000577f + -1.045000076f, rand1 % 31 + 60, rand2 % 101 + 155,
+    particle_spawnSteamParticle(pos, &velocity, 0, rand0 * 0.6020000577f + -1.045000076f, rand1 % 31 + 60, rand2 % 101 + 155,
                   shade, (u8)flag, 1.0f, 1.0f, 0, 0, 1, 0, arg5, 1);
 }
 
@@ -128,14 +128,14 @@ void func_151AEAB4(Vec3f *pos, u8 flag, u8 arg2) {
         rand1 = func_150ADA20();
         rand2 = func_150ADA20();
         rand3 = func_150ADA68();
-        func_151DA6F8(pos, &velocity, rand0 * 0.4060000181f + 0.2100000083f, rand1 % 41 + 60, rand2 % 101 + 155,
+        particle_spawnSplash(pos, &velocity, rand0 * 0.4060000181f + 0.2100000083f, rand1 % 41 + 60, rand2 % 101 + 155,
                       rand3 * 4.0f + 3.100000143f, func_150ADA20() % 5 + 3, flag, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0,
                       arg2, 1);
     }
 }
 
-/* Spawns a ground burst effect around obj: one func_15153F18 burst, 7-12 scattered
- * func_151D9B8C / func_151DAB58 particles on the ground, and a func_15136698 effect under obj. */
+/* Spawns a ground burst effect around obj: one particle_spawnSplashSprayAtAngles burst, 7-12 scattered
+ * particle_spawnKindEmitter / particle_spawnSquash particles on the ground, and a func_15136698 effect under obj. */
 void func_151AECA0(Actor *obj, u8 arg1, s32 arg2) {
     CollisionHit ground;
     SplashSpraySpec burst;
@@ -184,7 +184,7 @@ lbD:
     burst.spray.speedBase = 18.0f;
     burst.spray.speedRange = 11.80000019f;
     burst.spray.unk38 = 0.5f;
-    func_15153F18(&burst.angles, &burst.spray, &ground, 255, 1);
+    particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 255, 1);
 lbA:
     count = (func_150ADA20() % 6) + 7;
     probe.y = obj->ypos + 100.0f;
@@ -202,10 +202,10 @@ lbC:
         pos[1] = ground.height;
         pos[1] += 10.0f;
         if (func_150ADA20() & 1) {
-            func_151D9B8C(0, (func_150ADA68() * 4.5f) + 15.0f, (func_150ADA68() * 100.0f) + 155.0f,
+            particle_spawnKindEmitter(0, (func_150ADA68() * 4.5f) + 15.0f, (func_150ADA68() * 100.0f) + 155.0f,
                           &ground.tri, (Vec3f *)pos, 100, 0, 1, 0, arg1, arg2);
         } else {
-            func_151DAB58(0, (func_150ADA68() * 5.900000095f) + 6.099999905f, (func_150ADA68() * 100) + 155, // matching: int 100/155 here, float literals change allocation
+            particle_spawnSquash(0, (func_150ADA68() * 5.900000095f) + 6.099999905f, (func_150ADA68() * 100) + 155, // matching: int 100/155 here, float literals change allocation
                           (Vec3f *)pos, 1, arg1, arg2);
         }
         count--;
@@ -272,7 +272,7 @@ void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     func_151AF388(&position, dx, dy, dz, effect->owner);
 }
 
-/* Spawns one randomised func_151D9014 particle at `position`, moving at -0.13 * (dx, dy, dz). */
+/* Spawns one randomised particle_spawnSteamParticle particle at `position`, moving at -0.13 * (dx, dy, dz). */
 void func_151AF388(Vec3f *position, f32 dx, f32 dy, f32 dz, u8 owner) {
     f32 factor = 0.13000001f;
     Vec3f velocity;
@@ -282,7 +282,7 @@ void func_151AF388(Vec3f *position, f32 dx, f32 dy, f32 dz, u8 owner) {
     velocity.y = -dy * factor;
     velocity.z = -dz * factor;
     flag = (func_150ADA20() & 1) ? 1 : 0;
-    func_151D9014(position, &velocity, 0,
+    particle_spawnSteamParticle(position, &velocity, 0,
                   func_150ADA68() * 0.126f + -0.702f,
                   (func_150ADA20() & 0xF) + 10,
                   func_150ADA20() % 45 + 137,

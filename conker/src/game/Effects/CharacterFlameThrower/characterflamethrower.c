@@ -989,7 +989,7 @@ Gfx *flamethrower_drawJet(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view)
     s32 newStrip;
 
     if (actor->head.count >= 2) {
-        func_151D5D60(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             eye = &camera_global_Cameras[view].eye;
             jet = actor->state;
@@ -1008,7 +1008,7 @@ Gfx *flamethrower_drawJet(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view)
                 gfx = func_15142E24(gfx, &tex.desc, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
                 gfx = func_15142C10(gfx, jet->shade, jet->shade, jet->shade, 0xFF, &flag);
                 gfx = func_15142B7C(gfx, 1, 0x160600);
-                gfx = func_1513F4E4(gfx, 0xB, &flag);
+                gfx = particle_setCombineMode(gfx, 0xB, &flag);
                 gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x5049D8, &flag);
                 if (actor->head.tmpl.flags & 2) {
                     j = actor->head.end - 1;
@@ -1217,7 +1217,7 @@ typedef struct FlameLineData {
 } FlameLineData;
 
 /*
- * A particle of the shared particle system (func_1513D2F0/func_1513D524); only the fields used here.
+ * A particle of the shared particle system (particle_newQuadParticle/particle_newQuadParticleWhite); only the fields used here.
  * The ones in this file are beams: a camera-facing quad from `start` towards `end`.
  */
 struct SceneParticle {
@@ -1274,7 +1274,7 @@ void *flamethrower_buildJetLineQuad(SceneParticle *beam, s16 view) {
     Vec3f *eye;
     f32 scale;
 
-    func_151D5D60(beam->head.vtxBuffers, view, 0x40, &vertices, &fresh);
+    particle_getViewBuffer(beam->head.vtxBuffers, view, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh != 0) {
@@ -1479,7 +1479,7 @@ void flamethrower_shedJetLines(CharacterFlamethrowerActor *actor, s32 index) {
             } else {
                 flag = 0;
             }
-            ret = func_1513D524(&spawn, 0xA, 0xB, 0, 9, flag | 2, 0x5C, 0xFF, 0);
+            ret = particle_newQuadParticleWhite(&spawn, 0xA, 0xB, 0, 9, flag | 2, 0x5C, 0xFF, 0);
             if (ret != NULL) {
                 memcpy(&ret->data, &data, sizeof(data));
             }
@@ -1523,7 +1523,7 @@ s32 flamethrower_hitPlayer(CharacterFlamethrowerActor *actor) {
         d = dx * dx + dy * dy + dz * dz;
         if (d < r * r) {
             actor_hitScripted(obj, 0x60006, obj->langle, jet->owner - movement_obj);
-            func_1518D1C0(obj, 0xB, 0, 1, actor->head.header.owner, actor->head.header.kind, "Characterflamethrower");
+            particle_startActorEmitter(obj, 0xB, 0, 1, actor->head.header.owner, actor->head.header.kind, "Characterflamethrower");
             while (i != actor->head.start) {
                 actor->head.start = actor->head.start + 1;
                 if (actor->head.start == actor->head.tmpl.itemCount) {
@@ -2377,7 +2377,7 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
                     part.vel.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
                     part.vel.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
                     part.gravity = func_150ADA68() * flame->emit.unk34 + flame->emit.unk30;
-                    func_15130280(&part, 1, 0, 0, actor->head.header.owner, actor->head.header.kind);
+                    particle_newSpriteParticleWithFloor(&part, 1, 0, 0, actor->head.header.owner, actor->head.header.kind);
                 }
                 flame->particleAccum -= 1.0f;
             } while (flame->particleAccum > 1.0f);
@@ -2675,7 +2675,7 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
                 spawn.rot.y = spawn.pos.y + dir.y;
                 spawn.rot.z = spawn.pos.z + dir.z;
                 spawn.unk44 = func_150ADA20() % (flame->line.unk3D + 1) + flame->line.unk3C;
-                particle = func_1513D2F0(&spawn, &D_800A4AA0, 0x1F, 0x22, 0, 0x1A, ((func_150ADA20() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
+                particle = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x1F, 0x22, 0, 0x1A, ((func_150ADA20() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
                                     actor->head.header.owner, actor->head.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->data.line, &lineData, sizeof(lineData));
@@ -2710,7 +2710,7 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
 }
 
 
-extern s32 D_800A4AC8[][2];
+extern s32 gEffectRenderModes[][2];
 
 /* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */
 Gfx *flamethrower_drawFlame(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
@@ -2769,7 +2769,7 @@ Gfx *flamethrower_drawFlame(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 vie
             return gfx;
         }
     }
-    func_151D5D60(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), &vtx, NULL);
+    particle_getViewBuffer(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
@@ -2777,8 +2777,8 @@ Gfx *flamethrower_drawFlame(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 vie
     flag = 1;
     gfx = func_15142E24(gfx, &gEffectTextures[107], 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-    gfx = func_1513F4E4(gfx, 0x4C, &flag);
-    gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
+    gfx = particle_setCombineMode(gfx, 0x4C, &flag);
+    gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &flag);
     if (actor->head.tmpl.flags & 2) {
         index = actor->head.end;
         index--;
@@ -3144,7 +3144,7 @@ void *flamethrower_buildFlameLineQuad(SceneParticle *beam, s16 view) {
     u8 fresh;
     f32 scale;
 
-    func_151D5D60(beam->head.vtxBuffers, view, 0x40, &vertices, &fresh);
+    particle_getViewBuffer(beam->head.vtxBuffers, view, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {

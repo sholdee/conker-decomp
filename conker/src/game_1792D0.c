@@ -6,7 +6,7 @@
  * Eases unk40 toward the point 100 units above the particle's position by easeFactor,
  * then pins it back to exactly 100 units from the position along that direction.
  */
-void func_1514BE20(void *arg) {
+void particle_easeBendTarget(void *arg) {
     Vec3f above;
     Vec3f eased;
     JitterParticle *p;

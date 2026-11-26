@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151DB5D0 (game_2062D0.c) is declared in each file that calls it: game/Effects/Blood/blood.c was compiled with a
+// particle_spawnKindSprite (game_2062D0.c) is declared in each file that calls it: game/Effects/Blood/blood.c was compiled with a
 // different view of it.
-SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
+SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
                              u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
 /* Read by game_3F1F0.c. */
@@ -22,7 +22,7 @@ static const u8 D_800A1C40[4][2] = { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } };
 static const Vec3f D_800A1C48 = { -124.0f, -8.0f, 28.0f };
 static const Vec3f D_800A1C54 = { -170.0f, -8.0f, 28.0f };
 
-/* Effects 50 units above `obj`: a light_createWithEffect burst and a func_15152B38 emitter. */
+/* Effects 50 units above `obj`: a light_createWithEffect burst and a particle_spawnTrailBurst emitter. */
 void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
     Vec3f pos;
 
@@ -97,7 +97,7 @@ void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
         spawn.unk39 = 0;
         spawn.unk72 = -1;
         spawn.unk73 = -1;
-        func_15152B38(&spawn, 0xFF, 1);
+        particle_spawnTrailBurst(&spawn, 0xFF, 1);
     }
 }
 
@@ -269,7 +269,7 @@ void func_150F892C(StageObj *obj) {
                 spawn.rotVel.x = func_150ADA68() * 32.41f + -16.205f;
                 spawn.rotVel.z = func_150ADA68() * 32.41f + -16.205f;
                 spawn.gravity = func_150ADA68() * 0.337f + -1.177f;
-                func_1513264C(&spawn, 3, 1, 0, 0, 0xFF, 1);
+                particle_newModelParticleWithFloor(&spawn, 3, 1, 0, 0, 0xFF, 1);
             }
             state->unk34 -= 1.0f;
         } while (state->unk34 > 1.0f);
@@ -332,7 +332,7 @@ void func_150F892C(StageObj *obj) {
                 func_15143794(func_150ADA20() % 9U + i, (func_150ADA20() & 7) - 16,
                               func_150ADA68() * 10.0f + 6.0f, &flare.vel);
                 flare.gravity = func_150ADA68() * 0.268f + -0.3870000243f;
-                func_15130280(&flare, 1, 0, 0, 0xFF, 1);
+                particle_newSpriteParticleWithFloor(&flare, 1, 0, 0, 0xFF, 1);
             }
             state->unk30 -= 1.0f;
         } while (state->unk30 > 1.0f);
@@ -354,7 +354,7 @@ void func_150F892C(StageObj *obj) {
             pos.z += state->centerZ;
             func_15143794(func_150ADA20() % 9U + angle - 4, (func_150ADA20() & 7) - 16,
                           func_150ADA68() * 6.0f + 4.0f, &vel);
-            func_151DB5D0(8, &pos.x, &vel.x, func_150ADA68() * 200.0f + 200.0f, 1.025439024f, 0.938816011f,
+            particle_spawnKindSprite(8, &pos.x, &vel.x, func_150ADA68() * 200.0f + 200.0f, 1.025439024f, 0.938816011f,
                           func_150ADA68() * 0.2070000172f + -0.1690000147f, func_150ADA20() % 21U + 35,
                           func_150ADA20() % 121U + 100, 50, 5, 0, 0xFF, 1);
             state->unk2C -= 1.0f;
@@ -436,8 +436,8 @@ s32 arg2;
     gun = weapon_getGunAttachment(obj);
     if (gun != NULL) {
         if (weapon_getGunMuzzlePoints(points, &position, &hit, &normal, &unk30, obj, gun) != 0) {
-            func_151D3F14(&position, arg1, arg2);
-            func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f, arg1, arg2);
+            particle_spawnShortLightFlash(&position, arg1, arg2);
+            particle_spawnBoneDirParticle(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f, arg1, arg2);
             weapon_spawnMuzzleFlashes(&position, points, arg1, arg2);
         }
     }

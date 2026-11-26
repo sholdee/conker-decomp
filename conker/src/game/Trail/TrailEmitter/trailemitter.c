@@ -330,7 +330,7 @@ s32 trail_spawnHitPuff(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hit
     return 1;
 }
 
-/* Same as trail_spawnHitPuff, plus a func_151D8E20() effect (arg5) at the hit point. */
+/* Same as trail_spawnHitPuff, plus a particle_getContextEffectKind() effect (arg5) at the hit point. */
 s32 trail_spawnHitPuffAndEffect(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY, CollisionTri *surface) {
     QuadFxData fx;
     TrailParams *params;
@@ -360,8 +360,8 @@ s32 trail_spawnHitPuffAndEffect(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hit
         pos[0] = points[trail->head.start].pos.x;
         pos[1] = hitY;
         pos[2] = points[trail->head.start].pos.z;
-        kind = func_151D8E20();
-        func_151DBCBC(kind, func_150ADA68() * 40.0f + 100.0f, 0xFF, surface, pos, trail->head.header.owner, trail->head.header.kind);
+        kind = particle_getContextEffectKind();
+        particle_spawnKindMark(kind, func_150ADA68() * 40.0f + 100.0f, 0xFF, surface, pos, trail->head.header.owner, trail->head.header.kind);
     }
     return 1;
 }

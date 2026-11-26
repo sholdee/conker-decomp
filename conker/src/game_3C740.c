@@ -21,7 +21,7 @@ void *func_1500F290(f32 x, f32 y, f32 z) {
     def.rgba[2] = 0;
     def.rgba[3] = 0xFF;
     def.renderModes = 0x30001;
-    return func_1513C5B0(&def, 0, 0, 0, x, y, z, 110.0f, 110.0f, 0, 0, 0, 0xFF, 0);
+    return particle_spawnFlatQuadSpriteNoModel(&def, 0, 0, 0, x, y, z, 110.0f, 110.0f, 0, 0, 0, 0xFF, 0);
 }
 
 /* Starts an object emitter at (x, y, z) over the floor at floorY. */

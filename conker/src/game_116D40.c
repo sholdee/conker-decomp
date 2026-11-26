@@ -3,9 +3,9 @@
 #include "variables.h"
 
 
-/* Spawns a burst at pos scaled by scale: one func_15130374 particle moving along vel,
- * 5-12 func_15132A4C pieces flung in random directions, and a light_createWithEffect flash. */
-void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
+/* Spawns a burst at pos scaled by scale: one particle_newOwnedSpriteParticle particle moving along vel,
+ * 5-12 particle_newModelParticle pieces flung in random directions, and a light_createWithEffect flash. */
+void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
     s32 count;
     ParticleDesc6C spawn;
     s32 yaw;
@@ -50,7 +50,7 @@ void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
     spawn.pos = *pos;
     spawn.vel = *vel;
     spawn.gravity = 0.0f;
-    func_15130374(&spawn, 0, 0, arg3, arg4);
+    particle_newOwnedSpriteParticle(&spawn, 0, 0, arg3, arg4);
 
     count = (func_150ADA20() & 7) + 5;
     piece.flags = 0x21E8;
@@ -91,7 +91,7 @@ void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
         piece.gravity = ((func_150ADA68() * 99.0f) + -206.0f) * 0.01f;
         piece.rotVel.x = (func_150ADA68() * 101.0f) + -49.0f;
         piece.rotVel.z = (func_150ADA68() * 101.0f) + -49.0f;
-        func_15132A4C(&piece, 3, 0xFF, 0, arg3, arg4);
+        particle_newModelParticle(&piece, 3, 0xFF, 0, arg3, arg4);
         count--;
     }
 
@@ -107,8 +107,8 @@ void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
 
 
 /* Emitter update (handler table entry): accumulates a random spawn rate and, for each whole unit,
- * fires a func_150E9890 burst at the spawner's source with a random direction and scale. */
-void func_150E9E34(RandomBurstEmitter *emitter) {
+ * fires a particle_spawnImpactBurst burst at the spawner's source with a random direction and scale. */
+void particle_updateRandomBurstEmitter(RandomBurstEmitter *emitter) {
     BurstSpawner *spawner;
     Vec3f pos;
     Vec3f dir;
@@ -124,7 +124,7 @@ void func_150E9E34(RandomBurstEmitter *emitter) {
         yaw = func_150ADA20();
         pitch = func_150ADA20();
         func_15143794(yaw & 0xFF, 0x40 - (pitch % 129U), func_150ADA68() * 600.0f * 0.01f, &dir);
-        func_150E9890(&pos, &dir, scale, emitter->base.header.owner, emitter->base.header.kind);
+        particle_spawnImpactBurst(&pos, &dir, scale, emitter->base.header.owner, emitter->base.header.kind);
         spawner->spawnAccum -= 1.0f;
     }
 }

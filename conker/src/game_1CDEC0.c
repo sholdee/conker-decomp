@@ -5,7 +5,7 @@
 void *memcpy(void *, const void *, u32);
 
 /* Starts a spark emitter effect at the actor's position; the spark variant depends on the actor's unk184. */
-void func_151A0A10(Actor *actor, s16 duration, u8 owner, s32 arg3) {
+void particle_startSparkEmitter(Actor *actor, s16 duration, u8 owner, s32 arg3) {
     TimedEffect *effect;
     PointSparkEmitter emitter;
 
@@ -36,26 +36,26 @@ void func_151A0A10(Actor *actor, s16 duration, u8 owner, s32 arg3) {
 }
 
 /* Per-frame update of the spark emitter: emits one spark for every whole unit the accumulator gains. */
-void func_151A0AF8(SparkEmitterEffect *effect) {
+void particle_updateSparkEmitterEffect(SparkEmitterEffect *effect) {
     PointSparkEmitter *emitter;
 
     effect->emitter.accum += 0.1750000119f * gFrameDelta;
     emitter = &effect->emitter;
     while (emitter->accum > 1.0f) {
-        func_1514C678(emitter->x, emitter->y, emitter->z, func_150ADA68() * 25.0f + 15.0f,
+        particle_emitOnRandomCircle(emitter->x, emitter->y, emitter->z, func_150ADA68() * 25.0f + 15.0f,
                       0, 0xFF, 5, 4, emitter->variant, 0.0f, 0, effect->base.header.owner);
         emitter->accum -= 1.0f;
     }
 }
 
 /* Grey level of the sparks, by variant. */
-static u8 D_8008F8D0[] = { 128, 128 };
+static u8 gSparkGreyLevels[] = { 128, 128 };
 
 /*
  * Particle kind 4 spawn callback (D_8008AA00): a fast spark thrown out in a random
  * direction around `angle`, grey level and sprite chosen by `variant`.
  */
-s32 func_151A0C0C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ,
+s32 particle_spawnFastSpark(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ,
                   s32 angle, s32 baseAngle, f32 radius, s32 variant, f32 arg12, s32 arg13, u8 owner) {
     BillboardTemplate spark;
     s16 tilt;
@@ -93,9 +93,9 @@ s32 func_151A0C0C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     spark.flags = 0;
     spark.frame = 0;
     spark.frameStep = 0;
-    spark.primR = D_8008F8D0[variant];
-    spark.primG = D_8008F8D0[variant];
-    spark.primB = D_8008F8D0[variant];
+    spark.primR = gSparkGreyLevels[variant];
+    spark.primG = gSparkGreyLevels[variant];
+    spark.primB = gSparkGreyLevels[variant];
     switch (variant) {
     case 0:
         spark.anim = &D_800918A0;

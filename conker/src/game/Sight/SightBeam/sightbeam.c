@@ -194,7 +194,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
     spawn.unk45 = 0xFF;
     spawn.unk46 = 0;
     spawn.unk47 = 6;
-    obj = func_1513D4B8(&spawn, &D_800A4AA0, 0x1A, 0, 0, 0x18, 0, 0xA0, arg16, arg17);
+    obj = particle_newQuadParticleNoModel(&spawn, &gWhiteVtxColors, 0x1A, 0, 0, 0x18, 0, 0xA0, arg16, arg17);
     if (obj != NULL) {
         SightBeamState *objState;
         Vec3f dir;
@@ -262,7 +262,7 @@ void *sight_buildBeamQuad(SightBeamObject *obj, s16 view) {
             return NULL;
         }
     }
-    func_151D5D60(obj->head.vtxBuffers, view, sizeof(obj->head.vtxTemplate), &vertices, &fresh);
+    particle_getViewBuffer(obj->head.vtxBuffers, view, sizeof(obj->head.vtxTemplate), &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
@@ -410,7 +410,7 @@ void sight_notifyActorMoved(Actor *actor, TriggerZone *source) {
     if (actor != NULL) {
         msg.actor = actor;
         msg.source = source;
-        func_151403A8((s32)&msg, 0x20);
+        particle_broadcastToQuadParticles((s32)&msg, 0x20);
     }
 }
 
@@ -554,13 +554,13 @@ void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
     burst.spray.pos = obj->head.def.pos;
     burst.source.normal = obj->head.def.scale;
     burst.source.triangle = state->triangle0;
-    func_1514FBFC(&burst, obj->head.header.owner, obj->head.header.kind);
+    particle_spawnSurfaceJetSpray(&burst, obj->head.header.owner, obj->head.header.kind);
     burst.spray.pos = obj->head.def.rot;
     burst.source.normal.x = -obj->head.def.scale.x;
     burst.source.normal.y = -obj->head.def.scale.y;
     burst.source.normal.z = -obj->head.def.scale.z;
     burst.source.triangle = state->triangle1;
-    func_1514FBFC(&burst, obj->head.header.owner, obj->head.header.kind);
+    particle_spawnSurfaceJetSpray(&burst, obj->head.header.owner, obj->head.header.kind);
     pos.x = obj->head.def.pos.x;
     pos.y = obj->head.def.pos.y;
     pos.z = obj->head.def.pos.z;
@@ -692,10 +692,10 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
         desc.fadeStart = 1;
         desc.fadeRate = 0xFF;
         desc.drawFn = -1;
-        emitters[0] = func_15132A4C(&desc, 3, 0xFF, 0, arg7, arg8);
+        emitters[0] = particle_newModelParticle(&desc, 3, 0xFF, 0, arg7, arg8);
         if (emitters[0] != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760(&emitters[0]->head.mtx[i], &emitters[0]->head);
+                particle_buildUniformMatrix(&emitters[0]->head.mtx[i], &emitters[0]->head);
             }
         }
         desc.drawFn = 2;
@@ -713,10 +713,10 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
         }
         desc.model = 0x37;
         desc.matrixFn = 0;
-        emitters[1] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
+        emitters[1] = particle_newModelParticle(&desc, 3, 0xFF, 0x14, arg7, arg8);
         if (emitters[1] != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760(&emitters[1]->head.mtx[i], &emitters[1]->head);
+                particle_buildUniformMatrix(&emitters[1]->head.mtx[i], &emitters[1]->head);
             }
             memcpy(&emitters[1]->anim, &anim, sizeof(SightEmitterAnim));
         }
@@ -728,17 +728,17 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
             anim.unk4 = 0x8D;
             anim.unkC = 0x8E;
         }
-        emitters[2] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
+        emitters[2] = particle_newModelParticle(&desc, 3, 0xFF, 0x14, arg7, arg8);
         if (emitters[2] != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760(&emitters[2]->head.mtx[i], &emitters[2]->head);
+                particle_buildUniformMatrix(&emitters[2]->head.mtx[i], &emitters[2]->head);
             }
             memcpy(&emitters[2]->anim, &anim, sizeof(SightEmitterAnim));
         }
     }
 }
 
-/* Frees the beam's effects and emitters, then removes the beam object with func_1513CA6C. */
+/* Frees the beam's effects and emitters, then removes the beam object with particle_destroyQuadParticleDefault. */
 void sight_freeBeam(SightBeamObject *obj) {
     // matching: one variable first holds the object, then its state (as IDO allocated it)
     SightBeamState *state;
@@ -783,10 +783,10 @@ void sight_freeBeam(SightBeamObject *obj) {
     if (part != NULL) {
         effect_destroyObject(part);
     }
-    func_1513CA6C(&obj->head);
+    particle_destroyQuadParticleDefault(&obj->head);
 }
 
-/* Same as sight_freeBeam, but finishes with func_1513CAA0. */
+/* Same as sight_freeBeam, but finishes with particle_freeQuadParticleDefault. */
 void func_151C95D8(SightBeamObject *obj) {
     // matching: one variable first holds the object, then its state (as IDO allocated it)
     SightBeamState *state;
@@ -831,7 +831,7 @@ void func_151C95D8(SightBeamObject *obj) {
     if (part != NULL) {
         effect_destroyObject(part);
     }
-    func_1513CAA0(&obj->head);
+    particle_freeQuadParticleDefault(&obj->head);
 }
 
 /* Returns whether the beam that owns this extension effect is switched on. */
@@ -853,7 +853,7 @@ void sight_sendBeamCommand(s32 command, TriggerZone *source) {
     } msg;
     msg.source = source;
     msg.command = command;
-    func_151403A8((s32)&msg, 0x3A);
+    particle_broadcastToQuadParticles((s32)&msg, 0x3A);
 }
 
 /* Explosion at an actor's position: ground scorch, smoke, debris and sound. */
@@ -887,12 +887,12 @@ void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
                           &collision.tri, &impact, func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
         }
     }
-    func_151D5404(&origin, 506.0f, 1013.0f, 0.000987166888f, 15, 20, arg1, arg2);
-    func_151D5334(&origin, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
-    func_151D5514(&origin, arg1, arg2);
-    func_151D3FF4(&origin, arg1, arg2);
+    particle_startPlayerRumbles(&origin, 506.0f, 1013.0f, 0.000987166888f, 15, 20, arg1, arg2);
+    particle_startPlayerCameraWobbles(&origin, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
+    particle_spawnBlastSpray(&origin, arg1, arg2);
+    particle_spawnLightFlash(&origin, arg1, arg2);
     func_150E83AC(hit ? &impact : &origin, func_150ADA20() % 62U + 120, arg1, arg2);
-    func_151541B8(&origin, 2.0f * func_150ADA68() + 8.0f, 2.4641099f,
+    particle_spawnGrowFade(&origin, 2.0f * func_150ADA68() + 8.0f, 2.4641099f,
         func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
     if (!airborne) {
         func_15136C3C(actor, 0, 0, 1, 0, 0, arg1, arg2);

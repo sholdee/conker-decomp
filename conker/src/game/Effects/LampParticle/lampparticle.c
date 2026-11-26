@@ -80,7 +80,7 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
     spawn.ownerId = 0;
     spawn.fadeStart = 1;
     spawn.fadeRate = 255;
-    obj = func_15132A4C(&spawn, 3, 255, sizeof(LampSwing), arg2, arg3);
+    obj = particle_newModelParticle(&spawn, 3, 255, sizeof(LampSwing), arg2, arg3);
     if (obj != NULL) {
         LightEffectHeader header;
 
@@ -165,7 +165,7 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
     }
 }
 
-/* Particle update (D_800898B0 slot 9): advances the swing and its amplitude/speed ramps. */
+/* Particle update (gModelParticleUpdateFuncs slot 9): advances the swing and its amplitude/speed ramps. */
 s32 light_updateLampParticle(LampParticle *particle) {
     LampSwing *swing = &particle->swing;
 
@@ -183,7 +183,7 @@ s32 light_updateLampParticle(LampParticle *particle) {
     return 1;
 }
 
-/* Matrix callback (D_8008998C slot 4): the particle rolled by its swing angle, scaled by its size and
+/* Matrix callback (gModelParticleMatrixFuncs slot 4): the particle rolled by its swing angle, scaled by its size and
  * placed at its position. */
 s32 light_getLampParticleMatrix(Mtx *dest, LampParticle *particle) {
     MtxF mtx;
@@ -259,7 +259,7 @@ s32 light_updateLampParticleLight(LightEffect *effect) {
     return 1;
 }
 
-/* Event 0x1B handler for model 0x22 (see func_15133588): starts a 5-unit ramp of the swing. */
+/* Event 0x1B handler for model 0x22 (see particle_onModelParticleEvent): starts a 5-unit ramp of the swing. */
 void func_151B9660(LampParticle *particle) {
     particle->swing.timer = 5.0f;
     particle->swing.ampRate = 9.256800652f;

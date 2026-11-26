@@ -4,15 +4,15 @@
 
 void *memcpy(void *, const void *, u32);
 
-/* Live particle returned by func_15130374; its extra data starts at 0xA8. */
+/* Live particle returned by particle_newOwnedSpriteParticle; its extra data starts at 0xA8. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 unkA8;
 } Particle1DEF60;
 
 
-/* Spawns the task that func_151B1B34 updates for this owner. */
-void func_151B1AB0(Actor *owner) {
+/* Spawns the task that particle_updateOwnerSideTask updates for this owner. */
+void particle_startOwnerSideTask(Actor *owner) {
     Task151B1AB0 *task;
     Data151B1AB0 data;
 
@@ -30,7 +30,7 @@ void func_151B1AB0(Actor *owner) {
 }
 
 /* Per-frame update: emits particles from two points beside the owner at a randomised rate. */
-void func_151B1B34(Task151B1AB0 *task) {
+void particle_updateOwnerSideTask(Task151B1AB0 *task) {
     Data151B1AB0 *data;
     Particle1DEF60 *particle;
     Vec3f *origin;
@@ -107,7 +107,7 @@ void func_151B1B34(Task151B1AB0 *task) {
                 if (func_150ADA20() & 1) {
                     spawn.flags |= 0x80;
                 }
-                particle = func_15130374(&spawn, 1, sizeof(extra), task->base.header.owner, task->base.header.kind);
+                particle = particle_newOwnedSpriteParticle(&spawn, 1, sizeof(extra), task->base.header.owner, task->base.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->unkA8, &extra, sizeof(extra));
                 }
@@ -122,7 +122,7 @@ void func_151B1B34(Task151B1AB0 *task) {
 }
 
 /* Message handler for the task: follows an owner swap, or destroys itself when its owner goes away. */
-void func_151B1FAC(Task151B1AB0 *task, ActorMsg *msg, u8 kind) {
+void particle_onOwnerSideTaskMsg(Task151B1AB0 *task, ActorMsg *msg, u8 kind) {
     Data151B1AB0 *data = &task->data;
 
     if (kind == 0x2D) {

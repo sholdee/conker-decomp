@@ -268,7 +268,7 @@ Gfx *trail_drawBoneTrail(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
     BoneTrailState *state;
 
     if (effect->head.count >= 2) {
-        func_151D5D60(effect->vtxBuf, view, (effect->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(effect->vtxBuf, view, (effect->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             state = effect->state;
             camPos = &camera_global_Cameras[view].eye.x;
@@ -316,7 +316,7 @@ Gfx *trail_drawBoneTrail(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
             gfx = func_15142B7C(gfx, 1, 0x160600);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &stateFlag);
             gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &stateFlag);
-            gfx = func_1513F4E4(gfx, 6, &stateFlag);
+            gfx = particle_setCombineMode(gfx, 6, &stateFlag);
             gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &stateFlag);
             if (effect->head.tmpl.flags & TRAIL_EFFECT_ATTACHED) {
                 nextIdx = effect->head.end - 1;
@@ -533,7 +533,7 @@ void trail_emitBurst(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHe
     params[4] = 17;
     params[5] = -24;
 
-    particles = func_15130374(&spawn, 0, 12, parent->owner, 1);
+    particles = particle_newOwnedSpriteParticle(&spawn, 0, 12, parent->owner, 1);
     if (particles != NULL) {
         memcpy(&particles->data.ageFade, params, sizeof(params));
     }
@@ -690,7 +690,7 @@ void trail_updateBoneEmitter(BoneEmitterTask *task) {
         spawn.brightness = 0xFF;
         spawn.updateFunc = -1;
         spawn.deathFunc = -1;
-        func_15153634(&spawn, 0xFF, task->base.header.owner, task->base.header.kind);
+        particle_spawnSpriteBurst(&spawn, 0xFF, task->base.header.owner, task->base.header.kind);
     }
 }
 

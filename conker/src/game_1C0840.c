@@ -67,7 +67,7 @@ struct FallingObject {
 /*
  * While unkA4 is below unk96, grows unkA4/unkA2 with the timer. After that the object falls with
  * a speed that ramps up to 20; once it drops below floorY it sets unk98 to -1, first spawning a
- * func_151DBCBC effect at the landing point when unkB3 is 1.
+ * particle_spawnKindMark effect at the landing point when unkB3 is 1.
  */
 void effect_updateFallingObject(FallingObject *obj) {
     f32 pos[4]; // matching: a 4th (unused) slot keeps pos at its original stack offset
@@ -90,7 +90,7 @@ void effect_updateFallingObject(FallingObject *obj) {
             pos[0] = obj->x;
             pos[1] = obj->floorY;
             pos[2] = obj->z;
-            func_151DBCBC(5, 30.0f, 0xFF, 0, pos, obj->unkC, obj->unk1);
+            particle_spawnKindMark(5, 30.0f, 0xFF, 0, pos, obj->unkC, obj->unk1);
         }
         obj->unk98 = -1;
     }

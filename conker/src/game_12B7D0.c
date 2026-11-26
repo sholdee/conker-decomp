@@ -67,7 +67,7 @@ void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *out
             origin = position;
         }
         func_151D3E6C(obj, &position, &origin, 0x23);
-        func_151D3F14(&position, arg1, arg2);
+        particle_spawnShortLightFlash(&position, arg1, arg2);
         func_150FE604(obj, &position, arg1, arg2);
         func_150FE7D4(obj);
         if (outPosition != NULL) {
@@ -113,7 +113,7 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
 
 /* Handler: writes the world position of `obj`'s bone point D_800A1FC8 to `out`. */
 void func_150FE794(Actor *obj, s16 arg1, Vec3f *out) {
-    func_151D3E04(obj, out, &D_800A1FC8, D_80088B94, 0.0f);
+    particle_getBonePoint(obj, out, &D_800A1FC8, D_80088B94, 0.0f);
 }
 
 

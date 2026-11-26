@@ -509,7 +509,7 @@ void func_15076768(void) {
         goto setup_done;
     setup_done:
         collision_initHitFromObject(&floor, gCurrentActor);
-        func_1514B364(&position, &floor, 0xFF, 0);
+        particle_spawnGroundCluster(&position, &floor, 0xFF, 0);
         break;
     }
 }

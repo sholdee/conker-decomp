@@ -676,8 +676,8 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 20:
                     if (obj != NULL) {
-                        func_15190518(obj);
-                        func_1518F45C(0, 0x49);
+                        particle_sendActorGoneToEmitters(obj);
+                        particle_broadcastToActorEmitters(0, 0x49);
                     }
                     break;
                 case 21:
@@ -694,7 +694,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
                         ref.actor = obj;
                         ref.uniqueId = obj->unique_id;
-                        func_15191B8C(&ref, 0x50);
+                        particle_sendDripMsg(&ref, 0x50);
                     }
                     break;
             }
@@ -702,9 +702,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             u8 *list;
             s32 count;
 
-            list = func_1519003C(obj, &count);
+            list = particle_getObjEmitterData(obj, &count);
             if (list != NULL && event->unk6 < count) {
-                func_1518F51C(obj, list[event->unk6], -1, -1, -1, -1, 0, 0, 0xFF, 1);
+                particle_startAnchorEmitter(obj, list[event->unk6], -1, -1, -1, -1, 0, 0, 0xFF, 1);
             }
         } else if (event->value == 5) {
             s32 idx;
@@ -725,7 +725,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 } else {
                     c = sceneTag;
                 }
-                func_1518D1C0(obj, ids[idx], duration, 0, c, 0, "Cutscene 1");
+                particle_startActorEmitter(obj, ids[idx], duration, 0, c, 0, "Cutscene 1");
             }
         } else if (event->value == 0x36) {
             if (event->unk4 == 0) {
@@ -1056,9 +1056,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 }
 
 
-/* Defined in game_19A8B0.c as void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4).
+/* Defined in game_19A8B0.c as void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4).
    Not in particle.h: this file was compiled with an s8 texture (the call passes event->unk5 without narrowing). */
-void func_1516E778(f32 *position, s32 duration, s8 texture, u8 arg3, s32 arg4);
+void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, s8 texture, u8 arg3, s32 arg4);
 // matching: an s16 duration where the definition has s32 (the call truncates it)
 
 /*
@@ -1140,7 +1140,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 c5 = colors[idx][5];
                 t = param >> 3;
                 u = ((param * 40) / 4096) & 0xFF;
-                func_1516D99C((s32)pos >> 16, (s32)pos & 0xFFFF, 0, 0x1B, 0,
+                particle_newSpriteEmitter((s32)pos >> 16, (s32)pos & 0xFFFF, 0, 0x1B, 0,
                               c0, c1, c2, c3, c4, c5,
                               0, 1, 6, 0, 0, 0, 0, 0, t >> 8, t & 0xFF, 0, 0, 0xA, 0, 0, 0, 0, 0, 0, 0,
                               duration, u, u, 0xFF, 0xE, 8, 8, 0x25, 0, 0xFF, 8, 0, 0,
@@ -1152,7 +1152,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_151B9BF0(3, 3, 0, 0, 0, 0x320, 0x4B0, 0x190, 0xC8, 0x66, 0x1C7, 2, duration, pos, sceneTag, 0);
+                particle_newFallingEmitter(3, 3, 0, 0, 0, 0x320, 0x4B0, 0x190, 0xC8, 0x66, 0x1C7, 2, duration, pos, sceneTag, 0);
             }
         } else if (event->value == 0xB) {
             s32 duration;
@@ -1160,7 +1160,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_151B9BF0(0x2F, 1, 0, 0, 0, 0x7D0, 0x3E8, 0x190, 0xC8, 0x400, 0x400, 6, duration, pos, sceneTag, 0);
+                particle_newFallingEmitter(0x2F, 1, 0, 0, 0, 0x7D0, 0x3E8, 0x190, 0xC8, 0x400, 0x400, 6, duration, pos, sceneTag, 0);
             }
         } else if (event->value == 0xC) {
             SpriteFxTemplate sp;
@@ -1200,7 +1200,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 to.x = D_800C3958[scene][track].x;
                 to.y = D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset;
                 to.z = D_800C3958[scene][track].z;
-                func_150B0094(&from, &to, sceneTag, 1);
+                particle_fireTrailProjectile(&from, &to, sceneTag, 1);
             } else {
                 beam_spawnTracer(0, D_800C3868[scene][track]->x, D_800C3868[scene][track]->y, D_800C3868[scene][track]->z,
                               D_800C3958[scene][track].x, D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset,
@@ -1232,7 +1232,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (event->unk4 == 0) {
                 switch (event->unk6) {
                     case 0:
-                        func_1516E778(pos, duration, event->unk5, sceneTag, 0);
+                        particle_spawnEmitterFollowingPos(pos, duration, event->unk5, sceneTag, 0);
                         break;
                     case 1:
                         func_150BEF7C(duration);
@@ -1260,10 +1260,10 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         break;
                     }
                     case 3:
-                        func_151DC8BC(pos, (s16)duration, 1, 1, sceneTag, 0);
+                        particle_startColorEmitter(pos, (s16)duration, 1, 1, sceneTag, 0);
                         break;
                     case 4:
-                        func_151DC8BC(pos, (s16)duration, 0, 0, sceneTag, 0);
+                        particle_startColorEmitter(pos, (s16)duration, 0, 0, sceneTag, 0);
                         break;
                 }
             }
@@ -1271,7 +1271,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (obj == NULL) {
                 return 1;
             }
-            func_150BA4C0(obj, sceneTag, 1);
+            particle_attachOwnerEmitter(obj, sceneTag, 1);
         } else if (event->value == 0) {
             if (obj == NULL) {
                 return 1;
@@ -1281,7 +1281,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             effect_spawnQuadEffect(-1, pos[0], pos[1], pos[2], 0x14, 0x14, 1, sceneTag, 1);
         } else if (event->value == 6) {
         } else if (event->value == 7) {
-            func_150B2494(obj, 9, -1);
+            particle_spawnObjGroundBurst(obj, 9, -1);
         } else if (event->value == 0x21) {
             s32 duration;
             SeqEvent *found;
@@ -1321,19 +1321,19 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 1, 1, event->unk5, scene) - eventTime;
                 switch (event->unk5) {
                     case 1:
-                        func_15109410(obj, duration, -1, 0, 0.000709999993f, 0, sceneTag, 1);
+                        particle_startSegmentEmitter(obj, duration, -1, 0, 0.000709999993f, 0, sceneTag, 1);
                         break;
                     case 2:
-                        func_15109410(obj, duration, -1, 1, 0.00612499984f, 0, sceneTag, 1);
+                        particle_startSegmentEmitter(obj, duration, -1, 1, 0.00612499984f, 0, sceneTag, 1);
                         break;
                     case 3:
-                        func_15109ED4(actor, duration, -1, 0, 0.00612499984f, 0, sceneTag, 1);
+                        particle_startMatrixSegmentEmitter(actor, duration, -1, 0, 0.00612499984f, 0, sceneTag, 1);
                         break;
                     case 4:
-                        func_15109ED4(actor, duration, -1, 1, 0.00612499984f, 0, sceneTag, 1);
+                        particle_startMatrixSegmentEmitter(actor, duration, -1, 1, 0.00612499984f, 0, sceneTag, 1);
                         break;
                     case 5:
-                        func_1510A344(obj, duration, sceneTag, 1);
+                        particle_startPointPairEmitter(obj, duration, sceneTag, 1);
                         break;
                     case 6:
                         func_151619A0(track, duration, sceneTag, 1);
@@ -1370,7 +1370,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                                 sp.kind = 0;
                                 break;
                         }
-                        func_15190770(&sp, 0, sceneTag, 1);
+                        particle_newDripEmitter(&sp, 0, sceneTag, 1);
                         break;
                     }
                     case 10:
@@ -1428,7 +1428,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         effect_spawnHopSprite(duration, sceneTag, 1);
                         break;
                     case 20:
-                        func_151925C4(obj, duration, sceneTag, 1);
+                        particle_startObjDustEmitter(obj, duration, sceneTag, 1);
                         break;
                     case 21:
                         effect_newSlowFadeTextBox(event->unk6, D_800C35E0[scene][event->unk6], duration, sceneTag, 1);
@@ -1516,7 +1516,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             if (event->unk4 == 0) {
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_15192D48(obj, duration, sceneTag, 0);
+                particle_attachBoneSideEmitter(obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x5E) {
             s32 duration;
@@ -1537,12 +1537,12 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (event->unk4 == 0) {
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 if (obj->character_type == 0x49 || obj->character_type == 0x58) {
-                    list = func_1519003C(obj, &count);
+                    list = particle_getObjEmitterData(obj, &count);
                     if (list != NULL && event->unk6 < count) {
-                        func_1518F51C(obj, list[event->unk6], duration, -1, -1, -1, 0, 0, sceneTag, 1);
+                        particle_startAnchorEmitter(obj, list[event->unk6], duration, -1, -1, -1, 0, 0, sceneTag, 1);
                     }
                 } else {
-                    func_1518D1C0(obj, event->unk5, duration, 0, sceneTag, 1, "Cutscene 2");
+                    particle_startActorEmitter(obj, event->unk5, duration, 0, sceneTag, 1, "Cutscene 2");
                 }
             }
         } else if (event->value == 0x53) {
@@ -1752,7 +1752,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     }
                     break;
                 case 6:
-                    func_150BAA14(obj, 9, -1);
+                    particle_spawnObjEffects(obj, 9, -1);
                     break;
                 case 7:
                     func_150E0870(obj, sceneTag, 1);
@@ -1763,7 +1763,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     p.x = pos[0];
                     p.y = pos[1];
                     p.z = pos[2];
-                    func_151D5648(&p, sceneTag, 1);
+                    particle_spawnBlast(&p, sceneTag, 1);
                     break;
                 }
                 case 9:
@@ -1866,7 +1866,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         const Vec3f offs[2] = { { -65.0f, 172.0f, 9.0f }, { 15.0f, 63.0f, 9.0f } };
 
                         func_15143134(&offs[event->unk5], &out, obj->ob_matrix_ptr);
-                        func_15131EE4(&out, 0.6460000277f, sceneTag, 0);
+                        particle_spawnFlash(&out, 0.6460000277f, sceneTag, 0);
                     }
                     break;
                 }
@@ -1877,7 +1877,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         const u8 bones[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };
 
                         func_15143134(&offs[event->unk5], &out, &obj->ob_matrix_ptr[bones[event->unk5]]);
-                        func_15131EE4(&out, 6.990000248f, sceneTag, 0);
+                        particle_spawnFlash(&out, 6.990000248f, sceneTag, 0);
                     }
                     break;
                 }
@@ -1906,12 +1906,12 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 22:
                     if (obj != NULL) {
-                        func_15193660(obj, sceneTag, 0);
+                        particle_spawnBoneModelBurst(obj, sceneTag, 0);
                     }
                     break;
             }
         } else if (event->value == 0x40) {
-            func_151A0A10(obj, 0x28, sceneTag, 1);
+            particle_startSparkEmitter(obj, 0x28, sceneTag, 1);
         } else if (event->value == 0x4D) {
             DebrisEmitter sp;
 
@@ -1999,7 +1999,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             sp.spray.unk3E = 0xF;
             sp.spray.unk40 = 0;
             sp.spray.unk38 = 0.5f;
-            func_15153F18(&sp.angles, &sp.spray, 0, sceneTag, 1);
+            particle_spawnSplashSprayAtAngles(&sp.angles, &sp.spray, 0, sceneTag, 1);
         } else if (event->value == 0x24) {
             Vec3f p;
             s32 count;
@@ -2013,7 +2013,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (type >= 0xD) {
                 type = 0;
             }
-            func_151DBAA8(&p, count, type, sceneTag, 0);
+            particle_throwSplashes(&p, count, type, sceneTag, 0);
         } else if (event->value == 0x10) {
             u8 type;
 
@@ -2023,7 +2023,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
             func_151AF4D0(obj, type, sceneTag, 0);
         } else if (event->value == 0x47) {
-            func_151925C4(obj, 0x32, sceneTag, 0);
+            particle_startObjDustEmitter(obj, 0x32, sceneTag, 0);
         } else if (event->value == 0x2E) {
             func_150C1F60(sceneTag);
             func_150C2290(sceneTag);
@@ -2085,7 +2085,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (event->unk6 >= 0) {
                 dist = event->unk6;
             }
-            func_1518B264(pos, dist, speed, n, sceneTag);
+            particle_spawnDroplets(pos, dist, speed, n, sceneTag);
         } else if (event->value == 2) {
             f32 speed;
             f32 dist;
@@ -2103,7 +2103,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (event->unk6 >= 0) {
                 dist = event->unk6;
             }
-            func_1518B2A8(pos, dist, speed, n, 0x1E, 0x64, sceneTag);
+            particle_spawnModelDroplets(pos, dist, speed, n, 0x1E, 0x64, sceneTag);
         } else if (event->value == 0x28) {
             if (actor != NULL) {
                 func_15171600(actor, sceneTag, 0);
@@ -2153,7 +2153,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             p.y = pos[1];
             p.z = pos[2];
             count = (event->unk4 != 0) ? event->unk4 : 0xA;
-            func_151DBAA8(&p, count, 6, sceneTag, 0);
+            particle_throwSplashes(&p, count, 6, sceneTag, 0);
         } else {
             return 0;
         }

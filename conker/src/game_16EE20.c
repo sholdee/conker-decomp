@@ -98,8 +98,8 @@ static s32 (*gActorEffectSelectors[12])() = {
 ActorEffectDef gActorEffects[20] = {
     { func_15146BB8, 130 }, { func_15146BD8, 130 }, { func_15146A98, 85 },  { func_15146D60, 85 },
     { func_15146E84, 80 },  { func_15147040, -1 },  { func_15147318, 130 }, { func_150C1A40, -1 },
-    { attach_spawnBonePointEffects, -1 },  { func_150BAA14, -1 },  { func_150B2494, -1 },  { func_150CB1F4, -1 },
-    { func_151AF6D4, -1 },  { func_150EB090, 85 },  { func_150F2390, -1 },  { func_15147478, 130 },
+    { attach_spawnBonePointEffects, -1 },  { particle_spawnObjEffects, -1 },  { particle_spawnObjGroundBurst, -1 },  { particle_spawnSideDust, -1 },
+    { particle_spawnSideSpray, -1 },  { func_150EB090, 85 },  { func_150F2390, -1 },  { func_15147478, 130 },
     { func_151475D8, 130 }, { func_150BEACC, 85 },  { func_150BED4C, 85 },  { NULL, -1 },
 };
 
@@ -300,7 +300,7 @@ void func_15141F78(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f *pos, u
         flag = 0;
     }
 
-    func_1513C650(&packet, 0, 0, &src->tri, pos->x, src->height, pos->z, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
+    particle_spawnSurfaceQuadSprite(&packet, 0, 0, &src->tri, pos->x, src->height, pos->z, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
 }
 
 /* Template copied onto the stack for zone_findActorZone. */
@@ -325,7 +325,7 @@ s32 func_151420F8(Actor *actor) {
     return 1;
 }
 
-/* Spawns the func_15153F18 effect of the given kind at `pos`. */
+/* Spawns the particle_spawnSplashSprayAtAngles effect of the given kind at `pos`. */
 void effect_spawnSplashSpray(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB) {
     SplashSpraySpec params;
 
@@ -353,5 +353,5 @@ void effect_spawnSplashSpray(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scal
     params.spray.unk3E = 21;
     params.spray.unk40 = arg2;
     params.spray.kind = kind;
-    func_15153F18(&params.angles, &params.spray, 0, 0xFF, 1);
+    particle_spawnSplashSprayAtAngles(&params.angles, &params.spray, 0, 0xFF, 1);
 }

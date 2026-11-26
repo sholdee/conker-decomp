@@ -284,17 +284,17 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
         spawn.ownerId = 0;
         spawn.fadeStart = 1;
         spawn.fadeRate = 0xFF;
-        particle = func_15132A4C(&spawn, arg2, arg3, 0, arg7, arg8);
+        particle = particle_newModelParticle(&spawn, arg2, arg3, 0, arg7, arg8);
         if (particle != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760(&particle->mtx[i], particle);
+                particle_buildUniformMatrix(&particle->mtx[i], particle);
             }
         }
         return particle;
     }
 }
 
-/* Spawns two particle bursts at pos: one through func_15150F90, one through func_15153634. */
+/* Spawns two particle bursts at pos: one through particle_spawnPieceSpray, one through particle_spawnSpriteBurst. */
 void func_151BF0C8(Vec3f *pos) {
     PieceSpray first;
     SpriteBurst second;
@@ -317,7 +317,7 @@ void func_151BF0C8(Vec3f *pos) {
     first.kind = 3;
     first.lifeBase = 65;
     first.lifeRange = 30;
-    func_15150F90(&first, 1, 0xFF, 1);
+    particle_spawnPieceSpray(&first, 1, 0xFF, 1);
 
     second.countBase = 20;
     second.countRange = 8;
@@ -361,7 +361,7 @@ void func_151BF0C8(Vec3f *pos) {
     second.envColorMode = 6;
     second.unk64 = 1;
     second.extra = 0.9411770105f;
-    func_15153634(&second, 0xFF, 0xFF, 1);
+    particle_spawnSpriteBurst(&second, 0xFF, 0xFF, 1);
 }
 
 /* Shows the value of player_getStat(0, 3) (less one, capped at 99) as a two-digit counter that slides in. */

@@ -3,10 +3,10 @@
 #include "variables.h"
 
 
-/* Muzzle points (from, to) of this gun on bone gGunMuzzleBone (D_8008FC8C points to the first). */
+/* Muzzle points (from, to) of this gun on bone gGunMuzzleBone (gGunMuzzlePoints points to the first). */
 const Vec3f gGunMuzzleStart = { 10.0f, -121.0f, 81.0f };
 static const Vec3f D_800A213C = { 10.0f, -155.0f, 99.0f };
-/* Muzzle points (from, to) used by func_151D5714 in game/Event/TimedEvent/timedevent. */
+/* Muzzle points (from, to) used by particle_spawnBoneSegmentParticle in game/Event/TimedEvent/timedevent. */
 const Vec3f D_800A2148 = { -1.0f, -38.0f, 38.0f };
 const Vec3f D_800A2154 = { -26.0f, -23.0f, 51.0f };
 /* Particle textures that weapon_spawnFannedParticles picks from at random. */
@@ -33,9 +33,9 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     s32 random0;
 
     weapon_getShotFrame(obj, &position, &direction, &axis0, &axis1);
-    func_151D5148(obj);
+    particle_countShot(obj);
     if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
-        func_151D3F14(&position, arg3, arg4);
+        particle_spawnShortLightFlash(&position, arg3, arg4);
         motion.height = ((func_150ADA68() * 3400.0f) + 4800.0f) * 0.001000000047f;
         motion.width = ((func_150ADA68() * 220.0f) + 320.0f) * 0.1000000015f;
         random0 = func_150ADA20();
@@ -115,7 +115,7 @@ void weapon_rumbleGun(Actor *obj) {
 
 /* Gets the shot `position` and `direction` (and two axes) of `obj`. */
 void weapon_getShotFrame(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
-    func_151D5A18(obj, position, direction, axis0, axis1, D_8008FC8C[0], *D_8008FC94[0]);
+    particle_getGunAxes(obj, position, direction, axis0, axis1, gGunMuzzlePoints[0], *gGunMuzzleBones[0]);
     func_151D3E6C(obj, position, position, 0x8003A);
 }
 
@@ -195,7 +195,7 @@ void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32
         random0 = (func_150ADA20() & 1) ? 0x80 : 0;
         random1 = (func_150ADA20() & 1) ? 0x40 : 0;
         spawn.flags |= random1 | random0;
-        func_15130280(&spawn, 1, 0, 0, arg2, arg3);
+        particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, arg2, arg3);
         count--;
     } while (count > 0);
 }

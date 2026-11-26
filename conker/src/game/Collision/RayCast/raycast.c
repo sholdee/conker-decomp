@@ -269,7 +269,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
             break;
         }
         if (effect != -1) {
-            func_151D3480(&hit->pos, &hit->dir, &hit->tri, effect, 0xFF, 1);
+            particle_spawnHitImpact(&hit->pos, &hit->dir, &hit->tri, effect, 0xFF, 1);
         }
         return 1;
     }

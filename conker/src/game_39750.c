@@ -4,7 +4,7 @@
 #include "variables.h"
 
 /* The area effects of func_150139AC (game_40490.c), indexed by the zone's data1. */
-const Struct150139ACEntry D_80095FA0[6] = {
+const Struct150139ACEntry gAreaEffectDefs[6] = {
     { 6.50000004e-07f, 2.180000067f, 1.230000019f, 1.610000014f, 4.829999924f,
       252, 50,
       0.3999999762f, 0.09999999404f, 0.01620000042f, 0.005299999844f, 0.8600000143f, 0.5940000415f,
@@ -36,17 +36,17 @@ const Struct150139ACEntry D_80095FA0[6] = {
 /* Low 16 bits of RANDOM(); multiply by 1/65535 for a fraction in [0, 1]. */
 #define RANDOM_U16() (RANDOM() & 0xFFFF)
 
-/* Clears D_800DC468[] and the counters that go with it. */
-void func_1500C2A0(void) {
+/* Clears gParticleModelUseCounts[] and the counters that go with it. */
+void particle_resetModelList(void) {
     s32 i;
 
     for (i = 0; i < 233; i++) {
-        D_800DC468[i] = 0;
+        gParticleModelUseCounts[i] = 0;
     }
 
-    D_800DC460 = NULL;
-    D_800DC464 = NULL;
-    D_800DC63C = 0;
+    gParticleModelsHead = NULL;
+    gParticleModelsTail = NULL;
+    gModelParticleCount = 0;
 }
 
 void *memcpy(void *, const void *, u32);
@@ -55,7 +55,7 @@ void *memcpy(void *, const void *, u32);
  * Spawns func_1514462C(region) * density * 2e-6 particles at random points of the region,
  * each with a random type from a fixed list.
  */
-void func_1500C2F0(TriggerZone *region, f32 density) {
+void particle_spawnAreaParticles(TriggerZone *region, f32 density) {
     f32 count;
 
     count = func_1514462C(region) * density * 1.999999995e-06f;
@@ -125,13 +125,13 @@ void func_1500C2F0(TriggerZone *region, f32 density) {
             }
             collision_selectMap(0);
             part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
-            func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
+            particle_newModelParticle(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
     }
 }
 
-/* Extra data copied to offset 0xA8 of the object func_15130280 returns. */
+/* Extra data copied to offset 0xA8 of the object particle_newSpriteParticleWithFloor returns. */
 typedef struct {
     /* 0x00 */ f32 size;
     /* 0x04 */ s8 unk04;
@@ -145,8 +145,8 @@ typedef struct {
     /* 0x18 */ u8 pad18[4];
 } Particle15130280Extra; /* 0x1C bytes are copied */
 
-/* Spawns func_1514462C(region) * density * 2e-6 func_15130280 particles of random size. */
-void func_1500C8D0(TriggerZone *region, f32 density) {
+/* Spawns func_1514462C(region) * density * 2e-6 particle_newSpriteParticleWithFloor particles of random size. */
+void particle_spawnAreaSprites(TriggerZone *region, f32 density) {
     f32 count;
 
     count = func_1514462C(region) * density * 1.999999995e-06f;
@@ -239,7 +239,7 @@ void func_1500C8D0(TriggerZone *region, f32 density) {
             part.vel.z = RANDOM_U16() * inv65535 * 0.01300000027f + 0.005000000354f;
             collision_selectMap(0);
             part.viewMask = collision_findZoneLeaf(part.pos.x, part.pos.z);
-            obj = func_15130280(&part, 2, 0, 28, 255, 1);
+            obj = particle_newSpriteParticleWithFloor(&part, 2, 0, 28, 255, 1);
             if (obj != NULL) {
                 memcpy(obj + 1, &extra, sizeof(extra));
             }
@@ -248,7 +248,7 @@ void func_1500C8D0(TriggerZone *region, f32 density) {
     }
 }
 
-/* Extra data copied to offset 0x110 of the object func_1513D2F0 returns. */
+/* Extra data copied to offset 0x110 of the object particle_newQuadParticle returns. */
 typedef struct {
     /* 0x00 */ f32 centerY;
     /* 0x04 */ f32 amplitude; /* max distance from centerY that stays inside the region */
@@ -259,8 +259,8 @@ typedef struct {
     /* 0x18 */ f32 unk18;
 } Particle1513D2F0Extra; /* size 0x1C */
 
-/* Spawns func_1514462C(region) * density * 2e-7 func_1513D2F0 particles using D_800A4AA0. */
-void func_1500CE4C(TriggerZone *region, f32 density) {
+/* Spawns func_1514462C(region) * density * 2e-7 particle_newQuadParticle particles using gWhiteVtxColors. */
+void particle_spawnAreaQuads(TriggerZone *region, f32 density) {
     f32 count;
     s32 pad; // matching: stack slot
 
@@ -324,7 +324,7 @@ void func_1500CE4C(TriggerZone *region, f32 density) {
             part.unk44 = RANDOM() % 156 + 100;
             collision_selectMap(0);
             part.unk48 = collision_findZoneLeaf(part.pos.x, part.pos.z);
-            obj = func_1513D2F0(&part, &D_800A4AA0, 0x23, 0, 0, 0x1E, 0, 3, 0xFF, 0x1C, 0xFF, 1);
+            obj = particle_newQuadParticle(&part, &gWhiteVtxColors, 0x23, 0, 0, 0x1E, 0, 3, 0xFF, 0x1C, 0xFF, 1);
             if (obj != NULL) {
                 memcpy(obj + 1, &extra, sizeof(extra));
             }
@@ -333,7 +333,7 @@ void func_1500CE4C(TriggerZone *region, f32 density) {
     }
 }
 
-/* Like func_1500C2F0, at a tenth of the density and always with particle type 0x53. */
+/* Like particle_spawnAreaParticles, at a tenth of the density and always with particle type 0x53. */
 void func_1500D3AC(TriggerZone *region, f32 density) {
     f32 count;
 
@@ -396,13 +396,13 @@ void func_1500D3AC(TriggerZone *region, f32 density) {
             part.sizeXZ = part.sizeY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             collision_selectMap(0);
             part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
-            func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
+            particle_newModelParticle(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
     }
 }
 
-/* Like func_1500C2F0 with another particle type list; type 0x39 is drawn at 35% scale. */
+/* Like particle_spawnAreaParticles with another particle type list; type 0x39 is drawn at 35% scale. */
 void func_1500D8C8(TriggerZone *region, f32 density) {
     f32 count;
 
@@ -472,13 +472,13 @@ void func_1500D8C8(TriggerZone *region, f32 density) {
             }
             collision_selectMap(0);
             part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
-            func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
+            particle_newModelParticle(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
     }
 }
 
-/* Like func_1500C8D0 with larger func_15130280 particles and random colour bytes. */
+/* Like particle_spawnAreaSprites with larger particle_newSpriteParticleWithFloor particles and random colour bytes. */
 void func_1500DE88(TriggerZone *region, f32 density) {
     f32 count;
 
@@ -560,7 +560,7 @@ void func_1500DE88(TriggerZone *region, f32 density) {
             part.vel.z = RANDOM_U16() * inv65535 * 0.01000000071f + 0.002000000095f;
             collision_selectMap(0);
             part.viewMask = collision_findZoneLeaf(part.pos.x, part.pos.z);
-            obj = func_15130280(&part, 2, 0, 28, 255, 1);
+            obj = particle_newSpriteParticleWithFloor(&part, 2, 0, 28, 255, 1);
             if (obj != NULL) {
                 memcpy(obj + 1, &extra, sizeof(extra));
             }

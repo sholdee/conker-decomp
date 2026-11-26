@@ -97,7 +97,7 @@ s32 trail_fadeFallingTrail(FallingTrail *trail) {
 extern struct {
     s32 unk0;
     s32 unk4;
-} D_800A4AC8[];
+} gEffectRenderModes[];
 
 /*
  * Draws the trail as a camera-facing ribbon from the newest point (i) back to the tail, one quad per segment;
@@ -137,7 +137,7 @@ Gfx *trail_drawFallingTrail(FallingTrail *trail, Gfx *gfx, s16 view) {
     f32 scale;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->vtxBuf, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(trail->vtxBuf, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             data = trail->data;
             update = 1;
@@ -148,7 +148,7 @@ Gfx *trail_drawFallingTrail(FallingTrail *trail, Gfx *gfx, s16 view) {
             func_151442FC(&envR, &envG, &envB, &envA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->envMode);
             gfx = func_15142E24(gfx, &gEffectTextures[66], 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
-            gfx = func_1513F4E4(gfx, data->unk21, &update);
+            gfx = particle_setCombineMode(gfx, data->unk21, &update);
             gfx = func_15142B7C(gfx, data->setGeometryMode, data->clearGeometryMode);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
             gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
@@ -158,7 +158,7 @@ Gfx *trail_drawFallingTrail(FallingTrail *trail, Gfx *gfx, s16 view) {
                 cycleMode = G_CYC_1CYCLE;
             }
             gfx = func_15142FBC(gfx, cycleMode | G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE,
-                                D_800A4AC8[data->renderMode].unk0 | D_800A4AC8[data->renderMode].unk4, &update);
+                                gEffectRenderModes[data->renderMode].unk0 | gEffectRenderModes[data->renderMode].unk4, &update);
             i = trail->head.end - 1;
             i = (i < 0) ? trail->head.tmpl.itemCount - 1 : i;
             j = i - 1;
@@ -354,7 +354,7 @@ typedef struct {
     /* 0x3C */ f32 shrinkFactor;
 } TrailBurstPreset; /* size 0x40 */
 
-/* Burst description for func_15152B38, which spawns a randomised batch of trails with trail_spawnFallingTrail. */
+/* Burst description for particle_spawnTrailBurst, which spawns a randomised batch of trails with trail_spawnFallingTrail. */
 
 /* The emission presets (TrailBurstEmitter.emitter.preset); preset 0 emits nothing. */
 static const TrailBurstPreset gTrailBurstPresets[] = {
@@ -431,7 +431,7 @@ void trail_updateBurstEmitter(TrailBurstEmitter *owner) {
         burst.pos.x += emitter->origin->x;
         burst.pos.y += emitter->origin->y;
         burst.pos.z += emitter->origin->z;
-        func_15152B38(&burst, owner->base.header.owner, owner->base.header.kind);
+        particle_spawnTrailBurst(&burst, owner->base.header.owner, owner->base.header.kind);
         emitter->accum -= 1.0f;
     }
 }

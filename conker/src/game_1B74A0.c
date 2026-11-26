@@ -2,13 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Emitter handlers run by func_1518A094 before it follows the bone. Returning 0 ends the emitter's
- * update (func_1518A094 returns 0); setting *follow to FALSE skips this frame's bone follow. */
+/* Emitter handlers run by particle_followBoneGlow before it follows the bone. Returning 0 ends the emitter's
+ * update (particle_followBoneGlow returns 0); setting *follow to FALSE skips this frame's bone follow. */
 /* Declared without a prototype: func_151C9B64 takes its SightStatusObject. */
-static s32 (*D_8008D5A0[])() = { func_1518A214, func_1518A2E8, func_1518A324, func_151C9B64 };
+static s32 (*gBoneGlowFollowFuncs[])() = { func_1518A214, func_1518A2E8, func_1518A324, func_151C9B64 };
 
 /* Spawns an emitter (type 0xB) that follows the bone described by `attach`. */
-BoneGlow *func_15189FF0(ParticleDef *spawn, GlowShape *params, EmitterAttach *attach, u8 arg3, u8 arg4,
+BoneGlow *particle_spawnBoneGlow(ParticleDef *spawn, GlowShape *params, EmitterAttach *attach, u8 arg3, u8 arg4,
                        u8 arg5, u8 arg6) {
     BoneGlow *emitter;
 
@@ -25,7 +25,7 @@ BoneGlow *func_15189FF0(ParticleDef *spawn, GlowShape *params, EmitterAttach *at
 }
 
 /* Moves the emitter's p0/p1 onto its target's bone. Returns 0 once the target is gone. */
-s32 func_1518A094(BoneGlow *emitter) {
+s32 particle_followBoneGlow(BoneGlow *emitter) {
     EmitterAttach *attach;
 
     attach = &emitter->attach;
@@ -39,7 +39,7 @@ s32 func_1518A094(BoneGlow *emitter) {
         if (attach->handler != -1) {
             u8 follow;
 
-            if (D_8008D5A0[attach->handler](emitter, &follow)) {
+            if (gBoneGlowFollowFuncs[attach->handler](emitter, &follow)) {
                 if (!follow) {
                     return 1;
                 }
@@ -132,7 +132,7 @@ s32 func_1518A324(BoneGlow *emitter, u8 *follow) {
 }
 
 /* Message handler: message 0x2D moves the emitter from one object of the pair to the other. */
-void func_1518A360(BoneGlow *emitter, ActorSwapMsg *msg, u8 msgId) {
+void particle_onBoneGlowSwap(BoneGlow *emitter, ActorSwapMsg *msg, u8 msgId) {
     EmitterAttach *attach = &emitter->attach;
 
     if (msgId == 0x2D) {

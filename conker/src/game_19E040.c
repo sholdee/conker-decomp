@@ -336,7 +336,7 @@ void effect_spawnDustRing(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 siz
             px = radius * sn + x;
             velXHigh = velX >> 8;
             velXLow = velX;
-            func_1516D4E8(px, y, pz, 0xD, 0, colors[color][0], colors[color][1], colors[color][2], 0, 0, 0, 0,
+            particle_newStyleParticle(px, y, pz, 0xD, 0, colors[color][0], colors[color][1], colors[color][2], 0, 0, 0, 0,
                           2, velXHigh, velXLow, velZHigh, velZLow, 0, 0, 5, 0, 0, 0, (s16)size, (s16)size,
                           (r & 0xF) + 10, velY, 0, 0, owner, list);
             angle += step;
@@ -356,7 +356,7 @@ void func_15171BF4(Actor *obj, u8 owner) {
         func_150BD740(obj, owner, 1);
         break;
     case 0x54:
-        func_150CDBB0(obj, owner, 1);
+        particle_spawnGroundEffects(obj, owner, 1);
         break;
     }
 }

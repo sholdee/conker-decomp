@@ -72,7 +72,7 @@ s32 func_15146970(s32 kind, Actor *actor) {
 // matching: `actor` is an int cast at each use; with a pointer parameter IDO merges the two
 // loads of it that the original makes (lw t6 / lw a1 from the arg slot).
 
-/* Burst of func_15150F90 pieces from the actor's bone on `side`. */
+/* Burst of particle_spawnPieceSpray pieces from the actor's bone on `side`. */
 void func_15146A98(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     PieceSpray burst;
@@ -97,7 +97,7 @@ void func_15146A98(s32 actor, s32 side, s32 strength) {
         burst.kind = 3;
         burst.lifeBase = 25;
         burst.lifeRange = 25;
-        func_15150F90(&burst, 0, 0xFF, 1);
+        particle_spawnPieceSpray(&burst, 0, 0xFF, 1);
     }
 }
 
@@ -139,8 +139,8 @@ void func_15146D60(s32 actor, s32 side, s32 strength) {
     }
 }
 
-/* Effect func_151D8E20() at the ground below the actor's bone on `side` (only when strength is at
-   least 71), and a randomly sized func_151D9B8C or func_151DAB58 particle at ground height. */
+/* Effect particle_getContextEffectKind() at the ground below the actor's bone on `side` (only when strength is at
+   least 71), and a randomly sized particle_spawnKindEmitter or particle_spawnSquash particle at ground height. */
 void func_15146E84(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
@@ -152,7 +152,7 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
-            kind = func_151D8E20();
+            kind = particle_getContextEffectKind();
             if (strength >= 71) {
                 effect_spawnSplashSpray(kind, &pos, hit.material, 1.0f, 1.0f);
             }
@@ -164,18 +164,18 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
             if (func_150ADA20() & 1) {
                 size = func_150ADA68();
                 random = func_150ADA20();
-                func_151D9B8C(kind, size * 10.0f + 10.0f, (random % 101U) + 100, &hit.tri,
+                particle_spawnKindEmitter(kind, size * 10.0f + 10.0f, (random % 101U) + 100, &hit.tri,
                               &spot, (func_150ADA20() % 41U) + 80, 1, 1, 0, 0xFF, 1);
             } else {
                 size = func_150ADA68();
-                func_151DAB58(kind, size * 8.0f + 5.0f, (func_150ADA20() % 101U) + 100, &spot, 1,
+                particle_spawnSquash(kind, size * 8.0f + 5.0f, (func_150ADA20() % 101U) + 100, &spot, 1,
                               0xFF, 1);
             }
         }
     }
 }
 
-/* func_1514C678 at the actor's bone on `side`, with a random radius below 11. */
+/* particle_emitOnRandomCircle at the actor's bone on `side`, with a random radius below 11. */
 void func_15147040(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     s16 roll;
@@ -183,12 +183,12 @@ void func_15147040(s32 actor, s32 side, s32 strength) {
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         func_15146890(&pos, (Actor *)actor, NULL, side);
         roll = (func_150ADA20() % 11U) + 5;
-        func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 11.0f, 0, 0xFF, roll, 0x16, 0, 0.0f, 0,
+        particle_emitOnRandomCircle(pos.x, pos.y, pos.z, func_150ADA68() * 11.0f, 0, 0xFF, roll, 0x16, 0, 0.0f, 0,
                       0xFF);
     }
 }
 
-/* Spawn one func_15130374 particle at (x, y, z), flying off at a random pitch along `yaw`. */
+/* Spawn one particle_newOwnedSpriteParticle particle at (x, y, z), flying off at a random pitch along `yaw`. */
 s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw,
                   s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     ParticleDesc desc;
@@ -242,7 +242,7 @@ s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.fadeRate = 12;
     desc.scaleStart = 27;
 
-    particle = func_15130374(&desc, 1, 4, argE, 1);
+    particle = particle_newOwnedSpriteParticle(&desc, 1, 4, argE, 1);
     if (particle != NULL) {
         memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
     }

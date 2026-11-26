@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
+// particle_spawnSteamParticle (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
-SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
@@ -475,7 +475,7 @@ void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D
     payload.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
     burst.gravity = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001000000047f;
 
-    spawned = func_151303BC(&burst, 2, sizeof(payload));
+    spawned = particle_newSpriteParticle(&burst, 2, sizeof(payload));
     if (spawned != NULL) {
         memcpy((u8 *)spawned + 0xA8, &payload, sizeof(payload));
     }
@@ -557,7 +557,7 @@ void func_151AABC4(Actor *actor, u8 index) {
     Vec3f hit;
 
     if ((actor != NULL) && (actor->ob_matrix_ptr != NULL)) {
-        color = func_151D8E20();
+        color = particle_getContextEffectKind();
         func_15142314(actor->ob_matrix_ptr, D_800A8F70[index], &pos, actor);
         collision_initHitFromObject(&floor, actor);
         y = pos.y + 50.0f;
@@ -568,7 +568,7 @@ void func_151AABC4(Actor *actor, u8 index) {
             hit.x = pos.x;
             hit.y = floor.height;
             hit.z = pos.z;
-            func_151DBCBC(color, 40.0f, 150, &floor.tri, &hit, 0xFF, 1);
+            particle_spawnKindMark(color, 40.0f, 150, &floor.tri, &hit, 0xFF, 1);
             {
                 SplashSpraySpec c;
 
@@ -596,7 +596,7 @@ void func_151AABC4(Actor *actor, u8 index) {
                 c.spray.unk3E = 0xF;
                 c.spray.unk40 = 0;
                 c.spray.unk38 = 0.0f;
-                func_15153F18(&c.angles, &c.spray, &floor, 0xFF, 1);
+                particle_spawnSplashSprayAtAngles(&c.angles, &c.spray, &floor, 0xFF, 1);
             }
         }
     }
@@ -647,7 +647,7 @@ void effect_keepTaskFlicker(ActorTask *task) {
     }
     pos.z = actor->zpos;
     if (collision_probeFloorSurfBCached(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
-        color = func_151D8E20();
+        color = particle_getContextEffectKind();
         pos.y = task->watcher.hit.height;
         size = (func_150ADA68() * 30.0f) + 50.0f;
         payload.owner = &task->watcher;
@@ -666,14 +666,14 @@ void effect_keepTaskFlicker(ActorTask *task) {
         part.unk10 = 150;
         part.frame = 0;
         part.unk11 = 0xFF;
-        part.rgba[0] = D_800AB414[color].r;
-        part.rgba[1] = D_800AB414[color].g;
-        part.rgba[2] = D_800AB414[color].b;
+        part.rgba[0] = gKindColors[color].r;
+        part.rgba[1] = gKindColors[color].g;
+        part.rgba[2] = gKindColors[color].b;
         part.rgba[3] = 0xFF;
         part.renderModes = 0x440001;
         part.unk16 = 0;
         part.unk17 = 6;
-        fx->flicker = (FlickerSprite *)func_1513C73C(&part, 7, 1, &task->watcher.hit.tri, pos.x, pos.y, pos.z,
+        fx->flicker = (FlickerSprite *)particle_spawnSurfaceQuadSpriteNoModel(&part, 7, 1, &task->watcher.hit.tri, pos.x, pos.y, pos.z,
                                                  size, size, func_150ADA20() & 0xFF,
                                                  (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
         if (fx->flicker != NULL) {
@@ -708,7 +708,7 @@ s32 effect_detachTaskFlicker(FlickerSprite *fx) {
     ownerFx->flicker = NULL;
     fx->quad.def.flags |= 2;
     fx->flicker.owner = NULL;
-    func_1513F6C0(&fx->quad, 0, 0);
+    particle_setQuadSpriteFuncs(&fx->quad, 0, 0);
     return 0;
 }
 
@@ -838,7 +838,7 @@ void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *o
     payload.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
     payload.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
     burst.gravity = ((func_150ADA68() * 60.0f) + 21.0f) * 0.001000000047f;
-    spawned = func_151303BC(&burst, 2, sizeof(payload));
+    spawned = particle_newSpriteParticle(&burst, 2, sizeof(payload));
     if (spawned != NULL) {
         memcpy((u8 *)spawned + 0xA8, &payload, sizeof(payload));
     }
@@ -893,7 +893,7 @@ void func_151AB828(ActorTask *task) {
     effect_tryAttachActorEffect(task->watcher.character, 0, 4);
 }
 
-/* For actors of kind 0-4 or 150: spawns a func_15190770 effect on the actor. */
+/* For actors of kind 0-4 or 150: spawns a particle_newDripEmitter effect on the actor. */
 void func_151AB854(ActorTask *task) {
     Actor *actor;
     ActorLink desc;
@@ -914,7 +914,7 @@ void func_151AB854(ActorTask *task) {
         if (actor->playernumber != 0xFF) {
             actor->mv->idle.delay = 500;
         }
-        func_15190770(&desc, 0, task->watcher.header.owner, task->watcher.header.kind);
+        particle_newDripEmitter(&desc, 0, task->watcher.header.owner, task->watcher.header.kind);
     }
 }
 
@@ -950,7 +950,7 @@ void effect_spawnSparkEmitterTask(Actor *actor) {
     payload.accum = 0.0f;
     payload.rate = 0.400000006f;
     payload.rateRandom = 3.0f;
-    payload.color = func_151D8E20();
+    payload.color = particle_getContextEffectKind();
     task = effect_newTimedEffectNoDraw(0x3C, -1, 0xE, 1, 9, sizeof(payload), 0xFF, 0);
     if (task != NULL) {
         memcpy(&((EmitterTask *)task)->payload, &payload, sizeof(payload));
@@ -1006,7 +1006,7 @@ void effect_updateSparkEmitterTask(EmitterTask *task) {
 
                     randA = func_150ADA20();
                     randB = func_150ADA20();
-                    func_151D9014(&pos, &vel, emitter->color, randT * 0.5f + -1.0f, (u32)randA % 26U + 32,
+                    particle_spawnSteamParticle(&pos, &vel, emitter->color, randT * 0.5f + -1.0f, (u32)randA % 26U + 32,
                                   (u32)randB % 101U + 100, func_150ADA68() * 34.0f + 52.0f, 1, 1.0f, 1.0f, 1, &floor, 1,
                                   0, task->base.header.owner, task->base.header.kind);
                 }

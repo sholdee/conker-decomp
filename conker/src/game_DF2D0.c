@@ -20,8 +20,8 @@ void func_150B1E20(Camera *camera) {
     }
 }
 
-/* Spawns an emitter effect (func_150B1F90) at `pos` with a random duration of 69-201. */
-void func_150B1EE0(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
+/* Spawns an emitter effect (particle_updatePointEmitter) at `pos` with a random duration of 69-201. */
+void particle_spawnPointEmitter(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
     PointEmitterData data;
     TimedEffect *effect;
 
@@ -37,7 +37,7 @@ void func_150B1EE0(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
 
 /* Emitter effect update: accumulates a random rate per frame and spawns one particle at the
  * emitter's position per whole unit owed. */
-void func_150B1F90(PointEmitter *effect) {
+void particle_updatePointEmitter(PointEmitter *effect) {
     PointEmitterData *data;
 
     data = &effect->data;
@@ -93,7 +93,7 @@ void func_150B1F90(PointEmitter *effect) {
             spawn.alpha = func_150ADA20() % 101U + 100;
             spawn.timer = func_150ADA20() % 78U + 126;
             spawn.width = spawn.height = func_150ADA68() * 503.0f + 405.0f;
-            particle = func_15130280(&spawn, 1, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
+            particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
             }

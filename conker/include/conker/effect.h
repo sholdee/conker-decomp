@@ -1186,7 +1186,7 @@ Gfx *effect_beginQuadEffectDraw(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3);
 extern EffectHeader *gObjectLists[2][OBJ_TYPE_COUNT]; /* object lists: [list][type] heads a doubly linked list */
 extern s8 gObjectWalkDepth; /* depth of the object-list walks in progress */
 extern void *gObjectWalkNext[6]; // per object-list walk depth (gObjectWalkDepth): the next node to visit
-extern s32 D_800DD1B0; // texture last loaded by func_1517A9A8
+extern s32 D_800DD1B0; // texture last loaded by particle_loadDebrisTexture
 extern s32 D_800DD1B4;
 extern s32 D_800DD1B8;
 extern s16 D_800DD1BC;
@@ -1401,7 +1401,7 @@ typedef struct PeriodicTrigger {
     /* 0x8 */ Actor *target;
 } PeriodicTrigger;
 
-/* The burning effect of effect_setOnFire (game_1C1150.c): an AnchorEmitter (func_1518F51C) whose 12 bytes of extra
+/* The burning effect of effect_setOnFire (game_1C1150.c): an AnchorEmitter (particle_startAnchorEmitter) whose 12 bytes of extra
  * data are a PeriodicTrigger. Update effect_updateBurnDamage, expire func_151906C4, message effect_periodicTriggerMessage (game_1BDB90.c). */
 typedef struct PeriodicObject {
     /* 0x00 */ AnchorEmitter emitter;   /* emitter.group.actor: the burning actor */
@@ -1528,11 +1528,11 @@ typedef struct FxImpactSet {
     /* 0x00 */ s8 first;      /* gImpactFirstEffects index */
     /* 0x01 */ s8 firstStyle; /* gImpactSprays index (read by effect_spawnImpactSprayParticle) */
     /* 0x02 */ s8 second;     /* gImpactSecondEffects index */
-    /* 0x03 */ s8 emitter;    /* gImpactEmitterConfigs index (read by func_151AC61C, game_1D9A00.c) */
+    /* 0x03 */ s8 emitter;    /* gImpactEmitterConfigs index (read by particle_spawnYawSteam, game_1D9A00.c) */
     /* 0x04 */ s8 impact;     /* gImpactGroundEffects index */
 } FxImpactSet; // size 0x5
 
-/* Randomized particle parameters of an impact emitter (func_151AC61C): each value is base + random * range. */
+/* Randomized particle parameters of an impact emitter (particle_spawnYawSteam): each value is base + random * range. */
 typedef struct EmitterConfig {
     /* 0x00 */ s16 unk0;
     /* 0x02 */ s16 unk2;

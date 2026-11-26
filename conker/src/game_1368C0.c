@@ -7,7 +7,7 @@
  * at 0x28), the per-frame updates that emit their particles, and their spawn callbacks.
  */
 
-/* Live particle returned by func_15130374; its extra data (dataSize bytes) starts at 0xA8. */
+/* Live particle returned by particle_newOwnedSpriteParticle; its extra data (dataSize bytes) starts at 0xA8. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 unkA8;
@@ -45,9 +45,9 @@ static const Vec3f D_800A2628 = { 81.0f, -24.0f, 43.0f };
 /* This file's .data: the per-frame effect callbacks (none), and the particle emitters called with
  * (effect, point, segment start, segment end, segment tip, direction). */
 static void (*D_80088C60[])(Effect1368C0 *effect) = { NULL };
-static void (*D_80088C64[])(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) = {
-    func_15109848,
-    func_15109C20,
+static void (*gSegmentEmitFuncs[])(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) = {
+    particle_emitAlongDir,
+    particle_emitDebris,
     NULL,
 };
 /* not referenced: two 16-byte records */
@@ -58,9 +58,9 @@ static u32 D_80088C70[2][4] = {
 
 /*
  * Creates effect 0x1A on `object`, lasting `duration` frames (negative: 300), emitting
- * particles at `spawnRate` through D_80088C64[emitFunc]. `extraSize` more data bytes are reserved.
+ * particles at `spawnRate` through gSegmentEmitFuncs[emitFunc]. `extraSize` more data bytes are reserved.
  */
-TimedEffect *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
+TimedEffect *particle_startSegmentEmitter(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
                          u8 owner, s32 kind) {
     Effect1368C0 *effect;
     ObjectEmitterData data;
@@ -98,7 +98,7 @@ TimedEffect *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc
  * Effect 0x1A update: ends the effect when its object is gone, otherwise emits one particle per
  * whole unit of spawnAccum from a random point on the object's emission segments.
  */
-void func_151094FC(Effect1368C0 *effect) {
+void particle_updateSegmentEmitter(Effect1368C0 *effect) {
     ObjectEmitterData *data;
     Actor *object;
     Vec3f point;
@@ -141,7 +141,7 @@ void func_151094FC(Effect1368C0 *effect) {
             dir.y = (tip.y - end.y) * t + end.y - start.y;
             dir.z = (tip.z - end.z) * t + end.z - start.z;
             func_15145128(&dir, &dir, NULL, NULL);
-            D_80088C64[data->emitFunc](effect, &point, &start, &end, &tip, &dir);
+            gSegmentEmitFuncs[data->emitFunc](effect, &point, &start, &end, &tip, &dir);
             data->spawnAccum -= 1.0f;
         }
     } else {
@@ -154,8 +154,8 @@ void func_151094FC(Effect1368C0 *effect) {
     }
 }
 
-/* Particle emitter: a particle flying along `dir` from `point`, plus a func_15152B38 emitter there. */
-void func_15109848(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) {
+/* Particle emitter: a particle flying along `dir` from `point`, plus a particle_spawnTrailBurst emitter there. */
+void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) {
     ParticleDesc spawn;
     f32 speed;
     TrailBurst emitter;
@@ -202,7 +202,7 @@ void func_15109848(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     spawn.deathFunc = -1;
     spawn.drawFunc = -1;
     spawn.handlerSet = 4;
-    func_15130374(&spawn, 1, 0, effect->base.header.owner, effect->base.header.kind);
+    particle_newOwnedSpriteParticle(&spawn, 1, 0, effect->base.header.owner, effect->base.header.kind);
 
     emitter.countBase = 1;
     emitter.countRange = 4;
@@ -256,11 +256,11 @@ void func_15109848(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     emitter.unk39 = 0;
     emitter.unk72 = -1;
     emitter.unk73 = -1;
-    func_15152B38(&emitter, effect->base.header.owner, effect->base.header.kind);
+    particle_spawnTrailBurst(&emitter, effect->base.header.owner, effect->base.header.kind);
 }
 
 /* Particle emitter: a randomly sized and spun piece of debris thrown along `dir` from `point`. */
-void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) {
+void particle_emitDebris(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) {
     s32 padA4; // matching: unused stack slots in the original frame
     Actor *object;
     f32 speed;
@@ -305,7 +305,7 @@ void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     debris.destroyFn = 0;
     debris.squashFn = 0;
     debris.matrixFn = 2;
-    if (effect->base.callbackSet == 0x1A) { /* emitted by effect 0x1A (func_151094FC) */
+    if (effect->base.callbackSet == 0x1A) { /* emitted by effect 0x1A (particle_updateSegmentEmitter) */
         debris.unk6A = 1;
     } else {
         debris.unk6A = 2;
@@ -315,14 +315,14 @@ void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     debris.fadeStart = 10;
     debris.fadeRate = 25;
 
-    func_15132A4C(&debris, 3, 0xFF, 0, effect->base.header.owner, effect->base.header.kind);
+    particle_newModelParticle(&debris, 3, 0xFF, 0, effect->base.header.owner, effect->base.header.kind);
 }
 
 /*
  * Creates effect 0x1B for `arg0`, lasting `duration` frames (negative: 300), emitting particles at
- * `spawnRate` through D_80088C64[emitFunc]. `extraSize` more data bytes are reserved.
+ * `spawnRate` through gSegmentEmitFuncs[emitFunc]. `extraSize` more data bytes are reserved.
  */
-TimedEffect *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
+TimedEffect *particle_startMatrixSegmentEmitter(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
                          u8 owner, s32 kind) {
     Effect1368C0 *effect;
     MatrixEmitterData data;
@@ -359,7 +359,7 @@ TimedEffect *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f
  * Effect 0x1B update: emits one particle per whole unit of spawnAccum from a random point on the
  * emission segments, transformed by the matrix gfx_getObjectModelMtx builds from data.unk0.
  */
-void func_15109FB8(Effect1368C0 *effect) {
+void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
     MatrixEmitterData *data;
 
     data = &effect->data.matrix;
@@ -399,7 +399,7 @@ void func_15109FB8(Effect1368C0 *effect) {
             dir.y = (tip.y - end.y) * t + end.y - start.y;
             dir.z = (tip.z - end.z) * t + end.z - start.z;
             func_15145128(&dir, &dir, NULL, NULL);
-            D_80088C64[data->emitFunc](effect, &point, &start, &end, &tip, &dir);
+            gSegmentEmitFuncs[data->emitFunc](effect, &point, &start, &end, &tip, &dir);
             data->spawnAccum -= 1.0f;
         }
     } else {
@@ -413,7 +413,7 @@ void func_15109FB8(Effect1368C0 *effect) {
 }
 
 /* Creates effect 0x1C on `object`, lasting `duration` frames. */
-TimedEffect *func_1510A344(Actor *object, s16 duration, u8 owner, s32 kind) {
+TimedEffect *particle_startPointPairEmitter(Actor *object, s16 duration, u8 owner, s32 kind) {
     Effect1368C0 *effect;
     PairEmitterData data;
 
@@ -438,7 +438,7 @@ TimedEffect *func_1510A344(Actor *object, s16 duration, u8 owner, s32 kind) {
  * Effect 0x1C update: ends the effect when its object is gone, otherwise emits particles from one
  * of the object's two emission points (picked at random), flying towards that point's target.
  */
-void func_1510A40C(Effect1368C0 *effect) {
+void particle_updatePointPairEmitter(Effect1368C0 *effect) {
     PairEmitterData *data;
     Actor *object;
     Vec3f points[2];
@@ -519,7 +519,7 @@ void func_1510A40C(Effect1368C0 *effect) {
             spawn.vel.x = dirs[side].x * speed;
             spawn.vel.y = dirs[side].y * speed;
             spawn.vel.z = dirs[side].z * speed;
-            particle = func_15130374(&spawn, 1, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
+            particle = particle_newOwnedSpriteParticle(&spawn, 1, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->unkA8, &extra, sizeof(extra));
             }
@@ -533,7 +533,7 @@ void func_1510A40C(Effect1368C0 *effect) {
 }
 
 /* Message handler: on message 0x2D (two objects swapped), moves the effect to the other object. */
-void func_1510A870(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
+void particle_onSegmentEmitterSwap(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
     ActorRef *tracked = &effect->data.tracked;
 
     if (msgType == 0x2D) {
@@ -547,7 +547,7 @@ void func_1510A870(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
     }
 }
 
-/* Message handler: the same as func_1510A870. */
+/* Message handler: the same as particle_onSegmentEmitterSwap. */
 void func_1510A8CC(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
     ActorRef *tracked = &effect->data.tracked;
 

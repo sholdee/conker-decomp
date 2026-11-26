@@ -55,7 +55,7 @@ typedef union MoverWork {
     } bounce;
 } MoverWork;
 
-/* A piece spawned by func_15150400, as the handlers below see it. */
+/* A piece spawned by particle_spawnDebrisScatter, as the handlers below see it. */
 typedef struct {
     /* 0x000 */ u8 unk0;
     /* 0x001 */ u8 unk1;

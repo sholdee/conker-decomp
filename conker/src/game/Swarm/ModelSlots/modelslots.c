@@ -143,7 +143,7 @@ s32 swarm_spawnEffect(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 
                           0.03999999911f, 0.02500000037f, spawnFlags);
             break;
         case 9:
-            func_1517AA20(target->speed, target->xpos, target->ypos, target->zpos, count);
+            particle_spawnGroundChunks(target->speed, target->xpos, target->ypos, target->zpos, count);
             break;
     }
     if (type != 9) {

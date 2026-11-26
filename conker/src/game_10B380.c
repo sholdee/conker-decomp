@@ -99,7 +99,7 @@ s32 func_150DDFAC(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, Co
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C(&def, 5, 0, surface, points[source->head.start].x, height, points[source->head.start].z, size, size,
+    particle_spawnSurfaceQuadSpriteNoModel(&def, 5, 0, surface, points[source->head.start].x, height, points[source->head.start].z, size, size,
                   rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
     return 1;
 }
@@ -144,7 +144,7 @@ s32 func_150DE12C(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, Co
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C(&def, 5, 0, surface, points[source->head.start].x, height, points[source->head.start].z, size, size,
+    particle_spawnSurfaceQuadSpriteNoModel(&def, 5, 0, surface, points[source->head.start].x, height, points[source->head.start].z, size, size,
                   rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
     return 1;
 }

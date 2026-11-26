@@ -55,7 +55,7 @@ typedef struct TexturedQuad {
     /* 0x28 */ u8 colorLevel;
     /* 0x29 */ u8 primMode;
     /* 0x2A */ u8 envMode;
-    /* 0x2B */ u8 renderMode;       // index into D_800A4AC8
+    /* 0x2B */ u8 renderMode;       // index into gEffectRenderModes
     /* 0x2C */ u8 combiner;
     /* 0x2D */ u8 pad2D[3];
     /* 0x30 */ s32 geometrySet;
