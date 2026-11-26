@@ -162,6 +162,7 @@ extern s8 D_800D23A8;     /* race direction: 0 = towards higher node params */
 extern s8 D_800D23A9;
 
 /* game_B7060.c */
+extern MpGame *D_800D23B0; /* the loaded multiplayer game resource (func_15089BC0) */
 void func_15089BB0(void);
 s32 func_15089BC0(void);
 s32 func_15089F9C(s32 player);

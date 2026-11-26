@@ -22,7 +22,6 @@ Racer *D_800872A0 = NULL; // per-racer state of the race mode
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
 
-extern MpGame *D_800D23B0;
 
 /* Distance between two path nodes, 0 if either is 0xFF. */
 f32 func_15086BD0(s32 a, s32 b) {

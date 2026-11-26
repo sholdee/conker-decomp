@@ -133,6 +133,9 @@ f32 func_1504A620(f32 x);
 
 /* game_BC430.c */
 void func_1508EF80(Vec3f *arg0, Vec3f *arg1, f32 arg2, Vec3f *arg3);
+extern u8 D_80087358[40];     /* read by func_150ADAF0 (game_DAFA0.s) */
+extern u32 D_80087380;        /* number of groups in D_800D23C0 */
+extern ObjGroup *D_800D23C0;  /* the level's link groups (func_15017578) */
 
 /* game_21CAC0.c */
 s32 func_151EF610(void);

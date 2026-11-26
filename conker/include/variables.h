@@ -79,7 +79,6 @@ extern Gfx D_800859A0[]; // shared display list (2D/sprite render setup)
 
 
 extern u8 * D_80086CAC[];
-extern u32 D_80087380;
 
 extern Gfx D_800873D0[];
 extern Gfx D_80087408[];
@@ -462,7 +461,6 @@ extern u8 D_800D2DAA;
 extern u8  D_800D2DAB;
 extern u16 *D_800D2110;
 
-extern ObjGroup *D_800D23C0;
 extern Mtx  D_800D23D0;
 
 extern f32 D_800D2410[];
