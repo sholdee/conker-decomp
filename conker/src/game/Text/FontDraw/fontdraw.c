@@ -385,7 +385,8 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
             s32 full;
 
             if (draw) {
-                { // matching: -g3 block marker keeps as1 from hoisting the 1/4096 mtc1 above it
+                {
+                    /* matching: -g3 block marker keeps as1 from hoisting the 1/4096 mtc1 above it */
                     extern f32 gScreenScaleY;
 
                 gy = 0.0f;

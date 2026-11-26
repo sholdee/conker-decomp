@@ -10,7 +10,6 @@
 /* The font charset: glyph i of the font texture shows character gFixedFontCharset[i]. */
 static u8 gFixedFontCharset[] = "abcdefhiuvsnorm.klxz4321567890_!gjpqytw,EFGHKLNOPRSUVXZ@JM:WIYABCD_T\"+-=Q%/?() *";
 static Gfx D_80084928[] = { gsSPEndDisplayList() }; /* not referenced */
-extern u8 D_80084930[]; // 64x128 I4 font texture (an asset: the ROM bytes after this file's .data)
 
 /** Sets up the render state and loads the 64x128 I4 font texture into TMEM. */
 Gfx *text_setupFixedFont(Gfx *gfx) {

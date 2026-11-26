@@ -616,7 +616,7 @@ BoltObj *beam_spawnBoundsBolt(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 se
     desc.color = *(Color8 *)color;
     desc.kind = 2;
 
-    // matching: a block holding a declaration emits a scope marker that keeps IDO from hoisting &desc.color
+    /* matching: a block holding a declaration emits a scope marker that keeps IDO from hoisting &desc.color */
     {
         void beam_getBoundsPoint(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
 

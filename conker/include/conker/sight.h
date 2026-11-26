@@ -118,4 +118,7 @@ extern const f32 gSightRingXs[];
 extern const f32 gSightValueRangeMins[][2];
 extern const f32 gSightValueRangeScales[][2];
 
+/* The .bss slice at 0x800CBE10 (asm/data/bss_800CBE10.bss.s), read by game/Sight/SightHud/sighthud.c with an attach_char index, 0x32C bytes apart */
+extern u8 D_800CBFA8[][0x32C];
+
 #endif

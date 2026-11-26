@@ -19,6 +19,7 @@
  */
 
 /* game/Text/FontLoad/fontload.c */
+extern u8 font_ROM_START; // ROM start of the packed font glyphs (linker-defined, undefined_syms.us.txt)
 void func_15015910(void);
 void text_loadFont(s16 font);
 void text_unpackGlyph(u8 *record, s32 glyph, s32 font);
@@ -33,6 +34,9 @@ Gfx *text_setupFixedFont(Gfx *gfx);
 Gfx *text_drawFixedString(Gfx *gfx, s32 x, s32 y, u8 *str);
 s32 text_findFixedGlyph(u8 ch);
 Gfx *text_drawFixedGlyph(Gfx *gfx, s32 x, s32 y, s32 glyph);
+
+/* The .data slice at 0x2293F0 (asm/data/2293F0.data.s), after game/Text/FixedFont/fixedfont.c's .data */
+extern u8 D_80084930[]; // the 64x128 I4 font texture of text_setupFixedFont
 
 /* game/Text/FontDraw/fontdraw.c */
 void text_getIconSize(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noCombine, f32 *scale);

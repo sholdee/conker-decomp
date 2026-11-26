@@ -692,7 +692,8 @@ Game1EF500Trail *beam_fireSlotProjectile(actor, slot, arg2, arg3)
     dir.y -= muzzle.y;
     dir.z -= muzzle.z;
     {
-        f32 math_randomFloat(void); // matching: this block's extra line steers as1 scheduling
+        /* matching: this block's extra line steers as1 scheduling */
+        f32 math_randomFloat(void);
 
         rand0 = math_randomFloat();
         rand1 = math_randomFloat();

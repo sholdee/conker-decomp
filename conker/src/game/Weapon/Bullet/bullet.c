@@ -6,8 +6,7 @@
 s32 (*gBulletHitTest)(Vec3f *start, Vec3f *delta, Vec3f *hit);
 void (*gBulletImpactHook)(s32 x, s32 y, s32 z);
 
-// particle_spawnImpactMark (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
-// compiled with a different view of it.
+/* matching: no header declares particle_spawnImpactMark (emissionsource.c): followeffects.c and sightbeam.c were compiled with other views */
 void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
 
@@ -284,7 +283,8 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 pos.y = src->y + -13.0f;
                 pos.z = src->z;
             } else if (shooter->mv->SniperState != 0) {
-                extern u8 gIsMultiplayer; // matching: a declaration makes this an IDO scope block (register choice)
+                /* matching: a declaration makes this an IDO scope block (register choice) */
+                extern u8 gIsMultiplayer;
 
                 angle = math_getCameraYaw(((Camera *)obj)->CNumber, obj) * 0.01745329238f;
                 pos.x = cosf(angle) * 25.0f + src->x;
@@ -307,7 +307,8 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
     }
 
     if ((shooter->mv != NULL && shooter->mv->SniperState != 0) || aimer != NULL) {
-        extern u8 gIsMultiplayer; // matching: a declaration makes this an IDO scope block (register choice)
+        /* matching: a declaration makes this an IDO scope block (register choice) */
+        extern u8 gIsMultiplayer;
 
         who = (aimer != NULL) ? aimer : shooter;
 
@@ -334,7 +335,8 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
     if (weapon_traceBullet(&ray, &pos, useAim ? NULL : &dir, useAim ? &aimPos : NULL,
                       useAim ? &aimDir : NULL, shooter, ignore, &passPos, &passDist, &pass,
                       mode) != 0) {
-        extern u8 gIsMultiplayer; // matching: a declaration makes this an IDO scope block (register choice)
+        /* matching: a declaration makes this an IDO scope block (register choice) */
+        extern u8 gIsMultiplayer;
 
         state.mode = mode;
         state.trail = NULL;
@@ -407,7 +409,8 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             if (gScreenLayout < 2 && D_8008FD8C < 4) {
                 bulletState->unk8C = weapon_startBulletTrail(obj, fxOwner, fxList);
             } else {
-                extern u8 gIsMultiplayer; // matching: a declaration makes this an IDO scope block (register choice)
+                /* matching: a declaration makes this an IDO scope block (register choice) */
+                extern u8 gIsMultiplayer;
 
                 bulletState->unk8C = NULL;
             }

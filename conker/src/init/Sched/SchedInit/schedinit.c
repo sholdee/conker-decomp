@@ -8,11 +8,9 @@
  * includes its own header after the .bss. A new type in conker/sched.h can still change the order.
  */
 
-/*
- * matching: from other subsystems. These lines also set the .bss order: conker/boot.h, cont.h and sched.h
- * declare them too, but with fewer declarations here the .bss moves. libultra's __osShutdown and piThread
- * (D_80035910) are declared in variables.h for the files that include it.
- */
+/* From other subsystems: conker/boot.h, cont.h and sched.h declare them too, and variables.h declares libultra's
+ * __osShutdown and piThread (D_80035910) for the files that include it. */
+/* matching: these lines also set the .bss order; with fewer declarations here the .bss moves */
 extern u32 __osShutdown;
 extern u8 D_8002AAE0;
 extern u8 gPadInitDone;

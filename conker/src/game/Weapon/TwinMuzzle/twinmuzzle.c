@@ -52,7 +52,7 @@ Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 a
     aimDir.y -= aimStart.y;
     aimDir.z -= aimStart.z;
     {
-        // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
+        /* matching: the block (needing a declaration, so a prototype) fences as1's scheduling */
         void math_transformOffsets(const Vec3f **, Vec3f **, void *, s32);
 
         muzzleSrc[0] = &gTwinMuzzleStarts[slot];
@@ -65,7 +65,7 @@ Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 a
         randA = math_randomFloat() * 80.0f;
         math_dirFromBinAngleXZ(randInt & 0xFF, randA, &jitter[0], &jitter[1]);
         {
-            // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
+            /* matching: the block (needing a declaration, so a prototype) fences as1's scheduling */
             void math_dirFromBinAngleXZ(s16, f32, f32 *, f32 *);
 
             hit.x += jitter[0];
@@ -79,7 +79,7 @@ Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 a
         tracerDir = &aimDir;
     }
     {
-        // matching: the block (needing a declaration, so a prototype) orders the stores to tracer
+        /* matching: the block (needing a declaration, so a prototype) orders the stores to tracer */
         f32 math_randomFloat(void);
 
         randA = math_randomFloat();

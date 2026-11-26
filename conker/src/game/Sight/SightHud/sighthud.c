@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
-extern u8 D_800CBFA8[][0x32C];
-
 /* Starts the screen/player effects for player state `state` (some held items force state 27). */
 void sight_startPlayerEffects(Camera *player, s32 state) {
     u8 idx;

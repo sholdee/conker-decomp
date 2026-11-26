@@ -61,7 +61,7 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
     }
     joints = arg0->ob_matrix_ptr;
     if (joints != NULL) {
-        // matching: a block-scope declaration; its -g3 scope steers the schedule
+        /* matching: a block-scope declaration; its -g3 scope steers the schedule */
         extern const Vec3f D_800AAB68[];
 
         matrix = (u8 *)joints + gJointShotMatrixOffsets[side];
@@ -96,7 +96,7 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
         }
         /* No skeleton: start 34 units to the side of the aim direction (in the xz plane), 49 units up. */
         if ((fabsf(aim.x) > 9.999999747e-05f) || (fabsf(aim.z) > 9.999999747e-05f)) {
-            // matching: a block-scope declaration; its -g3 scope steers the schedule
+            /* matching: a block-scope declaration; its -g3 scope steers the schedule */
             f32 sqrtf(f32);
 
             dx = aim.x;

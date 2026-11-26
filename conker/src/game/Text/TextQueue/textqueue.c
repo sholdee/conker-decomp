@@ -26,8 +26,7 @@ static f32 gQueuedTextScale;    // scale
 
 #include "functions.h"
 #include "variables.h"
-
-s32 strlen(const char *);
+#include "libc/string.h"
 
 /* One queued line of HUD text (or, when `icon` is nonzero, one icon), freed after drawing. */
 typedef struct Game70200TextNode {

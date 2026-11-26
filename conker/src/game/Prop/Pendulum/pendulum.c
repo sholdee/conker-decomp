@@ -63,10 +63,6 @@ void prop_swingPendulum(WorldObject *pendulum) {
     }
 }
 
-// texture indices 0x2C1 and 0x1C0, linked as absolute symbols
-extern u8 D_2C1;
-extern u8 D_1C0;
-
 /* Per-object state of func_150C4E9C, allocated on first use. */
 typedef struct ScrollState {
     /* 0x00 */ s32 secondSetTImg; // index of the dl's second G_SETTIMG (0 if none), from prop_findSetTimg

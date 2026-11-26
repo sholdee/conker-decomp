@@ -19,14 +19,13 @@ static TriggerZone *gContextTextZone; /* zone to disable once the text box close
 
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* Byte-wide character in a text resource that separates two pages (see text_splitPages). */
 #define TEXT_PAGE_BREAK 0xBD
 
 /* Tests bit n of a byte-array bit set. */
 #define BIT_IS_SET(bits, n) ((bits)[(n) >> 3] & (1 << ((n) & 7)))
-
-s32 strlen(const char *);
 
 /* Queues text textId on obj's text slot (0 or 1), unless a script has locked that slot. Slot 1 also
    records the trigger zone, which text_updateContextText disables once text 0x2B / 0x2C has been shown. */
