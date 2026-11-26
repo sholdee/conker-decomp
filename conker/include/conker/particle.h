@@ -81,8 +81,6 @@
  *   game_1D3AB0.c
  *   game_1D9A00.c
  *   game_234530.c (data only, linked after game_1D9F10)
- *   game_1DBD40.c
- *   game_1DC720.c
  *   game_1DCA70.c
  *   game_1DEF60.c
  *   game_1E30A0.c
@@ -2776,16 +2774,6 @@ s32 func_151ACA20(QuadParticle *particle);
 /* The drip data of game_1BDC20.c. */
 extern const DropKind D_800A9D40[];
 extern EmitterKind D_8008FA70[];
-
-/* game_1DBD40.c */
-void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6);
-void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5);
-void func_151AEAB4(Vec3f *pos, u8 flag, u8 arg2);
-
-/* game_1DC720.c */
-void *func_151AF270(Actor *actor, u8 arg1, s32 arg2);
-void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
-void func_151AF388(f32 *position, f32 dx, f32 dy, f32 dz, s32 effectUnkC);
 
 /* game_1DCA70.c */
 /* Growth applied by func_151AFC08, stored in the spray particle at 0x128. */

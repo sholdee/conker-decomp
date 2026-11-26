@@ -108,7 +108,6 @@
  *   game_1D6E80.c
  *   game_1D92F0.c
  *   game_1DBB60.c
- *   game_1DC150.c
  *   game_1DD500.c
  *   game_1E3050.c
  *   game_1E5820.c
@@ -1564,9 +1563,6 @@ s32 func_151AC408(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 height, Collision
 
 /* game_1DBB60.c */
 void func_151AE6B0(CharacterWatcher *task);
-
-/* game_1DC150.c */
-void func_151AECA0(Actor *obj, u8 arg1, s32 arg2);
 
 /* game_1DD500.c */
 typedef struct Game1DD500Task Game1DD500Task;

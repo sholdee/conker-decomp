@@ -301,6 +301,13 @@ void func_151A7908(BloodDebrisParticle *particle);
 
 /* game_1DBC60.c */
 void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 arg3, s32 arg4);
+void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6);
+void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5);
+void func_151AEAB4(Vec3f *pos, u8 flag, u8 arg2);
+void func_151AECA0(Actor *obj, u8 arg1, s32 arg2);
+void *func_151AF270(Actor *actor, u8 arg1, s32 arg2);
+void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
+void func_151AF388(Vec3f *position, f32 dx, f32 dy, f32 dz, u8 owner);
 
 /* game_1DC980.c */
 void func_151AF4D0(Actor *, u8, u8, s32);
