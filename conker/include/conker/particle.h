@@ -924,6 +924,7 @@ void func_150E90DC(void);
 void func_150E9178(Game113D60RegionSpawnerEffect *effect);
 void func_150E93DC(Game113D60PointSpawnerEffect *effect);
 s32 func_150E971C(Game113D60Debris *debris);
+extern TriggerZone *D_800D9A20[2]; /* end points of source 1; func_15014040 registers them (by unk18) */
 
 /* game_116D40.c */
 /* Spawner state at +0x28 of a burst emitter. */

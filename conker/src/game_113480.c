@@ -64,7 +64,8 @@ void *func_150E5FD0(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f32 arg4, u8 a
     return streak;
 }
 
-extern s32 (*D_80088A10[])(Streak *);
+/* Impact callbacks, indexed by StreakImpact.callback. */
+static s32 (*D_80088A10[])(Streak *) = { func_150E67D0 };
 
 /* Moves the streak along its direction; runs its impact callback once it crosses the surface it was aimed at. */
 s8 func_150E6230(Streak *streak) {

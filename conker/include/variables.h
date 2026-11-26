@@ -370,7 +370,6 @@ extern u8  D_800D993A[];
 extern u8  D_800D9946[]; // just past the end of D_800D993A (func_15010600 stops there)
 
 extern u8 D_800D9950[];
-extern TriggerZone *D_800D9A20[2]; // registered by func_15014040 (by unk18)
 extern Vec3f D_800D9A50;
 extern u16 D_800D9AB0[4];
 extern Vec3f D_800D9AC0[];
