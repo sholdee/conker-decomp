@@ -433,7 +433,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
 }
 
 void func_1504BA38(Actor *obj) {
-    Struct80099140 *entry;
+    const Struct80099140 *entry;
     s8 unk2;
     s32 unk1;
 
