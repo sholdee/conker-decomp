@@ -1682,7 +1682,7 @@ typedef struct {
     /* 0x28 */ RandomTimer timer;
 } RandomBurstEffect;
 
-StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, s32 owner, s32 arg4);
+StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, u8 owner, s32 arg4);
 void func_15156388(StreakParticleDesc *desc, u8 kind, s32 extraSize);
 void func_151563B8(StreakParticle *arg0);
 Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex);

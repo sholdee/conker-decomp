@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_15156190 func_15156190_header // matching: this file keeps its own declaration of func_15156190
 #include "functions.h"
-#undef func_15156190
 #include "variables.h"
 
 // func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
@@ -1109,9 +1107,6 @@ void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) {
         count--;
     }
 }
-
-// matching: u8 where the definition has s32 (arg 4); returns void (the definition: StreakParticle *)
-extern void func_15156190(StreakParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns a random number of particles (func_15156190) at config->position, each pointing at a random
  * yaw and pitch (a direction of length 10). */

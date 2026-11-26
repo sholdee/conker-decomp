@@ -4,7 +4,7 @@
 
 
 /* Allocates a streak particle (kind 0 or 1) with extraSize trailing bytes and fills it from desc. */
-StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, s32 owner, s32 arg4) {
+StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, u8 owner, s32 arg4) {
     StreakParticle *newParticle;
     StreakParticle *particle;
     s32 id;
@@ -22,7 +22,7 @@ StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, 
             break;
     }
 
-    newParticle = func_15167A68(id, arg4, extraSize + sizeof(StreakParticle), 1, (u8)owner, 1);
+    newParticle = func_15167A68(id, arg4, extraSize + sizeof(StreakParticle), 1, owner, 1);
     if (newParticle == NULL) {
         return NULL;
     }
