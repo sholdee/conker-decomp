@@ -392,15 +392,15 @@ void func_150538CC(Actor *obj) {
         switch (kind) {
         case 13:
             if (hitFlags & 8) {
-                func_150D7120(&obj->xpos, 0xFF, 1);
+                func_150D7120((Vec3f *)&obj->xpos, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
             } else {
-                f32 vec[3];
+                Vec3f vec;
 
-                vec[0] = D_800CC254 - obj->old_xpos;
-                vec[1] = D_800CC258 - obj->old_ypos;
-                vec[2] = D_800CC25C - obj->old_zpos;
-                if (func_15145128(vec, vec, NULL, NULL) != 0) {
-                    func_150D728C(NULL, &obj->xpos, vec, 0xFF, 1);
+                vec.x = D_800CC254 - obj->old_xpos;
+                vec.y = D_800CC258 - obj->old_ypos;
+                vec.z = D_800CC25C - obj->old_zpos;
+                if (func_15145128(&vec, &vec, NULL, NULL) != 0) {
+                    func_150D728C(NULL, (Vec3f *)&obj->xpos, &vec, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
                 }
             }
             func_15088780(obj);
@@ -717,7 +717,7 @@ void func_1505528C(Actor *obj) {
         obj->count1++;
         hitFlags |= 2;
         if ((obj->floorMaterial & 0x1F) == 0xE) {
-            func_1514AD9C(&obj->xpos, 0xFF, 0);
+            func_1514AD9C((Vec3f *)&obj->xpos, 0xFF, 0); // xpos, ypos, zpos as one Vec3f
             func_15060F28(obj, 1);
             return;
         }

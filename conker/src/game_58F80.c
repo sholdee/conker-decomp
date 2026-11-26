@@ -38,7 +38,7 @@ extern u8 *D_8008422C[];
 extern s32 D_80088554;
 extern s32 D_80088558;
 extern s32 D_8008857C;
-extern u8 *D_8008CA4C[];
+extern TextureDesc *D_8008CA4C[];
 
 /* This file */
 
@@ -345,7 +345,7 @@ void func_1502C608(s32 index) {
         scroll = movement_obj[index].texScroll;
         speed = movement_obj[index].texScrollSpeed;
         if (movement_obj[index].unk7 != 0) {
-            period = D_8008CA4C[func_1502C3BC(index)][4] << 8;
+            period = D_8008CA4C[func_1502C3BC(index)]->frames << 8;
             scroll += speed;
             if (scroll >= period) {
                 scroll -= period;
@@ -481,7 +481,7 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     }
     if (mode == 4) {
         alpha = (D_800DF7C4 * alpha) >> 8;
-        model = (s32)D_800DF7C0;
+        model = D_800DF7C0;
     } else {
         model = obj->ob_matrix_ptr;
     }
@@ -1083,7 +1083,7 @@ void func_1502E4C4(s32 index) {
     Actor *obj;
     u8 id;
     MtxF *tbl;
-    s32 view;
+    RenderView *view;
     f32 width;
     f32 height;
     f32 yOffset;
@@ -1145,7 +1145,7 @@ void func_1502E4C4(s32 index) {
     for (i = 0; i <= D_80082FA0; i++) {
         s32 dist;
 
-        view = (s32)&D_800BE628[i];
+        view = &D_800BE628[i];
         tbl = &D_800D9C10[i];
         inside = FALSE;
         if (camera_global_Cameras[i].mv->SniperState != 0) {
@@ -1153,7 +1153,7 @@ void func_1502E4C4(s32 index) {
         } else {
             playerRange = range;
         }
-        dist = func_150A6360(view, tbl, obj->xpos, obj->ypos + yOffset, obj->zpos, width,
+        dist = func_150A6360(view, *tbl, obj->xpos, obj->ypos + yOffset, obj->zpos, width,
                              height, 20000.0f);
         if (dist == 0) {
             inside = TRUE;
