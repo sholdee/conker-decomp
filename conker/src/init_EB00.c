@@ -529,7 +529,7 @@ u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance,
     }
 
     if (flags & 0x40) {
-        y = func_15083E0C((u8)x);
+        y = func_15083E0C(x);
         if (y == -1) {
             return 0;
         }
@@ -1284,7 +1284,7 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                             if (rate >= 367) {
                                 ratio = 2.0f;
                             } else {
-                                unclampedRatio = 367.0f / (f32)(367 - rate);
+                                unclampedRatio = 367.0f / (367 - rate);
                                 ratio = unclampedRatio;
                                 if (unclampedRatio > 2.0f) {
                                     ratio = 2.0f;

@@ -795,7 +795,7 @@ s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         fade = 0xFF000000;
     }
     if (fade != 0) {
-        upper = ((u32)D_800BE9E4 << 23) & 0xFF000000;
+        upper = (D_800BE9E4 << 23) & 0xFF000000;
         if (upper < fade) {
             fade -= upper;
         } else {
@@ -835,7 +835,7 @@ s32 func_1000C7E8(s32 state, s32 channel, f32 x, f32 y, f32 z) {
     } else if (24000.0f < volume) {
         volume = 24000.0f;
     }
-    func_1000E40C(62, (s32)volume);
+    func_1000E40C(62, volume);
     return state;
 }
 
