@@ -11,7 +11,6 @@ s32 func_16001700(void)
   s32 count2;
   u32 end;
   s32 *ptr;
-  s32 *ptrEnd;
   if (__osContLastCmd != 1)
   {
     func_160018BC();
@@ -20,10 +19,20 @@ s32 func_16001700(void)
     end = osGetCount() + 0x30D40;
     if (osGetCount() < end)
     {
- do { count = func_160016F4(count); } while (osGetCount() < end); } func_160016F4(count); } ptrEnd = (s32 *) (&__osContLastCmd); ptr = (s32 *) (&__osContPifRam); do { ptrEnd = (s32 *) (&__osContLastCmd);
+      do
+      {
+        count = func_160016F4(count);
+      }
+      while (osGetCount() < end);
+    }
+    func_160016F4(count);
+  }
+  /* matching: the do must start on the line of the pointer's initialization (IDO schedules the
+   * loop by line number) */
+  ptr = (s32 *)&__osContPifRam; do {
     *(ptr++) = 0xFF;
   }
-  while (((u32) ptr) < ((u32) ptrEnd));
+  while ((u32)ptr < (u32)&__osContLastCmd);
   /* __osContPifRam.pifstatus, spelled through the next symbol of controller.c's .bss (__osContLastCmd
    * follows it): with __osContPifRam itself IDO keeps its address in a register across the call */
   ((u32 *)&__osContLastCmd)[-1] = 0;
@@ -51,7 +60,7 @@ void func_16001830(OSContPad *data)
 
   ptr = (u8 *)&__osContPifRam;
   i = 0;
-  if ((s32)__osMaxControllers > 0)
+  if (__osMaxControllers > 0)
   {
     do
     {
@@ -67,7 +76,7 @@ void func_16001830(OSContPad *data)
       ptr += sizeof(__OSContReadFormat);
       data++;
     }
-    while (i < (s32)__osMaxControllers);
+    while (i < __osMaxControllers);
   }
 }
 // __osPackReadData
@@ -103,7 +112,7 @@ void func_160018BC(void)
   readformat.stick_x = -1;
   readformat.stick_y = -1;
 
-  for (i = 0; i < (s32)__osMaxControllers; i++)
+  for (i = 0; i < __osMaxControllers; i++)
   {
     *(__OSContReadFormat *)ptr = readformat;
     ptr += sizeof(__OSContReadFormat);

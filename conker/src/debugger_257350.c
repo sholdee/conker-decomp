@@ -21,8 +21,8 @@ static u8 D_16003CB8[] = "0123456789abcdef";
 static u8 D_16003CCC[] = "0123456789ABCDEF";
 
 /* This unit's .rodata starts with these, in this order (then the literals of the functions). */
-static const u8 D_16004800[] = "hlL";   // size qualifiers
-static const u8 D_16004804[] = " +-#0"; // flag characters
+static const char D_16004800[] = "hlL";   // size qualifiers
+static const char D_16004804[] = " +-#0"; // flag characters
 static const u32 D_1600480C[] = { FLAGS_SPACE, FLAGS_PLUS, FLAGS_MINUS, FLAGS_HASH, FLAGS_ZERO, 0 }; // bit of each flag character
 static const double D_16004828[] = { 1e1, 1e2, 1e4, 1e8, 1e16, 1e32, 1e64, 1e128, 1e256 }; // powers of ten for _Ldtob
 
@@ -100,7 +100,7 @@ s32 func_16001BB4(u8 *(*pfn)(u8 *, const u8 *, u32), u8 *arg, const u8 *fmt, va_
     while (1) {
         const u8 *s;
         u8 c;
-        u8 *t;
+        const char *t;
         u8 ac[32];
 
         s = fmt;
@@ -115,7 +115,7 @@ s32 func_16001BB4(u8 *(*pfn)(u8 *, const u8 *, u32), u8 *arg, const u8 *fmt, va_
             return x.nchar;
         }
         fmt = ++s;
-        for (x.flags = 0; (t = (u8 *)strchr((char *)D_16004804, *s)) != NULL; s++) {
+        for (x.flags = 0; (t = strchr(D_16004804, *s)) != NULL; s++) {
             x.flags |= D_1600480C[t - D_16004804];
         }
         if (*s == '*') {
@@ -136,7 +136,7 @@ s32 func_16001BB4(u8 *(*pfn)(u8 *, const u8 *, u32), u8 *arg, const u8 *fmt, va_
         } else {
             ATOI(x.prec, s);
         }
-        x.qual = strchr((char *)D_16004800, *s) ? *s++ : '\0';
+        x.qual = strchr(D_16004800, *s) ? *s++ : '\0';
         if (x.qual == 'l' && *s == 'l') {
             x.qual = 'L';
             ++s;
