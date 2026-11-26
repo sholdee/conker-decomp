@@ -1634,7 +1634,7 @@ struct Camera {
     /* 0x408 */ u8 pad408[0x1C4];
     /* 0x5CC */ f32 LockedCamAngleK;
     /* 0x5D0 */ f32 ClampYAngle;
-    /* 0x5D4 */ s32 ClampYTop;
+    /* 0x5D4 */ f32 ClampYTop;
     /* 0x5D8 */ f32 ClampYBottom;
     /* 0x5DC */ f32 PanButtonAddOn;
     /* 0x5E0 */ f32 IdealYaw;                         /* not accessed by US code */
@@ -3232,7 +3232,7 @@ typedef struct ModelAsset {
     /* 0x14 */ s32 unk14;
     /* 0x18 */ s32 unk18;
     /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 rangeList;    // offset of a RelocRange list, rebased by func_15003120
+    /* 0x20 */ s32 rangeList;    // offset of its VtxColorGroup list, rebased by func_15003120
     /* 0x24 */ s32 unk24;
     /* 0x28 */ Vtx vertices[1];
 } ModelAsset;

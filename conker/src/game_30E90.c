@@ -283,8 +283,8 @@ void func_150039E0(s32 levelId, s32 arg1) {
 /* Saves the display list and source vertices of object D_800DBF88, unless it is 0xFF (none). */
 void func_15004574(void) {
     if (D_800DBF88 != 0xFF) {
-        D_800DBF8C = (s32)db_Object_array[D_800DBF88].displayList;
-        D_800DBF90 = (s32)db_Object_array[D_800DBF88].srcVertices;
+        D_800DBF8C = db_Object_array[D_800DBF88].displayList;
+        D_800DBF90 = db_Object_array[D_800DBF88].srcVertices;
     }
 }
 

@@ -1252,7 +1252,6 @@ segments:
       - [0x23A4A0, .rodata, game_32740]
       - [0x23A4C0, .rodata, game_33990]
       - [0x23A4F0, .rodata, game/entrypoint]
-      - [0x23A504, rodata]
       - [0x23A510, .rodata, game_34F20]
       - [0x23A5D0, .rodata, game_357F0]
       - [0x23A600, .rodata, game_360A0]

@@ -234,7 +234,7 @@ void func_15006BEC(s32 saveSlot) {
     if (D_800BE3F0 == NULL) {
         D_800BE3F0 = (u8 *)func_1502B5C8(NULL, 1, 7) + 8;
     }
-    p = (u8 *)(u32)&D_800BE358[2];
+    p = (u8 *)(u32)&D_800BE358[2]; // matching: without the (u32) round trip the code changes
     *p++ = saveSlot;
     *p++ = (sequence >> 24) & 0xFF;
     *p++ = (sequence >> 16) & 0xFF;

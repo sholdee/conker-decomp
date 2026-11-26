@@ -5,8 +5,8 @@
 
 
 void func_15005EE0(Camera *arg0) {
-    arg0->DistIndex = (u16)2;
-    arg0->DistMask = (u16)0xF;
+    arg0->DistIndex = 2;
+    arg0->DistMask = 0xF;
     func_15124B18(arg0);
     arg0->Tightness = 1;
 }

@@ -840,8 +840,8 @@ extern u8 *D_800DBEFC; // per object: frames to keep the handle once hidden
 extern u8  D_800DBF00;
 extern MtxF D_800DBF08[]; // per-frame
 extern u8  D_800DBF88;
-extern s32 D_800DBF8C;
-extern s32 D_800DBF90;
+extern Gfx *D_800DBF8C; // display list of object D_800DBF88 (func_15004574)
+extern Vtx *D_800DBF90; // its source vertices
 extern s32 * gWorldObjectContacts; // per object: bit N set when actor movement_obj[N] touches it
 extern s32 D_800DBF98; // grouped objects, kept at the end of db_Object_array
 extern Camera *camera_global_Cameras;

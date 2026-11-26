@@ -675,31 +675,24 @@ const u16 D_80091D20[NUM_TEXTURES] = {
 };
 
 
-typedef struct {
-    s32 start;
-    s32 end;
-    s32 unk8;
-} RelocRange;
-
-/* The vertex color groups D_800B0E30 (VtxColorGroup) as loaded: their pointers are still offsets to rebase. */
-#define sRangeLists (*(RelocRange ***)&D_800B0E30)
-#define sRangeCounts D_800B0E34
-
-/* Rebases entry `index`'s zero-terminated range list (at offset `list` in `base`) and stores its length. */
+/*
+ * Rebases vertex color set `index`: its zero-terminated group list (at offset `list` in `base`) and the
+ * groups' pointers are offsets from `base` as loaded. Stores the group count.
+ */
 void func_15003120(s32 index, s32 base, s32 list) {
     s32 i;
 
-    sRangeLists[index] = (RelocRange *)list;
-    sRangeCounts[index] = 0;
+    D_800B0E30[index] = (VtxColorGroup *)list;
+    D_800B0E34[index] = 0;
     if (list == 0) {
         return;
     }
-    sRangeLists[index] = (RelocRange *)((u8 *)sRangeLists[index] + base);
-    for (i = 0; sRangeLists[index][i].start != 0; i++) {
-        sRangeLists[index][i].start += base;
-        sRangeLists[index][i].end += base;
+    D_800B0E30[index] = (VtxColorGroup *)((u8 *)D_800B0E30[index] + base);
+    for (i = 0; D_800B0E30[index][i].colors != NULL; i++) {
+        D_800B0E30[index][i].colors = (Color24 *)((u8 *)D_800B0E30[index][i].colors + base);
+        D_800B0E30[index][i].vertexIndices = (u16 *)((u8 *)D_800B0E30[index][i].vertexIndices + base);
     }
-    sRangeCounts[index] = i;
+    D_800B0E34[index] = i;
 }
 
 
@@ -727,10 +720,10 @@ void func_150031EC(s32 levelId) {
     }
     func_150034B4();
     if (loaded) {
-        sRangeLists = allocate_memory(count * 4, 1, 0, 0);
-        sRangeCounts = allocate_memory(count, 1, 0, 0);
-        bzero(sRangeCounts, count);
-        bzero(sRangeLists, count);
+        D_800B0E30 = allocate_memory(count * 4, 1, 0, 0);
+        D_800B0E34 = allocate_memory(count, 1, 0, 0);
+        bzero(D_800B0E34, count);
+        bzero(D_800B0E30, count);
         D_800B0E38 = count;
         for (i = 0; i < count; i++) {
             model = models[i].model;

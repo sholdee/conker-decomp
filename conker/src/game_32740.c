@@ -54,8 +54,7 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
     }
     actorIndex = view->CNumber;
     actor = &movement_obj[actorIndex];
-    // the header types unk5D4 and unk2AC as s32, but both hold f32s
-    *(f32 *)&view->ClampYTop = ((f32)D_800BE624 * 60.0f) / 216.0f;
+    view->ClampYTop = ((f32)D_800BE624 * 60.0f) / 216.0f;
     view->ClampYBottom = ((f32)D_800BE624 * 40.0f) / 216.0f;
     view->Mode = 1;
     view->Motion = 0;
@@ -78,7 +77,7 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
     view->NearPlane = (u32)D_800B0DF0->unk2;
     view->lastPlayerPos.x = view->focus.x;
     view->lastPlayerPos.y = view->focus.y;
-    view->lastPlayerPos.z = *(f32 *)&view->focus.z;
+    view->lastPlayerPos.z = view->focus.z;
     view->LockedCameraAngle = 999.0f;
     view->SpecialFlags |= 0x80000000;
     func_15124AB4(view);
@@ -143,13 +142,12 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
 
     view->focus.x = actor->xpos;
     view->focus.y = actor->ypos;
-    *(f32 *)&view->focus.z = actor->zpos;
+    view->focus.z = actor->zpos;
     view->target = view->focus;
     view->lastPlayerPos = view->focus;
 
-    // matching: z is read through the vector (unk2AC is typed s32); *(f32 *)&view->focus.z reorders the loads
     view->IdealTripodMagnitude = sqrtf((view->focus.x - view->eye.x) * (view->focus.x - view->eye.x) +
-                         ((&view->focus)->z - view->eye.z) * ((&view->focus)->z - view->eye.z));
+                         (view->focus.z - view->eye.z) * (view->focus.z - view->eye.z));
     view->unk34C = view->eye.y - view->unk354;
     view->height = view->eye.y - view->unk354;
 
