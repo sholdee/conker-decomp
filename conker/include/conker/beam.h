@@ -825,7 +825,7 @@ void func_1510558C(ImpactObj *obj);
 void func_15105848(SparkObj *obj, s32 arg1, u8 msg);
 void func_151058B4(SparkObj *obj);
 void func_15105BC8(SparkObj *obj);
-ListObj *func_15105C24(s32 owner);
+ZoneRectEffect *func_15105C24(TriggerZone *zone);
 
 /* game_133190.c */
 BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);

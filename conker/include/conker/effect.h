@@ -1401,8 +1401,8 @@ Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index);
 struct ZoneEmitter; /* include/conker/particle.h */
 void func_151A6B10(struct ZoneEmitter *obj);
 void func_151A6B3C(struct ZoneEmitter *obj);
-void func_151A6B68(Actor *target, s32 owner);
-ListObj *func_151A6BD8(s32 owner);
+void func_151A6B68(Actor *target, TriggerZone *zone);
+ZoneEffect *func_151A6BD8(TriggerZone *zone);
 
 /* game_1D4140.c */
 void func_151A6C90(Actor *obj, u8 arg1, s32 arg2);

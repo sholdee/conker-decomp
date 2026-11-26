@@ -2998,18 +2998,36 @@ typedef struct ShapeEmitter {
     /* 0x0C */ f32 accumulator;
 } ShapeEmitter;
 
-/* A timed effect (object type 35 or 95, D_800A5770) in the object lists D_800DCE50 (game_1944C0.c) whose data starts with
- * an owner id, as func_15105C24 (game_131F30.c) and func_151A6BD8 (game_1D3FC0.c) search them. */
-typedef struct ListObj {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct ListObj *next;
-    /* 0x0C */ u8 padC[7];
-    /* 0x13 */ u8 callbackSet; // as in TimedEffect: 0x2E or 0x2C for these searches
-    /* 0x14 */ u8 pad14[0x14];
-    /* 0x28 */ s32 owner;
-    /* 0x2C */ u8 pad2C[0xC];
-    /* 0x38 */ struct Actor *actor; // set 0x2C (func_151A6B68)
-} ListObj;
+/* Zone effects: timed effects (object type 35 or 95, D_800A5770) that game_40490.c makes for a TriggerZone,
+ * with the zone first in their data. func_151A6BD8 (game_1D3FC0.c) finds the ZoneEffect of a zone (callbackSet
+ * 0x2C) and func_15105C24 (game_131F30.c) its ZoneRectEffect (callbackSet 0x2E). */
+typedef struct ZoneEffectData {     /* filled by func_15015104 */
+    /* 0x00 */ TriggerZone *zone;
+    /* 0x04 */ u8 unk4;             /* the zone's data2 */
+    /* 0x08 */ ZoneNode *node;      /* func_1510FD20 at the zone's x/z */
+    /* 0x0C */ u8 flags;            /* 3 when the zone's data3 is set, else 0 */
+    /* 0x10 */ struct Actor *actor; /* NULL at the start; read by func_151A6B68 */
+} ZoneEffectData;
+
+typedef struct ZoneEffect {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ ZoneEffectData data;
+} ZoneEffect;
+
+typedef struct ZoneRectData {       /* filled by func_15015354 */
+    /* 0x00 */ TriggerZone *zone;
+    /* 0x04 */ s16 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 points[4][3];    /* the zone's rotated rectangle */
+    /* 0x3C */ f32 edges[4][3];     /* points[i + 1] - points[i] */
+    /* 0x6C */ ZoneNode *node;      /* func_1510FD20 at the zone's x/z */
+    /* 0x70 */ struct Actor *actor; /* NULL at the start; read by func_1515FBC4 */
+} ZoneRectData;
+
+typedef struct ZoneRectEffect {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ ZoneRectData data;
+} ZoneRectEffect;
 
 /* State a DDB60Effect keeps at +0x28: func_150B0C58 (game_DDF10.c) fills it, func_150B0D20 updates it each frame.
  * (Effect-subsystem only, but here rather than conker/effect.h: one more type in a header that init_50A0.c sees

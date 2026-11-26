@@ -355,17 +355,18 @@ void func_15105BC8(SparkObj *obj) {
     }
 }
 
-/* Returns the first type-0x2E object owned by `owner` in either object list, searching the two
+/* Returns the ZoneRectEffect (callbackSet 0x2E) of `zone` in either object list, searching the two
  * object types listed in D_800A5770, or NULL. */
-ListObj *func_15105C24(s32 owner) {
+ZoneRectEffect *func_15105C24(TriggerZone *zone) {
     u8 i;
     u8 list;
-    ListObj *obj;
+    ZoneRectEffect *obj;
 
     for (i = 0; i < 2; i++) {
         for (list = 0; list < 2; list++) {
-            for (obj = (ListObj *)D_800DCE50[list][D_800A5770[i]]; obj != NULL; obj = obj->next) {
-                if (obj->callbackSet == 0x2E && owner == obj->owner) {
+            for (obj = (ZoneRectEffect *)D_800DCE50[list][D_800A5770[i]]; obj != NULL;
+                 obj = (ZoneRectEffect *)obj->base.header.next) {
+                if (obj->base.callbackSet == 0x2E && zone == obj->data.zone) {
                     return obj;
                 }
             }
