@@ -12,11 +12,7 @@ u8 D_800BE617;
 
 // matching: like D_800BE9D0 below, func_1515D6D0 (Gfx *(Gfx *, s32)) is used through an integer view here
 #define func_1515D6D0 func_1515D6D0_functions_h
-// matching: func_1000D758 takes three floats; this file passes z as raw bits in a2 through an integer view
-#define func_1000D758 func_1000D758_functions_h
 #include "functions.h"
-#undef func_1000D758
-void func_1000D758(f32 x, f32 y, s32 zBits);
 #undef func_1515D6D0
 // matching: this file's display-list code only matches with the write head D_800BE9D0 read as an integer
 // (pointer-typed loads pick different registers in func_1501878C's command appends)
@@ -282,8 +278,7 @@ void func_1501905C(void) {
     func_1501BB20();
     func_1502C380();
     if (0) {} // matching: IDO picks v0 (not v1) for the camera_global_Cameras load only with this
-    // matching: callers pass z as raw bits (lw into a2); functions.h declares the third parameter s32
-    func_1000D758(camera_global_Cameras->focus.x, camera_global_Cameras->focus.y, *(s32 *)&camera_global_Cameras->focus.z);
+    func_1000D758(camera_global_Cameras->focus.x, camera_global_Cameras->focus.y, camera_global_Cameras->focus.z);
     func_10011BB8();
     if (D_800E0B94 == 2) {
         func_150ADACC(0x81280783);
