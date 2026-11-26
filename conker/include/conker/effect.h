@@ -81,6 +81,7 @@
  *   game_174BF0.c
  *   game/done/game_1765E0.c
  *   game_179F30.c
+ *   game_22F650.c (data only, linked after game_179F30)
  *   game_182C30.c
  *   game_1844C0.c
  *   game_185560.c
@@ -1061,15 +1062,12 @@ void func_1514F538(Actor *obj);
 void func_1514F568(Actor *obj);
 void func_1514F590(Actor *obj);
 void func_1514F5CC(Actor *obj);
-extern const Vec3f D_800A58A0;
-extern const Vec3f D_800A58AC;
-extern const Vec3f D_800A58B8;
-extern const Vec3f D_800A58C4;
-extern const Vec3f D_800A5934;
-extern const Vec3f D_800A5940;
-extern const Vec3f D_800A594C;
-extern const Vec3f D_800A5958;
-extern const Vec3f D_800A5964;
+
+/* game_22F650.c (data only, linked after game_179F30) */
+extern const u8 D_800A5EC0[];
+extern const u8 D_800A5ED8[];
+extern const u8 *D_8008AB90[];
+extern const AttachmentType *D_8008ABE8[];
 
 /* game_182C30.c */
 /*

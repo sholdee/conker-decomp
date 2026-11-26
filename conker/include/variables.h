@@ -116,7 +116,6 @@ extern s32 (*D_8008B36C[])(void);
 extern void (*D_8008B370[])(LightEffect *effect, s32 arg1, u8 eventId); // light event handlers
 extern void (*D_8008B374[])(LightEffect *effect);
 
-extern AttachmentType * D_8008ABE8[];
 extern ObjType D_8008B4A8[OBJ_TYPE_COUNT];
 extern EffectHeader *D_800DCE50[2][OBJ_TYPE_COUNT]; /* object lists: [list][type] heads a doubly linked list (game_1944C0.c) */
 
