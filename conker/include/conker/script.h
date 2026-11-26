@@ -205,7 +205,7 @@ void func_15079F24(void);
 void func_15079F50(void);
 void func_15079F6C(void);
 void func_15079FBC(void);
-s32 func_1507A100(void);
+void func_1507A100(void);
 void func_1507A164(void);
 void func_1507A210(void);
 void func_1507A270(void);
@@ -272,7 +272,7 @@ void func_1507BA48(void);
 void func_1507BAD0(void);
 void func_1507BAF8(void);
 void func_1507BB20(void);
-ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId);
+const ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId);
 void func_1507BC14(Actor *obj);
 
 /* game_C3E20.c */

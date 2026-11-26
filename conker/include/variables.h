@@ -95,7 +95,6 @@ extern void (*D_80086004[])(s32);
 extern void (*D_8008600C[])(s32);
 extern void (*D_80086014[])(Actor *);
 extern void (*D_80086150[])(s32);
-extern void (*D_80086730[])(void);
 extern u8 * D_80086CAC[];
 extern s8  D_80087260;
 extern s8  D_80087264;

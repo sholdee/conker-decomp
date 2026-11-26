@@ -1179,7 +1179,7 @@ struct Actor {
     /* 0x212 */ u8  unk212[0x2];
     /* 0x214 */ s16 unk214;
     /* 0x216 */ s16 unk216;      // distance bias (game_C4DC0)
-    /* 0x218 */ ObjScriptCmd *scriptCmd; // current script command
+    /* 0x218 */ const ObjScriptCmd *scriptCmd; // current script command
     /* 0x21C */ u16 unk21C;
     /* 0x21E */ u8  unk21E;
     /* 0x21F */ u8  unk21F;

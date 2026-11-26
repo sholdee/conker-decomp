@@ -32,7 +32,7 @@ void func_15075400(s32 target) {
             D_800D154C->scriptCmd++;
         } else {
             label = D_800D154C->scriptCmd->op;
-            D_800D154C->scriptCmd = (ObjScriptCmd *)((u8 *)D_800D154C->scriptCmd + 1);
+            D_800D154C->scriptCmd = (const ObjScriptCmd *)((const u8 *)D_800D154C->scriptCmd + 1);
             if (target == label) {
                 // the interpreter steps past the current command after this returns
                 D_800D154C->scriptCmd--;
@@ -145,8 +145,8 @@ void func_15075884(void) {
 
     func_15075548();
     obj = D_800D154C;
-    dx = (f32)D_800D2104[obj->listpos][obj->unk21E + 1].x - obj->xpos;
-    dz = (f32)D_800D2104[obj->listpos][obj->unk21E + 1].z - obj->zpos;
+    dx = D_800D2104[obj->listpos][obj->unk21E + 1].x - obj->xpos;
+    dz = D_800D2104[obj->listpos][obj->unk21E + 1].z - obj->zpos;
     dist = sqrtf((dx * dx) + (dz * dz));
     dx = (f32)(u32)D_800D1891;
     speed = dist / dx;
@@ -241,7 +241,7 @@ void func_15075C24(void) {
         D_800D154C->yspd = (s16)((D_800D1892 << 8) | D_800D1890);
     }
     if (D_800D1893 != 2) {
-        D_800D154C->ygrav = (s16)(s8)D_800D1891;
+        D_800D154C->ygrav = (s8)D_800D1891;
     }
 }
 
@@ -344,8 +344,8 @@ void func_1507602C(void) {
 
     func_15075548();
     D_800D154C->unk21E = D_800D1891;
-    dx = (f32)D_800D2104[D_800D154C->listpos][D_800D1891 + 1].x - D_800D154C->xpos;
-    dz = (f32)D_800D2104[D_800D154C->listpos][D_800D1891 + 1].z - D_800D154C->zpos;
+    dx = D_800D2104[D_800D154C->listpos][D_800D1891 + 1].x - D_800D154C->xpos;
+    dz = D_800D2104[D_800D154C->listpos][D_800D1891 + 1].z - D_800D154C->zpos;
     time = 2.0f * (sqrtf((dx * dx) + (dz * dz)) / D_800D154C->stickspeed);
     if (time < 12.0f) {
         D_800D154C->stickspeed *= time * 0.08333300054f;
@@ -382,8 +382,8 @@ void func_150762B0(void) {
 }
 
 void func_150762D4(void) {
-    func_151669A0((s32)D_800D154C->xpos, (s32)(D_800D154C->ypos + 100.0f),
-                  (s32)D_800D154C->zpos, 0.45f, 0xFF, 0);
+    func_151669A0(D_800D154C->xpos, D_800D154C->ypos + 100.0f,
+                  D_800D154C->zpos, 0.45f, 0xFF, 0);
 }
 
 void func_15076340(void) {
@@ -629,8 +629,8 @@ void func_15076D3C(void) {
     s16 xz = D_800D1890 | (D_800D1891 << 8);
     s16 y = D_800D1892 | (D_800D1893 << 8);
 
-    D_800D154C->scale_xz = (f32)xz * scale;
-    D_800D154C->scale_y = (f32)y * scale;
+    D_800D154C->scale_xz = xz * scale;
+    D_800D154C->scale_y = y * scale;
     D_800D154C->unk154 = D_800D154C->scale_xz;
     D_800D154C->unk158 = D_800D154C->scale_y;
     func_15062BDC(D_800D154C, D_800D154C->scale_xz, D_800D154C->scale_y);
@@ -651,10 +651,10 @@ void func_15076E48(void) {
 /* Starts mode 7: a jump in a random direction with random speeds. */
 void func_15076E50(void) {
     func_15075548();
-    D_800D154C->yspd = (f32)(u32)(func_150ADA20_u8() % 20U) + 55.0f;
+    D_800D154C->yspd = (func_150ADA20_u8() % 20U) + 55.0f;
     D_800D154C->ygrav = 2.0f;
     D_800D154C->fangle = func_150ADA20_u8() % 0xFFFFU;
-    D_800D154C->speed = (u32)((func_150ADA20_u8() % 20U) + 15);
+    D_800D154C->speed = (func_150ADA20_u8() % 20U) + 15;
     D_800D154C->stickspeed = D_800D154C->speed;
     D_800D154C->unk223 = 7;
 }
@@ -1071,8 +1071,8 @@ void func_15077F64(void) {
     u8 index;
 
     index = D_800D1890 - 1;
-    dx = (f32)D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].x - D_800D154C->xpos;
-    dz = D_800D154C->zpos - (f32)D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].z;
+    dx = D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].x - D_800D154C->xpos;
+    dz = D_800D154C->zpos - D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].z;
     D_800D154C->fangle = func_1505A630(dx, dz, 0);
     turn = (D_800D154C->fangle - D_800D154C->angle) >> 8;
     if (turn & 0x80) {
@@ -1132,7 +1132,7 @@ void func_150781F4(void) {
     dx = point->x - D_800D154C->xpos;
     dz = point->z - D_800D154C->zpos;
     dist = sqrtf((dx * dx) + (dz * dz));
-    dx = (f32)(D_800D1893 << 3);
+    dx = D_800D1893 << 3;
     if (((D_800D1892 == 0) && (dist < dx)) ||
         ((D_800D1892 != 0) && (dist > dx))) {
         func_15075400(D_800D1890);
@@ -1488,8 +1488,8 @@ void func_150793D8(void) {
     s16 x;
     s16 z;
 
-    x = (s16)(s32)movement_obj[0].xpos;
-    z = (s16)(s32)movement_obj[0].zpos;
+    x = movement_obj[0].xpos;
+    z = movement_obj[0].zpos;
     if ((x < -1180) || (x > 1180) || (z < -1180) || (z > 1180)) {
         x = 0;
         z = 0;
@@ -1497,8 +1497,8 @@ void func_150793D8(void) {
 
     func_1505A184(func_150ADA20_u8(), 550.0f, 0.0f, &offsetX, &offsetZ, &third);
 
-    x = (s16)(s32)((f32)x + offsetX);
-    z = (s16)(s32)((f32)z + offsetZ);
+    x = x + offsetX;
+    z = z + offsetZ;
     if (x < -1200) {
         x = -1200;
     }
@@ -1656,7 +1656,7 @@ select_object: // matching: unused label, splits the block for the scheduler
         index = dc_glbl_CharNum;
         break;
     default:
-        index = func_15083FB0((u8)(D_800D1891 - 2));
+        index = func_15083FB0(D_800D1891 - 2);
         if (index == -1) {
             return;
         }
@@ -1792,11 +1792,10 @@ void func_15079FBC(void) {
 }
 
 /* Sets coordinate arg1 (0 x, 1 y, 2 z) of waypoint arg0 to (s16)(arg2:arg3). */
-s32 func_1507A100(void) {
+void func_1507A100(void) {
     s32 value = ((s8)D_800D1892 << 8) | D_800D1893;
 
     ((s16 *)&(D_800D2104[D_800D154C->listpos] + 1)[D_800D1890])[D_800D1891] = value; // matching: waypoints start one point past the centre
-    return value;
 }
 
 /* Sets the speed to object 0's speed plus (s8)arg2, clamped to [arg1, arg0]. */
@@ -2114,7 +2113,7 @@ void func_1507ADE0(void) {
     if (diff < 0) {
         diff = -diff;
     }
-    step = diff / (s32)D_800D1890;
+    step = diff / D_800D1890;
     D_800D154C->unk1E6 = step >> 8;
     D_800D154C->unk1E8 = step & 0xFF;
 }
@@ -2179,7 +2178,7 @@ void func_1507B178(void) {
     s16 value = (D_800D1891 << 8) | D_800D1890;
 
     if (D_800D1893 == 2) {
-        D_800D154C->bodyOffsetY = (s16)(value * D_800D154C->scale_y);
+        D_800D154C->bodyOffsetY = value * D_800D154C->scale_y;
     } else if (D_800D1893 == 1) {
         func_15062B50(D_800D154C, value);
     } else {
@@ -2402,15 +2401,86 @@ void func_1507BB20(void) {
 }
 
 typedef struct ScriptEntry {
-    ObjScriptCmd *script;
+    const ObjScriptCmd *script;
     u8 id;
 } ScriptEntry;
 
-extern ScriptEntry D_80086A88[]; // default scripts, ended by a NULL script
-extern ObjScriptCmd D_8009A120[];    // fallback script
+/* The fallback script. */
+static const ObjScriptCmd D_8009A120[5] = {
+    { 0x67, { 0x14, 0x0F, 0x19, 0x00 } },
+    { 0x31, { 0x80, 0x00, 0x00, 0x00 } },
+    { 0x33, { 0xFF, 0x00, 0x00, 0x00 } },
+    { 0x01, { 0x14, 0x00, 0x00, 0x00 } },
+    { 0x08, { 0x00, 0x00, 0x00, 0x00 } },
+};
+
+/* The command handlers, indexed by opcode. */
+static void (*D_80086730[214])(void) = {
+    func_1507735C, func_15075548, func_15075BE8, func_1507A774,
+    func_1507A71C, func_1507A7C0, func_15075C24, func_15075CA0,
+    func_15075DE8, func_15075E6C, func_15075E98, func_15075EB4,
+    func_15075F00, func_15075F40, func_1507BA48, func_15075F6C,
+    func_1507602C, func_150761C8, func_1507BAD0, func_150761F4,
+    func_1507AE94, func_1507A7DC, func_1507A838, func_1507A878,
+    func_15076250, func_150762B0, func_1507A8A8, func_1507AA48,
+    func_1507ACB0, func_1507ACE0, func_1507A620, func_1507AF3C,
+    func_15076220, func_15076340, func_15077404, func_15075CCC,
+    func_15075BB8, NULL, func_15075DC8, func_150762D4,
+    func_1507AD30, func_1507AD60, func_1507A8EC, func_1507ADE0,
+    func_15076394, func_150764C8, func_1507AE78, func_150764E4,
+    func_15076500, func_150763B0, func_1507AF98, func_1507652C,
+    func_1507B040, func_1507B058, func_1507659C, func_1507911C,
+    func_1507B15C, func_1507B234, func_1507B280, func_1507B2CC,
+    func_1507B318, func_15076600, func_1507B364, func_1507B3B0,
+    func_1507B3FC, func_15076624, func_1507B178, func_15076608,
+    func_1507B974, func_150766D0, func_15076760, func_15076768,
+    func_1507B578, func_1507BAF8, func_150767F4, func_150768DC,
+    func_15076B5C, func_15076B78, func_15075548, func_15076C7C,
+    func_15076CB4, func_15076B94, func_1507AD7C, func_1507ADAC,
+    func_15076CCC, func_15076D04, func_15076D3C, func_1507B7BC,
+    func_15076DF4, func_1507B448, func_1507B494, func_1507B4E0,
+    func_15075548, func_1507B52C, func_15075B8C, func_1507B7E8,
+    func_15075548, func_1507B8F4, func_150771F0, func_150772E8,
+    func_15076678, func_1507A808, func_15075650, func_15077364,
+    func_150778F0, func_150779A8, func_150779D4, func_15075D64,
+    func_1507BB20, func_15075AAC, func_15077190, func_15075B60,
+    func_15076E10, func_15076E48, func_1507B5C4, func_1507B630,
+    func_1507B6E0, func_15076E50, func_1507B734, func_15076F40,
+    func_15076F78, func_15076FA8, func_15077BE4, func_150770E4,
+    func_15077174, func_1507B958, func_15075D9C, func_15077294,
+    func_15079570, func_1507965C, func_150796CC, func_1507735C,
+    func_1507A2F8, func_1507A3B4, func_1507A528, func_1507735C,
+    func_1507735C, func_1507735C, func_15077AA0, func_1507735C,
+    func_15077ABC, func_15077B14, func_15077B44, func_15077C1C,
+    func_15075938, func_15075884, func_15077C38, func_15075A50,
+    func_15077B80, func_15077BB4, func_15077DA0, NULL,
+    func_15077E9C, func_15077DBC, func_15077EEC, func_15077F08,
+    func_15077F34, func_15077F64, func_15078074, func_1507813C,
+    func_150781A4, func_150781F4, func_150782CC, NULL,
+    func_150782E8, func_15078358, func_1507839C, func_15078520,
+    func_15078544, func_1507879C, func_15078874, func_15078890,
+    func_15078900, func_15078A08, func_1507900C, func_15079228,
+    func_150792E0, func_150792FC, func_15079390, func_1507903C,
+    func_150793D8, func_15079880, func_150798F8, func_15079928,
+    func_15079988, func_15079090, func_150799B4, func_15079790,
+    func_15079334, func_150791F0, func_15079A28, func_15079A58,
+    func_15079B30, func_15079F24, func_15079F50, func_15079F6C,
+    func_15079FBC, func_1507A100, func_1507A164, func_1507A210,
+    func_150790C4, func_15075D38, func_1507A270, func_15075D0C,
+    func_1507A2A4, func_1507A3CC, func_1507A428, func_1507A47C,
+    func_1507A4D4, func_1507A984, func_15077508, func_150774B4,
+    func_15077318, func_1507B884
+};
+
+/* The default scripts, ended by a NULL script. */
+static ScriptEntry D_80086A88[3] = {
+    { D_8009A120, 0x01 },
+    { D_8009A120, 0xFA },
+    { NULL, 0 },
+};
 
 /* Returns script `scriptId` of the current object's type, falling back to the default table. */
-ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId) {
+const ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId) {
     ActorAnim *typeData;
     ScriptEntry *table;
     s32 i;
@@ -2476,7 +2546,7 @@ void func_1507BC14(Actor *obj) {
     while (obj->unk21C == 0) {
         if (obj->scriptCmd->op >= 247) {
             // a label: skip its single byte
-            obj->scriptCmd = (ObjScriptCmd *)((u8 *)obj->scriptCmd + 1);
+            obj->scriptCmd = (const ObjScriptCmd *)((const u8 *)obj->scriptCmd + 1);
         } else {
             D_800D1890 = obj->scriptCmd->args[0];
             D_800D1891 = obj->scriptCmd->args[1];
