@@ -105,7 +105,7 @@ extern f32 D_8009F6C0; // 0.01745329238474369f
 /* 800A0000 */
 
 
-// in game_18D770.c
+// in game/Effects/Light/light.c
 
 
 

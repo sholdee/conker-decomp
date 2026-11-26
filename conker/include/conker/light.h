@@ -15,7 +15,7 @@
  *   game_135D00.c
  *   game_18A8F0.c
  *   game_18C660.c
- *   game_18D770.c
+ *   game/Effects/Light/light.c
  *   game_1BD880.c
  *   game_1E6260.c
  */
@@ -239,7 +239,7 @@ void func_1515EF74(s16 *mtx);
 f32 func_1515F008(s16 *mtx, s32 i);
 void func_1515F040(f32 value, s32 i);
 void func_1515F0AC(f32 value, s32 i);
-/* (PointLight *light); declared without a prototype: game_18D770.c passes a second argument */
+/* (PointLight *light); declared without a prototype: game/Effects/Light/light.c passes a second argument */
 void func_1515F10C();
 void func_1515F170(s32 group, u8 disabled);
 
@@ -273,7 +273,7 @@ void func_1515FBC4(Actor *obj, TriggerZone *zone);
 void func_1515FC34(Actor *obj, TriggerZone *zone);
 void func_1515FC60(Actor *obj, TriggerZone *zone);
 
-/* game_18D770.c */
+/* game/Effects/Light/light.c */
 extern u8 D_800DCDD0;
 LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                            u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA);

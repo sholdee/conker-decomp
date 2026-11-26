@@ -38,17 +38,8 @@ BIN_DIRS  = assets
 
 SPLIT_DIR := $(BUILD_DIR)/split
 
-DEBUGGER_SRC_DIRS := $(SRC_DIR)/debugger $(SRC_DIR)/debugger/data
-INIT_SRC_DIRS     := $(SRC_DIR)/init $(SRC_DIR)/init/data
-GAME_SRC_DIRS     := $(SRC_DIR)/game $(SRC_DIR)/game/data $(SRC_DIR)/game/done
-LIBULTRA_SRC_DIRS := $(SRC_DIR)/libultra $(SRC_DIR)/libultra/audio $(SRC_DIR)/libultra/gu \
-            				 $(SRC_DIR)/libultra/io $(SRC_DIR)/libultra/libc $(SRC_DIR)/libultra/os
-
-SRC_DIRS := $(SRC_DIR) \
-						$(DEBUGGER_SRC_DIRS) \
-						$(INIT_SRC_DIRS) \
-						$(GAME_SRC_DIRS) \
-						$(LIBULTRA_SRC_DIRS)
+# Every directory under src/: source files may live in nested directories (src/game/<Area>/<Name>/).
+SRC_DIRS := $(shell find $(SRC_DIR) -type d)
 
 
 S_FILES   = $(foreach dir,$(ASM_DIRS),$(wildcard $(dir)/*.s)) \

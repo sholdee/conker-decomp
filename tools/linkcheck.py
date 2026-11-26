@@ -69,6 +69,38 @@ def referenced(conker):
     return names
 
 
+def unrelocated_jumps(conker):
+    """5. Absolute jumps (`jal`/`j`) in linked code without an R_MIPS_26 relocation. Such a jump is a
+    raw instruction word (for example `.word 0x0D42A9DE` in hand-written asm): it matches the ROM, but
+    it keeps its old target when the code moves, so the build is no longer shiftable."""
+    ld = (conker / "conker.ld").read_text()
+    objs = sorted(set(re.findall(r"(build/\S+?\.o)\(\.text\)", ld)))
+    objs = [o for o in objs if (conker / o).exists()]
+    cmd = "mips-linux-gnu-objdump -dr --no-show-raw-insn -j .text " + " ".join(objs)
+    try:
+        out = subprocess.run(cmd, shell=True, cwd=conker, capture_output=True, text=True)
+    except FileNotFoundError:
+        out = None
+    if out is None or out.returncode or not out.stdout:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import mw
+        out = mw.run(cmd, conker, timeout=1800)
+    bad, obj, pending = [], None, None
+    for line in out.stdout.splitlines():
+        m = re.match(r"^(\S+\.o):\s+file format", line)
+        if m:
+            obj = m.group(1)
+            continue
+        if pending:
+            if not re.match(rf"^\s+{pending[0]}: R_MIPS_26\b", line):
+                bad.append(f"{obj} +0x{pending[0]}: {pending[1]} without a relocation")
+            pending = None
+        m = re.match(r"^\s+([0-9a-f]+):\s+(jal|j)\s+(\S+)", line)
+        if m:
+            pending = (m.group(1), f"{m.group(2)} {m.group(3)}")
+    return bad
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     conker = Path(args[0]) if args else Path(__file__).resolve().parent.parent / "conker"
@@ -118,6 +150,11 @@ def main():
         print("RAW POINTER:", r)
     print(f"raw pointers in linked data: {len(raw)}")
     wrong += raw
+    jumps = unrelocated_jumps(conker)
+    for j in jumps[:20]:
+        print("RAW JUMP:", j)
+    print(f"absolute jumps without a relocation: {len(jumps)}")
+    wrong += jumps
     # 3. ROM layout: the code's fixed ROM offsets must equal where the outer link put the segments
     #    (the game segment has a reserved size, so this holds unless a reservation overflows)
     layout = {"game_us_rzip_ROM_START": "game_us_rzip_ROM_START", "debugger_us_ROM_START": "debugger_us_ROM_START",

@@ -8,7 +8,7 @@
 /*
  * Subsystem "pipeexplode": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_DFBF0.c
+ *   game/Effects/PipeExplode/pipeexplode.c
  */
 
 /* The chunk object func_15132A4C creates; func_150B36AC is its floor-hit callback. */
@@ -48,7 +48,7 @@ typedef struct PipeExplodeActor {
     /* 0x98 */ PipeExplodeState *state;
 } PipeExplodeActor;
 
-/* game_DFBF0.c */
+/* game/Effects/PipeExplode/pipeexplode.c */
 extern const PipeSpot D_8009F920[3]; // the three exploding pipes
 void func_150B2740(u8 pipe, u8 arg1);
 s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,

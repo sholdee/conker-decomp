@@ -562,7 +562,7 @@ typedef struct EffectTemplate {
     /* 0x18 */ s32 material; /* func_151462C8's surface material, with flags 0x20 */
 } EffectTemplate; /* size 0x1C */
 
-/* Spawn parameters of a screen effect, copied to ScreenEffect.desc by func_1515FF74 (game_18D250.c). */
+/* Spawn parameters of a screen effect, copied to ScreenEffect.desc by func_1515FF74 (game/Effects/ColourFrameBuffer/colourframebuffer.c). */
 typedef struct EffectDesc {
     /* 0x0 */ u8 flags;        /* 1: ends when lifetime runs out, 2/8: hidden in some states, 4: skip one draw */
     /* 0x1 */ s8 updateIndex;  /* D_8008B0D0 handler, -1 for none */
@@ -573,7 +573,7 @@ typedef struct EffectDesc {
     /* 0x7 */ u8 pad7;
 } EffectDesc; /* size 0x8 */
 
-/* Spawn parameters of a blood drip, copied to BloodDrip.target by func_1513418C (game_161520.c). */
+/* Spawn parameters of a blood drip, copied to BloodDrip.target by func_1513418C (game/Effects/Blood/blood.c). */
 typedef struct BloodDripDesc {
     /* 0x00 */ Mtx *target[2]; /* matrices to transform offset by, double-buffered */
     /* 0x08 */ u8 ownerId;     /* owner->unique_id when attached */
@@ -593,7 +593,7 @@ typedef struct BloodDripDesc {
 } BloodDripDesc; /* size 0x30 */
 
 /* Blood dripping from a point, optionally attached to an actor or one of its bones (func_1513418C,
- * game_161520.c). The caller's payload follows it; game_1E2180.c's emitters keep one byte there. */
+ * game/Effects/Blood/blood.c). The caller's payload follows it; game_1E2180.c's emitters keep one byte there. */
 typedef struct BloodDrip {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ BloodDripDesc desc;  /* copied from the spawn template */
@@ -1427,7 +1427,7 @@ typedef struct ModelEffect {
     /* 0x120 */ EffectExtra extra; /* optional extension (func_15157898) */
 } ModelEffect; /* size 0x120 + the optional extension */
 
-/* func_15134DAC (game_161520.c): spawn parameters of a blood strip (object type 0x29), copied to the strip
+/* func_15134DAC (game/Effects/Blood/blood.c): spawn parameters of a blood strip (object type 0x29), copied to the strip
  * at +0x18. Every duration frames (after pause) offsetA/offsetB are sampled in bone space. */
 typedef struct BloodStripDesc {
     /* 0x00 */ u8 ownerId;
@@ -1455,7 +1455,7 @@ typedef struct BloodStripDesc {
 
 /*
  * Blood swept between two points (offsetA, offsetB) on an actor's bone (object type 0x29, spawned by
- * func_15134DAC in game_161520.c): every frame the points are transformed and the emit callback runs at
+ * func_15134DAC in game/Effects/Blood/blood.c): every frame the points are transformed and the emit callback runs at
  * steps between the old and new spots. Its fields ownerId..updateCallback are a copy of BloodStripDesc.
  */
 typedef struct BloodStrip {
@@ -1817,7 +1817,7 @@ typedef struct TrailMotion {
 /* Preset of a burst of func_15147DA0 particles thrown out around a point: radius and launch speed, then the
  * ranges of each particle's TrailMotion and EffectTemplate values (value = base + rand * range, or for the s16
  * pairs base + rand % (range + 1)). Tables: D_8009FBF0 (trail bursts, game_E1280.c), D_800A8728 (flamethrower
- * jet scatter, game_1C2C60.c). */
+ * jet scatter, game/Effects/CharacterFlameThrower/characterflamethrower.c). */
 typedef struct ScatterPreset {
     /* 0x00 */ f32 radius;
     /* 0x04 */ f32 speed;
@@ -1868,7 +1868,7 @@ typedef struct EffectTemplate18 {
     /* 0x16 */ u8 pad16[2];
 } EffectTemplate18;
 
-/* func_15134908 (game_161520.c): spawn parameters of a blood trail; copied verbatim into the effect. */
+/* func_15134908 (game/Effects/Blood/blood.c): spawn parameters of a blood trail; copied verbatim into the effect. */
 typedef struct BloodTrailDesc {
     /* 0x00 */ f32 *x;              /* followed point */
     /* 0x04 */ f32 *y;
@@ -1884,7 +1884,7 @@ typedef struct BloodTrailDesc {
 } BloodTrailDesc; /* size 0x1C */
 
 /* Blood trailing behind a moving point given by three coordinate pointers (object type 0x2A, spawned by
- * func_15134908 in game_161520.c); x..callback are a copy of BloodTrailDesc. Extra data may follow. */
+ * func_15134908 in game/Effects/Blood/blood.c); x..callback are a copy of BloodTrailDesc. Extra data may follow. */
 typedef struct BloodTrail {
     /* 0x00 */ EffectHeader header; // header.kind and header.owner are passed on to the drops it emits
     /* 0x10 */ f32 *x;
@@ -2809,7 +2809,7 @@ typedef struct FlickerSprite {
     /* 0xB0 */ SpriteFlicker flicker;
 } FlickerSprite; /* size 0xD0 */
 
-/* Extra data at 0x58 of a watcher's rising-particle emitter (func_1513418C, game_161520.c). Like
+/* Extra data at 0x58 of a watcher's rising-particle emitter (func_1513418C, game/Effects/Blood/blood.c). Like
  * SpriteFlicker, the owning watcher sets keepAlive every frame, the emitter's update clears it and the
  * emitter dies once it is not refreshed; its destructor clears the owner's pointer to it. */
 typedef struct WatcherEmitterLink {
@@ -2821,7 +2821,7 @@ typedef struct WatcherEmitterLink {
 
 typedef struct WatcherEmitter {
     /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x48];    /* the blood-drip body (game_161520.c) */
+    /* 0x10 */ u8 pad10[0x48];    /* the blood-drip body (game/Effects/Blood/blood.c) */
     /* 0x58 */ WatcherEmitterLink link;
 } WatcherEmitter; /* size 0x64 */
 

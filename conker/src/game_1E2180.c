@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c and game_161520.c
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
 SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
@@ -43,7 +43,7 @@ BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
     desc.offset.z = 16.0f;
     desc.radius = 15.0f;
     desc.rate = 0.448f;
-    desc.flags = 0x06; /* ON_BONE | LIFETIME (BLOOD_DRIP_* in game_161520.c) */
+    desc.flags = 0x06; /* ON_BONE | LIFETIME (BLOOD_DRIP_* in game/Effects/Blood/blood.c) */
     desc.lifetime = func_150ADA20() % 21U + 40;
     desc.emitter = 8;
     desc.callback = -1;

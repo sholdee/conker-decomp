@@ -8,7 +8,7 @@
  * Subsystem "blood": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game_F44D0.c
- *   game_161520.c
+ *   game/Effects/Blood/blood.c
  *   game_1D43B0.c
  *   game_1DBC60.c
  *   game_1DC980.c
@@ -154,7 +154,7 @@ typedef struct {
 void func_150C7020(Actor *owner, s16 duration, u8 arg2, s32 arg3);
 void func_150C71C0(f32 *from, f32 *to, s32 arg2, s32 arg3, s32 arg4, EffectHeader *task);
 
-/* game_161520.c */
+/* game/Effects/Blood/blood.c */
 s32 func_15134070(Actor *actor);
 s32 func_1513416C(DefParticleHead *particle);
 void *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
