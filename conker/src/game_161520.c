@@ -474,9 +474,9 @@ void func_151349D0(BloodTrail *trail) {
 }
 
 /* Message handler: forwards to func_151BC5A4 while the effect's unk28 is 1. */
-void func_15134C98(Effect15134C98 *arg0, s32 arg1, u8 arg2) {
-    if (arg0->unk28 == 1) {
-        func_151BC5A4(&arg0->base, arg1, arg2);
+void func_15134C98(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
+    if (effect->unk28 == 1) {
+        func_151BC5A4(effect, msg, msgId);
     }
 }
 
@@ -685,13 +685,13 @@ void func_151353A8(BloodStrip *arg0) {
 
 /* Transforms inA and inB by matrix into outA and outB. */
 void func_15135424(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *outB) {
-    Vec3f *in[2];
-    Vec3f *out[2];
+    f32 *in[2];
+    f32 *out[2];
 
-    in[0] = inA;
-    in[1] = inB;
-    out[0] = outA;
-    out[1] = outB;
+    in[0] = &inA->x;
+    in[1] = &inB->x;
+    out[0] = &outA->x;
+    out[1] = &outB->x;
     func_15145EA4(in, out, matrix, 2);
 }
 
@@ -1087,8 +1087,8 @@ void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
 }
 
 /* Spawns a blood particle of the given size with one of the four D_80089BAC textures. */
-s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5, Vec3f *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10) {
-    s32 particle;
+GrowingBloodParticle *func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5, Vec3f *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10) {
+    GrowingBloodParticle *particle;
     ParticleDef desc;
     f32 extra;
     Struct15136698Table textures;
@@ -1143,8 +1143,8 @@ s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5,
     random1 = func_150ADA20();
     value = func_150ADA20();
     particle = func_1513D594(&desc, 0, 0, 0x1A, 0, (random1 & 1) + (random0 & 1), value & 0xFF, 500.0f, 500.0f, 0, arg5, argB, argC, 0, 4, arg9, arg10);
-    if (particle != 0) {
-        memcpy(particle + 0x128, &extra, sizeof(extra));
+    if (particle != NULL) {
+        memcpy(&particle->growth, &extra, sizeof(extra));
     }
     return particle;
 }
@@ -1335,7 +1335,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     }
     if (arg4 != 0) {
         if ((D_800A3FF8 == &D_800A3FD8[kind]) || (D_800A40C8 == &D_800A3FD8[kind])) {
-            func_151C61A0((s32)&position, (s32)&hit, arg6, arg7);
+            func_151C61A0(&position, &hit, arg6, arg7);
         } else {
             func_1513A48C(&position, arg6, arg7);
         }
@@ -2511,7 +2511,7 @@ typedef struct {
 } Extra080C_1513A24C;
 
 /* Blood burst (func_1515080C) for an actor of blood profile `kind`; actor is a Actor. */
-void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor, void *hit, u8 arg9, s32 argA) {
+void func_1513A24C(Vec3f *position, const s32 *table, const f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor, void *hit, u8 arg9, s32 argA) {
     DebrisSpray config;
     Extra080C_1513A24C extra;
     s32 flag;
@@ -2901,7 +2901,7 @@ void func_1513B0B8(BloodChunk *chunk, s32 arg1, u8 message) {
 const u8 D_800A4324[3] = { 0x00, 0x01, 0x02 };
 const s32 D_800A4328[2] = { 0xE3, 0xE5 };
 const s32 D_800A4330[2] = { 0xE4, 0xE6 };
-const f32 D_800A4338[2][3] = {
+const Vec3f D_800A4338[2] = {
     { -15.369999f, 15.095f, 13.3182f },
     { -0.0834f, -19.5498f, 23.541f },
 };
@@ -3014,7 +3014,7 @@ void func_1513B0F8(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
             u32 random;
 
             drop.model = D_800A4330[i];
-            func_15143134(D_800A4338[i], &drop.pos, BONE_MATRIX(actor, 12));
+            func_15143134(&D_800A4338[i], &drop.pos, BONE_MATRIX(actor, 12));
             yaw = func_150ADA20();
             pitch = func_150ADA20();
             func_15143794((u8)yaw, (pitch % 35U) - 0x54, (func_150ADA68() * 6.12f) + 3.0f, &drop.vel.x);

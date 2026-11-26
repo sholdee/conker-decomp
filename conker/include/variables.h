@@ -356,7 +356,7 @@ extern void (*D_80089F2C[])(void);
 extern void (*D_80089F60[])(s32, s32, u8);
 extern f32 D_800895B0;
 extern ZDecode D_80089630[8]; // z-buffer decompression table
-extern s32 * D_80089A20[];
+extern const s32 *D_80089A20[];
 extern IdList2 D_8008A074; // effect-object kinds (game_16DC80)
 extern ActorEffectDef D_8008A0B4[];
 extern s32  D_8008A084[];

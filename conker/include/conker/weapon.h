@@ -243,7 +243,7 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
 void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect);
 SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
                         u8 altUnk62, s32 arg8, u8 arg9, s32 argA);
-void func_151C61A0(Vec3f *arg0, Vec3f *arg1, u8 arg2, s32 arg3);
+void func_151C61A0(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3);
 s32 func_151C6290(Actor *obj, Actor *self, s32 arg2);
 extern const Vec3f D_800AAA90; /* bone-attachment offset */
 extern const Vec3f D_800AAA9C;

@@ -1713,7 +1713,7 @@ void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count) {
 }
 
 /* Array version of func_15143134: mfs each offsets[i] by mtx into results[i]. */
-void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count) {
+void func_15145EA4(f32 **offsets, f32 **results, void *mtx, s32 count) {
     f32 *input;
     MtxF mf;
     f32 *output;
@@ -1747,7 +1747,7 @@ void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count) {
                 input = *inputs;
                 if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
                     output = *outputs;
-                    func_150A7960((f32 *)mtx, input[0], input[1], input[2], output, output + 1, output + 2);
+                    func_150A7960(mtx, input[0], input[1], input[2], output, output + 1, output + 2);
                 } else {
                     func_15142314(mtx, 0, *outputs);
                 }

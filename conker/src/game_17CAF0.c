@@ -726,7 +726,7 @@ void func_15151D6C(SurfaceDebrisBurst *config, s32 *variantIds, f32 *variantScal
 
 /* Spawns a random number of pieces in random directions around config->origin, each using a random
  * entry of the variant tables. */
-void func_15152190(DebrisBurst *config, s32 *variantIds, f32 *variantScales, u32 variantCount, f32 radius, u8 arg5, u8 arg6, s32 arg7) {
+void func_15152190(DebrisBurst *config, const s32 *variantIds, const f32 *variantScales, u32 variantCount, f32 radius, u8 arg5, u8 arg6, s32 arg7) {
     s32 count;
     s32 variant;
     ParticleSpawn78 spawn;

@@ -16,11 +16,6 @@
  *   game_1E9A30.c
  */
 
-/* A timed effect whose first data byte selects func_15134C98's forwarding. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ u8 unk28;
-} Effect15134C98;
 
 typedef struct {
     u8 pad0[0x14];
@@ -106,10 +101,13 @@ typedef struct {
     /* 0x170 */ DebrisData debris;
 } BloodDebrisParticle;
 
+/* An effect owned by an actor; func_151BC5A4 handles its messages, func_15134C98 forwards them while unk28 is 1. */
 typedef struct {
-    EffectHeader header;
-    u8 pad10[0x30];
-    ActorRef owner;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ u8 unk28;
+    /* 0x29 */ u8 pad29[0x17];
+    /* 0x40 */ ActorRef owner;
 } OwnedEffect40;
 
 /* One point of a ribbon trail. */
@@ -180,7 +178,7 @@ void func_151347CC(void *arg0, ActorMsg *msg, u8 message);
 void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3);
 BloodTrail *func_15134908(BloodTrailDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 void func_151349D0(BloodTrail *trail);
-void func_15134C98(Effect15134C98 *arg0, s32 arg1, u8 arg2);
+void func_15134C98(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId);
 void func_15134CD4(f32 arg0, f32 arg1, s32 arg2, s32 arg3);
 s32 func_15134CEC(Struct15134CEC *particle);
 BloodStrip *func_15134DAC(BloodStripDesc *desc, s32 arg1);
@@ -200,7 +198,7 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
 s32 func_15135BF8(BloodSplat *splat);
 void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4);
 void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3);
-s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5, Vec3f *arg6, u8 arg7, u8 arg8,
+GrowingBloodParticle *func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5, Vec3f *arg6, u8 arg7, u8 arg8,
                   u8 arg9, s32 arg10);
 s32 func_151368A8(GrowingBloodParticle *particle);
 void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, s32 arg5, f32 *position, u8 arg7, s32 arg8);
@@ -228,7 +226,7 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
 s32 func_15139578(BloodChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s32 surface);
 void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32 arg5);
 void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4);
-void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor,
+void func_1513A24C(Vec3f *position, const s32 *table, const f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor,
                    void *hit, u8 arg9, s32 argA);
 void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2);
 void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4);
@@ -297,7 +295,7 @@ extern const Vec3f D_800A42F4[2][2];
 extern const u8 D_800A4324[3];
 extern const s32 D_800A4328[2];
 extern const s32 D_800A4330[2];
-extern const f32 D_800A4338[2][3];
+extern const Vec3f D_800A4338[2];
 
 /* game_1D43B0.c */
 void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3);

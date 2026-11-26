@@ -51,7 +51,7 @@ s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     aimDir.z -= aimStart.z;
     {
         // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
-        void func_15145EA4(f32 **, f32 **, Mtx *, s32);
+        void func_15145EA4(f32 **, f32 **, void *, s32);
 
         muzzleSrc[0] = D_800A1518[slot];
         muzzleDst[0] = &muzzle.x;

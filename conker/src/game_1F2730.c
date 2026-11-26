@@ -324,7 +324,7 @@ SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value,
 }
 
 /* Spawns a fixed func_15154684 effect between the points `arg0` and `arg1`. */
-void func_151C61A0(Vec3f *arg0, Vec3f *arg1, u8 arg2, s32 arg3) {
+void func_151C61A0(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3) {
     ParticleBurst desc;
 
     desc.countBase = 10;
