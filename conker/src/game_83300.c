@@ -4471,14 +4471,14 @@ void func_15060F28(Actor *actor, s32 mode) {
     if (actor->morph != NULL) {
         func_10004074(actor->morph);
     }
-    if (actor->hit_vtx_array != 0) {
-        func_10004074((void *)actor->hit_vtx_array);
+    if (actor->hit_vtx_array != NULL) {
+        func_10004074(actor->hit_vtx_array);
     }
-    if (actor->hit_box_array != 0) {
-        func_10004074((void *)actor->hit_box_array);
+    if (actor->hit_box_array != NULL) {
+        func_10004074(actor->hit_box_array);
     }
-    if (actor->hit_ylimit_array != 0) {
-        func_10004074((void *)actor->hit_ylimit_array);
+    if (actor->hit_ylimit_array != NULL) {
+        func_10004074(actor->hit_ylimit_array);
     }
     if (actor->prevBones != NULL) {
         func_10004074(actor->prevBones);
