@@ -74,7 +74,10 @@ void func_150EEE00(Actor *actor, u8 slot) {
 }
 
 /* Sends message 0x43 for slot `slot` of `actor`. */
-void func_150EEF40(Actor *actor, u8 slot) {
+void func_150EEF40(actor, slot)
+    Actor *actor;
+    u8 slot;
+{
     ActorSlotMsg msg;
 
     msg.actor = actor;

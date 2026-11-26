@@ -749,7 +749,8 @@ void func_150E2FC0(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg);
 
 /* game_11C2B0.c */
 void func_150EEE00(Actor *actor, u8 slot);
-void func_150EEF40(Actor *actor, u8 slot);
+/* (Actor *actor, u8 slot); declared without a prototype: game_981E0.c passes a third argument */
+void func_150EEF40();
 AimedBeam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3);
 s32 func_150EF38C(AimedBeam *beam);
 s32 func_150EF784(Actor *actor, s32 arg1, s32 arg2);
