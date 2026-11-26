@@ -3,27 +3,6 @@
 #include "n_synthInternals.h"
 #undef n_alFxNew
 
-#if 0
-f32 PI = 3.1415927410125732;
-f32 D_8002C774 = 1.4142136573791504;
-f32 D_8002C778 = 1.0594631433486938;
-f32 D_8002C77C = 0.9438742995262146;
-f32 D_8002C780 = 26768.0;
-f32 D_8002C784 = 26768.0;
-f32 D_8002C788 = 173123.40625;
-f32 D_8002C78C = 0.0;
-#endif
-
-/* This file's constants (above), not defined here. */
-extern f32 D_8002C770;
-extern f32 D_8002C774;
-extern f32 D_8002C778;
-extern f32 D_8002C77C;
-extern f32 D_8002C780;
-extern f32 D_8002C784;
-extern f32 D_8002C788;
-extern f32 D_8002C78C;
-
 void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
     f32 sp24;
     f32 sp20;
@@ -33,9 +12,9 @@ void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
         arg1 = arg0 - 200.0f;
     }
 
-    sp24 = func_150484A0(arg1 * D_8002C770, arg0);
+    sp24 = func_150484A0(arg1 * 3.1415927f, arg0);
     sp20 = sp24 * sp24;
-    sp1C = (sp24 * D_8002C774) / arg2;
+    sp1C = (sp24 * 1.4142137f) / arg2;
     arg3[0] = sp20 / (1.0f + sp20 + sp1C);
     arg3[1] = arg3[0] * 2.0f;
     arg3[2] = arg3[0];
@@ -77,9 +56,9 @@ f32 func_1001CEA4(s32 arg0) {
     f32 sp0 = 1.0f;
 
     if (arg0 >= 0) {
-        sp4 = D_8002C778;
+        sp4 = 1.0594631f; /* 2^(1/12): one semitone up */
     } else {
-        sp4 = D_8002C77C;
+        sp4 = 0.9438743f; /* one semitone down */
         arg0 = -arg0;
     }
 
@@ -105,13 +84,13 @@ void func_1001CF38(LowPass *arg0, f32 arg1) {
     if (arg0->fgain < 10) {
         arg0->fgain = 10;
     }
-    func_1001CBF0(arg1,  arg0->fc + 10.0f, arg0->fgain / 10.0f, &sp30, &sp24);
+    func_1001CBF0(arg1,  arg0->fc + 10.0f, arg0->fgain / 10.0f, sp30, sp24);
 
     for(i = 3; i < 8; i++) {
         arg0->fcvec.fccoef[i] = 0;
     }
-    arg0->fcvec.fccoef[0] = sp30[0] * (D_8002C780 - (arg0->fgain * 128.0f));
-    arg0->fcvec.fccoef[1] = sp30[1] * (D_8002C784 - (arg0->fgain * 128.0f));
+    arg0->fcvec.fccoef[0] = sp30[0] * (26768.0f - (arg0->fgain * 128.0f));
+    arg0->fcvec.fccoef[1] = sp30[1] * (26768.0f - (arg0->fgain * 128.0f));
     arg0->fcvec.fccoef[2] = 0;
 
     arg0->fcvec.fccoef[8] = sp24[1] * -16384.0f;
@@ -166,7 +145,11 @@ typedef struct {
     s32 *params[4];            /* 0x34 */
 } N_ALSynConfig;
 
-extern s32 D_8002BBE0[]; /* default reverb parameters */
+/* The default effect parameters (libultra's NULL_PARAMS): no delay sections. */
+static s32 D_8002BBE0[10] = {
+    0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0
+};
 
 #define RANGE 2.0f
 
@@ -214,7 +197,7 @@ void n_alFxNew(N_ALFx **fx_ar, N_ALSynConfig *c, s16 bus, ALHeap *hp) {
 
         if (param[j]) {
             d->rsinc = ((((f32)param[j++]) / 1000) * RANGE) / c->outputRate;
-            d->rsgain = (((f32)param[j++]) / D_8002C788) * (d->output - d->input);
+            d->rsgain = (((f32)param[j++]) / 173123.40625f) * (d->output - d->input);
             d->rsval = 1.0;
             d->rsdelta = 0.0;
             d->rs = alHeapAlloc(hp, 1, sizeof(N_ALResampler));
