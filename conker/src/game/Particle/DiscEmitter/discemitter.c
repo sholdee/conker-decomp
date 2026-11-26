@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150C29F0(Struct150C29F0 *emitter) {
+void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     DiscEmitter *pos;
     ParticleEmitterDesc particle;
     f32 scaleA;
@@ -113,7 +113,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
         }
     }
 }
-s32 func_150C2FCC(ChannelParticle *particle) {
+s32 particle_shrinkBallisticChannelParticle(ChannelParticle *particle) {
     particle->head.def.width -= particle->head.def.width * particle->motion.shrinkRate;
     particle->head.def.height -= particle->head.def.height * particle->motion.shrinkRate;
     particle->head.def.pos.y += (particle->head.def.scale.y * gFrameDelta) + (0.5f * particle->head.def.scale.x * gFrameDelta * gFrameDelta);

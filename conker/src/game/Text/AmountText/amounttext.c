@@ -229,14 +229,14 @@ void text_handleAmountMessage(TextObj *obj, u8 *payload, u8 type) {
 }
 
 /*
- * Effect pre-draw (gModelEffectPreDrawFuncs[1]): binds segment 8 to D_80083740 while the effect's alpha is below 0xFF
- * (else D_800838C0), then texture 0xC3 to segments 6 and 7.
+ * Effect pre-draw (gModelEffectPreDrawFuncs[1]): binds segment 8 to gEffectXluRenderModes while the effect's alpha is below 0xFF
+ * (else gEffectOpaRenderModes), then texture 0xC3 to segments 6 and 7.
  */
 Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
     if (fx->params.color0.alpha < 0xFF) {
-        gSPSegment(gfx++, 8, D_80083740);
+        gSPSegment(gfx++, 8, gEffectXluRenderModes);
     } else {
-        gSPSegment(gfx++, 8, D_800838C0);
+        gSPSegment(gfx++, 8, gEffectOpaRenderModes);
     }
 
     gfx = particle_bindSegmentTexture(particle_bindSegmentTexture(gfx, 0xC3, 6, 3), 0xC3, 7, 3);

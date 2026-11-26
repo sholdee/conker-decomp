@@ -739,8 +739,8 @@ void effect_spawnImpactLight(Vec3f *pos, u8 arg1, s32 arg2) {
 // matching: this file was compiled with s32 parameters where the definition (game/Particle/EmissionSource/emissionsource.c) has u8 and s16,
 // so its calls do not narrow them. The definition is (f32 size, u8 arg1, s32 arg2, Vec3f *position,
 // s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 owner, s32 kind).
-void func_150E7FEC(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
-/* Spawns a randomised func_150E7FEC effect on surface `surf` at `pos`. */
+void particle_spawnImpactMark(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
+/* Spawns a randomised particle_spawnImpactMark effect on surface `surf` at `pos`. */
 void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
     s32 pad; // matching: unused stack slot
     u32 rnd1;
@@ -750,7 +750,7 @@ void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
     rnd0 = func_150ADA68();
     rnd1 = func_150ADA20();
     rnd2 = func_150ADA20();
-    func_150E7FEC(rnd0 * 75.0f + 75.0f, ((rnd1 % 56) + 200) & 0xFF, surf, pos,
+    particle_spawnImpactMark(rnd0 * 75.0f + 75.0f, ((rnd1 % 56) + 200) & 0xFF, surf, pos,
                   (rnd2 % 205) + 299, 1, 1, 0, 0, 0, (u8)arg2, 0);
 }
 

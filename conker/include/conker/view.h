@@ -16,7 +16,7 @@
 
 /* game/View/ViewOrtho/viewortho.c */
 void view_buildOrthoMatrices(void);
-void func_15012470(void);
+void view_initGroundDecalQueue(void);
 
 /* game_3F950.c */
 void func_150124A0(void);
@@ -48,18 +48,18 @@ extern u8 D_800BE635;
 extern s32 gLayoutViewWidths[6]; // the view width of each screen layout
 extern s32 gLayoutViewHeights[6]; // the view height of each screen layout
 extern s16 gLayoutViewCentres[4][5][2]; // the centre (x, y) of each view, by screen layout
-extern f32 D_800BE6B8; // the width scale of the two-player layout
-extern Gfx D_80082FC0[24][2]; // render mode tables for segment 8
-extern Gfx D_80083140[24][2];
+extern f32 gTwoPlayerWidthScale; // the width scale of the two-player layout
+extern Gfx gModelXluRenderModes[24][2]; // render mode tables for segment 8
+extern Gfx gModelOpaRenderModes[24][2];
 extern Gfx D_800832C0[24][2];
 extern Gfx D_80083440[24][2];
 extern Gfx D_800835C0[24][2];
-extern Gfx D_80083740[24][2];
-extern Gfx D_800838C0[24][2];
+extern Gfx gEffectXluRenderModes[24][2];
+extern Gfx gEffectOpaRenderModes[24][2];
 extern Gfx D_80083A40[24][2];
 extern Gfx D_80083BC0[24][2];
-extern Gfx D_80083D40[24][2];
-extern Gfx D_80083EC0[24][2];
+extern Gfx gWorldObjectXluRenderModes[24][2];
+extern Gfx gWorldObjectOpaRenderModes[24][2];
 
 /* game/View/Projection/projection.c */
 extern Vec3f gFovChanges[4];
@@ -68,8 +68,8 @@ extern ViewClip gViewClips[4];
 extern u8 gClipChangePending;
 extern f32 gDefaultFar;
 extern f32 gDefaultNear;
-extern u8 D_800D9B68[4][3];
-extern u8 D_800D9B78[4][3];
+extern u8 gTintPrimColors[4][3];
+extern u8 gTintEnvColors[4][3];
 extern u8 D_800D9B84[3];
 extern u8 D_800D9B88[3];
 extern u8 D_800D9B8B;
@@ -78,8 +78,8 @@ extern LookAt gLookAts[2];
 extern Ambient gViewAmbients[4][2];
 extern MtxF gViewMatrices[4];
 extern MtxF gViewProjMatrices[4];
-extern PointLightGfx *D_800D9E10[4];
-extern u8 D_800D9E20;
+extern PointLightGfx *gViewGfxLights[4];
+extern u8 gViewGfxLightMax;
 extern u8 D_800D9E21;
 extern PointLight *gPickedLights[14];
 void view_initDefaultProjection(s32 arg0);

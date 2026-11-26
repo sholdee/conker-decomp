@@ -16,9 +16,9 @@ static const VtxColor gActorBeamColors[4] = {
     { 255, 255, 255, 255, 0 },
 };
 
-// func_150E7FEC (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
+// particle_spawnImpactMark (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
 // compiled with a different view of it.
-void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
 
 /* Spawns the effect at each of the three gSprayAreas spots, starts three positioned sounds,
@@ -346,9 +346,9 @@ s32 effect_updateActorBeam(Actor150FD514 *particle) {
                 groundPos.x = particle->head.def.pos.x;
                 groundPos.y = ext->ground.height;
                 groundPos.z = particle->head.def.pos.z;
-                func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, func_150ADA20() % 76 + 180, &ext->ground.tri, &groundPos,
+                particle_spawnImpactMark(func_150ADA68() * 78.0f + 125.0f, func_150ADA20() % 76 + 180, &ext->ground.tri, &groundPos,
                               (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, particle->head.header.owner, 0);
-                func_150E83AC(&groundPos, (func_150ADA20() % 80) + 243, particle->head.header.owner, particle->head.header.kind);
+                particle_startRandomEmitter(&groundPos, (func_150ADA20() % 80) + 243, particle->head.header.owner, particle->head.header.kind);
             }
         }
     }

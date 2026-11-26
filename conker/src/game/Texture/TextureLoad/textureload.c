@@ -70,16 +70,16 @@ void texture_updateTint(s32 slot) {
             wave = gTintWaveAmps[slot][i] * math_cosBinAngle(gTintWavePhases[slot][i] >> 4);
             amount = (s32)wave + cur - 127;
             if (amount >= 0) {
-                D_800D9B68[slot][i] += amount;
+                gTintPrimColors[slot][i] += amount;
             } else {
-                D_800D9B78[slot][i] -= amount;
+                gTintEnvColors[slot][i] -= amount;
             }
 
-            if (D_800D9B68[slot][i] >= 128) {
-                D_800D9B68[slot][i] = 127;
+            if (gTintPrimColors[slot][i] >= 128) {
+                gTintPrimColors[slot][i] = 127;
             }
-            if (D_800D9B78[slot][i] >= 128) {
-                D_800D9B78[slot][i] = 127;
+            if (gTintEnvColors[slot][i] >= 128) {
+                gTintEnvColors[slot][i] = 127;
             }
 
             gTintWavePhases[slot][i] += gTintWaveSteps[slot][i];
@@ -92,8 +92,8 @@ void texture_updateTint(s32 slot) {
 
 /* Emits the prim and env colors for slot's current tint. */
 Gfx *texture_setTintColors(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot) {
-    gDPSetPrimColor(gfx++, 0xF2, 0, D_800D9B68[slot][0], D_800D9B68[slot][1], D_800D9B68[slot][2], primAlpha);
-    gDPSetEnvColor(gfx++, D_800D9B78[slot][0], D_800D9B78[slot][1], D_800D9B78[slot][2], envAlpha);
+    gDPSetPrimColor(gfx++, 0xF2, 0, gTintPrimColors[slot][0], gTintPrimColors[slot][1], gTintPrimColors[slot][2], primAlpha);
+    gDPSetEnvColor(gfx++, gTintEnvColors[slot][0], gTintEnvColors[slot][1], gTintEnvColors[slot][2], envAlpha);
     return gfx;
 }
 

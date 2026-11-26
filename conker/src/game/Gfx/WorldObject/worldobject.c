@@ -229,7 +229,7 @@ Gfx *gfx_drawObjectList(Gfx *gfx, s32 translucent, s16 view) {
     gSPSetGeometryMode(gfx++, G_LIGHTING);
     viewOffset = view * 4; // matching: indexing both tables by view computes view * 4 twice
     list = (DrawEntry ***)((u8 *)gViewDrawListPtrs + viewOffset);
-    gfx = light_reemitLights(gfx, *(PointLightGfx **)((u8 *)D_800D9E10 + viewOffset), D_800D9E20, D_800D9E21,
+    gfx = light_reemitLights(gfx, *(PointLightGfx **)((u8 *)gViewGfxLights + viewOffset), gViewGfxLightMax, D_800D9E21,
                         &gViewAmbients[view][D_800BE9C0]);
     for (i = 0; i < gViewDrawCounts[view]; i++) {
         gfx = gfx_drawObject(gfx, &db_Object_array[(**list)[i].index], &(*gObjectMtxBuffers[D_800BE9C0])[(**list)[i].index], view,
@@ -279,9 +279,9 @@ Gfx *gfx_drawObject(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance
     }
     gDPPipeSync(gfx++);
     if (alpha < 255) {
-        gSPSegment(gfx++, 8, D_80083D40);
+        gSPSegment(gfx++, 8, gWorldObjectXluRenderModes);
     } else {
-        gSPSegment(gfx++, 8, D_80083EC0);
+        gSPSegment(gfx++, 8, gWorldObjectOpaRenderModes);
     }
     if ((obj->object_status & 2) == 2) {
         gSPSetGeometryMode(gfx++, 0x400000);

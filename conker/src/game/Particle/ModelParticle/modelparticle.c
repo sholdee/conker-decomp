@@ -49,7 +49,7 @@ static ParticleFloorHitFn gModelParticleFloorFuncs[] = {
     blood_onChunkLand, func_15139578, particle_floorBounceSettle, func_15133D20,
     func_15133C58, func_150C01DC, prop_onPieceFloorHit,
 };
-static ParticleFloorType3Fn D_80089970[] = { NULL };
+static ParticleFloorType3Fn gModelParticleFloorType3Funcs[] = { NULL };
 static ParticleWallHitFn gModelParticleWallFuncs[] = { NULL, particle_wallShatter };
 static void (*gModelParticleDestroyFuncs[])() = { NULL, blood_destroyDebris, particle_stopPulseSound };
 static s32 (*gModelParticleSquashFuncs[])() = { particle_updateSquash };
@@ -370,9 +370,9 @@ Gfx *particle_drawModelParticle(Gfx *gfx, ModelParticle *arg1, s16 arg2) {
     }
     state = 1;
     if (particle->alpha < 0xFF) {
-        gSPSegment(gfx++, 8, D_80083740);
+        gSPSegment(gfx++, 8, gEffectXluRenderModes);
     } else {
-        gSPSegment(gfx++, 8, D_800838C0);
+        gSPSegment(gfx++, 8, gEffectOpaRenderModes);
     }
     if (particle->flags & 0x10000) {
         if (particle->drawFn != -1) {
@@ -456,7 +456,7 @@ s32 particle_movePhysics(ModelParticle *particle) {
             if (particle->floor.source == 3) {
                 particle->hitFlags |= 2;
                 if (particle->floorType3Fn != 0) {
-                    if (D_80089970[particle->floorType3Fn](particle, prev.x, prev.y, prev.z,
+                    if (gModelParticleFloorType3Funcs[particle->floorType3Fn](particle, prev.x, prev.y, prev.z,
                                                            particle->floor.height) == 0) {
                         return 0;
                     }

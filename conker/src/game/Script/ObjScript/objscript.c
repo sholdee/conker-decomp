@@ -389,7 +389,7 @@ void func_150762B0(void) {
 }
 
 void func_150762D4(void) {
-    func_151669A0(gCurrentActor->xpos, gCurrentActor->ypos + 100.0f,
+    particle_spawnPuffQuad(gCurrentActor->xpos, gCurrentActor->ypos + 100.0f,
                   gCurrentActor->zpos, 0.45f, 0xFF, 0);
 }
 

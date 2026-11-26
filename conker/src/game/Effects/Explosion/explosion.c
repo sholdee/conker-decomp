@@ -168,7 +168,7 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
 
 /*
  * Effect update: drops the effect's position onto the ground below it (if any), spawns a
- * point effect (func_150E83AC) there and scatters 3-5 beam_spawnAtGroundPoints spawns around it.
+ * point effect (particle_startRandomEmitter) there and scatters 3-5 beam_spawnAtGroundPoints spawns around it.
  */
 void effect_dropPointEffect(PointEffect *effect) {
     Vec3f *pos;
@@ -189,7 +189,7 @@ void effect_dropPointEffect(PointEffect *effect) {
         groundPos.z = pos->z;
         onGround = 1;
     }
-    func_150E83AC(onGround ? &groundPos : pos, func_150ADA20() % 62U + 120, effect->base.header.owner, effect->base.header.kind);
+    particle_startRandomEmitter(onGround ? &groundPos : pos, func_150ADA20() % 62U + 120, effect->base.header.owner, effect->base.header.kind);
     pos = onGround ? &groundPos : &effect->pos;
     center = *pos;
     center.y += 500.0f;

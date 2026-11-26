@@ -38,7 +38,7 @@ void game_initLevelSubsystems(s32 levelId) {
         // matching: IDO schedules the store differently without the block-scoped temp
         u8 result = func_15012720();
 
-        D_800E0A10 = result;
+        gLevelEffectKind = result;
     }
     view_buildOrthoMatrices();
 

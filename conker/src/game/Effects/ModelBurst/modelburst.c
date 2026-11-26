@@ -31,7 +31,7 @@ const ModelBurstPiece gBurstPieces[6] = {
 
 /* Defined in game/Particle/StyleParticle/styleparticle.c with a u8 style. This file was compiled with a view that takes an s32 style (no
    narrowing at the call). */
-void func_151700D8(f32 (*verts)[3], f32 x, f32 z, s32 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
+void particle_spawnQuadEdgeStyleParticles(f32 (*verts)[3], f32 x, f32 z, s32 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
                    s32 arg9);
 
 /* Spawns six models bursting up and out of the actor, plus a ring of dust particles around its feet. */
@@ -257,7 +257,7 @@ void func_15171600(WorldObject *actor, u8 owner, s32 list) {
 }
 
 /*
- * Passes func_151700D8 the corners of a (2 * halfX) x (2 * halfZ) rectangle centred at the actor's
+ * Passes particle_spawnQuadEdgeStyleParticles the corners of a (2 * halfX) x (2 * halfZ) rectangle centred at the actor's
  * position plus (offsetX, offsetY, offsetZ).
  */
 void effect_spawnRectangleParticles(WorldObject *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 offsetY, f32 offsetZ, s32 type,
@@ -282,7 +282,7 @@ void effect_spawnRectangleParticles(WorldObject *actor, f32 halfX, f32 halfZ, f3
     corners[3][0] = halfX + centerX;
     corners[3][1] = centerY;
     corners[3][2] = centerZ - halfZ;
-    func_151700D8(corners, centerX, centerZ, style, scale, type, countA, countB, owner, list);
+    particle_spawnQuadEdgeStyleParticles(corners, centerX, centerZ, style, scale, type, countA, countB, owner, list);
 }
 
 /*

@@ -13,13 +13,13 @@ LensFlare *gLensFlares; /* head of the lens flare list */
 #include "variables.h"
 
 /* The sun position of the levels whose LevelHeader.unk10 is 1. */
-static f32 D_8008CFF0[3] = { -73.0f, 80.0f, -95.0f };
+static f32 gSunPosition[3] = { -73.0f, 80.0f, -95.0f };
 
 /* Per LevelHeader.unk10: the sun position of the FLARE_SUN flares (NULL: no sun). */
-f32 *gSunPositions[2] = { NULL, D_8008CFF0 };
+f32 *gSunPositions[2] = { NULL, gSunPosition };
 
 /* Sprite sizes, one row per flare type. */
-static const u8 D_800A7250[2][7] = {
+static const u8 gFlareSpriteSizes[2][7] = {
     { 128, 64, 128, 255, 128, 64, 128 },
     { 32, 64, 32, 32, 32, 32, 32 },
 };
@@ -115,7 +115,7 @@ Gfx *flare_drawAll(Gfx *gfx, s32 arg1) {
     s32 zbufDepth;
     LensFlare *flare;
     f32 *sunPos;
-    FlareTypeBytes sizeRows = { 0, 1 }; /* row in D_800A7250 */
+    FlareTypeBytes sizeRows = { 0, 1 }; /* row in gFlareSpriteSizes */
     FlareTypeBytes counts = { 7, 3 };   /* number of sprites */
     FlareTypeBytes falloffs = { 1, 30 }; /* distance falloff */
     u8 *flash;
@@ -234,7 +234,7 @@ Gfx *flare_draw(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 falloff,
         for (i = 0; i < count; i++) {
             x = flare->screenX - dx * ((i + 1) * 2) / 5.0f;
             y = flare->screenY - dy * ((i + 1) * 2) / 5.0f;
-            size = D_800A7250[sizeRow][i];
+            size = gFlareSpriteSizes[sizeRow][i];
             y += size / 64.0f;
             sprite.alpha = intensity;
             sprite.scaleX = (size << 12) * gScreenScaleX / 255.0f;

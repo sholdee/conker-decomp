@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Timed effect (expire callback 5, func_150C29F0) carrying a DiscEmitter at 0x28. */
+/* Timed effect (expire callback 5, particle_emitDiscParticle) carrying a DiscEmitter at 0x28. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ DiscEmitter data;

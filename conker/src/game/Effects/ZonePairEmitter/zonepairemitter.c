@@ -252,10 +252,10 @@ void func_150DEBE0(s32 arg0) {
     }
 }
 
-/* Passes entry `index` of the D_800A0D08 and D_800A0D28 tables to light_sendEvent and func_151417C4. */
+/* Passes entry `index` of the D_800A0D08 and D_800A0D28 tables to light_sendEvent and flare_sendGlowEvent. */
 void func_150DEC28(u8 index, u8 arg1) {
     s32 i = index; // matching: without this copy IDO spills the scaled index to another slot
 
     light_sendEvent(D_800A0D08[i], 0x22, 0);
-    func_151417C4(D_800A0D28[i], 0x22);
+    flare_sendGlowEvent(D_800A0D28[i], 0x22);
 }

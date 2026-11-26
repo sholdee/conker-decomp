@@ -172,7 +172,7 @@ void particle_spawnWatcherParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, 
 }
 
 /* Linked-object update: returns whether its owner kept it alive this frame. */
-s32 func_150C63EC(WatcherEmitter *obj) {
+s32 particle_updateWatcherLink(WatcherEmitter *obj) {
     s32 alive = TRUE;
 
     if (!obj->link.keepAlive) {
@@ -183,7 +183,7 @@ s32 func_150C63EC(WatcherEmitter *obj) {
 }
 
 /* Linked-object destructor: detaches it from its emitter. */
-void func_150C6410(WatcherEmitter *obj) {
+void particle_destroyWatcherLink(WatcherEmitter *obj) {
     GameF3270Children *children = &((GameF3270Emitter *)obj->link.owner)->children;
 
     children->linked = NULL;
@@ -191,7 +191,7 @@ void func_150C6410(WatcherEmitter *obj) {
 }
 
 /* Linked-object destructor: detaches it from its emitter. */
-void func_150C6438(WatcherEmitter *obj) {
+void particle_freeWatcherLink(WatcherEmitter *obj) {
     GameF3270Children *children = &((GameF3270Emitter *)obj->link.owner)->children;
 
     children->linked = NULL;

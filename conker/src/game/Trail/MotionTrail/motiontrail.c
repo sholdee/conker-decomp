@@ -39,7 +39,7 @@ static TrailFunc gMotionTrailStateProcs[6] = {
 };
 static TrailFunc gMotionTrailUpdateProcs[13] = {
     NULL,          trail_fadeEmittedTrail, func_150AED9C, trail_fadeMotionTrail, particle_fadeMotionTrailByLife, trail_fadeKind2Trail, trail_fadeIn,
-    func_150B378C, effect_fadeImpactTrailByLife, effect_fadeTrailByLife, trail_landSprayTrail, effect_fadeSegmentTrailByLife, func_1514B844,
+    func_150B378C, effect_fadeImpactTrailByLife, effect_fadeTrailByLife, trail_landSprayTrail, effect_fadeSegmentTrailByLife, particle_fadeTrailByLife,
 };
 /* Finish handlers (TrailParams.finishFn); there are none. */
 static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
@@ -54,7 +54,7 @@ static TrailHitFunc D_8008A430[8] = {
     particle_splashBurst,
 };
 static TrailHitFunc D_8008A450[5] = {
-    NULL, trail_spawnHitPuffAndEffect, func_151AC550, func_15189FD0, particle_splashSpray,
+    NULL, trail_spawnHitPuffAndEffect, particle_spawnSampleKindMark, func_15189FD0, particle_splashSpray,
 };
 
 /* Runs the trail's update handlers and fades; returns whether it is still alive. */

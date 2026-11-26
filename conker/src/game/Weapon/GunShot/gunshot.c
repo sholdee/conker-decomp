@@ -116,7 +116,7 @@ void weapon_rumbleGun(Actor *obj) {
 /* Gets the shot `position` and `direction` (and two axes) of `obj`. */
 void weapon_getShotFrame(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
     particle_getGunAxes(obj, position, direction, axis0, axis1, gGunMuzzlePoints[0], *gGunMuzzleBones[0]);
-    func_151D3E6C(obj, position, position, 0x8003A);
+    particle_runAttackAtMidpoint(obj, position, position, 0x8003A);
 }
 
 

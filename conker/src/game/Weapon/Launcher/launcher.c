@@ -69,7 +69,7 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
             muzzle.z = obj->zpos;
             launch = muzzle;
         }
-        func_151D3E6C(obj, &muzzle, &launch, (level == 0x2B) ? 0x28 : 0x1E);
+        particle_runAttackAtMidpoint(obj, &muzzle, &launch, (level == 0x2B) ? 0x28 : 0x1E);
         particle_spawnShortLightFlash(&muzzle, arg1, arg2);
         func_150FE0B8(obj, &muzzle, arg1, arg2);
         weapon_rumbleLauncher(obj);

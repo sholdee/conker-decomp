@@ -337,9 +337,9 @@ Gfx *model_drawAttachmentReflections(Gfx *gfx, ModelAttachment *att, s32 red, s3
         gDPSetEnvColor(gfx++, red, green, blue, alpha);
 
         if (alpha < 255) {
-            gSPSegment(gfx++, 8, D_80082FC0);
+            gSPSegment(gfx++, 8, gModelXluRenderModes);
         } else {
-            gSPSegment(gfx++, 8, D_80083140);
+            gSPSegment(gfx++, 8, gModelOpaRenderModes);
         }
 
         for (j = 0; j < att->numDLists; j++) {

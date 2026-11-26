@@ -441,7 +441,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             }
             break;
         case 15:
-            func_150E8930();
+            particle_fireShake();
             break;
         case 19:
             screen_spawnOverlay(cmd->arg.h.lo);

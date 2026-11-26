@@ -68,11 +68,11 @@ static const AnchorEmitterTemplate *gAnchorEmitterTemplates[] = {
 };
 /* Emitter update and finish callbacks (AnchorEmitterParams.updateFunc, unk59Func); the callbacks take the emitter as
    their own view (effect_updateBurnDamage and func_151906C4, game/Effects/BurnDamage/burndamage.c), so the tables have no prototype. */
-static s32 (*D_8008D67C[])() = { effect_updateBurnDamage };
-static void (*D_8008D680[])() = { func_151906C4 };
+static s32 (*gAnchorEmitterUpdateFuncs[])() = { effect_updateBurnDamage };
+static void (*gAnchorEmitterExpireFuncs[])() = { func_151906C4 };
 
 /* Moves three sprite values toward random targets that are re-rolled on timers. */
-s32 func_1518F1A0(EffectSprite *sprite) {
+s32 particle_wobbleSpriteSize(EffectSprite *sprite) {
     SpriteWobble *state = &sprite->wobble;
 
     state->timer1 -= D_800BE9E4;
@@ -100,8 +100,8 @@ s32 func_1518F1A0(EffectSprite *sprite) {
     return 1;
 }
 
-/* Like func_1518F1A0, but each target is rolled only once. */
-s32 func_1518F384(EffectSprite *sprite) {
+/* Like particle_wobbleSpriteSize, but each target is rolled only once. */
+s32 particle_easeSpriteSizeOnce(EffectSprite *sprite) {
     SpriteWobble *state = &sprite->wobble;
 
     if (sprite->wobble.timer0 == 0) {
@@ -211,7 +211,7 @@ s32 particle_updateAnchorEmitter(AnchorEmitter *emitter) {
     params->accum += (params->tmpl.rate + func_150ADA68() * params->tmpl.rateRange) * gFrameDelta;
     particle_emitAtRandomAnchor(emitter);
     if (params->updateFunc != -1) {
-        return D_8008D67C[params->updateFunc](emitter);
+        return gAnchorEmitterUpdateFuncs[params->updateFunc](emitter);
     }
     return 1;
 }
@@ -220,7 +220,7 @@ void particle_runAnchorEmitterExpire(AnchorEmitter *emitter) {
     AnchorEmitterParams *params = &emitter->params;
 
     if (emitter->params.unk59Func != -1) {
-        D_8008D680[params->unk59Func](emitter);
+        gAnchorEmitterExpireFuncs[params->unk59Func](emitter);
     }
 }
 

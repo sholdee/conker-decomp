@@ -2952,7 +2952,7 @@ typedef struct ActorLink {
     /* 0x6 */ s16 timer;
     /* 0x8 */ u8 flags;             /* bit 0: the timer counts down */
     /* 0x9 */ u8 unk9;
-    /* 0xA */ u8 kind;              /* D_8008FA70 index */
+    /* 0xA */ u8 kind;              /* gDripEmitterKinds index */
 } ActorLink; /* size 0xC */
 
 /* Tick data of timed effect 0x46 (effect_updateBoltRing, game_E2DA0.c): bolts around a trigger zone. */
@@ -3090,7 +3090,7 @@ typedef struct ZonePairEmitter {
     /* 0x08 */ TriggerZone *target;
 } ZonePairEmitter;
 
-/* Data of timed effect expire callback 5 (func_150C29F0, game/Particle/PuffSprays/puffsprays.c): particles at a random point of a disc. */
+/* Data of timed effect expire callback 5 (particle_emitDiscParticle, game/Particle/PuffSprays/puffsprays.c): particles at a random point of a disc. */
 typedef struct DiscEmitter {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 z;
@@ -3098,7 +3098,7 @@ typedef struct DiscEmitter {
     /* 0x0C */ f32 y;
 } DiscEmitter; /* size 0x10 */
 
-/* Timed effect with a DiscEmitter as its data: the object of the expire callbacks func_150C29F0 and
+/* Timed effect with a DiscEmitter as its data: the object of the expire callbacks particle_emitDiscParticle and
  * func_150C2C00 (game/Particle/DiscEmitter/discemitter.c) and of func_150C2898 (game/Particle/PuffSprays/puffsprays.c). */
 typedef struct Struct150C29F0 {
     /* 0x00 */ TimedEffect base;

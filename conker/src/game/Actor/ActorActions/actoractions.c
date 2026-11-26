@@ -102,11 +102,11 @@ void actor_runPending(void) {
                 ctl = actor->mv;
             }
             if (ctl->deferredActions & 4) {
-                func_151D57F8(actor, 0);
+                particle_castGunRay(actor, 0);
                 ctl = actor->mv;
             }
             if (ctl->deferredActions & 8) {
-                func_151D57F8(actor, 1);
+                particle_castGunRay(actor, 1);
                 ctl = actor->mv;
             }
             if (ctl->deferredActions & 2) {

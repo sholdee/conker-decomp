@@ -119,7 +119,7 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
         from = origin;
         dir = &sourceDir;
     }
-    ext.handle = collide ? func_151D5B6C(from, dir, owner, arg23, NULL) : -1;
+    ext.handle = collide ? particle_raySphereObjectMask(from, dir, owner, arg23, NULL) : -1;
     if (weapon_setupProjectileRay(knownHit, &ext.path, origin, useSource ? &sourceDir : NULL, &ext.remaining, arg7, arg13,
                       altOrigin, useTarget ? &targetDir : NULL, &ext.flags, 3, arg10, owner, arg23, collide, arg15,
                       ext.handle, 0) == 0) {
@@ -378,7 +378,7 @@ s32 func_151C2E94(Actor *obj, Actor *self) {
 /* Impact handler: the projectile hit actor (at hitPos) during its ray cast. */
 s32 weapon_onProjectileImpact(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
                   RayHit *hit) {
-    return func_151D4DAC(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.dir,
+    return particle_applyShotHit(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.dir,
                          trail->head.header.owner, trail->head.header.kind);
 }
 

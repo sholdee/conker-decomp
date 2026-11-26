@@ -11,7 +11,7 @@ u8 D_800BE635;
 s32 gLayoutViewWidths[6];           // the view width of each screen layout
 s32 gLayoutViewHeights[6];           // the view height of each screen layout
 s16 gLayoutViewCentres[4][5][2];     // the centre (x, y) of each view, by screen layout
-f32 D_800BE6B8;              // the width scale of the two-player layout
+f32 gTwoPlayerWidthScale;              // the width scale of the two-player layout
 
 #include "functions.h"
 #include "variables.h"
@@ -34,7 +34,7 @@ static f32 D_80082FA8[6] = { 1.659999967f, 0.8299999833f, 1.679999948f, 1.679999
  * Render mode tables. Code binds one of them to segment 8. A model's display lists then call entry n
  * (at segment offset n * 16) to set the render mode of a part.
  */
-Gfx D_80082FC0[24][2] = {
+Gfx gModelXluRenderModes[24][2] = {
     RENDER_MODE(0x182C3F, 0x04D049D8), RENDER_MODE(0x182C3F, 0x04D049D8),
     RENDER_MODE(0x182C3F, 0x04D04DD8), RENDER_MODE(0x182C3F, 0x04D049D8),
     RENDER_MODE(0x18AC3F, 0x04D049D8), RENDER_MODE(0x18AC3F, 0x04D049D8),
@@ -49,7 +49,7 @@ Gfx D_80082FC0[24][2] = {
     RENDER_MODE(0x19EC3F, 0x04D04DD8), RENDER_MODE(0x19EC3F, 0x04D049D8),
 };
 
-Gfx D_80083140[24][2] = {
+Gfx gModelOpaRenderModes[24][2] = {
     RENDER_MODE(0x182C3F, 0x04D12078), RENDER_MODE(0x182C3F, 0x04D13078),
     RENDER_MODE(0x182C3F, 0x04D12D58), RENDER_MODE(0x182C3F, 0x04D12278),
     RENDER_MODE(0x18AC3F, 0x04D12078), RENDER_MODE(0x18AC3F, 0x04D13078),
@@ -109,7 +109,7 @@ Gfx D_800835C0[24][2] = {
     RENDER_MODE(0x19EC3F, 0x04D12048), RENDER_MODE(0x19EC3F, 0x04D12248),
 };
 
-Gfx D_80083740[24][2] = {
+Gfx gEffectXluRenderModes[24][2] = {
     RENDER_MODE(0x182CAF, 0x0C1849D8), RENDER_MODE(0x182CAF, 0x0C1849D8),
     RENDER_MODE(0x182CAF, 0x0C184DD8), RENDER_MODE(0x182CAF, 0x0C1849D8),
     RENDER_MODE(0x18ACAF, 0x0C1849D8), RENDER_MODE(0x18ACAF, 0x0C1849D8),
@@ -124,7 +124,7 @@ Gfx D_80083740[24][2] = {
     RENDER_MODE(0x19ECAF, 0x0C184DD8), RENDER_MODE(0x19ECAF, 0x0C1849D8),
 };
 
-Gfx D_800838C0[24][2] = {
+Gfx gEffectOpaRenderModes[24][2] = {
     RENDER_MODE(0x182CAF, 0x0C192078), RENDER_MODE(0x182CAF, 0x0C193078),
     RENDER_MODE(0x182CAF, 0x0C192D58), RENDER_MODE(0x182CAF, 0x0C192278),
     RENDER_MODE(0x18ACAF, 0x0C192078), RENDER_MODE(0x18ACAF, 0x0C193078),
@@ -169,7 +169,7 @@ Gfx D_80083BC0[24][2] = {
     RENDER_MODE(0x19ECAF, 0x0C192D58), RENDER_MODE(0x19ECAF, 0x0C192248),
 };
 
-Gfx D_80083D40[24][2] = {
+Gfx gWorldObjectXluRenderModes[24][2] = {
     RENDER_MODE(0x182C3F, 0x0C1849D8), RENDER_MODE(0x182C3F, 0x0C1849D8),
     RENDER_MODE(0x182C3F, 0x0C184DD8), RENDER_MODE(0x182C3F, 0x0C1849D8),
     RENDER_MODE(0x18AC3F, 0x0C1849D8), RENDER_MODE(0x18AC3F, 0x0C1849D8),
@@ -184,7 +184,7 @@ Gfx D_80083D40[24][2] = {
     RENDER_MODE(0x19EC3F, 0x0C184DD8), RENDER_MODE(0x19EC3F, 0x0C1849D8),
 };
 
-Gfx D_80083EC0[24][2] = {
+Gfx gWorldObjectOpaRenderModes[24][2] = {
     RENDER_MODE(0x182C3F, 0x0C192078), RENDER_MODE(0x182C3F, 0x0C193078),
     RENDER_MODE(0x182C3F, 0x0C192D58), RENDER_MODE(0x182C3F, 0x0C192278),
     RENDER_MODE(0x18AC3F, 0x0C192078), RENDER_MODE(0x18AC3F, 0x0C193078),
@@ -231,7 +231,7 @@ void view_allocViews(s32 numPlayers, s32 arg1) {
         scaled = width;
         scaled *= D_800968E0[0];
         scaledWidth = scaled;
-        D_800BE6B8 = (scaledWidth - (scaledWidth % 4)) / width;
+        gTwoPlayerWidthScale = (scaledWidth - (scaledWidth % 4)) / width;
     }
 
     func_150006E0(level);
@@ -363,8 +363,8 @@ void view_setupView(s32 view, s32 layout, s32 zRange, s16 arg3) {
     RENDER_VIEWS[view].unk64 = D_80082FA8[layout];
     RENDER_VIEWS[view].unk68 = 2.0f;
     if (layout == 1) {
-        RENDER_VIEWS[view].width *= D_800BE6B8;
-        RENDER_VIEWS[view].fovX = 103.02f * D_800BE6B8;
+        RENDER_VIEWS[view].width *= gTwoPlayerWidthScale;
+        RENDER_VIEWS[view].fovX = 103.02f * gTwoPlayerWidthScale;
         RENDER_VIEWS[view].fovY = 50.0f;
     } else {
         RENDER_VIEWS[view].fovX = 60.6f;

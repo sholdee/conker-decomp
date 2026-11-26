@@ -66,7 +66,7 @@ void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *out
             position.z = obj->zpos;
             origin = position;
         }
-        func_151D3E6C(obj, &position, &origin, 0x23);
+        particle_runAttackAtMidpoint(obj, &position, &origin, 0x23);
         particle_spawnShortLightFlash(&position, arg1, arg2);
         func_150FE604(obj, &position, arg1, arg2);
         func_150FE7D4(obj);

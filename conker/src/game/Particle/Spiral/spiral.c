@@ -20,7 +20,7 @@ VariantList gSpiralVariantLists[2] = {
 };
 
 /* Conditions of the camera emitters (CameraEmitterData.condition). */
-static s32 (*D_80088B38[])() = { effect_consumeZoneFlag };
+static s32 (*gCameraEmitterConditions[])() = { effect_consumeZoneFlag };
 
 /* Flags of SpiralState. */
 #define SPIRAL_FADE_NEAR 1 /* fade out as the camera gets close */
@@ -210,7 +210,7 @@ void particle_updateCameraSpiralEmitter(CameraEmitter *emitter) {
     f32 speed;
 
     data = &emitter->data;
-    if (data->condition != -1 && !D_80088B38[data->condition]()) {
+    if (data->condition != -1 && !gCameraEmitterConditions[data->condition]()) {
         return;
     }
     data->pending += (0.05100000277f + func_150ADA68() * 0.153000012f) * gFrameDelta;

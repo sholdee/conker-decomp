@@ -216,14 +216,14 @@ static void (*gBloodDripEmitters[])(f32, f32, f32, f32, f32, f32, EffectHeader *
     func_151AE890, effect_spawnDriftParticle, func_151B4E4C, func_151B50A4, func_151AF338, effect_spawnDripDrop,
 };
 /* Drip callbacks (BloodDripDesc.callback): 0 kills the drip. */
-static s32 (*gBloodDripCallbacks[])() = { effect_updateLoopSound, func_150C63EC, effect_isWatcherEmitterAlive };
+static s32 (*gBloodDripCallbacks[])() = { effect_updateLoopSound, particle_updateWatcherLink, effect_isWatcherEmitterAlive };
 /* Teardown handlers of a drip (BloodDripDesc.unk2D). */
 static void (*gBloodDripDestroyHandlers[10])() = {
-    blood_destroyDripDefault, effect_destroyLoopSound, func_150C6410, effect_destroyWatcherEmitter, blood_destroyDripDefault,
+    blood_destroyDripDefault, effect_destroyLoopSound, particle_destroyWatcherLink, effect_destroyWatcherEmitter, blood_destroyDripDefault,
     blood_destroyDripDefault, blood_destroyDripDefault, blood_destroyDripDefault, blood_destroyDripDefault, blood_destroyDripDefault,
 };
 static void (*gBloodDripFreeHandlers[10])() = {
-    blood_freeDripDefault, effect_freeLoopSound, func_150C6438, effect_freeWatcherEmitter, blood_freeDripDefault,
+    blood_freeDripDefault, effect_freeLoopSound, particle_freeWatcherLink, effect_freeWatcherEmitter, blood_freeDripDefault,
     blood_freeDripDefault, blood_freeDripDefault, blood_freeDripDefault, blood_freeDripDefault, blood_freeDripDefault,
 };
 

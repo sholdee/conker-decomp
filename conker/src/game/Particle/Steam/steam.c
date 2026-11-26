@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/particle.h describes it. */
-u8 D_800E0A10; /* the effect kind of the current context (particle_getContextEffectKind); game/Game/LevelInit/levelinit sets it */
+u8 gLevelEffectKind; /* the effect kind of the current context (particle_getContextEffectKind); game/Game/LevelInit/levelinit sets it */
 
 // functions.h declares these three with other return types; this file uses the s32 versions below.
 #include "functions.h"
@@ -40,12 +40,12 @@ static void (*gEffectKindColorFuncs[13])(ParticleDesc *) = {
 
 
 
-/* Effect kind for the current context: D_800E0A10, or kind 10 when level is clear and zone_isActorOutsideId(0, 0x1C) fails. */
+/* Effect kind for the current context: gLevelEffectKind, or kind 10 when level is clear and zone_isActorOutsideId(0, 0x1C) fails. */
 s32 particle_getContextEffectKind(void) {
     if ((level == 0) && (zone_isActorOutsideId(0, 0x1C) == 0)) {
         return 10;
     }
-    return D_800E0A10;
+    return gLevelEffectKind;
 }
 
 /* Id picker for effect kind 0 in the gKindParticleTexturePickers table. */
@@ -347,7 +347,7 @@ u8 func_151D9B34(void) {
 }
 
 
-static const Vec3f D_800AB3E8 = { 0.0f, -1.0f, 0.0f }; /* straight down */
+static const Vec3f gDownUnitVec = { 0.0f, -1.0f, 0.0f }; /* straight down */
 
 /*
  * Spawns an emitter of effect kind `kind` at `pos` (lifetime -1: default). With arg8 set and an
@@ -390,7 +390,7 @@ void particle_spawnKindEmitter(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos
                       func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                       arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
         arg8 && math_getTriEdges(tri, &outA, &outB, &normal)) {
-        down = D_800AB3E8;
+        down = gDownUnitVec;
         math_vec3Normalize(&normal, &normal, NULL, NULL);
         if (math_vec3Dot(&normal, &down) < -0.5f) {
             s32 pad; // matching: stack slot that places drip at the target offset

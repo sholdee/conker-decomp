@@ -681,9 +681,9 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
         alpha = (v * alpha) >> 8;
     }
     if (alpha < 0xFF) {
-        gSPSegment(gdl++, 8, D_80082FC0);
+        gSPSegment(gdl++, 8, gModelXluRenderModes);
     } else {
-        gSPSegment(gdl++, 8, D_80083140);
+        gSPSegment(gdl++, 8, gModelOpaRenderModes);
     }
     if (attach_getMatrices(att, owner, &mtx, &boneMtx) == 0) {
         return gdl;

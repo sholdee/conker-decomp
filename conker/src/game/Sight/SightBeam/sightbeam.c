@@ -518,7 +518,7 @@ const s32 D_800AAC30[] = { 0x17, 0x18 };
 // matching: this file was compiled with s32 parameters where the definition (game/Particle/EmissionSource/emissionsource.c) has u8 and s16,
 // so its calls do not narrow them. The definition is (f32 size, u8 arg1, s32 arg2, Vec3f *position,
 // s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 owner, s32 kind).
-void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
+void particle_spawnImpactMark(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Breaks the beam: debris and sparks at both ends, sounds, and (if `actor` tripped it) a reaction. */
 void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
@@ -573,8 +573,8 @@ void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
     pos.y = obj->head.def.rot.y;
     pos.z = obj->head.def.rot.z;
     light_createWithEffect(&header, &pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->head.def.pos, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->head.def.rot, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
+    particle_spawnImpactMark(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->head.def.pos, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
+    particle_spawnImpactMark(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->head.def.rot, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     if (actor != NULL) {
         camera_startWobblePreset(2, actor->CameraPtr->CNumber, 0, obj->head.header.owner, obj->head.header.kind);
         params8868.flags = 1;
@@ -883,7 +883,7 @@ void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
             hit = 1;
             impact.y = collision.height;
             impact.z = query.z;
-            func_150E7FEC(func_150ADA68() * 125.0f + 204.0f, (func_150ADA20() % 101U + 155) & 0xFF,
+            particle_spawnImpactMark(func_150ADA68() * 125.0f + 204.0f, (func_150ADA20() % 101U + 155) & 0xFF,
                           &collision.tri, &impact, func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
         }
     }
@@ -891,7 +891,7 @@ void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
     particle_startPlayerCameraWobbles(&origin, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
     particle_spawnBlastSpray(&origin, arg1, arg2);
     particle_spawnLightFlash(&origin, arg1, arg2);
-    func_150E83AC(hit ? &impact : &origin, func_150ADA20() % 62U + 120, arg1, arg2);
+    particle_startRandomEmitter(hit ? &impact : &origin, func_150ADA20() % 62U + 120, arg1, arg2);
     particle_spawnGrowFade(&origin, 2.0f * func_150ADA68() + 8.0f, 2.4641099f,
         func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
     if (!airborne) {

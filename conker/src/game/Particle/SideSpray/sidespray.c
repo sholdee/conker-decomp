@@ -45,7 +45,7 @@ s32 particle_getSpraySidePos(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 
     return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 500.0f, ground);
 }
 
-s32 func_151AF6C0(s32 arg0, s32 arg1) {
+s32 particle_selectSideSpray(s32 arg0, s32 arg1) {
     return 12;
 }
 
@@ -153,7 +153,7 @@ void particle_spawnSideSpray(Actor *actor, s32 side, s32 arg2) {
 }
 
 /* QuadSprite update: fades the sprite (def.unk10) out over the last 32 frames of its lifetime. */
-s32 func_151AFBD4(QuadSprite *sprite) {
+s32 particle_fadeSideSpraySprite(QuadSprite *sprite) {
     s32 fade;
 
     if (sprite->def.lifetime < 32) {

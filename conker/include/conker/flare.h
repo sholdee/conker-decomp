@@ -56,8 +56,8 @@ s32 flare_glowFlicker(GlowObj *obj);
 s32 flare_glowPulse(GlowObj *obj);
 s32 flare_glowEnvelope(GlowObj *obj);
 void flare_glowMessage(GlowObj *obj, u8 *msg, u8 msgType);
-void func_151417C4(u8 arg0, u8 arg1);
-s32 func_15141818(s32 arg0, s32 arg1);
+void flare_sendGlowEvent(u8 arg0, u8 arg1);
+s32 flare_hideGlow(s32 arg0, s32 arg1);
 void flare_placeGlowOnPivot(GlowObj *obj, f32 *pivot, f32 distance, f32 spread, f32 angleX, f32 angleZ);
 s32 flare_glowOrbit(GlowObj *obj);
 

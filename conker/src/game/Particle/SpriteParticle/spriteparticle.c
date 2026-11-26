@@ -76,11 +76,11 @@ void *particle_newSpriteParticle(ParticleDesc *desc, u8 kind, s32 dataSize) {
 static s32 (*gSpriteUpdateFuncs[])() = {
     trail_updateBurstParticle, func_151A4900, effect_dampJointSparkXZ, effect_updateRiseParticleToCeiling,
     effect_updateRiseParticle, particle_updateKindSprite, particle_dampSprayXZ, particle_dampSparkXZ,
-    particle_dampYawSpriteXZ, effect_dampParticleVelocityXZ, particle_updateDragXZ, func_151025F4,
+    particle_dampYawSpriteXZ, effect_dampParticleVelocityXZ, particle_updateDragXZ, particle_updateWobbleOffset,
     effect_updateOscillateParticle, particle_pulseDust, particle_landDust, particle_updateDustParticle,
     particle_updateDrag, particle_updateDragFade, func_151045F4, effect_updateBloodStripParticle,
     effect_updateDriftParticle, effect_updateLandingDriftParticle, particle_wobbleSmoke, particle_bobSteamParticle,
-    particle_updateAreaFlash, func_150E8824, particle_updateDragY, particle_updateFloorBounce,
+    particle_updateAreaFlash, particle_wobbleRandomEmitterParticle, particle_updateDragY, particle_updateFloorBounce,
     particle_updateDragFloorBounce, particle_updateDragXZFloorBounce, particle_updateFollowDrift, particle_updateFollowGrow,
     particle_updatePointPuff, particle_updateSteamParticle, particle_wobbleSteamSize, particle_steamFloorHit,
     func_150DA628, beam_updateFollowParticle, particle_updatePulse, particle_updateFlash,

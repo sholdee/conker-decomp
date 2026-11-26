@@ -8,7 +8,7 @@ typedef struct Vtx1514A6A0 {
 } Vtx1514A6A0;
 
 /* Builds the four camera-facing vertices of a beam quad from start toward end. */
-void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
+void *particle_buildCameraFacingBeamQuad(Beam1514A6A0 *beam, s16 cam) {
     Vtx1514A6A0 *vertices;
     void *result;
     f32 distanceSquared;
@@ -112,7 +112,7 @@ void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
 }
 
 /* Spawns `count` particles at random points within `radius` of (x, y, z). */
-void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32 sizeRange,
+void particle_scatterChannelParticles(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32 sizeRange,
                    f32 heightBase, f32 heightRange, s16 lifeBase, s16 lifeRange, u8 arg11) {
     ParticleEmitterDesc particle;
     u8 angle;
@@ -164,7 +164,7 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
 }
 
 /* Spawns one particle at `pos` with randomized size, lifetime and fade. */
-void func_1514AD9C(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnRandomChannelParticle(Vec3f *pos, u8 arg1, s32 arg2) {
     ParticleEmitterDesc particle;
     f32 size;
     f32 height;
@@ -202,7 +202,7 @@ void func_1514AD9C(Vec3f *pos, u8 arg1, s32 arg2) {
  * Shrinks unk2C/unk30 by the fraction shrinkFraction and integrates unk38 with velocity unk50 and
  * acceleration unk4C over one frame. Returns 0 once either size drops below 10.
  */
-s32 func_1514AF74(Particle177B50 *p) {
+s32 particle_shrinkBallisticQuad(Particle177B50 *p) {
     p->head.def.width -= p->head.def.width * p->shrinkFraction;
     p->head.def.height -= p->head.def.height * p->shrinkFraction;
     p->head.def.pos.y += p->head.def.scale.y * gFrameDelta + 0.5f * p->head.def.scale.x * gFrameDelta * gFrameDelta;
@@ -214,7 +214,7 @@ s32 func_1514AF74(Particle177B50 *p) {
 }
 
 /* Spawns a random number of particles scattered within 42 units of `pos` in the XZ plane. */
-void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_scatterChannelParticlesInDisc(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 count;
     ParticleEmitterDesc particle;
     s32 angle;
@@ -365,7 +365,7 @@ void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 arg2,
         emit.alpha = func_150ADA20() % 101U + 155;
         particle_spawnSimplePuffSpray(&emit, 0xFF);
     }
-    func_1514B034(&pos, arg2, arg3);
+    particle_scatterChannelParticlesInDisc(&pos, arg2, arg3);
 
     {
         ParticleDef desc;
@@ -409,7 +409,7 @@ void particle_spawnGroundCluster(Vec3f *position, CollisionHit *ground, u8 arg2,
 }
 
 /* Trail update handler (gMotionTrailUpdateProcs): fades out over the last 16 frames of life, capping the alpha at life * 16. */
-s32 func_1514B844(MotionTrail *trail) {
+s32 particle_fadeTrailByLife(MotionTrail *trail) {
     TrailParams *params = trail->params;
 
     if (trail->head.tmpl.life < 16 && trail->head.tmpl.life * 16 < params->motion.alpha) {
@@ -419,7 +419,7 @@ s32 func_1514B844(MotionTrail *trail) {
 }
 
 /* Grows unk2C and unk30 by unk4C, scaled by the frame delta gFrameDelta. */
-s32 func_1514B87C(Particle177B50 *p) {
+s32 particle_growQuadAtRate(Particle177B50 *p) {
     f32 growth = p->head.def.scale.x * gFrameDelta;
 
     p->head.def.width += growth;
@@ -428,7 +428,7 @@ s32 func_1514B87C(Particle177B50 *p) {
 }
 
 /* Fades out over the last 16 frames of life: caps alpha at life * 16. */
-s32 func_1514B8B0(Particle177B50 *p) {
+s32 particle_capQuadAlphaByLife(Particle177B50 *p) {
     if (p->head.def.lifetime < 16 && p->head.def.lifetime * 16 < p->head.def.unk44) {
         p->head.def.unk44 = p->head.def.lifetime * 16;
     }

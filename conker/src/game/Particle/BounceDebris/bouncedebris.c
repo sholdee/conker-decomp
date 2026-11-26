@@ -4,7 +4,7 @@
 
 
 /* Per-frame update of a bouncing debris particle: integrate motion, land/bounce on the floor, fade out. */
-void func_15169C70(Debris *debris) {
+void particle_updateBounceDebris(Debris *debris) {
     f32 dt;
     s32 floorHeight;
     s32 timer;
@@ -128,7 +128,7 @@ void func_15169C70(Debris *debris) {
 
 
 /* Drop callback: once it reaches the floor it dies and leaves a splash sprite; in the air, x/z drag. */
-void func_1516A3F4(DropParticle *drop) {
+void particle_updateDropToSplash(DropParticle *drop) {
     s32 intensity;
     s32 bottom;
     s32 floorY;
@@ -156,7 +156,7 @@ void func_1516A3F4(DropParticle *drop) {
             splash.scaleX = dim;
             splash.scaleY = dim;
             splash.unk15 = intensity;
-            splash.callback = 3; /* gObjectCallbacks[3] = func_1516A538 */
+            splash.callback = 3; /* gObjectCallbacks[3] = particle_updateSplashFx */
             effect_spawnSpriteFx(&splash, drop->owner, drop->list);
         }
     } else {
@@ -166,7 +166,7 @@ void func_1516A3F4(DropParticle *drop) {
 }
 
 /* Splash callback: from frame 3 on, spawns a sprite with a random texture (0x20-0x22) and angle each frame. */
-void func_1516A538(SplashFx *fx) {
+void particle_updateSplashFx(SplashFx *fx) {
     u32 angle;
     u32 texture;
     s32 intensity;
@@ -182,7 +182,7 @@ void func_1516A538(SplashFx *fx) {
 
 /* Particle kind handler: fades the particle in or out, applies gravity and drift, and bounces it
  * off the floor. Returns 1 once it has faded out completely. */
-s32 func_1516A648(StyleParticle *particle) {
+s32 particle_updateStyleBounce(StyleParticle *particle) {
     s32 alpha;
     s32 floorY;
 

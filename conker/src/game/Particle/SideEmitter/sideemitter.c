@@ -227,7 +227,7 @@ void particle_onSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType) {
 }
 
 /* Message handler of particle_attachBoneSideEmitter's effect: the same as particle_onSideEmitterMsg. */
-void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
+void particle_onBoneSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     FixedEmitterData *data = &effect->data;
     ActorSwapMsg *swap = msg;
     ActorRef *removal = msg;

@@ -141,15 +141,15 @@ void func_150ECC00(Actor *obj, u8 owner, s32 kind) {
 }
 
 /* Current colour (r, g, b), its target and its easing velocity. */
-static f32 D_80088AD0 = 255.0f;
-static f32 D_80088AD4 = 255.0f;
-static f32 D_80088AD8 = 255.0f;
-static f32 D_80088ADC = 255.0f;
-static f32 D_80088AE0 = 255.0f;
-static f32 D_80088AE4 = 255.0f;
-static f32 D_80088AE8 = 0.0f;
-static f32 D_80088AEC = 0.0f;
-static f32 D_80088AF0 = 0.0f;
+static f32 gEasedColorR = 255.0f;
+static f32 gEasedColorG = 255.0f;
+static f32 gEasedColorB = 255.0f;
+static f32 gEasedColorTargetR = 255.0f;
+static f32 gEasedColorTargetG = 255.0f;
+static f32 gEasedColorTargetB = 255.0f;
+static f32 gEasedColorVelR = 0.0f;
+static f32 gEasedColorVelG = 0.0f;
+static f32 gEasedColorVelB = 0.0f;
 
 /* Per-frame handler driven by setting 0x403B: while it is on, picks a target colour (one channel
  * at 128 per settings 0x4038-0x403A) and applies settings 0x9C/0x9A of mode 0x2007; otherwise
@@ -167,21 +167,21 @@ void func_150ECC70(Camera *obj) {
         script_command(0, 0x4033, 1);
         obj->AvailableModes |= 0x80021200;
         if (script_query(1, 0x4038, 6, 0x2000) != 0) {
-            D_80088ADC = 128.0f;
-            D_80088AE0 = 255.0f;
-            D_80088AE4 = 255.0f;
+            gEasedColorTargetR = 128.0f;
+            gEasedColorTargetG = 255.0f;
+            gEasedColorTargetB = 255.0f;
         } else if (script_query(1, 0x4039, 6, 0x2000) != 0) {
-            D_80088ADC = 255.0f;
-            D_80088AE0 = 128.0f;
-            D_80088AE4 = 255.0f;
+            gEasedColorTargetR = 255.0f;
+            gEasedColorTargetG = 128.0f;
+            gEasedColorTargetB = 255.0f;
         } else if (script_query(1, 0x403A, 6, 0x2000) != 0) {
-            D_80088ADC = 255.0f;
-            D_80088AE0 = 255.0f;
-            D_80088AE4 = 128.0f;
+            gEasedColorTargetR = 255.0f;
+            gEasedColorTargetG = 255.0f;
+            gEasedColorTargetB = 128.0f;
         } else {
-            D_80088ADC = 255.0f;
-            D_80088AE0 = 255.0f;
-            D_80088AE4 = 255.0f;
+            gEasedColorTargetR = 255.0f;
+            gEasedColorTargetG = 255.0f;
+            gEasedColorTargetB = 255.0f;
         }
         mode = script_query(0, 0x2007, 0xB7) | 0x2000;
         if (script_query(1, 0x4010, 6, 0x2000) == 0) {
@@ -211,19 +211,19 @@ void func_150ECC70(Camera *obj) {
         script_command(2, 0x9000, 8, value9A, half);
         obj->YOffsetTget = 220.0f;
     } else {
-        D_80088ADC = 255.0f;
-        D_80088AE0 = 255.0f;
-        D_80088AE4 = 255.0f;
+        gEasedColorTargetR = 255.0f;
+        gEasedColorTargetG = 255.0f;
+        gEasedColorTargetB = 255.0f;
         script_command(0, 0x4031, 0);
         script_command(0, 0x4032, 0);
         script_command(0, 0x4033, 0);
         obj->AvailableModes &= ~0x80021200;
         obj->AvailableModes |= 8;
     }
-    math_springTo(&D_80088AD0, D_80088ADC, &D_80088AE8, 4.0f, 6.0f, obj->SpringTime);
-    math_springTo(&D_80088AD4, D_80088AE0, &D_80088AEC, 4.0f, 6.0f, obj->SpringTime);
-    math_springTo(&D_80088AD8, D_80088AE4, &D_80088AF0, 4.0f, 6.0f, obj->SpringTime);
-    script_command(1, 0x30F3, 0x12, (u8)D_80088AD0);
-    script_command(1, 0x30F4, 0x12, (u8)D_80088AD4);
-    script_command(1, 0x30F5, 0x12, (u8)D_80088AD8);
+    math_springTo(&gEasedColorR, gEasedColorTargetR, &gEasedColorVelR, 4.0f, 6.0f, obj->SpringTime);
+    math_springTo(&gEasedColorG, gEasedColorTargetG, &gEasedColorVelG, 4.0f, 6.0f, obj->SpringTime);
+    math_springTo(&gEasedColorB, gEasedColorTargetB, &gEasedColorVelB, 4.0f, 6.0f, obj->SpringTime);
+    script_command(1, 0x30F3, 0x12, (u8)gEasedColorR);
+    script_command(1, 0x30F4, 0x12, (u8)gEasedColorG);
+    script_command(1, 0x30F5, 0x12, (u8)gEasedColorB);
 }

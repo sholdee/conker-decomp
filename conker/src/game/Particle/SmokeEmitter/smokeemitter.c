@@ -8,7 +8,7 @@ void particle_applyDrag(Vec3f *vel, f32 drag);
 
 /* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls actor_hitScripted on
  * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while movement_obj[0].stunned is set. */
-void func_150AF200(s32 idA, s32 idB) {
+void particle_hitPlayerOnObjectContact(s32 idA, s32 idB) {
     WorldObject *obj;
     s32 index;
 
@@ -235,7 +235,7 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
 }
 
 /* Advances the oscillator at 0x70 (math_wrapRadians wraps the phase) and writes its value to unk10. */
-s32 func_150AFBF4(Obj150AFBF4 *obj) {
+s32 particle_updateSineOscillator(Obj150AFBF4 *obj) {
     TimeOscillator *osc = &obj->osc;
 
     osc->phase = osc->phase + osc->rate * gFrameDelta;
@@ -278,7 +278,7 @@ void particle_freeCharSpriteEmitters(void) {
 
 /* Fires a tracer along the -z axis of bone 3 (bone 2 if `altBone`) of gCurrentActor, from 20 to
  * 150 units out, plus a tracer (beam_spawnBoneTracer) attached to the same bone. */
-void func_150AFE64(s32 altBone) {
+void particle_fireActorBoneTracer(s32 altBone) {
     f32 startX;
     f32 startY;
     f32 startZ;
@@ -313,14 +313,14 @@ void func_150AFE64(s32 altBone) {
     }
 }
 
-/* Runs func_150AF200 on objects 0xE2/0xE1 (after effect_updateRain(0)) when level is 6, else on 0xDF/0xDE. */
+/* Runs particle_hitPlayerOnObjectContact on objects 0xE2/0xE1 (after effect_updateRain(0)) when level is 6, else on 0xDF/0xDE. */
 void func_150B003C(s32 arg0) {
     if (level == 6) {
         effect_updateRain(0);
-        func_150AF200(0xE2, 0xE1);
+        particle_hitPlayerOnObjectContact(0xE2, 0xE1);
         return;
     }
-    func_150AF200(0xDF, 0xDE);
+    particle_hitPlayerOnObjectContact(0xDF, 0xDE);
 }
 
 /* Arguments the projectile's ribbon trail keeps (trail_spawnRibbon selector 1). */
@@ -408,8 +408,8 @@ void particle_freeTrailProjectile(GameDC6B0Projectile *projectile) {
 }
 
 /* The debris variants of particle_spawnObjDebrisBurst's burst and their scales. */
-static const s32 D_8009F790[] = { 6, 6, 6, 82, 82 };
-static const f32 D_8009F7A4[] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f };
+static const s32 gObjDebrisVariants[] = { 6, 6, 6, 82, 82 };
+static const f32 gObjDebrisScales[] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f };
 
 /* Spawns a particle burst and a burst of debris (5 variants) 30 units above obj. */
 void particle_spawnObjDebrisBurst(Actor *obj, u8 arg1, s32 arg2) {
@@ -484,7 +484,7 @@ void particle_spawnObjDebrisBurst(Actor *obj, u8 arg1, s32 arg2) {
         debris.scaleBase = 0.302000016f;
         debris.scaleRange = 0.3180000186f;
         debris.spin = 9.687f;
-        particle_spawnDebrisBurst(&debris, D_8009F790, D_8009F7A4, 5, 65.0f, 0, arg1, arg2);
+        particle_spawnDebrisBurst(&debris, gObjDebrisVariants, gObjDebrisScales, 5, 65.0f, 0, arg1, arg2);
     }
 }
 

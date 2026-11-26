@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Data copied into a effect_newTimedEffectNoDraw particle at offset 0x28 by func_1515AF90. */
+/* Data copied into a effect_newTimedEffectNoDraw particle at offset 0x28 by particle_spawnUnderwaterRiseEmitter. */
 typedef struct {
     /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 rate;
@@ -16,7 +16,7 @@ typedef struct {
  * at an angle within 20 units of its yaw (unk380, converted from degrees). The spot needs a floor
  * above the eye; the particle sits on the floor at most 250 units below the eye (else at that depth).
  */
-void func_1515AF90(s16 player) {
+void particle_spawnUnderwaterRiseEmitter(s16 player) {
     if (!(func_150ADA20() & 0xF)) {
         void *particle;
         GroundParticle effect;
@@ -87,7 +87,7 @@ void func_1515AF90(s16 player) {
 }
 
 /* Effect update: accumulates rate * gFrameDelta and spawns one particle_newSpriteParticle particle per whole unit. */
-void func_1515B21C(EmitterObject *obj) {
+void particle_updateUnderwaterRiseEmitter(EmitterObject *obj) {
     RiseEmitterState *emitter;
     void *particle;
     ParticleDesc6C desc;
@@ -171,8 +171,8 @@ void func_1515B21C(EmitterObject *obj) {
 
 #define MSG_REMOVE_PLAYER_SPRITES 0xB
 
-/* Broadcasts message 0xB to the screen sprites; func_1515B62C removes the player's sliding sprites. */
-void func_1515B5F4(s16 player) {
+/* Broadcasts message 0xB to the screen sprites; particle_handleSlidingSpriteMessage removes the player's sliding sprites. */
+void particle_removePlayerSlidingSprites(s16 player) {
     s16 payload[2]; // matching: only payload[0] is sent; the array keeps the stack slot
 
     payload[0] = player;
@@ -180,7 +180,7 @@ void func_1515B5F4(s16 player) {
 }
 
 /* Message handler of sprite kind 1: on message 0xB, removes the sprite if it belongs to that player. */
-void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type) {
+void particle_handleSlidingSpriteMessage(SlidingSprite *sprite, s16 *payload, u8 type) {
     if (type == MSG_REMOVE_PLAYER_SPRITES) {
         if (sprite->data.player == payload[0]) {
             effect_destroyObject(&sprite->header);
@@ -190,11 +190,11 @@ void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type) {
 
 
 /*
- * Spawns 10 white sprites (kind 1, update callback 2 = func_1515B994) at random spots of the player's
+ * Spawns 10 white sprites (kind 1, update callback 2 = particle_updateSlidingSprite) at random spots of the player's
  * viewport; they slide along y and stretch as they speed up. Called when the camera rises back above
  * its unk360 height.
  */
-void func_1515B674(s16 player) {
+void particle_spawnSlidingSprites(s16 player) {
     s32 pad0; // matching: unused stack slots around info
     ScreenSpriteInfo info;
     s32 pad1;
@@ -254,7 +254,7 @@ void func_1515B674(s16 player) {
  * Sprite update callback 2: moves the sprite along y with constant acceleration and stretches its
  * half height with the average speed. Always returns 1 (keep alive).
  */
-s32 func_1515B994(SlidingSprite *sprite) {
+s32 particle_updateSlidingSprite(SlidingSprite *sprite) {
     f32 previous;
 
     previous = sprite->data.velocity;
@@ -272,29 +272,29 @@ s32 func_1515B994(SlidingSprite *sprite) {
  */
 
 /* Stays above. */
-void func_1515BA10(s16 player) {
+void particle_onCameraStaysAboveWater(s16 player) {
 }
 
 /* Stays below. */
-void func_1515BA1C(s16 player) {
-    func_1515AF90(player);
+void particle_onCameraStaysUnderwater(s16 player) {
+    particle_spawnUnderwaterRiseEmitter(player);
 }
 
 /* Snaps above, or rises above while special. */
-void func_1515BA48(s16 player) {
+void particle_onCameraSnapsAboveWater(s16 player) {
 }
 
 /* Rises above (not special). */
-void func_1515BA54(s16 player) {
-    func_1515B674(player);
+void particle_onCameraLeavesWater(s16 player) {
+    particle_spawnSlidingSprites(player);
 }
 
 /* Snaps below, or goes below while special. */
-void func_1515BA80(s16 player) {
-    func_1515B5F4(player);
+void particle_onCameraSnapsUnderwater(s16 player) {
+    particle_removePlayerSlidingSprites(player);
 }
 
 /* Goes below (not special). */
-void func_1515BAAC(s16 player) {
-    func_1515B5F4(player);
+void particle_onCameraEntersWater(s16 player) {
+    particle_removePlayerSlidingSprites(player);
 }

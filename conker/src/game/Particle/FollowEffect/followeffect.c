@@ -139,12 +139,12 @@ void particle_onFollowEffectMsg(FollowEffect *effect, ActorMsg *msg, u8 type) {
 }
 
 /* FollowEffect callback; forwards to effect_defaultDestroyTimedEffect. */
-void func_150D5A2C(TimedEffect *effect) {
+void particle_destroyFollowEffect(TimedEffect *effect) {
     effect_defaultDestroyTimedEffect(effect);
 }
 
 /* FollowEffect callback; forwards to effect_defaultFreeTimedEffect. */
-void func_150D5A4C(TimedEffect *effect) {
+void particle_freeFollowEffect(TimedEffect *effect) {
     effect_defaultFreeTimedEffect(effect);
 }
 
@@ -333,7 +333,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
             }
         }
         if (obj->CameraPtr != NULL && gScreenLayout <= 0) {
-            func_150D66A4(obj->CameraPtr->CNumber, arg1, arg2);
+            particle_flashScreenWhite(obj->CameraPtr->CNumber, arg1, arg2);
         }
         if (hit && obj->CameraPtr != NULL) {
             if ((hitSurface & 0x1F) == 0xE) {
@@ -342,13 +342,13 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
                 weapon_spawnHitDecal((CollisionTri *)hitTri, &hitPos, arg1, arg2);
             }
         }
-        func_150D6434(&pos, arg1, arg2);
-        func_150D6388(&pos, arg1, arg2);
+        particle_spawnRandomSwell(&pos, arg1, arg2);
+        particle_spawnRandomGrowFade(&pos, arg1, arg2);
     }
 }
 
 /* Spawns a particle_spawnGrowFade effect at pos with a random size and a 200-255 fourth argument. */
-void func_150D6388(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnRandomGrowFade(Vec3f *pos, u8 arg1, s32 arg2) {
     u32 randInt;
     f32 randFrac;
 
@@ -358,7 +358,7 @@ void func_150D6388(Vec3f *pos, u8 arg1, s32 arg2) {
 }
 
 /* Spawns a particle_spawnSwell effect at pos with randomized parameters. */
-void func_150D6434(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnRandomSwell(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 rand3;
     f32 rand2;
     f32 rand1;
@@ -413,7 +413,7 @@ void func_150D65F0(CollisionTri *surface, Vec3f *pos, u8 arg2, s32 arg3) {
 }
 
 /* Calls screen_spawnFlash for camera arg0 with 0xFF, 0xFF, 0xFF, a random 200-255 and a random 25-30. */
-void func_150D66A4(u8 arg0, u8 arg1, s32 arg2) {
+void particle_flashScreenWhite(u8 arg0, u8 arg1, s32 arg2) {
     u32 rand2;
     u32 rand1;
 

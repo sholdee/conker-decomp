@@ -95,12 +95,12 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*   5 */ { effect_updateBillboard, NULL, effect_drawBillboard, NULL, gSpriteRenderDl, effect_beginBillboardDraw, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*   6 */ { effect_updateFadeBurst, NULL, effect_drawFadeBurst, NULL, gFadeBurstRenderSetupDl, NULL, NULL, NULL, NULL, gFadeBurstRenderTeardownDl, NULL, NULL, 1 },
     /*   7 */ { particle_updateFallingEmitter, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
-    /*   8 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, D_8008CE20, particle_beginSpinDebrisDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*   9 */ { particle_updateGroundChunk, NULL, particle_drawSpinDebris, NULL, D_8008CE20, particle_beginSpinDebrisDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*   8 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, gSpinDebrisZbSetupDl, particle_beginSpinDebrisDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*   9 */ { particle_updateGroundChunk, NULL, particle_drawSpinDebris, NULL, gSpinDebrisZbSetupDl, particle_beginSpinDebrisDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  10 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  11 */ { beam_updateTracer, NULL, beam_drawTracer, NULL, gTracerRenderSetupDl, NULL, NULL, beam_tracerSwapMessage, func_150E2F90, NULL, NULL, NULL, 1 },
-    /*  12 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, D_8008CE40, particle_beginSpinDebrisDraw, NULL, NULL, particle_endSpinDebrisDraw, gSpriteEndDl, NULL, NULL, 1 },
-    /*  13 */ { func_15166B50, NULL, func_15166D68, NULL, D_8008B440, func_15166F6C, NULL, NULL, func_15166FD8, NULL, NULL, NULL, 1 },
+    /*  12 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, gSpinDebrisNoZSetupDl, particle_beginSpinDebrisDraw, NULL, NULL, particle_endSpinDebrisDraw, gSpriteEndDl, NULL, NULL, 1 },
+    /*  13 */ { particle_updatePuffQuad, NULL, particle_drawPuffQuad, NULL, gPuffQuadSetupDl, particle_beginPuffQuadDraw, NULL, NULL, particle_endPuffQuadDraw, NULL, NULL, NULL, 1 },
     /*  14 */ { effect_updateQuadFx, NULL, effect_drawQuadFx, NULL, gQuadFxRenderSetupDl, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  15 */ { particle_updateFloorSprite, NULL, particle_drawFloorSprite, NULL, gFloorSpriteSetupDl, NULL, NULL, NULL, NULL, gFloorSpriteEndDl, NULL, NULL, 0 },
     /*  16 */ { effect_updateModelFx, NULL, effect_drawModelFx, NULL, NULL, NULL, NULL, NULL, NULL, gModelFxRenderTeardownDl, NULL, NULL, 0 },
@@ -176,7 +176,7 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  86 */ { particle_updateQuadParticle, NULL, particle_drawQuadParticle, NULL, gQuadParticleSetupDl, particle_sortDrawList, NULL, particle_onQuadParticleEvent, NULL, gQuadParticleEndDl, particle_destroyQuadParticle, particle_freeQuadParticle, 1 },
     /*  87 */ { sprite_updateScreenSprite, NULL, sprite_drawScreenSprite, NULL, gScreenSpriteSetupDl, NULL, NULL, sprite_screenSpriteMessage, NULL, gScreenSpriteTeardownDl, NULL, NULL, 1 },
     /*  88 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /*  89 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, D_8008CE40, particle_beginSpinDebrisDraw, NULL, NULL, particle_endSpinDebrisDraw, NULL, NULL, NULL, 1 },
+    /*  89 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, gSpinDebrisNoZSetupDl, particle_beginSpinDebrisDraw, NULL, NULL, particle_endSpinDebrisDraw, NULL, NULL, NULL, 1 },
     /*  90 */ { screen_updateTintEffect, NULL, func_151A5130, NULL, gSpriteRenderDl, NULL, NULL, func_151A55D4, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*  91 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
     /*  92 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
@@ -197,7 +197,7 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
  * own particle type. */
 static void (*gParticleCallbacks[])() = {
     particle_updateFallingParticle, effect_updateRainDrop, effect_billboardDelayFade, NULL,
-    NULL, particle_updateWakePuff, swarm_updateMember, func_1516A3F4,
+    NULL, particle_updateWakePuff, swarm_updateMember, particle_updateDropToSplash,
     NULL, particle_updateGrowingBillboard, func_150AECCC, effect_growBillboard,
     effect_shrinkBillboard, func_150E4CBC, effect_updateRainSplash, effect_updateFallingObject,
     particle_updateGatherParticle, particle_updateHoverParticle, particle_updateSwellParticle, particle_updateSwellTint,
@@ -207,7 +207,7 @@ static void (*gParticleCallbacks[])() = {
 /* Object callbacks (SpriteFx and ModelFx callback, BillboardTemplate onDeath, Sprite2D behavior),
  * declared without a prototype: each takes its own object type. */
 void (*gObjectCallbacks[])() = {
-    NULL, NULL, func_15169C70, func_1516A538,
+    NULL, NULL, particle_updateBounceDebris, particle_updateSplashFx,
     func_150B6DFC, func_150B6E3C, sprite_updateGrowIn, sprite_updateLinearMove,
     func_150B709C, beam_updateGrowSprite, beam_updateSpriteFade,
 };

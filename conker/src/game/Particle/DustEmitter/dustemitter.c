@@ -237,20 +237,20 @@ u8 particle_updateDustParticle(DustParticle *particle, Vec3f *prevPos) {
 }
 
 /* This file's .rodata front-end data: the dust emitter presets, indexed by kind (see particle_startObjDustEmitter). */
-static const Vec3f D_800A8030[] = {
+static const Vec3f gDustPresetOffsets[] = {
     { 0.0f, -6.0f, 9.0f }, { 0.0f, 12.0f, 30.0f }, { 0.0f, -12.0f, 24.0f }, { 0.0f, 0.0f, -91.0f },
 };
-static const u8 D_800A8060[] = { 15, 5, 8, 2 };
-static const f32 D_800A8064[] = { 0.110549994f, 0.39999998f, 0.110549994f, 0.110549994f };
-static const f32 D_800A8074[] = { 0.35678f, 0.48718f, 0.35678f, 0.35678f };
-static const f32 D_800A8084[] = { -0.259f, -0.65500003f, -0.259f, -0.259f };
-static const f32 D_800A8094[] = { 0.10300001f, 0.30200002f, 0.10300001f, 0.10300001f };
-static const s16 D_800A80A4[] = { 40, 25, 40, 50 };
-static const s16 D_800A80AC[] = { 0, 15, 0, 30 };
-static const f32 D_800A80B4[] = { 126.1f, 350.6f, 126.1f, 124.0f };
-static const f32 D_800A80C4[] = { 146.0f, 206.7f, 146.0f, 176.2f };
+static const u8 gDustPresetBones[] = { 15, 5, 8, 2 };
+static const f32 gDustPresetRateBases[] = { 0.110549994f, 0.39999998f, 0.110549994f, 0.110549994f };
+static const f32 gDustPresetRateRandoms[] = { 0.35678f, 0.48718f, 0.35678f, 0.35678f };
+static const f32 gDustPresetGravityBases[] = { -0.259f, -0.65500003f, -0.259f, -0.259f };
+static const f32 gDustPresetGravityRandoms[] = { 0.10300001f, 0.30200002f, 0.10300001f, 0.10300001f };
+static const s16 gDustPresetLifetimeBases[] = { 40, 25, 40, 50 };
+static const s16 gDustPresetLifetimeRandoms[] = { 0, 15, 0, 30 };
+static const f32 gDustPresetSizeBases[] = { 126.1f, 350.6f, 126.1f, 124.0f };
+static const f32 gDustPresetSizeRandoms[] = { 146.0f, 206.7f, 146.0f, 176.2f };
 static const f32 D_800A80D4[] = { 0.011000001f, 0.006f, 0.011000001f, 0.011000001f };
-static const u8 D_800A80E4[] = { 4, 4, 4, 2 };
+static const u8 gDustPresetKinds[] = { 4, 4, 4, 2 };
 
 /* Spawns the dust emitter preset that suits obj's id (particle_spawnDustEmitter) for `duration` frames, -1 for
  * the default. Returns the effect, or NULL when obj is NULL or has no preset. */
@@ -282,10 +282,10 @@ DustEmitter *particle_startObjDustEmitter(Actor *obj, s16 duration, u8 arg2, s32
         break;
     }
     if (kind != -1) {
-        effect = particle_spawnDustEmitter(obj, &D_800A8030[kind], D_800A8060[kind], D_800A8064[kind], D_800A8074[kind],
-                               duration, D_800A8084[kind], D_800A8094[kind], D_800A80A4[kind],
-                               D_800A80AC[kind], 100, 155, D_800A80B4[kind], D_800A80C4[kind],
-                               D_800A80D4[kind], D_800A80E4[kind], arg2, arg3);
+        effect = particle_spawnDustEmitter(obj, &gDustPresetOffsets[kind], gDustPresetBones[kind], gDustPresetRateBases[kind], gDustPresetRateRandoms[kind],
+                               duration, gDustPresetGravityBases[kind], gDustPresetGravityRandoms[kind], gDustPresetLifetimeBases[kind],
+                               gDustPresetLifetimeRandoms[kind], 100, 155, gDustPresetSizeBases[kind], gDustPresetSizeRandoms[kind],
+                               D_800A80D4[kind], gDustPresetKinds[kind], arg2, arg3);
     }
     return effect;
 }

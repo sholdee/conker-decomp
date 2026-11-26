@@ -143,7 +143,7 @@ s32 blood_dropDebrisTrail(BloodDebrisParticle *particle) {
 
 /*
  * Particle floorHitFn of the debris pieces. A slow landing stops the piece (and starts its fade-out),
- * optionally with a puff of func_1514AB5C particles; a fast one bounces it.
+ * optionally with a puff of particle_scatterChannelParticles particles; a fast one bounces it.
  */
 s32 blood_onDebrisFloorHit(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY) {
     DebrisData *data;
@@ -171,7 +171,7 @@ s32 blood_onDebrisFloorHit(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f
             if (data->landPuffFlag) {
                 puffFlag = TRUE;
             }
-            func_1514AB5C(x, floorY, z, particle->head.sizeXZ * 35.0f, func_150ADA20() % 3 + 2,
+            particle_scatterChannelParticles(x, floorY, z, particle->head.sizeXZ * 35.0f, func_150ADA20() % 3 + 2,
                           particle->head.sizeXZ, particle->head.sizeXZ * 0.5f,
                           particle->head.sizeXZ, particle->head.sizeXZ * 0.5f,
                           data->landPuffLifeBase, data->landPuffLifeRange, puffFlag);

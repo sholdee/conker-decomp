@@ -102,7 +102,7 @@ void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32
 }
 
 /* Fades the sprite out over its last 64 frames (def.unk10 = 4 * lifetime). */
-s32 func_150BA35C(QuadSprite *sprite) {
+s32 particle_fadeMoveHitSprite(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 64) {

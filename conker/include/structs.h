@@ -649,7 +649,7 @@ typedef struct {
     /* 0x1B1 */ u8  unk1B1;
     /* 0x1B2 */ u8  unk1B2;
     /* 0x1B3 */ u8  unk1B3;
-    /* 0x1B4 */ u8  deferredActions; // requests run, then cleared, by the per-frame loop in game/Actor/ActorActions/actoractions.c: 1 func_15063628, 2 fire (by rt_context_b), 4/8 func_151D57F8(0/1)
+    /* 0x1B4 */ u8  deferredActions; // requests run, then cleared, by the per-frame loop in game/Actor/ActorActions/actoractions.c: 1 func_15063628, 2 fire (by rt_context_b), 4/8 particle_castGunRay(0/1)
     /* 0x1B5 */ u8  pad1B5[3];
     /* 0x1B8 */ f32 gunPitch;        // tracked vehicle gun elevation, degrees (game/Weapon/Tank/tank.c)
     /* 0x1BC */ f32 gunYaw;          // tracked vehicle gun heading, degrees in [0, 360)

@@ -3152,7 +3152,7 @@ s32 actor_handleDeath(Actor *obj) {
         s32 result = 0;
 
         if ((obj->unk10E < 0xF0) && (flags & 0x20)) {
-            func_151669A0(obj->xpos, obj->ypos + 50.0f, obj->zpos, 0.5f, 0xFF, 0);
+            particle_spawnPuffQuad(obj->xpos, obj->ypos + 50.0f, obj->zpos, 0.5f, 0xFF, 0);
         }
         if (flags & 4) {
             result = func_1507D754(obj);
@@ -3916,7 +3916,7 @@ void func_1505528C(Actor *obj) {
         obj->count1++;
         hitFlags |= 2;
         if ((obj->floorMaterial & 0x1F) == 0xE) {
-            func_1514AD9C((Vec3f *)&obj->xpos, 0xFF, 0); // xpos, ypos, zpos as one Vec3f
+            particle_spawnRandomChannelParticle((Vec3f *)&obj->xpos, 0xFF, 0); // xpos, ypos, zpos as one Vec3f
             actor_remove(obj, 1);
             return;
         }

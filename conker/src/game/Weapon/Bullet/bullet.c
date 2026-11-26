@@ -6,9 +6,9 @@
 s32 (*D_800E0930)(Vec3f *start, Vec3f *delta, Vec3f *hit);
 void (*D_800E0934)(s32 x, s32 y, s32 z);
 
-// func_150E7FEC (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
+// particle_spawnImpactMark (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
 // compiled with a different view of it.
-void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
 
 /* Fills in the impact particle parameters; fewer particles on busy frames. */
@@ -187,7 +187,7 @@ void weapon_spawnHitDecal(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxL
     rand = func_150ADA68();
     shade.w = func_150ADA20();
     duration = func_150ADA20();
-    func_150E7FEC(rand * 75.0f + 75.0f, shade.w % 56 + 200, surface, pos,
+    particle_spawnImpactMark(rand * 75.0f + 75.0f, shade.w % 56 + 200, surface, pos,
                   duration % 205 + 299, 1, 1, 0, 0, 0, fxOwner, 0);
 }
 
@@ -226,7 +226,7 @@ void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList) {
 }
 
 void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
-    func_150E83AC(pos, func_150ADA20() % 62 + 120, fxOwner, fxList);
+    particle_startRandomEmitter(pos, func_150ADA20() % 62 + 120, fxOwner, fxList);
 }
 
 
@@ -328,7 +328,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
     if (level == 36) {
         mode = 0;
     } else {
-        mode = func_151D5B6C(useAim ? &aimPos : &pos, useAim ? &aimDir : &dir, shooter, 3, ignore);
+        mode = particle_raySphereObjectMask(useAim ? &aimPos : &pos, useAim ? &aimDir : &dir, shooter, 3, ignore);
     }
 
     if (weapon_traceBullet(&ray, &pos, useAim ? NULL : &dir, useAim ? &aimPos : NULL,
@@ -581,17 +581,17 @@ void weapon_runImpactAttack(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType,
 
     switch (impactType) {
     case 1:
-        func_151D42E8(pos, dir, owner, surface, 36);
+        particle_runAttackAlongDir(pos, dir, owner, surface, 36);
         return;
     case 2:
-        func_151D42E8(pos, dir, owner, surface, 37);
+        particle_runAttackAlongDir(pos, dir, owner, surface, 37);
         return;
     case 3:
-        func_151D40D4(pos, dir, owner, 0, surface, 22, 38, 0);
+        particle_runAttackPairAt(pos, dir, owner, 0, surface, 22, 38, 0);
         return;
     case 0:
     default:
-        func_151D40D4(pos, dir, owner, 0, surface, 22, 21, 0);
+        particle_runAttackPairAt(pos, dir, owner, 0, surface, 22, 21, 0);
         return;
     }
 }

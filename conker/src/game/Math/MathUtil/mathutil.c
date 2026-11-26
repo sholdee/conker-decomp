@@ -1863,7 +1863,7 @@ void *math_emitPointLights(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8
                                     actor->unk314);
                 break;
             case 2:
-                gfx = light_reemitLights(gfx, D_800D9E10[slot], D_800D9E20, D_800D9E21, &gViewAmbients[slot][D_800BE9C0]);
+                gfx = light_reemitLights(gfx, gViewGfxLights[slot], gViewGfxLightMax, D_800D9E21, &gViewAmbients[slot][D_800BE9C0]);
                 break;
             case 0:
             default:

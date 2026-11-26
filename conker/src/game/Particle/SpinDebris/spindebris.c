@@ -24,23 +24,23 @@ static Gfx gSpinDebrisDl[] = {
     gsSPEndDisplayList(),
 };
 
-static Gfx D_8008CE60[9];
+static Gfx gSpinDebrisCommonSetupDl[9];
 
 /* Render setups of the object types (drawBeginDL in gObjectTypes): types 8 and 9 draw in the z-buffered
  * translucent mode, types 12 and 89 without the z-buffer. */
-Gfx D_8008CE20[] = {
+Gfx gSpinDebrisZbSetupDl[] = {
     gsDPPipeSync(),
     gsDPSetRenderMode(G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2),
-    gsSPDisplayList(D_8008CE60),
+    gsSPDisplayList(gSpinDebrisCommonSetupDl),
     gsSPEndDisplayList(),
 };
-Gfx D_8008CE40[] = {
+Gfx gSpinDebrisNoZSetupDl[] = {
     gsDPPipeSync(),
     gsDPSetRenderMode(G_RM_XLU_SURF, G_RM_XLU_SURF2),
-    gsSPDisplayList(D_8008CE60),
+    gsSPDisplayList(gSpinDebrisCommonSetupDl),
     gsSPEndDisplayList(),
 };
-static Gfx D_8008CE60[9] = {
+static Gfx gSpinDebrisCommonSetupDl[9] = {
     gsDPSetCycleType(G_CYC_1CYCLE),
     gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0),
     gsDPSetTextureLOD(G_TL_TILE),

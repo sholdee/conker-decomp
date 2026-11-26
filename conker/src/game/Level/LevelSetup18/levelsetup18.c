@@ -63,5 +63,5 @@ void func_150109D0(void) {
     tmp.id = 1;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y); 
     rope_create(&tmp, 0);
-    func_150E8854();
+    particle_startShakeTimer();
 }

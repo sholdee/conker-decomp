@@ -15,7 +15,7 @@ static s32 D_800D1880;
 #include "variables.h"
 
 /* Defined in game/Particle/StyleParticle/styleparticle.c. Not in particle.h: game/Effects/ModelBurst/modelburst.c passes an s32 style. */
-void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
+void particle_spawnQuadEdgeStyleParticles(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
                    s32 arg9);
 
 
@@ -1465,10 +1465,10 @@ void func_1506DE84(void) {
         func_1506E0EC();
         return;
     case 9:
-        func_150AFE64(0);
+        particle_fireActorBoneTracer(0);
         return;
     case 10:
-        func_150AFE64(1);
+        particle_fireActorBoneTracer(1);
         return;
     case 11:
         func_1506E2CC();
@@ -1482,7 +1482,7 @@ void func_1506DE84(void) {
     }
 }
 
-/* Passes the corners of a +-270 square in the object's root matrix, at height unk180, to func_151700D8. */
+/* Passes the corners of a +-270 square in the object's root matrix, at height unk180, to particle_spawnQuadEdgeStyleParticles. */
 void func_1506E0EC(void) {
     f32 x;
     f32 y;
@@ -1521,7 +1521,7 @@ void func_1506E0EC(void) {
         }
         posX = gCurrentActor->xpos;
         posZ = gCurrentActor->zpos;
-        func_151700D8(vertices, posX, posZ, 4, gCurrentActor->scale_xz, 0, 4, 4, 0xFF, 0);
+        particle_spawnQuadEdgeStyleParticles(vertices, posX, posZ, 4, gCurrentActor->scale_xz, 0, 4, 4, 0xFF, 0);
     }
 }
 
@@ -1563,7 +1563,7 @@ void func_1506E2CC(void) {
         }
         posX = gCurrentActor->xpos;
         posZ = gCurrentActor->zpos;
-        func_151700D8(verts, posX, posZ, 5, gCurrentActor->scale_xz * 0.5f, 0, 4, 4, 0xFF, 0);
+        particle_spawnQuadEdgeStyleParticles(verts, posX, posZ, 5, gCurrentActor->scale_xz * 0.5f, 0, 4, 4, 0xFF, 0);
     }
 }
 /*
@@ -2262,7 +2262,7 @@ void func_150700E4(s32 cmd) {
 }
 
 void func_15070114(s32 cmd) {
-    func_151937F4(gCurrentActor, 0xFF, 1);
+    particle_attachBloodStrip(gCurrentActor, 0xFF, 1);
 }
 
 void func_15070144(s32 cmd) {

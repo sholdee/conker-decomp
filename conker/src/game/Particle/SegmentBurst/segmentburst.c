@@ -55,7 +55,7 @@ void particle_spawnBoneModelBurst(Actor *actor, u8 arg1, s32 arg2) {
 }
 
 /* Creates a blood_spawnStrip object attached to `owner`. */
-void func_151937F4(Actor *owner, s32 arg1, s32 arg2) {
+void particle_attachBloodStrip(Actor *owner, s32 arg1, s32 arg2) {
     BloodStripDesc desc;
 
     if ((owner != NULL) && (owner->type != 0)) {

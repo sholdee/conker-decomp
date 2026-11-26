@@ -204,9 +204,9 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
     gSPSegment(gfx++, 3, fx->model->partMtx[D_800BE9C0]);
     gSPSegment(gfx++, 1, fx->segment1);
     if (fx->params.color0.alpha < 0xFF || fx->params.color1.alpha < 0xFF) {
-        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083A40 : D_80083740);
+        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083A40 : gEffectXluRenderModes);
     } else {
-        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083BC0 : D_800838C0);
+        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083BC0 : gEffectOpaRenderModes);
     }
     for (i = 0; i < fx->displayListCount; i++) {
         gSPDisplayList(gfx++, fx->displayLists[i]);

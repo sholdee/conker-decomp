@@ -77,7 +77,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
     }
     if (!done) {
         if (emitter->link.actor->ob_matrix_ptr != NULL) {
-            kind = &D_8008FA70[emitter->link.kind];
+            kind = &gDripEmitterKinds[emitter->link.kind];
             head = NULL;
             tail = NULL;
             freeCount = 0;
@@ -90,7 +90,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
                         DripParticle *falling = slot->drop;
                         DripMotion *fall = &slot->drop->motion;
 
-                        dropKind = &D_800A9D40[fall->dropKind];
+                        dropKind = &gDropKinds[fall->dropKind];
                         dx = (falling->head.def.pos.x - falling->head.def.rot.x) * gFrameDeltaInv;
                         dz = (falling->head.def.pos.z - falling->head.def.rot.z) * gFrameDeltaInv;
                         fall->vel.y = 0.0f;
@@ -122,7 +122,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
                 if (emitter->spawnAccum > 1.0f) {
                     const DropKind *newKind;
 
-                    newKind = &D_800A9D40[kind->dropKind];
+                    newKind = &gDropKinds[kind->dropKind];
                     tail->next = head;
                     motion.vel.x = 0.0f;
                     motion.vel.y = 0.0f;
@@ -318,7 +318,7 @@ void particle_releaseDrips(DripEmitter *emitter) {
     for (i = 0; i < DRIP_SLOT_COUNT; i++, slot++) {
         if (slot->drop != NULL) {
             motion = &slot->drop->motion;
-            dropKind = &D_800A9D40[motion->dropKind];
+            dropKind = &gDropKinds[motion->dropKind];
             motion->vel.x = 0.0f;
             motion->vel.y = 0.0f;
             motion->vel.z = 0.0f;

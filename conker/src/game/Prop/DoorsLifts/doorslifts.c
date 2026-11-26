@@ -688,7 +688,7 @@ void prop_swingDoor(WorldObject *prop, s32 arg1) {
 
 /*
  * A flap that swings rotZ between 0 and params.half.lo degrees, accelerating harder near its
- * ends, with a sound and a puff of particles (func_151669A0) at each end.
+ * ends, with a sound and a puff of particles (particle_spawnPuffQuad) at each end.
  */
 void prop_swingFlap(WorldObject *prop) {
     f32 speed;
@@ -752,7 +752,7 @@ void prop_swingFlap(WorldObject *prop) {
             } else {
                 WORK(prop)->swing.accel *= 0.5f;
             }
-            func_151669A0(prop->x, prop->y, prop->z, 0.15f, 0xFF, 0);
+            particle_spawnPuffQuad(prop->x, prop->y, prop->z, 0.15f, 0xFF, 0);
         } else if (remaining > 0.0f) {
             speed += accel;
             if (speed > 10.0f) {

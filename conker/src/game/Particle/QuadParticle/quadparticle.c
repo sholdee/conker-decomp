@@ -33,8 +33,8 @@ typedef union {
 /* Sprite update (QuadSprite.updateFn; 0 = none) and expire (QuadSprite.expireFn) callbacks; an update returning 0
  * expires the sprite, an expire callback returning nonzero keeps it. */
 static s32 (*gQuadSpriteUpdateFuncs[])() = {
-    NULL, func_1513416C, func_150B961C, func_150BA35C, effect_fadeQuadSpriteByLife, effect_fadeTrailSpriteByLife, effect_updateFadeQuadSprite, effect_updateTaskFlicker,
-    particle_updateFlickerSprite, effect_updateFlickerSprite, func_150CB7CC, func_151AFBD4, effect_capQuadSpriteAlphaByLife, func_15136A1C,
+    NULL, func_1513416C, particle_fadeQuadSpriteByLife, particle_fadeMoveHitSprite, effect_fadeQuadSpriteByLife, effect_fadeTrailSpriteByLife, effect_updateFadeQuadSprite, effect_updateTaskFlicker,
+    particle_updateFlickerSprite, effect_updateFlickerSprite, particle_fadeSideDustSprite, particle_fadeSideSpraySprite, effect_capQuadSpriteAlphaByLife, func_15136A1C,
 };
 static s32 (*gQuadSpriteExpireFuncs[])() = { NULL, effect_detachTaskFlicker, particle_detachFlickerSprite, effect_expireFlickerSprite };
 
@@ -42,17 +42,17 @@ static s32 (*gQuadSpriteExpireFuncs[])() = { NULL, effect_detachTaskFlicker, par
 static s32 (*gQuadParticleUpdate1Funcs[])() = {
     NULL, particle_updateDriftMotion, particle_followBoneGlow, particle_fallAndGrow, particle_moveTumbling, particle_moveFlickerParticle, particle_moveFlickerTrail, beam_updateMotionPull,
     beam_updateMotion, beam_updateQuad, flamethrower_moveJetLine, particle_growQuadParticle, particle_wobbleDrip, particle_fallDrip, particle_updateSteamEffect,
-    particle_moveImpactStreak, effect_moveReleasedParticle, effect_swingParticleSize, func_1514B87C, particle_updateDriftQuad, func_150C308C, particle_updateRayBeam,
+    particle_moveImpactStreak, effect_moveReleasedParticle, effect_swingParticleSize, particle_growQuadAtRate, particle_updateDriftQuad, func_150C308C, particle_updateRayBeam,
     weapon_updateProjectile, func_150AE35C, particle_updateGrowMotion, particle_updateBallisticMotion, sight_updateBeam, weapon_updateBulletParticle, trail_integrateScalarMotion,
     beam_updateAimed, beam_updateGlow, flamethrower_moveFlameLine, particle_updateJitterBallisticEased, particle_updateJitterBallistic, func_150E4174, particle_bobQuad,
     effect_updateTrailPuff, flare_glowOrbit, particle_updateBoneBurstParticle, cutscene_updateTrackParticle, effect_moveTravelParticle, effect_updateBoneBeamParticle,
 };
 static s32 (*gQuadParticleUpdate2Funcs[])() = {
-    NULL, func_150B95FC, particle_fadeTumbling, flare_moveGlowAttachment, particle_flickerSize, particle_growFlickerParticle, particle_shrinkFlickerParticle, beam_shrinkMotion,
-    beam_shrinkMotionProgress, func_1518F1A0, beam_updateLinkedQuad, flamethrower_fadeJetLine, func_1518F384, particle_flickerChannelParticle, particle_growChannelParticle,
+    NULL, particle_fadeFallGrowParticle, particle_fadeTumbling, flare_moveGlowAttachment, particle_flickerSize, particle_growFlickerParticle, particle_shrinkFlickerParticle, beam_shrinkMotion,
+    beam_shrinkMotionProgress, particle_wobbleSpriteSize, beam_updateLinkedQuad, flamethrower_fadeJetLine, particle_easeSpriteSizeOnce, particle_flickerChannelParticle, particle_growChannelParticle,
     particle_shrinkChannelParticle, particle_shrinkRisingChannelParticle, particle_fadeQuadParticleByLife, particle_fadeDrip, particle_shrinkSteamEffect, particle_updateSquashEffect, particle_fadeImpactStreak,
-    particle_updateSpray, particle_updateDustPuff, particle_fadeInGrow, func_150C2FCC, blood_updateGrowingParticle, effect_fadeLandingParticleByLife, func_1514AF74,
-    func_1514B8B0, particle_updateDriftQuad, func_151022AC, flare_glowFlicker, flare_glowEnvelope, flamethrower_fadeFlameLine, particle_updateJitterParticle,
+    particle_updateSpray, particle_updateDustPuff, particle_fadeInGrow, particle_shrinkBallisticChannelParticle, blood_updateGrowingParticle, effect_fadeLandingParticleByLife, particle_shrinkBallisticQuad,
+    particle_capQuadAlphaByLife, particle_updateDriftQuad, particle_flickerRayBeam, flare_glowFlicker, flare_glowEnvelope, flamethrower_fadeFlameLine, particle_updateJitterParticle,
     particle_updateRelaunchedJitter, effect_updateBurstSpark, particle_swaySpark, trail_updateTrailGlow, particle_updateZoneEmitter, flare_glowPulse, effect_updateBurstGlow,
     effect_updateActorBeam,
 };
@@ -61,11 +61,11 @@ static s32 (*gQuadParticleExpireFuncs[])() = { NULL, particle_spawnBillboardOnEx
 /* Vertex functions of a particle (DefParticleHead.vertexFn), see particle_buildRotatedQuad. The prototype keeps the viewport an
  * s16; most entries take their own view of the particle. */
 static Vtx *(*gQuadParticleVertexFuncs[])(DefParticleHead *, s16) = {
-    particle_buildRotatedQuad, flare_buildGlowQuad, particle_buildFlickerQuad, particle_buildBendingQuad, func_1514A6A0, particle_buildActorEmitterQuad, beam_fillMotionVerts,
+    particle_buildRotatedQuad, flare_buildGlowQuad, particle_buildFlickerQuad, particle_buildBendingQuad, particle_buildCameraFacingBeamQuad, particle_buildActorEmitterQuad, beam_fillMotionVerts,
     beam_drawQuad, beam_drawLinkedQuad, flamethrower_buildJetLineQuad, particle_buildChannelQuad, particle_buildQuadParticleBillboard, particle_buildAxisQuad, particle_buildDripQuad,
     particle_buildSquashQuad, particle_buildImpactStreakQuad, effect_buildJointParticleQuad, particle_buildDriftQuad, particle_buildRayBeamQuad, particle_buildCentredAxisQuad, weapon_buildProjectileTail,
-    func_150AE36C, effect_buildBoneBeamQuad, func_1513EE14, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, particle_buildBeamQuadFwd,
-    particle_buildBeamQuadRev, effect_buildBurstSparkVtx, func_15140190, particle_buildSparkBeamQuad, particle_buildYawedVerticalQuad, effect_buildTrailPuffQuad, particle_buildUprightQuadFwd,
+    func_150AE36C, effect_buildBoneBeamQuad, particle_buildRotatedRectQuadUnrolled, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, particle_buildBeamQuadFwd,
+    particle_buildBeamQuadRev, effect_buildBurstSparkVtx, particle_buildRotatedRectQuad, particle_buildSparkBeamQuad, particle_buildYawedVerticalQuad, effect_buildTrailPuffQuad, particle_buildUprightQuadFwd,
     particle_buildUprightQuadRev, effect_buildActorBeamQuad, particle_buildBoneBurstQuad, effect_buildTravelParticleQuad,
 };
 
@@ -93,11 +93,11 @@ static void (*gQuadParticleFreeFuncs[])() = {
     beam_freeAimed, effect_freeBurstSpark, beam_freeModelBeam, effect_freeZoneEmitter, effect_freeActorBeam, particle_freeQuadParticleDefault,
 };
 /* Event handler of a sprite (particle_onQuadSpriteEvent). */
-static void (*gQuadSpriteEventFuncs[])(s32, s32, u8) = { func_1513CFD0 };
+static void (*gQuadSpriteEventFuncs[])(s32, s32, u8) = { particle_ignoreQuadSpriteEvent };
 /* Event handlers of a particle (ParticleDef.type, particle_onQuadParticleEvent); several take their own view of the particle and
  * of the event data. */
 static void (*gQuadParticleEventFuncs[])(DefParticleHead *, s32, u8) = {
-    func_1513E070, particle_onQuadParticleOwnerMsg, effect_boneBeamMessage, sight_handleBeamMessage, flare_glowMessage, beam_aimedMessage, effect_burstSparkMessage,
+    particle_ignoreQuadParticleEvent, particle_onQuadParticleOwnerMsg, effect_boneBeamMessage, sight_handleBeamMessage, flare_glowMessage, beam_aimedMessage, effect_burstSparkMessage,
     effect_burstSparkMessage, func_151C4AB0, effect_actorBeamMessage, particle_onBoneBurstParticleEvent,
 };
 
@@ -528,7 +528,7 @@ void particle_onQuadSpriteEvent(s32 arg0, s32 arg1, u8 arg2) {
     gQuadSpriteEventFuncs[0](arg0, arg1, arg2);
 }
 
-void func_1513CFD0(s32 arg0, s32 arg1, u8 arg2) {
+void particle_ignoreQuadSpriteEvent(s32 arg0, s32 arg1, u8 arg2) {
 }
 
 
@@ -975,7 +975,7 @@ void particle_onQuadParticleEvent(DefParticleHead *particle, s32 arg1, u8 arg2) 
     gQuadParticleEventFuncs[index](particle, arg1, arg2);
 }
 
-void func_1513E070(DefParticleHead *particle, s32 arg1, u8 arg2) {
+void particle_ignoreQuadParticleEvent(DefParticleHead *particle, s32 arg1, u8 arg2) {
 }
 
 /* Message handler: frees the particle when its owner goes away (0x1A), or retargets it on an actor swap (0x2D). */
@@ -1328,8 +1328,8 @@ Vtx *particle_buildUprightQuadRev(void *particle, s16 viewport) {
     return particle_buildUprightQuad(particle, TRUE, viewport);
 }
 
-/* Quad of width x height, rotated by def.rot and placed at def.pos (unrolled form of func_15140190). */
-Vtx *func_1513EE14(DefParticleHead *particle, s16 viewport) {
+/* Quad of width x height, rotated by def.rot and placed at def.pos (unrolled form of particle_buildRotatedRectQuad). */
+Vtx *particle_buildRotatedRectQuadUnrolled(DefParticleHead *particle, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
     MtxF mtx;
@@ -1837,7 +1837,7 @@ void particle_setQuadColors(Vtx *vtx, const VtxColor *colors) {
 }
 
 /* Quad of width x height, rotated by def.rot and placed at def.pos. */
-Vtx *func_15140190(DefParticleHead *particle, s16 viewport) {
+Vtx *particle_buildRotatedRectQuad(DefParticleHead *particle, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
     MtxF mtx;

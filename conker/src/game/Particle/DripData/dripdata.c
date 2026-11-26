@@ -199,13 +199,13 @@ static const BoneMount D_800A9BA0[26] = {
 };
 
 /* Lifetime and wobble of each kind of falling drop (DripMotion.dropKind). */
-const DropKind D_800A9D40[] = {
+const DropKind gDropKinds[] = {
     { 20, 20, { 4.0f, 20.0f }, { 2.0f, 6.0f } },
     { 30, 20, { 4.0f, 42.0f }, { 6.0f, 15.0f } },
 };
 
 /* One entry per emitter kind (ActorLink.kind). */
-EmitterKind D_8008FA70[] = {
+EmitterKind gDripEmitterKinds[] = {
     { 0, 51, D_800A92A0, 0.45f, 51, 10, 20 },
     { 0, 54, D_800A9840, 0.45f, 54, 10, 20 },
     { 1, 26, D_800A9BA0, 0.18f, 20, 20, 40 },

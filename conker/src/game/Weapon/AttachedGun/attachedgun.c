@@ -216,7 +216,7 @@ void weapon_findShotStart(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit,
         position->z = obj->zpos + (34.0f * sideZ);
         *endpoint = *position;
     }
-    func_151D5174(obj, position, direction, axis0, axis1, output0, output1, value0, value1, endpoint);
+    particle_intersectAimPlane(obj, position, direction, axis0, axis1, output0, output1, value0, value1, endpoint);
 }
 
 /* Spawns six muzzle-flash particles at `position`, one per entry of `points`. */

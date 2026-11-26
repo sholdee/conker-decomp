@@ -34,7 +34,7 @@ static const u32 D_800A51D0[10] = {
  * without a prototype (mixed signatures).
  */
 /* Visibility tests, indexed by GlowShape.handler: 0 hides the glow this frame. */
-static s32 (*gGlowVisibilityTests[])() = { func_151028AC, sight_isExtensionOn, func_15141818 };
+static s32 (*gGlowVisibilityTests[])() = { func_151028AC, sight_isExtensionOn, flare_hideGlow };
 /* Destroy handlers, indexed by GlowShape.type. */
 static void (*gGlowDestroyHandlers[])() = {
     flare_destroyGlowDefault, particle_destroyBeamLine, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault,
@@ -53,7 +53,7 @@ static GlowMsgFn gGlowMsgHandlers[] = {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, beam_glowMessage, particle_onBoneGlowSwap, func_150D7420,
     func_150D74DC, func_150D758C, effect_burstGlowMessage, effect_burstGlowMessage, func_150FADC8,
 };
-static IdList2 D_8008A074 = { { 0x1C, 0x56 } }; /* effect-object kinds */
+static IdList2 gGlowEventTypes = { { 0x1C, 0x56 } }; /* effect-object kinds */
 
 /*
  * Spawns a glow through particle_newQuadParticleWhite and copies paramSize bytes of params into it.
@@ -434,17 +434,17 @@ void flare_glowMessage(GlowObj *obj, u8 *msg, u8 msgType) {
 }
 
 
-/* Sends effect_sendEventToTypes the one-byte payload arg0, addressed with the two words of D_8008A074. */
-void func_151417C4(u8 arg0, u8 arg1) {
+/* Sends effect_sendEventToTypes the one-byte payload arg0, addressed with the two words of gGlowEventTypes. */
+void flare_sendGlowEvent(u8 arg0, u8 arg1) {
     u8 payload[1];
     IdList2 data;
 
-    data = D_8008A074;
+    data = gGlowEventTypes;
     payload[0] = arg0;
     effect_sendEventToTypes(data.ids, 2, (s32)payload, arg1);
 }
 
-s32 func_15141818(s32 arg0, s32 arg1) {
+s32 flare_hideGlow(s32 arg0, s32 arg1) {
     return 0;
 }
 

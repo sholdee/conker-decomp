@@ -88,7 +88,7 @@ typedef struct DebrisBloodTrail {
 typedef struct {
     /* 0x0 */ f32 stopSpeed;   /* landing slower than this (vel.y above it) stops the piece */
     /* 0x4 */ DebrisBloodTrail *trail;
-    /* 0x8 */ u8 landPuffs;    /* spawn func_1514AB5C particles on landing */
+    /* 0x8 */ u8 landPuffs;    /* spawn particle_scatterChannelParticles particles on landing */
     /* 0x9 */ u8 landPuffFlag;
     /* 0xA */ s16 landPuffLifeBase;
     /* 0xC */ s16 landPuffLifeRange;

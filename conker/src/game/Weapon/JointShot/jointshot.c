@@ -114,7 +114,7 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
         origin.z = arg0->zpos + (offset * dz);
         shotPos = origin;
     }
-    func_151D5174(arg0, &origin, &aim, &sp118, &spE4, &sp130, &sp124, &spF4, &spF0, &shotPos);
+    particle_intersectAimPlane(arg0, &origin, &aim, &sp118, &spE4, &sp130, &sp124, &spF4, &spF0, &shotPos);
     if (arg0->CameraPtr != NULL) {
         event.flags = 1;
         event.duration = (func_150ADA20() % 11U) + 11;

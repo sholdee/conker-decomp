@@ -10,7 +10,7 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
 
 /* Calls particle_spawnKindMark at the current sample's (x, z) at the given height, then sets the payload's
  * unk20 to 4. */
-s32 func_151AC550(SampleTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
+s32 particle_spawnSampleKindMark(SampleTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     EffectPayload *payload = state->payload;
     EffectSample *samples = state->samples;
     Vec3f position;

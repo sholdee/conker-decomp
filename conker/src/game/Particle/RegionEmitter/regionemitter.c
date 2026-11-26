@@ -284,7 +284,7 @@ struct Game1D3420Listener {
 
 /* Message handler: on message 0x35 whose id list contains this listener's target id, fires the
  * target emitter's effect once and records the message value. */
-void func_151A5F70(Game1D3420Listener *listener, void *data, u8 type) {
+void particle_handleRegionEmitterMessage(Game1D3420Listener *listener, void *data, u8 type) {
     Game1D3420Message *msg = data;
     s32 i;
     s32 found;
@@ -304,7 +304,7 @@ void func_151A5F70(Game1D3420Listener *listener, void *data, u8 type) {
         }
     }
     if (found && target->emitter->ready == 1) {
-        func_151A6068(target->emitter, target->zone, target->flags & 1, target->flags & 2,
+        particle_fireRegionEmitter(target->emitter, target->zone, target->flags & 1, target->flags & 2,
                       listener->unkC, listener->unk1);
         target->emitter->ready = 0;
         target->value = msg->value;
@@ -332,7 +332,7 @@ typedef struct Game1D3420Effect {
 
 /* Spawns an effect object at the emitter; with playSound also starts a light_createJitterAt handle at the
  * emitter's mid-height and plays sound 0x1AA there. */
-void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 arg4, s32 arg5) {
+void particle_fireRegionEmitter(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 arg4, s32 arg5) {
     ParticleDef spawn;
     Game1D3420EffectState init;
     Game1D3420Effect *effect;
@@ -461,7 +461,7 @@ Game1D2B10QuadVertex *particle_buildYawedVerticalQuad(Game1D2B10QuadOwner *owner
         vertices->x = owner->x - dx;
         vertices->y = owner->y;
         vertices->z = owner->z + dz;
-        // matching: the comma joins below shift ugen's tree slots onto the heap state func_151A6068 leaves
+        // matching: the comma joins below shift ugen's tree slots onto the heap state particle_fireRegionEmitter leaves
         vertices->s = sStart, vertices->t = 0;
         vertices->a = owner->alpha;
         vertices->flag = 0;

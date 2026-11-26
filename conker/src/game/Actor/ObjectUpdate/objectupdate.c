@@ -501,9 +501,9 @@ void actor_getDrawColours(Actor *obj, s32 player, s32 alpha, s32 *colour, s32 *p
     u8 *prim;
     u8 *env;
 
-    prim = D_800D9B68[player];
+    prim = gTintPrimColors[player];
     *primR = prim[0];
-    env = D_800D9B78[player];
+    env = gTintEnvColors[player];
     *primG = prim[1];
     *primB = prim[2];
     *envR = env[0];
@@ -571,9 +571,9 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     } else if (mode == 3) {
         gSPSegment(gdl++, 8, D_800832C0);
     } else if (alpha < 0xFF) {
-        gSPSegment(gdl++, 8, D_80082FC0);
+        gSPSegment(gdl++, 8, gModelXluRenderModes);
     } else {
-        gSPSegment(gdl++, 8, D_80083140);
+        gSPSegment(gdl++, 8, gModelOpaRenderModes);
     }
     gSPClearGeometryMode(gdl++, G_CULL_BOTH);
     if (mode == 0) {

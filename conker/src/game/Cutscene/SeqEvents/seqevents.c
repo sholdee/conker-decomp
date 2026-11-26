@@ -685,7 +685,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     break;
                 case 22:
                     if (obj != NULL) {
-                        func_151937F4(obj, 0xFF, 1);
+                        particle_attachBloodStrip(obj, 0xFF, 1);
                     }
                     break;
                 case 23:

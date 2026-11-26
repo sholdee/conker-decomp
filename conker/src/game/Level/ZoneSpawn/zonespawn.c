@@ -604,15 +604,15 @@ s32 level_registerFlamethrowerZone(TriggerZone *obj) {
     return 1;
 }
 
-/** Registers the object as D_800D9A20[data1] (data1 0 or 1). */
+/** Registers the object as gEmissionSourceZones[data1] (data1 0 or 1). */
 s32 func_15014040(TriggerZone *obj) {
     s32 which = obj->data1;
 
     obj->flags |= 4;
     if (which == 0) {
-        D_800D9A20[0] = obj;
+        gEmissionSourceZones[0] = obj;
     } else if (which == 1) {
-        D_800D9A20[1] = obj;
+        gEmissionSourceZones[1] = obj;
     }
     return 1;
 }

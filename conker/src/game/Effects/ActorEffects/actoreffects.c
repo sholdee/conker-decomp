@@ -87,7 +87,7 @@ void (*gProbeVisibleCallbacks[1])(void *probe, s32 r, s32 g, s32 b) = { NULL };
  * gActorEffects, or -1. Declared without a prototype: some selectors take the actor as an s32. 11: none.
  */
 static s32 (*gActorEffectSelectors[12])() = {
-    effect_selectPlayerFootEffect, effect_selectStompEffect, func_150D8A20, func_150BAA00, func_150B2480, func_150CB1E0, func_151AF6C0,
+    effect_selectPlayerFootEffect, effect_selectStompEffect, func_150D8A20, particle_selectObjEffects, particle_selectObjGroundBurst, particle_selectSideDust, particle_selectSideSpray,
     effect_selectAltFootEffect, effect_selectLegImpactEffect, effect_selectQuadrupedFootEffect, effect_selectQuadrupedFootEffectAlt, NULL,
 };
 

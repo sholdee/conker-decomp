@@ -10,7 +10,7 @@
  */
 
 /* Emission points on the owner's bones (EmitterInfo.points), one per slot. */
-static EmitterPoint D_8008D690[] = {
+static EmitterPoint gAllOverEmitPoints[] = {
     { { 26.0f, 0.0f, 0.0f }, 1 },
     { { 0.0f, 0.0f, -22.0f }, 1 },
     { { -29.0f, 0.0f, 9.0f }, 1 },
@@ -64,7 +64,7 @@ static EmitterPoint D_8008D690[] = {
     { { 42.0f, -14.0f, -6.0f }, 26 },
     { { -32.0f, -14.0f, -6.0f }, 25 },
 };
-static EmitterPoint D_8008D9D0[] = {
+static EmitterPoint gTailEmitPoints[] = {
     { { 19.0f, -26.0f, -41.0f }, 26 },
     { { -9.0f, -32.0f, -9.0f }, 26 },
     { { -42.0f, -13.0f, -28.0f }, 26 },
@@ -406,7 +406,7 @@ static ParticleTemplate D_8008EC40 = {
     17, 15, 0.85f, 0.262f, 15, 7,
     0, 9, 6, 8, 7, 0, 6, 0,
 };
-static ParticleTemplate D_8008EC80 = {
+static ParticleTemplate gCharacterSmokeTemplate = {
     8.3f, 17.9f, 25.4f, 29.5f, 57.969f,
     25137.0f, 6733.0f, 0.3f, 0.455f, -0.033f,
     22, 11, 0.85f, 0.308f, 36, 14,
@@ -436,15 +436,15 @@ static EmitterInfo D_8008ED80 = {
     1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0,
 };
 static EmitterInfo D_8008EDB8 = {
-    &D_8008E980, 51, D_8008D690, 5.0f, 13, 15, 10, 2, 2, { 0 },
+    &D_8008E980, 51, gAllOverEmitPoints, 5.0f, 13, 15, 10, 2, 2, { 0 },
     22.1f, 47.1f, 0.0f, 0.0f, -24.3f, -17.6f, 1,
 };
 static EmitterInfo D_8008EDF0 = {
-    &D_8008E9C0, 51, D_8008D690, 5.0f, 23, 17, 33, 1, 1, { 0 },
+    &D_8008E9C0, 51, gAllOverEmitPoints, 5.0f, 23, 17, 33, 1, 1, { 0 },
     1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0,
 };
 static EmitterInfo D_8008EE28 = {
-    &D_8008EA00, 51, D_8008D690, 5.0f, 51, 12, 8, 1, 1, { 0 },
+    &D_8008EA00, 51, gAllOverEmitPoints, 5.0f, 51, 12, 8, 1, 1, { 0 },
     1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0,
 };
 static EmitterInfo D_8008EE60 = {
@@ -484,23 +484,23 @@ static EmitterInfo D_8008F020 = {
     37.7f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0,
 };
 static EmitterInfo D_8008F058 = {
-    &D_8008E980, 29, D_8008D9D0, 5.0f, 13, 15, 10, 2, 1, { 0 },
+    &D_8008E980, 29, gTailEmitPoints, 5.0f, 13, 15, 10, 2, 1, { 0 },
     22.1f, 47.1f, 0.0f, 0.0f, -24.3f, -17.6f, 1,
 };
 static EmitterInfo D_8008F090 = {
-    &D_8008E9C0, 29, D_8008D9D0, 5.0f, 23, 17, 33, 1, 1, { 0 },
+    &D_8008E9C0, 29, gTailEmitPoints, 5.0f, 23, 17, 33, 1, 1, { 0 },
     1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0,
 };
 static EmitterInfo D_8008F0C8 = {
-    &D_8008EA00, 29, D_8008D9D0, 5.0f, 51, 12, 8, 1, 1, { 0 },
+    &D_8008EA00, 29, gTailEmitPoints, 5.0f, 51, 12, 8, 1, 1, { 0 },
     1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0,
 };
-static EmitterInfo D_8008F100 = {
-    &D_8008EC80, 51, D_8008D690, 1.5f, 51, 18, 10, 1, 1, { 0 },
+static EmitterInfo gAllOverSmokeInfo = {
+    &gCharacterSmokeTemplate, 51, gAllOverEmitPoints, 1.5f, 51, 18, 10, 1, 1, { 0 },
     1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0,
 };
-static EmitterInfo D_8008F138 = {
-    &D_8008EC80, 29, D_8008D9D0, 1.5f, 29, 18, 10, 1, 1, { 0 },
+static EmitterInfo gTailSmokeInfo = {
+    &gCharacterSmokeTemplate, 29, gTailEmitPoints, 1.5f, 29, 18, 10, 1, 1, { 0 },
     1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0,
 };
 static EmitterInfo D_8008F170 = {
@@ -532,14 +532,14 @@ static EmitterInfo *D_8008F2C0[] = {
     &D_8008ED80, &D_8008ED80, &D_8008ED80, &D_8008ED80, &D_8008ED80, &D_8008ED80,
     &D_8008ED80, &D_8008ED80, &D_8008ED80, &D_8008ED80, &D_8008ED80, &D_8008ED80,
 };
-static EmitterInfo *D_8008F2F0[] = {
+static EmitterInfo *gAllOverFireInfos[] = {
     &D_8008EDF0, &D_8008EE28, &D_8008EDB8, &D_8008EDF0, &D_8008EDF0, &D_8008EDF0,
     &D_8008EE28, &D_8008EDB8, &D_8008EDF0, &D_8008EDF0, &D_8008EDF0, &D_8008EE28,
     &D_8008EDB8, &D_8008EDF0, &D_8008EDF0, &D_8008EDF0, &D_8008EE28, &D_8008EDB8,
     &D_8008EDF0, &D_8008EDF0, &D_8008EDF0, &D_8008EE28, &D_8008EDB8, &D_8008EDF0,
     &D_8008EDF0, &D_8008EDF0, &D_8008EE28, &D_8008EDB8, &D_8008EDF0, &D_8008EDF0,
 };
-static EmitterInfo *D_8008F368[] = {
+static EmitterInfo *gTailFireInfos[] = {
     &D_8008F090, &D_8008F0C8, &D_8008F058, &D_8008F090, &D_8008F090, &D_8008F090,
     &D_8008F0C8, &D_8008F058, &D_8008F090, &D_8008F090, &D_8008F090, &D_8008F0C8,
     &D_8008F058, &D_8008F090, &D_8008F090, &D_8008F090, &D_8008F0C8, &D_8008F058,
@@ -569,19 +569,19 @@ static EmitterInfo *D_8008F4E8[] = {
     &D_8008EF78, &D_8008EF78, &D_8008EF78, &D_8008EF78, &D_8008EF78, &D_8008EF78,
     &D_8008EF78, &D_8008EF78, &D_8008EF78, &D_8008EF78, &D_8008EF78, &D_8008EF78,
 };
-static EmitterInfo *D_8008F518[] = {
-    &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100,
-    &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100,
-    &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100,
-    &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100,
-    &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100, &D_8008F100,
+static EmitterInfo *gAllOverSmokeInfos[] = {
+    &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo,
+    &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo,
+    &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo,
+    &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo,
+    &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo, &gAllOverSmokeInfo,
 };
-static EmitterInfo *D_8008F590[] = {
-    &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138,
-    &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138,
-    &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138,
-    &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138,
-    &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138, &D_8008F138,
+static EmitterInfo *gTailSmokeInfos[] = {
+    &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo,
+    &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo,
+    &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo,
+    &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo,
+    &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo, &gTailSmokeInfo,
 };
 static EmitterInfo *D_8008F608[] = {
     &D_8008F170, &D_8008F170, &D_8008F170, &D_8008F170, &D_8008F170, &D_8008F170,
@@ -620,15 +620,15 @@ static EmitterIdList D_8008F770[] = { { 2, D_8008F748 } };
 static EmitterIdList D_8008F778[] = { { 1, D_8008F74C } };
 /* The emitter tables, by game/Particle/ActorEmitter/actoremitter.c's gActorEmitterTables. */
 EmitterTable D_8008F780 = { D_8008F2C0, 0, NULL };
-EmitterTable D_8008F78C = { D_8008F2F0, 3, D_8008F750 };
-EmitterTable D_8008F798 = { D_8008F368, 3, D_8008F750 };
+EmitterTable gAllOverFireEmitterTable = { gAllOverFireInfos, 3, D_8008F750 };
+EmitterTable gTailFireEmitterTable = { gTailFireInfos, 3, D_8008F750 };
 EmitterTable D_8008F7A4 = { D_8008F3E0, 1, D_8008F768 };
 EmitterTable D_8008F7B0 = { D_8008F428, 1, D_8008F770 };
 EmitterTable D_8008F7BC = { D_8008F470, 0, NULL };
 EmitterTable D_8008F7C8 = { D_8008F4A0, 1, D_8008F778 };
 EmitterTable D_8008F7D4 = { D_8008F4E8, 0, NULL };
-EmitterTable D_8008F7E0 = { D_8008F518, 3, D_8008F750 };
-EmitterTable D_8008F7EC = { D_8008F590, 3, D_8008F750 };
+EmitterTable gAllOverSmokeEmitterTable = { gAllOverSmokeInfos, 3, D_8008F750 };
+EmitterTable gTailSmokeEmitterTable = { gTailSmokeInfos, 3, D_8008F750 };
 EmitterTable D_8008F7F8 = { D_8008F608, 0, NULL };
 EmitterTable D_8008F804 = { D_8008F638, 0, NULL };
 EmitterTable D_8008F810 = { D_8008F668, 0, NULL };

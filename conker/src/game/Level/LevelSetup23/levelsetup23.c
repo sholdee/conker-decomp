@@ -38,7 +38,7 @@ void func_15010A60(void) {
     LightEffect *snd;
     Vec3f pos;
 
-    func_150E8854();
+    particle_startShakeTimer();
 
     desc.updateFunc = 3;
     desc.drawFunc = 6;

@@ -4,7 +4,7 @@
 
 void *memcpy(void *, const void *, u32);
 
-// The string literals of func_1518E66C and func_1518E6D4: they lie in the front-end .rodata of the unit that
+// The string literals of particle_chainAllOverFireToSmoke and particle_chainTailFireToSmoke: they lie in the front-end .rodata of the unit that
 // begins at game/Particle/ActorEmitter/actoremitter (before game/Particle/ActorEmitter/actoremitter's literals), so this file cannot own them until the unit is merged.
 extern char D_800A7460[];
 extern char D_800A749C[];
@@ -62,7 +62,7 @@ void particle_pickPaletteTexture(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 
 }
 
 /* Expire callback: starts a kind 3 emitter on the owner and keeps this one alive for 128 more frames. */
-s32 func_1518E66C(ActorEmitterProcess *emitter) {
+s32 particle_chainAllOverFireToSmoke(ActorEmitterProcess *emitter) {
     particle_startActorEmitter(emitter->params.owner, 3, 0, 0, emitter->header.owner, emitter->header.kind, D_800A7460);
     emitter->params.lifetime = 128;
     emitter->params.expireCb = -1;
@@ -70,7 +70,7 @@ s32 func_1518E66C(ActorEmitterProcess *emitter) {
 }
 
 /* Expire callback: starts a kind 4 emitter on the owner and keeps this one alive for 128 more frames. */
-s32 func_1518E6D4(ActorEmitterProcess *emitter) {
+s32 particle_chainTailFireToSmoke(ActorEmitterProcess *emitter) {
     particle_startActorEmitter(emitter->params.owner, 4, 0, 0, emitter->header.owner, emitter->header.kind, D_800A749C);
     emitter->params.lifetime = 128;
     emitter->params.expireCb = -1;

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_150B2480(s32 arg0, s32 arg1) {
+s32 particle_selectObjGroundBurst(s32 arg0, s32 arg1) {
     return 10;
 }
 

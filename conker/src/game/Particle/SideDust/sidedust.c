@@ -7,7 +7,7 @@ static const Vec3f D_800A05E0 = { 7.0f, 0.0f, 0.0f };
 static const Vec3f D_800A05EC = { -7.0f, 0.0f, 0.0f };
 
 /* This file's .bss. */
-struct Queue *D_800D98E0; /* the effect FIFO queue (allocated by effect_allocQueue) */
+struct Queue *gEffectQueue; /* the effect FIFO queue (allocated by effect_allocQueue) */
 
 
 /*
@@ -48,7 +48,7 @@ s32 particle_getDustSidePos(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 s
     return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 500.0f, ground);
 }
 
-s32 func_150CB1E0(s32 arg0, s32 arg1) {
+s32 particle_selectSideDust(s32 arg0, s32 arg1) {
     return 0xB;
 }
 
@@ -149,7 +149,7 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
                                  500.0f, 500.0f, NULL, &ground.tri, 1, 8, 0xFF, 0);
         if (particle != NULL) {
             memcpy(&particle->growth, &growth, sizeof(growth));
-            if (effect_pushQueue(D_800D98E0, particle, 2) == 0) {
+            if (effect_pushQueue(gEffectQueue, particle, 2) == 0) {
                 effect_destroyObject(&particle->header);
             }
         }
@@ -166,7 +166,7 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
 }
 
 /* QuadSprite update: fades the sprite (def.unk10) out over the last 32 frames of its lifetime. */
-s32 func_150CB7CC(QuadSprite *sprite) {
+s32 particle_fadeSideDustSprite(QuadSprite *sprite) {
     s32 fade;
 
     if (sprite->def.lifetime < 32) {

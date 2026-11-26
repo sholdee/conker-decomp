@@ -6,13 +6,13 @@
  * This file's .data. The emitter tables by ActorEmitterParams.table; the tables are in game/Particle/ActorEmitterData/actoremitterdata.c.
  */
 static EmitterTable *gActorEmitterTables[] = {
-    &D_8008F780, &D_8008F78C, &D_8008F7A4, &D_8008F7B0, &D_8008F7D4, &D_8008F7BC, &D_8008F7C8, &D_8008F798,
-    &D_8008F7E0, &D_8008F7EC, &D_8008F7F8, &D_8008F804, &D_8008F810, &D_8008F81C, &D_8008F828, &D_8008F834,
+    &D_8008F780, &gAllOverFireEmitterTable, &D_8008F7A4, &D_8008F7B0, &D_8008F7D4, &D_8008F7BC, &D_8008F7C8, &gTailFireEmitterTable,
+    &gAllOverSmokeEmitterTable, &gTailSmokeEmitterTable, &D_8008F7F8, &D_8008F804, &D_8008F810, &D_8008F81C, &D_8008F828, &D_8008F834,
 };
 /* Particle spawn callbacks, by ParticleTemplate.spawnCb (game/Particle/ActorEmitterHandlers/actoremitterhandlers.c). */
 static void (*gActorEmitterSpawnFuncs[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, u16 *) = { particle_pickBlackTexture, particle_pickPaletteTexture };
 /* Lifetime callbacks, by ActorEmitterParams.expireCb (game/Particle/ActorEmitterHandlers/actoremitterhandlers.c). */
-static s32 (*gActorEmitterExpireFuncs[])(ActorEmitterProcess *) = { func_1518E66C, func_1518E6D4 };
+static s32 (*gActorEmitterExpireFuncs[])(ActorEmitterProcess *) = { particle_chainAllOverFireToSmoke, particle_chainTailFireToSmoke };
 
 void *memcpy(void *, const void *, u32);
 

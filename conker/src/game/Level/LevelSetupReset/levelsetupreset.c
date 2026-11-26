@@ -8,7 +8,7 @@ void level_resetSetupState(void) {
     s32 i;
     s32 j;
 
-    func_15012470();
+    view_initGroundDecalQueue();
     func_15008A10();
     func_15012770();
     for (i = 0; i < 20; i++) {

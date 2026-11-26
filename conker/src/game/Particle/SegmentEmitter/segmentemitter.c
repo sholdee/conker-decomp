@@ -44,7 +44,7 @@ static const Vec3f D_800A2628 = { 81.0f, -24.0f, 43.0f };
 
 /* This file's .data: the per-frame effect callbacks (none), and the particle emitters called with
  * (effect, point, segment start, segment end, segment tip, direction). */
-static void (*D_80088C60[])(Effect1368C0 *effect) = { NULL };
+static void (*gSegmentEmitterTickFuncs[])(Effect1368C0 *effect) = { NULL };
 static void (*gSegmentEmitFuncs[])(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) = {
     particle_emitAlongDir,
     particle_emitDebris,
@@ -150,7 +150,7 @@ void particle_updateSegmentEmitter(Effect1368C0 *effect) {
         }
     }
     if (data->tickFunc != -1) {
-        D_80088C60[data->tickFunc](effect);
+        gSegmentEmitterTickFuncs[data->tickFunc](effect);
     }
 }
 
@@ -408,7 +408,7 @@ void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
         }
     }
     if (data->tickFunc != -1) {
-        D_80088C60[data->tickFunc](effect);
+        gSegmentEmitterTickFuncs[data->tickFunc](effect);
     }
 }
 
@@ -548,7 +548,7 @@ void particle_onSegmentEmitterSwap(Effect1368C0 *effect, ActorSwapMsg *msg, u8 m
 }
 
 /* Message handler: the same as particle_onSegmentEmitterSwap. */
-void func_1510A8CC(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
+void particle_onPointPairEmitterSwap(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
     ActorRef *tracked = &effect->data.tracked;
 
     if (msgType == 0x2D) {

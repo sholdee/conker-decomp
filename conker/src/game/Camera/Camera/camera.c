@@ -319,29 +319,29 @@ void camera_updateStatus(Camera *camera) {
     }
     if (camera->Snap != 0) {
         if (camera->SpecialFlags & 1) {
-            func_1515BA80(camera->CNumber);
+            particle_onCameraSnapsUnderwater(camera->CNumber);
         } else {
-            func_1515BA48(camera->CNumber);
+            particle_onCameraSnapsAboveWater(camera->CNumber);
             camera->WaterDx = 0.0f;
         }
     } else if (!wasBelow && (camera->SpecialFlags & 1)) {
         if ((camera->SpecialFlags & 4) || (camera->Mode & 0x40000)) {
-            func_1515BA80(camera->CNumber);
+            particle_onCameraSnapsUnderwater(camera->CNumber);
         } else {
-            func_1515BAAC(camera->CNumber);
+            particle_onCameraEntersWater(camera->CNumber);
         }
     } else if (wasBelow && !(camera->SpecialFlags & 1)) {
         if ((camera->SpecialFlags & 4) || (camera->Mode & 0x40000)) {
-            func_1515BA48(camera->CNumber);
+            particle_onCameraSnapsAboveWater(camera->CNumber);
             camera->WaterDx = 0.0f;
         } else {
-            func_1515BA54(camera->CNumber);
+            particle_onCameraLeavesWater(camera->CNumber);
             camera_loadDistancePreset(camera);
         }
     } else if (camera->SpecialFlags & 1) {
-        func_1515BA1C(camera->CNumber);
+        particle_onCameraStaysUnderwater(camera->CNumber);
     } else {
-        func_1515BA10(camera->CNumber);
+        particle_onCameraStaysAboveWater(camera->CNumber);
     }
 }
 /* Saves the mode state in cache slot `slot` and switches to newMode. Returns 0 if the slot is taken. */

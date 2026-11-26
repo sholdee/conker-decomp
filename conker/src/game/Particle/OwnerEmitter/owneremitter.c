@@ -71,7 +71,7 @@ void particle_updateOwnerEmitter(EffectE7970 *effect) {
     }
 }
 
-void func_150BA8F0(EffectE7970 *effect, s32 arg1, u8 arg2) {
+void particle_onOwnerEmitterEvent(EffectE7970 *effect, s32 arg1, u8 arg2) {
     effect_handleTimedEffectOwnerEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 

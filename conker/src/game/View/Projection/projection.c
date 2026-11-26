@@ -14,8 +14,8 @@ static Mtx gView0Projection;   // projection spanning view 0
 #include "variables.h"
 
 /* The rest of this unit's .bss: conker/view.h declares these before the definitions, so they follow gView0Projection. */
-u8 D_800D9B68[4][3];     // per tint slot: prim colour (game/Texture/TextureLoad/textureload adds the positive part of its wave)
-u8 D_800D9B78[4][3];     // per tint slot: env colour (the negative part)
+u8 gTintPrimColors[4][3];     // per tint slot: prim colour (game/Texture/TextureLoad/textureload adds the positive part of its wave)
+u8 gTintEnvColors[4][3];     // per tint slot: env colour (the negative part)
 u8 D_800D9B84[3];
 u8 D_800D9B88[3];
 u8 D_800D9B8B;
@@ -24,8 +24,8 @@ LookAt gLookAts[2];          // per framebuffer
 Ambient gViewAmbients[4][2];      // per view and framebuffer
 MtxF gViewMatrices[4];            // per view: view matrix
 MtxF gViewProjMatrices[4];            // per view: view matrix * projection
-PointLightGfx *D_800D9E10[4];  // per view
-u8 D_800D9E20;
+PointLightGfx *gViewGfxLights[4];  // per view
+u8 gViewGfxLightMax;
 u8 D_800D9E21;                 // light count byte light_pickLights stored for player 0
 PointLight *gPickedLights[14];    // point lights light_pickLights picked this frame
 
@@ -233,7 +233,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
         gDma2p(gfx++, G_MOVEMEM, &gViewAmbients[view][D_800BE9C0], 48, G_MV_LIGHT, G_MVO_L2);
     }
     gfx = light_pickLights(gfx, view, camera_global_Cameras[view].eye.x, camera_global_Cameras[view].eye.y, camera_global_Cameras[view].eye.z, 0,
-                        D_800D9E10[view], D_800D9E20, &gViewAmbients[view][D_800BE9C0], &D_800D9E21, 1, 0, 0x25,
+                        gViewGfxLights[view], gViewGfxLightMax, &gViewAmbients[view][D_800BE9C0], &D_800D9E21, 1, 0, 0x25,
                         gPickedLights);
     if (!skipWorld) {
         if (level != 5) {
@@ -268,7 +268,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                 gSPDisplayList(gfx++, gLevelDisplayLists[0]);
             }
         }
-        gfx = light_reemitLights(gfx, D_800D9E10[view], D_800D9E20, D_800D9E21, &gViewAmbients[view][D_800BE9C0]);
+        gfx = light_reemitLights(gfx, gViewGfxLights[view], gViewGfxLightMax, D_800D9E21, &gViewAmbients[view][D_800BE9C0]);
         if (gLevelDisplayLists[2] != NULL) {
             gDPPipeSync(gfx++);
             gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);

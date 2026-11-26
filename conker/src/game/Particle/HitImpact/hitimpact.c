@@ -250,7 +250,7 @@ void particle_getBonePoint(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bon
 }
 
 /* Calls actor_runAttackAt at the midpoint of a and b, with obj's movement angle relative to its mv. */
-void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
+void particle_runAttackAtMidpoint(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
     f32 x = (a->x + b->x) * 0.5f;
     f32 y = (a->y + b->y) * 0.5f;
     f32 z = (a->z + b->z) * 0.5f;
@@ -301,7 +301,7 @@ void particle_spawnLightFlash(const Vec3f *pos, u8 arg1, s32 arg2) {
 
 /* Calls actor_runAttackAt twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
    or pos raised by half of target's height when there is no dir. */
-void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionTri *surface, s32 arg5, s32 arg6,
+void particle_runAttackPairAt(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionTri *surface, s32 arg5, s32 arg6,
                    s32 arg7) {
     u16 angle;
     Vec3f point;
@@ -325,7 +325,7 @@ void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionT
     actor_runAttackAt(pos->x, pos->y, pos->z, arg6, obj - movement_obj, angle, arg7, (s32)&point);
 }
 
-void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 arg4) {
+void particle_runAttackAlongDir(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 arg4) {
     f32 yaw;
     u16 angle;
 
@@ -580,7 +580,7 @@ void particle_attachTwinEmitters(Actor *obj) {
 
 
 /* Applies a hit from attacker to victim travelling along dir. */
-s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit *hit, s32 flags, Vec3f *dir, u8 arg7,
+s32 particle_applyShotHit(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit *hit, s32 flags, Vec3f *dir, u8 arg7,
                   s32 arg8) {
     s32 alreadyDead;
     s32 health;
@@ -644,7 +644,7 @@ void particle_countShot(Actor *obj) {
    unk31C->unk130 with the plane through ref (arg9, or arg1 without it) whose normal math_vec3Cross derives
    from arg2..arg4. The point and the line direction go to pointBuf/dirBuf and *outPoint/*outDir point at
    them; otherwise both are NULL. */
-void func_151D5174(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg4, Vec3f *pointBuf, Vec3f *dirBuf, Vec3f **outPoint, Vec3f **outDir, Vec3f *arg9) {
+void particle_intersectAimPlane(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg4, Vec3f *pointBuf, Vec3f *dirBuf, Vec3f **outPoint, Vec3f **outDir, Vec3f *arg9) {
     Vec3f *origin;
     Vec3f temp;
     Vec3f normal;
@@ -819,7 +819,7 @@ void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *own
 
 /* Computes obj's emission point and direction for slot `slot`, stores a far target point along it in
    unk31C->unkB8..unkC0, and calls collision_castRay from the point towards that target. */
-void func_151D57F8(Actor *obj, u8 slot) {
+void particle_castGunRay(Actor *obj, u8 slot) {
     Vec3f pos;
     Vec3f forward;
     Vec3f axis1;
@@ -830,7 +830,7 @@ void func_151D57F8(Actor *obj, u8 slot) {
     Vec3f *dir;
 
     particle_getGunAxes(obj, &pos, &forward, &axis1, &axis2, gGunMuzzlePoints[slot], *gGunMuzzleBones[slot]);
-    func_151D5174(obj, &pos, &forward, &axis1, &axis2, &pointBuf, &dirBuf, &origin, &dir, NULL);
+    particle_intersectAimPlane(obj, &pos, &forward, &axis1, &axis2, &pointBuf, &dirBuf, &origin, &dir, NULL);
     obj->mv->rayHit.hitType = 1;
     if (origin == NULL) {
         origin = &pos;
@@ -893,7 +893,7 @@ void particle_getGunAxes(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, V
 /* Runs math_raySphere(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter
    is not -1, only for those gObjectFilters[filter] accepts). Returns a mask with bit i cleared for each
    object i it reports. */
-s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg) {
+s32 particle_raySphereObjectMask(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg) {
     f32 radius;
     Actor *obj;
     s32 mask;

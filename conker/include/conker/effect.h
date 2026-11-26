@@ -1214,12 +1214,12 @@ extern s32 gCachedOtherModeH;
 extern s32 gCachedOtherModeL;
 extern s32 gDrawHookTextureFrame;
 extern s32 gDrawHookTextureCm;
-extern TextureDesc *gDrawHookTexture; // texture of the current draw hook (effect_beginQuadEffectDraw, func_15166F6C)
+extern TextureDesc *gDrawHookTexture; // texture of the current draw hook (effect_beginQuadEffectDraw, particle_beginPuffQuadDraw)
 typedef struct SpriteFx SpriteFx;
 typedef struct ModelFxData ModelFxData;
 /*
  * Data of a type 0x10 model effect (ModelFx in game/Effects/ObjectList/objectlist.c); effect_spawnModelFx copies a template of it into
- * the object. The callback-2 update, func_15169C70, reads it as Debris in game/Particle/BounceDebris/bouncedebris.c.
+ * the object. The callback-2 update, particle_updateBounceDebris, reads it as Debris in game/Particle/BounceDebris/bouncedebris.c.
  */
 struct ModelFxData {
     /* 0x00 */ f32 position[3];

@@ -83,12 +83,12 @@ Gfx *env_drawSky(Gfx *gfx, s32 arg1) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        D_800D9B68[i][0] = 0;
-        D_800D9B68[i][1] = 0;
-        D_800D9B68[i][2] = 0;
-        D_800D9B78[i][0] = 0;
-        D_800D9B78[i][1] = 0;
-        D_800D9B78[i][2] = 0;
+        gTintPrimColors[i][0] = 0;
+        gTintPrimColors[i][1] = 0;
+        gTintPrimColors[i][2] = 0;
+        gTintEnvColors[i][0] = 0;
+        gTintEnvColors[i][1] = 0;
+        gTintEnvColors[i][2] = 0;
     }
     gSPClearGeometryMode(gfx++, G_CULL_BOTH);
     gfx = env_clearDepth(gfx);
