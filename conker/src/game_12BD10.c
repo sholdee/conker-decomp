@@ -76,7 +76,7 @@ void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
 }
 
 /* Transforms the point D_800A2000 by bone D_80088BA0 of `actor` into `*out`. */
-void func_150FEBC8(Actor *actor, s32 arg1, Vec3f *out) {
+void func_150FEBC8(Actor *actor, s16 arg1, Vec3f *out) {
     void *mtx;
     const Vec3f *src;
     Vec3f *dst;

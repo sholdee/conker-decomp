@@ -10,11 +10,9 @@ void func_15131958(void *vel, f32 drag, void *arg2);
  * word after it, as const f32 D_800A19E0[4]. */
 extern const Vec3f D_800A19E0;
 
-/*
- * The point functions of func_151D469C's emitters, indexed by ObjEmitter.posFunc. Declared without a
- * prototype: func_150FEFD0 takes its second argument as an s16, the others as an s32.
- */
-static void (*D_8008FC70[])() = {
+/* The point functions of func_151D469C's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is
+ * their second argument). */
+static void (*D_8008FC70[])(Actor *obj, s16 arg1, Vec3f *out) = {
     func_151C6974, func_151C69A0, func_150FE794, func_150FE248, func_150FFBDC, func_150FEBC8, func_150FEFD0,
 };
 /* The guns' muzzle points and the bones they are on, for func_151D5A18 (by gun). */
@@ -32,8 +30,8 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
     u8 solid;
     s32 particleType;
     s32 big;
+    s32 hitVerts;
     f32 hitDist;
-    s32 hitUnk;
     s32 sfx;
 
     if (kind >= 6) {
@@ -62,7 +60,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
     }
     if (surface == NULL) {
         if (func_150AC9C0(pos->x - dir->x, pos->y - dir->y, pos->z - dir->z, dir->x, dir->y, dir->z,
-                          &hitDist, &hitSurface, &hitPos.x, &hitPos.y, &hitPos.z, &hitUnk, &surfaceId, 0, 0.0f)) {
+                          &hitVerts, &hitSurface, &hitPos.x, &hitPos.y, &hitPos.z, &hitDist, &surfaceId, 0, 0.0f)) {
             hit = 1;
         } else {
             typedef s32 BlockScope; // matching: a declaration in this block changes IDO's branch layout

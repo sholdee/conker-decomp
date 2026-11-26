@@ -146,12 +146,12 @@ Game1EF500Trail *func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *a
 }
 
 /* Handler-table entry: the side-0 point of func_151C69CC. */
-void func_151C6974(Actor *arg0, s32 arg1, Vec3f *out) {
+void func_151C6974(Actor *arg0, s16 arg1, Vec3f *out) {
     func_151C69CC(arg0, out, 0);
 }
 
 /* Handler-table entry: the side-1 point of func_151C69CC. */
-void func_151C69A0(Actor *arg0, s32 arg1, Vec3f *out) {
+void func_151C69A0(Actor *arg0, s16 arg1, Vec3f *out) {
     func_151C69CC(arg0, out, 1);
 }
 

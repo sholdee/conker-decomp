@@ -750,7 +750,7 @@ extern const Vec3f D_800A1FBC;
 struct Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2);
 void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *outOrigin);
 void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3);
-void func_150FE794(Actor *obj, s32 arg1, Vec3f *out);
+void func_150FE794(Actor *obj, s16 arg1, Vec3f *out);
 void func_150FE7D4(Actor *obj);
 
 /* game_12D630.c */

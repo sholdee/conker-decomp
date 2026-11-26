@@ -114,7 +114,7 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
 }
 
 /* Handler: writes the world position of obj's muzzle point to `out`. */
-void func_150FE248(Actor *obj, s32 arg1, Vec3f *out) {
+void func_150FE248(Actor *obj, s16 arg1, Vec3f *out) {
     func_151D3E04(obj, out, &D_800A1F70, D_80088B80, 0.0f);
 }
 

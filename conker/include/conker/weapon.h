@@ -122,12 +122,12 @@ void func_150EEDA8(Actor *obj);
 Game1EF500Trail *func_150FDDA0(Actor *obj, s32 arg1, s32 arg2);
 void func_150FDF38(Actor *obj, u8 arg1, s32 arg2, Vec3f *muzzleOut, Vec3f *launchOut);
 void func_150FE0B8(Actor *obj, Vec3f *muzzle, u8 arg2, s32 arg3);
-void func_150FE248(Actor *obj, s32 arg1, Vec3f *out);
+void func_150FE248(Actor *obj, s16 arg1, Vec3f *out);
 void func_150FE288(Actor *obj);
 
 /* game_12BD10.c */
 void func_150FE860(Actor *actor, u8 arg1, s32 arg2);
-void func_150FEBC8(Actor *actor, s32 arg1, Vec3f *out);
+void func_150FEBC8(Actor *actor, s16 arg1, Vec3f *out);
 void func_150FEC28(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, Vec3f *position, u8 arg5, s32 arg6);
 
 /* game_12C1E0.c */
@@ -152,7 +152,7 @@ extern const Vec3f D_800A2080[2][6];
 /* game_12CCF0.c */
 void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type);
-void func_150FFBDC(Actor *obj, s32 arg1, Vec3f *out);
+void func_150FFBDC(Actor *obj, s16 arg1, Vec3f *out);
 void func_150FFC3C(Actor *obj);
 void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
 void func_150FFD2C(Actor *obj, Actor *other, s32 arg2);
@@ -256,8 +256,8 @@ extern const Vec3f D_800AAAA8;
 /* game_1F3780.c */
 Game1EF500Trail *func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
                                s32 arg6);
-void func_151C6974(Actor *arg0, s32 arg1, Vec3f *out);
-void func_151C69A0(Actor *arg0, s32 arg1, Vec3f *out);
+void func_151C6974(Actor *arg0, s16 arg1, Vec3f *out);
+void func_151C69A0(Actor *arg0, s16 arg1, Vec3f *out);
 void func_151C69CC(Actor *arg0, Vec3f *out, u8 side);
 void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3);
 void func_151C6D70(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5);

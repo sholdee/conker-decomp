@@ -60,7 +60,8 @@ struct ActorFollowerGroup {
 /*
  * The follower and group callbacks, indexed by the fields named above. They are declared without a
  * prototype: each entry takes the follower or group as its own, longer view (EmitterParticle,
- * AnchorEmitter in game_1BC650.c).
+ * AnchorEmitter in game_1BC650.c). The message table keeps the prototype of its call, which passes the
+ * type as a u8; its entry still takes the AnchorEmitter view (warning 709).
  */
 static s32 (*D_8008FC40[])() = { func_1518FC04, func_1518FC44 }; /* BoneFollower.updateFn */
 static void (*D_8008FC48[])() = { func_1518FC84 };               /* BoneFollower.expireFn */
@@ -69,7 +70,7 @@ static void (*D_8008FC50[])() = { func_1518F89C };               /* ActorFollowe
 static void (*D_8008FC54[])() = { func_151D33B8 };               /* ActorFollowerGroup.untrackFn */
 static void (*D_8008FC58[])() = { func_1518F858 };               /* ActorFollowerGroup.expireFn */
 static void (*D_8008FC5C[])() = { NULL, func_151904BC };         /* per kind, before the followers go */
-static void (*D_8008FC64[])() = { NULL, func_15190550 };         /* per kind, after a message */
+static void (*D_8008FC64[])(ActorFollowerGroup *, ActorMsg *, u8) = { NULL, func_15190550 }; /* per kind, after a message */
 
 
 /* Takes a reference on shared resource `index`, loading it on the first reference. */
