@@ -52,6 +52,13 @@ extern f32 D_800CC2B4;
 extern u8 D_800CC2B8;
 extern u16 D_800CC2BA; /* frame step of the actor being updated */
 extern s32 D_800CC2BC;
+extern f32 D_800CC2C0;
+extern f32 D_800CC2C4;
+extern f32 D_800CC2C8;
+extern Actor movement_obj[26]; /* the actors */
+extern s32 D_800D1548;
+extern Actor *D_800D154C; /* the actor being updated */
+extern f32 D_800D1550; /* frame time step */
 
 /* game_B21B0.c */
 s32 func_15084D00(Actor *obj);

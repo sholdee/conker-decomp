@@ -2,8 +2,8 @@
 
 #include "structs.h"
 
-/* This file's .bss (0x800CC280-0x800CC2BF). IDO lays out a unit's variables in the order of their first
-   declaration, so they are defined here, in address order, before variables.h declares them. The order
+/* This file's .bss (0x800CC280-0x800D155F). IDO lays out a unit's variables in the order of their first
+   declaration, so they are defined here, in address order, before conker/player.h declares them. The order
    also depends on how many types and variables are declared before them (see init_50A0.c), so they come
    before functions.h, whose subsystem headers change often. */
 s32 D_800CC280;
@@ -20,6 +20,13 @@ f32 D_800CC2B4;
 u8 D_800CC2B8;
 u16 D_800CC2BA; // frame step of the actor being updated
 s32 D_800CC2BC;
+f32 D_800CC2C0;
+f32 D_800CC2C4;
+f32 D_800CC2C8;
+Actor movement_obj[26]; // the actors (original: movement_obj, an array of movement_move)
+s32 D_800D1548;
+Actor *D_800D154C; // the actor being updated
+f32 D_800D1550; // frame time step
 
 #include "functions.h"
 

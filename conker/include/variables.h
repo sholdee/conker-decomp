@@ -194,25 +194,7 @@ extern SeqSubtitle D_800C3CA0[3];
 extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
 extern s64 D_800C3A60[];
 
-
-
-
-extern f32 D_800CC2C0;
-extern f32 D_800CC2C4;
-extern f32 D_800CC2C8;
-
-extern Actor movement_obj[26]; // objects
-
-
-
 /* 800D0000 */
-
-
-extern f32 D_800D1550; // frame time step
-extern s32 D_800D1548;
-extern Actor *D_800D154C;
-
-
 
 extern GroundCandidate D_800D3300[]; // ground-probe hits
 extern u8  D_800D35DC; // 1-based slot of the actor being updated (0 = none)
