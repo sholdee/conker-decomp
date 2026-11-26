@@ -1,10 +1,6 @@
 #include <ultra64.h>
 
-// matching: this file calls func_150006E0, which takes no arguments, with the level; hide the header's prototype
-#define func_150006E0 func_150006E0_hdr
 #include "functions.h"
-#undef func_150006E0
-void func_150006E0(s32 level);
 #include "variables.h"
 
 

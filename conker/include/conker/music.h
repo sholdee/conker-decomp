@@ -71,6 +71,7 @@ u16 func_1000EA94(s32 arg0);
 void func_15000000(void);
 void func_15000090(void);
 void func_150000B0(void);
-void func_150006E0(void);
+/* (void); declared without a prototype: callers pass the level */
+void func_150006E0();
 
 #endif

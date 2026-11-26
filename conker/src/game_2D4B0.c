@@ -192,7 +192,7 @@ void func_150000B0(void) {
     func_10017944(1, q.unkD);
 }
 
-void func_150006E0(void) {
+void func_150006E0() {
     s32 i;
     s32 j;
 
