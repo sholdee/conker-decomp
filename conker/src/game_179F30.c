@@ -1075,8 +1075,6 @@ void func_1514E7C8(Actor *obj) {
     func_1514EC1C(handle, obj, 0xF);
 }
 
-/* Attachment destroy handlers (D_8008AB58 entries): release an attachment's handle. */
-
 /* Emitter offsets of func_1514EECC and func_1514F194. */
 static const Vec3f D_800A5934 = { 0.0f, 90.0f, 0.0f };
 static const Vec3f D_800A5940 = { 0.0f, 70.0f, 0.0f };
@@ -1084,9 +1082,10 @@ static const Vec3f D_800A594C = { 0.0f, 120.0f, 0.0f };
 static const Vec3f D_800A5958 = { 0.0f, 112.0f, 151.0f };
 static const Vec3f D_800A5964 = { 0.0f, 74.0f, -161.0f };
 
-void func_1514E824(s32 handle) {
+void func_1514E824(Actor *obj) {
 }
 
+/* Attachment destroy handlers (D_8008AB58 entries): release an attachment's handle. */
 void func_1514E830(EffectHeader *handle) {
     func_1516972C(handle);
 }
@@ -1172,12 +1171,12 @@ s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
     return 1;
 }
 
-void func_1514E9DC(s32 handle, s32 msg, s32 arg) {
-    func_1514E920(handle, msg, arg);
+s32 func_1514E9DC(s32 handle, s32 msg, s32 arg) {
+    return func_1514E920(handle, msg, arg);
 }
 
-void func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg) {
-    func_1514E89C(target, msg, arg);
+s32 func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg) {
+    return func_1514E89C(target, msg, arg);
 }
 
 /** Messages 3..12 switch the emitter between table 2 and tables 3, 5 and 6. */
@@ -1231,8 +1230,8 @@ s32 func_1514EA1C(ActorEmitterProcess *target, s32 msg, s32 arg) {
     return 1;
 }
 
-void func_1514EB6C(ToggleTarget *target, s32 msg, s32 arg) {
-    func_1514E89C(target, msg, arg);
+s32 func_1514EB6C(ToggleTarget *target, s32 msg, s32 arg) {
+    return func_1514E89C(target, msg, arg);
 }
 
 s32 func_1514EB8C(s32 handle, s32 msg, s32 arg) {

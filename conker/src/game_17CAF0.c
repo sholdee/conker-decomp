@@ -62,7 +62,7 @@ void func_1514F808(ConeBasis *cone, f32 speed, Vec3f *out) {
     f32 second;
     f32 first;
 
-    func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * cone->spread, &first, &second);
+    func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * cone->spread, &first, &second);
     out->x = (((cone->axis0.x * first) + (cone->axis1.x * second)) + cone->direction.x) * speed;
     out->y = (((cone->axis0.y * first) + (cone->axis1.y * second)) + cone->direction.y) * speed;
     out->z = (((cone->axis0.z * first) + (cone->axis1.z * second)) + cone->direction.z) * speed;
@@ -72,7 +72,7 @@ void func_1514F808(ConeBasis *cone, f32 speed, Vec3f *out) {
  * the cone around `direction` (scaled by 1000 here) spanned by axis0/axis1. */
 void func_1514F8F8(JetSpray *config, Vec3f *direction, Vec3f *axis0, Vec3f *axis1, f32 spread, u8 arg5, s32 arg6) {
     s32 count;
-    Vec3f velocity;
+    f32 velocity[3];
     f32 second;
     f32 first;
     f32 speed;
@@ -81,17 +81,17 @@ void func_1514F8F8(JetSpray *config, Vec3f *direction, Vec3f *axis0, Vec3f *axis
     direction->y *= 1000.0f;
     direction->z *= 1000.0f;
 
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
-        func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * spread, &first, &second);
-        velocity.x = ((axis0->x * first) + (axis1->x * second) + direction->x) * speed;
-        velocity.y = ((axis0->y * first) + (axis1->y * second) + direction->y) * speed;
-        velocity.z = ((axis0->z * first) + (axis1->z * second) + direction->z) * speed;
-        func_151A2AD4(&config->pos, &velocity,
+        func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * spread, &first, &second);
+        velocity[0] = ((axis0->x * first) + (axis1->x * second) + direction->x) * speed;
+        velocity[1] = ((axis0->y * first) + (axis1->y * second) + direction->y) * speed;
+        velocity[2] = ((axis0->z * first) + (axis1->z * second) + direction->z) * speed;
+        func_151A2AD4(&config->pos, velocity,
                       (func_150ADA68() * config->sizeRange) + config->sizeBase,
                       (func_150ADA68() * config->sizeSlopeRange) + config->sizeSlopeBase,
-                      (func_150ADA20() % (u32)(config->particleCountRange + 1)) + config->particleCountBase,
+                      (func_150ADA20() % (config->particleCountRange + 1)) + config->particleCountBase,
                       config->spread, config->drag, config->gravityBase, config->gravityRange,
                       config->delayBase, config->delayRange, config->alphaBase, config->alphaRange,
                       config->fadeStart, config->fadeOutStart, config->eventFunc, arg5, arg6);
@@ -135,15 +135,15 @@ void func_1514FBFC(SurfaceJetSpray *emitter, u8 arg1, s32 arg2) {
 void func_1514FCE8(JetSpraySpec *config, u8 arg1, s32 arg2) {
     s32 count;
 
-    count = (func_150ADA20() % (u32)(config->spray.countRange + 1)) + config->spray.countBase;
+    count = (func_150ADA20() % (config->spray.countRange + 1)) + config->spray.countBase;
     while (count != 0) {
         func_151A2A14(&config->spray.pos,
-                      (s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
-                      (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
+                      (func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
+                      (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase,
                       (func_150ADA68() * config->spray.speedRange) + config->spray.speedBase,
                       (func_150ADA68() * config->spray.sizeRange) + config->spray.sizeBase,
                       (func_150ADA68() * config->spray.sizeSlopeRange) + config->spray.sizeSlopeBase,
-                      (func_150ADA20() % (u32)(config->spray.particleCountRange + 1)) + config->spray.particleCountBase,
+                      (func_150ADA20() % (config->spray.particleCountRange + 1)) + config->spray.particleCountBase,
                       config->spray.spread, config->spray.drag, config->spray.gravityBase, config->spray.gravityRange,
                       config->spray.delayBase, config->spray.delayRange, config->spray.alphaBase,
                       config->spray.alphaRange, config->spray.fadeStart, config->spray.fadeOutStart,
@@ -165,13 +165,13 @@ void func_1514FF44(ConeBasis *cone, DropSpray *config, CollisionHit *ground, u8 
     Vec3f velocity;
 
     if (func_1514F6E8(cone) != 0) {
-        count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+        count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
         while (count != 0) {
             func_1514F808(cone, (func_150ADA68() * config->speedRange) + config->speedBase, &velocity);
             func_151D9014(&config->pos, &velocity, config->kind,
                           (func_150ADA68() * config->gravityRange) + config->gravityBase,
-                          (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase,
-                          (func_150ADA20() % (u32)(config->unk25 + 1)) + config->unk24,
+                          (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase,
+                          (func_150ADA20() % (config->unk25 + 1)) + config->unk24,
                           (func_150ADA68() * config->sizeRange) + config->sizeBase,
                           func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, ground, config->wobbles,
                           func_150ADA68() < config->bounceChance, arg3, arg4);
@@ -185,16 +185,16 @@ void func_15150178(AngleRange *angles, DropSpray *config, CollisionHit *ground, 
     s32 count;
     Vec3f velocity;
 
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
-        func_15143794((s16)((func_150ADA20() % (u32)(angles->yawRange + 1)) + angles->yawBase),
-                      (s16)((func_150ADA20() % (u32)(angles->pitchRange + 1)) + angles->pitchBase),
+        func_15143794((func_150ADA20() % (angles->yawRange + 1)) + angles->yawBase,
+                      (func_150ADA20() % (angles->pitchRange + 1)) + angles->pitchBase,
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &velocity);
         func_151D9014(&config->pos, &velocity, config->kind,
                       (func_150ADA68() * config->gravityRange) + config->gravityBase,
-                      (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase,
-                      (func_150ADA20() % (u32)(config->unk25 + 1)) + config->unk24,
+                      (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase,
+                      (func_150ADA20() % (config->unk25 + 1)) + config->unk24,
                       (func_150ADA68() * config->sizeRange) + config->sizeBase,
                       func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, ground, config->wobbles,
                       func_150ADA68() < config->bounceChance, arg3, arg4);
@@ -231,10 +231,10 @@ void func_15150400(DebrisScatter *config, AngleRange *angles, u8 arg2, s32 arg3)
     spawn.fadeStart = 12;
     spawn.fadeRate = 21;
     spawn.sound = 0;
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
-        yaw = (func_150ADA20() % (u32)(angles->yawRange + 1)) + angles->yawBase;
-        pitch = (func_150ADA20() % (u32)(angles->pitchRange + 1)) + angles->pitchBase;
+        yaw = (func_150ADA20() % (angles->yawRange + 1)) + angles->yawBase;
+        pitch = (func_150ADA20() % (angles->pitchRange + 1)) + angles->pitchBase;
         if (func_150ADA68() < config->floorHitChance) {
             spawn.updateFn = 13;
             spawn.floorHitFn = config->floorHitFn;
@@ -250,7 +250,7 @@ void func_15150400(DebrisScatter *config, AngleRange *angles, u8 arg2, s32 arg3)
         spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
-        spawn.lifetime = (func_150ADA20() % (u32)(config->lifetimeRange + 1)) + config->lifetimeBase;
+        spawn.lifetime = (func_150ADA20() % (config->lifetimeRange + 1)) + config->lifetimeBase;
         func_15143794(yaw, pitch, config->radius, &spawn.pos);
         spawn.pos.x += config->origin.x;
         spawn.pos.y += config->origin.y;
@@ -299,7 +299,7 @@ void func_1515080C(DebrisSpray *config, const s32 *variantIds, const f32 *varian
         spawn.elasticity = 0.5610000491f;
         spawn.rotVel.y = 0.0f;
         spawn.flags = 0x8 | 0x20 | 0x40 | (arg7 ? 0x80 : 0) | 0x100 | 0x800 | 0x1000 | 0x2000 | 0x10000 | (argB ? 0x4000 : 0) | (argC ? 0x100000 : 0);
-        count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+        count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
         if (variantCount < count) {
             count = variantCount;
         }
@@ -319,8 +319,8 @@ void func_1515080C(DebrisSpray *config, const s32 *variantIds, const f32 *varian
         spawn.fadeRate = 21;
         spawn.drawFn = arg8;
         while (count != 0) {
-            yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;
-            pitch = (func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase;
+            yaw = (func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase;
+            pitch = (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase;
             func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel);
             func_15143794(yaw, pitch, radius, &spawn.pos);
             spawn.pos.x += config->pos.x;
@@ -332,11 +332,11 @@ void func_1515080C(DebrisSpray *config, const s32 *variantIds, const f32 *varian
             spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
             spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
             spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
-            spawn.lifetime = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
+            spawn.lifetime = (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase;
             {
             /* pick the skip-th unused variant, wrapping around */
             u32 skip;
-            skip = func_150ADA20() % (u32)remaining;
+            skip = func_150ADA20() % remaining;
             slot = 0;
             done = FALSE;
             do {
@@ -392,11 +392,11 @@ void func_15150D1C(DecalSpray *config, u8 arg1, s32 arg2) {
     s32 surface;
     s32 count;
 
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     hitTriangle = &triangle; // matching: IDO keeps the buffer address in a saved register only via a variable
     while (count != 0) {
-        func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
-                      (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
+        func_15143794((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
+                      (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase,
                       100.0f, &direction);
         if (func_150AC9C0(config->pos.x, config->pos.y, config->pos.z,
                           direction.x, direction.y, direction.z, NULL, hitTriangle,
@@ -404,7 +404,7 @@ void func_15150D1C(DecalSpray *config, u8 arg1, s32 arg2) {
             && func_15145C90(surface) != 0 && distance < config->maxDistance) {
             func_151D9B8C(config->kind, (func_150ADA68() * config->sizeRange) + config->sizeBase,
                           (func_150ADA20() % 156U) + 100, hitTriangle, &hit,
-                          (func_150ADA20() % (u32)(config->unk2A + 1)) + config->unk28,
+                          (func_150ADA20() % (config->unk2A + 1)) + config->unk28,
                           1, 1, 1, arg1, arg2);
         }
         count--;
@@ -421,13 +421,13 @@ void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
 
     width = config->jitter + config->jitter;
     jitter.y = 0.0f;
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
         rotation.x = func_150ADA68() * 360.0f;
         rotation.y = func_150ADA68() * 360.0f;
         rotation.z = func_150ADA68() * 360.0f;
-        func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
-                      (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
+        func_15143794((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
+                      (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase,
                       func_150ADA68() * config->directionRange + config->directionBase,
                       &direction);
         jitter.x = func_150ADA68() * width - config->jitter;
@@ -437,7 +437,7 @@ void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
                       &direction, &jitter,
                       func_150ADA68() * config->sizeRange + config->sizeBase,
                       config->scale, config->kind,
-                      (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase,
+                      (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase,
                       arg1, 0, arg2, arg3);
         count--;
     }
@@ -504,16 +504,16 @@ void func_151511FC(SurfaceBurst *config, u8 arg1, s32 arg2) {
         normal.x *= 1000.0f;
         normal.y *= 1000.0f;
         normal.z *= 1000.0f;
-        count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+        count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
         while (count != 0) {
-            func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * config->spread, &first, &second);
+            func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * config->spread, &first, &second);
             speed = (func_150ADA68() * config->speedRange) + config->speedBase;
             desc.lifetime = (func_150ADA68() * config->lifetimeRange) + config->lifetimeBase;
             desc.width = desc.height = (func_150ADA68() * config->scaleRange) + config->scaleBase;
             desc.rot.x = func_150ADA68() * 360.0f;
             desc.rot.y = func_150ADA68() * 360.0f;
             desc.rot.z = func_150ADA68() * 360.0f;
-            desc.unk44 = (func_150ADA20() % (u32)(config->unk44Range + 1)) + config->unk44Base;
+            desc.unk44 = (func_150ADA20() % (config->unk44Range + 1)) + config->unk44Base;
             extra.velocity.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
             extra.velocity.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
             extra.velocity.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
@@ -571,14 +571,14 @@ void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
         motion.unk1E = config->unk9E;
         spawn.pos = config->pos;
         spawn.material = config->unkA0;
-        count = func_150ADA20() % (u32)(config->countRange + 1) + config->countBase;
+        count = func_150ADA20() % (config->countRange + 1) + config->countBase;
         while (count != 0) {
             rand = func_150ADA20();
-            func_15143874((s16)(rand & 0xFF), func_150ADA68() * config->source.spread, &first, &second);
+            func_15143874(rand & 0xFF, func_150ADA68() * config->source.spread, &first, &second);
             speed = func_150ADA68() * config->speedRange + config->speedBase;
-            motion.alpha = func_150ADA20() % (u32)(config->alphaRange + 1) + config->alphaBase;
-            spawn.itemCount = func_150ADA20() % (u32)(config->itemCountRange + 1) + config->itemCountBase;
-            spawn.life = func_150ADA20() % (u32)(config->lifeRange + 1) + config->lifeBase;
+            motion.alpha = func_150ADA20() % (config->alphaRange + 1) + config->alphaBase;
+            spawn.itemCount = func_150ADA20() % (config->itemCountRange + 1) + config->itemCountBase;
+            spawn.life = func_150ADA20() % (config->lifeRange + 1) + config->lifeBase;
             motion.halfWidth = func_150ADA68() * config->sizeRange + config->sizeBase;
             motion.gravity = func_150ADA68() * config->growthRange + config->growthBase;
             motion.velocity.x = (axis0.x * first + axis1.x * second + normal.x) * speed;
@@ -617,18 +617,18 @@ void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2) {
     motion.unk1C = config->unk80;
     motion.unk1E = config->unk82;
     spawn.material = config->unk84;
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
-        yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;
-        pitch = (func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase;
-        cosPitch = func_151423D8((u8)pitch);
-        sinPitch = func_151423D8((u8)(pitch - 0x40));
-        cosYaw = func_151423D8((u8)yaw);
-        sinYaw = func_151423D8((u8)(yaw - 0x40));
+        yaw = (func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase;
+        pitch = (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase;
+        cosPitch = func_151423D8(pitch);
+        sinPitch = func_151423D8(pitch - 0x40);
+        cosYaw = func_151423D8(yaw);
+        sinYaw = func_151423D8(yaw - 0x40);
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
-        motion.alpha = (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase;
-        spawn.itemCount = (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase;
-        spawn.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
+        motion.alpha = (func_150ADA20() % (config->alphaRange + 1)) + config->alphaBase;
+        spawn.itemCount = (func_150ADA20() % (config->itemCountRange + 1)) + config->itemCountBase;
+        spawn.life = (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase;
         motion.halfWidth = (func_150ADA68() * config->sizeRange) + config->sizeBase;
         motion.gravity = (func_150ADA68() * config->growthRange) + config->growthBase;
         horizontal = speed * cosPitch;
@@ -681,7 +681,7 @@ void func_15151D6C(SurfaceDebrisBurst *config, s32 *variantIds, f32 *variantScal
         spawn.pos = config->pos;
         spawn.rotVel.y = 0.0f;
         spawn.flags = 0x29E8;
-        count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+        count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
         spawn.variant = 0;
         spawn.unk5C = 0;
         spawn.alpha = 0xFF;
@@ -700,7 +700,7 @@ void func_15151D6C(SurfaceDebrisBurst *config, s32 *variantIds, f32 *variantScal
         spawn.fadeRate = 21;
         while (count != 0) {
             speed = (func_150ADA68() * config->speedRange) + config->speedBase;
-            func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * config->source.spread, &first, &second);
+            func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * config->source.spread, &first, &second);
             spawn.vel.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
             spawn.vel.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
             spawn.vel.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
@@ -717,7 +717,7 @@ void func_15151D6C(SurfaceDebrisBurst *config, s32 *variantIds, f32 *variantScal
             spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
             spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
             spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
-            spawn.lifetime = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
+            spawn.lifetime = (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase;
             func_15132A4C(&spawn, 3, 0xFF, 0, arg4, arg5);
             count--;
         }
@@ -756,10 +756,10 @@ void func_15152190(DebrisBurst *config, const s32 *variantIds, const f32 *varian
     spawn.ownerId = 0;
     spawn.fadeStart = 12;
     spawn.fadeRate = 21;
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
-        yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;
-        pitch = (func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase;
+        yaw = (func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase;
+        pitch = (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase;
         spawn.rot.x = func_150ADA68() * 360.0f;
         spawn.rot.y = func_150ADA68() * 360.0f;
         spawn.rot.z = func_150ADA68() * 360.0f;
@@ -767,7 +767,7 @@ void func_15152190(DebrisBurst *config, const s32 *variantIds, const f32 *varian
         spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
-        spawn.lifetime = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
+        spawn.lifetime = (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase;
         func_15143794(yaw, pitch, radius, &spawn.pos);
         spawn.pos.x += config->pos.x;
         spawn.pos.y += config->pos.y;
@@ -820,15 +820,15 @@ void func_15152520(ModelBurst *config, u8 arg1, s32 arg2) {
     params.fadeStart = config->fadeStart;
     params.fadeRate = config->fadeRate;
     motion.flags = config->motionFlags;
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
-        params.lifetime = (func_150ADA20() % (u32)(config->lifetimeRange + 1)) + config->lifetimeBase;
+        params.lifetime = (func_150ADA20() % (config->lifetimeRange + 1)) + config->lifetimeBase;
         motion.rot.x = func_150ADA68() * 360.0f;
         motion.rot.y = func_150ADA68() * 360.0f;
         motion.rot.z = func_150ADA68() * 360.0f;
         motion.scale = (func_150ADA68() * config->scaleRange) + config->scaleBase;
-        func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
-                      (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
+        func_15143794((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
+                      (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase,
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &motion.vel);
         motion.rotVel.x = (func_150ADA68() * config->rotVelRange.x) + config->rotVelBase.x;
@@ -840,23 +840,24 @@ void func_15152520(ModelBurst *config, u8 arg1, s32 arg2) {
     }
 }
 
-extern void (*D_8008AC60[])(Color8 *);
+/* The color functions of DriftBurst.colorFunc. */
+static void (*D_8008AC60[])(Color8 *) = { func_15152ABC };
 
 void func_15152874(DriftBurst *config, u8 arg1, s32 arg2) {
     DriftSpawn spawn;
     s32 count;
 
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     spawn.pos = config->pos;
     spawn.drag = config->drag;
     spawn.minVy = config->minVy;
     while (count != 0) {
-        func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
-                      (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
+        func_15143794((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
+                      (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase,
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &spawn.vel);
         spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
-        spawn.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
+        spawn.life = (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase;
         spawn.size.width = (func_150ADA68() * config->widthRange) + config->widthBase;
         spawn.size.height = (func_150ADA68() * config->heightRange) + config->heightBase;
         if (config->colorFunc != -1) {
@@ -873,12 +874,14 @@ void func_15152874(DriftBurst *config, u8 arg1, s32 arg2) {
 }
 
 /* Five RGB colors. */
-extern u8 D_800A5FE0[][3];
+static const u8 D_800A5FE0[][3] = {
+    { 0xDE, 0xA2, 0x2A }, { 0x38, 0x88, 0xCC }, { 0x97, 0xC1, 0x2A }, { 0xBD, 0x24, 0x09 }, { 0xB0, 0xAA, 0x8E },
+};
 
 /* A D_8008AC60 color function: a random color of D_800A5FE0 with a random alpha in [155, 255]. */
 void func_15152ABC(Color8 *out) {
     u8 *pad; // matching: unused stack slot above rgb
-    u8 *rgb;
+    const u8 *rgb;
 
     rgb = D_800A5FE0[(u8)(func_150ADA20() % 5U)];
     out->alpha = (func_150ADA20() % 101U) + 155;
@@ -896,7 +899,7 @@ void func_15152B38(config, arg1, arg2)
     TrailBurstParams spawn;
     s32 count;
 
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     param.pos = config->pos;
     param.flags = config->headerFlags;
     param.kind = 10;
@@ -915,23 +918,23 @@ void func_15152B38(config, arg1, arg2)
     spawn.shrinkPaused = config->shrinkPaused;
     spawn.shrinkFactor = config->shrinkFactor;
     while (count != 0) {
-        param.itemCount = (func_150ADA20() % (u32)(config->capacityRange + 1)) + config->capacityBase;
-        param.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
+        param.itemCount = (func_150ADA20() % (config->capacityRange + 1)) + config->capacityBase;
+        param.life = (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase;
         spawn.width = (func_150ADA68() * config->sizeRange) + config->sizeBase;
         spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
-        func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
-                      (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
+        func_15143794((func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase,
+                      (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase,
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &spawn.vel);
-        spawn.color.red = (func_150ADA20() % (u32)(config->colorRange.red + 1)) + config->colorBase.red;
-        spawn.color.green = (func_150ADA20() % (u32)(config->colorRange.green + 1)) + config->colorBase.green;
-        spawn.color.blue = (func_150ADA20() % (u32)(config->colorRange.blue + 1)) + config->colorBase.blue;
-        spawn.color.alpha = (func_150ADA20() % (u32)(config->colorRange.alpha + 1)) + config->colorBase.alpha;
-        spawn.color2.red = (func_150ADA20() % (u32)(config->color2Range.red + 1)) + config->color2Base.red;
-        spawn.color2.green = (func_150ADA20() % (u32)(config->color2Range.green + 1)) + config->color2Base.green;
-        spawn.color2.blue = (func_150ADA20() % (u32)(config->color2Range.blue + 1)) + config->color2Base.blue;
-        spawn.color2.alpha = (func_150ADA20() % (u32)(config->color2Range.alpha + 1)) + config->color2Base.alpha;
-        spawn.colorLevel = (func_150ADA20() % (u32)(config->colorLevelRange + 1)) + config->colorLevelBase;
+        spawn.color.red = (func_150ADA20() % (config->colorRange.red + 1)) + config->colorBase.red;
+        spawn.color.green = (func_150ADA20() % (config->colorRange.green + 1)) + config->colorBase.green;
+        spawn.color.blue = (func_150ADA20() % (config->colorRange.blue + 1)) + config->colorBase.blue;
+        spawn.color.alpha = (func_150ADA20() % (config->colorRange.alpha + 1)) + config->colorBase.alpha;
+        spawn.color2.red = (func_150ADA20() % (config->color2Range.red + 1)) + config->color2Base.red;
+        spawn.color2.green = (func_150ADA20() % (config->color2Range.green + 1)) + config->color2Base.green;
+        spawn.color2.blue = (func_150ADA20() % (config->color2Range.blue + 1)) + config->color2Base.blue;
+        spawn.color2.alpha = (func_150ADA20() % (config->color2Range.alpha + 1)) + config->color2Base.alpha;
+        spawn.colorLevel = (func_150ADA20() % (config->colorLevelRange + 1)) + config->colorLevelBase;
         func_1515C2F0(&param, 0, &spawn, 0, arg1, arg2);
         count--;
     }
@@ -967,17 +970,17 @@ void func_15152F70(SimplePuffSpray *config, u8 arg1) {
     params.unk18 = 0x20;
     params.primMode = 0;
     params.envMode = 9;
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
-        yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;
-        pitch = (func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase;
-        cosPitch = func_151423D8((u8)pitch);
-        sinPitch = func_151423D8((u8)(pitch - 0x40));
-        cosYaw = func_151423D8((u8)yaw);
-        sinYaw = func_151423D8((u8)(yaw - 0x40));
+        yaw = (func_150ADA20() % (config->angles.yawRange + 1)) + config->angles.yawBase;
+        pitch = (func_150ADA20() % (config->angles.pitchRange + 1)) + config->angles.pitchBase;
+        cosPitch = func_151423D8(pitch);
+        sinPitch = func_151423D8(pitch - 0x40);
+        cosYaw = func_151423D8(yaw);
+        sinYaw = func_151423D8(yaw - 0x40);
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
-        spawn.itemCount = (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase;
-        spawn.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
+        spawn.itemCount = (func_150ADA20() % (config->itemCountRange + 1)) + config->itemCountBase;
+        spawn.life = (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase;
         motion.halfWidth = (func_150ADA68() * config->sizeRange) + config->sizeBase;
         motion.gravity = (func_150ADA68() * config->growthRange) + config->growthBase;
         motion.velocity.x = (speed * cosPitch) * sinYaw;
@@ -1004,9 +1007,9 @@ void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2) {
     s16 pitch;
     s32 count;
 
-    packet.x = (s32)config->position.x;
-    packet.y = (s32)config->position.y;
-    packet.z = (s32)config->position.z;
+    packet.x = config->position.x;
+    packet.y = config->position.y;
+    packet.z = config->position.z;
     packet.subX = (u16)(s32)(config->position.x * 256.0f);
     packet.subZ = (u16)(s32)(config->position.y * 256.0f);
     packet.subY = (u16)(s32)(config->position.z * 256.0f);
@@ -1022,24 +1025,24 @@ void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2) {
     packet.frame = 0;
     packet.frameStep = config->frameStep;
     packet.anim = config->anim;
-    count = func_150ADA20() % (u32)(config->countRange + 1) + config->countBase;
+    count = func_150ADA20() % (config->countRange + 1) + config->countBase;
     while (count != 0) {
-        yaw = func_150ADA20() % (u32)(config->angles.yawRange + 1) + config->angles.yawBase;
-        pitch = func_150ADA20() % (u32)(config->angles.pitchRange + 1) + config->angles.pitchBase;
+        yaw = func_150ADA20() % (config->angles.yawRange + 1) + config->angles.yawBase;
+        pitch = func_150ADA20() % (config->angles.pitchRange + 1) + config->angles.pitchBase;
         cosPitch = func_151423D8(pitch);
         sinPitch = func_151423D8(pitch - 64);
         cosYaw = func_151423D8(yaw);
         sinYaw = func_151423D8(yaw - 64);
         speed = func_150ADA68() * config->speedRange + config->speedBase;
-        packet.life = func_150ADA20() % (u32)(config->lifeRange + 1) + config->lifeBase;
+        packet.life = func_150ADA20() % (config->lifeRange + 1) + config->lifeBase;
         horizontal = speed * cosPitch;
-        packet.velX = (s32)(horizontal * sinYaw);
-        packet.velY = (s32)(-speed * sinPitch);
-        packet.velZ = (s32)(horizontal * cosYaw);
-        packet.accelY = func_150ADA20() % (u32)(config->accelYRange + 1) + config->accelYBase;
-        packet.fadeStep = func_150ADA20() % (u32)(config->fadeRange + 1) + config->fadeBase;
-        packet.width = func_150ADA20() % (u32)(config->widthRange + 1) + config->widthBase;
-        packet.height = func_150ADA20() % (u32)(config->heightRange + 1) + config->heightBase;
+        packet.velX = horizontal * sinYaw;
+        packet.velY = -speed * sinPitch;
+        packet.velZ = horizontal * cosYaw;
+        packet.accelY = func_150ADA20() % (config->accelYRange + 1) + config->accelYBase;
+        packet.fadeStep = func_150ADA20() % (config->fadeRange + 1) + config->fadeBase;
+        packet.width = func_150ADA20() % (config->widthRange + 1) + config->widthBase;
+        packet.height = func_150ADA20() % (config->heightRange + 1) + config->heightBase;
         func_15167D84(&packet, 0, 0, -1, arg1, arg2);
         count--;
     }
@@ -1061,7 +1064,7 @@ void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) {
     f32 horizontal;
     void *object;
 
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     extra = config->extra;
     spawn.texture = config->texture;
     spawn.renderMode = config->renderMode;
@@ -1088,22 +1091,22 @@ void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) {
     spawn.scaleRate = config->scaleRate;
     spawn.views = arg1;
     while (count != 0) {
-        yaw = (func_150ADA20() % (u32)(config->yawRange + 1)) + config->yawBase;
-        pitch = (func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitchBase;
-        cosPitch = func_151423D8((u8)pitch);
-        sinPitch = func_151423D8((u8)(pitch - 0x40));
-        cosYaw = func_151423D8((u8)yaw);
-        sinYaw = func_151423D8((u8)(yaw - 0x40));
+        yaw = (func_150ADA20() % (config->yawRange + 1)) + config->yawBase;
+        pitch = (func_150ADA20() % (config->pitchRange + 1)) + config->pitchBase;
+        cosPitch = func_151423D8(pitch);
+        sinPitch = func_151423D8(pitch - 0x40);
+        cosYaw = func_151423D8(yaw);
+        sinYaw = func_151423D8(yaw - 0x40);
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
-        spawn.timer = (func_150ADA20() % (u32)(config->timerRange + 1)) + config->timerBase;
-        spawn.frameRate = (func_150ADA20() % (u32)(config->frameRateRange + 1)) + config->frameRateBase;
+        spawn.timer = (func_150ADA20() % (config->timerRange + 1)) + config->timerBase;
+        spawn.frameRate = (func_150ADA20() % (config->frameRateRange + 1)) + config->frameRateBase;
         horizontal = speed * cosPitch;
         spawn.width = spawn.height = (func_150ADA68() * config->sizeRange) + config->sizeBase;
         spawn.vel.x = horizontal * sinYaw;
         spawn.vel.y = -speed * sinPitch;
         spawn.vel.z = horizontal * cosYaw;
         spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
-        spawn.alpha = (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase;
+        spawn.alpha = (func_150ADA20() % (config->alphaRange + 1)) + config->alphaBase;
         object = func_15130280(&spawn, config->unk64, 0, 4, arg2, arg3);
         if (object != NULL) {
             memcpy((u8 *)object + 0xA8, &extra, sizeof(extra));
@@ -1125,7 +1128,7 @@ void func_151539B4(StreakBurst *config, u8 arg1) {
     f32 horizontal;
     f32 sinYaw;
 
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     spawn.pos = config->pos;
     spawn.headColor.red = config->headColor.red;
     spawn.headColor.green = config->headColor.green;
@@ -1140,21 +1143,21 @@ void func_151539B4(StreakBurst *config, u8 arg1) {
     spawn.fadeStart = config->fadeStart;
     spawn.fadeRate = config->fadeRate;
     while (count != 0) {
-        yaw = (func_150ADA20() % (u32)(config->yawRange + 1)) + config->yawBase;
-        pitch = (func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitchBase;
-        cosPitch = func_151423D8((u8)pitch);
-        sinPitch = func_151423D8((u8)(pitch - 0x40));
-        cosYaw = func_151423D8((u8)yaw);
+        yaw = (func_150ADA20() % (config->yawRange + 1)) + config->yawBase;
+        pitch = (func_150ADA20() % (config->pitchRange + 1)) + config->pitchBase;
+        cosPitch = func_151423D8(pitch);
+        sinPitch = func_151423D8(pitch - 0x40);
+        cosYaw = func_151423D8(yaw);
         horizontal = 10.0f * cosPitch;
-        sinYaw = func_151423D8((u8)(yaw - 0x40));
+        sinYaw = func_151423D8(yaw - 0x40);
         spawn.dir.x = horizontal * sinYaw;
         spawn.dir.y = -10.0f * sinPitch;
         spawn.dir.z = horizontal * cosYaw;
         spawn.headSpeed = (func_150ADA68() * config->headSpeedRange) + config->headSpeedBase;
         spawn.tailSpeed = (func_150ADA68() * config->tailSpeedRange) + config->tailSpeedBase;
-        spawn.lifetime = (func_150ADA20() % (u32)(config->lifetimeRange + 1)) + config->lifetimeBase;
+        spawn.lifetime = (func_150ADA20() % (config->lifetimeRange + 1)) + config->lifetimeBase;
         spawn.width = (func_150ADA68() * config->widthRange) + config->widthBase;
-        spawn.alpha = (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase;
+        spawn.alpha = (func_150ADA20() % (config->alphaRange + 1)) + config->alphaBase;
         func_15156190(&spawn, config->kind, 0, arg1, 0);
         count--;
     }
@@ -1174,15 +1177,15 @@ void func_15153CCC(ConeBasis *cone, SplashSpray *config, CollisionHit *ground, u
     Vec3f velocity;
 
     if (func_1514F6E8(cone) != 0) {
-        count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+        count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
         while (count != 0) {
             func_1514F808(cone, (func_150ADA68() * config->speedRange) + config->speedBase, &velocity);
             func_151DA6F8(&config->pos, &velocity,
                           (func_150ADA68() * config->sizeRange) + config->sizeBase,
-                          (s16)((func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase),
-                          (func_150ADA20() % (u32)(config->unk32 + 1)) + config->unk30,
+                          (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase,
+                          (func_150ADA20() % (config->unk32 + 1)) + config->unk30,
                           (func_150ADA68() * config->scaleRange) + config->scaleBase,
-                          (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase,
+                          (func_150ADA20() % (config->itemCountRange + 1)) + config->itemCountBase,
                           func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->kind, ground,
                           config->unk3C, config->unk3E, config->unk40, arg3, arg4);
             count--;
@@ -1195,18 +1198,18 @@ void func_15153F18(AngleRange *angles, SplashSpray *config, CollisionHit *ground
     s32 count;
     Vec3f velocity;
 
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count != 0) {
-        func_15143794((s16)((func_150ADA20() % (u32)(angles->yawRange + 1)) + angles->yawBase),
-                      (s16)((func_150ADA20() % (u32)(angles->pitchRange + 1)) + angles->pitchBase),
+        func_15143794((func_150ADA20() % (angles->yawRange + 1)) + angles->yawBase,
+                      (func_150ADA20() % (angles->pitchRange + 1)) + angles->pitchBase,
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &velocity);
         func_151DA6F8(&config->pos, &velocity,
                       (func_150ADA68() * config->sizeRange) + config->sizeBase,
-                      (s16)((func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase),
-                      (func_150ADA20() % (u32)(config->unk32 + 1)) + config->unk30,
+                      (func_150ADA20() % (config->lifeRange + 1)) + config->lifeBase,
+                      (func_150ADA20() % (config->unk32 + 1)) + config->unk30,
                       (func_150ADA68() * config->scaleRange) + config->scaleBase,
-                      (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase,
+                      (func_150ADA20() % (config->itemCountRange + 1)) + config->itemCountBase,
                       func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->kind, ground,
                       config->unk3C, config->unk3E, config->unk40, arg3, arg4);
         count--;
@@ -1335,17 +1338,17 @@ void func_15154684(ParticleBurst *config, u8 arg1, s32 arg2) {
     Vec3f velocity;
     s32 count;
 
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (config->countRange + 1)) + config->countBase;
     while (count > 0) {
-        func_15143794((s16)(func_150ADA20() & 0xFF),
-                      (s16)((func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitchBase),
+        func_15143794(func_150ADA20() & 0xFF,
+                      (func_150ADA20() % (config->pitchRange + 1)) + config->pitchBase,
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &velocity);
         func_151C5F44(config->pos, &velocity,
                       (func_150ADA68() * config->gravityRange) + config->gravityBase,
                       config->unk20,
-                      (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase,
-                      (func_150ADA20() % (u32)(config->timerRange + 1)) + config->timerBase,
+                      (func_150ADA20() % (config->alphaRange + 1)) + config->alphaBase,
+                      (func_150ADA20() % (config->timerRange + 1)) + config->timerBase,
                       (func_150ADA68() * config->sizeRange) + config->sizeBase,
                       func_150ADA68() < config->altChance,
                       config->ground, arg1, arg2);
