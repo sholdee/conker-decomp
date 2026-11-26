@@ -1115,7 +1115,7 @@ typedef struct {
     /* 0x0C */ u8 side;
     /* 0x0D */ u8 unkD;
     /* 0x0E */ u8 padE[2];
-    /* 0x10 */ TimedEffect *unk10;
+    /* 0x10 */ CamWobble *wobble; /* the other actor's camera wobble (func_15164780), or NULL */
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s8 unk16; // owner camera's unk23D, or -1
     /* 0x17 */ u8 pad17;

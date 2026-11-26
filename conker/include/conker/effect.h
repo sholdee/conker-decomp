@@ -667,7 +667,6 @@ extern const u8 D_800A1C00[8][8];
 /* game_127060.c */
 typedef struct Obj150FADC8 Obj150FADC8;
 typedef struct LineEmitter LineEmitter;
-typedef struct Func150FB188State Func150FB188State;
 typedef struct FadeInSprite FadeInSprite;
 typedef struct FadeInEffect FadeInEffect;
 void func_150F9BB0(Actor *actor, u8 owner, s32 kind);
@@ -675,13 +674,14 @@ void func_150FA1B8(BurstEffect *effect);
 void func_150FA468(TimedEffect *effect, s32 arg1, u8 event);
 void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind);
 void func_150FAA40(u8 owner, s32 kind);
+extern u8 D_80088B60; // set once func_150FAA40's emitter runs; game_3B920 clears it
 void func_150FAAEC(LineEmitter *effect);
 void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event);
 void func_150FAD28(void);
 void func_150FAD78(void);
 void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event);
 void func_150FAE18(s16 duration, u8 owner, s32 kind);
-s32 func_150FB188(Func150FB188State *obj);
+s32 func_150FB188(ModelEffect *fx);
 void func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 void func_150FB240(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeRate);
 s32 func_150FB29C(FadeInEffect *effect);

@@ -9,6 +9,8 @@ static const Vec3f D_800A1CE4 = { 30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CF0 = { -30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CFC[3] = { { -31.0f, -6.0f, 24.0f }, { 31.0f, -6.0f, 24.0f }, { 1.0f, -51.0f, 53.0f } };
 
+u8 D_80088B60 = 0;
+
 /* Spawns the burst effect on actor: two sparks and two glows that follow its second matrix. */
 void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
     BurstEffect *effect;
@@ -603,34 +605,19 @@ void func_150FAE18(s16 duration, u8 owner, s32 kind) {
     }
 }
 
-struct Func150FB188State {
-    u8 pad0[0x54];
-    f32 field54;
-    f32 field58;
-    f32 field5C;
-};
+/* Update callback (D_8008ADA8[2]): places the model at (-95, -80, 0), unrotated, scaled by 0.3. */
+s32 func_150FB188(ModelEffect *fx) {
+    f32 xform[5];
 
-typedef struct Func150FB188Transform {
-    f32 field0;
-    f32 field4;
-    f32 field8;
-    f32 fieldC;
-    f32 field10;
-} Func150FB188Transform;
-
-/* Sets obj->field54..5C to (-95, -80, 0) and calls func_15157DEC with {0, 0, 0, 0.3, 0.3}. */
-s32 func_150FB188(Func150FB188State *obj) {
-    Func150FB188Transform transform;
-
-    obj->field5C = 0.0f;
-    obj->field54 = -95.0f;
-    obj->field58 = -80.0f;
-    transform.field0 = 0.0f;
-    transform.field4 = 0.0f;
-    transform.field8 = 0.0f;
-    transform.fieldC = 0.3f;
-    transform.field10 = 0.3f;
-    func_15157DEC(obj, &transform);
+    fx->params.pos.z = 0.0f;
+    fx->params.pos.x = -95.0f;
+    fx->params.pos.y = -80.0f;
+    xform[0] = 0.0f;
+    xform[1] = 0.0f;
+    xform[2] = 0.0f;
+    xform[3] = 0.3f;
+    xform[4] = 0.3f;
+    func_15157DEC(fx, xform);
     return 1;
 }
 
