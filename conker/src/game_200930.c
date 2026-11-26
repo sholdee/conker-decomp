@@ -925,8 +925,8 @@ s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, s32 filterArg) {
    (2 * size bytes) on first use; *allocated (optional) is set when it was allocated now. The buffers hold
    vertices of several types, so slots points to an array of buffer pointers of any type and out to a
    pointer of any type. */
-void func_151D5D60(void *slots, s16 index, s32 size, void *out, s8 *allocated) {
-    s8 dummy;
+void func_151D5D60(void *slots, s16 index, s32 size, void *out, u8 *allocated) {
+    u8 dummy;
 
     if (allocated == NULL) {
         allocated = &dummy;
