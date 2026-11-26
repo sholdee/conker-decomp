@@ -246,14 +246,14 @@ Gfx *func_15018F08(Gfx *gfx, s16 player) {
 /* Per-player setup before drawing player's view (D_800D3674 follows the sign of camera->CameraPitch). */
 void game_prepareView(s16 player) {
     Camera *camera = &camera_global_Cameras[player];
-    D_8003C8E0 = 0xA000000;
+    gDebugStatusCode = 0xA000000;
     if ((screen_isViewFadeDone(player) == 0) && (gPaused == 0)) {
         screen_advanceViewFade(player);
     }
     func_1501B640(player);
     D_800D3674 = (camera->CameraPitch < 0.0f) ? -1000 : 5000;
     player_updateWarp(player);
-    D_8003C8E0 = 0;
+    gDebugStatusCode = 0;
 }
 
 /* Start of frame: reset the display-list head to this frame's buffer and update timing. */
@@ -277,7 +277,7 @@ void game_beginFrame(void) {
 }
 
 
-// D_80043B40 is the 508-entry TLB slot table (see the handwritten miss handler at 0x10006138,
+// gPageSlots is the 508-entry TLB slot table (see the handwritten miss handler at 0x10006138,
 // which uses the same {page, age} layout); this pass ages every slot by one frame.
 typedef struct {
     s32 page;
@@ -361,7 +361,7 @@ s32 game_updateFrame(void) {
     func_15036148();
     func_1515D6C8();
     for (i = 0; i < TLB_SLOT_COUNT; i++) {
-        ((TlbSlot *)D_80043B40)[i].age++;
+        ((TlbSlot *)gPageSlots)[i].age++;
     }
     return 1;
 }

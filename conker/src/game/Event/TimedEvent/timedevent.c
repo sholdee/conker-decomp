@@ -9,7 +9,7 @@ ActorAnim *gModelAnimTables[187]; // per model id: animation table, after its An
 static f32 gEventParamF;
 static f32 gEventResult;
 static s32 gDeferredSound;
-static s32 D_800D1880;
+static s32 gEventLoopRunning;
 
 #include "functions.h"
 #include "variables.h"
@@ -100,96 +100,96 @@ typedef void EventHandler(void);
 
 /* Animation-command handlers, indexed by the command (see event_runAnimCommand). */
 void (*gAnimCommandProcs[])(s32) = {
-    func_1506EFC8, func_1506F004, NULL, func_1506F02C,
-    func_1506F05C, NULL, func_1506F0C4, func_1506F0F0,
-    event_sprayTrails, func_1506F1A8, event_stopFlamethrowerJets, func_1506F8C0,
-    func_1506F54C, event_stopFlames, NULL, func_1506F8F0,
-    func_1506F9C0, func_1506FA90, NULL, func_1506FB60,
-    func_1506FB60, NULL, NULL, func_1506FBE8,
-    event_cancelTrailPair, func_1506FC1C, NULL, func_1506F11C,
-    func_1506F14C, func_1506FC9C, NULL, event_stopFlamethrowerJets,
-    func_1506FD30, func_1506FCFC, event_queueTrailPair, func_1506FDF0,
-    func_1506FE1C, func_1506FE48, func_1506FE74, func_1506FEA0,
-    func_1506FECC, func_1506FEF8, func_1506FF24, func_1506FF50,
-    func_1506FF78, func_1506FFAC, func_1506FFE0, func_15070014,
-    func_1507003C, func_150700B4, func_15070084, func_1506FCC8,
-    event_stopFlamethrowerJets, func_150700E4, func_15070114, func_15070144,
-    func_150701C4, NULL, NULL, func_150701F4,
-    func_15070224, func_15070300, func_15070690, func_15070690,
-    func_150706C4, func_150706C4, func_150706F8, event_fireMuzzle0,
-    event_fireMuzzle1, event_fireLauncher, func_150707F8, func_15070830,
-    func_15070860, func_15070898, func_15070CDC, func_15070D00,
+    func_1506EFC8, func_1506F004, NULL, event_attachOwnerEmitter,
+    event_startDustEmitter50, NULL, event_spawnFoot0Dust, event_spawnFoot1Dust,
+    event_sprayTrails, event_spawnBone12Flame, event_stopFlamethrowerJets, func_1506F8C0,
+    event_spawnBone13Flame, event_stopFlames, NULL, func_1506F8F0,
+    func_1506F9C0, func_1506FA90, NULL, event_fireJointShot,
+    event_fireJointShot, NULL, NULL, event_startSparkEmitter70,
+    event_cancelTrailPair, event_startSparkEmitter40, NULL, event_spawnSide0StepEffects,
+    event_spawnSide1StepEffects, func_1506FC9C, NULL, event_stopFlamethrowerJets,
+    func_1506FD30, event_spawnJetPreset5, event_queueTrailPair, event_spawnGroundMark0,
+    event_spawnGroundMark1, func_1506FE48, func_1506FE74, event_spawnGroundMark2,
+    event_spawnGroundMark3, func_1506FEF8, func_1506FF24, event_spawnSparkEmitterTask,
+    event_spawnBoneGroundBurst0, event_spawnBoneGroundBurst1, event_spawnBoneGroundBurst2, event_spawnImpactRing,
+    event_spawnJointImpact, event_spawnLandingBurst, event_spawnBloodGroundBurst, event_spawnJetPreset6,
+    event_stopFlamethrowerJets, event_spawnBoneModelBurst, event_attachBloodStrip, event_fireBullet,
+    event_fireSegmentShot, NULL, NULL, event_explodeSightAtActor,
+    func_15070224, func_15070300, event_fireBeamSlot, event_fireBeamSlot,
+    event_releaseBeamSlot, event_releaseBeamSlot, event_fireSlotProjectiles, event_fireMuzzle0,
+    event_fireMuzzle1, event_fireLauncher, event_runLauncherMuzzle, func_15070830,
+    func_15070860, event_spawnBone9Flame, event_spawnImpactBlast1, event_spawnImpactBlast0,
     func_15070D24, func_15071230, func_15071254, NULL,
-    NULL, func_15071278, func_150712AC, func_15071360,
-    func_15071434, event_spawnStripEffect, event_spawnStripEffect, event_notifyFollowersGone,
+    NULL, event_spawnTwoSidedEmitter, event_fireForwardProjectile, event_fireAttachedGun,
+    event_spawnShotEffectsWithAttacks, event_spawnStripEffect, event_spawnStripEffect, event_notifyFollowersGone,
     func_15071544, func_1507158C, func_150715D4, func_1507161C,
-    func_15071470, func_150714AC, func_150714E8, func_15071690,
-    func_150716EC, func_15071764, func_150717E0, func_15071830,
-    func_15071860, func_15071888, func_150718E4, func_15071998,
-    func_150719CC, func_15071A00, func_15071A34, func_15071A64,
-    func_1506F090, func_15071B18, func_15071D08,
+    event_spawnShotEffects, event_spawnShotEffectsWithRay, func_150714E8, event_spawnLargeObjBurst,
+    event_rumbleNearbyPlayers, func_15071764, func_150717E0, event_spawnDelayedBurst,
+    func_15071860, func_15071888, func_150718E4, event_spawnBonePointImpact0,
+    event_spawnBonePointImpact1, event_spawnBonePointImpact2, event_emitLineBursts, func_15071A64,
+    event_startDustEmitter, func_15071B18, func_15071D08,
 };
 /* Per-frame state handlers, indexed by the state number of an animation entry (see game/Actor/ActorMotion/actormotion.c). */
 void (*gAnimStateProcs[])(void) = {
-    func_1506D950, anim_updateIdle, func_1506AF74, func_1506AFE0,
-    func_1506B020, func_1506B070, func_1506B078, func_1506D950,
+    event_doNothing, anim_updateIdle, func_1506AF74, func_1506AFE0,
+    func_1506B020, func_1506B070, func_1506B078, event_doNothing,
     event_playNextAnim, func_1506B198, func_1506B1E8, func_1506B228,
     func_1506B268, func_1506B328, func_1506B2BC, func_1506B368,
-    func_15072AF8, func_1506B370, NULL, func_1506B5A4,
+    func_15072AF8, event_finishDeath, NULL, func_1506B5A4,
     func_1506B5AC, func_1506B5B4, func_1506B5CC, NULL,
-    func_1506B5E4, func_1506D950, func_1506D950, func_1506D950,
+    func_1506B5E4, event_doNothing, event_doNothing, event_doNothing,
     NULL, func_1506B3B0, NULL, event_pickTurnAnim,
     func_1506B50C, func_1506B520, func_15071ED4, func_15071F14,
-    func_1506B740, func_1506B82C, func_1506B7F4, func_15072918,
+    func_1506B740, func_1506B82C, func_1506B7F4, event_removeSelf,
     func_15072968, func_150729D0, event_playFollowUpAnim, func_15072A14,
     func_1506B860, func_1506B88C, func_1506B8B4, func_1506B91C,
-    func_1506B984, func_15073C28, func_15073C48, func_1506B944,
-    func_1506B8F4, func_15073F54, func_1506B9AC, func_1506B9C0,
+    func_1506B984, event_updateIdle, func_15073C48, func_1506B944,
+    func_1506B8F4, func_15073F54, event_clearIntelAnimSeq, func_1506B9C0,
     func_15072A40, func_15072A7C, func_15072940, func_1506D898,
 };
 /* Timed event handlers, indexed by the event id (see event_runTimedEvents). */
 static EventHandler *gTimedEventProcs[] = {
-    func_1506D950, event_setYSpeed, event_jump, event_setYGravity,
-    event_clearNoRun, event_setWantSpeed, event_setNoRun, func_1506BEDC,
-    func_1506BF1C, event_playSoundCommand, event_playDeferredSound, event_fireProjectile,
-    func_1506D584, event_resetBlink, func_1506EF5C, func_1506D950,
+    event_doNothing, event_setYSpeed, event_jump, event_setYGravity,
+    event_clearNoRun, event_setWantSpeed, event_setNoRun, event_setDoingHit,
+    event_playSoundCommandAboveWater, event_playSoundCommand, event_playDeferredSound, event_fireProjectile,
+    event_requestExpression, event_resetBlink, func_1506EF5C, event_doNothing,
     func_1506D4EC, event_stopHeadEffect, func_1506D4F4, func_1506D538,
-    func_15074870, func_1506D950, func_1506D74C, event_setYGravityTenths,
-    func_1507490C, event_dropHeldObject, func_1506D934, func_1506D950,
+    func_15074870, event_doNothing, func_1506D74C, event_setYGravityTenths,
+    event_setHeldObjectState, event_dropHeldObject, func_1506D934, event_doNothing,
     effect_rearmPlayerMarker, func_1506D958, func_150748F4, event_setImmune,
     func_1506DA94, event_startChasing, func_1506DB30, event_setBreakStun,
     event_setSpeed, event_setTaskInt2, event_setIntelHitRoute, func_1506DBA0,
-    func_1506DC10, func_1506DBD4, func_15073D34, event_setTaskInt1,
-    event_setEnergy, func_1506DCF8, func_15074A6C, event_scaleByPlayerDistance,
-    event_addNoShove, func_1506DD6C, func_1506DDB8, func_1506DDC0,
-    func_1506DE04, func_1506E5FC, event_throwHeldObject, func_1506EA18,
-    func_1506E73C, func_15074B7C, NULL, NULL,
+    func_1506DC10, func_1506DBD4, event_setBodyHeight, event_setTaskInt1,
+    event_setEnergy, func_1506DCF8, event_skipNextEventIfNotLifting, event_scaleByPlayerDistance,
+    event_addNoShove, event_setMatrixPhysics, func_1506DDB8, func_1506DDC0,
+    event_spawnWakePuffPair, event_playSound2Range1800, event_throwHeldObject, event_playSound1Range8000,
+    event_playSound2Range8000, func_15074B7C, NULL, NULL,
     func_1506EC50, func_1506ECD0, NULL, func_1506ECF0,
     NULL, NULL, func_1506ED0C, NULL,
     func_1506ED4C, func_1506ED68, func_1506ED90, func_1506B4EC,
     event_setMvmtControl, event_addTaskAttrib, event_clearTaskAttrib, event_clearMvmtControl,
-    func_1506E7FC, func_1506E77C, func_1506DE84, event_setAfterimage,
-    func_1506E63C, func_1506EED8, func_1506E8D8, func_1506E918,
-    func_1506EA58, event_addMvmtControl, event_setIntelAccel, event_setIntelDecel,
-    func_15071E58, func_15071F80, event_runAnimCommand, event_startHeadEffect,
-    func_15071F54, func_15071FB0, event_launchPlayer, func_150722F0,
-    func_1507266C, func_15071DC8, func_15071DF4, func_150727AC,
-    func_150727F0, event_runChildAnimCommand, func_1506D6B4, event_setTaskInt0,
-    func_15072DA0, func_15072DD8, func_15072E38, func_1506C418,
-    func_1506C43C, func_1506E848, func_1506E6BC, func_1506E7BC,
-    func_150721A4, func_15072E7C, func_15072E98, func_15072EC0,
+    func_1506E7FC, event_playQuietSound2Range1800, func_1506DE84, event_setAfterimage,
+    event_playSound2Range800, func_1506EED8, event_playSound1Range1800, event_playSound1Range800,
+    event_playQuietSound1Range3000, event_addMvmtControl, event_setIntelAccel, event_setIntelDecel,
+    func_15071E58, event_skipNextEventInCutscene, event_runAnimCommand, event_startHeadEffect,
+    event_startDeathCountdown, func_15071FB0, event_launchPlayer, event_fadeOwnedObject,
+    func_1507266C, event_runActorEffects, event_runSurfaceHandler, event_setAnimSpeedTenths,
+    event_setOwnedObjectsState, event_runChildAnimCommand, event_requestSubmergedExpression, event_setTaskInt0,
+    func_15072DA0, event_createPartSet, event_removePartSet, event_stopSound1,
+    event_stopSound2, event_playSound2IfNotPlaying, event_playSound2Range3000, event_playQuietSound2Range3000,
+    event_runFadeCommand, func_15072E7C, event_scaleAnimSpeed, func_15072EC0,
     event_setStunned, func_15072F10, func_1506BDE8, event_spawnObjectAhead,
     func_1507304C, func_15073054, event_respawnObject, func_1507233C,
-    func_15072360, func_15072388, func_150723AC, func_150723E0,
-    func_15073078, func_150730A4, event_fireVolley, func_150730D0,
-    event_releaseHeldObject, func_150739A4, func_150739C0, event_setStickSpeed,
+    func_15072360, func_15072388, event_removeObjectById, event_removeAttachedObjectById,
+    event_startCameraEnvelope, func_150730A4, event_fireVolley, func_150730D0,
+    event_releaseHeldObject, event_setWaitTimer, event_waitForTimer, event_setStickSpeed,
     func_15073A50, func_1506EEAC, event_setRopeSwing, func_15073C50,
-    func_15072740, func_1506E998, func_15073CB8, func_1506E9D8,
-    func_1506E6FC, func_1506E67C, func_1506E958, func_15073CF4,
-    func_15073D74, func_15073DA4, func_1506B82C, func_15073F5C,
-    event_clearNoShove, func_15073F78, func_1506E898, event_spawnThrownItem,
+    func_15072740, event_playSound1Range3000, func_15073CB8, event_playSound1Range4000,
+    event_playSound2Range4000, event_playSound2Range1300, event_playSound1Range1300, event_setBodyRadius,
+    event_detachObjectById, func_15073DA4, func_1506B82C, func_15073F5C,
+    event_clearNoShove, func_15073F78, event_startMp3TrackRange1800, event_spawnThrownItem,
     event_dealDamage, event_setWeaponStatus, func_15074664, event_setOwnerState,
-    event_addShotsFired, func_1507488C, func_15073E2C, func_15073EA4,
+    event_addShotsFired, event_skipEventsOnTaskBit, func_15073E2C, func_15073EA4,
     func_15073F1C,
 };
 s32 D_80086690 = 0x0FA10CDF; /* not referenced */
@@ -226,8 +226,8 @@ f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered) {
     if (time < obj->lastEventTime) {
         obj->speccnt = 0;
     }
-    D_800D1880 = 1;
-    while (obj->events != NULL && obj->events[obj->speccnt].time <= time && D_800D1880 != 0) {
+    gEventLoopRunning = 1;
+    while (obj->events != NULL && obj->events[obj->speccnt].time <= time && gEventLoopRunning != 0) {
         if (obj->events[obj->speccnt].time < 900.0f) {
             gEventParam = obj->events[obj->speccnt].parameter;
             gEventParamF = *(f32 *)&gEventParam;
@@ -333,7 +333,7 @@ void func_1506B328(void) {
 void func_1506B368(void) {
 }
 
-void func_1506B370(void) {
+void event_finishDeath(void) {
     actor_finishDeath(gCurrentActor - movement_obj);
 }
 
@@ -442,7 +442,7 @@ void event_pickPissedWalk(s32 count) {
     if (gCurrentActor->mv->pissed_walk == 0xA7) {
         gEventParam = 0xFF020144;
         gCurrentActor->mv->pissed_stumble = (math_random() % 3U) + 2;
-        func_1506E8D8();
+        event_playSound1Range1800();
         gCurrentActor->speed = gCurrentActor->speed * 0.2f;
     }
 }
@@ -512,7 +512,7 @@ void func_1506B984(void) {
     event_playAnim(175, 1.0f, 4.0f);
 }
 
-void func_1506B9AC(void) {
+void event_clearIntelAnimSeq(void) {
     gCurrentActor->intel_animseq = 0;
 }
 
@@ -529,7 +529,7 @@ void func_1506B9C0(void) {
 }
 
 /* Sound handlers: play sound gEventParam (its low half) at the current object (0 stops it). */
-void func_1506BA4C(s32 minDistance, s32 maxDistance) {
+void event_playOrStopSound2(s32 minDistance, s32 maxDistance) {
     if (gEventParam == 0) {
         sound_stopActorSound2(gCurrentActor);
     } else {
@@ -541,7 +541,7 @@ void func_1506BA4C(s32 minDistance, s32 maxDistance) {
     }
 }
 
-void func_1506BAD8(s32 minDistance, s32 maxDistance) {
+void event_playOrStopSound1(s32 minDistance, s32 maxDistance) {
     if (gEventParam == 0) {
         sound_stopActorSound1(gCurrentActor);
     } else {
@@ -553,11 +553,11 @@ void func_1506BAD8(s32 minDistance, s32 maxDistance) {
     }
 }
 
-void func_1506BB64(s32 minDistance, s32 maxDistance) {
+void event_startMp3Track(s32 minDistance, s32 maxDistance) {
     mp3_startTrackAt(gEventParam, gCurrentActor, 28000, minDistance, maxDistance);
 }
 
-void func_1506BBA8(s32 minDistance, s32 maxDistance) {
+void event_playQuietSound2(s32 minDistance, s32 maxDistance) {
     if (gCurrentActor->CameraPtr == 0) {
         sound_playActorSound2(gEventParam, gCurrentActor, 14000, minDistance, maxDistance);
     } else {
@@ -565,7 +565,7 @@ void func_1506BBA8(s32 minDistance, s32 maxDistance) {
     }
 }
 
-void func_1506BC24(s32 minDistance, s32 maxDistance) {
+void event_playQuietSound1(s32 minDistance, s32 maxDistance) {
     if (gCurrentActor->CameraPtr == 0) {
         sound_playActorSound1(gEventParam, gCurrentActor, 14000, minDistance, maxDistance);
     } else {
@@ -627,12 +627,12 @@ void event_setNoRun(void) {
     gCurrentActor->norun = gEventParam;
 }
 
-void func_1506BEDC(void) {
+void event_setDoingHit(void) {
     gCurrentActor->doing_hit = gEventParam;
     gCurrentActor->unk114 = gEventParam >> 8;
 }
 
-void func_1506BF1C(void) {
+void event_playSoundCommandAboveWater(void) {
     if (gCurrentActor->waterHeight <= gCurrentActor->ypos) {
         event_playSoundCommand();
     }
@@ -778,11 +778,11 @@ void event_playDeferredSound(void) {
     }
 }
 
-void func_1506C418(void) {
+void event_stopSound1(void) {
     sound_stopActorSound1(gCurrentActor);
 }
 
-void func_1506C43C(void) {
+void event_stopSound2(void) {
     sound_stopActorSound2(gCurrentActor);
 }
 
@@ -1222,7 +1222,7 @@ void event_resetBlink(void) {
  * face_requestExpression with the two bytes of gEventParam's high half and its low half (0xFFFF = none)
  * scaled by 1 / unk2D0->unk10.
  */
-void func_1506D584(void) {
+void event_requestExpression(void) {
     Actor *obj = gCurrentActor;
     f32 divisor;
     u16 value;
@@ -1244,7 +1244,7 @@ void func_1506D584(void) {
     }
 }
 
-void func_1506D6B4(void) {
+void event_requestSubmergedExpression(void) {
     Actor *obj = gCurrentActor;
     s32 sel;
 
@@ -1260,7 +1260,7 @@ void func_1506D6B4(void) {
         sel = 0x29;
     }
     gEventParam = (gEventParam & 0xFFFF) | (sel = (sel << 10) << 14); // matching: two-step shift + store to sel
-    func_1506D584();
+    event_requestExpression();
 }
 
 void func_1506D74C(void) {
@@ -1300,7 +1300,7 @@ void func_1506D934(void) {
     gCurrentActor->unk103 = gEventParam;
 }
 
-void func_1506D950(void) {
+void event_doNothing(void) {
 }
 
 void func_1506D958(void) {
@@ -1401,7 +1401,7 @@ void event_clearNoShove(void) {
     gCurrentActor->noshove &= ~gEventParam;
 }
 
-void func_1506DD6C(void) {
+void event_setMatrixPhysics(void) {
     if (gCurrentActor->mv != NULL) {
         gCurrentActor->mv->matrix_physics = gEventParam & 0x7F;
     }
@@ -1419,7 +1419,7 @@ void func_1506DDC0(void) {
     }
 }
 
-void func_1506DE04(void) {
+void event_spawnWakePuffPair(void) {
     s32 i;
     for (i = 0; i < 2; i++) {
         particle_spawnWakePuff(dc_glbl_CharNum, 10, 18, 12, 409, 4, 170, 0xFF, 0);
@@ -1440,7 +1440,7 @@ void func_1506DE84(void) {
             effect_spawnFadeBurst(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
                           10, 20, 7, 0.03f, 0.02f);
             gEventParam = 262;
-            func_1506BA4C(300, 1800);
+            event_playOrStopSound2(300, 1800);
         }
         return;
     case 2:
@@ -1462,7 +1462,7 @@ void func_1506DE84(void) {
         func_1516F2F8(dc_glbl_CharNum, 60, 120, 2, 0xFF, 0);
         return;
     case 8:
-        func_1506E0EC();
+        event_spawnLargeQuadEdgeParticles();
         return;
     case 9:
         particle_fireActorBoneTracer(0);
@@ -1471,7 +1471,7 @@ void func_1506DE84(void) {
         particle_fireActorBoneTracer(1);
         return;
     case 11:
-        func_1506E2CC();
+        event_spawnSmallQuadEdgeParticles();
         return;
     case 12:
         func_1516F2F8(dc_glbl_CharNum, 18, 12, 0, 0xFF, 0);
@@ -1483,7 +1483,7 @@ void func_1506DE84(void) {
 }
 
 /* Passes the corners of a +-270 square in the object's root matrix, at height unk180, to particle_spawnQuadEdgeStyleParticles. */
-void func_1506E0EC(void) {
+void event_spawnLargeQuadEdgeParticles(void) {
     f32 x;
     f32 y;
     f32 z;
@@ -1525,8 +1525,8 @@ void func_1506E0EC(void) {
     }
 }
 
-/* Same as func_1506E0EC with a +-100 quad at half scale. */
-void func_1506E2CC(void) {
+/* Same as event_spawnLargeQuadEdgeParticles with a +-100 quad at half scale. */
+void event_spawnSmallQuadEdgeParticles(void) {
     f32 x;
     f32 y;
     f32 z;
@@ -1632,113 +1632,113 @@ s32 event_resolveSoundCommand(Actor *obj, s32 *command, s32 mode) {
     return 1;
 }
 
-void func_1506E5FC(void) {
+void event_playSound2Range1800(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BA4C(300, 1800);
+        event_playOrStopSound2(300, 1800);
     }
 }
 
-void func_1506E63C(void) {
+void event_playSound2Range800(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BA4C(100, 800);
+        event_playOrStopSound2(100, 800);
     }
 }
 
-void func_1506E67C(void) {
+void event_playSound2Range1300(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BA4C(190, 1300);
+        event_playOrStopSound2(190, 1300);
     }
 }
 
-void func_1506E6BC(void) {
+void event_playSound2Range3000(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BA4C(300, 3000);
+        event_playOrStopSound2(300, 3000);
     }
 }
 
-void func_1506E6FC(void) {
+void event_playSound2Range4000(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BA4C(700, 4000);
+        event_playOrStopSound2(700, 4000);
     }
 }
 
-void func_1506E73C(void) {
+void event_playSound2Range8000(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BA4C(3000, 8000);
+        event_playOrStopSound2(3000, 8000);
     }
 }
 
-void func_1506E77C(void) {
+void event_playQuietSound2Range1800(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BBA8(300, 1800);
+        event_playQuietSound2(300, 1800);
     }
 }
 
-void func_1506E7BC(void) {
+void event_playQuietSound2Range3000(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BBA8(300, 3000);
+        event_playQuietSound2(300, 3000);
     }
 }
 
 void func_1506E7FC(void) {
     if (gCurrentActor->shad == 0.0f) {
         if (gCurrentActor->ivehitit == 0) {
-            func_1506E5FC();
+            event_playSound2Range1800();
         }
     }
 }
 
-void func_1506E848(void) {
+void event_playSound2IfNotPlaying(void) {
     if ((event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) && (sound_isSoundPlaying(gEventParam) == 0)) {
-        func_1506BA4C(80, 800);
+        event_playOrStopSound2(80, 800);
     }
 }
 
-void func_1506E898(void) {
+void event_startMp3TrackRange1800(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 2) != 0) {
-        func_1506BB64(300, 1800);
+        event_startMp3Track(300, 1800);
     }
 }
 
-void func_1506E8D8(void) {
+void event_playSound1Range1800(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BAD8(300, 1800);
+        event_playOrStopSound1(300, 1800);
     }
 }
 
-void func_1506E918(void) {
+void event_playSound1Range800(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BAD8(100, 800);
+        event_playOrStopSound1(100, 800);
     }
 }
 
-void func_1506E958(void) {
+void event_playSound1Range1300(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BAD8(190, 1300);
+        event_playOrStopSound1(190, 1300);
     }
 }
 
-void func_1506E998(void) {
+void event_playSound1Range3000(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BAD8(300, 3000);
+        event_playOrStopSound1(300, 3000);
     }
 }
 
-void func_1506E9D8(void) {
+void event_playSound1Range4000(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BAD8(700, 4000);
+        event_playOrStopSound1(700, 4000);
     }
 }
 
-void func_1506EA18(void) {
+void event_playSound1Range8000(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BAD8(3000, 8000);
+        event_playOrStopSound1(3000, 8000);
     }
 }
 
-void func_1506EA58(void) {
+void event_playQuietSound1Range3000(void) {
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BC24(300, 3000);
+        event_playQuietSound1(300, 3000);
     }
 }
 
@@ -1796,7 +1796,7 @@ void func_1506EC50(void) {
     if (gCurrentActor->shad > 0.2f) {
         if ((gEventParam & 0x8000) == 0 || movement_obj[0].ypos < gCurrentActor->ypos) {
             gEventResult = gEventParam & 0xFF;
-            D_800D1880 = 0;
+            gEventLoopRunning = 0;
             gCurrentActor->speccnt -= 1;
         }
     }
@@ -1908,31 +1908,31 @@ void func_1506F004(s32 cmd) {
     func_150BCBBC(gCurrentActor);
 }
 
-void func_1506F02C(s32 cmd) {
+void event_attachOwnerEmitter(s32 cmd) {
     particle_attachOwnerEmitter(gCurrentActor, 0xFF, 0);
 }
 
-void func_1506F05C(s32 cmd) {
+void event_startDustEmitter50(s32 cmd) {
     particle_startObjDustEmitter(gCurrentActor, 50, 0xFF, 1);
 }
 
-void func_1506F090(s32 cmd) {
+void event_startDustEmitter(s32 cmd) {
     particle_startObjDustEmitter(gCurrentActor, -1, 0xFF, 1);
 }
 
-void func_1506F0C4(s32 cmd) {
+void event_spawnFoot0Dust(s32 cmd) {
     particle_spawnFootDust(gCurrentActor, 0);
 }
 
-void func_1506F0F0(s32 cmd) {
+void event_spawnFoot1Dust(s32 cmd) {
     particle_spawnFootDust(gCurrentActor, 1);
 }
 
-void func_1506F11C(s32 cmd) {
+void event_spawnSide0StepEffects(s32 cmd) {
     effect_spawnJointStepEffects(gCurrentActor, 0, 0xFF);
 }
 
-void func_1506F14C(s32 cmd) {
+void event_spawnSide1StepEffects(s32 cmd) {
     effect_spawnJointStepEffects(gCurrentActor, 1, 0xFF);
 }
 
@@ -1940,7 +1940,7 @@ void event_sprayTrails(s32 cmd) {
     trail_sprayFromRing(gCurrentActor, 0xFF);
 }
 
-void func_1506F1A8(s32 cmd) {
+void event_spawnBone12Flame(s32 cmd) {
     CharacterFlamethrowerSetup descriptor;
     Actor *obj;
 
@@ -2041,7 +2041,7 @@ void event_stopFlamethrowerJets(s32 cmd) {
     flamethrower_stopJets(gCurrentActor);
 }
 
-void func_1506F54C(s32 cmd) {
+void event_spawnBone13Flame(s32 cmd) {
     CharacterFlamethrowerSetup descriptor;
 
     descriptor.seed.owner = gCurrentActor;
@@ -2152,7 +2152,7 @@ void func_1506FA90(s32 cmd) {
     beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 0x1A, -1, -181.0f, -218.0f, -1.0f, -681.0f, -584.0f, -2.0f, 3, 3, 5, 20.0f, (math_randomFloat() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
-void func_1506FB60(s32 cmd) {
+void event_fireJointShot(s32 cmd) {
     if (func_151044F4() != 0) {
         func_151C6A28(gCurrentActor, cmd - 0x13, 0xFF, 0);
     } else {
@@ -2160,11 +2160,11 @@ void func_1506FB60(s32 cmd) {
     }
 }
 
-void func_1506FBE8(s32 cmd) {
+void event_startSparkEmitter70(s32 cmd) {
     particle_startSparkEmitter(gCurrentActor, 0x46, 0xFF, 0);
 }
 
-void func_1506FC1C(s32 cmd) {
+void event_startSparkEmitter40(s32 cmd) {
     particle_startSparkEmitter(gCurrentActor, 0x28, 0xFF, 0);
 }
 
@@ -2180,11 +2180,11 @@ void func_1506FC9C(s32 cmd) {
     func_150B3AB0(gCurrentActor, 0xFF);
 }
 
-void func_1506FCC8(s32 cmd) {
+void event_spawnJetPreset6(s32 cmd) {
     flamethrower_spawnJet(gCurrentActor, 6, 0xFF, 0);
 }
 
-void func_1506FCFC(s32 cmd) {
+void event_spawnJetPreset5(s32 cmd) {
     flamethrower_spawnJet(gCurrentActor, 5, 0xFF, 0);
 }
 
@@ -2192,11 +2192,11 @@ void func_1506FD30(s32 cmd) {
     beam_spawnBoneTracerEx(gCurrentActor, gCurrentActor->unique_id, 1, -1, 0.0f, 0, 345.0f, 0.0f, 0, 414.0f, 3, 3, 5, 20.0f, (math_randomFloat() * 10.0f) + 40.0f, 1, 50.0f);
 }
 
-void func_1506FDF0(s32 cmd) {
+void event_spawnGroundMark0(s32 cmd) {
     effect_spawnBoneGroundMark(gCurrentActor, 0);
 }
 
-void func_1506FE1C(s32 cmd) {
+void event_spawnGroundMark1(s32 cmd) {
     effect_spawnBoneGroundMark(gCurrentActor, 1);
 }
 
@@ -2208,11 +2208,11 @@ void func_1506FE74(s32 cmd) {
     effect_spawnBoneGroundMark(gCurrentActor, 1);
 }
 
-void func_1506FEA0(s32 cmd) {
+void event_spawnGroundMark2(s32 cmd) {
     effect_spawnBoneGroundMark(gCurrentActor, 2);
 }
 
-void func_1506FECC(s32 cmd) {
+void event_spawnGroundMark3(s32 cmd) {
     effect_spawnBoneGroundMark(gCurrentActor, 3);
 }
 
@@ -2224,48 +2224,48 @@ void func_1506FF24(s32 cmd) {
     func_151AB920(gCurrentActor, 1);
 }
 
-void func_1506FF50(s32 cmd) {
+void event_spawnSparkEmitterTask(s32 cmd) {
     effect_spawnSparkEmitterTask(gCurrentActor);
 }
 
-void func_1506FF78(s32 cmd) {
+void event_spawnBoneGroundBurst0(s32 cmd) {
     particle_spawnBoneGroundBurst(gCurrentActor, 0, 1, 0xFF);
 }
 
-void func_1506FFAC(s32 cmd) {
+void event_spawnBoneGroundBurst1(s32 cmd) {
     particle_spawnBoneGroundBurst(gCurrentActor, 1, 1, 0xFF);
 }
 
-void func_1506FFE0(s32 cmd) {
+void event_spawnBoneGroundBurst2(s32 cmd) {
     particle_spawnBoneGroundBurst(gCurrentActor, 2, 1, 0xFF);
 }
 
-void func_15070014(s32 cmd) {
+void event_spawnImpactRing(s32 cmd) {
     effect_spawnImpactRing(gCurrentActor);
 }
 
-void func_1507003C(s32 cmd) {
+void event_spawnJointImpact(s32 cmd) {
     effect_spawnJointImpact(gCurrentActor, 0);
     effect_startJointEmitterTask(gCurrentActor, 0, 0x3E8, 0xFF, 0);
 }
 
-void func_15070084(s32 cmd) {
+void event_spawnBloodGroundBurst(s32 cmd) {
     blood_spawnGroundBurst(gCurrentActor, 0xFF, 1);
 }
 
-void func_150700B4(s32 cmd) {
+void event_spawnLandingBurst(s32 cmd) {
     effect_spawnLandingBurst(gCurrentActor, 0xFF, 1);
 }
 
-void func_150700E4(s32 cmd) {
+void event_spawnBoneModelBurst(s32 cmd) {
     particle_spawnBoneModelBurst(gCurrentActor, 0xFF, 1);
 }
 
-void func_15070114(s32 cmd) {
+void event_attachBloodStrip(s32 cmd) {
     particle_attachBloodStrip(gCurrentActor, 0xFF, 1);
 }
 
-void func_15070144(s32 cmd) {
+void event_fireBullet(s32 cmd) {
     IgnoreList info;
     s32 mode;
 
@@ -2283,11 +2283,11 @@ void func_15070144(s32 cmd) {
     weapon_rumbleShooter(gCurrentActor);
 }
 
-void func_150701C4(s32 cmd) {
+void event_fireSegmentShot(s32 cmd) {
     weapon_fireSegmentShot(gCurrentActor, 0xFF, 1);
 }
 
-void func_150701F4(s32 cmd) {
+void event_explodeSightAtActor(s32 cmd) {
     sight_explodeAtActor(gCurrentActor, 0xFF, 1);
 }
 
@@ -2396,15 +2396,15 @@ void func_15070300(s32 cmd) {
     weapon_spawnShortLight(&worldPos, 0xFF, 1);
 }
 
-void func_15070690(s32 cmd) {
+void event_fireBeamSlot(s32 cmd) {
     beam_fireSlot(gCurrentActor, (cmd - 0x3E) & 0xFF, cmd);
 }
 
-void func_150706C4(s32 cmd) {
+void event_releaseBeamSlot(s32 cmd) {
     beam_releaseSlot(gCurrentActor, (cmd - 0x3E) & 0xFF, cmd);
 }
 
-void func_150706F8(s32 cmd) {
+void event_fireSlotProjectiles(s32 cmd) {
     if ((gCurrentActor->unk94 & 0x10) == 0) {
         beam_fireSlotProjectile(gCurrentActor, 0, 0xFF, 1);
     }
@@ -2425,7 +2425,7 @@ void event_fireLauncher(s32 cmd) {
     weapon_fireLauncherProjectile(gCurrentActor, 0xFF, 1);
 }
 
-void func_150707F8(s32 cmd) {
+void event_runLauncherMuzzle(s32 cmd) {
     weapon_runLauncherMuzzle(gCurrentActor, 0xFF, 1, 0, 0);
 }
 
@@ -2437,7 +2437,7 @@ void func_15070860(s32 cmd) {
     func_150FE49C(gCurrentActor, 0xFF, 1, 0, 0);
 }
 
-void func_15070898(s32 cmd) {
+void event_spawnBone9Flame(s32 cmd) {
     CharacterFlamethrowerSetup descriptor;
 
     descriptor.seed.owner = gCurrentActor;
@@ -2536,7 +2536,7 @@ void event_stopFlames(s32 cmd) {
     flamethrower_stopFlames(gCurrentActor);
 }
 
-void func_15070C40(u8 variant) {
+void event_spawnImpactBlast(u8 variant) {
     Vec3f pos;
     Actor *obj;
     Actor *owner;
@@ -2550,12 +2550,12 @@ void func_15070C40(u8 variant) {
     effect_spawnImpactBlast(owner, obj, &pos, variant, 0, 0xFF, 0);
 }
 
-void func_15070CDC(s32 cmd) {
-    func_15070C40(1);
+void event_spawnImpactBlast1(s32 cmd) {
+    event_spawnImpactBlast(1);
 }
 
-void func_15070D00(s32 cmd) {
-    func_15070C40(0);
+void event_spawnImpactBlast0(s32 cmd) {
+    event_spawnImpactBlast(0);
 }
 
 void func_15070D24(s32 cmd) {
@@ -2640,11 +2640,11 @@ void func_15071254(s32 cmd) {
     func_15070F60(1);
 }
 
-void func_15071278(s32 cmd) {
+void event_spawnTwoSidedEmitter(s32 cmd) {
     particle_spawnTwoSidedEmitter(gCurrentActor, 0, 1, gCurrentActor->animseq.ub[1]);
 }
 
-void func_150712AC(s32 cmd) {
+void event_fireForwardProjectile(s32 cmd) {
     RumbleParams args;
 
     weapon_spawnForwardProjectile(gCurrentActor, 0xFF, 1);
@@ -2658,7 +2658,7 @@ void func_150712AC(s32 cmd) {
     }
 }
 
-void func_15071360(s32 cmd) {
+void event_fireAttachedGun(s32 cmd) {
     RumbleParams args;
 
     if (func_151044F4() != 0) {
@@ -2676,15 +2676,15 @@ void func_15071360(s32 cmd) {
     }
 }
 
-void func_15071434(s32 cmd) {
+void event_spawnShotEffectsWithAttacks(s32 cmd) {
     weapon_spawnShotEffects(gCurrentActor, 1, 0, 0xFF, 1);
 }
 
-void func_15071470(s32 cmd) {
+void event_spawnShotEffects(s32 cmd) {
     weapon_spawnShotEffects(gCurrentActor, 0, 0, 0xFF, 1);
 }
 
-void func_150714AC(s32 cmd) {
+void event_spawnShotEffectsWithRay(s32 cmd) {
     weapon_spawnShotEffects(gCurrentActor, 0, 1, 0xFF, 1);
 }
 
@@ -2719,7 +2719,7 @@ void event_notifyFollowersGone(s32 cmd) {
     trail_notifyFollowersGone(gCurrentActor);
 }
 
-void func_15071690(s32 cmd) {
+void event_spawnLargeObjBurst(s32 cmd) {
     Actor *obj;
     s32 pad0; // matching: unused stack slot
     s32 buf;
@@ -2731,7 +2731,7 @@ void func_15071690(s32 cmd) {
     }
 }
 
-void func_150716EC(s32 cmd) {
+void event_rumbleNearbyPlayers(s32 cmd) {
     Vec3f pos;
     Actor *obj;
 
@@ -2764,7 +2764,7 @@ void func_150717E0(s32 cmd) {
     }
 }
 
-void func_15071830(s32 cmd) {
+void event_spawnDelayedBurst(s32 cmd) {
     effect_spawnDelayedBurst(gCurrentActor, 0xFF, 1);
 }
 
@@ -2799,19 +2799,19 @@ const Vec3f D_80099BC8[3] = {
 const s32 gDebrisModelIds[6] = { 0x39, 0x11, 0x12, 0x13, 0x14, 0x15 };
 const f32 gDebrisModelScales[6] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 
-void func_15071998(s32 cmd) {
+void event_spawnBonePointImpact0(s32 cmd) {
     effect_spawnBonePointImpact(gCurrentActor, 0, 0xFF, 1);
 }
 
-void func_150719CC(s32 cmd) {
+void event_spawnBonePointImpact1(s32 cmd) {
     effect_spawnBonePointImpact(gCurrentActor, 1, 0xFF, 1);
 }
 
-void func_15071A00(s32 cmd) {
+void event_spawnBonePointImpact2(s32 cmd) {
     effect_spawnBonePointImpact(gCurrentActor, 2, 0xFF, 1);
 }
 
-void func_15071A34(s32 cmd) {
+void event_emitLineBursts(s32 cmd) {
     trail_emitLineBursts(gCurrentActor, 0xFF, 1);
 }
 
@@ -2893,11 +2893,11 @@ void event_runChildAnimCommand(void) {
     }
 }
 
-void func_15071DC8(void) {
+void event_runActorEffects(void) {
     effect_runActorEffects(gCurrentActor, gEventParam);
 }
 
-void func_15071DF4(void) {
+void event_runSurfaceHandler(void) {
     effect_runSurfaceHandler(gCurrentActor, gEventParam);
 }
 
@@ -2923,11 +2923,11 @@ void func_15071F14(void) {
     actor_playAnim(gCurrentActor, 36, 1.0f, 3.0f, 0.0f, 0.0f, 0);
 }
 
-void func_15071F54(void) {
+void event_startDeathCountdown(void) {
     actor_startDeathCountdown(gCurrentActor, gEventParam);
 }
 
-void func_15071F80(void) {
+void event_skipNextEventInCutscene(void) {
     if (gCutsceneStates[0] == 1) {
         gCurrentActor->speccnt++;
     }
@@ -2995,7 +2995,7 @@ void event_launchPlayer(void) {
     }
 }
 
-void func_150721A4(void) {
+void event_runFadeCommand(void) {
     u16 lo = gEventParam;
     u16 mid = gEventParam >> 8;
     u16 hi = gEventParam >> 16;
@@ -3026,7 +3026,7 @@ Actor *event_getOwnedObject(Actor *owner, s32 n) {
     return NULL;
 }
 
-void func_150722F0(void) {
+void event_fadeOwnedObject(void) {
     Actor *child = event_getFirstOwnedObject(gCurrentActor);
 
     if (child != NULL) {
@@ -3049,7 +3049,7 @@ void func_15072388(void) {
     gCurrentActor->unk94 |= gEventParam;
 }
 
-void func_150723AC(void) {
+void event_removeObjectById(void) {
     Actor *obj = collision_findObjectById(gEventParam);
 
     if (obj != NULL) {
@@ -3057,7 +3057,7 @@ void func_150723AC(void) {
     }
 }
 
-void func_150723E0(void) {
+void event_removeAttachedObjectById(void) {
     Actor *obj = collision_findObjectById(gEventParam);
 
     if (obj != NULL && obj->attach_char != 0) {
@@ -3160,12 +3160,12 @@ void func_15072740(void) {
     obj->unk101 = 4;
 }
 
-void func_150727AC(void) {
+void event_setAnimSpeedTenths(void) {
     gCurrentActor->animsp = gEventParam * 0.1f;
     gCurrentActor->unk2D0->speed[0] = gCurrentActor->animsp;
 }
 
-void func_150727F0(void) {
+void event_setOwnedObjectsState(void) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
@@ -3176,7 +3176,7 @@ void func_150727F0(void) {
     }
 }
 
-void func_15072918(void) {
+void event_removeSelf(void) {
     actor_remove(gCurrentActor, 0);
 }
 
@@ -3316,7 +3316,7 @@ void func_15072DA0(void) {
     gCurrentActor->unk2F8 |= gEventParam;
 }
 
-void func_15072DD8(void) {
+void event_createPartSet(void) {
     collision_createPartSet(gCurrentActor, gEventParam, 1.0f, 0);
 
     if (gCurrentActor->mv != NULL && gCurrentActor->mv->weapon_status == 1) {
@@ -3324,7 +3324,7 @@ void func_15072DD8(void) {
     }
 }
 
-void func_15072E38(void) {
+void event_removePartSet(void) {
     collision_removePartSet(gCurrentActor, gEventParam);
 
     if (gCurrentActor->mv != NULL) {
@@ -3336,7 +3336,7 @@ void func_15072E7C(void) {
     gCurrentActor->unk10C = gEventParam;
 }
 
-void func_15072E98(void) {
+void event_scaleAnimSpeed(void) {
     gCurrentActor->unk2D0->speed[0] *= gEventParamF;
 }
 
@@ -3381,7 +3381,7 @@ void func_15073070(void) {
 
 }
 
-void func_15073078(void) {
+void event_startCameraEnvelope(void) {
     camera_startEnvelope(0, gEventParam, 1);
 }
 
@@ -3555,15 +3555,15 @@ void event_releaseHeldObject(void) {
     }
 }
 
-void func_150739A4(void) {
+void event_setWaitTimer(void) {
     gCurrentActor->unk64 = gEventParam;
 }
 
-void func_150739C0(void) {
+void event_waitForTimer(void) {
     gCurrentActor->unk64 -= gFrameSteps;
 
     if (gCurrentActor->unk64 >= 0) {
-        D_800D1880 = 0;
+        gEventLoopRunning = 0;
         gCurrentActor->speccnt--;
         gEventResult = gEventParam;
     }
@@ -3611,7 +3611,7 @@ void event_setRopeSwing(void) {
     (*objp)->mv->ropeSwingTimer = (*param >> 24) & 0xFF;
 }
 
-void func_15073C28(void) {
+void event_updateIdle(void) {
     anim_updateIdle();
 }
 
@@ -3631,15 +3631,15 @@ void func_15073CB8(void) {
     }
 }
 
-void func_15073CF4(void) {
+void event_setBodyRadius(void) {
     actor_setBodyRadius(gCurrentActor, gEventParam);
 }
 
-void func_15073D34(void) {
+void event_setBodyHeight(void) {
     actor_setBodyHeight(gCurrentActor, gEventParam);
 }
 
-void func_15073D74(void) {
+void event_detachObjectById(void) {
     Actor *obj;
 
     obj = collision_findObjectById(gEventParam);
@@ -3921,7 +3921,7 @@ void func_15074870(void) {
 }
 
 /* Adds the top byte to unk138 when bit `mask` of word taskint[index] matches the low bit's sense. */
-void func_1507488C(void) {
+void event_skipEventsOnTaskBit(void) {
     u8 index;
     u8 mask;
     u8 enabled;
@@ -3941,7 +3941,7 @@ void func_150748F4(void) {
     movement_obj[0].ivehitit = gEventParam;
 }
 
-void func_1507490C(void) {
+void event_setHeldObjectState(void) {
     u8 index = gCurrentActor->lifting - 100;
 
     if (gCurrentActor->lifting != 0) {
@@ -3975,7 +3975,7 @@ void event_setBreakStun(void) {
     }
 }
 
-void func_15074A6C(void) {
+void event_skipNextEventIfNotLifting(void) {
     if (gCurrentActor->lifting == 0) {
         gCurrentActor->speccnt++;
     }
@@ -4010,7 +4010,7 @@ void event_scaleByPlayerDistance(void) {
 }
 
 void func_15074B7C(void) {
-    D_800D1880 = 0;
+    gEventLoopRunning = 0;
     gEventResult = gEventParam;
 
     if (gEventParam == 0) {

@@ -208,8 +208,8 @@ static void (*gParticleCallbacks[])() = {
  * declared without a prototype: each takes its own object type. */
 void (*gObjectCallbacks[])() = {
     NULL, NULL, particle_updateBounceDebris, particle_updateSplashFx,
-    func_150B6DFC, func_150B6E3C, sprite_updateGrowIn, sprite_updateLinearMove,
-    func_150B709C, beam_updateGrowSprite, beam_updateSpriteFade,
+    sprite_updateTexScroll, sprite_updateFrameScroll, sprite_updateGrowIn, sprite_updateLinearMove,
+    sprite_updateSlideBlink, beam_updateGrowSprite, beam_updateSpriteFade,
 };
 
 /* The texture table: the effects' animIndex / texture indices select an entry. */
@@ -378,7 +378,7 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
         if (gObjectTypes[type].draw != NULL) {
             head = &gObjectLists[list][type];
             if (*head != NULL) {
-                D_8003C8E0 = (type & 0xFFFFFF) | 0x7000000;
+                gDebugStatusCode = (type & 0xFFFFFF) | 0x7000000;
                 overflowed = FALSE;
                 if (gObjectTypes[type].drawMode == 0) {
                     mode0Start = gfx;
@@ -459,7 +459,7 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                         return mode0Start;
                     }
                 }
-                D_8003C8E0 = 0;
+                gDebugStatusCode = 0;
             }
         }
     }

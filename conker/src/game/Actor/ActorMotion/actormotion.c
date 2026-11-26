@@ -1105,7 +1105,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
                 }
                 if ((actor->unk2CC != 0) && (actor->speed > 5.0f)) {
                     gEventParam = actor->unk2CC;
-                    func_1506E5FC();
+                    event_playSound2Range1800();
                 }
                 if (actor->type == 4) {
                     actor->unk102 = 0;
@@ -2182,7 +2182,7 @@ void actor_landNonPlayer(Actor *actor, f32 floorY) {
                             actor->yspd = (0.0f - actor->yspd) * factor;
                             if (sound != 0 && actor->yspd > 5.0f) {
                                 gEventParam = sound;
-                                func_1506E5FC();
+                                event_playSound2Range1800();
                             }
                         } else if (actor->type != 7) {
                             actor->yspd = -4.0f * gActorTimeStep;
@@ -2521,7 +2521,7 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
                     victim->doing_hit = 0;
                     gEventParam = table[index].unk4;
                     if (gEventParam != 0) {
-                        func_1506E5FC();
+                        event_playSound2Range1800();
                     }
                     if (victim->type == 1) {
                         if ((victim->mv->transport == 2) && (victim->mv->bot == 0)) {
@@ -2540,7 +2540,7 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
                         victim->angle = attacker->langle;
                         victim->speed = 25.0f;
                         gEventParam = 0xFF0102E2;
-                        func_1506E5FC();
+                        event_playSound2Range1800();
                         attacker->doing_hit = 0;
                         attacker->intelwalk = 0xD;
                         attacker->scriptCmd = NULL;
@@ -2566,7 +2566,7 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
                     handler = table[index].unk8;
                     gEventParam = table[index].unk4;
                     if (gEventParam != 0) {
-                        func_1506E5FC();
+                        event_playSound2Range1800();
                     }
                     gHitReactionProcs[handler](attacker, victim, (u8 *)&reactionBuf);
                     if (victim->unkFC != 0) {
@@ -3564,9 +3564,9 @@ void actor_advanceReaction(s32 sourceIdx, Actor *actor) {
                             actor->mv->on_fire = 1;
                             gEventParam = 0xFF010434;
                             deathKind = 0;
-                            func_1506E5FC();
+                            event_playSound2Range1800();
                             gEventParam = 0xFF070169;
-                            func_1506E8D8();
+                            event_playSound1Range1800();
                             break;
                         default:
                             deathKind = 1;

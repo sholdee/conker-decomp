@@ -62,10 +62,10 @@ extern s32  D_80040000;
 
 
 
-// BSS ENDS AT D_80043B40
+// BSS ENDS AT gPageSlots
 
 extern OSMesg __osEepromTimerMsg;
-extern s32  D_80043B40[]; // 0xFE0-byte block past BSS end (TLB slot table in 45B80)
+extern s32  gPageSlots[]; // 0xFE0-byte block past BSS end (TLB slot table in 45B80)
 extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 
 // this space is filled by D_80044B20

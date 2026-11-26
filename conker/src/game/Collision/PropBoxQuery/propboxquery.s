@@ -162,8 +162,8 @@ glabel collision_findPropsInBox
     /* D3C5C 150A67AC 844D0002 */  lh         $t5, 0x2($v0)
     /* D3C60 150A67B0 01054021 */  addu       $t0, $t0, $a1
     /* D3C64 150A67B4 910C0000 */  lbu        $t4, 0x0($t0)
-    /* D3C68 150A67B8 3C0F800C */  lui        $t7, %hi(D_800BE5D8)
-    /* D3C6C 150A67BC 8DEFE5D8 */  lw         $t7, %lo(D_800BE5D8)($t7)
+    /* D3C68 150A67B8 3C0F800C */  lui        $t7, %hi(gBitmapCodeTree)
+    /* D3C6C 150A67BC 8DEFE5D8 */  lw         $t7, %lo(gBitmapCodeTree)($t7)
     /* D3C70 150A67C0 11200023 */  beqz       $t1, .L150A6850
     /* D3C74 150A67C4 24190007 */   addiu     $t9, $zero, 0x7
   .L150A67C8:

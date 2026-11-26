@@ -17,7 +17,7 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
 
     view_setPlayerCount(gModePlayerCounts[gMatchState.mode], arg2);
     func_150175E0();
-    func_150177F8();
+    zone_resetTaskWorkingSet();
     mp_clearGame();
     func_15000090();
     gRumbleRedetect = 1;
@@ -121,7 +121,7 @@ void game_loadLevel(void) {
     func_15016670();
     func_15004F00();
     model_allocBonePools();
-    func_15017868();
+    zone_reloadSectionTasks();
     env_initFog(level);
     func_1502AAF0();
     func_1502AAF8(level);

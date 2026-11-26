@@ -38,7 +38,7 @@ char D_80087414[] = "<NO TASK NAME SET!>"; /* not referenced */
 void script_loadLevelTasks(s32 unused, s32 reload) {
     s32 i;
 
-    D_8003C8E0 = 0x5000000;
+    gDebugStatusCode = 0x5000000;
     script_reallocTaskDoneBits();
     script_clearPoseCommands();
 
@@ -50,7 +50,7 @@ void script_loadLevelTasks(s32 unused, s32 reload) {
     }
 
     script_autoSave();
-    D_8003C8E0 = 0;
+    gDebugStatusCode = 0;
 }
 
 /* Returns the BSS of the task `id`, or NULL if it is not loaded. */
@@ -77,9 +77,9 @@ IdRecord *script_getTask(s32 id, s32 reload) {
         node = script_loadTask(id);
         script_insertTask(node);
         if (!ID_FLAG(TASK_ID(node))) {
-            D_8003C8E0 = 0x6000000;
+            gDebugStatusCode = 0x6000000;
             script_runTask(node, TASK_ENTRY_START);
-            D_8003C8E0 = 0;
+            gDebugStatusCode = 0;
         }
         if (!reload || (node->TaskID & RUN_INIT_ONCE_ONLY)) {
             node->TaskID |= TASK_INIT_PENDING;
@@ -240,9 +240,9 @@ void script_purgeTasks(s32 unloadAll) {
             script_freeTask(node);
             gTaskStates[id] = 3;
         } else if (unloadAll || (key & TASK_FINISHED) || ((key & PURGE_BETWEEN_SECTIONS) && level != node->LoadSection)) {
-            D_8003C8E0 = 0x6000001;
+            gDebugStatusCode = 0x6000001;
             script_runTask(node, TASK_ENTRY_PURGE);
-            D_8003C8E0 = 0;
+            gDebugStatusCode = 0;
             script_freeTask(node);
             if (!ID_FLAG(id)) {
                 gTaskStates[id] = 0;
@@ -277,9 +277,9 @@ void script_runTasks(s32 mode) {
         }
         if (mode == TASK_ENTRY_DONE) {
             if (ID_FLAG(id)) {
-                D_8003C8E0 = 0x6000002;
+                gDebugStatusCode = 0x6000002;
                 script_runTask(node, TASK_ENTRY_DONE);
-                D_8003C8E0 = 0;
+                gDebugStatusCode = 0;
                 gTaskStates[id] = 3;
                 node->TaskID |= TASK_FINISHED;
                 node = node->NextTaskPtr;
@@ -287,9 +287,9 @@ void script_runTasks(s32 mode) {
             }
         } else if (!ID_FLAG(id)) {
             if (key & TASK_INIT_PENDING) {
-                D_8003C8E0 = 0x6000003;
+                gDebugStatusCode = 0x6000003;
                 script_runTask(node, TASK_ENTRY_INIT);
-                D_8003C8E0 = 0;
+                gDebugStatusCode = 0;
                 key = node->TaskID &= ~TASK_INIT_PENDING;
             }
             if (key & TASK_FINISHED) {
@@ -298,9 +298,9 @@ void script_runTasks(s32 mode) {
             }
             if (!(key & SUSPEND_BETWEEN_SECTIONS) || level == node->LoadSection) {
                 if (mode == TASK_ENTRY_RUN || (mode == TASK_ENTRY_INIT && !(key & RUN_INIT_ONCE_ONLY))) {
-                    D_8003C8E0 = 0x6000004;
+                    gDebugStatusCode = 0x6000004;
                     script_runTask(node, mode);
-                    D_8003C8E0 = 0;
+                    gDebugStatusCode = 0;
                 }
                 if (mode == TASK_ENTRY_RUN) {
                     gTaskStates[id] = 1;

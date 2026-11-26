@@ -96,7 +96,7 @@ void func_150F34F4(Actor *actor) {
         if (D_800CC26D != 0) {
             if (actor->shad > 30.0f) {
                 gEventParam = 0xFF010074;
-                func_1506E8D8();
+                event_playSound1Range1800();
                 actor_attachToHost(&movement_obj[D_800CC26D - 100], dc_glbl_CharNum);
                 actor->lifting = D_800CC26D;
                 actor->unk102 = 1;
@@ -238,7 +238,7 @@ void func_150F34F4(Actor *actor) {
             actor_attachToHost(&movement_obj[D_800CC26D - 100], dc_glbl_CharNum);
             actor->lifting = D_800CC26D;
             gEventParam = 0xFF010074;
-            func_1506E8D8();
+            event_playSound1Range1800();
         }
         if (actor->lifting != 0) {
             if (actor->task_attrib & 2) {
@@ -256,7 +256,7 @@ void func_150F34F4(Actor *actor) {
                 actor->lifting = 0;
                 actor->yspd = 0.0f;
                 gEventParam = 0x76;
-                func_1506E8D8();
+                event_playSound1Range1800();
             }
         } else if ((gActorPressedButtons & Z_TRIG) && (actor->unk103 == 0)) {
             count = 0;
@@ -280,13 +280,13 @@ void func_150F34F4(Actor *actor) {
             if (actor->lifting != 0) {
                 if (actor->yspd < -10.0f) {
                     gEventParam = 0xFF0100A7;
-                    func_1506E5FC();
+                    event_playSound2Range1800();
                     gEventParam = 0xFF060372;
-                    func_1506E8D8();
+                    event_playSound1Range1800();
                 }
             } else if (actor->ypos < 0.0f) {
                 gEventParam = 0xFF010072;
-                func_1506E8D8();
+                event_playSound1Range1800();
             }
             if (actor->lifting == 0) {
                 actor->yspd = 20.0f;

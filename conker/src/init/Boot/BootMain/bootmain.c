@@ -8,12 +8,12 @@ u64 gMainThreadStackTop[0x400 / sizeof(u64)];  // the top of the main thread sta
 static OSThread gIdleThread;           // idle thread
 static u8 D_80031A60[0x80];           // not referenced
 OSThread gMainThread;                  // main thread
-static u8 D_80031C90[0xE88];          // not referenced in C: init_5C2C.s runs on the stack below D_80032B18
-u32 D_80032B18[6];                    // [0]: the stack pointer that init_5C2C.s saves before it switches stacks
+static u8 gPageFaultStack[0xE88];          // not referenced in C: init_5C2C.s runs on the stack below gPageFaultStackTop
+u32 gPageFaultStackTop[6];                    // [0]: the stack pointer that init_5C2C.s saves before it switches stacks
 static u8 gChunk0OffsetsBuf[0x800];          // chunk0 offset table (16-byte aligned through gChunk0Offsets)
-static u8 D_80033330[0xDB8];          // buffer for init_5C2C.s (16-byte aligned through D_800354F8)
-u8 D_800340E8[0x1410];                // init_5C2C.s: work area of the decompressor
-u8 *D_800354F8;                       // D_80033330, aligned to 16 bytes
+static u8 gPageDmaBufferStorage[0xDB8];          // buffer for init_5C2C.s (16-byte aligned through gPageDmaBuffer)
+u8 gPageInflateWork[0x1410];                // init_5C2C.s: work area of the decompressor
+u8 *gPageDmaBuffer;                       // gPageDmaBufferStorage, aligned to 16 bytes
 s32 *gChunk0Offsets;                      // chunk0 offsets (gChunk0OffsetsBuf, aligned to 16 bytes)
 
 #include "functions.h"
@@ -28,13 +28,13 @@ RomFile D_8002AAD0[2] = {
     { (s32)&game_us_rzip_ROM_START, (s32)&debugger_us_ROM_START },
 };
 u8 D_8002AAE0 = 0;
-u8 D_8002AAE4 = 0;
+u8 gPadInitDone = 0;
 u16 *gFramebuffers[2] = { NULL, NULL }; // the two framebuffers
 
 /** Boot entry: clear BSS, set up the CPU/FPU and start the idle thread (boot_idleThread). */
 void boot_entry(void) {
-    bzero(&gIdleThreadStack, (s32)D_80043B40 - (s32)&gIdleThreadStack); // clear BSS
-    func_100061F8(1, 31);
+    bzero(&gIdleThreadStack, (s32)gPageSlots - (s32)&gIdleThreadStack); // clear BSS
+    boot_invalidateTlbEntries(1, 31);
     osInitialize();
     __osSetSR(__osGetSR() | SR_CU1 | SR_FR);
     __osSetFpcCsr(FPCSR_FS);
@@ -70,18 +70,18 @@ void boot_mainThread(void *arg) {
     u32 framebufferSize;
 
     sched_startPreNmiThread();
-    clearSize = 0x80400000 - (s32)D_80043B40;
+    clearSize = 0x80400000 - (s32)gPageSlots;
     if (D_8000030C == 0) { // osResetType: cold reset
-        bzero(D_80043B40, clearSize);
+        bzero(gPageSlots, clearSize);
     } else {
         bzero(D_800E9D10, 0x80400000 - (s32)D_800E9D10);
     }
-    osInvalICache(D_80043B40, clearSize);
-    osInvalDCache(D_80043B40, clearSize);
+    osInvalICache(gPageSlots, clearSize);
+    osInvalDCache(gPageSlots, clearSize);
     heap_clearExpansionPak();
     heap_initMemoryLayout();
     heap_init();
-    func_1000709C();
+    boot_initInflateFixedTables();
     framebufferSize = 0x1ECC0;
     gFramebuffers[0] = heap_alloc(framebufferSize, 0xFF, 3, 1, 0);
     gFramebuffers[1] = heap_alloc(framebufferSize, 0xFF, 3, 1, 0);
@@ -93,10 +93,10 @@ void boot_mainThread(void *arg) {
     size = (u32)&debugger_us_ROM_START - compressedRomAddr;
     compressed = allocate_memory(size, 1, 2, 0);
     rom_read(compressedRomAddr, compressed, size, 1);
-    func_10006240(compressed, gLevelAssetLists, D_8003809C);
+    boot_decompress(compressed, gLevelAssetLists, D_8003809C);
     heap_free(compressed);
 
-    D_800354F8 = (u8 *)ALIGN16(&D_80033330);
+    gPageDmaBuffer = (u8 *)ALIGN16(&gPageDmaBufferStorage);
     blockCount = ((u32)&D_151FA130 - (u32)&music_init + 0xFFF) >> 12;
     gChunk0Offsets = (s32 *)ALIGN16(&gChunk0OffsetsBuf);
     size = blockCount + 1;
@@ -105,9 +105,9 @@ void boot_mainThread(void *arg) {
     for (i = 0; i < size; i++) {
         gChunk0Offsets[i] = (gChunk0Offsets[i] ^ 0x8039CCCA) + romBase;
     }
-    D_8003BE74 = 0;
-    func_10005B04(0xEB);
+    gPagePool = 0;
+    boot_initPaging(0xEB);
     func_10001420();
-    func_10005BE0();
+    boot_resetPageBitmap();
     boot_runGame();
 }

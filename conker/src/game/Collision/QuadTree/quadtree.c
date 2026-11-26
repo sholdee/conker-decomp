@@ -853,11 +853,11 @@ void collision_loadMapSettings(s32 map) {
     if (count != 0 && (res->unk4 << 8) != 0) {
         D_800B0DF0 = res->header;
         if (loaded == 0) {
-            D_8003C8E0 = 0xC000037;
+            gDebugStatusCode = 0xC000037;
             debug_fatalTrap();
         }
         if (D_800B0DF0 == NULL) {
-            D_8003C8E0 = 0xC000037;
+            gDebugStatusCode = 0xC000037;
             debug_fatalTrap();
         }
     }

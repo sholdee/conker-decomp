@@ -22,9 +22,9 @@ void zone_resetObjectCursor(void);
 void zone_getRandomPoint(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 
 /* game/Zone/ZoneBounds/zonebounds.c */
-void func_15017790(void);
-void func_150177F8(void);
-void func_15017868(void);
+void zone_resetTaskProgress(void);
+void zone_resetTaskWorkingSet(void);
+void zone_reloadSectionTasks(void);
 void zone_loadObjects(s32 arg0);
 void zone_computeAllBounds(TriggerZone *objects, s32 count);
 void zone_computeBounds(TriggerZone *obj, ZoneBounds *bounds);
@@ -33,8 +33,8 @@ void zone_computeBounds(TriggerZone *obj, ZoneBounds *bounds);
 void func_150183D0(s32 stride, s32 height, u8 *bitmap, s32 *cells);
 
 /* game/Zone/ZoneTree/zonetree.c */
-s32 func_1503F800(void *unused, s16 x, s16 z, s32 bit, s32 unused2);
-s32 func_1503F904(Actor *obj, s32 bit, s32 unused);
+s32 zone_isPointHiddenFromView(void *unused, s16 x, s16 z, s32 bit, s32 unused2);
+s32 zone_isActorHiddenFromView(Actor *obj, s32 bit, s32 unused);
 void zone_advanceObjectCursor(void);
 extern u8 gZoneCursorEnabled; // nonzero: zone_advanceObjectCursor cycles the zone-object cursor
 extern u8 gZoneObjectCursor; // zone-object cursor: index into movement_obj (0..24)
@@ -43,7 +43,7 @@ extern u8 gZoneObjectCursor; // zone-object cursor: index into movement_obj (0..
 void zone_updateGlobal(s32 ticks);
 void zone_cacheAngles(TriggerZone *zone);
 void zone_updateReflections(void);
-s32 func_150A1040(s32 value);
+s32 zone_addCheckOffset(s32 value);
 void zone_applyCameraZones(Camera *cam, TriggerZone **zoneList, s32 count);
 void zone_updateActor(Actor *actor);
 s32 zone_isOutside(Actor *actor, TriggerZone *zone, s32 withMargin);

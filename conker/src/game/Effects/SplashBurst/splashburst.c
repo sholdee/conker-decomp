@@ -82,7 +82,7 @@ void func_150E0BE0(Actor *obj) {
         if (obj->count5 > 60) {
             gEventParam = 0xFF020133;
             gCurrentActor = movement_obj;
-            func_1506E8D8();
+            event_playSound1Range1800();
             gCurrentActor = obj;
         }
         obj->count5 = 0;

@@ -4,8 +4,8 @@
 #define ADPCMFBYTES 9
 #define LFSAMPLES 4
 
-void func_10007DA0(void);
-extern s32 D_8003C8E0;
+void boot_debugTrap(void);
+extern s32 gDebugStatusCode;
 Acmd *_decodeChunk(Acmd *p, N_PVoice *f, s32 nframes, s32 nbytes, s16 dmemOut, s16 dmemIn, s32 flags);
 
 /* n_alAdpcmPull, with Rare's no-wavetable silence path and a debug trap on a
@@ -38,8 +38,8 @@ Acmd *n_alAdpcmPull(N_PVoice *f, s16 *outp, s32 outCount, Acmd *p) {
     }
 
     if (K0_TO_PHYS(e->dc_table->waveInfo.adpcmWave.book->book) > 0x800000) {
-        D_8003C8E0 = 0xF000003;
-        func_10007DA0();
+        gDebugStatusCode = 0xF000003;
+        boot_debugTrap();
     }
 
     n_aLoadADPCM(ptr++, e->dc_bookSize, K0_TO_PHYS(e->dc_table->waveInfo.adpcmWave.book->book));
@@ -149,7 +149,7 @@ Acmd *n_alAdpcmPull(N_PVoice *f, s16 *outp, s32 outCount, Acmd *p) {
  * The case bodies really are emitted 5-then-4: IDO -g sorts the dispatch
  * comparisons by case VALUE but lays the bodies out in SOURCE order, and
  * golden tests 4 first while placing case 5's body first. */
-s32 func_10021C40(N_PVoice *f, s32 paramID, void *param) {
+s32 audio_setDecoderParam(N_PVoice *f, s32 paramID, void *param) {
     switch (paramID) {
         case 5:
             f->dc_table = param;

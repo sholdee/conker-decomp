@@ -26,7 +26,7 @@ void effect_spawnHitSplash(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
             sum ^= *(u32 *)addr;
         }
         if (sum != 0xA3C35D52) {
-            addr = (u32)&D_80043B40[(osGetCount() & 0xFF) * 8]; // matching: reuses addr's register
+            addr = (u32)&gPageSlots[(osGetCount() & 0xFF) * 8]; // matching: reuses addr's register
             *(s32 *)addr = osGetCount() & 0x3FFFF7;
         }
     }

@@ -528,7 +528,7 @@ void func_1504BAF0(Actor *obj) {
         other = &movement_obj[index];
         if (other->carried >= 100 && (other->character_type == 168 || other->character_type == 169)) {
             gEventParam = 3;
-            func_1507490C();
+            event_setHeldObjectState();
         }
     }
     event_dropHeldObject();
@@ -1899,7 +1899,7 @@ void actor_updatePlayer(Actor *actor) {
                     if ((pushAnim != actor->animseq.uh) && (movement_obj[D_800CC26C].character_type != 0x17)) {
                         gEventParam = 0xFF08012B;
                         pushAccel = 0.5f;
-                        func_1506E8D8();
+                        event_playSound1Range1800();
                     }
                     if (movement_obj[D_800CC26C].unk224 != 0) {
                         pushScale = movement_obj[D_800CC26C].unk224 * 0.01f;
@@ -1996,7 +1996,7 @@ void actor_updatePlayer(Actor *actor) {
                         } else if (actor->energy != 0) {
                             if (gIsMultiplayer == 0) {
                                 gEventParam = 0xFF0201D6;
-                                func_1506E9D8();
+                                event_playSound1Range4000();
                             }
                             actor->energy -= 1;
                         }
@@ -2010,7 +2010,7 @@ void actor_updatePlayer(Actor *actor) {
                 }
                 if ((actor->energy != 0) && (sound_isActorSound2Playing(actor) == 0)) {
                     gEventParam = 0xFF08030A;
-                    func_1506E5FC();
+                    event_playSound2Range1800();
                 }
             } else {
                 turnSize = actor->inwater;
@@ -2618,7 +2618,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
             }
             if ((fabsf(actor->lean_angle) > 70.0f) && (gIsMultiplayer == 0) && (actor->energy != 0) && (actor->mv->gun_before_reload == 0)) {
                 gEventParam = 0xFF020146;
-                func_1506E8D8();
+                event_playSound1Range1800();
                 actor->mv->gun_before_reload = 1;
             }
             if (fabsf(actor->lean_angle) < 20.0f) {
@@ -3040,7 +3040,7 @@ void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 
         arg0->lifting = arg0->owner + 100;
         if (arg9 != 0) {
             gEventParam = arg9;
-            func_1506E5FC();
+            event_playSound2Range1800();
         }
         obj->unk1CC = obj->ypos;
         obj->angle = arg0->langle;
@@ -3548,7 +3548,7 @@ void func_150538CC(Actor *obj) {
                 other = collision_findObjectById(6);
                 if (gCollidedActors & (1U << (other - movement_obj))) {
                     gEventParam = 0xFF0100A7;
-                    func_1506E6FC();
+                    event_playSound2Range4000();
                     if (other != NULL) {
                         obj->angle = actor_getDirectionAngle(obj->xpos - other->xpos, other->zpos - obj->zpos, 0);
                     }
@@ -3926,7 +3926,7 @@ void func_1505528C(Actor *obj) {
 
             gEventParam = 0xFF0100B0;
             if (obj->ygrav != 0.0f) {
-                func_1506E5FC();
+                event_playSound2Range1800();
             }
             // matching: the int 0 stores below (not 0.0f) steer where IDO materializes its shared FP zero
             y = obj->ypos;

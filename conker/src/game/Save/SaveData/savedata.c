@@ -53,11 +53,11 @@ u8 gSaveScanning = FALSE; // scanning the EEPROM save files (save_readFile recor
    This file was compiled with a view that returns nothing. */
 void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size);
 
-/* Resets the saved game state (func_15017790, every gPlayedCutscenes entry and the values saved with them). */
+/* Resets the saved game state (zone_resetTaskProgress, every gPlayedCutscenes entry and the values saved with them). */
 void save_resetGameState(void) {
     s32 i;
 
-    func_15017790();
+    zone_resetTaskProgress();
     for (i = 0; i < 69; i++) { gPlayedCutscenes[i] = 0; }
 
     D_800BE3DF = 24;

@@ -25,7 +25,7 @@ void level_resetSetupState(void) {
         EffectHeader **entries = gLevelSprayEffects;
 
         gSpriteQueuedCmd = 0;
-        D_800D9894 = NULL;
+        gSpriteTintEffect = NULL;
         entries[0] = NULL;
         entries[1] = NULL;
         entries[2] = NULL;

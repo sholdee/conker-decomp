@@ -167,7 +167,7 @@ glabel func_100071D0
     /* 7428 10007428 112A0114 */  beq        $t1, $t2, .L1000787C
     /* 742C 1000742C 00000000 */   nop
     /* 7430 10007430 240A0000 */  addiu      $t2, $zero, 0x0
-    /* 7434 10007434 152A00D1 */  bne        $t1, $t2, func_1000777C
+    /* 7434 10007434 152A00D1 */  bne        $t1, $t2, boot_handleFault
     /* 7438 10007438 00000000 */   nop
     /* 743C 1000743C 03688024 */  and        $s0, $k1, $t0
   .L10007440:
@@ -200,7 +200,7 @@ glabel func_100071D0
     /* 7498 10007498 40095800 */  mfc0       $t1, $11 /* handwritten instruction */
     /* 749C 1000749C 40895800 */  mtc0       $t1, $11 /* handwritten instruction */
     /* 74A0 100074A0 24040018 */  addiu      $a0, $zero, 0x18
-    /* 74A4 100074A4 0C001DEE */  jal        func_100077B8
+    /* 74A4 100074A4 0C001DEE */  jal        send_mesg
     /* 74A8 100074A8 00000000 */   nop
     /* 74AC 100074AC 3C01FFFF */  lui        $at, (0xFFFF7FFF >> 16)
     /* 74B0 100074B0 34217FFF */  ori        $at, $at, (0xFFFF7FFF & 0xFFFF)
@@ -211,7 +211,7 @@ glabel func_100071D0
     /* 74C0 100074C0 24040010 */  addiu      $a0, $zero, 0x10
     /* 74C4 100074C4 2401F7FF */  addiu      $at, $zero, -0x801
     /* 74C8 100074C8 02018024 */  and        $s0, $s0, $at
-    /* 74CC 100074CC 0C001DEE */  jal        func_100077B8
+    /* 74CC 100074CC 0C001DEE */  jal        send_mesg
     /* 74D0 100074D0 00000000 */   nop
     /* 74D4 100074D4 1000FFDA */  b          .L10007440
     /* 74D8 100074D8 00000000 */   nop
@@ -236,7 +236,7 @@ glabel func_100071D0
     /* 7520 10007520 11800008 */  beqz       $t4, .L10007544
     /* 7524 10007524 00000000 */   nop
     /* 7528 10007528 24040020 */  addiu      $a0, $zero, 0x20
-    /* 752C 1000752C 0C001DEE */  jal        func_100077B8
+    /* 752C 1000752C 0C001DEE */  jal        send_mesg
     /* 7530 10007530 00000000 */   nop
     /* 7534 10007534 12200040 */  beqz       $s1, .L10007638
     /* 7538 10007538 00000000 */   nop
@@ -244,7 +244,7 @@ glabel func_100071D0
     /* 7540 10007540 00000000 */   nop
   .L10007544:
     /* 7544 10007544 24040058 */  addiu      $a0, $zero, 0x58
-    /* 7548 10007548 0C001DEE */  jal        func_100077B8
+    /* 7548 10007548 0C001DEE */  jal        send_mesg
     /* 754C 1000754C 00000000 */   nop
     /* 7550 10007550 12200039 */  beqz       $s1, .L10007638
     /* 7554 10007554 00000000 */   nop
@@ -256,7 +256,7 @@ glabel func_100071D0
     /* 7568 10007568 3C01A440 */  lui        $at, %hi(D_A4400010)
     /* 756C 1000756C AC200010 */  sw         $zero, %lo(D_A4400010)($at)
     /* 7570 10007570 24040038 */  addiu      $a0, $zero, 0x38
-    /* 7574 10007574 0C001DEE */  jal        func_100077B8
+    /* 7574 10007574 0C001DEE */  jal        send_mesg
     /* 7578 10007578 00000000 */   nop
     /* 757C 1000757C 1220002E */  beqz       $s1, .L10007638
     /* 7580 10007580 00000000 */   nop
@@ -269,7 +269,7 @@ glabel func_100071D0
     /* 7598 10007598 3C01A450 */  lui        $at, %hi(D_A450000C)
     /* 759C 1000759C AC29000C */  sw         $t1, %lo(D_A450000C)($at)
     /* 75A0 100075A0 24040030 */  addiu      $a0, $zero, 0x30
-    /* 75A4 100075A4 0C001DEE */  jal        func_100077B8
+    /* 75A4 100075A4 0C001DEE */  jal        send_mesg
     /* 75A8 100075A8 00000000 */   nop
     /* 75AC 100075AC 12200022 */  beqz       $s1, .L10007638
     /* 75B0 100075B0 00000000 */   nop
@@ -281,7 +281,7 @@ glabel func_100071D0
     /* 75C4 100075C4 3C01A480 */  lui        $at, %hi(D_A4800018)
     /* 75C8 100075C8 AC200018 */  sw         $zero, %lo(D_A4800018)($at)
     /* 75CC 100075CC 24040028 */  addiu      $a0, $zero, 0x28
-    /* 75D0 100075D0 0C001DEE */  jal        func_100077B8
+    /* 75D0 100075D0 0C001DEE */  jal        send_mesg
     /* 75D4 100075D4 00000000 */   nop
     /* 75D8 100075D8 12200017 */  beqz       $s1, .L10007638
     /* 75DC 100075DC 00000000 */   nop
@@ -294,7 +294,7 @@ glabel func_100071D0
     /* 75F4 100075F4 3C01A460 */  lui        $at, %hi(D_A4600010)
     /* 75F8 100075F8 AC290010 */  sw         $t1, %lo(D_A4600010)($at)
     /* 75FC 100075FC 24040040 */  addiu      $a0, $zero, 0x40
-    /* 7600 10007600 0C001DEE */  jal        func_100077B8
+    /* 7600 10007600 0C001DEE */  jal        send_mesg
     /* 7604 10007604 00000000 */   nop
     /* 7608 10007608 1220000B */  beqz       $s1, .L10007638
     /* 760C 1000760C 00000000 */   nop
@@ -307,7 +307,7 @@ glabel func_100071D0
     /* 7624 10007624 3C01A430 */  lui        $at, %hi(D_A4300000)
     /* 7628 10007628 AC290000 */  sw         $t1, %lo(D_A4300000)($at)
     /* 762C 1000762C 24040048 */  addiu      $a0, $zero, 0x48
-    /* 7630 10007630 0C001DEE */  jal        func_100077B8
+    /* 7630 10007630 0C001DEE */  jal        send_mesg
     /* 7634 10007634 00000000 */   nop
   .L10007638:
     /* 7638 10007638 2401FBFF */  addiu      $at, $zero, -0x401
@@ -332,7 +332,7 @@ glabel func_100071D0
     /* 767C 1000767C 240A0001 */  addiu      $t2, $zero, 0x1
     /* 7680 10007680 AD2A0000 */  sw         $t2, 0x0($t1)
     /* 7684 10007684 24040070 */  addiu      $a0, $zero, 0x70
-    /* 7688 10007688 0C001DEE */  jal        func_100077B8
+    /* 7688 10007688 0C001DEE */  jal        send_mesg
     /* 768C 1000768C 00000000 */   nop
     /* 7690 10007690 2401EFFF */  addiu      $at, $zero, -0x1001
     /* 7694 10007694 02018024 */  and        $s0, $s0, $at
@@ -349,7 +349,7 @@ glabel func_100071D0
     /* 76BC 100076BC 01014024 */  and        $t0, $t0, $at
     /* 76C0 100076C0 40886800 */  mtc0       $t0, $13 /* handwritten instruction */
     /* 76C4 100076C4 24040008 */  addiu      $a0, $zero, 0x8
-    /* 76C8 100076C8 0C001DEE */  jal        func_100077B8
+    /* 76C8 100076C8 0C001DEE */  jal        send_mesg
     /* 76CC 100076CC 00000000 */   nop
     /* 76D0 100076D0 2401FDFF */  addiu      $at, $zero, -0x201
     /* 76D4 100076D4 02018024 */  and        $s0, $s0, $at
@@ -360,22 +360,22 @@ glabel func_100071D0
     /* 76E4 100076E4 01014024 */  and        $t0, $t0, $at
     /* 76E8 100076E8 40886800 */  mtc0       $t0, $13 /* handwritten instruction */
     /* 76EC 100076EC 24040000 */  addiu      $a0, $zero, 0x0
-    /* 76F0 100076F0 0C001DEE */  jal        func_100077B8
+    /* 76F0 100076F0 0C001DEE */  jal        send_mesg
     /* 76F4 100076F4 00000000 */   nop
     /* 76F8 100076F8 2401FEFF */  addiu      $at, $zero, -0x101
     /* 76FC 100076FC 02018024 */  and        $s0, $s0, $at
     /* 7700 10007700 1000FF4F */  b          .L10007440
     /* 7704 10007704 00000000 */   nop
   .L10007708:
-    /* 7708 10007708 0C00170B */  jal        func_10005C2C
+    /* 7708 10007708 0C00170B */  jal        boot_handleGamePageFault
     /* 770C 1000770C 00000000 */   nop
     /* 7710 10007710 10000005 */  b          .L10007728
     /* 7714 10007714 00000000 */   nop
   .L10007718:
-    /* 7718 10007718 08001DDF */  j          func_1000777C
+    /* 7718 10007718 08001DDF */  j          boot_handleFault
     /* 771C 1000771C 00000000 */   nop
   .L10007720:
-    /* 7720 10007720 08001DDF */  j          func_1000777C
+    /* 7720 10007720 08001DDF */  j          boot_handleFault
     /* 7724 10007724 00000000 */   nop
   glabel .L10007728
     /* 7728 10007728 8F490004 */  lw         $t1, 0x4($k0) /* handwritten instruction */
@@ -403,7 +403,7 @@ glabel func_100071D0
     /* 7778 10007778 00000000 */   nop
 
 /* Handwritten function */
-glabel func_1000777C
+glabel boot_handleFault
     /* 777C 1000777C 3C018003 */  lui        $at, %hi(__osFaultedThread)
     /* 7780 10007780 AC3ABE04 */  sw         $k0, %lo(__osFaultedThread)($at) /* handwritten instruction */
     /* 7784 10007784 24090001 */  addiu      $t1, $zero, 0x1
@@ -412,16 +412,16 @@ glabel func_1000777C
     /* 7790 10007790 A7490012 */  sh         $t1, 0x12($k0) /* handwritten instruction */
     /* 7794 10007794 400A4000 */  mfc0       $t2, $8 /* handwritten instruction */
     /* 7798 10007798 AF4A0124 */  sw         $t2, 0x124($k0) /* handwritten instruction */
-    /* 779C 1000779C 0C001F6B */  jal        func_10007DAC
+    /* 779C 1000779C 0C001F6B */  jal        boot_runFaultDebugger
     /* 77A0 100077A0 00000000 */   nop
     /* 77A4 100077A4 24040060 */  addiu      $a0, $zero, 0x60
-    /* 77A8 100077A8 0C001DEE */  jal        func_100077B8
+    /* 77A8 100077A8 0C001DEE */  jal        send_mesg
     /* 77AC 100077AC 00000000 */   nop
     /* 77B0 100077B0 08001E8E */  j          func_10007A38
     /* 77B4 100077B4 00000000 */   nop
 
 /* Handwritten function */
-glabel func_100077B8
+glabel send_mesg
     /* 77B8 100077B8 03E09025 */  or         $s2, $ra, $zero
     /* 77BC 100077BC 3C0A8004 */  lui        $t2, %hi(__osEventStateTab)
     /* 77C0 100077C0 254A2910 */  addiu      $t2, $t2, %lo(__osEventStateTab)
@@ -479,7 +479,7 @@ glabel func_100077B8
     /* 7880 10007880 01014824 */  and        $t1, $t0, $at
     /* 7884 10007884 00094F02 */  srl        $t1, $t1, 28
     /* 7888 10007888 240A0001 */  addiu      $t2, $zero, 0x1
-    /* 788C 1000788C 152AFFBB */  bne        $t1, $t2, func_1000777C
+    /* 788C 1000788C 152AFFBB */  bne        $t1, $t2, boot_handleFault
     /* 7890 10007890 00000000 */   nop
     /* 7894 10007894 24090001 */  addiu      $t1, $zero, 0x1
     /* 7898 10007898 AF490018 */  sw         $t1, 0x18($k0) /* handwritten instruction */
@@ -762,7 +762,7 @@ glabel __osCleanupThread
     /* 7C70 10007C70 00000000 */   nop
 
 /* Handwritten function */
-glabel func_10007C74
+glabel boot_drawHexWord
     /* 7C74 10007C74 20840009 */  addi       $a0, $a0, 0x9 /* handwritten instruction */
     /* 7C78 10007C78 3C081000 */  lui        $t0, %hi(__osCleanupThread + 0xC)
     /* 7C7C 10007C7C 25087C04 */  addiu      $t0, $t0, %lo(__osCleanupThread + 0xC)
@@ -776,7 +776,7 @@ glabel func_10007C74
     /* 7C98 10007C98 306B000F */  andi       $t3, $v1, 0xF
     /* 7C9C 10007C9C 216B0009 */  addi       $t3, $t3, 0x9 /* handwritten instruction */
     /* 7CA0 10007CA0 00031902 */  srl        $v1, $v1, 4
-    /* 7CA4 10007CA4 0C001F4A */  jal        func_10007D28
+    /* 7CA4 10007CA4 0C001F4A */  jal        boot_drawGlyph
     /* 7CA8 10007CA8 2129FFE0 */   addi      $t1, $t1, -0x20 /* handwritten instruction */
     /* 7CAC 10007CAC 2442FFFF */  addiu      $v0, $v0, -0x1
     /* 7CB0 10007CB0 1440FFF9 */  bnez       $v0, .L10007C98
@@ -784,7 +784,7 @@ glabel func_10007C74
     /* 7CB8 10007CB8 01201025 */  or         $v0, $t1, $zero
     /* 7CBC 10007CBC 00A00008 */  jr         $a1
     /* 7CC0 10007CC0 00000000 */   nop
-  glabel func_10007CC4
+  glabel boot_drawString
     /* 7CC4 10007CC4 3C081000 */  lui        $t0, %hi(__osCleanupThread + 0xC)
     /* 7CC8 10007CC8 25087C04 */  addiu      $t0, $t0, %lo(__osCleanupThread + 0xC)
     /* 7CCC 10007CCC 01005809 */  jalr       $t3, $t0
@@ -806,7 +806,7 @@ glabel func_10007C74
     /* 7D04 10007D04 00005825 */  or         $t3, $zero, $zero
   .L10007D08:
     /* 7D08 10007D08 24630001 */  addiu      $v1, $v1, 0x1
-    /* 7D0C 10007D0C 0C001F4A */  jal        func_10007D28
+    /* 7D0C 10007D0C 0C001F4A */  jal        boot_drawGlyph
     /* 7D10 10007D10 00000000 */   nop
     /* 7D14 10007D14 806B0000 */  lb         $t3, 0x0($v1)
     /* 7D18 10007D18 1560FFF3 */  bnez       $t3, .L10007CE8
@@ -815,7 +815,7 @@ glabel func_10007C74
     /* 7D20 10007D20 00A00008 */  jr         $a1
     /* 7D24 10007D24 00000000 */   nop
 
-glabel func_10007D28
+glabel boot_drawGlyph
     /* 7D28 10007D28 24060008 */  addiu      $a2, $zero, 0x8
     /* 7D2C 10007D2C 01207825 */  or         $t7, $t1, $zero
     /* 7D30 10007D30 014FC021 */  addu       $t8, $t2, $t7

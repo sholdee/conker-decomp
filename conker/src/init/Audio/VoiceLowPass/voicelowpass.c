@@ -19,7 +19,7 @@ typedef struct {
 
 f32 sqrtf(f32);
 
-Acmd *func_10022040(Voice *voice, s16 *outp, s32 arg2, Acmd *p) {
+Acmd *audio_pullLowPass(Voice *voice, s16 *outp, s32 arg2, Acmd *p) {
     Acmd *ptr;
     f32 gain;
     Acmd *mixCmd;
@@ -68,7 +68,7 @@ s32 n_alLoadParam(N_PVoice *filter, s32 paramID, void *param) {
     switch (paramID) {
         case 4:
             filter->unkA2 = 0;
-            func_10021C40(filter, 4, param);
+            audio_setDecoderParam(filter, 4, param);
             break;
         case 18:
             filter->unkA2 = (s32)param;
@@ -82,7 +82,7 @@ s32 n_alLoadParam(N_PVoice *filter, s32 paramID, void *param) {
             filter->unk99 = (s32)param;
             break;
         default:
-            func_10021C40(filter, paramID, param);
+            audio_setDecoderParam(filter, paramID, param);
             break;
     }
 

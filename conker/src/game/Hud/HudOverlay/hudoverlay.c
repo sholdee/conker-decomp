@@ -51,7 +51,7 @@ extern u8 D_887;
 Gfx *hud_drawMain(Gfx *gfx) {
     s32 message;
 
-    D_8003C8E0 = 0x9000001;
+    gDebugStatusCode = 0x9000001;
     message = 0;
     gfx = hud_darkenScreen(gfx);
     if (gHudModeDrawers[gFrontEndState] != NULL) {
@@ -83,7 +83,7 @@ Gfx *hud_drawMain(Gfx *gfx) {
         text_printAt(0x94, 0xC8, 0x81, (char *)gTextStrings[message]);
     }
 
-    D_8003C8E0 = 0;
+    gDebugStatusCode = 0;
     return gfx;
 }
 
@@ -96,7 +96,7 @@ Gfx *hud_drawModeOverlay(Gfx *gfx) {
 
     mode = gFrontEndState;
     start = gfx;
-    D_8003C8E0 = 0x9000000;
+    gDebugStatusCode = 0x9000000;
     if (gHudModeOverlayDrawers[mode] != NULL) {
         gfx = gHudModeOverlayDrawers[mode](gfx);
     }
@@ -104,7 +104,7 @@ Gfx *hud_drawModeOverlay(Gfx *gfx) {
         D_80090058 = NULL;
         D_800E0C78 = 0;
     }
-    D_8003C8E0 = 0;
+    gDebugStatusCode = 0;
     if (gfx - gDisplayListBuffers[gDrawBufferIndex] > gDisplayListLimit) {
         overflow = TRUE;
     } else {
@@ -1011,13 +1011,13 @@ Gfx *hud_drawFadingMessage(Gfx *gfx) {
     if (D_800E0A80 < 0) {
         return gfx;
     }
-    if (D_800E0A90 < 0x168) {
-        alpha = D_800E0A90 << 2;
+    if (gFrontEndTimer < 0x168) {
+        alpha = gFrontEndTimer << 2;
         if (alpha >= 0x100) {
             alpha = 0xFF;
         }
     } else {
-        alpha = 0x1A9 - D_800E0A90;
+        alpha = 0x1A9 - gFrontEndTimer;
         alpha <<= 2;
         if (alpha < 0) {
             alpha = 0;
@@ -1064,7 +1064,7 @@ Gfx *func_151EBB50(Gfx *gfx) {
     s32 alpha;
     f32 scale;
 
-    alpha = 0xFF - ((D_800E0A90 - 0xF0) << 3);
+    alpha = 0xFF - ((gFrontEndTimer - 0xF0) << 3);
     if (alpha < 0) {
         alpha = 0;
     }
@@ -1081,15 +1081,15 @@ Gfx *func_151EBB50(Gfx *gfx) {
         return gfx;
     }
     gSPDisplayList(gfx++, gHudSpriteDl);
-    if (D_800E0A90 < 0xF0) {
-        alpha = 0xFF - ((D_800E0A90 - 0xB4) << 3);
+    if (gFrontEndTimer < 0xF0) {
+        alpha = 0xFF - ((gFrontEndTimer - 0xB4) << 3);
         if (alpha < 0) {
             alpha = 0;
         }
         if (alpha >= 0x100) {
             alpha = 0xFF;
         }
-        scale = D_800E0A90 / 180.0f + 0.75f;
+        scale = gFrontEndTimer / 180.0f + 0.75f;
         if (scale > 1.5f) {
             scale = 1.5f;
         }
@@ -1097,14 +1097,14 @@ Gfx *func_151EBB50(Gfx *gfx) {
         text_setColor(0xFF, 0, 0, alpha);
         text_printAt(0x94, 0x69, 1, (char *)gTextStrings[0x8E]);
         text_setScale(1.0f);
-    } else if (D_800E0A90 < 0x21C) {
-        if (D_800E0A90 < 0x12C) {
-            alpha = (D_800E0A90 - 0xF0) << 3;
+    } else if (gFrontEndTimer < 0x21C) {
+        if (gFrontEndTimer < 0x12C) {
+            alpha = (gFrontEndTimer - 0xF0) << 3;
             if (alpha >= 0x100) {
                 alpha = 0xFF;
             }
         } else {
-            alpha = 0xFF - ((D_800E0A90 - 0x1E0) << 3);
+            alpha = 0xFF - ((gFrontEndTimer - 0x1E0) << 3);
             if (alpha < 0) {
                 alpha = 0;
             }
@@ -1143,13 +1143,13 @@ Gfx *func_151EBB50(Gfx *gfx) {
         gHudSprite.width = 0x20;
         gHudSprite.height = 0x20;
     } else {
-        if (D_800E0A90 < 0x258) {
-            alpha = (D_800E0A90 - 0x21C) << 3;
+        if (gFrontEndTimer < 0x258) {
+            alpha = (gFrontEndTimer - 0x21C) << 3;
             if (alpha >= 0x100) {
                 alpha = 0xFF;
             }
         } else {
-            alpha = 0xFF - ((D_800E0A90 - 0x30C) << 3);
+            alpha = 0xFF - ((gFrontEndTimer - 0x30C) << 3);
             if (alpha < 0) {
                 alpha = 0;
             }
@@ -1176,8 +1176,8 @@ Gfx *func_151EBB50(Gfx *gfx) {
 /* Fades in a text line once the timer passes 0x5DC. */
 Gfx *func_151EC178(Gfx *gfx) {
     s32 alpha;
-    if (D_800E0A90 >= 0x5DD) {
-        alpha = (D_800E0A90 - 0x5DC) << 3;
+    if (gFrontEndTimer >= 0x5DD) {
+        alpha = (gFrontEndTimer - 0x5DC) << 3;
         if (alpha >= 0x100) {
             alpha = 0xFF;
         }
@@ -1187,7 +1187,7 @@ Gfx *func_151EC178(Gfx *gfx) {
     return gfx;
 }
 
-/* Draws a fading image and two overlaid sprites (the second tinted by D_800E0B97); updates the fade level D_800E0B96. */
+/* Draws a fading image and two overlaid sprites (the second tinted by gMenuPulse); updates the fade level gFrontEndFade. */
 Gfx *func_151EC1F0(Gfx *gfx) {
     s32 alpha;
     s32 temp;
@@ -1197,7 +1197,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
     }
 
     gSPDisplayList(gfx++, gHudSpriteDl);
-    temp = D_800E0A90; // matching: temp is reused for 0x1AC below
+    temp = gFrontEndTimer; // matching: temp is reused for 0x1AC below
     alpha = temp;
     if (alpha >= 0x12D) {
         temp = 0x1AC;
@@ -1221,7 +1221,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
     gfx = hud_drawSprite(gfx, &D_80091804, 0x92, 0xCB, 5, 2, 1.0f, 0);
     gDPSetCombine(gfx++, 0xFFD3FF, 0xFFA6FF7F);
-    gDPSetEnvColor(gfx++, 0x20, 0xFF, 0x20, D_800E0B97);
+    gDPSetEnvColor(gfx++, 0x20, 0xFF, 0x20, gMenuPulse);
     gfx = hud_drawSprite(gfx, &D_80091810, 0x92, 0xCB, 5, 2, 1.0f, 0);
     gfx = sprite_endDraw(gfx);
 
@@ -1235,7 +1235,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
         }
     }
     alpha = 0xFF - alpha;
-    D_800E0B96 = alpha;
+    gFrontEndFade = alpha;
     return gfx;
 }
 
@@ -1530,12 +1530,12 @@ Gfx *func_151EC648(Gfx *gfx) {
 }
 
 
-/* Draws a fading-in image with a tinted overlay (strength D_800E0B97). */
+/* Draws a fading-in image with a tinted overlay (strength gMenuPulse). */
 Gfx *func_151ED09C(Gfx *gfx) {
     s32 alpha;
 
     gSPDisplayList(gfx++, gHudSpriteDl);
-    alpha = D_800E0A90 << 2;
+    alpha = gFrontEndTimer << 2;
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
@@ -1543,20 +1543,20 @@ Gfx *func_151ED09C(Gfx *gfx) {
     gfx = hud_drawSprite(gfx, &D_8009181C, 0x92, 0x6C, 8, 3, 1.0f, 0);
     gDPPipeSync(gfx++);
     gDPSetCombine(gfx++, 0xFFD3FF, 0xFFA6FF7F);
-    gDPSetEnvColor(gfx++, 0xFF, 0x80, 0x20, (D_800E0B97 * (alpha + 1)) >> 8);
+    gDPSetEnvColor(gfx++, 0xFF, 0x80, 0x20, (gMenuPulse * (alpha + 1)) >> 8);
     gfx = hud_drawSprite(gfx, &D_80091828, 0x92, 0x6C, 8, 3, 1.0f, 0);
     return sprite_endDraw(gfx);
 }
 
-/* Darkens the whole screen with a black rectangle of alpha D_800E0B96. */
+/* Darkens the whole screen with a black rectangle of alpha gFrontEndFade. */
 Gfx *hud_darkenScreen(Gfx *gfx) {
-    if (D_800E0B96 == 0) {
+    if (gFrontEndFade == 0) {
         return gfx;
     }
     gDPPipeSync(gfx++);
     gDPSetOtherMode(gfx++, 0x082C3F, 0x504340);
     gDPSetCombine(gfx++, 0xFFFFFF, 0xFFFEFB7D);
-    gDPSetEnvColor(gfx++, 0, 0, 0, D_800E0B96);
+    gDPSetEnvColor(gfx++, 0, 0, 0, gFrontEndFade);
     return view_fillRect(gfx, 0, 0, gScreenWidth, gScreenHeight);
 }
 

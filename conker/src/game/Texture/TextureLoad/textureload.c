@@ -258,7 +258,7 @@ s32 texture_getAddress(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
             heap_free(packed);
             return 0x80000000;
         }
-        func_10006240(packed + odd, texture, D_8003809C);
+        boot_decompress(packed + odd, texture, D_8003809C);
         heap_free(packed);
         gTextureAddrs[index] = texture;
         gTexUseCounts[index] = 0;
@@ -319,7 +319,7 @@ void texture_updateAging(void) {
     gTexAgeFirst = 0xFFFF;
     gTexAgeLast = -1;
     if (start < 0 || end >= 0x1E53) {
-        D_8003C8E0 = 0x0C000046;
+        gDebugStatusCode = 0x0C000046;
         debug_fatalTrap();
     }
     gTexLastFreed = -1;
@@ -346,7 +346,7 @@ void texture_updateAging(void) {
             } else if (gTextureLifetimes[i] & 0x40) {
                 data = ((Entry1510D404 *)gTextureAddrs[i])->data;
                 size = ((Entry1510D404 *)gTextureAddrs[i])->size;
-                func_10006240(data + size, (Entry1510D404 *)gTextureAddrs[i], D_8003809C);
+                boot_decompress(data + size, (Entry1510D404 *)gTextureAddrs[i], D_8003809C);
                 heap_free(data);
                 gTextureLifetimes[i] &= ~0x40;
                 if (i < gTexAgeFirst) {

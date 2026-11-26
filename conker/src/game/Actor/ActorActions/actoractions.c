@@ -950,7 +950,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             if (arg0->animseq.uh != 0x283) {
                 arg0->speed *= 0.2f;
                 gEventParam = 0xFF010604;
-                func_1506E5FC();
+                event_playSound2Range1800();
                 speed = 1.0f;
             }
             anim = 0x283;
@@ -959,7 +959,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
         } else {
             if (arg0->animseq.uh == 0x283) {
                 gEventParam = 0xFF010604;
-                func_1506E5FC();
+                event_playSound2Range1800();
             }
             if (arg0->stickspeed >= 1.0f && arg0->norun == 0) {
                 arg0->unkAA = 0x2D;
@@ -1495,7 +1495,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             }
                             event_runAnimCommand();
                             gEventParam = -0xFCF920;
-                            func_1506E5FC();
+                            event_playSound2Range1800();
                             sound_playActorUntracked((math_random() & 1) + 0x2F5, arg0, 0x7D00, 0x1F4, 0x3E8);
                             if (!(math_random() & 7)) {
                                 sound_playActorUntrackedDelayed(0x5CD, arg0, 0x5DC0, 0x1F4, 0x3E8, 0x3C);
@@ -2062,7 +2062,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     if ((((before < 0x1000) || (before > 0xF000)) && (after >= 0x1000) && (after < 0x7000) && (arg0->mv->unk18 < 0)) ||
                         ((before > 0x7000) && (after <= 0x7000) && (arg0->mv->unk18 > 0))) {
                         gEventParam = -0xFEFA4A;
-                        func_1506E5FC();
+                        event_playSound2Range1800();
                     }
                 }
                 arg0->mv->unk7E = arg0->mv->press_angle;

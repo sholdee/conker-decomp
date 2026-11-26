@@ -69,7 +69,7 @@ void gfx_buildDrawLists(s32 player) {
                     if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->object_status & 1) && obj->alpha != 0 &&
                           (D_800C3658[player] != 0 || gCutsceneStates[player] != 1 || cutscene_isActorIndexBound(i, player) != 0) &&
                           ((gCutsceneStates[player] == 1 && cutscene_isActorIndexBound(i, player) != 0) ||
-                           !(obj->effectFlags & 0x100) || func_1503F800(&obj->unk98, obj->x, obj->z, view, 0) == 0))) {
+                           !(obj->effectFlags & 0x100) || zone_isPointHiddenFromView(&obj->unk98, obj->x, obj->z, view, 0) == 0))) {
                     } else {
                         f32 (*mtx)[4];
 
@@ -708,7 +708,7 @@ void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
                 if (((list[i][0] & 0xF0000000) != 0x80000000) || ((list[i][1] & 0xF0000000) != 0x80000000) ||
                     ((list[i][2] & 0xF0000000) != 0x80000000) ||
                     (list[i][0] & 3) || (list[i][1] & 3) || (list[i][2] & 3)) {
-                    D_8003C8E0 = 0xC00005A;
+                    gDebugStatusCode = 0xC00005A;
                     debug_fatalTrap();
                 }
             }

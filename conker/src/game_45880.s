@@ -23,7 +23,7 @@ glabel func_150183D0
     /* 458AC 150183FC AFA5003C */  sw         $a1, 0x3C($sp)
     /* 458B0 15018400 AFA60040 */  sw         $a2, 0x40($sp)
     /* 458B4 15018404 AFA70044 */  sw         $a3, 0x44($sp)
-    /* 458B8 15018408 0D406140 */  jal        func_15018500
+    /* 458B8 15018408 0D406140 */  jal        zone_buildCodeTree
     /* 458BC 1501840C 00000000 */   nop
     /* 458C0 15018410 8FB1003C */  lw         $s1, 0x3C($sp)
     /* 458C4 15018414 8FB00038 */  lw         $s0, 0x38($sp)
@@ -42,8 +42,8 @@ glabel func_150183D0
     /* 458F8 15018448 240BFFFF */  addiu      $t3, $zero, -0x1
     /* 458FC 1501844C 240C0000 */  addiu      $t4, $zero, 0x0
     /* 45900 15018450 24090000 */  addiu      $t1, $zero, 0x0
-    /* 45904 15018454 3C0D800C */  lui        $t5, %hi(D_800BE5D8)
-    /* 45908 15018458 8DADE5D8 */  lw         $t5, %lo(D_800BE5D8)($t5)
+    /* 45904 15018454 3C0D800C */  lui        $t5, %hi(gBitmapCodeTree)
+    /* 45908 15018458 8DADE5D8 */  lw         $t5, %lo(gBitmapCodeTree)($t5)
   .L1501845C:
     /* 4590C 1501845C 24080000 */  addiu      $t0, $zero, 0x0
     /* 45910 15018460 A54B0000 */  sh         $t3, 0x0($t2)
@@ -94,15 +94,15 @@ glabel func_150184B8
     /* 459A8 150184F8 03E00008 */  jr         $ra
     /* 459AC 150184FC 00000000 */   nop
 
-glabel func_15018500
+glabel zone_buildCodeTree
     /* 459B0 15018500 03E0A025 */  or         $s4, $ra, $zero
     /* 459B4 15018504 8CE40000 */  lw         $a0, 0x0($a3)
     /* 459B8 15018508 24050001 */  addiu      $a1, $zero, 0x1
     /* 459BC 1501850C 24060000 */  addiu      $a2, $zero, 0x0
     /* 459C0 15018510 0C000F10 */  jal        allocate_memory
     /* 459C4 15018514 24070000 */   addiu     $a3, $zero, 0x0
-    /* 459C8 15018518 3C01800C */  lui        $at, %hi(D_800BE5D8)
-    /* 459CC 1501851C AC22E5D8 */  sw         $v0, %lo(D_800BE5D8)($at)
+    /* 459C8 15018518 3C01800C */  lui        $at, %hi(gBitmapCodeTree)
+    /* 459CC 1501851C AC22E5D8 */  sw         $v0, %lo(gBitmapCodeTree)($at)
     /* 459D0 15018520 8FA70044 */  lw         $a3, 0x44($sp)
     /* 459D4 15018524 24E70004 */  addiu      $a3, $a3, 0x4
     /* 459D8 15018528 00E08025 */  or         $s0, $a3, $zero
@@ -227,14 +227,14 @@ glabel func_15018500
 
 .section .bss
 
-/* The map resource that func_150183D0 reads, and the tables that it and func_15018500 allocate */
+/* The map resource that func_150183D0 reads, and the tables that it and zone_buildCodeTree allocate */
 glabel D_800BE5D0
     /* 800BE5D0 */ .space 0x04
 
 glabel D_800BE5D4
     /* 800BE5D4 */ .space 0x04
 
-glabel D_800BE5D8
+glabel gBitmapCodeTree
     /* 800BE5D8 */ .space 0x04
 
     /* 800BE5DC */ .space 0x04

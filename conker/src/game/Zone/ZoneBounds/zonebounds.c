@@ -6,7 +6,7 @@
 
 
 /* Clears the per-id record flag bits (gTaskDoneBits) and state tables. */
-void func_15017790(void) {
+void zone_resetTaskProgress(void) {
     script_reallocTaskDoneBits();
     bzero(gTaskDoneBits, 0x1B);
     bzero(&D_800D2E50, 0x10);
@@ -16,7 +16,7 @@ void func_15017790(void) {
 }
 
 /* Resets the per-id record list (gTaskWorkingSet) and related state. */
-void func_150177F8(void) {
+void zone_resetTaskWorkingSet(void) {
     script_purgeTasks(1);
     bzero(&gTaskWorkingSet, 0xC);
     script_resetTimers();
@@ -29,7 +29,7 @@ void func_150177F8(void) {
 
 
 /* Moves every listed PURGE_BETWEEN_SECTIONS task to the current level (LoadSection), then reloads the tasks. */
-void func_15017868(void) {
+void zone_reloadSectionTasks(void) {
     IdRecord *node;
     s32 i;
 

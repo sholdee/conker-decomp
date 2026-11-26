@@ -92,7 +92,7 @@ void light_setupParticleSlot(s32 slot, s32 id, s32 flags) {
         }
         gParticleSlotScales[slot][0] = info->scaleX;
         gParticleSlotScales[slot][1] = info->scaleY;
-        D_800DDBC0[slot] = id;
+        gSpriteTypeTexInfoIds[slot] = id;
         gSpriteTypeKindRows[slot] = flags & 0xFF7F;
         if (flags & 0x80) {
             D_800DDC00 |= 1 << slot;
@@ -136,13 +136,13 @@ s32 func_1500AF08(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jit
 
     gLevelSprites[index].unk6 = (subtype << 5) | slot;
     gLevelSprites[index].kind = kind;
-    gLevelSprites[index].texInfo = D_800DDBC0[slot];
+    gLevelSprites[index].texInfo = gSpriteTypeTexInfoIds[slot];
 
     if (jitter != 0) {
         // matching: the "+ jitter - jitter" pair is needed for the original instruction sequence
         scale = (math_rand() % jitter + jitter) - jitter + 0x100;
         gLevelSprites[index].halfWidth = (gParticleSlotScales[slot][0] * scale) >> 10;
-        if (gParticleTexInfos[D_800DDBC0[slot]].flags & 4) {
+        if (gParticleTexInfos[gSpriteTypeTexInfoIds[slot]].flags & 4) {
             scale = math_rand() % jitter * 4 + scale;
         }
         gLevelSprites[index].height = (gParticleSlotScales[slot][1] * scale) >> 10;

@@ -112,7 +112,7 @@ OSContPad **cont_readPads(void) {
             gMenuPads[i].stick_y = 0;
         }
     }
-    if (gFrontEndState == 2 || D_800E0B95 == 2) {
+    if (gFrontEndState == 2 || gPrevFrontEndState == 2) {
         replaying = 1;
         os_playDemoInput();
     } else {

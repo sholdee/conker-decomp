@@ -63,16 +63,16 @@ void debug_checkDl(void *dl, u32 end) {
     debug_walkCheckDl(dl, end, NULL);
 }
 
-/** Posts error code 0xC00005B to D_8003C8E0 and calls debug_fatalTrap. */
+/** Posts error code 0xC00005B to gDebugStatusCode and calls debug_fatalTrap. */
 #define DL_ERROR()                          \
-    D_8003C8E0 = 0xC00005B;                 \
+    gDebugStatusCode = 0xC00005B;                 \
     debug_fatalTrap();
 
-/** DL_ERROR(), then calls func_10007DA0 with gDrawBufferIndex toggled for the call. */
+/** DL_ERROR(), then calls boot_debugTrap with gDrawBufferIndex toggled for the call. */
 #define DL_ERROR_FLIP()                   \
     DL_ERROR();                             \
     gDrawBufferIndex = 1 - gDrawBufferIndex;            \
-    func_10007DA0();                        \
+    boot_debugTrap();                        \
     gDrawBufferIndex = 1 - gDrawBufferIndex;
 
 /**

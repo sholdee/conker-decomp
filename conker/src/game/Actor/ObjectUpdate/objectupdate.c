@@ -51,7 +51,7 @@ Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player) {
     gSPDisplayList(gdl++, gObjectPassBeginDL);
     obj = movement_obj;
     for (i = 0; i != 25; i++, obj++) {
-        D_8003C8E0 = (i & 0xFFFFFF) | 0x01000000;
+        gDebugStatusCode = (i & 0xFFFFFF) | 0x01000000;
         state = obj->type;
         if (state == 0 || obj->drawtype == 3 || obj->drawtype == 5) {
             continue;
@@ -95,7 +95,7 @@ Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player) {
             }
         }
     }
-    D_8003C8E0 = 0x01FFFFFF;
+    gDebugStatusCode = 0x01FFFFFF;
     if (mode == 1) {
         gdl = attach_drawView(gdl, player, 0);
     } else if (mode == 2) {
@@ -104,7 +104,7 @@ Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player) {
         gdl = attach_drawView(gdl, player, 2);
     }
     gSPDisplayList(gdl++, gObjectPassEndDL);
-    D_8003C8E0 = 0;
+    gDebugStatusCode = 0;
     return gdl;
 }
 
@@ -1178,7 +1178,7 @@ void actor_updateCulling(s32 index) {
                 actor_fadeCommand(obj, 9, 0, 0, i);
                 event = -1;
             }
-            if ((obj->noshove & 0x800000) && event != 8 && gCutsceneStates[0] != 1 && func_1503F904(obj, i, oldMask) != 0) {
+            if ((obj->noshove & 0x800000) && event != 8 && gCutsceneStates[0] != 1 && zone_isActorHiddenFromView(obj, i, oldMask) != 0) {
                 inside = TRUE;
             }
         } else {

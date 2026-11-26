@@ -5,10 +5,10 @@
 /* This file's .bss, defined before the headers declare the globals. IDO's .bss order depends on the
  * declarations before it (see init/Sched/SchedInit/schedinit.c): after exactly these three headers it is the definition order. */
 static s8 D_8003A580;
-static u8 D_8003A581;
+static u8 gSchedAudioRunning;
 static u8 gSchedGfxState; // graphics task state
-static u8 D_8003A583;
-static u8 D_8003A584;
+static u8 gSchedGfxRspBusy;
+static u8 gSchedGfxRdpDone;
 static OSTimer gSchedAudioTimer; // audio start timer
 static u8 D_8003A5A8[0x20]; // not referenced
 static OSScMsg gSchedPreNmiMsg; // pre-NMI message
@@ -24,7 +24,7 @@ u8 gResetPending = FALSE;              // a reset (pre-NMI) is pending
 u8 D_8002AC60 = TRUE;
 u16 D_8002AC64 = 800;
 s32 D_8002AC68 = -1; // not referenced
-static s8 D_8002AC6C = 0;
+static s8 gSchedAudioTimerSet = 0;
 
 /* Messages received on the scheduler's interrupt queue gSchedInterruptQueue. */
 #define SCHED_MESG_RETRACE     0 /* VI retrace (osViSetEvent) */
@@ -39,10 +39,10 @@ void sched_threadMain(void *arg) {
     SchedulerClient *client;
     OSTime delay;
 
-    D_8003A581 = 0;
+    gSchedAudioRunning = 0;
     gSchedGfxState = 0;
-    D_8003A584 = 1;
-    D_8003A583 = 0;
+    gSchedGfxRdpDone = 1;
+    gSchedGfxRspBusy = 0;
     gSchedRetraceMsg.type = OS_SC_RETRACE_MSG;
     msg = NULL;
     arg = NULL; // matching: the thread argument is reused as a scratch variable (here and below)
@@ -62,18 +62,18 @@ void sched_threadMain(void *arg) {
             if (D_8003B23A != 0) {
                 D_8003B23A--;
             }
-            arg = (void *)D_8003A581;
-            if ((arg == NULL) && (D_8002AC6C == 0)) {
+            arg = (void *)gSchedAudioRunning;
+            if ((arg == NULL) && (gSchedAudioTimerSet == 0)) {
                 if (osRecvMesg(&gSchedAudioTaskQueue, (OSMesg *)&gSchedAudioTask, OS_MESG_NOBLOCK) == 0) {
                     delay = 200000;
                     if ((gSchedGfxState != 0) || !(osAiGetStatus() & AI_STATUS_FIFO_FULL)) {
                         delay = 20000;
                     }
                     osSetTimer(&gSchedAudioTimer, delay, 0, &gSchedInterruptQueue, (OSMesg)SCHED_MESG_AUDIO_TIMER);
-                    D_8002AC6C = 1;
+                    gSchedAudioTimerSet = 1;
                 }
             }
-            if (D_8003A581 == 0) {
+            if (gSchedAudioRunning == 0) {
                 sched_updateGfxTask();
             }
             arg = NULL;
@@ -83,18 +83,18 @@ void sched_threadMain(void *arg) {
                 if (osSpTaskYielded(&gSchedGfxTask->list) == 1) {
                     osSpTaskLoad(&gSchedAudioTask->list);
                     osSpTaskStartGo(&gSchedAudioTask->list);
-                    D_8003A581 = 1;
+                    gSchedAudioRunning = 1;
                     gSchedGfxState = 4;
                 } else {
                     gSchedGfxState = 1;
                     osSpTaskLoad(&gSchedAudioTask->list);
                     osSpTaskStartGo(&gSchedAudioTask->list);
-                    D_8003A581 = 1;
-                    D_8003A583 = 0;
+                    gSchedAudioRunning = 1;
+                    gSchedGfxRspBusy = 0;
                 }
-            } else if (D_8003A581 != 0) {
+            } else if (gSchedAudioRunning != 0) {
                 osSendMesg(gSchedAudioTask->msgQ, gSchedAudioTask->msg, OS_MESG_BLOCK);
-                D_8003A581 = 0;
+                gSchedAudioRunning = 0;
                 if (gSchedGfxState == 4) {
                     osSpTaskLoad(&gSchedGfxTask->list);
                     osSpTaskStartGo(&gSchedGfxTask->list);
@@ -102,27 +102,27 @@ void sched_threadMain(void *arg) {
                     gSchedGfxState = 1;
                 }
             } else {
-                D_8003A583 = 0;
-                if (D_8003A584 == 1) {
+                gSchedGfxRspBusy = 0;
+                if (gSchedGfxRdpDone == 1) {
                     sched_swapOrWait();
                 }
             }
             break;
         case SCHED_MESG_RDP_DONE:
-            D_8003A584 = 1;
-            if (D_8003A583 == 0) {
+            gSchedGfxRdpDone = 1;
+            if (gSchedGfxRspBusy == 0) {
                 sched_swapOrWait();
             }
             break;
         case SCHED_MESG_AUDIO_TIMER:
-            D_8002AC6C = (s32)arg;
-            if (D_8003A583 != 0) {
+            gSchedAudioTimerSet = (s32)arg;
+            if (gSchedGfxRspBusy != 0) {
                 osSpTaskYield();
                 gSchedGfxState = 3;
             } else {
                 osSpTaskLoad(&gSchedAudioTask->list);
                 osSpTaskStartGo(&gSchedAudioTask->list);
-                D_8003A581 = 1;
+                gSchedAudioRunning = 1;
             }
             break;
         case SCHED_MESG_CONT_READ:
@@ -165,8 +165,8 @@ void sched_startGfxTask(void) {
         osSpTaskStartGo(&gSchedGfxTask->list);
         D_8003A580 = 0;
         gSchedLastGfxTask = gSchedGfxTask;
-        D_8003A583 = 1;
-        D_8003A584 = 0;
+        gSchedGfxRspBusy = 1;
+        gSchedGfxRdpDone = 0;
         if ((gSchedRetraceCount == 255) ||
             ((gSchedRetraceCount >= 11) && ((gSchedRetraceCount >= 21) || (gCutsceneStates[0] != 1)))) {
             gSchedRetraceCount = 2;

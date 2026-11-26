@@ -1416,7 +1416,7 @@ struct WorldObject {
     /* 0x92 */ u8 contactNonPlayers;  // nonzero: onContact also runs for actors that are not players (ObjectBehavior)
     /* 0x93 */ u8 pad93;
     /* 0x94 */ Shadow *shadow;       // created and freed by gfx_updateObjectShadows
-    /* 0x98 */ s32 unk98;            // with unk9C, passed by address to func_1503F800
+    /* 0x98 */ s32 unk98;            // with unk9C, passed by address to zone_isPointHiddenFromView
     /* 0x9C */ s32 unk9C;
 }; // size 0xA0
 

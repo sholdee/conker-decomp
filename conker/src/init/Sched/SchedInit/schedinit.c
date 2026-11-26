@@ -3,7 +3,7 @@
 
 /*
  * IDO lays out this file's .bss in an order that depends on the declarations before it, and the static
- * D_8003BC20 of sched_preNmiThread must come last. So this file does not include functions.h or variables.h,
+ * gPreNmiTime of sched_preNmiThread must come last. So this file does not include functions.h or variables.h,
  * which change often. It declares what it needs from other subsystems here, defines its .bss, and
  * includes its own header after the .bss. A new type in conker/sched.h can still change the order.
  */
@@ -11,7 +11,7 @@
 /* From other subsystems. */
 extern u32 __osShutdown;
 extern u8 D_8002AAE0;
-extern u8 D_8002AAE4;
+extern u8 gPadInitDone;
 extern u8 gResetPending;
 extern u8 gAudioThreadStarted;
 extern OSThread gMainThread;
@@ -27,7 +27,7 @@ void boot_initScreen(void);
 void audio_stopThread(void);
 
 /*
- * Scheduler state, linked at 0x8003B1E8..0x8003BC28 in this order (with D_8003BC20 of sched_preNmiThread last).
+ * Scheduler state, linked at 0x8003B1E8..0x8003BC28 in this order (with gPreNmiTime of sched_preNmiThread last).
  * They are defined before conker/sched.h declares them: an earlier extern changes the order.
  */
 OSMesgQueue gSchedTaskQueue;
@@ -95,7 +95,7 @@ extern s32 osMotorStop(OSPfs *pfs);
 extern s32 _MakeMotorData(OSMesgQueue *mq, OSPfs *pfs, s32 channel);
 
 void sched_preNmiThread(void *arg) {
-    static u64 D_8003BC20; // boottime?
+    static u64 gPreNmiTime; // boottime?
     OSMesg mesg;
     s32 i;
 
@@ -107,12 +107,12 @@ void sched_preNmiThread(void *arg) {
     osStopThread(&D_80035910);
     osStopThread(&gMainThread);
     audio_stopThread(); // stop thread gAudioThread if gAudioThreadStarted not null
-    D_8003BC20 = osGetTime();
+    gPreNmiTime = osGetTime();
     __osViInit();
     D_8002AAE0 = 1;
     osSetThreadPri(NULL, 11);
 
-    if (D_8002AAE4 != 0) {
+    if (gPadInitDone != 0) {
         if (gContReadDone == 0) {
             osRecvMesg(&gSiMesgQueue, &gSiMesg, 1);
         }
@@ -125,10 +125,10 @@ void sched_preNmiThread(void *arg) {
         }
     }
 
-    while (osGetTime() < D_8003BC20 + 2272727) {
+    while (osGetTime() < gPreNmiTime + 2272727) {
     }
 
-    while (osGetTime() < D_8003BC20 + 7500000) {
+    while (osGetTime() < gPreNmiTime + 7500000) {
     }
 
     osWritebackDCacheAll();

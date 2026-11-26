@@ -5,8 +5,8 @@
 // a header declares after the ones the .c file declares first, so these are declared only here, before
 // functions.h: the order also depends on how many types and variables come before them (see init/Sched/SchedInit/schedinit.c).
 u8 gSpriteQueuedCmd; // queued command for sprite_runQueuedCommand
-EffectHeader *D_800D9894;
-// matching: defined in-file so as1 shares one lui across the unrolled stores in func_150B6C90
+EffectHeader *gSpriteTintEffect;
+// matching: defined in-file so as1 shares one lui across the unrolled stores in sprite_resetSlots
 static struct Sprite2D *gSpriteSlots[10];
 
 #include "functions.h"
@@ -17,7 +17,7 @@ static struct Sprite2D *gSpriteSlots[10];
 void sprite_runQueuedCommand(s32 unused) {
     switch (gSpriteQueuedCmd) {
     case 1:
-        func_150B6C90();
+        sprite_resetSlots();
         return;
     case 2:
         func_150B6D34();
@@ -48,13 +48,13 @@ void sprite_runQueuedCommand(s32 unused) {
 }
 
 /* Recreates the screen_spawnTintEffect effect and clears every sprite slot (without freeing the sprites). */
-void func_150B6C90(void) {
+void sprite_resetSlots(void) {
     s32 i;
 
-    if (D_800D9894 != NULL) {
-        effect_destroyObject(D_800D9894);
+    if (gSpriteTintEffect != NULL) {
+        effect_destroyObject(gSpriteTintEffect);
     }
-    D_800D9894 = screen_spawnTintEffect(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
+    gSpriteTintEffect = screen_spawnTintEffect(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
     gSpriteQueuedCmd = 3;
     for (i = 0; i < 10; i++) {
         gSpriteSlots[i] = NULL;
@@ -79,9 +79,9 @@ void func_150B6D34(void) {
 void sprite_freeAll(void) {
     s32 i;
 
-    if (D_800D9894 != NULL) {
-        effect_destroyObject(D_800D9894);
-        D_800D9894 = NULL;
+    if (gSpriteTintEffect != NULL) {
+        effect_destroyObject(gSpriteTintEffect);
+        gSpriteTintEffect = NULL;
     }
     for (i = 0; i < 10; i++) {
         if (gSpriteSlots[i] != NULL) {
@@ -93,7 +93,7 @@ void sprite_freeAll(void) {
 }
 
 /* Update routine 4: advances unk34 by 0x30 per frame, wrapping from above 0x800 back to -0xC00. */
-void func_150B6DFC(Sprite2D *sprite) {
+void sprite_updateTexScroll(Sprite2D *sprite) {
     sprite->params.sOffset += D_800BE9E4 * 0x30;
     if (sprite->params.sOffset > 0x800) {
         sprite->params.sOffset = -0xC00;
@@ -103,8 +103,8 @@ void func_150B6DFC(Sprite2D *sprite) {
 
 /* Update routine 5: scrolls the sprite up through its animation frames, fading it with its distance
  * from y = 170, until it reaches its target frame and y. Once stopped at y = 170 it blinks, and after
- * the third blink it turns into the D_80091918 sprite run by update routine 8 (func_150B709C). */
-void func_150B6E3C(Sprite2D *sprite) {
+ * the third blink it turns into the D_80091918 sprite run by update routine 8 (sprite_updateSlideBlink). */
+void sprite_updateFrameScroll(Sprite2D *sprite) {
     u32 three;
     f32 dist;
     s32 alpha;
@@ -162,7 +162,7 @@ void func_150B6E3C(Sprite2D *sprite) {
 }
 
 /* Update routine 8: slides the sprite from (230, 170) to (146, 120) over 30 steps, then blinks it. */
-void func_150B709C(Sprite2D *sprite) {
+void sprite_updateSlideBlink(Sprite2D *sprite) {
     s32 elapsed;
     s32 alpha;
 

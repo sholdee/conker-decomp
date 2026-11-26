@@ -495,7 +495,7 @@ s32 debugger_inputStack(void) {
 }
 
 /*
- * Debugger entry for a faulted thread (called from func_10007DAC): run the screens until one
+ * Debugger entry for a faulted thread (called from boot_runFaultDebugger): run the screens until one
  * returns DEBUGGER_EXIT. Returns 1 when the thread should be resumed.
  */
 s32 debugger_run(OSThread *thread) {
@@ -547,7 +547,7 @@ s32 debugger_run(OSThread *thread) {
             }
         }
     }
-    if ((((u32)D_8003C8E0 >> 24) & 0xFF) == 0xC) {
+    if ((((u32)gDebugStatusCode >> 24) & 0xFF) == 0xC) {
         thread = &gMainThread;
     }
     framebuffer = __osViCurr->framep;

@@ -28,7 +28,7 @@ void boot_idleThread(void *arg);
 void boot_mainThread(void *arg);
 extern RomFile D_8002AAD0[2];
 extern u8 D_8002AAE0;
-extern u8 D_8002AAE4;
+extern u8 gPadInitDone;
 extern u16 *gFramebuffers[2]; // the two framebuffers
 extern u64 gIdleThreadStack[0x400 / sizeof(u64)];  // idle thread stack
 extern u64 gMainThreadStack[0x3C00 / sizeof(u64)]; // main thread stack, with gMainThreadStackTop
@@ -52,29 +52,29 @@ extern f32 gScreenScaleX; // screen width / 292
 extern f32 gScreenScaleY; // screen height / 216
 
 /* init_5AB0.s: TLB paging of the game code (virtual 0x15000000) */
-void func_10005B04(s32 pageCount);
-extern s32 D_8003BE70;
-extern s32 D_8003BE74;
+void boot_initPaging(s32 pageCount);
+extern s32 gPageFreeBitmap;
+extern s32 gPagePool;
 
 /* init_5BE0.s */
-void func_10005BE0(void);
+void boot_resetPageBitmap(void);
 
 /* init_5C2C.s */
-void func_100061F8(s32 firstEntry, s32 lastEntry);
+void boot_invalidateTlbEntries(s32 firstEntry, s32 lastEntry);
 
 /* init_6240.s: decompresses src into dst and returns the size written.
  * (void *src, void *dst, u32 work); declared without a prototype: callers pass the destination as a
  * pointer or as an address in an s32 */
-s32 func_10006240();
+s32 boot_decompress();
 
 /* init_709C.s */
-void func_1000709C(void);
+void boot_initInflateFixedTables(void);
 
 /* init_7DA0.s: a syscall (debug trap) */
-void func_10007DA0(void);
+void boot_debugTrap(void);
 
 /* init_7DAC.s */
-extern s32 D_8003C8E0; // status code that the game posts for the debugger (0 when clear)
+extern s32 gDebugStatusCode; // status code that the game posts for the debugger (0 when clear)
 
 /* game/Boot/GameMain/gamemain.c */
 void boot_runGame(void);

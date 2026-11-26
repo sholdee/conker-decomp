@@ -36,14 +36,14 @@ struct DefParticleHead;
 //func_100056A0
 //func_100057E0
 //func_10005948
-//func_10005AB0
-//func_10005BE0
-//func_10005C2C
-//func_10007C74
-//func_10007CC4
-//func_10007D28
-//func_10007DA0
-//func_10007DAC
+//boot_mapCodeSegment
+//boot_resetPageBitmap
+//boot_handleGamePageFault
+//boot_drawHexWord
+//boot_drawString
+//boot_drawGlyph
+//boot_debugTrap
+//boot_runFaultDebugger
 //func_10008120
 // void func_10017870(u8 arg0);
 //__n_unmapVoice

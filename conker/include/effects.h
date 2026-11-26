@@ -2434,10 +2434,10 @@ typedef union Sprite2DData {
         s32 frame;                /* frame (8.8) to stop scrolling at */
         s32 y;                    /* y to stop scrolling at */
         s32 stage;
-    } scroll;                     /* func_150B6E3C (game/Sprite/SpriteRoutines/spriteroutines.c) */
+    } scroll;                     /* sprite_updateFrameScroll (game/Sprite/SpriteRoutines/spriteroutines.c) */
     struct {
         s32 elapsed;
-    } slide;                      /* func_150B709C */
+    } slide;                      /* sprite_updateSlideBlink */
     struct {
         s16 endX;
         s16 endY;
@@ -3043,7 +3043,7 @@ typedef struct ZoneRectEffect {
 
 /* State a DDB60Effect keeps at +0x28: effect_spawnPerimeterEmitter (game/Effects/PerimeterEmitter/perimeteremitter.c) fills it, effect_updatePerimeterEmitter updates it each frame.
  * (Effect-subsystem only, but here rather than conker/effect.h: one more type in a header that init/Sched/SchedInit/schedinit.c sees
- * moves sched_preNmiThread's static D_8003BC20 to the start of that file's .bss.) */
+ * moves sched_preNmiThread's static gPreNmiTime to the start of that file's .bss.) */
 typedef struct DDB60EffectData {
     /* 0x00 */ struct Actor *owner;
     /* 0x04 */ u8 ownerId; // owner->unique_id when attached; a mismatch means the slot was reused

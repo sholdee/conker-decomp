@@ -57,5 +57,5 @@ void cont_init(void) {
         }
     }
 
-    D_8002AAE4 = 1;
+    gPadInitDone = 1;
 }

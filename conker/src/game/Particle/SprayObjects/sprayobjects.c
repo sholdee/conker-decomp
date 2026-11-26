@@ -159,7 +159,7 @@ void func_150C3574(Actor *obj) {
     if (obj->unk87 == 4) {
         gEventParam = 0xFF020133;
         gCurrentActor = movement_obj;
-        func_1506E8D8();
+        event_playSound1Range1800();
         gCurrentActor = obj;
         obj->ob_slopex = obj->unkBC;
         obj->ob_slopey = obj->unk148;
@@ -194,7 +194,7 @@ void func_150C3574(Actor *obj) {
         } else {
             gEventParam = 0x62A;
         }
-        func_1506E5FC();
+        event_playSound2Range1800();
     } else {
         vol = obj->stickspeed * 2500.0f;
         if (vol > 0x6D60) {

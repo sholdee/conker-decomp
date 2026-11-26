@@ -153,7 +153,7 @@ void zone_updateReflections(void) {
 }
 
 /* Offsets a value by 0x400; used to hide the cartridge-check address and value in zone_updateActor. */
-s32 func_150A1040(s32 value) {
+s32 zone_addCheckOffset(s32 value) {
     return value + 0x400;
 }
 
@@ -422,9 +422,9 @@ void zone_updateActor(Actor *actor) {
 
                     /* Cartridge check: the ROM word at 0xB0000454 must be 0x1090827. */
                     __osPiGetAccess();
-                    osPiRawReadIo(func_150A1040(0xB0000054), &raw);
+                    osPiRawReadIo(zone_addCheckOffset(0xB0000054), &raw);
                     __osPiRelAccess();
-                    if (func_150A1040(raw) == 0x1090C2B && gCutsceneStates[0] == 0 && actor->energy != 0) {
+                    if (zone_addCheckOffset(raw) == 0x1090C2B && gCutsceneStates[0] == 0 && actor->energy != 0) {
                         player_startWarp(actor, zones[i].subTypeData, zones[i].data1);
                         if (level != zones[i].subTypeData) {
                             actor->imune = 0xFF;

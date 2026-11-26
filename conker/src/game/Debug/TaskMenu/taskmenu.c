@@ -116,8 +116,8 @@ s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
     lineY = 1;
     if (gTaskMenuResetTimer == 0 && (buttons & L_TRIG) && (buttons & R_TRIG)) {
         gTaskMenuResetTimer = 60;
-        func_15017790();
-        func_150177F8();
+        zone_resetTaskProgress();
+        zone_resetTaskWorkingSet();
     }
     if (gTaskMenuResetTimer != 0) {
         buttons = 0;

@@ -2196,77 +2196,77 @@ void func_1507B178(void) {
 void func_1507B234(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BAD8(300, 1800);
+        event_playOrStopSound1(300, 1800);
     }
 }
 
 void func_1507B280(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BAD8(300, 3000);
+        event_playOrStopSound1(300, 3000);
     }
 }
 
 void func_1507B2CC(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BA4C(300, 1800);
+        event_playOrStopSound2(300, 1800);
     }
 }
 
 void func_1507B318(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BA4C(300, 3000);
+        event_playOrStopSound2(300, 3000);
     }
 }
 
 void func_1507B364(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BAD8(700, 4000);
+        event_playOrStopSound1(700, 4000);
     }
 }
 
 void func_1507B3B0(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BA4C(700, 4000);
+        event_playOrStopSound2(700, 4000);
     }
 }
 
 void func_1507B3FC(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BAD8(3000, 8000);
+        event_playOrStopSound1(3000, 8000);
     }
 }
 
 void func_1507B448(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BAD8(190, 1300);
+        event_playOrStopSound1(190, 1300);
     }
 }
 
 void func_1507B494(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BA4C(190, 1300);
+        event_playOrStopSound2(190, 1300);
     }
 }
 
 void func_1507B4E0(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
-        func_1506BAD8(100, 800);
+        event_playOrStopSound1(100, 800);
     }
 }
 
 void func_1507B52C(void) {
     gEventParam = script_getArgWord();
     if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
-        func_1506BA4C(100, 800);
+        event_playOrStopSound2(100, 800);
     }
 }
 

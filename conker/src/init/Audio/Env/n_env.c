@@ -32,7 +32,7 @@ extern u8 D_800428C2;
 
 Acmd *_pullSubFrame(N_PVoice *filter, s16 *outp, s16 *inp, s32 sampleOffset, Acmd *p);
 s16  _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
-s32  func_10021C40(N_PVoice *f, s32 paramID, void *param);
+s32  audio_setDecoderParam(N_PVoice *f, s32 paramID, void *param);
 
 /* n_alEnvmixerPull: drain the voice's parameter list, emitting one RSP sub-frame per
    parameter delta, then emit the remainder of the 184-sample frame. */
@@ -69,7 +69,7 @@ Acmd *n_alEnvmixerPull(N_PVoice *f, s32 sampleOffset, Acmd *p) {
                 if (startParam->unity) {
                     e->rs_upitch = 1;
                 }
-                func_10021C40(e, AL_FILTER_SET_WAVETABLE, startParam->wave);
+                audio_setDecoderParam(e, AL_FILTER_SET_WAVETABLE, startParam->wave);
                 e->em_motion = AL_PLAYING;
                 e->em_first = 1;
                 e->em_delta = 0;
@@ -169,7 +169,7 @@ Acmd *n_alEnvmixerPull(N_PVoice *f, s32 sampleOffset, Acmd *p) {
                 if (startParam->unity) {
                     e->rs_upitch = 1;
                 }
-                func_10021C40(e, AL_FILTER_SET_WAVETABLE, startParam->wave);
+                audio_setDecoderParam(e, AL_FILTER_SET_WAVETABLE, startParam->wave);
                 e->em_motion = AL_PLAYING;
                 break;
             }
@@ -199,7 +199,7 @@ Acmd *n_alEnvmixerPull(N_PVoice *f, s32 sampleOffset, Acmd *p) {
 
             case AL_FILTER_SET_WAVETABLE:
                 ptr = _pullSubFrame(e, &outp, &inp, deltaSamples, ptr);
-                func_10021C40(e, AL_FILTER_SET_WAVETABLE, (void *)e->em_ctrlList->data.i);
+                audio_setDecoderParam(e, AL_FILTER_SET_WAVETABLE, (void *)e->em_ctrlList->data.i);
                 break;
 
             default:
@@ -261,7 +261,7 @@ s32 n_alEnvmixerParam(N_PVoice *filter, s32 paramID, void *param) {
     return 0;
 }
 
-Acmd *func_10022040(N_PVoice *voice, s16 *outp, s32 arg2, Acmd *p);
+Acmd *audio_pullLowPass(N_PVoice *voice, s16 *outp, s32 arg2, Acmd *p);
 s16 _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel);
 
 /* _pullSubFrame.  `inp` is never read here -- the caller advances it -- but it really is
@@ -278,7 +278,7 @@ Acmd *_pullSubFrame(N_PVoice *filter, s16 *outp, s16 *inp, s32 sampleOffset, Acm
         return ptr;
     }
 
-    ptr = func_10022040(e, outp, sampleOffset, p);
+    ptr = audio_pullLowPass(e, outp, sampleOffset, p);
 
     if (e->em_first != 0) {
         e->em_first = 0;

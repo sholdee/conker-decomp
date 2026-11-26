@@ -21,7 +21,7 @@ struct { s16 x; s16 y; s16 z; } gSpriteDisturbPoint; /* set by sprite_setDisturb
 s32 gSpriteTypeFrames[15 * 26]; // matching: an int that holds an address; a pointer type changes IDO's registers
 ParticleTexFile gSpriteTypeTexFiles[15];
 struct SpriteTexSize gSpriteTypeTexSizes[15];
-u8 D_800DDBC0[15];
+u8 gSpriteTypeTexInfoIds[15];
 u8 gSpriteTypeFrameCounts[15];
 u8 gSpriteTypeDisturbFrames[15];
 u8 gSpriteTypePasses[15];
@@ -369,14 +369,14 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                 }
                 if (gSpriteTypeFrames[type * FRAMES_PER_TYPE] == 0) {
                     if (gSpriteTypeTexFiles[type].devAddr != 0) {
-                        hi = gParticleTexInfos[D_800DDBC0[type]].frameSize * gParticleTexInfos[D_800DDBC0[type]].frameCount;
+                        hi = gParticleTexInfos[gSpriteTypeTexInfoIds[type]].frameSize * gParticleTexInfos[gSpriteTypeTexInfoIds[type]].frameCount;
                         gSpriteTypeTexFiles[type].buf = heap_alloc(gSpriteTypeTexFiles[type].size, 1, 2, 1, 0);
                         if (gSpriteTypeTexFiles[type].buf != 0) {
                             gSpriteTypeFrames[type * FRAMES_PER_TYPE] = heap_alloc(hi, 4, 1, 0, 0);
                             if (gSpriteTypeFrames[type * FRAMES_PER_TYPE] != 0) {
                                 rom_read(gSpriteTypeTexFiles[type].devAddr, gSpriteTypeTexFiles[type].buf, gSpriteTypeTexFiles[type].size, 1);
                                 gSpriteTypeTexFiles[type].used = 1;
-                                hi = gParticleTexInfos[D_800DDBC0[type]].frameSize;
+                                hi = gParticleTexInfos[gSpriteTypeTexInfoIds[type]].frameSize;
                                 for (frame = 1; frame < FRAMES_PER_TYPE; frame++) {
                                     gSpriteTypeFrames[type * FRAMES_PER_TYPE + frame] = gSpriteTypeFrames[type * FRAMES_PER_TYPE + frame - 1] + hi;
                                 }
@@ -400,7 +400,7 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                 if (gSpriteDisturbPoint.x != 0) {
                     if (math_distance3D(gLevelSprites[i].x - gSpriteDisturbPoint.x, gLevelSprites[i].y - gSpriteDisturbPoint.y,
                                       gLevelSprites[i].z - gSpriteDisturbPoint.z) < 80 &&
-                        D_800DDBC0[type] == 0) {
+                        gSpriteTypeTexInfoIds[type] == 0) {
                         if (gLevelSprites[i].disturbState != 0x21) {
                             gLevelSprites[i].disturbState = 0x21;
                             func_15170500(gLevelSprites[i].x, gLevelSprites[i].y + 68, gLevelSprites[i].z, 0, 0, 255, 0);
@@ -413,7 +413,7 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                     }
                     vtx[3].v.flag = gLevelSprites[i].height;
                 } else {
-                    if (dist < 48 && D_800DDBC0[type] == 0) {
+                    if (dist < 48 && gSpriteTypeTexInfoIds[type] == 0) {
                         gLevelSprites[i].disturbState = 0x22;
                         func_15170500(gLevelSprites[i].x, gLevelSprites[i].y + 68, gLevelSprites[i].z, 0, 0, 255, 0);
                     }
@@ -512,7 +512,7 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
     if ((u32) i < gSpriteVtxCount) {
         i *= 4;
         j = VTX(i).v.flag;
-        if (j % 26 == 0 && D_800DDBC0[j / 26] == 0) {
+        if (j % 26 == 0 && gSpriteTypeTexInfoIds[j / 26] == 0) {
             func_15170500(VTX(i).v.ob[0], VTX(i).v.ob[1] + 0x44, VTX(i).v.ob[2], 0, 1, 0xFF, 0);
         }
     }
@@ -540,14 +540,14 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
     gSpriteDisturbPoint.x = 0;
 }
 
-/* Releases every sprite type's texture file buffer, first passing it with the frames to func_10006240. */
+/* Releases every sprite type's texture file buffer, first passing it with the frames to boot_decompress. */
 void sprite_freeTypeTextures(void) {
     s32 i;
 
     for (i = 0; i < 15; i++) {
         if (gSpriteTypeTexFiles[i].buf != 0) {
             if (gSpriteTypeFrames[i * FRAMES_PER_TYPE] != 0) {
-                func_10006240(gSpriteTypeTexFiles[i].buf, gSpriteTypeFrames[i * FRAMES_PER_TYPE], D_8003809C);
+                boot_decompress(gSpriteTypeTexFiles[i].buf, gSpriteTypeFrames[i * FRAMES_PER_TYPE], D_8003809C);
                 heap_free(gSpriteTypeTexFiles[i].buf);
             }
             gSpriteTypeTexFiles[i].buf = 0;
