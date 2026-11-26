@@ -33,7 +33,7 @@ segments:
     subalign: 4   # hasm splits put object boundaries on 4-byte (not 16-byte) addresses
     subsegments:
       # -O2 -g3 from here
-      - [0x1000, hasm, entrypoint]
+      - [0x1000, hasm, init/Boot/EntryPoint/entrypoint]
       - [0x1050, c, init/Boot/BootMain/bootmain]
       - [0x1420, c, init/Libc/Xldtob/xldtob]
       - [0x2070, c, init/Libc/Xprintf/xprintf]
@@ -56,19 +56,19 @@ segments:
       - [0x50A0, c, init/Sched/SchedInit/schedinit]
       - [0x5570, c, init/Cont/Motor/motor]                     # Rare's controller-pak motor code (not SDK motor.c)
       - [0x57E0, c, init/Cont/MotorInit/motorinit]
-      - [0x5AB0, hasm, init_5AB0]
-      - [0x5BE0, hasm, init_5BE0]
-      - [0x5C2C, hasm, init_5C2C]
-      - [0x6240, hasm, init_6240]
-      - [0x625C, hasm, init_625C]
-      - [0x632C, hasm, init_632C]
-      - [0x6380, hasm, init_6380]
-      - [0x692C, hasm, init_692C]
-      - [0x696C, hasm, init_696C]
-      - [0x709C, hasm, init_709C]
-      - [0x71D0, hasm, init_71D0]
-      - [0x7DA0, hasm, init_7DA0]
-      - [0x7DAC, hasm, init_7DAC]
+      - [0x5AB0, hasm, init/Boot/Paging/pagesetup]
+      - [0x5BE0, hasm, init/Boot/Paging/pagebitmap]
+      - [0x5C2C, hasm, init/Boot/Paging/pagefault]
+      - [0x6240, hasm, init/Boot/Inflate/decompress]
+      - [0x625C, hasm, init/Boot/Inflate/inflatestream]
+      - [0x632C, hasm, init/Boot/Inflate/inflate]
+      - [0x6380, hasm, init/Boot/Inflate/inflateblock]
+      - [0x692C, hasm, init/Boot/Inflate/inflatefixed]
+      - [0x696C, hasm, init/Boot/Inflate/huftbuild]
+      - [0x709C, hasm, init/Boot/Inflate/inflatetables]
+      - [0x71D0, hasm, init/Boot/Exception/exceptasm]
+      - [0x7DA0, hasm, init/Boot/DebugTrap/debugtrap]
+      - [0x7DAC, hasm, init/Boot/FaultDebugger/faultdebugger]
       - [0x8120, hasm, libultra/os/maptlbrdb]
       - [0x8180, c, init/Audio/SeqPlayer/seqplayer]
       - [0x8F90, c, init/Audio/AudioMgr/audiomgr]
@@ -229,9 +229,9 @@ segments:
       - [0x2AB90, .data, init/Boot/ScreenInit/screeninit]
       - [0x2AC30, .data, init/Heap/Allocator/allocator]
       - [0x2AC50, .data, init/Sched/Scheduler/scheduler]
-      - [0x2AC70, .data, init_71D0]
+      - [0x2AC70, .data, init/Boot/Exception/exceptasm]
       - [0x2AC84, data] # crash screen font of init_71D0 (an asset)
-      - [0x2ADEC, .data, init_7DAC]
+      - [0x2ADEC, .data, init/Boot/FaultDebugger/faultdebugger]
       - [0x2AE40, .data, init/Audio/AudioMgr/audiomgr]
       - [0x2B070, .data, init/Audio/Tune/tune]
       - [0x2BA10, .data, init/Audio/MixSelector/mixselector]
@@ -256,8 +256,8 @@ segments:
       - [0x2BF80, .rodata, init/Libc/Xprintf/xprintf]
       - [0x2C080, .rodata, init/Os/DevMgr/devmgr]
       - [0x2C0A0, .rodata, init/Sched/Scheduler/scheduler]
-      - [0x2C0C0, .rodata, init_6380] # the inflate tables of init_6240..init_709C
-      - [0x2C1B0, .rodata, init_71D0]
+      - [0x2C0C0, .rodata, init/Boot/Inflate/inflateblock] # the inflate tables of init_6240..init_709C
+      - [0x2C1B0, .rodata, init/Boot/Exception/exceptasm]
       - [0x2C200, .rodata, init/Audio/SoundPan/soundpan]
       - [0x2C220, .rodata, init/Audio/Tune/tune]
       - [0x2C240, .rodata, init/Audio/DynamicSound/dynamicsound]
@@ -284,7 +284,7 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x80035500, name: init/Libc/Xprintf/xprintf}
       - {start: 0x2D4B0, type: bss, vram: 0x80035510, name: bss_80035510}
       - {start: 0x2D4B0, type: .bss, vram: 0x80036DD0, name: libultra/io/vimgr}
-      - {start: 0x2D4B0, type: .bss, vram: 0x80037E40, name: init_71D0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80037E40, name: init/Boot/Exception/exceptasm}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038070, name: init_38E0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038080, name: init/Heap/ExpansionPak/expansionpak}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038090, name: init/Heap/MemoryLayout/memorylayout}
@@ -296,9 +296,9 @@ segments:
       - {start: 0x2D4B0, type: bss, vram: 0x8003BC28, name: bss_8003BC28}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003BC30, name: init/Cont/Motor/motor}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003BE30, name: init/Cont/MotorInit/motorinit}
-      - {start: 0x2D4B0, type: .bss, vram: 0x8003BE70, name: init_5AB0}
-      - {start: 0x2D4B0, type: .bss, vram: 0x8003BE90, name: init_692C}
-      - {start: 0x2D4B0, type: .bss, vram: 0x8003C8E0, name: init_7DAC}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003BE70, name: init/Boot/Paging/pagesetup}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003BE90, name: init/Boot/Inflate/inflatefixed}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003C8E0, name: init/Boot/FaultDebugger/faultdebugger}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003C900, name: init/Audio/SeqPlayer/seqplayer}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003E380, name: init/Audio/AudioMgr/audiomgr}
       - {start: 0x2D4B0, type: .bss, vram: 0x800417B0, name: init/Audio/Tune/tune}
@@ -438,7 +438,7 @@ segments:
       - [0x447B0, c, game/Player/StatsInit/statsinit]
       - [0x44A90, c, game_44A90]
       - [0x44C40, c, game/Zone/ZoneBounds/zonebounds]
-      - [0x45880, hasm, game_45880]
+      - [0x45880, hasm, game/Zone/CodeTree/codetree]
       - [0x45B80, c, game/Game/MainLoop/mainloop]
       - [0x476D0, c, game/View/Views/views]
       - [0x487D0, c, game/Lighting/PlayerLight/playerlight]
@@ -1644,7 +1644,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800BE570, name: game/Level/ZoneSpawn/zonespawn}
       - {start: 0x255880, type: .bss, vram: 0x800BE580, name: game/Text/TextInit/textinit}
       - {start: 0x255880, type: .bss, vram: 0x800BE590, name: game/Level/SpawnTable/spawntable}
-      - {start: 0x255880, type: .bss, vram: 0x800BE5D0, name: game_45880}
+      - {start: 0x255880, type: .bss, vram: 0x800BE5D0, name: game/Zone/CodeTree/codetree}
       - {start: 0x255880, type: .bss, vram: 0x800BE5E0, name: game/Game/MainLoop/mainloop}
       - {start: 0x255880, type: .bss, vram: 0x800BE620, name: game/View/Views/views}
       - {start: 0x255880, type: .bss, vram: 0x800BE6C0, name: game/Lighting/PlayerLight/playerlight}

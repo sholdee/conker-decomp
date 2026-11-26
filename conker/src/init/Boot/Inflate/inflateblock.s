@@ -420,7 +420,7 @@ glabel boot_inflateStored
 
 .section .rodata
 
-/* The tables of the inflate code (init_6240.s to init_709C.s), as in gzip's inflate.c */
+/* The tables of the inflate code (init/Boot/Inflate/decompress.s to init/Boot/Inflate/inflatetables.s), as in gzip's inflate.c */
 
 /* mask_bits: mask_bits[n] = (1 << n) - 1 */
 glabel gInflateMaskBits

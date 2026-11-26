@@ -94,7 +94,7 @@ glabel boot_initPaging
 
 .section .bss
 
-/* The TLB paging state of the game code (init_5AB0.s, init_5BE0.s, init_5C2C.s) */
+/* The TLB paging state of the game code (init/Boot/Paging/pagesetup.s, init/Boot/Paging/pagebitmap.s, init/Boot/Paging/pagefault.s) */
 glabel gPageFreeBitmap
     /* 8003BE70 */ .space 0x04
 

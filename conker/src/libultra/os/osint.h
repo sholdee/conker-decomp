@@ -48,7 +48,7 @@ extern s32 __osAiDeviceBusy(void);
 extern int __osDpDeviceBusy(void);
 extern s32 __osLeoInterrupt(void);
 
-/* __osExceptionPreamble (init_71D0.s), the code that __osInitialize_common copies to the exception vectors. */
+/* __osExceptionPreamble (init/Boot/Exception/exceptasm.s), the code that __osInitialize_common copies to the exception vectors. */
 extern void func_100071D0(void);
 
 /*

@@ -5,7 +5,7 @@
 
 
 /*
- * Game entrypoint: initialises the subsystems, then runs the main loop forever,
+ * Game init/Boot/EntryPoint/entrypoint: initialises the subsystems, then runs the main loop forever,
  * stepping the frame according to the game state in gLevelChangeRequest.
  */
 void boot_runGame(void) {

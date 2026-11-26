@@ -10,7 +10,7 @@
  *   game/Zone/ZoneCursor/zonecursor.c
  *   game/Zone/RandomPoint/randompoint.c
  *   game/Zone/ZoneBounds/zonebounds.c
- *   game_45880.s
+ *   game/Zone/CodeTree/codetree.s
  *   game/Zone/ZoneTree/zonetree.c
  *   game/Zone/ZoneState/zonestate.c
  */
@@ -29,7 +29,7 @@ void zone_loadObjects(s32 arg0);
 void zone_computeAllBounds(TriggerZone *objects, s32 count);
 void zone_computeBounds(TriggerZone *obj, ZoneBounds *bounds);
 
-/* game_45880.s: builds the zone grid from a bitmap with rows of stride bytes */
+/* game/Zone/CodeTree/codetree.s: builds the zone grid from a bitmap with rows of stride bytes */
 void func_150183D0(s32 stride, s32 height, u8 *bitmap, s32 *cells);
 
 /* game/Zone/ZoneTree/zonetree.c */

@@ -8,11 +8,11 @@ u64 gMainThreadStackTop[0x400 / sizeof(u64)];  // the top of the main thread sta
 static OSThread gIdleThread;           // idle thread
 static u8 D_80031A60[0x80];           // not referenced
 OSThread gMainThread;                  // main thread
-static u8 gPageFaultStack[0xE88];          // not referenced in C: init_5C2C.s runs on the stack below gPageFaultStackTop
-u32 gPageFaultStackTop[6];                    // [0]: the stack pointer that init_5C2C.s saves before it switches stacks
+static u8 gPageFaultStack[0xE88];          // not referenced in C: init/Boot/Paging/pagefault.s runs on the stack below gPageFaultStackTop
+u32 gPageFaultStackTop[6];                    // [0]: the stack pointer that init/Boot/Paging/pagefault.s saves before it switches stacks
 static u8 gChunk0OffsetsBuf[0x800];          // chunk0 offset table (16-byte aligned through gChunk0Offsets)
-static u8 gPageDmaBufferStorage[0xDB8];          // buffer for init_5C2C.s (16-byte aligned through gPageDmaBuffer)
-u8 gPageInflateWork[0x1410];                // init_5C2C.s: work area of the decompressor
+static u8 gPageDmaBufferStorage[0xDB8];          // buffer for init/Boot/Paging/pagefault.s (16-byte aligned through gPageDmaBuffer)
+u8 gPageInflateWork[0x1410];                // init/Boot/Paging/pagefault.s: work area of the decompressor
 u8 *gPageDmaBuffer;                       // gPageDmaBufferStorage, aligned to 16 bytes
 s32 *gChunk0Offsets;                      // chunk0 offsets (gChunk0OffsetsBuf, aligned to 16 bytes)
 

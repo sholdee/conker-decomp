@@ -28,7 +28,7 @@ glabel boot_inflateFixed
 
 .section .bss
 
-/* The work area of the inflate code (init_6240.s to init_709C.s) */
+/* The work area of the inflate code (init/Boot/Inflate/decompress.s to init/Boot/Inflate/inflatetables.s) */
 glabel D_8003BE90
     /* 8003BE90 */ .space 0x04
 

@@ -12,13 +12,13 @@
  *   init_38E0.c
  *   init/Boot/VoidStub/voidstub.c
  *   init/Boot/ScreenInit/screeninit.c
- *   init_5AB0.s
- *   init_5BE0.s
- *   init_5C2C.s
- *   init_6240.s
- *   init_709C.s
- *   init_7DA0.s
- *   init_7DAC.s
+ *   init/Boot/Paging/pagesetup.s
+ *   init/Boot/Paging/pagebitmap.s
+ *   init/Boot/Paging/pagefault.s
+ *   init/Boot/Inflate/decompress.s
+ *   init/Boot/Inflate/inflatetables.s
+ *   init/Boot/DebugTrap/debugtrap.s
+ *   init/Boot/FaultDebugger/faultdebugger.s
  *   game/Boot/GameMain/gamemain.c
  */
 
@@ -51,29 +51,29 @@ void boot_clearFramebuffers(s32 red, s32 green, s32 blue);
 extern f32 gScreenScaleX; // screen width / 292
 extern f32 gScreenScaleY; // screen height / 216
 
-/* init_5AB0.s: TLB paging of the game code (virtual 0x15000000) */
+/* init/Boot/Paging/pagesetup.s: TLB paging of the game code (virtual 0x15000000) */
 void boot_initPaging(s32 pageCount);
 extern s32 gPageFreeBitmap;
 extern s32 gPagePool;
 
-/* init_5BE0.s */
+/* init/Boot/Paging/pagebitmap.s */
 void boot_resetPageBitmap(void);
 
-/* init_5C2C.s */
+/* init/Boot/Paging/pagefault.s */
 void boot_invalidateTlbEntries(s32 firstEntry, s32 lastEntry);
 
-/* init_6240.s: decompresses src into dst and returns the size written.
+/* init/Boot/Inflate/decompress.s: decompresses src into dst and returns the size written.
  * (void *src, void *dst, u32 work); declared without a prototype: callers pass the destination as a
  * pointer or as an address in an s32 */
 s32 boot_decompress();
 
-/* init_709C.s */
+/* init/Boot/Inflate/inflatetables.s */
 void boot_initInflateFixedTables(void);
 
-/* init_7DA0.s: a syscall (debug trap) */
+/* init/Boot/DebugTrap/debugtrap.s: a syscall (debug trap) */
 void boot_debugTrap(void);
 
-/* init_7DAC.s */
+/* init/Boot/FaultDebugger/faultdebugger.s */
 extern s32 gDebugStatusCode; // status code that the game posts for the debugger (0 when clear)
 
 /* game/Boot/GameMain/gamemain.c */

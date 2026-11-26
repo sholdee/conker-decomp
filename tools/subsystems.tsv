@@ -1,18 +1,18 @@
-src/entrypoint.s	boot	hand-written asm (subsystem from entry point)
+src/init/Boot/EntryPoint/entrypoint.s	boot	hand-written asm (subsystem from entry point)
 src/init_38E0.c	boot	early-boot helper pair (permuter-matched)
-src/init_5AB0.s	boot	hand-written asm (subsystem from its header group)
-src/init_5BE0.s	boot	hand-written asm (subsystem from its header group)
-src/init_5C2C.s	boot	hand-written asm (subsystem from its header group)
-src/init_6240.s	boot	hand-written asm (subsystem from its header group)
-src/init_625C.s	boot	hand-written asm (subsystem from nearest preceding file)
-src/init_632C.s	boot	hand-written asm (subsystem from nearest preceding file)
-src/init_6380.s	boot	hand-written asm (subsystem from nearest preceding file)
-src/init_692C.s	boot	hand-written asm (subsystem from nearest preceding file)
-src/init_696C.s	boot	hand-written asm (subsystem from nearest preceding file)
-src/init_709C.s	boot	hand-written asm (subsystem from its header group)
-src/init_71D0.s	boot	hand-written asm (subsystem from nearest preceding file)
-src/init_7DA0.s	boot	hand-written asm (subsystem from its header group)
-src/init_7DAC.s	boot	hand-written asm (subsystem from its header group)
+src/init/Boot/Paging/pagesetup.s	boot	hand-written asm (subsystem from its header group)
+src/init/Boot/Paging/pagebitmap.s	boot	hand-written asm (subsystem from its header group)
+src/init/Boot/Paging/pagefault.s	boot	hand-written asm (subsystem from its header group)
+src/init/Boot/Inflate/decompress.s	boot	hand-written asm (subsystem from its header group)
+src/init/Boot/Inflate/inflatestream.s	boot	hand-written asm (subsystem from nearest preceding file)
+src/init/Boot/Inflate/inflate.s	boot	hand-written asm (subsystem from nearest preceding file)
+src/init/Boot/Inflate/inflateblock.s	boot	hand-written asm (subsystem from nearest preceding file)
+src/init/Boot/Inflate/inflatefixed.s	boot	hand-written asm (subsystem from nearest preceding file)
+src/init/Boot/Inflate/huftbuild.s	boot	hand-written asm (subsystem from nearest preceding file)
+src/init/Boot/Inflate/inflatetables.s	boot	hand-written asm (subsystem from its header group)
+src/init/Boot/Exception/exceptasm.s	boot	hand-written asm (subsystem from nearest preceding file)
+src/init/Boot/DebugTrap/debugtrap.s	boot	hand-written asm (subsystem from its header group)
+src/init/Boot/FaultDebugger/faultdebugger.s	boot	hand-written asm (subsystem from its header group)
 src/libultra/audio/init_17870.c	audio	Rare audio output-mode setup
 src/game_32200.c	model	per-view vertex buffer copies for actor quads
 src/game/Camera/LevelCamSetup01/levelcamsetup01.c	camera	per-level camera preset hook
@@ -39,7 +39,7 @@ src/game/Camera/LevelCamSetup26/levelcamsetup26.c	camera	per-level camera preset
 src/game_38050.c	light	split off in the per-file pass; level particle and sprite setup (header group in light.h)
 src/game_3F950.c	level	per-level setup helper
 src/game_44A90.c	player	player stat limits and globals init
-src/game_45880.s	zone	hand-written asm (subsystem from its header group)
+src/game/Zone/CodeTree/codetree.s	zone	hand-written asm (subsystem from its header group)
 src/game_63A20.c	model	actor quad vertices (pinned billboard) placement and draw
 src/game/Collision/GroundQuery/groundquery.s	collision	hand-written asm (subsystem from its header group)
 src/game/Collision/PropGround/propground.s	collision	hand-written asm (subsystem from its header group)
