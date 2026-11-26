@@ -242,7 +242,7 @@ src/game_DDF10.c	effect	split from game_DDB60.c; same subsystem
 src/game_DE5A0.c	actor	object hover/pairing behaviour (moves to height, sits on other actor)
 src/game_DF2D0.c	particle	emitter effect spawning particles at a random rate; level camera flag hook
 src/game_DF930.c	particle	streak particle spawns and object effect burst
-src/game_DFBF0.c	pipeexplode	pipe explosion effect (../Effects/PipeExplode/pipeexplode.c)
+src/game/Effects/PipeExplode/pipeexplode.c	pipeexplode	pipe explosion effect (../Effects/PipeExplode/pipeexplode.c)
 src/game_E0F60.c	effect	bone effect with camera event and streak particles
 src/game_E1280.c	trail	particle trails: ring buffer of points drawn as a ribbon
 src/game_E2880.c	effect	spark effect attached to an owner

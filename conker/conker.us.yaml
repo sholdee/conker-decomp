@@ -591,7 +591,7 @@ segments:
       - [0xDF260, hasm, game_DF260]
       - [0xDF2D0, c, game_DF2D0]
       - [0xDF930, c, game_DF930]
-      - [0xDFBF0, c, game_DFBF0]
+      - [0xDFBF0, c, game/Effects/PipeExplode/pipeexplode]
       - [0xE0F60, c, game_E0F60]
       - [0xE1280, c, game_E1280]
       - [0xE2880, c, game_E2880]
@@ -1066,7 +1066,7 @@ segments:
       - {start: 0x22D080, type: .data, name: game_DAFA0, linker_section_order: .rodata}
       - {start: 0x22D1A0, type: .data, name: game_DBA60, linker_section_order: .rodata}
       - [0x22D1B0, rodata]
-      - {start: 0x22D1C0, type: .data, name: game_DFBF0, linker_section_order: .rodata}
+      - {start: 0x22D1C0, type: .data, name: game/Effects/PipeExplode/pipeexplode, linker_section_order: .rodata}
       - {start: 0x22D1D0, type: .data, name: game_E3C90, linker_section_order: .rodata}
       - {start: 0x22D1E0, type: .data, name: game_E5E90, linker_section_order: .rodata}
       - {start: 0x22D210, type: .data, name: game_E8090, linker_section_order: .rodata}
@@ -1334,7 +1334,7 @@ segments:
       - [0x244390, .rodata, game_DF260]
       - [0x2443A0, .rodata, game_DF2D0]
       - [0x2443C0, .rodata, game_DF930]
-      - [0x2443E0, .rodata, game_DFBF0]
+      - [0x2443E0, .rodata, game/Effects/PipeExplode/pipeexplode]
       - [0x244680, .rodata, game_E0F60]
       - [0x2446B0, .rodata, game_E1280]
       - [0x2446E0, .rodata, game_E2880]
