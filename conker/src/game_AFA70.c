@@ -1,10 +1,7 @@
 #include <ultra64.h>
 
-#define func_1505EEF4 func_1505EEF4_header // matching: this file keeps its own declaration of func_1505EEF4
 #include "functions.h"
 #include "variables.h"
-#undef func_1505EEF4
-extern Actor *func_1505EEF4(s32 id); // matching: called without its argument
 
 // One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
 typedef struct PartDef {
