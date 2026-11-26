@@ -286,11 +286,6 @@ s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 
 /* game_E8C10.c */
 struct Obj150BCFB8;
-struct Obj150BCFB8;
-struct Obj150BCFB8;
-struct Obj150BCFB8;
-struct Obj150BCFB8;
-struct Obj150BCFB8;
 s32 func_150BB760(Actor *actor);
 s32 func_150BBB5C(Actor *actor);
 s32 func_150BC488(Actor *actor);
@@ -299,11 +294,6 @@ s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 flo
 void func_150BD070(u8 arg0, s32 arg1);
 
 /* game_EABF0.c */
-struct Obj150BDB3C;
-struct Obj150BDB3C;
-struct Obj150BDB3C;
-struct Obj150BDB3C;
-struct Obj150BDB3C;
 struct Obj150BDB3C;
 void func_150BD740(Actor *actor, u8 arg1, s32 arg2);
 s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10,
