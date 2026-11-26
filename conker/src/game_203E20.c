@@ -232,7 +232,7 @@ void func_151D70CC(TextObj *obj, u8 *payload, u8 type) {
  * Effect pre-draw (D_8008ADBC[1]): binds segment 8 to D_80083740 while the effect's alpha is below 0xFF
  * (else D_800838C0), then texture 0xC3 to segments 6 and 7.
  */
-Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s16 view, u8 *needSync, u8 *proceed) {
+Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
     if (fx->params.color0.alpha < 0xFF) {
         gSPSegment(gfx++, 8, D_80083740);
     } else {

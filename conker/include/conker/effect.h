@@ -676,7 +676,7 @@ void func_150FAD78(void);
 void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event);
 void func_150FAE18(s16 duration, u8 owner, s32 kind);
 s32 func_150FB188(Func150FB188State *obj);
-void func_150FB1E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 void func_150FB240(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeRate);
 s32 func_150FB29C(FadeInEffect *effect);
 s32 func_150FB2E0(FadeInSprite *sprite);

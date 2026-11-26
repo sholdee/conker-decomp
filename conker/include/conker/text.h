@@ -97,6 +97,6 @@ void func_151D6BFC(Actor *owner, u8 arg1, s32 arg2);
 s32 func_151D6E60(ModelEffect *fx);
 s32 func_151D7000(TextObj *obj);
 void func_151D70CC(TextObj *obj, u8 *payload, u8 type);
-Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s16 view, u8 *needSync, u8 *proceed);
+Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 
 #endif

@@ -1,9 +1,5 @@
 #include <ultra64.h>
-// matching: func_150FB1E8 forwards its five words to func_151D710C unconverted; hide the header's prototype
-#define func_151D710C func_151D710C_hdr
 #include "functions.h"
-#undef func_151D710C
-s32 func_151D710C(s32, s32, s32, s32, s32);
 #include "variables.h"
 
 static const f32 D_800A1CC0[3] = { 0.0f, -8.0f, -85.0f };
@@ -639,8 +635,8 @@ s32 func_150FB188(Func150FB188State *obj) {
 }
 
 /* Passes func_151D710C's result, with the same remaining arguments, to func_15157F80. */
-void func_150FB1E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    func_15157F80(func_151D710C(arg0, arg1, arg2, arg3, arg4), arg1, arg2, arg3, arg4);
+void func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
+    func_15157F80(func_151D710C(gfx, fx, view, needSync, proceed), fx, view, needSync, proceed);
 }
 
 /* Layout of Effect (game_1844C0.c), as far as func_150FB29C uses it. */
