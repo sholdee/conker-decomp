@@ -6,10 +6,6 @@
    compiled with a view that takes a u8 cause. */
 void save_recordHit(Actor *source, Actor *victim, u8 cause);
 
-/* Defined in game/Event/TimedEvent/timedevent.c as f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered). This file was
-   compiled with a view that takes a fourth argument (one call passes the character index). */
-f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered, s32 arg3);
-
 /* Animation id lists (D_80099428 goes with the dive sound in actor_updatePlayerControls). */
 const u16 D_80099420[4] = { 0x215, 0x10E, 0x108, 0x249 };
 const u16 D_80099428[2] = { 0xE9, 0 };
@@ -2267,7 +2263,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
                 movement->transport = 0;
             }
         }
-        event_runTimedEvents(victim, 800.0f, 1, savedIdx);
+        event_runTimedEvents(victim, 800.0f, 1);
         gCurrentActor = savedActor;
         dc_glbl_CharNum = savedIdx;
         victim->noshove &= 0xFEFF7FFF;

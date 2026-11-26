@@ -1299,8 +1299,7 @@ void effect_getDrawGroupTypes(s32 group, s32 *first, s32 *last);
  * the original API passed it as an integer: callers that pass one address to several calls only match with
  * int parameters. So callers write (s32)&msg.
  */
-/* void effect_broadcastEvent(s32 event, u8 eventType) is declared in the files that call it:
-   game/Math/MathUtil/mathutil.c calls it with two more arguments. */
+void effect_broadcastEvent(s32 event, u8 eventType);
 void effect_sendEventToTypeRange(s32 first, s32 last, s32 event, u8 eventType);
 void effect_sendEventToTypes(const s32 *types, s32 count, s32 event, u8 eventType);
 void effect_sendEventToType(s32 type, s32 event, u8 eventType);

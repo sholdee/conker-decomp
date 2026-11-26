@@ -20,9 +20,6 @@ s32 *gChunk0Offsets;                      // chunk0 offsets (gChunk0OffsetsBuf, 
 #include "variables.h"
 #include "macros.h"
 
-extern u8 debugger_us_ROM_START;
-extern u8 game_us_rzip_ROM_START;
-
 /* ROM range of the compressed game code (game/Prop/PropMover/propmover.c reads it). */
 RomFile D_8002AAD0[2] = {
     { (s32)&game_us_rzip_ROM_START, (s32)&debugger_us_ROM_START },
@@ -54,7 +51,6 @@ void boot_idleThread(void *arg) {
     }
 }
 
-extern u8 D_151FA130; // end of the chunk0 code segment (starts at music_init)
 /**
  * Main thread: clear the heap, set up framebuffers and the VI manager, load and decompress the
  * boot data from ROM, load the chunk0 offset table, then hand over to the game.

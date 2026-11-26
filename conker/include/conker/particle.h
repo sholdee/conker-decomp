@@ -2052,6 +2052,8 @@ void particle_newSpriteEmitter(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32,
                    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                    s32, u8, s32, s32, s32, s32, s32, u8, s32);
 void particle_updateSpriteEmitter(SpriteEmitter *arg0);
+/* void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4) is declared in its only caller,
+   game/Cutscene/SeqEvents/seqevents.c, which was compiled with an s8 texture. */
 s32 particle_updateStyleColorRamp(StyleParticle *particle);
 s32 particle_updateStylePulse(StyleParticle *particle);
 void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3);

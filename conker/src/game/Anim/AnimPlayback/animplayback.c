@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Event/TimedEvent/timedevent.c. Not in event.h: game/Actor/ActorMotion/actormotion.c calls it with a fourth argument. */
-f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered);
-
 /*
  * Tables of the actor code: the binary-angle cosine and angle tables, the hit routes and the
  * hit-reaction tables of game/Actor/ActorMotion/actormotion.c. They lie between game/Script/ObjScript/objscript's data and game/Actor/ObjectSize/objectsize's.

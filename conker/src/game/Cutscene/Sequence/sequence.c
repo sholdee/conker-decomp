@@ -140,9 +140,6 @@ struct SeqQueueEntry *gSeqEventQueue; // dispatch queue, gSeqEventQueueSize entr
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game/Math/MathUtil/mathutil.c calls it with two more arguments. */
-void effect_broadcastEvent(s32 event, u8 eventType);
-
 extern u64 D_800CBE10[];
 
 /* Append a parameterless GBI command (gDPNoParam) at the display-list write head gDisplayListHead. */

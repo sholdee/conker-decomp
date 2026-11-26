@@ -14,10 +14,9 @@ static s32 gEventLoopRunning;
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Particle/StyleParticle/styleparticle.c. Not in particle.h: game/Effects/ModelBurst/modelburst.c passes an s32 style. */
+/* matching: not in particle.h, as game/Effects/ModelBurst/modelburst.c passes an s32 style (definition: game/Particle/StyleParticle/styleparticle.c) */
 void particle_spawnQuadEdgeStyleParticles(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
-                   s32 arg9);
-
+                                          s32 arg9);
 
 /* matching: four scalars, not s32[4] (an array gets an 8-aligned, larger frame) */
 struct SoundChoices {

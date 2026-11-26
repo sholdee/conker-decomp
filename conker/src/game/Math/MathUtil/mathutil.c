@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* matching: no prototype, as math_broadcastActorSwap passes two more arguments (definition: game/Effects/ObjectList/objectlist.c) */
-void effect_broadcastEvent();
-
 /* This file's .data: nine palettes of four RGB colours (math_pickPaletteColour). */
 static u8 gColourPalettes[9 * 12] = {
     0x83, 0x94, 0xAA, 0x50, 0x5E, 0x76, 0x28, 0x34, 0x40, 0x1A, 0x24, 0x30,
@@ -1899,7 +1896,7 @@ void math_broadcastActorSwap(Actor *a, Actor *b) {
     msg.actorB = b;
     msg.idA = a->unique_id;
     msg.idB = b->unique_id;
-    effect_broadcastEvent(&msg, 45, a, b);
+    effect_broadcastEvent((s32)&msg, 45);
 }
 
 /*
