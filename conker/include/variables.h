@@ -37,10 +37,6 @@ extern s32  D_8000031C[16]; // osAppNMIBuffer (64 bytes); libultra's declaration
 /* 80020000 */
 
 
-extern s32  D_8002B070;
-extern s32  D_8002B078[][4]; // probably not correct...
-extern s32  D_8002B9D4[]; /* default music eventTypes */
-extern u16  D_8002B9F4[]; /* default music eventMasks */
 
 
 
@@ -61,10 +57,6 @@ extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares i
 
 
 extern s32  D_80040000;
-extern u8   D_80041F00;
-extern s32  D_80041F04;
-extern s32  D_80041F08;
-extern s32  D_80041F0C;
 extern s32  D_80041F50;
 extern s32  D_80041F54;
 extern u16  D_80041F56;
@@ -78,13 +70,7 @@ extern s32  D_80041FDC;
 extern s32 D_80041FEC[][12];
 
 
-extern u32 D_800417BC;
-extern u8 D_800418AC[];
-extern s32 D_800418B0[3][16]; /* per-channel music event level */
 
-extern u8 D_800419A0;
-extern OSMesgQueue D_80041E58[3];
-extern OSMesg      D_80041EA0[3][8]; /* message buffers of the D_80041E58 queues */
 
 extern s32  D_80042760;
 extern s32  D_80042770;

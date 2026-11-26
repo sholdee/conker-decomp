@@ -1,27 +1,11 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
-
-/* Per-frame update hook of a music sequence: takes and returns its private state word. */
-typedef s32 (*MusicCallback)(s32 state, s32 channel, f32 x, f32 y, f32 z);
-
-/* Settings of one music sequence, indexed by sequence id. */
-typedef struct {
-    /* 0x0 */ u16 volume;
-    /* 0x2 */ u16 pad2;
-    /* 0x4 */ s32 flags; /* low nibble (with 0xF0 masked off) is the sequence kind */
-    /* 0x8 */ MusicCallback update;
-    /* 0xC */ u8 unkC;
-    /* 0xD */ u8 padD[3];
-} MusicInfo; /* size 0x10 */
-
 /* A volume that steps from current toward intended by rate per frame (func_1000CD40). */
-typedef struct {
+struct VolumeRamp {
     u16 current;
     u16 intended;
     u16 rate;
-} VolumeRamp;
+};
 
 /* One music sequence instance, from the pool tuneArray.
  * original: struct tune (rom_debug_struct.c); all field names but eventTypes, eventMasks, channelVolumes
@@ -31,10 +15,9 @@ struct MusicTrack {
     /* 0x04 */ s32 seq_number;        /* sequence id; -1 marks a free pool entry (original: "seq number") */
     /* 0x08 */ s32 *eventTypes;       /* how each of the 16 event bits behaves (func_1000CEAC) */
     /* 0x0C */ u16 *eventMasks;       /* event bits raised by a marker on each marker channel */
-    /* 0x10 */ MusicTrack *syncTune;  /* track whose markers the sync masks refer to */
+    /* 0x10 */ struct MusicTrack *syncTune;  /* track whose markers the sync masks refer to */
     /* 0x14 */ u8 syncTogether;
     /* 0x15 */ u8 internallyPaused;   /* 0 playing, 1 paused while silent, 2 paused on request */
-    /* 0x16 */ u8 pad16[2];
     /* 0x18 */ s32 startSync;         /* marker bits to wait for before replacing the old track */
     /* 0x1C */ s32 volumeSlideSync;   /* marker bits to wait for before stepping the ramps */
     /* 0x20 */ s32 jumpSync;          /* marker bits to wait for before the pending jump */
@@ -45,21 +28,208 @@ struct MusicTrack {
     /* 0x34 */ s32 tuneStatus;        /* private state word of the sequence's update callback */
     /* 0x38 */ s32 tuneOffChannels;   /* muted MIDI channels */
     /* 0x3C */ u8 channelVolumes[16];
-    /* 0x4C */ VolumeRamp vol0;       /* fade */
-    /* 0x52 */ VolumeRamp vol1;       /* crossfade */
-    /* 0x58 */ VolumeRamp vol2;       /* duck */
-    /* 0x5E */ u8 pad5E[2];
-    /* 0x60 */ MusicTrack *waitingTune; /* queued to take over this track's channel */
+    /* 0x4C */ struct VolumeRamp vol0;       /* fade */
+    /* 0x52 */ struct VolumeRamp vol1;       /* crossfade */
+    /* 0x58 */ struct VolumeRamp vol2;       /* duck */
+    /* 0x60 */ struct MusicTrack *waitingTune; /* queued to take over this track's channel */
 }; /* size 0x64 */
 
-extern MusicInfo D_8002B074[];        /* indexed by sequence id (< 150) */
-extern MusicTrack *D_800417B0[3];     /* track playing on each music channel */
-extern s32 D_800417C0[3][16];         /* per-event decay rate */
-extern s32 D_80041880[3];
-extern s32 D_80041890[3];             /* last marker position */
-extern s32 D_800418A0[3];             /* distance between the last two marker positions */
-extern u8 D_80041970[3][16];          /* per-event toggle */
-extern MusicTrack tuneArray[12];     /* track pool */
+/*
+ * This file's .bss. It is defined before functions.h and variables.h: IDO places a variable that an
+ * extern declared earlier (conker/music.h) after the others. The order also rotates with the number of
+ * types and externs declared before it; a typedef for struct VolumeRamp here would move D_80041F0C first.
+ */
+static struct MusicTrack *D_800417B0[3]; /* track playing on each music channel */
+static s32 D_800417C0[3][16];            /* per-event decay rate */
+static s32 D_80041880[3];
+static s32 D_80041890[3];                /* last marker position */
+static s32 D_800418A0[3];                /* distance between the last two marker positions */
+static u8 D_800418AC[3];
+s32 D_800418B0[3][16];                   /* per-channel music event level */
+static u8 D_80041970[3][16];             /* per-event toggle */
+u8 D_800419A0;
+static struct MusicTrack tuneArray[12];  /* track pool */
+OSMesgQueue D_80041E58[3];
+OSMesg D_80041EA0[3][8];                 /* message buffers of the D_80041E58 queues */
+u8 D_80041F00;
+s32 D_80041F04;
+s32 D_80041F08;
+s32 D_80041F0C;
+
+#include "functions.h"
+#include "variables.h"
+
+/* Per-frame update hook of a music sequence: takes and returns its private state word. */
+typedef s32 (*MusicCallback)(s32 state, s32 channel, f32 x, f32 y, f32 z);
+
+/* Settings of one music sequence, indexed by sequence id. */
+typedef struct {
+    /* 0x0 */ u16 volume;
+    /* 0x4 */ s32 flags; /* low nibble (with 0xF0 masked off) is the sequence kind */
+    /* 0x8 */ void *update; /* a MusicCallback; the callbacks take different parameter types */
+    /* 0xC */ u8 unkC;
+} MusicInfo; /* size 0x10 */
+
+/* This file's .data. */
+static s32 D_8002B070 = 0;
+
+/* Settings of each music sequence, indexed by sequence id. */
+static MusicInfo D_8002B074[150] = {
+    /*   0 */ { 18000, 0x00, NULL, 0 },
+    /*   1 */ { 14400, 0x20, func_1000B638, 1 },
+    /*   2 */ { 26000, 0x00, NULL, 0 },
+    /*   3 */ { 30000, 0x20, NULL, 0 },
+    /*   4 */ { 18000, 0x22, NULL, 1 },
+    /*   5 */ { 18000, 0x01, NULL, 0 },
+    /*   6 */ { 18000, 0x00, NULL, 1 },
+    /*   7 */ { 19000, 0x21, NULL, 0 },
+    /*   8 */ { 18000, 0x00, NULL, 0 },
+    /*   9 */ { 26000, 0x00, NULL, 0 },
+    /*  10 */ { 20000, 0x00, NULL, 0 },
+    /*  11 */ { 26000, 0x10, NULL, 0 },
+    /*  12 */ { 26000, 0x01, NULL, 0 },
+    /*  13 */ { 30000, 0x00, NULL, 1 },
+    /*  14 */ { 18000, 0x04, NULL, 0 },
+    /*  15 */ { 30000, 0x00, NULL, 0 },
+    /*  16 */ { 18000, 0x00, func_1000B830, 0 },
+    /*  17 */ { 18000, 0x04, NULL, 0 },
+    /*  18 */ { 18000, 0x01, NULL, 0 },
+    /*  19 */ { 18000, 0x10, func_1000B8B8, 0 },
+    /*  20 */ { 18000, 0x01, func_1000BBE8, 0 },
+    /*  21 */ { 18000, 0x85, NULL, 0 },
+    /*  22 */ { 25000, 0x85, NULL, 0 },
+    /*  23 */ { 21000, 0x85, NULL, 0 },
+    /*  24 */ { 18000, 0x01, NULL, 0 },
+    /*  25 */ { 18000, 0x52, func_1000BC28, 0 },
+    /*  26 */ { 28000, 0x01, NULL, 0 },
+    /*  27 */ { 32000, 0x00, NULL, 0 },
+    /*  28 */ { 18000, 0x00, NULL, 0 },
+    /*  29 */ { 32700, 0x01, NULL, 0 },
+    /*  30 */ { 13000, 0x10, NULL, 0 },
+    /*  31 */ { 24000, 0x10, NULL, 0 },
+    /*  32 */ { 18000, 0x10, NULL, 0 },
+    /*  33 */ { 32000, 0x10, func_1000BCBC, 0 },
+    /*  34 */ { 320, 0x02, func_1000BF60, 0 },
+    /*  35 */ { 260, 0x02, func_1000C350, 0 },
+    /*  36 */ { 32767, 0x10, func_1000C530, 0 },
+    /*  37 */ { 18000, 0x02, NULL, 0 },
+    /*  38 */ { 28000, 0x00, NULL, 0 },
+    /*  39 */ { 28000, 0x00, NULL, 0 },
+    /*  40 */ { 32000, 0x00, NULL, 0 },
+    /*  41 */ { 32000, 0x00, NULL, 0 },
+    /*  42 */ { 28000, 0x00, NULL, 0 },
+    /*  43 */ { 28000, 0x00, NULL, 0 },
+    /*  44 */ { 32700, 0x00, NULL, 0 },
+    /*  45 */ { 18000, 0x00, NULL, 0 },
+    /*  46 */ { 18000, 0x00, NULL, 0 },
+    /*  47 */ { 18000, 0x00, NULL, 0 },
+    /*  48 */ { 18000, 0x00, NULL, 0 },
+    /*  49 */ { 18000, 0x00, NULL, 0 },
+    /*  50 */ { 32000, 0x00, NULL, 0 },
+    /*  51 */ { 32000, 0x00, NULL, 0 },
+    /*  52 */ { 28000, 0x00, NULL, 0 },
+    /*  53 */ { 30000, 0x20, NULL, 0 },
+    /*  54 */ { 32700, 0x01, NULL, 0 },
+    /*  55 */ { 25000, 0x00, NULL, 0 },
+    /*  56 */ { 26000, 0x02, NULL, 1 },
+    /*  57 */ { 18000, 0x02, NULL, 0 },
+    /*  58 */ { 22000, 0x00, NULL, 0 },
+    /*  59 */ { 18000, 0x00, NULL, 0 },
+    /*  60 */ { 18000, 0x01, NULL, 0 },
+    /*  61 */ { 32767, 0x22, NULL, 0 },
+    /*  62 */ { 18000, 0x30, func_1000C7E8, 0 },
+    /*  63 */ { 32767, 0x10, NULL, 0 },
+    /*  64 */ { 18000, 0x00, NULL, 0 },
+    /*  65 */ { 32000, 0x00, NULL, 0 },
+    /*  66 */ { 24000, 0x22, NULL, 7 },
+    /*  67 */ { 32767, 0x00, NULL, 0 },
+    /*  68 */ { 18000, 0x03, NULL, 0 },
+    /*  69 */ { 28000, 0x01, NULL, 0 },
+    /*  70 */ { 28000, 0x11, NULL, 0 },
+    /*  71 */ { 28000, 0x01, NULL, 0 },
+    /*  72 */ { 28000, 0x01, NULL, 0 },
+    /*  73 */ { 18000, 0x02, NULL, 0 },
+    /*  74 */ { 18000, 0x01, NULL, 0 },
+    /*  75 */ { 32000, 0x10, NULL, 0 },
+    /*  76 */ { 12000, 0x10, func_1000C934, 0 },
+    /*  77 */ { 18000, 0x10, func_1000BA18, 0 },
+    /*  78 */ { 18000, 0x01, NULL, 0 },
+    /*  79 */ { 28000, 0x01, NULL, 0 },
+    /*  80 */ { 28000, 0x01, NULL, 0 },
+    /*  81 */ { 24000, 0x00, NULL, 0 },
+    /*  82 */ { 24000, 0x00, NULL, 0 },
+    /*  83 */ { 24000, 0x00, NULL, 0 },
+    /*  84 */ { 18000, 0x10, func_1000CA18, 0 },
+    /*  85 */ { 18000, 0x01, NULL, 0 },
+    /*  86 */ { 18000, 0x01, NULL, 0 },
+    /*  87 */ { 18000, 0x01, NULL, 0 },
+    /*  88 */ { 16000, 0x00, func_1000CAE4, 0 },
+    /*  89 */ { 32000, 0x58, NULL, 0 },
+    /*  90 */ { 20000, 0x00, NULL, 0 },
+    /*  91 */ { 32767, 0x18, NULL, 0 },
+    /*  92 */ { 25000, 0x00, NULL, 0 },
+    /*  93 */ { 25000, 0x00, NULL, 0 },
+    /*  94 */ { 25000, 0x00, NULL, 0 },
+    /*  95 */ { 24000, 0x10, NULL, 0 },
+    /*  96 */ { 18000, 0x10, NULL, 0 },
+    /*  97 */ { 18000, 0x10, NULL, 0 },
+    /*  98 */ { 15000, 0x00, NULL, 0 },
+    /*  99 */ { 24000, 0x01, NULL, 0 },
+    /* 100 */ { 18000, 0x01, NULL, 0 },
+    /* 101 */ { 32000, 0x08, NULL, 0 },
+    /* 102 */ { 18000, 0x00, NULL, 0 },
+    /* 103 */ { 18000, 0x00, NULL, 0 },
+    /* 104 */ { 26000, 0x00, NULL, 0 },
+    /* 105 */ { 18000, 0x01, NULL, 0 },
+    /* 106 */ { 26000, 0x01, NULL, 0 },
+    /* 107 */ { 26000, 0x00, NULL, 0 },
+    /* 108 */ { 32000, 0x01, NULL, 0 },
+    /* 109 */ { 26000, 0x01, NULL, 0 },
+    /* 110 */ { 18000, 0x00, NULL, 0 },
+    /* 111 */ { 22000, 0x08, NULL, 0 },
+    /* 112 */ { 18000, 0x01, NULL, 0 },
+    /* 113 */ { 32767, 0x01, NULL, 0 },
+    /* 114 */ { 18000, 0x03, NULL, 0 },
+    /* 115 */ { 18000, 0x01, NULL, 0 },
+    /* 116 */ { 18000, 0x01, NULL, 0 },
+    /* 117 */ { 24000, 0x01, NULL, 0 },
+    /* 118 */ { 32000, 0x01, NULL, 0 },
+    /* 119 */ { 18000, 0x01, NULL, 0 },
+    /* 120 */ { 18000, 0x03, NULL, 0 },
+    /* 121 */ { 18000, 0x01, NULL, 0 },
+    /* 122 */ { 18000, 0x01, NULL, 0 },
+    /* 123 */ { 32000, 0x03, NULL, 0 },
+    /* 124 */ { 24000, 0x03, NULL, 0 },
+    /* 125 */ { 18000, 0x03, NULL, 0 },
+    /* 126 */ { 18000, 0x03, NULL, 0 },
+    /* 127 */ { 18000, 0x03, NULL, 0 },
+    /* 128 */ { 18000, 0x01, NULL, 0 },
+    /* 129 */ { 24000, 0x01, NULL, 0 },
+    /* 130 */ { 18000, 0x01, NULL, 0 },
+    /* 131 */ { 18000, 0x01, NULL, 0 },
+    /* 132 */ { 32000, 0x01, NULL, 0 },
+    /* 133 */ { 18000, 0x10, func_1000C530, 0 },
+    /* 134 */ { 18000, 0x00, NULL, 0 },
+    /* 135 */ { 18000, 0x00, NULL, 0 },
+    /* 136 */ { 28000, 0x00, NULL, 0 },
+    /* 137 */ { 24000, 0x00, NULL, 0 },
+    /* 138 */ { 18000, 0x01, NULL, 0 },
+    /* 139 */ { 32000, 0x01, NULL, 0 },
+    /* 140 */ { 18000, 0x01, NULL, 0 },
+    /* 141 */ { 32000, 0x01, NULL, 0 },
+    /* 142 */ { 24000, 0x02, NULL, 1 },
+    /* 143 */ { 32767, 0x01, NULL, 0 },
+    /* 144 */ { 32000, 0x01, NULL, 0 },
+    /* 145 */ { 18000, 0x01, NULL, 0 },
+    /* 146 */ { 28000, 0x10, NULL, 0 },
+    /* 147 */ { 32767, 0x10, func_1000BAFC, 0 },
+    /* 148 */ { 18000, 0x03, NULL, 0 },
+    /* 149 */ { 18000, 0x00, NULL, 0 },
+};
+
+/* The default eventTypes and eventMasks of a track. */
+static s32 D_8002B9D4[8] = { 1, 0, 0, 0, 0, 0, 0, 0 };
+static u16 D_8002B9F4[8] = { 0x1, 0x3, 0x4, 0x8, 0x10, 0x20, 0, 0 };
 
 /* Returns the track playing sequence `id` on a channel, or NULL. */
 MusicTrack *func_1000B1B0(s32 id) {
