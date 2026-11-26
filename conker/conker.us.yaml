@@ -1994,7 +1994,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D2390, name: game_B4080}
       - {start: 0x255880, type: .bss, vram: 0x800D23B0, name: game_B7060}
       - {start: 0x255880, type: .bss, vram: 0x800D23C0, name: game_BC430}
-      - {start: 0x255880, type: bss, vram: 0x800D23D0, name: bss_800D23D0}
+      - {start: 0x255880, type: .bss, vram: 0x800D23D0, name: game_BC510}
       - {start: 0x255880, type: .bss, vram: 0x800D2C20, name: game_C1D70}
       - {start: 0x255880, type: .bss, vram: 0x800D2C70, name: game_C2350}
       - {start: 0x255880, type: .bss, vram: 0x800D2DB0, name: game_C3E20}

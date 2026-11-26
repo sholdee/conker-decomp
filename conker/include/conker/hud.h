@@ -84,6 +84,21 @@ void func_15093878(void);
 Gfx *func_150938BC(Gfx *gfx);
 Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large);
 extern const s16 D_8009DCB4[6]; /* the block stack's start [0..2] and target [3..5] position */
+extern Mtx D_800D23D0;          /* the HUD's projection matrix */
+extern f32 D_800D2410[6];       /* per block: its scale while it grows in */
+extern f32 D_800D2428[3];       /* the block stack's position */
+extern f32 D_800D2438[3];       /* the stack's wobble */
+extern s32 D_800D2444;          /* the stack's display timer */
+extern s32 D_800D2450;          /* the race time in frames */
+extern u16 D_800D2454;          /* perspNorm for D_800D23D0 */
+extern u8 D_800D2456;           /* blocks on the stack */
+extern u8 D_800D2457;           /* blocks it moves to */
+extern u8 D_800D2458;           /* the stack is shown */
+extern BlockDebris *D_800D245C; /* the debris list */
+extern Bubble D_800D2460[6];
+extern s32 D_800D24C0;
+extern WaterStage D_800D24C8;
+extern Gfx *D_800D2588;         /* display list built by game_BC510 */
 
 /* game_1EC390.c */
 void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 arg7, s32 arg8);

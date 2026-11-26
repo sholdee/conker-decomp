@@ -1,4 +1,31 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/*
+ * This file's .bss, defined before the headers declare it (see init_50A0.c). The ECTS build lays
+ * out these globals in a rotated order (D_800D2890 comes first), but the 0x380 unreferenced bytes
+ * still follow them: they were a static, which IDO places after the globals.
+ */
+Mtx D_800D23D0;            // the HUD's projection matrix
+f32 D_800D2410[6];         // per block: its scale while it grows in
+f32 D_800D2428[3];         // the block stack's position
+f32 D_800D2438[3];         // the stack's wobble
+s32 D_800D2444;            // the stack's display timer
+Gfx *D_800D2448;           // the clock's display list
+Mtx *D_800D244C;           // the clock's matrices, one per frame buffer
+s32 D_800D2450;            // the race time in frames
+u16 D_800D2454;            // perspNorm for D_800D23D0
+u8 D_800D2456;             // blocks on the stack
+u8 D_800D2457;             // blocks it moves to
+u8 D_800D2458;             // the stack is shown
+BlockDebris *D_800D245C;   // the debris list
+Bubble D_800D2460[6];
+s32 D_800D24C0;
+WaterStage D_800D24C8;
+Gfx *D_800D2588;           // display list built by game_BC510
+Mtx D_800D2590[6][2];      // per block: its matrix per frame buffer
+f32 D_800D2890[3];         // the stack's wobble velocity
+static u8 D_800D28A0[0x380]; /* not referenced */
 
 #include "functions.h"
 #include "variables.h"
@@ -544,7 +571,6 @@ Gfx *func_15090630(Gfx *gfx) {
     }
     return gfx;
 }
-extern s32 D_800D2558[];
 extern u16 D_8009025A;
 extern u16 D_80090262;
 extern u16 D_80090266;
@@ -633,8 +659,8 @@ void func_1509093C(void) {
             D_800D24C8.vtx[0] = vtxStart;
             D_800D24C8.vtx[1] = allocate_memory(D_800D24C8.count * sizeof(WaterVtx), 1, 2, 0);
             bcopy(vtxStart, D_800D24C8.vtx[1], D_800D24C8.count * sizeof(WaterVtx));
-            D_800D24C8.base = allocate_memory(D_800D24C8.count * sizeof(WaterBase), 1, 0, 0);
-            target = D_800D24C8.base;
+            D_800D24C8.shapes[0] = allocate_memory(D_800D24C8.count * sizeof(WaterBase), 1, 0, 0);
+            target = D_800D24C8.shapes[0];
             for (i = 0; i < D_800D24C8.count; i++) {
                 target[i].ob[0] = vtxStart[i].ob[0];
                 target[i].ob[1] = vtxStart[i].ob[1];
@@ -644,14 +670,14 @@ void func_1509093C(void) {
                 target[i].cn[2] = vtxStart[i].cn[2];
                 target[i].cn[3] = vtxStart[i].cn[3];
             }
-            /* D_800D2558 aliases D_800D24C8.target; the original addresses it by its own symbol */
+            /* shapes[0] is the rest shape copied above; the others are loaded */
             for (i = 1; i < 2; i++) {
-                func_1502B7F0(&D_800D2558[i - 1], 2, 0x18, i - 1);
+                func_1502B7F0(&D_800D24C8.shapes[i], 2, 0x18, i - 1);
             }
         }
-        base = D_800D24C8.base;
+        base = D_800D24C8.shapes[0];
         dst = D_800D24C8.vtx[D_800BE9C0];
-        target = D_800D24C8.target;
+        target = D_800D24C8.shapes[1];
         blend = D_800D24C8.unk94;
         for (i = 0; i < D_800D24C8.count; i++) {
             dst[i].ob[0] = base[i].ob[0] + ((f32)target[i].ob[0] - (f32)base[i].ob[0]) * blend;

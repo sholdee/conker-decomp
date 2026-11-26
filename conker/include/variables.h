@@ -357,35 +357,6 @@ extern f32 D_800D1550; // frame time step
 extern s32 D_800D1548;
 extern Actor *D_800D154C;
 
-
-
-extern s32 D_800D2450;
-
-extern Mtx  D_800D23D0;
-
-extern f32 D_800D2410[];
-extern f32 D_800D2428[3];
-extern f32 D_800D2438[3];
-extern s32 D_800D2444;
-extern Gfx *D_800D2448;
-extern Mtx  *D_800D244C;
-extern u16  D_800D2454; // perspNorm for D_800D23D0
-extern u8  D_800D2456;
-extern u8  D_800D2457;
-extern u8  D_800D2458;
-extern BlockDebris *D_800D245C;
-extern Bubble D_800D2460[6];
-extern u8  D_800D246D;
-extern u8  D_800D247D;
-extern s32 D_800D2548;
-extern Gfx *D_800D2588; // display list built by game_BC510
-extern Mtx  D_800D2590[6][2];
-extern s32 D_800D24C0;
-extern WaterStage D_800D24C8;
-
-extern f32 D_800D2890[3];
-
-
 extern u8 D_800D2E40;
 extern s32 D_800D2E48;
 extern s32 D_800D2E50;

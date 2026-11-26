@@ -2197,8 +2197,7 @@ typedef struct WaterStage {
     /* 0x00 */ Mtx mtx[2];
     /* 0x80 */ Gfx *dl;
     /* 0x84 */ WaterVtx *vtx[2];
-    /* 0x8C */ WaterBase *base;
-    /* 0x90 */ WaterBase *target;
+    /* 0x8C */ WaterBase *shapes[2]; /* [0] the rest shape, [1] the shape it blends to */
     /* 0x94 */ f32 unk94;
     /* 0x98 */ f32 unk98;
     /* 0x9C */ f32 unk9C;
