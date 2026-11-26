@@ -666,7 +666,7 @@ Game1EF500Trail *func_150F03F8(actor, slot, arg2, arg3)
     Vec3f *dst[2];
     LightEffectHeader hdr;
     Vec3i origin;
-    f32 params[2];
+    ParticleSize params;
     s32 randB;
     f32 rand1;
     f32 rand0;
@@ -711,12 +711,12 @@ Game1EF500Trail *func_150F03F8(actor, slot, arg2, arg3)
     origin.z = muzzle.z;
     randA = (func_150ADA20() % 51U) + 80;
     func_151602C0(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg2, arg3);
-    params[1] = (func_150ADA68() * 1906.0f + 969.0f) * 0.001000000047f;
-    params[0] = (func_150ADA68() * 911.0f + 628.0f) * 0.1000000015f;
+    params.height = (func_150ADA68() * 1906.0f + 969.0f) * 0.001000000047f;
+    params.width = (func_150ADA68() * 911.0f + 628.0f) * 0.1000000015f;
     randA = func_150ADA20();
     randB = func_150ADA20();
     rand0 = func_150ADA68() * 2000.0f + 2000.0f;
-    func_15102B38(actor, D_800A1670[slot], &D_800A1640[slot], &D_800A1658[slot], params,
+    func_15102B38(actor, D_800A1670[slot], &D_800A1640[slot], &D_800A1658[slot], &params,
                   (randA % 3U) + 8, (randB % 1U) + 0xFF, rand0, &muzzle, 0xFF, 0, -1, arg2, arg3);
     return ret;
 }
@@ -1130,7 +1130,7 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
         Vec3f *dst[1];
         LightEffectHeader hdr;
         Vec3i origin;
-        f32 params[2];
+        ParticleSize params;
         s32 randB;
         f32 rand0;
         s32 randA;
@@ -1150,13 +1150,13 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
         origin.z = muzzle.z;
         randA = (func_150ADA20() % 51U) + 80;
         func_151602C0(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
-        params[1] = (func_150ADA68() * 701.0f + 1925.0f) * 0.001000000047f;
-        params[0] = (func_150ADA68() * 1155.0f + 1526.0f) * 0.1000000015f;
+        params.height = (func_150ADA68() * 701.0f + 1925.0f) * 0.001000000047f;
+        params.width = (func_150ADA68() * 1155.0f + 1526.0f) * 0.1000000015f;
         randA = func_150ADA20();
         randB = func_150ADA20();
         rand0 = func_150ADA68() * 1877.0f + 2414.0f;
         func_15102B38(actor, D_800A180C[kind][slot], &D_800A168C[kind][variant][slot],
-                      &D_800A174C[kind][variant][slot], params, (randA % 6U) + 8, (randB % 1U) + 0xFF,
+                      &D_800A174C[kind][variant][slot], &params, (randA % 6U) + 8, (randB % 1U) + 0xFF,
                       rand0, &muzzle, 0xFF, 0, -1, arg3, arg4);
     }
 }

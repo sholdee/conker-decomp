@@ -85,14 +85,14 @@ void func_150FEBC8(Actor *actor, s32 arg1, Vec3f *out) {
 
 /* Spawns a randomized effect (func_15102B38) on bone `bone` of `actor` at `position`. */
 void func_150FEC28(Actor *actor, u8 bone, Vec3f *arg2, Vec3f *arg3, Vec3f *position, u8 arg5, s32 arg6) {
-    f32 motion[2];
+    ParticleSize motion;
     s32 pad; // matching: unused stack slot between motion and random
     s32 random[2];
 
-    motion[1] = func_150ADA68() * 1.001f + 0.6040000319f;
-    motion[0] = func_150ADA68() * 5.9f + 14.1f;
+    motion.height = func_150ADA68() * 1.001f + 0.6040000319f;
+    motion.width = func_150ADA68() * 5.9f + 14.1f;
     random[0] = func_150ADA20();
     random[1] = func_150ADA20();
-    func_15102B38(actor, bone, arg2, arg3, motion, (random[0] & 3) + 6, 0xFF, func_150ADA68() * 270.0f + 359.0f,
+    func_15102B38(actor, bone, arg2, arg3, &motion, (random[0] & 3) + 6, 0xFF, func_150ADA68() * 270.0f + 359.0f,
                   position, 0xFF, 0, -1, arg5, arg6);
 }

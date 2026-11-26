@@ -419,20 +419,20 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 const Vec3f a = { 3.0f, 125.0f, 35.0f };
                 const Vec3f b = { 6.0f, -50.0f, 35.0f };
                 const Vec3f c = { 3.0f, 200.0f, 35.0f };
-                f32 scale[2];
+                ParticleSize scale;
                 Vec3f outA;
                 Vec3f outB;
                 const Vec3f *in[2];
                 Vec3f *out[2];
 
-                scale[0] = func_150ADA68() * 10.0f + 25.0f;
-                scale[1] = func_150ADA68() * 1.009000063f + 2.013000011f;
+                scale.width = func_150ADA68() * 10.0f + 25.0f;
+                scale.height = func_150ADA68() * 1.009000063f + 2.013000011f;
                 in[0] = &a;
                 in[1] = &b;
                 out[0] = &outA;
                 out[1] = &outB;
                 func_15145EA4(in, out, &shooter->ob_matrix_ptr[9], 2);
-                func_15102B38(shooter, 9, &a, &c, scale, func_150ADA20() % 3 + 8,
+                func_15102B38(shooter, 9, &a, &c, &scale, func_150ADA20() % 3 + 8,
                               func_150ADA20() % 56 + 200, func_150ADA68() * 204.0f + 601.0f,
                               &outA, 0xFF, 0, -1, fxOwner, fxList);
                 func_15103254(func_150ADA20() % 3 + 8, func_150ADA20() % 56 + 200,

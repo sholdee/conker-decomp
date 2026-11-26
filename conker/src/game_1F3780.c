@@ -253,17 +253,17 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
 /* Spawns a func_15102B38 effect at `pos` between this side's D_800AAB08/D_800AAB20 points, with random
  * size, count and angle. */
 void func_151C6D70(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5) {
-    f32 values[2];
+    ParticleSize values;
     f32 angle;
     u32 random1;
     u32 random0;
 
-    values[1] = (func_150ADA68() * 1.001f) + 0.6040000319f;
-    values[0] = (func_150ADA68() * 5.9f) + 14.1f;
+    values.height = (func_150ADA68() * 1.001f) + 0.6040000319f;
+    values.width = (func_150ADA68() * 5.9f) + 14.1f;
     random0 = func_150ADA20();
     random1 = func_150ADA20();
     angle = func_150ADA68();
-    func_15102B38(arg0, (u32)D_800AAB00[side] >> 6, &D_800AAB08[side], &D_800AAB20[side], values,
+    func_15102B38(arg0, (u32)D_800AAB00[side] >> 6, &D_800AAB08[side], &D_800AAB20[side], &values,
                   (random0 % 4U) + 6, (random1 % 1U) + 255, (angle * 270.0f) + 359.0f, pos, 255, 0, arg3, arg4,
                   arg5);
 }

@@ -87,15 +87,15 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
     u8 arg2;
     s32 arg3;
 {
-    f32 params[2];
+    ParticleSize params;
     u8 cameraMask;
     s32 pad; // matching: unused stack slot
     s32 random1;
     s32 random0;
 
     if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
-        params[1] = func_150ADA68() * 1.5f + 2.0f;
-        params[0] = func_150ADA68() * 10.10000038f + 2.059999943f;
+        params.height = func_150ADA68() * 1.5f + 2.0f;
+        params.width = func_150ADA68() * 10.10000038f + 2.059999943f;
 
         if (obj->mv != NULL && obj->mv->SniperState != 0 && obj->CameraPtr != NULL) {
             cameraMask = ~(1 << obj->CameraPtr->CNumber) & 0xFF;
@@ -105,7 +105,7 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
 
         random0 = func_150ADA20();
         random1 = func_150ADA20();
-        func_15102B38(obj, D_80088B80, &D_800A1F70, &D_800A1F7C, params, (random0 % 5U) + 6, (random1 % 101U) + 155,
+        func_15102B38(obj, D_80088B80, &D_800A1F70, &D_800A1F7C, &params, (random0 % 5U) + 6, (random1 % 101U) + 155,
                       func_150ADA68() * 199.0f + 501.0f, muzzle, cameraMask, 0, -1, arg2, arg3);
     }
 }

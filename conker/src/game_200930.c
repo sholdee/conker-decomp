@@ -232,21 +232,21 @@ s32 func_151D3D50(WobbleParticle *particle) {
 
 /* Writes the world position of a point attached to bone `bone` of obj to out; objects without bone
    matrices use their origin raised by yOffset. */
-void func_151D3E04(Actor *obj, f32 *out, void *localPos, u8 bone, f32 yOffset) {
+void func_151D3E04(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bone, f32 yOffset) {
     if (obj->ob_matrix_ptr != NULL) {
-        func_15143134(localPos, (s32)out, (s32)obj->ob_matrix_ptr + (bone << 6));
+        func_15143134(localPos, out, &obj->ob_matrix_ptr[bone]);
     } else {
-        out[0] = obj->xpos;
-        out[1] = obj->ypos + yOffset;
-        out[2] = obj->zpos;
+        out->x = obj->xpos;
+        out->y = obj->ypos + yOffset;
+        out->z = obj->zpos;
     }
 }
 
 /* Calls func_1505D1C4 at the midpoint of a and b, with obj's movement angle relative to its mv. */
-void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3) {
-    f32 x = (b[0] + a[0]) * 0.5f;
-    f32 y = (b[1] + a[1]) * 0.5f;
-    f32 z = (b[2] + a[2]) * 0.5f;
+void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
+    f32 x = (a->x + b->x) * 0.5f;
+    f32 y = (a->y + b->y) * 0.5f;
+    f32 z = (a->z + b->z) * 0.5f;
 
     {
         u16 angle;

@@ -3008,8 +3008,8 @@ typedef struct {
 
 void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5);
 s32 func_151D3D50(WobbleParticle *particle);
-void func_151D3E04(Actor *obj, f32 *out, void *localPos, u8 bone, f32 yOffset);
-void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3);
+void func_151D3E04(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bone, f32 yOffset);
+void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3);
 void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2);
 void func_151D3FF4(Vec3f *pos, u8 arg1, s32 arg2);
 void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, s32 arg4, s32 arg5, s32 arg6, s32 arg7);

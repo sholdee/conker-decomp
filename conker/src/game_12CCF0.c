@@ -21,7 +21,7 @@ void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     Vec3f direction;
     Vec3f axis0;
     Vec3f axis1;
-    f32 motion[2];
+    ParticleSize motion;
     Vec3f trail[3];
     u8 scratch[0x64];
     void *buffer;
@@ -33,11 +33,11 @@ void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     func_151D5148(obj);
     if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
         func_151D3F14(&position, arg3, arg4);
-        motion[1] = ((func_150ADA68() * 3400.0f) + 4800.0f) * 0.001000000047f;
-        motion[0] = ((func_150ADA68() * 220.0f) + 320.0f) * 0.1000000015f;
+        motion.height = ((func_150ADA68() * 3400.0f) + 4800.0f) * 0.001000000047f;
+        motion.width = ((func_150ADA68() * 220.0f) + 320.0f) * 0.1000000015f;
         random0 = func_150ADA20();
         random1 = func_150ADA20();
-        func_15102B38(obj, D_80088BB0, &D_800A2130, &D_800A213C, motion,
+        func_15102B38(obj, D_80088BB0, &D_800A2130, &D_800A213C, &motion,
                       (random0 % 3U) + 4, (random1 & 0x7F) + 0x80,
                       (func_150ADA68() * 450.0f) + 780.0f, &position, 0xFF,
                       0, -1, arg3, arg4);
