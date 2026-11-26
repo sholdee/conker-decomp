@@ -78,7 +78,7 @@ typedef struct {
 typedef struct {
     Gfx *dl;
     s32 *data;
-    s32 unk8;
+    s16 *unk8; /* the distinct textures dl uses (func_1510CE60's usedOut) */
 } Struct151EDF4C;
 
 /* game_BC510.c */

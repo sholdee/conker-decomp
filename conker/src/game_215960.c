@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_1510CE60 func_1510CE60_header // matching: this file keeps its own declarations of these
 #include "functions.h"
-#undef func_1510CE60
 #include "variables.h"
 
 /* Per-mode (D_800E0B94) overlay drawers, called by func_151E8620. */
@@ -1821,7 +1819,6 @@ extern s8 D_800E0C81;
 extern s8 D_800E0C82;
 extern s8 D_800E0C83;
 extern s8 D_800E0C84;
-s32 func_1510CE60(Gfx *, s32, u32, s32, s32 *); // matching: a u32 countUse (the definition's s32 changes func_151EDF4C)
 
 /*
  * Loads the 30 display lists 0x1C5..0x1E2 and patches them: vertex addresses relocated with the

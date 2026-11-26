@@ -36,7 +36,7 @@ void func_1510C8A8(void);
 /* game_139FC0.c */
 void func_1510CB10(s32 slot);
 Gfx *func_1510CDB8(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot);
-s32 func_1510CE60(Gfx *dl, s32 strict, s32 countUse, s32 lifetime, s16 **usedOut);
+s32 func_1510CE60(Gfx *dl, s32 strict, u32 countUse, s32 lifetime, s16 **usedOut);
 s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse); /* texture address of a texture id */
 s32 func_1510D374(s32 index);
 void func_1510D404(void);

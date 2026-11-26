@@ -83,7 +83,7 @@ Gfx *func_1510CDB8(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot) {
  * allocated list (count, then the indices) of the distinct textures referenced.
  * Returns whether every texture loaded.
  */
-s32 func_1510CE60(Gfx *dl, s32 strict, s32 countUse, s32 lifetime, s16 **usedOut) {
+s32 func_1510CE60(Gfx *dl, s32 strict, u32 countUse, s32 lifetime, s16 **usedOut) {
     s32 seg;
     s32 i;
     s32 texSize;
