@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Sprays up to 30 trails from a ring around obj; stops early when a trail can't be created. */
-void func_150AEEB0(Actor *obj, u8 owner) {
+void trail_sprayFromRing(Actor *obj, u8 owner) {
     EffectTemplate spawn;
     TrailMotion motion;
     s32 remaining;
@@ -53,15 +53,15 @@ void func_150AEEB0(Actor *obj, u8 owner) {
             motion.velocity.x = speed * sinPitch * cosYaw;
             motion.velocity.y = -speed * cosPitch;
             motion.velocity.z = speed * sinPitch * sinYaw;
-            if (func_15147DA0(&spawn, &motion, 0, 1, 3, 0, 0, 0, 0, 0, 0, &render, 0, owner, 0) == NULL) {
+            if (trail_createMotionTrail(&spawn, &motion, 0, 1, 3, 0, 0, 0, 0, 0, 0, &render, 0, owner, 0) == NULL) {
                 ok = FALSE;
             }
         } while (ok && --remaining != 0);
     }
 }
 
-/* MotionTrail handler (D_8008A3F8[3]): fades the trail out over its last 8 frames. */
-s32 func_150AF1C0(MotionTrail *trail) {
+/* MotionTrail handler (gMotionTrailUpdateProcs[3]): fades the trail out over its last 8 frames. */
+s32 trail_fadeMotionTrail(MotionTrail *trail) {
     TrailParams *params = trail->params;
     s32 alpha = trail->head.tmpl.life * 32;
 

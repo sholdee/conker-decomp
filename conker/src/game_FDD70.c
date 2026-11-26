@@ -74,7 +74,7 @@ void func_150D0E90(s32 arg0) {
 
     if (movement_obj->mv->death_State == 0) {
         for (i = 0; i < 3; i++) {
-            prop = func_151149AC(0xFA - i);
+            prop = gfx_findObjectById(0xFA - i);
             propIndex = prop - db_Object_array;
             if (gWorldObjectContacts[propIndex] & 1) {
                 func_151951E0(movement_obj);
@@ -82,7 +82,7 @@ void func_150D0E90(s32 arg0) {
             }
         }
 
-        prop = func_151149AC(0xFB);
+        prop = gfx_findObjectById(0xFB);
         propIndex = prop - db_Object_array;
         if (gWorldObjectContacts[propIndex] & 1) {
             sound_playActorSound2(0x627, movement_obj, 0x7FFF, 200, 700);

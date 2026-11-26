@@ -29,7 +29,7 @@ const Vec3f D_800A2080[2][6] = { /* two random sets of flash points */
 };
 
 /* Fires a shot from the gun attachment (set 0x82) of `obj`, with muzzle effects when it has bones. */
-void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
+void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2) {
     Vec3f position;
     Vec3f endpoint;
     Vec3f direction;
@@ -50,10 +50,10 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
     f32 random1;
     f32 random0;
 
-    gun = func_150FF288(obj);
+    gun = weapon_getGunAttachment(obj);
     if (gun != NULL) {
         func_151D5148(obj);
-        func_150FF2AC(obj, &direction, &axis0, &axis1);
+        weapon_getShotAxes(obj, &direction, &axis0, &axis1);
 
         if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
             valid = TRUE;
@@ -61,7 +61,7 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
             valid = FALSE;
         }
 
-        func_150FF2D4(&valid, points, &position, &hit, &normal, &direction, &axis0, &axis1, &output0, &output1,
+        weapon_findShotStart(&valid, points, &position, &hit, &normal, &direction, &axis0, &axis1, &output0, &output1,
                       &value0, &value1, &endpoint, obj, gun);
 
         random0 = func_150ADA68();
@@ -81,7 +81,7 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
         }
 
         // matching: lbu of arg1 from its arg slot at each use (a u8 param gets spilled to a new slot)
-        func_151C229C(&endpoint, &direction, value0, value1, 1, 0, 300.0f, 0.003333333414f,
+        weapon_spawnProjectile(&endpoint, &direction, value0, value1, 1, 0, 300.0f, 0.003333333414f,
                       (random0 * 10.0f) + 25.0f, (random1 * 200.0f) + 600.0f,
                       50.0f, (randomWord % 156U) + 100, obj, 99, 1, 1, 1,
                       0, 1, 0, kind, 0.0f, 0xFF, directionSign, 0,
@@ -92,13 +92,13 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
             /* byte 2 of an attachment is the owner bone it follows */
             func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
                           ((u8 *)&arg1)[3], arg2);
-            func_150FF474(&position, points, ((u8 *)&arg1)[3], arg2);
+            weapon_spawnMuzzleFlashes(&position, points, ((u8 *)&arg1)[3], arg2);
         }
     }
 }
 
 /* Writes the world position of attachment set `setId` of `obj` to `out` (`obj`'s own position for -1). */
-void func_150FEFD0(Actor *obj, s16 setId, Vec3f *out) {
+void weapon_getAttachmentPos(Actor *obj, s16 setId, Vec3f *out) {
     const Vec3f *src;
     Vec3f *dst;
     ModelAttachment *attachment;
@@ -121,7 +121,7 @@ void func_150FEFD0(Actor *obj, s16 setId, Vec3f *out) {
     }
 }
 
-/* Like func_150FED30, but spawns its shot through func_150F7470. */
+/* Like weapon_fireAttachedGun, but spawns its shot through func_150F7470. */
 void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f position;
     Vec3f endpoint;
@@ -140,10 +140,10 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
     s32 randomWord;
     s32 hasValue1;
 
-    gun = func_150FF288(obj);
+    gun = weapon_getGunAttachment(obj);
     if (gun != NULL) {
         func_151D5148(obj);
-        func_150FF2AC(obj, &direction, &axis0, &axis1);
+        weapon_getShotAxes(obj, &direction, &axis0, &axis1);
 
         if (obj->ob_matrix_ptr != NULL) {
             valid = TRUE;
@@ -151,7 +151,7 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
             valid = FALSE;
         }
 
-        func_150FF2D4(&valid, points, &position, &hit, &normal, &direction, &axis0, &axis1, &output0, &output1,
+        weapon_findShotStart(&valid, points, &position, &hit, &normal, &direction, &axis0, &axis1, &output0, &output1,
                       &value0, &value1, &endpoint, obj, gun);
 
         if (value1 == NULL) {
@@ -168,30 +168,30 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
             func_151D3F14(&position, arg1, arg2);
             func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
                           arg1, arg2);
-            func_150FF474(&position, points, arg1, arg2);
+            weapon_spawnMuzzleFlashes(&position, points, arg1, arg2);
         }
     }
 }
 
 /* Returns `obj`'s gun attachment (set 0x82), or NULL. */
-ModelAttachment *func_150FF288(Actor *obj) {
+ModelAttachment *weapon_getGunAttachment(Actor *obj) {
     return func_1503195C(obj, 0x82, 0);
 }
 
 /* Fills `direction`, `axis0` and `axis1` for `obj` through func_15145740. */
-void func_150FF2AC(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
+void weapon_getShotAxes(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
     func_15145740(obj, direction, axis0, axis1, 0.8110000491f);
 }
 
 /*
- * Finds where a shot starts. With `*valid` set, the points come from the gun's bone (func_150FF6E0),
+ * Finds where a shot starts. With `*valid` set, the points come from the gun's bone (weapon_getGunMuzzlePoints),
  * which can fail and clear `*valid`; otherwise the start is beside `obj`, to the right of `direction`.
  */
-void func_150FF2D4(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal,
+void weapon_findShotStart(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal,
                    Vec3f *direction, Vec3f *axis0, Vec3f *axis1, Vec3f *output0, Vec3f *output1,
                    Vec3f **value0, Vec3f **value1, Vec3f *endpoint, Actor *obj, ModelAttachment *gun) {
     if (*valid) {
-        *valid = func_150FF6E0(points, position, hit, normal, endpoint, obj, gun);
+        *valid = weapon_getGunMuzzlePoints(points, position, hit, normal, endpoint, obj, gun);
     }
     if (!*valid) {
         f32 sideZ;
@@ -220,7 +220,7 @@ void func_150FF2D4(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f 
 }
 
 /* Spawns six muzzle-flash particles at `position`, one per entry of `points`. */
-void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3) {
+void weapon_spawnMuzzleFlashes(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3) {
     u8 i;
     s32 variant;
     s32 pad; // matching: unused stack slot
@@ -291,7 +291,7 @@ s32 func_150FF6B4(Actor *obj, s32 arg1, s32 arg2) {
  * Transforms the gun's muzzle points by its bone into world space. `normal` ends up relative to `hit`.
  * Returns FALSE if the transform fails.
  */
-u8 func_150FF6E0(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal, Vec3f *endpoint,
+u8 weapon_getGunMuzzlePoints(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal, Vec3f *endpoint,
                  Actor *obj, ModelAttachment *gun) {
     u8 i;
     const Vec3f *src[10];

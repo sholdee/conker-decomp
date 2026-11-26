@@ -79,7 +79,7 @@ void sight_resetPlayerEffects(Camera *player) {
     Camera *msg;
 
     msg = player;
-    func_15160274((s32)&msg, 0x21, (s32)player);
+    colourfb_broadcastMessage((s32)&msg, 0x21, (s32)player);
     func_1515572C((s32)&msg, 0x21);
     func_151A561C((s32)&msg, 0x21);
     func_151494E0((s32)&msg, 0x21);
@@ -479,7 +479,7 @@ void sight_spawnZoomSight(Camera *player, u8 big) {
         spawn.drawIndex = 1;
         spawn.lifetime = 300;
         spawn.messageIndex = 1;
-        lensObj = (SightLensObject *)func_1515FF74(&spawn, 0x498, 0xFF, 1);
+        lensObj = (SightLensObject *)colourfb_createScreenEffect(&spawn, 0x498, 0xFF, 1);
         if (lensObj != NULL) {
             lens.pixels = lensObj->pixels;
             memcpy(&lensObj->lens, &lens, sizeof(SightLens));

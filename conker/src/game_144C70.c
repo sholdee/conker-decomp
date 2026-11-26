@@ -233,7 +233,7 @@ void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
     f32 rotatedX;
 
     if (prop->modelId == 0x8006 && level == 53) {
-        prop = func_151149AC(0xFD);
+        prop = gfx_findObjectById(0xFD);
         func_1511F31C(prop);
         y = -555.0f;
         x = 0.0f;
@@ -458,7 +458,7 @@ void func_15117F3C(WorldObject *prop) {
                 accel += 0.02999999933f;
                 if (0.200000003f < accel) {
                     if (prop->sound_id == 0) {
-                        func_15114D24(prop, sound, 0x7D00, 0x5DC, 0xDAC, 0);
+                        gfx_playObjectSound(prop, sound, 0x7D00, 0x5DC, 0xDAC, 0);
                     }
                 }
                 prop->t += speed;
@@ -468,7 +468,7 @@ void func_15117F3C(WorldObject *prop) {
                     accel = 0.0f;
                     motion = TASK_FLAG_ON;
                     started = 0;
-                    func_15114D24(prop, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
+                    gfx_playObjectSound(prop, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
                     if (target != NULL) {
                         target->mv->unk6B = 0;
                     }
@@ -660,7 +660,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
         }
         PROP_SET_MOTION(prop, motion);
         if (sound != 0) {
-            func_15114D24(prop, sound, 0x5DC0, 0x9C4, 0x1194, 0);
+            gfx_playObjectSound(prop, sound, 0x5DC0, 0x9C4, 0x1194, 0);
         }
     }
     WORK(prop)->swing.speed = speed;

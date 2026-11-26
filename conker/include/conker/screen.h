@@ -122,7 +122,7 @@ struct ScreenTint {
     /* 0x16 */ u8 green;
     /* 0x17 */ u8 blue;
     /* 0x18 */ u8 rising;       /* red pulse direction: 0 fading, 1 brightening */
-    /* 0x19 */ u8 unk19;        /* index into D_8008F904; 0 also calls func_10011FA0(2) */
+    /* 0x19 */ u8 unk19;        /* index into D_8008F904; 0 also calls audio_requestMixSelector(2) */
     /* 0x1A */ u8 viewport;     /* index into gViews */
     /* 0x1B */ u8 pad1B[0x5];
 }; /* size 0x20 */

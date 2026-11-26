@@ -39,7 +39,7 @@ void screen_updateTintEffect(struct ScreenTint *effect) {
     }
 
     if (effect->unk19 == 0) {
-        func_10011FA0(2);
+        audio_requestMixSelector(2);
     }
 
     red = effect->red;

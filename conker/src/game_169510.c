@@ -41,19 +41,19 @@ static s32 (*D_80089CA8[])() = { NULL, func_151AB180, func_150C5EFC, func_150C68
 /* Particle update (DefParticleHead.updateFn1, updateFn2; 0 = none) and expire callbacks, as for sprites. */
 static s32 (*D_80089CB8[])() = {
     NULL, func_1513E6E8, func_1518A094, func_150B9560, func_150BA37C, func_1514A4EC, func_1514A594, func_1518EF54,
-    func_1518F058, func_150DB114, func_15197AB4, func_151AC9EC, func_15190F9C, func_15191520, func_151DA368,
+    func_1518F058, func_150DB114, flamethrower_moveJetLine, func_151AC9EC, func_15190F9C, func_15191520, func_151DA368,
     func_150E6230, func_151B118C, func_151B1828, func_1514B87C, func_150CD17C, func_150C308C, func_15101378,
-    func_151C2734, func_150AE35C, func_1513F6E8, func_1513F728, sight_updateBeam, func_151B85AC, func_151CEA20,
-    func_150EF38C, func_150F00EC, func_1519C26C, func_1514C258, func_1514C288, func_150E4174, func_151B8CFC,
+    weapon_updateProjectile, func_150AE35C, func_1513F6E8, func_1513F728, sight_updateBeam, weapon_updateBulletParticle, trail_integrateScalarMotion,
+    func_150EF38C, func_150F00EC, flamethrower_moveFlameLine, func_1514C258, func_1514C288, func_150E4174, func_151B8CFC,
     func_150F7E20, func_15141928, func_150F3214, func_1519EF04, func_150DEACC, func_15102D90,
 };
 static s32 (*D_80089D60[])() = {
     NULL, func_150B95FC, func_150BA424, func_1514143C, func_1514A19C, func_1514A380, func_1514A498, func_1518F108,
-    func_1518F15C, func_1518F1A0, func_150DB630, func_15197BBC, func_1518F384, func_15149838, func_15149A94,
+    func_1518F15C, func_1518F1A0, func_150DB630, flamethrower_fadeJetLine, func_1518F384, func_15149838, func_15149A94,
     func_15149BF4, func_15149C58, func_151ACA20, func_1519187C, func_151DA6A8, func_151DADA0, func_150E679C,
     func_151AFC08, func_150CBA30, func_150CC638, func_150C2FCC, func_151368A8, func_151B1478, func_1514AF74,
-    func_1514B8B0, func_150CD17C, func_151022AC, func_15141478, func_151415D4, func_1519C4E4, func_1514BE00,
-    func_1514BF7C, func_151BE210, func_150D317C, func_150D4CC4, func_151A6600, func_15141564, func_151BE6CC,
+    func_1514B8B0, func_150CD17C, func_151022AC, func_15141478, func_151415D4, flamethrower_fadeFlameLine, func_1514BE00,
+    func_1514BF7C, func_151BE210, func_150D317C, trail_updateTrailGlow, func_151A6600, func_15141564, func_151BE6CC,
     func_150FD514,
 };
 static s32 (*D_80089E10[])() = { NULL, func_15149EC4, func_1514C2B8 };
@@ -62,9 +62,9 @@ static s32 (*D_80089E10[])() = { NULL, func_15149EC4, func_1514C2B8 };
  * s16; most entries take their own view of the particle. */
 static Vtx *(*D_80089E1C[])(DefParticleHead *, s16) = {
     func_1513E83C, func_151408A4, func_15149FD0, func_1513F114, func_1514A6A0, func_1518E73C, func_1518EB10,
-    func_150DB2D8, func_150DB714, func_15197C10, func_15149D18, func_151AC810, func_1513F4B0, func_1519108C,
-    func_151DAE28, func_150E63A0, func_151B14AC, func_150CD59C, func_151019C4, func_15101F50, func_151C2AD0,
-    func_150AE36C, func_15102EB8, func_1513EE14, sight_buildBeamQuad, func_151B863C, func_1519C56C, func_1513FA2C,
+    func_150DB2D8, func_150DB714, flamethrower_buildJetLineQuad, func_15149D18, func_151AC810, func_1513F4B0, func_1519108C,
+    func_151DAE28, func_150E63A0, func_151B14AC, func_150CD59C, func_151019C4, func_15101F50, weapon_buildProjectileTail,
+    func_150AE36C, func_15102EB8, func_1513EE14, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, func_1513FA2C,
     func_1513FA70, func_151BE4B8, func_15140190, func_150D2D6C, func_151A6350, func_150F7F58, func_1513EDB4,
     func_1513EDE4, func_150FDBA0, func_150F337C, func_150DEB58,
 };
@@ -718,7 +718,7 @@ void *func_1513D668(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u
 
 /*
  * Computes the two half-axes of a particle quad rotated by angle. With onSlope the quad lies on the
- * slope func_1510E388 returns (each axis keeps its length); otherwise it lies in the plane of the
+ * slope shadow_getTriSlopes returns (each axis keeps its length); otherwise it lies in the plane of the
  * basis func_15144E80 returns.
  */
 s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface,
@@ -751,7 +751,7 @@ s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, Vec3s **
         sinA = func_151423D8(angle);
         widthSin = width * sinA;
         heightSin = height * sinA;
-        if (func_1510E388(triPtrs, surface->v, &slopeX, &slopeZ) == 0) {
+        if (shadow_getTriSlopes(triPtrs, surface->v, &slopeX, &slopeZ) == 0) {
             return 0;
         }
         {
@@ -1049,7 +1049,7 @@ void func_1513E2A4(void) {
 
 /*
  * Places a sprite's quad (half-size width x height, rotated by angle) around (x, y, z): in the plane of
- * the basis func_15144E80 returns for surface, or with no surface on the slope from func_1510E388.
+ * the basis func_15144E80 returns for surface, or with no surface on the slope from shadow_getTriSlopes.
  */
 s32 func_1513E2AC(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
                   f32 height, u8 angle) {
@@ -1117,7 +1117,7 @@ s32 func_1513E2AC(QuadSprite *sprite, Vec3s **triPtrs, CollisionTri *surface, f3
         v[3].ob[2] = z - uz - vz;
         return 1;
     }
-    if (func_1510E388(triPtrs, surface->v, &slopeX, &slopeZ) == 0) {
+    if (shadow_getTriSlopes(triPtrs, surface->v, &slopeX, &slopeZ) == 0) {
         return 0;
     }
     heightSin = height * sinA;

@@ -57,13 +57,13 @@ void light_loadParticleTextures(void) {
         if (id != 0xFF && (gParticleSlotTriCounts[i] != 0 || gParticleSlotResources[i].id == 0x3B)) {
             D_800DDA90[i].devAddr = (s32)func_1502B020(&size, 2, 0, id);
             D_800DDA90[i].size = (size + 15) & ~15;
-            length = D_80095CE0[id].frameSize;
+            length = gParticleTexInfos[id].frameSize;
             if (size == 0 || length == 0) {
                 length = 0;
                 D_800DDA90[i].devAddr = 0;
             }
-            D_800DDB80[i].s = (D_80095CE0[id].width << 5) - 1;
-            D_800DDB80[i].t = (((length / D_80095CE0[id].width) << 6) / 5) - 1;
+            D_800DDB80[i].s = (gParticleTexInfos[id].width << 5) - 1;
+            D_800DDB80[i].t = (((length / gParticleTexInfos[id].width) << 6) / 5) - 1;
         }
     }
 }
@@ -76,7 +76,7 @@ void light_setupParticleSlot(s32 slot, s32 id, s32 flags) {
 
     if (id != 255) {
         frames = &D_800DDBD0[slot];
-        info = &D_80095CE0[id];
+        info = &gParticleTexInfos[id];
         *frames = info->frameCount;
         infoFlags = info->flags;
         if (infoFlags & 0x10) {
@@ -142,7 +142,7 @@ s32 func_1500AF08(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jit
         // matching: the "+ jitter - jitter" pair is needed for the original instruction sequence
         scale = (func_151EF610() % jitter + jitter) - jitter + 0x100;
         D_800DDD18[index].halfWidth = (gParticleSlotScales[slot][0] * scale) >> 10;
-        if (D_80095CE0[D_800DDBC0[slot]].flags & 4) {
+        if (gParticleTexInfos[D_800DDBC0[slot]].flags & 4) {
             scale = func_151EF610() % jitter * 4 + scale;
         }
         D_800DDD18[index].height = (gParticleSlotScales[slot][1] * scale) >> 10;

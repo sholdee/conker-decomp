@@ -2,13 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-// matching: a 0.1f literal grows func_151C2050's frame by 8 bytes; the factor is a const struct in .rodata
+// matching: a 0.1f literal grows weapon_queueShotSound's frame by 8 bytes; the factor is a const struct in .rodata
 static const struct {
     f32 volumeFalloff;
 } D_800AAA30 = { 0.1f };
 
 /* Queues a positional sound event (func_1000E7A0 kind 8) for soundId, only in a few specific levels. */
-void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
+void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
     s32 pan;
     s32 volume;
     Camera *camera;
@@ -43,17 +43,17 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
 }
 
 /* TrailExt flags */
-#define TRAIL_HIT_CALLBACK 1    /* call D_800E0940 on expiry */
+#define TRAIL_HIT_CALLBACK 1    /* call gProjectileHitCallback on expiry */
 #define TRAIL_EXPIRE_HANDLER 2  /* call D_8008FBD0[expireHandler] on expiry */
 #define TRAIL_COLLIDE 4
 #define TRAIL_FLAG_8 8
 
-/* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler (entry 0 is func_151C2F48). */
+/* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler (entry 0 is weapon_onProjectileExpire). */
 typedef void (*TrailExpireHandler)(Game1EF500Trail *);
 extern TrailExpireHandler D_8008FBD0[];
 
 /* Level hook (installed by game_3DB30.c): called when a projectile with TRAIL_HIT_CALLBACK expires. */
-TrailHitCallback D_800E0940;
+TrailHitCallback gProjectileHitCallback;
 
 typedef struct {
     u16 sound;
@@ -68,7 +68,7 @@ void *memcpy(void *, const void *, u32);
  * sets up its path and runs its first update of dt. Returns NULL if it could not be placed or
  * if that first update already ended it.
  */
-Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
+Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
                                u8 altNormalized, RayHit *knownHit, f32 speed, f32 arg7, f32 arg8,
                                f32 driftSpeed, f32 arg10, u8 arg11, Actor *owner, u8 arg13, u8 collide, u8 arg15,
                                u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 arg20,
@@ -120,7 +120,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
         dir = &sourceDir;
     }
     ext.handle = collide ? func_151D5B6C(from, dir, owner, arg23, NULL) : -1;
-    if (func_151C4B0C(knownHit, &ext.path, origin, useSource ? &sourceDir : NULL, &ext.remaining, arg7, arg13,
+    if (weapon_setupProjectileRay(knownHit, &ext.path, origin, useSource ? &sourceDir : NULL, &ext.remaining, arg7, arg13,
                       altOrigin, useTarget ? &targetDir : NULL, &ext.flags, 3, arg10, owner, arg23, collide, arg15,
                       ext.handle, 0) == 0) {
         return NULL;
@@ -168,12 +168,12 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
 
         failed = FALSE;
         memcpy(&result->trail, &ext, sizeof(ext));
-        func_151C436C(result, &result->trail, dt);
-        if (func_151C43E0(result, &result->trail, dt) == 0) {
+        weapon_easeProjectileAccel(result, &result->trail, dt);
+        if (weapon_traceProjectile(result, &result->trail, dt) == 0) {
             failed = TRUE;
         }
-        func_151C4510(result, &result->trail, dt);
-        if (func_151C455C(result, &result->trail, dt) == 0) {
+        weapon_moveProjectile(result, &result->trail, dt);
+        if (weapon_countdownProjectileRange(result, &result->trail, dt) == 0) {
             failed = TRUE;
         }
         if (failed) {
@@ -188,7 +188,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
  * Per-frame update of a projectile: moves it, checks collisions and expiry, and plays a fly-by
  * sound once it passes close in front of a player. Returns 0 once the projectile is finished.
  */
-s8 func_151C2734(Game1EF500Trail *trail) {
+s8 weapon_updateProjectile(Game1EF500Trail *trail) {
     s8 alive;
     Game1EF500TrailExt *ext;
     Camera *player;
@@ -205,12 +205,12 @@ s8 func_151C2734(Game1EF500Trail *trail) {
 
     ext = &trail->trail;
     alive = TRUE;
-    func_151C436C(trail, ext, D_800BE9E4);
-    if (func_151C43E0(trail, ext, gFrameDelta) == 0) {
+    weapon_easeProjectileAccel(trail, ext, D_800BE9E4);
+    if (weapon_traceProjectile(trail, ext, gFrameDelta) == 0) {
         alive = FALSE;
     }
-    func_151C4510(trail, ext, gFrameDelta);
-    if (func_151C455C(trail, ext, gFrameDelta) == 0) {
+    weapon_moveProjectile(trail, ext, gFrameDelta);
+    if (weapon_countdownProjectileRange(trail, ext, gFrameDelta) == 0) {
         alive = FALSE;
     }
     if (ext->soundEnabled && alive == TRUE) {
@@ -266,7 +266,7 @@ s8 func_151C2734(Game1EF500Trail *trail) {
  * by width perpendicular to the view and faded to zero alpha at the far end. Returns the 4
  * vertices, or NULL if no vertex buffer was available.
  */
-Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
+Vtx *weapon_buildProjectileTail(Game1EF500Trail *trail, s16 index) {
     Vec3f start;
     Vec3f end;
     f32 dx, dy, dz;
@@ -345,7 +345,7 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
 }
 
 /* Whether obj is a live object other than self (a ray-cast filter). */
-s32 func_151C2E4C(Actor *obj, Actor *self) {
+s32 weapon_isOtherLiveObject(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
     }
@@ -358,7 +358,7 @@ s32 func_151C2E4C(Actor *obj, Actor *self) {
     return TRUE;
 }
 
-/* As func_151C2E4C, and obj's unk127 must also be set (not 0xFF). */
+/* As weapon_isOtherLiveObject, and obj's unk127 must also be set (not 0xFF). */
 s32 func_151C2E94(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
@@ -376,14 +376,14 @@ s32 func_151C2E94(Actor *obj, Actor *self) {
 }
 
 /* Impact handler: the projectile hit actor (at hitPos) during its ray cast. */
-s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
+s32 weapon_onProjectileImpact(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
                   RayHit *hit) {
     return func_151D4DAC(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.dir,
                          trail->head.header.owner, trail->head.header.kind);
 }
 
 /* Expiry handler 0 (D_8008FBD0[0]): debris, a flash and sometimes a burst where the projectile ended. */
-void func_151C2F48(Game1EF500Trail *trail) {
+void weapon_onProjectileExpire(Game1EF500Trail *trail) {
     Game1EF500TrailExt *ext;
     LightEffectHeader header;
     Vec3i header2;
@@ -463,7 +463,7 @@ void func_151C2F48(Game1EF500Trail *trail) {
 }
 
 /* Impact effect at pos: a burst, a randomly flipped particle and a flash. */
-void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
+void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     TrailBurst burst;
     ParticleDesc particle;
     LightEffectHeader header;
@@ -570,8 +570,8 @@ void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
     light_createWithEffect(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
-/* Smaller variant of func_151C329C. */
-void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
+/* Smaller variant of weapon_spawnImpactBurst. */
+void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     TrailBurst burst;
     ParticleDesc particle;
     LightEffectHeader header;
@@ -684,7 +684,7 @@ void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
  * Impact effects where the projectile hit: with the given chances, debris, a spark, a smoke burst
  * and a flash. Their look depends on the hit surface's material and on the level (level).
  */
-void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f32 smokeChance, f32 flashChance,
+void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f32 smokeChance, f32 flashChance,
                    u8 debrisArg, u8 smokeArg, u8 sparkArg) {
     s32 material;
     Game1EF500TrailExt *ext;
@@ -851,7 +851,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
 }
 
 /* Eases the projectile's accel toward its drift, once per elapsed step. */
-void func_151C436C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps) {
+void weapon_easeProjectileAccel(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps) {
     while (steps > 0) {
         steps--;
         ext->accel.x += (ext->drift.x - ext->accel.x) * 0.228659004f;
@@ -865,7 +865,7 @@ void func_151C436C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps) {
  * Casts a ray along the projectile's flight over the distance it moves this frame; on a hit,
  * runs the impact handler and returns 0.
  */
-u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
+u8 weapon_traceProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     u8 result;
     Actor *owner;
     f32 length;
@@ -888,7 +888,7 @@ u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
             func_15081690(owner, from->x, from->y, from->z, ext->path.dir.x, ext->path.dir.y, ext->path.dir.z,
                           &ray, length, 1, 0, solid, ext->fieldA8, 0, ext->handle);
             if (ray.hitType >= 2) {
-                func_151C2EF0(ray.obj, owner, trail, &ray.pos, &ray.far, &ray);
+                weapon_onProjectileImpact(ray.obj, owner, trail, &ray.pos, &ray.far, &ray);
                 result = FALSE;
             }
         }
@@ -897,14 +897,14 @@ u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
 }
 
 /* Moves the projectile by velocity * dt. */
-void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
+void weapon_moveProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     trail->head.def.pos.x += ext->velocity.x * dt;
     trail->head.def.pos.y += ext->velocity.y * dt;
     trail->head.def.pos.z += ext->velocity.z * dt;
 }
 
 /* Counts down the projectile's remaining distance; when it runs out, fires its expiry callbacks and returns 0. */
-s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
+s32 weapon_countdownProjectileRange(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     s32 alive;
     TrailHitCallback callback;
     WorldObject *target;
@@ -913,7 +913,7 @@ s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     ext->remaining -= dt;
     alive = TRUE;
     if (ext->remaining <= 0.0f) {
-        callback = D_800E0940;
+        callback = gProjectileHitCallback;
         if (callback != NULL && (ext->flags & TRAIL_HIT_CALLBACK)) {
             target = ext->path.surface;
             if (target != NULL) {
@@ -932,7 +932,7 @@ s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
 }
 
 /* StreamEmitter update: when its timer runs out, starts one ProjectileStream and picks a new random delay. */
-void func_151C4644(Game1EF500TimedOwner *owner) {
+void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
     StreamEmitter *emitter;
     ProjectileStream data;
     TimedEffect *effect;

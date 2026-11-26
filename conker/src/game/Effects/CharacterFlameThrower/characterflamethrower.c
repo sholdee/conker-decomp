@@ -5,16 +5,16 @@
  * This file's .bss, defined before the headers declare it (see init_50A0.c). Head/tail of the texture-scroll
  * reference list (TexScrollRef) and the texture-scroll list (TexScroll).
  */
-static struct ListNode *D_800E08E0;
-static struct ListNode *D_800E08E4;
-static struct ListNode *D_800E08E8;
-static struct ListNode *D_800E08EC;
+static struct ListNode *gTexScrollRefHead;
+static struct ListNode *gTexScrollRefTail;
+static struct ListNode *gTexScrollHead;
+static struct ListNode *gTexScrollTail;
 /* Next automatic (negative) texture-scroll id. */
-static s32 D_800E08F0;
+static s32 gNextAutoTexScrollId;
 static s32 D_800E08F4;    /* not referenced */
 static s32 D_800E08F8[2]; /* not referenced */
 /* The trigger zones of the flamethrower characters, by slot (game_40490.c registers them). */
-TriggerZone *D_800E0900[6];
+TriggerZone *gFlamethrowerZones[6];
 
 #include "functions.h"
 #include "variables.h"
@@ -23,7 +23,7 @@ void *memcpy(void *, const void *, u32);
 
 
 
-/* Generic doubly linked list node; every list allocated by func_151957B0 starts with one. */
+/* Generic doubly linked list node; every list allocated by flamethrower_appendListNode starts with one. */
 struct ListNode {
     struct ListNode *prev;
     struct ListNode *next;
@@ -62,7 +62,7 @@ struct TexScroll {
 };
 
 /* Allocates a `size`-byte list node and appends it to the list (*head, *tail). */
-void *func_151957B0(s32 size, ListNode **head, ListNode **tail) {
+void *flamethrower_appendListNode(s32 size, ListNode **head, ListNode **tail) {
     ListNode *node;
     ListNode *last;
 
@@ -87,10 +87,10 @@ void trailing_151957B0(void) {
 }
 
 /* Empties both texture-scroll lists. */
-void func_1519582C(void) {
-    D_800E08E0 = D_800E08E4 = NULL;
-    D_800E08E8 = D_800E08EC = NULL;
-    D_800E08F0 = -2;
+void flamethrower_clearTexScrolls(void) {
+    gTexScrollRefHead = gTexScrollRefTail = NULL;
+    gTexScrollHead = gTexScrollTail = NULL;
+    gNextAutoTexScrollId = -2;
 }
 
 /*
@@ -98,7 +98,7 @@ void func_1519582C(void) {
  * `texture` is 0). Returns the index of the G_SETTILESIZE that follows it, or -1, and stores in *levels how
  * many (G_SETTILESIZE, G_SETTILE) pairs follow.
  */
-s32 func_15195868(Gfx *dl, s32 texture, s32 occurrence, s32 *levels) {
+s32 flamethrower_findTileSizeCmd(Gfx *dl, s32 texture, s32 occurrence, s32 *levels) {
     s32 i;
     s32 c;
     s8 op;
@@ -133,13 +133,13 @@ s32 func_15195868(Gfx *dl, s32 texture, s32 occurrence, s32 *levels) {
 }
 
 /* Allocates a TexScroll for texture `id`; `size`/`pos` are the w1/w0 words of its G_SETTILESIZE. */
-TexScroll *func_15195984(s32 id, s32 size, s32 pos, s32 doubled) {
+TexScroll *flamethrower_newTexScroll(s32 id, s32 size, s32 pos, s32 doubled) {
     TexScroll *scroll;
     s32 i;
     s32 width;
     s32 height;
 
-    scroll = func_151957B0(sizeof(TexScroll), &D_800E08E8, &D_800E08EC);
+    scroll = flamethrower_appendListNode(sizeof(TexScroll), &gTexScrollHead, &gTexScrollTail);
     if (scroll != NULL) {
         scroll->refs = NULL;
         for (i = 0; i < 5; i++) {
@@ -175,7 +175,7 @@ s16 func_15195A84(s16 cmdIndex, TexScroll *scroll, s32 size, s32 doubled) {
  * Registers every (or the `occurrence`-th, when not -1) use of texture `texture` in main display list `which`
  * of `dl` with a TexScroll scrolling by (speedS, speedT).
  */
-TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 which, s32 speedS,
+TexScroll *flamethrower_addTexScroll(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 which, s32 speedS,
                          s32 speedT) {
     s32 idx;
     s32 slot;
@@ -192,17 +192,17 @@ TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
         i = 0;
     }
     do {
-        idx = func_15195868(dl, texture, i, &levels);
+        idx = flamethrower_findTileSizeCmd(dl, texture, i, &levels);
         if (idx == -1) {
             occurrence = 0;
         } else {
             if (texture == 0) {
-                texture = D_800E08F0;
+                texture = gNextAutoTexScrollId;
             }
             size = dl[idx].words.w1;
             pos = dl[idx].words.w0;
-            scroll = (TexScroll *)D_800E08E8;
-            // matching: dead store left over from func_15195DD4's lookup slot; removing it moves branches
+            scroll = (TexScroll *)gTexScrollHead;
+            // matching: dead store left over from flamethrower_addTexScrollInDl's lookup slot; removing it moves branches
             if (isNew) {
                 slot = -1;
             } else {
@@ -212,7 +212,7 @@ TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
                 scroll = scroll->next;
             }
             if (scroll == NULL) {
-                scroll = func_15195984(texture, size, pos, doubled);
+                scroll = flamethrower_newTexScroll(texture, size, pos, doubled);
                 if (scroll != NULL) {
                     isNew = FALSE;
                     scroll->speedS = speedS;
@@ -249,8 +249,8 @@ TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
             i++;
         }
     } while (occurrence == -1);
-    if (texture == D_800E08F0) {
-        D_800E08F0--;
+    if (texture == gNextAutoTexScrollId) {
+        gNextAutoTexScrollId--;
     }
     return scroll;
 }
@@ -259,7 +259,7 @@ TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
  * Adds a reference to the `count` tile-size commands at dl[cmdIndex] to `scroll`, unless already present
  * (the walk never compares the last reference).
  */
-void func_15195D00(TexScroll *scroll, Gfx *dl, s32 cmdIndex, s32 count) {
+void flamethrower_addTexScrollRef(TexScroll *scroll, Gfx *dl, s32 cmdIndex, s32 count) {
     TexScrollRef *ref;
     TexScrollRef *next;
 
@@ -276,10 +276,10 @@ void func_15195D00(TexScroll *scroll, Gfx *dl, s32 cmdIndex, s32 count) {
                 next = next->next;
             }
         } while (next != NULL);
-        next = func_151957B0(sizeof(TexScrollRef), &D_800E08E0, &D_800E08E4);
+        next = flamethrower_appendListNode(sizeof(TexScrollRef), &gTexScrollRefHead, &gTexScrollRefTail);
         ref->next = next;
     } else {
-        next = func_151957B0(sizeof(TexScrollRef), &D_800E08E0, &D_800E08E4);
+        next = flamethrower_appendListNode(sizeof(TexScrollRef), &gTexScrollRefHead, &gTexScrollRefTail);
         scroll->refs = next;
     }
     next->dl = dl;
@@ -288,8 +288,8 @@ void func_15195D00(TexScroll *scroll, Gfx *dl, s32 cmdIndex, s32 count) {
     next->next = NULL;
 }
 
-/* Like func_15195AA8, but records the uses in an arbitrary display list `dl` (as TexScrollRefs). */
-TexScroll *func_15195DD4(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
+/* Like flamethrower_addTexScroll, but records the uses in an arbitrary display list `dl` (as TexScrollRefs). */
+TexScroll *flamethrower_addTexScrollInDl(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
                          s32 speedT) {
     s32 idx;
     s32 key;
@@ -309,26 +309,26 @@ TexScroll *func_15195DD4(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
         i = 0;
     }
     do {
-        idx = func_15195868(dl, texture, i, &levels);
+        idx = flamethrower_findTileSizeCmd(dl, texture, i, &levels);
         if (idx == -1) {
             occurrence = 0;
         } else {
             if (texture == 0) {
-                texture = D_800E08F0;
+                texture = gNextAutoTexScrollId;
             }
             if (isNew) {
                 key = -1;
             } else {
                 key = texture;
             }
-            scroll = (TexScroll *)D_800E08E8;
+            scroll = (TexScroll *)gTexScrollHead;
             while (scroll != NULL && key != scroll->id) {
                 scroll = scroll->next;
             }
             size = dl[idx].words.w1;
             pos = dl[idx].words.w0;
             if (scroll == NULL) {
-                scroll = func_15195984(texture, size, pos, doubled);
+                scroll = flamethrower_newTexScroll(texture, size, pos, doubled);
                 if (scroll != NULL) {
                     isNew = FALSE;
                     scroll->speedS = speedS;
@@ -343,23 +343,23 @@ TexScroll *func_15195DD4(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
             if (scroll->levelCount < levels) {
                 scroll->levelCount = levels;
             }
-            func_15195D00(scroll, dl, idx, levels);
+            flamethrower_addTexScrollRef(scroll, dl, idx, levels);
             i++;
         }
     } while (occurrence == -1);
-    if (texture == D_800E08F0) {
-        D_800E08F0--;
+    if (texture == gNextAutoTexScrollId) {
+        gNextAutoTexScrollId--;
     }
     return scroll;
 }
 
-TexScroll *func_15195FB0(WorldObject *obj, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
+TexScroll *flamethrower_addObjectTexScroll(WorldObject *obj, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
                          s32 speedT) {
-    return func_15195DD4(obj->displayList, texture, doubled, occurrence, isNew, speedS, speedT);
+    return flamethrower_addTexScrollInDl(obj->displayList, texture, doubled, occurrence, isNew, speedS, speedT);
 }
 
 /* Advances every TexScroll and rewrites the G_SETTILESIZE commands it is registered in. */
-void func_15195FF0(Gfx *dl0, Gfx *dl1) {
+void flamethrower_updateTexScrolls(Gfx *dl0, Gfx *dl1) {
     TexScroll *scroll;
     u32 tileSize[8];
     TexScrollRef *ref;
@@ -373,7 +373,7 @@ void func_15195FF0(Gfx *dl0, Gfx *dl1) {
     s32 k;
     s32 idx;
 
-    scroll = (TexScroll *)D_800E08E8;
+    scroll = (TexScroll *)gTexScrollHead;
     while (scroll != NULL) {
         w = scroll->width;
         h = scroll->height;
@@ -441,7 +441,7 @@ void func_15195FF0(Gfx *dl0, Gfx *dl1) {
 }
 
 /* Sets the scroll speed of a TexScroll. */
-void func_15196318(TexScroll *scroll, s32 speedS, s32 speedT) {
+void flamethrower_setTexScrollSpeed(TexScroll *scroll, s32 speedS, s32 speedT) {
     if (scroll != NULL) {
         scroll->speedS = speedS;
         scroll->speedT = speedT;
@@ -470,7 +470,7 @@ struct CharacterFlamethrowerActor {
     /* 0x98 */ void *state;
 };
 
-/* Preset in D_800A87A0 that func_15196438 copies into a CharacterFlamethrowerJet. */
+/* Preset in gJetTemplates that flamethrower_spawnJet copies into a CharacterFlamethrowerJet. */
 struct CharacterFlamethrowerJetTemplate {
     /* 0x00 */ s16 lifetime;
     /* 0x04 */ f32 gravity;
@@ -513,7 +513,7 @@ typedef struct CharacterFlamethrowerJet {
     /* 0x04 */ u8 ownerId; /* owner->unique_id */
     /* 0x05 */ u8 bone;
     /* 0x06 */ u8 flags;
-    /* 0x07 */ s8 speedFn; /* D_8008F870 index, -1 = none */
+    /* 0x07 */ s8 speedFn; /* gJetSpeedProcs index, -1 = none */
     /* 0x08 */ Vec3f startOffset;
     /* 0x14 */ Vec3f endOffset;
     /* 0x20 */ Vec3f start;
@@ -531,22 +531,22 @@ typedef struct CharacterFlamethrowerJet {
     /* 0x54 */ u8 holdTime;
     /* 0x58 */ f32 sizeRate;
     /* 0x5C */ f32 size;
-    /* 0x60 */ s8 initFn;    /* D_8008F87C index */
-    /* 0x61 */ s8 updateFn;  /* D_8008F880 index */
-    /* 0x62 */ s8 destroyFn; /* D_8008F88C index */
-    /* 0x63 */ s8 soundFn;   /* D_8008F890 index: starts the sound */
-    /* 0x64 */ s8 soundUpdateFn; /* D_8008F894 index */
-    /* 0x65 */ s8 soundStopFn;   /* D_8008F898 index */
+    /* 0x60 */ s8 initFn;    /* gJetInitProcs index */
+    /* 0x61 */ s8 updateFn;  /* gJetUpdateProcs index */
+    /* 0x62 */ s8 destroyFn; /* gJetDestroyProcs index */
+    /* 0x63 */ s8 soundFn;   /* gJetSoundStartProcs index: starts the sound */
+    /* 0x64 */ s8 soundUpdateFn; /* gJetSoundUpdateProcs index */
+    /* 0x65 */ s8 soundStopFn;   /* gJetSoundStopProcs index */
     /* 0x66 */ u16 sound;
     /* 0x68 */ s8 unk68;     /* D_8008F89C index */
-    /* 0x69 */ u8 childPreset; /* D_800A8710 index */
-    /* 0x6A */ u8 childLife; /* points whose life drops below this spawn a child (func_15198110) */
+    /* 0x69 */ u8 childPreset; /* gJetChildPresets index */
+    /* 0x6A */ u8 childLife; /* points whose life drops below this spawn a child (flamethrower_shedJetLines) */
     /* 0x6C */ f32 childRate;
     /* 0x70 */ f32 childAccum;
-    /* 0x74 */ u8 scatterPreset; /* D_800A8728 index (func_15198D88) */
+    /* 0x74 */ u8 scatterPreset; /* gJetScatterPresets index (flamethrower_scatterParticles) */
     /* 0x78 */ f32 scatterRate;
     /* 0x7C */ f32 scatterAccum;
-    /* 0x80 */ u8 spritePreset; /* D_800A8770 index (func_151990AC) */
+    /* 0x80 */ u8 spritePreset; /* gJetSpritePresets index (flamethrower_emitSprites) */
     /* 0x84 */ f32 spriteRate;
     /* 0x88 */ f32 spriteAccum;
     /* 0x8C */ u8 headFadeCount;
@@ -557,52 +557,52 @@ typedef struct CharacterFlamethrowerJet {
 
 
 /* Jet callback tables, indexed by the CharacterFlamethrowerJet *Fn fields (-1 = none). */
-f32 (*D_8008F870[])(void *, s32) = {
+f32 (*gJetSpeedProcs[])(void *, s32) = {
     (f32 (*)(void *, s32))func_151979F8,
-    (f32 (*)(void *, s32))func_15197A0C,
+    (f32 (*)(void *, s32))flamethrower_getPowerTunable,
     (f32 (*)(void *, s32))func_15197A68,
 };
-void (*D_8008F87C[])(void *) = { (void (*)(void *))func_151993E4 };
-s32 (*D_8008F880[])(void *) = {
-    (s32 (*)(void *))func_15198570,
-    (s32 (*)(void *))func_1519897C,
-    (s32 (*)(void *))func_151987CC,
+void (*gJetInitProcs[])(void *) = { (void (*)(void *))flamethrower_activateJetZone };
+s32 (*gJetUpdateProcs[])(void *) = {
+    (s32 (*)(void *))flamethrower_hitPlayer,
+    (s32 (*)(void *))flamethrower_burnSwarm,
+    (s32 (*)(void *))flamethrower_hitObjects,
 };
-void (*D_8008F88C[])(void *) = { (void (*)(void *))func_1519944C };
-s16 (*D_8008F890[])(void) = { (s16 (*)(void))func_15198C60 };
-void (*D_8008F894[])(void *) = { (void (*)(void *))func_15198C90 };
-void (*D_8008F898[])(void *) = { (void (*)(void *))func_15198D40 };
+void (*gJetDestroyProcs[])(void *) = { (void (*)(void *))flamethrower_deactivateJetZone };
+s16 (*gJetSoundStartProcs[])(void) = { (s16 (*)(void))flamethrower_startJetSound };
+void (*gJetSoundUpdateProcs[])(void *) = { (void (*)(void *))flamethrower_moveJetSound };
+void (*gJetSoundStopProcs[])(void *) = { (void (*)(void *))flamethrower_stopJetSound };
 void (*D_8008F89C[])(void *) = { (void (*)(void *))func_15198D7C };
 
 /* Runs a jet's destroy callbacks, then func_151478F4. */
-void func_15196330(CharacterFlamethrowerActor *actor) {
+void flamethrower_destroyJet(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
 
     jet = actor->state;
     if (jet->soundStopFn != -1) {
-        D_8008F898[jet->soundStopFn](actor);
+        gJetSoundStopProcs[jet->soundStopFn](actor);
     }
     if (jet->destroyFn != -1) {
-        D_8008F88C[jet->destroyFn](actor);
+        gJetDestroyProcs[jet->destroyFn](actor);
     }
     func_151478F4(actor);
 }
 
 /* Runs a jet's destroy callbacks, then func_15147928. */
-void func_151963B4(CharacterFlamethrowerActor *actor) {
+void flamethrower_freeJet(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
 
     jet = actor->state;
     if (jet->soundStopFn != -1) {
-        D_8008F898[jet->soundStopFn](actor);
+        gJetSoundStopProcs[jet->soundStopFn](actor);
     }
     if (jet->destroyFn != -1) {
-        D_8008F88C[jet->destroyFn](actor);
+        gJetDestroyProcs[jet->destroyFn](actor);
     }
     func_15147928(actor);
 }
 
-/* Preset in D_800A8710 for the child particles a jet point spawns (func_15198110). */
+/* Preset in gJetChildPresets for the child particles a jet point spawns (flamethrower_shedJetLines). */
 struct JetChildPreset {
     /* 0x0 */ f32 sizeScale;
     /* 0x4 */ f32 unk4;
@@ -610,7 +610,7 @@ struct JetChildPreset {
     /* 0xA */ s16 lifeRange;
 };
 
-/* Sprite preset in D_800A8770 (func_151990AC). */
+/* Sprite preset in gJetSpritePresets (flamethrower_emitSprites). */
 struct JetSpritePreset {
     f32 radius;
     f32 speed;
@@ -623,22 +623,22 @@ struct JetSpritePreset {
     s16 size_range;
 };
 
-const JetChildPreset D_800A8710[] = {
+const JetChildPreset gJetChildPresets[] = {
     { 1.0f, 1.0f, 9, 12 },
     { 0.656f, 1.3f, 5, 12 },
 };
 
-const ScatterPreset D_800A8728[] = {
+const ScatterPreset gJetScatterPresets[] = {
     { 20.0f, 0.114f, 0.506f, 5.0f, 12.0f, 0.0f, 0.47f, 55, 10, 3, 7 },
     { 20.0f, 0.5f, 0.8f, 5.0f, 5.0f, 1.0f, 1.0f, 17, 10, 3, 2 },
 };
 
-const JetSpritePreset D_800A8770[] = {
+const JetSpritePreset gJetSpritePresets[] = {
     { 45.19f, 40.0f, 25.0f, -314, 186, 8, 11, 385, 386 },
     { 40.0f, 30.0f, 20.0f, -100, 70, 10, 20, 200, 150 },
 };
 
-const CharacterFlamethrowerJetTemplate D_800A87A0[] = {
+const CharacterFlamethrowerJetTemplate gJetTemplates[] = {
     { 600, 1.141f, 1.04f, 255, 20, 12, { 0.0f, 0.0f, 80.0f }, { 0.0f, -2.0f, 102.0f }, 0, 30, 155, 20, 4.8f, 17.0f, -1, 0, -1, -1, -1, -1, 0, 2, 0, 127, 0.726f, 0, 0.226f, 0, 0.135f, 6, 42, 6, 42 },
     { 30, 0.1f, 0.49f, 255, 24, 0, { 0.0f, 40.0f, 8.0f }, { 0.0f, 40.0f, 10.0f }, 2, 192, 255, 8, 1.2f, 0.9f, -1, -1, -1, -1, -1, -1, -1, 3, 0, 127, 0.726f, 0, 0.226f, 0, 0.135f, 6, 42, 6, 42 },
     { 30, 0.1f, 0.49f, 255, 24, 0, { 0.0f, 40.0f, 8.0f }, { 0.0f, 40.0f, 10.0f }, 2, 192, 255, 8, 1.2f, 0.9f, -1, -1, -1, -1, -1, -1, -1, 3, 0, 127, 0.726f, 0, 0.226f, 0, 0.135f, 6, 42, 6, 42 },
@@ -648,8 +648,8 @@ const CharacterFlamethrowerJetTemplate D_800A87A0[] = {
     { 600, 0.0f, 2.14f, 255, 20, 9, { 12.0f, -44.0f, 136.0f }, { 12.0f, -54.0f, 175.0f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, 2, -1, 0, 0, 0, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
 };
 
-/* Spawns a jet effect from preset D_800A87A0[preset], attached to a bone of `owner`. */
-CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32 arg3) {
+/* Spawns a jet effect from preset gJetTemplates[preset], attached to a bone of `owner`. */
+CharacterFlamethrowerActor *flamethrower_spawnJet(Actor *owner, s32 preset, u8 arg2, s32 arg3) {
     EffectTemplate spawn;
     CharacterFlamethrowerJet jet;
     CharacterFlamethrowerActor *actor;
@@ -663,7 +663,7 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     if (owner->ob_matrix_ptr == NULL) {
         return NULL;
     }
-    entry = &D_800A87A0[preset];
+    entry = &gJetTemplates[preset];
     jet.owner = owner;
     jet.ownerId = owner->unique_id;
     jet.flags = 2;
@@ -706,7 +706,7 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     jet.tailFadeCount = entry->tailFadeCount;
     jet.tailFadeStep = entry->tailFadeStep;
     if (jet.soundFn != -1) {
-        jet.sound = D_8008F890[jet.soundFn]();
+        jet.sound = gJetSoundStartProcs[jet.soundFn]();
     } else {
         jet.sound = 0;
     }
@@ -723,12 +723,12 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
         state = actor->state;
         memcpy(actor->state, &jet, sizeof(CharacterFlamethrowerJet));
         if (state->speedFn != -1) {
-            state->speed = D_8008F870[state->speedFn](actor, state->speedFn);
+            state->speed = gJetSpeedProcs[state->speedFn](actor, state->speedFn);
         } else {
             state->speed = 0.0f;
         }
         if (jet.initFn != -1) {
-            D_8008F87C[jet.initFn](actor);
+            gJetInitProcs[jet.initFn](actor);
         }
     }
     return actor;
@@ -736,7 +736,7 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
 
 
 /* Per-frame jet update: moves, fades and retires its particles, then runs its update callbacks. */
-s32 func_15196748(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_updateJet(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
     JetPoint *points;
     s32 i;
@@ -770,7 +770,7 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
         }
         if (points[i].life < jet->childLife) {
             if (points[i].spawnedChild == 0) {
-                func_15198110(actor, i);
+                flamethrower_shedJetLines(actor, i);
             }
         }
         points[i].size += jet->sizeRate * gFrameDelta;
@@ -813,13 +813,13 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
         } while (n != 0 && i != actor->head.end);
     }
     if (jet->soundUpdateFn != -1) {
-        D_8008F894[jet->soundUpdateFn](actor);
+        gJetSoundUpdateProcs[jet->soundUpdateFn](actor);
     }
     if (jet->unk68 != -1) {
         D_8008F89C[jet->unk68](actor);
     }
     if (jet->updateFn != -1) {
-        if (D_8008F880[jet->updateFn](actor) == 0) {
+        if (gJetUpdateProcs[jet->updateFn](actor) == 0) {
             return 0;
         }
     }
@@ -839,7 +839,7 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
  * Emits a jet's particles for this frame: tracks its bone-relative start/end points, then spawns
  * emitAccum particles interpolated between last frame's and this frame's points (and sparks/smoke).
  */
-s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
+s32 flamethrower_emitJet(CharacterFlamethrowerActor *actor, s32 arg1) {
     CharacterFlamethrowerJet *jet;
     JetPoint *points;
     Vec3f end;
@@ -874,7 +874,7 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
         return 0;
     }
     if (jet->speedFn != -1) {
-        jet->targetSpeed = D_8008F870[jet->speedFn](actor, arg1);
+        jet->targetSpeed = gJetSpeedProcs[jet->speedFn](actor, arg1);
     }
     matrix = &jet->owner->ob_matrix_ptr[jet->bone];
     func_15143134(&jet->startOffset, &actor->head.tmpl.pos, matrix);
@@ -903,11 +903,11 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
         do {
             jet->scatterAccum += jet->scatterRate;
             if (jet->scatterAccum > 1.0f) {
-                func_15198D88(actor, &end);
+                flamethrower_scatterParticles(actor, &end);
             }
             jet->spriteAccum += jet->spriteRate;
             if (jet->spriteAccum > 1.0f) {
-                func_151990AC(actor, &end);
+                flamethrower_emitSprites(actor, &end);
             }
             points[actor->head.end].spawnedChild = 0;
             points[actor->head.end].pos.x = cur.x;
@@ -968,7 +968,7 @@ typedef struct OneFrameTextureDesc {
 
 
 /* Draws a jet as a camera-facing ribbon through its points, oldest last. */
-Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
+Gfx *flamethrower_drawJet(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     Vtx_t *vtx;
     Vec3f *eye;
     Vec3f next;
@@ -1154,13 +1154,13 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
 }
 
 
-/* Jet speed callbacks (D_8008F870). */
+/* Jet speed callbacks (gJetSpeedProcs). */
 f32 func_151979F8(CharacterFlamethrowerActor *actor) {
     return 1.32f;
 }
 
 /* Returns the "power" tunable (func_151422C0) scaled by 0.01. */
-f32 func_15197A0C(CharacterFlamethrowerActor *actor) {
+f32 flamethrower_getPowerTunable(CharacterFlamethrowerActor *actor) {
     return func_151422C0(10, "power", 1, 500, "../Effects/CharacterFlameThrower/characterflamethrower.c", 2252) * 0.01f;
 }
 
@@ -1168,8 +1168,8 @@ f32 func_15197A68(CharacterFlamethrowerActor *actor) {
     return 10.9f;
 }
 
-/* Sends message 8 for `owner`, which stops its jets (see func_15198054). */
-void func_15197A7C(Actor *owner) {
+/* Sends message 8 for `owner`, which stops its jets (see flamethrower_onJetMessage). */
+void flamethrower_stopJets(Actor *owner) {
     ActorRef ref;
 
     if (owner != NULL) {
@@ -1179,7 +1179,7 @@ void func_15197A7C(Actor *owner) {
     }
 }
 
-/* User data of the line particles a jet spawns (func_15198110), at SceneParticle 0x110. */
+/* User data of the line particles a jet spawns (flamethrower_shedJetLines), at SceneParticle 0x110. */
 typedef struct JetChildData {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;
@@ -1204,7 +1204,7 @@ typedef struct JetChildData {
     /* 0x5A */ s16 alphaPerLife;
 } JetChildData;
 
-/* User data of the line particles a flame sheds (func_1519A9A4), at SceneParticle 0x110. */
+/* User data of the line particles a flame sheds (flamethrower_shapeFlame), at SceneParticle 0x110. */
 typedef struct FlameLineData {
     /* 0x00 */ Vec3f velA;
     /* 0x0C */ Vec3f velB;
@@ -1229,7 +1229,7 @@ struct SceneParticle {
 };
 
 /* Particle callback: applies drag and gravity to both end points' velocities, then moves them. */
-s32 func_15197AB4(SceneParticle *p) {
+s32 flamethrower_moveJetLine(SceneParticle *p) {
     p->data.jet.velA.x *= p->data.jet.dragA;
     p->data.jet.velA.y += p->data.jet.gravity * gFrameDelta;
     p->data.jet.velA.z *= p->data.jet.dragA;
@@ -1246,7 +1246,7 @@ s32 func_15197AB4(SceneParticle *p) {
 }
 
 /* Beam callback: shrinks width and progress by shrinkRate and fades alpha out over the last fadeStart frames. */
-s32 func_15197BBC(SceneParticle *p) {
+s32 flamethrower_fadeJetLine(SceneParticle *p) {
     s16 life;
 
     life = p->head.def.lifetime;
@@ -1261,7 +1261,7 @@ s32 func_15197BBC(SceneParticle *p) {
 
 
 /* Builds the beam quad (4 vertices) from start towards end, `progress` of the way, facing the camera. */
-void *func_15197C10(SceneParticle *beam, s16 view) {
+void *flamethrower_buildJetLineQuad(SceneParticle *beam, s16 view) {
     Vtx_t *vertices;
     void *result;
     f32 progress;
@@ -1356,12 +1356,12 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
 
 
 /* Message handler: dies when its owner is killed (0, 2, 8); follows an owner swap (0x2D). */
-void func_15198054(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
+void flamethrower_onJetMessage(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
     ActorRef *ref = actor->state;
 
     if (kind == 0 || kind == 2 || kind == 8) {
         if (msg->ref.actor == ref->actor || msg->ref.uniqueId == ref->uniqueId) {
-            func_151993B4(actor);
+            flamethrower_stopJet(actor);
         }
     } else if (kind == 0x2D) {
         if (ref->actor == msg->swap.actorA) {
@@ -1377,9 +1377,9 @@ void func_15198054(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
 
 /*
  * Called when jet point `index` fades below childLife: spawns line particles (moved and faded by
- * func_15197AB4/func_15197BBC) around the segment between it and the next newer point.
+ * flamethrower_moveJetLine/flamethrower_fadeJetLine) around the segment between it and the next newer point.
  */
-void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
+void flamethrower_shedJetLines(CharacterFlamethrowerActor *actor, s32 index) {
     CharacterFlamethrowerJet *jet;
     JetPoint *points;
     JetPoint *cur;
@@ -1404,7 +1404,7 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
 
     jet = actor->state;
     points = actor->points;
-    preset = &D_800A8710[jet->childPreset];
+    preset = &gJetChildPresets[jet->childPreset];
     cur = (JetPoint *)((u8 *)points + index * sizeof(JetPoint)); // matching: byte-offset form keeps the addu operand order
     jet->childAccum += jet->childRate;
     cur->spawnedChild = TRUE;
@@ -1490,7 +1490,7 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
 
 
 /* Jet update callback: a point inside object 0's (the player's) cylinder hits it and retires the older points. */
-s32 func_15198570(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_hitPlayer(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
     JetPoint *points;
     Actor *obj;
@@ -1537,7 +1537,7 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
 }
 
 /* Jet update callback: a point near any other active object (of the first 25) retires the older points. */
-s32 func_151987CC(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_hitObjects(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
     JetPoint *points;
     Actor *obj;
@@ -1593,7 +1593,7 @@ s32 func_151987CC(CharacterFlamethrowerActor *actor) {
  * Jet update callback, active while the owner's mv->unk58 is 1: the swarm actors of types 0x15-0x17 that
  * a point touches are hit (func_15168B10 message 0x18), get model 5 and go into state 4.
  */
-s32 func_1519897C(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_burnSwarm(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet = actor->state;
     JetPoint *points = actor->points;
     Actor *owner;
@@ -1645,10 +1645,10 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
                     dy = pos.y - ny;
                     dz = pos.z - nz;
                     if (dx * dx + dy * dy + dz * dz < r * r + 900.0f) {
-                        func_15183ACC(5);
+                        swarm_loadModel(5);
                         func_15168B10(&node->header, 0x18);
                         node->modelIndex = 5;
-                        node->vertices = D_800DDE80[5].unk8;
+                        node->vertices = gEffectModelSlots[5].unk8;
                         node->flags = 9;
                         node->yawStep = 40.0f;
                         node->pitch = 40.0f;
@@ -1665,13 +1665,13 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-/* Jet sound-start callback (D_8008F890): starts the looping flame sound; its handle is left in v0. */
-void func_15198C60(void) {
+/* Jet sound-start callback (gJetSoundStartProcs): starts the looping flame sound; its handle is left in v0. */
+void flamethrower_startJetSound(void) {
     sound_play(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
 
-/* Jet callback (D_8008F894): moves the jet's sound to its oldest point. */
-void func_15198C90(CharacterFlamethrowerActor *actor) {
+/* Jet callback (gJetSoundUpdateProcs): moves the jet's sound to its oldest point. */
+void flamethrower_moveJetSound(CharacterFlamethrowerActor *actor) {
     JetPoint *points;
     CharacterFlamethrowerJet *jet;
     u16 sound;
@@ -1687,8 +1687,8 @@ void func_15198C90(CharacterFlamethrowerActor *actor) {
     }
 }
 
-/* Jet destroy callback (D_8008F898): stops the jet's sound. */
-void func_15198D40(CharacterFlamethrowerActor *actor) {
+/* Jet destroy callback (gJetSoundStopProcs): stops the jet's sound. */
+void flamethrower_stopJetSound(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
     u16 sound;
 
@@ -1705,8 +1705,8 @@ void func_15198D40(CharacterFlamethrowerActor *actor) {
 void func_15198D7C(CharacterFlamethrowerActor *actor) {
 }
 
-/* Spawns scatterAccum particles (func_15147DA0) flying from the actor towards random points around `end`. */
-void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
+/* Spawns scatterAccum particles (trail_createMotionTrail) flying from the actor towards random points around `end`. */
+void flamethrower_scatterParticles(CharacterFlamethrowerActor *actor, Vec3f *end) {
     TrailRender style;
     CharacterFlamethrowerJet *jet;
     const ScatterPreset *preset;
@@ -1725,7 +1725,7 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     f32 rad;
 
     jet = actor->state;
-    preset = &D_800A8728[jet->scatterPreset];
+    preset = &gJetScatterPresets[jet->scatterPreset];
     spawn.flags = 1;
     motion.texture = 0xA;
     motion.shade = 0xFF;
@@ -1760,14 +1760,14 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
         motion.velocity.x = (px - actor->head.tmpl.pos.x) * speed;
         motion.velocity.y = (py - actor->head.tmpl.pos.y) * speed;
         motion.velocity.z = (pz - actor->head.tmpl.pos.z) * speed;
-        func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
+        trail_createMotionTrail(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
         jet->scatterAccum -= 1.0f;
     } while (jet->scatterAccum > 1.0f);
 }
 
 
 /* Emits spriteAccum sprites (func_15167D84) flying from the actor towards random points around `end`. */
-void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
+void flamethrower_emitSprites(CharacterFlamethrowerActor *actor, Vec3f *end) {
     f32 speed;
     BillboardTemplate packet;
     f32 cosine1;
@@ -1784,7 +1784,7 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
     CharacterFlamethrowerJet *jet;
 
     jet = actor->state;
-    preset = &D_800A8770[jet->spritePreset];
+    preset = &gJetSpritePresets[jet->spritePreset];
     packet.x = actor->head.tmpl.pos.x;
     packet.y = actor->head.tmpl.pos.y;
     packet.z = actor->head.tmpl.pos.z;
@@ -1829,7 +1829,7 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
 }
 
 /* Stops a jet: no new points, and it dies once fewer than 2 remain while the newest fade out. */
-void func_151993B4(CharacterFlamethrowerActor *actor) {
+void flamethrower_stopJet(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
 
     jet = actor->state;
@@ -1839,11 +1839,11 @@ void func_151993B4(CharacterFlamethrowerActor *actor) {
     jet->flags |= 4;
 }
 
-/* unique_ids of the 6 characters that have a flamethrower zone (D_800E0900). */
-const u8 D_800A8A9C[] = { 6, 7, 8, 9, 10, 11 };
+/* unique_ids of the 6 characters that have a flamethrower zone (gFlamethrowerZones). */
+const u8 gFlamethrowerCharacterIds[] = { 6, 7, 8, 9, 10, 11 };
 
-/* Jet init callback (D_8008F87C): clears the owner's flamethrower zone's `inactive` flag. */
-void func_151993E4(CharacterFlamethrowerActor *actor) {
+/* Jet init callback (gJetInitProcs): clears the owner's flamethrower zone's `inactive` flag. */
+void flamethrower_activateJetZone(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
     Actor *owner;
     s32 i;
@@ -1854,7 +1854,7 @@ void func_151993E4(CharacterFlamethrowerActor *actor) {
     i = 0;
     found = FALSE;
     do {
-        if (owner->unique_id == D_800A8A9C[i]) {
+        if (owner->unique_id == gFlamethrowerCharacterIds[i]) {
             found = TRUE;
         } else {
             i++;
@@ -1862,12 +1862,12 @@ void func_151993E4(CharacterFlamethrowerActor *actor) {
     } while (!found && i < 6);
 
     if (found) {
-        D_800E0900[i]->inactive = FALSE;
+        gFlamethrowerZones[i]->inactive = FALSE;
     }
 }
 
-/* Jet destroy callback (D_8008F88C): sets the owner's flamethrower zone's `inactive` flag again. */
-void func_1519944C(CharacterFlamethrowerActor *actor) {
+/* Jet destroy callback (gJetDestroyProcs): sets the owner's flamethrower zone's `inactive` flag again. */
+void flamethrower_deactivateJetZone(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
     Actor *owner;
     s32 i;
@@ -1878,7 +1878,7 @@ void func_1519944C(CharacterFlamethrowerActor *actor) {
     i = 0;
     found = FALSE;
     do {
-        if (owner->unique_id == D_800A8A9C[i]) {
+        if (owner->unique_id == gFlamethrowerCharacterIds[i]) {
             found = TRUE;
         } else {
             i++;
@@ -1886,7 +1886,7 @@ void func_1519944C(CharacterFlamethrowerActor *actor) {
     } while (!found && i < 6);
 
     if (found) {
-        D_800E0900[i]->inactive = TRUE;
+        gFlamethrowerZones[i]->inactive = TRUE;
     }
 }
 
@@ -1901,7 +1901,7 @@ typedef struct FlamePoint {
     /* 0x24 */ f32 texT;
 } FlamePoint;
 
-/* State block of a flame effect (func_151994B8): a ribbon of FlamePoints between two bone-relative points. */
+/* State block of a flame effect (flamethrower_spawnFlame): a ribbon of FlamePoints between two bone-relative points. */
 typedef struct CharacterFlamethrowerFlame {
     /* 0x000 */ FlameSeed seed;
     /* 0x04C */ FlameLineParams line;
@@ -1918,7 +1918,7 @@ typedef struct CharacterFlamethrowerFlame {
     /* 0x13C */ f32 particleAccum;
     /* 0x140 */ f32 alpha;
     /* 0x144 */ f32 texOffset;
-    /* 0x148 */ LightEffect *light; /* from func_1519C09C */
+    /* 0x148 */ LightEffect *light; /* from flamethrower_createFlameLight */
     /* 0x14C */ f32 length;
     /* 0x150 */ u8 flags;
     /* 0x151 */ s8 timer151;
@@ -1926,20 +1926,20 @@ typedef struct CharacterFlamethrowerFlame {
 } CharacterFlamethrowerFlame;
 
 /* Flame callback tables, indexed by the FlameSeed *Fn fields (-1 = none). */
-void (*D_8008F8A4[])(void *) = { (void (*)(void *))func_1519BEB8 };
-void (*D_8008F8A8[])(void *) = {
+void (*gFlameInitProcs[])(void *) = { (void (*)(void *))flamethrower_activateFlameZone };
+void (*gFlameAttackProcs[])(void *) = {
     (void (*)(void *))func_1519C948,
     (void (*)(void *))func_1519C970,
     (void (*)(void *))func_1519C998,
 };
-void (*D_8008F8B4[])(void *) = { (void (*)(void *))func_1519BF20 };
-s16 (*D_8008F8B8[])(void) = { (s16 (*)(void))func_1519BF8C };
-void (*D_8008F8BC[])(void *) = { (void (*)(void *))func_1519BFBC };
-void (*D_8008F8C0[])(void *) = { (void (*)(void *))func_1519C06C };
-s32 (*D_8008F8C4[])(void *) = { (s32 (*)(void *))func_1519C910 };
+void (*gFlameDestroyProcs[])(void *) = { (void (*)(void *))flamethrower_deactivateFlameZone };
+s16 (*gFlameSoundStartProcs[])(void) = { (s16 (*)(void))flamethrower_startFlameSound };
+void (*gFlameSoundUpdateProcs[])(void *) = { (void (*)(void *))flamethrower_moveFlameSound };
+void (*gFlameSoundStopProcs[])(void *) = { (void (*)(void *))flamethrower_stopFlameSound };
+s32 (*gFlameUpdateProcs[])(void *) = { (s32 (*)(void *))flamethrower_checkOwnerAlive };
 
 /* Spawns a flame effect with `extraSize` extra state bytes; setup->flags & 1 also attaches a light. */
-CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSetup *setup, u8 arg2, s32 arg3) {
+CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlamethrowerSetup *setup, u8 arg2, s32 arg3) {
     CharacterFlamethrowerActor *result;
     EffectTemplate spawn;
     CharacterFlamethrowerFlame initial;
@@ -1996,15 +1996,15 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
             state = result->state;
             memcpy(state, &initial, sizeof(CharacterFlamethrowerFlame));
             if (initial.seed.soundFn != -1) {
-                state->sound = D_8008F8B8[initial.seed.soundFn]();
+                state->sound = gFlameSoundStartProcs[initial.seed.soundFn]();
             } else {
                 state->sound = 0;
             }
             if (initial.seed.initFn != -1) {
-                D_8008F8A4[initial.seed.initFn](result);
+                gFlameInitProcs[initial.seed.initFn](result);
             }
             if (setup->flags & 1) {
-                state->light = func_1519C09C(result, &spawn.pos, setup->red, setup->green, setup->blue,
+                state->light = flamethrower_createFlameLight(result, &spawn.pos, setup->red, setup->green, setup->blue,
                                          setup->alpha, arg2, arg3);
             } else {
                 state->light = NULL;
@@ -2014,8 +2014,8 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
     return result;
 }
 
-/* Sends message 0x26 for `owner`, which stops its flames (see func_1519986C). */
-void func_15199834(Actor *owner) {
+/* Sends message 0x26 for `owner`, which stops its flames (see flamethrower_onFlameMessage). */
+void flamethrower_stopFlames(Actor *owner) {
     ActorRef ref;
 
     if (owner != NULL) {
@@ -2027,7 +2027,7 @@ void func_15199834(Actor *owner) {
 
 
 /* Message handler: dies when its owner is killed (0, 2, 0x26); follows an owner swap (0x2D). */
-void func_1519986C(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
+void flamethrower_onFlameMessage(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
     ActorRef *ref = actor->state;
 
     if (kind == 0 || kind == 2 || kind == 0x26) {
@@ -2047,29 +2047,29 @@ void func_1519986C(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
 
 
 /* Flame destroy: callbacks, then func_151478F4. */
-void func_15199928(CharacterFlamethrowerActor *actor) {
-    func_15199980(actor);
+void flamethrower_destroyFlame(CharacterFlamethrowerActor *actor) {
+    flamethrower_releaseFlame(actor);
     func_151478F4(actor);
 }
 
 /* Flame destroy: callbacks, then func_15147928. */
-void func_15199954(CharacterFlamethrowerActor *actor) {
-    func_15199980(actor);
+void flamethrower_freeFlame(CharacterFlamethrowerActor *actor) {
+    flamethrower_releaseFlame(actor);
     func_15147928(actor);
 }
 
 
 /* Runs a flame's destroy callbacks and removes its light. */
-void func_15199980(CharacterFlamethrowerActor *actor) {
+void flamethrower_releaseFlame(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
     LightEffect *light;
 
     flame = actor->state;
     if (flame->seed.soundStopFn != -1) {
-        D_8008F8C0[flame->seed.soundStopFn](actor);
+        gFlameSoundStopProcs[flame->seed.soundStopFn](actor);
     }
     if (flame->seed.destroyFn != -1) {
-        D_8008F8B4[flame->seed.destroyFn](actor);
+        gFlameDestroyProcs[flame->seed.destroyFn](actor);
     }
     light = flame->light;
     if (light != NULL) {
@@ -2080,7 +2080,7 @@ void func_15199980(CharacterFlamethrowerActor *actor) {
 
 
 /* Per-frame flame update: moves its points under gravity and keeps the light at the oldest point. */
-s32 func_15199A10(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_updateFlame(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
     FlamePoint *points;
     s32 i;
@@ -2094,7 +2094,7 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
         }
     }
     if (flame->seed.updateFn != -1) {
-        if (D_8008F8C4[flame->seed.updateFn](actor) == 0) {
+        if (gFlameUpdateProcs[flame->seed.updateFn](actor) == 0) {
             return 0;
         }
     }
@@ -2107,7 +2107,7 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
             i = actor->head.tmpl.itemCount - 1;
         }
         pt = &points[i];
-        func_1519BE1C(&pt->pos, &pt->vel, flame->seed.gravity, gFrameDelta);
+        flamethrower_integratePoint(&pt->pos, &pt->vel, flame->seed.gravity, gFrameDelta);
         pt->size += flame->seed.sizeRate * gFrameDelta;
     }
     {
@@ -2124,7 +2124,7 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
         }
     }
     if (flame->seed.soundUpdateFn != -1) {
-        D_8008F8BC[flame->seed.soundUpdateFn](actor);
+        gFlameSoundUpdateProcs[flame->seed.soundUpdateFn](actor);
     }
     flame->flags &= ~1;
     if (actor->head.count > 0) {
@@ -2141,7 +2141,7 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
  * Flame emitter: tracks the owner's bone (or its position and facing when it has no bones), emits
  * emitAccum points between last and this frame's start/end, then the scatter and emit particles and sparks.
  */
-s32 func_15199C34(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
     FlamePoint *points;
     Actor *obj;
@@ -2234,7 +2234,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
             p->length = 0.0f;
             p->alpha = flame->seed.alpha;
             p->texT = flame->texOffset;
-            func_1519BE1C(&p->pos, &p->vel, flame->seed.gravity, t);
+            flamethrower_integratePoint(&p->pos, &p->vel, flame->seed.gravity, t);
             p->size += flame->seed.sizeRate * t;
             actor->head.end++;
             if (actor->head.end == actor->head.tmpl.itemCount) {
@@ -2313,7 +2313,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
                     motion.velocity.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
                     motion.gravity = func_150ADA68() * flame->scatter.unk38 + flame->scatter.unk34;
                     motion.alpha = func_150ADA68() * flame->scatter.unk3E + flame->scatter.unk3C;
-                    func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
+                    trail_createMotionTrail(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
                 }
                 flame->scatterAccum -= 1.0f;
             } while (flame->scatterAccum > 1.0f);
@@ -2413,7 +2413,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
  * scrolls the texture, sheds line particles near `line.position` of the length, and (flags & 2) calls
  * func_1508B20C at the middle.
  */
-s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
     FlamePoint *points;
     f32 maxLen;
@@ -2685,7 +2685,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
         }
     }
     if (flame->seed.attackFn != -1) {
-        D_8008F8A8[flame->seed.attackFn](actor);
+        gFlameAttackProcs[flame->seed.attackFn](actor);
     }
     if ((flame->flags & 2) && actor->head.count >= 2) {
         Vec3f *end;
@@ -2713,7 +2713,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
 extern s32 D_800A4AC8[][2];
 
 /* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */
-Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
+Gfx *flamethrower_drawFlame(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     CharacterFlamethrowerFlame *state;
     Vec3f next;
     Vec3f cur;
@@ -2922,7 +2922,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
 }
 
 /* Integrates a point over `dt` under `gravity` (applied to vel.y). */
-void func_1519BE1C(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt) {
+void flamethrower_integratePoint(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt) {
     Vec3f v;
 
     v = *vel;
@@ -2932,8 +2932,8 @@ void func_1519BE1C(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt) {
     pos->z += v.z * dt;
 }
 
-/* Flame init callback (D_8008F8A4): clears the owner's flamethrower zone's `inactive` flag. */
-void func_1519BEB8(CharacterFlamethrowerActor *actor) {
+/* Flame init callback (gFlameInitProcs): clears the owner's flamethrower zone's `inactive` flag. */
+void flamethrower_activateFlameZone(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
     Actor *owner;
     s32 i;
@@ -2944,7 +2944,7 @@ void func_1519BEB8(CharacterFlamethrowerActor *actor) {
     i = 0;
     found = FALSE;
     do {
-        if (owner->unique_id == D_800A8A9C[i]) {
+        if (owner->unique_id == gFlamethrowerCharacterIds[i]) {
             found = TRUE;
         } else {
             i++;
@@ -2952,12 +2952,12 @@ void func_1519BEB8(CharacterFlamethrowerActor *actor) {
     } while (!found && i < 6);
 
     if (found) {
-        D_800E0900[i]->inactive = FALSE;
+        gFlamethrowerZones[i]->inactive = FALSE;
     }
 }
 
-/* Flame destroy callback (D_8008F8B4): sets the owner's flamethrower zone's `inactive` flag again. */
-void func_1519BF20(CharacterFlamethrowerActor *actor) {
+/* Flame destroy callback (gFlameDestroyProcs): sets the owner's flamethrower zone's `inactive` flag again. */
+void flamethrower_deactivateFlameZone(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
     Actor *owner;
     s32 i;
@@ -2968,7 +2968,7 @@ void func_1519BF20(CharacterFlamethrowerActor *actor) {
     i = 0;
     found = FALSE;
     do {
-        if (owner->unique_id == D_800A8A9C[i]) {
+        if (owner->unique_id == gFlamethrowerCharacterIds[i]) {
             found = TRUE;
         } else {
             i++;
@@ -2976,17 +2976,17 @@ void func_1519BF20(CharacterFlamethrowerActor *actor) {
     } while (!found && i < 6);
 
     if (found) {
-        D_800E0900[i]->inactive = TRUE;
+        gFlamethrowerZones[i]->inactive = TRUE;
     }
 }
 
-/* Flame sound-start callback (D_8008F8B8): starts the looping flame sound; its handle is left in v0. */
-void func_1519BF8C(void) {
+/* Flame sound-start callback (gFlameSoundStartProcs): starts the looping flame sound; its handle is left in v0. */
+void flamethrower_startFlameSound(void) {
     sound_play(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
 
-/* Flame callback (D_8008F8BC): moves the flame's sound to its oldest point. */
-void func_1519BFBC(CharacterFlamethrowerActor *actor) {
+/* Flame callback (gFlameSoundUpdateProcs): moves the flame's sound to its oldest point. */
+void flamethrower_moveFlameSound(CharacterFlamethrowerActor *actor) {
     FlamePoint *points;
     CharacterFlamethrowerFlame *flame;
     u16 sound;
@@ -3002,8 +3002,8 @@ void func_1519BFBC(CharacterFlamethrowerActor *actor) {
     }
 }
 
-/* Flame sound-stop callback (D_8008F8C0). */
-void func_1519C06C(CharacterFlamethrowerActor *actor) {
+/* Flame sound-stop callback (gFlameSoundStopProcs). */
+void flamethrower_stopFlameSound(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame = actor->state;
     u16 sound = flame->sound;
     if (sound != 0) {
@@ -3018,7 +3018,7 @@ typedef struct FlameLightData {
 } FlameLightData;
 
 /* Creates the light that follows flame `flame` at `pos`, colored (red, green, blue, alpha). */
-LightEffect *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
+LightEffect *flamethrower_createFlameLight(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
                          s32 arg7) {
     LightEffect *light;
     LightEffectHeader header;
@@ -3052,26 +3052,26 @@ LightEffect *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red
 }
 
 /* Light destroy: detaches it from its flame, then func_151617C4. */
-void func_1519C200(LightEffect *light) {
-    func_1519C258(light);
+void flamethrower_destroyFlameLight(LightEffect *light) {
+    flamethrower_detachFlameLight(light);
     func_151617C4(light);
 }
 
 /* Light destroy: detaches it from its flame, then func_151617E4. */
-void func_1519C22C(LightEffect *light) {
-    func_1519C258(light);
+void flamethrower_freeFlameLight(LightEffect *light) {
+    flamethrower_detachFlameLight(light);
     func_151617E4(light);
 }
 
 /* Clears the flame's pointer to this light. */
-void func_1519C258(LightEffect *light) {
+void flamethrower_detachFlameLight(LightEffect *light) {
     CharacterFlamethrowerFlame *flame = ((FlameLightData *)&light->data)->flame->state;
 
     flame->light = NULL;
 }
 
 /* Flame line particle callback: gravity, per-frame drag, then moves both beam ends (constant acceleration). */
-s32 func_1519C26C(SceneParticle *beam) {
+s32 flamethrower_moveFlameLine(SceneParticle *beam) {
     f32 dtSq;
     Vec3f velA;
     Vec3f velB;
@@ -3112,7 +3112,7 @@ s32 func_1519C26C(SceneParticle *beam) {
 }
 
 /* Flame line particle callback: per-frame shrink of width and progress, alpha fades over the last frames. */
-s32 func_1519C4E4(SceneParticle *beam) {
+s32 flamethrower_fadeFlameLine(SceneParticle *beam) {
     s32 i;
     FlameLineData *p = &beam->data.line;
 
@@ -3130,7 +3130,7 @@ s32 func_1519C4E4(SceneParticle *beam) {
 }
 
 /* Builds a flame line beam's quad (4 vertices) from start towards end, `progress` of the way, facing the camera. */
-void *func_1519C56C(SceneParticle *beam, s16 view) {
+void *flamethrower_buildFlameLineQuad(SceneParticle *beam, s16 view) {
     Vtx_t *vertices;
     void *result;
     Vec3f *pos;
@@ -3205,7 +3205,7 @@ void *func_1519C56C(SceneParticle *beam, s16 view) {
     return result;
 }
 
-/* State of the flames func_1519C9C4 spawns: a flame plus the two owner states it stays alive in. */
+/* State of the flames flamethrower_spawnControllerFlame spawns: a flame plus the two owner states it stays alive in. */
 typedef struct CharacterFlamethrowerFlameEx {
     /* 0x000 */ CharacterFlamethrowerFlame flame;
     /* 0x154 */ u8 pad154[4];
@@ -3213,8 +3213,8 @@ typedef struct CharacterFlamethrowerFlameEx {
     /* 0x15C */ s32 aliveState2;
 } CharacterFlamethrowerFlameEx;
 
-/* Flame update callback (D_8008F8C4): keeps the flame only while its owner's unk84 is one of aliveState. */
-s32 func_1519C910(CharacterFlamethrowerActor *actor) {
+/* Flame update callback (gFlameUpdateProcs): keeps the flame only while its owner's unk84 is one of aliveState. */
+s32 flamethrower_checkOwnerAlive(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlameEx *state = actor->state;
     Actor *owner = state->flame.seed.owner;
     u16 v = owner->animseq.uh;
@@ -3227,23 +3227,23 @@ s32 func_1519C910(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-/* Flame callbacks (D_8008F8A8): func_1519CDB0 with different spacings and kinds. */
+/* Flame callbacks (gFlameAttackProcs): flamethrower_attackAlongFlame with different spacings and kinds. */
 s32 func_1519C948(CharacterFlamethrowerActor *actor) {
-    func_1519CDB0(actor, 0.25f, 0x1C);
+    flamethrower_attackAlongFlame(actor, 0.25f, 0x1C);
     return 0;
 }
 
 s32 func_1519C970(CharacterFlamethrowerActor *actor) {
-    func_1519CDB0(actor, 0.5f, 0x1D);
+    flamethrower_attackAlongFlame(actor, 0.5f, 0x1D);
     return 0;
 }
 
 s32 func_1519C998(CharacterFlamethrowerActor *actor) {
-    func_1519CDB0(actor, 0.2f, 0x1D);
+    flamethrower_attackAlongFlame(actor, 0.2f, 0x1D);
     return 0;
 }
 
-/* An object that carries a character's flamethrower (callbacks func_1519C9C4/func_1519CD64). */
+/* An object that carries a character's flamethrower (callbacks flamethrower_spawnControllerFlame/flamethrower_updateController). */
 struct FlamethrowerController {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Actor *owner;
@@ -3253,7 +3253,7 @@ struct FlamethrowerController {
 };
 
 /* Spawns the controller owner's flame from a built-in setup. */
-void func_1519C9C4(FlamethrowerController *ctrl) {
+void flamethrower_spawnControllerFlame(FlamethrowerController *ctrl) {
     CharacterFlamethrowerActor *flame;
     CharacterFlamethrowerSetup setup;
     Actor *obj;
@@ -3349,7 +3349,7 @@ void func_1519C9C4(FlamethrowerController *ctrl) {
     setup.emit.unk34 = 0.1780000031f;
     setup.emit.unk38 = 23;
     setup.emit.unk3A = 11;
-    flame = func_151994B8(sizeof(ctrl->aliveState), &setup, ctrl->base.header.owner, ctrl->base.header.kind);
+    flame = flamethrower_spawnFlame(sizeof(ctrl->aliveState), &setup, ctrl->base.header.owner, ctrl->base.header.kind);
     if (flame != NULL) {
         state = flame->state;
         memcpy(&state->aliveState, ctrl->aliveState, sizeof(ctrl->aliveState));
@@ -3357,7 +3357,7 @@ void func_1519C9C4(FlamethrowerController *ctrl) {
 }
 
 /* Controller callback: kills the controller once its owner is gone or replaced. */
-void func_1519CD64(FlamethrowerController *ctrl) {
+void flamethrower_updateController(FlamethrowerController *ctrl) {
     Actor *owner = ctrl->owner;
 
     if (owner->type != 0 && owner->character_type != 0xFF && owner->unique_id == ctrl->ownerId) {
@@ -3368,7 +3368,7 @@ void func_1519CD64(FlamethrowerController *ctrl) {
 }
 
 /* Calls actor_runAttackAt(kind) at points spaced flame->length * fraction along the flame, oldest first. */
-void func_1519CDB0(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {
+void flamethrower_attackAlongFlame(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {
     f32 spacing;
     f32 factor;
     f32 total;

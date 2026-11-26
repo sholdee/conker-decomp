@@ -23,7 +23,7 @@ s32 script_worldObjectCommand(s32 id, s32 op, s32 *cmd) {
     s32 index;
     s32 pad[2]; // matching: unused stack slots (target frame is 0x40)
 
-    obj = func_151149AC(id);
+    obj = gfx_findObjectById(id);
     if (obj == NULL) {
         return 0;
     }
@@ -164,18 +164,18 @@ s32 script_worldObjectQuery(s32 id, s32 op, s32 *cmd) {
     s32 i;
     s32 result;
 
-    obj = func_151149AC(id);
+    obj = gfx_findObjectById(id);
     if (obj == NULL) {
         return 0;
     }
     switch (op) {
     case 19:
-        return func_15114050(obj, -1);
+        return gfx_isObjectTouchedBy(obj, -1);
     case 20:
-        return func_15114050(obj, func_15084000(cmd[2] & 0xFFFF0FFF));
+        return gfx_isObjectTouchedBy(obj, func_15084000(cmd[2] & 0xFFFF0FFF));
     case 21:
         for (i = 0; i < 25; i++) {
-            if (movement_obj[i].type == cmd[2] && func_15114050(obj, i)) {
+            if (movement_obj[i].type == cmd[2] && gfx_isObjectTouchedBy(obj, i)) {
                 return 1;
             }
         }
@@ -186,7 +186,7 @@ s32 script_worldObjectQuery(s32 id, s32 op, s32 *cmd) {
         }
         return 0;
     case 23:
-        result = func_151140C4(obj);
+        result = gfx_getTouchingActor(obj);
         if (result < 0) {
             return 0;
         }
@@ -376,8 +376,8 @@ void script_playRandomObjectSound(first, last, volume, objId, nearDistance, farD
 {
     WorldObject *obj;
 
-    obj = func_151149AC(objId);
-    func_15114D24(obj, sound_pickVariant(first, (u8)(last - first + 1)), volume, nearDistance, farDistance, 0);
+    obj = gfx_findObjectById(objId);
+    gfx_playObjectSound(obj, sound_pickVariant(first, (u8)(last - first + 1)), volume, nearDistance, farDistance, 0);
 }
 
 /* Plays a random sound from first..last at point `index` of the zones table, whose halfword at

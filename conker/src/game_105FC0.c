@@ -7,14 +7,14 @@
 void func_15131958(void *vel, f32 drag, void *arg2);
 
 /* Trail anchor point: 20 units above the actor. */
-void func_150D8B10(Actor *actor, Vec3f *out) {
+void trail_getPissAnchor(Actor *actor, Vec3f *out) {
     out->x = actor->xpos;
     out->y = actor->ypos + 20.0f;
     out->z = actor->zpos;
 }
 
 /* Trail launch vector from the actor (func_15145740's offset direction). */
-void func_150D8B3C(Actor *actor, Vec3f *out) {
+void trail_getPissLaunchDir(Actor *actor, Vec3f *out) {
     Vec3f target;
     Vec3f dir;
 
@@ -22,7 +22,7 @@ void func_150D8B3C(Actor *actor, Vec3f *out) {
 }
 
 /* Spawns a trail object that follows the actor. */
-void func_150D8B88(Actor *actor) {
+void trail_spawnPissTrail(Actor *actor) {
     EffectTemplate spawn;
     s32 pad; // matching: stack slot above data
     PissTrailData data;
@@ -35,7 +35,7 @@ void func_150D8B88(Actor *actor) {
             music_playTune(10, 55, 0);
         }
 
-        func_150D8B10(actor, &spawn.pos);
+        trail_getPissAnchor(actor, &spawn.pos);
         data.timer = 0;
         data.flags = 1;
         data.owner = actor;
@@ -43,7 +43,7 @@ void func_150D8B88(Actor *actor) {
         pos = spawn.pos;
         data.unk8 = pos;
         data.lastPos = pos;
-        func_150D8B3C(actor, &data.lastVel);
+        trail_getPissLaunchDir(actor, &data.lastVel);
 
         data.speedScale = 0.01724099927f;
         variant = func_151EF610() % 2;
@@ -76,7 +76,7 @@ void func_150D8B88(Actor *actor) {
 }
 
 /* Advances pos by vel over dt under gravity. */
-void func_150D8D84(Vec3f *pos, Vec3f *vel, f32 dt) {
+void trail_stepBallistic(Vec3f *pos, Vec3f *vel, f32 dt) {
     Vec3f v0;
 
     v0 = *vel;
@@ -95,7 +95,7 @@ void func_150D8E1C(PissTrail *trail) {
 }
 
 /* Moves every live point under gravity and ticks the owner's counter. */
-s32 func_150D8E4C(PissTrail *trail) {
+s32 trail_movePissPoints(PissTrail *trail) {
     PissTrailData *data;
     PissTrailPoint *points;
 
@@ -111,7 +111,7 @@ s32 func_150D8E4C(PissTrail *trail) {
             if (i < 0) {
                 i = trail->head.tmpl.itemCount - 1;
             }
-            func_150D8D84(&points[i].pos, &points[i].vel, gFrameDelta);
+            trail_stepBallistic(&points[i].pos, &points[i].vel, gFrameDelta);
         }
     }
 
@@ -135,7 +135,7 @@ s32 func_150D8E4C(PissTrail *trail) {
 }
 
 /* Follows the owner and emits new trail points, interpolated over the elapsed time. */
-s32 func_150D8FAC(PissTrail *trail) {
+s32 trail_emitPissPoints(PissTrail *trail) {
     PissTrailData *data;
     PissTrailPoint *points;
     Actor *actor;
@@ -157,8 +157,8 @@ s32 func_150D8FAC(PissTrail *trail) {
     if ((actor->type == 0) || (actor->unique_id != data->ownerId)) {
         return 0;
     }
-    func_150D8B10(actor, &pos);
-    func_150D8B3C(actor, &vel);
+    trail_getPissAnchor(actor, &pos);
+    trail_getPissLaunchDir(actor, &vel);
     trail->head.tmpl.pos = pos;
     if (data->flags & 1) {
         flags = actor->mv->buttons;
@@ -211,7 +211,7 @@ s32 func_150D8FAC(PissTrail *trail) {
             point->len = 0.0f;
             point->alpha = 255;
             point->texture = 0.0f;
-            func_150D8D84(&point->pos, &point->vel, time);
+            trail_stepBallistic(&point->pos, &point->vel, time);
             trail->head.end++;
             time -= step;
             if (trail->head.end == trail->head.tmpl.itemCount) {
@@ -246,7 +246,7 @@ s32 func_150D8FAC(PissTrail *trail) {
  * segment (hits trim the trail and affect the object hit), then scrolls the texture and
  * fades the oldest part.
  */
-s32 func_150D942C(PissTrail *trail) {
+s32 trail_tracePissTrail(PissTrail *trail) {
     s32 count;
     s32 i;
     f32 totalLen;
@@ -337,7 +337,7 @@ s32 func_150D942C(PissTrail *trail) {
                 }
                 func_15081690(owner, prev->pos.x, prev->pos.y, prev->pos.z, dir[0], dir[1], dir[2], &hit, cur->len, 0, 0, 1, -1, 0, 0);
                 if (hit.hitType != 0) {
-                    func_150DA67C(trail, &hit, dir);
+                    trail_spawnPissImpact(trail, &hit, dir);
                     if (hit.hitType >= 2) {
                         target = hit.obj;
                         target->taskint[2] = 1;
@@ -450,7 +450,7 @@ s32 func_150D942C(PissTrail *trail) {
 extern s32 D_800A4AC8[][2];
 
 /* Draws the trail as a camera-facing ribbon, one quad per segment. */
-Gfx *func_150D9C7C(PissTrail *trail, Gfx *gfx, s16 view) {
+Gfx *trail_drawPissTrail(PissTrail *trail, Gfx *gfx, s16 view) {
     PissTrailPoint *points;
     Vec3f next;
     Vec3f cur;
@@ -618,7 +618,7 @@ Gfx *func_150D9C7C(PissTrail *trail, Gfx *gfx, s16 view) {
 }
 
 /* Stops the trail's sound. */
-void func_150DA484(PissTrail *trail) {
+void trail_stopPissSound(PissTrail *trail) {
     PissTrailData *data = trail->data;
 
     if (data->sound != 0) {
@@ -626,18 +626,18 @@ void func_150DA484(PissTrail *trail) {
     }
 }
 
-void func_150DA4B4(PissTrail *trail) {
-    func_150DA484(trail);
+void trail_destroyPissTrail(PissTrail *trail) {
+    trail_stopPissSound(trail);
     func_151478F4(trail);
 }
 
-void func_150DA4E0(PissTrail *trail) {
-    func_150DA484(trail);
+void trail_freePissTrail(PissTrail *trail) {
+    trail_stopPissSound(trail);
     func_15147928(trail);
 }
 
 /* Trail message handler: 0x44 sets the speed scale, 0 removes the trail, 0x2D swaps owners. */
-void func_150DA50C(PissTrail *trail, TrailMessage *msg, u8 type) {
+void trail_onPissTrailMessage(PissTrail *trail, TrailMessage *msg, u8 type) {
     PissTrailData *data = trail->data;
     Actor *owner;
 
@@ -665,7 +665,7 @@ void func_150DA50C(PissTrail *trail, TrailMessage *msg, u8 type) {
 }
 
 /* Sets the speed scale of every trail owned by the actor. */
-void func_150DA5EC(Actor *actor, f32 speedScale) {
+void trail_setPissSpeedScale(Actor *actor, f32 speedScale) {
     TrailMessage msg;
 
     msg.owner = actor;
@@ -684,7 +684,7 @@ s32 func_150DA628(SpriteParticle *particle, s32 arg1) {
 }
 
 /* Spawns the impact effects of a trail segment hitting something (hit from func_15081690). */
-void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir) {
+void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
     PissTrailData *data;
     Actor *target;
 

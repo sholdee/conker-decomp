@@ -133,9 +133,9 @@ void func_1511F31C(WorldObject *prop) {
 
     id = prop->moveData.uhalf.lo;
     if (prop->modelId == 0x8005 && level == 0x35) {
-        parent = func_151149AC(id);
+        parent = gfx_findObjectById(id);
         if (parent != NULL) {
-            func_1511490C(mtx, parent);
+            gfx_getObjectModelMtx(mtx, parent);
             func_150A7960(mtx, -3.0f, 223.0f, 549.0f, &x, &y, &z);
             prop->x = x;
             prop->y = y;
@@ -305,7 +305,7 @@ void func_1511F788(WorldObject *prop) {
 void func_1511F92C(WorldObject *prop) {
     WorldObject *parent;
 
-    parent = func_151149AC(prop->moveData.bytes[3]);
+    parent = gfx_findObjectById(prop->moveData.bytes[3]);
     if (parent != NULL) {
         prop->x = parent->x;
         prop->y = parent->y;

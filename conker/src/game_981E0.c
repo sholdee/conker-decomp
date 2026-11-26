@@ -4,11 +4,11 @@
 
 /* This file's .bss (0x800D1580-0x800D188F), defined in address order before the headers declare it
    (see game_77BE0.c). */
-s32 D_800D1580; // parameter of the animation event being run (D_800D1874: the same bits as an f32)
-ActorAnim *D_800D1588[187]; // per model id: animation table, after its AnimHeader (see model_loadAnimTable)
-static f32 D_800D1874;
-static f32 D_800D1878;
-static s32 D_800D187C;
+s32 gEventParam; // parameter of the animation event being run (gEventParamF: the same bits as an f32)
+ActorAnim *gModelAnimTables[187]; // per model id: animation table, after its AnimHeader (see model_loadAnimTable)
+static f32 gEventParamF;
+static f32 gEventResult;
+static s32 gDeferredSound;
 static s32 D_800D1880;
 
 #include "functions.h"
@@ -27,11 +27,11 @@ struct SoundChoices {
     s32 sound3;
 };
 
-/* Zero-terminated list of the event ids that run when func_1506AD30 is filtered. */
-const u8 D_80099A30[12] = { 0x69, 0x6A, 0x9D, 0x94, 0x7E, 0x7F, 0x7A, 0x29, 0 };
+/* Zero-terminated list of the event ids that run when event_runTimedEvents is filtered. */
+const u8 gFilteredEventIds[12] = { 0x69, 0x6A, 0x9D, 0x94, 0x7E, 0x7F, 0x7A, 0x29, 0 };
 
 /* Turn-angle thresholds and animations per row (also read by game_83300.c and game_A28B0.c). */
-const u8 D_80099A3C[12][10] = {
+const u8 gTurnAnimTable[12][10] = {
     { 0x10, 0x00, 0x30, 0x04, 0x05, 0x02, 0x03, 0xFF, 0x02, 0x03 },
     { 0x20, 0x03, 0xFF, 0x06, 0x05, 0x06, 0x05, 0xFF, 0x06, 0x05 },
     { 0x20, 0x00, 0x40, 0x0A, 0x0B, 0x04, 0x03, 0x70, 0x08, 0x09 },
@@ -46,16 +46,16 @@ const u8 D_80099A3C[12][10] = {
     { 0x60, 0xFF, 0x60, 0x0D, 0x10, 0x0D, 0x10, 0xFF, 0x0D, 0x10 },
 };
 
-/* pissed_walk animations, one picked at random (D_80099ABC for the first pick). */
-const u8 D_80099AB4[8] = { 0xA6, 0xA7, 0xA6, 0xA6, 0xA6, 0xA7, 0xA6, 0xA8 };
-const u8 D_80099ABC[8] = { 0xAC, 0xAD, 0xAC, 0xAC, 0xAC, 0xAD, 0xAC, 0xA9 };
+/* pissed_walk animations, one picked at random (gPissedWalkFirstAnims for the first pick). */
+const u8 gPissedWalkAnims[8] = { 0xA6, 0xA7, 0xA6, 0xA6, 0xA6, 0xA7, 0xA6, 0xA8 };
+const u8 gPissedWalkFirstAnims[8] = { 0xAC, 0xAD, 0xAC, 0xAC, 0xAC, 0xAD, 0xAC, 0xA9 };
 
 /* Per projectile kind: hit value (also read by game_AEB40.c) and spawn offset x, y, z + bone. */
-const u8 D_80099AC4[20] = {
+const u8 gProjectileHitValues[20] = {
     0x00, 0x00, 0x10, 0x10, 0x00, 0x13, 0x10, 0x12, 0x23, 0x24,
     0x25, 0x10, 0x10, 0x10, 0x10, 0x3C, 0x1A, 0x10, 0x10, 0x00,
 };
-const s16 D_80099AD8[19][4] = {
+const s16 gProjectileSpawnOffsets[19][4] = {
     { -2, -14, 60, 4 },  { -2, -14, 60, 4 },  { -1, -22, 77, 9 },  { 0, 0, 0, 2 },
     { 14, -28, 37, 9 },  { -4, 23, 201, 3 },  { 0, 0, 0, 2 },      { 0, 0, 0, 0 },
     { 0, 0, 0, 0 },      { -4, 23, 201, 3 },  { -4, 23, 201, 3 },  { -1, -20, 12, 14 },
@@ -98,30 +98,30 @@ typedef struct TimedEvent {
 
 typedef void EventHandler(void);
 
-/* Animation-command handlers, indexed by the command (see func_15071D38). */
-void (*D_80086150[])(s32) = {
+/* Animation-command handlers, indexed by the command (see event_runAnimCommand). */
+void (*gAnimCommandProcs[])(s32) = {
     func_1506EFC8, func_1506F004, NULL, func_1506F02C,
     func_1506F05C, NULL, func_1506F0C4, func_1506F0F0,
-    func_1506F17C, func_1506F1A8, func_1506F524, func_1506F8C0,
-    func_1506F54C, func_15070C18, NULL, func_1506F8F0,
+    event_sprayTrails, func_1506F1A8, event_stopFlamethrowerJets, func_1506F8C0,
+    func_1506F54C, event_stopFlames, NULL, func_1506F8F0,
     func_1506F9C0, func_1506FA90, NULL, func_1506FB60,
     func_1506FB60, NULL, NULL, func_1506FBE8,
-    func_1506FC50, func_1506FC1C, NULL, func_1506F11C,
-    func_1506F14C, func_1506FC9C, NULL, func_1506F524,
-    func_1506FD30, func_1506FCFC, func_1506FC74, func_1506FDF0,
+    event_cancelTrailPair, func_1506FC1C, NULL, func_1506F11C,
+    func_1506F14C, func_1506FC9C, NULL, event_stopFlamethrowerJets,
+    func_1506FD30, func_1506FCFC, event_queueTrailPair, func_1506FDF0,
     func_1506FE1C, func_1506FE48, func_1506FE74, func_1506FEA0,
     func_1506FECC, func_1506FEF8, func_1506FF24, func_1506FF50,
     func_1506FF78, func_1506FFAC, func_1506FFE0, func_15070014,
     func_1507003C, func_150700B4, func_15070084, func_1506FCC8,
-    func_1506F524, func_150700E4, func_15070114, func_15070144,
+    event_stopFlamethrowerJets, func_150700E4, func_15070114, func_15070144,
     func_150701C4, NULL, NULL, func_150701F4,
     func_15070224, func_15070300, func_15070690, func_15070690,
-    func_150706C4, func_150706C4, func_150706F8, func_15070760,
-    func_15070794, func_150707C8, func_150707F8, func_15070830,
+    func_150706C4, func_150706C4, func_150706F8, event_fireMuzzle0,
+    event_fireMuzzle1, event_fireLauncher, func_150707F8, func_15070830,
     func_15070860, func_15070898, func_15070CDC, func_15070D00,
     func_15070D24, func_15071230, func_15071254, NULL,
     NULL, func_15071278, func_150712AC, func_15071360,
-    func_15071434, func_15071628, func_15071628, func_15071668,
+    func_15071434, event_spawnStripEffect, event_spawnStripEffect, event_notifyFollowersGone,
     func_15071544, func_1507158C, func_150715D4, func_1507161C,
     func_15071470, func_150714AC, func_150714E8, func_15071690,
     func_150716EC, func_15071764, func_150717E0, func_15071830,
@@ -130,72 +130,72 @@ void (*D_80086150[])(s32) = {
     func_1506F090, func_15071B18, func_15071D08,
 };
 /* Per-frame state handlers, indexed by the state number of an animation entry (see game_83300.c). */
-void (*D_8008630C[])(void) = {
+void (*gAnimStateProcs[])(void) = {
     func_1506D950, func_1507F640, func_1506AF74, func_1506AFE0,
     func_1506B020, func_1506B070, func_1506B078, func_1506D950,
-    func_1506B14C, func_1506B198, func_1506B1E8, func_1506B228,
+    event_playNextAnim, func_1506B198, func_1506B1E8, func_1506B228,
     func_1506B268, func_1506B328, func_1506B2BC, func_1506B368,
     func_15072AF8, func_1506B370, NULL, func_1506B5A4,
     func_1506B5AC, func_1506B5B4, func_1506B5CC, NULL,
     func_1506B5E4, func_1506D950, func_1506D950, func_1506D950,
-    NULL, func_1506B3B0, NULL, func_1506B3B8,
+    NULL, func_1506B3B0, NULL, event_pickTurnAnim,
     func_1506B50C, func_1506B520, func_15071ED4, func_15071F14,
     func_1506B740, func_1506B82C, func_1506B7F4, func_15072918,
-    func_15072968, func_150729D0, func_15072B44, func_15072A14,
+    func_15072968, func_150729D0, event_playFollowUpAnim, func_15072A14,
     func_1506B860, func_1506B88C, func_1506B8B4, func_1506B91C,
     func_1506B984, func_15073C28, func_15073C48, func_1506B944,
     func_1506B8F4, func_15073F54, func_1506B9AC, func_1506B9C0,
     func_15072A40, func_15072A7C, func_15072940, func_1506D898,
 };
-/* Timed event handlers, indexed by the event id (see func_1506AD30). */
-static EventHandler *D_800863FC[] = {
-    func_1506D950, func_1506BCA0, func_1506BCC8, func_1506BE2C,
-    func_1506BE84, func_1506BE98, func_1506BEC0, func_1506BEDC,
-    func_1506BF1C, func_1506BF5C, func_1506C32C, func_1506CE6C,
-    func_1506D584, func_1506D570, func_1506EF5C, func_1506D950,
-    func_1506D4EC, func_1506EFB4, func_1506D4F4, func_1506D538,
-    func_15074870, func_1506D950, func_1506D74C, func_1506BE54,
-    func_1507490C, func_1506EBC0, func_1506D934, func_1506D950,
-    func_15155F3C, func_1506D958, func_150748F4, func_1506DA78,
-    func_1506DA94, func_15074980, func_1506DB30, func_15074A44,
-    func_1506DB5C, func_1506DCC0, func_1506DB84, func_1506DBA0,
-    func_1506DC10, func_1506DBD4, func_15073D34, func_1506DCA4,
-    func_1506DCDC, func_1506DCF8, func_15074A6C, func_15074A94,
-    func_1506DD00, func_1506DD6C, func_1506DDB8, func_1506DDC0,
-    func_1506DE04, func_1506E5FC, func_1506EA98, func_1506EA18,
+/* Timed event handlers, indexed by the event id (see event_runTimedEvents). */
+static EventHandler *gTimedEventProcs[] = {
+    func_1506D950, event_setYSpeed, event_jump, event_setYGravity,
+    event_clearNoRun, event_setWantSpeed, event_setNoRun, func_1506BEDC,
+    func_1506BF1C, event_playSoundCommand, event_playDeferredSound, event_fireProjectile,
+    func_1506D584, event_resetBlink, func_1506EF5C, func_1506D950,
+    func_1506D4EC, event_stopHeadEffect, func_1506D4F4, func_1506D538,
+    func_15074870, func_1506D950, func_1506D74C, event_setYGravityTenths,
+    func_1507490C, event_dropHeldObject, func_1506D934, func_1506D950,
+    func_15155F3C, func_1506D958, func_150748F4, event_setImmune,
+    func_1506DA94, event_startChasing, func_1506DB30, event_setBreakStun,
+    event_setSpeed, event_setTaskInt2, event_setIntelHitRoute, func_1506DBA0,
+    func_1506DC10, func_1506DBD4, func_15073D34, event_setTaskInt1,
+    event_setEnergy, func_1506DCF8, func_15074A6C, event_scaleByPlayerDistance,
+    event_addNoShove, func_1506DD6C, func_1506DDB8, func_1506DDC0,
+    func_1506DE04, func_1506E5FC, event_throwHeldObject, func_1506EA18,
     func_1506E73C, func_15074B7C, NULL, NULL,
     func_1506EC50, func_1506ECD0, NULL, func_1506ECF0,
     NULL, NULL, func_1506ED0C, NULL,
     func_1506ED4C, func_1506ED68, func_1506ED90, func_1506B4EC,
-    func_1506EDAC, func_1506EE14, func_1506EE38, func_1506EDC8,
-    func_1506E7FC, func_1506E77C, func_1506DE84, func_1506EE60,
+    event_setMvmtControl, event_addTaskAttrib, event_clearTaskAttrib, event_clearMvmtControl,
+    func_1506E7FC, func_1506E77C, func_1506DE84, event_setAfterimage,
     func_1506E63C, func_1506EED8, func_1506E8D8, func_1506E918,
-    func_1506EA58, func_1506EDF0, func_15071E20, func_15071E3C,
-    func_15071E58, func_15071F80, func_15071D38, func_1506EEF4,
-    func_15071F54, func_15071FB0, func_15071FDC, func_150722F0,
+    func_1506EA58, event_addMvmtControl, event_setIntelAccel, event_setIntelDecel,
+    func_15071E58, func_15071F80, event_runAnimCommand, event_startHeadEffect,
+    func_15071F54, func_15071FB0, event_launchPlayer, func_150722F0,
     func_1507266C, func_15071DC8, func_15071DF4, func_150727AC,
-    func_150727F0, func_15071D78, func_1506D6B4, func_150729B4,
+    func_150727F0, event_runChildAnimCommand, func_1506D6B4, event_setTaskInt0,
     func_15072DA0, func_15072DD8, func_15072E38, func_1506C418,
     func_1506C43C, func_1506E848, func_1506E6BC, func_1506E7BC,
     func_150721A4, func_15072E7C, func_15072E98, func_15072EC0,
-    func_15072EF4, func_15072F10, func_1506BDE8, func_1506D2E8,
-    func_1507304C, func_15073054, func_15072420, func_1507233C,
+    event_setStunned, func_15072F10, func_1506BDE8, event_spawnObjectAhead,
+    func_1507304C, func_15073054, event_respawnObject, func_1507233C,
     func_15072360, func_15072388, func_150723AC, func_150723E0,
-    func_15073078, func_150730A4, func_1507342C, func_150730D0,
-    func_150738E8, func_150739A4, func_150739C0, func_15073A28,
-    func_15073A50, func_1506EEAC, func_15073B38, func_15073C50,
+    func_15073078, func_150730A4, event_fireVolley, func_150730D0,
+    event_releaseHeldObject, func_150739A4, func_150739C0, event_setStickSpeed,
+    func_15073A50, func_1506EEAC, event_setRopeSwing, func_15073C50,
     func_15072740, func_1506E998, func_15073CB8, func_1506E9D8,
     func_1506E6FC, func_1506E67C, func_1506E958, func_15073CF4,
     func_15073D74, func_15073DA4, func_1506B82C, func_15073F5C,
-    func_1506DD44, func_15073F78, func_1506E898, func_15073FA0,
-    func_150746F0, func_15074644, func_15074664, func_150747E4,
-    func_15074840, func_1507488C, func_15073E2C, func_15073EA4,
+    event_clearNoShove, func_15073F78, func_1506E898, event_spawnThrownItem,
+    event_dealDamage, event_setWeaponStatus, func_15074664, event_setOwnerState,
+    event_addShotsFired, func_1507488C, func_15073E2C, func_15073EA4,
     func_15073F1C,
 };
 s32 D_80086690 = 0x0FA10CDF; /* not referenced */
 /* Hit-reaction handlers, indexed by AttackReaction.unk8 (see game_83300.c). Declared without a
    prototype: most take (Actor *self, Actor *other, u8 *result), a few take other arguments. */
-void (*D_80086694[])() = {
+void (*gHitReactionProcs[])() = {
     func_15074BD8, func_15074BEC, func_15194320, func_15074C00,
     func_15074C80, func_15194394, func_15074DEC, func_15074E04,
     func_15194588, func_15074E80, func_151945CC, func_15194810,
@@ -210,43 +210,43 @@ void (*D_80086694[])() = {
 
 /*
  * Runs every event of the object's event list whose time is <= `time`. Each event stores its
- * parameter in D_800D1580 (and as a float in D_800D1874) and calls handler D_800863FC[id].
- * With `filtered` set, only ids in the zero-terminated list D_80099A30 run. A handler that
+ * parameter in gEventParam (and as a float in gEventParamF) and calls handler gTimedEventProcs[id].
+ * With `filtered` set, only ids in the zero-terminated list gFilteredEventIds run. A handler that
  * restarts the object's state (new token) rewinds `time` to the state's time. Returns
- * D_800D1878, which handlers may set.
+ * gEventResult, which handlers may set.
  */
-f32 func_1506AD30(Actor *obj, f32 time, u8 filtered) {
+f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered) {
     s32 token;
     u8 id;
 
     if (obj->drawtype == 4) {
         return 0.0f;
     }
-    D_800D1878 = 0.0f;
+    gEventResult = 0.0f;
     if (time < obj->lastEventTime) {
         obj->speccnt = 0;
     }
     D_800D1880 = 1;
     while (obj->events != NULL && obj->events[obj->speccnt].time <= time && D_800D1880 != 0) {
         if (obj->events[obj->speccnt].time < 900.0f) {
-            D_800D1580 = obj->events[obj->speccnt].parameter;
-            D_800D1874 = *(f32 *)&D_800D1580;
+            gEventParam = obj->events[obj->speccnt].parameter;
+            gEventParamF = *(f32 *)&gEventParam;
             token = obj->unk2D0->frameRom[0];
             if (D_800C35EA[0] == 0 || D_800C365E[0] != 0) {
                 id = obj->events[obj->speccnt].id;
                 if (filtered) {
                     s32 i;
                     for (i = 0; filtered; i++) {
-                        if (D_80099A30[i] == 0) {
+                        if (gFilteredEventIds[i] == 0) {
                             id = 0;
                         }
-                        if (id == D_80099A30[i]) {
+                        if (id == gFilteredEventIds[i]) {
                             break;
                         }
                     }
                 }
                 if (id != 0) {
-                    D_800863FC[id]();
+                    gTimedEventProcs[id]();
                 }
             }
             if (token != obj->unk2D0->frameRom[0]) {
@@ -256,7 +256,7 @@ f32 func_1506AD30(Actor *obj, f32 time, u8 filtered) {
             }
         }
     }
-    return D_800D1878;
+    return gEventResult;
 }
 
 void func_1506AF74(void) {
@@ -287,15 +287,15 @@ void func_1506B078(void) {
     } else {
         speed += 1.0f;
     }
-    func_1506B100(209, speed, 4.0f);
+    event_playAnim(209, speed, 4.0f);
 }
 
 /* actor_playAnim on the current object with the given id and two float arguments. */
-void func_1506B100(s32 id, f32 arg1, f32 arg2) {
+void event_playAnim(s32 id, f32 arg1, f32 arg2) {
     actor_playAnim(gCurrentActor, id, arg1, arg2, 0.0f, 0.0f, 0);
 }
 
-void func_1506B14C(void) {
+void event_playNextAnim(void) {
     actor_playAnim(gCurrentActor, gCurrentActor->animseq.uh + 1, gCurrentActor->animsp, 3.0f, 0.0f, 0.0f, 0);
 }
 
@@ -318,7 +318,7 @@ void func_1506B268(void) {
 }
 
 void func_1506B2BC(void) {
-    Actor *obj = func_150721E8(gCurrentActor);
+    Actor *obj = event_getFirstOwnedObject(gCurrentActor);
 
     if (obj != NULL && (obj - movement_obj) + 1 == movement_obj[0].stand_on_char) {
         gCurrentActor->scriptCmd = NULL;
@@ -340,8 +340,8 @@ void func_1506B370(void) {
 void func_1506B3B0(void) {
 }
 
-/* Picks unk244 from the D_80099A3C table by the angle between the object's facing and the player. */
-void func_1506B3B8(void) {
+/* Picks unk244 from the gTurnAnimTable table by the angle between the object's facing and the player. */
+void event_pickTurnAnim(void) {
     s32 absDiff32;
     s16 angleDiff;
     u8 sel = 0;
@@ -355,12 +355,12 @@ void func_1506B3B8(void) {
         absDiff = -absDiff;
     }
     absDiff32 = absDiff;
-    if (absDiff < D_80099A3C[0][sel]) { // matching: all three indexed by sel (still 0); constant indices schedule differently
+    if (absDiff < gTurnAnimTable[0][sel]) { // matching: all three indexed by sel (still 0); constant indices schedule differently
         sel = 1;
     } else {
-        if (D_80099A3C[0][sel + 7] < absDiff32) {
+        if (gTurnAnimTable[0][sel + 7] < absDiff32) {
             sel = 5;
-        } else if (D_80099A3C[0][sel + 2] < absDiff32) {
+        } else if (gTurnAnimTable[0][sel + 2] < absDiff32) {
             sel = 2;
         }
         if (angleDiff < 0) {
@@ -370,12 +370,12 @@ void func_1506B3B8(void) {
         }
     }
     gCurrentActor->speccnt = 0;
-    gCurrentActor->intel_animseq = D_80099A3C[0][sel];
+    gCurrentActor->intel_animseq = gTurnAnimTable[0][sel];
     gCurrentActor->unk21C = 20000;
 }
 
 void func_1506B4EC(void) {
-    func_1506B3B8();
+    event_pickTurnAnim();
 }
 
 void func_1506B50C(void) {
@@ -417,8 +417,8 @@ void func_1506B5E4(void) {
     gCurrentActor->unk2D0->speed[0] = 0.0f;
 }
 
-/* Picks a random entry (0..count-1) of D_80099ABC / D_80099AB4 for the object's mv->pissed_walk. */
-void func_1506B634(s32 count) {
+/* Picks a random entry (0..count-1) of gPissedWalkFirstAnims / gPissedWalkAnims for the object's mv->pissed_walk. */
+void event_pickPissedWalk(s32 count) {
     u32 rand;
     u32 pick;
     u8 index;
@@ -434,13 +434,13 @@ void func_1506B634(s32 count) {
                 index = 0;
             }
         }
-        ext->pissed_walk = D_80099ABC[index];
+        ext->pissed_walk = gPissedWalkFirstAnims[index];
     } else {
-        ext->pissed_walk = D_80099AB4[(u8)pick];
+        ext->pissed_walk = gPissedWalkAnims[(u8)pick];
     }
 
     if (gCurrentActor->mv->pissed_walk == 0xA7) {
-        D_800D1580 = 0xFF020144;
+        gEventParam = 0xFF020144;
         gCurrentActor->mv->pissed_stumble = (func_150ADA20() % 3U) + 2;
         func_1506E8D8();
         gCurrentActor->speed = gCurrentActor->speed * 0.2f;
@@ -462,7 +462,7 @@ void func_1506B740(void) {
             }
         }
         if (roll < 0x80) {
-            func_1506B634(8);
+            event_pickPissedWalk(8);
         }
     }
 }
@@ -470,7 +470,7 @@ void func_1506B740(void) {
 void func_1506B7F4(void) {
     gCurrentActor->norun = 0;
     gCurrentActor->count5 = 0;
-    func_1506B634(2);
+    event_pickPissedWalk(2);
 }
 
 void func_1506B82C(void) {
@@ -480,11 +480,11 @@ void func_1506B82C(void) {
 }
 
 void func_1506B860(void) {
-    func_1506B100(181, 0.63f, 5.0f);
+    event_playAnim(181, 0.63f, 5.0f);
 }
 
 void func_1506B88C(void) {
-    func_1506B100(182, 1.0f, 4.0f);
+    event_playAnim(182, 1.0f, 4.0f);
 }
 
 void func_1506B8B4(void) {
@@ -495,21 +495,21 @@ void func_1506B8B4(void) {
 }
 
 void func_1506B8F4(void) {
-    func_1506B100(222, 0.75f, 4.0f);
+    event_playAnim(222, 0.75f, 4.0f);
 }
 
 void func_1506B91C(void) {
-    func_1506B100(191, 1.0f, 4.0f);
+    event_playAnim(191, 1.0f, 4.0f);
 }
 
 void func_1506B944(void) {
     gCurrentActor->norun = 0;
     gCurrentActor->count5 = 0;
-    func_1506B100(197, 1.0f, 4.0f);
+    event_playAnim(197, 1.0f, 4.0f);
 }
 
 void func_1506B984(void) {
-    func_1506B100(175, 1.0f, 4.0f);
+    event_playAnim(175, 1.0f, 4.0f);
 }
 
 void func_1506B9AC(void) {
@@ -528,64 +528,64 @@ void func_1506B9C0(void) {
     func_1507F640();
 }
 
-/* Sound handlers: play sound D_800D1580 (its low half) at the current object (0 stops it). */
+/* Sound handlers: play sound gEventParam (its low half) at the current object (0 stops it). */
 void func_1506BA4C(s32 minDistance, s32 maxDistance) {
-    if (D_800D1580 == 0) {
+    if (gEventParam == 0) {
         sound_stopActorSound2(gCurrentActor);
     } else {
         if (gCurrentActor->CameraPtr == 0) {
-            sound_playActorSound2(D_800D1580, gCurrentActor, 28000, minDistance, maxDistance);
+            sound_playActorSound2(gEventParam, gCurrentActor, 28000, minDistance, maxDistance);
         } else {
-            sound_playActorSound2(D_800D1580, gCurrentActor, 24000, 500, 2500);
+            sound_playActorSound2(gEventParam, gCurrentActor, 24000, 500, 2500);
         }
     }
 }
 
 void func_1506BAD8(s32 minDistance, s32 maxDistance) {
-    if (D_800D1580 == 0) {
+    if (gEventParam == 0) {
         sound_stopActorSound1(gCurrentActor);
     } else {
         if (gCurrentActor->CameraPtr == 0) {
-            sound_playActorSound1(D_800D1580, gCurrentActor, 28000, minDistance, maxDistance);
+            sound_playActorSound1(gEventParam, gCurrentActor, 28000, minDistance, maxDistance);
         } else {
-            sound_playActorSound1(D_800D1580, gCurrentActor, 24000, 500, 2500);
+            sound_playActorSound1(gEventParam, gCurrentActor, 24000, 500, 2500);
         }
     }
 }
 
 void func_1506BB64(s32 minDistance, s32 maxDistance) {
-    mp3_startTrackAt(D_800D1580, gCurrentActor, 28000, minDistance, maxDistance);
+    mp3_startTrackAt(gEventParam, gCurrentActor, 28000, minDistance, maxDistance);
 }
 
 void func_1506BBA8(s32 minDistance, s32 maxDistance) {
     if (gCurrentActor->CameraPtr == 0) {
-        sound_playActorSound2(D_800D1580, gCurrentActor, 14000, minDistance, maxDistance);
+        sound_playActorSound2(gEventParam, gCurrentActor, 14000, minDistance, maxDistance);
     } else {
-        sound_playActorSound2(D_800D1580, gCurrentActor, 12000, 500, 2500);
+        sound_playActorSound2(gEventParam, gCurrentActor, 12000, 500, 2500);
     }
 }
 
 void func_1506BC24(s32 minDistance, s32 maxDistance) {
     if (gCurrentActor->CameraPtr == 0) {
-        sound_playActorSound1(D_800D1580, gCurrentActor, 14000, minDistance, maxDistance);
+        sound_playActorSound1(gEventParam, gCurrentActor, 14000, minDistance, maxDistance);
     } else {
-        sound_playActorSound1(D_800D1580, gCurrentActor, 12000, 500, 2500);
+        sound_playActorSound1(gEventParam, gCurrentActor, 12000, 500, 2500);
     }
 }
 
-void func_1506BCA0(void) {
-    gCurrentActor->yspd = D_800D1580;
+void event_setYSpeed(void) {
+    gCurrentActor->yspd = gEventParam;
 }
 
-/* Jump: sets yspd from D_800D1580 when the object is (nearly) at height unk180. */
-void func_1506BCC8(void) {
+/* Jump: sets yspd from gEventParam when the object is (nearly) at height unk180. */
+void event_jump(void) {
     Actor *obj;
     f32 height;
 
     obj = gCurrentActor;
     if (obj->type == 0x16) {
         if (obj->ypos == obj->floorY) {
-            gCurrentActor->yspd = (func_151EF610() % 8) + D_800D1580;
+            gCurrentActor->yspd = (func_151EF610() % 8) + gEventParam;
             obj = gCurrentActor;
             if (obj->speed != 0.0f) {
                 obj->yspd = obj->yspd * (obj->speed / 40.0f);
@@ -596,54 +596,54 @@ void func_1506BCC8(void) {
     } else {
         height = obj->ypos - obj->floorY;
         if (-5.0f < height && height < 5.0f) {
-            obj->yspd = D_800D1580;
+            obj->yspd = gEventParam;
         }
     }
 }
 
 void func_1506BDE8(void) {
     if (gCurrentActor->ypos < -1750.0f) {
-        gCurrentActor->yspd = D_800D1580;
+        gCurrentActor->yspd = gEventParam;
     }
 }
 
-void func_1506BE2C(void) {
-    gCurrentActor->ygrav = D_800D1580;
+void event_setYGravity(void) {
+    gCurrentActor->ygrav = gEventParam;
 }
 
-void func_1506BE54(void) {
-    gCurrentActor->ygrav = D_800D1580 * 0.1f;
+void event_setYGravityTenths(void) {
+    gCurrentActor->ygrav = gEventParam * 0.1f;
 }
 
-void func_1506BE84(void) {
+void event_clearNoRun(void) {
     gCurrentActor->norun = 0;
 }
 
-void func_1506BE98(void) {
-    gCurrentActor->wantspeed = D_800D1580;
+void event_setWantSpeed(void) {
+    gCurrentActor->wantspeed = gEventParam;
 }
 
-void func_1506BEC0(void) {
-    gCurrentActor->norun = D_800D1580;
+void event_setNoRun(void) {
+    gCurrentActor->norun = gEventParam;
 }
 
 void func_1506BEDC(void) {
-    gCurrentActor->doing_hit = D_800D1580;
-    gCurrentActor->unk114 = D_800D1580 >> 8;
+    gCurrentActor->doing_hit = gEventParam;
+    gCurrentActor->unk114 = gEventParam >> 8;
 }
 
 void func_1506BF1C(void) {
     if (gCurrentActor->unk118 <= gCurrentActor->ypos) {
-        func_1506BF5C();
+        event_playSoundCommand();
     }
 }
 
 /*
- * Plays sound command D_800D1580 at the current object: bits 0-10 the sound id, bits 14/15 play
- * only for / except owner id (top byte), bit 16 defers to func_1506C32C, bits 11-13 the mode
+ * Plays sound command gEventParam at the current object: bits 0-10 the sound id, bits 14/15 play
+ * only for / except owner id (top byte), bit 16 defers to event_playDeferredSound, bits 11-13 the mode
  * (0x2000: surface-dependent sound from sound_pickEffectVariant, volume scaled by speed).
  */
-void func_1506BF5C(void) {
+void event_playSoundCommand(void) {
     u32 sound;
     u32 owner;
     u16 volume;
@@ -653,16 +653,16 @@ void func_1506BF5C(void) {
     s32 type;
     u8 id;
 
-    sound = D_800D1580 & 0x7FF;
+    sound = gEventParam & 0x7FF;
     id = gCurrentActor->character_type;
-    ownerFilter = (u32)D_800D1580 >> 24;
+    ownerFilter = (u32)gEventParam >> 24;
     if (D_800D1C90[id]->subModelCount != 0) {
         owner = *D_80086CAC[D_800D1C90[id]->subModelList];
     } else {
         owner = id;
     }
-    D_800D187C = 0;
-    switch (D_800D1580 & 0xC000) {
+    gDeferredSound = 0;
+    switch (gEventParam & 0xC000) {
     case 0x4000:
         if (owner != ownerFilter) {
             return;
@@ -674,12 +674,12 @@ void func_1506BF5C(void) {
         }
         break;
     }
-    if (D_800D1580 & 0x10000) {
-        D_800D187C = D_800D1580 + 1;
+    if (gEventParam & 0x10000) {
+        gDeferredSound = gEventParam + 1;
         return;
     }
     volume = 32000;
-    switch (D_800D1580 & 0x3800) {
+    switch (gEventParam & 0x3800) {
     case 0x2000:
         if (gScreenLayout >= 2) {
             break;
@@ -738,19 +738,19 @@ void func_1506BF5C(void) {
 }
 
 /*
- * Follow-up of func_1506BF5C's deferred sound (D_800D187C = parameter + 1): picks one of up to
- * four 11-bit sound ids (the deferred one plus three packed in D_800D1580) and plays it.
+ * Follow-up of event_playSoundCommand's deferred sound (gDeferredSound = parameter + 1): picks one of up to
+ * four 11-bit sound ids (the deferred one plus three packed in gEventParam) and plays it.
  */
-void func_1506C32C(void) {
+void event_playDeferredSound(void) {
     s32 cmd;
     struct SoundChoices sounds;
     s32 index;
     s32 sound;
 
-    if (D_800D187C != 0) {
-        D_800D187C--;
-        cmd = D_800D1580;
-        sounds.sound0 = D_800D187C & 0x7FF;
+    if (gDeferredSound != 0) {
+        gDeferredSound--;
+        cmd = gEventParam;
+        sounds.sound0 = gDeferredSound & 0x7FF;
         sounds.sound1 = cmd & 0x7FF;
         sounds.sound2 = (cmd >> 11) & 0x7FF;
         sounds.sound3 = (cmd >> 22) & 0x7FF;
@@ -771,9 +771,9 @@ void func_1506C32C(void) {
 
         sound = (&sounds.sound0)[index];
         if (sound != 0) {
-            D_800D187C &= 0xFFFEF800;
-            D_800D1580 = sound | D_800D187C;
-            func_1506BF5C();
+            gDeferredSound &= 0xFFFEF800;
+            gEventParam = sound | gDeferredSound;
+            event_playSoundCommand();
         }
     }
 }
@@ -788,12 +788,12 @@ void func_1506C43C(void) {
 
 
 /*
- * Spawns a projectile object of the given kind (D_80099AD8 / D_80099AC4 rows) from the current
- * object, at `pos` (an f32[3]), at the bone from D_80099AD8, or just above the object. `flags`
+ * Spawns a projectile object of the given kind (gProjectileSpawnOffsets / gProjectileHitValues rows) from the current
+ * object, at `pos` (an f32[3]), at the bone from gProjectileSpawnOffsets, or just above the object. `flags`
  * aims it: 1 = no auto-aim, 2 = face the player, 4 = arc onto the player, 8 = random yaw spread,
  * 0x10 = lead the target unk222, 0x20 = remember unk222. Returns the new object.
  */
-u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32 kind, f32 minHeight,
+u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32 kind, f32 minHeight,
                   f32 scale, f32 *pos, s32 flags, s32 arg10) {
     Actor *obj;
     u16 aimAngle;
@@ -839,12 +839,12 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     } else {
         mtx = gCurrentActor->ob_matrix_ptr;
         if (D_800C3E90) {
-            guMtxL2F(mf, (Mtx *)&mtx[D_80099AD8[kind][3]]);
+            guMtxL2F(mf, (Mtx *)&mtx[gProjectileSpawnOffsets[kind][3]]);
             mtx = &mf;
         } else {
-            mtx = &mtx[D_80099AD8[kind][3]];
+            mtx = &mtx[gProjectileSpawnOffsets[kind][3]];
         }
-        func_150A7960(*mtx, D_80099AD8[kind][0], D_80099AD8[kind][1], D_80099AD8[kind][2], &x, &y, &z);
+        func_150A7960(*mtx, gProjectileSpawnOffsets[kind][0], gProjectileSpawnOffsets[kind][1], gProjectileSpawnOffsets[kind][2], &x, &y, &z);
         obj->xpos = x;
         obj->ypos = y;
         obj->zpos = z;
@@ -979,7 +979,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     }
     obj->count4 = 0x26;
     if (arg10 == 0) {
-        obj->doing_hit = D_80099AC4[kind] + 1;
+        obj->doing_hit = gProjectileHitValues[kind] + 1;
     }
     obj->shad = 100.0f;
     obj->unk114 = 255.0f;
@@ -1031,8 +1031,8 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     return (u8 *)obj;
 }
 
-/* Fires projectile kind D_800D1580 from the current object, aimed by its facing and camera pitch. */
-void func_1506CE6C(void) {
+/* Fires projectile kind gEventParam from the current object, aimed by its facing and camera pitch. */
+void event_fireProjectile(void) {
     s32 bone;
     s32 kind;
     f32 elevation;
@@ -1064,7 +1064,7 @@ void func_1506CE6C(void) {
     bone = -1;
     allocExt = 0;
     pos = NULL;
-    kind = D_800D1580;
+    kind = gEventParam;
     if (kind == 5 || kind == 9 || kind == 10) {
         bone = 3;
     }
@@ -1149,11 +1149,11 @@ void func_1506CE6C(void) {
     }
     actor_splitVelocity((s16)(elevation * 182.04445f), dist, 0.0f, &speed, &yVelocity, &unused);
     yVelocity = -yVelocity;
-    func_1506C460(heading, speed, yVelocity, gravity, 100, kind, 0.0f, scale, pos, flags, allocExt);
+    event_spawnProjectile(heading, speed, yVelocity, gravity, 100, kind, 0.0f, scale, pos, flags, allocExt);
 }
 
-/* Spawns object D_800D1580 & 0xFF ahead of the current object, with its marker 5000 units out. */
-void func_1506D2E8(void) {
+/* Spawns object gEventParam & 0xFF ahead of the current object, with its marker 5000 units out. */
+void event_spawnObjectAhead(void) {
     Actor *obj;
     f32 xOff;
     f32 zOff;
@@ -1162,15 +1162,15 @@ void func_1506D2E8(void) {
     s32 angle;
     f32 height;
 
-    type = D_800D1580 & 0xFF;
+    type = gEventParam & 0xFF;
     obj = actor_findOnPath(func_15083E0C(type));
     if (obj == NULL) {
         return;
     }
 
     height = 0.0f;
-    func_151A3390(obj, 0xFF);
-    if ((D_800D1580 & 0xFF00) != 0) {
+    trail_spawnActorBoneTrail(obj, 0xFF);
+    if ((gEventParam & 0xFF00) != 0) {
         height = gCurrentActor->CameraPtr->aim.signedPitch - 15.0f;
     }
 
@@ -1186,7 +1186,7 @@ void func_1506D2E8(void) {
     obj->attach_char = 0;
     obj->scriptCmd = NULL;
 
-    if ((D_800D1580 & 0xFF00) != 0) {
+    if ((gEventParam & 0xFF00) != 0) {
         obj->ypos = gCurrentActor->ypos + 70.0f;
         obj->intelwalk = 4;
         obj->scale_xz = 0.25f;
@@ -1214,12 +1214,12 @@ void func_1506D538(void) {
     }
 }
 
-void func_1506D570(void) {
+void event_resetBlink(void) {
     gCurrentActor->blinkTimer = 0;
 }
 
 /*
- * func_1507E7E4 with the two bytes of D_800D1580's high half and its low half (0xFFFF = none)
+ * func_1507E7E4 with the two bytes of gEventParam's high half and its low half (0xFFFF = none)
  * scaled by 1 / unk2D0->unk10.
  */
 void func_1506D584(void) {
@@ -1230,9 +1230,9 @@ void func_1506D584(void) {
     u8 lo;
 
     if (obj->defaultExpression != 0x2A) {
-        hi = D_800D1580 >> 24;
-        lo = (D_800D1580 >> 16) & 0xFF;
-        value = D_800D1580 & 0xFFFF;
+        hi = gEventParam >> 24;
+        lo = (gEventParam >> 16) & 0xFF;
+        value = gEventParam & 0xFFFF;
         divisor = obj->unk2D0->speed[0];
         if (divisor == 0.0f) {
             divisor = 0.01f;
@@ -1259,7 +1259,7 @@ void func_1506D6B4(void) {
     } else {
         sel = 0x29;
     }
-    D_800D1580 = (D_800D1580 & 0xFFFF) | (sel = (sel << 10) << 14); // matching: two-step shift + store to sel
+    gEventParam = (gEventParam & 0xFFFF) | (sel = (sel << 10) << 14); // matching: two-step shift + store to sel
     func_1506D584();
 }
 
@@ -1275,7 +1275,7 @@ void func_1506D74C(void) {
     gCurrentActor->ypos += 70.0f;
     gCurrentActor->unk137 = 0;
     gCurrentActor->norun = 0;
-    actor_splitVelocity(gCurrentActor->angle, D_800D1580, 0, &xOff, &zOff, &yOff);
+    actor_splitVelocity(gCurrentActor->angle, gEventParam, 0, &xOff, &zOff, &yOff);
     actor_playAnim(gCurrentActor, 15, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     gCurrentActor->xpos += xOff;
     gCurrentActor->zpos += zOff;
@@ -1297,7 +1297,7 @@ void func_1506D898(void) {
 }
 
 void func_1506D934(void) {
-    gCurrentActor->unk103 = D_800D1580;
+    gCurrentActor->unk103 = gEventParam;
 }
 
 void func_1506D950(void) {
@@ -1305,8 +1305,8 @@ void func_1506D950(void) {
 
 void func_1506D958(void) {
     s32 i;
-    s32 id = D_800D1580 & 0xFF;
-    s32 flag = (D_800D1580 >> 8) & 0xFF;
+    s32 id = gEventParam & 0xFF;
+    s32 flag = (gEventParam >> 8) & 0xFF;
     for (i = 0; i < 25; i++) {
         if (movement_obj[i].type != 0 && id == movement_obj[i].unkAB &&
             dc_glbl_CharNum + 1 == movement_obj[i].attach_char) {
@@ -1317,12 +1317,12 @@ void func_1506D958(void) {
     }
 }
 
-void func_1506DA78(void) {
-    gCurrentActor->imune = D_800D1580;
+void event_setImmune(void) {
+    gCurrentActor->imune = gEventParam;
 }
 
 void func_1506DA94(void) {
-    if (D_800D1580 != 0) {
+    if (gEventParam != 0) {
         if ((gCurrentActor->stickspeed > 20.0f) && (gCurrentActor->speed > 20.0f)) {
             gCurrentActor->count5 = 0;
         }
@@ -1331,25 +1331,25 @@ void func_1506DA94(void) {
 }
 
 void func_1506DB30(void) {
-    gScriptArg0 = D_800D1580;
+    gScriptArg0 = gEventParam;
     func_15076760();
 }
 
-void func_1506DB5C(void) {
-    gCurrentActor->speed = D_800D1580;
+void event_setSpeed(void) {
+    gCurrentActor->speed = gEventParam;
 }
 
-void func_1506DB84(void) {
-    gCurrentActor->intelhitroute = D_800D1580;
+void event_setIntelHitRoute(void) {
+    gCurrentActor->intelhitroute = gEventParam;
 }
 
 void func_1506DBA0(void) {
-    gCurrentActor->unk1E5 = D_800D1580 & 0xFF;
-    gCurrentActor->unk1E6 = (D_800D1580 >> 8) & 0xFF;
+    gCurrentActor->unk1E5 = gEventParam & 0xFF;
+    gCurrentActor->unk1E6 = (gEventParam >> 8) & 0xFF;
 }
 
 void func_1506DBD4(void) {
-    Actor *obj = func_15072208(gCurrentActor, 0);
+    Actor *obj = event_getOwnedObject(gCurrentActor, 0);
 
     if (obj != NULL) {
         func_15054A5C(obj, gCurrentActor);
@@ -1373,39 +1373,39 @@ void func_1506DC10(void) {
     actor_playUntrackedSound(id, gCurrentActor);
 }
 
-void func_1506DCA4(void) {
-    gCurrentActor->taskint[1] = D_800D1580;
+void event_setTaskInt1(void) {
+    gCurrentActor->taskint[1] = gEventParam;
 }
 
-void func_1506DCC0(void) {
-    gCurrentActor->taskint[2] = D_800D1580;
+void event_setTaskInt2(void) {
+    gCurrentActor->taskint[2] = gEventParam;
 }
 
-void func_1506DCDC(void) {
-    gCurrentActor->energy = D_800D1580;
+void event_setEnergy(void) {
+    gCurrentActor->energy = gEventParam;
 }
 
 void func_1506DCF8(void) {
 }
 
-/* Sets bits D_800D1580 in unkF8, or resets it to the spawn record default when 0. */
-void func_1506DD00(void) {
-    if (D_800D1580 == 0) {
+/* Sets bits gEventParam in unkF8, or resets it to the spawn record default when 0. */
+void event_addNoShove(void) {
+    if (gEventParam == 0) {
         gCurrentActor->noshove = gCurrentActor->listpos_ptr->objFlags;
     } else {
-        gCurrentActor->noshove |= D_800D1580;
+        gCurrentActor->noshove |= gEventParam;
     }
 }
 
-void func_1506DD44(void) {
-    gCurrentActor->noshove &= ~D_800D1580;
+void event_clearNoShove(void) {
+    gCurrentActor->noshove &= ~gEventParam;
 }
 
 void func_1506DD6C(void) {
     if (gCurrentActor->mv != NULL) {
-        gCurrentActor->mv->matrix_physics = D_800D1580 & 0x7F;
+        gCurrentActor->mv->matrix_physics = gEventParam & 0x7F;
     }
-    if (D_800D1580 == 0) {
+    if (gEventParam == 0) {
         gCurrentActor->angle = gCurrentActor->langle;
     }
 }
@@ -1415,7 +1415,7 @@ void func_1506DDB8(void) {
 
 void func_1506DDC0(void) {
     if (func_15178E50(level) != 0) {
-        func_1516EED4(dc_glbl_CharNum, D_800D1580, 0xFF, 0);
+        func_1516EED4(dc_glbl_CharNum, gEventParam, 0xFF, 0);
     }
 }
 
@@ -1428,7 +1428,7 @@ void func_1506DE04(void) {
 
 
 void func_1506DE84(void) {
-    switch (D_800D1580) {
+    switch (gEventParam) {
     case 0:
         if (gCurrentActor->shad == 0.0f) {
             func_151875E0(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
@@ -1439,7 +1439,7 @@ void func_1506DE84(void) {
         if ((func_150ADA20() & 0xFF) < 0x40U) { // 1 in 4
             func_151875E0(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
                           10, 20, 7, 0.03f, 0.02f);
-            D_800D1580 = 262;
+            gEventParam = 262;
             func_1506BA4C(300, 1800);
         }
         return;
@@ -1572,7 +1572,7 @@ void func_1506E2CC(void) {
  * the top byte is a play chance out of 256 and bits 16-20 a count of random variants.
  * Returns 0 if nothing should play.
  */
-s32 func_1506E46C(Actor *obj, s32 *command, s32 mode) {
+s32 event_resolveSoundCommand(Actor *obj, s32 *command, s32 mode) {
     s32 pad0; // matching: stack layout (pad0 / pad[3] / inner pad)
     u32 cmd;
     s32 pad[3];
@@ -1633,49 +1633,49 @@ s32 func_1506E46C(Actor *obj, s32 *command, s32 mode) {
 }
 
 void func_1506E5FC(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BA4C(300, 1800);
     }
 }
 
 void func_1506E63C(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BA4C(100, 800);
     }
 }
 
 void func_1506E67C(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BA4C(190, 1300);
     }
 }
 
 void func_1506E6BC(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BA4C(300, 3000);
     }
 }
 
 void func_1506E6FC(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BA4C(700, 4000);
     }
 }
 
 void func_1506E73C(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BA4C(3000, 8000);
     }
 }
 
 void func_1506E77C(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BBA8(300, 1800);
     }
 }
 
 void func_1506E7BC(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BBA8(300, 3000);
     }
 }
@@ -1689,61 +1689,61 @@ void func_1506E7FC(void) {
 }
 
 void func_1506E848(void) {
-    if ((func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) && (sound_isSoundPlaying(D_800D1580) == 0)) {
+    if ((event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) && (sound_isSoundPlaying(gEventParam) == 0)) {
         func_1506BA4C(80, 800);
     }
 }
 
 void func_1506E898(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 2) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 2) != 0) {
         func_1506BB64(300, 1800);
     }
 }
 
 void func_1506E8D8(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BAD8(300, 1800);
     }
 }
 
 void func_1506E918(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BAD8(100, 800);
     }
 }
 
 void func_1506E958(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BAD8(190, 1300);
     }
 }
 
 void func_1506E998(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BAD8(300, 3000);
     }
 }
 
 void func_1506E9D8(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BAD8(700, 4000);
     }
 }
 
 void func_1506EA18(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BAD8(3000, 8000);
     }
 }
 
 void func_1506EA58(void) {
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BC24(300, 3000);
     }
 }
 
 /* Throws the object held in unk13C (object index + 100) along the current object's facing. */
-void func_1506EA98(void) {
+void event_throwHeldObject(void) {
     u8 index;
     Actor *held;
 
@@ -1776,7 +1776,7 @@ void func_1506EA98(void) {
 }
 
 /* Drops the object held in unk13C (object index + 100). */
-void func_1506EBC0(void) {
+void event_dropHeldObject(void) {
     u8 index = gCurrentActor->lifting - 100;
 
     if (gCurrentActor->lifting) {
@@ -1794,8 +1794,8 @@ void func_1506EBC0(void) {
 
 void func_1506EC50(void) {
     if (gCurrentActor->shad > 0.2f) {
-        if ((D_800D1580 & 0x8000) == 0 || movement_obj[0].ypos < gCurrentActor->ypos) {
-            D_800D1878 = D_800D1580 & 0xFF;
+        if ((gEventParam & 0x8000) == 0 || movement_obj[0].ypos < gCurrentActor->ypos) {
+            gEventResult = gEventParam & 0xFF;
             D_800D1880 = 0;
             gCurrentActor->speccnt -= 1;
         }
@@ -1807,17 +1807,17 @@ void func_1506ECD0(void) {
 }
 
 void func_1506ECF0(void) {
-    gCurrentActor->unk3A = D_800D1580;
+    gCurrentActor->unk3A = gEventParam;
 }
 
 void func_1506ED0C(void) {
-    gCurrentActor->count5 = D_800D1580;
+    gCurrentActor->count5 = gEventParam;
     gCurrentActor->unk100 |= 0x10;
     gCurrentActor->mv->prop = 1;
 }
 
 void func_1506ED4C(void) {
-    gCurrentActor->unk100 = D_800D1580;
+    gCurrentActor->unk100 = gEventParam;
 }
 
 void func_1506ED68(void) {
@@ -1826,52 +1826,52 @@ void func_1506ED68(void) {
 }
 
 void func_1506ED90(void) {
-    gCurrentActor->unk21C = D_800D1580;
+    gCurrentActor->unk21C = gEventParam;
 }
 
-void func_1506EDAC(void) {
-    gCurrentActor->mvmt_control = D_800D1580;
+void event_setMvmtControl(void) {
+    gCurrentActor->mvmt_control = gEventParam;
 }
 
-void func_1506EDC8(void) {
-    gCurrentActor->mvmt_control &= ~D_800D1580;
+void event_clearMvmtControl(void) {
+    gCurrentActor->mvmt_control &= ~gEventParam;
 }
 
-void func_1506EDF0(void) {
-    gCurrentActor->mvmt_control |= D_800D1580;
+void event_addMvmtControl(void) {
+    gCurrentActor->mvmt_control |= gEventParam;
 }
 
-void func_1506EE14(void) {
-    gCurrentActor->task_attrib |= D_800D1580;
+void event_addTaskAttrib(void) {
+    gCurrentActor->task_attrib |= gEventParam;
 }
 
-void func_1506EE38(void) {
-    gCurrentActor->task_attrib &= ~D_800D1580;
+void event_clearTaskAttrib(void) {
+    gCurrentActor->task_attrib &= ~gEventParam;
 }
 
-void func_1506EE60(void) {
-    s32 param = D_800D1580;
-    s32 low = D_800D1580 & 0xFFFF;
+void event_setAfterimage(void) {
+    s32 param = gEventParam;
+    s32 low = gEventParam & 0xFFFF;
 
     if (param != 0) {
-        func_15188810(gCurrentActor, low, D_800D1580 >> 16);
+        trail_startActorAfterimage(gCurrentActor, low, gEventParam >> 16);
         return;
     }
-    func_15188A9C(gCurrentActor);
+    trail_fadeActorAfterimage(gCurrentActor);
 }
 
 void func_1506EEAC(void) {
-    func_151898C0(gCurrentActor, D_800D1580);
+    func_151898C0(gCurrentActor, gEventParam);
 }
 
 void func_1506EED8(void) {
-    gCurrentActor->unk24E = D_800D1580;
+    gCurrentActor->unk24E = gEventParam;
 }
 
-void func_1506EEF4(void) {
-    gCurrentActor->headEffect = (D_800D1580 >> 16) & 0xFFFF;
-    gCurrentActor->headEffectState = (D_800D1580 >> 24) & 0xFF;
-    gCurrentActor->headEffectTimer = D_800D1580 & 0xFFFF;
+void event_startHeadEffect(void) {
+    gCurrentActor->headEffect = (gEventParam >> 16) & 0xFFFF;
+    gCurrentActor->headEffectState = (gEventParam >> 24) & 0xFF;
+    gCurrentActor->headEffectTimer = gEventParam & 0xFFFF;
     gCurrentActor->unk284 = 0;
     gCurrentActor->unk285 = 0;
     gCurrentActor->unk286 = 0;
@@ -1884,9 +1884,9 @@ void func_1506EF5C(void) {
     s16 first;
     s16 second;
 
-    index = (D_800D1580 >> 16) & 0xFF;
-    first = (D_800D1580 >> 8) & 0xFF;
-    second = D_800D1580 & 0xFF;
+    index = (gEventParam >> 16) & 0xFF;
+    first = (gEventParam >> 8) & 0xFF;
+    second = gEventParam & 0xFF;
     gCurrentActor->headEffectTimer = 0xFFFF;
     gCurrentActor->headEffect = 5;
     index *= 2;
@@ -1894,7 +1894,7 @@ void func_1506EF5C(void) {
     (&gCurrentActor->unk285)[index] = second;
 }
 
-void func_1506EFB4(void) {
+void event_stopHeadEffect(void) {
     gCurrentActor->headEffectTimer = 0;
 }
 
@@ -1936,8 +1936,8 @@ void func_1506F14C(s32 cmd) {
     func_150BABE0(gCurrentActor, 1, 0xFF);
 }
 
-void func_1506F17C(s32 cmd) {
-    func_150AEEB0(gCurrentActor, 0xFF);
+void event_sprayTrails(s32 cmd) {
+    trail_sprayFromRing(gCurrentActor, 0xFF);
 }
 
 void func_1506F1A8(s32 cmd) {
@@ -2034,11 +2034,11 @@ void func_1506F1A8(s32 cmd) {
     descriptor.emit.spread = 45.0f;
     descriptor.emit.unk30 = -0.65500003f;
     descriptor.emit.unk34 = 0.30800003f;
-    func_151994B8(0, &descriptor, 0xFF, 0);
+    flamethrower_spawnFlame(0, &descriptor, 0xFF, 0);
 }
 
-void func_1506F524(s32 cmd) {
-    func_15197A7C(gCurrentActor);
+void event_stopFlamethrowerJets(s32 cmd) {
+    flamethrower_stopJets(gCurrentActor);
 }
 
 void func_1506F54C(s32 cmd) {
@@ -2133,7 +2133,7 @@ void func_1506F54C(s32 cmd) {
     descriptor.emit.unk34 = 0.44300002f;
     descriptor.emit.unk38 = 15;
     descriptor.emit.unk3A = 17;
-    func_151994B8(0, &descriptor, 0xFF, 0);
+    flamethrower_spawnFlame(0, &descriptor, 0xFF, 0);
 }
 
 void func_1506F8C0(s32 cmd) {
@@ -2156,7 +2156,7 @@ void func_1506FB60(s32 cmd) {
     if (func_151044F4() != 0) {
         func_151C6A28(gCurrentActor, cmd - 0x13, 0xFF, 0);
     } else {
-        func_151C62D0(gCurrentActor, cmd - 0x13, 0, 0, -1, 0xFF, 0);
+        weapon_fireJointShot(gCurrentActor, cmd - 0x13, 0, 0, -1, 0xFF, 0);
     }
 }
 
@@ -2168,12 +2168,12 @@ void func_1506FC1C(s32 cmd) {
     func_151A0A10(gCurrentActor, 0x28, 0xFF, 0);
 }
 
-void func_1506FC50(s32 cmd) {
-    func_1519E688();
+void event_cancelTrailPair(s32 cmd) {
+    trail_cancelTrailPair();
 }
 
-void func_1506FC74(s32 cmd) {
-    func_1519E6BC(gCurrentActor);
+void event_queueTrailPair(s32 cmd) {
+    trail_queueTrailPair(gCurrentActor);
 }
 
 void func_1506FC9C(s32 cmd) {
@@ -2181,11 +2181,11 @@ void func_1506FC9C(s32 cmd) {
 }
 
 void func_1506FCC8(s32 cmd) {
-    func_15196438(gCurrentActor, 6, 0xFF, 0);
+    flamethrower_spawnJet(gCurrentActor, 6, 0xFF, 0);
 }
 
 void func_1506FCFC(s32 cmd) {
-    func_15196438(gCurrentActor, 5, 0xFF, 0);
+    flamethrower_spawnJet(gCurrentActor, 5, 0xFF, 0);
 }
 
 void func_1506FD30(s32 cmd) {
@@ -2279,12 +2279,12 @@ void func_15070144(s32 cmd) {
     } else {
         mode = 0;
     }
-    func_151C0698(gCurrentActor, NULL, &info, mode, 0xFF, 1);
-    func_151C1FB8(gCurrentActor);
+    weapon_fireBullet(gCurrentActor, NULL, &info, mode, 0xFF, 1);
+    weapon_rumbleShooter(gCurrentActor);
 }
 
 void func_150701C4(s32 cmd) {
-    func_151C5280(gCurrentActor, 0xFF, 1);
+    weapon_fireSegmentShot(gCurrentActor, 0xFF, 1);
 }
 
 void func_150701F4(s32 cmd) {
@@ -2308,7 +2308,7 @@ void func_15070224(s32 cmd) {
 }
 
 
-/* Objects 0x77 / 0x28: fires (func_151C0698, else func_1506CE6C), then spawns effect func_15102B38 at bone 4. */
+/* Objects 0x77 / 0x28: fires (weapon_fireBullet, else event_fireProjectile), then spawns effect func_15102B38 at bone 4. */
 void func_15070300(s32 cmd) {
     u8 flag;
     Actor *obj;
@@ -2341,7 +2341,7 @@ void func_15070300(s32 cmd) {
         }
     done:;
     } else if (gCurrentActor->character_type == 0x28) {
-        obj = func_1507515C(gCurrentActor);
+        obj = event_getFirstLiveOwnedObject(gCurrentActor);
         mode = 0;
         flag = 0;
         if (obj->mv->SniperState != 0) {
@@ -2352,29 +2352,29 @@ void func_15070300(s32 cmd) {
     } else {
         return;
     }
-    func_151C1FB8(obj);
+    weapon_rumbleShooter(obj);
     if (other != NULL) {
-        func_151C1FB8(other);
+        weapon_rumbleShooter(other);
     }
     if (gIsMultiplayer != 0) {
         if (gCurrentActor->mv->unk128 & 0x10) {
-            D_800D1580 = 10;
+            gEventParam = 10;
             mode = 2;
             gCurrentActor->mv->unk12C--;
         } else {
-            D_800D1580 = 9;
+            gEventParam = 9;
         }
     } else {
-        D_800D1580 = 5;
+        gEventParam = 5;
     }
     if (flag) {
         info.count = 3;
         info.objs[0] = obj;
         info.objs[1] = other;
         info.objs[2] = gCurrentActor;
-        func_151C0698(obj, other, &info, mode, 0xFF, 1);
+        weapon_fireBullet(obj, other, &info, mode, 0xFF, 1);
     } else {
-        func_1506CE6C();
+        event_fireProjectile();
     }
     if (gCurrentActor->ob_matrix_ptr == NULL) {
         return;
@@ -2413,16 +2413,16 @@ void func_150706F8(s32 cmd) {
     }
 }
 
-void func_15070760(s32 cmd) {
-    func_150EBEC0(gCurrentActor, 0, 0xFF, 1);
+void event_fireMuzzle0(s32 cmd) {
+    weapon_fireTwinMuzzleShot(gCurrentActor, 0, 0xFF, 1);
 }
 
-void func_15070794(s32 cmd) {
-    func_150EBEC0(gCurrentActor, 1, 0xFF, 1);
+void event_fireMuzzle1(s32 cmd) {
+    weapon_fireTwinMuzzleShot(gCurrentActor, 1, 0xFF, 1);
 }
 
-void func_150707C8(s32 cmd) {
-    func_150FDDA0(gCurrentActor, 0xFF, 1);
+void event_fireLauncher(s32 cmd) {
+    weapon_fireLauncherProjectile(gCurrentActor, 0xFF, 1);
 }
 
 void func_150707F8(s32 cmd) {
@@ -2529,11 +2529,11 @@ void func_15070898(s32 cmd) {
     descriptor.emit.unk34 = 0.37600002f;
     descriptor.emit.unk38 = 10;
     descriptor.emit.unk3A = 25;
-    func_151994B8(0, &descriptor, 0xFF, 0);
+    flamethrower_spawnFlame(0, &descriptor, 0xFF, 0);
 }
 
-void func_15070C18(s32 cmd) {
-    func_15199834(gCurrentActor);
+void event_stopFlames(s32 cmd) {
+    flamethrower_stopFlames(gCurrentActor);
 }
 
 void func_15070C40(u8 variant) {
@@ -2647,7 +2647,7 @@ void func_15071278(s32 cmd) {
 void func_150712AC(s32 cmd) {
     RumbleParams args;
 
-    func_150FE860(gCurrentActor, 0xFF, 1);
+    weapon_spawnForwardProjectile(gCurrentActor, 0xFF, 1);
     if (gCurrentActor->CameraPtr != NULL) {
         args.flags = 1;
         args.duration = (func_150ADA20() % 7U) + 10;
@@ -2664,7 +2664,7 @@ void func_15071360(s32 cmd) {
     if (func_151044F4() != 0) {
         func_150FF084(gCurrentActor, 0xFF, 1);
     } else {
-        func_150FED30(gCurrentActor, 0xFF, 1);
+        weapon_fireAttachedGun(gCurrentActor, 0xFF, 1);
     }
     if (gCurrentActor->CameraPtr != NULL) {
         args.flags = 1;
@@ -2677,19 +2677,19 @@ void func_15071360(s32 cmd) {
 }
 
 void func_15071434(s32 cmd) {
-    func_150FF840(gCurrentActor, 1, 0, 0xFF, 1);
+    weapon_spawnShotEffects(gCurrentActor, 1, 0, 0xFF, 1);
 }
 
 void func_15071470(s32 cmd) {
-    func_150FF840(gCurrentActor, 0, 0, 0xFF, 1);
+    weapon_spawnShotEffects(gCurrentActor, 0, 0, 0xFF, 1);
 }
 
 void func_150714AC(s32 cmd) {
-    func_150FF840(gCurrentActor, 0, 1, 0xFF, 1);
+    weapon_spawnShotEffects(gCurrentActor, 0, 1, 0xFF, 1);
 }
 
 void func_150714E8(s32 cmd) {
-    func_151D5714(gCurrentActor, &D_800A2148, &D_800A2154, D_80088BB0, 1.0f, 0xFF, 1);
+    func_151D5714(gCurrentActor, &D_800A2148, &D_800A2154, gGunMuzzleBone, 1.0f, 0xFF, 1);
 }
 
 void func_15071544(s32 cmd) {
@@ -2711,12 +2711,12 @@ void func_1507161C(s32 cmd) {
 
 }
 
-void func_15071628(s32 cmd) {
-    func_151D0058(gCurrentActor, cmd - 0x55, 0xFF, 1);
+void event_spawnStripEffect(s32 cmd) {
+    trail_spawnStripEffect(gCurrentActor, cmd - 0x55, 0xFF, 1);
 }
 
-void func_15071668(s32 cmd) {
-    func_151D0024(gCurrentActor);
+void event_notifyFollowersGone(s32 cmd) {
+    trail_notifyFollowersGone(gCurrentActor);
 }
 
 void func_15071690(s32 cmd) {
@@ -2776,7 +2776,7 @@ void func_15071888(s32 cmd) {
     func_151D5714(gCurrentActor, &D_800A1FB0, &D_800A1FBC, D_80088B90, 0.7f, 0xFF, 1);
 }
 
-/* Spawns effect func_151C329C at one of four random bones. */
+/* Spawns effect weapon_spawnImpactBurst at one of four random bones. */
 void func_150718E4(s32 cmd) {
     Vec3f pos;
     const u8 bones[4] = { 13, 16, 24, 27 };
@@ -2784,7 +2784,7 @@ void func_150718E4(s32 cmd) {
     if (gCurrentActor->ob_matrix_ptr != NULL || (gCurrentActor->unk74 & 0xF) == 0xF) {
         func_15143134(&D_800A5480, &pos, &gCurrentActor->ob_matrix_ptr[bones[func_150ADA20() & 3]]);
         pos.y = gCurrentActor->floorY + 20.0f;
-        func_151C329C(&pos, 0xFF, 1);
+        weapon_spawnImpactBurst(&pos, 0xFF, 1);
     }
 }
 
@@ -2796,8 +2796,8 @@ const Vec3f D_80099BC8[3] = {
 };
 
 /* Debris model ids and their scales (func_15152190). */
-const s32 D_80099BEC[6] = { 0x39, 0x11, 0x12, 0x13, 0x14, 0x15 };
-const f32 D_80099C04[6] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+const s32 gDebrisModelIds[6] = { 0x39, 0x11, 0x12, 0x13, 0x14, 0x15 };
+const f32 gDebrisModelScales[6] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 
 void func_15071998(s32 cmd) {
     func_150FA520(gCurrentActor, 0, 0xFF, 1);
@@ -2812,7 +2812,7 @@ void func_15071A00(s32 cmd) {
 }
 
 void func_15071A34(s32 cmd) {
-    func_151D09A8(gCurrentActor, 0xFF, 1);
+    trail_emitLineBursts(gCurrentActor, 0xFF, 1);
 }
 
 void func_15071A64(s32 cmd) {
@@ -2859,7 +2859,7 @@ void func_15071B18(s32 cmd) {
             config.scaleBase = 0.096f;
             config.scaleRange = 0.07f;
             config.spin = 21.892f;
-            func_15152190(&config, D_80099BEC, D_80099C04,
+            func_15152190(&config, gDebrisModelIds, gDebrisModelScales,
                           6, 25.0f, 0, 0xFF, 1);
         }
     }
@@ -2869,50 +2869,50 @@ void func_15071D08(s32 cmd) {
     func_150F2230(gCurrentActor, 0xFF, 1);
 }
 
-/* Runs handler D_80086150[D_800D1580], passing it the command. */
-void func_15071D38(void) {
+/* Runs handler gAnimCommandProcs[gEventParam], passing it the command. */
+void event_runAnimCommand(void) {
     void (*func)(s32);
 
-    func = D_80086150[D_800D1580];
+    func = gAnimCommandProcs[gEventParam];
     if (func != NULL) {
-        func(D_800D1580);
+        func(gEventParam);
     }
 }
 
-/* Runs the D_80086150 handler on the object func_150721E8 returns. */
-void func_15071D78(void) {
+/* Runs the gAnimCommandProcs handler on the object event_getFirstOwnedObject returns. */
+void event_runChildAnimCommand(void) {
     Actor *target;
     Actor *saved;
 
-    target = func_150721E8(gCurrentActor);
+    target = event_getFirstOwnedObject(gCurrentActor);
     if (target != NULL) {
         saved = gCurrentActor;
         gCurrentActor = target;
-        func_15071D38();
+        event_runAnimCommand();
         gCurrentActor = saved;
     }
 }
 
 void func_15071DC8(void) {
-    func_15141A7C(gCurrentActor, D_800D1580);
+    func_15141A7C(gCurrentActor, gEventParam);
 }
 
 void func_15071DF4(void) {
-    func_15192800(gCurrentActor, D_800D1580);
+    func_15192800(gCurrentActor, gEventParam);
 }
 
-void func_15071E20(void) {
-    gCurrentActor->intel_accel = D_800D1580;
+void event_setIntelAccel(void) {
+    gCurrentActor->intel_accel = gEventParam;
 }
 
-void func_15071E3C(void) {
-    gCurrentActor->intel_decel = D_800D1580;
+void event_setIntelDecel(void) {
+    gCurrentActor->intel_decel = gEventParam;
 }
 
 void func_15071E58(void) {
-    D_800D1878 = D_800D1580 & 0xFF;
-    gCurrentActor->intel_animseq = (D_800D1580 >> 8) & 0xFF;
-    actor_playAnim(gCurrentActor, gCurrentActor->intel_animseq, 1.2f, 3.0f, D_800D1878, 0.0f, 0);
+    gEventResult = gEventParam & 0xFF;
+    gCurrentActor->intel_animseq = (gEventParam >> 8) & 0xFF;
+    actor_playAnim(gCurrentActor, gCurrentActor->intel_animseq, 1.2f, 3.0f, gEventResult, 0.0f, 0);
 }
 
 void func_15071ED4(void) {
@@ -2924,7 +2924,7 @@ void func_15071F14(void) {
 }
 
 void func_15071F54(void) {
-    func_1507C8E0(gCurrentActor, D_800D1580);
+    func_1507C8E0(gCurrentActor, gEventParam);
 }
 
 void func_15071F80(void) {
@@ -2941,10 +2941,10 @@ void func_15071FB0(void) {
 
 /*
  * Launches the player (movement_obj[0]) with the current object's stored velocity unk2D8[0..2]
- * and an animation. With D_800D1580 == 0, only if player->stand_on_char names the object owned by the
+ * and an animation. With gEventParam == 0, only if player->stand_on_char names the object owned by the
  * current player (unk65), and the player is turned around.
  */
-void func_15071FDC(void) {
+void event_launchPlayer(void) {
     Actor *player;
     Actor *entry;
     s32 found;
@@ -2955,7 +2955,7 @@ void func_15071FDC(void) {
     visible = 1;
     anim = 404;
     player = movement_obj;
-    if (D_800D1580 == 0) {
+    if (gEventParam == 0) {
         found = -1;
         entry = player;
         for (i = 0; i < 25; i++) {
@@ -2996,19 +2996,19 @@ void func_15071FDC(void) {
 }
 
 void func_150721A4(void) {
-    u16 lo = D_800D1580;
-    u16 mid = D_800D1580 >> 8;
-    u16 hi = D_800D1580 >> 16;
+    u16 lo = gEventParam;
+    u16 mid = gEventParam >> 8;
+    u16 hi = gEventParam >> 16;
 
     actor_fadeCommand(gCurrentActor, hi, lo, mid, 0);
 }
 
-Actor *func_150721E8(Actor *owner) {
-    return func_15072208(owner, 0);
+Actor *event_getFirstOwnedObject(Actor *owner) {
+    return event_getOwnedObject(owner, 0);
 }
 
 /* Returns the n-th object owned by `owner` (unk65 = owner index + 1), or NULL. */
-Actor *func_15072208(Actor *owner, s32 n) {
+Actor *event_getOwnedObject(Actor *owner, s32 n) {
     s32 ownerId;
     s32 count;
     s32 i;
@@ -3027,30 +3027,30 @@ Actor *func_15072208(Actor *owner, s32 n) {
 }
 
 void func_150722F0(void) {
-    Actor *child = func_150721E8(gCurrentActor);
+    Actor *child = event_getFirstOwnedObject(gCurrentActor);
 
     if (child != NULL) {
-        s32 hi = D_800D1580 >> 8;
-        u16 lo = D_800D1580;
+        s32 hi = gEventParam >> 8;
+        u16 lo = gEventParam;
 
         actor_fadeCommand(child, 2, hi, lo, 0);
     }
 }
 
 void func_1507233C(void) {
-    gCurrentActor->unk94 = ~(D_800D1580 | 1);
+    gCurrentActor->unk94 = ~(gEventParam | 1);
 }
 
 void func_15072360(void) {
-    gCurrentActor->unk94 &= ~D_800D1580;
+    gCurrentActor->unk94 &= ~gEventParam;
 }
 
 void func_15072388(void) {
-    gCurrentActor->unk94 |= D_800D1580;
+    gCurrentActor->unk94 |= gEventParam;
 }
 
 void func_150723AC(void) {
-    Actor *obj = func_15083E90(D_800D1580);
+    Actor *obj = func_15083E90(gEventParam);
 
     if (obj != NULL) {
         actor_remove(obj, 0);
@@ -3058,15 +3058,15 @@ void func_150723AC(void) {
 }
 
 void func_150723E0(void) {
-    Actor *obj = func_15083E90(D_800D1580);
+    Actor *obj = func_15083E90(gEventParam);
 
     if (obj != NULL && obj->attach_char != 0) {
         actor_remove(obj, 0);
     }
 }
 
-/* Respawns the object whose spawn record (D_800D20FC, 0x30-byte SpawnRecord entries) D_800D1580 names. */
-void func_15072420(void) {
+/* Respawns the object whose spawn record (D_800D20FC, 0x30-byte SpawnRecord entries) gEventParam names. */
+void event_respawnObject(void) {
     Actor *obj;
     s32 spawnFlags;
     s32 angle;
@@ -3074,10 +3074,10 @@ void func_15072420(void) {
     s32 id;
     s32 noKill;
 
-    angle = (D_800D1580 >> 8) & 0x7F;
-    noKill = (D_800D1580 >> 15) & 1;
-    spawnFlags = (D_800D1580 >> 16) & 0xFF;
-    id = func_15083E0C(D_800D1580);
+    angle = (gEventParam >> 8) & 0x7F;
+    noKill = (gEventParam >> 15) & 1;
+    spawnFlags = (gEventParam >> 16) & 0xFF;
+    id = func_15083E0C(gEventParam);
     if (id == -1) {
         return;
     }
@@ -3130,8 +3130,8 @@ void func_1507266C(void) {
             return;
         }
     }
-    packed = D_800D1580;
-    angle = D_800D1580 >> 16;
+    packed = gEventParam;
+    angle = gEventParam >> 16;
     obj = &movement_obj[gCurrentActor->unk222];
     obj->attach_char = dc_glbl_CharNum + 1;
     obj->basemtx = angle;
@@ -3153,7 +3153,7 @@ void func_15072740(void) {
     s32 angle;
     Actor *obj;
 
-    angle = D_800D1580 >> 16;
+    angle = gEventParam >> 16;
     obj = &movement_obj[gCurrentActor->unk222];
     obj->attach_char = dc_glbl_CharNum + 1;
     obj->basemtx = angle;
@@ -3161,7 +3161,7 @@ void func_15072740(void) {
 }
 
 void func_150727AC(void) {
-    gCurrentActor->animsp = D_800D1580 * 0.1f;
+    gCurrentActor->animsp = gEventParam * 0.1f;
     gCurrentActor->unk2D0->speed[0] = gCurrentActor->animsp;
 }
 
@@ -3171,7 +3171,7 @@ void func_150727F0(void) {
     for (i = 0; i < 25; i++) {
         if (movement_obj[i].type != 0 && dc_glbl_CharNum + 1 == movement_obj[i].attach_char) {
             movement_obj[i].scriptCmd = NULL;
-            movement_obj[i].intelwalk = D_800D1580;
+            movement_obj[i].intelwalk = gEventParam;
         }
     }
 }
@@ -3189,8 +3189,8 @@ void func_15072968(void) {
     gCurrentActor->norun = 25;
 }
 
-void func_150729B4(void) {
-    gCurrentActor->taskint[0] = D_800D1580;
+void event_setTaskInt0(void) {
+    gCurrentActor->taskint[0] = gEventParam;
 }
 
 void func_150729D0(void) {
@@ -3224,7 +3224,7 @@ void func_15072AF8(void) {
 }
 
 /* Picks the follow-up animation for the current animation unk84 and plays it. */
-void func_15072B44(void) {
+void event_playFollowUpAnim(void) {
     s32 state;
     s32 anim = -1;
 
@@ -3313,11 +3313,11 @@ void func_15072B44(void) {
 
 void func_15072DA0(void) {
     gCurrentActor->unk2F8 &= 0xFFF8;
-    gCurrentActor->unk2F8 |= D_800D1580;
+    gCurrentActor->unk2F8 |= gEventParam;
 }
 
 void func_15072DD8(void) {
-    func_15083568(gCurrentActor, D_800D1580, 1.0f, 0);
+    func_15083568(gCurrentActor, gEventParam, 1.0f, 0);
 
     if (gCurrentActor->mv != NULL && gCurrentActor->mv->weapon_status == 1) {
         gCurrentActor->mv->weapon_status = 2;
@@ -3325,7 +3325,7 @@ void func_15072DD8(void) {
 }
 
 void func_15072E38(void) {
-    func_150836CC(gCurrentActor, D_800D1580);
+    func_150836CC(gCurrentActor, gEventParam);
 
     if (gCurrentActor->mv != NULL) {
         gCurrentActor->mv->weapon_status = 0;
@@ -3333,24 +3333,24 @@ void func_15072E38(void) {
 }
 
 void func_15072E7C(void) {
-    gCurrentActor->unk10C = D_800D1580;
+    gCurrentActor->unk10C = gEventParam;
 }
 
 void func_15072E98(void) {
-    gCurrentActor->unk2D0->speed[0] *= D_800D1874;
+    gCurrentActor->unk2D0->speed[0] *= gEventParamF;
 }
 
 void func_15072EC0(void) {
     AnimInstance *anim;
 
     anim = gCurrentActor->unk2D0;
-    if (anim->speed[0] < D_800D1874) {
+    if (anim->speed[0] < gEventParamF) {
         gCurrentActor->unk10C = 0;
     }
 }
 
-void func_15072EF4(void) {
-    gCurrentActor->stunned = D_800D1580;
+void event_setStunned(void) {
+    gCurrentActor->stunned = gEventParam;
 }
 
 void func_15072F10(void) {
@@ -3374,7 +3374,7 @@ void func_1507304C(void) {
 }
 
 void func_15073054(void) {
-    gCurrentActor->unk22E = D_800D1580;
+    gCurrentActor->unk22E = gEventParam;
 }
 
 void func_15073070(void) {
@@ -3382,16 +3382,16 @@ void func_15073070(void) {
 }
 
 void func_15073078(void) {
-    func_1512D748(0, D_800D1580, 1);
+    func_1512D748(0, gEventParam, 1);
 }
 
 void func_150730A4(void) {
     gCurrentActor->levelMode = 3;
-    gCurrentActor->levelTimer = D_800D1580;
+    gCurrentActor->levelTimer = gEventParam;
 }
 
 void func_150730D0(void) {
-    if (D_800D1580 == 1) {
+    if (gEventParam == 1) {
         gCurrentActor->unk2F8 |= 0x100;
     } else {
         gCurrentActor->unk2F8 &= 0xFEFF;
@@ -3402,7 +3402,7 @@ void func_150730D0(void) {
  * Spawns a projectile (state 0x21) playing animation `anim`, at bone `bone` of `parent` offset by
  * (offX, offY, offZ), or at the parent's position. Returns the new object.
  */
-Actor *func_15073118(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, f32 yawOffset, f32 speed,
+Actor *event_spawnAnimProjectile(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, f32 yawOffset, f32 speed,
                      f32 yVelocity, f32 gravity, s32 unk83) {
     MtxF *mtx;
     MtxF mf;
@@ -3466,15 +3466,15 @@ Actor *func_15073118(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 
     return obj;
 }
 
-/* Fires projectiles from the current object; D_800D1580 picks the volley (0: aimed at the camera target). */
-void func_1507342C(void) {
+/* Fires projectiles from the current object; gEventParam picks the volley (0: aimed at the camera target). */
+void event_fireVolley(void) {
     Actor *obj;
     s32 rot;
     f32 y;
     f32 x;
     f32 pad[7]; // matching: unused stack space
 
-    if (D_800D1580 == 0) {
+    if (gEventParam == 0) {
         f32 dist;
         Camera *target;
         s32 hit;
@@ -3491,7 +3491,7 @@ void func_1507342C(void) {
             func_150ADA20() % 1000 < 200) {
             hit = 1;
         }
-        obj = func_15073118(gCurrentActor, 23, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
+        obj = event_spawnAnimProjectile(gCurrentActor, 23, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
         obj->noshove |= 0x01000000;
         if (hit != 0) {
             dx = target->eye.x - obj->xpos;
@@ -3512,7 +3512,7 @@ void func_1507342C(void) {
         } else {
             obj->taskint[0] = 0;
         }
-    } else if (D_800D1580 == 1) {
+    } else if (gEventParam == 1) {
         f32 t;
         f32 spread;
 
@@ -3521,24 +3521,24 @@ void func_1507342C(void) {
         y = 58.4f + t;
         t = (s32)(func_150ADA20() % 40 - 20) * spread;
         x = 42.8f + t;
-        func_15073118(gCurrentActor, 14, 0x42, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * spread, x, y, 2.9f, 100);
-    } else if (D_800D1580 == 2) {
-        obj = func_15073118(gCurrentActor, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
+        event_spawnAnimProjectile(gCurrentActor, 14, 0x42, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * spread, x, y, 2.9f, 100);
+    } else if (gEventParam == 2) {
+        obj = event_spawnAnimProjectile(gCurrentActor, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
         obj->vtilt = 180.0f;
         obj->noshove |= 0x01000000;
-    } else if (D_800D1580 == 3) {
+    } else if (gEventParam == 3) {
         f32 t;
 
         t = (s32)(func_150ADA20() % 40 - 20) * 10.0f;
         y = 58.4f + t;
         t = (s32)(func_150ADA20() % 40 - 20) * 10.0f;
         x = 42.8f + t;
-        func_15073118(gCurrentActor, 14, 0x88, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * 10.0f, x, y, 2.9f, 100);
+        event_spawnAnimProjectile(gCurrentActor, 14, 0x88, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * 10.0f, x, y, 2.9f, 100);
     }
 }
 
 /* Releases the object held in unk13C (object index + 100). */
-void func_150738E8(void) {
+void event_releaseHeldObject(void) {
     u8 index = gCurrentActor->lifting - 100;
 
     if (gCurrentActor->lifting != 0) {
@@ -3556,7 +3556,7 @@ void func_150738E8(void) {
 }
 
 void func_150739A4(void) {
-    gCurrentActor->unk64 = D_800D1580;
+    gCurrentActor->unk64 = gEventParam;
 }
 
 void func_150739C0(void) {
@@ -3565,15 +3565,15 @@ void func_150739C0(void) {
     if (gCurrentActor->unk64 >= 0) {
         D_800D1880 = 0;
         gCurrentActor->speccnt--;
-        D_800D1878 = D_800D1580;
+        gEventResult = gEventParam;
     }
 }
 
-void func_15073A28(void) {
-    gCurrentActor->stickspeed = D_800D1580;
+void event_setStickSpeed(void) {
+    gCurrentActor->stickspeed = gEventParam;
 }
 
-/* Applies actor_hitScripted (D_800D1580 & 0xFF00FF) to object unk124; bit 30 sets its unk1CC to our height. */
+/* Applies actor_hitScripted (gEventParam & 0xFF00FF) to object unk124; bit 30 sets its unk1CC to our height. */
 void func_15073A50(void) {
     Actor *parent;
     s32 flags;
@@ -3582,10 +3582,10 @@ void func_15073A50(void) {
     parent = gCurrentActor;
     index = parent->owner;
     if (movement_obj[index].attach_char != 0) {
-        flags = D_800D1580;
+        flags = gEventParam;
         parent->lifting = 0;
         movement_obj[index].imune = 0;
-        actor_hitScripted(&movement_obj[index], D_800D1580 & 0xFF00FF, 0, dc_glbl_CharNum);
+        actor_hitScripted(&movement_obj[index], gEventParam & 0xFF00FF, 0, dc_glbl_CharNum);
         movement_obj[index].unk1CC = 100000.0f;
         if (flags & 0x40000000) {
             movement_obj[index].unk1CC = gCurrentActor->ypos;
@@ -3595,14 +3595,14 @@ void func_15073A50(void) {
     }
 }
 
-/* Unpacks D_800D1580 into mv->ropeSwingForce (low half, as f32), ropeSwingAngle and ropeSwingTimer (top bytes). */
-void func_15073B38(void) {
+/* Unpacks gEventParam into mv->ropeSwingForce (low half, as f32), ropeSwingAngle and ropeSwingTimer (top bytes). */
+void event_setRopeSwing(void) {
     s32 *param;
     Actor **objp;
     f32 low;
     f32 mid;
 
-    param = &D_800D1580; // matching: both globals are accessed through pointer locals
+    param = &gEventParam; // matching: both globals are accessed through pointer locals
     objp = &gCurrentActor;
     low = *param & 0xFFFF;
     (*objp)->mv->ropeSwingForce = low;
@@ -3620,7 +3620,7 @@ void func_15073C48(void) {
 }
 
 void func_15073C50(void) {
-    gCurrentActor->unk224 = movement_obj[gCurrentActor->unk222].ypos + D_800D1580;
+    gCurrentActor->unk224 = movement_obj[gCurrentActor->unk222].ypos + gEventParam;
 }
 
 void func_15073CB8(void) {
@@ -3632,17 +3632,17 @@ void func_15073CB8(void) {
 }
 
 void func_15073CF4(void) {
-    actor_setBodyRadius(gCurrentActor, D_800D1580);
+    actor_setBodyRadius(gCurrentActor, gEventParam);
 }
 
 void func_15073D34(void) {
-    actor_setBodyHeight(gCurrentActor, D_800D1580);
+    actor_setBodyHeight(gCurrentActor, gEventParam);
 }
 
 void func_15073D74(void) {
     Actor *obj;
 
-    obj = func_15083E90(D_800D1580);
+    obj = func_15083E90(gEventParam);
     if (obj != NULL) {
         obj->attach_char = 0;
     }
@@ -3651,20 +3651,20 @@ void func_15073D74(void) {
 void func_15073DA4(void) {
     s32 kind;
 
-    if (D_800D1580 != 0) {
+    if (gEventParam != 0) {
         kind = 18;
     } else {
         kind = 2;
     }
-    func_1506C460(gCurrentActor->theta, 150.0f, 0, 0, 100, kind, 60.0f, 0.5f, NULL, 0, 1);
+    event_spawnProjectile(gCurrentActor->theta, 150.0f, 0, 0, 100, kind, 60.0f, 0.5f, NULL, 0, 1);
 }
 
 void func_15073E2C(void) {
-    func_1506C460(gCurrentActor->theta, 80.0f, 0, 0, 100, 11, 40.0f, 0.5f, NULL, 14, 1);
+    event_spawnProjectile(gCurrentActor->theta, 80.0f, 0, 0, 100, 11, 40.0f, 0.5f, NULL, 14, 1);
 }
 
 void func_15073EA4(void) {
-    func_1506C460(gCurrentActor->theta, 60.0f, 0, 0, 100, 12, 40.0f, 0.5f, NULL, 14, 1);
+    event_spawnProjectile(gCurrentActor->theta, 60.0f, 0, 0, 100, 12, 40.0f, 0.5f, NULL, 14, 1);
 }
 
 void func_15073F1C(void) {
@@ -3679,18 +3679,18 @@ void func_15073F54(void) {
 }
 
 void func_15073F5C(void) {
-    gCurrentActor->unk2CB = D_800D1580;
+    gCurrentActor->unk2CB = gEventParam;
 }
 
 void func_15073F78(void) {
-    gCurrentActor->unk10B &= ~D_800D1580;
+    gCurrentActor->unk10B &= ~gEventParam;
 }
 
 /*
- * Spawns the object D_800D1580 & 0xFFFF as a thrown/fired item of the current object, at a bone
+ * Spawns the object gEventParam & 0xFFFF as a thrown/fired item of the current object, at a bone
  * or above it, then sets its launch velocity and state (unk232) per thrower id.
  */
-void func_15073FA0(void) {
+void event_spawnThrownItem(void) {
     s32 state;
     s32 idx;
     s32 useDefault;
@@ -3710,7 +3710,7 @@ void func_15073FA0(void) {
     s16 angle;
     Actor *player;
 
-    arg = D_800D1580 & 0xFFFF;
+    arg = gEventParam & 0xFFFF;
     slot = func_15083E0C(arg);
     if (slot != -1) {
         state = 1;
@@ -3736,7 +3736,7 @@ void func_15073FA0(void) {
                     break;
                 case 0x7B:
                     if (arg == 0x10) {
-                        bone = (D_800D1580 >> 16) & 0xFF;
+                        bone = (gEventParam >> 16) & 0xFF;
                     } else {
                         useDefault = 1;
                     }
@@ -3764,7 +3764,7 @@ void func_15073FA0(void) {
                 state = 5;
                 player->mv->GrenadeThrowState = 0;
                 gCurrentActor->mv->rt_context_b = 0;
-                cmd = (D_800D1580 >> 16) & 1;
+                cmd = (gEventParam >> 16) & 1;
                 obj->ygrav = 4.0; // matching: double literal
                 player = gCurrentActor;
                 speed = ((0xF0 - player->mv->GrenadeTimer) * 60.0f) / 240.0f;
@@ -3804,7 +3804,7 @@ void func_15073FA0(void) {
             if (player->character_type == 0x4A) {
                 state = 5;
                 obj->speed = 0.0f;
-                func_151A3390(obj, 0xFF);
+                trail_spawnActorBoneTrail(obj, 0xFF);
                 D_800D2104[obj->listpos][1].x = movement_obj[0].xpos;
                 D_800D2104[obj->listpos][1].z = movement_obj[0].zpos;
             } else if (player->character_type == 0x7B) {
@@ -3845,23 +3845,23 @@ void func_15073FA0(void) {
     }
 }
 
-void func_15074644(void) {
-    gCurrentActor->mv->weapon_status = D_800D1580;
+void event_setWeaponStatus(void) {
+    gCurrentActor->mv->weapon_status = gEventParam;
 }
 
 void func_15074664(void) {
     if (gCurrentActor->mv != NULL) {
-        if (D_800D1580 == 1) {
-            func_10011FDC(5);
+        if (gEventParam == 1) {
+            audio_setMixFallback(5);
         } else if (gCurrentActor->mv->unk94 == 1) {
-            func_10011FDC(0);
+            audio_setMixFallback(0);
         }
-        gCurrentActor->mv->unk94 = D_800D1580;
+        gCurrentActor->mv->unk94 = gEventParam;
     }
 }
 
-/* Deals D_800D1580 damage to the current object (or, while it holds one, to the player). */
-void func_150746F0(void) {
+/* Deals gEventParam damage to the current object (or, while it holds one, to the player). */
+void event_dealDamage(void) {
     Actor *target;
     s32 damage;
     ActorCtl *ext;
@@ -3874,7 +3874,7 @@ void func_150746F0(void) {
         target = movement_obj;
     }
     if (target != NULL) {
-        damage = D_800D1580;
+        damage = gEventParam;
         if (damage >= target->energy) {
             target->energy = 0;
             gCurrentActor->energy = 0;
@@ -3897,7 +3897,7 @@ void func_150746F0(void) {
     }
 }
 /* Sets the state (unk232) of the current object's owner (unk65 = index + 1). */
-void func_150747E4(void) {
+void event_setOwnerState(void) {
     s32 i;
     s32 owner;
 
@@ -3905,19 +3905,19 @@ void func_150747E4(void) {
     i = owner;
     if (i != 0) {
         i = i - 1;
-        movement_obj[i].intelwalk = D_800D1580;
+        movement_obj[i].intelwalk = gEventParam;
         movement_obj[i].scriptCmd = NULL;
     }
 }
 
-void func_15074840(void) {
+void event_addShotsFired(void) {
     if (gCurrentActor->mv != NULL) {
-        gCurrentActor->mv->shotsfired += D_800D1580;
+        gCurrentActor->mv->shotsfired += gEventParam;
     }
 }
 
 void func_15074870(void) {
-    gCurrentActor->unk24F = D_800D1580;
+    gCurrentActor->unk24F = gEventParam;
 }
 
 /* Adds the top byte to unk138 when bit `mask` of word taskint[index] matches the low bit's sense. */
@@ -3926,19 +3926,19 @@ void func_1507488C(void) {
     u8 mask;
     u8 enabled;
 
-    index = D_800D1580 >> 16;
-    mask = D_800D1580 >> 8;
-    enabled = D_800D1580 & 1;
+    index = gEventParam >> 16;
+    mask = gEventParam >> 8;
+    enabled = gEventParam & 1;
     if ((&gCurrentActor->taskint[0])[index] & mask) {
         enabled ^= 1;
     }
     if (enabled != 0) {
-        gCurrentActor->speccnt += (u8)(D_800D1580 >> 24);
+        gCurrentActor->speccnt += (u8)(gEventParam >> 24);
     }
 }
 
 void func_150748F4(void) {
-    movement_obj[0].ivehitit = D_800D1580;
+    movement_obj[0].ivehitit = gEventParam;
 }
 
 void func_1507490C(void) {
@@ -3946,18 +3946,18 @@ void func_1507490C(void) {
 
     if (gCurrentActor->lifting != 0) {
         if (movement_obj[index].carried >= 100) {
-            movement_obj[index].intelwalk = D_800D1580;
+            movement_obj[index].intelwalk = gEventParam;
             movement_obj[index].scriptCmd = NULL;
             movement_obj[index].stunned = 0;
         }
     }
 }
 
-/* Makes every object within D_800D1580 * 8 units start chasing (mv->chasing = 20). */
-void func_15074980(void) {
+/* Makes every object within gEventParam * 8 units start chasing (mv->chasing = 20). */
+void event_startChasing(void) {
     s32 i;
     ActorCtl *ext;
-    f32 dist = D_800D1580 * 8;
+    f32 dist = gEventParam * 8;
 
     for (i = 0; i < D_8008FD8C; i++) {
         if (actor_distance3D(gCurrentActor, &movement_obj[i]) < dist) {
@@ -3969,9 +3969,9 @@ void func_15074980(void) {
     }
 }
 
-void func_15074A44(void) {
+void event_setBreakStun(void) {
     if (gCurrentActor->mv != NULL) {
-        gCurrentActor->mv->break_stun = D_800D1580;
+        gCurrentActor->mv->break_stun = gEventParam;
     }
 }
 
@@ -3982,7 +3982,7 @@ void func_15074A6C(void) {
 }
 
 /* Scales the object by distance to the player: 0.3 within 200, unk148 beyond 1500, lerped between. */
-void func_15074A94(void) {
+void event_scaleByPlayerDistance(void) {
     f32 dist;
     f32 maxScale;
     f32 scale;
@@ -4011,10 +4011,10 @@ void func_15074A94(void) {
 
 void func_15074B7C(void) {
     D_800D1880 = 0;
-    D_800D1878 = D_800D1580;
+    gEventResult = gEventParam;
 
-    if (D_800D1580 == 0) {
-        D_800D1878 = 0.1f;
+    if (gEventParam == 0) {
+        gEventResult = 0.1f;
         gCurrentActor->unk1FC |= 4;
         gCurrentActor->speccnt = 0;
     }
@@ -4095,7 +4095,7 @@ void func_15074E80(Actor *self, Actor *other, u8 *result) {
     if (other->type == 1) {
         self->imune = 0xFF;
         other->imune = 200;
-        D_800D1580 = 0x60000;
+        gEventParam = 0x60000;
         func_15072740();
     }
 }
@@ -4104,7 +4104,7 @@ void func_15074EE8(Actor *self, Actor *other, u8 *result) {
     if (other->type == 1) {
         self->imune = 0xFF;
         other->imune = 200;
-        D_800D1580 = 0x70000;
+        gEventParam = 0x70000;
         func_15072740();
     }
 }
@@ -4128,9 +4128,9 @@ void func_15074FD4(Actor *self, Actor *other, u8 *result) {
     if (other->type == 1) {
         self->imune = 0xFF;
         other->imune = 200;
-        D_800D1580 = 0x60000;
+        gEventParam = 0x60000;
         if (self->character_type == 0x8E) {
-            D_800D1580 = 0x140000;
+            gEventParam = 0x140000;
         }
         func_15072740();
     }
@@ -4164,7 +4164,7 @@ void func_150750C4(Actor *self, Actor *other, u8 *result) {
 }
 
 /* Returns the first live object owned by `owner` (unk65 = owner index + 1), or NULL. */
-Actor *func_1507515C(Actor *owner) {
+Actor *event_getFirstLiveOwnedObject(Actor *owner) {
     Actor *obj;
     s32 i;
 

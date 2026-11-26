@@ -23,13 +23,13 @@
  *   game_1F3780.c
  */
 
-/* A particle spawned by func_151B8400, which keeps its bullet at 0x110. */
+/* A particle spawned by weapon_spawnBulletParticle, which keeps its bullet at 0x110. */
 typedef struct {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Bullet *bullet;
 } BulletParticle;
 
-/* A positional sound; see func_151C110C. */
+/* A positional sound; see weapon_bulletSoundCallback. */
 typedef struct {
     /* 0x00 */ s16 unk0;
     /* 0x02 */ s16 x;
@@ -39,7 +39,7 @@ typedef struct {
     /* 0x18 */ Bullet *bullet;
 } SoundEmitter;
 
-/* Projectile state, stored at offset 0x110 of the object func_151C229C spawns. */
+/* Projectile state, stored at offset 0x110 of the object weapon_spawnProjectile spawns. */
 typedef struct Game1EF500TrailExt {
     /* 0x00 */ u8 flags;
     /* 0x01 */ u8 pad1[3];
@@ -105,18 +105,18 @@ typedef struct {
 } Func151C7038Arg;
 
 /* game_119370.c */
-Game1EF500Trail *func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3);
+Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 arg3);
 s32 func_150EC3D4(Actor *actor, Actor *self);
 void func_150EC45C(void *particle);
 
 /* game_11A680.c */
-f32 func_150ED1D0(f32 from, f32 to);
-f32 func_150ED234(Actor *self, Actor *target);
-f32 func_150ED298(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, f32 radius);
+f32 weapon_getAngleDelta(f32 from, f32 to);
+f32 weapon_getAngleToTarget(Actor *self, Actor *target);
+f32 weapon_getShellAimError(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, f32 radius);
 void func_150ED578(Actor *obj);
-void func_150ED638(Actor *obj, s32 left, s32 right);
-void func_150ED748(Actor *obj);
-void func_150EEC84(Actor *obj);
+void weapon_scrollTreads(Actor *obj, s32 left, s32 right);
+void weapon_updateTank(Actor *obj);
+void weapon_releaseTankCamera(Actor *obj);
 void func_150EEDA8(Actor *obj);
 
 /* game_22D5D0.c (data-only unit between game_120950 and game_121A20) */
@@ -124,29 +124,29 @@ extern const Vec3f D_800A19E0; /* the second gun's muzzle point */
 extern u8 D_80088B10;          /* the bone it is on */
 
 /* game_12B250.c */
-Game1EF500Trail *func_150FDDA0(Actor *obj, s32 arg1, s32 arg2);
+Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 arg1, s32 arg2);
 void func_150FDF38(Actor *obj, u8 arg1, s32 arg2, Vec3f *muzzleOut, Vec3f *launchOut);
 void func_150FE0B8(Actor *obj, Vec3f *muzzle, u8 arg2, s32 arg3);
-void func_150FE248(Actor *obj, s16 arg1, Vec3f *out);
-void func_150FE288(Actor *obj);
+void weapon_getLauncherMuzzlePos(Actor *obj, s16 arg1, Vec3f *out);
+void weapon_rumbleLauncher(Actor *obj);
 
 /* game_12BD10.c */
-void func_150FE860(Actor *actor, u8 arg1, s32 arg2);
-void func_150FEBC8(Actor *actor, s16 arg1, Vec3f *out);
-void func_150FEC28(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, Vec3f *position, u8 arg5, s32 arg6);
+void weapon_spawnForwardProjectile(Actor *actor, u8 arg1, s32 arg2);
+void weapon_getForwardProjectileStart(Actor *actor, s16 arg1, Vec3f *out);
+void weapon_spawnBoneBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, Vec3f *position, u8 arg5, s32 arg6);
 
 /* game_12C1E0.c */
-void func_150FED30(Actor *obj, s32 arg1, s32 arg2);
-void func_150FEFD0(Actor *obj, s16 setId, Vec3f *out);
+void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2);
+void weapon_getAttachmentPos(Actor *obj, s16 setId, Vec3f *out);
 void func_150FF084(Actor *obj, u8 arg1, s32 arg2);
-ModelAttachment *func_150FF288(Actor *obj);
-void func_150FF2AC(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
-void func_150FF2D4(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal,
+ModelAttachment *weapon_getGunAttachment(Actor *obj);
+void weapon_getShotAxes(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
+void weapon_findShotStart(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal,
                    Vec3f *direction, Vec3f *axis0, Vec3f *axis1, Vec3f *output0, Vec3f *output1,
                    Vec3f **value0, Vec3f **value1, Vec3f *endpoint, Actor *obj, ModelAttachment *gun);
-void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
+void weapon_spawnMuzzleFlashes(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
 s32 func_150FF6B4(Actor *obj, s32 arg1, s32 arg2);
-u8 func_150FF6E0(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal, Vec3f *endpoint,
+u8 weapon_getGunMuzzlePoints(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal, Vec3f *endpoint,
                  Actor *obj, ModelAttachment *gun);
 extern const Vec3f D_800A2050;
 extern const Vec3f D_800A205C;
@@ -155,101 +155,101 @@ extern const Vec3f D_800A2074;
 extern const Vec3f D_800A2080[2][6];
 
 /* game_12CCF0.c */
-void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
+void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type);
-void func_150FFBDC(Actor *obj, s16 arg1, Vec3f *out);
-void func_150FFC3C(Actor *obj);
-void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
+void weapon_getGunMuzzlePos(Actor *obj, s16 arg1, Vec3f *out);
+void weapon_rumbleGun(Actor *obj);
+void weapon_getShotFrame(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
 void func_150FFD2C(Actor *obj, Actor *other, s32 arg2);
-void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3);
-extern u8 D_80088BB0;
-extern const Vec3f D_800A2130;
+void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3);
+extern u8 gGunMuzzleBone;
+extern const Vec3f gGunMuzzleStart;
 extern const Vec3f D_800A2148;
 extern const Vec3f D_800A2154;
 
 /* game_1E58B0.c */
-BulletParticle *func_151B8400(Bullet *bullet);
-s32 func_151B85AC(BulletParticle *particle);
-void func_151B863C(BulletParticle *particle, s16 viewport);
-BloodTrail *func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList);
-void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
-SpriteParticle *func_151B8908(Bullet *bullet);
+BulletParticle *weapon_spawnBulletParticle(Bullet *bullet);
+s32 weapon_updateBulletParticle(BulletParticle *particle);
+void weapon_drawBulletParticle(BulletParticle *particle, s16 viewport);
+BloodTrail *weapon_startBulletTrail(Bullet *bullet, u8 fxOwner, s32 fxList);
+void weapon_emitBulletTrailParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
+SpriteParticle *weapon_spawnBulletSprite(Bullet *bullet);
 
 /* game_1ED0F0.c */
-void func_151BFC40(JetSpray *config, f32 *scale);
-void func_151BFDA0(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList);
-void func_151BFE84(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList);
-void func_151C0098(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwner, s32 fxList);
-s32 func_151C02E4(Actor *obj, Actor *self, s32 ignoreCount, Actor **ignore);
-void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C0418(Vec3f *pos, u8 fxOwner, s32 fxList);
+void weapon_initImpactSpray(JetSpray *config, f32 *scale);
+void weapon_spawnAirHit(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList);
+void weapon_spawnSurfaceHit(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList);
+void weapon_spawnObjectHit(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwner, s32 fxList);
+s32 weapon_isBulletTarget(Actor *obj, Actor *self, s32 ignoreCount, Actor **ignore);
+void weapon_spawnHitDecal(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList);
+void weapon_spawnHitLight(Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList);
-s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
-s32 func_151C1180(Bullet *bullet);
-void func_151C1570(Bullet *bullet);
+void weapon_fireBullet(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList);
+s32 weapon_bulletSoundCallback(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
+s32 weapon_updateBullet(Bullet *bullet);
+void weapon_releaseBullet(Bullet *bullet);
 void func_151C15FC(Bullet *bullet);
 void func_151C1628(Bullet *bullet);
-void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface);
-void func_151C1798(Actor *obj, Vec3f *pos);
-void func_151C1814(Bullet *bullet, Actor **pair, u8 event);
+void weapon_runImpactAttack(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface);
+void weapon_getBulletMuzzlePos(Actor *obj, Vec3f *pos);
+void weapon_onBulletPairEvent(Bullet *bullet, Actor **pair, u8 event);
 void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList);
-s32 func_151C1940(Actor *obj, Actor *self, IgnoreList *ignore);
-s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *aimDir,
+s32 weapon_filterBulletTarget(Actor *obj, Actor *self, IgnoreList *ignore);
+s32 weapon_traceBullet(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *aimDir,
                   Actor *shooter, IgnoreList *ignore, Vec3f *passPos, f32 *passDist,
                   CollisionHit *pass, s32 mode);
-void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 arg4,
+void weapon_castPiercingRay(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s8 arg8, IgnoreList *ignore, Vec3f *passPos,
                    f32 *passDist, CollisionHit *pass, s32 mode);
-void func_151C1FB8(Actor *obj);
+void weapon_rumbleShooter(Actor *obj);
 extern s32 (*D_800E0930)(Vec3f *start, Vec3f *delta, Vec3f *hit); /* per-level test of a bullet's step; TRUE stops it */
-extern void (*D_800E0934)(s32 x, s32 y, s32 z); /* per-level bullet impact hook (func_151C1654) */
-extern const u8 D_800AA954[3];
-extern const Vec3f D_800AA958[3];
+extern void (*D_800E0934)(s32 x, s32 y, s32 z); /* per-level bullet impact hook (weapon_runImpactAttack) */
+extern const u8 gBulletMuzzleBones[3];
+extern const Vec3f gBulletMuzzleOffsets[3];
 
 /* game_1EF500.c */
-/* The level hook D_800E0940: (hit position, index of the WorldObject that was hit). */
+/* The level hook gProjectileHitCallback: (hit position, index of the WorldObject that was hit). */
 typedef void (*TrailHitCallback)(Vec3f *pos, s32 index);
-extern TrailHitCallback D_800E0940;
-void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance);
-Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
+extern TrailHitCallback gProjectileHitCallback;
+void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance);
+Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
                                u8 altNormalized, RayHit *knownHit, f32 speed, f32 arg7, f32 arg8,
                                f32 driftSpeed, f32 arg10, u8 arg11, Actor *owner, u8 arg13, u8 collide, u8 arg15,
                                u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 arg20,
                                f32 dt, u8 arg22, s8 arg23, s32 extraSize, u8 arg25, s32 arg26);
-s8 func_151C2734(Game1EF500Trail *trail);
-Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index);
-s32 func_151C2E4C(Actor *obj, Actor *self);
+s8 weapon_updateProjectile(Game1EF500Trail *trail);
+Vtx *weapon_buildProjectileTail(Game1EF500Trail *trail, s16 index);
+s32 weapon_isOtherLiveObject(Actor *obj, Actor *self);
 s32 func_151C2E94(Actor *obj, Actor *self);
-s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
+s32 weapon_onProjectileImpact(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
                   RayHit *hit);
-void func_151C2F48(Game1EF500Trail *trail);
-void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2);
-void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2);
-void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f32 smokeChance, f32 flashChance,
+void weapon_onProjectileExpire(Game1EF500Trail *trail);
+void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2);
+void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2);
+void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f32 smokeChance, f32 flashChance,
                    u8 debrisArg, u8 smokeArg, u8 sparkArg);
-void func_151C436C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps);
-u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
-void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
-s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
-void func_151C4644(Game1EF500TimedOwner *owner);
+void weapon_easeProjectileAccel(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps);
+u8 weapon_traceProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
+void weapon_moveProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
+s32 weapon_countdownProjectileRange(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
+void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner);
 
 /* game_1F1F60.c */
 void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event);
-s32 func_151C4B0C(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
+s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
                   f32 distScale, u8 castRay, Vec3f *altOrigin, Vec3f *altDir, u8 *flags, u8 clearMask,
                   f32 defaultRemaining, void *owner, s8 arg13, u8 collide, u8 arg15, s32 arg16, u8 recast);
 
 /* game_1F2730.c */
-void func_151C5280(Actor *obj, u8 arg1, s32 arg2);
+void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2);
 void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4);
-void func_151C56A4(Vec3f *pos, u8 arg1, s32 arg2);
-void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
+void weapon_spawnLightAt(Vec3f *pos, u8 arg1, s32 arg2);
+void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
                    s32 arg7);
-void func_151C5E74(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
+void weapon_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
 SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
                         u8 altUnk62, CollisionHit *arg8, u8 arg9, s32 argA);
 void func_151C61A0(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3);
@@ -259,13 +259,13 @@ extern const Vec3f D_800AAA9C;
 extern const Vec3f D_800AAAA8;
 
 /* game_1F3780.c */
-Game1EF500Trail *func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
+Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
                                s32 arg6);
-void func_151C6974(Actor *arg0, s16 arg1, Vec3f *out);
-void func_151C69A0(Actor *arg0, s16 arg1, Vec3f *out);
-void func_151C69CC(Actor *arg0, Vec3f *out, u8 side);
+void weapon_getSide0JointPos(Actor *arg0, s16 arg1, Vec3f *out);
+void weapon_getSide1JointPos(Actor *arg0, s16 arg1, Vec3f *out);
+void weapon_getJointPos(Actor *arg0, Vec3f *out, u8 side);
 void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3);
-void func_151C6D70(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5);
+void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5);
 void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2);
 s32 func_151C7038(Func151C7038Arg *arg0);
 

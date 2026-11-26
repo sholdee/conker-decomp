@@ -479,8 +479,8 @@ void    func_1001E400(N_ALCSPlayer *seqp, s32 deltaTime, u8 status, u8 byte1, u8
 void    func_10002088(const char *fmt, ...);
 
 /* Conker: Rare's instrument loading in src/init_1AAE0.c (subsystem audio), used by init_15550.c. */
-void   *func_1001BD34(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx);
-void    func_1001BE1C(N_ALSynth *drvr, ALInstrument *inst, s32 soundIdx);
+void   *audio_loadInstrument(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx);
+void    audio_releaseInstrument(N_ALSynth *drvr, ALInstrument *inst, s32 soundIdx);
 
 
 /*

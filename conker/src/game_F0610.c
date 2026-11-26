@@ -157,7 +157,7 @@ void func_150C3574(Actor *obj) {
         obj->speed = dist + dist;
     }
     if (obj->unk87 == 4) {
-        D_800D1580 = 0xFF020133;
+        gEventParam = 0xFF020133;
         gCurrentActor = movement_obj;
         func_1506E8D8();
         gCurrentActor = obj;
@@ -188,11 +188,11 @@ void func_150C3574(Actor *obj) {
         sound_stopActorSound2(obj);
     } else if (sound_isActorSound2Playing(obj) == 0) {
         if (obj->character_type == 0xAC) {
-            D_800D1580 = 0x630;
+            gEventParam = 0x630;
         } else if (obj->character_type == 0x25) {
-            D_800D1580 = 0x67A;
+            gEventParam = 0x67A;
         } else {
-            D_800D1580 = 0x62A;
+            gEventParam = 0x62A;
         }
         func_1506E5FC();
     } else {
@@ -215,7 +215,7 @@ void func_150C3994(Actor *obj) {
         if (obj->taskint[0] == 0) {
             func_151B9BF0(0x2F, 1, obj->xpos, obj->ypos + 30.0f, obj->zpos, 0x7D0, 0x3E8, 0x190, 0xC8, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);
         } else {
-            func_15188810(obj, 0x64, 0);
+            trail_startActorAfterimage(obj, 0x64, 0);
         }
     }
     if (obj->yspd < 0.0f) {
@@ -228,10 +228,10 @@ void func_150C3994(Actor *obj) {
         obj->unk148 = 70.0f;
         if (obj->taskint[0] == 0) {
             func_151B9BF0(0x2F, 1, obj->xpos, obj->ypos + 30.0f, obj->zpos, 0x898, 0x500, 0x320, 0x2BC, 0xC00, 0xC00, 0x14, 1, 0, 0xFF, 0);
-            func_150C1660(obj->xpos, obj->ypos + 30.0f, obj->zpos, 0xFF);
+            trail_spawnKind2Ring(obj->xpos, obj->ypos + 30.0f, obj->zpos, 0xFF);
             actor_runHitHandler(obj, 6, NULL);
         } else {
-            func_15188810(obj, 0x64, 0);
+            trail_startActorAfterimage(obj, 0x64, 0);
         }
         sound_playActorSound1(0x1A9, obj, 0x7FFF, 0x3E8, 0x7D0);
         obj->doing_hit = 1;

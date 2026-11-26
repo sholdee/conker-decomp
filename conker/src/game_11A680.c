@@ -10,7 +10,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
    reaches the bytes and halves it uses through those fields. */
 
 /* Signed angle in degrees from `from` to `to`, in (-180, 180]. */
-f32 func_150ED1D0(f32 from, f32 to) {
+f32 weapon_getAngleDelta(f32 from, f32 to) {
     f32 delta;
 
     from = func_15144BC8(from);
@@ -22,11 +22,11 @@ f32 func_150ED1D0(f32 from, f32 to) {
 }
 
 /* Signed angle in degrees from `self`'s heading (unk40) to the direction of `target`. */
-f32 func_150ED234(Actor *self, Actor *target) {
+f32 weapon_getAngleToTarget(Actor *self, Actor *target) {
     s32 angle;
 
     angle = actor_getDirectionAngle(target->xpos - self->xpos, self->zpos - target->zpos, 0) + 0x4000;
-    return func_150ED1D0(angle * (360.0f / 65536.0f), self->theta);
+    return weapon_getAngleDelta(angle * (360.0f / 65536.0f), self->theta);
 }
 
 /* Transforms the point (x, y, z) by the 4x4 float matrix `mf`. */
@@ -37,7 +37,7 @@ f32 func_150ED234(Actor *self, Actor *target) {
  * Returns how far the shell lands short (+) or long (-) of the target, or, when the target is too high
  * to reach, 1000 times the extra elevation it needs.
  */
-f32 func_150ED298(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, f32 radius) {
+f32 weapon_getShellAimError(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, f32 radius) {
     Mtx *bones;
     f32 gravity;
     f32 disc;
@@ -130,7 +130,7 @@ void func_150ED578(Actor *obj) {
 }
 
 /* Scrolls texture groups 0 and 1 of `obj` (its two treads) by the track speeds, each clamped to [-45, 45]. */
-void func_150ED638(Actor *obj, s32 left, s32 right) {
+void weapon_scrollTreads(Actor *obj, s32 left, s32 right) {
     s32 temp;
     s32 size;
 
@@ -156,12 +156,12 @@ void func_150ED638(Actor *obj, s32 left, s32 right) {
  * Per-frame update of a player-driven tracked vehicle with an aimable gun.
  * - The controlling player (movement_obj[unk127] when gIsMultiplayer is set, else object 0) drives it: stick X steers,
  *   stick Y sets the throttle, A boosts while the player's state allows it, R stops it.
- * - The two treads are scrolled from the forward speed and the turn rate (func_150ED638).
+ * - The two treads are scrolled from the forward speed and the turn rate (weapon_scrollTreads).
  * - The gun angles (mv->gunYaw/gunPitch) either lead STATE->target, or turn with C-left/C-right while
  *   the pitch homes in on the best object ahead, or follow the line of sight of camera camSlot - 1.
  *   They end up in taskint[0] as two s16 angles (x50).
  */
-void func_150ED748(Actor *obj) {
+void weapon_updateTank(Actor *obj) {
     s32 viewer[1]; // matching: an array keeps the viewer index in memory; a scalar is register-allocated
     f32 velocity;
     s32 health;
@@ -381,7 +381,7 @@ void func_150ED748(Actor *obj) {
                 right = 0;
                 left = 0;
             }
-            func_150ED638(obj, left, right);
+            weapon_scrollTreads(obj, left, right);
         }
         if ((obj->character_type == 0x77) || (obj->character_type == 0x28)) {
             if (((trackSpeed = obj->speed) > 5.0f) && (obj->stickspeed <= 0.0f)) {
@@ -415,13 +415,13 @@ void func_150ED748(Actor *obj) {
                 leadZ = cosf(heading) * lead;
                 target->xpos += leadX;
                 target->zpos += leadZ;
-                bearing = func_150ED234(obj, target) * 0.01745329238f;
+                bearing = weapon_getAngleToTarget(obj, target) * 0.01745329238f;
                 dirX = sinf(bearing) * cosf(obj->lean_angle * 0.01745329238f);
                 dirZ = cosf(bearing) * cosf(obj->vtilt * 0.01745329238f);
                 angle = func_150484A0(dirX * 1000.0f, dirZ * 1000.0f);
                 aimOffset = obj->mv->unk12A * 400.0f;
-                obj->mv->gunYaw -= func_150ED1D0(angle * 57.29577637f + obj->mv->unk12A * 10.0f, obj->mv->gunYaw) * 0.125f;
-                obj->mv->gunPitch += func_150ED298(obj, obj->mv->gunPitch - obj->vtilt, target->xpos, target->ypos, target->zpos, aimOffset) * 0.001000000047f;
+                obj->mv->gunYaw -= weapon_getAngleDelta(angle * 57.29577637f + obj->mv->unk12A * 10.0f, obj->mv->gunYaw) * 0.125f;
+                obj->mv->gunPitch += weapon_getShellAimError(obj, obj->mv->gunPitch - obj->vtilt, target->xpos, target->ypos, target->zpos, aimOffset) * 0.001000000047f;
                 target->xpos -= leadX;
                 target->zpos -= leadZ;
             } else {
@@ -460,7 +460,7 @@ void func_150ED748(Actor *obj) {
                         if ((gIsMultiplayer == 0) && !(other->noshove & 0x40)) {
                             continue;
                         }
-                        offset = func_150ED1D0(func_150ED234(obj, other), obj->mv->gunYaw);
+                        offset = weapon_getAngleDelta(weapon_getAngleToTarget(obj, other), obj->mv->gunYaw);
                         score = offset;
                         if (offset < 0.0f) {
                             score = -offset;
@@ -494,7 +494,7 @@ void func_150ED748(Actor *obj) {
                     } else {
                         limit = driver->aim.topY;
                     }
-                    deltaZ = func_150ED298(obj, 0.0f, driver->xpos, limit, driver->zpos, 0.0f) * 0.001000000047f;
+                    deltaZ = weapon_getShellAimError(obj, 0.0f, driver->xpos, limit, driver->zpos, 0.0f) * 0.001000000047f;
                     limit = 4.0f * gFrameDelta;
                     if (limit < deltaZ) {
                         deltaZ = limit;
@@ -565,7 +565,7 @@ void func_150ED748(Actor *obj) {
                         hitX = dir[0] * dist + camera->eye.x;
                         hitY = dir[1] * dist + camera->eye.y;
                         hitZ = dir[2] * dist + camera->eye.z;
-                        obj->mv->gunPitch += func_150ED298(obj, 0.0f, hitX, hitY, hitZ, 0.0f) * 0.001000000047f;
+                        obj->mv->gunPitch += weapon_getShellAimError(obj, 0.0f, hitX, hitY, hitZ, 0.0f) * 0.001000000047f;
                     } else {
                         obj->mv->gunPitch *= 0.8999999762f;
                     }
@@ -590,7 +590,7 @@ void func_150ED748(Actor *obj) {
 }
 
 /* Sets `obj` to state 3 (immune) and gives its camera back to player object 0 or 1, clearing that pad's R. */
-void func_150EEC84(Actor *obj) {
+void weapon_releaseTankCamera(Actor *obj) {
     Camera *camera;
     Actor *player;
     s32 index;

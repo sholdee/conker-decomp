@@ -435,7 +435,7 @@ s32 func_1507D754(Actor *obj) {
         break;
     case 0x25:
         if (obj->taskint[2] != 0 || level == 6 || level == 0x3B) {
-            func_151CFA4C(obj, 0xFF, 1);
+            trail_breakApart(obj, 0xFF, 1);
         }
         return 0;
     case 0x79:
@@ -468,12 +468,12 @@ s32 func_1507D754(Actor *obj) {
         func_15145A50(obj);
         if (gIsMultiplayer != 0) {
             actor_kill(obj, 6);
-            spawned = func_151149AC((obj->playernumber + 11));
+            spawned = gfx_findObjectById((obj->playernumber + 11));
         } else {
             if (level == 0x23) {
-                spawned = func_151149AC(1);
+                spawned = gfx_findObjectById(1);
             }
-            handle = func_1507515C(obj);
+            handle = event_getFirstLiveOwnedObject(obj);
             if (handle != NULL && D_800C35EA[0] != 1) {
                 func_15136C3C(handle, 1, 1, 1, 1, 0, 0xFF, 1);
             }

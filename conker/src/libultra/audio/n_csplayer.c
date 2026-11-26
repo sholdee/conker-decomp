@@ -202,7 +202,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                 seqp->fxMixScale = seqp->nextEvent.msg.unknown0.unk4;
                 for (vs = seqp->vAllocHead; vs != 0; ) {
                     if (vs->envPhase != 3) {
-                        n_alSynSetFXMix(&vs->voice, func_1001B310(vs, seqp));
+                        n_alSynSetFXMix(&vs->voice, audio_getVoiceFxMix(vs, seqp));
                     }
                     vs = vs->next;
                 }
@@ -539,7 +539,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                  * calculate the note on parameters
                  */
                 pitch = vs->pitch * cs->pitchBend * vs->vibrato;
-                fxmix = func_1001B310(vs, seqp);
+                fxmix = audio_getVoiceFxMix(vs, seqp);
                 unk7A = cs->unk14;
                 if (unk7A) {
                     unk70 = func_1001CEA4(cents / 100 + cs->unk15 - 0x40) * 440.0f * cs->pitchBend;
@@ -661,7 +661,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
         case (AL_MIDI_ProgramChange):
             tmp = (seqp->chanState[chan].unk8 << 7) + key;
             if (tmp < seqp->bank->instCount) {
-                if (func_1001B7D0((N_ALSeqPlayer *)seqp, tmp, chan)) {
+                if (audio_loadChannelProgram((N_ALSeqPlayer *)seqp, tmp, chan)) {
                     evt.type = 2; /* AL_SEQP_MIDI_EVT */
                     evt.msg.midi.ticks = 0;
                     evt.msg.midi.status = chan | AL_MIDI_ProgramChange;

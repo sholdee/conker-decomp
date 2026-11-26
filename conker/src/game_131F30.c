@@ -223,7 +223,7 @@ typedef struct { f32 v[1]; } F32x1;
 static const S32x1 D_800A23A4 = { { 0x85 } };
 static const F32x1 D_800A23A8 = { { 0.1f } };
 
-/* Spawns the effects of an impact: a func_15102920 effect, func_151C329C by chance and, except on
+/* Spawns the effects of an impact: a func_15102920 effect, weapon_spawnImpactBurst by chance and, except on
  * surface type 9, sometimes debris flying back along the impact direction. */
 void func_1510558C(ImpactObj *obj) {
     ImpactHit *hit;
@@ -247,11 +247,11 @@ void func_1510558C(ImpactObj *obj) {
     surfaceFlags = hit->surfaceFlags;
     if ((surfaceFlags & 0x1F) == 9) {
         if (func_150ADA68() < 0.400000006f) {
-            func_151C329C(&hit->position, obj->base.header.owner, obj->base.header.kind);
+            weapon_spawnImpactBurst(&hit->position, obj->base.header.owner, obj->base.header.kind);
         }
     } else {
         if (func_150ADA68() < 0.1000000015f) {
-            func_151C329C(&hit->position, obj->base.header.owner, obj->base.header.kind);
+            weapon_spawnImpactBurst(&hit->position, obj->base.header.owner, obj->base.header.kind);
         }
         if (func_150ADA68() < 0.400000006f) {
             debris.variantIds = D_800A23A4;
@@ -341,7 +341,7 @@ void func_151058B4(SparkObj *obj) {
                 angle = func_150ADA20();
                 func_15143794(angle & 0xFF, func_150ADA20() % 22U - 54, func_150ADA68() * 20.0f + 30.0f, &part.vel);
                 part.gravity = func_150ADA68() * 1.486000061f + -3.048f;
-                func_1515C2F0(&spawn, 0, &part, 0, obj->base.header.owner, obj->base.header.kind);
+                trail_spawnFallingTrail(&spawn, 0, &part, 0, obj->base.header.owner, obj->base.header.kind);
                 count -= 1.0f;
             } while (count > 1.0f);
         }

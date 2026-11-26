@@ -8,16 +8,16 @@ SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
-/* Model-space points: func_151C5280 transforms D_800AAA90 and D_800AAAA8 through model part 0x46 into
+/* Model-space points: weapon_fireSegmentShot transforms D_800AAA90 and D_800AAAA8 through model part 0x46 into
  * world space; func_151C5588 passes D_800AAA90 and D_800AAA9C to func_15102B38. */
 const Vec3f D_800AAA90 = { -113.8288f, -14.082394f, 14.5422f };
 const Vec3f D_800AAA9C = { -124.648605f, -14.082394f, 14.5422f };
 const Vec3f D_800AAAA8 = { 7.3199987f, -14.082394f, 4.5422006f };
 
-/* Spawns a func_151C229C effect along a segment at `obj`: offset along func_15145740's `dir` from its
- * position, or, when it has ob_matrix_ptr, between two points of model part 0x46, plus func_151C56A4 and
+/* Spawns a weapon_spawnProjectile effect along a segment at `obj`: offset along func_15145740's `dir` from its
+ * position, or, when it has ob_matrix_ptr, between two points of model part 0x46, plus weapon_spawnLightAt and
  * (half the time) func_151C5588 effects at the segment start. */
-void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
+void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f start;
     Vec3f end;
     Vec3f dir;
@@ -48,7 +48,7 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
             if (func_1514654C(obj, part, 0, modelPoints, worldPoints, 2) == 0) {
                 return;
             }
-            func_151C56A4(&start, arg1, arg2);
+            weapon_spawnLightAt(&start, arg1, arg2);
             if (func_150ADA20() & 1) {
                 func_151C5588(obj, &start, 0x46, arg1, arg2);
             }
@@ -76,7 +76,7 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
         } else {
             arg23 = 2;
         }
-        func_151C229C(&start, 0, &end, &dir, 1, 0, 300.0f, 1.0f / 300.0f, (randA * 10.0f) + 25.0f,
+        weapon_spawnProjectile(&start, 0, &end, &dir, 1, 0, 300.0f, 1.0f / 300.0f, (randA * 10.0f) + 25.0f,
                       (randB * 150.0f) + 400.0f, 80.0f, (randInt % 56U) + 200, obj, 1, 1, 0, arg16, 0, 1, 0,
                       0x1A, 0.0f, 0xFF, arg23, 0, arg1, arg2);
     }
@@ -98,7 +98,7 @@ void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
 }
 
 /* Spawns a light_createWithEffect effect at `pos`, converted to integer coordinates. */
-void func_151C56A4(Vec3f *pos, u8 arg1, s32 arg2) {
+void weapon_spawnLightAt(Vec3f *pos, u8 arg1, s32 arg2) {
     LightEffectHeader header;
     Vec3i intPos;
 
@@ -117,7 +117,7 @@ void func_151C56A4(Vec3f *pos, u8 arg1, s32 arg2) {
 /* Spawns a burst of effects from the frame func_15137C64 derives from arg0..arg2: always a
  * func_151DC034 effect, then (each when its flag is set) a ring of func_151DA6F8 particles,
  * func_151D9014 particles along `dir`, and func_15130280 particles thrown at random angles. */
-void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
+void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
                    s32 arg7) {
     Vec3f unkPos;
     Vec3f origin;
@@ -240,7 +240,7 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
 
 /* Blood strip emit callback (D_80089B38): spawns one func_151D9014 particle whose position, velocity and
  * parameters func_15137F30 computes. */
-void func_151C5E74(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
+void weapon_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
     Vec3f pos;
     Vec3f unk60;
     Vec3f vel;

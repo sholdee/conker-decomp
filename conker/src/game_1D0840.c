@@ -10,7 +10,7 @@
 #define TRAIL_EFFECT_STARTED  4     /* state.lastPos is valid */
 
 /* Spawns the effects attached to an actor: a trail and two more effects. */
-void func_151A3390(Actor *owner, u8 arg1) {
+void trail_spawnActorBoneTrail(Actor *owner, u8 arg1) {
     BoneTrailParams params;
     Vec3f origin;
 
@@ -33,9 +33,9 @@ void func_151A3390(Actor *owner, u8 arg1) {
     params.pointsPerUnit = 0.01800000109f;
     params.width = 30.0f;
     params.widthGrowth = 0.9810000658f;
-    func_151A3504(&params, arg1);
-    func_151A4590(owner, arg1);
-    func_151A499C(owner, arg1);
+    trail_createBoneTrailEffect(&params, arg1);
+    trail_startBloodDrip(owner, arg1);
+    trail_startBoneEmitter(owner, arg1);
     sound_playActorSound2(0x1AA, owner, 0x55F0, 1000, 4000);
     origin.x = 0.0f;
     origin.y = 0.0f;
@@ -44,7 +44,7 @@ void func_151A3390(Actor *owner, u8 arg1) {
 }
 
 /* Creates a trail effect object from params. Returns NULL if there is no owner. */
-BoneTrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1) {
+BoneTrailEffect *trail_createBoneTrailEffect(BoneTrailParams *params, u8 arg1) {
     EffectTemplate info;
     BoneTrailState state;
     BoneTrailEffect *effect;
@@ -63,7 +63,7 @@ BoneTrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1) {
     state.pending = 0.0f;
     state.age = 0.0f;
 
-    if (func_151A4E34(&state.params, &info.pos) != 0) {
+    if (trail_getBoneAttachPoint(&state.params, &info.pos) != 0) {
         state.lastPos = info.pos;
         info.flags |= TRAIL_EFFECT_STARTED;
     }
@@ -80,7 +80,7 @@ BoneTrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1) {
  * Per-tick update of a trail's points: ages and fades them, drops dead ones from
  * the tail and publishes the tail position. Returns 0 to kill a detached trail.
  */
-s32 func_151A361C(BoneTrailEffect *effect) {
+s32 trail_ageBoneTrail(BoneTrailEffect *effect) {
     BoneTrailState *state = effect->state;
     BoneTrailPoint *points = effect->points;
     BoneTrailPoint *point;
@@ -131,7 +131,7 @@ s32 func_151A361C(BoneTrailEffect *effect) {
  * along the path travelled. If the bone can no longer be found, the trail is
  * detached and a TrailRetryTask is started to re-create it later.
  */
-s32 func_151A37C0(BoneTrailEffect *effect) {
+s32 trail_followBoneTrail(BoneTrailEffect *effect) {
     BoneTrailState *state = effect->state;
     BoneTrailPoint *points = effect->points;
     Actor *owner;
@@ -148,7 +148,7 @@ s32 func_151A37C0(BoneTrailEffect *effect) {
     }
     started = 0;
     if (!(effect->head.tmpl.flags & TRAIL_EFFECT_STARTED)) {
-        if (func_151A4E34(&state->params, &effect->head.tmpl.pos) != 0) {
+        if (trail_getBoneAttachPoint(&state->params, &effect->head.tmpl.pos) != 0) {
             started = 1;
             state->lastPos = effect->head.tmpl.pos;
             effect->head.tmpl.flags |= TRAIL_EFFECT_STARTED;
@@ -156,8 +156,8 @@ s32 func_151A37C0(BoneTrailEffect *effect) {
             return 1;
         }
     }
-    if (!started && func_151A4E34(&state->params, &effect->head.tmpl.pos) == 0) {
-        func_151A4E9C(effect);
+    if (!started && trail_getBoneAttachPoint(&state->params, &effect->head.tmpl.pos) == 0) {
+        trail_detachBoneTrail(effect);
         memcpy(&retry, state, sizeof(BoneTrailParams));
         {
             TrailRetryTask *task = func_151491F4(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->head.header.owner, 0);
@@ -230,7 +230,7 @@ s32 func_151A37C0(BoneTrailEffect *effect) {
     /*
      * matching: nine scopes holding a kept dead load each give as1 enough extra
      * basic blocks to stop it hoisting an addiu into the 'pending > 1.0f' branch
-     * (ledger: ~/conker-ws/func_151A37C0/notes.md, pass6).
+     * (ledger: ~/conker-ws/trail_followBoneTrail/notes.md, pass6).
      */
     { typedef s32 T0; state = *(BoneTrailState **)((u8 *)effect + 0x40); state = state; }
     { typedef s32 T1; state = *(BoneTrailState **)((u8 *)effect + 0x44); state = state; }
@@ -248,7 +248,7 @@ s32 func_151A37C0(BoneTrailEffect *effect) {
  * Draws a trail as a camera-facing ribbon: one quad per pair of neighbouring
  * points, from the head back to the tail. Needs at least two points.
  */
-Gfx *func_151A3BE4(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
+Gfx *trail_drawBoneTrail(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
     Vtx *vtx;
     f32 camX, camY, camZ, segX, segY, segZ;
     f32 sideX, sideY, sideZ, lenSq, scale;
@@ -451,7 +451,7 @@ Gfx *func_151A3BE4(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
     return gfx;
 }
 
-void func_151A4590(Actor *owner, u8 arg1) {
+void trail_startBloodDrip(Actor *owner, u8 arg1) {
     BloodDripDesc params;
 
     // matching: an integer test makes IDO reload owner from its arg slot
@@ -476,7 +476,7 @@ void func_151A4590(Actor *owner, u8 arg1) {
 }
 
 /* Emits a particle burst at (x, y, z), moving against the given direction. */
-void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *parent) {
+void trail_emitBurst(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *parent) {
     ParticleDesc spawn;
     f32 scale;
     s16 params[6];
@@ -539,8 +539,8 @@ void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHead
     }
 }
 
-/* Particle update for func_151A4638's bursts: fades and resizes by age. */
-s32 func_151A483C(SpriteParticle *particle, u8 arg1) {
+/* Particle update for trail_emitBurst's bursts: fades and resizes by age. */
+s32 trail_updateBurstParticle(SpriteParticle *particle, u8 arg1) {
     s16 age;
     AgeFadeParams *params;
 
@@ -568,7 +568,7 @@ s32 func_151A483C(SpriteParticle *particle, u8 arg1) {
     return 1;
 }
 
-/* Like func_151A483C, but always sets unk2C from the age. */
+/* Like trail_updateBurstParticle, but always sets unk2C from the age. */
 s32 func_151A4900(SpriteParticle *particle, u8 arg1) {
     s16 age;
     AgeFadeParams *params;
@@ -592,7 +592,7 @@ s32 func_151A4900(SpriteParticle *particle, u8 arg1) {
 }
 
 /* Starts a BoneEmitterTask on the owner's bone 1. */
-void func_151A499C(Actor *owner, u8 arg1) {
+void trail_startBoneEmitter(Actor *owner, u8 arg1) {
     BoneEmitterTask *task;
     BoneEmitter emitter;
 
@@ -614,7 +614,7 @@ void func_151A499C(Actor *owner, u8 arg1) {
  * Per-tick update of a BoneEmitterTask: ends when the owner is gone, otherwise
  * spawns the particles that have accumulated at the bone's current position.
  */
-void func_151A4A38(BoneEmitterTask *task) {
+void trail_updateBoneEmitter(BoneEmitterTask *task) {
     BoneEmitter *emitter;
     Vec3f pos;
     SpriteBurst spawn;
@@ -695,12 +695,12 @@ void func_151A4A38(BoneEmitterTask *task) {
 }
 
 /* Message handler of a trail: detach on owner removal, follow an owner swap. */
-void func_151A4CE0(BoneTrailEffect *effect, ActorMsg *msg, u8 type) {
+void trail_onBoneTrailMessage(BoneTrailEffect *effect, ActorMsg *msg, u8 type) {
     BoneTrailParams *trail = &effect->state->params;
 
     if (type == 0) {
         if ((msg->ref.actor == trail->owner) || (msg->ref.uniqueId == trail->ownerId)) {
-            func_151A4E9C(effect);
+            trail_detachBoneTrail(effect);
         }
     } else if (type == 0x2D) {
         if (trail->owner == msg->swap.actorA) {
@@ -714,7 +714,7 @@ void func_151A4CE0(BoneTrailEffect *effect, ActorMsg *msg, u8 type) {
 }
 
 /* Message handler of a BoneEmitterTask: end on owner removal, follow an owner swap. */
-void func_151A4D88(BoneEmitterTask *task, ActorMsg *msg, u8 type) {
+void trail_onBoneEmitterMessage(BoneEmitterTask *task, ActorMsg *msg, u8 type) {
     BoneEmitter *emitter = &task->emitter;
 
     if (type == 0) {
@@ -736,7 +736,7 @@ void func_151A4D88(BoneEmitterTask *task, ActorMsg *msg, u8 type) {
  * Transforms the trail's attachment offset by its owner's bone matrix into out.
  * Returns 0 if the owner has no bone matrices or is not being drawn.
  */
-s32 func_151A4E34(BoneTrailParams *params, Vec3f *out) {
+s32 trail_getBoneAttachPoint(BoneTrailParams *params, Vec3f *out) {
     Actor *owner = params->owner;
     MtxF *bones = owner->ob_matrix_ptr;
 
@@ -752,7 +752,7 @@ s32 func_151A4E34(BoneTrailParams *params, Vec3f *out) {
 }
 
 /* Detaches a trail from its owner: the head stops following and fades out. */
-void func_151A4E9C(BoneTrailEffect *effect) {
+void trail_detachBoneTrail(BoneTrailEffect *effect) {
     BoneTrailState *state = effect->state;
 
     effect->head.updateKind2 = 0;
@@ -765,7 +765,7 @@ void func_151A4E9C(BoneTrailEffect *effect) {
  * Per-tick update of a TrailRetryTask: the task ends when the owner is gone or
  * once the trail has been re-created on the owner's bone.
  */
-void func_151A4ECC(TrailRetryTask *task) {
+void trail_updateRetryTask(TrailRetryTask *task) {
     BoneTrailParams *trail;
     u8 done;
 
@@ -778,7 +778,7 @@ void func_151A4ECC(TrailRetryTask *task) {
         done = 1;
     }
     if (!done && trail->owner->ob_matrix_ptr != NULL && (trail->owner->unk74 & 0xF) != 0xF) {
-        func_151A3504(trail, task->base.header.owner);
+        trail_createBoneTrailEffect(trail, task->base.header.owner);
         done = 1;
     }
     if (done) {
@@ -788,7 +788,7 @@ void func_151A4ECC(TrailRetryTask *task) {
 }
 
 /* Message handler of a TrailRetryTask: end when the owner is removed. */
-void func_151A4F7C(TrailRetryTask *task, ActorMsg *msg, u8 type) {
+void trail_onRetryTaskMessage(TrailRetryTask *task, ActorMsg *msg, u8 type) {
     BoneTrailParams *trail = &task->trail;
 
     if (type == 0) {

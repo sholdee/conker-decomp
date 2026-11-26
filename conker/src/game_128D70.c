@@ -26,7 +26,7 @@ static const Vec3f D_800A1E68[2] = { { 50.0f, 0.0f, 200.0f }, { -50.0f, 0.0f, 20
 static const Vec3f D_800A1E80[2] = { { 0.0f, 50.0f, 220.0f }, { 0.0f, 50.0f, 220.0f } };
 
 /* Spawns the effect for one side (0 or 1) of `obj`. The side's points are transformed by one of obj's
- * ob_matrix_ptr matrices; when the target found by func_1507515C has unk197 set, the effect is aimed at the point
+ * ob_matrix_ptr matrices; when the target found by event_getFirstLiveOwnedObject has unk197 set, the effect is aimed at the point
  * where the target's line meets the plane through the transformed points. Also spawns occasional sparks
  * and trails, and a camera effect for the target's camera. */
 void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, s32 arg5) {
@@ -65,7 +65,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         target = NULL;
         useTarget = 0;
     } else {
-        target = func_1507515C(obj);
+        target = event_getFirstLiveOwnedObject(obj);
         if (target == NULL) {
             return;
         }
@@ -145,7 +145,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
     } else {
         variant = 4;
     }
-    func_151C229C(&origin, useTarget ? NULL : &dir, useTarget ? &hitPoint : NULL, useTarget ? &lineDir : NULL, useTarget ? 1 : 0, 0,
+    weapon_spawnProjectile(&origin, useTarget ? NULL : &dir, useTarget ? &hitPoint : NULL, useTarget ? &lineDir : NULL, useTarget ? 1 : 0, 0,
                   252.0f, 0.003968254197f, (func_150ADA68() * 20.0f) + 75.0f, (func_150ADA68() * 250.0f) + 502.0f, 50.0f,
                   (func_150ADA20() % 31U) + 225, target != NULL ? target : obj, 1, 1, gIsMultiplayer != 0 ? 0 : 1, 50, 0, 1, variant, 44, timeOffset,
                   cameraMask, 0, 0, arg4, arg5);
@@ -217,7 +217,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
 }
 
 
-/* Calls func_151C3B0C for a projectile. The last argument is a mask of every camera except the owner's,
+/* Calls weapon_spawnHitEffects for a projectile. The last argument is a mask of every camera except the owner's,
  * or 0xFF when the owner is gone, has no camera or fails one of the other checks. */
 void func_150FC368(Game1EF500Trail *trail) {
     u8 cameraMask;
@@ -231,7 +231,7 @@ void func_150FC368(Game1EF500Trail *trail) {
     } else {
         cameraMask = ~(1U << owner->CameraPtr->CNumber) & 0xFF;
     }
-    func_151C3B0C(trail, 1.0f, 1.0f, 0.6f, 0.0f, 0xFF, 0xFF, cameraMask);
+    weapon_spawnHitEffects(trail, 1.0f, 1.0f, 0.6f, 0.0f, 0xFF, 0xFF, cameraMask);
 }
 
 /* Spawns an emitter object that follows `owner` (see func_150FC614); when `other` has a camera, also

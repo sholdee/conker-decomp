@@ -454,14 +454,14 @@ void func_1500A79C(PointLight *light, s32 id) {
     light_createJitter(light, 22, 6, 0, 300, 2, 255, 1);
 }
 
-/** Attaches the light to the object func_151149AC returns for `id`, starting at its position. */
+/** Attaches the light to the object gfx_findObjectById returns for `id`, starting at its position. */
 void func_1500A7E8(PointLight *light, s32 id) {
     LightEffectHeader header;
     LightSwing attachment;
     LightEffect *effect;
     u8 objects[6] = { 2, 3, 4, 5, 6, 7 };
 
-    attachment.object = func_151149AC(objects[id - 80]);
+    attachment.object = gfx_findObjectById(objects[id - 80]);
     if (attachment.object != NULL) {
         attachment.offset = -400.0f;
         attachment.scale = 4.0f;

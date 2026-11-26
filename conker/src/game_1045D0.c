@@ -54,13 +54,13 @@ void func_150D728C(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 fxOwner, s3
         surfaceFx.source.normal.z = -dir->z;
         surfaceFx.source.triangle = *surface;
         surfaceFx.spray.pos = *pos;
-        func_151BFC40(&surfaceFx.spray, &surfaceFx.source.spread);
+        weapon_initImpactSpray(&surfaceFx.spray, &surfaceFx.source.spread);
         func_1514FBFC(&surfaceFx, fxOwner, fxList);
     } else {
         fx.direction.x = -dir->x;
         fx.direction.y = -dir->y;
         fx.direction.z = -dir->z;
-        func_151BFC40(&fx.spray, &fx.spread);
+        weapon_initImpactSpray(&fx.spray, &fx.spread);
         fx.spray.pos = *pos;
         func_1514FB98(&fx, fxOwner, fxList);
     }

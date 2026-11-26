@@ -194,7 +194,7 @@ void func_10005020(void) {
     D_8003A582 = 0;
     framebuffer = D_8002AC50->framebuffer;
     if ((D_8002AC50->flags & OS_SC_SWAPBUFFER) && (D_8002AC5C == 0)) {
-        func_1515FDA0((s32)framebuffer);
+        colourfb_drawScreenEffects((s32)framebuffer);
         osViSwapBuffer(framebuffer);
     }
     osSendMesg(D_8002AC50->msgQ, D_8002AC50->msg, OS_MESG_BLOCK);

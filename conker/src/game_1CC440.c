@@ -65,7 +65,7 @@ s32 func_1519EF90(config, side, out)
 }
 
 /* Clears the owner's reference to this trail, then hands it to func_151478F4. */
-void func_1519F108(SurfaceTrail *trail) {
+void trail_destroySurfaceTrail(SurfaceTrail *trail) {
     SurfaceTrailConfig *config = trail->config;
     TrailSide *sides;
 
@@ -82,7 +82,7 @@ void func_1519F108(SurfaceTrail *trail) {
 }
 
 /* Clears the owner's reference to this trail, then hands it to func_15147928. */
-void func_1519F168(SurfaceTrail *trail) {
+void trail_freeSurfaceTrail(SurfaceTrail *trail) {
     SurfaceTrailConfig *config = trail->config;
     TrailSide *sides;
 
@@ -156,7 +156,7 @@ SurfaceTrail *func_1519F1C8(owner, side)
 }
 
 /* Gives the owner a new trail on both sides. */
-void func_1519F3B8(SurfaceTrailOwner *owner) {
+void trail_startSurfaceTrails(SurfaceTrailOwner *owner) {
     TrailSide *sides = owner->trails.sides;
 
     sides[0].trail = func_1519F1C8(owner, TRAIL_SIDE_6);
@@ -172,23 +172,23 @@ void func_1519F400(owner)
     TrailSide *sides = owner->trails.sides;
 
     if (sides[0].trail != NULL) {
-        func_1519F48C(sides[0].trail);
+        trail_detachSurfaceTrail(sides[0].trail);
     }
     if (sides[1].trail != NULL) {
-        func_1519F48C(sides[1].trail);
+        trail_detachSurfaceTrail(sides[1].trail);
     }
     if (sides[0].spawner != NULL) {
-        func_151A0928(sides[0].spawner);
+        trail_unlinkSurfaceSpawner(sides[0].spawner);
         func_1516972C(&sides[0].spawner->base.header);
     }
     if (sides[1].spawner != NULL) {
-        func_151A0928(sides[1].spawner);
+        trail_unlinkSurfaceSpawner(sides[1].spawner);
         func_1516972C(&sides[1].spawner->base.header);
     }
 }
 
 /* Detaches the trail from its owner; the points already laid stay and fade out. */
-void func_1519F48C(SurfaceTrail *trail) {
+void trail_detachSurfaceTrail(SurfaceTrail *trail) {
     SurfaceTrailConfig *config = trail->config;
     TrailSide *sides;
 
@@ -210,7 +210,7 @@ void func_1519F48C(SurfaceTrail *trail) {
 /* gFrameDelta: frame time, D_800BE9E4: frames elapsed (both used as per-update scale factors). */
 
 /* Ages, drifts and re-grounds every point; returns 0 once a detached trail is used up. */
-s32 func_1519F4F0(SurfaceTrail *trail) {
+s32 trail_ageSurfaceTrail(SurfaceTrail *trail) {
     SurfaceTrailPoint *points;
     SurfaceTrailPoint *point;
     SurfaceTrailConfig *config;
@@ -288,7 +288,7 @@ s32 func_1519F4F0(SurfaceTrail *trail) {
  * Trail update while attached: follows the owner's actor and lays new points along the path it moved.
  * If the attach point is lost, detaches the trail and leaves a spawner to start a new one.
  */
-s32 func_1519F7F0(SurfaceTrail *trail) {
+s32 trail_followSurfaceTrail(SurfaceTrail *trail) {
     SurfaceTrailConfig *config;
     SurfaceTrailPoint *points;
     Actor *actor;
@@ -339,7 +339,7 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
         }
     }
     if (!found && func_1519EF90(config, (u8)trail->head.tmpl.kind, &trail->head.tmpl.pos) == 0) {
-        func_1519F48C(trail);
+        trail_detachSurfaceTrail(trail);
         sides = config->owner->trails.sides;
         link.owner = config->owner;
         link.side = trail->head.tmpl.kind;
@@ -466,7 +466,7 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
  * Draws the trail as a strip three vertices wide (outer edge, centre line, outer edge), from the newest
  * point (or the live attach point) back to the oldest. Only the centre line is opaque.
  */
-Gfx *func_1519FE6C(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
+Gfx *trail_drawSurfaceTrail(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
     Vtx *vtx;
     SurfaceTrailConfig *config;
     SurfaceTrailPoint *points;
@@ -707,7 +707,7 @@ Gfx *func_1519FE6C(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
 }
 
 /* Spawner update: once the owner's actor is back, creates the trail for its side and removes itself. */
-void func_151A084C(TrailSpawner *spawner) {
+void trail_updateSurfaceSpawner(TrailSpawner *spawner) {
     SurfaceTrail *trail;
     TrailSet *trails;
     Actor *actor;
@@ -735,14 +735,14 @@ void func_151A084C(TrailSpawner *spawner) {
         }
     }
     if (done) {
-        func_151A0928(spawner);
+        trail_unlinkSurfaceSpawner(spawner);
         spawner->base.header.state = -1;
         spawner->base.header.flags |= 1;
     }
 }
 
 /* Clears the owner's reference to this spawner. */
-void func_151A0928(TrailSpawner *spawner) {
+void trail_unlinkSurfaceSpawner(TrailSpawner *spawner) {
     TrailSide *sides = spawner->link.owner->trails.sides;
 
     if (spawner->link.side == TRAIL_SIDE_6) {
@@ -753,7 +753,7 @@ void func_151A0928(TrailSpawner *spawner) {
 }
 
 /* Event handler for a trail: event 10 about its owner's actor detaches the trail. */
-void func_151A0950(SurfaceTrail *trail, ActorRef *event, u8 type) {
+void trail_onSurfaceTrailEvent(SurfaceTrail *trail, ActorRef *event, u8 type) {
     SurfaceTrailOwner *owner;
     SurfaceTrailConfig *config = trail->config;
     Actor *actor;
@@ -763,19 +763,19 @@ void func_151A0950(SurfaceTrail *trail, ActorRef *event, u8 type) {
         if (owner != NULL) {
             actor = owner->watcher.character;
             if (event->actor == actor || event->uniqueId == owner->watcher.characterId) {
-                func_1519F48C(trail);
+                trail_detachSurfaceTrail(trail);
             }
         }
     }
 }
 
 /* Event handler for a spawner: event 0 about its owner's actor deletes the spawner. */
-void func_151A09B4(TrailSpawner *spawner, ActorRef *event, u8 type) {
+void trail_onSurfaceSpawnerEvent(TrailSpawner *spawner, ActorRef *event, u8 type) {
     Actor *actor = spawner->link.owner->watcher.character;
 
     if (type == 0) {
         if (actor == event->actor || event->uniqueId == actor->unique_id) {
-            func_151A0928(spawner);
+            trail_unlinkSurfaceSpawner(spawner);
             func_1516972C(&spawner->base.header);
         }
     }

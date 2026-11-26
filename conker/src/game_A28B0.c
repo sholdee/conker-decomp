@@ -499,7 +499,7 @@ void func_15076768(void) {
 
     switch (gScriptArg0) {
     case 0:
-        func_15197A7C(gCurrentActor);
+        flamethrower_stopJets(gCurrentActor);
         break;
     case 1:
         position.x = gCurrentActor->xpos;
@@ -1085,7 +1085,7 @@ void script_turnToWaypoint(void) {
     if (turn & 0x80) {
         turn = -turn;
     }
-    if (D_80099A3C[index][0] < turn) {
+    if (gTurnAnimTable[index][0] < turn) {
         gCurrentActor->unk250 = gScriptArg1;
         func_15056A00(gCurrentActor, turn, index);
     }
@@ -2152,12 +2152,12 @@ void func_1507B040(void) {
     gCurrentActor->angle = gCurrentActor->langle;
 }
 
-/* Acts on the object returned by func_15072208: arg0 0 calls actor_fadeCommand, 1 sets and 2 restarts script arg1. */
+/* Acts on the object returned by event_getOwnedObject: arg0 0 calls actor_fadeCommand, 1 sets and 2 restarts script arg1. */
 void func_1507B058(void) {
     Actor *savedObj = gCurrentActor;
     s32 savedIndex = dc_glbl_CharNum;
 
-    gCurrentActor = func_15072208(gCurrentActor, 0);
+    gCurrentActor = event_getOwnedObject(gCurrentActor, 0);
     dc_glbl_CharNum = gCurrentActor - movement_obj;
 
     if (gCurrentActor != NULL) {
@@ -2194,78 +2194,78 @@ void func_1507B178(void) {
 }
 
 void func_1507B234(void) {
-    D_800D1580 = script_getArgWord();
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    gEventParam = script_getArgWord();
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BAD8(300, 1800);
     }
 }
 
 void func_1507B280(void) {
-    D_800D1580 = script_getArgWord();
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    gEventParam = script_getArgWord();
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BAD8(300, 3000);
     }
 }
 
 void func_1507B2CC(void) {
-    D_800D1580 = script_getArgWord();
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    gEventParam = script_getArgWord();
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BA4C(300, 1800);
     }
 }
 
 void func_1507B318(void) {
-    D_800D1580 = script_getArgWord();
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    gEventParam = script_getArgWord();
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BA4C(300, 3000);
     }
 }
 
 void func_1507B364(void) {
-    D_800D1580 = script_getArgWord();
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    gEventParam = script_getArgWord();
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BAD8(700, 4000);
     }
 }
 
 void func_1507B3B0(void) {
-    D_800D1580 = script_getArgWord();
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    gEventParam = script_getArgWord();
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BA4C(700, 4000);
     }
 }
 
 void func_1507B3FC(void) {
-    D_800D1580 = script_getArgWord();
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    gEventParam = script_getArgWord();
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BAD8(3000, 8000);
     }
 }
 
 void func_1507B448(void) {
-    D_800D1580 = script_getArgWord();
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    gEventParam = script_getArgWord();
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BAD8(190, 1300);
     }
 }
 
 void func_1507B494(void) {
-    D_800D1580 = script_getArgWord();
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    gEventParam = script_getArgWord();
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BA4C(190, 1300);
     }
 }
 
 void func_1507B4E0(void) {
-    D_800D1580 = script_getArgWord();
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 1) != 0) {
+    gEventParam = script_getArgWord();
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 1) != 0) {
         func_1506BAD8(100, 800);
     }
 }
 
 void func_1507B52C(void) {
-    D_800D1580 = script_getArgWord();
-    if (func_1506E46C(gCurrentActor, &D_800D1580, 0) != 0) {
+    gEventParam = script_getArgWord();
+    if (event_resolveSoundCommand(gCurrentActor, &gEventParam, 0) != 0) {
         func_1506BA4C(100, 800);
     }
 }
@@ -2338,7 +2338,7 @@ void script_jumpIfTargetStunned(void) {
     }
 }
 
-/* Calls handler arg0 of D_80086150, preserving the current object. */
+/* Calls handler arg0 of gAnimCommandProcs, preserving the current object. */
 void script_callHandler(void) {
     Actor *savedObj;
     s32 savedIndex;
@@ -2346,7 +2346,7 @@ void script_callHandler(void) {
     void (*handler)(s32);
 
     index = gScriptArg0;
-    handler = D_80086150[index];
+    handler = gAnimCommandProcs[index];
     if (handler != NULL) {
         savedObj = gCurrentActor;
         savedIndex = dc_glbl_CharNum;
@@ -2492,7 +2492,7 @@ const ObjScriptCmd *script_getScript(s32 arg0, s32 scriptId) {
     ScriptEntry *table;
     s32 i;
 
-    typeData = D_800D1588[gCurrentActor->character_type];
+    typeData = gModelAnimTables[gCurrentActor->character_type];
     if (typeData == NULL) {
         return D_8009A120;
     }

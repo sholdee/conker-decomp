@@ -31,69 +31,69 @@ Gfx D_8008A498[] = {
  */
 /* Expire callbacks (TimedEffect.expireCallback). */
 static void (*D_8008A4C0[10])() = {
-    func_150AE790, func_15193390, func_150DDF88, func_151A18DC, func_151A1EE8, func_150C29F0, func_1519E65C,
-    func_1519C9C4, func_150DF334, func_150DEBE0,
+    func_150AE790, func_15193390, func_150DDF88, func_151A18DC, func_151A1EE8, func_150C29F0, trail_stopTrailPair,
+    flamethrower_spawnControllerFlame, func_150DF334, func_150DEBE0,
 };
 /* Tick callbacks (TimedEffect.tickCallback), run every frame. */
 static void (*D_8008A4E8[98])() = {
-    func_150DBC60, func_151A0AF8, func_151A11E4, func_151A1998, func_151A1FB4, func_151A4A38, func_151A5660,
-    func_15156B54, func_1519E464, func_1519E754, func_151A4ECC, func_151A084C, func_1515B21C, func_151918BC,
-    func_151AB9C8, func_150E6B84, func_150E7C9C, func_1515D130, func_150C2C00, func_151B0B88, func_151929A4,
+    func_150DBC60, func_151A0AF8, func_151A11E4, func_151A1998, func_151A1FB4, trail_updateBoneEmitter, func_151A5660,
+    func_15156B54, trail_updateStartTask, trail_updateTrailPairTask, trail_updateRetryTask, trail_updateSurfaceSpawner, func_1515B21C, func_151918BC,
+    func_151AB9C8, func_150E6B84, func_150E7C9C, trail_updateBurstEmitter, func_150C2C00, func_151B0B88, func_151929A4,
     func_151B1B34, func_151B2100, func_150CD7F8, func_15192DF0, func_15159C08, func_151094FC, func_15109FB8,
-    func_1510A40C, func_15191D54, light_updateColourCycle, func_150E114C, func_150AF328, func_151CE6D0, func_150EFB80,
-    func_1519CD64, func_150B54A8, func_151A8CEC, func_151082D0, func_150FC614, func_150E8470, func_150E9E34,
-    func_151C4644, func_151C4820, func_150EAB10, light_updateColourWave, func_150D1C30, screen_updateStrobe, screen_updateStrobeSpawner,
+    func_1510A40C, func_15191D54, light_updateColourCycle, func_150E114C, func_150AF328, trail_updateRandomPointEmitter, func_150EFB80,
+    flamethrower_updateController, func_150B54A8, func_151A8CEC, func_151082D0, func_150FC614, func_150E8470, func_150E9E34,
+    weapon_updateStreamEmitter, func_151C4820, func_150EAB10, light_updateColourWave, func_150D1C30, screen_updateStrobe, screen_updateStrobeSpawner,
     func_150D26F0, func_150D2924, func_150E8B1C, func_150E8D5C, func_150E88C0, func_150E9178, func_150E93DC,
     func_150D54C8, screen_updateFlash, func_150CF140, func_150CF530, func_15104C44, func_151050B0, func_151072BC,
-    func_1515AB88, func_151BDD8C, func_151D4794, func_151D7264, func_150F706C, func_15105BC8, func_150B5950,
+    func_1515AB88, func_151BDD8C, func_151D4794, trail_updateAnchoredEmitter, func_150F706C, func_15105BC8, func_150B5950,
     func_150B6110, func_150D1B40, func_150D149C, func_150B1F90, func_151D9EB0, func_150AF7C4, func_150F1170,
     func_150FA1B8, func_151002BC, func_150BDF0C, func_150DFEFC, func_150F5C98, func_150BA55C, func_150C44A4,
     func_150F6178, func_150F64DC, func_150F4DEC, func_150FAAEC, func_150B0D20, func_150EC520, func_150EC6B0,
-    func_151DC97C, func_150F2D14, func_150ECB8C, func_150DE7C0, func_151D1138, func_151BF81C, func_151D0128,
+    func_151DC97C, func_150F2D14, func_150ECB8C, func_150DE7C0, trail_updateTrackerEffect, func_151BF81C, trail_updateStripEffect,
 };
 /* Draw callbacks (TimedEffect.drawCallback): return the advanced display list. */
 static Gfx *(*D_8008A670[6])() = {
-    func_151B2974, func_151B5328, screen_drawStrobe, screen_drawFlash, func_151D014C, func_150D0034,
+    func_151B2974, func_151B5328, screen_drawStrobe, screen_drawFlash, trail_drawStripEffect, func_150D0034,
 };
 /* Destroy handlers, per callback set (TimedEffect.callbackSet). */
 static void (*D_8008A688[74])() = {
-    func_1514933C, func_1514933C, func_1519E8CC, func_1514933C, func_1519E924, func_1514933C, func_1514933C,
+    func_1514933C, func_1514933C, trail_destroyTask, func_1514933C, trail_destroyTrailPairTask, func_1514933C, func_1514933C,
     func_1514933C, func_1514933C, func_1514933C, func_151A5CAC, func_1514933C, func_1514933C, func_1514933C,
     func_1514933C, func_151B1A58, func_1514933C, func_1514933C, func_151B229C, func_151B2FE8, func_1514933C,
     func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C,
     func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_150F02C0, func_1514933C, func_1514933C,
     func_150B57E8, func_1514933C, func_150FC9A4, screen_freeStrobe, func_1514933C, func_150D5A2C, func_150D20B0,
     func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1510764C,
-    func_1514933C, func_15141990, func_151BE1B8, func_150F6368, func_1514933C, func_151D7424, func_150F740C,
+    func_1514933C, func_15141990, func_151BE1B8, func_150F6368, func_1514933C, trail_destroyAnchoredEmitter, func_150F740C,
     func_150F9794, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C,
     func_1514933C, func_150C4B08, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C,
-    func_1514933C, func_1514933C, func_151D1388, func_151BFBA4,
+    func_1514933C, func_1514933C, trail_destroyTracker, func_151BFBA4,
 };
 /* Free handlers, per callback set. */
 static void (*D_8008A7B0[74])() = {
-    func_15149368, func_15149368, func_1519E8F8, func_15149368, func_1519E948, func_15149368, func_15149368,
+    func_15149368, func_15149368, trail_freeTask, func_15149368, trail_freeTrailPairTask, func_15149368, func_15149368,
     func_15149368, func_15149368, func_15149368, func_151A5CEC, func_15149368, func_15149368, func_15149368,
     func_15149368, func_151B1A84, func_15149368, func_15149368, func_151B22C8, func_151B3014, func_15149368,
     func_15149368, func_15149368, func_15149368, func_15149368, func_15149368, func_15149368, func_15149368,
     func_15149368, func_15149368, func_15149368, func_15149368, func_150F02EC, func_15149368, func_15149368,
     func_150B5814, func_15149368, func_150FC9D0, func_150D22A8, func_15149368, func_150D5A4C, func_150D20DC,
     func_15149368, func_15149368, func_15149368, func_15149368, func_15149368, func_15149368, func_15107678,
-    func_15149368, func_151419B0, func_151BE1E4, func_150F6394, func_15149368, func_151D7450, func_150F7438,
+    func_15149368, func_151419B0, func_151BE1E4, func_150F6394, func_15149368, trail_freeAnchoredEmitter, func_150F7438,
     func_150F97C0, func_15149368, func_15149368, func_15149368, func_15149368, func_15149368, func_15149368,
     func_15149368, func_150C4B34, func_15149368, func_15149368, func_15149368, func_15149368, func_15149368,
-    func_15149368, func_15149368, func_151D13B4, func_151BFBD0,
+    func_15149368, func_15149368, trail_freeTracker, func_151BFBD0,
 };
 /* Message handlers, per callback set; optional. */
 static void (*D_8008A8D8[74])(TimedEffect *object, s32 msg, u8 msgType) = {
-    NULL, func_151A4D88, func_1519E570, func_1519E61C, func_1519E818, func_151A4F7C, func_151A09B4, NULL,
+    NULL, trail_onBoneEmitterMessage, trail_onTaskEvent, func_1519E61C, trail_onTrailPairTaskEvent, trail_onRetryTaskMessage, trail_onSurfaceSpawnerEvent, NULL,
     func_15191A84, func_151ABD54, NULL, NULL, NULL, NULL, NULL, func_151B19A4, func_15193234, func_151B1FAC,
     func_151B2F04, func_151B2EC4, NULL, func_151B5A9C, func_151932E0, NULL, NULL, NULL, func_1510A870, NULL,
-    func_1510A8CC, func_1519277C, func_151CD3CC, NULL, NULL, NULL, func_151A9024, func_150B5840, func_151087FC,
+    func_1510A8CC, func_1519277C, trail_onStreamTaskEvent, NULL, NULL, NULL, func_151A9024, func_150B5840, func_151087FC,
     func_150FC818, NULL, func_150AEDF8, func_150D596C, func_150D1F6C, func_150D32FC, func_150CF484, func_151A5F70,
-    func_15104FF8, func_15105548, func_15105848, func_151076A4, func_151D08F0, func_151419D0, func_151BE0AC,
-    func_150F63C0, func_151D4C38, func_151D73A8, func_150F7310, func_150F887C, NULL, func_150F15F8, func_15100230,
+    func_15104FF8, func_15105548, func_15105848, func_151076A4, trail_onOwnedEffectMessage, func_151419D0, func_151BE0AC,
+    func_150F63C0, func_151D4C38, trail_onAnchoredEmitterMessage, func_150F7310, func_150F887C, NULL, func_150F15F8, func_15100230,
     func_150BE150, func_150E02C0, func_150F6138, func_150BA8F0, func_150C4B60, func_150FA468, func_150F6850,
-    func_150B0CE0, func_150F3194, func_150ECB4C, func_150FACE4, func_150D00C0, func_151D1328, func_151BFBFC,
+    func_150B0CE0, func_150F3194, func_150ECB4C, func_150FACE4, func_150D00C0, trail_onTrackerMessage, func_151BFBFC,
 };
 
 

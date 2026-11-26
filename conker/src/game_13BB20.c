@@ -509,7 +509,7 @@ void func_1510F820(void *tri, void *verts, f32 *outDirX, f32 *outDirZ, f32 *unus
     f32 slopeZ;
     f32 length;
 
-    func_1510E388(tri, verts, &slopeX, &slopeZ);
+    shadow_getTriSlopes(tri, verts, &slopeX, &slopeZ);
     length = sqrtf((slopeX * slopeX) + (slopeZ * slopeZ));
     *outSlopeX = slopeX;
     *outSlopeZ = slopeZ;

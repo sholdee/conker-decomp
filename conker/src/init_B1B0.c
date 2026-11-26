@@ -397,28 +397,28 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
 
     if (D_80041F04 & 1) {
         if (state == 0) {
-            func_100088F0(channel, 0x8000, 1);
+            audio_setChannelsEnabled(channel, 0x8000, 1);
             if (level == 1 || level == 12) {
-                func_10008790(channel, 0x7000, 0, 0);
+                audio_fadeChannelsVolume(channel, 0x7000, 0, 0);
             } else if (level != 7) {
-                func_10008790(channel, 0xCA, 0, 0);
+                audio_fadeChannelsVolume(channel, 0xCA, 0, 0);
             }
             func_100085B8(channel, 15, 1);
         }
         state = 1;
     } else if (state != 0) {
-        func_100088F0(channel, 0x8000, 0);
+        audio_setChannelsEnabled(channel, 0x8000, 0);
         if (level == 1 || level == 12) {
-            func_10008790(channel, 0x7000, 255, 0);
+            audio_fadeChannelsVolume(channel, 0x7000, 255, 0);
         } else if (level != 7) {
-            func_10008790(channel, 0xCA, 255, 0);
+            audio_fadeChannelsVolume(channel, 0xCA, 255, 0);
         }
         func_100085B8(channel, 15, 0);
         state = 0;
     }
 
     if (level == 39) {
-        func_10011FA0(4);
+        audio_requestMixSelector(4);
         if (bit1 == 0) {
             bit1 = 2;
             func_1000E704(1, 1, 0xFFFF);
@@ -547,7 +547,7 @@ s32 func_1000BCBC(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 
     // matching: channel's address is taken so IDO keeps it in its arg slot
     if (state == 0) {
-        func_10008790(*&channel, 3, 16, 0);
+        audio_fadeChannelsVolume(*&channel, 3, 16, 0);
         func_1000886C(channel, 4, 0);
         state = 1;
     } else if (level == 19) {
@@ -630,8 +630,8 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
 
     if (pan != (oldMix & 0xFF)) {
         panChanged = 1;
-        func_10008744(channel, 1, pan & 0x7F);
-        func_10008744(channel, 2, pan & 0x7F);
+        audio_setChannelPan(channel, 1, pan & 0x7F);
+        audio_setChannelPan(channel, 2, pan & 0x7F);
         func_100086FC(channel, 1, pan >> 7);
         func_100086FC(channel, 2, pan >> 7);
     }
@@ -647,7 +647,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     }
 
     if (panChanged) {
-        func_10008744(channel, 0, 0x40);
+        audio_setChannelPan(channel, 0, 0x40);
         func_100086FC(channel, 0, 0);
     }
 
@@ -660,8 +660,8 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     }
 
     if (panChanged) {
-        func_10008744(channel, 3, pan & 0x7F);
-        func_10008744(channel, 4, pan & 0x7F);
+        audio_setChannelPan(channel, 3, pan & 0x7F);
+        audio_setChannelPan(channel, 4, pan & 0x7F);
         func_100086FC(channel, 3, pan >> 7);
         func_100086FC(channel, 4, pan >> 7);
     }
@@ -684,7 +684,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
             break;
         case 2:
             state = 0xF8;
-            func_10011FA0(4);
+            audio_requestMixSelector(4);
             func_1000E704(34, 1, 0xFFFF);
             music_fadeChannelVolume(34, 0, 0xFE0, started);
             break;
@@ -719,13 +719,13 @@ s32 func_1000C350(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     } else if (D_80041F08 != (state & 0x7FU)) {
         switch (D_80041F08) {
         case 1:
-            func_10008790(channel, 30, 0, 0);
-            func_10008790(channel, 1, 0x40, 0);
+            audio_fadeChannelsVolume(channel, 30, 0, 0);
+            audio_fadeChannelsVolume(channel, 1, 0x40, 0);
             break;
         case 2:
-            func_10008790(channel, 24, 255, 0);
-            func_10008790(channel, 6, 0, 0);
-            func_10008790(channel, 1, 1, 0);
+            audio_fadeChannelsVolume(channel, 24, 255, 0);
+            audio_fadeChannelsVolume(channel, 6, 0, 0);
+            audio_fadeChannelsVolume(channel, 1, 1, 0);
             break;
         }
         state = D_80041F08 | 0x80;
@@ -769,12 +769,12 @@ s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     if (mode != oldMode) {
         if (oldMode != 0) {
             // matching: channel's address is taken so IDO keeps it in its arg slot
-            func_100085F8(*&channel, oldMode + 9);
+            audio_muteChannel(*&channel, oldMode + 9);
         }
         if (mode != 0) {
             func_10008824(channel, mode + 9, low);
             func_100086FC(channel, mode + 9, high >> 7);
-            func_10008744(channel, mode + 9, high & 0x7F);
+            audio_setChannelPan(channel, mode + 9, high & 0x7F);
         }
     } else if (oldMode != 0 && D_80041F08 != 0 && upper != D_80041F0C) {
         if (low != oldLow) {
@@ -784,7 +784,7 @@ s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
             if ((high ^ oldHigh) & 0x80) {
                 func_100086FC(channel, mode + 9, high >> 7);
             }
-            func_10008744(channel, mode + 9, high & 0x7F);
+            audio_setChannelPan(channel, mode + 9, high & 0x7F);
         }
     }
     if (D_80041F04 & 0x10) {
@@ -799,7 +799,7 @@ s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         if (upper < fade) {
             fade -= upper;
         } else {
-            func_10008790(channel, 0xC0, 0, 90);
+            audio_fadeChannelsVolume(channel, 0xC0, 0, 90);
             fade = 0;
         }
     }
@@ -893,7 +893,7 @@ s32 func_1000CAE4(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     bit1 = state & 2;
     state &= 1;
     if (level == 66) {
-        func_10011FA0(4);
+        audio_requestMixSelector(4);
         if (state == 0) {
             state = 1;
             func_1000E704(88, 1, 0xFFFF);
@@ -904,7 +904,7 @@ s32 func_1000CAE4(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         state = 0;
     }
     if (bit1 == 0) {
-        func_10008790(channel, 0x1000, 0, 1);
+        audio_fadeChannelsVolume(channel, 0x1000, 0, 1);
         bit1 = 2;
     }
     return bit1 | state;
@@ -950,12 +950,12 @@ void music_updateChannelVolume(s32 channel) {
                   track->fullVolume) >> 15;
         if (volume != track->currentVolume) {
             if (track->currentVolume == 0) {
-                func_10008988(channel, track->tuneOffChannels ^ 0xFFFF, 1);
+                audio_setChannelMask(channel, track->tuneOffChannels ^ 0xFFFF, 1);
             } else if (volume == 0) {
-                func_10008988(channel, track->tuneOffChannels ^ 0xFFFF, 0);
+                audio_setChannelMask(channel, track->tuneOffChannels ^ 0xFFFF, 0);
             }
             track->currentVolume = volume;
-            func_10008EE0(channel, volume);
+            audio_setSeqVolume(channel, volume);
         }
     }
 }
@@ -990,7 +990,7 @@ s32 music_isSyncReached(u8 waitMask, MusicTrack *syncTo) {
             if (gChannelTunes[syncTo->player] == NULL || syncTo->seq_number <= 0) {
                 return TRUE;
             }
-            if (func_1000853C(syncTo->player) == 3) {
+            if (audio_getSeqState(syncTo->player) == 3) {
                 return TRUE;
             }
             if (!(gMusicInfo[syncTo->seq_number].flags & 0x20)) {
@@ -1076,7 +1076,7 @@ void music_readMarkers(s32 channel) {
         if (gChannelTunes[channel]->currentVolume == 0) {
             gMarkerBits[channel] |= 0x80;
             if (gChannelTunes[channel]->internallyPaused == 0) {
-                func_10008F58(channel);
+                audio_stopSeq(channel);
                 gChannelTunes[channel]->internallyPaused = 1;
             }
         } else if (gChannelTunes[channel]->internallyPaused == 1) {
@@ -1110,13 +1110,13 @@ void music_updateChannel(s32 index, f32 x, f32 y, f32 z) {
     // matching: index and channel are read back from their stack slots on every use, which IDO
     // only does through these pointer views; offset is the byte offset of index in the tables
     channel = (u8)((u32 *)&index)[0];
-    status = func_1000853C((u8)((u32 *)&index)[0]);
+    status = audio_getSeqState((u8)((u32 *)&index)[0]);
     offset = ((u32 *)&index)[0] * sizeof(*slot);
     slot = (MusicTrack **)&(*(u8 (*)[])gChannelTunes)[offset];
     track = *slot;
     if (track != NULL) {
         if (track->jumpPoint != 0 && music_isSyncReached(track->jumpSync, track->syncTune)) {
-            func_10008C6C(((u8 *)&channel)[3], (*slot)->jumpPoint - 1);
+            audio_jumpToSeqMarker(((u8 *)&channel)[3], (*slot)->jumpPoint - 1);
             track = *slot;
             // matching: the u32 casts steer IDO's register choice for the pending volume
             if (track->jumpVolume != 0) {
@@ -1143,7 +1143,7 @@ void music_updateChannel(s32 index, f32 x, f32 y, f32 z) {
                     music_clearSyncRefs(*slot);
                     next = (*slot)->waitingTune;
                     if (next->seq_number > 0) {
-                        if (func_10008CE8(channel, next->seq_number) == -1) {
+                        if (audio_playSequence(channel, next->seq_number) == -1) {
                             (*slot)->waitingTune->syncTune = NULL;
                             (*slot)->waitingTune->startSync = 0;
                             music_queueTune((*slot)->waitingTune, NULL);
@@ -1158,11 +1158,11 @@ void music_updateChannel(s32 index, f32 x, f32 y, f32 z) {
                             *(s32 *)((u8 *)D_80041880 + offset) = 0;
                             track = *slot;
                             if (gMusicInfo[track->seq_number].unkC != 0) {
-                                func_10008C04(channel, gMusicInfo[track->seq_number].unkC, 100);
+                                audio_findSeqLoopMarkers(channel, gMusicInfo[track->seq_number].unkC, 100);
                                 track = *slot;
                             }
                             if (track->jumpPoint != 0) {
-                                func_10008C6C(channel, track->jumpPoint - 1);
+                                audio_jumpToSeqMarker(channel, track->jumpPoint - 1);
                                 (*slot)->jumpPoint = 0;
                                 track = *slot;
                             }
@@ -1170,11 +1170,11 @@ void music_updateChannel(s32 index, f32 x, f32 y, f32 z) {
                             music_updateChannelVolume(((u32 *)&index)[0]);
                             func_100084D8(channel);
                             if ((*slot)->tuneOffChannels != 0) {
-                                func_100088F0(channel, (*slot)->tuneOffChannels, 0);
+                                audio_setChannelsEnabled(channel, (*slot)->tuneOffChannels, 0);
                             }
                             for (i = 0; i < 16; i++) {
                                 if ((*slot)->channelVolumes[i] != 0) {
-                                    func_10008660(channel, i, (*slot)->channelVolumes[i], 1);
+                                    audio_fadeChannelVolume(channel, i, (*slot)->channelVolumes[i], 1);
                                     (*slot)->channelVolumes[i] = 0;
                                 }
                             }
@@ -1497,7 +1497,7 @@ void music_freeStoppedTunes(void) {
             if (tuneArray[i].seq_number != invalid) {
                 tuneArray[i].seq_number = invalid;
             }
-        } else if (func_1000853C(channel) == 0) {
+        } else if (audio_getSeqState(channel) == 0) {
             gChannelTunes[tuneArray[i].player] = NULL;
             tuneArray[i].player = invalid;
             tuneArray[i].seq_number = invalid;
@@ -1555,7 +1555,7 @@ void music_pauseTune(s32 id, s32 pause) {
         }
         if (2 != track->internallyPaused && pause != 0) {
             if (track->internallyPaused != 1) {
-                func_10008F58(track->player);
+                audio_stopSeq(track->player);
             }
             track->internallyPaused = 2;
         }
@@ -1641,11 +1641,11 @@ void music_pauseAll(s32 pause) {
             continue;
         }
         if (pause != 0) {
-            func_10008EE0(i, 0);
+            audio_setSeqVolume(i, 0);
             if (gMusicInfo[gChannelTunes[i]->seq_number].flags & 0x10) {
                 continue;
             }
-            func_10008F58(i);
+            audio_stopSeq(i);
         } else {
             if (!(gMusicInfo[track->seq_number].flags & 0x10)) {
                 func_100084D8(i);
@@ -1695,7 +1695,7 @@ s32 music_fadeChannelVolume(s32 id, s32 percent, s32 channelMask, s32 frames) {
                 func_1000886C(track->player, channelMask, percent);
                 return TRUE;
             }
-            func_10008790(track->player, channelMask, percent, frames);
+            audio_fadeChannelsVolume(track->player, channelMask, percent, frames);
             return TRUE;
         }
         if (percent == 0) {
@@ -1755,7 +1755,7 @@ s32 music_jumpToMarker(s32 id, s32 marker, s32 waitMask, s32 syncId) {
     if (track != NULL) {
         if (waitMask == 0) {
             if (track->player >= 0) {
-                func_10008C6C(track->player, marker - 1);
+                audio_jumpToSeqMarker(track->player, marker - 1);
                 return TRUE;
             }
         }

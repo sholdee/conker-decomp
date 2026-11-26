@@ -314,7 +314,7 @@ s32 func_151725FC(Vtx *vtx, void *tri, f32 x, f32 y, f32 z, f32 angle, s32 size,
     if (n == 0) {
         n = 1;
     }
-    if (func_1510E388(tri, NULL, &slopeX, &slopeZ) == 0) {
+    if (shadow_getTriSlopes(tri, NULL, &slopeX, &slopeZ) == 0) {
         return 0;
     }
     axis[0][0] = 0.0f;

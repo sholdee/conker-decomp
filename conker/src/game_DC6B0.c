@@ -16,23 +16,23 @@ void func_150AF200(s32 idA, s32 idB) {
         return;
     }
 
-    obj = func_151149AC(idA);
+    obj = gfx_findObjectById(idA);
     index = obj - db_Object_array;
     if (gWorldObjectContacts[index] & 1) {
         actor_hitScripted(&movement_obj[0], 0x3F, 0x6E00, -1);
         return;
     }
 
-    obj = func_151149AC(idB);
+    obj = gfx_findObjectById(idB);
     index = obj - db_Object_array;
     if (gWorldObjectContacts[index] & 1) {
         actor_hitScripted(&movement_obj[0], 0x3F, 0xEE00, -1);
     }
 }
 
-/* Calls func_151CF898(arg0, unk2 + unk8, unk2). */
+/* Calls trail_spawnNearCamera(arg0, unk2 + unk8, unk2). */
 void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
-    func_151CF898(arg0, range->unk2 + range->unk8, range->unk2);
+    trail_spawnNearCamera(arg0, range->unk2 + range->unk8, range->unk2);
 }
 
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of gFrameDelta and spawns one
@@ -121,7 +121,7 @@ void func_150AF738(s16 lifetime, u8 arg1, s32 arg2) {
     desc.drawIndex = 2;
     desc.lifetime = lifetime;
     desc.messageIndex = 0;
-    func_1515FF74(&desc, 0, arg1, arg2);
+    colourfb_createScreenEffect(&desc, 0, arg1, arg2);
 }
 
 void func_150AF790(void *arg0, u8 *arg1) {
@@ -323,7 +323,7 @@ void func_150B003C(s32 arg0) {
     func_150AF200(0xDF, 0xDE);
 }
 
-/* Arguments the projectile's ribbon trail keeps (func_151B7328 selector 1). */
+/* Arguments the projectile's ribbon trail keeps (trail_spawnRibbon selector 1). */
 typedef struct GameDC6B0TrailArgs {
     GameDC6B0Projectile *source;
     s32 unk4;
@@ -381,7 +381,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
             trail = &projectile->trail;
             memcpy(trail, &trailArgs.unk4, sizeof(trailArgs.unk4));
             trailArgs.source = projectile;
-            *trail = func_151B7328(&trailArgs, 1, sizeof(trailArgs), arg2, arg3);
+            *trail = trail_spawnRibbon(&trailArgs, 1, sizeof(trailArgs), arg2, arg3);
         }
     }
 }
@@ -494,7 +494,7 @@ s32 func_150B060C(id, out)
     u8 id;
     struct Obj150B060C *out;
 {
-    out->object = func_151149AC(id);
+    out->object = gfx_findObjectById(id);
     if (out->object == NULL) {
         return 0;
     }

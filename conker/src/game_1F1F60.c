@@ -23,7 +23,7 @@ void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event) {
  * Stores the travel distance times `distScale` in *remaining; on a miss it clears `clearMask` from *flags
  * and stores `defaultRemaining` instead. Returns 0 if the ray could not be set up.
  */
-s32 func_151C4B0C(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
+s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
                   f32 distScale, u8 castRay, Vec3f *altOrigin, Vec3f *altDir, u8 *flags, u8 clearMask,
                   f32 defaultRemaining, void *owner, s8 arg13, u8 collide, u8 arg15, s32 arg16, u8 recast) {
     RayHit recastHit;
@@ -106,7 +106,7 @@ s32 func_151C4B0C(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 
                     return 0;
                 }
             }
-            func_151C2050(owner, &hit->pos, &hit->dir, hit->material, hit->dist);
+            weapon_queueShotSound(owner, &hit->pos, &hit->dir, hit->material, hit->dist);
             if (index == -1) {
                 hit->surface = NULL;
             } else {

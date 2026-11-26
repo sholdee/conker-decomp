@@ -209,7 +209,7 @@ void func_150C44A4(PulseEffect *effect) {
     if (emit) {
         data->unk8 += (0.1290000081f + func_150ADA68() * 0.1170000061f) * gFrameDelta;
         while (data->unk8 > 1.0f) {
-            func_151C36D8(&pos, effect->base.header.owner, effect->base.header.kind);
+            weapon_spawnSmallImpactBurst(&pos, effect->base.header.owner, effect->base.header.kind);
             data->unk8 -= 1.0f;
         }
     }

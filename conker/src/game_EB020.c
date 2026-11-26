@@ -66,7 +66,7 @@ void actor_updateFollower(Actor *self) {
         func_15052F9C(self, 100.0f, stateArg, 4, 0, runArg, 0, 0, 0, 0);
         return;
     }
-    if (searchState == self->intelwalk && (~D_800D18A0 & D_800CC268) && func_15072208(self, 0) == NULL) {
+    if (searchState == self->intelwalk && (~D_800D18A0 & D_800CC268) && event_getOwnedObject(self, 0) == NULL) {
         mask = ~D_800D18A0 & D_800CC268;
         for (i = 0; i < 25; i++) {
             while (!(mask & (1 << i)) && i < 25) {

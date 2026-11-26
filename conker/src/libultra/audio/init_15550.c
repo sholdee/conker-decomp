@@ -225,7 +225,7 @@ void _n_handleEvent(SndEvent *event) {
             switch (event->type) {
                 case 0x4000:
                     if (snd == NULL) {
-                        snd = func_1001BD34(D_8002BA2C->drvr,
+                        snd = audio_loadInstrument(D_8002BA2C->drvr,
                                                        &state->bank->instArray[0],
                                                        state->unk4C);
                         state->snd = snd;
@@ -299,7 +299,7 @@ void _n_handleEvent(SndEvent *event) {
                     fxmix = (state->unk50 & 0x7F) + ((keyMap->keyMax & 0xF) << 3);
                     fxmix = (MAX(0, fxmix) > 0x7F) ? 0x7F : MAX(0, fxmix);
                     fxmix |= state->unk50 & 0x80;
-                    func_1001BE1C(D_8002BA2C->drvr, state->bank->instArray[0], state->unk4C);
+                    audio_releaseInstrument(D_8002BA2C->drvr, state->bank->instArray[0], state->unk4C);
                     n_alSynStartVoiceParams(&state->voice, snd->wavetable,
                                             state->pitch * state->ratio, vol, pan, fxmix, 0,
                                             0.0f, 0, delta);

@@ -242,7 +242,7 @@ void model_shareAnimTable(s32 id) {
         for (j = 0; j < D_80098888[i]; j++) {
             if (D_80084410[i][j] == id) {
                 for (k = 0; k < D_80098888[i]; k++) {
-                    D_800D1588[D_80084410[i][k]] = D_800D1588[id];
+                    gModelAnimTables[D_80084410[i][k]] = gModelAnimTables[id];
                     gModelAnimCounts[D_80084410[i][k]] = gModelAnimCounts[id];
                 }
                 return;
@@ -268,12 +268,12 @@ s32 func_1503D5F0(s32 id) {
     return id;
 }
 
-/* D_800D1588[id] while it still points at the header (the original re-reads it on every use). */
-#define HEADER (((AnimHeaderRaw **)D_800D1588)[id])
+/* gModelAnimTables[id] while it still points at the header (the original re-reads it on every use). */
+#define HEADER (((AnimHeaderRaw **)gModelAnimTables)[id])
 
 /*
  * Loads the animation table of model id (shared by its group, see model_shareAnimTable) into
- * D_800D1588[id], unless it is already loaded. Returns 0, or 4 if it is missing.
+ * gModelAnimTables[id], unless it is already loaded. Returns 0, or 4 if it is missing.
  */
 s32 model_loadAnimTable(s32 id, s32 arg1) {
     u32 size;

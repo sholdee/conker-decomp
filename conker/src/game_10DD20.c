@@ -80,7 +80,7 @@ void func_150E0BE0(Actor *obj) {
         }
     } else {
         if (obj->count5 > 60) {
-            D_800D1580 = 0xFF020133;
+            gEventParam = 0xFF020133;
             gCurrentActor = movement_obj;
             func_1506E8D8();
             gCurrentActor = obj;

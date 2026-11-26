@@ -6,9 +6,9 @@
    compiled with a view that takes a u8 cause. */
 void save_recordHit(Actor *source, Actor *victim, u8 cause);
 
-/* Defined in game_981E0.c as f32 func_1506AD30(Actor *obj, f32 time, u8 filtered). This file was
+/* Defined in game_981E0.c as f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered). This file was
    compiled with a view that takes a fourth argument (one call passes the character index). */
-f32 func_1506AD30(Actor *obj, f32 time, u8 filtered, s32 arg3);
+f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered, s32 arg3);
 
 /* Animation id lists (D_80099428 goes with the dive sound in actor_updatePlayerControls). */
 const u16 D_80099420[4] = { 0x215, 0x10E, 0x108, 0x249 };
@@ -171,7 +171,7 @@ typedef struct {
     u8 flags; /* bit 0: copied to unk10B; & 0xFE: stun time / 100 */
 } Game83300AnimSub;
 
-/* An actor type's reaction (0x18 bytes); ANIM_HEADER(D_800D1588[id])->reactions points to the table. */
+/* An actor type's reaction (0x18 bytes); ANIM_HEADER(gModelAnimTables[id])->reactions points to the table. */
 typedef struct Game83300AnimEntry {
     u8 kind; /* matched by actor_findReaction */
     u8 pad1[3];
@@ -266,7 +266,7 @@ void actor_moveToHost(Actor *actor) {
         }
     }
     animIdx = actor_findReaction(animKind, actor);
-    animTable = D_800D1588[actor->character_type];
+    animTable = gModelAnimTables[actor->character_type];
     anims = ANIM_HEADER(animTable)->reactions;
     if ((movement_obj[hostIdx].type == 1) && (movement_obj[hostIdx].inwater != 0)) {
         actor->basemtx = 4;
@@ -367,9 +367,9 @@ void func_15056A00(Actor *actor, u8 turn, u8 row) {
     const u8 *entry;
 
     col = 0;
-    if (D_80099A3C[row][7] < turn) {
+    if (gTurnAnimTable[row][7] < turn) {
         col = 5;
-    } else if (D_80099A3C[row][2] < turn) {
+    } else if (gTurnAnimTable[row][2] < turn) {
         col = 2;
     }
     angle = actor->angle;
@@ -378,7 +378,7 @@ void func_15056A00(Actor *actor, u8 turn, u8 row) {
     } else {
         col += 4;
     }
-    entry = &D_80099A3C[row][col];
+    entry = &gTurnAnimTable[row][col];
     if (*entry != 0xFF) {
         actor->scriptCmd--;
         actor->unk21C = 20000;
@@ -765,7 +765,7 @@ void actor_updateChaseAi(Actor *actor) {
         if (state != 0xD) {
             if (((u8)actor->unk24F != 0) && ((state != 0) || (arriveDist < targetDist))) {
                 k = (u8)actor->unk24F - 1;
-                if (D_80099A3C[k][0] < turnDiff) {
+                if (gTurnAnimTable[k][0] < turnDiff) {
                     actor->angle = prevMoveAngle;
                     func_15056A00(actor, turnDiff, k);
                 }
@@ -1104,7 +1104,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
                     }
                 }
                 if ((actor->unk2CC != 0) && (actor->speed > 5.0f)) {
-                    D_800D1580 = actor->unk2CC;
+                    gEventParam = actor->unk2CC;
                     func_1506E5FC();
                 }
                 if (actor->type == 4) {
@@ -1375,7 +1375,7 @@ void actor_attachToHost(Actor *actor, s32 hostIdx) {
     actor->stunnedseq = actor_findReaction(D_800860E4[variant], actor);
     actor->animseq.uh = 0xFFFF;
     actor_advanceReaction(dc_glbl_CharNum, actor);
-    animTable = D_800D1588[actor->character_type];
+    animTable = gModelAnimTables[actor->character_type];
     if (animTable != NULL) {
         anims = ANIM_HEADER(animTable)->reactions;
         if ((anims != NULL) && (anims[actor->stunnedseq].sub[2].flags & 2)) {
@@ -2181,7 +2181,7 @@ void actor_landNonPlayer(Actor *actor, f32 floorY) {
                             factor = actor->unk2CB * 0.009999999776f;
                             actor->yspd = (0.0f - actor->yspd) * factor;
                             if (sound != 0 && actor->yspd > 5.0f) {
-                                D_800D1580 = sound;
+                                gEventParam = sound;
                                 func_1506E5FC();
                             }
                         } else if (actor->type != 7) {
@@ -2267,7 +2267,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
                 movement->transport = 0;
             }
         }
-        func_1506AD30(victim, 800.0f, 1, savedIdx);
+        event_runTimedEvents(victim, 800.0f, 1, savedIdx);
         gCurrentActor = savedActor;
         dc_glbl_CharNum = savedIdx;
         victim->noshove &= 0xFEFF7FFF;
@@ -2313,7 +2313,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         v = base[index].unk8;
     }
     if (reaction != 0x27) {
-        D_80086694[v](attacker, victim, &reaction);
+        gHitReactionProcs[v](attacker, victim, &reaction);
     }
     if (gIsMultiplayer != 0) {
         tmp = reaction;
@@ -2331,15 +2331,15 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         func_15169070(0, 0x68, (s32)&msg, 2);
     }
     if (base[index].unk4 != 0) {
-        D_800D1580 = base[index].unk4;
-        if (func_1506E46C(victim, &D_800D1580, 0) != 0) {
-            sound_playActorUntracked(D_800D1580, victim, 0x6D60, 0x12C, 0x708);
+        gEventParam = base[index].unk4;
+        if (event_resolveSoundCommand(victim, &gEventParam, 0) != 0) {
+            sound_playActorUntracked(gEventParam, victim, 0x6D60, 0x12C, 0x708);
         }
     } else {
         if (hit[index].unk4 != 0) {
-            D_800D1580 = hit[index].unk4;
-            if (func_1506E46C(victim, &D_800D1580, 0) != 0) {
-                sound_playActorUntracked(D_800D1580, victim, 0x6D60, 0x12C, 0x708);
+            gEventParam = hit[index].unk4;
+            if (event_resolveSoundCommand(victim, &gEventParam, 0) != 0) {
+                sound_playActorUntracked(gEventParam, victim, 0x6D60, 0x12C, 0x708);
             }
         }
     }
@@ -2414,8 +2414,8 @@ const HitReaction *actor_getHitReactions(Actor *actor) {
     const HitReaction **slot;
     const HitReaction *ret;
 
-    if ((actor->character_type != 0xFF) && (D_800D1588[actor->character_type] != NULL)) {
-        slot = &ANIM_HEADER(D_800D1588[actor->character_type])->hits; // matching: the address is formed before the load
+    if ((actor->character_type != 0xFF) && (gModelAnimTables[actor->character_type] != NULL)) {
+        slot = &ANIM_HEADER(gModelAnimTables[actor->character_type])->hits; // matching: the address is formed before the load
         ret = *slot;
     } else {
         ret = D_8009A9F8;
@@ -2519,8 +2519,8 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
                     victim->scriptCmd = NULL;
                     victim->norun = 1;
                     victim->doing_hit = 0;
-                    D_800D1580 = table[index].unk4;
-                    if (D_800D1580 != 0) {
+                    gEventParam = table[index].unk4;
+                    if (gEventParam != 0) {
                         func_1506E5FC();
                     }
                     if (victim->type == 1) {
@@ -2539,7 +2539,7 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
                     if (victim->animseq.uh == 0x283) {
                         victim->angle = attacker->langle;
                         victim->speed = 25.0f;
-                        D_800D1580 = 0xFF0102E2;
+                        gEventParam = 0xFF0102E2;
                         func_1506E5FC();
                         attacker->doing_hit = 0;
                         attacker->intelwalk = 0xD;
@@ -2564,14 +2564,14 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
                     u8 handler;
                     s32 sound;
                     handler = table[index].unk8;
-                    D_800D1580 = table[index].unk4;
-                    if (D_800D1580 != 0) {
+                    gEventParam = table[index].unk4;
+                    if (gEventParam != 0) {
                         func_1506E5FC();
                     }
-                    D_80086694[handler](attacker, victim, (u8 *)&reactionBuf);
+                    gHitReactionProcs[handler](attacker, victim, (u8 *)&reactionBuf);
                     if (victim->unkFC != 0) {
                         sound = victim->unkFC;
-                        if (func_1506E46C(attacker, &sound, 1) != 0) {
+                        if (event_resolveSoundCommand(attacker, &sound, 1) != 0) {
                             actor_playUntrackedSoundRate(sound, victim, 0x5DC0);
                         }
                     }
@@ -3283,7 +3283,7 @@ void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32
         state->speed[0] = speed;
         state->start[0] = arg10;
         if (animEntry != NULL) {
-            state->callback = D_8008630C[animEntry[1]];
+            state->callback = gAnimStateProcs[animEntry[1]];
         } else {
             state->callback = 0;
         }
@@ -3391,7 +3391,7 @@ void actor_playAnim(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 
     } else {
         return;
     }
-    animTable = D_800D1588[idx];
+    animTable = gModelAnimTables[idx];
     if (animTable == NULL) {
         actor_stopAnim(actor);
         return;
@@ -3428,7 +3428,7 @@ u32 actor_findReaction(s32 kind, Actor *actor) {
     if (id == 0xFF) {
         return 0;
     }
-    animTable = D_800D1588[id];
+    animTable = gModelAnimTables[id];
     if (animTable == NULL) {
         return 0;
     }
@@ -3474,7 +3474,7 @@ void actor_advanceReaction(s32 sourceIdx, Actor *actor) {
         return;
     }
     anim = actor->stunnedseq;
-    ptr = D_800D1588[actor->character_type];
+    ptr = gModelAnimTables[actor->character_type];
     table = ANIM_HEADER(ptr)->reactions;
     if (table == NULL) {
         return;
@@ -3491,7 +3491,7 @@ void actor_advanceReaction(s32 sourceIdx, Actor *actor) {
         if (table[anim].sound != 0) {
             s32 sound;
             sound = table[anim].sound;
-            if (func_1506E46C(actor, &sound, 1) != 0) {
+            if (event_resolveSoundCommand(actor, &sound, 1) != 0) {
                 if (sound != 0x33) {
                     actor_playSound(sound, actor);
                 } else {
@@ -3562,10 +3562,10 @@ void actor_advanceReaction(s32 sourceIdx, Actor *actor) {
                             break;
                         case 0x10:
                             actor->mv->on_fire = 1;
-                            D_800D1580 = 0xFF010434;
+                            gEventParam = 0xFF010434;
                             deathKind = 0;
                             func_1506E5FC();
-                            D_800D1580 = 0xFF070169;
+                            gEventParam = 0xFF070169;
                             func_1506E8D8();
                             break;
                         default:
@@ -4009,7 +4009,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
         }
         if (jumped != 0) {
             if (sound != 0) {
-                if (func_1506E46C(actor, &sound, 1) != 0) {
+                if (event_resolveSoundCommand(actor, &sound, 1) != 0) {
                     actor_playSound(sound, actor);
                 }
             }
@@ -4493,7 +4493,7 @@ void actor_remove(Actor *actor, s32 mode) {
     sound_stopActorSounds(actor);
     func_150303E4(actor);
     actor_releaseCarried(actor);
-    func_15188AD0(actor);
+    trail_removeActorAfterimages(actor);
     if (actor->mv != NULL) {
         func_10004074((void *)(s32)actor->mv); // matching: passing actor->mv directly mismatches
     }

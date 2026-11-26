@@ -351,7 +351,7 @@ void func_150E3738(HomingEffect *arg0) {
         } else {
             randAngle = 1;
         }
-        if (func_151C229C(&from, NULL, 0, 0, 0, &particle, 190.0f, 0.00526315812f /* 1 / 190 */, randWidth * 50.0f + 10.0f,
+        if (weapon_spawnProjectile(&from, NULL, 0, 0, 0, &particle, 190.0f, 0.00526315812f /* 1 / 190 */, randWidth * 50.0f + 10.0f,
                           scale * 191.0f + 160.0f, 80.0f, (randByte % 176U) + 80, 0, 0, 0, 0, 0, 0, 1, randAngle,
                           effect->unk40, 0.0f, 0xFF, -1, 0, effect->header.owner, effect->header.kind) != 0) {
             spawned = 1;
@@ -400,7 +400,7 @@ void func_150E4010(Obj4010 *obj) {
 }
 
 void func_150E411C(Game1EF500Trail *trail) {
-    func_151C3B0C(trail, 0.352000028f, 0.701000035f, 0.566000044f, 0.228000015f, 0xFF, 0xFF, 0xFF);
+    weapon_spawnHitEffects(trail, 0.352000028f, 0.701000035f, 0.566000044f, 0.228000015f, 0xFF, 0xFF, 0xFF);
 }
 
 struct Obj4174 {

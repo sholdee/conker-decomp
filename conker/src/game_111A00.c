@@ -8,7 +8,7 @@
 typedef struct Struct800A1070 {
     /* 0x00 */ u16 objectType;   // object spawned through func_15168800 (0 = none)
     /* 0x02 */ u16 particleType; // particle burst type (0 = none)
-    /* 0x04 */ u8 chance;        // percent chance of the func_151C329C effect
+    /* 0x04 */ u8 chance;        // percent chance of the weapon_spawnImpactBurst effect
     /* 0x05 */ u8 debrisType;    // func_150E4E04 debris kind (0 = none)
     /* 0x06 */ u8 minCount;      // particle count = minCount + 1 + rand % countRange
     /* 0x07 */ u8 countRange;
@@ -45,7 +45,7 @@ static const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
 
 /*
  * Spawns the impact effects of `material` at (x, y, z): a particle burst, debris (func_150E4E04),
- * a random func_151C329C effect and an object. `size` indexes D_800A111C/D_800A1110, `tri` is the
+ * a random weapon_spawnImpactBurst effect and an object. `size` indexes D_800A111C/D_800A1110, `tri` is the
  * hit triangle (three vertex pointers) or NULL, and `slot` indexes D_800D9960 (0xFF = none).
  * Bit 0x8000 of `material` is forwarded to func_150E4E04.
  */
@@ -88,7 +88,7 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
             pos.x = x;
             pos.y = y + 20.0f;
             pos.z = z;
-            func_151C329C(&pos, 0xFF, 1);
+            weapon_spawnImpactBurst(&pos, 0xFF, 1);
         }
         if (slot != 0xFF) {
             D_800D9960[slot].ricochetChance = 100;
@@ -174,7 +174,7 @@ void func_150E4928(WorldObject *obj) {
             } else {
                 material = obj->floorHitAttrib;
             }
-            func_1511490C(mtx, obj);
+            gfx_getObjectModelMtx(mtx, obj);
             if (tri != NULL) {
                 // matching: IDO keeps the sum in one register only when built up in i
                 i = tri[0];

@@ -534,7 +534,7 @@ s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3) {
     s32 modelId;
 
     modelId = obj->character_type;
-    if (D_800D1588[modelId] == NULL) {
+    if (gModelAnimTables[modelId] == NULL) {
         return 0;
     }
     if (gModelAnimCounts[modelId] == 0) {
@@ -945,7 +945,7 @@ void func_15084558(Actor *self) {
                             if (otherList[k] == list[i]) {
                                 unique = 0;
                             }
-                            if (D_800D1588[otherList[k]] == D_800D1588[list[i]] && D_800D1588[otherList[k]] != NULL) {
+                            if (gModelAnimTables[otherList[k]] == gModelAnimTables[list[i]] && gModelAnimTables[otherList[k]] != NULL) {
                                 freeData = 0;
                             }
                             if (D_800D1C90[otherList[k]] == D_800D1C90[list[i]] && D_800D1C90[otherList[k]] != NULL) {
@@ -955,13 +955,13 @@ void func_15084558(Actor *self) {
                     }
                 }
             }
-            if (freeData && D_800D1588[list[i]] != NULL) {
-                data = D_800D1588[list[i]];
+            if (freeData && gModelAnimTables[list[i]] != NULL) {
+                data = gModelAnimTables[list[i]];
                 {
                     func_100043B4((s32 *)ANIM_HEADER(data), 3);
                     for (k = 0; k < 187; k++) {
-                        if (data == D_800D1588[k]) {
-                            D_800D1588[k] = NULL;
+                        if (data == gModelAnimTables[k]) {
+                            gModelAnimTables[k] = NULL;
                         }
                     }
                 }

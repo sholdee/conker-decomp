@@ -186,7 +186,7 @@ typedef struct {
 /* A projectile created by func_1513264C. */
 typedef struct {
     /* 0x000 */ ModelParticle head;
-    /* 0x170 */ EffectObj *trail; /* ribbon effect (func_151B7328) following the projectile */
+    /* 0x170 */ EffectObj *trail; /* ribbon effect (trail_spawnRibbon) following the projectile */
 } GameDC6B0Projectile;
 
 struct Obj150B060C {
@@ -1266,7 +1266,7 @@ typedef struct {
 
 /* Data of effect 0x1B (func_15109ED4 / func_15109FB8). */
 typedef struct {
-    /* 0x00 */ void *unk0; /* passed to func_1511490C to build the emitter's matrix */
+    /* 0x00 */ void *unk0; /* passed to gfx_getObjectModelMtx to build the emitter's matrix */
     /* 0x04 */ f32 spawnAccum;
     /* 0x08 */ f32 spawnRate;
     /* 0x0C */ s8 tickFunc; /* index into D_80088C60, -1: none */

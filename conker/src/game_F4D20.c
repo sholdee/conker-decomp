@@ -136,7 +136,7 @@ void func_150C7C90(WorldObject *obj) {
         index = count;
     }
     last = &((F4D20Entry *)obj->displayList)[index];
-    angle = -669 - func_151149AC(obj->moveData.word & 0xFF)->y;
+    angle = -669 - gfx_findObjectById(obj->moveData.word & 0xFF)->y;
     if (obj->moveData.word & 0x8000) {
         angle = 836 - angle;
     }

@@ -75,7 +75,7 @@ void func_1500F40C(void) {
     descriptor.extent.y = 0;
     descriptor.extent.z = 1637.0f - descriptor.origin.z;
     descriptor.yaw = (s16)(func_150484A0(descriptor.extent.x, descriptor.extent.z) * 40.74366379f) - 64;
-    func_15189900(&descriptor, 1);
+    trail_createSprayEmitter(&descriptor, 1);
     descriptor.origin.x = 2810.0f;
     descriptor.origin.y = -1667.0f;
     descriptor.origin.z = 1637.0f;
@@ -83,7 +83,7 @@ void func_1500F40C(void) {
     descriptor.extent.y = -1668.0f - descriptor.origin.y;
     descriptor.extent.z = 1236.0f - descriptor.origin.z;
     descriptor.yaw = (s16)(func_150484A0(descriptor.extent.x, descriptor.extent.z) * 40.74366379f) - 64;
-    func_15189900(&descriptor, 1);
+    trail_createSprayEmitter(&descriptor, 1);
     descriptor.origin.x = 2667.0f;
     descriptor.origin.y = -1668.0f;
     descriptor.origin.z = 1236.0f;
@@ -91,7 +91,7 @@ void func_1500F40C(void) {
     descriptor.extent.y = -1676.0f - descriptor.origin.y;
     descriptor.extent.z = 1025.0f - descriptor.origin.z;
     descriptor.yaw = (s16)(func_150484A0(descriptor.extent.x, descriptor.extent.z) * 40.74366379f) - 64;
-    func_15189900(&descriptor, 1);
+    trail_createSprayEmitter(&descriptor, 1);
     descriptor.origin.x = 1894.0f;
     descriptor.origin.y = -1674.0f;
     descriptor.origin.z = 788.0f;
@@ -99,7 +99,7 @@ void func_1500F40C(void) {
     descriptor.extent.y = -1677.0f - descriptor.origin.y;
     descriptor.extent.z = 557.0f - descriptor.origin.z;
     descriptor.yaw = (s16)(func_150484A0(descriptor.extent.x, descriptor.extent.z) * 40.74366379f) - 64;
-    func_15189900(&descriptor, 1);
+    trail_createSprayEmitter(&descriptor, 1);
     descriptor.origin.x = 1841.0f;
     descriptor.origin.y = -1677.0f;
     descriptor.origin.z = 557.0f;
@@ -107,7 +107,7 @@ void func_1500F40C(void) {
     descriptor.extent.y = -1678.0f - descriptor.origin.y;
     descriptor.extent.z = 455.0f - descriptor.origin.z;
     descriptor.yaw = (s16)(func_150484A0(descriptor.extent.x, descriptor.extent.z) * 40.74366379f) - 64;
-    func_15189900(&descriptor, 1);
+    trail_createSprayEmitter(&descriptor, 1);
     descriptor.origin.x = 1594.0f;
     descriptor.origin.y = -1678.0f;
     descriptor.origin.z = 455.0f;
@@ -115,7 +115,7 @@ void func_1500F40C(void) {
     descriptor.extent.y = 0.0f;
     descriptor.extent.z = 613.0f - descriptor.origin.z;
     descriptor.yaw = (s16)(func_150484A0(descriptor.extent.x, descriptor.extent.z) * 40.74366379f) - 64;
-    func_15189900(&descriptor, 1);
+    trail_createSprayEmitter(&descriptor, 1);
     descriptor.origin.x = 1253.0f;
     descriptor.origin.y = -1673.0f;
     descriptor.origin.z = 668.0f;
@@ -123,7 +123,7 @@ void func_1500F40C(void) {
     descriptor.extent.y = -1682.0f - descriptor.origin.y;
     descriptor.extent.z = 572.0f - descriptor.origin.z;
     descriptor.yaw = (s16)(func_150484A0(descriptor.extent.x, descriptor.extent.z) * 40.74366379f) - 64;
-    func_15189900(&descriptor, 1);
+    trail_createSprayEmitter(&descriptor, 1);
     descriptor.origin.x = 1075.0f;
     descriptor.origin.y = -1682.0f;
     descriptor.origin.z = 572.0f;
@@ -131,7 +131,7 @@ void func_1500F40C(void) {
     descriptor.extent.y = -1680.0f - descriptor.origin.y;
     descriptor.extent.z = 687.0f - descriptor.origin.z;
     descriptor.yaw = (s16)(func_150484A0(descriptor.extent.x, descriptor.extent.z) * 40.74366379f) - 64;
-    func_15189900(&descriptor, 1);
+    trail_createSprayEmitter(&descriptor, 1);
     descriptor.origin.x = 872.0f;
     descriptor.origin.y = -1680.0f;
     descriptor.origin.z = 687.0f;
@@ -139,5 +139,5 @@ void func_1500F40C(void) {
     descriptor.extent.y = -1676.0f - descriptor.origin.y;
     descriptor.extent.z = 931.0f - descriptor.origin.z;
     descriptor.yaw = (s16)(func_150484A0(descriptor.extent.x, descriptor.extent.z) * 40.74366379f) - 64;
-    func_15189900(&descriptor, 1);
+    trail_createSprayEmitter(&descriptor, 1);
 }

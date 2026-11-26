@@ -20,8 +20,8 @@ static const Vec3f D_800AAB80[5][2] = {
 };
 
 /* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
- * a func_151D8868 event for its camera, side effects, then func_151C229C along `aim` (from the joints when arg2). */
-Game1EF500Trail *func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
+ * a func_151D8868 event for its camera, side effects, then weapon_spawnProjectile along `aim` (from the joints when arg2). */
+Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
                                s32 arg6) {
     Vec3f origin;
     Vec3f aim;
@@ -136,27 +136,27 @@ Game1EF500Trail *func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *a
             mask |= 1 << i;
         }
         if (arg2 || !(func_150ADA20() & mask)) {
-            func_151C6D70(arg0, side, &origin, arg4, arg5, arg6);
+            weapon_spawnJointBeam(arg0, side, &origin, arg4, arg5, arg6);
         }
     }
-    return func_151C229C(&shotPos, &aim, spF4, spF0, 1, 0, 300.0f, 0.003333333414f,
+    return weapon_spawnProjectile(&shotPos, &aim, spF4, spF0, 1, 0, 300.0f, 0.003333333414f,
                          func_150ADA68() * 10.0f + 25.0f, func_150ADA68() * 150.0f + 400.0f, 50.0f,
                          (func_150ADA20() % 156U) + 100, arg0, arg2 ? 0 : 1, arg2 ? 0 : 1, arg2 ? 0 : 1, 8, arg2 ? 0 : 1, 1, 0, 0x1A, 0.0f, 0xFF,
                          -1, 0, arg5, arg6);
 }
 
-/* Handler-table entry: the side-0 point of func_151C69CC. */
-void func_151C6974(Actor *arg0, s16 arg1, Vec3f *out) {
-    func_151C69CC(arg0, out, 0);
+/* Handler-table entry: the side-0 point of weapon_getJointPos. */
+void weapon_getSide0JointPos(Actor *arg0, s16 arg1, Vec3f *out) {
+    weapon_getJointPos(arg0, out, 0);
 }
 
-/* Handler-table entry: the side-1 point of func_151C69CC. */
-void func_151C69A0(Actor *arg0, s16 arg1, Vec3f *out) {
-    func_151C69CC(arg0, out, 1);
+/* Handler-table entry: the side-1 point of weapon_getJointPos. */
+void weapon_getSide1JointPos(Actor *arg0, s16 arg1, Vec3f *out) {
+    weapon_getJointPos(arg0, out, 1);
 }
 
 /* Transforms this side's D_800AAB08 point by its joint matrix (D_800AAB00 bytes into arg0->ob_matrix_ptr) into *out. */
-void func_151C69CC(Actor *arg0, Vec3f *out, u8 side) {
+void weapon_getJointPos(Actor *arg0, Vec3f *out, u8 side) {
     void *matrix = (u8 *)arg0->ob_matrix_ptr + D_800AAB00[side];
 
     func_15143134(&D_800AAB08[side], out, matrix);
@@ -174,7 +174,7 @@ typedef struct {
     /* 0x9C */ u8 flags;
 } ShotSource;
 
-/* Emits this side's effects (func_151D3F14, func_151D4408, func_151C6D70) from its joint points, then fires a
+/* Emits this side's effects (func_151D3F14, func_151D4408, weapon_spawnJointBeam) from its joint points, then fires a
  * copy of the shot described by the owner's 0x1B entry, its end pushed 10% beyond its start. */
 void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
     Vec3f origin;
@@ -205,7 +205,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
             }
             func_151D3F14(&origin, arg2, arg3);
             func_151D4408(&start, &dir, matrix, arg0, 1.0f, arg2, arg3);
-            func_151C6D70(arg0, side, &origin, -1, arg2, arg3);
+            weapon_spawnJointBeam(arg0, side, &origin, -1, arg2, arg3);
             {
                 ShotSource *source;
                 Vec3f end;
@@ -251,7 +251,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
 
 /* Spawns a func_15102B38 effect at `pos` between this side's D_800AAB08/D_800AAB20 points, with random
  * size, count and angle. */
-void func_151C6D70(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5) {
+void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5) {
     ParticleSize values;
     f32 angle;
     u32 random1;

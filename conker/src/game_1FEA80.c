@@ -17,7 +17,7 @@ void *memcpy(void *, const void *, u32);
 extern s32 D_800A4AC8[][2];
 
 /* Appends the owner's position to the trail and recomputes the previous sample's normal. */
-s32 func_151D15D0(TrackerTrail *actor) {
+s32 trail_sampleTrackerTrail(TrackerTrail *actor) {
     TrackerTrailData *state;
     TrackerTrailPoint *points;
     TrackerEffect *owner;
@@ -104,7 +104,7 @@ s32 func_151D15D0(TrackerTrail *actor) {
                         prevDir.x = (older->position.x - middle->position.x) * middleInvSpeed;
                         prevDir.z = (older->position.z - middle->position.z) * middleInvSpeed;
                         normal.x = -(nextZ - prevDir.z);
-                        // matching: as two statements; one expression changes func_151D1C98's vtx reloads
+                        // matching: as two statements; one expression changes trail_drawTrackerTrail's vtx reloads
                         normal.z = nextX;
                         normal.z -= prevDir.x;
                         lengthSq = normal.x * normal.x + normal.z * normal.z;
@@ -128,7 +128,7 @@ s32 func_151D15D0(TrackerTrail *actor) {
 }
 
 /* Trims the trail to state->maxLength and fades width and alpha from head to tail. */
-s32 func_151D197C(TrackerTrail *actor) {
+s32 trail_shapeTrackerTrail(TrackerTrail *actor) {
     TrackerTrailData *state;
     TrackerTrailPoint *points;
     f32 total;
@@ -226,7 +226,7 @@ s32 func_151D197C(TrackerTrail *actor) {
 }
 
 /* Draws the trail as a textured ribbon: one quad per pair of samples, head to tail. */
-Gfx *func_151D1C98(TrackerTrail *actor, Gfx *gfx, s16 arg2) {
+Gfx *trail_drawTrackerTrail(TrackerTrail *actor, Gfx *gfx, s16 arg2) {
     TrackerTrailData *state;
     Vec3f next;
     Vec3f first;
@@ -337,7 +337,7 @@ Gfx *func_151D1C98(TrackerTrail *actor, Gfx *gfx, s16 arg2) {
 }
 
 /* Detaches the trail from its owner. */
-void func_151D223C(TrackerTrail *actor) {
+void trail_detachTrackerTrail(TrackerTrail *actor) {
     TrackerTrailData *state;
     TrackerEffect *owner;
 
@@ -348,12 +348,12 @@ void func_151D223C(TrackerTrail *actor) {
     }
 }
 
-void func_151D2258(TrackerTrail *actor) {
-    func_151D223C(actor);
+void trail_destroyTrackerTrail(TrackerTrail *actor) {
+    trail_detachTrackerTrail(actor);
     func_151478F4(actor);
 }
 
-void func_151D2284(TrackerTrail *actor) {
-    func_151D223C(actor);
+void trail_freeTrackerTrail(TrackerTrail *actor) {
+    trail_detachTrackerTrail(actor);
     func_15147928(actor);
 }

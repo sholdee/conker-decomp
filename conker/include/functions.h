@@ -51,7 +51,7 @@ struct DefParticleHead;
 //func_1001AFEC
 //func_1001B07C
 //func_1001B200
-// s32  func_1001B310(void *arg0, void *arg1);
+// s32  audio_getVoiceFxMix(void *arg0, void *arg1);
 // u8   func_1001B450(void *arg0, void *arg1);
 //func_1019EA88
 //func_1019EAB0

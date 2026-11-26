@@ -224,7 +224,7 @@ s16 __n_vsVol(N_ALVoiceState *vs, N_ALSeqPlayer *seqp) {
 }
 
 /* The voice's fx mix: the channel's mix scaled by the player's mix controls, keeping bit 7. */
-u8 func_1001B310(N_ALVoiceState *vs, N_ALCSPlayer *seqp) {
+u8 audio_getVoiceFxMix(N_ALVoiceState *vs, N_ALCSPlayer *seqp) {
     s32 sign;
     s32 fxmix;
 
@@ -313,12 +313,12 @@ void __n_resetPerfChanState(N_ALSeqPlayer *seqp, s32 chan) {
  * the channel held before and copying the new one's settings into the channel.
  * Returns 1 if the program could not be loaded.
  */
-s32 func_1001B7D0(N_ALSeqPlayer *seqp, s32 instNum, s32 chan) {
+s32 audio_loadChannelProgram(N_ALSeqPlayer *seqp, s32 instNum, s32 chan) {
     ALSound *sound;
     ALInstrument *inst;
     s32 i;
 
-    inst = func_1001BD34(seqp->drvr, &seqp->bank->instArray[instNum], -1);
+    inst = audio_loadInstrument(seqp->drvr, &seqp->bank->instArray[instNum], -1);
     if (seqp->chanState[chan].instrument != NULL) {
         seqp->drvr->bankRelease(seqp->bank->instArray[seqp->chanState[chan].instNum]);
         seqp->chanState[chan].instrument = NULL;
@@ -377,7 +377,7 @@ s32 func_1001B7D0(N_ALSeqPlayer *seqp, s32 instNum, s32 chan) {
  * RAM address, or NULL if there is no loader or the result is not a
  * word-aligned KSEG0 address.
  */
-void *func_1001BD34(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx) {
+void *audio_loadInstrument(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx) {
     BankLoadProc loadProc;
     void *addr = NULL;
 
@@ -398,7 +398,7 @@ void *func_1001BD34(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx) {
 }
 
 /* Releases an instrument (soundIdx == -1) or one of its sounds through the driver. */
-void func_1001BE1C(N_ALSynth *drvr, ALInstrument *inst, s32 soundIdx) {
+void audio_releaseInstrument(N_ALSynth *drvr, ALInstrument *inst, s32 soundIdx) {
     if (soundIdx == -1) {
         drvr->bankAddRef(inst);
     } else {

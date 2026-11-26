@@ -82,9 +82,9 @@ void (*gActorUpdateHandlers[])(Actor *) = {
     func_150B10F0, func_15052590, func_150548E4, func_150C3994,
     func_150C3994, func_150F34F4, NULL, NULL,
     func_150C3574, func_15052464, func_150E0BE0, func_15054A0C,
-    func_15054A94, NULL, func_150ED748, func_150CE740,
+    func_15054A94, NULL, weapon_updateTank, func_150CE740,
     func_150D7928, func_1505528C, NULL, func_150EEDA8,
-    actor_updateFollower, func_150EEC84, func_150C3230, func_15055B64,
+    actor_updateFollower, weapon_releaseTankCamera, func_150C3230, func_15055B64,
     func_150D13A0, func_15055D48, func_15055BF8,
 };
 
@@ -527,11 +527,11 @@ void func_1504BAF0(Actor *obj) {
     if (index >= 0) {
         other = &movement_obj[index];
         if (other->carried >= 100 && (other->character_type == 168 || other->character_type == 169)) {
-            D_800D1580 = 3;
+            gEventParam = 3;
             func_1507490C();
         }
     }
-    func_1506EBC0();
+    event_dropHeldObject();
 }
 
 void func_1504BB88(Actor *obj) {
@@ -1237,7 +1237,7 @@ void actor_updatePlayer(Actor *actor) {
                 actor->mv->bitten -= D_800CC264;
                 if (D_800CC288 & 0xC000) {
                     if (actor->shad == 0.0f) {
-                        D_800D1580 = 0xFF030170;
+                        gEventParam = 0xFF030170;
                         actor->speed *= 0.4f;
                         actor->yspd = 10.0f;
                         actor->ygrav = 5.0f;
@@ -1897,7 +1897,7 @@ void actor_updatePlayer(Actor *actor) {
                         pushAnim = 0x18;
                     }
                     if ((pushAnim != actor->animseq.uh) && (movement_obj[D_800CC26C].character_type != 0x17)) {
-                        D_800D1580 = 0xFF08012B;
+                        gEventParam = 0xFF08012B;
                         pushAccel = 0.5f;
                         func_1506E8D8();
                     }
@@ -1995,7 +1995,7 @@ void actor_updatePlayer(Actor *actor) {
                             actor_kill(actor, 8);
                         } else if (actor->energy != 0) {
                             if (gIsMultiplayer == 0) {
-                                D_800D1580 = 0xFF0201D6;
+                                gEventParam = 0xFF0201D6;
                                 func_1506E9D8();
                             }
                             actor->energy -= 1;
@@ -2009,7 +2009,7 @@ void actor_updatePlayer(Actor *actor) {
                     actor->norun = 0xC;
                 }
                 if ((actor->energy != 0) && (sound_isActorSound2Playing(actor) == 0)) {
-                    D_800D1580 = 0xFF08030A;
+                    gEventParam = 0xFF08030A;
                     func_1506E5FC();
                 }
             } else {
@@ -2235,7 +2235,7 @@ void actor_updatePlayer(Actor *actor) {
                 actor->count3 = 0;
                 actor->unkA9 = 0;
                 if ((actor->mv->ladder == 0) && (actor->energy != 0)) {
-                    func_1506B100(0xD1, 2.0f, splashSpeed);
+                    event_playAnim(0xD1, 2.0f, splashSpeed);
                     actor->norun = 0;
                 }
                 if (actor->energy == 0) {
@@ -2299,7 +2299,7 @@ void actor_updatePlayer(Actor *actor) {
             if ((actor->animseq.uh != 0x101) && (actor->inwater == 0)) {
                 if (actor->animseq.uh != 0xCF) {
                     sound = 0x2007E5;
-                    if (func_1506E46C(actor, &sound, 1) != 0) {
+                    if (event_resolveSoundCommand(actor, &sound, 1) != 0) {
                         actor_playSound(sound, actor);
                     }
                     { BLK; }
@@ -2617,7 +2617,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
                 blend = 0.25f;
             }
             if ((fabsf(actor->lean_angle) > 70.0f) && (gIsMultiplayer == 0) && (actor->energy != 0) && (actor->mv->gun_before_reload == 0)) {
-                D_800D1580 = 0xFF020146;
+                gEventParam = 0xFF020146;
                 func_1506E8D8();
                 actor->mv->gun_before_reload = 1;
             }
@@ -3039,7 +3039,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
     if (force || ((obj->ypos < arg0->ypos + height * arg0->scale_y) && (obj->yspd < 0.0f))) {
         arg0->lifting = arg0->owner + 100;
         if (arg9 != 0) {
-            D_800D1580 = arg9;
+            gEventParam = arg9;
             func_1506E5FC();
         }
         obj->unk1CC = obj->ypos;
@@ -3547,7 +3547,7 @@ void func_150538CC(Actor *obj) {
 
                 other = func_15083E90(6);
                 if (D_800CC268 & (1U << (other - movement_obj))) {
-                    D_800D1580 = 0xFF0100A7;
+                    gEventParam = 0xFF0100A7;
                     func_1506E6FC();
                     if (other != NULL) {
                         obj->angle = actor_getDirectionAngle(obj->xpos - other->xpos, other->zpos - obj->zpos, 0);
@@ -3681,7 +3681,7 @@ void func_15054A94(Actor *obj) {
             return;
         }
         if (obj->animseq.uh == 0 && anim->frame[0] == 0.0f) {
-            func_15188810(obj, 100, 0);
+            trail_startActorAfterimage(obj, 100, 0);
         }
         if (obj->animseq.uh == 0 && other->animseq.uh == 0x4B) {
             actor_playAnim(obj, 1, 1.0f, 3.0f, 0.0f, 0.0f, 0);
@@ -3924,7 +3924,7 @@ void func_1505528C(Actor *obj) {
             f32 t;
             f32 y;
 
-            D_800D1580 = 0xFF0100B0;
+            gEventParam = 0xFF0100B0;
             if (obj->ygrav != 0.0f) {
                 func_1506E5FC();
             }
@@ -4044,7 +4044,7 @@ void func_15055BF8(Actor *obj) {
 void func_15055C88(Actor *obj) {
     s32 sfx = 0x2007E4;
 
-    if (!(obj->unk9C & 0x1000) && func_1506E46C(obj, &sfx, 1)) {
+    if (!(obj->unk9C & 0x1000) && event_resolveSoundCommand(obj, &sfx, 1)) {
         actor_playSound(sfx, obj);
     }
     obj->mv->over_edge = 100;

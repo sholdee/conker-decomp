@@ -93,7 +93,7 @@ s32 func_1517B500(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     s32 rnd;
 
     *phase = (*phase * 3) / 2;
-    limit = D_80095CE0[pos->texInfo].frameCount << 8;
+    limit = gParticleTexInfos[pos->texInfo].frameCount << 8;
     if (*phase >= limit) {
         *phase -= limit;
     }
@@ -369,14 +369,14 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                 }
                 if (D_800DD478[type * FRAMES_PER_TYPE] == 0) {
                     if (D_800DDA90[type].devAddr != 0) {
-                        hi = D_80095CE0[D_800DDBC0[type]].frameSize * D_80095CE0[D_800DDBC0[type]].frameCount;
+                        hi = gParticleTexInfos[D_800DDBC0[type]].frameSize * gParticleTexInfos[D_800DDBC0[type]].frameCount;
                         D_800DDA90[type].buf = func_10003C6C(D_800DDA90[type].size, 1, 2, 1, 0);
                         if (D_800DDA90[type].buf != 0) {
                             D_800DD478[type * FRAMES_PER_TYPE] = func_10003C6C(hi, 4, 1, 0, 0);
                             if (D_800DD478[type * FRAMES_PER_TYPE] != 0) {
                                 func_10004514(D_800DDA90[type].devAddr, D_800DDA90[type].buf, D_800DDA90[type].size, 1);
                                 D_800DDA90[type].used = 1;
-                                hi = D_80095CE0[D_800DDBC0[type]].frameSize;
+                                hi = gParticleTexInfos[D_800DDBC0[type]].frameSize;
                                 for (frame = 1; frame < FRAMES_PER_TYPE; frame++) {
                                     D_800DD478[type * FRAMES_PER_TYPE + frame] = D_800DD478[type * FRAMES_PER_TYPE + frame - 1] + hi;
                                 }

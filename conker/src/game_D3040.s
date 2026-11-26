@@ -242,8 +242,8 @@ glabel func_150A5E44
     /* D33B4 150A5F04 8D4A3690 */  lw         $t2, %lo(D_800D3690)($t2)
     /* D33B8 150A5F08 3C18800E */  lui        $t8, %hi(D_800DF0E4)
     /* D33BC 150A5F0C 8F18F0E4 */  lw         $t8, %lo(D_800DF0E4)($t8)
-    /* D33C0 150A5F10 3C0F800E */  lui        $t7, %hi(D_800DBEF8)
-    /* D33C4 150A5F14 8DEFBEF8 */  lw         $t7, %lo(D_800DBEF8)($t7)
+    /* D33C0 150A5F10 3C0F800E */  lui        $t7, %hi(gObjectBlocks)
+    /* D33C4 150A5F14 8DEFBEF8 */  lw         $t7, %lo(gObjectBlocks)($t7)
     /* D33C8 150A5F18 0018C040 */  sll        $t8, $t8, 1
     /* D33CC 150A5F1C 0304C021 */  addu       $t8, $t8, $a0
     /* D33D0 150A5F20 3C10800E */  lui        $s0, %hi(D_800DBE40)

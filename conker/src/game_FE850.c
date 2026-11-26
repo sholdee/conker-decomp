@@ -16,7 +16,7 @@ void func_150D13A0(Actor *arg0) {
 void func_150D1410(Actor *arg0) {
     WorldObject *temp;
 
-    temp = func_151149AC(0xF9);
+    temp = gfx_findObjectById(0xF9);
     if (temp != 0) {
         if ((arg0 - movement_obj) == 0) {
             temp->inactive = 1;
@@ -29,7 +29,7 @@ void func_150D1410(Actor *arg0) {
 void func_150D146C(Actor *arg0) {
     WorldObject *temp;
 
-    temp = func_151149AC(0xF9);
+    temp = gfx_findObjectById(0xF9);
     if (temp != 0) {
         temp->inactive = 1;
     }

@@ -138,7 +138,7 @@ void func_150BF21C(WorldObject *obj) {
             if (bob < 0.0f) {
                 bob = 0.0f;
             }
-            func_15114D24(obj, -1, 0x7D00, 500, 2000, 0);
+            gfx_playObjectSound(obj, -1, 0x7D00, 500, 2000, 0);
         } else {
             rate = 0.2f;
             BOB_WORK(obj)->bobPhase = 0.0f;
@@ -151,7 +151,7 @@ void func_150BF21C(WorldObject *obj) {
                 if (speed < 6.0f) {
                     speed += 0.5f;
                 }
-                func_15114D24(obj, 0xB9, 0x7D00, 500, 2000, 1);
+                gfx_playObjectSound(obj, 0xB9, 0x7D00, 500, 2000, 1);
             }
             BOB_WORK(obj)->speed = speed;
             if (fabsf(speed) < fabsf(diff)) {
@@ -165,9 +165,9 @@ void func_150BF21C(WorldObject *obj) {
                 obj->task_flag &= ~TASK_FLAG_STATE;
                 obj->task_flag |= TASK_FLAG_GOING_ON;
                 if (obj->sound_id == 0) {
-                    func_15114D24(obj, 0xB9, 0x3E80, 1000, 4000, 0);
+                    gfx_playObjectSound(obj, 0xB9, 0x3E80, 1000, 4000, 0);
                 }
-                func_15114F04(obj, 0x3E80, speed * 500.0f);
+                gfx_startObjectSound(obj, 0x3E80, speed * 500.0f);
             } else {
                 height = obj->moveData.word;
                 if (speed < 0.0f) {
@@ -176,7 +176,7 @@ void func_150BF21C(WorldObject *obj) {
                 obj->task_flag &= ~TASK_FLAG_STATE;
                 obj->task_flag |= TASK_FLAG_ON;
                 BOB_WORK(&obj[1])->speed = 0.0f;
-                func_15114D24(obj, -1, 0, 0, 0, 0);
+                gfx_playObjectSound(obj, -1, 0, 0, 0, 0);
             }
             BOB_WORK(obj)->height = height;
             BOB_WORK(obj)->speed = speed;
@@ -208,7 +208,7 @@ void func_150BF21C(WorldObject *obj) {
 typedef struct {
     /* 0x7C */ s32 unk7C;
     /* 0x80 */ s32 unk80;
-    /* 0x84 */ void *texScroll; // from func_15195FB0
+    /* 0x84 */ void *texScroll; // from flamethrower_addObjectTexScroll
 } ScrollWork;
 
 #define SCROLL_WORK(obj) ((ScrollWork *)&(obj)->touch)
@@ -225,7 +225,7 @@ void func_150BF760(WorldObject *obj) {
     if (D_800C35EA[0] != 1 || D_800C35E8[0] == 1) {
         func_1511B51C(obj);
         if (SCROLL_WORK(&obj[1])->texScroll == NULL) {
-            SCROLL_WORK(&obj[1])->texScroll = func_15195FB0(obj, D_800902B8, 1, -1, 0, 0, -8);
+            SCROLL_WORK(&obj[1])->texScroll = flamethrower_addObjectTexScroll(obj, D_800902B8, 1, -1, 0, 0, -8);
         }
         actor = func_15083E90(0x14);
         mode = obj->task_flag & TASK_FLAG_STATE;

@@ -69,7 +69,7 @@ void func_151749F8(s32 arg0, s32 arg1) {
     u8 temp;
 
     func_15165F70();
-    func_15195FF0(D_800B0E00[0], D_800B0E00[1]);
+    flamethrower_updateTexScrolls(D_800B0E00[0], D_800B0E00[1]);
     func_1510C8A8();
     temp = D_800B0DF0->updateCallback;
     if (temp != 0) {

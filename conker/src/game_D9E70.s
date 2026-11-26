@@ -480,8 +480,8 @@ glabel func_150AC9C0
     /* DA518 150AD068 269437E0 */  addiu      $s4, $s4, %lo(D_800D37E0)
     /* DA51C 150AD06C 029E8821 */  addu       $s1, $s4, $fp
     /* DA520 150AD070 023E8821 */  addu       $s1, $s1, $fp
-    /* DA524 150AD074 3C09800E */  lui        $t1, %hi(D_800DBEF8)
-    /* DA528 150AD078 8D29BEF8 */  lw         $t1, %lo(D_800DBEF8)($t1)
+    /* DA524 150AD074 3C09800E */  lui        $t1, %hi(gObjectBlocks)
+    /* DA528 150AD078 8D29BEF8 */  lw         $t1, %lo(gObjectBlocks)($t1)
     /* DA52C 150AD07C 3C06800E */  lui        $a2, %hi(D_800DBE40)
     /* DA530 150AD080 8CC6BE40 */  lw         $a2, %lo(D_800DBE40)($a2)
     /* DA534 150AD084 00C03825 */  or         $a3, $a2, $zero
@@ -613,8 +613,8 @@ glabel func_150AC9C0
     /* DA6EC 150AD23C 8DADBEF4 */  lw         $t5, %lo(db_Object_array)($t5)
     /* DA6F0 150AD240 00004012 */  mflo       $t0
     /* DA6F4 150AD244 01A8E021 */  addu       $gp, $t5, $t0
-    /* DA6F8 150AD248 3C0D800E */  lui        $t5, %hi(D_800DBEF8)
-    /* DA6FC 150AD24C 8DADBEF8 */  lw         $t5, %lo(D_800DBEF8)($t5)
+    /* DA6F8 150AD248 3C0D800E */  lui        $t5, %hi(gObjectBlocks)
+    /* DA6FC 150AD24C 8DADBEF8 */  lw         $t5, %lo(gObjectBlocks)($t5)
     /* DA700 150AD250 00164080 */  sll        $t0, $s6, 2
     /* DA704 150AD254 01A86821 */  addu       $t5, $t5, $t0
     /* DA708 150AD258 8DAD0000 */  lw         $t5, 0x0($t5)

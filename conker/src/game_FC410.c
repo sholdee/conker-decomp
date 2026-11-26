@@ -20,7 +20,7 @@ void func_150CEF60(s32 arg0) {
     cx = -1.0f;
     cy = 44.0f;
     z = -1805.0f;
-    temp_v0 = func_151149AC(4);
+    temp_v0 = gfx_findObjectById(4);
     angle = temp_v0->v * 0.017453292f;
     c.c = func_150AD78C(angle);
     s = func_150AD780(angle);

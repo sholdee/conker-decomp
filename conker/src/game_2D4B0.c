@@ -11,7 +11,7 @@ void music_init(void) {
     {
         msgQueue = &gMarkerQueues[i];
         osCreateMesgQueue(msgQueue, gMarkerQueueBufs[i], 8);
-        func_10008570(i, msgQueue);
+        audio_setSeqMsgQueue(i, msgQueue);
     }
 
     func_100085A4(0, 6, 1); // stub function

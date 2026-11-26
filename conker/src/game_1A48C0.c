@@ -41,7 +41,7 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
         u8 headingAngle;
 
         D_800DD410[D_800DD418++] = deformer;
-        obj = func_151149AC(objectId);
+        obj = gfx_findObjectById(objectId);
         shared = FALSE;
         deformer->objectId = objectId;
         deformer->flags = flags;
@@ -154,7 +154,7 @@ void func_15177A94(void) {
 
     for (i = 0; i < D_800DD418; i++) {
         deformer = D_800DD410[i];
-        obj = func_151149AC(deformer->objectId);
+        obj = gfx_findObjectById(deformer->objectId);
         if (obj->viewFlags & 0xF) {
             // the first deformer on an object starts from its base vertices, later ones stack
             if (!deformer->sharesObject) {
@@ -188,9 +188,9 @@ void func_15177A94(void) {
     }
     for (i = 0; i < D_800DD418; i++) {
         deformer = D_800DD410[i];
-        if (func_151149AC(deformer->objectId)->viewFlags & 0xF) {
+        if (gfx_findObjectById(deformer->objectId)->viewFlags & 0xF) {
             if (!deformer->sharesObject) {
-                obj = func_151149AC(deformer->objectId);
+                obj = gfx_findObjectById(deformer->objectId);
                 if (obj->t == 0.0f && obj->u == 0.0f && obj->v == 0.0f &&
                     obj->xScale == 1.0f && obj->yScale == 1.0f && obj->zScale == 1.0f) {
                     // no rotation or scale: just translate (y already holds the wave offset)
@@ -200,7 +200,7 @@ void func_15177A94(void) {
                         obj->vertices[D_800BE9C0][j].v.ob[2] = obj->srcVertices[j].v.ob[2] + obj->z;
                     }
                 } else {
-                    func_1511490C(mtx, obj);
+                    gfx_getObjectModelMtx(mtx, obj);
                     if (i) {} // matching: an extra use of i makes IDO keep it in a register and spill the list cursor
                     for (j = 0; j < obj->numVertices; j++) {
                         func_150A7960(mtx, obj->srcVertices[j].v.ob[0], obj->vertices[D_800BE9C0][j].v.ob[1],

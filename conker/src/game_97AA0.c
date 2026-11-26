@@ -109,8 +109,8 @@ void func_1506A968(Actor *obj, s32 arg1) {
 }
 
 void func_1506AA08(Actor *obj, s32 arg1) {
-    func_151B7144(obj, 0xFF, 1);
-    func_151B6320(obj, 0xFF, 1);
+    trail_spawnParticleAtTarget(obj, 0xFF, 1);
+    trail_spawnFollowTrail(obj, 0xFF, 1);
 }
 
 /* Spawns an effect that carries the object and the two words at arg as its data. */
@@ -156,11 +156,11 @@ void func_1506AC0C(Actor *obj, s32 arg1) {
 
     ref.actor = obj;
     ref.uniqueId = obj->unique_id;
-    func_151B7328(&ref, 0, 8, 0xFF, 1);
+    trail_spawnRibbon(&ref, 0, 8, 0xFF, 1);
 }
 
 void func_1506AC58(Actor *obj, s32 arg1) {
-    func_151CEAAC(obj, 0, 1, 0xFF, 1);
+    trail_spawnWaveTrail(obj, 0, 1, 0xFF, 1);
 }
 
 /* The movement-hit handlers by type. Declared without a prototype: two of them take a pointer as their

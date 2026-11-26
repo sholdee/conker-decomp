@@ -218,7 +218,7 @@ void func_1511B07C(WorldObject *obj) {
         }
     }
     if (sound != 0) {
-        func_15114D24(obj, sound, 0x7D00, 100, 2500, 1);
+        gfx_playObjectSound(obj, sound, 0x7D00, 100, 2500, 1);
     }
     speed = WORK(obj)->w1511B07C.speed;
     if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_ON) {
@@ -240,7 +240,7 @@ void func_1511B07C(WorldObject *obj) {
         if (targetX == obj->x) {
             speed = 0.0f;
             if (state == 0) {
-                func_15114D24(obj, 0x4E, 0x7D00, 100, 2500, 1);
+                gfx_playObjectSound(obj, 0x4E, 0x7D00, 100, 2500, 1);
             }
         }
     } else if (targetZ != obj->z) {
@@ -257,7 +257,7 @@ void func_1511B07C(WorldObject *obj) {
         if (obj->sound_id != 0) {
             sound_stop(obj->sound_id);
             obj->sound_id = 0;
-            func_15114D24(obj, 0x4C8, 0x7D00, 100, 2500, 1);
+            gfx_playObjectSound(obj, 0x4C8, 0x7D00, 100, 2500, 1);
         }
     }
     WORK(obj)->w1511B07C.speed = speed;
@@ -900,7 +900,7 @@ void func_1511CB44(WorldObject *obj) {
             }
         }
         if (mode == 1) {
-            wave->texScroll = func_15195FB0(obj, D_800902D8, 0, 0, 0, 0, 8);
+            wave->texScroll = flamethrower_addObjectTexScroll(obj, D_800902D8, 0, 0, 0, 0, 8);
         }
     }
     dst = obj->vertices[D_800BE9C0];
@@ -999,7 +999,7 @@ void func_1511D394(WorldObject *obj) {
     s32 wavePhase;
 
     id = obj->moveData.word & 0xFF;
-    owner = func_151149AC(id);
+    owner = gfx_findObjectById(id);
     if (owner == NULL) {
         return;
     }
@@ -1461,7 +1461,7 @@ void func_1511E780(WorldObject *prop) {
         sound = prop->moveData.word & 0xFFFF; // matching: the row index must share sound's register
         sound = (&D_80089260[sound].open)[soundSlot];
         if (sound > 0) {
-            func_15114D24(prop, sound, 24000, 200, 2500, 0);
+            gfx_playObjectSound(prop, sound, 24000, 200, 2500, 0);
         }
     }
     speed *= D_800BE9E4;
@@ -1545,7 +1545,7 @@ void func_1511E780(WorldObject *prop) {
         prop->v = sinf(WORK(prop)->wobble.phase) * 10.0f;
         if (WORK(prop)->wobble.phase > 12.5663709641f) { /* 4 pi */
             WORK(prop)->wobble.phase -= 12.5663709641f * ((func_150ADA20() & 4) + 1); // u32 multiplier
-            func_15114D24(prop, 0x503, 8000, 150, 600, 0);
+            gfx_playObjectSound(prop, 0x503, 8000, 150, 600, 0);
         }
         break;
     case 12:

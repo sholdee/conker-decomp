@@ -165,7 +165,7 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
         idBuf[0] = idsB.id[pipe];
         func_151494E0((s32)idBuf, 0x17);
     }
-    func_150B3F5C(&argsD, &origin, 20);
+    trail_spawnScatterTrail(&argsD, &origin, 20);
     func_10010F88(0xE7, 0x7FFF, 0, 2, 0, gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, 1000, 3000);
     func_10010F88(0x22, 0x7FFF, 0, 0, 0, gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, 1000, 3000);
 }
@@ -486,6 +486,6 @@ s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, Coll
     motion.velocity.x = state->velocityX;
     motion.velocity.y = func_150ADA68() * 15.0f + 15.0f;
     motion.velocity.z = state->velocityZ;
-    func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
+    trail_createMotionTrail(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
     return 1;
 }

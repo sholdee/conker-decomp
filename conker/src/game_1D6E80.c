@@ -258,7 +258,7 @@ typedef struct {
     /* 0x04 */ u8 characterId;
 } Msg151AA17C;
 
-/* Sends message 10 ({unk18, unk1C}) through func_15147D64 and func_151494E0, then func_1519F3B8. */
+/* Sends message 10 ({unk18, unk1C}) through func_15147D64 and func_151494E0, then trail_startSurfaceTrails. */
 void func_151AA17C(SurfaceTrailOwner *owner) {
     s32 word;
     Msg151AA17C msg;
@@ -270,7 +270,7 @@ void func_151AA17C(SurfaceTrailOwner *owner) {
     word = (s32)&msg;
     func_15147D64(word, 10);
     func_151494E0(word, 10);
-    func_1519F3B8(owner);
+    trail_startSurfaceTrails(owner);
 }
 
 void func_151AA1D0(void) {
@@ -293,7 +293,7 @@ void func_151AA210(SurfaceTrailOwner *owner) {
     word = (s32)&msg;
     func_15147D64(word, 10);
     func_151494E0(word, 10);
-    func_1519F3B8(owner);
+    trail_startSurfaceTrails(owner);
 }
 
 /* When the ground hit has flag bit 0 set, spawns a func_1513418C effect on the actor. */
@@ -602,7 +602,7 @@ void func_151AABC4(Actor *actor, u8 index) {
     }
 }
 
-/* Trail update handler (D_8008A3F8): caps the trail's alpha at its remaining life * 16 (at most 255). */
+/* Trail update handler (gMotionTrailUpdateProcs): caps the trail's alpha at its remaining life * 16 (at most 255). */
 s32 func_151AADBC(MotionTrail *trail) {
     TrailParams *params;
     s32 limit;

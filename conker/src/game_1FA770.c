@@ -19,7 +19,7 @@ extern CollisionHit D_800D9860; /* the floor under the last spawn point */
 
 
 /* Creates the spawner task for a stream source. */
-StreamTask *func_151CD2C0(TriggerZone *source, u8 arg1, s32 arg2) {
+StreamTask *trail_createStreamTask(TriggerZone *source, u8 arg1, s32 arg2) {
     StreamTask *task;
     StreamSpawner spawner;
 
@@ -36,7 +36,7 @@ StreamTask *func_151CD2C0(TriggerZone *source, u8 arg1, s32 arg2) {
 }
 
 /* Starts stream `id` (0-3). */
-void func_151CD35C(s32 id) {
+void trail_startStream(s32 id) {
     s32 payload;
 
     if (id >= 0 && id < 4) {
@@ -46,7 +46,7 @@ void func_151CD35C(s32 id) {
 }
 
 /* Stops stream `id` (0-3). */
-void func_151CD394(s32 id) {
+void trail_stopStream(s32 id) {
     s32 payload;
 
     if (id >= 0 && id < 4) {
@@ -56,7 +56,7 @@ void func_151CD394(s32 id) {
 }
 
 /* Event handler of a stream spawner task. */
-void func_151CD3CC(StreamTask *task, s32 *id, u8 event) {
+void trail_onStreamTaskEvent(StreamTask *task, s32 *id, u8 event) {
     StreamSpawner *spawner;
     s32 unused[3]; // matching: the shipped -g3 frame reserves 12 unreferenced bytes here
 
@@ -72,7 +72,7 @@ void func_151CD3CC(StreamTask *task, s32 *id, u8 event) {
     } else if (event == STREAM_EVENT_STOP) {
         if (spawner->id == *id) {
             if (spawner->emitter != NULL) {
-                func_151CE47C(spawner->emitter);
+                trail_stopStreamEmitter(spawner->emitter);
             }
         }
     } else if (event == STREAM_EVENT_ENDED) {
@@ -135,7 +135,7 @@ LevelStream *func_151CD4C0(source, textureIndex, id, arg3, arg4)
 
 /* Moves a stream's particles under gravity; those that reach the floor are retired.
  * Returns 0 once a stopped stream has run dry. */
-s32 func_151CD674(LevelStream *emitter) {
+s32 trail_moveStreamParticles(LevelStream *emitter) {
     StreamData *data;
     StreamParticle *particles;
     StreamParticle *particle;
@@ -183,7 +183,7 @@ s32 func_151CD674(LevelStream *emitter) {
 }
 
 /* Spawns a stream's new particles at the emitter, swaying in x/z and wobbling in width. */
-s32 func_151CD7BC(LevelStream *emitter) {
+s32 trail_spawnStreamParticles(LevelStream *emitter) {
     StreamData *data;
     StreamParticle *particles;
     StreamParticle *particle;
@@ -239,7 +239,7 @@ s32 func_151CD7BC(LevelStream *emitter) {
             particle->alpha = 0xFF;
             particle->tc = tc;
             particle->pos.y += velocity * gFrameDelta + halfGravity * (gFrameDelta * gFrameDelta);
-            particle->velocity = (f32)velocity + gravity * gFrameDelta; // matching: see func_151CD674
+            particle->velocity = (f32)velocity + gravity * gFrameDelta; // matching: see trail_moveStreamParticles
             emitter->head.end++;
             if (emitter->head.end == emitter->head.tmpl.itemCount) {
                 emitter->head.end = 0;
@@ -270,7 +270,7 @@ s32 func_151CD7BC(LevelStream *emitter) {
 }
 
 /* Fades a stream's ends: alpha ramps up over the lowest 19.7% of its height and down over the top 10%. */
-s32 func_151CDB94(LevelStream *emitter) {
+s32 trail_fadeStreamEnds(LevelStream *emitter) {
     StreamParticle *particles;
     StreamParticle *oldest;
     StreamParticle *particle;
@@ -317,11 +317,11 @@ s32 func_151CDB94(LevelStream *emitter) {
 }
 
 /* The stream textures (D_80090B60 indices) by textureIndex. */
-// matching: defined after func_151CDE20; with the values in view IDO keeps fewer values in registers there
-static const s32 D_800AAEE0[3];
+// matching: defined after trail_drawStream; with the values in view IDO keeps fewer values in registers there
+static const s32 gStreamTextures[3];
 
 /* Draws a stream as a camera-facing ribbon: one quad per pair of neighbouring particles, newest to oldest. */
-Gfx *func_151CDE20(LevelStream *emitter, Gfx *gfx, s16 view) {
+Gfx *trail_drawStream(LevelStream *emitter, Gfx *gfx, s16 view) {
     Vtx *vtx;
     StreamParticle *particles;
     StreamData *data;
@@ -339,7 +339,7 @@ Gfx *func_151CDE20(LevelStream *emitter, Gfx *gfx, s16 view) {
             data = emitter->data;
             particles = emitter->particles;
             update = 1;
-            gfx = func_15142E24(gfx, &D_80090B60[D_800AAEE0[data->textureIndex]], 0, 0, 0, 0, D_800AAEE0[data->textureIndex], 0,
+            gfx = func_15142E24(gfx, &D_80090B60[gStreamTextures[data->textureIndex]], 0, 0, 0, 0, gStreamTextures[data->textureIndex], 0,
                                 0, &update, 3);
             gfx = func_1513F4E4(gfx, 0x4E, &update);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
@@ -437,17 +437,17 @@ Gfx *func_151CDE20(LevelStream *emitter, Gfx *gfx, s16 view) {
     return gfx;
 }
 
-static const s32 D_800AAEE0[3] = { 25, 26, 192 };
+static const s32 gStreamTextures[3] = { 25, 26, 192 };
 
 /* Stops a stream emitter: no new particles, the ones in flight keep falling. */
-void func_151CE47C(LevelStream *emitter) {
+void trail_stopStreamEmitter(LevelStream *emitter) {
     emitter->head.updateKind2 = 0;
     emitter->head.tmpl.flags &= ~EMITTER_FLAG_EMITTING;
     emitter->head.tmpl.flags |= EMITTER_FLAG_STOPPED;
 }
 
 /* Destroy callbacks: tell the spawner its stream ended, then free the emitter. */
-void func_151CE49C(LevelStream *emitter) {
+void trail_destroyStreamEmitter(LevelStream *emitter) {
     s32 payload;
     StreamData *data;
 
@@ -457,7 +457,7 @@ void func_151CE49C(LevelStream *emitter) {
     func_151478F4(emitter);
 }
 
-void func_151CE4DC(LevelStream *emitter) {
+void trail_freeStreamEmitter(LevelStream *emitter) {
     s32 payload;
     StreamData *data;
 
@@ -469,13 +469,13 @@ void func_151CE4DC(LevelStream *emitter) {
 
 
 /* Sends `actor` event 0x60019 when its collision cylinder reaches the falling column of `source`'s stream. */
-void func_151CE51C(Actor *actor, TriggerZone *source) {
+void trail_testStreamContact(Actor *actor, TriggerZone *source) {
     Vec3f pos;
     f32 radius;
     f32 height;
     LevelStream *emitter;
 
-    emitter = func_151CE634(source->data1);
+    emitter = trail_findStream(source->data1);
     if (emitter != NULL) {
         func_1515C1A0(actor, &pos, &radius, &height);
         if (emitter->head.tmpl.flags & EMITTER_FLAG_STOPPED) {
@@ -525,7 +525,7 @@ void func_151CE51C(Actor *actor, TriggerZone *source) {
 
 
 /* Finds the stream emitter whose data has the given id, or NULL. */
-LevelStream *func_151CE634(s32 id) {
+LevelStream *trail_findStream(s32 id) {
     u8 i;
     s32 j;
     LevelStream *emitter;
@@ -551,7 +551,7 @@ LevelStream *func_151CE634(s32 id) {
 /* Emitter update: accumulates a randomized spawn rate and, for each whole unit, spawns one
  * 0x6A effect packet at a random point of the shape (only when its zone's view mask has one of its
  * low gScreenLayout + 1 bits set, i.e. a view can see it; otherwise the accumulated units are discarded). */
-void func_151CE6D0(Game1FBB80Object *object) {
+void trail_updateRandomPointEmitter(Game1FBB80Object *object) {
     Game1FBB80Effect *effect;
     s32 index;
     s16 mask;
@@ -610,7 +610,7 @@ void func_151CE6D0(Game1FBB80Object *object) {
 }
 
 /* Integrates position/velocity under constant acceleration over one frame and ramps fade up to 1. */
-s32 func_151CEA20(TrailScalarMotion *motion) {
+s32 trail_integrateScalarMotion(TrailScalarMotion *motion) {
     {
         f32 prevVelocity = motion->velocity;
 
@@ -625,7 +625,7 @@ s32 func_151CEA20(TrailScalarMotion *motion) {
 }
 
 /* Spawns a trail effect that follows owner (or anchor, when given). */
-WaveTrail *func_151CEAAC(Actor *owner, DescParticleHead *anchor, u8 arg2, u8 arg3, s32 arg4) {
+WaveTrail *trail_spawnWaveTrail(Actor *owner, DescParticleHead *anchor, u8 arg2, u8 arg3, s32 arg4) {
     EffectTemplate spawn;
     WaveTrailData info;
     WaveTrail *trail;
@@ -661,7 +661,7 @@ WaveTrail *func_151CEAAC(Actor *owner, DescParticleHead *anchor, u8 arg2, u8 arg
     random = func_150ADA68();
     info.phase = (random + random) * 3.141592741f; /* random angle in [0, 2pi) */
 
-    if (!func_151CEC10(&spawn.pos, owner, anchor)) {
+    if (!trail_getWaveTrailAnchor(&spawn.pos, owner, anchor)) {
         spawn.pos.x = 0.0f;
         spawn.pos.y = 0.0f;
         spawn.pos.z = 0.0f;
@@ -677,7 +677,7 @@ WaveTrail *func_151CEAAC(Actor *owner, DescParticleHead *anchor, u8 arg2, u8 arg
 #define TRAIL_HAS_POS 4 /* WaveTrail.head.tmpl.flags: pos holds a valid previous position */
 
 /* Writes the point a trail is attached to: the anchor's position if there is one, else the owner's. */
-s32 func_151CEC10(Vec3f *out, Actor *owner, DescParticleHead *anchor) {
+s32 trail_getWaveTrailAnchor(Vec3f *out, Actor *owner, DescParticleHead *anchor) {
     if (anchor != NULL) {
         *out = anchor->desc.pos;
     } else {
@@ -694,7 +694,7 @@ s32 func_151CEC10(Vec3f *out, Actor *owner, DescParticleHead *anchor) {
  * to the trail; with WAVE_TRAIL_SMOOTH the previous point's normal is re-averaged from its neighbours.
  * Returns 0 when the owner is gone or no longer matches.
  */
-s32 func_151CEC54(WaveTrail *trail) {
+s32 trail_followWaveTrail(WaveTrail *trail) {
     WaveTrailData *info;
     WaveTrailPoint *entries;
     Actor *owner;
@@ -718,7 +718,7 @@ s32 func_151CEC54(WaveTrail *trail) {
     }
     if (D_800BE9E4 > 0) {
         prev = trail->head.tmpl.pos;
-        if (func_151CEC10(&trail->head.tmpl.pos, owner, anchor)) {
+        if (trail_getWaveTrailAnchor(&trail->head.tmpl.pos, owner, anchor)) {
             if (!(trail->head.tmpl.flags & TRAIL_HAS_POS)) {
                 prev = trail->head.tmpl.pos;
             } else if (!(info->flags & WAVE_TRAIL_HAS_NORMAL)) {
@@ -837,7 +837,7 @@ s32 func_151CEC54(WaveTrail *trail) {
  * distance stays within data->maxLength, then gives each point a sine wave offset that
  * grows in amplitude along the trail.
  */
-s32 func_151CF120(WaveTrail *actor) {
+s32 trail_shapeWaveTrail(WaveTrail *actor) {
     WaveTrailData *config;
     WaveTrailPoint *points;
     s32 count;
@@ -924,7 +924,7 @@ s32 func_151CF120(WaveTrail *actor) {
 }
 
 /* Draws the ribbon from its newest point back to its oldest, one quad per segment. */
-Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
+Gfx *trail_drawWaveRibbon(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     RibbonInfo *info;
     Vec3f nextPos;
     Vec3f curPos;
@@ -1018,7 +1018,7 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
 }
 
 /* Message handler of a following actor: lets func_15169850 update or end the link to its owner. */
-void func_151CF844(TrackerTrail *actor, s32 arg1, u8 arg2) {
+void trail_onFollowerMessage(TrackerTrail *actor, s32 arg1, u8 arg2) {
     TrackerTrailData *data = actor->state;
 
     if (data->owner != NULL) {
@@ -1027,7 +1027,7 @@ void func_151CF844(TrackerTrail *actor, s32 arg1, u8 arg2) {
     }
 }
 
-/* Data of the ground effect spawned by func_151CF898. */
+/* Data of the ground effect spawned by trail_spawnNearCamera. */
 typedef struct {
     Vec3f pos;
     f32 unkC;
@@ -1040,7 +1040,7 @@ typedef struct {
 
 /* With probability 0.222, spawns an effect on the ground at a random point up to 2000 units from
  * the camera of the object's player, within 40 degrees either side of the camera's yaw. */
-void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
+void trail_spawnNearCamera(Actor *obj, f32 probeY, f32 arg2) {
     Camera *player;
     Vec3f spawnPos;
     Vec3f *camPos;
@@ -1077,8 +1077,8 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
     }
 }
 
-/* The model points the seven pieces of func_151CFA4C fly off from. */
-static const Vec3f D_800AAEEC[7] = {
+/* The model points the seven pieces of trail_breakApart fly off from. */
+static const Vec3f gBreakPiecePoints[7] = {
     { 12.21999931f, 63.10099792f, -34.88000107f },  { 59.45899963f, 27.04800034f, 23.3730011f },
     { -30.83699989f, 62.33999634f, 27.96899986f },  { 36.03700256f, -40.0929985f, -43.31699753f },
     { -41.90200043f, -24.30399895f, -39.91400146f }, { -51.70800018f, -18.10499954f, 40.625f },
@@ -1087,7 +1087,7 @@ static const Vec3f D_800AAEEC[7] = {
 
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
  * spin, plus three more effects at 200 units above it. */
-void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
+void trail_breakApart(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f vecB;
     Vec3f pos;
     Vec3f vecA;
@@ -1135,7 +1135,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
                 u32 pitch;
 
                 piece.model = models[i];
-                func_15143134(&D_800AAEEC[i], &piece.pos, obj->ob_matrix_ptr);
+                func_15143134(&gBreakPiecePoints[i], &piece.pos, obj->ob_matrix_ptr);
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794(yaw & 0xFF, (pitch % 25U) - 64, (func_150ADA68() * 11.44999981f) + 16.93000031f, &piece.vel);
@@ -1224,7 +1224,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 /* Tells every effect that follows the object that it is gone (message 0x18). */
-void func_151D0024(Actor *obj) {
+void trail_notifyFollowersGone(Actor *obj) {
     ActorRef msg;
 
     msg.actor = obj;
@@ -1233,7 +1233,7 @@ void func_151D0024(Actor *obj) {
 }
 
 /* Spawns a strip effect of the given variant on the object. */
-void func_151D0058(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
+void trail_spawnStripEffect(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
     StripEffect *effect;
     StripEffectData data;
 
@@ -1251,7 +1251,7 @@ void func_151D0058(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
 }
 
 /* Ends the strip effect once its owner's unk84 has changed. */
-void func_151D0128(StripEffect *effect) {
+void trail_updateStripEffect(StripEffect *effect) {
     Actor *owner = effect->data.owner;
 
     if (effect->data.ownerUnk84 != owner->animseq.uh) {
@@ -1259,15 +1259,15 @@ void func_151D0128(StripEffect *effect) {
     }
 }
 
-/* Per strip variant: the start point (in joint 2's space) and the joint of the end point D_800AAF74. */
-// matching: defined after func_151D014C (see D_800AAEE0)
-static const Vec3f D_800AAF5C[2];
-static const Vec3f D_800AAF74;
-static const u8 D_800AAF80[2];
+/* Per strip variant: the start point (in joint 2's space) and the joint of the end point gStripEndPoint. */
+// matching: defined after trail_drawStripEffect (see gStreamTextures)
+static const Vec3f gStripStartPoints[2];
+static const Vec3f gStripEndPoint;
+static const u8 gStripEndJoints[2];
 
 /* Draws the strip effect: six camera-facing quads joining two of the owner's model points, pinched
  * in the middle when the points are far apart. */
-Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
+Gfx *trail_drawStripEffect(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     StripEffectData *data;
     Vtx *vtx;
     Actor *owner;
@@ -1314,8 +1314,8 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
         return gfx;
     }
     update = 1;
-    func_15143134(&D_800AAF5C[data->variant], &from, &owner->ob_matrix_ptr[2]);
-    func_15143134(&D_800AAF74, &to, &owner->ob_matrix_ptr[D_800AAF80[data->variant]]);
+    func_15143134(&gStripStartPoints[data->variant], &from, &owner->ob_matrix_ptr[2]);
+    func_15143134(&gStripEndPoint, &to, &owner->ob_matrix_ptr[gStripEndJoints[data->variant]]);
     camPos = func_15144B34(cameraIdx);
     gfx = func_15142B7C(gfx, 0x200005, 0x60600);
     gfx = func_15142E24(gfx, &D_80090B60[127], 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
@@ -1414,13 +1414,13 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     return gfx;
 }
 
-static const Vec3f D_800AAF5C[2] = { { -109.0f, -87.0f, 31.0f }, { 109.0f, -87.0f, 31.0f } };
-static const Vec3f D_800AAF74 = { -1.0f, -27.0f, 1.0f };
-static const u8 D_800AAF80[2] = { 23, 34 };
+static const Vec3f gStripStartPoints[2] = { { -109.0f, -87.0f, 31.0f }, { 109.0f, -87.0f, 31.0f } };
+static const Vec3f gStripEndPoint = { -1.0f, -27.0f, 1.0f };
+static const u8 gStripEndJoints[2] = { 23, 34 };
 
 /* Message handler of the effects that follow an owner: frees the effect when its owner is gone
  * (messages 0 and 0x18) and follows the owner through a swap (0x2D). */
-void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
+void trail_onOwnedEffectMessage(OwnedEffect *effect, void *msg, u8 type) {
     ActorRef *ref = &effect->ref;
 
     if (type == 0 || type == 0x18) {
@@ -1443,13 +1443,13 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
     }
 }
 
-/* The two model points (in joint 2's space) that func_151D09A8's bursts run between. */
+/* The two model points (in joint 2's space) that trail_emitLineBursts's bursts run between. */
 static const Vec3f D_800AAF84 = { 0.0f, -26.0f, -20.0f };
 static const Vec3f D_800AAF90 = { 0.0f, 29.0f, 131.0f };
 
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
- * 5-10 more particles that each carry a func_151CEAAC effect. */
-void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
+ * 5-10 more particles that each carry a trail_spawnWaveTrail effect. */
+void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
     Vec3f dir;
     CollisionHit floor;
@@ -1572,7 +1572,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
                 spawn.gravity = (func_150ADA68() * 1.340000033f) + -2.328999996f;
                 particle = func_15130280(&spawn, 1, 0, 4, arg1, arg2);
                 if (particle != NULL) {
-                    particle->effect = func_151CEAAC(NULL, &particle->head, 0, arg1, arg2);
+                    particle->effect = trail_spawnWaveTrail(NULL, &particle->head, 0, arg1, arg2);
                 }
                 count--;
             }
@@ -1581,7 +1581,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 /* Frees the effect that travels with the particle. */
-void func_151D0ED8(CarrierParticle *particle) {
+void trail_freeCarriedEffect(CarrierParticle *particle) {
     if (particle->effect != NULL) {
         // matching: a volatile read makes IDO reload the pointer for the call, as the original does
         func_1516972C(*(EffectHeader *volatile *)&particle->effect);
@@ -1589,22 +1589,22 @@ void func_151D0ED8(CarrierParticle *particle) {
 }
 
 /* Particle handler: frees the attached effect, then runs func_1513173C. */
-void func_151D0F08(CarrierParticle *particle) {
-    func_151D0ED8(particle);
+void trail_destroyCarrierParticle(CarrierParticle *particle) {
+    trail_freeCarriedEffect(particle);
     func_1513173C(&particle->head);
 }
 
 /* Particle handler: frees the attached effect, then runs func_1513175C. */
-void func_151D0F34(CarrierParticle *particle) {
-    func_151D0ED8(particle);
+void trail_freeCarrierParticle(CarrierParticle *particle) {
+    trail_freeCarriedEffect(particle);
     func_1513175C(&particle->head);
 }
 
 /* Point functions: each writes a point of the object to out and returns whether it has one. */
-static s32 (*D_8008FC30[])(Actor *obj, Vec3f *out) = { func_151D1074, func_151D10A4, func_151D10C4 };
+static s32 (*gTrackerPointProcs[])(Actor *obj, Vec3f *out) = { trail_getPointAboveFloor, trail_getModelPoint0, trail_getModelPoint1 };
 
-/* Spawns a tracker effect that follows the object's point D_8008FC30[pointFn]. */
-void func_151D0F60(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
+/* Spawns a tracker effect that follows the object's point gTrackerPointProcs[pointFn]. */
+void trail_spawnTrackerEffect(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
     TrackerEffect *effect;
     TrackerData data;
 
@@ -1612,7 +1612,7 @@ void func_151D0F60(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
     data.ownerId = obj->unique_id;
     data.trail = NULL;
 
-    if (D_8008FC30[pointFn](obj, &data.pos) == 0) {
+    if (gTrackerPointProcs[pointFn](obj, &data.pos) == 0) {
         data.pos = D_800A5480;
     }
 
@@ -1628,7 +1628,7 @@ void func_151D0F60(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
 }
 
 /* Point function: 8 units above the object's unk180 height, at its x/z. */
-s32 func_151D1074(Actor *obj, Vec3f *out) {
+s32 trail_getPointAboveFloor(Actor *obj, Vec3f *out) {
     out->x = obj->xpos;
     out->y = obj->floorY + 8.0f;
     out->z = obj->zpos;
@@ -1636,32 +1636,32 @@ s32 func_151D1074(Actor *obj, Vec3f *out) {
 }
 
 /* Point function: the object's model point 0. */
-s32 func_151D10A4(Actor *obj, Vec3f *out) {
-    return func_151D10E4(obj, out, 0);
+s32 trail_getModelPoint0(Actor *obj, Vec3f *out) {
+    return trail_getModelPoint(obj, out, 0);
 }
 
 /* Point function: the object's model point 1. */
-s32 func_151D10C4(Actor *obj, Vec3f *out) {
-    return func_151D10E4(obj, out, 1);
+s32 trail_getModelPoint1(Actor *obj, Vec3f *out) {
+    return trail_getModelPoint(obj, out, 1);
 }
 
-static const Vec3f D_800AAF9C[2] = { { 100.0f, 8.0f, -20.0f }, { -100.0f, 8.0f, -20.0f } };
+static const Vec3f gTrackerModelPoints[2] = { { 100.0f, 8.0f, -20.0f }, { -100.0f, 8.0f, -20.0f } };
 
-/* Writes model point D_800AAF9C[which] of the object, in world space, to out. */
-s32 func_151D10E4(Actor *obj, Vec3f *out, u8 which) {
+/* Writes model point gTrackerModelPoints[which] of the object, in world space, to out. */
+s32 trail_getModelPoint(Actor *obj, Vec3f *out, u8 which) {
     s32 joints = (s32)obj->ob_matrix_ptr;
 
     if (joints == 0) {
         return FALSE;
     }
     // matching: "| 0" keeps joints from being a plain copy, so IDO gives it v0 and which a3
-    func_15143134(&D_800AAF9C[which], out, (Mtx *)(joints | 0));
+    func_15143134(&gTrackerModelPoints[which], out, (Mtx *)(joints | 0));
     return TRUE;
 }
 
 /* Tracker update: follows the owner's point, and drops the trail when the point is lost, jumps more
  * than 300 units, stops, or the owner is airborne, in water or in state 5, 6, 9, 13 or 14. */
-void func_151D1138(TrackerEffect *effect) {
+void trail_updateTrackerEffect(TrackerEffect *effect) {
     TrackerData *data;
     Actor *owner;
     u8 finished = FALSE;
@@ -1676,7 +1676,7 @@ void func_151D1138(TrackerEffect *effect) {
     }
 
     data->prevPos = data->pos;
-    if (D_8008FC30[data->pointFn](owner, &data->pos) == 0) {
+    if (gTrackerPointProcs[data->pointFn](owner, &data->pos) == 0) {
         data->pos = data->prevPos;
         finished = TRUE;
     }
@@ -1693,34 +1693,34 @@ void func_151D1138(TrackerEffect *effect) {
     }
 
     if (finished) {
-        func_151D13E0(effect);
+        trail_dropTrackerTrail(effect);
     } else if (data->trail == NULL) {
-        func_151D1448(effect);
+        trail_spawnTrackerTrail(effect);
     }
 }
 
 /* Message handler of the tracker effect: lets func_15169850 update or end the link to its owner. */
-void func_151D1328(TrackerEffect *effect, s32 arg1, u8 arg2) {
+void trail_onTrackerMessage(TrackerEffect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Tracker teardown: lets go of the trail. */
-void func_151D1368(TrackerEffect *effect) {
-    func_151D13E0(effect);
+void trail_releaseTracker(TrackerEffect *effect) {
+    trail_dropTrackerTrail(effect);
 }
 
-void func_151D1388(TrackerEffect *effect) {
-    func_151D1368(effect);
+void trail_destroyTracker(TrackerEffect *effect) {
+    trail_releaseTracker(effect);
     func_1514933C(&effect->base);
 }
 
-void func_151D13B4(TrackerEffect *effect) {
-    func_151D1368(effect);
+void trail_freeTracker(TrackerEffect *effect) {
+    trail_releaseTracker(effect);
     func_15149368(&effect->base);
 }
 
 /* Lets go of the tracker's trail, which then fades out on its own. */
-void func_151D13E0(TrackerEffect *effect) {
+void trail_dropTrackerTrail(TrackerEffect *effect) {
     TrackerData *data = &effect->data;
     TrackerTrailData *trailData;
 
@@ -1737,7 +1737,7 @@ void func_151D13E0(TrackerEffect *effect) {
 }
 
 /* Spawns the trail that follows the tracker effect. */
-void func_151D1448(TrackerEffect *effect) {
+void trail_spawnTrackerTrail(TrackerEffect *effect) {
     TrackerData *data;
     struct {
         EffectTemplate spawn;

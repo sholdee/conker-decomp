@@ -30,7 +30,7 @@ void game_initLevelSubsystems(s32 levelId) {
     D_800DD406 = 0;
     D_800E0930 = 0;
     D_800E0934 = NULL;
-    D_800E0940 = 0;
+    gProjectileHitCallback = 0;
     D_8008CD00 = 0;
     D_80088B60 = 0;
     D_800BE4E0 = NULL;
@@ -47,7 +47,7 @@ void game_initLevelSubsystems(s32 levelId) {
     aim_loadPoints(levelId);
     func_150127B0();
 
-    func_1519582C();
+    flamethrower_clearTexScrolls();
     func_15008BE0();
     func_15008B90();
     func_1500E5C0();
@@ -58,7 +58,7 @@ void game_initLevelSubsystems(s32 levelId) {
     light_initParticleSlots(levelId);
     light_buildLevelParticles();
     light_loadParticleTextures();
-    func_151872B0(levelId);
+    shadow_initLevelSettings(levelId);
     func_15178EB0();
     func_15012FE0();
 

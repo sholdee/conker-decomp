@@ -4,7 +4,7 @@
 
 /* Creates a trail object from a spawn description, motion block and render settings. Returns the MotionTrail
  * as void *: callers whose params extend TrailParams (extraSize bytes) keep it in their own view. */
-void *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
+void *trail_createMotionTrail(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
                     s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
                     CollisionHit *hit, u8 arg13, s32 arg14) {
     MotionTrail *trail;
@@ -34,15 +34,15 @@ void *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s
  */
 typedef s32 (*TrailFunc)();
 /* Update handlers (TrailParams.state, then .unk21); 0 ends the trail. */
-static TrailFunc D_8008A3E0[6] = {
-    NULL, func_151488C4, func_15148AF4, func_15148BA4, func_15148DE0, func_1518C0B8,
+static TrailFunc gMotionTrailStateProcs[6] = {
+    NULL, trail_moveAndAppendPoint, trail_movePoints, trail_movePointsGroundTest, trail_dropNewestPoint, trail_updateEmittedTrail,
 };
-static TrailFunc D_8008A3F8[13] = {
-    NULL,          func_1518C540, func_150AED9C, func_150AF1C0, func_150C251C, func_150C1978, func_151490C8,
-    func_150B378C, func_151AC3CC, func_151AADBC, func_15189EBC, func_150BDB3C, func_1514B844,
+static TrailFunc gMotionTrailUpdateProcs[13] = {
+    NULL,          trail_fadeEmittedTrail, func_150AED9C, trail_fadeMotionTrail, func_150C251C, trail_fadeKind2Trail, trail_fadeIn,
+    func_150B378C, func_151AC3CC, func_151AADBC, trail_landSprayTrail, func_150BDB3C, func_1514B844,
 };
 /* Finish handlers (TrailParams.finishFn); there are none. */
-static TrailFunc D_8008A42C[1] = { NULL };
+static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
 /*
  * Ground hit handlers (TrailParams.hitFn, and .hitKind3Fn for a hit of source 3), given the trail, the oldest
  * point's last position, the ground height and the surface: 0 ends the trail. They take floats, so they keep a
@@ -50,15 +50,15 @@ static TrailFunc D_8008A42C[1] = { NULL };
  */
 typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, CollisionTri *);
 static TrailHitFunc D_8008A430[8] = {
-    NULL,          func_15148EF8, func_1518C57C, func_150DDFAC, func_150DE12C, func_150B37C8, func_151AC408,
+    NULL,          func_15148EF8, trail_spawnHitPuff, func_150DDFAC, func_150DE12C, func_150B37C8, func_151AC408,
     func_151DA938,
 };
 static TrailHitFunc D_8008A450[5] = {
-    NULL, func_1518C69C, func_151AC550, func_15189FD0, func_151DAA88,
+    NULL, trail_spawnHitPuffAndEffect, func_151AC550, func_15189FD0, func_151DAA88,
 };
 
 /* Runs the trail's update handlers and fades; returns whether it is still alive. */
-s8 func_15147EB8(MotionTrail *trail) {
+s8 trail_updateMotionTrail(MotionTrail *trail) {
     TrailParams *params;
     s8 done;
     MotionTrailPoint *points;
@@ -70,12 +70,12 @@ s8 func_15147EB8(MotionTrail *trail) {
     done = 0;
     /* The two update handlers are called without arguments. */
     if (params->state != 0) {
-        if (D_8008A3E0[params->state]() == 0) {
+        if (gMotionTrailStateProcs[params->state]() == 0) {
             done = 1;
         }
     }
     if (params->unk21 != 0 && !done) {
-        if (D_8008A3F8[params->unk21]() == 0) {
+        if (gMotionTrailUpdateProcs[params->unk21]() == 0) {
             done = 1;
         }
     }
@@ -91,7 +91,7 @@ s8 func_15147EB8(MotionTrail *trail) {
     ret = !done;
     if (done) {
         if (params->finishFn != 0) {
-            done = D_8008A42C[params->finishFn](trail); // matching: dead store of the result
+            done = gMotionTrailFinishProcs[params->finishFn](trail); // matching: dead store of the result
         }
     }
     points = trail->points;
@@ -111,7 +111,7 @@ extern struct {
 } D_800A4AC8[];
 
 /* Draws the trail as a camera-facing ribbon of quads, newest point first. */
-Gfx *func_1514803C(MotionTrail *trail, Gfx *gfx, s16 arg2) {
+Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
     TrailParams *params;
     Vtx *vtx;
     u8 update;
@@ -281,7 +281,7 @@ Gfx *func_1514803C(MotionTrail *trail, Gfx *gfx, s16 arg2) {
 }
 
 /* Moves every point by the trail's velocity and gravity, then appends the current position. */
-s32 func_151488C4(MotionTrail *trail) {
+s32 trail_moveAndAppendPoint(MotionTrail *trail) {
     MotionTrailPoint *points;
     TrailParams *params;
     s32 phase;
@@ -341,7 +341,7 @@ s32 func_151488C4(MotionTrail *trail) {
 }
 
 /* Moves every point by the trail's velocity and gravity, newest to oldest. */
-s32 func_15148AF4(MotionTrail *trail) {
+s32 trail_movePoints(MotionTrail *trail) {
     s32 idx;
     MotionTrailPoint *points;
     TrailParams *params;
@@ -362,8 +362,8 @@ s32 func_15148AF4(MotionTrail *trail) {
     return 1;
 }
 
-/* Like func_15148AF4, then tests the oldest point's fall against the ground and runs a hit handler. */
-s32 func_15148BA4(MotionTrail *trail) {
+/* Like trail_movePoints, then tests the oldest point's fall against the ground and runs a hit handler. */
+s32 trail_movePointsGroundTest(MotionTrail *trail) {
     s32 index;
     TrailParams *params;
     MotionTrailPoint *points;
@@ -418,7 +418,7 @@ s32 func_15148BA4(MotionTrail *trail) {
 }
 
 /* Drops the newest point and respaces the remaining points' phases; fails below three points. */
-s32 func_15148DE0(MotionTrail *trail) {
+s32 trail_dropNewestPoint(MotionTrail *trail) {
     s32 idx;
     u16 step;
     u16 phase;
@@ -462,7 +462,7 @@ s32 func_15148EF8(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3) {
 }
 
 /* Spawns a trail at (x, y, z), launched at speed along the direction given by the yaw and pitch angles. */
-void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch, f32 speed, s16 arg8,
+void trail_launchMotionTrail(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch, f32 speed, s16 arg8,
                    f32 halfWidth, f32 gravity, u8 arg11) {
     f32 yawWaveQ;
     EffectTemplate18 spawn;
@@ -512,11 +512,11 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
     render.unk18 = 0x20;
     render.primMode = 0;
     render.envMode = 9;
-    func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, arg11, 1);
+    trail_createMotionTrail(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, arg11, 1);
 }
 
 /* Fades the trail in: alpha = 8 per unit of unk1C, capped at 255. */
-s32 func_151490C8(MotionTrail *trail) {
+s32 trail_fadeIn(MotionTrail *trail) {
     TrailParams *params = trail->params;
     s32 alpha = trail->head.tmpl.life * 8;
 
@@ -531,6 +531,6 @@ s32 func_151490C8(MotionTrail *trail) {
 }
 
 /* Hands the trail to func_151478F4. */
-void func_15149104(EffectObj *obj) {
+void trail_destroyEffectObj(EffectObj *obj) {
     func_151478F4(obj);
 }

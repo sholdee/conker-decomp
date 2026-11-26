@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Texture of each particle resource: flags, frame count, frame size, x and y scale, width, unk9. */
-const ParticleTexInfo D_80095CE0[69] = {
+const ParticleTexInfo gParticleTexInfos[69] = {
     { 0x39, 6, 0xDC0, 30, 70, 32, 0 },
     { 0x09, 5, 0xA00, 24, 48, 32, 0 },
     { 0x03, 5, 0xA00, 18, 36, 32, 0 },
@@ -75,19 +75,19 @@ const ParticleTexInfo D_80095CE0[69] = {
     { 0x01, 5, 0xA00, 38, 77, 32, 0 },
 };
 
-void func_1500C1E0(void) {
+void swarm_resetModelSlots(void) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        D_800DDF5C[i] = D_800DDF60[i] = 0;
+        gSwarmGroupsInUse[i] = gSwarmGroupSoundTimers[i] = 0;
     }
     for (i = 0; i < 11; i++) {
-        D_800DDF68[i] = -2;
+        gEffectModelSlotStates[i] = -2;
     }
 
-    bzero(D_800DDE80, 220); // bzero 220 bytes
+    bzero(gEffectModelSlots, 220); // bzero 220 bytes
 
     for (i = 0; i < 11; i++) {
-        D_800DDF78[i] = NULL;
+        gEffectModelSecondDls[i] = NULL;
     }
 }

@@ -11,7 +11,7 @@ s32 D_80088898 = 0;
 s32 D_8008889C = 0;
 
 void func_150CF530(s32 arg0) {
-    func_151CF898(&movement_obj[0], movement_obj[0].ypos + 300.0f, -10000.0f);
+    trail_spawnNearCamera(&movement_obj[0], movement_obj[0].ypos + 300.0f, -10000.0f);
 }
 
 /* Advances the texture scroll offsets by the frames elapsed. */

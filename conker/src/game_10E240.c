@@ -96,7 +96,7 @@ TimedEffect *func_150E1060(u8 index, u8 owner, s32 kind) {
     }
 
     emitter.index = index;
-    emitter.prop = func_151149AC(D_800A0FE0[index]);
+    emitter.prop = gfx_findObjectById(D_800A0FE0[index]);
     if (emitter.prop == NULL) {
         return NULL;
     }

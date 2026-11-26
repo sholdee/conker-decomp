@@ -110,8 +110,8 @@ glabel func_150AB1F0
     /* D8820 150AB370 954A0058 */  lhu        $t2, 0x58($t2)
     /* D8824 150AB374 AFAA014C */  sw         $t2, 0x14C($sp)
     /* D8828 150AB378 00085880 */  sll        $t3, $t0, 2
-    /* D882C 150AB37C 3C09800E */  lui        $t1, %hi(D_800DBEF8)
-    /* D8830 150AB380 8D29BEF8 */  lw         $t1, %lo(D_800DBEF8)($t1)
+    /* D882C 150AB37C 3C09800E */  lui        $t1, %hi(gObjectBlocks)
+    /* D8830 150AB380 8D29BEF8 */  lw         $t1, %lo(gObjectBlocks)($t1)
     /* D8834 150AB384 012B4821 */  addu       $t1, $t1, $t3
     /* D8838 150AB388 8D2B0000 */  lw         $t3, 0x0($t1)
     /* D883C 150AB38C AFAB0150 */  sw         $t3, 0x150($sp)
@@ -447,8 +447,8 @@ glabel func_150AB1F0
     /* D8D14 150AB864 95EB0058 */  lhu        $t3, 0x58($t7)
     /* D8D18 150AB868 0160B025 */  or         $s6, $t3, $zero
     /* D8D1C 150AB86C AFAB014C */  sw         $t3, 0x14C($sp)
-    /* D8D20 150AB870 3C09800E */  lui        $t1, %hi(D_800DBEF8)
-    /* D8D24 150AB874 8D29BEF8 */  lw         $t1, %lo(D_800DBEF8)($t1)
+    /* D8D20 150AB870 3C09800E */  lui        $t1, %hi(gObjectBlocks)
+    /* D8D24 150AB874 8D29BEF8 */  lw         $t1, %lo(gObjectBlocks)($t1)
     /* D8D28 150AB878 000A5080 */  sll        $t2, $t2, 2
     /* D8D2C 150AB87C 012A4821 */  addu       $t1, $t1, $t2
     /* D8D30 150AB880 8D290000 */  lw         $t1, 0x0($t1)

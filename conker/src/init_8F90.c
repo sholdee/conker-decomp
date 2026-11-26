@@ -96,27 +96,27 @@ typedef struct {
 
 /*
  * This file's .bss, 0x8003E380-0x800417B0. It is defined before functions.h and variables.h: IDO places a
- * variable that an extern declared earlier (D_8003E384, of conker/audio.h) after the others. The types
+ * variable that an extern declared earlier (gReleaseRawBanksPending, of conker/audio.h) after the others. The types
  * above are defined before it on purpose: IDO rotates the .bss order by the number of types and externs
  * declared before the definitions, and with fewer of them D_8003E380 is no longer first.
  */
 static void *D_8003E380;          /* the synthesis driver's globals */
-s32 D_8003E384;
-static AudioMgr D_8003E388;
-static OSThread D_8003E3A0;       /* audio thread */
+s32 gReleaseRawBanksPending;
+static AudioMgr gAudioMgr;
+static OSThread gAudioThread;       /* audio thread */
 static u8 D_8003E550[0x80];       /* not referenced */
-static OSMesgQueue D_8003E5D0;    /* retrace and pre-NMI messages from the scheduler */
+static OSMesgQueue gAudioMsgQueue;    /* retrace and pre-NMI messages from the scheduler */
 static OSMesg D_8003E5E8[8];
-static OSMesgQueue D_8003E608;    /* audio task done messages */
+static OSMesgQueue gAudioDoneQueue;    /* audio task done messages */
 static OSMesg D_8003E620[8];
 static u8 D_8003E640[0x60];       /* N_ALGlobals of the synthesis driver (n_alInit) */
-static u64 D_8003E6A0[AUDIO_STACK_SIZE / sizeof(u64)]; /* audio thread stack */
+static u64 gAudioThreadStack[AUDIO_STACK_SIZE / sizeof(u64)]; /* audio thread stack */
 
 /*
  * The bank loader's state: five separate variables that the code mostly uses as one BankState.
  * matching: the ROM needs both forms. Most accesses go through one base register at D_800406A0 with
- * offsets 0x4 to 0x10, which IDO emits only for one object (BANK_STATE). Three stores in func_10009BE4
- * and func_10009CBC have their own lui, which IDO emits only for a separate symbol (D_800406A4,
+ * offsets 0x4 to 0x10, which IDO emits only for one object (BANK_STATE). Three stores in audio_retireBank
+ * and audio_fetchBank have their own lui, which IDO emits only for a separate symbol (D_800406A4,
  * D_800406B0). Separate variables read by name, or a defined BankState, each change those functions.
  */
 static u8 D_800406A0;          /* the lists are set up */
@@ -126,19 +126,19 @@ static struct BankRecord *D_800406AC; /* DMA in flight */
 static struct BankRecord *D_800406B0; /* unreferenced, buffer still allocated */
 #define BANK_STATE (*(BankState *)&D_800406A0)
 
-static DMABuffer D_800406B8[NUM_DMA_BUFFERS];
-static struct BankRecord D_80040AC8[NUM_BANK_RECORDS];
-static DMAState D_80040F78;
+static DMABuffer gAudioDmaBuffers[NUM_DMA_BUFFERS];
+static struct BankRecord gBankRecords[NUM_BANK_RECORDS];
+static DMAState gAudioDmaState;
 static u8 D_80040F84;               /* frames left before the next short frame */
 static u32 D_80040F88;              /* short audio frame, in samples */
 static u32 D_80040F8C;              /* audio frame, in samples */
 static u32 D_80040F90;              /* longest audio frame, in samples */
 static u32 D_80040F94;              /* command list length */
-static OSIoMesg D_80040F98[MAX_SAMPLE_DMAS];
-static OSMesgQueue D_80041298;      /* sample DMA completions */
+static OSIoMesg gSampleDmaMsgs[MAX_SAMPLE_DMAS];
+static OSMesgQueue gSampleDmaQueue;      /* sample DMA completions */
 static OSMesg D_800412B0[MAX_SAMPLE_DMAS];
-static OSIoMesg D_80041330[MAX_BANK_DMAS];
-static OSMesgQueue D_800416F0;      /* bank DMA completions */
+static OSIoMesg gBankDmaMsgs[MAX_BANK_DMAS];
+static OSMesgQueue gBankDmaQueue;      /* bank DMA completions */
 static OSMesg D_80041708[MAX_BANK_DMAS];
 
 #include "functions.h"
@@ -185,14 +185,14 @@ struct SynDriverConfig {
 extern u8 D_8002C960[];
 
 /* This file's .data. */
-static u8 D_8002AE40 = FALSE; /* the audio thread was started */
-static u32 D_8002AE44 = 0;    /* audio frame count */
-static u32 D_8002AE48 = 0;    /* sample DMAs issued this frame */
+static u8 gAudioThreadStarted = FALSE; /* the audio thread was started */
+static u32 gAudioFrameCount = 0;    /* audio frame count */
+static u32 gSampleDmaCount = 0;    /* sample DMAs issued this frame */
 static s32 D_8002AE4C = 0;    /* the command list being built */
-static u32 D_8002AE50 = 0;    /* bank DMAs in flight */
+static u32 gBankDmaCount = 0;    /* bank DMAs in flight */
 /* Effect parameters of the two FX busses: the section count, the delay length, then
    8 values per section (input, output, fbcoef, ffcoef, gain, chorus rate, chorus depth, lowpass). */
-static FxParams D_8002AE54 = { {
+static FxParams gAudioFxParams = { {
         { 8, 6712,
           0, 192, 9830, -9830, 0, 0, 0, 0,
           192, 392, 9830, -9830, 11140, 0, 0, 9472,
@@ -216,17 +216,17 @@ static FxParams D_8002AE54 = { {
 Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 maxSamples);
 
 /* Sets up the synthesis driver, the DMA and bank caches and starts the audio thread. */
-void func_10008F90(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amConfig) {
+void audio_createAudioMgr(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amConfig) {
     u32 i;
     f32 fsize;
 
-    mp3_initStream(&D_8003E370);
-    config->dma = func_10009980;
+    mp3_initStream(&gAudioHeap);
+    config->dma = audio_dmaNew;
     config->outputRate = osAiSetFrequency(amConfig->frequency);
-    config->bankFetchNew = func_10009FFC;
-    config->bankDecRef = func_10009B2C;
-    config->bankAddRef = func_10009B90;
-    config->bankRelease = func_10009B4C;
+    config->bankFetchNew = audio_bankFetchNew;
+    config->bankDecRef = audio_bankDecRef;
+    config->bankAddRef = audio_bankAddRef;
+    config->bankRelease = audio_bankRelease;
 
     fsize = (f32)amConfig->framesPerField * config->outputRate / 30.0f;
     D_80040F8C = (s32)fsize;
@@ -239,7 +239,7 @@ void func_10008F90(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amCo
     D_80040F84 = 0;
 
     {
-        FxParams params = D_8002AE54;
+        FxParams params = gAudioFxParams;
 
         config->params[0] = params.values[0];
         config->params[1] = params.values[1];
@@ -247,52 +247,52 @@ void func_10008F90(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amCo
     }
     D_8003E380 = &D_8003E640;
 
-    D_800406B8[0].prev = NULL;
-    D_800406B8[0].next = NULL;
+    gAudioDmaBuffers[0].prev = NULL;
+    gAudioDmaBuffers[0].next = NULL;
     for (i = 0; i < NUM_DMA_BUFFERS - 1; i++) {
-        LIST_LINK(DMABuffer, &D_800406B8[i + 1], &D_800406B8[i]);
-        D_800406B8[i].ptr = alHeapAlloc(config->heap, 1, DMA_BUFFER_LENGTH);
+        LIST_LINK(DMABuffer, &gAudioDmaBuffers[i + 1], &gAudioDmaBuffers[i]);
+        gAudioDmaBuffers[i].ptr = alHeapAlloc(config->heap, 1, DMA_BUFFER_LENGTH);
     }
-    D_800406B8[i].ptr = alHeapAlloc(config->heap, 1, DMA_BUFFER_LENGTH);
+    gAudioDmaBuffers[i].ptr = alHeapAlloc(config->heap, 1, DMA_BUFFER_LENGTH);
 
-    bzero(D_80040AC8, sizeof(D_80040AC8));
-    D_80040AC8[0].prev = NULL;
-    D_80040AC8[0].next = NULL;
+    bzero(gBankRecords, sizeof(gBankRecords));
+    gBankRecords[0].prev = NULL;
+    gBankRecords[0].next = NULL;
     for (i = 0; i < NUM_BANK_RECORDS - 1; i++) {
-        LIST_LINK(BankRecord, &D_80040AC8[i + 1], &D_80040AC8[i]);
-        D_80040AC8[i].buffer = NULL;
+        LIST_LINK(BankRecord, &gBankRecords[i + 1], &gBankRecords[i]);
+        gBankRecords[i].buffer = NULL;
     }
-    D_80040AC8[i].buffer = NULL;
+    gBankRecords[i].buffer = NULL;
 
     for (i = 0; i < 2; i++) {
-        D_8003E388.ACMDList[i] = alHeapAlloc(config->heap, 1, amConfig->maxACMDSize * sizeof(Acmd));
+        gAudioMgr.ACMDList[i] = alHeapAlloc(config->heap, 1, amConfig->maxACMDSize * sizeof(Acmd));
     }
     D_80040F94 = amConfig->maxACMDSize;
 
     for (i = 0; i < 3; i++) {
-        D_8003E388.audioInfo[i] = alHeapAlloc(config->heap, 1, sizeof(AudioInfo));
-        D_8003E388.audioInfo[i]->msg.done.type = OS_SC_DONE_MSG;
-        D_8003E388.audioInfo[i]->msg.done.info = D_8003E388.audioInfo[i];
-        D_8003E388.audioInfo[i]->data = alHeapAlloc(config->heap, 1, 4 * D_80040F90);
+        gAudioMgr.audioInfo[i] = alHeapAlloc(config->heap, 1, sizeof(AudioInfo));
+        gAudioMgr.audioInfo[i]->msg.done.type = OS_SC_DONE_MSG;
+        gAudioMgr.audioInfo[i]->msg.done.info = gAudioMgr.audioInfo[i];
+        gAudioMgr.audioInfo[i]->data = alHeapAlloc(config->heap, 1, 4 * D_80040F90);
     }
 
-    osCreateMesgQueue(&D_8003E608, D_8003E620, 8);
-    osCreateMesgQueue(&D_8003E5D0, D_8003E5E8, 8);
-    osCreateMesgQueue(&D_80041298, D_800412B0, MAX_SAMPLE_DMAS);
-    osCreateMesgQueue(&D_800416F0, D_80041708, MAX_BANK_DMAS);
-    osCreateThread(&D_8003E3A0, 4, func_10009400, NULL, D_8003E6A0 + AUDIO_STACK_SIZE / sizeof(u64), priority);
-    D_8002AE40 = TRUE;
-    osStartThread(&D_8003E3A0);
+    osCreateMesgQueue(&gAudioDoneQueue, D_8003E620, 8);
+    osCreateMesgQueue(&gAudioMsgQueue, D_8003E5E8, 8);
+    osCreateMesgQueue(&gSampleDmaQueue, D_800412B0, MAX_SAMPLE_DMAS);
+    osCreateMesgQueue(&gBankDmaQueue, D_80041708, MAX_BANK_DMAS);
+    osCreateThread(&gAudioThread, 4, audio_threadMain, NULL, gAudioThreadStack + AUDIO_STACK_SIZE / sizeof(u64), priority);
+    gAudioThreadStarted = TRUE;
+    osStartThread(&gAudioThread);
 }
 
-void func_100093CC(void) {
-    if (D_8002AE40) {
-        osStopThread(&D_8003E3A0);
+void audio_stopThread(void) {
+    if (gAudioThreadStarted) {
+        osStopThread(&gAudioThread);
     }
 }
 
 /* Audio thread: builds and submits an audio frame on every second retrace. */
-void func_10009400(void *arg) {
+void audio_threadMain(void *arg) {
     u32 done;
     AudioInfo *lastInfo;
     AudioMsg *msg;
@@ -306,9 +306,9 @@ void func_10009400(void *arg) {
     fieldCount = 0;
     firstFrame = TRUE;
     client.flags = 0;
-    func_100051C8(&client, &D_8003E5D0);
+    func_100051C8(&client, &gAudioMsgQueue);
     while (!done) {
-        osRecvMesg(&D_8003E5D0, (OSMesg *)&msg, OS_MESG_BLOCK);
+        osRecvMesg(&gAudioMsgQueue, (OSMesg *)&msg, OS_MESG_BLOCK);
         if (D_8002AC5C != 0) {
             msg->gen.type = OS_SC_PRE_NMI_MSG;
         }
@@ -317,10 +317,10 @@ void func_10009400(void *arg) {
                 if (fieldCount >= 2) {
                     fieldCount = 0;
                 }
-                if (fieldCount == 0 && func_100095A0(D_8003E388.audioInfo[D_8002AE44 % 3], lastInfo) != 0) {
+                if (fieldCount == 0 && audio_handleFrame(gAudioMgr.audioInfo[gAudioFrameCount % 3], lastInfo) != 0) {
                     if (!firstFrame) {
                         /* wait for the previous frame's task */
-                        osRecvMesg(&D_8003E608, (OSMesg *)&msg, OS_MESG_BLOCK);
+                        osRecvMesg(&gAudioDoneQueue, (OSMesg *)&msg, OS_MESG_BLOCK);
                         lastInfo = msg->done.info;
                     }
                     firstFrame = FALSE;
@@ -337,7 +337,7 @@ void func_10009400(void *arg) {
     }
     n_alClose(&D_8003E640);
     for (;;) {
-        osRecvMesg(&D_8003E5D0, (OSMesg *)&msg, OS_MESG_BLOCK);
+        osRecvMesg(&gAudioMsgQueue, (OSMesg *)&msg, OS_MESG_BLOCK);
     }
 }
 
@@ -345,7 +345,7 @@ void func_10009400(void *arg) {
  * Queues the previous frame's samples to the AI, then builds this frame's command
  * list and sends its task to the scheduler. Returns 0 when there was nothing to do.
  */
-s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo) {
+s32 audio_handleFrame(AudioInfo *info, AudioInfo *lastInfo) {
     s16 *outBuffer;
     Acmd *cmdp;
     s32 cmdLen;
@@ -354,8 +354,8 @@ s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo) {
     u32 end;
 
     outBuffer = (s16 *)osVirtualToPhysical(info->data);
-    func_100099BC();
-    func_1000A03C();
+    audio_clearDma();
+    audio_updateBanks();
     samplesLeft = IO_READ(AI_LEN_REG) >> 2;
     if (lastInfo != NULL) {
         osAiSetNextBuffer(lastInfo->alignedData, lastInfo->frameSamples << 2);
@@ -377,18 +377,18 @@ s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo) {
     } else {
         info->alignedData = info->data;
     }
-    cmdp = n_alAudioFrame(D_8003E388.ACMDList[D_8002AE4C], &cmdLen, outBuffer, info->frameSamples);
+    cmdp = n_alAudioFrame(gAudioMgr.ACMDList[D_8002AE4C], &cmdLen, outBuffer, info->frameSamples);
     if (cmdLen == 0) {
         return 0;
     }
     t = &info->task;
     t->next = NULL;
-    t->msgQ = &D_8003E608;
+    t->msgQ = &gAudioDoneQueue;
     t->msg = &info->msg;
     t->flags = OS_SC_NEEDS_RSP;
     t->framebuffer = NULL;
-    t->list.t.data_ptr = (u64 *)D_8003E388.ACMDList[D_8002AE4C];
-    t->list.t.data_size = (cmdp - D_8003E388.ACMDList[D_8002AE4C]) * sizeof(Acmd);
+    t->list.t.data_ptr = (u64 *)gAudioMgr.ACMDList[D_8002AE4C];
+    t->list.t.data_size = (cmdp - gAudioMgr.ACMDList[D_8002AE4C]) * sizeof(Acmd);
     t->list.t.type = M_AUDTASK;
     t->list.t.ucode_boot = (u64 *)D_100290D0;
     t->list.t.ucode_boot_size = (s32)D_100291A0 - (s32)D_100290D0;
@@ -405,14 +405,14 @@ s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo) {
 }
 
 /* ALDMAproc: returns the physical address of ROM sample data, DMAing it into a cache buffer if needed. */
-s32 func_100097CC(s32 addr, s32 len, void *state) {
+s32 audio_dmaSample(s32 addr, s32 len, void *state) {
     u8 *foundBuffer;
     s32 delta;
     DMABuffer *dmaPtr;
     DMABuffer *lastDmaPtr;
     s32 buffEnd;
 
-    dmaPtr = D_80040F78.firstUsed;
+    dmaPtr = gAudioDmaState.firstUsed;
     lastDmaPtr = NULL;
     while (dmaPtr != NULL) {
         buffEnd = dmaPtr->startAddr + DMA_BUFFER_LENGTH;
@@ -420,29 +420,29 @@ s32 func_100097CC(s32 addr, s32 len, void *state) {
             break; /* the list is sorted, so no later buffer holds it */
         }
         if (buffEnd >= addr + len) {
-            dmaPtr->lastFrame = D_8002AE44;
+            dmaPtr->lastFrame = gAudioFrameCount;
             return osVirtualToPhysical(dmaPtr->ptr + addr - dmaPtr->startAddr);
         }
         lastDmaPtr = dmaPtr;
         dmaPtr = dmaPtr->next;
     }
 
-    dmaPtr = D_80040F78.firstFree;
-    if (dmaPtr == NULL || D_8002AE48 >= MAX_SAMPLE_DMAS) {
+    dmaPtr = gAudioDmaState.firstFree;
+    if (dmaPtr == NULL || gSampleDmaCount >= MAX_SAMPLE_DMAS) {
         return 0;
     }
-    D_80040F78.firstFree = dmaPtr->next;
+    gAudioDmaState.firstFree = dmaPtr->next;
     LIST_UNLINK(DMABuffer, dmaPtr);
     if (lastDmaPtr != NULL) {
         LIST_LINK(DMABuffer, dmaPtr, lastDmaPtr);
-    } else if (D_80040F78.firstUsed != NULL) {
-        lastDmaPtr = D_80040F78.firstUsed;
-        D_80040F78.firstUsed = dmaPtr;
+    } else if (gAudioDmaState.firstUsed != NULL) {
+        lastDmaPtr = gAudioDmaState.firstUsed;
+        gAudioDmaState.firstUsed = dmaPtr;
         dmaPtr->next = lastDmaPtr;
         dmaPtr->prev = NULL;
         lastDmaPtr->prev = dmaPtr;
     } else {
-        D_80040F78.firstUsed = dmaPtr;
+        gAudioDmaState.firstUsed = dmaPtr;
         dmaPtr->next = NULL;
         dmaPtr->prev = NULL;
     }
@@ -450,77 +450,77 @@ s32 func_100097CC(s32 addr, s32 len, void *state) {
     delta = addr & 1;
     addr -= delta;
     dmaPtr->startAddr = addr;
-    dmaPtr->lastFrame = D_8002AE44;
-    osPiStartDma(&D_80040F98[D_8002AE48++], OS_MESG_PRI_HIGH, OS_READ, addr, foundBuffer, DMA_BUFFER_LENGTH,
-                 &D_80041298);
+    dmaPtr->lastFrame = gAudioFrameCount;
+    osPiStartDma(&gSampleDmaMsgs[gSampleDmaCount++], OS_MESG_PRI_HIGH, OS_READ, addr, foundBuffer, DMA_BUFFER_LENGTH,
+                 &gSampleDmaQueue);
     return osVirtualToPhysical(foundBuffer) + delta;
 }
 
 /* ALDMANew */
-ALDMAproc func_10009980(void *state) {
-    if (!D_80040F78.initialized) {
-        D_80040F78.firstUsed = NULL;
-        D_80040F78.firstFree = D_800406B8;
-        D_80040F78.initialized = TRUE;
+ALDMAproc audio_dmaNew(void *state) {
+    if (!gAudioDmaState.initialized) {
+        gAudioDmaState.firstUsed = NULL;
+        gAudioDmaState.firstFree = gAudioDmaBuffers;
+        gAudioDmaState.initialized = TRUE;
     }
     *(void **)state = NULL;
-    return func_100097CC;
+    return audio_dmaSample;
 }
 
 /* Collects this frame's sample DMAs and frees cache buffers unused for two frames. */
-void func_100099BC(void) {
+void audio_clearDma(void) {
     u32 i;
     OSMesg iomsg;
     DMABuffer *dmaPtr;
     DMABuffer *nextPtr;
 
     iomsg = NULL;
-    for (i = 0; i < D_8002AE48; i++) {
-        if (osRecvMesg(&D_80041298, &iomsg, OS_MESG_NOBLOCK) == -1) {
-            osRecvMesg(&D_80041298, &iomsg, OS_MESG_BLOCK);
+    for (i = 0; i < gSampleDmaCount; i++) {
+        if (osRecvMesg(&gSampleDmaQueue, &iomsg, OS_MESG_NOBLOCK) == -1) {
+            osRecvMesg(&gSampleDmaQueue, &iomsg, OS_MESG_BLOCK);
         }
     }
-    dmaPtr = D_80040F78.firstUsed;
+    dmaPtr = gAudioDmaState.firstUsed;
     while (dmaPtr != NULL) {
         nextPtr = dmaPtr->next;
-        if (dmaPtr->lastFrame + 1 < D_8002AE44) {
-            if (D_80040F78.firstUsed == dmaPtr) {
-                D_80040F78.firstUsed = nextPtr;
+        if (dmaPtr->lastFrame + 1 < gAudioFrameCount) {
+            if (gAudioDmaState.firstUsed == dmaPtr) {
+                gAudioDmaState.firstUsed = nextPtr;
             }
             LIST_UNLINK(DMABuffer, dmaPtr);
-            if (D_80040F78.firstFree != NULL) {
-                LIST_LINK(DMABuffer, dmaPtr, D_80040F78.firstFree);
+            if (gAudioDmaState.firstFree != NULL) {
+                LIST_LINK(DMABuffer, dmaPtr, gAudioDmaState.firstFree);
             } else {
-                D_80040F78.firstFree = dmaPtr;
+                gAudioDmaState.firstFree = dmaPtr;
                 dmaPtr->next = NULL;
                 dmaPtr->prev = NULL;
             }
         }
         dmaPtr = nextPtr;
     }
-    D_8002AE48 = 0;
-    D_8002AE44++;
+    gSampleDmaCount = 0;
+    gAudioFrameCount++;
 }
 
 /* Drops a reference to a loaded bank. */
-void func_10009B2C(BankRecord *record) {
+void audio_bankDecRef(BankRecord *record) {
     if (((u32)record & 1) == 0) {
         record->refCount--;
     }
 }
 
 /* Drops a reference to a loaded bank and releases it when none are left. */
-void func_10009B4C(BankRecord *record) {
+void audio_bankRelease(BankRecord *record) {
     if (((u32)record & 1) == 0) {
         record->refCount--;
         if (record->refCount == 0) {
-            func_10009BE4(record);
+            audio_retireBank(record);
         }
     }
 }
 
 /* Takes a reference to a loaded bank. */
-void func_10009B90(BankRecord *record) {
+void audio_bankAddRef(BankRecord *record) {
     if (((u32)record & 1) == 0) {
         if (record->state == 1) {
             if (record->mode == 1) {
@@ -534,7 +534,7 @@ void func_10009B90(BankRecord *record) {
 }
 
 /* Restores the bank's owner slot and moves its record to the release list. */
-void func_10009BE4(BankRecord *record) {
+void audio_retireBank(BankRecord *record) {
     if ((u32)record & 1) {
         D_8003C8E0 = 0x0F000004;
         func_150AD770();
@@ -560,7 +560,7 @@ void func_10009BE4(BankRecord *record) {
  * Bank fetch: returns the loaded bank for an owner slot, or NULL while it is not
  * loaded yet, starting its DMA (and pointing the slot at its record) on first use.
  */
-void *func_10009CBC(u32 *slot, s32 mode) {
+void *audio_fetchBank(u32 *slot, s32 mode) {
     BankRecord *record;
     BankRecord *reuse;
     s32 size;
@@ -618,7 +618,7 @@ void *func_10009CBC(u32 *slot, s32 mode) {
             record->mode = mode;
             record->ownerSlot = slot;
             record->state = 0;
-            if (D_8002AE50 < MAX_BANK_DMAS) {
+            if (gBankDmaCount < MAX_BANK_DMAS) {
                 alignedSize = (size + 0xF) & ~0xF;
                 record->buffer = allocate_memory(alignedSize, 0xFF, 2, 0);
                 bzero(record->buffer, alignedSize);
@@ -628,8 +628,8 @@ void *func_10009CBC(u32 *slot, s32 mode) {
             if (record->buffer != NULL) {
                 osWritebackDCache(record->buffer, alignedSize);
                 osInvalDCache(record->buffer, alignedSize);
-                osPiStartDma(&D_80041330[D_8002AE50++], OS_MESG_PRI_HIGH, OS_READ, (value >> 5) & ~7,
-                             record->buffer, alignedSize, &D_800416F0);
+                osPiStartDma(&gBankDmaMsgs[gBankDmaCount++], OS_MESG_PRI_HIGH, OS_READ, (value >> 5) & ~7,
+                             record->buffer, alignedSize, &gBankDmaQueue);
                 *slot = (u32)record;
             }
         }
@@ -651,22 +651,22 @@ void *func_10009CBC(u32 *slot, s32 mode) {
 }
 
 /* Returns the bank fetch callback, initialising the bank records on first use. */
-BankFetchProc func_10009FFC(void) {
+BankFetchProc audio_bankFetchNew(void) {
     if (!BANK_STATE.initialized) {
         BANK_STATE.loadedList = NULL;
-        BANK_STATE.freeList = D_80040AC8;
+        BANK_STATE.freeList = gBankRecords;
         BANK_STATE.pendingList = NULL;
         BANK_STATE.releaseList = NULL;
         BANK_STATE.initialized = TRUE;
     }
-    return func_10009CBC;
+    return audio_fetchBank;
 }
 
 /*
  * Moves banks whose DMA has finished to the loaded list (relocating instrument
  * sound pointers), then frees the buffers of released banks.
  */
-void func_1000A03C(void) {
+void audio_updateBanks(void) {
     u32 i;
     u32 sound;
     s32 found;
@@ -680,8 +680,8 @@ void func_1000A03C(void) {
 
     received = 0;
     message = NULL;
-    for (i = 0; i < D_8002AE50; i++) {
-        if (osRecvMesg(&D_800416F0, (OSMesg *)&message, OS_MESG_NOBLOCK) != -1) {
+    for (i = 0; i < gBankDmaCount; i++) {
+        if (osRecvMesg(&gBankDmaQueue, (OSMesg *)&message, OS_MESG_NOBLOCK) != -1) {
             record = BANK_STATE.pendingList;
             received++;
             found = FALSE;
@@ -716,7 +716,7 @@ void func_1000A03C(void) {
             }
         }
     }
-    D_8002AE50 -= received;
+    gBankDmaCount -= received;
 
     record = BANK_STATE.releaseList;
     if (record != NULL) {
@@ -764,14 +764,14 @@ void func_1000A03C(void) {
             record = next;
         } while (next != NULL);
     }
-    if (D_8003E384 != 0) {
-        func_1000A348();
-        D_8003E384 = 0;
+    if (gReleaseRawBanksPending != 0) {
+        audio_releaseRawBanks();
+        gReleaseRawBanksPending = 0;
     }
 }
 
 /* Moves every unreferenced raw bank from the loaded list to the release list. */
-void func_1000A348(void) {
+void audio_releaseRawBanks(void) {
     BankRecord *record;
     BankRecord *next;
     u32 *ownerSlot;

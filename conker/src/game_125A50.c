@@ -212,7 +212,7 @@ void func_150F892C(StageObj *obj) {
             pos.y = func_150ADA68() * 150.0f + 30.0f;
             pos.x += state->centerX;
             pos.z += state->centerZ;
-            func_151C329C(&pos, obj->unkC, obj->unk1);
+            weapon_spawnImpactBurst(&pos, obj->unkC, obj->unk1);
             state->unk38 -= 1.0f;
         } while (state->unk38 > 1.0f);
     }
@@ -433,12 +433,12 @@ s32 arg2;
     Vec3f unk30;
     ModelAttachment *gun;
 
-    gun = func_150FF288(obj);
+    gun = weapon_getGunAttachment(obj);
     if (gun != NULL) {
-        if (func_150FF6E0(points, &position, &hit, &normal, &unk30, obj, gun) != 0) {
+        if (weapon_getGunMuzzlePoints(points, &position, &hit, &normal, &unk30, obj, gun) != 0) {
             func_151D3F14(&position, arg1, arg2);
             func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f, arg1, arg2);
-            func_150FF474(&position, points, arg1, arg2);
+            weapon_spawnMuzzleFlashes(&position, points, arg1, arg2);
         }
     }
 }

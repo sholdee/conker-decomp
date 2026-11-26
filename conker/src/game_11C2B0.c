@@ -455,7 +455,7 @@ void func_150EFB80(BeamEmitter *emitter) {
                 func_15143794(yaw & 0xFF, pitch % 31U - 55, func_150ADA68() * 15.0f + 25.0f, &part.vel);
                 part.gravity = (func_150ADA68() * 740.0f + -1761.0f) * 0.001000000047f;
                 part.color.alpha = func_150ADA20() % 101U + 155;
-                func_1515C2F0(&spawn, 0, &part, 0, emitter->base.header.owner, emitter->base.header.kind);
+                trail_spawnFallingTrail(&spawn, 0, &part, 0, emitter->base.header.owner, emitter->base.header.kind);
                 link->accum -= 1.0f;
             } while (link->accum > 1.0f);
         } else {
@@ -653,7 +653,7 @@ void func_150F03E8(LightEffect *flash) {
     beam->link.flash = NULL;
 }
 
-/* Fires a projectile (func_151C229C) from slot `slot` of `actor` once actor->taskint[2]
+/* Fires a projectile (weapon_spawnProjectile) from slot `slot` of `actor` once actor->taskint[2]
  * reaches 90, with a spark burst and a func_15102B38 effect at the muzzle. */
 Game1EF500Trail *func_150F03F8(actor, slot, arg2, arg3)
     Actor *actor;
@@ -700,7 +700,7 @@ Game1EF500Trail *func_150F03F8(actor, slot, arg2, arg3)
         rand0 = func_150ADA68();
         rand1 = func_150ADA68();
         func_150ADA20();
-        ret = func_151C229C(&muzzle, &dir, 0, 0, 0, 0, 150.0f, 0.006666666828f, rand0 * 19.0f + 38.0f,
+        ret = weapon_spawnProjectile(&muzzle, &dir, 0, 0, 0, 0, 150.0f, 0.006666666828f, rand0 * 19.0f + 38.0f,
                             rand1 * 363.0f + 149.0f, 50.0f, 0xFF, actor, 1, 1, 0, 8, 0, 1, 0, 0xA0038, 0.0f,
                             0xFF, -1, 0, arg2, arg3);
     }

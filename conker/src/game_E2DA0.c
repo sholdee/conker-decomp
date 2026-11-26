@@ -374,7 +374,7 @@ void func_150B648C(u8 variant) {
     params.width = D_8009FC78[variant];
     params.life = D_8009FC84[variant];
     params.burstRate = 0.3f;
-    func_150B3F5C(&params, &pos, D_8009FC8C[variant]);
+    trail_spawnScatterTrail(&params, &pos, D_8009FC8C[variant]);
 }
 
 typedef struct {

@@ -64,8 +64,8 @@ glabel func_150A43E0
     /* D195C 150A44AC 01735821 */  addu       $t3, $t3, $s3
     /* D1960 150A44B0 00139842 */  srl        $s3, $s3, 1
     /* D1964 150A44B4 01735821 */  addu       $t3, $t3, $s3
-    /* D1968 150A44B8 3C08800E */  lui        $t0, %hi(D_800DBEF8)
-    /* D196C 150A44BC 8D08BEF8 */  lw         $t0, %lo(D_800DBEF8)($t0)
+    /* D1968 150A44B8 3C08800E */  lui        $t0, %hi(gObjectBlocks)
+    /* D196C 150A44BC 8D08BEF8 */  lw         $t0, %lo(gObjectBlocks)($t0)
     /* D1970 150A44C0 001C8080 */  sll        $s0, $gp, 2
     /* D1974 150A44C4 01104021 */  addu       $t0, $t0, $s0
     /* D1978 150A44C8 8D080000 */  lw         $t0, 0x0($t0)

@@ -118,7 +118,7 @@ void func_150AE790(AttachedEffect *effect) {
             motion.velocity.x = horizontal * cosYaw;
             motion.velocity.y = -speed * cosPitch;
             motion.velocity.z = horizontal * sinYaw;
-            func_15147DA0(&spawn, &motion, 0, 1, 2, 0, 0, 0, 0, 0, 0, &style, 0, effect->base.header.owner, effect->base.header.kind);
+            trail_createMotionTrail(&spawn, &motion, 0, 1, 2, 0, 0, 0, 0, 0, 0, &style, 0, effect->base.header.owner, effect->base.header.kind);
         }
 
         duration = func_150ADA68() + 2.5f;

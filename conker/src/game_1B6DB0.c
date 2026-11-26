@@ -5,7 +5,7 @@
 /* Trail types (see game_175250.c). */
 
 /* Creates a spray emitter from desc; bit 0 of its flags records whether arg1 was set. */
-void func_15189900(SprayDesc *desc, u8 arg1) {
+void trail_createSprayEmitter(SprayDesc *desc, u8 arg1) {
     SprayEmitter *emitter;
     s32 flag;
 
@@ -33,7 +33,7 @@ void func_15189900(SprayDesc *desc, u8 arg1) {
 
 /* Spray emitter update: every 50 ticks checks for a player within 1581 units (sqrt 2500000) and, while one
    was found, spawns about desc.rate trail particles per frame along the spawn segment. */
-void func_15189A00(SprayEmitter *emitter) {
+void trail_updateSprayEmitter(SprayEmitter *emitter) {
     s32 i;
     s32 found;
     f32 *playerPos; /* unk2F8..unk300 of the player: its position */
@@ -124,7 +124,7 @@ void func_15189A00(SprayEmitter *emitter) {
             motion.gravity = (func_150ADA68() * emitter->desc.gravityRange) + emitter->desc.gravity;
             motion.alpha = (func_150ADA20() % (emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
             spawn.life = (func_150ADA20() % (emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
-            trail = func_15147DA0(&spawn, &motion, 8, 1, (emitter->flags & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0, &render, 0,
+            trail = trail_createMotionTrail(&spawn, &motion, 8, 1, (emitter->flags & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0, &render, 0,
                                   emitter->link.owner, emitter->link.kind);
             if (trail != NULL) {
                 params = trail->params;
@@ -136,7 +136,7 @@ void func_15189A00(SprayEmitter *emitter) {
 }
 
 /* Spray trail handler: once the oldest point falls below the floor, maybe splashes there, then ends the trail. */
-s32 func_15189EBC(SprayTrail *trail) {
+s32 trail_landSprayTrail(SprayTrail *trail) {
     f64 chance;
     SprayTrailParams *params = trail->params;
     MotionTrailPoint *points = trail->points;

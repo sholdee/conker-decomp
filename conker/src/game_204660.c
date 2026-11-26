@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /*
- * Bone trails: an emitter object (a TimedEffect made by func_151D71B0) follows a point on an actor's
+ * Bone trails: an emitter object (a TimedEffect made by trail_createAnchoredEmitter) follows a point on an actor's
  * bone and drags a trail object (made by func_15147A80) behind it. The trail keeps a ring buffer of
  * points that it renders as a textured ribbon.
  */
@@ -11,20 +11,20 @@
 struct AnchoredTrail;
 
 /* Per anchor type: the update that places the anchor, and the message handler. */
-static s32 (*D_8008FCA0[])(AnchoredTrailEmitter *) = { func_151D75C4 };
-static void (*D_8008FCA4[])(AnchoredTrailEmitter *, TrailBoneLink *, u8) = { func_151D7538 };
+static s32 (*gAnchorUpdateProcs[])(AnchoredTrailEmitter *) = { trail_updateBoneAnchor };
+static void (*gAnchorMessageProcs[])(AnchoredTrailEmitter *, TrailBoneLink *, u8) = { trail_onBoneAnchorMessage };
 /* The extra checks of a bone link (TrailBoneLink.condition). */
-static s32 (*D_8008FCA8[])(AnchoredTrailEmitter *) = { func_151D7724, func_151D7770, func_151D779C };
+static s32 (*gAnchorConditionProcs[])(AnchoredTrailEmitter *) = { func_151D7724, func_151D7770, trail_checkAnchorInWater };
 
 /* Per TrailBoneLink.bone: the anchor point in the bone's space, and the bone matrix it is on. */
-static const Vec3f D_800AB280[7] = {
+static const Vec3f gTrailBoneAnchors[7] = {
     { -21.0f, -12.0f, 32.0f }, { -22.0f, -4.0f, 16.0f }, { -8.0f, 24.0f, 2.0f }, { -24.0f, 16.0f, 18.0f },
     { 6.0f, 14.0f, 35.0f },    { 35.0f, 27.0f, 59.0f },  { -79.0f, 18.0f, 36.0f },
 };
-static const u8 D_800AB2D4[7] = { 15, 17, 15, 2, 6, 6, 14 };
+static const u8 gTrailBoneMatrices[7] = { 15, 17, 15, 2, 6, 6, 14 };
 
 /* Creates an emitter of the given anchor type with `extraSize` more bytes of data after the TrailAnchor. */
-TimedEffect *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extraSize, u8 arg5, s32 arg6) {
+TimedEffect *trail_createAnchoredEmitter(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extraSize, u8 arg5, s32 arg6) {
     TimedEffect *emitter;
     TrailAnchor anchor;
 
@@ -47,7 +47,7 @@ TimedEffect *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 ex
  * Emitter update: moves the anchor, and removes the emitter once its anchor is gone. A trail is attached
  * while the anchor stays valid and moves less than maxStep per frame, and detached otherwise.
  */
-void func_151D7264(AnchoredTrailEmitter *emitter) {
+void trail_updateAnchoredEmitter(AnchoredTrailEmitter *emitter) {
     TrailAnchor *anchor;
     Vec3f prevPos;
     u8 wasValid;
@@ -56,7 +56,7 @@ void func_151D7264(AnchoredTrailEmitter *emitter) {
     anchor = &emitter->anchor;
     prevPos = anchor->pos;
     wasValid = anchor->flags & 1;
-    if (D_8008FCA0[anchor->anchorType](emitter) == 0) {
+    if (gAnchorUpdateProcs[anchor->anchorType](emitter) == 0) {
         emitter->base.header.state = -1;
         emitter->base.header.flags |= 1;
         return;
@@ -68,43 +68,43 @@ void func_151D7264(AnchoredTrailEmitter *emitter) {
             step.z = anchor->pos.z - prevPos.z;
             if (func_15143E64(&step) < anchor->maxStep) {
                 if (anchor->trail == NULL) {
-                    func_151D7830(emitter);
+                    trail_spawnAnchoredTrail(emitter);
                 }
             } else {
-                func_151D77C8(emitter);
+                trail_detachAnchoredTrail(emitter);
             }
         } else {
-            func_151D77C8(emitter);
+            trail_detachAnchoredTrail(emitter);
         }
     } else {
-        func_151D77C8(emitter);
+        trail_detachAnchoredTrail(emitter);
     }
 }
 
 /* Emitter message handler: forwards to the anchor type's handler. */
-void func_151D73A8(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
-    if (D_8008FCA4[emitter->anchor.anchorType] != NULL) {
+void trail_onAnchoredEmitterMessage(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
+    if (gAnchorMessageProcs[emitter->anchor.anchorType] != NULL) {
         // matching: the original reloads anchorType for the call; IDO would reuse the first load
-        D_8008FCA4[*(volatile u8 *)&emitter->anchor.anchorType](emitter, msg, msgType);
+        gAnchorMessageProcs[*(volatile u8 *)&emitter->anchor.anchorType](emitter, msg, msgType);
     }
 }
 
-void func_151D7404(AnchoredTrailEmitter *emitter) {
-    func_151D77C8(emitter);
+void trail_releaseAnchoredEmitter(AnchoredTrailEmitter *emitter) {
+    trail_detachAnchoredTrail(emitter);
 }
 
-void func_151D7424(AnchoredTrailEmitter *emitter) {
-    func_151D7404(emitter);
+void trail_destroyAnchoredEmitter(AnchoredTrailEmitter *emitter) {
+    trail_releaseAnchoredEmitter(emitter);
     func_1514933C(&emitter->base);
 }
 
-void func_151D7450(AnchoredTrailEmitter *emitter) {
-    func_151D7404(emitter);
+void trail_freeAnchoredEmitter(AnchoredTrailEmitter *emitter) {
+    trail_releaseAnchoredEmitter(emitter);
     func_15149368(&emitter->base);
 }
 
 /* Broadcasts message 0x3D ({actor, unique_id}): the actor is going away. */
-void func_151D747C(Actor *actor) {
+void trail_broadcastActorGone(Actor *actor) {
     ActorRef msg;
 
     msg.actor = actor;
@@ -112,8 +112,8 @@ void func_151D747C(Actor *actor) {
     func_151494E0((s32)&msg, 0x3D);
 }
 
-/* Attaches a trail to `bone` of `actor`; `condition` picks an extra D_8008FCA8 check (-1 for none). */
-void func_151D74B0(Actor *actor, u8 bone, s8 condition, u8 arg3, s32 arg4) {
+/* Attaches a trail to `bone` of `actor`; `condition` picks an extra gAnchorConditionProcs check (-1 for none). */
+void trail_attachToBone(Actor *actor, u8 bone, s8 condition, u8 arg3, s32 arg4) {
     TrailBoneLink link;
     TimedEffect *emitter;
 
@@ -122,14 +122,14 @@ void func_151D74B0(Actor *actor, u8 bone, s8 condition, u8 arg3, s32 arg4) {
     link.bone = bone;
     link.condition = condition;
 
-    emitter = func_151D71B0(0x12C, 0, 0, 12.0f, sizeof(TrailBoneLink), arg3, arg4);
+    emitter = trail_createAnchoredEmitter(0x12C, 0, 0, 12.0f, sizeof(TrailBoneLink), arg3, arg4);
     if (emitter != NULL) {
         memcpy(&((AnchoredTrailEmitter *)emitter)->link, &link, sizeof(TrailBoneLink));
     }
 }
 
 /* Anchor type 0 message handler: removes the emitter when its actor goes away (message 0x3D). */
-void func_151D7538(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
+void trail_onBoneAnchorMessage(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
     // matching: the original reloads emitter and msg from their stack slots (address taken / int reload)
     AnchoredTrailEmitter **pEmitter = &emitter;
     TrailBoneLink *link;
@@ -150,7 +150,7 @@ void func_151D7538(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType
  * anchor is invalid while the actor has no bone matrices, rides something with a camera, or has
  * unk7 set.
  */
-s32 func_151D75C4(AnchoredTrailEmitter *emitter) {
+s32 trail_updateBoneAnchor(AnchoredTrailEmitter *emitter) {
     TrailBoneLink *link;
     Actor *actor;
     TrailAnchor *anchor;
@@ -173,10 +173,10 @@ s32 func_151D75C4(AnchoredTrailEmitter *emitter) {
         anchor->flags &= ~1;
         return 1;
     }
-    func_15143134(&D_800AB280[link->bone], &anchor->pos, &actor->ob_matrix_ptr[D_800AB2D4[link->bone]]);
+    func_15143134(&gTrailBoneAnchors[link->bone], &anchor->pos, &actor->ob_matrix_ptr[gTrailBoneMatrices[link->bone]]);
     anchor->flags |= 1;
     if (link->condition != -1) {
-        return D_8008FCA8[link->condition](emitter);
+        return gAnchorConditionProcs[link->condition](emitter);
     }
     return 1;
 }
@@ -204,7 +204,7 @@ s32 func_151D7770(AnchoredTrailEmitter *emitter) {
 }
 
 /* Condition 2: the anchor is invalid while the actor is in water. */
-s32 func_151D779C(AnchoredTrailEmitter *emitter) {
+s32 trail_checkAnchorInWater(AnchoredTrailEmitter *emitter) {
     TrailAnchor *anchor = &emitter->anchor;
     Actor *actor = emitter->link.actor;
 
@@ -215,7 +215,7 @@ s32 func_151D779C(AnchoredTrailEmitter *emitter) {
 }
 
 /* Detaches the emitter's trail, which then fades out. */
-void func_151D77C8(AnchoredTrailEmitter *emitter) {
+void trail_detachAnchoredTrail(AnchoredTrailEmitter *emitter) {
     TrailAnchor *anchor = &emitter->anchor;
 
     if (anchor->trail != NULL) {
@@ -232,7 +232,7 @@ void func_151D77C8(AnchoredTrailEmitter *emitter) {
 }
 
 /* Spawns a 25-point trail at the anchor and attaches it to the emitter. */
-void func_151D7830(AnchoredTrailEmitter *emitter) {
+void trail_spawnAnchoredTrail(AnchoredTrailEmitter *emitter) {
     AnchoredTrail *trail;
     AnchoredTrailData data;
     EffectTemplate header;
@@ -261,7 +261,7 @@ void func_151D7830(AnchoredTrailEmitter *emitter) {
 }
 
 /* Detached trail update: the points keep falling and the tail position follows the oldest point. */
-s32 func_151D792C(AnchoredTrail *trail) {
+s32 trail_fallAnchoredTrail(AnchoredTrail *trail) {
     AnchoredTrailPoint *points;
     s32 i;
 
@@ -275,7 +275,7 @@ s32 func_151D792C(AnchoredTrail *trail) {
         if (i < 0) {
             i = trail->head.tmpl.itemCount - 1;
         }
-        func_151D8718(&points[i].pos, &points[i].velY, gFrameDelta);
+        trail_fallPoint(&points[i].pos, &points[i].velY, gFrameDelta);
     }
 // matching: an (unused) label here makes IDO start a new block for the tail update
 tail:
@@ -293,7 +293,7 @@ tail:
  * Attached trail update: the head follows the emitter, and points are emitted (4 per second of
  * gFrameDelta) along the way from the last emitted point, each pre-aged by the time since it was due.
  */
-s32 func_151D7A38(AnchoredTrail *trail) {
+s32 trail_followAnchoredTrail(AnchoredTrail *trail) {
     AnchoredTrailData *data;
     AnchoredTrailPoint *points;
     Vec3f anchorPos;
@@ -339,7 +339,7 @@ s32 func_151D7A38(AnchoredTrail *trail) {
             point->length = 0.0f;
             point->alpha = 0;
             point->texU = 0.0f;
-            func_151D8718(&point->pos, &point->velY, age);
+            trail_fallPoint(&point->pos, &point->velY, age);
             trail->head.end++;
             age -= ageStep;
             if (trail->head.end == trail->head.tmpl.itemCount) {
@@ -370,7 +370,7 @@ s32 func_151D7A38(AnchoredTrail *trail) {
  * the last segment and dropping older points), scrolls the texture along it, and fades the alpha out
  * over the oldest 70%.
  */
-s32 func_151D7CD0(AnchoredTrail *trail) {
+s32 trail_shapeAnchoredTrail(AnchoredTrail *trail) {
     AnchoredTrailData *data;
     AnchoredTrailPoint *points;
     f32 totalLength;
@@ -496,7 +496,7 @@ extern Mode151D80C4 D_800A4AC8[];
  * Draws the trail as a ribbon 11 units wide, spread sideways by view's cos/sin (D_800DD1E8/D_800DD1D8), from
  * the head back to the oldest point. A fading trail scales the alpha by timer * 12.
  */
-Gfx *func_151D80C4(AnchoredTrail *trail, Gfx *gfx, s16 view) {
+Gfx *trail_drawAnchoredTrail(AnchoredTrail *trail, Gfx *gfx, s16 view) {
     AnchoredTrailData *data;
     Vec3f pos;
     Vec3f newerPos;
@@ -634,7 +634,7 @@ Gfx *func_151D80C4(AnchoredTrail *trail, Gfx *gfx, s16 view) {
 }
 
 /* Lets a point fall for dt: integrates velY under gravity and moves pos->y. */
-void func_151D8718(Vec3f *pos, f32 *velY, f32 dt) {
+void trail_fallPoint(Vec3f *pos, f32 *velY, f32 dt) {
     f32 v = *velY;
 
     *velY += 0.2340000123f * dt;
@@ -642,7 +642,7 @@ void func_151D8718(Vec3f *pos, f32 *velY, f32 dt) {
 }
 
 /* Detaches the trail from its emitter. */
-void func_151D8764(AnchoredTrail *trail) {
+void trail_detachFromEmitter(AnchoredTrail *trail) {
     AnchoredTrailData *data = trail->data;
     AnchoredTrailEmitter *emitter = data->emitter;
 
@@ -651,12 +651,12 @@ void func_151D8764(AnchoredTrail *trail) {
     }
 }
 
-void func_151D8780(AnchoredTrail *trail) {
-    func_151D8764(trail);
+void trail_destroyAnchoredTrail(AnchoredTrail *trail) {
+    trail_detachFromEmitter(trail);
     func_151478F4(trail);
 }
 
-void func_151D87AC(AnchoredTrail *trail) {
-    func_151D8764(trail);
+void trail_freeAnchoredTrail(AnchoredTrail *trail) {
+    trail_detachFromEmitter(trail);
     func_15147928(trail);
 }

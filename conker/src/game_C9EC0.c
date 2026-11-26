@@ -342,7 +342,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
                         dir.x = 0.0f;
                         dir.z = 0.0f;
                         dir.y = -1.0f;
-                        func_151BFE84(&floor.tri, &pos, &dir, 1, 0xFF, 1);
+                        weapon_spawnSurfaceHit(&floor.tri, &pos, &dir, 1, 0xFF, 1);
                     }
                 }
             }
@@ -361,7 +361,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
                     pos.x = obj->xpos;
                     pos.y = obj->ypos + 50.0f;
                     pos.z = obj->zpos;
-                    func_151C0098(&pos, obj, 1, 0xFF, 1);
+                    weapon_spawnObjectHit(&pos, obj, 1, 0xFF, 1);
                 }
             }
             break;
@@ -382,7 +382,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             func_150E1060(cmd->arg.b.lo, 0xFF, 1);
             break;
         case 18:
-            func_151CD35C(cmd->arg.w);
+            trail_startStream(cmd->arg.w);
             break;
         case 16:
             func_1000E7A0(16, 0);
@@ -487,7 +487,7 @@ s32 script_endEffect(s32 cmdId, ScriptCmd *cmd) {
             light_sendEvent(38, 24, 0);
             break;
         case 18:
-            func_151CD394(cmd->arg.w);
+            trail_stopStream(cmd->arg.w);
             break;
         case 2:
             D_800D9920 = 0;
@@ -537,7 +537,7 @@ s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
     switch (cmdId) {
         case 52:
             if (phase == 3) {
-                func_15197A7C(actor_findOnPath(CMD_OBJECT_ID(cmd->arg)));
+                flamethrower_stopJets(actor_findOnPath(CMD_OBJECT_ID(cmd->arg)));
             }
             break;
 

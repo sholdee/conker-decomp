@@ -288,7 +288,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
         return 2;
     }
     longShot = 0;
-    sound = D_80099AC4[kind];
+    sound = gProjectileHitValues[kind];
     if (kind == 7) {
         if (level == 43) {
             sound = 0x27;

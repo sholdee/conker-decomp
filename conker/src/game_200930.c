@@ -9,11 +9,11 @@ void func_15131958(void *vel, f32 drag, void *arg2);
 /* The point functions of func_151D469C's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is
  * their second argument). */
 static void (*D_8008FC70[])(Actor *obj, s16 arg1, Vec3f *out) = {
-    func_151C6974, func_151C69A0, func_150FE794, func_150FE248, func_150FFBDC, func_150FEBC8, func_150FEFD0,
+    weapon_getSide0JointPos, weapon_getSide1JointPos, func_150FE794, weapon_getLauncherMuzzlePos, weapon_getGunMuzzlePos, weapon_getForwardProjectileStart, weapon_getAttachmentPos,
 };
 /* The guns' muzzle points and the bones they are on, for func_151D5A18 (by gun). */
-const Vec3f *D_8008FC8C[] = { &D_800A2130, &D_800A19E0 };
-u8 *D_8008FC94[] = { &D_80088BB0, &D_80088B10 };
+const Vec3f *D_8008FC8C[] = { &gGunMuzzleStart, &D_800A19E0 };
+u8 *D_8008FC94[] = { &gGunMuzzleBone, &D_80088B10 };
 
 void *memcpy(void *, const void *, u32);
 
@@ -599,7 +599,7 @@ s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit
         (victim->character_type == 0x8C) || (victim->character_type == 0x8E) || (victim->character_type == 0x8F) || (victim->character_type == 0x91) ||
         (victim->character_type == 0x9E) || (victim->character_type == 0xA6) || (victim->character_type == 0xAB) || (victim->character_type == 0xAC) ||
         (victim->character_type == 0xB2) || (victim->character_type == 0xB4) || (victim->character_type == 0x5B)) {
-        func_151C2050(attacker, from, dir, 9, (hit != NULL) ? hit->dist : 0.0f);
+        weapon_queueShotSound(attacker, from, dir, 9, (hit != NULL) ? hit->dist : 0.0f);
     }
 
     health = victim->energy;

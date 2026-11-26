@@ -259,7 +259,7 @@ void func_1502C1A4(void) {
                     } else {
                         variantFlag = 0;
                     }
-                    obj->unk2D4 = (EffectHeader *)func_1510D970(0, obj, variant, 0, variantFlag);
+                    obj->unk2D4 = (EffectHeader *)shadow_createBlob(0, obj, variant, 0, variantFlag);
                     // matching: the label ends the block so as1 can't move the store into the branch delay slot
                 created:;
                 }
@@ -478,7 +478,7 @@ Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     }
     if (mode == 4) {
         alpha = (D_800DF7C4 * alpha) >> 8;
-        model = D_800DF7C0;
+        model = gBoneTrailMtxs;
     } else {
         model = obj->ob_matrix_ptr;
     }
@@ -969,7 +969,7 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
         canCull = FALSE;
     }
     if (obj->character_type == 0x8A) {
-        other = func_15072208(obj, 0);
+        other = event_getOwnedObject(obj, 0);
         if (other != NULL && other->mv != NULL && other->mv->SniperState != 0) {
             canCull = FALSE;
         }
@@ -1698,7 +1698,7 @@ void actor_applyForcedLod(Actor *obj) {
     if (obj->forced_lod == 0) {
         return;
     }
-    oldAnims = D_800D1588[obj->character_type];
+    oldAnims = gModelAnimTables[obj->character_type];
     if (obj->forced_lod == 0xFF) {
         obj->forced_lod = 0;
         lod = 0;
@@ -1714,7 +1714,7 @@ void actor_applyForcedLod(Actor *obj) {
     if (D_800C35EA[0] == 1) {
         D_800C3638 = 0;
     }
-    if (oldAnims != D_800D1588[model]) {
+    if (oldAnims != gModelAnimTables[model]) {
         if (obj->animseq.uh >= gModelAnimCounts[model]) {
             obj->animseq.uh = 0xFFFF;
             actor_playAnim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);

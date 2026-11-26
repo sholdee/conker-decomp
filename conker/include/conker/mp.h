@@ -65,7 +65,7 @@ typedef struct MpGame {
     /* 0x0EA8 */ s32 numSpawns;               /* entries in spawnNodes */
     /* 0x0EAC */ s32 respawnDelay;            /* slotTimer after a pickup */
     /* 0x0EB0 */ s32 slot[16];                /* slot held by each player, -1 = none */
-    /* 0x0EF0 */ s32 slotEntity[32];          /* func_151149AC id of each slot's pickup */
+    /* 0x0EF0 */ s32 slotEntity[32];          /* gfx_findObjectById id of each slot's pickup */
     /* 0x0F70 */ s32 slotOwner[32];           /* player holding each slot (| 0x2000 once taken), -1 = none */
     /* 0x0FF0 */ s32 itemOverride[32];        /* per player: 0 = none, 0x457 = no item */
     /* 0x1070 */ s32 slotTimer[32];           /* >0 counting down to respawn, 0 = available, -1 = held */

@@ -2,16 +2,16 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Spawns a ring of 25 kind-2 particles (func_150C16C0) of radius 80 around (x, y, z). */
-void func_150C1660(f32 x, f32 y, f32 z, u8 arg3) {
+/* Spawns a ring of 25 kind-2 particles (trail_spawnKind2Trail) of radius 80 around (x, y, z). */
+void trail_spawnKind2Ring(f32 x, f32 y, f32 z, u8 arg3) {
     func_1514C2F0(x, y, z, 80.0f, 0, 3, 25, 2, 0, 0.0f, 0, arg3);
 }
 
 /*
  * Particle kind 2 spawn callback (D_8008AA00[2]): launches one trail from (x, y, z)
- * outward along `angle` and upward at a random pitch, faded out by func_150C1978.
+ * outward along `angle` and upward at a random pitch, faded out by trail_fadeKind2Trail.
  */
-s32 func_150C16C0(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY,
+s32 trail_spawnKind2Trail(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY,
                   f32 originZ, s32 angle, s32 baseAngle, f32 radius, s32 arg11, f32 arg12,
                   s32 arg13, u8 arg14) {
     u8 pad[4]; // matching: frame size
@@ -60,14 +60,14 @@ s32 func_150C16C0(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
         motion.velocity.x = speed * pitchSin * angleCos;
         motion.velocity.y = -speed * pitchCos;
         motion.velocity.z = speed * pitchSin * angleSin;
-        func_15147DA0(&spawn, &motion, 0, 1, 5, 0, 0, 0, 0, 0, 0, &render, 0, arg14, 0);
+        trail_createMotionTrail(&spawn, &motion, 0, 1, 5, 0, 0, 0, 0, 0, 0, &render, 0, arg14, 0);
         count--;
     } while (count != 0);
     return 1;
 }
 
 /* MotionTrail fade handler: unk1B follows 8 * lifetime, capped at 0xFF. */
-s32 func_150C1978(MotionTrail *trail) {
+s32 trail_fadeKind2Trail(MotionTrail *trail) {
     TrailParams *params = trail->params;
     s32 alpha = trail->head.tmpl.life << 3;
 

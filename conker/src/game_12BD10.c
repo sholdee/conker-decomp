@@ -12,10 +12,10 @@ static const Vec3f D_800A2024 = { -26.0f, -23.0f, 51.0f };
 /* This file's .data. */
 static u8 D_80088BA0 = 9; // bone of the points above
 
-/* Spawns a projectile (func_151C229C) along `actor`'s direction. With bone matrices it starts at
- * bone D_80088BA0 and is followed by the func_151D3F14 / func_151D4408 / func_150FEC28 effects;
+/* Spawns a projectile (weapon_spawnProjectile) along `actor`'s direction. With bone matrices it starts at
+ * bone D_80088BA0 and is followed by the func_151D3F14 / func_151D4408 / weapon_spawnBoneBeam effects;
  * without them it starts 34 units to the side of and 49 units above the actor. */
-void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
+void weapon_spawnForwardProjectile(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f position;
     Vec3f direction;
     Vec3f axis0;
@@ -62,7 +62,7 @@ void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
         position.y = actor->ypos + 49.0f;
         position.z = actor->zpos + 34.0f * sideZ;
     }
-    func_151C229C(&position, &direction, 0, 0, 0, 0, 300.0f, 0.003333333414f,
+    weapon_spawnProjectile(&position, &direction, 0, 0, 0, 0, 300.0f, 0.003333333414f,
                   func_150ADA68() * 10.0f + 25.0f, func_150ADA68() * 200.0f + 400.0f, 50.0f,
                   (func_150ADA20() % 156U) + 100, actor, 1, 1, 0, 0, 1, 1, 0, 0x35, 0.0f, 0xFF, -1, 0,
                   arg1, arg2);
@@ -70,13 +70,13 @@ void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
         func_151D3F14(&position, arg1, arg2);
         func_151D4408(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
         if (func_150ADA20() & 1) {
-            func_150FEC28(actor, D_80088BA0, &D_800A2000, &D_800A200C, &position, arg1, arg2);
+            weapon_spawnBoneBeam(actor, D_80088BA0, &D_800A2000, &D_800A200C, &position, arg1, arg2);
         }
     }
 }
 
 /* Transforms the point D_800A2000 by bone D_80088BA0 of `actor` into `*out`. */
-void func_150FEBC8(Actor *actor, s16 arg1, Vec3f *out) {
+void weapon_getForwardProjectileStart(Actor *actor, s16 arg1, Vec3f *out) {
     void *mtx;
     const Vec3f *src;
     Vec3f *dst;
@@ -88,7 +88,7 @@ void func_150FEBC8(Actor *actor, s16 arg1, Vec3f *out) {
 }
 
 /* Spawns a randomized effect (func_15102B38) on bone `bone` of `actor` at `position`. */
-void func_150FEC28(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, Vec3f *position, u8 arg5, s32 arg6) {
+void weapon_spawnBoneBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, Vec3f *position, u8 arg5, s32 arg6) {
     ParticleSize motion;
     s32 pad; // matching: unused stack slot between motion and random
     s32 random[2];

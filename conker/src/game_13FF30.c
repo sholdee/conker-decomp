@@ -5,21 +5,21 @@
  * .bss, linked at 0x800DBED0..0x800DBFC0 in this order. Defined before variables.h and conker/gfx.h
  * declare them: IDO lays out .bss in first-declaration order, and an extern there would count.
  */
-DrawEntry *D_800DBED0[4]; // per view: draw list (D_80089240 points here)
-Mtx *D_800DBEE0; // model matrices, frame buffer 0 (one per object)
-Mtx *D_800DBEE4; // model matrices, frame buffer 1
-u16 D_800DBEE8[4]; // per view: entries in the draw list
+DrawEntry *gViewDrawLists[4]; // per view: draw list (gViewDrawListPtrs points here)
+Mtx *gObjectMtxsA; // model matrices, frame buffer 0 (one per object)
+Mtx *gObjectMtxsB; // model matrices, frame buffer 1
+u16 gViewDrawCounts[4]; // per view: entries in the draw list
 s32 gWorldObjectCount; // number of db_Object_array entries
 WorldObject *db_Object_array; // original name (Oct 2000 debugger); gWorldObjectCount entries
-void **D_800DBEF8; // per object: handle released with func_10004074
-u8 *D_800DBEFC; // per object: frames to keep the handle once hidden
-u8 D_800DBF00;
+void **gObjectBlocks; // per object: handle released with func_10004074
+u8 *gObjectBlockDelays; // per object: frames to keep the handle once hidden
+u8 gUngroupedObjectCount;
 MtxF D_800DBF08[2]; // per frame buffer
 u8 D_800DBF88;
 Gfx *D_800DBF8C; // display list of object D_800DBF88 (func_15004574)
 Vtx *D_800DBF90; // its source vertices
 s32 *gWorldObjectContacts; // per object: bit N set when actor movement_obj[N] touches it
-s32 D_800DBF98; // grouped objects, kept at the end of db_Object_array
+s32 gGroupedObjectCount; // grouped objects, kept at the end of db_Object_array
 
 #include "functions.h"
 #include "variables.h"
@@ -31,11 +31,11 @@ static s32 D_800DBFA4;
 static u8 D_800DBFA8[0x18]; /* not referenced */
 
 /* .data: per view, the draw list; per frame buffer, the model matrices. */
-DrawEntry **D_80089240[4] = { &D_800DBED0[0], &D_800DBED0[1], &D_800DBED0[2], &D_800DBED0[3] };
-Mtx **D_80089250[2] = { &D_800DBEE0, &D_800DBEE4 };
+DrawEntry **gViewDrawListPtrs[4] = { &gViewDrawLists[0], &gViewDrawLists[1], &gViewDrawLists[2], &gViewDrawLists[3] };
+Mtx **gObjectMtxBuffers[2] = { &gObjectMtxsA, &gObjectMtxsB };
 
 /* Builds each view's draw list: distance-culls and fades every object group, then appends visible groups. */
-void func_15112A80(s32 player) {
+void gfx_buildDrawLists(s32 player) {
     s32 drawDist;
     s32 alpha;
     WorldObject *obj;
@@ -53,10 +53,10 @@ void func_15112A80(s32 player) {
     for (view = 0; view <= gScreenLayout; view++) {
         RenderView *recp;
 
-        count = &D_800DBEE8[view];
+        count = &gViewDrawCounts[view];
         recp = &gViews[view];
         if (player_getStat(view, 0) != 0) {
-            D_800DBEE8[view] = 0;
+            gViewDrawCounts[view] = 0;
             for (i = 0; i < gWorldObjectCount;) {
                 groupSize = db_Object_array[i].state >> 4;
                 end = i + groupSize;
@@ -65,7 +65,7 @@ void func_15112A80(s32 player) {
                 for (; i <= end; i++) {
                     obj = i + db_Object_array; // matching: &db_Object_array[i] swaps the addu operands
                     obj->viewFlags &= ~(1 << view);
-                    // matching: empty then-branch orders uopt's live ranges (see func_15112A80 notes)
+                    // matching: empty then-branch orders uopt's live ranges (see gfx_buildDrawLists notes)
                     if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->object_status & 1) && obj->alpha != 0 &&
                           (D_800C3658[player] != 0 || D_800C35EA[player] != 1 || func_15022B08(i, player) != 0) &&
                           ((D_800C35EA[player] == 1 && func_15022B08(i, player) != 0) ||
@@ -132,8 +132,8 @@ void func_15112A80(s32 player) {
                 if (mask != 0) {
                     for (i = start; i <= end; i++) {
                         db_Object_array[i].viewFlags |= 1 << view;
-                        (*D_80089240[view])[*count].index = i;
-                        (*D_80089240[view])[*count].distance = *(s32 *)((u8 *)dist + (i - start) * 4); // matching: as above
+                        (*gViewDrawListPtrs[view])[*count].index = i;
+                        (*gViewDrawListPtrs[view])[*count].distance = *(s32 *)((u8 *)dist + (i - start) * 4); // matching: as above
                         (*count)++;
                     }
                 }
@@ -143,7 +143,7 @@ void func_15112A80(s32 player) {
 }
 
 /* Flags every object that is visible in some view (or always-update, state bit 4) and has an update callback. */
-void func_15113180(void) {
+void gfx_flagObjectUpdates(void) {
     s32 i;
 
     for (i = 0; i < gWorldObjectCount; i++) {
@@ -155,7 +155,7 @@ void func_15113180(void) {
 }
 
 /* Writes this frame's model matrix for every object in each view's draw list. */
-void func_15113218(void) {
+void gfx_updateObjectMatrices(void) {
     WorldObject *obj;
     Actor *actor;
     f32 (*parent)[4];
@@ -170,18 +170,18 @@ void func_15113218(void) {
         if (player_getStat(view, 0) == 0) {
             continue;
         }
-        for (j = 0; j < D_800DBEE8[view]; j++) {
-                obj = &db_Object_array[(*D_80089240[view])[j].index];
+        for (j = 0; j < gViewDrawCounts[view]; j++) {
+                obj = &db_Object_array[(*gViewDrawListPtrs[view])[j].index];
                 if ((obj->state & 1) == 1) {
-                    func_150A7B80(&(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
+                    func_150A7B80(&(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
                     continue;
                 }
                 if (obj->attach == 3) {
                     continue;
                 }
                 if (obj->attach < 3) {
-                    func_1511490C(mf, obj);
-                    guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
+                    gfx_getObjectModelMtx(mf, obj);
+                    guMtxF2L(mf, &(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
                 } else if (obj->attach > 100 && obj->attach < 125) {
                     actor = &movement_obj[obj->attach - 100];
                     if (actor->ob_matrix_ptr == NULL) {
@@ -189,7 +189,7 @@ void func_15113218(void) {
                         mf[3][0] = actor->xpos;
                         mf[3][1] = actor->ypos;
                         mf[3][2] = actor->zpos;
-                        guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
+                        guMtxF2L(mf, &(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
                     } else {
                         rot[2] = 0.0f;
                         rot[0] = rot[2];
@@ -203,17 +203,17 @@ void func_15113218(void) {
                         obj->x = mf[3][0];
                         obj->y = mf[3][1];
                         obj->z = mf[3][2];
-                        guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
+                        guMtxF2L(mf, &(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
                     }
                 } else {
-                    guMtxF2L(D_800DBF08[D_800BE9C0], &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
+                    guMtxF2L(D_800DBF08[D_800BE9C0], &(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
                 }
             }
     }
 }
 
 /* Draws one view's object list; translucent selects the pass (objects with flags bit 0x10 or alpha < 255). */
-Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
+Gfx *gfx_drawObjectList(Gfx *gfx, s32 translucent, s16 view) {
     s32 viewOffset;
     s32 pass;
     s32 i;
@@ -228,11 +228,11 @@ Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     gSPClearGeometryMode(gfx++, G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD | 0x400000);
     gSPSetGeometryMode(gfx++, G_LIGHTING);
     viewOffset = view * 4; // matching: indexing both tables by view computes view * 4 twice
-    list = (DrawEntry ***)((u8 *)D_80089240 + viewOffset);
+    list = (DrawEntry ***)((u8 *)gViewDrawListPtrs + viewOffset);
     gfx = light_reemitLights(gfx, *(PointLightGfx **)((u8 *)D_800D9E10 + viewOffset), D_800D9E20, D_800D9E21,
                         &gViewAmbients[view][D_800BE9C0]);
-    for (i = 0; i < D_800DBEE8[view]; i++) {
-        gfx = func_151137D4(gfx, &db_Object_array[(**list)[i].index], &(*D_80089250[D_800BE9C0])[(**list)[i].index], view,
+    for (i = 0; i < gViewDrawCounts[view]; i++) {
+        gfx = gfx_drawObject(gfx, &db_Object_array[(**list)[i].index], &(*gObjectMtxBuffers[D_800BE9C0])[(**list)[i].index], view,
                             (**list)[i].distance, pass);
     }
     gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -245,7 +245,7 @@ Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
  * Draws one object in one view, if it belongs to this pass (opaque pass: alpha 255 and no flags bit 0x10).
  * Returns gfx unchanged if nothing was drawn or the display list would overflow.
  */
-Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance, s32 pass) {
+Gfx *gfx_drawObject(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance, s32 pass) {
     s32 alpha;
     Gfx *start;
     s32 overflow;
@@ -316,7 +316,7 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
 }
 
 /* Creates or frees each object's shadow depending on whether the object is shown (in every active view). */
-void func_15113C88(void) {
+void gfx_updateObjectShadows(void) {
     s32 i;
     s32 j;
     s32 hidden;
@@ -342,7 +342,7 @@ void func_15113C88(void) {
         } while (0);
         if (show) {
             if (obj->shadow == NULL) {
-                obj->shadow = func_1510D970(1, obj, 0, 1, 0);
+                obj->shadow = shadow_createBlob(1, obj, 0, 1, 0);
             }
         } else if (obj->shadow != NULL) {
             func_1516972C(obj->shadow);
@@ -355,7 +355,7 @@ void func_15113C88(void) {
 
 /* Runs the update callback of every flagged object: first the ungrouped ones, then each group's members,
    where followers take the leader's move delta and floor triangle. */
-void func_15113E54(s32 arg0) {
+void gfx_runObjectUpdates(s32 arg0) {
     s16 moveX;
     s16 moveY;
     s16 moveZ;
@@ -370,7 +370,7 @@ void func_15113E54(s32 arg0) {
     moveY = 0;
     moveZ = 0;
     leaderFloorTri = 0;
-    count = gWorldObjectCount - D_800DBF98;
+    count = gWorldObjectCount - gGroupedObjectCount;
     for (i = 0; i < count; i++) {
         obj = i + db_Object_array; // matching: operand order of the addu
         if ((obj->viewFlags & 0x40) == 0x40 && obj->inactive == 0) {
@@ -406,7 +406,7 @@ void func_15113E54(s32 arg0) {
 }
 
 /* Whether actor `actor` (any actor if -1) touches obj; only objects with flags bit 0x80 track contacts. */
-s32 func_15114050(WorldObject *obj, s32 actor) {
+s32 gfx_isObjectTouchedBy(WorldObject *obj, s32 actor) {
     if (obj->object_status & 0x80) {
         if (actor == -1) {
             return TRUE;
@@ -419,7 +419,7 @@ s32 func_15114050(WorldObject *obj, s32 actor) {
 }
 
 /* The lowest-numbered actor touching obj, or 0. */
-s32 func_151140C4(WorldObject *obj) {
+s32 gfx_getTouchingActor(WorldObject *obj) {
     s32 i;
 
     i = 0;
@@ -434,7 +434,7 @@ s32 func_151140C4(WorldObject *obj) {
 }
 
 /* Dispatches this frame's actor contacts to each object's onContact callback and carries riding actors. */
-void func_15114188(void) {
+void gfx_dispatchObjectContacts(void) {
     s32 i;
     s32 j;
 
@@ -447,7 +447,7 @@ void func_15114188(void) {
                         db_Object_array[i].onContact(i + db_Object_array, &movement_obj[j]); // matching: addu operand order
                     }
                     if ((db_Object_array[i].object_status & 4) == 4 && !(db_Object_array[i].object_status & 8)) {
-                        func_1511473C(&movement_obj[j], i);
+                        gfx_carryActorOnObject(&movement_obj[j], i);
                     }
                 }
             }
@@ -460,7 +460,7 @@ void func_15114188(void) {
  * Moves the point (*x, *y, *z) along with object objIndex: rotates it about the object by this frame's spin
  * (around the object's own axes) and adds the object's move delta.
  */
-void func_15114348(s32 objIndex, f32 *x, f32 *y, f32 *z) {
+void gfx_carryPointWithObject(s32 objIndex, f32 *x, f32 *y, f32 *z) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -515,11 +515,11 @@ void func_15114348(s32 objIndex, f32 *x, f32 *y, f32 *z) {
 }
 
 /* Carries an actor standing on object objIndex: moves it with the object and turns it by the object's yaw spin. */
-void func_1511473C(Actor *actor, s32 objIndex) {
+void gfx_carryActorOnObject(Actor *actor, s32 objIndex) {
     if (actor == NULL || objIndex >= gWorldObjectCount) {
         return;
     }
-    func_15114348(objIndex, &actor->xpos, &actor->ypos, &actor->zpos);
+    gfx_carryPointWithObject(objIndex, &actor->xpos, &actor->ypos, &actor->zpos);
     actor->angle += db_Object_array[objIndex].spinY * 182.04444885f;
     if (actor->unk137 != 0 && objIndex + 1 == D_800CBDA0[actor - movement_obj]) {
         actor->langle = actor->angle;
@@ -527,7 +527,7 @@ void func_1511473C(Actor *actor, s32 objIndex) {
 }
 
 /* Builds an object's rotation matrix: yaw first, then pitch/roll (func_150A8050 makes Euler rotations). */
-void func_151148A8(MtxF mtx, WorldObject *obj) {
+void gfx_getObjectRotationMtx(MtxF mtx, WorldObject *obj) {
     MtxF pitchRoll;
 
     func_150A8050(mtx, 0.0f, obj->u, 0.0f);
@@ -536,10 +536,10 @@ void func_151148A8(MtxF mtx, WorldObject *obj) {
 }
 
 /* Builds an object's model matrix: scale, then rotation, then translation to (x, y + yOffset, z). */
-void func_1511490C(MtxF mtx, WorldObject *obj) {
+void gfx_getObjectModelMtx(MtxF mtx, WorldObject *obj) {
     MtxF scale;
 
-    func_151148A8(mtx, obj);
+    gfx_getObjectRotationMtx(mtx, obj);
     mtx[3][0] = obj->x;
     mtx[3][1] = obj->y + obj->yOffset;
     mtx[3][2] = obj->z;
@@ -548,7 +548,7 @@ void func_1511490C(MtxF mtx, WorldObject *obj) {
 }
 
 /* The object whose id is `id`, or NULL (id 0 never matches). */
-WorldObject *func_151149AC(u8 id) {
+WorldObject *gfx_findObjectById(u8 id) {
     s32 i;
 
     if (id == 0) {
@@ -563,43 +563,43 @@ WorldObject *func_151149AC(u8 id) {
 }
 
 /* Releases the handle of each object that is no longer drawn (after its delay, if it is unattached). */
-void func_15114A1C(void) {
+void gfx_freeHiddenObjectBlocks(void) {
     s32 i;
     void *handle;
 
     for (i = 0; i < gWorldObjectCount; i++) {
         if ((db_Object_array[i].state & 1) != 1) {
             // matching: the dead copies (handle, j) and empty ifs steer uopt's register choices (see notes)
-            handle = D_800DBEF8[i];
-            if (&D_800DBEF8) {}
-            if (D_800DBEF8[i] != 0) {
+            handle = gObjectBlocks[i];
+            if (&gObjectBlocks) {}
+            if (gObjectBlocks[i] != 0) {
                 if (db_Object_array[i].attach != 3 && !(db_Object_array[i].viewFlags & 0x80)) {
                     s32 j;
 
                     j = i;
                     if (j) {}
-                    func_10004074(D_800DBEF8[j]);
+                    func_10004074(gObjectBlocks[j]);
                     if (handle) {}
-                    D_800DBEF8[j] = 0;
-                } else if (D_800DBEFC[i] != 0) {
-                    D_800DBEFC[i]--;
+                    gObjectBlocks[j] = 0;
+                } else if (gObjectBlockDelays[i] != 0) {
+                    gObjectBlockDelays[i]--;
                 } else {
                     s32 j;
 
                     j = i;
                     if (j) {}
-                    func_10004074(D_800DBEF8[j]);
-                    D_800DBEF8[j] = 0;
+                    func_10004074(gObjectBlocks[j]);
+                    gObjectBlocks[j] = 0;
                 }
             }
         } else if (!(db_Object_array[i].viewFlags & 0x80)) {
-            D_800DBEF8[i] = 0;
+            gObjectBlocks[i] = 0;
         }
     }
 }
 
 /* Removes object `index` (frees its shadow, marks it removed), then drops removed objects off the array's end. */
-void func_15114B94(u32 index) {
+void gfx_removeObject(u32 index) {
     u32 ungrouped;
 
     if (index < gWorldObjectCount) {
@@ -611,10 +611,10 @@ void func_15114B94(u32 index) {
         db_Object_array[index].inactive = 1;
     }
     index = gWorldObjectCount - 1;
-    ungrouped = gWorldObjectCount - D_800DBF98;
+    ungrouped = gWorldObjectCount - gGroupedObjectCount;
     while (gWorldObjectCount != 0 && (db_Object_array[index].state & 8)) {
-        if (index >= ungrouped && D_800DBF98 != 0) {
-            D_800DBF98--;
+        if (index >= ungrouped && gGroupedObjectCount != 0) {
+            gGroupedObjectCount--;
         } else {
             ungrouped--;
         }
@@ -624,7 +624,7 @@ void func_15114B94(u32 index) {
 }
 
 /* Sound callback: moves the sound to its object (once, or every call when *follow is set). Returns 1 if not. */
-s32 func_15114CC4(ObjSound *sound, s32 arg1, s32 *follow, s32 arg3) {
+s32 gfx_objectSoundCallback(ObjSound *sound, s32 arg1, s32 *follow, s32 arg3) {
     WorldObject *obj = sound->obj;
 
     if (obj != NULL && (*follow != 0 || sound->positioned == 0)) {
@@ -640,9 +640,9 @@ s32 func_15114CC4(ObjSound *sound, s32 arg1, s32 *follow, s32 arg3) {
 /*
  * Plays sound `sfx` at obj, keeping the handle in obj->sound. sfx -1 stops it. flags: 1 keep it if already
  * playing, 2 restart (positioned once), 4 one-shot, 8 don't stop or forget the current sound;
- * otherwise the sound follows the object through func_15114CC4.
+ * otherwise the sound follows the object through gfx_objectSoundCallback.
  */
-void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 flags) {
+void gfx_playObjectSound(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 flags) {
     u16 handle;
 
     if (flags & 1) {
@@ -682,13 +682,13 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
         if (handle != 0) {
             sound_stopNextUpdate(handle);
         }
-        obj->sound_id = sound_addDynamicSound(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (SoundRecordCallback)func_15114CC4, obj, 0, 0, 0);
+        obj->sound_id = sound_addDynamicSound(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (SoundRecordCallback)gfx_objectSoundCallback, obj, 0, 0, 0);
     }
 }
 
-/* Starts a sound through func_1001001C with func_15114CC4 as its callback. */
-void func_15114F04(WorldObject *obj, s32 arg1, s32 arg2) {
-    func_1001001C((SoundRecordCallback)func_15114CC4, obj, 0, arg1, arg2);
+/* Starts a sound through func_1001001C with gfx_objectSoundCallback as its callback. */
+void gfx_startObjectSound(WorldObject *obj, s32 arg1, s32 arg2) {
+    func_1001001C((SoundRecordCallback)gfx_objectSoundCallback, obj, 0, arg1, arg2);
 }
 
 /*

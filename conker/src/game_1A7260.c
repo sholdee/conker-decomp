@@ -14,14 +14,14 @@ void func_15179DB0(u8 slot) {
     f32 *angle[2];
     f32 *rate[2];
 
-    vtx[1] = D_800DDE80[slot].unk4;
-    vtx[0] = D_800DDE80[slot].unk8;
-    angle[0] = &D_8008D0B0[slot].u.bob.angle[0];
-    angle[1] = &D_8008D0B0[slot].u.bob.angle[1];
-    rate[0] = &D_8008D0B0[slot].u.bob.rate[0];
-    rate[1] = &D_8008D0B0[slot].u.bob.rate[1];
+    vtx[1] = gEffectModelSlots[slot].unk4;
+    vtx[0] = gEffectModelSlots[slot].unk8;
+    angle[0] = &gSwarmFlights[slot].u.bob.angle[0];
+    angle[1] = &gSwarmFlights[slot].u.bob.angle[1];
+    rate[0] = &gSwarmFlights[slot].u.bob.rate[0];
+    rate[1] = &gSwarmFlights[slot].u.bob.rate[1];
     for (i = 0; i < 2; i++) {
-        height = D_8008D0B0[slot].u.bob.amplitude * sinf(*angle[i] * 0.01745329238f);
+        height = gSwarmFlights[slot].u.bob.amplitude * sinf(*angle[i] * 0.01745329238f);
         vtx[i][2].v.ob[0] = height;
         vtx[i][3].v.ob[0] = height;
         height = -(height >> 1);

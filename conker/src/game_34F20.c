@@ -79,9 +79,9 @@ void game_loadLevel(void) {
     func_1500E738();
     func_1500C2A0();
     D_800DC9F0 = 0;
-    D_800E0920 = NULL;
+    gPendingTrailPairTask = NULL;
     func_15008840();
-    D_8003E384 = 1;
+    gReleaseRawBanksPending = 1;
     resource = gPlayerSpawnPoints[0];
     slot = func_1507E114(&resource);
     if (gFrontEndState == 2) {
@@ -107,7 +107,7 @@ void game_loadLevel(void) {
     }
     func_15002F40(level);
     func_1501C53C();
-    func_15015E80();
+    gfx_allocDisplayLists();
     actor_clearAll();
     func_15017930(level);
     text_resetContextText();
@@ -138,7 +138,7 @@ void game_loadLevel(void) {
     music_startLevelMusic();
     sound_initLevel(level);
     mp3_stopForLevel(level);
-    func_10011FEC();
+    audio_clearMixSelectors();
     func_1501BB20();
     func_15008870(1);
     func_15008930(1);
@@ -168,7 +168,7 @@ void game_loadLevel(void) {
     func_15015910();
     func_15004F10();
     func_1501748C(gMatchState.playerMask);
-    func_1500C1E0();
+    swarm_resetModelSlots();
     model_resetParts();
     func_15004D50();
     func_150082CC();
@@ -225,7 +225,7 @@ void func_150081E4(void) {
 
     for (i = 0; i < 2; i++)
     {
-        D_800DF7C8[i] = NULL;
+        gBoneTrailLists[i] = NULL;
     }
 
     D_800D245C = 0;

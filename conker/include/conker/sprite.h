@@ -194,7 +194,7 @@ typedef struct Game1A89B0Position {
     s16 z;
     u8 unk6;     /* (subtype << 5) | sprite type (texture slot 0..14) */
     u8 phaseIdx; /* index into D_800DDC90 (type * 4 + phase); 60: not animated */
-    u8 texInfo;  /* index into D_80095CE0 */
+    u8 texInfo;  /* index into gParticleTexInfos */
     u8 pad9;
     u8 kind;     /* column of D_8008CF00 */
     u8 disturbState; /* 0x21 or more: disturbed (shows the type's disturbed frame); counts down from 0x22 to 0x21 */
@@ -233,7 +233,7 @@ extern SpriteKindChoice D_8008CF00[5][8]; /* [D_800DDC80 row][sprite kind] */
 extern s32 D_800DD478[15 * 26]; /* 26 frame addresses */
 extern ParticleTexFile D_800DDA90[15];
 extern SpriteTexSize D_800DDB80[15];
-extern u8 D_800DDBC0[15]; /* index into D_80095CE0 */
+extern u8 D_800DDBC0[15]; /* index into gParticleTexInfos */
 extern u8 D_800DDBD0[15]; /* frame count the phases cycle through */
 extern u8 D_800DDBE0[15]; /* frame shown while a sprite is disturbed (unkB >= 0x21) */
 extern u8 D_800DDBF0[15]; /* draw pass (see func_1517D7B0) */

@@ -235,7 +235,7 @@ ground:
         Payload18_150130B4 extra;
         u8 ids[6] = { 2, 3, 4, 5, 6, 7 };
 
-        extra.unk8 = func_151149AC(ids[kind - 13]);
+        extra.unk8 = gfx_findObjectById(ids[kind - 13]);
         if (extra.unk8 == NULL) {
             return 1;
         }
@@ -297,7 +297,7 @@ s32 func_1501370C(TriggerZone *obj) {
 
 s32 func_1501374C(TriggerZone *obj) {
     obj->flags |= 4;
-    func_1515D088(obj);
+    trail_spawnLevelEffect(obj);
     return 1;
 }
 
@@ -559,7 +559,7 @@ s32 func_15013DE8(TriggerZone *obj) {
 }
 
 s32 func_15013F9C(TriggerZone *obj) {
-    func_151CD2C0(obj, 0xFF, 1);
+    trail_createStreamTask(obj, 0xFF, 1);
     return 1;
 }
 
@@ -590,7 +590,7 @@ s32 func_15013FC4(TriggerZone *obj) {
     return 1;
 }
 
-/** Registers the object in slot data2 (0-5) of D_800E0900. */
+/** Registers the object in slot data2 (0-5) of gFlamethrowerZones. */
 s32 func_15014004(TriggerZone *obj) {
     s32 slot = obj->data2;
 
@@ -600,7 +600,7 @@ s32 func_15014004(TriggerZone *obj) {
     if (slot >= 6) {
         return 1;
     }
-    D_800E0900[slot] = obj;
+    gFlamethrowerZones[slot] = obj;
     return 1;
 }
 

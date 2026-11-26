@@ -959,7 +959,7 @@ u16 sound_startVoice(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mi
         } else {
             mix |= 0x7F;
         }
-        func_10017438(D_8003E368, sound & 0x7FFF, volume, pan, alCents2Ratio(cents), mix, bus,
+        func_10017438(gSoundBank, sound & 0x7FFF, volume, pan, alCents2Ratio(cents), mix, bus,
                       &gVoiceSlots[slot].voice);
     }
     return newHandle;

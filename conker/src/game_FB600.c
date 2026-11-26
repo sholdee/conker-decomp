@@ -23,7 +23,7 @@ MosaicEffect *screen_spawnMosaic(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) 
     data.halfHeight = 30000.0f;
     data.owner = owner;
     data.ownerId = owner->unique_id;
-    effect = (MosaicEffect *)func_1515FF74(&desc, sizeof(data), arg2, arg3);
+    effect = (MosaicEffect *)colourfb_createScreenEffect(&desc, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

@@ -5,7 +5,7 @@
 
 /* Per-object state of the projectile spawned by func_150F7470 (updated by func_150F78B4). */
 typedef struct {
-    /* 0x00 */ RayHit hit;   /* func_151C4B0C's ray along the flight path */
+    /* 0x00 */ RayHit hit;   /* weapon_setupProjectileRay's ray along the flight path */
     /* 0x64 */ s32 unk64;
     /* 0x68 */ f32 timeLeft;
     /* 0x6C */ f32 speed;
@@ -54,7 +54,7 @@ struct ProjectileParticle {
 };
 
 /* Spawns a projectile at `pos`, aimed along `aim` (or from `altOrigin` at `target` when both are set). `knownHit`
- * is a ray already cast (see func_151C4B0C). */
+ * is a ray already cast (see weapon_setupProjectileRay). */
 void func_150F7470(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *target, u8 targetIsDir, RayHit *knownHit, f32 speed,
                    f32 arg7, f32 arg8, Actor *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14,
                    s8 arg15, s32 sound, u8 arg17, u8 arg18, s32 arg19) {
@@ -86,7 +86,7 @@ void func_150F7470(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *target, u8 t
         }
         hasAimDir = TRUE;
     }
-    if (!func_151C4B0C(knownHit, &state.hit, pos, hasAimDir ? &aimDir : NULL, &state.timeLeft, arg7, arg10, altOrigin,
+    if (!weapon_setupProjectileRay(knownHit, &state.hit, pos, hasAimDir ? &aimDir : NULL, &state.timeLeft, arg7, arg10, altOrigin,
                        hasTargetDir ? &targetDir : NULL, &state.flags, 1, arg8, owner, arg15, arg12, arg13, 0,
                        arg17)) {
         return;

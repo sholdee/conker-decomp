@@ -160,14 +160,14 @@ s32 game_processMessage(void) {
                     }
                     bone_collapseAllMaskedBones();
                     actor_flushBoneMatrices();
-                    func_15189118(0);
+                    trail_limitHistorySpacing(0);
                     func_15084A18();
                     func_15125628();
                     DL_APPEND(_SHIFTL(G_RDPFULLSYNC, 24, 8), 0); // gDPFullSync
                     DL_APPEND(_SHIFTL(G_ENDDL, 24, 8), 0); // gSPEndDisplayList
                     func_10004674();
                     func_1510D404();
-                    func_15114A1C();
+                    gfx_freeHiddenObjectBlocks();
                     func_1517CFC4();
                     func_1501C880(0, 1);
                     D_800BE9B4 = 0;
@@ -273,7 +273,7 @@ void game_beginFrame(void) {
     if (gFrontEndState == 2) {
         func_150ADACC(0x81280783);
     }
-    func_10012020();
+    audio_updateMix();
 }
 
 
@@ -300,12 +300,12 @@ s32 game_updateFrame(void) {
     model_clearReflections();
     view_updateMatrices();
     func_1510F800(0);
-    func_15113180();
+    gfx_flagObjectUpdates();
     if (gPaused == 0) {
-        func_15113E54(1);
+        gfx_runObjectUpdates(1);
     }
     if (gPaused == 0) {
-        func_15114188();
+        gfx_dispatchObjectContacts();
     }
     func_15044A28();
     func_15018DFC();
@@ -327,11 +327,11 @@ s32 game_updateFrame(void) {
     for (player = 0; player <= gScreenLayout; player++) {
         func_15094EA0(player);
     }
-    func_15112A80(0);
+    gfx_buildDrawLists(0);
     func_151749F8(level, 0);
     func_1501C860();
     func_1511FC20(D_800BE9C0);
-    func_15188B74(0);
+    trail_updateBoneTrails(0);
     if (gPaused == 0) {
         func_1516706C();
         func_151671E8();
@@ -340,16 +340,16 @@ s32 game_updateFrame(void) {
     if (gIsMultiplayer == 0) {
         func_150A0D8C();
     }
-    func_15113218();
-    func_15188B74(1);
+    gfx_updateObjectMatrices();
+    trail_updateBoneTrails(1);
     func_151738C4(level);
     func_1502C1A4();
-    func_15113C88();
+    gfx_updateObjectShadows();
     if (D_800CC2B0 != 0) {
         actor_runPending();
     }
     if (gPaused == 0) {
-        func_15183D28();
+        swarm_updateModelSlots();
         func_151670C0();
         func_15177A94();
     }
@@ -414,28 +414,28 @@ Gfx *game_drawMainPass(Gfx *gfx, s16 player) {
         gSPViewport(gfx++, &gViews[player].viewports[D_800BE9C0]);
         gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
     }
-    gfx = func_151135C4(gfx, 1, player);
+    gfx = gfx_drawObjectList(gfx, 1, player);
     if (D_800BE575 == 2) {
         gfx = screen_drawFrameEcho(gfx);
     }
     gfx = func_151674F8(gfx, 6, player, 0);
     gfx = func_151674F8(gfx, 6, player, 1);
-    gfx = func_15186794(gfx, player);
+    gfx = shadow_drawRealTime(gfx, player);
     gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
     gfx = actor_drawPass(gfx, 1, player);
     gfx = model_drawReflections(gfx, player);
     gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
     if (camera->SpecialFlags & 1) {
         gfx = func_15018E88(gfx, player);
-        gfx = func_151135C4(gfx, 0, player);
+        gfx = gfx_drawObjectList(gfx, 0, player);
         gfx = func_15018F08(gfx, player);
     } else {
         gfx = func_15018F08(gfx, player);
-        gfx = func_151135C4(gfx, 0, player);
+        gfx = gfx_drawObjectList(gfx, 0, player);
         gfx = func_15018E88(gfx, player);
     }
-    gfx = func_15188D00(gfx, 0, player);
-    gfx = func_15188D00(gfx, 1, player);
+    gfx = trail_drawBoneTrails(gfx, 0, player);
+    gfx = trail_drawBoneTrails(gfx, 1, player);
     gfx = actor_drawPass(gfx, 2, player);
     gfx = func_151674F8(gfx, 2, player, 0);
     return func_151674F8(gfx, 2, player, 1);

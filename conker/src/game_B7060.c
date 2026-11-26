@@ -1363,7 +1363,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
                 obj->angle -= (s32)(yaw * 16.0f);
                 obj->langle = obj->angle;
                 obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
-                func_150DA5EC(obj, f);
+                trail_setPissSpeedScale(obj, f);
             } else if (D_800D23B0->attackTimer[player] >= 0) {
                 obj->mv->buttons = Z_TRIG;
                 if (mode == 1) {
@@ -1728,7 +1728,7 @@ s32 func_1508DC24(void) {
         D_80087340 = 0;
     }
     for (i = 0; i < base->numSlots; i++) {
-        pickup = func_151149AC(entities[i]);
+        pickup = gfx_findObjectById(entities[i]);
         if (pickup == NULL) {
             base = D_800D23B0;
             continue;
@@ -2049,7 +2049,7 @@ void func_1508EE0C(u16 type, u16 id) {
                     operand = D_800D23C0[i].members[j] & 0xFFF;
                     switch (D_800D23C0[i].members[j] >> 12) {
                     case 2:
-                        func_15114B94(operand);
+                        gfx_removeObject(operand);
                         break;
                     case 3:
                         aim_removePoint(operand);

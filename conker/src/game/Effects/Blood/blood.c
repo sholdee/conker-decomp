@@ -212,7 +212,7 @@ void *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
 /* Drop emitters of a drip (BloodDripDesc.emitter): called with the drop position, the path moved and the drip.
  * The prototype keeps the f32 arguments unpromoted; several emitters take their own view of the emitter object. */
 static void (*D_80089A70[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    func_151348F0, func_151A4638, func_151AA30C, func_151AB3A4, func_150C60D8, func_150C6A08,
+    func_151348F0, trail_emitBurst, func_151AA30C, func_151AB3A4, func_150C60D8, func_150C6A08,
     func_151AE890, func_150EA5CC, func_151B4E4C, func_151B50A4, func_151AF338, func_150E03F8,
 };
 /* Drip callbacks (BloodDripDesc.callback): 0 kills the drip. */
@@ -433,7 +433,7 @@ void *func_15134908(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
 
 /* Drop emitters of a trail (BloodTrail.emitter), as D_80089A70 (with a prototype for the same reason). */
 static void (*D_80089AFC[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    func_15134CD4, func_151A7610, func_15159BB0, func_151B86F4, func_151BC370, func_15136AE4, func_150C2898,
+    func_15134CD4, func_151A7610, func_15159BB0, weapon_emitBulletTrailParticle, func_151BC370, func_15136AE4, func_150C2898,
 };
 /* Trail callbacks (BloodTrail.callback): 0 kills the trail. */
 static s32 (*D_80089B18[])() = { func_151BC580 };
@@ -560,7 +560,7 @@ static s32 (*D_80089B1C[])() = {
 };
 static void (*D_80089B38[])(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32, BloodStrip *) = {
     func_151AA6D8, func_150C71C0, func_150EA11C, func_151938FC, func_151BD43C,
-    func_15137E60, func_151C5E74, func_150D1204, func_150F695C,
+    func_15137E60, weapon_emitBloodStripParticle, func_150D1204, func_150F695C,
 };
 static f32 (*D_80089B5C[])() = { func_15135670, func_151AAA4C, func_150EA490, func_151BD750 };
 static s32 (*D_80089B6C[])() = { func_151AABA0 };
@@ -1553,10 +1553,10 @@ void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
     }
     switch (mode) {
         case 1:
-            func_151C577C(from, to, direction, 1, 1, 1, arg4, arg5);
+            weapon_spawnHitBurst(from, to, direction, 1, 1, 1, arg4, arg5);
             return;
         case 2:
-            func_151C329C(from, arg4, arg5);
+            weapon_spawnImpactBurst(from, arg4, arg5);
             return;
         case 3:
             func_15136F50(from, to, direction, 1, arg4, arg5);

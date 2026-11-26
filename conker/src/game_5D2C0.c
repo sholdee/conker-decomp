@@ -870,14 +870,14 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
         light_createActorPulse(owner, 0xFF, 1);
         break;
     case 0x5D:
-        func_150D3360(owner, 0xFF, 1);
+        trail_spawnCharacterTrail(owner, 0xFF, 1);
         func_150D5440(owner, 0xFF, 1);
         break;
     case 0x3D:
         func_151BD828(owner, 0xFF, 1);
         break;
     case 0x1D:
-        func_151D74B0(owner, 0, 2, 0xFF, 1);
+        trail_attachToBone(owner, 0, 2, 0xFF, 1);
         break;
     case 0x5E:
     case 0x85:
@@ -891,7 +891,7 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
         }
         break;
     case 0x82:
-        func_151D74B0(owner, 6, -1, 0xFF, 1);
+        trail_attachToBone(owner, 6, -1, 0xFF, 1);
         break;
     }
 }
@@ -951,7 +951,7 @@ void func_15031C14(ModelAttachment *att) {
             break;
         case 0x1D:
         case 0x82:
-            func_151D747C(owner);
+            trail_broadcastActorGone(owner);
             break;
         case 0x5E:
         case 0x85:

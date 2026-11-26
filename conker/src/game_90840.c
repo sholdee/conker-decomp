@@ -153,8 +153,8 @@ void actor_runPending(void) {
                     break;
                 case 0x3B:
                     func_15081E78(actor, &ctl->rayHit, 0x10);
-                    func_150FFCC8(actor, &position, &direction, &side, &up);
-                    func_150FFD84(&position, &direction, 0xFF, 1);
+                    weapon_getShotFrame(actor, &position, &direction, &side, &up);
+                    weapon_spawnFannedParticles(&position, &direction, 0xFF, 1);
                     break;
                 case 0x23:
                     func_15081E78(actor, &ctl->rayHit, 8);
@@ -341,7 +341,7 @@ void actor_fireShot(Actor *arg0, s32 kind) {
     }
     actor_splitVelocity((s16)(pitch * 182.0444489f), dist, 0.0f, &velX, &velY, &velZ);
     velY = -velY;
-    func_1506C460(yaw, velX, velY, 0.0f, 100, kind, 0.0f, 0.5f, pos, 1, 1);
+    event_spawnProjectile(yaw, velX, velY, 0.0f, 100, kind, 0.0f, 0.5f, pos, 1, 1);
 }
 
 /* Picks animA or animB at random; if one of them is already playing, picks animC instead
@@ -422,7 +422,7 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
             arg0->count5 = 0xFF;
             break;
         case 3:
-            D_800D1580 = 1;
+            gEventParam = 1;
             func_15074664();
             if (arg0->inwater != 0 || (s32)arg0->shad != 0) {
                 func_15083568(arg0, 0x17, 1.0f, 0);
@@ -437,7 +437,7 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
             }
             break;
         case 4:
-            D_800D1580 = 0;
+            gEventParam = 0;
             func_15074664();
             if (arg0->inwater != 0 || (s32)arg0->shad != 0) {
                 func_150836CC(arg0, 0x17);
@@ -949,7 +949,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
         if (gCurrentPad->button & Z_TRIG) {
             if (arg0->animseq.uh != 0x283) {
                 arg0->speed *= 0.2f;
-                D_800D1580 = 0xFF010604;
+                gEventParam = 0xFF010604;
                 func_1506E5FC();
                 speed = 1.0f;
             }
@@ -958,7 +958,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             arg0->nojump = 3;
         } else {
             if (arg0->animseq.uh == 0x283) {
-                D_800D1580 = 0xFF010604;
+                gEventParam = 0xFF010604;
                 func_1506E5FC();
             }
             if (arg0->stickspeed >= 1.0f && arg0->norun == 0) {
@@ -1299,7 +1299,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     arg0->count5 = 0x10;
                     if (arg0->mv->pssd_is_pissing == 0) {
                         arg0->mv->pssd_is_pissing = 1;
-                        func_150D8B88(arg0);
+                        trail_spawnPissTrail(arg0);
                     }
                 }
             }
@@ -1489,12 +1489,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         prev = arg0->mv->unk7E;
                         arg0->mv->unk7E = prev + ((D_800CC264 * 4) / 3);
                         if ((prev ^ arg0->mv->unk7E) & 0x100) {
-                            D_800D1580 = 0x13;
+                            gEventParam = 0x13;
                             if (arg0->mv->unk7E & 0x200) {
-                                D_800D1580 = 0x14;
+                                gEventParam = 0x14;
                             }
-                            func_15071D38();
-                            D_800D1580 = -0xFCF920;
+                            event_runAnimCommand();
+                            gEventParam = -0xFCF920;
                             func_1506E5FC();
                             sound_playActorUntracked((func_150ADA20() & 1) + 0x2F5, arg0, 0x7D00, 0x1F4, 0x3E8);
                             if (!(func_150ADA20() & 7)) {
@@ -1688,8 +1688,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             anim = 0x1EB;
                         } else {
                             anim = 999;
-                            D_800D1580 = 0x53;
-                            func_15071D38();
+                            gEventParam = 0x53;
+                            event_runAnimCommand();
                         }
                         sound_stopByCallback(func_151037DC, arg0, arg0->unique_id);
                         sound_addDynamicSound((func_150ADA20() & 1) + 0x2F3, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x5DC, 0x1F4, func_151037DC, arg0, arg0->unique_id, 0, 0);
@@ -2061,7 +2061,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     after = D_800CC280 - arg0->langle;
                     if ((((before < 0x1000) || (before > 0xF000)) && (after >= 0x1000) && (after < 0x7000) && (arg0->mv->unk18 < 0)) ||
                         ((before > 0x7000) && (after <= 0x7000) && (arg0->mv->unk18 > 0))) {
-                        D_800D1580 = -0xFEFA4A;
+                        gEventParam = -0xFEFA4A;
                         func_1506E5FC();
                     }
                 }
@@ -2647,8 +2647,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 if ((act == arg0->mv->rt_context_b) || (arg0->mv->GrenadeThrowState == 4)) {
                     if ((func_1503195C(arg0, item, 0) != NULL) || (arg0->mv->GrenadeThrowState == 4)) {
                         func_150836CC(arg0, item);
-                        D_800D1580 = (u16)sfx | 0x10000;
-                        func_15073FA0();
+                        gEventParam = (u16)sfx | 0x10000;
+                        event_spawnThrownItem();
                         if (arg0->mv->numGrenades != 0) {
                             arg0->mv->numGrenades--;
                         }

@@ -4,7 +4,7 @@
 
 /* Render setup of the blob shadows (an I 8-bit 64x64 texture times the primitive alpha, decal blending); the
  * shadow type's entry in the object type table D_8008B4D4 points to it. */
-Gfx D_800890C0[] = {
+Gfx gBlobShadowSetupDl[] = {
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsSPClearGeometryMode(G_FOG | G_LIGHTING | G_LOD | G_CULL_FRONT),
     gsSPSetGeometryMode(G_CULL_BACK),
@@ -42,7 +42,7 @@ struct Shadow {
 }; /* size = 0x128 or 0x13A */
 
 /* Allocates a shadow for owner and sets up its two quads' texture coordinates. */
-Shadow *func_1510D970(s32 ownerType, void *owner, s32 texture, s32 createFlags, s32 flags) {
+Shadow *shadow_createBlob(s32 ownerType, void *owner, s32 texture, s32 createFlags, s32 flags) {
     Shadow *shadow;
     s32 size;
     s32 i;
@@ -85,7 +85,7 @@ Shadow *func_1510D970(s32 ownerType, void *owner, s32 texture, s32 createFlags, 
 }
 
 /* Places the shadow under its owner and builds its quad, tilted to the floor and faded with height. */
-void func_1510DA84(Shadow *shadow) {
+void shadow_updateBlob(Shadow *shadow) {
     s32 i;
     s32 alpha;
     Actor *obj;
@@ -154,7 +154,7 @@ void func_1510DA84(Shadow *shadow) {
         return;
     }
 onFloor: // matching: an unused label splits the block, so the call setup stays after the floorY > ownerY branch
-    if (func_1510E388(triPtrs, tri, &slopeX, &slopeZ)) {
+    if (shadow_getTriSlopes(triPtrs, tri, &slopeX, &slopeZ)) {
         height = ownerY - floorY;
         if (scale == 0.0f) {
             scale = 1.0f;
@@ -233,7 +233,7 @@ onFloor: // matching: an unused label splits the block, so the call setup stays 
 
 
 /* Draws the shadow quad, loading its texture and alpha only when they differ from the last shadow drawn. */
-Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
+Gfx *shadow_drawBlob(Gfx *gfx, Shadow *shadow, s16 view) {
     s32 alpha;
     s32 ownerAlpha;
     s32 tex;
@@ -280,7 +280,7 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
  * Solves the plane of a triangle (given as vertices or as vertex pointers) for its slopes dy/dx and dy/dz,
  * trying each corner and edge order until the system is solvable. Returns 0 (slopes 0) if none is.
  */
-s32 func_1510E388(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ) {
+s32 shadow_getTriSlopes(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ) {
     f32 ax;
     f32 ay;
     f32 az;

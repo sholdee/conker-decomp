@@ -73,7 +73,7 @@ void func_150A09D0(s32 ticks) {
                     zones[i].data2 = (zones[i].data2 & ~0xFF) | countdown;
                     if (countdown == 0) {
                         countdown = zones[i].data2;
-                        D_800DDF5C[(countdown >> 8) & 0xFF] = 0;
+                        gSwarmGroupsInUse[(countdown >> 8) & 0xFF] = 0;
                         zones[i].data2 &= 0xFFFF0000;
                     }
                 }
@@ -623,7 +623,7 @@ typedef struct {
     /* 0x20 */ u32 data3;
 } TriggerZoneBytes;
 
-/* ZONE_TYPE_MINI_SHAPE zone: spawns its object (func_15183290) once the countdown in the low byte of data2 is 0;
+/* ZONE_TYPE_MINI_SHAPE zone: spawns its object (swarm_spawnEffect) once the countdown in the low byte of data2 is 0;
    while the zone stays occupied the countdown is held at 2 or more. */
 void func_150A24C0(TriggerZone *zone, s32 unk127) {
     s32 handle;
@@ -646,7 +646,7 @@ void func_150A24C0(TriggerZone *zone, s32 unk127) {
             data2Byte0 = ((TriggerZoneBytes *)zone)->data2Byte0;
             data2Byte1 = ((TriggerZoneBytes *)zone)->data2Byte1;
             data3 = zone->data3;
-            handle = func_15183290(zone->x, zone->y + data2Byte1 * 16, zone->z, data1Lo, subtype, zone->xSize, unk127,
+            handle = swarm_spawnEffect(zone->x, zone->y + data2Byte1 * 16, zone->z, data1Lo, subtype, zone->xSize, unk127,
                                    data1Hi, data1Byte2, data2Byte0, data3);
             if (handle != -1 && zone->subTypeData != 9) {
                 zone->data2 = (handle << 8) | 0xF0 | (zone->data2 & 0xFFFF0000);
@@ -710,7 +710,7 @@ void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
         func_1515F270(actor, zone);
         break;
     case 10:
-        func_151CE51C(actor, zone);
+        trail_testStreamContact(actor, zone);
         break;
     }
 }

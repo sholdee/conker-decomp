@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Defined in game_981E0.c. Not in event.h: game_83300.c calls it with a fourth argument. */
-f32 func_1506AD30(Actor *obj, f32 time, u8 filtered);
+f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered);
 
 /*
  * Tables of the actor code: the binary-angle cosine and angle tables, the hit routes and the
@@ -266,7 +266,7 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
     jumped = 0;
     if (obj != NULL) {
         if ((D_800C35EA[mode] != 1) || (D_800C365E[mode] != 0)) {
-            result = func_1506AD30(gCurrentActor, time, 0);
+            result = event_runTimedEvents(gCurrentActor, time, 0);
             if (result != 0.0f) {
                 time = result;
             }
@@ -341,7 +341,7 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
     }
     if (obj != NULL) {
         if (jumped) {
-            func_1506AD30(gCurrentActor, anim->frame[0], 0);
+            event_runTimedEvents(gCurrentActor, anim->frame[0], 0);
         }
         // structs.h declares 0xB4 as s32 padB4; it holds the object's f32 animation time
         obj->lastEventTime = anim->frame[0];

@@ -156,7 +156,7 @@ void func_1511A838(WorldObject *mesh) {
             heights[i] += delta * followRates[i];
         }
     }
-    func_1511490C(matrix, mesh);
+    gfx_getObjectModelMtx(matrix, mesh);
     out = &mesh->vertices[D_800BE9C0]->v; /* this frame's buffer */
     lanePhases[0] = WORK(mesh)->wobblePhases & 0xFF;
     lanePhases[1] = (WORK(mesh)->wobblePhases >> 8) & 0xFF;

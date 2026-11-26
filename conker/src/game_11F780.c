@@ -39,13 +39,13 @@ s32 func_150F237C(s32 arg0, s32 arg1) {
     return 14;
 }
 
-/* Spawns a func_151C329C effect at the bone point of `slot`, if the owner has a skeleton. */
+/* Spawns a weapon_spawnImpactBurst effect at the bone point of `slot`, if the owner has a skeleton. */
 void func_150F2390(Actor *owner, s32 slot, s32 arg2) {
     Vec3f pos;
 
     if (owner->ob_matrix_ptr != NULL) {
         func_150F22D0(&pos, owner, slot);
-        func_151C329C(&pos, 0xFF, 0);
+        weapon_spawnImpactBurst(&pos, 0xFF, 0);
     }
 }
 

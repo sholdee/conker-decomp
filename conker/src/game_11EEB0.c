@@ -181,7 +181,7 @@ void func_150F20F0(s32 index) {
     }
 }
 
-/* Spawns func_151C329C's effect at a random point 100 units around bone 19 of `actor`
+/* Spawns weapon_spawnImpactBurst's effect at a random point 100 units around bone 19 of `actor`
  * (unless actor->unk74's low nibble is 0xF). */
 void func_150F2230(Actor *actor, s32 arg1, s32 arg2) {
     Vec3f offset;
@@ -193,6 +193,6 @@ void func_150F2230(Actor *actor, s32 arg1, s32 arg2) {
         offset.z = 0.0f;
         func_15143874(func_150ADA20() & 0xFF, 100.0f, &offset.x, &offset.z);
         func_15143134(&offset, &pos, &actor->ob_matrix_ptr[19]);
-        func_151C329C(&pos, arg1, arg2);
+        weapon_spawnImpactBurst(&pos, arg1, arg2);
     }
 }

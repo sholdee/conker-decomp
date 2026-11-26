@@ -9,7 +9,7 @@ void func_150DE320(s32 arg0) {
 }
 
 /* For each of eight zones records that func_150A32B4 accepts, sets the moving state of the
- * matching func_151149AC object, or (for records without one) calls func_150A2864(id, 1). */
+ * matching gfx_findObjectById object, or (for records without one) calls func_150A2864(id, 1). */
 void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
     WorldObject *prop;
@@ -19,7 +19,7 @@ void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
     for (i = 0; i < 8; i++) {
         if (func_150A32B4(&zones[ids[i]], arg0, arg1, arg2) != 0) {
             if (propIds[i] != 0) {
-                prop = func_151149AC(propIds[i]);
+                prop = gfx_findObjectById(propIds[i]);
                 prop->task_flag = (prop->task_flag & ~TASK_FLAG_STATE) | TASK_FLAG_ON;
             } else {
                 func_150A2864(ids[i], 1);

@@ -96,7 +96,7 @@ typedef struct ParticleDesc {
 } ParticleDesc; /* size 0x70 */
 
 /* Four particle textures to pick one from at random (ParticleDesc.texture): D_800A2160 (game_12CCF0.c) and
- * D_800AA4B8 (func_151B8908), both 0x60-0x63. A struct, so the callers copy it to the stack in one go. */
+ * gBulletSpriteTextures (weapon_spawnBulletSprite), both 0x60-0x63. A struct, so the callers copy it to the stack in one go. */
 typedef struct TextureChoices {
     /* 0x0 */ s32 texture[4];
 } TextureChoices; /* size 0x10 */
@@ -379,7 +379,7 @@ typedef struct FloorParticle {
     /* 0x170 */ f32 floorY;
 } FloorParticle;
 
-/* game_1ED0F0.c's views of the objects func_151B8908 and func_151B8400 return, defined there. */
+/* game_1ED0F0.c's views of the objects weapon_spawnBulletSprite and weapon_spawnBulletParticle return, defined there. */
 struct FollowFx;
 struct Bullet88;
 
@@ -391,8 +391,8 @@ typedef struct BulletState {
     /* 0x06C */ Actor *owner;
     /* 0x070 */ IgnoreList ignore;
     /* 0x080 */ LightEffect *trail;
-    /* 0x084 */ struct FollowFx *follow; /* func_151B8908 (game_1E58B0.c) */
-    /* 0x088 */ struct Bullet88 *unk88;  /* func_151B8400's particle (game_1E58B0.c) */
+    /* 0x084 */ struct FollowFx *follow; /* weapon_spawnBulletSprite (game_1E58B0.c) */
+    /* 0x088 */ struct Bullet88 *unk88;  /* weapon_spawnBulletParticle's particle (game_1E58B0.c) */
     /* 0x08C */ void *unk8C;
     /* 0x090 */ u16 sound;
     /* 0x092 */ u8 impactType;
@@ -405,8 +405,8 @@ typedef struct BulletState {
     /* 0x0CC */ s32 mode;
 } BulletState; /* size 0xD0 */
 
-/* A bullet: a ModelParticle (func_15132A4C) spawned by func_151C0698 (game_1ED0F0.c) and updated by
- * func_151C1180, with its BulletState as data. */
+/* A bullet: a ModelParticle (func_15132A4C) spawned by weapon_fireBullet (game_1ED0F0.c) and updated by
+ * weapon_updateBullet, with its BulletState as data. */
 typedef struct Bullet {
     /* 0x000 */ ModelParticle head;
     /* 0x170 */ BulletState state;
@@ -562,14 +562,14 @@ typedef struct EffectTemplate {
     /* 0x18 */ s32 material; /* func_151462C8's surface material, with flags 0x20 */
 } EffectTemplate; /* size 0x1C */
 
-/* Spawn parameters of a screen effect, copied to ScreenEffect.desc by func_1515FF74 (game/Effects/ColourFrameBuffer/colourframebuffer.c). */
+/* Spawn parameters of a screen effect, copied to ScreenEffect.desc by colourfb_createScreenEffect (game/Effects/ColourFrameBuffer/colourframebuffer.c). */
 typedef struct EffectDesc {
     /* 0x0 */ u8 flags;        /* 1: ends when lifetime runs out, 2/8: hidden in some states, 4: skip one draw */
-    /* 0x1 */ s8 updateIndex;  /* D_8008B0D0 handler, -1 for none */
-    /* 0x2 */ s8 drawIndex;    /* D_8008B0D8 handler, -1 for none */
+    /* 0x1 */ s8 updateIndex;  /* gScreenEffectUpdateProcs handler, -1 for none */
+    /* 0x2 */ s8 drawIndex;    /* gScreenEffectDrawProcs handler, -1 for none */
     /* 0x3 */ u8 pad3;
     /* 0x4 */ s16 lifetime;
-    /* 0x6 */ u8 messageIndex; /* D_8008B0E4 handler */
+    /* 0x6 */ u8 messageIndex; /* gScreenEffectMessageProcs handler */
     /* 0x7 */ u8 pad7;
 } EffectDesc; /* size 0x8 */
 
@@ -814,7 +814,7 @@ typedef struct AngleRange {
 #define TRAIL_BURST_FADE      0x4   /* alpha fades once life < fadeStart */
 #define TRAIL_BURST_SHRINK    0x8   /* width shrinks once life < shrinkStart */
 
-/* Per-trail settings, copied into the trail (FallingTrail.data) by func_1515C2F0 (game_1897A0.c). */
+/* Per-trail settings, copied into the trail (FallingTrail.data) by trail_spawnFallingTrail (game_1897A0.c). */
 typedef struct TrailBurstParams {
     /* 0x00 */ f32 width;     /* half-width of the ribbon */
     /* 0x04 */ Vec3f vel;     /* initial point velocity; only vel.y is kept per point */
@@ -836,12 +836,12 @@ typedef struct TrailBurstParams {
     /* 0x32 */ u8 shrinkPaused;
     /* 0x33 */ u8 pad33;
     /* 0x34 */ f32 shrinkFactor; /* width multiplier per frame */
-    /* 0x38 */ s8 unk38;      /* index into D_8008B080, -1: none */
-    /* 0x39 */ s8 unk39;      /* index into D_8008B084, -1: none */
+    /* 0x38 */ s8 unk38;      /* index into gFallingTrailMoveProcs, -1: none */
+    /* 0x39 */ s8 unk39;      /* index into gFallingTrailShapeProcs, -1: none */
     /* 0x3A */ u8 pad3A[2];
 } TrailBurstParams; /* size 0x3C */
 
-/* func_15152B38 (game_17CAF0.c): spawns countBase + rand % (countRange + 1) trails (func_1515C2F0) at pos,
+/* func_15152B38 (game_17CAF0.c): spawns countBase + rand % (countRange + 1) trails (trail_spawnFallingTrail) at pos,
  * each with random size, gravity, speed, direction, item count, life and colors from these base/range pairs. */
 typedef struct TrailBurst {
     /* 0x00 */ s32 countBase;
@@ -1035,7 +1035,7 @@ typedef struct SurfaceJetSpray {
     /* 0x24 */ JetSpray spray;
 } SurfaceJetSpray; /* size 0x78 */
 
-/* Render settings of a func_15147DA0 effect (game_175250.c), its 12th argument, copied into the effect. */
+/* Render settings of a trail_createMotionTrail effect (game_175250.c), its 12th argument, copied into the effect. */
 typedef struct TrailRender {
     /* 0x00 */ s32 unk0;              /* ORed into the other-mode high word */
     /* 0x04 */ s32 setGeometryMode;
@@ -1049,7 +1049,7 @@ typedef struct TrailRender {
     /* 0x1E */ u8 pad1E[2];
 } TrailRender; /* size 0x20 */
 
-/* func_15151A38 (game_17CAF0.c): countBase + rand % (countRange + 1) puffs (func_15147DA0 effects) at pos,
+/* func_15151A38 (game_17CAF0.c): countBase + rand % (countRange + 1) puffs (trail_createMotionTrail effects) at pos,
  * each moving at a random yaw/pitch from `angles`, with random size, growth, speed, item count, life and
  * alpha. */
 typedef struct PuffSpray {
@@ -1071,13 +1071,13 @@ typedef struct PuffSpray {
     /* 0x39 */ u8 headerFlags;      /* EffectTemplate.flags */
     /* 0x3A */ u8 red;
     /* 0x3B */ u8 pad3B;
-    /* 0x3C */ s32 handlers[6];     /* func_15147DA0's arguments 3..8 (state and handler indices) */
+    /* 0x3C */ s32 handlers[6];     /* trail_createMotionTrail's arguments 3..8 (state and handler indices) */
     /* 0x54 */ u8 blue;
     /* 0x55 */ u8 alphaBase;
     /* 0x56 */ u8 alphaRange;
     /* 0x57 */ u8 pad57;
-    /* 0x58 */ s32 unk58;           /* func_15147DA0's arg9 */
-    /* 0x5C */ s32 unk5C;           /* func_15147DA0's arg10 */
+    /* 0x58 */ s32 unk58;           /* trail_createMotionTrail's arg9 */
+    /* 0x5C */ s32 unk5C;           /* trail_createMotionTrail's arg10 */
     /* 0x60 */ TrailRender render;
     /* 0x80 */ s16 unk80;           /* copied to the motion block's 0x1C */
     /* 0x82 */ s16 unk82;           /* copied to the motion block's 0x1E */
@@ -1104,13 +1104,13 @@ typedef struct PuffSpray84 {
     /* 0x39 */ u8 headerFlags;      /* EffectTemplate.flags */
     /* 0x3A */ u8 red;
     /* 0x3B */ u8 pad3B;
-    /* 0x3C */ s32 handlers[6];     /* func_15147DA0's arguments 3..8 (state and handler indices) */
+    /* 0x3C */ s32 handlers[6];     /* trail_createMotionTrail's arguments 3..8 (state and handler indices) */
     /* 0x54 */ u8 blue;
     /* 0x55 */ u8 alphaBase;
     /* 0x56 */ u8 alphaRange;
     /* 0x57 */ u8 pad57;
-    /* 0x58 */ s32 unk58;           /* func_15147DA0's arg9 */
-    /* 0x5C */ s32 unk5C;           /* func_15147DA0's arg10 */
+    /* 0x58 */ s32 unk58;           /* trail_createMotionTrail's arg9 */
+    /* 0x5C */ s32 unk5C;           /* trail_createMotionTrail's arg10 */
     /* 0x60 */ TrailRender render;
     /* 0x80 */ s16 unk80;           /* copied to the motion block's 0x1C */
     /* 0x82 */ s16 unk82;           /* copied to the motion block's 0x1E */
@@ -1137,13 +1137,13 @@ typedef struct SurfacePuffSpray {
     /* 0x55 */ u8 headerFlags;      /* EffectTemplate.flags */
     /* 0x56 */ u8 red;
     /* 0x57 */ u8 pad57;
-    /* 0x58 */ s32 handlers[6];     /* func_15147DA0's arguments 3..8 (state and handler indices) */
+    /* 0x58 */ s32 handlers[6];     /* trail_createMotionTrail's arguments 3..8 (state and handler indices) */
     /* 0x70 */ u8 blue;
     /* 0x71 */ u8 alphaBase;
     /* 0x72 */ u8 alphaRange;
     /* 0x73 */ u8 pad73;
-    /* 0x74 */ s32 unk74;           /* func_15147DA0's arg9 */
-    /* 0x78 */ s32 unk78;           /* func_15147DA0's arg10 */
+    /* 0x74 */ s32 unk74;           /* trail_createMotionTrail's arg9 */
+    /* 0x78 */ s32 unk78;           /* trail_createMotionTrail's arg10 */
     /* 0x7C */ TrailRender render;
     /* 0x9C */ s16 unk9C;           /* copied to the motion block's 0x1C */
     /* 0x9E */ s16 unk9E;           /* copied to the motion block's 0x1E */
@@ -1221,7 +1221,7 @@ typedef struct SimplePuffSpray {
     /* 0x38 */ u8 green;
     /* 0x39 */ u8 red;
     /* 0x3A */ u8 pad3A[2];
-    /* 0x3C */ s32 handlers[6];     /* func_15147DA0's arguments 3..8 (state and handler indices) */
+    /* 0x3C */ s32 handlers[6];     /* trail_createMotionTrail's arguments 3..8 (state and handler indices) */
     /* 0x54 */ u8 blue;
     /* 0x55 */ u8 alpha;
     /* 0x56 */ u8 pad56[2];
@@ -1799,7 +1799,7 @@ typedef struct AnchorEmitter {
     /* 0x30 */ AnchorEmitterParams params;
 } AnchorEmitter; /* size 0x8C */
 
-/* func_15147DA0 (game_175250.c): motion and appearance block copied from its second argument (some
+/* trail_createMotionTrail (game_175250.c): motion and appearance block copied from its second argument (some
  * handlers read these words differently, e.g. game_17CAF0.c's puffs). */
 typedef struct TrailMotion {
     /* 0x00 */ f32 halfWidth;
@@ -1809,14 +1809,14 @@ typedef struct TrailMotion {
     /* 0x18 */ u8 flags;
     /* 0x19 */ u8 texture;          /* index into D_80091564 */
     /* 0x1A */ u8 shade;            /* passed with alpha to func_151441A4 / func_151442FC */
-    /* 0x1B */ u8 alpha;            /* faded by func_150C1978 */
+    /* 0x1B */ u8 alpha;            /* faded by trail_fadeKind2Trail */
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ s16 unk1E;
 } TrailMotion; /* size 0x20 */
 
-/* Preset of a burst of func_15147DA0 particles thrown out around a point: radius and launch speed, then the
+/* Preset of a burst of trail_createMotionTrail particles thrown out around a point: radius and launch speed, then the
  * ranges of each particle's TrailMotion and EffectTemplate values (value = base + rand * range, or for the s16
- * pairs base + rand % (range + 1)). Tables: D_8009FBF0 (trail bursts, game_E1280.c), D_800A8728 (flamethrower
+ * pairs base + rand % (range + 1)). Tables: gScatterPresets (trail bursts, game_E1280.c), gJetScatterPresets (flamethrower
  * jet scatter, game/Effects/CharacterFlameThrower/characterflamethrower.c). */
 typedef struct ScatterPreset {
     /* 0x00 */ f32 radius;
@@ -1832,7 +1832,7 @@ typedef struct ScatterPreset {
     /* 0x22 */ s16 itemCountRange;
 } ScatterPreset; /* size 0x24 */
 
-/* matching: TrailMotion before unk1C/unk1E (0x1C bytes; func_15147DA0 copies 0x20); see ParticleDesc64. */
+/* matching: TrailMotion before unk1C/unk1E (0x1C bytes; trail_createMotionTrail copies 0x20); see ParticleDesc64. */
 typedef struct TrailMotion1C {
     /* 0x00 */ f32 halfWidth;
     /* 0x04 */ Vec3f velocity;
@@ -1844,12 +1844,12 @@ typedef struct TrailMotion1C {
     /* 0x1B */ u8 alpha;
 } TrailMotion1C;
 
-/* User data of a func_15147DA0 trail (MotionTrail.params). */
+/* User data of a trail_createMotionTrail trail (MotionTrail.params). */
 typedef struct TrailParams {
     /* 0x00 */ TrailMotion motion;
-    /* 0x20 */ u8 state;            /* handler index into D_8008A3E0 */
-    /* 0x21 */ u8 unk21;            /* handler index into D_8008A3F8 */
-    /* 0x22 */ u8 finishFn;         /* handler index into D_8008A42C */
+    /* 0x20 */ u8 state;            /* handler index into gMotionTrailStateProcs */
+    /* 0x21 */ u8 unk21;            /* handler index into gMotionTrailUpdateProcs */
+    /* 0x22 */ u8 finishFn;         /* handler index into gMotionTrailFinishProcs */
     /* 0x23 */ u8 hitFn;            /* handler index into D_8008A430 */
     /* 0x24 */ u8 hitKind3Fn;       /* handler index into D_8008A450 */
     /* 0x25 */ u8 unk25;
@@ -1941,7 +1941,7 @@ typedef struct ParticleEmitterDesc {
     /* 0x44 */ f32 growRate;
 } ParticleEmitterDesc; /* size 0x48 */
 
-/* func_150B3F5C (game_E1280.c): settings of a smoke trail; the first 0x40 bytes of its ScatterTrailState. */
+/* trail_spawnScatterTrail (game_E1280.c): settings of a smoke trail; the first 0x40 bytes of its ScatterTrailState. */
 typedef struct TrailStateParams {
     /* 0x00 */ Vec3f baseVel;
     /* 0x0C */ f32 gravity;
@@ -2279,12 +2279,12 @@ typedef struct TrackerData {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;        /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ struct TrackerTrail *trail; /* spawned by func_151D1448 */
+    /* 0x08 */ struct TrackerTrail *trail; /* spawned by trail_spawnTrackerTrail */
     /* 0x0C */ Vec3f prevPos;
     /* 0x18 */ Vec3f pos;
     /* 0x24 */ Vec3f delta;
     /* 0x30 */ f32 dist;          /* distance moved this frame */
-    /* 0x34 */ u8 pointFn;        /* index into D_8008FC30 */
+    /* 0x34 */ u8 pointFn;        /* index into gTrackerPointProcs */
 } TrackerData;
 
 typedef struct TrackerEffect {
@@ -2292,7 +2292,7 @@ typedef struct TrackerEffect {
     /* 0x28 */ TrackerData data;
 } TrackerEffect;
 
-/* User data of a TrackerTrail (copied in at spawn by func_151D1448, game_1FA770.c; run by game_1FEA80.c). */
+/* User data of a TrackerTrail (copied in at spawn by trail_spawnTrackerTrail, game_1FA770.c; run by game_1FEA80.c). */
 typedef struct TrackerTrailData {
     /* 0x00 */ TrackerEffect *owner; /* NULL once the tracker lets go of the trail */
     /* 0x04 */ f32 texture;       /* running texture coordinate of the newest sample */
@@ -2320,8 +2320,8 @@ typedef struct TrailVec2 {
     f32 z;
 } TrailVec2;
 
-/* Kind 17 trail (func_151CEAAC, game_1FA770.c): follows an actor or a sprite particle (func_151CEC54,
- * same file) and wobbles as a sine wave that grows along its length (func_151CF120). */
+/* Kind 17 trail (trail_spawnWaveTrail, game_1FA770.c): follows an actor or a sprite particle (trail_followWaveTrail,
+ * same file) and wobbles as a sine wave that grows along its length (trail_shapeWaveTrail). */
 
 /* WaveTrailData.flags */
 #define WAVE_TRAIL_HAS_NORMAL 1 /* scaled/normal have been initialised */
@@ -2375,15 +2375,15 @@ typedef struct ParticleStream {
     /* 0x2C */ Vec3f position;
 } ParticleStream; /* size 0x38 */
 
-/* A stream of func_151C229C projectiles (TimedEffect tick callback 0x2B, func_151C4820, game_1F1CD0.c). */
+/* A stream of weapon_spawnProjectile projectiles (TimedEffect tick callback 0x2B, func_151C4820, game_1F1CD0.c). */
 typedef struct ProjectileStream {
     /* 0x00 */ ParticleStream stream;
-    /* 0x38 */ f32 speed;         /* func_151C229C's speed */
+    /* 0x38 */ f32 speed;         /* weapon_spawnProjectile's speed */
     /* 0x3C */ f32 unk3C;         /* its arg7 */
     /* 0x40 */ f32 unk40;         /* its arg10 */
 } ProjectileStream; /* size 0x44 */
 
-/* A timed emitter of ProjectileStreams (TimedEffect tick callback 0x2A, func_151C4644, game_1EF500.c; spawned by
+/* A timed emitter of ProjectileStreams (TimedEffect tick callback 0x2A, weapon_updateStreamEmitter, game_1EF500.c; spawned by
  * func_150144B8, game_40490.c): after a random delay it starts one stream and picks a new delay. */
 typedef struct StreamEmitter {
     /* 0x00 */ s16 *position;     /* x, y, z (of the spawning TriggerZone) */
@@ -2403,7 +2403,7 @@ typedef struct StreamEmitter {
     /* 0x34 */ f32 unk34;
 } StreamEmitter; /* size 0x38 */
 
-/* Spray description that func_15189900 (game_1B6DB0.c) copies into a new SprayEmitter (0x50 bytes).
+/* Spray description that trail_createSprayEmitter (game_1B6DB0.c) copies into a new SprayEmitter (0x50 bytes).
    Angles are in 256ths of a turn; every "...Range" is the random spread added to the value before it. */
 typedef struct SprayDesc {
     /* 0x00 */ s16 yaw;
@@ -2622,7 +2622,7 @@ typedef struct ChannelParticle {
     /* 0x160 */ f32 extra; /* the caller's emitter->extraSize bytes; game_EFEA0.c keeps a yaw angle here */
 } ChannelParticle;
 
-/* Per-particle data of the age-driven fade (func_151A483C / func_151A4900 for DescParticleHead particles,
+/* Per-particle data of the age-driven fade (trail_updateBurstParticle / func_151A4900 for DescParticleHead particles,
  * game_1D0840.c; billboard callbacks 0x14 / 0x15, game_1D43B0.c). Each *Start is a remaining-life value:
  * below it the alpha / colour follow the life (life * step) and the size grows by growRate per tick. */
 typedef struct AgeFadeParams {
@@ -2672,7 +2672,7 @@ typedef struct SpriteParticle {
         ParticlePulse pulse;
         ParticleFlash flash;
         WobbleData wobble;      /* update func 22 (func_150AF6E4, game_DC6B0.c) and the like */
-        AgeFadeParams ageFade;  /* update funcs 0 and 1 (func_151A483C / func_151A4900, game_1D0840.c) */
+        AgeFadeParams ageFade;  /* update funcs 0 and 1 (trail_updateBurstParticle / func_151A4900, game_1D0840.c) */
         struct {
             f32 drag;
             u8 pad4[4];
@@ -2872,7 +2872,7 @@ typedef struct DynModel {
 /* The user data after a DynModel's vertex buffers. matching: s32 arithmetic (a u8 * sum schedules differently) */
 #define DYNMODEL_USERDATA(model) ((void *)((s32)(model) + (model)->buffersSize + 0xF8))
 
-/* One point of a func_15147DA0 trail (game_175250.c); the points form the object's ring buffer. */
+/* One point of a trail_createMotionTrail trail (game_175250.c); the points form the object's ring buffer. */
 typedef struct MotionTrailPoint {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 velocityY;
@@ -2880,7 +2880,7 @@ typedef struct MotionTrailPoint {
     /* 0x12 */ u8 pad12[2];
 } MotionTrailPoint; /* size 0x14 */
 
-/* A trail made by func_15147DA0 (game_175250.c): an EffectObjHead object whose points move by TrailMotion
+/* A trail made by trail_createMotionTrail (game_175250.c): an EffectObjHead object whose points move by TrailMotion
  * and collide with the floor. */
 typedef struct MotionTrail {
     /* 0x00 */ EffectObjHead head;

@@ -78,7 +78,7 @@ void func_15173C60(s32 blend, s32 group) {
 void func_15173C90(s32 blend, s32 group, s32 propId) {
     WorldObject *prop;
 
-    prop = func_151149AC(propId);
+    prop = gfx_findObjectById(propId);
     if (prop != NULL) {
         s32 colorSet = prop->modelId & ~0x8000;
 

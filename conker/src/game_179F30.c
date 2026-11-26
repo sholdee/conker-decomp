@@ -760,7 +760,7 @@ void func_1514DC38(Actor *obj) {
 }
 
 void func_1514DC5C(Actor *obj) {
-    func_151D0F60(obj, 0, 0xFF, 1);
+    trail_spawnTrackerEffect(obj, 0, 0xFF, 1);
 }
 
 void func_1514DC84(Actor *obj) {
@@ -904,7 +904,7 @@ void func_1514E00C(Actor *obj) {
     emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
-    func_151D74B0(obj, 5, -1, 0xFF, 1);
+    trail_attachToBone(obj, 5, -1, 0xFF, 1);
 }
 
 void func_1514E194(Actor *obj) {
@@ -958,7 +958,7 @@ void func_1514E194(Actor *obj) {
     emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
-    func_151D74B0(obj, 5, -1, 0xFF, 1);
+    trail_attachToBone(obj, 5, -1, 0xFF, 1);
 }
 
 void func_1514E31C(Actor *obj) {
@@ -1470,8 +1470,8 @@ s32 func_1514F130(LightEffect *target, s32 msg, s32 arg) {
 void func_1514F194(Actor *obj) {
     void *handle;
 
-    func_151D0F60(obj, 1, 0xFF, 1);
-    func_151D0F60(obj, 2, 0xFF, 1);
+    trail_spawnTrackerEffect(obj, 1, 0xFF, 1);
+    trail_spawnTrackerEffect(obj, 2, 0xFF, 1);
     func_151BB044(obj);
     if (gIsMultiplayer == 0) {
         func_151BC074(obj);
@@ -1520,19 +1520,19 @@ void func_1514F44C(Actor *obj) {
 }
 
 void func_1514F4A8(Actor *obj) {
-    func_151D74B0(obj, 1, -1, 0xFF, 1);
+    trail_attachToBone(obj, 1, -1, 0xFF, 1);
 }
 
 void func_1514F4D8(Actor *obj) {
-    func_151D74B0(obj, 2, 1, 0xFF, 1);
+    trail_attachToBone(obj, 2, 1, 0xFF, 1);
 }
 
 void func_1514F508(Actor *obj) {
-    func_151D74B0(obj, 3, 0, 0xFF, 1);
+    trail_attachToBone(obj, 3, 0, 0xFF, 1);
 }
 
 void func_1514F538(Actor *obj) {
-    func_151D74B0(obj, 4, -1, 0xFF, 1);
+    trail_attachToBone(obj, 4, -1, 0xFF, 1);
 }
 
 void func_1514F568(Actor *obj) {

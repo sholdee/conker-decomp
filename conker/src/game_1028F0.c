@@ -339,7 +339,7 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
             if ((hitSurface & 0x1F) == 0xE) {
                 func_150D65F0((CollisionTri *)hitTri, &hitPos, arg1, arg2);
             } else {
-                func_151C0360((CollisionTri *)hitTri, &hitPos, arg1, arg2);
+                weapon_spawnHitDecal((CollisionTri *)hitTri, &hitPos, arg1, arg2);
             }
         }
         func_150D6434(&pos, arg1, arg2);

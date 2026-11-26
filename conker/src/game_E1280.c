@@ -28,18 +28,18 @@ void func_150B3DD0(void) {
     func_151494E0((s32)msg, 0x18);
 }
 
-void func_150B3E74(ScatterTrail *trail) {
+void trail_destroyScatterTrail(ScatterTrail *trail) {
     func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
     func_151478F4(trail);
 }
 
-void func_150B3EE8(ScatterTrail *trail) {
+void trail_freeScatterTrail(ScatterTrail *trail) {
     func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
     func_15147928(trail);
 }
 
 /* Spawns a trail at pos with the settings in params. Returns the new trail, or NULL. */
-ScatterTrail *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity) {
+ScatterTrail *trail_spawnScatterTrail(TrailStateParams *params, Vec3f *pos, s16 capacity) {
     EffectTemplate spawn;
     ScatterTrailState state;
     ScatterTrail *trail;
@@ -67,7 +67,7 @@ ScatterTrail *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity) 
 }
 
 /* Moves and ages the trail's points, dropping expired ones from the tail. Returns 0 once a stopped trail is empty. */
-s32 func_150B40E8(ScatterTrail *trail) {
+s32 trail_ageScatterTrail(ScatterTrail *trail) {
     ScatterTrailState *state;
     ScatterTrailPoint *points;
     s32 i;
@@ -125,7 +125,7 @@ s32 func_150B40E8(ScatterTrail *trail) {
 }
 
 /* Emits new trail points for this frame, interpolating speed across the frame's step. */
-s32 func_150B4294(ScatterTrail *trail) {
+s32 trail_emitScatterTrail(ScatterTrail *trail) {
     f32 inv;
     f32 dt;
     f32 speed;
@@ -152,7 +152,7 @@ s32 func_150B4294(ScatterTrail *trail) {
         do {
             state->burstAccum += state->burstRate;
             if (state->burstAccum > 1.0f) {
-                func_150B5088(trail);
+                trail_burstScatterTrail(trail);
             }
             points[trail->head.end].pos = trail->head.tmpl.pos;
             points[trail->head.end].vel.x = baseVel.x * speed;
@@ -193,7 +193,7 @@ s32 func_150B4294(ScatterTrail *trail) {
  * Draws the trail as a camera-facing ribbon, newest point first: each pair of points becomes a quad
  * whose sides are offset by the point's width along (segment x to-camera).
  */
-Gfx *func_150B4710(ScatterTrail *trail, Gfx *gfx, s16 camIdx) {
+Gfx *trail_drawScatterTrail(ScatterTrail *trail, Gfx *gfx, s16 camIdx) {
     Vtx *vtx;
     ScatterTrailState *state;
     Vec3f next;
@@ -403,7 +403,7 @@ lbl1:
 }
 
 /* Stops the trail: no more points are emitted and the ribbon detaches from the emitter. */
-void func_150B5060(ScatterTrail *trail) {
+void trail_stopScatterTrail(ScatterTrail *trail) {
     ScatterTrailState *state = trail->state;
 
     trail->head.updateKind2 = 0;
@@ -412,12 +412,12 @@ void func_150B5060(ScatterTrail *trail) {
 }
 
 /* The burst presets of ScatterTrail (indexed by its state's burstPreset). */
-static const ScatterPreset D_8009FBF0[] = {
+static const ScatterPreset gScatterPresets[] = {
     { 5.0f, 2.0f, 3.0f, 20.0f, 20.0f, 1.7f, 0.605f, 70, 0, 4, 3 },
 };
 
 /* Throws out a burst of particles around the trail's emitter, one per whole unit of burstAccum. */
-void func_150B5088(ScatterTrail *trail) {
+void trail_burstScatterTrail(ScatterTrail *trail) {
     TrailRender style;
     ScatterTrailState *state;
     EffectTemplate spawn;
@@ -435,7 +435,7 @@ void func_150B5088(ScatterTrail *trail) {
     const ScatterPreset *preset;
 
     state = trail->state;
-    preset = &D_8009FBF0[state->burstPreset];
+    preset = &gScatterPresets[state->burstPreset];
 
     style.unk0 = 0;
     style.setGeometryMode = 1;
@@ -471,14 +471,14 @@ void func_150B5088(ScatterTrail *trail) {
         particle.velocity.x = speed * x;
         particle.velocity.y = speed * y;
         particle.velocity.z = speed * z;
-        func_15147DA0(&spawn, &particle, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, trail->head.header.owner, trail->head.header.kind);
+        trail_createMotionTrail(&spawn, &particle, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, trail->head.header.owner, trail->head.header.kind);
         state->burstAccum -= 1.0f;
     } while (state->burstAccum > 1.0f);
 }
 
 /* Message handler: message 5 stops the trail. */
-void func_150B538C(ScatterTrail *trail, s32 arg1, u8 msg) {
+void trail_onScatterTrailMessage(ScatterTrail *trail, s32 arg1, u8 msg) {
     if (msg == 5) {
-        func_150B5060(trail);
+        trail_stopScatterTrail(trail);
     }
 }

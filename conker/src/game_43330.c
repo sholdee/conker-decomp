@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-void func_15015E80(void) {
+void gfx_allocDisplayLists(void) {
     if (D_800B0DF0->gfxCount == 0) {
         D_800B0DF0->gfxCount = 8000;
     }

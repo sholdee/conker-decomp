@@ -3852,7 +3852,7 @@ static const Snd151E6C1C D_800AB920[8] = {
 /*
  * Moves object index along the node path selected by gMenuState (unk2B = current stop, unk8 = progress
  * along it), spline-interpolating its position (unk2F8..) and look-at point (unk2A4..), and drives the
- * related objects returned by func_151149AC.
+ * related objects returned by gfx_findObjectById.
  */
 void func_151E6C1C(s32 index) {
     Camera *obj;
@@ -3981,7 +3981,7 @@ void func_151E6C1C(s32 index) {
         for (i = 0; i < 2; i++) {
             a = D_8008FFB0[i][gMenuState->unk2C];
             if (a != 0xFF) {
-                r = func_151149AC(a);
+                r = gfx_findObjectById(a);
                 if (r != NULL) {
                     if (gMenuState->unkC > 0.0f || D_8008FDD0 < 1.0f) {
                         if (D_8008FF78[gMenuState->unk2C] < (s32)(scale * 100.0f)) {
@@ -4198,12 +4198,12 @@ void func_151E6C1C(s32 index) {
 
     {
     WorldObject *q1;
-    r = func_151149AC(0xF8);
+    r = gfx_findObjectById(0xF8);
     if (r != NULL) {
         r->inactive = 1;
     }
-    q1 = func_151149AC(0xF6);
-    r2 = func_151149AC(0xF7);
+    q1 = gfx_findObjectById(0xF6);
+    r2 = gfx_findObjectById(0xF7);
     if (q1 != NULL && r2 != NULL) {
         if (gMenuState->menu == 0) {
             q1->inactive = 0;
@@ -4234,7 +4234,7 @@ void func_151E7DC0(void) {
         } else {
             objId = D_8008FFB0[i][0];
         }
-        r = func_151149AC(objId);
+        r = gfx_findObjectById(objId);
         if (r != NULL) {
             r->touch.i.b = 2;
         }

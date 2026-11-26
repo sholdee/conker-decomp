@@ -18,7 +18,7 @@ void func_15007830(void) {
     func_100050A0(&gGameMesgQueue);
     func_15003570();
     D_800BEAAB = 0;
-    func_10008180();
+    audio_init();
     music_init();
     func_15016588();
     func_151EEFF0();

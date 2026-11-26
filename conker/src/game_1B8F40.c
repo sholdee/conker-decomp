@@ -7,7 +7,7 @@
 #define OBJ_TYPE_TRAIL_EMITTER 0x1F
 
 /* Returns the actor's trail emitter, creating one if its kind has emitter settings. */
-TrailEmitter *func_1518BA90(Actor *actor, u8 owner, s32 list) {
+TrailEmitter *trail_getActorEmitter(Actor *actor, u8 owner, s32 list) {
     EffectHeader **heads;
     TrailEmitterParams params;
     TrailEmitter *emitter;
@@ -58,11 +58,11 @@ TrailEmitter *func_1518BA90(Actor *actor, u8 owner, s32 list) {
     }
     params.owner = actor;
     params.ownerId = actor->unique_id;
-    return func_1518BCD0(&params, owner, list);
+    return trail_spawnEmitter(&params, owner, list);
 }
 
 /* Destroys every trail emitter (after pointing each at `actor`). */
-void func_1518BBF4(Actor *actor) {
+void trail_destroyAllEmitters(Actor *actor) {
     s32 i;
     TrailEmitter *emitter;
 
@@ -89,7 +89,7 @@ void func_1518BBF4(Actor *actor) {
 }
 
 /* Spawns a trail emitter object from `params` with random initial timers. */
-TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list) {
+TrailEmitter *trail_spawnEmitter(TrailEmitterParams *params, u8 owner, s32 list) {
     TrailEmitter *emitter;
 
     emitter = func_15167A68(OBJ_TYPE_TRAIL_EMITTER, list, sizeof(TrailEmitter), 1, owner, 1);
@@ -115,7 +115,7 @@ typedef struct {
 } EmitterTrailParams;
 
 /* MotionTrail emitter update: while the owner is alive, spawns a trail from each point when its timer runs out. */
-void func_1518BD60(TrailEmitter *emitter) {
+void trail_updateEmitter(TrailEmitter *emitter) {
     u8 i;
     s32 point;
     MotionTrail *trail;
@@ -165,7 +165,7 @@ void func_1518BD60(TrailEmitter *emitter) {
                 motion.flags = emitter->params.flags | 8;
                 motion.shade = 0xFF - ((u8)(emitter->params.owner->floorMaterial >> 5) << 6);
                 motion.alpha = 0xFF;
-                trail = func_15147DA0(&spawn, &motion, spawn.itemCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
+                trail = trail_createMotionTrail(&spawn, &motion, spawn.itemCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
                                       0, &render, 0, emitter->link.owner, emitter->link.kind);
                 if (trail != NULL) {
                     link = &((EmitterTrailParams *)trail->params)->link;
@@ -186,7 +186,7 @@ void func_1518BD60(TrailEmitter *emitter) {
  * one point or, once full, hands the owner's motion to the trail and lets it go.
  * Returns 0 when the owner is gone.
  */
-s32 func_1518C0B8(MotionTrail *trail) {
+s32 trail_updateEmittedTrail(MotionTrail *trail) {
     EmitterTrailParams *params;
     MotionTrailPoint *points;
     s32 i;
@@ -288,7 +288,7 @@ s32 func_1518C0B8(MotionTrail *trail) {
 }
 
 /* MotionTrail fade: alpha (motion.alpha) follows 8 * unk1C, capped at 0xFF. */
-s32 func_1518C540(MotionTrail *trail) {
+s32 trail_fadeEmittedTrail(MotionTrail *trail) {
     s32 alpha;
     TrailParams *params;
 
@@ -305,7 +305,7 @@ s32 func_1518C540(MotionTrail *trail) {
 }
 
 /* MotionTrail hit handler: spawns a QuadFx puff where the trail's oldest point hit at height `hitY`. */
-s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
+s32 trail_spawnHitPuff(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
     QuadFxData fx;
     TrailParams *params;
     MotionTrailPoint *points;
@@ -330,8 +330,8 @@ s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
     return 1;
 }
 
-/* Same as func_1518C57C, plus a func_151D8E20() effect (arg5) at the hit point. */
-s32 func_1518C69C(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY, CollisionTri *surface) {
+/* Same as trail_spawnHitPuff, plus a func_151D8E20() effect (arg5) at the hit point. */
+s32 trail_spawnHitPuffAndEffect(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY, CollisionTri *surface) {
     QuadFxData fx;
     TrailParams *params;
     MotionTrailPoint *points;
@@ -370,7 +370,7 @@ s32 func_1518C69C(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY, CollisionTr
  * MotionTrail emitter message handler: follows its owner through an actor swap (type 0x2D) and is
  * destroyed when the owner goes away (type 0).
  */
-void func_1518C850(TrailEmitter *emitter, s32 data, u8 type) {
+void trail_onEmitterMessage(TrailEmitter *emitter, s32 data, u8 type) {
     ActorMsg *msg = (ActorMsg *)data;
     Actor *actor;
 

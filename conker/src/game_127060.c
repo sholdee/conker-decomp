@@ -283,7 +283,7 @@ typedef struct {
 
 /*
  * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two func_15153F18 /
- * func_15150178 bursts, a particle with a random rise, and func_151C329C at the point.
+ * func_15150178 bursts, a particle with a random rise, and weapon_spawnImpactBurst at the point.
  */
 void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
     Vec3f pos;
@@ -398,7 +398,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
                 memcpy(particle->data, data, sizeof(data));
             }
         }
-        func_151C329C(&pos, owner, kind);
+        weapon_spawnImpactBurst(&pos, owner, kind);
     }
 }
 
@@ -676,7 +676,7 @@ s32 func_150FB2E0(FadeInSprite *sprite) {
     return 1;
 }
 
-/* Spawns the func_150FEC28 / func_151D4408 effects on bone 14 of `actor`: point0 goes to `position`,
+/* Spawns the weapon_spawnBoneBeam / func_151D4408 effects on bone 14 of `actor`: point0 goes to `position`,
  * point2 to `origin` and point3 to `origin + delta`, all in world space. */
 void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f position;
@@ -708,7 +708,7 @@ void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
     {
         u8 bone = 14;
 
-        func_150FEC28(actor, bone, &point0, &point1, &position, arg1, arg2);
+        weapon_spawnBoneBeam(actor, bone, &point0, &point1, &position, arg1, arg2);
     }
     func_151D4408(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
 }

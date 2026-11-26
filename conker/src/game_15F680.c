@@ -33,7 +33,7 @@ typedef void (*ParticleEventFn)(ModelParticle *particle, void *data, u8 event);
 static s32 (*D_800898B0[])() = {
     NULL, func_15132DDC, func_150CBE88, func_150CCCB4,
     func_150CB008, func_151B5E94, func_151B6254, func_150CA07C,
-    func_151337C0, light_updateLampParticle, func_151C1180, func_150AE2A0,
+    func_151337C0, light_updateLampParticle, weapon_updateBullet, func_150AE2A0,
     func_151D3D50, func_15133894, func_151B8B40, func_1515452C,
     func_150F23E0, func_150E971C, func_15154A88, func_150F78B4,
     func_150F81BC, func_1519ED24, func_150F48D0, func_151C7038,
@@ -69,7 +69,7 @@ static void (*D_800899D4[])() = {
     func_1513259C,
 };
 static ParticleEventFn D_800899F8[] = {
-    NULL, func_151C1814, NULL, NULL,
+    NULL, weapon_onBulletPairEvent, NULL, NULL,
     NULL, func_15133DE8, func_1513B0B8, NULL,
     func_150F4CFC, NULL,
 };

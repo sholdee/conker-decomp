@@ -10,11 +10,11 @@ static const Vec3f D_800A1F88 = { 7.0f, 40.0f, 13.0f };
 /* This file's .data. */
 static u8 D_80088B80 = 9; // bone of the muzzle points above
 
-/* Fires a projectile (func_151C229C) from obj's launch point towards its target, after the muzzle
- * effects of func_150FDF38. Returns func_151C229C's result, or NULL without an obj. */
+/* Fires a projectile (weapon_spawnProjectile) from obj's launch point towards its target, after the muzzle
+ * effects of func_150FDF38. Returns weapon_spawnProjectile's result, or NULL without an obj. */
 // matching: arg1 is a u8 read from its stack slot at each use; a K&R u8 parameter is
 // narrowed once into a spilled copy instead
-Game1EF500Trail *func_150FDDA0(Actor *obj, s32 arg1, s32 arg2) {
+Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
     Vec3f dir;
     Vec3f muzzle;
@@ -37,7 +37,7 @@ Game1EF500Trail *func_150FDDA0(Actor *obj, s32 arg1, s32 arg2) {
     random = func_150ADA20();
     kind = (level == 0x2B) ? 0x27 : 0x1A;
 
-    return func_151C229C(&launch, NULL, &launch, &target, 0, 0, 300.0f, 0.003333333414f, rand0 * 10.0f + 25.0f,
+    return weapon_spawnProjectile(&launch, NULL, &launch, &target, 0, 0, 300.0f, 0.003333333414f, rand0 * 10.0f + 25.0f,
                          rand1 * 201.0f + 601.0f, 50.0f, (random % 56U) + 200, obj, 1, 1, 0, 0xFF, 1, 1, 0, kind,
                          0.0f, 0xFF, -1, 0, ((u8 *)&arg1)[3], arg2);
 }
@@ -72,7 +72,7 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
         func_151D3E6C(obj, &muzzle, &launch, (level == 0x2B) ? 0x28 : 0x1E);
         func_151D3F14(&muzzle, arg1, arg2);
         func_150FE0B8(obj, &muzzle, arg1, arg2);
-        func_150FE288(obj);
+        weapon_rumbleLauncher(obj);
         if (muzzleOut != NULL) {
             *muzzleOut = muzzle;
         }
@@ -114,12 +114,12 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
 }
 
 /* Handler: writes the world position of obj's muzzle point to `out`. */
-void func_150FE248(Actor *obj, s16 arg1, Vec3f *out) {
+void weapon_getLauncherMuzzlePos(Actor *obj, s16 arg1, Vec3f *out) {
     func_151D3E04(obj, out, &D_800A1F70, D_80088B80, 0.0f);
 }
 
 /* Sends a func_151D8868 event (type 1, random duration 15-23) to the camera of obj. */
-void func_150FE288(Actor *obj) {
+void weapon_rumbleLauncher(Actor *obj) {
     RumbleParams event;
 
     if (obj->CameraPtr != NULL) {

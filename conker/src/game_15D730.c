@@ -74,7 +74,7 @@ void *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
 
 /* Update functions, indexed by ParticleDesc.updateFunc (0 kills the particle). */
 static s32 (*D_80089760[])() = {
-    func_151A483C, func_151A4900, func_150BB260, func_15159594,
+    trail_updateBurstParticle, func_151A4900, func_150BB260, func_15159594,
     func_151596BC, func_151DB97C, func_151AFEA4, func_150CBCE0,
     func_150CC8D4, func_150CAC28, func_151316DC, func_151025F4,
     func_1515A11C, func_15192308, func_15192358, func_1519257C,
@@ -487,7 +487,7 @@ void func_1513175C(DescParticleHead *p) {
 static void (*D_80089814[])() = {
     func_1513173C, func_15101288, func_1513173C, func_1513173C,
     func_1513173C, func_15101328, func_1513173C, func_1513173C,
-    func_1513173C, func_1513173C, func_1513173C, func_151D0F08,
+    func_1513173C, func_1513173C, func_1513173C, trail_destroyCarrierParticle,
 };
 
 /* Calls the particle's D_80089814 handler (set 0 without PARTICLE_HANDLERS). */
@@ -505,7 +505,7 @@ void func_1513177C(SpriteParticle *p) {
 static s32 (*D_80089844[])() = {
     func_1513175C, func_151012B0, func_1513175C, func_1513175C,
     func_1513175C, func_15101350, func_1513175C, func_1513175C,
-    func_1513175C, func_1513175C, func_1513175C, func_151D0F34,
+    func_1513175C, func_1513175C, func_1513175C, trail_freeCarrierParticle,
 };
 
 /* Calls the particle's D_80089844 handler (set 0 without PARTICLE_HANDLERS). */

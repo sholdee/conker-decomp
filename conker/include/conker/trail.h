@@ -39,7 +39,7 @@ typedef struct {
 } ScatterTrailPoint; // size = 0x24
 
 /* Per-trail settings and emitter state, stored behind trail->state; the first 0x40 bytes are the
- * TrailStateParams given to func_150B3F5C. */
+ * TrailStateParams given to trail_spawnScatterTrail. */
 typedef struct {
     /* 0x00 */ Vec3f baseVel;
     /* 0x0C */ f32 gravity;
@@ -75,7 +75,7 @@ typedef struct {
     /* 0x54 */ f32 burstAccum;
 } ScatterTrailState; // size = 0x58
 
-/* A trail that throws out ScatterPreset particle bursts (D_8009FBF0) from its emitter as it goes. */
+/* A trail that throws out ScatterPreset particle bursts (gScatterPresets) from its emitter as it goes. */
 typedef struct ScatterTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
@@ -84,7 +84,7 @@ typedef struct ScatterTrail {
     /* 0x98 */ ScatterTrailState *state;
 } ScatterTrail;
 
-/* Written by func_15147A80's caller into a glow at 0x170 (GlowParams.anim's place), read by func_150D4CC4. */
+/* Written by func_15147A80's caller into a glow at 0x170 (GlowParams.anim's place), read by trail_updateTrailGlow. */
 typedef struct {
     /* 0x0 */ s16 timer;
     /* 0x4 */ f32 targetScale;
@@ -93,7 +93,7 @@ typedef struct {
 /* A glow returned by func_151407D0. */
 typedef struct TrailGlow {
     /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ GlowShape shape;          /* shape.scale eases toward tail.targetScale (func_150D4CC4) */
+    /* 0x110 */ GlowShape shape;          /* shape.scale eases toward tail.targetScale (trail_updateTrailGlow) */
     /* 0x16C */ u8 pad16C[4];
     /* 0x170 */ TrailGlowData tail;
 } TrailGlow;
@@ -125,7 +125,7 @@ typedef struct CharacterTrail {
     /* 0x98 */ CharacterTrailState *state;
 } CharacterTrail;
 
-/* Sound slot passed to func_150D5124 by the sound system. */
+/* Sound slot passed to trail_characterTrailSoundCallback by the sound system. */
 typedef struct TrailSound {
     s16 sound;
     s16 x;
@@ -165,7 +165,7 @@ typedef struct {
     f32 pending;        /* fractional points still to emit */
     f32 texScroll;
     f32 speedScale;
-    f32 surfaceAccum;   /* hit effect accumulators, see func_150DA67C */
+    f32 surfaceAccum;   /* hit effect accumulators, see trail_spawnPissImpact */
     f32 impactAccum;
     f32 sparkAccum;
     u8 flags;
@@ -173,7 +173,7 @@ typedef struct {
     u8 pad4E[2];
 } PissTrailData;
 
-/* Trail object created by func_150D8B88 (game_90840.c calls it when the actor starts pissing, mv->pssd_is_pissing). */
+/* Trail object created by trail_spawnPissTrail (game_90840.c calls it when the actor starts pissing, mv->pssd_is_pissing). */
 typedef struct PissTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
@@ -339,7 +339,7 @@ typedef struct FallingTrail {
     /* 0x98 */ TrailBurstParams *data;
 } FallingTrail;
 
-/* Data block at 0x28 of the effect func_1515D088 spawns. */
+/* Data block at 0x28 of the effect trail_spawnLevelEffect spawns. */
 typedef struct {
     /* 0x0 */ TriggerZone *owner;
     /* 0x4 */ f32 unk4;
@@ -363,10 +363,10 @@ typedef struct {
 typedef struct {
     /* 0x0 */ EmitterOrigin *origin;
     /* 0x4 */ f32 accum;  /* particles owed; one is emitted per whole unit */
-    /* 0x8 */ u8 preset;  /* index into D_800A64A0 */
+    /* 0x8 */ u8 preset;  /* index into gTrailBurstPresets */
 } TrailBurstState;
 
-/* Timed effect of func_1515D130. */
+/* Timed effect of trail_updateBurstEmitter. */
 typedef struct TrailBurstEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ TrailBurstState emitter;
@@ -378,7 +378,7 @@ typedef struct {
     /* 0x48 */ f32 floorY;
 } SprayTrailParams;
 
-/* A MotionTrail (func_15147DA0) whose params carry SprayTrailParams. */
+/* A MotionTrail (trail_createMotionTrail) whose params carry SprayTrailParams. */
 typedef struct SprayTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
@@ -399,7 +399,7 @@ typedef struct SprayEmitter {
     /* 0x71 */ u8 pad71[7];
 } SprayEmitter; /* size 0x78 */
 
-/* Emitter settings, copied into the object from a template by func_1518BCD0. */
+/* Emitter settings, copied into the object from a template by trail_spawnEmitter. */
 typedef struct TrailEmitterParams {
     /* 0x00 */ f32 speedMin;
     /* 0x04 */ f32 speedRange;
@@ -480,7 +480,7 @@ typedef struct MatrixTrail {
 typedef struct TrailTaskData {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
-    /* 0x08 */ s32 unk8;  /* spec index for func_1519E464, a frame timer for func_1519E754 */
+    /* 0x08 */ s32 unk8;  /* spec index for trail_updateStartTask, a frame timer for trail_updateTrailPairTask */
 } TrailTaskData;
 
 typedef struct TrailTask {
@@ -491,7 +491,7 @@ typedef struct TrailTask {
 /* Event payloads the handlers below get (see func_15147D64). */
 typedef union TrailEvent {
     ActorRef object;    /* events 0 and 7: trails of this owner stop */
-    u8 specIndex;       /* event 6: trails of this kind stop (func_1519CF70) */
+    u8 specIndex;       /* event 6: trails of this kind stop (trail_stopMatrixTrailsOfKind) */
     ActorSwapMsg swap;  /* event 0x2D: owners actorA and actorB trade places */
 } TrailEvent;
 
@@ -637,7 +637,7 @@ typedef struct BoneTrailEffect {
     /* 0x98 */ BoneTrailState *state;
 } BoneTrailEffect;
 
-/* Emits particles from a point on one of the owner's bones (task data of func_151A499C). */
+/* Emits particles from a point on one of the owner's bones (task data of trail_startBoneEmitter). */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
@@ -666,7 +666,7 @@ typedef struct TrailTargetRef {
     /* 0x04 */ u8 targetUnk3B;
 } TrailTargetRef;
 
-/* The object func_151CEA20 integrates: a 1-D position under constant acceleration, and a fade. */
+/* The object trail_integrateScalarMotion integrates: a 1-D position under constant acceleration, and a fade. */
 typedef struct TrailScalarMotion {
     /* 0x00 */ u8 pad0[0x38];
     /* 0x38 */ f32 position;
@@ -701,7 +701,7 @@ typedef struct RibbonActor {
     /* 0x98 */ RibbonInfo *info;
 } RibbonActor;
 
-/* Data of the camera-facing strip effect spawned by func_151D0058 and drawn by func_151D014C. */
+/* Data of the camera-facing strip effect spawned by trail_spawnStripEffect and drawn by trail_drawStripEffect. */
 typedef struct {
     /* 0x0 */ Actor *owner;
     /* 0x4 */ u8 ownerId;   /* owner->unique_id at spawn; a mismatch means the owner died */
@@ -726,13 +726,13 @@ typedef struct OwnedEffect {
 /* Partial view of the particle func_15130280 creates. */
 typedef struct CarrierParticle {
     /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ struct WaveTrail *effect; /* wave trail that travels with the particle (func_151CEAAC) */
+    /* 0xA8 */ struct WaveTrail *effect; /* wave trail that travels with the particle (trail_spawnWaveTrail) */
 } CarrierParticle;
 
 /* Emitter data at 0x28: where the trail is anchored this frame. */
 typedef struct {
     /* 0x00 */ struct AnchoredTrail *trail; /* attached trail, or NULL */
-    /* 0x04 */ u8 anchorType;       /* index into D_8008FCA0 (update) and D_8008FCA4 (message handler) */
+    /* 0x04 */ u8 anchorType;       /* index into gAnchorUpdateProcs (update) and gAnchorMessageProcs (message handler) */
     /* 0x05 */ u8 flags;            /* bit 0: pos is valid this frame */
     /* 0x06 */ u8 pad6[2];
     /* 0x08 */ Vec3f pos;
@@ -743,8 +743,8 @@ typedef struct {
 typedef struct TrailBoneLink {
     /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;  /* actor->unique_id when attached; a mismatch means the slot was reused */
-    /* 0x05 */ u8 bone;     /* index into D_800AB280 (offset) and D_800AB2D4 (bone matrix) */
-    /* 0x06 */ s8 condition; /* index into D_8008FCA8, or -1 for none */
+    /* 0x05 */ u8 bone;     /* index into gTrailBoneAnchors (offset) and gTrailBoneMatrices (bone matrix) */
+    /* 0x06 */ s8 condition; /* index into gAnchorConditionProcs, or -1 for none */
 } TrailBoneLink;
 
 typedef struct AnchoredTrailEmitter {
@@ -780,195 +780,195 @@ typedef struct AnchoredTrail {
 } AnchoredTrail;
 
 /* game_DC360.c */
-void func_150AEEB0(Actor *obj, u8 owner);
-s32 func_150AF1C0(MotionTrail *trail);
+void trail_sprayFromRing(Actor *obj, u8 owner);
+s32 trail_fadeMotionTrail(MotionTrail *trail);
 
 /* game_E1280.c */
 void func_150B3DD0(void);
-void func_150B3E74(ScatterTrail *trail);
-void func_150B3EE8(ScatterTrail *trail);
-ScatterTrail *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity);
-s32 func_150B40E8(ScatterTrail *trail);
-s32 func_150B4294(ScatterTrail *trail);
-Gfx *func_150B4710(ScatterTrail *trail, Gfx *gfx, s16 camIdx);
-void func_150B5060(ScatterTrail *trail);
-void func_150B5088(ScatterTrail *trail);
-void func_150B538C(ScatterTrail *trail, s32 arg1, u8 msg);
+void trail_destroyScatterTrail(ScatterTrail *trail);
+void trail_freeScatterTrail(ScatterTrail *trail);
+ScatterTrail *trail_spawnScatterTrail(TrailStateParams *params, Vec3f *pos, s16 capacity);
+s32 trail_ageScatterTrail(ScatterTrail *trail);
+s32 trail_emitScatterTrail(ScatterTrail *trail);
+Gfx *trail_drawScatterTrail(ScatterTrail *trail, Gfx *gfx, s16 camIdx);
+void trail_stopScatterTrail(ScatterTrail *trail);
+void trail_burstScatterTrail(ScatterTrail *trail);
+void trail_onScatterTrailMessage(ScatterTrail *trail, s32 arg1, u8 msg);
 
 /* game_EEB10.c */
-void func_150C1660(f32 x, f32 y, f32 z, u8 arg3);
-s32 func_150C16C0(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 angle, s32 baseAngle, f32 radius, s32 arg11, f32 arg12, s32 arg13, u8 arg14);
-s32 func_150C1978(MotionTrail *trail);
+void trail_spawnKind2Ring(f32 x, f32 y, f32 z, u8 arg3);
+s32 trail_spawnKind2Trail(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 angle, s32 baseAngle, f32 radius, s32 arg11, f32 arg12, s32 arg13, u8 arg14);
+s32 trail_fadeKind2Trail(MotionTrail *trail);
 
 /* game_100810.c */
-void func_150D3360(Actor *owner, u8 arg1, s32 arg2);
-s32 func_150D3A68(CharacterTrail *actor);
-s32 func_150D3FD4(CharacterTrail *actor);
-Gfx *func_150D4300(CharacterTrail *actor, Gfx *gfx, s16 view);
-void func_150D49C0(CharacterTrail *actor, ActorMsg *msg, u8 id);
-s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment);
-void func_150D4BD4(CharacterTrail *actor);
-void func_150D4C00(CharacterTrail *actor);
-void func_150D4C2C(CharacterTrail *actor);
-s32 func_150D4CC4(TrailGlow *particle);
-void func_150D4D58(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg4);
-s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut, s32 arg5, u16 *playing);
+void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2);
+s32 trail_updateCharacterTrail(CharacterTrail *actor);
+s32 trail_trimCharacterTrail(CharacterTrail *actor);
+Gfx *trail_drawCharacterTrail(CharacterTrail *actor, Gfx *gfx, s16 view);
+void trail_onCharacterTrailMessage(CharacterTrail *actor, ActorMsg *msg, u8 id);
+s32 trail_getCharacterTrailEnds(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment);
+void trail_destroyCharacterTrail(CharacterTrail *actor);
+void trail_freeCharacterTrail(CharacterTrail *actor);
+void trail_stopCharacterTrailFx(CharacterTrail *actor);
+s32 trail_updateTrailGlow(TrailGlow *particle);
+void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg4);
+s32 trail_characterTrailSoundCallback(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut, s32 arg5, u16 *playing);
 
 /* game_105FC0.c */
-void func_150D8B10(Actor *actor, Vec3f *out);
-void func_150D8B3C(Actor *actor, Vec3f *out);
-void func_150D8B88(Actor *actor);
-void func_150D8D84(Vec3f *pos, Vec3f *vel, f32 dt);
+void trail_getPissAnchor(Actor *actor, Vec3f *out);
+void trail_getPissLaunchDir(Actor *actor, Vec3f *out);
+void trail_spawnPissTrail(Actor *actor);
+void trail_stepBallistic(Vec3f *pos, Vec3f *vel, f32 dt);
 void func_150D8E1C(PissTrail *trail);
-s32 func_150D8E4C(PissTrail *trail);
-s32 func_150D8FAC(PissTrail *trail);
-s32 func_150D942C(PissTrail *trail);
-Gfx *func_150D9C7C(PissTrail *trail, Gfx *gfx, s16 view);
-void func_150DA484(PissTrail *trail);
-void func_150DA4B4(PissTrail *trail);
-void func_150DA4E0(PissTrail *trail);
-void func_150DA50C(PissTrail *trail, TrailMessage *msg, u8 type);
-void func_150DA5EC(Actor *actor, f32 speedScale);
+s32 trail_movePissPoints(PissTrail *trail);
+s32 trail_emitPissPoints(PissTrail *trail);
+s32 trail_tracePissTrail(PissTrail *trail);
+Gfx *trail_drawPissTrail(PissTrail *trail, Gfx *gfx, s16 view);
+void trail_stopPissSound(PissTrail *trail);
+void trail_destroyPissTrail(PissTrail *trail);
+void trail_freePissTrail(PissTrail *trail);
+void trail_onPissTrailMessage(PissTrail *trail, TrailMessage *msg, u8 type);
+void trail_setPissSpeedScale(Actor *actor, f32 speedScale);
 s32 func_150DA628(SpriteParticle *particle, s32 arg1);
-void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir);
+void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir);
 
 /* game_175250.c */
 /* Returns the new MotionTrail; callers whose params extend TrailParams (extraSize) keep it in their own view. */
-void *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render, CollisionHit *hit, u8 arg13, s32 arg14);
-s8 func_15147EB8(MotionTrail *trail);
-Gfx *func_1514803C(MotionTrail *trail, Gfx *gfx, s16 arg2);
-s32 func_151488C4(MotionTrail *trail);
-s32 func_15148AF4(MotionTrail *trail);
-s32 func_15148BA4(MotionTrail *trail);
-s32 func_15148DE0(MotionTrail *trail);
+void *trail_createMotionTrail(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render, CollisionHit *hit, u8 arg13, s32 arg14);
+s8 trail_updateMotionTrail(MotionTrail *trail);
+Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2);
+s32 trail_moveAndAppendPoint(MotionTrail *trail);
+s32 trail_movePoints(MotionTrail *trail);
+s32 trail_movePointsGroundTest(MotionTrail *trail);
+s32 trail_dropNewestPoint(MotionTrail *trail);
 s32 func_15148EF8(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3);
-void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch, f32 speed, s16 arg8, f32 halfWidth, f32 gravity, u8 arg11);
-s32 func_151490C8(MotionTrail *trail);
-void func_15149104(EffectObj *obj);
+void trail_launchMotionTrail(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch, f32 speed, s16 arg8, f32 halfWidth, f32 gravity, u8 arg11);
+s32 trail_fadeIn(MotionTrail *trail);
+void trail_destroyEffectObj(EffectObj *obj);
 
 /* game_1897A0.c */
-FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, CollisionHit *hit, u8 arg4, s32 arg5);
-s32 func_1515C388(FallingTrail *trail);
-s32 func_1515C534(FallingTrail *trail);
-Gfx *func_1515C6F4(FallingTrail *trail, Gfx *gfx, s16 view);
-s32 func_1515CF9C(FallingTrail *trail, TrailBurstParams *data);
-s32 func_1515D030(FallingTrail *trail, TrailBurstParams *data);
-LevelEffect *func_1515D088(TriggerZone *obj);
-void func_1515D130(TrailBurstEmitter *owner);
+FallingTrail *trail_spawnFallingTrail(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, CollisionHit *hit, u8 arg4, s32 arg5);
+s32 trail_moveFallingTrail(FallingTrail *trail);
+s32 trail_fadeFallingTrail(FallingTrail *trail);
+Gfx *trail_drawFallingTrail(FallingTrail *trail, Gfx *gfx, s16 view);
+s32 trail_growFallingTrail(FallingTrail *trail, TrailBurstParams *data);
+s32 trail_shrinkFallingTrail(FallingTrail *trail, TrailBurstParams *data);
+LevelEffect *trail_spawnLevelEffect(TriggerZone *obj);
+void trail_updateBurstEmitter(TrailBurstEmitter *owner);
 
 /* game_1B5CC0.c */
-extern MtxS16 *D_800DF7C0;       /* bone matrices drawn by actor_drawModel mode 4 */
+extern MtxS16 *gBoneTrailMtxs;       /* bone matrices drawn by actor_drawModel mode 4 */
 extern u8 D_800DF7C4;            /* alpha scale for actor_drawModel mode 4 */
-extern BoneTrail *D_800DF7C8[2]; /* [0]: Actor owners, [1]: world object owners */
-void func_15188810(Actor *object, s32 duration, s32 maxDist);
-void func_1518894C(WorldObject *owner, s32 duration, s32 maxDist);
-void func_15188A58(BoneTrail *trail, BoneTrail **list);
-void func_15188A9C(Actor *object);
-void func_15188AD0(Actor *object);
-void func_15188B74(s32 listIndex);
-Gfx *func_15188D00(Gfx *gfx, s32 listIndex, s16 player);
-void func_15188E48(BoneTrail *trail);
-void func_15188F84(BoneTrail *arg);
-void func_15189118(s32 listIndex);
-void func_151895A4(BoneTrail *trail);
-void func_151895CC(BoneTrail *trail);
-Gfx *func_151895F4(Gfx *gfx, BoneTrail *trail, s16 player);
-Gfx *func_151897A4(Gfx *gfx, BoneTrail *trail, s16 player);
+extern BoneTrail *gBoneTrailLists[2]; /* [0]: Actor owners, [1]: world object owners */
+void trail_startActorAfterimage(Actor *object, s32 duration, s32 maxDist);
+void trail_startObjectAfterimage(WorldObject *owner, s32 duration, s32 maxDist);
+void trail_appendBoneTrail(BoneTrail *trail, BoneTrail **list);
+void trail_fadeActorAfterimage(Actor *object);
+void trail_removeActorAfterimages(Actor *object);
+void trail_updateBoneTrails(s32 listIndex);
+Gfx *trail_drawBoneTrails(Gfx *gfx, s32 listIndex, s16 player);
+void trail_shiftActorHistory(BoneTrail *trail);
+void trail_shiftObjectHistory(BoneTrail *arg);
+void trail_limitHistorySpacing(s32 listIndex);
+void trail_freeActorAfterimage(BoneTrail *trail);
+void trail_freeObjectAfterimage(BoneTrail *trail);
+Gfx *trail_drawActorAfterimage(Gfx *gfx, BoneTrail *trail, s16 player);
+Gfx *trail_drawObjectAfterimage(Gfx *gfx, BoneTrail *trail, s16 player);
 void func_151898C0(Actor *object, s32 value);
 
 /* game_1B6DB0.c */
-void func_15189900(SprayDesc *desc, u8 arg1);
-void func_15189A00(SprayEmitter *emitter);
-s32 func_15189EBC(SprayTrail *trail);
+void trail_createSprayEmitter(SprayDesc *desc, u8 arg1);
+void trail_updateSprayEmitter(SprayEmitter *emitter);
+s32 trail_landSprayTrail(SprayTrail *trail);
 s32 func_15189FD0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* game_1B8F40.c */
-TrailEmitter *func_1518BA90(Actor *actor, u8 owner, s32 list);
-void func_1518BBF4(Actor *actor);
-TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list);
-void func_1518BD60(TrailEmitter *emitter);
-s32 func_1518C0B8(MotionTrail *trail);
-s32 func_1518C540(MotionTrail *trail);
-s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY);
-s32 func_1518C69C(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY, CollisionTri *surface);
-void func_1518C850(TrailEmitter *emitter, s32 data, u8 type);
+TrailEmitter *trail_getActorEmitter(Actor *actor, u8 owner, s32 list);
+void trail_destroyAllEmitters(Actor *actor);
+TrailEmitter *trail_spawnEmitter(TrailEmitterParams *params, u8 owner, s32 list);
+void trail_updateEmitter(TrailEmitter *emitter);
+s32 trail_updateEmittedTrail(MotionTrail *trail);
+s32 trail_fadeEmittedTrail(MotionTrail *trail);
+s32 trail_spawnHitPuff(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY);
+s32 trail_spawnHitPuffAndEffect(MotionTrail *trail, f32 x, f32 y, f32 z, f32 hitY, CollisionTri *surface);
+void trail_onEmitterMessage(TrailEmitter *emitter, s32 data, u8 type);
 
 /* game_1CA420.c */
-extern TrailTask *D_800E0920;
-void func_1519CF70(u8 specIndex);
-void func_1519CFA0(MatrixTrail *trail);
-void func_1519CFD0(MatrixTrail *trail);
-void func_1519D000(MatrixTrail *trail);
-MatrixTrail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5);
-s32 func_1519D240(MatrixTrail *trail);
-s32 func_1519D454(MatrixTrail *trail);
-Gfx *func_1519D9F4(MatrixTrail *trail, Gfx *gfx, s16 view);
-void func_1519E1F4(MatrixTrail *trail, TrailEvent *event, u8 eventId);
-s32 func_1519E304(MatrixTrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t);
-void func_1519E3BC(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
-void func_1519E464(TrailTask *task);
-void func_1519E570(TrailTask *task, TrailEvent *event, u8 eventId);
+extern TrailTask *gPendingTrailPairTask;
+void trail_stopMatrixTrailsOfKind(u8 specIndex);
+void trail_stopMatrixTrail(MatrixTrail *trail);
+void trail_destroyMatrixTrail(MatrixTrail *trail);
+void trail_freeMatrixTrail(MatrixTrail *trail);
+MatrixTrail *trail_startMatrixTrail(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5);
+s32 trail_ageMatrixTrail(MatrixTrail *trail);
+s32 trail_followMatrixTrail(MatrixTrail *trail);
+Gfx *trail_drawMatrixTrail(MatrixTrail *trail, Gfx *gfx, s16 view);
+void trail_onMatrixTrailEvent(MatrixTrail *trail, TrailEvent *event, u8 eventId);
+s32 trail_getAttachPoint(MatrixTrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t);
+void trail_restartTrailPair(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
+void trail_updateStartTask(TrailTask *task);
+void trail_onTaskEvent(TrailTask *task, TrailEvent *event, u8 eventId);
 void func_1519E61C(EffectHeader *task, TrailEvent *event, u8 eventId);
-void func_1519E65C(s32 unused);
-void func_1519E688(void);
-void func_1519E6BC(Actor *owner);
-void func_1519E754(TrailTask *task);
-void func_1519E818(TrailTask *task, TrailEvent *event, u8 eventId);
-void func_1519E8CC(TrailTask *task);
-void func_1519E8F8(TrailTask *task);
-void func_1519E924(TimedEffect *task);
-void func_1519E948(TimedEffect *task);
+void trail_stopTrailPair(s32 unused);
+void trail_cancelTrailPair(void);
+void trail_queueTrailPair(Actor *owner);
+void trail_updateTrailPairTask(TrailTask *task);
+void trail_onTrailPairTaskEvent(TrailTask *task, TrailEvent *event, u8 eventId);
+void trail_destroyTask(TrailTask *task);
+void trail_freeTask(TrailTask *task);
+void trail_destroyTrailPairTask(TimedEffect *task);
+void trail_freeTrailPairTask(TimedEffect *task);
 
 /* game_1CC440.c */
-void func_1519F108(SurfaceTrail *trail);
-void func_1519F168(SurfaceTrail *trail);
-void func_1519F3B8(SurfaceTrailOwner *owner);
+void trail_destroySurfaceTrail(SurfaceTrail *trail);
+void trail_freeSurfaceTrail(SurfaceTrail *trail);
+void trail_startSurfaceTrails(SurfaceTrailOwner *owner);
 /* (SurfaceTrailOwner *owner); declared without a prototype: func_151AA1D0 and func_151AA1F0 pass no argument
    (the owner is still in a0) */
 void func_1519F400();
-void func_1519F48C(SurfaceTrail *trail);
-s32 func_1519F4F0(SurfaceTrail *trail);
-s32 func_1519F7F0(SurfaceTrail *trail);
-Gfx *func_1519FE6C(SurfaceTrail *trail, Gfx *gfx, s16 arg2);
-void func_151A084C(TrailSpawner *spawner);
-void func_151A0928(TrailSpawner *spawner);
-void func_151A0950(SurfaceTrail *trail, ActorRef *event, u8 type);
-void func_151A09B4(TrailSpawner *spawner, ActorRef *event, u8 type);
+void trail_detachSurfaceTrail(SurfaceTrail *trail);
+s32 trail_ageSurfaceTrail(SurfaceTrail *trail);
+s32 trail_followSurfaceTrail(SurfaceTrail *trail);
+Gfx *trail_drawSurfaceTrail(SurfaceTrail *trail, Gfx *gfx, s16 arg2);
+void trail_updateSurfaceSpawner(TrailSpawner *spawner);
+void trail_unlinkSurfaceSpawner(TrailSpawner *spawner);
+void trail_onSurfaceTrailEvent(SurfaceTrail *trail, ActorRef *event, u8 type);
+void trail_onSurfaceSpawnerEvent(TrailSpawner *spawner, ActorRef *event, u8 type);
 
 /* game_1D0840.c */
-void func_151A3390(Actor *owner, u8 arg1);
-BoneTrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1);
-s32 func_151A361C(BoneTrailEffect *effect);
-s32 func_151A37C0(BoneTrailEffect *effect);
-Gfx *func_151A3BE4(BoneTrailEffect *effect, Gfx *gfx, s16 view);
-void func_151A4590(Actor *owner, u8 arg1);
-void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *parent);
-s32 func_151A483C(SpriteParticle *particle, u8 arg1);
+void trail_spawnActorBoneTrail(Actor *owner, u8 arg1);
+BoneTrailEffect *trail_createBoneTrailEffect(BoneTrailParams *params, u8 arg1);
+s32 trail_ageBoneTrail(BoneTrailEffect *effect);
+s32 trail_followBoneTrail(BoneTrailEffect *effect);
+Gfx *trail_drawBoneTrail(BoneTrailEffect *effect, Gfx *gfx, s16 view);
+void trail_startBloodDrip(Actor *owner, u8 arg1);
+void trail_emitBurst(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *parent);
+s32 trail_updateBurstParticle(SpriteParticle *particle, u8 arg1);
 s32 func_151A4900(SpriteParticle *particle, u8 arg1);
-void func_151A499C(Actor *owner, u8 arg1);
-void func_151A4A38(BoneEmitterTask *task);
-void func_151A4CE0(BoneTrailEffect *effect, ActorMsg *msg, u8 type);
-void func_151A4D88(BoneEmitterTask *task, ActorMsg *msg, u8 type);
-s32 func_151A4E34(BoneTrailParams *params, Vec3f *out);
-void func_151A4E9C(BoneTrailEffect *effect);
-void func_151A4ECC(TrailRetryTask *task);
-void func_151A4F7C(TrailRetryTask *task, ActorMsg *msg, u8 type);
+void trail_startBoneEmitter(Actor *owner, u8 arg1);
+void trail_updateBoneEmitter(BoneEmitterTask *task);
+void trail_onBoneTrailMessage(BoneTrailEffect *effect, ActorMsg *msg, u8 type);
+void trail_onBoneEmitterMessage(BoneEmitterTask *task, ActorMsg *msg, u8 type);
+s32 trail_getBoneAttachPoint(BoneTrailParams *params, Vec3f *out);
+void trail_detachBoneTrail(BoneTrailEffect *effect);
+void trail_updateRetryTask(TrailRetryTask *task);
+void trail_onRetryTaskMessage(TrailRetryTask *task, ActorMsg *msg, u8 type);
 
 /* game_1E37D0.c */
-void func_151B6320(Actor *target, u8 arg1, s32 arg2);
-s32 func_151B6420(EffectObj *obj);
-s32 func_151B65D4(EffectObj *obj);
-Gfx *func_151B6928(EffectObj *obj, Gfx *gfx, s16 view);
-void func_151B70B4(EffectObj *obj, void *msg, u8 msgType);
-void func_151B7144(Actor *target, u8 arg1, s32 arg2);
-EffectObj *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg4);
-s32 func_151B7678(EffectObj *obj, Vec3f *pos);
-s32 func_151B76CC(EffectObj *obj, Vec3f *pos);
-s32 func_151B77F4(EffectObj *obj);
-s32 func_151B7998(EffectObj *obj);
-Gfx *func_151B7C38(EffectObj *obj, Gfx *gfx, s16 view);
-void func_151B82CC(EffectObj *obj, void *msg, u8 msgType);
-void func_151B8318(EffectObj *obj, void *msg, u8 msgType);
+void trail_spawnFollowTrail(Actor *target, u8 arg1, s32 arg2);
+s32 trail_ageFollowTrail(EffectObj *obj);
+s32 trail_followTarget(EffectObj *obj);
+Gfx *trail_drawFollowTrail(EffectObj *obj, Gfx *gfx, s16 view);
+void trail_onFollowTrailMessage(EffectObj *obj, void *msg, u8 msgType);
+void trail_spawnParticleAtTarget(Actor *target, u8 arg1, s32 arg2);
+EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg4);
+s32 trail_getRibbonActorPos(EffectObj *obj, Vec3f *pos);
+s32 trail_getRibbonPointBehind(EffectObj *obj, Vec3f *pos);
+s32 trail_moveRibbon(EffectObj *obj);
+s32 trail_shapeRibbon(EffectObj *obj);
+Gfx *trail_drawRibbon(EffectObj *obj, Gfx *gfx, s16 view);
+void trail_onRibbonMessage(EffectObj *obj, void *msg, u8 msgType);
+void trail_onActorRibbonMessage(EffectObj *obj, void *msg, u8 msgType);
 
 /* game_1FA770.c */
 /* One particle of a stream (0x1C bytes); the emitter keeps them in a ring. */
@@ -1026,21 +1026,21 @@ typedef struct {
     StreamSpawner spawner;
 } StreamTask;
 
-StreamTask *func_151CD2C0(TriggerZone *source, u8 arg1, s32 arg2);
-void func_151CD35C(s32 id);
-void func_151CD394(s32 id);
-void func_151CD3CC(StreamTask *task, s32 *id, u8 event);
+StreamTask *trail_createStreamTask(TriggerZone *source, u8 arg1, s32 arg2);
+void trail_startStream(s32 id);
+void trail_stopStream(s32 id);
+void trail_onStreamTaskEvent(StreamTask *task, s32 *id, u8 event);
 /* Unprototyped: func_151CD4C0 is a K&R definition (callers pass its u8 arguments unnarrowed). */
 LevelStream *func_151CD4C0();
-s32 func_151CD674(LevelStream *emitter);
-s32 func_151CD7BC(LevelStream *emitter);
-s32 func_151CDB94(LevelStream *emitter);
-Gfx *func_151CDE20(LevelStream *emitter, Gfx *gfx, s16 view);
-void func_151CE47C(LevelStream *emitter);
-void func_151CE49C(LevelStream *emitter);
-void func_151CE4DC(LevelStream *emitter);
-void func_151CE51C(Actor *actor, TriggerZone *source);
-LevelStream *func_151CE634(s32 id);
+s32 trail_moveStreamParticles(LevelStream *emitter);
+s32 trail_spawnStreamParticles(LevelStream *emitter);
+s32 trail_fadeStreamEnds(LevelStream *emitter);
+Gfx *trail_drawStream(LevelStream *emitter, Gfx *gfx, s16 view);
+void trail_stopStreamEmitter(LevelStream *emitter);
+void trail_destroyStreamEmitter(LevelStream *emitter);
+void trail_freeStreamEmitter(LevelStream *emitter);
+void trail_testStreamContact(Actor *actor, TriggerZone *source);
+LevelStream *trail_findStream(s32 id);
 
 /* Data of the random-point emitter (a TimedEffect's data). */
 typedef struct Game1FBB80Effect {
@@ -1056,69 +1056,69 @@ typedef struct Game1FBB80Object {
     /* 0x28 */ Game1FBB80Effect effect;
 } Game1FBB80Object;
 
-void func_151CE6D0(Game1FBB80Object *object);
-s32 func_151CEA20(TrailScalarMotion *motion);
-WaveTrail *func_151CEAAC(Actor *owner, DescParticleHead *anchor, u8 arg2, u8 arg3, s32 arg4);
-s32 func_151CEC10(Vec3f *out, Actor *owner, DescParticleHead *anchor);
-s32 func_151CEC54(WaveTrail *trail);
-s32 func_151CF120(WaveTrail *actor);
-Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx);
-void func_151CF844(TrackerTrail *actor, s32 arg1, u8 arg2);
-void func_151CF898(Actor *obj, f32 probeY, f32 arg2);
-void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2);
-void func_151D0024(Actor *obj);
-void func_151D0058(Actor *obj, u8 variant, u8 arg2, s32 arg3);
-void func_151D0128(StripEffect *effect);
-Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx);
-void func_151D08F0(OwnedEffect *effect, void *msg, u8 type);
-void func_151D09A8(Actor *obj, u8 arg1, s32 arg2);
-void func_151D0ED8(CarrierParticle *particle);
-void func_151D0F08(CarrierParticle *particle);
-void func_151D0F34(CarrierParticle *particle);
-void func_151D0F60(Actor *obj, u8 pointFn, u8 arg2, s32 arg3);
-s32 func_151D1074(Actor *obj, Vec3f *out);
-s32 func_151D10A4(Actor *obj, Vec3f *out);
-s32 func_151D10C4(Actor *obj, Vec3f *out);
-s32 func_151D10E4(Actor *obj, Vec3f *out, u8 which);
-void func_151D1138(TrackerEffect *effect);
-void func_151D1328(TrackerEffect *effect, s32 arg1, u8 arg2);
-void func_151D1368(TrackerEffect *effect);
-void func_151D1388(TrackerEffect *effect);
-void func_151D13B4(TrackerEffect *effect);
-void func_151D13E0(TrackerEffect *effect);
-void func_151D1448(TrackerEffect *effect);
+void trail_updateRandomPointEmitter(Game1FBB80Object *object);
+s32 trail_integrateScalarMotion(TrailScalarMotion *motion);
+WaveTrail *trail_spawnWaveTrail(Actor *owner, DescParticleHead *anchor, u8 arg2, u8 arg3, s32 arg4);
+s32 trail_getWaveTrailAnchor(Vec3f *out, Actor *owner, DescParticleHead *anchor);
+s32 trail_followWaveTrail(WaveTrail *trail);
+s32 trail_shapeWaveTrail(WaveTrail *actor);
+Gfx *trail_drawWaveRibbon(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx);
+void trail_onFollowerMessage(TrackerTrail *actor, s32 arg1, u8 arg2);
+void trail_spawnNearCamera(Actor *obj, f32 probeY, f32 arg2);
+void trail_breakApart(Actor *obj, u8 arg1, s32 arg2);
+void trail_notifyFollowersGone(Actor *obj);
+void trail_spawnStripEffect(Actor *obj, u8 variant, u8 arg2, s32 arg3);
+void trail_updateStripEffect(StripEffect *effect);
+Gfx *trail_drawStripEffect(Gfx *gfx, StripEffect *effect, s16 cameraIdx);
+void trail_onOwnedEffectMessage(OwnedEffect *effect, void *msg, u8 type);
+void trail_emitLineBursts(Actor *obj, u8 arg1, s32 arg2);
+void trail_freeCarriedEffect(CarrierParticle *particle);
+void trail_destroyCarrierParticle(CarrierParticle *particle);
+void trail_freeCarrierParticle(CarrierParticle *particle);
+void trail_spawnTrackerEffect(Actor *obj, u8 pointFn, u8 arg2, s32 arg3);
+s32 trail_getPointAboveFloor(Actor *obj, Vec3f *out);
+s32 trail_getModelPoint0(Actor *obj, Vec3f *out);
+s32 trail_getModelPoint1(Actor *obj, Vec3f *out);
+s32 trail_getModelPoint(Actor *obj, Vec3f *out, u8 which);
+void trail_updateTrackerEffect(TrackerEffect *effect);
+void trail_onTrackerMessage(TrackerEffect *effect, s32 arg1, u8 arg2);
+void trail_releaseTracker(TrackerEffect *effect);
+void trail_destroyTracker(TrackerEffect *effect);
+void trail_freeTracker(TrackerEffect *effect);
+void trail_dropTrackerTrail(TrackerEffect *effect);
+void trail_spawnTrackerTrail(TrackerEffect *effect);
 
 /* game_1FEA80.c */
-s32 func_151D15D0(TrackerTrail *actor);
-s32 func_151D197C(TrackerTrail *actor);
-Gfx *func_151D1C98(TrackerTrail *actor, Gfx *gfx, s16 arg2);
-void func_151D223C(TrackerTrail *actor);
-void func_151D2258(TrackerTrail *actor);
-void func_151D2284(TrackerTrail *actor);
+s32 trail_sampleTrackerTrail(TrackerTrail *actor);
+s32 trail_shapeTrackerTrail(TrackerTrail *actor);
+Gfx *trail_drawTrackerTrail(TrackerTrail *actor, Gfx *gfx, s16 arg2);
+void trail_detachTrackerTrail(TrackerTrail *actor);
+void trail_destroyTrackerTrail(TrackerTrail *actor);
+void trail_freeTrackerTrail(TrackerTrail *actor);
 
 /* game_204660.c */
-TimedEffect *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extraSize, u8 arg5, s32 arg6);
-void func_151D7264(AnchoredTrailEmitter *emitter);
-void func_151D73A8(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType);
-void func_151D7404(AnchoredTrailEmitter *emitter);
-void func_151D7424(AnchoredTrailEmitter *emitter);
-void func_151D7450(AnchoredTrailEmitter *emitter);
-void func_151D747C(Actor *actor);
-void func_151D74B0(Actor *actor, u8 bone, s8 condition, u8 arg3, s32 arg4);
-void func_151D7538(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType);
-s32 func_151D75C4(AnchoredTrailEmitter *emitter);
+TimedEffect *trail_createAnchoredEmitter(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extraSize, u8 arg5, s32 arg6);
+void trail_updateAnchoredEmitter(AnchoredTrailEmitter *emitter);
+void trail_onAnchoredEmitterMessage(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType);
+void trail_releaseAnchoredEmitter(AnchoredTrailEmitter *emitter);
+void trail_destroyAnchoredEmitter(AnchoredTrailEmitter *emitter);
+void trail_freeAnchoredEmitter(AnchoredTrailEmitter *emitter);
+void trail_broadcastActorGone(Actor *actor);
+void trail_attachToBone(Actor *actor, u8 bone, s8 condition, u8 arg3, s32 arg4);
+void trail_onBoneAnchorMessage(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType);
+s32 trail_updateBoneAnchor(AnchoredTrailEmitter *emitter);
 s32 func_151D7724(AnchoredTrailEmitter *emitter);
 s32 func_151D7770(AnchoredTrailEmitter *emitter);
-s32 func_151D779C(AnchoredTrailEmitter *emitter);
-void func_151D77C8(AnchoredTrailEmitter *emitter);
-void func_151D7830(AnchoredTrailEmitter *emitter);
-s32 func_151D792C(AnchoredTrail *trail);
-s32 func_151D7A38(AnchoredTrail *trail);
-s32 func_151D7CD0(AnchoredTrail *trail);
-Gfx *func_151D80C4(AnchoredTrail *trail, Gfx *gfx, s16 view);
-void func_151D8718(Vec3f *pos, f32 *velY, f32 dt);
-void func_151D8764(AnchoredTrail *trail);
-void func_151D8780(AnchoredTrail *trail);
-void func_151D87AC(AnchoredTrail *trail);
+s32 trail_checkAnchorInWater(AnchoredTrailEmitter *emitter);
+void trail_detachAnchoredTrail(AnchoredTrailEmitter *emitter);
+void trail_spawnAnchoredTrail(AnchoredTrailEmitter *emitter);
+s32 trail_fallAnchoredTrail(AnchoredTrail *trail);
+s32 trail_followAnchoredTrail(AnchoredTrail *trail);
+s32 trail_shapeAnchoredTrail(AnchoredTrail *trail);
+Gfx *trail_drawAnchoredTrail(AnchoredTrail *trail, Gfx *gfx, s16 view);
+void trail_fallPoint(Vec3f *pos, f32 *velY, f32 dt);
+void trail_detachFromEmitter(AnchoredTrail *trail);
+void trail_destroyAnchoredTrail(AnchoredTrail *trail);
+void trail_freeAnchoredTrail(AnchoredTrail *trail);
 
 #endif

@@ -349,7 +349,7 @@ void func_15171BF4(Actor *obj, u8 owner) {
     switch (obj->character_type) {
     case 0x13:
     case 0x23:
-        func_150AEEB0(obj, owner);
+        trail_sprayFromRing(obj, owner);
         sound_playActorSound2(0x69, obj, 32000, 200, 2000);
         break;
     case 0x1E:

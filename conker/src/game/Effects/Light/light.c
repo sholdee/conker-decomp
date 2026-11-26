@@ -52,7 +52,7 @@ static void (*gLightEffectDestroyHandlers[])(LightEffect *) = {
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
-    func_151617C4, func_150F0390, func_1519C200, func_151617C4,
+    func_151617C4, func_150F0390, flamethrower_destroyFlameLight, func_151617C4,
     func_151617C4, func_15190464, func_151617C4, func_151617C4,
     func_151617C4, func_151617C4,
 };
@@ -65,7 +65,7 @@ static void (*gLightEffectFreeHandlers[])(LightEffect *) = {
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
-    func_151617E4, func_150F03BC, func_1519C22C, func_151617E4,
+    func_151617E4, func_150F03BC, flamethrower_freeFlameLight, func_151617E4,
     func_151617E4, func_15190490, func_151617E4, func_151617E4,
     func_151617E4, func_151617E4,
 };
@@ -543,7 +543,7 @@ LightEffect *func_15161408(PointLight *light, u8 arg1, s32 arg2) {
     LightEffectHeader header;
     WorldObject *mount;
 
-    mount = func_151149AC(249);
+    mount = gfx_findObjectById(249);
 
     header.flags = 0;
     header.update = 3;
@@ -1143,7 +1143,7 @@ void func_15162EF8(LightEffect *effect) {
     s8 message[9];
     WorldObject *object;
 
-    object = func_151149AC(effect->data.objectCycle.objectId);
+    object = gfx_findObjectById(effect->data.objectCycle.objectId);
     if (object != NULL) {
         object->touch.i.a |= 1;
     }
@@ -1156,7 +1156,7 @@ void func_15162F50(LightEffect *effect) {
     s8 message[9];
     WorldObject *object;
 
-    object = func_151149AC(effect->data.objectCycle.objectId);
+    object = gfx_findObjectById(effect->data.objectCycle.objectId);
     if (object != NULL) {
         object->touch.i.a &= ~1;
     }
@@ -1401,7 +1401,7 @@ LightEffect *light_createObjectPulse(u8 objectId, u8 arg1, s32 arg2) {
     WorldObject *object;
     Vec3i position;
 
-    object = func_151149AC(objectId);
+    object = gfx_findObjectById(objectId);
     if (object == NULL) {
         return NULL;
     }

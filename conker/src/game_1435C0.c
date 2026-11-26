@@ -28,7 +28,7 @@ void func_15116110(WorldObject *obj) {
         texture = (u16)info & 0x7FFF; // matching: the (u16) and (s8) casts pick IDO's register assignment
         doubled = info >> 15;
         info >>= 0; // matching: keeps the speed shifts below the texture/doubled setup (as1 orders by -g3 line)
-        WORK(obj)->texScroll = func_15195FB0(obj, texture, doubled, -1, 0, (s8)(info >> 24) & 0xFF, (s8)(info >> 16) & 0xFF);
+        WORK(obj)->texScroll = flamethrower_addObjectTexScroll(obj, texture, doubled, -1, 0, (s8)(info >> 24) & 0xFF, (s8)(info >> 16) & 0xFF);
         obj->moveData.word = 0;
     }
 }

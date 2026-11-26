@@ -12,7 +12,7 @@ void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s1
                    u8 arg9, u8 owner, s32 kind);
 
 /* Fills in the impact particle parameters; fewer particles on busy frames. */
-void func_151BFC40(JetSpray *config, f32 *scale) {
+void weapon_initImpactSpray(JetSpray *config, f32 *scale) {
     config->countBase = 3;
     config->countRange = 4 >> ((gScreenLayout >= 2) ? 1 : 0);
     *scale = 494.0f;
@@ -39,10 +39,10 @@ void func_151BFC40(JetSpray *config, f32 *scale) {
 
 
 /* Bullet hit with no surface: sparks and smoke at pos, plus impact particles thrown back along -dir. */
-void func_151BFDA0(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
+void weapon_spawnAirHit(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
     DirectedJetSpray fx;
 
-    func_151C0418(pos, fxOwner, fxList);
+    weapon_spawnHitLight(pos, fxOwner, fxList);
     func_151C04F8(pos, fxOwner, fxList);
     func_151C05A4(pos, fxOwner, fxList);
     func_151C05F0(pos, fxOwner, fxList);
@@ -50,20 +50,20 @@ void func_151BFDA0(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxL
         fx.direction.x = -dir->x;
         fx.direction.y = -dir->y;
         fx.direction.z = -dir->z;
-        func_151BFC40(&fx.spray, &fx.spread);
+        weapon_initImpactSpray(&fx.spray, &fx.spread);
         fx.spray.pos = *pos;
         func_1514FB98(&fx, fxOwner, fxList);
     }
 }
 
 /* Bullet hit against a collision surface (or none). */
-void func_151BFE84(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
+void weapon_spawnSurfaceHit(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
     Vec3f v0;
     Vec3f v1;
     Vec3f v2;
 
     // matching: taking the addresses keeps fxOwner/fxList in their stack slots (reloaded at each use)
-    func_151C0418(pos, *(u8 *)&fxOwner, *(s32 *)&fxList);
+    weapon_spawnHitLight(pos, *(u8 *)&fxOwner, *(s32 *)&fxList);
     func_151C04F8(pos, fxOwner, fxList);
     func_151C05A4(pos, fxOwner, fxList);
     func_151C05F0(pos, fxOwner, fxList);
@@ -73,7 +73,7 @@ void func_151BFE84(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 withParticl
         }
     }
     if (surface != NULL && withParticles) {
-        func_151C0360(surface, pos, fxOwner, fxList);
+        weapon_spawnHitDecal(surface, pos, fxOwner, fxList);
     }
     if (withParticles) {
         if (surface != NULL) {
@@ -84,7 +84,7 @@ void func_151BFE84(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 withParticl
             fx.source.normal.z = -dir->z;
             fx.source.triangle = *surface;
             fx.spray.pos = *pos;
-            func_151BFC40(&fx.spray, &fx.source.spread);
+            weapon_initImpactSpray(&fx.spray, &fx.source.spread);
             func_1514FBFC(&fx, fxOwner, fxList);
         } else {
             DirectedJetSpray fx;
@@ -92,7 +92,7 @@ void func_151BFE84(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 withParticl
             fx.direction.x = -dir->x;
             fx.direction.y = -dir->y;
             fx.direction.z = -dir->z;
-            func_151BFC40(&fx.spray, &fx.spread);
+            weapon_initImpactSpray(&fx.spray, &fx.spread);
             fx.spray.pos = *pos;
             func_1514FB98(&fx, fxOwner, fxList);
         }
@@ -100,13 +100,13 @@ void func_151BFE84(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 withParticl
 }
 
 /* Bullet hit on an object: sparks and debris at pos, plus a ground mark below it if hitObj is set. */
-void func_151C0098(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwner, s32 fxList) {
+void weapon_spawnObjectHit(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwner, s32 fxList) {
     JetSpraySpec fx;
     Vec3f probe;
     CollisionHit floor;
     Vec3f markPos;
 
-    func_151C0418(pos, fxOwner, fxList);
+    weapon_spawnHitLight(pos, fxOwner, fxList);
     func_151C04F8(pos, fxOwner, fxList);
     func_151C05A4(pos, fxOwner, fxList);
     func_151C05F0(pos, fxOwner, fxList);
@@ -151,14 +151,14 @@ void func_151C0098(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwner, s32 
             markPos.x = probe.x;
             markPos.y = floor.height;
             markPos.z = probe.z;
-            func_151C0360(&floor.tri, &markPos, fxOwner, fxList);
+            weapon_spawnHitDecal(&floor.tri, &markPos, fxOwner, fxList);
             func_151C0644(pos, fxOwner, fxList);
         }
     }
 }
 
 /* Whether obj is a valid target: not in the ignore list, not self, active, and with a valid id. */
-s32 func_151C02E4(Actor *obj, Actor *self, s32 ignoreCount, Actor **ignore) {
+s32 weapon_isBulletTarget(Actor *obj, Actor *self, s32 ignoreCount, Actor **ignore) {
     u8 i;
 
     for (i = 0; i < ignoreCount; i++) {
@@ -178,7 +178,7 @@ s32 func_151C02E4(Actor *obj, Actor *self, s32 ignoreCount, Actor **ignore) {
     return TRUE;
 }
 
-void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList) {
+void weapon_spawnHitDecal(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList) {
     // matching: the f64 member gives the random value an 8-byte aligned stack slot
     union { u32 w; f64 align; } shade;
     f32 rand;
@@ -191,7 +191,7 @@ void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList) {
                   duration % 205 + 299, 1, 1, 0, 0, 0, fxOwner, 0);
 }
 
-void func_151C0418(Vec3f *pos, u8 fxOwner, s32 fxList) {
+void weapon_spawnHitLight(Vec3f *pos, u8 fxOwner, s32 fxList) {
     LightEffectHeader header;
     Vec3i header2;
 
@@ -242,7 +242,7 @@ typedef struct Bullet88 {
 } Bullet88;
 
 /* Fires a bullet from shooter (aimed by aimer's view, if given) and spawns its object and effects. */
-void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList) {
+void weapon_fireBullet(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList) {
     RayHit ray;
     f32 passDist;
     Vec3f passPos;
@@ -268,7 +268,7 @@ void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactTy
     passDist = 0.0f;
     if (gIsMultiplayer != 0) {
         if (shooter->ob_matrix_ptr != NULL) {
-            func_151C1798(shooter, &pos);
+            weapon_getBulletMuzzlePos(shooter, &pos);
         } else {
             pos.x = shooter->xpos;
             pos.y = shooter->ypos + 65.0f;
@@ -291,14 +291,14 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 pos.y = src->y;
                 pos.z = src->z - sinf(angle) * 25.0f;
             } else if (shooter->ob_matrix_ptr != NULL) {
-                func_151C1798(shooter, &pos);
+                weapon_getBulletMuzzlePos(shooter, &pos);
             } else {
                 pos.x = shooter->xpos;
                 pos.y = shooter->ypos + 65.0f;
                 pos.z = shooter->zpos;
             }
         } else if (shooter->ob_matrix_ptr != NULL) {
-            func_151C1798(shooter, &pos);
+            weapon_getBulletMuzzlePos(shooter, &pos);
         } else {
             pos.x = shooter->xpos;
             pos.y = shooter->ypos + 65.0f;
@@ -331,7 +331,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         mode = func_151D5B6C(useAim ? &aimPos : &pos, useAim ? &aimDir : &dir, shooter, 3, ignore);
     }
 
-    if (func_151C196C(&ray, &pos, useAim ? NULL : &dir, useAim ? &aimPos : NULL,
+    if (weapon_traceBullet(&ray, &pos, useAim ? NULL : &dir, useAim ? &aimPos : NULL,
                       useAim ? &aimDir : NULL, shooter, ignore, &passPos, &passDist, &pass,
                       mode) != 0) {
         extern u8 gIsMultiplayer; // matching: a declaration makes this an IDO scope block (register choice)
@@ -400,12 +400,12 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             header2.y = pos.y;
             header2.z = pos.z;
             bulletState->trail = light_createWithEffect(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
-            bulletState->follow = (struct FollowFx *)func_151B8908(obj);
+            bulletState->follow = (struct FollowFx *)weapon_spawnBulletSprite(obj);
             bulletState->sound = sound_addDynamicSound(func_150ADA20() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
-                                               (SoundRecordCallback)func_151C110C, obj, 0, 4, 0);
-            bulletState->unk88 = (struct Bullet88 *)func_151B8400(obj);
+                                               (SoundRecordCallback)weapon_bulletSoundCallback, obj, 0, 4, 0);
+            bulletState->unk88 = (struct Bullet88 *)weapon_spawnBulletParticle(obj);
             if (gScreenLayout < 2 && D_8008FD8C < 4) {
-                bulletState->unk8C = func_151B8668(obj, fxOwner, fxList);
+                bulletState->unk8C = weapon_startBulletTrail(obj, fxOwner, fxList);
             } else {
                 extern u8 gIsMultiplayer; // matching: a declaration makes this an IDO scope block (register choice)
 
@@ -448,8 +448,8 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
     }
 }
 
-/* Sound callback registered by func_151C0698: keeps the bullet's sound at the bullet's position. */
-s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+/* Sound callback registered by weapon_fireBullet: keeps the bullet's sound at the bullet's position. */
+s32 weapon_bulletSoundCallback(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
     Bullet *bullet;
 
     bullet = emitter->bullet;
@@ -465,7 +465,7 @@ s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 ar
 }
 
 /* Per-frame bullet update: moves it, traces for hits and spawns the impact. Returns FALSE when it is done. */
-s32 func_151C1180(Bullet *bullet) {
+s32 weapon_updateBullet(Bullet *bullet) {
     BulletState *state;
     f32 step;
     Vec3f delta;
@@ -485,8 +485,8 @@ s32 func_151C1180(Bullet *bullet) {
     if (D_800E0930 != NULL) {
         if (D_800E0930(&bullet->head.pos, &delta, &hitPos) != 0) {
             func_15055A2C(0, hitPos.x, hitPos.y, hitPos.z, 0);
-            func_151C1654(&hitPos, &state->ray.dir, state->owner, state->impactType, NULL);
-            func_151BFDA0(&hitPos, &state->ray.dir, !(state->flags & 1), bullet->head.header.owner, bullet->head.header.kind);
+            weapon_runImpactAttack(&hitPos, &state->ray.dir, state->owner, state->impactType, NULL);
+            weapon_spawnAirHit(&hitPos, &state->ray.dir, !(state->flags & 1), bullet->head.header.owner, bullet->head.header.kind);
             return FALSE;
         }
     }
@@ -497,8 +497,8 @@ s32 func_151C1180(Bullet *bullet) {
 
         if (hit.hitType >= 2) {
             func_15055A2C(1, hit.pos.x, hit.pos.y, hit.pos.z, 0);
-            func_151C1654(&hit.pos, &state->ray.dir, state->owner, state->impactType, NULL);
-            func_151C0098(&hit.pos, hit.obj, !(state->flags & 1), bullet->head.header.owner, bullet->head.header.kind);
+            weapon_runImpactAttack(&hit.pos, &state->ray.dir, state->owner, state->impactType, NULL);
+            weapon_spawnObjectHit(&hit.pos, hit.obj, !(state->flags & 1), bullet->head.header.owner, bullet->head.header.kind);
             return FALSE;
         }
     }
@@ -517,8 +517,8 @@ s32 func_151C1180(Bullet *bullet) {
     if (state->lifetime <= 0.0f) {
         if (state->ray.hitType == 1) {
             func_15055A2C(0, state->ray.pos.x, state->ray.pos.y, state->ray.pos.z, 0);
-            func_151C1654(&state->ray.pos, &state->ray.dir, state->owner, state->impactType, &state->ray.tri);
-            func_151BFE84(&state->ray.tri, &state->ray.pos, &bullet->head.vel, !(state->flags & 1),
+            weapon_runImpactAttack(&state->ray.pos, &state->ray.dir, state->owner, state->impactType, &state->ray.tri);
+            weapon_spawnSurfaceHit(&state->ray.tri, &state->ray.pos, &bullet->head.vel, !(state->flags & 1),
                           bullet->head.header.owner, bullet->head.header.kind);
         }
         return FALSE;
@@ -538,7 +538,7 @@ s32 func_151C1180(Bullet *bullet) {
 }
 
 /* Releases a bullet's effects and its sound callback. */
-void func_151C1570(Bullet *bullet) {
+void weapon_releaseBullet(Bullet *bullet) {
     BulletState *state;
 
     state = &bullet->state;
@@ -557,21 +557,21 @@ void func_151C1570(Bullet *bullet) {
     if (state->unk8C != NULL) {
         func_1516972C(state->unk8C);
     }
-    sound_stopByCallback((SoundRecordCallback)func_151C110C, bullet, 0);
+    sound_stopByCallback((SoundRecordCallback)weapon_bulletSoundCallback, bullet, 0);
 }
 
 void func_151C15FC(Bullet *bullet) {
-    func_151C1570(bullet);
+    weapon_releaseBullet(bullet);
     func_15132570(&bullet->head);
 }
 
 void func_151C1628(Bullet *bullet) {
-    func_151C1570(bullet);
+    weapon_releaseBullet(bullet);
     func_1513259C(&bullet->head);
 }
 
 /* Impact sound/decal for a bullet hit, chosen by impactType. */
-void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface) {
+void weapon_runImpactAttack(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface) {
     void (*callback)(s32, s32, s32);
 
     callback = D_800E0934;
@@ -597,16 +597,16 @@ void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, Collisio
 }
 
 /* Bone index per muzzle. */
-const u8 D_800AA954[3] = { 9, 4, 4 };
+const u8 gBulletMuzzleBones[3] = { 9, 4, 4 };
 /* Muzzle offset in bone space. */
-const Vec3f D_800AA958[3] = {
+const Vec3f gBulletMuzzleOffsets[3] = {
     { 5.0f, 29.0f, 37.0f },
     { 0.0f, 0.0f, 70.0f },
     { 0.0f, 0.0f, 70.0f },
 };
 
 /* World position of obj's gun muzzle, from its bone matrices. */
-void func_151C1798(Actor *obj, Vec3f *pos) {
+void weapon_getBulletMuzzlePos(Actor *obj, Vec3f *pos) {
     s32 index;
 
     switch (obj->character_type) {
@@ -620,11 +620,11 @@ void func_151C1798(Actor *obj, Vec3f *pos) {
         index = 0;
         break;
     }
-    func_15143134(&D_800AA958[index], pos, &obj->ob_matrix_ptr[D_800AA954[index]]);
+    func_15143134(&gBulletMuzzleOffsets[index], pos, &obj->ob_matrix_ptr[gBulletMuzzleBones[index]]);
 }
 
 /* Event handler: event 0x2D hands the bullet's ownership between the two objects in pair. */
-void func_151C1814(Bullet *bullet, Actor **pair, u8 event) {
+void weapon_onBulletPairEvent(Bullet *bullet, Actor **pair, u8 event) {
     BulletState *state = &bullet->state;
     if (event == 0x2D) {
         // matching: the indexed form state[0] keeps IDO's compare operands in source order
@@ -652,9 +652,9 @@ void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList) {
     light_createWithEffect(&header, &header2, func_150ADA20() % 11 + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
-/* Target filter callback: func_151C02E4 with the ignore list packed in a struct. */
-s32 func_151C1940(Actor *obj, Actor *self, IgnoreList *ignore) {
-    return func_151C02E4(obj, self, ignore->count, ignore->objs);
+/* Target filter callback: weapon_isBulletTarget with the ignore list packed in a struct. */
+s32 weapon_filterBulletTarget(Actor *obj, Actor *self, IgnoreList *ignore) {
+    return weapon_isBulletTarget(obj, self, ignore->count, ignore->objs);
 }
 
 /*
@@ -662,7 +662,7 @@ s32 func_151C1940(Actor *obj, Actor *self, IgnoreList *ignore) {
  * then re-aims from start at whatever it hit. On a miss, ray describes a point 5000 units along the
  * direction. Returns FALSE only when re-aiming fails.
  */
-s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *aimDir,
+s32 weapon_traceBullet(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *aimDir,
                   Actor *shooter, IgnoreList *ignore, Vec3f *passPos, f32 *passDist,
                   CollisionHit *pass, s32 mode) {
     u8 trace;
@@ -675,7 +675,7 @@ s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *a
     if (aimPos != NULL && aimDir != NULL) {
         ray->origin = *aimPos;
         ray->dir = *aimDir;
-        func_151C1D5C(shooter, &ray->origin, &ray->dir, ray, 0.0f, 0, 0, 1, 3, ignore, passPos,
+        weapon_castPiercingRay(shooter, &ray->origin, &ray->dir, ray, 0.0f, 0, 0, 1, 3, ignore, passPos,
                       passDist, pass, mode);
 
         if (ray->hitType == 0) {
@@ -702,7 +702,7 @@ s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *a
     }
 
     if (trace) {
-        func_151C1D5C(shooter, &ray->origin, &ray->dir, ray, 0.0f, 0, 1, 1, 3, ignore, passPos,
+        weapon_castPiercingRay(shooter, &ray->origin, &ray->dir, ray, 0.0f, 0, 1, 1, 3, ignore, passPos,
                       passDist, pass, mode);
         if (ray->hitType != 0) {
             hit = TRUE;
@@ -738,7 +738,7 @@ s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *a
  * Ray cast that continues through pass-through surfaces; the first one it passes is reported in
  * passPos/passDist/pass. ray->dist is the total distance travelled.
  */
-void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 arg4,
+void weapon_castPiercingRay(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s8 arg8, IgnoreList *ignore, Vec3f *passPos,
                    f32 *passDist, CollisionHit *pass, s32 mode) {
     WorldObject *part;
@@ -785,7 +785,7 @@ void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 ar
 }
 
 
-void func_151C1FB8(Actor *obj) {
+void weapon_rumbleShooter(Actor *obj) {
     RumbleParams event;
 
     if (obj->CameraPtr != NULL) {

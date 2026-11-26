@@ -357,7 +357,7 @@ TimedEffect *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f
 
 /*
  * Effect 0x1B update: emits one particle per whole unit of spawnAccum from a random point on the
- * emission segments, transformed by the matrix func_1511490C builds from data.unk0.
+ * emission segments, transformed by the matrix gfx_getObjectModelMtx builds from data.unk0.
  */
 void func_15109FB8(Effect1368C0 *effect) {
     MatrixEmitterData *data;
@@ -380,7 +380,7 @@ void func_15109FB8(Effect1368C0 *effect) {
             f32 y;
             f32 z;
 
-            func_1511490C(mtx, data->unk0);
+            gfx_getObjectModelMtx(mtx, data->unk0);
             r = func_150ADA68() * D_800A2504[6];
             for (i = 0; D_800A2504[i] < r; i++) {
                 r -= D_800A2504[i];

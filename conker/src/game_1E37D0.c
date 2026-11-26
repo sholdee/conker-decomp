@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* State block of a trail effect (func_151B6320). */
+/* State block of a trail effect (trail_spawnFollowTrail). */
 typedef struct TargetTrailState {
     /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetUnk3B; /* target->unique_id when the trail was spawned */
@@ -27,7 +27,7 @@ typedef struct TargetTrailPoint {
 } TargetTrailPoint;
 
 /* Spawns a trail effect that follows target. */
-void func_151B6320(Actor *target, u8 arg1, s32 arg2) {
+void trail_spawnFollowTrail(Actor *target, u8 arg1, s32 arg2) {
     EffectTemplate spawn;
     s32 pad_dummy; // matching: stack pad
     TargetTrailState state;
@@ -56,7 +56,7 @@ void func_151B6320(Actor *target, u8 arg1, s32 arg2) {
 }
 
 /* Ages a trail's points, drops expired ones and sets the alpha of the rest. Returns 0 once the trail has finished. */
-s32 func_151B6420(EffectObj *obj) {
+s32 trail_ageFollowTrail(EffectObj *obj) {
     TargetTrailPoint *points;
     s32 i;
     f32 base;
@@ -112,7 +112,7 @@ s32 func_151B6420(EffectObj *obj) {
 }
 
 /* Follows the trail's target and emits points along the path it moved. Stops the trail once the target is gone. */
-s32 func_151B65D4(EffectObj *obj) {
+s32 trail_followTarget(EffectObj *obj) {
     TargetTrailState *state;
     TargetTrailPoint *points;
     Actor *target;
@@ -208,7 +208,7 @@ extern struct {
 
 /* Draws the trail as a camera-facing strip 20 units wide, from the newest point to the oldest.
  * While flags & 2 is set the strip starts at the effect position itself. */
-Gfx *func_151B6928(EffectObj *obj, Gfx *gfx, s16 view) {
+Gfx *trail_drawFollowTrail(EffectObj *obj, Gfx *gfx, s16 view) {
     Vtx *vtx;
     TargetTrailPoint *points;
     Vec3f *camera;
@@ -380,7 +380,7 @@ typedef struct SwapMessage {
 
 /* Message handler of a trail: message 0 (msg is a TrailTargetRef) stops the trail when it names its target;
  * message 0x2D (a SwapMessage) moves the trail to the other object of the swap. */
-void func_151B70B4(EffectObj *obj, void *msg, u8 msgType) {
+void trail_onFollowTrailMessage(EffectObj *obj, void *msg, u8 msgType) {
     TargetTrailState *state;
     Actor *current;
     Actor *objA;
@@ -411,7 +411,7 @@ void func_151B70B4(EffectObj *obj, void *msg, u8 msgType) {
 }
 
 /* Spawns a particle at target's position. */
-void func_151B7144(Actor *target, u8 arg1, s32 arg2) {
+void trail_spawnParticleAtTarget(Actor *target, u8 arg1, s32 arg2) {
     ParticleDesc spawn;
     s32 flag80;
     s32 flag40;
@@ -467,17 +467,17 @@ void func_151B7144(Actor *target, u8 arg1, s32 arg2) {
     func_15130280(&spawn, 1, 0, 0, arg1, arg2);
 }
 
-/* Particle a ribbon effect drags along (see func_151B77F4). */
+/* Particle a ribbon effect drags along (see trail_moveRibbon). */
 typedef struct LinkedParticle {
     /* 0x00 */ u8 pad0[0x40];
     /* 0x40 */ Vec3f pos;
 } LinkedParticle;
 
-/* State block of a ribbon effect (func_151B7328). A copy of its arguments follows at +0x10. */
+/* State block of a ribbon effect (trail_spawnRibbon). A copy of its arguments follows at +0x10. */
 typedef struct RibbonState {
     /* 0x00 */ LinkedParticle *linked;
     /* 0x04 */ void *args;
-    /* 0x08 */ u8 selector; /* index into D_8008FB90 and D_8008FB98 */
+    /* 0x08 */ u8 selector; /* index into gRibbonSourceProcs and gRibbonMessageProcs */
     /* 0x09 */ u8 pad9[3];
 } RibbonState;
 
@@ -490,11 +490,11 @@ typedef struct RibbonEffectPoint {
 } RibbonEffectPoint;
 
 /* Returns 0 when the effect's source is gone, else stores the source position in pos. */
-static s32 (*D_8008FB90[])(EffectObj *, Vec3f *) = { func_151B7678, func_151B76CC };
+static s32 (*gRibbonSourceProcs[])(EffectObj *, Vec3f *) = { trail_getRibbonActorPos, trail_getRibbonPointBehind };
 
-/* Spawns a ribbon effect that follows the position given by D_8008FB90[selector], with a copy of args
+/* Spawns a ribbon effect that follows the position given by gRibbonSourceProcs[selector], with a copy of args
  * (argsSize bytes) and a linked particle. Returns NULL if nothing was spawned. */
-EffectObj *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg4) {
+EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg4) {
     EffectObj *obj;
     EffectTemplate18 spawn;
     s32 pad; // matching: stack pad
@@ -518,7 +518,7 @@ EffectObj *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg
         // matching: state->args = (u8 *)state + 0x10, stored and reloaded as an s32 (IDO allocates differently otherwise)
         ((s32 *)state)[1] = (s32)((s32 *)state + 4);
         memcpy((void *)((s32 *)state)[1], args, argsSize);
-        if (D_8008FB90[selector](obj, &obj->head.tmpl.pos) == 0) {
+        if (gRibbonSourceProcs[selector](obj, &obj->head.tmpl.pos) == 0) {
             func_1516972C(&obj->head.header);
             return NULL;
         }
@@ -576,7 +576,7 @@ EffectObj *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg
     return obj;
 }
 
-/* Object a ribbon effect orbits (func_151B76CC). */
+/* Object a ribbon effect orbits (trail_getRibbonPointBehind). */
 typedef struct RotatedTarget {
     /* 0x00 */ u8 pad0[0x18];
     /* 0x18 */ f32 scaleXZ;
@@ -586,8 +586,8 @@ typedef struct RotatedTarget {
     /* 0x38 */ Vec3f pos;
 } RotatedTarget;
 
-/* D_8008FB90 callback: reads the followed actor's position; fails once the target is gone. */
-s32 func_151B7678(EffectObj *obj, Vec3f *pos) {
+/* gRibbonSourceProcs callback: reads the followed actor's position; fails once the target is gone. */
+s32 trail_getRibbonActorPos(EffectObj *obj, Vec3f *pos) {
     RibbonState *state;
     TrailTargetRef *ref;
     Actor *target;
@@ -605,8 +605,8 @@ s32 func_151B7678(EffectObj *obj, Vec3f *pos) {
     return 1;
 }
 
-/* D_8008FB90 callback: places pos 250 units along the target's local -z axis. */
-s32 func_151B76CC(EffectObj *obj, Vec3f *pos) {
+/* gRibbonSourceProcs callback: places pos 250 units along the target's local -z axis. */
+s32 trail_getRibbonPointBehind(EffectObj *obj, Vec3f *pos) {
     RibbonState *state;
     RotatedTarget **ref;
     RotatedTarget *target;
@@ -632,8 +632,8 @@ s32 func_151B76CC(EffectObj *obj, Vec3f *pos) {
     return 1;
 }
 
-/* Moves the ribbon to its source position (D_8008FB90[selector]) and appends a point there. Returns 0 once the source is gone. */
-s32 func_151B77F4(EffectObj *obj) {
+/* Moves the ribbon to its source position (gRibbonSourceProcs[selector]) and appends a point there. Returns 0 once the source is gone. */
+s32 trail_moveRibbon(EffectObj *obj) {
     RibbonState *state;
     RibbonEffectPoint *points;
     Vec3f previous;
@@ -644,7 +644,7 @@ s32 func_151B77F4(EffectObj *obj) {
     points = obj->items;
     if (D_800BE9E4 > 0) {
         previous = obj->head.tmpl.pos;
-        if (D_8008FB90[state->selector](obj, &obj->head.tmpl.pos) == 0) {
+        if (gRibbonSourceProcs[state->selector](obj, &obj->head.tmpl.pos) == 0) {
             return 0;
         }
         if (state->linked != NULL) {
@@ -678,7 +678,7 @@ s32 func_151B77F4(EffectObj *obj) {
 }
 
 /* Trims the ribbon to at most 1198 units of length, then fades its points from the head (opaque) to the tail. */
-s32 func_151B7998(EffectObj *obj) {
+s32 trail_shapeRibbon(EffectObj *obj) {
     RibbonEffectPoint *points;
     f32 total;
     f32 scale;
@@ -760,7 +760,7 @@ s32 func_151B7998(EffectObj *obj) {
 }
 
 /* Draws the ribbon as a camera-facing strip 58 units wide, from the newest point to the oldest. */
-Gfx *func_151B7C38(EffectObj *obj, Gfx *gfx, s16 view) {
+Gfx *trail_drawRibbon(EffectObj *obj, Gfx *gfx, s16 view) {
     Vec3f next;
     Vec3f cur;
     s32 index;
@@ -894,21 +894,21 @@ Gfx *func_151B7C38(EffectObj *obj, Gfx *gfx, s16 view) {
 }
 
 /* Message handlers of ribbon effects, indexed by RibbonState.selector; entries may be NULL. */
-static void (*D_8008FB98[])(EffectObj *, void *, u8) = { func_151B8318, NULL };
+static void (*gRibbonMessageProcs[])(EffectObj *, void *, u8) = { trail_onActorRibbonMessage, NULL };
 
-/* Message handler of a ribbon: forwards the message to D_8008FB98[selector], if there is one. */
-void func_151B82CC(EffectObj *obj, void *msg, u8 msgType) {
+/* Message handler of a ribbon: forwards the message to gRibbonMessageProcs[selector], if there is one. */
+void trail_onRibbonMessage(EffectObj *obj, void *msg, u8 msgType) {
     RibbonState *state = obj->userData;
-    void (*handler)(EffectObj *, void *, u8) = D_8008FB98[state->selector];
+    void (*handler)(EffectObj *, void *, u8) = gRibbonMessageProcs[state->selector];
 
     if (handler != NULL) {
         handler(obj, msg, msgType);
     }
 }
 
-/* D_8008FB98 handler of a ribbon that follows an actor: message 0 (msg is a TrailTargetRef) naming the target
+/* gRibbonMessageProcs handler of a ribbon that follows an actor: message 0 (msg is a TrailTargetRef) naming the target
  * destroys the ribbon. */
-void func_151B8318(EffectObj *obj, void *msg, u8 msgType) {
+void trail_onActorRibbonMessage(EffectObj *obj, void *msg, u8 msgType) {
     RibbonState *state = obj->userData;
     TrailTargetRef *ref = state->args;
 

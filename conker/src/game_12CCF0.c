@@ -3,23 +3,23 @@
 #include "variables.h"
 
 
-/* Muzzle points (from, to) of this gun on bone D_80088BB0 (D_8008FC8C points to the first). */
-const Vec3f D_800A2130 = { 10.0f, -121.0f, 81.0f };
+/* Muzzle points (from, to) of this gun on bone gGunMuzzleBone (D_8008FC8C points to the first). */
+const Vec3f gGunMuzzleStart = { 10.0f, -121.0f, 81.0f };
 static const Vec3f D_800A213C = { 10.0f, -155.0f, 99.0f };
 /* Muzzle points (from, to) used by func_151D5714 in game_981E0. */
 const Vec3f D_800A2148 = { -1.0f, -38.0f, 38.0f };
 const Vec3f D_800A2154 = { -26.0f, -23.0f, 51.0f };
-/* Particle textures that func_150FFD84 picks from at random. */
+/* Particle textures that weapon_spawnFannedParticles picks from at random. */
 static const TextureChoices D_800A2160 = { { 0x60, 0x61, 0x62, 0x63 } };
 
 /* This file's .data. */
-u8 D_80088BB0 = 9; // bone of the muzzle points above (game_981E0 uses it too)
+u8 gGunMuzzleBone = 9; // bone of the muzzle points above (game_981E0 uses it too)
 
 /*
  * Shot effects for `obj`: a muzzle effect and particles when it has bones, three actor_runAttackAt
  * spawns along `direction` if `arg1`, a func_15081690 call if `arg2`, then a camera event.
  */
-void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
+void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     Vec3f position;
     Vec3f direction;
     Vec3f axis0;
@@ -32,7 +32,7 @@ void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     s32 random1;
     s32 random0;
 
-    func_150FFCC8(obj, &position, &direction, &axis0, &axis1);
+    weapon_getShotFrame(obj, &position, &direction, &axis0, &axis1);
     func_151D5148(obj);
     if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
         func_151D3F14(&position, arg3, arg4);
@@ -40,11 +40,11 @@ void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
         motion.width = ((func_150ADA68() * 220.0f) + 320.0f) * 0.1000000015f;
         random0 = func_150ADA20();
         random1 = func_150ADA20();
-        func_15102B38(obj, D_80088BB0, &D_800A2130, &D_800A213C, &motion,
+        func_15102B38(obj, gGunMuzzleBone, &gGunMuzzleStart, &D_800A213C, &motion,
                       (random0 % 3U) + 4, (random1 & 0x7F) + 0x80,
                       (func_150ADA68() * 450.0f) + 780.0f, &position, 0xFF,
                       0, -1, arg3, arg4);
-        func_150FFD84(&position, &direction, arg3, arg4);
+        weapon_spawnFannedParticles(&position, &direction, arg3, arg4);
     }
     if (arg1) {
         s32 pad; // matching: unused stack slot
@@ -73,7 +73,7 @@ void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
                       direction.z * 0.001000000047f, buffer, 2000.0f, 0, 0, 0, -1, 0, 0);
         func_15081E78(obj, buffer, 0x10);
     }
-    func_150FFC3C(obj);
+    weapon_rumbleGun(obj);
 }
 
 /* Spawns actor_runAttackAt effect `type` at `position`, owned by `obj`. */
@@ -88,19 +88,19 @@ void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) {
     actor_runAttackAt(position->x, position->y, position->z, flags, index, angle, 0, (s32)origin);
 }
 
-/* Writes the world position of the muzzle point D_800A2130 on bone D_80088BB0 of `obj` to `out`. */
-void func_150FFBDC(Actor *obj, s16 arg1, Vec3f *out) {
+/* Writes the world position of the muzzle point gGunMuzzleStart on bone gGunMuzzleBone of `obj` to `out`. */
+void weapon_getGunMuzzlePos(Actor *obj, s16 arg1, Vec3f *out) {
     const Vec3f *src;
     Vec3f *dst;
 
-    src = &D_800A2130;
+    src = &gGunMuzzleStart;
     dst = out;
-    func_15145EA4(&src, &dst, obj->ob_matrix_ptr[D_80088BB0], 1);
+    func_15145EA4(&src, &dst, obj->ob_matrix_ptr[gGunMuzzleBone], 1);
 }
 
 
 /* Sends a func_151D8868 event (kind 1, 20-30 long) to `obj`'s camera, if it has one. */
-void func_150FFC3C(Actor *obj) {
+void weapon_rumbleGun(Actor *obj) {
     RumbleParams event;
 
     if (obj->CameraPtr != NULL) {
@@ -114,7 +114,7 @@ void func_150FFC3C(Actor *obj) {
 }
 
 /* Gets the shot `position` and `direction` (and two axes) of `obj`. */
-void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
+void weapon_getShotFrame(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
     func_151D5A18(obj, position, direction, axis0, axis1, D_8008FC8C[0], *D_8008FC94[0]);
     func_151D3E6C(obj, position, position, 0x8003A);
 }
@@ -130,7 +130,7 @@ void func_150FFD2C(Actor *obj, Actor *other, s32 arg2) {
 }
 
 /* Spawns 10-18 particles at `position`, fanned out around the yaw of `direction`. */
-void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3) {
+void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3) {
     ParticleDesc spawn;
     s32 count;
     s16 baseYaw;

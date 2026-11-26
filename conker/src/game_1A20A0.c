@@ -3,10 +3,10 @@
 #include "variables.h"
 
 /* Brightness of a grounded swarm actor, by bits 5-6 of its surface flags. */
-static const u8 D_800A7170[4] = { 0x00, 0x2A, 0x54, 0x7F };
+static const u8 gSwarmGroundBrightness[4] = { 0x00, 0x2A, 0x54, 0x7F };
 
 /* Spawns `count` swarm actors of type 10 around (x, y, z), heading roughly away from player `player`. */
-void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
+void swarm_spawnAwayFromPlayer(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
                    f32 minScale, f32 scaleRange, s32 flags) {
     SwarmActor *actor;
     f32 height;
@@ -54,7 +54,7 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
         actor->rollStep = 0.0f;
         actor->scale = (s32)(func_150ADA20() & 0xFFFF) * (1.0f / 32768.0f) * scaleRange + minScale;
         model = func_150ADA20() & 1;
-        actor->vertices = D_800DDE80[model].unk8;
+        actor->vertices = gEffectModelSlots[model].unk8;
         actor->modelIndex = model;
         if (i == 0) {
             actor->sound = func_10010E78(0, 0xA2, 0x7D00, 0, 0, 0, actorX, y, actorZ, 1000, 4000);
@@ -72,7 +72,7 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
                 surfaceFlags = 0;
             }
             actor->surfaceFlags = surfaceFlags;
-            actor->brightness = D_800A7170[(surfaceFlags >> 5) & 3];
+            actor->brightness = gSwarmGroundBrightness[(surfaceFlags >> 5) & 3];
         } else {
             actor->brightness = 0;
         }
@@ -83,7 +83,7 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
 
 /* Spawns `count` swarm actors of type 0x13 scattered over a `spread`-wide square around (x, z).
  * With `airborne` clear they start just above the ground; otherwise they start 300+ units up. */
-void func_15174FA4(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 arg6, s32 airborne,
+void swarm_spawnScattered(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 arg6, s32 airborne,
                    f32 minScale, f32 scaleRange) {
     f32 height;
     s32 spawnX;
@@ -121,7 +121,7 @@ void func_15174FA4(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 ar
         actor->rollStep = 0.0f;
         actor->yawStep = 3.0f;
         actor->scale = (s32)(func_150ADA20() & 0xFFFF) * (1.0f / 32768.0f) * scaleRange + minScale;
-        actor->vertices = D_800DDE80[7].unk8;
+        actor->vertices = gEffectModelSlots[7].unk8;
         actor->modelIndex = 7;
         samples = func_150A3A70(actorX, actorZ);
         if (samples == 0) {
@@ -162,7 +162,7 @@ void func_15174FA4(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 ar
 /* Spawns `count` swarm actors in a ring between minRadius and maxRadius around (x, z).
  * flags becomes the actors' flags; 0x10000 aims them away from player `player`,
  * 0x20000 gives them a random initial pitch. */
-void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
+void swarm_spawnRing(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
                    s32 player, s32 heightRange, s32 minRadius, s32 flags, s32 baseType, u32 typeCount,
                    s32 baseModel, s32 modelMask, s32 state, f32 minScale, f32 scaleRange, s32 spawnFlags) {
     SwarmActor *actor;
@@ -250,7 +250,7 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
             }
         }
         variant += baseModel;
-        actor->vertices = D_800DDE80[variant].unk8;
+        actor->vertices = gEffectModelSlots[variant].unk8;
         actor->modelIndex = variant;
         actor->originX = x;
         actor->originY = y;
@@ -279,7 +279,7 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
                 onGround = 0;
             }
             actor->surfaceFlags = onGround;
-            actor->brightness = D_800A7170[((u32)onGround >> 5) & 3];
+            actor->brightness = gSwarmGroundBrightness[((u32)onGround >> 5) & 3];
         } else {
             actor->brightness = 0;
         }
@@ -293,7 +293,7 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
 /* Common per-frame flight update for a swarm actor: fading, wandering inside its home ring,
  * pitch/yaw/roll easing, wing-frame swapping and movement. Frees the actor when its model
  * is unloaded, it has faded out, or it leaves the view. */
-void func_15175958(SwarmActor *actor) {
+void swarm_updateFlight(SwarmActor *actor) {
     s32 pad0; // matching: unused stack slot
     f32 dir[3];
     f32 rad[3];
@@ -316,7 +316,7 @@ void func_15175958(SwarmActor *actor) {
     f32 dz;
     u16 sound;
 
-    if (D_800DDE80[actor->modelIndex].resource == NULL || D_800DDF78[actor->modelIndex] == NULL) {
+    if (gEffectModelSlots[actor->modelIndex].resource == NULL || gEffectModelSecondDls[actor->modelIndex] == NULL) {
         func_1516972C(&actor->header);
         return;
     }
@@ -339,7 +339,7 @@ void func_15175958(SwarmActor *actor) {
         }
     }
     if (actor->fadingOut == 0) {
-        if ((actor->flags & 8) && D_800DDF5C[actor->group] == 0) {
+        if ((actor->flags & 8) && gSwarmGroupsInUse[actor->group] == 0) {
             actor->fadingOut = 1;
         } else if (alpha != 255) {
             alpha += D_800BE9E4 * 4;
@@ -359,9 +359,9 @@ void func_15175958(SwarmActor *actor) {
         }
         actor->alpha = alpha;
     }
-    model = &D_800DDE80[actor->modelIndex];
-    flight = &D_8008D0B0[actor->modelIndex];
-    D_800DDF68[actor->modelIndex] = 1;
+    model = &gEffectModelSlots[actor->modelIndex];
+    flight = &gSwarmFlights[actor->modelIndex];
+    gEffectModelSlotStates[actor->modelIndex] = 1;
     sound = actor->sound;
     if (sound != 0) {
         if (sound_isPlaying(sound) != 0) {
@@ -546,9 +546,9 @@ void func_15175958(SwarmActor *actor) {
         actor->y += dir[1] * speed;
         actor->z += dir[2] * speed;
     }
-    if (actor->header.type == 0x13 && D_800DDF60[actor->group] == 0) {
+    if (actor->header.type == 0x13 && gSwarmGroupSoundTimers[actor->group] == 0) {
         func_10010F88(0x10, 0x7FFF, func_150ADA20() & 0x7F, 0, 0, actor->x, actor->y, actor->z, 500, 4000);
-        D_800DDF60[actor->group] = (func_150ADA20() & 0x3F) + 30;
+        gSwarmGroupSoundTimers[actor->group] = (func_150ADA20() & 0x3F) + 30;
     }
     if ((actor->flags & 2) &&
         func_1510AEE0(gViewMatrices[0], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
@@ -561,11 +561,11 @@ void func_15175958(SwarmActor *actor) {
 /* Update for a perching swarm actor (bat): while perched (state 0) it bobs its head and
  * yaws a little, takes off when the player comes within 400 units (state 1), and once
  * 300 units above its perch it flies normally (states 2/3). */
-void func_1517685C(SwarmActor *actor) {
+void swarm_updatePercher(SwarmActor *actor) {
     s32 r;
 
-    if (D_800DDF5C[actor->group] != 0) {
-        D_800DDF68[actor->modelIndex] = 1;
+    if (gSwarmGroupsInUse[actor->group] != 0) {
+        gEffectModelSlotStates[actor->modelIndex] = 1;
         switch (actor->state) {
         case 0:
             if (func_150AD960(movement_obj->xpos, movement_obj->zpos, actor->x, actor->z) < 400) {
@@ -618,7 +618,7 @@ void func_1517685C(SwarmActor *actor) {
                 actor->flags |= 4;
                 actor->targetY = (s32)(func_150ADA20() & 0x7F) + (300.0f + actor->groundHeight);
             }
-            func_15175958(actor);
+            swarm_updateFlight(actor);
             return;
         default:
         case 2:
@@ -628,7 +628,7 @@ void func_1517685C(SwarmActor *actor) {
             } else if (actor->pitch < 0) {
                 actor->pitchStep = 1.5f;
             }
-            func_15175958(actor);
+            swarm_updateFlight(actor);
             return;
         }
     } else {
@@ -639,17 +639,17 @@ void func_1517685C(SwarmActor *actor) {
 /* Update for a hovering swarm actor: fades in/out with its group, waits (state 0) until the
  * player is within 200 units, then flies off towards a random height; in state 4 it is freed
  * once it drops below its ground height. */
-void func_15176B84(SwarmActor *actor) {
+void swarm_updateHoverer(SwarmActor *actor) {
     s32 alpha;
 
-    if ((D_800DDE80[actor->modelIndex].resource == NULL) || (D_800DDF78[actor->modelIndex] == NULL)) {
+    if ((gEffectModelSlots[actor->modelIndex].resource == NULL) || (gEffectModelSecondDls[actor->modelIndex] == NULL)) {
         func_1516972C(&actor->header);
         return;
     }
 
     alpha = actor->alpha;
     if (actor->fadingOut == 0) {
-        if (D_800DDF5C[actor->group] == 0) {
+        if (gSwarmGroupsInUse[actor->group] == 0) {
             actor->fadingOut = 1;
         } else if (alpha != 255) {
             alpha += D_800BE9E4 * 4;
@@ -670,16 +670,16 @@ void func_15176B84(SwarmActor *actor) {
         actor->alpha = alpha;
     }
 
-    D_800DDF68[actor->modelIndex] = 1;
+    gEffectModelSlotStates[actor->modelIndex] = 1;
 
     switch (actor->state) {
         case 0:
             if (func_150AD960(movement_obj[0].xpos, movement_obj[0].zpos, actor->x, actor->z) < 200) {
                 actor->state = 2;
                 actor->targetY = (f32)(func_150ADA20() % actor->heightRange) + actor->originY;
-                actor->vertices = D_800DDE80[actor->modelIndex].unk8;
+                actor->vertices = gEffectModelSlots[actor->modelIndex].unk8;
             } else {
-                actor->vertices = D_800DDE80[actor->modelIndex].unk4;
+                actor->vertices = gEffectModelSlots[actor->modelIndex].unk4;
             }
             return;
         case 2:
@@ -692,12 +692,12 @@ void func_15176B84(SwarmActor *actor) {
             }
             break;
     }
-    func_15175958(actor);
+    swarm_updateFlight(actor);
 }
 
 /* Draws a flying swarm actor: builds its scaled model matrix, eases its brightness towards
  * the lighting of the surface below it, and draws its model with that colour and its alpha. */
-Gfx *func_15176DF0(Gfx *gdl, SwarmActor *actor, s16 camera) {
+Gfx *swarm_drawFlying(Gfx *gdl, SwarmActor *actor, s16 camera) {
     s32 pad; // matching: unused stack slot
     MtxF rot;
     MtxF mtx;
@@ -705,7 +705,7 @@ Gfx *func_15176DF0(Gfx *gdl, SwarmActor *actor, s16 camera) {
     s32 brightness;
     s32 target;
 
-    if ((D_800DDE80[actor->modelIndex].resource == NULL) || (D_800DDF78[actor->modelIndex] == NULL)) {
+    if ((gEffectModelSlots[actor->modelIndex].resource == NULL) || (gEffectModelSecondDls[actor->modelIndex] == NULL)) {
         return gdl;
     }
     func_150A8050(mtx, 0.0f, actor->yaw, 0.0f);
@@ -728,7 +728,7 @@ Gfx *func_15176DF0(Gfx *gdl, SwarmActor *actor, s16 camera) {
     gSPSegment(gdl++, 1, actor->vertices);
     gDPPipeSync(gdl++);
     brightness = actor->brightness;
-    target = D_800A7170[(actor->surfaceFlags >> 5) & 3];
+    target = gSwarmGroundBrightness[(actor->surfaceFlags >> 5) & 3];
     if (brightness != target) {
         if (brightness < target) {
             brightness += D_800BE9E4 * 4;
@@ -750,14 +750,14 @@ Gfx *func_15176DF0(Gfx *gdl, SwarmActor *actor, s16 camera) {
         update = 0;
         gdl = func_15142FBC(gdl, 0x82CA0, 0x504A50, &update);
         gDPSetEnvColor(gdl++, col[0], col[1], col[2], actor->alpha);
-        gSPDisplayList(gdl++, D_800DDE80[actor->modelIndex].displayList);
+        gSPDisplayList(gdl++, gEffectModelSlots[actor->modelIndex].displayList);
     }
     return gdl;
 }
 
 /* Draws a swarm actor for camera `camera`, unless it is outside that camera's view.
- * Perched actors (state 0) use model 10's resting pose; the rest go through func_15176DF0. */
-Gfx *func_151770C8(Gfx *gdl, SwarmActor *actor, s16 camera) {
+ * Perched actors (state 0) use model 10's resting pose; the rest go through swarm_drawFlying. */
+Gfx *swarm_drawActor(Gfx *gdl, SwarmActor *actor, s16 camera) {
     MtxF mtx;
     s32 culled;
 
@@ -772,14 +772,14 @@ Gfx *func_151770C8(Gfx *gdl, SwarmActor *actor, s16 camera) {
             mtx[3][2] = actor->z;
             guMtxF2L(mtx, &actor->mtx[D_800BE9C0]);
             gSPMatrix(gdl++, &actor->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-            gSPSegment(gdl++, 1, D_800DDE80[10].unk4);
-            gSPDisplayList(gdl++, D_800DDE80[10].displayList);
+            gSPSegment(gdl++, 1, gEffectModelSlots[10].unk4);
+            gSPDisplayList(gdl++, gEffectModelSlots[10].displayList);
             break;
         case 1:
         case 2:
         case 3:
         default:
-            gdl = func_15176DF0(gdl, actor, camera);
+            gdl = swarm_drawFlying(gdl, actor, camera);
             break;
         }
     }
@@ -788,7 +788,7 @@ Gfx *func_151770C8(Gfx *gdl, SwarmActor *actor, s16 camera) {
 
 /* Flaps model `index`'s wings: updates the flap angle from the flap phase and rotates the inner
  * wing vertices by it and the outer ones by the angle 30 degrees of phase earlier. */
-void func_1517725C(u8 index) {
+void swarm_flapWings(u8 index) {
     f32 angle;
     f32 sinAngle;
     s16 x;
@@ -797,8 +797,8 @@ void func_1517725C(u8 index) {
     Vtx *vtx;
     f32 cosAngle;
 
-    flight = &D_8008D0B0[index];
-    vtx = D_800DDE80[index].unk8;
+    flight = &gSwarmFlights[index];
+    vtx = gEffectModelSlots[index].unk8;
     angle = flight->u.flap.phase * 0.01745329238f;
     flight->u.flap.angle = func_150AD78C(angle) * flight->u.flap.amplitude;
     angle = flight->u.flap.angle * 0.01745329238f;

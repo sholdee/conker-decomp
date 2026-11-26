@@ -165,7 +165,7 @@ void func_150D7790(Actor *obj, s32 action) {
     default:
         return;
     }
-    projectile = (Actor *)func_1506C460(obj->theta, 310.0f, 0.0f, 0.0f, variant * 30 + 30, 0xD, 0.0f, 1.0f,
+    projectile = (Actor *)event_spawnProjectile(obj->theta, 310.0f, 0.0f, 0.0f, variant * 30 + 30, 0xD, 0.0f, 1.0f,
                                             NULL, 1, variant == 0);
     if (projectile != NULL) {
         projectile->owner = dc_glbl_CharNum + 1;
@@ -324,7 +324,7 @@ void func_150D7928(Actor *obj) {
     } else {
         s32 volume;
         s32 pad; // matching: unused stack slot keeps the frame layout
-        func_1506B100(0, 2.0f, 4.0f);
+        event_playAnim(0, 2.0f, 4.0f);
         if (obj->shad > 75.0f) {
             timer = obj->unk102;
             if (timer < 30) {

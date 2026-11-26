@@ -255,7 +255,7 @@ typedef struct LevelHeader {
     /* 0x16 */ s16 unk16;
     /* 0x18 */ u16 maxParticles;    // level-triangle particles (game_36680)
     /* 0x1A */ u16 unk1A;           // gBonePoolSize, a count of 0x40-byte entries
-    /* 0x1C */ u16 gfxCount;        // display list length in Gfx (func_15015E80 adds 400)
+    /* 0x1C */ u16 gfxCount;        // display list length in Gfx (gfx_allocDisplayLists adds 400)
     /* 0x1E */ u16 unk1E;           // game_1B1600
     /* 0x20 */ u8  pad20;
     /* 0x21 */ u8  vtxColorFlags;   // game_1A0E60
@@ -816,7 +816,7 @@ typedef struct AnimInstance {
     /* 0x3F6 */ u8  unk3F6;         // set once the part matrices have been built
 } AnimInstance; // size 0x3F8
 
-/* One animation of a model's animation table (D_800D1588[id]); unk0 == 999 ends the table. */
+/* One animation of a model's animation table (gModelAnimTables[id]); unk0 == 999 ends the table. */
 typedef struct ActorAnim {
     /* 0x0 */ u16 unk0;
     /* 0x4 */ s32 offset; // relative to the table until model_relocateAnimTable relocates it
@@ -840,14 +840,14 @@ typedef struct {
 
 /* What a scene track drives (D_800C35F0[scene][track]). */
 typedef struct SeqTrackInfo {
-    /* 0x0 */ u16 type;     // 1 = camera, 2 = an object (func_15083E90), 3 = an actor (func_151149AC)
+    /* 0x0 */ u16 type;     // 1 = camera, 2 = an object (func_15083E90), 3 = an actor (gfx_findObjectById)
     /* 0x2 */ u8 targetId;  // object / actor id for types 2 and 3
     /* 0x3 */ u8 unk3;
     /* 0x4 */ s16 yOffset;
     /* 0x6 */ s16 unk6;
 } SeqTrackInfo; // size 0x8
 
-/* The header in front of an animation table from D_800D1588. */
+/* The header in front of an animation table from gModelAnimTables. */
 #define ANIM_HEADER(anims) ((AnimHeader *)(anims) - 1)
 
 /* Position/rotation offset of a ModelAttachment from its owner's joint. */
@@ -1048,7 +1048,7 @@ struct Actor {
     /* 0x0B0 */ s8  unkB0;
     /* 0x0B1 */ u8  padB1;
     /* 0x0B2 */ u16 unkB2;  // (oxygen?)
-    /* 0x0B4 */ f32 lastEventTime; // animation time of the last timed event (func_1506AD30)
+    /* 0x0B4 */ f32 lastEventTime; // animation time of the last timed event (event_runTimedEvents)
     /* 0x0B8 */ f32 vtilt;
     /* 0x0BC */ f32 unkBC;
     /* 0x0C0 */ f32 wantspeed;
@@ -1287,7 +1287,7 @@ struct Actor {
     /* 0x2CC */ s32 unk2CC;
     /* 0x2D0 */ AnimInstance *unk2D0;
     /* 0x2D4 */ EffectHeader *unk2D4;
-    /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for func_15071FDC, set by script command 0x22;
+    /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for event_launchPlayer, set by script command 0x22;
                                  // [0]/[1] are also a fade timer/rate (func_150DFDD0, game_F15D0)
     /* 0x2E4 */ s32 taskint[3]; // per-type state; game_EB340 saves [0]/[1] as commands 0xE/0x68;
                                 // [2] is nonzero while the unk2D8 fade runs
@@ -1365,7 +1365,7 @@ struct WorldObject {
     /* 0x40 */ s32 floorHitAttrib;   // collision material, used when materials is NULL
     /* 0x44 */ s32 *materials;       // per-triangle materials, from firstTri on
     /* 0x48 */ u8 pad48[4];
-    /* 0x4C */ u8 unk4C;            // 0: never drawn (func_15113C88)
+    /* 0x4C */ u8 unk4C;            // 0: never drawn (gfx_updateObjectShadows)
     /* 0x4D */ u8 shadowSize;         // blob shadow radius in 4-unit steps, times xScale (game_13AE20.c)
     /* 0x4E */ u8 attach;            // < 3: own transform, 3: none, 101..124: rides actor movement_obj[attach - 100]
     /* 0x4F */ u8 object_status;
@@ -1386,9 +1386,9 @@ struct WorldObject {
     /* 0x70 */ u8 state;             // 1: vertices transformed into per-frame copies, 2: drawn by func_150A50C0,
                                      // 8: removed, high nibble: objects following in its group
     /* 0x71 */ u8 object_num;        // own index in db_Object_array
-    /* 0x72 */ u8 unique_id;         // found by func_151149AC
+    /* 0x72 */ u8 unique_id;         // found by gfx_findObjectById
     /* 0x73 */ u8 task_flag;         // enum TaskFlag: bits 0-1 state, bit 2 locked
-    /* 0x74 */ u16 sound_id;         // handle from func_15114D24
+    /* 0x74 */ u16 sound_id;         // handle from gfx_playObjectSound
     /* 0x76 */ u8 pad76[2];
     /* 0x78 */ void (*onContact)(WorldObject *obj, Actor *actor);
     /* 0x7C */ union {
@@ -1415,7 +1415,7 @@ struct WorldObject {
     /* 0x90 */ u16 drawDistance;     // 0: default (gDefaultFar), 1: 40000
     /* 0x92 */ u8 contactNonPlayers;  // nonzero: onContact also runs for actors that are not players (ObjectBehavior)
     /* 0x93 */ u8 pad93;
-    /* 0x94 */ Shadow *shadow;       // created and freed by func_15113C88
+    /* 0x94 */ Shadow *shadow;       // created and freed by gfx_updateObjectShadows
     /* 0x98 */ s32 unk98;            // with unk9C, passed by address to func_1503F800
     /* 0x9C */ s32 unk9C;
 }; // size 0xA0
@@ -1958,7 +1958,7 @@ typedef struct TexCoord {
     /* 0x2 */ s16 t;
 } TexCoord;
 
-/* The texture of one particle resource (D_80095CE0[id]; game_38050.c and game_1A89B0.c read it). */
+/* The texture of one particle resource (gParticleTexInfos[id]; game_38050.c and game_1A89B0.c read it). */
 typedef struct ParticleTexInfo {
     /* 0x0 */ u8  flags;      // 0x01, 0x08: the slot's bit in D_800DDC04, D_800DDC08; 0x04: more y jitter
                               // 0x10: one frame fewer; 0x80: D_800DDBF0 = 2 (light_setupParticleSlot)
@@ -2337,7 +2337,7 @@ typedef struct SpawnPoint {
     /* 0x17 */ u8  pad17;
 } SpawnPoint; // size 0x18
 
-/* Objects a bullet trace ignores (func_151C0698 / func_151C1940, game_1ED0F0.c). */
+/* Objects a bullet trace ignores (weapon_fireBullet / weapon_filterBulletTarget, game_1ED0F0.c). */
 typedef struct IgnoreList {
     /* 0x00 */ s32 count;
     /* 0x04 */ Actor *objs[3];
@@ -2355,7 +2355,7 @@ typedef struct ParticleAxes {
     /* 0x0C */ Vec3f v;
 } ParticleAxes; // size 0x18
 
-/* Swarm script commands (game_CB1C0.c). The spawn command (script_spawnSwarm) for func_15177F90. */
+/* Swarm script commands (game_CB1C0.c). The spawn command (script_spawnSwarm) for swarm_createSwarm. */
 typedef struct SwarmSpawnCmd {
     /* 0x00 */ u8  pad0[0x7];
     /* 0x07 */ u8  memberCount;
@@ -2584,7 +2584,7 @@ typedef union LightEffectData {
     struct {
         /* 0x00 */ LightCycle cycle;
         /* 0x2C */ u8 pad2C[4];
-        /* 0x30 */ u8 objectId; // WorldObject id (func_151149AC) flagged by the cycle callbacks
+        /* 0x30 */ u8 objectId; // WorldObject id (gfx_findObjectById) flagged by the cycle callbacks
     } objectCycle;    // func_15009990
     struct GroundFlash groundFlash; // func_150EAE24
 } LightEffectData;
@@ -2762,7 +2762,7 @@ typedef struct BounceRecord {
     /* 0x8 */ s16 targetSpeed;  // re-randomised by func_150C851C
 } BounceRecord; // size 0xA
 
-/* One loaded effect model, D_800DDE80[slot] (game_1B0740 loads and frees them). */
+/* One loaded effect model, gEffectModelSlots[slot] (game_1B0740 loads and frees them). */
 typedef struct EffectModelSlot {
     /* 0x00 */ void *resource;
     /* 0x04 */ Vtx *unk4;          // two vertex buffers (swarm flap frames, wave deformation)
@@ -2872,13 +2872,13 @@ typedef struct MtxS16 {
     s16 fracPart[4][4];
 } MtxS16;
 
-/* A bone-matrix trail ("afterimage") drawn behind an object (game_1B5CC0); D_800DF7C8[type] lists them. */
+/* A bone-matrix trail ("afterimage") drawn behind an object (game_1B5CC0); gBoneTrailLists[type] lists them. */
 typedef struct BoneTrail {
     /* 0x00 */ u8 type;      /* index into the update/free/draw tables */
     /* 0x01 */ u8 numFrames; /* history length */
     /* 0x02 */ u8 numFilled; /* history frames captured so far */
     /* 0x03 */ u8 alpha;
-    /* 0x04 */ u8 maxDist;   /* max spacing between frames, see func_15189118 */
+    /* 0x04 */ u8 maxDist;   /* max spacing between frames, see trail_limitHistorySpacing */
     /* 0x06 */ s16 timer;
     /* 0x08 */ MtxS16 *frames;
     /* 0x0C */ struct BoneTrail *next;
@@ -3269,7 +3269,7 @@ typedef struct {
     /* 0x4 */ s32 unk4;
 } MessageEntry;
 
-/* Per-view list of the objects to draw this frame (D_80089240, built in game_13F9D0.c). */
+/* Per-view list of the objects to draw this frame (gViewDrawListPtrs, built in game_13F9D0.c). */
 typedef struct DrawEntry {
     /* 0x0 */ u16 index;    // into db_Object_array
     /* 0x2 */ u16 distance; // from func_150A6360
@@ -3294,7 +3294,7 @@ typedef struct HitReaction {
     /* 0x00 */ u8 unk0;  /* bit 0x80: this entry's reaction wins; & 0x7F: reaction anim kind */
     /* 0x01 */ u8 pad1[3];
     /* 0x04 */ s32 unk4; /* sound to play */
-    /* 0x08 */ u8 unk8;  /* handler index into D_80086694 */
+    /* 0x08 */ u8 unk8;  /* handler index into gHitReactionProcs */
     /* 0x09 */ u8 unk9;  /* hit-volume angle offset (high byte) / half width */
     /* 0x0A */ u8 unkA;  /* hit-volume distance / half depth */
     /* 0x0B */ u8 padB;

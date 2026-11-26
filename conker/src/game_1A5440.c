@@ -71,7 +71,7 @@ struct SwarmMember {
 };
 
 /* Spawns a swarm at (x, y, z) following targetPos (or the fixed point x, y, z), plus memberCount members. */
-void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, s32 arg6, s32 arg7, u8 arg8,
+void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, s32 arg6, s32 arg7, u8 arg8,
                    s32 playSfx, s32 argA) {
     SwarmMemberState template;
     Swarm *swarm;
@@ -154,7 +154,7 @@ void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, 
 
 
 /* Member update: steer towards the swarm, bob up and down, and pick a sprite from its velocity relative to camera_global_Cameras->TrueCameraAngle. */
-void func_15178268(SwarmMember *member) {
+void swarm_updateMember(SwarmMember *member) {
     s32 timer;
     s32 turn;
     s32 delta;
@@ -288,7 +288,7 @@ void func_15178268(SwarmMember *member) {
 }
 
 /* Member hook: defers to func_15168118 only when the swarm's viewMask has bit `view` set. */
-Gfx *func_15178750(Gfx *gfx, SwarmMember *member, s16 view) {
+Gfx *swarm_drawMember(Gfx *gfx, SwarmMember *member, s16 view) {
     Swarm *swarm;
 
     swarm = member->s.swarm;
@@ -300,7 +300,7 @@ Gfx *func_15178750(Gfx *gfx, SwarmMember *member, s16 view) {
 
 /* The empty function at 0x151787A4. */
 /* An empty callback: the function table D_8008CB64 points here. */
-void func_151787A4(void) {
+void swarm_doNothing(void) {
 }
 
 /*
@@ -308,7 +308,7 @@ void func_151787A4(void) {
  * and speed members up while far from the target.
  */
 // matching: x, y, z are scratch parameters; as locals IDO allocates them differently
-void func_151787AC(Swarm *swarm, s32 x, s32 y, s32 z) {
+void swarm_updateSwarm(Swarm *swarm, s32 x, s32 y, s32 z) {
     f32 tx;
     f32 ty;
     f32 tz;
@@ -414,7 +414,7 @@ void func_151787AC(Swarm *swarm, s32 x, s32 y, s32 z) {
 }
 
 /* Returns the live swarm with the given tag, or NULL. */
-Swarm *func_15178B98(u8 tag) {
+Swarm *swarm_findByTag(u8 tag) {
     Swarm *swarm;
 
     for (swarm = (Swarm *)D_800DCE50[0][58]; swarm != NULL; swarm = (Swarm *)swarm->header.next) {
@@ -426,10 +426,10 @@ Swarm *func_15178B98(u8 tag) {
 }
 
 /* Makes the swarm with the given tag follow targetPos. */
-void func_15178BE4(u8 tag, f32 *targetPos, s16 yOffset) {
+void swarm_setTarget(u8 tag, f32 *targetPos, s16 yOffset) {
     Swarm *swarm;
 
-    swarm = func_15178B98(tag);
+    swarm = swarm_findByTag(tag);
     if (swarm != NULL) {
         swarm->target.pos = targetPos;
         swarm->targetZ.packed = 0x80000000;
@@ -438,10 +438,10 @@ void func_15178BE4(u8 tag, f32 *targetPos, s16 yOffset) {
 }
 
 /* Makes the swarm with the given tag head for the fixed point (x, y, z). */
-void func_15178C34(u8 tag, s32 x, s32 y, s32 z, s16 yOffset) {
+void swarm_setTargetPoint(u8 tag, s32 x, s32 y, s32 z, s16 yOffset) {
     Swarm *swarm;
 
-    swarm = func_15178B98(tag);
+    swarm = swarm_findByTag(tag);
     if (swarm != NULL) {
         swarm->target.packed = (x << 16) | (y & 0xFFFF);
         swarm->targetZ.packed = z << 16;
@@ -450,14 +450,14 @@ void func_15178C34(u8 tag, s32 x, s32 y, s32 z, s16 yOffset) {
 }
 
 /* Returns the distance from the swarm with the given tag to movement_obj[index], or 1 if there is none. */
-s32 func_15178C9C(u8 tag, s32 index) {
+s32 swarm_getDistanceToActor(u8 tag, s32 index) {
     Swarm *swarm;
     s32 dx;
     s32 dy;
     s32 dz;
     s32 sum;
 
-    swarm = func_15178B98(tag);
+    swarm = swarm_findByTag(tag);
     if (swarm != NULL) {
         dx = movement_obj[index].xpos - swarm->x;
         dy = movement_obj[index].ypos - swarm->y;
@@ -472,7 +472,7 @@ s32 func_15178C9C(u8 tag, s32 index) {
 }
 
 /* Stops the swarm's sound, frees all of its members, then frees the swarm. */
-void func_15178DA4(Swarm *swarm) {
+void swarm_freeSwarm(Swarm *swarm) {
     SwarmMember *next;
     SwarmMember *member;
 
@@ -489,6 +489,6 @@ void func_15178DA4(Swarm *swarm) {
 }
 
 /* Destroys the swarm with the given tag. */
-void func_15178E14(u8 tag) {
-    func_15178DA4(func_15178B98(tag));
+void swarm_destroyByTag(u8 tag) {
+    swarm_freeSwarm(swarm_findByTag(tag));
 }

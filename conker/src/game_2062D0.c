@@ -652,7 +652,7 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
             c = 0;
             d = 0;
         }
-        splash = func_15147DA0(&spawn, &motion, 16, 1, 0, 0, a, b, 0, c, d, &style, ground, arg10, arg11);
+        splash = trail_createMotionTrail(&spawn, &motion, 16, 1, 0, 0, a, b, 0, c, d, &style, ground, arg10, arg11);
     }
     if (splash != NULL) {
         memcpy(&splash->state->burst, &burst, sizeof(burst));

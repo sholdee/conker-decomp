@@ -285,9 +285,9 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x17:
         if (cmd->a[0].w != 0) {
-            func_1518BA90(obj, 0xFF, 0);
+            trail_getActorEmitter(obj, 0xFF, 0);
         } else {
-            func_1518BBF4(obj);
+            trail_destroyAllEmitters(obj);
         }
         break;
     case 0x72:
@@ -442,7 +442,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x2F: {
         Actor *other;
 
-        other = func_15072208(obj, cmd->a[0].w);
+        other = event_getOwnedObject(obj, cmd->a[0].w);
         if (other != NULL) {
             switch (cmd->a[1].w) {
             case 0:

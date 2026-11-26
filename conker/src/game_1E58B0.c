@@ -1,18 +1,18 @@
 #include <ultra64.h>
-// matching: func_151B8908's spill slot needs func_150ADA20 declared returning s32, not u8
+// matching: weapon_spawnBulletSprite's spill slot needs func_150ADA20 declared returning s32, not u8
 #include "functions.h"
 #include "variables.h"
 
 /* The four vertex colours of the bullet particle. */
-static const VtxColor D_800AA490[4] = {
+static const VtxColor gBulletParticleColors[4] = {
     { 255, 255, 255, 255, 0 },
     { 255, 255, 255, 255, 0 },
     { 255, 255, 255, 0, 0 },
     { 255, 255, 255, 0, 0 },
 };
 
-/* Spawns the particle that follows bullet (updated by func_151B85AC). */
-BulletParticle *func_151B8400(Bullet *bullet) {
+/* Spawns the particle that follows bullet (updated by weapon_updateBulletParticle). */
+BulletParticle *weapon_spawnBulletParticle(Bullet *bullet) {
     BulletParticle *particle;
     struct {
         ParticleDef def;
@@ -47,7 +47,7 @@ BulletParticle *func_151B8400(Bullet *bullet) {
     spawn.def.fadeStart = 50;
     spawn.def.fadeRate = 5;
 
-    particle = func_1513D2F0(&spawn.def, D_800AA490, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, bullet->head.header.owner,
+    particle = func_1513D2F0(&spawn.def, gBulletParticleColors, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, bullet->head.header.owner,
                              bullet->head.header.kind);
     if (particle != NULL) {
         memcpy(&particle->bullet, &spawn.owner, sizeof(spawn.owner));
@@ -57,7 +57,7 @@ BulletParticle *func_151B8400(Bullet *bullet) {
 
 /* Keeps the particle on its bullet and advances unk28 by unk34; flags the particle (bit 0) once the
  * bullet is gone. */
-s32 func_151B85AC(BulletParticle *particle) {
+s32 weapon_updateBulletParticle(BulletParticle *particle) {
     Bullet *bullet = particle->bullet;
 
     if (bullet != NULL) {
@@ -72,12 +72,12 @@ s32 func_151B85AC(BulletParticle *particle) {
 }
 
 /* Draws the particle with the default particle drawer. */
-void func_151B863C(BulletParticle *particle, s16 viewport) {
+void weapon_drawBulletParticle(BulletParticle *particle, s16 viewport) {
     func_1513FA70(&particle->head, viewport);
 }
 
 /* Starts a BloodTrail effect (emitter 3) that tracks the bullet's position. */
-BloodTrail *func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
+BloodTrail *weapon_startBulletTrail(Bullet *bullet, u8 fxOwner, s32 fxList) {
     s32 pad; // matching: stack space
     BloodTrailDesc desc;
 
@@ -95,7 +95,7 @@ BloodTrail *func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
 
 /* Emitter callback (D_80089B08): spawns one particle at (x, y, z), flung in a random direction and
  * pushed against the emitter's movement (dx, dy, dz). */
-void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
+void weapon_emitBulletTrailParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
     Vec3f position;
     Vec3f velocity;
     Vec3f acceleration;
@@ -128,15 +128,15 @@ void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
                   effect->owner, effect->kind);
 }
 
-static const TextureChoices D_800AA4B8 = { { 0x60, 0x61, 0x62, 0x63 } };
+static const TextureChoices gBulletSpriteTextures = { { 0x60, 0x61, 0x62, 0x63 } };
 
 /* Spawns a particle at the bullet's position, with a random texture choice and random flag bits 0x40 / 0x80. */
-SpriteParticle *func_151B8908(Bullet *bullet) {
+SpriteParticle *weapon_spawnBulletSprite(Bullet *bullet) {
     s32 pad; // matching: unused frame slot above spawn
     ParticleDesc spawn;
     TextureChoices choices;
 
-    choices = D_800AA4B8;
+    choices = gBulletSpriteTextures;
     spawn.texture = choices.texture[func_150ADA20() & 3];
     spawn.renderMode = 0x1303;
     spawn.unk0 = 0x200005;

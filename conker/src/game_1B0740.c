@@ -2,11 +2,11 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/swarm.h describes it. */
-EffectModelSlot D_800DDE80[11];
-u8 D_800DDF5C[4];
-u8 D_800DDF60[4];
-s8 D_800DDF68[11];
-Gfx *D_800DDF78[11];
+EffectModelSlot gEffectModelSlots[11];
+u8 gSwarmGroupsInUse[4];
+u8 gSwarmGroupSoundTimers[4];
+s8 gEffectModelSlotStates[11];
+Gfx *gEffectModelSecondDls[11];
 
 #include "functions.h"
 #include "variables.h"
@@ -14,10 +14,10 @@ Gfx *D_800DDF78[11];
 /*
  * Effect model slots.
  *
- * D_800DDE80[11] holds one loaded model per slot (EffectModelSlot).
- * D_800DDF68[slot] is the slot's use state: 1 = used this frame, then counts down each frame;
- * -2 = unused, freed by func_15183D28.  D_800DDF78[slot] is the model's second display list.
- * D_800DDF5C[4] marks the swarm groups handed out by func_15183290.
+ * gEffectModelSlots[11] holds one loaded model per slot (EffectModelSlot).
+ * gEffectModelSlotStates[slot] is the slot's use state: 1 = used this frame, then counts down each frame;
+ * -2 = unused, freed by swarm_updateModelSlots.  gEffectModelSecondDls[slot] is the model's second display list.
+ * gSwarmGroupsInUse[4] marks the swarm groups handed out by swarm_spawnEffect.
  */
 
 /* Model resource returned by the loader func_1502B6BC. */
@@ -31,17 +31,17 @@ typedef struct ModelResource {
     /* 0x18 */ Gfx *unk18;
 } ModelResource;
 
-/* The model id of each slot (func_15183BA4 looks a model up here). */
-static const u8 D_800A72D0[11] = { 10, 10, 21, 22, 23, 24, 20, 19, 68, 69, 19 };
+/* The model id of each slot (swarm_callModelSecondDl looks a model up here). */
+static const u8 gEffectModelSlotIds[11] = { 10, 10, 21, 22, 23, 24, 20, 19, 68, 69, 19 };
 /* The wing vertex indices that func_15165C80 moves, per slot: left half, then right half. */
 static const u8 D_800A72DC[2] = { 13, 16 };
 static const u8 D_800A72E0[2] = { 1, 3 };
 static const u8 D_800A72E4[4] = { 9, 10, 13, 16 };
 /* The number of wing vertex indices per slot. */
-static const u8 D_800A72E8[7] = { 2, 2, 2, 2, 2, 2, 4 };
+static const u8 gSlotWingVertexCounts[7] = { 2, 2, 2, 2, 2, 2, 4 };
 
 /* Per-slot motion parameters: this file wobbles the wings of slots 0..6 between minAngle and maxAngle. */
-SwarmFlight D_8008D0B0[11] = {
+SwarmFlight gSwarmFlights[11] = {
     { 10, 8, 60, 60, 40.0f, 40.0f, 10.0f, 4.0f, 2.0f, { { 0.0f, 0.0f, 0.0f, 17.0f, 45.0f, -45.0f, 35.0f, 0.0f } } },
     { 12, 8, 60, 60, 40.0f, 40.0f, 10.0f, 4.0f, 2.0f, { { 0.0f, 0.0f, 0.0f, 15.0f, 45.0f, -45.0f, 35.0f, 0.0f } } },
     { 2, 1, 10, 10, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 0.0f, 0.0f, 0.0f, 10.0f, 75.0f, 10.0f, 49.0f, 0.0f } } },
@@ -56,14 +56,14 @@ SwarmFlight D_8008D0B0[11] = {
 };
 
 /* The wobble of the second vertex set of slots 2..4. */
-static SwarmFlight D_8008D318[3] = {
+static SwarmFlight gSwarmAltWobbles[3] = {
     { 2, 1, 10, 10, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 0.0f, 0.0f, 0.0f, 0.5f, 75.0f, 40.0f, 49.0f, 0.0f } } },
     { 2, 1, 10, 10, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 0.0f, 0.0f, 0.0f, 0.400000006f, 75.0f, 40.0f, 49.0f, 0.0f } } },
     { 2, 1, 10, 10, 40.0f, 40.0f, 5.0f, 8.0f, 4.0f, { { 0.0f, 0.0f, 0.0f, 0.3000000119f, 75.0f, 40.0f, 49.0f, 0.0f } } },
 };
 
 /* The wing vertex indices of each wobbling slot. */
-static const u8 *D_8008D3C0[7] = {
+static const u8 *gSlotWingVertices[7] = {
     D_800A72DC, D_800A72DC, D_800A72E0, D_800A72E0, D_800A72E0, D_800A72E0, D_800A72E4,
 };
 
@@ -71,13 +71,13 @@ static const u8 *D_8008D3C0[7] = {
  * Spawns effect `type` at (x, y, z) for `player`, loading the models it needs.
  * Returns the swarm group used, or -1 if no group is free or the effect can't start.
  */
-s32 func_15183290(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 player, s32 maxRadius,
+s32 swarm_spawnEffect(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 player, s32 maxRadius,
                   s32 heightRange, s32 minRadius, s32 spawnFlags) {
     s32 group;
     Actor *target;
 
     for (group = 0; group < 4; group++) {
-        if (D_800DDF5C[group] == 0) {
+        if (gSwarmGroupsInUse[group] == 0) {
             break;
         }
     }
@@ -90,56 +90,56 @@ s32 func_15183290(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 play
     target = camera_global_Cameras[player].CharPtr;
     switch (type) {
         case 0:
-            func_15177F90(count, NULL, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);
+            swarm_createSwarm(count, NULL, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);
             break;
         case 1:
-            func_15177F90(count, &movement_obj[0].xpos, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);
+            swarm_createSwarm(count, &movement_obj[0].xpos, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);
             break;
         case 2:
-            func_151838B0(0);
-            func_15175390(count, group, x, y, z, 63, player, 30, 0, 0x30003, 10, 0, 0, 1, 2, 0.8000000119f, 0.5f,
+            swarm_loadModelWithAltVerts(0);
+            swarm_spawnRing(count, group, x, y, z, 63, player, 30, 0, 0x30003, 10, 0, 0, 1, 2, 0.8000000119f, 0.5f,
                           spawnFlags);
             break;
         case 3:
             if (func_15184118(target)) {
-                func_15174BF0(count, group, x, y, z, player, 0.8000000119f, 0.5f, spawnFlags);
+                swarm_spawnAwayFromPlayer(count, group, x, y, z, player, 0.8000000119f, 0.5f, spawnFlags);
                 break;
             }
             return -1;
         case 8:
             return -1;
         case 4:
-            func_151839F0(7, 10);
-            func_15174FA4(count, group, x, y, z, maxRadius * 4, player, 0, 0.8000000119f, 0.5f);
+            swarm_loadModelWithExtra(7, 10);
+            swarm_spawnScattered(count, group, x, y, z, maxRadius * 4, player, 0, 0.8000000119f, 0.5f);
             break;
         case 10:
-            func_15183ACC(7);
-            func_15174FA4(count, group, x, y, z, maxRadius * 4, player, 1, 0.8000000119f, 0.5f);
+            swarm_loadModel(7);
+            swarm_spawnScattered(count, group, x, y, z, maxRadius * 4, player, 1, 0.8000000119f, 0.5f);
             break;
         case 11:
-            func_15183ACC(2);
-            func_15183ACC(3);
-            func_15183ACC(4);
-            func_15183ACC(5);
-            func_15175390(count, group, x, y, z, maxRadius, player, heightRange, minRadius, 0x4D, 21, 3, 2, -1, 0,
+            swarm_loadModel(2);
+            swarm_loadModel(3);
+            swarm_loadModel(4);
+            swarm_loadModel(5);
+            swarm_spawnRing(count, group, x, y, z, maxRadius, player, heightRange, minRadius, 0x4D, 21, 3, 2, -1, 0,
                           0.8000000119f, 0.5f, spawnFlags);
             break;
         case 5:
-            func_15183ACC(2);
-            func_15183ACC(3);
-            func_15183ACC(4);
-            func_15183ACC(5);
-            func_15175390(count, group, x, y, z, maxRadius, player, heightRange, minRadius, 0x4D, 21, 3, 2, -1, 2,
+            swarm_loadModel(2);
+            swarm_loadModel(3);
+            swarm_loadModel(4);
+            swarm_loadModel(5);
+            swarm_spawnRing(count, group, x, y, z, maxRadius, player, heightRange, minRadius, 0x4D, 21, 3, 2, -1, 2,
                           0.8000000119f, 0.5f, spawnFlags);
             break;
         case 6:
-            func_15183974(8);
-            func_15175390(count, group, x, y, z, maxRadius, player, heightRange, minRadius, 0x7D, 68, 2, 8, -1, 2,
+            swarm_loadModelPair(8);
+            swarm_spawnRing(count, group, x, y, z, maxRadius, player, heightRange, minRadius, 0x7D, 68, 2, 8, -1, 2,
                           0.8000000119f, 0.5f, spawnFlags);
             break;
         case 7:
-            func_15183ACC(6);
-            func_15175390(count, group, x, y, z, maxRadius, player, heightRange, minRadius, 0x4D, 20, 0, 6, 0, 2,
+            swarm_loadModel(6);
+            swarm_spawnRing(count, group, x, y, z, maxRadius, player, heightRange, minRadius, 0x4D, 20, 0, 6, 0, 2,
                           0.03999999911f, 0.02500000037f, spawnFlags);
             break;
         case 9:
@@ -147,179 +147,179 @@ s32 func_15183290(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 play
             break;
     }
     if (type != 9) {
-        D_800DDF5C[group] = 1;
+        gSwarmGroupsInUse[group] = 1;
     }
     return group;
 }
 
 /* Loads model `slot` and, into slot + 1, its alternate vertex set (sharing slot's display list). */
-void func_151838B0(s32 slot) {
+void swarm_loadModelWithAltVerts(s32 slot) {
     ModelResource *res;
 
-    if (D_800DDE80[slot].resource == NULL) {
-        func_15183ACC(slot);
+    if (gEffectModelSlots[slot].resource == NULL) {
+        swarm_loadModel(slot);
     }
-    if (D_800DDE80[slot + 1].resource == NULL) {
+    if (gEffectModelSlots[slot + 1].resource == NULL) {
         res = func_1502B6BC(0, 0, 0, 2, 9, slot + 0xAE);
         if (res != NULL) {
-            D_800DDE80[slot + 1].resource = res;
-            D_800DDE80[slot + 1].unk4 = res->unk0;
-            D_800DDE80[slot + 1].unk8 = res->unk8;
-            D_800DDE80[slot + 1].unk10 = NULL;
-            D_800DDE80[slot + 1].displayList = D_800DDE80[slot].displayList;
-            D_800DDF68[slot + 1] = 1;
+            gEffectModelSlots[slot + 1].resource = res;
+            gEffectModelSlots[slot + 1].unk4 = res->unk0;
+            gEffectModelSlots[slot + 1].unk8 = res->unk8;
+            gEffectModelSlots[slot + 1].unk10 = NULL;
+            gEffectModelSlots[slot + 1].displayList = gEffectModelSlots[slot].displayList;
+            gEffectModelSlotStates[slot + 1] = 1;
         }
     }
 }
 
 /* Loads models `slot` and slot + 1, giving slot + 1 slot's display list. */
-void func_15183974(s32 slot) {
-    if (D_800DDE80[slot].resource == NULL) {
-        func_15183ACC(slot);
+void swarm_loadModelPair(s32 slot) {
+    if (gEffectModelSlots[slot].resource == NULL) {
+        swarm_loadModel(slot);
     }
-    if (D_800DDE80[slot + 1].resource == NULL) {
-        func_15183ACC(slot + 1);
-        D_800DDE80[slot + 1].displayList = D_800DDE80[slot].displayList;
+    if (gEffectModelSlots[slot + 1].resource == NULL) {
+        swarm_loadModel(slot + 1);
+        gEffectModelSlots[slot + 1].displayList = gEffectModelSlots[slot].displayList;
     }
 }
 
 /* Loads model `slot` and, once it is loaded, the vertex-only model `extraSlot`. */
-void func_151839F0(s32 slot, s32 extraSlot) {
+void swarm_loadModelWithExtra(s32 slot, s32 extraSlot) {
     ModelResource *res;
 
-    if (D_800DDE80[slot].resource == NULL) {
-        func_15183ACC(slot);
+    if (gEffectModelSlots[slot].resource == NULL) {
+        swarm_loadModel(slot);
     }
-    if (D_800DDE80[slot].resource != NULL && D_800DDE80[extraSlot].resource == NULL) {
+    if (gEffectModelSlots[slot].resource != NULL && gEffectModelSlots[extraSlot].resource == NULL) {
         res = func_1502B6BC(0, 0, 0, 2, 9, extraSlot + 0xAD);
         if (res != NULL) {
-            D_800DDE80[extraSlot].resource = res;
-            D_800DDE80[extraSlot].unk4 = res->unk0;
-            D_800DDE80[extraSlot].unk8 = res->unk8;
-            D_800DDE80[extraSlot].displayList = res->unk18;
-            D_800DDE80[extraSlot].unk10 = NULL;
-            D_800DDF68[extraSlot] = 1;
+            gEffectModelSlots[extraSlot].resource = res;
+            gEffectModelSlots[extraSlot].unk4 = res->unk0;
+            gEffectModelSlots[extraSlot].unk8 = res->unk8;
+            gEffectModelSlots[extraSlot].displayList = res->unk18;
+            gEffectModelSlots[extraSlot].unk10 = NULL;
+            gEffectModelSlotStates[extraSlot] = 1;
         }
     }
 }
 
 /* Loads model `slot` (asset slot + 0xAD) if it isn't loaded yet. */
-void func_15183ACC(s32 slot) {
+void swarm_loadModel(s32 slot) {
     ModelResource *res;
 
-    if (D_800DDE80[slot].resource == NULL) {
+    if (gEffectModelSlots[slot].resource == NULL) {
         res = func_1502B6BC(0, 0, 0, 2, 9, slot + 0xAD);
         if (res != NULL) {
-            D_800DDE80[slot].resource = res;
-            D_800DDE80[slot].unk4 = res->unk0;
-            D_800DDE80[slot].unk8 = res->unk8;
-            D_800DDE80[slot].displayList = res->unk18;
-            D_800DDF78[slot] = res->unk10;
-            func_1510CE60(D_800DDF78[slot], 0, 1, 0x3E, &D_800DDE80[slot].unk10);
-            D_800DDF68[slot] = 1;
+            gEffectModelSlots[slot].resource = res;
+            gEffectModelSlots[slot].unk4 = res->unk0;
+            gEffectModelSlots[slot].unk8 = res->unk8;
+            gEffectModelSlots[slot].displayList = res->unk18;
+            gEffectModelSecondDls[slot] = res->unk10;
+            func_1510CE60(gEffectModelSecondDls[slot], 0, 1, 0x3E, &gEffectModelSlots[slot].unk10);
+            gEffectModelSlotStates[slot] = 1;
         }
     }
 }
 
 /* Appends a call to the second display list of the slot whose model id is `modelId`, if it is loaded. */
-Gfx *func_15183BA4(Gfx *gdl, s32 modelId, s32 arg2, s32 arg3) {
+Gfx *swarm_callModelSecondDl(Gfx *gdl, s32 modelId, s32 arg2, s32 arg3) {
     s32 slot;
     s32 i;
 
     slot = -1;
     for (i = 0; i < 11; i++) {
-        if (modelId == D_800A72D0[i]) {
+        if (modelId == gEffectModelSlotIds[i]) {
             slot = i;
             break;
         }
     }
 
-    if (slot != -1 && D_800DDF78[slot] != NULL) {
-        gSPDisplayList(gdl++, D_800DDF78[slot]);
+    if (slot != -1 && gEffectModelSecondDls[slot] != NULL) {
+        gSPDisplayList(gdl++, gEffectModelSecondDls[slot]);
     }
     return gdl;
 }
 
 /* Frees model `slot`. Slots 8 and 9 are a pair: slot 8's model is kept until slot 9 is unused too, and freeing
  * slot 9 after slot 8 also frees slot 8's model. */
-void func_15183C28(s32 slot) {
-    if (D_800DDE80[slot].unk10 != NULL) {
-        func_1510D630(D_800DDE80[slot].unk10);
-        D_800DDE80[slot].unk10 = NULL;
+void swarm_freeModel(s32 slot) {
+    if (gEffectModelSlots[slot].unk10 != NULL) {
+        func_1510D630(gEffectModelSlots[slot].unk10);
+        gEffectModelSlots[slot].unk10 = NULL;
     }
     if (slot == 8) {
-        if (D_800DDF68[9] != -2) {
+        if (gEffectModelSlotStates[9] != -2) {
             return;
         }
-    } else if (slot == 9 && D_800DDF68[8] == -2 && D_800DDE80[8].resource != NULL) {
+    } else if (slot == 9 && gEffectModelSlotStates[8] == -2 && gEffectModelSlots[8].resource != NULL) {
         // matching: as below, the int-to-pointer cast keeps the argument in v0 before the move to a0
-        func_10004074((void *)(s32)D_800DDE80[8].resource);
-        D_800DDE80[8].resource = NULL;
-        D_800DDF78[8] = NULL;
+        func_10004074((void *)(s32)gEffectModelSlots[8].resource);
+        gEffectModelSlots[8].resource = NULL;
+        gEffectModelSecondDls[8] = NULL;
     }
-    if (D_800DDE80[slot].resource != NULL) {
+    if (gEffectModelSlots[slot].resource != NULL) {
         // matching: IDO reloads the argument into a0 directly unless it goes through an int-to-pointer cast
-        func_10004074((void *)(s32)D_800DDE80[slot].resource);
-        D_800DDE80[slot].resource = NULL;
-        D_800DDF78[slot] = NULL;
+        func_10004074((void *)(s32)gEffectModelSlots[slot].resource);
+        gEffectModelSlots[slot].resource = NULL;
+        gEffectModelSecondDls[slot] = NULL;
     }
 }
 
 /* Per-frame update: ages the slots, animates the used ones and frees the ones no longer used. */
-void func_15183D28(void) {
+void swarm_updateModelSlots(void) {
     s32 i;
     s32 value;
     SwarmFlight *wave;
 
     for (i = 0; i < 11; i++) {
-        if (D_800DDF68[i] >= -1 && (D_800DDE80[i].resource == NULL || D_800DDF78[i] == NULL)) {
-            D_800DDF68[i] = -2;
+        if (gEffectModelSlotStates[i] >= -1 && (gEffectModelSlots[i].resource == NULL || gEffectModelSecondDls[i] == NULL)) {
+            gEffectModelSlotStates[i] = -2;
         }
     }
     for (i = 0; i < 4; i++) {
-        if (D_800DDF60[i] > 0) {
-            value = D_800DDF60[i] - D_800BE9E4;
+        if (gSwarmGroupSoundTimers[i] > 0) {
+            value = gSwarmGroupSoundTimers[i] - D_800BE9E4;
             if (value < 0) {
                 value = 0;
             }
-            D_800DDF60[i] = value;
+            gSwarmGroupSoundTimers[i] = value;
         }
     }
     for (i = 0; i < 7; i++) {
-        if (D_800DDF68[i] == 1) {
-            wave = &D_8008D0B0[i];
-            func_15165C80(&wave->u.wobble.angle, D_800DDE80[i].unk8, wave->u.wobble.radius, &wave->u.wobble.velocity, wave->u.wobble.maxAngle,
-                          wave->u.wobble.minAngle, D_8008D3C0[i], D_800A72E8[i]);
+        if (gEffectModelSlotStates[i] == 1) {
+            wave = &gSwarmFlights[i];
+            func_15165C80(&wave->u.wobble.angle, gEffectModelSlots[i].unk8, wave->u.wobble.radius, &wave->u.wobble.velocity, wave->u.wobble.maxAngle,
+                          wave->u.wobble.minAngle, gSlotWingVertices[i], gSlotWingVertexCounts[i]);
         }
     }
     for (i = 2; i < 5; i++) {
-        if (D_800DDF68[i] == 1) {
-            wave = &D_8008D318[i - 2];
-            func_15165C80(&wave->u.wobble.angle, D_800DDE80[i].unk4, wave->u.wobble.radius, &wave->u.wobble.velocity, wave->u.wobble.maxAngle,
-                          wave->u.wobble.minAngle, D_8008D3C0[i], D_800A72E8[i]);
+        if (gEffectModelSlotStates[i] == 1) {
+            wave = &gSwarmAltWobbles[i - 2];
+            func_15165C80(&wave->u.wobble.angle, gEffectModelSlots[i].unk4, wave->u.wobble.radius, &wave->u.wobble.velocity, wave->u.wobble.maxAngle,
+                          wave->u.wobble.minAngle, gSlotWingVertices[i], gSlotWingVertexCounts[i]);
         }
     }
-    if (D_800DDF68[7] == 1) {
-        func_1517725C(7);
+    if (gEffectModelSlotStates[7] == 1) {
+        swarm_flapWings(7);
     }
     for (i = 0; i < 2; i++) {
-        if (D_800DDF68[i + 8] == 1) {
+        if (gEffectModelSlotStates[i + 8] == 1) {
             func_15179DB0(i + 8);
         }
     }
-    if (D_800DDF68[7] == 1) {
-        D_800DDF68[10] = 1;
+    if (gEffectModelSlotStates[7] == 1) {
+        gEffectModelSlotStates[10] = 1;
     }
     for (i = 0; i < 11; i++) {
-        if (D_800DDF68[i] == -2 && D_800DDE80[i].resource != NULL) {
-            func_15183C28(i);
+        if (gEffectModelSlotStates[i] == -2 && gEffectModelSlots[i].resource != NULL) {
+            swarm_freeModel(i);
         }
     }
     for (i = 0; i < 11; i++) {
-        if (D_800DDF68[i] > 0) {
-            D_800DDF68[i] = 0;
-        } else if (D_800DDF68[i] >= -1) {
-            D_800DDF68[i]--;
+        if (gEffectModelSlotStates[i] > 0) {
+            gEffectModelSlotStates[i] = 0;
+        } else if (gEffectModelSlotStates[i] >= -1) {
+            gEffectModelSlotStates[i]--;
         }
     }
 }

@@ -95,7 +95,7 @@ void func_150F34F4(Actor *actor) {
         func_15052590(actor);
         if (D_800CC26D != 0) {
             if (actor->shad > 30.0f) {
-                D_800D1580 = 0xFF010074;
+                gEventParam = 0xFF010074;
                 func_1506E8D8();
                 actor_attachToHost(&movement_obj[D_800CC26D - 100], dc_glbl_CharNum);
                 actor->lifting = D_800CC26D;
@@ -237,7 +237,7 @@ void func_150F34F4(Actor *actor) {
             actor->yspd = 20.0f;
             actor_attachToHost(&movement_obj[D_800CC26D - 100], dc_glbl_CharNum);
             actor->lifting = D_800CC26D;
-            D_800D1580 = 0xFF010074;
+            gEventParam = 0xFF010074;
             func_1506E8D8();
         }
         if (actor->lifting != 0) {
@@ -255,7 +255,7 @@ void func_150F34F4(Actor *actor) {
                 rider->noshove &= ~0x400;
                 actor->lifting = 0;
                 actor->yspd = 0.0f;
-                D_800D1580 = 0x76;
+                gEventParam = 0x76;
                 func_1506E8D8();
             }
         } else if ((D_800CC288 & Z_TRIG) && (actor->unk103 == 0)) {
@@ -267,9 +267,9 @@ void func_150F34F4(Actor *actor) {
                     }
                 }
                 if (count < 5) {
-                    D_800D1580 = 6;
+                    gEventParam = 6;
                     actor->unk103 = 4;
-                    func_15073FA0();
+                    event_spawnThrownItem();
                 }
             }
         }
@@ -279,13 +279,13 @@ void func_150F34F4(Actor *actor) {
         if ((gCurrentPad->button & B_BUTTON) || (actor->unk86 != 0) || (actor->lifting != 0)) {
             if (actor->lifting != 0) {
                 if (actor->yspd < -10.0f) {
-                    D_800D1580 = 0xFF0100A7;
+                    gEventParam = 0xFF0100A7;
                     func_1506E5FC();
-                    D_800D1580 = 0xFF060372;
+                    gEventParam = 0xFF060372;
                     func_1506E8D8();
                 }
             } else if (actor->ypos < 0.0f) {
-                D_800D1580 = 0xFF010072;
+                gEventParam = 0xFF010072;
                 func_1506E8D8();
             }
             if (actor->lifting == 0) {

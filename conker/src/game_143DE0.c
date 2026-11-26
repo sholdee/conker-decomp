@@ -77,7 +77,7 @@ void func_151169B4(WorldObject *obj) {
         }
         step = obj->moveData.word & ~0xFC00;
         if (sound != 0 && obj->sound_id == 0 && D_80089260[sound].open != 0) {
-            func_15114D24(obj, D_80089260[sound].open, 24000, 2000, 4000, 0);
+            gfx_playObjectSound(obj, D_80089260[sound].open, 24000, 2000, 4000, 0);
         }
         step = (step * D_800BE9E4) >> 1;
         pos = &obj->x;
@@ -104,7 +104,7 @@ void func_151169B4(WorldObject *obj) {
         obj->moveX = obj->moveY = obj->moveZ = 0;
         if (obj->sound_id != 0) {
             if (sound != 0 && D_80089260[sound].opened != 0) {
-                func_15114D24(obj, D_80089260[sound].opened, 24000, 2000, 4000, 4);
+                gfx_playObjectSound(obj, D_80089260[sound].opened, 24000, 2000, 4000, 4);
             }
             obj->sound_id = 0;
         }
@@ -129,7 +129,7 @@ void func_15116BAC(WorldObject *obj) {
     maxDist = 0;
     rate = obj->moveData.word & ~0xFC00;
     if (sound != 0 && obj->sound_id == 0 && D_80089260[sound].open != 0) {
-        func_15114D24(obj, D_80089260[sound].open, 24000, 2000, 4000, 0);
+        gfx_playObjectSound(obj, D_80089260[sound].open, 24000, 2000, 4000, 0);
         started = TRUE;
     }
     step = (rate * D_800BE9E4) >> 1;
@@ -161,7 +161,7 @@ void func_15116BAC(WorldObject *obj) {
     if (sound != 0 && D_80089260[sound].arrive != 0) {
         maxDist -= (D_80089260[sound].arriveLead * rate) >> 1;
         if (maxDist <= 0 && (maxDist > -step || started)) {
-            func_15114D24(obj, D_80089260[sound].arrive, 24000, 2000, 4000, 0);
+            gfx_playObjectSound(obj, D_80089260[sound].arrive, 24000, 2000, 4000, 0);
         }
     }
 }
@@ -285,7 +285,7 @@ f32 func_151172D8(WorldObject *obj, f32 angle) {
     target = (obj->moveData.word << 22) >> 22;
     if (angle != target || velocity != 0.0f) {
         if (velocity == 0.0f && (obj->moveData.word >> 10) != 0 && D_80089260[obj->moveData.word >> 10].open != 0) {
-            func_15114D24(obj, D_80089260[obj->moveData.word >> 10].open, 24000, 200, 2500, 0);
+            gfx_playObjectSound(obj, D_80089260[obj->moveData.word >> 10].open, 24000, 200, 2500, 0);
         }
         angle += velocity * D_800BE9E4;
         delta = func_15048A70(angle, target);

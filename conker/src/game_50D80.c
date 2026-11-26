@@ -580,7 +580,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             D_800C35C2 = event->unk4 + 1;
             D_800C35C3 = level;
         } else if (event->value == 3) {
-            WorldObject *target = func_151149AC(event->unk6);
+            WorldObject *target = gfx_findObjectById(event->unk6);
 
             if (target == NULL) {
                 return 1;
@@ -627,7 +627,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     light_sendEvent(0x28, 0x17, 0);
                     break;
                 case 6:
-                    func_151CD35C(event->unk5);
+                    trail_startStream(event->unk5);
                     break;
                 case 7:
                     light_setGroupDisabled(3, event->unk5 ? 0 : 1);
@@ -669,7 +669,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_15169040(0, 0x4F);
                     break;
                 case 18:
-                    func_151CD394(event->unk5);
+                    trail_stopStream(event->unk5);
                     break;
                 case 19:
                     light_setGroupDisabled(0xB, 0);
@@ -729,7 +729,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x36) {
             if (event->unk4 == 0) {
-                func_1519D030(obj, 0, 300, 0, sceneTag, 0);
+                trail_startMatrixTrail(obj, 0, 300, 0, sceneTag, 0);
             } else if (event->unk4 == 1) {
                 ActorRef ref;
 
@@ -859,9 +859,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x4A) {
             if (event->unk4 == 0) {
-                func_10011FB0(event->unk5);
+                audio_setMixOverride(event->unk5);
             } else {
-                func_10011FB0(0);
+                audio_setMixOverride(0);
             }
         } else if (event->value == 0x54) {
             D_800C3660[scene] = ~event->unk4;
@@ -1187,7 +1187,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 if (count == 0) {
                     count = 0xC;
                 }
-                func_15177F90(count, pos, 0xFF, pos[0], pos[1], pos[2], 0, duration, sceneTag, 0, event->unk6);
+                swarm_createSwarm(count, pos, 0xFF, pos[0], pos[1], pos[2], 0, duration, sceneTag, 0, event->unk6);
             }
         } else if (event->value == 0x1A) {
             if (event->unk4 != 0 && event->unk4 == 1) { // matching: redundant test kept for codegen
@@ -1276,7 +1276,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (obj == NULL) {
                 return 1;
             }
-            func_151A3390(obj, sceneTag);
+            trail_spawnActorBoneTrail(obj, sceneTag);
         } else if (event->value == 0x20) {
             func_15165F80(-1, pos[0], pos[1], pos[2], 0x14, 0x14, 1, sceneTag, 1);
         } else if (event->value == 6) {
@@ -1708,7 +1708,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                                     p2 = &vec;
                                     if (func_1514654C(obj, attachment, 0, &p1, &p2, 1) != 0) {
                                         func_151C5588(obj, &vec, 0x46, sceneTag, 1);
-                                        func_151C56A4(&vec, sceneTag, 1);
+                                        weapon_spawnLightAt(&vec, sceneTag, 1);
                                     }
                                 }
                                 break;
@@ -1738,7 +1738,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 }
                 case 4:
-                    func_151CFA4C(obj, sceneTag, 1);
+                    trail_breakApart(obj, sceneTag, 1);
                     break;
                 case 5:
                     if (obj != NULL) {
@@ -1748,7 +1748,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         if (event->unk6 != 0) {
                             attachment = func_1503195C(obj, event->unk5 ? 0xA4 : 0xA5, 0);
                         }
-                        func_151C62D0(obj, event->unk5, 1, attachment, event->unk5 ? 0xA4 : 0xA5, sceneTag, 1);
+                        weapon_fireJointShot(obj, event->unk5, 1, attachment, event->unk5 ? 0xA4 : 0xA5, sceneTag, 1);
                     }
                     break;
                 case 6:
@@ -1790,7 +1790,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                                 break;
                         }
                         func_15143134(sel, &out, &obj->ob_matrix_ptr[bones[event->unk5]]);
-                        func_151C329C(&out, sceneTag, 1);
+                        weapon_spawnImpactBurst(&out, sceneTag, 1);
                     }
                     break;
                 }
@@ -2050,7 +2050,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             f9 = (state->unk18 * 0.1000000015f) + 1.0f;
             f10 = state->unk1C * 0.1000000015f;
             n = (event->unk5 != 0) ? event->unk5 : 0x64;
-            func_15148F1C(type, pos[0], pos[1], pos[2], i4, i5, i6, f7, n, f9, f10, sceneTag);
+            trail_launchMotionTrail(type, pos[0], pos[1], pos[2], i4, i5, i6, f7, n, f9, f10, sceneTag);
         } else if (event->value == 0x35) {
             s32 type;
 
@@ -2411,14 +2411,14 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (actor != NULL) {
                 if (event->unk4 == 0) {
-                    func_1518894C(actor, duration, event->unk5);
+                    trail_startObjectAfterimage(actor, duration, event->unk5);
                 } else if (skipping != 0) { // matching: empty, but it still shapes the code
                 }
             } else if (obj != NULL) {
                 if (event->unk4 == 0) {
-                    func_15188810(obj, duration, event->unk5);
+                    trail_startActorAfterimage(obj, duration, event->unk5);
                 } else if (skipping != 0) {
-                    func_15188AD0(obj);
+                    trail_removeActorAfterimages(obj);
                 }
             }
         } else if (event->value == 0x57) {
@@ -2461,7 +2461,7 @@ void func_1502A8A0(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 sce
         }
         pos = &obj->xpos;
     } else if (info->type == 3) {
-        actor = func_151149AC(info->targetId);
+        actor = gfx_findObjectById(info->targetId);
         if (actor == NULL) {
             return;
         }

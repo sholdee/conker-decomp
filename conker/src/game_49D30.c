@@ -664,7 +664,7 @@ void func_1501DF04(s32 scene) {
     if (mp3_isPlaying() != 0) {
         func_151F2BA8();
     }
-    obj = func_15072208(movement_obj, 0);
+    obj = event_getOwnedObject(movement_obj, 0);
     if (obj != NULL) {
         actor_remove(obj, 0);
     }
@@ -1669,7 +1669,7 @@ void func_15020EC4(s32 scene) {
                     } else if (ENT(scene, track)->targetId == 3) {
                         WorldObject *actor3;
 
-                        actor3 = func_151149AC(ENT(scene, track)->unk3);
+                        actor3 = gfx_findObjectById(ENT(scene, track)->unk3);
                         if (actor3 == NULL) {
                             continue;
                         }
@@ -1693,7 +1693,7 @@ void func_15020EC4(s32 scene) {
                         func_1512D560(player, 7, &gCamShot);
                     }
                 } else if (ENT(scene, track)->type == 3) {
-                    actor = func_151149AC(ENT(scene, track)->targetId);
+                    actor = gfx_findObjectById(ENT(scene, track)->targetId);
                     if (actor == NULL) {
                         continue;
                     }
@@ -2109,7 +2109,7 @@ void func_150226BC(s32 track, s32 scene) {
     if (D_800C35C8[scene][track] != 0) {
         info = &D_800C35F0[scene][track];
         if (info->type == 3) {
-            actor = func_151149AC(info->targetId);
+            actor = gfx_findObjectById(info->targetId);
             if (actor != NULL) {
                 if (actor->inactive == 1) {
                     func_15022640(actor->unique_id, scene);
@@ -2135,7 +2135,7 @@ void func_150227BC(s32 scene) {
 
     count = &D_800C354A[scene];
     for (i = 0; i < *count; i++) {
-        func_151149AC(D_800C3550[scene][i])->inactive = 1;
+        gfx_findObjectById(D_800C3550[scene][i])->inactive = 1;
     }
 }
 
@@ -2273,7 +2273,7 @@ void func_15022BA4(s32 scene) {
                 WorldObject *obj;
                 // matching: the s8 id goes through the pointer variable before the call
                 obj = (WorldObject *)(s8)D_800C35F0[scene][track].unk3;
-                obj = func_151149AC((s32)obj);
+                obj = gfx_findObjectById((s32)obj);
                 if (obj == NULL) {
                     return;
                 }

@@ -159,7 +159,7 @@ void func_150C2424(u8 arg0) {
                   (func_150ADA68() * 3.0f) + 4.0f, 3, 0, 0.0f, 0, arg0);
 }
 
-/* Trail update handler (D_8008A3F8): sets the trail's alpha from its remaining life (as func_150C1978). */
+/* Trail update handler (gMotionTrailUpdateProcs): sets the trail's alpha from its remaining life (as trail_fadeKind2Trail). */
 s32 func_150C251C(MotionTrail *trail) {
     TrailParams *params = trail->params;
     s32 alpha = trail->head.tmpl.life << 3;

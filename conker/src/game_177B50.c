@@ -408,7 +408,7 @@ void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
     }
 }
 
-/* Trail update handler (D_8008A3F8): fades out over the last 16 frames of life, capping the alpha at life * 16. */
+/* Trail update handler (gMotionTrailUpdateProcs): fades out over the last 16 frames of life, capping the alpha at life * 16. */
 s32 func_1514B844(MotionTrail *trail) {
     TrailParams *params = trail->params;
 

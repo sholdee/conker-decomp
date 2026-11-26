@@ -7,11 +7,11 @@
  * ribbon, two particle emitters that follow the owner and three looping sounds driven by its state.
  */
 
-// matching: defined below func_150D4300; with the initializer in view, IDO compiles func_150D4300 differently
-static const s32 D_800A09C0[4];
+// matching: defined below trail_drawCharacterTrail; with the initializer in view, IDO compiles trail_drawCharacterTrail differently
+static const s32 gCharacterTrailTextures[4];
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
-void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
+void trail_spawnCharacterTrail(Actor *owner, u8 arg1, s32 arg2) {
     EffectTemplate spawn;
     CharacterTrailState init;
     ModelAttachment *attachment;
@@ -35,7 +35,7 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
         return;
     }
     // matching: the store to init.attachment must be scheduled inside the call's argument setup
-    if (func_150D4AE0(&spawn.pos, &end, owner, (init.attachment = attachment)) != 0) {
+    if (trail_getCharacterTrailEnds(&spawn.pos, &end, owner, (init.attachment = attachment)) != 0) {
         spawn.flags |= 4;
     } else {
         spawn.pos.x = 0.0f;
@@ -53,11 +53,11 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
     state = ((CharacterTrail *)state)->state;
     memcpy(state, &init, sizeof(CharacterTrailState));
     if (D_8008FD8C < 5) {
-        sound_addDynamicSound(0x5B3, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B3, 12, 0);
+        sound_addDynamicSound(0x5B3, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5B3, 12, 0);
     }
-    sound_addDynamicSound(0x5B4, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B4, 12, 0);
+    sound_addDynamicSound(0x5B4, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5B4, 12, 0);
     if (D_8008FD8C < 7 || owner->CameraPtr != NULL) {
-        sound_addDynamicSound(0x5BC, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5BC, 12, 0);
+        sound_addDynamicSound(0x5BC, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5BC, 12, 0);
     }
     {
         GlowShape params;
@@ -151,8 +151,8 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
         params.handler = -1;
         params.alpha0 = 0.8000000119f;
         params.fadeRate = 9.999999975e-07f;
-        // matching: indexing D_800A09C0[...] costs IDO an extra 8-byte stack slot
-        desc.texture = *(D_800A09C0 + (func_150ADA20() & 3));
+        // matching: indexing gCharacterTrailTextures[...] costs IDO an extra 8-byte stack slot
+        desc.texture = *(gCharacterTrailTextures + (func_150ADA20() & 3));
         desc.type = 3;
         desc.renderModes = 0x2203;
         desc.lifetime = 300;
@@ -187,7 +187,7 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
  * Per-frame update: appends the owner's current model point to the ring buffer, aims the emitters
  * at it and picks the mode from the owner's speed (or a player's stick tilt).
  */
-s32 func_150D3A68(CharacterTrail *actor) {
+s32 trail_updateCharacterTrail(CharacterTrail *actor) {
     CharacterTrailState *state;
     CharacterTrailPoint *points;
     Actor *owner;
@@ -209,7 +209,7 @@ s32 func_150D3A68(CharacterTrail *actor) {
     }
     if (D_800BE9E4 > 0) {
         prevPos = actor->head.tmpl.pos;
-        switch (func_150D4AE0(&actor->head.tmpl.pos, &end, owner, attachment)) {
+        switch (trail_getCharacterTrailEnds(&actor->head.tmpl.pos, &end, owner, attachment)) {
         case 0:
             if (state->effects[0] != NULL) {
                 state->effects[0]->head.def.flags &= ~2;
@@ -309,7 +309,7 @@ s32 func_150D3A68(CharacterTrail *actor) {
                     if (func_1515C0F8(owner, &vel) == 0) {
                         vel = &D_800A5480;
                     }
-                    func_150D4D58(&actor->head.tmpl.pos, vel, owner->theta, actor->head.header.owner, actor->head.header.kind);
+                    trail_throwSparks(&actor->head.tmpl.pos, vel, owner->theta, actor->head.header.owner, actor->head.header.kind);
                 }
             } else if (state->mode == 2) {
                 if (tail != NULL) {
@@ -335,7 +335,7 @@ s32 func_150D3A68(CharacterTrail *actor) {
  * Trims the trail to a length that grows with the owner's speed, then tapers the point widths from
  * state->width at the head to 0 at the tail.
  */
-s32 func_150D3FD4(CharacterTrail *actor) {
+s32 trail_trimCharacterTrail(CharacterTrail *actor) {
     CharacterTrailState *state;
     CharacterTrailPoint *points;
     f32 total;
@@ -452,7 +452,7 @@ extern struct {
  * Draws the trail as a camera-facing ribbon: each point gets an edge, centre and edge vertex, offset
  * along (segment x view direction) by the point's width.
  */
-Gfx *func_150D4300(CharacterTrail *actor, Gfx *gfx, s16 view) {
+Gfx *trail_drawCharacterTrail(CharacterTrail *actor, Gfx *gfx, s16 view) {
     CharacterTrailPoint *points;
     Vec3f p1;
     Vec3f p0;
@@ -641,7 +641,7 @@ loop:
 }
 
 /* Message handler: destroys the trail when its owner goes away and follows the owner through a swap. */
-void func_150D49C0(CharacterTrail *actor, ActorMsg *msg, u8 id) {
+void trail_onCharacterTrailMessage(CharacterTrail *actor, ActorMsg *msg, u8 id) {
     CharacterTrailState *state = actor->state;
     Actor *obj;
 
@@ -664,7 +664,7 @@ void func_150D49C0(CharacterTrail *actor, ActorMsg *msg, u8 id) {
 }
 
 /* The four trail particle textures, one picked at random. */
-static const s32 D_800A09C0[4] = { 0x60, 0x61, 0x62, 0x63 };
+static const s32 gCharacterTrailTextures[4] = { 0x60, 0x61, 0x62, 0x63 };
 
 /* The trail's start and end points in the attachment's model space. */
 static const Vec3f D_800A09D0 = { -151.7874f, -23.267801f, -20.8778f };
@@ -674,7 +674,7 @@ static const Vec3f D_800A09DC = { -283.44f, -23.267801f, -20.8778f };
  * Computes the trail's start and end points: the points D_800A09D0 / D_800A09DC of `attachment`
  * (returns 1 when found, 0 when not), or 100 and 600 units above the owner when it has no model (2).
  */
-s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment) {
+s32 trail_getCharacterTrailEnds(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment) {
     const Vec3f *modelPoints[2];
     Vec3f *out[2];
 
@@ -698,26 +698,26 @@ s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attac
     return 2;
 }
 
-void func_150D4BD4(CharacterTrail *actor) {
-    func_150D4C2C(actor);
+void trail_destroyCharacterTrail(CharacterTrail *actor) {
+    trail_stopCharacterTrailFx(actor);
     func_151478F4(actor);
 }
 
-void func_150D4C00(CharacterTrail *actor) {
-    func_150D4C2C(actor);
+void trail_freeCharacterTrail(CharacterTrail *actor) {
+    trail_stopCharacterTrailFx(actor);
     func_15147928(actor);
 }
 
 /* Stops the trail's three sounds and destroys its particle emitters. */
-void func_150D4C2C(CharacterTrail *actor) {
+void trail_stopCharacterTrailFx(CharacterTrail *actor) {
     CharacterTrailState *state;
 
     state = actor->state;
     if (D_8008FD8C < 5) {
-        sound_stopByCallback((SoundRecordCallback)func_150D5124, state, 0x5B3);
+        sound_stopByCallback((SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5B3);
     }
-    sound_stopByCallback((SoundRecordCallback)func_150D5124, state, 0x5B4);
-    sound_stopByCallback((SoundRecordCallback)func_150D5124, state, 0x5BC);
+    sound_stopByCallback((SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5B4);
+    sound_stopByCallback((SoundRecordCallback)trail_characterTrailSoundCallback, state, 0x5BC);
     if (state->effects[0] != NULL) {
         func_1516972C(&state->effects[0]->head.header);
     }
@@ -727,12 +727,12 @@ void func_150D4C2C(CharacterTrail *actor) {
 }
 
 /* Update for the second emitter's particles: re-rolls the sprite every few frames and eases the scale. */
-s32 func_150D4CC4(TrailGlow *particle) {
+s32 trail_updateTrailGlow(TrailGlow *particle) {
     GlowShape *sub = &particle->shape;
 
     particle->tail.timer -= D_800BE9E4;
     if (particle->tail.timer < 0) {
-        particle->head.def.texture = D_800A09C0[func_150ADA20() & 3];
+        particle->head.def.texture = gCharacterTrailTextures[func_150ADA20() & 3];
         particle->tail.timer = (func_150ADA20() & 7) + 3;
     }
 
@@ -741,7 +741,7 @@ s32 func_150D4CC4(TrailGlow *particle) {
 }
 
 /* Throws 10-20 sparks from `pos`, fanned around the owner's facing `angle` (degrees) and against `vel`. */
-void func_150D4D58(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
+void trail_throwSparks(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
     ParticleDesc spawn;
     s32 count;
     s16 yaw;
@@ -783,7 +783,7 @@ void func_150D4D58(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
     spawn.scaleRate = 1.0f;
     do {
         scale = func_150ADA68() * 0.2230000049f + 0.8050000668f;
-        spawn.texture = D_800A09C0[func_150ADA20() & 3];
+        spawn.texture = gCharacterTrailTextures[func_150ADA20() & 3];
         spawn.timer = func_150ADA20() % 18U + 27;
         spawn.alpha = func_150ADA20() % 156U + 100;
         spawn.width = spawn.height = func_150ADA68() * 233.0f + 199.0f;
@@ -807,7 +807,7 @@ void func_150D4D58(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
  * Sound callback for the trail's three loops (0x5B3, 0x5B4, 0x5BC): moves volume and pitch toward
  * targets picked from the trail mode, follows the owner's position and stops when silenced.
  */
-s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
+s32 trail_characterTrailSoundCallback(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
                   s32 arg5, u16 *playing) {
     CharacterTrailState *state;
     s32 volume;

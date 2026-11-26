@@ -4,7 +4,7 @@
 #include "variables.h"
 
 /* Spawns a trail with extraSize + 0x40 bytes of data and copies *data into it. */
-FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, CollisionHit *hit, u8 arg4, s32 arg5) {
+FallingTrail *trail_spawnFallingTrail(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, CollisionHit *hit, u8 arg4, s32 arg5) {
     FallingTrail *trail;
 
     header->kind = 10;
@@ -18,11 +18,11 @@ FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstPar
 
 typedef s32 (*TrailHandler)(FallingTrail *, TrailBurstParams *);
 /* Handlers per TrailBurstParams.unk38 and unk39; each returns 0 when the trail fails. */
-static TrailHandler D_8008B080[] = { NULL };
-static TrailHandler D_8008B084[] = { func_1515CF9C, func_1515D030 };
+static TrailHandler gFallingTrailMoveProcs[] = { NULL };
+static TrailHandler gFallingTrailShapeProcs[] = { trail_growFallingTrail, trail_shrinkFallingTrail };
 
 /* Moves every point by the trail's velocity under gravity, runs the unk38 handler and tracks the tail position. */
-s32 func_1515C388(FallingTrail *trail) {
+s32 trail_moveFallingTrail(FallingTrail *trail) {
     TrailBurstParams *data;
     u8 failed;
     FallingTrailPoint *points;
@@ -48,7 +48,7 @@ s32 func_1515C388(FallingTrail *trail) {
         }
     }
     if (data->unk38 != -1) {
-        failed = D_8008B080[data->unk38](trail, data) == 0;
+        failed = gFallingTrailMoveProcs[data->unk38](trail, data) == 0;
     }
     if (trail->head.count > 0) {
         trail->head.modelPos = points[trail->head.start].pos;
@@ -64,7 +64,7 @@ s32 func_1515C388(FallingTrail *trail) {
 }
 
 /* Runs the unk39 handler, then fades the alpha and shrinks the width as the trail's life runs out. */
-s32 func_1515C534(FallingTrail *trail) {
+s32 trail_fadeFallingTrail(FallingTrail *trail) {
     TrailBurstParams *data;
     u8 failed;
     u32 frames;
@@ -72,7 +72,7 @@ s32 func_1515C534(FallingTrail *trail) {
     data = trail->data;
     failed = FALSE;
     if (data->unk39 != -1) {
-        failed = D_8008B084[data->unk39](trail, data) == 0;
+        failed = gFallingTrailShapeProcs[data->unk39](trail, data) == 0;
     }
     if (!failed) {
         if ((data->flags & TRAIL_BURST_FADE) && trail->head.tmpl.life < data->fadeStart) {
@@ -103,7 +103,7 @@ extern struct {
  * Draws the trail as a camera-facing ribbon from the newest point (i) back to the tail, one quad per segment;
  * alpha and the texture s coordinate ramp up along the ribbon.
  */
-Gfx *func_1515C6F4(FallingTrail *trail, Gfx *gfx, s16 view) {
+Gfx *trail_drawFallingTrail(FallingTrail *trail, Gfx *gfx, s16 view) {
     Vtx *vtx;
     s32 i;
     u8 update;
@@ -275,7 +275,7 @@ Gfx *func_1515C6F4(FallingTrail *trail, Gfx *gfx, s16 view) {
 }
 
 /* Handler: adds a point at the trail's position, or stops the unk39 handler once the buffer is full. */
-s32 func_1515CF9C(FallingTrail *trail, TrailBurstParams *data) {
+s32 trail_growFallingTrail(FallingTrail *trail, TrailBurstParams *data) {
     if (trail->head.count < trail->head.tmpl.itemCount - 1) {
         FallingTrailPoint *points;
 
@@ -294,7 +294,7 @@ s32 func_1515CF9C(FallingTrail *trail, TrailBurstParams *data) {
 }
 
 /* Handler: drops the newest point while more than two remain; returns 0 once the trail is down to two. */
-s32 func_1515D030(FallingTrail *trail, TrailBurstParams *data) {
+s32 trail_shrinkFallingTrail(FallingTrail *trail, TrailBurstParams *data) {
     s8 count;
     s32 result;
 
@@ -313,7 +313,7 @@ s32 func_1515D030(FallingTrail *trail, TrailBurstParams *data) {
 }
 
 /* Spawns an effect for the level object when its data1 kind is 0 or 1; returns it, or NULL. */
-LevelEffect *func_1515D088(TriggerZone *obj) {
+LevelEffect *trail_spawnLevelEffect(TriggerZone *obj) {
     s32 value; // matching: one variable holds the kind and then the effect (IDO's register and spill slot)
     LevelEffectData data;
 
@@ -331,7 +331,7 @@ LevelEffect *func_1515D088(TriggerZone *obj) {
     return (LevelEffect *)value;
 }
 
-/* Emission preset in D_800A64A0. */
+/* Emission preset in gTrailBurstPresets. */
 typedef struct {
     /* 0x00 */ f32 rateBase; /* particles per frame */
     /* 0x04 */ f32 rateRange;
@@ -354,24 +354,24 @@ typedef struct {
     /* 0x3C */ f32 shrinkFactor;
 } TrailBurstPreset; /* size 0x40 */
 
-/* Burst description for func_15152B38, which spawns a randomised batch of trails with func_1515C2F0. */
+/* Burst description for func_15152B38, which spawns a randomised batch of trails with trail_spawnFallingTrail. */
 
 /* The emission presets (TrailBurstEmitter.emitter.preset); preset 0 emits nothing. */
-static const TrailBurstPreset D_800A64A0[] = {
+static const TrailBurstPreset gTrailBurstPresets[] = {
     { 0 },
     { 0.0f, 0.03299999982f, 5, 15, 6.0f, 9.0f, -2.205000162f, 0.753000021f, 20.10000038f, 10.10000038f, 3, 4, 16, 9,
       6, 42, 6, { 0 }, 0.9900000691f },
 };
 
 /* Emits trail bursts at random points on a sphere around the origin, at the preset's random rate. */
-void func_1515D130(TrailBurstEmitter *owner) {
+void trail_updateBurstEmitter(TrailBurstEmitter *owner) {
     const TrailBurstPreset *preset;
     TrailBurstState *emitter;
     TrailBurst burst;
     s32 yaw;
     s32 pitch;
 
-    preset = &D_800A64A0[owner->emitter.preset];
+    preset = &gTrailBurstPresets[owner->emitter.preset];
     emitter = &owner->emitter;
     emitter->accum += preset->rateBase + func_150ADA68() * preset->rateRange;
 

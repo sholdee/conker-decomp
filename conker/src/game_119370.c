@@ -11,9 +11,9 @@ static const Vec3f D_800A1530[2] = { { 17.0f, 0.0f, 700.0f }, { -17.0f, 0.0f, 70
 static const u8 D_800A1548[2] = { 2, 4 };
 
 /* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
- * func_151C229C effect from the muzzle towards the jittered hit point (or along the aim on a miss), a
+ * weapon_spawnProjectile effect from the muzzle towards the jittered hit point (or along the aim on a miss), a
  * light_createWithEffect flash at the muzzle and a func_15102B38 beam on the muzzle's bone. */
-Game1EF500Trail *func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
+Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     Game1EF500Trail *tracer;
     Vec3f aimStart;
     Vec3f aimDir;
@@ -85,7 +85,7 @@ Game1EF500Trail *func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
         randA = func_150ADA68();
         randB = func_150ADA68();
         func_150ADA20();
-        tracer = func_151C229C(&muzzle, tracerDir, 0, 0, 0, 0, 130.0f, 1.0f / 130.0f, randA * 18.0f + 29.0f,
+        tracer = weapon_spawnProjectile(&muzzle, tracerDir, 0, 0, 0, 0, 130.0f, 1.0f / 130.0f, randA * 18.0f + 29.0f,
                                randB * 400.0f + 262.0f, 100.0f, 255, actor, 1, 1, 0, 0, 0, 1, 3, 26, 0.0f, 255, -1,
                                0, arg2, arg3);
     }
@@ -129,7 +129,7 @@ s32 func_150EC3D4(Actor *actor, Actor *self) {
     return FALSE;
 }
 
-/* Particle callback (table D_8008FBD0): func_151C3B0C with 1.0f, 1.0f, 1.0f, 0.0f and 0xFF masks. */
+/* Particle callback (table D_8008FBD0): weapon_spawnHitEffects with 1.0f, 1.0f, 1.0f, 0.0f and 0xFF masks. */
 void func_150EC45C(void *particle) {
-    func_151C3B0C(particle, 1.0f, 1.0f, 1.0f, 0.0f, 0xFF, 0xFF, 0xFF);
+    weapon_spawnHitEffects(particle, 1.0f, 1.0f, 1.0f, 0.0f, 0xFF, 0xFF, 0xFF);
 }

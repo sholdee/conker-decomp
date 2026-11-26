@@ -35,21 +35,21 @@ void func_150039E0(s32 levelId, s32 arg1) {
     setStateBit2 = FALSE;
     D_800BE2A0 = D_800BE2A2 = D_800BE2A4 = 0;
     i = func_1502B7F0(&spawns, 2, 0xB, levelId);
-    D_800DBF00 = i / sizeof(ObjectSpawn);
-    gWorldObjectCount = D_800DBF00;
-    D_800DBF98 = func_1502B7F0(&groupedSpawns, 3, 0xC, levelId, 2) / sizeof(ObjectSpawn);
-    gWorldObjectCount += D_800DBF98;
+    gUngroupedObjectCount = i / sizeof(ObjectSpawn);
+    gWorldObjectCount = gUngroupedObjectCount;
+    gGroupedObjectCount = func_1502B7F0(&groupedSpawns, 3, 0xC, levelId, 2) / sizeof(ObjectSpawn);
+    gWorldObjectCount += gGroupedObjectCount;
     db_Object_array = allocate_memory(gWorldObjectCount * sizeof(WorldObject), 1, 2, 0);
     if (db_Object_array == NULL) {
         gWorldObjectCount = 0;
-        D_800DBF98 = 0;
-        D_800DBF00 = 0;
+        gGroupedObjectCount = 0;
+        gUngroupedObjectCount = 0;
         return;
     }
     // base[i] is object i's spawn: the first list, then the grouped list
     base = spawns;
     for (i = 0; i < gWorldObjectCount; i++) {
-        if (i == D_800DBF00) {
+        if (i == gUngroupedObjectCount) {
             base = &groupedSpawns[-i]; // so that base[i] is groupedSpawns[0]
         }
         found = 0;
@@ -104,7 +104,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
         obj->unk98 = 0;
         if (obj->displayList == NULL) {
             id = base[i].modelId;
-            for (j = D_800DBF00; j < i; j++) {
+            for (j = gUngroupedObjectCount; j < i; j++) {
                 if (base[j].displayList == base[i].displayList && base[j].modelId == base[i].modelId
                     && db_Object_array[j].displayList != NULL) {
                     found = j + 1;
@@ -128,7 +128,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
                 obj->numVertices = (Vtx *)obj->displayList - obj->srcVertices;
                 obj->materials = model->materials;
             }
-            if (i >= D_800DBF00) {
+            if (i >= gUngroupedObjectCount) {
                 obj->unk4C = D_800A26C0[id].unk4C;
                 obj->shadowSize = D_800A26C0[id].shadowSize;
                 obj->cullRadiusXZ = D_800A26C0[id].cullRadiusXZ;
@@ -246,18 +246,18 @@ void func_150039E0(s32 levelId, s32 arg1) {
             }
         }
     }
-    D_800DBEE0 = allocate_memory(gWorldObjectCount * 0x40, 1, 2, 0);
-    D_800DBEE4 = allocate_memory(gWorldObjectCount * 0x40, 1, 2, 0);
-    D_800DBEF8 = allocate_memory(gWorldObjectCount * sizeof(void *), 1, 0, 0);
-    D_800DBEFC = allocate_memory(gWorldObjectCount, 1, 0, 0);
+    gObjectMtxsA = allocate_memory(gWorldObjectCount * 0x40, 1, 2, 0);
+    gObjectMtxsB = allocate_memory(gWorldObjectCount * 0x40, 1, 2, 0);
+    gObjectBlocks = allocate_memory(gWorldObjectCount * sizeof(void *), 1, 0, 0);
+    gObjectBlockDelays = allocate_memory(gWorldObjectCount, 1, 0, 0);
     for (i = 0; i < 4; i++) {
-        D_800DBED0[i] = allocate_memory(gWorldObjectCount * 4, 1, 0, 0);
+        gViewDrawLists[i] = allocate_memory(gWorldObjectCount * 4, 1, 0, 0);
     }
     gWorldObjectContacts = allocate_memory(gWorldObjectCount * sizeof(s32), 1, 0, 0);
     for (i = 0; i < gWorldObjectCount; i++) {
         gWorldObjectContacts[i] = 0;
     }
-    for (i = D_800DBF00; i < gWorldObjectCount; i++) {
+    for (i = gUngroupedObjectCount; i < gWorldObjectCount; i++) {
         if (db_Object_array[i].unique_id == 0) {
             db_Object_array[i].unique_id = func_15004BF0(FALSE);
         }
@@ -302,15 +302,15 @@ void func_150045C4(s32 arg0) {
             obj->attach = 3;
         }
         if (!(obj->state & 1)) {
-            func_1511490C(mtx, obj);
-            guMtxF2L(mtx, &(*D_80089250[D_800BE9C0])[i]);
-            bcopy(&(*D_80089250[D_800BE9C0])[i], &(*D_80089250[!D_800BE9C0])[i], sizeof(Mtx));
+            gfx_getObjectModelMtx(mtx, obj);
+            guMtxF2L(mtx, &(*gObjectMtxBuffers[D_800BE9C0])[i]);
+            bcopy(&(*gObjectMtxBuffers[D_800BE9C0])[i], &(*gObjectMtxBuffers[!D_800BE9C0])[i], sizeof(Mtx));
         }
         if (obj->moveProc == func_151150B0) {
             obj->moveProc = NULL;
         }
         if ((obj->state & 1) == 1) {
-            func_1511490C(mtx, obj);
+            gfx_getObjectModelMtx(mtx, obj);
             for (j = 0; j < obj->numVertices; j++) {
                 func_150A7960(mtx, obj->srcVertices[j].v.ob[0], obj->srcVertices[j].v.ob[1],
                               obj->srcVertices[j].v.ob[2], &x, &y, &z);
@@ -379,8 +379,8 @@ void func_15004A4C(void) {
     s32 i;
 
     for (i = 0; i < gWorldObjectCount; i++) {
-        D_800DBEF8[i] = 0;
-        D_800DBEFC[i] = 0;
+        gObjectBlocks[i] = 0;
+        gObjectBlockDelays[i] = 0;
     }
 }
 
@@ -442,7 +442,7 @@ void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn) {
 
 /*
  * Returns an object id that no object uses yet. With `fromTop` 0, counts up from 1 over the grouped
- * objects (0xFF if all are taken); otherwise counts down from 0xFF - D_800DBF00 over all objects.
+ * objects (0xFF if all are taken); otherwise counts down from 0xFF - gUngroupedObjectCount over all objects.
  */
 s32 func_15004BF0(s32 fromTop) {
     s32 i;
@@ -451,7 +451,7 @@ s32 func_15004BF0(s32 fromTop) {
     // matching: the parameter doubles as the start value so that IDO keeps it in a0
     if (fromTop == 0) {
         id = 1;
-        for (i = fromTop = D_800DBF00; i < gWorldObjectCount; i++) {
+        for (i = fromTop = gUngroupedObjectCount; i < gWorldObjectCount; i++) {
             if (id == db_Object_array[i].unique_id) {
                 id++;
                 i = fromTop - 1; // rescan with the next id
@@ -462,7 +462,7 @@ s32 func_15004BF0(s32 fromTop) {
             }
         }
     } else {
-        fromTop = 0xFF - D_800DBF00;
+        fromTop = 0xFF - gUngroupedObjectCount;
         id = fromTop;
         for (i = 0; i < gWorldObjectCount; i++) {
             if (id == db_Object_array[i].unique_id) {
