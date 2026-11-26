@@ -210,7 +210,7 @@ s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri
 
         {
             // matching: a block-scope declaration gives IDO a scope boundary here
-            extern s32 level; // matching: a declaration here opens a -g3 scope block (scheduling)
+            extern s32 level;
 
             objState = &obj->state;
             memcpy(objState, &state, sizeof(SightBeamState));

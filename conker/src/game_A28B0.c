@@ -1688,7 +1688,7 @@ select_object: // matching: unused label, splits the block for the scheduler
     case 4:
     case 5: {
         // matching: the block-scope redeclaration changes how IDO schedules the address of D_800D154C
-        extern Actor *D_800D154C; // matching: a declaration here opens a -g3 scope block (scheduling)
+        extern Actor *D_800D154C;
 
         // restart the object on script arg0, running as the current object meanwhile
         savedObj = D_800D154C;

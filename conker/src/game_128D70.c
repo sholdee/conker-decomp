@@ -98,7 +98,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
     dstPoints[2] = edgeB;
     func_15145EA4(srcPoints, dstPoints, matrix, useTarget ? 3 : 2);
     if (useTarget) {
-        // matching: this block-scope redeclaration of the callee is needed; removing it mismatches
+        // matching: a declaration here opens a -g3 scope block (scheduling)
         extern void func_151450B4(Vec3f *, Vec3f *, Vec3f *);
 
         linePoint = &target->mv->aimEye;
