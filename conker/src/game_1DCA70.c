@@ -2,8 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-extern Vec3f D_800AA0F0;
-extern Vec3f D_800AA0FC;
+/* Emission point offsets in the bone space of side 2 (bone 25) and side 1 (bone 32). */
+static const Vec3f D_800AA0F0 = { -19.0f, 0.0f, 25.0f };
+static const Vec3f D_800AA0FC = { 19.0f, 0.0f, 25.0f };
 
 
 /*
@@ -13,7 +14,7 @@ extern Vec3f D_800AA0FC;
  */
 s32 func_151AF5C0(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 side) {
     Vec3f probe;
-    Vec3f *offset;
+    const Vec3f *offset;
     MtxF *bone;
 
     if ((side != 1) && (side != 2)) {

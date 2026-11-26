@@ -9,7 +9,8 @@ typedef struct Game1DD500Profile {
     /* 0x0F */ u8 padF;
 } Game1DD500Profile; // size 0x10
 
-extern Vec3f D_800AA120;
+/* Impact point in the space of joint 6 (func_151B01B8). */
+static const Vec3f D_800AA120 = { 0.0f, -12.0f, 96.0f };
 
 /* Joint matrix of an actor, as an Mtx. */
 #define JOINT_MTX(actor, joint) (&(actor)->ob_matrix_ptr[joint])
@@ -309,8 +310,35 @@ typedef struct Game1DD500Mount {
     /* 0x4 */ Vec3f offset;
 } Game1DD500Mount;
 
-extern Game1DD500Mount D_800AA12C[11];
-extern Game1DD500Mount D_800AA1DC[11]; /* actor type 0x36 */
+/* Where the emitter keeps its particles: one mount per slot. */
+static const Game1DD500Mount D_800AA12C[11] = {
+    { 5, { 0 }, { 0.0f, -10.0f, 159.0f } },
+    { 5, { 0 }, { 34.0f, -8.0f, 145.0f } },
+    { 5, { 0 }, { -34.0f, -8.0f, 145.0f } },
+    { 5, { 0 }, { -52.0f, 10.0f, 104.0f } },
+    { 5, { 0 }, { 52.0f, 10.0f, 104.0f } },
+    { 5, { 0 }, { 52.0f, 34.0f, 38.0f } },
+    { 5, { 0 }, { -52.0f, 34.0f, 38.0f } },
+    { 6, { 0 }, { 20.0f, -46.0f, 131.0f } },
+    { 6, { 0 }, { -20.0f, -46.0f, 131.0f } },
+    { 6, { 0 }, { -46.0f, -26.0f, 84.0f } },
+    { 6, { 0 }, { 46.0f, -26.0f, 84.0f } },
+};
+
+/* actor type 0x36 */
+static const Game1DD500Mount D_800AA1DC[11] = {
+    { 4, { 0 }, { 0.0f, -32.0f, 195.0f } },
+    { 4, { 0 }, { 40.0f, -25.0f, 154.0f } },
+    { 4, { 0 }, { 69.0f, 8.0f, 86.0f } },
+    { 4, { 0 }, { 79.0f, 29.0f, 62.0f } },
+    { 4, { 0 }, { -79.0f, 29.0f, 62.0f } },
+    { 4, { 0 }, { -69.0f, 8.0f, 86.0f } },
+    { 4, { 0 }, { -40.0f, -25.0f, 154.0f } },
+    { 5, { 0 }, { 0.0f, -47.0f, 101.0f } },
+    { 5, { 0 }, { -40.0f, -42.0f, 69.0f } },
+    { 5, { 0 }, { 40.0f, -42.0f, 69.0f } },
+    { 5, { 0 }, { -72.0f, 10.0f, 3.0f } },
+};
 
 /* Emitter task update: carries attached particles with the owner's joints, releases expired ones and spawns new ones. */
 void func_151B0B88(Game1DD500Task *task) {
