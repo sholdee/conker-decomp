@@ -26,8 +26,6 @@ void func_15040350(void *dl, u32 end) {
     func_150403C8(dl, end, 0);
 }
 
-void func_10007DA0(void);
-
 /** Posts error code 0xC00005B to D_8003C8E0 and calls func_150AD770. */
 #define DL_ERROR()                          \
     D_8003C8E0 = 0xC00005B;                 \

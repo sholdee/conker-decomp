@@ -184,8 +184,6 @@ extern s32 D_800DBDBC;
 
 /* Per-texture lifetime in frames (1-3 count down; 4+ stays loaded) plus the 0x40 re-decompress flag. */
 
-extern void func_10006240(u8 *, Entry1510D404 *, u32);
-
 /*
  * Returns the address of texture `index`, loading it on first use: its compressed bytes (size from
  * D_80091D20, located by func_1510D374) are read from ROM and decompressed into a new buffer of the

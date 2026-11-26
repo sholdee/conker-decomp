@@ -6,8 +6,6 @@
 #include "macros.h"
 #include "libc/stdarg.h"
 
-extern s32 func_10006240(void *src, void *dst, u32 arg2); /* decompresses; returns the size written */
-
 void func_1502AAF0(void) {
 }
 

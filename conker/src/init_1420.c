@@ -5,9 +5,6 @@
 #include "libc/stdlib.h"
 #include "libc/string.h"
 
-void func_10005BE0(void);
-void func_100061F8(s32 arg0, s32 arg1);
-
 /* Zeroes the 0xFE0-byte block at D_80043B40, one word at a time. */
 void func_10001420(void) {
     // matching: the four zero terms and the if (1) block steer IDO's allocator to a1/a0

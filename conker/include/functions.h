@@ -46,10 +46,8 @@ void func_100030A0(OSPri priority, OSMesgQueue *mesgQueue, OSMesg *arg2, s32 arg
 //func_100057E0
 //func_10005948
 //func_10005AB0
-void func_10005B04(s32 arg0);
 //func_10005BE0
 //func_10005C2C
-void func_1000709C(void);
 //func_10007C74
 //func_10007CC4
 //func_10007D28

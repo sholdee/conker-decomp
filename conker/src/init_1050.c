@@ -30,8 +30,6 @@ void func_100010F8(s32 arg) {
 extern u8 D_151FA130; // end of the chunk0 code segment (starts at func_15000000)
 extern u8 debugger_us_ROM_START;
 extern u8 game_us_rzip_ROM_START;
-s32 func_10006240(void *src, void *dst, u32);
-void func_10005BE0(void);
 
 /**
  * Main thread: clear the heap, set up framebuffers and the VI manager, load and decompress the

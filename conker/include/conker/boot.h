@@ -12,6 +12,12 @@
  *   init_38E0.c
  *   init_39B0.c
  *   init_39C0.c
+ *   init_5AB0.s
+ *   init_5BE0.s
+ *   init_5C2C.s
+ *   init_6240.s
+ *   init_709C.s
+ *   init_7DA0.s
  *   game/entrypoint.c
  */
 
@@ -33,6 +39,26 @@ void func_100039B0(void);
 /* init_39C0.c */
 void func_100039C0(void);
 void func_10003ACC(s32 red, s32 green, s32 blue);
+
+/* init_5AB0.s: TLB paging of the game code (virtual 0x15000000) */
+void func_10005B04(s32 pageCount);
+
+/* init_5BE0.s */
+void func_10005BE0(void);
+
+/* init_5C2C.s */
+void func_100061F8(s32 firstEntry, s32 lastEntry);
+
+/* init_6240.s: decompresses src into dst and returns the size written.
+ * (void *src, void *dst, u32 work); declared without a prototype: callers pass the destination as a
+ * pointer or as an address in an s32 */
+s32 func_10006240();
+
+/* init_709C.s */
+void func_1000709C(void);
+
+/* init_7DA0.s: a syscall (debug trap) */
+void func_10007DA0(void);
 
 /* game/entrypoint.c */
 void func_15007830(void);

@@ -1928,7 +1928,7 @@ typedef struct ParticleResource {
 typedef struct ParticleTexFile {
     /* 0x0 */ s32 devAddr;
     /* 0x4 */ s32 size;
-    /* 0x8 */ s32 buf;
+    /* 0x8 */ void *buf;
     /* 0xC */ u8  used; // set when a sprite of this type was built this frame
     /* 0xD */ u8  padD[3];
 } ParticleTexFile; // size 0x10

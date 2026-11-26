@@ -518,8 +518,6 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
     D_800DD470.x = 0;
 }
 
-extern void func_10006240(s32, s32, s32);
-
 /* Releases every sprite type's texture file buffer, first passing it with the frames to func_10006240. */
 void func_1517CFC4(void) {
     s32 i;
