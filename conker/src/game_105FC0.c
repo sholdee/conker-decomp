@@ -807,7 +807,7 @@ void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir) {
         if (hit->hitType == 1) {
             data->surfaceAccum += (0.200000003f + func_150ADA68() * 0.1040000021f) * D_800BE9A4;
             while (data->surfaceAccum > 1.0f) {
-                func_151D9B8C(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, (s32)&hit->tri, &hit->pos,
+                func_151D9B8C(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, &hit->tri, &hit->pos,
                               (func_150ADA20() % 81U) + 60, 1, 1, 1, trail->head.header.owner, trail->head.header.kind);
                 data->surfaceAccum -= 1.0f;
             }

@@ -1,12 +1,5 @@
 #include <ultra64.h>
-// matching: functions.h declares func_151D9B8C (as defined) with an s32 4th parameter; this file
-// was compiled against a void * view, which schedules the call differently.
-#define func_151D9B8C func_151D9B8C_s32_decl_in_functions_h
-#define func_151D9B8C func_151D9B8C_header // matching: this file keeps its own declaration of func_151D9B8C
 #include "functions.h"
-#undef func_151D9B8C
-// matching: a pointer where the definition has s32 (arg 4)
-void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 #include "variables.h"
 
 

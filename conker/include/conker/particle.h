@@ -3187,7 +3187,7 @@ u8 func_151D9A68(void);
 u8 func_151D9AC0(void);
 u8 func_151D9ADC(void);
 u8 func_151D9B34(void);
-void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8, u8 arg9,
+void func_151D9B8C(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8, u8 arg9,
                    s32 argA);
 void func_151D9EB0(DripEffect *effect);
 void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6);

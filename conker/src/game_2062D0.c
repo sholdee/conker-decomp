@@ -236,7 +236,7 @@ u8 func_151D9534(SteamParticle *particle, Vec3f *arg1) {
                                   (s32)&particle->head.floor.tri, &point, particle->head.header.owner, particle->head.header.kind);
                 } else if (func_150ADA20() & 1) {
                     func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->burstScale, particle->head.desc.alpha,
-                                  (s32)&particle->head.floor.tri, &point, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
+                                  &particle->head.floor.tri, &point, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
                 } else {
                     func_151DAB58(wobble->kind, (avgScale * 0.025f) * wobble->burstScale, particle->head.desc.alpha, &point,
                                   1, particle->head.header.owner, particle->head.header.kind);
@@ -324,9 +324,9 @@ static const Vec3f D_800AB3E8 = { 0.0f, -1.0f, 0.0f }; /* straight down */
 
 /*
  * Spawns an emitter of effect kind `kind` at `pos` (lifetime -1: default). With arg8 set and an
- * upward-facing surface under arg3, also starts a DripEffect there.
+ * upward-facing surface under tri, also starts a DripEffect there.
  */
-void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8,
+void func_151D9B8C(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, s32 argA) {
     SpriteDef desc;
     TimedEffect *effect;
@@ -359,10 +359,10 @@ void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, s16 lifetim
     desc.unk17 = 7;
     desc.viewportMask = 0xFF;
     desc.unk1C = 0;
-    if (func_1513C650(&desc, 0, 0, arg3, pos->x, pos->y, pos->z, size, size,
+    if (func_1513C650(&desc, 0, 0, (s32)tri, pos->x, pos->y, pos->z, size, size,
                       func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                       arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
-        arg8 && func_15144E80(arg3, &outA, &outB, &normal)) {
+        arg8 && func_15144E80(tri, &outA, &outB, &normal)) {
         down = D_800AB3E8;
         func_15145128(&normal, &normal, NULL, NULL);
         if (func_15144A74(&normal, &down) < -0.5f) {

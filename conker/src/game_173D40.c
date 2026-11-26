@@ -166,7 +166,7 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
             if (func_150ADA20() & 1) {
                 size = func_150ADA68();
                 random = func_150ADA20();
-                func_151D9B8C(kind, size * 10.0f + 10.0f, (random % 101U) + 100, (s32)&hit.tri,
+                func_151D9B8C(kind, size * 10.0f + 10.0f, (random % 101U) + 100, &hit.tri,
                               &spot, (func_150ADA20() % 41U) + 80, 1, 1, 0, 0xFF, 1);
             } else {
                 size = func_150ADA68();

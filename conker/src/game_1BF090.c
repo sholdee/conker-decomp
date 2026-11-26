@@ -202,7 +202,7 @@ u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
         position.x = particle->head.desc.pos.x;
         position.y = dust->floorY + 2.0f;
         position.z = particle->head.desc.pos.z;
-        func_151D9B8C(dust->kind, dust->baseSize * 0.08308f, particle->head.desc.alpha, (s32)&dust->floor,
+        func_151D9B8C(dust->kind, dust->baseSize * 0.08308f, particle->head.desc.alpha, &dust->floor,
                       &position, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
         angleRandom = func_150ADA68();
         speedRandom = func_150ADA68();

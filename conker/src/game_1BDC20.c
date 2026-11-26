@@ -406,7 +406,7 @@ s8 func_15191520(DripParticle *drop) {
                               (s32)&motion->ground.tri, &probe, drop->head.header.owner, drop->head.header.kind);
             } else if (func_150ADA20() & 1) {
                 func_151D9B8C(motion->kind, drop->head.def.width * drop->head.def.height * 0.150000006f, drop->head.def.unk44,
-                              (s32)&motion->ground.tri, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,
+                              &motion->ground.tri, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,
                               drop->head.header.owner, drop->head.header.kind);
             } else {
                 func_151DAB58(motion->kind, drop->head.def.width * drop->head.def.height * 0.05000000075f, drop->head.def.unk44,

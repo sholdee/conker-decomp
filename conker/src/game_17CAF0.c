@@ -403,7 +403,7 @@ void func_15150D1C(DecalSpray *config, u8 arg1, s32 arg2) {
                           &hit.x, &hit.y, &hit.z, &distance, &surface, 0, 0.0f) != 0
             && func_15145C90(surface) != 0 && distance < config->maxDistance) {
             func_151D9B8C(config->kind, (func_150ADA68() * config->sizeRange) + config->sizeBase,
-                          (func_150ADA20() % 156U) + 100, (s32)hitTriangle, &hit,
+                          (func_150ADA20() % 156U) + 100, hitTriangle, &hit,
                           (func_150ADA20() % (u32)(config->unk2A + 1)) + config->unk28,
                           1, 1, 1, arg1, arg2);
         }
