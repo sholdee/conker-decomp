@@ -58,7 +58,8 @@ s32 func_15043BB8(MsgRing *ring, u8 *message, s32 size);
 s32 func_15043CA4(MsgRing *ring, u8 *dst, s32 dstSize);
 
 /* game_AD9B0.c */
-void func_15080500(Actor *obj, TriggerZone *zone, s32 slot, s32 textId);
+/* (Actor *obj, TriggerZone *zone, s32 slot, s32 textId); declared without a prototype: game_CDE80.c passes 5 arguments */
+void func_15080500();
 void func_15080620(s32 objIndex, s32 slot, s32 textId, s32 arg3);
 void func_150806A8(s32 objIndex);
 void func_15080718(s32 n, s32 *byteIndex, s32 *bitMask);

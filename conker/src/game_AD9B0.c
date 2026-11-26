@@ -15,7 +15,12 @@ s32 strlen(const char *);
 
 /* Queues text textId on obj's text slot (0 or 1), unless a script has locked that slot. Slot 1 also
    records the trigger zone, which func_15080C64 disables once text 0x2B / 0x2C has been shown. */
-void func_15080500(Actor *obj, TriggerZone *zone, s32 slot, s32 textId) {
+void func_15080500(obj, zone, slot, textId)
+    Actor *obj;
+    TriggerZone *zone;
+    s32 slot;
+    s32 textId;
+{
     if (obj != NULL && obj->type != 0 && obj->playernumber != 0xFF) {
         if (textId == 0x2B || textId == 0x2C) {
             D_800D1940 = textId;
