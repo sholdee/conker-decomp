@@ -611,9 +611,8 @@ void func_150EA944(WorldObject *entry);
 
 /* game_117FC0.c */
 typedef struct struct_EAB10 struct_EAB10;
-typedef struct FlashObject FlashObject;
 void func_150EAB10(struct_EAB10 *actor);
-s32 func_150EAE24(FlashObject *obj);
+s32 func_150EAE24(LightEffect *obj);
 
 /* game_118400.c */
 s32 func_150EAF50(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side);

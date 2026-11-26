@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 D_80088A90;
+static s32 D_80088A90 = 0; /* 1 while the camera is in the transport mode this hook set */
 
 /*
  * When both func_1509BE40 queries succeed, switch flags 0x405D-0x4061 on and (unless unk2C is 0x100

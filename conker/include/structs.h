@@ -2497,6 +2497,16 @@ typedef struct LightSwing {
     /* 0x0C */ Vec3f pivot;
 } LightSwing; // size 0x18
 
+/* LightEffect.data of a flash that slides along the ground (game_117FC0.c). */
+struct GroundFlash {
+    /* 0x00 */ Vec2fXZ position;
+    /* 0x08 */ Vec2fXZ velocity;
+    /* 0x10 */ f32 height;      /* used when the ground probe finds nothing */
+    /* 0x14 */ f32 probeHeight; /* height the ground probe starts from */
+    /* 0x18 */ f32 lifetime;
+    /* 0x1C */ CollisionHit ground;
+}; // size 0x40
+
 /* LightEffect.data: one payload per kind of light effect. */
 typedef union LightEffectData {
     s32 index;            // func_15161A68: entry of D_800C3958[0]
@@ -2538,6 +2548,7 @@ typedef union LightEffectData {
         /* 0x2C */ u8 pad2C[4];
         /* 0x30 */ u8 objectId; // WorldObject id (func_151149AC) flagged by the cycle callbacks
     } objectCycle;    // func_15009990
+    struct GroundFlash groundFlash; // func_150EAE24
 } LightEffectData;
 
 /* LightEffect.flags */
