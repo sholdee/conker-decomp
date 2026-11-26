@@ -5,16 +5,16 @@
 
 
 /* Per-material impact effects, indexed by the material id from func_1510F8CC. */
-struct Struct800A1070 {
+typedef struct Struct800A1070 {
     /* 0x00 */ u16 objectType;   // object spawned through func_15168800 (0 = none)
     /* 0x02 */ u16 particleType; // particle burst type (0 = none)
     /* 0x04 */ u8 chance;        // percent chance of the func_151C329C effect
     /* 0x05 */ u8 debrisType;    // func_150E4E04 debris kind (0 = none)
     /* 0x06 */ u8 minCount;      // particle count = minCount + 1 + rand % countRange
     /* 0x07 */ u8 countRange;
-};
+} Struct800A1070;
 
-const Struct800A1070 D_800A1070[] = {
+static const Struct800A1070 D_800A1070[] = {
     { 0, 0, 50, 0, 17, 40 },
     { 58, 59, 2, 10, 30, 12 },
     { 62, 0, 0, 10, 60, 20 },
@@ -38,10 +38,10 @@ const Struct800A1070 D_800A1070[] = {
 };
 
 /* Particle scale pair per `size`. */
-const u16 D_800A1110[][2] = { { 128, 96 }, { 256, 256 }, { 384, 384 } };
+static const u16 D_800A1110[][2] = { { 128, 96 }, { 256, 256 }, { 384, 384 } };
 
 /* Particle count multiplier per `size`. */
-const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
+static const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
 
 /*
  * Spawns the impact effects of `material` at (x, y, z): a particle burst, debris (func_150E4E04),

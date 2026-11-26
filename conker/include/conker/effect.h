@@ -576,7 +576,6 @@ void func_150E42F8(s32 count);
 void func_150E4514(s32 amount);
 
 /* game_111A00.c */
-typedef struct Struct800A1070 Struct800A1070;
 typedef struct Struct150E5810 Struct150E5810;
 typedef struct Struct150E4CBC Struct150E4CBC;
 void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 slot);
@@ -585,9 +584,6 @@ void func_150E4CBC(Struct150E4CBC *fx);
 void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot);
 void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size);
 s32 func_150E5810(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s16 (*verts)[3]);
-extern const Struct800A1070 D_800A1070[];
-extern const u16 D_800A1110[][2];
-extern const f32 D_800A111C[];
 
 /* game_112F90.c */
 void func_150E5AE0(void);
