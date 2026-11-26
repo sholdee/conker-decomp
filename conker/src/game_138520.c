@@ -9,11 +9,17 @@ u8 D_800D9B18;           // set while a gViewClips record is pending
 f32 D_800D9B1C;          // default far plane
 f32 D_800D9B20;          // default near plane
 static Mtx D_800D9B28;   // projection spanning view 0
-/* The rest of this unit's .bss (D_800D9B68..D_800D9B8C) stays in asm: game_13D350.c reads the bytes of
- * D_800D9B68 and D_800D9B78 through their own symbols. */
 
 #include "functions.h"
 #include "variables.h"
+
+/* The rest of this unit's .bss: conker/view.h declares these before the definitions, so they follow D_800D9B28. */
+u8 D_800D9B68[4][3];     // per tint slot: prim colour (game_139FC0 adds the positive part of its wave)
+u8 D_800D9B78[4][3];     // per tint slot: env colour (the negative part)
+u8 D_800D9B84[3];
+u8 D_800D9B88[3];
+u8 D_800D9B8B;
+u8 D_800D9B8C;
 
 /* Loads the default near/far planes from D_800DD2F2/D_800DD2F4 and builds the matrix D_800D9B28 spanning
  * view 0 (+-halfWidth by +-halfHeight, depth 1..10000). */

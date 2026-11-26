@@ -241,12 +241,6 @@ extern u8  D_800D993A[];
 extern u8  D_800D9946[]; // just past the end of D_800D993A (func_15010600 stops there)
 
 
-extern u8  D_800D9B68[4][3];
-extern u8  D_800D9B78[4][3];
-extern u8  D_800D9B84[];
-extern u8  D_800D9B88[];
-extern u8  D_800D9B8B;
-extern u8  D_800D9B8C;
 
 
 extern s32 D_800DBE18[];

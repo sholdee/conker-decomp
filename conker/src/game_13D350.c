@@ -20,28 +20,6 @@ Mtx *D_800DBEB0;       // sky projection matrices, 2 per view
  * extent from func_151108C4. */
 typedef Gfx *(*SkyDrawFunc)(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
-extern u8 D_800D9B69;
-extern u8 D_800D9B6A;
-extern u8 D_800D9B6B;
-extern u8 D_800D9B6C;
-extern u8 D_800D9B6D;
-extern u8 D_800D9B6E;
-extern u8 D_800D9B6F;
-extern u8 D_800D9B70;
-extern u8 D_800D9B71;
-extern u8 D_800D9B72;
-extern u8 D_800D9B73;
-extern u8 D_800D9B79;
-extern u8 D_800D9B7A;
-extern u8 D_800D9B7B;
-extern u8 D_800D9B7C;
-extern u8 D_800D9B7D;
-extern u8 D_800D9B7E;
-extern u8 D_800D9B7F;
-extern u8 D_800D9B80;
-extern u8 D_800D9B81;
-extern u8 D_800D9B82;
-extern u8 D_800D9B83;
 /* The textures of each textured sky set (D_800B0DF0->unk9), five per set. */
 static s32 D_80089130[5] = { 0x17E1, 0x1829, 0x1799, 0x1871, 0x18B9 };
 static s32 D_80089144[5] = { 0x1679, 0x16C1, 0x162B, 0x1709, 0x1751 };
@@ -104,32 +82,16 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     f32 x;
     f32 y;
     f32 z;
+    s32 i;
 
-    // matching: each byte is its own symbol (a lui per store), not an index into D_800D9B68/D_800D9B78
-    D_800D9B68[0][0] = 0;
-    D_800D9B69 = 0;
-    D_800D9B6A = 0;
-    D_800D9B78[0][0] = 0;
-    D_800D9B79 = 0;
-    D_800D9B7A = 0;
-    D_800D9B6B = 0;
-    D_800D9B6C = 0;
-    D_800D9B6D = 0;
-    D_800D9B7B = 0;
-    D_800D9B7C = 0;
-    D_800D9B7D = 0;
-    D_800D9B6E = 0;
-    D_800D9B6F = 0;
-    D_800D9B70 = 0;
-    D_800D9B7E = 0;
-    D_800D9B7F = 0;
-    D_800D9B80 = 0;
-    D_800D9B71 = 0;
-    D_800D9B72 = 0;
-    D_800D9B73 = 0;
-    D_800D9B81 = 0;
-    D_800D9B82 = 0;
-    D_800D9B83 = 0;
+    for (i = 0; i < 4; i++) {
+        D_800D9B68[i][0] = 0;
+        D_800D9B68[i][1] = 0;
+        D_800D9B68[i][2] = 0;
+        D_800D9B78[i][0] = 0;
+        D_800D9B78[i][1] = 0;
+        D_800D9B78[i][2] = 0;
+    }
     gSPClearGeometryMode(gfx++, G_CULL_BOTH);
     gfx = func_151106A8(gfx);
     gDPPipeSync(gfx++);
