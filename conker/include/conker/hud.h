@@ -19,7 +19,7 @@ typedef struct {
     /* 0x14 */ u8 displayListCount;
     /* 0x15 */ u8 blinkTimer;
     /* 0x16 */ u8 unk16[6];
-    /* 0x1C */ u8 *unk1C; /* the model's vertex data: segment 1 base */
+    /* 0x1C */ u8 *segment1Base; /* the model's vertex data: segment 1 base */
     /* 0x20 */ s32 unk20;
     /* 0x24 */ AnimInstance *anim; /* created by func_1503F62C */
     /* 0x28 */ MtxF matrices[2];
@@ -32,7 +32,7 @@ typedef struct {
 typedef struct {
     Gfx *dl;
     s32 *data;
-    s16 *unk8; /* the distinct textures dl uses (texture_resolveDl's usedOut) */
+    s16 *usedTextures; /* the distinct textures dl uses (texture_resolveDl's usedOut) */
 } Struct151EDF4C;
 
 /* game_BC510.c */

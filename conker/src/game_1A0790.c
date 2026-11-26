@@ -21,8 +21,8 @@ typedef struct {
     u16 unk6;
     u16 unk8;
     u16 unkA;
-    s16 unkC; /* -1: use the level header's unk2 */
-    s16 unkE; /* -1: use the level header's unk0 */
+    s16 nearPlane; /* -1: use the level header's unk2 (gDefaultNear) */
+    s16 farPlane; /* -1: use the level header's unk0 (gDefaultFar) */
 } FogPreset;
 
 /* The fog presets; func_151732E0 fills preset 0 from the level header. */
@@ -51,8 +51,8 @@ void func_151732E0(s32 arg0) {
     D_8008CC70[0].unk6 = D_800B0DF0->unk3C;
     D_8008CC70[0].unk8 = D_800B0DF0->unk3E;
     D_8008CC70[0].unkA = D_800B0DF0->unk40;
-    D_8008CC70[0].unkC = D_800B0DF0->unk2;
-    D_8008CC70[0].unkE = D_800B0DF0->unk0;
+    D_8008CC70[0].nearPlane = D_800B0DF0->unk2;
+    D_8008CC70[0].farPlane = D_800B0DF0->unk0;
     if (D_800B0DF0->fogPreset != -1) {
         D_800DD2E0 = 1;
         func_151733E4(D_800B0DF0->fogPreset, D_800B0DF0->fogPreset, arg0, 0, -1);
@@ -107,8 +107,8 @@ void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
         out6 = &preset->unk6;
         out8 = &preset->unk8;
         outA = &preset->unkA;
-        outC = &preset->unkC;
-        outE = &preset->unkE;
+        outC = &preset->nearPlane;
+        outE = &preset->farPlane;
     }
     for (i = 0; i < 2; i++) {
         if (i == 0) {
@@ -140,11 +140,11 @@ void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
     *out6 = (D_8008CC70[to].unk6 - D_8008CC70[from].unk6) * blend / 4096 + D_8008CC70[from].unk6;
     *out8 = (D_8008CC70[to].unk8 - D_8008CC70[from].unk8) * blend / 4096 + D_8008CC70[from].unk8;
     *outA = (D_8008CC70[to].unkA - D_8008CC70[from].unkA) * blend / 4096 + D_8008CC70[from].unkA;
-    fromValue = (D_8008CC70[from].unkC == -1) ? D_800B0DF0->unk2 : D_8008CC70[from].unkC;
-    toValue = (D_8008CC70[to].unkC == -1) ? D_800B0DF0->unk2 : D_8008CC70[to].unkC;
+    fromValue = (D_8008CC70[from].nearPlane == -1) ? D_800B0DF0->unk2 : D_8008CC70[from].nearPlane;
+    toValue = (D_8008CC70[to].nearPlane == -1) ? D_800B0DF0->unk2 : D_8008CC70[to].nearPlane;
     *outC = (toValue - fromValue) * blend / 4096 + fromValue;
-    fromValue = (D_8008CC70[from].unkE == -1) ? D_800B0DF0->unk0 : D_8008CC70[from].unkE;
-    toValue = (D_8008CC70[to].unkE == -1) ? D_800B0DF0->unk0 : D_8008CC70[to].unkE;
+    fromValue = (D_8008CC70[from].farPlane == -1) ? D_800B0DF0->unk0 : D_8008CC70[from].farPlane;
+    toValue = (D_8008CC70[to].farPlane == -1) ? D_800B0DF0->unk0 : D_8008CC70[to].farPlane;
     *outE = (toValue - fromValue) * blend / 4096 + fromValue;
 }
 

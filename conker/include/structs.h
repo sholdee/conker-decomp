@@ -232,8 +232,8 @@ typedef struct LevelMusic {
 /* The current level's settings resource, D_800B0DF0 (loaded by func_15000F04 in game/Collision/MapBackground/mapbackground). The
  * one-byte callback fields index handler tables; 0 means none. */
 typedef struct LevelHeader {
-    /* 0x00 */ u16 unk0;            // fog (D_8008CC70.unkE), gDefaultFar
-    /* 0x02 */ u16 unk2;            // fog (D_8008CC70.unkC), gDefaultNear, RenderView.unk67C
+    /* 0x00 */ u16 unk0;            // fog (D_8008CC70.farPlane), gDefaultFar
+    /* 0x02 */ u16 unk2;            // fog (D_8008CC70.nearPlane), gDefaultNear, RenderView.unk67C
     /* 0x04 */ u8  unk4;
     /* 0x05 */ u8  unk5;            // background colour (D_800DBEA8)
     /* 0x06 */ u8  unk6;

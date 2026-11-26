@@ -1675,7 +1675,7 @@ HudModel *func_151ED90C(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1) 
         return NULL;
     }
     model->blinkTimer = 1;
-    if (func_1503F62C(loadArg0, loadArg1, &model->srcDisplayLists, &model->displayListCount, &model->unk1C, &model->unk20, &model->anim) != 0) {
+    if (func_1503F62C(loadArg0, loadArg1, &model->srcDisplayLists, &model->displayListCount, &model->segment1Base, &model->unk20, &model->anim) != 0) {
         func_10004074(model);
         return NULL;
     }
@@ -1789,7 +1789,7 @@ Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_800E0C30);
     gDPSetFogColor(gfx++, 0, 0, 0, 0xFF);
     gSPSegment(gfx++, 3, model->anim->partMtx[D_800BE9C0]);
-    gSPSegment(gfx++, 1, model->unk1C);
+    gSPSegment(gfx++, 1, model->segment1Base);
 
     if (model == D_80090058) {
         model->blinkTimer--;
@@ -1841,7 +1841,7 @@ void func_151EDF4C(void) {
             data = rom_loadPathTable(0, 1, 0, 2, 9, i);
             D_80090138[j].data = data;
             D_80090138[j].dl = (Gfx *)*data;
-            texture_resolveDl(D_80090138[j].dl, 0, 1, 0x3E, &D_80090138[j].unk8);
+            texture_resolveDl(D_80090138[j].dl, 0, 1, 0x3E, &D_80090138[j].usedTextures);
             dl = D_80090138[j].dl;
             do {
                 cmd = (dl->words.w0 >> 24) & 0xFF;
