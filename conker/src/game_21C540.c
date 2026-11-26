@@ -24,15 +24,7 @@
  */
 
 extern s32 __osContinitialized;
-extern u8 __osMaxControllers;
-extern u8 __osContLastCmd;
 
-extern OSPifRam __osContPifRam;
-extern OSMesgQueue __osEepromTimerQ;
-
-void __osPackRequestData(u8 cmd);
-void __osContGetInitData(u8 *pattern, OSContStatus *data);
-s32 __osSiRawStartDma(s32 dir, void *dramAddr);
 void __osSiCreateAccessQueue(void);
 
 /* This ROM predates the OS_CPU_COUNTER form in include/2.0L/PR/os_convert.h: golden loads the

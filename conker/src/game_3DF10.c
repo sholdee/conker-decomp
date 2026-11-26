@@ -27,8 +27,6 @@ typedef struct {
     /* 0x28 */ f32 unk28;
 } Struct3DF10Tail; /* size 0x2C */
 
-extern u32 osGetCount(void);
-
 extern Vec3f D_80096450[];
 extern u8 D_80096498[];
 

@@ -13,8 +13,6 @@ extern OSPifRam D_800E0A30;
  * body is physically last, so the 16K case's break jumps over it, and as1 later moves the
  * default's `li` into the compare chain's delay slot and deletes the body.
  */
-extern u8 __osContLastCmd;
-s32 __osSiRawStartDma(s32 dir, void *dramAddr);
 
 s32 func_151DD140(OSMesgQueue *mq, u8 address, u8 *buffer) {
     s32 ret = 0;

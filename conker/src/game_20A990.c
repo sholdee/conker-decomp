@@ -4,9 +4,6 @@
 #include "controller.h"
 
 extern OSPifRam D_800E0A30;
-extern u8 __osContLastCmd;
-
-s32 __osSiRawStartDma(s32 dir, void *dramAddr);
 
 /* func_151DD65C = __osPackEepWriteData.  Byte-perfect at the tree default.
  *

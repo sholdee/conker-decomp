@@ -4,11 +4,6 @@
 #include "variables.h"
 #include "controller.h"
 
-
-extern u32 osGetCount(void);
-extern u8 __osContLastCmd;
-extern u8 __osMaxControllers;
-extern OSPifRam __osContPifRam;
 s32 func_16001700(void)
 {
   s32 ret;

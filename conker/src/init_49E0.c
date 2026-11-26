@@ -10,8 +10,6 @@
 #define SCHED_MESG_AUDIO_TIMER 3 /* delay before starting the pending audio task */
 #define SCHED_MESG_CONT_READ   6 /* timer set in game_48FD0.c: start a controller read */
 
-void func_10004DB0(void);
-
 /* Scheduler thread: dispatches VI retrace, RSP/RDP completion and timer messages. */
 void func_100049E0(void *arg) {
     OSMesg msg;
