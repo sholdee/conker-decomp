@@ -33,7 +33,7 @@ void func_150D54C8(FollowEffect *effect) {
     f32 sinYaw;
     f32 rightX;
     f32 rightZ;
-    Vec3f *refVel;
+    const Vec3f *refVel;
     u8 right;
     f32 along;
     f32 speed;

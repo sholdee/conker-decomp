@@ -843,7 +843,7 @@ void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);
 s32 func_15143DA8(s32 *value, s32 lo, s32 hi);
 s32 func_15143E08(Actor *actor);
 s32 func_15143E24(Actor *actor);
-f32 func_15143E64(Vec3f *v);
+f32 func_15143E64(const Vec3f *v);
 u8 func_15143E94(s32 arg0, s32 arg1);
 s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags);
 void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1, u8 a1,

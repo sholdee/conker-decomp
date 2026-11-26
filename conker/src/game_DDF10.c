@@ -90,7 +90,7 @@ void func_150B0D20(DDB60Effect *effect) {
     s32 idx;
     f32 forward[2];
     f32 right[2];
-    Vec3f *refVel;
+    const Vec3f *refVel;
     Vec3f pos;
     Vec3f vel;
     s16 angle;

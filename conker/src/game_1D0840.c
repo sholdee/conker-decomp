@@ -12,7 +12,7 @@
 /* Spawns the effects attached to an actor: a trail and two more effects. */
 void func_151A3390(Actor *owner, u8 arg1) {
     BoneTrailParams params;
-    f32 origin[3];
+    Vec3f origin;
 
     params.owner = owner;
     params.ownerId = owner->unique_id;
@@ -37,10 +37,10 @@ void func_151A3390(Actor *owner, u8 arg1) {
     func_151A4590(owner, arg1);
     func_151A499C(owner, arg1);
     func_10010154(0x1AA, owner, 0x55F0, 1000, 4000);
-    origin[0] = 0.0f;
-    origin[1] = 0.0f;
-    origin[2] = 0.0f;
-    func_15160A58(owner, 1, origin, 2, 300, 80, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
+    origin.x = 0.0f;
+    origin.y = 0.0f;
+    origin.z = 0.0f;
+    func_15160A58(owner, 1, &origin, 2, 300, 80, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
 }
 
 /* Creates a trail effect object from params. Returns NULL if there is no owner. */

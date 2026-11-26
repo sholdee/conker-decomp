@@ -86,14 +86,14 @@ void func_151D7404(AnchoredTrailEmitter *emitter) {
     func_151D77C8(emitter);
 }
 
-void func_151D7424(TimedEffect *emitter) {
+void func_151D7424(AnchoredTrailEmitter *emitter) {
     func_151D7404(emitter);
-    func_1514933C(emitter);
+    func_1514933C(&emitter->base);
 }
 
-void func_151D7450(TimedEffect *emitter) {
+void func_151D7450(AnchoredTrailEmitter *emitter) {
     func_151D7404(emitter);
-    func_15149368(emitter);
+    func_15149368(&emitter->base);
 }
 
 /* Broadcasts message 0x3D ({actor, unique_id}): the actor is going away. */

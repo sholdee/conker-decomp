@@ -838,7 +838,7 @@ void func_150D4BD4(CharacterTrail *actor);
 void func_150D4C00(CharacterTrail *actor);
 void func_150D4C2C(CharacterTrail *actor);
 s32 func_150D4CC4(TrailGlow *particle);
-void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4);
+void func_150D4D58(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg4);
 s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut, s32 arg5, u16 *playing);
 
 /* game_105FC0.c */
@@ -1048,8 +1048,8 @@ TimedEffect *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 ex
 void func_151D7264(AnchoredTrailEmitter *emitter);
 void func_151D73A8(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType);
 void func_151D7404(AnchoredTrailEmitter *emitter);
-void func_151D7424(TimedEffect *emitter);
-void func_151D7450(TimedEffect *emitter);
+void func_151D7424(AnchoredTrailEmitter *emitter);
+void func_151D7450(AnchoredTrailEmitter *emitter);
 void func_151D747C(Actor *actor);
 void func_151D74B0(Actor *actor, u8 bone, s8 condition, u8 arg3, s32 arg4);
 void func_151D7538(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType);

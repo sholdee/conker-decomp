@@ -134,7 +134,7 @@ void func_150C44A4(PulseEffect *effect) {
     Vec3f *posPtr;
     ModelAttachment *attachment;
     s32 emit;
-    Vec3f *wind;
+    const Vec3f *wind;
     Vec3f vel;
     s32 rand1;
     s32 rand0;

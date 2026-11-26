@@ -39,7 +39,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
     ParticleDesc desc;
     u8 side;
     f32 drag;
-    Vec3f *dir;
+    const Vec3f *dir;
     f32 speed;
     Particle1BFDD0 *particle;
 

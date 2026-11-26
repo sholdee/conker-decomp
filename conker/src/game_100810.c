@@ -303,7 +303,7 @@ s32 func_150D3A68(CharacterTrail *actor) {
                 }
                 state->targetWidth = 50.0f;
                 if (prevMode != state->mode) {
-                    Vec3f *vel;
+                    const Vec3f *vel;
 
                     if (func_1515C0F8(owner, &vel) == 0) {
                         vel = &D_800A5480;
@@ -339,7 +339,7 @@ s32 func_150D3FD4(CharacterTrail *actor) {
     CharacterTrailPoint *points;
     f32 total;
     f32 invTotal;
-    Vec3f *vel;
+    const Vec3f *vel;
     f32 speed;
     f32 maxLen;
     f32 t;
@@ -736,7 +736,7 @@ s32 func_150D4CC4(TrailGlow *particle) {
 }
 
 /* Throws 10-20 sparks from `pos`, fanned around the owner's facing `angle` (degrees) and against `vel`. */
-void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
+void func_150D4D58(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
     ParticleDesc spawn;
     s32 count;
     s16 yaw;

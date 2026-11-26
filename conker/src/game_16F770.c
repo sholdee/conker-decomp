@@ -768,7 +768,7 @@ s32 func_15143E24(Actor *actor) {
     return (s16)(actor->langle >> 8);
 }
 /* Length of a vector. */
-f32 func_15143E64(Vec3f *v) {
+f32 func_15143E64(const Vec3f *v) {
     f32 x = v->x;
     f32 y = v->y;
     f32 z = v->z;
