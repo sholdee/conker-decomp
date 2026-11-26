@@ -1165,7 +1165,7 @@ void func_15197A7C(Actor *owner) {
     if (owner != NULL) {
         ref.actor = owner;
         ref.uniqueId = owner->unique_id;
-        func_15147D64(&ref, 8);
+        func_15147D64((s32)&ref, 8);
     }
 }
 
@@ -2011,7 +2011,7 @@ void func_15199834(Actor *owner) {
     if (owner != NULL) {
         ref.actor = owner;
         ref.uniqueId = owner->unique_id;
-        func_15147D64(&ref, 0x26);
+        func_15147D64((s32)&ref, 0x26);
     }
 }
 

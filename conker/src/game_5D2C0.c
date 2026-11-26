@@ -911,7 +911,7 @@ void func_15031C14(ModelAttachment *att) {
         case 0x5D:
             ref5D.actor = owner;
             ref5D.uniqueId = owner->unique_id;
-            func_15147D64(ref = &ref5D, 0x2E);
+            func_15147D64((s32)(ref = &ref5D), 0x2E);
             func_151494E0((s32)ref, 0x2F);
             break;
         case 0x3D:

@@ -736,7 +736,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
                 ref.actor = obj;
                 ref.uniqueId = obj->unique_id;
-                func_15147D64(&ref, 7);
+                func_15147D64((s32)&ref, 7);
             }
         } else if (event->value == 0x30) {
             u8 v;

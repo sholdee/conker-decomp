@@ -45,7 +45,7 @@ void func_1519CF70(u8 specIndex) {
     u8 event[4];
 
     event[0] = specIndex;
-    func_15147D64(event, 6);
+    func_15147D64((s32)event, 6);
 }
 
 /* Stops a trail: it no longer emits and its tail fades out. */

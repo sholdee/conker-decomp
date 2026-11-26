@@ -1241,6 +1241,10 @@ void func_15168E34(s32 *addr, s32 offset);
 void func_15168E54(Gfx *dl, s32 offset);
 void func_15168F08(DLCommand *dl, s32 base);
 void func_15168F84(s32 group, s32 *first, s32 *last);
+/* Event broadcast API. The event payload is a pointer to a message whose type depends on eventType, but
+ * the original API passed it as an integer: callers that pass one address to several calls only match with
+ * int parameters. So callers write (s32)&msg.
+ */
 /* void func_15169040(s32 event, u8 eventType) is declared in the files that call it:
    game_16F770.c calls it with two more arguments. */
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
