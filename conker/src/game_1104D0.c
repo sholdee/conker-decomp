@@ -4,11 +4,6 @@
 
 extern s32 math_distance3D(s32, s32, s32);
 
-/* 18 bytes copied verbatim from an effect into each particle it spawns. */
-typedef struct {
-    s16 unk0[9];
-} SpawnCopyParams;
-
 /*
  * Object type 0x27: moves from pos toward target (a fixed point, a Actor or a followed f32[3]) at
  * speed units per frame, spawning particles that run from origin to the moving point. Live effects are
@@ -29,14 +24,7 @@ struct HomingEffect {
     /* 0x4A */ u16 sound;
     /* 0x4C */ f32 particleAccum;
     /* 0x50 */ f32 sparkAccum;
-    /* 0x54 */ f32 groundY;
-    /* 0x58 */ SpawnCopyParams params;
-    /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x71 */ u8 unk71;
-    /* 0x72 */ u8 pad72[2];
-    /* 0x74 */ s32 unk74;
+    /* 0x54 */ CollisionHit ground;   /* the floor below the last step */
     /* 0x78 */ f32 *follow;
     /* 0x7C */ s16 lifetime; /* frames left, or -99 for unlimited */
 };
@@ -53,11 +41,11 @@ HomingEffect *func_150E3020(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 t
     }
     effect->particleAccum = 0.0f;
     effect->sparkAccum = 0.0f;
-    effect->groundY = -10000.0f;
-    effect->unk6C = 0;
-    effect->unk70 = 0;
-    effect->unk71 = 0;
-    effect->unk74 = 0;
+    effect->ground.height = -10000.0f;
+    effect->ground.material = 0;
+    effect->ground.flags = 0;
+    effect->ground.source = 0;
+    effect->ground.surface = NULL;
     effect->lifetime = lifetime;
     effect->follow = follow;
     effect->pos.x = x;
@@ -208,25 +196,6 @@ void func_150E36BC(s32 handle, s32 *x, s32 *y, s32 *z) {
     }
 }
 
-/* Spawn description handed to func_151C229C. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ Vec3f unk8;
-    /* 0x14 */ Vec3f unk14;
-    /* 0x20 */ Vec3f unk20;
-    /* 0x2C */ Vec3f unk2C;
-    /* 0x38 */ Vec3f unk38;
-    /* 0x44 */ SpawnCopyParams params;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 unk59;
-    /* 0x5A */ u8 unk5A;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60;
-} HomingSpawnDesc;
-
-
 /*
  * Per-frame update of an effect: counts down its lifetime, steps pos toward the target and spawns particles
  * that run from origin to random points along that step, plus sparks at origin.
@@ -253,7 +222,7 @@ void func_150E3738(HomingEffect *arg0) {
     f32 unusedOut;
     f32 randWidth;
     s32 randByte;
-    HomingSpawnDesc particle;
+    RayHit particle;
     f32 unusedR;
     s32 randAngle;
 
@@ -335,8 +304,8 @@ void func_150E3738(HomingEffect *arg0) {
             point.z = rnd * step.z + prevPos.z + offsetZ;
         }
         end = point;
-        if (func_15046C80(&point, 0, point.y - 1000.0f, &effect->groundY) != 0) {
-            end.y = effect->groundY;
+        if (func_15046C80(&point, 0, point.y - 1000.0f, &effect->ground) != 0) {
+            end.y = effect->ground.height;
         }
         {
             extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *); // matching: -g3 block marker, as above
@@ -353,24 +322,24 @@ void func_150E3738(HomingEffect *arg0) {
             from.z += dir.z * scale;
             length -= scale;
         }
-        particle.unk0 = 0;
-        particle.unk4 = length;
-        particle.unk8 = end;
-        particle.unk14 = end;
-        particle.unk20 = end;
-        particle.unk2C = from;
-        particle.unk38 = dir;
-        particle.params = effect->params;
-        particle.unk56 = 0;
-        particle.unk58 = 0;
-        particle.unk59 = 1;
-        particle.unk5A = 0;
-        if (effect->unk71 == 2 || effect->unk71 == 3) {
-            particle.unk5C = effect->unk74;
+        particle.obj = NULL;
+        particle.dist = length;
+        particle.pos = end;
+        particle.centre = end;
+        particle.far = end;
+        particle.origin = from;
+        particle.dir = dir;
+        particle.tri = effect->ground.tri;
+        particle.bone = 0;
+        particle.part = 0;
+        particle.hitType = 1;
+        particle.index = 0;
+        if (effect->ground.source == 2 || effect->ground.source == 3) {
+            particle.surface = effect->ground.surface;
         } else {
-            particle.unk5C = 0;
+            particle.surface = NULL;
         }
-        particle.unk60 = effect->unk6C;
+        particle.material = effect->ground.material;
         randWidth = func_150ADA68();
         scale = func_150ADA68(); // matching: scale and randAngle are reused so they keep their registers
         randByte = func_150ADA20();
@@ -427,8 +396,8 @@ void func_150E4010(Obj4010 *obj) {
     }
 }
 
-void func_150E411C(s32 arg0) {
-    func_151C3B0C(arg0, 0.352000028f, 0.701000035f, 0.566000044f, 0.228000015f, 0xFF, 0xFF, 0xFF);
+void func_150E411C(Game1EF500Trail *trail) {
+    func_151C3B0C(trail, 0.352000028f, 0.701000035f, 0.566000044f, 0.228000015f, 0xFF, 0xFF, 0xFF);
 }
 
 struct Obj4174 {

@@ -1176,7 +1176,7 @@ extern s32 D_800DD21C;
 extern s32 D_800DD220;
 extern s32 D_800DD224;
 extern void *D_800DD228;
-extern s32 D_800DD230;
+extern SpriteParams D_800DD230;
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;
 extern u8   D_800DD2C0[16]; // per player: spawn point

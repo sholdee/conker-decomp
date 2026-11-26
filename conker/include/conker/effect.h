@@ -557,7 +557,7 @@ void func_150E35DC(s32 handle);
 void func_150E36BC(s32 handle, s32 *x, s32 *y, s32 *z);
 void func_150E3738(HomingEffect *arg0);
 void func_150E4010(Obj4010 *obj);
-void func_150E411C(s32 arg0);
+void func_150E411C(struct Game1EF500Trail *trail);
 s32 func_150E4174(Obj4174 *obj);
 
 /* game_111670.c */
