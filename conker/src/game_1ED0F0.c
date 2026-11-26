@@ -1,11 +1,6 @@
 #include <ultra64.h>
-// matching: func_151C0698 calls func_15144AA8 (one s32 parameter) with a u8 index and a second argument,
-// so this file keeps that view of it.
-#define func_15144AA8 func_15144AA8_effect_h
 #include "functions.h"
 #include "variables.h"
-#undef func_15144AA8
-f32 func_15144AA8(u8, Camera *);
 
 // func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
 // compiled with a different view of it.

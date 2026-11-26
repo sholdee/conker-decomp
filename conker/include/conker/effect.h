@@ -857,7 +857,8 @@ f32 func_15144598(TriggerZone *region);
 f32 func_1514462C(s32 arg0);
 void func_1514470C(TriggerZone *region, f32 *out);
 f32 func_15144A74(Vec3f *a, Vec3f *b); /* dot product */
-f32 func_15144AA8(s32 index);
+/* (s32 index); declared without a prototype: game_1ED0F0.c passes a second argument */
+f32 func_15144AA8();
 Vec3f *func_15144B34(s32 index);
 f32 func_15144B68(f32 angle);
 f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */

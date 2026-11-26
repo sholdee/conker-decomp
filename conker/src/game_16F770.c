@@ -1159,7 +1159,9 @@ f32 func_15144A74(Vec3f *a, Vec3f *b) {
 }
 
 /* camera_global_Cameras[index].TrueCameraAngle wrapped into [0, 360] degrees. */
-f32 func_15144AA8(s32 index) {
+f32 func_15144AA8(index)
+    s32 index;
+{
     f32 v = camera_global_Cameras[index].TrueCameraAngle;
     if (360.0f < v) {
         do {
