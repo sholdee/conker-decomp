@@ -263,11 +263,11 @@ s32 func_15160684(LightEffect *effect);
 s32 func_151606A8(LightEffect *effect);
 s32 func_151607A4(LightEffect *effect);
 void func_15160954(f32 *intensity, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect);
-LightEffect *func_15160A58(Actor *actor, u8 bone, Vec3f *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7,
+LightEffect *func_15160A58(Actor *actor, u8 bone, const Vec3f *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7,
                            s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 eventHandler, u8 argE,
                            s32 argF);
 u8 func_15160B74(LightEffect *effect);
-LightEffect *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 scale, u8 arg5, s16 lifetime,
+LightEffect *func_15160CDC(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, f32 scale, u8 arg5, s16 lifetime,
                            s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 eventHandler, u8 flagHit, u8 argE,
                            s32 argF);
 s32 func_15160E30(LightEffect *effect);

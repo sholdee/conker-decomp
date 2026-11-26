@@ -949,7 +949,6 @@ void func_15149514(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *ob
 
 /* game_179F30.c */
 typedef struct ToggleTarget ToggleTarget;
-typedef struct ModeTarget ModeTarget;
 s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
 s32 func_1514D15C(Actor *obj);
 s32 func_1514D310(Actor *owner);
@@ -1004,7 +1003,7 @@ s32 func_1514E89C(ToggleTarget *target, s32 msg, s32 arg);
 s32 func_1514E920(s32 handle, s32 msg, s32 arg);
 void func_1514E9DC(s32 handle, s32 msg, s32 arg);
 void func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg);
-s32 func_1514EA1C(ModeTarget *target, s32 msg, s32 arg);
+s32 func_1514EA1C(ActorEmitterProcess *target, s32 msg, s32 arg);
 void func_1514EB6C(ToggleTarget *target, s32 msg, s32 arg);
 s32 func_1514EB8C(s32 handle, s32 msg, s32 arg);
 Attachment *func_1514EBA4(void *handle, s16 type, s32 extraSize);
@@ -1040,7 +1039,21 @@ extern const Vec3f D_800A5958;
 extern const Vec3f D_800A5964;
 
 /* game_182C30.c */
-typedef struct PlayerMarker PlayerMarker;
+/*
+ * Type 0x50 object: a marker over player movement_obj[playerId], made of a white point light and a sprite
+ * (*D_800E03E0) that bob 160 units above the player.
+ */
+typedef struct PlayerMarker {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 playerId;
+    /* 0x11 */ u8 state;
+    /* 0x12 */ u8 bobPhase;
+    /* 0x13 */ u8 pad13;
+    /* 0x14 */ PointLight *light;
+    /* 0x18 */ Mtx mtx[2];
+    /* 0x98 */ f32 heightOffset;
+} PlayerMarker;
+
 PlayerMarker *func_15155780(s32 playerId, s32 owner);
 void func_151557FC(s32 playerId, s32 duration, f32 heightOffset);
 void func_1515589C(PlayerMarker *marker);
