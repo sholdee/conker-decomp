@@ -76,9 +76,9 @@ s8 gMatchResult;
  */
 /* A character of the menu scenes (save_spawnMenuCharacter). */
 typedef struct {
-    f32 unk0; /* scale */
-    s8 unk4; /* y offset */
-    u8 unk5; /* spawn type */
+    f32 scale;
+    s8 yOffset;
+    u8 spawnType;
     u8 unk6;
     u8 pad7;
 } Entry151E7F60;
@@ -96,11 +96,11 @@ typedef struct {
     /* 0x8 */ s8 teamColor[4];
 } TeamSetup;
 
-/* Cue table row: cutscene_start(unk0, unk2 or unk3). */
+/* Cue table row: cutscene_start(map, cutscene or altCutscene). */
 struct Struct151E4314 {
-    s16 unk0;
-    s8 unk2;
-    s8 unk3;
+    s16 map;
+    s8 cutscene;
+    s8 altCutscene;
 };
 
 /* menu 1: maps the stop unk2C to its menu 1 order (save_initMenu) */
@@ -2853,11 +2853,11 @@ void func_151E4314(void) {
     if (cueIdx >= 0) {
         entry = &D_800AB7A4[cueIdx];
         if (gRosterTeams[0]) {
-            param = entry->unk3;
+            param = entry->altCutscene;
         } else {
-            param = entry->unk2;
+            param = entry->cutscene;
         }
-        cutscene_start(entry->unk0, param, 0, 0, 0);
+        cutscene_start(entry->map, param, 0, 0, 0);
         D_8008FD80 = 1;
         gFrontEndState = 5;
         D_8008FD8C = 1;
@@ -2883,7 +2883,7 @@ void save_updateResultsScreen(void) {
 
     if (D_8008FD80 == 1) {
         idx = D_800AB68C[gMenuState->selection].unk7;
-        param = D_800AB7BC[idx].unk2;
+        param = D_800AB7BC[idx].cutscene;
         if (gMenuState->selection == 0) {
             count = 1;
             for (i = 0; i < D_8008FD88; i++) {
@@ -2892,12 +2892,12 @@ void save_updateResultsScreen(void) {
                 }
             }
             if (count) {
-                param = D_800AB7BC[idx].unk3;
+                param = D_800AB7BC[idx].altCutscene;
             }
         } else if (gPlayerRanks[0] != 1) {
-            param = D_800AB7BC[idx].unk3;
+            param = D_800AB7BC[idx].altCutscene;
         }
-        cutscene_start(D_800AB7BC[idx].unk0, param, 0, 0, 0);
+        cutscene_start(D_800AB7BC[idx].map, param, 0, 0, 0);
         D_8008FD80 = 0;
     } else {
         if (gMenuState->selection != 11 && gMenuState->selection != 12) {
@@ -3049,7 +3049,7 @@ void save_endRound(void) {
             D_8008FD80 = 4;
         }
     } else {
-        param = D_800AB7BC[resultCue].unk0;
+        param = D_800AB7BC[resultCue].map;
         gFrontEndState = 6;
         D_8008FD80 = 1;
     }
@@ -4271,10 +4271,10 @@ void save_checkCodeTamper(void) {
 }
 
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u8 unk6;
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 angle;
     u8 pad7;
 } Pos151E7F60;
 
@@ -4299,17 +4299,17 @@ void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx) {
     }
     spawnId = collision_findSpawnById(slotIdx + 0x10);
     spawn = (SpawnRecord *)((spawnId * 0x30) + (s32)gSpawnRecords); // matching: offset + base operand order
-    kind = gMenuCharacterTypes[charIdx].unk5;
+    kind = gMenuCharacterTypes[charIdx].spawnType;
     posIdx = slotIdx;
     if (gMenuState->unk2C == 7) {
         posIdx++;
     }
     spawn->type = kind;
-    spawn->x = gMenuCharacterPositions[posIdx].unk0;
-    spawn->y = gMenuCharacterPositions[posIdx].unk2;
-    spawn->y += gMenuCharacterTypes[charIdx].unk4;
-    spawn->z = gMenuCharacterPositions[posIdx].unk4;
-    spawn->angle = gMenuCharacterPositions[posIdx].unk6;
+    spawn->x = gMenuCharacterPositions[posIdx].x;
+    spawn->y = gMenuCharacterPositions[posIdx].y;
+    spawn->y += gMenuCharacterTypes[charIdx].yOffset;
+    spawn->z = gMenuCharacterPositions[posIdx].z;
+    spawn->angle = gMenuCharacterPositions[posIdx].angle;
     if (kind == 0x53) {
         spawn->unkD = 0x24;
     } else {
@@ -4321,7 +4321,7 @@ void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx) {
         gMenuCharacters[slotIdx] = obj;
         obj->drawtype = 7;
         obj->unk2F8 |= 3;
-        obj->scale_xz = obj->scale_y = gMenuCharacterTypes[charIdx].unk0;
+        obj->scale_xz = obj->scale_y = gMenuCharacterTypes[charIdx].scale;
         if (obj->character_type == 0 || obj->character_type == 0x80) {
             obj->mv = allocate_memory(0x1C0, 1, 0, 0);
             bzero(obj->mv, 0x1C0);
