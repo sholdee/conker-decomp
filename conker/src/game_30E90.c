@@ -304,9 +304,9 @@ void func_150045C4(s32 arg0) {
     WorldObject *obj;
     MtxF mtx;
     s32 j;
-    s32 floorFlags;
+    u32 floorFlags;
     f32 floorY;
-    s32 floorTri;
+    void *floorTri;
     f32 x;
     f32 y;
     f32 z;

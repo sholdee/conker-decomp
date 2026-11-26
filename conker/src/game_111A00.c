@@ -93,7 +93,7 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
         if (entry->particleType == 0x13) {
             func_15171D4C(x, y, z, 30, 0, 0x13, 0.0f, 0, count, 0xF, 0x55, 0, 0xFF, 0);
         } else if (tri != NULL) {
-            func_15171F04(x, y, z, (s32)tri, lifetime, 0xB5AD, entry->particleType, count, 0, 0, 0, 0xFF, 0);
+            func_15171F04(x, y, z, tri, lifetime, 0xB5AD, entry->particleType, count, 0, 0, 0, 0xFF, 0);
         } else {
             func_15171D4C(x, y, z, (s16)lifetime, 0xB5AD, entry->particleType, 0.0f, 0, count, 0, 0, 0, 0xFF, 0);
         }

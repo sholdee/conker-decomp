@@ -1350,7 +1350,7 @@ struct WorldObject {
         } f;                         // float view (not named by the debugger)
         struct {
             /* 0x7C */ s32 unk7C;
-            /* 0x80 */ s32 tri;      // floor probe results, see func_150045C4
+            /* 0x80 */ void *tri;    // floor probe results, see func_150045C4
             /* 0x84 */ f32 y;
         } floor;
     } touch;                         // per-behaviour scratch state
@@ -1671,10 +1671,10 @@ struct Camera {
     /* 0x636 */ u8 pad636[0x2];
     /* 0x638 */ s32 ForceAttribute;                   /* not accessed by US code */
     /* 0x63C */ s32 AttributeSet;                     /* not accessed by US code */
-    /* 0x640 */ s32 Attributes;
-    /* 0x644 */ s32 TrianglePtr;
-    /* 0x648 */ s32 unk648;
-    /* 0x64C */ u8 pad64C[0x10];
+    /* 0x640 */ u32 Attributes;
+    /* 0x644 */ void *TrianglePtr;                    /* floor triangle under the eye (the floor probe's outTri) */
+    /* 0x648 */ CollisionTri floorTri;                /* its vertices */
+    /* 0x65A */ u8 pad65A[0x2];
     /* 0x65C */ f32 CentPitchAngleVel;
     /* 0x660 */ f32 CentYawAngleVel;
     /* 0x664 */ Vec3f forward;

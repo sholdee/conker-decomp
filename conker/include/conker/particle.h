@@ -2051,11 +2051,11 @@ Particle19F150 *func_15171CA0(s16 lifetime, u16 color, u8 animIndex, s32 flags, 
                               s32 arg7);
 void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f32 angle, s32 dist, s32 size, s32 flags,
                    s32 animSpeed, s32 arg11, u8 arg12, s32 arg13);
-void func_15171F04(f32 x, f32 y, f32 z, s32 tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
+void func_15171F04(f32 x, f32 y, f32 z, void *tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
                    s32 animSpeed, s32 arg10, u8 arg11, s32 arg12);
 void func_15171FC0(Particle19F150 *particle);
 Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2);
-s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width);
+s32 func_151725FC(Vtx *vtx, void *tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width);
 s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, u8 width);
 
 /* game_1A1B40.c */

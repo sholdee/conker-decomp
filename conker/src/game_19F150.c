@@ -56,7 +56,7 @@ void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f
 }
 
 /* Spawns a sprite particle laid on collision triangle `tri` at (x, y, z). */
-void func_15171F04(f32 x, f32 y, f32 z, s32 tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
+void func_15171F04(f32 x, f32 y, f32 z, void *tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
                    s32 animSpeed, s32 arg10, u8 arg11, s32 arg12) {
     Particle19F150 *particle;
 
@@ -282,7 +282,7 @@ static const s16 D_800A6FF0[4][2] = { { 16 << 5, 0 }, { 0, 0 }, { 0, 16 << 5 }, 
  * Fills `vtx` with a quad of half-size `size` lying on the slope of collision triangle `tri`, centred on (x, y, z),
  * with its texture coordinates (for a texture `width` texels wide) rotated by `angle` degrees.
  */
-s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width) {
+s32 func_151725FC(Vtx *vtx, void *tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width) {
     f32 lenA;
     f32 lenB;
     f32 minLenSq;
@@ -309,7 +309,7 @@ s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u
     if (n == 0) {
         n = 1;
     }
-    if (func_1510E388((Vec3s **)tri, NULL, &slopeX, &slopeZ) == 0) {
+    if (func_1510E388(tri, NULL, &slopeX, &slopeZ) == 0) {
         return 0;
     }
     axis[0][0] = 0.0f;
@@ -383,9 +383,9 @@ s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u
  */
 s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, u8 width) {
     struct FloorHit {
-        s32 tri;
+        void *tri;
         f32 floorY;
-        s32 unk8;
+        u32 unk8;
         s32 unkC;
     };
     f32 sinT;
@@ -397,7 +397,7 @@ s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, 
     x += (f32)dist * sinT;
     z += (f32)dist * cosT;
     func_1510E82C(&floor.tri, 0, &floor.floorY, 0, &floor.unk8, 0, x, y, z, y, 0, 0);
-    if (floor.tri == 0) {
+    if (floor.tri == NULL) {
         return 0;
     }
     if (floor.floorY == -10000.0f) {

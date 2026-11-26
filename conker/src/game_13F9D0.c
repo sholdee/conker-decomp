@@ -441,7 +441,7 @@ void func_15113E54(s32 arg0) {
     s16 moveX;
     s16 moveY;
     s16 moveZ;
-    s32 leaderFloorTri;
+    void *leaderFloorTri;
     s32 i;
     s32 j;
     s32 count;

@@ -306,14 +306,14 @@ s32 func_15104634(f32 x, f32 z, f32 y, f32 *out);
 
 /* game_13BB20.c */
 s32 func_1510E670(s32 index);
-void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags, s16 *outType,
+void func_1510E7A4(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
                    f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj, f32 minY, f32 maxY);
-void func_1510E82C(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags, s16 *outType,
+void func_1510E82C(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
                    f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj);
-void func_1510E8BC(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags, s16 *outType,
+void func_1510E8BC(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
                    f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj, f32 unused12, f32 unused13, s32 noFallback);
-void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 *outFloorY, f32 *outPropFloorY,
-                   s32 *outFlags, s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *object, f32 minY,
+void func_1510E950(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)[3], f32 *outFloorY, f32 *outPropFloorY,
+                   u32 *outFlags, s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *object, f32 minY,
                    f32 maxY, s32 noFallback);
 f32 func_1510F648(f32 x, f32 y, f32 z);
 s32 func_1510F720(s32 x, s32 z, s32 radius, ZoneNode **outLeaves);

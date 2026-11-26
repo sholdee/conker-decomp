@@ -153,7 +153,7 @@ void func_15129C30(Camera *cam) {
     }
     cam->TrueCameraAngle = cam->CameraAngle;
     cam->TrueCameraAngleRad = cam->CameraAngleRad = cam->CameraAngle * 0.01745329238f;
-    func_1510E7A4(&cam->TrianglePtr, &cam->unk648, &floor.x, &cam->waterY, &cam->Attributes, 0, cam->eye.x, cam->eye.y,
+    func_1510E7A4(&cam->TrianglePtr, cam->floorTri.v, &floor.x, &cam->waterY, &cam->Attributes, 0, cam->eye.x, cam->eye.y,
                   cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
 }
 
