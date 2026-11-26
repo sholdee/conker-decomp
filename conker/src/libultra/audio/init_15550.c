@@ -342,10 +342,10 @@ void _n_handleEvent(SndEvent *event) {
                                                   (N_ALUnknownStruct1 *)state, 0x40);
                                 } else {
                                     func_10002088(
-                                        (s32)"snd %d has been freed too early - %d\n\n\n\n\n",
+                                        "snd %d has been freed too early - %d\n\n\n\n\n",
                                         state->unk54, state->unk54);
                                     func_10002088(
-                                        (s32)"-2 sound has been freed too early - %d\n\n\n\n\n",
+                                        "-2 sound has been freed too early - %d\n\n\n\n\n",
                                         state->unk54);
                                 }
                                 delta = (s32)((f32)snd->envelope->releaseTime / state->ratio /

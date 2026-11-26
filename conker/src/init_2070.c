@@ -10,12 +10,14 @@ u8 *func_10002070(u8 *arg, u8 *buf, u32 count) {
     return (u8 *)1;
 }
 
-void func_10002088(s32 arg0, ...) {
+/* osSyncPrintf: formats and discards the text (debug output is compiled out). */
+void func_10002088(const char *fmt, ...) {
     va_list args;
 
-    va_start(args, arg0);
+    va_start(args, fmt);
     D_80035500 = 0;
-    func_100020D0(func_10002070, 0, arg0, args);
+    // the formatter reads unsigned chars (libultra's char is unsigned; this build uses -signed)
+    func_100020D0(func_10002070, NULL, (u8 *)fmt, args);
 }
 
 static u8 D_8002AAF0[] = "                                "; // spaces
@@ -50,8 +52,8 @@ int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
     while (1) {
         u8 *s;
         u8 c;
-        u8 *t;
-        static const u8 D_8002BF84[] = " +-#0"; // the flag characters
+        char *t;
+        static const char D_8002BF84[] = " +-#0"; // the flag characters
         static const u32 D_8002BF8C[] = { 1, 2, 4, 8, 16, 0 }; // their bits in _Pft.flags
         u8 ac[32];
 
@@ -67,7 +69,7 @@ int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
             return x.nchar;
         }
         fmt = ++s;
-        for (x.flags = 0; (t = (u8 *)strchr((char *)D_8002BF84, *s)) != NULL; s++) {
+        for (x.flags = 0; (t = strchr(D_8002BF84, *s)) != NULL; s++) {
             x.flags |= D_8002BF8C[t - D_8002BF84];
         }
         if (*s == '*') {
