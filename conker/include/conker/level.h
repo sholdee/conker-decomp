@@ -172,6 +172,7 @@ s32 func_1500F9D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_1500FA64(void);
 
 /* game_3D2E0.c */
+extern BounceRecord *D_800BE4E0; /* ten bouncing cursors (func_1500FE30) */
 void func_1500FE30(void);
 void func_1500FF9C(void);
 void func_1500FFCC(void);
@@ -215,6 +216,7 @@ void func_150109D0(void);
 void func_15010A60(void);
 
 /* game_3E460.c */
+extern struct TexScroll **D_800BE4F0; /* four texture scrolls (func_15010FB0) */
 void func_15010FB0(void);
 
 /* game_3E5A0.c */
@@ -239,6 +241,7 @@ void func_15011B00(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_15011B94(void);
 
 /* game_3F0F0.c */
+extern u8 D_800BE500[5]; /* five level flags, cleared by func_15011C40 */
 void func_15011C40(void);
 
 /* game_3F120.c */

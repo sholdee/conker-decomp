@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+BounceRecord *D_800BE4E0; /* ten bouncing cursors */
+
 
 
 void func_1500FE30(void) {
