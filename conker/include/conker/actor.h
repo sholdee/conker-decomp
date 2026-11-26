@@ -24,6 +24,7 @@
  *   game_A9820.c
  *   game_A9D90.c
  *   game_DE5A0.c
+ *   game_DF260.s
  *   game_EB020.c
  */
 
@@ -342,6 +343,9 @@ void func_150B12FC(Actor *obj);
 void func_150B1484(Actor *obj);
 void func_150B17DC(Actor *obj);
 void func_150B19E0(Actor *obj);
+
+/* game_DF260.s: rearranges the 64-bit words from start up to end */
+void func_150B1DB0(void *start, void *end);
 
 /* game_EB020.c */
 void func_150BDB70(Actor *self);

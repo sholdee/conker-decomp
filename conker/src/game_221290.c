@@ -147,17 +147,11 @@ extern Mp3Decoder D_800E1880;
 extern s32 D_800B06BC[2][15];    /* bitrate table, indexed [id][bitrateIndex] */
 extern s32 D_800B0734[2][4];     /* sample-rate table, indexed [id][sampleRateIndex] */
 
-s32 func_151F8960(void *, s32 *, s32);
-
 /* func_151F8960(buf, &bitPos, n) reads n bits from buf at bitPos. */
 #define GET_HEADER_BITS(dec, n) func_151F8960((dec)->headerBuf, &(dec)->headerBit, (n))
 /* n bits of main data, a zero width reading as 0 */
 #define GET_MAIN_BITS(dec, n) \
     (((n) != 0) ? func_151F8960((dec)->mainData, &(dec)->mainDataBit, (n)) : 0)
-s32 func_151F8994(void *, s32 *, s32, s32, s32, s32, s16 **, u8 **);
-s32 func_151F8B4C(void *, s32 *, s32, s32, s32, s16 **, u8 **);
-s32 func_151F8CF0(f32 *, s32, f32 *, f32 *, f32 *);
-s32 func_151F9BF0(f32 *, s32, f32 *, f32 *);
 
 /* Builds the decoder's tables: the four IMDCT windows, the relocated Huffman
  * table pointers, x^(4/3) for the 8192 quantised magnitudes (Newton iteration

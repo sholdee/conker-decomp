@@ -10,6 +10,7 @@
  *   game/done/game_32720.c
  *   game_357F0.c
  *   game_44C40.c
+ *   game_45880.s
  *   game_6CCB0.c
  *   game_CDE80.c
  */
@@ -27,6 +28,9 @@ void func_15017868(void);
 void func_15017930(s32 arg0);
 void func_15017B20(TriggerZone *objects, s32 count);
 void func_15017FA4(TriggerZone *obj, ZoneBounds *bounds);
+
+/* game_45880.s: builds the zone grid from a bitmap with rows of stride bytes */
+void func_150183D0(s32 stride, s32 height, u8 *bitmap, s32 *cells);
 
 /* game_6CCB0.c */
 s32 func_1503F800(void *unused, s16 x, s16 z, s32 bit, s32 unused2);

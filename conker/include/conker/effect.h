@@ -61,6 +61,7 @@
  *   game_124920.c
  *   game_125A50.c
  *   game_127060.c
+ *   game_128970.s
  *   game_129DE0.c
  *   game_129E80.c
  *   game_129EE0.c
@@ -680,6 +681,9 @@ void func_150FB240(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeR
 s32 func_150FB29C(FadeInEffect *effect);
 s32 func_150FB2E0(FadeInSprite *sprite);
 void func_150FB324(Actor *actor, u8 arg1, s32 arg2);
+
+/* game_128970.s */
+Gfx *func_150FB4C0(Gfx *gfx, MtxF viewMtx);
 
 /* game_129DE0.c */
 typedef struct Effect_129DE0 Effect_129DE0;

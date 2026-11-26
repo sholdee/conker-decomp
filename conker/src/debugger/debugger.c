@@ -70,8 +70,6 @@ extern const u8 D_160047E8[];
 extern const u8 D_160047F0[];
 extern const u8 D_160047F4[];
 
-void func_16003650(void);
-
 /* SCREEN_PRESS_BUTTON: draw "PRESS BUTTON". */
 void func_16000000(void) {
     func_160012B0(278, D_160046AC);

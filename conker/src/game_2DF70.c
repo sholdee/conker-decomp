@@ -787,16 +787,16 @@ void func_15002560(QuadNode *node, QuadNode *parentNext) {
 void func_150025FC(void) {
     s32 width;
     s32 height;
-    s32 res0;
-    s32 res1;
+    u8 *res0;
+    s32 *res1;
 
     width = D_800DBE2A;
     height = D_800DBE2C;
 
     D_800DBE28 = (((width + 7) / 8) + 15) & 0xFFF0;
-    res0 = (s32)func_1502B5C8(NULL, 2, 5, level * 2);
-    res1 = (s32)func_1502B5C8(NULL, 2, 5, level * 2 + 1);
-    if (res0 == 0) {
+    res0 = func_1502B5C8(NULL, 2, 5, level * 2);
+    res1 = func_1502B5C8(NULL, 2, 5, level * 2 + 1);
+    if (res0 == NULL) {
         D_800BE5D0 = 0;
     } else {
         func_150183D0(D_800DBE28, height, res0, res1);

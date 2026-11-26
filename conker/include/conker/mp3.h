@@ -10,6 +10,9 @@
  *   init_12560.c
  *   game_43620.c
  *   game_221290.c
+ *   game_225D20.s
+ *   game_2261A0.s
+ *   game_2270A0.s
  *   libultra/audio/game_21FC90.c
  */
 
@@ -43,5 +46,17 @@ s32 func_151F7F60(Mp3Decoder *dec);
 s32 func_151F8088(Mp3Decoder *dec, s32 seekPos);
 Mp3Decoder *func_151F85C4(s32 handle, Mp3ReadFn read, s32 arg2);
 s32 func_151F86B0(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels);
+
+/* game_225D20.s: the bit reader (func_151F8960(buf, &bitPos, n) reads n bits from buf at bitPos) and the
+ * Huffman decoders */
+s32 func_151F8960(void *buf, s32 *bitPos, s32 n);
+s32 func_151F8994(void *buf, s32 *bitPos, s32 table, s32 line, s32 linbits, s32 end, s16 **val, u8 **sign);
+s32 func_151F8B4C(void *buf, s32 *bitPos, s32 table, s32 line, s32 end, s16 **val, u8 **sign);
+
+/* game_2261A0.s */
+void func_151F8CF0(f32 *xr, s32 sb, f32 *out, f32 *overlap, f32 *window);
+
+/* game_2270A0.s */
+void func_151F9BF0(f32 *xr, s32 sb, f32 *out, f32 *overlap);
 
 #endif

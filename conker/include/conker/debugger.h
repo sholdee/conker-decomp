@@ -12,6 +12,7 @@
  *   debugger_257330.c
  *   debugger_257350.c
  *   debugger/debugger.c
+ *   debugger_258ED0.s
  */
 
 /* Conversion state for one printf field (libultra _Pft): n0/n1/n2 are the lengths of the
@@ -87,5 +88,8 @@ u8 *func_160014F0(u8 *destination, u8 character);
 u8 *func_1600160C(s32 position);
 void func_16001678(void);
 s32 func_160016F4(s32 value);
+
+/* debugger_258ED0.s: takes the TLB snapshot */
+void func_16003650(void);
 
 #endif
