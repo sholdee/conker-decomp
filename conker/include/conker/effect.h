@@ -1085,7 +1085,7 @@ extern const AttachmentType *D_8008ABE8[];
 extern Gfx D_8008AD30[]; /* render teardown (object type table D_8008B4A8) */
 /*
  * Type 0x50 object: a marker over player movement_obj[playerId], made of a white point light and a sprite
- * (*D_800E03E0) that bob 160 units above the player.
+ * (attachment model 166, D_800E0148[166]) that bob 160 units above the player.
  */
 typedef struct PlayerMarker {
     /* 0x00 */ EffectHeader header;

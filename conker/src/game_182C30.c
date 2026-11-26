@@ -131,8 +131,6 @@ void func_1515589C(PlayerMarker *marker) {
     }
 }
 
-extern Gfx **D_800E03E0;
-
 /* Draws the marker sprite (2.25x scale, rotated by camera_global_Cameras[view].TrueCameraAngle) while the marker is shown. */
 Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
     s32 state;
@@ -158,7 +156,7 @@ Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
                       player->zpos);
         gSPMatrix(gfx++, &marker->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPClearGeometryMode(gfx++, G_ZBUFFER);
-        gSPDisplayList(gfx++, *D_800E03E0);
+        gSPDisplayList(gfx++, D_800E0148[166]->dlists); /* attachment model 166, loaded by func_1518C900 */
         gSPSetGeometryMode(gfx++, G_ZBUFFER);
     }
     return gfx;

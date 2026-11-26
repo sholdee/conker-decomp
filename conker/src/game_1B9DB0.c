@@ -1,4 +1,11 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/attach.h describes it. */
+u8 D_800DF7D0[0x1E4];                  /* per-model load reference counts */
+s16 *D_800DF9B8[0x1E4];                /* per model: written by func_1510CE60 */
+AttachModelHeader *D_800E0148[0x1E4];  /* per model: loaded attachment model header */
+
 #include "functions.h"
 #include "variables.h"
 

@@ -423,9 +423,6 @@ extern f32 * D_800DDE4C; // hole y, percent of the view height
 
 
 /* 800E0000 */
-extern u8 D_800DF7D0[]; // per-model load reference counts
-extern s16 *D_800DF9B8[]; // per model: written by func_1510CE60
-extern AttachModelHeader *D_800E0148[]; // per model: loaded attachment model header
 extern s32 D_800E0A74;
 extern s16 D_800E0A80;
 extern u8 D_800E0A8C;
