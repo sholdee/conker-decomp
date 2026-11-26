@@ -331,7 +331,6 @@ extern ModeEntry D_800AB68C[]; // multiplayer game-mode table
 extern s32 D_800AB754[];
 extern LevelHeader *D_800B0DF0;
 
-extern u8 D_800BE580[]; /* bit set over text ids */
 extern u8 D_800BE590;
 extern u16 D_800BE598[];
 extern s32 *D_800BE5A8[]; // per spawn model type: data loaded by func_1502B7F0
