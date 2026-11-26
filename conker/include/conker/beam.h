@@ -799,6 +799,7 @@ void func_150F7310(BeamObj *obj, ActorRef *msg, u8 msgId);
 void func_150F739C(BeamObj *obj);
 void func_150F740C(BeamObj *obj);
 void func_150F7438(BeamObj *obj);
+extern Vec3f D_800D9A50; // the last beam direction (func_150F706C); game_123FB0 aims a camera by it
 
 /* game_12E540.c */
 void func_15101090(RayBeam *beam);
