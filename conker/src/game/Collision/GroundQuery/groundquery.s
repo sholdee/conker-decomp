@@ -662,7 +662,7 @@ glabel collision_getTriHeightAt
 
 .section .bss
 
-/* Data of game_D0F20.s to game_D2450.s */
+/* Data of game/Collision/GroundQuery/groundquery.s to game/Collision/ActorGround/actorground.s */
 glabel gGroundCandidates
     /* 800D3300 */ .space 0xC
 glabel D_800D330C

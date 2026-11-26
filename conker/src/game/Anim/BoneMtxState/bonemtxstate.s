@@ -25,7 +25,7 @@ glabel anim_copyRootMtx
 
 .section .data
 
-/* The matrix state of game_D5650.s to game_D5DC8.s */
+/* The matrix state of game/Anim/BoneMtxState/bonemtxstate.s to game/Anim/BoneMtxEval/bonemtxeval.s */
 glabel gAnimMtxCursor
     /* 22D000 80088540 00000000 */ .word 0x00000000
 

@@ -503,7 +503,7 @@ glabel anim_buildBoneMatrices
 
 .section .data
 
-/* D_80088580: game_D5680.s reads it and game_D5DC8.s writes it; a table of handlers follows */
+/* D_80088580: game/Anim/BoneMatrices/bonematrices.s reads it and game/Anim/BoneMtxEval/bonemtxeval.s writes it; a table of handlers follows */
 glabel D_80088580
     /* 22D040 80088580 00000000 */ .word 0x00000000
     /* 22D044 80088584 15036CE8 */ .word func_15036CE8

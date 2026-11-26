@@ -69,5 +69,5 @@ math_transformPoint	s	guMtxXFMF-like; proven-asm math_transformPointW calls it w
 math_cross3	s	cross product; every mul.s alternates with a non-mul (IDO as in reorder mode cannot produce it); next to hasm math_cos. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
 math_dot3	s	dot product accumulating in place in $f0; schedule IDO as never produces (19,200 orders tried). No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
 math_length3	s	vector length; a plain reorder-mode .s assembled by IDO as -r4300_mul gives exactly these bytes. No natural C match: IDO 5.3, IDO 7.1, KMC GCC 2.7.2 sweeps (~10,000 builds, 2026-11-25)
-func_150AE1B0	s	IDO 5.3 -O1 gives the same 4 instructions but in $t6; this uses $t2 like its asm neighbours in game_DAFA0 (func_150AE1C0 uses dmult)
+func_150AE1B0	s	IDO 5.3 -O1 gives the same 4 instructions but in $t6; this uses $t2 like its asm neighbours in game/Script/ScriptInterp/scriptinterp (func_150AE1C0 uses dmult)
 func_150AB1A0	c	reads $t7 (or $ra,$t7,$zero; jr $t7) and the caller's stack frame (lwc1 $f20..$f31 from 0x4..0x30($sp), addiu $sp,0x58) without writing either: a second exit path of math_triBoxOverlap's frame

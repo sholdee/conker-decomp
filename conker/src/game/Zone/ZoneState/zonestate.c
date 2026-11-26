@@ -113,7 +113,7 @@ void zone_cacheAngles(TriggerZone *zone) {
     zone->cosYaw = math_cos(angle);
 }
 
-s32 math_distance3D(s32 dx, s32 dy, s32 dz); /* game_DAE50.s */
+s32 math_distance3D(s32 dx, s32 dy, s32 dz); /* game/Math/Rand64/rand64.s */
 
 /* Starts the ZONE_TYPE_REFLECTION zone effect (model_queueReflection) for every active actor inside such a zone. */
 void zone_updateReflections(void) {

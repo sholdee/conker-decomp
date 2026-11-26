@@ -51,7 +51,7 @@ glabel gfx_copyDlCulled
 
 .section .bss
 
-/* Data of game_D2570.s and game_D260C.s */
+/* Data of game/Gfx/CullDl/culldl.s and game/Gfx/CullLevelDl/cullleveldl.s */
 glabel D_800D35E0
     /* 800D35E0 */ .space 0x8
 glabel gCullVtxFlags

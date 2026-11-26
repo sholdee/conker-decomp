@@ -4,7 +4,7 @@
 
 /*
  * A data-only unit: the handler tables of the script commands. Bits 12-15 of a command word select the
- * class (entry class - 1), bits 0-11 the command or object id. The interpreter (game_DAFA0.s) runs the
+ * class (entry class - 1), bits 0-11 the command or object id. The interpreter (game/Script/ScriptInterp/scriptinterp.s) runs the
  * start and end handlers of gScriptStartHandlers / gScriptEndHandlers and the query and command handlers of gScriptQueryHandlers /
  * gScriptCommandHandlers; the dispatchers script_query / script_command (game/Script/TaskSet/taskset) call the last two. A null entry is
  * a class that has no handler of that kind.

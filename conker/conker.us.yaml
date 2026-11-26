@@ -533,54 +533,54 @@ segments:
       - [0xCD5A0, c, game/Script/TimerCmd/timercmd]
       - [0xCD860, c, game/Script/ZoneCmd/zonecmd]
       - [0xCDE80, c, game/Zone/ZoneState/zonestate]
-      - [0xD0F20, hasm, game_D0F20]
-      - [0xD1890, hasm, game_D1890]
-      - [0xD19A0, hasm, game_D19A0]
-      - [0xD1FB4, hasm, game_D1FB4]
-      - [0xD2450, hasm, game_D2450]
-      - [0xD2570, hasm, game_D2570]
-      - [0xD260C, hasm, game_D260C]
-      - [0xD3040, hasm, game_D3040]
-      - [0xD36C0, hasm, game_D36C0]
-      - [0xD3810, hasm, game_D3810]
-      - [0xD39B0, hasm, game_D39B0]
-      - [0xD3A18, hasm, game_D3A18]
+      - [0xD0F20, hasm, game/Collision/GroundQuery/groundquery]
+      - [0xD1890, hasm, game/Collision/PropGround/propground]
+      - [0xD19A0, hasm, game/Collision/PropTris/proptris]
+      - [0xD1FB4, hasm, game/Collision/ActorHitMesh/actorhitmesh]
+      - [0xD2450, hasm, game/Collision/ActorGround/actorground]
+      - [0xD2570, hasm, game/Gfx/CullDl/culldl]
+      - [0xD260C, hasm, game/Gfx/CullLevelDl/cullleveldl]
+      - [0xD3040, hasm, game/Shadow/ShadowFaces/shadowfaces]
+      - [0xD36C0, hasm, game/View/QuadInView/quadinview]
+      - [0xD3810, hasm, game/View/CylinderInView/cylinderinview]
+      - [0xD39B0, hasm, game/Collision/PropQuery/propquery]
+      - [0xD3A18, hasm, game/Collision/PropBoxQuery/propboxquery]
       - [0xD3D10, hasm, game/Effects/ObjectList/quadfxdraw]
-      - [0xD4450, hasm, game_D4450]
-      - [0xD4C20, hasm, game_D4C20]
+      - [0xD4450, hasm, game/Prop/WaveVertices/wavevertices]
+      - [0xD4C20, hasm, game/Libc/FillBytes/fillbytes]
       - [0xD4C40, hasm, libultra/gu/guMtxF2L]
-      - [0xD4E10, hasm, game_D4E10]
-      - [0xD4EB0, hasm, game_D4EB0]
-      - [0xD4EC4, hasm, game_D4EC4]
-      - [0xD4EF8, hasm, game_D4EF8]
-      - [0xD5030, hasm, game_D5030]
+      - [0xD4E10, hasm, game/Math/TransformPoint/transformpoint]
+      - [0xD4EB0, hasm, game/Math/TransformPointW/transformpointw]
+      - [0xD4EC4, hasm, game/Math/TransformW/transformw]
+      - [0xD4EF8, hasm, game/Math/MtxMulF/mtxmulf]
+      - [0xD5030, hasm, game/Math/MtxIdentity/mtxidentity]
       - [0xD5070, hasm, libultra/gu/guMtxIdentF]
-      - [0xD50C0, hasm, game_D50C0]
-      - [0xD5160, hasm, game_D5160]
-      - [0xD51B0, hasm, game_D51B0]
-      - [0xD5250, hasm, game_D5250]
-      - [0xD52A0, hasm, game_D52A0]
-      - [0xD5500, hasm, game_D5500]
-      - [0xD5650, hasm, game_D5650]
-      - [0xD5680, hasm, game_D5680]
-      - [0xD5DC8, hasm, game_D5DC8]
-      - [0xD6E34, hasm, game_D6E34]
-      - [0xD6FBC, hasm, game_D6FBC]
-      - [0xD70F0, hasm, game_D70F0]
-      - [0xD7980, hasm, game_D7980]
-      - [0xD7CC4, hasm, game_D7CC4]
-      - [0xD7E50, hasm, game_D7E50]
-      - [0xD8248, hasm, game_D8248]
-      - [0xD86A0, hasm, game_D86A0]
-      - [0xD9E70, hasm, game_D9E70]
-      - [0xDAC20, hasm, game_DAC20] # syscall
-      - [0xDAC30, hasm, game_DAC30]
-      - [0xDAD60, hasm, game_DAD60]
-      - [0xDADB0, hasm, game_DADB0]
-      - [0xDAE10, hasm, game_DAE10]
-      - [0xDAE50, hasm, game_DAE50]
-      - [0xDAFA0, hasm, game_DAFA0]
-      - [0xDB730, hasm, game_DB730]
+      - [0xD50C0, hasm, game/Math/MtxScale/mtxscale]
+      - [0xD5160, hasm, game/Math/MtxScaleF/mtxscalef]
+      - [0xD51B0, hasm, game/Math/TranslateMtx/translatemtx]
+      - [0xD5250, hasm, game/Math/MtxTranslateF/mtxtranslatef]
+      - [0xD52A0, hasm, game/Math/MtxRotateRPY/mtxrotaterpy]
+      - [0xD5500, hasm, game/Math/MtxRotateRPYF/mtxrotaterpyf]
+      - [0xD5650, hasm, game/Anim/BoneMtxState/bonemtxstate]
+      - [0xD5680, hasm, game/Anim/BoneMatrices/bonematrices]
+      - [0xD5DC8, hasm, game/Anim/BoneMtxEval/bonemtxeval]
+      - [0xD6E34, hasm, game/Math/MtxFToL/mtxftol]
+      - [0xD6FBC, hasm, game/Math/MtxRotScaleF/mtxrotscalef]
+      - [0xD70F0, hasm, game/Math/TriBoxFace/triboxface]
+      - [0xD7980, hasm, game/Math/TriBoxBevel/triboxbevel]
+      - [0xD7CC4, hasm, game/Math/TriBoxPointInTri/triboxpointintri]
+      - [0xD7E50, hasm, game/Math/TriCube/tricube]
+      - [0xD8248, hasm, game/Math/TriBoxOverlap/triboxoverlap]
+      - [0xD86A0, hasm, game/Collision/WallCollide/wallcollide]
+      - [0xD9E70, hasm, game/Collision/RayWorld/rayworld]
+      - [0xDAC20, hasm, game/Debug/FatalTrap/fataltrap] # syscall
+      - [0xDAC30, hasm, game/Math/SinCos/sincos]
+      - [0xDAD60, hasm, game/Math/Cross3/cross3]
+      - [0xDADB0, hasm, game/Math/DotLength/dotlength]
+      - [0xDAE10, hasm, game/Math/Distance2D/distance2d]
+      - [0xDAE50, hasm, game/Math/Rand64/rand64]
+      - [0xDAFA0, hasm, game/Script/ScriptInterp/scriptinterp]
+      - [0xDB730, hasm, game/Script/TaskExit/taskexit]
       - [0xDB750, c, game/Collision/WobbleQuad/wobblequad]
       - [0xDBA60, c, game/Effects/AttachedBurst/attachedburst]
       - [0xDC360, c, game/Trail/TrailSpray/trailspray]
@@ -1060,10 +1060,10 @@ segments:
       - {start: 0x22CEE0, type: .data, name: game/Script/CmdTables/cmdtables, linker_section_order: .rodata}
       - {start: 0x22CFD0, type: .data, name: game/Script/TimerCmd/timercmd, linker_section_order: .rodata}
       - [0x22CFF0, rodata]
-      - {start: 0x22D000, type: .data, name: game_D5650, linker_section_order: .rodata}
-      - {start: 0x22D040, type: .data, name: game_D5680, linker_section_order: .rodata}
-      - {start: 0x22D070, type: .data, name: game_DAE50, linker_section_order: .rodata}
-      - {start: 0x22D080, type: .data, name: game_DAFA0, linker_section_order: .rodata}
+      - {start: 0x22D000, type: .data, name: game/Anim/BoneMtxState/bonemtxstate, linker_section_order: .rodata}
+      - {start: 0x22D040, type: .data, name: game/Anim/BoneMatrices/bonematrices, linker_section_order: .rodata}
+      - {start: 0x22D070, type: .data, name: game/Math/Rand64/rand64, linker_section_order: .rodata}
+      - {start: 0x22D080, type: .data, name: game/Script/ScriptInterp/scriptinterp, linker_section_order: .rodata}
       - {start: 0x22D1A0, type: .data, name: game/Effects/AttachedBurst/attachedburst, linker_section_order: .rodata}
       - [0x22D1B0, rodata]
       - {start: 0x22D1C0, type: .data, name: game/Effects/PipeExplode/pipeexplode, linker_section_order: .rodata}
@@ -1315,16 +1315,16 @@ segments:
       - [0x243F60, .rodata, game/Script/TaskCmd/taskcmd]
       - [0x244010, .rodata, game/Script/ZoneCmd/zonecmd]
       - [0x244060, .rodata, game/Zone/ZoneState/zonestate]
-      - [0x244140, .rodata, game_D19A0]
-      - [0x244150, .rodata, game_D260C]
-      - [0x244160, .rodata, game_D36C0]
-      - [0x244170, .rodata, game_D52A0]
-      - [0x244180, .rodata, game_D5500]
-      - [0x244190, .rodata, game_D6FBC]
-      - [0x2441A0, .rodata, game_D7CC4]
-      - [0x2441B0, .rodata, game_D86A0]
-      - [0x2441D0, .rodata, game_DAC30]
-      - [0x244200, .rodata, game_DAE50]
+      - [0x244140, .rodata, game/Collision/PropTris/proptris]
+      - [0x244150, .rodata, game/Gfx/CullLevelDl/cullleveldl]
+      - [0x244160, .rodata, game/View/QuadInView/quadinview]
+      - [0x244170, .rodata, game/Math/MtxRotateRPY/mtxrotaterpy]
+      - [0x244180, .rodata, game/Math/MtxRotateRPYF/mtxrotaterpyf]
+      - [0x244190, .rodata, game/Math/MtxRotScaleF/mtxrotscalef]
+      - [0x2441A0, .rodata, game/Math/TriBoxPointInTri/triboxpointintri]
+      - [0x2441B0, .rodata, game/Collision/WallCollide/wallcollide]
+      - [0x2441D0, .rodata, game/Math/SinCos/sincos]
+      - [0x244200, .rodata, game/Math/Rand64/rand64]
       - [0x244210, .rodata, game/Collision/WobbleQuad/wobblequad]
       - [0x244220, .rodata, game/Effects/AttachedBurst/attachedburst]
       - [0x244250, .rodata, game/Particle/SmokeEmitter/smokeemitter]
@@ -1697,11 +1697,11 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D3000, name: game/Script/TaskCmd/taskcmd}
       - {start: 0x255880, type: .bss, vram: 0x800D3010, name: game/Script/TimerCmd/timercmd}
       - {start: 0x255880, type: .bss, vram: 0x800D3090, name: game/Zone/ZoneState/zonestate}
-      - {start: 0x255880, type: .bss, vram: 0x800D3300, name: game_D0F20}
-      - {start: 0x255880, type: .bss, vram: 0x800D35E0, name: game_D2570}
-      - {start: 0x255880, type: .bss, vram: 0x800D3680, name: game_D3040}
-      - {start: 0x255880, type: .bss, vram: 0x800D37E0, name: game_D3A18}
-      - {start: 0x255880, type: .bss, vram: 0x800D3840, name: game_DAFA0}
+      - {start: 0x255880, type: .bss, vram: 0x800D3300, name: game/Collision/GroundQuery/groundquery}
+      - {start: 0x255880, type: .bss, vram: 0x800D35E0, name: game/Gfx/CullDl/culldl}
+      - {start: 0x255880, type: .bss, vram: 0x800D3680, name: game/Shadow/ShadowFaces/shadowfaces}
+      - {start: 0x255880, type: .bss, vram: 0x800D37E0, name: game/Collision/PropBoxQuery/propboxquery}
+      - {start: 0x255880, type: .bss, vram: 0x800D3840, name: game/Script/ScriptInterp/scriptinterp}
       - {start: 0x255880, type: bss, vram: 0x800D9860, name: bss_800D9860}
       - {start: 0x255880, type: .bss, vram: 0x800D9890, name: game/Sprite/SpriteRoutines/spriteroutines}
       - {start: 0x255880, type: .bss, vram: 0x800D98C0, name: game/Prop/Pendulum/pendulum}

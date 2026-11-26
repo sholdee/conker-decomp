@@ -37,7 +37,7 @@ typedef union CmdArg {
     } b;
 } CmdArg;
 
-/* A script command record: a command word, then its argument words. The interpreter (game_DAFA0.s) passes
+/* A script command record: a command word, then its argument words. The interpreter (game/Script/ScriptInterp/scriptinterp.s) passes
  * the record to the start/end handlers of gScriptStartHandlers / gScriptEndHandlers (script_startEffect, script_endEffect) as
  * (id, cmd), and to the handlers of gScriptQueryHandlers / gScriptCommandHandlers as (id, arg, cmd); the dispatchers
  * script_query / script_command build one in gScriptCmdBuffer. Arguments that are speeds, scales or distances are
