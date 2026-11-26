@@ -143,8 +143,8 @@ void func_150528C8(Actor *obj);
 /* game_803A0.c */
 void func_15052EF0(Actor *obj);
 Actor *func_15052F58(s32 index, s32 arg1);
-void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7, s32 force,
-                   s32 arg9);
+/* void func_15052F9C(Actor *, f32 height, ...) is declared in the files that call it:
+   game_1048D0.c was compiled with an s32 return. */
 void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
 
 /* game_808E0.c */

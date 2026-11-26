@@ -3,6 +3,9 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Defined in game_803A0.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
+void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+                   s32 force, s32 arg9);
 
 void func_150536D0(Actor *obj) {
     obj->type = 13;

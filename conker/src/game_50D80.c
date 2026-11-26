@@ -14,6 +14,10 @@
 #undef func_15107B78
 #include "variables.h"
 
+/* Defined in game_803A0.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
+void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+                   s32 force, s32 arg9);
+
 // matching: the definitions take s32; this file narrows these arguments to s16 and u8
 void func_150F6890(Actor *, s16, u8, s32);
 void func_15107B78(Actor *, s16, s16, u8, s32);
