@@ -2,6 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
+u8 D_80084060[4] = { 0, 1, 2, 3 }; // the controller channel of each player; 4 or more: none
+u8 D_80084064 = 1;                 // a controller read has finished: func_1501BB20 arms the timer for the next
+static u8 D_80084068 = 3;          // the EEPROM probe result (2: a 16K EEPROM); 3 until the first probe
+
 extern OSTimer D_800BE6E0;
 
 
@@ -233,9 +237,6 @@ void func_1501C53C(void) {
         func_1501C17C(player);
     }
 }
-
-extern u8 D_80084068;
-
 
 /* Runs the pending EEPROM request. Without a 16K EEPROM (probe result D_80084068 != 2), load
    requests fall back to defaults and the others are dropped. */

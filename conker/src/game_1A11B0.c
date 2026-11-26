@@ -21,7 +21,7 @@ Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, s32 zDest, s32 colorDest,
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, colorDest);
     gSPTextureRectangle(gfx++, 0, 0, 3 << 2, 1 << 2, G_TX_RENDERTILE, x << 5, 0, 4 << 10, 1 << 10);
 
-    gfx = func_1501A490(func_1501A680(gfx), D_80082FA6, 0, 0, 0, 0);
+    gfx = func_1501A490(func_1501A680(gfx), D_80082FA4, 0, 0, 0, 0);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     return gfx;
 }

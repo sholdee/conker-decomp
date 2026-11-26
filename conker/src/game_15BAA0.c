@@ -26,7 +26,7 @@ Gfx *func_1512E5F0(Gfx *gfx, Camera *camera) {
     gSPTextureRectangle(gfx++, 0, 0, D_800BE620 << 2, 1 << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10);
     gDPPipeSync(gfx++);
 
-    gfx = func_1501A490(func_1501A680(gfx), D_80082FA6, 0, 0, 0, 0);
+    gfx = func_1501A490(func_1501A680(gfx), D_80082FA4, 0, 0, 0, 0);
     gDPSetOtherMode(gfx++,
                     G_AD_DISABLE | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE | G_TL_TILE |
                         G_TD_CLAMP | G_TP_PERSP | G_CYC_1CYCLE | G_PM_NPRIMITIVE | 0xF, // 0xF: blend mask bits

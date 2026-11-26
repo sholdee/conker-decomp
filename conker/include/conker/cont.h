@@ -78,6 +78,8 @@ void func_1501C17C(u8 player);
 void func_1501C1B0(void);
 void func_1501C53C(void);
 void func_1501C57C(void);
+extern u8 D_80084060[4]; // the controller channel of each player; 4 or more: none
+extern u8 D_80084064;    // a controller read has finished
 
 /* game_205C90.c */
 s32 func_151D87E0(u8 playerMask);

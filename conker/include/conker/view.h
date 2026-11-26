@@ -35,6 +35,19 @@ s32 func_1501AE94(s32 viewIndex);
 void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom);
 void func_1501B0A0(s32 view, s32 layout);
 void func_1501B22C(s32 viewIndex);
+extern s32 D_80082FA0; // the screen layout: the number of players
+extern s32 D_80082FA4; // the view being drawn
+extern Gfx D_80082FC0[24][2]; // render mode tables for segment 8
+extern Gfx D_80083140[24][2];
+extern Gfx D_800832C0[24][2];
+extern Gfx D_80083440[24][2];
+extern Gfx D_800835C0[24][2];
+extern Gfx D_80083740[24][2];
+extern Gfx D_800838C0[24][2];
+extern Gfx D_80083A40[24][2];
+extern Gfx D_80083BC0[24][2];
+extern Gfx D_80083D40[24][2];
+extern Gfx D_80083EC0[24][2];
 
 /* game_138520.c */
 void func_1510B070(s32 arg0);

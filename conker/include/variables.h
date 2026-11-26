@@ -152,17 +152,6 @@ extern void (*D_80082EA0[])(void);
 extern void (*D_80082ECC[])(void);
 extern void (*D_80082F40[])(void);
 extern void (*D_80082F70[])(void);
-extern s32  D_80082FA0;
-extern s32  D_80082FA4;
-extern s16 D_80082FA6;
-extern u8 D_80082FC0[];
-extern u8 D_80083140[];
-extern u8 D_80083740[]; // segment-8 texture data bound by effect pre-draws
-extern u8 D_800838C0[];
-extern u8 D_80083A40[];
-extern u8 D_80083BC0[];
-extern u8 D_80084060[]; /* controller port of each player, >= 4: none */
-extern u8   D_80084064;
 extern u8 D_80084160[];
 extern u8 D_80084190[];
 extern Vtx  D_80084300[5];

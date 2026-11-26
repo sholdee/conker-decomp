@@ -381,7 +381,7 @@ Gfx *func_15184FA4(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
         gDPPipeSync(gfx++);
     }
     gSPSetGeometryMode(gfx++, G_SHADING_SMOOTH | G_ZBUFFER);
-    gfx = func_1501A490(func_1501A680(gfx), D_80082FA6, 0, 0, 0, 0);
+    gfx = func_1501A490(func_1501A680(gfx), D_80082FA4, 0, 0, 0, 0);
     gfx = func_1510B7B4(gfx, view);
     movement_obj[objIndex].unk123 = 1;
     return gfx;
