@@ -2796,6 +2796,11 @@ typedef struct SpriteParticle {
             u8 pad4[4];
             ParticleBounce bounce;
         } dragBounce;
+        struct {
+            f32 drag;
+            u8 pad4[4];
+            ActorRef owner;     /* the particle moves with it (func_151BD79C, game_1E9A30.c) */
+        } dragOwner;
         ParticlePulse pulse;
         ParticleFlash flash;
         WobbleData wobble;      /* update func 22 (func_150AF6E4, game_DC6B0.c) and the like */

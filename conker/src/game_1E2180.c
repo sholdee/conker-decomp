@@ -64,18 +64,18 @@ BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
 
 /* Emitter 8 callback (D_80089A70): spawns one particle at (x, y, z). */
 void func_151B4E4C(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter) {
-    f32 position[3];
+    Vec3f position;
 
-    position[0] = x;
-    position[1] = y;
-    position[2] = z;
-    func_151B4EA4(position, dirX, dirY, dirZ, emitter->payload[0], emitter->header.owner);
+    position.x = x;
+    position.y = y;
+    position.z = z;
+    func_151B4EA4(&position, dirX, dirY, dirZ, emitter->payload[0], emitter->header.owner);
 }
 
 /* Spawns a randomized func_151D9014 particle at `position`, moving against (dirX, dirY, dirZ). */
-void func_151B4EA4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5) {
+void func_151B4EA4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5) {
     f32 speed;
-    f32 velocity[3];
+    Vec3f velocity;
     s32 coin;
     f32 fracB;
     u32 randB;
@@ -84,15 +84,15 @@ void func_151B4EA4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5
 
     // matching: named temporaries; passing the calls inline changes the stack frame
     speed = 0.20500001f;
-    velocity[0] = -dirX * speed;
-    velocity[1] = -dirY * speed;
-    velocity[2] = -dirZ * speed;
+    velocity.x = -dirX * speed;
+    velocity.y = -dirY * speed;
+    velocity.z = -dirZ * speed;
     fracA = func_150ADA68();
     randA = func_150ADA20();
     randB = func_150ADA20();
     fracB = func_150ADA68();
     coin = func_150ADA20() & 1;
-    func_151D9014(position, velocity, arg4, fracA * 0.497f + -1.0f, randA % 31 + 20, randB % 101 + 155,
+    func_151D9014(position, &velocity, arg4, fracA * 0.497f + -1.0f, randA % 31 + 20, randB % 101 + 155,
                   fracB * 152.0f + 109.0f, coin, 1.7f, 1.7f, 0, 0, 1, 0, arg5, 1);
 }
 
@@ -125,18 +125,18 @@ BloodDrip *func_151B4FE0(Actor *actor, u8 arg1, s32 arg2) {
 
 /* Emitter 9 callback (D_80089A70): spawns one particle at (x, y, z). */
 void func_151B50A4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter) {
-    f32 position[3];
+    Vec3f position;
 
-    position[0] = x;
-    position[1] = y;
-    position[2] = z;
-    func_151B50F4(position, dirX, dirY, dirZ, emitter->header.owner);
+    position.x = x;
+    position.y = y;
+    position.z = z;
+    func_151B50F4(&position, dirX, dirY, dirZ, emitter->header.owner);
 }
 
 /* Spawns a randomized func_151D9014 particle at `position`, moving against (dirX, dirY, dirZ). */
-void func_151B50F4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4) {
+void func_151B50F4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4) {
     f32 speed;
-    f32 velocity[3];
+    Vec3f velocity;
     u8 coin;
     f32 scaledB;
     u32 randB;
@@ -145,9 +145,9 @@ void func_151B50F4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4) {
 
     // matching: named temporaries; passing the calls inline changes the stack frame
     speed = 0.13000001f;
-    velocity[0] = -dirX * speed;
-    velocity[1] = -dirY * speed;
-    velocity[2] = -dirZ * speed;
+    velocity.x = -dirX * speed;
+    velocity.y = -dirY * speed;
+    velocity.z = -dirZ * speed;
     if (func_150ADA20() & 1) {
         coin = 1;
     } else {
@@ -157,6 +157,6 @@ void func_151B50F4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4) {
     randA = func_150ADA20();
     randB = func_150ADA20();
     scaledB = func_150ADA68() * 202.0f + 142.0f;
-    func_151D9014(position, velocity, 0, fracA * 0.126f + -0.702f, (randA & 0xF) + 10, randB % 45 + 137, scaledB,
+    func_151D9014(position, &velocity, 0, fracA * 0.126f + -0.702f, (randA & 0xF) + 10, randB % 45 + 137, scaledB,
                   coin, 1.7f, 1.7f, 0, 0, 1, 0, arg4, 1);
 }

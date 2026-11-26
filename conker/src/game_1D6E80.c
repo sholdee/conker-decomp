@@ -390,7 +390,7 @@ PulseFx *func_151AA48C(Actor *actor, ActorTask *task) {
     payload.base = 0.200000003f;
     payload.amplitude = 0.3000000119f;
 
-    fx = (PulseFx *)func_15134DAC(&desc, sizeof(payload)); /* a BloodStrip with the payload after it */
+    fx = func_15134DAC(&desc, sizeof(payload)); /* a BloodStrip with the payload after it */
     if (fx != NULL) {
         memcpy(&fx->payload, &payload, sizeof(payload));
     }

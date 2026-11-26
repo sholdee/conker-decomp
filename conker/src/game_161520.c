@@ -508,10 +508,11 @@ s32 func_15134CEC(Struct15134CEC *particle) {
 #define BLOOD_STRIP_LIFETIME 0x02
 
 /* Spawns a BloodStrip effect from desc. */
-BloodStrip *func_15134DAC(BloodStripDesc *desc, s32 arg1) {
+/* Returns a BloodStrip followed by extraSize bytes of the caller's data (the caller's own type). */
+void *func_15134DAC(BloodStripDesc *desc, s32 extraSize) {
     BloodStrip *strip;
 
-    strip = func_15167A68(0x29, 0, arg1 + 0x80, 1, 0xFF, 1);
+    strip = func_15167A68(0x29, 0, extraSize + 0x80, 1, 0xFF, 1);
     if (strip == NULL) {
         return NULL;
     }

@@ -432,7 +432,7 @@ s32 func_151BD42C(AgedBloodStrip *strip) {
 /* BloodStrip emit callback: spawns one blood droplet at pointA moving towards pointB. */
 void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 time,
                    BloodStrip *strip) {
-    BloodDroplet *particle;
+    SpriteParticle *particle; /* with data.dragOwner */
     Actor *owner;
     ParticleDesc68 desc;
     f32 drag;
@@ -491,8 +491,8 @@ void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 t
         desc.offset.z = strip->owner->zpos;
         particle = func_15130374(&desc, 1, 0x10, strip->header.owner, strip->header.kind);
         if (particle != NULL) {
-            memcpy(&particle->drag, &drag, sizeof(drag));
-            memcpy(&particle->owner, &ownerRef, sizeof(ownerRef));
+            memcpy(&particle->data.dragOwner.drag, &drag, sizeof(drag));
+            memcpy(&particle->data.dragOwner.owner, &ownerRef, sizeof(ownerRef));
         }
     }
 }
@@ -510,13 +510,13 @@ f32 func_151BD750(AgedBloodStrip *strip) {
 }
 
 /* Particle update: keeps the droplet moving with its owner, then runs the standard update. */
-void func_151BD79C(BloodDroplet *particle, Vec3f *prevPos) {
-    Actor *owner = particle->owner.actor;
+void func_151BD79C(SpriteParticle *particle, Vec3f *prevPos) {
+    Actor *owner = particle->data.dragOwner.owner.actor;
 
     if (owner->type != 0 && owner->character_type != 0xFF) {
-        particle->offset.x = owner->xpos;
-        particle->offset.y = owner->ypos;
-        particle->offset.z = owner->zpos;
+        particle->head.desc.offset.x = owner->xpos;
+        particle->head.desc.offset.y = owner->ypos;
+        particle->head.desc.offset.z = owner->zpos;
     }
     func_1513170C(particle, prevPos);
 }
@@ -770,7 +770,6 @@ void func_151BDD8C(BurstEffect *effect) {
     }
 }
 
-/* Message handler of the burst: message 0x3B (func_151BD7F4) for its owner frees it; the rest go to func_15169850. */
 /* Message handler of the burst: message 0x3B (func_151BD7F4) for its owner frees it; the rest go to func_15169850. */
 void func_151BE0AC(s32 effect, s32 msg, u8 msgId) {
     // matching: the original reads its parameters through this pointer; typed parameters

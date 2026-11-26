@@ -150,15 +150,6 @@ typedef struct {
     s16 sampleAge; /* 0x80: frames since the last sample */
 } AgedBloodStrip;
 
-/* Particle spawned by func_151BD43C, with its 0x10 bytes of per-particle data. */
-typedef struct {
-    u8 pad0[0x4C];
-    Vec3f offset;   /* 0x4C: ParticleDesc68.offset, the point the particle moves with */
-    u8 pad58[0x50];
-    f32 drag;          /* 0xA8: read by func_1513170C */
-    u8 padAC[4];
-    ActorRef owner;    /* 0xB0 */
-} BloodDroplet;
 
 /* game_F44D0.c */
 void func_150C7020(Actor *owner, s16 duration, u8 arg2, s32 arg3);
@@ -181,7 +172,7 @@ void func_151349D0(BloodTrail *trail);
 void func_15134C98(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId);
 void func_15134CD4(f32 arg0, f32 arg1, s32 arg2, s32 arg3);
 s32 func_15134CEC(Struct15134CEC *particle);
-BloodStrip *func_15134DAC(BloodStripDesc *desc, s32 arg1);
+void *func_15134DAC(BloodStripDesc *desc, s32 extraSize); /* a BloodStrip, then extraSize bytes */
 void func_15134E48(BloodStrip *arg0);
 void func_151352EC(EffectHeader *effect);
 void func_1513530C(EffectHeader *effect);
@@ -316,10 +307,10 @@ void func_151AF4D0(Actor *, u8, u8, s32);
 /* game_1E2180.c */
 BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2);
 void func_151B4E4C(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter);
-void func_151B4EA4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5);
+void func_151B4EA4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5);
 BloodDrip *func_151B4FE0(Actor *actor, u8 arg1, s32 arg2);
 void func_151B50A4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter);
-void func_151B50F4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4);
+void func_151B50F4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4);
 
 /* game_1E9A30.c */
 s32 func_151BC580(OwnedEffect40 *effect);
@@ -333,7 +324,7 @@ void func_151BD2F8(Actor *actor, s32 arg1, s32 arg2);
 s32 func_151BD42C(AgedBloodStrip *strip);
 void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 time, BloodStrip *strip);
 f32 func_151BD750(AgedBloodStrip *strip);
-void func_151BD79C(BloodDroplet *particle, Vec3f *prevPos);
+void func_151BD79C(SpriteParticle *particle, Vec3f *prevPos);
 void func_151BD7F4(Actor *actor);
 void func_151BD828(Actor *actor, u8 arg1, s32 arg2);
 void func_151BDD8C(BurstEffect *effect);
