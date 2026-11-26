@@ -641,19 +641,9 @@ typedef struct TrailRetryTask {
     /* 0x28 */ BoneTrailParams trail;
 } TrailRetryTask;
 
-/* Object a trail follows. */
-typedef struct TrailTarget {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u8 pad4[0x10];
-    /* 0x14 */ Vec3f pos;
-    /* 0x20 */ u8 pad20[0x1B];
-    /* 0x3B */ u8 unk3B;
-    /* 0x3C */ f32 unk3C;
-} TrailTarget;
-
-/* A TrailTarget and its unk3B byte: argument of a ribbon effect (selector 0) and of message 0. */
+/* An actor a trail follows and its unique_id: argument of a ribbon effect (selector 0) and of message 0. */
 typedef struct TrailTargetRef {
-    /* 0x00 */ TrailTarget *target;
+    /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetUnk3B;
 } TrailTargetRef;
 
@@ -945,12 +935,12 @@ void func_151A4ECC(TrailRetryTask *task);
 void func_151A4F7C(TrailRetryTask *task, ActorMsg *msg, u8 type);
 
 /* game_1E37D0.c */
-void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2);
+void func_151B6320(Actor *target, u8 arg1, s32 arg2);
 s32 func_151B6420(EffectObj *obj);
 s32 func_151B65D4(EffectObj *obj);
 Gfx *func_151B6928(EffectObj *obj, Gfx *gfx, s16 view);
 void func_151B70B4(EffectObj *obj, void *msg, u8 msgType);
-void func_151B7144(TrailTarget *target, u8 arg1, s32 arg2);
+void func_151B7144(Actor *target, u8 arg1, s32 arg2);
 EffectObj *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg4);
 s32 func_151B7678(EffectObj *obj, Vec3f *pos);
 s32 func_151B76CC(EffectObj *obj, Vec3f *pos);
