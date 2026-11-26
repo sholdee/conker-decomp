@@ -1478,9 +1478,6 @@ void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3);
 s32 func_1514B844(Particle177B50 *p);
 s32 func_1514B87C(Particle177B50 *p);
 s32 func_1514B8B0(Particle177B50 *p);
-void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Vec3f *velocity, f32 gravity, f32 drag,
-                    f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10,
-                    s32 arg11);
 s32 func_1514BC08(Particle177B50 *p, ParticleJitter *w);
 
 /* game_1792B0.c */

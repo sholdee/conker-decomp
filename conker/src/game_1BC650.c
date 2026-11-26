@@ -2,6 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 
+// func_1514B8E4 (game_177B50.c) is declared in each file that calls it: game_1D5FD0.c was compiled with a
+// different view of it.
+void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Vec3f *velocity, f32 gravity, f32 drag,
+                    f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10,
+                    s32 arg11);
+
 /* What func_151D2F00 (game_1FFF60.c) copies to ActorFollowerGroup.actor: the group's fields 0x10-0x1F. */
 typedef struct {
     /* 0x00 */ Actor *owner;
