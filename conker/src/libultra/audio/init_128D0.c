@@ -9,8 +9,8 @@ typedef struct OscState {
     /* 0x00 */ struct OscState *next;
     /* 0x04 */ u8  type;      // 1 = tremolo sine, 128 = vibrato sine
     /* 0x05 */ u8  pad5[0x1D];
-    /* 0x22 */ s16 maxCount;  // period in updates
-    /* 0x24 */ s16 curCount;
+    /* 0x22 */ u16 maxCount;  // period in updates
+    /* 0x24 */ u16 curCount;
     /* 0x26 */ u8  pad26[2];
     /* 0x28 */ union {
         struct {
@@ -25,10 +25,10 @@ typedef struct OscState {
 
 /* This file's .bss. */
 static OscState *gFreeOscStates; /* free oscillator states */
-static s32 D_80042804;           /* the oscillator states (func_100131FC) */
+static OscState *D_80042804;     /* the oscillator states (func_100131FC) */
 
 void alSeqFileNew(ALSeqFile *arg0, u8 *base) {
-    s32 offset = base;
+    s32 offset = (s32)base;
     s32 i;
 
     for (i = 0; i < arg0->seqCount; i++)
@@ -39,8 +39,8 @@ void alSeqFileNew(ALSeqFile *arg0, u8 *base) {
 
 // non-vanila alBnkfNew
 void func_10012934(ALBankFile *file, u8 *table, s32 arg2) {
-    s32 offset = file;
-    s32 woffset = table;
+    s32 offset = (s32)file;
+    s32 woffset = (s32)table;
     s32 sp1C = arg2;
 
     s32 i;
@@ -48,7 +48,7 @@ void func_10012934(ALBankFile *file, u8 *table, s32 arg2) {
     ALFailIf(file->revision != AL_BANK_VERSION, ERR_ALBNKFNEW);
 
     for (i = 0; i < file->bankCount; i++) {
-        file->bankArray[i] = (ALBank *)((u8 *)file->bankArray[i] + offset) ; // (s32)sp24; // ??
+        file->bankArray[i] = (ALBank *)((u8 *)file->bankArray[i] + offset);
         if (file->bankArray[i] != 0) {
             func_10012A28(file->bankArray[i], offset, woffset, sp1C);
         }
@@ -149,12 +149,12 @@ f32 func_10012D80(u8 arg0) {
             sp0 *= sp4;
         }
         sp4 *= sp4;
-        arg0 = (u32)arg0 >> 1;
+        arg0 >>= 1;
     }
     return sp0;
 }
 
-s32 func_10012E04(s32 *arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5) {
+s32 func_10012E04(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5) {
     OscState *sp2C;
     s32 ret;
 
@@ -200,22 +200,22 @@ s32 func_10012F94(OscState *arg0, f32 *arg1) {
     switch (sp28->type)
     {
         case 1: // guess this means union is u8s
-            sp28->curCount = (u16)sp28->curCount + 1;
-            if ((u16)sp28->curCount >= (u16)sp28->maxCount) {
+            sp28->curCount = sp28->curCount + 1;
+            if (sp28->curCount >= sp28->maxCount) {
                 sp28->curCount = 0;
             }
-            sp2C = (f32)(u16)sp28->curCount / (f32) (u16)sp28->maxCount;
+            sp2C = (f32)sp28->curCount / (f32)sp28->maxCount;
             sp2C = sinf(sp2C * 6.2831854820251465f); // 2 * PI
             sp2C = sp28->data.tsin.halfdepth * sp2C;
             *arg1 = sp28->data.tsin.baseVol + sp2C;
             break;
 
         case 128: // guess this means float?
-            sp28->curCount = (u16)sp28->curCount + 1;
-            if ((u16)sp28->curCount >= (u16)sp28->maxCount) {
+            sp28->curCount = sp28->curCount + 1;
+            if (sp28->curCount >= sp28->maxCount) {
                 sp28->curCount = 0;
             }
-            sp2C = (f32)(u16) sp28->curCount / (f32)(u16) sp28->maxCount;
+            sp2C = (f32)sp28->curCount / (f32)sp28->maxCount;
             sp2C = sinf(sp2C * 6.2831854820251465f) * sp28->data.vsin.depth;
             *arg1 = alCents2Ratio(sp2C);
             break;
@@ -226,26 +226,26 @@ s32 func_10012F94(OscState *arg0, f32 *arg1) {
     return ret;
 }
 
-void func_100131D8(s32 *arg0) {
-    *arg0 = (s32*)gFreeOscStates;
+void func_100131D8(OscState *arg0) {
+    arg0->next = gFreeOscStates;
     gFreeOscStates = arg0;
 }
 
 /* initOsc setup: allocates `arg1` oscillator states into the free list and installs the oscillator callbacks. */
 void func_100131FC(ALSeqpConfig *config, s32 arg1) {
-    s32 *sp24;
+    OscState *sp24;
     s32 i;
 
     D_80042804 = alHeapDBAlloc(0, 0, config->heap, arg1, sizeof(OscState));
-    gFreeOscStates = (s32) D_80042804;
-    gFreeOscStates = (s32) D_80042804; // ???
+    gFreeOscStates = D_80042804;
+    gFreeOscStates = D_80042804; // matching: the ROM stores it twice
     sp24 = D_80042804;
 
     for (i = 0; i < (arg1 - 1); i++) {
-        *sp24 = (i * 0x2C) + D_80042804 + 0x2C; // is this an array?
-        sp24 = *sp24;
+        sp24->next = &D_80042804[i + 1];
+        sp24 = sp24->next;
     }
-    *sp24 = 0;
+    sp24->next = NULL;
     config->initOsc = func_10012E04;
     config->updateOsc = func_10012F94;
     config->stopOsc = func_100131D8;

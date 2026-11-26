@@ -441,9 +441,9 @@ void    func_10012BD0(ALInstrument *inst, s32 arg1);
 void    func_10012C5C(ALSound *sound, s32 offset, s32 table);
 void    func_10012CFC(WaveTable *wave, s32 offset, s32 table);
 f32     func_10012D80(u8 arg0);
-s32     func_10012E04(s32 *arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5); /* the oscillators */
+s32     func_10012E04(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5); /* the oscillators */
 s32     func_10012F94(struct OscState *arg0, f32 *arg1);
-void    func_100131D8(s32 *arg0);
+void    func_100131D8(struct OscState *arg0);
 void    func_100131FC(ALSeqpConfig *config, s32 arg1);                  /* installs the oscillators */
 void    func_10017AA0(N_ALCSPlayer *seqp);                              /* code_17AA0.c: play */
 void    func_10017AF0(N_ALCSPlayer *seqp, struct OSMesgQueue_s *queue); /* init_17AF0.c */
