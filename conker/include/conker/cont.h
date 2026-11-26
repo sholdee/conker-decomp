@@ -107,6 +107,7 @@ extern f32 D_800BE980[MAXCONTROLLERS]; // per channel: the length of the rumble 
 extern OSMesg D_800BE990; // the message received from D_800BE900
 
 /* game_205C90.c */
+extern u8 D_800E0A00; /* set by func_151D8DE8 (all rumble off); game_48FD0 keeps the motors off while set */
 s32 func_151D87E0(u8 playerMask);
 RumbleObj *func_151D8868(RumbleParams *params, s32 dataSize, u8 arg2, s32 arg3);
 void func_151D8A24(RumbleObj *obj);

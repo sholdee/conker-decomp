@@ -455,7 +455,6 @@ extern BoneTrail *D_800DF7C8[2]; // [0]: Actor owners, [1]: world object owners
 extern u8 D_800DF7D0[]; // per-model load reference counts
 extern s16 *D_800DF9B8[]; // per model: written by func_1510CE60
 extern AttachModelHeader *D_800E0148[]; // per model: loaded attachment model header
-extern u8 D_800E0A00;
 extern s32 D_800E0A74;
 extern s16 D_800E0A80;
 extern u8 D_800E0A8C;
