@@ -111,7 +111,7 @@ jobs:
               python3 tools/toolchain/patch_splat.py
               make extract
               make -C conker extract
-              make -C conker -j"$(nproc)"
+              make -C conker -j"$(nproc)" 2>&1 | tee build-inner.log
               make -C conker replace
               make -j"$(nproc)"
               python3 tools/accounting.py
@@ -124,6 +124,14 @@ jobs:
 
       - name: Check the committed accounting manifest
         run: git -C test diff --exit-code -- tools/accounting.tsv
+
+      - name: Check the IDO warning count (trusted limit)
+        run: |
+          if [ -f trusted/tools/warncheck.py ] && [ -f trusted/tools/warnings_max.txt ]; then
+            python3 trusted/tools/warncheck.py test/build-inner.log trusted/tools/warnings_max.txt
+          else
+            echo "::notice::The base branch has no warning limit yet; this check starts after it merges."
+          fi
 
       - name: List gate files the change touches
         if: github.event_name == 'pull_request_target'

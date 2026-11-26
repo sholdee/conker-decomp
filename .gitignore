@@ -25,3 +25,4 @@ __pycache__/
 /tools/decomp-permuter/
 /.nearmiss/
 /.mw_land.lock
+build-inner.log
