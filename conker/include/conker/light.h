@@ -347,7 +347,7 @@ extern const f32 D_800A6820[24];
 void func_151903D0(LightEffect *effect);
 
 /* game_1E6260.c */
-void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3);
+void func_151B8DB0(PointLight *light, u8 kind, u8 arg2, s32 arg3);
 s32 func_151B9214(LampParticle *particle);
 s32 func_151B9310(Mtx *dest, LampParticle *particle);
 s32 func_151B9408(LightEffect *effect);
