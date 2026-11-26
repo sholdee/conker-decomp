@@ -4738,7 +4738,7 @@ s32 func_1506196C(Actor *actor, s32 player) {
 
 /*
  * Per-frame fade and visibility update of all actors: unk2FA bit 0 is set when func_150623F4 says the
- * actor is visible, or when one of its linked actors (keys in bytes 0x20B..0x20E) is.
+ * actor is visible, or when one of its linked actors (keys in unk20B) is.
  */
 void func_150619A8(void) {
     s32 i;
@@ -4761,7 +4761,7 @@ void func_150619A8(void) {
                 actor->unk2FA |= 1;
             } else {
                 actor->unk2FA &= ~1;
-                if (((u8 *)actor)[0x20B] != 0 || ((u8 *)actor)[0x20C] != 0 || ((u8 *)actor)[0x20D] != 0 || ((u8 *)actor)[0x20E] != 0) {
+                if (actor->unk20B[0] != 0 || actor->unk20B[1] != 0 || actor->unk20B[2] != 0 || actor->unk20B[3] != 0) {
                     list[count] = i;
                     count++;
                 }
@@ -4773,8 +4773,8 @@ void func_150619A8(void) {
             idx = list[i];
             actor = &movement_obj[idx];
             for (j = 0; j < 4; j++) {
-                if (((u8 *)actor)[0x20B + j] != 0) {
-                    other = func_15083E90(((u8 *)actor)[0x20B + j]);
+                if (actor->unk20B[j] != 0) {
+                    other = func_15083E90(actor->unk20B[j]);
                     if (other != NULL && (other->unk2FA & 1)) {
                         actor->unk2FA |= 1;
                         break;
