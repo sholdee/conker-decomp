@@ -64,7 +64,7 @@ void func_15114A1C(void);
 void func_15114B94(u32 index);
 s32 func_15114CC4(ObjSound *sound, s32 arg1, s32 *follow, s32 arg3);
 void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 flags);
-void func_15114F04(s32 arg0, s32 arg1, s32 arg2);
+void func_15114F04(WorldObject *obj, s32 arg1, s32 arg2);
 void func_15114F44(s32 arg0, s32 arg1, s32 arg2);
 extern Turret15112520Cfg D_80089200;
 

@@ -768,8 +768,8 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
 }
 
 /* Starts a sound through func_1001001C with func_15114CC4 as its callback. */
-void func_15114F04(s32 arg0, s32 arg1, s32 arg2) {
-    func_1001001C((SoundRecordCallback)func_15114CC4, (void *)arg0, 0, arg1, arg2);
+void func_15114F04(WorldObject *obj, s32 arg1, s32 arg2) {
+    func_1001001C((SoundRecordCallback)func_15114CC4, obj, 0, arg1, arg2);
 }
 
 extern s32 D_800DBF9C;
