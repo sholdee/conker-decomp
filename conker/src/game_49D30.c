@@ -1,9 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
-
-/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
-void func_15169040(s32 event, u8 eventType);
+#include <PR/sched.h>
+#include "structs.h"
 
 /* Cutscene ("sequence") data is kept per scene slot (0/1) and per track (up to 30 tracks). */
 
@@ -47,17 +44,105 @@ typedef struct SeqFileEntry {
     u32 size;
 } SeqFileEntry;
 
-extern u16 *D_800C35C8[];
-extern u8 D_800C35AA;
-extern SeqFileEntry *D_800C3668[];
+/* This file's .bss, in address order (0x800BEAD0..0x800C3D60). It is defined before the headers
+   declare it: an earlier extern changes the order (see init_50A0.c). */
+u64 *D_800BEAD0;
+OSScTask *D_800BEAD4;
+OSScTask D_800BEAD8[2];
+s32 D_800BEB98;
+u64 *D_800BEB9C; // RSP ucode data, right after its text in D_800C1060
+u8 D_800BEBA0;
+s32 D_800BEBA4;
+s32 D_800BEBA8[2]; /* not referenced */
+u64 D_800BEBB0[0x496];
+u64 D_800C1060[0x496]; // RSP ucode text buffer
+u8 D_800C3510[2];
+u8 D_800C3518[2][25];
+u8 D_800C354A[2];
+u8 D_800C3550[2][30];
+s16 D_800C358C[3];
+f32 D_800C3594;
+s16 D_800C3598[3];
+f32 D_800C35A0;
+f32 D_800C35A4;
+u8 D_800C35A8;
+u8 D_800C35A9;
+u8 D_800C35AA;
+s32 D_800C35B0[2]; // per scene: current time
+s32 D_800C35B8[2]; /* time at the previous update */
+u8 D_800C35C0[2];
+u8 D_800C35C2;
+u8 D_800C35C3;
+u8 D_800C35C4;
+u8 D_800C35C5;
+u16 *D_800C35C8[2];
+u16 *D_800C35D0[2];
+u16 *D_800C35D8[2]; /* each track's event count */
+u8 **D_800C35E0[2]; // per scene: text lists
+u8 D_800C35E8[2]; // per scene: changes with each run of the scene
+u8 D_800C35EA[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
+SeqTrackInfo *D_800C35F0[2]; // per scene: what each track drives
+u8 D_800C35F8;
+CamShot gCamShot; // scripted camera shot
+u8 D_800C3638;
+u8 D_800C363A[2]; /* track count */
+s32 D_800C3640[2]; /* end time */
+f32 D_800C3648; // added to both FOVs of every view
+f32 D_800C364C; // near-plane override when non-zero
+f32 D_800C3650; // far-plane override when non-zero
+u8 D_800C3654[2];
+u8 D_800C3656[2];
+u8 D_800C3658[2];
+u8 D_800C365A[2];
+u8 D_800C365C[2];
+u8 D_800C365E[2];
+u8 D_800C3660[2];
+u8 D_800C3662;
+u8 D_800C3663;
+SeqFileEntry *D_800C3668[2];
+u8 D_800C3670;
+u8 D_800C3671;
+u8 D_800C3672;
+f32 D_800C3674;
+f32 D_800C3678; // camera transition parameter (999.0f = unset); D_800C367C is its duration
+s32 D_800C367C;
+u8 D_800C3680;
+u8 D_800C3681;
+u8 D_800C3682;
+u8 D_800C3683;
+SeqEvent *D_800C3688[2][30]; // cutscene script event tracks per scene
+SeqChannelKey *D_800C3778[2][30];
+SeqPathKey *D_800C3868[2][30]; // per scene and track: path keyframes
+SeqTrackState *D_800C3958[2]; // per scene: the track states
+u8 *D_800C3960[2][30];
+SeqTrackPath *D_800C3A50[2];
+u8 D_800C3A58;
+s64 D_800C3A60[69];
+u8 D_800C3C88;
+u8 D_800C3C89;
+s8 D_800C3C8A;
+u8 D_800C3C8B;
+u8 D_800C3C8C;
+u8 D_800C3C8D;
+u16 D_800C3C8E;
+u8 D_800C3C90;
+s32 D_800C3C94;
+u8 D_800C3C98;
+u8 D_800C3C99;
+u16 D_800C3C9A;
+u8 D_800C3C9C;
+u8 D_800C3C9D;
+s16 D_800C3C9E;
+SeqSubtitle D_800C3CA0[3];
+u8 D_800C3D48[8]; // not referenced, but func_150233E4 stops at its address: the end of D_800C3CA0
+struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
 
-extern SeqTrackPath *D_800C3A50[];
-extern SeqSubtitle D_800C3D48; /* == &D_800C3CA0[3] */
+#include "functions.h"
+#include "variables.h"
 
-extern OSScTask *D_800BEAD4;
-extern OSScTask D_800BEAD8[];
-extern u64 *D_800BEAD0;
-extern u64 D_800BEBB0[];
+/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+void func_15169040(s32 event, u8 eventType);
+
 extern u64 D_800CBE10[];
 
 /* Append a parameterless GBI command (gDPNoParam) at the display-list write head D_800BE9D0. */
@@ -143,7 +228,6 @@ typedef struct {
 } UcodeRomEntry;
 
 extern u8 ucode_ROM_START[];
-extern s32 D_800BEB98;
 
 static s8 D_80084070 = -1; // the ucode pair now loaded (-1: none yet)
 static s8 D_80084074 = -1; // its offset (0 or 4) into D_80084078 for D_800BEBB0's ucode (-1: none yet)
@@ -202,8 +286,6 @@ void func_1501CDC0(s32 scene) {
     }
 }
 
-extern u16 *D_800C35D0[];
-extern SeqChannelKey *D_800C3778[][30];
 
 /* Work out the scene's end time D_800C3640[scene]: track 0's header length if set, else the latest
    header end time among tracks with events, else the time of the last channel key. */
@@ -273,7 +355,6 @@ s32 func_1501CFF8(s32 scene) {
     return sum;
 }
 
-extern f32 D_800C35A4;
 
 /* Reset the per-scene cutscene state before a new script is loaded. */
 void func_1501D044(s32 scene) {
@@ -352,7 +433,6 @@ s32 func_1501D2C4(s32 map, s32 cutscene) {
 
 /* Cutscene start callbacks (func_1501D348's `callback`; 0: none). */
 static void (*D_800840FC[])(s32, s32, s32, s32) = { NULL, func_15023870 };
-extern u8 D_800C35A8;
 
 /* Start cutscene `cutscene` of map `map` in scene slot `scene`. If another map is loaded, switch
    maps first (func_1501C730) and leave the request pending in D_800C35C4. Otherwise load the
@@ -478,7 +558,6 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
     }
 }
 
-extern u8 D_800C35A9;
 
 /* Scan the scene's scripts for type-5 events with values 0x1E, 0xE, 0x68 and 0x44 (setting the
    flags D_800C3C99, D_800C3C9C, D_800C35AA, D_800C35A9) and 0x77 (start time D_800C3C8E), and start
@@ -856,10 +935,6 @@ void func_1501E81C(s32 skipped, s32 scene) {
     }
 }
 
-extern s16 D_800C358C[];
-extern s16 D_800C3598[];
-extern f32 D_800C3594;
-extern f32 D_800C35A0;
 
 /* Hand control back after the scene's cutscene: restore the player camera and object state. */
 void func_1501EA18(s32 scene) {
@@ -1490,10 +1565,6 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
     D_800C3A50[scene][track].segment = segment;
 }
 
-Vec3f D_800C3620;
-
-// matching: going through a cast of &gCamShot changes IDO's address CSE in func_15020EC4
-#define MSG (*(CamShot *)&gCamShot)
 // matching: byte-offset form of &D_800C35F0[a][i]; plain indexing swaps two s-registers here
 #define ENT(a, i) ((SeqTrackInfo *)((u8 *)D_800C35F0[a] + (i) * 8))
 #define ELEM(a, i) (&D_800C3958[a][i])
@@ -1544,11 +1615,11 @@ void func_15020EC4(s32 scene) {
                     }
                     state = ELEM(scene, track);
                     if (state->unk34 == -9999.0f) {
-                        MSG.unk8 = 0.0f;
+                        gCamShot.unk8 = 0.0f;
                     } else {
                         state->unk34 = (state->unk34 < -20.0f) ? -20.0f : (state->unk34 > 40.0f) ? 40.0f : state->unk34;
                         state = ELEM(scene, track);
-                        MSG.unk8 = state->unk34;
+                        gCamShot.unk8 = state->unk34;
                     }
                     if (state->unk3C == -9999.0f) {
                         tilt3C = 0.0f;
@@ -1560,25 +1631,25 @@ void func_15020EC4(s32 scene) {
                     if (state->unk40 == -9999.0f) {
                         tilt40 = 0.0f;
                         while (0) { } // matching: orders the scene store after the ENT load
-                        MSG.unk4 = scene;
+                        gCamShot.unk4 = scene;
                     } else {
                         state->unk40 = (state->unk40 < -20.0f) ? -20.0f : (state->unk40 > 40.0f) ? 40.0f : state->unk40;
                         if (ENT(scene, track)) { } // matching: same, in this branch
                         state = ELEM(scene, track);
                         tilt40 = state->unk40;
-                        MSG.unk4 = scene;
+                        gCamShot.unk4 = scene;
                     }
-                    MSG.eye.x = state->x;
-                    MSG.eye.y = state->y;
-                    MSG.eye.z = state->z;
+                    gCamShot.eye.x = state->x;
+                    gCamShot.eye.y = state->y;
+                    gCamShot.eye.z = state->z;
                     if (ENT(scene, track)->targetId == 1) {
-                        MSG.mode = 0;
-                        MSG.at.focus.x = ELEM(scene, (s8)ENT(scene, track)->unk3)->x;
-                        MSG.at.focus.y = ELEM(scene, (s8)ENT(scene, track)->unk3)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
-                        MSG.at.focus.z = ELEM(scene, (s8)ENT(scene, track)->unk3)->z;
-                        MSG.unk2C = -state->unk14;
-                        MSG.unk30 = tilt3C;
-                        MSG.unk34 = tilt40;
+                        gCamShot.mode = 0;
+                        gCamShot.at.focus.x = ELEM(scene, (s8)ENT(scene, track)->unk3)->x;
+                        gCamShot.at.focus.y = ELEM(scene, (s8)ENT(scene, track)->unk3)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
+                        gCamShot.at.focus.z = ELEM(scene, (s8)ENT(scene, track)->unk3)->z;
+                        gCamShot.unk2C = -state->unk14;
+                        gCamShot.unk30 = tilt3C;
+                        gCamShot.unk34 = tilt40;
                     } else if (ENT(scene, track)->targetId == 2) {
                         Actor *obj;
 
@@ -1586,13 +1657,13 @@ void func_15020EC4(s32 scene) {
                         if (obj == NULL) {
                             continue;
                         }
-                        MSG.mode = 0;
-                        D_800C3620.x = obj->xpos;
-                        D_800C3620.y = obj->ypos + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
-                        D_800C3620.z = obj->zpos;
-                        MSG.unk2C = -state->unk14;
-                        MSG.unk30 = tilt3C;
-                        MSG.unk34 = tilt40;
+                        gCamShot.mode = 0;
+                        gCamShot.at.focus.x = obj->xpos;
+                        gCamShot.at.focus.y = obj->ypos + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
+                        gCamShot.at.focus.z = obj->zpos;
+                        gCamShot.unk2C = -state->unk14;
+                        gCamShot.unk30 = tilt3C;
+                        gCamShot.unk34 = tilt40;
                     } else if (ENT(scene, track)->targetId == 3) {
                         WorldObject *actor3;
 
@@ -1600,24 +1671,24 @@ void func_15020EC4(s32 scene) {
                         if (actor3 == NULL) {
                             continue;
                         }
-                        MSG.mode = 0;
-                        D_800C3620.x = actor3->x;
-                        D_800C3620.y = (actor3->y + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
-                        D_800C3620.z = actor3->z;
-                        MSG.unk2C = -state->unk14;
-                        MSG.unk30 = tilt3C;
-                        MSG.unk34 = tilt40;
+                        gCamShot.mode = 0;
+                        gCamShot.at.focus.x = actor3->x;
+                        gCamShot.at.focus.y = (actor3->y + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
+                        gCamShot.at.focus.z = actor3->z;
+                        gCamShot.unk2C = -state->unk14;
+                        gCamShot.unk30 = tilt3C;
+                        gCamShot.unk34 = tilt40;
                     } else if (ENT(scene, track)->targetId == 0) {
-                        MSG.mode = 1;
-                        MSG.at.angles.sway = -state->unk14;
-                        MSG.at.angles.pitch = state->unkC;
-                        MSG.at.angles.yaw = state->unk10;
-                        MSG.eye.y = MSG.eye.y + state->yOffset;
-                        MSG.unk2C = tilt3C;
-                        MSG.unk30 = tilt40;
+                        gCamShot.mode = 1;
+                        gCamShot.at.angles.sway = -state->unk14;
+                        gCamShot.at.angles.pitch = state->unkC;
+                        gCamShot.at.angles.yaw = state->unk10;
+                        gCamShot.eye.y += state->yOffset;
+                        gCamShot.unk2C = tilt3C;
+                        gCamShot.unk30 = tilt40;
                     }
                     if (D_800C3671 == 0) {
-                        func_1512D560(player, 7, &MSG);
+                        func_1512D560(player, 7, &gCamShot);
                     }
                 } else if (ENT(scene, track)->type == 3) {
                     actor = func_151149AC(ENT(scene, track)->targetId);
@@ -1874,10 +1945,6 @@ void func_15022190(s16 x, s16 y, s16 z, f32 value) {
     D_800C3663 = 1;
 }
 
-extern u8 D_800C3510[];
-extern u8 D_800C3518[][25];
-extern u8 D_800C354A[];
-extern u8 D_800C3550[][30];
 
 /* Set D_800C3598/D_800C35A0 (copied back to D_800C358C/D_800C3594 when a cutscene ends). */
 void func_150221E8(s16 x, s16 y, s16 z, f32 value) {
@@ -2348,7 +2415,7 @@ void func_150233E4(void) {
             entry->active = zero;
         }
         i++;
-    } while (&D_800C3D48 != &D_800C3CA0[i]);
+    } while ((SeqSubtitle *)D_800C3D48 != &D_800C3CA0[i]);
 }
 
 /* Release subtitle slot `sub`: close it now if `force`, else let an open one finish (func_1516D328). */
