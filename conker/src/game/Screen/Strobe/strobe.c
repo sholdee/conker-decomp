@@ -48,7 +48,7 @@ void screen_destroyStrobe(StrobeEffect *effect) {
     effect_defaultDestroyTimedEffect(&effect->base);
 }
 
-void func_150D22A8(StrobeEffect *effect) {
+void screen_freeStrobe(StrobeEffect *effect) {
     screen_uncountStrobe(effect);
     effect_defaultFreeTimedEffect(&effect->base);
 }

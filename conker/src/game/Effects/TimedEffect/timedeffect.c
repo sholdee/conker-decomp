@@ -76,7 +76,7 @@ static void (*gTimedEffectFreeFuncs[74])() = {
     effect_defaultFreeTimedEffect, effect_freeJointEmitterTask, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, func_151B22C8, func_151B3014, effect_defaultFreeTimedEffect,
     effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect,
     effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, beam_freeEmitter, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect,
-    effect_freeOwnerSpark, effect_defaultFreeTimedEffect, effect_freeWithChild, func_150D22A8, effect_defaultFreeTimedEffect, particle_freeFollowEffect, effect_freeRaySpinner,
+    effect_freeOwnerSpark, effect_defaultFreeTimedEffect, effect_freeWithChild, screen_freeStrobe, effect_defaultFreeTimedEffect, particle_freeFollowEffect, effect_freeRaySpinner,
     effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, beam_freeBoltChain,
     effect_defaultFreeTimedEffect, effect_freeTimedHandler, effect_freeBoneBurst, beam_freeModelBeamEffect, effect_defaultFreeTimedEffect, trail_freeAnchoredEmitter, beam_freeCastBeam,
     effect_freeStage, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect,

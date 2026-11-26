@@ -6106,3 +6106,4 @@ actor_updateMount = 0x150CE740; // type:func
 actor_updateCommon = 0x15052590; // type:func
 actor_startRiderJump = 0x1505327C; // type:func
 actor_seatRider = 0x15052F9C; // type:func
+screen_freeStrobe = 0x150D22A8; // type:func

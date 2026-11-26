@@ -156,7 +156,7 @@ void actor_updateMount(Actor *obj);
 void screen_spawnStrobe(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 darkAlpha, u8 owner, s32 kind);
 void screen_updateStrobe(StrobeEffect *effect);
 void screen_destroyStrobe(StrobeEffect *effect);
-void func_150D22A8(StrobeEffect *effect);
+void screen_freeStrobe(StrobeEffect *effect);
 void screen_uncountStrobe(StrobeEffect *effect);
 Gfx *screen_drawStrobe(Gfx *gfx, StrobeEffect *effect, s16 view);
 extern u8 gStrobeCount;

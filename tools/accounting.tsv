@@ -3040,7 +3040,7 @@ effect_freeRaySpinner	0x150D20DC	52	game	c		build/src/game/Effects/RaySpinner/ra
 screen_spawnStrobe	0x150D2110	188	game	c		build/src/game/Screen/Strobe/strobe.c.o
 screen_updateStrobe	0x150D21CC	176	game	c		build/src/game/Screen/Strobe/strobe.c.o
 screen_destroyStrobe	0x150D227C	44	game	c		build/src/game/Screen/Strobe/strobe.c.o
-func_150D22A8	0x150D22A8	44	game	c		build/src/game/Screen/Strobe/strobe.c.o
+screen_freeStrobe	0x150D22A8	44	game	c		build/src/game/Screen/Strobe/strobe.c.o
 screen_uncountStrobe	0x150D22D4	32	game	c		build/src/game/Screen/Strobe/strobe.c.o
 screen_drawStrobe	0x150D22F4	128	game	c		build/src/game/Screen/Strobe/strobe.c.o
 screen_updateStrobeSpawner	0x150D2374	220	game	c		build/src/game/Screen/Strobe/strobe.c.o
