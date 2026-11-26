@@ -87,21 +87,6 @@ typedef struct ActorTracker {
     /* 0x48 */ s32 unk48;
 } ActorTracker;
 
-/* One sprite placed in the level (D_800DDD18 holds D_800DDD20 of them, sorted by x or z). */
-typedef struct Game1A89B0Position {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 unk6;     /* low nibble: sprite type (texture slot 0..14) */
-    u8 phaseIdx; /* index into D_800DDC90 */
-    u8 texInfo;  /* index into D_80095CE0 */
-    u8 pad9;
-    u8 animIdx;  /* column of D_8008CF00 */
-    u8 unkB;
-    s8 halfWidth;
-    s8 height;
-} Game1A89B0Position;
-
 /* game_C1D70.c */
 extern f32 (*D_800D2C20)[4]; // the current float matrix
 extern s32 D_800D2C28[16];   // segment base addresses
@@ -199,6 +184,71 @@ void func_15169988(Sprite2D *sprite);
 Gfx *func_15169A48(Gfx *gfx, Sprite2D *sprite, s32 arg2);
 
 /* game_1A89B0.c */
+/*
+ * One sprite placed on a level triangle (D_800DDD18 holds D_800DDD20 of them, sorted by x or z; filled by
+ * func_1500AF08 when the level loads).
+ */
+typedef struct Game1A89B0Position {
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 unk6;     /* (subtype << 5) | sprite type (texture slot 0..14) */
+    u8 phaseIdx; /* index into D_800DDC90 (type * 4 + phase); 60: not animated */
+    u8 texInfo;  /* index into D_80095CE0 */
+    u8 pad9;
+    u8 kind;     /* column of D_8008CF00 */
+    u8 unkB;
+    s8 halfWidth;
+    s8 height;
+} Game1A89B0Position; /* size 0xE */
+
+/*
+ * A sprite kind (D_8008CEB8): emit places sprites of this kind on a level triangle when the level loads
+ * (func_1500BEC0) and returns the next free index; anim runs for each sprite every frame (func_1517BBAC),
+ * nonzero hides the sprite.
+ */
+typedef struct SpriteKind {
+    s32 (*emit)(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+    s32 (*anim)(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
+    s32 unk8;
+} SpriteKind;
+
+/* One cell of D_8008CF00: the sprite kind to emit and its count (the first argument of emit). */
+typedef struct SpriteKindChoice {
+    s16 emitter; /* index into D_8008CEB8 */
+    s16 count;
+} SpriteKindChoice;
+
+/* Texture coordinate extents of a sprite type's frame. */
+typedef struct SpriteTexSize {
+    s16 s;
+    s16 t;
+} SpriteTexSize;
+
+extern u8 D_8008CEB0; /* billboards queued by func_1517D578 */
+extern s32 D_8008CEB4; /* axis D_800DDD18 is sorted along: 0 = x, else z */
+extern SpriteKind D_8008CEB8[6];
+extern SpriteKindChoice D_8008CF00[5][8]; /* [D_800DDC80 row][sprite kind] */
+/* Per sprite type (15 types) unless noted: */
+extern s32 D_800DD478[15 * 26]; /* 26 frame addresses */
+extern ParticleTexFile D_800DDA90[15];
+extern SpriteTexSize D_800DDB80[15];
+extern u8 D_800DDBC0[15]; /* index into D_80095CE0 */
+extern u8 D_800DDBD0[15]; /* frame count the phases cycle through */
+extern u8 D_800DDBE0[15]; /* frame shown while a sprite is disturbed (unkB >= 0x21) */
+extern u8 D_800DDBF0[15]; /* draw pass (see func_1517D7B0) */
+extern s32 D_800DDC00; /* bit per type */
+extern s32 D_800DDC04; /* bit per type: ping-pong animation */
+extern s32 D_800DDC08; /* bit per type: random flips of the ping-pong direction */
+extern u8 D_800DDC10[15]; /* per-phase direction bits for ping-pong animation */
+extern u8 D_800DDC20[15][2];
+extern u8 D_800DDC80[15]; /* row of D_8008CF00 */
+extern s16 D_800DDC90[60]; /* animation phases, 4 per type (frame << 8) */
+extern s32 D_800DDD0C; /* most sprites built per frame */
+extern Vtx *D_800DDD10[2]; /* this frame's sprite vertex buffer, one per frame buffer */
+extern Game1A89B0Position *D_800DDD18; /* the level's sprites */
+extern u8 D_800DDD1C; /* billboard animation counter */
+extern s32 D_800DDD20; /* number of sprites in D_800DDD18 */
 s32 func_1517B500(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
 s32 func_1517B6E8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);
 s32 func_1517B7A8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha);

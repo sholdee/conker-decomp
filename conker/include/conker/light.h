@@ -174,9 +174,9 @@ s32 func_1500AF08(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jit
 s32 func_1500B1F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
 s32 func_1500B3B0(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
 s32 func_1500B714(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-void func_1500B8F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-void func_1500BAB8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
-void func_1500BC7C(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 func_1500B8F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 func_1500BAB8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 func_1500BC7C(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
 void func_1500BE40(s32 unused);
 void func_1500BE68(void);
 void func_1500BEC0(void);

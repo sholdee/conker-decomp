@@ -1,12 +1,88 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* A billboard queued by func_1517D578 and drawn by func_1517D690. */
+struct Entry1517D578 {
+    s16 x;
+    s16 y;
+    s16 z;
+    u8  frame; /* texture frame (from the D_800DDD1C animation counter) */
+    u16 halfWidth;
+    u16 height;
+    f32 angle;
+};
+
+/*
+ * .bss, linked at 0x800DD470..0x800DDD60 in this order. Defined before conker/sprite.h declares them: IDO
+ * lays out .bss in first-declaration order, and an extern there would count. The struct tags of
+ * SpriteTexSize and Game1A89B0Position are completed by conker/sprite.h.
+ */
+struct { s16 x; s16 y; s16 z; } D_800DD470; /* set by func_1517E05C; x == 0 means unset */
+s32 D_800DD478[15 * 26]; // matching: an int that holds an address; a pointer type changes IDO's registers
+ParticleTexFile D_800DDA90[15];
+struct SpriteTexSize D_800DDB80[15];
+u8 D_800DDBC0[15];
+u8 D_800DDBD0[15];
+u8 D_800DDBE0[15];
+u8 D_800DDBF0[15];
+s32 D_800DDC00;
+s32 D_800DDC04;
+s32 D_800DDC08;
+u8 D_800DDC10[15];
+u8 D_800DDC20[15][2];
+u32 D_800DDC40[15]; /* per sprite type: distance to the nearest sprite this frame */
+u8 D_800DDC80[15];
+s16 D_800DDC90[60];
+s32 D_800DDD08; /* not referenced */
+s32 D_800DDD0C;
+Vtx *D_800DDD10[2];
+struct Game1A89B0Position *D_800DDD18;
+u8 D_800DDD1C;
+s32 D_800DDD20;
+s32 D_800DDD24; /* texture strip of the billboards */
+struct Entry1517D578 D_800DDD28[3];
+s32 D_800DDD58; /* sprites in this frame's vertex buffer */
+
 #include "functions.h"
 #include "variables.h"
 
-extern s32 D_800DDD58;
-extern Gfx D_8008CFA0[];
+u8 D_8008CEB0 = 0;
+s32 D_8008CEB4 = 0;
+
+SpriteKind D_8008CEB8[6] = {
+    { func_1500B1F4, NULL, 0 },
+    { func_1500B714, func_1517B500, 0 },
+    { func_1500B8F4, func_1517B6E8, 0 },
+    { func_1500BAB8, func_1517B7A8, 0 },
+    { func_1500B3B0, NULL, 0 },
+    { func_1500BC7C, func_1517B7F8, 0 },
+};
+
+SpriteKindChoice D_8008CF00[5][8] = {
+    { { 0, 1 }, { 0, 2 }, { 4, 0 }, { 0, 4 }, { 4, 1 }, { 0, 6 }, { 4, 2 }, { 0, 8 } },
+    { { 1, 500 }, { 1, 250 }, { 1, 125 }, { 1, 62 }, { 1, 46 }, { 1, 31 }, { 1, 15 }, { 0, 1 } },
+    { { 2, 1 }, { 2, 2 }, { 2, 3 }, { 2, 4 }, { 2, 5 }, { 2, 6 }, { 2, 7 }, { 0, 1 } },
+    { { 3, 1 }, { 3, 2 }, { 3, 3 }, { 3, 4 }, { 3, 5 }, { 3, 6 }, { 3, 7 }, { 0, 1 } },
+    { { 5, 1 }, { 5, 2 }, { 5, 3 }, { 5, 4 }, { 5, 5 }, { 5, 6 }, { 0, 1 }, { 0, 3 } },
+};
+
+extern Mtx D_89470; /* the physical address of the fixed matrix D_80089470 */
+
+/* Render setup of the sprites and billboards. */
+static Gfx D_8008CFA0[] = {
+    gsSPMatrix(&D_89470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsDPPipeSync(),
+    gsSPClearGeometryMode(0xFFFF),
+    gsSPSetGeometryMode(G_ZBUFFER | G_SHADE | G_LOD),
+    gsDPSetOtherMode(0x182C3F, 0x0C184B50),
+    gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, 0, 0, 0, TEXEL1, COMBINED, ENVIRONMENT, SHADE, PRIMITIVE, COMBINED, 0, SHADE, 0),
+    gsSPTexture(0xFFFF, 0xFFFF, 0, 1, G_ON),
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsSPEndDisplayList(),
+};
 
 /*
- * Sprite animation callbacks (called through D_8008CEBC): each copies the sprite's position into its first
+ * Sprite animation callbacks (the anim functions of D_8008CEB8): each copies the sprite's position into its first
  * vertex, possibly offset, and may advance the animation phase or lower the alpha. Nonzero hides the sprite.
  */
 
@@ -111,8 +187,6 @@ s32 func_1517B7F8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     return 0;
 }
 
-extern Game1A89B0Position *D_800DDD18;
-
 /* Quicksorts D_800DDD18[first..last] by x, or by z when D_8008CEB4 is set (pivot = last element). */
 void func_1517B89C(s32 first, s32 last) {
     s32 left;
@@ -154,31 +228,7 @@ void func_1517B89C(s32 first, s32 last) {
     }
 }
 
-typedef struct {
-    s32 (*fn)(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha); /* nonzero: hide the sprite */
-    s32 unk4;
-    s32 unk8;
-} Game1A89B0Anim;
-
-typedef struct {
-    s16 idx;
-    s16 unk2;
-} Game1A89B0AnimRef;
-
-/* Texture coordinate extents of a sprite type's frame. */
-typedef struct {
-    s16 s;
-    s16 t;
-} Game1A89B0TexSize;
-
-extern Game1A89B0Anim D_8008CEBC[];
-extern Game1A89B0AnimRef D_8008CF00[][8];
-/* Per sprite type (15 types) unless noted: */
-extern u32 D_800DDC40[15]; /* distance to the nearest sprite this frame */
-extern Game1A89B0TexSize D_800DDB80[];
 extern s32 math_distance3D(s32, s32, s32);
-
-extern struct { s16 x; s16 y; s16 z; } D_800DD470; /* set by func_1517E05C; x == 0 means unset */
 
 /* Per sprite type: the texture file (D_800DDA90) and the 26 frame pointers into its decoded buffer. */
 #define FRAMES_PER_TYPE 26
@@ -296,7 +346,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
     }
     i = mid;
     if (IN_WINDOW(mid)) {
-        j = ((u32) D_800DDD20 < (u32) D_800DDD0C) ? D_800DDD20 : D_800DDD0C;
+        j = ((u32) D_800DDD20 < D_800DDD0C) ? D_800DDD20 : D_800DDD0C;
         D_800DDD10[D_800BE9C0] = allocate_memory(j << 6, 4, 2, 0);
         if (D_800DDD10[D_800BE9C0] == NULL) {
             return;
@@ -305,11 +355,11 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
         D_800DDD10[D_800BE9C0] = NULL;
         return;
     }
-    for (j = 0; (u32) j < (u32) D_800DDD0C && IN_WINDOW(i); i += dir) {
+    for (j = 0; (u32) j < D_800DDD0C && IN_WINDOW(i); i += dir) {
         dist = math_distance3D(D_800DDD18[i].x - x, D_800DDD18[i].y - y, D_800DDD18[i].z - z);
         if (dist < radius) {
             type = D_800DDD18[i].unk6 & 0xF;
-            if ((u32) dist < D_800DDC40[type]) {
+            if (dist < D_800DDC40[type]) {
                 D_800DDC40[type] = dist;
             }
             fadeDist = math_distance3D(D_800DDD18[i].x - fadeX, D_800DDD18[i].y - fadeY, D_800DDD18[i].z - fadeZ);
@@ -324,7 +374,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                         if (D_800DDA90[type].buf != 0) {
                             D_800DD478[type * FRAMES_PER_TYPE] = func_10003C6C(hi, 4, 1, 0, 0);
                             if (D_800DD478[type * FRAMES_PER_TYPE] != 0) {
-                                func_10004514(D_800DDA90[type].devAddr, (void *) D_800DDA90[type].buf, D_800DDA90[type].size, 1);
+                                func_10004514(D_800DDA90[type].devAddr, D_800DDA90[type].buf, D_800DDA90[type].size, 1);
                                 D_800DDA90[type].used = 1;
                                 hi = D_80095CE0[D_800DDBC0[type]].frameSize;
                                 for (frame = 1; frame < FRAMES_PER_TYPE; frame++) {
@@ -375,8 +425,8 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                     dist = 255;
                 }
                 vtx[0].v.cn[3] = dist;
-                if (D_8008CEBC[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].animIdx].idx].fn != NULL) {
-                    if (D_8008CEBC[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].animIdx].idx].fn(&D_800DDD18[i], vtx, &phase, &vtx[0].v.cn[3]) != 0) {
+                if (D_8008CEB8[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].kind].emitter].anim != NULL) {
+                    if (D_8008CEB8[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].kind].emitter].anim(&D_800DDD18[i], vtx, &phase, &vtx[0].v.cn[3]) != 0) {
                         continue;
                     }
                 } else {
@@ -458,8 +508,8 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
         }
     }
     /* occasionally spawn a particle at a random sprite showing frame 0 */
-    i = (u32) func_151EF610() % (u32) D_800DDD0C;
-    if ((u32) i < (u32) D_800DDD58) {
+    i = (u32) func_151EF610() % D_800DDD0C;
+    if ((u32) i < D_800DDD58) {
         i *= 4;
         j = VTX(i).v.flag;
         if (j % 26 == 0 && D_800DDBC0[j / 26] == 0) {
@@ -470,8 +520,8 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
     angle *= 0.01745329238f;
     cosA = cosf(angle) * 128.0f;
     sinA = sinf(angle);
-    for (i = 0; (u32) i < (u32) D_800DDD58; i++) {
-        halfWidth = (s16) VTX((i << 2) + 2).v.flag;
+    for (i = 0; (u32) i < D_800DDD58; i++) {
+        halfWidth = VTX((i << 2) + 2).v.flag;
         x = VTX((i << 2)).v.ob[0];
         height = VTX((i << 2) + 3).v.flag * 4;
         y = VTX((i << 2)).v.ob[1];
@@ -515,7 +565,7 @@ Gfx *func_1517D074(Gfx *gfx, s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 
 
     count = D_800DDD58;
     v = &VTX(count * 4);
-    if ((u32)D_800DDD58 >= (u32)D_800DDD0C) {
+    if ((u32)D_800DDD58 >= D_800DDD0C) {
         return gfx;
     }
 
@@ -555,18 +605,6 @@ Gfx *func_1517D074(Gfx *gfx, s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 
     D_800DDD58++;
     return gfx;
 }
-
-/* A billboard queued by func_1517D578 and drawn by func_1517D690. */
-struct Entry1517D578 {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8  frame; /* texture frame (from the D_800DDD1C animation counter) */
-    u16 halfWidth;
-    u16 height;
-    f32 angle;
-};
-extern struct Entry1517D578 D_800DDD28[];
 
 /* Queues a billboard (at most 3 per frame; D_8008CEB0 counts them). */
 void func_1517D578(s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 height, u8 frame) {
@@ -617,8 +655,6 @@ Gfx *func_1517D690(Gfx *gfx, s32 texture) {
     D_800DDD58 = saved;
     return gfx;
 }
-
-extern s32 D_800DDD24;
 
 /*
  * Draws the queued billboards (func_1517D690), then every sprite built by func_1517BBAC whose second

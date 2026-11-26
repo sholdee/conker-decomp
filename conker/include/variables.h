@@ -82,8 +82,6 @@ extern u64 D_800885B0;
 
 
 
-extern u8   D_8008CEB0;
-extern s32 D_8008CEB4; /* axis D_800DDD18 is sorted along: 0 = x, else z */
 extern f32 *D_8008CFFC[]; // per LevelHeader.unk10: sun position (game_1AB530 FLARE_SUN)
 
 extern u8 (*D_8008FCD0[])(void); // texture id pickers by effect kind (game_2062D0)
@@ -384,23 +382,7 @@ extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;
 
 extern s16  D_800DD444; // state timer
-extern s32  D_800DD478[15 * 26]; // per texture type: 26 frame addresses (game_1A89B0)
 
-extern ParticleTexFile D_800DDA90[15];
-extern u8 D_800DDBC0[]; /* index into D_80095CE0 */
-extern u8 D_800DDBD0[15]; /* frame count the phases cycle through */
-extern u8 D_800DDBE0[]; /* frame shown while a sprite is disturbed (unkB >= 0x21) */
-extern u8 D_800DDBF0[]; /* draw pass (see func_1517D7B0) */
-extern s32  D_800DDC00;
-extern s32  D_800DDC08;
-extern s32  D_800DDC04;
-extern u8 D_800DDC10[]; /* per-phase direction bits for ping-pong animation */
-extern u8 D_800DDC80[]; /* row of D_8008CF00 */
-extern s16 D_800DDC90[60]; /* animation phases, 4 per type (frame << 8) */
-extern Vtx *D_800DDD10[2]; // this frame's sprite vertex buffer (game_1A89B0), one per frame buffer
-extern s32  D_800DDD0C;
-extern u8   D_800DDD1C;
-extern s32  D_800DDD20;
 extern u8   D_800DDD61;
 extern LensFlare *D_800DDD64; // head of the lens flare list
 
