@@ -896,7 +896,7 @@ void func_15145A50(Actor *actor);
 s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f *hitFar, f32 *radius, f32 *arg6,
                   Vec3f *center);
 u8 func_15145C90(s32 index);
-void func_15145CD0(WorldObject *placement, f32 **in, f32 **out, s32 count);
+void func_15145CD0(WorldObject *placement, const f32 **in, f32 **out, s32 count);
 void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count);
 void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count);
 s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v); /* two axes perpendicular to a direction */

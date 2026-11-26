@@ -16,7 +16,8 @@ struct PropEmitterEffect {
     /* 0x28 */ PropEmitter emitter;
 };
 
-extern u8 D_800A0FE0[];
+/* The two emitter props. */
+static const u8 D_800A0FE0[2] = { 0xF7, 0xF6 };
 
 
 /* Sets camera distances when camera->CharContext is 9 (else when unk2C is 8), and flag bits in unk84
@@ -112,8 +113,8 @@ TimedEffect *func_150E1060(u8 index, u8 owner, s32 kind) {
 }
 
 /* Two points per emitter index, in the prop's space (start and end of the emission direction). */
-extern Vec3f D_800A0FE4[];
-extern Vec3f D_800A0FFC[];
+static const Vec3f D_800A0FE4[2] = { { -26.08121f, 28.21353f, 482.1082f }, { 22.96786f, 28.15965f, 437.60574f } };
+static const Vec3f D_800A0FFC[2] = { { -25.56817f, 28.21346f, 536.2602f }, { 22.96786f, 80.0f, 480.60574f } };
 
 /* Emitter effect update: accumulates a random rate and, while the emitter's zone has one of the
  * low D_80082FA0 + 1 bits set, emits one particle per whole unit along D_800A0FE4 -> D_800A0FFC. */
@@ -124,7 +125,7 @@ void func_150E114C(PropEmitterEffect *effect) {
     ParticleDesc args;
     f32 extra;
     f32 dir[3];
-    Vec3f *points[2];
+    const f32 *points[2];
     f32 *results[2];
     s32 flip80;
     s32 flip40;
@@ -172,8 +173,8 @@ void func_150E114C(PropEmitterEffect *effect) {
             args.brightness = 0xFF;
             extra = 0.962338984f;
             args.scaleRate = 1.011461973f;
-            points[0] = &D_800A0FE4[emitter->index];
-            points[1] = &D_800A0FFC[emitter->index];
+            points[0] = &D_800A0FE4[emitter->index].x;
+            points[1] = &D_800A0FFC[emitter->index].x;
             results[0] = &args.pos.x;
             results[1] = dir;
             func_15145CD0(emitter->prop, points, results, 2);

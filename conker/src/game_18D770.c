@@ -1563,7 +1563,7 @@ s32 func_151643F8(LightEffect *effect) {
 
 /* Moves the light to the point transformed by its matrix. */
 void func_1516441C(LightEffect *effect, LightTransformed *point) {
-    f32 *in;
+    const f32 *in;
     f32 *out;
     f32 position[3];
 
