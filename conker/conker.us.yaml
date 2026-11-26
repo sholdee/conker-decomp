@@ -1781,7 +1781,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D3000, name: game_CCD00}
       - {start: 0x255880, type: .bss, vram: 0x800D3010, name: game_CD5A0}
       - {start: 0x255880, type: .bss, vram: 0x800D3090, name: game_CDE80}
-      - {start: 0x255880, type: bss, vram: 0x800D3280, name: bss_800D3280}
+      - {start: 0x255880, type: .bss, vram: 0x800D3280, name: game_D0960}
       - {start: 0x255880, type: .bss, vram: 0x800D3300, name: game_D0F20}
       - {start: 0x255880, type: .bss, vram: 0x800D35E0, name: game_D2570}
       - {start: 0x255880, type: .bss, vram: 0x800D3680, name: game_D3040}

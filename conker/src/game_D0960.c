@@ -2,7 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-
+/* This file's .bss (0x800D3280): after the statics of game_CDE80 (0x800D3278) and before game_D0F20.s's
+ * .bss; neither this build nor the October 2000 debug build reads it. */
+u8 D_800D3280[0x80]; /* not referenced */
 
 /* Tests the segment p0-p1 against cyl (only an active ZONE_AREA_CYLINDER zone);
    on a hit writes the entry point to hit and returns TRUE. */
