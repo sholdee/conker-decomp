@@ -1,13 +1,14 @@
 #include <ultra64.h>
+
+/* The pending request: the caller's message queue, the next EEPROM block, the source and the bytes left. */
+static OSMesgQueue *D_800E0A20;
+static u8 D_800E0A24;
+static u8 *D_800E0A28;
+static s32 D_800E0A2C;
+
 #include "functions.h"
 #include "variables.h"
-
-extern OSTimer __osEepromTimer;
-extern OSMesgQueue __osEepromTimerQ;
-extern OSMesgQueue *D_800E0A20;
-extern u8 D_800E0A24;
-extern u8 *D_800E0A28;
-extern s32 D_800E0A2C;
+#include "controller.h"
 
 s32 func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size) {
     while (func_151DCFD8(1) != 0) {

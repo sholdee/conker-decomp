@@ -3332,6 +3332,6 @@ void func_151DC8BC();
 void func_151DC97C(ColorEmitter *emitter);
 
 /* game_20A290.c */
-void func_151DCDE0(void *arg0, u8 arg1, s32 arg2);
+void func_151DCDE0(Vec3f *pos, u8 arg1, s32 arg2);
 
 #endif
