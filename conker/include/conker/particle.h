@@ -3000,14 +3000,6 @@ typedef struct {
     /* 0xA8 */ WobbleData extra;
 } Puff151D4794;
 
-/* Hit description passed to func_151D4DAC. */
-typedef struct {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ u8 pad8[0x50];
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 unk59;
-} S151D4DAC;
 
 void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5);
 s32 func_151D3D50(WobbleParticle *particle);
@@ -3024,8 +3016,8 @@ void func_151D4794(ObjEmitterEffect *effect);
 void func_151D4C38(ObjEmitterEffect *effect, ActorRef *handle, u8 msg);
 s32 func_151D4D04(Puff151D4794 *puff, s32 arg1);
 void func_151D4D58(Actor *obj);
-void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4DAC *hit, s32 flags, f32 *dir, u8 arg7,
-                   s32 arg8);
+s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit *hit, s32 flags, Vec3f *dir, u8 arg7,
+                  s32 arg8);
 void func_151D5148(Actor *obj);
 void func_151D5174(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg4, Vec3f *pointBuf, Vec3f *dirBuf,
                    Vec3f **outPoint, Vec3f **outDir, Vec3f *arg9);

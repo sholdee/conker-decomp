@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// matching: callers here use the full s32 return of these, unlike their functions.h prototypes
-#define func_151D4DAC func_151D4DAC_header // matching: this file keeps its own declaration of func_151D4DAC
 #include "functions.h"
-#undef func_151D4DAC
 #include "variables.h"
 
 extern f32 D_800AAA30; /* 0.1f; ROM 0x24F4F0, just before this file's .rodata slice */
@@ -375,8 +372,6 @@ s32 func_151C2E94(Actor *obj, Actor *self) {
     }
     return TRUE;
 }
-// matching: returns its result (the definition is void); u8 where the definition has s32 (arg 9)
-s32 func_151D4DAC(void *, Actor *, Vec3f *, Vec3f *, RayHit *, s32, Vec3f *, u8, u8);
 
 /* Impact handler: the projectile hit actor (at hitPos) during its ray cast. */
 s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,

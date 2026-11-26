@@ -572,7 +572,8 @@ void func_151D4D58(Actor *obj) {
 
 
 /* Applies a hit from attacker to victim travelling along dir. */
-void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4DAC *hit, s32 flags, f32 *dir, u8 arg7, s32 arg8) {
+s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit *hit, s32 flags, Vec3f *dir, u8 arg7,
+                  s32 arg8) {
     s32 alreadyDead;
     s32 health;
     s32 hp;
@@ -590,7 +591,7 @@ void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4D
         (victim->character_type == 0x8C) || (victim->character_type == 0x8E) || (victim->character_type == 0x8F) || (victim->character_type == 0x91) ||
         (victim->character_type == 0x9E) || (victim->character_type == 0xA6) || (victim->character_type == 0xAB) || (victim->character_type == 0xAC) ||
         (victim->character_type == 0xB2) || (victim->character_type == 0xB4) || (victim->character_type == 0x5B)) {
-        func_151C2050(attacker, arg2, dir, 9, (hit != NULL) ? hit->unk4 : 0.0f);
+        func_151C2050(attacker, from, dir, 9, (hit != NULL) ? hit->dist : 0.0f);
     }
 
     health = victim->energy;
@@ -602,7 +603,7 @@ void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4D
 
     flags |= 0x60000;
     hp = victim->energy;
-    if ((hit != NULL) && (hit->unk59 == 3) && (hit->unk58 == 10)) {
+    if ((hit != NULL) && (hit->hitType == 3) && (hit->part == 10)) {
         if (health >= 3) {
             victim->energy = hp - 1;
         } else {
@@ -613,13 +614,14 @@ void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4D
         }
     }
 
-    func_15137610(victim, arg2, arg3, dir, arg7, arg8);
+    func_15137610(victim, from, to, dir, arg7, arg8);
 
     if (!alreadyDead) {
-        angle = func_150484A0(dir[0], dir[2]) * 10430.37793f;
+        angle = func_150484A0(dir->x, dir->z) * 10430.37793f;
         func_1505D024(victim, flags | 0x80000, (angle - 0x4000) | 1,
                       (attacker != NULL) ? (attacker - movement_obj) : -1);
     }
+    // no return statement here: the original falls off the end (game_1EF500.c returns what is left in v0)
 }
 
 /* Counts down mv->gun_before_reload and counts up mv->shotsfired. */
