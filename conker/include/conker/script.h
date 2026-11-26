@@ -345,8 +345,8 @@ void func_1509C8FC(s32 ref, s32 alt);
 typedef struct ResourceDescriptor {
     /* 0x00 */ const char *name;                 // NULL for unused slots
     /* 0x04 */ s32 packedId;                     // low 29 bits: id - 1
-    /* 0x08 */ u16 unk8;
-    /* 0x0A */ u16 unkA;                         // low 12 bits used
+    /* 0x08 */ u16 levelId;
+    /* 0x0A */ u16 packedSpawnPoint;             // low 12 bits: spawn point
     /* 0x0C */ const u16 *dependencies;          // resource indices, RESOURCE_LIST_END-terminated
     /* 0x10 */ const u16 *relatedDependencies;   // resource indices, RESOURCE_LIST_END-terminated
 } ResourceDescriptor; // size = 0x14

@@ -44,11 +44,11 @@ const char *script_getTaskName(s32 index) {
 }
 
 u16 func_1509CA30(s32 index) {
-    return D_80087430[index].unk8;
+    return D_80087430[index].levelId;
 }
 
 s32 func_1509CA50(s32 index) {
-    return D_80087430[index].unkA & 0xFFF;
+    return D_80087430[index].packedSpawnPoint & 0xFFF;
 }
 
 s32 func_1509CA78(s32 index) {
