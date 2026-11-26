@@ -893,7 +893,7 @@ s32 func_150E971C(Game113D60Debris *debris);
 /* game_116D40.c */
 /* Spawner state at +0x28 of a burst emitter. */
 typedef struct {
-    /* 0x00 */ s32 source;      // where func_1514470C places each burst
+    /* 0x00 */ TriggerZone *source; // where func_1514470C places each burst
     /* 0x04 */ f32 rateBase;    // bursts per unit of D_800BE9A4
     /* 0x08 */ f32 rateRange;
     /* 0x0C */ f32 scaleBase;   // size scale passed to func_150E9890

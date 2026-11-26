@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-static const f32 D_800A1CC0[3] = { 0.0f, -8.0f, -85.0f };
+static const Vec3f D_800A1CC0 = { 0.0f, -8.0f, -85.0f };
 static const Vec3f D_800A1CCC = { 24.0f, -8.0f, -85.0f };
 static const Vec3f D_800A1CD8 = { -24.0f, -8.0f, -85.0f };
 static const Vec3f D_800A1CE4 = { 30.0f, -70.0f, -85.0f };
@@ -162,7 +162,7 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
         event.strength = 8;
         event.updateKind = -1;
         func_151D8868(&event, 0, owner, kind);
-        func_15160A58(actor, 1, D_800A1CC0, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
+        func_15160A58(actor, 1, &D_800A1CC0, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
     }
 }
 
@@ -402,8 +402,8 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
 
 /* Data of the emitter effect started by func_150FAA40 and updated by func_150FAAEC. */
 typedef struct {
-    /* 0x00 */ s32 from; /* endpoints, resolved with func_1514470C */
-    /* 0x04 */ s32 to;
+    /* 0x00 */ TriggerZone *from; /* endpoints, resolved with func_1514470C */
+    /* 0x04 */ TriggerZone *to;
     /* 0x08 */ f32 pending; /* fractional count of spawns due */
 } LineEmitterData;
 
@@ -419,8 +419,8 @@ void func_150FAA40(u8 owner, s32 kind) {
     LineEmitter *effect;
 
     if (D_80088B60 == 0) {
-        data.from = (s32)&zones[35];
-        data.to = (s32)&zones[34];
+        data.from = &zones[35];
+        data.to = &zones[34];
         data.pending = 0.0f;
 
         effect = (LineEmitter *)func_15149130(300, -1, 0x57, -1, 0, 0x46, sizeof(data), owner, kind);

@@ -3190,8 +3190,8 @@ typedef struct TextObj {
 typedef struct ZonePairEmitter {
     /* 0x00 */ s16 timer; // frames until the next particle
     /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ s32 source;
-    /* 0x08 */ s32 target;
+    /* 0x04 */ TriggerZone *source;
+    /* 0x08 */ TriggerZone *target;
 } ZonePairEmitter;
 
 /* Data of timed effect expire callback 5 (func_150C29F0, game_EF410.c): particles at a random point of a disc. */

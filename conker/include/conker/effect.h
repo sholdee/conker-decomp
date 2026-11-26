@@ -856,7 +856,7 @@ s32 func_151444DC(s32 value, s32 hi, s32 lo);
 f32 func_15144528(f32 value, f32 hi, f32 lo);
 f32 func_15144598(TriggerZone *region);
 f32 func_1514462C(s32 arg0);
-void func_1514470C(TriggerZone *region, f32 *out);
+void func_1514470C(TriggerZone *region, Vec3f *out);
 f32 func_15144A74(Vec3f *a, Vec3f *b); /* dot product */
 /* (s32 index); declared without a prototype: game_1ED0F0.c passes a second argument */
 f32 func_15144AA8();

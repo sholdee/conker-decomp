@@ -806,7 +806,7 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
                 pick -= node->area;
                 node = node->next;
             }
-            func_1514470C(node->region, dataPtr);
+            func_1514470C(node->region, &dataPtr->position);
             dx = data.position.x - center->x;
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;
@@ -963,7 +963,7 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
                 pick -= node->area;
                 node = node->next;
             }
-            func_1514470C(node->region, &data);
+            func_1514470C(node->region, &data.position);
             dx = data.position.x - center->x;
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;

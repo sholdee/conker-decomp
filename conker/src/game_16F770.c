@@ -1069,7 +1069,7 @@ f32 func_1514462C(s32 arg0) {
 }
 
 /* Picks a random point inside the region into out[3], applying its tilt for boxes and cylinders. */
-void func_1514470C(TriggerZone *region, f32 *out) {
+void func_1514470C(TriggerZone *region, Vec3f *out) {
     f32 radiusZ;
     f32 height;
     f32 radiusX;
@@ -1089,9 +1089,9 @@ void func_1514470C(TriggerZone *region, f32 *out) {
     mode = ZONE_AREA_TYPE(region);
     switch (mode) {
     default:
-        out[0] = region->x;
-        out[1] = region->y;
-        out[2] = region->z;
+        out->x = region->x;
+        out->y = region->y;
+        out->z = region->z;
         return;
     case ZONE_AREA_BOX:
         {
@@ -1109,10 +1109,10 @@ void func_1514470C(TriggerZone *region, f32 *out) {
             mixed = y * sinPitch + z * cosPitch;
             x = x * cosYaw + mixed * sinYaw;
             y = y * cosPitch - z * sinPitch;
-            out[0] = region->x + x;
-            out[1] = region->y + y;
+            out->x = region->x + x;
+            out->y = region->y + y;
             rotatedZ = mixed * cosYaw - savedX * sinYaw;
-            out[2] = region->z + rotatedZ;
+            out->z = region->z + rotatedZ;
         }
         return;
     case ZONE_AREA_CYLINDER:
@@ -1134,9 +1134,9 @@ void func_1514470C(TriggerZone *region, f32 *out) {
             mixed = y * sinPitch + z * cosPitch;
             x = x * cosYaw + mixed * sinYaw;
             y = y * cosPitch - z * sinPitch;
-            out[0] = region->x + x;
-            out[1] = region->y + y;
-            out[2] = region->z + (mixed * cosYaw - savedX * sinYaw);
+            out->x = region->x + x;
+            out->y = region->y + y;
+            out->z = region->z + (mixed * cosYaw - savedX * sinYaw);
         }
         return;
     case ZONE_AREA_SPHERE:
@@ -1145,9 +1145,9 @@ void func_1514470C(TriggerZone *region, f32 *out) {
 
             func_151436B4(func_150ADA68() * 6.2831855f, func_150ADA68() * 6.2831855f,
                           func_150ADA68() * radiusX, &offset.x);
-            out[0] = region->x + offset.x;
-            out[1] = region->y + offset.y;
-            out[2] = region->z + offset.z;
+            out->x = region->x + offset.x;
+            out->y = region->y + offset.y;
+            out->z = region->z + offset.z;
         }
         return;
     }
