@@ -128,7 +128,7 @@ void func_1500C8D0(TriggerZone *region, f32 density) {
         f32 inv65535;
         ParticleDesc68 part;
         Particle15130280Extra extra;
-        void *obj;
+        DescParticleHead *obj;
         f32 top;
         f32 bottom;
         f32 range; // matching: reused for the distance to the nearer bound
@@ -213,7 +213,7 @@ void func_1500C8D0(TriggerZone *region, f32 density) {
             part.viewMask = func_1510FD20(part.pos.x, part.pos.z);
             obj = func_15130280(&part, 2, 0, 28, 255, 1);
             if (obj != NULL) {
-                memcpy((u8 *)obj + 0xA8, &extra, sizeof(extra));
+                memcpy(obj + 1, &extra, sizeof(extra));
             }
             count -= 1.0f;
         } while (count > 1.0f);
@@ -246,7 +246,7 @@ void func_1500CE4C(TriggerZone *region, f32 density) {
         f32 top;
         f32 bottom;
         f32 temp;
-        void *obj;
+        DefParticleHead *obj;
         s32 pad2; // matching: stack slots
         s32 pad3;
 
@@ -298,7 +298,7 @@ void func_1500CE4C(TriggerZone *region, f32 density) {
             part.unk48 = func_1510FD20(part.pos.x, part.pos.z);
             obj = func_1513D2F0(&part, &D_800A4AA0, 0x23, 0, 0, 0x1E, 0, 3, 0xFF, 0x1C, 0xFF, 1);
             if (obj != NULL) {
-                memcpy((u8 *)obj + 0x110, &extra, sizeof(extra));
+                memcpy(obj + 1, &extra, sizeof(extra));
             }
             count -= 1.0f;
         } while (count > 1.0f);
@@ -461,7 +461,7 @@ void func_1500DE88(TriggerZone *region, f32 density) {
         f32 inv65535;
         ParticleDesc68 part;
         Particle15130280Extra extra;
-        void *obj;
+        DescParticleHead *obj;
         f32 top;
         f32 bottom;
         f32 range; // matching: reused for the distance to the nearer bound
@@ -534,7 +534,7 @@ void func_1500DE88(TriggerZone *region, f32 density) {
             part.viewMask = func_1510FD20(part.pos.x, part.pos.z);
             obj = func_15130280(&part, 2, 0, 28, 255, 1);
             if (obj != NULL) {
-                memcpy((u8 *)obj + 0xA8, &extra, sizeof(extra));
+                memcpy(obj + 1, &extra, sizeof(extra));
             }
             count -= 1.0f;
         } while (count > 1.0f);
