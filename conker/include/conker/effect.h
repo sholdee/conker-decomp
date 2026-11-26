@@ -745,7 +745,7 @@ typedef struct Obj15102884 Obj15102884;
 Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport);
 s32 func_151022AC(Owner151022AC *obj);
 s32 func_151025F4(Owner151025F4 *obj, s32 arg1);
-s32 func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5);
+struct EffectParticle *func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5);
 void func_151027E8(Actor *actor);
 s32 func_1510281C(Owner1510281C *owner, s16 key);
 s32 func_15102884(Obj15102884 *obj, s32 arg1);

@@ -1144,7 +1144,7 @@ typedef struct {
 } EffectParticleState; /* size 0x94 */
 
 /* The main particle: a func_1513D4B8 particle (0x110 bytes) followed by its EffectParticleState. */
-typedef struct {
+typedef struct EffectParticle {
     DefParticleHead head;
     EffectParticleState state;
 } EffectParticle;
