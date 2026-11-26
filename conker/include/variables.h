@@ -435,9 +435,6 @@ extern s8  D_800BC448[]; // per texture: frames left before it is freed (0 = not
 
 extern u8 * D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
 extern ParticleResource D_800BE4A0[15];
-extern u8 (*D_800BE510)[3]; // base RGB of every level vertex, then the props'; (&D_800BE510)[i] for i < 4 is level model i's first vertex (no symbols of their own)
-extern u8 (***D_800BE520)[3]; // [set][group][i]: base RGB of each color-group vertex
-extern u16 * D_800BE524; // first D_800BE510 entry of each prop
 extern u16 *D_800BE570; // RGBA16 screen copy, D_800BE620 x D_800BE624 (game_203340)
 extern u8  D_800BE574;
 extern u8  D_800BE575;

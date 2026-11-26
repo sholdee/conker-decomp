@@ -1,4 +1,16 @@
 #include <ultra64.h>
+
+// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// the order it first sees each name, and that order also depends on how many types and variables are
+// declared before it (see init_50A0.c).
+u8 (*D_800BE510[4])[3]; // [0]: base RGB of every level vertex, then the props'; [i]: level model i's first vertex
+u8 (***D_800BE520)[3];   // [set][group][i]: base RGB of each color-group vertex
+u16 *D_800BE524;         // first D_800BE510[0] entry of each prop
+static u16 D_800BE528;    // vertices recorded so far
+static u8 D_800BE530[30]; // RGB of each G_SETENVCOLOR of the level's first display list
+static s16 D_800BE550[10]; // its command index
+static u8 D_800BE564;     // count of D_800BE530 entries
+
 #include "functions.h"
 #include "variables.h"
 
@@ -6,15 +18,6 @@ extern u8 D_800DF7D1;
 extern u8 D_800DF7D2;
 extern u8 D_800DF7D3[];
 extern u8 D_800DF9B3[];
-extern u16 D_800BE528;
-
-
-extern u8 D_800BE530[];
-extern s16 D_800BE550[];
-extern s32 D_800B0E44;
-extern s32 D_800B0E48;
-extern s32 D_800B0E4C;
-extern u8 D_800BE564;
 
 void func_150127B0(void) {
     s32 total;
@@ -37,8 +40,9 @@ void func_150127B0(void) {
                 total += db_Object_array[i].numVertices;
             }
         }
-        if ((D_800BE510 = allocate_memory(total * 3, 1, 0, 0)) == NULL) {
-            (&D_800BE510)[1] = NULL;
+        D_800BE510[0] = allocate_memory(total * 3, 1, 0, 0);
+        if (D_800BE510[0] == NULL) {
+            D_800BE510[1] = NULL;
             return;
         }
         D_800BE528 = 0;
@@ -46,10 +50,10 @@ void func_150127B0(void) {
         if (D_800B0DF0->vtxColorFlags & 1) {
             for (i = 0; i < 4; i++) {
                 if (D_800B0E10[i] != NULL) {
-                    (&D_800BE510)[i] = (void *)&((Color24 *)D_800BE510)[D_800BE528]; // matching: indexing through the Color24 view keeps IDO's addu operand order
+                    D_800BE510[i] = &D_800BE510[0][D_800BE528];
                     func_15012C84(D_800B0E10[i], D_800B0E40[i]);
                 } else {
-                    (&D_800BE510)[i] = NULL;
+                    D_800BE510[i] = NULL;
                 }
             }
         }
@@ -96,9 +100,9 @@ void func_15012C84(Vtx *arg0, u32 arg1) {
     u32 i;
 
     for (i = 0; i < arg1; i++) {
-        D_800BE510[D_800BE528][0] = arg0[i].v.cn[0];
-        D_800BE510[D_800BE528][1] = arg0[i].v.cn[1];
-        D_800BE510[D_800BE528][2] = arg0[i].v.cn[2];
+        D_800BE510[0][D_800BE528][0] = arg0[i].v.cn[0];
+        D_800BE510[0][D_800BE528][1] = arg0[i].v.cn[1];
+        D_800BE510[0][D_800BE528][2] = arg0[i].v.cn[2];
         D_800BE528++;
     }
 }

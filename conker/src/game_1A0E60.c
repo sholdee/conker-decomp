@@ -52,11 +52,11 @@ void func_151739B0(s32 colorSet, s32 isProp, s32 blend, s32 group, s32 propIndex
             index = indices[j];
             if (!(sVtxColorFlags & 4)) {
                 // matching: the byte offset index * 3 from the start row; IDO multiplies it (multu)
-                // where D_800BE510[start + index] would be shift-scaled
+                // where D_800BE510[0][start + index] would be shift-scaled
                 if (isProp == 0) {
-                    base = &D_800BE510[0][index * 3];
+                    base = &D_800BE510[0][0][index * 3];
                 } else {
-                    base = &D_800BE510[D_800BE524[propIndex]][index * 3];
+                    base = &D_800BE510[0][D_800BE524[propIndex]][index * 3];
                 }
             } else {
                 base = D_800BE520[colorSet][i][j];

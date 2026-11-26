@@ -25,6 +25,9 @@ void func_150127B0(void);
 void func_15012C84(Vtx *arg0, u32 arg1);
 void func_15012ED8(Gfx *dl);
 void func_15012F90(void);
+extern u8 (*D_800BE510[4])[3]; // [0]: base RGB of every level vertex, then the props'; [i]: level model i's first vertex
+extern u8 (***D_800BE520)[3]; // [set][group][i]: base RGB of each color-group vertex
+extern u16 *D_800BE524;       // first D_800BE510[0] entry of each prop
 
 /* game_FECC0.c */
 Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 tScroll, s32 arg5, f32 roll);
