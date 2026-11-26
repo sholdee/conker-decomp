@@ -40,7 +40,14 @@ void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind) {
 
 /* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by func_151DC97C
  * (D_8008A4E8[0x5B]), preceded by a func_151DC6A0 burst when `burst` is set. */
-void func_151DC8BC(Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner, s32 kind) {
+void func_151DC8BC(pos, duration, burst, randomColors, owner, kind)
+    Vec3f *pos;
+    s32 duration;
+    u8 burst;
+    u8 randomColors;
+    u8 owner;
+    s32 kind;
+{
     ColorEmitterData data;
     ColorEmitter *emitter;
 

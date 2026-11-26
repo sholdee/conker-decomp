@@ -3245,7 +3245,9 @@ typedef struct {
 } ColorEmitter;
 
 void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind);
-void func_151DC8BC(Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner, s32 kind);
+/* (Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner, s32 kind); declared without a prototype:
+ * game_50D80.c passes an s32 owner without narrowing it */
+void func_151DC8BC();
 void func_151DC97C(ColorEmitter *emitter);
 
 /* game_20A290.c */
