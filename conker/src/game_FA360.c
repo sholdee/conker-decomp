@@ -2,6 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Five yaw angles (radians) around which the bursts appear. */
+typedef struct {
+    f32 yaw[5];
+} BurstYaws;
+
+/* This file's .data. */
+DriftBurstEmitter *D_80088870 = NULL; /* the burst emitter whose rate func_150CDB6C sets */
+static BurstYaws D_80088874 = { { 0.19999999f, 1.3f, 2.3f, 3.3999999f, 5.4f } };
 
 /* Spawns a tumbling, swaying quad that drifts down from spawn->pos. */
 DriftQuad *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
@@ -157,13 +165,6 @@ Vtx_t *func_150CD59C(DriftQuad *effect, s16 bufferIndex) {
     return result;
 }
 
-/* Five yaw angles (radians) around which the bursts appear. */
-typedef struct {
-    f32 yaw[5];
-} BurstYaws;
-
-extern BurstYaws D_80088874;
-
 /*
  * Emitter update: accumulates rate over time and, for each whole unit, spawns a burst at a random distance
  * along one of the D_80088874 yaws, but only if that yaw is within pi/8 of the current camera's heading.
@@ -223,8 +224,6 @@ void func_150CD7F8(DriftBurstEmitter *emitter) {
         } while (timer->pending > 1.0f);
     }
 }
-
-extern DriftBurstEmitter *D_80088870;
 
 /* Sets the burst emitter's rate from a 0..255 intensity. */
 void func_150CDB6C(s32 intensity) {
