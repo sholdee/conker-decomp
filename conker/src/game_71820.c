@@ -4,7 +4,7 @@
  * This file's .bss, in the original order. IDO lays out .bss in an order that depends on the declarations
  * before it, so it is defined before functions.h and variables.h.
  */
-f32 D_800CBD90; // ledge probe results (func_150AB1F0 family in game_D9894.s)
+f32 D_800CBD90; // ledge probe results (func_150AB1F0 family in game_D86A0.s)
 f32 D_800CBD94;
 f32 D_800CBD98;
 s32 D_800CBD9C; // cleared by func_15044370

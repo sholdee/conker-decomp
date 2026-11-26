@@ -144,7 +144,7 @@ void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f3
                    f32 zUp);
 void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp);
-extern f32 D_800CBD90; // ledge probe results (written by game_D9894.s)
+extern f32 D_800CBD90; // ledge probe results (written by func_150AC3E4, game_D86A0.s)
 extern f32 D_800CBD94;
 extern f32 D_800CBD98;
 extern u16 D_800CBDA0[25]; // per movement_obj: 1 + the world object it touches, 0 if none
@@ -315,8 +315,6 @@ s32 func_150AAD98(Tri3f tri);
 
 /* game_D86A0.s */
 s32 func_150AB1F0(f32 x, f32 y, f32 z, Actor *actor, s32 arg4);
-
-/* game_D9894.s */
 void func_150AC3E4(f32 x, f32 y, f32 z, Actor *actor, s32 arg4);
 
 /* game_D9E70.s: casts the ray from (x, y, z) along (dx, dy, dz), up to maxDist when it is not 0. Each
@@ -329,8 +327,6 @@ void func_150AD770(void);
 
 /* game_DAC30.s */
 f32 func_150AD780(f32 x);
-
-/* game_DAC3C.s */
 f32 func_150AD78C(f32 x);
 
 /* game_DAD60.s: out = a x b */
