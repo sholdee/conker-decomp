@@ -1,6 +1,22 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/prop.h describes it. */
+u8 D_800DDE50;
+u8 D_800DDE54[4];
+s32 D_800DDE58; /* not referenced */
+WaveSample *D_800DDE60[8];
+
 #include "functions.h"
 #include "variables.h"
+
+/* The static parameters of each wave chain (game_362B0 starts a chain with one of them); scale is 1 / minZ. */
+WavePreset D_8008D050[4] = {
+    { -5.0f, 0.9200000167f, -0.001488095266f, -672, 209, 29, 0, 3136, -50, 0 },
+    { -5.0f, 0.9200000167f, -0.001488095266f, -672, 209, 118, 1, 3136, -50, 0 },
+    { -23.70000076f, 0.9700000286f, -0.0004222973075f, -2368, 375, 270, 0, 0, -64, 0 },
+    { -23.70000076f, 0.9700000286f, -0.0004222973075f, -2368, 375, 270, 1, 0, -64, 0 },
+};
 
 
 /*

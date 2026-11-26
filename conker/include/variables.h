@@ -87,7 +87,6 @@ extern u8   D_8008CD00;
 extern s32 D_8008CEB4; /* axis D_800DDD18 is sorted along: 0 = x, else z */
 extern f32 *D_8008CFFC[]; // per LevelHeader.unk10: sun position (game_1AB530 FLARE_SUN)
 
-extern WavePreset D_8008D050[]; // static parameters of each wave spring chain
 extern Vec3f * D_8008FC8C[];
 extern u8 * D_8008FC94[];
 extern u8 (*D_8008FCD0[])(void); // texture id pickers by effect kind (game_2062D0)
@@ -455,9 +454,6 @@ extern u8   D_800DDE40; // nonzero: iris driven by the cutscene tracks
 extern f32 * D_800DDE44; // closure, percent
 extern f32 * D_800DDE48; // hole x, percent of the view width
 extern f32 * D_800DDE4C; // hole y, percent of the view height
-extern u8   D_800DDE50;
-extern u8 D_800DDE54[];
-extern WaveSample *D_800DDE60[]; // samples of each active wave chain (40 each)
 extern EffectModelSlot D_800DDE80[11];
 
 extern u8 D_800DF0E0;

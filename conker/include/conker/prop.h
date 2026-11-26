@@ -342,6 +342,10 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
 void func_15177A94(void);
 
 /* game_1AFC80.c */
+extern u8 D_800DDE50;                /* active wave chains */
+extern u8 D_800DDE54[4];             /* per chain: its D_8008D050 preset */
+extern WaveSample *D_800DDE60[8];    /* samples of each active wave chain (40 each) */
+extern WavePreset D_8008D050[4];     /* static parameters of each wave spring chain */
 void func_151827D0(void);
 void func_15182C5C(WorldObject *prop);
 f32 func_15182F58(s32 dist, s32 chain);
