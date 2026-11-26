@@ -72,7 +72,7 @@ SightExtension *sight_spawnExtension(SightBeamObject *owner, Vec3f *start, Vec3f
 void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, ZoneNode *zone,
                    u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8);
 void sight_destroyBeam(SightBeamObject *obj);
-void func_151C95D8(SightBeamObject *obj);
+void sight_freeBeam(SightBeamObject *obj);
 s32 sight_isExtensionOn(SightExtension *effect, s32 arg1);
 void sight_sendBeamCommand(s32 command, TriggerZone *source);
 void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2);

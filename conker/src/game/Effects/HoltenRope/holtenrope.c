@@ -740,7 +740,7 @@ void rope_destroyEffect(HoltenRopeEffect *effect) {
     effect_defaultFree(&effect->header);
 }
 
-void func_151B4C98(HoltenRopeEffect *effect) {
+void rope_freeEffect(HoltenRopeEffect *effect) {
     rope_cleanupEffect(effect);
     effect_defaultFree(&effect->header);
 }

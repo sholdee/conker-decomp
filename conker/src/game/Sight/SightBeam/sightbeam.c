@@ -787,7 +787,7 @@ void sight_destroyBeam(SightBeamObject *obj) {
 }
 
 /* Same as sight_destroyBeam, but finishes with particle_freeQuadParticleDefault. */
-void func_151C95D8(SightBeamObject *obj) {
+void sight_freeBeam(SightBeamObject *obj) {
     // matching: one variable first holds the object, then its state (as IDO allocated it)
     SightBeamState *state;
     void *part;

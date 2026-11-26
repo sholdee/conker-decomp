@@ -7007,3 +7007,5 @@ level_spawnStageZone = 0x15011D60; // type:func
 level_spawnObjBurst = 0x1500EE18; // type:func
 level_spawnFlatSprite = 0x1500F290; // type:func
 level_initPipeBurstPoints = 0x150124A0; // type:func
+sight_freeBeam = 0x151C95D8; // type:func
+rope_freeEffect = 0x151B4C98; // type:func

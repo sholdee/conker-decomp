@@ -5408,7 +5408,7 @@ rope_drawStyleTinted	0x151B4A14	356	game	c		build/src/game/Effects/HoltenRope/ho
 rope_spaceFixedX	0x151B4B78	164	game	c		build/src/game/Effects/HoltenRope/holtenrope.c.o
 rope_cleanupEffect	0x151B4C1C	80	game	c		build/src/game/Effects/HoltenRope/holtenrope.c.o
 rope_destroyEffect	0x151B4C6C	44	game	c		build/src/game/Effects/HoltenRope/holtenrope.c.o
-func_151B4C98	0x151B4C98	56	game	c		build/src/game/Effects/HoltenRope/holtenrope.c.o
+rope_freeEffect	0x151B4C98	56	game	c		build/src/game/Effects/HoltenRope/holtenrope.c.o
 func_151B4CD0	0x151B4CD0	380	game	c		build/src/game/Effects/BloodEmitters/bloodemitters.c.o
 func_151B4E4C	0x151B4E4C	88	game	c		build/src/game/Effects/BloodEmitters/bloodemitters.c.o
 func_151B4EA4	0x151B4EA4	316	game	c		build/src/game/Effects/BloodEmitters/bloodemitters.c.o
@@ -5590,7 +5590,7 @@ sight_breakBeam	0x151C899C	1584	game	c		build/src/game/Sight/SightBeam/sightbeam
 sight_spawnExtension	0x151C8FCC	460	game	c		build/src/game/Sight/SightBeam/sightbeam.c.o
 sight_spawnEmitter	0x151C9198	828	game	c		build/src/game/Sight/SightBeam/sightbeam.c.o
 sight_destroyBeam	0x151C94D4	260	game	c		build/src/game/Sight/SightBeam/sightbeam.c.o
-func_151C95D8	0x151C95D8	260	game	c		build/src/game/Sight/SightBeam/sightbeam.c.o
+sight_freeBeam	0x151C95D8	260	game	c		build/src/game/Sight/SightBeam/sightbeam.c.o
 sight_isExtensionOn	0x151C96DC	48	game	c		build/src/game/Sight/SightBeam/sightbeam.c.o
 sight_sendBeamCommand	0x151C970C	52	game	c		build/src/game/Sight/SightBeam/sightbeam.c.o
 sight_explodeAtActor	0x151C9740	896	game	c		build/src/game/Sight/SightBeam/sightbeam.c.o

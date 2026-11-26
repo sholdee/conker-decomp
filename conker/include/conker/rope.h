@@ -240,6 +240,6 @@ s32 rope_drawStyleTinted(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1, s32 *pr
 s32 rope_spaceFixedX(HoltenRopeEffect *effect);
 void rope_cleanupEffect(HoltenRopeEffect *effect);
 void rope_destroyEffect(HoltenRopeEffect *effect);
-void func_151B4C98(HoltenRopeEffect *effect);
+void rope_freeEffect(HoltenRopeEffect *effect);
 
 #endif

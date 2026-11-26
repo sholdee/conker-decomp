@@ -89,7 +89,7 @@ static void (*gQuadParticleDestroyFuncs[])() = {
     beam_destroyAimed, effect_destroyBurstSpark, beam_destroyModelBeam, effect_destroyZoneEmitter, effect_destroyActorBeam, particle_destroyQuadParticleDefault,
 };
 static void (*gQuadParticleFreeFuncs[])() = {
-    particle_freeQuadParticleDefault, particle_freeRayBeam, particle_freeBeamHitFx, flare_freeGlow, particle_freeQuadParticleDefault, particle_freeQuadParticleDefault, func_151C95D8,
+    particle_freeQuadParticleDefault, particle_freeRayBeam, particle_freeBeamHitFx, flare_freeGlow, particle_freeQuadParticleDefault, particle_freeQuadParticleDefault, sight_freeBeam,
     beam_freeAimed, effect_freeBurstSpark, beam_freeModelBeam, effect_freeZoneEmitter, effect_freeActorBeam, particle_freeQuadParticleDefault,
 };
 /* Event handler of a sprite (particle_onQuadSpriteEvent). */

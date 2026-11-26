@@ -138,7 +138,7 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  48 */ { NULL, rope_updateRider, NULL, NULL, NULL, NULL, NULL, rope_riderMessage, NULL, NULL, NULL, NULL, -1 },
     /*  49 */ { effect_updateRingEffect, NULL, effect_drawRingEffect, NULL, gRingRenderSetupDl, NULL, NULL, NULL, NULL, gRingRenderResetDl, NULL, NULL, 1 },
     /*  50 */ { sprite_updateActorTracker, NULL, NULL, NULL, NULL, NULL, NULL, sprite_actorTrackerMessage, NULL, NULL, sprite_destroyActorTracker, sprite_freeActorTracker, -1 },
-    /*  51 */ { rope_updateEffect, NULL, rope_drawEffect, NULL, gRopeRenderSetupDl, NULL, NULL, rope_effectMessage, NULL, gRopeRenderResetDl, rope_destroyEffect, func_151B4C98, 1 },
+    /*  51 */ { rope_updateEffect, NULL, rope_drawEffect, NULL, gRopeRenderSetupDl, NULL, NULL, rope_effectMessage, NULL, gRopeRenderResetDl, rope_destroyEffect, rope_freeEffect, 1 },
     /*  52 */ { colourfb_updateScreenEffect, NULL, NULL, NULL, NULL, NULL, NULL, colourfb_dispatchMessage, NULL, NULL, NULL, NULL, -1 },
     /*  53 */ { light_updateEffect, NULL, NULL, NULL, NULL, NULL, NULL, light_handleEffectEvent, NULL, NULL, light_destroyEffect, light_freeEffect, -1 },
     /*  54 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
