@@ -155,7 +155,7 @@ void func_1509B810(IdRecord *node) {
 /* Loads task `id` (via func_1502B5C8) and sets its LoadSection to the current level level. */
 IdRecord *func_1509B8FC(s16 id) {
     IdRecord *node;
-    s32 size;
+    u32 size;
 
     node = func_1502B5C8(&size, 2, 20, id);
     node->TaskID |= id;

@@ -173,7 +173,7 @@ s32 func_1509CF28(s32 arg0, s32 *countOut) {
     ResourceSlot *table;
     u32 i;
     s32 done;
-    u32 count;
+    s32 count;
     RelocPair *reloc;
     u32 flags;
     s32 pad[2]; // matching: frame size
@@ -333,25 +333,25 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             {
                 s32 pad[2]; // matching: unused, keeps the frame size and floor's stack offset
                 CollisionHit floor;
-                f32 pos[3];
+                Vec3f pos;
 
                 floor.height = -10000.0f;
                 floor.material = 0;
                 floor.flags = 0;
                 floor.source = 0;
                 floor.surface = NULL;
-                pos[0] = cmd->arg.w;
-                pos[1] = 20000.0f;
-                pos[2] = cmd->a[0].w;
-                if (func_15046C80(pos, 0, floor.height, &floor) != 0) {
+                pos.x = cmd->arg.w;
+                pos.y = 20000.0f;
+                pos.z = cmd->a[0].w;
+                if (func_15046C80(&pos, 0, floor.height, &floor) != 0) {
                     { // matching: -g3 block keeps the float stores out of the branch delay slot
-                        f32 dir[3];
+                        Vec3f dir;
 
-                        pos[1] = floor.height;
-                        dir[0] = 0.0f;
-                        dir[2] = 0.0f;
-                        dir[1] = -1.0f;
-                        func_151BFE84(&floor.tri, pos, dir, 1, 0xFF, 1);
+                        pos.y = floor.height;
+                        dir.x = 0.0f;
+                        dir.z = 0.0f;
+                        dir.y = -1.0f;
+                        func_151BFE84(&floor.tri, &pos, &dir, 1, 0xFF, 1);
                     }
                 }
             }
@@ -362,14 +362,15 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             break;
         case 33:
             {
-                f32 pos[5];
+                s32 pad[2]; // matching: frame size
+                Vec3f pos;
 
                 obj = func_1505EEF4(CMD_OBJECT_ID(cmd->arg));
                 if (obj != NULL) {
-                    pos[0] = obj->xpos;
-                    pos[1] = obj->ypos + 50.0f;
-                    pos[2] = obj->zpos;
-                    func_151C0098(pos, obj, 1, 0xFF, 1);
+                    pos.x = obj->xpos;
+                    pos.y = obj->ypos + 50.0f;
+                    pos.z = obj->zpos;
+                    func_151C0098(&pos, obj, 1, 0xFF, 1);
                 }
             }
             break;
@@ -435,13 +436,14 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             break;
         case 7:
             {
-                f32 pos[5];
+                s32 pad[2]; // matching: frame size
+                Vec3f pos;
 
                 if (cmd->arg.w == 999) {
-                    pos[0] = cmd->a[0].w;
-                    pos[1] = cmd->a[1].w;
-                    pos[2] = cmd->a[2].w;
-                    func_150DECC0(pos, 0xFF, 1);
+                    pos.x = cmd->a[0].w;
+                    pos.y = cmd->a[1].w;
+                    pos.z = cmd->a[2].w;
+                    func_150DECC0(&pos, 0xFF, 1);
                 } else {
                     func_150E81A8(cmd->arg.w & 0xFF, 0xFF, 1);
                 }

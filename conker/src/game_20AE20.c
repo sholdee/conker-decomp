@@ -591,7 +591,7 @@ void func_151DE8F0(void) {
                 }
             }
             func_1504332C(0xFF, 0x32, 0x32, alpha - (alpha >> 2));
-            func_15042D94(0x94, 0xC0, 0x81, D_800E0BD8[0x8F]);
+            func_15042D94(0x94, 0xC0, 0x81, (char *)D_800E0BD8[0x8F]);
         }
     }
     camera_global_Cameras->Mode = 0x80000;
@@ -1038,7 +1038,7 @@ draw_rows: // matching: unused label splits the basic block for as1
         b = (D_8008FF08[color + 2] * shade) >> 8;
         func_1504332C(r, g, b, rowAlpha);
         if ((y >= 0x46) && (y < height + 0x50) && (pass == 0)) {
-            func_15042D94(0x94, y + 0xF, 0x81, D_800E0B88[list[i] + offset]);
+            func_15042D94(0x94, y + 0xF, 0x81, (char *)D_800E0B88[list[i] + offset]);
         }
         y += 11;
         i++;
@@ -2558,7 +2558,7 @@ void func_151E3344(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fa
             func_1504332C(0xFF, 0xFF, 0xFF, drawAlpha);
             func_150432FC(x, y);
             if (D_800AB64C[descOff] >= 0) {
-                func_15042E3C(D_800E0BD8[D_800AB64C[descOff]]);
+                func_15042E3C((char *)D_800E0BD8[D_800AB64C[descOff]]);
             } else if (D_800AB64C[descOff] < -1) {
                 func_150432FC(x, y + 9);
                 func_15042E3C(D_800AB89C, -D_800AB64C[descOff]);
@@ -2581,7 +2581,7 @@ void func_151E3344(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fa
             } else {
                 switch (kind) {
                     case 0x7F:
-                        func_15042E3C(D_800E0BD8[value != 0]);
+                        func_15042E3C((char *)D_800E0BD8[value != 0]);
                         break;
                     case 0x7E:
                         func_15042E3C(D_800AB8A4, value);
@@ -2607,11 +2607,11 @@ void func_151E3344(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fa
                         if (value >= 3) {
                             func_15042E3C(D_800AB8BC, value, D_800E0BD8[0x72]);
                         } else {
-                            func_15042E3C(D_800E0BD8[0x73]);
+                            func_15042E3C((char *)D_800E0BD8[0x73]);
                         }
                         break;
                     default:
-                        func_15042E3C(D_800E0BD8[D_800AB64C[descOff + 1 + value]]);
+                        func_15042E3C((char *)D_800E0BD8[D_800AB64C[descOff + 1 + value]]);
                         break;
                 }
             }
@@ -3684,7 +3684,7 @@ void func_151E6964(s32 bank) {
     u8 *cursor;
     u8 *end;
     s32 count;
-    s32 size;
+    u32 size;
 
     if (D_800E0BE0[10] != D_800BEAAB) {
         D_800BEAAB = D_800E0BE0[10];
