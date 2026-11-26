@@ -2,18 +2,46 @@
 #include "functions.h"
 #include "variables.h"
 
+/* not referenced */
+static const u8 D_800A6DF0[16] = {
+    0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0xFF, 0x00,
+};
+
+/* The intensity ramps of func_1516E8CC: descending thresholds and the colour at each. */
+static const u8 D_800A6E00[12] = { 255, 40, 35, 30, 25, 20, 15, 0, 255, 40, 0, 0 };
+static const u8 D_800A6E0C[12][3] = {
+    { 0xFF, 0xFF, 0x00 }, { 0xFF, 0xFF, 0x00 }, { 0xFF, 0x80, 0x00 }, { 0xFF, 0x80, 0x00 },
+    { 0xFF, 0x00, 0x00 }, { 0xFF, 0x00, 0x00 }, { 0xC0, 0x00, 0x00 }, { 0x80, 0x00, 0x00 },
+    { 0x5A, 0x5A, 0x5A }, { 0x5A, 0x5A, 0x5A }, { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x00 },
+};
+
+/* Emission segments of func_1516DB90 by emitter->x: from (x, y, z), to (x, y, z), random z mask. */
+static const s16 D_800A6E30[6][7] = {
+    { 0, 0, 34, 0, 0, 96, 0 },
+    { 0, 0, 190, 0, 0, 0, 0 },
+    { 0, 10, 20, 0, 10, 120, 0 },
+    { 0, 0, -20, 0, 0, -128, 0 },
+    { 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 50, -30, 0, -260, 390, 127 },
+};
+
+/* Render setup and teardown of the style particles (object types 18 and 103 of D_8008B4A8). */
+Gfx D_8008CB70[] = {
+    gsSPDisplayList(D_800873D0),
+    gsDPSetCombineLERP(PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0,
+                       PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0),
+    gsDPSetRenderMode(G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2),
+    gsSPEndDisplayList(),
+};
+Gfx D_8008CB90[] = {
+    gsSPDisplayList(D_80087408),
+    gsSPEndDisplayList(),
+};
 
 /* u8 tables indexed by a particle style */
 struct StyleTable {
     u8 v[11];
 };
-
-extern struct StyleTable D_8008CBC4;
-extern struct StyleTable D_8008CBD0;
-extern struct StyleTable D_8008CBDC;
-extern struct StyleTable D_8008CBE8;
-
-
 
 void func_1516D400(void) {
     s32 i;
@@ -79,7 +107,12 @@ void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
     }
 }
 
-extern s32 (*D_8008CBA0[])(StyleParticle *);
+/* Update handlers by StyleParticle.kind (1 frees the particle), declared without a prototype: two of them
+ * take other particle types. */
+static s32 (*D_8008CBA0[])() = {
+    func_1516E8CC, func_1516ECAC, func_1516F024, func_1516F9C4, func_1516FBCC,
+    func_1516FD50, func_151707E0, func_1516A648, func_150BF0F4,
+};
 
 void func_1516D678(StyleParticle *particle) {
     s32 value;
@@ -252,7 +285,6 @@ void func_1516D99C(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
 }
 
 
-extern s16 D_800A6E30[][7];
 
 
 void func_1516DB90(SpriteEmitter *arg0) {
@@ -492,9 +524,6 @@ void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4) {
         0, 0, 0, 0, 0, arg3, arg4);
 }
 
-extern u8 D_800A6E00[];
-extern u8 D_800A6E0C[][3];
-
 s32 func_1516E8CC(StyleParticle *particle) {
     s32 alpha;
     s32 intensity;
@@ -633,18 +662,13 @@ void func_1516EED4(s32 object, s32 threshold, u8 arg2, s32 arg3) {
 s32 func_1516F024(StyleParticle *particle) {
     u8 pad[16]; // matching: the original frame has 16 unused bytes here
     s32 style;
-    struct StyleTable damping;
-    struct StyleTable growth;
-    struct StyleTable maxAlpha;
-    struct StyleTable fadeRate;
+    struct StyleTable damping = { { 250, 250, 235, 235, 250, 250, 220, 210, 210, 220, 210 } };
+    struct StyleTable growth = { { 16, 7, 7, 7, 20, 8, 40, 40, 40, 20, 20 } };
+    struct StyleTable maxAlpha = { { 255, 255, 255, 255, 190, 170, 120, 200, 60, 120, 200 } };
+    struct StyleTable fadeRate = { { 8, 2, 10, 1, 8, 10, 255, 10, 2, 255, 10 } };
     s32 alpha;
     s32 limit;
     s32 lifetime;
-
-    damping = D_8008CBC4;
-    growth = D_8008CBD0;
-    maxAlpha = D_8008CBDC;
-    fadeRate = D_8008CBE8;
 
     lifetime = particle->lifetime;
     style = particle->u.drift.unk2C;
@@ -1013,9 +1037,6 @@ void func_15170034(s32 flags, f32 *outX, f32 *outY, f32 *outZ) {
 
 struct Vec3fTable { f32 v[3]; };
 struct RGBTable { u8 c[3][3]; };
-extern struct Vec3fTable D_8008CBF4;
-extern struct Vec3fTable D_8008CC00;
-extern struct RGBTable D_8008CC0C;
 
 void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8, s32 arg9) {
     s32 i;
@@ -1040,13 +1061,10 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type,
     s32 particleStyle;
     s32 pad; // matching: unused stack slot in the original frame
     s32 count;
-    struct Vec3fTable unused;
-    struct Vec3fTable velocityYRandoms;
-    struct RGBTable colors;
+    struct Vec3fTable unused = { { 143.0f, 30.0f, 30.0f } }; /* copied but never read, as in the original */
+    struct Vec3fTable velocityYRandoms = { { 571.0f, 130.0f, 130.0f } };
+    struct RGBTable colors = { { { 0x86, 0x6A, 0x3C }, { 0xC8, 0xBE, 0xB4 }, { 0xFF, 0xD2, 0x80 } } };
 
-    unused = D_8008CBF4; /* copied but never read, as in the original */
-    velocityYRandoms = D_8008CC00;
-    colors = D_8008CC0C;
     velocityYRandom = velocityYRandoms.v[type] * scale;
     sizeMin = 731.0f * scale;
     sizeRandom = 836.0f * scale;
