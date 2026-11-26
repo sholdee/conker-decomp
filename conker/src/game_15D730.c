@@ -17,7 +17,7 @@ extern IdList3 D_800A37F0;
 
 
 /* Allocates a particle of the given kind with dataSize bytes of per-particle data and copies desc into it. */
-SpriteParticle *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5) {
+void *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5) {
     SpriteParticle *particle;
     s32 type;
 
@@ -52,11 +52,11 @@ SpriteParticle *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground,
     return particle;
 }
 
-SpriteParticle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4) {
+void *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4) {
     return func_15130280(desc, kind, NULL, dataSize, arg3, arg4);
 }
 
-SpriteParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
+void *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
     return func_15130374(desc, kind, dataSize, 0xFF, 0);
 }
 

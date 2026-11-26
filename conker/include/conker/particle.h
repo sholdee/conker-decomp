@@ -1251,9 +1251,10 @@ void func_1510A870(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType);
 void func_1510A8CC(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType);
 
 /* game_15D730.c */
-SpriteParticle *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5);
-SpriteParticle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
-SpriteParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize);
+/* Each returns a SpriteParticle followed by dataSize bytes of its kind's data (the kind's own type). */
+void *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5);
+void *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
+void *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize);
 void func_151303EC(SpriteParticle *p);
 Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx);
 void func_1513137C(s16 *r, s16 *g, s16 *b, s16 *a, SpriteParticle *p);
