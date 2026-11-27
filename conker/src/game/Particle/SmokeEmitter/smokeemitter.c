@@ -36,10 +36,9 @@ void particle_hitPlayerOnObjectContact(s32 idA, s32 idB) {
     }
 }
 
-/* TriggerZone handler: trail_spawnNearCamera for obj, probing from the zone's top (y + ySize, unk2 + unk8) down to
- * its base (y, unk2). */
-void particle_spawnZoneGroundFxNearCamera(void *obj, Range150AF2E0 *range) {
-    trail_spawnNearCamera(obj, range->unk2 + range->unk8, range->unk2);
+/* TriggerZone handler: trail_spawnNearCamera for obj, probing from the zone's top (y + ySize) down to its base (y). */
+void particle_spawnZoneGroundFxNearCamera(void *obj, TriggerZone *range) {
+    trail_spawnNearCamera(obj, range->y + range->ySize, range->y);
 }
 
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of gFrameDelta and spawns one
@@ -135,35 +134,23 @@ void particle_drawGreyscaleScreen(void *effect, u8 *framebuffer) {
     colourfb_toGreyscale(framebuffer, framebuffer + 0x1ECC0);
 }
 
-typedef struct GameDC6B0SmokeMotion {
-    f32 x, y;
-    f32 phase; /* random in [0, 2pi) */
-    f32 unkC;
-} GameDC6B0SmokeMotion;
-
-/* A sprite created by sprite_newScreenSprite; the puffs carry their motion at 0x70. */
-typedef struct {
-    u8 pad0[0x70];
-    GameDC6B0SmokeMotion motion;
-} GameDC6B0SmokeSprite;
-
 
 /* Counts down the source's two timers and, when each expires, spawns a moving puff sprite or a
  * static spark sprite (lifetime capped at the source's maxLifetime) and restarts it randomly. */
 void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
-    GameDC6B0SmokeSprite *sprite;
+    Obj150AFBF4 *sprite;
     ScreenSpriteInfo puff;
-    GameDC6B0SmokeMotion motion;
+    TimeOscillator motion;
     GameDC6B0SmokeTimers *timers;
     ScreenSpriteInfo spark;
 
     timers = &source->timers;
     timers->puff -= gFrameTicks;
     if (timers->puff < 0) {
-        motion.x = math_randomFloat() * 280.0f + -140.0f;
-        motion.y = math_randomFloat() * 50.0f;
-        motion.phase = 2.0f * (math_randomFloat() * 3.141592741f);
-        motion.unkC = math_randomFloat() * 0.2680000067f;
+        motion.base = math_randomFloat() * 280.0f + -140.0f;
+        motion.amplitude = math_randomFloat() * 50.0f;
+        motion.phase = 2.0f * (math_randomFloat() * 3.141592741f); /* random in [0, 2pi) */
+        motion.rate = math_randomFloat() * 0.2680000067f;
         puff.x = 0.0f;
         puff.y = 0.0f;
         math_randomFloat(); /* a random value the original draws and discards */
@@ -199,7 +186,7 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
         puff.viewport = 0;
         sprite = sprite_newScreenSprite(&puff, 6, 0, 0, 0x10, source->base.header.owner, source->base.header.kind);
         if (sprite != NULL) {
-            memcpy(&sprite->motion, &motion, sizeof(motion));
+            memcpy(&sprite->osc, &motion, sizeof(motion));
         }
         timers->puff = math_random() % 41U + 45;
     }
@@ -241,13 +228,13 @@ void particle_updateSmokeSource(GameDC6B0SmokeSource *source) {
     }
 }
 
-/* Advances the oscillator at 0x70 (math_wrapRadians wraps the phase) and writes its value to unk10. */
+/* Advances the oscillator at 0x70 (math_wrapRadians wraps the phase) and writes its value to the sprite's x. */
 s32 particle_updateSineOscillator(Obj150AFBF4 *obj) {
     TimeOscillator *osc = &obj->osc;
 
     osc->phase = osc->phase + osc->rate * gFrameDelta;
     osc->phase = math_wrapRadians(osc->phase);
-    obj->unk10 = sinf(osc->phase) * osc->amplitude + osc->base;
+    obj->sprite.info.x = sinf(osc->phase) * osc->amplitude + osc->base;
     return 1;
 }
 
@@ -499,16 +486,16 @@ void particle_spawnObjDebrisBurst(Actor *obj, u8 owner, s32 list) {
  * Returns 0 if there is no such object. */
 s32 particle_initLightSwingOnObject(id, out)
     u8 id;
-    struct Obj150B060C *out;
+    LightSwing *out;
 {
     out->object = gfx_findObjectById(id);
     if (out->object == NULL) {
         return 0;
     }
-    out->unk0 = -150.0f;
-    out->unk4 = 4.5f;
-    out->x = out->object->x;
-    out->y = out->object->y;
-    out->z = out->object->z;
+    out->offset = -150.0f;
+    out->scale = 4.5f;
+    out->pivot.x = out->object->x;
+    out->pivot.y = out->object->y;
+    out->pivot.z = out->object->z;
     return 1;
 }

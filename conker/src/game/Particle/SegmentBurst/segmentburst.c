@@ -86,16 +86,16 @@ void particle_attachBloodStrip(Actor *owner, s32 fxOwner, s32 fxList) {
 }
 
 /* Sets the emitter's velocity scale. */
-s32 particle_sampleSegmentPower(SegmentEmitter *emitter) {
-    emitter->scale = 0.40200001f;
+s32 particle_sampleSegmentPower(BloodStrip *emitter) {
+    emitter->power = 0.40200001f;
     return TRUE;
 }
 
 /*
  * Spawns one particle on the segment `from` -> `to`, at fraction `t` along it, moving with velocity
- * (to - from) * emitter->scale. Skipped while the owner is in water or moving slower than 8.1.
+ * (to - from) * emitter->power. Skipped while the owner is in water or moving slower than 8.1.
  */
-void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, SegmentEmitter *emitter) {
+void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, BloodStrip *emitter) {
     EffectParams params;
     EffectMotion motion;
     const Vec3f *ownerMotion;
@@ -148,9 +148,9 @@ void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB
     params.ownerId = emitter->owner->unique_id;
     params.lightMode = 1;
     params.pos = *from;
-    motion.vel.x = (to->x - from->x) * emitter->scale;
-    motion.vel.y = (to->y - from->y) * emitter->scale;
-    motion.vel.z = (to->z - from->z) * emitter->scale;
+    motion.vel.x = (to->x - from->x) * emitter->power;
+    motion.vel.y = (to->y - from->y) * emitter->power;
+    motion.vel.z = (to->z - from->z) * emitter->power;
     params.pos.x += motion.vel.x * t;
     params.pos.y += motion.vel.y * t;
     params.pos.z += motion.vel.z * t;
@@ -166,5 +166,5 @@ void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB
     params.fadeStart = 25;
     params.fadeRate = 10;
     motion.flags = 0xF;
-    effect_newMovingModelEffect(&params, &motion, 0, (math_randomFloat() * 1814.0f) * 0.001000000047f, 0, 0, 0, emitter->unkC, emitter->unk1);
+    effect_newMovingModelEffect(&params, &motion, 0, (math_randomFloat() * 1814.0f) * 0.001000000047f, 0, 0, 0, emitter->header.owner, emitter->header.kind);
 }

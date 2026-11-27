@@ -6,6 +6,7 @@
 #include "conker/beam.h"
 #include "conker/camera.h"
 #include "conker/collision.h"
+#include "conker/sprite.h"
 
 /*
  * Subsystem "particle": prototypes of the non-static functions and declarations of the globals
@@ -143,13 +144,6 @@ void func_1500D8C8(TriggerZone *region, f32 density);
 void particle_spawnAreaLargeSprites(TriggerZone *region, f32 density);
 
 /* game/Particle/SmokeEmitter/smokeemitter.c */
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 pad4[2];
-    s16 unk8;
-} Range150AF2E0;
-
 /* Per-effect data of the particle_updateSmokeEmitter emitter. */
 typedef struct {
     /* 0x00 */ Vec3f pos;
@@ -180,10 +174,9 @@ typedef struct {
     /* 0xC */ f32 rate; /* per unit of gFrameDelta */
 } TimeOscillator;
 
+/* A sprite_newScreenSprite sprite that carries a TimeOscillator at 0x70 (the puffs of particle_updateSmokeSource). */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 pad14[0x5C];
+    /* 0x00 */ ScreenSprite sprite;
     /* 0x70 */ TimeOscillator osc;
 } Obj150AFBF4;
 
@@ -193,17 +186,8 @@ typedef struct {
     /* 0x170 */ EffectObj *trail; /* ribbon effect (trail_spawnRibbon) following the projectile */
 } GameDC6B0Projectile;
 
-struct Obj150B060C {
-    f32 unk0;
-    f32 unk4;
-    WorldObject *object;
-    f32 x; /* the object's position (WorldObject 0x10..0x14) */
-    f32 y;
-    f32 z;
-};
-
 void particle_hitPlayerOnObjectContact(s32 idA, s32 idB);
-void particle_spawnZoneGroundFxNearCamera(void *obj, Range150AF2E0 *range);
+void particle_spawnZoneGroundFxNearCamera(void *obj, TriggerZone *range);
 void particle_updateSmokeEmitter(SmokeEmitter *emitter);
 s32 particle_wobbleSmoke(SpriteParticle *particle, Vec3f *prevPos);
 void particle_startGreyscaleScreen(s16 lifetime, u8 owner, s32 list);
@@ -219,7 +203,7 @@ void particle_freeProjectileTrail(GameDC6B0Projectile *projectile);
 void particle_destroyTrailProjectile(GameDC6B0Projectile *projectile);
 void particle_freeTrailProjectile(GameDC6B0Projectile *projectile);
 void particle_spawnObjDebrisBurst(Actor *obj, u8 owner, s32 list);
-/* (u8 id, struct Obj150B060C *out); declared without a prototype: game/Lighting/LevelLights/levellights.c passes a third argument */
+/* (u8 id, LightSwing *out); declared without a prototype: game/Lighting/LevelLights/levellights.c passes a third argument */
 s32 particle_initLightSwingOnObject();
 
 /* game/Particle/PointEmitter/pointemitter.c */
@@ -2547,21 +2531,11 @@ void particle_onBoneSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType);
 
 /* game/Particle/SegmentBurst/segmentburst.c */
 /* Particle emitter that particle_sampleSegmentPower initialises and particle_emitOnSegment spawns from. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ Actor *owner;
-    /* 0x20 */ u8 pad20[0x54];
-    /* 0x74 */ f32 scale; /* scales (to - from) into the spawn velocity */
-} SegmentEmitter;
 
 void particle_spawnBoneModelBurst(Actor *actor, u8 owner, s32 list);
 void particle_attachBloodStrip(Actor *owner, s32 fxOwner, s32 fxList);
-s32 particle_sampleSegmentPower(SegmentEmitter *emitter);
-void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, SegmentEmitter *emitter);
+s32 particle_sampleSegmentPower(BloodStrip *emitter);
+void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 velocityA, s32 velocityB, f32 t, BloodStrip *emitter);
 
 /* game/Particle/FastSpark/fastspark.c */
 /* Data of the spark emitter effect, stored at 0x28 in the effect object from effect_newTimedEffectNoDraw. */
