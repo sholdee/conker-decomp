@@ -1428,7 +1428,7 @@ s32 mp_aimBot(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, 
 }
 
 /*
- * Copies player's target to its state (unk129). Once its attackTimer passes the limit for
+ * Copies player's target to its state (mv->targetIndex). Once its attackTimer passes the limit for
  * this level and distance it is reset, with mp_sendPlayerCommand(player, 0x61, 0x2000) if the target
  * is in sight; while the timer is 0, unk12A is set at random.
  */
@@ -1450,7 +1450,7 @@ s32 mp_updateBotAttack(s32 player) {
     obj = &movement_obj[player];
     off = player * 4;
     target = (s32 *)(targets + off);
-    obj->mv->unk129 = *target;
+    obj->mv->targetIndex = *target;
     if (*target < 0) {
         return 0;
     }

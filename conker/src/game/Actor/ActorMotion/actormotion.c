@@ -4217,8 +4217,8 @@ void actor_runPlayerAction(Actor *actor, s32 buttons, s32 pressed, f32 height, s
     }
 
     state = actor->mv->context_b & ~0x80;
-    if ((actor->mv->unk7C != 0) && (state == 0)) {
-        state = actor->mv->unk7C;
+    if ((actor->mv->defaultContext != 0) && (state == 0)) {
+        state = actor->mv->defaultContext;
     }
 
     if ((level != LEVEL_W1_TRAINING) && (level != LEVEL_W1_TRAINING_CAVE) && (actor->mv->rt_context_b == 0) &&

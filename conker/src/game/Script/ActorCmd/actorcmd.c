@@ -317,7 +317,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x72:
         if (obj->mv != NULL) {
-            obj->mv->unk129 = cmd->a[0].w;
+            obj->mv->targetIndex = cmd->a[0].w;
         } else {
             obj->targetIndex = cmd->a[0].w;
         }
@@ -556,7 +556,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x3B:
         obj->mv->walk_attrib |= cmd->a[0].w;
         if (gScriptCmdWordCount == 4) {
-            obj->mv->unk34 = cmd->a[1].w;
+            obj->mv->lockAngle = cmd->a[1].w;
         }
         break;
     case 0x3C:
@@ -890,7 +890,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->radarColor = cmd->a[0].w + 1;
         break;
     case 0x7E:
-        obj->mv->unk7C = cmd->a[0].w;
+        obj->mv->defaultContext = cmd->a[0].w;
         break;
     case 0x7F:
         obj->listpos_ptr->flags = cmd->a[0].w;

@@ -390,10 +390,10 @@ void weapon_updateTank(Actor *obj) {
         }
         /* Gun aim. */
         if (movement_obj[viewer[0]].mv->bot != 0) {
-            if (obj->mv->unk129 >= 0) {
+            if (obj->mv->targetIndex >= 0) {
                 /* Lead the target: move it along its heading by speed * distance / 200 while aiming. */
                 f32 dirZ;
-                target = &movement_obj[obj->mv->unk129];
+                target = &movement_obj[obj->mv->targetIndex];
                 dx = target->xpos - obj->xpos;
                 score = target->zpos - obj->zpos;
                 lead = sqrtf(dx * dx + score * score) / 200.0f;

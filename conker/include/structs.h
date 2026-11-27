@@ -520,7 +520,7 @@ typedef struct {
     /* 0x030 */ s8  gpoint;
     /* 0x031 */ u8  prop;
     /* 0x032 */ u16 walk_attrib;
-    /* 0x034 */ u16 unk34;
+    /* 0x034 */ u16 lockAngle;   // walk_attrib & 2: the input angle snaps to this axis (binary angle)
     /* 0x036 */ u8  over_edge;
     /* 0x037 */ u8  dwalk;
     /* 0x038 */ s32 old_keys;
@@ -561,7 +561,7 @@ typedef struct {
     /* 0x079 */ u8  rt_context_z;
     /* 0x07A */ u8  cont_zone_ind;
     /* 0x07B */ u8  inst_context;
-    /* 0x07C */ u8  unk7C;
+    /* 0x07C */ u8  defaultContext; // the context used while context_b (without bit 0x80) is 0
     /* 0x07D */ u8  matrix_physics;
     /* 0x07E */ u16 unk7E;
     /* 0x080 */ s16 unk80;
@@ -604,7 +604,7 @@ typedef struct {
     /* 0x124 */ s16 deathTimer;      // countdown for death_State 2 and 7 (game/Actor/KillRespawn/killrespawn.c)
     /* 0x126 */ s16 deathTime;       // ticks since death_State left 0
     /* 0x128 */ u8  unk128;
-    /* 0x129 */ s8  unk129;
+    /* 0x129 */ s8  targetIndex;  // index into movement_obj, < 0 for none
     /* 0x12A */ s8  unk12A;
     /* 0x12B */ u8  pad12B;
     /* 0x12C */ u16 unk12C;

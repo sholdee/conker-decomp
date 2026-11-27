@@ -556,7 +556,7 @@ void func_150642AC(Actor *actor, s32 buttons, f32 height, s32 noPlay, s32 lockB)
                 actor->count5 = 0xFF;
                 actor->norun = 0xFF;
             }
-        } else if ((actor->mv->context_b == 0 && actor->mv->unk7C == 0) || actor->mv->transport == 2) {
+        } else if ((actor->mv->context_b == 0 && actor->mv->defaultContext == 0) || actor->mv->transport == 2) {
             if (level != LEVEL_WMP_MAIN_WAR && level != LEVEL_WMP_BEACH && level != LEVEL_WMP_BEACH_WAR && level != LEVEL_WMP_TUNNELS) {
                 anim = 0x33;
                 if (actor->mv->pissed_up != 0) {

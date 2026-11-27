@@ -1391,12 +1391,12 @@ void actor_updatePlayer(Actor *actor) {
             diff = 0;
             actor->mv->press_angle = moveAngle + D_800cc280;
             if (actor->mv->walk_attrib & 2) {
-                lockAngle = actor->mv->unk34;
+                lockAngle = actor->mv->lockAngle;
                 wantAngle = actor->mv->press_angle;
-                lockDiff = actor->mv->unk34 - wantAngle;
+                lockDiff = actor->mv->lockAngle - wantAngle;
                 if (!((lockDiff + 0x2000) & 0xC000)) {
-                    actor->mv->press_angle = actor->mv->unk34;
-                    lockAngle = actor->mv->unk34;
+                    actor->mv->press_angle = actor->mv->lockAngle;
+                    lockAngle = actor->mv->lockAngle;
                     wantAngle = actor->mv->press_angle;
                     lockDiff = lockAngle - wantAngle;
                 }
