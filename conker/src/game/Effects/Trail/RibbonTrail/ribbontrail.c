@@ -511,7 +511,7 @@ EffectObj *trail_spawnRibbon(void *args, u8 selector, s32 argsSize, u8 owner, s3
     spawn.life = 300;
     spawn.flags = 20;
     spawn.kind = 16;
-    spawn.unk14 = 2;
+    spawn.shapeKind = 2;
     obj = effect_newEffectObj(&spawn, argsSize + 0x10, sizeof(RibbonEffectPoint), 0, 14, 14, 0, 0, 0, owner, list);
     if (obj != NULL) {
         state = obj->userData;

@@ -314,7 +314,7 @@ s32 particle_spawnYawTumbler(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     spawn.sizeXZ = spawn.sizeY = (math_randomFloat() * 500.0f + 100.0f) * 0.001000000047f;
     spawn.variant = 0;
-    spawn.unk5C = 0;
+    spawn.zone = 0;
 
     spawn.alpha = (math_random() % 101U) + 155;
     spawn.updateFn = 3;
@@ -325,7 +325,7 @@ s32 particle_spawnYawTumbler(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 0;
-    spawn.unk6A = 2;
+    spawn.lightMode = 2;
     spawn.owner = 0;
     spawn.ownerId = 0;
     spawn.fadeStart = 0x20;

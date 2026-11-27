@@ -71,7 +71,7 @@ void trail_spawnPissTrail(Actor *actor) {
         spawn.life = 300;
         spawn.flags = 54;
         spawn.kind = 2;
-        spawn.unk14 = 5;
+        spawn.shapeKind = 5;
         spawn.material = 0;
 
         trail = effect_newEffectObj(&spawn, sizeof(PissTrailData), sizeof(PissTrailPoint), 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);

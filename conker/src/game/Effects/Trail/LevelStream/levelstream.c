@@ -132,7 +132,7 @@ LevelStream *trail_createStreamEmitter(source, textureIndex, id, owner, list)
     data.unk20 = 0.0f;
     data.textureIndex = textureIndex;
     template.material = 0;
-    template.unk14 = 7;
+    template.shapeKind = 7;
     emitter = effect_newEffectObj(&template, sizeof(StreamData), sizeof(StreamParticle), 9, 9, 9, 0, 0, 0, owner, list);
     if (emitter != NULL) {
         memcpy(emitter->data, &data, sizeof(data));
@@ -643,7 +643,7 @@ WaveTrail *trail_spawnWaveTrail(Actor *owner, DescParticleHead *anchor, u8 smoot
     spawn.life = 300;
     spawn.flags = 16;
     spawn.kind = 17;
-    spawn.unk14 = 3;
+    spawn.shapeKind = 3;
 
     info.owner = owner;
     if (owner != NULL) {
@@ -1121,14 +1121,14 @@ void trail_breakApart(Actor *obj, u8 owner, s32 list) {
             piece.scale.z = 1.0f;
             piece.rotVel.y = 0.0f;
             piece.variant = 0;
-            piece.unk5C = 0;
+            piece.zone = 0;
             piece.alpha = 0xFF;
             piece.update2Fn = 0;
             piece.floorType3Fn = 0;
             piece.wallHitFn = 0;
             piece.destroyFn = 0;
             piece.squashFn = 0;
-            piece.unk6A = 1;
+            piece.lightMode = 1;
             piece.owner = obj;
             piece.ownerId = obj->unique_id;
             piece.fadeStart = 12;
@@ -1779,7 +1779,7 @@ void trail_spawnTrackerTrail(TrackerEffect *effect) {
     req.spawn.life = 300;
     req.spawn.flags = 54;
     req.spawn.kind = 19;
-    req.spawn.unk14 = 6;
+    req.spawn.shapeKind = 6;
     req.spawn.material = 0;
     trail = effect_newEffectObj(&req.spawn, sizeof(TrackerTrailData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->base.header.owner, effect->base.header.kind);
     if (trail != NULL) {

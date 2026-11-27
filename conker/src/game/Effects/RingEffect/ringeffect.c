@@ -472,7 +472,7 @@ void effect_ringEmitBurst(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosi
     packet.gravity = (math_randomFloat() * 1533.0f + -2500.0f) * 0.001000000047f;
     packet.sizeXZ = packet.sizeY = (math_randomFloat() * 400.0f + 199.0f) * 0.001000000047f;
     packet.variant = 0;
-    packet.unk5C = 0;
+    packet.zone = 0;
     packet.alpha = (math_random() % 101U) + 155;
     packet.updateFn = 7;
     packet.update2Fn = 0;
@@ -482,7 +482,7 @@ void effect_ringEmitBurst(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosi
     packet.destroyFn = 0;
     packet.squashFn = 0;
     packet.matrixFn = 0;
-    packet.unk6A = 2;
+    packet.lightMode = 2;
     packet.owner = 0;
     packet.ownerId = 0;
     packet.fadeStart = 0x20;
@@ -781,7 +781,7 @@ s32 effect_spawnTumblingBurst(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 ori
 
     packet.sizeXZ = packet.sizeY = (math_randomFloat() * 601.0f + 200.0f) * 0.001000000047f;
     packet.variant = 0;
-    packet.unk5C = 0;
+    packet.zone = 0;
 
     packet.alpha = (math_random() % 76U) + 180;
     packet.updateFn = 4;
@@ -792,7 +792,7 @@ s32 effect_spawnTumblingBurst(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 ori
     packet.destroyFn = 0;
     packet.squashFn = 0;
     packet.matrixFn = 0;
-    packet.unk6A = 2;
+    packet.lightMode = 2;
     packet.owner = 0;
     packet.ownerId = 0;
     packet.fadeStart = 0x20;

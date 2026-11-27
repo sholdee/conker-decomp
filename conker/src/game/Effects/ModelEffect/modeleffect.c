@@ -64,16 +64,16 @@ ModelEffect *effect_newModelEffect(EffectParams *params, s32 anim, f32 speed, s3
         return NULL;
     }
     memcpy(&fx->params, params, sizeof(EffectParams));
-    anim_createInstance(fx->params.model, fx->params.unkC, &fx->displayLists, &fx->displayListCount, &fx->segment1,
+    anim_createInstance(fx->params.model, fx->params.bank, &fx->displayLists, &fx->displayListCount, &fx->segment1,
                   &fx->unk78, &fx->model);
     guMtxIdentF(fx->mtx[0]);
     guMtxIdentF(fx->mtx[1]);
     fx->model->matrices[0] = fx->mtx[0];
     fx->model->matrices[1] = fx->mtx[1];
     anim_play(fx->model, 1, anim, speed, 0.0f, 0);
-    fx->attach.model = attachArg;
-    fx->attach.unk1C = arg4;
-    fx->attach.unk4 = 0;
+    fx->attach.maxLights = attachArg;
+    fx->attach.lightMask = arg4;
+    fx->attach.lightCount = 0;
     for (i = 0; i < 4; i++) {
         fx->attach.handles[i] = NULL;
     }
@@ -205,7 +205,7 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
                             fx->params.render.alphaDither,
                         gEffectRenderModes[fx->params.render.renderMode].cycle1 | gEffectRenderModes[fx->params.render.renderMode].cycle2, &needSync);
     if (fx->params.flags & 2) {
-        gfx = math_emitPointLights(gfx, &fx->attach, fx->params.unk41, fx->params.owner, fx->params.ownerId, view,
+        gfx = math_emitPointLights(gfx, &fx->attach, fx->params.lightMode, fx->params.owner, fx->params.ownerId, view,
                             &fx->params.pos, (fx->params.flags & 4) ? 1 : 0, 0);
     }
     gDPPipeSync(gfx++);

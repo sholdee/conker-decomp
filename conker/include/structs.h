@@ -2759,7 +2759,7 @@ typedef struct EffectModelSlot {
     /* 0x04 */ Vtx *unk4;          // two vertex buffers (swarm flap frames, wave deformation)
     /* 0x08 */ Vtx *unk8;
     /* 0x0C */ Gfx *displayList;
-    /* 0x10 */ s16 *unk10;         // texture ids used by the display list (texture_resolveDl's usedOut)
+    /* 0x10 */ s16 *usedTextures;         // texture ids used by the display list (texture_resolveDl's usedOut)
 } EffectModelSlot; // size 0x14
 
 /* A camera's message ring buffer, gCameraMsgQueues[camera index] (game/Camera/MessageQueue/messagequeue; allocated in game/Camera/CameraViews/cameraviews).

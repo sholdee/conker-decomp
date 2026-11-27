@@ -68,8 +68,8 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 owner, s32 list) {
     spawn.lifetime = 300;
     spawn.model = 0x22;
     collision_selectMap(0);
-    spawn.unk5C = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
-    spawn.flags = (spawn.unk5C ? 0x400 : 0) | 0x100 | 0x800;
+    spawn.zone = collision_findZoneLeaf(spawn.pos.x, spawn.pos.z);
+    spawn.flags = (spawn.zone ? 0x400 : 0) | 0x100 | 0x800;
     spawn.variant = 0;
     spawn.alpha = 255;
     spawn.updateFn = 9;
@@ -80,7 +80,7 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 owner, s32 list) {
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 4;
-    spawn.unk6A = 2;
+    spawn.lightMode = 2;
     spawn.owner = NULL;
     spawn.ownerId = 0;
     spawn.fadeStart = 1;
@@ -161,7 +161,7 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 owner, s32 list) {
                     desc.unk45 = 255;
                     desc.unk46 = 0;
                     desc.unk47 = 6;
-                    desc.unk48 = spawn.unk5C;
+                    desc.unk48 = spawn.zone;
                     desc.viewportMask = 255;
                     state->beam = flare_spawnGlow(&params.shape, sizeof(params), &desc, 0, 0, 0, 0, -1, owner, list);
                 }

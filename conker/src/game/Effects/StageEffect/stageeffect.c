@@ -238,7 +238,7 @@ void effect_advanceStage(StageObj *obj) {
         spawn.flags = 0x39E8;
         spawn.model = 0x86;
         spawn.variant = 0;
-        spawn.unk5C = 0;
+        spawn.zone = 0;
         spawn.alpha = 0xFF;
         spawn.updateFn = 8;
         spawn.update2Fn = 0;
@@ -248,7 +248,7 @@ void effect_advanceStage(StageObj *obj) {
         spawn.destroyFn = 0;
         spawn.squashFn = 0;
         spawn.matrixFn = 0;
-        spawn.unk6A = 2;
+        spawn.lightMode = 2;
         spawn.owner = NULL;
         spawn.ownerId = 0;
         spawn.fadeStart = 12;

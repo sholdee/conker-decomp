@@ -86,7 +86,7 @@ void particle_spawnSpiral(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed
         spawn.lifetime = 300;
         spawn.model = id;
         spawn.variant = 8;
-        spawn.unk5C = 0;
+        spawn.zone = 0;
         spawn.alpha = 255;
         spawn.updateFn = 22;
         spawn.update2Fn = 7;
@@ -97,7 +97,7 @@ void particle_spawnSpiral(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed
         spawn.squashFn = 0;
         spawn.matrixFn = 2;
         spawn.drawFn = -1;
-        spawn.unk6A = 2;
+        spawn.lightMode = 2;
         spawn.owner = 0;
         spawn.ownerId = 0;
         spawn.fadeStart = 1;

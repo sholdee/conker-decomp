@@ -254,7 +254,7 @@ void trail_spawnAnchoredTrail(AnchoredTrailEmitter *emitter) {
     header.life = 300;
     header.flags = 0x76;
     header.kind = 0x12;
-    header.unk14 = 4;
+    header.shapeKind = 4;
     header.material = 0;
 
     trail = effect_newEffectObj(&header, 0x20, sizeof(AnchoredTrailData), 0xD, 0x10, 0x10, 0, 0, 0, emitter->base.header.owner, emitter->base.header.kind);

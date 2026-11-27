@@ -213,7 +213,7 @@ s32 particle_spawnYawModelParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 
     desc.gravity = (math_randomFloat() * 603.0f + -2402.0f) * 0.001f;
     desc.sizeY = (math_randomFloat() * 300.0f + 101.0f) * 0.001f;
     desc.variant = 0;
-    desc.unk5C = 0;
+    desc.zone = 0;
     desc.sizeXZ = desc.sizeY;
     desc.alpha = (math_random() % 101U) + 155;
     desc.updateFn = 2;
@@ -224,7 +224,7 @@ s32 particle_spawnYawModelParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 
     desc.destroyFn = 0;
     desc.squashFn = 0;
     desc.matrixFn = 0;
-    desc.unk6A = 2;
+    desc.lightMode = 2;
     desc.owner = 0;
     desc.ownerId = 0;
     desc.fadeStart = 32;

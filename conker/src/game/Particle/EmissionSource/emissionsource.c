@@ -1047,7 +1047,7 @@ void particle_updateFallingDebrisSpawner(Game113D60PointSpawnerEffect *effect) {
             arg.vel.z = 0.0f;
             arg.rotVel.y = 0.0f;
             arg.variant = 0;
-            arg.unk5C = 0;
+            arg.zone = 0;
             arg.alpha = 0xFF;
             arg.update2Fn = 0;
             arg.floorHitFn = 0;
@@ -1056,7 +1056,7 @@ void particle_updateFallingDebrisSpawner(Game113D60PointSpawnerEffect *effect) {
             arg.destroyFn = 0;
             arg.squashFn = 0;
             arg.matrixFn = 2;
-            arg.unk6A = 2;
+            arg.lightMode = 2;
             arg.owner = 0;
             arg.ownerId = 0;
             arg.fadeStart = 1;

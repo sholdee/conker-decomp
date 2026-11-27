@@ -99,7 +99,7 @@ void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 ow
     packet.spawn.lifetime = duration;
     packet.spawn.model = id;
     packet.spawn.variant = 0;
-    packet.spawn.unk5C = 0;
+    packet.spawn.zone = 0;
     packet.spawn.alpha = 0xFF;
     packet.spawn.updateFn = 0x15;
     packet.spawn.update2Fn = 0;
@@ -109,7 +109,7 @@ void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 ow
     packet.spawn.destroyFn = 0;
     packet.spawn.squashFn = 0;
     packet.spawn.matrixFn = 2;
-    packet.spawn.unk6A = 0;
+    packet.spawn.lightMode = 0;
     packet.spawn.owner = NULL;
     packet.spawn.ownerId = 0;
     packet.spawn.fadeStart = 1;

@@ -44,7 +44,7 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 owner, s32 list) {
     debris.landPuffFlag = emitter->landPuffFlag;
     debris.landPuffLifeBase = emitter->landPuffLifeBase;
     debris.landPuffLifeRange = emitter->landPuffLifeRange;
-    spawn.unk5C = NULL;
+    spawn.zone = NULL;
     spawn.alpha = 0xFF;
     spawn.updateFn = 1;
     spawn.update2Fn = 5;
@@ -54,7 +54,7 @@ void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 owner, s32 list) {
     spawn.destroyFn = 1;
     spawn.squashFn = 0;
     spawn.matrixFn = 0;
-    spawn.unk6A = 0;
+    spawn.lightMode = 0;
     spawn.owner = NULL;
     spawn.ownerId = 0;
     spawn.fadeStart = 32;

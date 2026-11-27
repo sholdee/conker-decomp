@@ -448,7 +448,7 @@ void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ,
     chunk.rotVel.z = math_randomFloat() * 6.0f + -3.0f;
     rand = math_randomFloat() * 6.0f + -3.0f;
     chunk.variant = 0;
-    chunk.unk5C = 0;
+    chunk.zone = 0;
     chunk.rotVel.y = rand;
     chunk.alpha = 0xFF;
     chunk.updateFn = 1;
@@ -459,7 +459,7 @@ void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ,
     chunk.destroyFn = 0;
     chunk.squashFn = 0;
     chunk.matrixFn = 0;
-    chunk.unk6A = 2;
+    chunk.lightMode = 2;
     chunk.owner = 0;
     chunk.ownerId = 0;
     chunk.fadeStart = 0x20;

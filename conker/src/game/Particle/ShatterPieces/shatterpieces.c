@@ -64,7 +64,7 @@ s32 particle_floorShatter(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floo
             surface = particle_spawnAxisQuadParticle(&def, &gWhiteVtxColors, 0x18, 0, 0,
                                             (math_random() & 1) * 2 + (math_random() & 1),
                                             math_random() & 0xFF, 500.0f, 500.0f, NULL, surface,
-                                            particle->link.model, particle->link.unk1C, 0, 8, particle->header.owner,
+                                            particle->link.maxLights, particle->link.lightMask, 0, 8, particle->header.owner,
                                             particle->header.kind);
             if (surface != NULL) {
                 memcpy(((AxisParticle *)surface)->motion, extra, 8);
@@ -103,8 +103,8 @@ s32 particle_floorShatter(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floo
                 burst.pos.z = z;
                 burst.growthBase = 0.661f;
                 burst.growthRange = 0; // matching: 0.0f would keep the float zero above live in $f20 across the calls
-                burst.maxLights = particle->link.model;
-                burst.lightMask = particle->link.unk1C;
+                burst.maxLights = particle->link.maxLights;
+                burst.lightMask = particle->link.lightMask;
                 burst.render.otherModeH = 0;
                 burst.render.setGeometryMode = 0x220005;
                 burst.render.clearGeometryMode = 0x1D0600;
@@ -200,7 +200,7 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
                     spawned = particle_spawnAxisQuadParticle(&def, &gWhiteVtxColors, 0x18, 0, 0,
                                                             (math_random() & 1) * 2 + (math_random() & 1),
                                                             math_random() & 0xFF, 500.0f, 500.0f, NULL,
-                                                            &triangle, particle->link.model, particle->link.unk1C, 0,
+                                                            &triangle, particle->link.maxLights, particle->link.lightMask, 0,
                                                             8, particle->header.owner, particle->header.kind);
                     if (spawned != NULL) {
                         /* the 8-byte motion block; 4 bytes past extra are copied too */
@@ -241,8 +241,8 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
                     burst.blue = 0;
                     burst.alphaBase = 155;
                     burst.alphaRange = 100;
-                    burst.unk74 = particle->link.model;
-                    burst.unk78 = particle->link.unk1C;
+                    burst.unk74 = particle->link.maxLights;
+                    burst.unk78 = particle->link.lightMask;
                     burst.render.otherModeH = 0;
                     burst.render.setGeometryMode = 0x220005;
                     burst.render.clearGeometryMode = 0x1D0600;
@@ -404,8 +404,8 @@ s32 particle_updateKickable(ModelParticle *particle) {
                     def.unk50 = particle->floor.material;
                     spawned = particle_spawnAxisQuadParticle(&def, &gWhiteVtxColors, 0x18, 0, 0,
                                             (math_random() & 1) * 2 + (math_random() & 1), math_random() & 0xFF,
-                                            500.0f, 500.0f, NULL, &particle->floor.tri, particle->link.model,
-                                            particle->link.unk1C, 0, 8, particle->header.owner, particle->header.kind);
+                                            500.0f, 500.0f, NULL, &particle->floor.tri, particle->link.maxLights,
+                                            particle->link.lightMask, 0, 8, particle->header.owner, particle->header.kind);
                     if (spawned != NULL) {
                         /* the 8-byte motion block; 4 bytes past extra are copied too */
                         memcpy(spawned->motion, &extra, 8);
@@ -443,8 +443,8 @@ s32 particle_updateKickable(ModelParticle *particle) {
                 burst.growthRange = 0.31f;
                 burst.speedBase = 5.0f;
                 burst.speedRange = 7.0f;
-                burst.maxLights = particle->link.model;
-                burst.lightMask = particle->link.unk1C;
+                burst.maxLights = particle->link.maxLights;
+                burst.lightMask = particle->link.lightMask;
                 burst.render.otherModeH = 0;
                 burst.render.setGeometryMode = 0x220005;
                 burst.render.clearGeometryMode = 0x1D0600;

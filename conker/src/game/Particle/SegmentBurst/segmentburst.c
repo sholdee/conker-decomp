@@ -126,7 +126,7 @@ void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, S
     params.postDrawFunc = -1;
     params.lifetime = (math_random() % 41U) + 90;
     params.model = 0xA0;
-    params.unkC = 0x13;
+    params.bank = 0x13;
     params.render.setGeometryMode = 0x220405;
     params.render.clearGeometryMode = 0x40200;
     params.render.envMode = 8;
@@ -146,7 +146,7 @@ void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, S
     params.color1.alpha = 255;
     params.owner = emitter->owner;
     params.ownerId = emitter->owner->unique_id;
-    params.unk41 = 1;
+    params.lightMode = 1;
     params.pos = *from;
     motion.vel.x = (to->x - from->x) * emitter->scale;
     motion.vel.y = (to->y - from->y) * emitter->scale;

@@ -85,7 +85,7 @@ void particle_spawnAreaParticles(TriggerZone *region, f32 density) {
         part.destroyFn = 0;
         part.squashFn = 0;
         part.matrixFn = 2;
-        part.unk6A = 0;
+        part.lightMode = 0;
         part.owner = 0;
         part.ownerId = 0;
         part.fadeStart = 1;
@@ -127,7 +127,7 @@ void particle_spawnAreaParticles(TriggerZone *region, f32 density) {
                 part.sizeXZ = part.sizeY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             }
             collision_selectMap(0);
-            part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
+            part.zone = collision_findZoneLeaf(part.pos.x, part.pos.z);
             particle_newModelParticle(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -367,7 +367,7 @@ void func_1500D3AC(TriggerZone *region, f32 density) {
         part.destroyFn = 0;
         part.squashFn = 0;
         part.matrixFn = 2;
-        part.unk6A = 0;
+        part.lightMode = 0;
         part.owner = 0;
         part.ownerId = 0;
         part.fadeStart = 1;
@@ -398,7 +398,7 @@ void func_1500D3AC(TriggerZone *region, f32 density) {
             part.rotVel.z = RANDOM_U16() * inv65535 * 1.600000024f;
             part.sizeXZ = part.sizeY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             collision_selectMap(0);
-            part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
+            part.zone = collision_findZoneLeaf(part.pos.x, part.pos.z);
             particle_newModelParticle(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -433,7 +433,7 @@ void func_1500D8C8(TriggerZone *region, f32 density) {
         part.destroyFn = 0;
         part.squashFn = 0;
         part.matrixFn = 2;
-        part.unk6A = 0;
+        part.lightMode = 0;
         part.owner = 0;
         part.ownerId = 0;
         part.fadeStart = 1;
@@ -474,7 +474,7 @@ void func_1500D8C8(TriggerZone *region, f32 density) {
                 part.sizeY *= 0.349999994f;
             }
             collision_selectMap(0);
-            part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
+            part.zone = collision_findZoneLeaf(part.pos.x, part.pos.z);
             particle_newModelParticle(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);

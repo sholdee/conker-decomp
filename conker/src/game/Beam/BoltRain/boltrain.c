@@ -317,7 +317,7 @@ void beam_updateSparkRegion(SparkObj *obj) {
         if (count > 1.0f) {
             spawn.flags = 0x15;
             spawn.kind = 10;
-            spawn.unk14 = -1;
+            spawn.shapeKind = -1;
             part.flags = 4;
             part.primMode = 2;
             part.envMode = 3;

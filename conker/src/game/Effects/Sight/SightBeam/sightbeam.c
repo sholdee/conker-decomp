@@ -681,7 +681,7 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
         desc.lifetime = 300;
         desc.model = 0x36;
         desc.variant = 0;
-        desc.unk5C = zone;
+        desc.zone = zone;
         desc.alpha = 0xFF;
         desc.updateFn = 0;
         desc.update2Fn = 0;
@@ -691,7 +691,7 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
         desc.destroyFn = 0;
         desc.squashFn = 0;
         desc.matrixFn = 2;
-        desc.unk6A = 0;
+        desc.lightMode = 0;
         desc.owner = 0;
         desc.ownerId = 0;
         desc.fadeStart = 1;

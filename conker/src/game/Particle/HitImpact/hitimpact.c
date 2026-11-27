@@ -170,7 +170,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         p.scale.z = 1.0f;
         p.model = particleType;
         p.variant = 0;
-        p.unk5C = 0;
+        p.zone = 0;
         p.alpha = 255;
         p.update2Fn = 0;
         p.floorHitFn = 0;
@@ -179,7 +179,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         p.destroyFn = 0;
         p.squashFn = 0;
         p.matrixFn = 2;
-        p.unk6A = 0;
+        p.lightMode = 0;
         p.owner = NULL;
         p.ownerId = 0;
         p.fadeStart = 12;
@@ -393,7 +393,7 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     p.lifetime = (math_random() & 7) + 28;
     p.model = 37;
     p.variant = 0;
-    p.unk5C = 0;
+    p.zone = 0;
     p.alpha = 255;
     p.updateFn = 8;
     p.update2Fn = 0;
@@ -403,7 +403,7 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     p.destroyFn = 0;
     p.squashFn = 0;
     p.matrixFn = 2;
-    p.unk6A = 1;
+    p.lightMode = 1;
     p.owner = owner;
     p.ownerId = owner->unique_id;
     p.fadeStart = 6;

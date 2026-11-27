@@ -221,7 +221,7 @@ void particle_spawnDebrisScatter(DebrisScatter *config, AngleRange *angles, u8 a
     spawn.rotVel.y = 0.0f;
     spawn.flags = 0x1 | 0x8 | 0x20 | 0x40 | 0x80 | 0x100 | ((config->flags & 1) ? 0x800 : 0) | 0x2000 | 0x10000;
     spawn.variant = 0;
-    spawn.unk5C = 0;
+    spawn.zone = 0;
     spawn.alpha = 0xFF;
     spawn.update2Fn = 0;
     spawn.floorType3Fn = 0;
@@ -230,7 +230,7 @@ void particle_spawnDebrisScatter(DebrisScatter *config, AngleRange *angles, u8 a
     spawn.squashFn = 0;
     spawn.matrixFn = 2;
     spawn.drawFn = -1;
-    spawn.unk6A = 0;
+    spawn.lightMode = 0;
     spawn.owner = 0;
     spawn.ownerId = 0;
     spawn.fadeStart = 12;
@@ -309,7 +309,7 @@ void particle_spawnDebrisSpray(DebrisSpray *config, const s32 *variantIds, const
             count = variantCount;
         }
         spawn.variant = arg6;
-        spawn.unk5C = 0;
+        spawn.zone = 0;
         spawn.alpha = 0xFF;
         spawn.update2Fn = 0;
         spawn.floorType3Fn = 0;
@@ -317,7 +317,7 @@ void particle_spawnDebrisSpray(DebrisSpray *config, const s32 *variantIds, const
         spawn.destroyFn = 0;
         spawn.squashFn = 0;
         spawn.matrixFn = 2;
-        spawn.unk6A = 0;
+        spawn.lightMode = 0;
         spawn.owner = 0;
         spawn.ownerId = 0;
         spawn.fadeStart = 12;
@@ -688,7 +688,7 @@ void particle_spawnSurfaceDebrisBurst(SurfaceDebrisBurst *config, const s32 *var
         spawn.flags = 0x29E8;
         count = (math_random() % (config->countRange + 1)) + config->countBase;
         spawn.variant = 0;
-        spawn.unk5C = 0;
+        spawn.zone = 0;
         spawn.alpha = 0xFF;
         spawn.updateFn = 8;
         spawn.update2Fn = 0;
@@ -698,7 +698,7 @@ void particle_spawnSurfaceDebrisBurst(SurfaceDebrisBurst *config, const s32 *var
         spawn.destroyFn = 0;
         spawn.squashFn = 0;
         spawn.matrixFn = 2;
-        spawn.unk6A = 0;
+        spawn.lightMode = 0;
         spawn.owner = 0;
         spawn.ownerId = 0;
         spawn.fadeStart = 12;
@@ -746,7 +746,7 @@ void particle_spawnDebrisBurst(DebrisBurst *config, const s32 *variantIds, const
     spawn.rotVel.y = 0.0f;
     spawn.flags = (arg5 ? 0x100000 : 0) | 0x29E8;
     spawn.variant = 0;
-    spawn.unk5C = 0;
+    spawn.zone = 0;
     spawn.alpha = 0xFF;
     spawn.updateFn = 8;
     spawn.update2Fn = 0;
@@ -756,7 +756,7 @@ void particle_spawnDebrisBurst(DebrisBurst *config, const s32 *variantIds, const
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 2;
-    spawn.unk6A = 0;
+    spawn.lightMode = 0;
     spawn.owner = 0;
     spawn.ownerId = 0;
     spawn.fadeStart = 12;
@@ -805,7 +805,7 @@ void particle_spawnModelBurst(ModelBurst *config, u8 arg1, s32 arg2) {
     params.preDrawFunc = -1;
     params.postDrawFunc = -1;
     params.model = config->model;
-    params.unkC = config->unk38;
+    params.bank = config->unk38;
     params.render.colorDither = 0x80;
     params.render.alphaDither = 0x20;
     params.render.otherModeH = 0;
@@ -817,7 +817,7 @@ void particle_spawnModelBurst(ModelBurst *config, u8 arg1, s32 arg2) {
     params.render.combiner = 0x38;
     params.owner = 0;
     params.ownerId = 0;
-    params.unk41 = 2;
+    params.lightMode = 2;
     params.pos = config->position;
     motion.drag = config->drag;
     params.color0 = config->color0;
@@ -1287,7 +1287,7 @@ void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f3
     spawn.flags = 0x100140;
     spawn.model = 84;
     spawn.variant = 0;
-    spawn.unk5C = 0;
+    spawn.zone = 0;
     spawn.alpha = alpha;
     spawn.updateFn = 15;
     spawn.update2Fn = 0;
@@ -1297,7 +1297,7 @@ void *particle_spawnGrowFade(const Vec3f *position, f32 duration, f32 growth, f3
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 2;
-    spawn.unk6A = 0;
+    spawn.lightMode = 0;
     spawn.owner = 0;
     spawn.ownerId = 0;
     spawn.fadeStart = 1;
@@ -1398,7 +1398,7 @@ void *particle_spawnSwell(Vec3f *position, f32 duration, f32 size, f32 alpha, u8
     spawn.flags = 0x140;
     spawn.model = 85;
     spawn.variant = 0;
-    spawn.unk5C = 0;
+    spawn.zone = 0;
     spawn.alpha = 0xFF;
     spawn.updateFn = 18;
     spawn.update2Fn = 0;
@@ -1408,7 +1408,7 @@ void *particle_spawnSwell(Vec3f *position, f32 duration, f32 size, f32 alpha, u8
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 2;
-    spawn.unk6A = 0;
+    spawn.lightMode = 0;
     spawn.owner = 0;
     spawn.ownerId = 0;
     spawn.fadeStart = 1;

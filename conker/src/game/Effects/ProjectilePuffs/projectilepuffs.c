@@ -128,7 +128,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
     spawn.lifetime = 300;
     spawn.model = 0x2F;
     spawn.variant = 0;
-    spawn.unk5C = 0;
+    spawn.zone = 0;
     spawn.alpha = 0xFF;
     spawn.updateFn = 0x13;
     spawn.update2Fn = 0;
@@ -138,7 +138,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 0;
-    spawn.unk6A = 0;
+    spawn.lightMode = 0;
     spawn.owner = owner;
     spawn.ownerId = owner->unique_id;
     spawn.fadeStart = 1;
@@ -347,7 +347,7 @@ void effect_spawnPuffFollower(f32 *target, s16 lifetime, u8 owner, s32 list) {
     packet.spawn.lifetime = lifetime;
     packet.spawn.model = 0x2F;
     packet.spawn.variant = 0;
-    packet.spawn.unk5C = 0;
+    packet.spawn.zone = 0;
     packet.spawn.alpha = 0xFF;
     packet.spawn.updateFn = 0x14;
     packet.spawn.update2Fn = 0;
@@ -357,7 +357,7 @@ void effect_spawnPuffFollower(f32 *target, s16 lifetime, u8 owner, s32 list) {
     packet.spawn.destroyFn = 0;
     packet.spawn.squashFn = 0;
     packet.spawn.matrixFn = 0;
-    packet.spawn.unk6A = 0;
+    packet.spawn.lightMode = 0;
     packet.spawn.owner = NULL;
     packet.spawn.ownerId = 0;
     packet.spawn.fadeStart = 1;

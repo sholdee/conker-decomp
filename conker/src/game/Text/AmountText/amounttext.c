@@ -109,7 +109,7 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
     params.postDrawFunc = -1;
     params.lifetime = 150;
     params.model = 0xA5;
-    params.unkC = 0x17;
+    params.bank = 0x17;
     params.render.otherModeH = 0;
     params.render.setGeometryMode = 0x220405;
     params.render.clearGeometryMode = 0x40200;
@@ -129,7 +129,7 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
     params.color1.alpha = 0xFF;
     params.owner = owner;
     params.ownerId = owner->unique_id;
-    params.unk41 = 1;
+    params.lightMode = 1;
     params.pos = gZeroVec3f;
     params.fadeStart = 8;
     params.fadeRate = 0x1F;

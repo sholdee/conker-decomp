@@ -365,7 +365,7 @@ void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
         packet.lifetime = 300;
         packet.model = 210;
         packet.variant = 7;
-        packet.unk5C = 0;
+        packet.zone = 0;
         packet.alpha = 0xFF;
         packet.updateFn = 8;
         packet.update2Fn = 0;
@@ -375,7 +375,7 @@ void particle_fireTrailProjectile(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
         packet.destroyFn = 0;
         packet.squashFn = 0;
         packet.matrixFn = 2;
-        packet.unk6A = 0;
+        packet.lightMode = 0;
         packet.owner = 0;
         packet.ownerId = 0;
         packet.fadeStart = 1;

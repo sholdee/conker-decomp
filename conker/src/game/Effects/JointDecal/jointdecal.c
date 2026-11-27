@@ -232,7 +232,7 @@ s32 effect_spawnJointPiece(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 origin
     scale = math_randomFloat() * 18.80000114f + 5.6f;
     piece.model = 31;
     piece.variant = 0;
-    piece.unk5C = 0;
+    piece.zone = 0;
     piece.sizeXZ = scale;
     piece.alpha = 0xFF;
     piece.updateFn = 1;
@@ -243,7 +243,7 @@ s32 effect_spawnJointPiece(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 origin
     piece.destroyFn = 0;
     piece.squashFn = 0;
     piece.matrixFn = 0;
-    piece.unk6A = 0;
+    piece.lightMode = 0;
     piece.owner = 0;
     piece.ownerId = 0;
     piece.fadeStart = 1;

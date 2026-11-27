@@ -119,7 +119,7 @@ s32 particle_spawnYawSpinModel(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5
     spawn.sizeY = ((math_randomFloat() * 302.0f) + 52.0f) * 0.001f;
     spawn.sizeXZ = spawn.sizeY;
     spawn.variant = 0;
-    spawn.unk5C = NULL;
+    spawn.zone = NULL;
     spawn.alpha = (math_random() % 76U) + 180;
     spawn.updateFn = 8;
     spawn.update2Fn = 0;
@@ -129,7 +129,7 @@ s32 particle_spawnYawSpinModel(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 0;
-    spawn.unk6A = 2;
+    spawn.lightMode = 2;
     spawn.owner = NULL;
     spawn.ownerId = 0;
     spawn.fadeStart = 32;

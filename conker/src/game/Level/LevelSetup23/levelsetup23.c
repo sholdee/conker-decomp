@@ -47,9 +47,9 @@ void level_setup23(void) {
     desc.updateFunc = 3;
     desc.drawFunc = 6;
     desc.lifetime = 0x12C;
-    desc.unk30 = 9;
+    desc.assetTable = 9;
     desc.flags = 0;
-    desc.unk34 = 0x1AF;
+    desc.assetIndex = 0x1AF;
     desc.kind = 0;
 
     part.flags = 0xD00;
@@ -65,7 +65,7 @@ void level_setup23(void) {
     part.destroyFn = 0;
     part.squashFn = 0;
     part.matrixFn = 2;
-    part.unk6A = 2;
+    part.lightMode = 2;
     part.owner = 0;
     part.ownerId = 0;
     part.fadeStart = 1;
@@ -97,7 +97,7 @@ void level_setup23(void) {
         tail.unk18 = pos;
 
         collision_selectMap(0);
-        part.unk5C = collision_findZoneLeaf(part.pos.x, part.pos.z);
+        part.zone = collision_findZoneLeaf(part.pos.x, part.pos.z);
 
         rnd = (osGetCount() * math_random()) & 0xFFFF;
         rnd *= 1.525902189e-05f;

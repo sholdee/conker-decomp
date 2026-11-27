@@ -245,10 +245,10 @@ QuadSprite *particle_newQuadSprite(void *def, const void *colors, u8 updateFn, u
     particle_setQuadColors(sprite->vtx, colors);
     sprite->updateFn = updateFn;
     sprite->expireFn = expireFn;
-    sprite->link.model = model;
+    sprite->link.maxLights = model;
     sprite->active = 1;
     sprite->unk14 = 0;
-    sprite->link.unk1C = arg6;
+    sprite->link.lightMask = arg6;
     for (i = 0; i < 4; i++) {
         sprite->link.handles[i] = NULL;
     }
@@ -681,9 +681,9 @@ void *particle_newQuadParticle(void *def, const void *colors, u8 updateFn1, u8 u
     particle->ground.source = 0;
     particle->ground.flags = 0;
     particle->ground.material = 0;
-    particle->link.model = model;
-    particle->link.unk1C = arg8;
-    particle->link.unk4 = 0;
+    particle->link.maxLights = model;
+    particle->link.lightMask = arg8;
+    particle->link.lightCount = 0;
     for (i = 0; i < 4; i++) {
         particle->link.handles[i] = NULL;
     }

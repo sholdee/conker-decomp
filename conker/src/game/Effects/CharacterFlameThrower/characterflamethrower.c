@@ -1972,7 +1972,7 @@ CharacterFlamethrowerActor *flamethrower_spawnFlame(s32 extraSize, CharacterFlam
     spawn.life = 300;
     spawn.flags = 0x12;
     spawn.kind = 0xE;
-    spawn.unk14 = 0;
+    spawn.shapeKind = 0;
     initial.seed = setup->seed;
     inputs[0] = &initial.seed.startOffset;
     inputs[1] = &initial.seed.endOffset;
@@ -2295,7 +2295,7 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             style.envMode = 7;
             spawn.flags = 0x15;
             spawn.kind = 1;
-            spawn.unk14 = -1;
+            spawn.shapeKind = -1;
             motion.flags = 0x68;
             motion.texture = 0xA;
             motion.shade = 0xFF;

@@ -35,8 +35,8 @@ void *effect_spawnOwnerModel(Actor *owner, u8 fxOwner, s32 fxList) {
     desc.updateFunc = -1;
     desc.drawFunc = 3;
     desc.lifetime = 300;
-    desc.unk30 = 9;
-    desc.unk34 = 0x1AD;
+    desc.assetTable = 9;
+    desc.assetIndex = 0x1AD;
     desc.viewportMask = 0xFF;
     {
         s32 objIndex = owner - movement_obj;
@@ -274,7 +274,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list) {
             part.rotVel.y = 0.0f;
             part.flags = 0x39E9;
             part.variant = 0;
-            part.unk5C = 0;
+            part.zone = 0;
             part.alpha = 0xFF;
             part.updateFn = 0xD;
             part.update2Fn = 0;
@@ -284,7 +284,7 @@ void effect_spawnTankExplosion(Actor *obj, u8 owner, s32 list) {
             part.destroyFn = 0;
             part.squashFn = 0;
             part.matrixFn = 2;
-            part.unk6A = 0;
+            part.lightMode = 0;
             part.owner = obj;
             part.ownerId = obj->unique_id;
             part.fadeStart = 0xC;

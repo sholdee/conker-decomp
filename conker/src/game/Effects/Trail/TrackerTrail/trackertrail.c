@@ -252,7 +252,7 @@ Gfx *trail_drawTrackerTrail(TrackerTrail *actor, Gfx *gfx, s16 view) {
     }
     state = actor->state;
     points = actor->points;
-    particle_getViewBuffer(actor->unk84, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+    particle_getViewBuffer(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }

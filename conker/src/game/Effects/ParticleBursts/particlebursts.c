@@ -30,7 +30,7 @@ s32 func_150BB760(Actor *actor) {
         particle.model = 1;
         particle.flags = 0x29E9;
         particle.variant = 0;
-        particle.unk5C = 0;
+        particle.zone = 0;
         particle.alpha = 0xFF;
         particle.updateFn = 1;
         particle.update2Fn = 0;
@@ -40,7 +40,7 @@ s32 func_150BB760(Actor *actor) {
         particle.destroyFn = 0;
         particle.squashFn = 0;
         particle.matrixFn = 0;
-        particle.unk6A = 1;
+        particle.lightMode = 1;
         particle.owner = actor;
         particle.scale.x = 1.0f;
         particle.scale.y = 1.0f;
@@ -150,7 +150,7 @@ s32 func_150BBB5C(Actor *actor) {
         particle.lifetime = 0x78;
         particle.flags = 0x29E9;
         particle.variant = 0;
-        particle.unk5C = 0;
+        particle.zone = 0;
         particle.alpha = 0xFF;
         particle.updateFn = 1;
         particle.update2Fn = 0;
@@ -160,7 +160,7 @@ s32 func_150BBB5C(Actor *actor) {
         particle.destroyFn = 0;
         particle.squashFn = 0;
         particle.matrixFn = 0;
-        particle.unk6A = 0;
+        particle.lightMode = 0;
         particle.owner = NULL;
         particle.ownerId = 0;
         particle.fadeStart = 0x20;
@@ -261,7 +261,7 @@ s32 func_150BBB5C(Actor *actor) {
         particle.radius = actor->scale_xz * 20.0f;
         particle.sizeXZ = actor->scale_xz + actor->scale_xz;
         particle.variant = 0;
-        particle.unk5C = 0;
+        particle.zone = 0;
         particle.alpha = 0xFF;
         particle.updateFn = 1;
         particle.update2Fn = 0;
@@ -271,7 +271,7 @@ s32 func_150BBB5C(Actor *actor) {
         particle.destroyFn = 0;
         particle.squashFn = 0;
         particle.matrixFn = 0;
-        particle.unk6A = 0;
+        particle.lightMode = 0;
         particle.owner = NULL;
         particle.ownerId = 0;
         particle.fadeStart = 0x10;
@@ -325,7 +325,7 @@ s32 func_150BC488(Actor *actor) {
         particle.model = 1;
         particle.flags = 0x29E9;
         particle.variant = 0;
-        particle.unk5C = 0;
+        particle.zone = 0;
         particle.alpha = 0xFF;
         particle.updateFn = 1;
         particle.update2Fn = 0;
@@ -335,7 +335,7 @@ s32 func_150BC488(Actor *actor) {
         particle.destroyFn = 0;
         particle.squashFn = 0;
         particle.matrixFn = 0;
-        particle.unk6A = 0;
+        particle.lightMode = 0;
         particle.owner = NULL;
         particle.ownerId = 0;
         particle.fadeStart = 0x20;
@@ -444,7 +444,7 @@ s32 func_150BC488(Actor *actor) {
             particle.radius = actor->scale_xz * 20.0f;
             particle.sizeXZ = actor->scale_xz * 2.0f;
             particle.variant = 0;
-            particle.unk5C = 0;
+            particle.zone = 0;
             particle.alpha = 0xFF;
             particle.updateFn = 1;
             particle.update2Fn = 0;
@@ -455,7 +455,7 @@ s32 func_150BC488(Actor *actor) {
             particle.destroyFn = 0;
             particle.squashFn = 0;
             particle.matrixFn = 0;
-            particle.unk6A = 0;
+            particle.lightMode = 0;
             particle.owner = NULL;
             particle.ownerId = 0;
             particle.fadeStart = 0x10;
@@ -508,7 +508,7 @@ s32 func_150BCBBC(Actor *actor) {
         particle.lifetime = 0x96;
         particle.flags = 0x29E9;
         particle.variant = 0;
-        particle.unk5C = 0;
+        particle.zone = 0;
         particle.alpha = 0xFF;
         particle.updateFn = 1;
         particle.update2Fn = 0;
@@ -518,7 +518,7 @@ s32 func_150BCBBC(Actor *actor) {
         particle.destroyFn = 0;
         particle.squashFn = 0;
         particle.matrixFn = 0;
-        particle.unk6A = 0;
+        particle.lightMode = 0;
         particle.owner = NULL;
         particle.ownerId = 0;
         particle.fadeStart = 0x20;
@@ -637,7 +637,7 @@ void func_150BD070(u8 owner, s32 list) {
         particle.flags = 0x12DE8;
         particle.model = 1;
         particle.variant = 0;
-        particle.unk5C = 0;
+        particle.zone = 0;
         particle.alpha = 0xFF;
         particle.updateFn = 8;
         particle.update2Fn = 0;
@@ -648,7 +648,7 @@ void func_150BD070(u8 owner, s32 list) {
         particle.squashFn = 0;
         particle.matrixFn = 2;
         particle.drawFn = -1;
-        particle.unk6A = 2;
+        particle.lightMode = 2;
         particle.owner = NULL;
         particle.ownerId = 0;
         particle.fadeStart = 0xC;

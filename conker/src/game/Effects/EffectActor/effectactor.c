@@ -32,9 +32,9 @@ EffectActor *effect_newEffectActor(EffectActorTemplate *template, s32 attachment
         return NULL;
     }
     memcpy(&actor->tmpl, template, sizeof(EffectActorTemplate));
-    actor->attachment.model = attachment;
-    actor->attachment.unk1C = lightMask;
-    actor->attachment.unk4 = 0;
+    actor->attachment.maxLights = attachment;
+    actor->attachment.lightMask = lightMask;
+    actor->attachment.lightCount = 0;
     for (i = 0; i < 4; i++) {
         actor->attachment.handles[i] = NULL;
     }

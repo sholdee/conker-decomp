@@ -45,7 +45,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
         extra.angle = angle;
         params.owner = NULL;
         params.ownerId = 0;
-        params.unk41 = 0;
+        params.lightMode = 0;
         params.pos = *pos;
         extra.count = count;
         {
@@ -70,7 +70,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
         params.postDrawFunc = -1;
         params.lifetime = 300;
         params.model = 0xA2;
-        params.unkC = 8;
+        params.bank = 8;
         params.render.otherModeH = 0;
         params.render.setGeometryMode = 0x620405;
         params.render.clearGeometryMode = 0x40200;
@@ -276,7 +276,7 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
         spawn.lifetime = 300;
         spawn.model = 0x26;
         spawn.variant = variantIds[variant];
-        spawn.unk5C = zone;
+        spawn.zone = zone;
         spawn.alpha = 0xFF;
         if (level == LEVEL_W1_DOG_FISH) {
             spawn.updateFn = 0x18;
@@ -290,7 +290,7 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
         spawn.destroyFn = 0;
         spawn.squashFn = 0;
         spawn.matrixFn = 2;
-        spawn.unk6A = 0;
+        spawn.lightMode = 0;
         spawn.owner = NULL;
         spawn.ownerId = 0;
         spawn.fadeStart = 1;
@@ -416,7 +416,7 @@ void effect_showStatCounter(u8 owner, s32 kind) {
             panelConfig.postDrawFunc = 0;
             panelConfig.lifetime = 300;
             panelConfig.model = 0xA3;
-            panelConfig.unkC = 8;
+            panelConfig.bank = 8;
             panelConfig.render.otherModeH = 0x100000;
             panelConfig.render.setGeometryMode = 0x200004;
             panelConfig.render.clearGeometryMode = 0x60601;
@@ -436,7 +436,7 @@ void effect_showStatCounter(u8 owner, s32 kind) {
             panelConfig.color1.alpha = 0xFF;
             panelConfig.owner = 0;
             panelConfig.ownerId = 0;
-            panelConfig.unk41 = 1;
+            panelConfig.lightMode = 1;
             panelConfig.fadeStart = 1;
             panelConfig.fadeRate = 0xFF;
             panelConfig.pos.x = 300.0f;

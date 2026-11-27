@@ -272,7 +272,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
         piece.pos = pos;
         piece.flags = 0x21E8;
         piece.variant = 0;
-        piece.unk5C = 0;
+        piece.zone = 0;
         piece.alpha = 0xFF;
         piece.updateFn = 8;
         piece.update2Fn = 0;
@@ -282,7 +282,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
         piece.destroyFn = 0;
         piece.squashFn = 0;
         piece.matrixFn = 2;
-        piece.unk6A = 1;
+        piece.lightMode = 1;
         piece.owner = obj;
         piece.ownerId = obj->unique_id;
         piece.sound = 0;

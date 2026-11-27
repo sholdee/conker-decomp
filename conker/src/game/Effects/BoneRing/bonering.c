@@ -58,7 +58,7 @@ void effect_spawnStompRing(Actor *actor, s32 side, s32 arg2) {
     spawn.model = 5;
     spawn.flags = 0x29E9;
     spawn.variant = 0;
-    spawn.unk5C = NULL;
+    spawn.zone = NULL;
     spawn.alpha = 255;
     spawn.updateFn = 1;
     spawn.update2Fn = 0;
@@ -68,7 +68,7 @@ void effect_spawnStompRing(Actor *actor, s32 side, s32 arg2) {
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 0;
-    spawn.unk6A = 1;
+    spawn.lightMode = 1;
     spawn.owner = actor;
     spawn.scale.x = 1.0f;
     spawn.scale.y = 1.0f;

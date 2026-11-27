@@ -608,7 +608,7 @@ Splash *particle_spawnSplash(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 
     spawn.life = lifetime + 16;
     spawn.flags = 0x35;
     spawn.kind = 1;
-    spawn.unk14 = -1;
+    spawn.shapeKind = -1;
     spawn.material = material;
     motion.halfWidth = scale;
     motion.velocity = *vel;

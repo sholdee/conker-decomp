@@ -109,7 +109,7 @@ void effect_spawnBreakUp(Actor *obj, u8 arg1, s32 arg2) {
         chunk.scale.z = 1.0f;
         chunk.flags = 0x197D;
         chunk.variant = 0;
-        chunk.unk5C = NULL;
+        chunk.zone = NULL;
         chunk.alpha = 0xFF;
         chunk.updateFn = 1;
         chunk.update2Fn = 0;
@@ -119,7 +119,7 @@ void effect_spawnBreakUp(Actor *obj, u8 arg1, s32 arg2) {
         chunk.destroyFn = 0;
         chunk.squashFn = 0;
         chunk.matrixFn = 0;
-        chunk.unk6A = 0;
+        chunk.lightMode = 0;
         chunk.owner = NULL;
         chunk.ownerId = 0;
         chunk.fadeStart = 1;

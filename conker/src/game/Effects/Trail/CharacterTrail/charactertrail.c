@@ -36,7 +36,7 @@ void trail_spawnCharacterTrail(Actor *owner, u8 fxOwner, s32 fxList) {
     spawn.life = 300;
     spawn.flags = 0x12;
     spawn.kind = 15;
-    spawn.unk14 = 1;
+    spawn.shapeKind = 1;
     init.targetWidth = 20.0f;
     init.width = 20.0f;
     init.mode = 1;

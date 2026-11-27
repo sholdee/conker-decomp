@@ -41,7 +41,7 @@ void particle_spawnFootDust(Actor *actor, u8 foot) {
         spawn.model = 5;
         spawn.flags = 0x29E8;
         spawn.variant = 0;
-        spawn.unk5C = NULL;
+        spawn.zone = NULL;
         spawn.alpha = 0xFF;
         spawn.updateFn = 1;
         spawn.update2Fn = 0;
@@ -51,7 +51,7 @@ void particle_spawnFootDust(Actor *actor, u8 foot) {
         spawn.destroyFn = 0;
         spawn.squashFn = 0;
         spawn.matrixFn = 0;
-        spawn.unk6A = 1;
+        spawn.lightMode = 1;
         spawn.owner = actor;
         spawn.scale.x = 1.0f;
         spawn.scale.y = 1.0f;

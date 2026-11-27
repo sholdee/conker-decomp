@@ -538,7 +538,7 @@ void effect_spawnScreenCash(s16 duration, u8 owner, s32 kind) {
         model.postDrawFunc = 0;
         model.lifetime = duration;
         model.model = 0xA5;
-        model.unkC = 0x17;
+        model.bank = 0x17;
         model.render.otherModeH = 0;
         model.render.setGeometryMode = 0x200405;
         model.render.clearGeometryMode = 0x60200;
@@ -558,7 +558,7 @@ void effect_spawnScreenCash(s16 duration, u8 owner, s32 kind) {
         model.color1.alpha = 0xFF;
         model.owner = 0;
         model.ownerId = 0;
-        model.unk41 = 1;
+        model.lightMode = 1;
         model.pos = gZeroVec3f;
         model.fadeStart = 10;
         model.fadeRate = 25;

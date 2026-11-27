@@ -186,7 +186,7 @@ void func_150EB8C4(void) {
         spawn.scale.z = 1.0f;
         spawn.flags = 0x29E9;
         spawn.variant = 0;
-        spawn.unk5C = 0;
+        spawn.zone = 0;
         spawn.alpha = 0xFF;
         spawn.updateFn = 13;
         spawn.update2Fn = 0;
@@ -196,7 +196,7 @@ void func_150EB8C4(void) {
         spawn.destroyFn = 0;
         spawn.squashFn = 0;
         spawn.matrixFn = 2;
-        spawn.unk6A = 2;
+        spawn.lightMode = 2;
         spawn.owner = NULL;
         spawn.ownerId = 0;
         spawn.fadeStart = 25;

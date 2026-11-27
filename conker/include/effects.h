@@ -246,7 +246,7 @@ typedef struct ParticleSpawn {
     /* 0x56 */ u16 model;
     /* 0x58 */ u8 variant;
     /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ ZoneNode *unk5C; /* collision_findZoneLeaf zone of the spawn point, or NULL */
+    /* 0x5C */ ZoneNode *zone; /* collision_findZoneLeaf zone of the spawn point, or NULL */
     /* 0x60 */ u8 alpha;
     /* 0x61 */ u8 updateFn;
     /* 0x62 */ u8 update2Fn;
@@ -257,7 +257,7 @@ typedef struct ParticleSpawn {
     /* 0x67 */ u8 squashFn;
     /* 0x68 */ u8 matrixFn;
     /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
+    /* 0x6A */ u8 lightMode;
     /* 0x6B */ u8 pad6B;
     /* 0x6C */ struct Actor *owner;
     /* 0x70 */ u8 ownerId;
@@ -285,7 +285,7 @@ typedef struct ParticleSpawn78 {
     /* 0x56 */ u16 model;
     /* 0x58 */ u8 variant;
     /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ ZoneNode *unk5C; /* collision_findZoneLeaf zone of the spawn point, or NULL */
+    /* 0x5C */ ZoneNode *zone; /* collision_findZoneLeaf zone of the spawn point, or NULL */
     /* 0x60 */ u8 alpha;
     /* 0x61 */ u8 updateFn;
     /* 0x62 */ u8 update2Fn;
@@ -296,7 +296,7 @@ typedef struct ParticleSpawn78 {
     /* 0x67 */ u8 squashFn;
     /* 0x68 */ u8 matrixFn;
     /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
+    /* 0x6A */ u8 lightMode;
     /* 0x6B */ u8 pad6B;
     /* 0x6C */ struct Actor *owner;
     /* 0x70 */ u8 ownerId;
@@ -309,12 +309,12 @@ typedef struct ParticleSpawn78 {
 /* Point lights attached to a sprite or particle, applied through math_emitPointLights (light_pickLights and
  * light_reemitLights). */
 typedef struct ModelLink {
-    /* 0x00 */ s32 model;                  /* light_pickLights's maxLights; 0 = no lights */
-    /* 0x04 */ u8 unk4;                    /* light_pickLights's light count */
+    /* 0x00 */ s32 maxLights;              /* light_pickLights's maxLights; 0 = no lights */
+    /* 0x04 */ u8 lightCount;              /* light_pickLights's light count */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ PointLightGfx *handles[4];  /* light_allocGfxLights buffers, one per viewport, 0..gScreenLayout */
     /* 0x18 */ Ambient *sharedHandle;      /* light_allocAmbients buffer */
-    /* 0x1C */ s32 unk1C;                  /* light_pickLights's mask */
+    /* 0x1C */ s32 lightMask;              /* light_pickLights's mask */
 } ModelLink; /* size 0x20 */
 
 /* A pooled model (physics) particle of game/Particle/ModelParticle/modelparticle.c (at most 300 live, see gModelParticleCount). Bytes 0x10..0x8B are
@@ -338,7 +338,7 @@ typedef struct ModelParticle {
     /* 0x066 */ u16 model;
     /* 0x068 */ u8 variant;
     /* 0x069 */ u8 pad69[3];
-    /* 0x06C */ ZoneNode *unk6C; /* ParticleSpawn.unk5C */
+    /* 0x06C */ ZoneNode *zone; /* ParticleSpawn.zone */
     /* 0x070 */ u8 alpha;
     /* 0x071 */ u8 updateFn;
     /* 0x072 */ u8 update2Fn;
@@ -349,7 +349,7 @@ typedef struct ModelParticle {
     /* 0x077 */ u8 squashFn;
     /* 0x078 */ u8 matrixFn;
     /* 0x079 */ s8 drawFn;
-    /* 0x07A */ u8 unk7A;
+    /* 0x07A */ u8 lightMode; /* math_emitPointLights's mode (ParticleSpawn.lightMode) */
     /* 0x07B */ u8 pad7B;
     /* 0x07C */ struct Actor *owner;
     /* 0x080 */ u8 ownerId;
@@ -554,11 +554,11 @@ typedef struct DebrisEmitter {
 typedef struct EffectTemplate {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 life;
-    /* 0x0E */ u16 flags;     /* bit 0: life counts down; 0x10: run unk14's handler; 0x20: pass material to the draw;
+    /* 0x0E */ u16 flags;     /* bit 0: life counts down; 0x10: run shapeKind's handler; 0x20: pass material to the draw;
                                * 0x40: allocate as type 0x4D (else 0x22); trails: 2 attached (the strip starts
                                * at pos), 4 pos is valid, 8 fading */
     /* 0x10 */ s32 kind;      /* index into gEffectObjDestroyFuncs / gEffectObjFreeFuncs / gEffectObjMessageFuncs */
-    /* 0x14 */ s8 unk14;      /* index into gEffectObjShapeFuncs, -1: none */
+    /* 0x14 */ s8 shapeKind;  /* index into gEffectObjShapeFuncs, -1: none */
     /* 0x15 */ u8 itemCount;  /* number of items allocated after the user data */
     /* 0x16 */ u8 pad16[2];
     /* 0x18 */ s32 material; /* math_emitPointLights's surface material, with flags 0x20 */
@@ -1338,7 +1338,7 @@ typedef struct EffectParams {
     /* 0x05 */ u8 pad5;
     /* 0x06 */ s16 lifetime;
     /* 0x08 */ s32 model;
-    /* 0x0C */ s32 unkC;
+    /* 0x0C */ s32 bank;
     /* 0x10 */ TrailRender render;
     /* 0x30 */ Color8 color0;
     /* 0x34 */ Color8 color1;
@@ -1346,7 +1346,7 @@ typedef struct EffectParams {
     /* 0x39 */ u8 pad39[3];
     /* 0x3C */ struct Actor *owner; /* see effect_handleOwnerActorEvent */
     /* 0x40 */ u8 ownerId;
-    /* 0x41 */ u8 unk41;
+    /* 0x41 */ u8 lightMode;
     /* 0x42 */ u8 pad42[2];
     /* 0x44 */ Vec3f pos;
     /* 0x50 */ ZoneNode *mask;    /* with flags & 8: drawn only in the views that see this zone */
@@ -1857,7 +1857,7 @@ typedef struct EffectTemplate18 {
     /* 0x0C */ s16 life;
     /* 0x0E */ u16 flags;
     /* 0x10 */ s32 kind;
-    /* 0x14 */ s8 unk14;
+    /* 0x14 */ s8 shapeKind;
     /* 0x15 */ u8 itemCount;
     /* 0x16 */ u8 pad16[2];
 } EffectTemplate18;
@@ -2303,7 +2303,7 @@ typedef struct TrackerTrailData {
 typedef struct TrackerTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
+    /* 0x84 */ u8 buffers[0x10];
     /* 0x94 */ struct TrackerTrailPoint *points; /* game/Effects/Trail/TrackerTrail/trackertrail.c */
     /* 0x98 */ TrackerTrailData *state;
 } TrackerTrail;
@@ -2841,8 +2841,8 @@ typedef struct DynModelDesc {
     /* 0x24 */ u8 unk24;
     /* 0x25 */ u8 unk25;
     /* 0x26 */ u8 pad26[0xA];
-    /* 0x30 */ s32 unk30;      // model asset, passed to rom_loadPathTable
-    /* 0x34 */ s32 unk34;
+    /* 0x30 */ s32 assetTable;  // rom_loadPathTable path, first index: the asset table (9)
+    /* 0x34 */ s32 assetIndex;  // second index: the model's entry in that table
     /* 0x38 */ u8 kind;        // selects the gDynModelDestroyFuncs / gDynModelFreeFuncs handlers
     /* 0x39 */ u8 viewportMask; // viewports drawn in when DYNMODEL_FLAG_VIEWPORT_MASK is set
     /* 0x3A */ u8 pad3A[2];

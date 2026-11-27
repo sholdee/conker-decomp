@@ -237,7 +237,7 @@ s32 pipeexplode_spawnChunk(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 origin
     spawn.model = 0x1C;
     spawn.variant = 0;
     spawn.sizeXZ = pitchSin;
-    spawn.unk5C = 0;
+    spawn.zone = 0;
     spawn.alpha = 0xFF;
     spawn.updateFn = 1;
     spawn.update2Fn = 0;
@@ -247,7 +247,7 @@ s32 pipeexplode_spawnChunk(s32 shape, s32 index, f32 x, f32 y, f32 z, f32 origin
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 0;
-    spawn.unk6A = 2;
+    spawn.lightMode = 2;
     spawn.owner = 0;
     spawn.ownerId = 0;
     spawn.fadeStart = 1;
@@ -335,7 +335,7 @@ s32 pipeexplode_spawnTunableChunk(s32 shape, s32 index, f32 x, f32 y, f32 z, f32
     spawn.sizeXZ = pitchSin;
     spawn.model = 0x1C;
     spawn.variant = 0;
-    spawn.unk5C = 0;
+    spawn.zone = 0;
     spawn.alpha = 0xFF;
     spawn.updateFn = 1;
     spawn.radius = pitchSin * 0.1000000015f;
@@ -346,7 +346,7 @@ s32 pipeexplode_spawnTunableChunk(s32 shape, s32 index, f32 x, f32 y, f32 z, f32
     spawn.destroyFn = 0;
     spawn.squashFn = 0;
     spawn.matrixFn = 0;
-    spawn.unk6A = 2;
+    spawn.lightMode = 2;
     spawn.owner = 0;
     spawn.ownerId = 0;
     spawn.fadeStart = 32;

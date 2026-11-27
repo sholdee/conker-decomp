@@ -299,7 +299,7 @@ void particle_emitDebris(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f
     }
 
     debris.variant = 0;
-    debris.unk5C = 0;
+    debris.zone = 0;
     debris.alpha = 0xFF;
     debris.updateFn = 8;
     debris.update2Fn = 0;
@@ -310,9 +310,9 @@ void particle_emitDebris(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f
     debris.squashFn = 0;
     debris.matrixFn = 2;
     if (effect->base.callbackSet == 0x1A) { /* emitted by effect 0x1A (particle_updateSegmentEmitter) */
-        debris.unk6A = 1;
+        debris.lightMode = 1;
     } else {
-        debris.unk6A = 2;
+        debris.lightMode = 2;
     }
     debris.owner = object;
     debris.ownerId = object->unique_id;

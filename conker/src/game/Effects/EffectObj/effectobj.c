@@ -42,7 +42,7 @@ static s32 (*gEffectObjUpdate2Funcs[18])() = {
     trail_emitScatterTrail, trail_fadeFallingTrail, trail_spawnStreamParticles, effect_followRibbonTrail, trail_followTarget, flamethrower_emitFlame, trail_updateCharacterTrail,
     trail_moveRibbon, trail_followWaveTrail, trail_followAnchoredTrail, trail_sampleTrackerTrail,
 };
-/* Update handlers by head.tmpl.unk14 (flag 0x10). */
+/* Shape handlers by head.tmpl.shapeKind (flag 0x10). */
 static s32 (*gEffectObjShapeFuncs[8])() = {
     flamethrower_shapeFlame, trail_trimCharacterTrail, trail_shapeRibbon, trail_shapeWaveTrail, trail_shapeAnchoredTrail, trail_tracePissTrail, trail_shapeTrackerTrail,
     trail_fadeStreamEnds,
@@ -107,7 +107,7 @@ void effect_updateEffectObj(EffectObj *obj) {
     }
 
     if (obj->head.tmpl.flags & 0x10) {
-        kind = obj->head.tmpl.unk14;
+        kind = obj->head.tmpl.shapeKind;
         if (kind < -1 || kind >= 8) {
             effect_destroyObject(&obj->head.header);
             return;
@@ -223,9 +223,9 @@ void *effect_newEffectObj(EffectTemplate *header, s32 dataSize, s32 itemSize, s3
         obj->collision.flags = 0;
     }
 
-    obj->head.model.model = maxLights;
-    obj->head.model.unk1C = lightMask;
-    obj->head.model.unk4 = 0;
+    obj->head.model.maxLights = maxLights;
+    obj->head.model.lightMask = lightMask;
+    obj->head.model.lightCount = 0;
 
     for (i = 0; i < 4; i++) {
         obj->head.model.handles[i] = NULL;
