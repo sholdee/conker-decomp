@@ -43,7 +43,7 @@ extern s16 gScanBestFlagCount;
 extern u8 D_800BE3DE;
 extern s8 gCheckpointLevel;
 extern u8 gCheckpointSpawn;
-extern u32 D_800BE3E4; // saved clock (seconds)
+extern u32 D_800BE3E4; // the player's score as saved (stat 6; 2 bytes in the save file)
 extern s32 gPlayTime; // play time (seconds)
 extern s8 gEepromRequestArg; // argument of the pending EEPROM request gEepromRequest
 extern u8 *gSaveEntryBits; /* bit width of each of the 69 gPlayedCutscenes entries in a save file */

@@ -1904,7 +1904,7 @@ typedef struct {
 /* Summary of one of the three save files the player can pick. */
 typedef struct SaveSlotInfo {
     /* 0x00 */ s32 playTime;   /* gPlayTime, in seconds */
-    /* 0x04 */ u32 unk4;       /* D_800BE3E4 */
+    /* 0x04 */ u32 score;      /* D_800BE3E4, the player's score as saved */
     /* 0x08 */ s32 sequence;   /* incremented on every save, -1 when the slot is empty */
     /* 0x0C */ u8 checkpointLevel; /* gCheckpointLevel */
     /* 0x0D */ u8 flagCount;   /* number of bits set in the 27 bytes at gTaskDoneBits */
@@ -3047,15 +3047,15 @@ typedef struct ObjectBehavior {
 /* Saved settings of one multiplayer mode (gModeSettings[mode]); save_applyModeSettings copies them into gSettings[]. */
 typedef struct ModeSettings {
     /* 0x0 */ s8 unk0;
-    /* 0x1 */ s8 unk1; /* -> gSettings[2], at least 1 */
-    /* 0x2 */ s8 unk2; /* -> gSettings[3] */
-    /* 0x3 */ u8 unk3; /* -> gSettings[16], 0..4 */
+    /* 0x1 */ s8 lives; /* -> gSettings[2], at least 1 */
+    /* 0x2 */ s8 timeLimit; /* -> gSettings[3], in minutes; below 3: no limit */
+    /* 0x3 */ u8 botDifficulty; /* -> gSettings[16], 0..4 */
     /* 0x4 */ u8 unk4; /* -> gSettings[17] */
     /* 0x5 */ u8 unk5; /* mode-specific setting (gSettings[4] / [13] / [18] / [7]) */
     /* 0x6 */ u8 unk6; /* mode-specific setting (gSettings[14] / [19]) */
     /* 0x7 */ u8 unk7;
     /* 0x8 */ u8 unk8; /* -> gSettings[22] */
-    /* 0x9 */ u8 unk9; /* -> gSettings[6] */
+    /* 0x9 */ u8 scoreLimit; /* -> gSettings[6] */
 } ModeSettings; /* size 0xA */
 
 /* A HUD image drawn by hud_drawSprite: a texture id (split into 4KB chunks of consecutive ids) and its format.
@@ -3100,16 +3100,17 @@ typedef struct {
     /* 0x04 */ f32 stepSpeed;     /* its speed */
     /* 0x08 */ f32 pathProgress;  /* progress along the current stop's path */
     /* 0x0C */ f32 pathSpeed;     /* its speed */
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
+    /* 0x10 */ f32 focusShiftWeight; /* 1 when a menu-1 jump starts, then x0.85 per frame (a ramp while lookBack == 3) */
+    /* 0x14 */ f32 focusShiftX;   /* added to the focus, times focusShiftWeight: the old stop's direction minus */
+    /* 0x18 */ f32 focusShiftY;   /* the new stop's, from the home node */
+    /* 0x1C */ f32 focusShiftZ;
     /* 0x20 */ u16 input;        /* MENU_* bits pressed this frame on controller 1 */
     /* 0x22 */ u16 padInput[4];  /* MENU_* bits pressed this frame, per controller */
-    /* 0x2A */ s8 unk2A;
+    /* 0x2A */ s8 lookBack;       /* nonzero: the focus is mirrored through the eye; 1: entered menu 1 from the end of
+                                     path 0, 2: a B jump from stops 2..6, 3: after the jump */
     /* 0x2B */ s8 currentStop;    /* current path stop */
     /* 0x2C */ s8 displayedStop;  /* displayed stop */
-    /* 0x2D */ s8 unk2D;
+    /* 0x2D */ s8 unmappedStop;   /* displayedStop before menu 1 remaps it through D_800AB570 */
     /* 0x2E */ s8 stickX[4];     /* last stick position, per controller */
     /* 0x32 */ s8 stickY[4];
     /* 0x36 */ s8 repeatX[4];    /* stick auto-repeat timers */
@@ -3119,7 +3120,8 @@ typedef struct {
     /* 0x40 */ s8 prevPage;
     /* 0x41 */ s8 cursor;
     /* 0x42 */ s8 selection;     /* e.g. row of the mode table gModeEntries */
-    /* 0x43 */ s8 unk43;
+    /* 0x43 */ s8 stepRequest;    /* nonzero: step to the next stop on the next idle frame (set only while unk44 != 0,
+                                     and nothing sets unk44 nonzero) */
     /* 0x44 */ s8 unk44;
     /* 0x45 */ char pad45;
     /* 0x46 */ s16 score[16];    /* per-player score (checked against the limit gSettings[6], capped at 9999) */
@@ -3134,7 +3136,7 @@ typedef struct {
     /* 0x5 */ s8 teamSetup; /* gTeamSetups index; negative: -(preset + 1), every player on a team of their own */
     /* 0x6 */ s8 introCue;   /* cue of gModeIntroCues played before the match; -1: none */
     /* 0x7 */ s8 resultCue;  /* cue of gModeResultCues played with the results; -1, -2: special endings (save_endMatch) */
-    /* 0x8 */ s8 unk8;
+    /* 0x8 */ s8 defaultCharacter;
     /* 0x9 */ s8 unk9;
 } ModeEntry; /* size 0xA */
 

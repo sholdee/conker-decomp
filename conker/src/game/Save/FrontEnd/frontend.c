@@ -104,7 +104,7 @@ typedef struct {
     f32 scale;
     s8 yOffset;
     u8 spawnType;
-    u8 unk6;
+    u8 character;
     u8 pad7;
 } Entry151E7F60;
 
@@ -117,7 +117,7 @@ typedef struct {
     /* 0x4 */ s8 minSlots3;   /* the same, with 3 or more players */
     /* 0x5 */ s8 maxSlots3;
     /* 0x6 */ s8 teamMax3;
-    /* 0x7 */ s8 unk7;        /* if nonzero: team 1's size, and the cap of teams 1-3 */
+    /* 0x7 */ s8 team1Max;    /* if nonzero: team 1's size, and the cap of the teams after team 0 (only 2-team setups set it) */
     /* 0x8 */ s8 teamColor[4];
 } TeamSetup;
 
@@ -1277,7 +1277,7 @@ void save_updateSaveSlotPage(void) {
         text_setColor(0x20, 0x55, 0xFF, alpha);
     }
     if (entry->sequence != -1) {
-        score = entry->unk4;
+        score = entry->score;
         y = 0;
         if (score == 32000) {
             score = 1000000;
@@ -1342,7 +1342,7 @@ void save_updateSaveSlotPage(void) {
                 D_800BE3E4 = 0;
                 zone_resetTaskProgress();
                 entry->checkpointLevel = 0x18;
-                entry->unk4 = 0;
+                entry->score = 0;
                 entry->sequence = -1;
                 gMenuLoadStep = 0;
             } else {
@@ -1622,7 +1622,7 @@ void save_updateJoinPage(void) {
         maxPlayers = 4;
     }
     D_800E0B8C = 0;
-    if ((nextPage == 5) && (gModeEntries[gMenuState->selection].unk8 != 8)) {
+    if ((nextPage == 5) && (gModeEntries[gMenuState->selection].defaultCharacter != 8)) {
         if (gMenuCharacters[0] == NULL) {
             save_spawnMenuCharacter(0, gPlayerCharacters[0]);
         }
@@ -1857,7 +1857,7 @@ void save_updateTeamPage(void) {
     }
     text_setColor(0xFF, 0xFF, 0xFF, alpha);
     setup = &gTeamSetups[gModeEntries[gMenuState->selection].teamSetup];
-    special = setup->unk7;
+    special = setup->team1Max;
     gTeamCount = setup->teamCount;
     gTeamColorIds[0] = setup->teamColor[0];
     gTeamColorIds[1] = setup->teamColor[1];
@@ -2073,19 +2073,19 @@ void save_applyModeSettings(void) {
 
     mode = gModeEntries[gMenuState->selection].mode;
     settings = &gModeSettings[mode];
-    if (settings->unk3 >= 5) {
-        settings->unk3 = 4;
+    if (settings->botDifficulty >= 5) {
+        settings->botDifficulty = 4;
     }
-    if (settings->unk3 < 0) { // matching: never true for a u8, but IDO still emits the test
-        settings->unk3 = 0;
+    if (settings->botDifficulty < 0) { // matching: never true for a u8, but IDO still emits the test
+        settings->botDifficulty = 0;
     }
-    if (settings->unk1 <= 0) {
-        settings->unk1 = 1;
+    if (settings->lives <= 0) {
+        settings->lives = 1;
     }
-    gSettings[2] = settings->unk1;
-    gSettings[3] = settings->unk2;
+    gSettings[2] = settings->lives;
+    gSettings[3] = settings->timeLimit;
     gSettings[11] = 0;
-    gSettings[16] = settings->unk3;
+    gSettings[16] = settings->botDifficulty;
     gSettings[17] = settings->unk4;
     switch (mode) {
         case 0:
@@ -2114,7 +2114,7 @@ void save_applyModeSettings(void) {
             break;
     }
     gSettings[22] = settings->unk8;
-    gSettings[6] = settings->unk9;
+    gSettings[6] = settings->scoreLimit;
     save_validateSettings();
 }
 
@@ -2126,9 +2126,9 @@ void save_storeModeSettings(void) {
     mode = gModeEntries[gMenuState->selection].mode;
     settings = &gModeSettings[mode];
     settings->unk0 = 0;
-    settings->unk1 = gSettings[2];
-    settings->unk2 = gSettings[3];
-    settings->unk3 = gSettings[16];
+    settings->lives = gSettings[2];
+    settings->timeLimit = gSettings[3];
+    settings->botDifficulty = gSettings[16];
     settings->unk4 = gSettings[17];
     switch (mode) {
         case 0:
@@ -2150,7 +2150,7 @@ void save_storeModeSettings(void) {
             break;
     }
     settings->unk8 = gSettings[22];
-    settings->unk9 = gSettings[6];
+    settings->scoreLimit = gSettings[6];
     save_requestWriteModeSettings(gSettings);
 }
 
@@ -2158,7 +2158,7 @@ void save_storeModeSettings(void) {
 
 
 /*
- * For modes whose entry has unk8 == 8: finds connected controllers (gConnectedPads) that are not yet in the
+ * For modes whose entry has defaultCharacter == 8: finds connected controllers (gConnectedPads) that are not yet in the
  * roster gRoster[0..3]. With out == NULL they are inserted as extra roster slots; otherwise they are
  * written to out. Returns the number of rostered players, or 0 when nothing was added.
  */
@@ -2176,7 +2176,7 @@ s32 save_addPartnerPlayers(s32 *out) {
         gPartnerSlots[1] = 0;
     }
 
-    if (gModeEntries[gMenuState->selection].unk8 == 8) {
+    if (gModeEntries[gMenuState->selection].defaultCharacter == 8) {
         mask = 0;
         count = 0;
         if (gSettings[14] != 0) {
@@ -2315,7 +2315,7 @@ void save_setupMatch(void) {
     if (gSettings[3] >= 3) {
         gDefaultLives = 99;
     }
-    if (entry->unk8 == 8) {
+    if (entry->defaultCharacter == 8) {
         // matching: a do-while (not a for) gives the target's store order
         i = 0;
         do {
@@ -2346,17 +2346,17 @@ void save_setupMatch(void) {
             D_8008FD88++;
         }
     }
-    if (entry->unk8 != 8) {
+    if (entry->defaultCharacter != 8) {
         v = 0;
         if (D_800E0B8C != 0) {
             for (i = 0; gRoster[i] >= 0 && i < 4; i++) {
-                gDefaultCharacters[i] = gMenuCharacterTypes[gPlayerCharacters[i]].unk6;
+                gDefaultCharacters[i] = gMenuCharacterTypes[gPlayerCharacters[i]].character;
             }
             v = i;
         } else { // matching: the empty else changes IDO's branch layout (16 bytes)
         }
         for (i = v; i < 16; i++) {
-            gDefaultCharacters[i] = entry->unk8;
+            gDefaultCharacters[i] = entry->defaultCharacter;
             if (gMenuState->selection == 7) {
                 if (gRoster[i] < -1) {
                     gDefaultCharacters[i] = 11;
@@ -2371,9 +2371,9 @@ void save_setupMatch(void) {
                 } else {
                     gDefaultCharacters[i] = (math_random() & 0xF) + 17;
                 }
-            } else if ((gRosterTeams[i] != 0) && (entry->unk8 == 4)) {
+            } else if ((gRosterTeams[i] != 0) && (entry->defaultCharacter == 4)) {
                 gDefaultCharacters[i] = 3;
-            } else if ((gRoster[i] < -1) && (entry->unk8 == 11)) {
+            } else if ((gRoster[i] < -1) && (entry->defaultCharacter == 11)) {
                 gDefaultCharacters[i] = (i & 3) + 12;
             }
         }
@@ -3166,13 +3166,13 @@ void save_resetMenuState(void) {
     gMenuState->menu = 0;
     gMenuState->page = 0;
     gMenuState->cursor = 0;
-    gMenuState->unk43 = 0;
+    gMenuState->stepRequest = 0;
     gMenuState->unk44 = 0;
-    gMenuState->unk10 = 0.0f;
-    gMenuState->unk2A = 0;
-    gMenuState->unk14 = 0.0f;
-    gMenuState->unk18 = 0.0f;
-    gMenuState->unk1C = 0.0f;
+    gMenuState->focusShiftWeight = 0.0f;
+    gMenuState->lookBack = 0;
+    gMenuState->focusShiftX = 0.0f;
+    gMenuState->focusShiftY = 0.0f;
+    gMenuState->focusShiftZ = 0.0f;
     gMenuState->pathSpeed = 0.0f;
     gMenuState->pathProgress = 0.0f;
 }
@@ -3842,8 +3842,8 @@ void save_forgetTextBanks(void) {
 }
 
 typedef struct {
-    u16 unk0;
-    u16 unk2;
+    u16 forwardTune;
+    u16 backTune;
 } Snd151E6C1C;
 
 u8 D_8008FF40[6] = { 1, 2, 3, 4, 5, 6 };
@@ -3873,11 +3873,9 @@ static const Snd151E6C1C D_800AB920[8] = {
     { 42, 43 },
 };
 
-#define UNK2AC_F32 (*(f32 *)&obj->focus.z) // an f32; structs.h declares Camera.unk2AC as s32
-
 /*
  * Moves object index along the node path selected by gMenuState (currentStop = current stop, pathProgress = progress
- * along it), spline-interpolating its position (unk2F8..) and look-at point (unk2A4..), and drives the
+ * along it), spline-interpolating its position (eye) and look-at point (focus), and drives the
  * related objects returned by gfx_findObjectById.
  */
 void save_updateMenuCamera(s32 index) {
@@ -3945,10 +3943,10 @@ void save_updateMenuCamera(s32 index) {
     } else if (gMenuState->pathSpeed != 0.0f || gMenuState->pathProgress != 0.0f) {
         if ((gMenuState->input & 0x20) && (gMenuState->menu == 0 || gMenuState->currentStop != 0)) {
             gMenuState->pathSpeed = -speeds[gMenuState->currentStop];
-            music_playTune(sounds[gMenuState->currentStop].unk2, gMenuTune, 0);
-            gMenuTune = sounds[gMenuState->currentStop].unk2;
+            music_playTune(sounds[gMenuState->currentStop].backTune, gMenuTune, 0);
+            gMenuTune = sounds[gMenuState->currentStop].backTune;
         }
-        if (gMenuState->unk2A != 0 && gMenuState->menu == 1 && gMenuState->currentStop == 0) {
+        if (gMenuState->lookBack != 0 && gMenuState->menu == 1 && gMenuState->currentStop == 0) {
             if (gMenuState->input & 0x20) {
                 gMenuState->pathSpeed = speeds[gMenuState->currentStop];
             }
@@ -3963,15 +3961,15 @@ void save_updateMenuCamera(s32 index) {
             gMenuState->pathProgress = 0.0f;
             gMenuState->pathSpeed = 0.0f;
             if (gMenuState->displayedStop == 0 && gMenuState->menu == 1 && gMenuState->unk44 != 0) {
-                gMenuState->unk43 = 1;
+                gMenuState->stepRequest = 1;
                 gMenuState->unk44 = 0;
             }
         }
     } else {
         if (gMenuState->input & 0x10) {
             gMenuState->pathSpeed = speeds[gMenuState->currentStop];
-            music_playTune(sounds[gMenuState->currentStop].unk0, gMenuTune, 0);
-            gMenuTune = sounds[gMenuState->currentStop].unk0;
+            music_playTune(sounds[gMenuState->currentStop].forwardTune, gMenuTune, 0);
+            gMenuTune = sounds[gMenuState->currentStop].forwardTune;
         } else {
             if (gMenuState->input & 4) {
                 gMenuState->currentStop--;
@@ -3981,10 +3979,10 @@ void save_updateMenuCamera(s32 index) {
                     gMenuState->currentStop += nodeCount;
                 }
             }
-            if ((gMenuState->input & 8) || gMenuState->unk43 != 0) {
+            if ((gMenuState->input & 8) || gMenuState->stepRequest != 0) {
                 gMenuState->stepSpeed = 0.05000000075f;
             }
-            gMenuState->unk43 = 0;
+            gMenuState->stepRequest = 0;
             if (gMenuState->currentStop < 0) {
                 gMenuState->currentStop += nodeCount;
             }
@@ -4072,7 +4070,7 @@ void save_updateMenuCamera(s32 index) {
             obj->eye.z = math_catmullRom(z, seg, turnT);
             obj->focus.x = math_catmullRom(x, seg + 1, turnT);
             obj->focus.y = math_catmullRom(y, seg + 1, turnT);
-            UNK2AC_F32 = math_catmullRom(z, seg + 1, turnT);
+            obj->focus.z = math_catmullRom(z, seg + 1, turnT);
         } else {
             mp_getNodePos(path[0], &x[0], &y[0], &z[0]);
             mp_getNodePos(path[1], &x[1], &y[1], &z[1]);
@@ -4088,7 +4086,7 @@ void save_updateMenuCamera(s32 index) {
             obj->eye.z = z[0] + (z[1] - z[0]) * pathT;
             obj->focus.x = x[1] + (x[2] - x[1]) * pathT;
             obj->focus.y = y[1] + (y[2] - y[1]) * pathT;
-            UNK2AC_F32 = z[1] + (z[2] - z[1]) * pathT;
+            obj->focus.z = z[1] + (z[2] - z[1]) * pathT;
         }
     } else {
         idx = gMenuState->currentStop - 1;
@@ -4104,24 +4102,24 @@ void save_updateMenuCamera(s32 index) {
         }
         obj->focus.x = math_catmullRom(x, 0, turnT);
         obj->focus.y = math_catmullRom(y, 0, turnT);
-        UNK2AC_F32 = math_catmullRom(z, 0, turnT);
+        obj->focus.z = math_catmullRom(z, 0, turnT);
     }
 
-    if (gMenuState->unk2A != 0) {
+    if (gMenuState->lookBack != 0) {
         dx = obj->eye.x - obj->focus.x;
         dy = obj->eye.y - obj->focus.y;
-        dz = obj->eye.z - UNK2AC_F32;
+        dz = obj->eye.z - obj->focus.z;
         obj->focus.x = obj->eye.x + dx;
         obj->focus.y = obj->eye.y + dy;
-        UNK2AC_F32 = obj->eye.z + dz;
+        obj->focus.z = obj->eye.z + dz;
     }
-    obj->focus.x += gMenuState->unk10 * gMenuState->unk14;
-    obj->focus.y += gMenuState->unk10 * gMenuState->unk18;
-    UNK2AC_F32 += gMenuState->unk10 * gMenuState->unk1C;
-    if (gMenuState->unk2A != 3) {
-        gMenuState->unk10 *= 0.8500000238f;
+    obj->focus.x += gMenuState->focusShiftWeight * gMenuState->focusShiftX;
+    obj->focus.y += gMenuState->focusShiftWeight * gMenuState->focusShiftY;
+    obj->focus.z += gMenuState->focusShiftWeight * gMenuState->focusShiftZ;
+    if (gMenuState->lookBack != 3) {
+        gMenuState->focusShiftWeight *= 0.8500000238f;
     } else {
-        gMenuState->unk10 = -((0.25f - gMenuState->pathProgress) * 4.0f);
+        gMenuState->focusShiftWeight = -((0.25f - gMenuState->pathProgress) * 4.0f);
     }
 
     if (gMenuState->menu == 1) {
@@ -4135,51 +4133,51 @@ void save_updateMenuCamera(s32 index) {
         bx -= ax;
         by -= ay;
         bz -= az;
-        if (gMenuState->unk2A != 0) {
+        if (gMenuState->lookBack != 0) {
             bx = -bx;
             by = -by;
             bz = -bz;
         }
-        if (gMenuState->pathProgress == 0.0f && (gMenuState->input & 0x20) && gMenuState->unk10 < 0.009999999776f &&
+        if (gMenuState->pathProgress == 0.0f && (gMenuState->input & 0x20) && gMenuState->focusShiftWeight < 0.009999999776f &&
             gMenuState->stepSpeed == 0.0f) {
             gMenuState->currentStop = 0;
-            if (gMenuState->unk2D >= 2 && gMenuState->unk2D < 7) {
-                gMenuState->unk2A = 2;
+            if (gMenuState->unmappedStop >= 2 && gMenuState->unmappedStop < 7) {
+                gMenuState->lookBack = 2;
             }
             state = 1;
             gMenuState->pathSpeed = speeds[gMenuState->currentStop];
-            music_playTune(sounds[gMenuState->currentStop].unk0, gMenuTune, 0);
-            gMenuTune = sounds[gMenuState->currentStop].unk0;
+            music_playTune(sounds[gMenuState->currentStop].forwardTune, gMenuTune, 0);
+            gMenuTune = sounds[gMenuState->currentStop].forwardTune;
         }
-        if (gMenuState->pathProgress < 0.25f && gMenuState->unk2A == 1) {
+        if (gMenuState->pathProgress < 0.25f && gMenuState->lookBack == 1) {
             gMenuState->currentStop = 4;
             state = 2;
-            gMenuState->unk2A = 0;
+            gMenuState->lookBack = 0;
         }
-        if (gMenuState->pathProgress == 0.0f && gMenuState->unk2A == 3) {
+        if (gMenuState->pathProgress == 0.0f && gMenuState->lookBack == 3) {
             gMenuState->currentStop = 4;
-            gMenuState->unk2A = 0;
-            gMenuState->unk10 = 0.0f;
+            gMenuState->lookBack = 0;
+            gMenuState->focusShiftWeight = 0.0f;
         }
         if (state != 0) {
             mp_getNodePos(mp_findNodeById(nodeTable[gMenuState->currentStop]), &cx, &cy, &cz);
             cx -= ax;
             cy -= ay;
             cz -= az;
-            if (gMenuState->unk2A != 0) {
+            if (gMenuState->lookBack != 0) {
                 cx = -cx;
                 cy = -cy;
                 cz = -cz;
             }
-            gMenuState->unk10 = 1.0f;
-            gMenuState->unk14 = bx - cx;
-            gMenuState->unk18 = by - cy;
-            gMenuState->unk1C = bz - cz;
+            gMenuState->focusShiftWeight = 1.0f;
+            gMenuState->focusShiftX = bx - cx;
+            gMenuState->focusShiftY = by - cy;
+            gMenuState->focusShiftZ = bz - cz;
         }
         if (state == 2) {
-            gMenuState->unk10 = 0.0f;
+            gMenuState->focusShiftWeight = 0.0f;
             gMenuState->currentStop = 0;
-            gMenuState->unk2A = 3;
+            gMenuState->lookBack = 3;
         }
     }
 
@@ -4192,9 +4190,9 @@ void save_updateMenuCamera(s32 index) {
             gMenuState->pathSpeed = -D_8008FF48[0];
         }
         if (gMenuState->menu != 0) {
-            gMenuState->unk2A = 1;
+            gMenuState->lookBack = 1;
         } else {
-            gMenuState->unk2A = 0;
+            gMenuState->lookBack = 0;
         }
     }
     gMenuState->displayedStop = gMenuState->currentStop;
@@ -4207,14 +4205,14 @@ void save_updateMenuCamera(s32 index) {
     if (gMenuState->displayedStop >= nodeCount) {
         gMenuState->displayedStop -= nodeCount;
     }
-    gMenuState->unk2D = gMenuState->displayedStop;
+    gMenuState->unmappedStop = gMenuState->displayedStop;
     if (gMenuState->menu == 1) {
         gMenuState->displayedStop = D_800AB570[gMenuState->displayedStop];
     }
 
     obj->target.x = obj->focus.x;
     obj->target.y = obj->focus.y;
-    obj->target.z = UNK2AC_F32;
+    obj->target.z = obj->focus.z;
     obj->focus = obj->target;
     obj->CharRelAngle = 0.0f;
     obj->TgetFOVX = 20.0f;
@@ -4355,7 +4353,7 @@ void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx) {
         if (kind == 0x3B) {
             obj->swapTexture[0] = slotIdx + 1;
         }
-        collision_applyCharacterVariant(obj, gMenuCharacterTypes[charIdx].unk6);
+        collision_applyCharacterVariant(obj, gMenuCharacterTypes[charIdx].character);
         actor_playAnim(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     }
 }
