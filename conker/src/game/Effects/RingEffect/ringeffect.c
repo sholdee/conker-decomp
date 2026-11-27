@@ -436,15 +436,15 @@ struct BurstParticle {
 /* Ring emit callback 1: spawns a tumbling burst object at pos (the colour from particle_getDepthTint goes unused). */
 void effect_ringEmitBurst(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
     ParticleSpawn packet;
-    f32 r;
-    f32 g;
-    f32 b;
 
-    particle_getDepthTint(pos->z, &r, &g, &b);
     {
-        typedef s32 T; // matching: a scope with a declaration orders the struct copy
-        packet.pos = *pos;
+        f32 r;
+        f32 g;
+        f32 b;
+
+        particle_getDepthTint(pos->z, &r, &g, &b);
     }
+    packet.pos = *pos;
     packet.scale.x = 1.0f;
     packet.scale.y = 1.0f;
     packet.scale.z = 1.0f;

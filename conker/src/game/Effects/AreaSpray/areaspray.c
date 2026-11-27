@@ -168,15 +168,12 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
     CollisionHit ground;
     Vec3f pos;
     u8 onGround;
+    u8 flag;
     Vec3f probe;
     ParticleDef def;
     Ext150FCFD4 ext;
     Actor150FD514 *particle;
     Ext150FCFD4 *dst;
-    LightEffectHeader header;
-    Vec3i posInt;
-    ParticleDef groundDef;
-    s32 flag;
 
     if (obj->alpha < 0xFF) {
         return;
@@ -210,7 +207,7 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
     ext.emitCounter = 0.0f;
     ext.ground = ground;
     ext.soundHandle = sound_addDynamicSound(0x69E, pos.x, pos.y, pos.z, 32000, 3000, 500, 0, 0, 0, 0, 0);
-    flag = onGround ? 1 : 0; // matching: the s32 temp keeps IDO's branchy 0/1 select
+    flag = onGround ? 1 : 0; // matching: the temp keeps IDO's branchy 0/1 select
     ext.onGround = flag;
     def.texture = 0x59;
     def.type = 0xB;
@@ -243,53 +240,52 @@ void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
     if (particle != NULL) {
         dst = &particle->ext;
         memcpy(dst, &ext, sizeof(ext));
-        header.flags = 2;
-        header.update = 2;
-        header.lifetime = 300;
-        header.lightType = 6;
-        posInt.x = pos.x;
-        posInt.y = pos.y;
-        posInt.z = pos.z;
-        dst->light = light_createJitterAt(&header, &posInt, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, arg1, arg2);
         {
-            /* matching: a -g3 scope barrier: keeps the light store and the onGround test ahead of the constants */
-            extern const VtxColor gWhiteVtxColors[4];
+            LightEffectHeader header;
+            Vec3i posInt;
 
-            if (onGround) {
-                /* matching: a second -g3 scope barrier (a plain if mismatches) */
-                extern const Vec3f gZeroVec3f;
+            header.flags = 2;
+            header.update = 2;
+            header.lifetime = 300;
+            header.lightType = 6;
+            posInt.x = pos.x;
+            posInt.y = pos.y;
+            posInt.z = pos.z;
+            dst->light = light_createJitterAt(&header, &posInt, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, arg1, arg2);
+        }
+        if (onGround) {
+            ParticleDef groundDef;
 
-                groundDef.texture = 3;
-                groundDef.type = 0;
-                groundDef.renderModes = 0x3103;
-                groundDef.lifetime = 300;
-                groundDef.frame = 0;
-                groundDef.frameSpeed = 0;
-                groundDef.rgba[0] = 0xFF;
-                groundDef.rgba[1] = 0;
-                groundDef.rgba[2] = 0;
-                groundDef.rgba[3] = 0xFF;
-                groundDef.unk44 = 0xFF;
-                groundDef.width = 1.0f;
-                groundDef.height = 1.0f;
-                groundDef.pos.x = pos.x;
-                groundDef.pos.y = pos.y + 5.0f;
-                groundDef.pos.z = pos.z;
-                groundDef.rot = gZeroVec3f;
-                groundDef.scale.x = 1.0f;
-                groundDef.scale.y = 1.0f;
-                groundDef.scale.z = 1.0f;
-                groundDef.flags = 0x04EC0008;
-                groundDef.unk45 = 0xFF;
-                groundDef.unk46 = 0;
-                groundDef.unk47 = 6;
-                groundDef.unk48 = 0;
-                groundDef.viewportMask = 0xFF;
-                groundDef.unk50 = 0;
-                groundDef.fadeStart = 1;
-                groundDef.fadeRate = 0xFF;
-                dst->groundParticle = particle_spawnAxisQuadParticle(&groundDef, &gWhiteVtxColors, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, &ground.tri, 0, 0, 0, 0, arg1, arg2);
-            }
+            groundDef.texture = 3;
+            groundDef.type = 0;
+            groundDef.renderModes = 0x3103;
+            groundDef.lifetime = 300;
+            groundDef.frame = 0;
+            groundDef.frameSpeed = 0;
+            groundDef.rgba[0] = 0xFF;
+            groundDef.rgba[1] = 0;
+            groundDef.rgba[2] = 0;
+            groundDef.rgba[3] = 0xFF;
+            groundDef.unk44 = 0xFF;
+            groundDef.width = 1.0f;
+            groundDef.height = 1.0f;
+            groundDef.pos.x = pos.x;
+            groundDef.pos.y = pos.y + 5.0f;
+            groundDef.pos.z = pos.z;
+            groundDef.rot = gZeroVec3f;
+            groundDef.scale.x = 1.0f;
+            groundDef.scale.y = 1.0f;
+            groundDef.scale.z = 1.0f;
+            groundDef.flags = 0x04EC0008;
+            groundDef.unk45 = 0xFF;
+            groundDef.unk46 = 0;
+            groundDef.unk47 = 6;
+            groundDef.unk48 = 0;
+            groundDef.viewportMask = 0xFF;
+            groundDef.unk50 = 0;
+            groundDef.fadeStart = 1;
+            groundDef.fadeRate = 0xFF;
+            dst->groundParticle = particle_spawnAxisQuadParticle(&groundDef, &gWhiteVtxColors, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, &ground.tri, 0, 0, 0, 0, arg1, arg2);
         }
     }
 }
