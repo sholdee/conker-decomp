@@ -253,7 +253,7 @@ typedef struct LevelHeader {
     /* 0x14 */ u8  unk14;
     /* 0x15 */ u8  pad15;
     /* 0x16 */ s16 unk16;
-    /* 0x18 */ u16 maxParticles;    // level-triangle particles (game/Lighting/LevelLights/levellights)
+    /* 0x18 */ u16 maxParticles;    // level-triangle sprites (game/Sprite/LevelSpriteSetup/levelspritesetup)
     /* 0x1A */ u16 bonePoolSize;    // gBonePoolSize, a count of 0x40-byte entries
     /* 0x1C */ u16 gfxCount;        // display list length in Gfx (gfx_allocDisplayLists adds 400)
     /* 0x1E */ u16 unk1E;           // game/Shadow/RealTimeShadow/realtimeshadow
