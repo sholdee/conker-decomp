@@ -2620,7 +2620,7 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
     f32 t;
     f32 offZ;
     f32 height;
-    f32 pad1; // matching: pad1..pad5 and padBC..padCC reproduce the stack layout
+    f32 pad1; // matching: pad1..pad5, padCC and padC4 reproduce the stack layout
     f32 pad2;
     f32 pad3;
     f32 offZ2;
@@ -2634,9 +2634,6 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
     f32 padCC;
     f32 hitDist;
     f32 padC4;
-    f32 padC0;
-    f32 padBC;
-    s16 halfHeightRaw;
 
     selfSlot = (selfSlot & 0x7F) + 1;
     ret = 0;
@@ -2724,26 +2721,28 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
                 dx -= actor_rotateOffset(victim->theta, victim->unkDA, victim->unkD8, 1.0f, &offZ2);
                 dz2 -= offZ2;
             }
-            {
-                typedef s32 T1505C7D8; // matching: block-scope declaration steers IDO's scheduling
-
-                dy = y - (victim->ypos + victim->unkD6);
-                r = victim->unkD2;
-                h = victim->unkD4;
-                if (h == 0.0f) {
-                    continue;
-                }
+            dy = y - (victim->ypos + victim->unkD6);
+            r = victim->unkD2;
+            h = victim->unkD4;
+            if (h == 0.0f) {
+                continue;
             }
-            t = h / (radius + h);
-            maxDist = (r + radius) * (r + radius);
-            dy *= (r / h) * t + (1.0f - t);
-            dist = dx * dx + dy * dy + dz2 * dz2;
+            {
+                f32 weight;
+
+                weight = h / (radius + h);
+                maxDist = (r + radius) * (r + radius);
+                dy *= (r / h) * weight + (1.0f - weight);
+                dist = dx * dx + dy * dy + dz2 * dz2;
+            }
         }
         if (dist < maxDist) {
             if ((hit->unk24 & 0x2000) && i != attacker->carried) {
                 if (attacker->attachments != NULL) {
                     pos = *(Vec3f *)attacker->attachments; // the first attachment's first 12 bytes
                 } else {
+                    s16 halfHeightRaw;
+
                     actor_computeSize(attacker, &halfHeightRaw, 0, 0);
                     pos.x = attacker->xpos;
                     pos.y = attacker->ypos + (halfHeightRaw >> 1);
