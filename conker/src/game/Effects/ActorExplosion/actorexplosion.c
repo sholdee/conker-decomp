@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
 #include "conker/actor.h"
-#include "conker/beam.h"
 #include "conker/collision.h"
 #include "conker/effect.h"
 #include "conker/game.h"

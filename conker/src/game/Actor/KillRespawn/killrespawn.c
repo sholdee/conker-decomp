@@ -9,7 +9,6 @@ u8 gLastDeathKind;
 
 #include "conker/actor.h"
 #include "conker/attach.h"
-#include "conker/beam.h"
 #include "conker/blood.h"
 #include "conker/camera.h"
 #include "conker/collision.h"

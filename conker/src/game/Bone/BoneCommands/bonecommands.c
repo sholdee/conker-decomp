@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "conker/actor.h"
 #include "conker/attach.h"
-#include "conker/beam.h"
 #include "conker/bone.h"
 #include "conker/effect.h"
 #include "conker/game.h"

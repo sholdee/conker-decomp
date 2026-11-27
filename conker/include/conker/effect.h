@@ -58,6 +58,7 @@
  *   game/Effects/Oscillator/oscillator.c
  *   game/Effects/GroundFlash/groundflash.c
  *   game/Effects/BoneGroundHit/bonegroundhit.c
+ *   game/Effects/ActorExplosion/actorexplosion.c
  *   game/Effects/SwayObject/swayobject.c
  *   game/Effects/SurfaceSound/surfacesound.c
  *   game/Effects/BeamZones/beamzones.c
@@ -626,6 +627,14 @@ s32 effect_updateGroundFlash(LightEffect *obj);
 s32 effect_getAltFootPos(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side);
 s32 effect_selectAltFootEffect(s32 kind, Actor *actor);
 void effect_spawnFootprintAtAltFoot(s32 actor, s32 side, s32 strength);
+
+/* game/Effects/ActorExplosion/actorexplosion.c */
+void func_150F1A00(Actor *actor);
+GameCommand *func_150F1B48(GameCommand *cmd, s32 index);
+void func_150F1CB0(Actor *actor);
+void beam_spawnActorExplosion(Actor *actor, u8 arg1, s32 arg2);
+void beam_levelUpdateRandomSounds(s32 index);
+void beam_spawnImpactBurstNearBone(Actor *actor, s32 arg1, s32 arg2);
 
 /* game/Effects/SwayObject/swayobject.c */
 typedef struct SwayObject SwayObject;
