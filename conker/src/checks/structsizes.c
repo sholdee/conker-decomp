@@ -310,6 +310,7 @@ STATIC_ASSERT(sizeof(CamWobbleFalloff) == 0x18, CamWobbleFalloff_size);
 
 /* conker/cutscene.h */
 STATIC_ASSERT(sizeof(EvTimer) == 0x2C, EvTimer_size);
+STATIC_ASSERT(offsetof(TrackPhysicsParticle, track) == 0x170, TrackPhysicsParticle_track); /* after the ModelParticle */
 
 /* conker/effect.h */
 STATIC_ASSERT(sizeof(TextureFrameTables) == 0x8, TextureFrameTables_size);

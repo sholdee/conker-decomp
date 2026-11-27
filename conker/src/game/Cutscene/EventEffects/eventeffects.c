@@ -125,14 +125,14 @@ void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 ow
 s32 cutscene_updateTrackEffect(TrackPhysicsParticle *obj) {
     SeqTrackState *track = obj->track;
 
-    obj->unk18 = track->unk18 * 0.1f;
-    obj->unk1C = track->unk1C * 0.1f;
-    obj->unk20 = track->pitch;
-    obj->unk24 = track->yaw;
-    obj->unk28 = track->roll;
-    obj->pos.x = track->x;
-    obj->pos.y = track->y;
-    obj->pos.z = track->z;
+    obj->head.sizeXZ = track->unk18 * 0.1f;
+    obj->head.sizeY = track->unk1C * 0.1f;
+    obj->head.rot.x = track->pitch;
+    obj->head.rot.y = track->yaw;
+    obj->head.rot.z = track->roll;
+    obj->head.pos.x = track->x;
+    obj->head.pos.y = track->y;
+    obj->head.pos.z = track->z;
     return 1;
 }
 

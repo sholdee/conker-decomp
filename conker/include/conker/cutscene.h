@@ -58,16 +58,8 @@ typedef struct EvTimer {
 
 /* An object spawned by particle_newModelParticleWithFloor (ProjectileParticle in game/Effects/ProjectilePuffs/projectilepuffs.c), here following a cutscene track. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ f32 unk1C;
-    /* 0x020 */ f32 unk20;
-    /* 0x024 */ f32 unk24;
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ u8 pad2C[0xC];
-    /* 0x038 */ Vec3f pos;
-    /* 0x044 */ u8 pad44[0x12C];
-    /* 0x170 */ SeqTrackState *track;
+    /* 0x000 */ ModelParticle head;
+    /* 0x170 */ SeqTrackState *track; /* the kind's data after the ModelParticle (extraSize 4) */
 } TrackPhysicsParticle;
 
 /* A particle spawned by particle_newQuadParticle (a DefParticleHead, as BoneBeamParticle in game/Effects/BoneBeamParticle/bonebeamparticle.c), here following a cutscene track. */
