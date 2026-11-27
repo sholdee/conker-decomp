@@ -30,8 +30,8 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     Vec3f axis1;
     ParticleSize motion;
     Vec3f trail[3];
-    u8 scratch[0x64];
-    void *buffer;
+    RayHit scratch;
+    RayHit *buffer;
     ActorCtl *state;
     s32 random1;
     s32 random0;
@@ -68,9 +68,9 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     if (arg2) {
         state = obj->mv;
         if (state != NULL) {
-            buffer = (u8 *)state + 0xB0;
+            buffer = &state->rayHit;
         } else {
-            buffer = scratch;
+            buffer = &scratch;
         }
         collision_castRay(obj, position.x, position.y, position.z,
                       direction.x * 0.001000000047f, direction.y * 0.001000000047f,

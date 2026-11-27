@@ -4,17 +4,18 @@
 #include "conker/gfx.h"
 #include "conker/weapon.h"
 
-/* On event 0x2D, switch the object's id to the other end of the pair (with that end's tag). */
-void weapon_projectileMessage(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event) {
-    GameStruct151C4AB0b *state = &obj->state;
+/* Projectile message handler (gQuadParticleEventFuncs[8]): on message 0x2D (two actors swap identities), a
+ * projectile owned by one of them takes the other as its owner. */
+void weapon_projectileMessage(Game1EF500Trail *obj, ActorSwapMsg *swap, u8 event) {
+    Game1EF500TrailExt *state = &obj->trail;
 
     if (event == 0x2D) {
-        if (state->unk90 == pair->idA) {
-            state->unk90 = pair->idB;
-            state->unk94 = pair->tagB;
-        } else if (state->unk90 == pair->idB) {
-            state->unk90 = pair->idA;
-            state->unk94 = pair->tagA;
+        if (state->owner == swap->actorA) {
+            state->owner = swap->actorB;
+            state->ownerId = swap->idB;
+        } else if (state->owner == swap->actorB) {
+            state->owner = swap->actorA;
+            state->ownerId = swap->idA;
         }
     }
 }

@@ -30,16 +30,6 @@ typedef struct BulletParticle {
     /* 0x110 */ Bullet *bullet;
 } BulletParticle;
 
-/* A positional sound; see weapon_bulletSoundCallback. */
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x10];
-    /* 0x18 */ Bullet *bullet;
-} SoundEmitter;
-
 /* Projectile state, stored at offset 0x110 of the object weapon_spawnProjectile spawns. */
 typedef struct Game1EF500TrailExt {
     /* 0x00 */ u8 flags;
@@ -75,35 +65,6 @@ typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ StreamEmitter emitter;
 } Game1EF500TimedOwner;
-
-/* A pair of linked ids, each with a byte that goes with it. */
-typedef struct {
-    /* 0x0 */ s32 idA;
-    /* 0x4 */ s32 idB;
-    /* 0x8 */ u8 tagA;
-    /* 0x9 */ u8 tagB;
-} GameStruct151C4AB0a;
-
-/* State block stored at offset 0x110 of the object. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x90];
-    /* 0x90 */ s32 unk90;
-    /* 0x94 */ u8 unk94;
-} GameStruct151C4AB0b;
-
-typedef struct {
-    /* 0x000 */ u8 pad0[0x110];
-    /* 0x110 */ GameStruct151C4AB0b state;
-} GameObj151C4AB0;
-
-typedef struct {
-    u8 pad0[0x60];
-    s32 unk60;
-    u8 pad64[0x70 - 0x64];
-    u8 unk70;
-    u8 pad71[0x7C - 0x71];
-    Actor *unk7C;
-} Func151C7038Arg;
 
 /* game/Weapon/TwinMuzzle/twinmuzzle.c */
 Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 arg3);
@@ -189,7 +150,7 @@ void weapon_wobbleNearbyCameras(Vec3f *pos, u8 fxOwner, s32 fxList);
 void weapon_rumbleNearbyPlayers(Vec3f *pos, u8 fxOwner, s32 fxList);
 void weapon_startHitRandomEmitter(Vec3f *pos, u8 fxOwner, s32 fxList);
 void weapon_fireBullet(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList);
-s32 weapon_bulletSoundCallback(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
+s32 weapon_bulletSoundCallback(SoundRecord *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
 s32 weapon_updateBullet(Bullet *bullet);
 void weapon_releaseBullet(Bullet *bullet);
 void weapon_destroyBullet(Bullet *bullet);
@@ -240,7 +201,7 @@ void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner);
 
 
 /* game/Weapon/ProjectileRay/projectileray.c */
-void weapon_projectileMessage(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event);
+void weapon_projectileMessage(Game1EF500Trail *obj, ActorSwapMsg *swap, u8 event);
 s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
                   f32 distScale, u8 castRay, Vec3f *altOrigin, Vec3f *altDir, u8 *flags, u8 clearMask,
                   f32 defaultRemaining, void *owner, s8 arg13, u8 collide, u8 arg15, s32 arg16, u8 recast);
@@ -269,7 +230,7 @@ void weapon_getJointPos(Actor *arg0, Vec3f *out, u8 side);
 void weapon_fireJointShotProjectile(Actor *arg0, u8 side, u8 arg2, s32 arg3);
 void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5);
 void weapon_spawnHoverModel(Actor *owner, u8 arg1, s32 arg2);
-s32 weapon_updateHoverModel(Func151C7038Arg *arg0);
+s32 weapon_updateHoverModel(ModelParticle *particle);
 
 /* game_data_800DCA20.c (data only, owner unknown; linked after game/Math/MathUtil/mathutil) */
 extern u8 gLayoutDetailShift;

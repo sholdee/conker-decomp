@@ -164,6 +164,7 @@ STATIC_ASSERT(sizeof(ModelParticle) == 0x170, ModelParticle_size);
 STATIC_ASSERT(sizeof(BulletState) == 0xD0, BulletState_size);
 STATIC_ASSERT(sizeof(Bullet) == 0x240, Bullet_size);
 STATIC_ASSERT(sizeof(ParticleDef) == 0x58, ParticleDef_size);
+STATIC_ASSERT(sizeof(ParticleDef50) == 0x50, ParticleDef50_size);
 STATIC_ASSERT(sizeof(DebrisEmitter) == 0x5C, DebrisEmitter_size);
 STATIC_ASSERT(sizeof(EffectTemplate) == 0x1C, EffectTemplate_size);
 STATIC_ASSERT(sizeof(EffectDesc) == 0x8, EffectDesc_size);

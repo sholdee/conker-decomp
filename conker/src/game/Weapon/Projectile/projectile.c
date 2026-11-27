@@ -366,7 +366,7 @@ s32 weapon_isOtherLiveObject(Actor *obj, Actor *self) {
     return TRUE;
 }
 
-/* As weapon_isOtherLiveObject, and obj's unk127 must also be set (not 0xFF). */
+/* As weapon_isOtherLiveObject, and obj's playernumber must also be set (not 0xFF). */
 s32 weapon_isOtherLivePlayer(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
@@ -942,7 +942,7 @@ s32 weapon_countdownProjectileRange(Game1EF500Trail *trail, Game1EF500TrailExt *
 void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
     StreamEmitter *emitter;
     ProjectileStream data;
-    TimedEffect *effect;
+    Game1F1CD0Actor *effect;
 
     emitter = &owner->emitter;
     emitter->timer -= gFrameTicks;
@@ -968,7 +968,7 @@ void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
         effect = effect_newTimedEffect((math_random() % (emitter->lifeRange + 1)) + emitter->minLife,
                                -1, 0x2B, -1, 1, 0, sizeof(data), owner->base.header.owner, owner->base.header.kind);
         if (effect != NULL) {
-            memcpy((u8 *)effect + 0x28, &data, sizeof(data));
+            memcpy(&effect->emission, &data, sizeof(data));
         }
 
         emitter->timer = (math_random() % (emitter->delayRange + 1)) + emitter->minDelay;

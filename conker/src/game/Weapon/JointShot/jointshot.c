@@ -275,23 +275,17 @@ void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, 
                   arg5);
 }
 
-/* An object spawned by particle_newModelParticleWithFloor (only the field used here). */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x170];
-    /* 0x170 */ u8 unk170; /* start of the per-type state block */
-} SpawnedEffect;
-
 /* Spawns model particle 15 on `owner` when it starts the hover (anim 0xE9, actor_updatePlayerControls); its update
  * weapon_updateHoverModel keeps it while the hover lasts. */
 void weapon_spawnHoverModel(Actor *owner, u8 arg1, s32 arg2) {
     ParticleSpawn spawn;
     struct {
-        u8 unk0;
+        u8 bone; /* index into the owner's ob_matrix_ptr (matrix callback 5, particle_buildOwnerMatrix) */
     } state;
     const Vec3f *origin = &gZeroVec3f;
-    SpawnedEffect *effect;
+    ModelParticle *effect;
 
-    state.unk0 = 0;
+    state.bone = 0;
     spawn.radius = 1.0f;
     spawn.elasticity = 1.0f;
     spawn.sizeY = 1.0f;
@@ -328,24 +322,24 @@ void weapon_spawnHoverModel(Actor *owner, u8 arg1, s32 arg2) {
 
     effect = particle_newModelParticleWithFloor(&spawn, 3, 0xFF, 0, 1, arg1, arg2);
     if (effect != NULL) {
-        memcpy(&effect->unk170, &state, sizeof(state));
+        memcpy(MODEL_PARTICLE_DATA(effect), &state, sizeof(state));
     }
 }
 
 /* Model particle update 23: returns 0 (the particle dies) once the owner's anim is no longer 0xE9 (the hover); otherwise
- * mirrors func_15142A5C(owner) in flag 0x20000 and sets the alpha (unk70) to the owner's animation speed scaled to 0-255. */
-s32 weapon_updateHoverModel(Func151C7038Arg *arg0) {
+ * mirrors func_15142A5C(owner) in flag 0x20000 and sets the alpha to the owner's animation speed scaled to 0-255. */
+s32 weapon_updateHoverModel(ModelParticle *particle) {
     Actor *owner;
     f32 speed;
 
-    owner = arg0->unk7C;
+    owner = particle->owner;
     if (owner->animseq.uh != 0xE9) {
         return 0;
     }
     if (func_15142A5C(owner) != 0) {
-        arg0->unk60 |= 0x20000;
+        particle->flags |= 0x20000;
     } else {
-        arg0->unk60 &= ~0x20000;
+        particle->flags &= ~0x20000;
     }
     speed = owner->animsp * 35.0f;
     if (speed > 255.0f) {
@@ -357,7 +351,7 @@ s32 weapon_updateHoverModel(Func151C7038Arg *arg0) {
         // matching: the -g3 block scope keeps the float->u8 conversion after the clamp
         u8 clamped = speed;
 
-        arg0->unk70 = clamped;
+        particle->alpha = clamped;
     }
     return 1;
 }

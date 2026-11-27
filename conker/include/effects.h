@@ -492,6 +492,31 @@ typedef struct ParticleDef4C {
     /* 0x48 */ ZoneNode *zone; /* collision_findZoneLeaf zone of the spawn point, or NULL */
 } ParticleDef4C;
 
+/* matching: ParticleDef before material (0x50 bytes); see ParticleDesc64. */
+typedef struct ParticleDef50 {
+    /* 0x00 */ u8 texture;      /* gEffectTextures index, 0xFF = untextured */
+    /* 0x01 */ u8 type;         /* selects the gQuadParticleEventFuncs handler */
+    /* 0x02 */ u16 renderModes; /* low byte: gEffectRenderModes index, high byte: combiner index */
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ Vec3f pos;
+    /* 0x28 */ Vec3f rot;      /* or a point: particle_buildBendingQuad bend target, beam end, game/Effects/LandingBurst/landingburst previous position */
+    /* 0x34 */ Vec3f scale;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 alpha;        /* faded out with the lifetime (flag 0x8000000) */
+    /* 0x45 */ u8 colorLevel;
+    /* 0x46 */ u8 primMode;
+    /* 0x47 */ u8 envMode;
+    /* 0x48 */ ZoneNode *zone; /* collision_findZoneLeaf zone of the spawn point, or NULL */
+    /* 0x4C */ u8 viewportMask;
+    /* 0x4D */ u8 pad4D[3];
+} ParticleDef50;
+
 /* matching: ParticleDef before fadeStart (0x54 bytes); see ParticleDesc64. */
 typedef struct ParticleDef54 {
     /* 0x00 */ u8 texture;      /* gEffectTextures index, 0xFF = untextured */

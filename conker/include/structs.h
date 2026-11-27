@@ -378,6 +378,7 @@ struct SoundRecord {
         s32 delay;      /* low half: countdown; high half: the sound held back meanwhile */
         u16 half[2];
         Camera *camera; /* the aiming camera (camera_onZoomSound, camera_onLookSound) */
+        struct Bullet *bullet; /* weapon_bulletSoundCallback */
     } callback_param1;
     /* 0x1C */ union {
         s32 val;        /* sound_followOwnerCallback: the owner's unique_id in the low byte */

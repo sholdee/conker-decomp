@@ -32,7 +32,7 @@ f32 weapon_getAngleDelta(f32 from, f32 to) {
     return delta;
 }
 
-/* Signed angle in degrees from `self`'s heading (unk40) to the direction of `target`. */
+/* Signed angle in degrees from `self`'s heading (theta) to the direction of `target`. */
 f32 weapon_getAngleToTarget(Actor *self, Actor *target) {
     s32 angle;
 
@@ -165,7 +165,7 @@ void weapon_scrollTreads(Actor *obj, s32 left, s32 right) {
 
 /*
  * Per-frame update of a player-driven tracked vehicle with an aimable gun.
- * - The controlling player (movement_obj[unk127] when gIsMultiplayer is set, else object 0) drives it: stick X steers,
+ * - The controlling player (movement_obj[playernumber] when gIsMultiplayer is set, else object 0) drives it: stick X steers,
  *   stick Y sets the throttle, A boosts while the player's state allows it, R stops it.
  * - The two treads are scrolled from the forward speed and the turn rate (weapon_scrollTreads).
  * - The gun angles (mv->gunYaw/gunPitch) either lead STATE->target, or turn with C-left/C-right while

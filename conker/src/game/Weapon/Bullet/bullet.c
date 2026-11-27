@@ -446,10 +446,10 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
 }
 
 /* Sound callback registered by weapon_fireBullet: keeps the bullet's sound at the bullet's position. */
-s32 weapon_bulletSoundCallback(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+s32 weapon_bulletSoundCallback(SoundRecord *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
     Bullet *bullet;
 
-    bullet = emitter->bullet;
+    bullet = emitter->callback_param1.bullet;
     if (bullet != NULL && *arg2 != NULL) {
         emitter->x = bullet->head.pos.x;
         emitter->y = bullet->head.pos.y;

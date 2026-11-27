@@ -59,7 +59,7 @@ BulletParticle *weapon_spawnBulletParticle(Bullet *bullet) {
     return particle;
 }
 
-/* Keeps the particle on its bullet and advances unk28 by unk34; flags the particle (bit 0) once the
+/* Keeps the particle on its bullet and advances def.rot by def.scale; flags the particle (bit 0) once the
  * bullet is gone. */
 s32 weapon_updateBulletParticle(BulletParticle *particle) {
     Bullet *bullet = particle->bullet;

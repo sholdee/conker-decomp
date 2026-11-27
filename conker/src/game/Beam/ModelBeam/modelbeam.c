@@ -176,7 +176,7 @@ s32 beam_hookFrameTexture(ModelAttachment *att, Actor *actor) {
 
 /* Model attachment hook 21 (gAttachHooks[21]). While the actor is in state 5, slides the attachment's
  * texture over animation frames 69-84 by patching the upper-left t of the first G_SETTILESIZE in its
- * display list. unk38 is the fade state: 0 = start, 1 = shown, 2 = faded out. */
+ * display list. hookState is the fade state: 0 = start, 1 = shown, 2 = faded out. */
 s32 beam_hookSlideTexture(ModelAttachment *att, Actor *actor) {
     AnimInstance *anim;
     Gfx *gfx;
