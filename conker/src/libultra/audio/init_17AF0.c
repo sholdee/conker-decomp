@@ -22,5 +22,5 @@ void func_10017B30(N_ALCSPlayer *seqp) {
 }
 
 void func_10017BB8(N_ALCSPlayer *seqp, s32 arg1) {
-    func_1001E400(seqp, 0, arg1 | 0xB0, 252, 0);
+    n_alCSPSendMidi(seqp, 0, arg1 | 0xB0, 252, 0);
 }

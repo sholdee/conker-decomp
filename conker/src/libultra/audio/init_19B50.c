@@ -24,7 +24,7 @@ void func_10019C28(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 pan) {
     for (vs = seqp->vAllocHead; vs != NULL; vs = vs->next) {
         if ((vs->channel == chan)) {
             tmp = __n_vsPan(vs, (N_ALSeqPlayer *)seqp);
-            func_1001E2A0(&vs->voice, tmp);
+            n_alSynSetPan(&vs->voice, tmp);
         }
     }
 }
@@ -55,7 +55,7 @@ void func_10019D98(N_ALCSPlayer *seqp, u8 chan) {
     for (vs = seqp->vAllocHead; vs != NULL; vs = vs->next) {
         if (vs->channel == chan) {
             pan = seqp->chanState[chan].unk14;
-            n_alSynSetPan(&vs->voice, pan);
+            func_1001CB40(&vs->voice, pan);
             if (pan != 0) {
                 func_1001CA90(&vs->voice,
                     func_1001CEA4((vs->key - vs->sound->keyMap->keyBase) + keyoff) * 440.0f * pb);

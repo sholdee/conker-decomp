@@ -69,7 +69,7 @@ typedef struct {
     /* 0x2C */  void        (*bankDecRef)(void *record);
     /* 0x30 */  void        (*bankAddRef)(void *record);
     /* 0x34 */  void        (*bankRelease)(void *record);
-    /* 0x38 */  s32         waveTableBase;  /* handed to func_10012C5C */
+    /* 0x38 */  s32         waveTableBase;  /* handed to _bnkfPatchSound */
     /* 0x3C */  ALHeap      *heap;
     /* 0x40 */  struct ALParam_s      *paramList;
     /* 0x44 */  struct N_ALMainBus_s  *mainBus;
@@ -83,7 +83,7 @@ typedef struct {
 } N_ALSynth;
 
 /*
- * Conker: ALWaveTable as Rare's bank loader (func_10012CFC, init_128D0.c) and _pullSubFrame
+ * Conker: ALWaveTable as Rare's bank loader (_bnkfPatchWaveTable, init_128D0.c) and _pullSubFrame
  * (_pullSubFrame, init/Audio/Env/n_env.c) see it: the ADPCM wave info, then a word the loader clears.
  */
 typedef struct WaveTable {
@@ -135,7 +135,7 @@ void    n_alSynRemovePlayer( ALPlayer *client);
 void    n_alSynSetFXMix(N_ALVoice *v, u8 fxmix);
 void    n_alSynSetFXParam(ALFxRef fx, s16 paramID, void *param);
 void    n_alSynFreeFX(ALFxRef *fx);
-void    n_alSynSetPan(N_ALVoice *v, u8 pan);
+void    func_1001CB40(N_ALVoice *v, u8 pan);
 void    n_alSynSetPitch( N_ALVoice *v, f32 pitch);
 void    n_alSynSetPriority( N_ALVoice *voice, s16 priority);
 void    n_alSynSetVol( N_ALVoice *v, s16 volume, ALMicroTime t);
@@ -443,20 +443,20 @@ void     n_alSndpSetSound(ALSndId id);
  * Conker: Rare's additions to the audio library, defined in src/libultra/audio, in address order.
  */
 struct OscState; /* the sequence players' oscillator state, defined in init_128D0.c */
-void    func_10012934(ALBankFile *file, u8 *table, s32 arg2);           /* init_128D0.c: alBnkfNew */
-void    func_10012A28(ALBank *bank, s32 offset, s32 table, s32 arg3);   /* init_128D0.c: relocates a bank */
+void    alBnkfNew(ALBankFile *file, u8 *table, s32 arg2);           /* init_128D0.c: alBnkfNew */
+void    _bnkfPatchBank(ALBank *bank, s32 offset, s32 table, s32 arg3);   /* init_128D0.c: relocates a bank */
 void    func_10012B84(ALInstrument *inst, s32 arg1);
 void    func_10012BD0(ALInstrument *inst, s32 arg1);
-void    func_10012C5C(ALSound *sound, s32 offset, s32 table);
-void    func_10012CFC(WaveTable *wave, s32 offset, s32 table);
-f32     func_10012D80(u8 arg0);
-s32     func_10012E04(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5); /* the oscillators */
-s32     func_10012F94(struct OscState *arg0, f32 *arg1);
-void    func_100131D8(struct OscState *arg0);
+void    _bnkfPatchSound(ALSound *sound, s32 offset, s32 table);
+void    _bnkfPatchWaveTable(WaveTable *wave, s32 offset, s32 table);
+f32     _depth2Cents(u8 arg0);
+s32     initOsc(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5); /* the oscillators */
+s32     updateOsc(struct OscState *arg0, f32 *arg1);
+void    stopOsc(struct OscState *arg0);
 void    func_100131FC(ALSeqpConfig *config, s32 arg1);                  /* installs the oscillators */
-void    func_10015550(N_ALCSPlayer *seqp, ALBank *bank);                /* n_alCSPSetBank */
-void    func_100155A0(SndPlayerConfig *config);
-void    func_10017AA0(N_ALCSPlayer *seqp);                              /* code_17AA0.c: play */
+void    n_alCSPSetBank(N_ALCSPlayer *seqp, ALBank *bank);                /* n_alCSPSetBank */
+void    n_alSndpNew(SndPlayerConfig *config);
+void    n_alCSPPlay(N_ALCSPlayer *seqp);                              /* code_17AA0.c: play */
 void    func_10017AF0(N_ALCSPlayer *seqp, struct OSMesgQueue_s *queue); /* init_17AF0.c */
 void    func_10017B04(N_ALCSPlayer *seqp, s32 chan, u8 arg2);
 void    func_10017B30(N_ALCSPlayer *seqp);
@@ -465,26 +465,26 @@ void    func_10017C00(N_ALCSPlayer *seqp, s32 arg1);                    /* init_
 void    func_10017C68(N_ALCSPlayer *seqp, s32 arg1, u8 arg2, u8 arg3);
 void    func_10017CE0(N_ALCSPlayer *seqp, s32 arg1, u8 arg2);
 void    func_10017D30(N_ALCSPlayer *seqp, s32 arg1, u8 arg2);
-void    func_10017D80(N_ALCSPlayer *seqp, u8 chan, u8 prog);            /* code_17D80.c */
+void    n_alCSPSetChlPan(N_ALCSPlayer *seqp, u8 chan, u8 prog);            /* code_17D80.c */
 void    func_10017DF0(N_ALCSPlayer *csp, f32 arg1, f32 arg2);           /* init_17DF0.c */
 void    func_10017E4C(N_ALCSPlayer *csp, u8 chan, u8 arg2);
 void    func_10017F10(N_ALCSPlayer *seqp, u8 arg1, u8 arg2, u8 arg3, s32 arg4); /* init_17F10.c */
-void    func_100186DC(ALCSeq *seq, ALCSeqMarker *marker);               /* n_csq.c */
+void    alCSeqSetLoc(ALCSeq *seq, ALCSeqMarker *marker);               /* n_csq.c */
 void    func_10018790(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base);
-void    func_10018C60(N_ALCSPlayer *seqp);                              /* code_18C60.c: posts AL_TRACK_END */
-void    func_10018CB0(N_ALCSPlayer *seqp, ALCSeq *seq);                 /* code_18CB0.c */
-void    func_10018D00(N_ALCSPlayer *seqp, s16 vol);                     /* init_18D00.c */
+void    n_alCSPStop(N_ALCSPlayer *seqp);                              /* code_18C60.c: posts AL_TRACK_END */
+void    n_alCSPSetSeq(N_ALCSPlayer *seqp, ALCSeq *seq);                 /* code_18CB0.c */
+void    n_alCSPSetVol(N_ALCSPlayer *seqp, s16 vol);                     /* init_18D00.c */
 void    func_10018D50(N_ALCSPlayer *seqp);                              /* init_18D50.c */
 void    func_1001A704(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 value); /* init_19B50.c */
 void    func_1001CA90(N_ALVoice *v, f32 pitch);                         /* n_synsetpitch2.c */
 f32     func_1001CEA4(s32 arg0);                                        /* init_1CBF0.c */
-void   *func_1001D9B0(s16 bus);                                         /* init_1D900.c: the bus's effect */
+void   *n_alSynGetFXRef(s16 bus);                                         /* init_1D900.c: the bus's effect */
 LowPass *func_1001DA28(s16 bus);                                        /* init_1D900.c: the bus's low-pass */
-void    func_1001DAA0(void *fx, s16 paramID, void *value);
+void    n_alSynSetFXParam(void *fx, s16 paramID, void *value);
 void    func_1001DAE4(LowPass *lp, s16 paramID, s32 *value);
-void    func_1001E2A0(N_ALVoice *v, u8 pan);                            /* init_1E2A0.c */
+void    n_alSynSetPan(N_ALVoice *v, u8 pan);                            /* init_1E2A0.c */
 void    func_1001E350(N_ALVoice *v, u8 fxmix);                          /* init_1E350.c */
-void    func_1001E400(N_ALCSPlayer *seqp, s32 deltaTime, u8 status, u8 byte1, u8 byte2); /* init_1E400.c: send MIDI */
+void    n_alCSPSendMidi(N_ALCSPlayer *seqp, s32 deltaTime, u8 status, u8 byte1, u8 byte2); /* init_1E400.c: send MIDI */
 
 /* Conker: Rare's osSyncPrintf (init/Libc/Xprintf/xprintf.c), used by init_15550.c; it agrees with os_libc.h. */
 void    osSyncPrintf(const char *fmt, ...);

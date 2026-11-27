@@ -148,7 +148,7 @@ u8 __n_alCSeqGetTrackEvent(ALCSeq *seq, s32 track, N_ALEvent *event, s32 arg3) {
     }
     return 1;
 }
-void func_100186DC(ALCSeq *seq, ALCSeqMarker *marker) {
+void alCSeqSetLoc(ALCSeq *seq, ALCSeqMarker *marker) {
     s32 i;
 
     seq->validTracks = marker->validTracks;

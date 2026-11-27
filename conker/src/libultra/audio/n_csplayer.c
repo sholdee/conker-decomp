@@ -210,9 +210,9 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
 
             case 26:
                 if (seqp->nextEvent.msg.unknown2.unk1 < 8) {
-                    void *a = func_1001D9B0(seqp->nextEvent.msg.unknown2.unk0);
+                    void *a = n_alSynGetFXRef(seqp->nextEvent.msg.unknown2.unk0);
                     if (a) {
-                        func_1001DAA0(a, (seqp->nextEvent.msg.unknown2.unk2 << 3) | (seqp->nextEvent.msg.unknown2.unk1 & 7),
+                        n_alSynSetFXParam(a, (seqp->nextEvent.msg.unknown2.unk2 << 3) | (seqp->nextEvent.msg.unknown2.unk1 & 7),
                                       &seqp->nextEvent.msg.unknown2.unk4);
                     }
                 } else {

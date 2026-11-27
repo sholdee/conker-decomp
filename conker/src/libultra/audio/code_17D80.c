@@ -1,7 +1,7 @@
 #include <libaudio.h>
 #include "n_libaudio.h"
 
-void func_10017D80(N_ALCSPlayer *seqp, u8 chan, u8 prog)
+void n_alCSPSetChlPan(N_ALCSPlayer *seqp, u8 chan, u8 prog)
 {
     N_ALEvent evt;
 

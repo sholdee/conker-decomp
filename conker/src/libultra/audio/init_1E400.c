@@ -2,7 +2,7 @@
 
 
 // non-vanilla n_alCSPSendMidi or n_alSeqpSendMidi
-void func_1001E400(N_ALCSPlayer *seqp, s32 deltaTime, u8 status, u8 byte1, u8 byte2) {
+void n_alCSPSendMidi(N_ALCSPlayer *seqp, s32 deltaTime, u8 status, u8 byte1, u8 byte2) {
     N_ALEvent evt;
     ALMicroTime delta;
 

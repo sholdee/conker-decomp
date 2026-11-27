@@ -1,9 +1,9 @@
 #include <n_libaudio.h>
 
 
-ALMicroTime func_10015878(void *node);
+ALMicroTime _n_sndpVoiceHandler(void *node);
 
-void func_10015550(N_ALCSPlayer *csp, ALBank *bank) {
+void n_alCSPSetBank(N_ALCSPlayer *csp, ALBank *bank) {
     N_ALEvent event;
 
     event.type = AL_SEQP_BANK_EVT;
@@ -77,9 +77,9 @@ static s16 D_8002BA30 = 0; /* number of sounds playing */
 
 void _n_handleEvent(SndEvent *event);
 void func_10017298(SndState *arg0);
-void func_10016F80(ALEventQueue *evtq, SndState *state, u16 typeMask);
+void _removeEvents(ALEventQueue *evtq, SndState *state, u16 typeMask);
 
-void func_100155A0(SndPlayerConfig *c) {
+void n_alSndpNew(SndPlayerConfig *c) {
     u32 i;
     void *ptr;
     N_ALEvent event;
@@ -123,7 +123,7 @@ void func_100155A0(SndPlayerConfig *c) {
     }
 
     D_8002BA2C->node.next = NULL;
-    D_8002BA2C->node.handler = func_10015878;
+    D_8002BA2C->node.handler = _n_sndpVoiceHandler;
     D_8002BA2C->node.clientData = D_8002BA2C;
     n_alSynAddPlayer(&D_8002BA2C->node);
 
@@ -132,7 +132,7 @@ void func_100155A0(SndPlayerConfig *c) {
     D_8002BA2C->nextDelta = n_alEvtqNextEvent(&D_8002BA2C->evtq, &D_8002BA2C->nextEvent);
 }
 
-ALMicroTime func_10015878(void *node) {
+ALMicroTime _n_sndpVoiceHandler(void *node) {
     N_ALSndPlayer *alsp;
     N_ALEvent event;
 
@@ -230,7 +230,7 @@ void _n_handleEvent(SndEvent *event) {
                     }
                     if (snd != NULL) {
                         if ((u32)snd->envelope < 0x1000000) {
-                            func_10012C5C(snd, (s32)snd, (s32)((SndPlayer *)D_8002BA2C)->unk54);
+                            _bnkfPatchSound(snd, (s32)snd, (s32)((SndPlayer *)D_8002BA2C)->unk54);
                         }
                         if (((s32)snd->envelope & 0xFF000003) != 0x80000000) {
                             break;
@@ -331,7 +331,7 @@ void _n_handleEvent(SndEvent *event) {
                         switch (state->unk54) {
                             case 1:
                                 if (1) {
-                                    func_10016F80(&D_8002BA2C->evtq, state, 0x40);
+                                    _removeEvents(&D_8002BA2C->evtq, state, 0x40);
                                 } else {
                                     osSyncPrintf(
                                         "snd %d has been freed too early - %d\n\n\n\n\n",
@@ -371,7 +371,7 @@ void _n_handleEvent(SndEvent *event) {
                     if (state->unk54 == 1) {
                         tmp = state->unk4F + snd->samplePan - 0x40;
                         pan = MIN(MAX(tmp, 0), 0x7F);
-                        func_1001E2A0(&state->voice, pan);
+                        n_alSynSetPan(&state->voice, pan);
                     }
                     break;
 
@@ -494,7 +494,7 @@ void func_10016E90(SndState *arg0) {
         n_alSynFreeVoice(&arg0->voice);
     }
     func_10017298(arg0);
-    func_10016F80(&D_8002BA2C->evtq, arg0, 0xFFFF);
+    _removeEvents(&D_8002BA2C->evtq, arg0, 0xFFFF);
 }
 
 /* Posts a pitch event (type 16) for `state`: its requested pitch times the key map's detune ratio. */
@@ -514,7 +514,7 @@ void func_10016F00(SndState *state) {
 /* libultra's static _removeEvents(), with a type mask added: unlink every
  * pending event belonging to `state` whose type matches, and put its list item
  * back on the queue's free list. */
-void func_10016F80(ALEventQueue *evtq, SndState *state, u16 typeMask) {
+void _removeEvents(ALEventQueue *evtq, SndState *state, u16 typeMask) {
     ALLink            *thisNode;
     ALLink            *nextNode;
     N_ALEventListItem *thisItem;

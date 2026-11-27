@@ -328,7 +328,7 @@ s32 audio_loadChannelProgram(N_ALSeqPlayer *seqp, s32 instNum, s32 chan) {
             sound = inst->soundArray[i];
             /* a small envelope "pointer" is still an offset from the instrument */
             if ((u32)sound->envelope < 0x100000) {
-                func_10012C5C(sound, (s32)inst, seqp->drvr->waveTableBase);
+                _bnkfPatchSound(sound, (s32)inst, seqp->drvr->waveTableBase);
             }
         }
         sound = inst->soundArray[0];

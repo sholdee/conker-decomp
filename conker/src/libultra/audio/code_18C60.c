@@ -3,7 +3,7 @@
 #include "n_seqp.h"
 
 
-void func_10018C60(N_ALCSPlayer *seqp) {
+void n_alCSPStop(N_ALCSPlayer *seqp) {
     N_ALEvent evt;
 
     evt.type = AL_TRACK_END;

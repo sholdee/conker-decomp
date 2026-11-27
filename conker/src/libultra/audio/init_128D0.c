@@ -3,8 +3,8 @@
 #include <os_internal.h>
 #include <ultraerror.h>
 
-/* Oscillator state of the sequence players' tremolo / vibrato (init_128D0.c: func_10012E04 init,
- * func_10012F94 update, func_100131D8 stop), the libultra demo's oscData; free ones are linked from gFreeOscStates. */
+/* Oscillator state of the sequence players' tremolo / vibrato (init_128D0.c: initOsc init,
+ * updateOsc update, stopOsc stop), the libultra demo's oscData; free ones are linked from gFreeOscStates. */
 typedef struct OscState {
     /* 0x00 */ struct OscState *next;
     /* 0x04 */ u8  type;      // 1 = tremolo sine, 128 = vibrato sine
@@ -18,7 +18,7 @@ typedef struct OscState {
             u8 baseVol;
         } tsin;
         struct {
-            f32 depth;    // cents ratio (func_10012D80)
+            f32 depth;    // cents ratio (_depth2Cents)
         } vsin;
     } data;
 } OscState; // size 0x2C
@@ -38,7 +38,7 @@ void alSeqFileNew(ALSeqFile *arg0, u8 *base) {
 }
 
 // non-vanila alBnkfNew
-void func_10012934(ALBankFile *file, u8 *table, s32 arg2) {
+void alBnkfNew(ALBankFile *file, u8 *table, s32 arg2) {
     s32 offset = (s32)file;
     s32 woffset = (s32)table;
     s32 sp1C = arg2;
@@ -50,14 +50,14 @@ void func_10012934(ALBankFile *file, u8 *table, s32 arg2) {
     for (i = 0; i < file->bankCount; i++) {
         file->bankArray[i] = (ALBank *)((u8 *)file->bankArray[i] + offset);
         if (file->bankArray[i] != 0) {
-            func_10012A28(file->bankArray[i], offset, woffset, sp1C);
+            _bnkfPatchBank(file->bankArray[i], offset, woffset, sp1C);
         }
     }
 }
 
 /* Conker's _bnkfPatchBank: relocates the percussion and instrument 0 by the bank file offset, the other
  * instruments by the wave table offset. */
-void func_10012A28(ALBank *bank, s32 offset, s32 table, s32 arg3) {
+void _bnkfPatchBank(ALBank *bank, s32 offset, s32 table, s32 arg3) {
     s32 i;
     s32 tmp;
 
@@ -113,7 +113,7 @@ void func_10012BD0(ALInstrument *inst, s32 arg1) {
 }
 
 /* _bnkfPatchSound: relocates a sound's envelope, key map and wave table, then the wave table itself. */
-void func_10012C5C(ALSound *sound, s32 offset, s32 table) {
+void _bnkfPatchSound(ALSound *sound, s32 offset, s32 table) {
     if (sound->flags) {
         return;
     }
@@ -121,11 +121,11 @@ void func_10012C5C(ALSound *sound, s32 offset, s32 table) {
     sound->envelope = (ALEnvelope *)((u8 *)sound->envelope + offset);
     sound->keyMap = (ALKeyMap *)((u8 *)sound->keyMap + offset);
     sound->wavetable = (ALWaveTable *)((u8 *)sound->wavetable + offset);
-    func_10012CFC((WaveTable *)sound->wavetable, offset, table);
+    _bnkfPatchWaveTable((WaveTable *)sound->wavetable, offset, table);
 }
 
 /* _bnkfPatchWaveTable: relocates the wave data by `table` and the loop and ADPCM book by `offset`. */
-void func_10012CFC(WaveTable *wave, s32 offset, s32 table) {
+void _bnkfPatchWaveTable(WaveTable *wave, s32 offset, s32 table) {
     wave->flags = 1;
     wave->base += table;
     if (wave->type == AL_ADPCM_WAVE) {
@@ -139,7 +139,7 @@ void func_10012CFC(WaveTable *wave, s32 offset, s32 table) {
     }
 }
 
-f32 func_10012D80(u8 arg0) {
+f32 _depth2Cents(u8 arg0) {
     f32 sp4 = 1.0309929847717285f;
     f32 sp0 = 1.0f;
 
@@ -154,7 +154,7 @@ f32 func_10012D80(u8 arg0) {
     return sp0;
 }
 
-s32 func_10012E04(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5) {
+s32 initOsc(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5) {
     OscState *sp2C;
     s32 ret;
 
@@ -177,7 +177,7 @@ s32 func_10012E04(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5) {
                 *arg1 = sp2C->data.tsin.baseVol;
                 break;
             case 128:
-                sp2C->data.vsin.depth = func_10012D80(arg4);
+                sp2C->data.vsin.depth = _depth2Cents(arg4);
                 sp2C->curCount = 0;
                 sp2C->maxCount = 0x103 - arg3;
                 *arg1 = 1.0f;
@@ -189,7 +189,7 @@ s32 func_10012E04(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5) {
     return ret;
 }
 
-s32 func_10012F94(OscState *arg0, f32 *arg1) {
+s32 updateOsc(OscState *arg0, f32 *arg1) {
     f32 sp2C;
     OscState *sp28;
     s32 ret;
@@ -226,7 +226,7 @@ s32 func_10012F94(OscState *arg0, f32 *arg1) {
     return ret;
 }
 
-void func_100131D8(OscState *arg0) {
+void stopOsc(OscState *arg0) {
     arg0->next = gFreeOscStates;
     gFreeOscStates = arg0;
 }
@@ -246,7 +246,7 @@ void func_100131FC(ALSeqpConfig *config, s32 arg1) {
         sp24 = sp24->next;
     }
     sp24->next = NULL;
-    config->initOsc = func_10012E04;
-    config->updateOsc = func_10012F94;
-    config->stopOsc = func_100131D8;
+    config->initOsc = initOsc;
+    config->updateOsc = updateOsc;
+    config->stopOsc = stopOsc;
 }

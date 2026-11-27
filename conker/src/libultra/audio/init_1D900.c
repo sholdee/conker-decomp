@@ -20,7 +20,7 @@ void n_alSynSetFXMix( N_ALVoice *v, u8 fxmix) {
     }
 }
 
-void *func_1001D9B0(s16 arg0) {
+void *n_alSynGetFXRef(s16 arg0) {
     N_ALMainBus *sp4;
 
     sp4 = n_syn->mainBus;
@@ -42,7 +42,7 @@ LowPass *func_1001DA28(s16 arg0) {
     }
 }
 
-void func_1001DAA0(void *fx, s16 paramID, void *value) {
+void n_alSynSetFXParam(void *fx, s16 paramID, void *value) {
     void *sp1C = fx;
     n_alFxParamHdl(sp1C, paramID, value);
 }

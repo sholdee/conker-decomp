@@ -57,7 +57,7 @@ void audio_init(void) {
     rom_loadPathInto(bankFile, bankSize, 2, 0x17, 0);
     bankAddress = (u32)rom_findPath(0, 2, 0x17, 1);
     waveBase = rom_findPath(0, 2, 0x17, 2);
-    func_10012934(bankFile, waveBase, bankAddress);
+    alBnkfNew(bankFile, waveBase, bankAddress);
     gSoundBank = bankFile->bankArray[0];
 
     // read the sequence table header for its count, then the whole table
@@ -87,7 +87,7 @@ void audio_init(void) {
         gSeqPlayerBuffers[i] = NULL;
         gSeqPlayers[i] = alHeapAlloc(&gAudioHeap, 1, sizeof(N_ALCSPlayer));
         n_alCSPNew(gSeqPlayers[i], &playerConfig);
-        func_10015550(gSeqPlayers[i], bankFile->bankArray[0]);
+        n_alCSPSetBank(gSeqPlayers[i], bankFile->bankArray[0]);
     }
 
     soundConfig.maxEvents = 64;
@@ -96,7 +96,7 @@ void audio_init(void) {
     soundConfig.maxVolumes = 8;
     soundConfig.heap = &gAudioHeap;
     soundConfig.waveRom = waveBase;
-    func_100155A0(&soundConfig);
+    n_alSndpNew(&soundConfig);
     func_10017870(4);
     func_10017944(0, 2);
     func_10017944(1, 2);
@@ -106,7 +106,7 @@ void audio_init(void) {
 void audio_playSeqIfStopped(u8 player) {
     if (n_alCSPGetState(gSeqPlayers[player]) == AL_STOPPED ||
         n_alCSPGetState(gSeqPlayers[player]) == 3) {
-        func_10017AA0(gSeqPlayers[player]);
+        n_alCSPPlay(gSeqPlayers[player]);
     }
 }
 
@@ -153,7 +153,7 @@ void func_100086FC(u8 player, u8 chan, u8 arg2) {
 }
 
 void audio_setChannelPan(u8 player, u8 chan, u8 pan) {
-    func_10017D80(gSeqPlayers[player], chan, pan);
+    n_alCSPSetChlPan(gSeqPlayers[player], chan, pan);
 }
 
 /* audio_fadeChannelVolume for every channel in `mask`. */
@@ -246,7 +246,7 @@ void audio_findSeqLoopMarkers(u8 player, u8 count, s32 base) {
 
 /* Jump the player's sequence to one of its saved markers. */
 void audio_jumpToSeqMarker(u8 player, u8 marker) {
-    func_100186DC(&gSeqPlayerSeqs[player], &gSeqMarkers[player][marker]);
+    alCSeqSetLoc(&gSeqPlayerSeqs[player], &gSeqMarkers[player][marker]);
 }
 
 /* Stop the player, load `sequence` into its buffer if it isn't loaded already, and start playing it. */
@@ -256,12 +256,12 @@ s32 audio_playSequence(u8 player, s32 sequence) {
 
     // wait (bounded) for the player to stop
     count = 0;
-    func_10018C60(gSeqPlayers[player]);
+    n_alCSPStop(gSeqPlayers[player]);
     while (n_alCSPGetState(gSeqPlayers[player]) != AL_STOPPED && count < 2000000) {
         count++;
     }
     if (count >= 2000000) {
-        func_10018C60(gSeqPlayers[player]);
+        n_alCSPStop(gSeqPlayers[player]);
         while (n_alCSPGetState(gSeqPlayers[player]) != AL_STOPPED && count < 4000000) {
             count++;
         }
@@ -282,18 +282,18 @@ s32 audio_playSequence(u8 player, s32 sequence) {
         gSeqPlayerSeqIds[player] = sequence;
     }
     n_alCSeqNew(&gSeqPlayerSeqs[player], gSeqPlayerBuffers[player]);
-    func_10018CB0(gSeqPlayers[player], &gSeqPlayerSeqs[player]);
+    n_alCSPSetSeq(gSeqPlayers[player], &gSeqPlayerSeqs[player]);
     func_10017B30(gSeqPlayers[player]);
     return 0;
 }
 
 void audio_setSeqVolume(u8 player, s32 vol) {
-    func_10018D00(gSeqPlayers[player], vol);
+    n_alCSPSetVol(gSeqPlayers[player], vol);
 }
 
 void audio_endSeqTrack(u8 player) {
     // AL_TRACK_END
-    func_10018C60(gSeqPlayers[player]);
+    n_alCSPStop(gSeqPlayers[player]);
 }
 
 void audio_stopSeq(u8 player) {
