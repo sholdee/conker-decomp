@@ -135,7 +135,7 @@ void    n_alSynRemovePlayer( ALPlayer *client);
 void    n_alSynSetFXMix(N_ALVoice *v, u8 fxmix);
 void    n_alSynSetFXParam(ALFxRef fx, s16 paramID, void *param);
 void    n_alSynFreeFX(ALFxRef *fx);
-void    func_1001CB40(N_ALVoice *v, u8 pan);
+void    n_alSynSetPan(N_ALVoice *v, u8 pan);
 void    n_alSynSetPitch( N_ALVoice *v, f32 pitch);
 void    n_alSynSetPriority( N_ALVoice *voice, s16 priority);
 void    n_alSynSetVol( N_ALVoice *v, s16 volume, ALMicroTime t);
@@ -443,7 +443,6 @@ void     n_alSndpSetSound(ALSndId id);
  * Conker: Rare's additions to the audio library, defined in src/libultra/audio, in address order.
  */
 struct OscState; /* the sequence players' oscillator state, defined in init_128D0.c */
-void    alBnkfNew(ALBankFile *file, u8 *table, s32 arg2);           /* init_128D0.c: alBnkfNew */
 void    _bnkfPatchBank(ALBank *bank, s32 offset, s32 table, s32 arg3);   /* init_128D0.c: relocates a bank */
 void    func_10012B84(ALInstrument *inst, s32 arg1);
 void    func_10012BD0(ALInstrument *inst, s32 arg1);
@@ -454,9 +453,6 @@ s32     initOsc(void **arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5); /* 
 s32     updateOsc(struct OscState *arg0, f32 *arg1);
 void    stopOsc(struct OscState *arg0);
 void    func_100131FC(ALSeqpConfig *config, s32 arg1);                  /* installs the oscillators */
-void    n_alCSPSetBank(N_ALCSPlayer *seqp, ALBank *bank);                /* n_alCSPSetBank */
-void    n_alSndpNew(SndPlayerConfig *config);
-void    n_alCSPPlay(N_ALCSPlayer *seqp);                              /* code_17AA0.c: play */
 void    func_10017AF0(N_ALCSPlayer *seqp, struct OSMesgQueue_s *queue); /* init_17AF0.c */
 void    func_10017B04(N_ALCSPlayer *seqp, s32 chan, u8 arg2);
 void    func_10017B30(N_ALCSPlayer *seqp);
@@ -465,26 +461,18 @@ void    func_10017C00(N_ALCSPlayer *seqp, s32 arg1);                    /* init_
 void    func_10017C68(N_ALCSPlayer *seqp, s32 arg1, u8 arg2, u8 arg3);
 void    func_10017CE0(N_ALCSPlayer *seqp, s32 arg1, u8 arg2);
 void    func_10017D30(N_ALCSPlayer *seqp, s32 arg1, u8 arg2);
-void    n_alCSPSetChlPan(N_ALCSPlayer *seqp, u8 chan, u8 prog);            /* code_17D80.c */
 void    func_10017DF0(N_ALCSPlayer *csp, f32 arg1, f32 arg2);           /* init_17DF0.c */
 void    func_10017E4C(N_ALCSPlayer *csp, u8 chan, u8 arg2);
 void    func_10017F10(N_ALCSPlayer *seqp, u8 arg1, u8 arg2, u8 arg3, s32 arg4); /* init_17F10.c */
-void    alCSeqSetLoc(ALCSeq *seq, ALCSeqMarker *marker);               /* n_csq.c */
 void    func_10018790(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base);
-void    n_alCSPStop(N_ALCSPlayer *seqp);                              /* code_18C60.c: posts AL_TRACK_END */
-void    n_alCSPSetSeq(N_ALCSPlayer *seqp, ALCSeq *seq);                 /* code_18CB0.c */
-void    n_alCSPSetVol(N_ALCSPlayer *seqp, s16 vol);                     /* init_18D00.c */
 void    func_10018D50(N_ALCSPlayer *seqp);                              /* init_18D50.c */
 void    func_1001A704(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 value); /* init_19B50.c */
 void    func_1001CA90(N_ALVoice *v, f32 pitch);                         /* n_synsetpitch2.c */
+void    func_1001CB40(N_ALVoice *v, u8 pan);                            /* n_synsetpan.c */
 f32     func_1001CEA4(s32 arg0);                                        /* init_1CBF0.c */
-void   *n_alSynGetFXRef(s16 bus);                                         /* init_1D900.c: the bus's effect */
 LowPass *func_1001DA28(s16 bus);                                        /* init_1D900.c: the bus's low-pass */
-void    n_alSynSetFXParam(void *fx, s16 paramID, void *value);
 void    func_1001DAE4(LowPass *lp, s16 paramID, s32 *value);
-void    n_alSynSetPan(N_ALVoice *v, u8 pan);                            /* init_1E2A0.c */
 void    func_1001E350(N_ALVoice *v, u8 fxmix);                          /* init_1E350.c */
-void    n_alCSPSendMidi(N_ALCSPlayer *seqp, s32 deltaTime, u8 status, u8 byte1, u8 byte2); /* init_1E400.c: send MIDI */
 
 /* Conker: Rare's osSyncPrintf (init/Libc/Xprintf/xprintf.c), used by init_15550.c; it agrees with os_libc.h. */
 void    osSyncPrintf(const char *fmt, ...);

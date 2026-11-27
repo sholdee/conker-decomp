@@ -13,7 +13,7 @@
 #define alSynSetFXMix( a, b, c)       n_alSynSetFXMix( b, c)
 #define alSynSetFXParam( a, b, c, d)  n_alSynSetFXParam( b, c, d)
 #define alSynFreeFX( a, b)            n_alSynFreeFX( b)
-#define alSynSetPan( a, b, c)         func_1001CB40( b, c)
+#define alSynSetPan( a, b, c)         n_alSynSetPan( b, c)
 #define alSynSetPitch( a, b, c)       n_alSynSetPitch( b, c)
 #define alSynSetPriority( a, b, c)    n_alSynSetPriority( b, c)
 #define alSynSetVol( a, b, c, d)      n_alSynSetVol( b, c, d)
