@@ -10,19 +10,19 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
                              f32 burstScale, f32 altBurstScale, u8 lit, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 owner, s32 list);
 
-/* Calls particle_spawnKindMark at the current sample's (x, z) at the given height, then sets the payload's
- * unk20 to 4. */
-s32 particle_spawnSampleKindMark(SampleTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
-    EffectPayload *payload = state->payload;
-    EffectSample *samples = state->samples;
+/* Calls particle_spawnKindMark at the trail's oldest point's (x, z) at the given height, then sets the trail's
+ * params.state to 4. */
+s32 particle_spawnSampleKindMark(MotionTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
+    TrailParams *payload = state->params;
+    MotionTrailPoint *samples = state->points;
     Vec3f position;
 
-    position.x = samples[state->head.start].x;
+    position.x = samples[state->head.start].pos.x;
     position.y = height;
-    position.z = samples[state->head.start].z;
-    particle_spawnKindMark(particle_getContextEffectKind(), payload->unk0 * 7.0f, payload->unk1B, surface, &position,
+    position.z = samples[state->head.start].pos.z;
+    particle_spawnKindMark(particle_getContextEffectKind(), payload->motion.halfWidth * 7.0f, payload->motion.alpha, surface, &position,
                   state->head.header.owner, state->head.header.kind);
-    payload->unk20 = 4;
+    payload->state = 4;
     return 1;
 }
 

@@ -664,7 +664,7 @@ Splash *particle_spawnSplash(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 
 /* Splash impact handler: bursts into a particle_spawnKindEmitter emitter or a particle_spawnSquash effect at floor height. */
 s32 particle_splashBurst(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, CollisionTri *surface) {
     SplashState *state = splash->state;
-    SplashNode *nodes = splash->nodes;
+    MotionTrailPoint *nodes = splash->nodes;
     Vec3f point;
     SplashBurst *burst = &state->burst;
 
@@ -672,28 +672,28 @@ s32 particle_splashBurst(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, Collis
     point.y = floorY + 2.0f;
     point.z = nodes[splash->head.start].pos.z;
     if (math_random() & 1) {
-        particle_spawnKindEmitter(burst->kind, (state->motion.halfWidth * 3.0f) * burst->burstScale, state->motion.alpha, surface,
+        particle_spawnKindEmitter(burst->kind, (state->params.motion.halfWidth * 3.0f) * burst->burstScale, state->params.motion.alpha, surface,
                       &point, 100, 0, 1, 0, splash->head.header.owner, splash->head.header.kind);
     } else {
-        particle_spawnSquash(burst->kind, (state->motion.halfWidth * 1.1f) * burst->burstScale, state->motion.alpha, &point, 1,
+        particle_spawnSquash(burst->kind, (state->params.motion.halfWidth * 1.1f) * burst->burstScale, state->params.motion.alpha, &point, 1,
                       splash->head.header.owner, splash->head.header.kind);
     }
-    state->unk20 = 4;
+    state->params.state = 4;
     return 1;
 }
 
 /* Splash impact handler: a particle_spawnKindSplash burst at floor height. */
 s32 particle_splashSpray(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, CollisionTri *surface) {
     SplashState *state = splash->state;
-    SplashNode *nodes = splash->nodes;
+    MotionTrailPoint *nodes = splash->nodes;
     Vec3f point;
 
     point.x = nodes[splash->head.start].pos.x;
     point.y = floorY;
     point.z = nodes[splash->head.start].pos.z;
-    particle_spawnKindSplash(state->burst.kind, state->motion.halfWidth * 11.0f * state->burst.altBurstScale, state->motion.alpha,
+    particle_spawnKindSplash(state->burst.kind, state->params.motion.halfWidth * 11.0f * state->burst.altBurstScale, state->params.motion.alpha,
                   surface, &point, splash->head.header.owner, splash->head.header.kind);
-    state->unk20 = 4;
+    state->params.state = 4;
     return 1;
 }
 

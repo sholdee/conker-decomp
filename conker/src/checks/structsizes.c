@@ -373,13 +373,11 @@ STATIC_ASSERT(sizeof(DustParticle) == 0xD0, DustParticle_size);
 STATIC_ASSERT(sizeof(DustEmitterData) == 0x68, DustEmitterData_size);
 STATIC_ASSERT(sizeof(FixedEmitterData) == 0xC, FixedEmitterData_size);
 STATIC_ASSERT(sizeof(PointSparkEmitter) == 0x14, PointSparkEmitter_size);
-STATIC_ASSERT(sizeof(EffectSample) == 0x14, EffectSample_size);
 STATIC_ASSERT(sizeof(SteamWobble) == 0x1C, SteamWobble_size);
 STATIC_ASSERT(sizeof(ParticleSpin) == 0x1C, ParticleSpin_size);
 STATIC_ASSERT(sizeof(SteamData) == 0x1C, SteamData_size);
 STATIC_ASSERT(sizeof(DripData) == 0x18, DripData_size);
 STATIC_ASSERT(sizeof(SplashBurst) == 0xC, SplashBurst_size);
-STATIC_ASSERT(sizeof(SplashNode) == 0x14, SplashNode_size);
 STATIC_ASSERT(sizeof(SquashData) == 0xC, SquashData_size);
 STATIC_ASSERT(sizeof(ColorEmitterData) == 0x14, ColorEmitterData_size);
 

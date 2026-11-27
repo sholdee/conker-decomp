@@ -2661,33 +2661,7 @@ s32 particle_updateZoneEmitter(ZoneEmitter *obj);
 void particle_shutZoneEmitter(ZoneEmitter *obj);
 
 /* game/Particle/EmitterQuads/emitterquads.c */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-} EffectSample; // size 0x14
-
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ u8 pad4[0x17];
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 pad1C[4];
-    /* 0x20 */ u8 unk20;
-} EffectPayload;
-
-/* A effect_newEffectObj effect object (EffectObj) whose items are EffectSamples and whose user data is an
- * EffectPayload. */
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ EffectSample *samples;
-    /* 0x98 */ EffectPayload *payload;
-} SampleTrail;
-
-s32 particle_spawnSampleKindMark(SampleTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
+s32 particle_spawnSampleKindMark(MotionTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 typedef struct FxSpawnPayload FxSpawnPayload; /* defined in conker/effect.h */
 s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ, s32 yaw,
                   s32 baseYaw, f32 radius, s32 kind, f32 arg12, FxSpawnPayload *payload, u8 fxOwner);
@@ -3040,25 +3014,17 @@ typedef struct {
     u8 pad9[3];
 } SplashBurst; /* 0xC */
 
-/* The block a live splash points to at +0x98: its TrailMotion copy, state, and SplashBurst. */
+/* The block a live splash points to at +0x98: its TrailParams, then its SplashBurst. */
 typedef struct {
-    TrailMotion motion;
-    u8 unk20;
-    u8 pad21[0x27];
-    SplashBurst burst;
+    /* 0x00 */ TrailParams params;
+    /* 0x48 */ SplashBurst burst;
 } SplashState;
-
-typedef struct {
-    Vec3f pos;
-    f32 unkC;
-    f32 unk10;
-} SplashNode; /* 0x14 */
 
 typedef struct {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ SplashNode *nodes;
+    /* 0x84 */ u8 buffers[0x10];
+    /* 0x94 */ MotionTrailPoint *nodes;
     /* 0x98 */ SplashState *state;
 } Splash;
 
