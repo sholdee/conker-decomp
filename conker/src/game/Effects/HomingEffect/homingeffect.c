@@ -161,10 +161,11 @@ void effect_destroyHomingEffect(HomingEffect *effect) {
 /* Destroys the effect with the given handle, or every effect for handle 0. */
 void effect_stopHomingEffect(s32 handle) {
     s32 list;
-    HomingEffect *effect;
 
     handle--;
     for (list = 0; list != 2; list++) {
+        HomingEffect *effect;
+
         gObjectWalkDepth++;
         effect = (HomingEffect *)gObjectLists[list][0x27];
         while (effect != NULL) {
@@ -174,11 +175,7 @@ void effect_stopHomingEffect(s32 handle) {
             }
             effect = gObjectWalkNext[gObjectWalkDepth];
         }
-        {
-            s32 pad; // matching: -g3 block marker keeps the depth store out of the loop branch's delay slot
-
-            gObjectWalkDepth--;
-        }
+        gObjectWalkDepth--;
     }
 }
 

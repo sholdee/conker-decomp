@@ -64,10 +64,11 @@ TrailEmitter *trail_getActorEmitter(Actor *actor, u8 owner, s32 list) {
 /* Destroys every trail emitter (after pointing each at `actor`). */
 void trail_destroyAllEmitters(Actor *actor) {
     s32 i;
-    TrailEmitter *emitter;
 
     if (actor != NULL) {
         for (i = 0; i < 2; i++) {
+            TrailEmitter *emitter;
+
             gObjectWalkDepth++;
             for (emitter = (TrailEmitter *)gObjectLists[i][OBJ_TYPE_TRAIL_EMITTER]; emitter != NULL;
                  emitter = gObjectWalkNext[gObjectWalkDepth]) {
@@ -78,12 +79,7 @@ void trail_destroyAllEmitters(Actor *actor) {
                     effect_destroyObject(&emitter->link);
                 }
             }
-            {
-                /* matching: a slotless block-scope decl moves the -g3 line so the decrement fills the bnel slot */
-                extern s8 gObjectWalkDepth;
-
-                gObjectWalkDepth--;
-            }
+            gObjectWalkDepth--;
         }
     }
 }

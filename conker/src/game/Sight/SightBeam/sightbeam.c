@@ -92,7 +92,6 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
     ParticleDef spawn;
     SightBeamState state;
     Vec3i pos;
-    Vec3f ndir;
 
     collision_selectMap(0);
     state.zone0 = collision_findZoneLeaf(start->x, start->z);
@@ -124,8 +123,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
     state.speedS = (math_randomFloat() * 80.0f + 50.0f) * 0.001000000047f;
     state.speedT = (math_randomFloat() * 80.0f + 50.0f) * 0.001000000047f;
     {
-        /* matching: a block-scope declaration gives IDO a scope boundary here */
-        extern void sight_spawnEmitter(SightEmitter **, Vec3f *, CollisionTri *, Vec3f *, ZoneNode *, u8, u8, u8, s32);
+        Vec3f ndir;
 
         spawn.scale.x = end->x - start->x;
         spawn.scale.y = end->y - start->y;
@@ -197,40 +195,38 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
     obj = particle_newQuadParticleNoModel(&spawn, &gWhiteVtxColors, 0x1A, 0, 0, 0x18, 0, 0xA0, arg16, arg17);
     if (obj != NULL) {
         SightBeamState *objState;
-        Vec3f dir;
-        f32 len;
-        f32 inv;
-        Vec3f p0;
-        Vec3f p1;
-        Vec3f q0;
-        Vec3f q1;
 
+        objState = &obj->state;
+        memcpy(objState, &state, sizeof(SightBeamState));
         {
-            /* matching: a block-scope declaration gives IDO a scope boundary here */
-            extern s32 level;
+            Vec3f dir;
+            f32 len;
+            f32 inv;
+            Vec3f p0;
+            Vec3f p1;
+            Vec3f q0;
+            Vec3f q1;
 
-            objState = &obj->state;
-            memcpy(objState, &state, sizeof(SightBeamState));
-        }
-        dir = spawn.scale;
-        if (math_vec3Normalize(&dir, &dir, &len, &inv) != 0 && hasEndEffects) {
-            p0.x = start->x + dir.x * 20.0f;
-            p0.y = start->y + dir.y * 20.0f;
-            p0.z = start->z + dir.z * 20.0f;
-            p1.x = p0.x + dir.x * 500.0f;
-            p1.y = p0.y + dir.y * 500.0f;
-            p1.z = p0.z + dir.z * 500.0f;
-            q0.x = end->x - dir.x * 20.0f;
-            q0.y = end->y - dir.y * 20.0f;
-            q0.z = end->z - dir.z * 20.0f;
-            q1.x = q0.x - dir.x * 500.0f;
-            q1.y = q0.y - dir.y * 500.0f;
-            q1.z = q0.z - dir.z * 500.0f;
-            objState->endEffect0 = sight_spawnExtension(obj, &p0, &p1, red, green, blue, state.zone0, zoneMasked, arg16, arg17);
-            objState->endEffect1 = sight_spawnExtension(obj, &q0, &q1, red, green, blue, state.zone1, zoneMasked, arg16, arg17);
-        } else {
-            objState->endEffect0 = NULL;
-            objState->endEffect1 = NULL;
+            dir = spawn.scale;
+            if (math_vec3Normalize(&dir, &dir, &len, &inv) != 0 && hasEndEffects) {
+                p0.x = start->x + dir.x * 20.0f;
+                p0.y = start->y + dir.y * 20.0f;
+                p0.z = start->z + dir.z * 20.0f;
+                p1.x = p0.x + dir.x * 500.0f;
+                p1.y = p0.y + dir.y * 500.0f;
+                p1.z = p0.z + dir.z * 500.0f;
+                q0.x = end->x - dir.x * 20.0f;
+                q0.y = end->y - dir.y * 20.0f;
+                q0.z = end->z - dir.z * 20.0f;
+                q1.x = q0.x - dir.x * 500.0f;
+                q1.y = q0.y - dir.y * 500.0f;
+                q1.z = q0.z - dir.z * 500.0f;
+                objState->endEffect0 = sight_spawnExtension(obj, &p0, &p1, red, green, blue, state.zone0, zoneMasked, arg16, arg17);
+                objState->endEffect1 = sight_spawnExtension(obj, &q0, &q1, red, green, blue, state.zone1, zoneMasked, arg16, arg17);
+            } else {
+                objState->endEffect0 = NULL;
+                objState->endEffect1 = NULL;
+            }
         }
         if (objState->midEffect != NULL) {
             sound_addDynamicSound(0x4D0, pos.x, pos.y, pos.z, 0x1F40, 0xFA, 0x64, (SoundRecordCallback)sight_onBeamSound, objState, 0, 8, (u8)math_random());

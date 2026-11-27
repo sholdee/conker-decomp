@@ -17,10 +17,11 @@ static void (*gScreenEffectMessageProcs[])(ScreenEffect *, s32, u8) = { NULL, si
 /* Draws every screen effect in both object lists through its draw handler. */
 void colourfb_drawScreenEffects(s32 arg0) {
     u8 list;
-    ScreenEffect *effect;
     u8 visible;
 
     for (list = 0; list < 2; list++) {
+        ScreenEffect *effect;
+
         effect = (ScreenEffect *)gObjectLists[list][OBJ_TYPE_SCREEN_EFFECT];
         gObjectWalkDepth++;
         for (; effect != NULL; effect = gObjectWalkNext[gObjectWalkDepth]) {
@@ -43,12 +44,7 @@ void colourfb_drawScreenEffects(s32 arg0) {
                 gScreenEffectDrawProcs[effect->desc.drawIndex](effect, arg0);
             }
         }
-        {
-            /* matching: only a block-scope redeclaration (not a plain block or -= 1) schedules the decrement's lui first */
-            extern s8 gObjectWalkDepth;
-
-            gObjectWalkDepth--;
-        }
+        gObjectWalkDepth--;
     }
 }
 

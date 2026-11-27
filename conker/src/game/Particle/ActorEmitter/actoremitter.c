@@ -20,13 +20,14 @@ ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 life
                        void *arg6) {
     ActorEmitterParams params;
     s32 i;
-    ActorEmitterProcess *emitter;
 
     if (owner == NULL) {
         return NULL;
     }
     if (killExisting) {
         for (i = 0; i < 2; i++) {
+            ActorEmitterProcess *emitter;
+
             gObjectWalkDepth++;
             emitter = (ActorEmitterProcess *)gObjectLists[i][0x21];
             while (emitter != NULL) {
@@ -36,12 +37,7 @@ ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 life
                 }
                 emitter = gObjectWalkNext[gObjectWalkDepth];
             }
-            {
-                /* matching: the block-scope redeclaration makes IDO rematerialize &gObjectWalkDepth */
-                extern s8 gObjectWalkDepth;
-
-                gObjectWalkDepth--;
-            }
+            gObjectWalkDepth--;
         }
     }
     params.owner = owner;
