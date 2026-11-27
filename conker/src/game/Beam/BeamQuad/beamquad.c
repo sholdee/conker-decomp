@@ -21,7 +21,7 @@ static f32 gBoneQuadScaleXRates[] = { 0.007f };
 static f32 gBoneQuadScaleYRates[] = { 0.012f };
 
 /* Spawns a beam effect between two bone-relative points of the owner's skeleton. */
-void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3) {
+void beam_spawnBoneQuad(Actor *owner, s32 type, u8 fxOwner, s32 fxList) {
     MtxF *mtx;
     Vec3f from;
     Vec3f to;
@@ -59,7 +59,7 @@ void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3) {
             spawn.rot.x = vel.z * invDist;
             spawn.rot.y = 0.0f;
             spawn.rot.z = vel.x * invDist;
-            effect = particle_newQuadParticleWhite(&spawn, 9, 0, 0, 7, 0, 0x2C, arg2, arg3);
+            effect = particle_newQuadParticleWhite(&spawn, 9, 0, 0, 7, 0, 0x2C, fxOwner, fxList);
             if (effect != NULL) {
                 effect->u.beam.vel = vel;
                 effect->u.beam.size = gBoneQuadSizes[type];
@@ -159,24 +159,24 @@ Vtx_t *beam_drawQuad(BeamQuad *effect, s16 bufferIndex) {
 }
 
 /* Spawns a quad whose position, angle, size and alpha follow the given values. */
-void beam_spawnLinkedQuad(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHeight, s16 arg5, u8 arg6, s32 arg7) {
+void beam_spawnLinkedQuad(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHeight, s16 lifetime, u8 fxOwner, s32 fxList) {
     ParticleDef spawn;
     BeamQuad *effect;
 
-    if (pos != NULL && angle != NULL && halfWidth != NULL && alpha != NULL && halfHeight != NULL && arg5 != 0) {
+    if (pos != NULL && angle != NULL && halfWidth != NULL && alpha != NULL && halfHeight != NULL && lifetime != 0) {
         spawn.texture = 0x17;
         spawn.frameSpeed = 0x243A;
         spawn.flags = 0x401;
         spawn.alpha = 255;
         spawn.frame = 0;
-        spawn.lifetime = arg5;
+        spawn.lifetime = lifetime;
         spawn.colorLevel = 255;
         // matching: the three stores share one line so as1 keeps IDO's t6-t9 constant order
         spawn.rgba[2] = 200; spawn.rgba[1] = 200; spawn.rgba[0] = 200;
         spawn.rgba[3] = 200;
         spawn.renderModes = 0x401;
 
-        effect = particle_newQuadParticleWhite(&spawn, 0, 0xA, 0, 8, 0, 0x14, arg6, arg7);
+        effect = particle_newQuadParticleWhite(&spawn, 0, 0xA, 0, 8, 0, 0x14, fxOwner, fxList);
         if (effect != NULL) {
             effect->u.linked.pos = pos;
             effect->u.linked.angle = angle;

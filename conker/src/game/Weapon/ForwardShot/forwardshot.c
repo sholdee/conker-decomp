@@ -18,7 +18,7 @@ static u8 gForwardShotBone = 9; // bone of the points above
 /* Spawns a projectile (weapon_spawnProjectile) along `actor`'s direction. With bone matrices it starts at
  * bone gForwardShotBone and is followed by the particle_spawnShortLightFlash / particle_spawnBoneDirParticle / weapon_spawnBoneBeam effects;
  * without them it starts 34 units to the side of and 49 units above the actor. */
-void weapon_spawnForwardProjectile(Actor *actor, u8 arg1, s32 arg2) {
+void weapon_spawnForwardProjectile(Actor *actor, u8 fxOwner, s32 fxList) {
     Vec3f position;
     Vec3f direction;
     Vec3f axis0;
@@ -68,18 +68,18 @@ void weapon_spawnForwardProjectile(Actor *actor, u8 arg1, s32 arg2) {
     weapon_spawnProjectile(&position, &direction, 0, 0, 0, 0, 300.0f, 0.003333333414f,
                   math_randomFloat() * 10.0f + 25.0f, math_randomFloat() * 200.0f + 400.0f, 50.0f,
                   (math_random() % 156U) + 100, actor, 1, 1, 0, 0, 1, 1, 0, 0x35, 0.0f, 0xFF, -1, 0,
-                  arg1, arg2);
+                  fxOwner, fxList);
     if (actor->ob_matrix_ptr != NULL && (actor->cullMask & 0xF) != 0xF) {
-        particle_spawnShortLightFlash(&position, arg1, arg2);
-        particle_spawnBoneDirParticle(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
+        particle_spawnShortLightFlash(&position, fxOwner, fxList);
+        particle_spawnBoneDirParticle(&origin, &delta, mtx, actor, 1.0f, fxOwner, fxList);
         if (math_random() & 1) {
-            weapon_spawnBoneBeam(actor, gForwardShotBone, &gForwardShotStart, &gForwardShotBeamEnd, &position, arg1, arg2);
+            weapon_spawnBoneBeam(actor, gForwardShotBone, &gForwardShotStart, &gForwardShotBeamEnd, &position, fxOwner, fxList);
         }
     }
 }
 
 /* Transforms the point gForwardShotStart by bone gForwardShotBone of `actor` into `*out`. */
-void weapon_getForwardProjectileStart(Actor *actor, s16 arg1, Vec3f *out) {
+void weapon_getForwardProjectileStart(Actor *actor, s16 unused, Vec3f *out) {
     void *mtx;
     const Vec3f *src;
     Vec3f *dst;
@@ -91,7 +91,7 @@ void weapon_getForwardProjectileStart(Actor *actor, s16 arg1, Vec3f *out) {
 }
 
 /* Spawns a randomized effect (effect_spawnBoneBeamParticle) on bone `bone` of `actor` at `position`. */
-void weapon_spawnBoneBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, Vec3f *position, u8 arg5, s32 arg6) {
+void weapon_spawnBoneBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, Vec3f *position, u8 fxOwner, s32 fxList) {
     ParticleSize motion;
     s32 pad; // matching: unused stack slot between motion and random
     s32 random[2];
@@ -101,5 +101,5 @@ void weapon_spawnBoneBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f
     random[0] = math_random();
     random[1] = math_random();
     effect_spawnBoneBeamParticle(actor, bone, start, end, &motion, (random[0] & 3) + 6, 0xFF, math_randomFloat() * 270.0f + 359.0f,
-                  position, 0xFF, 0, -1, arg5, arg6);
+                  position, 0xFF, 0, -1, fxOwner, fxList);
 }

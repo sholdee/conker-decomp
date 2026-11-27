@@ -15,7 +15,7 @@ static const u8 gTwinMuzzleBones[2] = { 2, 4 };
 /* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
  * weapon_spawnProjectile effect from the muzzle towards the jittered hit point (or along the aim on a miss), a
  * light_createWithEffect flash at the muzzle and a effect_spawnBoneBeamParticle beam on the muzzle's bone. */
-Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
+Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 fxOwner, s32 fxList) {
     Game1EF500Trail *tracer;
     Vec3f aimStart;
     Vec3f aimDir;
@@ -89,7 +89,7 @@ Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 a
         math_random();
         tracer = weapon_spawnProjectile(&muzzle, tracerDir, 0, 0, 0, 0, 130.0f, 1.0f / 130.0f, randA * 18.0f + 29.0f,
                                randB * 400.0f + 262.0f, 100.0f, 255, actor, 1, 1, 0, 0, 0, 1, 3, 26, 0.0f, 255, -1,
-                               0, arg2, arg3);
+                               0, fxOwner, fxList);
     }
     flashHeader.flags = 3;
     flashHeader.update = -1;
@@ -99,14 +99,14 @@ Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 a
     flashPos.y = muzzle.y;
     flashPos.z = muzzle.z;
     randInt = (math_random() % 13U) + 90;
-    light_createWithEffect(&flashHeader, &flashPos, randInt, 255, 255, 255, 255, 0, 0, arg2, arg3);
+    light_createWithEffect(&flashHeader, &flashPos, randInt, 255, 255, 255, 255, 0, 0, fxOwner, fxList);
     beamSize.height = (math_randomFloat() * 2586.0f + 1758.0f) * 0.001000000047f;
     beamSize.width = (math_randomFloat() * 1357.0f + 968.0f) * 0.1000000015f;
     randInt2 = math_random();
     randInt = math_random();
     randA = math_randomFloat() * 1077.0f + 4000.0f;
     effect_spawnBoneBeamParticle(actor, gTwinMuzzleBones[slot], &gTwinMuzzleStarts[slot], &gTwinMuzzleBeamEnds[slot], &beamSize, (randInt2 % 6U) + 6,
-                  (randInt % 52U) + 193, randA, &muzzle, 255, 0, -1, arg2, arg3);
+                  (randInt % 52U) + 193, randA, &muzzle, 255, 0, -1, fxOwner, fxList);
     return tracer;
 }
 

@@ -96,7 +96,7 @@ void beam_releaseSlot(actor, slot)
 
 
 /* Spawns the beam of slot `slot` of `actor`, with its sparks, emitter, glow and flash. */
-AimedBeam *beam_spawnAimed(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
+AimedBeam *beam_spawnAimed(Actor *actor, u8 slot, u8 fxOwner, s32 fxList) {
     AimedBeam *beam;
     ParticleDef spawn;
     AimedBeamState init;
@@ -146,7 +146,7 @@ AimedBeam *beam_spawnAimed(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     spawn.material = 0;
     spawn.fadeStart = 1;
     spawn.fadeRate = 0xFF;
-    beam = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x1D, 0, 0, 0x1C, 0, 0, 0, 0x44, arg2, arg3);
+    beam = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x1D, 0, 0, 0x1C, 0, 0, 0, 0x44, fxOwner, fxList);
     if (beam != NULL) {
         link = &beam->link;
         memcpy(link, &init, sizeof(init));
@@ -184,20 +184,20 @@ AimedBeam *beam_spawnAimed(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
         sparkLink.beam = beam;
         part.type = 1;
         for (sparkLink.index = 0; sparkLink.index < 2; sparkLink.index++) {
-            link->sparks[sparkLink.index] = beam_newLightning(&part, 0x10, arg2, arg3);
+            link->sparks[sparkLink.index] = beam_newLightning(&part, 0x10, fxOwner, fxList);
             if (link->sparks[sparkLink.index] != NULL) {
                 memcpy(link->sparks[sparkLink.index]->link, &sparkLink, sizeof(sparkLink));
             }
         }
         emitterLink.beam = beam;
         emitterLink.accum = 0.0f;
-        emitter = effect_newTimedEffect(300, -1, 0x22, -1, 0, 0x20, sizeof(EmitterLink), arg2, arg3);
+        emitter = effect_newTimedEffect(300, -1, 0x22, -1, 0, 0x20, sizeof(EmitterLink), fxOwner, fxList);
         link->emitter = emitter;
         if (emitter != NULL) {
             memcpy(&emitter->link, &emitterLink, sizeof(emitterLink));
         }
-        link->glow = beam_spawnGlow(actor, slot, 0xFF, 0xD9, 0xA0, beam, arg2, arg3);
-        link->flash = beam_spawnFlash(0x46, 0xFF, 0x82, 0, beam, arg2, arg3);
+        link->glow = beam_spawnGlow(actor, slot, 0xFF, 0xD9, 0xA0, beam, fxOwner, fxList);
+        link->flash = beam_spawnFlash(0x46, 0xFF, 0x82, 0, beam, fxOwner, fxList);
         }
     }
     return beam;
@@ -269,7 +269,7 @@ s32 beam_updateAimed(AimedBeam *beam) {
 }
 
 /* Whether `actor` has id 0x28. */
-s32 func_150EF784(Actor *actor, s32 arg1, s32 arg2) {
+s32 func_150EF784(Actor *actor, s32 self, s32 filterArg) {
     if (actor->character_type == 0x28) {
         return TRUE;
     }
@@ -472,7 +472,7 @@ void beam_updateEmitter(BeamEmitter *emitter) {
 }
 
 /* Spawns the glow sprite of `beam` (slot `slot` of `actor`), tinted (r, g, b). */
-Glow *beam_spawnGlow(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u8 arg6, s32 arg7) {
+Glow *beam_spawnGlow(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u8 fxOwner, s32 fxList) {
     Glow *glow;
     GlowShape sprite;
     ParticleDef spawn;
@@ -542,7 +542,7 @@ Glow *beam_spawnGlow(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u
     sprite.type = 10;
     sprite.handler = -1;
 
-    glow = flare_spawnGlow(&sprite, 0x6C, &spawn, 0x1E, 0, 0, 0, -1, arg6, arg7);
+    glow = flare_spawnGlow(&sprite, 0x6C, &spawn, 0x1E, 0, 0, 0, -1, fxOwner, fxList);
     if (glow != NULL) {
         memcpy(&glow->link, &link, sizeof(link));
     }
@@ -570,7 +570,7 @@ s32 beam_updateGlow(Glow *glow) {
 }
 
 /* Spawns the muzzle flash of `beam`, colored (r, g, b, a). */
-LightEffect *beam_spawnFlash(u8 r, u8 g, u8 b, u8 a, AimedBeam *beam, u8 arg5, s32 arg6) {
+LightEffect *beam_spawnFlash(u8 r, u8 g, u8 b, u8 a, AimedBeam *beam, u8 fxOwner, s32 fxList) {
     LightEffect *flash;
     LightEffectHeader header;
     Vec3i origin;
@@ -585,7 +585,7 @@ LightEffect *beam_spawnFlash(u8 r, u8 g, u8 b, u8 a, AimedBeam *beam, u8 arg5, s
     origin.y = 0;
     origin.z = 0;
 
-    flash = light_createWithEffect(&header, &origin, r, g, b, a, 0xFF, 0, 4, arg5, arg6);
+    flash = light_createWithEffect(&header, &origin, r, g, b, a, 0xFF, 0, 4, fxOwner, fxList);
     if (flash != NULL) {
         memcpy(&flash->data.object, &link, sizeof(link));
     }
@@ -661,11 +661,11 @@ void beam_unlinkFlash(LightEffect *flash) {
 
 /* Fires a projectile (weapon_spawnProjectile) from slot `slot` of `actor` once actor->taskint[2]
  * reaches 90, with a spark burst and a effect_spawnBoneBeamParticle effect at the muzzle. */
-Game1EF500Trail *beam_fireSlotProjectile(actor, slot, arg2, arg3)
+Game1EF500Trail *beam_fireSlotProjectile(actor, slot, fxOwner, fxList)
     Actor *actor;
     u8 slot;
-    u8 arg2;
-    s32 arg3;
+    u8 fxOwner;
+    s32 fxList;
 {
     Game1EF500Trail *ret;
     Vec3f muzzle;
@@ -709,7 +709,7 @@ Game1EF500Trail *beam_fireSlotProjectile(actor, slot, arg2, arg3)
         math_random();
         ret = weapon_spawnProjectile(&muzzle, &dir, 0, 0, 0, 0, 150.0f, 0.006666666828f, rand0 * 19.0f + 38.0f,
                             rand1 * 363.0f + 149.0f, 50.0f, 0xFF, actor, 1, 1, 0, 8, 0, 1, 0, 0xA0038, 0.0f,
-                            0xFF, -1, 0, arg2, arg3);
+                            0xFF, -1, 0, fxOwner, fxList);
     }
     hdr.flags = 3;
     hdr.update = -1;
@@ -719,14 +719,14 @@ Game1EF500Trail *beam_fireSlotProjectile(actor, slot, arg2, arg3)
     origin.y = muzzle.y;
     origin.z = muzzle.z;
     randA = (math_random() % 51U) + 80;
-    light_createWithEffect(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg2, arg3);
+    light_createWithEffect(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
     params.height = (math_randomFloat() * 1906.0f + 969.0f) * 0.001000000047f;
     params.width = (math_randomFloat() * 911.0f + 628.0f) * 0.1000000015f;
     randA = math_random();
     randB = math_random();
     rand0 = math_randomFloat() * 2000.0f + 2000.0f;
     effect_spawnBoneBeamParticle(actor, gBeamProjectileBones[slot], &gBeamProjectileStarts[slot], &gBeamProjectileEnds[slot], &params,
-                  (randA % 3U) + 8, (randB % 1U) + 0xFF, rand0, &muzzle, 0xFF, 0, -1, arg2, arg3);
+                  (randA % 3U) + 8, (randB % 1U) + 0xFF, rand0, &muzzle, 0xFF, 0, -1, fxOwner, fxList);
     return ret;
 }
 
@@ -907,7 +907,7 @@ void beam_spawnFollowParticle(Actor *actor) {
 }
 
 /* Per-frame update of an actor-following particle: tracks the actor and pulses its size and alpha. */
-s32 beam_updateFollowParticle(AttachedSpriteParticle *particle, s32 arg1) {
+s32 beam_updateFollowParticle(AttachedSpriteParticle *particle, s32 prevPos) {
     ActorParticleLink *link;
     Actor *actor;
 
@@ -1106,12 +1106,12 @@ void beam_actorBoundMessage(ActorBound *self, ActorMsg *msg, u8 type) {
 
 /* Spark burst and effect_spawnBoneBeamParticle effect at slot `slot` of `actor`, muzzle variant
  * `variant` (0-3); actors with id 0x23 use the second table set. */
-void beam_spawnMuzzleBurst(actor, slot, variant, arg3, arg4)
+void beam_spawnMuzzleBurst(actor, slot, variant, fxOwner, fxList)
     Actor *actor;
     u8 slot;
     u8 variant;
-    u8 arg3;
-    s32 arg4;
+    u8 fxOwner;
+    s32 fxList;
 {
     Vec3f muzzle;
     u8 kind;
@@ -1158,7 +1158,7 @@ void beam_spawnMuzzleBurst(actor, slot, variant, arg3, arg4)
         origin.y = muzzle.y;
         origin.z = muzzle.z;
         randA = (math_random() % 51U) + 80;
-        light_createWithEffect(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
+        light_createWithEffect(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
         params.height = (math_randomFloat() * 701.0f + 1925.0f) * 0.001000000047f;
         params.width = (math_randomFloat() * 1155.0f + 1526.0f) * 0.1000000015f;
         randA = math_random();
@@ -1166,6 +1166,6 @@ void beam_spawnMuzzleBurst(actor, slot, variant, arg3, arg4)
         rand0 = math_randomFloat() * 1877.0f + 2414.0f;
         effect_spawnBoneBeamParticle(actor, gBeamMuzzleBurstBones[kind][slot], &gBeamMuzzleBurstStarts[kind][variant][slot],
                       &gBeamMuzzleBurstEnds[kind][variant][slot], &params, (randA % 6U) + 8, (randB % 1U) + 0xFF,
-                      rand0, &muzzle, 0xFF, 0, -1, arg3, arg4);
+                      rand0, &muzzle, 0xFF, 0, -1, fxOwner, fxList);
     }
 }

@@ -18,14 +18,14 @@
 /* game_43B20.c */
 void player_clearIdleRequests(void);
 void player_clearSpawnPoints(void);
-void player_loadSpawnPoints(s32 arg0);
+void player_loadSpawnPoints(s32 levelId);
 
 /* game/Player/StatsInit/statsinit.c */
-void player_initMatch(s16 arg0, s16 arg1);
-void func_1501748C(s16 arg0);
+void player_initMatch(s16 mode, s16 playerMask);
+void func_1501748C(s16 playerMask);
 void player_clearMatch(void);
-void player_offsetLinkGroupObjects(s32 arg0);
-void player_loadLinkGroups(s32 arg0);
+void player_offsetLinkGroupObjects(s32 offset);
+void player_loadLinkGroups(s32 levelId);
 
 /* game/Player/HudBlockInit/hudblockinit.c */
 void player_initHudBlockCount(void);

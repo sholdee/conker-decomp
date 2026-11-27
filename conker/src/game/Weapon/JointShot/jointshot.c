@@ -25,37 +25,37 @@ static const Vec3f D_800AAB80[5][2] = {
 };
 
 /* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
- * a cont_spawnRumble event for its camera, side effects, then weapon_spawnProjectile along `aim` (from the joints when arg2). */
-Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
-                               s32 arg6) {
+ * a cont_spawnRumble event for its camera, side effects, then weapon_spawnProjectile along `aim` (from the joints when jointAim). */
+Game1EF500Trail *weapon_fireJointShot(Actor *obj, u8 side, u8 jointAim, ModelAttachment *attachment, s16 node, u8 fxOwner,
+                               s32 fxList) {
     Vec3f origin;
     Vec3f aim;
     Vec3f shotPos;
-    Vec3f sp130;
-    Vec3f sp124;
-    Vec3f sp118;
+    Vec3f pointBuf;
+    Vec3f dirBuf;
+    Vec3f axis0;
     Vec3f start;
     Vec3f dir;
     void *matrix;
     MtxF *joints;
-    Vec3f *spF4;
-    Vec3f *spF0;
-    Vec3f spE4;
+    Vec3f *altOrigin;
+    Vec3f *altDir;
+    Vec3f axis1;
 
-    if (arg0 == NULL) {
+    if (obj == NULL) {
         return NULL;
     }
     if (side >= 2) {
         return NULL;
     }
-    if (func_15142A5C(arg0) != 0) {
+    if (func_15142A5C(obj) != 0) {
         return NULL;
     }
-    particle_countShot(arg0);
-    if (!arg2) {
-        math_getActorAim(arg0, &aim, &sp118, &spE4, 0.8110000491f);
+    particle_countShot(obj);
+    if (!jointAim) {
+        math_getActorAim(obj, &aim, &axis0, &axis1, 0.8110000491f);
     }
-    joints = arg0->ob_matrix_ptr;
+    joints = obj->ob_matrix_ptr;
     if (joints != NULL) {
         const Vec3f *points[5];
         Vec3f *results[5];
@@ -73,16 +73,16 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
         points[3] = &D_800AAB68[side];
         points[4] = &gJointShotBeamEnds[side];
         if (attachment != NULL) {
-            if (math_transformAttachmentOffsets(arg0, attachment, 0, points, results, arg2 ? 5 : 4) == 0) {
+            if (math_transformAttachmentOffsets(obj, attachment, 0, points, results, jointAim ? 5 : 4) == 0) {
                 return NULL;
             }
         } else {
-            math_transformOffsets(points, results, matrix, arg2 ? 5 : 4);
+            math_transformOffsets(points, results, matrix, jointAim ? 5 : 4);
         }
         dir.x -= start.x;
         dir.y -= start.y;
         dir.z -= start.z;
-        if (arg2) {
+        if (jointAim) {
             aim.x -= origin.x;
             aim.y -= origin.y;
             aim.z -= origin.z;
@@ -92,7 +92,7 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
         f32 dx;
         f32 offset;
 
-        if (arg2) {
+        if (jointAim) {
             return NULL;
         }
         /* No skeleton: start 34 units to the side of the aim direction (in the xz plane), 49 units up. */
@@ -112,60 +112,60 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
             dx = 0.0f;
         }
         offset = side ? 34.0f : -34.0f;
-        origin.x = arg0->xpos + (offset * dx);
-        origin.y = arg0->ypos + 49.0f;
-        origin.z = arg0->zpos + (offset * dz);
+        origin.x = obj->xpos + (offset * dx);
+        origin.y = obj->ypos + 49.0f;
+        origin.z = obj->zpos + (offset * dz);
         shotPos = origin;
     }
-    particle_intersectAimPlane(arg0, &origin, &aim, &sp118, &spE4, &sp130, &sp124, &spF4, &spF0, &shotPos);
-    if (arg0->CameraPtr != NULL) {
+    particle_intersectAimPlane(obj, &origin, &aim, &axis0, &axis1, &pointBuf, &dirBuf, &altOrigin, &altDir, &shotPos);
+    if (obj->CameraPtr != NULL) {
         RumbleParams event;
 
         event.flags = 1;
         event.duration = (math_random() % 11U) + 11;
-        event.playerMask = 1 << arg0->CameraPtr->CNumber;
+        event.playerMask = 1 << obj->CameraPtr->CNumber;
         math_random();
         event.strength = 8;
         event.updateKind = -1;
         cont_spawnRumble(&event, 0, 0xFF, 1);
     }
-    if ((arg0->ob_matrix_ptr != NULL) && ((arg0->cullMask & 0xF) != 0xF)) {
+    if ((obj->ob_matrix_ptr != NULL) && ((obj->cullMask & 0xF) != 0xF)) {
         s32 mask;
         u32 i;
 
-        if (arg2 || ((gScreenLayout < 2) && (math_random() & 1))) {
-            particle_spawnShortLightFlash(&origin, arg5, arg6);
+        if (jointAim || ((gScreenLayout < 2) && (math_random() & 1))) {
+            particle_spawnShortLightFlash(&origin, fxOwner, fxList);
         }
-        if ((arg2 || (gScreenLayout < 2)) && (math_random() & 1)) {
-            particle_spawnBoneDirParticle(&start, &dir, matrix, arg0, 1.0f, arg5, arg6);
+        if ((jointAim || (gScreenLayout < 2)) && (math_random() & 1)) {
+            particle_spawnBoneDirParticle(&start, &dir, matrix, obj, 1.0f, fxOwner, fxList);
         }
         mask = 1;
         for (i = gLayoutDetailShift; i > 0; i--) {
             mask |= 1 << i;
         }
-        if (arg2 || !(math_random() & mask)) {
-            weapon_spawnJointBeam(arg0, side, &origin, arg4, arg5, arg6);
+        if (jointAim || !(math_random() & mask)) {
+            weapon_spawnJointBeam(obj, side, &origin, node, fxOwner, fxList);
         }
     }
-    return weapon_spawnProjectile(&shotPos, &aim, spF4, spF0, 1, 0, 300.0f, 0.003333333414f,
+    return weapon_spawnProjectile(&shotPos, &aim, altOrigin, altDir, 1, 0, 300.0f, 0.003333333414f,
                          math_randomFloat() * 10.0f + 25.0f, math_randomFloat() * 150.0f + 400.0f, 50.0f,
-                         (math_random() % 156U) + 100, arg0, arg2 ? 0 : 1, arg2 ? 0 : 1, arg2 ? 0 : 1, 8, arg2 ? 0 : 1, 1, 0, 0x1A, 0.0f, 0xFF,
-                         -1, 0, arg5, arg6);
+                         (math_random() % 156U) + 100, obj, jointAim ? 0 : 1, jointAim ? 0 : 1, jointAim ? 0 : 1, 8, jointAim ? 0 : 1, 1, 0, 0x1A, 0.0f, 0xFF,
+                         -1, 0, fxOwner, fxList);
 }
 
 /* Handler-table entry: the side-0 point of weapon_getJointPos. */
-void weapon_getSide0JointPos(Actor *arg0, s16 arg1, Vec3f *out) {
-    weapon_getJointPos(arg0, out, 0);
+void weapon_getSide0JointPos(Actor *obj, s16 unused, Vec3f *out) {
+    weapon_getJointPos(obj, out, 0);
 }
 
 /* Handler-table entry: the side-1 point of weapon_getJointPos. */
-void weapon_getSide1JointPos(Actor *arg0, s16 arg1, Vec3f *out) {
-    weapon_getJointPos(arg0, out, 1);
+void weapon_getSide1JointPos(Actor *obj, s16 unused, Vec3f *out) {
+    weapon_getJointPos(obj, out, 1);
 }
 
-/* Transforms this side's gJointShotMuzzles point by its joint matrix (gJointShotMatrixOffsets bytes into arg0->ob_matrix_ptr) into *out. */
-void weapon_getJointPos(Actor *arg0, Vec3f *out, u8 side) {
-    void *matrix = (u8 *)arg0->ob_matrix_ptr + gJointShotMatrixOffsets[side];
+/* Transforms this side's gJointShotMuzzles point by its joint matrix (gJointShotMatrixOffsets bytes into obj->ob_matrix_ptr) into *out. */
+void weapon_getJointPos(Actor *obj, Vec3f *out, u8 side) {
+    void *matrix = (u8 *)obj->ob_matrix_ptr + gJointShotMatrixOffsets[side];
 
     math_transformOffset(&gJointShotMuzzles[side], out, matrix);
 }
@@ -184,20 +184,20 @@ typedef struct {
 
 /* Emits this side's effects (particle_spawnShortLightFlash, particle_spawnBoneDirParticle, weapon_spawnJointBeam) from its joint points, then fires a
  * copy of the shot described by the owner's 0x1B entry, its end pushed 10% beyond its start. */
-void weapon_fireJointShotProjectile(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
+void weapon_fireJointShotProjectile(Actor *obj, u8 side, u8 fxOwner, s32 fxList) {
     Vec3f origin;
     Vec3f start;
     Vec3f dir;
     void *matrix;
 
-    if ((arg0 != NULL) && (side < 2) && (func_15142A5C(arg0) == 0)) {
-        particle_countShot(arg0);
-        if (arg0->ob_matrix_ptr != NULL) {
+    if ((obj != NULL) && (side < 2) && (func_15142A5C(obj) == 0)) {
+        particle_countShot(obj);
+        if (obj->ob_matrix_ptr != NULL) {
             {
                 const Vec3f *points[3];
                 Vec3f *results[3];
 
-                matrix = (u8 *)arg0->ob_matrix_ptr + gJointShotMatrixOffsets[side];
+                matrix = (u8 *)obj->ob_matrix_ptr + gJointShotMatrixOffsets[side];
                 points[0] = &gJointShotMuzzles[side];
                 points[1] = &D_800AAB38[side];
                 points[2] = &D_800AAB50[side];
@@ -205,15 +205,15 @@ void weapon_fireJointShotProjectile(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
                 results[1] = &start;
                 results[2] = &dir;
                 math_transformOffsets(points, results, matrix, 3);
-                // matching: six dead ifs (fewer fail) change uopt's register choice: arg0 stays on the stack
+                // matching: six dead ifs (fewer fail) change uopt's register choice: obj stays on the stack
                 if (0) {} if (0) {} if (0) {} if (0) {} if (0) {} if (0) {}
                 dir.x -= start.x;
                 dir.y -= start.y;
                 dir.z -= start.z;
             }
-            particle_spawnShortLightFlash(&origin, arg2, arg3);
-            particle_spawnBoneDirParticle(&start, &dir, matrix, arg0, 1.0f, arg2, arg3);
-            weapon_spawnJointBeam(arg0, side, &origin, -1, arg2, arg3);
+            particle_spawnShortLightFlash(&origin, fxOwner, fxList);
+            particle_spawnBoneDirParticle(&start, &dir, matrix, obj, 1.0f, fxOwner, fxList);
+            weapon_spawnJointBeam(obj, side, &origin, -1, fxOwner, fxList);
             {
                 ShotSource *source;
                 Vec3f end;
@@ -221,7 +221,7 @@ void weapon_fireJointShotProjectile(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
                 ShotHolder *holder;
                 RayHit *src;
 
-                if (effect_findAttachmentByType(arg0->attachments, 0x1B, &entry) != 0) {
+                if (effect_findAttachmentByType(obj->attachments, 0x1B, &entry) != 0) {
                     source = entry->handle;
                     holder = &source->holder;
                     if (source->flags & 1) {
@@ -246,8 +246,8 @@ void weapon_fireJointShotProjectile(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
 
                                 shot = *src;
                                 shot.origin = end;
-                                effect_spawnProjectile(&origin, NULL, NULL, NULL, 0, &shot, 54.00000381f, 0.01851851679f, 500.0f, arg0, 0,
-                                              (src->hitType >= 2) ? 0 : 1, 1, 0, 0x1A, -1, 0, 1, arg2, arg3);
+                                effect_spawnProjectile(&origin, NULL, NULL, NULL, 0, &shot, 54.00000381f, 0.01851851679f, 500.0f, obj, 0,
+                                              (src->hitType >= 2) ? 0 : 1, 1, 0, 0x1A, -1, 0, 1, fxOwner, fxList);
                             }
                         }
                     }
@@ -259,7 +259,7 @@ void weapon_fireJointShotProjectile(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
 
 /* Spawns a effect_spawnBoneBeamParticle effect at `pos` between this side's gJointShotMuzzles/gJointShotBeamEnds points, with random
  * size, count and angle. */
-void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5) {
+void weapon_spawnJointBeam(Actor *obj, u8 side, Vec3f *pos, s16 node, u8 fxOwner, s32 fxList) {
     ParticleSize values;
     f32 angle;
     u32 random1;
@@ -270,14 +270,14 @@ void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, 
     random0 = math_random();
     random1 = math_random();
     angle = math_randomFloat();
-    effect_spawnBoneBeamParticle(arg0, (u32)gJointShotMatrixOffsets[side] >> 6, &gJointShotMuzzles[side], &gJointShotBeamEnds[side], &values,
-                  (random0 % 4U) + 6, (random1 % 1U) + 255, (angle * 270.0f) + 359.0f, pos, 255, 0, arg3, arg4,
-                  arg5);
+    effect_spawnBoneBeamParticle(obj, (u32)gJointShotMatrixOffsets[side] >> 6, &gJointShotMuzzles[side], &gJointShotBeamEnds[side], &values,
+                  (random0 % 4U) + 6, (random1 % 1U) + 255, (angle * 270.0f) + 359.0f, pos, 255, 0, node, fxOwner,
+                  fxList);
 }
 
 /* Spawns model particle 15 on `owner` when it starts the hover (anim 0xE9, actor_updatePlayerControls); its update
  * weapon_updateHoverModel keeps it while the hover lasts. */
-void weapon_spawnHoverModel(Actor *owner, u8 arg1, s32 arg2) {
+void weapon_spawnHoverModel(Actor *owner, u8 fxOwner, s32 fxList) {
     ParticleSpawn spawn;
     struct {
         u8 bone; /* index into the owner's ob_matrix_ptr (matrix callback 5, particle_buildOwnerMatrix) */
@@ -320,7 +320,7 @@ void weapon_spawnHoverModel(Actor *owner, u8 arg1, s32 arg2) {
     spawn.fadeRate = 0xFF;
     spawn.sound = 0;
 
-    effect = particle_newModelParticleWithFloor(&spawn, 3, 0xFF, 0, 1, arg1, arg2);
+    effect = particle_newModelParticleWithFloor(&spawn, 3, 0xFF, 0, 1, fxOwner, fxList);
     if (effect != NULL) {
         memcpy(MODEL_PARTICLE_DATA(effect), &state, sizeof(state));
     }

@@ -10,7 +10,7 @@
 #include "conker/texture.h"
 
 /* Spawns a beam effect between actors 0x17 and 0x16. */
-WavyBeamEffect *beam_spawnWavyBeam(s16 duration, u8 arg1, s32 arg2) {
+WavyBeamEffect *beam_spawnWavyBeam(s16 duration, u8 fxOwner, s32 fxList) {
     WavyBeamEffect *effect;
     WavyBeamData data;
 
@@ -24,7 +24,7 @@ WavyBeamEffect *beam_spawnWavyBeam(s16 duration, u8 arg1, s32 arg2) {
     data.fadeMax = 0.9f;
     data.fadeScale = 1.0f / data.fadeEnd;
 
-    effect = effect_newTimedEffect(duration, -1, -1, 1, 1, 0x15, sizeof(data), arg1, arg2);
+    effect = effect_newTimedEffect(duration, -1, -1, 1, 1, 0x15, sizeof(data), fxOwner, fxList);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

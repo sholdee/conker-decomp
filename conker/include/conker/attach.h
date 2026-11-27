@@ -21,7 +21,7 @@ struct S150D88AC;
 
 /* game/Attach/Attachment/attachment.c */
 extern ModelAttachment *gAttachments; // head of the model attachment list
-s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6);
+s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *numParts);
 s32 attach_initModel(ModelAttachment *att, Actor *owner);
 void attach_free(ModelAttachment *att, s32 immediate);
 void attach_removeSet(Actor *owner, s32 setId);
@@ -32,9 +32,9 @@ ModelAttachment *attach_add(Actor *owner, s32 model, s32 bone, s32 flags, s32 un
                                s32 setId, s32 handler, const u16 *ownerStates, s32 unk17, s32 parentSet, s32 parentMtx);
 void attach_setOffset(ModelAttachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY, f32 rotZ);
 Gfx *attach_drawView(Gfx *gdl, s32 view, s32 pass);
-Gfx *attach_drawOwner(Gfx *gdl, Actor *owner, s32 view, s32 arg3);
+Gfx *attach_drawOwner(Gfx *gdl, Actor *owner, s32 view, s32 reflections);
 s32 attach_getMatrices(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx);
-Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg4);
+Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 reflections);
 void attach_setAlpha(Actor *owner, s32 setId, s32 alpha, s32 index);
 ModelAttachment *attach_find(Actor *owner, s32 setId, s32 index);
 ModelAttachment *attach_findInSet(s32 setId, Actor *owner);
@@ -71,23 +71,23 @@ s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner);
 s32 attach_hookSpawnProjectile(ModelAttachment *att, Actor *actor);
 
 /* game/Attach/TextureScroll/texturescroll.c */
-void attach_emptyLevelUpdateHook1(s32 arg0);
+void attach_emptyLevelUpdateHook1(s32 unused);
 s32 attach_hookScrollTexH(ModelAttachment *att, Actor *actor);
 s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor);
-GameCommand *func_150D8590(GameCommand *cmd, s32 arg1);
+GameCommand *func_150D8590(GameCommand *cmd, s32 index);
 void attach_spawnFootImpact(Actor *actor);
-s32 attach_disableLightWithoutExpression(struct S150D88AC *arg0);
+s32 attach_disableLightWithoutExpression(struct S150D88AC *effect);
 
 /* game/Attach/BonePoint/bonepoint.c */
 s32 attach_getBonePoint(Vec3f *out, Actor *actor, u8 point);
-s32 attach_selectBonePointEffects(s32 arg0, s32 arg1);
-void attach_spawnBonePointEffects(Actor *actor, s32 point, s32 arg2);
+s32 attach_selectBonePointEffects(s32 kind, s32 actor);
+void attach_spawnBonePointEffects(Actor *actor, s32 point, s32 unused);
 
 /* game/Attach/AttachModel/attachmodel.c */
 extern u8 gAttachModelRefCounts[0x1E4];                 /* per-model load reference counts */
 extern s16 *gAttachModelTexIds[0x1E4];               /* per model: written by texture_resolveDl */
 extern AttachModelHeader *gAttachModelHeaders[0x1E4]; /* per model: loaded attachment model header */
-Gfx *attach_loadModelDl(s32 arg0);
-void attach_releaseModel(s32 arg0);
+Gfx *attach_loadModelDl(s32 model);
+void attach_releaseModel(s32 model);
 
 #endif

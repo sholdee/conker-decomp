@@ -11,7 +11,7 @@ void particle_spawnImpactMark(f32 size, u8 alpha, CollisionTri *surface, Vec3f *
                    u8 b, u8 owner, s32 list);
 
 
-void attach_emptyLevelUpdateHook1(s32 arg0) {
+void attach_emptyLevelUpdateHook1(s32 unused) {
 }
 
 
@@ -99,7 +99,7 @@ s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor) {
 }
 
 /* Writes the two-halfword command { 0x42, 0 } and returns the position after it. */
-GameCommand *func_150D8590(GameCommand *cmd, s32 arg1) {
+GameCommand *func_150D8590(GameCommand *cmd, s32 index) {
     cmd->opcode = 0x42;
     cmd->value = 0;
     return cmd + 1;
@@ -197,11 +197,11 @@ struct S150D88AC {
 
 /* Light attach callback 2 (gLightAttachCallbacks): unk14 is the LightEffect's light and unk18 its actor; sets the
  * light's disabled byte (PointLight 0x09) while the actor's expression (0x6F) is 0 and clears it otherwise. */
-s32 attach_disableLightWithoutExpression(struct S150D88AC *arg0) {
-    if (arg0->unk18[0x6F] != 0) {
-        arg0->unk14[9] = 0;
+s32 attach_disableLightWithoutExpression(struct S150D88AC *effect) {
+    if (effect->unk18[0x6F] != 0) {
+        effect->unk14[9] = 0;
     } else {
-        arg0->unk14[9] = 1;
+        effect->unk14[9] = 1;
     }
     return 1;
 }

@@ -22,22 +22,22 @@ const Vec3f gSegmentShotEnd = { 7.3199987f, -14.082394f, 4.5422006f };
 /* Spawns a weapon_spawnProjectile effect along a segment at `obj`: offset along math_getActorAim's `dir` from its
  * position, or, when it has ob_matrix_ptr, between two points of model part 0x46, plus weapon_spawnLightAt and
  * (half the time) weapon_spawnSegmentBeam effects at the segment start. */
-void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
+void weapon_fireSegmentShot(Actor *obj, u8 fxOwner, s32 fxList) {
     Vec3f start;
     Vec3f end;
     Vec3f dir;
-    Vec3f unkB0;
+    Vec3f axis0;
     ModelAttachment *part;
     const Vec3f *modelPoints[2];
     Vec3f *worldPoints[2];
-    s32 arg16;
-    s32 arg23;
+    s32 soundChance;
+    s32 filter;
     s32 randInt;
     f32 randB;
     f32 randA;
 
     if (obj != NULL) {
-        math_getActorAim(obj, &dir, &unkB0, NULL, 0.0f);
+        math_getActorAim(obj, &dir, &axis0, NULL, 0.0f);
         dir.x *= 0.001f;
         dir.y *= 0.001f;
         dir.z *= 0.001f;
@@ -53,9 +53,9 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
             if (math_transformAttachmentOffsets(obj, part, 0, modelPoints, worldPoints, 2) == 0) {
                 return;
             }
-            weapon_spawnLightAt(&start, arg1, arg2);
+            weapon_spawnLightAt(&start, fxOwner, fxList);
             if (math_random() & 1) {
-                weapon_spawnSegmentBeam(obj, &start, 0x46, arg1, arg2);
+                weapon_spawnSegmentBeam(obj, &start, 0x46, fxOwner, fxList);
             }
         } else {
             start.x = obj->xpos;
@@ -72,23 +72,23 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
         randB = math_randomFloat();
         randInt = math_random();
         if (obj->ob_matrix_ptr != NULL) {
-            arg16 = 255;
+            soundChance = 255;
         } else {
-            arg16 = 128;
+            soundChance = 128;
         }
         if (gIsMultiplayer != 0) {
-            arg23 = -1;
+            filter = -1;
         } else {
-            arg23 = 2;
+            filter = 2;
         }
         weapon_spawnProjectile(&start, 0, &end, &dir, 1, 0, 300.0f, 1.0f / 300.0f, (randA * 10.0f) + 25.0f,
-                      (randB * 150.0f) + 400.0f, 80.0f, (randInt % 56U) + 200, obj, 1, 1, 0, arg16, 0, 1, 0,
-                      0x1A, 0.0f, 0xFF, arg23, 0, arg1, arg2);
+                      (randB * 150.0f) + 400.0f, 80.0f, (randInt % 56U) + 200, obj, 1, 1, 0, soundChance, 0, 1, 0,
+                      0x1A, 0.0f, 0xFF, filter, 0, fxOwner, fxList);
     }
 }
 
 /* Spawns a effect_spawnBoneBeamParticle effect at `pos` on `obj` with randomized scale and parameters. */
-void weapon_spawnSegmentBeam(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
+void weapon_spawnSegmentBeam(Actor *obj, Vec3f *pos, s16 node, u8 fxOwner, s32 fxList) {
     ParticleSize scale;
     f32 angle;
     s32 rand[2]; /* rand[1] is drawn but never used */
@@ -99,11 +99,11 @@ void weapon_spawnSegmentBeam(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4
     rand[1] = math_random();
     angle = math_randomFloat();
     effect_spawnBoneBeamParticle(obj, 0, &gSegmentShotStart, &gSegmentShotBeamEnd, &scale, (rand[0] & 3) + 6, 0xFF,
-                  angle * 270.0f + 359.0f, pos, 0xFF, 0, arg2, arg3, arg4);
+                  angle * 270.0f + 359.0f, pos, 0xFF, 0, node, fxOwner, fxList);
 }
 
 /* Spawns a light_createWithEffect effect at `pos`, converted to integer coordinates. */
-void weapon_spawnLightAt(Vec3f *pos, u8 arg1, s32 arg2) {
+void weapon_spawnLightAt(Vec3f *pos, u8 fxOwner, s32 fxList) {
     LightEffectHeader header;
     Vec3i intPos;
 
@@ -116,15 +116,15 @@ void weapon_spawnLightAt(Vec3f *pos, u8 arg1, s32 arg2) {
     intPos.y = pos->y;
     intPos.z = pos->z;
 
-    light_createWithEffect(&header, &intPos, (math_random() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &intPos, (math_random() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, fxOwner, fxList);
 }
 
-/* Spawns a burst of effects from the frame blood_buildImpactFrame derives from arg0..arg2: always a
+/* Spawns a burst of effects from the frame blood_buildImpactFrame derives from `from`, `to` and `direction`: always a
  * particle_spawnKindPlainSprite effect, then (each when its flag is set) a ring of particle_spawnSplash particles,
  * particle_spawnSteamParticle particles along `dir`, and particle_newSpriteParticleWithFloor particles thrown at random angles. */
-void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
-                   s32 arg7) {
-    Vec3f unkPos;
+void weapon_spawnHitBurst(Vec3f *from, Vec3f *to, Vec3f *direction, u8 doForward, u8 doRing, u8 doScatter, u8 fxOwner,
+                   s32 fxList) {
+    Vec3f start;
     Vec3f origin;
     // matching: dir and the basis are arrays; Vec3f locals change the stack layout
     f32 dir[3];
@@ -139,17 +139,17 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
     Vec3f vel2;
     s32 count;
     ParticleDesc spawn;
-    f32 unkA8;
+    f32 drag;
     f32 f;
     f32 f2;
     s32 randA;
     s32 randC;
     SpriteParticle *particle;
 
-    if (blood_buildImpactFrame(&unkPos, &origin, (Vec3f *)dir, (Vec3f *)basisA, (Vec3f *)basisB, arg0, arg1, arg2) != 0) {
+    if (blood_buildImpactFrame(&start, &origin, (Vec3f *)dir, (Vec3f *)basisA, (Vec3f *)basisB, from, to, direction) != 0) {
         f2 = math_randomFloat();
         randA = math_random();
-        particle_spawnKindPlainSprite(&unkPos, f2 * 24.0f + 168.0f, randA % 101U + 155, (math_random() & 7) + 15, 1, arg6, arg7);
+        particle_spawnKindPlainSprite(&start, f2 * 24.0f + 168.0f, randA % 101U + 155, (math_random() & 7) + 15, 1, fxOwner, fxList);
         if (doRing) {
             ringCount = math_random() % 3U + 5;
             while (ringCount != 0) {
@@ -162,9 +162,9 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
                 randC = math_random();
                 randA = math_random();
                 f2 = math_randomFloat();
-                particle_spawnSplash(&unkPos, &vel, f * 0.162f + 0.193f, randC % 9U + 18, randA % 156U + 100,
-                              f2 * 4.0f + 4.0f, 3, math_random() % 1U, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, arg6,
-                              arg7);
+                particle_spawnSplash(&start, &vel, f * 0.162f + 0.193f, randC % 9U + 18, randA % 156U + 100,
+                              f2 * 4.0f + 4.0f, 3, math_random() % 1U, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, fxOwner,
+                              fxList);
                 ringCount--;
             }
             // matching: this dead store gives the ring loop's exit its own block; uopt reloads the loop
@@ -182,13 +182,13 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
                 randA = math_random();
                 randB = math_random();
                 particle_spawnSteamParticle(&origin, &vel2, 1, f * 0.682000041f + -0.4120000303f, randA % 11U + 5,
-                              randB % 156U + 100, math_randomFloat() * 60.0f + 80.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6,
-                              arg7);
+                              randB % 156U + 100, math_randomFloat() * 60.0f + 80.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, fxOwner,
+                              fxList);
             }
         }
         if (doScatter) {
             count = math_random() % 7U + 3;
-            unkA8 = 0.9508649707f;
+            drag = 0.9508649707f;
             spawn.texture = 0x6C;
             spawn.renderMode = 0x5103;
             spawn.setGeometryMode = 0x200005;
@@ -234,9 +234,9 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
                 f2 = math_randomFloat() * 122.0f + 77.0f;
                 spawn.width = f2;
                 spawn.height = f2;
-                particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(f32), arg6, arg7);
+                particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(f32), fxOwner, fxList);
                 if (particle != NULL) {
-                    memcpy(&particle->data.drag, &unkA8, sizeof(unkA8));
+                    memcpy(&particle->data.drag, &drag, sizeof(drag));
                 }
             }
         }
@@ -250,30 +250,30 @@ void weapon_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocity
     Vec3f unk60;
     Vec3f vel;
     /* particle_spawnSteamParticle arguments 3..6 */
-    f32 param3;
-    s16 param4;
-    u8 param5;
-    f32 param6;
+    f32 gravity;
+    s16 lifetime;
+    u8 alpha;
+    f32 size;
 
-    blood_getStripParticleParams(pointA, pointB, velocityA, velocityB, time, strip, &pos, &unk60, &vel, &param3, &param4, &param5,
-                  &param6);
-    particle_spawnSteamParticle(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, strip->header.owner,
+    blood_getStripParticleParams(pointA, pointB, velocityA, velocityB, time, strip, &pos, &unk60, &vel, &gravity, &lifetime, &alpha,
+                  &size);
+    particle_spawnSteamParticle(&pos, &vel, 1, gravity, lifetime, alpha, size, 0, 1.0f, 1.0f, 1, 0, 1, 0, strip->header.owner,
                   strip->header.kind);
 }
 
-/* Spawns a particle_newSpriteParticleWithFloor particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag
+/* Spawns a particle_newSpriteParticleWithFloor particle at `pos` moving at `vel`. A `timer` of -1 means 300 and leaves flag
  * bit 0 clear. Returns the particle, or NULL. */
-SpriteParticle *weapon_spawnDragSprite(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
-                        u8 altUnk62, CollisionHit *arg8, u8 arg9, s32 argA) {
+SpriteParticle *weapon_spawnDragSprite(Vec3f *pos, Vec3f *vel, f32 gravity, f32 drag, u8 alpha, s16 timer, f32 size,
+                        u8 altUpdate, CollisionHit *ground, u8 fxOwner, s32 fxList) {
     ParticleDesc spawn;
-    f32 unkA8;
+    f32 dragValue;
     SpriteParticle *particle;
     ParticleBounce bounce;
     s32 bit80;
-    s32 hasUnk0A;
+    s32 hasTimer;
     s32 bit40;
 
-    unkA8 = unkA8Value;
+    dragValue = drag;
     spawn.texture = 0x6C;
     spawn.renderMode = 0x5103;
     spawn.setGeometryMode = 0x200005;
@@ -283,12 +283,12 @@ SpriteParticle *weapon_spawnDragSprite(Vec3f *pos, Vec3f *vel, f32 unk54, f32 un
     spawn.fadeStart = 20;
     spawn.fadeRate = 12;
     bit40 = (math_random() & 1) ? 0x40 : 0;
-    hasUnk0A = (unk0A == -1) ? 0 : 1;
+    hasTimer = (timer == -1) ? 0 : 1;
     bit80 = (math_random() & 1) ? 0x80 : 0;
-    spawn.flags = bit80 | hasUnk0A | 2 | 4 | bit40 | 0x4000 | 0x8000 | 0x200 | 0x800000;
+    spawn.flags = bit80 | hasTimer | 2 | 4 | bit40 | 0x4000 | 0x8000 | 0x200 | 0x800000;
     spawn.primColorMode = 8;
     spawn.envColorMode = 6;
-    if (altUnk62) {
+    if (altUpdate) {
         spawn.updateFunc = 0x1D;
     } else {
         spawn.updateFunc = 0xA;
@@ -314,30 +314,30 @@ SpriteParticle *weapon_spawnDragSprite(Vec3f *pos, Vec3f *vel, f32 unk54, f32 un
     spawn.offset.y = 0.0f;
     spawn.offset.z = 0.0f;
     spawn.vel = *vel;
-    spawn.gravity = unk54;
-    spawn.alpha = unk1B;
-    if (unk0A == -1) {
+    spawn.gravity = gravity;
+    spawn.alpha = alpha;
+    if (timer == -1) {
         spawn.timer = 300;
     } else {
-        spawn.timer = unk0A;
+        spawn.timer = timer;
     }
     spawn.height = size;
     spawn.width = size;
-    particle = particle_newSpriteParticleWithFloor(&spawn, 1, arg8, sizeof(particle->data.dragBounce), arg9, argA);
+    particle = particle_newSpriteParticleWithFloor(&spawn, 1, ground, sizeof(particle->data.dragBounce), fxOwner, fxList);
     if (particle != NULL) {
-        memcpy(&particle->data.dragBounce.drag, &unkA8, sizeof(unkA8));
+        memcpy(&particle->data.dragBounce.drag, &dragValue, sizeof(dragValue));
         memcpy(&particle->data.dragBounce.bounce, &bounce, sizeof(bounce));
     }
     return particle;
 }
 
-/* Spawns a fixed particle_spawnParticleBurst effect between the points `arg0` and `arg1`. */
-void weapon_spawnTedizSplash(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3) {
+/* Spawns a fixed particle_spawnParticleBurst effect at `pos`, with `ground` as its particles' floor. */
+void weapon_spawnTedizSplash(Vec3f *pos, CollisionHit *ground, u8 fxOwner, s32 fxList) {
     ParticleBurst desc;
 
     desc.countBase = 10;
     desc.countRange = 4;
-    desc.pos = arg0;
+    desc.pos = pos;
     desc.yawBase = 0;
     desc.yawRange = 255;
     desc.pitchBase = -24;
@@ -354,12 +354,12 @@ void weapon_spawnTedizSplash(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3)
     desc.sizeBase = 96.0f;
     desc.sizeRange = 109.0f;
     desc.altChance = 1.0f;
-    desc.ground = arg1;
-    particle_spawnParticleBurst(&desc, arg2, arg3);
+    desc.ground = ground;
+    particle_spawnParticleBurst(&desc, fxOwner, fxList);
 }
 
 /* gObjectFilters object filter: rejects objects with id 0x5A, 0x74 or 0x7A. */
-s32 func_151C6290(Actor *obj, Actor *self, s32 arg2) {
+s32 func_151C6290(Actor *obj, Actor *self, s32 filterArg) {
     if (obj->character_type == 0x5A || obj->character_type == 0x74 || obj->character_type == 0x7A) {
         return FALSE;
     }

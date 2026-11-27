@@ -12,7 +12,7 @@
  * Spawns an emitter object for def with extraSize bytes of user data. lifetime -1 means untimed.
  * The spawn rate is scaled by the emitter's area: the anchor's, or that of a circle of def->radius.
  */
-Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s32 arg4) {
+Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 fxOwner, s32 fxList) {
     Emitter *emitter;
     EmitterState init;
     EmitterState *state;
@@ -26,7 +26,7 @@ Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 ar
     init.ground.source = 0;
     init.ground.surface = 0;
 
-    emitter = effect_newTimedEffect((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (extraSize + sizeof(EmitterState)), arg3, arg4);
+    emitter = effect_newTimedEffect((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (extraSize + sizeof(EmitterState)), fxOwner, fxList);
     if (emitter != NULL) {
         state = &emitter->state;
         memcpy(state, &init, sizeof(EmitterState));
@@ -339,7 +339,7 @@ static EmitterPreset gEmitterPresets[] = {
  * flags 1 and 2. lifetime -1 means untimed.
  */
 void beam_spawnEmitterPreset(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
-                   f32 bottom, f32 radius, s16 lifetime, u8 arg7, s32 arg8) {
+                   f32 bottom, f32 radius, s16 lifetime, u8 fxOwner, s32 fxList) {
     EmitterDef def;
     Emitter *emitter;
 
@@ -365,7 +365,7 @@ void beam_spawnEmitterPreset(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos
     def.update = -1;
     def.spawn = 1;
 
-    emitter = beam_newAreaEmitter(&def, lifetime, sizeof(ParticleSettings), arg7, arg8);
+    emitter = beam_newAreaEmitter(&def, lifetime, sizeof(ParticleSettings), fxOwner, fxList);
     if (emitter != NULL) {
         ParticleSettings *settings;
 
@@ -457,7 +457,7 @@ static void (*gGroundSpawnFuncs[])(Vec3f *, CollisionHit *, void *, u8, s32) = {
  * NULL uses a local one.
  */
 void beam_spawnAtGroundPoints(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit,
-                   s32 count, u8 spawnFunc, void *arg6, u8 arg7, s32 arg8) {
+                   s32 count, u8 spawnFunc, void *data, u8 fxOwner, s32 fxList) {
     CollisionHit localHit;
     Vec3f probe;
     Vec3f spawnPos;
@@ -485,7 +485,7 @@ void beam_spawnAtGroundPoints(Vec3f *center, f32 minY, f32 radius, CollisionHit 
             spawnPos.x = probe.x;
             spawnPos.y = hit->height;
             spawnPos.z = probe.z;
-            gGroundSpawnFuncs[spawnFunc](&spawnPos, hit, arg6, arg7, arg8);
+            gGroundSpawnFuncs[spawnFunc](&spawnPos, hit, data, fxOwner, fxList);
         }
     }
 }

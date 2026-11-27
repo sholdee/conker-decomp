@@ -22,36 +22,36 @@ AttachModelHeader *gAttachModelHeaders[0x1E4];  /* per model: loaded attachment 
 // named local (4 bytes), and its second spill at 0x2c (three slots lower, not two) proves
 // four compiler temps, one more than any two-local spelling can produce. `ret` is that
 // one local; the `move v1,v0` pair that looked like a named `c` is IDO's own temporary,
-// created by the post-increment `gAttachModelRefCounts[arg0]++` -- which yields the old value as a
+// created by the post-increment `gAttachModelRefCounts[model]++` -- which yields the old value as a
 // separate live range while the CSE of the load feeds the addiu. Writing the increment as
-// `= gAttachModelRefCounts[arg0] + 1` collapses the two live ranges and costs 847.
-Gfx *attach_loadModelDl(s32 arg0) {
+// `= gAttachModelRefCounts[model] + 1` collapses the two live ranges and costs 847.
+Gfx *attach_loadModelDl(s32 model) {
     AttachModelHeader *ret;
 
-    if (gAttachModelRefCounts[arg0] == 0) {
-        ret = rom_loadPathTable(0, 0, 0, 2, 9, arg0);
+    if (gAttachModelRefCounts[model] == 0) {
+        ret = rom_loadPathTable(0, 0, 0, 2, 9, model);
         if (ret == NULL) {
             return NULL;
         }
         // the table pointer is passed as one display list here
-        texture_resolveDl((Gfx *)ret->dlists, 0, 1, 0x3E, &gAttachModelTexIds[arg0]);
+        texture_resolveDl((Gfx *)ret->dlists, 0, 1, 0x3E, &gAttachModelTexIds[model]);
         effect_relocateDisplayList((Gfx *)ret->dlists, (s32)ret);
-        gAttachModelHeaders[arg0] = ret;
+        gAttachModelHeaders[model] = ret;
     } else {
-        ret = gAttachModelHeaders[arg0];
+        ret = gAttachModelHeaders[model];
     }
-    if (gAttachModelRefCounts[arg0] != 0xFF) {
-        gAttachModelRefCounts[arg0]++;
+    if (gAttachModelRefCounts[model] != 0xFF) {
+        gAttachModelRefCounts[model]++;
     }
     return (Gfx *)ret->dlists; // the table is used as one display list
 }
 
-void attach_releaseModel(s32 arg0) {
-    if (arg0 != 0x1E4) {
-        if (gAttachModelRefCounts[arg0] != 0) {
-            if (--gAttachModelRefCounts[arg0] == 0) {
-                texture_releaseList(gAttachModelTexIds[arg0]);
-                heap_setTag(gAttachModelHeaders[arg0], 4);
+void attach_releaseModel(s32 model) {
+    if (model != 0x1E4) {
+        if (gAttachModelRefCounts[model] != 0) {
+            if (--gAttachModelRefCounts[model] == 0) {
+                texture_releaseList(gAttachModelTexIds[model]);
+                heap_setTag(gAttachModelHeaders[model], 4);
             }
         }
     }

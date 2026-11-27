@@ -77,10 +77,10 @@ TrailHitCallback gProjectileHitCallback;
  * if that first update already ended it.
  */
 Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
-                               u8 altNormalized, RayHit *knownHit, f32 speed, f32 arg7, f32 arg8,
-                               f32 driftSpeed, f32 arg10, u8 arg11, Actor *owner, u8 arg13, u8 collide, u8 arg15,
-                               u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 arg20,
-                               f32 dt, u8 arg22, s8 arg23, s32 extraSize, u8 arg25, s32 arg26) {
+                               u8 altNormalized, RayHit *knownHit, f32 speed, f32 distScale, f32 width,
+                               f32 driftSpeed, f32 defaultRemaining, u8 alpha, Actor *owner, u8 castRay, u8 collide, u8 hitModels,
+                               u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 hitFlags,
+                               f32 dt, u8 viewportMask, s8 filter, s32 extraSize, u8 fxOwner, s32 fxList) {
     Game1EF500Trail *result;
     ParticleDef spawn;
     Game1EF500TrailExt ext;
@@ -98,11 +98,11 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
         targetDir = *altDirection;
     }
     ext.flags = (hitCallback ? TRAIL_HIT_CALLBACK : 0) | (expireHandler ? TRAIL_EXPIRE_HANDLER : 0) |
-                (collide ? TRAIL_COLLIDE : 0) | (arg15 ? TRAIL_FLAG_8 : 0);
+                (collide ? TRAIL_COLLIDE : 0) | (hitModels ? TRAIL_FLAG_8 : 0);
     ext.handle = 0;
-    ext.filter = arg23;
+    ext.filter = filter;
     ext.expireHandler = handlerIndex;
-    ext.hitFlags = arg20;
+    ext.hitFlags = hitFlags;
     ext.soundEnabled = (math_random() & 0xFFU) < soundChance ? TRUE : FALSE;
     ext.sound = 0;
     ext.listener = 0;
@@ -127,9 +127,9 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
         from = origin;
         dir = &sourceDir;
     }
-    ext.handle = collide ? particle_raySphereObjectMask(from, dir, owner, arg23, NULL) : -1;
-    if (weapon_setupProjectileRay(knownHit, &ext.path, origin, useSource ? &sourceDir : NULL, &ext.remaining, arg7, arg13,
-                      altOrigin, useTarget ? &targetDir : NULL, &ext.flags, 3, arg10, owner, arg23, collide, arg15,
+    ext.handle = collide ? particle_raySphereObjectMask(from, dir, owner, filter, NULL) : -1;
+    if (weapon_setupProjectileRay(knownHit, &ext.path, origin, useSource ? &sourceDir : NULL, &ext.remaining, distScale, castRay,
+                      altOrigin, useTarget ? &targetDir : NULL, &ext.flags, 3, defaultRemaining, owner, filter, collide, hitModels,
                       ext.handle, 0) == 0) {
         return NULL;
     }
@@ -155,10 +155,10 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     spawn.rgba[1] = 0;
     spawn.rgba[2] = 0;
     spawn.rgba[3] = 0xFF;
-    spawn.alpha = arg11;
+    spawn.alpha = alpha;
     spawn.colorLevel = 0xFF;
     spawn.height = driftSpeed;
-    spawn.width = arg8;
+    spawn.width = width;
     spawn.pos = *origin;
     spawn.rot.x = 0.0f;
     spawn.rot.y = 0.0f;
@@ -169,8 +169,8 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     spawn.flags = 0xC04C0008;
     spawn.primMode = 0;
     spawn.envMode = 0;
-    spawn.viewportMask = arg22;
-    result = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), arg25, arg26);
+    spawn.viewportMask = viewportMask;
+    result = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), fxOwner, fxList);
     if (result != NULL) {
         u8 failed;
 
@@ -471,7 +471,7 @@ void weapon_onProjectileExpire(Game1EF500Trail *trail) {
 }
 
 /* Impact effect at pos: a burst, a randomly flipped particle and a flash. */
-void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
+void weapon_spawnImpactBurst(Vec3f *pos, u8 fxOwner, s32 fxList) {
     TrailBurst burst;
     ParticleDesc particle;
     LightEffectHeader header;
@@ -529,7 +529,7 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.shapeFn = 0;
     burst.unk72 = -1;
     burst.unk73 = -1;
-    particle_spawnTrailBurst(&burst, arg1, arg2);
+    particle_spawnTrailBurst(&burst, fxOwner, fxList);
     particle.texture = 0x2B;
     particle.renderMode = 0x4403;
     particle.setGeometryMode = 0x200005;
@@ -567,7 +567,7 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.deathFunc = -1;
     particle.drawFunc = -1;
     particle.handlerSet = 4;
-    particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, arg1, arg2);
+    particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, fxOwner, fxList);
     header.flags = 3;
     header.update = -1;
     header.lifetime = (math_random() % 7U) + 6;
@@ -575,11 +575,11 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
-    light_createWithEffect(&header, &header2, (math_random() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (math_random() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
 /* Smaller variant of weapon_spawnImpactBurst. */
-void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
+void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 fxOwner, s32 fxList) {
     TrailBurst burst;
     ParticleDesc particle;
     LightEffectHeader header;
@@ -637,7 +637,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.shapeFn = 0;
     burst.unk72 = -1;
     burst.unk73 = -1;
-    particle_spawnTrailBurst(&burst, arg1, arg2);
+    particle_spawnTrailBurst(&burst, fxOwner, fxList);
 
     particle.texture = 0x2B;
     particle.renderMode = 0x4403;
@@ -676,7 +676,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.deathFunc = -1;
     particle.drawFunc = -1;
     particle.handlerSet = 4;
-    particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, arg1, arg2);
+    particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, fxOwner, fxList);
 
     header.flags = 3;
     header.update = -1;
@@ -685,7 +685,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
-    light_createWithEffect(&header, &header2, (math_random() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (math_random() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
 /*

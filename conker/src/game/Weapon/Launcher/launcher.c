@@ -16,9 +16,9 @@ static u8 gLauncherBone = 9; // bone of the muzzle points above
 
 /* Fires a projectile (weapon_spawnProjectile) from obj's launch point towards its target, after the muzzle
  * effects of weapon_runLauncherMuzzle. Returns weapon_spawnProjectile's result, or NULL without an obj. */
-// matching: arg1 is a u8 read from its stack slot at each use; a K&R u8 parameter is
+// matching: fxOwner is a u8 read from its stack slot at each use; a K&R u8 parameter is
 // narrowed once into a spilled copy instead
-Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 arg1, s32 arg2) {
+Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 fxOwner, s32 fxList) {
     s32 pad; // matching: unused stack slot
     Vec3f dir;
     Vec3f muzzle;
@@ -34,7 +34,7 @@ Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 arg1, s32 arg2) {
     }
 
     math_getActorAim(obj, &target, &dir, NULL, 0.0f);
-    weapon_runLauncherMuzzle(obj, ((u8 *)&arg1)[3], arg2, &muzzle, &launch);
+    weapon_runLauncherMuzzle(obj, ((u8 *)&fxOwner)[3], fxList, &muzzle, &launch);
 
     rand0 = math_randomFloat();
     rand1 = math_randomFloat();
@@ -43,15 +43,15 @@ Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 arg1, s32 arg2) {
 
     return weapon_spawnProjectile(&launch, NULL, &launch, &target, 0, 0, 300.0f, 0.003333333414f, rand0 * 10.0f + 25.0f,
                          rand1 * 201.0f + 601.0f, 50.0f, (random % 56U) + 200, obj, 1, 1, 0, 0xFF, 1, 1, 0, kind,
-                         0.0f, 0xFF, -1, 0, ((u8 *)&arg1)[3], arg2);
+                         0.0f, 0xFF, -1, 0, ((u8 *)&fxOwner)[3], fxList);
 }
 
 /* Computes obj's muzzle and launch points (bone gLauncherBone, or 56 above its origin without bone
  * matrices), runs the muzzle effects there and optionally returns both points. */
-void weapon_runLauncherMuzzle(obj, arg1, arg2, muzzleOut, launchOut)
+void weapon_runLauncherMuzzle(obj, fxOwner, fxList, muzzleOut, launchOut)
     Actor *obj;
-    u8 arg1;
-    s32 arg2;
+    u8 fxOwner;
+    s32 fxList;
     Vec3f *muzzleOut;
     Vec3f *launchOut;
 {
@@ -74,8 +74,8 @@ void weapon_runLauncherMuzzle(obj, arg1, arg2, muzzleOut, launchOut)
             launch = muzzle;
         }
         particle_runAttackAtMidpoint(obj, &muzzle, &launch, (level == LEVEL_WMP_BEACH) ? 0x28 : 0x1E);
-        particle_spawnShortLightFlash(&muzzle, arg1, arg2);
-        weapon_spawnLauncherFlash(obj, &muzzle, arg1, arg2);
+        particle_spawnShortLightFlash(&muzzle, fxOwner, fxList);
+        weapon_spawnLauncherFlash(obj, &muzzle, fxOwner, fxList);
         weapon_rumbleLauncher(obj);
         if (muzzleOut != NULL) {
             *muzzleOut = muzzle;
@@ -88,11 +88,11 @@ void weapon_runLauncherMuzzle(obj, arg1, arg2, muzzleOut, launchOut)
 
 /* Muzzle effect (effect_spawnBoneBeamParticle) at `muzzle` for objects with bone matrices, hidden from the
  * camera of obj's mv target while that has SniperState set. */
-void weapon_spawnLauncherFlash(obj, muzzle, arg2, arg3)
+void weapon_spawnLauncherFlash(obj, muzzle, fxOwner, fxList)
     Actor *obj;
     Vec3f *muzzle;
-    u8 arg2;
-    s32 arg3;
+    u8 fxOwner;
+    s32 fxList;
 {
     ParticleSize params;
     u8 cameraMask;
@@ -113,12 +113,12 @@ void weapon_spawnLauncherFlash(obj, muzzle, arg2, arg3)
         random0 = math_random();
         random1 = math_random();
         effect_spawnBoneBeamParticle(obj, gLauncherBone, &gLauncherMuzzle, &gLauncherFlashEnd, &params, (random0 % 5U) + 6, (random1 % 101U) + 155,
-                      math_randomFloat() * 199.0f + 501.0f, muzzle, cameraMask, 0, -1, arg2, arg3);
+                      math_randomFloat() * 199.0f + 501.0f, muzzle, cameraMask, 0, -1, fxOwner, fxList);
     }
 }
 
 /* Handler: writes the world position of obj's muzzle point to `out`. */
-void weapon_getLauncherMuzzlePos(Actor *obj, s16 arg1, Vec3f *out) {
+void weapon_getLauncherMuzzlePos(Actor *obj, s16 unused, Vec3f *out) {
     particle_getBonePoint(obj, out, &gLauncherMuzzle, gLauncherBone, 0.0f);
 }
 

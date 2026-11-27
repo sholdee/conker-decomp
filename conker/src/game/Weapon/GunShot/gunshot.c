@@ -21,9 +21,9 @@ u8 gGunMuzzleBone = 9; // bone of the muzzle points above (game/Event/TimedEvent
 
 /*
  * Shot effects for `obj`: a muzzle effect and particles when it has bones, three actor_runAttackAt
- * spawns along `direction` if `arg1`, a collision_castRay call if `arg2`, then a camera event.
+ * spawns along `direction` if `spawnAttacks`, a collision_castRay call if `castRay`, then a camera event.
  */
-void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
+void weapon_spawnShotEffects(Actor *obj, u8 spawnAttacks, u8 castRay, u8 fxOwner, s32 fxList) {
     Vec3f position;
     Vec3f direction;
     Vec3f axis0;
@@ -39,7 +39,7 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     weapon_getShotFrame(obj, &position, &direction, &axis0, &axis1);
     particle_countShot(obj);
     if ((obj->ob_matrix_ptr != NULL) && ((obj->cullMask & 0xF) != 0xF)) {
-        particle_spawnShortLightFlash(&position, arg3, arg4);
+        particle_spawnShortLightFlash(&position, fxOwner, fxList);
         motion.height = ((math_randomFloat() * 3400.0f) + 4800.0f) * 0.001000000047f;
         motion.width = ((math_randomFloat() * 220.0f) + 320.0f) * 0.1000000015f;
         random0 = math_random();
@@ -47,10 +47,10 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
         effect_spawnBoneBeamParticle(obj, gGunMuzzleBone, &gGunMuzzleStart, &gGunMuzzleEnd, &motion,
                       (random0 % 3U) + 4, (random1 & 0x7F) + 0x80,
                       (math_randomFloat() * 450.0f) + 780.0f, &position, 0xFF,
-                      0, -1, arg3, arg4);
-        weapon_spawnFannedParticles(&position, &direction, arg3, arg4);
+                      0, -1, fxOwner, fxList);
+        weapon_spawnFannedParticles(&position, &direction, fxOwner, fxList);
     }
-    if (arg1) {
+    if (spawnAttacks) {
         s32 pad; // matching: unused stack slot
         trail[0].x = (direction.x * 0.08800000697f) + position.x;
         trail[0].y = (direction.y * 0.08800000697f) + position.y;
@@ -65,7 +65,7 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
         weapon_spawnAttackAt(&trail[1], &position, obj, 0x30);
         weapon_spawnAttackAt(&trail[2], &position, obj, 0x31);
     }
-    if (arg2) {
+    if (castRay) {
         state = obj->mv;
         if (state != NULL) {
             buffer = &state->rayHit;
@@ -93,7 +93,7 @@ void weapon_spawnAttackAt(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) 
 }
 
 /* Writes the world position of the muzzle point gGunMuzzleStart on bone gGunMuzzleBone of `obj` to `out`. */
-void weapon_getGunMuzzlePos(Actor *obj, s16 arg1, Vec3f *out) {
+void weapon_getGunMuzzlePos(Actor *obj, s16 unused, Vec3f *out) {
     const Vec3f *src;
     Vec3f *dst;
 
@@ -125,7 +125,7 @@ void weapon_getShotFrame(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *a
 
 
 /* Calls collision_applyShotPartHit(other, 4, 0) when `other` is a 0x9F/0xA0 object without flag 0x80 in hiddenParts. */
-void func_150FFD2C(Actor *obj, Actor *other, s32 arg2) {
+void func_150FFD2C(Actor *obj, Actor *other, s32 unused) {
     if (other->character_type == 0x9F || other->character_type == 0xA0) {
         if (!(other->hiddenParts & 0x80)) {
             collision_applyShotPartHit(other, 4, 0);
@@ -134,7 +134,7 @@ void func_150FFD2C(Actor *obj, Actor *other, s32 arg2) {
 }
 
 /* Spawns 10-18 particles at `position`, fanned out around the yaw of `direction`. */
-void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3) {
+void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 fxOwner, s32 fxList) {
     ParticleDesc spawn;
     s32 count;
     s16 baseYaw;
@@ -199,7 +199,7 @@ void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32
         random0 = (math_random() & 1) ? 0x80 : 0;
         random1 = (math_random() & 1) ? 0x40 : 0;
         spawn.flags |= random1 | random0;
-        particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, arg2, arg3);
+        particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, fxOwner, fxList);
         count--;
     } while (count > 0);
 }

@@ -97,7 +97,7 @@ BloodTrail *weapon_startBulletTrail(Bullet *bullet, u8 fxOwner, s32 fxList) {
     return blood_spawnTrail(&desc, 0, fxOwner, fxList);
 }
 
-/* Emitter callback (D_80089B08): spawns one particle at (x, y, z), flung in a random direction and
+/* Emitter callback (gBloodTrailEmitters): spawns one particle at (x, y, z), flung in a random direction and
  * pushed against the emitter's movement (dx, dy, dz). */
 void weapon_emitBulletTrailParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
     Vec3f position;

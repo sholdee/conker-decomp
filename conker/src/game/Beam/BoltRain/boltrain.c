@@ -133,7 +133,7 @@ void beam_updateBoltRain(BoltRainObj *obj) {
 }
 
 /* Message handler: on 0x38 while the region is idle, restarts the rain for 300 frames with its sound. */
-void beam_boltRainMessage(BoltRainObj *obj, s32 arg1, u8 msg) {
+void beam_boltRainMessage(BoltRainObj *obj, s32 data, u8 msg) {
     BoltRainState *state = &obj->state;
 
     if (msg == 0x38 && state->region->inactive == 1) {
@@ -210,18 +210,18 @@ void beam_updateBoltArc(BoltArcObj *obj) {
 }
 
 /* Message handler: on 0x4B, calls effect_destroyObject on the object. */
-void beam_destroyOnMessage4B(EffectHeader *obj, s32 arg1, u8 msg) {
+void beam_destroyOnMessage4B(EffectHeader *obj, s32 data, u8 msg) {
     if (msg == 0x4B) {
         effect_destroyObject(obj);
     }
 }
 
 /* Message handler: on 0x38 while the region is idle, restarts the arcs for 300 frames. */
-void beam_boltArcMessage(BoltArcObj *obj, struct Actor **arg1, u8 msg) {
+void beam_boltArcMessage(BoltArcObj *obj, struct Actor **data, u8 msg) {
     BoltArcState *state = &obj->state;
 
     if (msg == 0x38 && state->region->inactive == 1) {
-        state->actor = *arg1;
+        state->actor = *data;
         state->timer = 300;
     }
 }
@@ -290,7 +290,7 @@ void beam_spawnImpactEffects(ImpactObj *obj) {
 
 
 /* Message handler: 0x38 bursts sparks and switches the effect on, 0x39 switches it off. */
-void beam_sparkRegionMessage(SparkObj *obj, s32 arg1, u8 msg) {
+void beam_sparkRegionMessage(SparkObj *obj, s32 data, u8 msg) {
     SparkState *state = &obj->state;
 
     if (msg == 0x38) {

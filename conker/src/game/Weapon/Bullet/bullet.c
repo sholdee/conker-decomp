@@ -446,18 +446,18 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
 }
 
 /* Sound callback registered by weapon_fireBullet: keeps the bullet's sound at the bullet's position. */
-s32 weapon_bulletSoundCallback(SoundRecord *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+s32 weapon_bulletSoundCallback(SoundRecord *emitter, s32 active, void **volume, s32 pan, s32 cents, s32 mix, s16 *sound) {
     Bullet *bullet;
 
     bullet = emitter->callback_param1.bullet;
-    if (bullet != NULL && *arg2 != NULL) {
+    if (bullet != NULL && *volume != NULL) {
         emitter->x = bullet->head.pos.x;
         emitter->y = bullet->head.pos.y;
         emitter->z = bullet->head.pos.z;
         return 0;
     }
 
-    *arg6 = 0;
+    *sound = 0;
     return 0;
 }
 
@@ -735,8 +735,8 @@ s32 weapon_traceBullet(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec
  * Ray cast that continues through pass-through surfaces; the first one it passes is reported in
  * passPos/passDist/pass. ray->dist is the total distance travelled.
  */
-void weapon_castPiercingRay(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 arg4,
-                   s32 arg5, s32 arg6, s32 arg7, s8 arg8, IgnoreList *ignore, Vec3f *passPos,
+void weapon_castPiercingRay(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 maxDist,
+                   s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, IgnoreList *ignore, Vec3f *passPos,
                    f32 *passDist, CollisionHit *pass, s32 mode) {
     WorldObject *part;
     Vec3f pos;
@@ -748,8 +748,8 @@ void weapon_castPiercingRay(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ra
     pos = *start;
 
     do {
-        collision_castRay(shooter, pos.x, pos.y, pos.z, dir->x, dir->y, dir->z, ray, arg4, arg5,
-                      arg6, arg7, arg8, ignore, mode);
+        collision_castRay(shooter, pos.x, pos.y, pos.z, dir->x, dir->y, dir->z, ray, maxDist, skipWorld,
+                      skipObjs, skipModels, filter, ignore, mode);
         dist += ray->dist;
         if (ray->surface != NULL) {
             WorldObject *p = ray->surface;

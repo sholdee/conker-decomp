@@ -22,7 +22,7 @@ Gfx gTracerRenderSetupDl[] = {
 AimImpact gAimImpacts[4];
 
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
-void beam_spawnTracer(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
+void beam_spawnTracer(s32 unused, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
                    f32 halfWidth, f32 length, s16 lifetime, u16 texture, s8 mode, s16 onTime, s16 offTime,
                    Actor *owner, u8 ownerId, u8 bone, s32 ownerTag, u8 impactEffect, u8 unkFE,
                    f32 startX, f32 startY, f32 startZ, f32 endX, f32 endY, f32 endZ) {

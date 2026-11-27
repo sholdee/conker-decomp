@@ -15,14 +15,14 @@ void player_clearSpawnPoints(void) {
     gSpawnPoints = 0;
 }
 
-void player_loadSpawnPoints(s32 arg0) {
-    s32 tmp;
+void player_loadSpawnPoints(s32 levelId) {
+    s32 count;
 
     gTeam0SpawnMask = -1;
     gTeam1SpawnMask = -1;
-    tmp = rom_loadPathTo(&gSpawnPoints, 3, 12, arg0, 6) / 24U;
-    gSpawnPointCount = tmp;
-    if (tmp == 0) {
+    count = rom_loadPathTo(&gSpawnPoints, 3, 12, levelId, 6) / 24U;
+    gSpawnPointCount = count;
+    if (count == 0) {
         gSpawnPoints = allocate_memory(24, 1, 0, 0);
         gSpawnPointCount = 1U;
         if (gSpawnRecords) {

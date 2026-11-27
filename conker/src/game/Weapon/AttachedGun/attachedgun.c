@@ -34,7 +34,7 @@ const Vec3f gAttachedGunFlashPoints[2][6] = { /* two random sets of flash points
 };
 
 /* Fires a shot from the gun attachment (set 0x82) of `obj`, with muzzle effects when it has bones. */
-void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2) {
+void weapon_fireAttachedGun(Actor *obj, s32 fxOwner, s32 fxList) {
     Vec3f position;
     Vec3f endpoint;
     Vec3f direction;
@@ -51,7 +51,7 @@ void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2) {
     u8 valid;
     s32 randomWord;
     s32 kind;
-    s32 directionSign;
+    s32 filter;
     f32 random1;
     f32 random0;
 
@@ -80,24 +80,24 @@ void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2) {
         }
 
         if (obj->character_type == 0x98) {
-            directionSign = 1;
+            filter = 1;
         } else {
-            directionSign = -1;
+            filter = -1;
         }
 
-        // matching: lbu of arg1 from its arg slot at each use (a u8 param gets spilled to a new slot)
+        // matching: lbu of fxOwner from its arg slot at each use (a u8 param gets spilled to a new slot)
         weapon_spawnProjectile(&endpoint, &direction, value0, value1, 1, 0, 300.0f, 0.003333333414f,
                       (random0 * 10.0f) + 25.0f, (random1 * 200.0f) + 600.0f,
                       50.0f, (randomWord % 156U) + 100, obj, 99, 1, 1, 1,
-                      0, 1, 0, kind, 0.0f, 0xFF, directionSign, 0,
-                      ((u8 *)&arg1)[3], arg2);
+                      0, 1, 0, kind, 0.0f, 0xFF, filter, 0,
+                      ((u8 *)&fxOwner)[3], fxList);
 
         if (valid) {
-            particle_spawnShortLightFlash(&position, ((u8 *)&arg1)[3], arg2);
+            particle_spawnShortLightFlash(&position, ((u8 *)&fxOwner)[3], fxList);
             /* byte 2 of an attachment is the owner bone it follows */
             particle_spawnBoneDirParticle(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
-                          ((u8 *)&arg1)[3], arg2);
-            weapon_spawnMuzzleFlashes(&position, points, ((u8 *)&arg1)[3], arg2);
+                          ((u8 *)&fxOwner)[3], fxList);
+            weapon_spawnMuzzleFlashes(&position, points, ((u8 *)&fxOwner)[3], fxList);
         }
     }
 }
@@ -127,7 +127,7 @@ void weapon_getAttachmentPos(Actor *obj, s16 setId, Vec3f *out) {
 }
 
 /* Like weapon_fireAttachedGun, but spawns its shot through effect_spawnProjectile. */
-void weapon_fireAttachedGunProjectile(Actor *obj, u8 arg1, s32 arg2) {
+void weapon_fireAttachedGunProjectile(Actor *obj, u8 fxOwner, s32 fxList) {
     Vec3f position;
     Vec3f endpoint;
     Vec3f direction;
@@ -167,13 +167,13 @@ void weapon_fireAttachedGunProjectile(Actor *obj, u8 arg1, s32 arg2) {
 
         randomWord = math_random();
         effect_spawnProjectile(&position, &direction, value0, value1, hasValue1, NULL, 54.00000381f, 0.01851851679f, 300.0f,
-                      obj, 1, 1, 1, 0, 0x1A, 1, (randomWord % 5U) + 807, 0, arg1, arg2);
+                      obj, 1, 1, 1, 0, 0x1A, 1, (randomWord % 5U) + 807, 0, fxOwner, fxList);
 
         if (valid) {
-            particle_spawnShortLightFlash(&position, arg1, arg2);
+            particle_spawnShortLightFlash(&position, fxOwner, fxList);
             particle_spawnBoneDirParticle(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
-                          arg1, arg2);
-            weapon_spawnMuzzleFlashes(&position, points, arg1, arg2);
+                          fxOwner, fxList);
+            weapon_spawnMuzzleFlashes(&position, points, fxOwner, fxList);
         }
     }
 }
@@ -225,7 +225,7 @@ void weapon_findShotStart(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit,
 }
 
 /* Spawns six muzzle-flash particles at `position`, one per entry of `points`. */
-void weapon_spawnMuzzleFlashes(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3) {
+void weapon_spawnMuzzleFlashes(Vec3f *position, Vec3f *points, u8 fxOwner, s32 fxList) {
     u8 i;
     s32 variant;
     s32 pad; // matching: unused stack slot
@@ -257,12 +257,12 @@ void weapon_spawnMuzzleFlashes(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3
         spawn.rot = points[i];
         spawn.alpha = (math_random() % 156U) + 100;
         variant = (math_random() & 1) ? 2 : 0;
-        particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0, 0, 0x1B, variant + 1, 0, 0, 0, arg2, arg3);
+        particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0, 0, 0x1B, variant + 1, 0, 0, 0, fxOwner, fxList);
     }
 }
 
 /* Returns FALSE for object id 0x98, TRUE otherwise. */
-s32 func_150FF6B4(Actor *obj, s32 arg1, s32 arg2) {
+s32 func_150FF6B4(Actor *obj, s32 self, s32 filterArg) {
     if (obj->character_type == 0x98) {
         return FALSE;
     }

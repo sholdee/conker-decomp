@@ -28,7 +28,7 @@ ModelAttachment *gAttachments; // head of the model attachment list
 
 
 /* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */
-s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6) {
+s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *numParts) {
     AttachModelHeader *header;
     s32 i;
 
@@ -57,8 +57,8 @@ s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *ar
     }
     if (arg5 != NULL) {
         *arg5 = header->bones;
-        if (arg6 != NULL) {
-            *arg6 = header->bonesSize >> 4;
+        if (numParts != NULL) {
+            *numParts = header->bonesSize >> 4;
         }
     }
     return 0;
@@ -608,7 +608,7 @@ Gfx *attach_drawView(Gfx *gdl, s32 view, s32 pass) {
 }
 
 /* Draws the visible attachments of `owner` in viewport `view`. */
-Gfx *attach_drawOwner(Gfx *gdl, Actor *owner, s32 view, s32 arg3) {
+Gfx *attach_drawOwner(Gfx *gdl, Actor *owner, s32 view, s32 reflections) {
     ModelAttachment *att;
     ModelAttachment *next;
 
@@ -622,7 +622,7 @@ Gfx *attach_drawOwner(Gfx *gdl, Actor *owner, s32 view, s32 arg3) {
             att = next;
             continue;
         }
-        gdl = attach_draw(gdl, att, owner, view, arg3);
+        gdl = attach_draw(gdl, att, owner, view, reflections);
         att = next;
     }
     return gdl;
@@ -665,9 +665,9 @@ s32 attach_getMatrices(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **bone
 
 
 /* Draws one attachment of `owner` in viewport `view` with the owner's lighting, fog and alpha.
- * `arg4` nonzero draws it through model_drawAttachmentReflections instead of its own display lists. Returns the
+ * `reflections` nonzero draws it through model_drawAttachmentReflections instead of its own display lists. Returns the
  * original `gdl` if the display list would overflow. */
-Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg4) {
+Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 reflections) {
     Mtx *mtx;
     Mtx *boneMtx;
     s32 segScratch[3];
@@ -775,7 +775,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
         v = texture_getAddress((s32)(void *)att->seg7Id, segScratch, 0x3E, 0);
         gSPSegment(gdl++, 7, v);
     }
-    if (arg4 == 0) {
+    if (reflections == 0) {
         gSPSetGeometryMode(gdl++, G_CULL_BACK);
         for (i = 0; i < att->numDLists; i++) {
             if (!(att->hiddenDLists & (1 << i))) {

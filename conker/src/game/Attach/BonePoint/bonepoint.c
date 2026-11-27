@@ -41,12 +41,12 @@ s32 attach_getBonePoint(Vec3f *out, Actor *actor, u8 point) {
     return 1;
 }
 
-s32 attach_selectBonePointEffects(s32 arg0, s32 arg1) {
+s32 attach_selectBonePointEffects(s32 kind, s32 actor) {
     return 8;
 }
 
 /* Spawns two effects at bone point `point` of the actor (see attach_getBonePoint), if it has bones. */
-void attach_spawnBonePointEffects(Actor *actor, s32 point, s32 arg2) {
+void attach_spawnBonePointEffects(Actor *actor, s32 point, s32 unused) {
     Vec3f pos;
 
     if (actor->ob_matrix_ptr != NULL) {

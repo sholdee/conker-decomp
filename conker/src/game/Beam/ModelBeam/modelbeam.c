@@ -110,7 +110,7 @@ void beam_updateSpriteFade(Sprite2D *sprite) {
     }
 }
 
-void beam_levelUpdateRain(s32 arg0) {
+void beam_levelUpdateRain(s32 unused) {
     effect_updateRain(0);
 }
 
@@ -245,7 +245,7 @@ s32 beam_hookSlideTexture(ModelAttachment *att, Actor *actor) {
 }
 
 /* Spawns a spark effect (beam_updateBoneSparks) on `owner`. */
-void beam_spawnBoneSparks(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
+void beam_spawnBoneSparks(Actor *owner, s16 duration, u8 fxOwner, s32 fxList) {
     SparkData data;
     BoneSparkEffect *effect;
 
@@ -253,7 +253,7 @@ void beam_spawnBoneSparks(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     data.ownerId = owner->unique_id;
     data.accum = 0.0f;
 
-    effect = effect_newTimedEffect(arg1, -1, 0x51, -1, 1, 0x3E, sizeof(data), arg2, arg3);
+    effect = effect_newTimedEffect(duration, -1, 0x51, -1, 1, 0x3E, sizeof(data), fxOwner, fxList);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -356,8 +356,8 @@ void beam_updateBoneSparks(BoneSparkEffect *effect) {
 
 /* Effect callback for the spark effect: hands effect_handleTimedEffectOwnerEvent the effect's owner reference
  * (pointer and id). */
-void beam_boneSparksMessage(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
-    effect_handleTimedEffectOwnerEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+void beam_boneSparksMessage(BoneSparkEffect *effect, s32 event, u8 eventType) {
+    effect_handleTimedEffectOwnerEvent(event, eventType, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Beam effect: while the owner lives and has a model (and hiddenParts bit 1 is clear), stretches the
@@ -444,8 +444,8 @@ void beam_freeModelBeamEffect(ModelBeamEffect *effect) {
 }
 
 /* Effect callback for the beam effect: hands effect_handleOwnerActorEvent the owner reference. */
-void beam_modelBeamMessage(ModelBeamEffect *effect, s32 arg1, u8 arg2) {
-    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+void beam_modelBeamMessage(ModelBeamEffect *effect, s32 event, u8 eventType) {
+    effect_handleOwnerActorEvent(event, eventType, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Clears the beam effect's reference to this beam. */
@@ -543,12 +543,12 @@ void beam_updateFlashBurst(FlashBurstEffect *effect) {
 }
 
 /* Effect callback for the burst effect: hands effect_handleOwnerActorEvent the owner reference. */
-void beam_flashBurstMessage(FlashBurstEffect *effect, s32 arg1, u8 arg2) {
-    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+void beam_flashBurstMessage(FlashBurstEffect *effect, s32 event, u8 eventType) {
+    effect_handleOwnerActorEvent(event, eventType, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Creates a blood_spawnStrip object attached to `owner`. */
-void beam_spawnBoneBloodStrip(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
+void beam_spawnBoneBloodStrip(Actor *owner, s16 lifetime, u8 fxOwner, s32 fxList) {
     BloodStripDesc desc;
 
     desc.ownerId = owner->unique_id;
@@ -564,7 +564,7 @@ void beam_spawnBoneBloodStrip(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     desc.flags = 2;
     desc.duration = 40;
     desc.pause = 16;
-    desc.lifetime = arg1;
+    desc.lifetime = lifetime;
     desc.sampleCallback = 5;
     desc.emitCallback = 8;
     desc.rateCallback = -1;
@@ -583,19 +583,19 @@ void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3
     Vec3f start;
     Vec3f end;
     Vec3f velocity;
-    f32 arg3;
-    s16 arg4;
-    u8 arg5;
-    f32 arg6;
+    f32 gravity;
+    s16 lifetime;
+    u8 alpha;
+    f32 size;
     CollisionHit ground;
     u8 probeGround;
     s32 flag;
     f32 random;
 
-    blood_getStripParticleParams(pointA, pointB, velocityA, velocityB, time, strip, &start, &end, &velocity, &arg3,
-                  &arg4, &arg5, &arg6);
+    blood_getStripParticleParams(pointA, pointB, velocityA, velocityB, time, strip, &start, &end, &velocity, &gravity,
+                  &lifetime, &alpha, &size);
     random = math_randomFloat();
-    arg6 *= 1.0f + (random + random);
+    size *= 1.0f + (random + random);
     probeGround = math_randomFloat() < 0.6f;
     if (probeGround) {
         collision_initHitFromObject(&ground, strip->owner);
@@ -611,6 +611,6 @@ void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3
     } else {
         flag = 0;
     }
-    particle_spawnSteamParticle(&start, &velocity, 1, arg3, arg4, arg5, arg6, probeGround, 1.8f, 1.8f, 1,
+    particle_spawnSteamParticle(&start, &velocity, 1, gravity, lifetime, alpha, size, probeGround, 1.8f, 1.8f, 1,
                   &ground, 1, flag, strip->header.owner, strip->header.kind);
 }

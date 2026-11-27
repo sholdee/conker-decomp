@@ -28,7 +28,7 @@ void weapon_projectileMessage(Game1EF500Trail *obj, ActorSwapMsg *swap, u8 event
  */
 s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
                   f32 distScale, u8 castRay, Vec3f *altOrigin, Vec3f *altDir, u8 *flags, u8 clearMask,
-                  f32 defaultRemaining, void *owner, s8 arg13, u8 collide, u8 arg15, s32 arg16, u8 recast) {
+                  f32 defaultRemaining, void *owner, s8 filter, u8 collide, u8 hitModels, s32 ignoreMask, u8 recast) {
     RayHit recastHit;
 
     if (knownHit != NULL) {
@@ -44,7 +44,7 @@ s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3
         }
         if (recast && (hit->hitType == 2 || hit->hitType == 3)) {
             collision_castRay(owner, hit->origin.x, hit->origin.y, hit->origin.z, hit->dir.x, hit->dir.y, hit->dir.z,
-                          &recastHit, 0.0f, 0, 1, 1, -1, 0, arg16);
+                          &recastHit, 0.0f, 0, 1, 1, -1, 0, ignoreMask);
             if (recastHit.hitType != 0) {
                 *hit = recastHit;
             }
@@ -63,7 +63,7 @@ s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3
             hit->dir = *dir;
         }
         collision_castRay(owner, hit->origin.x, hit->origin.y, hit->origin.z, hit->dir.x, hit->dir.y, hit->dir.z, hit,
-                      0.0f, 0, collide ? 0 : 1, (arg15 && collide) ? 0 : 1, arg13, 0, arg16);
+                      0.0f, 0, collide ? 0 : 1, (hitModels && collide) ? 0 : 1, filter, 0, ignoreMask);
         if (hit->surface == NULL) {
             index = -1;
         } else {
