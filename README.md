@@ -13,6 +13,12 @@ game text.
 
 ## Status (US only)
 
+![The US code by source file](../../raw/progress/treemap.svg)
+
+The map shows every source file, sized by its code. Green is C that compiles to byte-identical code, and
+blue is hand-written assembly (281 pieces with a proof, 8 with search evidence). CI regenerates it and the
+badges from the committed files after each change to `master` (`tools/progress.py`).
+
 - **Code: 100% decompiled and byte-matching.** All CPU code in the init, game and debugger segments is
   matched. As in other N64 decomps, a small part is hand-written assembly: 2.8% of the code, in 289
   labelled pieces. Examples are the exception handler and the 64-bit math helpers. 281 pieces have a
@@ -44,12 +50,6 @@ game text.
   above it.
 - **Other versions.** Splat configurations for the EU, debug and ECTS ROMs exist, but those versions are
   not decompiled and their builds are not verified.
-
-![The US code by source file](../../raw/progress/treemap.svg)
-
-The map shows every source file, sized by its code. Green is C that compiles to byte-identical code,
-and blue is hand-written assembly (281 pieces with a proof, 8 with search evidence). CI regenerates it, and the badges, from the committed files
-after each change to `master` (`tools/progress.py`).
 
 ## Building
 
