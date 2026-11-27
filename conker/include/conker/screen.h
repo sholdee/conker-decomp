@@ -217,9 +217,6 @@ void screen_spawnFlash(u8 r, u8 g, u8 b, u8 alpha, s32 duration, u8 view, u8 own
 void screen_updateFlash(FlashEffect *effect);
 Gfx *screen_drawFlash(Gfx *gfx, FlashEffect *effect, s16 view);
 
-/* rodata 0x24BD80 (a slice of conker.us.yaml without a unit, after vieweffects.c's .rodata) */
-extern f32 D_800A72C0; // 0.7f: screen_drawLetterbox reads it from memory (a literal would let IDO fold 1.0f - 0.7f)
-
 /* game/Screen/Tint/tint.c */
 /* returns the struct ScreenTint, followed by extraSize bytes of the caller's data */
 void *screen_spawnTintEffect(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19, s32 extraSize);

@@ -839,7 +839,7 @@ void screen_startOpening(s32 view) {
 Gfx *screen_drawLetterbox(Gfx *gfx) {
     s16 yl;
     s16 yh;
-    s32 pad; // matching: unused stack slot
+    f32 topShare = 0.6999999881f; // the top bar's share of the view height
     s16 top;
     s16 left;
     s16 bottom;
@@ -872,12 +872,12 @@ Gfx *screen_drawLetterbox(Gfx *gfx) {
     left = gRenderViews->left;
     bottom = gRenderViews->bottom;
     right = gRenderViews->right;
-    travel = gRenderViews->height * 0.6999999881f;
+    travel = gRenderViews->height * topShare;
     travel += 30.0f;
     travel *= amount;
     topBarEnd = (gRenderViews->top - 30.0f) + travel;
     gfx = screen_fillViewRect(gfx, left, top, right, (s16)topBarEnd, 0);
-    travel = gRenderViews->height * (1.0f - D_800A72C0);
+    travel = gRenderViews->height * (1.0f - topShare);
     travel += 30.0f;
     travel *= amount;
     bottomBarStart = (gRenderViews->bottom + 30.0f) - travel;

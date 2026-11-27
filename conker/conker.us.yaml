@@ -1550,7 +1550,6 @@ segments:
       - [0x24BD00, .rodata, game/Sprite/LevelSprites/levelsprites]
       - [0x24BD10, .rodata, game/Flare/LensFlare/lensflare]
       - [0x24BD20, .rodata, game/Screen/ViewEffects/vieweffects]
-      - [0x24BD80, rodata]
       - [0x24BD90, .rodata, game/Swarm/ModelSlots/modelslots]
       - [0x24BE10, .rodata, game/Shadow/RealTimeShadow/realtimeshadow]
       - [0x24BE50, .rodata, game/Effects/ColorAnim/coloranim]
