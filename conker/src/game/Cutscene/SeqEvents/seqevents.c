@@ -55,13 +55,13 @@ void cutscene_emptyStartHook(void) {
  * down its lifetime and applies fade-in/fade-out to *volume. Returns 1 (after
  * freeing the state) when the sound should stop.
  */
-s32 cutscene_updateSound(SeqVoice *voice, s32 active, u32 *volume, s32 pan, s32 cents, s32 mix, s16 *sound) {
+s32 cutscene_updateSound(SoundRecord *voice, s32 active, u32 *volume, s32 pan, s32 cents, s32 mix, s16 *sound) {
     SeqSound *snd;
     SeqTrackState *states;
     SeqTrackState *state;
     s32 fadeOut;
 
-    snd = voice->userData;
+    snd = voice->callback_param1.ptr;
     if ((snd->stopAtEnd != 0 && gCutsceneTimes[snd->scene] >= gCutsceneEndTimes[snd->scene]) || (voice->flags & 0x80)) {
         *volume = 0;
         *sound = 0;

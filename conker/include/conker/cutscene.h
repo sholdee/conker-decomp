@@ -36,18 +36,6 @@ typedef struct {
     /* 0xE */ u8 sceneTag;   /* gCutsceneIds[scene] when the sound started */
 } SeqSound;
 
-/* The sound voice handed to the cutscene_updateSound callback. */
-typedef struct {
-    /* 0x00 */ u8 pad0[2];
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[8];
-    /* 0x10 */ s32 flags;
-    /* 0x14 */ u8 pad14[4];
-    /* 0x18 */ SeqSound *userData;
-} SeqVoice;
-
 /* Owner of a cutscene_startTimer timer (an attachment handle in game/Cutscene/SeqEvents/seqevents.c): `timer` holds the running timer. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x30];
@@ -223,7 +211,7 @@ void cutscene_startCallback1(s32 map, s32 cutscene, s32 scene, s32 actorPath);
 
 /* game/Cutscene/SeqEvents/seqevents.c */
 void cutscene_emptyStartHook(void);
-s32 cutscene_updateSound(SeqVoice *voice, s32 active, u32 *volume, s32 pan, s32 cents, s32 mix, s16 *sound);
+s32 cutscene_updateSound(SoundRecord *voice, s32 active, u32 *volume, s32 pan, s32 cents, s32 mix, s16 *sound);
 s32 cutscene_findEvent(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s32 matchValue, s32 value,
                   s32 matchUnk4, s32 unk4, s32 matchUnk5, s32 unk5, s32 scene);
 void cutscene_findEventsAround(SeqEvent **prev, SeqEvent **next, s32 *prevTime, s32 *nextTime, s32 track, s32 type,
