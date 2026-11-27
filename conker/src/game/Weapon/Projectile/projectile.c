@@ -3,10 +3,20 @@
 #include "variables.h"
 #include "libc/string.h"
 
-// matching: a 0.1f literal grows weapon_queueShotSound's frame by 8 bytes; the factor is a const struct in .rodata
-static const struct {
-    f32 volumeFalloff;
-} D_800AAA30 = { 0.1f };
+/* This file's .data. */
+/* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler. Declared without a prototype: each handler
+   takes its own kind of object. */
+static void (*D_8008FBD0[])() = {
+    weapon_onProjectileExpire, func_150E4010, func_150E411C, func_150EC45C, func_150FC368, beam_spawnImpactEffects,
+};
+/* A fly-by sound of a projectile and the distance at which it plays. */
+typedef struct {
+    u16 sound;
+    u16 range;
+} FlybySound;
+static FlybySound D_8008FBE8[] = {
+    { 0x327, 40 }, { 0x328, 30 }, { 0x329, 60 }, { 0x32A, 20 }, { 0x32B, 15 }, { 0x320, 5 }, { 0x321, 5 }, { 0x322, 5 },
+};
 
 /* Queues a positional sound event (music_postEvent kind 8) for soundId, only in a few specific levels. */
 void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
@@ -14,14 +24,13 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
     s32 volume;
     Camera *camera;
     s32 direction;
-    s16 song;
-    f32 volumeLevel; // matching: separate spill slot for the value kept across sound_computePan
     f32 intensity;
 
     if (obj != NULL) {
         if (gIsMultiplayer || (camera = obj->CameraPtr) == NULL) {
-            song = D_800B0DF0->music.song;
-            if (song == 0x24 || song == 0x13 || song == 0x4D || song == 0x85 || song == 0x93) {
+            if (D_800B0DF0->music.song == 0x24 || D_800B0DF0->music.song == 0x13 ||
+                D_800B0DF0->music.song == 0x4D || D_800B0DF0->music.song == 0x85 ||
+                D_800B0DF0->music.song == 0x93) {
                 sound_getPanVolumeAt(pos->x, pos->y, pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
                 if ((u32)volume > 0x1000) {
                     volume = (u32)volume >> 7;
@@ -29,14 +38,12 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
                 }
             }
         } else {
-            song = D_800B0DF0->music.song;
-            if (song == 0x24 || song == 0x13) {
-                intensity = 255.0f - distance * D_800AAA30.volumeFalloff;
+            if (D_800B0DF0->music.song == 0x24 || D_800B0DF0->music.song == 0x13) {
+                intensity = 255.0f - distance * 0.1000000015f;
                 if (intensity > 16.0f) {
-                    volumeLevel = intensity;
                     /* 40.74 = 256 / 2pi: radians to a 256-step angle */
                     direction = sound_computePan(dir->x, dir->z, (u32)(camera->TrueCameraAngleRad * 40.74366379f));
-                    music_postEvent(8, (collision_getSurfaceType(soundId) + 1) | ((s32)volumeLevel << 8) | (direction << 16));
+                    music_postEvent(8, (collision_getSurfaceType(soundId) + 1) | ((s32)intensity << 8) | (direction << 16));
                 }
             }
         }
@@ -706,8 +713,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
     if (math_randomFloat() < debrisChance) {
         SpriteDef debris;
         f32 scale;
-        // not const (here and below): the ROM has these tables before D_800AAA30, so they are .data linked ahead of the .rodata
-        s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
+        const s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
         u8 big;
 
         scale = (math_randomFloat() * 15.0f) + 15.0f;
@@ -736,7 +742,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
     }
     if (math_randomFloat() < sparkChance) {
         ParticleDef spark;
-        s32 shade[6] = { 0x6D, 0x6D, 0x6E, 0x6E, 0x6D, 0x6D };
+        const s32 shade[6] = { 0x6D, 0x6D, 0x6E, 0x6E, 0x6D, 0x6D };
 
         ext = &trail->trail;
         spark.texture = shade[type];
@@ -771,9 +777,9 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
     }
     if (math_randomFloat() < smokeChance) {
         SpriteBurst smoke;
-        u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
+        const u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
                             { 0xAA, 0x52, 0x1E }, { 0x98, 0x92, 0x79 }, { 0xFF, 0xC0, 0x00 } };
-        u8 colorB[6][3] = { { 0x5C, 0x30, 0x00 }, { 0x5C, 0x30, 0x00 }, { 0x00, 0x00, 0x00 },
+        const u8 colorB[6][3] = { { 0x5C, 0x30, 0x00 }, { 0x5C, 0x30, 0x00 }, { 0x00, 0x00, 0x00 },
                             { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x00 }, { 0x8D, 0x8D, 0x00 } };
 
         smoke.countBase = 5;
@@ -823,7 +829,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
     if (math_randomFloat() < flashChance) {
         LightEffectHeader header;
         Vec3i header2;
-        u8 color[2][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xA7, 0xA7 } };
+        const u8 color[2][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xA7, 0xA7 } };
         u8 sel;
 
         header.flags = 3;

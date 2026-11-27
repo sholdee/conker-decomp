@@ -1203,7 +1203,7 @@ segments:
       - {start: 0x234650, type: .data, name: game/Trail/RibbonTrail/ribbontrail, linker_section_order: .rodata}
       - {start: 0x234660, type: .data, name: game/Effects/FollowEffects/followeffects, linker_section_order: .rodata}
       - {start: 0x234680, type: .data, name: game/Effects/StatCounter/statcounter, linker_section_order: .rodata}
-      - [0x234690, rodata]
+      - {start: 0x234690, type: .data, name: game/Weapon/Projectile/projectile, linker_section_order: .rodata}
       - {start: 0x2346D0, type: .data, name: game/Sight/SightHud/sighthud, linker_section_order: .rodata}
       - {start: 0x2346F0, type: .data, name: game/Trail/LevelStream/levelstream, linker_section_order: .rodata}
       - {start: 0x234700, type: .data, name: game/Effects/BoneFollower/bonefollower, linker_section_order: .rodata}
@@ -1609,8 +1609,7 @@ segments:
       - [0x24F050, .rodata, game/Effects/FollowEffects/followeffects]
       - [0x24F370, .rodata, game/Effects/StatCounter/statcounter]
       - [0x24F3F0, .rodata, game/Weapon/Bullet/bullet]
-      - {start: 0x24F490, type: .data, name: game/Weapon/Projectile/projectile, linker_section_order: .rodata}
-      - [0x24F4F0, .rodata, game/Weapon/Projectile/projectile]
+      - [0x24F490, .rodata, game/Weapon/Projectile/projectile]
       - [0x24F550, .rodata, game/Weapon/SegmentShot/segmentshot]
       - [0x24F5C0, .rodata, game/Weapon/JointShot/jointshot]
       - [0x24F6F0, .rodata, game/Sight/SightBeam/sightbeam]
