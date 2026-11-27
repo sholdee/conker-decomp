@@ -1502,7 +1502,7 @@ segments:
       - [0x248200, .rodata, game/Camera/CameraCommands/cameracommands]
       - [0x2482B0, .rodata, game/Particle/SpriteParticle/spriteparticle]
       - [0x248320, .rodata, game/Particle/ModelParticle/modelparticle]
-      - [0x248340, rodata]
+      - [0x248340, .rodata, game/Particle/ParticleModelIds/particlemodelids]
       - [0x2486F0, .rodata, game/Effects/Blood/blood]
       - [0x249480, .rodata, game/Effects/DynModel/dynmodel]
       - [0x249560, .rodata, game/Particle/QuadParticle/quadparticle]

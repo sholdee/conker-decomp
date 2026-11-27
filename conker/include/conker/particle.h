@@ -42,6 +42,7 @@
  *   game/Particle/SegmentEmitter/segmentemitter.c
  *   game/Particle/SpriteParticle/spriteparticle.c
  *   game/Particle/ModelParticle/modelparticle.c
+ *   game/Particle/ParticleModelIds/particlemodelids.c
  *   game/Particle/QuadParticle/quadparticle.c
  *   game/Particle/ChannelParticle/channelparticle.c
  *   game/Particle/FlickerParticle/flickerparticle.c
@@ -1380,7 +1381,9 @@ Gfx *particle_bindDataTexture(Gfx *gfx, ModelParticle *particle, s16 arg2);
 Gfx *particle_bindFirstListTexture(Gfx *gfx, ModelParticle *particle, s16 arg2);
 Gfx *particle_bindSegmentTexture(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 Gfx *particle_bindListTextures(Gfx *gfx, ModelParticle *particle, s16 arg2);
-extern s32 D_800A3880[]; /* the model ids by particle model (bank 9): the .rodata at 0x248340 after this file's (no file yet) */
+
+/* game/Particle/ParticleModelIds/particlemodelids.c (a data-only unit) */
+extern const s32 D_800A3880[233]; /* the model ids by particle model (bank 9) */
 
 /* game/Particle/QuadParticle/quadparticle.c */
 extern Gfx gQuadParticleSetupDl[]; /* render setup (object type table gObjectTypes) */
