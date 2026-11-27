@@ -8,8 +8,8 @@
  * one of them from the ROM into the start of gSpawnRecords, before the level's own records. This project
  * links them at the end of the debugger segment; nothing uses their addresses there.
  *
- * Each record: { flags, unk2, interaction_state, type, unk5, x, y, z, angle, unkD, unkE, unkF, unk10, unk11,
- * unk12, unk13, unk14, pad, objFlags, unk1C, unk1D, pad, xz_scale, y_scale, unique_id, partSet, unk2A, unk2C,
+ * Each record: { flags, removed, interaction_state, type, unk5, x, y, z, angle, unkD, unkE, turnRate, unk10,
+ * unk11, unk12, unk13, unk14, pad, objFlags, unk1C, unk1D, pad, xz_scale, y_scale, unique_id, partSet, unk2A, unk2C,
  * keepTime, unk2F }.
  */
 

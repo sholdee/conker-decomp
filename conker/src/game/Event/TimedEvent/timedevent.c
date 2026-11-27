@@ -3119,7 +3119,7 @@ void event_respawnObject(void) {
             actor_clearSlot(obj);
         }
     }
-    gSpawnRecords[id].unk2 = 0;
+    gSpawnRecords[id].removed = 0;
     slot = collision_spawnObject((SpawnRecord *)(id * 0x30 + (s32)gSpawnRecords), id, 0, 0, 0); // matching: integer address math
     if (slot == 0) {
         return;

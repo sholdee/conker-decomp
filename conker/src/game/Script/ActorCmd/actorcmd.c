@@ -46,7 +46,7 @@ s32 script_spawnActor(s32 scriptId, s32 cmd) {
     if (ret != -1) {
         obj = collision_findObjectById(scriptId);
         if (obj == NULL) {
-            gSpawnRecords[ret].unk2 = 0;
+            gSpawnRecords[ret].removed = 0;
             if (collision_spawnObject(ret + gSpawnRecords, ret, 0, 0, 0) == 0) { // matching: index + base operand order
                 return -1;
             }
@@ -70,7 +70,7 @@ s32 script_removeActor(s32 objId, C4DC0_arg1 *cmd) {
         return 0;
     }
     if (objId < gSpawnRecordCount) {
-        gSpawnRecords[objId].unk2 = 1;
+        gSpawnRecords[objId].removed = 1;
     }
     if (gScriptCmdWordCount == 2) {
         if (cmd->unk4 == 0) {

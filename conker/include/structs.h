@@ -658,7 +658,7 @@ typedef struct {
 /* One 0x30-byte entry of the level's spawn table gSpawnRecords; Actor.spawn points at the one it came from. */
 typedef struct SpawnRecord {
     /* 0x00 */ u16 flags;
-    /* 0x02 */ u8  unk2;
+    /* 0x02 */ u8  removed;      // 1: removed, collision_trySpawnRecord does not spawn it
     /* 0x03 */ u8  interaction_state;
     /* 0x04 */ u8  type;         // model id, 0xFF for none
     /* 0x05 */ u8  unk5;
@@ -668,7 +668,7 @@ typedef struct SpawnRecord {
     /* 0x0C */ u8  angle;        // high byte of the facing angle
     /* 0x0D */ u8  unkD;
     /* 0x0E */ u8  unkE;
-    /* 0x0F */ u8  unkF;
+    /* 0x0F */ u8  turnRate;     // the spawned actor's moveTurnRate and faceTurnRate
     /* 0x10 */ u8  unk10;
     /* 0x11 */ u8  unk11;
     /* 0x12 */ u8  unk12;

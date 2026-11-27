@@ -4462,13 +4462,13 @@ void actor_remove(Actor *actor, s32 mode) {
             /* matching: spawn is read as an s32 at each use; pointer reads let IDO keep it in a register */
             if ((*(s32 *)&actor->listpos_ptr) != 0) {
                 if (((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->flags & 0x20) {
-                    ((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->unk2 = 1;
+                    ((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->removed = 1;
                     gSpawnInUse[actor->listpos] = 0;
                 } else if (((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->flags & 1) {
                     gSpawnInUse[actor->listpos] = 0;
                 } else {
                     s32 pad;
-                    ((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->unk2 = 1;
+                    ((SpawnRecord *)*(s32 *)&actor->listpos_ptr)->removed = 1;
                     gSpawnInUse[actor->listpos] &= 0x80;
                 }
             } else {
@@ -5332,7 +5332,7 @@ void actor_respawnInPlace(Actor *actor, s32 type, s32 interaction_state, f32 sca
     spawn->interaction_state = interaction_state;
     spawn->xz_scale = scale;
     spawn->y_scale = scale;
-    spawn->unk2 = 0;
+    spawn->removed = 0;
     camera = actor->CameraPtr;
     x = actor->xpos;
     y = actor->ypos;

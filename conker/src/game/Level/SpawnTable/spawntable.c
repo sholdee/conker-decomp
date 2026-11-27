@@ -97,7 +97,7 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
         if ((1 << i) & gMatchState.playerMask) {
             s32 type = player_getStat(i, 1);
 
-            gSpawnRecords[i].unk2 = 0;
+            gSpawnRecords[i].removed = 0;
             switch (type) {
             case 0:
                 if (level == LEVEL_W5_BANK || level == LEVEL_W5_BANK_END || level == LEVEL_W5_END_ARENA) {
@@ -225,7 +225,7 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
             gSpawnRecords[i].angle = obj->angle >> 8;
             continue;
         }
-        gSpawnRecords[i].unk2 = 1;
+        gSpawnRecords[i].removed = 1;
     }
     level_collectSpawnModelTypes();
     for (j = 0; j < gSpawnRecordCount; j++) {

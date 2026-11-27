@@ -426,7 +426,7 @@ void script_setNearRange(void) {
 
 void script_setTurnRates(void) {
     if (gScriptArg0 == 128) {
-        gCurrentActor->moveTurnRate = gCurrentActor->listpos_ptr->unkF;
+        gCurrentActor->moveTurnRate = gCurrentActor->listpos_ptr->turnRate;
     } else {
         gCurrentActor->moveTurnRate = gScriptArg0;
     }
