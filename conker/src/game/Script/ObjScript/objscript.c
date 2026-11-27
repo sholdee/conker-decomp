@@ -1646,20 +1646,10 @@ u16 script_getAngleToPathStart(s32 arg0) {
 void script_changeObjectProperty(void) {
     s32 index;
     s32 *counter;
-    Actor *savedObj;
-    s32 savedIndex;
-    u16 angle;
-    s32 select;
 
-    select = gScriptArg1;
-    if (select == 0) {
-        // matching: the jump into the switch keeps arg1 == 0 out of the jump table
-        goto current;
-    }
-select_object: // matching: unused label, splits the block for the scheduler
     switch (gScriptArg1) {
+    case 0:
     case 1:
-    current:
         index = dc_glbl_CharNum;
         break;
     default:
@@ -1681,8 +1671,8 @@ select_object: // matching: unused label, splits the block for the scheduler
         break;
     case 4:
     case 5: {
-        /* matching: the block-scope redeclaration changes how IDO schedules the address of gCurrentActor */
-        extern Actor *gCurrentActor;
+        Actor *savedObj;
+        s32 savedIndex;
 
         // restart the object on script arg0, running as the current object meanwhile
         savedObj = gCurrentActor;
@@ -1704,12 +1694,15 @@ select_object: // matching: unused label, splits the block for the scheduler
     case 7:
         movement_obj[index].vtilt = 0.0f;
         return;
-    case 8:
+    case 8: {
+        u16 angle;
+
         angle = script_getAngleToPathStart(gCurrentActor->unk222);
         if ((script_getAngleToPathStart(dc_glbl_CharNum) - angle) & 0x8000) {
             gCurrentActor->unk221 = gScriptArg0;
         }
         return;
+    }
     case 9: {
         u16 value = (gScriptArg3 << 8) | gScriptArg0;
 

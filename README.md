@@ -13,6 +13,12 @@ game text.
 
 ## Status (US only)
 
+![The US code by source file](../../raw/progress/treemap.svg)
+
+The map shows every source file, sized by its code. Green is C that compiles to byte-identical code, and
+blue is hand-written assembly (281 pieces with a proof, 8 with search evidence). CI regenerates it and the
+badges from the committed files after each change to `master` (`tools/progress.py`).
+
 - **Code: 100% decompiled and byte-matching.** All CPU code in the init, game and debugger segments is
   matched. As in other N64 decomps, a small part is hand-written assembly: 2.8% of the code, in 289
   labelled pieces. Examples are the exception handler and the 64-bit math helpers. 281 pieces have a
@@ -21,7 +27,9 @@ game text.
 - **Fully linked.** No address is pinned: every reference goes through a symbol, so the code and the
   data can move. CI fails on a pinned address, a pointer written as a number, or a jump without a
   relocation. Emulator tests added code to each segment (init, game, debugger) and data to each
-  `.data`, `.rodata` and `.bss`. The shifted ROMs still ran the boot and attract sequence. A few fixed
+  `.data`, `.rodata` and `.bss`. The shifted ROMs still ran the boot and attract sequence.
+  `tools/shifttest/shift_test.sh` repeats the code test for the init and game segments
+  ([CONTRIBUTING.md](CONTRIBUTING.md)). A few fixed
   sizes remain, for example the 0x1FC000 bytes of game code that the page-fault handler maps (room for
   about 7.9 KB more). The build stops with a message before one of them breaks the game.
   [CONTRIBUTING.md](CONTRIBUTING.md) lists them.
@@ -44,12 +52,6 @@ game text.
   above it.
 - **Other versions.** Splat configurations for the EU, debug and ECTS ROMs exist, but those versions are
   not decompiled and their builds are not verified.
-
-![The US code by source file](../../raw/progress/treemap.svg)
-
-The map shows every source file, sized by its code. Green is C that compiles to byte-identical code,
-and blue is hand-written assembly (281 pieces with a proof, 8 with search evidence). CI regenerates it, and the badges, from the committed files
-after each change to `master` (`tools/progress.py`).
 
 ## Building
 
@@ -95,6 +97,12 @@ A successful build ends with:
 build/conker.us.bin: OK      # conker/build/conker.us.bin, sha1 842e3d348e3c8ae0039e2ab367ad492f9b5266d8
 build/conker.us.z64: OK      # the rebuilt ROM, sha1 4cbadd3c4e0729dec46af64ad018050eada4f47a
 ```
+
+`git status` does not show changes inside `tools/n64splat`, because `.gitmodules` sets
+`ignore = dirty` for it. In the submodule itself, `git status` shows the files that `patch_splat.py`
+changes, and `src/splat/segtypes/n64/i1.py` even in a fresh clone. The pinned upstream commit stores
+`i1.py` with CRLF line endings, but its `.gitattributes` asks for LF, so Git reports a change. The
+content is the same.
 
 After you edit a source file, run the last three steps again (`make -C conker`, `make -C conker replace`,
 `make`). Everything the build writes (`assets/`, `rzip/`, `build/`, `conker/asm/`, `conker/build/`) is

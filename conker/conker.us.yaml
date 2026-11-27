@@ -280,13 +280,15 @@ segments:
       - [0x2C850, .rodata, libultra/os/setintmask]
       - [0x2C8D0, .rodata, libultra/gu/sinf_init]
       - [0x2C920, .rodata, libultra/gu/libm_vals]
-      - [0x2C930, rodata]
+      - [0x2C930, .rodata, init/View/SetupDl/setupdl]
       - [0x2C960, rodata]
       # init bss: func_10001050 clears 0x8002D4B0..0x80043B40 (bss_size)
       - {start: 0x2D4B0, type: .bss, vram: 0x8002D4B0, name: init/Boot/BootMain/bootmain}
       - {start: 0x2D4B0, type: .bss, vram: 0x80035500, name: init/Libc/Xprintf/xprintf}
       - {start: 0x2D4B0, type: bss, vram: 0x80035510, name: bss_80035510}
-      - {start: 0x2D4B0, type: .bss, vram: 0x80036DD0, name: libultra/io/vimgr}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80035910, name: libultra/io/pimgr}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80036B60, name: libultra/io/sptask}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80036BA0, name: libultra/io/vimgr}
       - {start: 0x2D4B0, type: .bss, vram: 0x80037E40, name: init/Boot/Exception/exceptasm}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038070, name: init_38E0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038080, name: init/Heap/ExpansionPak/expansionpak}
@@ -310,20 +312,19 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x800427A0, name: init/Audio/Mp3Stream/mp3stream}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042800, name: libultra/audio/init_128D0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042810, name: libultra/audio/n_csplayer}
-      - {start: 0x2D4B0, type: bss, vram: 0x80042850, name: bss_80042850}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042850, name: libultra/audio/init_15550}
       - {start: 0x2D4B0, type: .bss, vram: 0x800428C0, name: libultra/audio/init_17870}
       - {start: 0x2D4B0, type: bss, vram: 0x800428D0, name: bss_800428D0}
-      # libultra objects that link their own .bss. A list-form bss entry has no ROM: splat takes its vram
-      # from the first field as if it were a ROM offset, and in init_data vram = 0x80000000 + offset.
-      - [0x428E0, .bss, libultra/os/initialize]
-      - [0x428F0, .bss, libultra/os/piacs]
-      - [0x42910, .bss, libultra/os/seteventmesg]
-      - [0x42990, .bss, libultra/os/timerintr]
-      - [0x429D0, .bss, libultra/io/pfsisplug]
-      - [0x42A10, .bss, libultra/io/controller]
-      - [0x42AA0, .bss, libultra/io/siacs]
-      - [0x42AC0, .bss, libultra/io/leointerrupt]
-      - [0x43AC0, .bss, libultra/io/leodiskinit]
+      # libultra objects that link their own .bss
+      - {start: 0x2D4B0, type: .bss, vram: 0x800428E0, name: libultra/os/initialize}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800428F0, name: libultra/os/piacs}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042910, name: libultra/os/seteventmesg}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042990, name: libultra/os/timerintr}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800429D0, name: libultra/io/pfsisplug}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042A10, name: libultra/io/controller}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042AA0, name: libultra/io/siacs}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042AC0, name: libultra/io/leointerrupt}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80043AC0, name: libultra/io/leodiskinit}
 
   - name:  game
     type:  code
@@ -656,6 +657,7 @@ segments:
       - [0xFDBE0, c, game/Effects/ZoneSounds/zonesounds]
       - [0xFDD70, c, game/Level/LevelHook30/levelhook30]
       - [0xFE850, c, game_FE850]
+      - [0xFE8C0, c, game_FE8C0]
       - [0xFE9E0, c, game/Camera/SpeedDistance/speeddistance]
       - [0xFECC0, c, game/Env/SkyGradient/skygradient]
       - [0xFEFF0, c, game/Effects/AmbientPulse/ambientpulse]
@@ -1062,8 +1064,7 @@ segments:
       - {start: 0x22BE50, type: .data, name: game/Hud/PlayerOverlay/playeroverlay, linker_section_order: .rodata}
       - {start: 0x22BE90, type: .data, name: game/Sprite/SpriteDraw/spritedraw, linker_section_order: .rodata}
       - {start: 0x22BED0, type: .data, name: game/Script/TaskSet/taskset, linker_section_order: .rodata}
-      - [0x22BEF0, rodata]   # resource manifest (names are game content: extracted, not in C)
-      - {start: 0x22CEE0, type: .data, name: game/Script/CmdTables/cmdtables, linker_section_order: .rodata}
+      - {start: 0x22BEF0, type: .data, name: game/Script/CmdTables/cmdtables, linker_section_order: .rodata}
       - {start: 0x22CFD0, type: .data, name: game/Script/TimerCmd/timercmd, linker_section_order: .rodata}
       - [0x22CFF0, rodata]
       - {start: 0x22D000, type: .data, name: game/Anim/BoneMtxState/bonemtxstate, linker_section_order: .rodata}
@@ -1203,7 +1204,7 @@ segments:
       - {start: 0x234650, type: .data, name: game/Trail/RibbonTrail/ribbontrail, linker_section_order: .rodata}
       - {start: 0x234660, type: .data, name: game/Effects/FollowEffects/followeffects, linker_section_order: .rodata}
       - {start: 0x234680, type: .data, name: game/Effects/StatCounter/statcounter, linker_section_order: .rodata}
-      - [0x234690, rodata]
+      - {start: 0x234690, type: .data, name: game/Weapon/Projectile/projectile, linker_section_order: .rodata}
       - {start: 0x2346D0, type: .data, name: game/Sight/SightHud/sighthud, linker_section_order: .rodata}
       - {start: 0x2346F0, type: .data, name: game/Trail/LevelStream/levelstream, linker_section_order: .rodata}
       - {start: 0x234700, type: .data, name: game/Effects/BoneFollower/bonefollower, linker_section_order: .rodata}
@@ -1393,7 +1394,7 @@ segments:
       - [0x245340, .rodata, game/Effects/TextLines/textlines]
       - [0x245350, .rodata, game/Level/LevelHook30/levelhook30]
       - [0x245370, .rodata, game_FE850]
-      - [0x245380, rodata]
+      - [0x245380, .rodata, game_FE8C0]
       - [0x245390, .rodata, game/Camera/SpeedDistance/speeddistance]
       - [0x2453A0, .rodata, game/Effects/AmbientPulse/ambientpulse]
       - [0x2453B0, .rodata, game/Effects/RaySpinner/rayspinner]
@@ -1502,7 +1503,7 @@ segments:
       - [0x248200, .rodata, game/Camera/CameraCommands/cameracommands]
       - [0x2482B0, .rodata, game/Particle/SpriteParticle/spriteparticle]
       - [0x248320, .rodata, game/Particle/ModelParticle/modelparticle]
-      - [0x248340, rodata]
+      - [0x248340, .rodata, game/Particle/ParticleModelIds/particlemodelids]
       - [0x2486F0, .rodata, game/Effects/Blood/blood]
       - [0x249480, .rodata, game/Effects/DynModel/dynmodel]
       - [0x249560, .rodata, game/Particle/QuadParticle/quadparticle]
@@ -1551,7 +1552,6 @@ segments:
       - [0x24BD00, .rodata, game/Sprite/LevelSprites/levelsprites]
       - [0x24BD10, .rodata, game/Flare/LensFlare/lensflare]
       - [0x24BD20, .rodata, game/Screen/ViewEffects/vieweffects]
-      - [0x24BD80, rodata]
       - [0x24BD90, .rodata, game/Swarm/ModelSlots/modelslots]
       - [0x24BE10, .rodata, game/Shadow/RealTimeShadow/realtimeshadow]
       - [0x24BE50, .rodata, game/Effects/ColorAnim/coloranim]
@@ -1561,8 +1561,7 @@ segments:
       - [0x24BEC0, .rodata, game/Particle/BillboardBurst/billboardburst]
       - [0x24BED0, .rodata, game/Trail/TrailEmitter/trailemitter]
       - [0x24BF10, .rodata, game/Particle/PlacementRing/placementring]
-      - [0x24BF20, rodata]
-      - [0x24C5D4, .rodata, game/Particle/ActorEmitter/actoremitter]
+      - [0x24BF20, .rodata, game/Particle/ActorEmitter/actoremitter]
       - [0x24C620, .rodata, game/Particle/ActorEmitterHandlers/actoremitterhandlers]
       - [0x24C628, .rodata, game/Particle/AnchorEmitter/anchoremitter]
       - [0x24CAC8, rodata]
@@ -1610,8 +1609,7 @@ segments:
       - [0x24F050, .rodata, game/Effects/FollowEffects/followeffects]
       - [0x24F370, .rodata, game/Effects/StatCounter/statcounter]
       - [0x24F3F0, .rodata, game/Weapon/Bullet/bullet]
-      - {start: 0x24F490, type: .data, name: game/Weapon/Projectile/projectile, linker_section_order: .rodata}
-      - [0x24F4F0, .rodata, game/Weapon/Projectile/projectile]
+      - [0x24F490, .rodata, game/Weapon/Projectile/projectile]
       - [0x24F550, .rodata, game/Weapon/SegmentShot/segmentshot]
       - [0x24F5C0, .rodata, game/Weapon/JointShot/jointshot]
       - [0x24F6F0, .rodata, game/Sight/SightBeam/sightbeam]
@@ -1636,7 +1634,7 @@ segments:
 
       # BSS ?
       - {start: 0x255880, type: .bss, vram: 0x800B0DC0, name: game/Collision/QuadTree/quadtree}
-      - {start: 0x255880, type: bss, vram: 0x800B0DF0, name: bss_800B0DF0}
+      - {start: 0x255880, type: .bss, vram: 0x800B0DF0, name: game/Level/LevelHeader/levelheader}
       - {start: 0x255880, type: .bss, vram: 0x800B0E00, name: game/Level/LevelModels/levelmodels}
       - {start: 0x255880, type: .bss, vram: 0x800BE2A0, name: game/Level/LevelObjects/levelobjects}
       - {start: 0x255880, type: .bss, vram: 0x800BE2B0, name: game/Camera/CameraViews/cameraviews}
@@ -1669,8 +1667,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800C6650, name: game/Aim/AimRemove/aimremove}
       - {start: 0x255880, type: .bss, vram: 0x800C6660, name: game/Model/ObjParts/objparts}
       - {start: 0x255880, type: .bss, vram: 0x800C67F0, name: game/Zone/ZoneTree/zonetree}
-      - {start: 0x255880, type: bss, vram: 0x800C6800, name: bss_800C6800}
-      - {start: 0x255880, type: .bss, vram: 0x800C6850, name: game/Debug/TaskMenu/taskmenu}
+      - {start: 0x255880, type: .bss, vram: 0x800C6800, name: game/Debug/TaskMenu/taskmenu}
       - {start: 0x255880, type: .bss, vram: 0x800C6860, name: game/Debug/DlCheck/dlcheck}
       - {start: 0x255880, type: .bss, vram: 0x800C68B0, name: game/Text/FontDraw/fontdraw}
       - {start: 0x255880, type: .bss, vram: 0x800CBD60, name: game/Text/TextQueue/textqueue}
@@ -1800,6 +1797,7 @@ segments:
     start: 0x00255880
     vram:  0x16000000
     align: 8
+    subalign: 8   # the base spawn tables start on an 8-byte address (0x25A1E8)
     subsegments:
       - [0x255880, c, debugger/Debugger/CrashScreen/crashscreen]
       - [0x256F80, c, debugger/Debugger/DebuggerCont/debuggercont]
@@ -1811,7 +1809,8 @@ segments:
       - [0x259560, rodata] # font of debugger/debugger (an asset)
       - [0x259860, .rodata, debugger/Debugger/CrashScreen/crashscreen]
       - [0x25A080, .rodata, debugger/Debugger/DebuggerPrintf/debuggerprintf]
-      - [0x25A1E0, rodata]
+      - [0x25A1E0, rodata] # 8 bytes that fill the ROM up to the next 16-byte position (stale bytes of the ROM builder)
+      - [0x25A1E8, .rodata, debugger/Level/BaseSpawns/basespawns]
 
       # BSS ?
 

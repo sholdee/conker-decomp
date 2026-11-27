@@ -237,16 +237,6 @@ void weapon_moveProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 
 s32 weapon_countdownProjectileRange(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner);
 
-/* The .rodata slice at 0x234690 (asm/data/234690.rodata.s), read by game/Weapon/Projectile/projectile.c */
-/* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler (entry 0 is weapon_onProjectileExpire). Declared
-   without a prototype: each handler takes its own kind of object. */
-extern void (*D_8008FBD0[])();
-/* A fly-by sound of a projectile and the distance at which it plays. */
-typedef struct {
-    u16 sound;
-    u16 range;
-} FlybySound;
-extern FlybySound D_8008FBE8[];
 
 /* game/Weapon/ProjectileRay/projectileray.c */
 void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event);

@@ -4,6 +4,9 @@
 This old splat predates spimdisasm 1.42's nonmatching/enddlabel marker labels and never
 disables them, so extraction emits markers that break the assembler and asm-processor.
 `git submodule update` reverts the patch, so run this again after every submodule update.
+The main repository does not report these edits as changes: .gitmodules sets `ignore = dirty` for the
+submodule. That setting also hides src/splat/segtypes/n64/i1.py, which Git shows as changed in a fresh
+clone: the pinned upstream commit stores it with CRLF line endings, but its .gitattributes asks for LF.
 """
 import sys
 from pathlib import Path

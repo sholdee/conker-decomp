@@ -50,7 +50,7 @@ s32 rom_getPathSize(s32 depth, ...);
 /* ROM positions that the linker defines (undefined_syms.us.txt) */
 extern u8 compressed_ROM_START[]; // start of the compressed assets
 extern u8 assets_offsets_table_ROM_START[]; // the root ROM table
-extern u8 D_1A33F0[]; // the two spawn tables in the debugger segment (level_loadSpawnTable)
+extern u8 D_1A33F0[]; // the two base spawn tables (debugger/Level/BaseSpawns/basespawns.c; level_loadSpawnTable)
 extern u8 D_1A34E0[];
 
 #endif

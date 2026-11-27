@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Build the toolchain image and start the long-lived `conker-tc` container that mw.py and the
 # runbook use. Paths are mounted at the same location inside, so commands run unchanged.
-# Overrides (defaults are the maintainer's setup): CONKER_WS (workspace root, ~/conker-ws),
-# CONKER_CONTAINER and CONKER_IMAGE (both conker-tc), CONKER_RAM (/dev/shm/conker-build).
+# Overrides (use the same values for mw.py and cw.py): CONKER_WS (workspace directory, default
+# ~/conker-ws), CONKER_CONTAINER and CONKER_IMAGE (both default conker-tc), CONKER_RAM (default
+# /dev/shm/conker-build).
 # Note: this replaces any existing container of the same name.
 set -euo pipefail
 REPO="$(cd "$(dirname "$0")/../.." && pwd)"

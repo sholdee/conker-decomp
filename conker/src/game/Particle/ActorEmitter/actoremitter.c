@@ -4,6 +4,122 @@
 #include "libc/string.h"
 
 /*
+ * The front-end .rodata of the unit that begins with this file (0x24BF20). The ROM shows that this file,
+ * actoremitterhandlers.c, game/Beam/BeamMotion/beammotion.c, game/Particle/AnchorEmitter/anchoremitter.c
+ * and the files up to game/Effects/BurnDamage/burndamage.c were one unit: their .rodata slices follow each
+ * other without unit padding. The strings and tables of the later files come before this file's literals,
+ * so they are defined here, in the ROM order, until the files are merged; the files that use them see the
+ * declarations in conker/particle.h. In one file with the others, beam_fillMotionVerts does not match yet
+ * (IDO keeps vtx in a register where the ROM loads it again).
+ */
+/* The effect names that particle_chainAllOverFireToSmoke and particle_chainTailFireToSmoke pass on. */
+const char D_800A7460[] = "effects_characterfire_conker_all_over_fire_to_smoke_death";
+const char D_800A749C[] = "effects_characterfire_conker_tail_fire_to_smoke_death";
+/* The template of particle_broadcastToActorEmitters's local. */
+const IdList1 D_800A74D4 = { { 0x21 } };
+/*
+ * The anchor emitter templates, one array per kind (gAnchorEmitterTemplates): { rate, rateRange, burstBase,
+ * burstRange, sizeX, sizeY, sizeXRange, sizeYRange, unk20, unk21Range, lifeMin, lifeRange, pad, maxCount,
+ * velocityScale, unk30, unk34Range, unk38, unk3C, unk3E, unk40, unk42Range, anchorSet, flags, pad, unk4C }.
+ */
+const AnchorEmitterTemplate D_800A74D8[] = {
+    { 0.504f, 0.517f, 20.0f, 10.0f, 0.46100003f, 0.574f, 0.404f, 0.41200003f, 80, 100, 20, 60, { 0 }, 30,
+      0.271f, 0.21f, 0.347f, 0.934411f, 16, 15, 20, 40, 0, 0x00, { 0 }, 0.085f },
+};
+const AnchorEmitterTemplate D_800A7528[] = {
+    { 0.30100003f, 1.108f, 10.0f, 10.0f, 0.628f, 1.1010001f, 1.8320001f, 1.342f, 80, 120, 20, 100, { 0 }, 40,
+      0.4f, 0.123f, 0.27f, 1.0f, 18, 14, 50, 50, 5, 0x01, { 0 }, 1.0f },
+};
+const AnchorEmitterTemplate D_800A7578[] = {
+    { 0.34500003f, 0.38300002f, 35.0f, 0.0f, 0.52900004f, 0.66300005f, 0.45200002f, 0.577f, 80, 80, 16, 64, { 0 }, 35,
+      0.428f, 0.31500003f, 0.36200002f, 0.91916f, 16, 15, 18, 20, 2, 0x00, { 0 }, 0.083000004f },
+};
+const AnchorEmitterTemplate D_800A75C8[] = {
+    { 1.5660001f, 1.595f, 10.0f, 5.0f, 0.50200003f, 0.453f, 0.24300002f, 0.34800002f, 80, 80, 10, 30, { 0 }, 15,
+      0.304f, 0.149f, 0.259f, 0.918552f, 15, 17, 45, 25, 1, 0x00, { 0 }, 0.060000002f },
+};
+const AnchorEmitterTemplate D_800A7618[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 4, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A7668[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 3, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A76B8[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 7, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A7708[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 8, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A7758[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 9, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A77A8[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 10, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A77F8[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 11, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A7848[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 13, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A7898[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 12, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A78E8[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 14, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A7938[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 15, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A7988[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 16, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A79D8[] = {
+    { 0.698f, 0.60800004f, 15.0f, 10.0f, 0.312f, 0.354f, 0.404f, 0.30400002f, 80, 80, 12, 48, { 0 }, 25,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 17, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A7A28[] = {
+    { 1.0f, 0.1f, 30.0f, 20.0f, 0.6f, 0.6f, 0.8f, 0.6f, 80, 80, 12, 48, { 0 }, 70,
+      0.393f, 0.19800001f, 0.30400002f, 0.922707f, 12, 21, 15, 10, 18, 0x00, { 0 }, 0.064f },
+};
+const AnchorEmitterTemplate D_800A7A78[] = {
+    { 0.504f, 0.517f, 20.0f, 10.0f, 0.46100003f, 0.574f, 0.404f, 0.41200003f, 80, 100, 20, 60, { 0 }, 30,
+      0.271f, 0.21f, 0.347f, 0.934411f, 16, 15, 20, 40, 19, 0x00, { 0 }, 0.085f },
+};
+/* The per-object-id emitter data blocks of particle_getObjEmitterData (all empty in this build). */
+const u8 D_800A7AC8[4] = { 0 };
+const u8 D_800A7ACC[4] = { 0 };
+const u8 D_800A7AD0[4] = { 0 };
+const u8 D_800A7AD4[4] = { 0 };
+const u8 D_800A7AD8[4] = { 0 };
+const u8 D_800A7ADC[4] = { 0 };
+const u8 D_800A7AE0[4] = { 0 };
+const u8 D_800A7AE4[4] = { 0 };
+const u8 D_800A7AE8[4] = { 0 };
+const u8 D_800A7AEC[4] = { 0 };
+const u8 D_800A7AF0[4] = { 0 };
+const u8 D_800A7AF4[4] = { 0 };
+const u8 D_800A7AF8[4] = { 0 };
+const u8 D_800A7AFC[4] = { 0 };
+const u8 D_800A7B00[4] = { 0 };
+const u8 D_800A7B04[4] = { 0 };
+const u8 D_800A7B08[4] = { 0 };
+const u8 D_800A7B0C[4] = { 0 };
+const u8 D_800A7B10[4] = { 0 };
+
+/*
  * This file's .data. The emitter tables by ActorEmitterParams.table; the tables are in game/Particle/ActorEmitterData/actoremitterdata.c.
  */
 static EmitterTable *gActorEmitterTables[] = {
@@ -17,7 +133,7 @@ static s32 (*gActorEmitterExpireFuncs[])(ActorEmitterProcess *) = { particle_cha
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
 ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
-                       void *arg6) {
+                       const char *arg6) {
     ActorEmitterParams params;
     s32 i;
 

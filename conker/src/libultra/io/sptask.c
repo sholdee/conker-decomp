@@ -1,36 +1,26 @@
 #include <ultra64.h>
 
-/* The SDK source uses a file-static `OSTask tp;` at 0x80036B60. Referencing each
- * converted field as its own absolute symbol (rather than tp.t.field off a single base)
- * stops IDO from CSE-ing the base into a saved register, matching the per-field %hi/%lo
- * the static generates. Avoids needing a .bss placement for the static. */
-extern OSTask D_80036B60;
-extern u64 *D_80036B70;
-extern u64 *D_80036B78;
-extern u64 *D_80036B80;
-extern u64 *D_80036B88;
-extern u64 *D_80036B8C;
-extern u64 *D_80036B90;
-extern u64 *D_80036B98;
+#define _osVirtualToPhysical(ptr)                 \
+    if (ptr != NULL) {                            \
+        ptr = (void *)osVirtualToPhysical(ptr);   \
+    }
+
+static OSTask tmp_task;
 
 OSTask *_VirtualToPhysicalTask(OSTask *intp)
 {
-    bcopy(intp, &D_80036B60, sizeof(OSTask));
-    if (D_80036B70 != NULL)
-        D_80036B70 = (u64 *) osVirtualToPhysical(D_80036B70);
-    if (D_80036B78 != NULL)
-        D_80036B78 = (u64 *) osVirtualToPhysical(D_80036B78);
-    if (D_80036B80 != NULL)
-        D_80036B80 = (u64 *) osVirtualToPhysical(D_80036B80);
-    if (D_80036B88 != NULL)
-        D_80036B88 = (u64 *) osVirtualToPhysical(D_80036B88);
-    if (D_80036B8C != NULL)
-        D_80036B8C = (u64 *) osVirtualToPhysical(D_80036B8C);
-    if (D_80036B90 != NULL)
-        D_80036B90 = (u64 *) osVirtualToPhysical(D_80036B90);
-    if (D_80036B98 != NULL)
-        D_80036B98 = (u64 *) osVirtualToPhysical(D_80036B98);
-    return &D_80036B60;
+    OSTask *tp;
+
+    tp = &tmp_task;
+    bcopy(intp, tp, sizeof(OSTask));
+    _osVirtualToPhysical(tp->t.ucode);
+    _osVirtualToPhysical(tp->t.ucode_data);
+    _osVirtualToPhysical(tp->t.dram_stack);
+    _osVirtualToPhysical(tp->t.output_buff);
+    _osVirtualToPhysical(tp->t.output_buff_size);
+    _osVirtualToPhysical(tp->t.data_ptr);
+    _osVirtualToPhysical(tp->t.yield_data_ptr);
+    return tp;
 }
 
 void osSpTaskLoad(OSTask *intp)

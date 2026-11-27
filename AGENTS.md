@@ -6,9 +6,20 @@ Every change must keep the ROM byte-identical. The gate is the ROM sha1 (inner
 `tools/accounting.py`. Locally `mw.py land`, `cw.py land` and `rename.py` enforce it; on GitHub the
 `Matching gate` workflow does.
 
-Paths: `~/conker` is the repository and `~/conker-ws` the workspace root on the maintainer's host.
-The tools take the repo root from their own location and honour `CONKER_REPO`, `CONKER_WS` and
-`CONKER_CONTAINER` (default `conker-tc`).
+## Paths
+The runbooks use these names. Commands run from the repository root unless they say otherwise.
+- `$CONKER_REPO`: your clone of this repository. The tools find it from their own location, so you
+  rarely need to set it.
+- `$CONKER_WS`, default `~/conker-ws`: the workspace directory. `mw.py` and `cw.py` create their
+  workspaces in it. The shell commands in the runbooks use the variable, so set it once:
+  `export CONKER_WS=~/conker-ws`.
+- `$CONKER_CONTAINER`, default `conker-tc`: the long-running toolchain container that the tools use.
+- `$CONKER_RAM`, default `/dev/shm/conker-build`: the RAM directory for workspace `build/` trees.
+- `$CONKER_REF`: optional. Your own clone of the independent decompilation
+  (`git clone https://github.com/DevOldSchool/conkers-bfd-decomp "$CONKER_REF"`). Some runbooks use it
+  as a read-only reference. Never run its scripts or build it.
+- `$CONKER_COAUTHOR`, default `Claude Opus 5.5 <noreply@anthropic.com>`: the `Co-Authored-By` trailer that
+  `cw.py land` writes. Set it to the model that made the change.
 
 ## Toolchain
 Builds run in the podman container `conker-tc`, made from `tools/toolchain/Containerfile` (Ubuntu
@@ -16,9 +27,11 @@ Builds run in the podman container `conker-tc`, made from `tools/toolchain/Conta
 `/opt/ido/5.3`, gzip-rare built from source). CI uses the same image. It must be running:
 ```
 podman start conker-tc   # or create it: tools/toolchain/run.sh
-podman exec -d conker-tc python3 ~/conker/tools/toolchain/tcd.py ~/conker-ws/.tcd.sock   # after a start
-podman exec -w ~/conker conker-tc bash -c 'make -C conker -j32 && make -C conker replace && make -j16'
+podman exec -d conker-tc python3 "$PWD/tools/toolchain/tcd.py" "$CONKER_WS/.tcd.sock"   # after a start
+podman exec -w "$PWD" conker-tc bash -c 'make -C conker -j32 && make -C conker replace && make -j16'
 ```
+`run.sh` mounts the repository, `$CONKER_WS` and `$CONKER_RAM` at the same paths inside the
+container, so the same paths work on both sides.
 A clean build of the code bin is ~5 s; one file + relink + sha ~0.6 s. `mw.py` sends commands to
 the `tcd` socket daemon when it is up — `podman exec` serializes on podman's lock and took
 20-40 s per call with a 16-agent fleet; it remains the fallback.
@@ -46,7 +59,7 @@ python3 tools/toolchain/patch_splat.py                  # splat marker-label pat
 git config core.hooksPath tools/git-hooks
 tools/toolchain/run.sh                                   # image + conker-tc container
 cp <rom> baserom.us.z64                                  # sha1 4cbadd3c…
-podman exec -w ~/conker conker-tc bash -c 'make extract && make -C conker extract && make -C conker -j32 && make -C conker replace && make -j16'
+podman exec -w "$PWD" conker-tc bash -c 'make extract && make -C conker extract && make -C conker -j32 && make -C conker replace && make -j16'
 mkdir -p conker/expected && cp -r conker/build conker/expected/   # golden objects for asm-differ
 ```
 

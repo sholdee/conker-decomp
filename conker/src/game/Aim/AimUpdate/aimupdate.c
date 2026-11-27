@@ -667,21 +667,25 @@ typedef struct {
     s32 types[8];
 } AimNodeTypes;
 
-/* Entries of the gObjectLists per-type lists. */
+/* Entries of the gObjectLists per-type lists, as far as aim_findTarget reads them. */
 typedef struct AimNode {
     /* 0x00 */ u8 pad0[8];
     /* 0x08 */ struct AimNode *next;
-    /* 0x0C */ u8 padC[0x2C];
-    /* 0x38 */ f32 unk38; /* position used by node types 25 and 72 */
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ u8 pad44[0x22];
-    /* 0x66 */ u16 unk66; /* types 25/72 are skipped while non-zero */
-    /* 0x68 */ u8 pad68[0x30];
-    /* 0x98 */ f32 unk98; /* position used by every other type */
+    /* 0x0C */ u8 padC[0x8C];
+    /* 0x98 */ f32 unk98; /* position */
     /* 0x9C */ f32 unk9C;
     /* 0xA0 */ f32 unkA0;
 } AimNode;
+
+/* The entries of node types 25 and 72, which keep their position elsewhere. */
+typedef struct AimNodeAlt {
+    /* 0x00 */ u8 pad0[0x38];
+    /* 0x38 */ f32 unk38; /* position */
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ u8 pad44[0x22];
+    /* 0x66 */ u16 unk66; /* skipped while non-zero */
+} AimNodeAlt;
 
 static AimNodeTypes gAimNodeTypes = { { 0x0A, 0x15, 0x16, 0x17, 0x13, 0x14, 0x19, 0x48 } };
 
@@ -695,6 +699,7 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
     s32 hitObj;
     s32 foundKind;
     s16 objX;
+    u8 usable;
     u32 idx;
     AimPoint *point;
     f32 radiusSq;
@@ -763,7 +768,6 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
         f32 pos[3];
         f32 maxDist;
         AimNodeTypes types;
-        s32 usable;
         s32 type;
         AimNode *node;
         f32 dx;
@@ -813,14 +817,15 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
                 node = (AimNode *)gObjectLists[list][type];
                 while (node != NULL) {
                     if (type == 25 || type == 72) {
-                        /* matching: this redeclaration of gAimPointCount (conker/aim.h) opens a -g3 scope block, which shifts the scheduling of the loop */
-                        extern s32 gAimPointCount;
-                        if (node->unk66 == 0) {
+                        AimNodeAlt *alt;
+
+                        alt = (AimNodeAlt *)node;
+                        if (alt->unk66 == 0) {
                             maxDist = 250000.0f;
                             usable = 1;
-                            pos[0] = node->unk38;
-                            pos[1] = node->unk3C;
-                            pos[2] = node->unk40;
+                            pos[0] = alt->unk38;
+                            pos[1] = alt->unk3C;
+                            pos[2] = alt->unk40;
                         } else {
                             usable = 0;
                         }

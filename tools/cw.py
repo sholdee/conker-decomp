@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """cw — cleanup workspaces: edit an already-matching C file into idiomatic C without changing a byte.
 
-    cw.py new  FILE       private workspace ~/conker-ws/clean.<name> for src/FILE (e.g. game_79F10.c)
+    cw.py new  FILE       private workspace $CONKER_WS/clean.<name> for src/FILE (e.g. game_79F10.c)
     cw.py check NAME      rebuild the workspace; RESULT: MATCH | MISMATCH | BUILD-FAIL, and on MISMATCH
                           the functions whose ROM bytes changed (with the first differing offset)
     cw.py land NAME [-m MSG]  3-way merge into main, rebuild, whole-bin sha gate, commit "MSG [cw]" (default "cleanup: FILE [cw]")
     cw.py list            open cleanup workspaces
 
 NAME is the workspace name printed by `new` (clean.game_79F10). Same lock, RAM builds, crash recovery and
-sha gate as mw.py. The verdict is the whole code bin's sha1: a cleanup lands only if the ROM is unchanged.
+sha gate as mw.py, and the same environment variables (CONKER_WS, CONKER_CONTAINER, CONKER_REPO).
+The verdict is the whole code bin's sha1: a cleanup lands only if the ROM is unchanged.
 """
-import argparse, fcntl, filecmp, json, re, shutil, subprocess, sys, time
+import os, argparse, fcntl, filecmp, json, re, shutil, subprocess, sys, time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -357,6 +358,7 @@ def cmd_land(a):
             autos = {n: (MAIN / n).read_bytes() for n in ("undefined_funcs_auto.txt", "undefined_syms_auto.txt")}
         backup = {f: (MAIN / f).read_bytes() if (MAIN / f).exists() else None for f in files}
         for f, data in merged.items():
+            (MAIN / f).parent.mkdir(parents=True, exist_ok=True)  # a new file may be in a new directory
             (MAIN / f).write_bytes(data)
         for f in deleted:
             backup.setdefault(f, (MAIN / f).read_bytes() if (MAIN / f).exists() else None)
@@ -386,7 +388,9 @@ def cmd_land(a):
         msg = f"{a.message.splitlines()[0]} [cw]" if a.message else f"cleanup: {m['file'] or m.get('tree')} [cw]"
         if a.message and len(a.message.splitlines()) > 1:
             msg += "\n\n" + "\n".join(a.message.splitlines()[1:]).strip()
-        git("commit", "-q", "-m", msg + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")
+        # the commit trailer names the model that made the change: CONKER_COAUTHOR overrides the default
+        coauthor = os.environ.get("CONKER_COAUTHOR", "Claude Opus 5.5 <noreply@anthropic.com>")
+        git("commit", "-q", "-m", msg + f"\n\nCo-Authored-By: {coauthor}")
         # the merged files are now main's: make them the new merge base for further edits
         for f in files:
             (ws / "base" / f).parent.mkdir(parents=True, exist_ok=True)

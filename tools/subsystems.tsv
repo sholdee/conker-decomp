@@ -707,3 +707,8 @@ src/init/Os/DevMgr/devmgr.c	os	Rare's copy of __osDevMgrMain with PI-thread inte
 src/init/Rom/RomDma/romdma.c	rom	cartridge ROM reads: blocking/non-blocking PI DMA and uncached copies
 src/init/Sched/SchedInit/schedinit.c	sched	scheduler client helpers and thread stop
 src/init/Sched/Scheduler/scheduler.c	sched	scheduler thread: VI retrace, RSP/RDP completion, gfx task state machine
+src/game_FE8C0.c	effect	the second function of the spin-decay unit and its literal
+src/game/Particle/ParticleModelIds/particlemodelids.c	particle	particle model id table (data only)
+src/init/View/SetupDl/setupdl.c	view	the RDP setup display list (data only)
+src/debugger/Level/BaseSpawns/basespawns.c	level	the two base spawn tables that level_loadSpawnTable reads from ROM (data only)
+src/game/Level/LevelHeader/levelheader.c	level	one .bss word between quadtree and levelmodels

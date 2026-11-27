@@ -915,7 +915,7 @@ void func_1504CA60(Actor *actor) {
 void actor_updatePlayer(Actor *actor) {
     u16 prevFacing;
     u16 moveAngle;
-    u8 pad1; // matching: unused; keeps the original stack layout
+    s8 turnStep;
     u8 turn;
     u8 turnRate;
     f32 moveSpeed;
@@ -923,12 +923,9 @@ void actor_updatePlayer(Actor *actor) {
     u16 heading;
     s32 diff;
     f32 surfaceDelta;
-    s8 turnStep;
-    s8 pad2; // matching: unused; keeps the original stack layout
-    u8 pad11; // matching: unused; keeps the original stack layout
-    u8 pad3; // matching: unused; keeps the original stack layout
-    u8 pad4; // matching: unused; keeps the original stack layout
-    s32 variant;
+    s32 lockDiff;
+    s32 wantAngle;
+    f32 turnLean;
     s32 pushAnim;
     s8 lean;
     f32 startX;
@@ -947,17 +944,17 @@ void actor_updatePlayer(Actor *actor) {
     u32 chance;
     f32 steer;
     f32 climbRate;
-    f32 swimSpeed;
+    f32 prevSteer;
     s32 turnSize;
     u16 lockAngle;
     u16 minOffset;
-    u16 pad6; // matching: unused; keeps the original stack layout
+    f32 height;
     s32 anim;
     u8 turnLeft;
     f32 phase;
     u16 deflect;
-    u16 quadrant;
-    f32 pitchInput;
+    u16 dirAngle;
+    f32 climbInput;
     f32 friction;
     Actor *target;
     f32 tilt;
@@ -976,8 +973,7 @@ void actor_updatePlayer(Actor *actor) {
     u16 pad8; // matching: unused; keeps the original stack layout
     u16 pad9; // matching: unused; keeps the original stack layout
     u16 offset;
-    u16 maxOffset;
-    u16 centerAngle;
+    Rope *path;
     s16 pad10; // matching: unused; keeps the original stack layout
     s32 climbIndex;
     s32 physics;
@@ -991,21 +987,6 @@ void actor_updatePlayer(Actor *actor) {
     f32 pushAccel;
     f32 floorY;
     f32 snapRange;
-    s32 dirMask;
-    s32 lockDiff;
-    s32 wantAngle;
-    f32 climbInput;
-    Rope *path;
-    u16 dirAngle;
-    u16 otherFacing;
-    f32 heightDiff;
-    f32 turnLean;
-    f32 prevSteer;
-    s16 ledgeAngle;
-    f32 height;
-    f32 ledgeY;
-    f32 splashSpeed;
-    s32 sound;
 
     moveSpeed = 0.0f;
     pushAnim = 0;
@@ -1106,8 +1087,7 @@ void actor_updatePlayer(Actor *actor) {
     }
     if (actor->mv->rt_context_b != 0x1B) {
         if (((actor->mv->AimState == 0) || (actor->mv->rt_context_b == 3)) && (actor->mv->rt_context_b != 0x12) && (actor->mv->rt_context_b != 2) && (actor->mv->rt_context_b != 0x13) && (actor->mv->rt_context_b != 0xA) && (actor->mv->rt_context_b != 0x34)) {
-            /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
-            extern OSContPad *gCurrentPad;
+            f32 pitchInput;
 
             mode = actor->mv->rt_context_b;
             D_800CC2BC |= 0x10;
@@ -1146,8 +1126,8 @@ void actor_updatePlayer(Actor *actor) {
                 physics = actor->mv->transport;
             }
             if (physics == 0x81) {
-                /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
-                extern s16 gActorStepPercent;
+                u16 centerAngle;
+                u16 maxOffset;
 
                 centerAngle = 0x6000;
                 angleDelta = gCurrentPad->stick_x * gActorStepPercent;
@@ -1174,8 +1154,7 @@ void actor_updatePlayer(Actor *actor) {
                 actor->langle = actor->angle;
             }
             if (actor->mv->SniperState != 0) {
-                /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
-                extern s32 gCameraYawAngle;
+                s32 variant;
 
                 moveSpeed = 0.1f;
                 actor->langle = (s32) (actor->mv->aimYaw * 182.04445f);
@@ -1295,8 +1274,7 @@ void actor_updatePlayer(Actor *actor) {
         }
     }
     if (!(actor->mv->transport & 0xF) && (actor->energy != 0) && (actor->stunned == 0) && (actor->shad == 0.0f) && ((gIsMultiplayer != 0) || ((actor->mv->rt_context_b == 9) && (actor->mv->matrix_physics == 0)) || (actor->mv->rt_context_b == 0x16) || (actor->mv->rt_context_b == 0x3B)) && ((actor->mv->weapon_status == 2) || (actor->mv->weapon_status == 0))) {
-        /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
-        extern OSContPad *gCurrentPad;
+        s32 dirMask;
 
         dirMask = ((actor->mv->rt_context_b) && ((actor->mv->SniperState == 0) || (actor->mv->rt_context_b == 0x16)) && (actor->mv->GrenadeThrowState == 0)) ? 0xF : 3;
         if ((gCurrentPad->button & dirMask) != 0) {
@@ -1407,6 +1385,8 @@ void actor_updatePlayer(Actor *actor) {
             actor->mv->press_angle = actor->langle;
         }
         if (actor->inwater != 0) {
+            f32 swimSpeed;
+
             swimSpeed = actor_updateSwim(actor, surfaceDelta);
             moveAngle = actor->mv->press_angle;
             if (actor->mv->unk22 >= 0) {
@@ -1425,9 +1405,6 @@ void actor_updatePlayer(Actor *actor) {
                     }
                 }
             } else {
-                /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
-                extern s32 gActorPressedButtons;
-
                 if ((gActorPressedButtons & 0x4000) && (gIsMultiplayer == 0) && (level != 0x29)) {
                     if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100) && !(actor->mv->water_attribs & 1)) {
                         actor->mv->unk21 = 0;
@@ -1853,20 +1830,19 @@ void actor_updatePlayer(Actor *actor) {
             heading = actor_getDirectionAngle(movement_obj[D_800CC26C].xpos - actor->xpos, actor->zpos - movement_obj[D_800CC26C].zpos, 0);
             
             if ((actor->shad == 0.0f) && (moveSpeed > 15.0f) && (((gPlayerMoveAngle - heading) - 0x4000) & 0x8000)) {
-                /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
-                extern Actor movement_obj[26];
+                f32 heightDiff;
 
                 follow = 0.1f;
                 carry = 1;
                 if (movement_obj[D_800CC26C].character_type == 0x61) {
                     if (actor->animseq.uh == 0x7A) {
+                        u16 otherFacing;
+                        u16 quadrant;
+
                         otherFacing = movement_obj[D_800CC26C].langle;
                         diff = actor->angle - otherFacing;
                         quadrant = (diff + 0x2000) & 0xC000;
                         if (quadrant & 0x4000) {
-                            /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
-                            extern u8 D_800CC26C;
-
                             movement_obj[D_800CC26C].scriptCmd = NULL;
                             movement_obj[D_800CC26C].intelwalk = 2;
                             movement_obj[D_800CC26C].angle = otherFacing + quadrant;
@@ -2173,17 +2149,21 @@ void actor_updatePlayer(Actor *actor) {
     actor_updateSlopeTilt(actor, startX, startZ, moveAngle);
     if (actor->mv->transport == 0) {
         if ((actor->shad > 5.0f) && (actor->unk137 == 0) && (actor->norun == 0) && (actor->mv->rt_context_b == 0) && (actor->mv->env_suit == 0) && (actor->stunned == 0) && (actor->mv->bitten == 0) && (actor->inwater == 0) && (actor->lifting == 0) && (actor->floorY != -10000.0f) && (actor->energy != 0) && (actor->mv->pissed_up == 0) && (actor->mv->transport == 0) && (actor->unk110 == 0) && ((actor->unk1CC - actor->ypos) < 450.0f)) {
-            anim = 0;
+            s16 ledgeAngle;
+            s32 ledge;
+            f32 ledgeY;
+
+            ledge = 0;
             if (gLedgeHeight1 != -32768.0f) {
                 ledgeAngle = (((actor->theta + gLedgeAngle1) - 90.0f) / 1.40625f);
                 ledgeY = gLedgeHeight1;
-                anim = 1;
+                ledge = 1;
             } else if ((gLedgeHeight2 != -32768.0f) && (actor->speed < 10.0f)) {
                 ledgeAngle = ((actor->theta + gLedgeAngle2 + 90.0f) / 1.40625f);
                 ledgeY = gLedgeHeight2;
-                anim = 2;
+                ledge = 2;
             }
-            if (anim != 0) {
+            if (ledge != 0) {
                 actor->angle = (ledgeAngle << 8);
                 actor->langle = actor->angle;
                 actor->ypos = ledgeY - 25.0f;
@@ -2204,6 +2184,8 @@ void actor_updatePlayer(Actor *actor) {
         }
         if (actor->yspd < 5.0f) {
             if ((actor->waterHeight != -10000.0f) && (actor->ypos < (actor->waterHeight - 60.0f)) && (actor->inwater != 1)) {
+                f32 splashSpeed;
+
                 splashSpeed = 4.0f;
                 actor->mv->save_done = 0;
                 actor->mv->prop = 0;
@@ -2307,8 +2289,7 @@ void actor_updatePlayer(Actor *actor) {
         if ((actor->mv->weapon_status != 1) && (actor->mv->weapon_status != 3) && (actor->waterHeight == -10000.0f)) {
             if ((actor->animseq.uh != 0x101) && (actor->inwater == 0)) {
                 if (actor->animseq.uh != 0xCF) {
-                    /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
-                    s32 event_resolveSoundCommand(Actor *obj, s32 *command, s32 mode);
+                    s32 sound;
 
                     sound = 0x2007E5;
                     if (event_resolveSoundCommand(actor, &sound, 1) != 0) {
@@ -2323,12 +2304,19 @@ void actor_updatePlayer(Actor *actor) {
     }
     actor->mv->duck_tilt = 0;
     actor_updateWalkAnim(actor, pushAnim, moveSpeed);
-    actor->mv->actual_speed = 2.0f * sqrtf(((actor->xpos - actor->old_xpos) * (actor->xpos - actor->old_xpos)) + ((actor->zpos - actor->old_zpos) * (actor->zpos - actor->old_zpos)));
-    actor->mv->walk_attrib = 0;
-    if ((actor->mv->bot != 0) || (padOverridden != 0)) {
-        *gCurrentPad = savedPad;
+    {
+        f32 dx;
+        f32 dz;
+
+        dx = actor->xpos - actor->old_xpos;
+        dz = actor->zpos - actor->old_zpos;
+        actor->mv->actual_speed = 2.0f * sqrtf((dx * dx) + (dz * dz));
+        actor->mv->walk_attrib = 0;
+        if ((actor->mv->bot != 0) || (padOverridden != 0)) {
+            *gCurrentPad = savedPad;
+        }
+        actor->mv->prevButtons = buttons;
     }
-    actor->mv->prevButtons = buttons;
 }
 
 /* Tilts the actor toward the slope of the ground under it (pitch/roll and the unk164/unk168 lean). */

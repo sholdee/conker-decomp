@@ -18,9 +18,10 @@ typedef struct {
     /* 0x54 */ void         *unk54;
 } SndPlayer;
 
-/* In the raw .bss: the player and the volume-table pointer. */
-extern SndPlayer D_80042850;
-extern s16 *D_800428B8;
+/* This file's .bss: the player and the volume-table pointer. */
+static SndPlayer D_80042850;
+static u8 D_800428A8[0x10]; /* not referenced */
+static s16 *D_800428B8;
 
 #ifndef MIN
 #define MIN(a,b) (((a)<(b))?(a):(b))

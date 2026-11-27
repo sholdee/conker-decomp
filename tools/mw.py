@@ -7,7 +7,7 @@ project context, links the full code bin, and compares it against the ROM — so
 verdict is exact (whole-bin sha1) and there is no "isolated vs in-project" gap.
 Workspaces never touch the main tree; `land` is the only writer, and it re-gates.
 
-  mw.py new   FUNC [--force]   create ~/conker-ws/FUNC (+ m2c draft)
+  mw.py new   FUNC [--force]   create $CONKER_WS/FUNC (+ m2c draft)
   mw.py check FUNC [-U N] [--no-diff] [-q]
                                build + verdict + asm diff
   mw.py batch FUNC V1.c V2.c … [-j N]
@@ -24,6 +24,9 @@ Workspaces never touch the main tree; `land` is the only writer, and it re-gates
                                ratchet queue: best attempt of every open function, closest first
 
 Builds run inside the `conker-tc` podman container (see tools/toolchain/).
+Environment: CONKER_WS (workspace directory, default ~/conker-ws), CONKER_CONTAINER (default
+conker-tc), CONKER_REPO (default: this script's checkout), CONKER_RAM (RAM build directory, default
+/dev/shm/conker-build) and CONKER_RAM_MB (its budget).
 """
 import argparse
 import fcntl
@@ -59,7 +62,7 @@ TCD_SOCK = WS_ROOT / ".tcd.sock"
 def clone_tree(src, dst):
     """Lean private copy of a conker/ tree: read-only dirs are symlinks to main, sources are
     reflinked (on disk, so work survives a reboot), build/ lives in RAM (ensure_build).
-    /home is a USB SSD: full copies of ~7000 files per workspace swamped it."""
+    Full copies of ~7000 files per workspace were too slow on a slow disk."""
     dst.mkdir(parents=True)
     for item in src.iterdir():
         if item.name == "build":

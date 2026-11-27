@@ -12,6 +12,7 @@
  *   game/View/ViewLayout/viewlayout.c
  *   game/View/Views/views.c
  *   game/View/Projection/projection.c
+ *   init/View/SetupDl/setupdl.c (init segment)
  */
 
 /* game/View/ViewOrtho/viewortho.c */
@@ -61,8 +62,8 @@ extern Gfx D_80083BC0[24][2];
 extern Gfx gWorldObjectXluRenderModes[24][2];
 extern Gfx gWorldObjectOpaRenderModes[24][2];
 
-/* rodata 0x2C930 (a slice of conker.us.yaml without a unit, in init): the setup display list of each frame (view_initFrameDisplayLists) */
-extern Gfx D_8002C930[];
+/* init/View/SetupDl/setupdl.c (a data-only unit in the init segment) */
+extern const Gfx D_8002C930[]; // the setup display list of each frame (view_initFrameDisplayLists)
 
 /* game/View/Projection/projection.c */
 extern Vec3f gFovChanges[4];

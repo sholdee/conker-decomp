@@ -38,6 +38,31 @@ the new version applies only after it is merged.
 Run the same build locally before you open a pull request. [README.md](README.md) has the commands.
 The IDO warning count is correct only after a clean build of the objects.
 
+## Emulator shift test (optional)
+
+The checks above do not boot the game. The shift test moves the code and boots the game in an
+emulator. It needs your ROM (`baserom.us.z64`) and Podman or Docker:
+
+```sh
+tools/shifttest/shift_test.sh
+```
+
+The script copies the tracked files of your working tree to `build/shifttest/tree`. Untracked files
+are not copied, so `git add` a new file first. It builds three ROMs with `NON_MATCHING=1`:
+- the base ROM, which must still match the original,
+- one ROM with 16 bytes of code (two empty functions) added to the first C file of the init segment,
+- one ROM with the same change in the game segment.
+
+It boots each ROM in mupen64plus in emulator modes 0 (interpreter) and 2 (dynamic recompiler), and
+saves a screenshot at frames 600, 1200 and 2400. Each run must give 3 screenshots. The script prints
+a table and writes `build/shifttest/summary.txt` and `build/shifttest/montage.png`. If a check
+fails, it exits with 1. `--help` gives the options. For example, `shift_test.sh base debugger`
+tests the debugger segment.
+
+If the images do not exist, the script builds them: the toolchain image (`conker`, as in README.md)
+and the emulator image (`tools/shifttest/Containerfile`). The output contains game data, so never
+commit it.
+
 ## C code
 
 - **The original form wins.** Write the code as Rare most likely wrote it. If the evidence shows an

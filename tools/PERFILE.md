@@ -16,12 +16,12 @@ The data of a compilation unit follows the same order as its code: if file A com
 the `.text`, then A's `.rodata`, `.data` and `.bss` also come before B's.
 1. **Find the owner of each word.** Use this evidence:
    - The position: the piece lies after the slice of one file and before the slice of the next.
-   - The references: which files use its symbols. `~/conker-ws/hdr/data_pieces.json` lists the C
-     and asm files that use the symbols of each piece. It does not count references from other data.
+   - The references: which files use its symbols. Grep `conker/src/` and `conker/asm/` for each symbol
+     of the piece. Also check references from other data.
    - IDO's layout: each unit pads its `.rodata`, `.data` and `.bss` to 16 bytes. Front-end data
      (const tables, strings) comes before the float literals and jump tables of the unit.
-   - Hints only: `~/ext/conkers-bfd-decomp/docs/evidence/data-layout/` and `config/symbols/`. This is
-     a read-only reference. Use its facts (addresses, sizes, boundaries). Never copy its code.
+   - Hints only: `docs/evidence/data-layout/` and `config/symbols/` in `$CONKER_REF` (your optional
+     clone of DevOldSchool/conkers-bfd-decomp, see "Paths" in AGENTS.md). This is a read-only reference. Use its facts (addresses, sizes, boundaries). Never copy its code.
 2. **A C unit's data goes into its C file.** Define the data with the correct type and initializer, in
    ROM order. Then give the file its slice in the yaml, and remove the externs. The procedures are in
    `tools/RODATA.md`: "Loop" for `.rodata`, "Static data and bss" for `.data` and `.bss`.
@@ -44,8 +44,8 @@ the `.text`, then A's `.rodata`, `.data` and `.bss` also come before B's.
 
 ## Part 2: types and casts
 Then apply `tools/CASTS.md` to each file of your range:
-- Correct the types that cause the remaining IDO warnings. The current list is
-  `~/conker-ws/hdr/warnings_after2.txt`. Warning 642 (K&R) stays. The short struct views (for example
+- Correct the types that cause the remaining IDO warnings. To list a file's warnings, rebuild its
+  object and grep for `Warning` (the loop in `tools/CASTS.md` shows how). Warning 642 (K&R) stays. The short struct views (for example
   `ParticleSpawn78`) stay, with their warnings: the owner decided this.
 - Read each scalar cast (`(u8)`, `(s16)`, `(s32)`, `(f32)` ...). Remove a cast that does nothing:
   the value already has the type, or the implicit conversion is the same, and the bytes stay the same.
@@ -53,12 +53,12 @@ Then apply `tools/CASTS.md` to each file of your range:
 
 ## Loop
 ```
-python3 ~/conker/tools/cw.py new --tree pf.<name>            # a tree workspace for your range
-python3 ~/conker/tools/ro_migrate.py check game_X --root ~/conker-ws/clean.pf.<name>/conker
+python3 tools/cw.py new --tree pf.<name>            # a tree workspace for your range
+python3 tools/ro_migrate.py check game_X --root $CONKER_WS/clean.pf.<name>/conker
 #   edit the C files, the .s files and the yaml slices of your range
-python3 ~/conker/tools/cw.py check clean.pf.<name>            # must print RESULT: MATCH
-python3 ~/conker/tools/linkcheck.py ~/conker-ws/clean.pf.<name>/conker   # 0 pinned, 0 raw pointers
-python3 ~/conker/tools/cw.py land  clean.pf.<name> -m "<file>: <what>"
+python3 tools/cw.py check clean.pf.<name>            # must print RESULT: MATCH
+python3 tools/linkcheck.py $CONKER_WS/clean.pf.<name>/conker   # 0 pinned, 0 raw pointers
+python3 tools/cw.py land  clean.pf.<name> -m "<file>: <what>"
 ```
 - Land after each file or two. After each land, start fresh with `cw.py new --tree --force`.
 - Other agents edit other ranges at the same time. The yaml lines near the ends of your range can

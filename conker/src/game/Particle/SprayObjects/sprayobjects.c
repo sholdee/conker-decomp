@@ -33,14 +33,11 @@ typedef struct {
     Actor *unk0;
     f32 pos[3];
     s32 targetIndex;
-    s32 unk14;
 } Struct150C3230;
 
 void func_150C3230(Actor *obj) {
     s32 index;
     s32 type;
-    Actor *target;
-    Struct150C3230 eventData;
 
     obj->noshove |= 0x4000000;
     if ((obj->unk222 != 0) && (obj->attach_char == 0)) {
@@ -61,13 +58,15 @@ void func_150C3230(Actor *obj) {
 
     index = obj->attach_char;
     if (index != 0) {
+        s32 anim;
+
         obj->unk222 = index;
-        if (movement_obj[index - 1].animseq.uh == 0x1F9) {
+        anim = movement_obj[index - 1].animseq.uh;
+        if (anim == 0x1F9) {
             type = 2;
-        } else if (movement_obj[index - 1].animseq.uh == 0x1FB) {
+        } else if (anim == 0x1FB) {
             type = 3;
         } else {
-            typedef s32 Type150C3230; // matching: a declaration here gives -g3 a block marker; as1 then fills the delay slot from this branch
             type = 1;
         }
     } else {
@@ -81,6 +80,8 @@ void func_150C3230(Actor *obj) {
     }
 
     if (obj->taskint[0] != 0) {
+        Actor *target;
+
         if (obj->attach_char != 0) {
             target = &movement_obj[obj->attach_char - 1];
             if (target->type == 5) {
@@ -101,6 +102,8 @@ void func_150C3230(Actor *obj) {
                 mp_addZone(obj->xpos, obj->ypos, obj->zpos, 900.0f);
             }
         } else {
+            Struct150C3230 eventData;
+
             eventData.pos[0] = obj->xpos;
             eventData.pos[1] = obj->ypos;
             eventData.pos[2] = obj->zpos;

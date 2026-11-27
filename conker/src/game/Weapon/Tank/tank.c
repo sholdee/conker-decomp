@@ -169,19 +169,19 @@ void weapon_updateTank(Actor *obj) {
     u8 player;
     u16 prevFacing;
     s32 buttonPad;
-    f32 throttle;
+    f32 angle;
     s32 lockFlags;
     f32 trackSpeed;
     f32 throttleScale;
     s8 steer;
     s16 turnRate;
-    s16 turn;
     s32 left;
     s32 right;
     f32 offset;
     f32 yawStep;
     Actor *driver;
     Actor *other;
+    f32 score;
     s32 reversing;
     OSContPad *pad;
     s8 unused1; // matching: unused, but keeps the stack layout
@@ -194,15 +194,6 @@ void weapon_updateTank(Actor *obj) {
     f32 bearing;
     f32 lead;
     f32 dirX;
-    s8 camSlot;
-    f32 angle;
-    f32 deltaZ;
-    f32 distance;
-    f32 score;
-    f32 bestScore;
-    s32 i;
-    s32 bestIdx;
-    s32 objCount;
 
     health = 1;
     if (gIsMultiplayer) {
@@ -352,7 +343,9 @@ void weapon_updateTank(Actor *obj) {
 
             blend = 1.0f; // matching: a literal 0.4f alone schedules differently
             if (obj->energy != 0) {
-                typedef s32 scope; // matching: a declaration here gives IDO a new block scope; no local fits (the 12 bytes above j hold stateFlags, blend and dirZ)
+                f32 throttle;
+                s16 turn;
+
                 throttle = obj->stickspeed;
                 trackSpeed = obj->speed;
                 turn = (s16)(obj->langle - prevFacing) / 70;
@@ -413,6 +406,13 @@ void weapon_updateTank(Actor *obj) {
                 obj->mv->gunPitch *= 0.8999999762f;
             }
         } else if (controlled && health) {
+            f32 bestScore;
+            s32 i;
+            s32 bestIdx;
+            s32 objCount;
+            s8 camSlot;
+            f32 deltaZ;
+            f32 distance;
             s32 j;
             s32 hit;
             f32 hitX;

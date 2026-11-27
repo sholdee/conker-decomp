@@ -42,6 +42,7 @@
  *   game/Particle/SegmentEmitter/segmentemitter.c
  *   game/Particle/SpriteParticle/spriteparticle.c
  *   game/Particle/ModelParticle/modelparticle.c
+ *   game/Particle/ParticleModelIds/particlemodelids.c
  *   game/Particle/QuadParticle/quadparticle.c
  *   game/Particle/ChannelParticle/channelparticle.c
  *   game/Particle/FlickerParticle/flickerparticle.c
@@ -1380,7 +1381,9 @@ Gfx *particle_bindDataTexture(Gfx *gfx, ModelParticle *particle, s16 arg2);
 Gfx *particle_bindFirstListTexture(Gfx *gfx, ModelParticle *particle, s16 arg2);
 Gfx *particle_bindSegmentTexture(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 Gfx *particle_bindListTextures(Gfx *gfx, ModelParticle *particle, s16 arg2);
-extern s32 D_800A3880[]; /* the model ids by particle model (bank 9): the .rodata at 0x248340 after this file's (no file yet) */
+
+/* game/Particle/ParticleModelIds/particlemodelids.c (a data-only unit) */
+extern const s32 D_800A3880[233]; /* the model ids by particle model (bank 9) */
 
 /* game/Particle/QuadParticle/quadparticle.c */
 extern Gfx gQuadParticleSetupDl[]; /* render setup (object type table gObjectTypes) */
@@ -2234,19 +2237,19 @@ void particle_updateGrowingBillboard(GrowingParticle *particle);
 /* game/Particle/PlacementRing/placementring.c */
 void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2);
 
-/* The .rodata at 0x24BF20 (no file yet): the front-end .rodata of the unit that begins at
- * game/Particle/ActorEmitter/actoremitter.c, before that file's literals. Its users cannot own it until the
- * unit is merged. */
-extern char D_800A7460[]; /* particle_chainAllOverFireToSmoke's string */
-extern char D_800A749C[]; /* particle_chainTailFireToSmoke's string */
+/* The front-end .rodata of the unit that begins with game/Particle/ActorEmitter/actoremitter.c (0x24BF20), defined in that
+ * file until the unit's files are merged (see the comment there). */
+extern const char D_800A7460[]; /* particle_chainAllOverFireToSmoke's string */
+extern const char D_800A749C[]; /* particle_chainTailFireToSmoke's string */
 extern const IdList1 D_800A74D4; /* { 0x21 }: the template of particle_broadcastToActorEmitters's local */
 /* The anchor emitter templates, one array per kind (only variant 0 exists; gAnchorEmitterTemplates). */
 extern const AnchorEmitterTemplate D_800A74D8[], D_800A7528[], D_800A7578[], D_800A75C8[], D_800A7618[], D_800A7668[], D_800A76B8[];
 extern const AnchorEmitterTemplate D_800A7708[], D_800A7758[], D_800A77A8[], D_800A77F8[], D_800A7848[], D_800A7898[], D_800A78E8[];
 extern const AnchorEmitterTemplate D_800A7938[], D_800A7988[], D_800A79D8[], D_800A7A28[], D_800A7A78[];
 /* The per-object-id emitter data blocks of particle_getObjEmitterData (all empty in this build). */
-extern u8 D_800A7AC8, D_800A7ACC, D_800A7AD0, D_800A7AD4, D_800A7AD8, D_800A7ADC, D_800A7AE0, D_800A7AE4, D_800A7AE8, D_800A7AEC;
-extern u8 D_800A7AF0, D_800A7AF4, D_800A7AF8, D_800A7AFC, D_800A7B00, D_800A7B04, D_800A7B08, D_800A7B0C, D_800A7B10;
+extern const u8 D_800A7AC8[4], D_800A7ACC[4], D_800A7AD0[4], D_800A7AD4[4], D_800A7AD8[4], D_800A7ADC[4], D_800A7AE0[4];
+extern const u8 D_800A7AE4[4], D_800A7AE8[4], D_800A7AEC[4], D_800A7AF0[4], D_800A7AF4[4], D_800A7AF8[4], D_800A7AFC[4];
+extern const u8 D_800A7B00[4], D_800A7B04[4], D_800A7B08[4], D_800A7B0C[4], D_800A7B10[4];
 
 /* game/Particle/ActorEmitter/actoremitter.c */
 /* Particle template, referenced by an EmitterInfo. */
@@ -2319,7 +2322,8 @@ typedef struct {
     /* 0x8 */ EmitterIdList *idLists;
 } EmitterTable;
 
-ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5, void *arg6);
+ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
+                                                const char *arg6);
 void particle_updateActorEmitter(ActorEmitterProcess *emitter);
 s32 particle_followEmitterSound(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 void particle_freeActorEmitterParticles(ActorEmitterProcess *emitter);
@@ -2384,7 +2388,7 @@ s32 particle_followAnchorEased(EmitterParticle *particle, Vec3f *target);
 s32 particle_followAnchor(EmitterParticle *particle, Vec3f *target);
 void particle_launchAnchorParticle(EmitterParticle *particle, Vec3f *dest);
 s32 particle_getEmitterKindForObj(Actor *obj, u8 *kind, u8 variant);
-u8 *particle_getObjEmitterData(Actor *obj, s32 *found);
+const u8 *particle_getObjEmitterData(Actor *obj, s32 *found);
 LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
 
 /* game/Particle/AnchorEmitterDestroy/anchoremitterdestroy.c */

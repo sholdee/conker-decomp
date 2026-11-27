@@ -696,7 +696,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     break;
             }
         } else if (event->value == 0x6E) {
-            u8 *list;
+            const u8 *list;
             s32 count;
 
             list = particle_getObjEmitterData(obj, &count);
@@ -1525,7 +1525,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
         } else if (event->value == 0x4C) {
             s32 duration;
             SeqEvent *found;
-            u8 *list;
+            const u8 *list;
             s32 count;
 
             if (event->unk4 == 0) {

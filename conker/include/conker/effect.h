@@ -35,6 +35,7 @@
  *   game/Effects/TextLines/textlines.c
  *   game/Effects/ZoneSounds/zonesounds.c
  *   game_FE850.c
+ *   game_FE8C0.c
  *   game/Effects/RaySpinner/rayspinner.c
  *   game/Effects/HitSpray/hitspray.c
  *   game/Effects/TintedObject/tintedobject.c
@@ -447,6 +448,9 @@ void effect_playRandomZoneSounds(s32 arg0);
 extern u8 gRandomSoundTimer;
 
 /* game_FE850.c */
+void effect_spinDownActor(Actor *arg0);
+
+/* game_FE8C0.c */
 /* A timed effect that pulses the ambient colour (effect_updateAmbientPulse, and light_updateAmbientRedDrift of game/Effects/AmbientPulse/ambientpulse.c). */
 typedef struct {
     TimedEffect base;
@@ -454,13 +458,9 @@ typedef struct {
     /* 0x2C */ f32 target;
     /* 0x30 */ f32 timer;  /* frames until target is re-rolled */
 } AmbientPulse;
-void effect_spinDownActor(Actor *arg0);
 void func_150D1410(Actor *arg0);
 void func_150D146C(Actor *arg0);
 void effect_updateAmbientPulse(AmbientPulse *arg0);
-/* 0.2489f, in the .rodata unit after game_FE850.c's (0x800A08C0, asm data): IDO puts a literal of that file into
- * the pool of effect_spinDownActor's literals (0x800A08B0), so the separate 16-byte block is data of another unit. */
-extern f32 D_800A08C0;
 
 /* game/Effects/RaySpinner/rayspinner.c */
 typedef struct FF0E0Object FF0E0Object;

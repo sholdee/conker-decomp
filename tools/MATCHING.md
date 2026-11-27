@@ -2,33 +2,35 @@
 
 Goal: replace one `#pragma GLOBAL_ASM(...)` stub with C that compiles (IDO 5.3, `-O2 -g3`,
 mips2) to the EXACT original bytes. The verdict is the whole code bin's sha1 — nothing else.
+Commands run from the repository root. `$CONKER_WS` is the workspace directory (default
+`~/conker-ws`; see "Paths" in AGENTS.md).
 
-**First, claim the function:** `mkdir ~/conker-ws/.claims/FUNC`. If that fails because the
+**First, claim the function:** `mkdir -p "$CONKER_WS/.claims" && mkdir "$CONKER_WS/.claims/FUNC"`. If that fails because the
 directory exists, another agent owns FUNC: do nothing else and stop at once with status
 BLOCKED and note "claimed". (A coordinator running two fleets over one list relies on this.)
-Exception — stale claims: if nothing in `~/conker-ws/FUNC/` (checks.jsonl, the workspace C file, my/)
-has changed in the last 30 minutes (`find ~/conker-ws/FUNC -newermt "-30 min" | head`), the owner
+Exception — stale claims: if nothing in `$CONKER_WS/FUNC/` (checks.jsonl, the workspace C file, my/)
+has changed in the last 30 minutes (`find "$CONKER_WS/FUNC" -newermt "-30 min" | head`), the owner
 died (e.g. a usage-limit pause); `touch` the claim dir and continue as the new owner.
 
 ## Loop
 ```
-python3 ~/conker/tools/mw.py new FUNC        # private workspace ~/conker-ws/FUNC (main tree is never touched)
-#   edit  ~/conker-ws/FUNC/conker/src/<file>.c   — replace the stub line for FUNC with C
-#   read  ~/conker-ws/FUNC/target.s (target asm), ~/conker-ws/FUNC/m2c.c (machine draft — types are guesses)
-#         ~/conker-ws/FUNC/prev.c if present: an earlier attempt's best C (often close — start from it)
-python3 ~/conker/tools/mw.py check FUNC      # ~2s: build + link + sha1; prints RESULT: MATCH | DIFF | BUILD-FAIL | STUB
-                                             #   -q = summary only; a link failure still shows the object diff
-python3 ~/conker/tools/mw.py land FUNC       # only after RESULT: MATCH — merges into main, re-gates, commits
-python3 ~/conker/tools/mw.py batch FUNC a.c b.c …   # try whole-file variants in parallel, one summary line each
-python3 ~/conker/tools/mw.py objdump FUNC    # your build's disassembly (with relocations)
-python3 ~/conker/tools/mw.py reset FUNC [--all]     # restore the file(s) from the pristine base
-python3 ~/conker/tools/mw.py similar FUNC    # matched TWINS (same code modulo symbols/regs/imms) — check FIRST
-python3 ~/conker/tools/mw.py note FUNC "…"   # ledger: record each hypothesis tried and its result
+python3 tools/mw.py new FUNC        # private workspace $CONKER_WS/FUNC (main tree is never touched)
+#   edit  $CONKER_WS/FUNC/conker/src/<file>.c   — replace the stub line for FUNC with C
+#   read  $CONKER_WS/FUNC/target.s (target asm), $CONKER_WS/FUNC/m2c.c (machine draft — types are guesses)
+#         $CONKER_WS/FUNC/prev.c if present: an earlier attempt's best C (often close — start from it)
+python3 tools/mw.py check FUNC      # ~2s: build + link + sha1; prints RESULT: MATCH | DIFF | BUILD-FAIL | STUB
+                                    #   -q = summary only; a link failure still shows the object diff
+python3 tools/mw.py land FUNC       # only after RESULT: MATCH — merges into main, re-gates, commits
+python3 tools/mw.py batch FUNC a.c b.c …   # try whole-file variants in parallel, one summary line each
+python3 tools/mw.py objdump FUNC    # your build's disassembly (with relocations)
+python3 tools/mw.py reset FUNC [--all]     # restore the file(s) from the pristine base
+python3 tools/mw.py similar FUNC    # matched TWINS (same code modulo symbols/regs/imms) — check FIRST
+python3 tools/mw.py note FUNC "…"   # ledger ($CONKER_WS/FUNC/notes.md): record each hypothesis and its result
 ```
 **If `land` prints LAND-FAIL after your check said MATCH**, look at the cfe errors it prints. They are
 almost always a declaration that another function landed into the same file after your workspace
 was made (a `redeclaration of X`, `Incompatible type`, a typedef that now exists twice). Your MATCH is
-real, so do not stop: copy main's current file (`~/conker/conker/<file>`) over your workspace file,
+real, so do not stop: copy main's current file (`conker/<file>` in the main tree) over your workspace file,
 put your function back in place of its GLOBAL_ASM stub, make the declarations agree (prefer the
 type the definition uses; keep main's existing declarations if they are compatible), re-run
 `check` until MATCH, then `land` again. Never leave a matched function unlanded.
@@ -48,14 +50,14 @@ The `CURRENT (N)` number is the diff score (lower is closer; 0 with RESULT: DIFF
 function is right but something ELSE in the bin changed — e.g. a new literal in .rodata).
 
 ## Rules
-- Edit ONLY files under `~/conker-ws/FUNC/conker/src/` and (sparingly) `include/`. Prefer
+- Edit ONLY files under `$CONKER_WS/FUNC/conker/src/` and (sparingly) `include/`. Prefer
   local `extern`/prototype/struct declarations at the top of your own `.c` file. A shared
   prototype in `include/functions.h` that is provably wrong (the callee's asm shows the real
   param widths) may be corrected there — `land` re-gates the whole ROM, so a change that alters
   any other function is rejected. Never edit asm/, Makefile, yaml, tools.
 - Never add a `#pragma GLOBAL_ASM`. Other stubs in the same file stay as they are.
 - Keep ALL scratch files (variants, scripts, notes) inside your own workspace, e.g.
-  `~/conker-ws/FUNC/my/`. Never use /tmp or the session scratchpad: other agents share them and
+  `$CONKER_WS/FUNC/my/`. Never use /tmp or the session scratchpad: other agents share them and
   overwrite each other's files.
 - Scripted variant sweeps (`mw.py batch`, generators) are fine, but keep each sweep to a few
   hundred variants; the machine is shared by many agents. Stop and report REGALLOC instead of
@@ -171,6 +173,6 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
   stack offsets differ, reorder named locals or change their widths. Declaring a loop
   pointer inside the loop body opens a -g3 scope that keeps stores before the increments.
 
-IDO idioms: `~/conker/tools/ido_cookbook.md` (read it), `~/conker/tools/ido_reference.md`
+IDO idioms: `tools/ido_cookbook.md` (read it), `tools/ido_reference.md`
 (large, grep it for a specific symptom). Matched C in other `src/*.c` files is a good style
 reference for this codebase.

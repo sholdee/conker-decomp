@@ -3025,9 +3025,9 @@ level_spawnBloodStrip	0x150D10E4	208	game	c		build/src/game/Level/LevelHook30/le
 level_sampleBloodStripPower	0x150D11B4	80	game	c		build/src/game/Level/LevelHook30/levelhook30.c.o
 level_emitBloodStripParticle	0x150D1204	412	game	c		build/src/game/Level/LevelHook30/levelhook30.c.o
 effect_spinDownActor	0x150D13A0	112	game	c		build/src/game_FE850.c.o
-func_150D1410	0x150D1410	92	game	c		build/src/game_FE850.c.o
-func_150D146C	0x150D146C	48	game	c		build/src/game_FE850.c.o
-effect_updateAmbientPulse	0x150D149C	148	game	c		build/src/game_FE850.c.o
+func_150D1410	0x150D1410	92	game	c		build/src/game_FE8C0.c.o
+func_150D146C	0x150D146C	48	game	c		build/src/game_FE8C0.c.o
+effect_updateAmbientPulse	0x150D149C	148	game	c		build/src/game_FE8C0.c.o
 camera_scaleBySpeed	0x150D1530	736	game	c		build/src/game/Camera/SpeedDistance/speeddistance.c.o
 env_drawSkyGradient	0x150D1810	816	game	c		build/src/game/Env/SkyGradient/skygradient.c.o
 light_updateAmbientRedDrift	0x150D1B40	144	game	c		build/src/game/Effects/AmbientPulse/ambientpulse.c.o

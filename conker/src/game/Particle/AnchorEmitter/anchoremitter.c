@@ -471,34 +471,34 @@ s32 particle_getEmitterKindForObj(Actor *obj, u8 *kind, u8 variant) {
 }
 
 /* Returns the per-object-id data block (all empty in this build), setting *found. */
-u8 *particle_getObjEmitterData(Actor *obj, s32 *found) {
-    u8 *data;
+const u8 *particle_getObjEmitterData(Actor *obj, s32 *found) {
+    const u8 *data;
 
     switch (obj->character_type) {
     case 0x87:
     case 0xB0:
-        data = &D_800A7AFC;
+        data = D_800A7AFC;
         *found = 1;
         break;
     case 0xB1:
-        data = &D_800A7B00;
+        data = D_800A7B00;
         *found = 1;
         break;
     case 0xB4:
-        data = &D_800A7B04;
+        data = D_800A7B04;
         *found = 1;
         break;
     case 0x70:
     case 0xB2:
-        data = &D_800A7B08;
+        data = D_800A7B08;
         *found = 1;
         break;
     case 0x53:
-        data = &D_800A7B0C;
+        data = D_800A7B0C;
         *found = 1;
         break;
     case 0x96:
-        data = &D_800A7B10;
+        data = D_800A7B10;
         *found = 1;
         break;
     case 0x00:
@@ -506,27 +506,27 @@ u8 *particle_getObjEmitterData(Actor *obj, s32 *found) {
     case 0x02:
     case 0x03:
     case 0x04:
-        data = &D_800A7AC8;
+        data = D_800A7AC8;
         *found = 1;
         break;
     case 0x49:
-        data = &D_800A7ACC;
+        data = D_800A7ACC;
         *found = 1;
         break;
     case 0x58:
-        data = &D_800A7AD0;
+        data = D_800A7AD0;
         *found = 1;
         break;
     case 0x50:
-        data = &D_800A7AD4;
+        data = D_800A7AD4;
         *found = 1;
         break;
     case 0x75:
-        data = &D_800A7AD8;
+        data = D_800A7AD8;
         *found = 1;
         break;
     case 0x80:
-        data = &D_800A7ADC;
+        data = D_800A7ADC;
         *found = 1;
         break;
     case 0x11:
@@ -534,32 +534,32 @@ u8 *particle_getObjEmitterData(Actor *obj, s32 *found) {
     case 0x3B:
     case 0x98:
     case 0x99:
-        data = &D_800A7AE0;
+        data = D_800A7AE0;
         *found = 1;
         break;
     case 0x16:
-        data = &D_800A7AE4;
+        data = D_800A7AE4;
         *found = 1;
         break;
     case 0x88:
     case 0x90:
-        data = &D_800A7AE8;
+        data = D_800A7AE8;
         *found = 1;
         break;
     case 0x9C:
-        data = &D_800A7AEC;
+        data = D_800A7AEC;
         *found = 1;
         break;
     case 0x9D:
-        data = &D_800A7AF0;
+        data = D_800A7AF0;
         *found = 1;
         break;
     case 0x9F:
-        data = &D_800A7AF4;
+        data = D_800A7AF4;
         *found = 1;
         break;
     case 0xA0:
-        data = &D_800A7AF8;
+        data = D_800A7AF8;
         *found = 1;
         break;
     default:

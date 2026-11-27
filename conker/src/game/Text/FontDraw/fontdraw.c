@@ -129,7 +129,7 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
     s32 dsdx;
     s32 i;
     s32 dtdy;
-    s32 yi;
+    s32 full;
     s32 pad15C; // matching: stack-slot pads (frame layout of the IDO original)
     s32 pad158;
     s32 pad154;
@@ -381,60 +381,53 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
         } else {
             draw = 1;
         }
-        {
-            s32 full;
+        if (draw) {
+            s32 yi;
 
-            if (draw) {
-                {
-                    /* matching: -g3 block marker keeps as1 from hoisting the 1/4096 mtc1 above it */
-                    extern f32 gScreenScaleY;
-
-                gy = 0.0f;
-                w = gFontGlyphs[font][c].w;
-                h = gFontGlyphs[font][c].h;
-                sx = scaleX * 0.000244140625f;
-                sy = scaleY * 0.000244140625f;
-                if (gTextWaveOn != 0) {
-                    gy += wave;
-                }
-                x += gFontGlyphs[font][c].x * gScreenScaleX * sx;
-                y += (gFontGlyphs[font][c].y - gy) * gScreenScaleY * sy;
-                ix = scaleX;
-                iy = scaleY;
-                if (gViews[gCurrentView].left <= x + w * gScreenScaleX && x < gViews[gCurrentView].right &&
-                    gViews[gCurrentView].top <= y + h * gScreenScaleY && y < gViews[gCurrentView].bottom) {
-                    dsdx = 0x400000 / ix;
-                    dtdy = 0x400000 / iy;
-                    if (w != prevW || h != prevH) {
-                        gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, ((w + 7) >> 3), 0, 3, 0, G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
-                        gDPSetTileSize(gfx++, 3, 0, 0, (((w + 7) & 0xFFF8) - 1) << 2, h << 2);
-                    }
-                    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, gFontBitmaps[font][0] + c * 0xE0); // matching: a byte offset; gFontBitmaps[font][c] changes the frame
-                    gDPLoadBlock(gfx++, 1, 0, 0, ((((w + 7) & 0xFFF8) * (h + 1) + 1) >> 1) - 1, 0);
-                    yi = y;
-                    gSPScisTextureRectangle(gfx++,
-                        (x * 4), yi * 4,
-                        (x * 4 + (f32)((w * ix) / 4096) * 4),
-                        ((s32)(f32)((h * iy) / 4096) + yi) * 4,
-                        3, 0, ((-(s32)((y - yi) * 32.0f) * 4096) + 0x20000) / iy, dsdx, dtdy);
-                }
-                y -= (gFontGlyphs[font][c].y - gy) * gScreenScaleY * sx;
-                x += (gFontGlyphs[font][c].w - 1) * gScreenScaleX * sy;
-                }
+            gy = 0.0f;
+            w = gFontGlyphs[font][c].w;
+            h = gFontGlyphs[font][c].h;
+            sx = scaleX * 0.000244140625f;
+            sy = scaleY * 0.000244140625f;
+            if (gTextWaveOn != 0) {
+                gy += wave;
             }
-            i++;
-            prevW = w;
-            prevH = h;
-            if (gfx != NULL) {
-                if ((gfx - gDisplayListBuffers[gDrawBufferIndex]) > gDisplayListLimit) {
-                    full = 1;
-                } else {
-                    full = 0;
+            x += gFontGlyphs[font][c].x * gScreenScaleX * sx;
+            y += (gFontGlyphs[font][c].y - gy) * gScreenScaleY * sy;
+            ix = scaleX;
+            iy = scaleY;
+            if (gViews[gCurrentView].left <= x + w * gScreenScaleX && x < gViews[gCurrentView].right &&
+                gViews[gCurrentView].top <= y + h * gScreenScaleY && y < gViews[gCurrentView].bottom) {
+                dsdx = 0x400000 / ix;
+                dtdy = 0x400000 / iy;
+                if (w != prevW || h != prevH) {
+                    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, ((w + 7) >> 3), 0, 3, 0, G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
+                    gDPSetTileSize(gfx++, 3, 0, 0, (((w + 7) & 0xFFF8) - 1) << 2, h << 2);
                 }
-                if (full) {
-                    gDPPipeSync(gfx);
-                    return start;
-                }
+                gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, gFontBitmaps[font][0] + c * 0xE0); // matching: a byte offset; gFontBitmaps[font][c] changes the frame
+                gDPLoadBlock(gfx++, 1, 0, 0, ((((w + 7) & 0xFFF8) * (h + 1) + 1) >> 1) - 1, 0);
+                yi = y;
+                gSPScisTextureRectangle(gfx++,
+                    (x * 4), yi * 4,
+                    (x * 4 + (f32)((w * ix) / 4096) * 4),
+                    ((s32)(f32)((h * iy) / 4096) + yi) * 4,
+                    3, 0, ((-(s32)((y - yi) * 32.0f) * 4096) + 0x20000) / iy, dsdx, dtdy);
+            }
+            y -= (gFontGlyphs[font][c].y - gy) * gScreenScaleY * sx;
+            x += (gFontGlyphs[font][c].w - 1) * gScreenScaleX * sy;
+        }
+        i++;
+        prevW = w;
+        prevH = h;
+        if (gfx != NULL) {
+            if ((gfx - gDisplayListBuffers[gDrawBufferIndex]) > gDisplayListLimit) {
+                full = 1;
+            } else {
+                full = 0;
+            }
+            if (full) {
+                gDPPipeSync(gfx);
+                return start;
             }
         }
     }

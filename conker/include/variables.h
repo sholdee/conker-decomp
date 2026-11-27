@@ -44,7 +44,7 @@ extern u32  __osShutdown;
 /* BSS STARTS at gIdleThreadStack */
 
 /* 80030000 */
-extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares it itself); stopped by the PI manager in init/Os/DevMgr/devmgr
+extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which defines it); stopped by the PI manager in init/Os/DevMgr/devmgr
 
 
 
@@ -103,7 +103,7 @@ extern f32 gRotateRPYFDegToRad; // 0.01745329238474369f
 
 /* 800B0000 */
 
-extern LevelHeader *D_800B0DF0;
+extern LevelHeader *D_800B0DF0; // game/Level/LevelHeader/levelheader.c
 
 extern s32 D_800BE5D0;
 
