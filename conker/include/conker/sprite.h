@@ -8,6 +8,7 @@
 /*
  * Subsystem "sprite": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
+ *   game/Sprite/LevelSpriteSetup/levelspritesetup.c
  *   game/Sprite/PointGroup/pointgroup.c
  *   game/Sprite/SpriteDraw/spritedraw.c
  *   game/Sprite/SpriteRoutines/spriteroutines.c
@@ -87,6 +88,21 @@ typedef struct ActorTracker {
     /* 0x44 */ s32 unk44;
     /* 0x48 */ s32 unk48;
 } ActorTracker;
+
+/* game/Sprite/LevelSpriteSetup/levelspritesetup.c */
+void light_initParticleSlots(s32 arg0);
+void light_loadParticleTextures(void);
+void light_setupParticleSlot(s32 slot, s32 id, s32 flags);
+s32 light_addLevelParticle(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jitter, u8 kind, s32 parity);
+s32 light_scatterParticles(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 light_placeParticlePattern(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 light_placeCentreParticle(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 light_scatterParticles87(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 light_scatterParticles8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+s32 light_scatterParticles33(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri);
+void light_resetSpriteBuffers(s32 unused);
+void light_resetParticles(void);
+void light_buildLevelParticles(void);
 
 /* game/Sprite/PointGroup/pointgroup.c */
 extern f32 (*gPointGroupMtx)[4]; // the current float matrix

@@ -50,7 +50,6 @@ s32 gSpriteVtxCount; /* sprites in this frame's vertex buffer */
 #include "conker/collision.h"
 #include "conker/game.h"
 #include "conker/heap.h"
-#include "conker/light.h"
 #include "conker/math.h"
 #include "conker/particle.h"
 #include "conker/rom.h"

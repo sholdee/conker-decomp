@@ -11,6 +11,7 @@
 #include "conker/particle.h"
 #include "conker/script.h"
 #include "conker/shadow.h"
+#include "conker/sprite.h"
 #include "conker/view.h"
 #include "conker/weapon.h"
 

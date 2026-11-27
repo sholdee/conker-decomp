@@ -36,7 +36,7 @@ src/game/Camera/LevelCamSetup22/levelcamsetup22.c	camera	per-level camera hook (
 src/game/Camera/LevelCamSetup23/levelcamsetup23.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup24/levelcamsetup24.c	camera	per-level camera hook with zone-dependent heights
 src/game/Camera/LevelCamSetup26/levelcamsetup26.c	camera	per-level camera preset hook
-src/game/Sprite/LevelSpriteSetup/levelspritesetup.c	light	split off in the per-file pass; level particle and sprite setup (header group in light.h)
+src/game/Sprite/LevelSpriteSetup/levelspritesetup.c	sprite	builds the level's sprites when a level loads: sprite type setup, placement on the level triangles, type textures
 src/game/Level/PipeBurstSetup/pipeburstsetup.c	level	per-level setup helper
 src/game/Player/HudBlockInit/hudblockinit.c	player	player stat limits and globals init
 src/game/Zone/CodeTree/codetree.s	zone	hand-written asm (subsystem from its header group)

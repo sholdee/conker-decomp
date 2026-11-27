@@ -4,7 +4,6 @@
 #include "conker/game.h"
 #include "conker/heap.h"
 #include "conker/level.h"
-#include "conker/light.h"
 #include "conker/math.h"
 #include "conker/rom.h"
 #include "conker/sound.h"

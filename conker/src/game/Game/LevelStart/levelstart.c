@@ -33,6 +33,7 @@
 #include "conker/screen.h"
 #include "conker/script.h"
 #include "conker/sound.h"
+#include "conker/sprite.h"
 #include "conker/swarm.h"
 #include "conker/text.h"
 #include "conker/trail.h"
