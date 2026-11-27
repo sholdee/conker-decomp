@@ -3132,7 +3132,7 @@ effect_spawnTrailSpriteLarge	0x150DDFAC	384	game	c		build/src/game/Effects/TrapE
 effect_spawnTrailSpriteSmall	0x150DE12C	376	game	c		build/src/game/Effects/TrapEffect/trapeffect.c.o
 effect_fadeTrailSpriteByLife	0x150DE2A4	32	game	c		build/src/game/Effects/TrapEffect/trapeffect.c.o
 effect_shrinkBillboard	0x150DE2C4	76	game	c		build/src/game/Effects/TrapEffect/trapeffect.c.o
-effect_emptyLevelHook14	0x150DE310	16	game	c		build/src/game_10B7C0.c.o
+effect_emptyLevelHook14	0x150DE310	16	game	c		build/src/game/Effects/LevelHook14/levelhook14.c.o
 func_150DE320	0x150DE320	12	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
 effect_onBulletImpactZones	0x150DE32C	300	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
 func_150DE458	0x150DE458	640	game	c		build/src/game/Effects/ZonePairEmitter/zonepairemitter.c.o
@@ -3401,7 +3401,7 @@ effect_freeStage	0x150F97C0	44	game	c		build/src/game/Effects/StageEffect/stagee
 effect_spawnCutsceneBoneBeam	0x150F97EC	356	game	c		build/src/game/Effects/StageEffect/stageeffect.c.o
 effect_spawnGunMuzzleEffects	0x150F9950	208	game	c		build/src/game/Effects/StageEffect/stageeffect.c.o
 camera_levelHook28	0x150F9A20	144	game	c		build/src/game/Camera/LevelHook28/levelhook28.c.o
-screen_drawStarSky	0x150F9AB0	256	game	c		build/src/game_126F60.c.o
+screen_drawStarSky	0x150F9AB0	256	game	c		build/src/game/Screen/StarSky/starsky.c.o
 effect_spawnDelayedBurst	0x150F9BB0	1544	game	c		build/src/game_127060.c.o
 effect_updateDelayedBurst	0x150FA1B8	688	game	c		build/src/game_127060.c.o
 effect_handleLightSwitchEvent	0x150FA468	184	game	c		build/src/game_127060.c.o
@@ -3475,7 +3475,7 @@ effect_sendOwnerGone	0x15100180	52	game	c		build/src/game/Effects/OwnerEffect/ow
 effect_spawnOwnerEffect	0x151001B4	124	game	c		build/src/game/Effects/OwnerEffect/ownereffect.c.o
 effect_ownerEffectMessage	0x15100230	140	game	c		build/src/game/Effects/OwnerEffect/ownereffect.c.o
 effect_updateOwnerEffect	0x151002BC	116	game	c		build/src/game/Effects/OwnerEffect/ownereffect.c.o
-effect_emptyLevelHook8	0x15100330	16	game	c		build/src/game_12D7E0.c.o
+effect_emptyLevelHook8	0x15100330	16	game	c		build/src/game/Effects/LevelHook08/levelhook08.c.o
 effect_levelUpdateFlagLights	0x15100340	292	game	c		build/src/game/Effects/FlagLights/flaglights.c.o
 effect_bindFlagLightTextures	0x15100464	412	game	c		build/src/game/Effects/FlagLights/flaglights.c.o
 particle_spawnRayBeam	0x15100600	2704	game	c		build/src/game/Particle/RayBeam/raybeam.c.o

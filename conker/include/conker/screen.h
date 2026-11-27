@@ -12,7 +12,7 @@
  *   game/Screen/Mosaic/mosaic.c
  *   game/Actor/MountControl/mountcontrol.c
  *   game/Screen/Strobe/strobe.c
- *   game_126F60.c
+ *   game/Screen/StarSky/starsky.c
  *   game/Screen/Fade/fade.c
  *   game/Screen/ViewEffects/vieweffects.c
  *   game/Screen/Tint/tint.c
@@ -162,7 +162,7 @@ Gfx *screen_drawStrobe(Gfx *gfx, StrobeEffect *effect, s16 view);
 extern u8 gStrobeCount;
 void screen_updateStrobeSpawner(StrobeSpawner *spawner);
 
-/* game_126F60.c */
+/* game/Screen/StarSky/starsky.c */
 Gfx *screen_drawStarSky(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
 /* game/Screen/Fade/fade.c */

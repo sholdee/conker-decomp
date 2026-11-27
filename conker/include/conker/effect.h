@@ -41,7 +41,7 @@
  *   game/Effects/PuffTimer/pufftimer.c
  *   game/Effects/FallingStream/fallingstream.c
  *   game/Effects/TrapEffect/trapeffect.c
- *   game_10B7C0.c
+ *   game/Effects/LevelHook14/levelhook14.c
  *   game/Effects/ZonePairEmitter/zonepairemitter.c
  *   game/Effects/RainHook/rainhook.c
  *   game/Effects/Explosion/explosion.c
@@ -68,7 +68,7 @@
  *   game/Effects/TreadScroll/treadscroll.c
  *   game/Effects/BonePointFx/bonepointfx.c
  *   game/Effects/OwnerEffect/ownereffect.c
- *   game_12D7E0.c
+ *   game/Effects/LevelHook08/levelhook08.c
  *   game/Effects/FlagLights/flaglights.c
  *   game/Effects/BoneBeamParticle/bonebeamparticle.c
  *   game/Effects/DebrisThrow/debristhrow.c
@@ -513,7 +513,7 @@ s32 effect_spawnTrailSpriteSmall(EffectSpawnSource *source, f32 x, f32 y, f32 z,
 s32 effect_fadeTrailSpriteByLife(QuadSprite *sprite);
 void effect_shrinkBillboard(BillboardParticle *particle);
 
-/* game_10B7C0.c */
+/* game/Effects/LevelHook14/levelhook14.c */
 void effect_emptyLevelHook14(s32 arg0);
 
 /* game/Effects/ZonePairEmitter/zonepairemitter.c */
@@ -755,7 +755,7 @@ void effect_spawnOwnerEffect(Actor *owner);
 void effect_ownerEffectMessage(OwnerEffect *effect, ActorRef *msg, u8 msgId);
 void effect_updateOwnerEffect(OwnerEffect *effect);
 
-/* game_12D7E0.c */
+/* game/Effects/LevelHook08/levelhook08.c */
 void effect_emptyLevelHook8(s32 arg0);
 
 /* game/Effects/FlagLights/flaglights.c */
