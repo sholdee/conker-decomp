@@ -6,16 +6,9 @@
 #include "conker/sight.h"
 #include "conker/zone.h"
 
-/* A command/query message: an 8-byte header followed by word parameters. */
-struct Msg_CD860 {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 params[5];
-};
-
 /* Applies command `opcode` with the parameters in `cmd` to zone `zone` (an index into zones).
  * Returns 1 for commands 0-2 and 0 otherwise. */
-s32 script_zoneCommand(s32 zone, u32 opcode, Msg_CD860 *cmd) {
+s32 script_zoneCommand(s32 zone, u32 opcode, ScriptCmd *cmd) {
     s32 mode;
 
     switch (opcode) {
@@ -26,17 +19,17 @@ s32 script_zoneCommand(s32 zone, u32 opcode, Msg_CD860 *cmd) {
         zone_setDisabled(zone, 1);
         return 1;
     case 2:
-        zone_setData1(zone, cmd->params[0], cmd->params[1]);
+        zone_setData1(zone, cmd->a[0].w, cmd->a[1].w);
         return 1;
     case 3:
-        zone_setPosition(zone, cmd->params[0], cmd->params[1], cmd->params[2]);
+        zone_setPosition(zone, cmd->a[0].w, cmd->a[1].w, cmd->a[2].w);
         break;
     case 4:
-        zone_setParams(zone, cmd->params[0], cmd->params[1], cmd->params[2], cmd->params[3], cmd->params[4]);
+        zone_setParams(zone, cmd->a[0].w, cmd->a[1].w, cmd->a[2].w, cmd->a[3].w, cmd->a[4].w);
         break;
     case 5:
         // matching: `== 0` would compile to sltiu; the inverted test keeps the branchy form
-        mode = (cmd->params[0] == 999) ? 2 : (cmd->params[0] != 0) ? 0 : 1;
+        mode = (cmd->a[0].w == 999) ? 2 : (cmd->a[0].w != 0) ? 0 : 1;
         sight_sendBeamCommand(mode, &zones[zone]);
         break;
     }
@@ -46,7 +39,7 @@ s32 script_zoneCommand(s32 zone, u32 opcode, Msg_CD860 *cmd) {
 /* Answers query `opcode` about zone `zone`; `cmd` carries the query's parameters.
  * Queries 6 and 13 take an id whose bits 12-15 select its kind: 0x2000 is an object in
  * movement_obj (looked up by actor_findOnPath), 0x9000 a zones record. */
-s32 script_zoneQuery(s32 zone, s32 opcode, Msg_CD860 *cmd) {
+s32 script_zoneQuery(s32 zone, s32 opcode, ScriptCmd *cmd) {
     switch (opcode) {
     case 6:
         {
@@ -56,8 +49,8 @@ s32 script_zoneQuery(s32 zone, s32 opcode, Msg_CD860 *cmd) {
             Actor *obj;
             s32 ret = 0;
 
-            id = cmd->params[0] & 0xFFFF0FFF;
-            switch (cmd->params[0] & 0xF000) {
+            id = cmd->a[0].w & 0xFFFF0FFF;
+            switch (cmd->a[0].w & 0xF000) {
             case 0x2000:
                 obj = actor_findOnPath(id);
                 if (obj == NULL) {
@@ -122,7 +115,7 @@ s32 script_zoneQuery(s32 zone, s32 opcode, Msg_CD860 *cmd) {
             s32 i;
 
             for (i = 0; i < 25; i++) {
-                if (movement_obj[i].type == cmd->params[0] && zone_isActorOutsideId(i, zone) == 0) {
+                if (movement_obj[i].type == cmd->a[0].w && zone_isActorOutsideId(i, zone) == 0) {
                     if (opcode == 11) {
                         return movement_obj[i].listpos | 0x2000;
                     }
@@ -140,8 +133,8 @@ s32 script_zoneQuery(s32 zone, s32 opcode, Msg_CD860 *cmd) {
             s32 result;
             Actor *obj;
 
-            id = cmd->params[0] & 0xFFFF0FFF;
-            switch (cmd->params[0] & 0xF000) {
+            id = cmd->a[0].w & 0xFFFF0FFF;
+            switch (cmd->a[0].w & 0xF000) {
             case 0x2000:
                 obj = actor_findOnPath(id);
                 result = zone_isActorBehindGate(obj - movement_obj, zone);
@@ -168,8 +161,8 @@ s32 script_zoneQuery(s32 zone, s32 opcode, Msg_CD860 *cmd) {
                     if (gScriptCmdWordCount == 2) {
                         return 1;
                     }
-                    if (cmd->params[1] != 0) {
-                        if (movement_obj[i].mv->rt_context_b != 3 && zone_isCameraOutsideId(i, cmd->params[0] & 0xFFFF0FFF) == 0) {
+                    if (cmd->a[1].w != 0) {
+                        if (movement_obj[i].mv->rt_context_b != 3 && zone_isCameraOutsideId(i, cmd->a[0].w & 0xFFFF0FFF) == 0) {
                             return 1;
                         }
                     } else {
@@ -184,7 +177,7 @@ s32 script_zoneQuery(s32 zone, s32 opcode, Msg_CD860 *cmd) {
         {
             s32 which;
 
-            which = cmd->params[0];
+            which = cmd->a[0].w;
             if (which == 0) {
                 return zones[zone].subTypeData;
             } else if (which == 1) {

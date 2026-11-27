@@ -17,7 +17,7 @@ typedef struct Rec150A0264 {
 } Rec150A0264;
 
 struct Src150A0264 {
-    char pad0[4];
+    s32 id;    /* the record's command word (ScriptCmd.id) */
     s32 unit;  /* the timer unit (Rec150A0264.unit) of the start command */
     s32 value; /* the count that command 2 sets */
 };

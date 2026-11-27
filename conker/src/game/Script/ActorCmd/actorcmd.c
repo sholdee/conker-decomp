@@ -31,11 +31,6 @@
 void actor_seatRider(Actor *mount, f32 height, s32 baseMtx, s32 attachFlags, s32 hideRider, s32 mountWalk, s32 immune,
                    s32 hitRoute, s32 force, s32 soundCmd);
 
-struct C4DC0_arg1 {
-    u8 pad0[4];
-    s32 unk4;
-};
-
 
 /* Returns the object id for script id `scriptId` (| 0x2000 when nonzero), spawning it from its slot if needed. */
 s32 script_spawnActor(s32 scriptId, s32 cmd) {
@@ -62,7 +57,7 @@ s32 script_spawnActor(s32 scriptId, s32 cmd) {
 }
 
 /* Removes object `objId` (flagging its spawn slot); returns 999999 on success, 0 if there is no such object. */
-s32 script_removeActor(s32 objId, C4DC0_arg1 *cmd) {
+s32 script_removeActor(s32 objId, ScriptCmd *cmd) {
     Actor *obj;
 
     obj = actor_findOnPath(objId);
@@ -73,7 +68,7 @@ s32 script_removeActor(s32 objId, C4DC0_arg1 *cmd) {
         gSpawnRecords[objId].removed = 1;
     }
     if (gScriptCmdWordCount == 2) {
-        if (cmd->unk4 == 0) {
+        if (cmd->arg.w == 0) {
             actor_remove(obj, 0);
         } else {
             actor_handleDeath(obj);
