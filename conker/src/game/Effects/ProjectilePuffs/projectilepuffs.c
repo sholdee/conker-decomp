@@ -16,34 +16,29 @@ typedef struct {
     /* 0x6C */ f32 speed;
     /* 0x70 */ u8 flags; /* 1: impact effect, 2: ray-test the path, 4: see effect_updateProjectile */
     /* 0x71 */ u8 pad71[3];
-    /* 0x74 */ Vec3f unk74;
-    /* 0x80 */ Vec3f unk80;
+    /* 0x74 */ Vec3f axisU;   /* math_buildPerpendicularBasis axes perpendicular to hit.dir */
+    /* 0x80 */ Vec3f axisV;
     /* 0x8C */ f32 trailDist;
     /* 0x90 */ f32 trailAge;
     /* 0x94 */ f32 trailAgeStep;
     /* 0x98 */ Vec3f trailPos;
     /* 0xA4 */ Vec3f trailStep;
-    /* 0xB0 */ s8 unkB0;
+    /* 0xB0 */ s8 filter;     /* collision_castRay's filter */
     /* 0xB1 */ u8 padB1[3];
 } ProjectileState;
 
 /* Per-object state of the effect spawned by effect_spawnPuffFollower (updated by effect_updatePuffFollower). */
 typedef struct {
-    /* 0x00 */ f32 *target; /* position (3 floats), then 3 more floats copied to unk20 */
+    /* 0x00 */ f32 *target; /* position (3 floats), then 3 more floats copied to rot */
     /* 0x04 */ Vec3f trailPos;
     /* 0x10 */ f32 trailAge;
 } FollowState;
 
 /* An object spawned by particle_newModelParticleWithFloor. */
 struct ProjectileParticle {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0x13];
-    /* 0x020 */ f32 unk20;
-    /* 0x024 */ f32 unk24;
-    /* 0x028 */ f32 unk28;
+    /* 0x000 */ EffectHeader header;
+    /* 0x010 */ u8 pad10[0x10];
+    /* 0x020 */ Vec3f rot;         /* ModelParticle.rot */
     /* 0x02C */ u8 pad2C[0xC];
     /* 0x038 */ Vec3f pos;
     /* 0x044 */ Vec3f vel;
@@ -77,7 +72,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
         targetDir = *target;
     }
     state.flags = (endFlash ? 1 : 0) | (collide ? 2 : 0) | (hitModels ? 4 : 0);
-    state.unkB0 = filter;
+    state.filter = filter;
     if (altOrigin != NULL && target != NULL) {
         if (!hasTargetDir) {
             if (!math_vec3Normalize(target, &targetDir, NULL, NULL)) {
@@ -96,7 +91,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
                        recast)) {
         return;
     }
-    if (!math_buildPerpendicularBasis(&state.hit.dir, &state.unk74, &state.unk80)) {
+    if (!math_buildPerpendicularBasis(&state.hit.dir, &state.axisU, &state.axisV)) {
         return;
     }
     state.unk64 = arg14;
@@ -197,11 +192,11 @@ s8 effect_updateProjectile(ProjectileParticle *obj) {
     dist = state->speed * dt;
     if (state->flags & 2) {
         collision_castRay(owner, obj->pos.x, obj->pos.y, obj->pos.z, state->hit.dir.x, state->hit.dir.y,
-                      state->hit.dir.z, &hit, dist, 1, 0, !(state->flags & 4), state->unkB0, 0, 0);
+                      state->hit.dir.z, &hit, dist, 1, 0, !(state->flags & 4), state->filter, 0, 0);
         if (hit.hitType >= 2) {
-            particle_applyShotHit(hit.obj, owner, &hit.pos, &hit.far, &hit, 0x1A, &state->hit.dir, obj->unkC, obj->unk1);
+            particle_applyShotHit(hit.obj, owner, &hit.pos, &hit.far, &hit, 0x1A, &state->hit.dir, obj->header.owner, obj->header.kind);
             if (state->flags & 1) {
-                effect_spawnPuffFlash(&hit.pos, obj->unkC, obj->unk1);
+                effect_spawnPuffFlash(&hit.pos, obj->header.owner, obj->header.kind);
             }
             alive = FALSE;
         }
@@ -214,7 +209,7 @@ s8 effect_updateProjectile(ProjectileParticle *obj) {
         if (state->timeLeft <= 0.0f) {
             alive = FALSE;
             if (state->flags & 1) {
-                effect_spawnPuffFlash(&obj->pos, obj->unkC, obj->unk1);
+                effect_spawnPuffFlash(&obj->pos, obj->header.owner, obj->header.kind);
             }
         }
     }
@@ -227,8 +222,8 @@ s8 effect_updateProjectile(ProjectileParticle *obj) {
         if (puffs > 1.0f) {
             PuffState puffState;
 
-            puffState.axisU = state->unk74;
-            puffState.axisV = state->unk80;
+            puffState.axisU = state->axisU;
+            puffState.axisV = state->axisV;
             puffState.sizeBase = 8.318000793f;
             puffState.sizeAmplitude = 8.318000793f;
             spawn.texture = 0x7A;
@@ -262,7 +257,7 @@ s8 effect_updateProjectile(ProjectileParticle *obj) {
                 puffState.timeLeft = 27.0f - state->trailAge;
                 spawn.pos = state->trailPos;
                 spawn.alpha = puffState.timeLeft * 6.481481552f;
-                puff = particle_newQuadParticle(&spawn, colors, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
+                puff = particle_newQuadParticle(&spawn, colors, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->header.owner, obj->header.kind);
                 if (puff != NULL) {
                     memcpy(&puff->state, &puffState, sizeof(puffState));
                 }
@@ -377,9 +372,9 @@ s32 effect_updatePuffFollower(ProjectileParticle *obj) {
     obj->pos.x = follow->target[0];
     obj->pos.y = follow->target[1];
     obj->pos.z = follow->target[2];
-    obj->unk20 = follow->target[3];
-    obj->unk24 = follow->target[4];
-    obj->unk28 = follow->target[5];
+    obj->rot.x = follow->target[3];
+    obj->rot.y = follow->target[4];
+    obj->rot.z = follow->target[5];
     {
         Vec3f delta;
         f32 dist;
@@ -439,7 +434,7 @@ s32 effect_updatePuffFollower(ProjectileParticle *obj) {
                     puffState.timeLeft = 27.0f - follow->trailAge;
                     spawn.pos = follow->trailPos;
                     spawn.alpha = puffState.timeLeft * 6.481481552f;
-                    puff = particle_newQuadParticle(&spawn, colors, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
+                    puff = particle_newQuadParticle(&spawn, colors, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->header.owner, obj->header.kind);
                     if (puff != NULL) {
                         memcpy(&puff->state, &puffState, sizeof(puffState));
                     }

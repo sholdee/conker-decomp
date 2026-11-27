@@ -22,11 +22,8 @@ typedef struct {
 } FlashSpawner;
 
 struct struct_EAB10 {
-    /* 0x00 */ u8  pad0;
-    /* 0x01 */ u8  unk1;
-    /* 0x02 */ u8  pad2[0xA];
-    /* 0x0C */ u8  unkC;
-    /* 0x0D */ u8  padD[0x1B];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8  pad10[0x18];
     /* 0x28 */ FlashSpawner spawner;
 };
 
@@ -89,8 +86,8 @@ void effect_spawnGroundFlashes(struct_EAB10 *actor) {
                     origin.y = spawner->height;
                     origin.z = flash.position.z;
                     obj = light_createWithEffect(&header, &origin, spawner->colour[3], spawner->colour[0],
-                                        spawner->colour[1], spawner->colour[2], 0xFF, 0, 0x40, actor->unkC,
-                                        actor->unk1);
+                                        spawner->colour[1], spawner->colour[2], 0xFF, 0, 0x40, actor->header.owner,
+                                        actor->header.kind);
                     if (obj != NULL) {
                         memcpy(&obj->data.groundFlash, &flash, sizeof(flash));
                     }

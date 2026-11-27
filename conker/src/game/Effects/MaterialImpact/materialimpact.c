@@ -471,17 +471,14 @@ void effect_launchDebrisChunk(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ,
 
 struct Struct150E5810 {
     /* 0x00 */ EffectHeader header;
-    /* 0x10 */ f32 unk10;
+    /* 0x10 */ f32 radius; // ModelParticle.radius: it comes to rest this far above the ground
     /* 0x14 */ f32 bounce; // restitution applied on each ground hit
-    /* 0x18 */ u8 pad18[0x24];
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
+    /* 0x18 */ u8 pad18[0x20];
+    /* 0x38 */ Vec3f pos;
     /* 0x44 */ f32 velX;
     /* 0x48 */ f32 velY;
     /* 0x4C */ f32 velZ;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
+    /* 0x50 */ Vec3f rotVel;
     /* 0x5C */ s32 unk5C;
     /* 0x60 */ s32 flags;
 };
@@ -500,7 +497,7 @@ s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groun
     Vec3f normal;
     Vec3f unit;
 
-    obj->unk3C = obj->unk10 * 1.100000024f + groundY;
+    obj->pos.y = obj->radius * 1.100000024f + groundY;
     if (obj->velY > -2.0f) {
         obj->velX = 0.0f;
         obj->flags &= ~0x6F;
@@ -536,9 +533,9 @@ s32 effect_bounceOffTriangle(Struct150E5810 *obj, f32 x, f32 y, f32 z, f32 groun
             obj->velY = -obj->velY * obj->bounce;
             obj->velZ *= obj->bounce;
         }
-        obj->unk50 *= obj->bounce;
-        obj->unk54 *= obj->bounce;
-        obj->unk58 *= obj->bounce;
+        obj->rotVel.x *= obj->bounce;
+        obj->rotVel.y *= obj->bounce;
+        obj->rotVel.z *= obj->bounce;
     }
     return 1;
 }

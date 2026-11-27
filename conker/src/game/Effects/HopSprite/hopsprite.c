@@ -52,11 +52,7 @@ typedef struct {
 
 /* A screen sprite made by sprite_newScreenSprite (ScreenSprite in game/Sprite/ScreenSprite/screensprite.c, 0x70 bytes) with its motion data. */
 struct HopSprite {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[3];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Vec2f pos;
     /* 0x18 */ u8 pad18[0x70 - 0x18];
     /* 0x70 */ union {
@@ -184,7 +180,7 @@ s32 effect_updateHopSprite(HopSprite *hopper) {
                     rand = 0;
                 }
                 spawn.flags = rand | 1 | bit2 | 8 | 0x10 | 0x20; // matching: folding the constants into 0x39 changes the code
-                particle = sprite_newScreenSprite(&spawn, 13, 0, 0, 0x10, hopper->unkC, hopper->unk1);
+                particle = sprite_newScreenSprite(&spawn, 13, 0, 0, 0x10, hopper->header.owner, hopper->header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->motion.bounce, &dust, sizeof(dust));
                 }

@@ -123,11 +123,8 @@ void effect_stageZoneHandler(Actor *obj, TriggerZone *zone) {
 }
 
 struct StageObj {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ StageState stage;
 };
 
@@ -185,13 +182,13 @@ void effect_advanceStage(StageObj *obj) {
             state->parts[state->stage]->inactive = 1;
             state->stage++;
             state->parts[state->stage]->inactive = 0;
-            camera_startWobblePreset(7, 0, 0, obj->unkC, obj->unk1);
+            camera_startWobblePreset(7, 0, 0, obj->header.owner, obj->header.kind);
             event.flags = 1;
             event.duration = 25;
             event.playerMask = 1;
             event.strength = 8;
             event.updateKind = -1;
-            cont_spawnRumble(&event, 0, obj->unkC, obj->unk1);
+            cont_spawnRumble(&event, 0, obj->header.owner, obj->header.kind);
             state->stageTimer = math_random() % 31U + 70;
         }
     }
@@ -203,7 +200,7 @@ void effect_advanceStage(StageObj *obj) {
         event.playerMask = 1;
         event.strength = (math_random() & 3) + 1;
         event.updateKind = -1;
-        cont_spawnRumble(&event, 0, obj->unkC, obj->unk1);
+        cont_spawnRumble(&event, 0, obj->header.owner, obj->header.kind);
         sound_playAt((math_random() & 3) + 0x6D6, 24000, 0, 0, -1, state->parts[state->stage]->x,
                       state->parts[state->stage]->y, state->parts[state->stage]->z, 500, 1000);
         state->eventTimer = math_random() % 151U + 150;
@@ -219,7 +216,7 @@ void effect_advanceStage(StageObj *obj) {
             pos.y = math_randomFloat() * 150.0f + 30.0f;
             pos.x += state->centerX;
             pos.z += state->centerZ;
-            weapon_spawnImpactBurst(&pos, obj->unkC, obj->unk1);
+            weapon_spawnImpactBurst(&pos, obj->header.owner, obj->header.kind);
             state->unk38 -= 1.0f;
         } while (state->unk38 > 1.0f);
     }

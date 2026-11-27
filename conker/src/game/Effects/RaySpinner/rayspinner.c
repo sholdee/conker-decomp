@@ -3,29 +3,12 @@
 #include "conker/effect.h"
 #include "conker/game.h"
 
-typedef struct {
-    u8 pad0[9];
-    u8 unk9;
-    u8 padA[4];
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    u8 pad14[0x1B];
-    u8 unk2F;
-} FF0E0ChildData;
-
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x4];
-    FF0E0ChildData *unk14;
-} FF0E0Child;
-
 /* Per-object state stored at offset 0x28 of the object. */
 typedef struct {
     Vec3f position;
     Vec3f rotation;
     Vec3f angularVelocity;
-    FF0E0Child *children[6];
+    LightEffect *children[6]; /* light_createWithEffect lights, one per ray */
     f32 intensity;
     s32 unk40;
     u8 flags; // bit 0: enabled
@@ -58,10 +41,10 @@ const FF0E0SpinMsg gRaySpinnerSpinPresets[3] = {
 };
 
 /* Spins the object and casts a ray from its position along each of the six rotated directions,
- * moving each child to the hit point (unk9 = 0) or flagging it unk9 = 1 on a miss or while disabled. */
+ * moving each child's light to the hit point (light->disabled = 0) or setting light->disabled = 1 on a miss or while disabled. */
 void effect_updateRaySpinner(FF0E0Object *obj) {
     FF0E0State *state;
-    FF0E0Child *child;
+    LightEffect *child;
     MtxF mtx;
     s32 i;
 
@@ -84,21 +67,21 @@ void effect_updateRaySpinner(FF0E0Object *obj) {
                 math_transformPoint(mtx, gRaySpinnerDirections[i].x, gRaySpinnerDirections[i].y, gRaySpinnerDirections[i].z, &targetX, &targetY, &targetZ);
                 if (collision_castRayWorld(state->position.x, state->position.y, state->position.z, targetX, targetY, targetZ,
                                   NULL, NULL, &hitX, &hitY, &hitZ, &fraction, NULL, NULL, 0.0f)) {
-                    child->unk14->unk9 = 0;
-                    child->unk14->unkE = hitX;
-                    child->unk14->unk10 = hitY;
-                    child->unk14->unk12 = hitZ;
-                    child->unk14->unk2F = state->intensity * fraction;
+                    child->light->disabled = 0;
+                    child->light->x = hitX;
+                    child->light->y = hitY;
+                    child->light->z = hitZ;
+                    child->light->radius = state->intensity * fraction;
                 } else {
-                    child->unk14->unk9 = 1;
+                    child->light->disabled = 1;
                 }
             }
         }
     } else {
         for (i = 0; i < 6; i++) {
-            FF0E0Child *disabledChild = state->children[i];
+            LightEffect *disabledChild = state->children[i];
             if (disabledChild != NULL) {
-                disabledChild->unk14->unk9 = 1;
+                disabledChild->light->disabled = 1;
             }
         }
     }
@@ -136,14 +119,14 @@ void effect_raySpinnerMessage(FF0E0Object *obj, s32 arg, u8 msg) {
 /* Passes every child to effect_destroyObject. */
 void effect_destroyRaySpinnerChildren(FF0E0Object *obj) {
     FF0E0State *state;
-    FF0E0Child *child;
+    LightEffect *child;
     u8 i;
 
     state = &obj->state;
     for (i = 0; i < 6; i++) {
         child = state->children[i];
         if (child != NULL) {
-            effect_destroyObject(&child->header);
+            effect_destroyObject(child);
         }
     }
 }
