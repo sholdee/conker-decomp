@@ -433,7 +433,7 @@ static const HitSphere *gHitSphereTables[12] = {
  * and yaw unk40), rejects it against obj's whole-body sphere, then tests it against each of obj's
  * hit spheres (table `type`) grown by `radius`.  On a hit, calls actor_runAttackAt at obj's position
  * (unless obj is immune) and returns bone + 1; returns 0 for a miss. */
-s32 collision_testPointHitSpheres(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 arg5) {
+s32 collision_testPointHitSpheres(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 attackId) {
     f32 scale;
     f32 angle;
     f32 s;
@@ -504,7 +504,7 @@ s32 collision_testPointHitSpheres(Actor *self, Actor *obj, s32 type, f32 dist, f
             r = p->radius * obj->scale_xz + radius;
             if (!(r * r < dx * dx + dy * dy + dz * dz)) {
                 if (obj->imune == 0) {
-                    actor_runAttackAt(obj->xpos, obj->ypos, obj->zpos, arg5, self - movement_obj, 0, 0, 0);
+                    actor_runAttackAt(obj->xpos, obj->ypos, obj->zpos, attackId, self - movement_obj, 0, 0, 0);
                 }
                 return p->bone + 1;
             }
@@ -625,7 +625,7 @@ s32 collision_rayHitSpheres(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *
 
 /* Finds the first live object of the given model whose hit spheres the point `dist` ahead of
  * `self` (with reach `radius`) touches.  Stores it in *outTarget and returns bone + 1, or 0. */
-s32 collision_findHitSphereTarget(Actor *self, f32 dist, f32 radius, Actor **outTarget, s32 arg4, s32 model) {
+s32 collision_findHitSphereTarget(Actor *self, f32 dist, f32 radius, Actor **outTarget, s32 attackId, s32 model) {
     s32 i;
     Actor *obj;
     s32 idx;
@@ -641,7 +641,7 @@ s32 collision_findHitSphereTarget(Actor *self, f32 dist, f32 radius, Actor **out
         if (idx == -1) {
             continue;
         }
-        bone = collision_testPointHitSpheres(self, obj, gModelHitTables[idx].sphereTable, dist, radius, arg4);
+        bone = collision_testPointHitSpheres(self, obj, gModelHitTables[idx].sphereTable, dist, radius, attackId);
         if (bone != 0) {
             *outTarget = obj;
             return bone;

@@ -12,12 +12,12 @@ void level_setup09(void) {
     level_initPipeBurstPoints();
 }
 
-void level_spawnObjBurst(Actor *arg0, s32 arg1, s32 arg2) {
+void level_spawnObjBurst(Actor *obj, s32 owner, s32 list) {
     ActorRef tmp;
     TimedEffect *effect;
 
-    tmp.actor = arg0;
-    tmp.uniqueId = arg0->unique_id;
+    tmp.actor = obj;
+    tmp.uniqueId = obj->unique_id;
 
     effect = effect_newTimedEffect(0x12C, -1, 0x45, -1, 0, 0, 8, 0xFF, 1);
     if (effect != NULL) {

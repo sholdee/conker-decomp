@@ -899,7 +899,7 @@ s32 level_findTextureByAddr(s32 addr) {
     return -1;
 }
 
-void func_150039B0(s32 arg0) {
+void func_150039B0(s32 levelId) {
 }
 
 /* Sets gMeshTriMaterials to `addr` + 8 (past the material block's header), or to NULL when `addr` is 0. */

@@ -15,7 +15,7 @@ typedef struct {
 } Effect1500EF20;
 
 void level_setup05(void) {
-    Effect1500EF20 *temp_v0;
+    Effect1500EF20 *effect;
     DiscEmitter tmp;
 
     flamethrower_addTexScroll(gLevelDisplayLists[0], D_800902B8, 1, -1, 0, 0, 0, -8);
@@ -25,31 +25,31 @@ void level_setup05(void) {
     tmp.z = -1770.0f;
     tmp.y = -1278.0f;
     tmp.radius = 400.0f;
-    temp_v0 = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->data, &tmp, sizeof(tmp));
+    effect = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
+    if (effect != NULL) {
+        memcpy(&effect->data, &tmp, sizeof(tmp));
     }
 
     tmp.x = 7207.0f;
     tmp.z = -1412.0f;
     tmp.y = -1733.0f;
-    temp_v0 = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->data, &tmp, sizeof(tmp));
+    effect = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
+    if (effect != NULL) {
+        memcpy(&effect->data, &tmp, sizeof(tmp));
     }
 
     tmp.z = 1412.0f;
-    temp_v0 = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->data, &tmp, sizeof(tmp));
+    effect = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
+    if (effect != NULL) {
+        memcpy(&effect->data, &tmp, sizeof(tmp));
     }
 
     tmp.x = 9776.0f;
     tmp.z = 1770.0f;
     tmp.y = -1278.0f;
-    temp_v0 = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->data, &tmp, sizeof(tmp));
+    effect = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
+    if (effect != NULL) {
+        memcpy(&effect->data, &tmp, sizeof(tmp));
     }
 
     gAmbientEaseRed = gAmbientColour[0];

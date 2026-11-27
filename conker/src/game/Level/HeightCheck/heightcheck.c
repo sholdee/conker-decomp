@@ -3,7 +3,7 @@
 #include "conker/level.h"
 
 
-s32 level_isCameraAboveLimit(s32 arg0) {
+s32 level_isCameraAboveLimit(s32 levelId) {
     if ((gLevelHeader->unk14 == 1)) {
         s32 tmp = camera_global_Cameras->eye.y;
         if (gLevelHeader->unk16 < tmp) {

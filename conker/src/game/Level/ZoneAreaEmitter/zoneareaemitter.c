@@ -5,11 +5,11 @@
 #include "conker/level.h"
 
 
-void level_spawnZoneAreaEmitter(s32 arg0, s32 arg1) {
+void level_spawnZoneAreaEmitter(s32 zone, s32 kind) {
     EmitterDef tmp;
 
     tmp.flags = 7;
-    tmp.anchor = (TriggerZone *)arg0;
+    tmp.anchor = (TriggerZone *)zone;
     tmp.rate = 6.999999869e-08f;
     tmp.rateRange = 1.800000007e-07f;
     tmp.pos.x = 0.0f;

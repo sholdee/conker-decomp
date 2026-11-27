@@ -291,7 +291,7 @@ void func_150045BC(void) {
  * state bit 0, transforms its vertices into its per-frame copies), then probes the floor under objects
  * with view flag 0x20.
  */
-void level_prepareObjects(s32 arg0) {
+void level_prepareObjects(s32 levelId) {
     s32 i;
     WorldObject *obj;
     MtxF mtx;

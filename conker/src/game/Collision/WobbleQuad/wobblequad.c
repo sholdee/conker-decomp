@@ -49,62 +49,62 @@ struct Foo150AE36C {
 
 
 
-s32 collision_updateWobble(struct Foo150AE280 *arg0) {
-    struct Foo150AE280Inner *temp_v0;
+s32 collision_updateWobble(struct Foo150AE280 *particle) {
+    struct Foo150AE280Inner *phases;
 
-    arg0->unk170.unk8 += 0.065f * gFrameDelta;
-    arg0->unk170.unkC += 0.0484f * gFrameDelta;
-    temp_v0 = &arg0->unk170;
-    temp_v0->unk8 = math_wrapRadians(arg0->unk170.unk8);
-    temp_v0->unkC = math_wrapRadians(temp_v0->unkC);
-    arg0->unk20 = sinf(temp_v0->unk8) * 3.0860002f;
-    arg0->unk28 = sinf(temp_v0->unkC) * 5.9140005f;
+    particle->unk170.unk8 += 0.065f * gFrameDelta;
+    particle->unk170.unkC += 0.0484f * gFrameDelta;
+    phases = &particle->unk170;
+    phases->unk8 = math_wrapRadians(particle->unk170.unk8);
+    phases->unkC = math_wrapRadians(phases->unkC);
+    particle->unk20 = sinf(phases->unk8) * 3.0860002f;
+    particle->unk28 = sinf(phases->unkC) * 5.9140005f;
     return 1;
 }
 
-s32 func_150AE35C(s32 arg0) {
+s32 func_150AE35C(s32 particle) {
     return 1;
 }
 
-s16 *collision_buildTransformedUprightQuad(struct Foo150AE36C *arg0, s16 arg1) {
-    s16 *var_v0;
+s16 *collision_buildTransformedUprightQuad(struct Foo150AE36C *particle, s16 viewport) {
+    s16 *vertices;
     s16 *ret;
-    f32 temp_f2;
-    f32 temp_f12;
-    f32 sp94;
-    f32 sp90;
-    f32 sp8C;
+    f32 offsetX;
+    f32 offsetZ;
+    f32 z;
+    f32 y;
+    f32 x;
     f32 pad84[2];
     MtxF mtx;
-    u8 sp43;
+    u8 fresh;
 
-    particle_getViewBuffer(arg0->unk100, arg1, 0x40, &var_v0, &sp43);
-    ret = var_v0;
-    if (var_v0) {
-        if (sp43) {
-            memcpy(arg0->unk100[arg1], arg0->unkC0, 0x40);
-            memcpy(arg0->unk100[arg1] + 0x20, arg0->unkC0, 0x40);
+    particle_getViewBuffer(particle->unk100, viewport, 0x40, &vertices, &fresh);
+    ret = vertices;
+    if (vertices) {
+        if (fresh) {
+            memcpy(particle->unk100[viewport], particle->unkC0, 0x40);
+            memcpy(particle->unk100[viewport] + 0x20, particle->unkC0, 0x40);
         }
     } else {
         return 0;
     }
 
-    math_mtxFRotScaleXZ(mtx, arg0->unk160->unk18, arg0->unk160->unk1C, arg0->unk160->unk20, arg0->unk160->unk24, arg0->unk160->unk28, arg0->unk160->unk38, arg0->unk160->unk3C, arg0->unk160->unk40);
-    math_transformPoint(mtx, arg0->unk34, arg0->unk38, arg0->unk3C, &sp8C, &sp90, &sp94);
+    math_mtxFRotScaleXZ(mtx, particle->unk160->unk18, particle->unk160->unk1C, particle->unk160->unk20, particle->unk160->unk24, particle->unk160->unk28, particle->unk160->unk38, particle->unk160->unk3C, particle->unk160->unk40);
+    math_transformPoint(mtx, particle->unk34, particle->unk38, particle->unk3C, &x, &y, &z);
 
-    temp_f2 = gCameraAngleCosines[arg1] * arg0->unk2C;
-    temp_f12 = gCameraAngleSines[arg1] * arg0->unk2C;
+    offsetX = gCameraAngleCosines[viewport] * particle->unk2C;
+    offsetZ = gCameraAngleSines[viewport] * particle->unk2C;
 
-    var_v0[3] = 0;
-    var_v0[0xB] = 0;
-    var_v0[0x13] = 0;
-    var_v0[0x1B] = 0;
-    var_v0[0] = var_v0[0x18] = sp8C + temp_f2;
-    var_v0[1] = var_v0[9] = sp90;
-    var_v0[2] = var_v0[0x1A] = sp94 - temp_f12;
-    var_v0[8] = var_v0[0x10] = sp8C - temp_f2;
-    var_v0[0x11] = var_v0[0x19] = sp90 + arg0->unk30;
-    var_v0[0xA] = var_v0[0x12] = sp94 + temp_f12;
+    vertices[3] = 0;
+    vertices[0xB] = 0;
+    vertices[0x13] = 0;
+    vertices[0x1B] = 0;
+    vertices[0] = vertices[0x18] = x + offsetX;
+    vertices[1] = vertices[9] = y;
+    vertices[2] = vertices[0x1A] = z - offsetZ;
+    vertices[8] = vertices[0x10] = x - offsetX;
+    vertices[0x11] = vertices[0x19] = y + particle->unk30;
+    vertices[0xA] = vertices[0x12] = z + offsetZ;
 
     return ret;
 }

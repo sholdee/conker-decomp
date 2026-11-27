@@ -167,7 +167,7 @@ typedef struct MotionEffect {
 } MotionEffect;
 
 /* Spawns an effect tied to owner, with a moving child effect and a light attached to it. */
-void level_spawnModelBeam(Actor *owner, u8 arg1, s32 arg2) {
+void level_spawnModelBeam(Actor *owner, u8 fxOwner, s32 list) {
     ControllerEffect *object;
     Controller data;
     Controller *controller;
@@ -176,7 +176,7 @@ void level_spawnModelBeam(Actor *owner, u8 arg1, s32 arg2) {
     data.id = owner->unique_id;
     data.effect = NULL;
     data.light = NULL;
-    object = effect_newTimedEffect(300, -1, 0x54, -1, 0, 0x34, sizeof(Controller), arg1, arg2);
+    object = effect_newTimedEffect(300, -1, 0x54, -1, 0, 0x34, sizeof(Controller), fxOwner, list);
     if (object != NULL) {
         controller = &object->controller;
         memcpy(controller, &data, sizeof(data));
@@ -234,7 +234,7 @@ void level_spawnModelBeam(Actor *owner, u8 arg1, s32 arg2) {
             packet.envMode = 7;
             packet.zone = 0;
             controller->effect = particle_newQuadParticle(&packet, &gWhiteVtxColors, 0, 0x25, 0, 0x1D,
-                                               ((math_random() & 1) ? 2 : 0) + 1, 0, 0, sizeof(motion), arg1, arg2);
+                                               ((math_random() & 1) ? 2 : 0) + 1, 0, 0, sizeof(motion), fxOwner, list);
             if (controller->effect != NULL) {
                 memcpy(&controller->effect->motion, &motion, sizeof(motion));
             }
@@ -245,13 +245,13 @@ void level_spawnModelBeam(Actor *owner, u8 arg1, s32 arg2) {
             header2.x = 0;
             header2.y = 0;
             header2.z = 0;
-            controller->light = light_createWithEffect(&header, &header2, 40, 255, 255, 255, 255, 1, 0, arg1, arg2);
+            controller->light = light_createWithEffect(&header, &header2, 40, 255, 255, 255, 255, 1, 0, fxOwner, list);
         }
     }
 }
 
 /* Spawns timed effect 85 (beam_updateFlashBurst): light bursts on the owner while it lives. */
-void level_spawnFlashBurst(Actor *owner, u8 arg1, s32 arg2) {
+void level_spawnFlashBurst(Actor *owner, u8 fxOwner, s32 list) {
     FlashBurstData data;
     FlashBurstEffect *effect;
 
@@ -259,7 +259,7 @@ void level_spawnFlashBurst(Actor *owner, u8 arg1, s32 arg2) {
     data.ownerId = owner->unique_id;
     data.timer = 0;
 
-    effect = effect_newTimedEffect(300, -1, 0x55, -1, 0, 0x42, sizeof(FlashBurstData), arg1, arg2);
+    effect = effect_newTimedEffect(300, -1, 0x55, -1, 0, 0x42, sizeof(FlashBurstData), fxOwner, list);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

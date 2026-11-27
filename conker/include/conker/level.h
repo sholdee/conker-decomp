@@ -142,14 +142,14 @@ void level_readTextureSizes(void);
 void level_buildCollisionTris(s32 unused);
 void level_buildCollisionQuadTrees(void);
 s32 level_findTextureByAddr(s32 addr);
-void func_150039B0(s32 arg0);
+void func_150039B0(s32 levelId);
 void level_setMeshTriMaterials(s32 addr);
 
 /* game/Level/LevelObjects/levelobjects.c */
 void level_spawnObjects(s32 levelId, s32 arg1);
 void func_15004574(void);
 void func_150045BC(void);
-void level_prepareObjects(s32 arg0);
+void level_prepareObjects(s32 levelId);
 void level_relocateDl(DlCommand *dl, s32 offset, s32 matrixOffset);
 void level_clearObjectBlocks(void);
 void level_setObjectCullRadius(WorldObject *obj, ObjectSpawn *spawn);
@@ -171,12 +171,12 @@ void level_setup36(void);
 void level_emptySetup03(void);
 
 /* game_3BFE0.c */
-void level_queueObjectDrop04(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void level_queueObjectDrop04(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding);
 void level_setup04(void);
 
 /* game_3C230.c */
 void level_setup09(void);
-void level_spawnObjBurst(Actor *arg0, s32 arg1, s32 arg2);
+void level_spawnObjBurst(Actor *obj, s32 owner, s32 list);
 void level_spawnBoltRingZone(TriggerZone *zone);
 
 /* game_3C3D0.c */
@@ -191,7 +191,7 @@ void level_queueObjectDrop08(s32 x, s32 y, s32 z, s32 floorY);
 void level_setup08(void);
 
 /* game/Level/LevelSetup11/levelsetup11.c */
-void level_queueObjectDrop11(s32 x, s32 y, s32 z, s32 floorY, s32 arg4);
+void level_queueObjectDrop11(s32 x, s32 y, s32 z, s32 floorY, s32 markOnLanding);
 void level_setup11(void);
 
 /* game/Level/LevelSetup12/levelsetup12.c */
@@ -215,7 +215,7 @@ void level_setup32(void);
 
 /* game/Level/LevelSetup02/levelsetup02.c */
 void level_setup15(void);
-void level_spawnBoltEmitter(Actor *arg0);
+void level_spawnBoltEmitter(Actor *obj);
 void level_setup02(void);
 
 /* game_3DB30.c */
@@ -256,11 +256,11 @@ void level_setup31(void);
 
 /* game/Level/LevelSetup13/levelsetup13.c */
 void level_setup13(void);
-void level_spawnModelBeam(Actor *owner, u8 arg1, s32 arg2);
-void level_spawnFlashBurst(Actor *owner, u8 arg1, s32 arg2);
+void level_spawnModelBeam(Actor *owner, u8 fxOwner, s32 list);
+void level_spawnFlashBurst(Actor *owner, u8 fxOwner, s32 list);
 
 /* game_3EFB0.c */
-void level_queueObjectDrop17(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void level_queueObjectDrop17(s32 x, s32 y, s32 z, s32 floorY);
 void level_setup17(void);
 
 /* game_3F0F0.c */
@@ -277,17 +277,17 @@ void level_setup26(void);
 s32 level_spawnStageZone(TriggerZone *zone);
 
 /* game_3F3D0.c */
-void level_startAmbientRedDrift(s32 arg0);
+void level_startAmbientRedDrift(s32 unused);
 
 /* game_3F450.c */
-void level_startAmbientPulse(s32 arg0);
+void level_startAmbientPulse(s32 unused);
 
 /* game_3F4D0.c */
-void level_spawnZoneAreaEmitter(s32 arg0, s32 arg1);
+void level_spawnZoneAreaEmitter(s32 zone, s32 kind);
 
 /* game_3F560.c */
-void level_startAmbientColourCycle(s32 arg0);
-void level_attachDripEmitter(Actor *arg0);
+void level_startAmbientColourCycle(s32 unused);
+void level_attachDripEmitter(Actor *obj);
 
 /* game/Level/GroundParticles/groundparticles.c */
 void level_spawnLightAlphaModel(LightEffect *effect);
@@ -351,7 +351,7 @@ extern s32 *gSpawnModelData[8]; // per spawn model type: data loaded by rom_load
 
 /* game/Level/LevelHook30/levelhook30.c */
 void level_hook30(Camera *camera);
-void level_updateHazardProps(s32 arg0);
+void level_updateHazardProps(s32 unused);
 void level_spawnBloodStrip(Actor *obj, u8 mirrored);
 s32 level_sampleBloodStripPower(BloodStrip *strip);
 void level_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
@@ -367,10 +367,10 @@ extern u8 D_800D9928[14];
 extern u8 D_800D9938[14];
 
 /* game/Level/LevelHooks/levelhooks.c */
-void level_runHook(void *arg0, s32 arg1);
+void level_runHook(void *camera, s32 levelId);
 
 /* game_1A6300.c */
-s32 level_isCameraAboveLimit(s32 arg0);
+s32 level_isCameraAboveLimit(s32 levelId);
 
 /* game/Level/LevelHeader/levelheader.c */
 extern LevelHeader *gLevelHeader; // game/Level/LevelHeader/levelheader.c

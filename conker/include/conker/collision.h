@@ -64,7 +64,7 @@ typedef struct PartSet {
 
 /* game/Collision/MapBackground/mapbackground.c */
 void collision_clearUvWobbles(void);
-void collision_initMapBackground(s32 arg0);
+void collision_initMapBackground(s32 levelId);
 
 /* game/Collision/QuadTree/quadtree.c */
 void collision_addDlTris(Gfx *dl);
@@ -95,7 +95,7 @@ void collision_loadMapSettingsChecksumEnd(void);
 extern u8 *gTriArenaCursor; /* triangle-data arena cursor; game_34ED0 clears the game .bss from here */
 
 /* game/Collision/CylinderSets/cylindersets.c */
-void collision_loadCylinderSets(s32 arg0);
+void collision_loadCylinderSets(s32 levelId);
 
 /* game/Collision/Probe/probe.c */
 void func_15044370(void);
@@ -159,11 +159,11 @@ extern f32 gLedgeX;
 extern TriggerNode *gTriggerNodes; // timed trigger nodes (collision_addTriggerNode)
 
 /* game/Collision/HitSphere/hitsphere.c */
-s32 collision_testPointHitSpheres(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 arg5);
+s32 collision_testPointHitSpheres(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 attackId);
 s32 collision_getHitTableIndex(Actor *obj);
 s32 collision_rayHitSpheres(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre,
                   f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
-s32 collision_findHitSphereTarget(Actor *self, f32 dist, f32 radius, Actor **outTarget, s32 arg4, s32 model);
+s32 collision_findHitSphereTarget(Actor *self, f32 dist, f32 radius, Actor **outTarget, s32 attackId, s32 model);
 
 /* game/Collision/RayCast/raycast.c */
 void collision_castRay(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out,
@@ -175,18 +175,18 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind);
 
 /* game/Collision/Spawn/spawn.c */
 s32 collision_trySpawnRecord(s32 spawnIdx, s32 arg1);
-void collision_trySpawnRecords(s32 arg0, s32 arg1, s32 firstRange);
+void collision_trySpawnRecords(s32 levelId, s32 arg1, s32 firstRange);
 void func_150829D8(Actor *obj);
 s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
 void collision_allocActorLights(Actor *obj);
-void collision_applyCharacterVariant(Actor *obj, s32 arg1);
-void *collision_createPartSet(Actor *parent, s32 setId, f32 arg2, s32 arg3);
+void collision_applyCharacterVariant(Actor *obj, s32 choice);
+void *collision_createPartSet(Actor *parent, s32 setId, f32 speed, s32 lifetime);
 void collision_removePartSet(Actor *parent, s32 setId);
 void collision_setObjectModel(s32 objIdx, s32 modelId, s32 arg2);
-s32 collision_allocAnimState(Actor *obj, s32 arg1, s32 arg2, f32 arg3);
+s32 collision_allocAnimState(Actor *obj, s32 anim, s32 flag8000, f32 speed);
 void collision_applyModelDefaults(Actor *obj, s32 modelId, SpawnRecord *spawn);
-Actor *collision_createChildObject(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7,
-                     f32 arg8);
+Actor *collision_createChildObject(Actor *parent, s32 baseMtx, s32 modelId, s32 arg3, s32 state, s32 modelLoadFlags, s32 inheritScale,
+                     s32 anim, f32 speed);
 s32 collision_getFreeUniqueId(void);
 s32 collision_findSpawnById(u8 id);
 Actor *collision_findObjectById(u8 id);
@@ -195,7 +195,7 @@ s32 collision_findSlotBySpawnIndex(s32 id);
 s32 collision_initModelData(Actor *obj, s32 model);
 void collision_releaseAllModelData(Actor *obj);
 void collision_releaseModelData(Actor *obj, s32 model);
-void collision_loadSpawnModel(SpawnRecord *spawn, s32 arg1, s32 arg2);
+void collision_loadSpawnModel(SpawnRecord *spawn, s32 spawnIdx, s32 arg2);
 void collision_freeObjectModels(Actor *self);
 s32 collision_getModelId(Actor *obj);
 s32 collision_getLodModelId(Actor *obj, s32 *outIndex);
@@ -364,18 +364,18 @@ void script_runTask(IdRecord *node, s32 mode);
 void script_exitTask(void);
 
 /* game/Collision/WobbleQuad/wobblequad.c */
-s32 collision_updateWobble(struct Foo150AE280 *arg0);
-s32 func_150AE35C(s32 arg0);
-s16 *collision_buildTransformedUprightQuad(struct Foo150AE36C *arg0, s16 arg1);
+s32 collision_updateWobble(struct Foo150AE280 *particle);
+s32 func_150AE35C(s32 particle);
+s16 *collision_buildTransformedUprightQuad(struct Foo150AE36C *particle, s16 viewport);
 
 /* game/Collision/ObjectRay/objectray.c */
 s32 collision_castRayAtObjects(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex, s32 effect);
 
 /* game/Collision/GroundHeight/groundheight.c */
-void func_151045E0(void *arg0, s32 arg1, f32 arg2);
-s32 func_151045F4(s32 arg0, s32 arg1);
-void func_15104608(f32 x, f32 y, f32 z, s32 arg3);
-s32 func_15104620(s32 arg0, s32 arg1);
+void func_151045E0(void *obj, s32 arg1, f32 arg2);
+s32 func_151045F4(s32 particle, s32 prevPos);
+void func_15104608(f32 x, f32 y, f32 z, s32 owner);
+s32 func_15104620(s32 particle, s32 view);
 s32 collision_getFloorNearY(f32 x, f32 z, f32 y, f32 *out);
 
 /* game/Collision/Floor/floor.c */

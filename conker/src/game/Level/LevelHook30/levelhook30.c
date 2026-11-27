@@ -71,7 +71,7 @@ void level_hook30(Camera *camera) {
 /* Steps four scroll counters by gFrameTicks; then, unless movement_obj[0]'s mv->death_State is set, kills
  * movement_obj[0] once per prop 0xFA-0xF8 it stands on, and if it stands on prop 0xFB plays sound 0x627 and
  * runs it through blood_spawnHitEffects .. actor_kill(6). */
-void level_updateHazardProps(s32 arg0) {
+void level_updateHazardProps(s32 unused) {
     WorldObject *prop;
     s32 propIndex;
     s32 i;

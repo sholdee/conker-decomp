@@ -2,17 +2,17 @@
 #include "conker/collision.h"
 
 
-void func_151045E0(void *arg0, s32 arg1, f32 arg2) {
+void func_151045E0(void *obj, s32 arg1, f32 arg2) {
 }
 
-s32 func_151045F4(s32 arg0, s32 arg1) {
+s32 func_151045F4(s32 particle, s32 prevPos) {
     return 0x1;
 }
 
-void func_15104608(f32 x, f32 y, f32 z, s32 arg3) {
+void func_15104608(f32 x, f32 y, f32 z, s32 owner) {
 }
 
-s32 func_15104620(s32 arg0, s32 arg1) {
+s32 func_15104620(s32 particle, s32 view) {
     return 0x1;
 }
 
