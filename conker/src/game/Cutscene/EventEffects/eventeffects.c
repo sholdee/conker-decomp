@@ -83,9 +83,9 @@ void cutscene_spawnTrackEffect(SeqTrackState *track, u16 id, s16 duration, u8 ow
     packet.spawn.elasticity = 1.0f;
     packet.spawn.sizeXZ = track->unk18 * 0.1f;
     packet.spawn.sizeY = track->unk1C * 0.1f;
-    packet.spawn.rot.x = track->unkC;
-    packet.spawn.rot.y = track->unk10;
-    packet.spawn.rot.z = track->unk14;
+    packet.spawn.rot.x = track->pitch;
+    packet.spawn.rot.y = track->yaw;
+    packet.spawn.rot.z = track->roll;
     packet.spawn.scale.x = 1.0f;
     packet.spawn.scale.y = 1.0f;
     packet.spawn.scale.z = 1.0f;
@@ -127,9 +127,9 @@ s32 cutscene_updateTrackEffect(TrackPhysicsParticle *obj) {
 
     obj->unk18 = track->unk18 * 0.1f;
     obj->unk1C = track->unk1C * 0.1f;
-    obj->unk20 = track->unkC;
-    obj->unk24 = track->unk10;
-    obj->unk28 = track->unk14;
+    obj->unk20 = track->pitch;
+    obj->unk24 = track->yaw;
+    obj->unk28 = track->roll;
     obj->pos.x = track->x;
     obj->pos.y = track->y;
     obj->pos.z = track->z;
@@ -158,9 +158,9 @@ void cutscene_spawnTrackParticle(SeqTrackState *track, s32 texture, s16 lifetime
     def.pos.x = track->x;
     def.pos.y = track->y;
     def.pos.z = track->z;
-    def.rot.x = track->unkC;
-    def.rot.y = track->unk10;
-    def.rot.z = track->unk14;
+    def.rot.x = track->pitch;
+    def.rot.y = track->yaw;
+    def.rot.z = track->roll;
     def.scale.x = 1.0f;
     def.scale.y = 1.0f;
     def.scale.z = 1.0f;
@@ -187,9 +187,9 @@ s32 cutscene_updateTrackParticle(TrackParticle *particle) {
 
     particle->head.def.width = track->unk18 * 10.0f;
     particle->head.def.height = track->unk1C * 10.0f;
-    particle->head.def.rot.x = track->unkC;
-    particle->head.def.rot.y = track->unk10;
-    particle->head.def.rot.z = track->unk14;
+    particle->head.def.rot.x = track->pitch;
+    particle->head.def.rot.y = track->yaw;
+    particle->head.def.rot.z = track->roll;
     particle->head.def.pos.x = track->x;
     particle->head.def.pos.y = track->y;
     particle->head.def.pos.z = track->z;

@@ -1055,9 +1055,9 @@ void cutscene_evalTracks(s32 scene) {
                 gSeqTrackStates[scene][track].z = 0.0f;
             }
             if (gSeqTrackInfos[scene][track].type == 4) {
-                gSeqTrackStates[scene][track].unkC = 64.0f;
-                gSeqTrackStates[scene][track].unk10 = 0.0f;
-                gSeqTrackStates[scene][track].unk14 = 20.0f;
+                gSeqTrackStates[scene][track].pitch = 64.0f;
+                gSeqTrackStates[scene][track].yaw = 0.0f;
+                gSeqTrackStates[scene][track].roll = 20.0f;
                 gSeqTrackStates[scene][track].unk18 = 255.0f;
                 gSeqTrackStates[scene][track].unk1C = 62.5f;
                 gSeqTrackStates[scene][track].unk20 = 50.0f;
@@ -1066,9 +1066,9 @@ void cutscene_evalTracks(s32 scene) {
                 gSeqTrackStates[scene][track].unk2C = 0.0f;
                 gSeqTrackStates[scene][track].unk34 = 0.0f;
             } else {
-                gSeqTrackStates[scene][track].unkC = 0.0f;
-                gSeqTrackStates[scene][track].unk10 = gCutsceneAnchorTurn;
-                gSeqTrackStates[scene][track].unk14 = 0.0f;
+                gSeqTrackStates[scene][track].pitch = 0.0f;
+                gSeqTrackStates[scene][track].yaw = gCutsceneAnchorTurn;
+                gSeqTrackStates[scene][track].roll = 0.0f;
                 gSeqTrackStates[scene][track].unk18 = -9999.0f;
                 gSeqTrackStates[scene][track].unk1C = -9999.0f;
                 gSeqTrackStates[scene][track].unk20 = -9999.0f;
@@ -1200,15 +1200,15 @@ void cutscene_evalTracks(s32 scene) {
                     value[10] = 0.0f;
                 }
                 if (gSeqActiveEvents[scene][track][0] != 0xFF) {
-                    cutscene_getTrackHeading(track, value[10], &gSeqTrackStates[scene][track].unk10, scene);
+                    cutscene_getTrackHeading(track, value[10], &gSeqTrackStates[scene][track].yaw, scene);
                 } else if (value[7] != -9999.0f) {
-                    gSeqTrackStates[scene][track].unk10 = value[7];
+                    gSeqTrackStates[scene][track].yaw = value[7];
                 }
                 if (value[8] != -9999.0f) {
-                    gSeqTrackStates[scene][track].unkC = value[8];
+                    gSeqTrackStates[scene][track].pitch = value[8];
                 }
                 if (value[6] != -9999.0f) {
-                    gSeqTrackStates[scene][track].unk14 = value[6];
+                    gSeqTrackStates[scene][track].roll = value[6];
                 }
                 if (value[5] != -9999.0f) {
                     gSeqTrackStates[scene][track].unk18 = value[5];
@@ -1668,7 +1668,7 @@ void cutscene_applyTracks(s32 scene) {
                         gCamShot.at.focus.x = ELEM(scene, (s8)ENT(scene, track)->unk3)->x;
                         gCamShot.at.focus.y = ELEM(scene, (s8)ENT(scene, track)->unk3)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
                         gCamShot.at.focus.z = ELEM(scene, (s8)ENT(scene, track)->unk3)->z;
-                        gCamShot.unk2C = -state->unk14;
+                        gCamShot.unk2C = -state->roll;
                         gCamShot.unk30 = tilt3C;
                         gCamShot.unk34 = tilt40;
                     } else if (ENT(scene, track)->targetId == 2) {
@@ -1682,7 +1682,7 @@ void cutscene_applyTracks(s32 scene) {
                         gCamShot.at.focus.x = obj->xpos;
                         gCamShot.at.focus.y = obj->ypos + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
                         gCamShot.at.focus.z = obj->zpos;
-                        gCamShot.unk2C = -state->unk14;
+                        gCamShot.unk2C = -state->roll;
                         gCamShot.unk30 = tilt3C;
                         gCamShot.unk34 = tilt40;
                     } else if (ENT(scene, track)->targetId == 3) {
@@ -1696,14 +1696,14 @@ void cutscene_applyTracks(s32 scene) {
                         gCamShot.at.focus.x = focus->x;
                         gCamShot.at.focus.y = (focus->y + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
                         gCamShot.at.focus.z = focus->z;
-                        gCamShot.unk2C = -state->unk14;
+                        gCamShot.unk2C = -state->roll;
                         gCamShot.unk30 = tilt3C;
                         gCamShot.unk34 = tilt40;
                     } else if (ENT(scene, track)->targetId == 0) {
                         gCamShot.mode = 1;
-                        gCamShot.at.angles.sway = -state->unk14;
-                        gCamShot.at.angles.pitch = state->unkC;
-                        gCamShot.at.angles.yaw = state->unk10;
+                        gCamShot.at.angles.sway = -state->roll;
+                        gCamShot.at.angles.pitch = state->pitch;
+                        gCamShot.at.angles.yaw = state->yaw;
                         gCamShot.eye.y += state->yOffset;
                         gCamShot.unk2C = tilt3C;
                         gCamShot.unk30 = tilt40;
@@ -1722,9 +1722,9 @@ void cutscene_applyTracks(s32 scene) {
                     actor->x = ELEM(scene, track)->x;
                     actor->y = ELEM(scene, track)->y + ELEM(scene, track)->yOffset;
                     actor->z = ELEM(scene, track)->z;
-                    actor->t = ELEM(scene, track)->unkC;
-                    actor->u = ELEM(scene, track)->unk10;
-                    actor->v = ELEM(scene, track)->unk14;
+                    actor->t = ELEM(scene, track)->pitch;
+                    actor->u = ELEM(scene, track)->yaw;
+                    actor->v = ELEM(scene, track)->roll;
                     if (ELEM(scene, track)->unk18 != -9999.0f) {
                         actor->xScale = ELEM(scene, track)->unk18 * 0.01f;
                     }
@@ -1847,8 +1847,8 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                     if (rescaled) {
                         actor_setScale(obj, obj->scale_xz, obj->scale_y);
                     }
-                    obj->vtilt = gSeqTrackStates[scene][track].unkC;
-                    angle = gSeqTrackStates[scene][track].unk10 + 180.0f;
+                    obj->vtilt = gSeqTrackStates[scene][track].pitch;
+                    angle = gSeqTrackStates[scene][track].yaw + 180.0f;
                     while (angle >= 360.0f) {
                         angle -= 360.0f;
                     }
@@ -1857,7 +1857,7 @@ void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack) {
                     }
                     obj->angle = obj->langle = obj->fangle = (s16)((u32)(angle * 182.0444489f) - 0x4000);
                     obj->theta = angle;
-                    obj->lean_angle = gSeqTrackStates[scene][track].unk14;
+                    obj->lean_angle = gSeqTrackStates[scene][track].roll;
                     gSeqTrackStates[scene][track].unk34 = (gSeqTrackStates[scene][track].unk34 < 0.0f) ? 0.0f : (gSeqTrackStates[scene][track].unk34 > 255.0f) ? 255.0f : gSeqTrackStates[scene][track].unk34;
                     actor_fadeCommand(obj, 1, gSeqTrackStates[scene][track].unk34, 0, 0);
                     obj->old_xpos = obj->xpos;

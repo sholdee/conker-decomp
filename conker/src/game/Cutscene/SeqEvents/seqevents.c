@@ -410,10 +410,10 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                 sub->unk2A = 100;
                 sub->isOpen = 1;
                 sub->unk28 = 0;
-                sub->unk1C = &gSeqTrackStates[scene][track].unkC;
-                sub->unk20 = &gSeqTrackStates[scene][track].unk10;
+                sub->unk1C = &gSeqTrackStates[scene][track].pitch;
+                sub->unk20 = &gSeqTrackStates[scene][track].yaw;
                 sub->unk2F = 1;
-                sub->unk24 = &gSeqTrackStates[scene][track].unk14;
+                sub->unk24 = &gSeqTrackStates[scene][track].roll;
                 sub->r = colors[event->unk5][0];
                 sub->g = colors[event->unk5][1];
                 sub->b = colors[event->unk5][2];
@@ -632,7 +632,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     point.x = gSeqTrackStates[scene][track].x;
                     point.y = gSeqTrackStates[scene][track].y;
                     point.z = gSeqTrackStates[scene][track].z;
-                    func_151BE850(&point, gSeqTrackStates[scene][track].unk10, 1, 0, 2, 0xFF, 1);
+                    func_151BE850(&point, gSeqTrackStates[scene][track].yaw, 1, 0, 2, 0xFF, 1);
                     break;
                 case 1:
                     point2.x = gSeqTrackStates[scene][track].x;
@@ -1641,7 +1641,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
 
             duration = cutscene_findEvent(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                beam_spawnLinkedQuad(pos, &gSeqTrackStates[scene][track].unk10, &gSeqTrackStates[scene][track].unk18,
+                beam_spawnLinkedQuad(pos, &gSeqTrackStates[scene][track].yaw, &gSeqTrackStates[scene][track].unk18,
                               &gSeqTrackStates[scene][track].unk1C, &gSeqTrackStates[scene][track].unk20, duration,
                               sceneTag, 0);
             }
@@ -1763,7 +1763,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     p.x = gSeqTrackStates[scene][track].x;
                     p.y = gSeqTrackStates[scene][track].y;
                     p.z = gSeqTrackStates[scene][track].z;
-                    func_151BE850(&p, gSeqTrackStates[scene][track].unk10, 1, 0, 2, sceneTag, 1);
+                    func_151BE850(&p, gSeqTrackStates[scene][track].yaw, 1, 0, 2, sceneTag, 1);
                     break;
                 }
                 case 4:
@@ -2073,8 +2073,8 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             }
             state = &gSeqTrackStates[scene][track];
             i4 = state->unk20 * 0.05000000075f;
-            i5 = (state->unk10 + 180.0f) * 0.7111111283f;
-            i6 = state->unkC * 0.7111111283f;
+            i5 = (state->yaw + 180.0f) * 0.7111111283f;
+            i6 = state->pitch * 0.7111111283f;
             f7 = (state->yOffset * 0.1000000015f) + 0.5f;
             f9 = (state->unk18 * 0.1000000015f) + 1.0f;
             f10 = state->unk1C * 0.1000000015f;

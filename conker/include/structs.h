@@ -2631,10 +2631,10 @@ typedef struct SeqTrackState {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 y;
     /* 0x08 */ f32 z;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18; // light intensity (light_updateSeqTrack)
+    /* 0x0C */ f32 pitch;
+    /* 0x10 */ f32 yaw;
+    /* 0x14 */ f32 roll;
+    /* 0x18 */ f32 unk18; // light radius (light_updateSeqTrack)
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24; // light colour r, g, b (light_updateSeqTrack)
